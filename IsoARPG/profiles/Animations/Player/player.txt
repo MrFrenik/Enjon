@@ -1,0 +1,32 @@
+// ORIENTATIONS [NW, NE, E, W, N, S, SE, SW]
+
+{
+	walk:
+		framecount: 6
+		file: pixelanimtestframessplit.png
+		delays: [1.0]
+		starts: [0, 6, 12, 18, 24, 30, 36, 42]
+}
+
+{
+	attack_dagger:
+		framecount: 6
+		file: pixelanimtestframessplit.png
+		delays: [0.3, 0.4, 1.9, 0.05, 0.06, 1.5]
+		starts: [48, 54, 54, 48, 54, 48, 54, 48]
+}
+
+{
+	attack_bow:
+		framecount: 6
+		file: pixelanimtestframessplit.png
+		delays: [1.5, 0.4, 1.0, 0.1, 0.1, 0.5]
+		starts: [96, 102, 102, 96, 102, 96, 102, 96]
+}
+
+
+
+
+
+
+

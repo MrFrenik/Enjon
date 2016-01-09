@@ -1,0 +1,28 @@
+TODO:
+
+Collisions:
+	- Set up quadtrees/BSP
+	- Establish appropriate hit boxes for enemies and characters based on animation frames	
+	- Different weapons will have different hit boxes
+
+Animations: 
+	- Full character animation set for testing (Walking, Attacking)
+	- Full enemy animation set for testing (Walking, Attacking)
+
+Game Design:
+	- Create overall game design flowchart
+	- Implement myself as a mini-boss (game programmer boss!)
+
+Systems: 
+	- Separate characters into layers: head gear, armor, legs, weapons, etc.
+	- Develop particle engine
+	
+	- AIController:
+		- Look up and set Behavior Trees for entities
+
+	- Renderer2D:
+		- PostProcessing: 
+			- Post Processing wraps the rendering code
+			- Set up FrameBuffer to be written to and 	
+
+

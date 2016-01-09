@@ -1,0 +1,3 @@
+all of these textures where made from sources found on burningwell.org, all the source pictures were taken by titus tscharntke except for concrete368 and cretebrick970 which were based off images taken by Georges Grondin. 
+
+ These images were turned into tileable images and then isometric tiles by p0ss for opengameart.org

@@ -1,0 +1,61 @@
+﻿Build started 1/6/2016 7:57:46 PM.
+     1>Project "D:\C++Projects\VS\IsoARPG\IsoARPG.vcxproj" on node 2 (Build target(s)).
+     1>Link:
+         D:\Programs\MicroSoft Visual Studio Community 2013\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\IsoARPG.exe" /NOLOGO Enjon.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\IsoARPG.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\IsoARPG.lib" /MACHINE:X86 /SAFESEH D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\intermediate\Animation.obj
+         D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\intermediate\ComponentSystems.obj
+         D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\intermediate\Entity.obj
+         D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\intermediate\Actor.obj
+         D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\intermediate\Enemy.obj
+         D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\intermediate\Game.obj
+         D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\intermediate\Level.obj
+         D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\intermediate\main.obj
+         D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\intermediate\Player.obj
+         D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\intermediate\Projectile.obj
+         D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\intermediate\SpatialHash.obj
+     1>Enjon.lib(InputManager.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(InputManager.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(InputManager.obj) : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:ICF' specification
+     1>Enjon.lib(Vec2.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(Vec2.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(Vec3.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(Vec3.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(SpriteBatch.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(SpriteBatch.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(ResourceManager.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(ResourceManager.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(ShaderManager.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(ShaderManager.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(FontManager.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(FontManager.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(Window.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(Window.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(GLSLProgram.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(GLSLProgram.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(Camera2D.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(Camera2D.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(Text2D.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(Text2D.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(Button.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(Button.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(mat4.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(mat4.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(Enjon.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(Enjon.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(Timing.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(Timing.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(TextureCache.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(TextureCache.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(ImageLoader.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(ImageLoader.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(picoPNG.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(picoPNG.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>Enjon.lib(IOManager.obj) : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in Animation.obj
+     1>Enjon.lib(IOManager.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in Animation.obj
+     1>LINK : warning LNK4098: defaultlib 'MSVCRTD' conflicts with use of other libs; use /NODEFAULTLIB:library
+     1>LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+     1>D:\C++Projects\VS\Enjon\..\IsoARPG\bin\release\IsoARPG.exe : fatal error LNK1319: 38 mismatches detected
+     1>Done Building Project "D:\C++Projects\VS\IsoARPG\IsoARPG.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:01.17

@@ -1,0 +1,15 @@
+CC=cl
+SRC_SOURCE=../src/*.cpp
+SRC_HEADER=../include/*.h
+SOL_PATH=D:/C++Projects/VS/3DEngine
+SRC_INC_1=$(SOL_PATH)/include
+SRC_INC_2=$(SOL_PATH)/deps/include
+LIB_PATH_1=$(SOL_PATH)/deps/lib
+LIB=SDL2.lib SDL2main.lib OpenGL32.lib glew32.lib glew32s.lib
+
+all: $(SRC_SOURCE) $(SRC_HEADER)
+	$(CC) $(SRC_SOURCE) /I$(SRC_INC_1) /I$(SRC_INC_2) /EHsc /link SDL.lib SDLmain.lib SDL_image.lib /SUBSYSTEM:CONSOLE /NODEFAULTLIB:msvcrt.lib /LIBPATH:"$(LIB_PATH_1)"
+
+clear: 
+	del *.obj
+	del *.exe
