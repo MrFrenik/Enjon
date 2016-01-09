@@ -55,7 +55,8 @@ namespace ECS { namespace Component {
 	// Inventory struct
 	typedef struct 
 	{
-		eid32 Items[MAX_ITEMS];
+		// eid32 Items[MAX_ITEMS];
+		std::vector<eid32> Items;
 	} InventoryComponent; 
 
 	// Collision struct

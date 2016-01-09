@@ -160,7 +160,7 @@ int main(int argc, char** argv)
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 30;
 
 	for (int e = 0; e < AmountDrawn; e++)
 	{
@@ -280,11 +280,11 @@ int main(int argc, char** argv)
 		for (eid32 e = 0; e < World->MaxAvailableID; e++)
 		{
 			// if (World->Types[e] == Component::EntityType::PLAYER ||  World->Types[e] == Component::EntityType::ITEM) continue;
+			if (e == Item || e == Player) continue;
 
 			// Don't draw if the entity doesn't exist anymore
 			bitmask32 Mask = World->Masks[e];
 			if ((Mask & COMPONENT_RENDERER2D) != COMPONENT_RENDERER2D) continue;
-
 
 			Math::Vec2* EntityPosition; 
 			Math::Vec2* Ground;
@@ -313,7 +313,7 @@ int main(int argc, char** argv)
 			}
 
 			Ground = &World->TransformSystem->Transforms[e].GroundPosition;
-			if (Camera.IsBoundBoxInCamView(*Ground, Math::Vec2(64.0f, 32.0f)))
+			if (Camera.IsBoundBoxInCamView(*Ground, Math::Vec2(64.0f, 32.0f)) && World->Types[e] != ECS::Component::EntityType::ITEM)
 			{
 				PlayerBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 										Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));

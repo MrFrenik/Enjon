@@ -400,7 +400,7 @@ namespace ECS { namespace Systems {
 		InventorySystem* NewInventorySystem(struct EntityManager* Manager)
 		{
 			struct InventorySystem* System = (InventorySystem*)malloc(sizeof(InventorySystem));
-			if (System == nullptr) Enjon::Utils::FatalError("COMPOPNENT_SYSTEMS::NEW_INVENTORY_SYSTEM::System is null"); 
+			if (System == nullptr) Enjon::Utils::FatalError("COMPOPNENT_SYSTEMS::NEW_INVENTORY_SYSTEM::System is null");
 			System->Manager = Manager;
 			return System;
 		}
@@ -754,6 +754,8 @@ namespace ECS { namespace Systems {
 			// Check the quadrants of entities and then check for collisions
 			for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
 			{ 
+				// If entity has no transform, then continue
+				if ((Manager->Masks[e] & COMPONENT_TRANSFORM3D) != COMPONENT_TRANSFORM3D) continue;
 				// Get the cell that entity belongs to
 				const Enjon::Math::Vec2* EPosition = &Enjon::Math::IsoToCartesian(Manager->TransformSystem->Transforms[e].GroundPosition);
 				int CellIndex = SpatialHash::FindCell(Manager->Grid, e, EPosition);
@@ -775,10 +777,6 @@ namespace ECS { namespace Systems {
 
 							if ((AType == Component::EntityType::ITEM && BType == Component::EntityType::ENEMY) || 
 								(AType == Component::EntityType::ENEMY && BType == Component::EntityType::ITEM)) 
-							{
-								continue;
-							} 
-							if ((AType == Component::EntityType::PLAYER && BType == Component::EntityType::PLAYER))
 							{
 								continue;
 							}
@@ -831,14 +829,14 @@ namespace ECS { namespace Systems {
 										printf("Manager size: %d\n", Manager->MaxAvailableID);
 
 										// Drop some loot!
-										for (int i = 0; i < 1; i++)
+										for (int i = 0; i < 5; i++)
 										{
 											static Enjon::Graphics::SpriteSheet ItemSheet; 
 											if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png"), Enjon::Math::iVec2(1, 1));
-											eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(ColliderPosition->x + 128.0f, ColliderPosition->x + 128.0f), 
-																				  Enjon::Random::Roll(ColliderPosition->y + 128.0f, ColliderPosition->y + 128.0f), 0.0f), 
-																				  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Component::EntityType::ITEM, Enjon::Graphics::RGBA8_Blue());
-											printf("Manager size: %d\n", Manager->MaxAvailableID);
+											eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(ColliderPosition->x + 128.0f, ColliderPosition->x + 256.0f), 
+																				  Enjon::Random::Roll(ColliderPosition->y + 128.0f, ColliderPosition->y + 256.0f), 0.0f), 
+																				  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item");
+											printf("Manager size: %d, New ID: %d\n", Manager->MaxAvailableID, id);
 										} 
 									}
 
@@ -861,9 +859,38 @@ namespace ECS { namespace Systems {
 								if (AType == Component::EntityType::ITEM)
 								{
 									printf("Picked up item!\n");
+								
+									// Place in player inventory
+									Manager->InventorySystem->Inventories[e].Items.push_back(collider);
 
-									// Just get rid of item for now
-									// EntitySystem::RemoveEntity(Manager, collider);
+									printf("Inventory Size: %d\n", Manager->InventorySystem->Inventories[e].Items.size());
+									
+									// Turn off render component of inventory
+									bitmask32* Mask = &Manager->Masks[collider];
+
+									if ((*Mask & COMPONENT_RENDERER2D) == COMPONENT_RENDERER2D) *Mask ^= COMPONENT_RENDERER2D;	
+									if ((*Mask & COMPONENT_TRANSFORM3D) == COMPONENT_TRANSFORM3D) *Mask ^= COMPONENT_TRANSFORM3D;	
+
+									// Continue to next entity 	
+									continue;
+								}
+
+								if (BType == Component::EntityType::ITEM)
+								{
+									printf("Picked up item!\n");
+
+									// Place in player inventory
+									Manager->InventorySystem->Inventories[collider].Items.push_back(e);
+
+									printf("Inventory Size: %d\n", Manager->InventorySystem->Inventories[collider].Items.size());
+									
+									// Turn off render component of inventory
+									bitmask32* Mask = &Manager->Masks[e];
+
+									if ((*Mask & COMPONENT_RENDERER2D) == COMPONENT_RENDERER2D) *Mask ^= COMPONENT_RENDERER2D;	
+									if ((*Mask & COMPONENT_TRANSFORM3D) == COMPONENT_TRANSFORM3D) *Mask ^= COMPONENT_TRANSFORM3D;	
+
+									// Continue to next entity 	
 									continue;
 								}
 
@@ -909,15 +936,15 @@ namespace ECS { namespace Systems {
 								// Manager->Masks[collider] = COMPONENT_NONE; // Kill that fucker
 
 								// Debug testing
-								printf("EntityType: ");
-								switch(Manager->Types[collider])
-								{
-									case Component::EntityType::ITEM: 	printf("Item"); 		break;
-									case Component::EntityType::PLAYER: printf("Player"); 		break;
-									case Component::EntityType::ENEMY: 	printf("Enemy"); 		break;
-									default: 							printf("Undefined"); 	break;
-								}
-								printf(", Entity ID: %d\n", collider);
+								// printf("EntityType: ");
+								// switch(Manager->Types[collider])
+								// {
+								// 	case Component::EntityType::ITEM: 	printf("Item"); 		break;
+								// 	case Component::EntityType::PLAYER: printf("Player"); 		break;
+								// 	case Component::EntityType::ENEMY: 	printf("Enemy"); 		break;
+								// 	default: 							printf("Undefined"); 	break;
+								// }
+								// printf(", Entity ID: %d\n", collider);
 							}
 						}
 					}	
