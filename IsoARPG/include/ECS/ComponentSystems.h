@@ -13,6 +13,8 @@
 // EntityManagers hold pointers to their system, which hold the arrays of data
 // ComponentSystems don't need to know of mangers...or do they? Yes, they'll hold pointers to the managers of which they belong
 namespace ECS { namespace Systems {
+
+	const float TILE_SIZE = 34.0f;
 	
 	struct EntityManager
 	{
@@ -146,8 +148,18 @@ namespace ECS { namespace Systems {
 
 	namespace Collision
 	{
+
 		// Updates all possible collisions
 		void Update(struct EntityManager* Manager);
+
+		// Check collision type  
+		Enjon::uint32 GetCollisionType(Systems::EntityManager* Manager, ECS::eid32 A, ECS::eid32 B);
+
+		// Collide Player with Item
+		void CollideWithItem(Systems::EntityManager* Manager, ECS::eid32 A, ECS::eid32 B);
+
+		// Collide Player with Enemy
+		void CollideWithEnemy(Systems::EntityManager* Manager, ECS::eid32 A, ECS::eid32 B);
 	}
 	
 	/////////////////////

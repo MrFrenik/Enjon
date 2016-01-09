@@ -7,7 +7,7 @@
 #include "IO/InputManager.h"
 #include "Graphics/Color.h"
 
-#define MAX_ITEMS	200
+#define MAX_ITEMS	10
 
 namespace ECS { namespace Component {
 	
@@ -55,7 +55,6 @@ namespace ECS { namespace Component {
 	// Inventory struct
 	typedef struct 
 	{
-		// eid32 Items[MAX_ITEMS];
 		std::vector<eid32> Items;
 	} InventoryComponent; 
 

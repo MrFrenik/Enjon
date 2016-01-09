@@ -1,6 +1,55 @@
 ComponentSystems.cpp
-..\IsoARPG\src\ECS\ComponentSystems.cpp(774) : error C3861: 'printDebug': identifier not found
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : error C2146: syntax error : missing ';' before identifier 'CollisionMask'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(153) : error C2146: syntax error : missing ';' before identifier 'COLLISION_NONE'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(153) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(153) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
+        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(154) : error C2146: syntax error : missing ';' before identifier 'COLLISION_PLAYER'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(154) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(154) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
+        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(155) : error C2146: syntax error : missing ';' before identifier 'COLLISION_ENEMY'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(155) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(155) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
+        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(156) : error C2146: syntax error : missing ';' before identifier 'COLLISION_ITEM'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(156) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(156) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
+        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(163) : error C2146: syntax error : missing ';' before identifier 'GetCollisionType'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(163) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(163) : error C2365: 'ECS::Systems::Collision::CollisionTypeMask' : redefinition; previous definition was 'namespace'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(971) : error C2146: syntax error : missing ';' before identifier 'GetCollisionType'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(971) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+..\IsoARPG\src\ECS\ComponentSystems.cpp(971) : error C2365: 'ECS::Systems::Collision::CollisionTypeMask' : redefinition; previous definition was 'namespace'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(972) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+..\IsoARPG\src\ECS\ComponentSystems.cpp(974) : error C2065: 'CollisionMask' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(974) : error C2146: syntax error : missing ';' before identifier 'Mask'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(974) : error C2065: 'Mask' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(1003) : error C2065: 'Mask' : undeclared identifier
 main.cpp
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : error C2146: syntax error : missing ';' before identifier 'CollisionMask'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(153) : error C2146: syntax error : missing ';' before identifier 'COLLISION_NONE'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(153) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(153) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
+        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(154) : error C2146: syntax error : missing ';' before identifier 'COLLISION_PLAYER'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(154) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(154) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
+        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(155) : error C2146: syntax error : missing ';' before identifier 'COLLISION_ENEMY'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(155) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(155) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
+        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(156) : error C2146: syntax error : missing ';' before identifier 'COLLISION_ITEM'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(156) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(156) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
+        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(163) : error C2146: syntax error : missing ';' before identifier 'GetCollisionType'
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(163) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(163) : error C2365: 'ECS::Systems::Collision::CollisionTypeMask' : redefinition; previous definition was 'namespace'
 Generating Code...
 Skipping... (no relevant changes detected)
 Entity.cpp

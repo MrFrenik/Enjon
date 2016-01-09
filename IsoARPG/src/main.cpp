@@ -160,7 +160,7 @@ int main(int argc, char** argv)
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
-	static uint32 AmountDrawn = 30;
+	static uint32 AmountDrawn = 1;
 
 	for (int e = 0; e < AmountDrawn; e++)
 	{
@@ -209,7 +209,7 @@ int main(int argc, char** argv)
 		CameraDims = Math::Vec4(*PlayerStuff, quadDimsStuff / Camera.GetScale());
 
 		SpatialHash::ClearCells(World->Grid);
-		// AIController::Update(World->AIControllerSystem, Player);
+		AIController::Update(World->AIControllerSystem, Player);
 		PlayerController::Update(World->PlayerControllerSystem);
 		Animation2D::Update(World->Animation2DSystem);
 		TransformSystem::Update(World->TransformSystem);
