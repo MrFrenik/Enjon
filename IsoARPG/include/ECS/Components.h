@@ -7,7 +7,7 @@
 #include "IO/InputManager.h"
 #include "Graphics/Color.h"
 
-#define MAX_ITEMS	10
+#define MAX_ITEMS	100
 
 namespace ECS { namespace Component {
 	
