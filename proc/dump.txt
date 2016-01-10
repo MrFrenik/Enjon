@@ -1,59 +1,69 @@
 ComponentSystems.cpp
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : error C2146: syntax error : missing ';' before identifier 'CollisionMask'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(153) : error C2146: syntax error : missing ';' before identifier 'COLLISION_NONE'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(153) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(153) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
-        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(154) : error C2146: syntax error : missing ';' before identifier 'COLLISION_PLAYER'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(154) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(154) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
-        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(155) : error C2146: syntax error : missing ';' before identifier 'COLLISION_ENEMY'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(155) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(155) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
-        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(156) : error C2146: syntax error : missing ';' before identifier 'COLLISION_ITEM'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(156) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(156) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
-        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(163) : error C2146: syntax error : missing ';' before identifier 'GetCollisionType'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(163) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(163) : error C2365: 'ECS::Systems::Collision::CollisionTypeMask' : redefinition; previous definition was 'namespace'
-..\IsoARPG\src\ECS\ComponentSystems.cpp(971) : error C2146: syntax error : missing ';' before identifier 'GetCollisionType'
-..\IsoARPG\src\ECS\ComponentSystems.cpp(971) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-..\IsoARPG\src\ECS\ComponentSystems.cpp(971) : error C2365: 'ECS::Systems::Collision::CollisionTypeMask' : redefinition; previous definition was 'namespace'
-..\IsoARPG\src\ECS\ComponentSystems.cpp(972) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-..\IsoARPG\src\ECS\ComponentSystems.cpp(974) : error C2065: 'CollisionMask' : undeclared identifier
-..\IsoARPG\src\ECS\ComponentSystems.cpp(974) : error C2146: syntax error : missing ';' before identifier 'Mask'
-..\IsoARPG\src\ECS\ComponentSystems.cpp(974) : error C2065: 'Mask' : undeclared identifier
-..\IsoARPG\src\ECS\ComponentSystems.cpp(1003) : error C2065: 'Mask' : undeclared identifier
-main.cpp
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : error C2146: syntax error : missing ';' before identifier 'CollisionMask'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(153) : error C2146: syntax error : missing ';' before identifier 'COLLISION_NONE'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(153) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(153) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
-        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(154) : error C2146: syntax error : missing ';' before identifier 'COLLISION_PLAYER'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(154) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(154) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
-        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(155) : error C2146: syntax error : missing ';' before identifier 'COLLISION_ENEMY'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(155) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(155) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
-        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(156) : error C2146: syntax error : missing ';' before identifier 'COLLISION_ITEM'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(156) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(156) : error C2086: 'int ECS::Systems::Collision::CollisionTypeMask::CollisionMask' : redefinition
-        D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(151) : see declaration of 'ECS::Systems::Collision::CollisionTypeMask::CollisionMask'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(163) : error C2146: syntax error : missing ';' before identifier 'GetCollisionType'
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(163) : error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-D:\C++Projects\VS\3DEnjon\IsoARPG\include\ECS/ComponentSystems.h(163) : error C2365: 'ECS::Systems::Collision::CollisionTypeMask' : redefinition; previous definition was 'namespace'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(157) : error C2664: 'void std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert(std::initializer_list<std::pair<const _Kty,_Ty>>)' : cannot convert argument 1 from 'std::pair<const char *,Animation *>' to 'std::pair<const _Kty,_Ty> &&'
+        with
+        [
+            _Kty=const char *
+,            _Ty=Animation
+,            _Pr=std::less<const char *>
+,            _Alloc=std::allocator<std::pair<const char *const ,Animation>>
+        ]
+        and
+        [
+            _Kty=const char *
+,            _Ty=Animation
+        ]
+        Reason: cannot convert from 'std::pair<const char *,Animation *>' to 'std::pair<const _Kty,_Ty>'
+        with
+        [
+            _Kty=const char *
+,            _Ty=Animation
+        ]
+        No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+..\IsoARPG\src\ECS\ComponentSystems.cpp(159) : error C2664: 'void std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert(std::initializer_list<std::pair<const _Kty,_Ty>>)' : cannot convert argument 1 from 'std::pair<const char *,Animation *>' to 'std::pair<const _Kty,_Ty> &&'
+        with
+        [
+            _Kty=const char *
+,            _Ty=Animation
+,            _Pr=std::less<const char *>
+,            _Alloc=std::allocator<std::pair<const char *const ,Animation>>
+        ]
+        and
+        [
+            _Kty=const char *
+,            _Ty=Animation
+        ]
+        Reason: cannot convert from 'std::pair<const char *,Animation *>' to 'std::pair<const _Kty,_Ty>'
+        with
+        [
+            _Kty=const char *
+,            _Ty=Animation
+        ]
+        No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+..\IsoARPG\src\ECS\ComponentSystems.cpp(161) : error C2664: 'void std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert(std::initializer_list<std::pair<const _Kty,_Ty>>)' : cannot convert argument 1 from 'std::pair<const char *,Animation *>' to 'std::pair<const _Kty,_Ty> &&'
+        with
+        [
+            _Kty=const char *
+,            _Ty=Animation
+,            _Pr=std::less<const char *>
+,            _Alloc=std::allocator<std::pair<const char *const ,Animation>>
+        ]
+        and
+        [
+            _Kty=const char *
+,            _Ty=Animation
+        ]
+        Reason: cannot convert from 'std::pair<const char *,Animation *>' to 'std::pair<const _Kty,_Ty>'
+        with
+        [
+            _Kty=const char *
+,            _Ty=Animation
+        ]
+        No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
 Generating Code...
 Skipping... (no relevant changes detected)
 Entity.cpp
 SpatialHash.cpp
+main.cpp
 Level.cpp
 Animation.cpp
 Camera3D.cpp

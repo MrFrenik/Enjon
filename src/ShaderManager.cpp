@@ -79,6 +79,7 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 
 	GLSLProgram* GetShader(const char* shadername)
 	{
+		// NOTE(John): Could make this faster by sorting the map by name for binary searches
 		// Search for shader
 		if (shaders.size > 0)
 		{

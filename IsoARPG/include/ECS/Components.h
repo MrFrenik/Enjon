@@ -6,6 +6,10 @@
 #include "Graphics/SpriteSheet.h"
 #include "IO/InputManager.h"
 #include "Graphics/Color.h"
+#include "Animation.h"
+
+#include <map>
+#include <utility>
 
 #define MAX_ITEMS	100
 

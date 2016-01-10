@@ -14,6 +14,11 @@
 
 void printDebug(char* message);
 
+// NOTE(John): This is here for now... These need to go in an animations manager however
+static struct Animation Player_Walk = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "walk"));
+static struct Animation Player_Attack_Dagger = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_dagger"));
+static struct Animation Player_Attack_Bow = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_bow"));
+
 namespace ECS { namespace Systems {
 
 	///////////////////////////
@@ -141,9 +146,13 @@ namespace ECS { namespace Systems {
 			Manager->PlayerControllerSystem->PlayerControllers[Player].Input = Input;
 			
 			// Set up Animation2D
-			Manager->Animation2DSystem->Animations[Player].Sheet = Sheet;
-			Manager->Animation2DSystem->Animations[Player].CurrentFrame = 0; 
-			Manager->Animation2DSystem->Animations[Player].BeginningFrame = 0; 
+			Component::Animation2D* Animation2D = &Manager->Animation2DSystem->Animations[Player];
+			Animation2D->Sheet = Sheet; 
+			// These are redundant...
+			Animation2D->CurrentFrame = 0; 
+			Animation2D->BeginningFrame = 0;
+
+				
 
 			// Set up Label 
 			// NOTE(John): This isn't the best way to do this; most likely will throw an error at some point
@@ -188,9 +197,12 @@ namespace ECS { namespace Systems {
 			Transform->BaseHeight = Position.z;
 
 			// Set up Animation2D
-			Manager->Animation2DSystem->Animations[AI].Sheet = Sheet; 
-			Manager->Animation2DSystem->Animations[AI].CurrentFrame = 0; 
-			Manager->Animation2DSystem->Animations[AI].BeginningFrame = 0; 
+			Component::Animation2D* Animation2D = &Manager->Animation2DSystem->Animations[AI];
+			Animation2D->Sheet = Sheet; 
+			// These are redundant...
+			Animation2D->CurrentFrame = 0; 
+			Animation2D->BeginningFrame = 0; 
+
 			
 			// Set up Label
 			// NOTE(John): This isn't the best way to do this; most likely will throw an error at some point
@@ -787,8 +799,7 @@ namespace ECS { namespace Systems {
 							// Get collision mask for A and B
 							Enjon::uint32 Mask = GetCollisionType(Manager, e, collider);
 
-							// If enemy and item, then continue to next pair
-							if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) continue;
+							if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) 												continue;
 							if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 	{ CollideWithItem(Manager, collider, e); 	continue; } 
 							if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 	{ CollideWithEnemy(Manager, e, collider); 	continue; }
 							if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 	{ CollideWithEnemy(Manager, e, collider); 	continue; }
