@@ -14,11 +14,6 @@
 
 void printDebug(char* message);
 
-// NOTE(John): This is here for now... These need to go in an animations manager however
-static struct Animation Player_Walk = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "walk"));
-static struct Animation Player_Attack_Dagger = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_dagger"));
-static struct Animation Player_Attack_Bow = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_bow"));
-
 namespace ECS { namespace Systems {
 
 	///////////////////////////
@@ -151,6 +146,8 @@ namespace ECS { namespace Systems {
 			// These are redundant...
 			Animation2D->CurrentFrame = 0; 
 			Animation2D->BeginningFrame = 0;
+			Animation2D->CurrentAnimation = AnimationManager::GetAnimation("Walk");
+			Animation2D->SetStart = 0;
 
 				
 
@@ -490,7 +487,7 @@ namespace ECS { namespace Systems {
 	namespace Animation2D 
 	{ 
 		// TESTING THIS ONLY
-		enum EntityAnimationState { WALKING, ATTACKING }; // This should be split up into continuous and discrete states
+		enum EntityAnimationState { WALKING, ATTACKING, IDLE }; // This should be split up into continuous and discrete states
 		EntityAnimationState PlayerState = EntityAnimationState::WALKING;
 		bool HitFrame = false;
 		
@@ -503,9 +500,9 @@ namespace ECS { namespace Systems {
 		
 		void Update(struct Animation2DSystem* System)
 		{
-			// How are we going to update our sytems?
-			// I guess we'll just, uh, try some shit out
+			// Get manager
 			struct EntityManager* Manager = System->Manager;
+			// Loop through all entities with animations
 			for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
 			{
 				// If has an animation component
@@ -514,126 +511,87 @@ namespace ECS { namespace Systems {
 					// If is a player
 					if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
 					{
-						Component::Animation2D* Animation = &Manager->Animation2DSystem->Animations[e];
-						const Enjon::Math::Vec2* ViewVector = &Manager->TransformSystem->Transforms[e].ViewVector;
-						const Enjon::Math::Vec3* Velocity = &Manager->TransformSystem->Transforms[e].Velocity;
-						Enjon::uint32* BeginningFrame = &Animation->BeginningFrame;
-						Enjon::uint32 EndFrame = *BeginningFrame + Animation->Sheet->dims.x;
-						Enjon::uint32 XDim = Animation->Sheet->dims.x;
-						
-						// static variables for testing purposes
-						// TODO(John): Get this shit out of here and store it appropriately in Math constants or some shit like that
-						static float time = 0.0f;
-						static Enjon::Math::Vec2 E(1, 0);
-						static Enjon::Math::Vec2 NE(1, 1);
-						static Enjon::Math::Vec2 N(0, 1);
-						static Enjon::Math::Vec2 NW(-1, 1);
-						static Enjon::Math::Vec2 W(-1, 0);
-						static Enjon::Math::Vec2 SW(-1, -1);
-						static Enjon::Math::Vec2 S(0, -1);
-						static Enjon::Math::Vec2 SE(1, -1); 
+						// Get necessary items
+						Component::Animation2D* AnimationComponent = &Manager->Animation2DSystem->Animations[e];
+						Enjon::Math::Vec2* ViewVector = &Manager->TransformSystem->Transforms[e].ViewVector;
+						Enjon::Math::Vec3* Velocity = &Manager->TransformSystem->Transforms[e].Velocity;
+						Enjon::uint32* BeginningFrame = &AnimationComponent->BeginningFrame;
+						Enjon::uint32* SetStart = &AnimationComponent->SetStart;
+						const Animation* CurrentAnimation = AnimationComponent->CurrentAnimation;
 
-						// Increment time
-						// TODO(John): Put this as a variable in a JSON file; it will be the specified delay between two consecutive frames
-						static float increment = 1.0f;
-						static float frametimer = 0.0f;
-						static int RowOffset = 0;
-						static bool SetStart = false;
-
-						// NOTE(John): Okay, so this might work, but it will get pretty crazy, since I'll have to calculate the starting position for all these animations
-						
-						if (PlayerState == EntityAnimationState::WALKING) RowOffset = 0;
-						else if (PlayerState == EntityAnimationState::ATTACKING) RowOffset = 8;
-					
-						// Setting animation beginning frame based on view vector
-						if (PlayerState == EntityAnimationState::ATTACKING && !SetStart)
+						// Get what the current animation is based on the player state
+						switch(PlayerState)
 						{
-							if		(ViewVector->x <= 0)   {*BeginningFrame = XDim * (0 + RowOffset); SetStart = true;}
-							else if (ViewVector->x > 0)    {*BeginningFrame = XDim * (1 + RowOffset); SetStart = true;}
+							case EntityAnimationState::WALKING: 	CurrentAnimation = AnimationManager::GetAnimation("Walk");	break;
+							case EntityAnimationState::ATTACKING: 	CurrentAnimation = AnimationManager::GetAnimation("Attack_Bow"); break;
+						}
+
+						// Setting animation beginning frame based on view vector
+						if (PlayerState == EntityAnimationState::ATTACKING && !(*SetStart))
+						{
+							if		(ViewVector->x <= 0)   {*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; *SetStart = TRUE;}
+							else if (ViewVector->x > 0)    {*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; *SetStart = TRUE;}
 						
 							// Set currentframe to beginning frame
-							Animation->CurrentFrame = 0;
+							AnimationComponent->CurrentFrame = 0;
 						}
-						else if (PlayerState == EntityAnimationState::WALKING)
+
+						// Set beginning frame based on view vector
+						if (PlayerState == EntityAnimationState::WALKING || PlayerState == EntityAnimationState::IDLE)
 						{
-							if		(*ViewVector == NW)		*BeginningFrame = XDim * (0 + RowOffset);
-							else if (*ViewVector == NE)		*BeginningFrame = XDim * (1 + RowOffset);
-							else if (*ViewVector == E)		*BeginningFrame = XDim * (2 + RowOffset);
-							else if (*ViewVector == W)		*BeginningFrame = XDim * (3 + RowOffset);
-							else if (*ViewVector == N)		*BeginningFrame = XDim * (4 + RowOffset);
-							else if (*ViewVector == S)		*BeginningFrame = XDim * (5 + RowOffset);
-							else if (*ViewVector == SE)		*BeginningFrame = XDim * (6 + RowOffset);
-							else if (*ViewVector == SW)		*BeginningFrame = XDim * (7 + RowOffset);
-							else							*BeginningFrame = XDim * (0 + RowOffset); 
+							if		(*ViewVector == NORTHWEST)		*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW];
+							else if (*ViewVector == NORTHEAST)		*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE];
+							else if (*ViewVector == EAST)			*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::E];
+							else if (*ViewVector == WEST)			*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::W];
+							else if (*ViewVector == NORTH)			*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::N];
+							else if (*ViewVector == SOUTH)			*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::S];
+							else if (*ViewVector == SOUTHEAST)		*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::SE];
+							else if (*ViewVector == SOUTHWEST)		*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::SW];
+							else									*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW];
 						}
-						
-					
-						if (PlayerState == EntityAnimationState::WALKING)
+
+						// NOTE(John): Leave if Idle, for now
+						if (PlayerState != EntityAnimationState::ATTACKING && Velocity->x == 0.0f && Velocity->y == 0.0f) return;
+
+						// Animation
+						AnimationComponent->AnimationTimer += CurrentAnimation->AnimationTimerIncrement;
+						if (AnimationComponent->AnimationTimer >= CurrentAnimation->Profile->Delays[AnimationComponent->CurrentFrame % CurrentAnimation->Profile->FrameCount])
 						{
-							if (abs(Velocity->x) > WALKPACE || abs(Velocity->y) >= WALKPACE) time += 0.5f;
-							else time += 0.4f;	
-						
-							if (time >= 3.0f && (Velocity->x != 0 || Velocity->y != 0))
-							{ 
-								Animation->CurrentFrame++;
-								if (Animation->CurrentFrame + *BeginningFrame >= EndFrame)
-								{
-									Animation->CurrentFrame = 0;
-								}
-								
-								// Reset time 
-								time = 0.0f;
-							}
-						} 
-						else if (PlayerState == EntityAnimationState::ATTACKING)
-						{
-							time += 0.1f;
-							if (time >= increment)
+							// Increase current frame
+							AnimationComponent->CurrentFrame++;
+
+							Enjon::uint32 ActiveFrame = AnimationComponent->CurrentFrame + *BeginningFrame;
+
+							// Reset timer
+							AnimationComponent->AnimationTimer = 0.0f;
+
+							// Check for hit frame if attacking
+							if (PlayerState == EntityAnimationState::ATTACKING)
 							{
-								if (*BeginningFrame + Animation->CurrentFrame != *BeginningFrame + 2)
-								{
-									increment = 0.3f;
-									Animation->CurrentFrame++;
-								}
-							
-								// Hold the upward swing frame a bit
-								if (*BeginningFrame + Animation->CurrentFrame == *BeginningFrame + 2)
-								{
-									frametimer += 0.1f; // this is the delay attribute which will be help in the data file for the animation
-									if (frametimer >= 0.7f)
-									{
-										Animation->CurrentFrame++;
-										frametimer = 0.0f;
-									}
-								}
-								// Activate collision with sword
-								if (*BeginningFrame + Animation->CurrentFrame == *BeginningFrame + 3)
+								// Activate collision with hit frame
+								if (ActiveFrame == *BeginningFrame + 3)
 								{
 									// Collision at this point
 									HitFrame = true;
-
-									// Try adding a collision box for the weapon here
-
 								} 
+
 								else HitFrame = false;
 
-								if (*BeginningFrame + Animation->CurrentFrame >= *BeginningFrame + 5)
+								// End attacking animation state
+								if (ActiveFrame >= *BeginningFrame + CurrentAnimation->Profile->FrameCount)
 								{
-									Animation->CurrentFrame = 5;
-									frametimer += 0.1f;
-								if (frametimer >= 0.5f)
-									{
-										Animation->CurrentFrame = 0;
-										frametimer = 0.0f;
-										time = 0.0f;
-										PlayerState = EntityAnimationState::WALKING;
-										SetStart = false;
-										increment = 1.0f;
-									}
+									AnimationComponent->CurrentFrame = 0;
+									PlayerState = EntityAnimationState::WALKING;
+									*SetStart = FALSE;
 								}
-								time = 0.0f;
-							} 
-						} 
+							}
+
+							// Reset animation	
+							if (ActiveFrame >= *BeginningFrame + CurrentAnimation->Profile->FrameCount) 
+							{
+								AnimationComponent->CurrentFrame = 0;
+							}
+						}
 					}
 				}
 			} 
@@ -700,6 +658,7 @@ namespace ECS { namespace Systems {
 					if (Input->IsKeyPressed(SDL_BUTTON_LEFT)) {
 						// Set to attack?
 						Animation2D::PlayerState = Animation2D::EntityAnimationState::ATTACKING;  // NOTE(John): THIS IS FUCKING AWFUL
+						Animation->CurrentAnimation = AnimationManager::GetAnimation("Attack_Dagger");
 					}
 
 					if (Input->IsKeyDown(SDLK_w)) {

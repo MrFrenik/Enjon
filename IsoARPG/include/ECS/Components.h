@@ -74,9 +74,11 @@ namespace ECS { namespace Component {
 	{
 		eid32 Entity;
 		Enjon::Graphics::SpriteSheet* Sheet; // TODO(John): Pull all spritesheets from some kind of cache, either the resource manager or a spritesheet manager
+		float AnimationTimer;
 		Enjon::uint32 CurrentFrame;
+		Enjon::uint32 SetStart;
 		Enjon::uint32 BeginningFrame; 
-		char* CurrentAnimation;
+		const Animation* CurrentAnimation;
 	} Animation2D;
 
 	// Label struct

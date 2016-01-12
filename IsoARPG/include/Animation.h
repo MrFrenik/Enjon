@@ -21,12 +21,13 @@ struct Animation
 {
 	struct AnimationProfile* Profile;
 	int BeginningFrame;
-	int CurrentFrame;
 	float AnimationTimer;
 	float AnimationTimerIncrement;
 }; 
 
-struct AnimationProfile CreateAnimationProfile(char* ProfileFilePath, char* AnimationName);
+typedef struct Animation Animation;
+
+struct AnimationProfile* CreateAnimationProfile(char* ProfileFilePath, char* AnimationName);
 struct Animation CreateAnimation(struct AnimationProfile* Profile, float AnimationTimerIncrement = 0.1f, Orientation Orient = Orientation::NW);
 
 

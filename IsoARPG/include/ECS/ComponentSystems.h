@@ -1,11 +1,13 @@
 #ifndef COMPONENT_SYSTEMS_H
 #define COMPONENT_SYSTEMS_H
 
-#include "ECS/Components.h"
-#include <ECS/Entity.h>
-#include <SpatialHash.h>
-
 #include <SDL2/SDL.h> 
+
+#include "ECS/Components.h"
+#include "ECS/Entity.h"
+
+#include "SpatialHash.h"
+#include "AnimationManager.h"
 
 #define SCREEN_VERTICAL_CENTER			1440 / 2
 #define SCREEN_HORIZONTAL_CENTER		900 / 2

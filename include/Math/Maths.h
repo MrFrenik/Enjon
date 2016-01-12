@@ -23,6 +23,14 @@
 	#define SOUTHEAST   Enjon::Math::Vec2(1, -1)
 	#define SOUTHWEST   Enjon::Math::Vec2(-1, -1)
 
+// Bools
+#ifndef TRUE 		
+	#define TRUE 	1
+#endif
+#ifndef FALSE
+	#define FALSE	0
+#endif
+
 namespace Enjon { namespace Math { 
 	
 	inline float ToRadians(float degrees)

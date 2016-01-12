@@ -13,11 +13,10 @@ namespace AnimationManager {
 	void AddAnimation();
 
 	// Get specificed animation with given name
-	Animation GetAnimation(const char* AnimationName); 
+	const Animation* GetAnimation(const char* AnimationName);
 
 	// Delete all animations and clear any memory used
 	void DeleteAnimations();
-
 }
 
 

@@ -45,6 +45,7 @@
 #include <Utils/FileUtils.h>
 #include <Math/Random.h>
 #include "Animation.h"
+#include "AnimationManager.h"
 #include "SpatialHash.h"
 #include "Math/Random.h"
 
@@ -92,16 +93,19 @@ int main(int argc, char** argv)
 	// Create HUDCamera
 	Graphics::Camera2D HUDCamera;
 	HUDCamera.Init(screenWidth, screenHeight);
-	HUDCamera.SetScale(1.0f); 
+	HUDCamera.SetScale(1.0f);
+
+	// Init AnimationManager
+	AnimationManager::Init(); 
 	
 	// Init level
 	Enjon::Graphics::SpriteBatch TileBatch;
 	TileBatch.Init();
 
 	// Test Animation
-	struct Animation Player_Walk = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "walk"));
-	struct Animation Player_Attack_Dagger = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_dagger"));
-	struct Animation Player_Attack_Bow = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_bow"));
+	// struct Animation Player_Walk = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "walk"));
+	// struct Animation Player_Attack_Dagger = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_dagger"));
+	// struct Animation Player_Attack_Bow = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_bow"));
 
 	Level level;
 	Graphics::GLTexture TileTexture;
@@ -160,7 +164,7 @@ int main(int argc, char** argv)
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
-	static uint32 AmountDrawn = 25;
+	static uint32 AmountDrawn = 1;
 
 	for (int e = 0; e < AmountDrawn; e++)
 	{
@@ -456,13 +460,13 @@ int main(int argc, char** argv)
 {
 	#define WINDOWRUNNING 1
 		
-	struct AnimationProfile player_walk = CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "walk"); 
-	struct AnimationProfile player_attack_dagger = CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_dagger"); 
-	struct AnimationProfile player_attack_bow = CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_bow"); 
+	struct AnimationProfile* player_walk = CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "walk"); 
+	struct AnimationProfile* player_attack_dagger = CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_dagger"); 
+	struct AnimationProfile* player_attack_bow = CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_bow"); 
 
-	struct Animation Player_Walk = CreateAnimation(&player_walk, 0.1f, Orientation::NE);
-	struct Animation Player_Attack_Dagger = CreateAnimation(&player_attack_dagger, 0.075f); 
-	struct Animation Player_Attack_Bow = CreateAnimation(&player_attack_bow, 0.075f); 
+	struct Animation Player_Walk = CreateAnimation(player_walk, 0.1f, Orientation::NE);
+	struct Animation Player_Attack_Dagger = CreateAnimation(player_attack_dagger, 0.075f); 
+	struct Animation Player_Attack_Bow = CreateAnimation(player_attack_bow, 0.075f); 
 
 
 #if WINDOWRUNNING
@@ -480,7 +484,7 @@ int main(int argc, char** argv)
 	Enjon::Graphics::SpriteSheet Sheet; 
 
 	Batch.Init();
-	Sheet.Init(Enjon::Input::ResourceManager::GetTexture(player_walk.FilePath), Enjon::Math::iVec2(6, 24)); 
+	Sheet.Init(Enjon::Input::ResourceManager::GetTexture(player_walk->FilePath), Enjon::Math::iVec2(6, 24)); 
 
 	Enjon::Graphics::ShaderManager::Init();
 

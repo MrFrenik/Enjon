@@ -7,16 +7,16 @@ struct Animation CreateAnimation(struct AnimationProfile* Profile, float Animati
 	Anim.AnimationTimer = 0.0f;
 	Anim.AnimationTimerIncrement = AnimationTimerIncrement;
 	Anim.BeginningFrame = Profile->Starts[Orient];
-	Anim.CurrentFrame = Anim.BeginningFrame;
 
 	return Anim;
 }
 
-struct AnimationProfile CreateAnimationProfile(char* ProfileFilePath, char* AnimationName)
+struct AnimationProfile* CreateAnimationProfile(char* ProfileFilePath, char* AnimationName)
 { 
 	// Animation to be returned
-	struct AnimationProfile Anim;
-	Anim.FilePath = (char*)malloc(sizeof(char) * 128);
+	struct AnimationProfile* Anim = (struct AnimationProfile*)malloc(sizeof(struct AnimationProfile));
+
+	Anim->FilePath = (char*)malloc(sizeof(char) * 128);
 	char* BeginningPath = "../IsoARPG/Assets/Textures/";
 	
 	// Read file and get string from it
@@ -87,10 +87,10 @@ struct AnimationProfile CreateAnimationProfile(char* ProfileFilePath, char* Anim
 					if (strcmp(objectbuffer, "framecount") == 0)
 					{
 						// Get the integer from buffer
-						Anim.FrameCount = Enjon::Utils::convert_buffer_to_int(numberbuffer, numCount);
+						Anim->FrameCount = Enjon::Utils::convert_buffer_to_int(numberbuffer, numCount);
 
 						// Set up frame delays 
-						Anim.Delays = (float*)malloc(sizeof(float) * Anim.FrameCount);
+						Anim->Delays = (float*)malloc(sizeof(float) * Anim->FrameCount);
 					} 
 
 					// Get the frame delays
@@ -100,18 +100,18 @@ struct AnimationProfile CreateAnimationProfile(char* ProfileFilePath, char* Anim
 						float delay = Enjon::Utils::convert_buffer_to_float(numberbuffer, counter, decimalIndex); 
 					
 						// Check to see whether or not we need to repeat this float
-						if (str[i] != ',' && !read_array_set && (frameDelayCounter % Anim.FrameCount == 0)) 
+						if (str[i] != ',' && !read_array_set && (frameDelayCounter % Anim->FrameCount == 0)) 
 						{ 
-							for (int i = 0; i < Anim.FrameCount; i++)
+							for (int i = 0; i < Anim->FrameCount; i++)
 							{
-								Anim.Delays[frameDelayCounter] = delay;
+								Anim->Delays[frameDelayCounter] = delay;
 								frameDelayCounter++;
 							}
 						}
 						
 						else // Otherwise place in array and continue to loop through framedelays
 						{
-							Anim.Delays[frameDelayCounter] = delay;
+							Anim->Delays[frameDelayCounter] = delay;
 							frameDelayCounter++;
 						}
 					} 
@@ -119,7 +119,7 @@ struct AnimationProfile CreateAnimationProfile(char* ProfileFilePath, char* Anim
 					// Get the start frames
 					if (strcmp(objectbuffer, "starts") == 0)
 					{
-						Anim.Starts[startCounter] = Enjon::Utils::convert_buffer_to_int(numberbuffer, numCount);
+						Anim->Starts[startCounter] = Enjon::Utils::convert_buffer_to_int(numberbuffer, numCount);
 						startCounter++;
 					} 
 
@@ -157,16 +157,16 @@ struct AnimationProfile CreateAnimationProfile(char* ProfileFilePath, char* Anim
 						// Set animation's file path to databuffer
 						for (size_t i = 0; i < strlen(BeginningPath) + 1; ++i)
 						{
-							Anim.FilePath[i] = BeginningPath[i];
+							Anim->FilePath[i] = BeginningPath[i];
 						}
 
-						for (size_t j = 0, i = strlen(Anim.FilePath); j < strlen(databuffer) + 1; ++j, ++i)
+						for (size_t j = 0, i = strlen(Anim->FilePath); j < strlen(databuffer) + 1; ++j, ++i)
 						{
-							Anim.FilePath[i] = databuffer[j];
+							Anim->FilePath[i] = databuffer[j];
 						}
 
 						// Set null terminator
-						Anim.FilePath[strlen(Anim.FilePath) + 1] = '\0';
+						Anim->FilePath[strlen(Anim->FilePath) + 1] = '\0';
 					} 
 
 					// Deactivate buffer
