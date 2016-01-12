@@ -173,9 +173,6 @@ int main(int argc, char** argv)
 																enemydims, &EnemySheet, "Enemy", 0.05f); // NOTE(John): The transform system is a bottleneck right now }
 	}
 
-	// Create Item
-	eid32 Item = EntitySystem::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight(), 0))), 0), 
-														Math::Vec2(64.0f, 32.0f), &ItemSheet, "Item"); 
 
 	// Create player
 	eid32 Player = EntitySystem::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(100.0f, 100.0f), &PlayerSheet, "Player", 0.4f, Math::Vec3(1, 1, 0)); 
@@ -272,19 +269,21 @@ int main(int argc, char** argv)
 		static uint32 Col = 0;
 		static uint32 i = 0;
 		static Math::Vec2 dims(100.0f, 100.0f);
-		static Math::Vec2 itemDims(16.0f, 16.0f);
+		static Math::Vec2 itemDims(64.0f, 64.0f);
 		static Math::Vec4 uv(0, 0, 1, 1);
 		static Math::Vec2 pos(-1000, -1000);
 		static Graphics::GLTexture beast = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png"); 
 		static Graphics::GLTexture playertexture = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/pixelanimtest.png"); 
 		static Graphics::GLTexture groundtiletexture = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledblue.png"); 
-		static Graphics::GLTexture orb = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png"); 
+		static Graphics::GLTexture orb = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"); 
+		static Graphics::SpriteSheet ArrowSheet;
+		if (!ArrowSheet.IsInit()) ArrowSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1)); 
 	
 		// Draw enemies
 		for (eid32 e = 0; e < World->MaxAvailableID; e++)
 		{
 			// if (World->Types[e] == Component::EntityType::PLAYER ||  World->Types[e] == Component::EntityType::ITEM) continue;
-			if (e == Item || e == Player) continue;
+			if (e == Player) continue;
 
 			// Don't draw if the entity doesn't exist anymore
 			bitmask32 Mask = World->Masks[e];
@@ -312,7 +311,21 @@ int main(int argc, char** argv)
 				// Don't draw if not in view
 				if (Camera.IsBoundBoxInCamView(*EntityPosition, itemDims))
 				{
-					PlayerBatch.Add(Math::Vec4(*EntityPosition, itemDims), uv, orb.id, *Color);
+					static int index;
+
+					// Get attack vector and draw arrow based on that
+					Enjon::Math::Vec2* AttackVector = &World->TransformSystem->Transforms[Player].AttackVector;
+					if		(*AttackVector == EAST)				index = 0;
+					else if (*AttackVector == NORTHEAST)		index = 1;
+					else if (*AttackVector == NORTH)			index = 2;
+					else if (*AttackVector == NORTHWEST)		index = 3;
+					else if (*AttackVector == WEST)				index = 4;
+					else if (*AttackVector == SOUTHWEST)		index = 5;
+					else if (*AttackVector == SOUTH)			index = 6;
+					else if (*AttackVector == SOUTHEAST)		index = 7;
+					else										index = 0;
+
+					PlayerBatch.Add(Math::Vec4(*EntityPosition, itemDims), ArrowSheet.GetUV(index), ArrowSheet.texture.id, *Color);
 				}
 			}
 
@@ -326,13 +339,6 @@ int main(int argc, char** argv)
 			// Draw ground tile on cartesian map			
 			// PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[e].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
 			// 						Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f));
-		}
-
-		// Draw Item
-		if ((World->Masks[Item] & COMPONENT_RENDERER2D) == COMPONENT_RENDERER2D)
-		{
-			PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[Item].Position.XY(), 16.0f, 16.0f), ItemSheet.GetUV(0), ItemSheet.texture.id, 
-								Graphics::SetOpacity(Graphics::RGBA8_White(), 0.5));
 		}
 	
 		// Draw player

@@ -1,70 +1,140 @@
 ComponentSystems.cpp
-..\IsoARPG\src\ECS\ComponentSystems.cpp(157) : error C2664: 'void std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert(std::initializer_list<std::pair<const _Kty,_Ty>>)' : cannot convert argument 1 from 'std::pair<const char *,Animation *>' to 'std::pair<const _Kty,_Ty> &&'
-        with
-        [
-            _Kty=const char *
-,            _Ty=Animation
-,            _Pr=std::less<const char *>
-,            _Alloc=std::allocator<std::pair<const char *const ,Animation>>
-        ]
-        and
-        [
-            _Kty=const char *
-,            _Ty=Animation
-        ]
-        Reason: cannot convert from 'std::pair<const char *,Animation *>' to 'std::pair<const _Kty,_Ty>'
-        with
-        [
-            _Kty=const char *
-,            _Ty=Animation
-        ]
-        No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-..\IsoARPG\src\ECS\ComponentSystems.cpp(159) : error C2664: 'void std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert(std::initializer_list<std::pair<const _Kty,_Ty>>)' : cannot convert argument 1 from 'std::pair<const char *,Animation *>' to 'std::pair<const _Kty,_Ty> &&'
-        with
-        [
-            _Kty=const char *
-,            _Ty=Animation
-,            _Pr=std::less<const char *>
-,            _Alloc=std::allocator<std::pair<const char *const ,Animation>>
-        ]
-        and
-        [
-            _Kty=const char *
-,            _Ty=Animation
-        ]
-        Reason: cannot convert from 'std::pair<const char *,Animation *>' to 'std::pair<const _Kty,_Ty>'
-        with
-        [
-            _Kty=const char *
-,            _Ty=Animation
-        ]
-        No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-..\IsoARPG\src\ECS\ComponentSystems.cpp(161) : error C2664: 'void std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::insert(std::initializer_list<std::pair<const _Kty,_Ty>>)' : cannot convert argument 1 from 'std::pair<const char *,Animation *>' to 'std::pair<const _Kty,_Ty> &&'
-        with
-        [
-            _Kty=const char *
-,            _Ty=Animation
-,            _Pr=std::less<const char *>
-,            _Alloc=std::allocator<std::pair<const char *const ,Animation>>
-        ]
-        and
-        [
-            _Kty=const char *
-,            _Ty=Animation
-        ]
-        Reason: cannot convert from 'std::pair<const char *,Animation *>' to 'std::pair<const _Kty,_Ty>'
-        with
-        [
-            _Kty=const char *
-,            _Ty=Animation
-        ]
-        No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+..\IsoARPG\src\ECS\ComponentSystems.cpp(533) : error C2065: 'Current' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(533) : error C2146: syntax error : missing ')' before identifier 'Weapon'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(533) : error C2065: 'Weapon' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(533) : error C2059: syntax error : ')'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(535) : error C2143: syntax error : missing '}' before ';'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(535) : error C2064: term does not evaluate to a function taking 1 arguments
+..\IsoARPG\src\ECS\ComponentSystems.cpp(541) : error C2065: 'SetStart' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(543) : error C2065: 'ViewVector' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(543) : error C2227: left of '->x' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(543) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(543) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(543) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(543) : error C2227: left of '->Starts' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(543) : error C2065: 'SetStart' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(544) : error C2065: 'ViewVector' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(544) : error C2227: left of '->x' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(544) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(544) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(544) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(544) : error C2227: left of '->Starts' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(544) : error C2065: 'SetStart' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(547) : error C2065: 'AnimationComponent' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(547) : error C2227: left of '->CurrentFrame' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(553) : error C2065: 'ViewVector' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(553) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(553) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(553) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(553) : error C2227: left of '->Starts' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(554) : error C2065: 'ViewVector' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(554) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(554) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(554) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(554) : error C2227: left of '->Starts' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(555) : error C2065: 'ViewVector' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(555) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(555) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(555) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(555) : error C2227: left of '->Starts' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(556) : error C2065: 'ViewVector' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(556) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(556) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(556) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(556) : error C2227: left of '->Starts' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(557) : error C2065: 'ViewVector' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(557) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(557) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(557) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(557) : error C2227: left of '->Starts' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(558) : error C2065: 'ViewVector' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(558) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(558) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(558) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(558) : error C2227: left of '->Starts' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(559) : error C2065: 'ViewVector' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(559) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(559) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(559) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(559) : error C2227: left of '->Starts' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(560) : error C2065: 'ViewVector' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(560) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(560) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(560) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(560) : error C2227: left of '->Starts' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(561) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(561) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(561) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(561) : error C2227: left of '->Starts' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(565) : error C2065: 'Velocity' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(565) : error C2227: left of '->x' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(565) : error C2227: left of '->y' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(568) : error C2065: 'AnimationComponent' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(568) : error C2227: left of '->AnimationTimer' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(568) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(568) : error C2227: left of '->AnimationTimerIncrement' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(569) : error C2065: 'AnimationComponent' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(569) : error C2227: left of '->AnimationTimer' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(569) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(569) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(569) : error C2227: left of '->Delays' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(569) : error C2227: left of '->CurrentFrame' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(569) : error C2227: left of '->FrameCount' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(572) : error C2065: 'AnimationComponent' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(572) : error C2227: left of '->CurrentFrame' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(574) : error C2065: 'AnimationComponent' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(574) : error C2227: left of '->CurrentFrame' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(574) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(577) : error C2065: 'AnimationComponent' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(577) : error C2227: left of '->AnimationTimer' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(583) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(592) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(592) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(592) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(592) : error C2227: left of '->FrameCount' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(594) : error C2065: 'AnimationComponent' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(594) : error C2227: left of '->CurrentFrame' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(596) : error C2065: 'SetStart' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(601) : error C2065: 'BeginningFrame' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(601) : error C2065: 'CurrentAnimation' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(601) : error C2227: left of '->Profile' must point to class/struct/union/generic type
+        type is 'unknown-type'
+..\IsoARPG\src\ECS\ComponentSystems.cpp(601) : error C2227: left of '->FrameCount' must point to class/struct/union/generic type
+..\IsoARPG\src\ECS\ComponentSystems.cpp(603) : error C2065: 'AnimationComponent' : undeclared identifier
+..\IsoARPG\src\ECS\ComponentSystems.cpp(603) : fatal error C1003: error count exceeds 100; stopping compilation
 Generating Code...
 Skipping... (no relevant changes detected)
 Entity.cpp
 SpatialHash.cpp
 main.cpp
 Level.cpp
+AnimationManager.cpp
 Animation.cpp
 Camera3D.cpp
 Vec4.cpp

@@ -16,8 +16,20 @@
 namespace ECS { namespace Component {
 	
 	using eid32 = Enjon::uint32;
+	using projectileTypeMask = Enjon::uint32;
 
-	enum EntityType { CONSUMABLE, ITEM, ENEMY, NPC, PLAYER };
+	enum MaskType { PROJECTILE_MASK, PLAYER_MASK, ENEMY_MASK };
+	enum EntityType { CONSUMABLE, ITEM, ENEMY, NPC, PLAYER, PROJECTILE };
+
+	typedef std::map<MaskType, Enjon::uint32> 		BITMASKMAP;
+	typedef std::pair<MaskType, Enjon::uint32>		BITMASKPAIR;		
+
+	enum Projectile_Type : projectileTypeMask
+	{
+		PROJECTILE_ARROW				= 0x00000000, 
+		PROJECTILE_PLAYER				= 0x00000001,  // Not sure if I like these last two here or if I want another mask for item ownership 
+		PROJECTILE_ENEMY				= 0x00000002
+	};
 
 	// Transform struct
 	typedef struct
@@ -29,6 +41,7 @@ namespace ECS { namespace Component {
 		Enjon::Math::Vec3 Velocity;
 		Enjon::Math::Vec3 VelocityGoal;
 		Enjon::Math::Vec2 ViewVector;
+		Enjon::Math::Vec2 AttackVector;
 		Enjon::Math::Vec2 CartesianPosition;
 		// NOTE(John): For now, we'll keep the position of the ground tile in here
 		// NOTE(John): Also, we'll keep the dimensions of the entity in here
@@ -107,6 +120,13 @@ namespace ECS { namespace Component {
 		eid32 Entity;
 		float Health;
 	} HealthComponent;
+
+	// Bitmask Component
+	typedef struct 
+	{
+		eid32 Entity;
+		std::map<MaskType, Enjon::uint32> Masks;	
+	} BitmaskComponent;
 
 	// Type Component
 	typedef struct

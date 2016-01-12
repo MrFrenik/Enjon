@@ -47,6 +47,7 @@ namespace ECS { namespace Systems {
 	{
 		struct EntityManager* Manager;
 		Component::HealthComponent HealthComponents[MAX_ENTITIES];
+		Component::BitmaskComponent BitMasks[MAX_ENTITIES];
 	};
 	
 	struct PlayerControllerSystem
@@ -126,7 +127,7 @@ namespace ECS { namespace Systems {
 							Enjon::Math::Vec3 VelocityGoal = Enjon::Math::Vec3(0,0,0), float Health = 100.0f, Enjon::Graphics::ColorRGBA8 Color = Enjon::Graphics::RGBA8_White());
 
 		// Creates Item entity and returns eid
-		eid32 CreateItem(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, char* Name, 
+		eid32 CreateItem(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, char* Name, Component::BITMASKMAP Masks,
 								Component::EntityType Type = Component::EntityType::ITEM, Enjon::Graphics::ColorRGBA8 Color = Enjon::Graphics::RGBA8_White());
 	} 
 

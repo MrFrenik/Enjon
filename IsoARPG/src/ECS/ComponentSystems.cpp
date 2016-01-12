@@ -39,14 +39,14 @@ namespace ECS { namespace Systems {
 			Manager->MaxAvailableID = 0;
 
 			// Initialize the component systems
-			Manager->TransformSystem		= TransformSystem::NewTransform3DSystem(Manager);
-			Manager->PlayerControllerSystem = PlayerController::NewPlayerControllerSystem(Manager);
-			Manager->AIControllerSystem		= AIController::NewAIControllerSystem(Manager);
-			Manager->LabelSystem			= Label::NewLabelSystem(Manager);
-			Manager->Animation2DSystem		= Animation2D::NewAnimation2DSystem(Manager);
-			Manager->AttributeSystem 		= Attributes::NewAttributeSystem(Manager);
-			Manager->Renderer2DSystem 		= Renderer2D::NewRenderer2DSystem(Manager);
-			Manager->InventorySystem 		= Inventory::NewInventorySystem(Manager);
+			Manager->TransformSystem			= TransformSystem::NewTransform3DSystem(Manager);
+			Manager->PlayerControllerSystem 	= PlayerController::NewPlayerControllerSystem(Manager);
+			Manager->AIControllerSystem			= AIController::NewAIControllerSystem(Manager);
+			Manager->LabelSystem				= Label::NewLabelSystem(Manager);
+			Manager->Animation2DSystem			= Animation2D::NewAnimation2DSystem(Manager);
+			Manager->AttributeSystem 			= Attributes::NewAttributeSystem(Manager);
+			Manager->Renderer2DSystem 			= Renderer2D::NewRenderer2DSystem(Manager);
+			Manager->InventorySystem 			= Inventory::NewInventorySystem(Manager);
 
 			Manager->Width = Width;
 			Manager->Height = Height;
@@ -58,6 +58,7 @@ namespace ECS { namespace Systems {
 			return Manager;
 		} 
 
+		// NOTE(John): Creating and Removing entities is buggy right now in the way that it manager ids
 		// Creates blank entity and returns eid
 		eid32 CreateEntity(struct EntityManager* Manager, bitmask32 Components)
 		{
@@ -74,13 +75,15 @@ namespace ECS { namespace Systems {
 				{
 					Manager->NextAvailableID++;
 					Manager->MaxAvailableID++;
-					Manager->Length++;
 				}
 				else
 				{
 					// Otherwise set next to length, which is the greatest unused id
-					Manager->NextAvailableID = Manager->MaxAvailableID;
+					Manager->NextAvailableID = Manager->Length;
 				} 
+
+				// Increment Length
+				Manager->Length++;
 				
 				// Set bitfield up
 				Manager->Masks[Entity] = Components;
@@ -132,7 +135,8 @@ namespace ECS { namespace Systems {
 			Transform->Position = Position;
 			Transform->VelocityGoalScale = VelocityScale;
 			Transform->VelocityGoal = VelocityGoal; 
-			Transform->ViewVector = Enjon::Math::Vec2(0, 0);
+			Transform->ViewVector = Enjon::Math::Vec2(1, 1);
+			Transform->AttackVector = Enjon::Math::Vec2(1, 1);
 			Transform->GroundPosition = Enjon::Math::Vec2(Position.x + Dimensions.x / 2.0f, Position.y);
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
@@ -148,8 +152,6 @@ namespace ECS { namespace Systems {
 			Animation2D->BeginningFrame = 0;
 			Animation2D->CurrentAnimation = AnimationManager::GetAnimation("Walk");
 			Animation2D->SetStart = 0;
-
-				
 
 			// Set up Label 
 			// NOTE(John): This isn't the best way to do this; most likely will throw an error at some point
@@ -189,6 +191,8 @@ namespace ECS { namespace Systems {
 			Transform->Dimensions = Dimensions;
 			Transform->VelocityGoal = VelocityGoal;
 			Transform->VelocityGoalScale = VelocityScale;
+			Transform->ViewVector = Enjon::Math::Vec2(1, 1);
+			Transform->AttackVector = Enjon::Math::Vec2(1, 1);
 			Transform->GroundPosition = Enjon::Math::Vec2(Position.XY());
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
@@ -219,7 +223,7 @@ namespace ECS { namespace Systems {
 		} 
 
 		// Creates ai entity and returns eid
-		eid32 CreateItem(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, char* Name, Component::EntityType Type, 
+		eid32 CreateItem(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, char* Name, Component::BITMASKMAP Masks, Component::EntityType Type, 
 								Enjon::Graphics::ColorRGBA8 Color)
 		{
 			// Get id for ai
@@ -371,25 +375,23 @@ namespace ECS { namespace Systems {
 
 					// Make sure that position is within bounds of World
 					int Width = Manager->Width, Height = Manager->Height;
-					if (Transform->CartesianPosition.x < -Width + TileWidth) { Transform->CartesianPosition.x = -Width + TileWidth; Velocity->x *= -1; }   
-					if (Transform->CartesianPosition.x > 0.0f) { Transform->CartesianPosition.x = 0.0f; Velocity->x *= -1; }
-					if (Transform->CartesianPosition.y > 0.0f) { Transform->CartesianPosition.y = 0.0f; Velocity->y *= -1; }
-					if (Transform->CartesianPosition.y < -Height + TileWidth) { Transform->CartesianPosition.y = -Height + TileWidth; Velocity->y *= -1; }
+					bool CollideWithLevel = false;
+					if (Transform->CartesianPosition.x < -Width + TileWidth) { Transform->CartesianPosition.x = -Width + TileWidth; Velocity->x *= -1; CollideWithLevel = true; }   
+					if (Transform->CartesianPosition.x > 0.0f) { Transform->CartesianPosition.x = 0.0f; Velocity->x *= -1; CollideWithLevel = true; }
+					if (Transform->CartesianPosition.y > 0.0f) { Transform->CartesianPosition.y = 0.0f; Velocity->y *= -1; CollideWithLevel = true; }
+					if (Transform->CartesianPosition.y < -Height + TileWidth) { Transform->CartesianPosition.y = -Height + TileWidth; Velocity->y *= -1; CollideWithLevel = true; }
+
+					// Delete item for now if it collides with level
+					if (Manager->Types[e] == Component::EntityType::ITEM && CollideWithLevel)
+					{
+						printf("EntityAmount before delete: %d\n", Manager->Length);
+						EntitySystem::RemoveEntity(Manager, e);
+						printf("EntityAmount after delete: %d\n", Manager->Length);
+					}
 
 					*GroundPosition = Enjon::Math::CartesianToIso(Transform->CartesianPosition);
 					Position->y = GroundPosition->y + Position->z;
 					Position->x = GroundPosition->x - Transform->Dimensions.x / 2.0f + TileWidth;
-
-					static float time = 0.0f;
-					if (Manager->LabelSystem->Labels[e].Name == "Player")
-					{
-						time += 0.1f;
-						if (time > 1.0f)
-						{ 
-							//const Enjon::Math::Vec2* CartesianPos = &Transform->CartesianPosition;
-							//printf("Cartesian Position: %.2f, %.2f\n", CartesianPos.x, CartesianPos.y);
-						}
-					}
 				}
 			}
 		}
@@ -487,8 +489,10 @@ namespace ECS { namespace Systems {
 	namespace Animation2D 
 	{ 
 		// TESTING THIS ONLY
-		enum EntityAnimationState { WALKING, ATTACKING, IDLE }; // This should be split up into continuous and discrete states
-		EntityAnimationState PlayerState = EntityAnimationState::WALKING;
+		static enum EntityAnimationState { WALKING, ATTACKING, IDLE }; // This should be split up into continuous and discrete states
+		static enum Weapons { BOW, DAGGER };
+		static EntityAnimationState PlayerState = EntityAnimationState::WALKING;
+		static Weapons CurrentWeapon = Weapons::DAGGER;
 		bool HitFrame = false;
 		
 		struct Animation2DSystem* NewAnimation2DSystem(struct EntityManager* Manager)
@@ -513,8 +517,11 @@ namespace ECS { namespace Systems {
 					{
 						// Get necessary items
 						Component::Animation2D* AnimationComponent = &Manager->Animation2DSystem->Animations[e];
-						Enjon::Math::Vec2* ViewVector = &Manager->TransformSystem->Transforms[e].ViewVector;
-						Enjon::Math::Vec3* Velocity = &Manager->TransformSystem->Transforms[e].Velocity;
+						Systems::Transform3DSystem* System = Manager->TransformSystem;
+						Enjon::Math::Vec2* ViewVector = &System->Transforms[e].ViewVector;
+						Enjon::Math::Vec2* AttackVector = &System->Transforms[e].AttackVector;
+						Enjon::Math::Vec3* Velocity = &System->Transforms[e].Velocity;
+						Enjon::Math::Vec3* Position = &System->Transforms[e].Position;
 						Enjon::uint32* BeginningFrame = &AnimationComponent->BeginningFrame;
 						Enjon::uint32* SetStart = &AnimationComponent->SetStart;
 						const Animation* CurrentAnimation = AnimationComponent->CurrentAnimation;
@@ -523,14 +530,20 @@ namespace ECS { namespace Systems {
 						switch(PlayerState)
 						{
 							case EntityAnimationState::WALKING: 	CurrentAnimation = AnimationManager::GetAnimation("Walk");	break;
-							case EntityAnimationState::ATTACKING: 	CurrentAnimation = AnimationManager::GetAnimation("Attack_Bow"); break;
+							case EntityAnimationState::ATTACKING:
+								switch(CurrentWeapon)
+								{
+									case Weapons::DAGGER: CurrentAnimation = AnimationManager::GetAnimation("Attack_Dagger"); break;
+									case Weapons::BOW: 		CurrentAnimation = AnimationManager::GetAnimation("Attack_Bow"); break;
+								}
+								break;
 						}
 
 						// Setting animation beginning frame based on view vector
 						if (PlayerState == EntityAnimationState::ATTACKING && !(*SetStart))
 						{
-							if		(ViewVector->x <= 0)   {*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; *SetStart = TRUE;}
-							else if (ViewVector->x > 0)    {*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; *SetStart = TRUE;}
+							if		(ViewVector->x <= 0)   {*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; *SetStart = TRUE; *AttackVector = *ViewVector; }
+							else if (ViewVector->x > 0)    {*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; *SetStart = TRUE; *AttackVector = *ViewVector; }
 						
 							// Set currentframe to beginning frame
 							AnimationComponent->CurrentFrame = 0;
@@ -568,14 +581,36 @@ namespace ECS { namespace Systems {
 							// Check for hit frame if attacking
 							if (PlayerState == EntityAnimationState::ATTACKING)
 							{
-								// Activate collision with hit frame
 								if (ActiveFrame == *BeginningFrame + 3)
 								{
-									// Collision at this point
-									HitFrame = true;
+									// Activate collision with dagger "hit frame"
+									if (CurrentWeapon == Weapons::DAGGER)
+									{
+										// Collision at this point
+										HitFrame = true;
+									}
+									if (CurrentWeapon == Weapons::BOW)
+									{
+										// Create an arrow projectile entity for now...
+										static Enjon::Graphics::SpriteSheet ItemSheet;
+										Component::BITMASKMAP Masks;
+										Enjon::uint32 ProjectileMask = Component::Projectile_Type::PROJECTILE_ARROW; 
+										Masks.insert(Component::BITMASKPAIR(Component::MaskType::PROJECTILE_MASK, ProjectileMask));
+										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
+										eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Position->x + AttackVector->x * 128.0f, Position->y + AttackVector->y * 128.0f, Position->z),
+																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Masks);
+
+										// Give the arrow some velocity
+										// Manager->TransformSystem->Transforms[id].VelocityGoal = Enjon::Math::Vec3(10.0f, 10.0f, 0.0f);
+										Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(AttackVector->x * 10.0f, AttackVector->y * 10.0f, 0.0f);
+
+										printf("Entity Amount: %d\n", Manager->MaxAvailableID);
+
+									}
 								} 
 
 								else HitFrame = false;
+
 
 								// End attacking animation state
 								if (ActiveFrame >= *BeginningFrame + CurrentAnimation->Profile->FrameCount)
@@ -658,7 +693,18 @@ namespace ECS { namespace Systems {
 					if (Input->IsKeyPressed(SDL_BUTTON_LEFT)) {
 						// Set to attack?
 						Animation2D::PlayerState = Animation2D::EntityAnimationState::ATTACKING;  // NOTE(John): THIS IS FUCKING AWFUL
-						Animation->CurrentAnimation = AnimationManager::GetAnimation("Attack_Dagger");
+					}
+
+					if (Input->IsKeyPressed(SDLK_1)) {
+						// Set current weapon to dagger
+						Animation2D::CurrentWeapon = Animation2D::Weapons::DAGGER;
+						printf("pressed dagger\n");
+					}
+
+					if (Input->IsKeyPressed(SDLK_2)) {
+						// Set current weapon to bow
+						Animation2D::CurrentWeapon = Animation2D::Weapons::BOW;
+						printf("pressed bow\n");
 					}
 
 					if (Input->IsKeyDown(SDLK_w)) {
@@ -957,9 +1003,9 @@ namespace ECS { namespace Systems {
 							if (Roll == 4) ItemColor = Enjon::Graphics::RGBA8_Yellow();
 							if (Roll == 5) ItemColor = Enjon::Graphics::RGBA8_Magenta();
 
-							eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(ColliderPosition->x - 64.0f, ColliderPosition->x + 64.0f), 
-																  Enjon::Random::Roll(ColliderPosition->y - 64.0f, ColliderPosition->y + 64.0f), 0.0f), 
-																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Component::EntityType::ITEM, Enjon::Graphics::SetOpacity(ItemColor, 0.5f));
+							// eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(ColliderPosition->x - 64.0f, ColliderPosition->x + 64.0f), 
+							// 									  Enjon::Random::Roll(ColliderPosition->y - 64.0f, ColliderPosition->y + 64.0f), 0.0f), 
+							// 									  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Component::EntityType::ITEM, Enjon::Graphics::SetOpacity(ItemColor, 0.5f));
 						} 
 
 					}
