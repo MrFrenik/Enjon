@@ -23,13 +23,12 @@ namespace ECS { namespace Component {
 	using EntityMask = Enjon::uint64;
 
 	enum MaskType { PROJECTILE_MASK, PLAYER_MASK, ENEMY_MASK };
-	enum EntityType { CONSUMABLE, ITEM, ENEMY, NPC, PLAYER, PROJECTILE };
+	enum EntityType { CONSUMABLE, ITEM, ENEMY, NPC, PLAYER, PROJECTILE, WEAPON };
 
 	// Transform struct
 	typedef struct
 	{
 		// NOTE(John): This is getting a bit bloated...
-
 		eid32 Entity;
 		Enjon::Math::Vec3 Position;
 		Enjon::Math::Vec3 Velocity;
@@ -37,8 +36,6 @@ namespace ECS { namespace Component {
 		Enjon::Math::Vec2 ViewVector;
 		Enjon::Math::Vec2 AttackVector;
 		Enjon::Math::Vec2 CartesianPosition;
-		// NOTE(John): For now, we'll keep the position of the ground tile in here
-		// NOTE(John): Also, we'll keep the dimensions of the entity in here
 		Enjon::Physics::AABB AABB;
 		Enjon::Math::Vec2 GroundPosition;
 		Enjon::Math::Vec2 Dimensions;
@@ -67,7 +64,9 @@ namespace ECS { namespace Component {
 	// Inventory struct
 	typedef struct 
 	{
+		eid32 Entity;
 		std::vector<eid32> Items;
+		eid32 WeaponEquipped; // NO NO NO, Terrible way of doing this!
 	} InventoryComponent; 
 
 	// Collision struct

@@ -7,7 +7,7 @@ namespace ECS { namespace Masks {
 
 	using EntityMask = Enjon::uint64;
 
-	enum Entity_Type : EntityMask 
+	enum Type : EntityMask 
 	{
 		PLAYER 			= 0x0000000000000000,
 		AI 				= 0x1000000000000000, 
@@ -15,28 +15,40 @@ namespace ECS { namespace Masks {
 		WEAPON  		= 0x4000000000000000
 	};
 
-	enum Weapon_Options : EntityMask
+	enum WeaponOptions : EntityMask
 	{
 		MELEE			= 0x0000000000000000, 
-		PROJECTILE 		= 0x0000000000000001
+		PROJECTILE 		= 0x0100000000000000,
+		RANGED 			= 0x0200000000000000
 	};
 
-	enum Item_Options : EntityMask
-	{
-		CONSUMABLE 		= 0x0000000000000000		
-	};
-
-	enum Player_Options : EntityMask
+	enum WeaponSubOptions : EntityMask
 	{
 
 	};
 
-	enum AI_Options : EntityMask
+	enum ItemOptions : EntityMask
+	{
+		CONSUMABLE 			= 0x0100000000000000 
+	};
+
+	enum PlayerOptions : EntityMask
 	{
 
 	};
 
+	enum AIOptions : EntityMask
+	{
 
+	};
+
+	enum GeneralOptions: EntityMask
+	{
+		RENDERABLE		= 0x0000000000000001,
+		COLLIDABLE		= 0x0000000000000002,
+		EQUIPPED 		= 0x0000000000000004, 
+		PICKED_UP		= 0x0000000000000008
+	};
 }}
 
 #endif

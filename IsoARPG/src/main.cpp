@@ -170,7 +170,18 @@ int main(int argc, char** argv)
 
 	// Create player
 	eid32 Player = EntitySystem::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(100.0f, 100.0f), &PlayerSheet, "Player", 0.4f, Math::Vec3(1, 1, 0)); 
-		
+
+	// Create Sword
+	eid32 Sword = EntitySystem::CreateItem(World, World->TransformSystem->Transforms[Player].Position, Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, 
+												(Masks::Type::WEAPON | Masks::GeneralOptions::EQUIPPED), Component::EntityType::WEAPON, "Weapon");
+
+	// Turn off Rendering / Transform Components
+	// EntitySystem::RemoveComponents(World, Sword, COMPONENT_RENDERER2D);
+
+	// Equip player with sword
+	World->InventorySystem->Inventories[Player].Items.push_back(Sword);
+	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
+
 	// Set position to player
 	Camera.SetPosition(Math::Vec2(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, World->TransformSystem->Transforms[Player].Position.y)); 
 	
@@ -210,7 +221,6 @@ int main(int argc, char** argv)
 		TransformSystem::Update(World->TransformSystem);
 		Collision::Update(World);
 		Renderer2D::Update(World); 
-		PlayerController::Update(World->PlayerControllerSystem);
 
 		// Check for input
 		ProcessInput(&Input, &Camera, World, Player); 
@@ -343,8 +353,8 @@ int main(int argc, char** argv)
 			}
 
 			// Draw ground tile on cartesian map			
-			// PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[e].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
-			// 						Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f));
+			PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[e].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
+									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f));
 		}
 	
 		// Draw player
@@ -352,6 +362,12 @@ int main(int argc, char** argv)
 		Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
 		const Enjon::Graphics::ColorRGBA8* Color = &World->Renderer2DSystem->Renderers[Player].Color;
 		PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[Player].Position.XY(), dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color);
+
+		static float AABBHeight = 32.0f, AABBWidth = 64.0f;
+		Enjon::Math::Vec2* A = &World->TransformSystem->Transforms[Player].CartesianPosition;
+		Enjon::Physics::AABB* AABB = &World->TransformSystem->Transforms[Sword].AABB;
+		PlayerBatch.Add(Math::Vec4(AABB->Min.x, AABB->Min.y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), 0,
+									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
 
 		// Draw player ground tile 
 		const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;

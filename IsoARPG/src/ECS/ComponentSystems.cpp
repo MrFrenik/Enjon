@@ -115,6 +115,12 @@ namespace ECS { namespace Systems {
 			return Manager->Masks[Entity] != COMPONENT_NONE;
 		}
 
+		// Turns off component
+		void RemoveComponents(struct EntityManager* Manager, eid32 Entity, bitmask32 Components)
+		{
+			Manager->Masks[Entity] &= ~(Components);
+		}
+
 		// Creats player entity and returns eid
 		eid32 CreatePlayer(struct EntityManager* Manager, Enjon::Input::InputManager* Input, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, 
 						   Enjon::Graphics::SpriteSheet* Sheet, char* Name, float VelocityScale, Enjon::Math::Vec3 Velocity, Enjon::Math::Vec3 VelocityGoal, float Health, Enjon::Graphics::ColorRGBA8 Color)
@@ -158,6 +164,9 @@ namespace ECS { namespace Systems {
 			Animation2D->BeginningFrame = 0;
 			Animation2D->CurrentAnimation = AnimationManager::GetAnimation("Walk");
 			Animation2D->SetStart = 0;
+
+			// Set up Inventory System
+			Manager->InventorySystem->Inventories[Player].Entity = Player;
 
 			// Set up Label 
 			// NOTE(John): This isn't the best way to do this; most likely will throw an error at some point
@@ -235,8 +244,8 @@ namespace ECS { namespace Systems {
 		} 
 
 		// Creates ai entity and returns eid
-		eid32 CreateItem(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, char* Name, Component::EntityType Type, 
-								Enjon::Graphics::ColorRGBA8 Color)
+		eid32 CreateItem(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, Masks::EntityMask Mask, 
+								Component::EntityType Type, char* Name, Enjon::Graphics::ColorRGBA8 Color)
 		{
 			// Get id for ai
 			eid32 Item = CreateEntity(Manager, 
@@ -275,6 +284,9 @@ namespace ECS { namespace Systems {
 
 			// Set up type
 			Manager->Types[Item] = Type;
+
+			// Set up Attributes
+			Manager->AttributeSystem->Masks[Item] = Mask;
 
 			return Item;
 		} 
@@ -345,17 +357,18 @@ namespace ECS { namespace Systems {
 		}
 
 		// Updates a Transform3D system
-		// NOTE(John): It would be much faster to draw the entity in here after being updated instead of having to pass through the entities again later on
 		void Update(Transform3DSystem* System)
 		{
 			EntityManager* Manager = System->Manager;
 			// Look at the entities in the Manager up to the last entered position and then update based on component masks
 			for (eid32 e = 0; e <Manager->MaxAvailableID; e++)
 			{
-				// To manage collisions, need to split the screen into quadrants, then check all other entities in that quadrant for collision 
 				// If equal then transform that entity
 				if (Manager->Masks[e] & COMPONENT_TRANSFORM3D)
 				{
+					// If equipped, then don't update transform here
+					if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::EQUIPPED) continue;
+
 					// First transform the velocity by LERPing it
 					Component::Transform3D* Transform = &System->Transforms[e];
 					float Scale = Transform->VelocityGoalScale; 
@@ -399,8 +412,8 @@ namespace ECS { namespace Systems {
 					if (Transform->CartesianPosition.y > 0.0f) { Transform->CartesianPosition.y = 0.0f; Velocity->y *= -1; CollideWithLevel = true; }
 					if (Transform->CartesianPosition.y < -Height + TileWidth) { Transform->CartesianPosition.y = -Height + TileWidth; Velocity->y *= -1; CollideWithLevel = true; }
 
-					// Delete item for now if it collides with level
-					if ((Manager->Types[e] == Component::EntityType::ITEM | Manager->Types[e] == Component::EntityType::PROJECTILE) && CollideWithLevel)
+					// Delete projectile for now if it collides with level
+					if ((Manager->Types[e] == Component::EntityType::PROJECTILE) && CollideWithLevel)
 					{
 						printf("EntityAmount before delete: %d\n", Manager->Length);
 						EntitySystem::RemoveEntity(Manager, e);
@@ -417,6 +430,40 @@ namespace ECS { namespace Systems {
 					V2 Min(CP->x, CP->y);
 					V2 Max(CP->x + TILE_SIZE, CP->y + TILE_SIZE);
 					*AABB = {Min, Max};
+
+					// Go through the items in this entity's inventory and set to this position
+					// NOTE(John): Note sure if I like this here... or at all...
+					std::vector<eid32>* Items = &Manager->InventorySystem->Inventories[e].Items;
+					eid32 WeaponEquipped = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+					for (eid32 i : *Items)
+					{
+						if (i == WeaponEquipped) continue;
+						Component::Transform3D* ItemTransform = &System->Transforms[i];
+						ItemTransform->Position = *Position;
+						ItemTransform->CartesianPosition = Transform->CartesianPosition;
+						ItemTransform->GroundPosition = *GroundPosition;
+					}
+
+					// Calculate equipped weapon Transform
+					Component::Transform3D* WeaponTransform = &System->Transforms[WeaponEquipped];
+					WeaponTransform->Position = *Position;
+					WeaponTransform->GroundPosition = *GroundPosition;
+					WeaponTransform->CartesianPosition = Transform->CartesianPosition;
+
+					// Calculate that AABB, nickuh
+					const V2* AttackVector = &Transform->AttackVector;
+					V2 Center = V2(CP->x + TILE_SIZE / 2.0f, CP->y + TILE_SIZE / 2.0f);
+					// V2 Min;
+					float yOffset = 30.0f;
+
+					WeaponTransform->AABB = {V2(AABB->Min.x - 32.0f, AABB->Min.y), V2(AABB->Max.x + 32.0f, AABB->Max.y)};
+					// printf("AABB: Min: %2f, %2f, Max: %.2f, %.2f\n", AABB->Min.x - 64.0f, AABB->Min.y - 64.0f, AABB->Max.x + 64.0f, AABB->Max.y);
+					// printf("AABB: Min: %2f, %2f, Max: %.2f, %.2f\n", AABB->Min.x, AABB->Min.y, AABB->Max.x, AABB->Max.y);
+					// printf("Center: %.2f, %.2f\n", Center.x, Center.y);
+
+
+
+
 				}
 			}
 		}
@@ -538,9 +585,28 @@ namespace ECS { namespace Systems {
 			// Loop through all entities with animations
 			for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
 			{
+				static float blink_counter = 0.0f;
+				static float blink_increment = 1.0f;
+
 				// If has an animation component
 				if (Manager->Masks[e] & COMPONENT_ANIMATION2D)
 				{
+					// Just testing out random effects based on health
+					float Health = Manager->AttributeSystem->HealthComponents[e].Health;
+					if (Health <= 10.0f) 		blink_increment = 0.5f;
+					else if (Health <= 20.0f) 		blink_increment = 1.0f;
+					else if (Health <= 50.0f) 	blink_increment = 2.0f;
+
+					if (Health <= 50.0f && Health > 0.0f) 
+					{
+						blink_counter += 0.1f;
+						if (blink_counter >= blink_increment)
+						{
+							blink_counter = 0.0f;
+							Manager->Masks[e] ^= COMPONENT_RENDERER2D;
+						}
+					}
+
 					// If is a player
 					if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
 					{
@@ -627,25 +693,34 @@ namespace ECS { namespace Systems {
 									{
 										// Collision at this point
 										HitFrame = true;
+
+										// Make Weapon visible and collidable
+										eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+										Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D | COMPONENT_RENDERER2D);
 									}
+
 									if (CurrentWeapon == Weapons::BOW)
 									{
 										// Create an arrow projectile entity for now...
 										static Enjon::Graphics::SpriteSheet ItemSheet;
 										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
-										eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Position->x + AttackVector->x * 128.0f, Position->y + AttackVector->y * 128.0f, Position->z),
-																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Component::EntityType::PROJECTILE);
+										eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Position->x + AttackVector->x, Position->y + AttackVector->y, Position->z),
+																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::WEAPON | Masks::WeaponOptions::PROJECTILE), 
+																  Component::EntityType::PROJECTILE);
 
 										// Give the arrow some velocity
 										Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(AttackVector->x * 20.0f, AttackVector->y * 10.0f, 0.0f);
 
 										printf("Entity Amount: %d\n", Manager->MaxAvailableID);
-
 									}
 								} 
 
-								else HitFrame = false;
-
+								else 
+								{ 
+									HitFrame = false;
+									eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+									EntitySystem::RemoveComponents(Manager, Weapon, COMPONENT_RENDERER2D | COMPONENT_TRANSFORM3D);
+								} 
 
 								// End attacking animation state
 								if (ActiveFrame >= *BeginningFrame + CurrentAnimation->Profile->FrameCount)
@@ -730,6 +805,12 @@ namespace ECS { namespace Systems {
 						Animation2D::PlayerState = Animation2D::EntityAnimationState::ATTACKING;  // NOTE(John): THIS IS FUCKING AWFUL
 					}
 
+					if (Input->IsKeyPressed(SDLK_r)) {
+						printf("flipping on\n");
+						eid32 WeaponEquipped = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+						Manager->Masks[WeaponEquipped] ^= COMPONENT_RENDERER2D;	
+					}
+
 					if (Input->IsKeyPressed(SDLK_1)) {
 						// Set current weapon to dagger
 						Animation2D::CurrentWeapon = Animation2D::Weapons::DAGGER;
@@ -767,6 +848,7 @@ namespace ECS { namespace Systems {
 					if (Input->IsKeyDown(SDLK_SPACE)) {
 						Transform->VelocityGoal.z = Multiplier * goal;	
 					}
+
 
 					if (!Input->IsKeyDown(SDLK_SPACE)) {
 						Transform->VelocityGoal.z = -9.8f;	
@@ -840,10 +922,10 @@ namespace ECS { namespace Systems {
 							// Get collision mask for A and B
 							Enjon::uint32 Mask = GetCollisionType(Manager, e, collider);
 
-							if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) 		{ 										 		continue; }
+							if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 							if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
 							if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ CollideWithItem(Manager, collider, e); 		continue; } 
-							if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
+							// if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 							if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						}
 					}	
@@ -969,62 +1051,34 @@ namespace ECS { namespace Systems {
 			// Collision didn't happen
 			if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) return;
 				
+			// Picking up an item
 			else
 			{
-				// Picking up an item
-				if (AType == Component::EntityType::ITEM)
+				eid32 Item 	= AType == Component::EntityType::ITEM ? A_ID : B_ID;
+				eid32 Player = Item == A_ID ? B_ID : A_ID;
+				
+				if (Manager->InventorySystem->Inventories[Player].Items.size() < MAX_ITEMS)
 				{
-					// If there's still space in inventory
-					if (Manager->InventorySystem->Inventories[B_ID].Items.size() < MAX_ITEMS)
-					{
-						printf("Picked up item!\n");
+					printf("Picked up item!\n");
+				
+					// Place in player inventory
+					Manager->InventorySystem->Inventories[Player].Items.push_back(Item);
+
+					printf("Inventory Size: %d\n", Manager->InventorySystem->Inventories[Player].Items.size());
 					
-						// Place in player inventory
-						Manager->InventorySystem->Inventories[B_ID].Items.push_back(A_ID);
+					// Turn off render and transform components of item
+					EntitySystem::RemoveComponents(Manager, Item, COMPONENT_RENDERER2D | COMPONENT_TRANSFORM3D);
 
-						printf("Inventory Size: %d\n", Manager->InventorySystem->Inventories[B_ID].Items.size());
-						
-						// Turn off render component of item
-						bitmask32* Mask = &Manager->Masks[A_ID];
-
-						*Mask &= ~COMPONENT_RENDERER2D;	
-						*Mask &= ~COMPONENT_TRANSFORM3D;
-					}
-					else 
-					{
-						printf("Inventory already full!\n");
-					}
-
-					// Continue to next entity 	
-					return;
+					// Set item to picked up
+					Manager->AttributeSystem->Masks[Item] |= Masks::GeneralOptions::PICKED_UP;
 				}
-
-				if (BType == Component::EntityType::ITEM)
+				else 
 				{
-					// If there's still space in inventory
-					if (Manager->InventorySystem->Inventories[A_ID].Items.size() < MAX_ITEMS)
-					{
-						printf("Picked up item!\n");
-
-						// Place in player inventory
-						Manager->InventorySystem->Inventories[A_ID].Items.push_back(B_ID);
-
-						printf("Inventory Size: %d\n", Manager->InventorySystem->Inventories[A_ID].Items.size());
-						
-						// Turn off render and transform component of inventory
-						bitmask32* Mask = &Manager->Masks[B_ID];
-
-						*Mask &= ~COMPONENT_RENDERER2D;	
-						*Mask &= ~COMPONENT_TRANSFORM3D;
-					}
-					else
-					{
-						printf("Inventory already full!\n");
-					}
-
-					// Continue to next entity 	
-					return;
+					printf("Inventory already full!\n");
 				}
+
+				// Continue to next entity 	
+				return;
 			}
 		}
 
@@ -1048,42 +1102,43 @@ namespace ECS { namespace Systems {
 			float HitRadius = 64.0f;
 
 			// NOTE(John): Stupid check for now to see if I can get some hits going on
-			if (Manager->Masks[A_ID] & COMPONENT_PLAYERCONTROLLER && 
-				Animation2D::PlayerState == Animation2D::EntityAnimationState::ATTACKING && Animation2D::HitFrame)
-			{
-				if (DistFromCenter < HitRadius)
-				{
-					// Get health and color of entity
-					Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
-					Enjon::Graphics::ColorRGBA8* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
+			// if (Manager->Masks[A_ID] & COMPONENT_PLAYERCONTROLLER && 
+			// 	Animation2D::PlayerState == Animation2D::EntityAnimationState::ATTACKING && Animation2D::HitFrame)
+			// {
+			// 	if (DistFromCenter < HitRadius)
+			// 	{
+			// 		// Get health and color of entity
+			// 		Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
+			// 		Enjon::Graphics::ColorRGBA8* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
 
-					if (HealthComponent == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Collider health component is null");
-					if (Color == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Color component is null");
+			// 		if (HealthComponent == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Collider health component is null");
+			// 		if (Color == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Color component is null");
 			
-					// Decrement by some arbitrary amount for now	
-					HealthComponent->Health -= Enjon::Random::Roll(10.0f, 20.0f);
+			// 		// Decrement by some arbitrary amount for now	
+			// 		HealthComponent->Health -= Enjon::Random::Roll(10.0f, 20.0f);
 
-					// Change colors based on health	
-					if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8_Orange();
-					if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8_Red();
+			// 		// Change colors based on health	
+			// 		if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8_Orange();
+			// 		if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8_Red();
 
-					// If dead, then kill it	
-					if (HealthComponent->Health <= 0.0f)
-					{
-						// Remove collider
-						EntitySystem::RemoveEntity(Manager, B_ID);
+			// 		// If dead, then kill it	
+			// 		if (HealthComponent->Health <= 0.0f)
+			// 		{
+			// 			// Remove collider
+			// 			EntitySystem::RemoveEntity(Manager, B_ID);
 						
-						// Drop some loot!
-						Collision::DropRandomLoot(Manager, 5, &ColliderPosition->XY());
-					}
-				}
-			}
+			// 			// Drop some loot!
+			// 			Collision::DropRandomLoot(Manager, 5, &ColliderPosition->XY());
+			// 		}
+			// 	}
+			// }
 
 			// Collision didn't happen
 			if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) return;
 			
 			else
 			{
+				printf("collided\n");
 				// Get minimum translation distance
 				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
 
@@ -1122,7 +1177,8 @@ namespace ECS { namespace Systems {
 
 				eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(Position->x - 64.0f, Position->x + 64.0f), 
 													  Enjon::Random::Roll(Position->y - 64.0f, Position->y + 64.0f), 0.0f), 
-													  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Component::EntityType::ITEM, Enjon::Graphics::SetOpacity(ItemColor, 0.5f));
+													  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::ITEM | Masks::ItemOptions::CONSUMABLE), 
+													  Component::EntityType::ITEM, "Item", Enjon::Graphics::SetOpacity(ItemColor, 0.5f));
 			} 
 
 		}
