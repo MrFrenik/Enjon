@@ -18,7 +18,7 @@
 
 #if TESTING 
 
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -102,11 +102,6 @@ int main(int argc, char** argv)
 	Enjon::Graphics::SpriteBatch TileBatch;
 	TileBatch.Init();
 
-	// Test Animation
-	// struct Animation Player_Walk = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "walk"));
-	// struct Animation Player_Attack_Dagger = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_dagger"));
-	// struct Animation Player_Attack_Bow = CreateAnimation(&CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_bow"));
-
 	Level level;
 	Graphics::GLTexture TileTexture;
 	level.Init(Camera.GetPosition().x, Camera.GetPosition().y, 100, 100);
@@ -119,9 +114,6 @@ int main(int argc, char** argv)
 	float tilewidth = 64.0f;
 	float tileheight = tilewidth / 2.0f; 
 
-	// NOTE(John): Might want to go with a QuadTree instead...
-	// Or at the very least try and render out the grid and see where the issues actually are happening
-	// At the very least, just integrate Box2D...
 	// Spatial Hash
 	SpatialHash::Grid grid;
 	int width = level.GetWidth();
@@ -166,7 +158,7 @@ int main(int argc, char** argv)
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
-	static uint32 AmountDrawn = 10;
+	static uint32 AmountDrawn = 1;
 
 	for (int e = 0; e < AmountDrawn; e++)
 	{
@@ -213,10 +205,11 @@ int main(int argc, char** argv)
 
 		PlayerController::Update(World->PlayerControllerSystem);
 		SpatialHash::ClearCells(World->Grid);
-		AIController::Update(World->AIControllerSystem, Player);
-		Animation2D::Update(World->Animation2DSystem);
+		// AIController::Update(World->AIControllerSystem, Player);
+		Animation2D::Update(World);
 		TransformSystem::Update(World->TransformSystem);
-		Collision::Update(World); 
+		Collision::Update(World);
+		Renderer2D::Update(World); 
 		PlayerController::Update(World->PlayerControllerSystem);
 
 		// Check for input

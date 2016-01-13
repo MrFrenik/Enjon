@@ -141,6 +141,12 @@ namespace ECS { namespace Systems {
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
 
+			// Set up AABB
+			V2* CP = &Transform->CartesianPosition;
+			V2 Min(CP->x, CP->y);
+			V2 Max(CP->x + TILE_SIZE, CP->y + TILE_SIZE);
+			Transform->AABB = {Min, Max};
+
 			// Set up Input
 			Manager->PlayerControllerSystem->PlayerControllers[Player].Input = Input;
 			
@@ -197,6 +203,12 @@ namespace ECS { namespace Systems {
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
 
+			// Set up AABB
+			V2* CP = &Transform->CartesianPosition;
+			V2 Min(CP->x, CP->y);
+			V2 Max(CP->x + TILE_SIZE, CP->y + TILE_SIZE);
+			Transform->AABB = {Min, Max};
+
 			// Set up Animation2D
 			Component::Animation2D* Animation2D = &Manager->Animation2DSystem->Animations[AI];
 			Animation2D->Sheet = Sheet; 
@@ -242,6 +254,12 @@ namespace ECS { namespace Systems {
 			Transform->GroundPosition = Enjon::Math::Vec2(Position.XY());
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
+
+			// Set up AABB
+			V2* CP = &Transform->CartesianPosition;
+			V2 Min(CP->x, CP->y);
+			V2 Max(CP->x + TILE_SIZE, CP->y + TILE_SIZE);
+			Transform->AABB = {Min, Max};
 
 			// Set up Animation2D
 			Manager->Animation2DSystem->Animations[Item].Sheet = Sheet; 
@@ -392,6 +410,13 @@ namespace ECS { namespace Systems {
 					*GroundPosition = Enjon::Math::CartesianToIso(Transform->CartesianPosition);
 					Position->y = GroundPosition->y + Position->z;
 					Position->x = GroundPosition->x - Transform->Dimensions.x / 2.0f + TileWidth;
+
+					// Set up AABB
+					Enjon::Physics::AABB* AABB = &Manager->TransformSystem->Transforms[e].AABB;
+					V2* CP = &Transform->CartesianPosition;
+					V2 Min(CP->x, CP->y);
+					V2 Max(CP->x + TILE_SIZE, CP->y + TILE_SIZE);
+					*AABB = {Min, Max};
 				}
 			}
 		}
@@ -430,7 +455,11 @@ namespace ECS { namespace Systems {
 		// Updates Renderers of EntityManager
 		void Update(struct EntityManager* Manager)
 		{
+			// Need to render components here
+			for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
+			{
 
+			}
 		}
 
 		// Create new Render2DSystem
@@ -502,10 +531,10 @@ namespace ECS { namespace Systems {
 			return System;
 		}
 		
-		void Update(struct Animation2DSystem* System)
+		void Update(struct EntityManager* Manager)
 		{
-			// Get manager
-			struct EntityManager* Manager = System->Manager;
+			// Get System
+			struct Animation2DSystem* System = Manager->Animation2DSystem;
 			// Loop through all entities with animations
 			for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
 			{
@@ -517,11 +546,11 @@ namespace ECS { namespace Systems {
 					{
 						// Get necessary items
 						Component::Animation2D* AnimationComponent = &Manager->Animation2DSystem->Animations[e];
-						Systems::Transform3DSystem* System = Manager->TransformSystem;
-						Enjon::Math::Vec2* ViewVector = &System->Transforms[e].ViewVector;
-						Enjon::Math::Vec2* AttackVector = &System->Transforms[e].AttackVector;
-						Enjon::Math::Vec3* Velocity = &System->Transforms[e].Velocity;
-						Enjon::Math::Vec3* Position = &System->Transforms[e].Position;
+						Systems::Transform3DSystem* TransformSystem = Manager->TransformSystem;
+						Enjon::Math::Vec2* ViewVector = &TransformSystem->Transforms[e].ViewVector;
+						Enjon::Math::Vec2* AttackVector = &TransformSystem->Transforms[e].AttackVector;
+						Enjon::Math::Vec3* Velocity = &TransformSystem->Transforms[e].Velocity;
+						Enjon::Math::Vec3* Position = &TransformSystem->Transforms[e].Position;
 						Enjon::uint32* BeginningFrame = &AnimationComponent->BeginningFrame;
 						Enjon::uint32* SetStart = &AnimationComponent->SetStart;
 						const Animation* CurrentAnimation = AnimationComponent->CurrentAnimation;
@@ -546,13 +575,13 @@ namespace ECS { namespace Systems {
 							{
 								*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; 
 								*SetStart = TRUE; 
-								if (Velocity->x != 0.0f && Velocity->y != 0.0f) *AttackVector = *ViewVector; 
+								if (Velocity->x != 0.0f || Velocity->y != 0.0f) *AttackVector = *ViewVector; 
 							}
 							else if (ViewVector->x > 0)  
 							{
 								*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; 
 								*SetStart = TRUE; 
-								if (Velocity->x != 0.0f && Velocity->y != 0.0f) *AttackVector = *ViewVector; 
+								if (Velocity->x != 0.0f || Velocity->y != 0.0f) *AttackVector = *ViewVector; 
 							}
 						
 							// Set currentframe to beginning frame
@@ -608,8 +637,7 @@ namespace ECS { namespace Systems {
 																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Component::EntityType::PROJECTILE);
 
 										// Give the arrow some velocity
-										// Manager->TransformSystem->Transforms[id].VelocityGoal = Enjon::Math::Vec3(10.0f, 10.0f, 0.0f);
-										Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(AttackVector->x * 15.0f, AttackVector->y * 15.0f, 0.0f);
+										Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(AttackVector->x * 20.0f, AttackVector->y * 10.0f, 0.0f);
 
 										printf("Entity Amount: %d\n", Manager->MaxAvailableID);
 
@@ -866,11 +894,9 @@ namespace ECS { namespace Systems {
 			Enjon::Math::Vec3* ColliderPosition = &Manager->TransformSystem->Transforms[B_ID].Position;
 			Enjon::Math::Vec2* A = &Manager->TransformSystem->Transforms[B_ID].CartesianPosition;
 			Enjon::Math::Vec2* B = &Manager->TransformSystem->Transforms[A_ID].CartesianPosition;
-			
-			V2 AMin(A->x, A->y);
-			V2 AMax(A->x + TILE_SIZE, A->y + TILE_SIZE);
-			V2 BMin(B->x, B->y);
-			V2 BMax(B->x + TILE_SIZE, B->y + TILE_SIZE);
+			Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
+			Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
+			Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
 				
 			V2 ACenter = V2(A->x + TILE_SIZE / 2.0f, A->y + TILE_SIZE / 2.0f);
 			V2 BCenter = V2(B->x + TILE_SIZE / 2.0f, B->y + TILE_SIZE / 2.0f);
@@ -878,45 +904,15 @@ namespace ECS { namespace Systems {
 			float DistFromCenter = ACenter.DistanceTo(BCenter);
 
 			// Collision didn't happen
-			if (BMax.x < AMin.x || 
-				BMax.y < AMin.y ||
-				BMin.x > AMax.x ||
-				BMin.y > AMax.y )
-			{
-				return;
-			}
+			if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) return;
 			
 			else if (DistFromCenter < TILE_SIZE);
 			{
-				//////////////////////////////////
-				// MINIMUM TRANSLATION DISTANCE //
-				//////////////////////////////////
-
-				V2 mtd;
-
-				float left		= BMin.x - AMax.x;
-				float right		= BMax.x - AMin.x;
-				float top		= BMin.y - AMax.y;
-				float bottom	= BMax.y - AMin.y;
-
-				if (abs(left) < right) 
-					mtd.x = left;
-				else 
-					mtd.x = right;
-
-				if (abs(top) < bottom) 
-					mtd.y = top;
-				else 
-					mtd.y = bottom;
-
-				if (abs(mtd.x) < abs(mtd.y)) 
-					mtd.y = 0;
-				else
-					mtd.x = 0;
+				// Get minimum translation distance
+				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_A, AABB_B);
 
 				// Update velocities based on "bounce" factor
 				float bf = 1.0f; // Bounce factor 
-				Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
 				ColliderVelocity->x = -ColliderVelocity->x * bf;
 				ColliderVelocity->y = -ColliderVelocity->y * bf;
 
@@ -935,12 +931,17 @@ namespace ECS { namespace Systems {
 				if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8_Orange();
 				if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8_Red();
 
-				// Remove entity if no health
-				if (HealthComponent->Health <= 0.0f) EntitySystem::RemoveEntity(Manager, B_ID);
+				if (HealthComponent->Health <= 0.0f) 
+				{
+					// Remove entity if no health
+					EntitySystem::RemoveEntity(Manager, B_ID);
+
+					// Drop random loot
+					if (Enjon::Random::Roll(0, 10) >= 5) Collision::DropRandomLoot(Manager, 3, &ColliderPosition->XY());
+				}
 
 				// Remove projectile
 				EntitySystem::RemoveEntity(Manager, A_ID);
-
 
 				// Continue with next entity
 				return;
@@ -957,11 +958,8 @@ namespace ECS { namespace Systems {
 			Enjon::Math::Vec3* ColliderPosition = &Manager->TransformSystem->Transforms[B_ID].Position;
 			Enjon::Math::Vec2* A = &Manager->TransformSystem->Transforms[A_ID].CartesianPosition;
 			Enjon::Math::Vec2* B = &Manager->TransformSystem->Transforms[B_ID].CartesianPosition;
-			
-			V2 AMin(A->x, A->y);
-			V2 AMax(A->x + TILE_SIZE, A->y + TILE_SIZE);
-			V2 BMin(B->x, B->y);
-			V2 BMax(B->x + TILE_SIZE, B->y + TILE_SIZE);
+			Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
+			Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
 				
 			V2 ACenter = V2(A->x + TILE_SIZE / 2.0f, A->y + TILE_SIZE / 2.0f);
 			V2 BCenter = V2(B->x + TILE_SIZE / 2.0f, B->y + TILE_SIZE / 2.0f);
@@ -969,15 +967,9 @@ namespace ECS { namespace Systems {
 			float DistFromCenter = ACenter.DistanceTo(BCenter);
 
 			// Collision didn't happen
-			if (BMax.x < AMin.x || 
-				BMax.y < AMin.y ||
-				BMin.x > AMax.x ||
-				BMin.y > AMax.y )
-			{
-				return;
-			}
-			
-			else if (DistFromCenter < TILE_SIZE);
+			if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) return;
+				
+			else
 			{
 				// Picking up an item
 				if (AType == Component::EntityType::ITEM)
@@ -1043,11 +1035,10 @@ namespace ECS { namespace Systems {
 			Enjon::Math::Vec3* ColliderPosition = &Manager->TransformSystem->Transforms[B_ID].Position;
 			Enjon::Math::Vec2* A = &Manager->TransformSystem->Transforms[B_ID].CartesianPosition;
 			Enjon::Math::Vec2* B = &Manager->TransformSystem->Transforms[A_ID].CartesianPosition;
-			
-			V2 AMin(A->x, A->y);
-			V2 AMax(A->x + TILE_SIZE, A->y + TILE_SIZE);
-			V2 BMin(B->x, B->y);
-			V2 BMax(B->x + TILE_SIZE, B->y + TILE_SIZE);
+			Enjon::Math::Vec3* EntityVelocity = &Manager->TransformSystem->Transforms[A_ID].Velocity; 
+			Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
+			Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
+			Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
 				
 			V2 ACenter = V2(A->x + TILE_SIZE / 2.0f, A->y + TILE_SIZE / 2.0f);
 			V2 BCenter = V2(B->x + TILE_SIZE / 2.0f, B->y + TILE_SIZE / 2.0f);
@@ -1070,7 +1061,7 @@ namespace ECS { namespace Systems {
 					if (Color == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Color component is null");
 			
 					// Decrement by some arbitrary amount for now	
-					HealthComponent->Health -= 10.0f;
+					HealthComponent->Health -= Enjon::Random::Roll(10.0f, 20.0f);
 
 					// Change colors based on health	
 					if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8_Orange();
@@ -1079,84 +1070,27 @@ namespace ECS { namespace Systems {
 					// If dead, then kill it	
 					if (HealthComponent->Health <= 0.0f)
 					{
-
-						printf("Manager size: %d\n", Manager->MaxAvailableID);
-
-						static Enjon::Graphics::SpriteSheet ItemSheet; 
-						if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png"), Enjon::Math::iVec2(1, 1));
-
 						// Remove collider
 						EntitySystem::RemoveEntity(Manager, B_ID);
 						
 						// Drop some loot!
-						for (int i = 0; i < 10; i++)
-						{
-							int Roll = Enjon::Random::Roll(0, 5);
-
-							Enjon::Graphics::ColorRGBA8 ItemColor;
-
-							if (Roll == 0) ItemColor = Enjon::Graphics::RGBA8_Red();
-							if (Roll == 1) ItemColor = Enjon::Graphics::RGBA8_Orange();
-							if (Roll == 2) ItemColor = Enjon::Graphics::RGBA8_Blue();
-							if (Roll == 3) ItemColor = Enjon::Graphics::RGBA8_Green();
-							if (Roll == 4) ItemColor = Enjon::Graphics::RGBA8_Yellow();
-							if (Roll == 5) ItemColor = Enjon::Graphics::RGBA8_Magenta();
-
-							eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(ColliderPosition->x - 64.0f, ColliderPosition->x + 64.0f), 
-																  Enjon::Random::Roll(ColliderPosition->y - 64.0f, ColliderPosition->y + 64.0f), 0.0f), 
-																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Component::EntityType::ITEM, Enjon::Graphics::SetOpacity(ItemColor, 0.5f));
-						} 
-
+						Collision::DropRandomLoot(Manager, 5, &ColliderPosition->XY());
 					}
-
-					// Debug
-					printf("EID: %d, Health: %.2f\n", B_ID, HealthComponent->Health);
 				}
 			}
 
 			// Collision didn't happen
-			if (BMax.x < AMin.x || 
-				BMax.y < AMin.y ||
-				BMin.x > AMax.x ||
-				BMin.y > AMax.y )
-			{
-				return;
-			}
+			if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) return;
 			
-			else if (DistFromCenter < TILE_SIZE);
+			else
 			{
-				//////////////////////////////////
-				// MINIMUM TRANSLATION DISTANCE //
-				//////////////////////////////////
-
-				V2 mtd;
-
-				float left		= BMin.x - AMax.x;
-				float right		= BMax.x - AMin.x;
-				float top		= BMin.y - AMax.y;
-				float bottom	= BMax.y - AMin.y;
-
-				if (abs(left) < right) 
-					mtd.x = left;
-				else 
-					mtd.x = right;
-
-				if (abs(top) < bottom) 
-					mtd.y = top;
-				else 
-					mtd.y = bottom;
-
-				if (abs(mtd.x) < abs(mtd.y)) 
-					mtd.y = 0;
-				else
-					mtd.x = 0;
+				// Get minimum translation distance
+				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
 
 				*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), EntityPosition->z); 
 
 				// Update velocities based on "bounce" factor
 				float bf = 1.0f; // Bounce factor 
-				Enjon::Math::Vec3* EntityVelocity = &Manager->TransformSystem->Transforms[A_ID].Velocity; 
-				Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
 				EntityVelocity->x = -EntityVelocity->x * bf; 
 				EntityVelocity->y = -EntityVelocity->y * bf;
 				ColliderVelocity->x = -ColliderVelocity->x * bf;
@@ -1165,6 +1099,32 @@ namespace ECS { namespace Systems {
 				// Continue with next entity
 				return;
 			}
+		}
+
+
+		void DropRandomLoot(Systems::EntityManager* Manager, Enjon::uint32 count, const Enjon::Math::Vec2* Position)
+		{
+			static Enjon::Graphics::SpriteSheet ItemSheet; 
+			if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png"), Enjon::Math::iVec2(1, 1));
+
+			for (int i = 0; i < count; i++)
+			{
+				int Roll = Enjon::Random::Roll(0, 5);
+
+				Enjon::Graphics::ColorRGBA8 ItemColor;
+
+				if (Roll == 0) ItemColor = Enjon::Graphics::RGBA8_Red();
+				if (Roll == 1) ItemColor = Enjon::Graphics::RGBA8_Orange();
+				if (Roll == 2) ItemColor = Enjon::Graphics::RGBA8_Blue();
+				if (Roll == 3) ItemColor = Enjon::Graphics::RGBA8_Green();
+				if (Roll == 4) ItemColor = Enjon::Graphics::RGBA8_Yellow();
+				if (Roll == 5) ItemColor = Enjon::Graphics::RGBA8_Magenta();
+
+				eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(Position->x - 64.0f, Position->x + 64.0f), 
+													  Enjon::Random::Roll(Position->y - 64.0f, Position->y + 64.0f), 0.0f), 
+													  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Component::EntityType::ITEM, Enjon::Graphics::SetOpacity(ItemColor, 0.5f));
+			} 
+
 		}
 
 	} // namespace Collision

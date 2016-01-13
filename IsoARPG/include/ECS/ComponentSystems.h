@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h> 
 
+#include "Physics/AABB.h"
 #include "ECS/Components.h"
 #include "ECS/Entity.h"
 
@@ -166,6 +167,9 @@ namespace ECS { namespace Systems {
 
 		// Collide Projectile with Enemy
 		void CollideWithProjectile(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
+
+		// Totally for testing purposes...
+		void DropRandomLoot(Systems::EntityManager* Manager, Enjon::uint32 count, const Enjon::Math::Vec2* Position);
 	}
 	
 	/////////////////////
@@ -204,7 +208,7 @@ namespace ECS { namespace Systems {
 	namespace Animation2D
 	{ 
 		// Updates Transforms of EntityManager
-		void Update(struct Animation2DSystem* System);	
+		void Update(struct EntityManager* Manager);	
 		
 		// Creates new Transform3DSystem
 		Animation2DSystem* NewAnimation2DSystem(struct EntityManager* Manager);		

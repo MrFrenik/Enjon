@@ -4,8 +4,11 @@
 #include "System/Types.h"
 #include "Math/Maths.h"
 #include "Graphics/SpriteSheet.h"
+#include "Graphics/SpriteBatch.h"
 #include "IO/InputManager.h"
 #include "Graphics/Color.h"
+#include "Physics/AABB.h"
+
 #include "Animation.h"
 
 #include <map>
@@ -36,6 +39,7 @@ namespace ECS { namespace Component {
 		Enjon::Math::Vec2 CartesianPosition;
 		// NOTE(John): For now, we'll keep the position of the ground tile in here
 		// NOTE(John): Also, we'll keep the dimensions of the entity in here
+		Enjon::Physics::AABB AABB;
 		Enjon::Math::Vec2 GroundPosition;
 		Enjon::Math::Vec2 Dimensions;
 		float BaseHeight;
@@ -131,6 +135,7 @@ namespace ECS { namespace Component {
 	{
 		eid32 Entity;
 		Enjon::Graphics::ColorRGBA8 Color;
+		Enjon::Graphics::SpriteBatch* Batch;
 		// NOTE(John): Should I add a spritebatch component here as well?
 	} Renderer2DComponent;
 

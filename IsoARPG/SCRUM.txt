@@ -1,9 +1,14 @@
+KEY_CODES: 
+	- √ : ALT + 251
+
 TODO:
 
 Collisions:
-	- Set up quadtrees/BSP
-	- Establish appropriate hit boxes for enemies and characters based on animation frames	
+	- Set up quadtrees/BSP √
+	- Establish appropriate hit boxes for enemies and characters based on AABB struct
+	- Create AABB struct and place in either Transform system or a different physics system	
 	- Different weapons will have different hit boxes
+	- Refactor collision code even more
 
 Animations: 
 	- Full character animation set for testing (Walking, Attacking)
@@ -13,14 +18,23 @@ Game Design:
 	- Create overall game design flowchart
 	- Implement myself as a mini-boss (game programmer boss!)
 
+GamePlay: 
+	- Design target system for ranged weapons
+
 Systems: 
-	- Separate characters into layers: head gear, armor, legs, weapons, etc.
-	- Develop particle engine
+	- General:
+		- Separate characters into layers: head gear, armor, legs, weapons, etc.
+
+	- Effects:
+		- Develop particle engine
 	
 	- AIController:
 		- Look up and set Behavior Trees for entities
 
 	- Renderer2D:
+		- Set up rendering system
+		- Renderer components will keep track of sprite batch pointers
+		- Set up SpriteBatch manager
 		- PostProcessing: 
 			- Post Processing wraps the rendering code
 			- Set up FrameBuffer to be written to and 	
