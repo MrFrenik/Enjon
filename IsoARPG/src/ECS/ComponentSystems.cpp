@@ -79,7 +79,7 @@ namespace ECS { namespace Systems {
 				else
 				{
 					// Otherwise set next to length, which is the greatest unused id
-					Manager->NextAvailableID = Manager->Length;
+					Manager->NextAvailableID = Manager->MaxAvailableID;
 				} 
 
 				// Increment Length
@@ -223,7 +223,7 @@ namespace ECS { namespace Systems {
 		} 
 
 		// Creates ai entity and returns eid
-		eid32 CreateItem(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, char* Name, Component::BITMASKMAP Masks, Component::EntityType Type, 
+		eid32 CreateItem(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, char* Name, Component::EntityType Type, 
 								Enjon::Graphics::ColorRGBA8 Color)
 		{
 			// Get id for ai
@@ -382,7 +382,7 @@ namespace ECS { namespace Systems {
 					if (Transform->CartesianPosition.y < -Height + TileWidth) { Transform->CartesianPosition.y = -Height + TileWidth; Velocity->y *= -1; CollideWithLevel = true; }
 
 					// Delete item for now if it collides with level
-					if (Manager->Types[e] == Component::EntityType::ITEM && CollideWithLevel)
+					if ((Manager->Types[e] == Component::EntityType::ITEM | Manager->Types[e] == Component::EntityType::PROJECTILE) && CollideWithLevel)
 					{
 						printf("EntityAmount before delete: %d\n", Manager->Length);
 						EntitySystem::RemoveEntity(Manager, e);
@@ -542,8 +542,18 @@ namespace ECS { namespace Systems {
 						// Setting animation beginning frame based on view vector
 						if (PlayerState == EntityAnimationState::ATTACKING && !(*SetStart))
 						{
-							if		(ViewVector->x <= 0)   {*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; *SetStart = TRUE; *AttackVector = *ViewVector; }
-							else if (ViewVector->x > 0)    {*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; *SetStart = TRUE; *AttackVector = *ViewVector; }
+							if		(ViewVector->x <= 0)
+							{
+								*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; 
+								*SetStart = TRUE; 
+								if (Velocity->x != 0.0f && Velocity->y != 0.0f) *AttackVector = *ViewVector; 
+							}
+							else if (ViewVector->x > 0)  
+							{
+								*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; 
+								*SetStart = TRUE; 
+								if (Velocity->x != 0.0f && Velocity->y != 0.0f) *AttackVector = *ViewVector; 
+							}
 						
 							// Set currentframe to beginning frame
 							AnimationComponent->CurrentFrame = 0;
@@ -593,16 +603,13 @@ namespace ECS { namespace Systems {
 									{
 										// Create an arrow projectile entity for now...
 										static Enjon::Graphics::SpriteSheet ItemSheet;
-										Component::BITMASKMAP Masks;
-										Enjon::uint32 ProjectileMask = Component::Projectile_Type::PROJECTILE_ARROW; 
-										Masks.insert(Component::BITMASKPAIR(Component::MaskType::PROJECTILE_MASK, ProjectileMask));
 										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
 										eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Position->x + AttackVector->x * 128.0f, Position->y + AttackVector->y * 128.0f, Position->z),
-																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Masks);
+																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Component::EntityType::PROJECTILE);
 
 										// Give the arrow some velocity
 										// Manager->TransformSystem->Transforms[id].VelocityGoal = Enjon::Math::Vec3(10.0f, 10.0f, 0.0f);
-										Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(AttackVector->x * 10.0f, AttackVector->y * 10.0f, 0.0f);
+										Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(AttackVector->x * 15.0f, AttackVector->y * 15.0f, 0.0f);
 
 										printf("Entity Amount: %d\n", Manager->MaxAvailableID);
 
@@ -770,6 +777,7 @@ namespace ECS { namespace Systems {
 		Enjon::uint32 COLLISION_PLAYER		= 0x00000001;
 		Enjon::uint32 COLLISION_ENEMY		= 0x00000002;
 		Enjon::uint32 COLLISION_ITEM		= 0x00000004;
+		Enjon::uint32 COLLISION_PROJECTILE	= 0x00000008;
 
 		// Updates all possible collisions
 		void Update(struct EntityManager* Manager)
@@ -804,10 +812,11 @@ namespace ECS { namespace Systems {
 							// Get collision mask for A and B
 							Enjon::uint32 Mask = GetCollisionType(Manager, e, collider);
 
-							if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) 												continue;
-							if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 	{ CollideWithItem(Manager, collider, e); 	continue; } 
-							if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 	{ CollideWithEnemy(Manager, e, collider); 	continue; }
-							if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 	{ CollideWithEnemy(Manager, e, collider); 	continue; }
+							if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) 		{ 										 		continue; }
+							if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
+							if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ CollideWithItem(Manager, collider, e); 		continue; } 
+							if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
+							if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						}
 					}	
 				}
@@ -831,22 +840,112 @@ namespace ECS { namespace Systems {
 			// Or the mask with TypeA collision
 			switch(*TypeA)
 			{
-				case Component::EntityType::ITEM:		Mask |= COLLISION_ITEM; 		break;
-				case Component::EntityType::PLAYER:		Mask |= COLLISION_PLAYER; 		break;
-				case Component::EntityType::ENEMY: 		Mask |= COLLISION_ENEMY; 		break;
-				default: 								Mask |= COLLISION_NONE;			break; 
+				case Component::EntityType::ITEM:			Mask |= COLLISION_ITEM; 			break;
+				case Component::EntityType::PLAYER:			Mask |= COLLISION_PLAYER; 			break;
+				case Component::EntityType::ENEMY: 			Mask |= COLLISION_ENEMY; 			break;
+				case Component::EntityType::PROJECTILE: 	Mask |= COLLISION_PROJECTILE; 		break;
+				default: 									Mask |= COLLISION_NONE;				break; 
 			}	
 
 			// // Or the mask with TypeB collision
 			switch(*TypeB)
 			{
-				case Component::EntityType::ITEM:		Mask |= COLLISION_ITEM; 		break;
-				case Component::EntityType::PLAYER:		Mask |= COLLISION_PLAYER; 		break;
-				case Component::EntityType::ENEMY: 		Mask |= COLLISION_ENEMY; 		break;
-				default: 								Mask |= COLLISION_NONE;			break; 
+				case Component::EntityType::ITEM:			Mask |= COLLISION_ITEM; 			break;
+				case Component::EntityType::PLAYER:			Mask |= COLLISION_PLAYER; 			break;
+				case Component::EntityType::ENEMY: 			Mask |= COLLISION_ENEMY; 			break;
+				case Component::EntityType::PROJECTILE: 	Mask |= COLLISION_PROJECTILE; 		break;
+				default: 									Mask |= COLLISION_NONE;				break; 
 			}
 
 			return Mask;	
+		}
+
+		void CollideWithProjectile(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID)
+		{
+			Enjon::Math::Vec3* EntityPosition = &Manager->TransformSystem->Transforms[A_ID].Position;
+			Enjon::Math::Vec3* ColliderPosition = &Manager->TransformSystem->Transforms[B_ID].Position;
+			Enjon::Math::Vec2* A = &Manager->TransformSystem->Transforms[B_ID].CartesianPosition;
+			Enjon::Math::Vec2* B = &Manager->TransformSystem->Transforms[A_ID].CartesianPosition;
+			
+			V2 AMin(A->x, A->y);
+			V2 AMax(A->x + TILE_SIZE, A->y + TILE_SIZE);
+			V2 BMin(B->x, B->y);
+			V2 BMax(B->x + TILE_SIZE, B->y + TILE_SIZE);
+				
+			V2 ACenter = V2(A->x + TILE_SIZE / 2.0f, A->y + TILE_SIZE / 2.0f);
+			V2 BCenter = V2(B->x + TILE_SIZE / 2.0f, B->y + TILE_SIZE / 2.0f);
+
+			float DistFromCenter = ACenter.DistanceTo(BCenter);
+
+			// Collision didn't happen
+			if (BMax.x < AMin.x || 
+				BMax.y < AMin.y ||
+				BMin.x > AMax.x ||
+				BMin.y > AMax.y )
+			{
+				return;
+			}
+			
+			else if (DistFromCenter < TILE_SIZE);
+			{
+				//////////////////////////////////
+				// MINIMUM TRANSLATION DISTANCE //
+				//////////////////////////////////
+
+				V2 mtd;
+
+				float left		= BMin.x - AMax.x;
+				float right		= BMax.x - AMin.x;
+				float top		= BMin.y - AMax.y;
+				float bottom	= BMax.y - AMin.y;
+
+				if (abs(left) < right) 
+					mtd.x = left;
+				else 
+					mtd.x = right;
+
+				if (abs(top) < bottom) 
+					mtd.y = top;
+				else 
+					mtd.y = bottom;
+
+				if (abs(mtd.x) < abs(mtd.y)) 
+					mtd.y = 0;
+				else
+					mtd.x = 0;
+
+				// Update velocities based on "bounce" factor
+				float bf = 1.0f; // Bounce factor 
+				Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
+				ColliderVelocity->x = -ColliderVelocity->x * bf;
+				ColliderVelocity->y = -ColliderVelocity->y * bf;
+
+				// Hurt Collider
+				// Get health and color of entity
+				Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
+				Enjon::Graphics::ColorRGBA8* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
+
+				if (HealthComponent == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Collider health component is null");
+				if (Color == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Color component is null");
+		
+				// Decrement by some arbitrary amount for now	
+				HealthComponent->Health -= 10.0f;
+
+				// Change colors based on health	
+				if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8_Orange();
+				if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8_Red();
+
+				// Remove entity if no health
+				if (HealthComponent->Health <= 0.0f) EntitySystem::RemoveEntity(Manager, B_ID);
+
+				// Remove projectile
+				EntitySystem::RemoveEntity(Manager, A_ID);
+
+
+				// Continue with next entity
+				return;
+			}
+
 		}
 
 		void CollideWithItem(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID)
@@ -1003,9 +1102,9 @@ namespace ECS { namespace Systems {
 							if (Roll == 4) ItemColor = Enjon::Graphics::RGBA8_Yellow();
 							if (Roll == 5) ItemColor = Enjon::Graphics::RGBA8_Magenta();
 
-							// eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(ColliderPosition->x - 64.0f, ColliderPosition->x + 64.0f), 
-							// 									  Enjon::Random::Roll(ColliderPosition->y - 64.0f, ColliderPosition->y + 64.0f), 0.0f), 
-							// 									  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Component::EntityType::ITEM, Enjon::Graphics::SetOpacity(ItemColor, 0.5f));
+							eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(ColliderPosition->x - 64.0f, ColliderPosition->x + 64.0f), 
+																  Enjon::Random::Roll(ColliderPosition->y - 64.0f, ColliderPosition->y + 64.0f), 0.0f), 
+																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, "Item", Component::EntityType::ITEM, Enjon::Graphics::SetOpacity(ItemColor, 0.5f));
 						} 
 
 					}

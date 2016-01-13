@@ -18,7 +18,7 @@
 
 #if TESTING 
 
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -131,9 +131,11 @@ int main(int argc, char** argv)
 	Enjon::Graphics::SpriteSheet PlayerSheet;
 	Enjon::Graphics::SpriteSheet EnemySheet;
 	Enjon::Graphics::SpriteSheet ItemSheet;
+	Enjon::Graphics::SpriteSheet ArrowSheet;
 	PlayerSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/pixelanimtestframessplit.png"), Enjon::Math::iVec2(6, 24));
 	EnemySheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/enemy.png"), Math::iVec2(1, 1));
 	ItemSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png"), Math::iVec2(1, 1));
+	ArrowSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Math::iVec2(8, 1));
 	
 	// Creating tiled iso level
 	TileBatch.Begin(); 
@@ -145,8 +147,8 @@ int main(int argc, char** argv)
 	PlayerBatch.Init();
 	
 	// Create QuadrantBatch
-	Enjon::Graphics::SpriteBatch QuadrantBatch;
-	QuadrantBatch.Init();
+	Enjon::Graphics::SpriteBatch EnemyBatch;
+	EnemyBatch.Init();
 
 	// Create InputManager
 	Input::InputManager Input;
@@ -164,7 +166,7 @@ int main(int argc, char** argv)
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 10;
 
 	for (int e = 0; e < AmountDrawn; e++)
 	{
@@ -209,12 +211,13 @@ int main(int argc, char** argv)
 		ViewPort = Math::Vec2(SCREENWIDTH, SCREENHEIGHT) / Camera.GetScale();
 		CameraDims = Math::Vec4(*PlayerStuff, quadDimsStuff / Camera.GetScale());
 
+		PlayerController::Update(World->PlayerControllerSystem);
 		SpatialHash::ClearCells(World->Grid);
 		AIController::Update(World->AIControllerSystem, Player);
-		PlayerController::Update(World->PlayerControllerSystem);
 		Animation2D::Update(World->Animation2DSystem);
 		TransformSystem::Update(World->TransformSystem);
 		Collision::Update(World); 
+		PlayerController::Update(World->PlayerControllerSystem);
 
 		// Check for input
 		ProcessInput(&Input, &Camera, World, Player); 
@@ -262,14 +265,17 @@ int main(int argc, char** argv)
 
 
 		// Draw Entities
+		EnemyBatch.Begin();
+		PlayerBatch.Begin(); 
+
 		wchar_t wcstring[10]; 
 		glUniform1i(glGetUniformLocation(shader, "isLevel"), 0);
-		PlayerBatch.Begin(); 
 		static uint32 Row = 0;
 		static uint32 Col = 0;
 		static uint32 i = 0;
 		static Math::Vec2 dims(100.0f, 100.0f);
-		static Math::Vec2 itemDims(64.0f, 64.0f);
+		static Math::Vec2 arrowDims(64.0f, 64.0f);
+		static Math::Vec2 itemDims(20.0f, 20.0f);
 		static Math::Vec4 uv(0, 0, 1, 1);
 		static Math::Vec2 pos(-1000, -1000);
 		static Graphics::GLTexture beast = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png"); 
@@ -282,7 +288,6 @@ int main(int argc, char** argv)
 		// Draw enemies
 		for (eid32 e = 0; e < World->MaxAvailableID; e++)
 		{
-			// if (World->Types[e] == Component::EntityType::PLAYER ||  World->Types[e] == Component::EntityType::ITEM) continue;
 			if (e == Player) continue;
 
 			// Don't draw if the entity doesn't exist anymore
@@ -297,13 +302,21 @@ int main(int argc, char** argv)
 			const Enjon::Graphics::ColorRGBA8* Color = &World->Renderer2DSystem->Renderers[e].Color;
 
 			// If AI
-			if ((Mask & COMPONENT_AICONTROLLER) == COMPONENT_AICONTROLLER)
+			if (Mask & COMPONENT_AICONTROLLER)
 			{
 				// Don't draw if not in view
 				if (Camera.IsBoundBoxInCamView(*EntityPosition, enemydims))
 				{
-					PlayerBatch.Add(Math::Vec4(*EntityPosition, enemydims), uv, beast.id, *Color);
+					EnemyBatch.Add(Math::Vec4(*EntityPosition, enemydims), uv, beast.id, *Color);
 				}
+			}
+			else if (World->Types[e] == ECS::Component::EntityType::ITEM)
+			{
+				if (Camera.IsBoundBoxInCamView(*EntityPosition, itemDims))
+				{
+					PlayerBatch.Add(Math::Vec4(*EntityPosition, itemDims), ItemSheet.GetUV(0), ItemSheet.texture.id, *Color);
+				}
+
 			}
 			// If item
 			else
@@ -325,12 +338,12 @@ int main(int argc, char** argv)
 					else if (*AttackVector == SOUTHEAST)		index = 7;
 					else										index = 0;
 
-					PlayerBatch.Add(Math::Vec4(*EntityPosition, itemDims), ArrowSheet.GetUV(index), ArrowSheet.texture.id, *Color);
+					PlayerBatch.Add(Math::Vec4(*EntityPosition, arrowDims), ArrowSheet.GetUV(index), ArrowSheet.texture.id, *Color);
 				}
 			}
 
 			Ground = &World->TransformSystem->Transforms[e].GroundPosition;
-			if (Camera.IsBoundBoxInCamView(*Ground, Math::Vec2(64.0f, 32.0f)) && World->Types[e] != ECS::Component::EntityType::ITEM)
+			if (Camera.IsBoundBoxInCamView(*Ground, Math::Vec2(64.0f, 32.0f)) && World->Types[e] != ECS::Component::EntityType::ITEM && World->Types[e] != ECS::Component::EntityType::PROJECTILE)
 			{
 				PlayerBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 										Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
@@ -359,8 +372,8 @@ int main(int argc, char** argv)
 		// Draw Cartesian Level
 		// NOTE(John): This is a HUGE bottleneck for some reason. Figure it out.
 		//level.DrawCartesianLevel(PlayerBatch);
-		
-		
+	
+		EnemyBatch.End();
 		PlayerBatch.End(); 
 	
 		// Set up shader for rendering
@@ -381,6 +394,7 @@ int main(int argc, char** argv)
 		} 
 		
 		PlayerBatch.RenderBatch();
+		EnemyBatch.RenderBatch();
 
 		Window.SwapBuffer();
 		

@@ -127,7 +127,7 @@ namespace ECS { namespace Systems {
 							Enjon::Math::Vec3 VelocityGoal = Enjon::Math::Vec3(0,0,0), float Health = 100.0f, Enjon::Graphics::ColorRGBA8 Color = Enjon::Graphics::RGBA8_White());
 
 		// Creates Item entity and returns eid
-		eid32 CreateItem(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, char* Name, Component::BITMASKMAP Masks,
+		eid32 CreateItem(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, char* Name, 
 								Component::EntityType Type = Component::EntityType::ITEM, Enjon::Graphics::ColorRGBA8 Color = Enjon::Graphics::RGBA8_White());
 	} 
 
@@ -163,6 +163,9 @@ namespace ECS { namespace Systems {
 
 		// Collide Player with Enemy
 		void CollideWithEnemy(Systems::EntityManager* Manager, ECS::eid32 A, ECS::eid32 B);
+
+		// Collide Projectile with Enemy
+		void CollideWithProjectile(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
 	}
 	
 	/////////////////////

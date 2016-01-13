@@ -17,19 +17,10 @@ namespace ECS { namespace Component {
 	
 	using eid32 = Enjon::uint32;
 	using projectileTypeMask = Enjon::uint32;
+	using EntityMask = Enjon::uint64;
 
 	enum MaskType { PROJECTILE_MASK, PLAYER_MASK, ENEMY_MASK };
 	enum EntityType { CONSUMABLE, ITEM, ENEMY, NPC, PLAYER, PROJECTILE };
-
-	typedef std::map<MaskType, Enjon::uint32> 		BITMASKMAP;
-	typedef std::pair<MaskType, Enjon::uint32>		BITMASKPAIR;		
-
-	enum Projectile_Type : projectileTypeMask
-	{
-		PROJECTILE_ARROW				= 0x00000000, 
-		PROJECTILE_PLAYER				= 0x00000001,  // Not sure if I like these last two here or if I want another mask for item ownership 
-		PROJECTILE_ENEMY				= 0x00000002
-	};
 
 	// Transform struct
 	typedef struct
