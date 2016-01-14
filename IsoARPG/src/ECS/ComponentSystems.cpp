@@ -456,14 +456,16 @@ namespace ECS { namespace Systems {
 					// V2 Min;
 					float yOffset = 30.0f;
 
-					WeaponTransform->AABB = {V2(AABB->Min.x - 32.0f, AABB->Min.y), V2(AABB->Max.x + 32.0f, AABB->Max.y)};
+					// if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
+					// {
+					// 	printf("A Min: %.2f, %.2f, Max: %.2f, %.2f\n", AABB->Min.x, AABB->Min.y, AABB->Max.x, AABB->Max.y);
+					// 	printf("B Min: %.2f, %.2f, Max: %.2f, %.2f\n", AABB->Min.x, AABB->Min.y + TILE_SIZE, AABB->Max.x, AABB->Max.y);
+					// }
+
+					WeaponTransform->AABB = {V2(Min.x, Min.y), V2(Max.x + TILE_SIZE, Max.y + TILE_SIZE)};
 					// printf("AABB: Min: %2f, %2f, Max: %.2f, %.2f\n", AABB->Min.x - 64.0f, AABB->Min.y - 64.0f, AABB->Max.x + 64.0f, AABB->Max.y);
 					// printf("AABB: Min: %2f, %2f, Max: %.2f, %.2f\n", AABB->Min.x, AABB->Min.y, AABB->Max.x, AABB->Max.y);
 					// printf("Center: %.2f, %.2f\n", Center.x, Center.y);
-
-
-
-
 				}
 			}
 		}
@@ -1134,7 +1136,7 @@ namespace ECS { namespace Systems {
 			// }
 
 			// Collision didn't happen
-			if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) return;
+			if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) { printf("not collided\n"); return; }
 			
 			else
 			{
@@ -1142,7 +1144,7 @@ namespace ECS { namespace Systems {
 				// Get minimum translation distance
 				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
 
-				*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), EntityPosition->z); 
+				*ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), 0.0f); 
 
 				// Update velocities based on "bounce" factor
 				float bf = 1.0f; // Bounce factor 
@@ -1150,6 +1152,30 @@ namespace ECS { namespace Systems {
 				EntityVelocity->y = -EntityVelocity->y * bf;
 				ColliderVelocity->x = -ColliderVelocity->x * bf;
 				ColliderVelocity->y = -ColliderVelocity->y * bf;
+
+				// Get health and color of entity
+				Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
+				Enjon::Graphics::ColorRGBA8* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
+
+				if (HealthComponent == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Collider health component is null");
+				if (Color == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Color component is null");
+		
+				// Decrement by some arbitrary amount for now	
+				HealthComponent->Health -= Enjon::Random::Roll(10.0f, 20.0f);
+
+				// Change colors based on health	
+				if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8_Orange();
+				if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8_Red();
+
+				// If dead, then kill it	
+				if (HealthComponent->Health <= 0.0f)
+				{
+					// Remove collider
+					EntitySystem::RemoveEntity(Manager, B_ID);
+					
+					// Drop some loot!
+					Collision::DropRandomLoot(Manager, 5, &ColliderPosition->XY());
+				}
 
 				// Continue with next entity
 				return;

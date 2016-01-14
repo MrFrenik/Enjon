@@ -18,7 +18,7 @@
 // ComponentSystems don't need to know of mangers...or do they? Yes, they'll hold pointers to the managers of which they belong
 namespace ECS { namespace Systems {
 
-	const float TILE_SIZE = 34.0f;
+	const float TILE_SIZE = 32.0f;
 	
 	struct EntityManager
 	{

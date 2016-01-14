@@ -366,7 +366,7 @@ int main(int argc, char** argv)
 		static float AABBHeight = 32.0f, AABBWidth = 64.0f;
 		Enjon::Math::Vec2* A = &World->TransformSystem->Transforms[Player].CartesianPosition;
 		Enjon::Physics::AABB* AABB = &World->TransformSystem->Transforms[Sword].AABB;
-		PlayerBatch.Add(Math::Vec4(AABB->Min.x, AABB->Min.y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), 0,
+		PlayerBatch.Add(Math::Vec4(AABB->Min.x, AABB->Min.y, abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y)), Math::Vec4(0, 0, 1, 1), 0,
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
 
 		// Draw player ground tile 
