@@ -182,6 +182,9 @@ namespace ECS { namespace Systems {
 
 			// Set up Type
 			Manager->Types[Player] = Component::EntityType::PLAYER;
+
+			// Set up inventory
+			Manager->InventorySystem->Inventories[Player].WeaponEquipped = NULL_ENTITY; // Set out of range of being processed
 			
 			return Player;
 		} 
@@ -240,6 +243,9 @@ namespace ECS { namespace Systems {
 			// Set up type
 			Manager->Types[AI] = Component::EntityType::ENEMY;
 
+			// Set up inventory
+			Manager->InventorySystem->Inventories[AI].WeaponEquipped = NULL_ENTITY;
+
 			return AI;
 		} 
 
@@ -287,6 +293,9 @@ namespace ECS { namespace Systems {
 
 			// Set up Attributes
 			Manager->AttributeSystem->Masks[Item] = Mask;
+
+			// Set up Inventory... This has to be fixed and is a problem with having a general ECS
+			Manager->InventorySystem->Inventories->WeaponEquipped = NULL_ENTITY;
 
 			return Item;
 		} 
@@ -444,28 +453,40 @@ namespace ECS { namespace Systems {
 						ItemTransform->GroundPosition = *GroundPosition;
 					}
 
+					// Leave if weapon not equipped  
+					// NOTE(John): Again, another reason I don't like this being here. If the weapon were processed in the transform loop, it would be skipped until its Transform 
+					// 			   Component came online
+					if (WeaponEquipped == MAX_ENTITIES || Manager->AttributeSystem->Masks[e] & Masks::Type::WEAPON) continue;
+
 					// Calculate equipped weapon Transform
 					Component::Transform3D* WeaponTransform = &System->Transforms[WeaponEquipped];
 					WeaponTransform->Position = *Position;
 					WeaponTransform->GroundPosition = *GroundPosition;
 					WeaponTransform->CartesianPosition = Transform->CartesianPosition;
 
-					// Calculate that AABB, nickuh
-					const V2* AttackVector = &Transform->AttackVector;
-					V2 Center = V2(CP->x + TILE_SIZE / 2.0f, CP->y + TILE_SIZE / 2.0f);
-					// V2 Min;
-					float yOffset = 30.0f;
+					// Calculate AABB
+					Enjon::Physics::AABB NE 	= {V2(Min.x + TILE_SIZE, Min.y - TILE_SIZE / 2.0f), V2(Max.x + TILE_SIZE, Max.y + TILE_SIZE / 2.0f)};
+					Enjon::Physics::AABB N 		= {V2(Min.x + TILE_SIZE / 2.0f, Min.y + TILE_SIZE / 2.0f), V2(Max.x + TILE_SIZE, Max.y + TILE_SIZE)};
+					Enjon::Physics::AABB NW 	= {V2(Min.x - TILE_SIZE / 2.0f, Min.y + TILE_SIZE), V2(Max.x + TILE_SIZE / 2.0f, Max.y + TILE_SIZE)};
+					Enjon::Physics::AABB W 		= {V2(Min.x - TILE_SIZE, Min.y + TILE_SIZE / 2.0f), V2(Max.x - TILE_SIZE / 2.0f, Max.y + TILE_SIZE)};
+					Enjon::Physics::AABB SW 	= {V2(Min.x - TILE_SIZE, Min.y - TILE_SIZE / 2.0f), V2(Max.x - TILE_SIZE, Max.y + TILE_SIZE / 2.0f)};
+					Enjon::Physics::AABB S 		= {V2(Min.x - TILE_SIZE, Min.y - TILE_SIZE), V2(Max.x - TILE_SIZE / 2.0f, Max.y - TILE_SIZE / 2.0f)};
+					Enjon::Physics::AABB SE 	= {V2(Min.x - TILE_SIZE / 2.0f, Min.y - TILE_SIZE), V2(Max.x + TILE_SIZE / 2.0f, Max.y - TILE_SIZE)};
+					Enjon::Physics::AABB E 		= {V2(Min.x + TILE_SIZE / 2.0f, Min.y - TILE_SIZE), V2(Max.x + TILE_SIZE, Max.y - TILE_SIZE / 2.0f)};
 
-					// if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
-					// {
-					// 	printf("A Min: %.2f, %.2f, Max: %.2f, %.2f\n", AABB->Min.x, AABB->Min.y, AABB->Max.x, AABB->Max.y);
-					// 	printf("B Min: %.2f, %.2f, Max: %.2f, %.2f\n", AABB->Min.x, AABB->Min.y + TILE_SIZE, AABB->Max.x, AABB->Max.y);
-					// }
+					// Get Attack Vector 
+					V2* AttackVector = &Transform->AttackVector;
 
-					WeaponTransform->AABB = {V2(Min.x, Min.y), V2(Max.x + TILE_SIZE, Max.y + TILE_SIZE)};
-					// printf("AABB: Min: %2f, %2f, Max: %.2f, %.2f\n", AABB->Min.x - 64.0f, AABB->Min.y - 64.0f, AABB->Max.x + 64.0f, AABB->Max.y);
-					// printf("AABB: Min: %2f, %2f, Max: %.2f, %.2f\n", AABB->Min.x, AABB->Min.y, AABB->Max.x, AABB->Max.y);
-					// printf("Center: %.2f, %.2f\n", Center.x, Center.y);
+					// Apply AABB to weapon
+					if 		(*AttackVector == NORTH) 		WeaponTransform->AABB = N;
+					else if (*AttackVector == NORTHEAST) 	WeaponTransform->AABB = NE;
+					else if (*AttackVector == NORTHWEST) 	WeaponTransform->AABB = NW;
+					else if (*AttackVector == WEST) 		WeaponTransform->AABB = W;
+					else if (*AttackVector == SOUTHWEST) 	WeaponTransform->AABB = SW;
+					else if (*AttackVector == SOUTH) 		WeaponTransform->AABB = S;
+					else if (*AttackVector == SOUTHEAST) 	WeaponTransform->AABB = SE;
+					else if (*AttackVector == EAST) 		WeaponTransform->AABB = E;
+					else									WeaponTransform->AABB = NW;
 				}
 			}
 		}
@@ -706,12 +727,12 @@ namespace ECS { namespace Systems {
 										// Create an arrow projectile entity for now...
 										static Enjon::Graphics::SpriteSheet ItemSheet;
 										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
-										eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Position->x + AttackVector->x, Position->y + AttackVector->y, Position->z),
+										eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Position->x + 32.0f, Position->y + 32.0f, Position->z + 50.0f),
 																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::WEAPON | Masks::WeaponOptions::PROJECTILE), 
 																  Component::EntityType::PROJECTILE);
 
 										// Give the arrow some velocity
-										Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(AttackVector->x * 20.0f, AttackVector->y * 10.0f, 0.0f);
+										Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(AttackVector->x * 30.0f, AttackVector->y * 15.0f, 0.0f);
 
 										printf("Entity Amount: %d\n", Manager->MaxAvailableID);
 									}
@@ -927,7 +948,7 @@ namespace ECS { namespace Systems {
 							if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 							if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
 							if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ CollideWithItem(Manager, collider, e); 		continue; } 
-							// if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
+							if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 							if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						}
 					}	
@@ -981,16 +1002,11 @@ namespace ECS { namespace Systems {
 			Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
 			Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
 			Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
-				
-			V2 ACenter = V2(A->x + TILE_SIZE / 2.0f, A->y + TILE_SIZE / 2.0f);
-			V2 BCenter = V2(B->x + TILE_SIZE / 2.0f, B->y + TILE_SIZE / 2.0f);
-
-			float DistFromCenter = ACenter.DistanceTo(BCenter);
 
 			// Collision didn't happen
 			if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) return;
 			
-			else if (DistFromCenter < TILE_SIZE);
+			else 
 			{
 				// Get minimum translation distance
 				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_A, AABB_B);
@@ -1044,11 +1060,6 @@ namespace ECS { namespace Systems {
 			Enjon::Math::Vec2* B = &Manager->TransformSystem->Transforms[B_ID].CartesianPosition;
 			Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
 			Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
-				
-			V2 ACenter = V2(A->x + TILE_SIZE / 2.0f, A->y + TILE_SIZE / 2.0f);
-			V2 BCenter = V2(B->x + TILE_SIZE / 2.0f, B->y + TILE_SIZE / 2.0f);
-
-			float DistFromCenter = ACenter.DistanceTo(BCenter);
 
 			// Collision didn't happen
 			if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) return;
@@ -1095,86 +1106,52 @@ namespace ECS { namespace Systems {
 			Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
 			Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
 			Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
-				
-			V2 ACenter = V2(A->x + TILE_SIZE / 2.0f, A->y + TILE_SIZE / 2.0f);
-			V2 BCenter = V2(B->x + TILE_SIZE / 2.0f, B->y + TILE_SIZE / 2.0f);
-
-			float DistFromCenter = ACenter.DistanceTo(BCenter);
-
-			float HitRadius = 64.0f;
-
-			// NOTE(John): Stupid check for now to see if I can get some hits going on
-			// if (Manager->Masks[A_ID] & COMPONENT_PLAYERCONTROLLER && 
-			// 	Animation2D::PlayerState == Animation2D::EntityAnimationState::ATTACKING && Animation2D::HitFrame)
-			// {
-			// 	if (DistFromCenter < HitRadius)
-			// 	{
-			// 		// Get health and color of entity
-			// 		Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
-			// 		Enjon::Graphics::ColorRGBA8* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
-
-			// 		if (HealthComponent == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Collider health component is null");
-			// 		if (Color == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Color component is null");
-			
-			// 		// Decrement by some arbitrary amount for now	
-			// 		HealthComponent->Health -= Enjon::Random::Roll(10.0f, 20.0f);
-
-			// 		// Change colors based on health	
-			// 		if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8_Orange();
-			// 		if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8_Red();
-
-			// 		// If dead, then kill it	
-			// 		if (HealthComponent->Health <= 0.0f)
-			// 		{
-			// 			// Remove collider
-			// 			EntitySystem::RemoveEntity(Manager, B_ID);
-						
-			// 			// Drop some loot!
-			// 			Collision::DropRandomLoot(Manager, 5, &ColliderPosition->XY());
-			// 		}
-			// 	}
-			// }
 
 			// Collision didn't happen
-			if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) { printf("not collided\n"); return; }
+			if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) { return; }
 			
 			else
 			{
-				printf("collided\n");
 				// Get minimum translation distance
 				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
 
-				*ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), 0.0f); 
+				*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), ColliderPosition->z); 
 
 				// Update velocities based on "bounce" factor
-				float bf = 1.0f; // Bounce factor 
+				float bf; // Bounce factor 
+				if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON) bf = 1.2f;
+				else bf = 1.0f;
+
 				EntityVelocity->x = -EntityVelocity->x * bf; 
 				EntityVelocity->y = -EntityVelocity->y * bf;
 				ColliderVelocity->x = -ColliderVelocity->x * bf;
 				ColliderVelocity->y = -ColliderVelocity->y * bf;
 
-				// Get health and color of entity
-				Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
-				Enjon::Graphics::ColorRGBA8* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
-
-				if (HealthComponent == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Collider health component is null");
-				if (Color == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Color component is null");
-		
-				// Decrement by some arbitrary amount for now	
-				HealthComponent->Health -= Enjon::Random::Roll(10.0f, 20.0f);
-
-				// Change colors based on health	
-				if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8_Orange();
-				if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8_Red();
-
-				// If dead, then kill it	
-				if (HealthComponent->Health <= 0.0f)
+				if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
 				{
-					// Remove collider
-					EntitySystem::RemoveEntity(Manager, B_ID);
-					
-					// Drop some loot!
-					Collision::DropRandomLoot(Manager, 5, &ColliderPosition->XY());
+					// Get health and color of entity
+					Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
+					Enjon::Graphics::ColorRGBA8* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
+
+					if (HealthComponent == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Collider health component is null");
+					if (Color == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Color component is null");
+			
+					// Decrement by some arbitrary amount for now	
+					HealthComponent->Health -= Enjon::Random::Roll(10.0f, 20.0f);
+
+					// Change colors based on health	
+					if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8_Orange();
+					if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8_Red();
+
+					// If dead, then kill it	
+					if (HealthComponent->Health <= 0.0f)
+					{
+						// Remove collider
+						EntitySystem::RemoveEntity(Manager, B_ID);
+						
+						// Drop some loot!
+						Collision::DropRandomLoot(Manager, 5, &ColliderPosition->XY());
+					}
 				}
 
 				// Continue with next entity

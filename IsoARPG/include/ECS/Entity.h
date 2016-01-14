@@ -8,6 +8,7 @@
 // Attempt at doing Composition instead of Inheritance based objects
 
 #define MAX_ENTITIES		500000  // Max number of possible entities allowed
+#define NULL_ENTITY			999999
 
 namespace ECS { 
 

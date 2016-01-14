@@ -176,7 +176,7 @@ int main(int argc, char** argv)
 												(Masks::Type::WEAPON | Masks::GeneralOptions::EQUIPPED), Component::EntityType::WEAPON, "Weapon");
 
 	// Turn off Rendering / Transform Components
-	// EntitySystem::RemoveComponents(World, Sword, COMPONENT_RENDERER2D);
+	EntitySystem::RemoveComponents(World, Sword, COMPONENT_RENDERER2D | COMPONENT_TRANSFORM3D);
 
 	// Equip player with sword
 	World->InventorySystem->Inventories[Player].Items.push_back(Sword);
@@ -216,7 +216,7 @@ int main(int argc, char** argv)
 
 		PlayerController::Update(World->PlayerControllerSystem);
 		SpatialHash::ClearCells(World->Grid);
-		// AIController::Update(World->AIControllerSystem, Player);
+		AIController::Update(World->AIControllerSystem, Player);
 		Animation2D::Update(World);
 		TransformSystem::Update(World->TransformSystem);
 		Collision::Update(World);
@@ -346,7 +346,7 @@ int main(int argc, char** argv)
 			}
 
 			Ground = &World->TransformSystem->Transforms[e].GroundPosition;
-			if (Camera.IsBoundBoxInCamView(*Ground, Math::Vec2(64.0f, 32.0f)) && World->Types[e] != ECS::Component::EntityType::ITEM && World->Types[e] != ECS::Component::EntityType::PROJECTILE)
+			if (Camera.IsBoundBoxInCamView(*Ground, Math::Vec2(64.0f, 32.0f)))
 			{
 				PlayerBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 										Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
