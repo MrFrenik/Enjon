@@ -18,7 +18,7 @@
 
 #if TESTING 
 
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -363,11 +363,18 @@ int main(int argc, char** argv)
 		const Enjon::Graphics::ColorRGBA8* Color = &World->Renderer2DSystem->Renderers[Player].Color;
 		PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[Player].Position.XY(), dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color);
 
-		static float AABBHeight = 32.0f, AABBWidth = 64.0f;
 		Enjon::Math::Vec2* A = &World->TransformSystem->Transforms[Player].CartesianPosition;
 		Enjon::Physics::AABB* AABB = &World->TransformSystem->Transforms[Sword].AABB;
+		Enjon::Math::Vec2 AABBIsomin(Enjon::Math::CartesianToIso(AABB->Min));
+		Enjon::Math::Vec2 AABBIsomax(Enjon::Math::CartesianToIso(AABB->Max));
+		float AABBHeight = abs(AABB->Max.y - AABB->Min.y), AABBWidth = abs(AABB->Max.x - AABB->Min.y);
+	
+		// Cart	
 		PlayerBatch.Add(Math::Vec4(AABB->Min.x, AABB->Min.y, abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y)), Math::Vec4(0, 0, 1, 1), 0,
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
+		// Iso	
+		// PlayerBatch.Add(Math::Vec4(AABBIsomin, 64.0f * 2, 32.0f * 2), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
+		// 							Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
 
 		// Draw player ground tile 
 		const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;

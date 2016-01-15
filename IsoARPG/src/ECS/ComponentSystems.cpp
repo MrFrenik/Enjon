@@ -390,6 +390,11 @@ namespace ECS { namespace Systems {
 					Velocity->x = Enjon::Math::Lerp(VelocityGoal->x, Velocity->x, Scale); 
 					Velocity->y = Enjon::Math::Lerp(VelocityGoal->y, Velocity->y, Scale); 
 					Velocity->z = Enjon::Math::Lerp(VelocityGoal->z, Velocity->z, Scale); 
+
+					if (Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM)
+					{
+						printf("VG: %.2f, %.2f, %.2f\n", Velocity->x, Velocity->y, Velocity->z);
+					}
 					
 					// Set entity's position after interpolating
 					Position->x += Velocity->x;
@@ -456,7 +461,7 @@ namespace ECS { namespace Systems {
 					// Leave if weapon not equipped  
 					// NOTE(John): Again, another reason I don't like this being here. If the weapon were processed in the transform loop, it would be skipped until its Transform 
 					// 			   Component came online
-					if (WeaponEquipped == MAX_ENTITIES || Manager->AttributeSystem->Masks[e] & Masks::Type::WEAPON) continue;
+					if (WeaponEquipped == NULL_ENTITY || Manager->AttributeSystem->Masks[e] & Masks::Type::WEAPON) continue;
 
 					// Calculate equipped weapon Transform
 					Component::Transform3D* WeaponTransform = &System->Transforms[WeaponEquipped];
@@ -610,6 +615,7 @@ namespace ECS { namespace Systems {
 			{
 				static float blink_counter = 0.0f;
 				static float blink_increment = 1.0f;
+				static float damaged_counter = 0.0f;
 
 				// If has an animation component
 				if (Manager->Masks[e] & COMPONENT_ANIMATION2D)
@@ -617,8 +623,20 @@ namespace ECS { namespace Systems {
 					// Just testing out random effects based on health
 					float Health = Manager->AttributeSystem->HealthComponents[e].Health;
 					if (Health <= 10.0f) 		blink_increment = 0.5f;
-					else if (Health <= 20.0f) 		blink_increment = 1.0f;
+					else if (Health <= 20.0f) 	blink_increment = 1.0f;
 					else if (Health <= 50.0f) 	blink_increment = 2.0f;
+
+					if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::DAMAGED)
+					{
+						Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA8(0, 0, 0, 0);  // damaged color for now 
+						damaged_counter += 0.1f;
+						if (damaged_counter >= 0.3f)
+						{
+							Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA8_White();  
+							Manager->AttributeSystem->Masks[e] &= ~Masks::GeneralOptions::DAMAGED;
+							damaged_counter = 0.0f;
+						}						
+					}
 
 					if (Health <= 50.0f && Health > 0.0f) 
 					{
@@ -1021,6 +1039,9 @@ namespace ECS { namespace Systems {
 				Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
 				Enjon::Graphics::ColorRGBA8* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
 
+				// Set option to damaged
+				Manager->AttributeSystem->Masks[B_ID] |= Masks::GeneralOptions::DAMAGED;	
+
 				if (HealthComponent == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Collider health component is null");
 				if (Color == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Color component is null");
 		
@@ -1028,8 +1049,8 @@ namespace ECS { namespace Systems {
 				HealthComponent->Health -= 10.0f;
 
 				// Change colors based on health	
-				if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8_Orange();
-				if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8_Red();
+				if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8(255, 0, 0, 255);
+				if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8(255, 0, 0, 255);
 
 				if (HealthComponent->Health <= 0.0f) 
 				{
@@ -1127,11 +1148,15 @@ namespace ECS { namespace Systems {
 				ColliderVelocity->x = -ColliderVelocity->x * bf;
 				ColliderVelocity->y = -ColliderVelocity->y * bf;
 
+
 				if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
 				{
 					// Get health and color of entity
 					Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
 					Enjon::Graphics::ColorRGBA8* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
+
+					// Set option to damaged
+					Manager->AttributeSystem->Masks[B_ID] |= Masks::GeneralOptions::DAMAGED;	
 
 					if (HealthComponent == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Collider health component is null");
 					if (Color == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Color component is null");
@@ -1140,7 +1165,7 @@ namespace ECS { namespace Systems {
 					HealthComponent->Health -= Enjon::Random::Roll(10.0f, 20.0f);
 
 					// Change colors based on health	
-					if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8_Orange();
+					if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8(0, 0, 0, 0);
 					if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8_Red();
 
 					// If dead, then kill it	
@@ -1182,6 +1207,9 @@ namespace ECS { namespace Systems {
 													  Enjon::Random::Roll(Position->y - 64.0f, Position->y + 64.0f), 0.0f), 
 													  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::ITEM | Masks::ItemOptions::CONSUMABLE), 
 													  Component::EntityType::ITEM, "Item", Enjon::Graphics::SetOpacity(ItemColor, 0.5f));
+				Manager->TransformSystem->Transforms[id].VelocityGoal.x = 0.0f;
+				Manager->TransformSystem->Transforms[id].VelocityGoal.y = 0.0f;
+				Manager->TransformSystem->Transforms[id].Velocity = {0.0f, 0.0f, 0.0f};
 			} 
 
 		}
