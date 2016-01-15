@@ -1008,8 +1008,6 @@ namespace ECS { namespace Systems {
 							Component::EntityType AType = Manager->Types[collider];
 							Component::EntityType BType = Manager->Types[e];
 
-							// if ((Manager->AttributeSystem->Masks[e] & Masks::Type::WEAPON) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0) continue; 
-
 							// Get collision mask for A and B
 							Enjon::uint32 Mask = GetCollisionType(Manager, e, collider);
 
@@ -1022,7 +1020,9 @@ namespace ECS { namespace Systems {
 					}	
 				}
 			}
-		}
+			// printf("Times: %d\n", times);
+			times = 0;
+		} // Collision Update
 		
 
 		Enjon::uint32 GetCollisionType(Systems::EntityManager* Manager, ECS::eid32 A, ECS::eid32 B)

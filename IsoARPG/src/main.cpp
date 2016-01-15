@@ -64,6 +64,7 @@ using namespace ECS;
 using namespace Systems;
 
 void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* Manager, ECS::eid32 Entity);
+void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);
 
 #undef main
 int main(int argc, char** argv)
@@ -84,6 +85,9 @@ int main(int argc, char** argv)
 	// Create a window
 	Graphics::Window Window;
 	Window.Init("Testing Grounds", screenWidth, screenHeight, SCREENRES);
+
+	// Hide mouse
+	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
 
 	// Create Camera
 	Graphics::Camera2D Camera;
@@ -158,7 +162,7 @@ int main(int argc, char** argv)
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
-	static uint32 AmountDrawn = 10;
+	static uint32 AmountDrawn = 100;
 
 	for (int e = 0; e < AmountDrawn; e++)
 	{
@@ -184,7 +188,7 @@ int main(int argc, char** argv)
 	World->InventorySystem->Inventories[Player].Items.push_back(Sword);
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 10;
+	AmountDrawn = 0;
 
 	for (int e = 0; e < AmountDrawn; e++)
 	{
@@ -235,7 +239,7 @@ int main(int argc, char** argv)
 		Renderer2D::Update(World); 
 		PlayerController::Update(World->PlayerControllerSystem);
 
-		// Clear entities from collision system
+		// Clear entities from collision system vectors
 		World->CollisionSystem->Entities.clear();
 
 		// Check for input
@@ -428,6 +432,10 @@ int main(int argc, char** argv)
 		PlayerBatch.RenderBatch();
 		EnemyBatch.RenderBatch();
 
+
+		// Draw Cursor
+		DrawCursor(&PlayerBatch, &Input);
+
 		Window.SwapBuffer();
 		
 		////////////////////////////////////////////////
@@ -489,6 +497,59 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	}
 }
 
+void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager)
+{ 
+	Enjon::Math::Mat4 model, view, projection;
+	model = Math::Mat4::Identity();
+	view = Math::Mat4::Orthographic(0, (float)SCREENWIDTH, 0, (float)SCREENHEIGHT, -1, 1);
+	projection = Math::Mat4::Identity();
+	
+	GLuint shader = Graphics::ShaderManager::GetShader("Basic")->GetProgramID(); 
+	glUseProgram(shader);
+	{
+		glUniform1i(glGetUniformLocation(shader, "texture"),
+					 0);
+		glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
+							1, 0, model.elements);
+		glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
+							1, 0, view.elements);
+		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
+							1, 0, projection.elements);
+	}
+
+	static int index = 0;
+	static float timer = 0.0f;
+	
+	// if (m_isclicked)
+	// { 
+	// 	timer += 0.1f;
+	// 	if (timer >= 0.2f)
+	// 	{
+	// 		index++;
+	// 		timer = 0.0f;
+	// 	}
+	// 	if (index >= 5)
+	// 	{
+	// 		m_isclicked = false;
+	// 		timer = 0.0f;
+	// 		index = 0;
+	// 	}
+	// }
+
+	static Enjon::Graphics::GLTexture MouseTexture = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Cursor24.png");
+ 
+	Batch->Begin();	
+	Enjon::Math::Vec4 destRect(InputManager->GetMouseCoords().x, -InputManager->GetMouseCoords().y + SCREENHEIGHT - 16, 16, 16);
+	Enjon::Math::Vec4 uvRect(0, 0, 1, 1);
+	// if (m_isclicked) m_hudbatch.Add(Math::Vec4(destRect.x - 125, destRect.y - 75, 252, 180), m_groundclick.GetUV(index), m_groundclick.texture.id,
+	// 										SetOpacity(Graphics::RGBA8_White(), 0.6f));
+	// m_hudbatch.Add(Math::Vec4(destRect.x + 3.0f, destRect.y - 3.0f, destRect.z, destRect.w), uvRect, 
+	// 			   m_mousecursortexture.id, SetOpacity(Graphics::RGBA8_Black(), 0.5f));
+	Batch->Add(destRect, uvRect, MouseTexture.id);
+	Batch->End();
+	Batch->RenderBatch();
+	Graphics::ShaderManager::UnuseProgram("Basic");
+}
 
 #endif 
 
