@@ -466,6 +466,17 @@ int main(int argc, char** argv)
 
 void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* World, ECS::eid32 Entity)
 {
+	static float shake_amount = 15.0f;
+	static float screen_shake = 0.0f;
+	if (screen_shake > 0.0f)
+	{
+		screen_shake -= 0.1f;
+		float XOffset = Enjon::Random::Roll(-shake_amount, shake_amount);
+		float YOffset = Enjon::Random::Roll(-shake_amount, shake_amount);
+		Enjon::Math::Vec2 Position = Camera->GetPosition();
+		Camera->SetPosition(Enjon::Math::Vec2(Position.x + XOffset, Position.y + YOffset)); 
+	}
+
     SDL_Event event;
 //
 //    //Will keep looping until there are no more events to process
@@ -502,7 +513,11 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		if (Camera->GetScale() > 0.1f) Camera->SetScale(Camera->GetScale() - 0.01f);	
 	}
 	if (Input->IsKeyDown(SDLK_e)){
-		Camera->SetScale(Camera->GetScale() + 0.01f);	
+		Camera->SetScale(Camera->GetScale() + 0.01f);
+	}
+
+	if (Input->IsKeyPressed(SDLK_t)) {
+		screen_shake = 1.0f;
 	}
 }
 

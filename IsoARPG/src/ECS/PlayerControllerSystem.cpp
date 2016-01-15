@@ -14,7 +14,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 	}
 
 	void Update(struct PlayerControllerSystem* System)
-	{ 
+	{
 		ECS::Systems::EntityManager* Manager = System->Manager;
 
 		for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
