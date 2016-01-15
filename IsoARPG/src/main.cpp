@@ -37,17 +37,26 @@
 #endif 
 
 #include <Enjon.h>
-#include <SDL2/SDL.h>
-#include <GLEW/glew.h>
-#include <ECS/ComponentSystems.h>
-#include <ECS/Entity.h>
-#include "Level.h"
 #include <Utils/FileUtils.h>
 #include <Math/Random.h>
+
+#include <SDL2/SDL.h>
+#include <GLEW/glew.h>
+
+#include <ECS/ComponentSystems.h>
+#include <ECS/PlayerControllerSystem.h>
+#include <ECS/Transform3DSystem.h>
+#include <ECS/CollisionSystem.h>
+#include <ECS/Animation2DSystem.h>
+#include <ECS/InventorySystem.h> 
+#include <ECS/Renderer2DSystem.h>
+#include <ECS/AIControllerSystem.h> 
+#include <ECS/Entity.h>
+
 #include "Animation.h"
 #include "AnimationManager.h"
 #include "SpatialHash.h"
-#include "Math/Random.h"
+#include "Level.h"
 
 #include <stdio.h>
 #include <iostream> 
@@ -234,7 +243,7 @@ int main(int argc, char** argv)
 		SpatialHash::ClearCells(World->Grid);
 		AIController::Update(World->AIControllerSystem, Player);
 		Animation2D::Update(World);
-		TransformSystem::Update(World->TransformSystem);
+		Transform::Update(World->TransformSystem);
 		Collision::Update(World);
 		Renderer2D::Update(World); 
 		PlayerController::Update(World->PlayerControllerSystem);

@@ -16,6 +16,20 @@
 #define SCREEN_VERTICAL_CENTER			1440 / 2
 #define SCREEN_HORIZONTAL_CENTER		900 / 2
 
+#define WALKPACE	3.0f
+#define SPRINTPACE  WALKPACE * 2.0f
+
+struct TestSystem;
+struct LabelSystem;
+struct AttributeSystem;
+struct PlayerControllerSystem;
+struct Transform3DSystem;
+struct CollisionSystem;
+struct Animation2DSystem;
+struct InventorySystem;
+struct Renderer2DSystem;
+struct AIControllerSystem;
+
 // EntityManagers hold pointers to their system, which hold the arrays of data
 // ComponentSystems don't need to know of mangers...or do they? Yes, they'll hold pointers to the managers of which they belong
 namespace ECS { namespace Systems {
@@ -37,6 +51,7 @@ namespace ECS { namespace Systems {
 		struct AttributeSystem* AttributeSystem;
 		struct Renderer2DSystem* Renderer2DSystem;
 		struct InventorySystem* InventorySystem;
+		struct TestSystem* TestSystem;
 
 		bitmask32 Masks[MAX_ENTITIES];
 		Component::EntityType Types[MAX_ENTITIES];
@@ -47,63 +62,13 @@ namespace ECS { namespace Systems {
 		int Height;
 
 		SpatialHash::Grid* Grid;
-	}; 
-
-	struct AttributeSystem
-	{
-		struct EntityManager* Manager;
-		Component::HealthComponent HealthComponents[MAX_ENTITIES];
-		Component::BitmaskComponent BitMasks[MAX_ENTITIES];
-		Masks::EntityMask Masks[MAX_ENTITIES];
 	};
 	
-	struct PlayerControllerSystem
-	{
-		struct EntityManager* Manager;
-		Component::PlayerController PlayerControllers[MAX_ENTITIES];
-	}; 
-		
-	struct Transform3DSystem
-	{
-		struct EntityManager* Manager;
-		Component::Transform3D Transforms[MAX_ENTITIES];
-	}; 
-
-	struct CollisionSystem
-	{
-		struct EntityManager* Manager;
-		std::vector<eid32> Entities;
-	};
-	
-	struct InventorySystem
-	{
-		struct EntityManager* Manager;
-		Component::InventoryComponent Inventories[MAX_ENTITIES];
-	}; 
-	
-	struct AIControllerSystem
-	{
-		struct EntityManager* Manager;
-		Component::AIController AIControllers[MAX_ENTITIES];
-	}; 
-	
-	struct Animation2DSystem
-	{
-		struct EntityManager* Manager;
-		Component::Animation2D Animations[MAX_ENTITIES];
-	}; 
-	
-	struct LabelSystem
-	{
-		struct EntityManager* Manager;
-		Component::Label Labels[MAX_ENTITIES];
-	};
-
-	struct Renderer2DSystem
-	{
-		struct EntityManager* Manager;
-		Component::Renderer2DComponent Renderers[MAX_ENTITIES];
-	};
+	// struct AIControllerSystem
+	// {
+	// 	struct EntityManager* Manager;
+	// 	Component::AIController AIControllers[MAX_ENTITIES];
+	// };
 
 	////////////////////
 	// Entity Manager //
@@ -143,148 +108,21 @@ namespace ECS { namespace Systems {
 
 		// Adds components
 		void AddComponents(bitmask32 Components);
-	} 
-
-	/////////////////////
-	// TransformSystem //
-	///////////////////// 
-
-	// Reponsible for managing all the entity transforms 
-	namespace TransformSystem 
-	{ 
-		// Updates Transforms of EntityManager
-		void Update(Transform3DSystem* System);
-
-		// Creates new Transform3DSystem
-		Transform3DSystem* NewTransform3DSystem(struct EntityManager* Manager);		
 	}
-	
-	/////////////////////
-	// CollisionSystem //
-	/////////////////////
-
-	namespace Collision
-	{
-
-		// Updates all possible collisions
-		void Update(struct EntityManager* Manager);
-
-		// Creates new CollisionSystem
-		CollisionSystem* NewCollisionSystem(struct EntityManager* Manager);		
-
-		// Check collision type  
-		Enjon::uint32 GetCollisionType(Systems::EntityManager* Manager, ECS::eid32 A, ECS::eid32 B);
-
-		// Collide Player with Item
-		void CollideWithItem(Systems::EntityManager* Manager, ECS::eid32 A, ECS::eid32 B);
-
-		// Collide Player with Enemy
-		void CollideWithEnemy(Systems::EntityManager* Manager, ECS::eid32 A, ECS::eid32 B);
-
-		// Collide Projectile with Enemy
-		void CollideWithProjectile(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
-
-		// Totally for testing purposes...
-		void DropRandomLoot(Systems::EntityManager* Manager, Enjon::uint32 count, const Enjon::Math::Vec2* Position);
-	}
-	
-	/////////////////////
-	// InventorySystem //
-	///////////////////// 
-
-	// Reponsible for managing all the inventories 
-	namespace Inventory 
-	{ 
-		// Updates Transforms of EntityManager
-		void Update(InventorySystem* System);
-
-		// Creates new Transform3DSystem
-		InventorySystem* NewInventorySystem(struct EntityManager* Manager);		
-	}
-	
-	////////////////////
-	// RendererSystem //
-	////////////////////
-
-	// Reponsible for managing all the renderers
-	namespace Renderer2D
-	{ 
-		// Updates Renderers of EntityManager
-		void Update(struct EntityManager* Manager);
-
-		// Create new Render2DSystem
-		Renderer2DSystem* NewRenderer2DSystem(struct EntityManager* Manager);	
-	}
-	
-	///////////////////////
-	// Animation2DSystem //
-	/////////////////////// 
-
-	// Reponsible for managing all the renderers
-	namespace Animation2D
-	{ 
-		// Updates Transforms of EntityManager
-		void Update(struct EntityManager* Manager);	
-		
-		// Creates new Transform3DSystem
-		Animation2DSystem* NewAnimation2DSystem(struct EntityManager* Manager);		
-	}
-	
-	////////////////////////////
-	// PlayerControllerSystem //
-	//////////////////////////// 
-
-	namespace PlayerController
-	{ 
-		// Constructs and returns new PlayerControllerSystem
-		// TODO(John): Write custom allocator for this
-		struct PlayerControllerSystem* NewPlayerControllerSystem(struct EntityManager* Manager);
-		
-		// Updates Controller of player it is attached to
-		void Update(struct PlayerControllerSystem* System);	
-	} 
 	
 	////////////////////////
 	// AIControllerSystem //
 	////////////////////////
 
-	namespace AIController
-	{ 
-		// Constructs and returns new AIControllerSystem
-		// TODO(John): Write custom allocator for this
-		struct AIControllerSystem* NewAIControllerSystem(struct EntityManager* Manager);
+	// namespace AIController
+	// { 
+	// 	// Constructs and returns new AIControllerSystem
+	// 	// TODO(John): Write custom allocator for this
+	// 	struct AIControllerSystem* NewAIControllerSystem(struct EntityManager* Manager);
 		
-		// Updates Controller of AI it is attached to
-		void Update(struct AIControllerSystem* System, eid32 Player);	
-	} 
-	
-	/////////////////
-	// LabelSystem //
-	/////////////////
-
-	namespace Label
-	{ 
-		// Constructs and returns new AIControllerSystem
-		// TODO(John): Write custom allocator for this
-		struct LabelSystem* NewLabelSystem(struct EntityManager* Manager);
-		
-		// Updates Controller of AI it is attached to
-		void Update(struct LabelSystem* System);	
-	} 
-
-	/////////////////////
-	// AttributeSystem //
-	/////////////////////
-
-	namespace Attributes
-	{
-		// Constructs and returns new AIControllerSystem
-		// TODO(John): Write custom allocator for this
-		struct AttributeSystem* NewAttributeSystem(struct EntityManager* Manager);
-
-		// Updates Attributes of entity that it's attached to
-		void Update(struct AttributeSystem* System);	
-	}
+	// 	// Updates Controller of AI it is attached to
+	// 	void Update(struct AIControllerSystem* System, eid32 Player);	
+	// }
 }}
 
 
