@@ -44,7 +44,7 @@ namespace SpatialHash {
 	}
 
 	// TODO(John): Create a pair checking function to maintain and update pairs of entities that have already been checked with one another
-	
+	// NOTE(John): As of now, this is incredibly too slow to work...
 	void GetNeighborCells(Grid* grid, int index, std::vector<ECS::eid32>* Entities)
 	{
 		// Grab all neighbor cell indexes	
@@ -59,13 +59,13 @@ namespace SpatialHash {
 		int max = grid->rows * grid->cols;
 
 		// If valid, append to entities
-		if (Top >= 0)		   { if (!grid->cells[Top].entities.empty()) { for (ECS::eid32& entity : grid->cells[Top].entities)		    			{ Entities->push_back(entity); }}} 
-		if (Bottom < max)	   { if (!grid->cells[Bottom].entities.empty()) { for (ECS::eid32& entity : grid->cells[Bottom].entities)	   			{ Entities->push_back(entity); }}}
-		if (TopLeft >= 0)	   { if (!grid->cells[TopLeft].entities.empty()) { for (ECS::eid32& entity : grid->cells[TopLeft].entities)	    		{ Entities->push_back(entity); }}}
-		if (TopRight >= 0)	   { if (!grid->cells[TopRight].entities.empty()) { for (ECS::eid32& entity : grid->cells[TopRight].entities)   		{ Entities->push_back(entity); }}}
-		if (Left >= 0)		   { if (!grid->cells[Left].entities.empty()) { for (ECS::eid32& entity : grid->cells[Left].entities)	    			{ Entities->push_back(entity); }}}
-		if (Right < max)	   { if (!grid->cells[Right].entities.empty()) { for (ECS::eid32& entity : grid->cells[Right].entities)	    			{ Entities->push_back(entity); }}}
-		if (BottomLeft < max)  { if (!grid->cells[BottomLeft].entities.empty()) { for (ECS::eid32& entity : grid->cells[BottomLeft].entities)  		{ Entities->push_back(entity); }}}
-		if (BottomRight < max) { if (!grid->cells[BottomRight].entities.empty()) { for (ECS::eid32& entity : grid->cells[BottomRight].entities) 	{ Entities->push_back(entity); }}}
+		if (Top >= 0)		   if (!grid->cells[Top].entities.empty())  			Entities->insert(Entities->end(), grid->cells[Top].entities.begin(), grid->cells[Top].entities.end()); 
+		if (Bottom < max)	   if (!grid->cells[Bottom].entities.empty()) 			Entities->insert(Entities->end(), grid->cells[Bottom].entities.begin(), grid->cells[Bottom].entities.end());
+		if (TopLeft >= 0)	   if (!grid->cells[TopLeft].entities.empty()) 			Entities->insert(Entities->end(), grid->cells[TopLeft].entities.begin(), grid->cells[TopLeft].entities.end());
+		if (TopRight >= 0)	   if (!grid->cells[TopRight].entities.empty()) 		Entities->insert(Entities->end(), grid->cells[TopRight].entities.begin(), grid->cells[TopRight].entities.end());
+		if (Left >= 0)		   if (!grid->cells[Left].entities.empty()) 			Entities->insert(Entities->end(), grid->cells[Left].entities.begin(), grid->cells[Left].entities.end());
+		if (Right < max)	   if (!grid->cells[Right].entities.empty()) 			Entities->insert(Entities->end(), grid->cells[Right].entities.begin(), grid->cells[Right].entities.end());
+		if (BottomLeft < max)  if (!grid->cells[BottomLeft].entities.empty()) 		Entities->insert(Entities->end(), grid->cells[BottomLeft].entities.begin(), grid->cells[BottomLeft].entities.end());
+		if (BottomRight < max) if (!grid->cells[BottomRight].entities.empty()) 		Entities->insert(Entities->end(), grid->cells[BottomRight].entities.begin(), grid->cells[BottomRight].entities.end());
 	}
 }

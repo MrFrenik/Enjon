@@ -47,6 +47,7 @@ namespace ECS { namespace Systems {
 			Manager->AttributeSystem 			= Attributes::NewAttributeSystem(Manager);
 			Manager->Renderer2DSystem 			= Renderer2D::NewRenderer2DSystem(Manager);
 			Manager->InventorySystem 			= Inventory::NewInventorySystem(Manager);
+			Manager->CollisionSystem 			= Collision::NewCollisionSystem(Manager);
 
 			Manager->Width = Width;
 			Manager->Height = Height;
@@ -98,6 +99,8 @@ namespace ECS { namespace Systems {
 		// Removes selected entity from manager by setting bitfield to COMPONENT_NONE
 		void RemoveEntity(struct EntityManager* Manager, eid32 Entity)
 		{
+			// Need to reset all of its components in here
+
 			// Set component mask to COMPONENT_NONE to remove
 			Manager->Masks[Entity] = COMPONENT_NONE;
 
@@ -236,6 +239,7 @@ namespace ECS { namespace Systems {
 			// Set up Attributes
 			Manager->AttributeSystem->HealthComponents[AI].Health = Health;
 			Manager->AttributeSystem->HealthComponents[AI].Entity = AI;
+			Manager->AttributeSystem->Masks[AI] |= Masks::Type::AI;
 
 			// Set up Renderer
 			Manager->Renderer2DSystem->Renderers[AI].Color = Color;
@@ -312,7 +316,7 @@ namespace ECS { namespace Systems {
 		// TODO(John): Write custom allocator for this
 		struct AttributeSystem* NewAttributeSystem(struct EntityManager* Manager)
 		{
-			struct AttributeSystem* System = (AttributeSystem*)malloc(sizeof(AttributeSystem));
+			struct AttributeSystem* System = new AttributeSystem;
 			if (System == nullptr) Enjon::Utils::FatalError("COMPOPNENT_SYSTEMS::NEW_ATTRIBUTE_SYSTEM::System is null"); 
 			System->Manager = Manager;
 			return System;
@@ -335,7 +339,7 @@ namespace ECS { namespace Systems {
 		// TODO(John): Write custom allocator for this
 		struct LabelSystem* NewLabelSystem(struct EntityManager* Manager)
 		{
-			struct LabelSystem* System = (LabelSystem*)malloc(sizeof(LabelSystem));
+			struct LabelSystem* System = new LabelSystem;
 			if (System == nullptr) Enjon::Utils::FatalError("COMPOPNENT_SYSTEMS::NEW_LABEL_SYSTEM::System is null"); 
 			System->Manager = Manager;
 			return System;
@@ -359,7 +363,7 @@ namespace ECS { namespace Systems {
 		// Create a new Transform3D Sytem
 		Transform3DSystem* NewTransform3DSystem(struct EntityManager* Manager)
 		{
-			Transform3DSystem* System = (Transform3DSystem*)malloc(sizeof(Transform3DSystem));
+			Transform3DSystem* System = new Transform3DSystem;
 			if (System == nullptr) Enjon::Utils::FatalError("COMPOPNENT_SYSTEMS::NEW_TRANSFORM_3D_SYSTEM::System is null"); 
 			System->Manager = Manager;
 			return System;
@@ -378,6 +382,25 @@ namespace ECS { namespace Systems {
 					// If equipped, then don't update transform here
 					if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::EQUIPPED) continue;
 
+					// If an item
+					if ((Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0)
+					{
+						// Need to see whether or not the player is within range before I turn on its collision component
+						Enjon::Math::Vec3* P = &Manager->TransformSystem->Transforms[e].Position;
+						V2* GP = &Manager->TransformSystem->Transforms[e].GroundPosition;
+						V2* PGP = &Manager->TransformSystem->Transforms[Manager->Player].GroundPosition;
+
+						if (PGP->DistanceTo(*GP) <= TILE_SIZE * 2) Manager->CollisionSystem->Entities.push_back(e);
+	
+						// Set up GroundPosition
+						GP->x = P->x + Manager->TransformSystem->Transforms[e].Dimensions.x / 2.0f - 32.0f; // Tilewidth
+						GP->y = P->y - P->z; 
+						continue;
+					}
+
+					// Push back into collision system
+					else Manager->CollisionSystem->Entities.push_back(e);
+
 					// First transform the velocity by LERPing it
 					Component::Transform3D* Transform = &System->Transforms[e];
 					float Scale = Transform->VelocityGoalScale; 
@@ -389,12 +412,7 @@ namespace ECS { namespace Systems {
 					
 					Velocity->x = Enjon::Math::Lerp(VelocityGoal->x, Velocity->x, Scale); 
 					Velocity->y = Enjon::Math::Lerp(VelocityGoal->y, Velocity->y, Scale); 
-					Velocity->z = Enjon::Math::Lerp(VelocityGoal->z, Velocity->z, Scale); 
-
-					if (Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM)
-					{
-						printf("VG: %.2f, %.2f, %.2f\n", Velocity->x, Velocity->y, Velocity->z);
-					}
+					Velocity->z = Enjon::Math::Lerp(VelocityGoal->z, Velocity->z, Scale);
 					
 					// Set entity's position after interpolating
 					Position->x += Velocity->x;
@@ -492,6 +510,9 @@ namespace ECS { namespace Systems {
 					else if (*AttackVector == SOUTHEAST) 	WeaponTransform->AABB = SE;
 					else if (*AttackVector == EAST) 		WeaponTransform->AABB = E;
 					else									WeaponTransform->AABB = NW;
+
+					// Push weapon back into collision system
+					Manager->CollisionSystem->Entities.push_back(WeaponEquipped);
 				}
 			}
 		}
@@ -513,7 +534,7 @@ namespace ECS { namespace Systems {
 		// Creates new Transform3DSystem
 		InventorySystem* NewInventorySystem(struct EntityManager* Manager)
 		{
-			struct InventorySystem* System = (InventorySystem*)malloc(sizeof(InventorySystem));
+			struct InventorySystem* System = new InventorySystem;
 			if (System == nullptr) Enjon::Utils::FatalError("COMPOPNENT_SYSTEMS::NEW_INVENTORY_SYSTEM::System is null");
 			System->Manager = Manager;
 			return System;
@@ -540,7 +561,7 @@ namespace ECS { namespace Systems {
 		// Create new Render2DSystem
 		Renderer2DSystem* NewRenderer2DSystem(struct EntityManager* Manager)
 		{
-			struct Renderer2DSystem* System = (Renderer2DSystem*)malloc(sizeof(Renderer2DSystem));
+			struct Renderer2DSystem* System = new Renderer2DSystem;
 			if (System == nullptr) Enjon::Utils::FatalError("COMPOPNENT_SYSTEMS::NEW_RENDERER2D_SYSTEM::System is null"); 
 			System->Manager = Manager;
 			return System;
@@ -551,7 +572,7 @@ namespace ECS { namespace Systems {
 	{
 		struct AIControllerSystem* NewAIControllerSystem(struct EntityManager* Manager)
 		{ 
-			struct AIControllerSystem* System = (struct AIControllerSystem*)malloc(sizeof(struct AIControllerSystem));
+			struct AIControllerSystem* System = new AIControllerSystem;
 			System->Manager = Manager;
 			return System;
 		}
@@ -601,7 +622,7 @@ namespace ECS { namespace Systems {
 		
 		struct Animation2DSystem* NewAnimation2DSystem(struct EntityManager* Manager)
 		{
-			struct Animation2DSystem* System = (struct Animation2DSystem*)malloc(sizeof(Animation2DSystem));
+			struct Animation2DSystem* System = new Animation2DSystem;
 			System->Manager = Manager;
 			return System;
 		}
@@ -617,6 +638,14 @@ namespace ECS { namespace Systems {
 				static float blink_increment = 1.0f;
 				static float damaged_counter = 0.0f;
 
+				Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[e];
+				// Change colors based on health	
+				if (Manager->AttributeSystem->Masks[e] & Masks::Type::AI)
+				{
+					if (HealthComponent->Health <= 50.0f) Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA8_Orange();
+					if (HealthComponent->Health <= 20.0f) Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA8_Red();
+				}
+
 				// If has an animation component
 				if (Manager->Masks[e] & COMPONENT_ANIMATION2D)
 				{
@@ -630,7 +659,7 @@ namespace ECS { namespace Systems {
 					{
 						Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA8(0, 0, 0, 0);  // damaged color for now 
 						damaged_counter += 0.1f;
-						if (damaged_counter >= 0.3f)
+						if (damaged_counter >= 0.5f)
 						{
 							Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA8_White();  
 							Manager->AttributeSystem->Masks[e] &= ~Masks::GeneralOptions::DAMAGED;
@@ -746,8 +775,9 @@ namespace ECS { namespace Systems {
 										static Enjon::Graphics::SpriteSheet ItemSheet;
 										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
 										eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Position->x + 32.0f, Position->y + 32.0f, Position->z + 50.0f),
-																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::WEAPON | Masks::WeaponOptions::PROJECTILE), 
+																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::WEAPON | Masks::WeaponOptions::PROJECTILE | Masks::GeneralOptions::PICKED_UP), 
 																  Component::EntityType::PROJECTILE);
+										Manager->Masks[id] |= COMPONENT_TRANSFORM3D;
 
 										// Give the arrow some velocity
 										Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(AttackVector->x * 30.0f, AttackVector->y * 15.0f, 0.0f);
@@ -793,7 +823,7 @@ namespace ECS { namespace Systems {
 	{ 
 		struct PlayerControllerSystem* NewPlayerControllerSystem(struct EntityManager* Manager)
 		{
-			struct PlayerControllerSystem* System = (struct PlayerControllerSystem*)malloc(sizeof(struct PlayerControllerSystem));
+			struct PlayerControllerSystem* System = new PlayerControllerSystem;
 			System->Manager = Manager;
 			return System;
 		}
@@ -929,6 +959,16 @@ namespace ECS { namespace Systems {
 		Enjon::uint32 COLLISION_ENEMY		= 0x00000002;
 		Enjon::uint32 COLLISION_ITEM		= 0x00000004;
 		Enjon::uint32 COLLISION_PROJECTILE	= 0x00000008;
+		Enjon::uint32 COLLISION_WEAPON		= 0x00000010;
+
+		// Creates new CollisionSystem
+		CollisionSystem* NewCollisionSystem(struct EntityManager* Manager)
+		{
+			struct CollisionSystem* System = new struct CollisionSystem;
+			if (System == nullptr) Enjon::Utils::FatalError("COMPOPNENT_SYSTEMS::NEW_COLLISION_SYSTEM::System is null"); 
+			System->Manager = Manager;
+			return System;
+		}		
 
 		// Updates all possible collisions
 		void Update(struct EntityManager* Manager)
@@ -936,9 +976,15 @@ namespace ECS { namespace Systems {
 			static Enjon::uint32 times;
 			times = 0; 
 			
+			eid32 size = Manager->CollisionSystem->Entities.empty() ? 0 : Manager->CollisionSystem->Entities.size();	
 			// Check the quadrants of entities and then check for collisions
-			for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
-			{ 
+			for (eid32 n = 0; n < size; n++)
+			{
+				// Get entity
+				eid32 e = Manager->CollisionSystem->Entities[n];
+
+				// if ((Manager->AttributeSystem->Masks[e] & Masks::Type::WEAPON) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0) continue; 
+
 				// If entity has no transform, then continue
 				if (!(Manager->Masks[e] & COMPONENT_TRANSFORM3D)) continue;
 				// Get the cell that entity belongs to
@@ -948,6 +994,8 @@ namespace ECS { namespace Systems {
 				// Check all entities and neighbors
 				std::vector<eid32> Entities = Manager->Grid->cells[CellIndex].entities;
 				SpatialHash::GetNeighborCells(Manager->Grid, CellIndex, &Entities);  // Note(John): This is causing too much slowdown
+
+				// TODO(John): Keep a mapping of already checked pairs to cut this time down
 				
 				// Get entities 
 				if (!Entities.empty())
@@ -960,10 +1008,12 @@ namespace ECS { namespace Systems {
 							Component::EntityType AType = Manager->Types[collider];
 							Component::EntityType BType = Manager->Types[e];
 
+							// if ((Manager->AttributeSystem->Masks[e] & Masks::Type::WEAPON) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0) continue; 
+
 							// Get collision mask for A and B
 							Enjon::uint32 Mask = GetCollisionType(Manager, e, collider);
 
-							if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
+							if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 							if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
 							if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ CollideWithItem(Manager, collider, e); 		continue; } 
 							if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
@@ -992,6 +1042,7 @@ namespace ECS { namespace Systems {
 			switch(*TypeA)
 			{
 				case Component::EntityType::ITEM:			Mask |= COLLISION_ITEM; 			break;
+				case Component::EntityType::WEAPON:			Mask |= COLLISION_WEAPON; 			break;
 				case Component::EntityType::PLAYER:			Mask |= COLLISION_PLAYER; 			break;
 				case Component::EntityType::ENEMY: 			Mask |= COLLISION_ENEMY; 			break;
 				case Component::EntityType::PROJECTILE: 	Mask |= COLLISION_PROJECTILE; 		break;
@@ -1002,6 +1053,7 @@ namespace ECS { namespace Systems {
 			switch(*TypeB)
 			{
 				case Component::EntityType::ITEM:			Mask |= COLLISION_ITEM; 			break;
+				case Component::EntityType::WEAPON:			Mask |= COLLISION_WEAPON; 			break;
 				case Component::EntityType::PLAYER:			Mask |= COLLISION_PLAYER; 			break;
 				case Component::EntityType::ENEMY: 			Mask |= COLLISION_ENEMY; 			break;
 				case Component::EntityType::PROJECTILE: 	Mask |= COLLISION_PROJECTILE; 		break;
@@ -1047,10 +1099,6 @@ namespace ECS { namespace Systems {
 		
 				// Decrement by some arbitrary amount for now	
 				HealthComponent->Health -= 10.0f;
-
-				// Change colors based on health	
-				if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8(255, 0, 0, 255);
-				if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8(255, 0, 0, 255);
 
 				if (HealthComponent->Health <= 0.0f) 
 				{
@@ -1164,9 +1212,6 @@ namespace ECS { namespace Systems {
 					// Decrement by some arbitrary amount for now	
 					HealthComponent->Health -= Enjon::Random::Roll(10.0f, 20.0f);
 
-					// Change colors based on health	
-					if (HealthComponent->Health <= 50.0f) *Color = Enjon::Graphics::RGBA8(0, 0, 0, 0);
-					if (HealthComponent->Health <= 20.0f) *Color = Enjon::Graphics::RGBA8_Red();
 
 					// If dead, then kill it	
 					if (HealthComponent->Health <= 0.0f)

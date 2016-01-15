@@ -11,7 +11,7 @@
 
 typedef Enjon::Math::Vec2 V2; 
 
-const int CELL_SIZE = 128;
+const int CELL_SIZE = 256;
 
 namespace SpatialHash { 
 

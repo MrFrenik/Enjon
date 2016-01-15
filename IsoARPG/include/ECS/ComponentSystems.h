@@ -11,6 +11,8 @@
 #include "SpatialHash.h"
 #include "AnimationManager.h"
 
+#include <vector>
+
 #define SCREEN_VERTICAL_CENTER			1440 / 2
 #define SCREEN_HORIZONTAL_CENTER		900 / 2
 
@@ -38,6 +40,8 @@ namespace ECS { namespace Systems {
 
 		bitmask32 Masks[MAX_ENTITIES];
 		Component::EntityType Types[MAX_ENTITIES];
+
+		eid32 Player;
 
 		int Width; 
 		int Height;
@@ -68,6 +72,7 @@ namespace ECS { namespace Systems {
 	struct CollisionSystem
 	{
 		struct EntityManager* Manager;
+		std::vector<eid32> Entities;
 	};
 	
 	struct InventorySystem
@@ -163,6 +168,9 @@ namespace ECS { namespace Systems {
 
 		// Updates all possible collisions
 		void Update(struct EntityManager* Manager);
+
+		// Creates new CollisionSystem
+		CollisionSystem* NewCollisionSystem(struct EntityManager* Manager);		
 
 		// Check collision type  
 		Enjon::uint32 GetCollisionType(Systems::EntityManager* Manager, ECS::eid32 A, ECS::eid32 B);

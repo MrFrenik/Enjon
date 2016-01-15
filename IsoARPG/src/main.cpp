@@ -18,7 +18,7 @@
 
 #if TESTING 
 
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -158,22 +158,24 @@ int main(int argc, char** argv)
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 10;
 
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
-		EntitySystem::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight(), 0))), height),
+		EntitySystem::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
 																enemydims, &EnemySheet, "Enemy", 0.05f); // NOTE(John): The transform system is a bottleneck right now }
 	}
-
 
 	// Create player
 	eid32 Player = EntitySystem::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(100.0f, 100.0f), &PlayerSheet, "Player", 0.4f, Math::Vec3(1, 1, 0)); 
 
+	// Set player for world
+	World->Player = Player;
+
 	// Create Sword
 	eid32 Sword = EntitySystem::CreateItem(World, World->TransformSystem->Transforms[Player].Position, Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, 
-												(Masks::Type::WEAPON | Masks::GeneralOptions::EQUIPPED), Component::EntityType::WEAPON, "Weapon");
+												(Masks::Type::WEAPON | Masks::GeneralOptions::EQUIPPED | Masks::GeneralOptions::PICKED_UP), Component::EntityType::WEAPON, "Weapon");
 
 	// Turn off Rendering / Transform Components
 	EntitySystem::RemoveComponents(World, Sword, COMPONENT_RENDERER2D | COMPONENT_TRANSFORM3D);
@@ -181,6 +183,16 @@ int main(int argc, char** argv)
 	// Equip player with sword
 	World->InventorySystem->Inventories[Player].Items.push_back(Sword);
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
+
+	AmountDrawn = 10;
+
+	for (int e = 0; e < AmountDrawn; e++)
+	{
+		// Create Sword
+		eid32 id = EntitySystem::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
+										Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, Masks::Type::ITEM, Component::EntityType::ITEM, "Weapon");
+		// EntitySystem::RemoveComponents(World, id, COMPONENT_TRANSFORM3D);
+	}
 
 	// Set position to player
 	Camera.SetPosition(Math::Vec2(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, World->TransformSystem->Transforms[Player].Position.y)); 
@@ -221,6 +233,10 @@ int main(int argc, char** argv)
 		TransformSystem::Update(World->TransformSystem);
 		Collision::Update(World);
 		Renderer2D::Update(World); 
+		PlayerController::Update(World->PlayerControllerSystem);
+
+		// Clear entities from collision system
+		World->CollisionSystem->Entities.clear();
 
 		// Check for input
 		ProcessInput(&Input, &Camera, World, Player); 
@@ -353,8 +369,8 @@ int main(int argc, char** argv)
 			}
 
 			// Draw ground tile on cartesian map			
-			PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[e].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
-									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f));
+			// PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[e].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
+			// 						Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f));
 		}
 	
 		// Draw player
@@ -382,8 +398,8 @@ int main(int argc, char** argv)
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
 	
 		// Draw player cartesian position
-		PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[Player].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
-								Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f));
+		// PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[Player].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
+		// 						Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f));
 
 		// Draw Cartesian Level
 		// NOTE(John): This is a HUGE bottleneck for some reason. Figure it out.
