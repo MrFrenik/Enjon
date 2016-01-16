@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h> 
 
+#include "Graphics/Camera2D.h"
 #include "Physics/AABB.h"
 #include "ECS/Components.h"
 #include "ECS/Entity.h"
@@ -62,6 +63,7 @@ namespace ECS { namespace Systems {
 		int Height;
 
 		SpatialHash::Grid* Grid;
+		Enjon::Graphics::Camera2D* Camera;
 	};
 	
 	// struct AIControllerSystem
@@ -78,7 +80,7 @@ namespace ECS { namespace Systems {
 	{ 
 		// Creates and returns instance of an Entity Manager
 		// TODO(John): Write custom allocators instead of using malloc/delete
-		struct EntityManager* NewEntityManager(int Width, int Height); 
+		struct EntityManager* NewEntityManager(int Width, int Height, Enjon::Graphics::Camera2D* Camera); 
 		
 		// Creates a blank entity, returns the eid and places in manager
 		eid32 CreateEntity(struct EntityManager* Manager, bitmask32 Components);

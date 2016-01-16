@@ -2,6 +2,7 @@
 #define CAMERA2D_H
 
 #include "Math/Maths.h"
+#include "Math/Random.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////// 
@@ -35,6 +36,9 @@ namespace Enjon { namespace Graphics {
 	inline float GetScale() const {return m_scalar;}
 	inline Enjon::Math::Mat4 GetCameraMatrix() const {return m_cameraMatrix;}
 
+	// Screen Shake
+	void ShakeScreen(float Intensity);
+
 	private:
 		int m_screenWidth, m_screenHeight;
 		bool m_needsMatrixUpdate;
@@ -42,6 +46,8 @@ namespace Enjon { namespace Graphics {
 		Enjon::Math::Mat4 m_cameraMatrix;
 		Enjon::Math::Mat4 m_orthoMatrix;
 		float m_scalar;
+		float m_shake_counter;
+		float m_shake_intensity;
 	};
 }}
 

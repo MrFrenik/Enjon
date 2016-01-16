@@ -5,6 +5,7 @@
 #include "ECS/InventorySystem.h"
 #include "ECS/Renderer2DSystem.h"
 
+#include <Graphics/Camera2D.h>
 #include <Math/Random.h>
 #include <IO/ResourceManager.h>
 
@@ -135,6 +136,9 @@ namespace ECS{ namespace Systems { namespace Collision {
 		
 		else 
 		{
+			// Shake the camera for effect
+			Manager->Camera->ShakeScreen(Enjon::Random::Roll(5, 15));
+
 			// Get minimum translation distance
 			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_A, AABB_B);
 
@@ -245,7 +249,14 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 			// Update velocities based on "bounce" factor
 			float bf; // Bounce factor 
-			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON) bf = 1.2f;
+			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
+			{
+				// Shake the camera for effect
+				Manager->Camera->ShakeScreen(Enjon::Random::Roll(5, 15));
+	
+				bf = 1.2f;
+			}
+
 			else bf = 1.0f;
 
 			EntityVelocity->x = -EntityVelocity->x * bf; 

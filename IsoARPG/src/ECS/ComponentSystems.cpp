@@ -31,7 +31,7 @@ namespace ECS { namespace Systems {
 	namespace EntitySystem {
 
 		// Creates new EntityManager and returns it
-		struct EntityManager* NewEntityManager(int Width, int Height)
+		struct EntityManager* NewEntityManager(int Width, int Height, Enjon::Graphics::Camera2D* Camera)
 		{
 			struct EntityManager* Manager = new EntityManager;
 
@@ -66,6 +66,9 @@ namespace ECS { namespace Systems {
 			// Initialize spatial hash
 			Manager->Grid = new SpatialHash::Grid;
 			SpatialHash::Init(Manager->Grid, Manager->Width, Manager->Height);
+
+			// Set up camera
+			Manager->Camera = Camera;
 
 			return Manager;
 		} 

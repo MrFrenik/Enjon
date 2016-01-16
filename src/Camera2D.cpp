@@ -26,6 +26,8 @@ namespace Enjon { namespace Graphics {
 		m_screenWidth = screenWidth;
 		m_screenHeight = screenHeight;
 		m_orthoMatrix = Enjon::Math::Mat4::Orthographic(0.0f, (float)m_screenWidth, 0.0f, (float)m_screenHeight, -1, 1);
+		m_shake_counter = 0.0f;
+		m_shake_intensity = 0.0f;
 	}
 
 	void Camera2D::Update(){
@@ -42,6 +44,16 @@ namespace Enjon { namespace Graphics {
 
 			//Reset matrix update bool to false
 			m_needsMatrixUpdate = false;
+		}
+
+		// Check if screen is being shaken
+		if (this->m_shake_counter > 0.0f)
+		{
+			m_shake_counter -= 0.1f;
+			float XOffset = Enjon::Random::Roll(-m_shake_intensity, m_shake_intensity);
+			float YOffset = Enjon::Random::Roll(-m_shake_intensity, m_shake_intensity);
+			Enjon::Math::Vec2 Position = this->GetPosition();
+			this->SetPosition(Enjon::Math::Vec2(Position.x + XOffset, Position.y + YOffset)); 
 		}
 
 	}
@@ -105,6 +117,13 @@ namespace Enjon { namespace Graphics {
 
 		return pos;
 	}
+
+	void Camera2D::ShakeScreen(float Intensity)
+	{
+		this->m_shake_intensity = Intensity;
+		this->m_shake_counter = 1.0f;
+	}
+
 }}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

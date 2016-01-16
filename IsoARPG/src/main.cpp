@@ -166,7 +166,7 @@ int main(int argc, char** argv)
 	/////////////////
 
 	// Create new EntityManager
-	struct EntityManager* World = EntitySystem::NewEntityManager(level.GetWidth(), level.GetWidth());
+	struct EntityManager* World = EntitySystem::NewEntityManager(level.GetWidth(), level.GetWidth(), &Camera);
 
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
 
@@ -259,7 +259,7 @@ int main(int argc, char** argv)
 		static float scale = 6.0f; 
 		m_velocity.x = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, Camera.GetPosition().x, 8.0f);
 		m_velocity.y = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.y, Camera.GetPosition().y, scale); 
-		Camera.SetPosition(m_velocity); 
+		Camera.SetPosition(m_velocity);
 		////////////////////////////////////////////////
 
 		///////////////
@@ -517,7 +517,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	}
 
 	if (Input->IsKeyPressed(SDLK_t)) {
-		screen_shake = 1.0f;
+		Camera->ShakeScreen(15.0f);
 	}
 }
 
