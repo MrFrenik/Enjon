@@ -18,7 +18,7 @@
 
 #if TESTING 
 
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -171,7 +171,7 @@ int main(int argc, char** argv)
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
-	static uint32 AmountDrawn = 100;
+	static uint32 AmountDrawn = 1;
 
 	for (int e = 0; e < AmountDrawn; e++)
 	{

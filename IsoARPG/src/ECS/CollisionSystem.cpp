@@ -137,7 +137,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 		else 
 		{
 			// Shake the camera for effect
-			Manager->Camera->ShakeScreen(Enjon::Random::Roll(5, 15));
+			Manager->Camera->ShakeScreen(Enjon::Random::Roll(10, 15));
 
 			// Get minimum translation distance
 			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_A, AABB_B);
@@ -252,7 +252,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
 			{
 				// Shake the camera for effect
-				Manager->Camera->ShakeScreen(Enjon::Random::Roll(5, 15));
+				Manager->Camera->ShakeScreen(Enjon::Random::Roll(10, 15));
 	
 				bf = 1.2f;
 			}

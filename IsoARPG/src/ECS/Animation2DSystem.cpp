@@ -3,7 +3,9 @@
 #include "ECS/Transform3DSystem.h"
 #include "ECS/InventorySystem.h"
 #include "ECS/Renderer2DSystem.h"
+#include "ECS/PlayerControllerSystem.h"
 
+#include <Graphics/Camera2D.h>
 #include <IO/ResourceManager.h>
 
 namespace ECS { namespace Systems { namespace Animation2D {
@@ -184,10 +186,37 @@ namespace ECS { namespace Systems { namespace Animation2D {
 															  Component::EntityType::PROJECTILE);
 									Manager->Masks[id] |= COMPONENT_TRANSFORM3D;
 
-									// Give the arrow some velocity
-									Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(AttackVector->x * 30.0f, AttackVector->y * 15.0f, 0.0f);
+									// Set arrow velocity to normalize: mousepos - arrowpos
+									Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
+									Manager->Camera->ConvertScreenToWorld(MousePos);
+									Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].Position.XY();
 
-									printf("Entity Amount: %d\n", Manager->MaxAvailableID);
+									// Find vector between the two and normalize
+									Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x - 32.0f, Pos.y - 32.0f));
+
+									float speed = 30.0f;
+
+									// Fire in direction of mouse
+									Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(ArrowVelocity.x * speed, ArrowVelocity.y * speed, 0.0f);
+
+									// Set attack vector of player to this velocity
+									int Mult = 1.0f;
+									Enjon::Math::Vec2 AttackVector;
+									// X < 0
+									if (ArrowVelocity.x < 0 && ArrowVelocity.x >= -0.3f) AttackVector.x = 0.0f;
+									else if (ArrowVelocity.x < 0 && ArrowVelocity.x < -0.3f) AttackVector.x = -1.0f;
+									// X > 0
+									if (ArrowVelocity.x >= 0 && ArrowVelocity.x < 0.5f) AttackVector.x = 0.0f;
+									else if (ArrowVelocity.x >= 0 && ArrowVelocity.x >= 0.5f) AttackVector.x = 1.0f;
+									// Y < 0
+									if (ArrowVelocity.y < 0 && ArrowVelocity.y > -0.3f) AttackVector.y = 0.0f;
+									else if (ArrowVelocity.y < 0 && ArrowVelocity.y <= -0.3f) AttackVector.y = -1.0f;
+									// Y > 0
+									if (ArrowVelocity.y >= 0 && ArrowVelocity.y < 0.3f) AttackVector.y = 0.0f;
+									else if (ArrowVelocity.y >= 0 && ArrowVelocity.y >= 0.3f) AttackVector.y = 1.0f;
+
+
+									Manager->TransformSystem->Transforms[e].AttackVector = AttackVector;
 								}
 							} 
 
