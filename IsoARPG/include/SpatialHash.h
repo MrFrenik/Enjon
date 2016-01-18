@@ -11,7 +11,7 @@
 
 typedef Enjon::Math::Vec2 V2; 
 
-const int CELL_SIZE = 256;
+const int CELL_SIZE = 128;
 
 namespace SpatialHash { 
 
@@ -27,8 +27,8 @@ namespace SpatialHash {
 		std::vector<Cell> cells; 
 	} Grid; 
 
-	void Init(Grid* grid, int width, int height); 
-	int FindCell(Grid* grid, ECS::eid32 entity, const V2* position); 
+	void Init(Grid* grid, int width, int height, int cell_size = CELL_SIZE); 
+	int FindCell(Grid* grid, ECS::eid32 entity, const V2* position, int cell_size = CELL_SIZE); 
 	void ClearCells(Grid* grid);
 	void GetNeighborCells(Grid* grid, int index, std::vector<ECS::eid32>* Entities);
 }

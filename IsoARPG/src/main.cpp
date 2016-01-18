@@ -115,6 +115,9 @@ int main(int argc, char** argv)
 	Enjon::Graphics::SpriteBatch TileBatch;
 	TileBatch.Init();
 
+	Enjon::Graphics::SpriteBatch FrontWallBatch;
+	FrontWallBatch.Init();
+
 	Level level;
 	Graphics::GLTexture TileTexture;
 	level.Init(Camera.GetPosition().x, Camera.GetPosition().y, 100, 100);
@@ -135,21 +138,31 @@ int main(int argc, char** argv)
 	// Make spritesheets for player and enemy and item
 	Enjon::Graphics::SpriteSheet PlayerSheet;
 	Enjon::Graphics::SpriteSheet EnemySheet;
+	Enjon::Graphics::SpriteSheet EnemySheet2;
 	Enjon::Graphics::SpriteSheet ItemSheet;
 	Enjon::Graphics::SpriteSheet ArrowSheet;
+	Enjon::Graphics::SpriteSheet ReticleSheet;
+	Enjon::Graphics::SpriteSheet TargetSheet;
 	PlayerSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/pixelanimtestframessplit.png"), Enjon::Math::iVec2(6, 24));
-	EnemySheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/enemy.png"), Math::iVec2(1, 1));
+	EnemySheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png"), Math::iVec2(1, 1));
+	EnemySheet2.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/enemy.png"), Math::iVec2(1, 1));
 	ItemSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png"), Math::iVec2(1, 1));
 	ArrowSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Math::iVec2(8, 1));
+	ReticleSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/circle_reticle.png"), Math::iVec2(1, 1));
+	TargetSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Target.png"), Math::iVec2(1, 1));
 	
 	// Creating tiled iso level
 	TileBatch.Begin(); 
 	level.DrawIsoLevel(TileBatch);
 	TileBatch.End();	
+
+	FrontWallBatch.Begin();
+	level.DrawIsoLevelFront(FrontWallBatch);
+	FrontWallBatch.End();
  
-	// Create PlayerBatch
-	Enjon::Graphics::SpriteBatch PlayerBatch;
-	PlayerBatch.Init();
+	// Create EntityBatch
+	Enjon::Graphics::SpriteBatch EntityBatch;
+	EntityBatch.Init();
 	
 	// Create QuadrantBatch
 	Enjon::Graphics::SpriteBatch EnemyBatch;
@@ -171,8 +184,8 @@ int main(int argc, char** argv)
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
-	static uint32 AmountDrawn = 1;
 
+	static uint32 AmountDrawn = 10;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -239,7 +252,6 @@ int main(int argc, char** argv)
 		ViewPort = Math::Vec2(SCREENWIDTH, SCREENHEIGHT) / Camera.GetScale();
 		CameraDims = Math::Vec4(*PlayerStuff, quadDimsStuff / Camera.GetScale());
 
-		PlayerController::Update(World->PlayerControllerSystem);
 		SpatialHash::ClearCells(World->Grid);
 		AIController::Update(World->AIControllerSystem, Player);
 		Animation2D::Update(World);
@@ -250,6 +262,8 @@ int main(int argc, char** argv)
 
 		// Clear entities from collision system vectors
 		World->CollisionSystem->Entities.clear();
+		// Clear entities from PlayerControllerSystem targets vector
+		World->PlayerControllerSystem->Targets.clear();
 
 		// Check for input
 		ProcessInput(&Input, &Camera, World, Player); 
@@ -276,6 +290,7 @@ int main(int argc, char** argv)
 		view = Camera.GetCameraMatrix();
 		projection = Math::Mat4::Identity();
 
+
 		GLint shader = Graphics::ShaderManager::GetShader("Basic")->GetProgramID();
 		isLevel = 1;
 		glUseProgram(shader);
@@ -290,6 +305,7 @@ int main(int argc, char** argv)
 								1, 0, projection.elements);
 			glUniform1f(glGetUniformLocation(shader, "time"), time);
 			glUniform1i(glGetUniformLocation(shader, "isLevel"), isLevel);
+			glUniform2f(glGetUniformLocation(shader, "resolution"), SCREENWIDTH, SCREENHEIGHT);
 		} 
 		
 		// Draw map
@@ -297,14 +313,14 @@ int main(int argc, char** argv)
 
 
 		// Draw Entities
-		EnemyBatch.Begin();
-		PlayerBatch.Begin(); 
+		EntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); 
 
 		wchar_t wcstring[10]; 
 		glUniform1i(glGetUniformLocation(shader, "isLevel"), 0);
 		static uint32 Row = 0;
 		static uint32 Col = 0;
 		static uint32 i = 0;
+		static Math::Vec2 enemydims2(180.0f, 222.0f);
 		static Math::Vec2 dims(100.0f, 100.0f);
 		static Math::Vec2 arrowDims(64.0f, 64.0f);
 		static Math::Vec2 itemDims(20.0f, 20.0f);
@@ -339,14 +355,22 @@ int main(int argc, char** argv)
 				// Don't draw if not in view
 				if (Camera.IsBoundBoxInCamView(*EntityPosition, enemydims))
 				{
-					EnemyBatch.Add(Math::Vec4(*EntityPosition, enemydims), uv, beast.id, *Color);
+					EntityBatch.Add(Math::Vec4(*EntityPosition, enemydims), uv, beast.id, *Color, EntityPosition->y);
 				}
+				// If target
+				if (e == World->PlayerControllerSystem->CurrentTarget)
+				{
+					Math::Vec2 ReticleDims(94.0f, 47.0f);
+					Math::Vec2 Position = World->TransformSystem->Transforms[e].GroundPosition - Math::Vec2(15.0f, 5.0f);
+					EntityBatch.Add(Math::Vec4(Position.x, Position.y, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), TargetSheet.texture.id, Enjon::Graphics::RGBA8_Red(), Position.y);
+				}
+
 			}
 			else if (World->Types[e] == ECS::Component::EntityType::ITEM)
 			{
 				if (Camera.IsBoundBoxInCamView(*EntityPosition, itemDims))
 				{
-					PlayerBatch.Add(Math::Vec4(*EntityPosition, itemDims), ItemSheet.GetUV(0), ItemSheet.texture.id, *Color);
+					EntityBatch.Add(Math::Vec4(*EntityPosition, itemDims), ItemSheet.GetUV(0), ItemSheet.texture.id, *Color, EntityPosition->y);
 				}
 
 			}
@@ -370,27 +394,36 @@ int main(int argc, char** argv)
 					else if (*AttackVector == SOUTHEAST)		index = 7;
 					else										index = 0;
 
-					PlayerBatch.Add(Math::Vec4(*EntityPosition, arrowDims), ArrowSheet.GetUV(index), ArrowSheet.texture.id, *Color);
+					EntityBatch.Add(Math::Vec4(*EntityPosition, arrowDims), ArrowSheet.GetUV(index), ArrowSheet.texture.id, *Color, EntityPosition->y);
 				}
 			}
 
 			Ground = &World->TransformSystem->Transforms[e].GroundPosition;
-			if (Camera.IsBoundBoxInCamView(*Ground, Math::Vec2(64.0f, 32.0f)))
+			if (World->Types[e] != ECS::Component::EntityType::ITEM && Camera.IsBoundBoxInCamView(*Ground, Math::Vec2(64.0f, 32.0f)))
 			{
-				PlayerBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-										Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
+				EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
+										Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f), 1.0f);
 			}
 
 			// Draw ground tile on cartesian map			
-			// PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[e].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
+			// EntityBatch.Add(Math::Vec4(World->TransformSystem->Transforms[e].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
 			// 						Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f));
 		}
+
+		// Draw player reticle
+		// NOTE(John): In order for this to work the way I'm thinking, I'll need to learn stencil buffering
+		// and apply that here to mask out the area I don't want
+		Math::Vec2 ReticleDims(94.0f, 47.0f);
+		Math::Vec2 Position = World->TransformSystem->Transforms[Player].GroundPosition - Math::Vec2(17.0f, 0.0f);
+		EntityBatch.Add(Math::Vec4(Position.x, Position.y + World->TransformSystem->Transforms[Player].Position.z, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), ReticleSheet.texture.id, 
+									Graphics::RGBA8_White(), Position.y + World->TransformSystem->Transforms[Player].Position.z);	
 	
 		// Draw player
 		static Graphics::SpriteSheet* Sheet = World->Animation2DSystem->Animations[Player].Sheet; static Enjon::uint32 Frame = World->Animation2DSystem->Animations[Player].CurrentFrame;
 		Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
 		const Enjon::Graphics::ColorRGBA8* Color = &World->Renderer2DSystem->Renderers[Player].Color;
-		PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[Player].Position.XY(), dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color);
+		Enjon::Math::Vec2* PlayerPosition = &World->TransformSystem->Transforms[Player].Position.XY();
+		EntityBatch.Add(Math::Vec4(*PlayerPosition, dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color, PlayerPosition->y);
 
 		Enjon::Math::Vec2* A = &World->TransformSystem->Transforms[Player].CartesianPosition;
 		Enjon::Physics::AABB* AABB = &World->TransformSystem->Transforms[Sword].AABB;
@@ -399,27 +432,26 @@ int main(int argc, char** argv)
 		float AABBHeight = abs(AABB->Max.y - AABB->Min.y), AABBWidth = abs(AABB->Max.x - AABB->Min.y);
 	
 		// Cart	
-		PlayerBatch.Add(Math::Vec4(AABB->Min.x, AABB->Min.y, abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y)), Math::Vec4(0, 0, 1, 1), 0,
+		EntityBatch.Add(Math::Vec4(AABB->Min.x, AABB->Min.y, abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y)), Math::Vec4(0, 0, 1, 1), 0,
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
 		// Iso	
-		// PlayerBatch.Add(Math::Vec4(AABBIsomin, 64.0f * 2, 32.0f * 2), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
+		// EntityBatch.Add(Math::Vec4(AABBIsomin, 64.0f * 2, 32.0f * 2), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 		// 							Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
 
 		// Draw player ground tile 
 		const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;
-		PlayerBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
+		EntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
 	
 		// Draw player cartesian position
-		// PlayerBatch.Add(Math::Vec4(World->TransformSystem->Transforms[Player].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
+		// EntityBatch.Add(Math::Vec4(World->TransformSystem->Transforms[Player].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
 		// 						Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f));
 
 		// Draw Cartesian Level
 		// NOTE(John): This is a HUGE bottleneck for some reason. Figure it out.
-		//level.DrawCartesianLevel(PlayerBatch);
+		//level.DrawCartesianLevel(EntityBatch);
 	
-		EnemyBatch.End();
-		PlayerBatch.End(); 
+		EntityBatch.End(); 
 	
 		// Set up shader for rendering
 		isLevel = 1;
@@ -437,13 +469,15 @@ int main(int argc, char** argv)
 			glUniform1f(glGetUniformLocation(shader, "time"), time);
 			glUniform1i(glGetUniformLocation(shader, "isLevel"), isLevel);
 		} 
-		
-		PlayerBatch.RenderBatch();
-		EnemyBatch.RenderBatch();
 
+		// Draw entities		
+		EntityBatch.RenderBatch();
+
+		// Draw front walls
+		FrontWallBatch.RenderBatch();
 
 		// Draw Cursor
-		DrawCursor(&PlayerBatch, &Input);
+		DrawCursor(&EntityBatch, &Input);
 
 		Window.SwapBuffer();
 		
@@ -466,17 +500,6 @@ int main(int argc, char** argv)
 
 void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* World, ECS::eid32 Entity)
 {
-	static float shake_amount = 15.0f;
-	static float screen_shake = 0.0f;
-	if (screen_shake > 0.0f)
-	{
-		screen_shake -= 0.1f;
-		float XOffset = Enjon::Random::Roll(-shake_amount, shake_amount);
-		float YOffset = Enjon::Random::Roll(-shake_amount, shake_amount);
-		Enjon::Math::Vec2 Position = Camera->GetPosition();
-		Camera->SetPosition(Enjon::Math::Vec2(Position.x + XOffset, Position.y + YOffset)); 
-	}
-
     SDL_Event event;
 //
 //    //Will keep looping until there are no more events to process

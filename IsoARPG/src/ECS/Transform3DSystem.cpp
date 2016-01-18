@@ -85,10 +85,10 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// Make sure that position is within bounds of World
 				int Width = Manager->Width, Height = Manager->Height;
 				bool CollideWithLevel = false;
-				if (Transform->CartesianPosition.x < -Width + TileWidth) { Transform->CartesianPosition.x = -Width + TileWidth; Velocity->x *= -1; CollideWithLevel = true; }   
-				if (Transform->CartesianPosition.x > 0.0f) { Transform->CartesianPosition.x = 0.0f; Velocity->x *= -1; CollideWithLevel = true; }
-				if (Transform->CartesianPosition.y > 0.0f) { Transform->CartesianPosition.y = 0.0f; Velocity->y *= -1; CollideWithLevel = true; }
-				if (Transform->CartesianPosition.y < -Height + TileWidth) { Transform->CartesianPosition.y = -Height + TileWidth; Velocity->y *= -1; CollideWithLevel = true; }
+				if (Transform->CartesianPosition.x < -Width + TileWidth * 2.0f) { Transform->CartesianPosition.x = -Width + TileWidth * 2.0f; Velocity->x *= -1; CollideWithLevel = true; }   
+				if (Transform->CartesianPosition.x > -TileWidth) { Transform->CartesianPosition.x = -TileWidth; Velocity->x *= -1; CollideWithLevel = true; }
+				if (Transform->CartesianPosition.y > -TileWidth) { Transform->CartesianPosition.y = -TileWidth; Velocity->y *= -1; CollideWithLevel = true; }
+				if (Transform->CartesianPosition.y < -Height + TileWidth * 2.0f) { Transform->CartesianPosition.y = -Height + TileWidth * 2.0f; Velocity->y *= -1; CollideWithLevel = true; }
 
 				// Delete projectile for now if it collides with level
 				if ((Manager->Types[e] == Component::EntityType::PROJECTILE) && CollideWithLevel)

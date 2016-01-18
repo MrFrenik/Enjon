@@ -3,6 +3,7 @@
 #include "ECS/Transform3DSystem.h"
 #include "ECS/AttributeSystem.h"
 #include "ECS/InventorySystem.h"
+#include "ECS/PlayerControllerSystem.h"
 #include "ECS/Renderer2DSystem.h"
 
 #include <Graphics/Camera2D.h>
@@ -53,6 +54,20 @@ namespace ECS{ namespace Systems { namespace Collision {
 			std::vector<eid32> Entities = Manager->Grid->cells[CellIndex].entities;
 			SpatialHash::GetNeighborCells(Manager->Grid, CellIndex, &Entities);  // Note(John): This is causing too much slowdown
 
+			// Use these same entities for targets if player
+			if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
+			{
+				std::vector<eid32>* Targets = &Manager->PlayerControllerSystem->Targets;
+				for (eid32 it = 0; it < Entities.size(); it++)
+				{
+					if (Manager->Masks[Entities[it]] & COMPONENT_AICONTROLLER)
+					{
+						Targets->push_back(Entities[it]);	
+					}
+				}
+				// Targets->insert(Targets->end(), Entities.begin(), Entities.end());
+			}
+
 			// TODO(John): Keep a mapping of already checked pairs to cut this time down
 			
 			// Get entities 
@@ -69,11 +84,11 @@ namespace ECS{ namespace Systems { namespace Collision {
 						// Get collision mask for A and B
 						Enjon::uint32 Mask = GetCollisionType(Manager, e, collider);
 
+						if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
 						if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ CollideWithItem(Manager, collider, e); 		continue; } 
 						if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
-						if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 					}
 				}	
 			}

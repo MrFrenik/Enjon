@@ -114,18 +114,35 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					// Setting animation beginning frame based on view vector
 					if (PlayerState == EntityAnimationState::ATTACKING && !(*SetStart))
 					{
-						if		(ViewVector->x <= 0)
+						// Get direction to mouse
+						Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
+						Manager->Camera->ConvertScreenToWorld(MousePos);
+
+						if (MousePos.x <= Position->x)
 						{
 							*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; 
 							*SetStart = TRUE; 
-							if (Velocity->x != 0.0f || Velocity->y != 0.0f) *AttackVector = *ViewVector; 
+							if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
 						}
-						else if (ViewVector->x > 0)  
+						else if (MousePos.x > Position->x)  
 						{
 							*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; 
 							*SetStart = TRUE; 
-							if (Velocity->x != 0.0f || Velocity->y != 0.0f) *AttackVector = *ViewVector; 
+							if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
 						}
+
+						// if (ViewVector->x <= 0)
+						// {
+						// 	*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; 
+						// 	*SetStart = TRUE; 
+						// 	if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
+						// }
+						// else if (ViewVector->x > 0)  
+						// {
+						// 	*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; 
+						// 	*SetStart = TRUE; 
+						// 	if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
+						// }
 					
 						// Set currentframe to beginning frame
 						AnimationComponent->CurrentFrame = 0;

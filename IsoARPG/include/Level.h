@@ -16,8 +16,8 @@ struct Tile
 	//Tile(Enjon::Graphics::GLTexture Texture, Enjon::Math::Vec2 Pos, Enjon::Math::Vec2 Dims, unsigned int Index)
 	//	: texture(Texture), pos(Pos), dims(Dims), index(Index)
 	//{}
-	Tile(Enjon::Math::Vec2 Pos, Enjon::Math::Vec2 Dims, unsigned int Index)
-		: pos(Pos), dims(Dims), index(Index)
+	Tile(Enjon::Math::Vec2 Pos, Enjon::Math::Vec2 Dims, Enjon::Graphics::SpriteSheet* sheet, unsigned int Index)
+		: pos(Pos), dims(Dims), Sheet(sheet), index(Index)
 	{}
 
 	//TODO:: Instead of giving each tile a texture, give it a Row/Col position or UV information from a specific spritesheet
@@ -25,6 +25,7 @@ struct Tile
 	unsigned int index;
 	Enjon::Math::Vec2 pos;	
 	Enjon::Math::Vec2 dims; 
+	Enjon::Graphics::SpriteSheet* Sheet;
 };
 
 class Level
@@ -35,6 +36,7 @@ public:
 
 	void Init(float x, float y, int row, int col);
 	void DrawIsoLevel(Enjon::Graphics::SpriteBatch& batch); 
+	void DrawIsoLevelFront(Enjon::Graphics::SpriteBatch& batch);
 	void DrawCartesianLevel(Enjon::Graphics::SpriteBatch& batch); 
 
 	inline int GetHeight() { return m_height; }
@@ -43,13 +45,19 @@ public:
 
 private:
 	std::vector<Tile> m_isotiles;
+	std::vector<Tile> m_isoTilesFront;
+	std::vector<Tile> m_isoTilesBack;
 	std::vector<Tile> m_cartesiantiles; 
 
 	Enjon::Graphics::SpriteSheet m_tilesheet;
+	Enjon::Graphics::SpriteSheet m_wallSheet;
 
 	int m_width;
 	int m_height;
 
+private:
+	bool IsBorder(int i, int j, int rows, int cols);
+	bool IsFront(int i, int j, int rows, int cols);
 };
 
 

@@ -1,6 +1,7 @@
 
 #include "ECS/PlayerControllerSystem.h"
 #include "ECS/Transform3DSystem.h"
+#include "ECS/Renderer2DSystem.h"
 #include "ECS/Animation2DSystem.h"
 #include "ECS/InventorySystem.h"
 
@@ -10,6 +11,10 @@ namespace ECS { namespace Systems { namespace PlayerController {
 	{
 		struct PlayerControllerSystem* System = new PlayerControllerSystem;
 		System->Manager = Manager;
+
+		// Set up current index
+		System->CurrentIndex = 0;
+
 		return System;
 	}
 
@@ -17,7 +22,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 	{
 		ECS::Systems::EntityManager* Manager = System->Manager;
 
-		for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
+		for (eid32 e = Manager->Player; e < Manager->Player + 1; e++)
 		{
 			if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
 			{ 
@@ -123,8 +128,24 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				if (Input->IsKeyDown(SDLK_LSHIFT)) {
 					goal = SPRINTPACE;
 				}
+ 				else goal = WALKPACE;
 
-				else goal = WALKPACE;
+				if (Input->IsKeyPressed(SDLK_TAB)) {
+
+					printf("Size: %d\n", System->Targets.size());
+
+					if (System->Targets.size())
+					{
+						Manager->Renderer2DSystem->Renderers[System->CurrentTarget].Color = Enjon::Graphics::RGBA8_White();
+
+						printf("getting next target...\n");
+						System->CurrentIndex = (System->CurrentIndex + 1) % System->Targets.size();
+						System->CurrentTarget = System->Targets[System->CurrentIndex];
+
+						System->CurrentTarget = System->Targets[System->CurrentIndex];
+					}
+				}
+			
 				if (!Input->IsKeyDown(SDLK_w) && !Input->IsKeyDown(SDLK_s)) Transform->VelocityGoal.y = 0;
 				if (!Input->IsKeyDown(SDLK_a) && !Input->IsKeyDown(SDLK_d)) Transform->VelocityGoal.x = 0; 
 			}

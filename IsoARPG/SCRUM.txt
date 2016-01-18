@@ -40,6 +40,6 @@ Systems:
 		- Set up SpriteBatch manager
 		- PostProcessing: 
 			- Post Processing wraps the rendering code
-			- Set up FrameBuffer to be written to and 	
+			- Set up FrameBuffer to be written to and read from 	
 
 

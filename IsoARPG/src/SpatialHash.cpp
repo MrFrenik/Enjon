@@ -3,24 +3,24 @@
 
 namespace SpatialHash {
 
-	void Init(Grid* grid, int width, int height)
+	void Init(Grid* grid, int width, int height, int cell_size)
 	{
 		if (grid == nullptr) Enjon::Utils::FatalError("SPATIALHASH::INIT::Cannot operate on null data.");
 
-		grid->rows = ceil(height / CELL_SIZE);
-		grid->cols = ceil(width / CELL_SIZE);
+		grid->rows = ceil(height / cell_size);
+		grid->cols = ceil(width / cell_size);
 
 		// Allocate correct memory size for cells
 		grid->cells.resize(grid->rows * grid->cols + 1);
 	}
 
-	int FindCell(Grid* grid, ECS::eid32 entity, const V2* position)
+	int FindCell(Grid* grid, ECS::eid32 entity, const V2* position, int cell_size)
 	{
 		int posX = -position->x;
 		int posY = -position->y; 
 
-		int row = floor(posY / CELL_SIZE);
-		int col = floor(posX / CELL_SIZE);
+		int row = floor(posY / cell_size);
+		int col = floor(posX / cell_size);
 
 		int index = row * grid->cols + col;
 		int max = grid->rows * grid->cols;

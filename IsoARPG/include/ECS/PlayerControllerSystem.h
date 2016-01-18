@@ -4,11 +4,18 @@
 #include "ECS/Components.h"
 #include "ECS/Entity.h"
 #include "ECS/ComponentSystems.h"
+#include "SpatialHash.h"
 
 struct PlayerControllerSystem
 {
 	ECS::Systems::EntityManager* Manager;
 	ECS::Component::PlayerController PlayerControllers[MAX_ENTITIES];
+	std::vector<Enjon::uint32> Targets;  // Totally testing this for now...
+
+	// Probably just make a targeting system and component for this data
+	Enjon::uint32 CurrentIndex;
+	Enjon::uint32 CurrentTarget;
+	SpatialHash::Grid* Grid;
 }; 
 
 namespace ECS { namespace Systems { namespace PlayerController {
