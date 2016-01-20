@@ -56,10 +56,13 @@ void Level::Init(float x, float y, int rows, int cols)
 				{
 					// Add a wall to iso world
 					m_isotiles.emplace_back(Tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(wallWidth, wallHeight), &m_wallSheet, index));
+					// Add coordinates of 2D world to cartesian data
 				}
 
-				// Add coordinates of 2D world to cartesian data
-				m_cartesiantiles.emplace_back(Tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(tilewidth, tileheight), &m_tilesheet, index));
+				//Add coordinates of 2d world to level data vector
+				m_cartesiantiles.emplace_back(Tile(Enjon::Math::IsoToCartesian(Enjon::Math::Vec2(currentX, currentY)), 
+												Enjon::Math::Vec2(tilewidth / 2.0f), &m_tilesheet, index));
+
 			}
 
 			// Add tile
@@ -69,7 +72,9 @@ void Level::Init(float x, float y, int rows, int cols)
 				index = Enjon::Random::Roll(0, 3);
 				if (index == 0 || index == 1) index = Enjon::Random::Roll(0, 3);
 				if (index == 0) index = Enjon::Random::Roll(0, 3);
-				m_isotiles.emplace_back(Tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(tilewidth, tileheight), &m_tilesheet, index));
+				Tile tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(tilewidth, tileheight), &m_tilesheet, index);
+				m_isotiles.emplace_back(tile);
+				m_mapTiles.emplace_back(tile);
 
 				//Add coordinates of 2d world to level data vector
 				m_cartesiantiles.emplace_back(Tile(Enjon::Math::IsoToCartesian(Enjon::Math::Vec2(currentX, currentY)), 
@@ -129,8 +134,16 @@ void Level::DrawCartesianLevel(Enjon::Graphics::SpriteBatch& batch)
 { 
 	for (Tile& tile : m_cartesiantiles)
 	{
-		//batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.texture.id, Enjon::Graphics::ColorRGBA8::White().SetOpacity(0.5f));
-		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id, 
-				  Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA8_White(), 0.5f));
+		// batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.Sheet->texture.id, Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA8_White(), 0.25f));
+		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), 0, 
+				  Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA8_Orange(), 0.1f));
 	}
 } 
+
+void Level::DrawMap(Enjon::Graphics::SpriteBatch& batch)
+{
+	for (Tile& tile : m_mapTiles)
+	{
+		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), 0, Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA8_Black(), 0.2f), 100.0f);
+	}	
+}

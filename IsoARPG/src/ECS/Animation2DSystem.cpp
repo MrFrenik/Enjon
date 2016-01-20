@@ -41,8 +41,8 @@ namespace ECS { namespace Systems { namespace Animation2D {
 		// Loop through all entities with animations
 		for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
 		{
-			static float blink_counter = 0.0f;
-			static float blink_increment = 1.0f;
+			// static float blink_counter = 0.0f;
+			// static float blink_increment = 1.0f;
 			static float damaged_counter = 0.0f;
 
 			Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[e];
@@ -57,10 +57,10 @@ namespace ECS { namespace Systems { namespace Animation2D {
 			if (Manager->Masks[e] & COMPONENT_ANIMATION2D)
 			{
 				// Just testing out random effects based on health
-				float Health = Manager->AttributeSystem->HealthComponents[e].Health;
-				if (Health <= 10.0f) 		blink_increment = 0.5f;
-				else if (Health <= 20.0f) 	blink_increment = 1.0f;
-				else if (Health <= 50.0f) 	blink_increment = 2.0f;
+				// float Health = Manager->AttributeSystem->HealthComponents[e].Health;
+				// if (Health <= 10.0f) 		blink_increment = 0.5f;
+				// else if (Health <= 20.0f) 	blink_increment = 1.0f;
+				// else if (Health <= 50.0f) 	blink_increment = 2.0f;
 
 				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::DAMAGED)
 				{
@@ -74,15 +74,15 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					}						
 				}
 
-				if (Health <= 50.0f && Health > 0.0f) 
-				{
-					blink_counter += 0.1f;
-					if (blink_counter >= blink_increment)
-					{
-						blink_counter = 0.0f;
-						Manager->Masks[e] ^= COMPONENT_RENDERER2D;
-					}
-				}
+				// if (Health <= 50.0f && Health > 0.0f) 
+				// {
+				// 	blink_counter += 0.1f;
+				// 	if (blink_counter >= blink_increment)
+				// 	{
+				// 		blink_counter = 0.0f;
+				// 		Manager->Masks[e] ^= COMPONENT_RENDERER2D;
+				// 	}
+				// }
 
 				// If is a player
 				if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)

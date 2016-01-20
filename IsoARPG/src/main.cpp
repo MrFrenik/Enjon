@@ -67,6 +67,8 @@ char buffer[256];
 char buffer2[256];
 char buffer3[256];
 bool isRunning = true;
+bool ShowMap = false;
+bool Paused = false;
 
 using namespace Enjon;
 using namespace ECS;
@@ -115,8 +117,23 @@ int main(int argc, char** argv)
 	Enjon::Graphics::SpriteBatch TileBatch;
 	TileBatch.Init();
 
+	Enjon::Graphics::SpriteBatch CartesianTileBatch;
+	CartesianTileBatch.Init();
+
+	Enjon::Graphics::SpriteBatch CartesianEntityBatch;
+	CartesianEntityBatch.Init();
+
 	Enjon::Graphics::SpriteBatch FrontWallBatch;
 	FrontWallBatch.Init();
+
+	Enjon::Graphics::SpriteBatch MapBatch;
+	MapBatch.Init();
+
+	Enjon::Graphics::SpriteBatch MapEntityBatch;
+	MapEntityBatch.Init();
+
+	Enjon::Graphics::SpriteBatch TextBatch;
+	TextBatch.Init();
 
 	Level level;
 	Graphics::GLTexture TileTexture;
@@ -152,9 +169,17 @@ int main(int argc, char** argv)
 	level.DrawIsoLevel(TileBatch);
 	TileBatch.End();	
 
+	CartesianTileBatch.Begin();
+	level.DrawCartesianLevel(CartesianTileBatch);
+	CartesianTileBatch.End();
+
 	FrontWallBatch.Begin();
 	level.DrawIsoLevelFront(FrontWallBatch);
 	FrontWallBatch.End();
+
+	MapBatch.Begin();
+	level.DrawMap(MapBatch);
+	MapBatch.End();
  
 	// Create EntityBatch
 	Enjon::Graphics::SpriteBatch EntityBatch;
@@ -181,7 +206,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 10;
+	static uint32 AmountDrawn = 100;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -213,7 +238,6 @@ int main(int argc, char** argv)
 		// Create Sword
 		eid32 id = EntitySystem::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
 										Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, Masks::Type::ITEM, Component::EntityType::ITEM, "Weapon");
-		// EntitySystem::RemoveComponents(World, id, COMPONENT_TRANSFORM3D);
 	}
 
 	// Set position to player
@@ -248,18 +272,22 @@ int main(int argc, char** argv)
 		ViewPort = Math::Vec2(SCREENWIDTH, SCREENHEIGHT) / Camera.GetScale();
 		CameraDims = Math::Vec4(*PlayerStuff, quadDimsStuff / Camera.GetScale());
 
-		SpatialHash::ClearCells(World->Grid);
-		AIController::Update(World->AIControllerSystem, Player);
-		Animation2D::Update(World);
-		Transform::Update(World->TransformSystem);
-		Collision::Update(World);
-		Renderer2D::Update(World); 
-		PlayerController::Update(World->PlayerControllerSystem);
+		if (!Paused)
+		{
+			SpatialHash::ClearCells(World->Grid);
+			AIController::Update(World->AIControllerSystem, Player);
+			Animation2D::Update(World);
+			Transform::Update(World->TransformSystem);
+			Collision::Update(World);
+			Renderer2D::Update(World); 
+			PlayerController::Update(World->PlayerControllerSystem);
+	
+			// Clear entities from collision system vectors
+			World->CollisionSystem->Entities.clear();
+			// Clear entities from PlayerControllerSystem targets vector
+			World->PlayerControllerSystem->Targets.clear();
+		}
 
-		// Clear entities from collision system vectors
-		World->CollisionSystem->Entities.clear();
-		// Clear entities from PlayerControllerSystem targets vector
-		World->PlayerControllerSystem->Targets.clear();
 
 		// Check for input
 		ProcessInput(&Input, &Camera, World, Player); 
@@ -270,6 +298,7 @@ int main(int argc, char** argv)
 		m_velocity.x = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, Camera.GetPosition().x, 8.0f);
 		m_velocity.y = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.y, Camera.GetPosition().y, scale); 
 		Camera.SetPosition(m_velocity);
+
 		////////////////////////////////////////////////
 
 		///////////////
@@ -286,7 +315,6 @@ int main(int argc, char** argv)
 		view = Camera.GetCameraMatrix();
 		projection = Math::Mat4::Identity();
 
-
 		GLint shader = Graphics::ShaderManager::GetShader("Basic")->GetProgramID();
 		isLevel = 1;
 		glUseProgram(shader);
@@ -301,15 +329,18 @@ int main(int argc, char** argv)
 								1, 0, projection.elements);
 			glUniform1f(glGetUniformLocation(shader, "time"), time);
 			glUniform1i(glGetUniformLocation(shader, "isLevel"), isLevel);
+			glUniform1i(glGetUniformLocation(shader, "isPaused"), Paused);
 			glUniform2f(glGetUniformLocation(shader, "resolution"), SCREENWIDTH, SCREENHEIGHT);
+			glUniform1i(glGetUniformLocation(shader, "useOverlay"), true);
 		} 
 		
 		// Draw map
-		TileBatch.RenderBatch(); 
-
+		TileBatch.RenderBatch();
 
 		// Draw Entities
 		EntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); 
+		MapEntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); 
+		TextBatch.Begin(); 
 
 		wchar_t wcstring[10]; 
 		glUniform1i(glGetUniformLocation(shader, "isLevel"), 0);
@@ -399,11 +430,9 @@ int main(int argc, char** argv)
 			{
 				EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 										Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f), 1.0f);
+				MapEntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
+										Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f), 1.0f);
 			}
-
-			// Draw ground tile on cartesian map			
-			// EntityBatch.Add(Math::Vec4(World->TransformSystem->Transforms[e].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
-			// 						Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f));
 		}
 
 		// Draw player reticle
@@ -426,28 +455,28 @@ int main(int argc, char** argv)
 		Enjon::Math::Vec2 AABBIsomin(Enjon::Math::CartesianToIso(AABB->Min));
 		Enjon::Math::Vec2 AABBIsomax(Enjon::Math::CartesianToIso(AABB->Max));
 		float AABBHeight = abs(AABB->Max.y - AABB->Min.y), AABBWidth = abs(AABB->Max.x - AABB->Min.y);
-	
-		// Cart	
-		EntityBatch.Add(Math::Vec4(AABB->Min.x, AABB->Min.y, abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y)), Math::Vec4(0, 0, 1, 1), 0,
-									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
-		// Iso	
-		// EntityBatch.Add(Math::Vec4(AABBIsomin, 64.0f * 2, 32.0f * 2), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-		// 							Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
 
 		// Draw player ground tile 
 		const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;
 		EntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
-	
-		// Draw player cartesian position
-		// EntityBatch.Add(Math::Vec4(World->TransformSystem->Transforms[Player].CartesianPosition, Math::Vec2(32.0f, 32.0f)), Math::Vec4(0, 0, 1, 1), 0, 
-		// 						Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f));
+		MapEntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
+									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
 
-		// Draw Cartesian Level
-		// NOTE(John): This is a HUGE bottleneck for some reason. Figure it out.
-		//level.DrawCartesianLevel(EntityBatch);
+		// Add an overlay to the Map for better viewing
+		MapEntityBatch.Add(Math::Vec4(-3100, -3150, 6250, 3100), Math::Vec4(0, 0, 1, 1), Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
+								Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA8_White(), 0.7f), 100.0f);
+
+		if (Paused)
+		{
+			// Draw paused text
+			TextBatch.Add(Math::Vec4(Camera.GetPosition().x - 250.0f, Camera.GetPosition().y - 100.0f, 500.0f, 250.0f), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/paused.png").id, 
+									Graphics::RGBA8_Orange(), -50.0f);
+		}
 	
-		EntityBatch.End(); 
+		EntityBatch.End();
+		TextBatch.End(); 
+		MapEntityBatch.End(); 
 	
 		// Set up shader for rendering
 		isLevel = 1;
@@ -464,6 +493,7 @@ int main(int argc, char** argv)
 								1, 0, projection.elements);
 			glUniform1f(glGetUniformLocation(shader, "time"), time);
 			glUniform1i(glGetUniformLocation(shader, "isLevel"), isLevel);
+			glUniform1i(glGetUniformLocation(shader, "useOverlay"), true);
 		} 
 
 		// Draw entities		
@@ -471,6 +501,29 @@ int main(int argc, char** argv)
 
 		// Draw front walls
 		FrontWallBatch.RenderBatch();
+
+		// Draw Text
+		if (Paused)
+		{
+			glUniform1i(glGetUniformLocation(shader, "useOverlay"), false);
+			TextBatch.RenderBatch();
+		}
+
+		// Draw Cartesian Map
+		model *= Math::Mat4::Translate(Math::Vec3(-SCREENWIDTH / 4.0f - 140.0f, SCREENHEIGHT / 2.0f - 40.0f, 0.0f)) * Math::Mat4::Scale(Math::Vec3(0.08f, 0.08f, 1.0f));
+		view = HUDCamera.GetCameraMatrix();
+
+		glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
+							1, 0, model.elements);
+		glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
+							1, 0, view.elements);
+
+		if (ShowMap)
+		{
+			MapEntityBatch.RenderBatch();
+			MapBatch.RenderBatch();
+		}
+
 
 		// Draw Cursor
 		DrawCursor(&EntityBatch, &Input);
@@ -535,8 +588,13 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		Camera->SetScale(Camera->GetScale() + 0.01f);
 	}
 
-	if (Input->IsKeyPressed(SDLK_t)) {
-		Camera->ShakeScreen(15.0f);
+	// Stupid, but use it for now...
+	if (Input->IsKeyPressed(SDLK_m)) {
+		ShowMap = !ShowMap;
+	}
+
+	if (Input->IsKeyPressed(SDLK_p)) {
+		Paused = !Paused;
 	}
 }
 

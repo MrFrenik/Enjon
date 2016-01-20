@@ -38,6 +38,7 @@ public:
 	void DrawIsoLevel(Enjon::Graphics::SpriteBatch& batch); 
 	void DrawIsoLevelFront(Enjon::Graphics::SpriteBatch& batch);
 	void DrawCartesianLevel(Enjon::Graphics::SpriteBatch& batch); 
+	void DrawMap(Enjon::Graphics::SpriteBatch& batch);
 
 	inline int GetHeight() { return m_height; }
 	inline int GetWidth() { return m_width; }
@@ -45,6 +46,7 @@ public:
 
 private:
 	std::vector<Tile> m_isotiles;
+	std::vector<Tile> m_mapTiles;
 	std::vector<Tile> m_isoTilesFront;
 	std::vector<Tile> m_isoTilesBack;
 	std::vector<Tile> m_cartesiantiles; 
