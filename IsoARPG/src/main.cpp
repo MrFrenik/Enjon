@@ -125,10 +125,6 @@ int main(int argc, char** argv)
 	
 	float x = Camera.GetPosition().x;
 	float y = Camera.GetPosition().y;
-	float currentX = x;
-	float currentY = y; 
-	float tilewidth = 64.0f;
-	float tileheight = tilewidth / 2.0f; 
 
 	// Spatial Hash
 	SpatialHash::Grid grid;
@@ -355,7 +351,7 @@ int main(int argc, char** argv)
 				// Don't draw if not in view
 				if (Camera.IsBoundBoxInCamView(*EntityPosition, enemydims))
 				{
-					EntityBatch.Add(Math::Vec4(*EntityPosition, enemydims), uv, beast.id, *Color, EntityPosition->y);
+					EntityBatch.Add(Math::Vec4(*EntityPosition, enemydims), uv, beast.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
 				}
 				// If target
 				if (e == World->PlayerControllerSystem->CurrentTarget)
@@ -413,17 +409,17 @@ int main(int argc, char** argv)
 		// Draw player reticle
 		// NOTE(John): In order for this to work the way I'm thinking, I'll need to learn stencil buffering
 		// and apply that here to mask out the area I don't want
-		Math::Vec2 ReticleDims(94.0f, 47.0f);
-		Math::Vec2 Position = World->TransformSystem->Transforms[Player].GroundPosition - Math::Vec2(17.0f, 0.0f);
-		EntityBatch.Add(Math::Vec4(Position.x, Position.y + World->TransformSystem->Transforms[Player].Position.z, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), ReticleSheet.texture.id, 
-									Graphics::RGBA8_White(), Position.y + World->TransformSystem->Transforms[Player].Position.z);	
+		// Math::Vec2 ReticleDims(94.0f, 47.0f);
+		// Math::Vec2 Position = World->TransformSystem->Transforms[Player].GroundPosition - Math::Vec2(17.0f, 0.0f);
+		// EntityBatch.Add(Math::Vec4(Position.x, Position.y + World->TransformSystem->Transforms[Player].Position.z, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), ReticleSheet.texture.id, 
+		// 							Graphics::RGBA8_White(), Position.y + World->TransformSystem->Transforms[Player].Position.z);	
 	
 		// Draw player
 		static Graphics::SpriteSheet* Sheet = World->Animation2DSystem->Animations[Player].Sheet; static Enjon::uint32 Frame = World->Animation2DSystem->Animations[Player].CurrentFrame;
 		Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
 		const Enjon::Graphics::ColorRGBA8* Color = &World->Renderer2DSystem->Renderers[Player].Color;
 		Enjon::Math::Vec2* PlayerPosition = &World->TransformSystem->Transforms[Player].Position.XY();
-		EntityBatch.Add(Math::Vec4(*PlayerPosition, dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color, PlayerPosition->y);
+		EntityBatch.Add(Math::Vec4(*PlayerPosition, dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
 
 		Enjon::Math::Vec2* A = &World->TransformSystem->Transforms[Player].CartesianPosition;
 		Enjon::Physics::AABB* AABB = &World->TransformSystem->Transforms[Sword].AABB;

@@ -12,7 +12,7 @@ Collisions:
 
 Animations: 
 	- Full character animation set for testing (Walking, Attacking)
-	- Full enemy animation set for testing (Walking, Attacking)
+	- Full enemy animation set for testing (Walking, Attacking, Death)
 
 SpriteBatch:
 	- Add Mask to each vertex for shader effects when rendering so to avoid using unnecessary shaders

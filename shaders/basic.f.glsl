@@ -15,7 +15,7 @@ uniform int isLevel;
 uniform vec2 resolution;
 
 // Multiplier for being hit
-const float MULT = 100, outerRadius = 0.5, innerRadius = 0.1, intensity = 0.7;
+const float MULT = 100.0f, outerRadius = 0.7, innerRadius = 0.1, intensity = 0.9;
 
 // Radius of vignette, where 0.5 results in circle fitting the screen
 const float RADIUS = 0.75;
@@ -34,6 +34,9 @@ void main()
 	// Sample the texture
 	vec4 texColor = texture2D(tex, fs_in.uv);
 
+	//if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texture(tex, fs_in.uv) * MULT;
+	//else color = texture(tex, fs_in.uv) * fs_in.color;
+	
 	// Calculate relative position
 	vec2 position = (gl_FragCoord.xy / vec2(1920, 1080)) - vec2(0.5, 0.5);
 
@@ -53,21 +56,22 @@ void main()
 
 	// 3. SEPIA
 
-	// Create sepia tone from constant value
+	// Create tone from constant value
 	vec3 sepiaColor = vec3(gray) * BLUE;
 
 	// Use mix so that sepia effect is at 75%
-	texColor.rgb = mix(texColor.rgb, sepiaColor, 0.25);
+	texColor.rgb = mix(texColor.rgb, sepiaColor, 0.50);
 
 	// Final color, multiplied by vertex color
-	color = texColor * fs_in.color;
+	//color = color * texColor;
 
 	// Mask color if hit
 	// NOTE(John): Doesn't seem to be working, so might want to add some more information to the verticies
 	//if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texture(tex, fs_in.uv) * MULT;
 	//else color = texture(tex, fs_in.uv) * fs_in.color;
-	if (fs_in.color.a == 0) color = texColor * fs_in.color * MULT;
-	else color = texColor * fs_in.color;
+	if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texColor * MULT;
+	else color = fs_in.color * texColor;
+	
 }
 
 

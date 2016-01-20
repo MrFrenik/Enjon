@@ -261,6 +261,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
 
 			*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), ColliderPosition->z); 
+			Manager->TransformSystem->Transforms[A_ID].GroundPosition -= Enjon::Math::CartesianToIso(mtd); 
+
 
 			// Update velocities based on "bounce" factor
 			float bf; // Bounce factor 
