@@ -194,6 +194,9 @@ namespace ECS { namespace Systems {
 			Manager->AttributeSystem->HealthComponents[Player].Health = Health;
 			Manager->AttributeSystem->HealthComponents[Player].Entity = Player;
 
+			// Set up masks
+			Manager->AttributeSystem->Masks[Player] |= (Masks::Type::PLAYER | Masks::GeneralOptions::COLLIDABLE);
+
 			// Set up Renderer
 			Manager->Renderer2DSystem->Renderers[Player].Color = Color;
 
@@ -253,7 +256,9 @@ namespace ECS { namespace Systems {
 			// Set up Attributes
 			Manager->AttributeSystem->HealthComponents[AI].Health = Health;
 			Manager->AttributeSystem->HealthComponents[AI].Entity = AI;
-			Manager->AttributeSystem->Masks[AI] |= Masks::Type::AI;
+			
+			// Set up masks
+			Manager->AttributeSystem->Masks[AI] |= (Masks::Type::AI | Masks::GeneralOptions::COLLIDABLE);
 
 			// Set up Renderer
 			Manager->Renderer2DSystem->Renderers[AI].Color = Color;

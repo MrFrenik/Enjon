@@ -29,6 +29,10 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				Enjon::Input::InputManager* Input = System->PlayerControllers[e].Input; 
 
 				SDL_Event event;
+				static SDL_Joystick* Stick;
+				static int joyX;
+				static int joyY;
+				const static int JOY_DEADZONE = 3000;
 
 				while (SDL_PollEvent(&event)) {
 					switch (event.type) {
@@ -48,6 +52,28 @@ namespace ECS { namespace Systems { namespace PlayerController {
 							break;
 						case SDL_MOUSEMOTION:
 							Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+							break;
+						case SDL_JOYAXISMOTION:
+							switch(event.jaxis.axis)
+							{
+								case 0: 
+									if (event.jaxis.value < -JOY_DEADZONE)
+									{
+										printf ("Left\n");
+									}
+									if (event.jaxis.value > JOY_DEADZONE)
+										printf("Right\n");
+									break;
+								case 1:
+									if (event.jaxis.value < -JOY_DEADZONE)
+										printf("Up\n");
+									if (event.jaxis.value > JOY_DEADZONE)
+										printf("Down\n");
+									break;
+							}
+							break;
+						case SDL_JOYBUTTONDOWN:
+							printf("Button down!\n");
 							break;
 						default:
 							break;

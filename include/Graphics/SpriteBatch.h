@@ -19,10 +19,17 @@
 
 namespace Enjon { namespace Graphics {
 
-	enum class GlyphSortType { NONE, FRONT_TO_BACK, BACK_TO_FRONT, TEXTURE };
+	enum class GlyphSortType 
+	{ 
+		NONE, 
+		FRONT_TO_BACK, 
+		BACK_TO_FRONT, 
+		TEXTURE 
+	};
 
 	struct Glyph 
 	{ 
+
 		GLuint texture;
 		float depth; 
 		Vertex topLeft;
@@ -30,6 +37,14 @@ namespace Enjon { namespace Graphics {
 		Vertex topRight;
 		Vertex bottomRight;
 	};
+
+	inline Enjon::Math::Vec2 RotatePoint(const Enjon::Math::Vec2* Pos, float angle)
+	{
+		Enjon::Math::Vec2 NewVec;
+		NewVec.x = Pos->x * cos(angle) - Pos->y * sin(angle);
+		NewVec.y = Pos->x * sin(angle) + Pos->y * cos(angle);
+		return NewVec;	
+	}
 
 	inline Glyph NewGlyph(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, float depth, const ColorRGBA8& color)
 	{
@@ -46,6 +61,50 @@ namespace Enjon { namespace Graphics {
 		
 		/* Set topRight vertex */
 		glyph.topRight = NewVertex(destRect.x + destRect.z, destRect.y + destRect.w, uvRect.x + uvRect.z, uvRect.y + uvRect.w, color.r, color.g, color.b, color.a);
+
+		/* Set texture */
+		glyph.texture = texture;
+
+		/* Set depth */
+		glyph.depth = depth;
+
+		return glyph;
+	}
+
+	inline Glyph NewGlyph(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, float depth, const ColorRGBA8& color, float angle)
+	{
+		Glyph glyph;
+
+        Enjon::Math::Vec2 halfDims(destRect.z / 2.0f, destRect.w / 2.0f);
+
+        // Get points centered at origin
+        Enjon::Math::Vec2 tl(-halfDims.x, halfDims.y);
+        Enjon::Math::Vec2 bl(-halfDims.x, -halfDims.y);
+        Enjon::Math::Vec2 br(halfDims.x, -halfDims.y);
+        Enjon::Math::Vec2 tr(halfDims.x, halfDims.y);
+
+        // Rotate the points
+        tl = RotatePoint(&tl, angle) + halfDims;
+        bl = RotatePoint(&bl, angle) + halfDims;
+        br = RotatePoint(&br, angle) + halfDims;
+        tr = RotatePoint(&tr, angle) + halfDims;
+
+        tl = Enjon::Math::CartesianToIso(tl);
+        bl = Enjon::Math::CartesianToIso(bl);
+        br = Enjon::Math::CartesianToIso(br);
+        tr = Enjon::Math::CartesianToIso(tr);
+
+		/* Set topLeft vertex */
+		glyph.topLeft = NewVertex(destRect.x + tl.x, destRect.y + tl.y, uvRect.x, uvRect.y + uvRect.w, color.r, color.g, color.b, color.a);
+
+		/* Set bottomLeft vertex */
+		glyph.bottomLeft = NewVertex(destRect.x + bl.x, destRect.y + bl.y, uvRect.x, uvRect.y, color.r, color.g, color.b, color.a);
+
+		/* Set bottomRight vertex */
+		glyph.bottomRight = NewVertex(destRect.x + br.x, destRect.y + br.y, uvRect.x + uvRect.z, uvRect.y, color.r, color.g, color.b, color.a); 
+		
+		/* Set topRight vertex */
+		glyph.topRight = NewVertex(destRect.x + tr.x, destRect.y + tr.y, uvRect.x + uvRect.z, uvRect.y + uvRect.w, color.r, color.g, color.b, color.a);
 
 		/* Set texture */
 		glyph.texture = texture;
@@ -91,8 +150,13 @@ namespace Enjon { namespace Graphics {
 		void Begin(GlyphSortType sortType = GlyphSortType::TEXTURE);
 		void End();
 
+		/* Adds glpyh to spritebatch to be rendered */
 		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture = 0, const ColorRGBA8& color = RGBA8(255), float depth = 0.0f);
 
+		/* Adds glpyh to spritebatch to be rendered with specified rotation */
+		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA8& color, float depth, float angle);
+
+		/* Renders entire batch to screen */
 		void RenderBatch();
 
 		unsigned int inline GetRenderBatchesSize() const { return m_renderBatches.size(); }

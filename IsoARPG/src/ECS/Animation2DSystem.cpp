@@ -198,9 +198,12 @@ namespace ECS { namespace Systems { namespace Animation2D {
 									// Create an arrow projectile entity for now...
 									static Enjon::Graphics::SpriteSheet ItemSheet;
 									if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
-									eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Position->x + 32.0f, Position->y + 32.0f, Position->z + 50.0f),
-															  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::WEAPON | Masks::WeaponOptions::PROJECTILE | Masks::GeneralOptions::PICKED_UP), 
-															  Component::EntityType::PROJECTILE);
+									eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Position->x + 32.0f, Position->y + 32.0f, Position->z + 60.0f),
+															  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::WEAPON | 
+															  												Masks::WeaponOptions::PROJECTILE | 
+															  												Masks::GeneralOptions::PICKED_UP | 
+															  												Masks::GeneralOptions::COLLIDABLE), 
+															  												Component::EntityType::PROJECTILE);
 									Manager->Masks[id] |= COMPONENT_TRANSFORM3D;
 
 									// Set arrow velocity to normalize: mousepos - arrowpos
@@ -209,12 +212,13 @@ namespace ECS { namespace Systems { namespace Animation2D {
 									Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].Position.XY();
 
 									// Find vector between the two and normalize
-									Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x - 32.0f, Pos.y - 32.0f));
+									Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x + 32.0f, Pos.y + 32.0f));
 
 									float speed = 30.0f;
 
 									// Fire in direction of mouse
-									Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(ArrowVelocity.x * speed, ArrowVelocity.y * speed, 0.0f);
+									Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(ArrowVelocity.x * speed, ArrowVelocity.y * speed, -0.98f);
+									Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;
 
 									// Set attack vector of player to this velocity
 									int Mult = 1.0f;

@@ -52,6 +52,13 @@ namespace Enjon { namespace Graphics {
 		m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color));
 	}
 
+	/* Adds glpyh to spritebatch to be rendered with specified rotation */
+	void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA8& color, float depth, float angle)
+	{
+		// Place back new glyph
+		m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color, angle));
+	}
+
 	void SpriteBatch::RenderBatch() 
 	{ 
 		// Bind our VAO. This sets up the opengl state we need, including the vertex attribute pointers and binds the VBO 
@@ -194,7 +201,8 @@ namespace Enjon { namespace Graphics {
 	}
 
 	bool SpriteBatch::CompareTexture(Glyph* a, Glyph* b) 
-{
+	{
 		return (a->texture < b->texture);
 	}
+
 }}

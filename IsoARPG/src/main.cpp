@@ -51,6 +51,7 @@
 #include <ECS/InventorySystem.h> 
 #include <ECS/Renderer2DSystem.h>
 #include <ECS/AIControllerSystem.h> 
+#include <ECS/AttributeSystem.h>
 #include <ECS/Entity.h>
 
 #include "Animation.h"
@@ -69,6 +70,9 @@ char buffer3[256];
 bool isRunning = true;
 bool ShowMap = false;
 bool Paused = false;
+bool IsDashing = false;
+
+float DashingCounter = 0.0f;
 
 using namespace Enjon;
 using namespace ECS;
@@ -76,6 +80,8 @@ using namespace Systems;
 
 void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* Manager, ECS::eid32 Entity);
 void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);
+
+SDL_Joystick* Joystick;
 
 #undef main
 int main(int argc, char** argv)
@@ -92,6 +98,12 @@ int main(int argc, char** argv)
 
 	//Init Enjon
 	Enjon::Init();
+
+	// Query for available controllers
+	printf("%d joysticks were found. \n\n", SDL_NumJoysticks());
+
+	Joystick = SDL_JoystickOpen(0);
+	SDL_JoystickEventState(SDL_ENABLE);
 
 	// Create a window
 	Graphics::Window Window;
@@ -206,7 +218,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 100;
+	static uint32 AmountDrawn = 1000;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -215,7 +227,7 @@ int main(int argc, char** argv)
 	}
 
 	// Create player
-	eid32 Player = EntitySystem::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(100.0f, 100.0f), &PlayerSheet, "Player", 0.4f, Math::Vec3(1, 1, 0)); 
+	eid32 Player = EntitySystem::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(100.0f, 100.0f), &PlayerSheet, "Player", 0.3f, Math::Vec3(1, 1, 0)); 
 
 	// Set player for world
 	World->Player = Player;
@@ -305,7 +317,7 @@ int main(int argc, char** argv)
 		// RENDERING //
 		///////////////
 		
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT);
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, Enjon::Graphics::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
 
 		static int isLevel;
 
@@ -328,7 +340,7 @@ int main(int argc, char** argv)
 			glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
 								1, 0, projection.elements);
 			glUniform1f(glGetUniformLocation(shader, "time"), time);
-			glUniform1i(glGetUniformLocation(shader, "isLevel"), isLevel);
+			glUniform1i(glGetUniformLocation(shader, "isLevel"), true);
 			glUniform1i(glGetUniformLocation(shader, "isPaused"), Paused);
 			glUniform2f(glGetUniformLocation(shader, "resolution"), SCREENWIDTH, SCREENHEIGHT);
 			glUniform1i(glGetUniformLocation(shader, "useOverlay"), true);
@@ -343,7 +355,7 @@ int main(int argc, char** argv)
 		TextBatch.Begin(); 
 
 		wchar_t wcstring[10]; 
-		glUniform1i(glGetUniformLocation(shader, "isLevel"), 0);
+		glUniform1i(glGetUniformLocation(shader, "isLevel"), false);
 		static uint32 Row = 0;
 		static uint32 Col = 0;
 		static uint32 i = 0;
@@ -442,9 +454,63 @@ int main(int argc, char** argv)
 		// Math::Vec2 Position = World->TransformSystem->Transforms[Player].GroundPosition - Math::Vec2(17.0f, 0.0f);
 		// EntityBatch.Add(Math::Vec4(Position.x, Position.y + World->TransformSystem->Transforms[Player].Position.z, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), ReticleSheet.texture.id, 
 		// 							Graphics::RGBA8_White(), Position.y + World->TransformSystem->Transforms[Player].Position.z);	
-	
+
 		// Draw player
+
+		// Dashing state if dashing
 		static Graphics::SpriteSheet* Sheet = World->Animation2DSystem->Animations[Player].Sheet; static Enjon::uint32 Frame = World->Animation2DSystem->Animations[Player].CurrentFrame;
+
+		if (IsDashing)
+		{
+			// Make unable to collide with enemy
+			World->AttributeSystem->Masks[Player] &= ~Masks::GeneralOptions::COLLIDABLE;
+
+			float DashAmount = 10.0f;
+			World->TransformSystem->Transforms[Player].Position.x += (World->TransformSystem->Transforms[Player].Velocity.x * 2.0f);
+			World->TransformSystem->Transforms[Player].Position.y += (World->TransformSystem->Transforms[Player].Velocity.y * 8.0f);
+			World->TransformSystem->Transforms[Player].VelocityGoalScale = 0.01f;
+			World->TransformSystem->Transforms[Player].Velocity.x *= 1.05f; 
+			World->TransformSystem->Transforms[Player].Velocity.y *= 1.05f; 
+			// Setting the "alarm"
+			DashingCounter += 0.05f;
+			if (DashingCounter >= 0.75f) { IsDashing = false; DashingCounter = 0.0f; }
+			float Opacity = 0.5f;
+			for (int i = 0; i < 5; i++)
+			{
+				Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
+				Enjon::Graphics::ColorRGBA8 DashColor = World->Renderer2DSystem->Renderers[Player].Color;
+				Enjon::Math::Vec2 PP = World->TransformSystem->Transforms[Player].Position.XY();
+				Enjon::Math::Vec2 PV = World->TransformSystem->Transforms[Player].Velocity.XY();
+				PP.x -= (i + i*0.75f) * PV.x;
+				PP.y -= (i + i*0.75f) * PV.y;
+				EntityBatch.Add(Math::Vec4(PP, dims), Sheet->GetUV(Frame), Sheet->texture.id, Graphics::SetOpacity(DashColor, Opacity), PP.y - World->TransformSystem->Transforms[Player].Position.z);
+				Opacity -= 0.05f;
+			}
+		}
+
+		else 
+		{
+			static float slide_counter = 0.0f;
+			slide_counter += 0.05f;
+			if (slide_counter >= 1.0f)
+			{
+				World->TransformSystem->Transforms[Player].VelocityGoalScale = 0.3f;
+				slide_counter = 0.0f;
+				// Make able to collide with enemy again
+				World->AttributeSystem->Masks[Player] |= Masks::GeneralOptions::COLLIDABLE;
+			}
+
+		}
+
+		// Draw player "spell" box for testing purposes
+		// Get the box coords in cartesian view, then translate to iso coords
+		static float rotation_count = 0.0f;
+		rotation_count += 1.25f;
+		Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[Player].CartesianPosition) + Math::Vec2(55.0f, 0.0f));
+		float radius = 100.0f;
+		BoxCoords = BoxCoords - radius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(rotation_count)), sin(Math::ToRadians(rotation_count))));
+		EntityBatch.Add(Math::Vec4(BoxCoords, 50, 100), Math::Vec4(0, 0, 1, 1), 0, Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f), 1.0f, Math::ToRadians(rotation_count - 90));
+	
 		Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
 		const Enjon::Graphics::ColorRGBA8* Color = &World->Renderer2DSystem->Renderers[Player].Color;
 		Enjon::Math::Vec2* PlayerPosition = &World->TransformSystem->Transforms[Player].Position.XY();
@@ -460,8 +526,11 @@ int main(int argc, char** argv)
 		const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;
 		EntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
+		EntityBatch.Add(Math::Vec4(GroundPosition->x - 40.0f, GroundPosition->y - 80.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
+									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
 		MapEntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
+
 
 		// Add an overlay to the Map for better viewing
 		MapEntityBatch.Add(Math::Vec4(-3100, -3150, 6250, 3100), Math::Vec4(0, 0, 1, 1), Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
@@ -470,7 +539,7 @@ int main(int argc, char** argv)
 		if (Paused)
 		{
 			// Draw paused text
-			TextBatch.Add(Math::Vec4(Camera.GetPosition().x - 250.0f, Camera.GetPosition().y - 100.0f, 500.0f, 250.0f), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/paused.png").id, 
+			TextBatch.Add(Math::Vec4(Camera.GetPosition().x - 60.0f, Camera.GetPosition().y - 30.0f, 125.0f, 70.0f), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/paused.png").id, 
 									Graphics::RGBA8_Orange(), -50.0f);
 		}
 	
@@ -492,7 +561,7 @@ int main(int argc, char** argv)
 			glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
 								1, 0, projection.elements);
 			glUniform1f(glGetUniformLocation(shader, "time"), time);
-			glUniform1i(glGetUniformLocation(shader, "isLevel"), isLevel);
+			glUniform1i(glGetUniformLocation(shader, "isLevel"), false);
 			glUniform1i(glGetUniformLocation(shader, "useOverlay"), true);
 		} 
 
@@ -550,7 +619,6 @@ int main(int argc, char** argv)
 void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* World, ECS::eid32 Entity)
 {
     SDL_Event event;
-//
 //    //Will keep looping until there are no more events to process
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
@@ -575,8 +643,8 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 			default:
 				break;
 		}
-    } 
-	
+    }
+
 	if (Input->IsKeyPressed(SDLK_ESCAPE))
 	{
 		isRunning = false;	
@@ -586,6 +654,11 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	}
 	if (Input->IsKeyDown(SDLK_e)){
 		Camera->SetScale(Camera->GetScale() + 0.01f);
+	}
+
+	if (Input->IsKeyPressed(SDLK_c)) {
+		printf("Dashing\n");
+		IsDashing = true;
 	}
 
 	// Stupid, but use it for now...
@@ -731,7 +804,7 @@ int main(int argc, char** argv)
 								1, 0, view.elements);
 			glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
 								1, 0, projection.elements);
-			glUniform1i(glGetUniformLocation(shader, "isLevel"), 1);
+			glUniform1i(glGetUniformLocation(shader, "isLevel"), 0);
 		} 
 	
 		// Begin batch

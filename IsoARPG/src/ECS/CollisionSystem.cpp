@@ -260,9 +260,11 @@ namespace ECS{ namespace Systems { namespace Collision {
 			// Get minimum translation distance
 			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
 
-			*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), ColliderPosition->z); 
+			*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), EntityPosition->z); 
 			Manager->TransformSystem->Transforms[A_ID].GroundPosition -= Enjon::Math::CartesianToIso(mtd); 
 
+			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
+				*ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd) * 1.1f, 0.0f);
 
 			// Update velocities based on "bounce" factor
 			float bf; // Bounce factor 

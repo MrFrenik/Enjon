@@ -11,13 +11,13 @@ out vec4 color;
 
 uniform sampler2D tex;
 uniform float time;
-uniform int isLevel;
+uniform bool isLevel;
 uniform bool isPaused;
 uniform bool useOverlay;
 uniform vec2 resolution;
 
 // Multiplier for being hit
-const float MULT = 100.0f, outerRadius = 0.7, innerRadius = 0.1, intensity = 0.9;
+const float MULT = 100.0f, outerRadius = 0.7, innerRadius = 0.1, intensity = 0.5;
 
 // Radius of vignette, where 0.5 results in circle fitting the screen
 const float RADIUS = 0.75;
@@ -29,8 +29,9 @@ const float SOFTNESS = 0.45;
 const vec3 SEPIA = vec3(1.2, 1.0, 0.8);
 const vec3 BLUE = vec3(0.7, 0.5, 1.2);
 const vec3 DARKGREY = vec3(0.01, 0.01, 0.1);
+const vec3 WHITE = vec3(1.00, 1.00, 1.0);
 
-vec4 Overlay(vec4 texColor, vec3 overlay);
+vec4 Overlay(vec4 texColor, vec3 overlay, float mixAmount);
 
 void main() 
 {
@@ -41,7 +42,23 @@ void main()
 	{
 		if (useOverlay)
 		{
-			texColor = Overlay(texColor, SEPIA * DARKGREY);
+			texColor = Overlay(texColor, SEPIA, 50.0f);
+			//texColor = Overlay(texColor, SEPIA * DARKGREY, 0.25);
+
+			// Mask color if hit
+			if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texColor * MULT;
+			else color = fs_in.color * texColor;
+		}
+		else
+		{
+			color = fs_in.color * texColor;	
+		}
+	}
+	else if (isLevel)
+	{
+		if (useOverlay)
+		{
+			texColor = Overlay(texColor, SEPIA, 50.0f);
 
 			// Mask color if hit
 			if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texColor * MULT;
@@ -55,7 +72,7 @@ void main()
 
 	else
 	{
-		texColor = Overlay(texColor, BLUE);
+		texColor = Overlay(texColor, BLUE, 0.5f);
 
 		// Mask color if hit
 		if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texColor * MULT;
@@ -63,7 +80,7 @@ void main()
 	}
 }
 
-vec4 Overlay(vec4 textureColor, vec3 overlay)
+vec4 Overlay(vec4 textureColor, vec3 overlay, float mixAmount)
 {
 	vec4 texColor = textureColor;
 
@@ -86,7 +103,7 @@ vec4 Overlay(vec4 textureColor, vec3 overlay)
 	vec3 overlayColor = vec3(gray) * overlay;
 
 	// Use mix so that sepia effect is at 75%
-	texColor.rgb = mix(texColor.rgb, overlayColor, 0.50);
+	texColor.rgb = mix(texColor.rgb, overlayColor, mixAmount);
 
 	return texColor;
 }

@@ -43,9 +43,8 @@ namespace ECS{ namespace Systems { namespace Transform {
 					GP->y = P->y - P->z; 
 					continue;
 				}
-
 				// Push back into collision system
-				else Manager->CollisionSystem->Entities.push_back(e);
+				else if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::COLLIDABLE) Manager->CollisionSystem->Entities.push_back(e);
 
 				// First transform the velocity by LERPing it
 				Component::Transform3D* Transform = &System->Transforms[e];
@@ -62,11 +61,16 @@ namespace ECS{ namespace Systems { namespace Transform {
 				
 				// Set entity's position after interpolating
 				Position->x += Velocity->x;
-				Position->z += Velocity->z; 
-				
+				Position->z += Velocity->z;
+
 				// Clamp z position to BaseHeight
 				if (Position->z < Transform->BaseHeight) 
 				{
+					if (Manager->AttributeSystem->Masks[e] & (Masks::Type::WEAPON | Masks::WeaponOptions::PROJECTILE))
+					{
+						EntitySystem::RemoveEntity(Manager, e);
+					}
+
 					Velocity->z = 0.0f;
 					Position->z = Transform->BaseHeight;
 					Position->y = GroundPosition->y + Position->z;
