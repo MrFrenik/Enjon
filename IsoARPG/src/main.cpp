@@ -18,7 +18,7 @@
 
 #if TESTING 
 
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -218,7 +218,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1000;
+	static uint32 AmountDrawn = 0;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -501,15 +501,73 @@ int main(int argc, char** argv)
 			}
 
 		}
+		// Get angle from mouse to coordinates
+		Math::Vec2 MouseCoords = Input.GetMouseCoords();
+		Camera.ConvertScreenToWorld(MouseCoords);
+		static Math::Vec2 right(1.0f, 0.0f);
+		Math::Vec2 Diff = Math::Vec2::Normalize(World->TransformSystem->Transforms[Player].Position.XY() - MouseCoords);
+		float DotProduct = Diff.DotProduct(right);
+		float AimAngle = acos(DotProduct) * 180.0f / M_PI;
+		if (Diff.y < 0.0f) AimAngle *= -1; 
+		printf("Aim Angle: %.2f\n", AimAngle);
+
 
 		// Draw player "spell" box for testing purposes
 		// Get the box coords in cartesian view, then translate to iso coords
 		static float rotation_count = 0.0f;
 		rotation_count += 1.25f;
-		Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[Player].CartesianPosition) + Math::Vec2(55.0f, 0.0f));
-		float radius = 100.0f;
-		BoxCoords = BoxCoords - radius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(rotation_count)), sin(Math::ToRadians(rotation_count))));
-		EntityBatch.Add(Math::Vec4(BoxCoords, 50, 100), Math::Vec4(0, 0, 1, 1), 0, Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f), 1.0f, Math::ToRadians(rotation_count - 90));
+		Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[Player].CartesianPosition) + Math::Vec2(5.0f, 0.0f));
+		float boxRadius = 50.0f;
+		BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle -40)), sin(Math::ToRadians(AimAngle - 40))));
+		EntityBatch.Add(Math::Vec4(BoxCoords, 100, 50), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png").id, 
+							Graphics::SetOpacity(Graphics::RGBA8_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 50), Graphics::CoordinateFormat::ISOMETRIC);
+
+
+		Enjon::Math::Vec2 AimCoords(World->TransformSystem->Transforms[Player].Position.XY() + Math::Vec2(100.0f, -100.0f));
+		float aimRadius = 0.25f;
+		AimCoords = AimCoords - aimRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle)), sin(Math::ToRadians(AimAngle))));
+
+		// Draw player "aim" box for testing purposes
+		static float aim_count = 0.0f;
+		static float aim_count2 = 0.0f;
+		aim_count += 0.5f;
+		static Enjon::uint32 aim_index = 0;
+		static Graphics::ColorRGBA8 AimColor;
+		if (aim_count >= 1.0f)
+		{
+			if (aim_index == 0)
+			{
+				aim_count2 += 0.05f;
+				if (aim_count2 >= 1.0f)
+				{
+					aim_count2 = 0.0f;
+					aim_count = 0.0f;
+					aim_index++;
+				}	
+			}
+			else if (aim_index == 7)
+			{
+				AimColor = Graphics::RGBA8_Red();
+				aim_count2 += 0.025f;
+				if (aim_count2 >= 1.0f)
+				{
+					AimColor = Graphics::RGBA8_White();
+					aim_index = 0;
+					aim_count = 0.0f;
+					aim_count2 = 0.0f;
+				}
+
+			}
+			else
+			{
+				AimColor = Graphics::RGBA8_White();
+				aim_index++;
+				aim_count = 0.0f;
+			}
+		}
+		static Graphics::SpriteSheet AimSheet;
+		AimSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/aim_guide.png"), Math::iVec2(8, 1));
+		// EntityBatch.Add(Math::Vec4(AimCoords, 200, 300), AimSheet.GetUV(aim_index), AimSheet.texture.id, AimColor, 1.0f, Math::ToRadians(AimAngle + 120.0f), Graphics::CoordinateFormat::ISOMETRIC);
 	
 		Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
 		const Enjon::Graphics::ColorRGBA8* Color = &World->Renderer2DSystem->Renderers[Player].Color;

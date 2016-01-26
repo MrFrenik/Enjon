@@ -53,10 +53,10 @@ namespace Enjon { namespace Graphics {
 	}
 
 	/* Adds glpyh to spritebatch to be rendered with specified rotation */
-	void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA8& color, float depth, float angle)
+	void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA8& color, float depth, float angle, Graphics::CoordinateFormat format)
 	{
 		// Place back new glyph
-		m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color, angle));
+		m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color, angle, format));
 	}
 
 	void SpriteBatch::RenderBatch() 
