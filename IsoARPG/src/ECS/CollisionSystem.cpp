@@ -48,15 +48,18 @@ namespace ECS{ namespace Systems { namespace Collision {
 			if (!(Manager->Masks[e] & COMPONENT_TRANSFORM3D)) continue;
 			// Get the cell that entity belongs to
 			const Enjon::Math::Vec2* EPosition = &Enjon::Math::IsoToCartesian(Manager->TransformSystem->Transforms[e].GroundPosition);
-			int CellIndex = SpatialHash::FindCell(Manager->Grid, e, EPosition);
+			// int CellIndex = SpatialHash::FindCell(Manager->Grid, e, EPosition);
+			std::vector<eid32> Entities = SpatialHash::FindCell(Manager->Grid, e, &Manager->TransformSystem->Transforms[e].AABB);
+			// std::vector<eid32> Entities;
 
 			// Check all entities and neighbors
-			std::vector<eid32> Entities = Manager->Grid->cells[CellIndex].entities;
-			SpatialHash::GetNeighborCells(Manager->Grid, CellIndex, &Entities);  // Note(John): This is causing too much slowdown
+			// std::vector<eid32> Entities = Manager->Grid->cells[CellIndex].entities;
+			// SpatialHash::GetNeighborCells(Manager->Grid, CellIndex, &Entities);  // Note(John): This is causing too much slowdown
 
 			// Use these same entities for targets if player
 			if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
 			{
+				// printf("size: %d\n", Entities.size());
 				std::vector<eid32>* Targets = &Manager->PlayerControllerSystem->Targets;
 				for (eid32 it = 0; it < Entities.size(); it++)
 				{
@@ -264,7 +267,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			Manager->TransformSystem->Transforms[A_ID].GroundPosition -= Enjon::Math::CartesianToIso(mtd); 
 
 			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
-				*ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd) * 1.1f, 0.0f);
+				*ColliderPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd) * 1.1f, 0.0f);
 
 			// Update velocities based on "bounce" factor
 			float bf; // Bounce factor 

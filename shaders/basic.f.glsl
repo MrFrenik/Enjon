@@ -58,7 +58,7 @@ void main()
 	{
 		if (useOverlay)
 		{
-			texColor = Overlay(texColor, SEPIA, 50.0f);
+			texColor = Overlay(texColor, BLUE, 0.25f);
 
 			// Mask color if hit
 			if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texColor * MULT;

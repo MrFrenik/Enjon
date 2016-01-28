@@ -74,6 +74,10 @@ bool IsDashing = false;
 
 float DashingCounter = 0.0f;
 
+float CollisionRunTime = 0.0f;
+float TransformRunTime = 0.0f;
+float ClearEntitiesRunTime = 0.0f;
+
 using namespace Enjon;
 using namespace ECS;
 using namespace Systems;
@@ -218,7 +222,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 0;
+	static uint32 AmountDrawn = 2500;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -281,21 +285,33 @@ int main(int argc, char** argv)
 		static Math::Vec2 quadDimsStuff(50.0f, 50.0f);
 		static Math::Vec2 ViewPort;
 		static Math::Vec4 CameraDims;
+		static float StartTicks = 0.0f;
 		ViewPort = Math::Vec2(SCREENWIDTH, SCREENHEIGHT) / Camera.GetScale();
 		CameraDims = Math::Vec4(*PlayerStuff, quadDimsStuff / Camera.GetScale());
 
 		if (!Paused)
 		{
+			StartTicks = SDL_GetTicks();
 			SpatialHash::ClearCells(World->Grid);
+			ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks) / 1000.0f; // NOTE(John): As the levels increase, THIS becomes the true bottleneck
+
 			AIController::Update(World->AIControllerSystem, Player);
 			Animation2D::Update(World);
+
+			StartTicks = SDL_GetTicks();
 			Transform::Update(World->TransformSystem);
+			TransformRunTime = (SDL_GetTicks() - StartTicks) / 1000.0f;
+
+			StartTicks = SDL_GetTicks();	
 			Collision::Update(World);
+			CollisionRunTime = (SDL_GetTicks() - StartTicks) / 1000.0f;
+
 			Renderer2D::Update(World); 
 			PlayerController::Update(World->PlayerControllerSystem);
 	
 			// Clear entities from collision system vectors
 			World->CollisionSystem->Entities.clear();
+
 			// Clear entities from PlayerControllerSystem targets vector
 			World->PlayerControllerSystem->Targets.clear();
 		}
@@ -509,7 +525,7 @@ int main(int argc, char** argv)
 		float DotProduct = Diff.DotProduct(right);
 		float AimAngle = acos(DotProduct) * 180.0f / M_PI;
 		if (Diff.y < 0.0f) AimAngle *= -1; 
-		printf("Aim Angle: %.2f\n", AimAngle);
+		// printf("Aim Angle: %.2f\n", AimAngle);
 
 
 		// Draw player "spell" box for testing purposes
@@ -519,8 +535,8 @@ int main(int argc, char** argv)
 		Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[Player].CartesianPosition) + Math::Vec2(5.0f, 0.0f));
 		float boxRadius = 50.0f;
 		BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle -40)), sin(Math::ToRadians(AimAngle - 40))));
-		EntityBatch.Add(Math::Vec4(BoxCoords, 100, 50), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png").id, 
-							Graphics::SetOpacity(Graphics::RGBA8_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 50), Graphics::CoordinateFormat::ISOMETRIC);
+		// EntityBatch.Add(Math::Vec4(BoxCoords, 100, 50), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png").id, 
+		// 					Graphics::SetOpacity(Graphics::RGBA8_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 45), Graphics::CoordinateFormat::ISOMETRIC);
 
 
 		Enjon::Math::Vec2 AimCoords(World->TransformSystem->Transforms[Player].Position.XY() + Math::Vec2(100.0f, -100.0f));
@@ -568,6 +584,7 @@ int main(int argc, char** argv)
 		static Graphics::SpriteSheet AimSheet;
 		AimSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/aim_guide.png"), Math::iVec2(8, 1));
 		// EntityBatch.Add(Math::Vec4(AimCoords, 200, 300), AimSheet.GetUV(aim_index), AimSheet.texture.id, AimColor, 1.0f, Math::ToRadians(AimAngle + 120.0f), Graphics::CoordinateFormat::ISOMETRIC);
+
 	
 		Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
 		const Enjon::Graphics::ColorRGBA8* Color = &World->Renderer2DSystem->Renderers[Player].Color;
@@ -576,9 +593,14 @@ int main(int argc, char** argv)
 
 		Enjon::Math::Vec2* A = &World->TransformSystem->Transforms[Player].CartesianPosition;
 		Enjon::Physics::AABB* AABB = &World->TransformSystem->Transforms[Sword].AABB;
-		Enjon::Math::Vec2 AABBIsomin(Enjon::Math::CartesianToIso(AABB->Min));
+		Enjon::Math::Vec2 AV = World->TransformSystem->Transforms[Player].AttackVector;
+		float XDiff = TILE_SIZE;
+		Enjon::Math::Vec2 AABBIsomin(Enjon::Math::CartesianToIso(AABB->Min) + Math::Vec2(XDiff, 0.0f));
 		Enjon::Math::Vec2 AABBIsomax(Enjon::Math::CartesianToIso(AABB->Max));
-		float AABBHeight = abs(AABB->Max.y - AABB->Min.y), AABBWidth = abs(AABB->Max.x - AABB->Min.y);
+		float AABBHeight = AABB->Max.y - AABB->Min.y, AABBWidth = AABB->Max.x - AABB->Min.y;
+		EntityBatch.Add(Math::Vec4(AABBIsomin, Math::Vec2(abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y))), 
+							Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
+							Graphics::SetOpacity(Graphics::RGBA8_Red(), 0.2f), 1.0f, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
 
 		// Draw player ground tile 
 		const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;
@@ -587,6 +609,10 @@ int main(int argc, char** argv)
 		EntityBatch.Add(Math::Vec4(GroundPosition->x - 40.0f, GroundPosition->y - 80.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
 		MapEntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
+									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
+		EntityBatch.Add(Math::Vec4(AABB->Min, Math::Vec2(abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y))), Math::Vec4(0, 0, 1, 1), 0,
+									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
+		EntityBatch.Add(Math::Vec4(A->x, A->y, TILE_SIZE, TILE_SIZE), Math::Vec4(0, 0, 1, 1), 0,
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
 
 
@@ -662,13 +688,16 @@ int main(int argc, char** argv)
 		// End FPSLimiter
 		FPS = Limiter.End();
 
-		// static float counter = 0.0f;
-		// counter += 0.1f;
-		// if (counter > 1.0f)
-		// {
-		// 	printf("Player id: %d\n", Player);
-		// 	counter = 0.0f;
-		// }
+		static float counter = 0.0f;
+		counter += 0.025f;
+		if (counter > 1.0f)
+		{
+			printf("FPS: %0.2f\n", FPS);
+			printf("ClearEntitiesRunTime: %f s\n", ClearEntitiesRunTime);
+			printf("Transform Time: %f s\n", TransformRunTime);
+			printf("Collision Time: %f s\n", CollisionRunTime);
+			counter = 0.0f;
+		}
 	} 
 
 	return 0;

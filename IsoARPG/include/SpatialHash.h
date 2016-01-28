@@ -8,10 +8,11 @@
 #include <ECS/Entity.h>
 #include <Math/Maths.h>
 #include <Utils/Errors.h>
+#include <Physics/AABB.h>
 
 typedef Enjon::Math::Vec2 V2; 
 
-const int CELL_SIZE = 64;
+const int CELL_SIZE = 32;
 
 namespace SpatialHash { 
 
@@ -29,6 +30,7 @@ namespace SpatialHash {
 
 	void Init(Grid* grid, int width, int height, int cell_size = CELL_SIZE); 
 	int FindCell(Grid* grid, ECS::eid32 entity, const V2* position, int cell_size = CELL_SIZE); 
+	std::vector<ECS::eid32> FindCell(Grid* grid, ECS::eid32 entity, const Enjon::Physics::AABB* AABB, int cell_size = CELL_SIZE); 
 	void ClearCells(Grid* grid);
 	void GetNeighborCells(Grid* grid, int index, std::vector<ECS::eid32>* Entities);
 }

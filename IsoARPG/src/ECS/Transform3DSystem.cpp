@@ -137,15 +137,29 @@ namespace ECS{ namespace Systems { namespace Transform {
 				WeaponTransform->GroundPosition = *GroundPosition;
 				WeaponTransform->CartesianPosition = Transform->CartesianPosition;
 
+				// static float WeaponSize = 32.0f;
+
+				// // Calculate AABB
+				// Enjon::Physics::AABB NE 	= {V2(Min.x + WeaponSize, Min.y - WeaponSize / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize / 2.0f)};
+				// Enjon::Physics::AABB N 		= {V2(Min.x + WeaponSize / 2.0f, Min.y + WeaponSize / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize)};
+				// Enjon::Physics::AABB NW 	= {V2(Min.x - WeaponSize / 2.0f, Min.y + WeaponSize), V2(Max.x + WeaponSize / 2.0f, Max.y + WeaponSize)};
+				// Enjon::Physics::AABB W 		= {V2(Min.x - WeaponSize, Min.y + WeaponSize / 2.0f), V2(Max.x - WeaponSize / 2.0f, Max.y + WeaponSize)};
+				// Enjon::Physics::AABB SW 	= {V2(Min.x - WeaponSize, Min.y - WeaponSize / 2.0f), V2(Max.x - WeaponSize, Max.y + WeaponSize / 2.0f)};
+				// Enjon::Physics::AABB S 		= {V2(Min.x - WeaponSize, Min.y - WeaponSize), V2(Max.x - WeaponSize / 2.0f, Max.y - WeaponSize / 2.0f)};
+				// Enjon::Physics::AABB SE 	= {V2(Min.x - WeaponSize / 2.0f, Min.y - WeaponSize), V2(Max.x + WeaponSize / 2.0f, Max.y - WeaponSize)};
+				// Enjon::Physics::AABB E 		= {V2(Min.x + WeaponSize / 2.0f, Min.y - WeaponSize), V2(Max.x + WeaponSize, Max.y - WeaponSize / 2.0f)};
+
+				static float WeaponSize = 128.0f;
+
 				// Calculate AABB
-				Enjon::Physics::AABB NE 	= {V2(Min.x + TILE_SIZE, Min.y - TILE_SIZE / 2.0f), V2(Max.x + TILE_SIZE, Max.y + TILE_SIZE / 2.0f)};
-				Enjon::Physics::AABB N 		= {V2(Min.x + TILE_SIZE / 2.0f, Min.y + TILE_SIZE / 2.0f), V2(Max.x + TILE_SIZE, Max.y + TILE_SIZE)};
-				Enjon::Physics::AABB NW 	= {V2(Min.x - TILE_SIZE / 2.0f, Min.y + TILE_SIZE), V2(Max.x + TILE_SIZE / 2.0f, Max.y + TILE_SIZE)};
-				Enjon::Physics::AABB W 		= {V2(Min.x - TILE_SIZE, Min.y + TILE_SIZE / 2.0f), V2(Max.x - TILE_SIZE / 2.0f, Max.y + TILE_SIZE)};
-				Enjon::Physics::AABB SW 	= {V2(Min.x - TILE_SIZE, Min.y - TILE_SIZE / 2.0f), V2(Max.x - TILE_SIZE, Max.y + TILE_SIZE / 2.0f)};
-				Enjon::Physics::AABB S 		= {V2(Min.x - TILE_SIZE, Min.y - TILE_SIZE), V2(Max.x - TILE_SIZE / 2.0f, Max.y - TILE_SIZE / 2.0f)};
-				Enjon::Physics::AABB SE 	= {V2(Min.x - TILE_SIZE / 2.0f, Min.y - TILE_SIZE), V2(Max.x + TILE_SIZE / 2.0f, Max.y - TILE_SIZE)};
-				Enjon::Physics::AABB E 		= {V2(Min.x + TILE_SIZE / 2.0f, Min.y - TILE_SIZE), V2(Max.x + TILE_SIZE, Max.y - TILE_SIZE / 2.0f)};
+				Enjon::Physics::AABB NE 	= {V2(Min.x + TILE_SIZE / 2.0f, Min.y - WeaponSize / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize / 2.0f)};
+				Enjon::Physics::AABB N 		= {V2(Min.x + TILE_SIZE / 2.0f, Min.y + TILE_SIZE / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize)};
+				Enjon::Physics::AABB NW 	= {V2(Min.x - WeaponSize / 2.0f, Min.y + TILE_SIZE / 2.0f), V2(Max.x + WeaponSize / 2.0f, Max.y + WeaponSize)};
+				Enjon::Physics::AABB W 		= {V2(Min.x - WeaponSize, Min.y + TILE_SIZE / 2.0f), V2(Max.x - TILE_SIZE / 2.0f, Max.y + WeaponSize)};
+				Enjon::Physics::AABB SW 	= {V2(Min.x - WeaponSize, Min.y - WeaponSize / 2.0f), V2(Max.x - TILE_SIZE / 2.0f, Max.y + WeaponSize / 2.0f)};
+				Enjon::Physics::AABB S 		= {V2(Min.x - WeaponSize, Min.y - WeaponSize), V2(Max.x - TILE_SIZE / 2.0f, Max.y - TILE_SIZE / 2.0f)};
+				Enjon::Physics::AABB SE 	= {V2(Min.x - WeaponSize / 2.0f, Min.y - WeaponSize), V2(Max.x + WeaponSize / 2.0f, Max.y - TILE_SIZE / 2.0f)};
+				Enjon::Physics::AABB E 		= {V2(Min.x + TILE_SIZE / 2.0f, Min.y - WeaponSize), V2(Max.x + WeaponSize, Max.y - TILE_SIZE / 2.0f)};
 
 				// Get Attack Vector 
 				V2* AttackVector = &Transform->AttackVector;
