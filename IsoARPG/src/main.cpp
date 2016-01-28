@@ -74,9 +74,10 @@ bool IsDashing = false;
 
 float DashingCounter = 0.0f;
 
-float CollisionRunTime = 0.0f;
-float TransformRunTime = 0.0f;
-float ClearEntitiesRunTime = 0.0f;
+Enjon::uint32 CollisionRunTime = 0;
+Enjon::uint32 TransformRunTime = 0;
+Enjon::uint32 ClearEntitiesRunTime = 0;
+Enjon::uint32 RenderTime = 0;
 
 using namespace Enjon;
 using namespace ECS;
@@ -153,7 +154,8 @@ int main(int argc, char** argv)
 
 	Level level;
 	Graphics::GLTexture TileTexture;
-	level.Init(Camera.GetPosition().x, Camera.GetPosition().y, 100, 100);
+	const int levelSize = 100;
+	level.Init(Camera.GetPosition().x, Camera.GetPosition().y, levelSize, levelSize);
 	TileTexture = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledblue.png");
 	
 	float x = Camera.GetPosition().x;
@@ -222,12 +224,12 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 2500;
+	static uint32 AmountDrawn = 3000;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
 		EntitySystem::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
-																enemydims, &EnemySheet, "Enemy", 0.05f); // NOTE(John): The transform system is a bottleneck right now }
+																enemydims, &EnemySheet, "Enemy", 0.05f); 
 	}
 
 	// Create player
@@ -293,18 +295,18 @@ int main(int argc, char** argv)
 		{
 			StartTicks = SDL_GetTicks();
 			SpatialHash::ClearCells(World->Grid);
-			ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks) / 1000.0f; // NOTE(John): As the levels increase, THIS becomes the true bottleneck
+			ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
 
 			AIController::Update(World->AIControllerSystem, Player);
 			Animation2D::Update(World);
 
 			StartTicks = SDL_GetTicks();
 			Transform::Update(World->TransformSystem);
-			TransformRunTime = (SDL_GetTicks() - StartTicks) / 1000.0f;
+			TransformRunTime = (SDL_GetTicks() - StartTicks);
 
 			StartTicks = SDL_GetTicks();	
 			Collision::Update(World);
-			CollisionRunTime = (SDL_GetTicks() - StartTicks) / 1000.0f;
+			CollisionRunTime = (SDL_GetTicks() - StartTicks);
 
 			Renderer2D::Update(World); 
 			PlayerController::Update(World->PlayerControllerSystem);
@@ -332,6 +334,8 @@ int main(int argc, char** argv)
 		///////////////
 		// RENDERING //
 		///////////////
+
+		StartTicks = SDL_GetTicks();
 		
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, Enjon::Graphics::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
 
@@ -682,6 +686,8 @@ int main(int argc, char** argv)
 		DrawCursor(&EntityBatch, &Input);
 
 		Window.SwapBuffer();
+
+		RenderTime = SDL_GetTicks() - StartTicks;
 		
 		////////////////////////////////////////////////
 
@@ -692,10 +698,11 @@ int main(int argc, char** argv)
 		counter += 0.025f;
 		if (counter > 1.0f)
 		{
-			printf("FPS: %0.2f\n", FPS);
-			printf("ClearEntitiesRunTime: %f s\n", ClearEntitiesRunTime);
-			printf("Transform Time: %f s\n", TransformRunTime);
-			printf("Collision Time: %f s\n", CollisionRunTime);
+			printf("FPS: %0.0f\n", FPS);
+			printf("ClearEntitiesRunTime: %dms\n", ClearEntitiesRunTime);
+			printf("Transform Time: %dms\n", TransformRunTime);
+			printf("Collision Time: %dms\n", CollisionRunTime);
+			printf("Render Time: %dms\n", RenderTime);
 			counter = 0.0f;
 		}
 	} 

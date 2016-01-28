@@ -3,6 +3,7 @@
 
 namespace SpatialHash {
 
+	/* Inits spatial grid based on width, height of level and given cell size */ 
 	void Init(Grid* grid, int width, int height, int cell_size)
 	{
 		if (grid == nullptr) Enjon::Utils::FatalError("SPATIALHASH::INIT::Cannot operate on null data.");
@@ -14,6 +15,7 @@ namespace SpatialHash {
 		grid->cells.resize(grid->rows * grid->cols + 1);
 	}
 
+	/* Finds particular cell that a given entity belongs to based on its position */
 	int FindCell(Grid* grid, ECS::eid32 entity, const V2* position, int cell_size)
 	{
 		int posX = -position->x;
@@ -32,6 +34,7 @@ namespace SpatialHash {
 		return index;
 	}
 
+	/* Overloaded function that finds particular cell that a given entity belongs to based on its AABB (preferred method) */
 	std::vector<ECS::eid32> FindCell(Grid* grid, ECS::eid32 entity, const Enjon::Physics::AABB* AABB, int cell_size)
 	{
 		std::vector<ECS::eid32> entities;
@@ -65,23 +68,34 @@ namespace SpatialHash {
 
 				// Then push back this entity
 				grid->cells[index].entities.push_back(entity);
+
+				// Keep track of "dirty" cells here
+				grid->dirtyCells.push_back(index);
 			}
 		}
 
 		return entities;
 	}
 
-	void ClearCells(Grid* grid)
+	/* Clears all entity vectors from every cell in the spatial grid */
+	// NOTE(John): This does not scale with large levels, because I'm having to clear ALL cells instead of "dirty" ones
+	void ClearCells(Grid* grid) 
 	{
 		if (grid == nullptr) Enjon::Utils::FatalError("SPATIALHASH::CLEARCELLS::Cannot operate on null data.");
 
-		for (Cell& cell : grid->cells)
-		{ 
-			if (!cell.entities.empty()) cell.entities.clear();
+		// Loop through dirty cells and clear entities from those
+		for (Enjon::uint32 i : grid->dirtyCells)
+		{
+			grid->cells[i].entities.clear();
 		}
+
+		// Clear dirty cells
+		grid->dirtyCells.clear();
 
 	}
 
+
+	/* Finds all neighboring cells to a given entitiy's cell and stores those in a passed in entities vector */
 	// TODO(John): Create a pair checking function to maintain and update pairs of entities that have already been checked with one another
 	// NOTE(John): As of now, this is incredibly too slow to work...
 	void GetNeighborCells(Grid* grid, int index, std::vector<ECS::eid32>* Entities)

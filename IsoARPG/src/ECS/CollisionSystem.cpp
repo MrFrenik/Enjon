@@ -10,6 +10,8 @@
 #include <Math/Random.h>
 #include <IO/ResourceManager.h>
 
+#include <SDL2/SDL.h>
+
 namespace ECS{ namespace Systems { namespace Collision {
 
 	// Collision BitMasks
@@ -32,29 +34,23 @@ namespace ECS{ namespace Systems { namespace Collision {
 	// Updates all possible collisions
 	void Update(struct EntityManager* Manager)
 	{
-		static Enjon::uint32 times;
-		times = 0; 
-		
+		static Enjon::uint32 StartTime = 0;
+		static Enjon::uint32 GetCellsTime = 0;
+		static Enjon::uint32 CollisionCheckTime = 0;
+
 		eid32 size = Manager->CollisionSystem->Entities.empty() ? 0 : Manager->CollisionSystem->Entities.size();	
-		// Check the quadrants of entities and then check for collisions
+		
 		for (eid32 n = 0; n < size; n++)
 		{
 			// Get entity
 			eid32 e = Manager->CollisionSystem->Entities[n];
 
-			// if ((Manager->AttributeSystem->Masks[e] & Masks::Type::WEAPON) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0) continue; 
-
 			// If entity has no transform, then continue
 			if (!(Manager->Masks[e] & COMPONENT_TRANSFORM3D)) continue;
-			// Get the cell that entity belongs to
+			
+			// Get the cell(s) that entity belongs to
 			const Enjon::Math::Vec2* EPosition = &Enjon::Math::IsoToCartesian(Manager->TransformSystem->Transforms[e].GroundPosition);
-			// int CellIndex = SpatialHash::FindCell(Manager->Grid, e, EPosition);
 			std::vector<eid32> Entities = SpatialHash::FindCell(Manager->Grid, e, &Manager->TransformSystem->Transforms[e].AABB);
-			// std::vector<eid32> Entities;
-
-			// Check all entities and neighbors
-			// std::vector<eid32> Entities = Manager->Grid->cells[CellIndex].entities;
-			// SpatialHash::GetNeighborCells(Manager->Grid, CellIndex, &Entities);  // Note(John): This is causing too much slowdown
 
 			// Use these same entities for targets if player
 			if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
@@ -68,12 +64,11 @@ namespace ECS{ namespace Systems { namespace Collision {
 						Targets->push_back(Entities[it]);	
 					}
 				}
-				// Targets->insert(Targets->end(), Entities.begin(), Entities.end());
 			}
 
 			// TODO(John): Keep a mapping of already checked pairs to cut this time down
-			
-			// Get entities 
+		
+			// Collide with entities 
 			if (!Entities.empty())
 			{
 				for (eid32 collider : Entities)
@@ -96,8 +91,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 				}	
 			}
 		}
-		// printf("Times: %d\n", times);
-		times = 0;
+
 	} // Collision Update
 	
 
@@ -155,7 +149,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 		else 
 		{
 			// Shake the camera for effect
-			Manager->Camera->ShakeScreen(Enjon::Random::Roll(10, 15));
+			Manager->Camera->ShakeScreen(Enjon::Random::Roll(0, 15));
 
 			// Get minimum translation distance
 			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_A, AABB_B);
@@ -233,11 +227,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 				// Set item to picked up
 				Manager->AttributeSystem->Masks[Item] |= Masks::GeneralOptions::PICKED_UP;
 			}
-			else 
-			{
-				printf("Inventory already full!\n");
-			}
-
+			
 			// Continue to next entity 	
 			return;
 		}

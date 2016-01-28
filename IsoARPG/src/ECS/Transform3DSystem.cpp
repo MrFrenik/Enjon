@@ -149,7 +149,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// Enjon::Physics::AABB SE 	= {V2(Min.x - WeaponSize / 2.0f, Min.y - WeaponSize), V2(Max.x + WeaponSize / 2.0f, Max.y - WeaponSize)};
 				// Enjon::Physics::AABB E 		= {V2(Min.x + WeaponSize / 2.0f, Min.y - WeaponSize), V2(Max.x + WeaponSize, Max.y - WeaponSize / 2.0f)};
 
-				static float WeaponSize = 128.0f;
+				static float WeaponSize = 500.0f;
 
 				// Calculate AABB
 				Enjon::Physics::AABB NE 	= {V2(Min.x + TILE_SIZE / 2.0f, Min.y - WeaponSize / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize / 2.0f)};
