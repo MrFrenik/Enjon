@@ -1,21 +1,19 @@
-main.cpp
-Generating Code...
-Compiling...
 Transform3DSystem.cpp
+Generating Code...
+Skipping... (no relevant changes detected)
 TestSystem.cpp
 Renderer2DSystem.cpp
 PlayerControllerSystem.cpp
 LabelSystem.cpp
 InventorySystem.cpp
+Entity.cpp
 ComponentSystems.cpp
 CollisionSystem.cpp
 AttributeSystem.cpp
 Animation2DSystem.cpp
 AIControllerSystem.cpp
 SpatialHash.cpp
-Generating Code...
-Skipping... (no relevant changes detected)
-Entity.cpp
+main.cpp
 Level.cpp
 AnimationManager.cpp
 Animation.cpp

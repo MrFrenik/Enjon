@@ -18,7 +18,7 @@
 
 #if TESTING 
 
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -614,10 +614,12 @@ int main(int argc, char** argv)
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
 		MapEntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
-		EntityBatch.Add(Math::Vec4(AABB->Min, Math::Vec2(abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y))), Math::Vec4(0, 0, 1, 1), 0,
-									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
-		EntityBatch.Add(Math::Vec4(A->x, A->y, TILE_SIZE, TILE_SIZE), Math::Vec4(0, 0, 1, 1), 0,
-									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
+
+		// Cartesian AABB overlay
+		// EntityBatch.Add(Math::Vec4(AABB->Min, Math::Vec2(abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y))), Math::Vec4(0, 0, 1, 1), 0,
+		// 							Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
+		// EntityBatch.Add(Math::Vec4(A->x, A->y, TILE_SIZE, TILE_SIZE), Math::Vec4(0, 0, 1, 1), 0,
+		// 							Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
 
 
 		// Add an overlay to the Map for better viewing

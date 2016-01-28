@@ -264,7 +264,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
 			{
 				// Shake the camera for effect
-				Manager->Camera->ShakeScreen(Enjon::Random::Roll(10, 15));
+				Manager->Camera->ShakeScreen(Enjon::Random::Roll(50, 100));
 	
 				bf = 1.2f;
 			}

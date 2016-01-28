@@ -83,7 +83,7 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 34596,
+				"buffer_size": 35008,
 				"line_ending": "Windows"
 			}
 		},
@@ -131,7 +131,25 @@
 			"file": "src/ECS/CollisionSystem.cpp",
 			"settings":
 			{
-				"buffer_size": 13996,
+				"buffer_size": 13358,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "Searching 134 files for \"MAX_ITEMS\"\n\nD:\\C++Projects\\VS\\3DEnjon\\IsoARPG\\include\\ECS\\Components.h:\n   15  #include <utility>\n   16  \n   17: #define MAX_ITEMS	100\n   18  \n   19  namespace ECS { namespace Component {\n\nD:\\C++Projects\\VS\\3DEnjon\\IsoARPG\\src\\ECS\\CollisionSystem.cpp:\n  213  			eid32 Player = Item == A_ID ? B_ID : A_ID;\n  214  			\n  215: 			if (Manager->InventorySystem->Inventories[Player].Items.size() < MAX_ITEMS)\n  216  			{\n  217  				printf(\"Picked up item!\\n\");\n\n2 matches across 2 files\n",
+			"settings":
+			{
+				"buffer_size": 505,
+				"line_ending": "Windows",
+				"name": "Find Results",
+				"scratch": true
+			}
+		},
+		{
+			"file": "include/ECS/Components.h",
+			"settings":
+			{
+				"buffer_size": 3891,
 				"line_ending": "Windows"
 			}
 		},
@@ -139,7 +157,7 @@
 			"file": "include/SpatialHash.h",
 			"settings":
 			{
-				"buffer_size": 868,
+				"buffer_size": 1374,
 				"line_ending": "Windows"
 			}
 		},
@@ -147,7 +165,7 @@
 			"file": "src/SpatialHash.cpp",
 			"settings":
 			{
-				"buffer_size": 4369,
+				"buffer_size": 5132,
 				"line_ending": "Windows"
 			}
 		},
@@ -180,6 +198,14 @@
 			"settings":
 			{
 				"buffer_size": 5221,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/ECS/Transform3DSystem.cpp",
+			"settings":
+			{
+				"buffer_size": 9773,
 				"line_ending": "Windows"
 			}
 		},
@@ -286,10 +312,12 @@
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations/Player",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS",
 		"/D/C++Projects/VS/3DEnjon/shaders"
 	],
 	"file_history":
 	[
+		"/D/C++Projects/VS/3DEnjon/proc/all.bat",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations/Player/player.txt",
 		"/D/C++Projects/VS/3DEnjon/proc/dump.txt",
@@ -416,8 +444,7 @@
 		"/D/Documents/School/Algorithms/Practice/Exam2/src/stack.c",
 		"/D/Documents/School/Algorithms/Practice/Exam2/include/stack.h",
 		"/D/Documents/School/Algorithms/7_Homework/proc/run",
-		"/D/Documents/School/Algorithms/7_Homework/src/graph_main.cpp",
-		"/D/Documents/School/Algorithms/7_Homework/src/graph_list.cpp"
+		"/D/Documents/School/Algorithms/7_Homework/src/graph_main.cpp"
 	],
 	"find":
 	{
@@ -428,6 +455,7 @@
 		"height": 127.0,
 		"where_history":
 		[
+			""
 		]
 	},
 	"find_state":
@@ -435,6 +463,14 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"amount",
+			"MAX_ITEMS",
+			"Render",
+			"CollisionRunTime",
+			"amount",
+			"weaponsize",
+			"TransformSystem",
+			"printf",
 			"AIcontroller",
 			"CollisionStartTicks",
 			"CollisionUpdateTicks",
@@ -554,15 +590,7 @@
 			"AmountDrawn",
 			"AIController",
 			"CreateItem",
-			"CollideWithP",
-			"printf",
-			"Sword",
-			");",
-			"printf",
-			"TILE_SIZE",
-			"printf",
-			"frame",
-			"RemoveCom"
+			"CollideWithP"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -580,7 +608,7 @@
 	"groups":
 	[
 		{
-			"selected": 7,
+			"selected": 0,
 			"sheets":
 			[
 				{
@@ -589,15 +617,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 34596,
+						"buffer_size": 35008,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5960,
-								5960
+								6081,
+								6081
 							]
 						],
 						"settings":
@@ -656,10 +684,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 3372.0,
+						"translation.y": 5931.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
@@ -738,7 +766,7 @@
 						"translation.y": 2403.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 11,
 					"type": "text"
 				},
 				{
@@ -817,7 +845,7 @@
 						"translation.y": 340.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 13,
 					"type": "text"
 				},
 				{
@@ -896,7 +924,7 @@
 						"translation.y": 3071.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 10,
 					"type": "text"
 				},
 				{
@@ -976,7 +1004,7 @@
 						"translation.y": 589.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
@@ -1055,7 +1083,7 @@
 						"translation.y": 3044.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
@@ -1064,15 +1092,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 13996,
+						"buffer_size": 13358,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2107,
-								2107
+								11503,
+								11503
 							]
 						],
 						"settings":
@@ -1131,19 +1159,149 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 583.0,
+						"translation.y": 1317.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
 					"buffer": 7,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 505,
+						"regions":
+						{
+							"match":
+							{
+								"flags": 112,
+								"regions":
+								[
+									[
+										146,
+										155
+									],
+									[
+										416,
+										425
+									]
+								],
+								"scope": ""
+							}
+						},
+						"selection":
+						[
+							[
+								43,
+								43
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "find results.hidden-tmlanguage",
+							"detect_indentation": false,
+							"line_numbers": false,
+							"output_tag": 1,
+							"result_base_dir": "",
+							"result_file_regex": "^([A-Za-z\\\\/<].*):$",
+							"result_line_regex": "^ +([0-9]+):",
+							"scroll_past_end": true,
+							"syntax": "Packages/Default/Find Results.hidden-tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "include/ECS/Components.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3891,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								338,
+								338
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c",
+							"buffer_scroll_name": "cae51f91",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								6,
+								20,
+								19,
+								21,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
 					"file": "include/SpatialHash.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 868,
+						"buffer_size": 1374,
 						"regions":
 						{
 						},
@@ -1213,24 +1371,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 10,
 					"file": "src/SpatialHash.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4369,
+						"buffer_size": 5132,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1672,
-								1672
+								1311,
+								1311
 							]
 						],
 						"settings":
@@ -1289,14 +1447,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 465.0,
+						"translation.y": 646.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 9,
+					"buffer": 11,
 					"file": "include/ECS/Masks.h",
 					"semi_transient": false,
 					"settings":
@@ -1371,11 +1529,11 @@
 						"translation.y": 28.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 12,
 					"type": "text"
 				},
 				{
-					"buffer": 10,
+					"buffer": 12,
 					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/Window.h",
 					"semi_transient": false,
 					"settings":
@@ -1450,11 +1608,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 12,
+					"stack_index": 16,
 					"type": "text"
 				},
 				{
-					"buffer": 11,
+					"buffer": 13,
 					"file": "/D/C++Projects/VS/3DEnjon/include/Math/Vec2.h",
 					"semi_transient": false,
 					"settings":
@@ -1529,11 +1687,11 @@
 						"translation.y": 291.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 14,
 					"type": "text"
 				},
 				{
-					"buffer": 12,
+					"buffer": 14,
 					"file": "src/ECS/PlayerControllerSystem.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1619,11 +1777,101 @@
 						"translation.y": 1099.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 14,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 13,
+					"buffer": 15,
+					"file": "src/ECS/Transform3DSystem.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9773,
+						"regions":
+						{
+							"bookmark_m":
+							{
+								"flags": 144,
+								"regions":
+								[
+									[
+										4843,
+										4843
+									]
+								]
+							}
+						},
+						"selection":
+						[
+							[
+								1237,
+								1237
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c",
+							"buffer_scroll_name": "c918a525",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								15,
+								15,
+								29,
+								53,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 153.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 16,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/basic.f.glsl",
 					"semi_transient": false,
 					"settings":
@@ -1698,11 +1946,11 @@
 						"translation.y": 555.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 15,
 					"type": "text"
 				},
 				{
-					"buffer": 14,
+					"buffer": 17,
 					"file": "include/ECS/PlayerControllerSystem.h",
 					"semi_transient": false,
 					"settings":
@@ -1777,7 +2025,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 13,
+					"stack_index": 17,
 					"type": "text"
 				}
 			]

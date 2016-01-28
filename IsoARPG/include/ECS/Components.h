@@ -14,7 +14,7 @@
 #include <map>
 #include <utility>
 
-#define MAX_ITEMS	100
+#define MAX_ITEMS	5000
 
 namespace ECS { namespace Component {
 	

@@ -28,13 +28,17 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// If equipped, then don't update transform here
 				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::EQUIPPED) continue;
 
+				// Get distance to player
+				V2* GP = &Manager->TransformSystem->Transforms[e].GroundPosition;
+				V2* PGP = &Manager->TransformSystem->Transforms[Manager->Player].GroundPosition;
+
+				if (PGP->DistanceTo(*GP) >= 5000) continue; // TODO(John): Make this squared distance so as to not use a square root function EVERY frame for EVERY entity
+
 				// If an item
 				if ((Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0)
 				{
 					// Need to see whether or not the player is within range before I turn on its collision component
 					Enjon::Math::Vec3* P = &Manager->TransformSystem->Transforms[e].Position;
-					V2* GP = &Manager->TransformSystem->Transforms[e].GroundPosition;
-					V2* PGP = &Manager->TransformSystem->Transforms[Manager->Player].GroundPosition;
 
 					if (PGP->DistanceTo(*GP) <= TILE_SIZE * 2) Manager->CollisionSystem->Entities.push_back(e);
 
@@ -137,19 +141,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 				WeaponTransform->GroundPosition = *GroundPosition;
 				WeaponTransform->CartesianPosition = Transform->CartesianPosition;
 
-				// static float WeaponSize = 32.0f;
-
-				// // Calculate AABB
-				// Enjon::Physics::AABB NE 	= {V2(Min.x + WeaponSize, Min.y - WeaponSize / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize / 2.0f)};
-				// Enjon::Physics::AABB N 		= {V2(Min.x + WeaponSize / 2.0f, Min.y + WeaponSize / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize)};
-				// Enjon::Physics::AABB NW 	= {V2(Min.x - WeaponSize / 2.0f, Min.y + WeaponSize), V2(Max.x + WeaponSize / 2.0f, Max.y + WeaponSize)};
-				// Enjon::Physics::AABB W 		= {V2(Min.x - WeaponSize, Min.y + WeaponSize / 2.0f), V2(Max.x - WeaponSize / 2.0f, Max.y + WeaponSize)};
-				// Enjon::Physics::AABB SW 	= {V2(Min.x - WeaponSize, Min.y - WeaponSize / 2.0f), V2(Max.x - WeaponSize, Max.y + WeaponSize / 2.0f)};
-				// Enjon::Physics::AABB S 		= {V2(Min.x - WeaponSize, Min.y - WeaponSize), V2(Max.x - WeaponSize / 2.0f, Max.y - WeaponSize / 2.0f)};
-				// Enjon::Physics::AABB SE 	= {V2(Min.x - WeaponSize / 2.0f, Min.y - WeaponSize), V2(Max.x + WeaponSize / 2.0f, Max.y - WeaponSize)};
-				// Enjon::Physics::AABB E 		= {V2(Min.x + WeaponSize / 2.0f, Min.y - WeaponSize), V2(Max.x + WeaponSize, Max.y - WeaponSize / 2.0f)};
-
-				static float WeaponSize = 500.0f;
+				static float WeaponSize = 5000.0f;
 
 				// Calculate AABB
 				Enjon::Physics::AABB NE 	= {V2(Min.x + TILE_SIZE / 2.0f, Min.y - WeaponSize / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize / 2.0f)};
