@@ -20,7 +20,7 @@
 * MAIN GAME
 */
 
-#if 0
+#if 1
 #define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
@@ -102,6 +102,12 @@ int main(int argc, char** argv)
 	float FPS = 60;
 	int screenWidth = SCREENWIDTH, screenHeight = SCREENHEIGHT;
 
+	// Profile strings
+	std::string FPSString = "60.0";
+	std::string RenderTimeString = "0";
+	std::string CollisionTimeString = "0";
+	std::string TransformTimeString = "0";
+
 	// Init Limiter
 	Enjon::Utils::FPSLimiter Limiter; 
 	Limiter.Init(60.0f); 
@@ -156,6 +162,12 @@ int main(int argc, char** argv)
 
 	Enjon::Graphics::SpriteBatch TextBatch;
 	TextBatch.Init();
+
+	Enjon::Graphics::SpriteBatch HUDBatch;
+	HUDBatch.Init();
+
+	Enjon::Graphics::Fonts::Font PauseFont;
+	Enjon::Graphics::Fonts::Init("../assets/fonts/TheBoldFont/TheBoldFont.ttf", 72, &PauseFont);
 
 	Level level;
 	Graphics::GLTexture TileTexture;
@@ -229,7 +241,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 5000;
+	static uint32 AmountDrawn = 3000;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -378,6 +390,7 @@ int main(int argc, char** argv)
 		EntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); 
 		MapEntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); 
 		TextBatch.Begin(); 
+		HUDBatch.Begin();
 
 		wchar_t wcstring[10]; 
 		glUniform1i(glGetUniformLocation(shader, "isLevel"), false);
@@ -420,6 +433,8 @@ int main(int argc, char** argv)
 				if (Camera.IsBoundBoxInCamView(*EntityPosition, enemydims))
 				{
 					EntityBatch.Add(Math::Vec4(*EntityPosition, enemydims), uv, beast.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
+					Graphics::Fonts::PrintText(EntityPosition->x + 100.0f, EntityPosition->y + 220.0f, 0.25f, std::to_string(e), &PauseFont, TextBatch, 
+															Graphics::SetOpacity(Graphics::RGBA8_Green(), 0.8f));
 				}
 				// If target
 				if (e == World->PlayerControllerSystem->CurrentTarget)
@@ -634,13 +649,31 @@ int main(int argc, char** argv)
 		if (Paused)
 		{
 			// Draw paused text
-			TextBatch.Add(Math::Vec4(Camera.GetPosition().x - 60.0f, Camera.GetPosition().y - 30.0f, 125.0f, 70.0f), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/paused.png").id, 
-									Graphics::RGBA8_Orange(), -50.0f);
+			Enjon::Graphics::Fonts::PrintText(Camera.GetPosition().x - 110.0f, Camera.GetPosition().y - 30.0f, 1.0f, "Paused", &PauseFont, TextBatch);
 		}
+
+		// Add FPS
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
+										0.4f, "FPS: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 100.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
+										0.3f, FPSString, &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.8f));
+
+		// Add CollisionTime
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
+										0.4f, "Collisions: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
+										0.3f, CollisionTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.8f));
+
+		// Add RenderTime
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
+										0.4f, "Rendering: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
+										0.3f, RenderTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.8f));
 	
 		EntityBatch.End();
 		TextBatch.End(); 
 		MapEntityBatch.End(); 
+		HUDBatch.End();
 	
 		// Set up shader for rendering
 		isLevel = 1;
@@ -663,15 +696,38 @@ int main(int argc, char** argv)
 		// Draw entities		
 		EntityBatch.RenderBatch();
 
+		// Draw Text
+		shader = Graphics::ShaderManager::GetShader("Text")->GetProgramID();
+		glUseProgram(shader);
+		{
+			glUniform1i(glGetUniformLocation(shader, "tex"),
+						 0);
+			glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
+								1, 0, model.elements);
+			glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
+								1, 0, view.elements);
+			glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
+								1, 0, projection.elements);
+		} 
+
+
+		TextBatch.RenderBatch();
+
+		// Render HUD camera	
+		view = HUDCamera.GetCameraMatrix();
+		glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
+							1, 0, view.elements);
+		HUDBatch.RenderBatch();
+
+		shader = Graphics::ShaderManager::GetShader("Basic")->GetProgramID();
+		glUseProgram(shader);
+		view = Camera.GetCameraMatrix();
+		glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
+							1, 0, view.elements);
+
 		// Draw front walls
 		FrontWallBatch.RenderBatch();
 
-		// Draw Text
-		if (Paused)
-		{
-			glUniform1i(glGetUniformLocation(shader, "useOverlay"), false);
-			TextBatch.RenderBatch();
-		}
 
 		// Draw Cartesian Map
 		model *= Math::Mat4::Translate(Math::Vec3(-SCREENWIDTH / 4.0f - 140.0f, SCREENHEIGHT / 2.0f - 40.0f, 0.0f)) * Math::Mat4::Scale(Math::Vec3(0.08f, 0.08f, 1.0f));
@@ -705,11 +761,11 @@ int main(int argc, char** argv)
 		counter += 0.025f;
 		if (counter > 1.0f)
 		{
-			printf("FPS: %0.0f\n", FPS);
-			printf("ClearEntitiesRunTime: %dms\n", ClearEntitiesRunTime);
-			printf("Transform Time: %dms\n", TransformRunTime);
-			printf("Collision Time: %dms\n", CollisionRunTime);
-			printf("Render Time: %dms\n", RenderTime);
+			FPSString = std::to_string(FPS);
+			CollisionTimeString = std::to_string(CollisionRunTime);
+			TransformTimeString = std::to_string(TransformRunTime);
+			RenderTimeString = std::to_string(RenderTime);
+
 			counter = 0.0f;
 		}
 	} 
@@ -809,7 +865,7 @@ void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager*
 * SYSTEMS TEST
 */
 
-#if 1
+#if 0
 #include <stdio.h>
 #include <map>
 

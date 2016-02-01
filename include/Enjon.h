@@ -28,6 +28,7 @@
 #include "Graphics/Vertex.h"
 #include "Graphics/Window.h"
 #include "Graphics/ShaderManager.h"
+#include "Graphics/Font.h"
 
 #include "IO/ImageLoader.h"
 #include "IO/InputManager.h"
