@@ -1,5 +1,6 @@
-main.cpp
+ParticleEngine2D.cpp
 Generating Code...
+d:\c++projects\vs\3denjon\src\particleengine2d.cpp(54) : warning C4715: 'Enjon::Graphics::Particle2D::FindNextAvailableParticle' : not all control paths return a value
 Skipping... (no relevant changes detected)
 Transform3DSystem.cpp
 TestSystem.cpp
@@ -14,6 +15,7 @@ AttributeSystem.cpp
 Animation2DSystem.cpp
 AIControllerSystem.cpp
 SpatialHash.cpp
+main.cpp
 Level.cpp
 AnimationManager.cpp
 Animation.cpp
@@ -35,6 +37,7 @@ InputManager.cpp
 ImageLoader.cpp
 GLSLProgram.cpp
 Game.cpp
+Font.cpp
 Errors.cpp
 Enjon.cpp
 Camera2D.cpp
@@ -46,16 +49,18 @@ Copyright (C) Microsoft Corporation.  All rights reserved.
 /out:main.exe 
 /SUBSYSTEM:CONSOLE 
 /NODEFAULTLIB:msvcrt.lib 
-"/LIBPATH:..\deps\lib" Opengl32.lib SDL2.lib SDL2main.lib glew32.lib glew32s.lib 
+"/LIBPATH:..\deps\lib" Opengl32.lib SDL2.lib SDL2main.lib glew32.lib glew32s.lib freetype.lib 
 AABB.obj 
 Camera2D.obj 
 Enjon.obj 
 Errors.obj 
+Font.obj 
 Game.obj 
 GLSLProgram.obj 
 ImageLoader.obj 
 InputManager.obj 
 IOManager.obj 
+ParticleEngine2D.obj 
 picoPNG.obj 
 ResourceManager.obj 
 ShaderManager.obj 

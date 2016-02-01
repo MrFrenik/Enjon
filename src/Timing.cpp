@@ -48,10 +48,10 @@ namespace Enjon { namespace Utils {
 			} 
 						
 			//Limit the FPS to maxFPS
-			//if (SECOND / m_maxFPS > frameTicks)
-			//{
-			//	SDL_Delay(Uint32(SECOND / m_maxFPS - frameTicks));
-			//} 
+			// if (SECOND / m_maxFPS > frameTicks)
+			// {
+			// 	SDL_Delay(Uint32(SECOND / m_maxFPS - frameTicks));
+			// } 
 			
 
 			//return FPS

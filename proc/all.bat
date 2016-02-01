@@ -1,3 +1,3 @@
 @echo off
-call proc\build > proc\dump.txt
+call proc\build
 call proc\run

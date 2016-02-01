@@ -43,6 +43,7 @@
 #include <Enjon.h>
 #include <SDL2/SDL.h>
 #include <GLEW/glew.h>
+#include <Graphics/ParticleEngine2D.h>
 
 /*-- Entity Component System includes --*/
 #include <ECS/ComponentSystems.h>
@@ -241,7 +242,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 3000;
+	static uint32 AmountDrawn = 10;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -713,11 +714,6 @@ int main(int argc, char** argv)
 
 		TextBatch.RenderBatch();
 
-		// Render HUD camera	
-		view = HUDCamera.GetCameraMatrix();
-		glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
-							1, 0, view.elements);
-		HUDBatch.RenderBatch();
 
 		shader = Graphics::ShaderManager::GetShader("Basic")->GetProgramID();
 		glUseProgram(shader);
@@ -728,7 +724,28 @@ int main(int argc, char** argv)
 		// Draw front walls
 		FrontWallBatch.RenderBatch();
 
+		// Draw Text
+		shader = Graphics::ShaderManager::GetShader("Text")->GetProgramID();
+		glUseProgram(shader);
+		{
+			glUniform1i(glGetUniformLocation(shader, "tex"),
+						 0);
+			glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
+								1, 0, model.elements);
+			glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
+								1, 0, view.elements);
+			glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
+								1, 0, projection.elements);
+		} 
 
+		// Render HUD camera	
+		view = HUDCamera.GetCameraMatrix();
+		glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
+							1, 0, view.elements);
+		HUDBatch.RenderBatch();
+
+		shader = Graphics::ShaderManager::GetShader("Basic")->GetProgramID();
+		glUseProgram(shader);
 		// Draw Cartesian Map
 		model *= Math::Mat4::Translate(Math::Vec3(-SCREENWIDTH / 4.0f - 140.0f, SCREENHEIGHT / 2.0f - 40.0f, 0.0f)) * Math::Mat4::Scale(Math::Vec3(0.08f, 0.08f, 1.0f));
 		view = HUDCamera.GetCameraMatrix();
