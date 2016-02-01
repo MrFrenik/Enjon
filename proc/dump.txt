@@ -1,6 +1,7 @@
-Transform3DSystem.cpp
+main.cpp
 Generating Code...
 Skipping... (no relevant changes detected)
+Transform3DSystem.cpp
 TestSystem.cpp
 Renderer2DSystem.cpp
 PlayerControllerSystem.cpp
@@ -13,7 +14,6 @@ AttributeSystem.cpp
 Animation2DSystem.cpp
 AIControllerSystem.cpp
 SpatialHash.cpp
-main.cpp
 Level.cpp
 AnimationManager.cpp
 Animation.cpp

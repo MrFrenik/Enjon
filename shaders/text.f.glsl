@@ -1,6 +1,20 @@
-uniform sampler2D texture;
-void main()
+#version 330 core
+
+in DATA
 {
-    float a = texture2D(texture, gl_TexCoord[0].xy).r;
-    gl_FragColor = vec4(gl_Color.rgb, gl_Color.a*a);
+	vec2 position;
+	vec4 color;
+	vec2 uv;
+}fs_in;
+
+out vec4 color;
+
+uniform sampler2D tex;
+
+void main() 
+{
+	// Sample the texture
+	vec4 sampled = vec4(1.0,1.0, 1.0, texture(tex, fs_in.uv).r);
+	color = fs_in.color * sampled;
 }
+

@@ -72,11 +72,19 @@ void main()
 
 	else
 	{
-		texColor = Overlay(texColor, BLUE, 0.5f);
+		if (useOverlay)
+		{
+		 	texColor = Overlay(texColor, BLUE, 0.5f);
+			
+			// Mask color if hit
+			if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texColor * MULT;
+			else color = fs_in.color * texColor;
+		}
+		else
+		{
+			color = fs_in.color * texColor;
+		}
 
-		// Mask color if hit
-		if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texColor * MULT;
-		else color = fs_in.color * texColor;
 	}
 }
 

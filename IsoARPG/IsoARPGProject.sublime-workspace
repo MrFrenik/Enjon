@@ -83,129 +83,7 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 35008,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteBatch.h",
-			"settings":
-			{
-				"buffer_size": 5833,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/src/SpriteBatch.cpp",
-			"settings":
-			{
-				"buffer_size": 6407,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/Animation2DSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 11584,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/proc/dump.txt",
-			"settings":
-			{
-				"buffer_size": 1543,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/ComponentSystems.cpp",
-			"settings":
-			{
-				"buffer_size": 14025,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/CollisionSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 13358,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"contents": "Searching 134 files for \"MAX_ITEMS\"\n\nD:\\C++Projects\\VS\\3DEnjon\\IsoARPG\\include\\ECS\\Components.h:\n   15  #include <utility>\n   16  \n   17: #define MAX_ITEMS	100\n   18  \n   19  namespace ECS { namespace Component {\n\nD:\\C++Projects\\VS\\3DEnjon\\IsoARPG\\src\\ECS\\CollisionSystem.cpp:\n  213  			eid32 Player = Item == A_ID ? B_ID : A_ID;\n  214  			\n  215: 			if (Manager->InventorySystem->Inventories[Player].Items.size() < MAX_ITEMS)\n  216  			{\n  217  				printf(\"Picked up item!\\n\");\n\n2 matches across 2 files\n",
-			"settings":
-			{
-				"buffer_size": 505,
-				"line_ending": "Windows",
-				"name": "Find Results",
-				"scratch": true
-			}
-		},
-		{
-			"file": "include/ECS/Components.h",
-			"settings":
-			{
-				"buffer_size": 3891,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "include/SpatialHash.h",
-			"settings":
-			{
-				"buffer_size": 1374,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/SpatialHash.cpp",
-			"settings":
-			{
-				"buffer_size": 5132,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "include/ECS/Masks.h",
-			"settings":
-			{
-				"buffer_size": 869,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/Window.h",
-			"settings":
-			{
-				"buffer_size": 1657,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/include/Math/Vec2.h",
-			"settings":
-			{
-				"buffer_size": 2405,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/PlayerControllerSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 5221,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/Transform3DSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 9773,
+				"buffer_size": 33206,
 				"line_ending": "Windows"
 			}
 		},
@@ -213,15 +91,57 @@
 			"file": "/D/C++Projects/VS/3DEnjon/shaders/basic.f.glsl",
 			"settings":
 			{
-				"buffer_size": 2464,
+				"buffer_size": 2465,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "include/ECS/PlayerControllerSystem.h",
+			"file": "src/ECS/CollisionSystem.cpp",
 			"settings":
 			{
-				"buffer_size": 932,
+				"buffer_size": 13359,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/ECS/Transform3DSystem.cpp",
+			"settings":
+			{
+				"buffer_size": 8602,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "\nSearching 134 files for \"Enjon.h\"\n\nD:\\C++Projects\\VS\\3DEnjon\\include\\Game.h:\n   15  #include \"Graphics/Window.h\"\n   16  #include \"Graphics/ShaderManager.h\"\n   17: #include \"Enjon.h\"\n   18  \n   19  namespace Game\n\nD:\\C++Projects\\VS\\3DEnjon\\src\\Enjon.cpp:\n    2  #include <SDL2/SDL.h>\n    3  \n    4: #include \"Enjon.h\"\n    5  \n    6  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////\n\nD:\\C++Projects\\VS\\3DEnjon\\IsoARPG\\bin\\debug\\intermediate\\IsoARPG.tlog\\CL.read.1.tlog:\n  745  D:\\PROGRAMS\\MICROSOFT VISUAL STUDIO COMMUNITY 2013\\VC\\INCLUDE\\MEMORY\n  746  ^D:\\C++PROJECTS\\VS\\ISOARPG\\SRC\\MAIN.CPP\n  747: D:\\C++PROJECTS\\VS\\ENJON\\INCLUDE\\ENJON.H\n  748  D:\\C++PROJECTS\\VS\\ENJON\\INCLUDE\\SYSTEM\\CONFIG.H\n  749  D:\\C++PROJECTS\\VS\\ENJON\\INCLUDE\\UTILS\\TIMING.H\n  ...\n 1397  C:\\PROGRAM FILES (X86)\\WINDOWS KITS\\8.1\\INCLUDE\\UM\\GL\\GLU.H\n 1398  C:\\PROGRAM FILES (X86)\\WINDOWS KITS\\8.1\\INCLUDE\\UM\\GL\\GL.H\n 1399: D:\\C++PROJECTS\\VS\\ENJON\\INCLUDE\\ENJON.H\n 1400  D:\\C++PROJECTS\\VS\\ENJON\\INCLUDE\\SYSTEM\\CONFIG.H\n 1401  D:\\C++PROJECTS\\VS\\ENJON\\INCLUDE\\UTILS\\TIMING.H\n\nD:\\C++Projects\\VS\\3DEnjon\\IsoARPG\\bin\\release\\intermediate\\IsoARPG.tlog\\CL.read.1.tlog:\n 1133  C:\\PROGRAM FILES (X86)\\WINDOWS KITS\\8.1\\INCLUDE\\UM\\GL\\GLU.H\n 1134  C:\\PROGRAM FILES (X86)\\WINDOWS KITS\\8.1\\INCLUDE\\UM\\GL\\GL.H\n 1135: D:\\C++PROJECTS\\VS\\ENJON\\INCLUDE\\ENJON.H\n 1136  D:\\C++PROJECTS\\VS\\ENJON\\INCLUDE\\SYSTEM\\CONFIG.H\n 1137  D:\\C++PROJECTS\\VS\\ENJON\\INCLUDE\\UTILS\\TIMING.H\n ....\n 2551  D:\\C++PROJECTS\\VS\\ENJON\\DEPENDENCIES\\INCLUDE\\SDL2\\SDL_VERSION.H\n 2552  ^D:\\C++PROJECTS\\VS\\ISOARPG\\SRC\\MAIN.CPP\n 2553: D:\\C++PROJECTS\\VS\\ENJON\\INCLUDE\\ENJON.H\n 2554  D:\\C++PROJECTS\\VS\\ENJON\\INCLUDE\\SYSTEM\\CONFIG.H\n 2555  D:\\C++PROJECTS\\VS\\ENJON\\INCLUDE\\UTILS\\TIMING.H\n\nD:\\C++Projects\\VS\\3DEnjon\\IsoARPG\\src\\main.cpp:\n   36  #endif \n   37  \n   38: #include <Enjon.h>\n   39  #include <Utils/FileUtils.h>\n   40  #include <Math/Random.h>\n   ..\n  806  #include <IO/ResourceManager.h>\n  807  #include <Math/Maths.h>\n  808: #include <Enjon.h>\n  809  #include <Graphics/Window.h>\n  810  #include <Graphics/SpriteBatch.h>\n\n8 matches across 5 files\n\n\nSearching 134 files for \"ENJON_H\"\n\nD:\\C++Projects\\VS\\3DEnjon\\include\\Enjon.h:\n    1: #ifndef ENJON_H\n    2: #define ENJON_H\n    3  \n    4  /////////////////////\n\n2 matches in 1 file\n",
+			"settings":
+			{
+				"buffer_size": 2326,
+				"line_ending": "Windows",
+				"name": "Find Results",
+				"scratch": true
+			}
+		},
+		{
+			"file": "/D/C++Projects/VS/3DEnjon/include/Enjon.h",
+			"settings":
+			{
+				"buffer_size": 1325,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/C++Projects/VS/3DEnjon/deps/include/STB/stb_truetype.h",
+			"settings":
+			{
+				"buffer_size": 127284,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/D/C++Projects/VS/3DEnjon/proc/dump.txt",
+			"settings":
+			{
+				"buffer_size": 1543,
 				"line_ending": "Windows"
 			}
 		}
@@ -305,44 +225,50 @@
 	"expanded_folders":
 	[
 		"/D/C++Projects/VS/3DEnjon/include",
+		"/D/C++Projects/VS/3DEnjon/include/IO",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations/Player",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS",
-		"/D/C++Projects/VS/3DEnjon/shaders"
+		"/D/C++Projects/VS/3DEnjon/shaders",
+		"/D/C++Projects/VS/3DEnjon/deps/include/STB"
 	],
 	"file_history":
 	[
 		"/D/C++Projects/VS/3DEnjon/proc/all.bat",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations/Player/player.txt",
-		"/D/C++Projects/VS/3DEnjon/proc/dump.txt",
-		"/D/C++Projects/VS/3DEnjon/include/Math/Mat4.h",
-		"/D/C++Projects/G++/Projects/ZombieChallenge/src/Player.cpp",
+		"/D/C++Projects/VS/3DEnjon/proc/bd.bat",
+		"/D/C++Projects/VS/3DEnjon/proc/proc/all",
+		"/D/C++Projects/VS/3DEnjon/include/Game.h",
 		"/D/C++Projects/VS/3DEnjon/shaders/basic.f.glsl",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/SCRUM.txt",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/PlayerControllerSystem.h",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/main.cpp",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/PlayerControllerSystem.cpp",
+		"/D/C++Projects/VS/3DEnjon/include/Math/Vec2.h",
+		"/D/C++Projects/VS/3DEnjon/include/Graphics/Window.h",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Masks.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/SpatialHash.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/SpatialHash.h",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Components.h",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/CollisionSystem.cpp",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/ComponentSystems.cpp",
+		"/D/C++Projects/VS/3DEnjon/proc/dump.txt",
 		"/D/C++Projects/VS/3DEnjon/src/SpriteBatch.cpp",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteBatch.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/Level.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/ComponentSystems.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/Level.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/CollisionSystem.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/ComponentSystems.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/Animation2DSystem.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/main.cpp",
+		"/D/C++Projects/VS/3DEnjon/include/Math/Random.h",
+		"/D/C++Projects/VS/3DEnjon/include/Math/Mat4.h",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations/Player/player.txt",
+		"/D/C++Projects/G++/Projects/ZombieChallenge/src/Player.cpp",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/SCRUM.txt",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/Level.cpp",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/Level.h",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/ComponentSystems.h",
 		"/D/C++Projects/G++/Projects/ZombieChallenge/src/Game.cpp",
 		"/D/C++Projects/G++/Projects/ZombieChallenge/src/Gun.cpp",
 		"/D/C++Projects/G++/Projects/ZombieChallenge/src/Bullet.cpp",
 		"/D/C++Projects/VS/3DEnjon/src/Camera2D.cpp",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/Camera2D.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/CollisionSystem.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/PlayerControllerSystem.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/AIControllerSystem.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/AIControllerSystem.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/LabelSystem.cpp",
@@ -353,16 +279,13 @@
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/InventorySystem.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Animation2DSystem.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Transform3DSystem.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/PlayerControllerSystem.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Entity.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Components.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/TestSystem.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/TestSystem.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/AttributeSystem.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/AttributeSystem.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/Animation.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/Animation.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Masks.h",
 		"/D/C++Projects/VS/3DEnjon/src/AABB.cpp",
 		"/D/C++Projects/VS/3DEnjon/include/Physics/AABB.h",
 		"/D/C++Projects/VS/3DEnjon/include/Math/Maths.h",
@@ -376,7 +299,6 @@
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteSheet.h",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/Vertex.h",
 		"/D/C++Projects/VS/3DEnjon/proc/build.bat",
-		"/D/C++Projects/VS/3DEnjon/include/Math/Vec2.h",
 		"/D/C++Projects/VS/3DEnjon/include/Enjon.h",
 		"/D/C++Projects/VS/Enjon/src/ShaderManager.cpp",
 		"/D/C++Projects/VS/Enjon/include/Graphics/ShaderManager.h",
@@ -439,12 +361,7 @@
 		"/D/Documents/School/Algorithms/7_Homework/src/queue.cpp",
 		"/D/Documents/School/Algorithms/7_Homework/src/queue.h",
 		"/D/Documents/School/Algorithms/Practice/Exam2/src/main.c",
-		"/D/Documents/School/Algorithms/7_Homework/src/stack.cpp",
-		"/D/Documents/School/Algorithms/7_Homework/src/stack.h",
-		"/D/Documents/School/Algorithms/Practice/Exam2/src/stack.c",
-		"/D/Documents/School/Algorithms/Practice/Exam2/include/stack.h",
-		"/D/Documents/School/Algorithms/7_Homework/proc/run",
-		"/D/Documents/School/Algorithms/7_Homework/src/graph_main.cpp"
+		"/D/Documents/School/Algorithms/7_Homework/src/stack.cpp"
 	],
 	"find":
 	{
@@ -463,6 +380,18 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"#if",
+			"512",
+			"Camera.",
+			"\n}",
+			"#if 0",
+			"#if 1",
+			"#if",
+			"if 1",
+			"ENJON_H",
+			"Enjon.h",
+			"Render",
+			"Cartesian",
 			"amount",
 			"MAX_ITEMS",
 			"Render",
@@ -578,19 +507,7 @@
 			"vector",
 			"COLLISION_ITEM",
 			"malloc",
-			"Renderer2DSystem",
-			"Sword",
-			"Updates",
-			"printf",
-			"COLLISION_ITEM",
-			"VelocityGoal",
-			"TransformSystem",
-			"DropRandom",
-			"TransformSystem",
-			"AmountDrawn",
-			"AIController",
-			"CreateItem",
-			"CollideWithP"
+			"Renderer2DSystem"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -617,15 +534,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 35008,
+						"buffer_size": 33206,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								6081,
-								6081
+								6193,
+								6193
 							]
 						],
 						"settings":
@@ -684,7 +601,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 5931.0,
+						"translation.y": 3440.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -692,1199 +609,19 @@
 				},
 				{
 					"buffer": 1,
-					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteBatch.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5833,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2282,
-								2282
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "4da2a177",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								223,
-								11,
-								15,
-								11,
-								7,
-								55,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 2403.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 11,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "/D/C++Projects/VS/3DEnjon/src/SpriteBatch.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6407,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								489,
-								489
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "1372d23a",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								223,
-								11,
-								15,
-								11,
-								10,
-								4,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 340.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 13,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "src/ECS/Animation2DSystem.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 11584,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								9252,
-								9252
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "ab92de6d",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								15,
-								15,
-								59,
-								33,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 3071.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 10,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "/D/C++Projects/VS/3DEnjon/proc/dump.txt",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1543,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1543,
-								1543
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "plain text",
-							"buffer_scroll_name": "6331bb51",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								223,
-								11,
-								15,
-								12,
-								2,
-								32,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"tab_size": 8,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 589.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "src/ECS/ComponentSystems.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 14025,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1242,
-								1242
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "09bd5571",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								6,
-								20,
-								19,
-								17,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 3044.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "src/ECS/CollisionSystem.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 13358,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								11503,
-								11503
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "82b72c48",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								15,
-								15,
-								44,
-								43,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1317.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 505,
-						"regions":
-						{
-							"match":
-							{
-								"flags": 112,
-								"regions":
-								[
-									[
-										146,
-										155
-									],
-									[
-										416,
-										425
-									]
-								],
-								"scope": ""
-							}
-						},
-						"selection":
-						[
-							[
-								43,
-								43
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "find results.hidden-tmlanguage",
-							"detect_indentation": false,
-							"line_numbers": false,
-							"output_tag": 1,
-							"result_base_dir": "",
-							"result_file_regex": "^([A-Za-z\\\\/<].*):$",
-							"result_line_regex": "^ +([0-9]+):",
-							"scroll_past_end": true,
-							"syntax": "Packages/Default/Find Results.hidden-tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "include/ECS/Components.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3891,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								338,
-								338
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "cae51f91",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								6,
-								20,
-								19,
-								21,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "include/SpatialHash.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1374,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								256,
-								256
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "31641c13",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								6,
-								20,
-								19,
-								21,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "src/SpatialHash.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5132,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1311,
-								1311
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "02633158",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								6,
-								20,
-								19,
-								17,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 646.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 11,
-					"file": "include/ECS/Masks.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 869,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								401,
-								401
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "8c8c6192",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								12,
-								22,
-								38,
-								27,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 28.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 12,
-					"type": "text"
-				},
-				{
-					"buffer": 12,
-					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/Window.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1657,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								665,
-								665
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "444eb218",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								223,
-								11,
-								9,
-								8,
-								27,
-								27,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 16,
-					"type": "text"
-				},
-				{
-					"buffer": 13,
-					"file": "/D/C++Projects/VS/3DEnjon/include/Math/Vec2.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2405,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1368,
-								1368
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "d5dad2a0",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								223,
-								11,
-								15,
-								11,
-								7,
-								51,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 291.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 14,
-					"type": "text"
-				},
-				{
-					"buffer": 14,
-					"file": "src/ECS/PlayerControllerSystem.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5221,
-						"regions":
-						{
-							"bookmark_n":
-							{
-								"flags": 144,
-								"regions":
-								[
-									[
-										1742,
-										1742
-									]
-								]
-							}
-						},
-						"selection":
-						[
-							[
-								2128,
-								2128
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "840bfab6",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								15,
-								15,
-								6,
-								59,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1099.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 15,
-					"file": "src/ECS/Transform3DSystem.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9773,
-						"regions":
-						{
-							"bookmark_m":
-							{
-								"flags": 144,
-								"regions":
-								[
-									[
-										4843,
-										4843
-									]
-								]
-							}
-						},
-						"selection":
-						[
-							[
-								1237,
-								1237
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c",
-							"buffer_scroll_name": "c918a525",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								15,
-								15,
-								29,
-								53,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 153.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 16,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/basic.f.glsl",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2464,
+						"buffer_size": 2465,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1269,
-								1269
+								1478,
+								1478
 							]
 						],
 						"settings":
@@ -1943,33 +680,33 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 555.0,
+						"translation.y": 640.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 15,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 17,
-					"file": "include/ECS/PlayerControllerSystem.h",
+					"buffer": 2,
+					"file": "src/ECS/CollisionSystem.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 932,
+						"buffer_size": 13359,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								390,
-								390
+								10546,
+								10546
 							]
 						],
 						"settings":
 						{
 							"bs_sintax": "c",
-							"buffer_scroll_name": "3de0a795",
+							"buffer_scroll_name": "82b72c48",
 							"c_time":
 							[
 								128,
@@ -2002,8 +739,8 @@
 								1,
 								15,
 								15,
-								4,
-								47,
+								44,
+								43,
 								0,
 								0,
 								0,
@@ -2022,10 +759,414 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
+						"translation.y": 4080.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "src/ECS/Transform3DSystem.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8602,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4737,
+								4737
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c",
+							"buffer_scroll_name": "c918a525",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								15,
+								15,
+								29,
+								53,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1332.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2326,
+						"regions":
+						{
+							"match":
+							{
+								"flags": 112,
+								"regions":
+								[
+									[
+										174,
+										181
+									],
+									[
+										309,
+										316
+									],
+									[
+										701,
+										708
+									],
+									[
+										996,
+										1003
+									],
+									[
+										1374,
+										1381
+									],
+									[
+										1654,
+										1661
+									],
+									[
+										1860,
+										1867
+									],
+									[
+										2030,
+										2037
+									],
+									[
+										2237,
+										2244
+									],
+									[
+										2260,
+										2267
+									]
+								],
+								"scope": ""
+							}
+						},
+						"selection":
+						[
+							[
+								2238,
+								2238
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "find results.hidden-tmlanguage",
+							"detect_indentation": false,
+							"line_numbers": false,
+							"output_tag": 2,
+							"result_base_dir": "",
+							"result_file_regex": "^([A-Za-z\\\\/<].*):$",
+							"result_line_regex": "^ +([0-9]+):",
+							"scroll_past_end": true,
+							"syntax": "Packages/Default/Find Results.hidden-tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 442.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/D/C++Projects/VS/3DEnjon/include/Enjon.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1325,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								835,
+								835
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c",
+							"buffer_scroll_name": "e46c592f",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								223,
+								11,
+								15,
+								11,
+								7,
+								51,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C.tmLanguage"
+						},
+						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 17,
+					"stack_index": 6,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 6,
+					"file": "/D/C++Projects/VS/3DEnjon/deps/include/STB/stb_truetype.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 127284,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								17704,
+								17704
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c",
+							"buffer_scroll_name": "30eed553",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								29,
+								7,
+								48,
+								2,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"tab_size": 3,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 7719.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/D/C++Projects/VS/3DEnjon/proc/dump.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1543,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1482,
+								1482
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "plain text",
+							"buffer_scroll_name": "6331bb51",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								223,
+								11,
+								15,
+								12,
+								2,
+								32,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 589.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
 					"type": "text"
 				}
 			]
@@ -2048,11 +1189,18 @@
 				0,
 				1,
 				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
 			]
 		],
 		"cols":
 		[
 			0.0,
+			0.561186650185,
 			1.0
 		],
 		"rows":
@@ -2115,7 +1263,7 @@
 	"show_minimap": false,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": true,
+	"side_bar_visible": false,
 	"side_bar_width": 302.0,
 	"status_bar_visible": false,
 	"template_settings":

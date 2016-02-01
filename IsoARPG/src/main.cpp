@@ -16,8 +16,11 @@
 	#define TESTING 1
 #endif
 
-#if TESTING 
+/**
+* MAIN GAME
+*/
 
+#if 0
 #define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
@@ -36,13 +39,12 @@
 	#define SCREENRES Graphics::DEFAULT
 #endif 
 
+/*-- External/Engine Libraries includes --*/
 #include <Enjon.h>
-#include <Utils/FileUtils.h>
-#include <Math/Random.h>
-
 #include <SDL2/SDL.h>
 #include <GLEW/glew.h>
 
+/*-- Entity Component System includes --*/
 #include <ECS/ComponentSystems.h>
 #include <ECS/PlayerControllerSystem.h>
 #include <ECS/Transform3DSystem.h>
@@ -54,11 +56,13 @@
 #include <ECS/AttributeSystem.h>
 #include <ECS/Entity.h>
 
+/*-- IsoARPG includes --*/
 #include "Animation.h"
 #include "AnimationManager.h"
 #include "SpatialHash.h"
 #include "Level.h"
 
+/*-- Standard Library includes --*/
 #include <stdio.h>
 #include <iostream> 
 #include <time.h>
@@ -83,6 +87,7 @@ using namespace Enjon;
 using namespace ECS;
 using namespace Systems;
 
+/*-- Function Declarations --*/
 void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* Manager, ECS::eid32 Entity);
 void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);
 
@@ -224,7 +229,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 3000;
+	static uint32 AmountDrawn = 5000;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -787,34 +792,11 @@ void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager*
 							1, 0, projection.elements);
 	}
 
-	static int index = 0;
-	static float timer = 0.0f;
-	
-	// if (m_isclicked)
-	// { 
-	// 	timer += 0.1f;
-	// 	if (timer >= 0.2f)
-	// 	{
-	// 		index++;
-	// 		timer = 0.0f;
-	// 	}
-	// 	if (index >= 5)
-	// 	{
-	// 		m_isclicked = false;
-	// 		timer = 0.0f;
-	// 		index = 0;
-	// 	}
-	// }
-
 	static Enjon::Graphics::GLTexture MouseTexture = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Cursor24.png");
  
 	Batch->Begin();	
 	Enjon::Math::Vec4 destRect(InputManager->GetMouseCoords().x, -InputManager->GetMouseCoords().y + SCREENHEIGHT - 16, 16, 16);
 	Enjon::Math::Vec4 uvRect(0, 0, 1, 1);
-	// if (m_isclicked) m_hudbatch.Add(Math::Vec4(destRect.x - 125, destRect.y - 75, 252, 180), m_groundclick.GetUV(index), m_groundclick.texture.id,
-	// 										SetOpacity(Graphics::RGBA8_White(), 0.6f));
-	// m_hudbatch.Add(Math::Vec4(destRect.x + 3.0f, destRect.y - 3.0f, destRect.z, destRect.w), uvRect, 
-	// 			   m_mousecursortexture.id, SetOpacity(Graphics::RGBA8_Black(), 0.5f));
 	Batch->Add(destRect, uvRect, MouseTexture.id);
 	Batch->End();
 	Batch->RenderBatch();
@@ -823,34 +805,36 @@ void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager*
 
 #endif 
 
+/**
+* SYSTEMS TEST
+*/
 
-#if TESTING_PARSER
-
+#if 1
 #include <stdio.h>
-#include <Graphics/SpriteSheet.h>
-#include <IO/ResourceManager.h>
-#include <Math/Maths.h>
-#include <Enjon.h>
-#include <Graphics/Window.h>
-#include <Graphics/SpriteBatch.h>
-#include <Graphics/Camera2D.h>
-#include <Graphics/ShaderManager.h>
+#include <map>
 
-#include "Animation.h"
+#include <Enjon.h>
+#include <Graphics/Font.h>
+
+bool ProcessInput(Enjon::Input::InputManager* Input);
+// void InitFont(void);
+// void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Enjon::Graphics::SpriteBatch& Batch, 
+// 						Enjon::Graphics::ColorRGBA8 Color = Enjon::Graphics::RGBA8_White());
+
+// typedef struct 
+// {
+// 	GLuint TextureID;
+// 	Enjon::Math::iVec2 Size;
+// 	Enjon::Math::iVec2 Bearing;
+// 	GLuint Advance;
+// } Character;
+
+// std::map<GLchar, Character> Characters;
 
 #undef main
 int main(int argc, char** argv)
 {
 	#define WINDOWRUNNING 1
-		
-	struct AnimationProfile* player_walk = CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "walk"); 
-	struct AnimationProfile* player_attack_dagger = CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_dagger"); 
-	struct AnimationProfile* player_attack_bow = CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_bow"); 
-
-	struct Animation Player_Walk = CreateAnimation(player_walk, 0.1f, Orientation::NE);
-	struct Animation Player_Attack_Dagger = CreateAnimation(player_attack_dagger, 0.075f); 
-	struct Animation Player_Attack_Bow = CreateAnimation(player_attack_bow, 0.075f); 
-
 
 #if WINDOWRUNNING
 	Enjon::Init();
@@ -862,24 +846,28 @@ int main(int argc, char** argv)
 
 	Enjon::Utils::FPSLimiter Limiter;
 	Limiter.Init(60.0f);
+	
+	Enjon::Input::InputManager Input;
 
 	Enjon::Graphics::SpriteBatch Batch;
-	Enjon::Graphics::SpriteSheet Sheet; 
+
+	// InitFont();
+
+	Enjon::Graphics::Fonts::Font Zombie_32;
+	Enjon::Graphics::Fonts::Init("../assets/fonts/Zombie/Zombie.ttf", 32, &Zombie_32);
 
 	Batch.Init();
-	Sheet.Init(Enjon::Input::ResourceManager::GetTexture(player_walk->FilePath), Enjon::Math::iVec2(6, 24)); 
 
 	Enjon::Graphics::ShaderManager::Init();
 
-
+	bool Running = true;
 	// Game loop
-	while (true)
+	while (Running)
 	{ 
 		Limiter.Begin();
 
-		static struct Animation* CurrentAnimation;
-		static float increment = 0.1f;
-		static float size = 200.0f;
+		// Process input
+		Running = ProcessInput(&Input);
 
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT); 
 		Camera.Update(); 
@@ -889,7 +877,7 @@ int main(int argc, char** argv)
 		view = Camera.GetCameraMatrix();
 		projection = Enjon::Math::Mat4::Identity();
 
-		GLint shader = Enjon::Graphics::ShaderManager::GetShader("Basic")->GetProgramID();
+		GLint shader = Enjon::Graphics::ShaderManager::GetShader("Text")->GetProgramID();
 		glUseProgram(shader);
 		{
 			glUniform1i(glGetUniformLocation(shader, "tex"),
@@ -900,111 +888,171 @@ int main(int argc, char** argv)
 								1, 0, view.elements);
 			glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
 								1, 0, projection.elements);
-			glUniform1i(glGetUniformLocation(shader, "isLevel"), 0);
 		} 
 	
 		// Begin batch
 		Batch.Begin();
 
-		////////// 
-		// WALK //
-		//////////
-		CurrentAnimation = &Player_Walk; 
-
-		CurrentAnimation->AnimationTimer += CurrentAnimation->AnimationTimerIncrement;
-		if (CurrentAnimation->AnimationTimer >= CurrentAnimation->Profile->Delays[CurrentAnimation->CurrentFrame % CurrentAnimation->Profile->FrameCount])
-		{
-			CurrentAnimation->CurrentFrame++;
-			CurrentAnimation->AnimationTimer = 0.0f;
-			if (CurrentAnimation->CurrentFrame >= CurrentAnimation->BeginningFrame + CurrentAnimation->Profile->FrameCount) 
-					CurrentAnimation->CurrentFrame -= CurrentAnimation->Profile->FrameCount;
-		} 
-	
-		// Draw Walk
-		Batch.Add(Enjon::Math::Vec4(-50, 0, size, size), Sheet.GetUV(CurrentAnimation->CurrentFrame), Sheet.texture.id);
-		
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-		/////////////////// 
-		// ATTACK DAGGER //
-		///////////////////
-		CurrentAnimation = &Player_Attack_Dagger; 
-		
-		CurrentAnimation->AnimationTimer += CurrentAnimation->AnimationTimerIncrement;
-		if (CurrentAnimation->AnimationTimer >= CurrentAnimation->Profile->Delays[CurrentAnimation->CurrentFrame % CurrentAnimation->Profile->FrameCount])
-		{
-			CurrentAnimation->CurrentFrame++;
-			CurrentAnimation->AnimationTimer = 0.0f;
-			if (CurrentAnimation->CurrentFrame >= CurrentAnimation->BeginningFrame + CurrentAnimation->Profile->FrameCount) CurrentAnimation->CurrentFrame -= CurrentAnimation->Profile->FrameCount; 
-		}
-		
-		// Draw Attack Dagger
-		Batch.Add(Enjon::Math::Vec4(-300, 0, size, size), Sheet.GetUV(CurrentAnimation->CurrentFrame), Sheet.texture.id);
-		
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		//////////////// 
-		// ATTACK BOW //
-		////////////////
-		CurrentAnimation = &Player_Attack_Bow; 
-		
-		CurrentAnimation->AnimationTimer += CurrentAnimation->AnimationTimerIncrement;
-		if (CurrentAnimation->AnimationTimer >= CurrentAnimation->Profile->Delays[CurrentAnimation->CurrentFrame % CurrentAnimation->Profile->FrameCount])
-		{
-			CurrentAnimation->CurrentFrame++;
-			CurrentAnimation->AnimationTimer = 0.0f;
-			if (CurrentAnimation->CurrentFrame >= CurrentAnimation->BeginningFrame + CurrentAnimation->Profile->FrameCount) CurrentAnimation->CurrentFrame -= CurrentAnimation->Profile->FrameCount; 
-		}
-		
-		// Draw Attack Bow
-		Batch.Add(Enjon::Math::Vec4(200, 0, size, size), Sheet.GetUV(CurrentAnimation->CurrentFrame), Sheet.texture.id);
+		// Draw text
+		Enjon::Graphics::Fonts::PrintText(0.0f, 0.0f, 0.8f, "I have text!", &Zombie_32, Batch, Enjon::Graphics::RGBA8_Orange());
 
 		// End and render
 		Batch.End();
 		Batch.RenderBatch();
 
+
 		Limiter.End();
 		Window.SwapBuffer();
 	}
 
-	#endif 
-
-	// Delete pointers in animation
-	// free(player_walk.Delays);
-	// free(player_walk.FilePath);
-
-	char ch;
-	scanf("%c", &ch);
+	#endif
 
 	return 0;
 } 
 
+bool ProcessInput(Enjon::Input::InputManager* Input)
+{
+    SDL_Event event;
+//    //Will keep looping until there are no more events to process
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_QUIT:
+                return false;
+                break;
+			case SDL_KEYUP:
+				Input->ReleaseKey(event.key.keysym.sym); 
+				break;
+			case SDL_KEYDOWN:
+				Input->PressKey(event.key.keysym.sym);
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				Input->PressKey(event.button.button);
+				break;
+			case SDL_MOUSEBUTTONUP:
+				Input->ReleaseKey(event.button.button);
+				break;
+			case SDL_MOUSEMOTION:
+				Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+				break;
+			default:
+				break;
+		}
+    }
+
+	if (Input->IsKeyPressed(SDLK_ESCAPE))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+// void InitFont(void)
+// {
+// 	// FreeType
+//     FT_Library ft;
+//     // All functions return a value different than 0 whenever an error occurred
+//     if (FT_Init_FreeType(&ft))
+//         std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+
+//     // Load font as face
+//     FT_Face face;
+//     if (FT_New_Face(ft, "../assets/fonts/Zombie/Zombie.ttf", 0, &face))
+//         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+
+//     // Set size to load glyphs as
+//     FT_Set_Pixel_Sizes(face, 0, 48);
+
+//     // Disable byte-alignment restriction
+//     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); 
+
+//     // Load first 128 characters of ASCII set
+//     for (GLubyte c = 0; c < 128; c++)
+//     {
+//         // Load character glyph 
+//         if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+//         {
+//             std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+//             continue;
+//         }
+//         // Generate texture
+//         GLuint texture;
+//         glGenTextures(1, &texture);
+//         glBindTexture(GL_TEXTURE_2D, texture);
+//         glTexImage2D(
+//             GL_TEXTURE_2D,
+//             0,
+//             GL_RED,
+//             face->glyph->bitmap.width,
+//             face->glyph->bitmap.rows,
+//             0,
+//             GL_RED,
+//             GL_UNSIGNED_BYTE,
+//             face->glyph->bitmap.buffer
+//         );
+//         // Set texture options
+// 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+// 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+// 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+// 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//         // Now store character for later use
+//         Character character = {
+//             texture,
+//             Enjon::Math::iVec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+//             Enjon::Math::iVec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+//             face->glyph->advance.x
+//         };
+//         Characters.insert(std::pair<GLchar, Character>(c, character));
+//     }
+//     glBindTexture(GL_TEXTURE_2D, 0);
+//     // Destroy FreeType once we're finished
+//     FT_Done_Face(face);
+//     FT_Done_FreeType(ft);
+// }
+
+// void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Enjon::Graphics::SpriteBatch& Batch, 
+// 						Enjon::Graphics::ColorRGBA8 Color)
+// {
+// 	// Iterate through all characters
+//     std::string::const_iterator c;
+//     for (c = text.begin(); c != text.end(); c++) 
+//     {
+//         Character ch = Characters[*c];
+
+//         GLfloat xpos = x + ch.Bearing.x * scale;
+//         GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+//         GLfloat w = ch.Size.x * scale;
+//         GLfloat h = ch.Size.y * scale;
+
+//         Enjon::Math::Vec4 DestRect(xpos, ypos, w, h);
+//         Enjon::Math::Vec4 UV(0, 0, 1, 1);
+
+//         // Add to batch
+//         Batch.Add(DestRect, UV, ch.TextureID, Color);
+
+//         // Advance to next character
+//         x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+//     }
+// }
+
 #endif
 
-#if FUNCTION_TESTS
 
-#include "SpatialHash.h"
-#include <Level.h>
+/**
+*  UNIT TESTS
+*/
 
+#if 0
+
+#include <Enjon.h>
+
+#undef main
 int main(int argc, char** argv) {
 
-	// Need to make sure that the level size is normalized from (0, 0) to (width, height)
-	
-	SpatialHash::Grid grid;
-
-	SpatialHash::Init(&grid, 10, 10);
-
-	ECS::eid32 id = 5;
-	V2 position = V2(127, 127); 
-	SpatialHash::FindCell(&grid, id, &position);
-	position = V2(220, 0); 
-	SpatialHash::FindCell(&grid, id, &position);
-
-	while(true);
 
 	return 0;
 }
-
 #endif
 
 
