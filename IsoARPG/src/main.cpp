@@ -225,6 +225,9 @@ int main(int argc, char** argv)
 	Enjon::Graphics::SpriteBatch EnemyBatch;
 	EnemyBatch.Init();
 
+	// Create a particle batch to be used by World
+	EG::Particle2D::ParticleBatch2D* TestParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
+
 	// Create InputManager
 	Input::InputManager Input;
 
@@ -238,11 +241,15 @@ int main(int argc, char** argv)
 	// Create new EntityManager
 	struct EntityManager* World = EntitySystem::NewEntityManager(level.GetWidth(), level.GetWidth(), &Camera);
 
+	// Push back particle batch into world
+	EG::Particle2D::AddParticleBatch(World->ParticleEngine, TestParticleBatch);
+
+
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 10;
+	static uint32 AmountDrawn = 0;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -309,6 +316,25 @@ int main(int argc, char** argv)
 		ViewPort = Math::Vec2(SCREENWIDTH, SCREENHEIGHT) / Camera.GetScale();
 		CameraDims = Math::Vec4(*PlayerStuff, quadDimsStuff / Camera.GetScale());
 
+		//// Totally testing for shiggles
+		static float PCounter = 0.0f;
+		PCounter += 0.05f;
+		static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/orb.png").id;
+		if (PCounter >= 1.0f)
+		{
+			const EM::Vec3* PP = &World->TransformSystem->Transforms[Player].Position;
+
+			// Add 10 at a time
+			for (uint32 i = 0; i < 500; i++)
+			{
+				EG::ColorRGBA8 C = EG::RGBA8(Random::Roll(0, 255), Random::Roll(0, 255), Random::Roll(0, 255), Random::Roll(20, 255));
+				float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(1, 5), PSize = Random::Roll(2, 15);
+				EG::Particle2D::AddParticle(World->TransformSystem->Transforms[Player].Position + EM::Vec3(XPos, YPos, 0.0f), Math::Vec3(0.0f, 0.0f, ZVel), 
+					Math::Vec2(PSize), C, PTex, 0.005f, TestParticleBatch);
+				PCounter = 0.0f;
+			}
+		}
+
 		if (!Paused)
 		{
 			StartTicks = SDL_GetTicks();
@@ -327,6 +353,10 @@ int main(int argc, char** argv)
 			CollisionRunTime = (SDL_GetTicks() - StartTicks);
 
 			Renderer2D::Update(World); 
+
+			// Updates the world's particle engine
+			World->ParticleEngine->Update();
+		
 			PlayerController::Update(World->PlayerControllerSystem);
 	
 			// Clear entities from collision system vectors
@@ -670,6 +700,9 @@ int main(int argc, char** argv)
 										0.4f, "Rendering: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
 										0.3f, RenderTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.8f));
+
+		// Add particles to entity batch
+		EG::Particle2D::Draw(World->ParticleEngine);
 	
 		EntityBatch.End();
 		TextBatch.End(); 

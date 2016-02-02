@@ -29,12 +29,15 @@
 #include "Graphics/Window.h"
 #include "Graphics/ShaderManager.h"
 #include "Graphics/Font.h"
+#include "Graphics/ParticleEngine2D.h"
 
 #include "IO/ImageLoader.h"
 #include "IO/InputManager.h"
 #include "IO/IOManager.h"
 #include "IO/ResourceManager.h"
 #include "IO/TextureCache.h"
+
+#include "Physics/AABB.h"
 
 #include "Defines.h"
 

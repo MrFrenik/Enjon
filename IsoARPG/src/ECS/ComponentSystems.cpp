@@ -56,9 +56,7 @@ namespace ECS { namespace Systems {
 			Manager->Renderer2DSystem 			= Renderer2D::NewRenderer2DSystem(Manager);
 			Manager->InventorySystem 			= Inventory::NewInventorySystem(Manager);
 			Manager->CollisionSystem 			= Collision::NewCollisionSystem(Manager);
-
-			// NOTE(John): Use this as an example for refactoring this file into separate files!
-			Manager->TestSystem 				= Test::NewTestSystem(Manager);
+			Manager->ParticleEngine 			= EG::Particle2D::NewParticleEngine();
 
 			Manager->Width = Width;
 			Manager->Height = Height;

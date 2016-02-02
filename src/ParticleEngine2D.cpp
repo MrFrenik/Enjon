@@ -10,7 +10,6 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 	/* Finds next available particle in particle batch */
 	uint32 FindNextAvailableParticle(ParticleBatch2D* PB);
 
-
 	/* Updates the particle batch */
 	uint32 ParticleBatch2D::Update()
 	{
@@ -24,8 +23,15 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 			// Decay particle lifetime by rate
 			*LT -= *DR;
 
+			Math::Vec3* Position = &p.Position;
+			Math::Vec3* Velocity = &p.Velocity;
+
 			// Move position of particle by its velocity
-			p.Position += p.Velocity;	
+			Position->x += Velocity->x;
+			Position->z += Velocity->z;
+
+			// Add z to y component of position
+			Position->y += Velocity->y + Velocity->z; 
 		}
 
 		return 1;
@@ -43,8 +49,16 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		return 1;
 	}
 
+	/* Creates a ParticleEngine2D* and returns it */
+	ParticleEngine2D* NewParticleEngine()
+	{
+		ParticleEngine2D* PE = new ParticleEngine2D();
+		assert(PE);
+		return PE;	
+	}
+
 	/* Creates a ParticleBatch2D* and returns it */
-	ParticleBatch2D* NewParticleBatch2D(SpriteBatch* SB)
+	ParticleBatch2D* NewParticleBatch(SpriteBatch* SB)
 	{
 		ParticleBatch2D* PB = new ParticleBatch2D();
 		assert(PB);
@@ -67,13 +81,20 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 	}
 
 	/* Adds a particle to a batch */
-	uint32 AddParticle(Math::Vec3 P, Math::Vec3 V, ColorRGBA8 C, GLuint ID, float DR, ParticleBatch2D* PB)
+	uint32 AddParticle(Math::Vec3 P, Math::Vec3 V, Math::Vec2 D, ColorRGBA8 C, GLuint ID, float DR, ParticleBatch2D* PB)
 	{
 		// Get next available index in particles
 		uint32 i = FindNextAvailableParticle(PB);
 
 		// Place back in Particles
-		PB->Particles[i] = {P, V, 1.0f, DR, C, ID};
+		auto* p = &PB->Particles[i];
+		p->Position = P;
+		p->Velocity = V;
+		p->Dimensions = D;
+		p->LifeTime = 1.0f;
+		p->DecayRate = DR; 
+		p->Color = C;
+		p->TexID = ID;
 
 		return 1;
 	}
@@ -86,7 +107,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		// Loop from next available to max
 		for (uint32 i = *NAP; i < MAXPARTICLES; i++)
 		{
-			if (PB->Particles[i].LifeTime == 0.0f)
+			if (PB->Particles[i].LifeTime <= 0.0f)
 			{
 				*NAP = i;
 				return i;
@@ -96,7 +117,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		// Loop from beginning to next available - 1
 		for (uint32 i = 0; i < *NAP - 1; i++)	
 		{
-			if (PB->Particles[i].LifeTime == 0.0f)
+			if (PB->Particles[i].LifeTime <= 0.0f)
 			{
 				*NAP = i;
 				return i;
@@ -106,6 +127,15 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		// Otherwise, loop back around
 		return 0;
 	}	
+
+	/* Frees memory of given particle engine */
+	uint32 FreeEngine(ParticleEngine2D* PE)
+	{
+		assert(PE);
+		FreeBatches(PE);
+		delete(PE);
+		return 1;
+	}
 
 	/* Frees memory of all particle batches */
 	uint32 FreeBatches(ParticleEngine2D* PE)
@@ -118,8 +148,45 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		return 1;
 	}
 
-	///< Now need to focus on drawing particles...
+	/* Adds all particles in each particle batch to be drawn */
+	void Draw(ParticleEngine2D* PE) 
+	{
+		// Loop through all particle batches in engine
+		for (auto PB : PE->ParticleBatches)
+		{
+			// Loop through all particles in PB
+			for (uint32 i = 0; i < MAXPARTICLES; i++)
+			{
+				// Get particle at i
+				auto* P = &PB->Particles[i];
 
-
+				// Only draw if alive
+				if (P->LifeTime > 0.0f)
+				{
+					// Add particle to sprite batch to be rendered
+					PB->SB->Add(Math::Vec4(P->Position.XY(), P->Dimensions), Math::Vec4(0, 0, 1, 1), P->TexID, P->Color, P->Position.y - P->Position.z);
+				}
+			}
+		}
+	}
 
 }}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -3,8 +3,8 @@
 
 #include <SDL2/SDL.h> 
 
-#include "Graphics/Camera2D.h"
-#include "Physics/AABB.h"
+#include "Enjon.h"
+
 #include "ECS/Components.h"
 #include "ECS/Entity.h"
 
@@ -52,7 +52,7 @@ namespace ECS { namespace Systems {
 		struct AttributeSystem* AttributeSystem;
 		struct Renderer2DSystem* Renderer2DSystem;
 		struct InventorySystem* InventorySystem;
-		struct TestSystem* TestSystem;
+		EG::Particle2D::ParticleEngine2D* ParticleEngine;
 
 		bitmask32 Masks[MAX_ENTITIES];
 		Component::EntityType Types[MAX_ENTITIES];
@@ -105,26 +105,12 @@ namespace ECS { namespace Systems {
 		eid32 CreateItem(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, Masks::EntityMask Mask = Masks::Type::ITEM, 
 									Component::EntityType Type = Component::EntityType::ITEM, char* Name = "Item",  Enjon::Graphics::ColorRGBA8 Color = Enjon::Graphics::RGBA8_White());
 
-		// Turns off component
+		/* Turns off component from entity by bitwise ^= */
 		void RemoveComponents(struct EntityManager* Manager, eid32 Entity, bitmask32 Components);
 
-		// Adds components
+		/* Adds components to entity by bitwise | */
 		void AddComponents(bitmask32 Components);
 	}
-	
-	////////////////////////
-	// AIControllerSystem //
-	////////////////////////
-
-	// namespace AIController
-	// { 
-	// 	// Constructs and returns new AIControllerSystem
-	// 	// TODO(John): Write custom allocator for this
-	// 	struct AIControllerSystem* NewAIControllerSystem(struct EntityManager* Manager);
-		
-	// 	// Updates Controller of AI it is attached to
-	// 	void Update(struct AIControllerSystem* System, eid32 Player);	
-	// }
 }}
 
 
