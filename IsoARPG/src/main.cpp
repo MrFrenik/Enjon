@@ -21,7 +21,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -92,6 +92,7 @@ using namespace Systems;
 /*-- Function Declarations --*/
 void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* Manager, ECS::eid32 Entity);
 void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);
+void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position);
 
 SDL_Joystick* Joystick;
 
@@ -250,7 +251,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 10;
+	static uint32 AmountDrawn = 1000;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -317,186 +318,6 @@ int main(int argc, char** argv)
 		ViewPort = Math::Vec2(SCREENWIDTH, SCREENHEIGHT) / Camera.GetScale();
 		CameraDims = Math::Vec4(*PlayerStuff, quadDimsStuff / Camera.GetScale());
 
-		// Totally testing for shiggles
-		static float PCounter = 0.0f;
-		// PCounter += 0.25f;
-		static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_1.png").id;
-		static GLuint PTex2 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_2.png").id;
-		static GLuint PTex3 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_3.png").id;
-		static GLuint PTex4 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/bg-light.png").id;
-
-		const EM::Vec3* PP = &World->TransformSystem->Transforms[Player].Position;
-
-		static EG::ColorRGBA8 R = EG::RGBA8(100, 7, 7, Random::Roll(20, 255));
-		static EG::ColorRGBA8 R2 = EG::RGBA8(200, 50, 50, Random::Roll(20, 255));
-		static EG::ColorRGBA8 R3 = EG::RGBA8(200, 150, 25, Random::Roll(20, 255));
-		static EG::ColorRGBA8 R4 = EG::RGBA8(220, 220, 25, Random::Roll(20, 255));
-		static EG::ColorRGBA8 R5 = EG::RGBA8(220, 100, 25, Random::Roll(20, 255));
-		static EG::ColorRGBA8 Gray = EG::RGBA8(70, 70, 70, Random::Roll(20, 255));
-
-		static float TopSmokeCounter = 0.0f;
-		TopSmokeCounter += 0.025f;
-		if (TopSmokeCounter >= 1.0f)
-		{
-			for (int i = 0; i < 10; i++)
-			{
-				float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 5), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
-								YSize = Random::Roll(75, 100), XSize = Random::Roll(75, 150);
-				int Roll = Random::Roll(1, 3);
-				GLuint tex;
-				if (Roll == 1) tex = PTex;
-				else if (Roll == 2) tex = PTex2;
-				else tex = PTex3; 
-
-				int Alpha = Random::Roll(20, 75);
-
-				EG::Particle2D::AddParticle(Math::Vec3(-20.0f, -950.0f, 0.0f), Math::Vec3(XVel, YVel, ZVel), 
-					Math::Vec2(XSize, YSize), EG::RGBA8(Gray.r, Gray.g, Gray.b, Alpha), tex, 0.005f, TestParticleBatch);
-			}
-			TopSmokeCounter = 0.0f;
-		}
-
-		static float SmokeCounter = 0.0f;
-		SmokeCounter += 0.25f;
-		if (SmokeCounter >= 1.0f)
-		{
-			for (int i = 0; i < 10; i++)
-			{
-				float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 5), XVel = Random::Roll(-2, 2), YVel = Random::Roll(-1, 1),
-								YSize = Random::Roll(100, 150), XSize = Random::Roll(100, 150);
-				int Roll = Random::Roll(1, 3);
-				GLuint tex;
-				if (Roll == 1) tex = PTex;
-				else if (Roll == 2) tex = PTex2;
-				else tex = PTex3; 
-
-				int RedAmount = Random::Roll(0, 50);
-				int Alpha = Random::Roll(20, 255);
-
-
-				EG::Particle2D::AddParticle(Math::Vec3(-20, -980, 0.0f), Math::Vec3(XVel, YVel, ZVel), 
-					Math::Vec2(XSize, YSize), EG::RGBA8(Gray.r + RedAmount, Gray.g, Gray.b + 10.0f, Alpha), tex, 0.025f, TestParticleBatch);
-			}
-			SmokeCounter = 0.0f;
-		}
-
-
-		static float FlameCounter = 0.0f;
-		FlameCounter += 0.25f;
-		if (FlameCounter >= 1.0f)
-		{
-			int RedAmount = Enjon::Random::Roll(200, 255);
-			EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 100, 20, RedAmount);
-			for (int i = 0; i < 1; i++)
-			{
-				float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
-								YSize = Random::Roll(75, 125), XSize = Random::Roll(50, 100);
-				int Roll = Random::Roll(1, 3);
-
-				GLuint tex;
-				if (Roll == 1) tex = PTex;
-				else if (Roll == 2) tex = PTex2;
-				else tex = PTex3; 
-
-				EG::Particle2D::AddParticle(Math::Vec3(0, -1000, 0.0f), Math::Vec3(XVel, YVel, ZVel), 
-					Math::Vec2(XSize, YSize), Fire, tex, 0.025f, TestParticleBatch);
-			}
-			FlameCounter = 0.0f;
-		}
-
-		static float InnerFlameCounter = 0.0f;
-		InnerFlameCounter += 0.25f;
-		if (InnerFlameCounter >= 1.0f)
-		{
-			int RedAmount = Enjon::Random::Roll(200, 255);
-			EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 200, 25, 0);
-			for (int i = 0; i < 1; i++)
-			{
-				float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
-								YSize = Random::Roll(50, 75), XSize = Random::Roll(50, 75);
-				int Roll = Random::Roll(1, 3);
-
-				GLuint tex;
-				if (Roll == 1) tex = PTex;
-				else if (Roll == 2) tex = PTex2;
-				else tex = PTex3; 
-
-				EG::Particle2D::AddParticle(Math::Vec3(0, -1000, 0.0f), Math::Vec3(XVel, YVel, ZVel), 
-					Math::Vec2(XSize, YSize), Fire, tex, 0.05f, TestParticleBatch);
-			}
-			InnerFlameCounter = 0.0f;
-		}
-
-		static float LightFlameCounter = 0.0f;
-		LightFlameCounter += 0.025f;
-		if (LightFlameCounter >= 1.0f)
-		{
-			int RedAmount = Enjon::Random::Roll(200, 255);
-			EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 150, 0, 2);
-			for (int i = 0; i < 4; i++)
-			{
-				float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(1, 2), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
-								YSize = Random::Roll(200, 300), XSize = Random::Roll(200, 300);
-				int Roll = Random::Roll(1, 3);
-
-				GLuint tex;
-				if (Roll == 1) tex = PTex;
-				else if (Roll == 2) tex = PTex2;
-				else tex = PTex3; 
-
-				EG::Particle2D::AddParticle(Math::Vec3(-50.0f, -1000.0f, 0.0f), Math::Vec3(XVel, YVel, ZVel), 
-					Math::Vec2(XSize, YSize), Fire, PTex4, 0.025f, TestParticleBatch);
-			}
-			LightFlameCounter = 0.0f;
-		}
-
-		static float Ember = 0.0f;
-		Ember += 0.05f;
-		if (Ember >= 1.0f)
-		{
-			int RedAmount = Enjon::Random::Roll(200, 255);
-			EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 200, 0, 0);
-			for (int i = 0; i < 15; i++)
-			{
-				float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(5, 10), XVel = Random::Roll(-5, 5), YVel = Random::Roll(-5, 5),
-								YSize = Random::Roll(1, 5), XSize = Random::Roll(1, 3);
-				int Roll = Random::Roll(1, 3);
-
-				GLuint tex;
-				if (Roll == 1) tex = PTex;
-				else if (Roll == 2) tex = PTex2;
-				else tex = PTex3; 
-
-				EG::Particle2D::AddParticle(Math::Vec3(20.0f, -980.0f, 0.0f), Math::Vec3(XVel, YVel, ZVel), 
-					Math::Vec2(XSize, YSize), Fire, PTex, 0.05f, TestParticleBatch);
-			}
-			Ember = 0.0f;
-		}
-
-		static float LightEmber = 0.0f;
-		Ember += 0.025f;
-		if (Ember >= 1.0f)
-		{
-			int RedAmount = Enjon::Random::Roll(200, 255);
-			EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 255, 0, 0);
-			for (int i = 0; i < 15; i++)
-			{
-				float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(5, 10), XVel = Random::Roll(-5, 5), YVel = Random::Roll(-5, 5),
-								YSize = Random::Roll(2, 8), XSize = Random::Roll(2, 5);
-				int Roll = Random::Roll(1, 3);
-
-				GLuint tex;
-				if (Roll == 1) tex = PTex;
-				else if (Roll == 2) tex = PTex2;
-				else tex = PTex3; 
-
-				EG::Particle2D::AddParticle(Math::Vec3(20.0f, -980.0f, 0.0f), Math::Vec3(XVel, YVel, ZVel), 
-					Math::Vec2(XSize, YSize), Fire, PTex, 0.05f, TestParticleBatch);
-			}
-			Ember = 0.0f;
-		}
-
-
 		if (!Paused)
 		{
 			StartTicks = SDL_GetTicks();
@@ -515,6 +336,14 @@ int main(int argc, char** argv)
 			CollisionRunTime = (SDL_GetTicks() - StartTicks);
 
 			Renderer2D::Update(World); 
+
+			float x_pos = 0.0f, y_pos = 0.0f;
+			for (int i = 0; i < 7; i++)
+			{
+				DrawFire(TestParticleBatch, EM::Vec3(0.0f + x_pos, 0.0f + y_pos, 0.0f));
+				x_pos -= 200.0f;
+				y_pos -= 100.0f;
+			}
 
 			// Updates the world's particle engine
 			World->ParticleEngine->Update();
@@ -1069,6 +898,187 @@ void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager*
 	Batch->RenderBatch();
 	Graphics::ShaderManager::UnuseProgram("Basic");
 }
+
+void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position)
+{
+	// Totally testing for shiggles
+	static float PCounter = 0.0f;
+	// PCounter += 0.25f;
+	static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_1.png").id;
+	static GLuint PTex2 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_2.png").id;
+	static GLuint PTex3 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_3.png").id;
+	static GLuint PTex4 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/bg-light.png").id;
+
+	static EG::ColorRGBA8 R = EG::RGBA8(100, 7, 7, Random::Roll(20, 255));
+	static EG::ColorRGBA8 R2 = EG::RGBA8(200, 50, 50, Random::Roll(20, 255));
+	static EG::ColorRGBA8 R3 = EG::RGBA8(200, 150, 25, Random::Roll(20, 255));
+	static EG::ColorRGBA8 R4 = EG::RGBA8(220, 220, 25, Random::Roll(20, 255));
+	static EG::ColorRGBA8 R5 = EG::RGBA8(220, 100, 25, Random::Roll(20, 255));
+	static EG::ColorRGBA8 Gray = EG::RGBA8(70, 70, 70, Random::Roll(20, 255));
+
+	static float TopSmokeCounter = 0.0f;
+	TopSmokeCounter += 0.025f;
+	if (TopSmokeCounter >= 1.0f)
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 5), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
+							YSize = Random::Roll(75, 100), XSize = Random::Roll(75, 150);
+			int Roll = Random::Roll(1, 3);
+			GLuint tex;
+			if (Roll == 1) tex = PTex;
+			else if (Roll == 2) tex = PTex2;
+			else tex = PTex3; 
+
+			int Alpha = Random::Roll(20, 75);
+
+			EG::Particle2D::AddParticle(Math::Vec3(Position.x -20.0f, Position.y + 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Math::Vec2(XSize, YSize), EG::RGBA8(Gray.r, Gray.g, Gray.b, Alpha), tex, 0.005f, Batch);
+		}
+		TopSmokeCounter = 0.0f;
+	}
+
+	static float SmokeCounter = 0.0f;
+	SmokeCounter += 0.25f;
+	if (SmokeCounter >= 1.0f)
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 5), XVel = Random::Roll(-2, 2), YVel = Random::Roll(-1, 1),
+							YSize = Random::Roll(100, 150), XSize = Random::Roll(100, 150);
+			int Roll = Random::Roll(1, 3);
+			GLuint tex;
+			if (Roll == 1) tex = PTex;
+			else if (Roll == 2) tex = PTex2;
+			else tex = PTex3; 
+
+			int RedAmount = Random::Roll(0, 50);
+			int Alpha = Random::Roll(20, 255);
+
+
+			EG::Particle2D::AddParticle(Math::Vec3(Position.x - 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Math::Vec2(XSize, YSize), EG::RGBA8(Gray.r + RedAmount, Gray.g, Gray.b + 10.0f, Alpha), tex, 0.025f, Batch);
+		}
+		SmokeCounter = 0.0f;
+	}
+
+
+	static float FlameCounter = 0.0f;
+	FlameCounter += 0.25f;
+	if (FlameCounter >= 1.0f)
+	{
+		int RedAmount = Enjon::Random::Roll(200, 255);
+		EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 100, 20, RedAmount);
+		for (int i = 0; i < 1; i++)
+		{
+			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
+							YSize = Random::Roll(75, 125), XSize = Random::Roll(50, 100);
+			int Roll = Random::Roll(1, 3);
+
+			GLuint tex;
+			if (Roll == 1) tex = PTex;
+			else if (Roll == 2) tex = PTex2;
+			else tex = PTex3; 
+
+			EG::Particle2D::AddParticle(Math::Vec3(Position.x, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Math::Vec2(XSize, YSize), Fire, tex, 0.025f, Batch);
+		}
+		FlameCounter = 0.0f;
+	}
+
+	static float InnerFlameCounter = 0.0f;
+	InnerFlameCounter += 0.25f;
+	if (InnerFlameCounter >= 1.0f)
+	{
+		int RedAmount = Enjon::Random::Roll(200, 255);
+		EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 200, 25, 0);
+		for (int i = 0; i < 1; i++)
+		{
+			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
+							YSize = Random::Roll(50, 75), XSize = Random::Roll(50, 75);
+			int Roll = Random::Roll(1, 3);
+
+			GLuint tex;
+			if (Roll == 1) tex = PTex;
+			else if (Roll == 2) tex = PTex2;
+			else tex = PTex3; 
+
+			EG::Particle2D::AddParticle(Math::Vec3(Position.x, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Math::Vec2(XSize, YSize), Fire, tex, 0.05f, Batch);
+		}
+		InnerFlameCounter = 0.0f;
+	}
+
+	static float LightFlameCounter = 0.0f;
+	LightFlameCounter += 0.025f;
+	if (LightFlameCounter >= 1.0f)
+	{
+		int RedAmount = Enjon::Random::Roll(200, 255);
+		EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 150, 0, 2);
+		for (int i = 0; i < 4; i++)
+		{
+			float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(1, 2), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
+							YSize = Random::Roll(200, 300), XSize = Random::Roll(200, 300);
+			int Roll = Random::Roll(1, 3);
+
+			GLuint tex;
+			if (Roll == 1) tex = PTex;
+			else if (Roll == 2) tex = PTex2;
+			else tex = PTex3; 
+
+			EG::Particle2D::AddParticle(Math::Vec3(Position.x -50.0f, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Math::Vec2(XSize, YSize), Fire, PTex4, 0.025f, Batch);
+		}
+		LightFlameCounter = 0.0f;
+	}
+
+	static float Ember = 0.0f;
+	Ember += 0.05f;
+	if (Ember >= 1.0f)
+	{
+		int RedAmount = Enjon::Random::Roll(200, 255);
+		EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 200, 0, 0);
+		for (int i = 0; i < 15; i++)
+		{
+			float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(5, 10), XVel = Random::Roll(-5, 5), YVel = Random::Roll(-5, 5),
+							YSize = Random::Roll(1, 5), XSize = Random::Roll(1, 3);
+			int Roll = Random::Roll(1, 3);
+
+			GLuint tex;
+			if (Roll == 1) tex = PTex;
+			else if (Roll == 2) tex = PTex2;
+			else tex = PTex3; 
+
+			EG::Particle2D::AddParticle(Math::Vec3(Position.x + 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Math::Vec2(XSize, YSize), Fire, PTex, 0.05f, Batch);
+		}
+		Ember = 0.0f;
+	}
+
+	static float LightEmber = 0.0f;
+	Ember += 0.025f;
+	if (Ember >= 1.0f)
+	{
+		int RedAmount = Enjon::Random::Roll(200, 255);
+		EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 255, 0, 0);
+		for (int i = 0; i < 15; i++)
+		{
+			float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(5, 10), XVel = Random::Roll(-5, 5), YVel = Random::Roll(-5, 5),
+							YSize = Random::Roll(2, 8), XSize = Random::Roll(2, 5);
+			int Roll = Random::Roll(1, 3);
+
+			GLuint tex;
+			if (Roll == 1) tex = PTex;
+			else if (Roll == 2) tex = PTex2;
+			else tex = PTex3; 
+
+			EG::Particle2D::AddParticle(Math::Vec3(Position.x + 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Math::Vec2(XSize, YSize), Fire, PTex, 0.05f, Batch);
+		}
+		Ember = 0.0f;
+	}
+}
+
 
 #endif 
 

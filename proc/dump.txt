@@ -1,24 +1,18 @@
-ComponentSystems.cpp
 main.cpp
-..\IsoARPG\src\main.cpp(174) : error C2065: 'EntityBatch' : undeclared identifier
-ParticleEngine2D.cpp
 Generating Code...
-Compiling...
+Skipping... (no relevant changes detected)
 Transform3DSystem.cpp
 TestSystem.cpp
 Renderer2DSystem.cpp
 PlayerControllerSystem.cpp
 LabelSystem.cpp
 InventorySystem.cpp
+Entity.cpp
+ComponentSystems.cpp
 CollisionSystem.cpp
 AttributeSystem.cpp
 Animation2DSystem.cpp
 AIControllerSystem.cpp
-Game.cpp
-Enjon.cpp
-Generating Code...
-Skipping... (no relevant changes detected)
-Entity.cpp
 SpatialHash.cpp
 Level.cpp
 AnimationManager.cpp
@@ -36,11 +30,63 @@ Sprite.cpp
 ShaderManager.cpp
 ResourceManager.cpp
 picoPNG.cpp
+ParticleEngine2D.cpp
 IOManager.cpp
 InputManager.cpp
 ImageLoader.cpp
 GLSLProgram.cpp
+Game.cpp
 Font.cpp
 Errors.cpp
+Enjon.cpp
 Camera2D.cpp
 AABB.cpp
+Microsoft (R) Incremental Linker Version 12.00.31101.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/debug 
+/out:main.exe 
+/SUBSYSTEM:CONSOLE 
+/NODEFAULTLIB:msvcrt.lib 
+"/LIBPATH:..\deps\lib" Opengl32.lib SDL2.lib SDL2main.lib glew32.lib glew32s.lib freetype.lib 
+AABB.obj 
+Camera2D.obj 
+Enjon.obj 
+Errors.obj 
+Font.obj 
+Game.obj 
+GLSLProgram.obj 
+ImageLoader.obj 
+InputManager.obj 
+IOManager.obj 
+ParticleEngine2D.obj 
+picoPNG.obj 
+ResourceManager.obj 
+ShaderManager.obj 
+Sprite.obj 
+SpriteBatch.obj 
+TextureCache.obj 
+Timing.obj 
+Window.obj 
+Mat4.obj 
+Vec2.obj 
+Vec3.obj 
+Vec4.obj 
+Camera3D.obj 
+Animation.obj 
+AnimationManager.obj 
+Level.obj 
+main.obj 
+SpatialHash.obj 
+AIControllerSystem.obj 
+Animation2DSystem.obj 
+AttributeSystem.obj 
+CollisionSystem.obj 
+ComponentSystems.obj 
+Entity.obj 
+InventorySystem.obj 
+LabelSystem.obj 
+PlayerControllerSystem.obj 
+Renderer2DSystem.obj 
+TestSystem.obj 
+Transform3DSystem.obj 

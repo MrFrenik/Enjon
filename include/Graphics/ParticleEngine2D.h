@@ -9,7 +9,7 @@
 #include "System/Types.h"
 #include "Math/Maths.h"
 
-const int MAXPARTICLES = 10000;
+const int MAXPARTICLES = 100000;
 
 namespace Enjon { namespace Graphics { namespace Particle2D { 
 
