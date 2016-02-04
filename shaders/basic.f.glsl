@@ -10,14 +10,15 @@ in DATA
 out vec4 color;
 
 uniform sampler2D tex;
-uniform float time;
 uniform bool isLevel;
 uniform bool isPaused;
 uniform bool useOverlay;
-uniform vec2 resolution;
 
 // Multiplier for being hit
-const float MULT = 100.0f, outerRadius = 0.7, innerRadius = 0.1, intensity = 0.5;
+const float MULT = 100.0f; 
+const float FIREMULT = 100.0f;
+
+const float outerRadius = 0.4, innerRadius = 0.1, intensity = 0.5;
 
 // Radius of vignette, where 0.5 results in circle fitting the screen
 const float RADIUS = 0.75;
@@ -35,9 +36,8 @@ vec4 Overlay(vec4 texColor, vec3 overlay, float mixAmount);
 
 void main() 
 {
-	// Sample the texture
 	vec4 texColor = texture2D(tex, fs_in.uv);
-
+	
 	if (isPaused)
 	{
 		if (useOverlay)
@@ -46,7 +46,7 @@ void main()
 			//texColor = Overlay(texColor, SEPIA * DARKGREY, 0.25);
 
 			// Mask color if hit
-			if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texColor * MULT;
+			if (fs_in.color.r == 0.0 && fs_in.color.a == 0.0) color = texColor * MULT;
 			else color = fs_in.color * texColor;
 		}
 		else
@@ -74,11 +74,23 @@ void main()
 	{
 		if (useOverlay)
 		{
-		 	texColor = Overlay(texColor, BLUE, 0.5f);
 			
 			// Mask color if hit
-			if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texColor * MULT;
-			else color = fs_in.color * texColor;
+			if (fs_in.color.r == 0 && fs_in.color.a == 0)
+			{
+			 	texColor = Overlay(texColor, SEPIA, 0.7f);
+				color = texColor * MULT;
+			}
+			else if (fs_in.color.r >= .5 && fs_in.color.a == 0) 
+			{
+				texColor = Overlay(texColor, SEPIA, 50.0f);
+				color = texColor * vec4(2.0f, 1.0f, 1.0f, 1.0f);
+			}
+			else 
+			{
+			 	texColor = Overlay(texColor, BLUE, 0.5f);
+				color = fs_in.color * texColor;
+			}
 		}
 		else
 		{
@@ -115,6 +127,5 @@ vec4 Overlay(vec4 textureColor, vec3 overlay, float mixAmount)
 
 	return texColor;
 }
-
 
 
