@@ -77,7 +77,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 100;
+const int LEVELSIZE = 50;
 
 float DashingCounter = 0.0f;
 
@@ -252,7 +252,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 0;
+	static uint32 AmountDrawn = 100;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -430,6 +430,8 @@ int main(int argc, char** argv)
 		static Graphics::GLTexture orb = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"); 
 		static Graphics::SpriteSheet ArrowSheet;
 		if (!ArrowSheet.IsInit()) ArrowSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1)); 
+
+		EM::Vec2 PC = World->TransformSystem->Transforms[Player].Position.XY();
 	
 		// Draw enemies
 		for (eid32 e = 0; e < World->MaxAvailableID; e++)
@@ -445,7 +447,18 @@ int main(int argc, char** argv)
 			char buffer[25];
 			
 			EntityPosition = &World->TransformSystem->Transforms[e].Position.XY();
+			Ground = &World->TransformSystem->Transforms[e].GroundPosition;
 			const Enjon::Graphics::ColorRGBA8* Color = &World->Renderer2DSystem->Renderers[e].Color;
+
+			// static Math::Vec2 right(1.0f, 0.0f);
+			// EM::Vec2 Diff = EM::Vec2::Normalize(PC - *EntityPosition);
+			// float DotProduct = Diff.DotProduct(right);
+			// float Angle = acos(DotProduct) * 180.0f / M_PI;
+			// if (Diff.y < 0.0f) Angle *= -1;
+	
+			// Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[e].CartesianPosition + Math::Vec2(16.0f)) + Math::Vec2(20.0f, -50.0f));
+			// float boxRadius = 50.0f;
+			// BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(Angle + 90)), sin(Math::ToRadians(Angle + 90))));
 
 			// If AI
 			if (Mask & COMPONENT_AICONTROLLER)
@@ -456,6 +469,9 @@ int main(int argc, char** argv)
 					EntityBatch.Add(Math::Vec4(*EntityPosition, enemydims), uv, beast.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
 					Graphics::Fonts::PrintText(EntityPosition->x + 100.0f, EntityPosition->y + 220.0f, 0.25f, std::to_string(e), &PauseFont, TextBatch, 
 															Graphics::SetOpacity(Graphics::RGBA8_Green(), 0.8f));
+					// Draw shadow
+					// EntityBatch.Add(Math::Vec4(BoxCoords, 80.0f, 300.0f), uv, beast.id,
+					// 							Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(Angle + 90));
 				}
 				// If target
 				if (e == World->PlayerControllerSystem->CurrentTarget)
@@ -643,14 +659,15 @@ int main(int argc, char** argv)
 		Enjon::Math::Vec2 AABBIsomin(Enjon::Math::CartesianToIso(AABB->Min) + Math::Vec2(XDiff, 0.0f));
 		Enjon::Math::Vec2 AABBIsomax(Enjon::Math::CartesianToIso(AABB->Max));
 		float AABBHeight = AABB->Max.y - AABB->Min.y, AABBWidth = AABB->Max.x - AABB->Min.y;
-		// EntityBatch.Add(Math::Vec4(AABBIsomin, Math::Vec2(abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y))), 
-		// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
-		// 					Graphics::SetOpacity(Graphics::RGBA8_Red(), 0.2f), 1.0f, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
+		EntityBatch.Add(Math::Vec4(AABBIsomin, Math::Vec2(abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y))), 
+							Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
+							Graphics::SetOpacity(Graphics::RGBA8_Red(), 0.2f), AABBIsomin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
 
 		// Draw player ground tile 
 		const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;
 		EntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
+		// Draw player shadow
 		EntityBatch.Add(Math::Vec4(GroundPosition->x - 40.0f, GroundPosition->y - 80.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
 									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
 		MapEntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
@@ -702,8 +719,8 @@ int main(int argc, char** argv)
 			uint32 C = -PGP->y / TW;
 
 			// 12 block radius might be the smallest I'd like to go
-			uint32 Radius = 12;
-			uint32 Padding = 4;
+			uint32 Radius = 10;
+			uint32 Padding = 2;
 
 			uint32 MinR = R - Radius;
 			uint32 MaxR = R + Radius + Padding;

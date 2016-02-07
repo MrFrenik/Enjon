@@ -180,6 +180,51 @@ namespace ECS { namespace Systems { namespace Animation2D {
 						// Check for hit frame if attacking
 						if (PlayerState == EntityAnimationState::ATTACKING)
 						{
+							if (ActiveFrame == *BeginningFrame + 1)
+							{
+								// Activate collision with dagger "hit frame"
+								if (CurrentWeapon == Weapons::DAGGER)
+								{
+									// Collision at this point
+									HitFrame = true;
+
+									// Make Weapon visible and collidable
+									eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);
+
+									eid32 id = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+
+									// Set arrow velocity to normalize: mousepos - arrowpos
+									Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
+									Manager->Camera->ConvertScreenToWorld(MousePos);
+									Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].Position.XY();
+
+									// Find vector between the two and normalize
+									Enjon::Math::Vec2 DaggerVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x + 32.0f, Pos.y + 32.0f));
+
+									float speed = 30.0f;
+
+									// Set attack vector of player to this velocity
+									int Mult = 1.0f;
+									Enjon::Math::Vec2 AttackVector;
+									// X < 0
+									if (DaggerVelocity.x < 0 && DaggerVelocity.x >= -0.3f) AttackVector.x = 0.0f;
+									else if (DaggerVelocity.x < 0 && DaggerVelocity.x < -0.3f) AttackVector.x = -1.0f;
+									// X > 0
+									if (DaggerVelocity.x >= 0 && DaggerVelocity.x < 0.5f) AttackVector.x = 0.0f;
+									else if (DaggerVelocity.x >= 0 && DaggerVelocity.x >= 0.5f) AttackVector.x = 1.0f;
+									// Y < 0
+									if (DaggerVelocity.y < 0 && DaggerVelocity.y > -0.3f) AttackVector.y = 0.0f;
+									else if (DaggerVelocity.y < 0 && DaggerVelocity.y <= -0.3f) AttackVector.y = -1.0f;
+									// Y > 0
+									if (DaggerVelocity.y >= 0 && DaggerVelocity.y < 0.3f) AttackVector.y = 0.0f;
+									else if (DaggerVelocity.y >= 0 && DaggerVelocity.y >= 0.3f) AttackVector.y = 1.0f;
+
+
+									Manager->TransformSystem->Transforms[e].AttackVector = AttackVector;
+								}
+
+							}
 							if (ActiveFrame == *BeginningFrame + 3)
 							{
 								// Activate collision with dagger "hit frame"
@@ -190,7 +235,9 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 									// Make Weapon visible and collidable
 									eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
-									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D | COMPONENT_RENDERER2D);
+									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);
+
+									eid32 id = Manager->InventorySystem->Inventories[e].WeaponEquipped;
 								}
 
 								if (CurrentWeapon == Weapons::BOW)
@@ -269,6 +316,5 @@ namespace ECS { namespace Systems { namespace Animation2D {
 	}
 
 }}}
-
 
 
