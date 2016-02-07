@@ -77,7 +77,13 @@ namespace Enjon { namespace Graphics {
 		// Unbind the VAO 
 		glBindVertexArray(0);
 	}
-	
+
+	/* Merges two sprite batches together */
+	void SpriteBatch::MergeGlyphs(SpriteBatch* Other) 
+	{
+		std::vector<Glyph>* OtherGlyphs = Other->GetGlyphs();
+		m_glyphs.insert(m_glyphs.end(), OtherGlyphs->begin(), OtherGlyphs->end());
+	}
 
 	void SpriteBatch::CreateRenderBatches() 
 	{

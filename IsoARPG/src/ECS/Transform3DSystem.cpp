@@ -141,7 +141,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 				WeaponTransform->GroundPosition = *GroundPosition;
 				WeaponTransform->CartesianPosition = Transform->CartesianPosition;
 
-				static float WeaponSize = 80.0f;
+				static float WeaponSize = 128.0f;
 
 				// Calculate AABB
 				Enjon::Physics::AABB NE 	= {V2(Min.x + TILE_SIZE / 2.0f, Min.y - WeaponSize / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize / 2.0f)};

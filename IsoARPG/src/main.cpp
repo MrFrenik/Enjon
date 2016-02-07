@@ -21,7 +21,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -76,6 +76,8 @@ bool isRunning = true;
 bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
+
+const int LEVELSIZE = 100;
 
 float DashingCounter = 0.0f;
 
@@ -174,8 +176,7 @@ int main(int argc, char** argv)
 
 	Level level;
 	Graphics::GLTexture TileTexture;
-	const int levelSize = 100;
-	level.Init(Camera.GetPosition().x, Camera.GetPosition().y, levelSize, levelSize);
+	level.Init(Camera.GetPosition().x, Camera.GetPosition().y, LEVELSIZE, LEVELSIZE);
 	TileTexture = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledblue.png");
 	
 	float x = Camera.GetPosition().x;
@@ -251,7 +252,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1000;
+	static uint32 AmountDrawn = 0;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -337,7 +338,7 @@ int main(int argc, char** argv)
 
 			Renderer2D::Update(World); 
 
-			float x_pos = 0.0f, y_pos = 0.0f;
+			float x_pos = -500.0f, y_pos = -500.0f;
 			for (int i = 0; i < 7; i++)
 			{
 				DrawFire(TestParticleBatch, EM::Vec3(0.0f + x_pos, 0.0f + y_pos, 0.0f));
@@ -404,7 +405,7 @@ int main(int argc, char** argv)
 		} 
 		
 		// Draw map
-		TileBatch.RenderBatch();
+		// TileBatch.RenderBatch();
 
 		// Draw Entities
 		EntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); 
@@ -693,6 +694,45 @@ int main(int argc, char** argv)
 		// Add particles to entity batch
 		EG::Particle2D::Draw(World->ParticleEngine);
 
+		// Draw only the world that surrounds the player
+		{
+			auto TW = 256.0f / 2.0f;
+			EM::Vec2* PGP = &World->TransformSystem->Transforms[Player].CartesianPosition;
+			uint32 R = -PGP->x / TW;
+			uint32 C = -PGP->y / TW;
+
+			// 12 block radius might be the smallest I'd like to go
+			uint32 Radius = 12;
+			uint32 Padding = 4;
+
+			uint32 MinR = R - Radius;
+			uint32 MaxR = R + Radius + Padding;
+			uint32 MinC = C - Radius;
+			uint32 MaxC = C + Radius + Padding;
+
+
+			if (C <= Radius) MinC = 0;
+			if (R <= Radius) MinR = 0;
+			if (C >= LEVELSIZE - Radius - Padding) MaxC = LEVELSIZE;
+			if (R >= LEVELSIZE - Radius - Padding) MaxR = LEVELSIZE;
+
+			auto IsoTiles = level.GetIsoTiles();
+			for (uint32 i = MinR; i < MaxR; i++)
+			{
+				for (uint32 j = MinC; j < MaxC; j++)
+				{
+					auto T = IsoTiles[LEVELSIZE * i + j];
+
+					// If front wall, then lower opacity
+					EG::ColorRGBA8 Color = EG::RGBA8_White();
+					if (i == 0 || i >= LEVELSIZE - 1 || j == 0 || j >= LEVELSIZE - 1) Color = EG::SetOpacity(Color, 0.5f);
+					EntityBatch.Add(Enjon::Math::Vec4(T->pos, T->dims), T->Sheet->GetUV(T->index), T->Sheet->texture.id, Color, T->depth);
+				}
+			}
+
+		}
+
+
 		EntityBatch.End();
 		TextBatch.End(); 
 		MapEntityBatch.End(); 
@@ -745,7 +785,7 @@ int main(int argc, char** argv)
 							1, 0, view.elements);
 
 		// Draw front walls
-		FrontWallBatch.RenderBatch();
+		// FrontWallBatch.RenderBatch();
 
 		// Draw Text
 		shader = Graphics::ShaderManager::GetShader("Text")->GetProgramID();

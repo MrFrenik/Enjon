@@ -83,7 +83,7 @@ void main()
 			}
 			else if (fs_in.color.r >= .5 && fs_in.color.a == 0) 
 			{
-				texColor = Overlay(texColor, SEPIA, 50.0f);
+				texColor = Overlay(texColor, SEPIA, 100.0f);
 				color = texColor * vec4(2.0f, 1.0f, 1.0f, 1.0f);
 			}
 			else 

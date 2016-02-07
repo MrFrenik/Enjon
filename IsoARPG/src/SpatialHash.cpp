@@ -18,6 +18,7 @@ namespace SpatialHash {
 	/* Finds particular cell that a given entity belongs to based on its position */
 	int FindCell(Grid* grid, ECS::eid32 entity, const V2* position, int cell_size)
 	{
+		// Take position out of negative space
 		int posX = -position->x;
 		int posY = -position->y; 
 

@@ -1,4 +1,5 @@
 #include "Level.h" 
+#include "System/Types.h"
 
 #include <IO/ResourceManager.h>
 
@@ -26,10 +27,10 @@ void Level::Init(float x, float y, int rows, int cols)
 	//Push tiles back into level data 
 	float currentX = x;
 	float currentY = y; 
-	float tilewidth = 64.0f;
+	float tilewidth = 256.0f;
 	float tileheight = tilewidth / 2.0f;
-	float wallWidth = 64.0f;
-	float wallHeight = 480.0f;
+	float wallWidth = tilewidth;
+	float wallHeight = 7.6f * tilewidth;
 	int checker = 0;
 	unsigned int index = 0;
 
@@ -50,18 +51,20 @@ void Level::Init(float x, float y, int rows, int cols)
 				if (IsFront(i, j, rows, cols))
 				{
 					// Add a wall to front render iso world
-					m_isoTilesFront.emplace_back(Tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(wallWidth, wallHeight), &m_wallSheet, index));
+					m_isoTilesFront.emplace_back(Tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(wallWidth, wallHeight), currentY, &m_wallSheet, index));
+					
+					m_isotiles.emplace_back(Tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(wallWidth, wallHeight), currentY, &m_wallSheet, index));
 				}
 				else
 				{
 					// Add a wall to iso world
-					m_isotiles.emplace_back(Tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(wallWidth, wallHeight), &m_wallSheet, index));
+					m_isotiles.emplace_back(Tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(wallWidth, wallHeight), currentY, &m_wallSheet, index));
 					// Add coordinates of 2D world to cartesian data
 				}
 
 				//Add coordinates of 2d world to level data vector
 				m_cartesiantiles.emplace_back(Tile(Enjon::Math::IsoToCartesian(Enjon::Math::Vec2(currentX, currentY)), 
-												Enjon::Math::Vec2(tilewidth / 2.0f), &m_tilesheet, index));
+												Enjon::Math::Vec2(tilewidth / 2.0f), 2.0f, &m_tilesheet, index));
 
 			}
 
@@ -72,13 +75,13 @@ void Level::Init(float x, float y, int rows, int cols)
 				index = Enjon::Random::Roll(0, 3);
 				if (index == 0 || index == 1) index = Enjon::Random::Roll(0, 3);
 				if (index == 0) index = Enjon::Random::Roll(0, 3);
-				Tile tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(tilewidth, tileheight), &m_tilesheet, index);
+				Tile tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(tilewidth, tileheight), 2.0f, &m_tilesheet, index);
 				m_isotiles.emplace_back(tile);
 				m_mapTiles.emplace_back(tile);
 
 				//Add coordinates of 2d world to level data vector
 				m_cartesiantiles.emplace_back(Tile(Enjon::Math::IsoToCartesian(Enjon::Math::Vec2(currentX, currentY)), 
-												Enjon::Math::Vec2(tilewidth / 2.0f), &m_tilesheet, index));
+												Enjon::Math::Vec2(tilewidth / 2.0f), 2.0f, &m_tilesheet, index));
 			 }
 
 			//Increment currentX and currentY	
@@ -94,6 +97,15 @@ void Level::Init(float x, float y, int rows, int cols)
 		currentY = y;
 		checker++;
 	} 
+
+	// Resize glyph pointers to glyph vector size
+	m_isoTilePointers.resize(m_isotiles.size()); 
+
+	// Set up glyph pointers to point to corresponding glyphs
+	for (uint32_t i = 0; i < m_isotiles.size(); i++)
+	{	
+		m_isoTilePointers[i] = &m_isotiles[i];
+	}
 
 }
 
@@ -126,7 +138,7 @@ void Level::DrawIsoLevelFront(Enjon::Graphics::SpriteBatch& batch)
 	for (Tile& tile : m_isoTilesFront)
 	{
 		//batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.texture.id);
-		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id, Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA8_White(), 0.7f));
+		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id);
 	}
 }
 

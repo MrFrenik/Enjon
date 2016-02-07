@@ -347,8 +347,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 					EG::Particle2D::AddParticle(EM::Vec3(PP->x + 50.0f + XVel, PP->y + 50.0f + ZVel, 0.0f), EM::Vec3(XVel, XVel, ZVel), 
 						EM::Vec2(XSize * 1.5f, YSize * 1.5f), R, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
 
-					EG::Particle2D::AddParticle(EM::Vec3(PP->x + 50.0f, PP->y + 50.0f, 0.0f), EM::Vec3(XVel + 2.0f, XVel + 2.0f, ZVel - 2.0f), 
-						EM::Vec2(XSize, YSize), R2, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
+					// EG::Particle2D::AddParticle(EM::Vec3(PP->x + 50.0f, PP->y + 50.0f, 0.0f), EM::Vec3(XVel + 2.0f, XVel + 2.0f, ZVel - 2.0f), 
+					// 	EM::Vec2(XSize, YSize), R2, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
 				}
 
 				// If dead, then kill it	

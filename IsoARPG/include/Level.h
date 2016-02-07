@@ -12,19 +12,17 @@
 
 struct Tile
 {
-	Tile();
-	//Tile(Enjon::Graphics::GLTexture Texture, Enjon::Math::Vec2 Pos, Enjon::Math::Vec2 Dims, unsigned int Index)
-	//	: texture(Texture), pos(Pos), dims(Dims), index(Index)
-	//{}
-	Tile(Enjon::Math::Vec2 Pos, Enjon::Math::Vec2 Dims, Enjon::Graphics::SpriteSheet* sheet, unsigned int Index)
-		: pos(Pos), dims(Dims), Sheet(sheet), index(Index)
+	Tile() {}
+	Tile(Enjon::Math::Vec2 Pos, Enjon::Math::Vec2 Dims, float Depth, Enjon::Graphics::SpriteSheet* sheet, unsigned int Index)
+		: pos(Pos), dims(Dims), depth(Depth), Sheet(sheet), index(Index)
 	{}
 
 	//TODO:: Instead of giving each tile a texture, give it a Row/Col position or UV information from a specific spritesheet
 	//Enjon::Graphics::GLTexture texture;
 	unsigned int index;
 	Enjon::Math::Vec2 pos;	
-	Enjon::Math::Vec2 dims; 
+	Enjon::Math::Vec2 dims;
+	float depth; 
 	Enjon::Graphics::SpriteSheet* Sheet;
 };
 
@@ -44,8 +42,11 @@ public:
 	inline int GetWidth() { return m_width; }
 	inline Enjon::Math::Vec2 GetDims() { return Enjon::Math::Vec2(m_width, m_height); }
 
+	inline std::vector<Tile*> GetIsoTiles() { return m_isoTilePointers; }
+
 private:
 	std::vector<Tile> m_isotiles;
+	std::vector<Tile*> m_isoTilePointers;
 	std::vector<Tile> m_mapTiles;
 	std::vector<Tile> m_isoTilesFront;
 	std::vector<Tile> m_isoTilesBack;

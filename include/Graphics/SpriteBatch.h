@@ -169,7 +169,16 @@ namespace Enjon { namespace Graphics {
 		/* Renders entire batch to screen */
 		void RenderBatch();
 
-		unsigned int inline GetRenderBatchesSize() const { return m_renderBatches.size(); }
+		/* Merges two sprite batches together */
+		void MergeGlyphs(SpriteBatch* Other); 
+
+		/* Gets the glyphs of this spritebatch */
+		std::vector<Glyph>* GetGlyphs() { return &m_glyphs; }
+
+		/* Gets the size of the render batch */
+		inline unsigned int GetRenderBatchesSize() const { return m_renderBatches.size(); }
+
+
 
 	private:
 		void CreateRenderBatches();
