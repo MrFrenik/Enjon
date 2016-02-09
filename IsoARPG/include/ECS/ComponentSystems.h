@@ -17,8 +17,6 @@
 #define SCREEN_VERTICAL_CENTER			1440 / 2
 #define SCREEN_HORIZONTAL_CENTER		900 / 2
 
-#define WALKPACE	3.0f
-#define SPRINTPACE  WALKPACE * 2.0f
 
 struct TestSystem;
 struct LabelSystem;

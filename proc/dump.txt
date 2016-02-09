@@ -1,18 +1,20 @@
+PlayerControllerSystem.cpp
+ComponentSystems.cpp
+CollisionSystem.cpp
+Animation2DSystem.cpp
 main.cpp
 Generating Code...
-Skipping... (no relevant changes detected)
+Compiling...
 Transform3DSystem.cpp
 TestSystem.cpp
 Renderer2DSystem.cpp
-PlayerControllerSystem.cpp
 LabelSystem.cpp
 InventorySystem.cpp
-Entity.cpp
-ComponentSystems.cpp
-CollisionSystem.cpp
 AttributeSystem.cpp
-Animation2DSystem.cpp
 AIControllerSystem.cpp
+Generating Code...
+Skipping... (no relevant changes detected)
+Entity.cpp
 SpatialHash.cpp
 Level.cpp
 AnimationManager.cpp

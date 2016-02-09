@@ -77,7 +77,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 50;
+const int LEVELSIZE = 500;
 
 float DashingCounter = 0.0f;
 
@@ -136,7 +136,7 @@ int main(int argc, char** argv)
 	// Create Camera
 	Graphics::Camera2D Camera;
 	Camera.Init(screenWidth, screenHeight);
-	Camera.SetScale(1.0f); 
+	Camera.SetScale(0.75f); 
 	
 	// Create HUDCamera
 	Graphics::Camera2D HUDCamera;
@@ -252,7 +252,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 100;
+	static uint32 AmountDrawn = 2500;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -277,7 +277,7 @@ int main(int argc, char** argv)
 	World->InventorySystem->Inventories[Player].Items.push_back(Sword);
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 100;
+	AmountDrawn = 10000;
 
 	for (int e = 0; e < AmountDrawn; e++)
 	{
@@ -719,7 +719,7 @@ int main(int argc, char** argv)
 			uint32 C = -PGP->y / TW;
 
 			// 12 block radius might be the smallest I'd like to go
-			uint32 Radius = 10;
+			uint32 Radius = 12;
 			uint32 Padding = 2;
 
 			uint32 MinR = R - Radius;

@@ -297,8 +297,12 @@ namespace ECS{ namespace Systems { namespace Collision {
 			*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), EntityPosition->z); 
 			Manager->TransformSystem->Transforms[A_ID].GroundPosition -= Enjon::Math::CartesianToIso(mtd); 
 
+			// if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
+			// 	*ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd) * 1.0f, 0.0f);
+			Enjon::Math::Vec2 Difference = Enjon::Math::Vec2::Normalize(EntityPosition->XY() - ColliderPosition->XY());
+
 			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
-				*ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd) * 1.0f, 0.0f);
+				*ColliderPosition -= Enjon::Math::Vec3(Difference * 30.0f, 0.0f);
 
 			// Update velocities based on "bounce" factor
 			float bf; // Bounce factor 

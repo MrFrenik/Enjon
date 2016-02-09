@@ -31,7 +31,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 			Position->z += Velocity->z;
 
 			// Add z to y component of position
-			Position->y += Velocity->y + Velocity->z; 
+			Position->y += Velocity->y + Velocity->z;
 		}
 
 		return 1;

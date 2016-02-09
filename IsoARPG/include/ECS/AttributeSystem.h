@@ -27,3 +27,28 @@ namespace ECS{ namespace Systems { namespace Attributes {
 
 #endif
 
+/* 
+	Damage component
+	{
+		base damage;
+	}
+
+	Magic component
+	{
+		
+	}
+
+	How do I represent a lightning dagger that has a change to leech health?
+
+	weapon type - dagger
+	base damage - 7-10
+	magic damage - lightning
+	magic damage - leech
+
+	damage component 
+	{
+		float base_damage;
+		float magic_damage;
+	}
+
+*/

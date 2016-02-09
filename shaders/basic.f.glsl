@@ -18,13 +18,13 @@ uniform bool useOverlay;
 const float MULT = 100.0f; 
 const float FIREMULT = 100.0f;
 
-const float outerRadius = 0.4, innerRadius = 0.1, intensity = 0.5;
+const float outerRadius = 0.4, innerRadius = 0.1, intensity = 0.75;
 
 // Radius of vignette, where 0.5 results in circle fitting the screen
 const float RADIUS = 0.75;
 
 // softness of vignette, between 0.0 and 1.0
-const float SOFTNESS = 0.45;
+const float SOFTNESS = 0.8;
 
 /* Colors */
 const vec3 SEPIA = vec3(1.2, 1.0, 0.8);
@@ -58,7 +58,7 @@ void main()
 	{
 		if (useOverlay)
 		{
-			texColor = Overlay(texColor, BLUE, 0.25f);
+			texColor = Overlay(texColor, BLUE, 0.25);
 
 			// Mask color if hit
 			if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texColor * MULT;
@@ -88,7 +88,7 @@ void main()
 			}
 			else 
 			{
-			 	texColor = Overlay(texColor, BLUE, 0.5f);
+			 	texColor = Overlay(texColor, SEPIA, 0.3f);
 				color = fs_in.color * texColor;
 			}
 		}
