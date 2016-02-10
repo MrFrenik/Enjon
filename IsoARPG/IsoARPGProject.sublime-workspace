@@ -83,7 +83,7 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 48119,
+				"buffer_size": 48126,
 				"line_ending": "Windows"
 			}
 		},
@@ -147,7 +147,15 @@
 			"file": "src/ECS/CollisionSystem.cpp",
 			"settings":
 			{
-				"buffer_size": 16613,
+				"buffer_size": 16612,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "include/ECS/PlayerControllerSystem.h",
+			"settings":
+			{
+				"buffer_size": 992,
 				"line_ending": "Windows"
 			}
 		},
@@ -171,7 +179,7 @@
 			"file": "include/ECS/ComponentSystems.h",
 			"settings":
 			{
-				"buffer_size": 4158,
+				"buffer_size": 4100,
 				"line_ending": "Windows"
 			}
 		},
@@ -192,10 +200,18 @@
 			}
 		},
 		{
+			"file": "include/ECS/AttributeSystem.h",
+			"settings":
+			{
+				"buffer_size": 1045,
+				"line_ending": "Windows"
+			}
+		},
+		{
 			"file": "/D/C++Projects/VS/3DEnjon/proc/dump.txt",
 			"settings":
 			{
-				"buffer_size": 1618,
+				"buffer_size": 1650,
 				"line_ending": "Windows"
 			}
 		}
@@ -438,6 +454,17 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"SetScale",
+			"WALKPACE",
+			"collidewithenemy",
+			"amountdrawn",
+			"= ",
+			"intensity",
+			"LEVELSIZE",
+			"LEVELSIZZE",
+			"amountdrawn",
+			"LEVELSIZE",
+			"amountdrawn",
 			"collidewithenemy",
 			"BoxCoords",
 			" + 90",
@@ -554,18 +581,7 @@
 			"SYSTEM TESTS",
 			"#if",
 			"512",
-			"Camera.",
-			"\n}",
-			"#if 0",
-			"#if 1",
-			"#if",
-			"if 1",
-			"ENJON_H",
-			"Enjon.h",
-			"Render",
-			"Cartesian",
-			"amount",
-			"MAX_ITEMS"
+			"Camera."
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -583,7 +599,7 @@
 	"groups":
 	[
 		{
-			"selected": 13,
+			"selected": 0,
 			"sheets":
 			[
 				{
@@ -592,15 +608,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 48119,
+						"buffer_size": 48126,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								7563,
-								7563
+								3273,
+								3273
 							]
 						],
 						"settings":
@@ -659,10 +675,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 3899.0,
+						"translation.y": 1927.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
@@ -741,7 +757,7 @@
 						"translation.y": 209.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
@@ -820,7 +836,7 @@
 						"translation.y": 1943.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 12,
 					"type": "text"
 				},
 				{
@@ -899,7 +915,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 13,
 					"type": "text"
 				},
 				{
@@ -915,8 +931,8 @@
 						"selection":
 						[
 							[
-								1814,
-								1814
+								748,
+								754
 							]
 						],
 						"settings":
@@ -975,10 +991,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 878.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 14,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
@@ -1056,7 +1072,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 13,
+					"stack_index": 16,
 					"type": "text"
 				},
 				{
@@ -1135,7 +1151,7 @@
 						"translation.y": 2119.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 11,
 					"type": "text"
 				},
 				{
@@ -1214,7 +1230,7 @@
 						"translation.y": 4329.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
@@ -1223,15 +1239,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 16613,
+						"buffer_size": 16612,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								12778,
-								12778
+								12755,
+								12755
 							]
 						],
 						"settings":
@@ -1290,7 +1306,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 5281.0,
+						"translation.y": 4686.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 4,
@@ -1298,6 +1314,85 @@
 				},
 				{
 					"buffer": 9,
+					"file": "include/ECS/PlayerControllerSystem.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 992,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								229,
+								229
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c",
+							"buffer_scroll_name": "3de0a795",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								15,
+								15,
+								4,
+								47,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
 					"file": "/D/C++Projects/VS/3DEnjon/src/AABB.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1372,11 +1467,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 14,
 					"type": "text"
 				},
 				{
-					"buffer": 10,
+					"buffer": 11,
 					"file": "/D/C++Projects/VS/3DEnjon/src/Font.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1451,24 +1546,24 @@
 						"translation.y": 1007.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 15,
 					"type": "text"
 				},
 				{
-					"buffer": 11,
+					"buffer": 12,
 					"file": "include/ECS/ComponentSystems.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4158,
+						"buffer_size": 4100,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4158,
-								4158
+								290,
+								290
 							]
 						],
 						"settings":
@@ -1527,14 +1622,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1082.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 12,
+					"buffer": 13,
 					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/ParticleEngine2D.h",
 					"semi_transient": false,
 					"settings":
@@ -1609,11 +1704,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 10,
 					"type": "text"
 				},
 				{
-					"buffer": 13,
+					"buffer": 14,
 					"file": "/D/C++Projects/VS/3DEnjon/src/ParticleEngine2D.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1625,8 +1720,8 @@
 						"selection":
 						[
 							[
-								871,
-								871
+								344,
+								344
 							]
 						],
 						"settings":
@@ -1688,24 +1783,103 @@
 						"translation.y": 27.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
-					"buffer": 14,
-					"file": "/D/C++Projects/VS/3DEnjon/proc/dump.txt",
+					"buffer": 15,
+					"file": "include/ECS/AttributeSystem.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1618,
+						"buffer_size": 1045,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								9,
-								9
+								1040,
+								1040
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c",
+							"buffer_scroll_name": "a1951988",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								15,
+								14,
+								55,
+								58,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 16,
+					"file": "/D/C++Projects/VS/3DEnjon/proc/dump.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1650,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								27,
+								27
 							]
 						],
 						"settings":
@@ -1768,7 +1942,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 12,
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
