@@ -162,7 +162,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 
 					if (System->Targets.size())
 					{
-						Manager->Renderer2DSystem->Renderers[System->CurrentTarget].Color = Enjon::Graphics::RGBA8_White();
+						Manager->Renderer2DSystem->Renderers[System->CurrentTarget].Color = Enjon::Graphics::RGBA16_White();
 
 						printf("getting next target...\n");
 						System->CurrentIndex = (System->CurrentIndex + 1) % System->Targets.size();

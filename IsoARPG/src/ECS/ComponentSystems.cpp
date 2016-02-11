@@ -1,5 +1,4 @@
 #include "ECS/ComponentSystems.h"
-#include "ECS/TestSystem.h"
 #include "ECS/LabelSystem.h"
 #include "ECS/AttributeSystem.h"
 #include "ECS/PlayerControllerSystem.h"
@@ -138,7 +137,7 @@ namespace ECS { namespace Systems {
 
 		// Creats player entity and returns eid
 		eid32 CreatePlayer(struct EntityManager* Manager, Enjon::Input::InputManager* Input, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, 
-						   Enjon::Graphics::SpriteSheet* Sheet, char* Name, float VelocityScale, Enjon::Math::Vec3 Velocity, Enjon::Math::Vec3 VelocityGoal, float Health, Enjon::Graphics::ColorRGBA8 Color)
+						   Enjon::Graphics::SpriteSheet* Sheet, char* Name, float VelocityScale, Enjon::Math::Vec3 Velocity, Enjon::Math::Vec3 VelocityGoal, float Health, Enjon::Graphics::ColorRGBA16 Color)
 		{
 			// Get id for player
 			eid32 Player = CreateEntity(Manager,
@@ -209,7 +208,7 @@ namespace ECS { namespace Systems {
 
 		// Creates ai entity and returns eid
 		eid32 CreateAI(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, char* Name, float VelocityScale,
-						 Enjon::Math::Vec3 Velocity, Enjon::Math::Vec3 VelocityGoal, float Health, Enjon::Graphics::ColorRGBA8 Color)
+						 Enjon::Math::Vec3 Velocity, Enjon::Math::Vec3 VelocityGoal, float Health, Enjon::Graphics::ColorRGBA16 Color)
 		{
 			// Get id for ai
 			eid32 AI = CreateEntity(Manager, 
@@ -272,7 +271,7 @@ namespace ECS { namespace Systems {
 
 		// Creates ai entity and returns eid
 		eid32 CreateItem(struct EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, Masks::EntityMask Mask, 
-								Component::EntityType Type, char* Name, Enjon::Graphics::ColorRGBA8 Color)
+								Component::EntityType Type, char* Name, Enjon::Graphics::ColorRGBA16 Color)
 		{
 			// Get id for ai
 			eid32 Item = CreateEntity(Manager, 

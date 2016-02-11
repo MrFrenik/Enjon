@@ -66,7 +66,7 @@ namespace Enjon { namespace Graphics {
 
 		//Set all vertex colors to magenta
 		for (int i = 0; i < 6; i++) {
-		   SetColor(vertexData[i], 255,0,255,255);
+		   SetColor(vertexData[i], 1.0f,0,1.0f,1.0f);
 		} 
 
 		//Tell opengl to bind our vertex buffer object
@@ -94,7 +94,7 @@ namespace Enjon { namespace Graphics {
 		//This is the position attribute pointer
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 		//This is the color attribute pointer
-		glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, color)); 
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color)); 
 		//This is the UV attribute pointer
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv) );
 

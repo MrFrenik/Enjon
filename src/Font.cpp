@@ -71,7 +71,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	}
 
 	/* Adds a string of tex at (x,y) to given spritebatch */
-	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, Enjon::Graphics::ColorRGBA8 Color)
+	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, Enjon::Graphics::ColorRGBA16 Color)
 	{
 		// Iterate through all characters
 	    std::string::const_iterator c;

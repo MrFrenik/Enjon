@@ -32,7 +32,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 
 	/* Adds a string of tex at (x,y) to given spritebatch */
 	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, 
-						Enjon::Graphics::ColorRGBA8 Color = Enjon::Graphics::RGBA8_White());
+						Enjon::Graphics::ColorRGBA16 Color = Enjon::Graphics::RGBA16_White());
 
 }}}
 

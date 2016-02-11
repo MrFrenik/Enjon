@@ -77,7 +77,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 500;
+const int LEVELSIZE = 40;
 
 float DashingCounter = 0.0f;
 
@@ -252,7 +252,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 2500;
+	static uint32 AmountDrawn = 1000;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -277,7 +277,7 @@ int main(int argc, char** argv)
 	World->InventorySystem->Inventories[Player].Items.push_back(Sword);
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 10000;
+	AmountDrawn = 0;
 
 	for (int e = 0; e < AmountDrawn; e++)
 	{
@@ -339,12 +339,12 @@ int main(int argc, char** argv)
 			Renderer2D::Update(World); 
 
 			float x_pos = -500.0f, y_pos = -500.0f;
-			for (int i = 0; i < 7; i++)
-			{
-				DrawFire(TestParticleBatch, EM::Vec3(0.0f + x_pos, 0.0f + y_pos, 0.0f));
-				x_pos -= 200.0f;
-				y_pos -= 100.0f;
-			}
+			// for (int i = 0; i < 7; i++)
+			// {
+			// 	DrawFire(TestParticleBatch, EM::Vec3(0.0f + x_pos, 0.0f + y_pos, 0.0f));
+			// 	x_pos -= 200.0f;
+			// 	y_pos -= 100.0f;
+			// }
 
 			// Updates the world's particle engine
 			World->ParticleEngine->Update();
@@ -448,7 +448,7 @@ int main(int argc, char** argv)
 			
 			EntityPosition = &World->TransformSystem->Transforms[e].Position.XY();
 			Ground = &World->TransformSystem->Transforms[e].GroundPosition;
-			const Enjon::Graphics::ColorRGBA8* Color = &World->Renderer2DSystem->Renderers[e].Color;
+			const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[e].Color;
 
 			// static Math::Vec2 right(1.0f, 0.0f);
 			// EM::Vec2 Diff = EM::Vec2::Normalize(PC - *EntityPosition);
@@ -468,17 +468,17 @@ int main(int argc, char** argv)
 				{
 					EntityBatch.Add(Math::Vec4(*EntityPosition, enemydims), uv, beast.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
 					Graphics::Fonts::PrintText(EntityPosition->x + 100.0f, EntityPosition->y + 220.0f, 0.25f, std::to_string(e), &PauseFont, TextBatch, 
-															Graphics::SetOpacity(Graphics::RGBA8_Green(), 0.8f));
+															Graphics::SetOpacity(Graphics::RGBA16_Green(), 0.8f));
 					// Draw shadow
 					// EntityBatch.Add(Math::Vec4(BoxCoords, 80.0f, 300.0f), uv, beast.id,
-					// 							Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(Angle + 90));
+					// 							Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(Angle + 90));
 				}
 				// If target
 				if (e == World->PlayerControllerSystem->CurrentTarget)
 				{
 					Math::Vec2 ReticleDims(94.0f, 47.0f);
 					Math::Vec2 Position = World->TransformSystem->Transforms[e].GroundPosition - Math::Vec2(15.0f, 5.0f);
-					EntityBatch.Add(Math::Vec4(Position.x, Position.y, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), TargetSheet.texture.id, Enjon::Graphics::RGBA8_Red(), Position.y);
+					EntityBatch.Add(Math::Vec4(Position.x, Position.y, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), TargetSheet.texture.id, Enjon::Graphics::RGBA16_Red(), Position.y);
 				}
 
 			}
@@ -518,9 +518,9 @@ int main(int argc, char** argv)
 			if (World->Types[e] != ECS::Component::EntityType::ITEM && Camera.IsBoundBoxInCamView(*Ground, Math::Vec2(64.0f, 32.0f)))
 			{
 				EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-										Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f), 1.0f);
+										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);
 				MapEntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-										Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f), 1.0f);
+										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.7f), 1.0f);
 			}
 		}
 
@@ -530,7 +530,7 @@ int main(int argc, char** argv)
 		// Math::Vec2 ReticleDims(94.0f, 47.0f);
 		// Math::Vec2 Position = World->TransformSystem->Transforms[Player].GroundPosition - Math::Vec2(17.0f, 0.0f);
 		// EntityBatch.Add(Math::Vec4(Position.x, Position.y + World->TransformSystem->Transforms[Player].Position.z, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), ReticleSheet.texture.id, 
-		// 							Graphics::RGBA8_White(), Position.y + World->TransformSystem->Transforms[Player].Position.z);	
+		// 							Graphics::RGBA16_White(), Position.y + World->TransformSystem->Transforms[Player].Position.z);	
 
 		// Draw player
 
@@ -555,7 +555,7 @@ int main(int argc, char** argv)
 			for (int i = 0; i < 5; i++)
 			{
 				Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
-				Enjon::Graphics::ColorRGBA8 DashColor = World->Renderer2DSystem->Renderers[Player].Color;
+				Enjon::Graphics::ColorRGBA16 DashColor = World->Renderer2DSystem->Renderers[Player].Color;
 				Enjon::Math::Vec2 PP = World->TransformSystem->Transforms[Player].Position.XY();
 				Enjon::Math::Vec2 PV = World->TransformSystem->Transforms[Player].Velocity.XY();
 				PP.x -= (i + i*0.75f) * PV.x;
@@ -597,7 +597,7 @@ int main(int argc, char** argv)
 		float boxRadius = 50.0f;
 		BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle -40)), sin(Math::ToRadians(AimAngle - 40))));
 		// EntityBatch.Add(Math::Vec4(BoxCoords, 100, 50), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png").id, 
-		// 					Graphics::SetOpacity(Graphics::RGBA8_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 45), Graphics::CoordinateFormat::ISOMETRIC);
+		// 					Graphics::SetOpacity(Graphics::RGBA16_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 45), Graphics::CoordinateFormat::ISOMETRIC);
 
 
 		Enjon::Math::Vec2 AimCoords(World->TransformSystem->Transforms[Player].Position.XY() + Math::Vec2(100.0f, -100.0f));
@@ -609,7 +609,7 @@ int main(int argc, char** argv)
 		static float aim_count2 = 0.0f;
 		aim_count += 0.5f;
 		static Enjon::uint32 aim_index = 0;
-		static Graphics::ColorRGBA8 AimColor;
+		static Graphics::ColorRGBA16 AimColor;
 		if (aim_count >= 1.0f)
 		{
 			if (aim_index == 0)
@@ -624,11 +624,11 @@ int main(int argc, char** argv)
 			}
 			else if (aim_index == 7)
 			{
-				AimColor = Graphics::RGBA8_Red();
+				AimColor = Graphics::RGBA16_Red();
 				aim_count2 += 0.025f;
 				if (aim_count2 >= 1.0f)
 				{
-					AimColor = Graphics::RGBA8_White();
+					AimColor = Graphics::RGBA16_White();
 					aim_index = 0;
 					aim_count = 0.0f;
 					aim_count2 = 0.0f;
@@ -637,7 +637,7 @@ int main(int argc, char** argv)
 			}
 			else
 			{
-				AimColor = Graphics::RGBA8_White();
+				AimColor = Graphics::RGBA16_White();
 				aim_index++;
 				aim_count = 0.0f;
 			}
@@ -648,7 +648,7 @@ int main(int argc, char** argv)
 
 	
 		Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
-		const Enjon::Graphics::ColorRGBA8* Color = &World->Renderer2DSystem->Renderers[Player].Color;
+		const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[Player].Color;
 		Enjon::Math::Vec2* PlayerPosition = &World->TransformSystem->Transforms[Player].Position.XY();
 		EntityBatch.Add(Math::Vec4(*PlayerPosition, dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
 
@@ -661,28 +661,28 @@ int main(int argc, char** argv)
 		float AABBHeight = AABB->Max.y - AABB->Min.y, AABBWidth = AABB->Max.x - AABB->Min.y;
 		EntityBatch.Add(Math::Vec4(AABBIsomin, Math::Vec2(abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y))), 
 							Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
-							Graphics::SetOpacity(Graphics::RGBA8_Red(), 0.2f), AABBIsomin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
+							Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), AABBIsomin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
 
 		// Draw player ground tile 
 		const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;
 		EntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.2f));
+									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f));
 		// Draw player shadow
 		EntityBatch.Add(Math::Vec4(GroundPosition->x - 40.0f, GroundPosition->y - 80.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
-									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
+									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
 		MapEntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-									Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
+									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.7f));
 
 		// Cartesian AABB overlay
 		// EntityBatch.Add(Math::Vec4(AABB->Min, Math::Vec2(abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y))), Math::Vec4(0, 0, 1, 1), 0,
-		// 							Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
+		// 							Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.7f));
 		// EntityBatch.Add(Math::Vec4(A->x, A->y, TILE_SIZE, TILE_SIZE), Math::Vec4(0, 0, 1, 1), 0,
-		// 							Graphics::SetOpacity(Graphics::RGBA8_Black(), 0.7f));
+		// 							Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.7f));
 
 
 		// Add an overlay to the Map for better viewing
 		MapEntityBatch.Add(Math::Vec4(-3100, -3150, 6250, 3100), Math::Vec4(0, 0, 1, 1), Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
-								Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA8_White(), 0.7f), 100.0f);
+								Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_White(), 0.7f), 100.0f);
 
 		if (Paused)
 		{
@@ -692,21 +692,21 @@ int main(int argc, char** argv)
 
 		// Add FPS
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
-										0.4f, "FPS: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.5f));
+										0.4f, "FPS: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 100.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
-										0.3f, FPSString, &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.8f));
+										0.3f, FPSString, &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Add CollisionTime
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
-										0.4f, "Collisions: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.5f));
+										0.4f, "Collisions: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
-										0.3f, CollisionTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.8f));
+										0.3f, CollisionTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Add RenderTime
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
-										0.4f, "Rendering: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.5f));
+										0.4f, "Rendering: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
-										0.3f, RenderTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA8_White(), 0.8f));
+										0.3f, RenderTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Add particles to entity batch
 		EG::Particle2D::Draw(World->ParticleEngine);
@@ -741,12 +741,11 @@ int main(int argc, char** argv)
 					auto T = IsoTiles[LEVELSIZE * i + j];
 
 					// If front wall, then lower opacity
-					EG::ColorRGBA8 Color = EG::RGBA8_White();
+					EG::ColorRGBA16 Color = EG::RGBA16_White();
 					if (i == 0 || i >= LEVELSIZE - 1 || j == 0 || j >= LEVELSIZE - 1) Color = EG::SetOpacity(Color, 0.5f);
 					EntityBatch.Add(Enjon::Math::Vec4(T->pos, T->dims), T->Sheet->GetUV(T->index), T->Sheet->texture.id, Color, T->depth);
 				}
 			}
-
 		}
 
 
@@ -966,20 +965,16 @@ void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Posi
 	static GLuint PTex3 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_3.png").id;
 	static GLuint PTex4 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/bg-light.png").id;
 
-	static EG::ColorRGBA8 R = EG::RGBA8(100, 7, 7, Random::Roll(20, 255));
-	static EG::ColorRGBA8 R2 = EG::RGBA8(200, 50, 50, Random::Roll(20, 255));
-	static EG::ColorRGBA8 R3 = EG::RGBA8(200, 150, 25, Random::Roll(20, 255));
-	static EG::ColorRGBA8 R4 = EG::RGBA8(220, 220, 25, Random::Roll(20, 255));
-	static EG::ColorRGBA8 R5 = EG::RGBA8(220, 100, 25, Random::Roll(20, 255));
-	static EG::ColorRGBA8 Gray = EG::RGBA8(70, 70, 70, Random::Roll(20, 255));
+	static EG::ColorRGBA16 Gray = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
 
+	/*
 	static float TopSmokeCounter = 0.0f;
 	TopSmokeCounter += 0.025f;
 	if (TopSmokeCounter >= 1.0f)
 	{
 		for (int i = 0; i < 10; i++)
 		{
-			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 5), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
+			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(1, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
 							YSize = Random::Roll(75, 100), XSize = Random::Roll(75, 150);
 			int Roll = Random::Roll(1, 3);
 			GLuint tex;
@@ -987,13 +982,14 @@ void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Posi
 			else if (Roll == 2) tex = PTex2;
 			else tex = PTex3; 
 
-			int Alpha = Random::Roll(20, 75);
+			int Alpha = Random::Roll(0.3f, 0.8f);
 
-			EG::Particle2D::AddParticle(Math::Vec3(Position.x -20.0f, Position.y + 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
-				Math::Vec2(XSize, YSize), EG::RGBA8(Gray.r, Gray.g, Gray.b, Alpha), tex, 0.005f, Batch);
+			EG::Particle2D::AddParticle(Math::Vec3(Position.x -20.0f, Position.y + 70.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Math::Vec2(XSize, YSize), EG::RGBA16(Gray.r + 0.2f, Gray.g, Gray.b, Gray.a - Alpha), tex, 0.005f, Batch);
 		}
 		TopSmokeCounter = 0.0f;
 	}
+	*/
 
 	static float SmokeCounter = 0.0f;
 	SmokeCounter += 0.25f;
@@ -1010,22 +1006,20 @@ void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Posi
 			else tex = PTex3; 
 
 			int RedAmount = Random::Roll(0, 50);
-			int Alpha = Random::Roll(20, 255);
+			int Alpha = Random::Roll(0.7f, 1.0f);
 
 
 			EG::Particle2D::AddParticle(Math::Vec3(Position.x - 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
-				Math::Vec2(XSize, YSize), EG::RGBA8(Gray.r + RedAmount, Gray.g, Gray.b + 10.0f, Alpha), tex, 0.025f, Batch);
+				Math::Vec2(XSize, YSize), EG::RGBA16(Gray.r, Gray.g, Gray.b + 0.1f, Gray.a - Alpha), tex, 0.025f, Batch);
 		}
 		SmokeCounter = 0.0f;
 	}
-
 
 	static float FlameCounter = 0.0f;
 	FlameCounter += 0.25f;
 	if (FlameCounter >= 1.0f)
 	{
-		int RedAmount = Enjon::Random::Roll(200, 255);
-		EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 100, 20, RedAmount);
+		EG::ColorRGBA16 Fire = EG::RGBA16(3.0f, 0.3f, 0.1f, 1.0f);
 		for (int i = 0; i < 1; i++)
 		{
 			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
@@ -1043,12 +1037,12 @@ void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Posi
 		FlameCounter = 0.0f;
 	}
 
+	
 	static float InnerFlameCounter = 0.0f;
-	InnerFlameCounter += 0.25f;
+	InnerFlameCounter += 0.05f;
 	if (InnerFlameCounter >= 1.0f)
 	{
-		int RedAmount = Enjon::Random::Roll(200, 255);
-		EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 200, 25, 0);
+		EG::ColorRGBA16 Fire = EG::RGBA16(5.0f, 0.8f, 0.1f, 2.0f);
 		for (int i = 0; i < 1; i++)
 		{
 			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
@@ -1070,8 +1064,7 @@ void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Posi
 	LightFlameCounter += 0.025f;
 	if (LightFlameCounter >= 1.0f)
 	{
-		int RedAmount = Enjon::Random::Roll(200, 255);
-		EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 150, 0, 2);
+		EG::ColorRGBA16 Fire = EG::RGBA16(8.0f, 1.6f, 0.0f, 0.005f);
 		for (int i = 0; i < 4; i++)
 		{
 			float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(1, 2), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
@@ -1083,7 +1076,7 @@ void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Posi
 			else if (Roll == 2) tex = PTex2;
 			else tex = PTex3; 
 
-			EG::Particle2D::AddParticle(Math::Vec3(Position.x -50.0f, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+			EG::Particle2D::AddParticle(Math::Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
 				Math::Vec2(XSize, YSize), Fire, PTex4, 0.025f, Batch);
 		}
 		LightFlameCounter = 0.0f;
@@ -1093,35 +1086,11 @@ void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Posi
 	Ember += 0.05f;
 	if (Ember >= 1.0f)
 	{
-		int RedAmount = Enjon::Random::Roll(200, 255);
-		EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 200, 0, 0);
+		EG::ColorRGBA16 Fire = EG::RGBA16(5.0f, 0.8f, 0.0f, 5.0f);
 		for (int i = 0; i < 15; i++)
 		{
 			float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(5, 10), XVel = Random::Roll(-5, 5), YVel = Random::Roll(-5, 5),
 							YSize = Random::Roll(1, 5), XSize = Random::Roll(1, 3);
-			int Roll = Random::Roll(1, 3);
-
-			GLuint tex;
-			if (Roll == 1) tex = PTex;
-			else if (Roll == 2) tex = PTex2;
-			else tex = PTex3; 
-
-			EG::Particle2D::AddParticle(Math::Vec3(Position.x + 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
-				Math::Vec2(XSize, YSize), Fire, PTex, 0.05f, Batch);
-		}
-		Ember = 0.0f;
-	}
-
-	static float LightEmber = 0.0f;
-	Ember += 0.025f;
-	if (Ember >= 1.0f)
-	{
-		int RedAmount = Enjon::Random::Roll(200, 255);
-		EG::ColorRGBA8 Fire = EG::RGBA8(RedAmount, 255, 0, 0);
-		for (int i = 0; i < 15; i++)
-		{
-			float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(5, 10), XVel = Random::Roll(-5, 5), YVel = Random::Roll(-5, 5),
-							YSize = Random::Roll(2, 8), XSize = Random::Roll(2, 5);
 			int Roll = Random::Roll(1, 3);
 
 			GLuint tex;
@@ -1153,7 +1122,7 @@ void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Posi
 bool ProcessInput(Enjon::Input::InputManager* Input);
 // void InitFont(void);
 // void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Enjon::Graphics::SpriteBatch& Batch, 
-// 						Enjon::Graphics::ColorRGBA8 Color = Enjon::Graphics::RGBA8_White());
+// 						Enjon::Graphics::ColorRGBA16 Color = Enjon::Graphics::RGBA16_White());
 
 // typedef struct 
 // {
@@ -1228,7 +1197,7 @@ int main(int argc, char** argv)
 		Batch.Begin();
 
 		// Draw text
-		Enjon::Graphics::Fonts::PrintText(0.0f, 0.0f, 0.8f, "I have text!", &Zombie_32, Batch, Enjon::Graphics::RGBA8_Orange());
+		Enjon::Graphics::Fonts::PrintText(0.0f, 0.0f, 0.8f, "I have text!", &Zombie_32, Batch, Enjon::Graphics::RGBA16_Orange());
 
 		// End and render
 		Batch.End();
@@ -1345,7 +1314,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input)
 // }
 
 // void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Enjon::Graphics::SpriteBatch& Batch, 
-// 						Enjon::Graphics::ColorRGBA8 Color)
+// 						Enjon::Graphics::ColorRGBA16 Color)
 // {
 // 	// Iterate through all characters
 //     std::string::const_iterator c;

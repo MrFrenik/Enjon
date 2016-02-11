@@ -59,10 +59,7 @@ void main()
 		if (useOverlay)
 		{
 			texColor = Overlay(texColor, BLUE, 0.25);
-
-			// Mask color if hit
-			if (fs_in.color.r == 0 && fs_in.color.a == 0) color = texColor * MULT;
-			else color = fs_in.color * texColor;
+			color = fs_in.color * texColor;
 		}
 		else
 		{
@@ -75,26 +72,12 @@ void main()
 		if (useOverlay)
 		{
 			
-			// Mask color if hit
-			if (fs_in.color.r == 0 && fs_in.color.a == 0)
-			{
-			 	texColor = Overlay(texColor, SEPIA, 0.7f);
-				color = texColor * MULT;
-			}
-			else if (fs_in.color.r >= .5 && fs_in.color.a == 0) 
-			{
-				texColor = Overlay(texColor, SEPIA, 100.0f);
-				color = texColor * vec4(2.0f, 1.0f, 1.0f, 1.0f);
-			}
-			else 
-			{
-			 	texColor = Overlay(texColor, SEPIA, 0.3f);
-				color = fs_in.color * texColor;
-			}
+		 	texColor = Overlay(texColor, SEPIA, 0.3f);
+			color = fs_in.color * texColor;
 		}
 		else
 		{
-			color = fs_in.color * texColor;
+			color = fs_in.color * texture2D(tex, fs_in.uv);
 		}
 
 	}

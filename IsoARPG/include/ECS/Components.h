@@ -133,7 +133,7 @@ namespace ECS { namespace Component {
 	typedef struct 
 	{
 		eid32 Entity;
-		Enjon::Graphics::ColorRGBA8 Color;
+		Enjon::Graphics::ColorRGBA16 Color;
 		Enjon::Graphics::SpriteBatch* Batch;
 		// NOTE(John): Should I add a spritebatch component here as well?
 	} Renderer2DComponent;

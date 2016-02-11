@@ -46,18 +46,25 @@ namespace Enjon { namespace Graphics {
 		CreateRenderBatches();
 	} 
 
-	void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA8& color /* = ColorRGBA8(255) */, float depth /* = 0.0f ) */ )
+	void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color /* = ColorRGBA16(255) */, float depth /* = 0.0f ) */ )
 	{ 
 		// Place back new glyph
 		m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color));
 	}
 
 	/* Adds glpyh to spritebatch to be rendered with specified rotation */
-	void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA8& color, float depth, float angle, Graphics::CoordinateFormat format)
+	void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, Graphics::CoordinateFormat format)
 	{
 		// Place back new glyph
 		m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color, angle, format));
 	}
+
+	/* Adds glpyh to spritebatch to be rendered with 16bit color */
+	// void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth)
+	// {
+	// 	// Place back new glyph
+	// 	m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color));
+	// }
 
 	void SpriteBatch::RenderBatch() 
 	{ 
@@ -172,7 +179,7 @@ namespace Enjon { namespace Graphics {
 		// This is the position attribute pointer 
 		glVertexAttribPointer(GL_VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 		// This is the color attribute pointer 
-		glVertexAttribPointer(GL_VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+		glVertexAttribPointer(GL_VERTEX_ATTRIB_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
 		// This is the UV attribute pointer 
 		glVertexAttribPointer(GL_VERTEX_ATTRIB_UV, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
 

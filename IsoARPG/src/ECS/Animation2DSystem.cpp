@@ -49,8 +49,8 @@ namespace ECS { namespace Systems { namespace Animation2D {
 			// Change colors based on health	
 			if (Manager->AttributeSystem->Masks[e] & Masks::Type::AI)
 			{
-				if (HealthComponent->Health <= 50.0f) Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA8_Orange();
-				if (HealthComponent->Health <= 20.0f) Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA8_Red();
+				if (HealthComponent->Health <= 50.0f) Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16_Orange();
+				if (HealthComponent->Health <= 20.0f) Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16_Red();
 			}
 
 			// If has an animation component
@@ -64,11 +64,11 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::DAMAGED)
 				{
-					Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA8(0, 0, 0, 0);  // damaged color for now 
+					Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16(100.0f, 100.0f, 100.0f, 100.0f);  // damaged color for now 
 					damaged_counter += 0.1f;
 					if (damaged_counter >= 0.5f)
 					{
-						Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA8_White();  
+						Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16_White();  
 						Manager->AttributeSystem->Masks[e] &= ~Masks::GeneralOptions::DAMAGED;
 						damaged_counter = 0.0f;
 					}						

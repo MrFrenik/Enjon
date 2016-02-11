@@ -52,7 +52,7 @@ namespace Enjon { namespace Graphics {
 		return NewVec;	
 	}
 
-	inline Glyph NewGlyph(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, float depth, const ColorRGBA8& color)
+	inline Glyph NewGlyph(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, float depth, const ColorRGBA16& color)
 	{
 		Glyph glyph;
 
@@ -77,7 +77,7 @@ namespace Enjon { namespace Graphics {
 		return glyph;
 	}
 
-	inline Glyph NewGlyph(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, float depth, const ColorRGBA8& color, float angle, Graphics::CoordinateFormat Format)
+	inline Glyph NewGlyph(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, float depth, const ColorRGBA16& color, float angle, Graphics::CoordinateFormat Format)
 	{
 		Glyph glyph;
 
@@ -161,10 +161,10 @@ namespace Enjon { namespace Graphics {
 		void End();
 
 		/* Adds glpyh to spritebatch to be rendered */
-		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture = 0, const ColorRGBA8& color = RGBA8(255), float depth = 0.0f);
+		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture = 0, const ColorRGBA16& color = RGBA16(1.0f), float depth = 0.0f);
 
 		/* Adds glpyh to spritebatch to be rendered with specified rotation */
-		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA8& color, float depth, float angle, CoordinateFormat Format = CoordinateFormat::CARTESIAN);
+		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, CoordinateFormat Format = CoordinateFormat::CARTESIAN);
 
 		/* Renders entire batch to screen */
 		void RenderBatch();

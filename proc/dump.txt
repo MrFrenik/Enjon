@@ -1,21 +1,18 @@
-PlayerControllerSystem.cpp
 ComponentSystems.cpp
-CollisionSystem.cpp
-Animation2DSystem.cpp
-main.cpp
-Generating Code...
-Compiling...
-Transform3DSystem.cpp
-TestSystem.cpp
-Renderer2DSystem.cpp
-LabelSystem.cpp
-InventorySystem.cpp
-AttributeSystem.cpp
-AIControllerSystem.cpp
 Generating Code...
 Skipping... (no relevant changes detected)
+Transform3DSystem.cpp
+Renderer2DSystem.cpp
+PlayerControllerSystem.cpp
+LabelSystem.cpp
+InventorySystem.cpp
 Entity.cpp
+CollisionSystem.cpp
+AttributeSystem.cpp
+Animation2DSystem.cpp
+AIControllerSystem.cpp
 SpatialHash.cpp
+main.cpp
 Level.cpp
 AnimationManager.cpp
 Animation.cpp
@@ -90,5 +87,4 @@ InventorySystem.obj
 LabelSystem.obj 
 PlayerControllerSystem.obj 
 Renderer2DSystem.obj 
-TestSystem.obj 
 Transform3DSystem.obj 

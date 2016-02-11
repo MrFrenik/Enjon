@@ -75,7 +75,6 @@ namespace Enjon { namespace Graphics {
 		return RGBA8(left.r, left.g, left.b, (int)(a * 255));
 	}
 
-
 	// Strict POD struct ColoRGBA16
 	struct ColorRGBA16
 	{ 

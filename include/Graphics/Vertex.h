@@ -57,11 +57,11 @@ namespace Enjon { namespace Graphics {
 	struct Vertex 
 	{ 
 		Position2f position;
-		ColorRGBA8 color;
+		ColorRGBA16 color;
 		UV uv; 
 	};
 
-	inline Vertex NewVertex(float x, float y, float u, float v, GLubyte r,  GLubyte g, GLubyte b, GLubyte a)	
+	inline Vertex NewVertex(GLfloat x, GLfloat y, GLfloat u, GLfloat v, GLfloat r,  GLfloat g, GLfloat b, GLfloat a)	
 	{
 		Vertex vertex;
 
@@ -89,7 +89,7 @@ namespace Enjon { namespace Graphics {
 		vertex.uv.v = v;
 	}
 
-	inline void SetColor(Vertex& vertex, GLubyte r, GLubyte g, GLubyte b, GLubyte a )
+	inline void SetColor(Vertex& vertex, GLfloat r, GLfloat g, GLfloat b, GLfloat a )
 	{
 		vertex.color.r = r;
 		vertex.color.g = g;
@@ -100,7 +100,7 @@ namespace Enjon { namespace Graphics {
 	struct Vertex3 
 	{ 
 		Vertex3() {}
-		Vertex3(float x, float y, float z, float u, float v, GLubyte r,  GLubyte g, GLubyte b, GLubyte a)	
+		Vertex3(float x, float y, float z, float u, float v, GLfloat r,  GLfloat g, GLfloat b, GLfloat a)	
 		{
 			SetPosition(x, y, z);
 			SetColor(r, g, b, a);
@@ -124,7 +124,7 @@ namespace Enjon { namespace Graphics {
 			uv.v = v;
 		}
 
-		void SetColor( GLubyte r, GLubyte g, GLubyte b, GLubyte a )
+		void SetColor( GLfloat r, GLfloat g, GLfloat b, GLfloat a )
 		{
 			color.r = r;
 			color.g = g;

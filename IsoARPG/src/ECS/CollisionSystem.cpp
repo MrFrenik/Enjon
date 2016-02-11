@@ -167,7 +167,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			// Hurt Collider
 			// Get health and color of entity
 			Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
-			Enjon::Graphics::ColorRGBA8* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
+			Enjon::Graphics::ColorRGBA16* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
 
 			// Set option to damaged
 			Manager->AttributeSystem->Masks[B_ID] |= Masks::GeneralOptions::DAMAGED;	
@@ -180,8 +180,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			const EM::Vec3* PP = &Manager->TransformSystem->Transforms[B_ID].Position;
 			static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/orb.png").id;
 
-			EG::ColorRGBA8 R = EG::RGBA8(100, 7, 7, Enjon::Random::Roll(20, 255));
-			EG::ColorRGBA8 R2 = EG::RGBA8(255, 50, 50, Enjon::Random::Roll(20, 255));
+			EG::ColorRGBA16 R = EG::RGBA16(1.0f, 0.01f, 0.01f, 1.0f);
 
 			// Add 100 at a time
 			for (Enjon::uint32 i = 0; i < 10; i++)
@@ -255,7 +254,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 				const EM::Vec3* PP = &Manager->TransformSystem->Transforms[Player].Position;
 				static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/orb.png").id;
 
-				EG::ColorRGBA8 C1 = EG::RGBA8(255, 0, 0, 0);
+				EG::ColorRGBA16 C1 = EG::RGBA16(1.0f, 0, 0, 1.0f);
 
 				// Add 100 at a time
 				for (Enjon::uint32 i = 0; i < 5; i++)
@@ -324,7 +323,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			{
 				// Get health and color of entity
 				Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
-				Enjon::Graphics::ColorRGBA8* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
+				Enjon::Graphics::ColorRGBA16* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
 
 				// Set option to damaged
 				Manager->AttributeSystem->Masks[B_ID] |= Masks::GeneralOptions::DAMAGED;	
@@ -339,8 +338,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 				const EM::Vec3* PP = &Manager->TransformSystem->Transforms[B_ID].Position;
 				static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/orb.png").id;
 
-				EG::ColorRGBA8 R = EG::RGBA8(100, 7, 7, Enjon::Random::Roll(20, 255));
-				EG::ColorRGBA8 R2 = EG::RGBA8(255, 50, 50, Enjon::Random::Roll(20, 255));
+				EG::ColorRGBA16 R = EG::RGBA16(1.0f, 0.01f, 0.01f, 1.0f);
 
 				// Add 100 at a time
 				for (Enjon::uint32 i = 0; i < 10; i++)
@@ -350,9 +348,6 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 					EG::Particle2D::AddParticle(EM::Vec3(PP->x + 50.0f + XVel, PP->y + 50.0f + ZVel, 0.0f), EM::Vec3(XVel, XVel, ZVel), 
 						EM::Vec2(XSize * 1.5f, YSize * 1.5f), R, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
-
-					// EG::Particle2D::AddParticle(EM::Vec3(PP->x + 50.0f, PP->y + 50.0f, 0.0f), EM::Vec3(XVel + 2.0f, XVel + 2.0f, ZVel - 2.0f), 
-					// 	EM::Vec2(XSize, YSize), R2, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
 				}
 
 				// If dead, then kill it	
@@ -381,14 +376,14 @@ namespace ECS{ namespace Systems { namespace Collision {
 		{
 			int Roll = Enjon::Random::Roll(0, 5);
 
-			Enjon::Graphics::ColorRGBA8 ItemColor;
+			Enjon::Graphics::ColorRGBA16 ItemColor;
 
-			if (Roll == 0) ItemColor = Enjon::Graphics::RGBA8_Red();
-			if (Roll == 1) ItemColor = Enjon::Graphics::RGBA8_Orange();
-			if (Roll == 2) ItemColor = Enjon::Graphics::RGBA8_Blue();
-			if (Roll == 3) ItemColor = Enjon::Graphics::RGBA8_Green();
-			if (Roll == 4) ItemColor = Enjon::Graphics::RGBA8_Yellow();
-			if (Roll == 5) ItemColor = Enjon::Graphics::RGBA8_Magenta();
+			if (Roll == 0) ItemColor = Enjon::Graphics::RGBA16_Red();
+			if (Roll == 1) ItemColor = Enjon::Graphics::RGBA16_Orange();
+			if (Roll == 2) ItemColor = Enjon::Graphics::RGBA16_Blue();
+			if (Roll == 3) ItemColor = Enjon::Graphics::RGBA16_Green();
+			if (Roll == 4) ItemColor = Enjon::Graphics::RGBA16_Yellow();
+			if (Roll == 5) ItemColor = Enjon::Graphics::RGBA16_Magenta();
 
 			eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(Position->x - 64.0f, Position->x + 64.0f), 
 												  Enjon::Random::Roll(Position->y - 64.0f, Position->y + 64.0f), 0.0f), 

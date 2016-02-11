@@ -146,9 +146,9 @@ void Level::DrawCartesianLevel(Enjon::Graphics::SpriteBatch& batch)
 { 
 	for (Tile& tile : m_cartesiantiles)
 	{
-		// batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.Sheet->texture.id, Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA8_White(), 0.25f));
+		// batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.Sheet->texture.id, Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_White(), 0.25f));
 		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), 0, 
-				  Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA8_Orange(), 0.1f));
+				  Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_Orange(), 0.1f));
 	}
 } 
 
@@ -156,6 +156,6 @@ void Level::DrawMap(Enjon::Graphics::SpriteBatch& batch)
 {
 	for (Tile& tile : m_mapTiles)
 	{
-		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), 0, Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA8_Black(), 0.2f), 100.0f);
+		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), 0, Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_Black(), 0.2f), 100.0f);
 	}	
 }

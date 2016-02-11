@@ -83,7 +83,15 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 48126,
+				"buffer_size": 48121,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/C++Projects/VS/3DEnjon/src/SpriteBatch.cpp",
+			"settings":
+			{
+				"buffer_size": 6974,
 				"line_ending": "Windows"
 			}
 		},
@@ -115,7 +123,7 @@
 			"file": "/D/C++Projects/VS/3DEnjon/shaders/basic.f.glsl",
 			"settings":
 			{
-				"buffer_size": 2776,
+				"buffer_size": 2796,
 				"line_ending": "Windows"
 			}
 		},
@@ -195,7 +203,7 @@
 			"file": "/D/C++Projects/VS/3DEnjon/src/ParticleEngine2D.cpp",
 			"settings":
 			{
-				"buffer_size": 3701,
+				"buffer_size": 3840,
 				"line_ending": "Windows"
 			}
 		},
@@ -212,6 +220,30 @@
 			"settings":
 			{
 				"buffer_size": 1650,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteBatch.h",
+			"settings":
+			{
+				"buffer_size": 6272,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/Vertex.h",
+			"settings":
+			{
+				"buffer_size": 2533,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/Color.h",
+			"settings":
+			{
+				"buffer_size": 4398,
 				"line_ending": "Windows"
 			}
 		}
@@ -454,6 +486,24 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"drawfire",
+			"B",
+			"b",
+			"B",
+			"b",
+			"G",
+			"g",
+			"G",
+			"b",
+			"B",
+			"g",
+			"(float)",
+			"10",
+			"DrawFire",
+			"basic.f",
+			"levelsize",
+			".r",
+			"r",
 			"SetScale",
 			"WALKPACE",
 			"collidewithenemy",
@@ -563,25 +613,7 @@
 			"Limiter.Init",
 			"FPSString",
 			"Balls",
-			"FPSString",
-			"PrintText",
-			"CorbertRegular",
-			"Zombie_16",
-			"PrintText",
-			"Character",
-			"Font",
-			"map",
-			"Color",
-			"PrintText",
-			"Sample",
-			"sample Text",
-			"sample text",
-			"isLevel",
-			"SYSTEM ",
-			"SYSTEM TESTS",
-			"#if",
-			"512",
-			"Camera."
+			"FPSString"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -608,15 +640,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 48126,
+						"buffer_size": 48121,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3273,
-								3273
+								7022,
+								7022
 							]
 						],
 						"settings":
@@ -675,7 +707,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1927.0,
+						"translation.y": 3899.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -683,6 +715,85 @@
 				},
 				{
 					"buffer": 1,
+					"file": "/D/C++Projects/VS/3DEnjon/src/SpriteBatch.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6974,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5947,
+								5947
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c",
+							"buffer_scroll_name": "1372d23a",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								223,
+								11,
+								15,
+								11,
+								10,
+								4,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2691.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
 					"file": "include/Level.h",
 					"semi_transient": false,
 					"settings":
@@ -757,11 +868,11 @@
 						"translation.y": 209.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
+					"buffer": 3,
 					"file": "src/Level.cpp",
 					"semi_transient": false,
 					"settings":
@@ -836,11 +947,11 @@
 						"translation.y": 1943.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 12,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 4,
 					"file": "src/SpatialHash.cpp",
 					"semi_transient": false,
 					"settings":
@@ -852,8 +963,8 @@
 						"selection":
 						[
 							[
-								700,
-								700
+								868,
+								868
 							]
 						],
 						"settings":
@@ -915,24 +1026,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 13,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
+					"buffer": 5,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/basic.f.glsl",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2776,
+						"buffer_size": 2796,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								748,
-								754
+								1904,
+								1904
 							]
 						],
 						"settings":
@@ -987,18 +1098,18 @@
 								46
 							],
 							"spell_check": false,
-							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"syntax": "Packages/C++/C++.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 844.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 6,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/basic.v.glsl",
 					"semi_transient": false,
 					"settings":
@@ -1010,8 +1121,8 @@
 						"selection":
 						[
 							[
-								527,
-								527
+								276,
+								276
 							]
 						],
 						"settings":
@@ -1066,17 +1177,17 @@
 								46
 							],
 							"spell_check": false,
-							"syntax": "Packages/Text/Plain text.tmLanguage"
+							"syntax": "Packages/C++/C++.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 16,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 7,
 					"file": "src/ECS/Transform3DSystem.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1151,11 +1262,11 @@
 						"translation.y": 2119.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 18,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 8,
 					"file": "src/ECS/Animation2DSystem.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1230,11 +1341,11 @@
 						"translation.y": 4329.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 17,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 9,
 					"file": "src/ECS/CollisionSystem.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1309,11 +1420,11 @@
 						"translation.y": 4686.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 15,
 					"type": "text"
 				},
 				{
-					"buffer": 9,
+					"buffer": 10,
 					"file": "include/ECS/PlayerControllerSystem.h",
 					"semi_transient": false,
 					"settings":
@@ -1388,11 +1499,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 14,
 					"type": "text"
 				},
 				{
-					"buffer": 10,
+					"buffer": 11,
 					"file": "/D/C++Projects/VS/3DEnjon/src/AABB.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1467,11 +1578,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 14,
+					"stack_index": 19,
 					"type": "text"
 				},
 				{
-					"buffer": 11,
+					"buffer": 12,
 					"file": "/D/C++Projects/VS/3DEnjon/src/Font.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1483,8 +1594,8 @@
 						"selection":
 						[
 							[
-								3401,
-								3401
+								2168,
+								2168
 							]
 						],
 						"settings":
@@ -1543,14 +1654,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1007.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 15,
+					"stack_index": 20,
 					"type": "text"
 				},
 				{
-					"buffer": 12,
+					"buffer": 13,
 					"file": "include/ECS/ComponentSystems.h",
 					"semi_transient": false,
 					"settings":
@@ -1625,11 +1736,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 13,
 					"type": "text"
 				},
 				{
-					"buffer": 13,
+					"buffer": 14,
 					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/ParticleEngine2D.h",
 					"semi_transient": false,
 					"settings":
@@ -1701,27 +1812,27 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 431.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 12,
 					"type": "text"
 				},
 				{
-					"buffer": 14,
+					"buffer": 15,
 					"file": "/D/C++Projects/VS/3DEnjon/src/ParticleEngine2D.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3701,
+						"buffer_size": 3840,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								344,
-								344
+								677,
+								677
 							]
 						],
 						"settings":
@@ -1780,14 +1891,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 27.0,
+						"translation.y": 36.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 15,
+					"buffer": 16,
 					"file": "include/ECS/AttributeSystem.h",
 					"semi_transient": false,
 					"settings":
@@ -1862,11 +1973,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 16,
 					"type": "text"
 				},
 				{
-					"buffer": 16,
+					"buffer": 17,
 					"file": "/D/C++Projects/VS/3DEnjon/proc/dump.txt",
 					"semi_transient": false,
 					"settings":
@@ -1942,7 +2053,244 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 18,
+					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteBatch.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6272,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2187,
+								2187
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c",
+							"buffer_scroll_name": "4da2a177",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								223,
+								11,
+								15,
+								11,
+								7,
+								55,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 38.0,
+						"translation.y": 895.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 19,
+					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/Vertex.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2533,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1067,
+								1067
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c",
+							"buffer_scroll_name": "07ffe650",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								223,
+								11,
+								15,
+								11,
+								7,
+								55,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 487.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 20,
+					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/Color.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4398,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2119,
+								2119
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c",
+							"buffer_scroll_name": "5327e7b7",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								223,
+								11,
+								15,
+								11,
+								7,
+								55,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 777.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
 					"type": "text"
 				}
 			]
@@ -2033,7 +2381,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 289.0,
+	"side_bar_width": 293.0,
 	"status_bar_visible": false,
 	"template_settings":
 	{
