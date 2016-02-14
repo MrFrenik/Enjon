@@ -5,6 +5,8 @@
 #include "ECS/InventorySystem.h"
 #include "ECS/PlayerControllerSystem.h"
 #include "ECS/Renderer2DSystem.h"
+#include "ECS/EffectSystem.h"
+#include "ECS/Effects.h"
 
 #include <Graphics/Camera2D.h>
 #include <Graphics/ParticleEngine2D.h>
@@ -191,9 +193,18 @@ namespace ECS{ namespace Systems { namespace Collision {
 				EG::Particle2D::AddParticle(EM::Vec3(PP->x + 50.0f + XVel, PP->y + 50.0f + ZVel, 0.0f), EM::Vec3(XVel, XVel, ZVel), 
 					EM::Vec2(XSize, YSize), R, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
 			}
+
+			// Get min and max damage of weapon
+			auto DC = Manager->AttributeSystem->DamageComponents[A_ID];
+			auto MiD = (Enjon::uint32)DC.MinDamage;
+			auto MaD = (Enjon::uint32)DC.MaxDamage;
+
+			auto Damage = Enjon::Random::Roll(MiD, MaD);
 	
-			// Decrement by some arbitrary amount for now	
-			HealthComponent->Health -= 10.0f;
+			// Decrement by damage	
+			HealthComponent->Health -= Damage;
+
+			printf("Hit for %d damage\n", Damage);
 
 			if (HealthComponent->Health <= 0.0f) 
 			{
@@ -203,6 +214,16 @@ namespace ECS{ namespace Systems { namespace Collision {
 				// Drop random loot
 				if (Enjon::Random::Roll(0, 10) >= 5) Collision::DropRandomLoot(Manager, 3, &ColliderPosition->XY());
 			}
+			else
+			{
+				// Apply an effect just to see if this shit work at all...
+				auto* T = &Manager->EffectSystem->TransferredEffects[B_ID]["Poison"];
+				T->Type = EffectType::TEMPORARY;
+				T->Apply = &Effects::Poison;
+				T->Timer = Component::TimerComponent{10.0f, 0.05f, B_ID};
+				T->Entity = B_ID;
+			}
+
 
 			// Remove projectile
 			EntitySystem::RemoveEntity(Manager, A_ID);
@@ -321,6 +342,13 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
 			{
+				// Get min and max damage of weapon
+				auto DC = Manager->AttributeSystem->DamageComponents[A_ID];
+				auto MiD = (Enjon::uint32)DC.MinDamage;
+				auto MaD = (Enjon::uint32)DC.MaxDamage;
+
+				auto Damage = Enjon::Random::Roll(MiD, MaD);
+
 				// Get health and color of entity
 				Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
 				Enjon::Graphics::ColorRGBA16* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
@@ -332,7 +360,9 @@ namespace ECS{ namespace Systems { namespace Collision {
 				if (Color == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Color component is null");
 		
 				// Decrement by some arbitrary amount for now	
-				HealthComponent->Health -= Enjon::Random::Roll(10.0f, 20.0f);
+				HealthComponent->Health -= Damage;
+
+				printf("Hit for %d damage.\n", Damage);
 
 				// Add blood particle effect (totally a test)...
 				const EM::Vec3* PP = &Manager->TransformSystem->Transforms[B_ID].Position;
@@ -349,6 +379,20 @@ namespace ECS{ namespace Systems { namespace Collision {
 					EG::Particle2D::AddParticle(EM::Vec3(PP->x + 50.0f + XVel, PP->y + 50.0f + ZVel, 0.0f), EM::Vec3(XVel, XVel, ZVel), 
 						EM::Vec2(XSize * 1.5f, YSize * 1.5f), R, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
 				}
+
+				// Apply an effect just to see if this shit work at all...
+				auto* T = &Manager->EffectSystem->TransferredEffects[B_ID]["Poison"];
+				T->Type = EffectType::TEMPORARY;
+				T->Apply = &Effects::Poison;
+				T->Timer = Component::TimerComponent{3.0f, 0.05f, B_ID};
+				T->Entity = B_ID;
+										
+	typedef struct 
+	{
+		float CurrentTime;
+		float DT;
+		eid32 Entity;
+	} TimerComponent;
 
 				// If dead, then kill it	
 				if (HealthComponent->Health <= 0.0f)

@@ -49,8 +49,10 @@ namespace ECS { namespace Systems { namespace Animation2D {
 			// Change colors based on health	
 			if (Manager->AttributeSystem->Masks[e] & Masks::Type::AI)
 			{
-				if (HealthComponent->Health <= 50.0f) Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16_Orange();
-				if (HealthComponent->Health <= 20.0f) Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16_Red();
+				auto* RS = &Manager->Renderer2DSystem->Renderers[e];
+				if (HealthComponent->Health <= 50.0f) RS->Color = Enjon::Graphics::RGBA16_Orange();
+				if (HealthComponent->Health <= 20.0f) RS->Color = Enjon::Graphics::RGBA16_Red();
+				else RS->Color = Enjon::Graphics::RGBA16_White();
 			}
 
 			// If has an animation component

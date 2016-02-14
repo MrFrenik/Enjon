@@ -28,6 +28,7 @@ struct Animation2DSystem;
 struct InventorySystem;
 struct Renderer2DSystem;
 struct AIControllerSystem;
+struct EffectSystem;
 
 // EntityManagers hold pointers to their system, which hold the arrays of data
 // ComponentSystems don't need to know of mangers...or do they? Yes, they'll hold pointers to the managers of which they belong
@@ -50,6 +51,7 @@ namespace ECS { namespace Systems {
 		struct AttributeSystem* AttributeSystem;
 		struct Renderer2DSystem* Renderer2DSystem;
 		struct InventorySystem* InventorySystem;
+		struct EffectSystem* EffectSystem;
 		EG::Particle2D::ParticleEngine2D* ParticleEngine;
 
 		bitmask32 Masks[MAX_ENTITIES];

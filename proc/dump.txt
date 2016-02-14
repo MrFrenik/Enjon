@@ -1,4 +1,4 @@
-ComponentSystems.cpp
+CollisionSystem.cpp
 Generating Code...
 Skipping... (no relevant changes detected)
 Transform3DSystem.cpp
@@ -7,7 +7,8 @@ PlayerControllerSystem.cpp
 LabelSystem.cpp
 InventorySystem.cpp
 Entity.cpp
-CollisionSystem.cpp
+EffectSystem.cpp
+ComponentSystems.cpp
 AttributeSystem.cpp
 Animation2DSystem.cpp
 AIControllerSystem.cpp
@@ -82,6 +83,7 @@ Animation2DSystem.obj
 AttributeSystem.obj 
 CollisionSystem.obj 
 ComponentSystems.obj 
+EffectSystem.obj 
 Entity.obj 
 InventorySystem.obj 
 LabelSystem.obj 

@@ -5,12 +5,17 @@
 #include "ECS/Entity.h"
 #include "ECS/ComponentSystems.h"
 
+#include <unordered_map>
+
 struct AttributeSystem
 {
 	ECS::Systems::EntityManager* Manager;
 	ECS::Component::HealthComponent HealthComponents[MAX_ENTITIES];
 	ECS::Component::BitmaskComponent BitMasks[MAX_ENTITIES];
 	ECS::Masks::EntityMask Masks[MAX_ENTITIES];
+
+	// Trying this out with a hashmap
+	std::unordered_map<ECS::eid32, ECS::Component::DamageComponent> DamageComponents;
 };
 
 namespace ECS{ namespace Systems { namespace Attributes {
@@ -24,31 +29,5 @@ namespace ECS{ namespace Systems { namespace Attributes {
 
 }}}
 
-
 #endif
 
-/* 
-	Damage component
-	{
-		base damage;
-	}
-
-	Magic component
-	{
-		
-	}
-
-	How do I represent a lightning dagger that has a change to leech health?
-
-	weapon type - dagger
-	base damage - 7-10
-	magic damage - lightning
-	magic damage - leech
-
-	damage component 
-	{
-		float base_damage;
-		float magic_damage;
-	}
-
-*/

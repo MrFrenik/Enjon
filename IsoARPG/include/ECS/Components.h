@@ -11,7 +11,7 @@
 
 #include "Animation.h"
 
-#include <map>
+#include <unordered_map>
 #include <utility>
 
 #define MAX_ITEMS	5000
@@ -22,14 +22,17 @@ namespace ECS { namespace Component {
 	using projectileTypeMask = Enjon::uint32;
 	using EntityMask = Enjon::uint64;
 
-	enum MaskType { PROJECTILE_MASK, PLAYER_MASK, ENEMY_MASK };
-	enum EntityType { CONSUMABLE, ITEM, ENEMY, NPC, PLAYER, PROJECTILE, WEAPON };
+	enum MaskType 					{ PROJECTILE_MASK, PLAYER_MASK, ENEMY_MASK };
+	enum EntityType 				{ CONSUMABLE, ITEM, ENEMY, NPC, PLAYER, PROJECTILE, WEAPON };
+	enum WeaponType 				{ AXE, DAGGER, BOW }; 												// These are obviously not thorough...
+	enum ArmorType 					{ HELM, CHEST, ARMS, LEGS, BOOTS };									// Neither are these...
+	enum Uniqueness 				{ COMMON, UNCOMMON, RARE, MAGIC, UNIQUE, LEGEND };
+	enum StatsType 					{ WEAPONTYPE, ARMORTYPE };
 
 	// Transform struct
 	typedef struct
 	{
 		// NOTE(John): This is getting a bit bloated...
-		eid32 Entity;
 		Enjon::Math::Vec3 Position;
 		Enjon::Math::Vec3 Velocity;
 		Enjon::Math::Vec3 VelocityGoal;
@@ -41,65 +44,65 @@ namespace ECS { namespace Component {
 		Enjon::Math::Vec2 Dimensions;
 		float BaseHeight;
 		float VelocityGoalScale; 
-
+		eid32 Entity;
 	} Transform3D;
 
 	// Position struct
 	typedef struct
 	{
-		eid32 Entity;
 		Enjon::Math::Vec3 IsoPosition;
 		Enjon::Math::Vec3 CartesianPosition;
+		eid32 Entity;
 	} PositionComponent;
 
 	// Velocity struct
 	typedef struct
 	{
-		eid32 Entity;
 		Enjon::Math::Vec3 Velocity;
 		Enjon::Math::Vec3 VelocityGoal;
 		float VelocityGoalScale;
+		eid32 Entity;
 	} VelocityComponent;
 
 	// Inventory struct
 	typedef struct 
 	{
-		eid32 Entity;
 		std::vector<eid32> Items;
 		eid32 WeaponEquipped; // NO NO NO, Terrible way of doing this!
+		eid32 Entity;
 	} InventoryComponent; 
 
 	// Collision struct
 	typedef struct
 	{
-		eid32 Entity;
 		Enjon::Math::Vec3 CartesianCoords;
+		eid32 Entity;
 	} CollisionComponent;
 
 	// Animation2D struct
 	typedef struct
 	{
-		eid32 Entity;
 		Enjon::Graphics::SpriteSheet* Sheet; // TODO(John): Pull all spritesheets from some kind of cache, either the resource manager or a spritesheet manager
 		float AnimationTimer;
 		Enjon::uint32 CurrentFrame;
 		Enjon::uint32 SetStart;
 		Enjon::uint32 BeginningFrame; 
 		const Animation* CurrentAnimation;
+		eid32 Entity;
 	} Animation2D;
 
 	// Label struct
 	typedef struct
 	{
-		eid32 Entity;
 		char* Name; 
+		eid32 Entity;
 	} Label;
 
 	// PlayerController struct
 	typedef struct
 	{
-		eid32 Entity;
 		Enjon::Input::InputManager* Input; 
+		eid32 Entity;
 	} PlayerController;
 
 	// AIController struct
@@ -111,32 +114,48 @@ namespace ECS { namespace Component {
 	// Health Component
 	typedef struct 
 	{
-		eid32 Entity;
 		float Health;
+		eid32 Entity;
 	} HealthComponent;
 
 	// Bitmask Component
 	typedef struct 
 	{
+		std::unordered_map<MaskType, Enjon::uint32> Masks;	
 		eid32 Entity;
-		std::map<MaskType, Enjon::uint32> Masks;	
 	} BitmaskComponent;
 
 	// Type Component
 	typedef struct
 	{
-		eid32 Entity;
 		EntityType Type;
+		eid32 Entity;
 	} TypeComponent;
 
 	// Render Component
 	typedef struct 
 	{
-		eid32 Entity;
 		Enjon::Graphics::ColorRGBA16 Color;
 		Enjon::Graphics::SpriteBatch* Batch;
+		eid32 Entity;
 		// NOTE(John): Should I add a spritebatch component here as well?
 	} Renderer2DComponent;
+
+	// Timer Component
+	typedef struct 
+	{
+		float CurrentTime;
+		float DT;
+		eid32 Entity;
+	} TimerComponent;
+
+	// Weapon Component
+	typedef struct 
+	{
+		float MinDamage;
+		float MaxDamage;
+	} DamageComponent;
+	
 
 	//////////////////
 	// Constructors //
@@ -151,7 +170,7 @@ namespace ECS { namespace Component {
 		Component.Entity = Entity;
 		Component.VelocityGoalScale = Scale;
 		
-		return Component;
+		return Component; 
 	}
 
 	// Create new PlayerController Component

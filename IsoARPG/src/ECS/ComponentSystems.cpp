@@ -8,10 +8,12 @@
 #include "ECS/InventorySystem.h"
 #include "ECS/Renderer2DSystem.h"
 #include "ECS/AIControllerSystem.h"
+#include "ECS/EffectSystem.h"
 #include "Utils/Errors.h"
 #include "Math/Random.h"
 #include "Graphics/SpriteSheet.h"
 #include "IO/ResourceManager.h"
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -55,6 +57,7 @@ namespace ECS { namespace Systems {
 			Manager->Renderer2DSystem 			= Renderer2D::NewRenderer2DSystem(Manager);
 			Manager->InventorySystem 			= Inventory::NewInventorySystem(Manager);
 			Manager->CollisionSystem 			= Collision::NewCollisionSystem(Manager);
+			Manager->EffectSystem				= Effect::NewEffectSystem(Manager);
 			Manager->ParticleEngine 			= EG::Particle2D::NewParticleEngine();
 
 			Manager->Width = Width;
@@ -187,12 +190,15 @@ namespace ECS { namespace Systems {
 			Manager->LabelSystem->Labels[Player].Name = Name;
 			Manager->LabelSystem->Labels[Player].Entity = Player;
 
+			// Set up Attribute System
+			AttributeSystem* AS = Manager->AttributeSystem;
+
 			// Set up health component
-			Manager->AttributeSystem->HealthComponents[Player].Health = Health;
-			Manager->AttributeSystem->HealthComponents[Player].Entity = Player;
+			AS->HealthComponents[Player].Health = Health;
+			AS->HealthComponents[Player].Entity = Player;
 
 			// Set up masks
-			Manager->AttributeSystem->Masks[Player] |= (Masks::Type::PLAYER | Masks::GeneralOptions::COLLIDABLE);
+			AS->Masks[Player] |= (Masks::Type::PLAYER | Masks::GeneralOptions::COLLIDABLE);
 
 			// Set up Renderer
 			Manager->Renderer2DSystem->Renderers[Player].Color = Color;
@@ -251,11 +257,12 @@ namespace ECS { namespace Systems {
 			Manager->LabelSystem->Labels[AI].Name = Name;
 
 			// Set up Attributes
-			Manager->AttributeSystem->HealthComponents[AI].Health = Health;
-			Manager->AttributeSystem->HealthComponents[AI].Entity = AI;
+			AttributeSystem* AS = Manager->AttributeSystem;
+			AS->HealthComponents[AI].Health = Health;
+			AS->HealthComponents[AI].Entity = AI;
 			
 			// Set up masks
-			Manager->AttributeSystem->Masks[AI] |= (Masks::Type::AI | Masks::GeneralOptions::COLLIDABLE);
+			AS->Masks[AI] |= (Masks::Type::AI | Masks::GeneralOptions::COLLIDABLE);
 
 			// Set up Renderer
 			Manager->Renderer2DSystem->Renderers[AI].Color = Color;
@@ -312,7 +319,11 @@ namespace ECS { namespace Systems {
 			Manager->Types[Item] = Type;
 
 			// Set up Attributes
-			Manager->AttributeSystem->Masks[Item] = Mask;
+			AttributeSystem* AS = Manager->AttributeSystem;		
+			AS->Masks[Item] = Mask;
+
+			// Add damage component if item is a weapopn
+			if (Mask & Masks::Type::WEAPON) AS->DamageComponents[Item] = Component::DamageComponent{5.0f, 8.0f};
 
 			// Set up Inventory... This has to be fixed and is a problem with having a general ECS
 			Manager->InventorySystem->Inventories->WeaponEquipped = NULL_ENTITY;
@@ -321,72 +332,6 @@ namespace ECS { namespace Systems {
 		} 
 
 	} // namespace EntitySystem
-	
-	////////////////////
-	// RendererSystem //
-	////////////////////
-
-	// Reponsible for managing all the renderers
-	// namespace Renderer2D
-	// {
-	// 	// Updates Renderers of EntityManager
-	// 	void Update(struct EntityManager* Manager)
-	// 	{
-	// 		// Need to render components here
-	// 		for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
-	// 		{
-
-	// 		}
-	// 	}
-
-	// 	// Create new Render2DSystem
-	// 	Renderer2DSystem* NewRenderer2DSystem(struct EntityManager* Manager)
-	// 	{
-	// 		struct Renderer2DSystem* System = new Renderer2DSystem;
-	// 		if (System == nullptr) Enjon::Utils::FatalError("COMPOPNENT_SYSTEMS::NEW_RENDERER2D_SYSTEM::System is null"); 
-	// 		System->Manager = Manager;
-	// 		return System;
-	// 	}
-	// } 
-	
-	// namespace AIController
-	// {
-	// 	struct AIControllerSystem* NewAIControllerSystem(struct EntityManager* Manager)
-	// 	{ 
-	// 		struct AIControllerSystem* System = new AIControllerSystem;
-	// 		System->Manager = Manager;
-	// 		return System;
-	// 	}
-
-	// 	// Updates Controller of AI it is attached to
-	// 	void Update(struct AIControllerSystem* System, eid32 Player)
-	// 	{
-	// 		struct EntityManager* Manager = System->Manager;
-	// 		const Component::Transform3D* Target = &Manager->TransformSystem->Transforms[Player];
-	// 		// Let's just make it go towards the player for testing
-	// 		for (eid32 ai = 0; ai < Manager->MaxAvailableID; ai++)
-	// 		{
-	// 			// Check to see if entity has ai controller
-	// 			if ((Manager->Masks[ai] & (COMPONENT_AICONTROLLER | COMPONENT_TRANSFORM3D)) == (COMPONENT_AICONTROLLER | COMPONENT_TRANSFORM3D))
-	// 			{
-	// 				Component::Transform3D* AI = &Manager->TransformSystem->Transforms[ai];
-
-	// 				// Find difference in positions	
-	// 				Enjon::Math::Vec3 Difference = Enjon::Math::Vec3::Normalize(Enjon::Math::Vec3(Target->CartesianPosition, Target->Position.z) - Enjon::Math::Vec3(AI->CartesianPosition, AI->Position.z));
-
-	// 				Enjon::Math::Vec2 a = Target->GroundPosition;
-	// 				Enjon::Math::Vec2 b = AI->GroundPosition;
-	// 				float distance = a.DistanceTo(b);
-
-	// 				if (distance <= 60.0f) AI->VelocityGoal = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
-	// 				// Move towards player
-	// 				// TODO(John): Come up with some kind of passed in speed parameter to multiply by the difference vector
-	// 				//AI->Velocity = Difference; 
-	// 				else AI->VelocityGoal = Difference * 2.0f;
-	// 			}
-	// 		}
-	// 	}
-	// }
 }}
 
 void printDebug(char* message)

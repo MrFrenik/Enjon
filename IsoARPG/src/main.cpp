@@ -21,7 +21,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -55,6 +55,7 @@
 #include <ECS/Renderer2DSystem.h>
 #include <ECS/AIControllerSystem.h> 
 #include <ECS/AttributeSystem.h>
+#include <ECS/EffectSystem.h>
 #include <ECS/Entity.h>
 
 /*-- IsoARPG includes --*/
@@ -77,7 +78,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 40;
+const int LEVELSIZE = 50;
 
 float DashingCounter = 0.0f;
 
@@ -252,7 +253,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1000;
+	static uint32 AmountDrawn = 100;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -335,6 +336,9 @@ int main(int argc, char** argv)
 			StartTicks = SDL_GetTicks();	
 			Collision::Update(World);
 			CollisionRunTime = (SDL_GetTicks() - StartTicks);
+
+			// Apply effects
+			Effect::Update(World);
 
 			Renderer2D::Update(World); 
 
@@ -1350,9 +1354,21 @@ bool ProcessInput(Enjon::Input::InputManager* Input)
 
 #include <Enjon.h>
 
+#include <unordered_map>
+#include <iostream>
+
 #undef main
 int main(int argc, char** argv) {
 
+	std::unordered_map<std::string, int> Map;
+
+	Map["BLACK"] = 5;
+	Map["Bob"] = 6;
+
+	for (auto e : Map)
+	{
+		std::cout << "Key: " << e.first << ", Value: " << e.second << std::endl;	
+	}
 
 	return 0;
 }
