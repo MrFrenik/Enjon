@@ -24,9 +24,7 @@ struct EffectSystem
 	ECS::Systems::EntityManager* Manager;
 
 	std::unordered_map<std::string, EffectComponent> TransferredEffects[MAX_ENTITIES];
-	// std::unordered_map<std::string, EffectComponent> TransferrableEffects{MAX_ENTITIES];
-
-	// std::vector<ECS::eide32> AllEffects;
+	std::unordered_map<std::string, EffectComponent> TransferrableEffects[MAX_ENTITIES];
 };
 
 

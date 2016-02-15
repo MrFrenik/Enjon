@@ -56,7 +56,9 @@
 #include <ECS/AIControllerSystem.h> 
 #include <ECS/AttributeSystem.h>
 #include <ECS/EffectSystem.h>
+#include <ECS/EntityFactory.h>
 #include <ECS/Entity.h>
+#include <Loot.h>
 
 /*-- IsoARPG includes --*/
 #include "Animation.h"
@@ -78,7 +80,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 50;
+const int LEVELSIZE = 100;
 
 float DashingCounter = 0.0f;
 
@@ -86,6 +88,7 @@ Enjon::uint32 CollisionRunTime = 0;
 Enjon::uint32 TransformRunTime = 0;
 Enjon::uint32 ClearEntitiesRunTime = 0;
 Enjon::uint32 RenderTime = 0;
+Enjon::uint32 EffectRunTime = 0;
 Enjon::uint32 ParticleCount = 0;
 
 using namespace Enjon;
@@ -113,6 +116,7 @@ int main(int argc, char** argv)
 	std::string RenderTimeString = "0";
 	std::string CollisionTimeString = "0";
 	std::string TransformTimeString = "0";
+	std::string EffectTimeString = "0";
 
 	// Init Limiter
 	Enjon::Utils::FPSLimiter Limiter; 
@@ -245,6 +249,9 @@ int main(int argc, char** argv)
 	// Create new EntityManager
 	struct EntityManager* World = EntitySystem::NewEntityManager(level.GetWidth(), level.GetWidth(), &Camera);
 
+	// Init loot system
+	Loot::Init();
+
 	// Push back particle batch into world
 	EG::Particle2D::AddParticleBatch(World->ParticleEngine, TestParticleBatch);
 
@@ -257,18 +264,18 @@ int main(int argc, char** argv)
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
-		EntitySystem::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
+		Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
 																enemydims, &EnemySheet, "Enemy", 0.05f); 
 	}
 
 	// Create player
-	eid32 Player = EntitySystem::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(100.0f, 100.0f), &PlayerSheet, "Player", 0.3f, Math::Vec3(1, 1, 0)); 
+	eid32 Player = Factory::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(100.0f, 100.0f), &PlayerSheet, "Player", 0.3f, Math::Vec3(1, 1, 0)); 
 
 	// Set player for world
 	World->Player = Player;
 
 	// Create Sword
-	eid32 Sword = EntitySystem::CreateItem(World, World->TransformSystem->Transforms[Player].Position, Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, 
+	eid32 Sword = Factory::CreateItem(World, World->TransformSystem->Transforms[Player].Position, Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, 
 												(Masks::Type::WEAPON | Masks::GeneralOptions::EQUIPPED | Masks::GeneralOptions::PICKED_UP), Component::EntityType::WEAPON, "Weapon");
 
 	// Turn off Rendering / Transform Components
@@ -283,7 +290,7 @@ int main(int argc, char** argv)
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		// Create Sword
-		eid32 id = EntitySystem::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
+		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
 										Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, Masks::Type::ITEM, Component::EntityType::ITEM, "Weapon");
 	}
 
@@ -326,7 +333,7 @@ int main(int argc, char** argv)
 			SpatialHash::ClearCells(World->Grid);
 			ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
 
-			AIController::Update(World->AIControllerSystem, Player);
+			// AIController::Update(World->AIControllerSystem, Player);
 			Animation2D::Update(World);
 
 			StartTicks = SDL_GetTicks();
@@ -338,11 +345,13 @@ int main(int argc, char** argv)
 			CollisionRunTime = (SDL_GetTicks() - StartTicks);
 
 			// Apply effects
+			StartTicks = SDL_GetTicks();	
 			Effect::Update(World);
+			EffectRunTime = (SDL_GetTicks() - StartTicks);
 
 			Renderer2D::Update(World); 
 
-			float x_pos = -500.0f, y_pos = -500.0f;
+			// float x_pos = -500.0f, y_pos = -500.0f;
 			// for (int i = 0; i < 7; i++)
 			// {
 			// 	DrawFire(TestParticleBatch, EM::Vec3(0.0f + x_pos, 0.0f + y_pos, 0.0f));
@@ -696,21 +705,27 @@ int main(int argc, char** argv)
 
 		// Add FPS
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
-										0.4f, "FPS: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 100.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
-										0.3f, FPSString, &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+										0.2f, "FPS: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
+										0.2f, FPSString, &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Add CollisionTime
-		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
-										0.4f, "Collisions: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
-										0.3f, CollisionTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 80.0f, 
+										0.2f, "Collisions: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 80.0f, 
+										0.2f, CollisionTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Add RenderTime
-		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
-										0.4f, "Rendering: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
-										0.3f, RenderTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
+										0.2f, "Rendering: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
+										0.2f, RenderTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+		// Add EffectTime
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, 
+										0.2f, "Effects: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, 
+										0.2f, EffectTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Add particles to entity batch
 		EG::Particle2D::Draw(World->ParticleEngine);
@@ -865,6 +880,10 @@ int main(int argc, char** argv)
 			CollisionTimeString = std::to_string(CollisionRunTime);
 			TransformTimeString = std::to_string(TransformRunTime);
 			RenderTimeString = std::to_string(RenderTime);
+			EffectTimeString = std::to_string(EffectRunTime);
+
+			auto S = World->AttributeSystem->DamageComponents.size();
+			printf("DC: %d\n", S);
 
 			counter = 0.0f;
 		}
@@ -971,29 +990,6 @@ void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Posi
 
 	static EG::ColorRGBA16 Gray = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
 
-	/*
-	static float TopSmokeCounter = 0.0f;
-	TopSmokeCounter += 0.025f;
-	if (TopSmokeCounter >= 1.0f)
-	{
-		for (int i = 0; i < 10; i++)
-		{
-			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(1, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
-							YSize = Random::Roll(75, 100), XSize = Random::Roll(75, 150);
-			int Roll = Random::Roll(1, 3);
-			GLuint tex;
-			if (Roll == 1) tex = PTex;
-			else if (Roll == 2) tex = PTex2;
-			else tex = PTex3; 
-
-			int Alpha = Random::Roll(0.3f, 0.8f);
-
-			EG::Particle2D::AddParticle(Math::Vec3(Position.x -20.0f, Position.y + 70.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
-				Math::Vec2(XSize, YSize), EG::RGBA16(Gray.r + 0.2f, Gray.g, Gray.b, Gray.a - Alpha), tex, 0.005f, Batch);
-		}
-		TopSmokeCounter = 0.0f;
-	}
-	*/
 
 	static float SmokeCounter = 0.0f;
 	SmokeCounter += 0.25f;

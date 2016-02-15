@@ -7,6 +7,7 @@
 #include "ECS/Renderer2DSystem.h"
 #include "ECS/EffectSystem.h"
 #include "ECS/Effects.h"
+#include "ECS/EntityFactory.h"
 
 #include <Graphics/Camera2D.h>
 #include <Graphics/ParticleEngine2D.h>
@@ -219,8 +220,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 				// Apply an effect just to see if this shit work at all...
 				auto* T = &Manager->EffectSystem->TransferredEffects[B_ID]["Poison"];
 				T->Type = EffectType::TEMPORARY;
-				T->Apply = &Effects::Poison;
-				T->Timer = Component::TimerComponent{10.0f, 0.05f, B_ID};
+				T->Apply = &Effects::Cold;
+				T->Timer = Component::TimerComponent{5.0f, 0.05f, B_ID};
 				T->Entity = B_ID;
 			}
 
@@ -362,7 +363,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 				// Decrement by some arbitrary amount for now	
 				HealthComponent->Health -= Damage;
 
-				printf("Hit for %d damage.\n", Damage);
+				// printf("Hit for %d damage.\n", Damage);
 
 				// Add blood particle effect (totally a test)...
 				const EM::Vec3* PP = &Manager->TransformSystem->Transforms[B_ID].Position;
@@ -371,7 +372,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 				EG::ColorRGBA16 R = EG::RGBA16(1.0f, 0.01f, 0.01f, 1.0f);
 
 				// Add 100 at a time
-				for (Enjon::uint32 i = 0; i < 10; i++)
+				for (Enjon::uint32 i = 0; i < 5; i++)
 				{
 					float XPos = Enjon::Random::Roll(-50, 100), YPos = Enjon::Random::Roll(-50, 100), ZVel = Enjon::Random::Roll(-10, 10), XVel = Enjon::Random::Roll(-10, 10), 
 									YSize = Enjon::Random::Roll(2, 7), XSize = Enjon::Random::Roll(1, 5);
@@ -386,22 +387,21 @@ namespace ECS{ namespace Systems { namespace Collision {
 				T->Apply = &Effects::Poison;
 				T->Timer = Component::TimerComponent{3.0f, 0.05f, B_ID};
 				T->Entity = B_ID;
-										
-	typedef struct 
-	{
-		float CurrentTime;
-		float DT;
-		eid32 Entity;
-	} TimerComponent;
 
 				// If dead, then kill it	
 				if (HealthComponent->Health <= 0.0f)
 				{
+					// Drop some loot!
+					// Collision::DropRandomLoot(Manager, 5, &ColliderPosition->XY());
+					Loot::DropLootBasedOnProfile(Manager, B_ID);
+
+					auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
+
+					printf("Chance to Drop: %.2f\n", 100.0f * LP->ChanceToDrop);
+
 					// Remove collider
 					EntitySystem::RemoveEntity(Manager, B_ID);
 					
-					// Drop some loot!
-					Collision::DropRandomLoot(Manager, 5, &ColliderPosition->XY());
 				}
 			}
 
@@ -411,6 +411,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 	}
 
 
+	// TODO(John): Create "loot profiles" for AI and feed that into this function and any like it
 	void DropRandomLoot(Systems::EntityManager* Manager, Enjon::uint32 count, const Enjon::Math::Vec2* Position)
 	{
 		static Enjon::Graphics::SpriteSheet ItemSheet; 
@@ -429,7 +430,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			if (Roll == 4) ItemColor = Enjon::Graphics::RGBA16_Yellow();
 			if (Roll == 5) ItemColor = Enjon::Graphics::RGBA16_Magenta();
 
-			eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(Position->x - 64.0f, Position->x + 64.0f), 
+			eid32 id = Factory::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(Position->x - 64.0f, Position->x + 64.0f), 
 												  Enjon::Random::Roll(Position->y - 64.0f, Position->y + 64.0f), 0.0f), 
 												  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::ITEM | Masks::ItemOptions::CONSUMABLE), 
 												  Component::EntityType::ITEM, "Item", Enjon::Graphics::SetOpacity(ItemColor, 0.5f));

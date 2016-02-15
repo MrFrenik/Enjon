@@ -4,6 +4,7 @@
 #include "ECS/InventorySystem.h"
 #include "ECS/Renderer2DSystem.h"
 #include "ECS/PlayerControllerSystem.h"
+#include "ECS/EntityFactory.h"
 
 #include <Graphics/Camera2D.h>
 #include <IO/ResourceManager.h>
@@ -41,8 +42,6 @@ namespace ECS { namespace Systems { namespace Animation2D {
 		// Loop through all entities with animations
 		for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
 		{
-			// static float blink_counter = 0.0f;
-			// static float blink_increment = 1.0f;
 			static float damaged_counter = 0.0f;
 
 			Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[e];
@@ -58,12 +57,6 @@ namespace ECS { namespace Systems { namespace Animation2D {
 			// If has an animation component
 			if (Manager->Masks[e] & COMPONENT_ANIMATION2D)
 			{
-				// Just testing out random effects based on health
-				// float Health = Manager->AttributeSystem->HealthComponents[e].Health;
-				// if (Health <= 10.0f) 		blink_increment = 0.5f;
-				// else if (Health <= 20.0f) 	blink_increment = 1.0f;
-				// else if (Health <= 50.0f) 	blink_increment = 2.0f;
-
 				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::DAMAGED)
 				{
 					Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16(100.0f, 100.0f, 100.0f, 100.0f);  // damaged color for now 
@@ -75,16 +68,6 @@ namespace ECS { namespace Systems { namespace Animation2D {
 						damaged_counter = 0.0f;
 					}						
 				}
-
-				// if (Health <= 50.0f && Health > 0.0f) 
-				// {
-				// 	blink_counter += 0.1f;
-				// 	if (blink_counter >= blink_increment)
-				// 	{
-				// 		blink_counter = 0.0f;
-				// 		Manager->Masks[e] ^= COMPONENT_RENDERER2D;
-				// 	}
-				// }
 
 				// If is a player
 				if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
@@ -103,12 +86,12 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					// Get what the current animation is based on the player state
 					switch(PlayerState)
 					{
-						case EntityAnimationState::WALKING: 	CurrentAnimation = AnimationManager::GetAnimation("Walk");	break;
+						case EntityAnimationState::WALKING: 	CurrentAnimation = AnimationManager::GetAnimation("Player", "walk");	break;
 						case EntityAnimationState::ATTACKING:
 							switch(CurrentWeapon)
 							{
-								case Weapons::DAGGER: CurrentAnimation = AnimationManager::GetAnimation("Attack_Dagger"); break;
-								case Weapons::BOW: 		CurrentAnimation = AnimationManager::GetAnimation("Attack_Bow"); break;
+								case Weapons::DAGGER: 	CurrentAnimation = AnimationManager::GetAnimation("Player", "attack_dagger"); break;
+								case Weapons::BOW: 		CurrentAnimation = AnimationManager::GetAnimation("Player", "attack_bow"); break;
 							}
 							break;
 					}
@@ -132,19 +115,6 @@ namespace ECS { namespace Systems { namespace Animation2D {
 							*SetStart = TRUE; 
 							if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
 						}
-
-						// if (ViewVector->x <= 0)
-						// {
-						// 	*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; 
-						// 	*SetStart = TRUE; 
-						// 	if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
-						// }
-						// else if (ViewVector->x > 0)  
-						// {
-						// 	*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; 
-						// 	*SetStart = TRUE; 
-						// 	if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
-						// }
 					
 						// Set currentframe to beginning frame
 						AnimationComponent->CurrentFrame = 0;
@@ -255,7 +225,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										// Create an arrow projectile entity for now...
 										static Enjon::Graphics::SpriteSheet ItemSheet;
 										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
-										eid32 id = EntitySystem::CreateItem(Manager, Enjon::Math::Vec3(Position->x + 32.0f, Position->y + 32.0f, Position->z + 60.0f),
+										eid32 id = Factory::CreateItem(Manager, Enjon::Math::Vec3(Position->x + 32.0f, Position->y + 32.0f, Position->z + 60.0f),
 																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::WEAPON | 
 																  												Masks::WeaponOptions::PROJECTILE | 
 																  												Masks::GeneralOptions::PICKED_UP | 

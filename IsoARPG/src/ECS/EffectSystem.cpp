@@ -40,7 +40,6 @@ namespace ECS{ namespace Systems { namespace Effect {
 					if (T->CurrentTime <= 0.0f)
 					{
 						it = S->erase(it);
-						printf("Removed effect\n");
 					}
 					// Otherwise apply the effect
 					else
@@ -55,8 +54,7 @@ namespace ECS{ namespace Systems { namespace Effect {
 					E->Apply(E->Entity, Manager);
 					++it;
 				}
-			}	
-
+			}
 		}
 	}
 

@@ -4,6 +4,7 @@
 #include "ECS/Components.h"
 #include "ECS/Entity.h"
 #include "ECS/ComponentSystems.h"
+#include "Loot.h"
 
 #include <unordered_map>
 
@@ -16,6 +17,7 @@ struct AttributeSystem
 
 	// Trying this out with a hashmap
 	std::unordered_map<ECS::eid32, ECS::Component::DamageComponent> DamageComponents;
+	std::unordered_map<ECS::eid32, const LootProfile*> LootProfiles;
 };
 
 namespace ECS{ namespace Systems { namespace Attributes {

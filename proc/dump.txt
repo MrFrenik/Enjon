@@ -1,4 +1,4 @@
-CollisionSystem.cpp
+Loot.cpp
 Generating Code...
 Skipping... (no relevant changes detected)
 Transform3DSystem.cpp
@@ -6,9 +6,11 @@ Renderer2DSystem.cpp
 PlayerControllerSystem.cpp
 LabelSystem.cpp
 InventorySystem.cpp
+EntityFactory.cpp
 Entity.cpp
 EffectSystem.cpp
 ComponentSystems.cpp
+CollisionSystem.cpp
 AttributeSystem.cpp
 Animation2DSystem.cpp
 AIControllerSystem.cpp
@@ -76,6 +78,7 @@ Camera3D.obj
 Animation.obj 
 AnimationManager.obj 
 Level.obj 
+Loot.obj 
 main.obj 
 SpatialHash.obj 
 AIControllerSystem.obj 
@@ -85,6 +88,7 @@ CollisionSystem.obj
 ComponentSystems.obj 
 EffectSystem.obj 
 Entity.obj 
+EntityFactory.obj 
 InventorySystem.obj 
 LabelSystem.obj 
 PlayerControllerSystem.obj 
