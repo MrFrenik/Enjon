@@ -15,9 +15,12 @@ struct AttributeSystem
 	ECS::Component::BitmaskComponent BitMasks[MAX_ENTITIES];
 	ECS::Masks::EntityMask Masks[MAX_ENTITIES];
 
+	const Loot::LootProfile* LootProfiles[MAX_ENTITIES];
+	const Loot::Weapon::WeaponProfile* WeaponProfiles[MAX_ENTITIES];
+
 	// Trying this out with a hashmap
-	std::unordered_map<ECS::eid32, ECS::Component::DamageComponent> DamageComponents;
-	std::unordered_map<ECS::eid32, const LootProfile*> LootProfiles;
+	// std::unordered_map<ECS::eid32, const Loot::Weapon::WeaponProfile*> WeaponProfiles;
+	// std::unordered_map<ECS::eid32, const Loot::LootProfile*> LootProfiles;
 };
 
 namespace ECS{ namespace Systems { namespace Attributes {

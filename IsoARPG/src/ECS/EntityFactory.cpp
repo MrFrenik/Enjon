@@ -124,8 +124,7 @@ namespace ECS { namespace Factory {
 			Animation2D->Sheet = Sheet; 
 			// These are redundant...
 			Animation2D->CurrentFrame = 0; 
-			Animation2D->BeginningFrame = 0; 
-
+			Animation2D->BeginningFrame = 0;
 			
 			// Set up Label
 			// NOTE(John): This isn't the best way to do this; most likely will throw an error at some point
@@ -137,7 +136,7 @@ namespace ECS { namespace Factory {
 			AS->HealthComponents[AI].Entity = AI;
 
 			// Set up loot drop profile
-			auto NR = Enjon::Random::Roll(0, 2);
+			auto NR = Enjon::Random::Roll(0, 1);
 			std::string N;
 			if (NR == 1) N = "Monster1";
 			else N = "Monster2"; 
@@ -205,7 +204,7 @@ namespace ECS { namespace Factory {
 			AS->Masks[Item] = Mask;
 
 			// Add damage component if item is a weapopn
-			if (Mask & Masks::Type::WEAPON) AS->DamageComponents[Item] = Component::DamageComponent{5.0f, 8.0f};
+			// if (Mask & Masks::Type::WEAPON) AS->DamageComponents[Item] = Component::DamageComponent{5.0f, 8.0f};
 
 			// Set up Inventory... This has to be fixed and is a problem with having a general ECS
 			Manager->InventorySystem->Inventories->WeaponEquipped = NULL_ENTITY;
@@ -258,8 +257,9 @@ namespace ECS { namespace Factory {
 			AttributeSystem* AS = Manager->AttributeSystem;		
 			AS->Masks[Weapon] = Mask;
 
-			// Add damage component if Weapon is a weapopn
-			if (Mask & Masks::Type::WEAPON) AS->DamageComponents[Weapon] = Component::DamageComponent{5.0f, 8.0f};
+			// Get Weapon Profile
+			auto WP = Loot::Weapon::GetProfile(std::string("Dagger"));
+			AS->WeaponProfiles[Weapon] = WP;
 
 			// Set up Inventory... This has to be fixed and is a problem with having a general ECS
 			Manager->InventorySystem->Inventories->WeaponEquipped = NULL_ENTITY;

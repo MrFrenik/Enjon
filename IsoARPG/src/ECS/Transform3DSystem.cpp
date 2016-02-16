@@ -3,6 +3,7 @@
 #include "ECS/AttributeSystem.h"
 #include "ECS/CollisionSystem.h"
 #include "ECS/InventorySystem.h"
+#include "Loot.h"
 
 namespace ECS{ namespace Systems { namespace Transform {
 
@@ -141,31 +142,53 @@ namespace ECS{ namespace Systems { namespace Transform {
 				WeaponTransform->GroundPosition = *GroundPosition;
 				WeaponTransform->CartesianPosition = Transform->CartesianPosition;
 
-				static float WeaponSize = 80.0f;
+				// AABB structs
+				Enjon::Physics::AABB NE;
+				Enjon::Physics::AABB N;
+				Enjon::Physics::AABB NW;
+				Enjon::Physics::AABB W;
+				Enjon::Physics::AABB SW;
+				Enjon::Physics::AABB S;
+				Enjon::Physics::AABB SE;
+				Enjon::Physics::AABB E;
 
-				// Calculate AABB
-				Enjon::Physics::AABB NE 	= {V2(Min.x + TILE_SIZE / 2.0f, Min.y - WeaponSize / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize / 2.0f)};
-				Enjon::Physics::AABB N 		= {V2(Min.x + TILE_SIZE / 2.0f, Min.y + TILE_SIZE / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize)};
-				Enjon::Physics::AABB NW 	= {V2(Min.x - WeaponSize / 2.0f, Min.y + TILE_SIZE / 2.0f), V2(Max.x + WeaponSize / 2.0f, Max.y + WeaponSize)};
-				Enjon::Physics::AABB W 		= {V2(Min.x - WeaponSize, Min.y + TILE_SIZE / 2.0f), V2(Max.x - TILE_SIZE / 2.0f, Max.y + WeaponSize)};
-				Enjon::Physics::AABB SW 	= {V2(Min.x - WeaponSize, Min.y - WeaponSize / 2.0f), V2(Max.x - TILE_SIZE / 2.0f, Max.y + WeaponSize / 2.0f)};
-				Enjon::Physics::AABB S 		= {V2(Min.x - WeaponSize, Min.y - WeaponSize), V2(Max.x - TILE_SIZE / 2.0f, Max.y - TILE_SIZE / 2.0f)};
-				Enjon::Physics::AABB SE 	= {V2(Min.x - WeaponSize / 2.0f, Min.y - WeaponSize), V2(Max.x + WeaponSize / 2.0f, Max.y - TILE_SIZE / 2.0f)};
-				Enjon::Physics::AABB E 		= {V2(Min.x + TILE_SIZE / 2.0f, Min.y - WeaponSize), V2(Max.x + WeaponSize, Max.y - TILE_SIZE / 2.0f)};
+				// Get reach of weapon from its profile
+				auto* WP = Manager->AttributeSystem->WeaponProfiles[WeaponEquipped];
+				float WeaponSize = WP->Reach;
+				auto ReachType = WP->Spread;
 
-				// Get Attack Vector 
-				V2* AttackVector = &Transform->AttackVector;
+				// Get reach type of weapon to determine how to draw the AABB of the weapon
+				if (ReachType == Loot::Weapon::ReachType::OMNIDIRECTION)
+				{
+					WeaponTransform->AABB = {V2(Min.x - WeaponSize / 2.0f, Min.y - WeaponSize / 2.0f), V2(Max.x + WeaponSize / 2.0f, Max.y + WeaponSize / 2.0f)};
+				}
 
-				// Apply AABB to weapon
-				if 		(*AttackVector == NORTH) 		WeaponTransform->AABB = N;
-				else if (*AttackVector == NORTHEAST) 	WeaponTransform->AABB = NE;
-				else if (*AttackVector == NORTHWEST) 	WeaponTransform->AABB = NW;
-				else if (*AttackVector == WEST) 		WeaponTransform->AABB = W;
-				else if (*AttackVector == SOUTHWEST) 	WeaponTransform->AABB = SW;
-				else if (*AttackVector == SOUTH) 		WeaponTransform->AABB = S;
-				else if (*AttackVector == SOUTHEAST) 	WeaponTransform->AABB = SE;
-				else if (*AttackVector == EAST) 		WeaponTransform->AABB = E;
-				else									WeaponTransform->AABB = NW;
+				else
+				{
+					// Calculate AABB
+					NE 		= {V2(Min.x + TILE_SIZE / 2.0f, Min.y - WeaponSize / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize / 2.0f)};
+					N 		= {V2(Min.x + TILE_SIZE / 2.0f, Min.y + TILE_SIZE / 2.0f), V2(Max.x + WeaponSize, Max.y + WeaponSize)};
+					NW 		= {V2(Min.x - WeaponSize / 2.0f, Min.y + TILE_SIZE / 2.0f), V2(Max.x + WeaponSize / 2.0f, Max.y + WeaponSize)};
+					W 		= {V2(Min.x - WeaponSize, Min.y + TILE_SIZE / 2.0f), V2(Max.x - TILE_SIZE / 2.0f, Max.y + WeaponSize)};
+					SW 		= {V2(Min.x - WeaponSize, Min.y - WeaponSize / 2.0f), V2(Max.x - TILE_SIZE / 2.0f, Max.y + WeaponSize / 2.0f)};
+					S 		= {V2(Min.x - WeaponSize, Min.y - WeaponSize), V2(Max.x - TILE_SIZE / 2.0f, Max.y - TILE_SIZE / 2.0f)};
+					SE 		= {V2(Min.x - WeaponSize / 2.0f, Min.y - WeaponSize), V2(Max.x + WeaponSize / 2.0f, Max.y - TILE_SIZE / 2.0f)};
+					E 		= {V2(Min.x + TILE_SIZE / 2.0f, Min.y - WeaponSize), V2(Max.x + WeaponSize, Max.y - TILE_SIZE / 2.0f)};
+
+					// Get Attack Vector 
+					V2* AttackVector = &Transform->AttackVector;
+
+					// Apply AABB to weapon
+					if 		(*AttackVector == NORTH) 		WeaponTransform->AABB = N;
+					else if (*AttackVector == NORTHEAST) 	WeaponTransform->AABB = NE;
+					else if (*AttackVector == NORTHWEST) 	WeaponTransform->AABB = NW;
+					else if (*AttackVector == WEST) 		WeaponTransform->AABB = W;
+					else if (*AttackVector == SOUTHWEST) 	WeaponTransform->AABB = SW;
+					else if (*AttackVector == SOUTH) 		WeaponTransform->AABB = S;
+					else if (*AttackVector == SOUTHEAST) 	WeaponTransform->AABB = SE;
+					else if (*AttackVector == EAST) 		WeaponTransform->AABB = E;
+					else									WeaponTransform->AABB = NW;
+				}
 
 				// Push weapon back into collision system
 				Manager->CollisionSystem->Entities.push_back(WeaponEquipped);

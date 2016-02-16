@@ -225,7 +225,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										// Create an arrow projectile entity for now...
 										static Enjon::Graphics::SpriteSheet ItemSheet;
 										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
-										eid32 id = Factory::CreateItem(Manager, Enjon::Math::Vec3(Position->x + 32.0f, Position->y + 32.0f, Position->z + 60.0f),
+										eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->x + 32.0f, Position->y + 32.0f, Position->z + 60.0f),
 																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::WEAPON | 
 																  												Masks::WeaponOptions::PROJECTILE | 
 																  												Masks::GeneralOptions::PICKED_UP | 

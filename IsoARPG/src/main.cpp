@@ -260,7 +260,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 100;
+	static uint32 AmountDrawn = 5000;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -275,14 +275,20 @@ int main(int argc, char** argv)
 	World->Player = Player;
 
 	// Create Sword
-	eid32 Sword = Factory::CreateItem(World, World->TransformSystem->Transforms[Player].Position, Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, 
+	eid32 Sword = Factory::CreateWeapon(World, World->TransformSystem->Transforms[Player].Position, Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, 
 												(Masks::Type::WEAPON | Masks::GeneralOptions::EQUIPPED | Masks::GeneralOptions::PICKED_UP), Component::EntityType::WEAPON, "Weapon");
+
+	// Create Bow
+	eid32 Bow = Factory::CreateWeapon(World, World->TransformSystem->Transforms[Player].Position, Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, 
+												(Masks::Type::WEAPON | Masks::GeneralOptions::PICKED_UP), Component::EntityType::WEAPON, "Weapon");
 
 	// Turn off Rendering / Transform Components
 	EntitySystem::RemoveComponents(World, Sword, COMPONENT_RENDERER2D | COMPONENT_TRANSFORM3D);
 
-	// Equip player with sword
+	// Add weapons to player inventory
 	World->InventorySystem->Inventories[Player].Items.push_back(Sword);
+	World->InventorySystem->Inventories[Player].Items.push_back(Bow);
+	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
 	AmountDrawn = 0;
@@ -333,7 +339,7 @@ int main(int argc, char** argv)
 			SpatialHash::ClearCells(World->Grid);
 			ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
 
-			// AIController::Update(World->AIControllerSystem, Player);
+			AIController::Update(World->AIControllerSystem, Player);
 			Animation2D::Update(World);
 
 			StartTicks = SDL_GetTicks();
@@ -449,7 +455,7 @@ int main(int argc, char** argv)
 		// Draw enemies
 		for (eid32 e = 0; e < World->MaxAvailableID; e++)
 		{
-			if (e == Player) continue;
+			if (e == Player || e == Sword || e == Bow) continue;
 
 			// Don't draw if the entity doesn't exist anymore
 			bitmask32 Mask = World->Masks[e];
@@ -882,8 +888,7 @@ int main(int argc, char** argv)
 			RenderTimeString = std::to_string(RenderTime);
 			EffectTimeString = std::to_string(EffectRunTime);
 
-			auto S = World->AttributeSystem->DamageComponents.size();
-			printf("DC: %d\n", S);
+			Loot::PrintCounts();
 
 			counter = 0.0f;
 		}

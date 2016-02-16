@@ -10,17 +10,37 @@
 #include "ECS/Components.h"
 #include "ECS/EntityFactory.h"
 
+#include <stdio.h>
+
 namespace Loot {
 
+	typedef struct 
+	{
+		Enjon::uint32 Common;
+		Enjon::uint32 Uncommon;
+		Enjon::uint32 Rare;
+		Enjon::uint32 Magic;
+		Enjon::uint32 Legend;	
+	} RarityCount;
+
+	RarityCount Counts;
+
 	std::unordered_map<std::string, LootProfile> LootProfiles;
+	std::unordered_map<std::string, Weapon::WeaponProfile> WeaponProfiles;
+
 
 	void AddProfile(std::string N, LootProfile L);
 
 	/* Creates drop profiles for entities */	
 	void Init()
 	{
-		AddProfile(std::string("Monster1"), LootProfile{1, 0.75f, 0.01f, 0.02f, 0.20f, 0.30f, 0.43f});
-		AddProfile(std::string("Monster2"), LootProfile{2, 0.85f, 0.05f, 0.10f, 0.35f, 0.25f, 0.35f});
+		Counts = {0, 0, 0, 0, 0};
+
+		AddProfile(std::string("Monster1"), LootProfile{1, 0.40f, 0.0001f, 0.0002f, 0.020f, 0.030f, 0.056f});
+		AddProfile(std::string("Monster2"), LootProfile{2, 0.20f, 0.0001f, 0.0005f, 0.035f, 0.025f, 0.055f});
+
+		// Init weapon profiles
+		Weapon::Init();
 	}
 
 	/* Adds profile to profiles map */
@@ -50,7 +70,7 @@ namespace Loot {
 		// Get amount to be dropped
 		auto DA = LP->NumOfDrops;
 
-		auto Roll = (float)Enjon::Random::Roll(0, 1000) / 1000.0f;
+		auto Roll = (float)Enjon::Random::Roll(0, 10000) / 10000.0f;
 		
 		if (Roll > LP->ChanceToDrop) return;	// Leave if no chance to drop an item
 
@@ -62,41 +82,87 @@ namespace Loot {
 
 		for (Enjon::uint32 i = 0; i < DA; i++)
 		{
-			Roll = (float)Enjon::Random::Roll(0, 1000) / 1000.0f;	
-
+			float Roll = (float)Enjon::Random::Roll(0, 10000) / 10000.0f;
+			
 			// Legendary 
 			if (Roll <= LP->LegendRate)
 			{
 				ItemColor = Enjon::Graphics::RGBA16_Orange();
+				Counts.Legend++;
+				printf("Making legend...\n");
 			}
 			// Rare
 			else if (Roll <= LP->RareRate)
 			{
 				ItemColor = Enjon::Graphics::RGBA16_Magenta();
+				Counts.Rare++;
+				printf("Making rare...\n");
 			}
 			// Magic
 			else if (Roll <= LP->MagicRate)
 			{
 				ItemColor = Enjon::Graphics::RGBA16_Blue();
+				Counts.Magic++;
+				printf("Making magic...\n");
 			}
 			// Uncommon
 			else if (Roll <= LP->UncommonRate)
 			{
 				ItemColor = Enjon::Graphics::RGBA16_Yellow();
+				Counts.Uncommon++;
+				printf("Making uncommon...\n");
 			}
 			// Common
-			else
+			else if (Roll <= LP->CommoneRate)
 			{
 				ItemColor = Enjon::Graphics::RGBA16_Green();
+				Counts.Common++;
+				printf("Making common...\n");
 			}
+			// Otherwise continue the loop and don't drop anything	
+			else continue;
 
 			ECS::eid32 id = ECS::Factory::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(Position->x - 64.0f, Position->x + 64.0f), 
 												  Enjon::Random::Roll(Position->y - 64.0f, Position->y + 64.0f), 0.0f), 
 												  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (ECS::Masks::Type::ITEM | ECS::Masks::ItemOptions::CONSUMABLE), 
-												  ECS::Component::EntityType::ITEM, "Item", Enjon::Graphics::SetOpacity(ItemColor, 0.5f));
+												  ECS::Component::EntityType::ITEM, "Item", ItemColor);
 			Manager->TransformSystem->Transforms[id].VelocityGoal.x = 0.0f;
 			Manager->TransformSystem->Transforms[id].VelocityGoal.y = 0.0f;
 			Manager->TransformSystem->Transforms[id].Velocity = {0.0f, 0.0f, 0.0f};
+		}
+	}
+
+	void PrintCounts()
+	{
+		printf("Legend: %d, Rare: %d, Magic: %d, Uncommon: %d, Common: %d\n", Counts.Legend, Counts.Rare, Counts.Magic, Counts.Uncommon, Counts.Common);
+	}
+
+
+	namespace Weapon {
+
+		/* Function Declarations */
+		void AddProfile(std::string N, WeaponProfile L);
+
+		/* Creates weapon profiles */	
+		void Init()
+		{
+			Weapon::AddProfile(std::string("Dagger"), WeaponProfile{Range{30, 67}, 500.0f, BaseType::DAGGER, ReachType::OMNIDIRECTION});
+			Weapon::AddProfile(std::string("Bow"), WeaponProfile{Range{58, 115}, 30.0f, BaseType::BOW, ReachType::UNIDIRECTION});
+		}
+
+		/* Adds profile to profiles map */
+		void AddProfile(std::string N, WeaponProfile L)
+		{
+			// Will overwrite existing profiles
+			WeaponProfiles[N] = L;
+		}
+
+		/* Gets specific weapon profile given */
+		const WeaponProfile* GetProfile(std::string& N)
+		{
+			auto it = WeaponProfiles.find(N);
+			if (it != WeaponProfiles.end()) return &it->second;
+			else return &WeaponProfiles["Dagger"];
 		}
 	}
 }

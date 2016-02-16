@@ -24,7 +24,7 @@ namespace ECS { namespace Masks {
 
 	enum WeaponSubOptions : EntityMask
 	{
-
+		
 	};
 
 	enum ItemOptions : EntityMask

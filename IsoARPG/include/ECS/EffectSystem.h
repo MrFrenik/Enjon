@@ -23,8 +23,9 @@ struct EffectSystem
 {
 	ECS::Systems::EntityManager* Manager;
 
+	/* Note(John): This takes too much memory; Might need to change this or roll a more light-weight implementation */
 	std::unordered_map<std::string, EffectComponent> TransferredEffects[MAX_ENTITIES];
-	std::unordered_map<std::string, EffectComponent> TransferrableEffects[MAX_ENTITIES];
+	// std::unordered_map<std::string, EffectComponent> TransferrableEffects[MAX_ENTITIES];
 };
 
 

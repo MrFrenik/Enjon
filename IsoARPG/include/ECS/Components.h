@@ -26,7 +26,6 @@ namespace ECS { namespace Component {
 	enum EntityType 				{ CONSUMABLE, ITEM, ENEMY, NPC, PLAYER, PROJECTILE, WEAPON };
 	enum WeaponType 				{ AXE, DAGGER, BOW }; 												// These are obviously not thorough...
 	enum ArmorType 					{ HELM, CHEST, ARMS, LEGS, BOOTS };									// Neither are these...
-	enum Uniqueness 				{ COMMON, UNCOMMON, RARE, MAGIC, UNIQUE, LEGEND };
 	enum StatsType 					{ WEAPONTYPE, ARMORTYPE };
 
 	// Transform struct

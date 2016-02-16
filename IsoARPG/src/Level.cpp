@@ -72,9 +72,9 @@ void Level::Init(float x, float y, int rows, int cols)
 			 else
 			 {
 				//Add coordinates of iso world to tile data
-				index = Enjon::Random::Roll(0, 3);
-				if (index == 0 || index == 1) index = Enjon::Random::Roll(0, 3);
-				if (index == 0) index = Enjon::Random::Roll(0, 3);
+				index = Enjon::Random::Roll(0, 2);
+				if (index == 0 || index == 1) index = Enjon::Random::Roll(0, 2);
+				if (index == 0) index = Enjon::Random::Roll(0, 2);
 				Tile tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(tilewidth, tileheight), 2.0f, &m_tilesheet, index);
 				m_isotiles.emplace_back(tile);
 				m_mapTiles.emplace_back(tile);

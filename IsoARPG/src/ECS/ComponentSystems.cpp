@@ -115,7 +115,10 @@ namespace ECS { namespace Systems {
 		{
 			// Need to reset/remove all of its components in here
 			// TODO(John): Keep track of all its components (maps) and then remove all of those
-			if (Manager->AttributeSystem->Masks[Entity] & Masks::Type::WEAPON) Manager->AttributeSystem->DamageComponents.erase(Entity);
+			if (Manager->AttributeSystem->Masks[Entity] & Masks::Type::WEAPON) 
+			{
+				// Manager->AttributeSystem->WeaponProfiles.erase(Entity);
+			}
 
 			// Set component mask to COMPONENT_NONE to remove
 			Manager->Masks[Entity] = COMPONENT_NONE;

@@ -10,7 +10,7 @@ namespace Enjon { namespace Random {
 	{
 		double x = rand()/static_cast<double>(RAND_MAX + 1);
 
-		int roll = min + static_cast<int>(x * (max - min));
+		int roll = min + static_cast<int>(x * (max - min + 1));
 		return roll;
 	} 
 

@@ -196,28 +196,42 @@ namespace ECS{ namespace Systems { namespace Collision {
 			}
 
 			// Get min and max damage of weapon
-			auto DC = Manager->AttributeSystem->DamageComponents[A_ID];
-			auto MiD = (Enjon::uint32)DC.MinDamage;
-			auto MaD = (Enjon::uint32)DC.MaxDamage;
+			const Loot::Weapon::WeaponProfile* WP = Manager->AttributeSystem->WeaponProfiles[A_ID];
+
+			Enjon::uint32 MiD, MaD;
+			if (WP)
+			{
+				MiD = WP->Damage.Min;
+				MaD = WP->Damage.Max;
+			}
+			else 
+			{
+				MiD = 5;
+				MaD = 10;
+			}
 
 			auto Damage = Enjon::Random::Roll(MiD, MaD);
 	
 			// Decrement by damage	
 			HealthComponent->Health -= Damage;
 
-			printf("Hit for %d damage\n", Damage);
+			// printf("Hit for %d damage\n", Damage);
 
 			if (HealthComponent->Health <= 0.0f) 
 			{
 				// Remove entity if no health
 				EntitySystem::RemoveEntity(Manager, B_ID);
 
-				// Drop random loot
-				if (Enjon::Random::Roll(0, 10) >= 5) Collision::DropRandomLoot(Manager, 3, &ColliderPosition->XY());
+				// Drop some loot!
+				Loot::DropLootBasedOnProfile(Manager, B_ID);
+
+				auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
+
+				printf("Chance to Drop: %.2f\n", 100.0f * LP->ChanceToDrop);
 			}
 			else
 			{
-				// Apply an effect just to see if this shit work at all...
+				// Apply an effect just to see if this shit works at all...
 				auto* T = &Manager->EffectSystem->TransferredEffects[B_ID]["Poison"];
 				T->Type = EffectType::TEMPORARY;
 				T->Apply = &Effects::Cold;
@@ -344,9 +358,9 @@ namespace ECS{ namespace Systems { namespace Collision {
 			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
 			{
 				// Get min and max damage of weapon
-				auto DC = Manager->AttributeSystem->DamageComponents[A_ID];
-				auto MiD = (Enjon::uint32)DC.MinDamage;
-				auto MaD = (Enjon::uint32)DC.MaxDamage;
+				auto DC = Manager->AttributeSystem->WeaponProfiles[A_ID]->Damage;
+				auto MiD = DC.Min;
+				auto MaD = DC.Max;
 
 				auto Damage = Enjon::Random::Roll(MiD, MaD);
 
@@ -392,7 +406,6 @@ namespace ECS{ namespace Systems { namespace Collision {
 				if (HealthComponent->Health <= 0.0f)
 				{
 					// Drop some loot!
-					// Collision::DropRandomLoot(Manager, 5, &ColliderPosition->XY());
 					Loot::DropLootBasedOnProfile(Manager, B_ID);
 
 					auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
