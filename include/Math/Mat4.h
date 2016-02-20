@@ -33,9 +33,9 @@ namespace Enjon { namespace Math {
 		static Mat4 Identity();
 		static Mat4 Scale(const Vec3& vector);
 		static Mat4 Translate(const Vec3& vector);
-		static Mat4 Rotate(float angle, const Vec3& axis); 
-
+		static Mat4 Rotate(float angle, const Vec3& axis);
 	};
+
 
 
 }}

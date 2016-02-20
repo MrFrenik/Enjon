@@ -1,6 +1,8 @@
 #include <assert.h>
 
 #include "Graphics/ParticleEngine2D.h"
+#include "Graphics/FontManager.h"
+#include "Utils/Errors.h"
 
 
 namespace Enjon { namespace Graphics { namespace Particle2D { 

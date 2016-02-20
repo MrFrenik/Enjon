@@ -27,8 +27,21 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 		std::map<GLchar, Character> Characters;	
 	} Font;
 
+	typedef struct 
+	{
+		Enjon::Math::Vec4 DestRect;
+		Enjon::Math::Vec4 UV;
+		GLuint TextureID;
+	} CharacterStats;
+
 	/* Inits a particular font with a particular size and stores in a returned map */
 	void Init(char* filePath, GLuint size, Font* font);
+
+	/* Gets character stats from given font */
+	CharacterStats GetCharacterAttributes(Math::Vec2 Pos, float scale, Font* F, std::string::const_iterator c, float* advance);
+
+	/* Creates and returns new font */
+	Font* CreateFont(char* filePath, GLuint size);
 
 	/* Adds a string of tex at (x,y) to given spritebatch */
 	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, 

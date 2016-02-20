@@ -29,6 +29,7 @@
 #include "Graphics/Window.h"
 #include "Graphics/ShaderManager.h"
 #include "Graphics/Font.h"
+#include "Graphics/FontManager.h"
 #include "Graphics/ParticleEngine2D.h"
 
 #include "IO/ImageLoader.h"

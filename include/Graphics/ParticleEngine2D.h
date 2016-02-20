@@ -6,6 +6,7 @@
 #include "Graphics/Color.h"
 #include "Graphics/SpriteBatch.h"
 #include "Graphics/GLTexture.h"
+#include "Graphics/Font.h"
 #include "System/Types.h"
 #include "Math/Maths.h"
 

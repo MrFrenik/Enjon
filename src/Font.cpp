@@ -1,6 +1,7 @@
 #include <Math/Maths.h>
 
 #include "Graphics/Font.h"
+#include "Utils/Errors.h"
 
 namespace Enjon { namespace Graphics { namespace Fonts {
 
@@ -61,13 +62,50 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	            face->glyph->advance.x
 	        };
 
-	        // Insert into font character map`
+	        // Insert into font character map
 	        font->Characters.insert(std::pair<GLchar, Character>(c, character));
 	    }
 	    glBindTexture(GL_TEXTURE_2D, 0);
 	    // Destroy FreeType once we're finished
 	    FT_Done_Face(face);
 	    FT_Done_FreeType(ft);
+	}
+
+	/* Creates and returns new font */
+	Font* CreateFont(char* filePath, GLuint size)
+	{
+		// Create new font
+		Font* F = new Font;
+
+		// Init
+		Init(filePath, size, F);
+
+		// Check for null
+		if (F == nullptr) Utils::FatalError("FONT::CREATE_FONT::Font is null.");
+
+		return F;
+	}
+
+	/* Gets character stats from given font */
+	CharacterStats GetCharacterAttributes(Math::Vec2 Pos, float scale, Font* F, std::string::const_iterator c, float* advance)
+	{
+		Character ch = F->Characters[*c];
+
+		float x = Pos.x;
+		float y = Pos.y;
+
+        GLfloat xpos = x + ch.Bearing.x * scale;
+        GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+        GLfloat w = ch.Size.x * scale;
+        GLfloat h = ch.Size.y * scale;
+
+        Enjon::Math::Vec4 DestRect(xpos, ypos, w, h);
+        Enjon::Math::Vec4 UV(0, 0, 1, 1);
+
+        *advance = x + (ch.Advance >> 6) * scale;
+
+        return CharacterStats{DestRect, UV, ch.TextureID};
 	}
 
 	/* Adds a string of tex at (x,y) to given spritebatch */

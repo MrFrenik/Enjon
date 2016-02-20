@@ -11,6 +11,7 @@
 
 #include <Graphics/Camera2D.h>
 #include <Graphics/ParticleEngine2D.h>
+#include <Graphics/FontManager.h>
 #include <Graphics/Color.h>
 #include <Defines.h>
 #include <System/Types.h>
@@ -395,12 +396,39 @@ namespace ECS{ namespace Systems { namespace Collision {
 						EM::Vec2(XSize * 1.5f, YSize * 1.5f), R, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
 				}
 
+
+				// This doesn't work too well right now...
+				// std::string S("23");
+			 //    std::string::const_iterator c;
+			 //    float x = PP->x + 100.0f;
+			 //    float y = PP->y + 150.0f;
+			 //    float advance = 0.0f;
+			 //    float scale = 0.5f;
+			 //    for (c = S.begin(); c != S.end(); c++) 
+			 //    {
+				// 	EG::Fonts::CharacterStats CS = 
+				// 				EG::Fonts::GetCharacterAttributes(EM::Vec2(x, y), scale, EG::FontManager::GetFont("Bold"), c, &advance);
+
+				// 	// Create particle
+				// 	EG::Particle2D::AddParticle(EM::Vec3(CS.DestRect.x, CS.DestRect.y, 0.0f), EM::Vec3(0.0f, 0.0f, 10.0f), EM::Vec2(CS.DestRect.z, CS.DestRect.w), 
+				// 								EG::RGBA16_White(), CS.TextureID, 0.025f, Manager->ParticleEngine->ParticleBatches[0]);
+
+				// 	x += advance;
+			 //    }
+
+
 				// Apply an effect just to see if this shit work at all...
-				auto* T = &Manager->EffectSystem->TransferredEffects[B_ID]["Poison"];
-				T->Type = EffectType::TEMPORARY;
-				T->Apply = &Effects::Poison;
-				T->Timer = Component::TimerComponent{3.0f, 0.05f, B_ID};
-				T->Entity = B_ID;
+				// 20% chance to apply
+				float Percent = 0.2f;
+				float Chance = (float)Enjon::Random::Roll(0, 100) / 100.0f;
+				if (Chance < Percent)
+				{
+					auto* T = &Manager->EffectSystem->TransferredEffects[B_ID]["Poison"];
+					T->Type = EffectType::TEMPORARY;
+					T->Apply = &Effects::Poison;
+					T->Timer = Component::TimerComponent{3.0f, 0.05f, B_ID};
+					T->Entity = B_ID;
+				}
 
 				// If dead, then kill it	
 				if (HealthComponent->Health <= 0.0f)

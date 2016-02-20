@@ -41,9 +41,6 @@
 
 /*-- External/Engine Libraries includes --*/
 #include <Enjon.h>
-#include <SDL2/SDL.h>
-#include <GLEW/glew.h>
-#include <Graphics/ParticleEngine2D.h>
 
 /*-- Entity Component System includes --*/
 #include <ECS/ComponentSystems.h>
@@ -80,7 +77,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 100;
+const int LEVELSIZE = 40;
 
 float DashingCounter = 0.0f;
 
@@ -150,6 +147,9 @@ int main(int argc, char** argv)
 
 	// Init AnimationManager
 	AnimationManager::Init(); 
+
+	// Init FontManager
+	Enjon::Graphics::FontManager::Init();
 	
 	// Init level
 	Enjon::Graphics::SpriteBatch TileBatch;
@@ -176,9 +176,6 @@ int main(int argc, char** argv)
 	Enjon::Graphics::SpriteBatch HUDBatch;
 	HUDBatch.Init();
 
-	Enjon::Graphics::Fonts::Font PauseFont;
-	Enjon::Graphics::Fonts::Init("../assets/fonts/TheBoldFont/TheBoldFont.ttf", 72, &PauseFont);
-
 	Level level;
 	Graphics::GLTexture TileTexture;
 	level.Init(Camera.GetPosition().x, Camera.GetPosition().y, LEVELSIZE, LEVELSIZE);
@@ -193,13 +190,14 @@ int main(int argc, char** argv)
 	SpatialHash::Init(&grid, width, width);
 
 	// Make spritesheets for player and enemy and item
-	Enjon::Graphics::SpriteSheet PlayerSheet;
-	Enjon::Graphics::SpriteSheet EnemySheet;
-	Enjon::Graphics::SpriteSheet EnemySheet2;
-	Enjon::Graphics::SpriteSheet ItemSheet;
-	Enjon::Graphics::SpriteSheet ArrowSheet;
-	Enjon::Graphics::SpriteSheet ReticleSheet;
-	Enjon::Graphics::SpriteSheet TargetSheet;
+	EG::SpriteSheet PlayerSheet;
+	EG::SpriteSheet EnemySheet;
+	EG::SpriteSheet EnemySheet2;
+	EG::SpriteSheet ItemSheet;
+	EG::SpriteSheet ArrowSheet;
+	EG::SpriteSheet ReticleSheet;
+	EG::SpriteSheet TargetSheet;
+	EG::SpriteSheet HealthSheet;
 	PlayerSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/pixelanimtestframessplit.png"), Enjon::Math::iVec2(6, 24));
 	EnemySheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png"), Math::iVec2(1, 1));
 	EnemySheet2.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/enemy.png"), Math::iVec2(1, 1));
@@ -207,6 +205,8 @@ int main(int argc, char** argv)
 	ArrowSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Math::iVec2(8, 1));
 	ReticleSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/circle_reticle.png"), Math::iVec2(1, 1));
 	TargetSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Target.png"), Math::iVec2(1, 1));
+	HealthSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBar.png"), EM::iVec2(1, 1));
+
 	
 	// Creating tiled iso level
 	TileBatch.Begin(); 
@@ -233,8 +233,9 @@ int main(int argc, char** argv)
 	Enjon::Graphics::SpriteBatch ParticleBatch;
 	ParticleBatch.Init();
 
-	// Create a particle batch to be used by World
+	// Create particle batchs to be used by World
 	EG::Particle2D::ParticleBatch2D* TestParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
+	EG::Particle2D::ParticleBatch2D* TextParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
 
 	// Create InputManager
 	Input::InputManager Input;
@@ -252,15 +253,16 @@ int main(int argc, char** argv)
 	// Init loot system
 	Loot::Init();
 
-	// Push back particle batch into world
+	// Push back particle batchs into world
 	EG::Particle2D::AddParticleBatch(World->ParticleEngine, TestParticleBatch);
+	EG::Particle2D::AddParticleBatch(World->ParticleEngine, TextParticleBatch);
 
 
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 5000;
+	static uint32 AmountDrawn = 100;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -339,7 +341,7 @@ int main(int argc, char** argv)
 			SpatialHash::ClearCells(World->Grid);
 			ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
 
-			AIController::Update(World->AIControllerSystem, Player);
+			// AIController::Update(World->AIControllerSystem, Player);
 			Animation2D::Update(World);
 
 			StartTicks = SDL_GetTicks();
@@ -356,6 +358,8 @@ int main(int argc, char** argv)
 			EffectRunTime = (SDL_GetTicks() - StartTicks);
 
 			Renderer2D::Update(World); 
+
+			DrawFire(TestParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 
 			// float x_pos = -500.0f, y_pos = -500.0f;
 			// for (int i = 0; i < 7; i++)
@@ -486,7 +490,7 @@ int main(int argc, char** argv)
 				if (Camera.IsBoundBoxInCamView(*EntityPosition, enemydims))
 				{
 					EntityBatch.Add(Math::Vec4(*EntityPosition, enemydims), uv, beast.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
-					Graphics::Fonts::PrintText(EntityPosition->x + 100.0f, EntityPosition->y + 220.0f, 0.25f, std::to_string(e), &PauseFont, TextBatch, 
+					Graphics::Fonts::PrintText(EntityPosition->x + 100.0f, EntityPosition->y + 220.0f, 0.4f, std::to_string(e), Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
 															Graphics::SetOpacity(Graphics::RGBA16_Green(), 0.8f));
 					// Draw shadow
 					// EntityBatch.Add(Math::Vec4(BoxCoords, 80.0f, 300.0f), uv, beast.id,
@@ -614,7 +618,7 @@ int main(int argc, char** argv)
 		rotation_count += 1.25f;
 		Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[Player].CartesianPosition) + Math::Vec2(5.0f, 0.0f));
 		float boxRadius = 50.0f;
-		BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle -40)), sin(Math::ToRadians(AimAngle - 40))));
+		BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle - 90)), sin(Math::ToRadians(AimAngle - 90))));
 		// EntityBatch.Add(Math::Vec4(BoxCoords, 100, 50), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png").id, 
 		// 					Graphics::SetOpacity(Graphics::RGBA16_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 45), Graphics::CoordinateFormat::ISOMETRIC);
 
@@ -662,8 +666,8 @@ int main(int argc, char** argv)
 			}
 		}
 		static Graphics::SpriteSheet AimSheet;
-		AimSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/aim_guide.png"), Math::iVec2(8, 1));
-		// EntityBatch.Add(Math::Vec4(AimCoords, 200, 300), AimSheet.GetUV(aim_index), AimSheet.texture.id, AimColor, 1.0f, Math::ToRadians(AimAngle + 120.0f), Graphics::CoordinateFormat::ISOMETRIC);
+		AimSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png"), Math::iVec2(1, 1));
+		// EntityBatch.Add(Math::Vec4(AimCoords, 300, 100), AimSheet.GetUV(aim_index), AimSheet.texture.id, AimColor, 1.0f, Math::ToRadians(AimAngle + 90.0f), Graphics::CoordinateFormat::ISOMETRIC);
 
 	
 		Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
@@ -698,6 +702,19 @@ int main(int argc, char** argv)
 		// EntityBatch.Add(Math::Vec4(A->x, A->y, TILE_SIZE, TILE_SIZE), Math::Vec4(0, 0, 1, 1), 0,
 		// 							Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.7f));
 
+		// Add Health display
+		Graphics::Fonts::Font* F = Graphics::FontManager::GetFont(std::string("Bold")); 
+
+		Enjon::Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - 40.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 40.0f, 0.4f, 
+											"Enemy Health", EG::FontManager::GetFont("Bold"), 
+											HUDBatch, EG::RGBA16_Orange());
+
+		float X = HUDCamera.GetPosition().x - 190.0f;
+		float Y = HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f;
+		HUDBatch.Add(EM::Vec4(X, Y, 400.0f, 10.0f),
+					 EM::Vec4(0, 0, 1, 1), 
+					  HealthSheet.texture.id, 
+					  EG::RGBA16_Red());
 
 		// Add an overlay to the Map for better viewing
 		MapEntityBatch.Add(Math::Vec4(-3100, -3150, 6250, 3100), Math::Vec4(0, 0, 1, 1), Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
@@ -706,32 +723,32 @@ int main(int argc, char** argv)
 		if (Paused)
 		{
 			// Draw paused text
-			Enjon::Graphics::Fonts::PrintText(Camera.GetPosition().x - 110.0f, Camera.GetPosition().y - 30.0f, 1.0f, "Paused", &PauseFont, TextBatch);
+			Enjon::Graphics::Fonts::PrintText(Camera.GetPosition().x - 110.0f, Camera.GetPosition().y - 30.0f, 1.0f, "Paused", F, TextBatch);
 		}
 
 		// Add FPS
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
-										0.2f, "FPS: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+										0.4f, "FPS: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
-										0.2f, FPSString, &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+										0.4f, FPSString, F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Add CollisionTime
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 80.0f, 
-										0.2f, "Collisions: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+										0.4f, "Collisions: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 80.0f, 
-										0.2f, CollisionTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+										0.4f, CollisionTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Add RenderTime
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
-										0.2f, "Rendering: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+										0.4f, "Rendering: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
-										0.2f, RenderTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+										0.4f, RenderTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Add EffectTime
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, 
-										0.2f, "Effects: ", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+										0.4f, "Effects: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, 
-										0.2f, EffectTimeString + " ms", &PauseFont, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+										0.4f, EffectTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Add particles to entity batch
 		EG::Particle2D::Draw(World->ParticleEngine);
@@ -994,6 +1011,25 @@ void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Posi
 	static GLuint PTex4 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/bg-light.png").id;
 
 	static EG::ColorRGBA16 Gray = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
+
+	std::string S("23.5");
+    std::string::const_iterator c;
+    float x = 100.0f;
+    float y = 100.0f;
+    float advance = 0.0f;
+    float scale = 0.5f;
+    for (c = S.begin(); c != S.end(); c++) 
+    {
+		EG::Fonts::CharacterStats CS = 
+					EG::Fonts::GetCharacterAttributes(Math::Vec2(x, y), scale, EG::FontManager::GetFont("Bold"), c, &advance);
+
+		// Create particle
+		EG::Particle2D::AddParticle(EM::Vec3(CS.DestRect.x, CS.DestRect.y, 0.0f), EM::Vec3(0.0f, 0.0f, 1.0f), EM::Vec2(50.0f, 50.0f), 
+										EG::RGBA16_Orange(), CS.TextureID, 0.025f, Batch);
+
+		x += advance * scale;
+    }
+
 
 
 	static float SmokeCounter = 0.0f;
