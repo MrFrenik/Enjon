@@ -93,7 +93,6 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				}
 
 				if (Input->IsKeyPressed(SDLK_r)) {
-					printf("flipping on\n");
 					eid32 WeaponEquipped = Manager->InventorySystem->Inventories[e].WeaponEquipped;
 					Manager->Masks[WeaponEquipped] ^= COMPONENT_RENDERER2D;	
 				}
@@ -101,13 +100,17 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				if (Input->IsKeyPressed(SDLK_1)) {
 					// Set current weapon to dagger
 					Animation2D::SetCurrentWeapon(Animation2D::Weapons::DAGGER);
-					printf("pressed dagger\n");
 				}
 
 				if (Input->IsKeyPressed(SDLK_2)) {
 					// Set current weapon to bow
 					Animation2D::SetCurrentWeapon(Animation2D::Weapons::BOW);
-					printf("pressed bow\n");
+				}
+
+				if (Input->IsKeyPressed(SDLK_3)) {
+					//Set current weapon to axe
+					Animation2D::SetCurrentWeapon(Animation2D::Weapons::AXE);
+					printf("Pressed axe\n");
 				}
 
 				if (Input->IsKeyDown(SDLK_w)) {

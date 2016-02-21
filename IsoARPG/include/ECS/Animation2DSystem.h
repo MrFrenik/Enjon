@@ -14,7 +14,7 @@ struct Animation2DSystem
 namespace ECS { namespace Systems { namespace Animation2D {
 	
 	enum EntityAnimationState { WALKING, ATTACKING, IDLE }; // This should be split up into continuous and discrete states
-	enum Weapons { BOW, DAGGER };
+	enum Weapons { BOW, DAGGER, AXE };
 
 	void SetPlayerState(EntityAnimationState State);
 	void SetCurrentWeapon(Weapons CurrentWeapon);

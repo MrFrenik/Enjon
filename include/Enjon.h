@@ -28,6 +28,7 @@
 #include "Graphics/Vertex.h"
 #include "Graphics/Window.h"
 #include "Graphics/ShaderManager.h"
+#include "Graphics/SpriteSheetManager.h"
 #include "Graphics/Font.h"
 #include "Graphics/FontManager.h"
 #include "Graphics/ParticleEngine2D.h"

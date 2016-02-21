@@ -7,13 +7,12 @@
 #include "ECS/EntityFactory.h"
 
 #include <Graphics/Camera2D.h>
+#include <Graphics/SpriteSheetManager.h>
 #include <IO/ResourceManager.h>
 
 namespace ECS { namespace Systems { namespace Animation2D {
 
 	// TESTING THIS ONLY
-	// static enum EntityAnimationState { WALKING, ATTACKING, IDLE }; // This should be split up into continuous and discrete states
-	// static enum Weapons { BOW, DAGGER };
 	static EntityAnimationState PlayerState = EntityAnimationState::WALKING;
 	static Weapons CurrentWeapon = Weapons::DAGGER;
 	bool HitFrame = false;
@@ -92,6 +91,8 @@ namespace ECS { namespace Systems { namespace Animation2D {
 							{
 								case Weapons::DAGGER: 	CurrentAnimation = AnimationManager::GetAnimation("Player", "attack_dagger"); break;
 								case Weapons::BOW: 		CurrentAnimation = AnimationManager::GetAnimation("Player", "attack_bow"); break;
+								case Weapons::AXE: 		CurrentAnimation = AnimationManager::GetAnimation("Player", "attack_axe"); break;
+								default: 				CurrentAnimation = AnimationManager::GetAnimation("Player", "attack_dagger"); break;
 							}
 							break;
 					}
@@ -99,6 +100,10 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					// Setting animation beginning frame based on view vector
 					if (PlayerState == EntityAnimationState::ATTACKING && !(*SetStart))
 					{
+						// Set spritesheet
+						if (CurrentWeapon == Weapons::AXE) AnimationComponent->Sheet = Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("PlayerSheet2");
+						else AnimationComponent->Sheet = Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("PlayerSheet");
+
 						// Get direction to mouse
 						Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
 						Manager->Camera->ConvertScreenToWorld(MousePos);
@@ -123,6 +128,8 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					// Set beginning frame based on view vector
 					if (PlayerState == EntityAnimationState::WALKING || PlayerState == EntityAnimationState::IDLE)
 					{
+						AnimationComponent->Sheet = Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("PlayerSheet");
+
 						if		(*ViewVector == NORTHWEST)		*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW];
 						else if (*ViewVector == NORTHEAST)		*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE];
 						else if (*ViewVector == EAST)			*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::E];
@@ -155,10 +162,10 @@ namespace ECS { namespace Systems { namespace Animation2D {
 							if (ActiveFrame == *BeginningFrame + 1)
 							{
 								// Activate collision with dagger "hit frame"
-								if (CurrentWeapon == Weapons::DAGGER)
+								if (CurrentWeapon == Weapons::DAGGER || CurrentWeapon == Weapons::AXE)
 								{
 									// Collision at this point
-									HitFrame = true;
+									// HitFrame = true;
 
 									// Make Weapon visible and collidable
 									eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
@@ -197,10 +204,10 @@ namespace ECS { namespace Systems { namespace Animation2D {
 								}
 
 							}
-							if (ActiveFrame == *BeginningFrame + 3)
+							if (ActiveFrame == *BeginningFrame + 3 || ActiveFrame == *BeginningFrame + 6)
 							{
 								// Activate collision with dagger "hit frame"
-								if (CurrentWeapon == Weapons::DAGGER)
+								if (CurrentWeapon == Weapons::DAGGER && ActiveFrame == *BeginningFrame + 3)
 								{
 									// Collision at this point
 									HitFrame = true;
@@ -210,6 +217,13 @@ namespace ECS { namespace Systems { namespace Animation2D {
 									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);
 
 									eid32 id = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+								}
+
+								if (CurrentWeapon == Weapons::AXE && ActiveFrame == *BeginningFrame + 6)
+								{
+									HitFrame = true;
+									eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);
 								}
 
 								if (CurrentWeapon == Weapons::BOW)
@@ -293,7 +307,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 									}
 								}
-							} 
+							}
 
 							else 
 							{ 

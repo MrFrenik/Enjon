@@ -38,6 +38,7 @@ namespace AnimationManager {
 		AddAnimation(PlayerAnimations, std::string("walk"), CreateAnimation(CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "walk")));
 		AddAnimation(PlayerAnimations, std::string("attack_dagger"), CreateAnimation(CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_dagger")));
 		AddAnimation(PlayerAnimations, std::string("attack_bow"), CreateAnimation(CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_bow")));
+		AddAnimation(PlayerAnimations, std::string("attack_axe"), CreateAnimation(CreateAnimationProfile("../IsoARPG/Profiles/Animations/Player/player.txt", "attack_axe")));
 	}
 
 	/* Add animations to the animation manager */
@@ -55,7 +56,8 @@ namespace AnimationManager {
 		{
 			auto it = PlayerAnimations.find(AnimationName);
 			if (it != PlayerAnimations.end()) return &it->second;
-			else return &PlayerAnimations["walk"];
+			else printf("Not found!");
+			// else return &PlayerAnimations["walk"];
 		}
 		
 		else return &PlayerAnimations["walk"];

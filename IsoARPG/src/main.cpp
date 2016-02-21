@@ -1,4 +1,3 @@
-#define REALGAME 0  // Alter this to change back and forth to testing mode
 #define PARSER  0
 #define TEST_FUNCTIONS 0
 
@@ -77,7 +76,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 40;
+const int LEVELSIZE = 100;
 
 float DashingCounter = 0.0f;
 
@@ -144,6 +143,9 @@ int main(int argc, char** argv)
 	Graphics::Camera2D HUDCamera;
 	HUDCamera.Init(screenWidth, screenHeight);
 	HUDCamera.SetScale(1.0f);
+
+	// Init SpriteSheetManager
+	EG::SpriteSheetManager::Init();
 
 	// Init AnimationManager
 	AnimationManager::Init(); 
@@ -262,7 +264,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 100;
+	static uint32 AmountDrawn = 1000;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -359,10 +361,10 @@ int main(int argc, char** argv)
 
 			Renderer2D::Update(World); 
 
-			DrawFire(TestParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
+			// DrawFire(TestParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 
 			// float x_pos = -500.0f, y_pos = -500.0f;
-			// for (int i = 0; i < 7; i++)
+			// for (int i = 0; i < 10; i++)
 			// {
 			// 	DrawFire(TestParticleBatch, EM::Vec3(0.0f + x_pos, 0.0f + y_pos, 0.0f));
 			// 	x_pos -= 200.0f;
@@ -558,7 +560,8 @@ int main(int argc, char** argv)
 		// Draw player
 
 		// Dashing state if dashing
-		static Graphics::SpriteSheet* Sheet = World->Animation2DSystem->Animations[Player].Sheet; static Enjon::uint32 Frame = World->Animation2DSystem->Animations[Player].CurrentFrame;
+		Graphics::SpriteSheet* Sheet = World->Animation2DSystem->Animations[Player].Sheet; 
+		Enjon::uint32 Frame = World->Animation2DSystem->Animations[Player].CurrentFrame;
 
 		if (IsDashing)
 		{
@@ -669,7 +672,7 @@ int main(int argc, char** argv)
 		AimSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png"), Math::iVec2(1, 1));
 		// EntityBatch.Add(Math::Vec4(AimCoords, 300, 100), AimSheet.GetUV(aim_index), AimSheet.texture.id, AimColor, 1.0f, Math::ToRadians(AimAngle + 90.0f), Graphics::CoordinateFormat::ISOMETRIC);
 
-	
+
 		Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
 		const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[Player].Color;
 		Enjon::Math::Vec2* PlayerPosition = &World->TransformSystem->Transforms[Player].Position.XY();
@@ -1012,23 +1015,23 @@ void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Posi
 
 	static EG::ColorRGBA16 Gray = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
 
-	std::string S("23.5");
-    std::string::const_iterator c;
-    float x = 100.0f;
-    float y = 100.0f;
-    float advance = 0.0f;
-    float scale = 0.5f;
-    for (c = S.begin(); c != S.end(); c++) 
-    {
-		EG::Fonts::CharacterStats CS = 
-					EG::Fonts::GetCharacterAttributes(Math::Vec2(x, y), scale, EG::FontManager::GetFont("Bold"), c, &advance);
+	// std::string S("23.5");
+ //    std::string::const_iterator c;
+ //    float x = 100.0f;
+ //    float y = 100.0f;
+ //    float advance = 0.0f;
+ //    float scale = 0.5f;
+ //    for (c = S.begin(); c != S.end(); c++) 
+ //    {
+	// 	EG::Fonts::CharacterStats CS = 
+	// 				EG::Fonts::GetCharacterAttributes(Math::Vec2(x, y), scale, EG::FontManager::GetFont("Bold"), c, &advance);
 
-		// Create particle
-		EG::Particle2D::AddParticle(EM::Vec3(CS.DestRect.x, CS.DestRect.y, 0.0f), EM::Vec3(0.0f, 0.0f, 1.0f), EM::Vec2(50.0f, 50.0f), 
-										EG::RGBA16_Orange(), CS.TextureID, 0.025f, Batch);
+	// 	// Create particle
+	// 	EG::Particle2D::AddParticle(EM::Vec3(CS.DestRect.x, CS.DestRect.y, 0.0f), EM::Vec3(0.0f, 0.0f, 1.0f), EM::Vec2(50.0f, 50.0f), 
+	// 									EG::RGBA16_Orange(), CS.TextureID, 0.025f, Batch);
 
-		x += advance * scale;
-    }
+	// 	x += advance * scale;
+ //    }
 
 
 
