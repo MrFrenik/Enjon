@@ -32,7 +32,7 @@ namespace ECS { namespace Systems {
 	namespace EntitySystem {
 
 		// Creates new EntityManager and returns it
-		struct EntityManager* NewEntityManager(int Width, int Height, Enjon::Graphics::Camera2D* Camera)
+		struct EntityManager* NewEntityManager(int Width, int Height, Enjon::Graphics::Camera2D* Camera, Level* Lvl)
 		{
 			struct EntityManager* Manager = new EntityManager;
 
@@ -69,6 +69,9 @@ namespace ECS { namespace Systems {
 
 			// Set up camera
 			Manager->Camera = Camera;
+
+			// Set level
+			Manager->Lvl = Lvl;
 
 			return Manager;
 		} 

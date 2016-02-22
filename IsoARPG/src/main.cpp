@@ -76,7 +76,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 100;
+const int LEVELSIZE = 50;
 
 float DashingCounter = 0.0f;
 
@@ -158,6 +158,9 @@ int main(int argc, char** argv)
 	Enjon::Graphics::SpriteBatch TileBatch;
 	TileBatch.Init();
 
+	Enjon::Graphics::SpriteBatch GroundTileBatch;
+	GroundTileBatch.Init();
+
 	Enjon::Graphics::SpriteBatch CartesianTileBatch;
 	CartesianTileBatch.Init();
 
@@ -178,6 +181,9 @@ int main(int argc, char** argv)
 
 	Enjon::Graphics::SpriteBatch HUDBatch;
 	HUDBatch.Init();
+
+	Enjon::Graphics::SpriteBatch OverlayBatch;
+	OverlayBatch.Init();
 
 	Level level;
 	Graphics::GLTexture TileTexture;
@@ -216,6 +222,10 @@ int main(int argc, char** argv)
 	level.DrawIsoLevel(TileBatch);
 	TileBatch.End();	
 
+	GroundTileBatch.Begin();
+	level.DrawGroundTiles(GroundTileBatch);
+	GroundTileBatch.End();
+
 	CartesianTileBatch.Begin();
 	level.DrawCartesianLevel(CartesianTileBatch);
 	CartesianTileBatch.End();
@@ -227,6 +237,11 @@ int main(int argc, char** argv)
 	MapBatch.Begin();
 	level.DrawMap(MapBatch);
 	MapBatch.End();
+
+	// Add Overlays 
+	OverlayBatch.Begin();
+	level.DrawTileOverlays(OverlayBatch);
+	OverlayBatch.End();
  
 	// Create EntityBatch
 	Enjon::Graphics::SpriteBatch EntityBatch;
@@ -252,7 +267,7 @@ int main(int argc, char** argv)
 	/////////////////
 
 	// Create new EntityManager
-	struct EntityManager* World = EntitySystem::NewEntityManager(level.GetWidth(), level.GetWidth(), &Camera);
+	struct EntityManager* World = EntitySystem::NewEntityManager(level.GetWidth(), level.GetWidth(), &Camera, &level);
 
 	// Init loot system
 	Loot::Init();
@@ -267,7 +282,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1000;
+	static uint32 AmountDrawn = 5000;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -331,6 +346,14 @@ int main(int argc, char** argv)
 		// Update Input Manager
 		Input.Update();	
 
+		// Check whether or not overlays are dirty and then reset overlay batch if needed
+		if (World->Lvl->GetOverlaysDirty())
+		{
+			OverlayBatch.Begin();
+			World->Lvl->DrawTileOverlays(OverlayBatch);
+			OverlayBatch.End();
+		}
+
 		// Update World 
 		const Math::Vec2* PlayerStuff = &World->TransformSystem->Transforms[Player].Position.XY();
 		static Math::Vec2 quadDimsStuff(50.0f, 50.0f);
@@ -364,14 +387,14 @@ int main(int argc, char** argv)
 
 			Renderer2D::Update(World); 
 
-			static float SmokeCount = 0.0f;
-			SmokeCount += 0.05f;
-			if (SmokeCount > 1.0f)
-			{
-				DrawSmoke(SmokeBatch, EM::Vec3(-4000, -4000, 0.0f));
-				DrawSmoke(SmokeBatch, EM::Vec3(-5000.0f, -4500.0f, 0.0f));
-				SmokeCount = 0.0f;
-			}
+			// static float SmokeCount = 0.0f;
+			// SmokeCount += 0.05f;
+			// if (SmokeCount > 1.0f)
+			// {
+			// 	DrawSmoke(SmokeBatch, EM::Vec3(-4000, -4000, 0.0f));
+			// 	DrawSmoke(SmokeBatch, EM::Vec3(-5000.0f, -4500.0f, 0.0f));
+			// 	SmokeCount = 0.0f;
+			// }
 
 			// DrawFire(TestParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 
@@ -440,7 +463,13 @@ int main(int argc, char** argv)
 			glUniform1i(glGetUniformLocation(shader, "isPaused"), Paused);
 			glUniform1i(glGetUniformLocation(shader, "useOverlay"), true);
 		} 
-		
+
+		// Draw ground tiles
+		GroundTileBatch.RenderBatch();
+
+		// Draw TileOverlays
+		OverlayBatch.RenderBatch();
+
 		// Draw map
 		// TileBatch.RenderBatch();
 
@@ -772,39 +801,39 @@ int main(int argc, char** argv)
 
 		// Draw only the world that surrounds the player
 		{
-			auto TW = 256.0f / 2.0f;
-			EM::Vec2* PGP = &World->TransformSystem->Transforms[Player].CartesianPosition;
-			uint32 R = -PGP->x / TW;
-			uint32 C = -PGP->y / TW;
+			// auto TW = 256.0f / 2.0f;
+			// EM::Vec2* PGP = &World->TransformSystem->Transforms[Player].CartesianPosition;
+			// uint32 R = -PGP->x / TW;
+			// uint32 C = -PGP->y / TW;
 
-			// 12 block radius might be the smallest I'd like to go
-			uint32 Radius = 12;
-			uint32 Padding = 2;
+			// // 12 block radius might be the smallest I'd like to go
+			// uint32 Radius = 12;
+			// uint32 Padding = 2;
 
-			uint32 MinR = R - Radius;
-			uint32 MaxR = R + Radius + Padding;
-			uint32 MinC = C - Radius;
-			uint32 MaxC = C + Radius + Padding;
+			// uint32 MinR = R - Radius;
+			// uint32 MaxR = R + Radius + Padding;
+			// uint32 MinC = C - Radius;
+			// uint32 MaxC = C + Radius + Padding;
 
 
-			if (C <= Radius) MinC = 0;
-			if (R <= Radius) MinR = 0;
-			if (C >= LEVELSIZE - Radius - Padding) MaxC = LEVELSIZE;
-			if (R >= LEVELSIZE - Radius - Padding) MaxR = LEVELSIZE;
+			// if (C <= Radius) MinC = 0;
+			// if (R <= Radius) MinR = 0;
+			// if (C >= LEVELSIZE - Radius - Padding) MaxC = LEVELSIZE;
+			// if (R >= LEVELSIZE - Radius - Padding) MaxR = LEVELSIZE;
 
-			auto IsoTiles = level.GetIsoTiles();
-			for (uint32 i = MinR; i < MaxR; i++)
-			{
-				for (uint32 j = MinC; j < MaxC; j++)
-				{
-					auto T = IsoTiles[LEVELSIZE * i + j];
+			// auto IsoTiles = level.GetIsoTiles();
+			// for (uint32 i = MinR; i < MaxR; i++)
+			// {
+			// 	for (uint32 j = MinC; j < MaxC; j++)
+			// 	{
+			// 		auto T = IsoTiles[LEVELSIZE * i + j];
 
-					// If front wall, then lower opacity
-					EG::ColorRGBA16 Color = EG::RGBA16_White();
-					if (i == 0 || i >= LEVELSIZE - 1 || j == 0 || j >= LEVELSIZE - 1) Color = EG::SetOpacity(Color, 0.5f);
-					EntityBatch.Add(Enjon::Math::Vec4(T->pos, T->dims), T->Sheet->GetUV(T->index), T->Sheet->texture.id, Color, T->depth);
-				}
-			}
+			// 		// If front wall, then lower opacity
+			// 		EG::ColorRGBA16 Color = EG::RGBA16_White();
+			// 		if (i == 0 || i >= LEVELSIZE - 1 || j == 0 || j >= LEVELSIZE - 1) Color = EG::SetOpacity(Color, 0.5f);
+			// 		EntityBatch.Add(Enjon::Math::Vec4(T->pos, T->dims), T->Sheet->GetUV(T->index), T->Sheet->texture.id, Color, T->depth);
+			// 	}
+			// }
 		}
 
 
@@ -833,6 +862,7 @@ int main(int argc, char** argv)
 
 		// Draw entities		
 		EntityBatch.RenderBatch();
+
 
 		// Draw Text
 		shader = Graphics::ShaderManager::GetShader("Text")->GetProgramID();

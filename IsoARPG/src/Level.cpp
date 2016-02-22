@@ -23,6 +23,9 @@ void Level::Init(float x, float y, int rows, int cols)
 	m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/stone.png"), Enjon::Math::iVec2(3, 1));
 	m_wallSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/wall_chunk.png"), Enjon::Math::iVec2(1, 1));
 
+	// Overlays are clean
+	m_OverlaysDirty = false;
+
 	
 	//Push tiles back into level data 
 	float currentX = x;
@@ -76,8 +79,9 @@ void Level::Init(float x, float y, int rows, int cols)
 				if (index == 0 || index == 1) index = Enjon::Random::Roll(0, 2);
 				if (index == 0) index = Enjon::Random::Roll(0, 2);
 				Tile tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(tilewidth, tileheight), 2.0f, &m_tilesheet, index);
-				m_isotiles.emplace_back(tile);
+				// m_isotiles.emplace_back(tile);
 				m_mapTiles.emplace_back(tile);
+				m_GroundTiles.emplace_back(tile);
 
 				//Add coordinates of 2d world to level data vector
 				m_cartesiantiles.emplace_back(Tile(Enjon::Math::IsoToCartesian(Enjon::Math::Vec2(currentX, currentY)), 
@@ -123,6 +127,16 @@ bool Level::IsBorder(int i, int j, int rows, int cols)
 	return false;
 }
 
+void Level::DrawGroundTiles(Enjon::Graphics::SpriteBatch& batch)
+{
+	//Add level information to batch
+	for (Tile& tile : m_GroundTiles)
+	{
+		//batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.texture.id);
+		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id);
+	}
+}
+
 void Level::DrawIsoLevel(Enjon::Graphics::SpriteBatch& batch)
 { 
 	//Add level information to batch
@@ -159,3 +173,31 @@ void Level::DrawMap(Enjon::Graphics::SpriteBatch& batch)
 		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), 0, Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_Black(), 0.2f), 100.0f);
 	}	
 }
+
+void Level::DrawTileOverlays(Enjon::Graphics::SpriteBatch& batch)
+{
+	for (TileOverlay& TO : m_TileOverlays)
+	{
+		batch.Add(TO.DestRect, Enjon::Math::Vec4(0, 0, 1, 1), TO.Tex.id);
+	}
+}
+
+void Level::AddTileOverlay(Enjon::Graphics::GLTexture Tex, Enjon::Math::Vec4 DestRect)
+{
+	struct TileOverlay TO = TileOverlay{Tex, DestRect};
+	m_TileOverlays.push_back(TO);
+	m_OverlaysDirty = true;
+}
+
+void Level::CleanOverlays()
+{
+	m_OverlaysDirty = false;
+}
+
+bool Level::GetOverlaysDirty()
+{
+	return m_OverlaysDirty;
+}
+
+
+

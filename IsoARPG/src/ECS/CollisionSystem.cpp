@@ -9,6 +9,8 @@
 #include "ECS/Effects.h"
 #include "ECS/EntityFactory.h"
 
+#include "Level.h"
+
 #include <Graphics/Camera2D.h>
 #include <Graphics/ParticleEngine2D.h>
 #include <Graphics/FontManager.h>
@@ -228,7 +230,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 				auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
 
-				printf("Chance to Drop: %.2f\n", 100.0f * LP->ChanceToDrop);
+				// printf("Chance to Drop: %.2f\n", 100.0f * LP->ChanceToDrop);
 			}
 			else
 			{
@@ -431,6 +433,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 				}
 
 				// If dead, then kill it	
+				// TODO(John): This doesn't belong here. Need to have this be a dispatched message to the attribute system or the entity manager itself.
 				if (HealthComponent->Health <= 0.0f)
 				{
 					// Drop some loot!
@@ -438,7 +441,16 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 					auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
 
-					printf("Chance to Drop: %.2f\n", 100.0f * LP->ChanceToDrop);
+					// printf("Chance to Drop: %.2f\n", 100.0f * LP->ChanceToDrop);
+
+					// Put an overlay onto the world
+					Manager->Lvl->AddTileOverlay(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/target.png"), Enjon::Math::Vec4(ColliderPosition->XY(), 32.0f, 32.0f));
+
+					struct TileOverlay
+					{
+						Enjon::Graphics::GLTexture Tex;
+						Enjon::Math::Vec4 DestRect;
+					};
 
 					// Remove collider
 					EntitySystem::RemoveEntity(Manager, B_ID);

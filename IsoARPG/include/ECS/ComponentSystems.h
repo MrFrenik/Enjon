@@ -11,6 +11,7 @@
 #include "Masks.h"
 #include "SpatialHash.h"
 #include "AnimationManager.h"
+#include "Level.h"
 
 #include <vector>
 
@@ -64,6 +65,8 @@ namespace ECS { namespace Systems {
 
 		SpatialHash::Grid* Grid;
 		Enjon::Graphics::Camera2D* Camera;
+
+		Level* Lvl;
 	};
 
 	////////////////////
@@ -74,7 +77,7 @@ namespace ECS { namespace Systems {
 	{ 
 		// Creates and returns instance of an Entity Manager
 		// TODO(John): Write custom allocators instead of using malloc/delete
-		struct EntityManager* NewEntityManager(int Width, int Height, Enjon::Graphics::Camera2D* Camera); 
+		struct EntityManager* NewEntityManager(int Width, int Height, Enjon::Graphics::Camera2D* Camera, Level* Lvl); 
 		
 		// Creates a blank entity, returns the eid and places in manager
 		eid32 CreateEntity(struct EntityManager* Manager, bitmask32 Components);
