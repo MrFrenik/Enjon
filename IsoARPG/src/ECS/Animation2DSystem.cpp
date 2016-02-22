@@ -10,6 +10,8 @@
 #include <Graphics/SpriteSheetManager.h>
 #include <IO/ResourceManager.h>
 
+#include <iostream>
+
 namespace ECS { namespace Systems { namespace Animation2D {
 
 	// TESTING THIS ONLY
@@ -21,6 +23,8 @@ namespace ECS { namespace Systems { namespace Animation2D {
 	{
 		PlayerState = State;
 	}
+
+	EntityAnimationState GetPlayerState() { return PlayerState; }
 
 	void SetCurrentWeapon(Weapons CW)
 	{
@@ -159,27 +163,23 @@ namespace ECS { namespace Systems { namespace Animation2D {
 						// Check for hit frame if attacking
 						if (PlayerState == EntityAnimationState::ATTACKING)
 						{
+							eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+							eid32 id = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+
+							Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
+							Manager->Camera->ConvertScreenToWorld(MousePos);
+							Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].Position.XY();
+
+							// Find vector between the two and normalize
+							Enjon::Math::Vec2 AttackVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x + 32.0f, Pos.y + 32.0f));
+
 							if (ActiveFrame == *BeginningFrame + 1)
 							{
 								// Activate collision with dagger "hit frame"
 								if (CurrentWeapon == Weapons::DAGGER || CurrentWeapon == Weapons::AXE)
 								{
-									// Collision at this point
-									// HitFrame = true;
-
 									// Make Weapon visible and collidable
-									eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
 									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);
-
-									eid32 id = Manager->InventorySystem->Inventories[e].WeaponEquipped;
-
-									// Set arrow velocity to normalize: mousepos - arrowpos
-									Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
-									Manager->Camera->ConvertScreenToWorld(MousePos);
-									Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].Position.XY();
-
-									// Find vector between the two and normalize
-									Enjon::Math::Vec2 DaggerVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x + 32.0f, Pos.y + 32.0f));
 
 									float speed = 50.0f;
 
@@ -187,17 +187,17 @@ namespace ECS { namespace Systems { namespace Animation2D {
 									int Mult = 1.0f;
 									Enjon::Math::Vec2 AttackVector;
 									// X < 0
-									if (DaggerVelocity.x < 0 && DaggerVelocity.x >= -0.3f) AttackVector.x = 0.0f;
-									else if (DaggerVelocity.x < 0 && DaggerVelocity.x < -0.3f) AttackVector.x = -1.0f;
+									if (AttackVelocity.x < 0 && AttackVelocity.x >= -0.3f) AttackVector.x = 0.0f;
+									else if (AttackVelocity.x < 0 && AttackVelocity.x < -0.3f) AttackVector.x = -1.0f;
 									// X > 0
-									if (DaggerVelocity.x >= 0 && DaggerVelocity.x < 0.5f) AttackVector.x = 0.0f;
-									else if (DaggerVelocity.x >= 0 && DaggerVelocity.x >= 0.5f) AttackVector.x = 1.0f;
+									if (AttackVelocity.x >= 0 && AttackVelocity.x < 0.5f) AttackVector.x = 0.0f;
+									else if (AttackVelocity.x >= 0 && AttackVelocity.x >= 0.5f) AttackVector.x = 1.0f;
 									// Y < 0
-									if (DaggerVelocity.y < 0 && DaggerVelocity.y > -0.3f) AttackVector.y = 0.0f;
-									else if (DaggerVelocity.y < 0 && DaggerVelocity.y <= -0.3f) AttackVector.y = -1.0f;
+									if (AttackVelocity.y < 0 && AttackVelocity.y > -0.3f) AttackVector.y = 0.0f;
+									else if (AttackVelocity.y < 0 && AttackVelocity.y <= -0.3f) AttackVector.y = -1.0f;
 									// Y > 0
-									if (DaggerVelocity.y >= 0 && DaggerVelocity.y < 0.3f) AttackVector.y = 0.0f;
-									else if (DaggerVelocity.y >= 0 && DaggerVelocity.y >= 0.3f) AttackVector.y = 1.0f;
+									if (AttackVelocity.y >= 0 && AttackVelocity.y < 0.3f) AttackVector.y = 0.0f;
+									else if (AttackVelocity.y >= 0 && AttackVelocity.y >= 0.3f) AttackVector.y = 1.0f;
 
 
 									Manager->TransformSystem->Transforms[e].AttackVector = AttackVector;
@@ -217,6 +217,12 @@ namespace ECS { namespace Systems { namespace Animation2D {
 									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);
 
 									eid32 id = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+
+									// Move player in direction of attack vector
+									auto Vel = &Manager->TransformSystem->Transforms[e].Velocity;
+									*Vel = 7.0f * Enjon::Math::Vec3(AttackVelocity, Vel->z);
+
+									std::cout << AttackVelocity << std::endl;
 								}
 
 								if (CurrentWeapon == Weapons::AXE && ActiveFrame == *BeginningFrame + 6)
@@ -224,12 +230,15 @@ namespace ECS { namespace Systems { namespace Animation2D {
 									HitFrame = true;
 									eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
 									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);
+
+									auto Vel = &Manager->TransformSystem->Transforms[e].Velocity;
+									*Vel = 8.0f * Enjon::Math::Vec3(AttackVelocity, Vel->z);
 								}
 
-								if (CurrentWeapon == Weapons::BOW)
+								if (CurrentWeapon == Weapons::BOW && ActiveFrame == *BeginningFrame + 3)
 								{
-									for (auto i = 0; i < 10; i++)
-									{
+									// for (auto i = 0; i < 10; i++)
+									// {
 										
 								
 										// Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[e].CartesianPosition + Math::Vec2(16.0f)) + Math::Vec2(20.0f, -50.0f));
@@ -239,7 +248,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										// Create an arrow projectile entity for now...
 										static Enjon::Graphics::SpriteSheet ItemSheet;
 										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
-										eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->x + 32.0f, Position->y + 32.0f, Position->z + 60.0f),
+										eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->x, Position->y, 40.0f),
 																  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::WEAPON | 
 																  												Masks::WeaponOptions::PROJECTILE | 
 																  												Masks::GeneralOptions::PICKED_UP | 
@@ -251,39 +260,17 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										// Set arrow velocity to normalize: mousepos - arrowpos
 										Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
 										Manager->Camera->ConvertScreenToWorld(MousePos);
-										Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].Position.XY();
+										Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].GroundPosition;
+										MousePos.y -= 80.0f;
 
 										// Find vector between the two and normalize
-										Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x + 32.0f, Pos.y + 32.0f));
-
-										// static Enjon::Math::Vec2 right(1.0f, 0.0f);
-										// float DotProduct = ArrowVelocity.DotProduct(right);
-										// float Angle = acos(DotProduct) * 180.0f / M_PI;
-										// if (ArrowVelocity.y < 0.0f) Angle *= -1;
-
-										// Manager->TransformSystem->Transforms[id].Position = Enjon::Math::Vec3(Position->x + cos(Enjon::Math::ToRadians(Angle + 5 * i)), 
-										// 																	  Position->y + sin(Enjon::Math::ToRadians(Angle + 5 * i)), Position->z + 60.0f);
-
-
-										switch(i)
-										{
-											case 0: break;
-											case 1: ArrowVelocity -= Enjon::Math::Vec2(0.1f); break;
-											case 2: ArrowVelocity -= Enjon::Math::Vec2(0.2f); break;
-											case 3: ArrowVelocity -= Enjon::Math::Vec2(0.3f); break;
-											case 4: ArrowVelocity -= Enjon::Math::Vec2(0.4f); break;
-											case 5: ArrowVelocity += Enjon::Math::Vec2(0.1f); break;
-											case 6: ArrowVelocity += Enjon::Math::Vec2(0.2f); break;
-											case 7: ArrowVelocity += Enjon::Math::Vec2(0.3f); break;
-											case 8: ArrowVelocity += Enjon::Math::Vec2(0.4f); break;
-											case 9: ArrowVelocity += Enjon::Math::Vec2(0.5f); break;
-											default: break;
-										}
+										Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x, Pos.y));
 
 										float speed = 50.0f;
 
 										// Fire in direction of mouse
-										Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(ArrowVelocity.x * speed, ArrowVelocity.y * speed, -0.98f);
+										// Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(ArrowVelocity.x * speed, ArrowVelocity.y * speed, -0.98f);
+										Manager->TransformSystem->Transforms[id].Velocity = speed * Enjon::Math::Vec3(ArrowVelocity.x, ArrowVelocity.y, 0.0f);
 										Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;
 
 										// Set attack vector of player to this velocity
@@ -305,7 +292,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 										Manager->TransformSystem->Transforms[e].AttackVector = AttackVector;
 
-									}
+									// }
 								}
 							}
 

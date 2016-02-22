@@ -113,32 +113,34 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					printf("Pressed axe\n");
 				}
 
-				if (Input->IsKeyDown(SDLK_w)) {
+				// if (Animation2D::GetPlayerState() != Animation2D::EntityAnimationState::ATTACKING)
+				// {
+					if (Input->IsKeyDown(SDLK_w)) {
 
-					Transform->VelocityGoal.y = Multiplier * goal / 2.0f;
-					Transform->ViewVector.y = 1.0f;
-				}
-				if (Input->IsKeyDown(SDLK_s)) {
+						Transform->VelocityGoal.y = Multiplier * goal / 2.0f;
+						Transform->ViewVector.y = 1.0f;
+					}
+					if (Input->IsKeyDown(SDLK_s)) {
 
-					Transform->VelocityGoal.y = Multiplier * -goal / 2.0f;
-					Transform->ViewVector.y = -1.0f;
-				}
-				if (Input->IsKeyDown(SDLK_a)) {
+						Transform->VelocityGoal.y = Multiplier * -goal / 2.0f;
+						Transform->ViewVector.y = -1.0f;
+					}
+					if (Input->IsKeyDown(SDLK_a)) {
 
-					Transform->VelocityGoal.x = Multiplier * -goal;
-					Transform->ViewVector.x = -1.0f; 
-				}
+						Transform->VelocityGoal.x = Multiplier * -goal;
+						Transform->ViewVector.x = -1.0f; 
+					}
 
-				if (Input->IsKeyDown(SDLK_d)) {
+					if (Input->IsKeyDown(SDLK_d)) {
 
-					Transform->VelocityGoal.x = Multiplier * goal;
-					Transform->ViewVector.x = 1.0f; 
-				}
+						Transform->VelocityGoal.x = Multiplier * goal;
+						Transform->ViewVector.x = 1.0f; 
+					}
 
-				if (Input->IsKeyDown(SDLK_SPACE)) {
-					Transform->VelocityGoal.z = Multiplier * goal;	
-				}
-
+					if (Input->IsKeyDown(SDLK_SPACE)) {
+						Transform->VelocityGoal.z = Multiplier * goal;	
+					}
+				// }
 
 				if (!Input->IsKeyDown(SDLK_SPACE)) {
 					Transform->VelocityGoal.z = -9.8f;	

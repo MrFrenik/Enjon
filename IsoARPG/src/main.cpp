@@ -549,14 +549,6 @@ int main(int argc, char** argv)
 			}
 		}
 
-		// Draw player reticle
-		// NOTE(John): In order for this to work the way I'm thinking, I'll need to learn stencil buffering
-		// and apply that here to mask out the area I don't want
-		// Math::Vec2 ReticleDims(94.0f, 47.0f);
-		// Math::Vec2 Position = World->TransformSystem->Transforms[Player].GroundPosition - Math::Vec2(17.0f, 0.0f);
-		// EntityBatch.Add(Math::Vec4(Position.x, Position.y + World->TransformSystem->Transforms[Player].Position.z, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), ReticleSheet.texture.id, 
-		// 							Graphics::RGBA16_White(), Position.y + World->TransformSystem->Transforms[Player].Position.z);	
-
 		// Draw player
 
 		// Dashing state if dashing
@@ -569,11 +561,14 @@ int main(int argc, char** argv)
 			World->AttributeSystem->Masks[Player] &= ~Masks::GeneralOptions::COLLIDABLE;
 
 			float DashAmount = 10.0f;
-			World->TransformSystem->Transforms[Player].Position.x += (World->TransformSystem->Transforms[Player].Velocity.x * 2.0f);
-			World->TransformSystem->Transforms[Player].Position.y += (World->TransformSystem->Transforms[Player].Velocity.y * 8.0f);
+			auto Vel = World->TransformSystem->Transforms[Player].Velocity * 2.0f;
+			World->TransformSystem->Transforms[Player].Position.x += Vel.x;
+			World->TransformSystem->Transforms[Player].Position.y += Vel.y * 4.0f;
+			// World->TransformSystem->Transforms[Player].Position.x += (World->TransformSystem->Transforms[Player].Velocity.x * 2.0f);
+			// World->TransformSystem->Transforms[Player].Position.y += (World->TransformSystem->Transforms[Player].Velocity.y * 8.0f);
 			World->TransformSystem->Transforms[Player].VelocityGoalScale = 0.01f;
-			World->TransformSystem->Transforms[Player].Velocity.x *= 1.05f; 
-			World->TransformSystem->Transforms[Player].Velocity.y *= 1.05f; 
+			// World->TransformSystem->Transforms[Player].Velocity.x *= 1.05f; 
+			// World->TransformSystem->Transforms[Player].Velocity.y *= 1.05f; 
 			// Setting the "alarm"
 			DashingCounter += 0.05f;
 			if (DashingCounter >= 0.75f) { IsDashing = false; DashingCounter = 0.0f; }
@@ -676,6 +671,13 @@ int main(int argc, char** argv)
 		Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
 		const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[Player].Color;
 		Enjon::Math::Vec2* PlayerPosition = &World->TransformSystem->Transforms[Player].Position.XY();
+		if (World->Animation2DSystem->Animations[Player].Sheet == EG::SpriteSheetManager::GetSpriteSheet("PlayerSheet2"))
+		{
+			dims = Math::Vec2(115.0f, 115.0f);
+			printf("Yes, fucker!\n");
+		}
+		else dims = Math::Vec2(100.0f, 100.0f);
+
 		EntityBatch.Add(Math::Vec4(*PlayerPosition, dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
 
 		Enjon::Math::Vec2* A = &World->TransformSystem->Transforms[Player].CartesianPosition;
@@ -992,10 +994,11 @@ void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager*
 							1, 0, projection.elements);
 	}
 
-	static Enjon::Graphics::GLTexture MouseTexture = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Cursor24.png");
- 
+	static Enjon::Graphics::GLTexture MouseTexture = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/crosshair.png");
+
+	float size = 32.0f; 
 	Batch->Begin();	
-	Enjon::Math::Vec4 destRect(InputManager->GetMouseCoords().x, -InputManager->GetMouseCoords().y + SCREENHEIGHT - 16, 16, 16);
+	Enjon::Math::Vec4 destRect(InputManager->GetMouseCoords().x, -InputManager->GetMouseCoords().y + SCREENHEIGHT - size, size, size);
 	Enjon::Math::Vec4 uvRect(0, 0, 1, 1);
 	Batch->Add(destRect, uvRect, MouseTexture.id);
 	Batch->End();

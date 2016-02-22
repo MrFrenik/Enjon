@@ -17,6 +17,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 	enum Weapons { BOW, DAGGER, AXE };
 
 	void SetPlayerState(EntityAnimationState State);
+	EntityAnimationState GetPlayerState();
 	void SetCurrentWeapon(Weapons CurrentWeapon);
 
 	// Updates Transforms of EntityManager
