@@ -95,6 +95,7 @@ using namespace Systems;
 void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* Manager, ECS::eid32 Entity);
 void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);
 void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position);
+void DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math::Vec3 Pos);
 
 SDL_Joystick* Joystick;
 
@@ -116,7 +117,7 @@ int main(int argc, char** argv)
 
 	// Init Limiter
 	Enjon::Utils::FPSLimiter Limiter; 
-	Limiter.Init(60.0f); 
+	Limiter.Init(70.0f); 
 
 	//Init Enjon
 	Enjon::Init();
@@ -238,6 +239,7 @@ int main(int argc, char** argv)
 	// Create particle batchs to be used by World
 	EG::Particle2D::ParticleBatch2D* TestParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
 	EG::Particle2D::ParticleBatch2D* TextParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
+	EG::Particle2D::ParticleBatch2D* SmokeBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
 
 	// Create InputManager
 	Input::InputManager Input;
@@ -258,6 +260,7 @@ int main(int argc, char** argv)
 	// Push back particle batchs into world
 	EG::Particle2D::AddParticleBatch(World->ParticleEngine, TestParticleBatch);
 	EG::Particle2D::AddParticleBatch(World->ParticleEngine, TextParticleBatch);
+	EG::Particle2D::AddParticleBatch(World->ParticleEngine, SmokeBatch);
 
 
 	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;
@@ -343,7 +346,7 @@ int main(int argc, char** argv)
 			SpatialHash::ClearCells(World->Grid);
 			ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
 
-			// AIController::Update(World->AIControllerSystem, Player);
+			AIController::Update(World->AIControllerSystem, Player);
 			Animation2D::Update(World);
 
 			StartTicks = SDL_GetTicks();
@@ -361,10 +364,19 @@ int main(int argc, char** argv)
 
 			Renderer2D::Update(World); 
 
+			static float SmokeCount = 0.0f;
+			SmokeCount += 0.05f;
+			if (SmokeCount > 1.0f)
+			{
+				DrawSmoke(SmokeBatch, EM::Vec3(-4000, -4000, 0.0f));
+				DrawSmoke(SmokeBatch, EM::Vec3(-5000.0f, -4500.0f, 0.0f));
+				SmokeCount = 0.0f;
+			}
+
 			// DrawFire(TestParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 
 			// float x_pos = -500.0f, y_pos = -500.0f;
-			// for (int i = 0; i < 10; i++)
+			// for (int i = 0; i < 5; i++)
 			// {
 			// 	DrawFire(TestParticleBatch, EM::Vec3(0.0f + x_pos, 0.0f + y_pos, 0.0f));
 			// 	x_pos -= 200.0f;
@@ -687,9 +699,9 @@ int main(int argc, char** argv)
 		Enjon::Math::Vec2 AABBIsomin(Enjon::Math::CartesianToIso(AABB->Min) + Math::Vec2(XDiff, 0.0f));
 		Enjon::Math::Vec2 AABBIsomax(Enjon::Math::CartesianToIso(AABB->Max));
 		float AABBHeight = AABB->Max.y - AABB->Min.y, AABBWidth = AABB->Max.x - AABB->Min.y;
-		EntityBatch.Add(Math::Vec4(AABBIsomin, Math::Vec2(abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y))), 
-							Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
-							Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), AABBIsomin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
+		// EntityBatch.Add(Math::Vec4(AABBIsomin, Math::Vec2(abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y))), 
+		// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
+		// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), AABBIsomin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
 
 		// Draw player ground tile 
 		const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;
@@ -1006,6 +1018,52 @@ void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager*
 	Graphics::ShaderManager::UnuseProgram("Basic");
 }
 
+void DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math::Vec3 Pos)
+{
+	static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_1.png").id;
+	static GLuint PTex2 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_2.png").id;
+	static GLuint PTex3 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_3.png").id;
+	static EG::ColorRGBA16 Gray = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
+
+	for (int i = 0; i < 5; i++)
+	{
+		float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-100, 100), ZVel = Random::Roll(-1, 1), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
+						YSize = Random::Roll(350, 50), XSize = Random::Roll(350, 50);
+		int Roll = Random::Roll(1, 3);
+		GLuint tex;
+		if (Roll == 1) tex = PTex;
+		else if (Roll == 2) tex = PTex2;
+		else tex = PTex3; 
+
+		int RedAmount = Random::Roll(0, 50);
+		int Alpha = Random::Roll(0.95f, 0.95f);
+
+
+		EG::Particle2D::AddParticle(Pos + Math::Vec3(XPos, YPos, 0.0f), Math::Vec3(XVel, YVel, ZVel), 
+			Math::Vec2(XSize, YSize), EG::RGBA16(Gray.r, Gray.g, Gray.b + 0.1f, 0.25f), tex, 0.0005f, Batch);
+	}
+	// for (int i = 0; i < 2; i++)
+	// {
+	// 	float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-100, 100), ZVel = Random::Roll(-1, 1), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
+	// 					YSize = Random::Roll(350, 50), XSize = Random::Roll(350, 50);
+	// 	int Roll = Random::Roll(1, 3);
+	// 	GLuint tex;
+	// 	if (Roll == 1) tex = PTex;
+	// 	else if (Roll == 2) tex = PTex2;
+	// 	else tex = PTex3; 
+
+	// 	int RedAmount = Random::Roll(0, 50);
+	// 	int Alpha = Random::Roll(0.95f, 0.95f);
+
+
+	// 	EG::Particle2D::AddParticle(Pos + Math::Vec3(XPos, YPos, 0.0f), Math::Vec3(XVel, YVel, ZVel), 
+	// 		Math::Vec2(XSize, YSize), EG::RGBA16(10.0f, 0.4f, 10.0f, 0.05f), tex, 0.0005f, Batch);
+	// }
+
+	EG::Particle2D::AddParticle(Pos, Math::Vec3(0.0f, 0.15f, 0.0f), Math::Vec2(350.0f, 350.0f), EG::RGBA16(10.0f, 0.4f, 10.0f, 0.0175f), PTex, 0.00025f, Batch);
+
+}
+
 void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position)
 {
 	// Totally testing for shiggles
@@ -1053,7 +1111,7 @@ void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Posi
 			else tex = PTex3; 
 
 			int RedAmount = Random::Roll(0, 50);
-			int Alpha = Random::Roll(0.7f, 1.0f);
+			int Alpha = Random::Roll(0.8f, 1.0f);
 
 
 			EG::Particle2D::AddParticle(Math::Vec3(Position.x - 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 

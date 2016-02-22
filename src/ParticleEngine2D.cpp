@@ -36,10 +36,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 			Position->y += Velocity->y + Velocity->z;
 
 			// Decay particle alpha over time
-			float CDP = *DR - 0.0025f;
-			float* A = &p.Color.a;
-			*A -= CDP;
-			if (*A < 0.0f) *A = 0.0f;
+			p.Color.a -= p.DecayRate * 0.5f;
 		}
 
 		return 1;

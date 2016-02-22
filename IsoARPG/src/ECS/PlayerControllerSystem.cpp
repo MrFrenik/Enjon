@@ -97,53 +97,54 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					Manager->Masks[WeaponEquipped] ^= COMPONENT_RENDERER2D;	
 				}
 
-				if (Input->IsKeyPressed(SDLK_1)) {
-					// Set current weapon to dagger
-					Animation2D::SetCurrentWeapon(Animation2D::Weapons::DAGGER);
+				if (Animation2D::GetPlayerState() != Animation2D::EntityAnimationState::ATTACKING)
+				{
+					if (Input->IsKeyPressed(SDLK_1)) {
+						// Set current weapon to dagger
+						Animation2D::SetCurrentWeapon(Animation2D::Weapons::DAGGER);
+					}
+
+					if (Input->IsKeyPressed(SDLK_2)) {
+						// Set current weapon to bow
+						Animation2D::SetCurrentWeapon(Animation2D::Weapons::BOW);
+					}
+
+					if (Input->IsKeyPressed(SDLK_3)) {
+						//Set current weapon to axe
+						Animation2D::SetCurrentWeapon(Animation2D::Weapons::AXE);
+						printf("Pressed axe\n");
+					}
 				}
 
-				if (Input->IsKeyPressed(SDLK_2)) {
-					// Set current weapon to bow
-					Animation2D::SetCurrentWeapon(Animation2D::Weapons::BOW);
+				if (Input->IsKeyDown(SDLK_w)) {
+
+					Transform->VelocityGoal.y = Multiplier * goal / 2.0f;
+					Transform->ViewVector.y = 1.0f;
+				}
+				if (Input->IsKeyDown(SDLK_s)) {
+
+					Transform->VelocityGoal.y = Multiplier * -goal / 2.0f;
+					Transform->ViewVector.y = -1.0f;
+				}
+				if (Input->IsKeyDown(SDLK_a)) {
+
+					Transform->VelocityGoal.x = Multiplier * -goal;
+					Transform->ViewVector.x = -1.0f; 
 				}
 
-				if (Input->IsKeyPressed(SDLK_3)) {
-					//Set current weapon to axe
-					Animation2D::SetCurrentWeapon(Animation2D::Weapons::AXE);
-					printf("Pressed axe\n");
+				if (Input->IsKeyDown(SDLK_d)) {
+
+					Transform->VelocityGoal.x = Multiplier * goal;
+					Transform->ViewVector.x = 1.0f; 
 				}
 
-				// if (Animation2D::GetPlayerState() != Animation2D::EntityAnimationState::ATTACKING)
-				// {
-					if (Input->IsKeyDown(SDLK_w)) {
+				if (Input->IsKeyPressed(SDLK_SPACE)) {
+					// Keep from double jumping
+					if (Transform->Position.z <= Transform->BaseHeight) Transform->Velocity.z = 1.0f * goal;
+				}
 
-						Transform->VelocityGoal.y = Multiplier * goal / 2.0f;
-						Transform->ViewVector.y = 1.0f;
-					}
-					if (Input->IsKeyDown(SDLK_s)) {
-
-						Transform->VelocityGoal.y = Multiplier * -goal / 2.0f;
-						Transform->ViewVector.y = -1.0f;
-					}
-					if (Input->IsKeyDown(SDLK_a)) {
-
-						Transform->VelocityGoal.x = Multiplier * -goal;
-						Transform->ViewVector.x = -1.0f; 
-					}
-
-					if (Input->IsKeyDown(SDLK_d)) {
-
-						Transform->VelocityGoal.x = Multiplier * goal;
-						Transform->ViewVector.x = 1.0f; 
-					}
-
-					if (Input->IsKeyDown(SDLK_SPACE)) {
-						Transform->VelocityGoal.z = Multiplier * goal;	
-					}
-				// }
-
-				if (!Input->IsKeyDown(SDLK_SPACE)) {
-					Transform->VelocityGoal.z = -9.8f;	
+				if (!Input->IsKeyPressed(SDLK_SPACE)) {
+					Transform->VelocityGoal.z = 2 * -9.8f;	
 				}
 
 				if (!Input->WasKeyDown(SDLK_w) && !Input->WasKeyDown(SDLK_s))

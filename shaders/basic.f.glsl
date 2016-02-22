@@ -72,7 +72,7 @@ void main()
 		if (useOverlay)
 		{
 			
-		 	texColor = Overlay(texColor, SEPIA, 0.3f);
+		 	texColor = Overlay(texColor, BLUE, 0.4f);
 			color = fs_in.color * texColor;
 		}
 		else

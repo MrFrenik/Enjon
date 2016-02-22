@@ -171,13 +171,16 @@ namespace ECS { namespace Systems { namespace Animation2D {
 							Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].Position.XY();
 
 							// Find vector between the two and normalize
-							Enjon::Math::Vec2 AttackVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x + 32.0f, Pos.y + 32.0f));
+							static Enjon::Math::Vec2 AttackVelocity;
+							// AttackVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x + 32.0f, Pos.y + 32.0f));
 
 							if (ActiveFrame == *BeginningFrame + 1)
 							{
 								// Activate collision with dagger "hit frame"
 								if (CurrentWeapon == Weapons::DAGGER || CurrentWeapon == Weapons::AXE)
 								{
+									AttackVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x + 32.0f, Pos.y + 32.0f));
+
 									// Make Weapon visible and collidable
 									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);
 
@@ -220,7 +223,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 									// Move player in direction of attack vector
 									auto Vel = &Manager->TransformSystem->Transforms[e].Velocity;
-									*Vel = 7.0f * Enjon::Math::Vec3(AttackVelocity, Vel->z);
+									*Vel = 5.0f * Enjon::Math::Vec3(AttackVelocity, 0.0f);
 
 									std::cout << AttackVelocity << std::endl;
 								}
@@ -232,7 +235,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);
 
 									auto Vel = &Manager->TransformSystem->Transforms[e].Velocity;
-									*Vel = 8.0f * Enjon::Math::Vec3(AttackVelocity, Vel->z);
+									*Vel = 6.5f * Enjon::Math::Vec3(AttackVelocity, Vel->z);
 								}
 
 								if (CurrentWeapon == Weapons::BOW && ActiveFrame == *BeginningFrame + 3)
