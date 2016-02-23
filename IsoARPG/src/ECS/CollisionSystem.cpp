@@ -501,7 +501,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 		auto X = (float)Enjon::Random::Roll(-50, 50);
 		auto Y = (float)Enjon::Random::Roll(-50, 50);
 		auto C = Enjon::Graphics::RGBA16_White();
-		auto DC = Enjon::Random::Roll(1, 100) / 255.0f;
+		auto DC = Enjon::Random::Roll(50, 100) / 255.0f;
 		C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, alpha);
 		Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(PP.x + X, PP.y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(25, 50)), C);
 	}

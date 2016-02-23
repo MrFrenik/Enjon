@@ -18,7 +18,7 @@ uniform bool useOverlay;
 const float MULT = 100.0f; 
 const float FIREMULT = 100.0f;
 
-const float outerRadius = 0.4, innerRadius = 0.1, intensity = 0.60;
+const float outerRadius = 0.7, innerRadius = 0.1, intensity = 0.70;
 
 // Radius of vignette, where 0.5 results in circle fitting the screen
 const float RADIUS = 0.75;
@@ -72,7 +72,7 @@ void main()
 		if (useOverlay)
 		{
 			
-		 	texColor = Overlay(texColor, BLUE, 0.4f);
+		 	texColor = Overlay(texColor, BLUE, 0.7f);
 			color = fs_in.color * texColor;
 		}
 		else

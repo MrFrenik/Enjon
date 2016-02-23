@@ -129,11 +129,16 @@ bool Level::IsBorder(int i, int j, int rows, int cols)
 
 void Level::DrawGroundTiles(Enjon::Graphics::SpriteBatch& batch)
 {
+	auto C = Enjon::Graphics::RGBA16_White();
+	auto DC = Enjon::Random::Roll(100, 200) / 255.0f;
+	C.r -= DC;
+	C.g -= DC;
+	C.b -= DC;
 	//Add level information to batch
 	for (Tile& tile : m_GroundTiles)
 	{
 		//batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.texture.id);
-		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id);
+		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id, C);
 	}
 }
 
