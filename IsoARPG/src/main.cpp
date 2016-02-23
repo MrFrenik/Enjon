@@ -20,7 +20,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -86,6 +86,7 @@ Enjon::uint32 ClearEntitiesRunTime = 0;
 Enjon::uint32 RenderTime = 0;
 Enjon::uint32 EffectRunTime = 0;
 Enjon::uint32 ParticleCount = 0;
+Enjon::uint32 TileOverlayRunTime = 0;
 
 using namespace Enjon;
 using namespace ECS;
@@ -114,6 +115,7 @@ int main(int argc, char** argv)
 	std::string CollisionTimeString = "0";
 	std::string TransformTimeString = "0";
 	std::string EffectTimeString = "0";
+	std::string TileOverlayTimeString = "0";
 
 	// Init Limiter
 	Enjon::Utils::FPSLimiter Limiter; 
@@ -282,7 +284,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 5000;
+	static uint32 AmountDrawn = 100;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -346,13 +348,6 @@ int main(int argc, char** argv)
 		// Update Input Manager
 		Input.Update();	
 
-		// Check whether or not overlays are dirty and then reset overlay batch if needed
-		if (World->Lvl->GetOverlaysDirty())
-		{
-			OverlayBatch.Begin();
-			World->Lvl->DrawTileOverlays(OverlayBatch);
-			OverlayBatch.End();
-		}
 
 		// Update World 
 		const Math::Vec2* PlayerStuff = &World->TransformSystem->Transforms[Player].Position.XY();
@@ -365,6 +360,16 @@ int main(int argc, char** argv)
 
 		if (!Paused)
 		{
+			StartTicks = SDL_GetTicks();
+			// Check whether or not overlays are dirty and then reset overlay batch if needed
+			if (World->Lvl->GetOverlaysDirty())
+			{
+				OverlayBatch.Begin();
+				World->Lvl->DrawTileOverlays(OverlayBatch);
+				OverlayBatch.End();
+			}
+	
+			TileOverlayRunTime = SDL_GetTicks() - StartTicks;		
 			StartTicks = SDL_GetTicks();
 			SpatialHash::ClearCells(World->Grid);
 			ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
@@ -715,7 +720,7 @@ int main(int argc, char** argv)
 		if (World->Animation2DSystem->Animations[Player].Sheet == EG::SpriteSheetManager::GetSpriteSheet("PlayerSheet2"))
 		{
 			dims = Math::Vec2(115.0f, 115.0f);
-			printf("Yes, fucker!\n");
+			// printf("Yes, fucker!\n");
 		}
 		else dims = Math::Vec2(100.0f, 100.0f);
 
@@ -795,6 +800,12 @@ int main(int argc, char** argv)
 										0.4f, "Effects: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, 
 										0.4f, EffectTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+		// Add TileOverlayTime
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
+										0.4f, "TileOverlay: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
+										0.4f, TileOverlayTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Add particles to entity batch
 		EG::Particle2D::Draw(World->ParticleEngine);
@@ -951,6 +962,7 @@ int main(int argc, char** argv)
 			TransformTimeString = std::to_string(TransformRunTime);
 			RenderTimeString = std::to_string(RenderTime);
 			EffectTimeString = std::to_string(EffectRunTime);
+			TileOverlayTimeString = std::to_string(TileOverlayRunTime);
 
 			Loot::PrintCounts();
 

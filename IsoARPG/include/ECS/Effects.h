@@ -7,6 +7,7 @@
 #include "ECS/Transform3DSystem.h"
 
 #include <Graphics/Color.h>
+#include <Graphics/ParticleEngine2D.h>
 #include <Math/Maths.h>
 
 /*
@@ -59,6 +60,16 @@ namespace ECS { namespace Effects {
 		// Apply damage
 		auto* T = &Manager->EffectSystem->TransferredEffects[E]["Cold"].Timer;
 		Damage(E, Manager);
+
+		// Add random particles for shiggles
+		auto alpha = (float)Enjon::Random::Roll(2, 100) / 255.0f;
+		auto PP = &Manager->TransformSystem->Transforms[E].Position;
+		auto Vel = Enjon::Math::Vec3(Enjon::Random::Roll(-1, 1), Enjon::Random::Roll(-1, 1), Enjon::Random::Roll(1, 1));
+		auto S = Enjon::Math::Vec2(Enjon::Random::Roll(50, 100), Enjon::Random::Roll(50, 100));
+		EG::Particle2D::AddParticle(EM::Vec3(PP->x + 100.0f, PP->y + 100.0f, 100.0f), Vel, 
+			S, Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_Blue(), alpha), 
+			Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/smoke_1.png").id, 0.025f, Manager->ParticleEngine->ParticleBatches[0]);
+					
 	}
 }}
 

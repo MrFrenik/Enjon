@@ -40,6 +40,10 @@ namespace ECS { namespace Systems { namespace Animation2D {
 	
 	void Update(struct EntityManager* Manager)
 	{
+		// Attack speed
+		// TODO(John): Make this dependent on equipped weapon and player stats
+		static float AttackSpeed = 5.0f;
+
 		// Get System
 		struct Animation2DSystem* System = Manager->Animation2DSystem;
 		// Loop through all entities with animations
@@ -149,7 +153,8 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					if (PlayerState != EntityAnimationState::ATTACKING && Velocity->x == 0.0f && Velocity->y == 0.0f) return;
 
 					// Animation
-					AnimationComponent->AnimationTimer += CurrentAnimation->AnimationTimerIncrement;
+					if (PlayerState == EntityAnimationState::ATTACKING) AnimationComponent->AnimationTimer += CurrentAnimation->AnimationTimerIncrement * AttackSpeed;
+					else AnimationComponent->AnimationTimer += CurrentAnimation->AnimationTimerIncrement;
 					if (AnimationComponent->AnimationTimer >= CurrentAnimation->Profile->Delays[AnimationComponent->CurrentFrame % CurrentAnimation->Profile->FrameCount])
 					{
 						// Increase current frame

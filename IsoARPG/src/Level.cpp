@@ -178,13 +178,16 @@ void Level::DrawTileOverlays(Enjon::Graphics::SpriteBatch& batch)
 {
 	for (TileOverlay& TO : m_TileOverlays)
 	{
-		batch.Add(TO.DestRect, Enjon::Math::Vec4(0, 0, 1, 1), TO.Tex.id);
+		batch.Add(TO.DestRect, Enjon::Math::Vec4(0, 0, 1, 1), TO.Tex.id, TO.Color);
 	}
+
+	// Set to not dirty
+	m_OverlaysDirty = false;
 }
 
-void Level::AddTileOverlay(Enjon::Graphics::GLTexture Tex, Enjon::Math::Vec4 DestRect)
+void Level::AddTileOverlay(Enjon::Graphics::GLTexture Tex, Enjon::Math::Vec4 DestRect, Enjon::Graphics::ColorRGBA16 Color)
 {
-	struct TileOverlay TO = TileOverlay{Tex, DestRect};
+	struct TileOverlay TO = TileOverlay{Tex, DestRect, Color};
 	m_TileOverlays.push_back(TO);
 	m_OverlaysDirty = true;
 }

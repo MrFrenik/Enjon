@@ -87,7 +87,12 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				Component::Transform3D* Transform = &Manager->TransformSystem->Transforms[e];
 				Component::Animation2D* Animation = &Manager->Animation2DSystem->Animations[e];
 				
-				if (Input->IsKeyPressed(SDL_BUTTON_LEFT)) {
+				// if (Input->IsKeyPressed(SDL_BUTTON_LEFT)) {
+				// 	// Set to attack?
+				// 	Animation2D::SetPlayerState(Animation2D::EntityAnimationState::ATTACKING);  // NOTE(John): THIS IS FUCKING AWFUL
+				// }
+
+				if (Input->IsKeyDown(SDL_BUTTON_LEFT)) {
 					// Set to attack?
 					Animation2D::SetPlayerState(Animation2D::EntityAnimationState::ATTACKING);  // NOTE(John): THIS IS FUCKING AWFUL
 				}

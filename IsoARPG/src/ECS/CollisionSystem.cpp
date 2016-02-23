@@ -33,6 +33,10 @@ namespace ECS{ namespace Systems { namespace Collision {
 	Enjon::uint32 COLLISION_PROJECTILE	= 0x00000008;
 	Enjon::uint32 COLLISION_WEAPON		= 0x00000010;
 
+	/*-- Function Declarations --*/
+	void DrawBlood(ECS::Systems::EntityManager* Manager, Enjon::Math::Vec2 Pos);
+	void DrawBody(ECS::Systems::EntityManager* Manager, Enjon::Math::Vec2 Pos);
+
 	// Creates new CollisionSystem
 	struct CollisionSystem* NewCollisionSystem(struct EntityManager* Manager)
 	{
@@ -196,6 +200,9 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 				EG::Particle2D::AddParticle(EM::Vec3(PP->x + 50.0f + XVel, PP->y + 50.0f + ZVel, 0.0f), EM::Vec3(XVel, XVel, ZVel), 
 					EM::Vec2(XSize, YSize), R, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
+
+				// Add blood overlay to level
+				DrawBlood(Manager, ColliderPosition->XY());
 			}
 
 			// Get min and max damage of weapon
@@ -222,6 +229,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 			if (HealthComponent->Health <= 0.0f) 
 			{
+				DrawBody(Manager, ColliderPosition->XY());
+
 				// Remove entity if no health
 				EntitySystem::RemoveEntity(Manager, B_ID);
 
@@ -229,17 +238,18 @@ namespace ECS{ namespace Systems { namespace Collision {
 				Loot::DropLootBasedOnProfile(Manager, B_ID);
 
 				auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
-
-				// printf("Chance to Drop: %.2f\n", 100.0f * LP->ChanceToDrop);
 			}
 			else
 			{
-				// Apply an effect just to see if this shit works at all...
-				auto* T = &Manager->EffectSystem->TransferredEffects[B_ID]["Poison"];
-				T->Type = EffectType::TEMPORARY;
-				T->Apply = &Effects::Cold;
-				T->Timer = Component::TimerComponent{5.0f, 0.05f, B_ID};
-				T->Entity = B_ID;
+				if ((Manager->Masks[B_ID] & COMPONENT_NONE) != COMPONENT_NONE)
+				{
+					// Apply an effect just to see if this shit works at all...
+					auto* T = &Manager->EffectSystem->TransferredEffects[B_ID]["Poison"];
+					T->Type = EffectType::TEMPORARY;
+					T->Apply = &Effects::Cold;
+					T->Timer = Component::TimerComponent{5.0f, 0.05f, B_ID};
+					T->Entity = B_ID;
+				}
 			}
 
 
@@ -396,6 +406,9 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 					EG::Particle2D::AddParticle(EM::Vec3(PP->x + 50.0f + XVel, PP->y + 50.0f + ZVel, 0.0f), EM::Vec3(XVel, XVel, ZVel), 
 						EM::Vec2(XSize * 1.5f, YSize * 1.5f), R, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
+
+					// Blood!
+					DrawBlood(Manager, ColliderPosition->XY());
 				}
 
 
@@ -417,6 +430,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 				// 	x += advance;
 			 //    }
+
 
 
 				// Apply an effect just to see if this shit work at all...
@@ -443,8 +457,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 					// printf("Chance to Drop: %.2f\n", 100.0f * LP->ChanceToDrop);
 
-					// Put an overlay onto the world
-					Manager->Lvl->AddTileOverlay(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/target.png"), Enjon::Math::Vec4(ColliderPosition->XY(), 32.0f, 32.0f));
+					// Put body overlay onto the world
+					DrawBody(Manager, ColliderPosition->XY());
 
 					struct TileOverlay
 					{
@@ -463,35 +477,33 @@ namespace ECS{ namespace Systems { namespace Collision {
 		}
 	}
 
-
-	// TODO(John): Create "loot profiles" for AI and feed that into this function and any like it
-	void DropRandomLoot(Systems::EntityManager* Manager, Enjon::uint32 count, const Enjon::Math::Vec2* Position)
+	void DrawBody(ECS::Systems::EntityManager* Manager, Enjon::Math::Vec2 PP)
 	{
-		static Enjon::Graphics::SpriteSheet ItemSheet; 
-		if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png"), Enjon::Math::iVec2(1, 1));
+		auto S = 200.0f;
+		auto C = Enjon::Graphics::RGBA16_White();
+		auto DC = 0.25f;
+		C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, C.a);
+		Manager->Lvl->AddTileOverlay(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/body.png"), Enjon::Math::Vec4(PP, S, S * 0.26f), C);
+	}
 
-		for (int i = 0; i < count; i++)
+	void DrawBlood(ECS::Systems::EntityManager* Manager, Enjon::Math::Vec2 PP)
+	{
+		auto I = Enjon::Random::Roll(0, 2);
+		Enjon::Graphics::GLTexture S;
+		switch(I)
 		{
-			int Roll = Enjon::Random::Roll(0, 5);
-
-			Enjon::Graphics::ColorRGBA16 ItemColor;
-
-			if (Roll == 0) ItemColor = Enjon::Graphics::RGBA16_Red();
-			if (Roll == 1) ItemColor = Enjon::Graphics::RGBA16_Orange();
-			if (Roll == 2) ItemColor = Enjon::Graphics::RGBA16_Blue();
-			if (Roll == 3) ItemColor = Enjon::Graphics::RGBA16_Green();
-			if (Roll == 4) ItemColor = Enjon::Graphics::RGBA16_Yellow();
-			if (Roll == 5) ItemColor = Enjon::Graphics::RGBA16_Magenta();
-
-			eid32 id = Factory::CreateItem(Manager, Enjon::Math::Vec3(Enjon::Random::Roll(Position->x - 64.0f, Position->x + 64.0f), 
-												  Enjon::Random::Roll(Position->y - 64.0f, Position->y + 64.0f), 0.0f), 
-												  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::ITEM | Masks::ItemOptions::CONSUMABLE), 
-												  Component::EntityType::ITEM, "Item", Enjon::Graphics::SetOpacity(ItemColor, 0.5f));
-			Manager->TransformSystem->Transforms[id].VelocityGoal.x = 0.0f;
-			Manager->TransformSystem->Transforms[id].VelocityGoal.y = 0.0f;
-			Manager->TransformSystem->Transforms[id].Velocity = {0.0f, 0.0f, 0.0f};
-		} 
-
+			case 0: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/blood_1.png"); break;
+			case 1: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/blood_2.png"); break;
+			case 2: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/blood_3.png"); break;
+			default: break;
+		}
+		auto alpha = Enjon::Random::Roll(50, 255) / 255.0f;
+		auto X = (float)Enjon::Random::Roll(-50, 50);
+		auto Y = (float)Enjon::Random::Roll(-50, 50);
+		auto C = Enjon::Graphics::RGBA16_White();
+		auto DC = Enjon::Random::Roll(1, 100) / 255.0f;
+		C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, alpha);
+		Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(PP.x + X, PP.y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(25, 50)), C);
 	}
 
 }}}

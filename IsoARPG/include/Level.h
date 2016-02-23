@@ -7,6 +7,7 @@
 #include <Graphics/GLTexture.h>
 #include <Graphics/SpriteBatch.h>
 #include <Graphics/SpriteSheet.h>
+#include <Graphics/Color.h>
 #include <Math/Maths.h>
 #include <Math/Random.h>
 
@@ -30,6 +31,7 @@ struct TileOverlay
 {
 	Enjon::Graphics::GLTexture Tex;
 	Enjon::Math::Vec4 DestRect;
+	Enjon::Graphics::ColorRGBA16 Color;
 };
 
 class Level
@@ -45,7 +47,7 @@ public:
 	void DrawMap(Enjon::Graphics::SpriteBatch& batch);
 	void DrawTileOverlays(Enjon::Graphics::SpriteBatch& batch);
 	void DrawGroundTiles(Enjon::Graphics::SpriteBatch& batch);
-	void AddTileOverlay(Enjon::Graphics::GLTexture Tex, Enjon::Math::Vec4 DestRect);
+	void AddTileOverlay(Enjon::Graphics::GLTexture Tex, Enjon::Math::Vec4 DestRectf, Enjon::Graphics::ColorRGBA16 Color = Enjon::Graphics::RGBA16_White());
 	void CleanOverlays();
 	bool GetOverlaysDirty();
 

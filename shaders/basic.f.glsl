@@ -18,7 +18,7 @@ uniform bool useOverlay;
 const float MULT = 100.0f; 
 const float FIREMULT = 100.0f;
 
-const float outerRadius = 0.4, innerRadius = 0.1, intensity = 0.75;
+const float outerRadius = 0.4, innerRadius = 0.1, intensity = 0.60;
 
 // Radius of vignette, where 0.5 results in circle fitting the screen
 const float RADIUS = 0.75;
