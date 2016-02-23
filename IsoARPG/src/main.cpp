@@ -32,13 +32,9 @@
 		#define SCREENHEIGHT 1080
 	#endif
 	#define SCREENRES    Graphics::FULLSCREEN
-// #else
-// 	#define SCREENWIDTH  1024
-// 	#define SCREENHEIGHT 768
-// 	#define SCREENRES Graphics::DEFAULT
 #else
-	#define SCREENWIDTH  1920
-	#define SCREENHEIGHT 1080
+	#define SCREENWIDTH  1024
+	#define SCREENHEIGHT 768
 	#define SCREENRES Graphics::DEFAULT
 #endif 
 
@@ -80,7 +76,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 50;
+const int LEVELSIZE = 40;
 
 float DashingCounter = 0.0f;
 
@@ -396,15 +392,15 @@ int main(int argc, char** argv)
 
 			Renderer2D::Update(World); 
 
-			static float SmokeCount = 0.0f;
-			SmokeCount += 0.05f;
-			if (SmokeCount > 1.0f)
-			{
-				DrawSmoke(SmokeBatch, EM::Vec3(-4000, -4000, 0.0f));
-				DrawSmoke(SmokeBatch, EM::Vec3(-5000.0f, -4500.0f, 0.0f));
-				DrawSmoke(SmokeBatch, EM::Vec3(-2000, -2000.0f, 0.0f));
-				SmokeCount = 0.0f;
-			}
+			// static float SmokeCount = 0.0f;
+			// SmokeCount += 0.05f;
+			// if (SmokeCount > 1.0f)
+			// {
+			// 	DrawSmoke(SmokeBatch, EM::Vec3(-4000, -4000, 0.0f));
+			// 	DrawSmoke(SmokeBatch, EM::Vec3(-5000.0f, -4500.0f, 0.0f));
+			// 	DrawSmoke(SmokeBatch, EM::Vec3(-2000, -2000.0f, 0.0f));
+			// 	SmokeCount = 0.0f;
+			// }
 
 			// DrawFire(TestParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 

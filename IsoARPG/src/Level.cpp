@@ -23,6 +23,8 @@ void Level::Init(float x, float y, int rows, int cols)
 	m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/stone.png"), Enjon::Math::iVec2(3, 1));
 	m_wallSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/wall_chunk.png"), Enjon::Math::iVec2(1, 1));
 
+	CurrentOverlayIndex = 0;
+
 	// Overlays are clean
 	m_OverlaysDirty = false;
 
@@ -193,7 +195,12 @@ void Level::DrawTileOverlays(Enjon::Graphics::SpriteBatch& batch)
 void Level::AddTileOverlay(Enjon::Graphics::GLTexture Tex, Enjon::Math::Vec4 DestRect, Enjon::Graphics::ColorRGBA16 Color)
 {
 	struct TileOverlay TO = TileOverlay{Tex, DestRect, Color};
-	m_TileOverlays.push_back(TO);
+	if (m_TileOverlays.size() == MAX_TILE_OVERLAY - 1)
+	{
+		if (CurrentOverlayIndex >= MAX_TILE_OVERLAY) CurrentOverlayIndex = 0;
+		m_TileOverlays[CurrentOverlayIndex++] = TO;
+	}
+	else m_TileOverlays.push_back(TO);
 	m_OverlaysDirty = true;
 }
 

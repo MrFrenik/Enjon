@@ -42,7 +42,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 	{
 		// Attack speed
 		// TODO(John): Make this dependent on equipped weapon and player stats
-		static float AttackSpeed = 5.0f;
+		static float AttackSpeed = 20.0f;
 
 		// Get System
 		struct Animation2DSystem* System = Manager->Animation2DSystem;

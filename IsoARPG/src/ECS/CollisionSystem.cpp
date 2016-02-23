@@ -306,7 +306,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 				EG::ColorRGBA16 C1 = EG::RGBA16(1.0f, 0, 0, 1.0f);
 
 				// Add 100 at a time
-				for (Enjon::uint32 i = 0; i < 5; i++)
+				for (Enjon::uint32 i = 0; i < 3; i++)
 				{
 					float XPos = Enjon::Random::Roll(-50, 100), YPos = Enjon::Random::Roll(-50, 100), ZVel = Enjon::Random::Roll(-10, 10), XVel = Enjon::Random::Roll(-10, 10), 
 									YVel = Enjon::Random::Roll(-10, 10), YSize = Enjon::Random::Roll(1, 3), XSize = Enjon::Random::Roll(1, 3);
@@ -399,7 +399,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 				EG::ColorRGBA16 R = EG::RGBA16(1.0f, 0.01f, 0.01f, 1.0f);
 
 				// Add 100 at a time
-				for (Enjon::uint32 i = 0; i < 5; i++)
+				for (Enjon::uint32 i = 0; i < 3; i++)
 				{
 					float XPos = Enjon::Random::Roll(-50, 100), YPos = Enjon::Random::Roll(-50, 100), ZVel = Enjon::Random::Roll(-10, 10), XVel = Enjon::Random::Roll(-10, 10), 
 									YSize = Enjon::Random::Roll(2, 7), XSize = Enjon::Random::Roll(1, 5);
@@ -455,8 +455,6 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 					auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
 
-					// printf("Chance to Drop: %.2f\n", 100.0f * LP->ChanceToDrop);
-
 					// Put body overlay onto the world
 					DrawBody(Manager, ColliderPosition->XY());
 
@@ -481,7 +479,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 	{
 		auto S = 200.0f;
 		auto C = Enjon::Graphics::RGBA16_White();
-		auto DC = 0.25f;
+		auto DC = 0.75f;
 		C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, C.a);
 		Manager->Lvl->AddTileOverlay(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/body.png"), Enjon::Math::Vec4(PP, S, S * 0.26f), C);
 	}
@@ -498,12 +496,12 @@ namespace ECS{ namespace Systems { namespace Collision {
 			default: break;
 		}
 		auto alpha = Enjon::Random::Roll(50, 255) / 255.0f;
-		auto X = (float)Enjon::Random::Roll(-50, 50);
-		auto Y = (float)Enjon::Random::Roll(-50, 50);
+		auto X = (float)Enjon::Random::Roll(-50, 100);
+		auto Y = (float)Enjon::Random::Roll(-100, 50);
 		auto C = Enjon::Graphics::RGBA16_White();
-		auto DC = Enjon::Random::Roll(50, 100) / 255.0f;
+		auto DC = Enjon::Random::Roll(80, 100) / 255.0f;
 		C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, alpha);
-		Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(PP.x + X, PP.y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(25, 50)), C);
+		Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(PP.x + X, PP.y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(50, 100)), C);
 	}
 
 }}}

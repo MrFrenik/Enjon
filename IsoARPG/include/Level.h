@@ -11,6 +11,8 @@
 #include <Math/Maths.h>
 #include <Math/Random.h>
 
+#define MAX_TILE_OVERLAY	10000
+
 struct Tile
 {
 	Tile() {}
@@ -67,6 +69,9 @@ private:
 	std::vector<Tile> m_cartesiantiles; 
 	std::vector<TileOverlay> m_TileOverlays;
 	std::vector<Tile> m_GroundTiles;
+
+	struct TileOverlay Overlays[MAX_TILE_OVERLAY];
+	Enjon::uint32 CurrentOverlayIndex;
 
 	Enjon::Graphics::SpriteSheet m_tilesheet;
 	Enjon::Graphics::SpriteSheet m_wallSheet;
