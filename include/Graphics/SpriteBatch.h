@@ -81,6 +81,7 @@ namespace Enjon { namespace Graphics {
 	{
 		Glyph glyph;
 
+        // Enjon::Math::Vec2 halfDims(destRect.z / 2.0f, destRect.w / 2.0f);
         Enjon::Math::Vec2 halfDims(destRect.z / 2.0f, destRect.w / 2.0f);
 
         // Get points centered at origin
@@ -89,11 +90,20 @@ namespace Enjon { namespace Graphics {
         Enjon::Math::Vec2 br(halfDims.x, -halfDims.y);
         Enjon::Math::Vec2 tr(halfDims.x, halfDims.y);
 
-        // Rotate the points
-        tl = RotatePoint(&tl, angle) + halfDims;
-        bl = RotatePoint(&bl, angle) + halfDims;
-        br = RotatePoint(&br, angle) + halfDims;
-        tr = RotatePoint(&tr, angle) + halfDims;
+        // auto r = 10.0f;
+        // auto c = r * cos(angle);
+        // auto s = r * sin(angle);
+        // tl += Enjon::Math::Vec2(c, s);
+        // tr += Enjon::Math::Vec2(c, s);
+        // bl += Enjon::Math::Vec2(c, s);
+        // br += Enjon::Math::Vec2(c, s);
+
+        // Rotate the points back to left corner as pivot point
+        // NOTE(John): Better way of doing this would be to rotate by a given point
+        tl = RotatePoint(&tl, angle);
+        bl = RotatePoint(&bl, angle);
+        br = RotatePoint(&br, angle);
+        tr = RotatePoint(&tr, angle);
 
         if (Format == CoordinateFormat::ISOMETRIC)
         {

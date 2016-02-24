@@ -1,6 +1,8 @@
 #define PARSER  0
 #define TEST_FUNCTIONS 0
 
+#define _SECURE_SCL 0
+
 // Don't touch these
 #if REALGAME 
 	#define TESTING 0
@@ -76,7 +78,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 40;
+const int LEVELSIZE = 30;
 
 float DashingCounter = 0.0f;
 
@@ -134,8 +136,8 @@ int main(int argc, char** argv)
 	Graphics::Window Window;
 	Window.Init("Testing Grounds", screenWidth, screenHeight, SCREENRES);
 
-	// Hide mouse
-	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
+	// Hide/Show mouse
+	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
 
 	// Create Camera
 	Graphics::Camera2D Camera;
@@ -284,7 +286,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 100;
+	static uint32 AmountDrawn = 0;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 30.0f;
@@ -392,15 +394,18 @@ int main(int argc, char** argv)
 
 			Renderer2D::Update(World); 
 
-			// static float SmokeCount = 0.0f;
-			// SmokeCount += 0.05f;
-			// if (SmokeCount > 1.0f)
-			// {
-			// 	DrawSmoke(SmokeBatch, EM::Vec3(-4000, -4000, 0.0f));
-			// 	DrawSmoke(SmokeBatch, EM::Vec3(-5000.0f, -4500.0f, 0.0f));
-			// 	DrawSmoke(SmokeBatch, EM::Vec3(-2000, -2000.0f, 0.0f));
-			// 	SmokeCount = 0.0f;
-			// }
+			auto LvlSize = level.GetDims();
+			static float SmokeCount = 0.0f;
+			SmokeCount += 0.005f;
+			Enjon::uint32 SR = Enjon::Random::Roll(0, 3);
+			if (SmokeCount > 1.0f)
+			{
+				for (Enjon::uint32 i = 0; i < 10; i++)
+				{
+					DrawSmoke(SmokeBatch, EM::Vec3(Enjon::Random::Roll(-LvlSize.x, LvlSize.x), Enjon::Random::Roll(-LvlSize.y * 2.0f, LvlSize.y * 2.0f), 0.0f));
+				}
+				SmokeCount = 0.0f;
+			}
 
 			// DrawFire(TestParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 
@@ -568,6 +573,8 @@ int main(int argc, char** argv)
 				// Don't draw if not in view
 				if (Camera.IsBoundBoxInCamView(*EntityPosition, itemDims))
 				{
+					auto Sheet = World->Animation2DSystem->Animations[e].Sheet;
+					auto Dims = World->TransformSystem->Transforms[e].Dimensions;
 					static int index;
 
 					// Get attack vector and draw arrow based on that
@@ -582,7 +589,7 @@ int main(int argc, char** argv)
 					else if (*AttackVector == SOUTHEAST)		index = 7;
 					else										index = 0;
 
-					EntityBatch.Add(Math::Vec4(*EntityPosition, arrowDims), ArrowSheet.GetUV(index), ArrowSheet.texture.id, *Color, EntityPosition->y);
+					EntityBatch.Add(Math::Vec4(*EntityPosition, Dims), Sheet->GetUV(index), Sheet->texture.id, *Color, EntityPosition->y);
 				}
 			}
 
@@ -591,8 +598,8 @@ int main(int argc, char** argv)
 			{
 				EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);
-				MapEntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.7f), 1.0f);
+				// MapEntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
+				// 						Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.7f), 1.0f);
 			}
 		}
 
@@ -745,8 +752,8 @@ int main(int argc, char** argv)
 		// Draw player shadow
 		EntityBatch.Add(Math::Vec4(GroundPosition->x - 40.0f, GroundPosition->y - 80.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
 									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
-		MapEntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.7f));
+		// MapEntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
+		// 							Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.7f));
 
 		// Cartesian AABB overlay
 		// EntityBatch.Add(Math::Vec4(AABB->Min, Math::Vec2(abs(AABB->Max.x - AABB->Min.x), abs(AABB->Max.y - AABB->Min.y))), Math::Vec4(0, 0, 1, 1), 0,
@@ -761,6 +768,34 @@ int main(int argc, char** argv)
 											"Enemy Health", EG::FontManager::GetFont("Bold"), 
 											HUDBatch, EG::RGBA16_Orange());
 
+		// Rotate the thing
+		{
+			// Random verticle bar to test rotations
+			EM::Vec2 BeamDims(500.0f, 50.0f);
+			EM::Vec2 BeamPos = World->TransformSystem->Transforms[Player].Position.XY() + EM::Vec2(BeamDims.y / 2.0f + 30.0f, 20.0f);
+			Enjon::Math::Vec2 MousePos = Input.GetMouseCoords();
+			Camera.ConvertScreenToWorld(MousePos);
+			MousePos = EM::IsoToCartesian(MousePos);
+			BeamPos = EM::IsoToCartesian(BeamPos);
+			EM::Vec2 R(1,0);
+			auto Norm = EM::Vec2::Normalize(MousePos - BeamPos);
+			auto a = acos(Norm.DotProduct(R)) * 180.0f / M_PI;
+			if (Norm.y < 0) a *= -1;
+			// a += 90;
+			BeamPos = EM::CartesianToIso(BeamPos);
+			auto BeamX = BeamPos.x;
+			auto BeamY = BeamPos.y;
+			auto Rad = 250.0f;
+			BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
+			// BeamPos = 2 * EM::Vec2(BeamX + cos(a), BeamY + sin(a));
+			// auto Radius = 10.0f;
+			// BeamPos = Radius * EM::Vec2(BeamX + cos(a), BeamY + sin(a));
+			// BeamPos = EM::Vec2(BeamX * cos(a) - BeamY * sin(a), BeamX * sin(a) + BeamY * cos(a));
+
+			EntityBatch.Add(EM::Vec4(BeamPos, BeamDims), EM::Vec4(0, 0, 1, 1), 
+							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::RGBA16_Green(), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
+		}	
+
 		float X = HUDCamera.GetPosition().x - 190.0f;
 		float Y = HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f;
 		HUDBatch.Add(EM::Vec4(X, Y, 400.0f, 10.0f),
@@ -769,8 +804,8 @@ int main(int argc, char** argv)
 					  EG::RGBA16_Red());
 
 		// Add an overlay to the Map for better viewing
-		MapEntityBatch.Add(Math::Vec4(-3100, -3150, 6250, 3100), Math::Vec4(0, 0, 1, 1), Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
-								Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_White(), 0.7f), 100.0f);
+		// MapEntityBatch.Add(Math::Vec4(-3100, -3150, 6250, 3100), Math::Vec4(0, 0, 1, 1), Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
+		// 						Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_White(), 0.7f), 100.0f);
 
 		if (Paused)
 		{
@@ -807,6 +842,10 @@ int main(int argc, char** argv)
 										0.4f, "TileOverlay: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
 										0.4f, TileOverlayTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+		// Draw Isometric compass
+		MapEntityBatch.Add(EM::Vec4(HUDCamera.GetPosition() - EM::Vec2(SCREENWIDTH / 2.0f - 30.0f, -SCREENHEIGHT / 2.0f + 250.0f), 150.0f, 75.0f), 
+						EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Coordinates.png").id, EG::RGBA16_White());
 
 		// Add particles to entity batch
 		EG::Particle2D::Draw(World->ParticleEngine);
@@ -927,7 +966,7 @@ int main(int argc, char** argv)
 		shader = Graphics::ShaderManager::GetShader("Basic")->GetProgramID();
 		glUseProgram(shader);
 		// Draw Cartesian Map
-		model *= Math::Mat4::Translate(Math::Vec3(-SCREENWIDTH / 4.0f - 140.0f, SCREENHEIGHT / 2.0f - 40.0f, 0.0f)) * Math::Mat4::Scale(Math::Vec3(0.08f, 0.08f, 1.0f));
+		// model *= Math::Mat4::Translate(Math::Vec3(-SCREENWIDTH / 4.0f - 140.0f, SCREENHEIGHT / 2.0f - 40.0f, 0.0f)) * Math::Mat4::Scale(Math::Vec3(0.08f, 0.08f, 1.0f));
 		view = HUDCamera.GetCameraMatrix();
 
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
@@ -938,7 +977,7 @@ int main(int argc, char** argv)
 		if (ShowMap)
 		{
 			MapEntityBatch.RenderBatch();
-			MapBatch.RenderBatch();
+			// MapBatch.RenderBatch();
 		}
 
 
@@ -1053,7 +1092,7 @@ void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager*
 
 	float size = 32.0f; 
 	Batch->Begin();	
-	Enjon::Math::Vec4 destRect(InputManager->GetMouseCoords().x, -InputManager->GetMouseCoords().y + SCREENHEIGHT - size, size, size);
+	Enjon::Math::Vec4 destRect(InputManager->GetMouseCoords().x - size / 2.0f, -InputManager->GetMouseCoords().y + SCREENHEIGHT - size + size / 2.0f, size, size);
 	Enjon::Math::Vec4 uvRect(0, 0, 1, 1);
 	Batch->Add(destRect, uvRect, MouseTexture.id);
 	Batch->End();

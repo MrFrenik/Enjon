@@ -146,7 +146,7 @@ namespace Loot {
 		/* Creates weapon profiles */	
 		void Init()
 		{
-			Weapon::AddProfile(std::string("Dagger"), WeaponProfile{Range{10, 20}, 100.0f, BaseType::DAGGER, ReachType::UNIDIRECTION});
+			Weapon::AddProfile(std::string("Dagger"), WeaponProfile{Range{3, 5}, 100.0f, BaseType::DAGGER, ReachType::UNIDIRECTION});
 			Weapon::AddProfile(std::string("Axe"), WeaponProfile{Range{20, 30}, 120.0f, BaseType::DAGGER, ReachType::UNIDIRECTION});
 			Weapon::AddProfile(std::string("Bow"), WeaponProfile{Range{5, 10}, 30.0f, BaseType::BOW, ReachType::UNIDIRECTION});
 		}
