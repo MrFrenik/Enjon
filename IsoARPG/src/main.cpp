@@ -286,10 +286,10 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 0;
+	static uint32 AmountDrawn = 1;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
-		float height = 30.0f;
+		float height = 10.0f;
 		Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
 																enemydims, &EnemySheet, "Enemy", 0.05f); 
 	}
@@ -771,8 +771,8 @@ int main(int argc, char** argv)
 		// Rotate the thing
 		{
 			// Random verticle bar to test rotations
-			EM::Vec2 BeamDims(500.0f, 50.0f);
-			EM::Vec2 BeamPos = World->TransformSystem->Transforms[Player].Position.XY() + EM::Vec2(BeamDims.y / 2.0f + 30.0f, 20.0f);
+			EM::Vec2 BeamDims(500.0f, 2.0f);
+			EM::Vec2 BeamPos = World->TransformSystem->Transforms[Player].Position.XY() + EM::Vec2(BeamDims.y / 2.0f + 60.0f, 40.0f);
 			Enjon::Math::Vec2 MousePos = Input.GetMouseCoords();
 			Camera.ConvertScreenToWorld(MousePos);
 			MousePos = EM::IsoToCartesian(MousePos);
@@ -793,7 +793,7 @@ int main(int argc, char** argv)
 			// BeamPos = EM::Vec2(BeamX * cos(a) - BeamY * sin(a), BeamX * sin(a) + BeamY * cos(a));
 
 			EntityBatch.Add(EM::Vec4(BeamPos, BeamDims), EM::Vec4(0, 0, 1, 1), 
-							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::RGBA16_Green(), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
+							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::SetOpacity(EG::RGBA16_Green(), 0.5f), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
 		}	
 
 		float X = HUDCamera.GetPosition().x - 190.0f;

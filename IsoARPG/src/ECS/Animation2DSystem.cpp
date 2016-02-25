@@ -42,7 +42,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 	{
 		// Attack speed
 		// TODO(John): Make this dependent on equipped weapon and player stats
-		static float AttackSpeed = 1.0f;
+		static float AttackSpeed = 100.0f;
 
 		// Get System
 		struct Animation2DSystem* System = Manager->Animation2DSystem;
@@ -61,7 +61,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 				else RS->Color = Enjon::Graphics::RGBA16_White();
 			}
 
-			// If has an animation component
+			// If has an animation componentasssssssssscdcaasd
 			if (Manager->Masks[e] & COMPONENT_ANIMATION2D)
 			{
 				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::DAMAGED)
@@ -254,51 +254,52 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										// BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(Angle + i)), sin(Math::ToRadians(Angle + i))));
 										
 										// Create an arrow projectile entity for now...
-											// static Enjon::Graphics::SpriteSheet ItemSheet;
-										// if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
-										// eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->x, Position->y, 40.0f),
-										// 						  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::WEAPON | 
-										// 						  												Masks::WeaponOptions::PROJECTILE | 
-										// 						  												Masks::GeneralOptions::PICKED_UP | 
-										// 						  												Masks::GeneralOptions::COLLIDABLE), 
-										// 						  												Component::EntityType::PROJECTILE);
-										// Manager->Masks[id] |= COMPONENT_TRANSFORM3D;
+											static Enjon::Graphics::SpriteSheet ItemSheet;
+										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
+										eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->x, Position->y, 30.0f),
+																  Enjon::Math::Vec2(64.0f, 64.0f), &ItemSheet, (Masks::Type::WEAPON | 
+																  												Masks::WeaponOptions::PROJECTILE | 
+																  												Masks::GeneralOptions::PICKED_UP | 
+																  												Masks::GeneralOptions::COLLIDABLE), 
+																  												Component::EntityType::PROJECTILE);
+										Manager->Masks[id] |= COMPONENT_TRANSFORM3D;
 
 
 										// // Set arrow velocity to normalize: mousepos - arrowpos
-										// Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
-										// Manager->Camera->ConvertScreenToWorld(MousePos);
-										// Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].GroundPosition;
-										// MousePos.y -= 80.0f;
+										Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
+										Manager->Camera->ConvertScreenToWorld(MousePos);
+										Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].GroundPosition;
+										MousePos.y -= 20.0f;
 
 										// // Find vector between the two and normalize
-										// Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x, Pos.y));
+										Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x, Pos.y));
+										auto RX = Enjon::Random::Roll(-5, 5) / 100.0f;
+										auto RY = Enjon::Random::Roll(-5, 5) / 100.0f;
 
-										// float speed = 50.0f;
+										float speed = 50.0f;
 
 										// // Fire in direction of mouse
-										// // Manager->TransformSystem->Transforms[id].Velocity = Enjon::Math::Vec3(ArrowVelocity.x * speed, ArrowVelocity.y * speed, -0.98f);
-										// Manager->TransformSystem->Transforms[id].Velocity = speed * Enjon::Math::Vec3(ArrowVelocity.x, ArrowVelocity.y, 0.0f);
-										// Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;
+										Manager->TransformSystem->Transforms[id].Velocity = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);
+										Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;
 
-										// // Set attack vector of player to this velocity
-										// int Mult = 1.0f;
-										// Enjon::Math::Vec2 AttackVector;
-										// // X < 0
-										// if (ArrowVelocity.x < 0 && ArrowVelocity.x >= -0.3f) AttackVector.x = 0.0f;
-										// else if (ArrowVelocity.x < 0 && ArrowVelocity.x < -0.3f) AttackVector.x = -1.0f;
-										// // X > 0
-										// if (ArrowVelocity.x >= 0 && ArrowVelocity.x < 0.5f) AttackVector.x = 0.0f;
-										// else if (ArrowVelocity.x >= 0 && ArrowVelocity.x >= 0.5f) AttackVector.x = 1.0f;
-										// // Y < 0
-										// if (ArrowVelocity.y < 0 && ArrowVelocity.y > -0.3f) AttackVector.y = 0.0f;
-										// else if (ArrowVelocity.y < 0 && ArrowVelocity.y <= -0.3f) AttackVector.y = -1.0f;
-										// // Y > 0
-										// if (ArrowVelocity.y >= 0 && ArrowVelocity.y < 0.3f) AttackVector.y = 0.0f;
-										// else if (ArrowVelocity.y >= 0 && ArrowVelocity.y >= 0.3f) AttackVector.y = 1.0f;
+										// Set attack vector of player to this velocity
+										int Mult = 1.0f;
+										Enjon::Math::Vec2 AttackVector;
+										// X < 0
+										if (ArrowVelocity.x < 0 && ArrowVelocity.x >= -0.3f) AttackVector.x = 0.0f;
+										else if (ArrowVelocity.x < 0 && ArrowVelocity.x < -0.3f) AttackVector.x = -1.0f;
+										// X > 0
+										if (ArrowVelocity.x >= 0 && ArrowVelocity.x < 0.5f) AttackVector.x = 0.0f;
+										else if (ArrowVelocity.x >= 0 && ArrowVelocity.x >= 0.5f) AttackVector.x = 1.0f;
+										// Y < 0
+										if (ArrowVelocity.y < 0 && ArrowVelocity.y > -0.3f) AttackVector.y = 0.0f;
+										else if (ArrowVelocity.y < 0 && ArrowVelocity.y <= -0.3f) AttackVector.y = -1.0f;
+										// Y > 0
+										if (ArrowVelocity.y >= 0 && ArrowVelocity.y < 0.3f) AttackVector.y = 0.0f;
+										else if (ArrowVelocity.y >= 0 && ArrowVelocity.y >= 0.3f) AttackVector.y = 1.0f;
 
 
-										// Manager->TransformSystem->Transforms[e].AttackVector = AttackVector;
+										Manager->TransformSystem->Transforms[e].AttackVector = AttackVector;
 
 									// }
 								}
