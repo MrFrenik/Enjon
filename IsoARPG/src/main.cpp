@@ -97,8 +97,9 @@ using namespace Systems;
 /*-- Function Declarations --*/
 void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* Manager, ECS::eid32 Entity);
 void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);
-void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position);
+// void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position);
 void DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math::Vec3 Pos);
+void ShootGrenade(struct EntityManager* Manager, Enjon::Math::Vec3 Pos, EG::SpriteSheet* Sheet);
 
 SDL_Joystick* Joystick;
 
@@ -286,7 +287,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 2000;
+	static uint32 AmountDrawn = 100;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -307,6 +308,10 @@ int main(int argc, char** argv)
 	// Create Bow
 	eid32 Bow = Factory::CreateWeapon(World, World->TransformSystem->Transforms[Player].Position, Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, 
 												(Masks::Type::WEAPON | Masks::GeneralOptions::PICKED_UP), Component::EntityType::WEAPON, "Weapon");
+
+	eid32 Grenade = Factory::CreateWeapon(World, EM::Vec3(World->TransformSystem->Transforms[Player].Position.XY(), 0.0f), Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet);
+	World->TransformSystem->Transforms[Grenade].VelocityGoal = EM::Vec3(0, 4.0f, 1.0f);
+	World->TransformSystem->Transforms[Grenade].BaseHeight = 0.0f;
 
 	// Turn off Rendering / Transform Components
 	EntitySystem::RemoveComponents(World, Sword, COMPONENT_RENDERER2D | COMPONENT_TRANSFORM3D);
@@ -408,12 +413,6 @@ int main(int argc, char** argv)
 				SmokeCount = 0.0f;
 			}
 
-			auto S = Enjon::Math::CartesianToIso(level.GetDims());
-			for (int i = 0; i < 5; i++)
-			{
-				DrawFire(TestParticleBatch, EM::Vec3(Enjon::Random::Roll(-S.x, S.x), Enjon::Random::Roll(-S.y, S.y), 0.0f));
-			}
-
 			// Updates the world's particle engine
 			World->ParticleEngine->Update();
 		
@@ -424,6 +423,39 @@ int main(int argc, char** argv)
 
 			// Clear entities from PlayerControllerSystem targets vector
 			World->PlayerControllerSystem->Targets.clear();
+
+			// Update grenade
+			// auto GrP = &World->TransformSystem->Transforms[Grenade].Position.z;
+			// auto GrV = World->TransformSystem->Transforms[Grenade].Velocity.z;
+			// auto BH = World->TransformSystem->Transforms[Grenade].BaseHeight;
+			// static bool rising = true;
+			// static bool exploded = false;
+			// static float TOP = 20.0f;
+			// if (*GrP >= TOP && rising)
+			// {
+			// 	World->TransformSystem->Transforms[Grenade].VelocityGoal.z = -(GrV - GrV / 4.0f);	
+			// 	TOP -= TOP / 4.0f;
+			// 	rising = false;
+			// }
+			// else if (*GrP <= World->TransformSystem->Transforms[Grenade].BaseHeight + TOP / 2.0f && TOP > 2.0f)
+			// {
+			// 	rising = true;
+			// 	World->TransformSystem->Transforms[Grenade].Velocity.z = TOP;
+			// }
+			// else if (TOP < 2.0f)
+			// {
+			// 	if (!exploded)
+			// 	{
+			// 		printf("Boom!\n");
+			// 		for (auto i = 0; i < 10; i++)
+			// 		{
+			// 			DrawFire(TestParticleBatch, World->TransformSystem->Transforms[Grenade].Position);
+			// 		}
+			// 		Camera.ShakeScreen(Enjon::Random::Roll(15, 20));
+			// 		exploded = true;
+			// 		ECS::Systems::EntitySystem::RemoveEntity(World, Grenade);
+			// 	}
+			// }
 		}
 
 
@@ -1151,151 +1183,180 @@ void DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math:
 
 }
 
-void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position)
+void ShootGrenade(struct EntityManager* Manager, Enjon::Math::Vec3 Pos, EG::SpriteSheet* Sheet)
 {
-	// Totally testing for shiggles
-	static float PCounter = 0.0f;
-	// PCounter += 0.25f;
-	static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_1.png").id;
-	static GLuint PTex2 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_2.png").id;
-	static GLuint PTex3 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_3.png").id;
-	static GLuint PTex4 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/bg-light.png").id;
+	ECS::eid32 Player = Manager->Player;
+	ECS::eid32 Grenade = Factory::CreateWeapon(Manager, EM::Vec3(Manager->TransformSystem->Transforms[Player].Position.XY(), 0.0f), Enjon::Math::Vec2(16.0f, 16.0f), Sheet);
 
-	static EG::ColorRGBA16 Gray = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
+	// Shoot in direction of mouse
+	// Set velocity to normalize: mousepos - pos
+	Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[Grenade].Input->GetMouseCoords();
+	Manager->Camera->ConvertScreenToWorld(MousePos);
+	MousePos.y -= 20.0f;
 
-	// std::string S("23.5");
- //    std::string::const_iterator c;
- //    float x = 100.0f;
- //    float y = 100.0f;
- //    float advance = 0.0f;
- //    float scale = 0.5f;
- //    for (c = S.begin(); c != S.end(); c++) 
- //    {
-	// 	EG::Fonts::CharacterStats CS = 
-	// 				EG::Fonts::GetCharacterAttributes(Math::Vec2(x, y), scale, EG::FontManager::GetFont("Bold"), c, &advance);
+	// Find vector between the two and normalize
+	Enjon::Math::Vec2 GV = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x, Pos.y));
+	auto RX = Enjon::Random::Roll(-10, 2) / 100.0f;
+	auto RY = Enjon::Random::Roll(-10, 2) / 100.0f;
 
-	// 	// Create particle
-	// 	EG::Particle2D::AddParticle(EM::Vec3(CS.DestRect.x, CS.DestRect.y, 0.0f), EM::Vec3(0.0f, 0.0f, 1.0f), EM::Vec2(50.0f, 50.0f), 
-	// 									EG::RGBA16_Orange(), CS.TextureID, 0.025f, Batch);
+	float speed = 50.0f;
 
-	// 	x += advance * scale;
- //    }
+	// // Fire in direction of mouse
+	// Manager->TransformSystem->Transforms[id].VelocityGoal = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
+	// Manager->TransformSystem->Transforms[id].Velocity = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
+	// Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;
 
 
+	Manager->TransformSystem->Transforms[Grenade].VelocityGoal = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 1.0f);
+	Manager->TransformSystem->Transforms[Grenade].VelocityGoal = EM::Vec3(0, 4.0f, 1.0f);
+	Manager->TransformSystem->Transforms[Grenade].BaseHeight = 0.0f;
+}
 
-	static float SmokeCounter = 0.0f;
-	SmokeCounter += 0.25f;
-	if (SmokeCounter >= 1.0f)
-	{
-		for (int i = 0; i < 10; i++)
-		{
-			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 5), XVel = Random::Roll(-2, 2), YVel = Random::Roll(-1, 1),
-							YSize = Random::Roll(100, 150), XSize = Random::Roll(100, 150);
-			int Roll = Random::Roll(1, 3);
-			GLuint tex;
-			if (Roll == 1) tex = PTex;
-			else if (Roll == 2) tex = PTex2;
-			else tex = PTex3; 
+// void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position)
+// {
+// 	// Totally testing for shiggles
+// 	static float PCounter = 0.0f;
+// 	// PCounter += 0.25f;
+// 	static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_1.png").id;
+// 	static GLuint PTex2 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_2.png").id;
+// 	static GLuint PTex3 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_3.png").id;
+// 	static GLuint PTex4 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/bg-light.png").id;
 
-			int RedAmount = Random::Roll(0, 50);
-			int Alpha = Random::Roll(0.8f, 1.0f);
+// 	static EG::ColorRGBA16 Gray = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
+
+// 	// std::string S("23.5");
+//  //    std::string::const_iterator c;
+//  //    float x = 100.0f;
+//  //    float y = 100.0f;
+//  //    float advance = 0.0f;
+//  //    float scale = 0.5f;
+//  //    for (c = S.begin(); c != S.end(); c++) 
+//  //    {
+// 	// 	EG::Fonts::CharacterStats CS = 
+// 	// 				EG::Fonts::GetCharacterAttributes(Math::Vec2(x, y), scale, EG::FontManager::GetFont("Bold"), c, &advance);
+
+// 	// 	// Create particle
+// 	// 	EG::Particle2D::AddParticle(EM::Vec3(CS.DestRect.x, CS.DestRect.y, 0.0f), EM::Vec3(0.0f, 0.0f, 1.0f), EM::Vec2(50.0f, 50.0f), 
+// 	// 									EG::RGBA16_Orange(), CS.TextureID, 0.025f, Batch);
+
+// 	// 	x += advance * scale;
+//  //    }
 
 
-			EG::Particle2D::AddParticle(Math::Vec3(Position.x - 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
-				Math::Vec2(XSize, YSize), EG::RGBA16(Gray.r, Gray.g, Gray.b + 0.1f, Gray.a - Alpha), tex, 0.025f, Batch);
-		}
-		SmokeCounter = 0.0f;
-	}
 
-	static float FlameCounter = 0.0f;
-	FlameCounter += 0.25f;
-	if (FlameCounter >= 1.0f)
-	{
-		EG::ColorRGBA16 Fire = EG::RGBA16(3.0f, 0.3f, 0.1f, 1.0f);
-		for (int i = 0; i < 1; i++)
-		{
-			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
-							YSize = Random::Roll(75, 125), XSize = Random::Roll(50, 100);
-			int Roll = Random::Roll(1, 3);
+// 	static float SmokeCounter = 0.0f;
+// 	SmokeCounter += 0.25f;
+// 	if (SmokeCounter >= 1.0f)
+// 	{
+// 		for (int i = 0; i < 10; i++)
+// 		{
+// 			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 5), XVel = Random::Roll(-2, 2), YVel = Random::Roll(-1, 1),
+// 							YSize = Random::Roll(100, 150), XSize = Random::Roll(100, 150);
+// 			int Roll = Random::Roll(1, 3);
+// 			GLuint tex;
+// 			if (Roll == 1) tex = PTex;
+// 			else if (Roll == 2) tex = PTex2;
+// 			else tex = PTex3; 
 
-			GLuint tex;
-			if (Roll == 1) tex = PTex;
-			else if (Roll == 2) tex = PTex2;
-			else tex = PTex3; 
+// 			int RedAmount = Random::Roll(0, 50);
+// 			int Alpha = Random::Roll(0.8f, 1.0f);
 
-			EG::Particle2D::AddParticle(Math::Vec3(Position.x, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
-				Math::Vec2(XSize, YSize), Fire, tex, 0.025f, Batch);
-		}
-		FlameCounter = 0.0f;
-	}
+
+// 			EG::Particle2D::AddParticle(Math::Vec3(Position.x - 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+// 				Math::Vec2(XSize, YSize), EG::RGBA16(Gray.r, Gray.g, Gray.b + 0.1f, Gray.a - Alpha), tex, 0.025f, Batch);
+// 		}
+// 		SmokeCounter = 0.0f;
+// 	}
+
+// 	static float FlameCounter = 0.0f;
+// 	FlameCounter += 0.25f;
+// 	if (FlameCounter >= 1.0f)
+// 	{
+// 		EG::ColorRGBA16 Fire = EG::RGBA16(3.0f, 0.3f, 0.1f, 1.0f);
+// 		for (int i = 0; i < 1; i++)
+// 		{
+// 			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
+// 							YSize = Random::Roll(75, 125), XSize = Random::Roll(50, 100);
+// 			int Roll = Random::Roll(1, 3);
+
+// 			GLuint tex;
+// 			if (Roll == 1) tex = PTex;
+// 			else if (Roll == 2) tex = PTex2;
+// 			else tex = PTex3; 
+
+// 			EG::Particle2D::AddParticle(Math::Vec3(Position.x, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+// 				Math::Vec2(XSize, YSize), Fire, tex, 0.025f, Batch);
+// 		}
+// 		FlameCounter = 0.0f;
+// 	}
 
 	
-	static float InnerFlameCounter = 0.0f;
-	InnerFlameCounter += 0.05f;
-	if (InnerFlameCounter >= 1.0f)
-	{
-		EG::ColorRGBA16 Fire = EG::RGBA16(5.0f, 0.8f, 0.1f, 2.0f);
-		for (int i = 0; i < 1; i++)
-		{
-			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
-							YSize = Random::Roll(50, 75), XSize = Random::Roll(50, 75);
-			int Roll = Random::Roll(1, 3);
+// 	static float InnerFlameCounter = 0.0f;
+// 	InnerFlameCounter += 0.05f;
+// 	if (InnerFlameCounter >= 1.0f)
+// 	{
+// 		EG::ColorRGBA16 Fire = EG::RGBA16(5.0f, 0.8f, 0.1f, 2.0f);
+// 		for (int i = 0; i < 1; i++)
+// 		{
+// 			float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
+// 							YSize = Random::Roll(50, 75), XSize = Random::Roll(50, 75);
+// 			int Roll = Random::Roll(1, 3);
 
-			GLuint tex;
-			if (Roll == 1) tex = PTex;
-			else if (Roll == 2) tex = PTex2;
-			else tex = PTex3; 
+// 			GLuint tex;
+// 			if (Roll == 1) tex = PTex;
+// 			else if (Roll == 2) tex = PTex2;
+// 			else tex = PTex3; 
 
-			EG::Particle2D::AddParticle(Math::Vec3(Position.x, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
-				Math::Vec2(XSize, YSize), Fire, tex, 0.05f, Batch);
-		}
-		InnerFlameCounter = 0.0f;
-	}
+// 			EG::Particle2D::AddParticle(Math::Vec3(Position.x, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+// 				Math::Vec2(XSize, YSize), Fire, tex, 0.05f, Batch);
+// 		}
+// 		InnerFlameCounter = 0.0f;
+// 	}
 
-	static float LightFlameCounter = 0.0f;
-	LightFlameCounter += 0.025f;
-	if (LightFlameCounter >= 1.0f)
-	{
-		EG::ColorRGBA16 Fire = EG::RGBA16(8.0f, 1.6f, 0.0f, 0.005f);
-		for (int i = 0; i < 4; i++)
-		{
-			float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(1, 2), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
-							YSize = Random::Roll(200, 300), XSize = Random::Roll(200, 300);
-			int Roll = Random::Roll(1, 3);
+// 	static float LightFlameCounter = 0.0f;
+// 	LightFlameCounter += 0.025f;
+// 	if (LightFlameCounter >= 1.0f)
+// 	{
+// 		EG::ColorRGBA16 Fire = EG::RGBA16(8.0f, 1.6f, 0.0f, 0.005f);
+// 		for (int i = 0; i < 4; i++)
+// 		{
+// 			float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(1, 2), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
+// 							YSize = Random::Roll(200, 300), XSize = Random::Roll(200, 300);
+// 			int Roll = Random::Roll(1, 3);
 
-			GLuint tex;
-			if (Roll == 1) tex = PTex;
-			else if (Roll == 2) tex = PTex2;
-			else tex = PTex3; 
+// 			GLuint tex;
+// 			if (Roll == 1) tex = PTex;
+// 			else if (Roll == 2) tex = PTex2;
+// 			else tex = PTex3; 
 
-			EG::Particle2D::AddParticle(Math::Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
-				Math::Vec2(XSize, YSize), Fire, PTex4, 0.025f, Batch);
-		}
-		LightFlameCounter = 0.0f;
-	}
+// 			EG::Particle2D::AddParticle(Math::Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+// 				Math::Vec2(XSize, YSize), Fire, PTex4, 0.025f, Batch);
+// 		}
+// 		LightFlameCounter = 0.0f;
+// 	}
 
-	static float Ember = 0.0f;
-	Ember += 0.05f;
-	if (Ember >= 1.0f)
-	{
-		EG::ColorRGBA16 Fire = EG::RGBA16(5.0f, 0.8f, 0.0f, 5.0f);
-		for (int i = 0; i < 15; i++)
-		{
-			float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(5, 10), XVel = Random::Roll(-5, 5), YVel = Random::Roll(-5, 5),
-							YSize = Random::Roll(1, 5), XSize = Random::Roll(1, 3);
-			int Roll = Random::Roll(1, 3);
+// 	static float Ember = 0.0f;
+// 	Ember += 0.05f;
+// 	if (Ember >= 1.0f)
+// 	{
+// 		EG::ColorRGBA16 Fire = EG::RGBA16(5.0f, 0.8f, 0.0f, 5.0f);
+// 		for (int i = 0; i < 15; i++)
+// 		{
+// 			float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(5, 10), XVel = Random::Roll(-5, 5), YVel = Random::Roll(-5, 5),
+// 							YSize = Random::Roll(1, 5), XSize = Random::Roll(1, 3);
+// 			int Roll = Random::Roll(1, 3);
 
-			GLuint tex;
-			if (Roll == 1) tex = PTex;
-			else if (Roll == 2) tex = PTex2;
-			else tex = PTex3; 
+// 			GLuint tex;
+// 			if (Roll == 1) tex = PTex;
+// 			else if (Roll == 2) tex = PTex2;
+// 			else tex = PTex3; 
 
-			EG::Particle2D::AddParticle(Math::Vec3(Position.x + 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
-				Math::Vec2(XSize, YSize), Fire, PTex, 0.05f, Batch);
-		}
-		Ember = 0.0f;
-	}
-}
+// 			EG::Particle2D::AddParticle(Math::Vec3(Position.x + 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+// 				Math::Vec2(XSize, YSize), Fire, PTex, 0.05f, Batch);
+// 		}
+// 		Ember = 0.0f;
+// 	}
+// }
 
 
 #endif 

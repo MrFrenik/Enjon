@@ -234,8 +234,6 @@ namespace ECS { namespace Systems { namespace Animation2D {
 									// Move player in direction of attack vector
 									auto Vel = &Manager->TransformSystem->Transforms[e].Velocity;
 									*Vel = 5.0f * Enjon::Math::Vec3(AttackVelocity, 0.0f);
-
-									std::cout << AttackVelocity << std::endl;
 								}
 
 								if (CurrentWeapon == Weapons::AXE && ActiveFrame == *BeginningFrame + 6)
@@ -250,7 +248,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 								if (CurrentWeapon == Weapons::BOW && ActiveFrame == *BeginningFrame + 3)
 								{
-									for (auto i = 0; i < 10; i++)
+									for (auto i = 0; i < 1; i++)
 									{
 										// Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[e].CartesianPosition + Math::Vec2(16.0f)) + Math::Vec2(20.0f, -50.0f));
 										// float boxRadius = 50.0f;
@@ -285,6 +283,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										float speed = 50.0f;
 
 										// // Fire in direction of mouse
+										Manager->TransformSystem->Transforms[id].VelocityGoal = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);
 										Manager->TransformSystem->Transforms[id].Velocity = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);
 										Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;
 

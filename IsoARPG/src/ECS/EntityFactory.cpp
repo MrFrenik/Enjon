@@ -173,6 +173,7 @@ namespace ECS { namespace Factory {
 			Transform->Position = Position;
 			Transform->VelocityGoal = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
 			Transform->Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+			Transform->VelocityGoalScale = 0.3f;
 			Transform->Dimensions = Dimensions;
 			Transform->GroundPosition = Enjon::Math::Vec2(Position.XY());
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
@@ -227,6 +228,7 @@ namespace ECS { namespace Factory {
 			Transform->Position = Position;
 			Transform->VelocityGoal = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
 			Transform->Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+			Transform->VelocityGoalScale = 0.8f;
 			Transform->Dimensions = Dimensions;
 			Transform->GroundPosition = Enjon::Math::Vec2(Position.XY());
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);

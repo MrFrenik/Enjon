@@ -1,11 +1,17 @@
 
+#include "Graphics/SpriteSheet.h"
+
 #include "ECS/PlayerControllerSystem.h"
+#include "ECS/AttributeSystem.h"
 #include "ECS/Transform3DSystem.h"
 #include "ECS/Renderer2DSystem.h"
 #include "ECS/Animation2DSystem.h"
 #include "ECS/InventorySystem.h"
+#include "ECS/EntityFactory.h"
 
 namespace ECS { namespace Systems { namespace PlayerController {
+
+	void ShootGrenade(struct EntityManager* Manager, Enjon::Math::Vec3 Pos, EG::SpriteSheet* Sheet);
 
 	struct PlayerControllerSystem* NewPlayerControllerSystem(ECS::Systems::EntityManager* Manager)
 	{
@@ -95,6 +101,17 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				if (Input->IsKeyDown(SDL_BUTTON_LEFT)) {
 					// Set to attack?
 					Animation2D::SetPlayerState(Animation2D::EntityAnimationState::ATTACKING);  // NOTE(John): THIS IS FUCKING AWFUL
+				}
+
+				if (Input->IsKeyPressed(SDL_BUTTON_RIGHT)) {
+					for (auto i = 0; i < 10; i++)
+					{
+						auto P = Manager->TransformSystem->Transforms[Manager->Player].Position;
+						P += Enjon::Math::Vec3(Enjon::Random::Roll(-100, 100), Enjon::Random::Roll(-100, 100), 0.0f);
+						ShootGrenade(Manager, P, Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"));
+
+					}
+
 				}
 
 				if (Input->IsKeyPressed(SDLK_r)) {
@@ -188,6 +205,32 @@ namespace ECS { namespace Systems { namespace PlayerController {
 
 			}
 		}
+	}
+
+	void ShootGrenade(struct EntityManager* Manager, Enjon::Math::Vec3 Pos, Enjon::Graphics::SpriteSheet* Sheet)
+	{
+		ECS::eid32 Player = Manager->Player;
+		ECS::eid32 Grenade = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Manager->TransformSystem->Transforms[Player].Position.XY(), 0.0f), Enjon::Math::Vec2(16.0f, 16.0f), Sheet,
+													Masks::Type::WEAPON | Masks::WeaponOptions::EXPLOSIVE);
+
+		// Shoot in direction of mouse
+		Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[Player].Input->GetMouseCoords();
+		Manager->Camera->ConvertScreenToWorld(MousePos);
+		MousePos.y -= 20.0f;
+
+		Manager->AttributeSystem->Masks[Grenade] |= Masks::GeneralOptions::RISING;
+
+		// Find vector between the two and normalize
+		Enjon::Math::Vec2 GV = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x, Pos.y));
+		auto RX = Enjon::Random::Roll(-2, 2) / 100.0f;
+		auto RY = Enjon::Random::Roll(-2, 2) / 100.0f;
+
+		float speed = 30.0f;
+
+		Manager->TransformSystem->Transforms[Grenade].Velocity = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
+		Manager->TransformSystem->Transforms[Grenade].VelocityGoal = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
+		Manager->TransformSystem->Transforms[Grenade].BaseHeight = 0.0f;
+		Manager->TransformSystem->Transforms[Grenade].MaxHeight = 10.0f;
 	}
 
 }}}

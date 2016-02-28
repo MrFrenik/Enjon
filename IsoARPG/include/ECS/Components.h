@@ -42,6 +42,7 @@ namespace ECS { namespace Component {
 		Enjon::Math::Vec2 GroundPosition;
 		Enjon::Math::Vec2 Dimensions;
 		float BaseHeight;
+		float MaxHeight;
 		float VelocityGoalScale; 
 		eid32 Entity;
 	} Transform3D;

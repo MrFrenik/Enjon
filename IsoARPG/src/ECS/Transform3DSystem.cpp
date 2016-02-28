@@ -71,21 +71,77 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// Clamp z position to BaseHeight
 				if (Position->z < Transform->BaseHeight) 
 				{
-					if (Manager->AttributeSystem->Masks[e] & (Masks::Type::WEAPON | Masks::WeaponOptions::PROJECTILE))
+					if (Manager->AttributeSystem->Masks[e] & (Masks::WeaponOptions::PROJECTILE))
 					{
 						EntitySystem::RemoveEntity(Manager, e);
 					}
 
-					Velocity->z = 0.0f;
-					Position->z = Transform->BaseHeight;
-					Position->y = GroundPosition->y + Position->z;
+					// if ((Manager->AttributeSystem->Masks[e] & Masks::Type::WEAPON) == 0)
+					// {
+						Velocity->z = 0.0f;
+						Position->z = Transform->BaseHeight;
+						Position->y = GroundPosition->y + Position->z;
+					// }
 				} 
-				
-				// Set position.y to be a sum of y and z velocities
-				Position->y += Velocity->y + Velocity->z; 
-				
-				// Set up GroundPosition
-				GroundPosition->x = Position->x + Transform->Dimensions.x / 2.0f - TileWidth;
+
+				if (Manager->AttributeSystem->Masks[e] & (Masks::WeaponOptions::EXPLOSIVE))
+				{
+					// Update grenade
+					auto GrP = &Manager->TransformSystem->Transforms[e].Position.z;
+					auto GrV = Manager->TransformSystem->Transforms[e].Velocity.z;
+					auto BH = Manager->TransformSystem->Transforms[e].BaseHeight;
+					float* TOP = &Manager->TransformSystem->Transforms[e].MaxHeight;
+					if (*GrP >= *TOP && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::RISING))
+					{
+						Manager->TransformSystem->Transforms[e].VelocityGoal.z = -(GrV - GrV / 4.0f);	
+						*TOP -= *TOP / 4.0f;
+						Manager->AttributeSystem->Masks[e] &= ~Masks::GeneralOptions::RISING;
+					}
+					else if (*GrP <= Manager->TransformSystem->Transforms[e].BaseHeight + *TOP / 2.0f && *TOP > 2.0f)
+					{
+						Manager->AttributeSystem->Masks[e] |= Masks::GeneralOptions::RISING;
+						Manager->TransformSystem->Transforms[e].Velocity.z = *TOP;
+					}
+					else if (*TOP < 2.0f)
+					{
+						if ((Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::EXPLODED) == 0)
+						{
+							printf("Boom!\n");
+							for (auto i = 0; i < 10; i++)
+							{
+								Enjon::Graphics::Particle2D::DrawFire(Manager->ParticleEngine->ParticleBatches[0], Manager->TransformSystem->Transforms[e].Position);
+
+								auto I = Enjon::Random::Roll(0, 2);
+								Enjon::Graphics::GLTexture S;
+								switch(I)
+								{
+									case 0: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody.png"); break;
+									case 1: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody_2.png"); break;
+									case 2: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody_3.png"); break;
+									default: break;
+								}
+								auto Position = &Manager->TransformSystem->Transforms[e].Position;
+								auto alpha = Enjon::Random::Roll(50, 255) / 255.0f;
+								auto X = (float)Enjon::Random::Roll(-50, 100);
+								auto Y = (float)Enjon::Random::Roll(-100, 50);
+								auto C = Enjon::Graphics::RGBA16_White();
+								auto DC = Enjon::Random::Roll(80, 100) / 255.0f;
+								C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, alpha);
+								Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(Position->x + X, Position->y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(50, 100)), C);
+
+								Manager->Camera->ShakeScreen(Enjon::Random::Roll(15, 20));
+								Manager->AttributeSystem->Masks[e] |= Masks::GeneralOptions::EXPLODED;
+								ECS::Systems::EntitySystem::RemoveEntity(Manager, e);
+							}
+						}
+					}
+				}
+					
+					// Set position.y to be a sum of y and z velocities
+					Position->y += Velocity->y + Velocity->z; 
+					
+					// Set up GroundPosition
+					GroundPosition->x = Position->x + Transform->Dimensions.x / 2.0f - TileWidth;
 				GroundPosition->y = Position->y - Position->z; 
 
 				// Set up CartesianPosition
@@ -98,6 +154,9 @@ namespace ECS{ namespace Systems { namespace Transform {
 				if (Transform->CartesianPosition.x > -TileWidth) { Transform->CartesianPosition.x = -TileWidth; Velocity->x *= -1; CollideWithLevel = true; }
 				if (Transform->CartesianPosition.y > -TileWidth) { Transform->CartesianPosition.y = -TileWidth; Velocity->y *= -1; CollideWithLevel = true; }
 				if (Transform->CartesianPosition.y < -Height + TileWidth * 2.0f) { Transform->CartesianPosition.y = -Height + TileWidth * 2.0f; Velocity->y *= -1; CollideWithLevel = true; }
+
+
+
 
 				// Delete projectile for now if it collides with level
 				if ((Manager->Types[e] == Component::EntityType::PROJECTILE) && CollideWithLevel)

@@ -10,6 +10,7 @@
 #include "Graphics/Font.h"
 #include "System/Types.h"
 #include "Math/Maths.h"
+#include "Defines.h"
 
 const int MAXPARTICLES = 10000;
 
@@ -71,6 +72,8 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 
 	/* Adds all particles in each particle batch to be drawn */
 	void Draw(ParticleEngine2D* PE, Enjon::Graphics::Camera2D* Camera);
+
+	void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position);
 }}}
 
 #endif
