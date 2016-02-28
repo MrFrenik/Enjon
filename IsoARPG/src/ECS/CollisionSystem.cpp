@@ -32,6 +32,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 	Enjon::uint32 COLLISION_ITEM		= 0x00000004;
 	Enjon::uint32 COLLISION_PROJECTILE	= 0x00000008;
 	Enjon::uint32 COLLISION_WEAPON		= 0x00000010;
+	Enjon::uint32 COLLISION_EXPLOSIVE	= 0x00000020;
 
 	/*-- Function Declarations --*/
 	void DrawBlood(ECS::Systems::EntityManager* Manager, Enjon::Math::Vec2 Pos);
@@ -102,6 +103,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 						if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
 						if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ CollideWithItem(Manager, collider, e); 		continue; } 
 						if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
+						if (Mask == (COLLISION_EXPLOSIVE | COLLISION_ENEMY))	{ CollideWithProjectile(Manager, e, collider);  continue; }
 					}
 				}	
 			}
@@ -131,6 +133,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			case Component::EntityType::PLAYER:			Mask |= COLLISION_PLAYER; 			break;
 			case Component::EntityType::ENEMY: 			Mask |= COLLISION_ENEMY; 			break;
 			case Component::EntityType::PROJECTILE: 	Mask |= COLLISION_PROJECTILE; 		break;
+			case Component::EntityType::EXPLOSIVE: 		Mask |= COLLISION_EXPLOSIVE; 		break;
 			default: 									Mask |= COLLISION_NONE;				break; 
 		}	
 
@@ -142,10 +145,113 @@ namespace ECS{ namespace Systems { namespace Collision {
 			case Component::EntityType::PLAYER:			Mask |= COLLISION_PLAYER; 			break;
 			case Component::EntityType::ENEMY: 			Mask |= COLLISION_ENEMY; 			break;
 			case Component::EntityType::PROJECTILE: 	Mask |= COLLISION_PROJECTILE; 		break;
+			case Component::EntityType::EXPLOSIVE: 		Mask |= COLLISION_EXPLOSIVE; 		break;
 			default: 									Mask |= COLLISION_NONE;				break; 
 		}
 
 		return Mask;	
+	}
+
+	// Collide Explosive with Enemy
+	void CollideWithExplosive(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID)
+	{
+		Enjon::Math::Vec3* EntityPosition = &Manager->TransformSystem->Transforms[A_ID].Position;
+		Enjon::Math::Vec3* ColliderPosition = &Manager->TransformSystem->Transforms[B_ID].Position;
+		Enjon::Math::Vec2* A = &Manager->TransformSystem->Transforms[B_ID].CartesianPosition;
+		Enjon::Math::Vec2* B = &Manager->TransformSystem->Transforms[A_ID].CartesianPosition;
+		Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
+		Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
+		Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
+
+		// Collision didn't happen
+		if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) return;
+		
+		else 
+		{
+			// Shake the camera for effect
+			Manager->Camera->ShakeScreen(Enjon::Random::Roll(30, 40));
+
+			// Get minimum translation distance
+			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_A, AABB_B);
+
+			// Update velocities based on "bounce" factor
+			float bf = 1.0f; // Bounce factor 
+			ColliderVelocity->x = -ColliderVelocity->x * bf;
+			ColliderVelocity->y = -ColliderVelocity->y * bf;
+
+			// Hurt Collider
+			// Get health and color of entity
+			Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
+			Enjon::Graphics::ColorRGBA16* Color = &Manager->Renderer2DSystem->Renderers[B_ID].Color;
+
+			// Set option to damaged
+			Manager->AttributeSystem->Masks[B_ID] |= Masks::GeneralOptions::DAMAGED;	
+
+			if (HealthComponent == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Collider health component is null");
+			if (Color == nullptr) Enjon::Utils::FatalError("COMPONENT_SYSTEMS::COLLISION_SYSTEM::Color component is null");
+
+			// Add blood particle effect (totally a test)...
+
+			const EM::Vec3* PP = &Manager->TransformSystem->Transforms[B_ID].Position;
+			static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/orb.png").id;
+
+			EG::ColorRGBA16 R = EG::RGBA16(1.0f, 0.01f, 0.01f, 1.0f);
+
+			// Add 100 at a time
+			// for (Enjon::uint32 i = 0; i < 2; i++)
+			// {
+				float XPos = Enjon::Random::Roll(-50, 100), YPos = Enjon::Random::Roll(-50, 100), ZVel = Enjon::Random::Roll(-10, 10), XVel = Enjon::Random::Roll(-10, 10), 
+								YSize = Enjon::Random::Roll(2, 7), XSize = Enjon::Random::Roll(1, 5);
+
+				EG::Particle2D::AddParticle(EM::Vec3(PP->x + 50.0f + XVel, PP->y + 50.0f + ZVel, 0.0f), EM::Vec3(XVel, XVel, ZVel), 
+					EM::Vec2(XSize, YSize), R, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
+
+				// Add blood overlay to level
+				DrawBlood(Manager, ColliderPosition->XY());
+			// }
+
+			// Get min and max damage of weapon
+			const Loot::Weapon::WeaponProfile* WP = Manager->AttributeSystem->WeaponProfiles[A_ID];
+
+			Enjon::uint32 MiD, MaD;
+			if (WP)
+			{
+				MiD = WP->Damage.Min;
+				MaD = WP->Damage.Max;
+			}
+			else 
+			{
+				MiD = 5;
+				MaD = 10;
+			}
+
+			auto Damage = Enjon::Random::Roll(MiD, MaD);
+	
+			// Decrement by damage	
+			HealthComponent->Health -= Damage;
+
+			// printf("Hit for %d damage\n", Damage);
+
+			if (HealthComponent->Health <= 0.0f) 
+			{
+				DrawBody(Manager, ColliderPosition->XY());
+
+				// Remove entity if no health
+				EntitySystem::RemoveEntity(Manager, B_ID);
+
+				// Drop some loot!
+				Loot::DropLootBasedOnProfile(Manager, B_ID);
+
+				auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
+			}
+
+			// Remove projectile
+			EntitySystem::RemoveEntity(Manager, A_ID);
+
+			// Continue with next entity
+			return;
+		}
+
 	}
 
 	void CollideWithProjectile(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID)
@@ -163,8 +269,49 @@ namespace ECS{ namespace Systems { namespace Collision {
 		
 		else 
 		{
+			// If is a grenade, then spawn an explosion
+			if (Manager->AttributeSystem->Masks[A_ID] & Masks::WeaponSubOptions::GRENADE)
+			{
+				// TODO(John): Make a "spawn" function that gets called for any entity that has a factory component
+				ECS::eid32 Explosion = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Manager->TransformSystem->Transforms[A_ID].Position.XY(), 0.0f), Enjon::Math::Vec2(16.0f, 16.0f), 
+															Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"), 
+															Masks::Type::WEAPON | Masks::WeaponOptions::EXPLOSIVE, Component::EntityType::EXPLOSIVE, "Explosion");
+
+				Manager->AttributeSystem->Masks[Explosion] |= Masks::GeneralOptions::COLLIDABLE;
+
+				Manager->TransformSystem->Transforms[Explosion].Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+				Manager->TransformSystem->Transforms[Explosion].VelocityGoal = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+				Manager->TransformSystem->Transforms[Explosion].BaseHeight = 0.0f;
+				Manager->TransformSystem->Transforms[Explosion].MaxHeight = 0.0f;
+
+				Manager->TransformSystem->Transforms[Explosion].AABBPadding = Enjon::Math::Vec2(200, 200);
+
+				for (auto i = 0; i < 10; i++)
+				{
+					Enjon::Graphics::Particle2D::DrawFire(Manager->ParticleEngine->ParticleBatches[0], Manager->TransformSystem->Transforms[A_ID].Position);
+
+					auto I = Enjon::Random::Roll(0, 2);
+					Enjon::Graphics::GLTexture S;
+					switch(I)
+					{
+						case 0: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody.png"); break;
+						case 1: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody_2.png"); break;
+						case 2: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody_3.png"); break;
+						default: break;
+					}
+					auto Position = &Manager->TransformSystem->Transforms[A_ID].Position;
+					auto alpha = Enjon::Random::Roll(50, 255) / 255.0f;
+					auto X = (float)Enjon::Random::Roll(-50, 100);
+					auto Y = (float)Enjon::Random::Roll(-100, 50);
+					auto C = Enjon::Graphics::RGBA16_White();
+					auto DC = Enjon::Random::Roll(80, 100) / 255.0f;
+					C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, alpha);
+					Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(Position->x + X, Position->y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(50, 100)), C);
+				}
+			}
+				
 			// Shake the camera for effect
-			Manager->Camera->ShakeScreen(Enjon::Random::Roll(0, 15));
+			Manager->Camera->ShakeScreen(Enjon::Random::Roll(10, 15));
 
 			// Get minimum translation distance
 			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_A, AABB_B);

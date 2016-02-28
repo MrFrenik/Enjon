@@ -38,6 +38,7 @@ namespace ECS { namespace Factory {
 			Transform->GroundPosition = Enjon::Math::Vec2(Position.x + Dimensions.x / 2.0f, Position.y);
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
+			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
 
 			// Set up AABB
 			V2* CP = &Transform->CartesianPosition;
@@ -112,6 +113,7 @@ namespace ECS { namespace Factory {
 			Transform->GroundPosition = Enjon::Math::Vec2(Position.XY());
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
+			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
 
 			// Set up AABB
 			V2* CP = &Transform->CartesianPosition;
@@ -178,6 +180,7 @@ namespace ECS { namespace Factory {
 			Transform->GroundPosition = Enjon::Math::Vec2(Position.XY());
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
+			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
 
 			// Set up AABB
 			V2* CP = &Transform->CartesianPosition;
@@ -203,9 +206,6 @@ namespace ECS { namespace Factory {
 			// Set up Attributes
 			AttributeSystem* AS = Manager->AttributeSystem;		
 			AS->Masks[Item] = Mask;
-
-			// Add damage component if item is a weapopn
-			// if (Mask & Masks::Type::WEAPON) AS->DamageComponents[Item] = Component::DamageComponent{5.0f, 8.0f};
 
 			// Set up Inventory... This has to be fixed and is a problem with having a general ECS
 			Manager->InventorySystem->Inventories->WeaponEquipped = NULL_ENTITY;
@@ -233,6 +233,7 @@ namespace ECS { namespace Factory {
 			Transform->GroundPosition = Enjon::Math::Vec2(Position.XY());
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
+			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
 
 			// Set up AABB
 			V2* CP = &Transform->CartesianPosition;
@@ -268,5 +269,4 @@ namespace ECS { namespace Factory {
 
 			return Weapon;
 		}
-
 }}

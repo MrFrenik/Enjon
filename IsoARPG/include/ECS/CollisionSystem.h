@@ -31,6 +31,9 @@ namespace ECS { namespace Systems { namespace Collision {
 	// Collide Projectile with Enemy
 	void CollideWithProjectile(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
 
+	// Collide Explosive with Enemy
+	void CollideWithExplosive(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
+
 	// Totally for testing purposes...
 	void DropRandomLoot(Systems::EntityManager* Manager, Enjon::uint32 count, const Enjon::Math::Vec2* Position);
 }}}

@@ -106,7 +106,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				if (Input->IsKeyPressed(SDL_BUTTON_RIGHT)) {
 					for (auto i = 0; i < 10; i++)
 					{
-						auto P = Manager->TransformSystem->Transforms[Manager->Player].Position;
+						auto P = Manager->TransformSystem->Transforms[Manager->Player].Position + Enjon::Math::Vec3(100.0f, 20.0f, 0.0f);
 						P += Enjon::Math::Vec3(Enjon::Random::Roll(-100, 100), Enjon::Random::Roll(-100, 100), 0.0f);
 						ShootGrenade(Manager, P, Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"));
 
@@ -210,15 +210,17 @@ namespace ECS { namespace Systems { namespace PlayerController {
 	void ShootGrenade(struct EntityManager* Manager, Enjon::Math::Vec3 Pos, Enjon::Graphics::SpriteSheet* Sheet)
 	{
 		ECS::eid32 Player = Manager->Player;
+		auto G = Enjon::Graphics::RGBA16_Green();
+		G.g += 10.0f;
 		ECS::eid32 Grenade = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Manager->TransformSystem->Transforms[Player].Position.XY(), 0.0f), Enjon::Math::Vec2(16.0f, 16.0f), Sheet,
-													Masks::Type::WEAPON | Masks::WeaponOptions::EXPLOSIVE);
+													Masks::Type::WEAPON | Masks::WeaponOptions::PROJECTILE | Masks::WeaponSubOptions::GRENADE, Component::EntityType::EXPLOSIVE, "Grenade", G);
 
 		// Shoot in direction of mouse
 		Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[Player].Input->GetMouseCoords();
 		Manager->Camera->ConvertScreenToWorld(MousePos);
-		MousePos.y -= 20.0f;
+		// MousePos.y -= 20.0f;
 
-		Manager->AttributeSystem->Masks[Grenade] |= Masks::GeneralOptions::RISING;
+		Manager->AttributeSystem->Masks[Grenade] |= Masks::GeneralOptions::RISING | Masks::GeneralOptions::COLLIDABLE;
 
 		// Find vector between the two and normalize
 		Enjon::Math::Vec2 GV = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x, Pos.y));

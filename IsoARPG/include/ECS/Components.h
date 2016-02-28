@@ -23,7 +23,7 @@ namespace ECS { namespace Component {
 	using EntityMask = Enjon::uint64;
 
 	enum MaskType 					{ PROJECTILE_MASK, PLAYER_MASK, ENEMY_MASK };
-	enum EntityType 				{ CONSUMABLE, ITEM, ENEMY, NPC, PLAYER, PROJECTILE, WEAPON };
+	enum EntityType 				{ CONSUMABLE, ITEM, ENEMY, NPC, PLAYER, PROJECTILE, WEAPON, EXPLOSIVE};
 	enum WeaponType 				{ AXE, DAGGER, BOW }; 												// These are obviously not thorough...
 	enum ArmorType 					{ HELM, CHEST, ARMS, LEGS, BOOTS };									// Neither are these...
 	enum StatsType 					{ WEAPONTYPE, ARMORTYPE };
@@ -39,6 +39,7 @@ namespace ECS { namespace Component {
 		Enjon::Math::Vec2 AttackVector;
 		Enjon::Math::Vec2 CartesianPosition;
 		Enjon::Physics::AABB AABB;
+		Enjon::Math::Vec2 AABBPadding;
 		Enjon::Math::Vec2 GroundPosition;
 		Enjon::Math::Vec2 Dimensions;
 		float BaseHeight;

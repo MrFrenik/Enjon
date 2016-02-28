@@ -25,7 +25,7 @@ namespace ECS { namespace Masks {
 
 	enum WeaponSubOptions : EntityMask
 	{
-		
+		GRENADE 		= 0x0010000000000000
 	};
 
 	enum ItemOptions : EntityMask

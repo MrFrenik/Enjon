@@ -3,6 +3,7 @@
 #include "ECS/AttributeSystem.h"
 #include "ECS/CollisionSystem.h"
 #include "ECS/InventorySystem.h"
+#include "ECS/EntityFactory.h"
 #include "Loot.h"
 
 namespace ECS{ namespace Systems { namespace Transform {
@@ -28,6 +29,8 @@ namespace ECS{ namespace Systems { namespace Transform {
 			{
 				// If equipped, then don't update transform here
 				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::EQUIPPED) continue;
+
+				if (Manager->AttributeSystem->Masks[e] & Masks::WeaponOptions::EXPLOSIVE) EntitySystem::RemoveEntity(Manager, e);
 
 				// Get distance to player
 				V2* GP = &Manager->TransformSystem->Transforms[e].GroundPosition;
@@ -71,20 +74,17 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// Clamp z position to BaseHeight
 				if (Position->z < Transform->BaseHeight) 
 				{
-					if (Manager->AttributeSystem->Masks[e] & (Masks::WeaponOptions::PROJECTILE))
+					if ((Manager->AttributeSystem->Masks[e] & (Masks::WeaponOptions::PROJECTILE)) && (Manager->AttributeSystem->Masks[e] & Masks::WeaponSubOptions::GRENADE) == 0)
 					{
 						EntitySystem::RemoveEntity(Manager, e);
 					}
 
-					// if ((Manager->AttributeSystem->Masks[e] & Masks::Type::WEAPON) == 0)
-					// {
-						Velocity->z = 0.0f;
-						Position->z = Transform->BaseHeight;
-						Position->y = GroundPosition->y + Position->z;
-					// }
+					Velocity->z = 0.0f;
+					Position->z = Transform->BaseHeight;
+					Position->y = GroundPosition->y + Position->z;
 				} 
 
-				if (Manager->AttributeSystem->Masks[e] & (Masks::WeaponOptions::EXPLOSIVE))
+				if (Manager->AttributeSystem->Masks[e] & (Masks::WeaponSubOptions::GRENADE))
 				{
 					// Update grenade
 					auto GrP = &Manager->TransformSystem->Transforms[e].Position.z;
@@ -106,7 +106,6 @@ namespace ECS{ namespace Systems { namespace Transform {
 					{
 						if ((Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::EXPLODED) == 0)
 						{
-							printf("Boom!\n");
 							for (auto i = 0; i < 10; i++)
 							{
 								Enjon::Graphics::Particle2D::DrawFire(Manager->ParticleEngine->ParticleBatches[0], Manager->TransformSystem->Transforms[e].Position);
@@ -129,10 +128,24 @@ namespace ECS{ namespace Systems { namespace Transform {
 								C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, alpha);
 								Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(Position->x + X, Position->y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(50, 100)), C);
 
-								Manager->Camera->ShakeScreen(Enjon::Random::Roll(15, 20));
+								Manager->Camera->ShakeScreen(Enjon::Random::Roll(30, 40));
 								Manager->AttributeSystem->Masks[e] |= Masks::GeneralOptions::EXPLODED;
 								ECS::Systems::EntitySystem::RemoveEntity(Manager, e);
 							}
+
+							// TODO(John): Make a "spawn" function that gets called for any entity that has a factory component
+							ECS::eid32 Explosion = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Manager->TransformSystem->Transforms[e].Position.XY(), 0.0f), Enjon::Math::Vec2(16.0f, 16.0f), 
+																		Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"), 
+																		Masks::Type::WEAPON | Masks::WeaponOptions::EXPLOSIVE, Component::EntityType::EXPLOSIVE, "Explosion");
+
+							Manager->AttributeSystem->Masks[Explosion] |= Masks::GeneralOptions::COLLIDABLE;
+
+							Manager->TransformSystem->Transforms[Explosion].Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+							Manager->TransformSystem->Transforms[Explosion].VelocityGoal = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+							Manager->TransformSystem->Transforms[Explosion].BaseHeight = 0.0f;
+							Manager->TransformSystem->Transforms[Explosion].MaxHeight = 0.0f;
+
+							Manager->TransformSystem->Transforms[Explosion].AABBPadding = Enjon::Math::Vec2(200, 200);
 						}
 					}
 				}
@@ -173,8 +186,9 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// Set up AABB
 				Enjon::Physics::AABB* AABB = &Manager->TransformSystem->Transforms[e].AABB;
 				V2* CP = &Transform->CartesianPosition;
-				V2 Min(CP->x, CP->y);
-				V2 Max(CP->x + TILE_SIZE, CP->y + TILE_SIZE);
+				auto Dims = &Manager->TransformSystem->Transforms[e].AABBPadding;
+				V2 Min(CP->x - Dims->x, CP->y - Dims->y);
+				V2 Max(CP->x + TILE_SIZE + Dims->x, CP->y + TILE_SIZE + Dims->y);
 				*AABB = {Min, Max};
 
 				// Go through the items in this entity's inventory and set to this position
