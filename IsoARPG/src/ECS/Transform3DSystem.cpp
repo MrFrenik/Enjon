@@ -6,6 +6,8 @@
 #include "ECS/EntityFactory.h"
 #include "Loot.h"
 
+#include <Utils/Errors.h>
+
 namespace ECS{ namespace Systems { namespace Transform {
 
 	// Create a new Transform3D Sytem
@@ -18,7 +20,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 	}
 
 	// Updates a Transform3D system
-	void Update(Transform3DSystem* System)
+	void Update(Transform3DSystem* System, Enjon::Graphics::Particle2D::ParticleBatch2D* Batch)
 	{
 		EntityManager* Manager = System->Manager;
 		// Look at the entities in the Manager up to the last entered position and then update based on component masks
@@ -106,32 +108,31 @@ namespace ECS{ namespace Systems { namespace Transform {
 					{
 						if ((Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::EXPLODED) == 0)
 						{
-							for (auto i = 0; i < 10; i++)
+							// auto B = Manager->ParticleEngine->ParticleBatches.at(0);
+							if (Batch == nullptr) Enjon::Utils::FatalError("TRANSFORMSYSTEM::UPDATE::LINE_112::SpriteBatch Null");
+							else Enjon::Graphics::Particle2D::DrawFire(Batch, Manager->TransformSystem->Transforms[e].Position);
+
+							auto I = Enjon::Random::Roll(0, 2);
+							Enjon::Graphics::GLTexture S;
+							switch(I)
 							{
-								Enjon::Graphics::Particle2D::DrawFire(Manager->ParticleEngine->ParticleBatches[0], Manager->TransformSystem->Transforms[e].Position);
-
-								auto I = Enjon::Random::Roll(0, 2);
-								Enjon::Graphics::GLTexture S;
-								switch(I)
-								{
-									case 0: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody.png"); break;
-									case 1: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody_2.png"); break;
-									case 2: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody_3.png"); break;
-									default: break;
-								}
-								auto Position = &Manager->TransformSystem->Transforms[e].Position;
-								auto alpha = Enjon::Random::Roll(50, 255) / 255.0f;
-								auto X = (float)Enjon::Random::Roll(-50, 100);
-								auto Y = (float)Enjon::Random::Roll(-100, 50);
-								auto C = Enjon::Graphics::RGBA16_White();
-								auto DC = Enjon::Random::Roll(80, 100) / 255.0f;
-								C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, alpha);
-								Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(Position->x + X, Position->y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(50, 100)), C);
-
-								Manager->Camera->ShakeScreen(Enjon::Random::Roll(30, 40));
-								Manager->AttributeSystem->Masks[e] |= Masks::GeneralOptions::EXPLODED;
-								ECS::Systems::EntitySystem::RemoveEntity(Manager, e);
+								case 0: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody.png"); break;
+								case 1: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody_2.png"); break;
+								case 2: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody_3.png"); break;
+								default: break;
 							}
+							auto Position = &Manager->TransformSystem->Transforms[e].Position;
+							auto alpha = Enjon::Random::Roll(50, 255) / 255.0f;
+							auto X = (float)Enjon::Random::Roll(-50, 100);
+							auto Y = (float)Enjon::Random::Roll(-100, 50);
+							auto C = Enjon::Graphics::RGBA16_White();
+							auto DC = Enjon::Random::Roll(80, 100) / 255.0f;
+							C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, alpha);
+							Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(Position->x + X, Position->y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(50, 100)), C);
+
+							Manager->Camera->ShakeScreen(Enjon::Random::Roll(30, 40));
+							Manager->AttributeSystem->Masks[e] |= Masks::GeneralOptions::EXPLODED;
+							ECS::Systems::EntitySystem::RemoveEntity(Manager, e);
 
 							// TODO(John): Make a "spawn" function that gets called for any entity that has a factory component
 							ECS::eid32 Explosion = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Manager->TransformSystem->Transforms[e].Position.XY(), 0.0f), Enjon::Math::Vec2(16.0f, 16.0f), 

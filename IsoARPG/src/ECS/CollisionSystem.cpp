@@ -286,32 +286,30 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 				Manager->TransformSystem->Transforms[Explosion].AABBPadding = Enjon::Math::Vec2(200, 200);
 
-				for (auto i = 0; i < 10; i++)
-				{
-					Enjon::Graphics::Particle2D::DrawFire(Manager->ParticleEngine->ParticleBatches[0], Manager->TransformSystem->Transforms[A_ID].Position);
+				Enjon::Graphics::Particle2D::DrawFire(Manager->ParticleEngine->ParticleBatches[0], Manager->TransformSystem->Transforms[A_ID].Position);
 
-					auto I = Enjon::Random::Roll(0, 2);
-					Enjon::Graphics::GLTexture S;
-					switch(I)
-					{
-						case 0: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody.png"); break;
-						case 1: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody_2.png"); break;
-						case 2: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody_3.png"); break;
-						default: break;
-					}
-					auto Position = &Manager->TransformSystem->Transforms[A_ID].Position;
-					auto alpha = Enjon::Random::Roll(50, 255) / 255.0f;
-					auto X = (float)Enjon::Random::Roll(-50, 100);
-					auto Y = (float)Enjon::Random::Roll(-100, 50);
-					auto C = Enjon::Graphics::RGBA16_White();
-					auto DC = Enjon::Random::Roll(80, 100) / 255.0f;
-					C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, alpha);
-					Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(Position->x + X, Position->y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(50, 100)), C);
+				auto I = Enjon::Random::Roll(0, 2);
+				Enjon::Graphics::GLTexture S;
+				switch(I)
+				{
+					case 0: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody.png"); break;
+					case 1: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody_2.png"); break;
+					case 2: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/explody_3.png"); break;
+					default: break;
 				}
+				auto Position = &Manager->TransformSystem->Transforms[A_ID].Position;
+				auto alpha = Enjon::Random::Roll(50, 255) / 255.0f;
+				auto X = (float)Enjon::Random::Roll(-50, 100);
+				auto Y = (float)Enjon::Random::Roll(-100, 50);
+				auto C = Enjon::Graphics::RGBA16_White();
+				auto DC = Enjon::Random::Roll(80, 100) / 255.0f;
+				C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, alpha);
+				Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(Position->x + X, Position->y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(50, 100)), C);
 			}
 				
 			// Shake the camera for effect
-			Manager->Camera->ShakeScreen(Enjon::Random::Roll(10, 15));
+			if (Manager->AttributeSystem->Masks[A_ID] & Masks::WeaponOptions::EXPLOSIVE) Manager->Camera->ShakeScreen(Enjon::Random::Roll(30, 40));
+			else Manager->Camera->ShakeScreen(Enjon::Random::Roll(10, 15));
 
 			// Get minimum translation distance
 			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_A, AABB_B);

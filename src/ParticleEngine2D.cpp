@@ -196,26 +196,6 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 
 		static EG::ColorRGBA16 Gray = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
 
-		// std::string S("23.5");
-	 //    std::string::const_iterator c;
-	 //    float x = 100.0f;
-	 //    float y = 100.0f;
-	 //    float advance = 0.0f;
-	 //    float scale = 0.5f;
-	 //    for (c = S.begin(); c != S.end(); c++) 
-	 //    {
-		// 	EG::Fonts::CharacterStats CS = 
-		// 				EG::Fonts::GetCharacterAttributes(Math::Vec2(x, y), scale, EG::FontManager::GetFont("Bold"), c, &advance);
-
-		// 	// Create particle
-		// 	EG::Particle2D::AddParticle(EM::Vec3(CS.DestRect.x, CS.DestRect.y, 0.0f), EM::Vec3(0.0f, 0.0f, 1.0f), EM::Vec2(50.0f, 50.0f), 
-		// 									EG::RGBA16_Orange(), CS.TextureID, 0.025f, Batch);
-
-		// 	x += advance * scale;
-	 //    }
-
-
-
 		static float SmokeCounter = 0.0f;
 		SmokeCounter += 0.25f;
 		if (SmokeCounter >= 1.0f)
@@ -223,7 +203,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 			for (int i = 0; i < 10; i++)
 			{
 				float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 5), XVel = Random::Roll(-2, 2), YVel = Random::Roll(-1, 1),
-								YSize = Random::Roll(100, 150), XSize = Random::Roll(100, 150);
+								YSize = Random::Roll(100, 200), XSize = Random::Roll(150, 200);
 				int Roll = Random::Roll(1, 3);
 				GLuint tex;
 				if (Roll == 1) tex = PTex;
@@ -231,11 +211,11 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 				else tex = PTex3; 
 
 				int RedAmount = Random::Roll(0, 50);
-				int Alpha = Random::Roll(0.8f, 1.0f);
+				int Alpha = Random::Roll(995, 1000) / 1000.0f;
 
 
 				EG::Particle2D::AddParticle(Math::Vec3(Position.x - 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
-					Math::Vec2(XSize, YSize), EG::RGBA16(Gray.r, Gray.g, Gray.b + 0.1f, Gray.a - Alpha), tex, 0.025f, Batch);
+					Math::Vec2(XSize, YSize), EG::RGBA16(Gray.r, Gray.g, Gray.b + 0.1f, 0.185f), tex, 0.0025f, Batch);
 			}
 			SmokeCounter = 0.0f;
 		}
@@ -244,11 +224,11 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		FlameCounter += 0.25f;
 		if (FlameCounter >= 1.0f)
 		{
-			EG::ColorRGBA16 Fire = EG::RGBA16(3.0f, 0.3f, 0.1f, 1.0f);
+			EG::ColorRGBA16 Fire = EG::RGBA16(3.0f, 0.3f, 0.1f, 0.5f);
 			for (int i = 0; i < 1; i++)
 			{
 				float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
-								YSize = Random::Roll(75, 125), XSize = Random::Roll(50, 100);
+								YSize = Random::Roll(75, 125), XSize = Random::Roll(75, 125);
 				int Roll = Random::Roll(1, 3);
 
 				GLuint tex;

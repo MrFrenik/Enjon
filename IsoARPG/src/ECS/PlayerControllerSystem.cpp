@@ -103,7 +103,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					Animation2D::SetPlayerState(Animation2D::EntityAnimationState::ATTACKING);  // NOTE(John): THIS IS FUCKING AWFUL
 				}
 
-				if (Input->IsKeyPressed(SDL_BUTTON_RIGHT)) {
+				if (Input->IsKeyDown(SDL_BUTTON_RIGHT)) {
 					for (auto i = 0; i < 10; i++)
 					{
 						auto P = Manager->TransformSystem->Transforms[Manager->Player].Position + Enjon::Math::Vec3(100.0f, 20.0f, 0.0f);
@@ -232,7 +232,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 		Manager->TransformSystem->Transforms[Grenade].Velocity = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
 		Manager->TransformSystem->Transforms[Grenade].VelocityGoal = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
 		Manager->TransformSystem->Transforms[Grenade].BaseHeight = 0.0f;
-		Manager->TransformSystem->Transforms[Grenade].MaxHeight = 10.0f;
+		Manager->TransformSystem->Transforms[Grenade].MaxHeight = 30.0f;
 	}
 
 }}}
