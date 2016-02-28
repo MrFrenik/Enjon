@@ -32,7 +32,14 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// If equipped, then don't update transform here
 				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::EQUIPPED) continue;
 
-				if (Manager->AttributeSystem->Masks[e] & Masks::WeaponOptions::EXPLOSIVE) EntitySystem::RemoveEntity(Manager, e);
+				if (Manager->AttributeSystem->Masks[e] & Masks::WeaponOptions::EXPLOSIVE) 
+				{
+					if ((Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::EXPLODED) == 0)
+					{
+						Manager->AttributeSystem->Masks[e] |= Masks::GeneralOptions::EXPLODED;
+					}
+					else EntitySystem::RemoveEntity(Manager, e);
+				}
 
 				// Get distance to player
 				V2* GP = &Manager->TransformSystem->Transforms[e].GroundPosition;
