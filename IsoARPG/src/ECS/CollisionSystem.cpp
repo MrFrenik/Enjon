@@ -193,8 +193,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 			EG::ColorRGBA16 R = EG::RGBA16(1.0f, 0.01f, 0.01f, 1.0f);
 
 			// Add 100 at a time
-			for (Enjon::uint32 i = 0; i < 10; i++)
-			{
+			// for (Enjon::uint32 i = 0; i < 2; i++)
+			// {
 				float XPos = Enjon::Random::Roll(-50, 100), YPos = Enjon::Random::Roll(-50, 100), ZVel = Enjon::Random::Roll(-10, 10), XVel = Enjon::Random::Roll(-10, 10), 
 								YSize = Enjon::Random::Roll(2, 7), XSize = Enjon::Random::Roll(1, 5);
 
@@ -203,7 +203,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 				// Add blood overlay to level
 				DrawBlood(Manager, ColliderPosition->XY());
-			}
+			// }
 
 			// Get min and max damage of weapon
 			const Loot::Weapon::WeaponProfile* WP = Manager->AttributeSystem->WeaponProfiles[A_ID];
@@ -396,22 +396,22 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 				// Add blood particle effect (totally a test)...
 				const EM::Vec3* PP = &Manager->TransformSystem->Transforms[B_ID].Position;
-				static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/orb.png").id;
+				static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/blood_1.png").id;
 
 				EG::ColorRGBA16 R = EG::RGBA16(1.0f, 0.01f, 0.01f, 1.0f);
 
 				// Add 100 at a time
-				for (Enjon::uint32 i = 0; i < 2; i++)
-				{
+				// for (Enjon::uint32 i = 0; i < 2; i++)
+				// {
 					float XPos = Enjon::Random::Roll(-50, 100), YPos = Enjon::Random::Roll(-50, 100), ZVel = Enjon::Random::Roll(-10, 10), XVel = Enjon::Random::Roll(-10, 10), 
-									YSize = Enjon::Random::Roll(2, 7), XSize = Enjon::Random::Roll(1, 5);
+									YSize = Enjon::Random::Roll(10, 20), XSize = Enjon::Random::Roll(10, 20);
 
 					EG::Particle2D::AddParticle(EM::Vec3(PP->x + 50.0f + XVel, PP->y + 50.0f + ZVel, 0.0f), EM::Vec3(XVel, XVel, ZVel), 
 						EM::Vec2(XSize * 1.5f, YSize * 1.5f), R, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
 
 					// Blood!
 					DrawBlood(Manager, ColliderPosition->XY());
-				}
+				// }
 
 
 				// This doesn't work too well right now...

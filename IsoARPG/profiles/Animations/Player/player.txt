@@ -12,7 +12,7 @@
 	attack_dagger:
 		framecount: 6
 		file: pixelanimtestframessplit.png
-		delays: [0.3, 0.4, 0.7, 0.05, 0.06, 1.7]
+		delays: [0.01, 0.02, 0.8, 0.3, 0.1, 2.0]
 		starts: [48, 54, 54, 48, 54, 48, 54, 48]
 }
 
@@ -28,7 +28,7 @@
 	attack_axe:
 		framecount: 8
 		file: axe.png
-		delays: [0.3, 0.4, 0.4, 0.5, 1.5, 0.05, 0.06, 2.5]
+		delays: [0.02, 0.04, 0.04, 0.05, 1.5, 0.05, 0.06, 2.5]
 		starts: [0, 8, 8, 0, 0, 8, 8, 0]
 }
 

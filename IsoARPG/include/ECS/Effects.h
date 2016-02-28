@@ -40,7 +40,7 @@ namespace ECS { namespace Effects {
 	void Poison(ECS::eid32 E, ECS::Systems::EntityManager* Manager)
 	{
 		// Change to green color
-		ChangeColor(E, Manager, Enjon::Graphics::RGBA16_Green());
+		// ChangeColor(E, Manager, Enjon::Graphics::RGBA16_Green());
 
 		// Apply damage
 		auto* T = &Manager->EffectSystem->TransferredEffects[E]["Poison"].Timer;

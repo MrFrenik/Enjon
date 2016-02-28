@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -78,7 +78,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 30;
+const int LEVELSIZE = 100;
 
 float DashingCounter = 0.0f;
 
@@ -142,7 +142,7 @@ int main(int argc, char** argv)
 	// Create Camera
 	Graphics::Camera2D Camera;
 	Camera.Init(screenWidth, screenHeight);
-	Camera.SetScale(0.75f); 
+	Camera.SetScale(1.0f); 
 	
 	// Create HUDCamera
 	Graphics::Camera2D HUDCamera;
@@ -286,7 +286,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 2000;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -395,6 +395,7 @@ int main(int argc, char** argv)
 			Renderer2D::Update(World); 
 
 			auto LvlSize = level.GetDims();
+			EM::IsoToCartesian(LvlSize);
 			static float SmokeCount = 0.0f;
 			SmokeCount += 0.005f;
 			Enjon::uint32 SR = Enjon::Random::Roll(0, 3);
@@ -407,15 +408,11 @@ int main(int argc, char** argv)
 				SmokeCount = 0.0f;
 			}
 
-			// DrawFire(TestParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
-
-			// float x_pos = -500.0f, y_pos = -500.0f;
-			// for (int i = 0; i < 5; i++)
-			// {
-			// 	DrawFire(TestParticleBatch, EM::Vec3(0.0f + x_pos, 0.0f + y_pos, 0.0f));
-			// 	x_pos -= 200.0f;
-			// 	y_pos -= 100.0f;
-			// }
+			auto S = Enjon::Math::CartesianToIso(level.GetDims());
+			for (int i = 0; i < 5; i++)
+			{
+				DrawFire(TestParticleBatch, EM::Vec3(Enjon::Random::Roll(-S.x, S.x), Enjon::Random::Roll(-S.y, S.y), 0.0f));
+			}
 
 			// Updates the world's particle engine
 			World->ParticleEngine->Update();
@@ -609,34 +606,42 @@ int main(int argc, char** argv)
 		Graphics::SpriteSheet* Sheet = World->Animation2DSystem->Animations[Player].Sheet; 
 		Enjon::uint32 Frame = World->Animation2DSystem->Animations[Player].CurrentFrame;
 
-		if (IsDashing)
+		auto Vel = &World->TransformSystem->Transforms[Player].Velocity;
+		if (IsDashing && !(Vel->x == 0 && Vel->y == 0))
 		{
 			// Make unable to collide with enemy
 			World->AttributeSystem->Masks[Player] &= ~Masks::GeneralOptions::COLLIDABLE;
 
 			float DashAmount = 10.0f;
-			auto Vel = World->TransformSystem->Transforms[Player].Velocity * 2.0f;
-			World->TransformSystem->Transforms[Player].Position.x += Vel.x;
-			World->TransformSystem->Transforms[Player].Position.y += Vel.y * 4.0f;
-			// World->TransformSystem->Transforms[Player].Position.x += (World->TransformSystem->Transforms[Player].Velocity.x * 2.0f);
-			// World->TransformSystem->Transforms[Player].Position.y += (World->TransformSystem->Transforms[Player].Velocity.y * 8.0f);
-			World->TransformSystem->Transforms[Player].VelocityGoalScale = 0.01f;
-			// World->TransformSystem->Transforms[Player].Velocity.x *= 1.05f; 
-			// World->TransformSystem->Transforms[Player].Velocity.y *= 1.05f; 
+			auto Pos = &World->TransformSystem->Transforms[Player].Position;
+			auto V = EM::Vec2::Normalize(Vel->XY());
+			V *= 5.0f;
+			Pos->x += V.x;
+			Pos->y += V.y;
+
 			// Setting the "alarm"
 			DashingCounter += 0.05f;
-			if (DashingCounter >= 0.75f) { IsDashing = false; DashingCounter = 0.0f; }
+			if (DashingCounter >= 1.0f) { IsDashing = false; DashingCounter = 0.0f; }
 			float Opacity = 0.5f;
 			for (int i = 0; i < 5; i++)
 			{
 				Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
 				Enjon::Graphics::ColorRGBA16 DashColor = World->Renderer2DSystem->Renderers[Player].Color;
+				// DashColor.r += (i + i*2.9f);
+				DashColor.g += (i + i*20.75f);
+				DashColor.b += (i*5.25f);
 				Enjon::Math::Vec2 PP = World->TransformSystem->Transforms[Player].Position.XY();
 				Enjon::Math::Vec2 PV = World->TransformSystem->Transforms[Player].Velocity.XY();
-				PP.x -= (i + i*0.75f) * PV.x;
-				PP.y -= (i + i*0.75f) * PV.y;
-				EntityBatch.Add(Math::Vec4(PP, dims), Sheet->GetUV(Frame), Sheet->texture.id, Graphics::SetOpacity(DashColor, Opacity), PP.y - World->TransformSystem->Transforms[Player].Position.z);
+				PP.x -= (i + i*2.75f) * PV.x;
+				PP.y -= (i + i*2.75f) * PV.y;
+				EntityBatch.Add(Math::Vec4(PP, dims), Sheet->GetUV(Frame - i), Sheet->texture.id, Graphics::SetOpacity(DashColor, Opacity), PP.y - World->TransformSystem->Transforms[Player].Position.z);
 				Opacity -= 0.05f;
+
+				// Add a particle pos, vel, size, color, texture, decay, batch
+				EG::Particle2D::AddParticle(EM::Vec3(PP + EM::Vec2(40.0f, 50.0f), 0.0f), EM::Vec3(PV * -1.0f, 0.0f), EM::Vec2(2.0f, 2.0f), DashColor, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png").id, 0.05f, World->ParticleEngine->ParticleBatches[0]);
+				// Add a particle pos, vel, size, color, texture, decay, batch
+				EG::Particle2D::AddParticle(EM::Vec3(PP + EM::Vec2(40.0f, 30.0f), 0.0f), EM::Vec3(PV * -1.0f, 0.0f), EM::Vec2(Random::Roll(25, 100), Random::Roll(25, 100)), 
+					EG::SetOpacity(DashColor, 0.025f), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/smoke_1.png").id, 0.025f, World->ParticleEngine->ParticleBatches[0]);
 			}
 		}
 
@@ -750,7 +755,7 @@ int main(int argc, char** argv)
 		EntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f));
 		// Draw player shadow
-		EntityBatch.Add(Math::Vec4(GroundPosition->x - 40.0f, GroundPosition->y - 80.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
+		EntityBatch.Add(Math::Vec4(GroundPosition->x - 20.0f, GroundPosition->y - 20.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
 									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
 		// MapEntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 		// 							Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.7f));
@@ -848,7 +853,7 @@ int main(int argc, char** argv)
 						EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Coordinates.png").id, EG::RGBA16_White());
 
 		// Add particles to entity batch
-		EG::Particle2D::Draw(World->ParticleEngine);
+		EG::Particle2D::Draw(World->ParticleEngine, &Camera);
 
 		// Draw only the world that surrounds the player
 		{

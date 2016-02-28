@@ -77,6 +77,7 @@ namespace ECS { namespace Systems {
 		} 
 
 		// NOTE(John): Creating and Removing entities is buggy right now in the way that it manager ids
+		// TODO(John): This is busted, so fix it to be similar to how particle batches create particles
 		// Creates blank entity and returns eid
 		eid32 CreateEntity(struct EntityManager* Manager, bitmask32 Components)
 		{

@@ -4,13 +4,14 @@
 #include <vector>
 
 #include "Graphics/Color.h"
+#include "Graphics/Camera2D.h"
 #include "Graphics/SpriteBatch.h"
 #include "Graphics/GLTexture.h"
 #include "Graphics/Font.h"
 #include "System/Types.h"
 #include "Math/Maths.h"
 
-const int MAXPARTICLES = 100000;
+const int MAXPARTICLES = 10000;
 
 namespace Enjon { namespace Graphics { namespace Particle2D { 
 
@@ -69,7 +70,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 	uint32 FreeBatches(ParticleEngine2D* PE);
 
 	/* Adds all particles in each particle batch to be drawn */
-	void Draw(ParticleEngine2D* PE);
+	void Draw(ParticleEngine2D* PE, Enjon::Graphics::Camera2D* Camera);
 }}}
 
 #endif

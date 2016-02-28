@@ -42,7 +42,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 	{
 		// Attack speed
 		// TODO(John): Make this dependent on equipped weapon and player stats
-		static float AttackSpeed = 100.0f;
+		static float AttackSpeed = 1.0f;
 
 		// Get System
 		struct Animation2DSystem* System = Manager->Animation2DSystem;
@@ -61,12 +61,12 @@ namespace ECS { namespace Systems { namespace Animation2D {
 				else RS->Color = Enjon::Graphics::RGBA16_White();
 			}
 
-			// If has an animation componentasssssssssscdcaasd
+			// If has an animation component
 			if (Manager->Masks[e] & COMPONENT_ANIMATION2D)
 			{
 				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::DAMAGED)
 				{
-					Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16(100.0f, 100.0f, 100.0f, 100.0f);  // damaged color for now 
+					Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16(100.0f, 0.0f, 0.0f, 100.0f);  // damaged color for now 
 					damaged_counter += 0.1f;
 					if (damaged_counter >= 0.5f)
 					{
@@ -153,7 +153,12 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					if (PlayerState != EntityAnimationState::ATTACKING && Velocity->x == 0.0f && Velocity->y == 0.0f) return;
 
 					// Animation
-					if (PlayerState == EntityAnimationState::ATTACKING) AnimationComponent->AnimationTimer += CurrentAnimation->AnimationTimerIncrement * AttackSpeed;
+					if (PlayerState == EntityAnimationState::ATTACKING) 
+					{
+						if (CurrentWeapon == Weapons::BOW) AttackSpeed = 2.0f;
+						else AttackSpeed = 1.0f;
+						AnimationComponent->AnimationTimer += CurrentAnimation->AnimationTimerIncrement * AttackSpeed;
+					}
 					else AnimationComponent->AnimationTimer += CurrentAnimation->AnimationTimerIncrement;
 					if (AnimationComponent->AnimationTimer >= CurrentAnimation->Profile->Delays[AnimationComponent->CurrentFrame % CurrentAnimation->Profile->FrameCount])
 					{
@@ -245,23 +250,24 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 								if (CurrentWeapon == Weapons::BOW && ActiveFrame == *BeginningFrame + 3)
 								{
-									// for (auto i = 0; i < 10; i++)
-									// {
-										
-								
+									for (auto i = 0; i < 10; i++)
+									{
 										// Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[e].CartesianPosition + Math::Vec2(16.0f)) + Math::Vec2(20.0f, -50.0f));
 										// float boxRadius = 50.0f;
 										// BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(Angle + i)), sin(Math::ToRadians(Angle + i))));
 										
 										// Create an arrow projectile entity for now...
-											static Enjon::Graphics::SpriteSheet ItemSheet;
+										static Enjon::Graphics::SpriteSheet ItemSheet;
+										auto C = Enjon::Graphics::RGBA16_Orange();
+										C.r += 2.0f;
 										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
 										eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->x, Position->y, 30.0f),
-																  Enjon::Math::Vec2(64.0f, 64.0f), &ItemSheet, (Masks::Type::WEAPON | 
+																  Enjon::Math::Vec2(80.0f, 80.0f), &ItemSheet, (Masks::Type::WEAPON | 
 																  												Masks::WeaponOptions::PROJECTILE | 
 																  												Masks::GeneralOptions::PICKED_UP | 
 																  												Masks::GeneralOptions::COLLIDABLE), 
-																  												Component::EntityType::PROJECTILE);
+																  												Component::EntityType::PROJECTILE, "arrow", 
+																												C);
 										Manager->Masks[id] |= COMPONENT_TRANSFORM3D;
 
 
@@ -273,8 +279,8 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 										// // Find vector between the two and normalize
 										Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x, Pos.y));
-										auto RX = Enjon::Random::Roll(-5, 5) / 100.0f;
-										auto RY = Enjon::Random::Roll(-5, 5) / 100.0f;
+										auto RX = Enjon::Random::Roll(-10, 2) / 100.0f;
+										auto RY = Enjon::Random::Roll(-10, 2) / 100.0f;
 
 										float speed = 50.0f;
 
@@ -301,7 +307,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 										Manager->TransformSystem->Transforms[e].AttackVector = AttackVector;
 
-									// }
+									}
 								}
 							}
 

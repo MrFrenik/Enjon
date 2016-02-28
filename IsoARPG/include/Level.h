@@ -11,7 +11,7 @@
 #include <Math/Maths.h>
 #include <Math/Random.h>
 
-#define MAX_TILE_OVERLAY	12000
+#define MAX_TILE_OVERLAY	1000
 
 struct Tile
 {

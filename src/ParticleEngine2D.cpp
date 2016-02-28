@@ -129,8 +129,9 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 			}
 		}
 
-		// Otherwise, loop back around
-		return 0;
+		// Otherwise, loop back arounda
+		*NAP = 0; 
+		return *NAP;
 	}	
 
 	/* Frees memory of given particle engine */
@@ -154,8 +155,10 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 	}
 
 	/* Adds all particles in each particle batch to be drawn */
-	void Draw(ParticleEngine2D* PE) 
+	void Draw(ParticleEngine2D* PE, Enjon::Graphics::Camera2D* Camera) 
 	{
+		if (Camera == nullptr) Utils::FatalError("PARTICLE_ENGINE::DRAW::Camera is null.");
+
 		// Loop through all particle batches in engine
 		for (auto PB : PE->ParticleBatches)
 		{
@@ -165,11 +168,14 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 				// Get particle at i
 				auto* P = &PB->Particles[i];
 
-				// Only draw if alive
-				if (P->LifeTime > 0.0f && P->Color.a > 0.0f)
+				if (Camera->IsBoundBoxInCamView(P->Position.XY(), P->Dimensions))
 				{
-					// Add particle to sprite batch to be rendered
-					PB->SB->Add(Math::Vec4(P->Position.XY(), P->Dimensions), Math::Vec4(0, 0, 1, 1), P->TexID, P->Color, P->Position.y - P->Position.z);
+					// Only draw if alive
+					if (P->LifeTime > 0.0f && P->Color.a > 0.0f)
+					{
+						// Add particle to sprite batch to be rendered
+						PB->SB->Add(Math::Vec4(P->Position.XY(), P->Dimensions), Math::Vec4(0, 0, 1, 1), P->TexID, P->Color, P->Position.y - P->Position.z);
+					}
 				}
 			}
 		}
