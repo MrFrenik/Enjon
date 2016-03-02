@@ -34,36 +34,35 @@ namespace ECS { namespace Systems { namespace AIController {
 				Enjon::Math::Vec2 b = AI->GroundPosition;
 				float distance = a.DistanceTo(b);
 
-				if (distance <= 60.0f) AI->VelocityGoal = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+				if (distance <= 60.0f) AI->Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
 				// Move towards player
 				// TODO(John): Come up with some kind of passed in speed parameter to multiply by the difference vector
 				//AI->Velocity = Difference; 
-				else AI->VelocityGoal = Difference * 2.0f;
+				else AI->Velocity = Difference * 2.0f;
 
 
 				// Just testing projectiles from enemies
-				if (Enjon::Random::Roll(0, 1000000) > 999900)
-				{
-					// Create an arrow projectile entity for now...
-					static Enjon::Graphics::SpriteSheet ItemSheet;
-					if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png"), Enjon::Math::iVec2(1, 1));
-					eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(b.x, b.y, 40.0f),
-											  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::WEAPON | 
-											  												Masks::GeneralOptions::PICKED_UP),
-											  												Component::EntityType::PROJECTILE);
-					Manager->Masks[id] |= COMPONENT_TRANSFORM3D;
+				// if (Enjon::Random::Roll(0, 1000000) > 999900)
+				// {
+				// 	// Create an arrow projectile entity for now...
+				// 	static Enjon::Graphics::SpriteSheet ItemSheet;
+				// 	if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png"), Enjon::Math::iVec2(1, 1));
+				// 	eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(b.x, b.y, 40.0f),
+				// 							  Enjon::Math::Vec2(16.0f, 16.0f), &ItemSheet, (Masks::Type::WEAPON),
+				// 							  												Component::EntityType::PROJECTILE);
+				// 	Manager->Masks[id] |= COMPONENT_TRANSFORM3D;
 
 
-					// Set arrow velocity to normalize: targetpos - aipos
-					// Find vector between the two and normalize
-					Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(a - b);
+				// 	// Set arrow velocity to normalize: targetpos - aipos
+				// 	// Find vector between the two and normalize
+				// 	Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(a - b);
 
-					float speed = 15.0f;
+				// 	float speed = 15.0f;
 
-					// Fire in direction of mouse
-					Manager->TransformSystem->Transforms[id].Velocity = speed * Enjon::Math::Vec3(ArrowVelocity.x, ArrowVelocity.y, 0.0f);
-					Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;
-				}
+				// 	// Fire in direction of mouse
+				// 	Manager->TransformSystem->Transforms[id].Velocity = speed * Enjon::Math::Vec3(ArrowVelocity.x, ArrowVelocity.y, 0.0f);
+				// 	Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;
+				// }
 
 			}
 		}

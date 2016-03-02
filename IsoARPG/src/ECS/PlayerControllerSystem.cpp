@@ -104,7 +104,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				}
 
 				if (Input->IsKeyDown(SDL_BUTTON_RIGHT)) {
-					for (auto i = 0; i < 1; i++)
+					for (auto i = 0; i < 2; i++)
 					{
 						auto P = Manager->TransformSystem->Transforms[Manager->Player].Position + Enjon::Math::Vec3(50.0f, 20.0f, 0.0f);
 						P += Enjon::Math::Vec3(Enjon::Random::Roll(-100, 100), Enjon::Random::Roll(-100, 100), 0.0f);
@@ -210,9 +210,9 @@ namespace ECS { namespace Systems { namespace PlayerController {
 	void ShootGrenade(struct EntityManager* Manager, Enjon::Math::Vec3 Pos, Enjon::Graphics::SpriteSheet* Sheet)
 	{
 		ECS::eid32 Player = Manager->Player;
-		auto G = Enjon::Graphics::RGBA16_Green();
-		G.g += 10.0f;
-		ECS::eid32 Grenade = Factory::CreateWeapon(Manager, Pos, Enjon::Math::Vec2(16.0f, 16.0f), Sheet,
+		auto G = Enjon::Graphics::RGBA16_ZombieGreen();
+		G.g += 100.0f;
+		ECS::eid32 Grenade = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Pos.XY(), 0.0f), Enjon::Math::Vec2(16.0f, 16.0f), Sheet,
 													Masks::Type::WEAPON | Masks::WeaponOptions::PROJECTILE | Masks::WeaponSubOptions::GRENADE, Component::EntityType::EXPLOSIVE, "Grenade", G);
 
 		// Shoot in direction of mouse
@@ -223,16 +223,17 @@ namespace ECS { namespace Systems { namespace PlayerController {
 		Manager->AttributeSystem->Masks[Grenade] |= Masks::GeneralOptions::RISING | Masks::GeneralOptions::COLLIDABLE;
 
 		// Find vector between the two and normalize
-		Enjon::Math::Vec2 GV = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x, Pos.y));
+		Enjon::Math::Vec2 GV = Enjon::Math::Vec2::Normalize(Enjon::Math::IsoToCartesian(MousePos) - Enjon::Math::IsoToCartesian(Pos.XY()));
 		auto RX = Enjon::Random::Roll(-2, 2) / 100.0f;
 		auto RY = Enjon::Random::Roll(-2, 2) / 100.0f;
+		GV = Enjon::Math::CartesianToIso(GV);
 
-		float speed = 50.0f;
+		float speed = 10.0f;
 
 		Manager->TransformSystem->Transforms[Grenade].Velocity = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
 		Manager->TransformSystem->Transforms[Grenade].VelocityGoal = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
 		Manager->TransformSystem->Transforms[Grenade].BaseHeight = 0.0f;
-		Manager->TransformSystem->Transforms[Grenade].MaxHeight = 5.0f;
+		Manager->TransformSystem->Transforms[Grenade].MaxHeight = 30.0f;
 	}
 
 }}}

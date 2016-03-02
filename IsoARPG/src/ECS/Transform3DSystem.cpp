@@ -45,7 +45,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 				V2* GP = &Manager->TransformSystem->Transforms[e].GroundPosition;
 				V2* PGP = &Manager->TransformSystem->Transforms[Manager->Player].GroundPosition;
 
-				if (PGP->DistanceTo(*GP) >= 5000) continue; // TODO(John): Make this squared distance so as to not use a square root function EVERY frame for EVERY entity
+				if (PGP->DistanceTo(*GP) >= 5000 && Manager->AttributeSystem->Masks[e] & Masks::Type::AI) continue; // TODO(John): Make this squared distance so as to not use a square root function EVERY frame for EVERY entity
 
 				// If an item
 				if ((Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0)

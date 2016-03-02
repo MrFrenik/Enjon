@@ -83,7 +83,55 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 54784,
+				"buffer_size": 50680,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "include/ECS/Transform3DSystem.h",
+			"settings":
+			{
+				"buffer_size": 632,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/ECS/EntityFactory.cpp",
+			"settings":
+			{
+				"buffer_size": 10446,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/ECS/Transform3DSystem.cpp",
+			"settings":
+			{
+				"buffer_size": 13480,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "include/ECS/Components.h",
+			"settings":
+			{
+				"buffer_size": 4425,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "include/ECS/AttributeSystem.h",
+			"settings":
+			{
+				"buffer_size": 1099,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "include/ECS/Masks.h",
+			"settings":
+			{
+				"buffer_size": 1042,
 				"line_ending": "Windows"
 			}
 		},
@@ -99,7 +147,7 @@
 			"file": "include/ECS/Effects.h",
 			"settings":
 			{
-				"buffer_size": 2448,
+				"buffer_size": 2451,
 				"line_ending": "Windows"
 			}
 		},
@@ -112,10 +160,10 @@
 			}
 		},
 		{
-			"file": "src/ECS/ComponentSystems.cpp",
+			"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/ParticleEngine2D.h",
 			"settings":
 			{
-				"buffer_size": 4833,
+				"buffer_size": 2127,
 				"line_ending": "Windows"
 			}
 		},
@@ -123,7 +171,15 @@
 			"file": "/D/C++Projects/VS/3DEnjon/src/ParticleEngine2D.cpp",
 			"settings":
 			{
-				"buffer_size": 3874,
+				"buffer_size": 8782,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/ECS/ComponentSystems.cpp",
+			"settings":
+			{
+				"buffer_size": 4833,
 				"line_ending": "Windows"
 			}
 		},
@@ -136,18 +192,10 @@
 			}
 		},
 		{
-			"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/ParticleEngine2D.h",
-			"settings":
-			{
-				"buffer_size": 1952,
-				"line_ending": "Windows"
-			}
-		},
-		{
 			"file": "include/Level.h",
 			"settings":
 			{
-				"buffer_size": 2490,
+				"buffer_size": 2489,
 				"line_ending": "Windows"
 			}
 		},
@@ -163,7 +211,7 @@
 			"file": "src/ECS/PlayerControllerSystem.cpp",
 			"settings":
 			{
-				"buffer_size": 5701,
+				"buffer_size": 7786,
 				"line_ending": "Windows"
 			}
 		},
@@ -187,7 +235,7 @@
 			"file": "src/ECS/AIControllerSystem.cpp",
 			"settings":
 			{
-				"buffer_size": 2877,
+				"buffer_size": 2859,
 				"line_ending": "Windows"
 			}
 		},
@@ -211,15 +259,7 @@
 			"file": "src/ECS/Animation2DSystem.cpp",
 			"settings":
 			{
-				"buffer_size": 15064,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "include/ECS/Components.h",
-			"settings":
-			{
-				"buffer_size": 4363,
+				"buffer_size": 15133,
 				"line_ending": "Windows"
 			}
 		},
@@ -243,7 +283,7 @@
 			"file": "/D/C++Projects/VS/3DEnjon/src/SpriteSheetManager.cpp",
 			"settings":
 			{
-				"buffer_size": 1113,
+				"buffer_size": 1264,
 				"line_ending": "Windows",
 				"name": "#include \"Graphics/SpriteSheet.h\""
 			}
@@ -268,17 +308,8 @@
 			"file": "profiles/Animations/Player/player.txt",
 			"settings":
 			{
-				"buffer_size": 627,
+				"buffer_size": 633,
 				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "VSQ.txt",
-			"settings":
-			{
-				"buffer_size": 2155,
-				"line_ending": "Windows",
-				"name": "Vlambeer Scale of Quality"
 			}
 		},
 		{
@@ -293,7 +324,15 @@
 			"file": "src/ECS/CollisionSystem.cpp",
 			"settings":
 			{
-				"buffer_size": 19386,
+				"buffer_size": 25843,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "include/ECS/CollisionSystem.h",
+			"settings":
+			{
+				"buffer_size": 1273,
 				"line_ending": "Windows"
 			}
 		},
@@ -385,14 +424,19 @@
 	"expanded_folders":
 	[
 		"/D/C++Projects/VS/3DEnjon/include",
+		"/D/C++Projects/VS/3DEnjon/include/System",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations/Player"
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations/Player",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS"
 	],
 	"file_history":
 	[
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/VSQ.txt",
 		"/D/C++Projects/VS/IsoARPG/src/Player.cpp",
 		"/D/C++Projects/VS/IsoARPG/src/Game.cpp",
 		"/D/C++Projects/VS/3DEnjon/shaders/basic.f.glsl",
@@ -519,8 +563,7 @@
 		"/D/HTMLProjects/StartAngular/amd/src/app/stylesheets/_custom.scss",
 		"/D/HTMLProjects/StartAngular/amd/src/components/directives/notificationDirective.js",
 		"/D/HTMLProjects/StartAngular/amd/src/components/directives/notificationsDirective",
-		"/D/HTMLProjects/StartAngular/amd/src/components/directives/messagesSection.js",
-		"/D/HTMLProjects/StartAngular/amd/src/app/views/partials/messages.html"
+		"/D/HTMLProjects/StartAngular/amd/src/components/directives/messagesSection.js"
 	],
 	"find":
 	{
@@ -539,6 +582,87 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"amountdraw",
+			"shootgrenade",
+			"shootgren",
+			"1000",
+			"shootgre",
+			"200",
+			"shootgrenade",
+			"utils",
+			"if",
+			"1",
+			"void",
+			"grenade",
+			"shootgre",
+			"e",
+			"100",
+			"amountdrawn",
+			"Grenade",
+			"GRENADE",
+			"Grenade",
+			"10",
+			"PROJECTILE",
+			".x",
+			"EAAB",
+			"EAABIsoMin",
+			"EAAB",
+			"AABB",
+			"AABBIsomax",
+			"AABBIsomin",
+			"draw aabb",
+			"drawaabb",
+			"groundtile",
+			"shootgren",
+			"shootgrenade",
+			"PP",
+			"50",
+			"10",
+			"shootgrenade",
+			"EM",
+			"processinput",
+			"drawfire",
+			"Grenade",
+			"World",
+			"grenade",
+			"shootgrenade",
+			"&ItemSheet",
+			"World",
+			"ArrowVelocity",
+			"grenade",
+			"drawsmoke",
+			"grenade",
+			"std::cout",
+			"printf",
+			"grenade",
+			"printf",
+			"Grp",
+			"grenade",
+			"32",
+			"grenade",
+			"drawfire",
+			"50",
+			"el",
+			"dashing",
+			"*",
+			"TRUE",
+			"8",
+			"7",
+			"6",
+			"2",
+			"1",
+			"bt",
+			"dash",
+			"addparticle",
+			"drawfire",
+			"drawsmoke",
+			"draw",
+			"drawblood",
+			"Draw",
+			"setscale",
+			"50",
+			"25",
+			"50",
 			"attackspeed",
 			"100",
 			"64",
@@ -585,88 +709,7 @@
 			"50",
 			"drawsmoke",
 			"fullscreen",
-			"Delta",
-			"drawblood",
-			"body",
-			"drawblood",
-			"printf",
-			"100",
-			"20",
-			"random",
-			"ResourceManager",
-			"200.0f",
-			"printtext",
-			"printf",
-			"auto t",
-			"Level::",
-			"amountdrawn",
-			"Limiter",
-			"drawsmoke",
-			"Vec2",
-			"drawfire",
-			"100",
-			"200",
-			"drawsmoke",
-			"SmokeCounter",
-			"dashing",
-			"DaggerVelocity",
-			"110",
-			"200",
-			"dims",
-			"aicont",
-			"16",
-			"aicontroller",
-			"100",
-			"PlayerAnimations",
-			"std::string(), ",
-			"PlayerSheet",
-			"drawfire",
-			"levelsize",
-			"drawfire",
-			"DrawFire",
-			"aicontroller",
-			"PrintText",
-			"0.2f",
-			"HUDBatch.Add",
-			"Enjon::Graphics",
-			"5f",
-			"aicont",
-			"drawfire",
-			"&PauseFont",
-			"PauseFont",
-			"Graphics::",
-			"FontMap",
-			"Fonts",
-			"Font",
-			"Particle",
-			"reticle",
-			"prinf",
-			"hit for",
-			"LEVELSIZE",
-			"amountdrawn",
-			"DC",
-			"WeaponP",
-			"DamageCom",
-			"DamageComponents",
-			"LootProfiles",
-			"shake",
-			"DA",
-			"Enjon",
-			"\n	",
-			"PlayerAnimations",
-			"DROP_PROFILE_H",
-			"drawfire",
-			"20",
-			"LEVELSIZE",
-			"drawfire",
-			"dagger",
-			"walk",
-			"item",
-			"Item",
-			"\n#",
-			"CreateItem",
-			"TILE_SIZE",
-			"EntitySystem"
+			"Delta"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -684,7 +727,7 @@
 	"groups":
 	[
 		{
-			"selected": 23,
+			"selected": 16,
 			"sheets":
 			[
 				{
@@ -693,15 +736,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 54784,
+						"buffer_size": 50680,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								7977,
-								7977
+								7891,
+								7891
 							]
 						],
 						"settings":
@@ -760,14 +803,487 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 4471.0,
+						"translation.y": 4454.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
+					"file": "include/ECS/Transform3DSystem.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 632,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								479,
+								479
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "cc48ab0f",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								15,
+								15,
+								27,
+								38,
+								11,
+								155,
+								59,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 13,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/ECS/EntityFactory.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10446,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3357,
+								3357
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "c2338e69",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								2,
+								15,
+								9,
+								11,
+								20,
+								10,
+								73,
+								45,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1462.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 15,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "src/ECS/Transform3DSystem.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 13480,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3877,
+								3877
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "c918a525",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								15,
+								15,
+								29,
+								53,
+								0,
+								24,
+								169,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1530.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "include/ECS/Components.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4425,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1240,
+								1240
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "cae51f91",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								6,
+								20,
+								19,
+								21,
+								0,
+								246,
+								224,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 17,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "include/ECS/AttributeSystem.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1099,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								416,
+								416
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "a1951988",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								15,
+								14,
+								55,
+								58,
+								3,
+								1,
+								65,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 21,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "include/ECS/Masks.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1042,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								851,
+								851
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "8c8c6192",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								12,
+								22,
+								38,
+								27,
+								4,
+								22,
+								101,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 88.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
 					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteBatch.h",
 					"semi_transient": false,
 					"settings":
@@ -842,24 +1358,24 @@
 						"translation.y": 1360.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 29,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
+					"buffer": 8,
 					"file": "include/ECS/Effects.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2448,
+						"buffer_size": 2451,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2116,
-								2116
+								1265,
+								1265
 							]
 						],
 						"settings":
@@ -918,14 +1434,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 612.0,
+						"translation.y": 423.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 25,
+					"stack_index": 26,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 9,
 					"file": "include/ECS/ComponentSystems.h",
 					"semi_transient": false,
 					"settings":
@@ -997,14 +1513,194 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 895.0,
+						"translation.y": 494.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 12,
+					"stack_index": 19,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
+					"buffer": 10,
+					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/ParticleEngine2D.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2127,
+						"regions":
+						{
+							"bookmark_k":
+							{
+								"flags": 144,
+								"regions":
+								[
+									[
+										2025,
+										2025
+									]
+								]
+							}
+						},
+						"selection":
+						[
+							[
+								334,
+								334
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "488a2319",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								2,
+								1,
+								16,
+								16,
+								38,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": -0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "/D/C++Projects/VS/3DEnjon/src/ParticleEngine2D.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8782,
+						"regions":
+						{
+							"bookmark_n":
+							{
+								"flags": 144,
+								"regions":
+								[
+									[
+										1048,
+										1048
+									]
+								]
+							}
+						},
+						"selection":
+						[
+							[
+								5746,
+								5746
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "9c2c201f",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								2,
+								1,
+								16,
+								40,
+								52,
+								0,
+								0,
+								0,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 3159.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 12,
 					"file": "src/ECS/ComponentSystems.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1076,104 +1772,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1356.0,
+						"translation.y": 629.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 12,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
-					"file": "/D/C++Projects/VS/3DEnjon/src/ParticleEngine2D.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3874,
-						"regions":
-						{
-							"bookmark_n":
-							{
-								"flags": 144,
-								"regions":
-								[
-									[
-										971,
-										971
-									]
-								]
-							}
-						},
-						"selection":
-						[
-							[
-								2232,
-								2232
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "9c2c201f",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								2,
-								1,
-								16,
-								40,
-								52,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1511.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
+					"buffer": 13,
 					"file": "/D/C++Projects/VS/3DEnjon/src/Timing.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1185,8 +1791,8 @@
 						"selection":
 						[
 							[
-								735,
-								735
+								734,
+								734
 							]
 						],
 						"settings":
@@ -1248,103 +1854,24 @@
 						"translation.y": 357.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 22,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/ParticleEngine2D.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1952,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								771,
-								771
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "488a2319",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								2,
-								1,
-								16,
-								16,
-								38,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 255.0,
-						"zoom_level": 1.0
-					},
 					"stack_index": 27,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 14,
 					"file": "include/Level.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2490,
+						"buffer_size": 2489,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								360,
-								360
+								356,
+								356
 							]
 						],
 						"settings":
@@ -1406,11 +1933,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 19,
+					"stack_index": 20,
 					"type": "text"
 				},
 				{
-					"buffer": 9,
+					"buffer": 15,
 					"file": "src/Level.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1422,8 +1949,8 @@
 						"selection":
 						[
 							[
-								5973,
-								5973
+								4075,
+								4075
 							]
 						],
 						"settings":
@@ -1482,27 +2009,27 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 2901.0,
+						"translation.y": 2862.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 20,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 10,
+					"buffer": 16,
 					"file": "src/ECS/PlayerControllerSystem.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5701,
+						"buffer_size": 7786,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2692,
-								2692
+								3132,
+								3132
 							]
 						],
 						"settings":
@@ -1561,14 +2088,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1833.0,
+						"translation.y": 1428.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 13,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
-					"buffer": 11,
+					"buffer": 17,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/basic.f.glsl",
 					"semi_transient": false,
 					"settings":
@@ -1640,14 +2167,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 765.0,
+						"translation.y": 663.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 21,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 12,
+					"buffer": 18,
 					"file": "include/ECS/PlayerControllerSystem.h",
 					"semi_transient": false,
 					"settings":
@@ -1722,24 +2249,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 16,
+					"stack_index": 32,
 					"type": "text"
 				},
 				{
-					"buffer": 13,
+					"buffer": 19,
 					"file": "src/ECS/AIControllerSystem.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2877,
+						"buffer_size": 2859,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1807,
-								1807
+								1454,
+								1454
 							]
 						],
 						"settings":
@@ -1798,14 +2325,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 355.0,
+						"translation.y": 317.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 14,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 14,
+					"buffer": 20,
 					"file": "/D/C++Projects/VS/3DEnjon/proc/build.bat",
 					"semi_transient": false,
 					"settings":
@@ -1879,11 +2406,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 15,
+					"stack_index": 31,
 					"type": "text"
 				},
 				{
-					"buffer": 15,
+					"buffer": 21,
 					"file": "/D/C++Projects/VS/3DEnjon/include/Enjon.h",
 					"semi_transient": false,
 					"settings":
@@ -1957,24 +2484,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 16,
+					"buffer": 22,
 					"file": "src/ECS/Animation2DSystem.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 15064,
+						"buffer_size": 15133,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								6894,
-								6894
+								6871,
+								6871
 							]
 						],
 						"settings":
@@ -2033,93 +2560,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 2244.0,
+						"translation.y": 2448.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 17,
-					"file": "include/ECS/Components.h",
-					"semi_transient": true,
-					"settings":
-					{
-						"buffer_size": 4363,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								831,
-								831
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "cae51f91",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								6,
-								20,
-								19,
-								21,
-								0,
-								246,
-								224,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 18,
+					"buffer": 23,
 					"file": "src/Loot.cpp",
 					"semi_transient": false,
 					"settings":
@@ -2131,8 +2579,8 @@
 						"selection":
 						[
 							[
-								4057,
-								4057
+								4211,
+								4211
 							]
 						],
 						"settings":
@@ -2194,11 +2642,11 @@
 						"translation.y": 1760.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 16,
 					"type": "text"
 				},
 				{
-					"buffer": 19,
+					"buffer": 24,
 					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteSheetmanager.h",
 					"semi_transient": false,
 					"settings":
@@ -2272,24 +2720,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 26,
+					"stack_index": 25,
 					"type": "text"
 				},
 				{
-					"buffer": 20,
+					"buffer": 25,
 					"file": "/D/C++Projects/VS/3DEnjon/src/SpriteSheetManager.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1113,
+						"buffer_size": 1264,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1084,
-								1084
+								562,
+								562
 							]
 						],
 						"settings":
@@ -2352,11 +2800,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 24,
+					"stack_index": 23,
 					"type": "text"
 				},
 				{
-					"buffer": 21,
+					"buffer": 26,
 					"file": "src/AnimationManager.cpp",
 					"semi_transient": false,
 					"settings":
@@ -2368,8 +2816,8 @@
 						"selection":
 						[
 							[
-								1344,
-								1344
+								1866,
+								1872
 							]
 						],
 						"settings":
@@ -2431,11 +2879,11 @@
 						"translation.y": 492.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 24,
 					"type": "text"
 				},
 				{
-					"buffer": 22,
+					"buffer": 27,
 					"file": "include/ECS/Animation2DSystem.h",
 					"semi_transient": false,
 					"settings":
@@ -2510,24 +2958,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 30,
 					"type": "text"
 				},
 				{
-					"buffer": 23,
+					"buffer": 28,
 					"file": "profiles/Animations/Player/player.txt",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 627,
+						"buffer_size": 633,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								268,
-								268
+								571,
+								571
 							]
 						],
 						"settings":
@@ -2589,112 +3037,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 28,
 					"type": "text"
 				},
 				{
-					"buffer": 24,
-					"file": "VSQ.txt",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2155,
-						"regions":
-						{
-							"bookmark_h":
-							{
-								"flags": 144,
-								"regions":
-								[
-									[
-										1771,
-										1771
-									]
-								]
-							},
-							"bookmark_j":
-							{
-								"flags": 144,
-								"regions":
-								[
-									[
-										1693,
-										1693
-									]
-								]
-							}
-						},
-						"selection":
-						[
-							[
-								677,
-								677
-							]
-						],
-						"settings":
-						{
-							"auto_name": "Vlambeer Scale of Quality",
-							"bs_sintax": "plain text",
-							"buffer_scroll_name": "42f35e5e",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								2,
-								23,
-								17,
-								37,
-								51,
-								12,
-								243,
-								175,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 25,
+					"buffer": 29,
 					"file": "include/AnimationManager.h",
 					"semi_transient": false,
 					"settings":
@@ -2768,24 +3115,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 23,
+					"stack_index": 22,
 					"type": "text"
 				},
 				{
-					"buffer": 26,
+					"buffer": 30,
 					"file": "src/ECS/CollisionSystem.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 19386,
+						"buffer_size": 25843,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								13708,
-								13708
+								11359,
+								11359
 							]
 						],
 						"settings":
@@ -2844,14 +3191,93 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 5598.0,
+						"translation.y": 4676.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 31,
+					"file": "include/ECS/CollisionSystem.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1273,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								983,
+								983
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "1c6d1cb4",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								15,
+								15,
+								43,
+								19,
+								12,
+								101,
+								172,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 18,
 					"type": "text"
 				},
 				{
-					"buffer": 27,
+					"buffer": 32,
 					"file": "include/ECS/EntityFactory.h",
 					"semi_transient": false,
 					"settings":
@@ -2863,8 +3289,8 @@
 						"selection":
 						[
 							[
-								1012,
-								1012
+								1011,
+								1011
 							]
 						],
 						"settings":
@@ -2926,7 +3352,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 17,
+					"stack_index": 14,
 					"type": "text"
 				}
 			]

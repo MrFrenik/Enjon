@@ -155,7 +155,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					// Animation
 					if (PlayerState == EntityAnimationState::ATTACKING) 
 					{
-						if (CurrentWeapon == Weapons::BOW) AttackSpeed = 2.0f;
+						if (CurrentWeapon == Weapons::BOW) AttackSpeed = 10.0f;
 						else AttackSpeed = 1.0f;
 						AnimationComponent->AnimationTimer += CurrentAnimation->AnimationTimerIncrement * AttackSpeed;
 					}
@@ -250,16 +250,12 @@ namespace ECS { namespace Systems { namespace Animation2D {
 								{
 									for (auto i = 0; i < 1; i++)
 									{
-										// Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[e].CartesianPosition + Math::Vec2(16.0f)) + Math::Vec2(20.0f, -50.0f));
-										// float boxRadius = 50.0f;
-										// BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(Angle + i)), sin(Math::ToRadians(Angle + i))));
-										
 										// Create an arrow projectile entity for now...
 										static Enjon::Graphics::SpriteSheet ItemSheet;
 										auto C = Enjon::Graphics::RGBA16_Orange();
 										C.r += 2.0f;
-										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1));
-										eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->x, Position->y, 30.0f),
+										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png"), Enjon::Math::iVec2(1, 1));
+										eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->XY(), 40.0f),
 																  Enjon::Math::Vec2(80.0f, 80.0f), &ItemSheet, (Masks::Type::WEAPON | 
 																  												Masks::WeaponOptions::PROJECTILE | 
 																  												Masks::GeneralOptions::PICKED_UP | 
@@ -269,20 +265,23 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										Manager->Masks[id] |= COMPONENT_TRANSFORM3D;
 
 
-										// // Set arrow velocity to normalize: mousepos - arrowpos
+										// Set arrow velocity to normalize: mousepos - arrowpos
 										Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
 										Manager->Camera->ConvertScreenToWorld(MousePos);
-										Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].GroundPosition;
-										MousePos.y -= 20.0f;
+										Enjon::Math::Vec2 Pos = Position->XY();
+										// MousePos.y += 80.0f;
 
 										// // Find vector between the two and normalize
-										Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x, Pos.y));
+										Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(Enjon::Math::IsoToCartesian(MousePos) - Enjon::Math::IsoToCartesian(Pos));
 										auto RX = Enjon::Random::Roll(-10, 2) / 100.0f;
 										auto RY = Enjon::Random::Roll(-10, 2) / 100.0f;
+										ArrowVelocity = Enjon::Math::CartesianToIso(ArrowVelocity);
 
 										float speed = 50.0f;
 
 										// // Fire in direction of mouse
+										// Manager->TransformSystem->Transforms[id].Velocity = speed * Enjon::Math::Vec3(ArrowVelocity.x, ArrowVelocity.y, 0.0f);
+										// Manager->TransformSystem->Transforms[id].VelocityGoal = speed * Enjon::Math::Vec3(ArrowVelocity.x, ArrowVelocity.y, 0.0f);
 										Manager->TransformSystem->Transforms[id].VelocityGoal = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);
 										Manager->TransformSystem->Transforms[id].Velocity = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);
 										Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;
