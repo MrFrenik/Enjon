@@ -133,7 +133,7 @@ void Level::DrawGroundTiles(Enjon::Graphics::SpriteBatch& batch)
 {
 	auto C = Enjon::Graphics::RGBA16_White();
 	// auto DC = Enjon::Random::Roll(100, 200) / 255.0f;
-	auto DC = 150.0f / 255.0f;
+	auto DC = 200.0f / 255.0f;
 	C.r -= DC;
 	C.g -= DC;
 	C.b -= DC;

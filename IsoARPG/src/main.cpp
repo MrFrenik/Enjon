@@ -286,7 +286,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 100;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -898,7 +898,7 @@ int main(int argc, char** argv)
 		/*-- RANDOM DRAWING --*/
 		// Draw box
 		// For a box, need 4 faces, so 4 quads
-		static EM::Vec2 BoxPos = World->TransformSystem->Transforms[Player].Position.XY(); 
+		EM::Vec2 BoxPos = World->TransformSystem->Transforms[Player].Position.XY() + EM::Vec2(42.0f, 20.0f); 
 		DrawBox(&EntityBatch, BoxPos);
 
 		EntityBatch.End();
@@ -1126,26 +1126,35 @@ void DrawBox(Enjon::Graphics::SpriteBatch* Batch, Enjon::Math::Vec2 Pos)
 
 	*/
 
-	float s = 50.0f;
+	float s = 20.0f;
 	static EM::Vec2 Dims(s, s);
 	static EM::Vec2 LightDims(300.0f, 300.0f);
-	static float Height = Dims.y;
+	static float Height = 40.0f;
 	static float t = 0.0f;
 	t += 1.0f;
-	float angle = EM::ToRadians(t);
+	float angle = EM::ToRadians(t / 2.0f);
 	float RX = sin(t);
 	float RY = sin(0.05f * t) * 1.0f;
 	static GLuint TexID = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box.png").id;
 	static GLuint LightId = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg-light.png").id;
 	EG::ColorRGBA16 Color = EG::RGBA16_Orange();
+	float Rad = 80.0f;
+	EM::Vec2 BoxPos = Pos + Rad * EM::CartesianToIso(Math::Vec2(cos(angle), sin(angle)));
 
 	Color.r += sin(0.005f * t) * 5.0f;
 	float alpha = Color.r > 0 ? 0.1f : 0.0f;
 
-	// Draw first face
-	Batch->Add(EM::Vec4(Pos.x, Pos.y + Height, Dims.x, Dims.y + RY), EM::Vec4(0, 0, 1, 1), TexID, Color, Pos.y, angle);
-	Batch->Add(EM::Vec4(Pos.x, Pos.y, Dims.x / 2.0f, Dims.y + RY / 2.0f), EM::Vec4(0, 0, 1, 1), TexID, EG::SetOpacity(EG::RGBA16_Black(), 0.1f), Pos.y, angle, EG::CoordinateFormat::ISOMETRIC);
-	Batch->Add(EM::Vec4(Pos.x - LightDims.x / 2.0f, Pos.y - LightDims.y / 3.0f, LightDims), EM::Vec4(0, 0, 1, 1), LightId, EG::SetOpacity(Color, Color.r / 20.0f), Pos.y);
+	// Light box
+	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y + Height, Dims.x, Dims.y + RY), EM::Vec4(0, 0, 1, 1), TexID, EG::SetOpacity(Color, 0.5f), BoxPos.y, angle);
+
+	// Shadow
+	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y, Dims.x / 2.0f, Dims.y + RY / 2.0f), EM::Vec4(0, 0, 1, 1), TexID, EG::SetOpacity(EG::RGBA16_Black(), 0.2f + Color.r / 30.0f), BoxPos.y, angle, EG::CoordinateFormat::ISOMETRIC);
+
+	// Light haze
+	Batch->Add(EM::Vec4(BoxPos.x - LightDims.x / 2.0f, BoxPos.y - LightDims.y / 2.5f, LightDims), EM::Vec4(0, 0, 1, 1), LightId, EG::SetOpacity(Color, Color.r / 30.0f), BoxPos.y);
+
+	// Base light
+	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y - Height, 500.0f, 500.0f), EM::Vec4(0, 0, 1, 1), LightId, EG::SetOpacity(Color, Color.r / 70.0f), BoxPos.y, 0.0f, EG::CoordinateFormat::ISOMETRIC);
 }
 
 void DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math::Vec3 Pos)
