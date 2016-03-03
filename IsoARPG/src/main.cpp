@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -78,7 +78,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 100;
+const int LEVELSIZE = 50;
 
 float DashingCounter = 0.0f;
 
@@ -98,6 +98,7 @@ using namespace Systems;
 void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* Manager, ECS::eid32 Entity);
 void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);
 void DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math::Vec3 Pos);
+void DrawBox(Enjon::Graphics::SpriteBatch* Batch, Enjon::Math::Vec2 Pos);
 
 SDL_Joystick* Joystick;
 
@@ -285,7 +286,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 100;
+	static uint32 AmountDrawn = 1;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -293,6 +294,12 @@ int main(int argc, char** argv)
 																enemydims, &EnemySheet, "Enemy", 0.05f); 
 		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
 	}
+
+	// eid32 boss = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 10.0f),
+	// 														enemydims * 3.0f, &EnemySheet, "Enemy", 0.05f); 
+	// World->TransformSystem->Transforms[boss].AABBPadding = EM::Vec2(30);
+	// World->AttributeSystem->HealthComponents[boss].Health = 10000.0f;
+
 
 	// Create player
 	eid32 Player = Factory::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(100.0f, 100.0f), &PlayerSheet, 
@@ -318,14 +325,16 @@ int main(int argc, char** argv)
 	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 0;
+	AmountDrawn = 10;
 
-	for (int e = 0; e < AmountDrawn; e++)
+	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
 		// Create Sword
 		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
-										Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, Masks::Type::ITEM, Component::EntityType::ITEM, "Weapon");
+										Enjon::Math::Vec2(32.0f, 32.0f), EG::SpriteSheetManager::GetSpriteSheet("Box"), Masks::Type::ITEM, Component::EntityType::ITEM);
 	}
+
+	eid32 Box = Factory::CreateItem(World, World->TransformSystem->Transforms[Player].Position, EM::Vec2(32.0f, 100.0f), &ItemSheet, Masks::Type::ITEM, Component::EntityType::ITEM);
 
 	// Set position to player
 	Camera.SetPosition(Math::Vec2(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, World->TransformSystem->Transforms[Player].Position.y)); 
@@ -373,7 +382,7 @@ int main(int argc, char** argv)
 			}
 
 			// Draw some random assed fire
-			// EG::Particle2D::DrawFire(TestParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
+			EG::Particle2D::DrawFire(TestParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 	
 			TileOverlayRunTime = SDL_GetTicks() - StartTicks;		
 			StartTicks = SDL_GetTicks();
@@ -517,18 +526,20 @@ int main(int argc, char** argv)
 			Math::Vec2* EntityPosition; 
 			Math::Vec2* Ground;
 			char buffer[25];
-			
+		
+			EG::SpriteSheet* ESpriteSheet = World->Animation2DSystem->Animations[e].Sheet;	
 			EntityPosition = &World->TransformSystem->Transforms[e].Position.XY();
 			Ground = &World->TransformSystem->Transforms[e].GroundPosition;
 			const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[e].Color;
+			auto EDims = &World->TransformSystem->Transforms[e].Dimensions;
 
 			// If AI
 			if (Mask & COMPONENT_AICONTROLLER)
 			{
 				// Don't draw if not in view
-				if (Camera.IsBoundBoxInCamView(*EntityPosition, enemydims))
+				if (Camera.IsBoundBoxInCamView(*EntityPosition, *EDims))
 				{
-					EntityBatch.Add(Math::Vec4(*EntityPosition, enemydims), uv, beast.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
+					EntityBatch.Add(Math::Vec4(*EntityPosition, *EDims), uv, beast.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
 					Graphics::Fonts::PrintText(EntityPosition->x + 100.0f, EntityPosition->y + 220.0f, 0.4f, std::to_string(e), Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
 															Graphics::SetOpacity(Graphics::RGBA16_Green(), 0.8f));
 				}
@@ -543,9 +554,9 @@ int main(int argc, char** argv)
 			}
 			else if (World->Types[e] == ECS::Component::EntityType::ITEM)
 			{
-				if (Camera.IsBoundBoxInCamView(*EntityPosition, itemDims))
+				if (Camera.IsBoundBoxInCamView(*EntityPosition, *EDims))
 				{
-					EntityBatch.Add(Math::Vec4(*EntityPosition, itemDims), ItemSheet.GetUV(0), ItemSheet.texture.id, *Color, EntityPosition->y);
+					EntityBatch.Add(Math::Vec4(*EntityPosition, *EDims), ESpriteSheet->GetUV(0), ESpriteSheet->texture.id, *Color, EntityPosition->y);
 				}
 
 			}
@@ -884,6 +895,11 @@ int main(int argc, char** argv)
 			// }
 		}
 
+		/*-- RANDOM DRAWING --*/
+		// Draw box
+		// For a box, need 4 faces, so 4 quads
+		static EM::Vec2 BoxPos = World->TransformSystem->Transforms[Player].Position.XY(); 
+		DrawBox(&EntityBatch, BoxPos);
 
 		EntityBatch.End();
 		TextBatch.End(); 
@@ -1095,6 +1111,41 @@ void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager*
 	Batch->End();
 	Batch->RenderBatch();
 	Graphics::ShaderManager::UnuseProgram("Basic");
+}
+
+void DrawBox(Enjon::Graphics::SpriteBatch* Batch, Enjon::Math::Vec2 Pos)
+{
+	/*
+		   ------
+		 /     /|
+		/     /	|
+	   -------  /
+	   |     | /
+	   |_____|/
+
+
+	*/
+
+	float s = 50.0f;
+	static EM::Vec2 Dims(s, s);
+	static EM::Vec2 LightDims(300.0f, 300.0f);
+	static float Height = Dims.y;
+	static float t = 0.0f;
+	t += 1.0f;
+	float angle = EM::ToRadians(t);
+	float RX = sin(t);
+	float RY = sin(0.05f * t) * 1.0f;
+	static GLuint TexID = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box.png").id;
+	static GLuint LightId = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg-light.png").id;
+	EG::ColorRGBA16 Color = EG::RGBA16_Orange();
+
+	Color.r += sin(0.005f * t) * 5.0f;
+	float alpha = Color.r > 0 ? 0.1f : 0.0f;
+
+	// Draw first face
+	Batch->Add(EM::Vec4(Pos.x, Pos.y + Height, Dims.x, Dims.y + RY), EM::Vec4(0, 0, 1, 1), TexID, Color, Pos.y, angle);
+	Batch->Add(EM::Vec4(Pos.x, Pos.y, Dims.x / 2.0f, Dims.y + RY / 2.0f), EM::Vec4(0, 0, 1, 1), TexID, EG::SetOpacity(EG::RGBA16_Black(), 0.1f), Pos.y, angle, EG::CoordinateFormat::ISOMETRIC);
+	Batch->Add(EM::Vec4(Pos.x - LightDims.x / 2.0f, Pos.y - LightDims.y / 3.0f, LightDims), EM::Vec4(0, 0, 1, 1), LightId, EG::SetOpacity(Color, Color.r / 20.0f), Pos.y);
 }
 
 void DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math::Vec3 Pos)

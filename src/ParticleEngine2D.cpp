@@ -282,7 +282,24 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 				else tex = PTex3; 
 
 				EG::Particle2D::AddParticle(Math::Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
-					Math::Vec2(XSize, YSize), Fire, PTex4, 0.025f, Batch);
+					Math::Vec2(XSize, YSize), Fire, tex, 0.025f, Batch);
+			}
+			LightFlameCounter = 0.0f;
+		}
+
+		static float LightCounter = 0.0f;
+		LightFlameCounter += 0.025f;
+		if (LightFlameCounter >= 1.0f)
+		{
+			EG::ColorRGBA16 Fire = EG::RGBA16(8.0f, 1.6f, 0.0f, 0.005f);
+			for (int i = 0; i < 1; i++)
+			{
+				float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(1, 2), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
+								YSize = Random::Roll(500, 500), XSize = Random::Roll(500, 500);
+				int Roll = Random::Roll(1, 3);
+
+				EG::Particle2D::AddParticle(Math::Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+					Math::Vec2(XSize, YSize), Fire, PTex4, 0.7f, Batch);
 			}
 			LightFlameCounter = 0.0f;
 		}

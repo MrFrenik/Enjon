@@ -22,7 +22,8 @@ namespace Enjon { namespace Graphics {
 	enum CoordinateFormat
 	{
 		CARTESIAN, 
-		ISOMETRIC
+		ISOMETRIC, 
+		PROJECTION
 	};
 
 	enum class GlyphSortType 

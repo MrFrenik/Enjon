@@ -9,6 +9,8 @@ namespace Enjon { namespace Graphics { namespace SpriteSheetManager {
 		AddSpriteSheet(Sheets, std::string("PlayerSheet"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/pixelanimtestframessplitsmall.png"), Enjon::Math::iVec2(6, 24));
 		AddSpriteSheet(Sheets, std::string("PlayerSheet2"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/axe.png"), Enjon::Math::iVec2(8, 2));
 		AddSpriteSheet(Sheets, std::string("Orb"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png"), Enjon::Math::iVec2(1, 1));
+		AddSpriteSheet(Sheets, std::string("Wall"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/wall_chunk.png"), Enjon::Math::iVec2(1, 1));
+		AddSpriteSheet(Sheets, std::string("Box"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box.png"), Enjon::Math::iVec2(1, 1));
 	}
 
 	/* Add spritesheets to the spritesheetmanager */

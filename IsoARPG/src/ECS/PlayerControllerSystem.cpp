@@ -212,7 +212,8 @@ namespace ECS { namespace Systems { namespace PlayerController {
 		ECS::eid32 Player = Manager->Player;
 		auto G = Enjon::Graphics::RGBA16_ZombieGreen();
 		G.g += 100.0f;
-		ECS::eid32 Grenade = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Pos.XY(), 0.0f), Enjon::Math::Vec2(16.0f, 16.0f), Sheet,
+		float height = 30.0f;
+		ECS::eid32 Grenade = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Pos.XY(), height / 2.0f), Enjon::Math::Vec2(16.0f, 16.0f), Sheet,
 													Masks::Type::WEAPON | Masks::WeaponOptions::PROJECTILE | Masks::WeaponSubOptions::GRENADE, Component::EntityType::EXPLOSIVE, "Grenade", G);
 
 		// Shoot in direction of mouse
@@ -233,7 +234,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 		Manager->TransformSystem->Transforms[Grenade].Velocity = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
 		Manager->TransformSystem->Transforms[Grenade].VelocityGoal = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
 		Manager->TransformSystem->Transforms[Grenade].BaseHeight = 0.0f;
-		Manager->TransformSystem->Transforms[Grenade].MaxHeight = 30.0f;
+		Manager->TransformSystem->Transforms[Grenade].MaxHeight = height;
 	}
 
 }}}
