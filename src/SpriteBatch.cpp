@@ -59,12 +59,13 @@ namespace Enjon { namespace Graphics {
 		m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color, angle, format));
 	}
 
-	/* Adds glpyh to spritebatch to be rendered with 16bit color */
-	// void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth)
-	// {
-	// 	// Place back new glyph
-	// 	m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color));
-	// }
+	/* Adds polygon glyph to spritebatch to be rendered */
+	void SpriteBatch::AddPolygon(std::vector<Enjon::Math::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, CoordinateFormat format)
+	{
+		// Place back new glyph
+		m_glyphs.emplace_back(NewPolygon(Points, uvRect, texture, color, depth, format));	
+	}
+
 
 	void SpriteBatch::RenderBatch() 
 	{ 

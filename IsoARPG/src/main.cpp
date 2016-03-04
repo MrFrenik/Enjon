@@ -98,7 +98,7 @@ using namespace Systems;
 void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* Manager, ECS::eid32 Entity);
 void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);
 void DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math::Vec3 Pos);
-void DrawBox(Enjon::Graphics::SpriteBatch* Batch, ECS::Systems::EntityManager* Manager);
+void DrawBox(Enjon::Graphics::SpriteBatch* Batch, Enjon::Graphics::SpriteBatch* LightBatch, ECS::Systems::EntityManager* Manager);
 
 SDL_Joystick* Joystick;
 
@@ -167,6 +167,9 @@ int main(int argc, char** argv)
 
 	Enjon::Graphics::SpriteBatch CartesianTileBatch;
 	CartesianTileBatch.Init();
+
+	Enjon::Graphics::SpriteBatch LightBatch;
+	LightBatch.Init();
 
 	Enjon::Graphics::SpriteBatch CartesianEntityBatch;
 	CartesianEntityBatch.Init();
@@ -256,6 +259,7 @@ int main(int argc, char** argv)
 	ParticleBatch.Init();
 
 	// Create particle batchs to be used by World
+	EG::Particle2D::ParticleBatch2D* LightParticleBatch = EG::Particle2D::NewParticleBatch(&LightBatch);
 	EG::Particle2D::ParticleBatch2D* TestParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
 	EG::Particle2D::ParticleBatch2D* TextParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
 	EG::Particle2D::ParticleBatch2D* SmokeBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
@@ -278,6 +282,7 @@ int main(int argc, char** argv)
 
 	// Push back particle batchs into world
 	EG::Particle2D::AddParticleBatch(World->ParticleEngine, TestParticleBatch);
+	EG::Particle2D::AddParticleBatch(World->ParticleEngine, LightParticleBatch);
 	EG::Particle2D::AddParticleBatch(World->ParticleEngine, TextParticleBatch);
 	EG::Particle2D::AddParticleBatch(World->ParticleEngine, SmokeBatch);
 
@@ -382,7 +387,7 @@ int main(int argc, char** argv)
 			}
 
 			// Draw some random assed fire
-			EG::Particle2D::DrawFire(TestParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
+			// EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 	
 			TileOverlayRunTime = SDL_GetTicks() - StartTicks;		
 			StartTicks = SDL_GetTicks();
@@ -393,7 +398,7 @@ int main(int argc, char** argv)
 			Animation2D::Update(World);
 
 			StartTicks = SDL_GetTicks();
-			Transform::Update(World->TransformSystem, TestParticleBatch);
+			Transform::Update(World->TransformSystem, LightParticleBatch);
 			TransformRunTime = (SDL_GetTicks() - StartTicks);
 
 			StartTicks = SDL_GetTicks();	
@@ -416,7 +421,7 @@ int main(int argc, char** argv)
 			{
 				for (Enjon::uint32 i = 0; i < 10; i++)
 				{
-					DrawSmoke(SmokeBatch, EM::Vec3(Enjon::Random::Roll(-LvlSize.x, LvlSize.x), Enjon::Random::Roll(-LvlSize.y * 2.0f, LvlSize.y * 2.0f), 0.0f));
+					DrawSmoke(LightParticleBatch, EM::Vec3(Enjon::Random::Roll(-LvlSize.x, LvlSize.x), Enjon::Random::Roll(-LvlSize.y * 2.0f, LvlSize.y * 2.0f), 0.0f));
 				}
 				SmokeCount = 0.0f;
 			}
@@ -491,6 +496,7 @@ int main(int argc, char** argv)
 		// Draw Entities
 		EntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); 
 		MapEntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); 
+		LightBatch.Begin();
 		TextBatch.Begin(); 
 		HUDBatch.Begin();
 
@@ -605,6 +611,10 @@ int main(int argc, char** argv)
 
 		// Draw player
 
+		// Draw box
+		// For a box, need 4 faces, so 4 quads
+		DrawBox(&EntityBatch, &EntityBatch, World);
+
 		// Dashing state if dashing
 		Graphics::SpriteSheet* Sheet = World->Animation2DSystem->Animations[Player].Sheet; 
 		Enjon::uint32 Frame = World->Animation2DSystem->Animations[Player].CurrentFrame;
@@ -644,7 +654,7 @@ int main(int argc, char** argv)
 				EG::Particle2D::AddParticle(EM::Vec3(PP + EM::Vec2(40.0f, 50.0f), 0.0f), EM::Vec3(PV * -1.0f, 0.0f), EM::Vec2(2.0f, 2.0f), DashColor, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png").id, 0.05f, World->ParticleEngine->ParticleBatches[0]);
 				// Add a particle pos, vel, size, color, texture, decay, batch
 				EG::Particle2D::AddParticle(EM::Vec3(PP + EM::Vec2(40.0f, 30.0f), 0.0f), EM::Vec3(PV * -1.0f, 0.0f), EM::Vec2(Random::Roll(25, 100), Random::Roll(25, 100)), 
-					EG::SetOpacity(DashColor, 0.025f), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/smoke_1.png").id, 0.025f, World->ParticleEngine->ParticleBatches[0]);
+					EG::SetOpacity(DashColor, 0.05f), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/smoke_1.png").id, 0.025f, LightParticleBatch);
 			}
 		}
 
@@ -897,12 +907,19 @@ int main(int argc, char** argv)
 		}
 
 		/*-- RANDOM DRAWING --*/
-		// Draw box
-		// For a box, need 4 faces, so 4 quads
-		DrawBox(&EntityBatch, World);
+
+		// Add some random polygon
+		std::vector<EM::Vec2> Points;
+		Points.push_back(EM::Vec2(-1500, -1400));	// BL
+		Points.push_back(EM::Vec2(-800, -1400));	// BR
+		Points.push_back(EM::Vec2(-850, -1200));	// TR
+		Points.push_back(EM::Vec2(-900, -1200));	// TL
+		EntityBatch.AddPolygon(Points, EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::RGBA16_Orange(), Points.at(0).y, EG::CoordinateFormat::ISOMETRIC);
+
 
 		EntityBatch.End();
 		TextBatch.End(); 
+		LightBatch.End();
 		MapEntityBatch.End(); 
 		HUDBatch.End();
 	
@@ -926,6 +943,13 @@ int main(int argc, char** argv)
 
 		// Draw entities		
 		EntityBatch.RenderBatch();
+
+		// Draw Lights
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		LightBatch.RenderBatch();
+
+		// Set blend mode back
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
 		// Draw Text
@@ -1113,7 +1137,7 @@ void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager*
 	Graphics::ShaderManager::UnuseProgram("Basic");
 }
 
-void DrawBox(Enjon::Graphics::SpriteBatch* Batch, ECS::Systems::EntityManager* Manager)
+void DrawBox(Enjon::Graphics::SpriteBatch* Batch, Enjon::Graphics::SpriteBatch* LightBatch, ECS::Systems::EntityManager* Manager)
 {
 	/*
 		   ------
@@ -1126,7 +1150,8 @@ void DrawBox(Enjon::Graphics::SpriteBatch* Batch, ECS::Systems::EntityManager* M
 
 	*/
 
-	EM::Vec2 Pos = Manager->TransformSystem->Transforms[Manager->Player].Position.XY() + EM::Vec2(42.0f, 20.0f); 
+	EM::Vec3* PP = &Manager->TransformSystem->Transforms[Manager->Player].Position;
+	EM::Vec2 Pos = PP->XY() + EM::Vec2(42.0f, 20.0f - PP->z); 
 
 	float s = 20.0f;
 	static EM::Vec2 Dims(s, s);
@@ -1134,6 +1159,7 @@ void DrawBox(Enjon::Graphics::SpriteBatch* Batch, ECS::Systems::EntityManager* M
 	static float Height = 40.0f;
 	static float t = 0.0f;
 	t += 1.0f;
+	Height += sin(0.05 * t) * 5.0f;
 	float angle = EM::ToRadians(t / 2.0f);
 	float angle2 = EM::ToRadians(t / 2.0f + 120.0f);
 	float RX = sin(t);
@@ -1144,13 +1170,15 @@ void DrawBox(Enjon::Graphics::SpriteBatch* Batch, ECS::Systems::EntityManager* M
 	float Rad = 80.0f;
 	EM::Vec2 BoxPos = Pos + Rad * EM::CartesianToIso(Math::Vec2(cos(angle), sin(angle)));
 
-	Color.r += sin(0.005f * t) * 5.0f;
-	Color.g += sin(0.005f * t) * 5.0f;
+	Color.r += 10.0f;
+	Color.g += 10.0f;
+	// Color.r += sin(0.005f * t) * 5.0f;
+	// Color.g += sin(0.005f * t) * 5.0f;
 	float alpha = Color.r > 0 ? 0.1f : 0.0f;
 
 	// Player shadow
 	EG::SpriteSheet* PS = Manager->Animation2DSystem->Animations[Manager->Player].Sheet;
-	Enjon::uint32 CurrentFrame = Manager->Animation2DSystem->Animations[Manager->Player].CurrentFrame;
+	Enjon::uint32 CurrentFrame = Manager->Animation2DSystem->Animations[Manager->Player].CurrentFrame + Manager->Animation2DSystem->Animations[Manager->Player].BeginningFrame;
 	EM::Vec2 BeamDims(100.0f, 150.0f);
 	EM::Vec2 BeamPos = Pos + EM::Vec2(10.0f, -10.0f);
 	BeamPos = EM::IsoToCartesian(BeamPos);
@@ -1160,26 +1188,26 @@ void DrawBox(Enjon::Graphics::SpriteBatch* Batch, ECS::Systems::EntityManager* M
 	// a += 90.0f;
 	if (Norm.y < 0) a *= -1;
 	BeamPos = EM::CartesianToIso(BeamPos);
-	auto PRad = 75.0f;
+	auto PRad = 75.0f + Height / 2.5f + PP->z * 2.0f;
 	BeamPos = BeamPos + PRad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a + 180)), sin(EM::ToRadians(a + 180))));
 
 	// Player Shadow
-	Batch->Add(EM::Vec4(BeamPos - Manager->TransformSystem->Transforms[Manager->Player].Position.z, BeamDims), 
-		PS->GetUV(CurrentFrame), PS->texture.id, EG::SetOpacity(EG::RGBA16_Black(), Color.r / 30.0f),
+	Batch->Add(EM::Vec4(BeamPos - Manager->TransformSystem->Transforms[Manager->Player].Position.z, BeamDims + EM::Vec2(Height / 2.0f, Height + PP->z)), 
+		PS->GetUV(CurrentFrame), PS->texture.id, EG::SetOpacity(EG::RGBA16_Black(), Color.r / 30.0f - Height / 750.0f),
 				BeamPos.y, EM::ToRadians(a + 90.0f), EG::CoordinateFormat::ISOMETRIC);
 
 	// Light box
 	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y + Height, Dims.x, Dims.y + RY), EM::Vec4(0, 0, 1, 1), TexID, EG::SetOpacity(Color, 1.0f), BoxPos.y, angle);
 
 	// Shadow
-	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y, Dims.x / 2.0f, Dims.y + RY / 2.0f), EM::Vec4(0, 0, 1, 1), TexID, EG::SetOpacity(EG::RGBA16_Black(), 0.2f + Color.r / 30.0f), BoxPos.y, angle, EG::CoordinateFormat::ISOMETRIC);
+	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y, Dims.x / 100.0f - Height / 2.0f, Dims.y / 100.0f - Height / 2.0f), EM::Vec4(0, 0, 1, 1), TexID, EG::SetOpacity(EG::RGBA16_Black(), 0.2f + Color.r / 30.0f - Height / 450.0f), BoxPos.y, angle, EG::CoordinateFormat::ISOMETRIC);
 
 
 	// Light haze
-	Batch->Add(EM::Vec4(BoxPos.x - LightDims.x / 2.0f, BoxPos.y - LightDims.y / 2.5f, LightDims), EM::Vec4(0, 0, 1, 1), LightId, EG::SetOpacity(Color, Color.r / 30.0f), BoxPos.y);
+	LightBatch->Add(EM::Vec4(BoxPos.x - LightDims.x / 2.0f, BoxPos.y - LightDims.y / 2.0f + Height, LightDims), EM::Vec4(0, 0, 1, 1), LightId, EG::SetOpacity(Color, Color.r / 30.0f), BoxPos.y);
 
 	// Base light
-	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y - Height, 500.0f, 500.0f), EM::Vec4(0, 0, 1, 1), LightId, EG::SetOpacity(Color, Color.r / 55.0f), BoxPos.y, 0.0f, EG::CoordinateFormat::ISOMETRIC);
+	LightBatch->Add(EM::Vec4(BoxPos.x, BoxPos.y, 500.0f - Height, 500.0f - Height), EM::Vec4(0, 0, 1, 1), LightId, EG::SetOpacity(Color, Color.r / 55.0f - Height / 2500.0f), BoxPos.y, 0.0f, EG::CoordinateFormat::ISOMETRIC);
 }
 
 void DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math::Vec3 Pos)

@@ -78,6 +78,45 @@ namespace Enjon { namespace Graphics {
 		return glyph;
 	}
 
+	inline Glyph NewPolygon(std::vector<Enjon::Math::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, CoordinateFormat format)
+	{
+		Glyph glyph;
+
+		Enjon::Math::Vec2* TL = &Points.at(0);
+		Enjon::Math::Vec2* TR = &Points.at(1);
+		Enjon::Math::Vec2* BR = &Points.at(2);
+		Enjon::Math::Vec2* BL = &Points.at(3);
+
+		if (format == CoordinateFormat::ISOMETRIC)
+		{
+			*TL = Enjon::Math::CartesianToIso(*TL);
+			*TR = Enjon::Math::CartesianToIso(*TR);
+			*BL = Enjon::Math::CartesianToIso(*BL);
+			*BR = Enjon::Math::CartesianToIso(*BR);
+		} 
+
+		/* Set topLeft vertex */
+		glyph.topLeft = NewVertex(TL->x, TL->y, uvRect.x, uvRect.y + uvRect.w, color.r, color.g, color.b, color.a);
+
+		/* Set bottomLeft vertex */
+		glyph.bottomLeft = NewVertex(BL->x, BL->y, uvRect.x, uvRect.y, color.r, color.g, color.b, color.a);
+
+		/* Set bottomRight vertex */
+		glyph.bottomRight = NewVertex(BR->x, BR->y, uvRect.x + uvRect.z, uvRect.y, color.r, color.g, color.b, color.a); 
+		
+		/* Set topRight vertex */
+		glyph.topRight = NewVertex(TR->x, TR->y, uvRect.x + uvRect.z, uvRect.y + uvRect.w, color.r, color.g, color.b, color.a);
+
+		/* Set texture */
+		glyph.texture = texture;
+
+		/* Set depth */
+		glyph.depth = depth;
+
+		return glyph;
+
+	}
+
 	inline Glyph NewGlyph(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, float depth, const ColorRGBA16& color, float angle, Graphics::CoordinateFormat Format)
 	{
 		Glyph glyph;
@@ -90,14 +129,6 @@ namespace Enjon { namespace Graphics {
         Enjon::Math::Vec2 bl(-halfDims.x, -halfDims.y);
         Enjon::Math::Vec2 br(halfDims.x, -halfDims.y);
         Enjon::Math::Vec2 tr(halfDims.x, halfDims.y);
-
-        // auto r = 10.0f;
-        // auto c = r * cos(angle);
-        // auto s = r * sin(angle);
-        // tl += Enjon::Math::Vec2(c, s);
-        // tr += Enjon::Math::Vec2(c, s);
-        // bl += Enjon::Math::Vec2(c, s);
-        // br += Enjon::Math::Vec2(c, s);
 
         // Rotate the points back to left corner as pivot point
         // NOTE(John): Better way of doing this would be to rotate by a given point
@@ -176,6 +207,9 @@ namespace Enjon { namespace Graphics {
 
 		/* Adds glpyh to spritebatch to be rendered with specified rotation */
 		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, CoordinateFormat Format = CoordinateFormat::CARTESIAN);
+
+		/* Adds polygon glyph to spritebatch to be rendered */
+		void AddPolygon(std::vector<Enjon::Math::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color = Enjon::Graphics::RGBA16_White(), float depth = 0.0f, CoordinateFormat = CoordinateFormat::CARTESIAN);
 
 		/* Renders entire batch to screen */
 		void RenderBatch();
