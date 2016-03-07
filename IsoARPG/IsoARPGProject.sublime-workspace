@@ -83,7 +83,7 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 53825,
+				"buffer_size": 54241,
 				"line_ending": "Windows"
 			}
 		},
@@ -139,7 +139,7 @@
 			"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteBatch.h",
 			"settings":
 			{
-				"buffer_size": 7538,
+				"buffer_size": 7801,
 				"line_ending": "Windows"
 			}
 		},
@@ -147,7 +147,7 @@
 			"file": "/D/C++Projects/VS/3DEnjon/src/SpriteBatch.cpp",
 			"settings":
 			{
-				"buffer_size": 6967,
+				"buffer_size": 6993,
 				"line_ending": "Windows"
 			}
 		},
@@ -574,6 +574,22 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"50",
+			"10",
+			"bg-light",
+			"bg-png",
+			"drawbox",
+			"lightparticle",
+			"drawplayer",
+			"drawbox",
+			"2500",
+			"drawbox",
+			"dash",
+			"dashj",
+			"dash",
+			"drawbox",
+			"BL",
+			"TL",
 			"));",
 			".end()",
 			"drawbox",
@@ -685,23 +701,7 @@
 			"1",
 			"bt",
 			"dash",
-			"addparticle",
-			"drawfire",
-			"drawsmoke",
-			"draw",
-			"drawblood",
-			"Draw",
-			"setscale",
-			"50",
-			"25",
-			"50",
-			"attackspeed",
-			"100",
-			"64",
-			"attackspeed",
-			"10",
-			"TTACKSPEED",
-			"attackspeed"
+			"addparticle"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -728,7 +728,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 53825,
+						"buffer_size": 54241,
 						"regions":
 						{
 							"bookmark_j":
@@ -737,8 +737,8 @@
 								"regions":
 								[
 									[
-										43045,
-										43045
+										43061,
+										43061
 									]
 								]
 							}
@@ -746,8 +746,8 @@
 						"selection":
 						[
 							[
-								36463,
-								36463
+								46103,
+								46103
 							]
 						],
 						"settings":
@@ -806,7 +806,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 15074.0,
+						"translation.y": 19788.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -1291,15 +1291,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7538,
+						"buffer_size": 7801,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								6502,
-								6502
+								2394,
+								2395
 							]
 						],
 						"settings":
@@ -1358,10 +1358,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 2913.0,
+						"translation.y": 1045.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -1370,15 +1370,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6967,
+						"buffer_size": 6993,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2123,
-								2123
+								1898,
+								1898
 							]
 						],
 						"settings":
@@ -1436,11 +1436,11 @@
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
-						"translation.x": -0.0,
-						"translation.y": 460.0,
+						"translation.x": 0.0,
+						"translation.y": 317.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -3366,7 +3366,7 @@
 	"show_minimap": false,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": true,
+	"side_bar_visible": false,
 	"side_bar_width": 274.0,
 	"status_bar_visible": false,
 	"template_settings":

@@ -9,10 +9,6 @@
 #define DEFINES_H
 
 
-// #define EG(a) Enjon::Graphics::##a
-// #define EM(a) Enjon::Math::##a
-// #define EI(a) Enjon::Input::##a
-
 #define EG Enjon::Graphics
 #define EM Enjon::Math
 #define EI Enjon::Input

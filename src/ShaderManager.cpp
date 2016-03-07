@@ -4,6 +4,7 @@
 
 namespace Enjon { namespace Graphics { namespace ShaderManager {
 
+	// TODO(John): Switch to using a hash map(unordered map)
 	typedef struct
 	{
 		const char* name;
@@ -38,6 +39,8 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("Atlas", "../shaders/atlas.v.glsl", "../shaders/atlas.f.glsl");
 		ShaderManager::AddShader("Text","../shaders/text.v.glsl", "../shaders/text.f.glsl");
 		ShaderManager::AddShader("Learn","../shaders/learn.v.glsl", "../shaders/learn.f.glsl");
+		ShaderManager::AddShader("FrameBuffer", "../shaders/framebuffers.v.glsl", "../shaders/framebuffers.f.glsl");
+		ShaderManager::AddShader("ScreenShader", "../shaders/screenshader.v.glsl", "../shaders/screenshader.f.glsl");
 	}
 
 	void ResizeShaders(int capacity)

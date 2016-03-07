@@ -84,7 +84,7 @@ namespace Enjon { namespace Graphics {
 		glDeleteShader(m_fragmentShaderID);
 	}
 
-	//Adds an attribute to our shader. SHould be called between compiling and linking.
+	//Adds an attribute to our shader. Should be called between compiling and linking.
 	void GLSLProgram::AddAttribute(const GLchar* attributeName) {
 		glBindAttribLocation(m_programID, m_numAttributes++, attributeName);
 	}
