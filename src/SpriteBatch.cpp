@@ -77,7 +77,6 @@ namespace Enjon { namespace Graphics {
 			// Bind the texture of the renderbatch 
 			glBindTexture(GL_TEXTURE_2D, m_renderBatches[i].texture);
 
-
 			// Draw our object 
 			glDrawArrays(GL_TRIANGLES, m_renderBatches[i].offset, m_renderBatches[i].numVertices);
 		}

@@ -33,6 +33,7 @@
 #include "Graphics/FontManager.h"
 #include "Graphics/ParticleEngine2D.h"
 #include "Graphics/FrameBufferObject.h"
+#include "Graphics/DeferredRenderer.h"
 
 #include "IO/ImageLoader.h"
 #include "IO/InputManager.h"

@@ -93,7 +93,7 @@ namespace Enjon { namespace Graphics {
 		glDeleteRenderbuffersEXT(1, &m_depthBuffer);
 	}
 
-	void FrameBufferObject::Begin()
+	void FrameBufferObject::Bind()
 	{
 		// Bind our FBO and set the viewport to the proper size
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo);
@@ -102,7 +102,7 @@ namespace Enjon { namespace Graphics {
 
 		// Clear the render targets
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-		glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+		glClearColor(0.3f, 0.3f, 0.3f, 1.0f );
 
 		glActiveTextureARB(GL_TEXTURE0_ARB);
 		glEnable(GL_TEXTURE_2D);
@@ -112,7 +112,7 @@ namespace Enjon { namespace Graphics {
 		glDrawBuffers(3, buffers);
 	}
 
-	void FrameBufferObject::End()
+	void FrameBufferObject::Unbind()
 	{
 		// Stop acquiring and unbind the FBO
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);

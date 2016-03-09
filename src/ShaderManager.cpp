@@ -41,6 +41,7 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("Learn","../shaders/learn.v.glsl", "../shaders/learn.f.glsl");
 		ShaderManager::AddShader("FrameBuffer", "../shaders/framebuffers.v.glsl", "../shaders/framebuffers.f.glsl");
 		ShaderManager::AddShader("ScreenShader", "../shaders/screenshader.v.glsl", "../shaders/screenshader.f.glsl");
+		ShaderManager::AddShader("NormalShader", "../shaders/framebuffers.v.glsl", "../shaders/normal.f.glsl");
 	}
 
 	void ResizeShaders(int capacity)

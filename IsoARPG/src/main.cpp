@@ -1494,6 +1494,8 @@ const Enjon::uint32 SCREENHEIGHT = 600;
 bool ProcessInput(EI::InputManager* Input);
 GLuint generateAttachmentTexture(GLboolean depth, GLboolean stencil);
 
+float LightZ = 0.075f;
+
 #undef main
 int main(int argc, char** argv) {
 
@@ -1504,27 +1506,42 @@ int main(int argc, char** argv) {
 	// Create a window
 	EG::Window Window;
 	Window.Init("Unit Test", SCREENWIDTH, SCREENHEIGHT);
+	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
+
+	// Init ShaderManager
+	EG::ShaderManager::Init(); 
+
+	// Shader for frame buffer
+	EG::GLSLProgram* FBS 	= EG::ShaderManager::GetShader("FrameBuffer");
+	EG::GLSLProgram* NS 	= EG::ShaderManager::GetShader("NormalShader"); 	
+	EG::GLSLProgram* SS 	= EG::ShaderManager::GetShader("ScreenShader");
 
 	// Create FBO
 	EG::FrameBufferObject* FBO = new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
+	EG::FrameBufferObject* NFBO = new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
+
+	// Deferred Renderer
+	EG::DeferredRenderer* DF = new EG::DeferredRenderer(SCREENWIDTH, SCREENHEIGHT, FBO, EG::ShaderManager::GetShader("ScreenShader"));
 
 	// Sprite batch
 	EG::SpriteBatch* Batch = new EG::SpriteBatch();
 	Batch->Init();
+
+	// Normals batch
+	EG::SpriteBatch* NormalsBatch = new EG::SpriteBatch();
+	NormalsBatch->Init();
+
+	// Deferred batch
+	EG::SpriteBatch* DBatch = new EG::SpriteBatch();
+	DBatch->Init();
 
 	// Create Camera
 	EG::Camera2D* Camera = new EG::Camera2D;
 	Camera->Init(SCREENWIDTH, SCREENHEIGHT);
 
 	// InputManager
-	EI::InputManager* Input = new EI::InputManager();
+	EI::InputManager Input = EI::InputManager();
 
-	// Init ShaderManager
-	EG::ShaderManager::Init(); 
-
-	// Shader for frame buffer
-	EG::GLSLProgram* FBS = EG::ShaderManager::GetShader("FrameBuffer");
-	EG::GLSLProgram* SS = EG::ShaderManager::GetShader("ScreenShader");
 
 	GLfloat quadVertices[] = {   // Vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // Positions   // TexCoords
@@ -1536,7 +1553,6 @@ int main(int argc, char** argv) {
          1.0f, -1.0f,  1.0f, 0.0f,
          1.0f,  1.0f,  1.0f, 1.0f
     };
-
 
     GLuint quadVAO, quadVBO;
     glGenVertexArrays(1, &quadVAO);
@@ -1550,77 +1566,136 @@ int main(int argc, char** argv) {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
     glBindVertexArray(0);
 
-    // Framebuffers
-    GLuint framebuffer;
-    glGenFramebuffers(1, &framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);  
-    // Create a color attachment texture
-    GLuint textureColorbuffer = generateAttachmentTexture(false, false);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
-    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, DrawBuffers);
-    // Now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 	// Matricies for shaders
 	EM::Mat4 Model, View, Projection;
 
-	GLuint OrbTex = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box.png").id;
+	GLuint BrickDiffuseTex 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brick_diffuse.png").id;
+	GLuint BrickNormalsTex 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brick_normal.png").id;
+	GLuint LightBulbTex 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/light_bulb.png").id;
 
 	// Main loop
 	bool running = true;
 	while (running)
 	{
-		t += 0.0005f;
+		t += 0.005f;
 
 		// Check for quit condition
-		running = ProcessInput(Input);
+		running = ProcessInput(&Input);
 
 		// Update camera
 		Camera->Update();
 
-		// Bind frame buffer
-		 glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        // Clear all attached buffers        
-        Window.Clear(1.0f, GL_COLOR_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
+		// Update input
+		Input.Update();
 
-        // Use shader
-        FBS->Use();
-        {
-        	Model = EM::Mat4::Identity();	
-        	View = Camera->GetCameraMatrix();
-        	Projection = EM::Mat4::Identity();
+		// Set up necessary matricies
+    	Model = EM::Mat4::Identity();	
+    	View = Camera->GetCameraMatrix();
+    	Projection = EM::Mat4::Identity();
 
-        	FBS->SetUniformMat4("model", Model);
-        	FBS->SetUniformMat4("view", View);
-        	FBS->SetUniformMat4("projection", Projection);
+		float W = 200.0f, H = 150.0f;
 
-        	Batch->Begin();
-        	{
-        		Batch->Add(
-        			EM::Vec4(Camera->GetPosition(), EM::Vec2(100.0f)), 
-        			EM::Vec4(0, 0, 1, 1), 
-        			OrbTex); 
-        	}
-        	Batch->End();
-        	Batch->RenderBatch();
+    	// Draw batches
+    	Batch->Begin(EG::GlyphSortType::BACK_TO_FRONT);
+    	NormalsBatch->Begin(EG::GlyphSortType::BACK_TO_FRONT);
+    	{
+    		// Add brick diffuse
+    		Batch->Add(
+    			EM::Vec4(Camera->GetPosition() - EM::Vec2(W / 2.0f, H / 2.0f), EM::Vec2(W, H)), 
+    			EM::Vec4(0, 0, 1, 1), 
+    			BrickDiffuseTex, 
+    			EG::RGBA16_White(),
+    			0, 
+    			0, 
+    			EG::CoordinateFormat::ISOMETRIC
+    			);
+    		NormalsBatch->Add(
+    			EM::Vec4(Camera->GetPosition() - EM::Vec2(W / 2.0f, H / 2.0f), EM::Vec2(W, H)), 
+    			EM::Vec4(0, 0, 1, 1), 
+    			BrickNormalsTex,
+    			EG::RGBA16_White(),
+    			0, 
+    			0, 
+    			EG::CoordinateFormat::ISOMETRIC
+    			);
+    		// Add lightbulb cursor
+    		EM::Vec2 MC = Input.GetMouseCoords();
+    		Camera->ConvertScreenToWorld(MC);
+    		MC.y *= -1;
+    		Batch->Add(
+    			EM::Vec4(MC, EM::Vec2(20, 30)), 
+    			EM::Vec4(0, 0, 1, 1), 
+    			LightBulbTex
+    			);
+    	}
+    	Batch->End();
+    	NormalsBatch->End();	
 
-        }
-        FBS->Unuse();
+    	// Bind FBO and render diffuse
+    	FBO->Bind();
+    	{
+    		FBS->Use();
+    		{
+		    	// Update uniforms
+		    	FBS->SetUniformMat4("model", Model);
+		    	FBS->SetUniformMat4("view", View);
+		    	FBS->SetUniformMat4("projection", Projection);
+
+		    	// Render
+		    	Batch->RenderBatch();
+    		}
+    	}
+    	FBO->Unbind();
+    	Batch->RenderBatch();
+
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT);
+
+		// Bind NFBO and render normal
+	    NFBO->Bind();
+	    {
+	        FBS->Use();
+	        {
+	        	// Update uniforms
+	        	FBS->SetUniformMat4("model", Model);
+	        	FBS->SetUniformMat4("view", View);
+	        	FBS->SetUniformMat4("projection", Projection);
+
+	        	NormalsBatch->RenderBatch();
+	        }
+	        FBS->Unuse();
+	     }
+	     NFBO->Unbind();
 
 		// Bind default buffer and render FBO texure
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0f, 0.0f, 0.0f, 1.0f));
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 
+		// Render default buffer and combine diffuse and normals
 		SS->Use();
 		{
-			// SS->SetUniform1f("time", t);
+			GLuint m_diffuseID = glGetUniformLocationARB(SS->GetProgramID(),"u_diffuse");
+			GLuint m_normalsID  = glGetUniformLocationARB(SS->GetProgramID(),"u_normals");
+
+			glActiveTextureARB(GL_TEXTURE0_ARB);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, FBO->GetDiffuseTexture());
+			glUniform1iARB (m_diffuseID, 0);
+
+			glActiveTextureARB(GL_TEXTURE1_ARB);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, NFBO->GetDiffuseTexture());
+			glUniform1iARB (m_normalsID, 1);
+
+			EM::Vec2 MP = Input.GetMouseCoords();
+			MP = EM::Vec2(MP.x / SCREENWIDTH, (-MP.y + SCREENHEIGHT) / SCREENHEIGHT);
+			SS->SetUniform2f("Resolution", EM::Vec2(SCREENWIDTH, SCREENHEIGHT));
+			SS->SetUniform3f("LightPos", EM::Vec3(MP, LightZ));
+			SS->SetUniform4f("LightColor", EM::Vec4(0.5f, 0.8f, 0.6f, 1.0f));
+			SS->SetUniform4f("AmbientColor", EM::Vec4(0.1f, 0.1f, 0.7f, 0.3f));
+			SS->SetUniform3f("Falloff", EM::Vec3(1.0f, 0.1f, 0.01f));
+	
 			glBindVertexArray(quadVAO);
-			glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glBindVertexArray(0);
 		}
@@ -1646,6 +1721,15 @@ bool ProcessInput(EI::InputManager* Input)
 			case SDL_KEYDOWN:
 				Input->PressKey(event.key.keysym.sym);
 				break;
+			case SDL_MOUSEBUTTONDOWN:
+				Input->PressKey(event.button.button);
+				break;
+			case SDL_MOUSEBUTTONUP:
+				Input->ReleaseKey(event.button.button);
+				break;
+			case SDL_MOUSEMOTION:
+				Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+				break;
 			default:
 				break;
 		}
@@ -1655,63 +1739,23 @@ bool ProcessInput(EI::InputManager* Input)
 	{
 		return false;	
 	}
+	if (Input->IsKeyDown(SDLK_UP))
+	{
+		LightZ += 0.001f;
+	}
+	if (Input->IsKeyDown(SDLK_DOWN))
+	{
+		LightZ -= 0.001f;
+	}
 
 	return true;
 }
 
-
-
-// // This function loads a texture from file. Note: texture loading functions like these are usually 
-// // managed by a 'Resource Manager' that manages all resources (like textures, models, audio). 
-// // For learning purposes we'll just define it as a utility function.
-// GLuint loadTexture(GLchar const * path, GLboolean alpha)
-// {
-//     //Generate texture ID and load texture data 
-//     GLuint textureID;
-//     glGenTextures(1, &textureID);
-//     int width,height;
-//     unsigned char* image = SOIL_load_image(path, &width, &height, 0, alpha ? SOIL_LOAD_RGBA : SOIL_LOAD_RGB);
-//     // Assign texture to ID
-//     glBindTexture(GL_TEXTURE_2D, textureID);
-//     glTexImage2D(GL_TEXTURE_2D, 0, alpha ? GL_RGBA : GL_RGB, width, height, 0, alpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, image);
-//     glGenerateMipmap(GL_TEXTURE_2D);	
-
-//     // Parameters
-//     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, alpha ? GL_CLAMP_TO_EDGE : GL_REPEAT );	// Use GL_MIRRORED_REPEAT to prevent white borders. Due to interpolation it takes value from next repeat 
-//     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, alpha ? GL_CLAMP_TO_EDGE : GL_REPEAT );
-//     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-//     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//     glBindTexture(GL_TEXTURE_2D, 0);
-//     SOIL_free_image_data(image);
-//     return textureID;
-// }
-
-// Generates a texture that is suited for attachments to a framebuffer
-GLuint generateAttachmentTexture(GLboolean depth, GLboolean stencil)
+void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager)
 {
-    // What enum to use?
-    GLenum attachment_type;
-    if(!depth && !stencil)
-        attachment_type = GL_RGB;
-    else if(depth && !stencil)
-        attachment_type = GL_DEPTH_COMPONENT;
-    else if(!depth && stencil)
-        attachment_type = GL_STENCIL_INDEX;
 
-    //Generate texture ID and load texture data 
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    if(!depth && !stencil)
-        glTexImage2D(GL_TEXTURE_2D, 0, attachment_type, SCREENWIDTH, SCREENHEIGHT, 0, attachment_type, GL_UNSIGNED_BYTE, NULL);
-    else // Using both a stencil and depth test, needs special format arguments
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, SCREENWIDTH, SCREENHEIGHT, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    return textureID;
 }
+
 
 #endif
 

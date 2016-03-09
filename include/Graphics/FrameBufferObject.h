@@ -16,8 +16,8 @@ namespace Enjon { namespace Graphics {
 			FrameBufferObject(uint32 Width, uint32 Height);
 			~FrameBufferObject();
 
-			void Begin();
-			void End();
+			void Bind();
+			void Unbind();
 
 
 			GLuint inline GetDiffuseTexture() const 	{ return m_diffuseTexture; } 

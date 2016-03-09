@@ -24,14 +24,14 @@ namespace Enjon { namespace Graphics {
 	void DeferredRenderer::Render()
 	{
 		//Projection setup
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		glOrtho(0,m_width,0,m_height,0.1f,2);	
+		// glMatrixMode(GL_PROJECTION);
+		// glPushMatrix();
+		// glLoadIdentity();
+		// glOrtho(0,m_width,0,m_height,0.1f,2);	
 		
 		//Model setup
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
+		// glMatrixMode(GL_MODELVIEW);
+		// glPushMatrix();
 		
 		glUseProgramObjectARB(m_shader->GetProgramID());
 
@@ -82,10 +82,10 @@ namespace Enjon { namespace Graphics {
 		glUseProgramObjectARB(0);
 		
 		//Reset to the matrices	
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
+		// glMatrixMode(GL_PROJECTION);
+		// glPopMatrix();
+		// glMatrixMode(GL_MODELVIEW);
+		// glPopMatrix();
 
 	}
 }}
