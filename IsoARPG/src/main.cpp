@@ -22,7 +22,7 @@
 */
 
 #if 0
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -1486,15 +1486,26 @@ bool ProcessInput(Enjon::Input::InputManager* Input)
 
 #include <unordered_map>
 #include <iostream>
+#include <vector>
 
-const Enjon::uint32 SCREENWIDTH = 800;
-const Enjon::uint32 SCREENHEIGHT = 600;
+const Enjon::uint32 SCREENWIDTH = 1440;
+const Enjon::uint32 SCREENHEIGHT = 900;
 
 /* Function Declarations */
-bool ProcessInput(EI::InputManager* Input);
-GLuint generateAttachmentTexture(GLboolean depth, GLboolean stencil);
+bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera);
+void LevelInit(EG::SpriteBatch* Batch, EG::SpriteBatch* NormalsBatch, EG::SpriteBatch* DepthBatch, GLuint BrickDiffuseTex, GLuint BrickNormalsTex);
 
-float LightZ = 0.075f;
+float LightZ = 0.02f;
+
+#define NUM_LIGHTS 	32
+
+typedef struct
+{
+	EM::Vec3 Position;
+	EG::ColorRGBA16 Color;
+	float Radius;
+	EM::Vec3 Falloff;
+} Light;
 
 #undef main
 int main(int argc, char** argv) {
@@ -1502,11 +1513,15 @@ int main(int argc, char** argv) {
 	Enjon::Init();
 
 	float t = 0.0f;
+	float FPS = 0.0f;
 
 	// Create a window
 	EG::Window Window;
 	Window.Init("Unit Test", SCREENWIDTH, SCREENHEIGHT);
-	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
+	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
+
+	EU::FPSLimiter Limiter;
+	Limiter.Init(60);	
 
 	// Init ShaderManager
 	EG::ShaderManager::Init(); 
@@ -1515,10 +1530,15 @@ int main(int argc, char** argv) {
 	EG::GLSLProgram* FBS 	= EG::ShaderManager::GetShader("FrameBuffer");
 	EG::GLSLProgram* NS 	= EG::ShaderManager::GetShader("NormalShader"); 	
 	EG::GLSLProgram* SS 	= EG::ShaderManager::GetShader("ScreenShader");
+	EG::GLSLProgram* BS 	= EG::ShaderManager::GetShader("Basic");
+	EG::GLSLProgram* DS 	= EG::ShaderManager::GetShader("DepthShader");
 
 	// Create FBO
-	EG::FrameBufferObject* FBO = new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
-	EG::FrameBufferObject* NFBO = new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
+	const int W = 1000;
+	const int H = W * 0.64f;
+	EG::FrameBufferObject* FBO = new EG::FrameBufferObject(W, H);
+	EG::FrameBufferObject* NFBO = new EG::FrameBufferObject(W, H);
+	EG::FrameBufferObject* DFBO = new EG::FrameBufferObject(W, H);
 
 	// Deferred Renderer
 	EG::DeferredRenderer* DF = new EG::DeferredRenderer(SCREENWIDTH, SCREENHEIGHT, FBO, EG::ShaderManager::GetShader("ScreenShader"));
@@ -1531,27 +1551,53 @@ int main(int argc, char** argv) {
 	EG::SpriteBatch* NormalsBatch = new EG::SpriteBatch();
 	NormalsBatch->Init();
 
+	// Normals batch
+	EG::SpriteBatch* DepthBatch = new EG::SpriteBatch();
+	DepthBatch->Init();
+
 	// Deferred batch
-	EG::SpriteBatch* DBatch = new EG::SpriteBatch();
-	DBatch->Init();
+	EG::SpriteBatch* CubeBatch = new EG::SpriteBatch();
+	CubeBatch->Init();
 
 	// Create Camera
 	EG::Camera2D* Camera = new EG::Camera2D;
-	Camera->Init(SCREENWIDTH, SCREENHEIGHT);
+	Camera->Init(W, H);
 
 	// InputManager
 	EI::InputManager Input = EI::InputManager();
 
+	// Vector of lights
+	std::vector<Light> Lights;
+
+	const GLfloat constant = 1.0f; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)
+    const GLfloat linear = 1.0f;
+    const GLfloat quadratic = 100.0f;
+    // Then calculate radius of light volume/sphere
+    const GLfloat maxBrightness = std::fmaxf(std::fmaxf(0.8f, 0.3f), 0.3f);  // max(max(lightcolor.r, lightcolor.g), lightcolor.b)
+    GLfloat Radius = (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2 * quadratic);
+
+	for (GLuint i = 0; i < NUM_LIGHTS; i++)
+	{
+		Light L = {
+					  EM::Vec3(ER::Roll(0, 5000), ER::Roll(0, 5000), LightZ), 
+					  EG::RGBA16(ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, 1.0f), 
+					  Radius, 
+					  EM::Vec3(constant, linear, quadratic)
+				  };
+
+		Lights.push_back(L);
+	}
 
 	GLfloat quadVertices[] = {   // Vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // Positions   // TexCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
 
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
+        -1.0f,  1.0f,  0.0f, 1.0f,   	// TL
+        -1.0f, -1.0f,  0.0f, 0.0f,   	// BL
+         1.0f, -1.0f,  1.0f, 0.0f,		// BR
+
+        -1.0f,  1.0f,  0.0f, 1.0f,		// TL
+         1.0f, -1.0f,  1.0f, 0.0f,		// BR
+         1.0f,  1.0f,  1.0f, 1.0f 		// TR
     };
 
     GLuint quadVAO, quadVBO;
@@ -1569,18 +1615,29 @@ int main(int argc, char** argv) {
 	// Matricies for shaders
 	EM::Mat4 Model, View, Projection;
 
-	GLuint BrickDiffuseTex 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brick_diffuse.png").id;
-	GLuint BrickNormalsTex 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brick_normal.png").id;
-	GLuint LightBulbTex 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/light_bulb.png").id;
+	GLuint BrickDiffuseTex 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png").id;
+	GLuint BrickNormalsTex 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png").id;
+	// GLuint LightBulbTex 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/light_bulb.png").id;
+	GLuint BGTex 			= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id;
+	GLuint CubeTex 			= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box.png").id;
+
+	// Spritesheet
+	EG::SpriteSheet* Sheet = new EG::SpriteSheet();
+	Sheet->Init(EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box_sheet.png"), EM::iVec2(2, 1));
+
+	// Build level
+	LevelInit(Batch, NormalsBatch, DepthBatch, BrickDiffuseTex, BrickNormalsTex);
 
 	// Main loop
 	bool running = true;
 	while (running)
 	{
+		Limiter.Begin();
+
 		t += 0.005f;
 
 		// Check for quit condition
-		running = ProcessInput(&Input);
+		running = ProcessInput(&Input, Camera);
 
 		// Update camera
 		Camera->Update();
@@ -1593,43 +1650,15 @@ int main(int argc, char** argv) {
     	View = Camera->GetCameraMatrix();
     	Projection = EM::Mat4::Identity();
 
-		float W = 200.0f, H = 150.0f;
+		float W = 300.0f, H = 250.0f;
 
-    	// Draw batches
-    	Batch->Begin(EG::GlyphSortType::BACK_TO_FRONT);
-    	NormalsBatch->Begin(EG::GlyphSortType::BACK_TO_FRONT);
-    	{
-    		// Add brick diffuse
-    		Batch->Add(
-    			EM::Vec4(Camera->GetPosition() - EM::Vec2(W / 2.0f, H / 2.0f), EM::Vec2(W, H)), 
-    			EM::Vec4(0, 0, 1, 1), 
-    			BrickDiffuseTex, 
-    			EG::RGBA16_White(),
-    			0, 
-    			0, 
-    			EG::CoordinateFormat::ISOMETRIC
-    			);
-    		NormalsBatch->Add(
-    			EM::Vec4(Camera->GetPosition() - EM::Vec2(W / 2.0f, H / 2.0f), EM::Vec2(W, H)), 
-    			EM::Vec4(0, 0, 1, 1), 
-    			BrickNormalsTex,
-    			EG::RGBA16_White(),
-    			0, 
-    			0, 
-    			EG::CoordinateFormat::ISOMETRIC
-    			);
-    		// Add lightbulb cursor
-    		EM::Vec2 MC = Input.GetMouseCoords();
-    		Camera->ConvertScreenToWorld(MC);
-    		MC.y *= -1;
-    		Batch->Add(
-    			EM::Vec4(MC, EM::Vec2(20, 30)), 
-    			EM::Vec4(0, 0, 1, 1), 
-    			LightBulbTex
-    			);
-    	}
-    	Batch->End();
-    	NormalsBatch->End();	
+		//Enable alpha blending
+		glEnable(GL_BLEND);
+
+		//Set blend function type
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 1.0));
 
     	// Bind FBO and render diffuse
     	FBO->Bind();
@@ -1644,70 +1673,122 @@ int main(int argc, char** argv) {
 		    	// Render
 		    	Batch->RenderBatch();
     		}
+    		FBS->Unuse();
     	}
     	FBO->Unbind();
-    	Batch->RenderBatch();
-
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT);
+		// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
 
 		// Bind NFBO and render normal
 	    NFBO->Bind();
 	    {
-	        FBS->Use();
+	        NS->Use();
 	        {
 	        	// Update uniforms
-	        	FBS->SetUniformMat4("model", Model);
-	        	FBS->SetUniformMat4("view", View);
-	        	FBS->SetUniformMat4("projection", Projection);
+	        	NS->SetUniformMat4("model", Model);
+	        	NS->SetUniformMat4("view", View);
+	        	NS->SetUniformMat4("projection", Projection);
 
 	        	NormalsBatch->RenderBatch();
 	        }
-	        FBS->Unuse();
+	        NS->Unuse();
 	     }
 	     NFBO->Unbind();
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
 
 		// Bind default buffer and render FBO texure
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT);
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
 		glDisable(GL_DEPTH_TEST);
 
 		// Render default buffer and combine diffuse and normals
+		glBlendFunc(GL_ONE, GL_ONE);
 		SS->Use();
 		{
-			GLuint m_diffuseID = glGetUniformLocationARB(SS->GetProgramID(),"u_diffuse");
-			GLuint m_normalsID  = glGetUniformLocationARB(SS->GetProgramID(),"u_normals");
+			static GLuint m_diffuseID 	= glGetUniformLocationARB(SS->GetProgramID(),"u_diffuse");
+			static GLuint m_normalsID  	= glGetUniformLocationARB(SS->GetProgramID(),"u_normals");
+			static GLuint m_positionID  = glGetUniformLocationARB(SS->GetProgramID(),"u_position");
 
+			EM::Vec2 MP = Input.GetMouseCoords();
+			Camera->ConvertScreenToWorld(MP);
+			EM::Vec3 CP = EM::Vec3(Camera->GetPosition() - EM::Vec2(-100.0f, 0.0f), 0.0);
+
+			// Bind diffuse
 			glActiveTextureARB(GL_TEXTURE0_ARB);
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, FBO->GetDiffuseTexture());
 			glUniform1iARB (m_diffuseID, 0);
 
+			// Bind normals
 			glActiveTextureARB(GL_TEXTURE1_ARB);
 			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, NFBO->GetDiffuseTexture());
+			glBindTexture(GL_TEXTURE_2D, NFBO->GetNormalsTexture());
 			glUniform1iARB (m_normalsID, 1);
 
-			EM::Vec2 MP = Input.GetMouseCoords();
-			MP = EM::Vec2(MP.x / SCREENWIDTH, (-MP.y + SCREENHEIGHT) / SCREENHEIGHT);
-			SS->SetUniform2f("Resolution", EM::Vec2(SCREENWIDTH, SCREENHEIGHT));
-			SS->SetUniform3f("LightPos", EM::Vec3(MP, LightZ));
-			SS->SetUniform4f("LightColor", EM::Vec4(0.5f, 0.8f, 0.6f, 1.0f));
-			SS->SetUniform4f("AmbientColor", EM::Vec4(0.1f, 0.1f, 0.7f, 0.3f));
-			SS->SetUniform3f("Falloff", EM::Vec3(1.0f, 0.1f, 0.01f));
-	
+			// Bind depth
+			glActiveTextureARB(GL_TEXTURE2_ARB);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, FBO->GetPositionTexture());
+			glUniform1iARB(m_positionID, 2);	
+
+			for (GLuint i = 0; i < Lights.size(); i++)
+			{
+				auto L = &Lights.at(i);
+
+				glUniform3f(glGetUniformLocation(SS->GetProgramID(), ("Lights[" + std::to_string(i) + "].Position").c_str()), L->Position.x + sin(t) * 100, L->Position.y + sin(t) * 200, L->Position.z + LightZ);
+				glUniform4f(glGetUniformLocation(SS->GetProgramID(), ("Lights[" + std::to_string(i) + "].Color").c_str()), L->Color.r, L->Color.g, L->Color.b, L->Color.a);
+				glUniform1f(glGetUniformLocation(SS->GetProgramID(), ("Lights[" + std::to_string(i) + "].Radius").c_str()), L->Radius);
+				glUniform3f(glGetUniformLocation(SS->GetProgramID(), ("Lights[" + std::to_string(i) + "].Falloff").c_str()), L->Falloff.x, L->Falloff.y, L->Falloff.z);
+			}
+
+			// Set uniforms
+			glUniform2f(glGetUniformLocation(SS->GetProgramID(), "Resolution"),
+						 SCREENWIDTH, SCREENHEIGHT);
+			glUniform4f(glGetUniformLocation(SS->GetProgramID(), "AmbientColor"), 0.2f, 0.7f, 0.5f, 0.1f);
+			glUniform3f(glGetUniformLocation(SS->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
+
+			glUniformMatrix4fv(glGetUniformLocation(SS->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
+											Camera->GetCameraMatrix().Invert().elements);
+			glUniformMatrix4fv(glGetUniformLocation(SS->GetProgramID(), "View"), 1, 0, 
+											Camera->GetCameraMatrix().elements);
+
+			// Render	
 			glBindVertexArray(quadVAO);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glBindVertexArray(0);
+
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 		SS->Unuse();
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		// BS->Use();
+		// {
+  //       	// BS->SetUniformMat4("model", Model);
+  //       	BS->SetUniformMat4("view", View);
+  //       	// BS->SetUniformMat4("projection", Projection);
+
+  //       	CubeBatch->Begin();
+  //       	CubeBatch->Add(
+  //       		EM::Vec4(0, 0, 100, 100), 
+  //       		EM::Vec4(0, 0, 1, 1), 
+  //       		EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/enemy.png").id
+  //       		);
+  //       	CubeBatch->End();
+  //       	CubeBatch->RenderBatch();
+		// }
+		// BS->Unuse();
 
 		Window.SwapBuffer();
+
+		FPS = Limiter.End();
+
+		printf("FPS: %.2f\n", FPS);
 	}
 
 	return 0;
 }
 
-bool ProcessInput(EI::InputManager* Input)
+bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -1735,27 +1816,143 @@ bool ProcessInput(EI::InputManager* Input)
 		}
     }
 
+    const float Speed = 20.0f;
+
 	if (Input->IsKeyPressed(SDLK_ESCAPE))
 	{
 		return false;	
 	}
 	if (Input->IsKeyDown(SDLK_UP))
 	{
-		LightZ += 0.001f;
+		LightZ -= 0.001f;
 	}
 	if (Input->IsKeyDown(SDLK_DOWN))
 	{
-		LightZ -= 0.001f;
+		LightZ += 0.001f;
+	}
+	if (Input->IsKeyDown(SDLK_a))
+	{
+		Camera->SetPosition(Camera->GetPosition() + EM::Vec2(-Speed, 0.0f));
+	}
+	if (Input->IsKeyDown(SDLK_d))
+	{
+		Camera->SetPosition(Camera->GetPosition() + EM::Vec2(Speed, 0.0f));
+	}
+	if (Input->IsKeyDown(SDLK_w))
+	{
+		Camera->SetPosition(Camera->GetPosition() + EM::Vec2(0.0f, Speed));
+	}
+	if (Input->IsKeyDown(SDLK_s))
+	{
+		Camera->SetPosition(Camera->GetPosition() + EM::Vec2(0.0f, -Speed));
+	}
+	if (Input->IsKeyDown(SDLK_e))
+	{
+		auto S = Camera->GetScale();
+			Camera->SetScale(Camera->GetScale() + 0.005f);
+	}
+	if (Input->IsKeyDown(SDLK_q))
+	{
+		auto S = Camera->GetScale();
+		if (S > 0.1f) Camera->SetScale(Camera->GetScale() - 0.005f);
 	}
 
 	return true;
 }
 
-void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager)
+void LevelInit(EG::SpriteBatch* Batch, EG::SpriteBatch* NormalsBatch, EG::SpriteBatch* DepthBatch, GLuint BrickDiffuseTex, GLuint BrickNormalsTex)
 {
+	float x = 0;
+	float y = 0;
+	float currentX = x;
+	float currentY = y; 
+	float tilewidth = 512.0f;
+	float tileheight = tilewidth / 2.0f;
+	unsigned int index = 0;
 
+	int rows = 50, cols = 50;
+
+	Batch->Begin(EG::GlyphSortType::FRONT_TO_BACK);
+	NormalsBatch->Begin(EG::GlyphSortType::FRONT_TO_BACK);
+	DepthBatch->Begin();
+
+	//Grab Iso and Cartesian tile data
+	for (int i = 0; i < rows; i++)
+	{ 
+		for (int j = 0; j < cols; j++)
+		{
+    		// Add brick diffuse
+    		Batch->Add(
+    			EM::Vec4(EM::Vec2(currentX, currentY), EM::Vec2(tilewidth, tileheight))
+    			, EM::Vec4(0, 0, 1, 1)
+    			, BrickDiffuseTex 
+    			, EG::RGBA16_White()
+    			, 0
+    			, 0 
+    			, EG::CoordinateFormat::ISOMETRIC
+    			);
+    		// Add brick normal
+    		NormalsBatch->Add(
+    			EM::Vec4(EM::Vec2(currentX, currentY), EM::Vec2(tilewidth, tileheight))
+    			,EM::Vec4(0, 0, 1, 1) 
+    			, BrickNormalsTex
+    			, EG::RGBA16_White()
+    			, 0 
+    			, 0
+    			,EG::CoordinateFormat::ISOMETRIC
+    			);
+
+			//Increment currentX and currentY	
+			currentX += (tilewidth / 2.0f);
+			currentY -= (tileheight / 2.0f);
+
+		}
+
+		//Go down a row
+		x += tilewidth / 2.0f;
+		y += tileheight / 2.0f;
+		currentX = x;
+		currentY = y;
+	} 
+
+	EG::SpriteSheet Sheet;
+	Sheet.Init(EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box_sheet.png"), EM::iVec2(2, 1));
+
+	for (Enjon::uint32 i = 0; i < 1000; i++)
+	{
+		Enjon::uint32 x = ER::Roll(0, 5000), y = ER::Roll(-5000, 5000);
+		Batch->Add(
+			EM::Vec4(x, y, 40, 40), 
+			Sheet.GetUV(0), 
+			Sheet.texture.id, 
+			EG::RGBA16_White(), 
+			1
+			, 0
+			,EG::CoordinateFormat::ISOMETRIC
+			);
+		NormalsBatch->Add(
+			EM::Vec4(x, y, 40, 40), 
+			Sheet.GetUV(1), 
+			Sheet.texture.id,
+			EG::RGBA16_White(), 
+			1
+			, 0
+			,EG::CoordinateFormat::ISOMETRIC
+			);
+	}
+
+	Batch->Add(
+		EM::Vec4(0, 0, 300, 200), 
+		EM::Vec4(0, 0, 1, 1), 
+		EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png").id, 
+		EG::RGBA16_White(), 
+		1
+		);
+
+	Batch->End();
+	NormalsBatch->End();
+	DepthBatch->End();
 }
-
 
 #endif
 

@@ -27,7 +27,6 @@ void Level::Init(float x, float y, int rows, int cols)
 
 	// Overlays are clean
 	m_OverlaysDirty = false;
-
 	
 	//Push tiles back into level data 
 	float currentX = x;

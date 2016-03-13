@@ -19,18 +19,18 @@ namespace Enjon { namespace Graphics {
 
 		void CreateShader(const char* vertexShaderFilePath, const char* fragmentShaderFilepath); 
 		void AddAttribute(const GLchar* attributeName); 
-		GLint GetUniformLocation(const GLchar* uniformName); 
+		GLint GetUniformLocation(std::string uniformName); 
 		void Use();
 		void Unuse();
 
-		void SetUniform1i(const GLchar* name, const int& val);
-		void SetUniform1fv(const GLchar* name, float* val, int count);
-		void SetUniform1iv(const GLchar* name, int* val, int count);
-		void SetUniform1f(const GLchar* name, const float& val);
-		void SetUniform2f(const GLchar* name, const Math::Vec2& vector);
-		void SetUniform3f(const GLchar* name, const Math::Vec3& vector);
-		void SetUniform4f(const GLchar* name, const Math::Vec4& vector);
-		void SetUniformMat4(const GLchar* name, const Math::Mat4& matrix); 
+		void SetUniform1i(std::string name, const int& val);
+		void SetUniform1fv(std::string name, float* val, int count);
+		void SetUniform1iv(std::string name, int* val, int count);
+		void SetUniform1f(std::string name, const float& val);
+		void SetUniform2f(std::string name, const Math::Vec2& vector);
+		void SetUniform3f(std::string name, const Math::Vec3& vector);
+		void SetUniform4f(std::string name, const Math::Vec4& vector);
+		void SetUniformMat4(std::string name, const Math::Mat4& matrix); 
 		
 		GLuint inline GetProgramID() const { return m_programID; } 
 	

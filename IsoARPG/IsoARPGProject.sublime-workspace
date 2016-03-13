@@ -83,106 +83,7 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 60619,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/include/Enjon.h",
-			"settings":
-			{
-				"buffer_size": 1572,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/src/DeferredRenderer.cpp",
-			"settings":
-			{
-				"buffer_size": 2343,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/src/ShaderManager.cpp",
-			"settings":
-			{
-				"buffer_size": 3391,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/shaders/screenshader.v.glsl",
-			"settings":
-			{
-				"buffer_size": 309,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/shaders/screenshader.f.glsl",
-			"settings":
-			{
-				"buffer_size": 2534,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/shaders/framebuffers.v.glsl",
-			"settings":
-			{
-				"buffer_size": 539,
-				"line_ending": "Windows",
-				"name": "#version 330 core"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/shaders/framebuffers.f.glsl",
-			"settings":
-			{
-				"buffer_size": 467,
-				"line_ending": "Windows",
-				"name": "#version 330 core"
-			}
-		},
-		{
-			"file": "/D/C++Projects/VS/3DEnjon/shaders/normal.f.glsl",
-			"settings":
-			{
-				"buffer_size": 277,
-				"line_ending": "Windows",
-				"name": "#version 330 core"
-			}
-		},
-		{
-			"file": "/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredRendering.vert",
-			"settings":
-			{
-				"buffer_size": 163,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredShading.frag",
-			"settings":
-			{
-				"buffer_size": 269,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredRendering.frag",
-			"settings":
-			{
-				"buffer_size": 663,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredShading.vert",
-			"settings":
-			{
-				"buffer_size": 510,
+				"buffer_size": 66304,
 				"line_ending": "Windows"
 			}
 		},
@@ -190,15 +91,39 @@
 			"file": "/D/C++Projects/VS/3DEnjon/src/FrameBufferObject.cpp",
 			"settings":
 			{
-				"buffer_size": 5315,
+				"buffer_size": 5278,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/FrameBufferObject.h",
+			"file": "/D/C++Projects/VS/3DEnjon/shaders/screenshader.v.glsl",
 			"settings":
 			{
-				"buffer_size": 1398,
+				"buffer_size": 310,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/C++Projects/VS/3DEnjon/shaders/screenshader.f.glsl",
+			"settings":
+			{
+				"buffer_size": 2947,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/C++Projects/VS/3DEnjon/shaders/framebuffers.f.glsl",
+			"settings":
+			{
+				"buffer_size": 366,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/C++Projects/VS/3DEnjon/shaders/framebuffers.v.glsl",
+			"settings":
+			{
+				"buffer_size": 635,
 				"line_ending": "Windows"
 			}
 		}
@@ -282,29 +207,41 @@
 	"expanded_folders":
 	[
 		"/D/C++Projects/VS/3DEnjon/include",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics",
-		"/D/C++Projects/VS/3DEnjon/src",
 		"/D/C++Projects/VS/3DEnjon/shaders"
 	],
 	"file_history":
 	[
-		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/source/DeferredRendering/FBORenderTexture.cpp",
-		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/source/DeferredRendering/DeferredRendering.cpp",
-		"/D/C++Projects/VS/3DEnjon/src/SpriteBatch.cpp",
+		"/D/C++Projects/VS/3DEnjon/src/ShaderManager.cpp",
+		"/D/C++Projects/VS/3DEnjon/proc/dump.txt",
+		"/D/C++Projects/VS/3DEnjon/shaders/depth.f.glsl",
+		"/D/C++Projects/VS/3DEnjon/shaders/depth.v.glsl",
+		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredShading.frag",
 		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredShading.vert",
 		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredRendering.frag",
 		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredRendering.vert",
-		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredShading.frag",
-		"/D/C++Projects/VS/3DEnjon/include/Defines.h",
-		"/D/C++Projects/VS/3DEnjon/src/ShaderManager.cpp",
-		"/D/C++Projects/VS/3DEnjon/src/GLSLProgram.cpp",
+		"/D/C++Projects/VS/3DEnjon/shaders/geometrypass.v.glsl",
+		"/D/C++Projects/VS/3DEnjon/shaders/geometrypass.f.glsl",
+		"/D/C++Projects/VS/3DEnjon/src/GBuffer.cpp",
+		"/D/C++Projects/VS/3DEnjon/include/Graphics/GBuffer.h",
 		"/D/C++Projects/VS/3DEnjon/include/Enjon.h",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/FrameBufferObject.h",
 		"/D/C++Projects/VS/3DEnjon/src/FrameBufferObject.cpp",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/DeferredRenderer.h",
-		"/D/C++Projects/VS/3DEnjon/src/DeferredRenderer.cpp",
-		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/source/DeferredRendering/DeferredRendering.h",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/GLSLProgram.h",
+		"/D/C++Projects/VS/3DEnjon/src/GLSLProgram.cpp",
+		"/D/C++Projects/VS/3DEnjon/include/Math/Mat4.h",
+		"/D/C++Projects/VS/3DEnjon/src/Math/Mat4.cpp",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/Level.cpp",
+		"/D/C++Projects/VS/3DEnjon/include/Defines.h",
+		"/D/C++Projects/VS/3DEnjon/src/DeferredRenderer.cpp",
+		"/D/C++Projects/VS/3DEnjon/shaders/framebuffers.v.glsl",
+		"/D/C++Projects/VS/3DEnjon/shaders/framebuffers.f.glsl",
+		"/D/C++Projects/VS/3DEnjon/shaders/normal.f.glsl",
+		"/C/Users/John/Desktop/Study.txt",
+		"/D/C++Projects/VS/3DEnjon/src/SpriteBatch.cpp",
+		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/source/DeferredRendering/FBORenderTexture.cpp",
+		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/source/DeferredRendering/DeferredRendering.cpp",
+		"/D/C++Projects/VS/3DEnjon/include/Graphics/DeferredRenderer.h",
+		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/source/DeferredRendering/DeferredRendering.h",
 		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/source/DeferredRendering/FBORenderTexture.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/EntityFactory.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/AnimationManager.h",
@@ -321,7 +258,6 @@
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/AIControllerSystem.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/PlayerControllerSystem.h",
 		"/D/C++Projects/VS/3DEnjon/shaders/basic.f.glsl",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/Level.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/Level.h",
 		"/D/C++Projects/VS/3DEnjon/src/Timing.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/ComponentSystems.cpp",
@@ -340,13 +276,11 @@
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/VSQ.txt",
 		"/D/C++Projects/VS/IsoARPG/src/Player.cpp",
 		"/D/C++Projects/VS/IsoARPG/src/Game.cpp",
-		"/D/C++Projects/VS/3DEnjon/proc/dump.txt",
 		"/D/C++Projects/VS/3DEnjon/src/FontManager.cpp",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/FontManager.h",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/Font.h",
 		"/D/C++Projects/VS/3DEnjon/src/Font.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/EffectSystem.cpp",
-		"/D/C++Projects/VS/3DEnjon/include/Math/Mat4.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/EffectSystem.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/Loot.h",
 		"/D/C++Projects/VS/3DEnjon/include/Math/Random.h",
@@ -404,18 +338,7 @@
 		"/D/C++Projects/VS/Enjon/include/Graphics/ShaderManager.h",
 		"/D/C++Projects/VS/IsoARPG/src/main.cpp",
 		"/D/C++Projects/VS/3DEnjon/src/Graphics/Camera3D.cpp",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/Camera3D.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/src",
-		"/D/C++Projects/VS/3DEnjon/src/main.cpp",
-		"/D/HTMLProjects/StartAngular/amd/src/components/data/TodoListService.js",
-		"/D/HTMLProjects/StartAngular/amd/src/app/controllers/MapController.js",
-		"/D/HTMLProjects/StartAngular/amd/src/app/views/partials/map.html",
-		"/D/HTMLProjects/StartAngular/amd/src/components/directives/testDirective.js",
-		"/D/HTMLProjects/StartAngular/amd/src/app/controllers/MainController.js",
-		"/D/HTMLProjects/StartAngular/amd/src/components/data/MessagesService.js",
-		"/D/HTMLProjects/StartAngular/amd/src/components/data/PerformanceService.js",
-		"/D/HTMLProjects/StartAngular/amd/src/components/data/NotificationsService.js",
-		"/D/HTMLProjects/StartAngular/amd/src/index.html"
+		"/D/C++Projects/VS/3DEnjon/include/Graphics/Camera3D.h"
 	],
 	"find":
 	{
@@ -434,6 +357,83 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"show",
+			"FBS",
+			"framebuffers",
+			"T",
+			"Height",
+			"Width",
+			"CP",
+			"Position",
+			"0",
+			"const GLchar*",
+			"const GLchar* uniformName",
+			"SS->",
+			"InverseCameraMatrix",
+			"LightPos",
+			"LP",
+			"100",
+			"-500",
+			"levelinit",
+			"level",
+			"1.0f",
+			"1",
+			"LightPos",
+			"BS",
+			"500",
+			"::",
+			"attenuation",
+			"BS",
+			"100",
+			"10",
+			"levelinit",
+			"400",
+			"300",
+			"256",
+			"SCREENHEIGHT",
+			"SCREENWIDTH",
+			"1000",
+			"100",
+			"10",
+			"1000",
+			"SCR_HEIGHT",
+			"FBS",
+			"BS",
+			"SS",
+			"BS",
+			"FBS",
+			"BS",
+			"Batch",
+			"100",
+			"LP",
+			"LightPos",
+			"point",
+			"LevelInit",
+			"W",
+			"		",
+			"std::Cout",
+			"Camera->GetPosition()",
+			"processi",
+			"    			// , 0 \n    			// , EG::CoordinateFormat::ISOMETRIC\n",
+			" - EM::Vec2(W / 2.0f, H / 2.0f)",
+			"specular",
+			"100",
+			"30",
+			"Texture",
+			"#if 0",
+			" * i",
+			"LightZ",
+			"ShowMouse",
+			"processinpu",
+			"LightPos",
+			"Dir",
+			"LP",
+			"LightPos",
+			"FBS",
+			"LightPos",
+			"vTexCoord",
+			"NS",
+			"NormalsBatch",
 			"SCREENHEIGHT",
 			"SCREENWIDTH",
 			"vTexCoord",
@@ -484,84 +484,7 @@
 			"drawplayer",
 			"drawbox",
 			"2500",
-			"drawbox",
-			"dash",
-			"dashj",
-			"dash",
-			"drawbox",
-			"BL",
-			"TL",
-			"));",
-			".end()",
-			"drawbox",
-			"draw",
-			"blue",
-			"drawbox",
-			"draw player",
-			"World",
-			"drawbox",
-			"PSheet",
-			"drawbox",
-			"BeamPos",
-			"Pos.y",
-			"BeamPos",
-			"Pos.x",
-			"a",
-			"drawbox",
-			"beam",
-			"drawbox",
-			"32",
-			"wall_c",
-			"levelsize",
-			"y",
-			"drawbox",
-			" /",
-			"drawbox",
-			"drawpos",
-			"drawbox",
-			"(); ",
-			"100",
-			"drawsmoke",
-			"8",
-			" + RY",
-			" + RX",
-			"shootgren",
-			"render",
-			"Position->x",
-			"drawsmoke",
-			"0.95f",
-			"drawsmoke",
-			"amountdraw",
-			"shootgrenade",
-			"shootgren",
-			"1000",
-			"shootgre",
-			"200",
-			"shootgrenade",
-			"utils",
-			"if",
-			"1",
-			"void",
-			"grenade",
-			"shootgre",
-			"e",
-			"100",
-			"amountdrawn",
-			"Grenade",
-			"GRENADE",
-			"Grenade",
-			"10",
-			"PROJECTILE",
-			".x",
-			"EAAB",
-			"EAABIsoMin",
-			"EAAB",
-			"AABB",
-			"AABBIsomax",
-			"AABBIsomin",
-			"draw aabb",
-			"drawaabb",
-			"groundtile"
+			"drawbox"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -570,7 +493,7 @@
 		"replace_history":
 		[
 		],
-		"reverse": true,
+		"reverse": false,
 		"show_context": true,
 		"use_buffer2": true,
 		"whole_word": false,
@@ -579,7 +502,7 @@
 	"groups":
 	[
 		{
-			"selected": 7,
+			"selected": 4,
 			"sheets":
 			[
 				{
@@ -588,7 +511,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 60619,
+						"buffer_size": 66304,
 						"regions":
 						{
 							"bookmark_j":
@@ -608,8 +531,19 @@
 								"regions":
 								[
 									[
-										58275,
-										58275
+										58818,
+										58818
+									]
+								]
+							},
+							"bookmark_l":
+							{
+								"flags": 144,
+								"regions":
+								[
+									[
+										62664,
+										62664
 									]
 								]
 							}
@@ -617,8 +551,8 @@
 						"selection":
 						[
 							[
-								58829,
-								58829
+								61657,
+								61657
 							]
 						],
 						"settings":
@@ -677,111 +611,33 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 27710.0,
+						"translation.y": 30884.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "/D/C++Projects/VS/3DEnjon/include/Enjon.h",
+					"file": "/D/C++Projects/VS/3DEnjon/src/FrameBufferObject.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1572,
+						"buffer_size": 5278,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								886,
-								886
+								4916,
+								4916
 							]
 						],
 						"settings":
 						{
 							"bs_sintax": "c++",
-							"buffer_scroll_name": "e46c592f",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								223,
-								11,
-								15,
-								11,
-								7,
-								51,
-								6,
-								243,
-								208,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "/D/C++Projects/VS/3DEnjon/src/DeferredRenderer.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2343,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1202,
-								1202
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "631540c0",
+							"buffer_scroll_name": "0b78611b",
 							"c_time":
 							[
 								128,
@@ -813,12 +669,12 @@
 								224,
 								3,
 								7,
-								10,
 								9,
-								1,
-								9,
-								168,
-								225,
+								42,
+								25,
+								2,
+								138,
+								171,
 								113,
 								1,
 								133,
@@ -833,107 +689,28 @@
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
-						"translation.x": 0.0,
-						"translation.y": 357.0,
+						"translation.x": 41.0,
+						"translation.y": 120.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "/D/C++Projects/VS/3DEnjon/src/ShaderManager.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3391,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1526,
-								1526
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "3c173c30",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								223,
-								11,
-								15,
-								11,
-								10,
-								4,
-								12,
-								85,
-								67,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 216.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
+					"buffer": 2,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/screenshader.v.glsl",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 309,
+						"buffer_size": 310,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								152,
-								152
+								0,
+								0
 							]
 						],
 						"settings":
@@ -994,24 +771,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 3,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/screenshader.f.glsl",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2534,
+						"buffer_size": 2947,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								298,
-								298
+								2839,
+								2839
 							]
 						],
 						"settings":
@@ -1071,32 +848,31 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 952.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
-					"file": "/D/C++Projects/VS/3DEnjon/shaders/framebuffers.v.glsl",
+					"buffer": 4,
+					"file": "/D/C++Projects/VS/3DEnjon/shaders/framebuffers.f.glsl",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 539,
+						"buffer_size": 366,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								255,
-								255
+								97,
+								97
 							]
 						],
 						"settings":
 						{
-							"auto_name": "#version 330 core",
 							"bs_sintax": "plain text",
 							"buffer_scroll_name": "a36e09e2",
 							"c_time":
@@ -1153,31 +929,30 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
-					"file": "/D/C++Projects/VS/3DEnjon/shaders/framebuffers.f.glsl",
+					"buffer": 5,
+					"file": "/D/C++Projects/VS/3DEnjon/shaders/framebuffers.v.glsl",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 467,
+						"buffer_size": 635,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								255,
-								255
+								225,
+								225
 							]
 						],
 						"settings":
 						{
-							"auto_name": "#version 330 core",
 							"bs_sintax": "plain text",
-							"buffer_scroll_name": "a36e09e2",
+							"buffer_scroll_name": "d1046a2d",
 							"c_time":
 							[
 								128,
@@ -1215,85 +990,6 @@
 								5,
 								80,
 								155,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "/D/C++Projects/VS/3DEnjon/shaders/normal.f.glsl",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 277,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								58,
-								58
-							]
-						],
-						"settings":
-						{
-							"auto_name": "#version 330 core",
-							"bs_sintax": "plain text",
-							"buffer_scroll_name": "eec44e26",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								3,
-								8,
-								13,
-								20,
-								1,
-								11,
-								99,
-								109,
 								113,
 								1,
 								133,
@@ -1312,477 +1008,6 @@
 						"zoom_level": 1.0
 					},
 					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredRendering.vert",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 163,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "plain text",
-							"buffer_scroll_name": "59e45481",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								219,
-								9,
-								20,
-								22,
-								14,
-								28,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 10,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredShading.frag",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 269,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								186,
-								186
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "plain text",
-							"buffer_scroll_name": "e42935b0",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								219,
-								9,
-								20,
-								0,
-								42,
-								40,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 11,
-					"type": "text"
-				},
-				{
-					"buffer": 11,
-					"file": "/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredRendering.frag",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 663,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								663,
-								663
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "plain text",
-							"buffer_scroll_name": "9439fd6f",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								219,
-								9,
-								20,
-								22,
-								47,
-								50,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 12,
-					"type": "text"
-				},
-				{
-					"buffer": 12,
-					"file": "/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/data/deferredShading.vert",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 510,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								44,
-								44
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "plain text",
-							"buffer_scroll_name": "5ba7db27",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								219,
-								9,
-								20,
-								0,
-								42,
-								12,
-								0,
-								0,
-								0,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 13,
-					"type": "text"
-				},
-				{
-					"buffer": 13,
-					"file": "/D/C++Projects/VS/3DEnjon/src/FrameBufferObject.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5315,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								5161,
-								5161
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "0b78611b",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								3,
-								7,
-								9,
-								42,
-								25,
-								2,
-								138,
-								171,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1155.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 14,
-					"file": "/D/C++Projects/VS/3DEnjon/include/Graphics/FrameBufferObject.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1398,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								519,
-								519
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "40189c31",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								3,
-								7,
-								9,
-								35,
-								33,
-								1,
-								220,
-								75,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 14,
 					"type": "text"
 				}
 			]
@@ -1873,7 +1098,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": false,
-	"side_bar_width": 274.0,
+	"side_bar_width": 298.0,
 	"status_bar_visible": false,
 	"template_settings":
 	{

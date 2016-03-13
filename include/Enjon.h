@@ -34,6 +34,7 @@
 #include "Graphics/ParticleEngine2D.h"
 #include "Graphics/FrameBufferObject.h"
 #include "Graphics/DeferredRenderer.h"
+#include "Graphics/GBuffer.h"
 
 #include "IO/ImageLoader.h"
 #include "IO/InputManager.h"

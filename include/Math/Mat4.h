@@ -26,6 +26,8 @@ namespace Enjon { namespace Math {
 		
 		Vec4 Multiply(const Vec4& other) const;
 		friend Vec4 operator*(const Mat4& left, const Vec4& right);
+
+		Mat4& Invert();
 		
 		static Mat4 Orthographic(float left, float right, float bottom, float top, float near, float far);
 		static Mat4 Perspective(float FOV, float aspectRatio, float near, float far);
@@ -34,6 +36,8 @@ namespace Enjon { namespace Math {
 		static Mat4 Scale(const Vec3& vector);
 		static Mat4 Translate(const Vec3& vector);
 		static Mat4 Rotate(float angle, const Vec3& axis);
+		static Mat4 Inverse(const Mat4& M);
+
 	};
 
 

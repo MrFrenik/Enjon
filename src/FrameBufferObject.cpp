@@ -77,7 +77,7 @@ namespace Enjon { namespace Graphics {
 		if( status != GL_FRAMEBUFFER_COMPLETE_EXT)
 			throw new std::exception("Can't initialize an FBO render texture. FBO initialization failed.");
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 	}
 
 	/* Destructor */
@@ -98,14 +98,17 @@ namespace Enjon { namespace Graphics {
 		// Bind our FBO and set the viewport to the proper size
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo);
 		glPushAttrib(GL_VIEWPORT_BIT);
-		glViewport(0,0,m_width, m_height);
+		// glViewport(0,0,m_width, m_height);
 
 		// Clear the render targets
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-		glClearColor(0.3f, 0.3f, 0.3f, 1.0f );
+		// glClearColor(0.3f, 0.3f, 0.3f, 1.0f );
 
 		glActiveTextureARB(GL_TEXTURE0_ARB);
 		glEnable(GL_TEXTURE_2D);
+		
+		// glEnable(GL_DEPTH_TEST);
+		// glDepthMask(true);
 
 		// Specify what to render an start acquiring
 		GLenum buffers[] = { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_COLOR_ATTACHMENT2_EXT };

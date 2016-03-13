@@ -23,6 +23,7 @@ namespace Enjon { namespace Graphics {
 			GLuint inline GetDiffuseTexture() const 	{ return m_diffuseTexture; } 
 			GLuint inline GetPositionTexture() const 	{ return m_positionTexture; } 
 			GLuint inline GetNormalsTexture() const 	{ return m_normalsTexture; } 
+			GLuint inline GetDepthTexture() const 		{ return m_depthBuffer; } 
 
 		private:
 		
