@@ -102,9 +102,12 @@ void main()
         }
     }
 
+
     // color = texture2D(u_diffuse, fs_in.TexCoords);
     color = vec4(Lighting, 1.0);
-    // color = vec4(LightDir, 1.0);
+
+    // Emissiveness
+    if (DiffuseColor.r >= 1.0 || DiffuseColor.g >= 1.0 || DiffuseColor.b >= 1.0) color += DiffuseColor; 
 }
 
 

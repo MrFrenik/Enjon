@@ -1534,8 +1534,8 @@ int main(int argc, char** argv) {
 	EG::GLSLProgram* DS 	= EG::ShaderManager::GetShader("DepthShader");
 
 	// Create FBO
-	const int W = 1000;
-	const int H = W * 0.64f;
+	const int W = SCREENWIDTH;
+	const int H = SCREENHEIGHT;
 	EG::FrameBufferObject* FBO = new EG::FrameBufferObject(W, H);
 	EG::FrameBufferObject* NFBO = new EG::FrameBufferObject(W, H);
 	EG::FrameBufferObject* DFBO = new EG::FrameBufferObject(W, H);
@@ -1660,6 +1660,19 @@ int main(int argc, char** argv) {
 
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 1.0));
 
+		auto L = Lights.at(9);
+		auto LC = L.Color;
+		auto LightPosition = L.Position.XY();
+		CubeBatch->Begin();
+		CubeBatch->Add(
+			EM::Vec4(LightPosition.x + sin(t) * 100, -(LightPosition.y + sin(t) * 200 + LightZ * 2000), 40, 40), 
+			EM::Vec4(0, 0, 1, 1), 
+			CubeTex, 
+			EG::RGBA16(LC.r, LC.g + 50, LC.b, LC.a)
+			);
+		CubeBatch->End();
+
+
     	// Bind FBO and render diffuse
     	FBO->Bind();
     	{
@@ -1672,6 +1685,7 @@ int main(int argc, char** argv) {
 
 		    	// Render
 		    	Batch->RenderBatch();
+		    	CubeBatch->RenderBatch();
     		}
     		FBS->Unuse();
     	}
@@ -1713,16 +1727,16 @@ int main(int argc, char** argv) {
 			EM::Vec3 CP = EM::Vec3(Camera->GetPosition() - EM::Vec2(-100.0f, 0.0f), 0.0);
 
 			// Bind diffuse
-			glActiveTextureARB(GL_TEXTURE0_ARB);
+			glActiveTexture(GL_TEXTURE0);
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, FBO->GetDiffuseTexture());
-			glUniform1iARB (m_diffuseID, 0);
+			glUniform1i(m_diffuseID, 0);
 
 			// Bind normals
-			glActiveTextureARB(GL_TEXTURE1_ARB);
+			glActiveTexture(GL_TEXTURE1);
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, NFBO->GetNormalsTexture());
-			glUniform1iARB (m_normalsID, 1);
+			glUniform1i(m_normalsID, 1);
 
 			// Bind depth
 			glActiveTextureARB(GL_TEXTURE2_ARB);
@@ -1743,7 +1757,7 @@ int main(int argc, char** argv) {
 			// Set uniforms
 			glUniform2f(glGetUniformLocation(SS->GetProgramID(), "Resolution"),
 						 SCREENWIDTH, SCREENHEIGHT);
-			glUniform4f(glGetUniformLocation(SS->GetProgramID(), "AmbientColor"), 0.2f, 0.7f, 0.5f, 0.1f);
+			glUniform4f(glGetUniformLocation(SS->GetProgramID(), "AmbientColor"), 0.2f, 0.7f, 0.3f, 0.2f);
 			glUniform3f(glGetUniformLocation(SS->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
 
 			glUniformMatrix4fv(glGetUniformLocation(SS->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
@@ -1760,23 +1774,6 @@ int main(int argc, char** argv) {
 		}
 		SS->Unuse();
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		// BS->Use();
-		// {
-  //       	// BS->SetUniformMat4("model", Model);
-  //       	BS->SetUniformMat4("view", View);
-  //       	// BS->SetUniformMat4("projection", Projection);
-
-  //       	CubeBatch->Begin();
-  //       	CubeBatch->Add(
-  //       		EM::Vec4(0, 0, 100, 100), 
-  //       		EM::Vec4(0, 0, 1, 1), 
-  //       		EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/enemy.png").id
-  //       		);
-  //       	CubeBatch->End();
-  //       	CubeBatch->RenderBatch();
-		// }
-		// BS->Unuse();
 
 		Window.SwapBuffer();
 
@@ -1870,7 +1867,7 @@ void LevelInit(EG::SpriteBatch* Batch, EG::SpriteBatch* NormalsBatch, EG::Sprite
 	float tileheight = tilewidth / 2.0f;
 	unsigned int index = 0;
 
-	int rows = 50, cols = 50;
+	int rows = 10, cols = 10;
 
 	Batch->Begin(EG::GlyphSortType::FRONT_TO_BACK);
 	NormalsBatch->Begin(EG::GlyphSortType::FRONT_TO_BACK);
@@ -1945,7 +1942,7 @@ void LevelInit(EG::SpriteBatch* Batch, EG::SpriteBatch* NormalsBatch, EG::Sprite
 		EM::Vec4(0, 0, 300, 200), 
 		EM::Vec4(0, 0, 1, 1), 
 		EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png").id, 
-		EG::RGBA16_White(), 
+		EG::RGBA16(5.0, 0, 0, 1), 
 		1
 		);
 
