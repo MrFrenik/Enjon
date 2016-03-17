@@ -8,6 +8,7 @@
 #include "IO/InputManager.h"
 #include "Graphics/Color.h"
 #include "Physics/AABB.h"
+#include "Defines.h"
 
 #include "Animation.h"
 
@@ -42,6 +43,7 @@ namespace ECS { namespace Component {
 		Enjon::Math::Vec2 AABBPadding;
 		Enjon::Math::Vec2 GroundPosition;
 		Enjon::Math::Vec2 Dimensions;
+		float Angle;
 		float BaseHeight;
 		float MaxHeight;
 		float VelocityGoalScale; 
@@ -138,6 +140,7 @@ namespace ECS { namespace Component {
 	{
 		Enjon::Graphics::ColorRGBA16 Color;
 		Enjon::Graphics::SpriteBatch* Batch;
+		EG::CoordinateFormat Format;
 		eid32 Entity;
 		// NOTE(John): Should I add a spritebatch component here as well?
 	} Renderer2DComponent;

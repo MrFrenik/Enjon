@@ -20,7 +20,7 @@
 	attack_bow:
 		framecount: 6
 		file: pixelanimtestframessplit.png
-		delays: [0.5, 0.7, 2.5, 0.1, 0.1, 0.5]
+		delays: [0.1, 0.1, 0.2, 0.1, 0.1, 0.5]
 		starts: [96, 102, 102, 96, 102, 96, 102, 96]
 }
 

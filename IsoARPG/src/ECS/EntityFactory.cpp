@@ -39,6 +39,7 @@ namespace ECS { namespace Factory {
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
+			Transform->Angle = 0.0f;
 
 			// Set up AABB
 			V2* CP = &Transform->CartesianPosition;
@@ -57,6 +58,9 @@ namespace ECS { namespace Factory {
 			Animation2D->BeginningFrame = 0;
 			Animation2D->CurrentAnimation = AnimationManager::GetAnimation("Player", "Walk");
 			Animation2D->SetStart = 0;
+
+			// Set up renderer component
+			Manager->Renderer2DSystem->Renderers[Player].Format = EG::CoordinateFormat::CARTESIAN;
 
 			// Set up Inventory System
 			Manager->InventorySystem->Inventories[Player].Entity = Player;
@@ -114,6 +118,7 @@ namespace ECS { namespace Factory {
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
+			Transform->Angle = 0.0f;
 
 			// Set up AABB
 			V2* CP = &Transform->CartesianPosition;
@@ -127,6 +132,9 @@ namespace ECS { namespace Factory {
 			// These are redundant...
 			Animation2D->CurrentFrame = 0; 
 			Animation2D->BeginningFrame = 0;
+
+			// Set up renderer component
+			Manager->Renderer2DSystem->Renderers[AI].Format = EG::CoordinateFormat::CARTESIAN;
 			
 			// Set up Label
 			// NOTE(John): This isn't the best way to do this; most likely will throw an error at some point
@@ -181,6 +189,7 @@ namespace ECS { namespace Factory {
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
+			Transform->Angle = 0.0f;
 
 			// Set up AABB
 			V2* CP = &Transform->CartesianPosition;
@@ -192,6 +201,9 @@ namespace ECS { namespace Factory {
 			Manager->Animation2DSystem->Animations[Item].Sheet = Sheet; 
 			Manager->Animation2DSystem->Animations[Item].CurrentFrame = 0; 
 			Manager->Animation2DSystem->Animations[Item].BeginningFrame = 0; 
+
+			// Set up renderer component
+			Manager->Renderer2DSystem->Renderers[Item].Format = EG::CoordinateFormat::CARTESIAN;
 			
 			// Set up Label
 			// NOTE(John): This isn't the best way to do this; most likely will throw an error at some point
@@ -234,6 +246,7 @@ namespace ECS { namespace Factory {
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
+			Transform->Angle = 0.0f;
 
 			// Set up AABB
 			V2* CP = &Transform->CartesianPosition;
@@ -245,6 +258,9 @@ namespace ECS { namespace Factory {
 			Manager->Animation2DSystem->Animations[Weapon].Sheet = Sheet; 
 			Manager->Animation2DSystem->Animations[Weapon].CurrentFrame = 0; 
 			Manager->Animation2DSystem->Animations[Weapon].BeginningFrame = 0; 
+
+			// Set up renderer component
+			Manager->Renderer2DSystem->Renderers[Weapon].Format = EG::CoordinateFormat::CARTESIAN;
 			
 			// Set up Label
 			// NOTE(John): This isn't the best way to do this; most likely will throw an error at some point

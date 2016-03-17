@@ -1,6 +1,10 @@
 #version 330 core
 in vec2 TexCoords;
 
+layout (location = 0) out vec4 diffuse;     // Diffuse
+layout (location = 1) out vec4 position;
+layout (location = 2) out vec4 normals;
+
 out vec4 color;
 
 uniform sampler2D u_diffuse;
@@ -21,18 +25,15 @@ struct Light {
     float Radius;
 };
 
-const int N_LIGHTS = 32;
+const int N_LIGHTS = 100;
 uniform Light Lights[N_LIGHTS];
 
+uniform int NumberOfLights;
 
 //values used for shading algorithm...
 uniform vec2 Resolution;      //resolution of screen
-// uniform vec3 LightPos;        //light position, normalized
-// uniform vec4 LightColor;      //light RGBA -- alpha is intensity
 uniform vec4 AmbientColor;    //ambient RGBA -- alpha is intensity 
-// uniform vec3 Falloff;         //attenuation coefficients
 uniform vec3 ViewPos;         //attenuation coefficients
-// uniform float Radius;
 uniform mat4 CameraInverse;
 uniform mat4 View;
 
@@ -54,7 +55,7 @@ void main()
     // Get view direction
     vec3 ViewDir = normalize(vec3(ViewPos.xy - Position.xy, ViewPos.z));
 
-    for (int i = 0; i < N_LIGHTS; i++)
+    for (int i = 0; i < NumberOfLights; i++)
     {
         vec3 LightPosVS = (View * vec4(Lights[i].Position.xyz, 1.0f)).xyz;
 
@@ -106,8 +107,13 @@ void main()
     // color = texture2D(u_diffuse, fs_in.TexCoords);
     color = vec4(Lighting, 1.0);
 
+
     // Emissiveness
-    if (DiffuseColor.r >= 1.0 || DiffuseColor.g >= 1.0 || DiffuseColor.b >= 1.0) color += DiffuseColor; 
+    if (DiffuseColor.r >= 1.0 || DiffuseColor.g >= 1.0 || DiffuseColor.b >= 1.0) color += DiffuseColor;
+
+    diffuse = color;
+    position = color;
+    normals = color;
 }
 
 

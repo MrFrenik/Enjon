@@ -34,11 +34,13 @@ namespace ECS { namespace Systems { namespace AIController {
 				Enjon::Math::Vec2 b = AI->GroundPosition;
 				float distance = a.DistanceTo(b);
 
+				float speed = 5.0f;
+
 				if (distance <= 60.0f) AI->Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
 				// Move towards player
 				// TODO(John): Come up with some kind of passed in speed parameter to multiply by the difference vector
 				//AI->Velocity = Difference; 
-				else AI->Velocity = Difference * 2.0f;
+				else AI->Velocity = Difference * speed;
 
 
 				// Just testing projectiles from enemies

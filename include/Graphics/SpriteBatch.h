@@ -6,6 +6,7 @@
 #include "GLEW/glew.h"
 #include "Math/Maths.h"
 #include "System/Types.h"
+#include "Defines.h"
 
 #include <vector>
 #include <algorithm> 
@@ -121,7 +122,6 @@ namespace Enjon { namespace Graphics {
 	{
 		Glyph glyph;
 
-        // Enjon::Math::Vec2 halfDims(destRect.z / 2.0f, destRect.w / 2.0f);
         Enjon::Math::Vec2 halfDims(destRect.z / 2.0f, destRect.w / 2.0f);
 
         // Get points centered at origin

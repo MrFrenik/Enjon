@@ -48,12 +48,14 @@ namespace ECS{ namespace Systems { namespace Transform {
 				if (PGP->DistanceTo(*GP) >= 5000 && Manager->AttributeSystem->Masks[e] & Masks::Type::AI) continue; // TODO(John): Make this squared distance so as to not use a square root function EVERY frame for EVERY entity
 
 				// If an item
+				
 				if ((Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0)
 				{
 					// Need to see whether or not the player is within range before I turn on its collision component
 					Enjon::Math::Vec3* P = &Manager->TransformSystem->Transforms[e].Position;
 
-					if (PGP->DistanceTo(*GP) <= TILE_SIZE * 2) Manager->CollisionSystem->Entities.push_back(e);
+					// if (PGP->DistanceTo(*GP) <= TILE_SIZE * 2) Manager->CollisionSystem->Entities.push_back(e);
+					if (PGP->DistanceTo(*GP) <= 5000 * 2) Manager->CollisionSystem->Entities.push_back(e);
 
 					// Set up GroundPosition
 					GP->x = P->x + Manager->TransformSystem->Transforms[e].Dimensions.x / 2.0f - 32.0f; // Tilewidth

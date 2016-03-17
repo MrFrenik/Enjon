@@ -34,15 +34,12 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 
 		// Add shaders
 		ShaderManager::AddShader("Basic", "../shaders/basic.v.glsl", "../shaders/basic.f.glsl");
-		ShaderManager::AddShader("Button", "../shaders/button.v.glsl", "../shaders/button.f.glsl");
-		ShaderManager::AddShader("ButtonNT", "../shaders/buttonNT.v.glsl", "../shaders/buttonNT.f.glsl");
-		ShaderManager::AddShader("Atlas", "../shaders/atlas.v.glsl", "../shaders/atlas.f.glsl");
 		ShaderManager::AddShader("Text","../shaders/text.v.glsl", "../shaders/text.f.glsl");
-		ShaderManager::AddShader("Learn","../shaders/learn.v.glsl", "../shaders/learn.f.glsl");
 		ShaderManager::AddShader("FrameBuffer", "../shaders/framebuffers.v.glsl", "../shaders/framebuffers.f.glsl");
 		ShaderManager::AddShader("ScreenShader", "../shaders/screenshader.v.glsl", "../shaders/screenshader.f.glsl");
 		ShaderManager::AddShader("NormalShader", "../shaders/framebuffers.v.glsl", "../shaders/normal.f.glsl");
 		ShaderManager::AddShader("DepthShader", "../shaders/depth.v.glsl", "../shaders/depth.f.glsl");
+		ShaderManager::AddShader("NoCameraProjection", "../shaders/no_camera.v.glsl", "../shaders/no_camera.f.glsl");
 	}
 
 	void ResizeShaders(int capacity)

@@ -98,10 +98,12 @@ namespace ECS{ namespace Systems { namespace Collision {
 						// Get collision mask for A and B
 						Enjon::uint32 Mask = GetCollisionType(Manager, e, collider);
 
+						if (Mask == (COLLISION_ITEM | COLLISION_ITEM)) 			{ 												continue; }
 						if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
 						if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ CollideWithItem(Manager, collider, e); 		continue; } 
+						if (Mask == (COLLISION_ENEMY | COLLISION_ITEM)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_EXPLOSIVE | COLLISION_ENEMY))	{ CollideWithProjectile(Manager, e, collider);  continue; }
 					}
