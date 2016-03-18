@@ -35,9 +35,9 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		// Add shaders
 		ShaderManager::AddShader("Basic", "../shaders/basic.v.glsl", "../shaders/basic.f.glsl");
 		ShaderManager::AddShader("Text","../shaders/text.v.glsl", "../shaders/text.f.glsl");
-		ShaderManager::AddShader("FrameBuffer", "../shaders/framebuffers.v.glsl", "../shaders/framebuffers.f.glsl");
-		ShaderManager::AddShader("ScreenShader", "../shaders/screenshader.v.glsl", "../shaders/screenshader.f.glsl");
-		ShaderManager::AddShader("NormalShader", "../shaders/framebuffers.v.glsl", "../shaders/normal.f.glsl");
+		ShaderManager::AddShader("DiffuseShader", "../shaders/diffuse.v.glsl", "../shaders/diffuse.f.glsl");
+		ShaderManager::AddShader("DeferredShader", "../shaders/deferred.v.glsl", "../shaders/deferred.f.glsl");
+		ShaderManager::AddShader("NormalsShader", "../shaders/normal.v.glsl", "../shaders/normal.f.glsl");
 		ShaderManager::AddShader("DepthShader", "../shaders/depth.v.glsl", "../shaders/depth.f.glsl");
 		ShaderManager::AddShader("NoCameraProjection", "../shaders/no_camera.v.glsl", "../shaders/no_camera.f.glsl");
 	}

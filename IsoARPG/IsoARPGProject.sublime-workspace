@@ -83,15 +83,15 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 69712,
+				"buffer_size": 75215,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/D/C++Projects/VS/3DEnjon/src/Camera2D.cpp",
+			"file": "/D/C++Projects/VS/3DEnjon/src/ShaderManager.cpp",
 			"settings":
 			{
-				"buffer_size": 3930,
+				"buffer_size": 3225,
 				"line_ending": "Windows"
 			}
 		},
@@ -104,10 +104,18 @@
 			}
 		},
 		{
-			"file": "/D/C++Projects/VS/3DEnjon/src/FrameBufferObject.cpp",
+			"file": "/D/C++Projects/VS/3DEnjon/shaders/no_camera.f.glsl",
 			"settings":
 			{
-				"buffer_size": 5290,
+				"buffer_size": 200,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/C++Projects/VS/3DEnjon/shaders/no_camera.v.glsl",
+			"settings":
+			{
+				"buffer_size": 422,
 				"line_ending": "Windows"
 			}
 		},
@@ -131,7 +139,7 @@
 			"file": "/D/C++Projects/VS/3DEnjon/shaders/screenshader.f.glsl",
 			"settings":
 			{
-				"buffer_size": 3031,
+				"buffer_size": 3233,
 				"line_ending": "Windows"
 			}
 		},
@@ -231,14 +239,27 @@
 	"expanded_folders":
 	[
 		"/D/C++Projects/VS/3DEnjon/include",
-		"/D/C++Projects/VS/3DEnjon/src"
+		"/D/C++Projects/VS/3DEnjon/src",
+		"/D/C++Projects/VS/3DEnjon/shaders"
 	],
 	"file_history":
 	[
+		"/D/C++Projects/VS/HQHT/UI/css/style.css",
+		"/D/C++Projects/VS/HQHT/UI/index.html",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/CollisionSystem.cpp",
+		"/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteBatch.h",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/EntityFactory.cpp",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/Animation2DSystem.cpp",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations/Player/player.txt",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/AIControllerSystem.cpp",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Components.h",
+		"/D/C++Projects/VS/3DEnjon/src/FrameBufferObject.cpp",
+		"/D/C++Projects/VS/3DEnjon/src/ShaderManager.cpp",
+		"/D/C++Projects/VS/3DEnjon/shaders/basic.v.glsl",
 		"/D/C++Projects/VS/3DEnjon/proc/debug.bat",
 		"/D/C++Projects/VS/3DEnjon/src/Window.cpp",
 		"/D/C++Projects/VS/3DEnjon/include/Defines.h",
-		"/D/C++Projects/VS/3DEnjon/src/ShaderManager.cpp",
 		"/D/C++Projects/VS/3DEnjon/proc/dump.txt",
 		"/D/C++Projects/VS/3DEnjon/shaders/depth.f.glsl",
 		"/D/C++Projects/VS/3DEnjon/shaders/depth.v.glsl",
@@ -252,7 +273,6 @@
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/GBuffer.h",
 		"/D/C++Projects/VS/3DEnjon/include/Enjon.h",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/FrameBufferObject.h",
-		"/D/C++Projects/VS/3DEnjon/src/FrameBufferObject.cpp",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/GLSLProgram.h",
 		"/D/C++Projects/VS/3DEnjon/src/GLSLProgram.cpp",
 		"/D/C++Projects/VS/3DEnjon/include/Math/Mat4.h",
@@ -273,15 +293,12 @@
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/AnimationManager.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/CollisionSystem.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Animation2DSystem.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations/Player/player.txt",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteSheetmanager.h",
 		"/D/C++Projects/VS/3DEnjon/src/SpriteSheetManager.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/AnimationManager.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/Loot.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/Animation2DSystem.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/PlayerControllerSystem.cpp",
 		"/D/C++Projects/VS/3DEnjon/proc/build.bat",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/AIControllerSystem.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/PlayerControllerSystem.h",
 		"/D/C++Projects/VS/3DEnjon/shaders/basic.f.glsl",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/Level.h",
@@ -290,14 +307,9 @@
 		"/D/C++Projects/VS/3DEnjon/src/ParticleEngine2D.cpp",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/ParticleEngine2D.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Effects.h",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteBatch.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Masks.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/AttributeSystem.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Components.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Transform3DSystem.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/EntityFactory.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/CollisionSystem.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/ComponentSystems.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/VSQ.txt",
 		"/D/C++Projects/VS/IsoARPG/src/Player.cpp",
@@ -320,7 +332,6 @@
 		"/D/C++Projects/VS/3DEnjon/src/Game.cpp",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/Vertex.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/SpatialHash.cpp",
-		"/D/C++Projects/VS/3DEnjon/shaders/basic.v.glsl",
 		"/D/C++Projects/VS/3DEnjon/src/AABB.cpp",
 		"/D/C++Projects/Tutorials/Help/main.c",
 		"/D/Programs/Brogue/Brogue-windows-v1.7.4/Brogue Source/BrogueCode/Random.c",
@@ -360,9 +371,7 @@
 		"/D/C++Projects/VS/IsoARPG/src/Enemy.cpp",
 		"/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteSheet.h",
 		"/D/C++Projects/VS/Enjon/src/ShaderManager.cpp",
-		"/D/C++Projects/VS/Enjon/include/Graphics/ShaderManager.h",
-		"/D/C++Projects/VS/IsoARPG/src/main.cpp",
-		"/D/C++Projects/VS/3DEnjon/src/Graphics/Camera3D.cpp"
+		"/D/C++Projects/VS/Enjon/include/Graphics/ShaderManager.h"
 	],
 	"find":
 	{
@@ -381,6 +390,35 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"#if 1",
+			"#if 0",
+			"sin",
+			"BS",
+			"UIBatch",
+			"Graphics",
+			"HUDCamera->Init",
+			"HUDCamera.Init",
+			"HUDCAmera",
+			"position",
+			"DFBO",
+			"CubeBatch",
+			"#if 0",
+			"amountdrawn",
+			"amountdraw",
+			"for",
+			"AABB",
+			"a",
+			"angle",
+			"Beam",
+			"vbo",
+			"NormalsBatch",
+			"NS",
+			"nS",
+			"NS",
+			"->",
+			"DiffuseBatch",
+			"Shader",
+			"#if ",
 			"0.5f",
 			"0.8f",
 			"0.2f",
@@ -479,36 +517,7 @@
 			"point",
 			"LevelInit",
 			"W",
-			"		",
-			"std::Cout",
-			"Camera->GetPosition()",
-			"processi",
-			"    			// , 0 \n    			// , EG::CoordinateFormat::ISOMETRIC\n",
-			" - EM::Vec2(W / 2.0f, H / 2.0f)",
-			"specular",
-			"100",
-			"30",
-			"Texture",
-			"#if 0",
-			" * i",
-			"LightZ",
-			"ShowMouse",
-			"processinpu",
-			"LightPos",
-			"Dir",
-			"LP",
-			"LightPos",
-			"FBS",
-			"LightPos",
-			"vTexCoord",
-			"NS",
-			"NormalsBatch",
-			"SCREENHEIGHT",
-			"SCREENWIDTH",
-			"vTexCoord",
-			"100",
-			"shaderID",
-			"m_fbo"
+			"		"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -535,7 +544,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 69712,
+						"buffer_size": 75215,
 						"regions":
 						{
 							"bookmark_j":
@@ -544,8 +553,8 @@
 								"regions":
 								[
 									[
-										43154,
-										43154
+										42225,
+										42225
 									]
 								]
 							},
@@ -555,8 +564,8 @@
 								"regions":
 								[
 									[
-										55029,
-										55029
+										59039,
+										59039
 									]
 								]
 							},
@@ -566,8 +575,8 @@
 								"regions":
 								[
 									[
-										63789,
-										63789
+										67768,
+										67768
 									]
 								]
 							}
@@ -575,8 +584,8 @@
 						"selection":
 						[
 							[
-								55475,
-								55475
+								58106,
+								58106
 							]
 						],
 						"settings":
@@ -635,7 +644,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 25789.0,
+						"translation.y": 27030.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -643,25 +652,25 @@
 				},
 				{
 					"buffer": 1,
-					"file": "/D/C++Projects/VS/3DEnjon/src/Camera2D.cpp",
-					"semi_transient": true,
+					"file": "/D/C++Projects/VS/3DEnjon/src/ShaderManager.cpp",
+					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3930,
+						"buffer_size": 3225,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2346,
-								2346
+								1191,
+								1191
 							]
 						],
 						"settings":
 						{
 							"bs_sintax": "c++",
-							"buffer_scroll_name": "987dc711",
+							"buffer_scroll_name": "3c173c30",
 							"c_time":
 							[
 								128,
@@ -696,9 +705,9 @@
 								11,
 								10,
 								4,
-								10,
-								101,
-								36,
+								12,
+								85,
+								67,
 								113,
 								1,
 								133,
@@ -714,7 +723,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1155.0,
+						"translation.y": 187.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
@@ -797,30 +806,30 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
 					"buffer": 3,
-					"file": "/D/C++Projects/VS/3DEnjon/src/FrameBufferObject.cpp",
+					"file": "/D/C++Projects/VS/3DEnjon/shaders/no_camera.f.glsl",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5290,
+						"buffer_size": 200,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4858,
-								4858
+								164,
+								164
 							]
 						],
 						"settings":
 						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "0b78611b",
+							"bs_sintax": "plain text",
+							"buffer_scroll_name": "42e56b2b",
 							"c_time":
 							[
 								128,
@@ -851,13 +860,13 @@
 								7,
 								224,
 								3,
-								7,
-								9,
-								42,
-								25,
-								2,
-								138,
-								171,
+								17,
+								11,
+								36,
+								10,
+								14,
+								97,
+								1,
 								113,
 								1,
 								133,
@@ -869,18 +878,95 @@
 								46
 							],
 							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 1265.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
 					"buffer": 4,
+					"file": "/D/C++Projects/VS/3DEnjon/shaders/no_camera.v.glsl",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 422,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								420,
+								420
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "plain text",
+							"buffer_scroll_name": "d9092868",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								3,
+								17,
+								11,
+								36,
+								18,
+								10,
+								28,
+								250,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/normal.f.glsl",
 					"semi_transient": false,
 					"settings":
@@ -958,7 +1044,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 6,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/screenshader.v.glsl",
 					"semi_transient": false,
 					"settings":
@@ -970,8 +1056,8 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								58,
+								58
 							]
 						],
 						"settings":
@@ -1032,24 +1118,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 7,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/screenshader.f.glsl",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3031,
+						"buffer_size": 3233,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								337,
-								337
+								3174,
+								3174
 							]
 						],
 						"settings":
@@ -1109,14 +1195,14 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 323.0,
+						"translation.y": 1224.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 8,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/framebuffers.f.glsl",
 					"semi_transient": false,
 					"settings":
@@ -1190,11 +1276,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 9,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/framebuffers.v.glsl",
 					"semi_transient": false,
 					"settings":
@@ -1206,8 +1292,8 @@
 						"selection":
 						[
 							[
-								386,
-								386
+								63,
+								63
 							]
 						],
 						"settings":
@@ -1265,10 +1351,10 @@
 							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 102.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 5,
 					"type": "text"
 				}
 			]
