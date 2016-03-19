@@ -90,7 +90,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 100;
+const int LEVELSIZE = 200;
 
 float DashingCounter = 0.0f;
 
@@ -218,6 +218,9 @@ int main(int argc, char** argv)
 	EG::SpriteBatch NormalsBatch;
 	NormalsBatch.Init();
 
+	EG::SpriteBatch GroundTileNormalsBatch;
+	GroundTileNormalsBatch.Init();
+
 	EG::SpriteBatch DeferredBatch;
 	DeferredBatch.Init();
 
@@ -263,6 +266,15 @@ int main(int argc, char** argv)
 	level.DrawGroundTiles(GroundTileBatch);
 	GroundTileBatch.End();
 
+	GroundTileNormalsBatch.Begin();
+	GroundTileNormalsBatch.Add(
+		EM::Vec4(-10000, -10000, 10000, 10000), 
+		EM::Vec4(0, 0, 1, 1),
+		EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, 
+		EG::RGBA16(0.0f, 0.0f, 1.0f, 1.0f)
+		);
+	GroundTileNormalsBatch.End();
+
 	CartesianTileBatch.Begin();
 	level.DrawCartesianLevel(CartesianTileBatch);
 	CartesianTileBatch.End();
@@ -289,7 +301,7 @@ int main(int argc, char** argv)
 	ParticleBatch.Init();
 
 	// Create particle batchs to be used by World
-	EG::Particle2D::ParticleBatch2D* LightParticleBatch = EG::Particle2D::NewParticleBatch(&LightBatch);
+	EG::Particle2D::ParticleBatch2D* LightParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
 	EG::Particle2D::ParticleBatch2D* TestParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
 	EG::Particle2D::ParticleBatch2D* TextParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
 	EG::Particle2D::ParticleBatch2D* SmokeBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
@@ -300,8 +312,10 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* ScreenShader 	= EG::ShaderManager::GetShader("NoCameraProjection");
 
 	// FBO
-	EG::FrameBufferObject* DiffuseFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
-	EG::FrameBufferObject* NormalsFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
+	float DWidth = SCREENWIDTH;
+	float DHeight = SCREENHEIGHT;
+	EG::FrameBufferObject* DiffuseFBO 	= new EG::FrameBufferObject(DWidth, DHeight);
+	EG::FrameBufferObject* NormalsFBO 	= new EG::FrameBufferObject(DWidth, DHeight);
 	EG::FrameBufferObject* DeferredFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
 
 	// Create InputManager
@@ -329,7 +343,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 10;
+	static uint32 AmountDrawn = 100;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -404,17 +418,20 @@ int main(int argc, char** argv)
 	std::vector<Light> Lights;
 
 	const GLfloat constant = 1.0f; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)
-    const GLfloat linear = 1.0f;
-    const GLfloat quadratic = 100.0f;
+    const GLfloat linear = 0.1f;
+    const GLfloat quadratic = 25.0f;
     // Then calculate radius of light volume/sphere
-    const GLfloat maxBrightness = std::fmaxf(std::fmaxf(0.8f, 0.3f), 0.3f);  // max(max(lightcolor.r, lightcolor.g), lightcolor.b)
-    GLfloat Radius = (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2 * quadratic);
 
+   	float LevelWidth = level.GetWidth();
+   	float LevelHeight = level.GetHeight(); 
 	for (GLuint i = 0; i < NUM_LIGHTS; i++)
 	{
+		EG::ColorRGBA16 Color = EG::RGBA16(ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, 1.5f);
+	    GLfloat maxBrightness = std::fmaxf(std::fmaxf(Color.r, Color.g), Color.b);  // max(max(lightcolor.r, lightcolor.g), lightcolor.b)
+	    GLfloat Radius = (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2 * quadratic);
 		Light L = {
-					  EM::Vec3(ER::Roll(0, -5000), ER::Roll(0, -5000), LightZ), 
-					  EG::RGBA16(ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, 1.0f), 
+					  EM::Vec3(ER::Roll(0, -LevelWidth), ER::Roll(0, -LevelHeight), LightZ), 
+					  Color, 
 					  Radius, 
 					  EM::Vec3(constant, linear, quadratic)
 				  };
@@ -679,7 +696,7 @@ int main(int argc, char** argv)
 
 		// Draw box
 		// For a box, need 4 faces, so 4 quads
-		DrawBox(&EntityBatch, &EntityBatch, World);
+		// DrawBox(&EntityBatch, &EntityBatch, World);
 
 		// Dashing state if dashing
 		Graphics::SpriteSheet* Sheet = World->Animation2DSystem->Animations[Player].Sheet; 
@@ -902,6 +919,18 @@ int main(int argc, char** argv)
 										0.4f, "TileOverlay: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
 										0.4f, TileOverlayTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+		// // Add LightsToDraw
+		Enjon::uint32 LightsSize = LightsToDraw.size(); 
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 160.0f, 
+										0.4f, "LightsToDraw: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 160.0f, 
+										0.4f, std::to_string(LightsSize), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+		// // LightZ
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 180.0f, 
+										0.4f, "LightZ: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 180.0f, 
+										0.4f, std::to_string(LightZ), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Draw Isometric compass
 		MapEntityBatch.Add(EM::Vec4(HUDCamera.GetPosition() - EM::Vec2(SCREENWIDTH / 2.0f - 30.0f, -SCREENHEIGHT / 2.0f + 250.0f), 150.0f, 75.0f), 
@@ -957,20 +986,19 @@ int main(int argc, char** argv)
 		Points.push_back(EM::Vec2(-900, -1200));	// TL
 		EntityBatch.AddPolygon(Points, EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::RGBA16_Orange(), Points.at(0).y, EG::CoordinateFormat::ISOMETRIC);
 
-
 		// Add a random cube 
-		static EG::SpriteSheet* BoxSheet = EG::SpriteSheetManager::GetSpriteSheet("BoxSheet");
-		EM::Vec2 BoxPos = World->TransformSystem->Transforms[Player].Position.XY();
-		EntityBatch.Add(
-			EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
-			BoxSheet->GetUV(0), 
-			BoxSheet->texture.id
-			);
-		NormalsBatch.Add(
-			EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
-			BoxSheet->GetUV(1),
-			BoxSheet->texture.id
-			);
+		// static EG::SpriteSheet* BoxSheet = EG::SpriteSheetManager::GetSpriteSheet("BoxSheet");
+		// EM::Vec2 BoxPos = World->TransformSystem->Transforms[Player].Position.XY();
+		// EntityBatch.Add(
+		// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
+		// 	BoxSheet->GetUV(0), 
+		// 	BoxSheet->texture.id
+		// 	);
+		// NormalsBatch.Add(
+		// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
+		// 	BoxSheet->GetUV(1),
+		// 	BoxSheet->texture.id
+		// 	);
 
 
 		EntityBatch.End();
@@ -1013,6 +1041,7 @@ int main(int argc, char** argv)
 				NormalsShader->SetUniformMat4("view", view);
 				NormalsShader->SetUniformMat4("projection", projection);
 
+				GroundTileNormalsBatch.RenderBatch();
 				NormalsBatch.RenderBatch();
 			}
 			NormalsShader->Unuse();
@@ -1052,26 +1081,28 @@ int main(int argc, char** argv)
 
 				glUniform1i(glGetUniformLocation(DeferredShader->GetProgramID(), "NumberOfLights"), LightsToDraw.size());
 
+				auto CameraScale = Camera.GetScale();
 				for (GLuint i = 0; i < LightsToDraw.size(); i++)
 				{
 					auto L = LightsToDraw.at(i);
 
-					glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Position").c_str()), L->Position.x + sin(t) * 100, L->Position.y + sin(t) * 200, L->Position.z + LightZ);
+					glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Position").c_str()), L->Position.x, L->Position.y, L->Position.z + LightZ);
 					glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Color").c_str()), L->Color.r, L->Color.g, L->Color.b, L->Color.a);
-					glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Radius").c_str()), L->Radius);
+					glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Radius").c_str()), L->Radius / CameraScale);
 					glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Falloff").c_str()), L->Falloff.x, L->Falloff.y, L->Falloff.z);
 				}
 
 				// Set uniforms
 				glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
 							 SCREENWIDTH, SCREENHEIGHT);
-				glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.2f, 0.8f, 1.0f);
+				glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 1.0f);
 				glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
 
 				glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
 												Camera.GetCameraMatrix().Invert().elements);
 				glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "View"), 1, 0, 
 												Camera.GetCameraMatrix().elements);
+				glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), "Scale"), Camera.GetScale());
 
 
 				// Render	
@@ -1221,6 +1252,12 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	}
 	if (Input->IsKeyDown(SDLK_e)){
 		Camera->SetScale(Camera->GetScale() + 0.01f);
+	}
+	if (Input->IsKeyDown(SDLK_UP)){
+		LightZ += 0.01f;
+	}
+	if (Input->IsKeyDown(SDLK_DOWN)){
+		LightZ -= 0.01f;
 	}
 
 	if (Input->IsKeyPressed(SDLK_c)) {
@@ -1372,16 +1409,15 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 {
 	for (auto& L : *Lights)
 	{
-		auto P = L.Position.XY();
-		P.y *= -1;
 		auto R = L.Radius;
-		auto D = 2 * R;
+		auto D = 20 * R;
 		EM::Vec2 dimensions(D, D);
+		auto P = EM::Vec2(L.Position.x - D, L.Position.y - D);
 
 		 
-		Enjon::Math::Vec2 scaledScreenDimensions = Enjon::Math::Vec2((float)SCREENWIDTH, (float)SCREENHEIGHT) / Camera->GetScale() * 2;
-		const float MIN_DISTANCE_X = dimensions.x / 2.0f + scaledScreenDimensions.x / 2.0f;
-		const float MIN_DISTANCE_Y = dimensions.y / 2.0f + scaledScreenDimensions.y / 2.0f;
+		Enjon::Math::Vec2 scaledScreenDimensions = Enjon::Math::Vec2((float)SCREENWIDTH, (float)SCREENHEIGHT) / Camera->GetScale() * 4.0f;
+		float MIN_DISTANCE_X = dimensions.x / 2.0f + scaledScreenDimensions.x / 2.0f;
+		float MIN_DISTANCE_Y = dimensions.y / 2.0f + scaledScreenDimensions.y / 2.0f;
 
 		//Center position of parameters passed in
 		Enjon::Math::Vec2 centerPos = P + dimensions / 2.0f;	

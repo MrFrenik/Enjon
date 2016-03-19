@@ -36,6 +36,7 @@ uniform vec4 AmbientColor;    //ambient RGBA -- alpha is intensity
 uniform vec3 ViewPos;         //attenuation coefficients
 uniform mat4 CameraInverse;
 uniform mat4 View;
+uniform float Scale;
 
 void main()
 {
@@ -50,6 +51,7 @@ void main()
     // Hardcoded ambient light
     vec3 Lighting = AmbientColor.rgb * AmbientColor.a * DiffuseColor.rgb;
 
+    // vec3 Position = (CameraInverse * vec4(FragPos.xyz, 1.0f) / FragPos.w).xyz;
     vec3 Position = FragPos.xyz;
 
     // Get view direction
@@ -57,6 +59,7 @@ void main()
 
     for (int i = 0; i < NumberOfLights; i++)
     {
+        // vec3 LightPosVS = (vec4(Lights[i].Position.xyz, 1.0f)).xyz;
         vec3 LightPosVS = (View * vec4(Lights[i].Position.xyz, 1.0f)).xyz;
 
         // //The delta position of light
@@ -65,20 +68,17 @@ void main()
         // //Determine distance (used for attenuation) BEFORE we normalize our LightDir
         float D = length(LightDir);
 
-        if (D < Lights[i].Radius) 
+        if (D < Lights[i].Radius * Scale) 
         {
             LightDir = normalize(LightDir);
-
-            // //Correct for aspect ratio
-            LightDir.x *= Resolution.x / Resolution.y;
         
             // //normalize our vectors
-            vec3 N = normalize(NormalMap * 2.0 - 1.0);
+            vec3 N = normalize(NormalMap);
             vec3 L = normalize(LightDir);
 
             vec3 HalfwayDir = normalize(LightDir + ViewDir);
 
-            float spec = pow(max(dot(N, HalfwayDir), 0.0), 250.0);
+            float spec = pow(max(dot(normalize(NormalMap * 2.0 - 1.0), HalfwayDir), 0.0), 256.0);
 
             // Get light color
             vec4 LightColor = Lights[i].Color;
@@ -97,9 +97,10 @@ void main()
             // //calculate attenuation
             float Attenuation = 1.0 / (Falloff.x + (Falloff.y*D) + (Falloff.z*D*D));
 
-            Diffuse *= Attenuation;
+            Diffuse *= Attenuation * LightColor.a;
             Specular *= Attenuation;
-            Lighting += Diffuse + Specular;
+            // Lighting += Diffuse + Specular;
+            Lighting += Diffuse;
         }
     }
 
