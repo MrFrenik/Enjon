@@ -98,7 +98,7 @@ void main()
             //calculate attenuation
             vec3 Falloff = Lights[i].Falloff;
 
-            float Attenuation = 1.0 / (Falloff.x + (Falloff.y*D) + (Falloff.z*D*D));
+            float Attenuation = 0.5 / (Falloff.x + (Falloff.y*D) + (Falloff.z*D*D));
 
             vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * Attenuation;
 

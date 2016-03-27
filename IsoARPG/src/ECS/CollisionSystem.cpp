@@ -103,9 +103,16 @@ namespace ECS{ namespace Systems { namespace Collision {
 						if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
-						if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ CollideWithItem(Manager, collider, e); 		continue; } 
-						if (Mask == (COLLISION_ITEM | COLLISION_EXPLOSIVE))		{ if (AType == Component::EntityType::ITEM) CollideWithEnemy(Manager, collider, e);
-																				  else 										CollideWithEnemy(Manager, e, collider); 		
+						if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
+																				  else 											CollideWithDebris(Manager, e, collider); 
+																				  continue; 
+																				} 
+						if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) 		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
+																				  else 											CollideWithDebris(Manager, e, collider); 
+																				  continue; 
+																				} 
+						if (Mask == (COLLISION_ITEM | COLLISION_EXPLOSIVE))		{ if (AType == Component::EntityType::ITEM) 	CollideWithEnemy(Manager, collider, e);
+																				  else 											CollideWithEnemy(Manager, e, collider); 		
 																				  continue; 
 																				} 
 						// if (Mask == (COLLISION_ENEMY | COLLISION_ITEM)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
@@ -495,6 +502,30 @@ namespace ECS{ namespace Systems { namespace Collision {
 			}
 			
 			// Continue to next entity 	
+			return;
+		}
+	}
+	void CollideWithDebris(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID)
+	{
+		Enjon::Math::Vec3* EntityPosition = &Manager->TransformSystem->Transforms[A_ID].Position;
+		Enjon::Math::Vec3* ColliderPosition = &Manager->TransformSystem->Transforms[B_ID].Position;
+		Enjon::Math::Vec2* A = &Manager->TransformSystem->Transforms[B_ID].CartesianPosition;
+		Enjon::Math::Vec2* B = &Manager->TransformSystem->Transforms[A_ID].CartesianPosition;
+		Enjon::Math::Vec3* EntityVelocity = &Manager->TransformSystem->Transforms[A_ID].Velocity; 
+		Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
+		Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
+		Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
+
+		// Collision didn't happen
+		if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) { return; }
+	
+		else
+		{
+			// Get minimum translation distance
+			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
+
+			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::ITEM) *EntityVelocity = -0.1f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+
 			return;
 		}
 	}

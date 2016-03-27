@@ -56,7 +56,9 @@ namespace ECS{ namespace Systems { namespace Transform {
 					Enjon::Math::Vec3* P = &Manager->TransformSystem->Transforms[e].Position;
 
 					// if (PGP->DistanceTo(*GP) <= TILE_SIZE * 2) Manager->CollisionSystem->Entities.push_back(e);
-					if (PGP->DistanceTo(*GP) <= 1500) Manager->CollisionSystem->Entities.push_back(e);
+					if (PGP->DistanceTo(*GP) <= 1250) Manager->CollisionSystem->Entities.push_back(e);
+
+					Manager->TransformSystem->Transforms[e].Angle += 0.01f * Manager->TransformSystem->Transforms[e].Velocity.x;
 
 					// if (Manager->Camera->IsBoundBoxInCamView(P->XY(), EM::Vec2(100, 100))) Manager->Renderer2DSystem->Entities.push_back(e);
 

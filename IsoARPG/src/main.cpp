@@ -90,7 +90,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 60;
+const int LEVELSIZE = 25;
 
 float DashingCounter = 0.0f;
 
