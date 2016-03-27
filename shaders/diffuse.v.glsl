@@ -21,7 +21,7 @@ void main() {
     gl_Position = projection * view * model * vec4(vertexPosition.x, vertexPosition.y, 0.0, 1.0);
 	fs_out.TexCoords = vec2(vertexUV.x, -vertexUV.y); 
 	fs_out.Color = vertexColor;
-	fs_out.Position = model * vec4(vertexPosition.x, vertexPosition.y, 0.0, 1.0);
+	fs_out.Position = view * model * vec4(vertexPosition.x, vertexPosition.y, 0.0, 1.0);
 
 	FragPos = view * model * vec4(vertexPosition.x, vertexPosition.y, 0.0f, 1.0f);
 }

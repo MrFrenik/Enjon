@@ -70,7 +70,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define NUM_LIGHTS 	100
+#define NUM_LIGHTS 	10
 
 typedef struct
 {
@@ -80,7 +80,7 @@ typedef struct
 	EM::Vec3 Falloff;
 } Light;
 
-float LightZ = 0.02f;
+float LightZ = 0.08f;
 
 char buffer[256];
 char buffer2[256];
@@ -90,7 +90,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 200;
+const int LEVELSIZE = 60;
 
 float DashingCounter = 0.0f;
 
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
 	// Seed random 
 	srand(time(NULL));
 
-	float FPS = 60;
+	float FPS = 100;
 	int screenWidth = SCREENWIDTH, screenHeight = SCREENHEIGHT;
 
 	// Profile strings
@@ -263,17 +263,19 @@ int main(int argc, char** argv)
 	TileBatch.End();	
 
 	GroundTileBatch.Begin();
-	level.DrawGroundTiles(GroundTileBatch);
+	GroundTileNormalsBatch.Begin();
+	level.DrawGroundTiles(GroundTileBatch, GroundTileNormalsBatch);
+	GroundTileNormalsBatch.End();
 	GroundTileBatch.End();
 
-	GroundTileNormalsBatch.Begin();
-	GroundTileNormalsBatch.Add(
-		EM::Vec4(-10000, -10000, 10000, 10000), 
-		EM::Vec4(0, 0, 1, 1),
-		EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, 
-		EG::RGBA16(0.0f, 0.0f, 1.0f, 1.0f)
-		);
-	GroundTileNormalsBatch.End();
+	// GroundTileNormalsBatch.Begin();
+	// GroundTileNormalsBatch.Add(
+	// 	EM::Vec4(-10000, -10000, 10000, 10000), 
+	// 	EM::Vec4(0, 0, 1, 1),
+	// 	EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, 
+	// 	EG::RGBA16(0.0f, 0.0f, 1.0f, 1.0f)
+	// 	);
+	// GroundTileNormalsBatch.End();
 
 	CartesianTileBatch.Begin();
 	level.DrawCartesianLevel(CartesianTileBatch);
@@ -312,8 +314,9 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* ScreenShader 	= EG::ShaderManager::GetShader("NoCameraProjection");
 
 	// FBO
+	// float DWidth = SCREENWIDTH * 0.9f;
 	float DWidth = SCREENWIDTH;
-	float DHeight = SCREENHEIGHT;
+	float DHeight = DWidth * 0.5625f;
 	EG::FrameBufferObject* DiffuseFBO 	= new EG::FrameBufferObject(DWidth, DHeight);
 	EG::FrameBufferObject* NormalsFBO 	= new EG::FrameBufferObject(DWidth, DHeight);
 	EG::FrameBufferObject* DeferredFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
@@ -376,16 +379,21 @@ int main(int argc, char** argv)
 	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 100;
+	AmountDrawn = 20000;
 
 	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
-		// Create Sword
 		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
-										Enjon::Math::Vec2(32.0f, 32.0f), EG::SpriteSheetManager::GetSpriteSheet("Box"), Masks::Type::ITEM, Component::EntityType::ITEM);
+										Enjon::Math::Vec2(ER::Roll(10, 20), ER::Roll(2, 10)), EG::SpriteSheetManager::GetSpriteSheet("VerticleBar"), Masks::Type::ITEM, Component::EntityType::ITEM);
+		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
+		World->Renderer2DSystem->Renderers[id].Format = EG::CoordinateFormat::ISOMETRIC;
+		World->Renderer2DSystem->Renderers[id].Color = EG::RGBA16(0.5f, 0.2f, 0.1f, 1.0f);
+		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+
+
 	}
 
-	eid32 Box = Factory::CreateItem(World, World->TransformSystem->Transforms[Player].Position, EM::Vec2(32.0f, 100.0f), &ItemSheet, Masks::Type::ITEM, Component::EntityType::ITEM);
+	// eid32 Box = Factory::CreateItem(World, World->TransformSystem->Transforms[Player].Position, EM::Vec2(32.0f, 100.0f), &ItemSheet, Masks::Type::ITEM, Component::EntityType::ITEM);
 
 	// Set position to player
 	Camera.SetPosition(Math::Vec2(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, World->TransformSystem->Transforms[Player].Position.y)); 
@@ -419,14 +427,14 @@ int main(int argc, char** argv)
 
 	const GLfloat constant = 1.0f; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)
     const GLfloat linear = 0.1f;
-    const GLfloat quadratic = 25.0f;
+    const GLfloat quadratic = 40.0f;
     // Then calculate radius of light volume/sphere
 
    	float LevelWidth = level.GetWidth();
    	float LevelHeight = level.GetHeight(); 
 	for (GLuint i = 0; i < NUM_LIGHTS; i++)
 	{
-		EG::ColorRGBA16 Color = EG::RGBA16(ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, 1.5f);
+		EG::ColorRGBA16 Color = EG::RGBA16(ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, 2.5f);
 	    GLfloat maxBrightness = std::fmaxf(std::fmaxf(Color.r, Color.g), Color.b);  // max(max(lightcolor.r, lightcolor.g), lightcolor.b)
 	    GLfloat Radius = (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2 * quadratic);
 		Light L = {
@@ -463,6 +471,10 @@ int main(int argc, char** argv)
 		// Update Input Manager
 		Input.Update();	
 
+		auto L = &Lights.at(0);
+		L->Position = EM::Vec3(World->TransformSystem->Transforms[Player].Position.XY(), LightZ);
+		L->Color = EG::RGBA16(6.0f, 4.0f, 6.0f, 1.0f);
+
 		// Clear lights
 		LightsToDraw.clear();
 
@@ -488,6 +500,15 @@ int main(int argc, char** argv)
 				World->Lvl->DrawTileOverlays(OverlayBatch);
 				OverlayBatch.End();
 			}
+
+			// Clear entities from Renderer system vector
+			World->Renderer2DSystem->Entities.clear();
+
+			// Clear entities from collision system vectors
+			World->CollisionSystem->Entities.clear();
+
+			// Clear entities from PlayerControllerSystem targets vector
+			World->PlayerControllerSystem->Targets.clear();
 
 			// Draw some random assed fire
 			// EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
@@ -534,11 +555,7 @@ int main(int argc, char** argv)
 		
 			PlayerController::Update(World->PlayerControllerSystem);
 	
-			// Clear entities from collision system vectors
-			World->CollisionSystem->Entities.clear();
 
-			// Clear entities from PlayerControllerSystem targets vector
-			World->PlayerControllerSystem->Targets.clear();
 		}
 
 
@@ -605,8 +622,10 @@ int main(int argc, char** argv)
 		EM::Vec2 PC = World->TransformSystem->Transforms[Player].Position.XY();
 	
 		// Draw enemies
-		for (eid32 e = 0; e < World->MaxAvailableID; e++)
+		for (eid32 n = 0; n < World->Renderer2DSystem->Entities.size(); n++)
 		{
+			ECS::eid32 e = World->Renderer2DSystem->Entities.at(n);
+
 			if (e == Player || e == Sword || e == Bow) continue;
 
 			// Don't draw if the entity doesn't exist anymore
@@ -626,13 +645,9 @@ int main(int argc, char** argv)
 			// If AI
 			if (Mask & COMPONENT_AICONTROLLER)
 			{
-				// Don't draw if not in view
-				if (Camera.IsBoundBoxInCamView(*EntityPosition, *EDims))
-				{
-					EntityBatch.Add(Math::Vec4(*EntityPosition, *EDims), uv, beast.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
-					Graphics::Fonts::PrintText(EntityPosition->x + 100.0f, EntityPosition->y + 220.0f, 0.4f, std::to_string(e), Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
+				EntityBatch.Add(Math::Vec4(*EntityPosition, *EDims), uv, beast.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
+				Graphics::Fonts::PrintText(EntityPosition->x + 100.0f, EntityPosition->y + 220.0f, 0.4f, std::to_string(e), Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
 															Graphics::SetOpacity(Graphics::RGBA16_Green(), 0.8f));
-				}
 				// If target
 				if (e == World->PlayerControllerSystem->CurrentTarget)
 				{
@@ -644,41 +659,34 @@ int main(int argc, char** argv)
 			}
 			else if (World->Types[e] == ECS::Component::EntityType::ITEM)
 			{
-				if (Camera.IsBoundBoxInCamView(*EntityPosition, *EDims))
-				{
-					EntityBatch.Add(Math::Vec4(*EntityPosition, *EDims), ESpriteSheet->GetUV(0), ESpriteSheet->texture.id, *Color, EntityPosition->y);
-				}
-
+				EntityBatch.Add(Math::Vec4(*EntityPosition, *EDims), ESpriteSheet->GetUV(0), ESpriteSheet->texture.id, *Color, EntityPosition->y, 
+										World->TransformSystem->Transforms[e].Angle, World->Renderer2DSystem->Renderers[e].Format);
 			}
 			else
 			{
-				// Don't draw if not in view
-				if (Camera.IsBoundBoxInCamView(*EntityPosition, itemDims))
-				{
-					auto Sheet = World->Animation2DSystem->Animations[e].Sheet;
-					auto Dims = World->TransformSystem->Transforms[e].Dimensions;
-					static int index;
+				auto Sheet = World->Animation2DSystem->Animations[e].Sheet;
+				auto Dims = World->TransformSystem->Transforms[e].Dimensions;
+				static int index;
 
-					// Get attack vector and draw arrow based on that
-					Enjon::Math::Vec2* AttackVector = &World->TransformSystem->Transforms[Player].AttackVector;
-					if		(*AttackVector == EAST)				index = 0;
-					else if (*AttackVector == NORTHEAST)		index = 1;
-					else if (*AttackVector == NORTH)			index = 2;
-					else if (*AttackVector == NORTHWEST)		index = 3;
-					else if (*AttackVector == WEST)				index = 4;
-					else if (*AttackVector == SOUTHWEST)		index = 5;
-					else if (*AttackVector == SOUTH)			index = 6;
-					else if (*AttackVector == SOUTHEAST)		index = 7;
-					else										index = 0;
+				// Get attack vector and draw arrow based on that
+				Enjon::Math::Vec2* AttackVector = &World->TransformSystem->Transforms[Player].AttackVector;
+				if		(*AttackVector == EAST)				index = 0;
+				else if (*AttackVector == NORTHEAST)		index = 1;
+				else if (*AttackVector == NORTH)			index = 2;
+				else if (*AttackVector == NORTHWEST)		index = 3;
+				else if (*AttackVector == WEST)				index = 4;
+				else if (*AttackVector == SOUTHWEST)		index = 5;
+				else if (*AttackVector == SOUTH)			index = 6;
+				else if (*AttackVector == SOUTHEAST)		index = 7;
+				else										index = 0;
 
-					EntityBatch.Add(Math::Vec4(*EntityPosition, Dims), Sheet->GetUV(index), Sheet->texture.id, *Color, EntityPosition->y, World->TransformSystem->Transforms[e].Angle, 
-										World->Renderer2DSystem->Renderers[e].Format);
-				}
+				EntityBatch.Add(Math::Vec4(*EntityPosition, Dims), Sheet->GetUV(index), Sheet->texture.id, *Color, EntityPosition->y, World->TransformSystem->Transforms[e].Angle, 
+									World->Renderer2DSystem->Renderers[e].Format);
 			}
 
 			Ground = &World->TransformSystem->Transforms[e].GroundPosition;
 			auto EAABB = &World->TransformSystem->Transforms[e].AABB;
-			if (World->Types[e] != ECS::Component::EntityType::ITEM && Camera.IsBoundBoxInCamView(*Ground, Math::Vec2(64.0f, 32.0f)))
+			if (World->Types[e] != ECS::Component::EntityType::ITEM)
 			{
 				EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);
@@ -919,6 +927,7 @@ int main(int argc, char** argv)
 										0.4f, "TileOverlay: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
 										0.4f, TileOverlayTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
 		// // Add LightsToDraw
 		Enjon::uint32 LightsSize = LightsToDraw.size(); 
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 160.0f, 
@@ -931,6 +940,30 @@ int main(int argc, char** argv)
 										0.4f, "LightZ: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 180.0f, 
 										0.4f, std::to_string(LightZ), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+		// Entities
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 200.0f, 
+										0.4f, "Entities: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 200.0f, 
+										0.4f, std::to_string(World->Length), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+		// Renderer size
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 220.0f, 
+										0.4f, "Entities Drawn: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 220.0f, 
+										0.4f, std::to_string(World->Renderer2DSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+		// Collisions size
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 240.0f, 
+										0.4f, "Collisions size: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 240.0f, 
+										0.4f, std::to_string(World->CollisionSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+		// Transform run tim
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 260.0f, 
+										0.4f, "Transforms: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 260.0f, 
+										0.4f, TransformTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Draw Isometric compass
 		MapEntityBatch.Add(EM::Vec4(HUDCamera.GetPosition() - EM::Vec2(SCREENWIDTH / 2.0f - 30.0f, -SCREENHEIGHT / 2.0f + 250.0f), 150.0f, 75.0f), 
@@ -993,11 +1026,13 @@ int main(int argc, char** argv)
 		// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
 		// 	BoxSheet->GetUV(0), 
 		// 	BoxSheet->texture.id
+		// 	EG::SetOpacity(EG::RGBA16_White(), 0.05f)
 		// 	);
 		// NormalsBatch.Add(
 		// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
 		// 	BoxSheet->GetUV(1),
-		// 	BoxSheet->texture.id
+		// 	BoxSheet->texture.id,
+		// 	EG::SetOpacity(EG::RGBA16_White(), 0.5f)
 		// 	);
 
 
@@ -1059,7 +1094,7 @@ int main(int argc, char** argv)
 				static GLuint m_normalsID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_normals");
 				static GLuint m_positionID  = glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_position");
 
-				EM::Vec3 CP = EM::Vec3(Camera.GetPosition() - EM::Vec2(-100.0f, 0.0f), 0.0);
+				EM::Vec3 CP = EM::Vec3(Camera.GetPosition(), 1.0f);
 
 				// Bind diffuse
 				glActiveTexture(GL_TEXTURE0);
@@ -1095,7 +1130,7 @@ int main(int argc, char** argv)
 				// Set uniforms
 				glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
 							 SCREENWIDTH, SCREENHEIGHT);
-				glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 1.0f);
+				glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.4f);
 				glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
 
 				glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
@@ -1179,11 +1214,14 @@ int main(int argc, char** argv)
 							1, 0, view.elements);
 		HUDBatch.RenderBatch();
 
+
 		shader = Graphics::ShaderManager::GetShader("Basic")->GetProgramID();
 		glUseProgram(shader);
 
 		// Draw Cursor
 		DrawCursor(&HUDBatch, &Input);
+
+
 
 		Window.SwapBuffer();
 
@@ -1410,12 +1448,12 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 	for (auto& L : *Lights)
 	{
 		auto R = L.Radius;
-		auto D = 20 * R;
+		auto D = 2 * R;
 		EM::Vec2 dimensions(D, D);
 		auto P = EM::Vec2(L.Position.x - D, L.Position.y - D);
 
 		 
-		Enjon::Math::Vec2 scaledScreenDimensions = Enjon::Math::Vec2((float)SCREENWIDTH, (float)SCREENHEIGHT) / Camera->GetScale() * 4.0f;
+		Enjon::Math::Vec2 scaledScreenDimensions = Enjon::Math::Vec2((float)SCREENWIDTH, (float)SCREENHEIGHT) / (Camera->GetScale() * 0.37f);
 		float MIN_DISTANCE_X = dimensions.x / 2.0f + scaledScreenDimensions.x / 2.0f;
 		float MIN_DISTANCE_Y = dimensions.y / 2.0f + scaledScreenDimensions.y / 2.0f;
 

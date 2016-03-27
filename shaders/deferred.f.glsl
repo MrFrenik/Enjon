@@ -54,11 +54,15 @@ void main()
     // vec3 Position = (CameraInverse * vec4(FragPos.xyz, 1.0f) / FragPos.w).xyz;
     vec3 Position = FragPos.xyz;
 
-    // Get view direction
-    vec3 ViewDir = normalize(vec3(ViewPos.xy - Position.xy, ViewPos.z));
+    vec3 CamView = (View * vec4(ViewPos, 1.0f)).xyz;
+
+    // vec3 ViewDir = normalize(vec3(ViewPos.xy - Position.xy, ViewPos.z));
 
     for (int i = 0; i < NumberOfLights; i++)
     {
+        // Get view direction
+        vec3 ViewDir = normalize(vec3(CamView.xy - Position.xy, CamView.z - Lights[i].Position.z));
+    
         // vec3 LightPosVS = (vec4(Lights[i].Position.xyz, 1.0f)).xyz;
         vec3 LightPosVS = (View * vec4(Lights[i].Position.xyz, 1.0f)).xyz;
 
@@ -68,49 +72,49 @@ void main()
         // //Determine distance (used for attenuation) BEFORE we normalize our LightDir
         float D = length(LightDir);
 
-        if (D < Lights[i].Radius * Scale) 
+        if (D < Lights[i].Radius / Scale) 
         {
             LightDir = normalize(LightDir);
+
+            LightDir.x *= Resolution.x / Resolution.y;
         
-            // //normalize our vectors
-            vec3 N = normalize(NormalMap);
+            //normalize our vectors
+            vec3 N = normalize(NormalMap * 2.0 - 1.0);
             vec3 L = normalize(LightDir);
 
-            vec3 HalfwayDir = normalize(LightDir + ViewDir);
+            // vec3 HalfwayDir = normalize(LightDir + ViewDir);
 
-            float spec = pow(max(dot(normalize(NormalMap * 2.0 - 1.0), HalfwayDir), 0.0), 256.0);
+            // float spec = pow(max(dot(N, HalfwayDir), 0.0), 256.0);
 
             // Get light color
             vec4 LightColor = Lights[i].Color;
 
-            vec3 Specular = DiffuseColor.a * LightColor.rgb * spec;
+            // vec3 Specular = LightColor.rgb * spec;
 
-            // //Pre-multiply light color with intensity
-            // //Then perform "N dot L" to determine our diffuse term
-            vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * max(dot(N, L), 0.0);
-
-            // //pre-multiply ambient color with intensity
-            vec3 Ambient = AmbientColor.rgb * AmbientColor.a;
-
+            //Pre-multiply light color with intensity
+            //Then perform "N dot L" to determine our diffuse term
+            // vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * max(dot(N, L), 0.0);
+            
+            //calculate attenuation
             vec3 Falloff = Lights[i].Falloff;
 
-            // //calculate attenuation
             float Attenuation = 1.0 / (Falloff.x + (Falloff.y*D) + (Falloff.z*D*D));
 
-            Diffuse *= Attenuation * LightColor.a;
-            Specular *= Attenuation;
+            vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * Attenuation;
+
+            // Diffuse *= Attenuation * LightColor.a;
+            // Specular *= Attenuation / 2.0f;
             // Lighting += Diffuse + Specular;
             Lighting += Diffuse;
         }
     }
 
-
-    // color = texture2D(u_diffuse, fs_in.TexCoords);
+    // color = texture2D(u_position, fs_in.TexCoords);
     color = vec4(Lighting, 1.0);
 
 
     // Emissiveness
-    if (DiffuseColor.r >= 1.0 || DiffuseColor.g >= 1.0 || DiffuseColor.b >= 1.0) color += DiffuseColor;
+    if (DiffuseColor.r >= 1.0 || DiffuseColor.g >= 1.0 || DiffuseColor.b >= 1.0) color += DiffuseColor * DiffuseColor.a;
 
     diffuse = color;
     position = color;

@@ -1,5 +1,6 @@
 #include "Level.h" 
 #include "System/Types.h"
+#include "Defines.h"
 
 #include <IO/ResourceManager.h>
 
@@ -20,7 +21,8 @@ void Level::Init(float x, float y, int rows, int cols)
 	// TODO(John): Levels will be generated dynamically and randomly seeded as well
 	// TODO(John): Bound entities within the level 
 
-	m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/stone.png"), Enjon::Math::iVec2(3, 1));
+	// m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/stone.png"), Enjon::Math::iVec2(3, 1));
+	m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png"), Enjon::Math::iVec2(1, 1));
 	m_wallSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/wall_chunk.png"), Enjon::Math::iVec2(1, 1));
 
 	CurrentOverlayIndex = 0;
@@ -31,7 +33,7 @@ void Level::Init(float x, float y, int rows, int cols)
 	//Push tiles back into level data 
 	float currentX = x;
 	float currentY = y; 
-	float tilewidth = 256.0f;
+	float tilewidth = 512.0f;
 	float tileheight = tilewidth / 2.0f;
 	float wallWidth = tilewidth;
 	float wallHeight = 7.6f * tilewidth;
@@ -79,7 +81,8 @@ void Level::Init(float x, float y, int rows, int cols)
 				index = Enjon::Random::Roll(0, 2);
 				if (index == 0 || index == 1) index = Enjon::Random::Roll(0, 2);
 				if (index == 0) index = Enjon::Random::Roll(0, 2);
-				Tile tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(tilewidth, tileheight), 2.0f, &m_tilesheet, index);
+				// Tile tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(tilewidth, tileheight), 2.0f, &m_tilesheet, index);
+				Tile tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(tilewidth, tileheight), 2.0f, &m_tilesheet, 1);
 				// m_isotiles.emplace_back(tile);
 				m_mapTiles.emplace_back(tile);
 				m_GroundTiles.emplace_back(tile);
@@ -128,7 +131,7 @@ bool Level::IsBorder(int i, int j, int rows, int cols)
 	return false;
 }
 
-void Level::DrawGroundTiles(Enjon::Graphics::SpriteBatch& batch)
+void Level::DrawGroundTiles(Enjon::Graphics::SpriteBatch& Batch, EG::SpriteBatch& Normals)
 {
 	auto C = Enjon::Graphics::RGBA16_White();
 	// auto DC = Enjon::Random::Roll(100, 200) / 255.0f;
@@ -136,11 +139,12 @@ void Level::DrawGroundTiles(Enjon::Graphics::SpriteBatch& batch)
 	C.r -= DC;
 	C.g -= DC;
 	C.b -= DC;
-	//Add level information to batch
+	//Add level information to Batch
 	for (Tile& tile : m_GroundTiles)
 	{
-		//batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.texture.id);
-		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id, C);
+		//Batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.texture.id);
+		Batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id, C, 0, 0, EG::CoordinateFormat::ISOMETRIC);
+		Normals.Add(EM::Vec4(tile.pos, tile.dims), EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png").id, EG::RGBA16_White(), 0, 0, EG::CoordinateFormat::ISOMETRIC);
 	}
 }
 

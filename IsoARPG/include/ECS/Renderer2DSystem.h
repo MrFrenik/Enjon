@@ -5,10 +5,13 @@
 #include "ECS/Entity.h"
 #include "ECS/ComponentSystems.h"
 
+#include <vector>
+
 struct Renderer2DSystem
 {
 	ECS::Systems::EntityManager* Manager;
 	ECS::Component::Renderer2DComponent Renderers[MAX_ENTITIES];
+	std::vector<Enjon::uint32> Entities;
 };
 
 namespace ECS { namespace Systems { namespace Renderer2D {

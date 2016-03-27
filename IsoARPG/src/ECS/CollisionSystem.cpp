@@ -33,6 +33,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 	Enjon::uint32 COLLISION_PROJECTILE	= 0x00000008;
 	Enjon::uint32 COLLISION_WEAPON		= 0x00000010;
 	Enjon::uint32 COLLISION_EXPLOSIVE	= 0x00000020;
+	Enjon::uint32 COLLISION_PROP		= 0x00000040;
 
 	/*-- Function Declarations --*/
 	void DrawBlood(ECS::Systems::EntityManager* Manager, Enjon::Math::Vec2 Pos);
@@ -103,9 +104,13 @@ namespace ECS{ namespace Systems { namespace Collision {
 						if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
 						if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ CollideWithItem(Manager, collider, e); 		continue; } 
-						if (Mask == (COLLISION_ENEMY | COLLISION_ITEM)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
+						if (Mask == (COLLISION_ITEM | COLLISION_EXPLOSIVE))		{ if (AType == Component::EntityType::ITEM) CollideWithEnemy(Manager, collider, e);
+																				  else 										CollideWithEnemy(Manager, e, collider); 		
+																				  continue; 
+																				} 
+						// if (Mask == (COLLISION_ENEMY | COLLISION_ITEM)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
-						if (Mask == (COLLISION_EXPLOSIVE | COLLISION_ENEMY))	{ CollideWithProjectile(Manager, e, collider);  continue; }
+						if (Mask == (COLLISION_EXPLOSIVE | COLLISION_ENEMY))	{ CollideWithExplosive(Manager, e, collider);  	continue; }
 					}
 				}	
 			}
@@ -136,6 +141,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			case Component::EntityType::ENEMY: 			Mask |= COLLISION_ENEMY; 			break;
 			case Component::EntityType::PROJECTILE: 	Mask |= COLLISION_PROJECTILE; 		break;
 			case Component::EntityType::EXPLOSIVE: 		Mask |= COLLISION_EXPLOSIVE; 		break;
+			case Component::EntityType::PROP: 			Mask |= COLLISION_PROP; 			break;
 			default: 									Mask |= COLLISION_NONE;				break; 
 		}	
 
@@ -148,6 +154,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			case Component::EntityType::ENEMY: 			Mask |= COLLISION_ENEMY; 			break;
 			case Component::EntityType::PROJECTILE: 	Mask |= COLLISION_PROJECTILE; 		break;
 			case Component::EntityType::EXPLOSIVE: 		Mask |= COLLISION_EXPLOSIVE; 		break;
+			case Component::EntityType::PROP: 			Mask |= COLLISION_PROP; 			break;
 			default: 									Mask |= COLLISION_NONE;				break; 
 		}
 
@@ -162,6 +169,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 		Enjon::Math::Vec2* A = &Manager->TransformSystem->Transforms[B_ID].CartesianPosition;
 		Enjon::Math::Vec2* B = &Manager->TransformSystem->Transforms[A_ID].CartesianPosition;
 		Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
+		Enjon::Math::Vec3* EntityVelocity = &Manager->TransformSystem->Transforms[A_ID].Velocity; 
 		Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
 		Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
 
@@ -175,6 +183,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 			// Get minimum translation distance
 			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_A, AABB_B);
+
+			*EntityVelocity = EM::Vec3(EM::CartesianToIso(mtd), EntityVelocity->z);
 
 			// Update velocities based on "bounce" factor
 			float bf = 1.0f; // Bounce factor 
@@ -236,15 +246,15 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 			if (HealthComponent->Health <= 0.0f) 
 			{
-				DrawBody(Manager, ColliderPosition->XY());
+				// DrawBody(Manager, ColliderPosition->XY());
 
 				// Remove entity if no health
 				EntitySystem::RemoveEntity(Manager, B_ID);
 
 				// Drop some loot!
-				Loot::DropLootBasedOnProfile(Manager, B_ID);
+				// Loot::DropLootBasedOnProfile(Manager, B_ID);
 
-				auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
+				// auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
 			}
 
 			// Remove projectile
@@ -262,6 +272,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 		Enjon::Math::Vec3* ColliderPosition = &Manager->TransformSystem->Transforms[B_ID].Position;
 		Enjon::Math::Vec2* A = &Manager->TransformSystem->Transforms[B_ID].CartesianPosition;
 		Enjon::Math::Vec2* B = &Manager->TransformSystem->Transforms[A_ID].CartesianPosition;
+		Enjon::Math::Vec3* EntityVelocity = &Manager->TransformSystem->Transforms[A_ID].Velocity;
 		Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
 		Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
 		Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
@@ -316,6 +327,19 @@ namespace ECS{ namespace Systems { namespace Collision {
 			// Get minimum translation distance
 			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_A, AABB_B);
 
+			*EntityVelocity = EM::Vec3(EM::CartesianToIso(mtd), EntityVelocity->z);
+			// *EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), EntityPosition->z); 
+			// Manager->TransformSystem->Transforms[A_ID].GroundPosition -= Enjon::Math::CartesianToIso(mtd); 
+
+			// if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
+			// 	*ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd) * 1.0f, 0.0f);
+			Enjon::Math::Vec2 Difference = Enjon::Math::Vec2::Normalize(EntityPosition->XY() - ColliderPosition->XY());
+
+			// if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
+			// 	*ColliderPosition -= Enjon::Math::Vec3(Difference * 30.0f, 0.0f);
+			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
+				*ColliderVelocity = 2.0f * Enjon::Math::Vec3(Difference, 0.0f);
+
 			// Update velocities based on "bounce" factor
 			float bf = 1.0f; // Bounce factor 
 			ColliderVelocity->x = -ColliderVelocity->x * bf;
@@ -376,15 +400,15 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 			if (HealthComponent->Health <= 0.0f) 
 			{
-				DrawBody(Manager, ColliderPosition->XY());
+				//DrawBody(Manager, ColliderPosition->XY());
 
 				// Remove entity if no health
 				EntitySystem::RemoveEntity(Manager, B_ID);
 
 				// Drop some loot!
-				Loot::DropLootBasedOnProfile(Manager, B_ID);
+				// Loot::DropLootBasedOnProfile(Manager, B_ID);
 
-				auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
+				// auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
 			}
 			else
 			{
@@ -399,7 +423,6 @@ namespace ECS{ namespace Systems { namespace Collision {
 				}
 			}
 
-
 			// Remove projectile
 			EntitySystem::RemoveEntity(Manager, A_ID);
 
@@ -413,6 +436,13 @@ namespace ECS{ namespace Systems { namespace Collision {
 	{
 		Component::EntityType AType = Manager->Types[A_ID];
 		Component::EntityType BType = Manager->Types[B_ID];
+
+		auto AM = Manager->AttributeSystem->Masks[A_ID];
+		auto BM = Manager->AttributeSystem->Masks[B_ID];
+
+		// Leave if debris
+		if (AM & Masks::GeneralOptions::DEBRIS || BM & Masks::GeneralOptions::DEBRIS) return;
+
 
 		Enjon::Math::Vec3* EntityPosition = &Manager->TransformSystem->Transforms[A_ID].Position;
 		Enjon::Math::Vec3* ColliderPosition = &Manager->TransformSystem->Transforms[B_ID].Position;
@@ -483,14 +513,18 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 		// Collision didn't happen
 		if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) { return; }
-		
+	
 		else
 		{
 			// Get minimum translation distance
 			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
 
-			*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), EntityPosition->z); 
-			Manager->TransformSystem->Transforms[A_ID].GroundPosition -= Enjon::Math::CartesianToIso(mtd); 
+			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::ITEM) *EntityVelocity = 0.25f * EM::Vec3(EM::CartesianToIso(mtd), 20.0f);
+			else 
+			{
+				*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), EntityPosition->z); 
+			}
+			// Manager->TransformSystem->Transforms[A_ID].GroundPosition -= Enjon::Math::CartesianToIso(mtd); 
 
 			// if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
 			// 	*ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd) * 1.0f, 0.0f);
@@ -560,28 +594,6 @@ namespace ECS{ namespace Systems { namespace Collision {
 					DrawBlood(Manager, ColliderPosition->XY());
 				// }
 
-
-				// This doesn't work too well right now...
-				// std::string S("23");
-			 //    std::string::const_iterator c;
-			 //    float x = PP->x + 100.0f;
-			 //    float y = PP->y + 150.0f;
-			 //    float advance = 0.0f;
-			 //    float scale = 1.5f;
-			 //    for (c = S.begin(); c != S.end(); c++) 
-			 //    {
-				// 	EG::Fonts::CharacterStats CS = 
-				// 				EG::Fonts::GetCharacterAttributes(EM::Vec2(x, y), scale, EG::FontManager::GetFont("Bold"), c, &advance);
-
-				// 	// Create particle
-				// 	EG::Particle2D::AddParticle(EM::Vec3(CS.DestRect.x, CS.DestRect.y, 0.0f), EM::Vec3(0.0f, 0.0f, 10.0f), EM::Vec2(CS.DestRect.z, CS.DestRect.w), 
-				// 								EG::RGBA16_White(), CS.TextureID, 0.025f, Manager->ParticleEngine->ParticleBatches[0]);
-
-				// 	x += advance;
-			 //    }
-
-
-
 				// Apply an effect just to see if this shit work at all...
 				// 20% chance to apply
 				float Percent = 0.2f;
@@ -600,18 +612,12 @@ namespace ECS{ namespace Systems { namespace Collision {
 				if (HealthComponent->Health <= 0.0f)
 				{
 					// Drop some loot!
-					Loot::DropLootBasedOnProfile(Manager, B_ID);
+					// Loot::DropLootBasedOnProfile(Manager, B_ID);
 
-					auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
+					// auto* LP = Manager->AttributeSystem->LootProfiles[B_ID];
 
 					// Put body overlay onto the world
-					DrawBody(Manager, ColliderPosition->XY());
-
-					struct TileOverlay
-					{
-						Enjon::Graphics::GLTexture Tex;
-						Enjon::Math::Vec4 DestRect;
-					};
+					// DrawBody(Manager, ColliderPosition->XY());
 
 					// Remove collider
 					EntitySystem::RemoveEntity(Manager, B_ID);

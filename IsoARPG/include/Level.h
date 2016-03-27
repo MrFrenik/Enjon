@@ -11,7 +11,7 @@
 #include <Math/Maths.h>
 #include <Math/Random.h>
 
-#define MAX_TILE_OVERLAY	5000
+#define MAX_TILE_OVERLAY	1000
 
 struct Tile
 {
@@ -48,7 +48,7 @@ public:
 	void DrawCartesianLevel(Enjon::Graphics::SpriteBatch& batch); 
 	void DrawMap(Enjon::Graphics::SpriteBatch& batch);
 	void DrawTileOverlays(Enjon::Graphics::SpriteBatch& batch);
-	void DrawGroundTiles(Enjon::Graphics::SpriteBatch& batch);
+ 	void DrawGroundTiles(Enjon::Graphics::SpriteBatch& Batch, EG::SpriteBatch& Normals);
 	void AddTileOverlay(Enjon::Graphics::GLTexture Tex, Enjon::Math::Vec4 DestRectf, Enjon::Graphics::ColorRGBA16 Color = Enjon::Graphics::RGBA16_White());
 	void CleanOverlays();
 	bool GetOverlaysDirty();

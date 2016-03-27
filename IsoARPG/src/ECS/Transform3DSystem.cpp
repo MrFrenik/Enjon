@@ -3,6 +3,7 @@
 #include "ECS/AttributeSystem.h"
 #include "ECS/CollisionSystem.h"
 #include "ECS/InventorySystem.h"
+#include "ECS/Renderer2DSystem.h"
 #include "ECS/EntityFactory.h"
 #include "Loot.h"
 
@@ -24,7 +25,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 	{
 		EntityManager* Manager = System->Manager;
 		// Look at the entities in the Manager up to the last entered position and then update based on component masks
-		for (eid32 e = 0; e <Manager->MaxAvailableID; e++)
+		for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
 		{
 			// If equal then transform that entity
 			if (Manager->Masks[e] & COMPONENT_TRANSFORM3D)
@@ -55,15 +56,16 @@ namespace ECS{ namespace Systems { namespace Transform {
 					Enjon::Math::Vec3* P = &Manager->TransformSystem->Transforms[e].Position;
 
 					// if (PGP->DistanceTo(*GP) <= TILE_SIZE * 2) Manager->CollisionSystem->Entities.push_back(e);
-					if (PGP->DistanceTo(*GP) <= 5000 * 2) Manager->CollisionSystem->Entities.push_back(e);
+					if (PGP->DistanceTo(*GP) <= 1500) Manager->CollisionSystem->Entities.push_back(e);
+
+					// if (Manager->Camera->IsBoundBoxInCamView(P->XY(), EM::Vec2(100, 100))) Manager->Renderer2DSystem->Entities.push_back(e);
 
 					// Set up GroundPosition
-					GP->x = P->x + Manager->TransformSystem->Transforms[e].Dimensions.x / 2.0f - 32.0f; // Tilewidth
-					GP->y = P->y - P->z; 
-					continue;
+					// GP->x = P->x + Manager->TransformSystem->Transforms[e].Dimensions.x / 2.0f - 32.0f; // Tilewidth
+					// GP->y = P->y - P->z; 
+
+					// continue;
 				}
-				// Push back into collision system
-				else if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::COLLIDABLE) Manager->CollisionSystem->Entities.push_back(e);
 
 				// First transform the velocity by LERPing it
 				Component::Transform3D* Transform = &System->Transforms[e];
@@ -73,6 +75,14 @@ namespace ECS{ namespace Systems { namespace Transform {
 				Enjon::Math::Vec3* Position = &Transform->Position; 
 				Enjon::Math::Vec2* GroundPosition = &Transform->GroundPosition; 
 				float TileWidth = 32.0f;
+
+				// Push back into collision system
+				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::COLLIDABLE) Manager->CollisionSystem->Entities.push_back(e);
+
+				if (Manager->Masks[e] & COMPONENT_RENDERER2D && Manager->Camera->IsBoundBoxInCamView(Position->XY(), Manager->TransformSystem->Transforms[e].Dimensions))
+				{
+					Manager->Renderer2DSystem->Entities.push_back(e);
+				}
 				
 				Velocity->x = Enjon::Math::Lerp(VelocityGoal->x, Velocity->x, Scale); 
 				Velocity->y = Enjon::Math::Lerp(VelocityGoal->y, Velocity->y, Scale); 
@@ -155,7 +165,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 							Manager->TransformSystem->Transforms[Explosion].BaseHeight = 0.0f;
 							Manager->TransformSystem->Transforms[Explosion].MaxHeight = 0.0f;
 
-							Manager->TransformSystem->Transforms[Explosion].AABBPadding = Enjon::Math::Vec2(200, 200);
+							Manager->TransformSystem->Transforms[Explosion].AABBPadding = Enjon::Math::Vec2(500, 500);
 						}
 					}
 				}
@@ -173,10 +183,11 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// Make sure that position is within bounds of World
 				int Width = Manager->Width, Height = Manager->Height;
 				bool CollideWithLevel = false;
-				if (Transform->CartesianPosition.x < -Width + TileWidth * 2.0f) { Transform->CartesianPosition.x = -Width + TileWidth * 2.0f; Velocity->x *= -1; CollideWithLevel = true; }   
-				if (Transform->CartesianPosition.x > -TileWidth) { Transform->CartesianPosition.x = -TileWidth; Velocity->x *= -1; CollideWithLevel = true; }
-				if (Transform->CartesianPosition.y > -TileWidth) { Transform->CartesianPosition.y = -TileWidth; Velocity->y *= -1; CollideWithLevel = true; }
-				if (Transform->CartesianPosition.y < -Height + TileWidth * 2.0f) { Transform->CartesianPosition.y = -Height + TileWidth * 2.0f; Velocity->y *= -1; CollideWithLevel = true; }
+				float Multiplier = -0.15f;
+				if (Transform->CartesianPosition.x < -Width + TileWidth * 2.0f) { Transform->CartesianPosition.x = -Width + TileWidth * 2.0f; Velocity->x *= Multiplier; CollideWithLevel = true; }   
+				if (Transform->CartesianPosition.x > -TileWidth) { Transform->CartesianPosition.x = -TileWidth; Velocity->x *= Multiplier; CollideWithLevel = true; }
+				if (Transform->CartesianPosition.y > -TileWidth) { Transform->CartesianPosition.y = -TileWidth; Velocity->y *= Multiplier; CollideWithLevel = true; }
+				if (Transform->CartesianPosition.y < -Height + TileWidth * 2.0f) { Transform->CartesianPosition.y = -Height + TileWidth * 2.0f; Velocity->y *= Multiplier; CollideWithLevel = true; }
 
 
 
@@ -200,6 +211,11 @@ namespace ECS{ namespace Systems { namespace Transform {
 				V2 Min(CP->x - Dims->x, CP->y - Dims->y);
 				V2 Max(CP->x + TILE_SIZE + Dims->x, CP->y + TILE_SIZE + Dims->y);
 				*AABB = {Min, Max};
+
+				if (Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM)
+				{
+					continue;	
+				}
 
 				// Go through the items in this entity's inventory and set to this position
 				// NOTE(John): Note sure if I like this here... or at all...

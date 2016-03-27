@@ -98,23 +98,21 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				// 	Animation2D::SetPlayerState(Animation2D::EntityAnimationState::ATTACKING);  // NOTE(John): THIS IS FUCKING AWFUL
 				// }
 
-				if (Input->IsKeyDown(SDL_BUTTON_LEFT)) {
+				if (Input->IsKeyDown(SDL_BUTTON_LEFT)) 
+				{
 					// Set to attack?
 					Animation2D::SetPlayerState(Animation2D::EntityAnimationState::ATTACKING);  // NOTE(John): THIS IS FUCKING AWFUL
 				}
 
-				if (Input->IsKeyDown(SDL_BUTTON_RIGHT)) {
-					for (auto i = 0; i < 2; i++)
-					{
-						auto P = Manager->TransformSystem->Transforms[Manager->Player].Position + Enjon::Math::Vec3(50.0f, 20.0f, 0.0f);
-						P += Enjon::Math::Vec3(Enjon::Random::Roll(-100, 100), Enjon::Random::Roll(-100, 100), 0.0f);
-						ShootGrenade(Manager, P, Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"));
-
-					}
-
+				if (Input->IsKeyPressed(SDL_BUTTON_RIGHT)) 
+				{
+					auto P = Manager->TransformSystem->Transforms[Manager->Player].Position + Enjon::Math::Vec3(50.0f, 20.0f, 0.0f);
+					P += Enjon::Math::Vec3(Enjon::Random::Roll(-100, 100), Enjon::Random::Roll(-100, 100), 0.0f);
+					ShootGrenade(Manager, P, Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"));
 				}
 
-				if (Input->IsKeyPressed(SDLK_r)) {
+				if (Input->IsKeyPressed(SDLK_r)) 
+				{
 					eid32 WeaponEquipped = Manager->InventorySystem->Inventories[e].WeaponEquipped;
 					Manager->Masks[WeaponEquipped] ^= COMPONENT_RENDERER2D;	
 				}
@@ -212,9 +210,9 @@ namespace ECS { namespace Systems { namespace PlayerController {
 		ECS::eid32 Player = Manager->Player;
 		auto G = Enjon::Graphics::RGBA16_ZombieGreen();
 		G.g += 100.0f;
-		float height = 30.0f;
+		float height = 20.0f;
 		ECS::eid32 Grenade = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Pos.XY(), height / 2.0f), Enjon::Math::Vec2(16.0f, 16.0f), Sheet,
-													Masks::Type::WEAPON | Masks::WeaponOptions::PROJECTILE | Masks::WeaponSubOptions::GRENADE, Component::EntityType::EXPLOSIVE, "Grenade", G);
+													Masks::Type::WEAPON | Masks::WeaponOptions::PROJECTILE | Masks::WeaponSubOptions::GRENADE, Component::EntityType::PROJECTILE, "Grenade", G);
 
 		// Shoot in direction of mouse
 		Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[Player].Input->GetMouseCoords();
@@ -229,7 +227,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 		auto RY = Enjon::Random::Roll(-2, 2) / 100.0f;
 		GV = Enjon::Math::CartesianToIso(GV);
 
-		float speed = 10.0f;
+		float speed = 5.0f;
 
 		Manager->TransformSystem->Transforms[Grenade].Velocity = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
 		Manager->TransformSystem->Transforms[Grenade].VelocityGoal = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
