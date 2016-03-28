@@ -46,7 +46,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 				V2* GP = &Manager->TransformSystem->Transforms[e].GroundPosition;
 				V2* PGP = &Manager->TransformSystem->Transforms[Manager->Player].GroundPosition;
 
-				if (PGP->DistanceTo(*GP) >= 5000 && Manager->AttributeSystem->Masks[e] & Masks::Type::AI) continue; // TODO(John): Make this squared distance so as to not use a square root function EVERY frame for EVERY entity
+				if (PGP->DistanceTo(*GP) >= 5000) continue; // TODO(John): Make this squared distance so as to not use a square root function EVERY frame for EVERY entity
 
 				// If an item
 				
@@ -56,17 +56,9 @@ namespace ECS{ namespace Systems { namespace Transform {
 					Enjon::Math::Vec3* P = &Manager->TransformSystem->Transforms[e].Position;
 
 					// if (PGP->DistanceTo(*GP) <= TILE_SIZE * 2) Manager->CollisionSystem->Entities.push_back(e);
-					if (PGP->DistanceTo(*GP) <= 1250) Manager->CollisionSystem->Entities.push_back(e);
+					if (PGP->DistanceTo(*GP) <= 1450) Manager->CollisionSystem->Entities.push_back(e);
 
 					Manager->TransformSystem->Transforms[e].Angle += 0.01f * Manager->TransformSystem->Transforms[e].Velocity.x;
-
-					// if (Manager->Camera->IsBoundBoxInCamView(P->XY(), EM::Vec2(100, 100))) Manager->Renderer2DSystem->Entities.push_back(e);
-
-					// Set up GroundPosition
-					// GP->x = P->x + Manager->TransformSystem->Transforms[e].Dimensions.x / 2.0f - 32.0f; // Tilewidth
-					// GP->y = P->y - P->z; 
-
-					// continue;
 				}
 
 				// First transform the velocity by LERPing it
@@ -81,6 +73,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// Push back into collision system
 				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::COLLIDABLE) Manager->CollisionSystem->Entities.push_back(e);
 
+				// Push back into renderer system
 				if (Manager->Masks[e] & COMPONENT_RENDERER2D && Manager->Camera->IsBoundBoxInCamView(Position->XY(), Manager->TransformSystem->Transforms[e].Dimensions))
 				{
 					Manager->Renderer2DSystem->Entities.push_back(e);
@@ -172,11 +165,11 @@ namespace ECS{ namespace Systems { namespace Transform {
 					}
 				}
 					
-					// Set position.y to be a sum of y and z velocities
-					Position->y += Velocity->y + Velocity->z; 
-					
-					// Set up GroundPosition
-					GroundPosition->x = Position->x + Transform->Dimensions.x / 2.0f - TileWidth;
+				// Set position.y to be a sum of y and z velocities
+				Position->y += Velocity->y + Velocity->z; 
+				
+				// Set up GroundPosition
+				GroundPosition->x = Position->x + Transform->Dimensions.x / 2.0f - TileWidth;
 				GroundPosition->y = Position->y - Position->z; 
 
 				// Set up CartesianPosition
@@ -185,11 +178,11 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// Make sure that position is within bounds of World
 				int Width = Manager->Width, Height = Manager->Height;
 				bool CollideWithLevel = false;
-				float Multiplier = -0.15f;
-				if (Transform->CartesianPosition.x < -Width + TileWidth * 2.0f) { Transform->CartesianPosition.x = -Width + TileWidth * 2.0f; Velocity->x *= Multiplier; CollideWithLevel = true; }   
-				if (Transform->CartesianPosition.x > -TileWidth) { Transform->CartesianPosition.x = -TileWidth; Velocity->x *= Multiplier; CollideWithLevel = true; }
-				if (Transform->CartesianPosition.y > -TileWidth) { Transform->CartesianPosition.y = -TileWidth; Velocity->y *= Multiplier; CollideWithLevel = true; }
-				if (Transform->CartesianPosition.y < -Height + TileWidth * 2.0f) { Transform->CartesianPosition.y = -Height + TileWidth * 2.0f; Velocity->y *= Multiplier; CollideWithLevel = true; }
+				float Multiplier = -1.0f;
+				if (Transform->CartesianPosition.x < -Width + TileWidth * 2.0f) { Transform->CartesianPosition.x = -Width + TileWidth * 2.0f; Velocity->x *= Multiplier; VelocityGoal->x *= Multiplier; CollideWithLevel = true; }   
+				if (Transform->CartesianPosition.x > -TileWidth) { Transform->CartesianPosition.x = -TileWidth; Velocity->x *= Multiplier; VelocityGoal->x *= Multiplier; CollideWithLevel = true; }
+				if (Transform->CartesianPosition.y > -TileWidth) { Transform->CartesianPosition.y = -TileWidth; Velocity->y *= Multiplier; VelocityGoal->y *= Multiplier; CollideWithLevel = true; }
+				if (Transform->CartesianPosition.y < -Height + TileWidth * 2.0f) { Transform->CartesianPosition.y = -Height + TileWidth * 2.0f; Velocity->y *= Multiplier; VelocityGoal->y *= Multiplier; CollideWithLevel = true; }
 
 
 
@@ -197,9 +190,9 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// Delete projectile for now if it collides with level
 				if ((Manager->Types[e] == Component::EntityType::PROJECTILE) && CollideWithLevel)
 				{
-					printf("EntityAmount before delete: %d\n", Manager->Length);
+					if ((Manager->AttributeSystem->Masks[e] & Masks::WeaponSubOptions::GRENADE) == 0 &&
+						(Manager->AttributeSystem->Masks[e] & Masks::WeaponOptions::EXPLOSIVE) == 0)
 					EntitySystem::RemoveEntity(Manager, e);
-					printf("EntityAmount after delete: %d\n", Manager->Length);
 				}
 
 				*GroundPosition = Enjon::Math::CartesianToIso(Transform->CartesianPosition);

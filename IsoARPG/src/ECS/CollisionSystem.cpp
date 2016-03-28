@@ -34,6 +34,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 	Enjon::uint32 COLLISION_WEAPON		= 0x00000010;
 	Enjon::uint32 COLLISION_EXPLOSIVE	= 0x00000020;
 	Enjon::uint32 COLLISION_PROP		= 0x00000040;
+	Enjon::uint32 COLLISION_VORTEX  	= 0x00000080;
 
 	/*-- Function Declarations --*/
 	void DrawBlood(ECS::Systems::EntityManager* Manager, Enjon::Math::Vec2 Pos);
@@ -99,7 +100,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 						// Get collision mask for A and B
 						Enjon::uint32 Mask = GetCollisionType(Manager, e, collider);
 
-						if (Mask == (COLLISION_ITEM | COLLISION_ITEM)) 			{ 												continue; }
+						if (Mask == (COLLISION_ITEM | COLLISION_ITEM)) 			{ CollideWithDebris(Manager, collider, e);		continue; }
 						if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
@@ -111,13 +112,19 @@ namespace ECS{ namespace Systems { namespace Collision {
 																				  else 											CollideWithDebris(Manager, e, collider); 
 																				  continue; 
 																				} 
-						if (Mask == (COLLISION_ITEM | COLLISION_EXPLOSIVE))		{ if (AType == Component::EntityType::ITEM) 	CollideWithEnemy(Manager, collider, e);
-																				  else 											CollideWithEnemy(Manager, e, collider); 		
+						if (Mask == (COLLISION_ITEM | COLLISION_EXPLOSIVE))		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e);
+																				  else 											CollideWithDebris(Manager, e, collider); 		
+																				  continue; 
+																				} 
+						if (Mask == (COLLISION_ITEM | COLLISION_VORTEX))		{ if (AType == Component::EntityType::ITEM) 	CollideWithVortex(Manager, collider, e);
+																				  else 											CollideWithVortex(Manager, e, collider); 		
 																				  continue; 
 																				} 
 						// if (Mask == (COLLISION_ENEMY | COLLISION_ITEM)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
-						if (Mask == (COLLISION_EXPLOSIVE | COLLISION_ENEMY))	{ CollideWithExplosive(Manager, e, collider);  	continue; }
+						if (Mask == (COLLISION_EXPLOSIVE | COLLISION_ENEMY))	{ if (AType == Component::EntityType::ENEMY) 	CollideWithExplosive(Manager, e, collider);  	
+																				  else 											CollideWithExplosive(Manager, collider, e); 
+																				  continue; }
 					}
 				}	
 			}
@@ -149,6 +156,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			case Component::EntityType::PROJECTILE: 	Mask |= COLLISION_PROJECTILE; 		break;
 			case Component::EntityType::EXPLOSIVE: 		Mask |= COLLISION_EXPLOSIVE; 		break;
 			case Component::EntityType::PROP: 			Mask |= COLLISION_PROP; 			break;
+			case Component::EntityType::VORTEX: 		Mask |= COLLISION_VORTEX;			break;
 			default: 									Mask |= COLLISION_NONE;				break; 
 		}	
 
@@ -162,6 +170,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			case Component::EntityType::PROJECTILE: 	Mask |= COLLISION_PROJECTILE; 		break;
 			case Component::EntityType::EXPLOSIVE: 		Mask |= COLLISION_EXPLOSIVE; 		break;
 			case Component::EntityType::PROP: 			Mask |= COLLISION_PROP; 			break;
+			case Component::EntityType::VORTEX: 		Mask |= COLLISION_VORTEX;			break;
 			default: 									Mask |= COLLISION_NONE;				break; 
 		}
 
@@ -265,7 +274,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			}
 
 			// Remove projectile
-			EntitySystem::RemoveEntity(Manager, A_ID);
+			// EntitySystem::RemoveEntity(Manager, A_ID);
 
 			// Continue with next entity
 			return;
@@ -521,10 +530,66 @@ namespace ECS{ namespace Systems { namespace Collision {
 	
 		else
 		{
-			// Get minimum translation distance
-			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
 
-			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::ITEM) *EntityVelocity = -0.1f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+			if (Manager->AttributeSystem->Masks[B_ID] & Masks::WeaponOptions::EXPLOSIVE)
+			{
+				V2 Direction = EM::Vec2::Normalize(*A - *B);
+				if (Direction.x == 0) Direction.x = (float)ER::Roll(-100, 100) / 100.0f;
+				if (Direction.y == 0) Direction.y = (float)ER::Roll(-100, 100) / 100.0f;
+				float Length = Direction.Length();
+				float Impulse = 40.0f - 15 * Length;
+				*EntityVelocity = -Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f); 
+			}
+			else if (Manager->AttributeSystem->Masks[B_ID] & Masks::GeneralOptions::DEBRIS && 
+					 Manager->AttributeSystem->Masks[A_ID] & Masks::GeneralOptions::DEBRIS)
+			{
+				{
+					V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
+					*EntityVelocity = *EntityVelocity + -0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+				}
+			}
+			else
+			{
+				// Get minimum translation distance
+				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
+				*EntityVelocity = *EntityVelocity + -0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+			}
+		}
+
+		return;
+	}
+
+	void CollideWithVortex(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID)
+	{
+		Enjon::Math::Vec3* EntityPosition = &Manager->TransformSystem->Transforms[A_ID].Position;
+		Enjon::Math::Vec3* ColliderPosition = &Manager->TransformSystem->Transforms[B_ID].Position;
+		Enjon::Math::Vec2* A = &Manager->TransformSystem->Transforms[B_ID].CartesianPosition;
+		Enjon::Math::Vec2* B = &Manager->TransformSystem->Transforms[A_ID].CartesianPosition;
+		Enjon::Math::Vec3* EntityVelocity = &Manager->TransformSystem->Transforms[A_ID].Velocity; 
+		Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
+		Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
+		Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
+
+		// Collision didn't happen
+		if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) { return; }
+	
+		else
+		{
+
+			if (Manager->AttributeSystem->Masks[B_ID] & Masks::WeaponOptions::EXPLOSIVE)
+			{
+				V2 Direction = EM::Vec2::Normalize(*A - *B);
+				float Length = Direction.Length();
+				float Impulse = 20.0f - 15 * Length;
+				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
+				*EntityVelocity = Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f); }
+			else
+			{
+				// Get minimum translation distance
+				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
+				*EntityVelocity = -1.0f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+			}
+
 
 			return;
 		}

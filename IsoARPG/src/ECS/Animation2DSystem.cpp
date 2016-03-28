@@ -296,6 +296,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										// // Fire in direction of mouse
 										Manager->TransformSystem->Transforms[id].VelocityGoal = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);
 										Manager->TransformSystem->Transforms[id].Velocity = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);
+										Manager->TransformSystem->Transforms[id].Velocity.z = -5.0f;
 										Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;
 
 										// Set attack vector of player to this velocity

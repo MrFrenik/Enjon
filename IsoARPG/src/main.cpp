@@ -70,7 +70,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define NUM_LIGHTS 	10
+#define NUM_LIGHTS 	5
 
 typedef struct
 {
@@ -90,7 +90,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 25;
+const int LEVELSIZE = 10;
 
 float DashingCounter = 0.0f;
 
@@ -346,7 +346,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 100;
+	static uint32 AmountDrawn = 1;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -379,7 +379,7 @@ int main(int argc, char** argv)
 	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 20000;
+	AmountDrawn = 1000;
 
 	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
@@ -541,9 +541,9 @@ int main(int argc, char** argv)
 			static float SmokeCount = 0.0f;
 			SmokeCount += 0.005f;
 			Enjon::uint32 SR = Enjon::Random::Roll(0, 3);
-			if (SmokeCount > 1.0f)
+			if (SmokeCount > 2.0f)
 			{
-				for (Enjon::uint32 i = 0; i < 10; i++)
+				for (Enjon::uint32 i = 0; i < 5; i++)
 				{
 					DrawSmoke(LightParticleBatch, EM::Vec3(Enjon::Random::Roll(-LvlSize.x, LvlSize.x), Enjon::Random::Roll(-LvlSize.y * 2.0f, LvlSize.y * 2.0f), 0.0f));
 				}

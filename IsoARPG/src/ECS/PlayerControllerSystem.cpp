@@ -12,6 +12,8 @@
 namespace ECS { namespace Systems { namespace PlayerController {
 
 	void ShootGrenade(struct EntityManager* Manager, Enjon::Math::Vec3 Pos, EG::SpriteSheet* Sheet);
+	void MakeExplosion(struct EntityManager* Manager, EM::Vec3 Pos);
+	void MakeVortex(struct EntityManager* Manager, EM::Vec3 Pos);
 
 	struct PlayerControllerSystem* NewPlayerControllerSystem(ECS::Systems::EntityManager* Manager)
 	{
@@ -26,6 +28,9 @@ namespace ECS { namespace Systems { namespace PlayerController {
 
 	void Update(struct PlayerControllerSystem* System)
 	{
+		static bool RightButtonDown = false;
+
+
 		ECS::Systems::EntityManager* Manager = System->Manager;
 
 		for (eid32 e = Manager->Player; e < Manager->Player + 1; e++)
@@ -104,11 +109,20 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					Animation2D::SetPlayerState(Animation2D::EntityAnimationState::ATTACKING);  // NOTE(John): THIS IS FUCKING AWFUL
 				}
 
-				if (Input->IsKeyPressed(SDL_BUTTON_RIGHT)) 
+				if (Input->IsKeyDown(SDL_BUTTON_RIGHT)) 
 				{
 					auto P = Manager->TransformSystem->Transforms[Manager->Player].Position + Enjon::Math::Vec3(50.0f, 20.0f, 0.0f);
-					P += Enjon::Math::Vec3(Enjon::Random::Roll(-100, 100), Enjon::Random::Roll(-100, 100), 0.0f);
-					ShootGrenade(Manager, P, Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"));
+					// P += Enjon::Math::Vec3(Enjon::Random::Roll(-100, 100), Enjon::Random::Roll(-100, 100), 0.0f);
+					// ShootGrenade(Manager, P, Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"));
+					MakeVortex(Manager, P);
+					RightButtonDown = true;
+				}
+
+				else if (RightButtonDown)
+				{
+					auto P = Manager->TransformSystem->Transforms[Manager->Player].Position + Enjon::Math::Vec3(50.0f, 20.0f, 0.0f);
+					MakeExplosion(Manager, P);
+					RightButtonDown = false;
 				}
 
 				if (Input->IsKeyPressed(SDLK_r)) 
@@ -177,7 +191,10 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					if (Manager->TransformSystem->Transforms[e].ViewVector.y != 0) Manager->TransformSystem->Transforms[e].ViewVector.x = 0;
 				} 
 
-				if (Input->IsKeyDown(SDLK_LSHIFT)) {
+				if (Input->IsKeyDown(SDLK_LCTRL)) {
+					goal = WALKPACE / 2.0f;
+				}
+				else if (Input->IsKeyDown(SDLK_LSHIFT)) {
 					goal = SPRINTPACE;
 				}
  				else goal = WALKPACE;
@@ -227,12 +244,48 @@ namespace ECS { namespace Systems { namespace PlayerController {
 		auto RY = Enjon::Random::Roll(-2, 2) / 100.0f;
 		GV = Enjon::Math::CartesianToIso(GV);
 
-		float speed = 5.0f;
+		float speed = 10.0f;
 
 		Manager->TransformSystem->Transforms[Grenade].Velocity = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
 		Manager->TransformSystem->Transforms[Grenade].VelocityGoal = speed * Enjon::Math::Vec3(GV.x + RX, GV.y + RY, 0.0f);
 		Manager->TransformSystem->Transforms[Grenade].BaseHeight = 0.0f;
 		Manager->TransformSystem->Transforms[Grenade].MaxHeight = height;
+	}
+
+	void MakeExplosion(struct EntityManager* Manager, EM::Vec3 Pos)
+	{
+		// TODO(John): Make a "spawn" function that gets called for any entity that has a factory component
+		ECS::eid32 Explosion = Factory::CreateWeapon(Manager, Pos, Enjon::Math::Vec2(16.0f, 16.0f), 
+													Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"), 
+													Masks::Type::WEAPON | Masks::WeaponOptions::EXPLOSIVE, Component::EntityType::EXPLOSIVE, "Explosion");
+
+		Manager->Camera->ShakeScreen(Enjon::Random::Roll(30, 40));
+		Manager->AttributeSystem->Masks[Explosion] |= Masks::GeneralOptions::COLLIDABLE;
+
+		Manager->TransformSystem->Transforms[Explosion].Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+		Manager->TransformSystem->Transforms[Explosion].VelocityGoal = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+		Manager->TransformSystem->Transforms[Explosion].BaseHeight = 0.0f;
+		Manager->TransformSystem->Transforms[Explosion].MaxHeight = 0.0f;
+
+		Manager->TransformSystem->Transforms[Explosion].AABBPadding = Enjon::Math::Vec2(500, 500);
+	}
+
+	void MakeVortex(struct EntityManager* Manager, EM::Vec3 Pos)
+	{
+		// TODO(John): Make a "spawn" function that gets called for any entity that has a factory component
+		ECS::eid32 Vortex = Factory::CreateWeapon(Manager, Pos, Enjon::Math::Vec2(16.0f, 16.0f), 
+													Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"), 
+													Masks::Type::WEAPON | Masks::WeaponOptions::EXPLOSIVE, Component::EntityType::VORTEX, "Vortex");
+
+		Manager->Camera->ShakeScreen(Enjon::Random::Roll(10, 15));
+		Manager->AttributeSystem->Masks[Vortex] |= Masks::GeneralOptions::COLLIDABLE;
+
+		Manager->TransformSystem->Transforms[Vortex].Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+		Manager->TransformSystem->Transforms[Vortex].VelocityGoal = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+		Manager->TransformSystem->Transforms[Vortex].BaseHeight = 0.0f;
+		Manager->TransformSystem->Transforms[Vortex].MaxHeight = 0.0f;
+
+		Manager->TransformSystem->Transforms[Vortex].AABBPadding = Enjon::Math::Vec2(500, 500);
 	}
 
 }}}

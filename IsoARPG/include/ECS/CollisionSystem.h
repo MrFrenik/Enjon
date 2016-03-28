@@ -36,6 +36,8 @@ namespace ECS { namespace Systems { namespace Collision {
 
 	void CollideWithDebris(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
 
+	void CollideWithVortex(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
+
 	// Totally for testing purposes...
 	void DropRandomLoot(Systems::EntityManager* Manager, Enjon::uint32 count, const Enjon::Math::Vec2* Position);
 }}}
