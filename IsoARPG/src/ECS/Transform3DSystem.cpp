@@ -178,7 +178,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// Make sure that position is within bounds of World
 				int Width = Manager->Width, Height = Manager->Height;
 				bool CollideWithLevel = false;
-				float Multiplier = -1.0f;
+				float Multiplier = -0.5f;
 				if (Transform->CartesianPosition.x < -Width + TileWidth * 2.0f) { Transform->CartesianPosition.x = -Width + TileWidth * 2.0f; Velocity->x *= Multiplier; VelocityGoal->x *= Multiplier; CollideWithLevel = true; }   
 				if (Transform->CartesianPosition.x > -TileWidth) { Transform->CartesianPosition.x = -TileWidth; Velocity->x *= Multiplier; VelocityGoal->x *= Multiplier; CollideWithLevel = true; }
 				if (Transform->CartesianPosition.y > -TileWidth) { Transform->CartesianPosition.y = -TileWidth; Velocity->y *= Multiplier; VelocityGoal->y *= Multiplier; CollideWithLevel = true; }
