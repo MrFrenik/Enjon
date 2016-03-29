@@ -70,7 +70,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define NUM_LIGHTS 	5
+#define NUM_LIGHTS 	2
 
 typedef struct
 {
@@ -346,7 +346,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 0;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -379,7 +379,7 @@ int main(int argc, char** argv)
 	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 1000;
+	AmountDrawn = 333;
 
 	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
@@ -391,6 +391,22 @@ int main(int argc, char** argv)
 		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
 
 
+	}
+
+	for (uint32 e = 0; e < AmountDrawn; e++)
+	{
+		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
+										Enjon::Math::Vec2(ER::Roll(5, 10), ER::Roll(2, 5)), EG::SpriteSheetManager::GetSpriteSheet("Box"), Masks::Type::ITEM, Component::EntityType::ITEM);
+		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
+		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+	}
+
+	for (uint32 e = 0; e < AmountDrawn; e++)
+	{
+		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
+										Enjon::Math::Vec2(ER::Roll(10, 20), ER::Roll(10, 20)), EG::SpriteSheetManager::GetSpriteSheet("BoxDebris"), Masks::Type::ITEM, Component::EntityType::ITEM);
+		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
+		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
 	}
 
 	// eid32 Box = Factory::CreateItem(World, World->TransformSystem->Transforms[Player].Position, EM::Vec2(32.0f, 100.0f), &ItemSheet, Masks::Type::ITEM, Component::EntityType::ITEM);
@@ -541,9 +557,9 @@ int main(int argc, char** argv)
 			static float SmokeCount = 0.0f;
 			SmokeCount += 0.005f;
 			Enjon::uint32 SR = Enjon::Random::Roll(0, 3);
-			if (SmokeCount > 2.0f)
+			if (SmokeCount > 10.0f)
 			{
-				for (Enjon::uint32 i = 0; i < 5; i++)
+				for (Enjon::uint32 i = 0; i < 3; i++)
 				{
 					DrawSmoke(LightParticleBatch, EM::Vec3(Enjon::Random::Roll(-LvlSize.x, LvlSize.x), Enjon::Random::Roll(-LvlSize.y * 2.0f, LvlSize.y * 2.0f), 0.0f));
 				}
