@@ -346,7 +346,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 0;
+	static uint32 AmountDrawn = 100;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -384,13 +384,11 @@ int main(int argc, char** argv)
 	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
 		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
-										Enjon::Math::Vec2(ER::Roll(10, 20), ER::Roll(2, 10)), EG::SpriteSheetManager::GetSpriteSheet("VerticleBar"), Masks::Type::ITEM, Component::EntityType::ITEM);
+										Enjon::Math::Vec2(ER::Roll(5, 10), ER::Roll(1, 5)), EG::SpriteSheetManager::GetSpriteSheet("VerticleBar"), Masks::Type::ITEM, Component::EntityType::ITEM);
 		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
 		World->Renderer2DSystem->Renderers[id].Format = EG::CoordinateFormat::ISOMETRIC;
 		World->Renderer2DSystem->Renderers[id].Color = EG::RGBA16(0.5f, 0.2f, 0.1f, 1.0f);
 		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
-
-
 	}
 
 	for (uint32 e = 0; e < AmountDrawn; e++)
@@ -399,6 +397,7 @@ int main(int argc, char** argv)
 										Enjon::Math::Vec2(ER::Roll(5, 10), ER::Roll(2, 5)), EG::SpriteSheetManager::GetSpriteSheet("Box"), Masks::Type::ITEM, Component::EntityType::ITEM);
 		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
 		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(50, 100) / 50.0f;
 	}
 
 	for (uint32 e = 0; e < AmountDrawn; e++)
@@ -407,9 +406,27 @@ int main(int argc, char** argv)
 										Enjon::Math::Vec2(ER::Roll(10, 20), ER::Roll(10, 20)), EG::SpriteSheetManager::GetSpriteSheet("BoxDebris"), Masks::Type::ITEM, Component::EntityType::ITEM);
 		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
 		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(50, 100) / 50.0f;
 	}
 
-	// eid32 Box = Factory::CreateItem(World, World->TransformSystem->Transforms[Player].Position, EM::Vec2(32.0f, 100.0f), &ItemSheet, Masks::Type::ITEM, Component::EntityType::ITEM);
+	for (uint32 e = 0; e < 100; e++)
+	{
+		auto s = ER::Roll(20, 40);
+		eid32 Box = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
+										Enjon::Math::Vec2(s, s), EG::SpriteSheetManager::GetSpriteSheet("Box"), Masks::Type::ITEM, Component::EntityType::ITEM);
+		World->TransformSystem->Transforms[Box].Mass = 2.5f - ER::Roll(1, 50) / 50.0f;
+		World->TransformSystem->Transforms[Box].AABBPadding = 15.0f;
+
+	}
+
+	for (uint32 e = 0; e < 50; e++)
+	{
+		auto s = ER::Roll(50, 80);
+		eid32 BiggerBox = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
+										Enjon::Math::Vec2(s, s), EG::SpriteSheetManager::GetSpriteSheet("Box"), Masks::Type::ITEM, Component::EntityType::ITEM);
+		World->TransformSystem->Transforms[BiggerBox].Mass = 5.0f - ER::Roll(1, 100) / 50.0f;
+		World->TransformSystem->Transforms[BiggerBox].AABBPadding = 15.0f;
+	}
 
 	// Set position to player
 	Camera.SetPosition(Math::Vec2(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, World->TransformSystem->Transforms[Player].Position.y)); 
@@ -1146,7 +1163,7 @@ int main(int argc, char** argv)
 				// Set uniforms
 				glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
 							 SCREENWIDTH, SCREENHEIGHT);
-				glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.4f);
+				glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 1.0f);
 				glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
 
 				glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 

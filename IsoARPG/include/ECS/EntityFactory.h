@@ -2,6 +2,7 @@
 #define ENTITY_FACTORY_H
 
 #include "ECS/ComponentSystems.h"
+#include "Defines.h"
 
 namespace ECS { namespace Factory {
 
@@ -22,6 +23,11 @@ namespace ECS { namespace Factory {
 		// Creates Item entity and returns eid
 		eid32 CreateWeapon(Systems::EntityManager* Manager, Enjon::Math::Vec3 Position, Enjon::Math::Vec2 Dimensions, Enjon::Graphics::SpriteSheet* Sheet, Masks::EntityMask Mask = Masks::Type::WEAPON, 
 									Component::EntityType Type = Component::EntityType::WEAPON, char* Name = "Weapon",  Enjon::Graphics::ColorRGBA16 Color = Enjon::Graphics::RGBA16_White());
+
+
+		void CreateExplosion(Systems::EntityManager* Manager, EM::Vec3 Pos);
+
+		void CreateVortex(Systems::EntityManager* Manager, EM::Vec3 Pos);
 }}
 
 #endif

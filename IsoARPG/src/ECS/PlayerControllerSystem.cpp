@@ -112,23 +112,22 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				if (Input->IsKeyDown(SDL_BUTTON_RIGHT)) 
 				{
 					auto P = Manager->TransformSystem->Transforms[Manager->Player].Position + Enjon::Math::Vec3(50.0f, 20.0f, 0.0f);
-					// P += Enjon::Math::Vec3(Enjon::Random::Roll(-100, 100), Enjon::Random::Roll(-100, 100), 0.0f);
-					// ShootGrenade(Manager, P, Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"));
-					MakeVortex(Manager, P);
+					Factory::CreateVortex(Manager, P);
 					RightButtonDown = true;
 				}
 
 				else if (RightButtonDown)
 				{
 					auto P = Manager->TransformSystem->Transforms[Manager->Player].Position + Enjon::Math::Vec3(50.0f, 20.0f, 0.0f);
-					MakeExplosion(Manager, P);
+					Factory::CreateExplosion(Manager, P);
 					RightButtonDown = false;
 				}
 
 				if (Input->IsKeyPressed(SDLK_r)) 
 				{
-					eid32 WeaponEquipped = Manager->InventorySystem->Inventories[e].WeaponEquipped;
-					Manager->Masks[WeaponEquipped] ^= COMPONENT_RENDERER2D;	
+					auto P = Manager->TransformSystem->Transforms[Manager->Player].Position + Enjon::Math::Vec3(50.0f, 20.0f, 0.0f);
+					P += Enjon::Math::Vec3(Enjon::Random::Roll(-100, 100), Enjon::Random::Roll(-100, 100), 0.0f);
+					ShootGrenade(Manager, P, Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"));
 				}
 
 				if (Animation2D::GetPlayerState() != Animation2D::EntityAnimationState::ATTACKING)

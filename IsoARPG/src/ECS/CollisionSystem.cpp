@@ -524,6 +524,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 		Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
 		Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
 		Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
+		float AMass = Manager->TransformSystem->Transforms[A_ID].Mass;
+		float BMass = Manager->TransformSystem->Transforms[B_ID].Mass;
 
 		// Collision didn't happen
 		if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) { return; }
@@ -538,7 +540,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 				if (Direction.y == 0) Direction.y = (float)ER::Roll(-100, 100) / 100.0f;
 				float Length = Direction.Length();
 				float Impulse = 55.0f - 15 * Length;
-				*EntityVelocity = -Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f); 
+
+				*EntityVelocity = (1.0f / AMass) * -Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f); 
 			}
 			else if (Manager->AttributeSystem->Masks[B_ID] & Masks::GeneralOptions::DEBRIS && 
 					 Manager->AttributeSystem->Masks[A_ID] & Masks::GeneralOptions::DEBRIS)
@@ -572,6 +575,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 		Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
 		Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
 		Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
+		float AMass = Manager->TransformSystem->Transforms[A_ID].Mass;
+		float BMass = Manager->TransformSystem->Transforms[B_ID].Mass;
 
 		// Collision didn't happen
 		if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) { return; }
@@ -582,12 +587,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			float Length = Direction.Length();
 			float Impulse = 2.0f;
 			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
-			*EntityVelocity = 0.85f * *EntityVelocity + Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
-
-			// EM::Vec2 MD = EM::Vec2::Normalize(Manager->PlayerControllerSystem->PlayerControllers[Manager->Player].Input->GetMouseCoords() - *A);
-
-			// if ((*A - *B).Length() <= 50.0f) *EntityVelocity += 30.0f * EM::Vec3(cos(0.0025f * t), sin(0.0025f * t), 0.0f) + EM::Vec3(MD, 0.0f);
-			// if ((*A - *B).Length() <= 50.0f) *EntityVelocity = 20.0f * EM::Vec3(MD, 0.0f);
+			*EntityVelocity = 0.85f * *EntityVelocity + (1.0f / AMass) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
 		}
 
 		return;

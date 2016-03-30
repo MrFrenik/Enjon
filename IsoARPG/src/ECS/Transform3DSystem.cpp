@@ -55,10 +55,10 @@ namespace ECS{ namespace Systems { namespace Transform {
 					// Need to see whether or not the player is within range before I turn on its collision component
 					Enjon::Math::Vec3* P = &Manager->TransformSystem->Transforms[e].Position;
 
-					// if (PGP->DistanceTo(*GP) <= TILE_SIZE * 2) Manager->CollisionSystem->Entities.push_back(e);
 					if (PGP->DistanceTo(*GP) <= 1450) Manager->CollisionSystem->Entities.push_back(e);
 
-					Manager->TransformSystem->Transforms[e].Angle += 0.01f * Manager->TransformSystem->Transforms[e].Velocity.x;
+					if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::DEBRIS)
+						Manager->TransformSystem->Transforms[e].Angle += 0.01f * Manager->TransformSystem->Transforms[e].Velocity.x;
 				}
 
 				// First transform the velocity by LERPing it

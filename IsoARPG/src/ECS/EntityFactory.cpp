@@ -40,6 +40,7 @@ namespace ECS { namespace Factory {
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
 			Transform->Angle = 0.0f;
+			Transform->Mass = 3.0f;
 
 			// Set up AABB
 			V2* CP = &Transform->CartesianPosition;
@@ -119,6 +120,7 @@ namespace ECS { namespace Factory {
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
 			Transform->Angle = 0.0f;
+			Transform->Mass = 3.0f;
 
 			// Set up AABB
 			V2* CP = &Transform->CartesianPosition;
@@ -190,6 +192,7 @@ namespace ECS { namespace Factory {
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
 			Transform->Angle = 0.0f;
+			Transform->Mass = 1.2f;
 
 			// Set up AABB
 			V2* CP = &Transform->CartesianPosition;
@@ -247,6 +250,7 @@ namespace ECS { namespace Factory {
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
 			Transform->Angle = 0.0f;
+			Transform->Mass = 1.2f;
 
 			// Set up AABB
 			V2* CP = &Transform->CartesianPosition;
@@ -284,5 +288,41 @@ namespace ECS { namespace Factory {
 			Manager->InventorySystem->Inventories->WeaponEquipped = NULL_ENTITY;
 
 			return Weapon;
+		}
+
+		void CreateExplosion(Systems::EntityManager* Manager, EM::Vec3 Pos)
+		{
+			// TODO(John): Make a "spawn" function that gets called for any entity that has a factory component
+			ECS::eid32 Explosion = Factory::CreateWeapon(Manager, Pos, Enjon::Math::Vec2(16.0f, 16.0f), 
+														Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"), 
+														Masks::Type::WEAPON | Masks::WeaponOptions::EXPLOSIVE, Component::EntityType::EXPLOSIVE, "Explosion");
+
+			Manager->Camera->ShakeScreen(Enjon::Random::Roll(30, 40));
+			Manager->AttributeSystem->Masks[Explosion] |= Masks::GeneralOptions::COLLIDABLE;
+
+			Manager->TransformSystem->Transforms[Explosion].Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+			Manager->TransformSystem->Transforms[Explosion].VelocityGoal = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+			Manager->TransformSystem->Transforms[Explosion].BaseHeight = 0.0f;
+			Manager->TransformSystem->Transforms[Explosion].MaxHeight = 0.0f;
+
+			Manager->TransformSystem->Transforms[Explosion].AABBPadding = Enjon::Math::Vec2(500, 500);
+		}
+
+		void CreateVortex(Systems::EntityManager* Manager, EM::Vec3 Pos)
+		{
+			// TODO(John): Make a "spawn" function that gets called for any entity that has a factory component
+			ECS::eid32 Vortex = Factory::CreateWeapon(Manager, Pos, Enjon::Math::Vec2(16.0f, 16.0f), 
+														Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"), 
+														Masks::Type::WEAPON | Masks::WeaponOptions::EXPLOSIVE, Component::EntityType::VORTEX, "Vortex");
+
+			Manager->Camera->ShakeScreen(Enjon::Random::Roll(10, 15));
+			Manager->AttributeSystem->Masks[Vortex] |= Masks::GeneralOptions::COLLIDABLE;
+
+			Manager->TransformSystem->Transforms[Vortex].Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+			Manager->TransformSystem->Transforms[Vortex].VelocityGoal = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
+			Manager->TransformSystem->Transforms[Vortex].BaseHeight = 0.0f;
+			Manager->TransformSystem->Transforms[Vortex].MaxHeight = 0.0f;
+
+			Manager->TransformSystem->Transforms[Vortex].AABBPadding = Enjon::Math::Vec2(500, 500);
 		}
 }}

@@ -33,6 +33,7 @@ namespace ECS { namespace Component {
 	typedef struct
 	{
 		// NOTE(John): This is getting a bit bloated...
+		// NOTE(John): Yep, make a physics component
 		Enjon::Math::Vec3 Position;
 		Enjon::Math::Vec3 Velocity;
 		Enjon::Math::Vec3 VelocityGoal;
@@ -47,6 +48,7 @@ namespace ECS { namespace Component {
 		float BaseHeight;
 		float MaxHeight;
 		float VelocityGoalScale; 
+		float Mass;
 		eid32 Entity;
 	} Transform3D;
 
