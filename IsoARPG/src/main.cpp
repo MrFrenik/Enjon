@@ -493,8 +493,8 @@ int main(int argc, char** argv)
 
 
 	{
-		float BeamSegX = 30.0f, BeamSegY = 2.0f;
-		for (Enjon::uint32 i = 0; i < 20; i++)
+		float BeamSegX = 2.5f, BeamSegY = 5.0f;
+		for (Enjon::uint32 i = 0; i < 200; i++)
 		{
 			BeamSegments.push_back({EM::Vec2(0.0f, 0.0f), EM::Vec2(BeamSegX, BeamSegY), 0.0f});
 		}
@@ -522,9 +522,12 @@ int main(int argc, char** argv)
 		// Update Input Manager
 		Input.Update();	
 
-		auto L = &Lights.at(0);
-		L->Position = EM::Vec3(World->TransformSystem->Transforms[Player].Position.XY(), LightZ);
-		L->Color = EG::RGBA16(6.0f, 4.0f, 6.0f, 1.0f);
+		{
+			auto L = &Lights.at(0);
+			const EM::Vec3* P = &World->TransformSystem->Transforms[Player].Position;
+			L->Position = EM::Vec3(P->x, P->y - P->z, LightZ);
+			L->Color = EG::RGBA16(6.0f, 4.0f, 6.0f, 1.0f);
+		}
 
 		// Clear lights
 		LightsToDraw.clear();
@@ -911,9 +914,12 @@ int main(int argc, char** argv)
 									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
 
 	
-		//////////////////////////////
-		// BEAM //////////////////////	
-		//////////////////////////////
+		///////////////////////////////
+		// BEAMS //////////////////////	
+		///////////////////////////////
+
+		EG::ColorRGBA16 C = EG::RGBA16(0.1f, 0.3f, 10.0f, 0.2f);
+		EM::Vec2 Norm;
 
 		// First segment
 		{
@@ -925,7 +931,7 @@ int main(int argc, char** argv)
 			MousePos = EM::IsoToCartesian(MousePos);
 			BeamPos = EM::IsoToCartesian(BeamPos);
 			EM::Vec2 R(1,0);
-			auto Norm = EM::Vec2::Normalize(MousePos - BeamPos);
+			Norm = EM::Vec2::Normalize(MousePos - BeamPos);
 			auto a = acos(Norm.DotProduct(R)) * 180.0f / M_PI;
 			if (Norm.y < 0) a *= -1;
 			BeamPos = EM::CartesianToIso(BeamPos);
@@ -937,8 +943,9 @@ int main(int argc, char** argv)
 			BeamSegments.at(0).Position = BeamPos;
 			BeamSegments.at(0).Angle = a;
 
+			// Beam 1
 			EntityBatch.Add(EM::Vec4(BeamPos, BeamDims), EM::Vec4(0, 0, 1, 1), 
-							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/VerticleBar.png").id, EG::RGBA16(0.1f, 0.3f, 10.0f, 1.0f), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
+							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/VerticleBar.png").id, C, BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
 		}
 
 
@@ -948,18 +955,36 @@ int main(int argc, char** argv)
 			for (Enjon::uint32 i = 1; i < BeamSegments.size(); i++)
 			{
 				// Random verticle bar to test rotations
-				EM::Vec2 BeamDims = BeamSegments.at(1).Dimensions;
+				EM::Vec2 BeamDims = BeamSegments.at(i).Dimensions;
 				EM::Vec2 BeamPos = BeamSegments.at(i - 1).Position;
-				float a = BeamSegments.at(i - 1).Angle - sin(t);
+				float O = BeamSegments.at(0).Angle;
+				float A = BeamSegments.at(i - 1).Angle;
+				float B = BeamSegments.at(i).Angle;
+				float Difference = BeamSegments.at(i - 1).Angle - BeamSegments.at(i).Angle;
+				// if ((O >= 170 && B <= -180) || (O <= -170 && B >= 170)) { Difference *= -1;}
+				float a;
+				if (abs(Difference) > 290) a = B + Difference;
+				else a = B + Difference * 0.95f;
 				auto Rad = 0.5f * BeamDims.x;
 				BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
 				BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
 				BeamSegments.at(i).Position = BeamPos;
 				BeamSegments.at(i).Angle = a;
+				BeamSegments.at(i).Dimensions.y += sin(t) * i / 30.0f;
 
 				EntityBatch.Add(EM::Vec4(BeamPos, BeamDims), EM::Vec4(0, 0, 1, 1), 
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/VerticleBar.png").id, EG::RGBA16(0.1f, 0.3f, 10.0f, 1.0f), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/VerticleBar.png").id, EG::SetOpacity(C, (sin(t) + 1.1f) / 2.0f), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
 			}	
+		}
+
+		{
+			static float SegCounter = 0.0f;
+			SegCounter += 0.1f;
+			if (SegCounter > 5.0f)
+			{
+				printf("%.2f, %.2f\n", BeamSegments.at(0).Angle, BeamSegments.at(19).Angle);
+				SegCounter = 0.0f;
+			}
 		}
 
 		////////////////////////////////////////////////

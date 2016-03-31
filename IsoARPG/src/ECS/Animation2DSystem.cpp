@@ -14,6 +14,8 @@
 
 namespace ECS { namespace Systems { namespace Animation2D {
 
+	//enJon sux dick
+
 	// TESTING THIS ONLY
 	static EntityAnimationState PlayerState = EntityAnimationState::WALKING;
 	static Weapons CurrentWeapon = Weapons::DAGGER;
@@ -155,7 +157,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					// Animation
 					if (PlayerState == EntityAnimationState::ATTACKING) 
 					{
-						if (CurrentWeapon == Weapons::BOW) AttackSpeed = 10.0f;
+						if (CurrentWeapon == Weapons::BOW) AttackSpeed = 1.0f;
 						else AttackSpeed = 1.0f;
 						AnimationComponent->AnimationTimer += CurrentAnimation->AnimationTimerIncrement * AttackSpeed;
 					}
@@ -252,13 +254,14 @@ namespace ECS { namespace Systems { namespace Animation2D {
 									{
 										// Create an arrow projectile entity for now...
 										static Enjon::Graphics::SpriteSheet ItemSheet;
+										static float t = 0.0f;
+										t += 0.1f;
+
 										auto C = Enjon::Graphics::RGBA16(0.0f, 100.0f, 0.0f, 100.0f);
 										C.r += 2.0f;
-										// EM::Vec2 Dim(10.0f + ER::Roll(0, 60), 5.0f);
-										EM::Vec2 Dim(20.0f, 10.0f);
 										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bluebutton.png"), Enjon::Math::iVec2(1, 1));
-										eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->x + 60.0f, Position->y + 20.0f, 50.0f),
-																  Enjon::Math::Vec2(100.0f, 10.0f), &ItemSheet, (Masks::Type::WEAPON | 
+										eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->x + 60.0f, Position->y + 40.0f, 50.0f),
+																  Enjon::Math::Vec2(10.0f + ER::Roll(0, 60), 5.0f), &ItemSheet, (Masks::Type::WEAPON | 
 																  												Masks::WeaponOptions::PROJECTILE | 
 																  												Masks::GeneralOptions::PICKED_UP | 
 																  												Masks::GeneralOptions::COLLIDABLE), 
@@ -289,13 +292,11 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										EM::Vec3* ArrowPos = &Manager->TransformSystem->Transforms[id].Position;
 										*ArrowPos = EM::Vec3(ArrowPos->XY() + Rad * EM::CartesianToIso(EM::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a)))), 40.0f);
 										
-										// auto RX = Enjon::Random::Roll(-10, 2) / 100.0f;
-										// auto RY = Enjon::Random::Roll(-10, 2) / 100.0f;
-										auto RX = 0.0f;
-										auto RY = 0.0f;
+										auto RX = sin(t) * Enjon::Random::Roll(-10, 2) / 100.0f;
+										auto RY = sin(t) * Enjon::Random::Roll(-10, 2) / 100.0f;
 										ArrowVelocity = Enjon::Math::CartesianToIso(ArrowVelocity);
 
-										float speed = 10.0f;
+										float speed = 50.0f;
 
 										// // Fire in direction of mouse
 										Manager->TransformSystem->Transforms[id].VelocityGoal = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);
