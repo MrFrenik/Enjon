@@ -82,6 +82,15 @@ typedef struct
 
 float LightZ = 0.08f;
 
+typedef struct 
+{
+	EM::Vec2 Position;
+	EM::Vec2 Dimensions; 
+	float Angle;
+} BeamSegment;
+
+std::vector<BeamSegment> BeamSegments;
+
 char buffer[256];
 char buffer2[256];
 char buffer3[256];
@@ -346,7 +355,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 100;
+	static uint32 AmountDrawn = 1;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -481,6 +490,15 @@ int main(int argc, char** argv)
 	}
 
 	std::vector<Light*> LightsToDraw;
+
+
+	{
+		float BeamSegX = 30.0f, BeamSegY = 2.0f;
+		for (Enjon::uint32 i = 0; i < 20; i++)
+		{
+			BeamSegments.push_back({EM::Vec2(0.0f, 0.0f), EM::Vec2(BeamSegX, BeamSegY), 0.0f});
+		}
+	}
 
 	
 	while(isRunning)
@@ -733,6 +751,7 @@ int main(int argc, char** argv)
 			}
 		}
 
+
 		// Draw player
 
 		// Draw box
@@ -891,10 +910,15 @@ int main(int argc, char** argv)
 		EntityBatch.Add(Math::Vec4(GroundPosition->x - 20.0f, GroundPosition->y - 20.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
 									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
 
-		// Rotate the thing
+	
+		//////////////////////////////
+		// BEAM //////////////////////	
+		//////////////////////////////
+
+		// First segment
 		{
 			// Random verticle bar to test rotations
-			EM::Vec2 BeamDims(500.0f, 2.0f);
+			EM::Vec2 BeamDims = BeamSegments.at(0).Dimensions;
 			EM::Vec2 BeamPos = World->TransformSystem->Transforms[Player].Position.XY() + EM::Vec2(BeamDims.y / 2.0f + 60.0f, 40.0f);
 			Enjon::Math::Vec2 MousePos = Input.GetMouseCoords();
 			Camera.ConvertScreenToWorld(MousePos);
@@ -904,17 +928,42 @@ int main(int argc, char** argv)
 			auto Norm = EM::Vec2::Normalize(MousePos - BeamPos);
 			auto a = acos(Norm.DotProduct(R)) * 180.0f / M_PI;
 			if (Norm.y < 0) a *= -1;
-			// a += 90;
 			BeamPos = EM::CartesianToIso(BeamPos);
 			auto BeamX = BeamPos.x;
 			auto BeamY = BeamPos.y;
-			auto Rad = 130.0f;
+			auto Rad = 0.5f * BeamDims.x;
 			BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
 			BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
+			BeamSegments.at(0).Position = BeamPos;
+			BeamSegments.at(0).Angle = a;
 
 			EntityBatch.Add(EM::Vec4(BeamPos, BeamDims), EM::Vec4(0, 0, 1, 1), 
-							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::SetOpacity(EG::RGBA16_Green(), 0.5f), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
-		}	
+							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/VerticleBar.png").id, EG::RGBA16(0.1f, 0.3f, 10.0f, 1.0f), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
+		}
+
+
+
+		// Rest of the segments
+		{
+			for (Enjon::uint32 i = 1; i < BeamSegments.size(); i++)
+			{
+				// Random verticle bar to test rotations
+				EM::Vec2 BeamDims = BeamSegments.at(1).Dimensions;
+				EM::Vec2 BeamPos = BeamSegments.at(i - 1).Position;
+				float a = BeamSegments.at(i - 1).Angle - sin(t);
+				auto Rad = 0.5f * BeamDims.x;
+				BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
+				BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
+				BeamSegments.at(i).Position = BeamPos;
+				BeamSegments.at(i).Angle = a;
+
+				EntityBatch.Add(EM::Vec4(BeamPos, BeamDims), EM::Vec4(0, 0, 1, 1), 
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/VerticleBar.png").id, EG::RGBA16(0.1f, 0.3f, 10.0f, 1.0f), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
+			}	
+		}
+
+		////////////////////////////////////////////////
+		////////////////////////////////////////////////
 
 		float X = HUDCamera.GetPosition().x - 190.0f;
 		float Y = HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f;
