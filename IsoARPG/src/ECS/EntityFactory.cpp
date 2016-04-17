@@ -179,6 +179,7 @@ namespace ECS { namespace Factory {
 			AC->BB->AddComponent(std::string("EntityManager"), new BlackBoardComponent<Systems::EntityManager*>(Manager));
 			AC->BB->AddComponent(std::string("TargetPosition"), new BlackBoardComponent<EM::Vec3>(EM::Vec3(0.0f, 0.0f, 0.0f)));
 			AC->BB->AddComponent(std::string("MovementLoop"), new BlackBoardComponent<u32>(0));
+			AC->BB->AddComponent(std::string("Timer"), new BlackBoardComponent<Timer*>(new Timer{0.0f, 0.01f, 1.0f}));
 
 			return AI;
 		} 

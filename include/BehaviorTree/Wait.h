@@ -95,6 +95,73 @@ namespace BT
 			i32 TotalLoops;
 			i32 CurrentLoop;
 	};
+
+	class WaitWBBRead : public Task<WaitWBBRead>
+	{
+		public:
+
+			WaitWBBRead(BehaviorTree* BT)
+			{
+				this->BTree = BT;
+				Init();
+			}
+
+			~WaitWBBRead(){}
+
+			void Init()
+			{
+				State = BehaviorNodeState::INVALID;
+			}
+
+			BehaviorNodeState Run()
+			{
+				// Get State Object from BlackBoard
+				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto SS = &SO->GetData()->States;
+				auto Clock = static_cast<BlackBoardComponent<Timer*>*>(BTree->GetBlackBoard()->GetComponent("Timer"))->GetData();
+
+				if (SS->at(this->TreeIndex) != BehaviorNodeState::RUNNING)
+				{
+					SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
+					Reset();
+				}
+
+				Clock->CurrentTime += Clock->DT;
+				if (Clock->CurrentTime >= Clock->Time)
+				{
+					SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
+					State = BehaviorNodeState::SUCCESS;
+					// std::cout << "Done Waiting!" << std::endl;
+					return BehaviorNodeState::SUCCESS;
+				}
+
+				else
+				{
+					float D = Clock->Time - Clock->CurrentTime; 
+					// std::cout << D << " more to go." << std::endl;
+					SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
+					return BehaviorNodeState::RUNNING;
+				}
+
+				SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
+				return BehaviorNodeState::RUNNING;
+			}
+
+			inline void Reset()
+			{
+				// Get State Object from BlackBoard
+				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto SS = &SO->GetData()->States;
+				auto Clock = static_cast<BlackBoardComponent<Timer*>*>(BTree->GetBlackBoard()->GetComponent("Timer"))->GetData();
+
+				SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
+
+				State = BehaviorNodeState::RUNNING;
+				Clock->CurrentTime = 0.0f;
+			}
+
+		private:
+	};
 }
 
 #endif

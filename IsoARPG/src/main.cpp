@@ -361,7 +361,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 250;
+	static uint32 AmountDrawn = 5;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -1137,12 +1137,12 @@ int main(int argc, char** argv)
 		/*-- RANDOM DRAWING --*/
 
 		// Add some random polygon
-		std::vector<EM::Vec2> Points;
-		Points.push_back(EM::Vec2(-1500, -1400));	// BL
-		Points.push_back(EM::Vec2(-800, -1400));	// BR
-		Points.push_back(EM::Vec2(-850, -1200));	// TR
-		Points.push_back(EM::Vec2(-900, -1200));	// TL
-		EntityBatch.AddPolygon(Points, EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::RGBA16_Orange(), Points.at(0).y, EG::CoordinateFormat::ISOMETRIC);
+		// std::vector<EM::Vec2> Points;
+		// Points.push_back(EM::Vec2(-1500, -1400));	// BL
+		// Points.push_back(EM::Vec2(-800, -1400));	// BR
+		// Points.push_back(EM::Vec2(-850, -1200));	// TR
+		// Points.push_back(EM::Vec2(-900, -1200));	// TL
+		// EntityBatch.AddPolygon(Points, EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::RGBA16_Orange(), Points.at(0).y, EG::CoordinateFormat::ISOMETRIC);
 
 		// Add a random cube 
 		// static EG::SpriteSheet* BoxSheet = EG::SpriteSheetManager::GetSpriteSheet("BoxSheet");
