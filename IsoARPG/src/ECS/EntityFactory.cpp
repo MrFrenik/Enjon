@@ -8,7 +8,8 @@
 #include "ECS/EffectSystem.h"
 #include "ECS/AttributeSystem.h"
 #include "ECS/Entity.h"
-
+#include "ECS/AIControllerSystem.h"
+#include "BehaviorTreeManager.h"
 
 namespace ECS { namespace Factory {
 
@@ -165,6 +166,15 @@ namespace ECS { namespace Factory {
 
 			// Set up inventory
 			Manager->InventorySystem->Inventories[AI].WeaponEquipped = NULL_ENTITY;
+
+			// Set up brain
+			auto AC = &Manager->AIControllerSystem->AIControllers[AI];
+			AC->Brain = BTManager::GetBehaviorTree("TestTree");
+			AC->SO = AC->Brain->CreateStateObject();
+			AC->BB = AC->Brain->CreateBlackBoard();
+
+			AC->BB->AddComponent(std::string("EID"), new BlackBoardComponent<eid32>(AI));
+			AC->BB->AddComponent(std::string("EntityManager"), new BlackBoardComponent<Systems::EntityManager*>(Manager));
 
 			return AI;
 		} 

@@ -1,21 +1,22 @@
+BehaviorTreeManager.cpp
+Generating Code...
+Skipping... (no relevant changes detected)
 Transform3DSystem.cpp
 Renderer2DSystem.cpp
 PlayerControllerSystem.cpp
 LabelSystem.cpp
 InventorySystem.cpp
 EntityFactory.cpp
+Entity.cpp
 EffectSystem.cpp
 ComponentSystems.cpp
 CollisionSystem.cpp
 AttributeSystem.cpp
 Animation2DSystem.cpp
 AIControllerSystem.cpp
+SpatialHash.cpp
 main.cpp
 Loot.cpp
-Generating Code...
-Skipping... (no relevant changes detected)
-Entity.cpp
-SpatialHash.cpp
 Level.cpp
 AnimationManager.cpp
 Animation.cpp
@@ -47,8 +48,9 @@ Errors.cpp
 Enjon.cpp
 DeferredRenderer.cpp
 Camera2D.cpp
+BehaviorTree.cpp
 AABB.cpp
-Microsoft (R) Incremental Linker Version 12.00.31101.0
+Microsoft (R) Incremental Linker Version 12.00.40629.0
 Copyright (C) Microsoft Corporation.  All rights reserved.
 
 /debug 
@@ -57,6 +59,7 @@ Copyright (C) Microsoft Corporation.  All rights reserved.
 /NODEFAULTLIB:msvcrt.lib 
 "/LIBPATH:..\deps\lib" Opengl32.lib SDL2.lib SDL2main.lib glew32.lib glew32s.lib freetype.lib 
 AABB.obj 
+BehaviorTree.obj 
 Camera2D.obj 
 DeferredRenderer.obj 
 Enjon.obj 
@@ -87,6 +90,7 @@ Vec4.obj
 Camera3D.obj 
 Animation.obj 
 AnimationManager.obj 
+BehaviorTreeManager.obj 
 Level.obj 
 Loot.obj 
 main.obj 

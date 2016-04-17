@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -63,6 +63,7 @@
 #include "AnimationManager.h"
 #include "SpatialHash.h"
 #include "Level.h"
+#include "BehaviorTreeManager.h"
 
 /*-- Standard Library includes --*/
 #include <stdio.h>
@@ -80,7 +81,7 @@ typedef struct
 	EM::Vec3 Falloff;
 } Light;
 
-float LightZ = 0.08f;
+float LightZ = 0.03f;
 
 typedef struct 
 {
@@ -183,6 +184,9 @@ int main(int argc, char** argv)
 
 	// Init FontManager
 	Enjon::Graphics::FontManager::Init();
+
+	// Init BehaviorTreeManager
+	BTManager::Init();
 	
 	// Init level
 	Enjon::Graphics::SpriteBatch TileBatch;
@@ -493,8 +497,8 @@ int main(int argc, char** argv)
 
 
 	{
-		float BeamSegX = 2.5f, BeamSegY = 5.0f;
-		for (Enjon::uint32 i = 0; i < 200; i++)
+		float BeamSegX = 10.5f, BeamSegY = 2.0f;
+		for (Enjon::uint32 i = 0; i < 50; i++)
 		{
 			BeamSegments.push_back({EM::Vec2(0.0f, 0.0f), EM::Vec2(BeamSegX, BeamSegY), 0.0f});
 		}
@@ -918,7 +922,7 @@ int main(int argc, char** argv)
 		// BEAMS //////////////////////	
 		///////////////////////////////
 
-		EG::ColorRGBA16 C = EG::RGBA16(0.1f, 0.3f, 10.0f, 0.2f);
+		EG::ColorRGBA16 C = EG::RGBA16_ZombieGreen();
 		EM::Vec2 Norm;
 
 		// First segment
@@ -964,19 +968,21 @@ int main(int argc, char** argv)
 				// if ((O >= 170 && B <= -180) || (O <= -170 && B >= 170)) { Difference *= -1;}
 				float a;
 				if (abs(Difference) > 290) a = B + Difference;
-				else a = B + Difference * 0.95f;
+				else a = B + Difference * 0.5f;
+				// a += ER::Roll(-7, 7);
 				auto Rad = 0.5f * BeamDims.x;
+				BeamDims.y += i * sin(t);
 				BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
 				BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
 				BeamSegments.at(i).Position = BeamPos;
 				BeamSegments.at(i).Angle = a;
-				BeamSegments.at(i).Dimensions.y += sin(t) * i / 30.0f;
 
 				EntityBatch.Add(EM::Vec4(BeamPos, BeamDims), EM::Vec4(0, 0, 1, 1), 
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/VerticleBar.png").id, EG::SetOpacity(C, (sin(t) + 1.1f) / 2.0f), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
 			}	
 		}
 
+		/*
 		{
 			static float SegCounter = 0.0f;
 			SegCounter += 0.1f;
@@ -986,6 +992,7 @@ int main(int argc, char** argv)
 				SegCounter = 0.0f;
 			}
 		}
+		*/
 
 		////////////////////////////////////////////////
 		////////////////////////////////////////////////

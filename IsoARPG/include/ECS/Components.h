@@ -5,6 +5,7 @@
 #include "Math/Maths.h"
 #include "Graphics/SpriteSheet.h"
 #include "Graphics/SpriteBatch.h"
+#include "BehaviorTreeManager.h"
 #include "IO/InputManager.h"
 #include "Graphics/Color.h"
 #include "Physics/AABB.h"
@@ -114,6 +115,9 @@ namespace ECS { namespace Component {
 	typedef struct
 	{
 		eid32 Entity; 
+		BT::BehaviorTree* Brain;
+		BT::StateObject* SO;
+		BT::BlackBoard* BB;
 	} AIController;
 
 	// Health Component

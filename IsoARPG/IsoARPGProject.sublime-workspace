@@ -87,7 +87,23 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 80955,
+				"buffer_size": 81664,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/C++Projects/VS/3DEnjon/src/GLSLProgram.cpp",
+			"settings":
+			{
+				"buffer_size": 6095,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "profiles/Animations/Player/player.txt",
+			"settings":
+			{
+				"buffer_size": 634,
 				"line_ending": "Windows"
 			}
 		},
@@ -188,13 +204,10 @@
 			}
 		},
 		{
-			"contents": "#include \"ECS/Animation2DSystem.h\"\n#include \"ECS/AttributeSystem.h\"\n#include \"ECS/Transform3DSystem.h\"\n#include \"ECS/InventorySystem.h\"\n#include \"ECS/Renderer2DSystem.h\"\n#include \"ECS/PlayerControllerSystem.h\"\n#include \"ECS/EntityFactory.h\"\n\n#include <Graphics/Camera2D.h>\n#include <Graphics/SpriteSheetManager.h>\n#include <IO/ResourceManager.h>\n\n#include <iostream>\n\nnamespace ECS { namespace Systems { namespace Animation2D {\n\n	//enJon sux dick\n\n	// TESTING THIS ONLY\n	static EntityAnimationState PlayerState = EntityAnimationState::WALKING;\n	static Weapons CurrentWeapon = Weapons::DAGGER;\n	bool HitFrame = false;\n	\n	void SetPlayerState(EntityAnimationState State)\n	{\n		PlayerState = State;\n	}\n\n	EntityAnimationState GetPlayerState() { return PlayerState; }\n\n	void SetCurrentWeapon(Weapons CW)\n	{\n		CurrentWeapon = CW;\n	}\n\n	struct Animation2DSystem* NewAnimation2DSystem(struct EntityManager* Manager)\n	{\n		struct Animation2DSystem* System = new Animation2DSystem;\n		System->Manager = Manager;\n		return System;\n	}\n	\n	void Update(struct EntityManager* Manager)\n	{\n		// Attack speed\n		// TODO(John): Make this dependent on equipped weapon and player stats\n		static float AttackSpeed = 1.0f;\n\n		// Get System\n		struct Animation2DSystem* System = Manager->Animation2DSystem;\n		// Loop through all entities with animations\n		for (eid32 e = 0; e < Manager->MaxAvailableID; e++)\n		{\n			static float damaged_counter = 0.0f;\n\n			Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[e];\n			// Change colors based on health	\n			if (Manager->AttributeSystem->Masks[e] & Masks::Type::AI)\n			{\n				auto* RS = &Manager->Renderer2DSystem->Renderers[e];\n				if (HealthComponent->Health <= 50.0f) RS->Color = Enjon::Graphics::RGBA16_Orange();\n				if (HealthComponent->Health <= 20.0f) RS->Color = Enjon::Graphics::RGBA16_Red();\n				else RS->Color = Enjon::Graphics::RGBA16_White();\n			}\n\n			// If has an animation component\n			if (Manager->Masks[e] & COMPONENT_ANIMATION2D)\n			{\n				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::DAMAGED)\n				{\n					Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16(100.0f, 0.0f, 0.0f, 100.0f);  // damaged color for now \n					damaged_counter += 0.1f;\n					if (damaged_counter >= 0.5f)\n					{\n						Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16_White();  \n						Manager->AttributeSystem->Masks[e] &= ~Masks::GeneralOptions::DAMAGED;\n						damaged_counter = 0.0f;\n					}						\n				}\n\n				// If is a player\n				if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)\n				{\n					// Get necessary items\n					Component::Animation2D* AnimationComponent = &Manager->Animation2DSystem->Animations[e];\n					Transform3DSystem* TransformSystem = Manager->TransformSystem;\n					Enjon::Math::Vec2* ViewVector = &TransformSystem->Transforms[e].ViewVector;\n					Enjon::Math::Vec2* AttackVector = &TransformSystem->Transforms[e].AttackVector;\n					Enjon::Math::Vec3* Velocity = &TransformSystem->Transforms[e].Velocity;\n					Enjon::Math::Vec3* Position = &TransformSystem->Transforms[e].Position;\n					Enjon::uint32* BeginningFrame = &AnimationComponent->BeginningFrame;\n					Enjon::uint32* SetStart = &AnimationComponent->SetStart;\n					const Animation* CurrentAnimation = AnimationComponent->CurrentAnimation;\n\n					// Get what the current animation is based on the player state\n					switch(PlayerState)\n					{\n						case EntityAnimationState::WALKING: 	CurrentAnimation = AnimationManager::GetAnimation(\"Player\", \"walk\");	break;\n						case EntityAnimationState::ATTACKING:\n							switch(CurrentWeapon)\n							{\n								case Weapons::DAGGER: 	CurrentAnimation = AnimationManager::GetAnimation(\"Player\", \"attack_dagger\"); break;\n								case Weapons::BOW: 		CurrentAnimation = AnimationManager::GetAnimation(\"Player\", \"attack_bow\"); break;\n								case Weapons::AXE: 		CurrentAnimation = AnimationManager::GetAnimation(\"Player\", \"attack_axe\"); break;\n								default: 				CurrentAnimation = AnimationManager::GetAnimation(\"Player\", \"attack_dagger\"); break;\n							}\n							break;\n					}\n\n					// Setting animation beginning frame based on view vector\n					if (PlayerState == EntityAnimationState::ATTACKING && !(*SetStart))\n					{\n						// Set spritesheet\n						if (CurrentWeapon == Weapons::AXE) AnimationComponent->Sheet = Enjon::Graphics::SpriteSheetManager::GetSpriteSheet(\"PlayerSheet2\");\n						else AnimationComponent->Sheet = Enjon::Graphics::SpriteSheetManager::GetSpriteSheet(\"PlayerSheet\");\n\n						// Get direction to mouse\n						Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();\n						Manager->Camera->ConvertScreenToWorld(MousePos);\n\n						if (MousePos.x <= Position->x)\n						{\n							*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; \n							*SetStart = TRUE; \n							if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; \n						}\n						else if (MousePos.x > Position->x)  \n						{\n							*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; \n							*SetStart = TRUE; \n							if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; \n						}\n					\n						// Set currentframe to beginning frame\n						AnimationComponent->CurrentFrame = 0;\n					}\n\n					// Set beginning frame based on view vector\n					if (PlayerState == EntityAnimationState::WALKING || PlayerState == EntityAnimationState::IDLE)\n					{\n						AnimationComponent->Sheet = Enjon::Graphics::SpriteSheetManager::GetSpriteSheet(\"PlayerSheet\");\n\n						if		(*ViewVector == NORTHWEST)		*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW];\n						else if (*ViewVector == NORTHEAST)		*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE];\n						else if (*ViewVector == EAST)			*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::E];\n						else if (*ViewVector == WEST)			*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::W];\n						else if (*ViewVector == NORTH)			*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::N];\n						else if (*ViewVector == SOUTH)			*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::S];\n						else if (*ViewVector == SOUTHEAST)		*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::SE];\n						else if (*ViewVector == SOUTHWEST)		*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::SW];\n						else									*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW];\n					}\n\n					// NOTE(John): Leave if Idle, for now\n					if (PlayerState != EntityAnimationState::ATTACKING && Velocity->x == 0.0f && Velocity->y == 0.0f) return;\n\n					// Animation\n					if (PlayerState == EntityAnimationState::ATTACKING) \n					{\n						if (CurrentWeapon == Weapons::BOW) AttackSpeed = 10.0f;\n						else AttackSpeed = 1.0f;\n						AnimationComponent->AnimationTimer += CurrentAnimation->AnimationTimerIncrement * AttackSpeed;\n					}\n					else AnimationComponent->AnimationTimer += CurrentAnimation->AnimationTimerIncrement;\n					if (AnimationComponent->AnimationTimer >= CurrentAnimation->Profile->Delays[AnimationComponent->CurrentFrame % CurrentAnimation->Profile->FrameCount])\n					{\n						// Increase current frame\n						AnimationComponent->CurrentFrame++;\n\n						Enjon::uint32 ActiveFrame = AnimationComponent->CurrentFrame + *BeginningFrame;\n\n						// Reset timer\n						AnimationComponent->AnimationTimer = 0.0f;\n\n						// Check for hit frame if attacking\n						if (PlayerState == EntityAnimationState::ATTACKING)\n						{\n							eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;\n							eid32 id = Manager->InventorySystem->Inventories[e].WeaponEquipped;\n\n							Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();\n							Manager->Camera->ConvertScreenToWorld(MousePos);\n							Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].Position.XY();\n\n							// Find vector between the two and normalize\n							static Enjon::Math::Vec2 AttackVelocity;\n							// AttackVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x + 32.0f, Pos.y + 32.0f));\n\n							if (ActiveFrame == *BeginningFrame + 1)\n							{\n								// Activate collision with dagger \"hit frame\"\n								if (CurrentWeapon == Weapons::DAGGER || CurrentWeapon == Weapons::AXE)\n								{\n									AttackVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x + 32.0f, Pos.y + 32.0f));\n\n									// Make Weapon visible and collidable\n									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);\n\n									float speed = 50.0f;\n\n									// Set attack vector of player to this velocity\n									int Mult = 1.0f;\n									Enjon::Math::Vec2 AttackVector;\n									// X < 0\n									if (AttackVelocity.x < 0 && AttackVelocity.x >= -0.3f) AttackVector.x = 0.0f;\n									else if (AttackVelocity.x < 0 && AttackVelocity.x < -0.3f) AttackVector.x = -1.0f;\n									// X > 0\n									if (AttackVelocity.x >= 0 && AttackVelocity.x < 0.5f) AttackVector.x = 0.0f;\n									else if (AttackVelocity.x >= 0 && AttackVelocity.x >= 0.5f) AttackVector.x = 1.0f;\n									// Y < 0\n									if (AttackVelocity.y < 0 && AttackVelocity.y > -0.3f) AttackVector.y = 0.0f;\n									else if (AttackVelocity.y < 0 && AttackVelocity.y <= -0.3f) AttackVector.y = -1.0f;\n									// Y > 0\n									if (AttackVelocity.y >= 0 && AttackVelocity.y < 0.3f) AttackVector.y = 0.0f;\n									else if (AttackVelocity.y >= 0 && AttackVelocity.y >= 0.3f) AttackVector.y = 1.0f;\n\n\n									Manager->TransformSystem->Transforms[e].AttackVector = AttackVector;\n								}\n\n							}\n							if (ActiveFrame == *BeginningFrame + 3 || ActiveFrame == *BeginningFrame + 6)\n							{\n								// Activate collision with dagger \"hit frame\"\n								if (CurrentWeapon == Weapons::DAGGER && ActiveFrame == *BeginningFrame + 3)\n								{\n									// Collision at this point\n									HitFrame = true;\n\n									// Make Weapon visible and collidable\n									eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;\n									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);\n\n									eid32 id = Manager->InventorySystem->Inventories[e].WeaponEquipped;\n\n									// Move player in direction of attack vector\n									auto Vel = &Manager->TransformSystem->Transforms[e].Velocity;\n									*Vel = 5.0f * Enjon::Math::Vec3(AttackVelocity, 0.0f);\n								}\n\n								if (CurrentWeapon == Weapons::AXE && ActiveFrame == *BeginningFrame + 6)\n								{\n									HitFrame = true;\n									eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;\n									Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);\n\n									auto Vel = &Manager->TransformSystem->Transforms[e].Velocity;\n									*Vel = 6.5f * Enjon::Math::Vec3(AttackVelocity, Vel->z);\n								}\n\n								if (CurrentWeapon == Weapons::BOW && ActiveFrame == *BeginningFrame + 3)\n								{\n									for (auto i = 0; i < 1; i++)\n									{\n										// Create an arrow projectile entity for now...\n										static Enjon::Graphics::SpriteSheet ItemSheet;\n										auto C = Enjon::Graphics::RGBA16(0.0f, 100.0f, 0.0f, 100.0f);\n										C.r += 2.0f;\n										// EM::Vec2 Dim(10.0f + ER::Roll(0, 60), 5.0f);\n										EM::Vec2 Dim(20.0f, 10.0f);\n										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/bluebutton.png\"), Enjon::Math::iVec2(1, 1));\n										eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->x + 60.0f, Position->y + 20.0f, 50.0f),\n																  Enjon::Math::Vec2(100.0f, 10.0f), &ItemSheet, (Masks::Type::WEAPON | \n																  												Masks::WeaponOptions::PROJECTILE | \n																  												Masks::GeneralOptions::PICKED_UP | \n																  												Masks::GeneralOptions::COLLIDABLE), \n																  												Component::EntityType::PROJECTILE, \"arrow\", \n																												C);\n										Manager->Masks[id] |= COMPONENT_TRANSFORM3D;\n\n										Manager->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(15);\n\n\n										// Set arrow velocity to normalize: mousepos - arrowpos\n										Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();\n										Manager->Camera->ConvertScreenToWorld(MousePos);\n										Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].Position.XY();\n\n										// // Find vector between the two and normalize\n										Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(Enjon::Math::IsoToCartesian(MousePos) - Enjon::Math::IsoToCartesian(Pos));\n\n										EM::Vec2 R(1,0);\n										float a = acos(ArrowVelocity.DotProduct(R)) * 180.0f / M_PI;\n										if (ArrowVelocity.y < 0) a *= -1;\n\n										Manager->TransformSystem->Transforms[id].Angle = EM::ToRadians(a);\n\n										auto ArrowX = Position->x;\n										auto ArrowY = Position->y;\n										auto Rad = 5.0f;\n										EM::Vec3* ArrowPos = &Manager->TransformSystem->Transforms[id].Position;\n										*ArrowPos = EM::Vec3(ArrowPos->XY() + Rad * EM::CartesianToIso(EM::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a)))), 40.0f);\n										\n										// auto RX = Enjon::Random::Roll(-10, 2) / 100.0f;\n										// auto RY = Enjon::Random::Roll(-10, 2) / 100.0f;\n										auto RX = 0.0f;\n										auto RY = 0.0f;\n										ArrowVelocity = Enjon::Math::CartesianToIso(ArrowVelocity);\n\n										float speed = 10.0f;\n\n										// // Fire in direction of mouse\n										Manager->TransformSystem->Transforms[id].VelocityGoal = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);\n										Manager->TransformSystem->Transforms[id].Velocity = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);\n										Manager->TransformSystem->Transforms[id].Velocity.z = -5.0f;\n										Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;\n\n										// Set attack vector of player to this velocity\n										int Mult = 1.0f;\n										Enjon::Math::Vec2 AttackVector;\n										// X < 0\n										if (ArrowVelocity.x < 0 && ArrowVelocity.x >= -0.3f) AttackVector.x = 0.0f;\n										else if (ArrowVelocity.x < 0 && ArrowVelocity.x < -0.3f) AttackVector.x = -1.0f;\n										// X > 0\n										if (ArrowVelocity.x >= 0 && ArrowVelocity.x < 0.5f) AttackVector.x = 0.0f;\n										else if (ArrowVelocity.x >= 0 && ArrowVelocity.x >= 0.5f) AttackVector.x = 1.0f;\n										// Y < 0\n										if (ArrowVelocity.y < 0 && ArrowVelocity.y > -0.3f) AttackVector.y = 0.0f;\n										else if (ArrowVelocity.y < 0 && ArrowVelocity.y <= -0.3f) AttackVector.y = -1.0f;\n										// Y > 0\n										if (ArrowVelocity.y >= 0 && ArrowVelocity.y < 0.3f) AttackVector.y = 0.0f;\n										else if (ArrowVelocity.y >= 0 && ArrowVelocity.y >= 0.3f) AttackVector.y = 1.0f;\n\n\n										Manager->TransformSystem->Transforms[e].AttackVector = AttackVector;\n\n										// Set up coordinate format\n										Manager->Renderer2DSystem->Renderers[id].Format = EG::CoordinateFormat::ISOMETRIC;	\n\n									}\n								}\n							}\n\n							else \n							{ \n								HitFrame = false;\n								eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;\n								EntitySystem::RemoveComponents(Manager, Weapon, COMPONENT_RENDERER2D | COMPONENT_TRANSFORM3D);\n							} \n\n							// End attacking animation state\n							if (ActiveFrame >= *BeginningFrame + CurrentAnimation->Profile->FrameCount)\n							{\n								AnimationComponent->CurrentFrame = 0;\n								PlayerState = EntityAnimationState::WALKING;\n								*SetStart = FALSE;\n							}\n						}\n\n						// Reset animation	\n						if (ActiveFrame >= *BeginningFrame + CurrentAnimation->Profile->FrameCount) \n						{\n							AnimationComponent->CurrentFrame = 0;\n						}\n					}\n				}\n			}\n		} \n	}\n\n}}}\n\n\n",
 			"file": "src/ECS/Animation2DSystem.cpp",
-			"file_size": 16225,
-			"file_write_time": 131038445275257851,
 			"settings":
 			{
-				"buffer_size": 15883,
+				"buffer_size": 15817,
 				"line_ending": "Windows"
 			}
 		},
@@ -359,10 +372,12 @@
 	"expanded_folders":
 	[
 		"/D/C++Projects/VS/3DEnjon/include",
+		"/D/C++Projects/VS/3DEnjon/include/Graphics",
 		"/D/C++Projects/VS/3DEnjon/src",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/profiles/Animations/Player",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS"
 	],
@@ -514,6 +529,24 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"BEAM",
+			"10",
+			"BEAM",
+			"beamsegments",
+			"BEAM",
+			"Beam",
+			"BEAM",
+			"C",
+			"beamsegments",
+			"BEAM",
+			"EG::RGBA16(0.1f, 0.3f, 10.0f, 0.3f)",
+			"c180",
+			"179",
+			"80",
+			"0",
+			"BEAM",
+			"BEAMS",
+			"BEAM",
 			"bg-light",
 			"BeamSegments.push",
 			"2.0f",
@@ -623,25 +656,7 @@
 			"DS",
 			"time",
 			"FBO",
-			"SS",
-			"DFBO",
-			"DiffuseShader",
-			"DiffuseFBO",
-			"screenshader",
-			"#if 1",
-			"#if 0",
-			"sin",
-			"BS",
-			"UIBatch",
-			"Graphics",
-			"HUDCamera->Init",
-			"HUDCamera.Init",
-			"HUDCAmera",
-			"position",
-			"DFBO",
-			"CubeBatch",
-			"#if 0",
-			"amountdrawn"
+			"SS"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -668,7 +683,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 80955,
+						"buffer_size": 81664,
 						"regions":
 						{
 							"bookmark_j":
@@ -677,8 +692,8 @@
 								"regions":
 								[
 									[
-										51226,
-										51226
+										51935,
+										51935
 									]
 								]
 							},
@@ -688,8 +703,8 @@
 								"regions":
 								[
 									[
-										62277,
-										62277
+										62986,
+										62986
 									]
 								]
 							},
@@ -699,8 +714,8 @@
 								"regions":
 								[
 									[
-										74047,
-										74047
+										74756,
+										74756
 									]
 								]
 							}
@@ -708,8 +723,8 @@
 						"selection":
 						[
 							[
-								16903,
-								16903
+								36053,
+								36053
 							]
 						],
 						"settings":
@@ -768,7 +783,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 8041.0,
+						"translation.y": 16048.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -776,6 +791,164 @@
 				},
 				{
 					"buffer": 1,
+					"file": "/D/C++Projects/VS/3DEnjon/src/GLSLProgram.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6095,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								968,
+								968
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "87ee111b",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								223,
+								11,
+								15,
+								11,
+								10,
+								4,
+								10,
+								253,
+								126,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "profiles/Animations/Player/player.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 634,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								570,
+								570
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "plain text",
+							"buffer_scroll_name": "fcc29e0f",
+							"c_time":
+							[
+								128,
+								3,
+								99,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								100,
+								97,
+								116,
+								101,
+								116,
+								105,
+								109,
+								101,
+								10,
+								113,
+								0,
+								67,
+								10,
+								7,
+								224,
+								1,
+								6,
+								20,
+								19,
+								21,
+								1,
+								112,
+								192,
+								113,
+								1,
+								133,
+								113,
+								2,
+								82,
+								113,
+								3,
+								46
+							],
+							"spell_check": false,
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
 					"file": "src/ECS/CollisionSystem.cpp",
 					"semi_transient": false,
 					"settings":
@@ -850,11 +1023,11 @@
 						"translation.y": 8937.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
+					"buffer": 4,
 					"file": "include/ECS/Components.h",
 					"semi_transient": false,
 					"settings":
@@ -929,11 +1102,11 @@
 						"translation.y": 385.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 10,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 5,
 					"file": "include/SpatialHash.h",
 					"semi_transient": false,
 					"settings":
@@ -1008,11 +1181,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 12,
+					"stack_index": 14,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
+					"buffer": 6,
 					"file": "include/ECS/CollisionSystem.h",
 					"semi_transient": false,
 					"settings":
@@ -1087,11 +1260,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 7,
 					"file": "include/ECS/Renderer2DSystem.h",
 					"semi_transient": false,
 					"settings":
@@ -1165,11 +1338,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 15,
+					"stack_index": 17,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 8,
 					"file": "src/ECS/Transform3DSystem.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1244,11 +1417,11 @@
 						"translation.y": 489.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 9,
 					"file": "include/ECS/PlayerControllerSystem.h",
 					"semi_transient": false,
 					"settings":
@@ -1323,11 +1496,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 12,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 10,
 					"file": "include/ECS/Masks.h",
 					"semi_transient": false,
 					"settings":
@@ -1402,11 +1575,11 @@
 						"translation.y": 51.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 13,
+					"stack_index": 15,
 					"type": "text"
 				},
 				{
-					"buffer": 9,
+					"buffer": 11,
 					"file": "src/ECS/ComponentSystems.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1481,11 +1654,11 @@
 						"translation.y": 478.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 13,
 					"type": "text"
 				},
 				{
-					"buffer": 10,
+					"buffer": 12,
 					"file": "/D/C++Projects/VS/3DEnjon/src/FrameBufferObject.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1560,11 +1733,11 @@
 						"translation.y": 1287.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 14,
+					"stack_index": 16,
 					"type": "text"
 				},
 				{
-					"buffer": 11,
+					"buffer": 13,
 					"file": "src/Level.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1639,11 +1812,11 @@
 						"translation.y": 2227.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 18,
+					"stack_index": 20,
 					"type": "text"
 				},
 				{
-					"buffer": 12,
+					"buffer": 14,
 					"file": "include/Level.h",
 					"semi_transient": false,
 					"settings":
@@ -1718,24 +1891,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 19,
+					"stack_index": 21,
 					"type": "text"
 				},
 				{
-					"buffer": 13,
+					"buffer": 15,
 					"file": "src/ECS/Animation2DSystem.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 15883,
+						"buffer_size": 15817,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5639,
-								5639
+								13332,
+								13332
 							]
 						],
 						"settings":
@@ -1794,14 +1967,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 2065.0,
+						"translation.y": 4397.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 14,
+					"buffer": 16,
 					"file": "src/ECS/PlayerControllerSystem.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1876,11 +2049,11 @@
 						"translation.y": 1632.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 15,
+					"buffer": 17,
 					"file": "src/ECS/EntityFactory.cpp",
 					"semi_transient": false,
 					"settings":
@@ -1955,11 +2128,11 @@
 						"translation.y": 4701.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
-					"buffer": 16,
+					"buffer": 18,
 					"file": "include/ECS/EntityFactory.h",
 					"semi_transient": false,
 					"settings":
@@ -2034,11 +2207,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
-					"buffer": 17,
+					"buffer": 19,
 					"file": "/D/C++Projects/VS/3DEnjon/src/SpriteSheetManager.cpp",
 					"semi_transient": false,
 					"settings":
@@ -2113,11 +2286,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 11,
 					"type": "text"
 				},
 				{
-					"buffer": 18,
+					"buffer": 20,
 					"file": "/D/C++Projects/VS/3DEnjon/src/ShaderManager.cpp",
 					"semi_transient": false,
 					"settings":
@@ -2192,11 +2365,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 16,
+					"stack_index": 18,
 					"type": "text"
 				},
 				{
-					"buffer": 19,
+					"buffer": 21,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/diffuse.v.glsl",
 					"semi_transient": false,
 					"settings":
@@ -2270,11 +2443,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 22,
+					"stack_index": 24,
 					"type": "text"
 				},
 				{
-					"buffer": 20,
+					"buffer": 22,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/normal.v.glsl",
 					"semi_transient": false,
 					"settings":
@@ -2349,11 +2522,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 23,
+					"stack_index": 25,
 					"type": "text"
 				},
 				{
-					"buffer": 21,
+					"buffer": 23,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/normal.f.glsl",
 					"semi_transient": false,
 					"settings":
@@ -2427,11 +2600,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 21,
+					"stack_index": 23,
 					"type": "text"
 				},
 				{
-					"buffer": 22,
+					"buffer": 24,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/deferred.v.glsl",
 					"semi_transient": false,
 					"settings":
@@ -2505,11 +2678,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 20,
+					"stack_index": 22,
 					"type": "text"
 				},
 				{
-					"buffer": 23,
+					"buffer": 25,
 					"file": "/D/C++Projects/VS/3DEnjon/shaders/deferred.f.glsl",
 					"semi_transient": false,
 					"settings":
@@ -2585,7 +2758,7 @@
 						"translation.y": 1097.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 17,
+					"stack_index": 19,
 					"type": "text"
 				}
 			]
@@ -2652,12 +2825,12 @@
 	},
 	"select_project":
 	{
-		"height": 0.0,
+		"height": 625.0,
 		"last_filter": "",
 		"selected_items":
 		[
 		],
-		"width": 0.0
+		"width": 475.0
 	},
 	"select_symbol":
 	{

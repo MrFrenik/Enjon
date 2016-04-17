@@ -44,6 +44,8 @@
 
 #include "Physics/AABB.h"
 
+#include "BehaviorTree/BT.h"
+
 #include "Defines.h"
 
 
