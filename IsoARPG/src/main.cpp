@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -106,6 +106,7 @@ float DashingCounter = 0.0f;
 
 Enjon::uint32 CollisionRunTime = 0;
 Enjon::uint32 TransformRunTime = 0;
+Enjon::uint32 AIRunTime = 0;
 Enjon::uint32 ClearEntitiesRunTime = 0;
 Enjon::uint32 RenderTime = 0;
 Enjon::uint32 EffectRunTime = 0;
@@ -141,6 +142,7 @@ int main(int argc, char** argv)
 	std::string TransformTimeString = "0";
 	std::string EffectTimeString = "0";
 	std::string TileOverlayTimeString = "0";
+	std::string AITimeString = "0";
 
 	// Init Limiter
 	Enjon::Utils::FPSLimiter Limiter; 
@@ -359,7 +361,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 250;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -576,7 +578,10 @@ int main(int argc, char** argv)
 			SpatialHash::ClearCells(World->Grid);
 			ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
 
+			StartTicks = SDL_GetTicks();
 			AIController::Update(World->AIControllerSystem, Player);
+			AIRunTime = SDL_GetTicks() - StartTicks;
+
 			Animation2D::Update(World);
 
 			StartTicks = SDL_GetTicks();
@@ -1073,11 +1078,17 @@ int main(int argc, char** argv)
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 240.0f, 
 										0.4f, std::to_string(World->CollisionSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
-		// Transform run tim
+		// Transform run time
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 260.0f, 
 										0.4f, "Transforms: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 260.0f, 
 										0.4f, TransformTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+		// AI run time
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 280.0f, 
+										0.4f, "AI: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 280.0f, 
+										0.4f, AITimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Draw Isometric compass
 		MapEntityBatch.Add(EM::Vec4(HUDCamera.GetPosition() - EM::Vec2(SCREENWIDTH / 2.0f - 30.0f, -SCREENHEIGHT / 2.0f + 250.0f), 150.0f, 75.0f), 
@@ -1356,6 +1367,7 @@ int main(int argc, char** argv)
 			RenderTimeString = std::to_string(RenderTime);
 			EffectTimeString = std::to_string(EffectRunTime);
 			TileOverlayTimeString = std::to_string(TileOverlayRunTime);
+			AITimeString = std::to_string(AIRunTime);
 
 			Loot::PrintCounts();
 

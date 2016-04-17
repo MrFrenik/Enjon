@@ -16,9 +16,9 @@ namespace BT
 	{
 		public:
 
-			Wait(BlackBoard* BB, Timer T, i32 L = 0)
+			Wait(BehaviorTree* BT, Timer T, i32 L = 0)
 			{
-				this->BB = BB;
+				this->BTree = BT;
 				Clock = T;
 				TotalLoops = L;
 				Init();
@@ -37,7 +37,7 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BB->GetComponent("States"));
+				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
 				auto SS = &SO->GetData()->States;
 
 				if (SS->at(this->TreeIndex) != BehaviorNodeState::RUNNING)
@@ -54,13 +54,13 @@ namespace BT
 						u32 D = TotalLoops - CurrentLoop;
 						CurrentLoop++;
 						Clock.CurrentTime = 0.0f;
-						std::cout << D << " more loop(s) to go." << std::endl;
+						// std::cout << D << " more loop(s) to go." << std::endl;
 					}
 					else
 					{
 						SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
 						State = BehaviorNodeState::SUCCESS;
-						std::cout << "Done Waiting!" << std::endl;
+						// std::cout << "Done Waiting!" << std::endl;
 						return BehaviorNodeState::SUCCESS;
 					}
 				}
@@ -68,7 +68,7 @@ namespace BT
 				else
 				{
 					float D = Clock.Time - Clock.CurrentTime; 
-					std::cout << D << " more to go." << std::endl;
+					// std::cout << D << " more to go." << std::endl;
 					SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
 					return BehaviorNodeState::RUNNING;
 				}
@@ -79,6 +79,12 @@ namespace BT
 
 			inline void Reset()
 			{
+				// Get State Object from BlackBoard
+				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto SS = &SO->GetData()->States;
+
+				SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
+
 				State = BehaviorNodeState::RUNNING;
 				Clock.CurrentTime = 0.0f;
 				CurrentLoop = 0;

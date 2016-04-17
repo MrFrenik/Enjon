@@ -9,13 +9,12 @@ namespace BT
 	{
 		public:
 
-			BBWrite(BlackBoard* bb, void (*A)(BlackBoard* BB)){ BB = bb; Action = A; Init(); }
-			BBWrite(BehaviorTree* BT, void (*A)(BlackBoard* BB)){ BTree = BT; Action = A; Init(); }
+			// BBWrite(BlackBoard* bb, void (*A)(BlackBoard* BB)){ BB = bb; Action = A; Init(); }
+			BBWrite(BehaviorTree* BT, void (*A)(BehaviorTree* BT), BehaviorNodeBase* B = nullptr){ BTree = BT; Action = A; Init(); Child = B; }
 			~BBWrite(){}
 
 			void Init()
 			{
-				Child = nullptr;
 				State = BehaviorNodeState::INVALID;	
 			}
 
@@ -48,7 +47,7 @@ namespace BT
 				{
 					State = BehaviorNodeState::SUCCESS;
 					SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
-					Action(BB);
+					Action(BTree);
 					return BehaviorNodeState::SUCCESS;
 				}
 				if (S == BehaviorNodeState::FAILURE)
@@ -57,10 +56,12 @@ namespace BT
 					SS->at(this->TreeIndex) = BehaviorNodeState::FAILURE;
 					return BehaviorNodeState::FAILURE;
 				}
+
+				return BehaviorNodeState::RUNNING;
 			}
 
 		private:
-			void (*Action)(BlackBoard* BB);
+			void (*Action)(BehaviorTree* BT);
 
 
 

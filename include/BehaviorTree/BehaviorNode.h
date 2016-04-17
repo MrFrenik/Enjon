@@ -91,8 +91,6 @@ namespace BT
 				// Get total child size of tree by recursively calling get child size + Root
 				auto S = Root->GetChildSize() + 1;
 
-				std::cout << "Size: " << S << std::endl;
-
 				// Push back states into SO
 				for (u32 i = 0; i < S; i++)
 				{

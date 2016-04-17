@@ -11,6 +11,8 @@
 #include "ECS/AIControllerSystem.h"
 #include "BehaviorTreeManager.h"
 
+#include "Defines.h"
+
 namespace ECS { namespace Factory {
 
 		// Creats player entity and returns eid
@@ -175,6 +177,8 @@ namespace ECS { namespace Factory {
 
 			AC->BB->AddComponent(std::string("EID"), new BlackBoardComponent<eid32>(AI));
 			AC->BB->AddComponent(std::string("EntityManager"), new BlackBoardComponent<Systems::EntityManager*>(Manager));
+			AC->BB->AddComponent(std::string("TargetPosition"), new BlackBoardComponent<EM::Vec3>(EM::Vec3(0.0f, 0.0f, 0.0f)));
+			AC->BB->AddComponent(std::string("MovementLoop"), new BlackBoardComponent<u32>(0));
 
 			return AI;
 		} 

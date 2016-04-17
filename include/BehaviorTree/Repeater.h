@@ -87,13 +87,20 @@ namespace BT
 	{
 		public:
 
-			RepeaterWithBBRead() {}
-			RepeaterWithBBRead(BlackBoard* BB, i32 (*A)(BlackBoard* BB), i32 C = 1) : Count(C) 
+			// SimpleTask(BehaviorTree* BT, void (*Action)(BehaviorTree*))
+			// {
+			// 	this->BTree = BT;
+			// 	this->Action = Action;
+			// 	State = BehaviorNodeState::INVALID;
+			// }
+
+			RepeaterWithBBRead(BehaviorTree* BT, i32 (*A)(BehaviorTree*), BehaviorNodeBase* B = nullptr, i32 C = 1) 
+				: Count(C)
 			{
-				this->BB = BB;
+				this->Child = B;
+				this->BTree = BT;
 				Action = A;
 				State = BehaviorNodeState::INVALID; 
-				Child = nullptr; 
 			}
 		
 			~RepeaterWithBBRead() {}
@@ -101,7 +108,7 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BB->GetComponent("States"));
+				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
 				auto SS = &SO->GetData()->States;
 
 				if (SS->at(this->TreeIndex) != BehaviorNodeState::RUNNING)
@@ -133,9 +140,7 @@ namespace BT
 				else
 				{
 					// Need to read count from BB, so call action
-					Count = Action(BB);
-
-					std::cout << "Count: " << Count << std::endl;
+					Count = Action(BTree);
 
 					// Inifinte loop, so do not decrement count
 					if (Count < 0) 
@@ -148,7 +153,6 @@ namespace BT
 					{
 						if (Count <= 0)
 						{
-							std::cout << "Repeater succeeded." << std::endl;
 							State = BehaviorNodeState::SUCCESS;
 							SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
 							return BehaviorNodeState::SUCCESS;
@@ -156,7 +160,6 @@ namespace BT
 						else
 						{
 							State = BehaviorNodeState::RUNNING;
-							std::cout << "Running again..." << std::endl;
 							SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
 							return BehaviorNodeState::RUNNING;
 						}
@@ -166,7 +169,7 @@ namespace BT
 
 		private:
 			i32 Count;
-			i32 (*Action)(BlackBoard* BB);
+			i32 (*Action)(BehaviorTree*);
 	};
 
 }

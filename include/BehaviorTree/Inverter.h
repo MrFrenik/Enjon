@@ -9,23 +9,25 @@ namespace BT
 	{
 		public:
 
-			Inverter(BlackBoard* BB) { this->BB = BB; Init(); }
-			Inverter(BlackBoard* BB, BehaviorNodeBase* B) { this->BB = BB; Init(); Child = B; }
+			// Inverter(BlackBoard* BB) { this->BB = BB; Init(); }
+			// Inverter(BlackBoard* BB, BehaviorNodeBase* B) { this->BB = BB; Init(); Child = B; }
+			Inverter(BehaviorTree* BT, BehaviorNodeBase* B = nullptr) { this->BTree = BT; Init(); Child = B; }
 			~Inverter() {}
 
 			void Init() { State = BehaviorNodeState::INVALID; Child = nullptr; }
 
 			BehaviorNodeState Run()
 			{
+				// Get State Object from BlackBoard
+				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto SS = &SO->GetData()->States;
 
 				if (State != BehaviorNodeState::RUNNING)
 				{
+					SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
 					State = BehaviorNodeState::RUNNING;
 				}	
 
-				// Get State Object from BlackBoard
-				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BB->GetComponent("States"));
-				auto SS = &SO->GetData()->States;
 
 				if (Child == nullptr) 
 				{
@@ -44,7 +46,6 @@ namespace BT
 					case BehaviorNodeState::FAILURE: 
 					{
 						State = SUCCESS;
-						std::cout << "Inverted Failure to Success." << std::endl;
 						SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;	
 						return BehaviorNodeState::SUCCESS;
 						break;
@@ -53,13 +54,17 @@ namespace BT
 					case BehaviorNodeState::SUCCESS:
 					{
 						State = FAILURE;
-						std::cout << "Inverted Success to Failure." << std::endl;
 						SS->at(this->TreeIndex) = BehaviorNodeState::FAILURE;	
 						return BehaviorNodeState::FAILURE;
 						break;
 					}
 
-					default: return BehaviorNodeState::SUCCESS; break;
+					default: 
+					{
+						SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
+						return BehaviorNodeState::SUCCESS; 
+						break;
+					}
 				}
 			}
 	};	
