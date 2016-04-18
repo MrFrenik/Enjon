@@ -34,14 +34,10 @@ inline BT::BehaviorTree* TestTree()
 										   		auto W = Manager->Lvl->GetWidth();
 										   		auto H = Manager->Lvl->GetHeight();
 
-										   		// std::cout << W << ", " << H << "." << std::endl;
-
 										   		auto X = ER::Roll(0, 800);
 										   		auto Y = ER::Roll(-2000, -200);
 
 										   		P->SetData(EM::Vec3(X, Y, 0.0f));
-
-										   		// std::cout << "Setting new direction..." << std::endl;
 
 										   		// Just set its velocity goal for now...
 										   });
@@ -65,8 +61,8 @@ inline BT::BehaviorTree* TestTree()
 																								EM::Vec3(AI->CartesianPosition, AI->Position.z));
 											float speed = 5000.0f / (H + 0.0001f);
 
-											AI->Velocity = Difference * speed;
-											// AI->VelocityGoal = Difference * speed;
+											// AI->Velocity = Difference * speed;
+											AI->VelocityGoal = Difference * 2.0f;
 										 });
 
 	BT::RepeaterWithBBRead* RWBBR = new BT::RepeaterWithBBRead(BT, 	&RepeaterFunc);														 
@@ -114,8 +110,8 @@ inline BT::BehaviorTree* TestTree()
 																												EM::Vec3(AI2->CartesianPosition, AI2->Position.z));
 															float speed = 5000.0f / (H + 0.0001f);
 
-															AI2->Velocity = Difference * speed;
-															// AI2->VelocityGoal = Difference * speed;
+															// AI2->Velocity = Difference * speed;
+															AI2->VelocityGoal = Difference * 4.0f;
 
 													   		return false;
 												   		}	
@@ -141,7 +137,8 @@ inline BT::BehaviorTree* TestTree()
 														ECS::eid32 id = ECS::Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position.x + 60.0f, Position.y + 40.0f, 50.0f),
 																				  Enjon::Math::Vec2(10.0f + ER::Roll(0, 60), 5.0f), &ItemSheet, (ECS::Masks::Type::WEAPON | 
 																				  												ECS::Masks::WeaponOptions::PROJECTILE | 
-																				  												ECS::Masks::GeneralOptions::PICKED_UP),
+																				  												ECS::Masks::GeneralOptions::PICKED_UP | 
+																				  												ECS::Masks::GeneralOptions::COLLIDABLE),
 																				  												ECS::Component::EntityType::PROJECTILE, "arrow", 
 																																C);
 														Manager->Masks[id] |= ECS::ComponentMasks::COMPONENT_TRANSFORM3D;
@@ -180,8 +177,7 @@ inline BT::BehaviorTree* TestTree()
 														Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;
 
 														// Set up coordinate format
-														Manager->Renderer2DSystem->Renderers[id].Format = EG::CoordinateFormat::ISOMETRIC;	
-
+														Manager->Renderer2DSystem->Renderers[id].Format = EG::CoordinateFormat::ISOMETRIC;
 													});
 
 	// Build tree

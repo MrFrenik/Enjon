@@ -103,7 +103,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 						if (Mask == (COLLISION_ITEM | COLLISION_ITEM)) 			{ CollideWithDebris(Manager, collider, e);		continue; }
 						if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
-						if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
+						// if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
 						if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
 																				  else 											CollideWithDebris(Manager, e, collider); 
 																				  continue; 
@@ -120,7 +120,14 @@ namespace ECS{ namespace Systems { namespace Collision {
 																				  else 											CollideWithVortex(Manager, e, collider); 		
 																				  continue; 
 																				} 
-						// if (Mask == (COLLISION_ENEMY | COLLISION_ITEM)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
+						if (Mask == (COLLISION_PROJECTILE | COLLISION_VORTEX))	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithVortex(Manager, collider, e);
+																				  else 												CollideWithVortex(Manager, e, collider); 		
+																				  continue; 
+																				} 
+						if (Mask == (COLLISION_PROJECTILE | COLLISION_EXPLOSIVE))	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithDebris(Manager, collider, e);
+																				  else 													CollideWithDebris(Manager, e, collider); 		
+																				  continue; 
+																				} 
 						if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_EXPLOSIVE | COLLISION_ENEMY))	{ if (AType == Component::EntityType::ENEMY) 	CollideWithExplosive(Manager, e, collider);  	
 																				  else 											CollideWithExplosive(Manager, collider, e); 
@@ -542,6 +549,12 @@ namespace ECS{ namespace Systems { namespace Collision {
 				float Impulse = 55.0f - 15 * Length;
 
 				*EntityVelocity = (1.0f / AMass) * -Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f); 
+
+				if (Manager->AttributeSystem->Masks[A_ID] & Masks::WeaponOptions::PROJECTILE)
+				{
+					*EntityVelocity = *EntityVelocity * 2.0f;
+					Manager->TransformSystem->Transforms[A_ID].VelocityGoal = *EntityVelocity;
+				}
 			}
 			else if (Manager->AttributeSystem->Masks[B_ID] & Masks::GeneralOptions::DEBRIS && 
 					 Manager->AttributeSystem->Masks[A_ID] & Masks::GeneralOptions::DEBRIS)
@@ -583,11 +596,35 @@ namespace ECS{ namespace Systems { namespace Collision {
 	
 		else
 		{
-			V2 Direction = EM::Vec2::Normalize(*A - *B);
-			float Length = Direction.Length();
-			float Impulse = 2.0f;
-			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
-			*EntityVelocity = 0.85f * *EntityVelocity + (1.0f / AMass) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
+			if (Manager->AttributeSystem->Masks[A_ID] & Masks::WeaponOptions::PROJECTILE)
+			{
+				auto Center = (AABB_B->Max + AABB_B->Min) / 2.0f;
+				float DistFromCenter = A->DistanceTo(Center);
+
+				if (DistFromCenter > 30.0f)
+				{
+					V2 Direction = EM::Vec2::Normalize(*A - *B);
+					float Length = Direction.Length();
+					float Impulse = 2.0f;
+					V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
+					*EntityVelocity = 0.85f * *EntityVelocity + (1.0f / AMass) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
+				}
+				else *EntityVelocity = EM::Vec3(0.0f, 0.0f, 0.0f);
+			}
+			else
+			{
+				auto Center = (AABB_B->Max + AABB_B->Min) / 2.0f;
+				float DistFromCenter = A->DistanceTo(Center);
+			
+				if (DistFromCenter > 15.0f)
+				{
+					V2 Direction = EM::Vec2::Normalize(*A - *B);
+					float Length = Direction.Length();
+					float Impulse = 2.0f;
+					V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
+					*EntityVelocity = 0.85f * *EntityVelocity + (1.0f / AMass) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
+				}	
+			}
 		}
 
 		return;
