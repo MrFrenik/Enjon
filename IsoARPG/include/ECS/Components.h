@@ -141,6 +141,13 @@ namespace ECS { namespace Component {
 		eid32 Entity;
 	} TypeComponent;
 
+	// Group Component
+	typedef struct 
+	{
+		eid32 Entity;
+		eid32 Parent;	
+	} GroupComponent;
+
 	// Render Component
 	typedef struct 
 	{

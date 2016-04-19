@@ -20,7 +20,7 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BB->GetComponent("States"));
+				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 				auto SS = &SO->GetData()->States;
 
 				if (Children.size() == 0) 
@@ -78,22 +78,6 @@ namespace BT
 					SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
 					return BehaviorNodeState::SUCCESS;
 				}
-
-				// if (S == BehaviorNodeState::FAILURE)
-				// {
-				// 	Itr++;
-
-				// 	// Succeed when all children succeed
-				// 	if (Itr >= Children.end())
-				// 	{
-				// 		State = BehaviorNodeState::FAILURE;
-				// 		std::cout << "Selector failed!" << std::endl;
-				// 		return BehaviorNodeState::FAILURE;
-				// 	}
-
-				// 	else CurrentNode = *Itr;
-
-				// }
 
 				return BehaviorNodeState::RUNNING;
 			}

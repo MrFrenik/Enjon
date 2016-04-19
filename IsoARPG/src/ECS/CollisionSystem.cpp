@@ -103,7 +103,10 @@ namespace ECS{ namespace Systems { namespace Collision {
 						if (Mask == (COLLISION_ITEM | COLLISION_ITEM)) 			{ CollideWithDebris(Manager, collider, e);		continue; }
 						if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
 						if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
-						// if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ CollideWithProjectile(Manager, e, collider); 	continue; } 
+						if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithProjectile(Manager, collider, e); 	
+																			      else 										    	CollideWithProjectile(Manager, e, collider); 
+																			      continue; 
+																			  	} 
 						if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
 																				  else 											CollideWithDebris(Manager, e, collider); 
 																				  continue; 
@@ -299,6 +302,9 @@ namespace ECS{ namespace Systems { namespace Collision {
 		Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
 		Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
 		Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
+
+		// If parent, then return
+		if (Manager->AttributeSystem->Groups[A_ID].Parent == B_ID) return;
 
 		// Collision didn't happen
 		if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) return;
@@ -554,6 +560,16 @@ namespace ECS{ namespace Systems { namespace Collision {
 				{
 					*EntityVelocity = *EntityVelocity * 2.0f;
 					Manager->TransformSystem->Transforms[A_ID].VelocityGoal = *EntityVelocity;
+	
+					// // Find vector between the two and normalize
+					// Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(Enjon::Math::IsoToCartesian(MousePos) - Enjon::Math::IsoToCartesian(Pos));
+
+					EM::Vec2 R(1,0);
+					float a = acos(Direction.DotProduct(R)) * 180.0f / M_PI;
+					if (Direction.y < 0) a *= -1;
+
+					Manager->TransformSystem->Transforms[A_ID].Angle = EM::ToRadians(a);
+
 				}
 			}
 			else if (Manager->AttributeSystem->Masks[B_ID] & Masks::GeneralOptions::DEBRIS && 
@@ -596,20 +612,45 @@ namespace ECS{ namespace Systems { namespace Collision {
 	
 		else
 		{
-			if (Manager->AttributeSystem->Masks[A_ID] & Masks::WeaponOptions::PROJECTILE)
-			{
-				auto Center = (AABB_B->Max + AABB_B->Min) / 2.0f;
-				float DistFromCenter = A->DistanceTo(Center);
+				// V2 Direction = EM::Vec2::Normalize(*A - *B);
+				// if (Direction.x == 0) Direction.x = (float)ER::Roll(-100, 100) / 100.0f;
+				// if (Direction.y == 0) Direction.y = (float)ER::Roll(-100, 100) / 100.0f;
+				// float Length = Direction.Length();
+				// float Impulse = 55.0f - 15 * Length;
 
-				if (DistFromCenter > 30.0f)
+				// *EntityVelocity = (1.0f / AMass) * -Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f); 
+
+				if (Manager->AttributeSystem->Masks[A_ID] & Masks::WeaponOptions::PROJECTILE)
 				{
-					V2 Direction = EM::Vec2::Normalize(*A - *B);
-					float Length = Direction.Length();
-					float Impulse = 2.0f;
-					V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
-					*EntityVelocity = 0.85f * *EntityVelocity + (1.0f / AMass) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
-				}
-				else *EntityVelocity = EM::Vec3(0.0f, 0.0f, 0.0f);
+					auto Center = (AABB_B->Max + AABB_B->Min) / 2.0f;
+					float DistFromCenter = B->DistanceTo(Center);
+
+					if (DistFromCenter > 100.0f)
+					{
+						// *EntityVelocity = *EntityVelocity * 2.0f;
+						// Manager->TransformSystem->Transforms[A_ID].VelocityGoal = *EntityVelocity;
+		
+						// // Find vector between the two and normalize
+						// Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(Enjon::Math::IsoToCartesian(MousePos) - Enjon::Math::IsoToCartesian(Pos));
+
+						V2 Direction = EM::Vec2::Normalize(Center - *B);
+						float Length = Direction.Length();
+						float Impulse = 2.0f;
+						V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
+						*EntityVelocity = 0.85f * *EntityVelocity + (1.0f / AMass) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
+
+						EM::Vec2 R(1,0);
+						float a = acos(Direction.DotProduct(R)) * 180.0f / M_PI;
+						if (Direction.y < 0) a *= -1;
+
+						Manager->TransformSystem->Transforms[A_ID].Angle = EM::ToRadians(a);
+					}
+					
+					else 
+					{
+						*EntityVelocity = *EntityVelocity * 0.75f;
+						Manager->TransformSystem->Transforms[A_ID].VelocityGoal = EM::Vec3(0.0f, 0.0f, 0.0f);
+					}
 			}
 			else
 			{
@@ -625,6 +666,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 					*EntityVelocity = 0.85f * *EntityVelocity + (1.0f / AMass) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
 				}	
 			}
+
+			Manager->AttributeSystem->Groups[A_ID].Parent = Manager->AttributeSystem->Groups[B_ID].Parent;
 		}
 
 		return;
@@ -641,6 +684,9 @@ namespace ECS{ namespace Systems { namespace Collision {
 		Enjon::Math::Vec3* ColliderVelocity = &Manager->TransformSystem->Transforms[B_ID].Velocity; 
 		Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
 		Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
+
+		// Height not the same... Testing
+		if (abs(EntityPosition->z - ColliderPosition->z) > 100.0f) return;
 
 		// Collision didn't happen
 		if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) { return; }

@@ -25,7 +25,7 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 				auto SS = &SO->GetData()->States;
 
 				// Will fail if there are no children
@@ -58,7 +58,6 @@ namespace BT
 					if (CN >= Children.end()) 
 					{
 						State = BehaviorNodeState::SUCCESS;
-						// std::cout << "Sequence succeeded!" << std::endl;
 						SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
 						return BehaviorNodeState::SUCCESS;
 					}

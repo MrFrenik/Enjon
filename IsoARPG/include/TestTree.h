@@ -12,7 +12,7 @@
 
 i32 RepeaterFunc(BT::BehaviorTree* T)
 {
-	auto D = static_cast<BlackBoardComponent<u32>*>(T->GetBlackBoard()->GetComponent("MovementLoop"));
+	auto D = T->GetBlackBoard()->GetComponent<u32>("MovementLoop");
 	auto C = D->GetData();
 	D->SetData(0);
 	return C;
@@ -27,14 +27,14 @@ inline BT::BehaviorTree* TestTree()
 
 	BT::SimpleTask* ST1 = new BT::SimpleTask(BT, [](BT::BehaviorTree* BT)
 										   {
-										   		auto D = static_cast<BlackBoardComponent<ECS::Systems::EntityManager*>*>(BT->GetBlackBoard()->GetComponent("EntityManager"));
-										   		auto P = static_cast<BlackBoardComponent<EM::Vec3>*>(BT->GetBlackBoard()->GetComponent("TargetPosition"));
+										   		auto P = BT->GetBlackBoard()->GetComponent<EM::Vec3>("TargetPosition");
+										   		auto D = BT->GetBlackBoard()->GetComponent<ECS::Systems::EntityManager*>("EntityManager");
 										   		auto Manager = D->GetData();
 
 										   		auto W = Manager->Lvl->GetWidth();
 										   		auto H = Manager->Lvl->GetHeight();
 
-										   		auto X = ER::Roll(0, 800);
+										   		auto X = ER::Roll(0, 500);
 										   		auto Y = ER::Roll(-2000, -200);
 
 										   		P->SetData(EM::Vec3(X, Y, 0.0f));
@@ -44,9 +44,10 @@ inline BT::BehaviorTree* TestTree()
 
 	BT::SimpleTask* ST2 = new BT::SimpleTask(BT, [](BT::BehaviorTree* BT)
 										 {
-									   		auto D = static_cast<BlackBoardComponent<ECS::Systems::EntityManager*>*>(BT->GetBlackBoard()->GetComponent("EntityManager"));
-									   		auto ID = static_cast<BlackBoardComponent<ECS::eid32>*>(BT->GetBlackBoard()->GetComponent("EID"));
-									   		auto P = static_cast<BlackBoardComponent<EM::Vec3>*>(BT->GetBlackBoard()->GetComponent("TargetPosition"));
+									   		auto P = BT->GetBlackBoard()->GetComponent<EM::Vec3>("TargetPosition");
+									   		auto D = BT->GetBlackBoard()->GetComponent<ECS::Systems::EntityManager*>("EntityManager");
+									   		auto ID = BT->GetBlackBoard()->GetComponent<ECS::eid32>("EID");
+
 									   		auto Manager = D->GetData();
 									   		auto Target = P->GetData();
 									   		auto ai = ID->GetData();
@@ -69,16 +70,17 @@ inline BT::BehaviorTree* TestTree()
 
 	BT::BBWrite* BBW = new BT::BBWrite(BT, [](BT::BehaviorTree* BT)
 							{
-						   		auto D = static_cast<BlackBoardComponent<u32>*>(BT->GetBlackBoard()->GetComponent("MovementLoop"));
+						   		auto D = BT->GetBlackBoard()->GetComponent<u32>("MovementLoop");
 						   		D->SetData(1);
 							});
 
 	BT::Inverter* INV = new BT::Inverter(BT);
 	BT::ConditionalTask* CT = new BT::ConditionalTask(BT, [](BT::BehaviorTree* BT)
 												   {
-												   		auto D = static_cast<BlackBoardComponent<ECS::Systems::EntityManager*>*>(BT->GetBlackBoard()->GetComponent("EntityManager"));
-												   		auto ID = static_cast<BlackBoardComponent<ECS::eid32>*>(BT->GetBlackBoard()->GetComponent("EID"));
-												   		auto P = static_cast<BlackBoardComponent<EM::Vec3>*>(BT->GetBlackBoard()->GetComponent("TargetPosition"));
+												   		auto P = BT->GetBlackBoard()->GetComponent<EM::Vec3>("TargetPosition");
+												   		auto D = BT->GetBlackBoard()->GetComponent<ECS::Systems::EntityManager*>("EntityManager");
+												   		auto ID = BT->GetBlackBoard()->GetComponent<ECS::eid32>("EID");
+												   		
 												   		auto Manager = D->GetData();
 												   		auto Target = P->GetData();
 												   		auto ai = ID->GetData();
@@ -88,9 +90,6 @@ inline BT::BehaviorTree* TestTree()
 												   		auto H = Manager->AttributeSystem->HealthComponents[ai].Health; 
 
 												   		auto Distance = AI->DistanceTo(Target.XY());
-
-
-												   		// std::cout << Distance << std::endl;
 
 												   		if (Distance <= 100.0f) 
 												   		{
@@ -121,8 +120,8 @@ inline BT::BehaviorTree* TestTree()
 
 	BT::SimpleTask* Shoot = new BT::SimpleTask(BT, [](BT::BehaviorTree* BT) 
 													{
-												   		auto Manager = static_cast<BlackBoardComponent<ECS::Systems::EntityManager*>*>(BT->GetBlackBoard()->GetComponent("EntityManager"))->GetData();
-												   		auto ID = static_cast<BlackBoardComponent<ECS::eid32>*>(BT->GetBlackBoard()->GetComponent("EID"))->GetData();
+												   		auto Manager = BT->GetBlackBoard()->GetComponent<ECS::Systems::EntityManager*>("EntityManager")->GetData();
+												   		auto ID = BT->GetBlackBoard()->GetComponent<ECS::eid32>("EID")->GetData();
 
 												   		auto Position = Manager->TransformSystem->Transforms[ID].Position.XY();
 														
@@ -178,6 +177,9 @@ inline BT::BehaviorTree* TestTree()
 
 														// Set up coordinate format
 														Manager->Renderer2DSystem->Renderers[id].Format = EG::CoordinateFormat::ISOMETRIC;
+
+														// Set up Parent
+														Manager->AttributeSystem->Groups[id].Parent = ID;
 													});
 
 	// Build tree

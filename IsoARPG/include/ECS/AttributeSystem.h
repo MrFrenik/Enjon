@@ -14,6 +14,7 @@ struct AttributeSystem
 	ECS::Component::HealthComponent HealthComponents[MAX_ENTITIES];
 	ECS::Component::BitmaskComponent BitMasks[MAX_ENTITIES];
 	ECS::Masks::EntityMask Masks[MAX_ENTITIES];
+	ECS::Component::GroupComponent Groups[MAX_ENTITIES];
 
 	const Loot::LootProfile* LootProfiles[MAX_ENTITIES];
 	const Loot::Weapon::WeaponProfile* WeaponProfiles[MAX_ENTITIES];

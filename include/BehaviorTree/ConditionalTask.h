@@ -22,7 +22,7 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 				auto SS = &SO->GetData()->States;
 
 				if (State != BehaviorNodeState::RUNNING)

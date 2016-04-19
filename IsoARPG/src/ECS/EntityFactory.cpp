@@ -84,6 +84,10 @@ namespace ECS { namespace Factory {
 			// Set up masks
 			AS->Masks[Player] |= (Masks::Type::PLAYER | Masks::GeneralOptions::COLLIDABLE);
 
+			// Set up parent
+			AS->Groups[Player].Entity = Player;
+			AS->Groups[Player].Parent = Player;
+
 			// Set up Renderer
 			Manager->Renderer2DSystem->Renderers[Player].Color = Color;
 
@@ -160,6 +164,10 @@ namespace ECS { namespace Factory {
 			// Set up masks
 			AS->Masks[AI] |= (Masks::Type::AI | Masks::GeneralOptions::COLLIDABLE);
 
+			// Set up parent
+			AS->Groups[AI].Entity = AI;
+			AS->Groups[AI].Parent = AI;
+
 			// Set up Renderer
 			Manager->Renderer2DSystem->Renderers[AI].Color = Color;
 
@@ -180,6 +188,7 @@ namespace ECS { namespace Factory {
 			AC->BB->AddComponent(std::string("TargetPosition"), new BlackBoardComponent<EM::Vec3>(EM::Vec3(0.0f, 0.0f, 0.0f)));
 			AC->BB->AddComponent(std::string("MovementLoop"), new BlackBoardComponent<u32>(0));
 			AC->BB->AddComponent(std::string("Timer"), new BlackBoardComponent<Timer*>(new Timer{0.0f, 0.01f, 1.0f}));
+
 
 			return AI;
 		} 
@@ -236,6 +245,10 @@ namespace ECS { namespace Factory {
 			// Set up Attributes
 			AttributeSystem* AS = Manager->AttributeSystem;		
 			AS->Masks[Item] = Mask;
+
+			// Set up parent
+			AS->Groups[Item].Entity = Item;
+			AS->Groups[Item].Parent = Item;
 
 			// Set up Inventory... This has to be fixed and is a problem with having a general ECS
 			Manager->InventorySystem->Inventories->WeaponEquipped = NULL_ENTITY;
@@ -295,6 +308,10 @@ namespace ECS { namespace Factory {
 			AttributeSystem* AS = Manager->AttributeSystem;		
 			AS->Masks[Weapon] = Mask;
 
+			// Set up parent
+			AS->Groups[Weapon].Entity = Weapon;
+			AS->Groups[Weapon].Parent = Weapon;
+
 			// Get Weapon Profile
 			auto WP = Loot::Weapon::GetProfile(std::string("Dagger"));
 			AS->WeaponProfiles[Weapon] = WP;
@@ -338,6 +355,6 @@ namespace ECS { namespace Factory {
 			Manager->TransformSystem->Transforms[Vortex].BaseHeight = 0.0f;
 			Manager->TransformSystem->Transforms[Vortex].MaxHeight = 0.0f;
 
-			Manager->TransformSystem->Transforms[Vortex].AABBPadding = Enjon::Math::Vec2(500, 500);
+			Manager->TransformSystem->Transforms[Vortex].AABBPadding = Enjon::Math::Vec2(200, 200);
 		}
 }}

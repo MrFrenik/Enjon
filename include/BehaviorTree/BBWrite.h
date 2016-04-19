@@ -9,7 +9,6 @@ namespace BT
 	{
 		public:
 
-			// BBWrite(BlackBoard* bb, void (*A)(BlackBoard* BB)){ BB = bb; Action = A; Init(); }
 			BBWrite(BehaviorTree* BT, void (*A)(BehaviorTree* BT), BehaviorNodeBase* B = nullptr){ BTree = BT; Action = A; Init(); Child = B; }
 			~BBWrite(){}
 
@@ -21,7 +20,7 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 				auto SS = &SO->GetData()->States;
 
 				if (Child == nullptr) 

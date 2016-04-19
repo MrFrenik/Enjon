@@ -54,7 +54,8 @@ namespace BT
 				Components[S] = B;
 			}
 
-			inline BlackBoardComponentBase* GetComponent(std::string S) { return Components[S]; }
+			template <typename T>
+			inline BlackBoardComponent<T>* GetComponent(std::string S) { return static_cast<BlackBoardComponent<T>*>(Components[S]); }
 
 		private:
 			std::unordered_map<std::string, BlackBoardComponentBase*> Components;

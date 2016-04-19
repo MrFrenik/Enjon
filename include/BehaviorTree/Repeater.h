@@ -19,7 +19,7 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 				auto SS = &SO->GetData()->States;
 
 				if (SS->at(this->TreeIndex) != BehaviorNodeState::RUNNING)
@@ -38,7 +38,6 @@ namespace BT
 				Child->Run();
 
 				// Get child's state after running
-				// BehaviorNodeState S = Child->GetState();
 				BehaviorNodeState S = SS->at(Child->GetIndex());
 
 				if (S == BehaviorNodeState::RUNNING)
@@ -87,13 +86,6 @@ namespace BT
 	{
 		public:
 
-			// SimpleTask(BehaviorTree* BT, void (*Action)(BehaviorTree*))
-			// {
-			// 	this->BTree = BT;
-			// 	this->Action = Action;
-			// 	State = BehaviorNodeState::INVALID;
-			// }
-
 			RepeaterWithBBRead(BehaviorTree* BT, i32 (*A)(BehaviorTree*), BehaviorNodeBase* B = nullptr, i32 C = 1) 
 				: Count(C)
 			{
@@ -108,7 +100,7 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 				auto SS = &SO->GetData()->States;
 
 				if (SS->at(this->TreeIndex) != BehaviorNodeState::RUNNING)
@@ -128,7 +120,6 @@ namespace BT
 				Child->Run();
 
 				// Get child's state after running
-				// BehaviorNodeState S = Child->GetState();
 				BehaviorNodeState S = SS->at(Child->GetIndex());
 
 				if (S == BehaviorNodeState::RUNNING) 

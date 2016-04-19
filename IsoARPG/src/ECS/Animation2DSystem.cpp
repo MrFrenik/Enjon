@@ -326,6 +326,8 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										// Set up coordinate format
 										Manager->Renderer2DSystem->Renderers[id].Format = EG::CoordinateFormat::ISOMETRIC;	
 
+										// Set up parent
+										Manager->AttributeSystem->Groups[id].Parent = e;
 									}
 								}
 							}

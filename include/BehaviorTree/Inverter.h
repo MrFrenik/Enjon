@@ -9,8 +9,6 @@ namespace BT
 	{
 		public:
 
-			// Inverter(BlackBoard* BB) { this->BB = BB; Init(); }
-			// Inverter(BlackBoard* BB, BehaviorNodeBase* B) { this->BB = BB; Init(); Child = B; }
 			Inverter(BehaviorTree* BT, BehaviorNodeBase* B = nullptr) { this->BTree = BT; Init(); Child = B; }
 			~Inverter() {}
 
@@ -19,7 +17,7 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 				auto SS = &SO->GetData()->States;
 
 				if (State != BehaviorNodeState::RUNNING)

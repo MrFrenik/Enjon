@@ -117,7 +117,6 @@ namespace BT
 			{
 				// HotSwap in BlackBoard to be operated on
 				BB = bb;
-				auto S = static_cast<BlackBoardComponent<StateObject*>*>(BB->GetComponent("States"));
 
 				// Now run tree on BB
 				Root->Run();
@@ -209,7 +208,7 @@ namespace BT
 			void Reset()
 			{
 				// Get State Object from BlackBoard
-				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 				auto SS = &SO->GetData()->States;
 
 				// Reset state
@@ -269,7 +268,7 @@ namespace BT
 
 			void Reset()
 			{
-				auto S = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto S = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 				S->GetData()->States.at(this->TreeIndex) = BehaviorNodeState::RUNNING;
 				Itr = Children.begin();
 		
@@ -341,7 +340,7 @@ namespace BT
 			void Reset()
 			{
 				// Get State Object from BlackBoard
-				auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 				auto SS = &SO->GetData()->States;
 
 				// Reset state
@@ -375,7 +374,7 @@ namespace BT
 			}
 
 			// Get State Object from BlackBoard
-			auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
+			auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 
 			Action(BTree);
 

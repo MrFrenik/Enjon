@@ -180,15 +180,13 @@ namespace ECS{ namespace Systems { namespace Transform {
 				bool CollideWithLevel = false;
 				float Multiplier = -0.5f;
 
-				if ((Manager->Types[e] && Component::EntityType::ENEMY) == 0)
+				if ((Manager->Types[e] & Component::EntityType::ENEMY) == 0)
 				{
 					if (Transform->CartesianPosition.x < -Width + TileWidth * 2.0f) { Transform->CartesianPosition.x = -Width + TileWidth * 2.0f; Velocity->x *= Multiplier; VelocityGoal->x *= Multiplier; CollideWithLevel = true; }   
 					if (Transform->CartesianPosition.x > -TileWidth) { Transform->CartesianPosition.x = -TileWidth; Velocity->x *= Multiplier; VelocityGoal->x *= Multiplier; CollideWithLevel = true; }
 					if (Transform->CartesianPosition.y > -TileWidth) { Transform->CartesianPosition.y = -TileWidth; Velocity->y *= Multiplier; VelocityGoal->y *= Multiplier; CollideWithLevel = true; }
 					if (Transform->CartesianPosition.y < -Height + TileWidth * 2.0f) { Transform->CartesianPosition.y = -Height + TileWidth * 2.0f; Velocity->y *= Multiplier; VelocityGoal->y *= Multiplier; CollideWithLevel = true; }
 				}
-
-
 
 
 				// Delete projectile for now if it collides with level
