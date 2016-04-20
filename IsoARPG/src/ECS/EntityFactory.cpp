@@ -39,6 +39,7 @@ namespace ECS { namespace Factory {
 			Transform->ViewVector = Enjon::Math::Vec2(1, 1);
 			Transform->AttackVector = Enjon::Math::Vec2(1, 1);
 			Transform->GroundPosition = Enjon::Math::Vec2(Position.x + Dimensions.x / 2.0f, Position.y);
+			Transform->GroundPositionOffset = Enjon::Math::Vec2(Transform->Dimensions.x / 2.0f - Systems::TILE_SIZE, 0.0f);
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
@@ -123,6 +124,7 @@ namespace ECS { namespace Factory {
 			Transform->ViewVector = Enjon::Math::Vec2(1, 1);
 			Transform->AttackVector = Enjon::Math::Vec2(1, 1);
 			Transform->GroundPosition = Enjon::Math::Vec2(Position.XY());
+			Transform->GroundPositionOffset = Enjon::Math::Vec2(Transform->Dimensions.x / 2.0f - Systems::TILE_SIZE, 0.0f);
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
@@ -274,6 +276,7 @@ namespace ECS { namespace Factory {
 			Transform->VelocityGoalScale = 0.8f;
 			Transform->Dimensions = Dimensions;
 			Transform->GroundPosition = Enjon::Math::Vec2(Position.XY());
+			Transform->GroundPositionOffset = Enjon::Math::Vec2(0.0f, 0.0f);
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
@@ -336,6 +339,7 @@ namespace ECS { namespace Factory {
 			Manager->TransformSystem->Transforms[Explosion].VelocityGoal = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
 			Manager->TransformSystem->Transforms[Explosion].BaseHeight = 0.0f;
 			Manager->TransformSystem->Transforms[Explosion].MaxHeight = 0.0f;
+			Manager->TransformSystem->Transforms[Explosion].GroundPositionOffset = Enjon::Math::Vec2(0.0f, 0.0f);
 
 			Manager->TransformSystem->Transforms[Explosion].AABBPadding = Enjon::Math::Vec2(500, 500);
 		}
@@ -343,8 +347,8 @@ namespace ECS { namespace Factory {
 		void CreateVortex(Systems::EntityManager* Manager, EM::Vec3 Pos)
 		{
 			// TODO(John): Make a "spawn" function that gets called for any entity that has a factory component
-			ECS::eid32 Vortex = Factory::CreateWeapon(Manager, Pos, Enjon::Math::Vec2(16.0f, 16.0f), 
-														Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"), 
+			ECS::eid32 Vortex = Factory::CreateWeapon(Manager, Pos + EM::Vec3(0.0f, 120.0f, 0.0f), Enjon::Math::Vec2(500.0f, 500.0f) + EM::Vec2(ER::Roll(-60, 60), ER::Roll(-70, 70)), 
+														Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("ForceField"), 
 														Masks::Type::WEAPON | Masks::WeaponOptions::EXPLOSIVE, Component::EntityType::VORTEX, "Vortex");
 
 			Manager->Camera->ShakeScreen(Enjon::Random::Roll(10, 15));
@@ -354,7 +358,16 @@ namespace ECS { namespace Factory {
 			Manager->TransformSystem->Transforms[Vortex].VelocityGoal = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
 			Manager->TransformSystem->Transforms[Vortex].BaseHeight = 0.0f;
 			Manager->TransformSystem->Transforms[Vortex].MaxHeight = 0.0f;
+			Manager->TransformSystem->Transforms[Vortex].GroundPositionOffset = EM::Vec2(0.0f, -120.0f);
 
+			auto C = EG::RGBA16(static_cast<float>(ER::Roll(0, 10)) / 10.0f, 
+								static_cast<float>(ER::Roll(0, 10)) / 10.0f, 
+								static_cast<float>(ER::Roll(0, 10)) / 10.0f, 
+								1.0f);
+
+			Manager->Renderer2DSystem->Renderers[Vortex].Color = EG::SetOpacity(C, static_cast<float>(ER::Roll(1, 3)) / 10.0f);
 			Manager->TransformSystem->Transforms[Vortex].AABBPadding = Enjon::Math::Vec2(200, 200);
+
+
 		}
 }}

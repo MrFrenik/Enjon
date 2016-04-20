@@ -183,8 +183,8 @@ inline BT::BehaviorTree* TestTree()
 													});
 
 	// Build tree
-	BT->SetRoot(REP);
-		REP->AddChild(SEQ);
+	BT->SetRoot(SEQ);
+		// REP->AddChild(SEQ);
 			SEQ->AddChild(ST1);
 			SEQ->AddChild(ST2);
 			SEQ->AddChild(RWBBR);

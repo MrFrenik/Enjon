@@ -635,9 +635,9 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 						V2 Direction = EM::Vec2::Normalize(Center - *B);
 						float Length = Direction.Length();
-						float Impulse = 2.0f;
+						float Impulse = 2.0f * 15 - Length;
 						V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
-						*EntityVelocity = 0.85f * *EntityVelocity + (1.0f / AMass) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
+						*EntityVelocity = 0.2f * *EntityVelocity + (1.0f / 100.0f) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
 
 						EM::Vec2 R(1,0);
 						float a = acos(Direction.DotProduct(R)) * 180.0f / M_PI;
@@ -648,7 +648,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 					
 					else 
 					{
-						*EntityVelocity = *EntityVelocity * 0.75f;
+						*EntityVelocity = *EntityVelocity * 0.95;
 						Manager->TransformSystem->Transforms[A_ID].VelocityGoal = EM::Vec3(0.0f, 0.0f, 0.0f);
 					}
 			}

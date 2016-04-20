@@ -164,13 +164,16 @@ namespace ECS{ namespace Systems { namespace Transform {
 						}
 					}
 				}
+
+				// Get ground position offset
+				auto GPO = &Manager->TransformSystem->Transforms[e].GroundPositionOffset;
 					
 				// Set position.y to be a sum of y and z velocities
 				Position->y += Velocity->y + Velocity->z; 
 				
 				// Set up GroundPosition
-				GroundPosition->x = Position->x + Transform->Dimensions.x / 2.0f - TileWidth;
-				GroundPosition->y = Position->y - Position->z; 
+				GroundPosition->x = Position->x + GPO->x;
+				GroundPosition->y = Position->y - Position->z + GPO->y; 
 
 				// Set up CartesianPosition
 				Transform->CartesianPosition = Enjon::Math::IsoToCartesian(*GroundPosition);
@@ -197,9 +200,9 @@ namespace ECS{ namespace Systems { namespace Transform {
 					EntitySystem::RemoveEntity(Manager, e);
 				}
 
-				*GroundPosition = Enjon::Math::CartesianToIso(Transform->CartesianPosition);
-				Position->y = GroundPosition->y + Position->z;
-				Position->x = GroundPosition->x - Transform->Dimensions.x / 2.0f + TileWidth;
+				// *GroundPosition = Enjon::Math::CartesianToIso(Transform->CartesianPosition);
+				// Position->y = GroundPosition->y + Position->z;
+				// Position->x = GroundPosition->x - Transform->Dimensions.x / 2.0f + TileWidth;
 
 				// Set up AABB
 				Enjon::Physics::AABB* AABB = &Manager->TransformSystem->Transforms[e].AABB;

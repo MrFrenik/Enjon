@@ -45,6 +45,7 @@ namespace ECS { namespace Component {
 		Enjon::Math::Vec2 AABBPadding;
 		Enjon::Math::Vec2 GroundPosition;
 		Enjon::Math::Vec2 Dimensions;
+		Enjon::Math::Vec2 GroundPositionOffset;
 		float Angle;
 		float BaseHeight;
 		float MaxHeight;

@@ -118,7 +118,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 
 				else if (RightButtonDown)
 				{
-					auto P = Manager->TransformSystem->Transforms[Manager->Player].Position + Enjon::Math::Vec3(50.0f, 20.0f, 0.0f);
+					auto P = Manager->TransformSystem->Transforms[Manager->Player].Position;
 					Factory::CreateExplosion(Manager, P);
 					RightButtonDown = false;
 				}
