@@ -71,7 +71,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define NUM_LIGHTS 	2
+#define NUM_LIGHTS 	10
 
 typedef struct
 {
@@ -933,6 +933,7 @@ int main(int argc, char** argv)
 		// BEAMS //////////////////////	
 		///////////////////////////////
 
+		/*
 		EG::ColorRGBA16 C = EG::RGBA16_ZombieGreen();
 		EM::Vec2 Norm;
 
@@ -992,6 +993,7 @@ int main(int argc, char** argv)
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/VerticleBar.png").id, EG::SetOpacity(C, (sin(t) + 1.1f) / 2.0f), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
 			}	
 		}
+		*/
 
 		/*
 		{
@@ -1261,7 +1263,7 @@ int main(int argc, char** argv)
 				// Set uniforms
 				glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
 							 SCREENWIDTH, SCREENHEIGHT);
-				glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 1.0f);
+				glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.3f);
 				glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
 
 				glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 

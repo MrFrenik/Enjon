@@ -346,12 +346,18 @@ namespace ECS { namespace Factory {
 
 		void CreateVortex(Systems::EntityManager* Manager, EM::Vec3 Pos)
 		{
+			static float t = 0.0f;
+			t += 0.1f;
+
 			// TODO(John): Make a "spawn" function that gets called for any entity that has a factory component
-			ECS::eid32 Vortex = Factory::CreateWeapon(Manager, Pos + EM::Vec3(0.0f, 120.0f, 0.0f), Enjon::Math::Vec2(500.0f, 500.0f) + EM::Vec2(ER::Roll(-60, 60), ER::Roll(-70, 70)), 
+			// EM::Vec2 Diff(50.0f * sin(t), 50.0f * sin(t));
+			// EM::Vec2 Diff(static_cast<float>(ER::Roll(-50, 50)) * sin(t), static_cast<float>(ER::Roll(-50, 50)) * sin(t));
+			EM::Vec2 Diff(ER::Roll(-70, 70), ER::Roll(-80, 80));
+			ECS::eid32 Vortex = Factory::CreateWeapon(Manager, Pos + EM::Vec3(0.0f, 120.0f, 0.0f), Enjon::Math::Vec2(500.0f, 500.0f) + Diff, 
 														Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("ForceField"), 
 														Masks::Type::WEAPON | Masks::WeaponOptions::EXPLOSIVE, Component::EntityType::VORTEX, "Vortex");
 
-			Manager->Camera->ShakeScreen(Enjon::Random::Roll(10, 15));
+			Manager->Camera->ShakeScreen(Enjon::Random::Roll(5, 10));
 			Manager->AttributeSystem->Masks[Vortex] |= Masks::GeneralOptions::COLLIDABLE;
 
 			Manager->TransformSystem->Transforms[Vortex].Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
@@ -360,14 +366,14 @@ namespace ECS { namespace Factory {
 			Manager->TransformSystem->Transforms[Vortex].MaxHeight = 0.0f;
 			Manager->TransformSystem->Transforms[Vortex].GroundPositionOffset = EM::Vec2(0.0f, -120.0f);
 
-			auto C = EG::RGBA16(static_cast<float>(ER::Roll(0, 10)) / 10.0f, 
-								static_cast<float>(ER::Roll(0, 10)) / 10.0f, 
-								static_cast<float>(ER::Roll(0, 10)) / 10.0f, 
+			auto C = EG::RGBA16(static_cast<float>(ER::Roll(0, 20)) / 10.0f, 
+								static_cast<float>(ER::Roll(0, 20)) / 10.0f, 
+								static_cast<float>(ER::Roll(0, 20)) / 10.0f, 
 								1.0f);
 
 			Manager->Renderer2DSystem->Renderers[Vortex].Color = EG::SetOpacity(C, static_cast<float>(ER::Roll(1, 3)) / 10.0f);
-			Manager->TransformSystem->Transforms[Vortex].AABBPadding = Enjon::Math::Vec2(200, 200);
+			Manager->TransformSystem->Transforms[Vortex].AABBPadding = Enjon::Math::Vec2(150, 150);
 
-
+			std::cout << "ID: " << Vortex << std::endl;
 		}
 }}

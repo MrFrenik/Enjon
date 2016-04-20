@@ -212,10 +212,16 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 			*EntityVelocity = EM::Vec3(EM::CartesianToIso(mtd), EntityVelocity->z);
 
+			Enjon::Math::Vec2 Difference = Enjon::Math::Vec2::Normalize(EntityPosition->XY() - ColliderPosition->XY());
+
+			// if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
+			// 	*ColliderPosition -= Enjon::Math::Vec3(Difference * 30.0f, 0.0f);
+			*ColliderVelocity = -2.0f * Enjon::Math::Vec3(Difference, 0.0f);
+
 			// Update velocities based on "bounce" factor
-			float bf = 1.0f; // Bounce factor 
-			ColliderVelocity->x = -ColliderVelocity->x * bf;
-			ColliderVelocity->y = -ColliderVelocity->y * bf;
+			// float bf = 1.0f; // Bounce factor 
+			// ColliderVelocity->x = -ColliderVelocity->x * bf;
+			// ColliderVelocity->y = -ColliderVelocity->y * bf;
 
 			// Hurt Collider
 			// Get health and color of entity
@@ -367,12 +373,12 @@ namespace ECS{ namespace Systems { namespace Collision {
 			// if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
 			// 	*ColliderPosition -= Enjon::Math::Vec3(Difference * 30.0f, 0.0f);
 			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
-				*ColliderVelocity = 2.0f * Enjon::Math::Vec3(Difference, 0.0f);
+				*ColliderVelocity = -2.0f * Enjon::Math::Vec3(Difference, 0.0f);
 
 			// Update velocities based on "bounce" factor
-			float bf = 1.0f; // Bounce factor 
-			ColliderVelocity->x = -ColliderVelocity->x * bf;
-			ColliderVelocity->y = -ColliderVelocity->y * bf;
+			// float bf = 1.0f; // Bounce factor 
+			// ColliderVelocity->x = -ColliderVelocity->x * bf;
+			// ColliderVelocity->y = -ColliderVelocity->y * bf;
 
 			// Hurt Collider
 			// Get health and color of entity
@@ -552,7 +558,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 				if (Direction.x == 0) Direction.x = (float)ER::Roll(-100, 100) / 100.0f;
 				if (Direction.y == 0) Direction.y = (float)ER::Roll(-100, 100) / 100.0f;
 				float Length = Direction.Length();
-				float Impulse = 55.0f - 15 * Length;
+				float Impulse = 55.0f / (Length + 0.001f);
 
 				*EntityVelocity = (1.0f / AMass) * -Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f); 
 
@@ -560,9 +566,6 @@ namespace ECS{ namespace Systems { namespace Collision {
 				{
 					*EntityVelocity = *EntityVelocity * 2.0f;
 					Manager->TransformSystem->Transforms[A_ID].VelocityGoal = *EntityVelocity;
-	
-					// // Find vector between the two and normalize
-					// Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(Enjon::Math::IsoToCartesian(MousePos) - Enjon::Math::IsoToCartesian(Pos));
 
 					EM::Vec2 R(1,0);
 					float a = acos(Direction.DotProduct(R)) * 180.0f / M_PI;
@@ -612,58 +615,41 @@ namespace ECS{ namespace Systems { namespace Collision {
 	
 		else
 		{
-				// V2 Direction = EM::Vec2::Normalize(*A - *B);
-				// if (Direction.x == 0) Direction.x = (float)ER::Roll(-100, 100) / 100.0f;
-				// if (Direction.y == 0) Direction.y = (float)ER::Roll(-100, 100) / 100.0f;
-				// float Length = Direction.Length();
-				// float Impulse = 55.0f - 15 * Length;
+			if (Manager->AttributeSystem->Masks[A_ID] & Masks::WeaponOptions::PROJECTILE)
+			{
+				auto Center = (AABB_B->Max + AABB_B->Min) / 2.0f;
+				float DistFromCenter = B->DistanceTo(Center);
 
-				// *EntityVelocity = (1.0f / AMass) * -Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f); 
-
-				if (Manager->AttributeSystem->Masks[A_ID] & Masks::WeaponOptions::PROJECTILE)
+				if (DistFromCenter > 100.0f)
 				{
-					auto Center = (AABB_B->Max + AABB_B->Min) / 2.0f;
-					float DistFromCenter = B->DistanceTo(Center);
 
-					if (DistFromCenter > 100.0f)
-					{
-						// *EntityVelocity = *EntityVelocity * 2.0f;
-						// Manager->TransformSystem->Transforms[A_ID].VelocityGoal = *EntityVelocity;
-		
-						// // Find vector between the two and normalize
-						// Enjon::Math::Vec2 ArrowVelocity = Enjon::Math::Vec2::Normalize(Enjon::Math::IsoToCartesian(MousePos) - Enjon::Math::IsoToCartesian(Pos));
+					V2 Direction = EM::Vec2::Normalize(Center - *B);
+					float Length = Direction.Length();
+					float Impulse = 2.0f * 15 - Length;
+					V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
+					*EntityVelocity = 0.2f * *EntityVelocity + (1.0f / 1000.0f) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
+					*EntityPosition += EM::Vec3(ER::Roll(-1, 1), ER::Roll(-1, 1), 0.0f);
 
-						V2 Direction = EM::Vec2::Normalize(Center - *B);
-						float Length = Direction.Length();
-						float Impulse = 2.0f * 15 - Length;
-						V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
-						*EntityVelocity = 0.2f * *EntityVelocity + (1.0f / 100.0f) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
+					EM::Vec2 R(1,0);
+					float a = acos(Direction.DotProduct(R)) * 180.0f / M_PI;
+					if (Direction.y < 0) a *= -1;
 
-						EM::Vec2 R(1,0);
-						float a = acos(Direction.DotProduct(R)) * 180.0f / M_PI;
-						if (Direction.y < 0) a *= -1;
-
-						Manager->TransformSystem->Transforms[A_ID].Angle = EM::ToRadians(a);
-					}
-					
-					else 
-					{
-						*EntityVelocity = *EntityVelocity * 0.95;
-						Manager->TransformSystem->Transforms[A_ID].VelocityGoal = EM::Vec3(0.0f, 0.0f, 0.0f);
-					}
+					Manager->TransformSystem->Transforms[A_ID].Angle = EM::ToRadians(a);
+				}
 			}
 			else
 			{
 				auto Center = (AABB_B->Max + AABB_B->Min) / 2.0f;
 				float DistFromCenter = A->DistanceTo(Center);
 			
-				if (DistFromCenter > 15.0f)
+				if (DistFromCenter > 13.0f)
 				{
 					V2 Direction = EM::Vec2::Normalize(*A - *B);
 					float Length = Direction.Length();
 					float Impulse = 2.0f;
 					V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
 					*EntityVelocity = 0.85f * *EntityVelocity + (1.0f / AMass) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
+					*EntityPosition += EM::Vec3(ER::Roll(-1, 1), ER::Roll(-1, 1), 0.0f);
 				}	
 			}
 

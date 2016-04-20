@@ -200,8 +200,10 @@ namespace ECS{ namespace Systems { namespace Transform {
 					EntitySystem::RemoveEntity(Manager, e);
 				}
 
-				// *GroundPosition = Enjon::Math::CartesianToIso(Transform->CartesianPosition);
+				*GroundPosition = Enjon::Math::CartesianToIso(Transform->CartesianPosition);
+				Position->y = GroundPosition->y + Position->z - GPO->y;
 				// Position->y = GroundPosition->y + Position->z;
+				Position->x = GroundPosition->x - GPO->x;
 				// Position->x = GroundPosition->x - Transform->Dimensions.x / 2.0f + TileWidth;
 
 				// Set up AABB

@@ -130,9 +130,9 @@ inline BT::BehaviorTree* TestTree()
 														static float t = 0.0f;
 														t += 0.1f;
 
-														auto C = Enjon::Graphics::RGBA16(0.0f, 100.0f, 0.0f, 100.0f);
+														auto C = Enjon::Graphics::RGBA16(100.0f, 0.0f, 0.0f, 100.0f);
 														C.r += 2.0f;
-														if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bluebutton.png"), Enjon::Math::iVec2(1, 1));
+														if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png"), Enjon::Math::iVec2(1, 1));
 														ECS::eid32 id = ECS::Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position.x + 60.0f, Position.y + 40.0f, 50.0f),
 																				  Enjon::Math::Vec2(10.0f + ER::Roll(0, 60), 5.0f), &ItemSheet, (ECS::Masks::Type::WEAPON | 
 																				  												ECS::Masks::WeaponOptions::PROJECTILE | 
