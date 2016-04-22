@@ -5,6 +5,7 @@
 #include "ECS/ComponentSystems.h"
 #include "ECS/Renderer2DSystem.h"
 #include "ECS/Transform3DSystem.h"
+#include "ECS/EffectSystem.h"
 
 #include <Graphics/Color.h>
 #include <Graphics/ParticleEngine2D.h>
@@ -37,7 +38,7 @@ namespace ECS { namespace Effects {
 	}
 
 	/* Applies poison damage to entity over time */
-	void Poison(ECS::eid32 E, ECS::Systems::EntityManager* Manager)
+	inline void Poison(ECS::eid32 E, ECS::Systems::EntityManager* Manager)
 	{
 		// Change to green color
 		// ChangeColor(E, Manager, Enjon::Graphics::RGBA16_Green());

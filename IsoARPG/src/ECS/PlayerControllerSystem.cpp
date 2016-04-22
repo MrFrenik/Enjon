@@ -117,16 +117,6 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					Factory::CreateVortex(Manager, P);
 					RightButtonDown = true;
 
-					for (auto i = 0; i < 2; i++)
-					{
-						EM::Vec3 Vel((float)ER::Roll(-1, 1), (float)ER::Roll(-1, 1), (float)ER::Roll(-1, 1));
-						EM::Vec3 Diff(ER::Roll(-20, 20), ER::Roll(-20, 20), ER::Roll(-2, 2));
-						EM::Vec2 Size(ER::Roll(2, 5), ER::Roll(2, 5));
-						auto C = EG::RGBA16(0.0f, static_cast<float>(ER::Roll(1, 10)) / 10.0f, static_cast<float>(ER::Roll(2, 10)) / 5.0f, 1.0f);
-						static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/verticlebar.png").id;
-						EG::Particle2D::AddParticle(EM::Vec3(P.x + Diff.x, P.y + 130.0f + Diff.y, 0.0f), EM::Vec3(Vel.x * sin(t), Vel.y * sin(t), Vel.z * sin(t)), 
-							EM::Vec2(Size.x, Size.y), C, PTex, 0.025f, Manager->ParticleEngine->ParticleBatches.at(0));
-					}
 				
 				}
 

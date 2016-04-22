@@ -101,7 +101,7 @@ namespace ECS { namespace Component {
 	// Label struct
 	typedef struct
 	{
-		char* Name; 
+		std::string Name; 
 		eid32 Entity;
 	} Label;
 

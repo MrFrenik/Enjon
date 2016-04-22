@@ -4,11 +4,14 @@ KEY_CODES:
 TODO:
 
 Collisions:
-	- Set up quadtrees/BSP √
-	- Establish appropriate hit boxes for enemies and characters based on AABB struct
-	- Create AABB struct and place in either Transform system or a different physics system	
+	- √ Set up quadtrees/BSP 
+	- √ Establish appropriate hit boxes for enemies and characters based on AABB struct 
+	- √ Create AABB struct and place in either Transform system or a different physics system	
 	- Different weapons will have different hit boxes
 	- Refactor collision code even more
+	- OBB collisions for rotated objects
+	- Line collisions
+	- Sphere vs. Box / Line collisions
 
 Animations: 
 	- Full character animation set for testing (Walking, Attacking)
@@ -29,17 +32,24 @@ Systems:
 		- Separate characters into layers: head gear, armor, legs, weapons, etc.
 
 	- Effects:
-		- Develop particle engine
+		- √ Develop particle engine
 	
 	- AIController:
-		- Look up and set Behavior Trees for entities
+		- √ Look up and set Behavior Trees for entities
 
 	- Renderer2D:
 		- Set up rendering system
 		- Renderer components will keep track of sprite batch pointers
 		- Set up SpriteBatch manager
 		- PostProcessing: 
-			- Post Processing wraps the rendering code
-			- Set up FrameBuffer to be written to and read from 	
+			- √ Post Processing wraps the rendering code
+			- √ Set up FrameBuffer to be written to and read from 	
 
+	- Factory: 
+		- If entity has a factory component, needs to use its own factory function
 
+	- Entity: 
+		- Every entity needs an OnDestroy function to handle all of its dependency cleanup as well as calling any other functions	
+
+	- EntityManager:
+		- Adding / Removing entities is busted. Fix it.

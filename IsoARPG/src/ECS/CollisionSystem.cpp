@@ -560,7 +560,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 				float Length = Direction.Length();
 				float Impulse = 55.0f / (Length + 0.001f);
 
-				*EntityVelocity = (1.0f / AMass) * -Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f); 
+				*EntityVelocity = (1.0f / AMass) * -Impulse * EM::Vec3(EM::CartesianToIso(Direction), EntityVelocity->z); 
 
 				if (Manager->AttributeSystem->Masks[A_ID] & Masks::WeaponOptions::PROJECTILE)
 				{
@@ -597,7 +597,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 	void CollideWithVortex(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID)
 	{
 		static float t = 0.0f;
-		t += 0.01f;
+		t += 0.001f;
 
 		Enjon::Math::Vec3* EntityPosition = &Manager->TransformSystem->Transforms[A_ID].Position;
 		Enjon::Math::Vec3* ColliderPosition = &Manager->TransformSystem->Transforms[B_ID].Position;
@@ -627,7 +627,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 					float Length = Direction.Length();
 					float Impulse = 2.0f * 15 - Length;
 					V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
-					*EntityVelocity = 0.2f * *EntityVelocity + (1.0f / 1000.0f) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
+					*EntityVelocity = 0.2f * *EntityVelocity + (1.0f / 1000.0f) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), sin(t) * ER::Roll(1, 10));
 					*EntityPosition += EM::Vec3(ER::Roll(-1, 1), ER::Roll(-1, 1), 0.0f);
 
 					EM::Vec2 R(1,0);
@@ -648,8 +648,14 @@ namespace ECS{ namespace Systems { namespace Collision {
 					float Length = Direction.Length();
 					float Impulse = 2.0f;
 					V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
-					*EntityVelocity = 0.85f * *EntityVelocity + (1.0f / AMass) * Impulse * EM::Vec3(EM::CartesianToIso(Direction), 0.0f);
-					*EntityPosition += EM::Vec3(ER::Roll(-1, 1), ER::Roll(-1, 1), 0.0f);
+					*EntityVelocity = 0.85f * *EntityVelocity + (1.0f / AMass) * Impulse * EM::Vec3(EM::CartesianToIso(Direction) + 
+																						   EM::CartesianToIso(0.25f * EM::Vec2(2.0f * cos(t), sin(t))), sin(t) * 1.0f);
+					Manager->TransformSystem->Transforms[A_ID].VelocityGoal = EM::Vec3(0.0f, 0.0f, 0.0f);
+					// *EntityPosition += EM::Vec3(ER::Roll(-1, 1), ER::Roll(-1, 1), 0.0f);
+					EM::Vec2 R(1,0);
+					float a = acos(Direction.DotProduct(R)) * 180.0f / M_PI;
+					if (Direction.y < 0) a *= -1;
+					*EntityPosition = *EntityPosition + (2.0f / AMass) * EM::Vec3(EM::CartesianToIso(EM::Vec2(cos(EM::ToRadians(a + 180)), sin(EM::ToRadians(a + 180)))), 0.0f);
 				}	
 			}
 

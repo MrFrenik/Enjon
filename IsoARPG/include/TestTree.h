@@ -167,7 +167,7 @@ inline BT::BehaviorTree* TestTree()
 														auto RY = sin(t) * Enjon::Random::Roll(-10, 2) / 100.0f;
 														ArrowVelocity = Enjon::Math::CartesianToIso(ArrowVelocity);
 
-														float speed = 50.0f;
+														float speed = 30.0f;
 
 														// // Fire in direction of mouse
 														Manager->TransformSystem->Transforms[id].VelocityGoal = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);

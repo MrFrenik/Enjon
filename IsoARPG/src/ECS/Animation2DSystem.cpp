@@ -257,20 +257,19 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										static float t = 0.0f;
 										t += 0.1f;
 
-										auto C = Enjon::Graphics::RGBA16(0.0f, 100.0f, 0.0f, 100.0f);
-										C.r += 2.0f;
-										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bluebutton.png"), Enjon::Math::iVec2(1, 1));
+										auto C = Enjon::Graphics::RGBA16(0.0f, 20.0f, 100.0f, 100.0f);
+										// C.r += 2.0f;
+										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png"), Enjon::Math::iVec2(1, 1));
 										eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->x + 60.0f, Position->y + 40.0f, 50.0f),
 																  Enjon::Math::Vec2(10.0f + ER::Roll(0, 60), 5.0f), &ItemSheet, (Masks::Type::WEAPON | 
 																  												Masks::WeaponOptions::PROJECTILE | 
 																  												Masks::GeneralOptions::PICKED_UP | 
 																  												Masks::GeneralOptions::COLLIDABLE), 
-																  												Component::EntityType::PROJECTILE, "arrow", 
+																  												Component::EntityType::PROJECTILE, "Arrow", 
 																												C);
 										Manager->Masks[id] |= COMPONENT_TRANSFORM3D;
 
 										Manager->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(15);
-
 
 										// Set arrow velocity to normalize: mousepos - arrowpos
 										Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
@@ -296,7 +295,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										auto RY = sin(t) * Enjon::Random::Roll(-10, 2) / 100.0f;
 										ArrowVelocity = Enjon::Math::CartesianToIso(ArrowVelocity);
 
-										float speed = 50.0f;
+										float speed = 200.0f;
 
 										// // Fire in direction of mouse
 										Manager->TransformSystem->Transforms[id].VelocityGoal = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);

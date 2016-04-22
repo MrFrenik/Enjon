@@ -12,6 +12,7 @@
 #include "BehaviorTreeManager.h"
 
 #include "Defines.h"
+#include "System/Types.h"
 
 namespace ECS { namespace Factory {
 
@@ -349,12 +350,11 @@ namespace ECS { namespace Factory {
 			static float t = 0.0f;
 			t += 0.1f;
 
-			// TODO(John): Make a "spawn" function that gets called for any entity that has a factory component
-			// EM::Vec2 Diff(50.0f * sin(t), 50.0f * sin(t));
-			// EM::Vec2 Diff(static_cast<float>(ER::Roll(-50, 50)) * sin(t), static_cast<float>(ER::Roll(-50, 50)) * sin(t));
+			std::string F("ForceField");
+			static Enjon::uint32 index = 0;
 			EM::Vec2 Diff(ER::Roll(-70, 70), ER::Roll(-80, 80));
 			ECS::eid32 Vortex = Factory::CreateWeapon(Manager, Pos + EM::Vec3(0.0f, 120.0f, 0.0f), Enjon::Math::Vec2(500.0f, 500.0f) + Diff, 
-														Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("ForceField"), 
+														Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("ForceField" + std::to_string(index)), 
 														Masks::Type::WEAPON | Masks::WeaponOptions::EXPLOSIVE, Component::EntityType::VORTEX, "Vortex");
 
 			Manager->Camera->ShakeScreen(Enjon::Random::Roll(5, 10));
@@ -374,6 +374,23 @@ namespace ECS { namespace Factory {
 			Manager->Renderer2DSystem->Renderers[Vortex].Color = EG::SetOpacity(C, static_cast<float>(ER::Roll(1, 3)) / 10.0f);
 			Manager->TransformSystem->Transforms[Vortex].AABBPadding = Enjon::Math::Vec2(150, 150);
 
+			for (auto i = 0; i < 2; i++)
+			{
+				EM::Vec3 Vel((float)ER::Roll(-1, 1), (float)ER::Roll(-1, 1), (float)ER::Roll(-1, 1));
+				EM::Vec3 Diff(ER::Roll(-20, 20), ER::Roll(-20, 20), ER::Roll(-2, 2));
+				EM::Vec2 Size(ER::Roll(2, 5), ER::Roll(2, 5));
+				auto C = EG::RGBA16(0.0f, static_cast<float>(ER::Roll(1, 10)) / 10.0f, static_cast<float>(ER::Roll(2, 10)) / 5.0f, 1.0f);
+				static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/verticlebar.png").id;
+				EG::Particle2D::AddParticle(EM::Vec3(Pos.x + Diff.x, Pos.y + 130.0f + Diff.y, 0.0f), EM::Vec3(Vel.x * sin(t), Vel.y * sin(t), Vel.z * sin(t)), 
+					EM::Vec2(Size.x, Size.y), C, PTex, 0.025f, Manager->ParticleEngine->ParticleBatches.at(0));
+			}
+
 			std::cout << "ID: " << Vortex << std::endl;
+			index = (index + 1) % 4;
+		}
+
+		void CreateBeam(Systems::EntityManager* Manager, EM::Vec3 Pos)
+		{
+
 		}
 }}
