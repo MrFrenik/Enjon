@@ -165,16 +165,16 @@ namespace ECS{ namespace Systems { namespace Transform {
 				if (Manager->LabelSystem->Labels[e].Name.compare("Arrow") == 0)
 				{
 					auto NV = EM::Vec2::Normalize(Velocity->XY());
-					for (auto i = 0; i < 10; i++)
+					for (auto i = 0; i < 2; i++)
 					{
 						EM::Vec3 Vel((float)ER::Roll(-1, 1), (float)ER::Roll(-1, 1), (float)ER::Roll(-1, 1));
 						Vel = Vel * 0.5f;
-						EM::Vec3 Diff(ER::Roll(-10, 10) * i, ER::Roll(-10, 10) * i, ER::Roll(-2, 2));
+						EM::Vec3 Diff(ER::Roll(-10, 10) * i * 2, ER::Roll(-20, 10) * i * 2, ER::Roll(-2, 2));
 						EM::Vec2 Size(ER::Roll(2, 5), ER::Roll(2, 5));
-						auto C = EG::RGBA16(0.0f, static_cast<float>(ER::Roll(1, 10)) / 10.0f, static_cast<float>(ER::Roll(2, 10)) / 5.0f, 1.0f);
+						auto C = EG::RGBA16(static_cast<float>(ER::Roll(2, 10)) / 5.0f, static_cast<float>(ER::Roll(1, 10)) / 10.0f, 0.0f, 1.0f);
 						static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/verticlebar.png").id;
-						EG::Particle2D::AddParticle(EM::Vec3(Position->x + Diff.x, Position->y + Diff.y + 30.0f, 0.0f), EM::Vec3(Vel.x, Vel.y, Vel.z), 
-							EM::Vec2(Size.x, Size.y), C, PTex, 0.0095f, Manager->ParticleEngine->ParticleBatches.at(0));
+						EG::Particle2D::AddParticle(EM::Vec3(Position->x + Diff.x, Position->y + Diff.y, 0.0f), EM::Vec3(Vel.x, Vel.y, Vel.z), 
+							EM::Vec2(Size.x, Size.y), C, PTex, 0.015f, Manager->ParticleEngine->ParticleBatches.at(0));
 					}
 				}
 
@@ -215,9 +215,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 
 				*GroundPosition = Enjon::Math::CartesianToIso(Transform->CartesianPosition);
 				Position->y = GroundPosition->y + Position->z - GPO->y;
-				// Position->y = GroundPosition->y + Position->z;
 				Position->x = GroundPosition->x - GPO->x;
-				// Position->x = GroundPosition->x - Transform->Dimensions.x / 2.0f + TileWidth;
 
 				// Set up AABB
 				Enjon::Physics::AABB* AABB = &Manager->TransformSystem->Transforms[e].AABB;

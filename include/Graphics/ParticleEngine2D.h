@@ -2,6 +2,7 @@
 #define PARTICLE_ENGINE_2D_H
 
 #include <vector>
+#include <iostream>
 
 #include "Graphics/Color.h"
 #include "Graphics/Camera2D.h"
@@ -12,7 +13,7 @@
 #include "Math/Maths.h"
 #include "Defines.h"
 
-const int MAXPARTICLES = 10000;
+const int MAXPARTICLES = 8000;
 
 namespace Enjon { namespace Graphics { namespace Particle2D { 
 
@@ -35,7 +36,8 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		/* Updates the particle batch */
 		uint32 Update();
 
-		Particle Particles[MAXPARTICLES];
+		std::vector<Particle> Particles;
+		// Particle Particles[MAXPARTICLES];
 		uint32 NextAvailableParticle;
 		Graphics::SpriteBatch* SB;
 	} ParticleBatch2D;

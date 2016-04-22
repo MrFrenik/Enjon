@@ -30,6 +30,7 @@ GamePlay:
 Systems: 
 	- General:
 		- Separate characters into layers: head gear, armor, legs, weapons, etc.
+		- Vortex is created every frame that the right click is held. 
 
 	- Effects:
 		- √ Develop particle engine

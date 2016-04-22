@@ -39,7 +39,8 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 			Position->y += Velocity->y + Velocity->z;
 
 			// Decay particle alpha over time
-			p.Color.a -= p.DecayRate * 0.5f;
+			// p.Color.a -= p.DecayRate * 0.5f;
+			p.Color.a *= *LT;
 		}
 
 		return 1;
@@ -69,6 +70,11 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 	ParticleBatch2D* NewParticleBatch(SpriteBatch* SB)
 	{
 		ParticleBatch2D* PB = new ParticleBatch2D();
+		// PB->Particles.reserve(MAXPARTICLES);
+		for (auto i = 0; i < MAXPARTICLES; i++)
+		{
+			PB->Particles.push_back(Particle{});
+		}
 		assert(PB);
 		PB->SB = SB;
 		return PB;		
@@ -94,8 +100,10 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		// Get next available index in particles
 		uint32 i = FindNextAvailableParticle(PB);
 
+		if (i >= MAXPARTICLES) return MAXPARTICLES;
+
 		// Place back in Particles
-		auto* p = &PB->Particles[i];
+		auto p = &PB->Particles.at(i);
 		p->Position = P;
 		p->Velocity = V;
 		p->Dimensions = D;
@@ -110,31 +118,33 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 	/* Finds next available particle in particle batch */
 	uint32 FindNextAvailableParticle(ParticleBatch2D* PB)
 	{
-		uint32* NAP = &PB->NextAvailableParticle;
+		uint32 NAP = PB->NextAvailableParticle;
 
 		// Loop from next available to max
-		for (uint32 i = *NAP; i < MAXPARTICLES; i++)
+		for (uint32 i = NAP; i < MAXPARTICLES; ++i)
 		{
-			if (PB->Particles[i].LifeTime <= 0.0f)
+			if (PB->Particles.at(i).LifeTime <= 0.0f)
 			{
-				*NAP = i;
+				PB->NextAvailableParticle = i;
 				return i;
 			} 
 		}
 
+		if (NAP - 1 >= MAXPARTICLES) NAP = MAXPARTICLES - 1;
+		
 		// Loop from beginning to next available - 1
-		for (uint32 i = 0; i < *NAP - 1; i++)	
+		for (uint32 i = 0; i < NAP - 1; i++)	
 		{
-			if (PB->Particles[i].LifeTime <= 0.0f)
+			if (PB->Particles.at(i).LifeTime <= 0.0f)
 			{
-				*NAP = i;
+				PB->NextAvailableParticle = i;
 				return i;
 			}
 		}
 
-		// Otherwise, loop back arounda
-		*NAP = 0; 
-		return *NAP;
+		// Otherwise, loop back around
+		PB->NextAvailableParticle = 0; 
+		return MAXPARTICLES;
 	}	
 
 	/* Frees memory of given particle engine */
@@ -163,21 +173,21 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		if (Camera == nullptr) Utils::FatalError("PARTICLE_ENGINE::DRAW::Camera is null.");
 
 		// Loop through all particle batches in engine
-		for (auto PB : PE->ParticleBatches)
+		for (auto& PB : PE->ParticleBatches)
 		{
 			// Loop through all particles in PB
-			for (uint32 i = 0; i < MAXPARTICLES; i++)
+			for (auto& P : PB->Particles)
 			{
 				// Get particle at i
-				auto* P = &PB->Particles[i];
+				// auto* P = &PB->Particles.at(i);
 
-				if (Camera->IsBoundBoxInCamView(P->Position.XY(), P->Dimensions))
+				if (Camera->IsBoundBoxInCamView(P.Position.XY(), P.Dimensions))
 				{
 					// Only draw if alive
-					if (P->LifeTime > 0.0f && P->Color.a > 0.0f)
+					if (P.LifeTime > 0.0f && P.Color.a > 0.0f)
 					{
 						// Add particle to sprite batch to be rendered
-						PB->SB->Add(Math::Vec4(P->Position.XY(), P->Dimensions), Math::Vec4(0, 0, 1, 1), P->TexID, P->Color, P->Position.y - P->Position.z);
+						PB->SB->Add(Math::Vec4(P.Position.XY(), P.Dimensions), Math::Vec4(0, 0, 1, 1), P.TexID, P.Color, P.Position.y - P.Position.z);
 					}
 				}
 			}

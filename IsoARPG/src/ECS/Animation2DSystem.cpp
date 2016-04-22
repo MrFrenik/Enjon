@@ -250,14 +250,14 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 								if (CurrentWeapon == Weapons::BOW && ActiveFrame == *BeginningFrame + 3)
 								{
-									for (auto i = 0; i < 1; i++)
+									for (auto i = 0; i < 10; i++)
 									{
 										// Create an arrow projectile entity for now...
 										static Enjon::Graphics::SpriteSheet ItemSheet;
 										static float t = 0.0f;
 										t += 0.1f;
 
-										auto C = Enjon::Graphics::RGBA16(0.0f, 20.0f, 100.0f, 100.0f);
+										auto C = Enjon::Graphics::RGBA16(100.0f, 0.0f, 0.0f, 100.0f);
 										// C.r += 2.0f;
 										if (!ItemSheet.IsInit()) ItemSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png"), Enjon::Math::iVec2(1, 1));
 										eid32 id = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Position->x + 60.0f, Position->y + 40.0f, 50.0f),
@@ -295,7 +295,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 										auto RY = sin(t) * Enjon::Random::Roll(-10, 2) / 100.0f;
 										ArrowVelocity = Enjon::Math::CartesianToIso(ArrowVelocity);
 
-										float speed = 200.0f;
+										float speed = 60.0f;
 
 										// // Fire in direction of mouse
 										Manager->TransformSystem->Transforms[id].VelocityGoal = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);

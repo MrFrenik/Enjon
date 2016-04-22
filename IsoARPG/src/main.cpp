@@ -22,8 +22,8 @@
 */
 
 #if 1
-#define FULLSCREENMODE   0
-#define SECOND_DISPLAY   0
+#define FULLSCREENMODE   1
+#define SECOND_DISPLAY   1
 
 #if FULLSCREENMODE
 	#if SECOND_DISPLAY
@@ -361,7 +361,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 5;
+	static uint32 AmountDrawn = 50;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -1263,7 +1263,7 @@ int main(int argc, char** argv)
 				// Set uniforms
 				glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
 							 SCREENWIDTH, SCREENHEIGHT);
-				glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.3f);
+				glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.8f);
 				glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
 
 				glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
