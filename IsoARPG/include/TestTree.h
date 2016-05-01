@@ -22,8 +22,8 @@ inline BT::BehaviorTree* TestTree()
 {
 	BT::BehaviorTree* BT = new BT::BehaviorTree();
 
-	BT::Repeater* REP = new BT::Repeater(BT);
 	BT::Sequence* SEQ = new BT::Sequence(BT);
+	BT::Sequence* SEQ2 = new BT::Sequence(BT);
 
 	BT::SimpleTask* ST1 = new BT::SimpleTask(BT, [](BT::BehaviorTree* BT)
 										   {
@@ -167,7 +167,7 @@ inline BT::BehaviorTree* TestTree()
 														auto RY = sin(t) * Enjon::Random::Roll(-10, 2) / 100.0f;
 														ArrowVelocity = Enjon::Math::CartesianToIso(ArrowVelocity);
 
-														float speed = 30.0f;
+														float speed = 20.0f;
 
 														// // Fire in direction of mouse
 														Manager->TransformSystem->Transforms[id].VelocityGoal = speed * Enjon::Math::Vec3(ArrowVelocity.x + RX, ArrowVelocity.y + RY, 0.0f);
@@ -184,15 +184,15 @@ inline BT::BehaviorTree* TestTree()
 
 	// Build tree
 	BT->SetRoot(SEQ);
-		// REP->AddChild(SEQ);
-			SEQ->AddChild(ST1);
-			SEQ->AddChild(ST2);
-			SEQ->AddChild(RWBBR);
-				RWBBR->AddChild(BBW);
-					BBW->AddChild(INV);
-						INV->AddChild(CT);
-			SEQ->AddChild(W);
-			SEQ->AddChild(Shoot);
+		SEQ->AddChild(ST1);
+		SEQ->AddChild(ST2);
+		SEQ->AddChild(RWBBR);
+			RWBBR->AddChild(BBW);
+				BBW->AddChild(INV);
+					INV->AddChild(CT);
+		SEQ->AddChild(SEQ2);
+			SEQ2->AddChild(W);
+			SEQ2->AddChild(Shoot);
 	BT->End();
 
 	return BT;

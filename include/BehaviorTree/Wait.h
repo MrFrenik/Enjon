@@ -118,10 +118,8 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				// auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
 				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 				auto SS = &SO->GetData()->States;
-				// auto Clock = static_cast<BlackBoardComponent<Timer*>*>(BTree->GetBlackBoard()->GetComponent("Timer"))->GetData();
 				auto Clock = BTree->GetBlackBoard()->GetComponent<Timer*>("Timer")->GetData();
 
 				if (SS->at(this->TreeIndex) != BehaviorNodeState::RUNNING)
@@ -135,14 +133,12 @@ namespace BT
 				{
 					SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
 					State = BehaviorNodeState::SUCCESS;
-					// std::cout << "Done Waiting!" << std::endl;
 					return BehaviorNodeState::SUCCESS;
 				}
 
 				else
 				{
 					float D = Clock->Time - Clock->CurrentTime; 
-					// std::cout << D << " more to go." << std::endl;
 					SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
 					return BehaviorNodeState::RUNNING;
 				}
@@ -154,10 +150,8 @@ namespace BT
 			inline void Reset()
 			{
 				// Get State Object from BlackBoard
-				// auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
 				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
 				auto SS = &SO->GetData()->States;
-				// auto Clock = static_cast<BlackBoardComponent<Timer*>*>(BTree->GetBlackBoard()->GetComponent("Timer"))->GetData();
 				auto Clock = BTree->GetBlackBoard()->GetComponent<Timer*>("Timer")->GetData();
 
 				SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;

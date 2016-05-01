@@ -361,7 +361,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 50;
+	static uint32 AmountDrawn = 5;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -379,7 +379,10 @@ int main(int argc, char** argv)
 
 	// Create Sword
 	eid32 Sword = Factory::CreateWeapon(World, World->TransformSystem->Transforms[Player].Position, Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, 
-												(Masks::Type::WEAPON | Masks::GeneralOptions::EQUIPPED | Masks::GeneralOptions::PICKED_UP), Component::EntityType::WEAPON, "Weapon");
+												(Masks::Type::WEAPON | 
+												 Masks::WeaponOptions::MELEE | 
+												 Masks::GeneralOptions::EQUIPPED | 
+												 Masks::GeneralOptions::PICKED_UP), Component::EntityType::WEAPON, "Weapon");
 
 	// Create Bow
 	eid32 Bow = Factory::CreateWeapon(World, World->TransformSystem->Transforms[Player].Position, Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, 

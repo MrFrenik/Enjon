@@ -127,8 +127,12 @@ namespace ECS{ namespace Systems { namespace Collision {
 																				  else 												CollideWithVortex(Manager, e, collider); 		
 																				  continue; 
 																				} 
-						if (Mask == (COLLISION_PROJECTILE | COLLISION_EXPLOSIVE))	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithDebris(Manager, collider, e);
+						if (Mask == (COLLISION_PROJECTILE | COLLISION_EXPLOSIVE)){ if (AType == Component::EntityType::PROJECTILE) 	CollideWithDebris(Manager, collider, e);
 																				  else 													CollideWithDebris(Manager, e, collider); 		
+																				  continue; 
+																				} 
+						if (Mask == (COLLISION_PROJECTILE | COLLISION_WEAPON))	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithDebris(Manager, collider, e);
+																				  else 												CollideWithDebris(Manager, e, collider); 		
 																				  continue; 
 																				} 
 						if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
@@ -574,6 +578,33 @@ namespace ECS{ namespace Systems { namespace Collision {
 					Manager->TransformSystem->Transforms[A_ID].Angle = EM::ToRadians(a);
 
 				}
+			}
+			else if (Manager->AttributeSystem->Masks[B_ID] & Masks::WeaponOptions::MELEE)
+			{
+				V2 Direction = *A - *B;
+				Direction.x += ER::Roll(-10, 10);
+				Direction.y += ER::Roll(-10, 10);
+				Direction = EM::Vec2::Normalize(Direction);
+				if (Direction.x == 0) Direction.x = (float)ER::Roll(-100, 100) / 100.0f;
+				if (Direction.y == 0) Direction.y = (float)ER::Roll(-100, 100) / 100.0f;
+				float Length = Direction.Length();
+				float Impulse = 25.0f / (Length + 0.001f);
+
+				*EntityVelocity = (1.0f / AMass) * -Impulse * EM::Vec3(EM::CartesianToIso(Direction), EntityVelocity->z);
+
+				if (Manager->AttributeSystem->Masks[A_ID] & Masks::WeaponOptions::PROJECTILE)
+				{
+					*EntityVelocity = *EntityVelocity * 2.0f;
+					Manager->TransformSystem->Transforms[A_ID].VelocityGoal = *EntityVelocity;
+
+					EM::Vec2 R(1,0);
+					float a = acos(Direction.DotProduct(R)) * 180.0f / M_PI;
+					if (Direction.y < 0) a *= -1;
+
+					Manager->TransformSystem->Transforms[A_ID].Angle = EM::ToRadians(a);
+
+				}
+
 			}
 			else if (Manager->AttributeSystem->Masks[B_ID] & Masks::GeneralOptions::DEBRIS && 
 					 Manager->AttributeSystem->Masks[A_ID] & Masks::GeneralOptions::DEBRIS)
