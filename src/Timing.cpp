@@ -38,20 +38,20 @@ namespace Enjon { namespace Utils {
 			Uint32 frameTicks = SDL_GetTicks() - m_startTicks; 
 
 			//TODO:: Implement this using time-steps
-			if (m_FPS > m_maxFPS + 5.0f) second = SECOND * 2.0f;
+			if (m_FPS > m_maxFPS + 10.0f) second = SECOND * 2.0f;
 			else if (m_FPS < m_maxFPS - 10.0f) second = SECOND / 2.0f;
 			else second = SECOND; 
-			
-			if (second / m_maxFPS > frameTicks)
-			{
-				SDL_Delay(Uint32(second / m_maxFPS - frameTicks));
-			} 
+
+			// if (second / m_maxFPS > frameTicks)
+			// {
+			// 	SDL_Delay(Uint32(second / m_maxFPS - frameTicks));
+			// } 
 						
 			//Limit the FPS to maxFPS
-			// if (SECOND / m_maxFPS > frameTicks)
-			// {
-			// 	SDL_Delay(Uint32(SECOND / m_maxFPS - frameTicks));
-			// } 
+			if (SECOND / m_maxFPS > frameTicks)
+			{
+				SDL_Delay(Uint32(SECOND / m_maxFPS - frameTicks));
+			} 
 			
 
 			//return FPS
@@ -60,7 +60,7 @@ namespace Enjon { namespace Utils {
 
 		void FPSLimiter::CalculateFPS()
 		{ 
-			static const int NUM_SAMPLES = 10;
+			static const int NUM_SAMPLES = 20;
 			static Uint32 frameTimes[NUM_SAMPLES];
 			static int currentFrame = 0;
 

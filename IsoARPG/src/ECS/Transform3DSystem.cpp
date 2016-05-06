@@ -44,6 +44,15 @@ namespace ECS{ namespace Systems { namespace Transform {
 
 				if (PGP->DistanceTo(*GP) >= 5000) continue; // TODO(John): Make this squared distance so as to not use a square root function EVERY frame for EVERY entity
 
+
+				// Use these same entities for targets if player
+					// printf("size: %d\n", Entities.size());
+				std::vector<eid32>* Targets = &Manager->PlayerControllerSystem->Targets;
+				if (Manager->Masks[e] & COMPONENT_AICONTROLLER)
+				{
+					if (PGP->DistanceTo(*GP) <= 1000) Targets->push_back(e);	
+				}
+
 				// If an item
 				
 				if ((Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0)

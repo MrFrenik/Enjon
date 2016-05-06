@@ -23,7 +23,7 @@
 
 #if 1
 #define FULLSCREENMODE   1
-#define SECOND_DISPLAY   1
+#define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
 	#if SECOND_DISPLAY
@@ -100,7 +100,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 
-const int LEVELSIZE = 10;
+const int LEVELSIZE = 20;
 
 float DashingCounter = 0.0f;
 
@@ -361,12 +361,22 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 5;
-	for (int e = 0; e < AmountDrawn; e++)
+	static uint32 AmountDrawn = 20;
+	// for (int e = 0; e < AmountDrawn; e++)
+	// {
+	// 	float height = 10.0f;
+	// 	eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
+	// 															enemydims, &EnemySheet, "Enemy", 0.05f); 
+	// 	World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
+	// }
+
+	// Create random dude to see what he looks like
 	{
-		float height = 10.0f;
+		float height = 0.0f;
+		float h = 300.0f;
+		float w = h * 0.707f;
 		eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
-																enemydims, &EnemySheet, "Enemy", 0.05f); 
+																EM::Vec2(w, h), EG::SpriteSheetManager::GetSpriteSheet("Dude"), "Enemy", 0.05f); 
 		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
 	}
 
@@ -397,7 +407,7 @@ int main(int argc, char** argv)
 	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 333;
+	AmountDrawn = 5000;
 
 	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
@@ -711,7 +721,7 @@ int main(int argc, char** argv)
 			// If AI
 			if (Mask & COMPONENT_AICONTROLLER)
 			{
-				EntityBatch.Add(Math::Vec4(*EntityPosition, *EDims), uv, beast.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
+				EntityBatch.Add(Math::Vec4(*EntityPosition, *EDims), uv, ESpriteSheet->texture.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
 				Graphics::Fonts::PrintText(EntityPosition->x + 100.0f, EntityPosition->y + 220.0f, 0.4f, std::to_string(e), Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
 															Graphics::SetOpacity(Graphics::RGBA16_Green(), 0.8f));
 				// If target

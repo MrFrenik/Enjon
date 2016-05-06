@@ -107,7 +107,7 @@
 			"file": "src/ECS/Transform3DSystem.cpp",
 			"settings":
 			{
-				"buffer_size": 15034,
+				"buffer_size": 15340,
 				"line_ending": "Windows"
 			}
 		},
@@ -131,7 +131,7 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 83084,
+				"buffer_size": 83086,
 				"line_ending": "Windows"
 			}
 		},
@@ -155,7 +155,7 @@
 			"file": "/E/Development/Enjon/src/ImageLoader.cpp",
 			"settings":
 			{
-				"buffer_size": 1916,
+				"buffer_size": 1928,
 				"line_ending": "Windows"
 			}
 		},
@@ -171,7 +171,7 @@
 			"file": "src/ECS/CollisionSystem.cpp",
 			"settings":
 			{
-				"buffer_size": 36360,
+				"buffer_size": 36396,
 				"line_ending": "Windows"
 			}
 		},
@@ -443,6 +443,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"NEAREST",
+			"target",
 			"LINEAR",
 			"NEAREST",
 			"*NAP",
@@ -568,9 +570,7 @@
 			"1000",
 			"getlights",
 			"quadratic",
-			"drawblood",
-			"render",
-			"L.at"
+			"drawblood"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -588,7 +588,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 8,
 			"sheets":
 			[
 				{
@@ -604,8 +604,8 @@
 						"selection":
 						[
 							[
-								8351,
-								8351
+								7328,
+								7328
 							]
 						],
 						"settings":
@@ -665,10 +665,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 2077.0,
+						"translation.y": 1143.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
@@ -697,7 +697,7 @@
 						"translation.y": 1868.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
@@ -706,15 +706,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 15034,
+						"buffer_size": 15340,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								8121,
-								8121
+								3206,
+								3206
 							]
 						],
 						"settings":
@@ -773,10 +773,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 2317.0,
+						"translation.y": 720.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -933,7 +933,7 @@
 						"translation.y": 3082.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
@@ -942,15 +942,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 83084,
+						"buffer_size": 83086,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								11639,
-								11639
+								11920,
+								11920
 							]
 						],
 						"settings":
@@ -1009,10 +1009,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 5389.0,
+						"translation.y": 5302.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -1037,11 +1037,11 @@
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
-						"translation.x": -0.0,
+						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 10,
 					"type": "text"
 				},
 				{
@@ -1066,11 +1066,11 @@
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
-						"translation.x": -0.0,
-						"translation.y": 1890.0,
+						"translation.x": 0.0,
+						"translation.y": 1317.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
@@ -1079,15 +1079,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1916,
+						"buffer_size": 1928,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1289,
-								1289
+								1370,
+								1370
 							]
 						],
 						"settings":
@@ -1095,11 +1095,11 @@
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
-						"translation.x": -0.0,
+						"translation.x": 0.0,
 						"translation.y": 90.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
@@ -1115,8 +1115,8 @@
 						"selection":
 						[
 							[
-								7585,
-								7585
+								7594,
+								7594
 							]
 						],
 						"settings":
@@ -1178,7 +1178,7 @@
 						"translation.y": 2366.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
@@ -1187,15 +1187,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 36360,
+						"buffer_size": 36396,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								25279,
-								25279
+								2944,
+								2944
 							]
 						],
 						"settings":
@@ -1254,10 +1254,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 8377.0,
+						"translation.y": 614.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
@@ -1333,10 +1333,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1622.0,
+						"translation.y": 2612.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{

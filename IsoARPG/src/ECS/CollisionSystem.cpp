@@ -71,18 +71,18 @@ namespace ECS{ namespace Systems { namespace Collision {
 			std::vector<eid32> Entities = SpatialHash::FindCell(Manager->Grid, e, &Manager->TransformSystem->Transforms[e].AABB);
 
 			// Use these same entities for targets if player
-			if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
-			{
-				// printf("size: %d\n", Entities.size());
-				std::vector<eid32>* Targets = &Manager->PlayerControllerSystem->Targets;
-				for (eid32 it = 0; it < Entities.size(); it++)
-				{
-					if (Manager->Masks[Entities[it]] & COMPONENT_AICONTROLLER)
-					{
-						Targets->push_back(Entities[it]);	
-					}
-				}
-			}
+			// if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
+			// {
+			// 	// printf("size: %d\n", Entities.size());
+			// 	std::vector<eid32>* Targets = &Manager->PlayerControllerSystem->Targets;
+			// 	for (eid32 it = 0; it < Entities.size(); it++)
+			// 	{
+			// 		if (Manager->Masks[Entities[it]] & COMPONENT_AICONTROLLER)
+			// 		{
+			// 			Targets->push_back(Entities[it]);	
+			// 		}
+			// 	}
+			// }
 
 			// TODO(John): Keep a mapping of already checked pairs to cut this time down
 		

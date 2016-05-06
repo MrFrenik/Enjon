@@ -18,6 +18,7 @@ namespace Enjon { namespace Graphics { namespace SpriteSheetManager {
 		AddSpriteSheet(Sheets, std::string("ForceField1"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/forcefield2.png"), Enjon::Math::iVec2(1, 1));
 		AddSpriteSheet(Sheets, std::string("ForceField2"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/forcefield3.png"), Enjon::Math::iVec2(1, 1));
 		AddSpriteSheet(Sheets, std::string("ForceField3"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/forcefield4.png"), Enjon::Math::iVec2(1, 1));
+		AddSpriteSheet(Sheets, std::string("Dude"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/dude.png"), Enjon::Math::iVec2(1, 1));
 	}
 
 	/* Add spritesheets to the spritesheetmanager */
