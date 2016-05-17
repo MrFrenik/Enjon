@@ -1,4 +1,5 @@
 #include "Graphics/SpriteSheetManager.h"
+#include <iostream>
 
 namespace Enjon { namespace Graphics { namespace SpriteSheetManager {
 
@@ -19,6 +20,7 @@ namespace Enjon { namespace Graphics { namespace SpriteSheetManager {
 		AddSpriteSheet(Sheets, std::string("ForceField2"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/forcefield3.png"), Enjon::Math::iVec2(1, 1));
 		AddSpriteSheet(Sheets, std::string("ForceField3"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/forcefield4.png"), Enjon::Math::iVec2(1, 1));
 		AddSpriteSheet(Sheets, std::string("Dude"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/dude.png"), Enjon::Math::iVec2(1, 1));
+		AddSpriteSheet(Sheets, std::string("Enemy"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/enemy.png"), Enjon::Math::iVec2(1, 1));
 	}
 
 	/* Add spritesheets to the spritesheetmanager */
@@ -41,7 +43,7 @@ namespace Enjon { namespace Graphics { namespace SpriteSheetManager {
 		auto it = Sheets.find(N);
 		if (it != Sheets.end()) return &it->second;
 		else return nullptr;
-		printf("Not found!");
+		std::cout << N << "not found!" << std::endl;
 	}
 
 }}}

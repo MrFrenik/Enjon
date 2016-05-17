@@ -21,8 +21,8 @@
 * MAIN GAME
 */
 
-#if 1
-#define FULLSCREENMODE   1
+#if 0
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -59,7 +59,7 @@
 #include <Loot.h>
 
 /*-- IsoARPG includes --*/
-#include "Animation.h"
+#include "EnjonAnimation.h"
 #include "AnimationManager.h"
 #include "SpatialHash.h"
 #include "Level.h"
@@ -362,13 +362,13 @@ int main(int argc, char** argv)
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
 	static uint32 AmountDrawn = 20;
-	// for (int e = 0; e < AmountDrawn; e++)
-	// {
-	// 	float height = 10.0f;
-	// 	eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
-	// 															enemydims, &EnemySheet, "Enemy", 0.05f); 
-	// 	World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
-	// }
+	for (int e = 0; e < AmountDrawn; e++)
+	{
+		float height = 10.0f;
+		eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
+																enemydims, &EnemySheet, "Enemy", 0.05f); 
+		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
+	}
 
 	// Create random dude to see what he looks like
 	{
@@ -376,7 +376,7 @@ int main(int argc, char** argv)
 		float h = 300.0f;
 		float w = h * 0.707f;
 		eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
-																EM::Vec2(w, h), EG::SpriteSheetManager::GetSpriteSheet("Dude"), "Enemy", 0.05f); 
+																EM::Vec2(w, h), EG::SpriteSheetManager::GetSpriteSheet("Enemy"), "Enemy", 0.05f); 
 		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
 	}
 
@@ -584,7 +584,7 @@ int main(int argc, char** argv)
 			World->PlayerControllerSystem->Targets.clear();
 
 			// Draw some random assed fire
-			// EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
+			EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 	
 			TileOverlayRunTime = SDL_GetTicks() - StartTicks;		
 			StartTicks = SDL_GetTicks();
@@ -630,13 +630,11 @@ int main(int argc, char** argv)
 			World->ParticleEngine->Update();
 		
 			PlayerController::Update(World->PlayerControllerSystem);
-	
-
 		}
-
 
 		// Check for input
 		ProcessInput(&Input, &Camera, World, Player); 
+
 
 		//LERP camera to center of player position
 		static Math::Vec2 m_velocity;
@@ -1634,7 +1632,7 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 *  UNIT TESTS
 */
 
-#if 0
+#if 1
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -1656,6 +1654,7 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 
 /*-- External/Engine Libraries includes --*/
 #include <Enjon.h>
+#include <sajson/sajson.h>
 
 /*-- Entity Component System includes --*/
 #include <ECS/ComponentSystems.h>
@@ -1673,7 +1672,7 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 #include <Loot.h>
 
 /*-- IsoARPG includes --*/
-#include "Animation.h"
+#include "EnjonAnimation.h"
 #include "AnimationManager.h"
 #include "SpatialHash.h"
 #include "Level.h"
@@ -1684,26 +1683,30 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 #include <time.h>
 #include <stdlib.h>
 
-const int NUM_LIGHTS  	= 100;
-const int LEVELSIZE 	= 100;
+using namespace ECS;
+using namespace Systems;
+using namespace spine;
 
 typedef struct
 {
-	EM::Vec3 Position;
-	EG::ColorRGBA16 Color;
-	float Radius;
-	EM::Vec3 Falloff;
-} Light;
+	EM::Vec4 Dims;
+	EM::Vec2 SourceSize;
+} ImageFrame;
+
+typedef struct 
+{
+	EM::Vec2 AtlasSize;
+	EG::GLTexture Texture;	
+} Atlas;
 
 /* Function Declarations */
 bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera);
-void LevelInit(EG::SpriteBatch* Batch, EG::SpriteBatch* NormalsBatch, EG::SpriteBatch* DepthBatch, GLuint BrickDiffuseTex, GLuint BrickNormalsTex);
-void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Light*>& LightsToDraw);
+ImageFrame GetImageFrame(const sajson::value& Frame, const std::string Name);
+void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch);
 
-float LightZ = 0.02f;
 
-using namespace ECS;
-using namespace Systems;
+const std::string TextureDir("../IsoARPG/Assets/Textures/");
+
 
 #undef main
 int main(int argc, char** argv) {
@@ -1719,10 +1722,7 @@ int main(int argc, char** argv) {
 	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
 
 	EU::FPSLimiter Limiter;
-	Limiter.Init(60);	
-
-	// Init AnimationManager
-	AnimationManager::Init(); 
+	Limiter.Init(60);
 
 	// Init ShaderManager
 	EG::ShaderManager::Init(); 
@@ -1731,52 +1731,17 @@ int main(int argc, char** argv) {
 	EG::FontManager::Init();
 
 	// Shader for frame buffer
-	EG::GLSLProgram* FBS 	= EG::ShaderManager::GetShader("DiffuseShader");
-	EG::GLSLProgram* NS 	= EG::ShaderManager::GetShader("NormalsShader"); 	
-	EG::GLSLProgram* SS 	= EG::ShaderManager::GetShader("DeferredShader");
-	EG::GLSLProgram* TS 	= EG::ShaderManager::GetShader("Text");
-	EG::GLSLProgram* DS 	= EG::ShaderManager::GetShader("NoCameraProjection");
-
-	// Create FBO
-	const int W = SCREENWIDTH;
-	const int H = SCREENHEIGHT;
-	EG::FrameBufferObject* FBO = new EG::FrameBufferObject(W, H);
-	EG::FrameBufferObject* NFBO = new EG::FrameBufferObject(W, H);
-	EG::FrameBufferObject* DFBO = new EG::FrameBufferObject(W, H);
-
-	// Deferred Renderer
-	EG::DeferredRenderer* DF = new EG::DeferredRenderer(SCREENWIDTH, SCREENHEIGHT, FBO, EG::ShaderManager::GetShader("DeferredShader"));
-
-	// Sprite batch
-	EG::SpriteBatch* Batch = new EG::SpriteBatch();
-	Batch->Init();
-
-	// Normals batch
-	EG::SpriteBatch* NormalsBatch = new EG::SpriteBatch();
-	NormalsBatch->Init();
-
-	// Normals batch
-	EG::SpriteBatch* DepthBatch = new EG::SpriteBatch();
-	DepthBatch->Init();
-
-	// Cube batch
-	EG::SpriteBatch* CubeBatch = new EG::SpriteBatch();
-	CubeBatch->Init();
-
-	// Deferred batch
-	EG::SpriteBatch* DeferredBatch = new EG::SpriteBatch();
-	DeferredBatch->Init();
+	EG::GLSLProgram* TS 	= EG::ShaderManager::GetShader("Basic");
 
 	// UI Batch
 	EG::SpriteBatch* UIBatch = new EG::SpriteBatch();
 	UIBatch->Init();
 
-	// Create EntityBatch
-	Enjon::Graphics::SpriteBatch* EntityBatch = new EG::SpriteBatch();
+	EG::SpriteBatch* EntityBatch = new EG::SpriteBatch();
 	EntityBatch->Init();
 
-	EG::SpriteBatch* TileBatch = new EG::SpriteBatch();
-	TileBatch->Init();
+	const float W = SCREENWIDTH;
+	const float H = SCREENHEIGHT;
 
 	// Create Camera
 	EG::Camera2D* Camera = new EG::Camera2D;
@@ -1786,115 +1751,52 @@ int main(int argc, char** argv) {
 	EG::Camera2D* HUDCamera = new EG::Camera2D;
 	HUDCamera->Init(W, H);
 
-
-
 	// InputManager
 	EI::InputManager Input = EI::InputManager();
-
-	Level level;
-	level.Init(Camera->GetPosition().x, Camera->GetPosition().y, LEVELSIZE, LEVELSIZE);
-	
-	float x = Camera->GetPosition().x;
-	float y = Camera->GetPosition().y;
-
-	// Spatial Hash
-	SpatialHash::Grid grid;
-	SpatialHash::Init(&grid, level.GetWidth(), level.GetWidth());
-
-
-	// Create particle batchs to be used by World
-	EG::Particle2D::ParticleBatch2D* ParticleBatch = EG::Particle2D::NewParticleBatch(EntityBatch);
-
-	// Vector of lights
-	std::vector<Light> Lights;
-
-	const GLfloat constant = 1.0f; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)
-    const GLfloat linear = 1.0f;
-    const GLfloat quadratic = 100.0f;
-    // Then calculate radius of light volume/sphere
-    const GLfloat maxBrightness = std::fmaxf(std::fmaxf(0.8f, 0.3f), 0.3f);  // max(max(lightcolor.r, lightcolor.g), lightcolor.b)
-    GLfloat Radius = (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2 * quadratic);
-
-	for (GLuint i = 0; i < NUM_LIGHTS; i++)
-	{
-		Light L = {
-					  EM::Vec3(ER::Roll(0, 5000), ER::Roll(0, 5000), LightZ), 
-					  EG::RGBA16(ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, 1.0f), 
-					  Radius, 
-					  EM::Vec3(constant, linear, quadratic)
-				  };
-
-		Lights.push_back(L);
-	}
-
-	GLfloat quadVertices[] = {   // Vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-        // Positions   // TexCoords
-
-        -1.0f,  1.0f,  0.0f, 1.0f,   	// TL
-        -1.0f, -1.0f,  0.0f, 0.0f,   	// BL
-         1.0f, -1.0f,  1.0f, 0.0f,		// BR
-
-        -1.0f,  1.0f,  0.0f, 1.0f,		// TL
-         1.0f, -1.0f,  1.0f, 0.0f,		// BR
-         1.0f,  1.0f,  1.0f, 1.0f 		// TR
-    };
-
-    GLuint quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
-    glBindVertexArray(0);
 
 	// Matricies for shaders
 	EM::Mat4 Model, View, Projection;
 
-	GLuint BrickDiffuseTex 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png").id;
-	GLuint BrickNormalsTex 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png").id;
-	GLuint BGTex 			= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id;
-	GLuint CubeTex 			= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box.png").id;
+    using sajson::literal;
+    std::string json = EU::read_file(std::string(TextureDir + "TexturePackerTest/test.json").c_str());
+    const sajson::document& doc = sajson::parse(sajson::string(json.c_str(), json.length()));
 
-	// Spritesheet
-	EG::SpriteSheet* Sheet = new EG::SpriteSheet();
-	Sheet->Init(EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box_sheet.png"), EM::iVec2(2, 1));
+    if (!doc.is_valid())
+    {
+        std::cout << "Invalid json: " << doc.get_error_message() << std::endl;;
+    }
 
-	// Build level
-	LevelInit(Batch, NormalsBatch, DepthBatch, BrickDiffuseTex, BrickNormalsTex);
 
-	// Draw level
-	TileBatch->Begin();
-	level.DrawGroundTiles(*TileBatch);
-	TileBatch->End();
+    // Get root and length of json file
+    const auto& root = doc.get_root();
+    const auto len = root.get_length();
 
-	std::vector<Light*> LightsToDraw;
+    // Get handle to meta deta
+    const auto meta = root.find_object_key(literal("meta"));
+    assert(meta < len);
+    const auto& Meta = root.get_object_value(meta);
 
-	/////////////////
-	// Testing ECS //   
-	/////////////////
+    // Get handle to frame data
+    const auto frames = root.find_object_key(literal("frames"));
+    assert(frames < len);
+    const auto& Frames = root.get_object_value(frames);
 
-	// Create new EntityManager
-	auto World = ECS::Systems::EntitySystem::NewEntityManager(level.GetWidth(), level.GetWidth(), Camera, &level);
+    // Get image size
+    auto ISize = Meta.get_value_of_key(literal("size"));
+    float AWidth = ISize.get_value_of_key(literal("w")).get_safe_float_value();
+    float AHeight = ISize.get_value_of_key(literal("h")).get_safe_float_value();
 
-	// Init loot system
-	Loot::Init();
+    Atlas atlas = {	EM::Vec2(AWidth, AHeight), 
+    				EI::ResourceManager::GetTexture(std::string(TextureDir + "/TexturePackerTest/test.png"))
+    			  };
 
-	// Push back particle batchs into world
-	EG::Particle2D::AddParticleBatch(World->ParticleEngine, ParticleBatch);
-
-	// Create player
-	ECS::eid32 Player = ECS::Factory::CreatePlayer(World, &Input, EM::Vec3(EM::CartesianToIso(EM::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), EM::Vec2(100.0f, 100.0f), 
-														EG::SpriteSheetManager::GetSpriteSheet("PlayerSheet"), "Player", 0.4f, EM::Vec3(1, 1, 0));
-
-	// Set player for world
-	World->Player = Player;
-
-	// Set position to player
-	Camera->SetPosition(EM::Vec2(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, World->TransformSystem->Transforms[Player].Position.y)); 
+   	// Get frames
+	ImageFrame I_Box 		= GetImageFrame(Frames, "box");
+	ImageFrame I_Beast 		= GetImageFrame(Frames, "beast");
+	ImageFrame I_2G 		= GetImageFrame(Frames, "2g");
+	ImageFrame I_BoxDebris 	= GetImageFrame(Frames, "box_debris");
+	ImageFrame I_BlueButton = GetImageFrame(Frames, "bluebutton");
+	ImageFrame I_PixelTest 	= GetImageFrame(Frames, "pixelanimtest");
 
 	// Main loop
 	bool running = true;
@@ -1919,50 +1821,6 @@ int main(int argc, char** argv) {
     	View = Camera->GetCameraMatrix();
     	Projection = EM::Mat4::Identity();
 
-		// Clear lights
-		LightsToDraw.clear();
-
-    	// Process which lights to actually draw this frame
-    	GetLights(Camera, &Lights, LightsToDraw);
-
-		float W = 300.0f, H = 250.0f;
-
-		{
-			// Check whether or not overlays are dirty and then reset overlay batch if needed
-			if (World->Lvl->GetOverlaysDirty())
-			{
-				// OverlayBatch.Begin();
-				// World->Lvl->DrawTileOverlays(OverlayBatch);
-				// OverlayBatch.End();
-			}
-	
-			SpatialHash::ClearCells(World->Grid);
-			AIController::Update(World->AIControllerSystem, Player);
-			Animation2D::Update(World);
-			Transform::Update(World->TransformSystem, ParticleBatch);
-			Collision::Update(World);
-			Effect::Update(World);
-			Renderer2D::Update(World);
-
-			// Updates the world's particle engine
-			World->ParticleEngine->Update();
-
-			PlayerController::Update(World->PlayerControllerSystem);
-	
-			// Clear entities from collision system vectors
-			World->CollisionSystem->Entities.clear();
-
-			// Clear entities from PlayerControllerSystem targets vector
-			World->PlayerControllerSystem->Targets.clear();
-		}
-
-		//LERP camera to center of player position
-		static EM::Vec2 CameraVelocity;
-		static float scale = 6.0f; 
-		CameraVelocity.x = EM::Lerp(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, Camera->GetPosition().x, 8.0f);
-		CameraVelocity.y = EM::Lerp(World->TransformSystem->Transforms[Player].Position.y, Camera->GetPosition().y, scale); 
-		Camera->SetPosition(CameraVelocity);
-
 		/////////////////////////////////
 		// RENDERING ////////////////////
 		/////////////////////////////////
@@ -1975,152 +1833,22 @@ int main(int argc, char** argv) {
 
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 1.0));
 
-		auto L = Lights.at(0);
-		auto LC = L.Color;
-		auto LightPosition = L.Position.XY();
-		CubeBatch->Begin();
-		CubeBatch->Add(
-			EM::Vec4(LightPosition.x + sin(t) * 100, (LightPosition.y + sin(t) * 200 - LightZ * 1000), 40, 40), 
-			EM::Vec4(0, 0, 1, 1), 
-			CubeTex, 
-			EG::RGBA16(LC.r, LC.g + 50, LC.b + 50, LC.a)
-			);
-		CubeBatch->End();
-
-    	// Bind FBO and render diffuse
-    	FBO->Bind();
-    	{
-    		FBS->Use();
-    		{
-		    	// Update uniforms
-		    	FBS->SetUniformMat4("model", Model);
-		    	FBS->SetUniformMat4("view", View);
-		    	FBS->SetUniformMat4("projection", Projection);
-
-		    	// Render
-		    	// Batch->RenderBatch();
-		    	CubeBatch->RenderBatch();
-		    	TileBatch->RenderBatch();
-    		}
-    		FBS->Unuse();
-    	}
-    	FBO->Unbind();
-
-		
-		// Bind NFBO and render normal
-	    NFBO->Bind();
-	    {
-	        NS->Use();
-	        {
-	        	// Update uniforms
-	        	NS->SetUniformMat4("model", Model);
-	        	NS->SetUniformMat4("view", View);
-	        	NS->SetUniformMat4("projection", Projection);
-
-	        	NormalsBatch->RenderBatch();
-	        }
-	        NS->Unuse();
-	     }
-	     NFBO->Unbind();
-
-		// Deferred Render
-		glDisable(GL_DEPTH_TEST);
-		glBlendFunc(GL_ONE, GL_ONE);
-		DFBO->Bind();
-		{
-			SS->Use();
-			{
-				static GLuint m_diffuseID 	= glGetUniformLocationARB(SS->GetProgramID(),"u_diffuse");
-				static GLuint m_normalsID  	= glGetUniformLocationARB(SS->GetProgramID(),"u_normals");
-				static GLuint m_positionID  = glGetUniformLocationARB(SS->GetProgramID(),"u_position");
-
-				EM::Vec2 MP = Input.GetMouseCoords();
-				Camera->ConvertScreenToWorld(MP);
-				EM::Vec3 CP = EM::Vec3(Camera->GetPosition() - EM::Vec2(-100.0f, 0.0f), 0.0);
-
-				// Bind diffuse
-				glActiveTexture(GL_TEXTURE0);
-				glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, FBO->GetDiffuseTexture());
-				glUniform1i(m_diffuseID, 0);
-
-				// Bind normals
-				glActiveTexture(GL_TEXTURE1);
-				glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, NFBO->GetNormalsTexture());
-				glUniform1i(m_normalsID, 1);
-
-				// Bind position
-				glActiveTexture(GL_TEXTURE2);
-				glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, FBO->GetPositionTexture());
-				glUniform1i(m_positionID, 2);
-
-				glUniform1i(glGetUniformLocation(SS->GetProgramID(), "NumberOfLights"), LightsToDraw.size());
-
-				for (GLuint i = 0; i < LightsToDraw.size(); i++)
-				{
-					auto L = LightsToDraw.at(i);
-
-					glUniform3f(glGetUniformLocation(SS->GetProgramID(), ("Lights[" + std::to_string(i) + "].Position").c_str()), L->Position.x + sin(t) * 100, L->Position.y + sin(t) * 200, L->Position.z + LightZ);
-					glUniform4f(glGetUniformLocation(SS->GetProgramID(), ("Lights[" + std::to_string(i) + "].Color").c_str()), L->Color.r, L->Color.g, L->Color.b, L->Color.a);
-					glUniform1f(glGetUniformLocation(SS->GetProgramID(), ("Lights[" + std::to_string(i) + "].Radius").c_str()), L->Radius);
-					glUniform3f(glGetUniformLocation(SS->GetProgramID(), ("Lights[" + std::to_string(i) + "].Falloff").c_str()), L->Falloff.x, L->Falloff.y, L->Falloff.z);
-				}
-
-				// Set uniforms
-				glUniform2f(glGetUniformLocation(SS->GetProgramID(), "Resolution"),
-							 SCREENWIDTH, SCREENHEIGHT);
-				glUniform4f(glGetUniformLocation(SS->GetProgramID(), "AmbientColor"), 1.0f, 1.0f, 1.0f, 1.0f);
-				glUniform3f(glGetUniformLocation(SS->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
-
-				glUniformMatrix4fv(glGetUniformLocation(SS->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
-												Camera->GetCameraMatrix().Invert().elements);
-				glUniformMatrix4fv(glGetUniformLocation(SS->GetProgramID(), "View"), 1, 0, 
-												Camera->GetCameraMatrix().elements);
-
-
-				// Render	
-				{
-					glBindVertexArray(quadVAO);
-					glDrawArrays(GL_TRIANGLES, 0, 6);
-					glBindVertexArray(0);
-
-					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, 0);
-				}
-			}
-			SS->Unuse();
-		}
-		DFBO->Unbind();
-
-		// Set blend function back to normalized
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		// Do any post processing here, of course...
-		// Bind default buffer and render deferred render texture
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		DS->Use();
-		{
-			DeferredBatch->Begin();
-			{
-				DeferredBatch->Add(
-					EM::Vec4(-1, -1, 2, 2),
-					EM::Vec4(0, 0, 1, 1), 
-					DFBO->GetDiffuseTexture()
-					);
-			}
-			DeferredBatch->End();
-			DeferredBatch->RenderBatch();
-		}
-		DS->Unuse();
-
-
 		// Basic shader for UI
 		TS->Use();
 		{
+			EntityBatch->Begin();
+			{
+				// Draw frames
+				DrawFrame(I_Box, 		EM::Vec2(0, -100), 		atlas, EntityBatch);
+				DrawFrame(I_Beast, 		EM::Vec2(20, 40), 		atlas, EntityBatch);
+				DrawFrame(I_BlueButton, EM::Vec2(100, 50), 		atlas, EntityBatch);
+				DrawFrame(I_2G, 		EM::Vec2(50, -200),		atlas, EntityBatch);
+				DrawFrame(I_BoxDebris, 	EM::Vec2(0, 200), 		atlas, EntityBatch);
+				DrawFrame(I_PixelTest, 	EM::Vec2(-200, -300),	atlas, EntityBatch);
+			}
+			EntityBatch->End();
+			EntityBatch->RenderBatch();
+
 			TS->SetUniformMat4("model", EM::Mat4::Identity());
 			TS->SetUniformMat4("projection", EM::Mat4::Identity());
 			TS->SetUniformMat4("view", HUDCamera->GetCameraMatrix());
@@ -2131,13 +1859,12 @@ int main(int argc, char** argv) {
 												EG::SetOpacity(EG::RGBA16_White(), 0.8f));
 				EG::Fonts::PrintText(HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 50.0f, HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 30.0f, 0.4f, std::to_string(FPS), EG::FontManager::GetFont(std::string("Bold")), *UIBatch, 
 												EG::SetOpacity(EG::RGBA16_White(), 0.8f));
+
 			}
 			UIBatch->End();
 			UIBatch->RenderBatch();
 		}
 		TS->Unuse();
-
-
 
 		Window.SwapBuffer();
 
@@ -2179,14 +1906,6 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	{
 		return false;	
 	}
-	if (Input->IsKeyDown(SDLK_UP))
-	{
-		LightZ -= 0.001f;
-	}
-	if (Input->IsKeyDown(SDLK_DOWN))
-	{
-		LightZ += 0.001f;
-	}
 	if (Input->IsKeyDown(SDLK_e))
 	{
 		auto S = Camera->GetScale();
@@ -2201,155 +1920,51 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	return true;
 }
 
-void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Light*>& LightsToDraw)
+ImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name)
 {
-	for (auto& L : *Lights)
-	{
-		auto P = L.Position.XY();
-		P.y *= -1;
-		auto R = L.Radius;
-		auto D = 2 * R;
-		EM::Vec2 dimensions(D, D);
+	using namespace sajson;
 
-		 
-		Enjon::Math::Vec2 scaledScreenDimensions = Enjon::Math::Vec2((float)SCREENWIDTH, (float)SCREENHEIGHT) / Camera->GetScale() * 4;
-		// const float TILE_RADIUS = (float)TILE_WIDTH / 2;
-		const float MIN_DISTANCE_X = dimensions.x / 2.0f + scaledScreenDimensions.x / 2.0f;
-		const float MIN_DISTANCE_Y = dimensions.y / 2.0f + scaledScreenDimensions.y / 2.0f;
+    // Get an image for testing
+    auto image = Frames.find_object_key(literal(Name.c_str()));
+    assert(image < Frames.get_length());
+    const auto& Image = Frames.get_object_value(image);
+   
+   	// Get sub objects 
+    const auto imageframe = Image.find_object_key(literal("frame"));
+    const auto& imageFrame = Image.get_object_value(imageframe);
+	const auto ss = Image.find_object_key(literal("sourceSize"));
+	const auto& SS = Image.get_object_value(ss);
 
-		//Center position of parameters passed in
-		Enjon::Math::Vec2 centerPos = P + dimensions / 2.0f;	
-		//Center position of camera
-		Enjon::Math::Vec2 centerCameraPos = Camera->GetPosition();
-		//Distance vector between two center positions
-		Enjon::Math::Vec2 distVec = centerPos - centerCameraPos;
+	// // frame information
+	float x = imageFrame.get_value_of_key(literal("x")).get_safe_float_value();
+	float y = imageFrame.get_value_of_key(literal("y")).get_safe_float_value();
+	float z = imageFrame.get_value_of_key(literal("w")).get_safe_float_value();
+	float w = imageFrame.get_value_of_key(literal("h")).get_safe_float_value();
 
-		float xDepth = MIN_DISTANCE_X - abs(distVec.x);
-		float yDepth = MIN_DISTANCE_Y - abs(distVec.y);
-		
-		if (xDepth > yDepth && yDepth > 0) LightsToDraw.push_back(&L);
-		
+	// // size information
+	EM::Vec2 SourceSize(SS.get_value_of_key(literal("w")).get_safe_float_value(), 
+						SS.get_value_of_key(literal("h")).get_safe_float_value());
 
-		// if (Camera->IsBoundBoxInCamView(P, EM::Vec2(D))) LightsToDraw.push_back(&L);
-	}
+	// Return frame
+	ImageFrame IF = {	EM::Vec4(x, y, z, w), 
+					  		SourceSize
+						};
+
+	// ImageFrame IF;
+	return IF;
 }
 
-void LevelInit(EG::SpriteBatch* Batch, EG::SpriteBatch* NormalsBatch, EG::SpriteBatch* DepthBatch, GLuint BrickDiffuseTex, GLuint BrickNormalsTex)
+void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch)
 {
-	float x = 0;
-	float y = 0;
-	float currentX = x;
-	float currentY = y; 
-	float tilewidth = 512.0f;
-	float tileheight = tilewidth / 2.0f;
-	unsigned int index = 0;
+	float ScalingFactor = 0.5f;
+	auto& Dims = Image.Dims;
+	auto& SSize = Image.SourceSize;
+	auto AWidth = A.AtlasSize.x;
+	auto AHeight = A.AtlasSize.y;
 
-	int rows = 200, cols = 200;
-
-	Batch->Begin(EG::GlyphSortType::FRONT_TO_BACK);
-	NormalsBatch->Begin(EG::GlyphSortType::FRONT_TO_BACK);
-	DepthBatch->Begin();
-
-	//Grab Iso and Cartesian tile data
-	for (int i = 0; i < rows; i++)
-	{ 
-		for (int j = 0; j < cols; j++)
-		{
-    		// Add brick diffuse
-    		Batch->Add(
-    			EM::Vec4(EM::Vec2(currentX, currentY), EM::Vec2(tilewidth, tileheight))
-    			, EM::Vec4(0, 0, 1, 1)
-    			, BrickDiffuseTex 
-    			, EG::RGBA16_White()
-    			, 0
-    			, 0 
-    			, EG::CoordinateFormat::ISOMETRIC
-    			);
-    		// Add brick normal
-    		NormalsBatch->Add(
-    			EM::Vec4(EM::Vec2(currentX, currentY), EM::Vec2(tilewidth, tileheight))
-    			,EM::Vec4(0, 0, 1, 1) 
-    			, BrickNormalsTex
-    			, EG::RGBA16_White()
-    			, 0 
-    			, 0
-    			,EG::CoordinateFormat::ISOMETRIC
-    			);
-
-			//Increment currentX and currentY	
-			currentX += (tilewidth / 2.0f);
-			currentY -= (tileheight / 2.0f);
-
-		}
-
-		//Go down a row
-		x -= tilewidth / 2.0f;
-		y -= tileheight / 2.0f;
-		currentX = x;
-		currentY = y;
-	} 
-
-	EG::SpriteSheet Sheet;
-	EG::SpriteSheet Sheet2;
-	Sheet.Init(EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box_sheet_iso.png"), EM::iVec2(2, 1));
-	Sheet2.Init(EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box_sheet.png"), EM::iVec2(2, 1));
-
-	for (Enjon::uint32 i = 0; i < 100; i++)
-	{
-		Enjon::uint32 x = ER::Roll(0, 5000), y = ER::Roll(-5000, 5000);
-		Batch->Add(
-			EM::Vec4(x, y, 80, 40), 
-			Sheet.GetUV(0), 
-			Sheet.texture.id, 
-			EG::SetOpacity(EG::RGBA16_White(), 0.5f), 
-			1
-			// , 0
-			// ,EG::CoordinateFormat::ISOMETRIC
-			);
-		NormalsBatch->Add(
-			EM::Vec4(x, y, 80, 40), 
-			Sheet.GetUV(1), 
-			Sheet.texture.id,
-			EG::RGBA16_White(), 
-			1
-			// , 0
-			// ,EG::CoordinateFormat::ISOMETRIC
-			);
-	}
-	for (Enjon::uint32 i = 0; i < 100; i++)
-	{
-		Enjon::uint32 x = ER::Roll(0, 5000), y = ER::Roll(-5000, 5000);
-		Batch->Add(
-			EM::Vec4(x, y, 40, 40), 
-			Sheet2.GetUV(0), 
-			Sheet2.texture.id, 
-			EG::SetOpacity(EG::RGBA16_White(), 0.5f), 
-			1
-			, 0
-			,EG::CoordinateFormat::ISOMETRIC
-			);
-		NormalsBatch->Add(
-			EM::Vec4(x, y, 40, 40), 
-			Sheet2.GetUV(1), 
-			Sheet2.texture.id,
-			EG::RGBA16_White(), 
-			1
-			, 0
-			,EG::CoordinateFormat::ISOMETRIC
-			);
-	}
-
-	Batch->Add(
-		EM::Vec4(0, 0, 300, 200), 
-		EM::Vec4(0, 0, 1, 1), 
-		EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png").id, 
-		EG::RGBA16(5.0, 0, 0, 0.2f), 
-		1
-		);
-
-	Batch->End();
-	NormalsBatch->End();
-	DepthBatch->End();
+	Batch->Add(EM::Vec4(Position.x, Position.y, SSize * ScalingFactor), 
+				EM::Vec4(Dims.x / AWidth, (AHeight - Dims.y - Dims.w) / AHeight, Dims.z / AWidth, Dims.w / AHeight), 
+				A.Texture.id);
 }
 
 #endif

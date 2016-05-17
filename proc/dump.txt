@@ -1,6 +1,26 @@
-BehaviorTreeManager.cpp
+Atlas.cpp
 Generating Code...
 Skipping... (no relevant changes detected)
+WeightedMeshAttachment.cpp
+TransformConstraint.cpp
+Timelines.cpp
+Slot.cpp
+Skin.cpp
+SkeletonJson.cpp
+SkeletonData.cpp
+SkeletonBounds.cpp
+Skeleton.cpp
+RegionAttachment.cpp
+PoolTrackEntryFactory.cpp
+MeshAttachment.cpp
+IkConstraint.cpp
+BoundingBoxAttachment.cpp
+Bone.cpp
+AttachmentLoader.cpp
+AtlasAttachmentLoader.cpp
+AnimationStateData.cpp
+AnimationState.cpp
+Animation.cpp
 Transform3DSystem.cpp
 Renderer2DSystem.cpp
 PlayerControllerSystem.cpp
@@ -18,8 +38,9 @@ SpatialHash.cpp
 main.cpp
 Loot.cpp
 Level.cpp
+EnjonAnimation.cpp
+BehaviorTreeManager.cpp
 AnimationManager.cpp
-Animation.cpp
 Camera3D.cpp
 Vec4.cpp
 Vec3.cpp
@@ -50,7 +71,7 @@ DeferredRenderer.cpp
 Camera2D.cpp
 BehaviorTree.cpp
 AABB.cpp
-Microsoft (R) Incremental Linker Version 12.00.40629.0
+Microsoft (R) Incremental Linker Version 14.00.23918.0
 Copyright (C) Microsoft Corporation.  All rights reserved.
 
 /debug 
@@ -88,9 +109,9 @@ Vec2.obj
 Vec3.obj 
 Vec4.obj 
 Camera3D.obj 
-Animation.obj 
 AnimationManager.obj 
 BehaviorTreeManager.obj 
+EnjonAnimation.obj 
 Level.obj 
 Loot.obj 
 main.obj 
@@ -108,3 +129,24 @@ LabelSystem.obj
 PlayerControllerSystem.obj 
 Renderer2DSystem.obj 
 Transform3DSystem.obj 
+Animation.obj 
+AnimationState.obj 
+AnimationStateData.obj 
+Atlas.obj 
+AtlasAttachmentLoader.obj 
+AttachmentLoader.obj 
+Bone.obj 
+BoundingBoxAttachment.obj 
+IkConstraint.obj 
+MeshAttachment.obj 
+PoolTrackEntryFactory.obj 
+RegionAttachment.obj 
+Skeleton.obj 
+SkeletonBounds.obj 
+SkeletonData.obj 
+SkeletonJson.obj 
+Skin.obj 
+Slot.obj 
+Timelines.obj 
+TransformConstraint.obj 
+WeightedMeshAttachment.obj 

@@ -1,0 +1,153 @@
+
+AnimationTest2.png
+size: 1024,1024
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+axe
+  rotate: false
+  xy: 2, 350
+  size: 457, 664
+  orig: 457, 664
+  offset: 0, 0
+  index: -1
+back_cloth
+  rotate: true
+  xy: 124, 6
+  size: 68, 119
+  orig: 68, 119
+  offset: 0, 0
+  index: -1
+head
+  rotate: true
+  xy: 894, 559
+  size: 90, 128
+  orig: 90, 128
+  offset: 0, 0
+  index: -1
+hip
+  rotate: true
+  xy: 718, 185
+  size: 170, 130
+  orig: 170, 130
+  offset: 0, 0
+  index: -1
+left_foot
+  rotate: true
+  xy: 667, 357
+  size: 100, 126
+  orig: 100, 126
+  offset: 0, 0
+  index: -1
+left_forearm
+  rotate: false
+  xy: 781, 592
+  size: 111, 422
+  orig: 111, 422
+  offset: 0, 0
+  index: -1
+left_hand
+  rotate: false
+  xy: 461, 573
+  size: 166, 441
+  orig: 166, 441
+  offset: 0, 0
+  index: -1
+left_lower_leg
+  rotate: false
+  xy: 894, 651
+  size: 123, 224
+  orig: 123, 224
+  offset: 0, 0
+  index: -1
+left_shoulder
+  rotate: false
+  xy: 894, 877
+  size: 128, 137
+  orig: 128, 137
+  offset: 0, 0
+  index: -1
+left_thigh
+  rotate: false
+  xy: 667, 459
+  size: 101, 164
+  orig: 101, 164
+  offset: 0, 0
+  index: -1
+left_upper_arm
+  rotate: false
+  xy: 883, 469
+  size: 134, 88
+  orig: 134, 88
+  offset: 0, 0
+  index: -1
+loin_cloth
+  rotate: false
+  xy: 629, 625
+  size: 150, 389
+  orig: 150, 389
+  offset: 0, 0
+  index: -1
+neck
+  rotate: true
+  xy: 463, 135
+  size: 216, 140
+  orig: 216, 140
+  offset: 0, 0
+  index: -1
+right_foot
+  rotate: true
+  xy: 770, 466
+  size: 124, 111
+  orig: 124, 111
+  offset: 0, 0
+  index: -1
+right_forearm
+  rotate: true
+  xy: 2, 3
+  size: 71, 120
+  orig: 71, 120
+  offset: 0, 0
+  index: -1
+right_hand
+  rotate: false
+  xy: 795, 363
+  size: 64, 101
+  orig: 64, 101
+  offset: 0, 0
+  index: -1
+right_lower_leg
+  rotate: false
+  xy: 605, 172
+  size: 111, 179
+  orig: 111, 179
+  offset: 0, 0
+  index: -1
+right_thigh
+  rotate: true
+  xy: 245, 2
+  size: 72, 108
+  orig: 72, 108
+  offset: 0, 0
+  index: -1
+right_upper_arm
+  rotate: false
+  xy: 376, 109
+  size: 85, 239
+  orig: 85, 239
+  offset: 0, 0
+  index: -1
+sword
+  rotate: true
+  xy: 2, 76
+  size: 272, 372
+  orig: 272, 372
+  offset: 0, 0
+  index: -1
+torso
+  rotate: false
+  xy: 461, 353
+  size: 204, 218
+  orig: 204, 218
+  offset: 0, 0
+  index: -1

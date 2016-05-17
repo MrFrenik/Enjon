@@ -12,6 +12,9 @@
 		},
 		{
 			"path": "E:\\Development\\Enjon\\shaders"
+		},
+		{
+			"path": "E:\\Development\\Enjon\\deps\\spine-cpp"
 		}
 	]
 }

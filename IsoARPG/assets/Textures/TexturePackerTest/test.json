@@ -1,0 +1,93 @@
+{"frames": {
+
+"2g":
+{
+	"frame": {"x":202,"y":286,"w":52,"h":82},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":82},
+	"sourceSize": {"w":52,"h":82},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"beast":
+{
+	"frame": {"x":1,"y":286,"w":199,"h":187},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":14,"y":1,"w":199,"h":187},
+	"sourceSize": {"w":222,"h":200},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"bluebutton":
+{
+	"frame": {"x":533,"y":313,"w":154,"h":56},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":154,"h":56},
+	"sourceSize": {"w":154,"h":56},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"box":
+{
+	"frame": {"x":543,"y":194,"w":118,"h":117},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":118,"h":117},
+	"sourceSize": {"w":118,"h":117},
+	"pivot": {"x":0.508475,"y":0.452991}
+},
+"box_debris":
+{
+	"frame": {"x":533,"y":371,"w":118,"h":117},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":118,"h":117},
+	"sourceSize": {"w":118,"h":117},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"pixelanimtest":
+{
+	"frame": {"x":543,"y":1,"w":135,"h":191},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":65,"w":135,"h":191},
+	"sourceSize": {"w":176,"h":256},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"smoke_1":
+{
+	"frame": {"x":285,"y":1,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"smoke_2":
+{
+	"frame": {"x":1,"y":1,"w":282,"h":283},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":27,"y":22,"w":282,"h":283},
+	"sourceSize": {"w":336,"h":330},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"smoke_3":
+{
+	"frame": {"x":285,"y":259,"w":246,"h":233},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":8,"w":246,"h":233},
+	"sourceSize": {"w":253,"h":256},
+	"pivot": {"x":0.5,"y":0.5}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "E:/Development/Enjon/IsoARPG/assets/TexturePackerTest/test.png",
+	"format": "RGBA8888",
+	"size": {"w":688,"h":493},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:637df7054d83bb7d2135e2d96fa3b7c4:4732398b8dda284805433445415474fc:02ab132358d6d8b512e80119463a8329$"
+}
+}

@@ -3,7 +3,7 @@
 
 #include <SDL2/SDL.h> 
 
-#define MILLISECOND       0.5f  
+#define MILLISECOND       1.0f  
 #define SECOND            MILLISECOND * 1000.0f
 
 namespace Enjon { namespace Utils { 

@@ -90,7 +90,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					Enjon::Math::Vec3* Position = &TransformSystem->Transforms[e].Position;
 					Enjon::uint32* BeginningFrame = &AnimationComponent->BeginningFrame;
 					Enjon::uint32* SetStart = &AnimationComponent->SetStart;
-					const Animation* CurrentAnimation = AnimationComponent->CurrentAnimation;
+					const Animate::Animation* CurrentAnimation = AnimationComponent->CurrentAnimation;
 
 					// Get what the current animation is based on the player state
 					switch(PlayerState)

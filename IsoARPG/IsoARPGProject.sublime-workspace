@@ -88,122 +88,34 @@
 	"buffers":
 	[
 		{
-			"file": "include/TestTree.h",
-			"settings":
-			{
-				"buffer_size": 8398,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/E/Development/Enjon/include/BehaviorTree/Wait.h",
-			"settings":
-			{
-				"buffer_size": 3842,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/Transform3DSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 15340,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "include/ECS/ECS.h",
-			"settings":
-			{
-				"buffer_size": 475,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/Animation2DSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 15907,
-				"line_ending": "Windows"
-			}
-		},
-		{
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 83086,
+				"buffer_size": 71950,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "include/ECS/Masks.h",
+			"file": "/E/Development/Enjon/deps/spine-cpp/third_party/sajson/sajson.h",
 			"settings":
 			{
-				"buffer_size": 1107,
+				"buffer_size": 45326,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "src/Loot.cpp",
+			"file": "/E/Development/Enjon/deps/spine-cpp/src/spinecpp/SkeletonJson.cpp",
 			"settings":
 			{
-				"buffer_size": 4987,
+				"buffer_size": 46517,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/E/Development/Enjon/src/ImageLoader.cpp",
+			"file": "assets/Textures/TexturePackerTest/test.json",
 			"settings":
 			{
-				"buffer_size": 1928,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/EntityFactory.cpp",
-			"settings":
-			{
-				"buffer_size": 16284,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/CollisionSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 36396,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/PlayerControllerSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 8400,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/BehaviorTreeManager.cpp",
-			"settings":
-			{
-				"buffer_size": 744,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "include/BehaviorTreeManager.h",
-			"settings":
-			{
-				"buffer_size": 343,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "include/ECS/EntityFactory.h",
-			"settings":
-			{
-				"buffer_size": 2059,
+				"buffer_size": 2295,
 				"line_ending": "Windows"
 			}
 		}
@@ -288,15 +200,52 @@
 	"expanded_folders":
 	[
 		"/E/Development/Enjon/include",
-		"/E/Development/Enjon/include/BehaviorTree",
-		"/E/Development/Enjon/IsoARPG",
-		"/E/Development/Enjon/IsoARPG/include",
-		"/E/Development/Enjon/IsoARPG/include/ECS",
-		"/E/Development/Enjon/IsoARPG/src",
-		"/E/Development/Enjon/IsoARPG/src/ECS"
+		"/E/Development/Enjon/include/Graphics",
+		"/E/Development/Enjon/src"
 	],
 	"file_history":
 	[
+		"/E/Development/Enjon/IsoARPG/assets/Textures/TexturePackerTest/test.json",
+		"/E/Development/Enjon/IsoARPG/assets/TexturePackerTest/test.json",
+		"/E/Development/Enjon/deps/spine-cpp/include/spinecpp/extension.h",
+		"/E/Development/Enjon/deps/spine-cpp/include/spinecpp/Atlas.h",
+		"/E/Development/Enjon/deps/spine-cpp/src/spinecpp/Atlas.cpp",
+		"/E/Development/Enjon/src/SpriteBatch.cpp",
+		"/E/Development/Enjon/include/Graphics/SpriteBatch.h",
+		"/E/Development/Enjon/IsoARPG/assets/Textures/Test/AnimationTest2.json",
+		"/E/Development/Enjon/IsoARPG/assets/Textures/spineboy/spineboy.json",
+		"/E/Development/Enjon/IsoARPG/assets/Textures/spineboy/spineboy.atlas",
+		"/E/Development/Enjon/proc/rel.bat",
+		"/E/Development/Enjon/deps/spine-cpp/include/spinecpp/spinecpp.h",
+		"/E/Development/Enjon/src/ImageLoader.cpp",
+		"/E/Development/Enjon/include/Utils/Timing.h",
+		"/E/Development/Enjon/IsoARPG/include/ECS/EntityFactory.h",
+		"/E/Development/Enjon/IsoARPG/src/ECS/EntityFactory.cpp",
+		"/E/Development/Enjon/IsoARPG/src/ECS/CollisionSystem.cpp",
+		"/E/Development/Enjon/IsoARPG/src/ECS/PlayerControllerSystem.cpp",
+		"/E/Development/Enjon/IsoARPG/src/BehaviorTreeManager.cpp",
+		"/E/Development/Enjon/IsoARPG/include/BehaviorTreeManager.h",
+		"/E/Development/Enjon/src/Timing.cpp",
+		"/E/Development/Enjon/IsoARPG/src/AnimationManager.cpp",
+		"/E/Development/Enjon/IsoARPG/include/AnimationManager.h",
+		"/E/Development/Enjon/IsoARPG/include/EnjonAnimation.h",
+		"/E/Development/Enjon/IsoARPG/src/EnjonAnimation.cpp",
+		"/E/Development/Enjon/IsoARPG/include/ECS/Components.h",
+		"/E/Development/Enjon/proc/clean.bat",
+		"/E/Development/Enjon/proc/dump.txt",
+		"/E/Development/Enjon/IsoARPG/src/Loot.cpp",
+		"/E/Development/Enjon/IsoARPG/include/ECS/Masks.h",
+		"/E/Development/Enjon/src/SpriteSheetManager.cpp",
+		"/E/Development/Enjon/IsoARPG/src/ECS/Animation2DSystem.cpp",
+		"/E/Development/Enjon/IsoARPG/include/ECS/ECS.h",
+		"/E/Development/Enjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
+		"/E/Development/Enjon/include/BehaviorTree/Wait.h",
+		"/E/Development/Enjon/IsoARPG/include/TestTree.h",
+		"/E/Development/Enjon/IsoARPG/include/ECS/Animation2DSystem.h",
+		"/E/Development/Enjon/IsoARPG/include/Animation.h",
+		"/E/Development/Enjon/IsoARPG/src/Animation.cpp",
+		"/E/Development/Enjon/deps/spine-cpp/include/spinecpp/Animation.h",
+		"/E/Documents/School/IntroSE/final.txt",
 		"/E/Programs/SublimeText/Data/Packages/User/Preferences.sublime-settings",
 		"/C/Development/C++/Enjon/src/ParticleEngine2D.cpp",
 		"/C/Development/C++/Enjon/include/Graphics/ParticleEngine2D.h",
@@ -383,48 +332,7 @@
 		"/D/C++Projects/VS/3DEnjon/src/SpriteBatch.cpp",
 		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/source/DeferredRendering/FBORenderTexture.cpp",
 		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/source/DeferredRendering/DeferredRendering.cpp",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/DeferredRenderer.h",
-		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/source/DeferredRendering/DeferredRendering.h",
-		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/source/DeferredRendering/FBORenderTexture.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/AnimationManager.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Animation2DSystem.h",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/SpriteSheetmanager.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/AnimationManager.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/Loot.cpp",
-		"/D/C++Projects/VS/3DEnjon/proc/build.bat",
-		"/D/C++Projects/VS/3DEnjon/shaders/basic.f.glsl",
-		"/D/C++Projects/VS/3DEnjon/src/Timing.cpp",
-		"/D/C++Projects/VS/3DEnjon/src/ParticleEngine2D.cpp",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/ParticleEngine2D.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Effects.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Transform3DSystem.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/ComponentSystems.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/VSQ.txt",
-		"/D/C++Projects/VS/IsoARPG/src/Player.cpp",
-		"/D/C++Projects/VS/IsoARPG/src/Game.cpp",
-		"/D/C++Projects/VS/3DEnjon/src/FontManager.cpp",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/FontManager.h",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/Font.h",
-		"/D/C++Projects/VS/3DEnjon/src/Font.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/EffectSystem.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/EffectSystem.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/Loot.h",
-		"/D/C++Projects/VS/3DEnjon/include/Math/Random.h",
-		"/D/C++Projects/VS/3DEnjon/include/Utils/Timing.h",
-		"/D/C++Projects/VS/3DEnjon/proc/rel.bat",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/AttributeSystem.cpp",
-		"/C/Users/John/Desktop/Programming/Personal/Chess/Piece.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/Animation.cpp",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/Color.h",
-		"/D/C++Projects/VS/3DEnjon/src/Sprite.cpp",
-		"/D/C++Projects/VS/3DEnjon/src/Game.cpp",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/Vertex.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/SpatialHash.cpp",
-		"/D/C++Projects/VS/3DEnjon/src/AABB.cpp",
-		"/D/C++Projects/Tutorials/Help/main.c",
-		"/D/Programs/Brogue/Brogue-windows-v1.7.4/Brogue Source/BrogueCode/Random.c",
-		"/D/C++Projects/VS/3DEnjon/shaders/atlas.f.glsl",
-		"/D/C++Projects/VS/3DEnjon/shaders/text.f.glsl"
+		"/D/C++Projects/VS/3DEnjon/include/Graphics/DeferredRenderer.h"
 	],
 	"find":
 	{
@@ -443,6 +351,26 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"Box",
+			"box",
+			"Box",
+			"box",
+			"Frames",
+			"400",
+			"auto",
+			"Size",
+			"size",
+			"Size",
+			"Site",
+			"100",
+			"auto",
+			"#if",
+			"animation",
+			"Animation",
+			"animation",
+			"Animation",
+			"amountdrawn",
+			"Limiter",
 			"NEAREST",
 			"target",
 			"LINEAR",
@@ -550,27 +478,7 @@
 			"amountdrawn",
 			"amountdraw",
 			"amountdrawn",
-			"drawsmoke",
-			"amountdrawn",
-			"100",
-			"amountdrawn",
-			"auto L",
-			"amountdrawn",
-			"-0.75f",
-			"amountdrawn",
-			"400",
-			"amountdrawn",
-			"amount",
-			"amountdrawn",
-			"amountrdawn",
-			"amountdraw",
-			"amountdrawn",
-			"Manager->AttributeSystem->Masks[e]",
-			"amountdrawn",
-			"1000",
-			"getlights",
-			"quadratic",
-			"drawblood"
+			"drawsmoke"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -588,369 +496,35 @@
 	"groups":
 	[
 		{
-			"selected": 8,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "include/TestTree.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8398,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								7328,
-								7328
-							]
-						],
-						"settings":
-						{
-							"auto_name": "",
-							"bs_sintax": "plain text",
-							"buffer_scroll_name": "9119cb04",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								4,
-								16,
-								23,
-								30,
-								52,
-								6,
-								135,
-								239,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1143.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "/E/Development/Enjon/include/BehaviorTree/Wait.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3842,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3095,
-								3095
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1868.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "src/ECS/Transform3DSystem.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 15340,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3206,
-								3206
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "c918a525",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								15,
-								15,
-								29,
-								53,
-								0,
-								24,
-								169,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 720.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "include/ECS/ECS.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 475,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								222,
-								222
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "plain text",
-							"buffer_scroll_name": "9140aaeb",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								4,
-								20,
-								16,
-								45,
-								51,
-								13,
-								82,
-								173,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 11,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "src/ECS/Animation2DSystem.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 15907,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								10804,
-								10804
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "ab92de6d",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								15,
-								15,
-								59,
-								33,
-								5,
-								161,
-								248,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 3082.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
 					"file": "src/main.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 83086,
+						"buffer_size": 71950,
 						"regions":
 						{
+							"bookmark_e":
+							{
+								"flags": 144,
+								"regions":
+								[
+									[
+										66126,
+										66126
+									]
+								]
+							}
 						},
 						"selection":
 						[
 							[
-								11920,
-								11920
+								71450,
+								71450
 							]
 						],
 						"settings":
@@ -1009,570 +583,105 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 5302.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "include/ECS/Masks.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1107,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								487,
-								487
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 10,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "src/Loot.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4987,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								4288,
-								4288
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1317.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "/E/Development/Enjon/src/ImageLoader.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1928,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1370,
-								1370
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 90.0,
+						"translation.y": 28837.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
 					"type": "text"
 				},
 				{
-					"buffer": 9,
-					"file": "src/ECS/EntityFactory.cpp",
+					"buffer": 1,
+					"file": "/E/Development/Enjon/deps/spine-cpp/third_party/sajson/sajson.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 16284,
+						"buffer_size": 45326,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								7594,
-								7594
+								16154,
+								16154
 							]
 						],
 						"settings":
 						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "c2338e69",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								2,
-								15,
-								9,
-								11,
-								20,
-								10,
-								73,
-								45,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
 							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2366.0,
+						"translation.y": 4072.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 10,
-					"file": "src/ECS/CollisionSystem.cpp",
+					"buffer": 2,
+					"file": "/E/Development/Enjon/deps/spine-cpp/src/spinecpp/SkeletonJson.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 36396,
+						"buffer_size": 46517,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2944,
-								2944
+								4275,
+								4275
 							]
 						],
 						"settings":
 						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "82b72c48",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								15,
-								15,
-								44,
-								43,
-								13,
-								75,
-								100,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
 							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 614.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 11,
-					"file": "src/ECS/PlayerControllerSystem.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8400,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3517,
-								3517
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "840bfab6",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								1,
-								15,
-								15,
-								6,
-								59,
-								10,
-								71,
-								227,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 2612.0,
+						"translation.y": 1755.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 3,
 					"type": "text"
-				},
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
 				{
-					"buffer": 12,
-					"file": "src/BehaviorTreeManager.cpp",
+					"buffer": 3,
+					"file": "assets/Textures/TexturePackerTest/test.json",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 744,
+						"buffer_size": 2295,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								378,
-								378
+								1040,
+								1040
 							]
 						],
 						"settings":
 						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "8c0544f5",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								4,
-								16,
-								23,
-								8,
-								33,
-								6,
-								172,
-								182,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
-						"translation.x": 0.0,
+						"translation.x": -0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 14,
-					"type": "text"
-				},
-				{
-					"buffer": 13,
-					"file": "include/BehaviorTreeManager.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 343,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								277,
-								277
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "a7108025",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								4,
-								16,
-								23,
-								3,
-								39,
-								11,
-								100,
-								135,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 12,
-					"type": "text"
-				},
-				{
-					"buffer": 14,
-					"file": "include/ECS/EntityFactory.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2059,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1035,
-								1035
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "0009ccf9",
-							"c_time":
-							[
-								128,
-								3,
-								99,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								100,
-								97,
-								116,
-								101,
-								116,
-								105,
-								109,
-								101,
-								10,
-								113,
-								0,
-								67,
-								10,
-								7,
-								224,
-								2,
-								15,
-								9,
-								8,
-								57,
-								5,
-								141,
-								133,
-								113,
-								1,
-								133,
-								113,
-								2,
-								82,
-								113,
-								3,
-								46
-							],
-							"spell_check": false,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 13,
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -1595,11 +704,18 @@
 				0,
 				1,
 				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
 			]
 		],
 		"cols":
 		[
 			0.0,
+			0.5,
 			1.0
 		],
 		"rows":
@@ -1662,7 +778,7 @@
 	"show_minimap": false,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": true,
+	"side_bar_visible": false,
 	"side_bar_width": 230.0,
 	"status_bar_visible": false,
 	"template_settings":

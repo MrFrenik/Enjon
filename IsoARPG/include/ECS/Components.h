@@ -11,7 +11,7 @@
 #include "Physics/AABB.h"
 #include "Defines.h"
 
-#include "Animation.h"
+#include "EnjonAnimation.h"
 
 #include <unordered_map>
 #include <utility>
@@ -94,7 +94,7 @@ namespace ECS { namespace Component {
 		Enjon::uint32 CurrentFrame;
 		Enjon::uint32 SetStart;
 		Enjon::uint32 BeginningFrame; 
-		const Animation* CurrentAnimation;
+		const Animate::Animation* CurrentAnimation;
 		eid32 Entity;
 	} Animation2D;
 
