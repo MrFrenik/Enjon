@@ -96,7 +96,7 @@ namespace ECS { namespace Component {
 		Enjon::uint32 BeginningFrame; 
 		const Animate::Animation* CurrentAnimation;
 		eid32 Entity;
-	} Animation2D;
+	} Animation2D;	
 
 	// Label struct
 	typedef struct

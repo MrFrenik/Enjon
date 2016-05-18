@@ -1682,6 +1682,7 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 #include <iostream> 
 #include <time.h>
 #include <stdlib.h>
+#include <vector>
 
 using namespace ECS;
 using namespace Systems;
@@ -1691,6 +1692,9 @@ typedef struct
 {
 	EM::Vec4 Dims;
 	EM::Vec2 SourceSize;
+	const std::string Name;
+	float Delay;
+	GLuint TextureID;
 } ImageFrame;
 
 typedef struct 
@@ -1699,10 +1703,17 @@ typedef struct
 	EG::GLTexture Texture;	
 } Atlas;
 
+typedef struct 
+{
+	std::vector<ImageFrame> Frames;
+	uint32_t TotalFrames;
+} Anim;
+
 /* Function Declarations */
 bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera);
 ImageFrame GetImageFrame(const sajson::value& Frame, const std::string Name);
 void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch);
+Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc);
 
 
 const std::string TextureDir("../IsoARPG/Assets/Textures/");
@@ -1791,12 +1802,18 @@ int main(int argc, char** argv) {
     			  };
 
    	// Get frames
-	ImageFrame I_Box 		= GetImageFrame(Frames, "box");
-	ImageFrame I_Beast 		= GetImageFrame(Frames, "beast");
-	ImageFrame I_2G 		= GetImageFrame(Frames, "2g");
-	ImageFrame I_BoxDebris 	= GetImageFrame(Frames, "box_debris");
-	ImageFrame I_BlueButton = GetImageFrame(Frames, "bluebutton");
-	ImageFrame I_PixelTest 	= GetImageFrame(Frames, "pixelanimtest");
+	// ImageFrame I_Box 		= GetImageFrame(Frames, "box");
+	// ImageFrame I_Beast 		= GetImageFrame(Frames, "beast");
+	// ImageFrame I_2G 		= GetImageFrame(Frames, "2g");
+	// ImageFrame I_BoxDebris 	= GetImageFrame(Frames, "box_debris");
+	// ImageFrame I_BlueButton = GetImageFrame(Frames, "bluebutton");
+	// ImageFrame I_PixelTest 	= GetImageFrame(Frames, "pixelanimtest");
+
+	// Create animation
+	Anim Test = CreateAnimation(std::string("test"), Frames);
+
+	// Also need a current index for frames	
+	uint32_t CurrentIndex = 0;
 
 	// Main loop
 	bool running = true;
@@ -1804,6 +1821,7 @@ int main(int argc, char** argv) {
 	{
 		Limiter.Begin();
 
+		// Keep track of animation delays
 		t += 0.005f;
 
 		// Check for quit condition
@@ -1838,13 +1856,19 @@ int main(int argc, char** argv) {
 		{
 			EntityBatch->Begin();
 			{
-				// Draw frames
-				DrawFrame(I_Box, 		EM::Vec2(0, -100), 		atlas, EntityBatch);
-				DrawFrame(I_Beast, 		EM::Vec2(20, 40), 		atlas, EntityBatch);
-				DrawFrame(I_BlueButton, EM::Vec2(100, 50), 		atlas, EntityBatch);
-				DrawFrame(I_2G, 		EM::Vec2(50, -200),		atlas, EntityBatch);
-				DrawFrame(I_BoxDebris, 	EM::Vec2(0, 200), 		atlas, EntityBatch);
-				DrawFrame(I_PixelTest, 	EM::Vec2(-200, -300),	atlas, EntityBatch);
+				// Get current animation frame and draw that
+				// ImageFrame CurrentFrame = Test.Frames.at(CurrentIndex);
+
+				// Change animation frame if delay is past
+				if (t >= Test.Frames.at(CurrentIndex).Delay)
+				{
+					CurrentIndex = (CurrentIndex + 1) % Test.TotalFrames;
+					// CurrentFrame = Test.Frames.at((CurrentIndex + 1) % Test.TotalFrames);
+					t = 0.0f;
+				}
+
+				// Draw frame
+				DrawFrame(Test.Frames.at(CurrentIndex), EM::Vec2(0, -100),	atlas, EntityBatch);
 			}
 			EntityBatch->End();
 			EntityBatch->RenderBatch();
@@ -1947,8 +1971,14 @@ ImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name)
 
 	// Return frame
 	ImageFrame IF = {	EM::Vec4(x, y, z, w), 
-					  		SourceSize
-						};
+					  	SourceSize,
+					  	Name
+					};
+
+	// Need to read this value from .json 
+	// Also, the TextureDir needs to be formatted at beginning of program, since it's OS specific 
+	// 	in the way that forward or backslashes are read
+	IF.TextureID = EI::ResourceManager::GetTexture(std::string(TextureDir + "TexturePackerTest/test.png")).id;
 
 	// ImageFrame IF;
 	return IF;
@@ -1967,7 +1997,83 @@ void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::S
 				A.Texture.id);
 }
 
+Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc)
+{
+	// need to parse the file for a specific animatioa
+	Anim A;
+
+	// This doc will need to be passed in, but for now, just lazy load it...
+    using sajson::literal;
+    std::string json = EU::read_file(std::string("../IsoARPG/Profiles/Animations/test.json").c_str());
+    const sajson::document& doc = sajson::parse(sajson::string(json.c_str(), json.length()));
+
+    if (!doc.is_valid())
+    {
+        std::cout << "Invalid json: " << doc.get_error_message() << std::endl;
+    }
+
+    // Get root and length of animation json file
+    const auto& anim_root = doc.get_root();
+    const auto len = anim_root.get_length();
+
+    // Get handle to animation
+    const auto anim = anim_root.find_object_key(literal(AnimName.c_str()));
+    assert(anim < len);
+    const auto& Anim = anim_root.get_object_value(anim);
+    const auto anim_len = Anim.get_length();
+
+    // Get frames array and delays array
+    std::vector<std::string> frames;
+    std::vector<float> delays;
+
+    // Frames
+    const auto fr = Anim.find_object_key(literal("frames"));
+    assert(fr < anim_len);
+    const auto& Frames = Anim.get_object_value(fr);
+    const auto frames_len = Frames.get_length();
+    frames.reserve(frames_len);
+
+    // Delays
+    const auto de = Anim.find_object_key(literal("delays"));
+    assert(de < anim_len);
+    const auto& Delays = Anim.get_object_value(de);
+    delays.reserve(frames_len);
+
+    // Now need to loop through this shit like whoa...
+    // Get iframe, get its delay, push into A.frames
+    for (auto i = 0; i < frames_len; i++)
+    {
+    	auto IF = GetImageFrame(FramesDoc, Frames.get_array_element(i).get_string_value());
+    	IF.Delay = Delays.get_array_element(i).get_safe_float_value();
+
+    	// push back into A.frames
+    	A.Frames.push_back(IF);
+    }
+
+    // Get total number of frames in vector
+    A.TotalFrames = A.Frames.size();
+
+	return A;
+}
+
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
