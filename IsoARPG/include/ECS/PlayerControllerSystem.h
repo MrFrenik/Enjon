@@ -29,6 +29,8 @@ namespace ECS { namespace Systems { namespace PlayerController {
 	
 	// Updates Controller of player it is attached to
 	void Update(struct PlayerControllerSystem* System);	
+
+	bool GetTargeting();
 }}}
 
 

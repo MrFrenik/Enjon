@@ -107,6 +107,44 @@ namespace ECS { namespace Systems { namespace Animation2D {
 							break;
 					}
 
+					// We can get whether or not we're targeting here and set view vector accordingly
+					if (PlayerController::GetTargeting())
+					{
+						// Get velocity of target
+						auto Target = Manager->PlayerControllerSystem->CurrentTarget;
+						EM::Vec2* TargetPosition = &Manager->TransformSystem->Transforms[Target].GroundPosition;
+						EM::Vec2* Pos = &Manager->TransformSystem->Transforms[e].GroundPosition;
+
+						// // Find vector between the two and normalize
+						Enjon::Math::Vec2 NormalizedDistance = Enjon::Math::Vec2::Normalize(*TargetPosition - *Pos);
+
+						// Get right basis vector
+						EM::Vec2 R(1, 0);
+
+						// Get dot product
+						auto Dot = R.DotProduct(NormalizedDistance);
+
+						// Get angle
+						auto a = acos(Dot) * 180.0f / M_PI;
+						if (NormalizedDistance.y < 0) a *= -1;
+
+						// a += 180.0f;
+
+						// Rotation freedom 
+						auto DOF = 22.5f;
+
+						std::cout << "angle: " << a << std::endl;
+
+						if 		(a >= -22.0f && a < 22.5f) 	*ViewVector = EAST;
+						else if (a >= 22.5f && a < 67.5)	*ViewVector = NORTHEAST;
+						else if (a >= 67.5f && a < 112.5f)	*ViewVector = NORTH;
+						else if (a >= 112.5f && a < 157.5f) *ViewVector = NORTHWEST;
+						else if (a >= -157.5f && a < -112.0f) * ViewVector = SOUTHWEST;
+						else if (a >= -112.5f && a < -67.0f) * ViewVector = SOUTH;
+						else if (a >= -67.0f && a < -22.0f) * ViewVector = SOUTHEAST;
+						else *ViewVector = WEST;
+					}
+
 					// Setting animation beginning frame based on view vector
 					if (PlayerState == EntityAnimationState::ATTACKING && !(*SetStart))
 					{
@@ -114,21 +152,47 @@ namespace ECS { namespace Systems { namespace Animation2D {
 						if (CurrentWeapon == Weapons::AXE) AnimationComponent->Sheet = Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("PlayerSheet2");
 						else AnimationComponent->Sheet = Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("PlayerSheet");
 
-						// Get direction to mouse
-						Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
-						Manager->Camera->ConvertScreenToWorld(MousePos);
 
-						if (MousePos.x <= Position->x)
+						if (PlayerController::GetTargeting())
 						{
-							*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; 
-							*SetStart = TRUE; 
-							if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
+							// Get velocity of target
+							auto Target = Manager->PlayerControllerSystem->CurrentTarget;
+							EM::Vec2* TargetPosition = &Manager->TransformSystem->Transforms[Target].GroundPosition;
+							EM::Vec2* Pos = &Manager->TransformSystem->Transforms[e].GroundPosition;
+
+							if (TargetPosition->x < Pos->x)
+							{
+								*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; 
+								*SetStart = TRUE; 
+								if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector;
+							}
+							else 
+							{
+								*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; 
+								*SetStart = TRUE; 
+								if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector;
+							}
+
 						}
-						else if (MousePos.x > Position->x)  
+
+						else
 						{
-							*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; 
-							*SetStart = TRUE; 
-							if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
+							// Get direction to mouse
+							Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
+							Manager->Camera->ConvertScreenToWorld(MousePos);
+	
+							if (MousePos.x <= Position->x)
+							{
+								*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NW]; 
+								*SetStart = TRUE; 
+								if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
+							}
+							else if (MousePos.x > Position->x)  
+							{
+								*BeginningFrame = CurrentAnimation->Profile->Starts[Orientation::NE]; 
+								*SetStart = TRUE; 
+								if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
+							}
 						}
 					
 						// Set currentframe to beginning frame
@@ -198,24 +262,28 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 									float speed = 50.0f;
 
-									// Set attack vector of player to this velocity
-									int Mult = 1.0f;
-									Enjon::Math::Vec2 AttackVector;
-									// X < 0
-									if (AttackVelocity.x < 0 && AttackVelocity.x >= -0.3f) AttackVector.x = 0.0f;
-									else if (AttackVelocity.x < 0 && AttackVelocity.x < -0.3f) AttackVector.x = -1.0f;
-									// X > 0
-									if (AttackVelocity.x >= 0 && AttackVelocity.x < 0.5f) AttackVector.x = 0.0f;
-									else if (AttackVelocity.x >= 0 && AttackVelocity.x >= 0.5f) AttackVector.x = 1.0f;
-									// Y < 0
-									if (AttackVelocity.y < 0 && AttackVelocity.y > -0.3f) AttackVector.y = 0.0f;
-									else if (AttackVelocity.y < 0 && AttackVelocity.y <= -0.3f) AttackVector.y = -1.0f;
-									// Y > 0
-									if (AttackVelocity.y >= 0 && AttackVelocity.y < 0.3f) AttackVector.y = 0.0f;
-									else if (AttackVelocity.y >= 0 && AttackVelocity.y >= 0.3f) AttackVector.y = 1.0f;
+									if (!PlayerController::GetTargeting())
+									{
+										// Set attack vector of player to this velocity
+										int Mult = 1.0f;
+										Enjon::Math::Vec2 AttackVector;
+										// X < 0
+										if (AttackVelocity.x < 0 && AttackVelocity.x >= -0.3f) AttackVector.x = 0.0f;
+										else if (AttackVelocity.x < 0 && AttackVelocity.x < -0.3f) AttackVector.x = -1.0f;
+										// X > 0
+										if (AttackVelocity.x >= 0 && AttackVelocity.x < 0.5f) AttackVector.x = 0.0f;
+										else if (AttackVelocity.x >= 0 && AttackVelocity.x >= 0.5f) AttackVector.x = 1.0f;
+										// Y < 0
+										if (AttackVelocity.y < 0 && AttackVelocity.y > -0.3f) AttackVector.y = 0.0f;
+										else if (AttackVelocity.y < 0 && AttackVelocity.y <= -0.3f) AttackVector.y = -1.0f;
+										// Y > 0
+										if (AttackVelocity.y >= 0 && AttackVelocity.y < 0.3f) AttackVector.y = 0.0f;
+										else if (AttackVelocity.y >= 0 && AttackVelocity.y >= 0.3f) AttackVector.y = 1.0f;
 
 
-									Manager->TransformSystem->Transforms[e].AttackVector = AttackVector;
+										Manager->TransformSystem->Transforms[e].AttackVector = AttackVector;
+
+									}
 								}
 
 							}

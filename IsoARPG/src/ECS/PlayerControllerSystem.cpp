@@ -11,6 +11,8 @@
 
 namespace ECS { namespace Systems { namespace PlayerController {
 
+	bool Targeting = false;
+
 	void ShootGrenade(struct EntityManager* Manager, Enjon::Math::Vec3 Pos, EG::SpriteSheet* Sheet);
 	void MakeExplosion(struct EntityManager* Manager, EM::Vec3 Pos);
 	void MakeVortex(struct EntityManager* Manager, EM::Vec3 Pos);
@@ -29,7 +31,6 @@ namespace ECS { namespace Systems { namespace PlayerController {
 	void Update(struct PlayerControllerSystem* System)
 	{
 		static bool RightButtonDown = false;
-
 
 		ECS::Systems::EntityManager* Manager = System->Manager;
 
@@ -175,6 +176,11 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					Transform->ViewVector.x = 1.0f; 
 				}
 
+				if (Input->IsKeyPressed(SDLK_t)) {
+
+					Targeting = !Targeting;
+				}
+
 				if (Input->IsKeyPressed(SDLK_SPACE)) {
 					// Keep from double jumping
 					if (Transform->Position.z <= Transform->BaseHeight) Transform->Velocity.z = 1.0f * goal;
@@ -254,6 +260,8 @@ namespace ECS { namespace Systems { namespace PlayerController {
 		Manager->TransformSystem->Transforms[Grenade].BaseHeight = 0.0f;
 		Manager->TransformSystem->Transforms[Grenade].MaxHeight = height;
 	}
+
+	bool GetTargeting() { return Targeting; }
 
 }}}
 
