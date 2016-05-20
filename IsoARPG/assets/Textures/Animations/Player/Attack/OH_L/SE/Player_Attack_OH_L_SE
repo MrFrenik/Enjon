@@ -1,0 +1,93 @@
+{"frames": {
+
+"01":
+{
+	"frame": {"x":1,"y":1,"w":487,"h":309},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":63,"y":158,"w":487,"h":309},
+	"sourceSize": {"w":800,"h":585},
+	"pivot": {"x":0.49,"y":0.671795}
+},
+"02":
+{
+	"frame": {"x":1,"y":312,"w":486,"h":300},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":64,"y":161,"w":486,"h":300},
+	"sourceSize": {"w":800,"h":585},
+	"pivot": {"x":0.50625,"y":0.663248}
+},
+"03":
+{
+	"frame": {"x":499,"y":492,"w":229,"h":306},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":256,"y":119,"w":229,"h":306},
+	"sourceSize": {"w":800,"h":585},
+	"pivot": {"x":0.5,"y":0.668376}
+},
+"04":
+{
+	"frame": {"x":799,"y":1,"w":146,"h":316},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":339,"y":112,"w":146,"h":316},
+	"sourceSize": {"w":800,"h":585},
+	"pivot": {"x":0.51,"y":0.704274}
+},
+"05":
+{
+	"frame": {"x":311,"y":614,"w":186,"h":312},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":340,"y":114,"w":186,"h":312},
+	"sourceSize": {"w":800,"h":585},
+	"pivot": {"x":0.50375,"y":0.661538}
+},
+"06":
+{
+	"frame": {"x":1,"y":614,"w":308,"h":316},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":308,"y":130,"w":308,"h":316},
+	"sourceSize": {"w":800,"h":585},
+	"pivot": {"x":0.51625,"y":0.682051}
+},
+"07":
+{
+	"frame": {"x":490,"y":1,"w":307,"h":283},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":308,"y":163,"w":307,"h":283},
+	"sourceSize": {"w":800,"h":585},
+	"pivot": {"x":0.5075,"y":0.663248}
+},
+"08":
+{
+	"frame": {"x":490,"y":286,"w":300,"h":204},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":284,"y":205,"w":300,"h":204},
+	"sourceSize": {"w":800,"h":585},
+	"pivot": {"x":0.5,"y":0.680342}
+},
+"09":
+{
+	"frame": {"x":730,"y":492,"w":179,"h":225},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":282,"y":198,"w":179,"h":225},
+	"sourceSize": {"w":800,"h":585},
+	"pivot": {"x":0.51,"y":0.671795}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png",
+	"format": "RGBA8888",
+	"size": {"w":946,"h":946},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:01dfb2a56d1d80b5149ba30618a1ff10:4efa892fa295f13eb8008cc34e2421f9:f12cd203b3090ee58c2d47cae85ac0e4$"
+}
+}

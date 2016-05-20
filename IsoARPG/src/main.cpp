@@ -21,7 +21,7 @@
 * MAIN GAME
 */
 
-#if 1
+#if 0
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
@@ -1632,7 +1632,7 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 *  UNIT TESTS
 */
 
-#if 0
+#if 1
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -1691,9 +1691,11 @@ using namespace spine;
 typedef struct
 {
 	EM::Vec4 Dims;
+	EM::Vec4 OffsetDims;
 	EM::Vec2 SourceSize;
 	const std::string Name;
 	float Delay;
+	float YOffset;
 	GLuint TextureID;
 } ImageFrame;
 
@@ -1716,8 +1718,9 @@ void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::S
 Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc);
 
 
-const std::string TextureDir("../IsoARPG/Assets/Textures/");
-
+const std::string AnimTextureDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png");
+const std::string AnimTextureJSONDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json");
+const std::string AnimationDir("../IsoARPG/Profiles/Animations/Player/PlayerAttackOHLSEAnimation.json");
 
 #undef main
 int main(int argc, char** argv) {
@@ -1769,7 +1772,7 @@ int main(int argc, char** argv) {
 	EM::Mat4 Model, View, Projection;
 
     using sajson::literal;
-    std::string json = EU::read_file(std::string(TextureDir + "TexturePackerTest/test.json").c_str());
+    std::string json = EU::read_file(AnimTextureJSONDir.c_str());
     const sajson::document& doc = sajson::parse(sajson::string(json.c_str(), json.length()));
 
     if (!doc.is_valid())
@@ -1798,19 +1801,11 @@ int main(int argc, char** argv) {
     float AHeight = ISize.get_value_of_key(literal("h")).get_safe_float_value();
 
     Atlas atlas = {	EM::Vec2(AWidth, AHeight), 
-    				EI::ResourceManager::GetTexture(std::string(TextureDir + "/TexturePackerTest/test.png"))
+    				EI::ResourceManager::GetTexture(AnimTextureDir.c_str())
     			  };
 
-   	// Get frames
-	// ImageFrame I_Box 		= GetImageFrame(Frames, "box");
-	// ImageFrame I_Beast 		= GetImageFrame(Frames, "beast");
-	// ImageFrame I_2G 		= GetImageFrame(Frames, "2g");
-	// ImageFrame I_BoxDebris 	= GetImageFrame(Frames, "box_debris");
-	// ImageFrame I_BlueButton = GetImageFrame(Frames, "bluebutton");
-	// ImageFrame I_PixelTest 	= GetImageFrame(Frames, "pixelanimtest");
-
 	// Create animation
-	Anim Test = CreateAnimation(std::string("test"), Frames);
+	Anim Test = CreateAnimation(std::string("Player_Attack_OH_L_SE"), Frames);
 
 	// Also need a current index for frames	
 	uint32_t CurrentIndex = 0;
@@ -1822,7 +1817,7 @@ int main(int argc, char** argv) {
 		Limiter.Begin();
 
 		// Keep track of animation delays
-		t += 0.005f;
+		t += 0.15f;
 
 		// Check for quit condition
 		running = ProcessInput(&Input, Camera);
@@ -1856,19 +1851,31 @@ int main(int argc, char** argv) {
 		{
 			EntityBatch->Begin();
 			{
-				// Get current animation frame and draw that
-				// ImageFrame CurrentFrame = Test.Frames.at(CurrentIndex);
 
-				// Change animation frame if delay is past
+				// EM::Vec2 Position(-400, 0);
+				// for (auto& F : Test.Frames)
+				// {
+				// 	DrawFrame(F, Position, atlas, EntityBatch);
+				// 	Position += EM::Vec2(100, 0);
+				// }
+
 				if (t >= Test.Frames.at(CurrentIndex).Delay)
 				{
 					CurrentIndex = (CurrentIndex + 1) % Test.TotalFrames;
-					// CurrentFrame = Test.Frames.at((CurrentIndex + 1) % Test.TotalFrames);
 					t = 0.0f;
 				}
+				DrawFrame(Test.Frames.at(CurrentIndex), EM::Vec2(0, 0),	atlas, EntityBatch);
+				
+				// DrawFrame(Test.Frames.at(6), EM::Vec2(-100, 0),	atlas, EntityBatch);
+				// DrawFrame(Test.Frames.at(7), EM::Vec2(0, 0),	atlas, EntityBatch);
+				// DrawFrame(Test.Frames.at(8), EM::Vec2(100, 0),	atlas, EntityBatch);
 
-				// Draw frame
-				DrawFrame(Test.Frames.at(CurrentIndex), EM::Vec2(0, -100),	atlas, EntityBatch);
+				// Draw random shit
+				// EntityBatch->Add(
+				// 					EM::Vec4(0, 0, 100, 100), 
+				// 					EM::Vec4(0, 0, 1, 1), 
+				// 					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box.png").id
+				// 				);
 			}
 			EntityBatch->End();
 			EntityBatch->RenderBatch();
@@ -1958,6 +1965,8 @@ ImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name)
     const auto& imageFrame = Image.get_object_value(imageframe);
 	const auto ss = Image.find_object_key(literal("sourceSize"));
 	const auto& SS = Image.get_object_value(ss);
+	const auto sss = Image.find_object_key(literal("spriteSourceSize"));
+	const auto& SSS = Image.get_object_value(sss);
 
 	// // frame information
 	float x = imageFrame.get_value_of_key(literal("x")).get_safe_float_value();
@@ -1966,19 +1975,28 @@ ImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name)
 	float w = imageFrame.get_value_of_key(literal("h")).get_safe_float_value();
 
 	// // size information
+	EM::Vec4 Offsets(	SSS.get_value_of_key(literal("x")).get_safe_float_value(),
+						SSS.get_value_of_key(literal("y")).get_safe_float_value(),
+						SSS.get_value_of_key(literal("w")).get_safe_float_value(), 
+						SSS.get_value_of_key(literal("h")).get_safe_float_value());
+
 	EM::Vec2 SourceSize(SS.get_value_of_key(literal("w")).get_safe_float_value(), 
 						SS.get_value_of_key(literal("h")).get_safe_float_value());
 
 	// Return frame
 	ImageFrame IF = {	EM::Vec4(x, y, z, w), 
+					  	Offsets,
 					  	SourceSize,
-					  	Name
+					  	Name, 
+					  	0.0f, 
+					  	0
 					};
+
 
 	// Need to read this value from .json 
 	// Also, the TextureDir needs to be formatted at beginning of program, since it's OS specific 
 	// 	in the way that forward or backslashes are read
-	IF.TextureID = EI::ResourceManager::GetTexture(std::string(TextureDir + "TexturePackerTest/test.png")).id;
+	IF.TextureID = EI::ResourceManager::GetTexture(AnimTextureDir).id;
 
 	// ImageFrame IF;
 	return IF;
@@ -1986,14 +2004,21 @@ ImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name)
 
 void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch)
 {
-	float ScalingFactor = 0.5f;
+	float ScalingFactor = 1.0f;
 	auto& Dims = Image.Dims;
 	auto& SSize = Image.SourceSize;
+	auto& Offsets = Image.OffsetDims;
+	auto YOffset = Image.YOffset;
 	auto AWidth = A.AtlasSize.x;
 	auto AHeight = A.AtlasSize.y;
 
-	Batch->Add(EM::Vec4(Position.x, Position.y, SSize * ScalingFactor), 
-				EM::Vec4(Dims.x / AWidth, (AHeight - Dims.y - Dims.w) / AHeight, Dims.z / AWidth, Dims.w / AHeight), 
+	Batch->Add(EM::Vec4(Position.x + (Offsets.x - SSize.x / 2.0f) * ScalingFactor, 
+						Position.y + YOffset * ScalingFactor / 2.0f - (Offsets.y - SSize.y / 2.0f) * ScalingFactor, 
+						EM::Vec2(Offsets.z, Offsets.w) * ScalingFactor), 
+				EM::Vec4(Dims.x / AWidth, 
+						(AHeight - Dims.y - Dims.w) / AHeight, 
+						 Dims.z / AWidth, 
+						 Dims.w / AHeight), 
 				A.Texture.id);
 }
 
@@ -2004,7 +2029,7 @@ Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc
 
 	// This doc will need to be passed in, but for now, just lazy load it...
     using sajson::literal;
-    std::string json = EU::read_file(std::string("../IsoARPG/Profiles/Animations/test.json").c_str());
+    std::string json = EU::read_file(AnimationDir.c_str());
     const sajson::document& doc = sajson::parse(sajson::string(json.c_str(), json.length()));
 
     if (!doc.is_valid())
@@ -2024,7 +2049,7 @@ Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc
 
     // Get frames array and delays array
     std::vector<std::string> frames;
-    std::vector<float> delays;
+    // std::vector<float> delays;
 
     // Frames
     const auto fr = Anim.find_object_key(literal("frames"));
@@ -2037,7 +2062,13 @@ Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc
     const auto de = Anim.find_object_key(literal("delays"));
     assert(de < anim_len);
     const auto& Delays = Anim.get_object_value(de);
-    delays.reserve(frames_len);
+    // delays.reserve(frames_len);
+
+    // Offsets
+    const auto os = Anim.find_object_key(literal("offsets"));
+    assert(os < anim_len);
+    const auto& Offset = Anim.get_object_value(os);
+    // delays.reserve(frames_len);
 
     // Now need to loop through this shit like whoa...
     // Get iframe, get its delay, push into A.frames
@@ -2045,6 +2076,7 @@ Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc
     {
     	auto IF = GetImageFrame(FramesDoc, Frames.get_array_element(i).get_string_value());
     	IF.Delay = Delays.get_array_element(i).get_safe_float_value();
+    	IF.YOffset = Offset.get_array_element(i).get_safe_float_value();
 
     	// push back into A.frames
     	A.Frames.push_back(IF);

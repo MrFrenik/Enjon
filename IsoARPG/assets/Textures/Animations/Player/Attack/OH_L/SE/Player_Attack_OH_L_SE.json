@@ -1,0 +1,174 @@
+{"frames": {
+
+"01":
+{
+	"frame": {"x":355,"y":343,"w":113,"h":122},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":132,"y":101,"w":113,"h":122},
+	"sourceSize": {"w":400,"h":293},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"02":
+{
+	"frame": {"x":341,"y":469,"w":94,"h":105},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":129,"y":103,"w":94,"h":105},
+	"sourceSize": {"w":400,"h":293},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"03":
+{
+	"frame": {"x":448,"y":135,"w":99,"h":133},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":130,"y":70,"w":99,"h":133},
+	"sourceSize": {"w":400,"h":293},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"04":
+{
+	"frame": {"x":278,"y":418,"w":59,"h":145},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":172,"y":68,"w":59,"h":145},
+	"sourceSize": {"w":400,"h":293},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"05":
+{
+	"frame": {"x":355,"y":193,"w":89,"h":146},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":174,"y":66,"w":89,"h":146},
+	"sourceSize": {"w":400,"h":293},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"06":
+{
+	"frame": {"x":408,"y":3,"w":122,"h":128},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":159,"y":88,"w":122,"h":128},
+	"sourceSize": {"w":400,"h":293},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"07":
+{
+	"frame": {"x":148,"y":477,"w":126,"h":96},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":160,"y":106,"w":126,"h":96},
+	"sourceSize": {"w":400,"h":293},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"08":
+{
+	"frame": {"x":3,"y":477,"w":141,"h":98},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":143,"y":107,"w":141,"h":98},
+	"sourceSize": {"w":400,"h":293},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"09":
+{
+	"frame": {"x":472,"y":272,"w":88,"h":104},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":141,"y":100,"w":88,"h":104},
+	"sourceSize": {"w":400,"h":293},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"345":
+{
+	"frame": {"x":3,"y":3,"w":261,"h":233},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":405,"y":257,"w":261,"h":233},
+	"sourceSize": {"w":1050,"h":750},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"asdf":
+{
+	"frame": {"x":3,"y":240,"w":261,"h":233},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":405,"y":257,"w":261,"h":233},
+	"sourceSize": {"w":1050,"h":750},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"left_hand":
+{
+	"frame": {"x":268,"y":193,"w":83,"h":221},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":83,"h":221},
+	"sourceSize": {"w":83,"h":221},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"left_lower_leg":
+{
+	"frame": {"x":439,"y":469,"w":59,"h":112},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":59,"h":112},
+	"sourceSize": {"w":62,"h":112},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"right_foot":
+{
+	"frame": {"x":472,"y":380,"w":62,"h":37},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":19,"w":62,"h":37},
+	"sourceSize": {"w":62,"h":56},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"right_forearm":
+{
+	"frame": {"x":502,"y":512,"w":36,"h":60},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":36,"h":60},
+	"sourceSize": {"w":36,"h":60},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"right_lower_leg":
+{
+	"frame": {"x":502,"y":421,"w":56,"h":87},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":3,"w":56,"h":87},
+	"sourceSize": {"w":56,"h":90},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"right_upper_arm":
+{
+	"frame": {"x":534,"y":3,"w":43,"h":120},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":43,"h":120},
+	"sourceSize": {"w":43,"h":120},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"sword":
+{
+	"frame": {"x":268,"y":3,"w":136,"h":186},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":136,"h":186},
+	"sourceSize": {"w":136,"h":186},
+	"pivot": {"x":0.5,"y":0.5}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png",
+	"format": "RGBA8888",
+	"size": {"w":586,"h":586},
+	"scale": "0.5",
+	"smartupdate": "$TexturePacker:SmartUpdate:890f79b19e39bfbcc764c706f49daa2e:81c9a09bf81bcc4e42dff2aaf580efbe:c55dc12ac9f2c32ca9229b94831d4c23$"
+}
+}

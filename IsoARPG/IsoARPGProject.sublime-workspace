@@ -91,39 +91,15 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 74724,
+				"buffer_size": 75861,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/E/Development/Enjon/deps/spine-cpp/third_party/sajson/sajson.h",
+			"file": "profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
 			"settings":
 			{
-				"buffer_size": 45326,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "profiles/Animations/test.json",
-			"settings":
-			{
-				"buffer_size": 171,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "include/ECS/Components.h",
-			"settings":
-			{
-				"buffer_size": 4828,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "assets/Textures/TexturePackerTest/test.json",
-			"settings":
-			{
-				"buffer_size": 2295,
+				"buffer_size": 279,
 				"line_ending": "Windows"
 			}
 		}
@@ -209,14 +185,26 @@
 	[
 		"/E/Development/Enjon/include",
 		"/E/Development/Enjon/IsoARPG",
-		"/E/Development/Enjon/IsoARPG/include",
-		"/E/Development/Enjon/IsoARPG/include/ECS"
+		"/E/Development/Enjon/IsoARPG/profiles",
+		"/E/Development/Enjon/IsoARPG/profiles/Animations",
+		"/E/Development/Enjon/IsoARPG/profiles/Animations/Player"
 	],
 	"file_history":
 	[
+		"/E/Development/Enjon/IsoARPG/assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE_no_trim.json",
+		"/E/Development/Enjon/IsoARPG/assets/Textures/Animations/Player/Attack/OH_L/SE/stuff.xml",
+		"/E/Development/Enjon/IsoARPG/assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json",
+		"/E/Development/Enjon/deps/spine-cpp/third_party/sajson/sajson.h",
+		"/E/Development/Enjon/IsoARPG/assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE",
+		"/E/Development/Enjon/IsoARPG/include/ECS/PlayerControllerSystem.h",
+		"/E/Development/Enjon/IsoARPG/src/ECS/PlayerControllerSystem.cpp",
+		"/E/Development/Enjon/IsoARPG/src/ECS/Animation2DSystem.cpp",
+		"/E/Development/Enjon/IsoARPG/include/ECS/Components.h",
+		"/E/Development/Enjon/IsoARPG/assets/Textures/TexturePackerTest/test.json",
+		"/E/Development/Enjon/IsoARPG/profiles/Animations/test.json",
+		"/E/Development/Enjon/IsoARPG/assets/Textures/Animations/Player/Attack/OH_L/SE/PlayerAttackOHLSEAnimation.json",
 		"/E/Development/Enjon/deps/spine-cpp/src/spinecpp/SkeletonJson.cpp",
 		"/E/Development/Enjon/IsoARPG/profiles/Animations/test.txt",
-		"/E/Development/Enjon/IsoARPG/assets/Textures/TexturePackerTest/test.json",
 		"/E/Development/Enjon/IsoARPG/assets/TexturePackerTest/test.json",
 		"/E/Development/Enjon/deps/spine-cpp/include/spinecpp/extension.h",
 		"/E/Development/Enjon/deps/spine-cpp/include/spinecpp/Atlas.h",
@@ -233,7 +221,6 @@
 		"/E/Development/Enjon/IsoARPG/include/ECS/EntityFactory.h",
 		"/E/Development/Enjon/IsoARPG/src/ECS/EntityFactory.cpp",
 		"/E/Development/Enjon/IsoARPG/src/ECS/CollisionSystem.cpp",
-		"/E/Development/Enjon/IsoARPG/src/ECS/PlayerControllerSystem.cpp",
 		"/E/Development/Enjon/IsoARPG/src/BehaviorTreeManager.cpp",
 		"/E/Development/Enjon/IsoARPG/include/BehaviorTreeManager.h",
 		"/E/Development/Enjon/src/Timing.cpp",
@@ -241,13 +228,11 @@
 		"/E/Development/Enjon/IsoARPG/include/AnimationManager.h",
 		"/E/Development/Enjon/IsoARPG/include/EnjonAnimation.h",
 		"/E/Development/Enjon/IsoARPG/src/EnjonAnimation.cpp",
-		"/E/Development/Enjon/IsoARPG/include/ECS/Components.h",
 		"/E/Development/Enjon/proc/clean.bat",
 		"/E/Development/Enjon/proc/dump.txt",
 		"/E/Development/Enjon/IsoARPG/src/Loot.cpp",
 		"/E/Development/Enjon/IsoARPG/include/ECS/Masks.h",
 		"/E/Development/Enjon/src/SpriteSheetManager.cpp",
-		"/E/Development/Enjon/IsoARPG/src/ECS/Animation2DSystem.cpp",
 		"/E/Development/Enjon/IsoARPG/include/ECS/ECS.h",
 		"/E/Development/Enjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
 		"/E/Development/Enjon/include/BehaviorTree/Wait.h",
@@ -333,15 +318,7 @@
 		"/D/C++Projects/VS/3DEnjon/shaders/geometrypass.v.glsl",
 		"/D/C++Projects/VS/3DEnjon/shaders/geometrypass.f.glsl",
 		"/D/C++Projects/VS/3DEnjon/src/GBuffer.cpp",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/GBuffer.h",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/FrameBufferObject.h",
-		"/D/C++Projects/VS/3DEnjon/include/Graphics/GLSLProgram.h",
-		"/D/C++Projects/VS/3DEnjon/include/Math/Mat4.h",
-		"/D/C++Projects/VS/3DEnjon/src/Math/Mat4.cpp",
-		"/D/C++Projects/VS/3DEnjon/src/DeferredRenderer.cpp",
-		"/C/Users/John/Desktop/Study.txt",
-		"/D/C++Projects/VS/3DEnjon/src/SpriteBatch.cpp",
-		"/C/Users/John/Desktop/DeferredRenderingSimpleOpenGLTutorial/Deferred Rendering Tutorial/source/DeferredRendering/FBORenderTexture.cpp"
+		"/D/C++Projects/VS/3DEnjon/include/Graphics/GBuffer.h"
 	],
 	"find":
 	{
@@ -360,6 +337,19 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"0",
+			"20",
+			"40",
+			"Offsets",
+			"EI",
+			"SSS",
+			"SS",
+			"SSize",
+			"0.4",
+			"beam",
+			"ViewVector.",
+			"AttackVector",
+			"ArrowVelocity",
 			"Anim.get_length()",
 			"s",
 			"Meta",
@@ -474,20 +464,7 @@
 			"50.0f",
 			"BeamSegments.push",
 			"BeamSegments.puh",
-			"BeamSegments",
-			"Enjon::Random::Roll(-10, 2) / 100.0f",
-			"amountdrawn",
-			"75.0f",
-			"20",
-			"10",
-			"Box",
-			"amountdrawn",
-			"EntityFactory",
-			"amountdrawn",
-			"amountd",
-			"amountda",
-			"amountdrawn",
-			"sin"
+			"BeamSegments"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -505,7 +482,7 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 0,
 			"sheets":
 			[
 				{
@@ -514,7 +491,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 74724,
+						"buffer_size": 75861,
 						"regions":
 						{
 							"bookmark_e":
@@ -523,8 +500,8 @@
 								"regions":
 								[
 									[
-										66368,
-										66368
+										66661,
+										66661
 									]
 								]
 							}
@@ -532,8 +509,8 @@
 						"selection":
 						[
 							[
-								68697,
-								68697
+								73079,
+								73079
 							]
 						],
 						"settings":
@@ -592,57 +569,27 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 24947.0,
+						"translation.y": 29663.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "/E/Development/Enjon/deps/spine-cpp/third_party/sajson/sajson.h",
+					"file": "profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 45326,
+						"buffer_size": 279,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								18713,
-								18713
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 6630.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "profiles/Animations/test.json",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 171,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								84,
-								84
+								271,
+								271
 							]
 						],
 						"settings":
@@ -653,71 +600,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "include/ECS/Components.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4828,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2598,
-								2598
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": -0.0,
-						"translation.y": 1125.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 0,
-			"sheets":
-			[
-				{
-					"buffer": 4,
-					"file": "assets/Textures/TexturePackerTest/test.json",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2295,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								359,
-								359
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -725,7 +608,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 23.0
+		"height": 46.0
 	},
 	"input":
 	{
@@ -740,18 +623,11 @@
 				0,
 				1,
 				1
-			],
-			[
-				1,
-				0,
-				2,
-				1
 			]
 		],
 		"cols":
 		[
 			0.0,
-			0.5,
 			1.0
 		],
 		"rows":
@@ -814,7 +690,7 @@
 	"show_minimap": false,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": true,
+	"side_bar_visible": false,
 	"side_bar_width": 230.0,
 	"status_bar_visible": false,
 	"template_settings":
