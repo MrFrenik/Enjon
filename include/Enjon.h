@@ -36,6 +36,9 @@
 #include "Graphics/DeferredRenderer.h"
 #include "Graphics/GBuffer.h"
 
+#include "GUI/Signal.h"
+#include "GUI/Property.h"
+
 #include "IO/ImageLoader.h"
 #include "IO/InputManager.h"
 #include "IO/IOManager.h"

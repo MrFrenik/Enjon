@@ -1,9 +1,28 @@
 #ifndef FILEUTILS_H
 #define FILEUTILS_H
 
+#include <fstream>
+#include <sstream>
 #include <string>
 
 namespace Enjon { namespace Utils { 
+
+	inline std::string read_file_sstream(const char* filePath)
+	{
+		// Get and open input file
+		std::ifstream inFile;
+		inFile.open(filePath);
+
+		// Stream from file into stringstream
+		std::stringstream strStream;
+		strStream << inFile.rdbuf();
+
+		// Close the file stream
+		inFile.close();
+
+		// Return contents in string
+		return strStream.str();
+	}
 
 	inline std::string read_file(const char* filePath)
 	{

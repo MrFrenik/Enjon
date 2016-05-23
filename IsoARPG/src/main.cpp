@@ -1620,19 +1620,104 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 #endif 
 
 /**
+*  UNIT TESTS
+*/
+
+/*-- External/Engine Libraries includes --*/
+#include <Enjon.h>
+
+/*-- Standard Library includes --*/
+#include <iostream>
+#include <sstream>
+#include <string>
+
+// Button class
+class Button
+{
+	public:
+		EGUI::Signal<> on_click;
+};
+
+// TextBox
+class TextBox
+{
+	public:
+		TextBox() { text = ""; }
+
+	public:
+		EGUI::Property<std::string> text;
+};
+
+
+#undef main
+int main(int argc, char** argv)
+{
+	// Create button
+	Button UpButton;
+	Button DownButton;
+
+	// Create TextBox
+	TextBox TB;
+
+	// Create Property
+	EGUI::Property<float> DelayValue;
+
+	TB.text.on_change().connect([](std::string S)
+	{
+		std::cout << "Text changed to: " << S << std::endl;
+	});
+
+	// Connect value of text to delay value
+	DelayValue.connect_from(::atof(TB.text.get().c_str()));
+
+	// Connect button click to setting textbox
+	UpButton.on_click.connect([&]()
+	{
+		// Get value of string
+		float V = ::atof(TB.text.get().c_str());
+
+		// Increment by 1
+		V += 1.0f;
+
+		// Set back to text
+		TB.text = std::to_string(V);
+	});
+
+	// Connect down button click to setting textbox
+	DownButton.on_click.connect([&]()
+	{
+
+		// Get value of text string
+		float V = ::atof(TB.text.get().c_str());
+
+		// Decrement by 1
+		V -= 1.0f;
+
+		// Set back to set
+		TB.text = std::to_string(V);
+	});
+
+	// Emit button clicks
+	UpButton.on_click.emit();
+	UpButton.on_click.emit();
+	UpButton.on_click.emit();
+	DownButton.on_click.emit();
+
+
+	return 0;
+}
+
+#if 1
+
+
+
+#endif
+
+/**
 * SYSTEMS TEST
 */
 
 #if 0
-
-#endif
-
-
-/**
-*  UNIT TESTS
-*/
-
-#if 1
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -1745,7 +1830,7 @@ int main(int argc, char** argv) {
 	EG::FontManager::Init();
 
 	// Shader for frame buffer
-	EG::GLSLProgram* TS 	= EG::ShaderManager::GetShader("Basic");
+	EG::GLSLProgram* TS	= EG::ShaderManager::GetShader("Basic");
 
 	// UI Batch
 	EG::SpriteBatch* UIBatch = new EG::SpriteBatch();
@@ -1772,7 +1857,7 @@ int main(int argc, char** argv) {
 	EM::Mat4 Model, View, Projection;
 
     using sajson::literal;
-    std::string json = EU::read_file(AnimTextureJSONDir.c_str());
+    std::string json = EU::read_file_sstream(AnimTextureJSONDir.c_str());
     const sajson::document& doc = sajson::parse(sajson::string(json.c_str(), json.length()));
 
     if (!doc.is_valid())
@@ -1785,17 +1870,17 @@ int main(int argc, char** argv) {
     const auto& root = doc.get_root();
     const auto len = root.get_length();
 
-    // Get handle to meta deta
+    // // Get handle to meta deta
     const auto meta = root.find_object_key(literal("meta"));
     assert(meta < len);
     const auto& Meta = root.get_object_value(meta);
 
-    // Get handle to frame data
+    // // Get handle to frame data
     const auto frames = root.find_object_key(literal("frames"));
     assert(frames < len);
     const auto& Frames = root.get_object_value(frames);
 
-    // Get image size
+    // // Get image size
     auto ISize = Meta.get_value_of_key(literal("size"));
     float AWidth = ISize.get_value_of_key(literal("w")).get_safe_float_value();
     float AHeight = ISize.get_value_of_key(literal("h")).get_safe_float_value();
@@ -1817,7 +1902,7 @@ int main(int argc, char** argv) {
 		Limiter.Begin();
 
 		// Keep track of animation delays
-		t += 0.15f;
+		t += 0.25f;
 
 		// Check for quit condition
 		running = ProcessInput(&Input, Camera);
@@ -1849,9 +1934,12 @@ int main(int argc, char** argv) {
 		// Basic shader for UI
 		TS->Use();
 		{
+			TS->SetUniformMat4("model", Model);
+			TS->SetUniformMat4("projection", Projection);
+			TS->SetUniformMat4("view", View);
+
 			EntityBatch->Begin();
 			{
-
 				// EM::Vec2 Position(-400, 0);
 				// for (auto& F : Test.Frames)
 				// {
@@ -1929,7 +2017,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 				Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 				break;
 			default:
-				break;
+k				break;
 		}
     }
 
