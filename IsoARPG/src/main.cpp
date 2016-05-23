@@ -1638,14 +1638,35 @@ class Button
 		EGUI::Signal<> on_click;
 };
 
+// Slider class
+class Slider
+{
+	public:
+		EGUI::Signal<> on_slide_right;
+		EGUI::Signal<> on_slide_left;
+};
+
 // TextBox
 class TextBox
 {
 	public:
-		TextBox() { text = ""; }
+		TextBox(std::string n) : Name(n) 
+		{ 
+			text = ""; 
+
+			this->text.on_change().connect([&](std::string S)
+			{
+				std::cout << this->Name << " changed to: " << S << std::endl;
+			});
+		}
+
+		void SetText(std::string S) { this->text = S; }
 
 	public:
 		EGUI::Property<std::string> text;
+
+	private:
+		std::string Name;
 };
 
 
@@ -1656,16 +1677,19 @@ int main(int argc, char** argv)
 	Button UpButton;
 	Button DownButton;
 
+	// Create slider
+	Slider slider;
+
 	// Create TextBox
-	TextBox TB;
+	TextBox TB("Delays");
+	TextBox TB2("Other Delays");
+
+	std::vector<TextBox*> TextBoxes;
+	TextBoxes.push_back(&TB);
+	TextBoxes.push_back(&TB2);
 
 	// Create Property
 	EGUI::Property<float> DelayValue;
-
-	TB.text.on_change().connect([](std::string S)
-	{
-		std::cout << "Text changed to: " << S << std::endl;
-	});
 
 	// Connect value of text to delay value
 	DelayValue.connect_from(::atof(TB.text.get().c_str()));
@@ -1673,36 +1697,21 @@ int main(int argc, char** argv)
 	// Connect button click to setting textbox
 	UpButton.on_click.connect([&]()
 	{
-		// Get value of string
-		float V = ::atof(TB.text.get().c_str());
+		for (auto T : TextBoxes)
+		{
+			// Get value of string
+			float V = ::atof(T->text.get().c_str());
 
-		// Increment by 1
-		V += 1.0f;
+			// Increment by 1
+			V += 1.0f;
 
-		// Set back to text
-		TB.text = std::to_string(V);
+			// Set back to text
+			T->text = std::to_string(V);
+		}
 	});
 
-	// Connect down button click to setting textbox
-	DownButton.on_click.connect([&]()
-	{
 
-		// Get value of text string
-		float V = ::atof(TB.text.get().c_str());
-
-		// Decrement by 1
-		V -= 1.0f;
-
-		// Set back to set
-		TB.text = std::to_string(V);
-	});
-
-	// Emit button clicks
 	UpButton.on_click.emit();
-	UpButton.on_click.emit();
-	UpButton.on_click.emit();
-	DownButton.on_click.emit();
-
 
 	return 0;
 }
