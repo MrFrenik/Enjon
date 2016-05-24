@@ -83,7 +83,6 @@ namespace Enjon { namespace GUI {
       connection_ = &source;
       connection_id_ = source.on_change().connect([this](T const& value){
         set(value);
-        return true;
       });
       set(source.get());
     }

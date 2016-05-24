@@ -1619,6 +1619,8 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 
 #endif 
 
+
+#if 0
 /**
 *  UNIT TESTS
 */
@@ -1716,7 +1718,6 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-#if 1
 
 
 
@@ -1726,7 +1727,7 @@ int main(int argc, char** argv)
 * SYSTEMS TEST
 */
 
-#if 0
+#if 1
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -1805,6 +1806,35 @@ typedef struct
 	uint32_t TotalFrames;
 } Anim;
 
+typedef struct
+{
+	EGUI::Signal<> on_click;
+} Button;
+
+
+// Something like this eventually for global gui references...
+namespace ButtonManager
+{
+	std::unordered_map<std::string, Button*> Buttons;
+
+	void AddButton(std::string S, Button* B)
+	{
+		Buttons[S] = B;
+	}
+
+	Button* GetButton(const std::string S)
+	{
+		auto search = Buttons.find(S);
+		if (search != Buttons.end())
+		{
+			return search->second;
+		}	
+
+		return nullptr;
+	}
+};
+
+
 /* Function Declarations */
 bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera);
 ImageFrame GetImageFrame(const sajson::value& Frame, const std::string Name);
@@ -1823,6 +1853,8 @@ int main(int argc, char** argv) {
 
 	float t = 0.0f;
 	float FPS = 0.0f;
+	float TimeIncrement = 0.0f;
+
 
 	// Create a window
 	EG::Window Window;
@@ -1904,6 +1936,129 @@ int main(int argc, char** argv) {
 	// Also need a current index for frames	
 	uint32_t CurrentIndex = 0;
 
+	////////////////////////////////
+	// ANIMATION EDITOR ////////////
+
+	// Need to create a simple button, for now, that will start and stop the animation
+	Button PlayButton;
+	Button NextFrame;
+	Button PreviousFrame;
+	Button OffsetUp;
+	Button OffsetDown;
+	Button DelayUp;
+	Button DelayDown;
+
+
+	// Set up PlayButton's signal
+	PlayButton.on_click.connect([&]()
+	{
+		if (TimeIncrement <= 0.0f) TimeIncrement = 0.25f;
+		else TimeIncrement = 0.0f;
+	});
+
+	// Set up NextFrame's signal
+	NextFrame.on_click.connect([&]()
+	{
+		// If playing, then stop the time
+		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
+
+		// Get Current Animation, which in this case is just Test
+		CurrentIndex = (CurrentIndex + 1) % Test.TotalFrames;
+
+		// And set t = -1.0f for safety
+		t = -1.0f;
+	});
+
+	// Set up PreviousFrame's signal
+	PreviousFrame.on_click.connect([&]()
+	{
+		// If playing, then stop the time
+		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
+
+		// Get Current Animation, which in this case is just Test
+		if (CurrentIndex > 0) CurrentIndex--;
+
+		// Bounds check
+		else CurrentIndex = Test.TotalFrames - 1;
+
+		// And set t = -1.0f for safety
+		t = -1.0f;
+	});
+
+	// Set up OffsetUp's signal
+	OffsetUp.on_click.connect([&]()
+	{
+		// Get Current Frame
+		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+
+		// Get CurrentFrame's YOffset
+		auto YOffset = CurrentFrame->YOffset;
+
+		// Increment by arbitrary amount...
+		YOffset += 1.0f;
+
+		// Reset offset
+		CurrentFrame->YOffset = YOffset;
+	});
+
+	// Set up OffsetDown's signal
+	OffsetDown.on_click.connect([&]()
+	{
+		// Get Current Frame
+		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+
+		// Get CurrentFrame's YOffset
+		auto YOffset = CurrentFrame->YOffset;
+
+		// Increment by arbitrary amount...
+		YOffset -= 1.0f;
+
+		// Reset offset
+		CurrentFrame->YOffset = YOffset;
+	});
+
+	// Set up DelayUp's signal
+	DelayUp.on_click.connect([&]()
+	{
+		// Get Current Frame
+		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+
+		// Get CurrentFrame's Delay
+		auto Delay = CurrentFrame->Delay;
+
+		// Increment by arbitrary amount...
+		Delay += 0.1f;
+
+		// Reset Delay
+		CurrentFrame->Delay = Delay;
+	});
+
+	// Set up DelayUp's signal
+	DelayDown.on_click.connect([&]()
+	{
+		// Get Current Frame
+		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+
+		// Get CurrentFrame's Delay
+		auto Delay = CurrentFrame->Delay;
+
+		// Increment by arbitrary amount...
+		if (Delay > 0.0f) Delay -= 0.1f;
+
+		// Reset Delay
+		CurrentFrame->Delay = Delay;
+	});
+
+	// Put into button manager map
+	ButtonManager::AddButton("PlayButton", &PlayButton);
+	ButtonManager::AddButton("NextFrame", &NextFrame);
+	ButtonManager::AddButton("PreviousFrame", &PreviousFrame);
+	ButtonManager::AddButton("OffsetUp", &OffsetUp);
+	ButtonManager::AddButton("OffsetDown", &OffsetDown);
+	ButtonManager::AddButton("DelayUp", &DelayUp);
+	ButtonManager::AddButton("DelayDown", &DelayDown);
+
+
 	// Main loop
 	bool running = true;
 	while (running)
@@ -1911,7 +2066,7 @@ int main(int argc, char** argv) {
 		Limiter.Begin();
 
 		// Keep track of animation delays
-		t += 0.25f;
+		t += TimeIncrement;
 
 		// Check for quit condition
 		running = ProcessInput(&Input, Camera);
@@ -1938,7 +2093,7 @@ int main(int argc, char** argv) {
 		//Set blend function type
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 1.0));
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0));
 
 		// Basic shader for UI
 		TS->Use();
@@ -1949,12 +2104,6 @@ int main(int argc, char** argv) {
 
 			EntityBatch->Begin();
 			{
-				// EM::Vec2 Position(-400, 0);
-				// for (auto& F : Test.Frames)
-				// {
-				// 	DrawFrame(F, Position, atlas, EntityBatch);
-				// 	Position += EM::Vec2(100, 0);
-				// }
 
 				if (t >= Test.Frames.at(CurrentIndex).Delay)
 				{
@@ -1962,17 +2111,14 @@ int main(int argc, char** argv) {
 					t = 0.0f;
 				}
 				DrawFrame(Test.Frames.at(CurrentIndex), EM::Vec2(0, 0),	atlas, EntityBatch);
-				
-				// DrawFrame(Test.Frames.at(6), EM::Vec2(-100, 0),	atlas, EntityBatch);
-				// DrawFrame(Test.Frames.at(7), EM::Vec2(0, 0),	atlas, EntityBatch);
-				// DrawFrame(Test.Frames.at(8), EM::Vec2(100, 0),	atlas, EntityBatch);
 
-				// Draw random shit
-				// EntityBatch->Add(
-				// 					EM::Vec4(0, 0, 100, 100), 
-				// 					EM::Vec4(0, 0, 1, 1), 
-				// 					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box.png").id
-				// 				);
+				// Draw point at 0,0
+				EntityBatch->Add(
+									EM::Vec4(0, 0, 5, 5), 
+									EM::Vec4(0, 0, 1, 1), 
+									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png").id,
+									EG::RGBA16_Red()
+								);
 			}
 			EntityBatch->End();
 			EntityBatch->RenderBatch();
@@ -1987,6 +2133,69 @@ int main(int argc, char** argv) {
 												EG::SetOpacity(EG::RGBA16_White(), 0.8f));
 				EG::Fonts::PrintText(HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 50.0f, HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 30.0f, 0.4f, std::to_string(FPS), EG::FontManager::GetFont(std::string("Bold")), *UIBatch, 
 												EG::SetOpacity(EG::RGBA16_White(), 0.8f));
+
+				auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+
+				// Display current frame information
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, 0.4f, 
+										std::string("Current Frame: "), 
+										EG::FontManager::GetFont(std::string("Bold")), 
+										*UIBatch, 
+										EG::SetOpacity(EG::RGBA16_White(), 0.8f)
+									);
+				// Current Frame Name
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, 0.4f, 
+										std::string("Name: "), 
+										EG::FontManager::GetFont(std::string("Bold")), 
+										*UIBatch, 
+										EG::SetOpacity(EG::RGBA16_Red(), 0.8f)
+									);
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 80.0f, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, 0.4f, 
+										CurrentFrame->Name, 
+										EG::FontManager::GetFont(std::string("Bold")), 
+										*UIBatch, 
+										EG::SetOpacity(EG::RGBA16_Red(), 0.8f)
+									);
+				// Current Frame Delay
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 110.0f, 0.4f, 
+										std::string("Delay: "), 
+										EG::FontManager::GetFont(std::string("Bold")), 
+										*UIBatch, 
+										EG::SetOpacity(EG::RGBA16_Red(), 0.8f)
+									);
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 80.0f, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 110.0f, 0.4f, 
+										std::to_string(CurrentFrame->Delay), 
+										EG::FontManager::GetFont(std::string("Bold")), 
+										*UIBatch, 
+										EG::SetOpacity(EG::RGBA16_Red(), 0.8f)
+									);
+				// Current Frame Delay
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, 0.4f, 
+										std::string("Y Offset: "), 
+										EG::FontManager::GetFont(std::string("Bold")), 
+										*UIBatch, 
+										EG::SetOpacity(EG::RGBA16_Red(), 0.8f)
+									);
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 80.0f, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, 0.4f, 
+										std::to_string(CurrentFrame->YOffset), 
+										EG::FontManager::GetFont(std::string("Bold")), 
+										*UIBatch, 
+										EG::SetOpacity(EG::RGBA16_Red(), 0.8f)
+									);
 
 			}
 			UIBatch->End();
@@ -2026,7 +2235,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 				Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 				break;
 			default:
-k				break;
+				break;
 		}
     }
 
@@ -2043,6 +2252,71 @@ k				break;
 	{
 		auto S = Camera->GetScale();
 		if (S > 0.1f) Camera->SetScale(Camera->GetScale() - 0.005f);
+	}
+	if (Input->IsKeyPressed(SDLK_SPACE))
+	{
+		// Get button from button manager
+		auto PlayButton = ButtonManager::GetButton("PlayButton");
+
+		// Press play
+		PlayButton->on_click.emit();
+	}
+	if (Input->IsKeyPressed(SDLK_RIGHT))
+	{
+		// Get button from button manager
+		auto NextFrame = ButtonManager::GetButton("NextFrame");
+
+		// Press next frame
+		NextFrame->on_click.emit();	
+	}
+	if (Input->IsKeyPressed(SDLK_LEFT))
+	{
+		// Get button from button manager
+		auto PreviousFrame = ButtonManager::GetButton("PreviousFrame");
+
+		// Press next frame
+		PreviousFrame->on_click.emit();
+	}
+	if (Input->IsKeyPressed(SDLK_UP))
+	{
+		// Get button from button manager
+		auto OffsetUp = ButtonManager::GetButton("OffsetUp");
+
+		// Press offset up
+		OffsetUp->on_click.emit();
+	}
+	if (Input->IsKeyPressed(SDLK_DOWN))
+	{
+		// Get button from button manager
+		auto OffsetDown = ButtonManager::GetButton("OffsetDown");
+
+		// Press offset Down
+		if (OffsetDown)
+		{
+			OffsetDown->on_click.emit();
+		}
+	}
+	if (Input->IsKeyPressed(SDLK_LEFTBRACKET))
+	{
+		// Get button from button manager
+		auto DelayDown = ButtonManager::GetButton("DelayDown");
+
+		// Emit
+		if (DelayDown)
+		{
+			DelayDown->on_click.emit();	
+		}	
+	}
+	if (Input->IsKeyPressed(SDLK_RIGHTBRACKET))
+	{
+		// Get button from button manager
+		auto DelayUp = ButtonManager::GetButton("DelayUp");
+
+		// Emit
+		if (DelayUp)
+		{
+			DelayUp->on_click.emit();
+		}
 	}
 
 	return true;
@@ -2081,7 +2355,8 @@ ImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name)
 						SS.get_value_of_key(literal("h")).get_safe_float_value());
 
 	// Return frame
-	ImageFrame IF = {	EM::Vec4(x, y, z, w), 
+	ImageFrame IF = {	
+						EM::Vec4(x, y, z, w), 
 					  	Offsets,
 					  	SourceSize,
 					  	Name, 
@@ -2110,7 +2385,7 @@ void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::S
 	auto AHeight = A.AtlasSize.y;
 
 	Batch->Add(EM::Vec4(Position.x + (Offsets.x - SSize.x / 2.0f) * ScalingFactor, 
-						Position.y + YOffset * ScalingFactor / 2.0f - (Offsets.y - SSize.y / 2.0f) * ScalingFactor, 
+						Position.y + YOffset * ScalingFactor / 2.0f - (Offsets.y - Dims.w / 2.0f) * ScalingFactor, 
 						EM::Vec2(Offsets.z, Offsets.w) * ScalingFactor), 
 				EM::Vec4(Dims.x / AWidth, 
 						(AHeight - Dims.y - Dims.w) / AHeight, 
@@ -2146,7 +2421,6 @@ Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc
 
     // Get frames array and delays array
     std::vector<std::string> frames;
-    // std::vector<float> delays;
 
     // Frames
     const auto fr = Anim.find_object_key(literal("frames"));
@@ -2159,7 +2433,6 @@ Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc
     const auto de = Anim.find_object_key(literal("delays"));
     assert(de < anim_len);
     const auto& Delays = Anim.get_object_value(de);
-    // delays.reserve(frames_len);
 
     // Offsets
     const auto os = Anim.find_object_key(literal("offsets"));
