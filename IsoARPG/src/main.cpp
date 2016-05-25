@@ -1970,7 +1970,7 @@ int main(int argc, char** argv) {
 	{
 		if (TimeIncrement <= 0.0f) 
 		{
-			TimeIncrement = 0.05f;
+			TimeIncrement = 0.15f;
 			PlayButton.State = ButtonState::ACTIVE;
 		}
 
@@ -2110,9 +2110,15 @@ int main(int argc, char** argv) {
 	// Draw BG
 	BGBatch->Begin();
 	BGBatch->Add(
-					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 3.0f, SCREENWIDTH, SCREENHEIGHT),
+					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
 					EM::Vec4(0, 0, 1, 1),
 					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png").id
+				);
+	BGBatch->Add(
+					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
+					EM::Vec4(0, 0, 1, 1),
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg_cross.png").id,
+					EG::SetOpacity(EG::RGBA16_White(), 0.2f)
 				);
 	BGBatch->End();
 
@@ -2181,14 +2187,6 @@ int main(int argc, char** argv) {
 					t = 0.0f;
 				}
 				DrawFrame(Test.Frames.at(CurrentIndex), EM::Vec2(0, 0),	atlas, EntityBatch);
-
-				// Draw point at 0,0
-				EntityBatch->Add(
-									EM::Vec4(0, 0, 5, 5), 
-									EM::Vec4(0, 0, 1, 1), 
-									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png").id,
-									EG::RGBA16_Red()
-								);
 
 			}
 			EntityBatch->End();
