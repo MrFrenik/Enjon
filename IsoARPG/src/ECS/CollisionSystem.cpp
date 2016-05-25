@@ -56,6 +56,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 		static Enjon::uint32 GetCellsTime = 0;
 		static Enjon::uint32 CollisionCheckTime = 0;
 
+		// This could really be unecessary writing...
 		eid32 size = Manager->CollisionSystem->Entities.empty() ? 0 : Manager->CollisionSystem->Entities.size();	
 		
 		for (eid32 n = 0; n < size; n++)
@@ -64,6 +65,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 			eid32 e = Manager->CollisionSystem->Entities[n];
 
 			// If entity has no transform, then continue
+			// Could I pull this out of the loop to get rid of unnecessary branching?
 			if (!(Manager->Masks[e] & COMPONENT_TRANSFORM3D)) continue;
 			
 			// Get the cell(s) that entity belongs to
@@ -87,61 +89,70 @@ namespace ECS{ namespace Systems { namespace Collision {
 			// TODO(John): Keep a mapping of already checked pairs to cut this time down
 		
 			// Collide with entities 
-			if (!Entities.empty())
+			for (eid32 collider : Entities)
 			{
-				for (eid32 collider : Entities)
+				// This will cause unnecessary branching. Figure out a way to take it out of the loop.
+				if (collider != e)
 				{
-					if (Manager->Masks[collider] & COMPONENT_TRANSFORM3D && collider != e)
-					{
-						// Get EntityType of collider and entity
-						Component::EntityType AType = Manager->Types[collider];
-						Component::EntityType BType = Manager->Types[e];
+					// Get EntityType of collider and entity
+					Component::EntityType AType = Manager->Types[collider];
+					Component::EntityType BType = Manager->Types[e];
 
-						// Get collision mask for A and B
-						Enjon::uint32 Mask = GetCollisionType(Manager, e, collider);
+					// Get collision mask for A and B
+					Enjon::uint32 Mask = GetCollisionType(Manager, e, collider);
 
-						if (Mask == (COLLISION_ITEM | COLLISION_ITEM)) 			{ CollideWithDebris(Manager, collider, e);		continue; }
-						if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
-						if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
-						if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithProjectile(Manager, collider, e); 	
-																			      else 										    	CollideWithProjectile(Manager, e, collider); 
-																			      continue; 
-																			  	} 
-						if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
-																				  else 											CollideWithDebris(Manager, e, collider); 
-																				  continue; 
-																				} 
-						if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) 		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
-																				  else 											CollideWithDebris(Manager, e, collider); 
-																				  continue; 
-																				} 
-						if (Mask == (COLLISION_ITEM | COLLISION_EXPLOSIVE))		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e);
-																				  else 											CollideWithDebris(Manager, e, collider); 		
-																				  continue; 
-																				} 
-						if (Mask == (COLLISION_ITEM | COLLISION_VORTEX))		{ if (AType == Component::EntityType::ITEM) 	CollideWithVortex(Manager, collider, e);
-																				  else 											CollideWithVortex(Manager, e, collider); 		
-																				  continue; 
-																				} 
-						if (Mask == (COLLISION_PROJECTILE | COLLISION_VORTEX))	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithVortex(Manager, collider, e);
-																				  else 												CollideWithVortex(Manager, e, collider); 		
-																				  continue; 
-																				} 
-						if (Mask == (COLLISION_PROJECTILE | COLLISION_EXPLOSIVE)){ if (AType == Component::EntityType::PROJECTILE) 	CollideWithDebris(Manager, collider, e);
-																				  else 													CollideWithDebris(Manager, e, collider); 		
-																				  continue; 
-																				} 
-						if (Mask == (COLLISION_PROJECTILE | COLLISION_WEAPON))	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithDebris(Manager, collider, e);
-																				  else 												CollideWithDebris(Manager, e, collider); 		
-																				  continue; 
-																				} 
-						if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
-						if (Mask == (COLLISION_EXPLOSIVE | COLLISION_ENEMY))	{ if (AType == Component::EntityType::ENEMY) 	CollideWithExplosive(Manager, e, collider);  	
-																				  else 											CollideWithExplosive(Manager, collider, e); 
-																				  continue; }
-					}
-				}	
-			}
+					// NOTE(John): I can only imagine how much branching this causes... Ugh.
+					if (Mask == (COLLISION_ITEM | COLLISION_ITEM)) 			{ CollideWithDebris(Manager, collider, e);		continue; }
+					if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
+					if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
+					if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithProjectile(Manager, collider, e); 	
+																		      else 										    	CollideWithProjectile(Manager, e, collider); 
+																		      continue; 
+																		  	} 
+																		  	
+					if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
+																			  else 											CollideWithDebris(Manager, e, collider); 
+																			  continue; 
+																			} 
+
+					if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) 		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
+																			  else 											CollideWithDebris(Manager, e, collider); 
+																			  continue; 
+																			} 
+
+					if (Mask == (COLLISION_ITEM | COLLISION_EXPLOSIVE))		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e);
+																			  else 											CollideWithDebris(Manager, e, collider); 		
+																			  continue; 
+																			} 
+
+					if (Mask == (COLLISION_ITEM | COLLISION_VORTEX))		{ if (AType == Component::EntityType::ITEM) 	CollideWithVortex(Manager, collider, e);
+																			  else 											CollideWithVortex(Manager, e, collider); 		
+																			  continue; 
+																			} 
+
+					if (Mask == (COLLISION_PROJECTILE | COLLISION_VORTEX))	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithVortex(Manager, collider, e);
+																			  else 												CollideWithVortex(Manager, e, collider); 		
+																			  continue; 
+																			} 
+
+					if (Mask == (COLLISION_PROJECTILE | COLLISION_EXPLOSIVE)){ if (AType == Component::EntityType::PROJECTILE) 	CollideWithDebris(Manager, collider, e);
+																			  else 													CollideWithDebris(Manager, e, collider); 		
+																			  continue; 
+																			} 
+
+					if (Mask == (COLLISION_PROJECTILE | COLLISION_WEAPON))	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithDebris(Manager, collider, e);
+																			  else 												CollideWithDebris(Manager, e, collider); 		
+																			  continue; 
+																			} 
+
+					if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
+
+					if (Mask == (COLLISION_EXPLOSIVE | COLLISION_ENEMY))	{ if (AType == Component::EntityType::ENEMY) 	CollideWithExplosive(Manager, e, collider);  	
+																			  else 											CollideWithExplosive(Manager, collider, e); 
+																			  continue; 
+																			}
+				}
+			}	
 		}
 
 	} // Collision Update

@@ -1,7 +1,7 @@
 #ifndef FONT_H
 #define FONT_H
 
-#include <map>
+#include <unordered_map>
 
 #include <GLEW/glew.h>
 
@@ -19,12 +19,12 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 		GLuint TextureID;
 		Enjon::Math::iVec2 Size;
 		Enjon::Math::iVec2 Bearing;
-		GLuint Advance;
+		FT_Pos Advance;
 	} Character;
 
 	typedef struct 
 	{
-		std::map<GLchar, Character> Characters;	
+		std::unordered_map<GLchar, Character> Characters;	
 	} Font;
 
 	typedef struct 

@@ -52,8 +52,8 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	        // Set texture options
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	        // Now store character for later use
 	        Character character = {
 	            texture,
@@ -66,6 +66,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	        font->Characters.insert(std::pair<GLchar, Character>(c, character));
 	    }
 	    glBindTexture(GL_TEXTURE_2D, 0);
+
 	    // Destroy FreeType once we're finished
 	    FT_Done_Face(face);
 	    FT_Done_FreeType(ft);

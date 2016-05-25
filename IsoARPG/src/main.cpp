@@ -361,7 +361,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 100;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -1804,11 +1804,16 @@ typedef struct
 {
 	std::vector<ImageFrame> Frames;
 	uint32_t TotalFrames;
+	std::string Name;
 } Anim;
+
+enum ButtonState { INACTIVE, ACTIVE };
 
 typedef struct
 {
 	EGUI::Signal<> on_click;
+	std::vector<ImageFrame> Frames;
+	ButtonState State;
 } Button;
 
 
@@ -1871,7 +1876,8 @@ int main(int argc, char** argv) {
 	EG::FontManager::Init();
 
 	// Shader for frame buffer
-	EG::GLSLProgram* TS	= EG::ShaderManager::GetShader("Basic");
+	EG::GLSLProgram* BasicShader	= EG::ShaderManager::GetShader("Basic");
+	EG::GLSLProgram* TextShader		= EG::ShaderManager::GetShader("Text");  
 
 	// UI Batch
 	EG::SpriteBatch* UIBatch = new EG::SpriteBatch();
@@ -1879,6 +1885,9 @@ int main(int argc, char** argv) {
 
 	EG::SpriteBatch* EntityBatch = new EG::SpriteBatch();
 	EntityBatch->Init();
+
+	EG::SpriteBatch* BGBatch = new EG::SpriteBatch();
+	BGBatch->Init();
 
 	const float W = SCREENWIDTH;
 	const float H = SCREENHEIGHT;
@@ -1948,12 +1957,28 @@ int main(int argc, char** argv) {
 	Button DelayUp;
 	Button DelayDown;
 
+	// Set up play button image frames
+	PlayButton.Frames.push_back(GetImageFrame(Frames, "playbuttonup"));
+	PlayButton.Frames.push_back(GetImageFrame(Frames, "playbuttondown"));
+
+	// Set state to inactive
+	PlayButton.State = ButtonState::INACTIVE;
+
 
 	// Set up PlayButton's signal
 	PlayButton.on_click.connect([&]()
 	{
-		if (TimeIncrement <= 0.0f) TimeIncrement = 0.25f;
-		else TimeIncrement = 0.0f;
+		if (TimeIncrement <= 0.0f) 
+		{
+			TimeIncrement = 0.05f;
+			PlayButton.State = ButtonState::ACTIVE;
+		}
+
+		else 
+		{
+			TimeIncrement = 0.0f;
+			PlayButton.State = ButtonState::INACTIVE;
+		}
 	});
 
 	// Set up NextFrame's signal
@@ -1961,6 +1986,8 @@ int main(int argc, char** argv) {
 	{
 		// If playing, then stop the time
 		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
+
+		PlayButton.State = ButtonState::INACTIVE;
 
 		// Get Current Animation, which in this case is just Test
 		CurrentIndex = (CurrentIndex + 1) % Test.TotalFrames;
@@ -1975,6 +2002,8 @@ int main(int argc, char** argv) {
 		// If playing, then stop the time
 		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
 
+		PlayButton.State = ButtonState::INACTIVE;
+
 		// Get Current Animation, which in this case is just Test
 		if (CurrentIndex > 0) CurrentIndex--;
 
@@ -1988,6 +2017,11 @@ int main(int argc, char** argv) {
 	// Set up OffsetUp's signal
 	OffsetUp.on_click.connect([&]()
 	{
+		// If playing, then stop the time
+		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
+
+		PlayButton.State = ButtonState::INACTIVE;
+
 		// Get Current Frame
 		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
 
@@ -2004,6 +2038,11 @@ int main(int argc, char** argv) {
 	// Set up OffsetDown's signal
 	OffsetDown.on_click.connect([&]()
 	{
+		// If playing, then stop the time
+		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
+
+		PlayButton.State = ButtonState::INACTIVE;
+
 		// Get Current Frame
 		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
 
@@ -2020,6 +2059,11 @@ int main(int argc, char** argv) {
 	// Set up DelayUp's signal
 	DelayUp.on_click.connect([&]()
 	{
+		// If playing, then stop the time
+		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
+
+		PlayButton.State = ButtonState::INACTIVE;
+
 		// Get Current Frame
 		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
 
@@ -2036,6 +2080,11 @@ int main(int argc, char** argv) {
 	// Set up DelayUp's signal
 	DelayDown.on_click.connect([&]()
 	{
+		// If playing, then stop the time
+		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
+
+		PlayButton.State = ButtonState::INACTIVE;
+
 		// Get Current Frame
 		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
 
@@ -2057,6 +2106,15 @@ int main(int argc, char** argv) {
 	ButtonManager::AddButton("OffsetDown", &OffsetDown);
 	ButtonManager::AddButton("DelayUp", &DelayUp);
 	ButtonManager::AddButton("DelayDown", &DelayDown);
+
+	// Draw BG
+	BGBatch->Begin();
+	BGBatch->Add(
+					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 3.0f, SCREENWIDTH, SCREENHEIGHT),
+					EM::Vec4(0, 0, 1, 1),
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png").id
+				);
+	BGBatch->End();
 
 
 	// Main loop
@@ -2080,7 +2138,7 @@ int main(int argc, char** argv) {
 
 		// Set up necessary matricies
     	Model = EM::Mat4::Identity();	
-    	View = Camera->GetCameraMatrix();
+    	View = HUDCamera->GetCameraMatrix();
     	Projection = EM::Mat4::Identity();
 
 		/////////////////////////////////
@@ -2096,13 +2154,25 @@ int main(int argc, char** argv) {
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0));
 
 		// Basic shader for UI
-		TS->Use();
+		BasicShader->Use();
 		{
-			TS->SetUniformMat4("model", Model);
-			TS->SetUniformMat4("projection", Projection);
-			TS->SetUniformMat4("view", View);
+			BasicShader->SetUniformMat4("model", Model);
+			BasicShader->SetUniformMat4("projection", Projection);
+			BasicShader->SetUniformMat4("view", View);
 
-			EntityBatch->Begin();
+			// Draw BG
+			BGBatch->RenderBatch();
+
+			UIBatch->Begin();
+			// Draw Play button
+			DrawFrame(PlayButton.Frames.at(PlayButton.State), EM::Vec2(0, -200), atlas, UIBatch);
+			UIBatch->End();
+			UIBatch->RenderBatch();
+
+			View = Camera->GetCameraMatrix();
+			BasicShader->SetUniformMat4("view", View);
+
+			EntityBatch->Begin(EG::GlyphSortType::BACK_TO_FRONT);
 			{
 
 				if (t >= Test.Frames.at(CurrentIndex).Delay)
@@ -2119,19 +2189,33 @@ int main(int argc, char** argv) {
 									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png").id,
 									EG::RGBA16_Red()
 								);
+
 			}
 			EntityBatch->End();
 			EntityBatch->RenderBatch();
 
-			TS->SetUniformMat4("model", EM::Mat4::Identity());
-			TS->SetUniformMat4("projection", EM::Mat4::Identity());
-			TS->SetUniformMat4("view", HUDCamera->GetCameraMatrix());
+		}
+		BasicShader->Unuse();
+
+		// Shader for text
+		TextShader->Use();
+		{
+			View = HUDCamera->GetCameraMatrix();
+
+			TextShader->SetUniformMat4("model", Model);
+			TextShader->SetUniformMat4("projection", Projection);
+			TextShader->SetUniformMat4("view", View);
 
 			UIBatch->Begin();
 			{
-				EG::Fonts::PrintText(HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 30.0f, 0.4f, std::string("FPS: "), EG::FontManager::GetFont(std::string("Bold")), *UIBatch, 
+				// Get font for use
+				auto CurrentFont = EG::FontManager::GetFont("BebasNeue");
+				auto XOffset = 110.0f;
+				auto scale = 1.0f;
+
+				EG::Fonts::PrintText(HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 30.0f, scale, std::string("FPS: "), CurrentFont, *UIBatch, 
 												EG::SetOpacity(EG::RGBA16_White(), 0.8f));
-				EG::Fonts::PrintText(HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 50.0f, HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 30.0f, 0.4f, std::to_string(FPS), EG::FontManager::GetFont(std::string("Bold")), *UIBatch, 
+				EG::Fonts::PrintText(HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 50.0f, HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 30.0f, scale, std::to_string((uint32_t)FPS), CurrentFont, *UIBatch, 
 												EG::SetOpacity(EG::RGBA16_White(), 0.8f));
 
 				auto CurrentFrame = &Test.Frames.at(CurrentIndex);
@@ -2139,69 +2223,78 @@ int main(int argc, char** argv) {
 				// Display current frame information
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, 0.4f, 
-										std::string("Current Frame: "), 
-										EG::FontManager::GetFont(std::string("Bold")), 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, scale, 
+										std::string("Animation: "), 
+										CurrentFont, 
 										*UIBatch, 
-										EG::SetOpacity(EG::RGBA16_White(), 0.8f)
+										EG::RGBA16_LightGrey()
+									);
+				// Display current frame information
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, scale, 
+										Test.Name, 
+										CurrentFont, 
+										*UIBatch, 
+										EG::RGBA16_LightGrey()
 									);
 				// Current Frame Name
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, 0.4f, 
-										std::string("Name: "), 
-										EG::FontManager::GetFont(std::string("Bold")), 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, scale, 
+										std::string("Frame: "), 
+										CurrentFont, 
 										*UIBatch, 
-										EG::SetOpacity(EG::RGBA16_Red(), 0.8f)
+										EG::RGBA16_LightGrey()
 									);
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 80.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, 0.4f, 
-										CurrentFrame->Name, 
-										EG::FontManager::GetFont(std::string("Bold")), 
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, scale, 
+										std::to_string(CurrentIndex), 
+										CurrentFont, 
 										*UIBatch, 
-										EG::SetOpacity(EG::RGBA16_Red(), 0.8f)
+										EG::RGBA16_LightGrey()
 									);
 				// Current Frame Delay
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 110.0f, 0.4f, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 110.0f, scale, 
 										std::string("Delay: "), 
-										EG::FontManager::GetFont(std::string("Bold")), 
+										CurrentFont, 
 										*UIBatch, 
-										EG::SetOpacity(EG::RGBA16_Red(), 0.8f)
+										EG::RGBA16_LightGrey()
 									);
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 80.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 110.0f, 0.4f, 
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 110.0f, scale, 
 										std::to_string(CurrentFrame->Delay), 
-										EG::FontManager::GetFont(std::string("Bold")), 
+										CurrentFont, 
 										*UIBatch, 
-										EG::SetOpacity(EG::RGBA16_Red(), 0.8f)
+										EG::RGBA16_LightGrey()
 									);
 				// Current Frame Delay
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, 0.4f, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, scale, 
 										std::string("Y Offset: "), 
-										EG::FontManager::GetFont(std::string("Bold")), 
+										CurrentFont, 
 										*UIBatch, 
-										EG::SetOpacity(EG::RGBA16_Red(), 0.8f)
+										EG::RGBA16_LightGrey()
 									);
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 80.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, 0.4f, 
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, scale, 
 										std::to_string(CurrentFrame->YOffset), 
-										EG::FontManager::GetFont(std::string("Bold")), 
+										CurrentFont, 
 										*UIBatch, 
-										EG::SetOpacity(EG::RGBA16_Red(), 0.8f)
+										EG::RGBA16_LightGrey()
 									);
 
 			}
 			UIBatch->End();
 			UIBatch->RenderBatch();
 		}
-		TS->Unuse();
+		TextShader->Unuse();
 
 		Window.SwapBuffer();
 
@@ -2234,9 +2327,33 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 			case SDL_MOUSEMOTION:
 				Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 				break;
+			case SDL_MOUSEWHEEL:
+				Camera->SetScale(Camera->GetScale() + (event.wheel.y) * 0.05f);
+				if (Camera->GetScale() < 0.1f) Camera->SetScale(0.1f);
 			default:
 				break;
 		}
+    }
+
+    // Basic check
+    if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
+    {
+    	// Check if colliding with play button
+    	auto MousePos = Input->GetMouseCoords();
+
+    	// Get play button
+    	auto PlayButton = ButtonManager::GetButton("PlayButton");
+
+    	auto X = MousePos.x;
+    	auto Y = MousePos.y;
+
+    	std::cout << MousePos << std::endl;
+
+    	if (X >= 489.0f && X <= 536.0f &&
+    		Y >= 531.0f && Y <= 565.0f)
+    	{
+    		PlayButton->on_click.emit();
+    	}
     }
 
 	if (Input->IsKeyPressed(SDLK_ESCAPE))
@@ -2245,13 +2362,12 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	}
 	if (Input->IsKeyDown(SDLK_e))
 	{
-		auto S = Camera->GetScale();
-			Camera->SetScale(Camera->GetScale() + 0.005f);
+		Camera->SetScale(Camera->GetScale() + 0.05f);
 	}
 	if (Input->IsKeyDown(SDLK_q))
 	{
 		auto S = Camera->GetScale();
-		if (S > 0.1f) Camera->SetScale(Camera->GetScale() - 0.005f);
+		if (S > 0.1f) Camera->SetScale(S - 0.05f);
 	}
 	if (Input->IsKeyPressed(SDLK_SPACE))
 	{
@@ -2277,7 +2393,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		// Press next frame
 		PreviousFrame->on_click.emit();
 	}
-	if (Input->IsKeyPressed(SDLK_UP))
+	if (Input->IsKeyDown(SDLK_UP))
 	{
 		// Get button from button manager
 		auto OffsetUp = ButtonManager::GetButton("OffsetUp");
@@ -2285,7 +2401,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		// Press offset up
 		OffsetUp->on_click.emit();
 	}
-	if (Input->IsKeyPressed(SDLK_DOWN))
+	if (Input->IsKeyDown(SDLK_DOWN))
 	{
 		// Get button from button manager
 		auto OffsetDown = ButtonManager::GetButton("OffsetDown");
@@ -2376,7 +2492,7 @@ ImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name)
 
 void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch)
 {
-	float ScalingFactor = 1.0f;
+	float ScalingFactor = 0.8f;
 	auto& Dims = Image.Dims;
 	auto& SSize = Image.SourceSize;
 	auto& Offsets = Image.OffsetDims;
@@ -2454,6 +2570,9 @@ Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc
 
     // Get total number of frames in vector
     A.TotalFrames = A.Frames.size();
+
+    // Set animation name
+    A.Name = AnimName;
 
 	return A;
 }

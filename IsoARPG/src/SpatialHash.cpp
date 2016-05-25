@@ -41,6 +41,7 @@ namespace SpatialHash {
 		std::vector<ECS::eid32> entities;
 
 		// Get individual elements of min and max and negate them to bring them into positive cell space
+		// Stupid, figure out how to put the LEVEL into positive space and then let that trickle down throughout the code
 		int min_y = -AABB->Min.y;	
 		int min_x = -AABB->Min.x;	
 		int max_y = -AABB->Max.y;	
