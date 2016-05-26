@@ -361,7 +361,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 100;
+	static uint32 AmountDrawn = 20;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -706,12 +706,12 @@ int main(int argc, char** argv)
 			bitmask32 Mask = World->Masks[e];
 			if ((Mask & COMPONENT_RENDERER2D) != COMPONENT_RENDERER2D) continue;
 
-			Math::Vec2* EntityPosition; 
+			Math::Vec3* EntityPosition; 
 			Math::Vec2* Ground;
 			char buffer[25];
 		
 			EG::SpriteSheet* ESpriteSheet = World->Animation2DSystem->Animations[e].Sheet;	
-			EntityPosition = &World->TransformSystem->Transforms[e].Position.XY();
+			EntityPosition = &World->TransformSystem->Transforms[e].Position;
 			Ground = &World->TransformSystem->Transforms[e].GroundPosition;
 			const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[e].Color;
 			auto EDims = &World->TransformSystem->Transforms[e].Dimensions;
@@ -719,9 +719,22 @@ int main(int argc, char** argv)
 			// If AI
 			if (Mask & COMPONENT_AICONTROLLER)
 			{
-				EntityBatch.Add(Math::Vec4(*EntityPosition, *EDims), uv, ESpriteSheet->texture.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
-				Graphics::Fonts::PrintText(EntityPosition->x + 100.0f, EntityPosition->y + 220.0f, 0.4f, std::to_string(e), Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
-															Graphics::SetOpacity(Graphics::RGBA16_Green(), 0.8f));
+				EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), uv, ESpriteSheet->texture.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
+
+				// Entity id
+				Graphics::Fonts::PrintText(EntityPosition->x + 20.0f, EntityPosition->y - 20.0f, 0.4f, std::string("ID: ") + std::to_string(e), Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
+															Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// Entity Position 
+				auto X = EntityPosition->x;
+				auto Y = EntityPosition->y;
+				auto Z = EntityPosition->z;
+				Graphics::Fonts::PrintText(	EntityPosition->x + 20.0f, 
+											EntityPosition->y - 40.0f, 
+											0.4f, std::string("<") + std::to_string(X) + std::string(", ") + std::to_string(Y) + (", ") + std::to_string(Z) + std::string(">"), 
+											Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
+															Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
 				// If target
 				if (e == World->PlayerControllerSystem->CurrentTarget)
 				{
@@ -733,7 +746,7 @@ int main(int argc, char** argv)
 			}
 			else if (World->Types[e] == ECS::Component::EntityType::ITEM)
 			{
-				EntityBatch.Add(Math::Vec4(*EntityPosition, *EDims), ESpriteSheet->GetUV(0), ESpriteSheet->texture.id, *Color, EntityPosition->y, 
+				EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), ESpriteSheet->GetUV(0), ESpriteSheet->texture.id, *Color, EntityPosition->y, 
 										World->TransformSystem->Transforms[e].Angle, World->Renderer2DSystem->Renderers[e].Format);
 			}
 			else
@@ -754,7 +767,7 @@ int main(int argc, char** argv)
 				else if (*AttackVector == SOUTHEAST)		index = 7;
 				else										index = 0;
 
-				EntityBatch.Add(Math::Vec4(*EntityPosition, Dims), Sheet->GetUV(index), Sheet->texture.id, *Color, EntityPosition->y, World->TransformSystem->Transforms[e].Angle, 
+				EntityBatch.Add(Math::Vec4(EntityPosition->XY(), Dims), Sheet->GetUV(index), Sheet->texture.id, *Color, EntityPosition->y, World->TransformSystem->Transforms[e].Angle, 
 									World->Renderer2DSystem->Renderers[e].Format);
 			}
 
@@ -1021,12 +1034,13 @@ int main(int argc, char** argv)
 		////////////////////////////////////////////////
 		////////////////////////////////////////////////
 
-		float X = HUDCamera.GetPosition().x - 190.0f;
-		float Y = HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f;
-		HUDBatch.Add(EM::Vec4(X, Y, 400.0f, 10.0f),
-					 EM::Vec4(0, 0, 1, 1), 
-					  HealthSheet.texture.id, 
-					  EG::RGBA16_Red());
+		// Add the health bar for shiggles
+		// float X = HUDCamera.GetPosition().x - 190.0f;
+		// float Y = HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f;
+		// HUDBatch.Add(EM::Vec4(X, Y, 400.0f, 10.0f),
+		// 			 EM::Vec4(0, 0, 1, 1), 
+		// 			  HealthSheet.texture.id, 
+		// 			  EG::RGBA16_Red());
 
 		auto F = EG::FontManager::GetFont("Bold");
 
@@ -1036,6 +1050,7 @@ int main(int argc, char** argv)
 			Enjon::Graphics::Fonts::PrintText(Camera.GetPosition().x - 110.0f, Camera.GetPosition().y - 30.0f, 1.0f, "Paused", F, TextBatch);
 		}
 
+		// Profiling info
 		// Add FPS
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
 										0.4f, "FPS: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
@@ -1109,9 +1124,9 @@ int main(int argc, char** argv)
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 280.0f, 
 										0.4f, AITimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
-		// Draw Isometric compass
-		MapEntityBatch.Add(EM::Vec4(HUDCamera.GetPosition() - EM::Vec2(SCREENWIDTH / 2.0f - 30.0f, -SCREENHEIGHT / 2.0f + 250.0f), 150.0f, 75.0f), 
-						EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Coordinates.png").id, EG::RGBA16_White());
+		// // Draw Isometric compass
+		// MapEntityBatch.Add(EM::Vec4(HUDCamera.GetPosition() - EM::Vec2(SCREENWIDTH / 2.0f - 30.0f, -SCREENHEIGHT / 2.0f + 250.0f), 150.0f, 75.0f), 
+		// 				EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Coordinates.png").id, EG::RGBA16_White());
 
 		// Add particles to entity batch
 		EG::Particle2D::Draw(World->ParticleEngine, &Camera);
@@ -1791,6 +1806,7 @@ typedef struct
 	const std::string Name;
 	float Delay;
 	float YOffset;
+	float XOffset;
 	GLuint TextureID;
 } ImageFrame;
 
@@ -1809,25 +1825,79 @@ typedef struct
 
 enum ButtonState { INACTIVE, ACTIVE };
 
-typedef struct
-{
-	EGUI::Signal<> on_click;
-	std::vector<ImageFrame> Frames;
-	ButtonState State;
-} Button;
 
+// GUI Element
+struct GUIElementBase
+{
+	virtual void Init() = 0;
+
+	GUIElementBase* Parent;
+};
+
+template <typename T>
+struct GUIElement : public GUIElementBase
+{
+	void Init()
+	{
+		static_cast<T*>(this)->Init();
+	}
+};
+
+// Button
+struct GUIButton : GUIElement<GUIButton>
+{
+	void Init()
+	{
+		std::cout << "Initialized Button..." << std::endl;
+	}
+
+	EGUI::Signal<> on_click;
+	std::vector<ImageFrame> Frames;   // Could totally put this in a resource manager of some sort
+	ButtonState State;
+};
+
+// Group
+// Group is responsible for holding other gui elements and then transforming them together
+
+struct GUIGroup : GUIElement<GUIGroup>
+{
+	void Init()
+	{
+		std::cout << "Yeah..." << std::endl;
+	}
+
+	// Position of group used for transform
+	EM::Vec2 Position;
+
+	// Vector of children
+	std::vector<GUIElementBase*> Children;
+};
+
+namespace GUI
+{
+	GUIGroup* AddToGroup(GUIGroup* Group, GUIElementBase* Element)
+	{
+		// Push back into group's children
+		Group->Children.push_back(Element);
+
+		// Set Group as parent of child
+		Element->Parent = Group;
+
+		return Group;
+	}
+}
 
 // Something like this eventually for global gui references...
 namespace ButtonManager
 {
-	std::unordered_map<std::string, Button*> Buttons;
+	std::unordered_map<std::string, GUIButton*> Buttons;
 
-	void AddButton(std::string S, Button* B)
+	void AddButton(std::string S, GUIButton* B)
 	{
 		Buttons[S] = B;
 	}
 
-	Button* GetButton(const std::string S)
+	GUIButton* GetButton(const std::string S)
 	{
 		auto search = Buttons.find(S);
 		if (search != Buttons.end())
@@ -1839,6 +1909,8 @@ namespace ButtonManager
 	}
 };
 
+// Just need to get where I can group together GUIElements, transform them together, and then
+// access individual GUIElements with the mouse
 
 /* Function Declarations */
 bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera);
@@ -1859,7 +1931,6 @@ int main(int argc, char** argv) {
 	float t = 0.0f;
 	float FPS = 0.0f;
 	float TimeIncrement = 0.0f;
-
 
 	// Create a window
 	EG::Window Window;
@@ -1949,21 +2020,34 @@ int main(int argc, char** argv) {
 	// ANIMATION EDITOR ////////////
 
 	// Need to create a simple button, for now, that will start and stop the animation
-	Button PlayButton;
-	Button NextFrame;
-	Button PreviousFrame;
-	Button OffsetUp;
-	Button OffsetDown;
-	Button DelayUp;
-	Button DelayDown;
+	GUIButton PlayButton;
+	GUIButton NextFrame;
+	GUIButton PreviousFrame;
+	GUIButton OffsetUp;
+	GUIButton OffsetDown;
+	GUIButton DelayUp;
+	GUIButton DelayDown;
+
+	GUIGroup Group;
+	Group.Position = EM::Vec2(0.0f, -200.0f);
+
+	// Add PlayButton to Group
+	GUI::AddToGroup(&Group, &PlayButton);
+	GUI::AddToGroup(&Group, &NextFrame);
+	GUI::AddToGroup(&Group, &PreviousFrame);
 
 	// Set up play button image frames
 	PlayButton.Frames.push_back(GetImageFrame(Frames, "playbuttonup"));
 	PlayButton.Frames.push_back(GetImageFrame(Frames, "playbuttondown"));
 
+	// Set up PlayButton offsets
+	PlayButton.Frames.at(0).XOffset = 29.0f;
+	PlayButton.Frames.at(1).XOffset = 29.0f;
+	PlayButton.Frames.at(0).YOffset = -21.0f;
+	PlayButton.Frames.at(1).YOffset = -21.0f;
+
 	// Set state to inactive
 	PlayButton.State = ButtonState::INACTIVE;
-
 
 	// Set up PlayButton's signal
 	PlayButton.on_click.connect([&]()
@@ -2170,8 +2254,22 @@ int main(int argc, char** argv) {
 			BGBatch->RenderBatch();
 
 			UIBatch->Begin();
-			// Draw Play button
-			DrawFrame(PlayButton.Frames.at(PlayButton.State), EM::Vec2(0, -200), atlas, UIBatch);
+			{
+				// Draw Parent
+				auto Parent = static_cast<GUIGroup*>(PlayButton.Parent);
+				// Parent->Position = EM::Vec2(0, Test.Frames.at(CurrentIndex).YOffset);
+				UIBatch->Add(
+								EM::Vec4(Parent->Position, 200, 100),
+								EM::Vec4(0, 0, 1, 1),
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								EG::SetOpacity(EG::RGBA16_Blue(), 0.05f)
+							);
+
+				// Draw Play button
+				auto PBF = PlayButton.Frames.at(PlayButton.State);
+				// Calculate these offsets
+				DrawFrame(PBF, EM::Vec2(0, 0) + Parent->Position, atlas, UIBatch);
+			}
 			UIBatch->End();
 			UIBatch->RenderBatch();
 
@@ -2495,11 +2593,13 @@ void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::S
 	auto& SSize = Image.SourceSize;
 	auto& Offsets = Image.OffsetDims;
 	auto YOffset = Image.YOffset;
+	auto XOffset = Image.XOffset;
+
 	auto AWidth = A.AtlasSize.x;
 	auto AHeight = A.AtlasSize.y;
 
-	Batch->Add(EM::Vec4(Position.x + (Offsets.x - SSize.x / 2.0f) * ScalingFactor, 
-						Position.y + YOffset * ScalingFactor / 2.0f - (Offsets.y - Dims.w / 2.0f) * ScalingFactor, 
+	Batch->Add(EM::Vec4(Position.x + (XOffset + Offsets.x - SSize.x / 2.0f) * ScalingFactor, 
+						Position.y + (YOffset - Offsets.y + Dims.w / 2.0f) * ScalingFactor, 
 						EM::Vec2(Offsets.z, Offsets.w) * ScalingFactor), 
 				EM::Vec4(Dims.x / AWidth, 
 						(AHeight - Dims.y - Dims.w) / AHeight, 
@@ -2548,11 +2648,15 @@ Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc
     assert(de < anim_len);
     const auto& Delays = Anim.get_object_value(de);
 
-    // Offsets
-    const auto os = Anim.find_object_key(literal("offsets"));
-    assert(os < anim_len);
-    const auto& Offset = Anim.get_object_value(os);
-    // delays.reserve(frames_len);
+    // YOffset
+    const auto yos = Anim.find_object_key(literal("yoffsets"));
+    assert(yos < anim_len);
+    const auto& YOffset = Anim.get_object_value(yos);
+
+    // XOffset
+    const auto xos = Anim.find_object_key(literal("xoffsets"));
+    assert(xos < anim_len);
+    const auto& XOffset = Anim.get_object_value(xos);
 
     // Now need to loop through this shit like whoa...
     // Get iframe, get its delay, push into A.frames
@@ -2560,7 +2664,8 @@ Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc
     {
     	auto IF = GetImageFrame(FramesDoc, Frames.get_array_element(i).get_string_value());
     	IF.Delay = Delays.get_array_element(i).get_safe_float_value();
-    	IF.YOffset = Offset.get_array_element(i).get_safe_float_value();
+    	IF.YOffset = YOffset.get_array_element(i).get_safe_float_value();
+    	IF.XOffset = XOffset.get_array_element(i).get_safe_float_value();
 
     	// push back into A.frames
     	A.Frames.push_back(IF);
