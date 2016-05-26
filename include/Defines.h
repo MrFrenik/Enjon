@@ -15,6 +15,7 @@
 #define ER 		Enjon::Random
 #define EU 		Enjon::Utils
 #define EGUI 	Enjon::GUI
+#define EP		Enjon::Physics
 
 
 #endif

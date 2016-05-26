@@ -1800,13 +1800,12 @@ using namespace spine;
 
 typedef struct
 {
-	EM::Vec4 Dims;
-	EM::Vec4 OffsetDims;
+	EM::Vec4 UVs;
+	EM::Vec2 Offsets;
 	EM::Vec2 SourceSize;
-	const std::string Name;
 	float Delay;
-	float YOffset;
-	float XOffset;
+	float ScalingFactor;
+	const std::string Name;
 	GLuint TextureID;
 } ImageFrame;
 
@@ -1824,6 +1823,7 @@ typedef struct
 } Anim;
 
 enum ButtonState { INACTIVE, ACTIVE };
+enum HoveredState { OFF_HOVER, ON_HOVER };
 
 
 // GUI Element
@@ -1832,6 +1832,8 @@ struct GUIElementBase
 	virtual void Init() = 0;
 
 	GUIElementBase* Parent;
+	EM::Vec2 Position;
+	EP::AABB AABB;
 };
 
 template <typename T>
@@ -1851,9 +1853,12 @@ struct GUIButton : GUIElement<GUIButton>
 		std::cout << "Initialized Button..." << std::endl;
 	}
 
-	EGUI::Signal<> on_click;
 	std::vector<ImageFrame> Frames;   // Could totally put this in a resource manager of some sort
 	ButtonState State;
+	HoveredState HoverState;
+	EGUI::Signal<> on_click;
+	EGUI::Signal<> on_hover;
+	EGUI::Signal<> off_hover;
 };
 
 // Group
@@ -1865,9 +1870,6 @@ struct GUIGroup : GUIElement<GUIGroup>
 	{
 		std::cout << "Yeah..." << std::endl;
 	}
-
-	// Position of group used for transform
-	EM::Vec2 Position;
 
 	// Vector of children
 	std::vector<GUIElementBase*> Children;
@@ -1909,14 +1911,37 @@ namespace ButtonManager
 	}
 };
 
+class GUIManager
+{
+	public:
+		GUIManager(){}
+		~GUIManager(){}
+
+
+	private:
+};
+
+struct SceneNode
+{
+
+};
+
+class SceneGraph
+{
+	public:
+
+	private:
+};
+
 // Just need to get where I can group together GUIElements, transform them together, and then
 // access individual GUIElements with the mouse
 
 /* Function Declarations */
 bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera);
 ImageFrame GetImageFrame(const sajson::value& Frame, const std::string Name);
-void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch);
+void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White());
 Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc);
+void CalculateAABBWithParent(EP::AABB* A, GUIButton* Button);
 
 
 const std::string AnimTextureDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png");
@@ -2025,8 +2050,12 @@ int main(int argc, char** argv) {
 	GUIButton PreviousFrame;
 	GUIButton OffsetUp;
 	GUIButton OffsetDown;
+	GUIButton OffsetLeft;
+	GUIButton OffsetRight;
 	GUIButton DelayUp;
 	GUIButton DelayDown;
+
+	EG::ColorRGBA16 PlayButtonColor = EG::RGBA16_White();
 
 	GUIGroup Group;
 	Group.Position = EM::Vec2(0.0f, -200.0f);
@@ -2041,13 +2070,50 @@ int main(int argc, char** argv) {
 	PlayButton.Frames.push_back(GetImageFrame(Frames, "playbuttondown"));
 
 	// Set up PlayButton offsets
-	PlayButton.Frames.at(0).XOffset = 29.0f;
-	PlayButton.Frames.at(1).XOffset = 29.0f;
-	PlayButton.Frames.at(0).YOffset = -21.0f;
-	PlayButton.Frames.at(1).YOffset = -21.0f;
+	{
+		auto xo = 0.0f;
+		auto yo = 0.0f;
+		PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.x = xo;
+		PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.y = yo;
+		PlayButton.Frames.at(ButtonState::ACTIVE).Offsets.x = xo;
+		PlayButton.Frames.at(ButtonState::ACTIVE).Offsets.y = yo;
+	}
+
+	// Set up PlayButton position within the group
+	PlayButton.Position = EM::Vec2(10.0f, 20.0f);
 
 	// Set state to inactive
 	PlayButton.State = ButtonState::INACTIVE;
+	PlayButton.HoverState = HoveredState::OFF_HOVER;
+
+	// Set up Scaling Factor
+	PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor = 0.8f;
+	PlayButton.Frames.at(ButtonState::ACTIVE).ScalingFactor = 0.8f;
+
+	// Set up PlayButton AABB
+	PlayButton.AABB.Min =  EM::Vec2(PlayButton.Position.x + Group.Position.x + PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.x * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor,
+									PlayButton.Position.y + Group.Position.y + PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.y * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor); 
+	PlayButton.AABB.Max = PlayButton.AABB.Min + EM::Vec2(PlayButton.Frames.at(ButtonState::INACTIVE).SourceSize.x * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor, 
+										     PlayButton.Frames.at(ButtonState::INACTIVE).SourceSize.y * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor);
+
+	// Set up PlayButton's on_hover signal
+	PlayButton.on_hover.connect([&]()
+	{
+		// We'll just change a color for now
+		PlayButtonColor = EG::RGBA16_White();
+
+		// Set state to active
+		PlayButton.HoverState = HoveredState::ON_HOVER;
+	});
+
+	// Set up PlayButton's off_hover signal
+	PlayButton.off_hover.connect([&]()
+	{
+		PlayButtonColor = EG::RGBA16_LightGrey();
+
+		// Set state to inactive
+		PlayButton.HoverState = HoveredState::OFF_HOVER;
+	});
 
 	// Set up PlayButton's signal
 	PlayButton.on_click.connect([&]()
@@ -2110,13 +2176,13 @@ int main(int argc, char** argv) {
 		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
 
 		// Get CurrentFrame's YOffset
-		auto YOffset = CurrentFrame->YOffset;
+		auto YOffset = CurrentFrame->Offsets.y;
 
 		// Increment by arbitrary amount...
 		YOffset += 1.0f;
 
 		// Reset offset
-		CurrentFrame->YOffset = YOffset;
+		CurrentFrame->Offsets.y = YOffset;
 	});
 
 	// Set up OffsetDown's signal
@@ -2131,13 +2197,55 @@ int main(int argc, char** argv) {
 		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
 
 		// Get CurrentFrame's YOffset
-		auto YOffset = CurrentFrame->YOffset;
+		auto YOffset = CurrentFrame->Offsets.y;
 
 		// Increment by arbitrary amount...
 		YOffset -= 1.0f;
 
 		// Reset offset
-		CurrentFrame->YOffset = YOffset;
+		CurrentFrame->Offsets.y = YOffset;
+	});
+
+	// Set up OffsetLeft's signal
+	OffsetLeft.on_click.connect([&]()
+	{
+		// If playing, then stop the time
+		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
+
+		PlayButton.State = ButtonState::INACTIVE;
+
+		// Get Current Frame
+		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+
+		// Get CurrentFrame's YOffset
+		auto XOffset = CurrentFrame->Offsets.x;
+
+		// Increment by arbitrary amount...
+		XOffset -= 1.0f;
+
+		// Reset offset
+		CurrentFrame->Offsets.x = XOffset;
+	});
+
+	// Set up OffsetRight's signal
+	OffsetRight.on_click.connect([&]()
+	{
+		// If playing, then stop the time
+		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
+
+		PlayButton.State = ButtonState::INACTIVE;
+
+		// Get Current Frame
+		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+
+		// Get CurrentFrame's YOffset
+		auto XOffset = CurrentFrame->Offsets.x;
+
+		// Increment by arbitrary amount...
+		XOffset += 1.0f;
+
+		// Reset offset
+		CurrentFrame->Offsets.x = XOffset;
 	});
 
 	// Set up DelayUp's signal
@@ -2188,6 +2296,8 @@ int main(int argc, char** argv) {
 	ButtonManager::AddButton("PreviousFrame", &PreviousFrame);
 	ButtonManager::AddButton("OffsetUp", &OffsetUp);
 	ButtonManager::AddButton("OffsetDown", &OffsetDown);
+	ButtonManager::AddButton("OffsetLeft", &OffsetLeft);
+	ButtonManager::AddButton("OffsetRight", &OffsetRight);
 	ButtonManager::AddButton("DelayUp", &DelayUp);
 	ButtonManager::AddButton("DelayDown", &DelayDown);
 
@@ -2256,8 +2366,8 @@ int main(int argc, char** argv) {
 			UIBatch->Begin();
 			{
 				// Draw Parent
-				auto Parent = static_cast<GUIGroup*>(PlayButton.Parent);
-				// Parent->Position = EM::Vec2(0, Test.Frames.at(CurrentIndex).YOffset);
+				auto Parent = PlayButton.Parent;
+				Parent->Position = EM::Vec2(0.0f, Test.Frames.at(CurrentIndex).Offsets.y - 100.0f);
 				UIBatch->Add(
 								EM::Vec4(Parent->Position, 200, 100),
 								EM::Vec4(0, 0, 1, 1),
@@ -2268,7 +2378,17 @@ int main(int argc, char** argv) {
 				// Draw Play button
 				auto PBF = PlayButton.Frames.at(PlayButton.State);
 				// Calculate these offsets
-				DrawFrame(PBF, EM::Vec2(0, 0) + Parent->Position, atlas, UIBatch);
+				DrawFrame(PBF, PlayButton.Position + Parent->Position, atlas, UIBatch, PlayButtonColor);
+
+				// Draw PlayButton AABB
+				// Calculate the AABB (this could be set up to another signal and only done when necessary)
+				CalculateAABBWithParent(&PlayButton.AABB, &PlayButton);
+				UIBatch->Add(
+								EM::Vec4(PlayButton.AABB.Min, PlayButton.AABB.Max - PlayButton.AABB.Min), 
+								EM::Vec4(0, 0, 1, 1),
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								EG::SetOpacity(EG::RGBA16_Red(), 0.3f)
+							);
 			}
 			UIBatch->End();
 			UIBatch->RenderBatch();
@@ -2368,7 +2488,7 @@ int main(int argc, char** argv) {
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
-				// Current Frame Delay
+				// Current Frame Y offset
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
 										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, scale, 
@@ -2380,7 +2500,24 @@ int main(int argc, char** argv) {
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
 										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, scale, 
-										std::to_string(CurrentFrame->YOffset), 
+										std::to_string(CurrentFrame->Offsets.y), 
+										CurrentFont, 
+										*UIBatch, 
+										EG::RGBA16_LightGrey()
+									);
+				// Current Frame X Offset
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 150.0f, scale, 
+										std::string("X Offset: "), 
+										CurrentFont, 
+										*UIBatch, 
+										EG::RGBA16_LightGrey()
+									);
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 150.0f, scale, 
+										std::to_string(CurrentFrame->Offsets.x), 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
@@ -2402,6 +2539,8 @@ int main(int argc, char** argv) {
 
 bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 {
+	static bool WasHovered = false;
+
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
@@ -2431,22 +2570,48 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		}
     }
 
-    // Basic check
+	// Get Mouse Position
+	auto MousePos = Input->GetMouseCoords();
+	Camera->ConvertScreenToWorld(MousePos);
+
+	// Get play button
+	auto PlayButton = ButtonManager::GetButton("PlayButton");
+	auto AABB = &PlayButton->AABB;
+
+	// Check whether the mouse is hovered over the play button
+	auto MouseOverButton = EP::AABBvsPoint(AABB, MousePos);
+
+	if (MouseOverButton)
+	{
+		if (PlayButton->HoverState == HoveredState::OFF_HOVER)
+		{
+			std::cout << "Entering Hover..." << std::endl;
+
+			// Emit on hover action
+			PlayButton->on_hover.emit();
+		}
+	}
+
+	// If the mouse was hovering and has now left
+	else if (PlayButton->HoverState == HoveredState::ON_HOVER)
+	{
+		std::cout << "Exiting Hover..." << std::endl;
+
+		// Emit off hover action
+		PlayButton->off_hover.emit();
+	}
+
+    // Basic check for click
+    // These events need to be captured and passed to the GUI manager as signals
     if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
     {
-    	// Check if colliding with play button
-    	auto MousePos = Input->GetMouseCoords();
-
-    	// Get play button
-    	auto PlayButton = ButtonManager::GetButton("PlayButton");
-
     	auto X = MousePos.x;
     	auto Y = MousePos.y;
 
-    	std::cout << MousePos << std::endl;
+    	std::cout << "Mouse Pos: " << MousePos << std::endl;
 
-    	if (X >= 489.0f && X <= 536.0f &&
-    		Y >= 531.0f && Y <= 565.0f)
+    	// Do AABB test with PlayButton
+    	if (MouseOverButton)
     	{
     		PlayButton->on_click.emit();
     	}
@@ -2473,21 +2638,21 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		// Press play
 		PlayButton->on_click.emit();
 	}
-	if (Input->IsKeyPressed(SDLK_RIGHT))
+	if (Input->IsKeyDown(SDLK_RIGHT))
 	{
 		// Get button from button manager
-		auto NextFrame = ButtonManager::GetButton("NextFrame");
+		auto OffsetRight = ButtonManager::GetButton("OffsetRight");
 
 		// Press next frame
-		NextFrame->on_click.emit();	
+		OffsetRight->on_click.emit();	
 	}
-	if (Input->IsKeyPressed(SDLK_LEFT))
+	if (Input->IsKeyDown(SDLK_LEFT))
 	{
 		// Get button from button manager
-		auto PreviousFrame = ButtonManager::GetButton("PreviousFrame");
+		auto OffsetLeft = ButtonManager::GetButton("OffsetLeft");
 
 		// Press next frame
-		PreviousFrame->on_click.emit();
+		OffsetLeft->on_click.emit();
 	}
 	if (Input->IsKeyDown(SDLK_UP))
 	{
@@ -2507,6 +2672,29 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		{
 			OffsetDown->on_click.emit();
 		}
+	}
+	if (Input->IsKeyPressed(SDLK_m))
+	{
+		// Get button from button manager
+		auto NextFrame = ButtonManager::GetButton("NextFrame");
+
+		// Press offset Down
+		if (NextFrame)
+		{
+			NextFrame->on_click.emit();
+		}
+	}
+	if (Input->IsKeyPressed(SDLK_n))
+	{
+		// Get button from button manager
+		auto PreviousFrame = ButtonManager::GetButton("PreviousFrame");
+
+		// Press offset Down
+		if (PreviousFrame)
+		{
+			PreviousFrame->on_click.emit();
+		}
+
 	}
 	if (Input->IsKeyPressed(SDLK_LEFTBRACKET))
 	{
@@ -2531,6 +2719,8 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		}
 	}
 
+
+
 	return true;
 }
 
@@ -2546,33 +2736,27 @@ ImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name)
    	// Get sub objects 
     const auto imageframe = Image.find_object_key(literal("frame"));
     const auto& imageFrame = Image.get_object_value(imageframe);
-	const auto ss = Image.find_object_key(literal("sourceSize"));
-	const auto& SS = Image.get_object_value(ss);
 	const auto sss = Image.find_object_key(literal("spriteSourceSize"));
 	const auto& SSS = Image.get_object_value(sss);
 
-	// // frame information
+	// UV information
 	float x = imageFrame.get_value_of_key(literal("x")).get_safe_float_value();
 	float y = imageFrame.get_value_of_key(literal("y")).get_safe_float_value();
 	float z = imageFrame.get_value_of_key(literal("w")).get_safe_float_value();
 	float w = imageFrame.get_value_of_key(literal("h")).get_safe_float_value();
 
-	// // size information
-	EM::Vec4 Offsets(	SSS.get_value_of_key(literal("x")).get_safe_float_value(),
-						SSS.get_value_of_key(literal("y")).get_safe_float_value(),
-						SSS.get_value_of_key(literal("w")).get_safe_float_value(), 
+	// Size information
+	EM::Vec2 SourceSize(SSS.get_value_of_key(literal("w")).get_safe_float_value(), 
 						SSS.get_value_of_key(literal("h")).get_safe_float_value());
-
-	EM::Vec2 SourceSize(SS.get_value_of_key(literal("w")).get_safe_float_value(), 
-						SS.get_value_of_key(literal("h")).get_safe_float_value());
 
 	// Return frame
 	ImageFrame IF = {	
 						EM::Vec4(x, y, z, w), 
-					  	Offsets,
+					  	EM::Vec2(0.0f),
 					  	SourceSize,
+					  	0.0f,
+					  	1.0f, 
 					  	Name, 
-					  	0.0f, 
 					  	0
 					};
 
@@ -2586,26 +2770,27 @@ ImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name)
 	return IF;
 }
 
-void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch)
+void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color)
 {
 	float ScalingFactor = 0.8f;
-	auto& Dims = Image.Dims;
+	auto& Dims = Image.UVs;
 	auto& SSize = Image.SourceSize;
-	auto& Offsets = Image.OffsetDims;
-	auto YOffset = Image.YOffset;
-	auto XOffset = Image.XOffset;
+	auto& Offsets = Image.Offsets;
 
 	auto AWidth = A.AtlasSize.x;
 	auto AHeight = A.AtlasSize.y;
 
-	Batch->Add(EM::Vec4(Position.x + (XOffset + Offsets.x - SSize.x / 2.0f) * ScalingFactor, 
-						Position.y + (YOffset - Offsets.y + Dims.w / 2.0f) * ScalingFactor, 
-						EM::Vec2(Offsets.z, Offsets.w) * ScalingFactor), 
+	Batch->Add(
+				EM::Vec4(Position.x + Offsets.x * ScalingFactor, 
+						Position.y + Offsets.y * ScalingFactor, 
+						EM::Vec2(SSize.x, SSize.y) * ScalingFactor), 
 				EM::Vec4(Dims.x / AWidth, 
 						(AHeight - Dims.y - Dims.w) / AHeight, 
 						 Dims.z / AWidth, 
 						 Dims.w / AHeight), 
-				A.Texture.id);
+				A.Texture.id, 
+				Color
+			  );
 }
 
 Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc)
@@ -2658,14 +2843,13 @@ Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc
     assert(xos < anim_len);
     const auto& XOffset = Anim.get_object_value(xos);
 
-    // Now need to loop through this shit like whoa...
-    // Get iframe, get its delay, push into A.frames
+    // Get iframe, get its delay and offsets, push into A.frames
     for (auto i = 0; i < frames_len; i++)
     {
     	auto IF = GetImageFrame(FramesDoc, Frames.get_array_element(i).get_string_value());
     	IF.Delay = Delays.get_array_element(i).get_safe_float_value();
-    	IF.YOffset = YOffset.get_array_element(i).get_safe_float_value();
-    	IF.XOffset = XOffset.get_array_element(i).get_safe_float_value();
+    	IF.Offsets.x = XOffset.get_array_element(i).get_safe_float_value();
+    	IF.Offsets.y = YOffset.get_array_element(i).get_safe_float_value();
 
     	// push back into A.frames
     	A.Frames.push_back(IF);
@@ -2678,6 +2862,18 @@ Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc
     A.Name = AnimName;
 
 	return A;
+}
+
+void CalculateAABBWithParent(EP::AABB* A, GUIButton* Button)
+{
+	auto Parent = Button->Parent;
+	auto PPos = &Parent->Position;
+
+	// Set up PlayButton AABB
+	Button->AABB.Min =  EM::Vec2(Button->Position.x + PPos->x + Button->Frames.at(ButtonState::INACTIVE).Offsets.x * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor,
+									Button->Position.y + PPos->y + Button->Frames.at(ButtonState::INACTIVE).Offsets.y * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor); 
+	Button->AABB.Max = Button->AABB.Min + EM::Vec2(Button->Frames.at(ButtonState::INACTIVE).SourceSize.x * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor, 
+										     Button->Frames.at(ButtonState::INACTIVE).SourceSize.y * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor); 
 }
 
 #endif

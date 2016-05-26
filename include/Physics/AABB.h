@@ -2,6 +2,7 @@
 #define AABB_H
 
 #include "Math/Maths.h"
+#include "Defines.h"
 
 namespace Enjon { namespace Physics {
 
@@ -11,6 +12,9 @@ namespace Enjon { namespace Physics {
 		Enjon::Math::Vec2 Min;
 		Enjon::Math::Vec2 Max;
 	} AABB;
+
+	// Test point vs AABB
+	bool AABBvsPoint(const AABB* A, const EM::Vec2& P);
 
 	// Tests intersection between two AABBs
 	bool AABBvsAABB(const AABB* A, const AABB* B);

@@ -2,6 +2,18 @@
 
 namespace Enjon { namespace Physics {
 
+	// Test point vs AABB
+	bool AABBvsPoint(const AABB* A, const EM::Vec2& P)
+	{
+		if (A->Min.x > P.x || A->Max.x < P.x ||
+			A->Min.y > P.y || A->Max.y < P.y) 
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 	// Tests intersection between two AABBs
 	bool AABBvsAABB(const AABB* A, const AABB* B)
 	{
