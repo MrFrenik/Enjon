@@ -64,6 +64,11 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 
 	        // Insert into font character map
 	        font->Characters.insert(std::pair<GLchar, Character>(c, character));
+
+	        // Find max height
+	        if (character.Size.y > font->MaxHeight) font->MaxHeight = character.Size.y;
+	        if (character.Size.x > font->MaxWidth) font->MaxWidth = character.Size.x;
+
 	    }
 	    glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -77,6 +82,10 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	{
 		// Create new font
 		Font* F = new Font;
+
+		// Set max width and height to 0
+		F->MaxHeight = 0.0f;
+		F->MaxWidth = 0.0f;
 
 		// Init
 		Init(filePath, size, F);

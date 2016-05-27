@@ -24,7 +24,9 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 
 	typedef struct 
 	{
-		std::unordered_map<GLchar, Character> Characters;	
+		std::unordered_map<GLchar, Character> Characters;
+		float MaxHeight;
+		float MaxWidth;	
 	} Font;
 
 	typedef struct 

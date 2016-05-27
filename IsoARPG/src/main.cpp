@@ -1861,6 +1861,20 @@ struct GUIButton : GUIElement<GUIButton>
 	EGUI::Signal<> off_hover;
 };
 
+// TextBox
+struct GUITextBox : GUIElement<GUITextBox>
+{
+	void Init()
+	{}
+
+	ButtonState State;
+	HoveredState HoverState;
+	std::string Text;
+	EGUI::Signal<> on_click;
+	EGUI::Signal<> on_hover;
+	EGUI::Signal<> off_hover;
+};
+
 // Group
 // Group is responsible for holding other gui elements and then transforming them together
 
@@ -1894,12 +1908,12 @@ namespace ButtonManager
 {
 	std::unordered_map<std::string, GUIButton*> Buttons;
 
-	void AddButton(std::string S, GUIButton* B)
+	void Add(std::string S, GUIButton* B)
 	{
 		Buttons[S] = B;
 	}
 
-	GUIButton* GetButton(const std::string S)
+	GUIButton* Get(const std::string S)
 	{
 		auto search = Buttons.find(S);
 		if (search != Buttons.end())
@@ -1907,6 +1921,27 @@ namespace ButtonManager
 			return search->second;
 		}	
 
+		return nullptr;
+	}
+};
+
+// This is stupid, but it's for testing...
+namespace TextBoxManager
+{
+	std::unordered_map<std::string, GUITextBox*> TextBoxes;
+
+	void Add(std::string S, GUITextBox* T)
+	{
+		TextBoxes[S] = T;
+	}
+
+	GUITextBox* Get(const std::string S)
+	{
+		auto search = TextBoxes.find(S);
+		if (search != TextBoxes.end())
+		{
+			return search->second;
+		}
 		return nullptr;
 	}
 };
@@ -1919,6 +1954,26 @@ class GUIManager
 
 
 	private:
+};
+
+namespace CameraManager
+{
+	std::unordered_map<std::string, EG::Camera2D*> Cameras;
+
+	void AddCamera(std::string S, EG::Camera2D* C)
+	{
+		Cameras[S] = C;
+	}
+
+	EG::Camera2D* GetCamera(const std::string S)
+	{
+		auto search = Cameras.find(S);
+		if (search != Cameras.end())
+		{
+			return search->second;
+		}
+		return nullptr;
+	}
 };
 
 struct SceneNode
@@ -1942,11 +1997,14 @@ ImageFrame GetImageFrame(const sajson::value& Frame, const std::string Name);
 void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White());
 Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc);
 void CalculateAABBWithParent(EP::AABB* A, GUIButton* Button);
+void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);
 
 
 const std::string AnimTextureDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png");
 const std::string AnimTextureJSONDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json");
 const std::string AnimationDir("../IsoARPG/Profiles/Animations/Player/PlayerAttackOHLSEAnimation.json");
+
+EG::GLTexture MouseTexture;
 
 #undef main
 int main(int argc, char** argv) {
@@ -1960,7 +2018,7 @@ int main(int argc, char** argv) {
 	// Create a window
 	EG::Window Window;
 	Window.Init("Unit Test", SCREENWIDTH, SCREENHEIGHT, SCREENRES);
-	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
+	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
 
 	EU::FPSLimiter Limiter;
 	Limiter.Init(60);
@@ -1995,6 +2053,10 @@ int main(int argc, char** argv) {
 	// Create HUDCamera
 	EG::Camera2D* HUDCamera = new EG::Camera2D;
 	HUDCamera->Init(W, H);
+
+	// Register cameras with manager
+	CameraManager::AddCamera("HUDCamera", HUDCamera);
+	CameraManager::AddCamera("SceneCamera", Camera);
 
 	// InputManager
 	EI::InputManager Input = EI::InputManager();
@@ -2041,6 +2103,9 @@ int main(int argc, char** argv) {
 	// Also need a current index for frames	
 	uint32_t CurrentIndex = 0;
 
+	// Set up mouse texture to default
+	MouseTexture = EI::ResourceManager::GetTexture("../assets/Textures/mouse_cursor_20.png");
+
 	////////////////////////////////
 	// ANIMATION EDITOR ////////////
 
@@ -2055,6 +2120,8 @@ int main(int argc, char** argv) {
 	GUIButton DelayUp;
 	GUIButton DelayDown;
 
+	GUITextBox InputText;
+
 	EG::ColorRGBA16 PlayButtonColor = EG::RGBA16_White();
 
 	GUIGroup Group;
@@ -2064,6 +2131,7 @@ int main(int argc, char** argv) {
 	GUI::AddToGroup(&Group, &PlayButton);
 	GUI::AddToGroup(&Group, &NextFrame);
 	GUI::AddToGroup(&Group, &PreviousFrame);
+	GUI::AddToGroup(&Group, &InputText);
 
 	// Set up play button image frames
 	PlayButton.Frames.push_back(GetImageFrame(Frames, "playbuttonup"));
@@ -2095,6 +2163,46 @@ int main(int argc, char** argv) {
 									PlayButton.Position.y + Group.Position.y + PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.y * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor); 
 	PlayButton.AABB.Max = PlayButton.AABB.Min + EM::Vec2(PlayButton.Frames.at(ButtonState::INACTIVE).SourceSize.x * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor, 
 										     PlayButton.Frames.at(ButtonState::INACTIVE).SourceSize.y * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor);
+
+	// Set up InputText position within the group
+	InputText.Position = EM::Vec2(100.0f, 60.0f);
+
+	// Set states to inactive
+	InputText.State = ButtonState::INACTIVE;
+	InputText.HoverState = HoveredState::OFF_HOVER;
+
+	// Set up InputText AABB
+	// This will be dependent on the size of the text, or it will be static, or it will be dependent on some image frame
+	InputText.AABB.Min = InputText.Position + Group.Position;
+	InputText.AABB.Max = InputText.AABB.Min + EM::Vec2(100.0f, 20.0f);
+
+	// Calculate Group's AABB by its children's AABBs 
+	Group.AABB.Min = Group.Position;
+	// Figure out height
+	auto GroupHeight = InputText.AABB.Max.y - Group.AABB.Min.y;
+	auto GroupWidth = InputText.AABB.Max.x - Group.AABB.Min.x;
+	Group.AABB.Max = Group.AABB.Min + EM::Vec2(GroupWidth, GroupHeight);
+
+	std::cout << Group.AABB.Max << std::endl;
+
+	// Set up InputText's on_hover signal
+	InputText.on_hover.connect([&]()
+	{
+		// Change the mouse cursor
+		MouseTexture = EI::ResourceManager::GetTexture("../assets/Textures/caret.png");
+
+		InputText.HoverState = HoveredState::ON_HOVER;
+
+	});
+
+	// Set up InputText's off_hover signal
+	InputText.off_hover.connect([&]()
+	{
+		// Change mouse cursor back to defaul
+		MouseTexture = EI::ResourceManager::GetTexture("../assets/Textures/mouse_cursor_20.png");
+
+		InputText.HoverState = HoveredState::OFF_HOVER;
+	});
 
 	// Set up PlayButton's on_hover signal
 	PlayButton.on_hover.connect([&]()
@@ -2291,15 +2399,19 @@ int main(int argc, char** argv) {
 	});
 
 	// Put into button manager map
-	ButtonManager::AddButton("PlayButton", &PlayButton);
-	ButtonManager::AddButton("NextFrame", &NextFrame);
-	ButtonManager::AddButton("PreviousFrame", &PreviousFrame);
-	ButtonManager::AddButton("OffsetUp", &OffsetUp);
-	ButtonManager::AddButton("OffsetDown", &OffsetDown);
-	ButtonManager::AddButton("OffsetLeft", &OffsetLeft);
-	ButtonManager::AddButton("OffsetRight", &OffsetRight);
-	ButtonManager::AddButton("DelayUp", &DelayUp);
-	ButtonManager::AddButton("DelayDown", &DelayDown);
+	ButtonManager::Add("PlayButton", &PlayButton);
+	ButtonManager::Add("NextFrame", &NextFrame);
+	ButtonManager::Add("PreviousFrame", &PreviousFrame);
+	ButtonManager::Add("OffsetUp", &OffsetUp);
+	ButtonManager::Add("OffsetDown", &OffsetDown);
+	ButtonManager::Add("OffsetLeft", &OffsetLeft);
+	ButtonManager::Add("OffsetRight", &OffsetRight);
+	ButtonManager::Add("DelayUp", &DelayUp);
+	ButtonManager::Add("DelayDown", &DelayDown);
+
+
+	// Put into textbox manager
+	TextBoxManager::Add("InputText", &InputText);
 
 	// Draw BG
 	BGBatch->Begin();
@@ -2367,9 +2479,9 @@ int main(int argc, char** argv) {
 			{
 				// Draw Parent
 				auto Parent = PlayButton.Parent;
-				Parent->Position = EM::Vec2(0.0f, Test.Frames.at(CurrentIndex).Offsets.y - 100.0f);
+
 				UIBatch->Add(
-								EM::Vec4(Parent->Position, 200, 100),
+								EM::Vec4(Parent->AABB.Min, Parent->AABB.Max - Parent->AABB.Min),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 								EG::SetOpacity(EG::RGBA16_Blue(), 0.05f)
@@ -2382,9 +2494,18 @@ int main(int argc, char** argv) {
 
 				// Draw PlayButton AABB
 				// Calculate the AABB (this could be set up to another signal and only done when necessary)
+				// std::cout << PlayButton.AABB.Max - PlayButton.AABB.Min << std::endl;
 				CalculateAABBWithParent(&PlayButton.AABB, &PlayButton);
 				UIBatch->Add(
 								EM::Vec4(PlayButton.AABB.Min, PlayButton.AABB.Max - PlayButton.AABB.Min), 
+								EM::Vec4(0, 0, 1, 1),
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								EG::SetOpacity(EG::RGBA16_Red(), 0.3f)
+							);
+
+				// CalculateAABBWithParent(&InputText.AABB, &InputText);
+				UIBatch->Add(
+								EM::Vec4(InputText.AABB.Min, InputText.AABB.Max - InputText.AABB.Min), 
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 								EG::SetOpacity(EG::RGBA16_Red(), 0.3f)
@@ -2523,11 +2644,25 @@ int main(int argc, char** argv) {
 										EG::RGBA16_LightGrey()
 									);
 
+
 			}
 			UIBatch->End();
 			UIBatch->RenderBatch();
 		}
 		TextShader->Unuse();
+
+		BasicShader->Use();
+		{
+			View = HUDCamera->GetCameraMatrix();
+			BasicShader->SetUniformMat4("view", View);
+
+			UIBatch->Begin();
+			{
+				DrawCursor(UIBatch, &Input);
+			}
+			UIBatch->End();
+			UIBatch->RenderBatch();
+		}
 
 		Window.SwapBuffer();
 
@@ -2572,14 +2707,14 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 
 	// Get Mouse Position
 	auto MousePos = Input->GetMouseCoords();
-	Camera->ConvertScreenToWorld(MousePos);
+	CameraManager::GetCamera("HUDCamera")->ConvertScreenToWorld(MousePos);
 
 	// Get play button
-	auto PlayButton = ButtonManager::GetButton("PlayButton");
-	auto AABB = &PlayButton->AABB;
+	auto PlayButton = ButtonManager::Get("PlayButton");
+	auto AABB_PB = &PlayButton->AABB;
 
 	// Check whether the mouse is hovered over the play button
-	auto MouseOverButton = EP::AABBvsPoint(AABB, MousePos);
+	auto MouseOverButton = EP::AABBvsPoint(AABB_PB, MousePos);
 
 	if (MouseOverButton)
 	{
@@ -2600,6 +2735,34 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		// Emit off hover action
 		PlayButton->off_hover.emit();
 	}
+
+	// Get InputText
+	auto InputText = TextBoxManager::Get("InputText");
+	auto AABB_IT = &InputText->AABB;
+
+	// Check whether mouse is over the input text
+	auto MouseOverText = EP::AABBvsPoint(AABB_IT, MousePos);
+
+	if (MouseOverText)
+	{
+		if (InputText->HoverState == HoveredState::OFF_HOVER)
+		{
+			std::cout << "Entering Hover..." << std::endl;
+
+			// Emit on_hover action
+			InputText->on_hover.emit();
+		}
+	}
+
+	// If the mouse was hovering and has now left
+	else if (InputText->HoverState == HoveredState::ON_HOVER)
+	{
+		std::cout << "Exiting Hover..." << std::endl;
+
+		// Emit off hover action
+		InputText->off_hover.emit();
+	}
+
 
     // Basic check for click
     // These events need to be captured and passed to the GUI manager as signals
@@ -2633,7 +2796,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	if (Input->IsKeyPressed(SDLK_SPACE))
 	{
 		// Get button from button manager
-		auto PlayButton = ButtonManager::GetButton("PlayButton");
+		auto PlayButton = ButtonManager::Get("PlayButton");
 
 		// Press play
 		PlayButton->on_click.emit();
@@ -2641,7 +2804,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	if (Input->IsKeyDown(SDLK_RIGHT))
 	{
 		// Get button from button manager
-		auto OffsetRight = ButtonManager::GetButton("OffsetRight");
+		auto OffsetRight = ButtonManager::Get("OffsetRight");
 
 		// Press next frame
 		OffsetRight->on_click.emit();	
@@ -2649,7 +2812,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	if (Input->IsKeyDown(SDLK_LEFT))
 	{
 		// Get button from button manager
-		auto OffsetLeft = ButtonManager::GetButton("OffsetLeft");
+		auto OffsetLeft = ButtonManager::Get("OffsetLeft");
 
 		// Press next frame
 		OffsetLeft->on_click.emit();
@@ -2657,7 +2820,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	if (Input->IsKeyDown(SDLK_UP))
 	{
 		// Get button from button manager
-		auto OffsetUp = ButtonManager::GetButton("OffsetUp");
+		auto OffsetUp = ButtonManager::Get("OffsetUp");
 
 		// Press offset up
 		OffsetUp->on_click.emit();
@@ -2665,7 +2828,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	if (Input->IsKeyDown(SDLK_DOWN))
 	{
 		// Get button from button manager
-		auto OffsetDown = ButtonManager::GetButton("OffsetDown");
+		auto OffsetDown = ButtonManager::Get("OffsetDown");
 
 		// Press offset Down
 		if (OffsetDown)
@@ -2676,7 +2839,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	if (Input->IsKeyPressed(SDLK_m))
 	{
 		// Get button from button manager
-		auto NextFrame = ButtonManager::GetButton("NextFrame");
+		auto NextFrame = ButtonManager::Get("NextFrame");
 
 		// Press offset Down
 		if (NextFrame)
@@ -2687,7 +2850,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	if (Input->IsKeyPressed(SDLK_n))
 	{
 		// Get button from button manager
-		auto PreviousFrame = ButtonManager::GetButton("PreviousFrame");
+		auto PreviousFrame = ButtonManager::Get("PreviousFrame");
 
 		// Press offset Down
 		if (PreviousFrame)
@@ -2699,7 +2862,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	if (Input->IsKeyPressed(SDLK_LEFTBRACKET))
 	{
 		// Get button from button manager
-		auto DelayDown = ButtonManager::GetButton("DelayDown");
+		auto DelayDown = ButtonManager::Get("DelayDown");
 
 		// Emit
 		if (DelayDown)
@@ -2710,7 +2873,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	if (Input->IsKeyPressed(SDLK_RIGHTBRACKET))
 	{
 		// Get button from button manager
-		auto DelayUp = ButtonManager::GetButton("DelayUp");
+		auto DelayUp = ButtonManager::Get("DelayUp");
 
 		// Emit
 		if (DelayUp)
@@ -2876,6 +3039,16 @@ void CalculateAABBWithParent(EP::AABB* A, GUIButton* Button)
 										     Button->Frames.at(ButtonState::INACTIVE).SourceSize.y * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor); 
 }
 
+void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager)
+{
+	float size = 16.0f; 
+	std::cout << InputManager->GetMouseCoords() << std::endl;
+	auto MouseCoords = InputManager->GetMouseCoords();
+	CameraManager::GetCamera("HUDCamera")->ConvertScreenToWorld(MouseCoords);
+	Enjon::Math::Vec4 destRect(MouseCoords.x, MouseCoords.y - size, size, size);
+	Enjon::Math::Vec4 uvRect(0, 0, 1, 1);
+	Batch->Add(destRect, uvRect, MouseTexture.id);
+}
 #endif
 
 

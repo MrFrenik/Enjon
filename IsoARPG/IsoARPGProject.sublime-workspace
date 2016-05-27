@@ -115,7 +115,31 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 90021,
+				"buffer_size": 95659,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Development/Enjon/src/AABB.cpp",
+			"settings":
+			{
+				"buffer_size": 1162,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Development/Enjon/include/Physics/AABB.h",
+			"settings":
+			{
+				"buffer_size": 628,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Development/Enjon/include/Defines.h",
+			"settings":
+			{
+				"buffer_size": 509,
 				"line_ending": "Windows"
 			}
 		},
@@ -139,18 +163,15 @@
 			"file": "profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
 			"settings":
 			{
-				"buffer_size": 348,
+				"buffer_size": 376,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"contents": "	{\"frames\": {\n\n\"01\":\n{\n	\"frame\": {\"x\":224,\"y\":111,\"w\":113,\"h\":131},\n	\"rotated\": false,\n	\"trimmed\": true,\n	\"spriteSourceSize\": {\"x\":132,\"y\":93,\"w\":113,\"h\":131},\n	\"sourceSize\": {\"w\":400,\"h\":293},\n	\"pivot\": {\"x\":0.5,\"y\":0.5}\n},\n\"02\":\n{\n	\"frame\": {\"x\":274,\"y\":2,\"w\":96,\"h\":106},\n	\"rotated\": false,\n	\"trimmed\": true,\n	\"spriteSourceSize\": {\"x\":128,\"y\":103,\"w\":96,\"h\":106},\n	\"sourceSize\": {\"w\":400,\"h\":293},\n	\"pivot\": {\"x\":0.5,\"y\":0.5}\n},\n\"03\":\n{\n	\"frame\": {\"x\":69,\"y\":212,\"w\":100,\"h\":143},\n	\"rotated\": false,\n	\"trimmed\": true,\n	\"spriteSourceSize\": {\"x\":129,\"y\":69,\"w\":100,\"h\":143},\n	\"sourceSize\": {\"w\":400,\"h\":293},\n	\"pivot\": {\"x\":0.5,\"y\":0.5}\n},\n\"04\":\n{\n	\"frame\": {\"x\":2,\"y\":161,\"w\":64,\"h\":148},\n	\"rotated\": false,\n	\"trimmed\": true,\n	\"spriteSourceSize\": {\"x\":171,\"y\":65,\"w\":64,\"h\":148},\n	\"sourceSize\": {\"w\":400,\"h\":293},\n	\"pivot\": {\"x\":0.5,\"y\":0.5}\n},\n\"05\":\n{\n	\"frame\": {\"x\":172,\"y\":245,\"w\":91,\"h\":147},\n	\"rotated\": false,\n	\"trimmed\": true,\n	\"spriteSourceSize\": {\"x\":173,\"y\":65,\"w\":91,\"h\":147},\n	\"sourceSize\": {\"w\":400,\"h\":293},\n	\"pivot\": {\"x\":0.5,\"y\":0.5}\n},\n\"06\":\n{\n	\"frame\": {\"x\":266,\"y\":245,\"w\":123,\"h\":149},\n	\"rotated\": false,\n	\"trimmed\": true,\n	\"spriteSourceSize\": {\"x\":158,\"y\":67,\"w\":123,\"h\":149},\n	\"sourceSize\": {\"w\":400,\"h\":293},\n	\"pivot\": {\"x\":0.5,\"y\":0.5}\n},\n\"07\":\n{\n	\"frame\": {\"x\":93,\"y\":103,\"w\":128,\"h\":106},\n	\"rotated\": false,\n	\"trimmed\": true,\n	\"spriteSourceSize\": {\"x\":159,\"y\":97,\"w\":128,\"h\":106},\n	\"sourceSize\": {\"w\":400,\"h\":293},\n	\"pivot\": {\"x\":0.5,\"y\":0.5}\n},\n\"08\":\n{\n	\"frame\": {\"x\":128,\"y\":2,\"w\":143,\"h\":98},\n	\"rotated\": false,\n	\"trimmed\": true,\n	\"spriteSourceSize\": {\"x\":143,\"y\":107,\"w\":143,\"h\":98},\n	\"sourceSize\": {\"w\":400,\"h\":293},\n	\"pivot\": {\"x\":0.5,\"y\":0.5}\n},\n\"09\":\n{\n	\"frame\": {\"x\":2,\"y\":47,\"w\":88,\"h\":111},\n	\"rotated\": false,\n	\"trimmed\": true,\n	\"spriteSourceSize\": {\"x\":141,\"y\":99,\"w\":88,\"h\":111},\n	\"sourceSize\": {\"w\":400,\"h\":293},\n	\"pivot\": {\"x\":0.5,\"y\":0.5}\n},\n\"playbuttondown\":\n{\n	\"frame\": {\"x\":2,\"y\":2,\"w\":60,\"h\":42},\n	\"rotated\": false,\n	\"trimmed\": false,\n	\"spriteSourceSize\": {\"x\":0,\"y\":0,\"w\":60,\"h\":42},\n	\"sourceSize\": {\"w\":60,\"h\":42},\n	\"pivot\": {\"x\":0.5,\"y\":0.5}\n},\n\"playbuttonup\":\n{\n	\"frame\": {\"x\":65,\"y\":2,\"w\":60,\"h\":42},\n	\"rotated\": false,\n	\"trimmed\": false,\n	\"spriteSourceSize\": {\"x\":0,\"y\":0,\"w\":60,\"h\":42},\n	\"sourceSize\": {\"w\":60,\"h\":42},\n	\"pivot\": {\"x\":0.5,\"y\":0.5}\n}},\n\"meta\": {\n	\"app\": \"http://www.codeandweb.com/texturepacker\",\n	\"version\": \"1.0\",\n	\"image\": \"Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png\",\n	\"format\": \"RGBA8888\",\n	\"size\": {\"w\":396,\"h\":396},\n	\"scale\": \"0.5\",\n	\"smartupdate\": \"$TexturePacker:SmartUpdate:c73b242959edbf76585a300ba9a51411:68a54426dec517c097aed2e03f86e267:c55dc12ac9f2c32ca9229b94831d4c23$\"\n}\n}\n",
 			"file": "assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json",
-			"file_size": 2774,
-			"file_write_time": 131086804724190000,
 			"settings":
 			{
-				"buffer_size": 2664,
+				"buffer_size": 2663,
 				"line_ending": "Windows"
 			}
 		}
@@ -242,8 +263,6 @@
 		"/E/Development/Enjon/src",
 		"/E/Development/Enjon/IsoARPG",
 		"/E/Development/Enjon/IsoARPG/include",
-		"/E/Development/Enjon/IsoARPG/profiles/Animations",
-		"/E/Development/Enjon/IsoARPG/profiles/Animations/Player",
 		"/E/Development/Enjon/IsoARPG/src",
 		"/E/Development/Enjon/IsoARPG/src/ECS"
 	],
@@ -395,6 +414,27 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"Group.",
+			"PlayButton",
+			"DrawFrame",
+			"AABB",
+			"PAABB",
+			"29.0f",
+			"2f",
+			"0",
+			"0.8f",
+			"SSize",
+			"SS",
+			"130",
+			"Pressed",
+			"NextFrame",
+			"OffsetUp",
+			"PreviousFrame",
+			"OffsetLeft",
+			"OffsetRight",
+			"OffsetLeft",
+			"OffsetDown",
+			"OffsetLeft",
 			"19",
 			"os",
 			"Offset",
@@ -501,28 +541,7 @@
 			"component",
 			"60",
 			"NUM_LIGHTS",
-			"2",
-			"5",
-			"10",
-			"VORTEX",
-			"Vortex",
-			"->",
-			"100",
-			"10",
-			"200",
-			"AI",
-			"Manager->AttributeSystem",
-			"Item",
-			"AI",
-			".",
-			"AAAB_B",
-			"FULLSCREEN",
-			"std::cout",
-			"Clock.",
-			"Wait",
-			"];",
-			"FULLSCREEN",
-			"260"
+			"2"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -570,7 +589,7 @@
 						"translation.y": 20.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
@@ -629,7 +648,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -638,7 +657,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 90021,
+						"buffer_size": 95659,
 						"regions":
 						{
 							"bookmark_e":
@@ -647,8 +666,8 @@
 								"regions":
 								[
 									[
-										70645,
-										70645
+										70986,
+										70986
 									]
 								]
 							}
@@ -656,8 +675,8 @@
 						"selection":
 						[
 							[
-								72261,
-								72261
+								80441,
+								80441
 							]
 						],
 						"settings":
@@ -716,7 +735,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 28327.0,
+						"translation.y": 32978.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -724,6 +743,92 @@
 				},
 				{
 					"buffer": 4,
+					"file": "/E/Development/Enjon/src/AABB.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1162,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								151,
+								151
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/E/Development/Enjon/include/Physics/AABB.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 628,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								97,
+								97
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/E/Development/Enjon/include/Defines.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 509,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								499,
+								499
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
 					"file": "/E/Development/Enjon/include/Graphics/Color.h",
 					"semi_transient": false,
 					"settings":
@@ -748,11 +853,11 @@
 						"translation.y": 1224.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 8,
 					"file": "/E/Development/Enjon/src/FontManager.cpp",
 					"semi_transient": false,
 					"settings":
@@ -777,24 +882,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 9,
 					"file": "profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 348,
+						"buffer_size": 376,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								284,
-								284
+								366,
+								366
 							]
 						],
 						"settings":
@@ -805,16 +910,16 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 10,
 					"file": "assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2664,
+						"buffer_size": 2663,
 						"regions":
 						{
 						},
@@ -834,7 +939,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 10,
 					"type": "text"
 				}
 			]
@@ -924,7 +1029,7 @@
 	"show_minimap": false,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": false,
+	"side_bar_visible": true,
 	"side_bar_width": 230.0,
 	"status_bar_visible": false,
 	"template_settings":
