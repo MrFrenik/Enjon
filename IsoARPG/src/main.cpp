@@ -1988,6 +1988,28 @@ class SceneGraph
 	private:
 };
 
+namespace CursorManager
+{
+	std::unordered_map<std::string, SDL_Cursor*> Cursors;
+
+	void Init()
+	{
+		Cursors["Arrow"] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+		Cursors["IBeam"] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
+	}
+
+	SDL_Cursor* Get(const std::string S)
+	{
+		auto search = Cursors.find(S);
+		if (search != Cursors.end())
+		{
+			return search->second;
+		}
+		return nullptr;
+	}
+
+};
+
 // Just need to get where I can group together GUIElements, transform them together, and then
 // access individual GUIElements with the mouse
 
@@ -2018,7 +2040,13 @@ int main(int argc, char** argv) {
 	// Create a window
 	EG::Window Window;
 	Window.Init("Unit Test", SCREENWIDTH, SCREENHEIGHT, SCREENRES);
-	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
+	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
+
+	// Init cursor manager
+	CursorManager::Init();
+
+	// Set to default cursor
+	SDL_SetCursor(CursorManager::Get("Arrow"));
 
 	EU::FPSLimiter Limiter;
 	Limiter.Init(60);
@@ -2189,7 +2217,8 @@ int main(int argc, char** argv) {
 	InputText.on_hover.connect([&]()
 	{
 		// Change the mouse cursor
-		MouseTexture = EI::ResourceManager::GetTexture("../assets/Textures/caret.png");
+		// MouseTexture = EI::ResourceManager::GetTexture("../assets/Textures/caret.png");
+		SDL_SetCursor(CursorManager::Get("IBeam"));
 
 		InputText.HoverState = HoveredState::ON_HOVER;
 
@@ -2199,7 +2228,8 @@ int main(int argc, char** argv) {
 	InputText.off_hover.connect([&]()
 	{
 		// Change mouse cursor back to defaul
-		MouseTexture = EI::ResourceManager::GetTexture("../assets/Textures/mouse_cursor_20.png");
+		// MouseTexture = EI::ResourceManager::GetTexture("../assets/Textures/mouse_cursor_20.png");
+		SDL_SetCursor(CursorManager::Get("Arrow"));
 
 		InputText.HoverState = HoveredState::OFF_HOVER;
 	});
@@ -2650,19 +2680,6 @@ int main(int argc, char** argv) {
 			UIBatch->RenderBatch();
 		}
 		TextShader->Unuse();
-
-		BasicShader->Use();
-		{
-			View = HUDCamera->GetCameraMatrix();
-			BasicShader->SetUniformMat4("view", View);
-
-			UIBatch->Begin();
-			{
-				DrawCursor(UIBatch, &Input);
-			}
-			UIBatch->End();
-			UIBatch->RenderBatch();
-		}
 
 		Window.SwapBuffer();
 
