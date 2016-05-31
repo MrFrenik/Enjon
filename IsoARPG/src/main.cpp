@@ -1824,6 +1824,7 @@ typedef struct
 
 enum ButtonState { INACTIVE, ACTIVE };
 enum HoveredState { OFF_HOVER, ON_HOVER };
+enum GUIType { BUTTON, TEXTBOX };
 
 
 // GUI Element
@@ -1834,6 +1835,7 @@ struct GUIElementBase
 	GUIElementBase* Parent;
 	EM::Vec2 Position;
 	EP::AABB AABB;
+	GUIType Type;
 };
 
 template <typename T>
@@ -1870,9 +1872,11 @@ struct GUITextBox : GUIElement<GUITextBox>
 	ButtonState State;
 	HoveredState HoverState;
 	std::string Text;
-	EGUI::Signal<> on_click;
+	int32_t CursorIndex;
 	EGUI::Signal<> on_hover;
 	EGUI::Signal<> off_hover;
+	EGUI::Signal<> on_click;
+	EGUI::Signal<char> on_keyboard;
 };
 
 // Group
@@ -2020,11 +2024,15 @@ void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::S
 Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc);
 void CalculateAABBWithParent(EP::AABB* A, GUIButton* Button);
 void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);
+bool IsModifier(unsigned int Key);
 
 
 const std::string AnimTextureDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png");
 const std::string AnimTextureJSONDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json");
 const std::string AnimationDir("../IsoARPG/Profiles/Animations/Player/PlayerAttackOHLSEAnimation.json");
+
+GUIElementBase* SelectedGUIElement = nullptr;
+GUIElementBase* KeyboardFocus = nullptr;
 
 EG::GLTexture MouseTexture;
 
@@ -2150,7 +2158,15 @@ int main(int argc, char** argv) {
 
 	GUITextBox InputText;
 
+	// Set up text box's text
+	InputText.Text = std::string("");
+	InputText.CursorIndex = 0;
+
 	EG::ColorRGBA16 PlayButtonColor = EG::RGBA16_White();
+	EG::ColorRGBA16 InputTextColor = EG::RGBA16(0.6f, 0.6f, 0.6f, 1.0f);
+
+	PlayButton.Type = GUIType::BUTTON;
+	InputText.Type = GUIType::TEXTBOX;
 
 	GUIGroup Group;
 	Group.Position = EM::Vec2(0.0f, -200.0f);
@@ -2174,6 +2190,7 @@ int main(int argc, char** argv) {
 		PlayButton.Frames.at(ButtonState::ACTIVE).Offsets.x = xo;
 		PlayButton.Frames.at(ButtonState::ACTIVE).Offsets.y = yo;
 	}
+
 
 	// Set up PlayButton position within the group
 	PlayButton.Position = EM::Vec2(10.0f, 20.0f);
@@ -2213,14 +2230,65 @@ int main(int argc, char** argv) {
 
 	std::cout << Group.AABB.Max << std::endl;
 
+	// Set up InputText's on_click signal
+	InputText.on_click.connect([&]()
+	{
+		// For now, just change the text to empty string
+		// Will need to eventually set this box to the selected component, then hot-swap in input manager controls for this particular gui-element
+		// Find where the cursor is by the mouse
+	});
+
+	InputText.on_keyboard.connect([&](char c)
+	{
+		auto str_len = InputText.Text.length();
+		auto cursor_index = InputText.CursorIndex;
+
+		std::cout << cursor_index << std::endl;
+
+		// erase from string
+		if ((unsigned int)c == SDLK_BACKSPACE)
+		{
+			if (str_len > 0)
+			{
+				InputText.Text.erase(cursor_index - 1);
+				InputText.CursorIndex--;
+			}
+		} 
+
+		// End of string
+		else if (cursor_index >= str_len)
+		{
+			InputText.Text += c;
+			InputText.CursorIndex = str_len + 1;
+		}
+		// Cursor somewhere in the middle of the string
+		else if (cursor_index > 0)
+		{
+			auto FirstHalf = InputText.Text.substr(0, cursor_index);
+			auto SecondHalf = InputText.Text.substr(cursor_index, str_len);
+
+			FirstHalf += c; 
+			InputText.Text = FirstHalf + SecondHalf;
+			InputText.CursorIndex++;
+		}
+		// Beginning of string
+		else
+		{
+			InputText.Text = c + InputText.Text;
+			InputText.CursorIndex++;
+		}
+	});
+
 	// Set up InputText's on_hover signal
 	InputText.on_hover.connect([&]()
 	{
 		// Change the mouse cursor
-		// MouseTexture = EI::ResourceManager::GetTexture("../assets/Textures/caret.png");
 		SDL_SetCursor(CursorManager::Get("IBeam"));
 
 		InputText.HoverState = HoveredState::ON_HOVER;
+
+		// Change color of Box
+		InputTextColor = EG::RGBA16_LightGrey();
 
 	});
 
@@ -2228,10 +2296,12 @@ int main(int argc, char** argv) {
 	InputText.off_hover.connect([&]()
 	{
 		// Change mouse cursor back to defaul
-		// MouseTexture = EI::ResourceManager::GetTexture("../assets/Textures/mouse_cursor_20.png");
 		SDL_SetCursor(CursorManager::Get("Arrow"));
 
 		InputText.HoverState = HoveredState::OFF_HOVER;
+	
+		// Change color of Box
+		InputTextColor = EG::RGBA16(0.6f, 0.6f, 0.6f, 1.0f);
 	});
 
 	// Set up PlayButton's on_hover signal
@@ -2538,7 +2608,7 @@ int main(int argc, char** argv) {
 								EM::Vec4(InputText.AABB.Min, InputText.AABB.Max - InputText.AABB.Min), 
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16_Red(), 0.3f)
+								InputTextColor
 							);
 			}
 			UIBatch->End();
@@ -2674,6 +2744,18 @@ int main(int argc, char** argv) {
 										EG::RGBA16_LightGrey()
 									);
 
+				// Print out text box's text
+				auto Padding = EM::Vec2(5.0f, 5.0f);
+				EG::Fonts::PrintText(	
+										InputText.Position.x + InputText.Parent->Position.x + Padding.x, 
+										InputText.Position.y + InputText.Parent->Position.y + Padding.y, 1.0f, 
+										InputText.Text, 
+										EG::FontManager::GetFont("WeblySleek"), 
+										*UIBatch, 
+										EG::RGBA16_DarkGrey()
+									);
+
+
 
 			}
 			UIBatch->End();
@@ -2692,6 +2774,19 @@ int main(int argc, char** argv) {
 bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 {
 	static bool WasHovered = false;
+	unsigned int CurrentKey = 0;
+	static std::string str = "";
+	char CurrentChar = 0;
+
+	if (KeyboardFocus)
+	{
+		SDL_StartTextInput();
+	}
+	else 
+	{
+		SDL_StopTextInput();
+		CurrentChar = 0;
+	}
 
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -2701,9 +2796,11 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
                 break;
 			case SDL_KEYUP:
 				Input->ReleaseKey(event.key.keysym.sym); 
+				CurrentKey = 0;
 				break;
 			case SDL_KEYDOWN:
 				Input->PressKey(event.key.keysym.sym);
+				CurrentKey = event.key.keysym.sym;
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				Input->PressKey(event.button.button);
@@ -2717,9 +2814,28 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 			case SDL_MOUSEWHEEL:
 				Camera->SetScale(Camera->GetScale() + (event.wheel.y) * 0.05f);
 				if (Camera->GetScale() < 0.1f) Camera->SetScale(0.1f);
+			case SDL_TEXTINPUT:
+				str += event.text.text;
+				CurrentChar = event.text.text[0];
+				std::cout << str << std::endl;
 			default:
 				break;
 		}
+    }
+
+    if (SelectedGUIElement)
+    {
+    	switch (SelectedGUIElement->Type)
+    	{
+    		case GUIType::BUTTON:
+    			// std::cout << "Selected Button!" << std::endl;
+    			break;
+    		case GUIType::TEXTBOX:
+    			// std::cout << "Selected TextBox!" << std::endl;
+    			break;
+    		default:
+    			break;
+    	}
     }
 
 	// Get Mouse Position
@@ -2793,7 +2909,22 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
     	// Do AABB test with PlayButton
     	if (MouseOverButton)
     	{
+    		SelectedGUIElement = PlayButton;
     		PlayButton->on_click.emit();
+    	}
+
+    	else if (MouseOverText)
+    	{
+    		SelectedGUIElement = InputText;
+    		KeyboardFocus = InputText;
+    		InputText->on_click.emit();
+    	}
+
+    	else
+    	{
+    		// This is incredibly not thought out at all...
+    		SelectedGUIElement = nullptr;
+    		KeyboardFocus = nullptr;
     	}
     }
 
@@ -2801,101 +2932,115 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	{
 		return false;	
 	}
-	if (Input->IsKeyDown(SDLK_e))
-	{
-		Camera->SetScale(Camera->GetScale() + 0.05f);
-	}
-	if (Input->IsKeyDown(SDLK_q))
-	{
-		auto S = Camera->GetScale();
-		if (S > 0.1f) Camera->SetScale(S - 0.05f);
-	}
-	if (Input->IsKeyPressed(SDLK_SPACE))
-	{
-		// Get button from button manager
-		auto PlayButton = ButtonManager::Get("PlayButton");
 
-		// Press play
-		PlayButton->on_click.emit();
-	}
-	if (Input->IsKeyDown(SDLK_RIGHT))
+	if (KeyboardFocus && CurrentKey != 0)
 	{
-		// Get button from button manager
-		auto OffsetRight = ButtonManager::Get("OffsetRight");
-
-		// Press next frame
-		OffsetRight->on_click.emit();	
-	}
-	if (Input->IsKeyDown(SDLK_LEFT))
-	{
-		// Get button from button manager
-		auto OffsetLeft = ButtonManager::Get("OffsetLeft");
-
-		// Press next frame
-		OffsetLeft->on_click.emit();
-	}
-	if (Input->IsKeyDown(SDLK_UP))
-	{
-		// Get button from button manager
-		auto OffsetUp = ButtonManager::Get("OffsetUp");
-
-		// Press offset up
-		OffsetUp->on_click.emit();
-	}
-	if (Input->IsKeyDown(SDLK_DOWN))
-	{
-		// Get button from button manager
-		auto OffsetDown = ButtonManager::Get("OffsetDown");
-
-		// Press offset Down
-		if (OffsetDown)
+		// Check for modifiers first
+		if (!IsModifier(CurrentKey))
 		{
-			OffsetDown->on_click.emit();
+			if (CurrentKey == SDLK_BACKSPACE) InputText->on_keyboard.emit(static_cast<char>(CurrentKey));
+			else InputText->on_keyboard.emit(CurrentChar);
 		}
 	}
-	if (Input->IsKeyPressed(SDLK_m))
-	{
-		// Get button from button manager
-		auto NextFrame = ButtonManager::Get("NextFrame");
 
-		// Press offset Down
-		if (NextFrame)
+	else if (KeyboardFocus == nullptr)
+	{
+		if (Input->IsKeyDown(SDLK_e))
 		{
-			NextFrame->on_click.emit();
+			Camera->SetScale(Camera->GetScale() + 0.05f);
 		}
-	}
-	if (Input->IsKeyPressed(SDLK_n))
-	{
-		// Get button from button manager
-		auto PreviousFrame = ButtonManager::Get("PreviousFrame");
-
-		// Press offset Down
-		if (PreviousFrame)
+		if (Input->IsKeyDown(SDLK_q))
 		{
-			PreviousFrame->on_click.emit();
+			auto S = Camera->GetScale();
+			if (S > 0.1f) Camera->SetScale(S - 0.05f);
 		}
-
-	}
-	if (Input->IsKeyPressed(SDLK_LEFTBRACKET))
-	{
-		// Get button from button manager
-		auto DelayDown = ButtonManager::Get("DelayDown");
-
-		// Emit
-		if (DelayDown)
+		if (Input->IsKeyPressed(SDLK_SPACE))
 		{
-			DelayDown->on_click.emit();	
-		}	
-	}
-	if (Input->IsKeyPressed(SDLK_RIGHTBRACKET))
-	{
-		// Get button from button manager
-		auto DelayUp = ButtonManager::Get("DelayUp");
+			// Get button from button manager
+			auto PlayButton = ButtonManager::Get("PlayButton");
 
-		// Emit
-		if (DelayUp)
+			// Press play
+			PlayButton->on_click.emit();
+		}
+		if (Input->IsKeyDown(SDLK_RIGHT))
 		{
-			DelayUp->on_click.emit();
+			// Get button from button manager
+			auto OffsetRight = ButtonManager::Get("OffsetRight");
+
+			// Press next frame
+			OffsetRight->on_click.emit();	
+		}
+		if (Input->IsKeyDown(SDLK_LEFT))
+		{
+			// Get button from button manager
+			auto OffsetLeft = ButtonManager::Get("OffsetLeft");
+
+			// Press next frame
+			OffsetLeft->on_click.emit();
+		}
+		if (Input->IsKeyDown(SDLK_UP))
+		{
+			// Get button from button manager
+			auto OffsetUp = ButtonManager::Get("OffsetUp");
+
+			// Press offset up
+			OffsetUp->on_click.emit();
+		}
+		if (Input->IsKeyDown(SDLK_DOWN))
+		{
+			// Get button from button manager
+			auto OffsetDown = ButtonManager::Get("OffsetDown");
+
+			// Press offset Down
+			if (OffsetDown)
+			{
+				OffsetDown->on_click.emit();
+			}
+		}
+		if (Input->IsKeyPressed(SDLK_m))
+		{
+			// Get button from button manager
+			auto NextFrame = ButtonManager::Get("NextFrame");
+
+			// Press offset Down
+			if (NextFrame)
+			{
+				NextFrame->on_click.emit();
+			}
+		}
+		if (Input->IsKeyPressed(SDLK_n))
+		{
+			// Get button from button manager
+			auto PreviousFrame = ButtonManager::Get("PreviousFrame");
+
+			// Press offset Down
+			if (PreviousFrame)
+			{
+				PreviousFrame->on_click.emit();
+			}
+
+		}
+		if (Input->IsKeyPressed(SDLK_LEFTBRACKET))
+		{
+			// Get button from button manager
+			auto DelayDown = ButtonManager::Get("DelayDown");
+
+			// Emit
+			if (DelayDown)
+			{
+				DelayDown->on_click.emit();	
+			}	
+		}
+		if (Input->IsKeyPressed(SDLK_RIGHTBRACKET))
+		{
+			// Get button from button manager
+			auto DelayUp = ButtonManager::Get("DelayUp");
+
+			// Emit
+			if (DelayUp)
+			{
+				DelayUp->on_click.emit();
+			}
 		}
 	}
 
@@ -3066,6 +3211,20 @@ void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager*
 	Enjon::Math::Vec4 uvRect(0, 0, 1, 1);
 	Batch->Add(destRect, uvRect, MouseTexture.id);
 }
+
+bool IsModifier(unsigned int Key)
+{
+	if (Key == SDLK_LSHIFT || 
+		Key == SDLK_RSHIFT || 
+		Key == SDLK_LCTRL  ||
+		Key == SDLK_RCTRL  ||
+		Key == SDLK_CAPSLOCK)
+	return true;
+
+	else return false; 
+}
+
+
 #endif
 
 

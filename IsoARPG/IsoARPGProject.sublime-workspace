@@ -115,7 +115,7 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 100043,
+				"buffer_size": 100441,
 				"line_ending": "Windows"
 			}
 		},
@@ -681,7 +681,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 100043,
+						"buffer_size": 100441,
 						"regions":
 						{
 							"bookmark_e":
@@ -690,8 +690,8 @@
 								"regions":
 								[
 									[
-										72149,
-										72149
+										72677,
+										72677
 									]
 								]
 							}
@@ -699,8 +699,8 @@
 						"selection":
 						[
 							[
-								99651,
-								99651
+								77216,
+								77216
 							]
 						],
 						"settings":
@@ -759,7 +759,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 42328.0,
+						"translation.y": 30884.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
