@@ -1876,7 +1876,8 @@ struct GUITextBox : GUIElement<GUITextBox>
 	EGUI::Signal<> on_hover;
 	EGUI::Signal<> off_hover;
 	EGUI::Signal<> on_click;
-	EGUI::Signal<char> on_keyboard;
+	EGUI::Signal<std::string> on_keyboard;
+	EGUI::Signal<> on_backspace;
 };
 
 // Group
@@ -2219,7 +2220,7 @@ int main(int argc, char** argv) {
 	// Set up InputText AABB
 	// This will be dependent on the size of the text, or it will be static, or it will be dependent on some image frame
 	InputText.AABB.Min = InputText.Position + Group.Position;
-	InputText.AABB.Max = InputText.AABB.Min + EM::Vec2(100.0f, 20.0f);
+	InputText.AABB.Max = InputText.AABB.Min + EM::Vec2(300.0f, 20.0f);
 
 	// Calculate Group's AABB by its children's AABBs 
 	Group.AABB.Min = Group.Position;
@@ -2238,25 +2239,28 @@ int main(int argc, char** argv) {
 		// Find where the cursor is by the mouse
 	});
 
-	InputText.on_keyboard.connect([&](char c)
+	InputText.on_backspace.connect([&]()
+	{
+		auto str_len = InputText.Text.length();
+		auto cursor_index = InputText.CursorIndex;
+
+		// erase from string
+		if (str_len > 0)
+		{
+			InputText.Text.erase(cursor_index - 1);
+			InputText.CursorIndex--;
+		}
+	});
+
+	InputText.on_keyboard.connect([&](std::string c)
 	{
 		auto str_len = InputText.Text.length();
 		auto cursor_index = InputText.CursorIndex;
 
 		std::cout << cursor_index << std::endl;
 
-		// erase from string
-		if ((unsigned int)c == SDLK_BACKSPACE)
-		{
-			if (str_len > 0)
-			{
-				InputText.Text.erase(cursor_index - 1);
-				InputText.CursorIndex--;
-			}
-		} 
-
 		// End of string
-		else if (cursor_index >= str_len)
+		if (cursor_index >= str_len)
 		{
 			InputText.Text += c;
 			InputText.CursorIndex = str_len + 1;
@@ -2815,7 +2819,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 				Camera->SetScale(Camera->GetScale() + (event.wheel.y) * 0.05f);
 				if (Camera->GetScale() < 0.1f) Camera->SetScale(0.1f);
 			case SDL_TEXTINPUT:
-				str += event.text.text;
+				str = event.text.text;
 				CurrentChar = event.text.text[0];
 				std::cout << str << std::endl;
 			default:
@@ -2938,8 +2942,8 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		// Check for modifiers first
 		if (!IsModifier(CurrentKey))
 		{
-			if (CurrentKey == SDLK_BACKSPACE) InputText->on_keyboard.emit(static_cast<char>(CurrentKey));
-			else InputText->on_keyboard.emit(CurrentChar);
+			if (CurrentKey == SDLK_BACKSPACE) InputText->on_backspace.emit();
+			else InputText->on_keyboard.emit(str);
 		}
 	}
 
