@@ -2220,7 +2220,7 @@ int main(int argc, char** argv) {
 	// Set up InputText AABB
 	// This will be dependent on the size of the text, or it will be static, or it will be dependent on some image frame
 	InputText.AABB.Min = InputText.Position + Group.Position;
-	InputText.AABB.Max = InputText.AABB.Min + EM::Vec2(300.0f, 20.0f);
+	InputText.AABB.Max = InputText.AABB.Min + EM::Vec2(300.0f, 60.0f);
 
 	// Calculate Group's AABB by its children's AABBs 
 	Group.AABB.Min = Group.Position;
@@ -2229,7 +2229,7 @@ int main(int argc, char** argv) {
 	auto GroupWidth = InputText.AABB.Max.x - Group.AABB.Min.x;
 	Group.AABB.Max = Group.AABB.Min + EM::Vec2(GroupWidth, GroupHeight);
 
-	std::cout << Group.AABB.Max << std::endl;
+	// std::cout << Group.AABB.Max << std::endl;
 
 	// Set up InputText's on_click signal
 	InputText.on_click.connect([&]()
@@ -2257,7 +2257,7 @@ int main(int argc, char** argv) {
 		auto str_len = InputText.Text.length();
 		auto cursor_index = InputText.CursorIndex;
 
-		std::cout << cursor_index << std::endl;
+		// std::cout << cursor_index << std::endl;
 
 		// End of string
 		if (cursor_index >= str_len)
@@ -2750,9 +2750,11 @@ int main(int argc, char** argv) {
 
 				// Print out text box's text
 				auto Padding = EM::Vec2(5.0f, 5.0f);
+				auto ITextHeight = InputText.AABB.Max.y - InputText.AABB.Min.y; // InputTextHeight
+				auto TextHeight = ITextHeight - 20.0f;
 				EG::Fonts::PrintText(	
 										InputText.Position.x + InputText.Parent->Position.x + Padding.x, 
-										InputText.Position.y + InputText.Parent->Position.y + Padding.y, 1.0f, 
+										InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 
 										InputText.Text, 
 										EG::FontManager::GetFont("WeblySleek"), 
 										*UIBatch, 
