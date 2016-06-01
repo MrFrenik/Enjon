@@ -1798,168 +1798,131 @@ using namespace ECS;
 using namespace Systems;
 using namespace spine;
 
-typedef struct
-{
-	EM::Vec4 UVs;
-	EM::Vec2 Offsets;
-	EM::Vec2 SourceSize;
-	float Delay;
-	float ScalingFactor;
-	const std::string Name;
-	GLuint TextureID;
-} ImageFrame;
+// typedef struct
+// {
+// 	EM::Vec4 UVs;
+// 	EM::Vec2 Offsets;
+// 	EM::Vec2 SourceSize;
+// 	float Delay;
+// 	float ScalingFactor;
+// 	const std::string Name;
+// 	GLuint TextureID;
+// } ImageFrame;
 
-typedef struct 
-{
-	EM::Vec2 AtlasSize;
-	EG::GLTexture Texture;	
-} Atlas;
+// typedef struct 
+// {
+// 	EM::Vec2 AtlasSize;
+// 	EG::GLTexture Texture;	
+// } Atlas;
 
-typedef struct 
-{
-	std::vector<ImageFrame> Frames;
-	uint32_t TotalFrames;
-	std::string Name;
-} Anim;
+// typedef struct 
+// {
+// 	std::vector<ImageFrame> Frames;
+// 	uint32_t TotalFrames;
+// 	std::string Name;
+// } Anim;
 
-enum ButtonState { INACTIVE, ACTIVE };
-enum HoveredState { OFF_HOVER, ON_HOVER };
-enum GUIType { BUTTON, TEXTBOX };
+// enum ButtonState { INACTIVE, ACTIVE };
+// enum HoveredState { OFF_HOVER, ON_HOVER };
+// enum GUIType { BUTTON, TEXTBOX };
 
 
-// GUI Element
-struct GUIElementBase
-{
-	virtual void Init() = 0;
+// // GUI Element
+// struct GUIElementBase
+// {
+// 	virtual void Init() = 0;
 
-	GUIElementBase* Parent;
-	EM::Vec2 Position;
-	EP::AABB AABB;
-	GUIType Type;
-};
+// 	GUIElementBase* Parent;
+// 	EM::Vec2 Position;
+// 	EP::AABB AABB;
+// 	GUIType Type;
+// };
 
-template <typename T>
-struct GUIElement : public GUIElementBase
-{
-	void Init()
+// template <typename T>
+// struct GUIElement : public GUIElementBase
+// {
+// 	void Init()
+// 	{
+// 		static_cast<T*>(this)->Init();
+// 	}
+// };
+
+// namespace Enjon { namespace GUI {
+
+	// Button
+	// struct GUIButton : GUIElement<GUIButton>
+	// {
+	// 	void Init()
+	// 	{
+	// 		std::cout << "Initialized Button..." << std::endl;
+	// 	}
+
+	// 	std::vector<ImageFrame> Frames;   // Could totally put this in a resource manager of some sort
+	// 	ButtonState State;
+	// 	HoveredState HoverState;
+	// 	EGUI::Signal<> on_click;
+	// 	EGUI::Signal<> on_hover;
+	// 	EGUI::Signal<> off_hover;
+	// };
+
+
+// }}
+
+namespace Enjon { namespace GUI {
+
+	// Something like this eventually for global gui references...
+	namespace ButtonManager
 	{
-		static_cast<T*>(this)->Init();
-	}
-};
+		std::unordered_map<std::string, GUIButton*> Buttons;
 
-// Button
-struct GUIButton : GUIElement<GUIButton>
-{
-	void Init()
-	{
-		std::cout << "Initialized Button..." << std::endl;
-	}
-
-	std::vector<ImageFrame> Frames;   // Could totally put this in a resource manager of some sort
-	ButtonState State;
-	HoveredState HoverState;
-	EGUI::Signal<> on_click;
-	EGUI::Signal<> on_hover;
-	EGUI::Signal<> off_hover;
-};
-
-// TextBox
-struct GUITextBox : GUIElement<GUITextBox>
-{
-	void Init()
-	{}
-
-	ButtonState State;
-	HoveredState HoverState;
-	std::string Text;
-	int32_t CursorIndex;
-	EGUI::Signal<> on_hover;
-	EGUI::Signal<> off_hover;
-	EGUI::Signal<> on_click;
-	EGUI::Signal<std::string> on_keyboard;
-	EGUI::Signal<> on_backspace;
-};
-
-// Group
-// Group is responsible for holding other gui elements and then transforming them together
-
-struct GUIGroup : GUIElement<GUIGroup>
-{
-	void Init()
-	{
-		std::cout << "Yeah..." << std::endl;
-	}
-
-	// Vector of children
-	std::vector<GUIElementBase*> Children;
-};
-
-namespace GUI
-{
-	GUIGroup* AddToGroup(GUIGroup* Group, GUIElementBase* Element)
-	{
-		// Push back into group's children
-		Group->Children.push_back(Element);
-
-		// Set Group as parent of child
-		Element->Parent = Group;
-
-		return Group;
-	}
-}
-
-// Something like this eventually for global gui references...
-namespace ButtonManager
-{
-	std::unordered_map<std::string, GUIButton*> Buttons;
-
-	void Add(std::string S, GUIButton* B)
-	{
-		Buttons[S] = B;
-	}
-
-	GUIButton* Get(const std::string S)
-	{
-		auto search = Buttons.find(S);
-		if (search != Buttons.end())
+		void Add(std::string S, GUIButton* B)
 		{
-			return search->second;
-		}	
-
-		return nullptr;
-	}
-};
-
-// This is stupid, but it's for testing...
-namespace TextBoxManager
-{
-	std::unordered_map<std::string, GUITextBox*> TextBoxes;
-
-	void Add(std::string S, GUITextBox* T)
-	{
-		TextBoxes[S] = T;
-	}
-
-	GUITextBox* Get(const std::string S)
-	{
-		auto search = TextBoxes.find(S);
-		if (search != TextBoxes.end())
-		{
-			return search->second;
+			Buttons[S] = B;
 		}
-		return nullptr;
-	}
-};
 
-class GUIManager
-{
-	public:
-		GUIManager(){}
-		~GUIManager(){}
+		GUIButton* Get(const std::string S)
+		{
+			auto search = Buttons.find(S);
+			if (search != Buttons.end())
+			{
+				return search->second;
+			}	
+
+			return nullptr;
+		}
+	};
+
+	// This is stupid, but it's for testing...
+	namespace TextBoxManager
+	{
+		std::unordered_map<std::string, GUITextBox*> TextBoxes;
+
+		void Add(std::string S, GUITextBox* T)
+		{
+			TextBoxes[S] = T;
+		}
+
+		GUITextBox* Get(const std::string S)
+		{
+			auto search = TextBoxes.find(S);
+			if (search != TextBoxes.end())
+			{
+				return search->second;
+			}
+			return nullptr;
+		}
+	};
+
+	class GUIManager
+	{
+		public:
+			GUIManager(){}
+			~GUIManager(){}
 
 
-	private:
-};
+		private:
+	};
+}}
 
 namespace CameraManager
 {
@@ -2017,6 +1980,8 @@ namespace CursorManager
 
 // Just need to get where I can group together GUIElements, transform them together, and then
 // access individual GUIElements with the mouse
+using namespace Enjon;
+using namespace GUI;
 
 /* Function Declarations */
 bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera);

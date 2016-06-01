@@ -35,9 +35,12 @@
 #include "Graphics/FrameBufferObject.h"
 #include "Graphics/DeferredRenderer.h"
 #include "Graphics/GBuffer.h"
+#include "Graphics/Animations.h"
 
 #include "GUI/Signal.h"
 #include "GUI/Property.h"
+#include "GUI/GUIElement.h"
+#include "GUI/GUIButton.h"
 
 #include "IO/ImageLoader.h"
 #include "IO/InputManager.h"
