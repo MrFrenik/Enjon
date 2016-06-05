@@ -119,8 +119,13 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	}
 
 	/* Adds a string of tex at (x,y) to given spritebatch */
-	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, Enjon::Graphics::ColorRGBA16 Color)
+	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, Enjon::Graphics::ColorRGBA16 Color, TextStyle Style)
 	{
+	    if (Style == TextStyle::SHADOW) 
+	    {
+	    	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, EG::RGBA16_Black(), TextStyle::DEFAULT);
+	    }
+
 		// Iterate through all characters
 	    std::string::const_iterator c;
 	    for (c = text.begin(); c != text.end(); c++) 
@@ -142,6 +147,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	        // Advance to next character
 	        x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
 	    }
+
 	}
 
 }}}

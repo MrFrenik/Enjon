@@ -1798,76 +1798,6 @@ using namespace ECS;
 using namespace Systems;
 using namespace spine;
 
-// typedef struct
-// {
-// 	EM::Vec4 UVs;
-// 	EM::Vec2 Offsets;
-// 	EM::Vec2 SourceSize;
-// 	float Delay;
-// 	float ScalingFactor;
-// 	const std::string Name;
-// 	GLuint TextureID;
-// } ImageFrame;
-
-// typedef struct 
-// {
-// 	EM::Vec2 AtlasSize;
-// 	EG::GLTexture Texture;	
-// } Atlas;
-
-// typedef struct 
-// {
-// 	std::vector<ImageFrame> Frames;
-// 	uint32_t TotalFrames;
-// 	std::string Name;
-// } Anim;
-
-// enum ButtonState { INACTIVE, ACTIVE };
-// enum HoveredState { OFF_HOVER, ON_HOVER };
-// enum GUIType { BUTTON, TEXTBOX };
-
-
-// // GUI Element
-// struct GUIElementBase
-// {
-// 	virtual void Init() = 0;
-
-// 	GUIElementBase* Parent;
-// 	EM::Vec2 Position;
-// 	EP::AABB AABB;
-// 	GUIType Type;
-// };
-
-// template <typename T>
-// struct GUIElement : public GUIElementBase
-// {
-// 	void Init()
-// 	{
-// 		static_cast<T*>(this)->Init();
-// 	}
-// };
-
-// namespace Enjon { namespace GUI {
-
-	// Button
-	// struct GUIButton : GUIElement<GUIButton>
-	// {
-	// 	void Init()
-	// 	{
-	// 		std::cout << "Initialized Button..." << std::endl;
-	// 	}
-
-	// 	std::vector<ImageFrame> Frames;   // Could totally put this in a resource manager of some sort
-	// 	ButtonState State;
-	// 	HoveredState HoverState;
-	// 	EGUI::Signal<> on_click;
-	// 	EGUI::Signal<> on_hover;
-	// 	EGUI::Signal<> off_hover;
-	// };
-
-
-// }}
-
 namespace Enjon { namespace GUI {
 
 	// Something like this eventually for global gui references...
@@ -1913,15 +1843,26 @@ namespace Enjon { namespace GUI {
 		}
 	};
 
-	class GUIManager
+	namespace GUIManager
 	{
-		public:
-			GUIManager(){}
-			~GUIManager(){}
+		std::unordered_map<std::string, GUIElementBase*> Elements;
 
+		void Add(std::string S, GUIElementBase* E)
+		{
+			Elements[S] = E;
+		}
 
-		private:
-	};
+		GUIElementBase* Get(const std::string S)
+		{
+			auto search = Elements.find(S);
+			if (search != Elements.end())
+			{
+				return search->second;
+			}
+
+			return nullptr;
+		}
+	}
 }}
 
 namespace CameraManager
@@ -2039,8 +1980,8 @@ int main(int argc, char** argv) {
 	EG::SpriteBatch* UIBatch = new EG::SpriteBatch();
 	UIBatch->Init();
 
-	EG::SpriteBatch* EntityBatch = new EG::SpriteBatch();
-	EntityBatch->Init();
+	EG::SpriteBatch* SceneBatch = new EG::SpriteBatch();
+	SceneBatch->Init();
 
 	EG::SpriteBatch* BGBatch = new EG::SpriteBatch();
 	BGBatch->Init();
@@ -2102,34 +2043,37 @@ int main(int argc, char** argv) {
 	// Create animation
 	Anim Test = CreateAnimation(std::string("Player_Attack_OH_L_SE"), Frames);
 
-	// Also need a current index for frames	
-	uint32_t CurrentIndex = 0;
-
 	// Set up mouse texture to default
 	MouseTexture = EI::ResourceManager::GetTexture("../assets/Textures/mouse_cursor_20.png");
 
 	////////////////////////////////
 	// ANIMATION EDITOR ////////////
 
-	// Need to create a simple button, for now, that will start and stop the animation
-	GUIButton PlayButton;
-	GUIButton NextFrame;
-	GUIButton PreviousFrame;
-	GUIButton OffsetUp;
-	GUIButton OffsetDown;
-	GUIButton OffsetLeft;
-	GUIButton OffsetRight;
-	GUIButton DelayUp;
-	GUIButton DelayDown;
+	GUIButton 			PlayButton;
+	GUIButton 			NextFrame;
+	GUIButton 			PreviousFrame;
+	GUIButton 			OffsetUp;
+	GUIButton 			OffsetDown;
+	GUIButton 			OffsetLeft;
+	GUIButton 			OffsetRight;
+	GUIButton 			DelayUp;
+	GUIButton 			DelayDown;
+	GUITextBox 			InputText;
+	GUIAnimationElement SceneAnimation;
 
-	GUITextBox InputText;
+	// Set up Scene Animtation
+	SceneAnimation.CurrentAnimation = &Test;
+	SceneAnimation.CurrentIndex = 0;
+	SceneAnimation.Position = EM::Vec2(0.0f);
+	SceneAnimation.State = ButtonState::INACTIVE;
+	SceneAnimation.HoverState = HoveredState::OFF_HOVER;
 
 	// Set up text box's text
 	InputText.Text = std::string("");
 	InputText.CursorIndex = 0;
 
 	EG::ColorRGBA16 PlayButtonColor = EG::RGBA16_White();
-	EG::ColorRGBA16 InputTextColor = EG::RGBA16(0.6f, 0.6f, 0.6f, 1.0f);
+	EG::ColorRGBA16 InputTextColor = EG::RGBA16(0.05f, 0.05f, 0.05f, 0.4f);
 
 	PlayButton.Type = GUIType::BUTTON;
 	InputText.Type = GUIType::TEXTBOX;
@@ -2166,8 +2110,8 @@ int main(int argc, char** argv) {
 	PlayButton.HoverState = HoveredState::OFF_HOVER;
 
 	// Set up Scaling Factor
-	PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor = 0.8f;
-	PlayButton.Frames.at(ButtonState::ACTIVE).ScalingFactor = 0.8f;
+	PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor = 1.0f;
+	PlayButton.Frames.at(ButtonState::ACTIVE).ScalingFactor = 1.0f;
 
 	// Set up PlayButton AABB
 	PlayButton.AABB.Min =  EM::Vec2(PlayButton.Position.x + Group.Position.x + PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.x * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor,
@@ -2185,7 +2129,7 @@ int main(int argc, char** argv) {
 	// Set up InputText AABB
 	// This will be dependent on the size of the text, or it will be static, or it will be dependent on some image frame
 	InputText.AABB.Min = InputText.Position + Group.Position;
-	InputText.AABB.Max = InputText.AABB.Min + EM::Vec2(300.0f, 60.0f);
+	InputText.AABB.Max = InputText.AABB.Min + EM::Vec2(200.0f, 20.0f);
 
 	// Calculate Group's AABB by its children's AABBs 
 	Group.AABB.Min = Group.Position;
@@ -2194,7 +2138,17 @@ int main(int argc, char** argv) {
 	auto GroupWidth = InputText.AABB.Max.x - Group.AABB.Min.x;
 	Group.AABB.Max = Group.AABB.Min + EM::Vec2(GroupWidth, GroupHeight);
 
-	// std::cout << Group.AABB.Max << std::endl;
+	// Set up SceneAnimation's on_hover signal
+	SceneAnimation.on_hover.connect([&]()
+	{
+		SceneAnimation.HoverState = HoveredState::ON_HOVER;
+	});
+
+	// Set up SceneAnimation's off_hover signal
+	SceneAnimation.off_hover.connect([&]()
+	{
+		SceneAnimation.HoverState = HoveredState::OFF_HOVER;
+	});
 
 	// Set up InputText's on_click signal
 	InputText.on_click.connect([&]()
@@ -2257,7 +2211,7 @@ int main(int argc, char** argv) {
 		InputText.HoverState = HoveredState::ON_HOVER;
 
 		// Change color of Box
-		InputTextColor = EG::RGBA16_LightGrey();
+		InputTextColor = EG::SetOpacity(EG::RGBA16_LightGrey(), 0.3f);
 
 	});
 
@@ -2270,7 +2224,7 @@ int main(int argc, char** argv) {
 		InputText.HoverState = HoveredState::OFF_HOVER;
 	
 		// Change color of Box
-		InputTextColor = EG::RGBA16(0.6f, 0.6f, 0.6f, 1.0f);
+		InputTextColor = EG::RGBA16(0.05f, 0.05f, 0.05f, 0.4f);
 	});
 
 	// Set up PlayButton's on_hover signal
@@ -2317,7 +2271,8 @@ int main(int argc, char** argv) {
 		PlayButton.State = ButtonState::INACTIVE;
 
 		// Get Current Animation, which in this case is just Test
-		CurrentIndex = (CurrentIndex + 1) % Test.TotalFrames;
+		auto CurrentIndex = SceneAnimation.CurrentIndex;
+		SceneAnimation.CurrentIndex = (CurrentIndex + 1) % SceneAnimation.CurrentAnimation->TotalFrames;
 
 		// And set t = -1.0f for safety
 		t = -1.0f;
@@ -2332,10 +2287,11 @@ int main(int argc, char** argv) {
 		PlayButton.State = ButtonState::INACTIVE;
 
 		// Get Current Animation, which in this case is just Test
-		if (CurrentIndex > 0) CurrentIndex--;
+		auto CurrentIndex = SceneAnimation.CurrentIndex;
+		if (CurrentIndex > 0) SceneAnimation.CurrentIndex -= 1;
 
 		// Bounds check
-		else CurrentIndex = Test.TotalFrames - 1;
+		else SceneAnimation.CurrentIndex = SceneAnimation.CurrentAnimation->TotalFrames - 1;
 
 		// And set t = -1.0f for safety
 		t = -1.0f;
@@ -2350,7 +2306,7 @@ int main(int argc, char** argv) {
 		PlayButton.State = ButtonState::INACTIVE;
 
 		// Get Current Frame
-		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+		auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
 
 		// Get CurrentFrame's YOffset
 		auto YOffset = CurrentFrame->Offsets.y;
@@ -2371,7 +2327,7 @@ int main(int argc, char** argv) {
 		PlayButton.State = ButtonState::INACTIVE;
 
 		// Get Current Frame
-		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+		auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
 
 		// Get CurrentFrame's YOffset
 		auto YOffset = CurrentFrame->Offsets.y;
@@ -2392,7 +2348,7 @@ int main(int argc, char** argv) {
 		PlayButton.State = ButtonState::INACTIVE;
 
 		// Get Current Frame
-		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+		auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
 
 		// Get CurrentFrame's YOffset
 		auto XOffset = CurrentFrame->Offsets.x;
@@ -2413,7 +2369,7 @@ int main(int argc, char** argv) {
 		PlayButton.State = ButtonState::INACTIVE;
 
 		// Get Current Frame
-		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+		auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
 
 		// Get CurrentFrame's YOffset
 		auto XOffset = CurrentFrame->Offsets.x;
@@ -2434,7 +2390,7 @@ int main(int argc, char** argv) {
 		PlayButton.State = ButtonState::INACTIVE;
 
 		// Get Current Frame
-		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+		auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
 
 		// Get CurrentFrame's Delay
 		auto Delay = CurrentFrame->Delay;
@@ -2455,7 +2411,7 @@ int main(int argc, char** argv) {
 		PlayButton.State = ButtonState::INACTIVE;
 
 		// Get Current Frame
-		auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+		auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
 
 		// Get CurrentFrame's Delay
 		auto Delay = CurrentFrame->Delay;
@@ -2482,18 +2438,37 @@ int main(int argc, char** argv) {
 	// Put into textbox manager
 	TextBoxManager::Add("InputText", &InputText);
 
+	GUIManager::Add("PlayButton", &PlayButton);
+	GUIManager::Add("NextFrame", &NextFrame);
+	GUIManager::Add("PreviousFrame", &PreviousFrame);
+	GUIManager::Add("OffsetUp", &OffsetUp);
+	GUIManager::Add("OffsetDown", &OffsetDown);
+	GUIManager::Add("OffsetLeft", &OffsetLeft);
+	GUIManager::Add("OffsetRight", &OffsetRight);
+	GUIManager::Add("DelayUp", &DelayUp);
+	GUIManager::Add("DelayDown", &DelayDown);
+	GUIManager::Add("InputText", &InputText);
+	GUIManager::Add("SceneAnimation", &SceneAnimation);
+
 	// Draw BG
 	BGBatch->Begin();
 	BGBatch->Add(
 					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
 					EM::Vec4(0, 0, 1, 1),
-					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png").id
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png").id,
+					EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.4f)
+				);
+	BGBatch->Add(
+					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
+					EM::Vec4(0, 0, 1, 1),
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png").id,
+					EG::SetOpacity(EG::RGBA16_White(), 0.3f)
 				);
 	BGBatch->Add(
 					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
 					EM::Vec4(0, 0, 1, 1),
 					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg_cross.png").id,
-					EG::SetOpacity(EG::RGBA16_White(), 0.2f)
+					EG::SetOpacity(EG::RGBA16_White(), 0.1f)
 				);
 	BGBatch->End();
 
@@ -2514,6 +2489,9 @@ int main(int argc, char** argv) {
 		Camera->Update();
 		HUDCamera->Update();
 
+		// Set up AABB of Scene Animation
+		EGUI::AnimationElement::AABBSetup(&SceneAnimation);
+
 		// Update input
 		Input.Update();
 
@@ -2533,6 +2511,7 @@ int main(int argc, char** argv) {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0));
+		// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.02f, 0.0f, 0.05f, 1.0f));
 
 		// Basic shader for UI
 		BasicShader->Use();
@@ -2586,19 +2565,31 @@ int main(int argc, char** argv) {
 			View = Camera->GetCameraMatrix();
 			BasicShader->SetUniformMat4("view", View);
 
-			EntityBatch->Begin(EG::GlyphSortType::BACK_TO_FRONT);
+			SceneBatch->Begin();
 			{
-
-				if (t >= Test.Frames.at(CurrentIndex).Delay)
+				// Draw AABB of current frame if hovered over or selected
+				if (SceneAnimation.HoverState == HoveredState::ON_HOVER)
 				{
-					CurrentIndex = (CurrentIndex + 1) % Test.TotalFrames;
+					auto AABB_SA = &SceneAnimation.AABB;
+					SceneBatch->Add(
+								EM::Vec4(AABB_SA->Min, AABB_SA->Max - AABB_SA->Min), 
+								EM::Vec4(0,0,1,1), 
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/selection_box.png").id,
+								EG::RGBA16_Red()
+							  );
+				}
+
+				if (t >= Frame->Delay)
+				{
+					SceneAnimation.CurrentIndex = (CurrentIndex + 1) % CurrentAnimation->TotalFrames;
+					Frame = &CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
 					t = 0.0f;
 				}
-				DrawFrame(Test.Frames.at(CurrentIndex), EM::Vec2(0, 0),	atlas, EntityBatch);
+				DrawFrame(*Frame, Position,	atlas, SceneBatch);
 
 			}
-			EntityBatch->End();
-			EntityBatch->RenderBatch();
+			SceneBatch->End();
+			SceneBatch->RenderBatch();
 
 		}
 		BasicShader->Unuse();
@@ -2615,7 +2606,7 @@ int main(int argc, char** argv) {
 			UIBatch->Begin();
 			{
 				// Get font for use
-				auto CurrentFont = EG::FontManager::GetFont("BebasNeue");
+				auto CurrentFont = EG::FontManager::GetFont("WeblySleek");
 				auto XOffset = 110.0f;
 				auto scale = 1.0f;
 
@@ -2624,7 +2615,7 @@ int main(int argc, char** argv) {
 				EG::Fonts::PrintText(HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 50.0f, HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 30.0f, scale, std::to_string((uint32_t)FPS), CurrentFont, *UIBatch, 
 												EG::SetOpacity(EG::RGBA16_White(), 0.8f));
 
-				auto CurrentFrame = &Test.Frames.at(CurrentIndex);
+				auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
 
 				// Display current frame information
 				EG::Fonts::PrintText(	
@@ -2656,7 +2647,7 @@ int main(int argc, char** argv) {
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
 										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, scale, 
-										std::to_string(CurrentIndex), 
+										std::to_string(SceneAnimation.CurrentIndex), 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
@@ -2713,7 +2704,8 @@ int main(int argc, char** argv) {
 										EG::RGBA16_LightGrey()
 									);
 
-				// Print out text box's text
+				// Print out text box's text w/ shadow
+				// Could totally load these styles from JSON, which would be a cool way to add themes to the editor
 				auto Padding = EM::Vec2(5.0f, 5.0f);
 				auto ITextHeight = InputText.AABB.Max.y - InputText.AABB.Min.y; // InputTextHeight
 				auto TextHeight = ITextHeight - 20.0f;
@@ -2723,7 +2715,7 @@ int main(int argc, char** argv) {
 										InputText.Text, 
 										EG::FontManager::GetFont("WeblySleek"), 
 										*UIBatch, 
-										EG::RGBA16_DarkGrey()
+										EG::RGBA16_LightGrey()
 									);
 
 
@@ -2814,7 +2806,8 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	CameraManager::GetCamera("HUDCamera")->ConvertScreenToWorld(MousePos);
 
 	// Get play button
-	auto PlayButton = ButtonManager::Get("PlayButton");
+	// auto PlayButton = ButtonManager::Get("PlayButton");
+	auto PlayButton = static_cast<GUIButton*>(GUIManager::Get("PlayButton"));
 	auto AABB_PB = &PlayButton->AABB;
 
 	// Check whether the mouse is hovered over the play button
@@ -2841,7 +2834,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	}
 
 	// Get InputText
-	auto InputText = TextBoxManager::Get("InputText");
+	auto InputText = static_cast<GUITextBox*>(GUIManager::Get("InputText"));
 	auto AABB_IT = &InputText->AABB;
 
 	// Check whether mouse is over the input text
@@ -2865,6 +2858,32 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 
 		// Emit off hover action
 		InputText->off_hover.emit();
+	}
+
+	// Get SceneAnimation
+	auto SceneAnimation = static_cast<GUIAnimationElement*>(GUIManager::Get("SceneAnimation"));
+	auto AABB_SA = &SceneAnimation->AABB;
+
+	// Check whether mouse is over scene animation
+	auto MouseOverAnimation = EP::AABBvsPoint(AABB_SA, MousePos);
+	if (MouseOverAnimation)
+	{
+		if (SceneAnimation->HoverState == HoveredState::OFF_HOVER)
+		{
+			std::cout << "Entering Hover..." << std::endl;
+
+			// Emit on hover action
+			SceneAnimation->on_hover.emit();
+		}
+	}
+
+	// If mouse was hovering nad has now left
+	else if (SceneAnimation->HoverState == HoveredState::ON_HOVER)
+	{
+		std::cout << "Exiting Hover..." << std::endl;
+
+		// Emit off hover action
+			SceneAnimation->off_hover.emit();
 	}
 
 
@@ -3068,7 +3087,7 @@ ImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name)
 
 void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color)
 {
-	float ScalingFactor = 0.8f;
+	float ScalingFactor = 1.0f;
 	auto& Dims = Image.UVs;
 	auto& SSize = Image.SourceSize;
 	auto& Offsets = Image.Offsets;

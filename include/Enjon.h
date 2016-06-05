@@ -41,6 +41,7 @@
 #include "GUI/Property.h"
 #include "GUI/GUIElement.h"
 #include "GUI/GUIButton.h"
+#include "GUI/GUIAnimationElement.h"
 
 #include "IO/ImageLoader.h"
 #include "IO/InputManager.h"

@@ -1,12 +1,13 @@
 #ifndef GUIELEMENT_H
 #define GUIELEMENT_H
 
+#include "Defines.h" 
+
 #include "Physics/AABB.h"
 
 #include "GUI/Signal.h"
 #include "GUI/Property.h"
 
-#include "Graphics/Animations.h"
 
 #include <vector>
 #include <string>
@@ -26,6 +27,12 @@ namespace Enjon { namespace GUI {
 		EM::Vec2 Position;
 		EP::AABB AABB;
 		GUIType Type;
+
+		ButtonState State;
+		HoveredState HoverState;
+		EGUI::Signal<> on_click;
+		EGUI::Signal<> on_hover;
+		EGUI::Signal<> off_hover;
 	};
 
 	template <typename T>
@@ -37,21 +44,6 @@ namespace Enjon { namespace GUI {
 		}
 	};
 
-	// Button
-	struct GUIButton : GUIElement<GUIButton>
-	{
-		void Init()
-		{
-			std::cout << "Initialized Button..." << std::endl;
-		}
-
-		std::vector<ImageFrame> Frames;   // Could totally put this in a resource manager of some sort
-		ButtonState State;
-		HoveredState HoverState;
-		EGUI::Signal<> on_click;
-		EGUI::Signal<> on_hover;
-		EGUI::Signal<> off_hover;
-	};
 
 	// TextBox
 	struct GUITextBox : GUIElement<GUITextBox>
@@ -63,9 +55,7 @@ namespace Enjon { namespace GUI {
 		HoveredState HoverState;
 		std::string Text;
 		int32_t CursorIndex;
-		EGUI::Signal<> on_hover;
-		EGUI::Signal<> off_hover;
-		EGUI::Signal<> on_click;
+		
 		EGUI::Signal<std::string> on_keyboard;
 		EGUI::Signal<> on_backspace;
 	};
@@ -92,6 +82,7 @@ namespace Enjon { namespace GUI {
 
 		return Group;
 	}
+
 
 }}
 
