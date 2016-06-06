@@ -2171,6 +2171,34 @@ int main(int argc, char** argv) {
 		// For now, just change the text to empty string
 		// Will need to eventually set this box to the selected component, then hot-swap in input manager controls for this particular gui-element
 		// Find where the cursor is by the mouse
+
+		// Naive way first - get mouse position in UI space
+		EM::Vec2 MouseCoords = Input.GetMouseCoords();
+		CameraManager::GetCamera("HUDCamera")->ConvertScreenToWorld(MouseCoords);
+
+		std::string& Text = InputText.Text;
+		auto XAdvance = InputText.Position.x;
+		uint32_t index = 0;
+
+		std::cout << "Mouse x: " << MouseCoords.x << std::endl;
+
+		// Get advance
+		for (auto& c : Text)
+		{
+			float Advance = EG::Fonts::GetAdvance(c, EG::FontManager::GetFont("WeblySleek"), 1.0f);
+			if (XAdvance + Advance < MouseCoords.x) 
+			{
+				XAdvance += Advance;
+				index++;
+				std::cout << "XAdvance: " << XAdvance << std::endl;
+				std::cout << "Index: " << index << std::endl;
+			}
+			else break;
+		}
+
+		InputText.CursorIndex = index;
+		std::cout << "Cursor Index: " << InputText.CursorIndex << std::endl;
+
 	});
 
 	InputText.on_backspace.connect([&]()
@@ -2774,7 +2802,7 @@ int main(int argc, char** argv) {
 					caret_on = !caret_on;	
 				}
 
-				if (caret_on)
+				if (KeyboardFocus && caret_on)
 				{
 					// Print out caret, make it a yellow line
 					// Need to get text from InputText
@@ -2782,9 +2810,9 @@ int main(int argc, char** argv) {
 					auto XAdvance = InputText.Position.x + InputText.Parent->Position.x + Padding.x;
 
 					// Get xadvance of all characters
-					for (auto& c : Text)
+					for (auto i = 0; i < InputText.CursorIndex; ++i)
 					{
-						XAdvance += EG::Fonts::GetAdvance(c, CurrentFont, scale);
+						XAdvance += EG::Fonts::GetAdvance(InputText.Text[i], CurrentFont, scale);
 					}
 					UIBatch->Add(
 									EM::Vec4(XAdvance + 1.0f, InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
