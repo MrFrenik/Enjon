@@ -2815,7 +2815,7 @@ int main(int argc, char** argv) {
 						XAdvance += EG::Fonts::GetAdvance(InputText.Text[i], CurrentFont, scale);
 					}
 					UIBatch->Add(
-									EM::Vec4(XAdvance + 1.0f, InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
+									EM::Vec4(XAdvance + 0.2f, InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
 									EM::Vec4(0, 0, 1, 1),
 									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 									EG::RGBA16_LightGrey()
