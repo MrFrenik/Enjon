@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <string>
+#include <cstdint>
 
 namespace Enjon { namespace GUI {
 

@@ -1796,7 +1796,6 @@ int main(int argc, char** argv)
 
 using namespace ECS;
 using namespace Systems;
-using namespace spine;
 
 namespace Enjon { namespace GUI {
 
@@ -2207,9 +2206,15 @@ int main(int argc, char** argv) {
 		auto cursor_index = InputText.CursorIndex;
 
 		// erase from string
-		if (str_len > 0)
+		if (str_len > 0 && cursor_index > 0)
 		{
-			InputText.Text.erase(cursor_index - 1);
+			auto S1 = InputText.Text.substr(0, cursor_index - 1);
+			std::string S2;
+
+			if (cursor_index + 1 < str_len) S2 = InputText.Text.substr(cursor_index, str_len);
+
+			S1.erase(cursor_index - 1);
+			InputText.Text = S1 + S2;
 			InputText.CursorIndex--;
 		}
 	});
@@ -2778,6 +2783,23 @@ int main(int argc, char** argv) {
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 170.0f, scale, 
+										std::string("Onion Skin: "), 
+										CurrentFont, 
+										*UIBatch, 
+										EG::RGBA16_LightGrey()
+									);
+				auto OnionString = ToggleOnionSkin.State == ButtonState::ACTIVE ? std::string("ON") : std::string("OFF");
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 170.0f, scale, 
+										OnionString, 
+										CurrentFont, 
+										*UIBatch, 
+										EG::RGBA16_LightGrey()
+									);
 
 				// Print out text box's text w/ shadow
 				// Could totally load these styles from JSON, which would be a cool way to add themes to the editor
@@ -3069,6 +3091,14 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		if (!IsModifier(CurrentKey))
 		{
 			if (CurrentKey == SDLK_BACKSPACE) InputText->on_backspace.emit();
+			else if (CurrentKey == SDLK_LEFT)
+			{
+				if (InputText->CursorIndex > 0) InputText->CursorIndex--;
+			}
+			else if (CurrentKey == SDLK_RIGHT)
+			{
+				if (InputText->CursorIndex < InputText->Text.length()) InputText->CursorIndex++;
+			}
 			else InputText->on_keyboard.emit(str);
 		}
 	}
