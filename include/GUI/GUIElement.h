@@ -16,7 +16,7 @@ namespace Enjon { namespace GUI {
 
 	enum ButtonState { INACTIVE, ACTIVE };
 	enum HoveredState { OFF_HOVER, ON_HOVER };
-	enum GUIType { BUTTON, TEXTBOX };
+	enum GUIType { BUTTON, TEXTBOX, SCENE_ANIMATION };
 
 	// GUI Element
 	struct GUIElementBase

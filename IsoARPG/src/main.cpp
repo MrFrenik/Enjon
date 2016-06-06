@@ -1940,6 +1940,7 @@ const std::string AnimationDir("../IsoARPG/Profiles/Animations/Player/PlayerAtta
 
 GUIElementBase* SelectedGUIElement = nullptr;
 GUIElementBase* KeyboardFocus = nullptr;
+GUIElementBase* MouseFocus = nullptr;
 
 EG::GLTexture MouseTexture;
 
@@ -2058,8 +2059,13 @@ int main(int argc, char** argv) {
 	GUIButton 			OffsetRight;
 	GUIButton 			DelayUp;
 	GUIButton 			DelayDown;
+	GUIButton			ToggleOnionSkin;
 	GUITextBox 			InputText;
 	GUIAnimationElement SceneAnimation;
+
+	// Set up ToggleOnionSkin
+	ToggleOnionSkin.Type = GUIType::BUTTON;
+	ToggleOnionSkin.State = ButtonState::INACTIVE;
 
 	// Set up Scene Animtation
 	SceneAnimation.CurrentAnimation = &Test;
@@ -2067,6 +2073,7 @@ int main(int argc, char** argv) {
 	SceneAnimation.Position = EM::Vec2(0.0f);
 	SceneAnimation.State = ButtonState::INACTIVE;
 	SceneAnimation.HoverState = HoveredState::OFF_HOVER;
+	SceneAnimation.Type = GUIType::SCENE_ANIMATION;
 
 	// Set up text box's text
 	InputText.Text = std::string("");
@@ -2137,6 +2144,14 @@ int main(int argc, char** argv) {
 	auto GroupHeight = InputText.AABB.Max.y - Group.AABB.Min.y;
 	auto GroupWidth = InputText.AABB.Max.x - Group.AABB.Min.x;
 	Group.AABB.Max = Group.AABB.Min + EM::Vec2(GroupWidth, GroupHeight);
+
+	// Set up ToggleOnionSkin's on_click signal
+	ToggleOnionSkin.on_click.connect([&]()
+	{
+		std::cout << "Emiting onion skin..." << std::endl;
+
+		ToggleOnionSkin.State = ToggleOnionSkin.State == ButtonState::INACTIVE ? ButtonState::ACTIVE : ButtonState::INACTIVE;
+	});
 
 	// Set up SceneAnimation's on_hover signal
 	SceneAnimation.on_hover.connect([&]()
@@ -2449,6 +2464,7 @@ int main(int argc, char** argv) {
 	GUIManager::Add("DelayDown", &DelayDown);
 	GUIManager::Add("InputText", &InputText);
 	GUIManager::Add("SceneAnimation", &SceneAnimation);
+	GUIManager::Add("ToggleOnionSkin", &ToggleOnionSkin);
 
 	// Draw BG
 	BGBatch->Begin();
@@ -2567,7 +2583,13 @@ int main(int argc, char** argv) {
 
 			SceneBatch->Begin();
 			{
-				// Draw AABB of current frame if hovered over or selected
+				// Draw AABB of current frame
+				auto CurrentAnimation = SceneAnimation.CurrentAnimation;
+				auto CurrentIndex = SceneAnimation.CurrentIndex;
+				auto Frame = &CurrentAnimation->Frames.at(CurrentIndex);
+				auto TotalFrames = CurrentAnimation->TotalFrames;
+				auto& Position = SceneAnimation.Position;
+
 				if (SceneAnimation.HoverState == HoveredState::ON_HOVER)
 				{
 					auto AABB_SA = &SceneAnimation.AABB;
@@ -2581,10 +2603,35 @@ int main(int argc, char** argv) {
 
 				if (t >= Frame->Delay)
 				{
-					SceneAnimation.CurrentIndex = (CurrentIndex + 1) % CurrentAnimation->TotalFrames;
+					CurrentIndex = (CurrentIndex + 1) % TotalFrames;
+					SceneAnimation.CurrentIndex = CurrentIndex;
 					Frame = &CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
 					t = 0.0f;
 				}
+
+				// Check for onion skin being on
+				if (ToggleOnionSkin.State == ButtonState::ACTIVE)
+				{
+					auto PreviousIndex = 0;
+
+					// Draw the scene previous and after
+					if (CurrentIndex > 0)
+					{
+						PreviousIndex = CurrentIndex - 1;
+					}	
+					else
+					{
+						PreviousIndex = TotalFrames - 1;
+					}
+
+					auto NextFrame = &CurrentAnimation->Frames.at((SceneAnimation.CurrentIndex + 1) % TotalFrames);
+					auto PreviousFrame = &CurrentAnimation->Frames.at(PreviousIndex);
+
+					DrawFrame(*PreviousFrame, Position, atlas, SceneBatch, EG::SetOpacity(EG::RGBA16_Blue(), 0.3f));
+					DrawFrame(*NextFrame, Position, atlas, SceneBatch, EG::SetOpacity(EG::RGBA16_Red(), 0.3f));
+				}
+
+				// Draw Scene animation
 				DrawFrame(*Frame, Position,	atlas, SceneBatch);
 
 			}
@@ -2681,7 +2728,7 @@ int main(int argc, char** argv) {
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
 										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, scale, 
-										std::to_string(CurrentFrame->Offsets.y), 
+										std::to_string(static_cast<int32_t>(CurrentFrame->Offsets.y)), 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
@@ -2698,7 +2745,7 @@ int main(int argc, char** argv) {
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
 										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 150.0f, scale, 
-										std::to_string(CurrentFrame->Offsets.x), 
+										std::to_string(static_cast<int32_t>(CurrentFrame->Offsets.x)), 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
@@ -2737,6 +2784,7 @@ int main(int argc, char** argv) {
 bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 {
 	static bool WasHovered = false;
+	static EM::Vec2 MouseFrameOffset(0.0f);
 	unsigned int CurrentKey = 0;
 	static std::string str = "";
 	char CurrentChar = 0;
@@ -2862,10 +2910,12 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 
 	// Get SceneAnimation
 	auto SceneAnimation = static_cast<GUIAnimationElement*>(GUIManager::Get("SceneAnimation"));
+	auto SceneMousePos = Input->GetMouseCoords();
+	CameraManager::GetCamera("SceneCamera")->ConvertScreenToWorld(SceneMousePos);
 	auto AABB_SA = &SceneAnimation->AABB;
 
 	// Check whether mouse is over scene animation
-	auto MouseOverAnimation = EP::AABBvsPoint(AABB_SA, MousePos);
+	auto MouseOverAnimation = EP::AABBvsPoint(AABB_SA, SceneMousePos);
 	if (MouseOverAnimation)
 	{
 		if (SceneAnimation->HoverState == HoveredState::OFF_HOVER)
@@ -2901,22 +2951,58 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
     	{
     		SelectedGUIElement = PlayButton;
     		PlayButton->on_click.emit();
+    		MouseFocus = nullptr;
     	}
 
     	else if (MouseOverText)
     	{
     		SelectedGUIElement = InputText;
     		KeyboardFocus = InputText;
+    		MouseFocus = nullptr; 			// The way to do this eventually is set all of these focuses here to this element but define whether or not it can move
     		InputText->on_click.emit();
+    	}
+
+    	else if (MouseOverAnimation)
+    	{
+    		SelectedGUIElement = SceneAnimation;
+    		MouseFocus = SceneAnimation;
+    		MouseFrameOffset = EM::Vec2(SceneMousePos.x - SceneAnimation->AABB.Min.x, SceneMousePos.y - SceneAnimation->AABB.Min.y);
     	}
 
     	else
     	{
     		// This is incredibly not thought out at all...
     		SelectedGUIElement = nullptr;
+    		MouseFocus = nullptr;
     		KeyboardFocus = nullptr;
     	}
     }
+
+    // NOTE(John): Again, these input manager states will be hot loaded in, so this will be cleaned up eventaully...
+	if (MouseFocus)
+	{
+		if (Input->IsKeyDown(SDL_BUTTON_LEFT))
+		{
+			auto X = SceneMousePos.x;
+			auto Y = SceneMousePos.y;
+
+			// Turn off the play button
+			if (PlayButton->State == ButtonState::ACTIVE) PlayButton->on_click.emit();
+
+			if (MouseFocus->Type == GUIType::SCENE_ANIMATION)
+			{
+				auto Anim = static_cast<GUIAnimationElement*>(MouseFocus);
+				auto CurrentAnimation = Anim->CurrentAnimation;	
+
+				// Find bottom corner of current frame
+				auto BottomCorner = Anim->AABB.Min;
+
+				// Update offsets
+				CurrentAnimation->Frames.at(Anim->CurrentIndex).Offsets = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
+				// CurrentAnimation->Frames.at(Anim->CurrentIndex).Offsets = EM::Vec2(X, Y);
+			}
+		}
+	}
 
 	if (Input->IsKeyPressed(SDLK_ESCAPE))
 	{
@@ -2932,6 +3018,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 			else InputText->on_keyboard.emit(str);
 		}
 	}
+
 
 	else if (KeyboardFocus == nullptr)
 	{
@@ -3030,6 +3117,17 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 			if (DelayUp)
 			{
 				DelayUp->on_click.emit();
+			}
+		}
+		if (Input->IsKeyPressed(SDLK_o))
+		{
+			// Get button from button manager
+			auto ToggleOnionSkin = static_cast<GUIButton*>(GUIManager::Get("ToggleOnionSkin"));
+
+			// Emit
+			if (ToggleOnionSkin)
+			{
+				ToggleOnionSkin->on_click.emit();
 			}
 		}
 	}
