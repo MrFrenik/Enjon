@@ -2764,22 +2764,35 @@ int main(int argc, char** argv) {
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
-				// Print out caret, make it a yellow line
-				// Need to get text from InputText
-				auto Text = InputText.Text;
-				auto XAdvance = InputText.Position.x + InputText.Parent->Position.x + Padding.x;
+				static float caret_count = 0.0f;
+				caret_count += 0.1f;
+				static bool caret_on = true;
 
-				// Get xadvance of all characters
-				for (auto& c : Text)
+				if (caret_count >= 4.0f)
 				{
-					XAdvance += EG::Fonts::GetAdvance(c, CurrentFont, scale);
+					caret_count = 0.0f;
+					caret_on = !caret_on;	
 				}
-				UIBatch->Add(
-								EM::Vec4(XAdvance + 1.0f, InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
-								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::RGBA16_LightGrey()
-							);
+
+				if (caret_on)
+				{
+					// Print out caret, make it a yellow line
+					// Need to get text from InputText
+					auto Text = InputText.Text;
+					auto XAdvance = InputText.Position.x + InputText.Parent->Position.x + Padding.x;
+
+					// Get xadvance of all characters
+					for (auto& c : Text)
+					{
+						XAdvance += EG::Fonts::GetAdvance(c, CurrentFont, scale);
+					}
+					UIBatch->Add(
+									EM::Vec4(XAdvance + 1.0f, InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
+									EM::Vec4(0, 0, 1, 1),
+									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+									EG::RGBA16_LightGrey()
+								);
+				}
 
 
 			}
