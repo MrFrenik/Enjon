@@ -42,7 +42,11 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	void Init(char* filePath, GLuint size, Font* font);
 
 	/* Gets character stats from given font */
-	CharacterStats GetCharacterAttributes(Math::Vec2 Pos, float scale, Font* F, std::string::const_iterator c, float* advance);
+	// CharacterStats GetCharacterAttributes(Math::Vec2 Pos, float scale, Font* F, std::string::const_iterator c, float* advance);
+
+	CharacterStats GetCharacterAttributes(Enjon::Math::Vec2 Pos, float scale, Font* F, std::string::const_iterator c, float* advance);
+
+	float GetAdvance(char c, Font* F, float scale);
 
 	/* Creates and returns new font */
 	Font* CreateFont(char* filePath, GLuint size);

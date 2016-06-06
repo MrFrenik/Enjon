@@ -97,7 +97,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	}
 
 	/* Gets character stats from given font */
-	CharacterStats GetCharacterAttributes(Math::Vec2 Pos, float scale, Font* F, std::string::const_iterator c, float* advance)
+	CharacterStats GetCharacterAttributes(Enjon::Math::Vec2 Pos, float scale, Font* F, std::string::const_iterator c, float* advance)
 	{
 		Character ch = F->Characters[*c];
 
@@ -116,6 +116,13 @@ namespace Enjon { namespace Graphics { namespace Fonts {
         *advance = x + (ch.Advance >> 6) * scale;
 
         return CharacterStats{DestRect, UV, ch.TextureID};
+	}
+
+	float GetAdvance(char c, Font* F, float scale)
+	{
+		Character ch = F->Characters[c];
+
+		return (ch.Advance >> 6) * scale;
 	}
 
 	/* Adds a string of tex at (x,y) to given spritebatch */

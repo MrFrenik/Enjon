@@ -2764,7 +2764,22 @@ int main(int argc, char** argv) {
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
+				// Print out caret, make it a yellow line
+				// Need to get text from InputText
+				auto Text = InputText.Text;
+				auto XAdvance = InputText.Position.x + InputText.Parent->Position.x + Padding.x;
 
+				// Get xadvance of all characters
+				for (auto& c : Text)
+				{
+					XAdvance += EG::Fonts::GetAdvance(c, CurrentFont, scale);
+				}
+				UIBatch->Add(
+								EM::Vec4(XAdvance + 1.0f, InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
+								EM::Vec4(0, 0, 1, 1),
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								EG::RGBA16_LightGrey()
+							);
 
 
 			}
@@ -2854,7 +2869,6 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 	CameraManager::GetCamera("HUDCamera")->ConvertScreenToWorld(MousePos);
 
 	// Get play button
-	// auto PlayButton = ButtonManager::Get("PlayButton");
 	auto PlayButton = static_cast<GUIButton*>(GUIManager::Get("PlayButton"));
 	auto AABB_PB = &PlayButton->AABB;
 
@@ -2999,7 +3013,6 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 
 				// Update offsets
 				CurrentAnimation->Frames.at(Anim->CurrentIndex).Offsets = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
-				// CurrentAnimation->Frames.at(Anim->CurrentIndex).Offsets = EM::Vec2(X, Y);
 			}
 		}
 	}
