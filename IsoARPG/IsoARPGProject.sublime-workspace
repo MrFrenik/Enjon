@@ -88,34 +88,29 @@
 	"buffers":
 	[
 		{
-			"file": "/E/Development/Enjon/include/GUI/Signal.h",
+			"contents": "#define PARSER  0\n#define TEST_FUNCTIONS 0\n\n#define _SECURE_SCL 0\n\n// Don't touch these\n#if REALGAME \n	#define TESTING 0\n#elif TEST_FUNCTIONS\n	#define TESTING 0\n	#define TESTING_PARSER 0\n	#define FUNCTION_TESTS 1\n#elif PARSER\n	#define TESTING 0\n	#define TESTING_PARSER 1 \n#else\n	#define TESTING 1\n#endif\n\n/**\n* MAIN GAME\n*/\n\n#if 0\n#define FULLSCREENMODE   0\n#define SECOND_DISPLAY   0\n\n#if FULLSCREENMODE\n	#if SECOND_DISPLAY\n		#define SCREENWIDTH 1440\n		#define SCREENHEIGHT 900\n	#else\n		#define SCREENWIDTH  1920\n		#define SCREENHEIGHT 1080\n	#endif\n	#define SCREENRES    Graphics::FULLSCREEN\n#else\n	#define SCREENWIDTH  1024\n	#define SCREENHEIGHT 768\n	#define SCREENRES Graphics::DEFAULT\n#endif \n\n/*-- External/Engine Libraries includes --*/\n#include <Enjon.h>\n\n/*-- Entity Component System includes --*/\n#include <ECS/ComponentSystems.h>\n#include <ECS/PlayerControllerSystem.h>\n#include <ECS/Transform3DSystem.h>\n#include <ECS/CollisionSystem.h>\n#include <ECS/Animation2DSystem.h>\n#include <ECS/InventorySystem.h> \n#include <ECS/Renderer2DSystem.h>\n#include <ECS/AIControllerSystem.h> \n#include <ECS/AttributeSystem.h>\n#include <ECS/EffectSystem.h>\n#include <ECS/EntityFactory.h>\n#include <ECS/Entity.h>\n#include <Loot.h>\n\n/*-- IsoARPG includes --*/\n#include \"EnjonAnimation.h\"\n#include \"AnimationManager.h\"\n#include \"SpatialHash.h\"\n#include \"Level.h\"\n#include \"BehaviorTreeManager.h\"\n\n/*-- Standard Library includes --*/\n#include <stdio.h>\n#include <iostream> \n#include <time.h>\n#include <stdlib.h>\n\n#define NUM_LIGHTS 	10\n\ntypedef struct\n{\n	EM::Vec3 Position;\n	EG::ColorRGBA16 Color;\n	float Radius;\n	EM::Vec3 Falloff;\n} Light;\n\nfloat LightZ = 0.03f;\n\ntypedef struct \n{\n	EM::Vec2 Position;\n	EM::Vec2 Dimensions; \n	float Angle;\n} BeamSegment;\n\nstd::vector<BeamSegment> BeamSegments;\n\nchar buffer[256];\nchar buffer2[256];\nchar buffer3[256];\nbool isRunning = true;\nbool ShowMap = false;\nbool Paused = false;\nbool IsDashing = false;\n\nconst int LEVELSIZE = 20;\n\nfloat DashingCounter = 0.0f;\n\nEnjon::uint32 CollisionRunTime = 0;\nEnjon::uint32 TransformRunTime = 0;\nEnjon::uint32 AIRunTime = 0;\nEnjon::uint32 ClearEntitiesRunTime = 0;\nEnjon::uint32 RenderTime = 0;\nEnjon::uint32 EffectRunTime = 0;\nEnjon::uint32 ParticleCount = 0;\nEnjon::uint32 TileOverlayRunTime = 0;\n\nusing namespace Enjon;\nusing namespace ECS;\nusing namespace Systems;\n\n/*-- Function Declarations --*/\nvoid ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* Manager, ECS::eid32 Entity);\nvoid DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);\nvoid DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math::Vec3 Pos);\nvoid DrawBox(Enjon::Graphics::SpriteBatch* Batch, Enjon::Graphics::SpriteBatch* LightBatch, ECS::Systems::EntityManager* Manager);\nvoid GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Light*>& LightsToDraw);\n\nSDL_Joystick* Joystick;\n\n#undef main\nint main(int argc, char** argv)\n{\n	// Seed random \n	srand(time(NULL));\n\n	float FPS = 100;\n	int screenWidth = SCREENWIDTH, screenHeight = SCREENHEIGHT;\n\n	// Profile strings\n	std::string FPSString = \"60.0\";\n	std::string RenderTimeString = \"0\";\n	std::string CollisionTimeString = \"0\";\n	std::string TransformTimeString = \"0\";\n	std::string EffectTimeString = \"0\";\n	std::string TileOverlayTimeString = \"0\";\n	std::string AITimeString = \"0\";\n\n	// Init Limiter\n	Enjon::Utils::FPSLimiter Limiter; \n	Limiter.Init(60.0f); \n\n	//Init Enjon\n	Enjon::Init();\n\n	// Query for available controllers\n	printf(\"%d joysticks were found. \\n\\n\", SDL_NumJoysticks());\n\n	Joystick = SDL_JoystickOpen(0);\n	SDL_JoystickEventState(SDL_ENABLE);\n\n	// Create a window\n	Graphics::Window Window;\n	Window.Init(\"Testing Grounds\", screenWidth, screenHeight, SCREENRES);\n\n	// Hide/Show mouse\n	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);\n\n\n	// Create Camera\n	Graphics::Camera2D Camera;\n	Camera.Init(screenWidth, screenHeight);\n	Camera.SetScale(1.0f); \n	\n	// Create HUDCamera\n	Graphics::Camera2D HUDCamera;\n	HUDCamera.Init(screenWidth, screenHeight);\n	HUDCamera.SetScale(1.0f);\n\n	// Init ShaderManager\n	Enjon::Graphics::ShaderManager::Init(); \n\n	// Init SpriteSheetManager\n	EG::SpriteSheetManager::Init();\n\n	// Init AnimationManager\n	AnimationManager::Init(); \n\n	// Init FontManager\n	Enjon::Graphics::FontManager::Init();\n\n	// Init BehaviorTreeManager\n	BTManager::Init();\n	\n	// Init level\n	Enjon::Graphics::SpriteBatch TileBatch;\n	TileBatch.Init();\n\n	Enjon::Graphics::SpriteBatch GroundTileBatch;\n	GroundTileBatch.Init();\n\n	Enjon::Graphics::SpriteBatch CartesianTileBatch;\n	CartesianTileBatch.Init();\n\n	Enjon::Graphics::SpriteBatch LightBatch;\n	LightBatch.Init();\n\n	Enjon::Graphics::SpriteBatch CartesianEntityBatch;\n	CartesianEntityBatch.Init();\n\n	Enjon::Graphics::SpriteBatch FrontWallBatch;\n	FrontWallBatch.Init();\n\n	Enjon::Graphics::SpriteBatch MapBatch;\n	MapBatch.Init();\n\n	Enjon::Graphics::SpriteBatch MapEntityBatch;\n	MapEntityBatch.Init();\n\n	Enjon::Graphics::SpriteBatch TextBatch;\n	TextBatch.Init();\n\n	Enjon::Graphics::SpriteBatch HUDBatch;\n	HUDBatch.Init();\n\n	Enjon::Graphics::SpriteBatch OverlayBatch;\n	OverlayBatch.Init();\n\n	EG::SpriteBatch CubeBatch;\n	CubeBatch.Init();\n\n	EG::SpriteBatch DiffuseBatch;\n	DiffuseBatch.Init();\n\n	EG::SpriteBatch NormalsBatch;\n	NormalsBatch.Init();\n\n	EG::SpriteBatch GroundTileNormalsBatch;\n	GroundTileNormalsBatch.Init();\n\n	EG::SpriteBatch DeferredBatch;\n	DeferredBatch.Init();\n\n	Level level;\n	Graphics::GLTexture TileTexture;\n	level.Init(Camera.GetPosition().x, Camera.GetPosition().y, LEVELSIZE, LEVELSIZE);\n	TileTexture = Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/tiletestfilledblue.png\");\n	\n	float x = Camera.GetPosition().x;\n	float y = Camera.GetPosition().y;\n\n	// Spatial Hash\n	SpatialHash::Grid grid;\n	int width = level.GetWidth();\n	SpatialHash::Init(&grid, width, width);\n\n	// Make spritesheets for player and enemy and item\n	EG::SpriteSheet PlayerSheet;\n	EG::SpriteSheet EnemySheet;\n	EG::SpriteSheet EnemySheet2;\n	EG::SpriteSheet ItemSheet;\n	EG::SpriteSheet ArrowSheet;\n	EG::SpriteSheet ReticleSheet;\n	EG::SpriteSheet TargetSheet;\n	EG::SpriteSheet HealthSheet;\n	PlayerSheet.Init(Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/pixelanimtestframessplit.png\"), Enjon::Math::iVec2(6, 24));\n	EnemySheet.Init(Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/beast.png\"), Math::iVec2(1, 1));\n	EnemySheet2.Init(Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/enemy.png\"), Math::iVec2(1, 1));\n	ItemSheet.Init(Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/orb.png\"), Math::iVec2(1, 1));\n	ArrowSheet.Init(Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/arrows.png\"), Math::iVec2(8, 1));\n	ReticleSheet.Init(Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/circle_reticle.png\"), Math::iVec2(1, 1));\n	TargetSheet.Init(Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/Target.png\"), Math::iVec2(1, 1));\n	HealthSheet.Init(Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/HealthBar.png\"), EM::iVec2(1, 1));\n\n\n	\n	// Creating tiled iso level\n	TileBatch.Begin(); \n	level.DrawIsoLevel(TileBatch);\n	TileBatch.End();	\n\n	GroundTileBatch.Begin();\n	GroundTileNormalsBatch.Begin();\n	level.DrawGroundTiles(GroundTileBatch, GroundTileNormalsBatch);\n	GroundTileNormalsBatch.End();\n	GroundTileBatch.End();\n\n	// GroundTileNormalsBatch.Begin();\n	// GroundTileNormalsBatch.Add(\n	// 	EM::Vec4(-10000, -10000, 10000, 10000), \n	// 	EM::Vec4(0, 0, 1, 1),\n	// 	EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/verticlebar.png\").id, \n	// 	EG::RGBA16(0.0f, 0.0f, 1.0f, 1.0f)\n	// 	);\n	// GroundTileNormalsBatch.End();\n\n	CartesianTileBatch.Begin();\n	level.DrawCartesianLevel(CartesianTileBatch);\n	CartesianTileBatch.End();\n\n	FrontWallBatch.Begin();\n	level.DrawIsoLevelFront(FrontWallBatch);\n	FrontWallBatch.End();\n\n	MapBatch.Begin();\n	level.DrawMap(MapBatch);\n	MapBatch.End();\n\n	// Add Overlays \n	OverlayBatch.Begin();\n	level.DrawTileOverlays(OverlayBatch);\n	OverlayBatch.End();\n \n	// Create EntityBatch\n	Enjon::Graphics::SpriteBatch EntityBatch;\n	EntityBatch.Init();\n	\n	// Create Particle Batch\n	Enjon::Graphics::SpriteBatch ParticleBatch;\n	ParticleBatch.Init();\n\n	// Create particle batchs to be used by World\n	EG::Particle2D::ParticleBatch2D* LightParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);\n	EG::Particle2D::ParticleBatch2D* TestParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);\n	EG::Particle2D::ParticleBatch2D* TextParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);\n	EG::Particle2D::ParticleBatch2D* SmokeBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);\n\n	EG::GLSLProgram* DeferredShader = EG::ShaderManager::GetShader(\"DeferredShader\");\n	EG::GLSLProgram* DiffuseShader 	= EG::ShaderManager::GetShader(\"DiffuseShader\");\n	EG::GLSLProgram* NormalsShader 	= EG::ShaderManager::GetShader(\"NormalsShader\");\n	EG::GLSLProgram* ScreenShader 	= EG::ShaderManager::GetShader(\"NoCameraProjection\");\n\n	// FBO\n	// float DWidth = SCREENWIDTH * 0.9f;\n	float DWidth = SCREENWIDTH;\n	float DHeight = DWidth * 0.5625f;\n	EG::FrameBufferObject* DiffuseFBO 	= new EG::FrameBufferObject(DWidth, DHeight);\n	EG::FrameBufferObject* NormalsFBO 	= new EG::FrameBufferObject(DWidth, DHeight);\n	EG::FrameBufferObject* DeferredFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);\n\n	// Create InputManager\n	Input::InputManager Input;\n\n\n	/////////////////\n	// Testing ECS //   \n	/////////////////\n\n	// Create new EntityManager\n	struct EntityManager* World = EntitySystem::NewEntityManager(level.GetWidth(), level.GetWidth(), &Camera, &level);\n\n	// Init loot system\n	Loot::Init();\n\n	// Push back particle batchs into world\n	EG::Particle2D::AddParticleBatch(World->ParticleEngine, TestParticleBatch);\n	EG::Particle2D::AddParticleBatch(World->ParticleEngine, LightParticleBatch);\n	EG::Particle2D::AddParticleBatch(World->ParticleEngine, TextParticleBatch);\n	EG::Particle2D::AddParticleBatch(World->ParticleEngine, SmokeBatch);\n\n\n	Math::Vec2 Pos = Camera.GetPosition() + 50.0f;\n\n	static Math::Vec2 enemydims(222.0f, 200.0f);\n\n	static uint32 AmountDrawn = 20;\n	for (int e = 0; e < AmountDrawn; e++)\n	{\n		float height = 10.0f;\n		eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),\n																enemydims, &EnemySheet, \"Enemy\", 0.05f); \n		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);\n	}\n\n	// Create random dude to see what he looks like\n	{\n		float height = 0.0f;\n		float h = 300.0f;\n		float w = h * 0.707f;\n		eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),\n																EM::Vec2(w, h), EG::SpriteSheetManager::GetSpriteSheet(\"Enemy\"), \"Enemy\", 0.05f); \n		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);\n	}\n\n	// Create player\n	eid32 Player = Factory::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(100.0f, 100.0f), &PlayerSheet, \n		\"Player\", 0.4f, Math::Vec3(1, 1, 0)); \n\n	// Set player for world\n	World->Player = Player;\n\n	// Create Sword\n	eid32 Sword = Factory::CreateWeapon(World, World->TransformSystem->Transforms[Player].Position, Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, \n												(Masks::Type::WEAPON | \n												 Masks::WeaponOptions::MELEE | \n												 Masks::GeneralOptions::EQUIPPED | \n												 Masks::GeneralOptions::PICKED_UP), Component::EntityType::WEAPON, \"Weapon\");\n\n	// Create Bow\n	eid32 Bow = Factory::CreateWeapon(World, World->TransformSystem->Transforms[Player].Position, Enjon::Math::Vec2(32.0f, 32.0f), &ItemSheet, \n												(Masks::Type::WEAPON | Masks::GeneralOptions::PICKED_UP), Component::EntityType::WEAPON, \"Weapon\");\n\n	// Turn off Rendering / Transform Components\n	EntitySystem::RemoveComponents(World, Sword, COMPONENT_RENDERER2D | COMPONENT_TRANSFORM3D);\n\n	// Add weapons to player inventory\n	World->InventorySystem->Inventories[Player].Items.push_back(Sword);\n	World->InventorySystem->Inventories[Player].Items.push_back(Bow);\n	// Equip sword\n	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;\n\n	AmountDrawn = 5000;\n\n	for (uint32 e = 0; e < AmountDrawn; e++)\n	{\n		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), \n										Enjon::Math::Vec2(ER::Roll(5, 10), ER::Roll(1, 5)), EG::SpriteSheetManager::GetSpriteSheet(\"VerticleBar\"), Masks::Type::ITEM, Component::EntityType::ITEM);\n		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);\n		World->Renderer2DSystem->Renderers[id].Format = EG::CoordinateFormat::ISOMETRIC;\n		World->Renderer2DSystem->Renderers[id].Color = EG::RGBA16(0.5f, 0.2f, 0.1f, 1.0f);\n		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;\n	}\n\n	for (uint32 e = 0; e < AmountDrawn; e++)\n	{\n		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), \n										Enjon::Math::Vec2(ER::Roll(5, 10), ER::Roll(2, 5)), EG::SpriteSheetManager::GetSpriteSheet(\"Box\"), Masks::Type::ITEM, Component::EntityType::ITEM);\n		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);\n		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;\n		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(50, 100) / 50.0f;\n	}\n\n	for (uint32 e = 0; e < AmountDrawn; e++)\n	{\n		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), \n										Enjon::Math::Vec2(ER::Roll(10, 20), ER::Roll(10, 20)), EG::SpriteSheetManager::GetSpriteSheet(\"BoxDebris\"), Masks::Type::ITEM, Component::EntityType::ITEM);\n		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);\n		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;\n		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(50, 100) / 50.0f;\n	}\n\n	for (uint32 e = 0; e < 100; e++)\n	{\n		auto s = ER::Roll(20, 40);\n		eid32 Box = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), \n										Enjon::Math::Vec2(s, s), EG::SpriteSheetManager::GetSpriteSheet(\"Box\"), Masks::Type::ITEM, Component::EntityType::ITEM);\n		World->TransformSystem->Transforms[Box].Mass = 2.5f - ER::Roll(1, 50) / 50.0f;\n		World->TransformSystem->Transforms[Box].AABBPadding = 15.0f;\n\n	}\n\n	for (uint32 e = 0; e < 50; e++)\n	{\n		auto s = ER::Roll(50, 80);\n		eid32 BiggerBox = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), \n										Enjon::Math::Vec2(s, s), EG::SpriteSheetManager::GetSpriteSheet(\"Box\"), Masks::Type::ITEM, Component::EntityType::ITEM);\n		World->TransformSystem->Transforms[BiggerBox].Mass = 5.0f - ER::Roll(1, 100) / 50.0f;\n		World->TransformSystem->Transforms[BiggerBox].AABBPadding = 15.0f;\n	}\n\n	// Set position to player\n	Camera.SetPosition(Math::Vec2(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, World->TransformSystem->Transforms[Player].Position.y)); \n\n	GLfloat quadVertices[] = {   // Vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.\n        // Positions   // TexCoords\n\n        -1.0f,  1.0f,  0.0f, 1.0f,   	// TL\n        -1.0f, -1.0f,  0.0f, 0.0f,   	// BL\n         1.0f, -1.0f,  1.0f, 0.0f,		// BR\n\n        -1.0f,  1.0f,  0.0f, 1.0f,		// TL\n         1.0f, -1.0f,  1.0f, 0.0f,		// BR\n         1.0f,  1.0f,  1.0f, 1.0f 		// TR\n    };\n\n    GLuint quadVAO, quadVBO;\n    glGenVertexArrays(1, &quadVAO);\n    glGenBuffers(1, &quadVBO);\n    glBindVertexArray(quadVAO);\n    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);\n    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);\n    glEnableVertexAttribArray(0);\n    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);\n    glEnableVertexAttribArray(1);\n    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));\n    glBindVertexArray(0);\n\n    // Vector of lights\n	std::vector<Light> Lights;\n\n	const GLfloat constant = 1.0f; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)\n    const GLfloat linear = 0.1f;\n    const GLfloat quadratic = 40.0f;\n    // Then calculate radius of light volume/sphere\n\n   	float LevelWidth = level.GetWidth();\n   	float LevelHeight = level.GetHeight(); \n	for (GLuint i = 0; i < NUM_LIGHTS; i++)\n	{\n		EG::ColorRGBA16 Color = EG::RGBA16(ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, 2.5f);\n	    GLfloat maxBrightness = std::fmaxf(std::fmaxf(Color.r, Color.g), Color.b);  // max(max(lightcolor.r, lightcolor.g), lightcolor.b)\n	    GLfloat Radius = (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2 * quadratic);\n		Light L = {\n					  EM::Vec3(ER::Roll(0, -LevelWidth), ER::Roll(0, -LevelHeight), LightZ), \n					  Color, \n					  Radius, \n					  EM::Vec3(constant, linear, quadratic)\n				  };\n\n		Lights.push_back(L);\n	}\n\n	std::vector<Light*> LightsToDraw;\n\n\n	{\n		float BeamSegX = 10.5f, BeamSegY = 2.0f;\n		for (Enjon::uint32 i = 0; i < 50; i++)\n		{\n			BeamSegments.push_back({EM::Vec2(0.0f, 0.0f), EM::Vec2(BeamSegX, BeamSegY), 0.0f});\n		}\n	}\n\n	\n	while(isRunning)\n	{ \n		static float t = 0.0f;\n		t += 0.025f;\n\n		/////////////\n		// Updates // \n		///////////// \n\n		// Begin FPSLimiter\n		Limiter.Begin();\n\n		// Update Camera\n		Camera.Update();\n		\n		// Update HUDCamera\n		HUDCamera.Update();\n\n		// Update Input Manager\n		Input.Update();	\n\n		{\n			auto L = &Lights.at(0);\n			const EM::Vec3* P = &World->TransformSystem->Transforms[Player].Position;\n			L->Position = EM::Vec3(P->x, P->y - P->z, LightZ);\n			L->Color = EG::RGBA16(6.0f, 4.0f, 6.0f, 1.0f);\n		}\n\n		// Clear lights\n		LightsToDraw.clear();\n\n    	// Process which lights to actually draw this frame\n    	GetLights(&Camera, &Lights, LightsToDraw);\n\n		// Update World \n		const Math::Vec2* PlayerStuff = &World->TransformSystem->Transforms[Player].Position.XY();\n		static Math::Vec2 quadDimsStuff(50.0f, 50.0f);\n		static Math::Vec2 ViewPort;\n		static Math::Vec4 CameraDims;\n		static float StartTicks = 0.0f;\n		ViewPort = Math::Vec2(SCREENWIDTH, SCREENHEIGHT) / Camera.GetScale();\n		CameraDims = Math::Vec4(*PlayerStuff, quadDimsStuff / Camera.GetScale());\n\n		if (!Paused)\n		{\n			StartTicks = SDL_GetTicks();\n			// Check whether or not overlays are dirty and then reset overlay batch if needed\n			if (World->Lvl->GetOverlaysDirty())\n			{\n				OverlayBatch.Begin();\n				World->Lvl->DrawTileOverlays(OverlayBatch);\n				OverlayBatch.End();\n			}\n\n			// Clear entities from Renderer system vector\n			World->Renderer2DSystem->Entities.clear();\n\n			// Clear entities from collision system vectors\n			World->CollisionSystem->Entities.clear();\n\n			// Clear entities from PlayerControllerSystem targets vector\n			World->PlayerControllerSystem->Targets.clear();\n\n			// Draw some random assed fire\n			EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));\n	\n			TileOverlayRunTime = SDL_GetTicks() - StartTicks;		\n			StartTicks = SDL_GetTicks();\n			SpatialHash::ClearCells(World->Grid);\n			ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck\n\n			StartTicks = SDL_GetTicks();\n			AIController::Update(World->AIControllerSystem, Player);\n			AIRunTime = SDL_GetTicks() - StartTicks;\n\n			Animation2D::Update(World);\n\n			StartTicks = SDL_GetTicks();\n			Transform::Update(World->TransformSystem, LightParticleBatch);\n			TransformRunTime = (SDL_GetTicks() - StartTicks);\n\n			StartTicks = SDL_GetTicks();	\n			Collision::Update(World);\n			CollisionRunTime = (SDL_GetTicks() - StartTicks);\n\n			// Apply effects\n			StartTicks = SDL_GetTicks();	\n			Effect::Update(World);\n			EffectRunTime = (SDL_GetTicks() - StartTicks);\n\n			Renderer2D::Update(World); \n\n			auto LvlSize = level.GetDims();\n			EM::IsoToCartesian(LvlSize);\n			static float SmokeCount = 0.0f;\n			SmokeCount += 0.005f;\n			Enjon::uint32 SR = Enjon::Random::Roll(0, 3);\n			if (SmokeCount > 10.0f)\n			{\n				for (Enjon::uint32 i = 0; i < 3; i++)\n				{\n					DrawSmoke(LightParticleBatch, EM::Vec3(Enjon::Random::Roll(-LvlSize.x, LvlSize.x), Enjon::Random::Roll(-LvlSize.y * 2.0f, LvlSize.y * 2.0f), 0.0f));\n				}\n				SmokeCount = 0.0f;\n			}\n\n			// Updates the world's particle engine\n			World->ParticleEngine->Update();\n		\n			PlayerController::Update(World->PlayerControllerSystem);\n		}\n\n		// Check for input\n		ProcessInput(&Input, &Camera, World, Player); \n\n\n		//LERP camera to center of player position\n		static Math::Vec2 m_velocity;\n		static float scale = 6.0f; \n		m_velocity.x = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, Camera.GetPosition().x, 8.0f);\n		m_velocity.y = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.y, Camera.GetPosition().y, scale); \n		Camera.SetPosition(m_velocity);\n\n		////////////////////////////////////////////////\n\n		///////////////\n		// RENDERING //\n		///////////////\n\n		StartTicks = SDL_GetTicks();\n		\n		// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, Enjon::Graphics::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));\n\n		//Enable alpha blending\n		glEnable(GL_BLEND);\n\n		//Set blend function type\n		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);\n\n		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));\n\n\n		// Set up shader\n		Math::Mat4 model, view, projection;\n		model = Math::Mat4::Identity();\n		view = Camera.GetCameraMatrix();\n		projection = Math::Mat4::Identity();\n\n		// Draw Entities\n		EntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); \n		NormalsBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT);\n		MapEntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); \n		LightBatch.Begin();\n		TextBatch.Begin(); \n		HUDBatch.Begin();\n		DeferredBatch.Begin();\n\n		static uint32 Row = 0;\n		static uint32 Col = 0;\n		static uint32 i = 0;\n		static Math::Vec2 enemydims2(180.0f, 222.0f);\n		static Math::Vec2 dims(100.0f, 100.0f);\n		static Math::Vec2 arrowDims(64.0f, 64.0f);\n		static Math::Vec2 itemDims(20.0f, 20.0f);\n		static Math::Vec4 uv(0, 0, 1, 1);\n		static Math::Vec2 pos(-1000, -1000);\n		static Graphics::GLTexture beast = Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/beast.png\"); \n		static Graphics::GLTexture playertexture = Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/pixelanimtest.png\"); \n		static Graphics::GLTexture groundtiletexture = Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/tiletestfilledblue.png\"); \n		static Graphics::GLTexture orb = Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/arrows.png\"); \n		static Graphics::SpriteSheet ArrowSheet;\n		if (!ArrowSheet.IsInit()) ArrowSheet.Init(Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/arrows.png\"), Enjon::Math::iVec2(8, 1)); \n\n		EM::Vec2 PC = World->TransformSystem->Transforms[Player].Position.XY();\n	\n		// Draw enemies\n		for (eid32 n = 0; n < World->Renderer2DSystem->Entities.size(); n++)\n		{\n			ECS::eid32 e = World->Renderer2DSystem->Entities.at(n);\n\n			if (e == Player || e == Sword || e == Bow) continue;\n\n			// Don't draw if the entity doesn't exist anymore\n			bitmask32 Mask = World->Masks[e];\n			if ((Mask & COMPONENT_RENDERER2D) != COMPONENT_RENDERER2D) continue;\n\n			Math::Vec3* EntityPosition; \n			Math::Vec2* Ground;\n			char buffer[25];\n		\n			EG::SpriteSheet* ESpriteSheet = World->Animation2DSystem->Animations[e].Sheet;	\n			EntityPosition = &World->TransformSystem->Transforms[e].Position;\n			Ground = &World->TransformSystem->Transforms[e].GroundPosition;\n			const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[e].Color;\n			auto EDims = &World->TransformSystem->Transforms[e].Dimensions;\n\n			// If AI\n			if (Mask & COMPONENT_AICONTROLLER)\n			{\n				EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), uv, ESpriteSheet->texture.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);\n\n				// Entity id\n				Graphics::Fonts::PrintText(EntityPosition->x + 20.0f, EntityPosition->y - 20.0f, 0.4f, std::string(\"ID: \") + std::to_string(e), Graphics::FontManager::GetFont(std::string(\"Bold\")), TextBatch, \n															Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n				// Entity Position \n				auto X = EntityPosition->x;\n				auto Y = EntityPosition->y;\n				auto Z = EntityPosition->z;\n				Graphics::Fonts::PrintText(	EntityPosition->x + 20.0f, \n											EntityPosition->y - 40.0f, \n											0.4f, std::string(\"<\") + std::to_string(X) + std::string(\", \") + std::to_string(Y) + (\", \") + std::to_string(Z) + std::string(\">\"), \n											Graphics::FontManager::GetFont(std::string(\"Bold\")), TextBatch, \n															Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n				// If target\n				if (e == World->PlayerControllerSystem->CurrentTarget)\n				{\n					Math::Vec2 ReticleDims(94.0f, 47.0f);\n					Math::Vec2 Position = World->TransformSystem->Transforms[e].GroundPosition - Math::Vec2(15.0f, 5.0f);\n					EntityBatch.Add(Math::Vec4(Position.x, Position.y, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), TargetSheet.texture.id, Enjon::Graphics::RGBA16_Red(), Position.y);\n				}\n\n			}\n			else if (World->Types[e] == ECS::Component::EntityType::ITEM)\n			{\n				EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), ESpriteSheet->GetUV(0), ESpriteSheet->texture.id, *Color, EntityPosition->y, \n										World->TransformSystem->Transforms[e].Angle, World->Renderer2DSystem->Renderers[e].Format);\n			}\n			else\n			{\n				auto Sheet = World->Animation2DSystem->Animations[e].Sheet;\n				auto Dims = World->TransformSystem->Transforms[e].Dimensions;\n				static int index;\n\n				// Get attack vector and draw arrow based on that\n				Enjon::Math::Vec2* AttackVector = &World->TransformSystem->Transforms[Player].AttackVector;\n				if		(*AttackVector == EAST)				index = 0;\n				else if (*AttackVector == NORTHEAST)		index = 1;\n				else if (*AttackVector == NORTH)			index = 2;\n				else if (*AttackVector == NORTHWEST)		index = 3;\n				else if (*AttackVector == WEST)				index = 4;\n				else if (*AttackVector == SOUTHWEST)		index = 5;\n				else if (*AttackVector == SOUTH)			index = 6;\n				else if (*AttackVector == SOUTHEAST)		index = 7;\n				else										index = 0;\n\n				EntityBatch.Add(Math::Vec4(EntityPosition->XY(), Dims), Sheet->GetUV(index), Sheet->texture.id, *Color, EntityPosition->y, World->TransformSystem->Transforms[e].Angle, \n									World->Renderer2DSystem->Renderers[e].Format);\n			}\n\n			Ground = &World->TransformSystem->Transforms[e].GroundPosition;\n			auto EAABB = &World->TransformSystem->Transforms[e].AABB;\n			if (World->Types[e] != ECS::Component::EntityType::ITEM)\n			{\n				EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,\n										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);\n	\n				float XDiff = World->TransformSystem->Transforms[e].AABBPadding.x;\n				float YDiff = World->TransformSystem->Transforms[e].AABBPadding.y;\n				// Enjon::Math::Vec2 EAABBIsoMin(Enjon::Math::CartesianToIso(EAABB->Min) + Math::Vec2(XDiff / 2.0f, XDiff / 2.0f));\n				Enjon::Math::Vec2 EAABBIsoMin(Enjon::Math::CartesianToIso(EAABB->Min));\n				auto EAABBIsoMax(EM::CartesianToIso(EAABB->Max));\n				// float EAABBHeight = EAABB->Max.y - EAABB->Min.y, EAABBWidth = EAABB->Max.x - EAABB->Min.y;\n				// EntityBatch.Add(Math::Vec4(EAABBIsoMin, Math::Vec2(abs(EAABB->Max.x - EAABB->Min.x), abs(EAABB->Max.y - EAABB->Min.y))), \n				// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/2dmaptile.png\").id, \n				// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);\n				// EntityBatch.Add(Math::Vec4(EAABBIsoMin.x, EAABBIsoMin.y, Math::Vec2(XDiff, YDiff)), \n				// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/2dmaptile.png\").id, \n				// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);\n			}\n		}\n\n\n		// Draw player\n\n		// Draw box\n		// For a box, need 4 faces, so 4 quads\n		// DrawBox(&EntityBatch, &EntityBatch, World);\n\n		// Dashing state if dashing\n		Graphics::SpriteSheet* Sheet = World->Animation2DSystem->Animations[Player].Sheet; \n		Enjon::uint32 Frame = World->Animation2DSystem->Animations[Player].CurrentFrame;\n\n		auto Vel = &World->TransformSystem->Transforms[Player].Velocity;\n		if (IsDashing && !(Vel->x == 0 && Vel->y == 0))\n		{\n			// Make unable to collide with enemy\n			World->AttributeSystem->Masks[Player] &= ~Masks::GeneralOptions::COLLIDABLE;\n\n			float DashAmount = 10.0f;\n			auto Pos = &World->TransformSystem->Transforms[Player].Position;\n			auto V = EM::Vec2::Normalize(Vel->XY());\n			V *= 5.0f;\n			Pos->x += V.x;\n			Pos->y += V.y;\n\n			// Setting the \"alarm\"\n			DashingCounter += 0.05f;\n			if (DashingCounter >= 1.0f) { IsDashing = false; DashingCounter = 0.0f; }\n			float Opacity = 0.5f;\n			for (int i = 0; i < 5; i++)\n			{\n				Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;\n				Enjon::Graphics::ColorRGBA16 DashColor = World->Renderer2DSystem->Renderers[Player].Color;\n				// DashColor.r += (i + i*2.9f);\n				DashColor.g += (i + i*20.75f);\n				DashColor.b += (i*5.25f);\n				Enjon::Math::Vec2 PP = World->TransformSystem->Transforms[Player].Position.XY();\n				Enjon::Math::Vec2 PV = World->TransformSystem->Transforms[Player].Velocity.XY();\n				PP.x -= (i + i*2.75f) * PV.x;\n				PP.y -= (i + i*2.75f) * PV.y;\n				EntityBatch.Add(Math::Vec4(PP, dims), Sheet->GetUV(Frame - i), Sheet->texture.id, Graphics::SetOpacity(DashColor, Opacity), PP.y - World->TransformSystem->Transforms[Player].Position.z);\n				Opacity -= 0.05f;\n\n				// Add a particle pos, vel, size, color, texture, decay, batch\n				EG::Particle2D::AddParticle(EM::Vec3(PP + EM::Vec2(40.0f, 50.0f), 0.0f), EM::Vec3(PV * -1.0f, 0.0f), EM::Vec2(2.0f, 2.0f), DashColor, EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/orb.png\").id, 0.05f, World->ParticleEngine->ParticleBatches[0]);\n				// Add a particle pos, vel, size, color, texture, decay, batch\n				EG::Particle2D::AddParticle(EM::Vec3(PP + EM::Vec2(40.0f, 30.0f), 0.0f), EM::Vec3(PV * -1.0f, 0.0f), EM::Vec2(Random::Roll(25, 100), Random::Roll(25, 100)), \n					EG::SetOpacity(DashColor, 0.05f), EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/smoke_1.png\").id, 0.025f, LightParticleBatch);\n			}\n		}\n\n		else \n		{\n			static float slide_counter = 0.0f;\n			slide_counter += 0.05f;\n			if (slide_counter >= 1.0f)\n			{\n				World->TransformSystem->Transforms[Player].VelocityGoalScale = 0.3f;\n				slide_counter = 0.0f;\n				// Make able to collide with enemy again\n				World->AttributeSystem->Masks[Player] |= Masks::GeneralOptions::COLLIDABLE;\n			}\n\n		}\n		// Get angle from mouse to coordinates\n		Math::Vec2 MouseCoords = Input.GetMouseCoords();\n		Camera.ConvertScreenToWorld(MouseCoords);\n		static Math::Vec2 right(1.0f, 0.0f);\n		Math::Vec2 Diff = Math::Vec2::Normalize(World->TransformSystem->Transforms[Player].Position.XY() - MouseCoords);\n		float DotProduct = Diff.DotProduct(right);\n		float AimAngle = acos(DotProduct) * 180.0f / M_PI;\n		if (Diff.y < 0.0f) AimAngle *= -1; \n		// printf(\"Aim Angle: %.2f\\n\", AimAngle);\n\n\n		// Draw player \"spell\" box for testing purposes\n		// Get the box coords in cartesian view, then translate to iso coords\n		static float rotation_count = 0.0f;\n		rotation_count += 1.25f;\n		Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[Player].CartesianPosition) + Math::Vec2(45.0f, 35.0f));\n		float boxRadius = 10.0f;\n		BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle - 90)), sin(Math::ToRadians(AimAngle - 90))));\n		EntityBatch.Add(Math::Vec4(BoxCoords, 100, 50), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/vector_reticle.png\").id, \n							Graphics::SetOpacity(Graphics::RGBA16_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 45), Graphics::CoordinateFormat::ISOMETRIC);\n\n\n		Enjon::Math::Vec2 AimCoords(World->TransformSystem->Transforms[Player].Position.XY() + Math::Vec2(100.0f, -100.0f));\n		float aimRadius = 0.25f;\n		AimCoords = AimCoords - aimRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle)), sin(Math::ToRadians(AimAngle))));\n\n		// Draw player \"aim\" box for testing purposes\n		static float aim_count = 0.0f;\n		static float aim_count2 = 0.0f;\n		aim_count += 0.5f;\n		static Enjon::uint32 aim_index = 0;\n		static Graphics::ColorRGBA16 AimColor;\n		if (aim_count >= 1.0f)\n		{\n			if (aim_index == 0)\n			{\n				aim_count2 += 0.05f;\n				if (aim_count2 >= 1.0f)\n				{\n					aim_count2 = 0.0f;\n					aim_count = 0.0f;\n					aim_index++;\n				}	\n			}\n			else if (aim_index == 7)\n			{\n				AimColor = Graphics::RGBA16_Red();\n				aim_count2 += 0.025f;\n				if (aim_count2 >= 1.0f)\n				{\n					AimColor = Graphics::RGBA16_White();\n					aim_index = 0;\n					aim_count = 0.0f;\n					aim_count2 = 0.0f;\n				}\n\n			}\n			else\n			{\n				AimColor = Graphics::RGBA16_White();\n				aim_index++;\n				aim_count = 0.0f;\n			}\n		}\n		static Graphics::SpriteSheet AimSheet;\n		AimSheet.Init(Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/vector_reticle.png\"), Math::iVec2(1, 1));\n\n\n		Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;\n		const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[Player].Color;\n		Enjon::Math::Vec2* PlayerPosition = &World->TransformSystem->Transforms[Player].Position.XY();\n		if (World->Animation2DSystem->Animations[Player].Sheet == EG::SpriteSheetManager::GetSpriteSheet(\"PlayerSheet2\"))\n		{\n			dims = Math::Vec2(115.0f, 115.0f);\n		}\n		else dims = Math::Vec2(100.0f, 100.0f);\n\n		// Draw player\n		EntityBatch.Add(Math::Vec4(*PlayerPosition, dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);\n\n		Enjon::Math::Vec2* A = &World->TransformSystem->Transforms[Player].CartesianPosition;\n		Enjon::Physics::AABB* AABB = &World->TransformSystem->Transforms[Sword].AABB;\n		Enjon::Math::Vec2 AV = World->TransformSystem->Transforms[Player].AttackVector;\n		float XDiff = TILE_SIZE;\n		Enjon::Math::Vec2 AABBIsomin(Enjon::Math::CartesianToIso(AABB->Min) + Math::Vec2(XDiff, 0.0f));\n		Enjon::Math::Vec2 AABBIsomax(Enjon::Math::CartesianToIso(AABB->Max));\n		float AABBHeight = AABB->Max.y - AABB->Min.y, AABBWidth = AABB->Max.x - AABB->Min.y;\n\n		// Draw player ground tile \n		const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;\n		EntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,\n									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f));\n		// Draw player shadow\n		EntityBatch.Add(Math::Vec4(GroundPosition->x - 20.0f, GroundPosition->y - 20.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,\n									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));\n\n	\n		///////////////////////////////\n		// BEAMS //////////////////////	\n		///////////////////////////////\n\n		/*\n		EG::ColorRGBA16 C = EG::RGBA16_ZombieGreen();\n		EM::Vec2 Norm;\n\n		// First segment\n		{\n			// Random verticle bar to test rotations\n			EM::Vec2 BeamDims = BeamSegments.at(0).Dimensions;\n			EM::Vec2 BeamPos = World->TransformSystem->Transforms[Player].Position.XY() + EM::Vec2(BeamDims.y / 2.0f + 60.0f, 40.0f);\n			Enjon::Math::Vec2 MousePos = Input.GetMouseCoords();\n			Camera.ConvertScreenToWorld(MousePos);\n			MousePos = EM::IsoToCartesian(MousePos);\n			BeamPos = EM::IsoToCartesian(BeamPos);\n			EM::Vec2 R(1,0);\n			Norm = EM::Vec2::Normalize(MousePos - BeamPos);\n			auto a = acos(Norm.DotProduct(R)) * 180.0f / M_PI;\n			if (Norm.y < 0) a *= -1;\n			BeamPos = EM::CartesianToIso(BeamPos);\n			auto BeamX = BeamPos.x;\n			auto BeamY = BeamPos.y;\n			auto Rad = 0.5f * BeamDims.x;\n			BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));\n			BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));\n			BeamSegments.at(0).Position = BeamPos;\n			BeamSegments.at(0).Angle = a;\n\n			// Beam 1\n			EntityBatch.Add(EM::Vec4(BeamPos, BeamDims), EM::Vec4(0, 0, 1, 1), \n							EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/VerticleBar.png\").id, C, BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);\n		}\n\n\n\n		// Rest of the segments\n		{\n			for (Enjon::uint32 i = 1; i < BeamSegments.size(); i++)\n			{\n				// Random verticle bar to test rotations\n				EM::Vec2 BeamDims = BeamSegments.at(i).Dimensions;\n				EM::Vec2 BeamPos = BeamSegments.at(i - 1).Position;\n				float O = BeamSegments.at(0).Angle;\n				float A = BeamSegments.at(i - 1).Angle;\n				float B = BeamSegments.at(i).Angle;\n				float Difference = BeamSegments.at(i - 1).Angle - BeamSegments.at(i).Angle;\n				// if ((O >= 170 && B <= -180) || (O <= -170 && B >= 170)) { Difference *= -1;}\n				float a;\n				if (abs(Difference) > 290) a = B + Difference;\n				else a = B + Difference * 0.5f;\n				// a += ER::Roll(-7, 7);\n				auto Rad = 0.5f * BeamDims.x;\n				BeamDims.y += i * sin(t);\n				BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));\n				BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));\n				BeamSegments.at(i).Position = BeamPos;\n				BeamSegments.at(i).Angle = a;\n\n				EntityBatch.Add(EM::Vec4(BeamPos, BeamDims), EM::Vec4(0, 0, 1, 1), \n								EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/VerticleBar.png\").id, EG::SetOpacity(C, (sin(t) + 1.1f) / 2.0f), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);\n			}	\n		}\n		*/\n\n		/*\n		{\n			static float SegCounter = 0.0f;\n			SegCounter += 0.1f;\n			if (SegCounter > 5.0f)\n			{\n				printf(\"%.2f, %.2f\\n\", BeamSegments.at(0).Angle, BeamSegments.at(19).Angle);\n				SegCounter = 0.0f;\n			}\n		}\n		*/\n\n		////////////////////////////////////////////////\n		////////////////////////////////////////////////\n\n		// Add the health bar for shiggles\n		// float X = HUDCamera.GetPosition().x - 190.0f;\n		// float Y = HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f;\n		// HUDBatch.Add(EM::Vec4(X, Y, 400.0f, 10.0f),\n		// 			 EM::Vec4(0, 0, 1, 1), \n		// 			  HealthSheet.texture.id, \n		// 			  EG::RGBA16_Red());\n\n		auto F = EG::FontManager::GetFont(\"Bold\");\n\n		if (Paused)\n		{\n			// Draw paused text\n			Enjon::Graphics::Fonts::PrintText(Camera.GetPosition().x - 110.0f, Camera.GetPosition().y - 30.0f, 1.0f, \"Paused\", F, TextBatch);\n		}\n\n		// Profiling info\n		// Add FPS\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, \n										0.4f, \"FPS: \", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, \n										0.4f, FPSString, F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n		// Add CollisionTime\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 80.0f, \n										0.4f, \"Collisions: \", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 80.0f, \n										0.4f, CollisionTimeString + \" ms\", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n		// Add RenderTime\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, \n										0.4f, \"Rendering: \", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, \n										0.4f, RenderTimeString + \" ms\", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n		// Add EffectTime\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, \n										0.4f, \"Effects: \", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, \n										0.4f, EffectTimeString + \" ms\", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n		// Add TileOverlayTime\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, \n										0.4f, \"TileOverlay: \", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, \n										0.4f, TileOverlayTimeString + \" ms\", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n		// // Add LightsToDraw\n		Enjon::uint32 LightsSize = LightsToDraw.size(); \n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 160.0f, \n										0.4f, \"LightsToDraw: \", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 160.0f, \n										0.4f, std::to_string(LightsSize), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n		// // LightZ\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 180.0f, \n										0.4f, \"LightZ: \", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 180.0f, \n										0.4f, std::to_string(LightZ), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n		// Entities\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 200.0f, \n										0.4f, \"Entities: \", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 200.0f, \n										0.4f, std::to_string(World->Length), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n		// Renderer size\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 220.0f, \n										0.4f, \"Entities Drawn: \", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 220.0f, \n										0.4f, std::to_string(World->Renderer2DSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n		// Collisions size\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 240.0f, \n										0.4f, \"Collisions size: \", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 240.0f, \n										0.4f, std::to_string(World->CollisionSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n		// Transform run time\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 260.0f, \n										0.4f, \"Transforms: \", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 260.0f, \n										0.4f, TransformTimeString + \" ms\", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n		// AI run time\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 280.0f, \n										0.4f, \"AI: \", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));\n		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 280.0f, \n										0.4f, AITimeString + \" ms\", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));\n\n		// // Draw Isometric compass\n		// MapEntityBatch.Add(EM::Vec4(HUDCamera.GetPosition() - EM::Vec2(SCREENWIDTH / 2.0f - 30.0f, -SCREENHEIGHT / 2.0f + 250.0f), 150.0f, 75.0f), \n		// 				EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/Coordinates.png\").id, EG::RGBA16_White());\n\n		// Add particles to entity batch\n		EG::Particle2D::Draw(World->ParticleEngine, &Camera);\n\n		// Draw only the world that surrounds the player\n		{\n			// auto TW = 256.0f / 2.0f;\n			// EM::Vec2* PGP = &World->TransformSystem->Transforms[Player].CartesianPosition;\n			// uint32 R = -PGP->x / TW;\n			// uint32 C = -PGP->y / TW;\n\n			// // 12 block radius might be the smallest I'd like to go\n			// uint32 Radius = 12;\n			// uint32 Padding = 2;\n\n			// uint32 MinR = R - Radius;\n			// uint32 MaxR = R + Radius + Padding;\n			// uint32 MinC = C - Radius;\n			// uint32 MaxC = C + Radius + Padding;\n\n\n			// if (C <= Radius) MinC = 0;\n			// if (R <= Radius) MinR = 0;\n			// if (C >= LEVELSIZE - Radius - Padding) MaxC = LEVELSIZE;\n			// if (R >= LEVELSIZE - Radius - Padding) MaxR = LEVELSIZE;\n\n			// auto IsoTiles = level.GetIsoTiles();\n			// for (uint32 i = MinR; i < MaxR; i++)\n			// {\n			// 	for (uint32 j = MinC; j < MaxC; j++)\n			// 	{\n			// 		auto T = IsoTiles[LEVELSIZE * i + j];\n\n			// 		// If front wall, then lower opacity\n			// 		EG::ColorRGBA16 Color = EG::RGBA16_White();\n			// 		if (i == 0 || i >= LEVELSIZE - 1 || j == 0 || j >= LEVELSIZE - 1) Color = EG::SetOpacity(Color, 0.5f);\n			// 		EntityBatch.Add(Enjon::Math::Vec4(T->pos, T->dims), T->Sheet->GetUV(T->index), T->Sheet->texture.id, Color, T->depth);\n			// 	}\n			// }\n		}\n\n		/*-- RANDOM DRAWING --*/\n\n		// Add some random polygon\n		// std::vector<EM::Vec2> Points;\n		// Points.push_back(EM::Vec2(-1500, -1400));	// BL\n		// Points.push_back(EM::Vec2(-800, -1400));	// BR\n		// Points.push_back(EM::Vec2(-850, -1200));	// TR\n		// Points.push_back(EM::Vec2(-900, -1200));	// TL\n		// EntityBatch.AddPolygon(Points, EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/verticlebar.png\").id, EG::RGBA16_Orange(), Points.at(0).y, EG::CoordinateFormat::ISOMETRIC);\n\n		// Add a random cube \n		// static EG::SpriteSheet* BoxSheet = EG::SpriteSheetManager::GetSpriteSheet(\"BoxSheet\");\n		// EM::Vec2 BoxPos = World->TransformSystem->Transforms[Player].Position.XY();\n		// EntityBatch.Add(\n		// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), \n		// 	BoxSheet->GetUV(0), \n		// 	BoxSheet->texture.id\n		// 	EG::SetOpacity(EG::RGBA16_White(), 0.05f)\n		// 	);\n		// NormalsBatch.Add(\n		// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), \n		// 	BoxSheet->GetUV(1),\n		// 	BoxSheet->texture.id,\n		// 	EG::SetOpacity(EG::RGBA16_White(), 0.5f)\n		// 	);\n\n\n		EntityBatch.End();\n		TextBatch.End(); \n		LightBatch.End();\n		MapEntityBatch.End(); \n		HUDBatch.End();\n		NormalsBatch.End();\n	\n		// Diffuse and Position Rendering\n		DiffuseFBO->Bind();\n		{\n			DiffuseShader->Use();\n			{\n				// Set up uniforms\n				DiffuseShader->SetUniformMat4(\"model\", model);\n				DiffuseShader->SetUniformMat4(\"view\", view);\n				DiffuseShader->SetUniformMat4(\"projection\", projection);\n\n				// Draw ground tiles\n				GroundTileBatch.RenderBatch();\n				// Draw TileOverlays\n				OverlayBatch.RenderBatch();\n				// Draw entities		\n				EntityBatch.RenderBatch();\n\n				ParticleBatch.RenderBatch();\n			}\n			DiffuseShader->Unuse();\n		}\n		DiffuseFBO->Unbind();\n\n		// Normals Rendering\n		NormalsFBO->Bind();\n		{\n			NormalsShader->Use();\n			{\n				// Set up uniforms\n				NormalsShader->SetUniformMat4(\"model\", model);\n				NormalsShader->SetUniformMat4(\"view\", view);\n				NormalsShader->SetUniformMat4(\"projection\", projection);\n\n				GroundTileNormalsBatch.RenderBatch();\n				NormalsBatch.RenderBatch();\n			}\n			NormalsShader->Unuse();\n		}\n		NormalsFBO->Unbind();\n\n		// Deferred Render\n		glDisable(GL_DEPTH_TEST);\n		glBlendFunc(GL_ONE, GL_ONE);\n		DeferredFBO->Bind();\n		{\n			DeferredShader->Use();\n			{\n				static GLuint m_diffuseID 	= glGetUniformLocationARB(DeferredShader->GetProgramID(),\"u_diffuse\");\n				static GLuint m_normalsID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),\"u_normals\");\n				static GLuint m_positionID  = glGetUniformLocationARB(DeferredShader->GetProgramID(),\"u_position\");\n\n				EM::Vec3 CP = EM::Vec3(Camera.GetPosition(), 1.0f);\n\n				// Bind diffuse\n				glActiveTexture(GL_TEXTURE0);\n				glEnable(GL_TEXTURE_2D);\n				glBindTexture(GL_TEXTURE_2D, DiffuseFBO->GetDiffuseTexture());\n				glUniform1i(m_diffuseID, 0);\n\n				// Bind normals\n				glActiveTexture(GL_TEXTURE1);\n				glEnable(GL_TEXTURE_2D);\n				glBindTexture(GL_TEXTURE_2D, NormalsFBO->GetDiffuseTexture());\n				glUniform1i(m_normalsID, 1);\n\n				// Bind position\n				glActiveTexture(GL_TEXTURE2);\n				glEnable(GL_TEXTURE_2D);\n				glBindTexture(GL_TEXTURE_2D, DiffuseFBO->GetPositionTexture());\n				glUniform1i(m_positionID, 2);\n\n				glUniform1i(glGetUniformLocation(DeferredShader->GetProgramID(), \"NumberOfLights\"), LightsToDraw.size());\n\n				auto CameraScale = Camera.GetScale();\n				for (GLuint i = 0; i < LightsToDraw.size(); i++)\n				{\n					auto L = LightsToDraw.at(i);\n\n					glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), (\"Lights[\" + std::to_string(i) + \"].Position\").c_str()), L->Position.x, L->Position.y, L->Position.z + LightZ);\n					glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), (\"Lights[\" + std::to_string(i) + \"].Color\").c_str()), L->Color.r, L->Color.g, L->Color.b, L->Color.a);\n					glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), (\"Lights[\" + std::to_string(i) + \"].Radius\").c_str()), L->Radius / CameraScale);\n					glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), (\"Lights[\" + std::to_string(i) + \"].Falloff\").c_str()), L->Falloff.x, L->Falloff.y, L->Falloff.z);\n				}\n\n				// Set uniforms\n				glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), \"Resolution\"),\n							 SCREENWIDTH, SCREENHEIGHT);\n				glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), \"AmbientColor\"), 0.3f, 0.5f, 0.8f, 0.8f);\n				glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), \"ViewPos\"), CP.x, CP.y, CP.z);\n\n				glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), \"InverseCameraMatrix\"), 1, 0, \n												Camera.GetCameraMatrix().Invert().elements);\n				glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), \"View\"), 1, 0, \n												Camera.GetCameraMatrix().elements);\n				glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), \"Scale\"), Camera.GetScale());\n\n\n				// Render	\n				{\n					glBindVertexArray(quadVAO);\n					glDrawArrays(GL_TRIANGLES, 0, 6);\n					glBindVertexArray(0);\n\n					glActiveTexture(GL_TEXTURE0);\n					glBindTexture(GL_TEXTURE_2D, 0);\n				}\n			}\n			DeferredShader->Unuse();\n		}\n		DeferredFBO->Unbind();\n\n		// Set blend function back to normalized\n		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);\n\n		// Do any post processing here, of course...\n		// Bind default buffer and render deferred render texture\n		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));\n		glBindFramebuffer(GL_FRAMEBUFFER, 0);\n\n		ScreenShader->Use();\n		{\n			DeferredBatch.Begin();\n			{\n				DeferredBatch.Add(\n					EM::Vec4(-1, -1, 2, 2),\n					EM::Vec4(0, 0, 1, 1), \n					DeferredFBO->GetDiffuseTexture()\n					);\n			}\n			DeferredBatch.End();\n			DeferredBatch.RenderBatch();\n		}\n		ScreenShader->Unuse();\n\n		// Draw Text\n		auto shader = Graphics::ShaderManager::GetShader(\"Text\")->GetProgramID();\n		glUseProgram(shader);\n		{\n			glUniform1i(glGetUniformLocation(shader, \"tex\"),\n						 0);\n			glUniformMatrix4fv(glGetUniformLocation(shader, \"model\"),\n								1, 0, model.elements);\n			glUniformMatrix4fv(glGetUniformLocation(shader, \"view\"),\n								1, 0, view.elements);\n			glUniformMatrix4fv(glGetUniformLocation(shader, \"projection\"),\n								1, 0, projection.elements);\n		} \n\n\n		TextBatch.RenderBatch();\n\n		// Draw Text\n		shader = Graphics::ShaderManager::GetShader(\"Text\")->GetProgramID();\n		glUseProgram(shader);\n		{\n			glUniform1i(glGetUniformLocation(shader, \"tex\"),\n						 0);\n			glUniformMatrix4fv(glGetUniformLocation(shader, \"model\"),\n								1, 0, model.elements);\n			glUniformMatrix4fv(glGetUniformLocation(shader, \"view\"),\n								1, 0, view.elements);\n			glUniformMatrix4fv(glGetUniformLocation(shader, \"projection\"),\n								1, 0, projection.elements);\n		} \n\n		// Render HUD camera	\n		view = HUDCamera.GetCameraMatrix();\n		glUniformMatrix4fv(glGetUniformLocation(shader, \"view\"),\n							1, 0, view.elements);\n		HUDBatch.RenderBatch();\n\n\n		shader = Graphics::ShaderManager::GetShader(\"Basic\")->GetProgramID();\n		glUseProgram(shader);\n\n		// Draw Cursor\n		// DrawCursor(&HUDBatch, &Input);\n\n\n\n		Window.SwapBuffer();\n\n		RenderTime = SDL_GetTicks() - StartTicks;\n		\n		////////////////////////////////////////////////\n\n		// End FPSLimiter\n		FPS = Limiter.End();\n\n		static float counter = 0.0f;\n		counter += 0.025f;\n		if (counter > 1.0f)\n		{\n			FPSString = std::to_string(FPS);\n			CollisionTimeString = std::to_string(CollisionRunTime);\n			TransformTimeString = std::to_string(TransformRunTime);\n			RenderTimeString = std::to_string(RenderTime);\n			EffectTimeString = std::to_string(EffectRunTime);\n			TileOverlayTimeString = std::to_string(TileOverlayRunTime);\n			AITimeString = std::to_string(AIRunTime);\n\n			Loot::PrintCounts();\n\n			counter = 0.0f;\n		}\n	} \n\n	return 0;\n}\n\nvoid ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* World, ECS::eid32 Entity)\n{\n    SDL_Event event;\n//    //Will keep looping until there are no more events to process\n    while (SDL_PollEvent(&event)) {\n        switch (event.type) {\n            case SDL_QUIT:\n                isRunning = false;\n                break;\n			case SDL_KEYUP:\n				Input->ReleaseKey(event.key.keysym.sym); \n				break;\n			case SDL_KEYDOWN:\n				Input->PressKey(event.key.keysym.sym);\n				break;\n			case SDL_MOUSEBUTTONDOWN:\n				Input->PressKey(event.button.button);\n				break;\n			case SDL_MOUSEBUTTONUP:\n				Input->ReleaseKey(event.button.button);\n				break;\n			case SDL_MOUSEMOTION:\n				Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);\n				break;\n			default:\n				break;\n		}\n    }\n\n	if (Input->IsKeyPressed(SDLK_ESCAPE))\n	{\n		isRunning = false;	\n	}\n	if (Input->IsKeyDown(SDLK_q)){\n		if (Camera->GetScale() > 0.1f) Camera->SetScale(Camera->GetScale() - 0.01f);	\n	}\n	if (Input->IsKeyDown(SDLK_e)){\n		Camera->SetScale(Camera->GetScale() + 0.01f);\n	}\n	if (Input->IsKeyDown(SDLK_UP)){\n		LightZ += 0.01f;\n	}\n	if (Input->IsKeyDown(SDLK_DOWN)){\n		LightZ -= 0.01f;\n	}\n\n	if (Input->IsKeyPressed(SDLK_c)) {\n		printf(\"Dashing\\n\");\n		IsDashing = true;\n	}\n\n	// Stupid, but use it for now...\n	if (Input->IsKeyPressed(SDLK_m)) {\n		ShowMap = !ShowMap;\n	}\n\n	if (Input->IsKeyPressed(SDLK_p)) {\n		Paused = !Paused;\n	}\n}\n\nvoid DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager)\n{ \n	Enjon::Math::Mat4 model, view, projection;\n	model = Math::Mat4::Identity();\n	view = Math::Mat4::Orthographic(0, (float)SCREENWIDTH, 0, (float)SCREENHEIGHT, -1, 1);\n	projection = Math::Mat4::Identity();\n	\n	GLuint shader = Graphics::ShaderManager::GetShader(\"Basic\")->GetProgramID(); \n	glUseProgram(shader);\n	{\n		glUniform1i(glGetUniformLocation(shader, \"texture\"),\n					 0);\n		glUniformMatrix4fv(glGetUniformLocation(shader, \"model\"),\n							1, 0, model.elements);\n		glUniformMatrix4fv(glGetUniformLocation(shader, \"view\"),\n							1, 0, view.elements);\n		glUniformMatrix4fv(glGetUniformLocation(shader, \"projection\"),\n							1, 0, projection.elements);\n	}\n\n	static Enjon::Graphics::GLTexture MouseTexture = Enjon::Input::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/crosshair.png\");\n\n	float size = 32.0f; \n	Batch->Begin();	\n	Enjon::Math::Vec4 destRect(InputManager->GetMouseCoords().x - size / 2.0f, -InputManager->GetMouseCoords().y + SCREENHEIGHT - size + size / 2.0f, size, size);\n	Enjon::Math::Vec4 uvRect(0, 0, 1, 1);\n	Batch->Add(destRect, uvRect, MouseTexture.id);\n	Batch->End();\n	Batch->RenderBatch();\n	Graphics::ShaderManager::UnuseProgram(\"Basic\");\n}\n\nvoid DrawBox(Enjon::Graphics::SpriteBatch* Batch, Enjon::Graphics::SpriteBatch* LightBatch, ECS::Systems::EntityManager* Manager)\n{\n	/*\n		   ------\n		 /     /|\n		/     /	|\n	   -------  /\n	   |     | /\n	   |_____|/\n\n\n	*/\n\n	EM::Vec3* PP = &Manager->TransformSystem->Transforms[Manager->Player].Position;\n	EM::Vec2 Pos = PP->XY() + EM::Vec2(42.0f, 20.0f - PP->z); \n\n	float s = 20.0f;\n	static EM::Vec2 Dims(s, s);\n	static EM::Vec2 LightDims(300.0f, 300.0f);\n	static float Height = 40.0f;\n	static float t = 0.0f;\n	t += 1.0f;\n	Height += sin(0.05 * t) * 5.0f;\n	float angle = EM::ToRadians(t / 2.0f);\n	float angle2 = EM::ToRadians(t / 2.0f + 120.0f);\n	float RX = sin(t);\n	float RY = sin(0.05f * t) * 1.0f;\n	static GLuint TexID = EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/box.png\").id;\n	static GLuint LightId = EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/bg-light-small.png\").id;\n	EG::ColorRGBA16 Color = EG::RGBA16_White();\n	float Rad = 80.0f;\n	EM::Vec2 BoxPos = Pos + Rad * EM::CartesianToIso(Math::Vec2(cos(angle), sin(angle)));\n\n	Color.r += 10.0f;\n	Color.g += 10.0f;\n	// Color.r += sin(0.005f * t) * 5.0f;\n	// Color.g += sin(0.005f * t) * 5.0f;\n	float alpha = Color.r > 0 ? 0.1f : 0.0f;\n\n	// Player shadow\n	EG::SpriteSheet* PS = Manager->Animation2DSystem->Animations[Manager->Player].Sheet;\n	Enjon::uint32 CurrentFrame = Manager->Animation2DSystem->Animations[Manager->Player].CurrentFrame + Manager->Animation2DSystem->Animations[Manager->Player].BeginningFrame;\n	EM::Vec2 BeamDims(100.0f, 150.0f);\n	EM::Vec2 BeamPos = Pos + EM::Vec2(10.0f, -10.0f);\n	BeamPos = EM::IsoToCartesian(BeamPos);\n	EM::Vec2 R(1,0);\n	auto Norm = EM::Vec2::Normalize(EM::IsoToCartesian(BoxPos) - BeamPos);\n	auto a = acos(Norm.DotProduct(R)) * 180.0f / M_PI;\n	// a += 90.0f;\n	if (Norm.y < 0) a *= -1;\n	BeamPos = EM::CartesianToIso(BeamPos);\n	auto PRad = 75.0f + Height / 2.5f + PP->z * 2.0f;\n	BeamPos = BeamPos + PRad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a + 180)), sin(EM::ToRadians(a + 180))));\n\n	// Player Shadow\n	Batch->Add(EM::Vec4(BeamPos - Manager->TransformSystem->Transforms[Manager->Player].Position.z, BeamDims + EM::Vec2(Height / 2.0f, Height + PP->z)), \n		PS->GetUV(CurrentFrame), PS->texture.id, EG::SetOpacity(EG::RGBA16_Black(), Color.r / 20.0f - Height / 750.0f),\n				BeamPos.y, EM::ToRadians(a + 90.0f), EG::CoordinateFormat::ISOMETRIC);\n\n	// Light box\n	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y + Height, Dims.x, Dims.y + RY), EM::Vec4(0, 0, 1, 1), TexID, EG::RGBA16(Color.r + 100.0f, Color.g + 100.0f, Color.b, Color.a), BoxPos.y, angle);\n\n	// Shadow\n	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y, Dims.x / 100.0f - Height / 2.0f, Dims.y / 100.0f - Height / 2.0f), EM::Vec4(0, 0, 1, 1), TexID, EG::SetOpacity(EG::RGBA16_Black(), 0.2f + Color.r / 30.0f - Height / 450.0f), BoxPos.y, angle, EG::CoordinateFormat::ISOMETRIC);\n\n\n	// Light haze\n	LightBatch->Add(EM::Vec4(BoxPos.x - LightDims.x / 2.0f, BoxPos.y - LightDims.y / 2.0f + Height, LightDims), EM::Vec4(0, 0, 1, 1), LightId, EG::SetOpacity(Color, Color.r / 60.0f), BoxPos.y);\n\n	// Base light\n	LightBatch->Add(EM::Vec4(BoxPos.x, BoxPos.y, 500.0f - Height, 500.0f - Height), EM::Vec4(0, 0, 1, 1), LightId, EG::SetOpacity(Color, Color.r / 55.0f - Height / 2500.0f), BoxPos.y, 0.0f, EG::CoordinateFormat::ISOMETRIC);\n}\n\nvoid DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math::Vec3 Pos)\n{\n	static GLuint PTex = EI::ResourceManager::GetTexture(\"../IsoARPG/assets/textures/smoke_1.png\").id;\n	static GLuint PTex2 = EI::ResourceManager::GetTexture(\"../IsoARPG/assets/textures/smoke_2.png\").id;\n	static GLuint PTex3 = EI::ResourceManager::GetTexture(\"../IsoARPG/assets/textures/smoke_3.png\").id;\n	static EG::ColorRGBA16 Gray = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);\n\n	for (int i = 0; i < 100; i++)\n	{\n		float XPos = Random::Roll(-2000, 2000), YPos = Random::Roll(-2000, 2000), ZVel = Random::Roll(-1, 1), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),\n						YSize = Random::Roll(100, 500), XSize = Random::Roll(200, 700);\n		int Roll = Random::Roll(1, 3);\n		GLuint tex;\n		if (Roll == 1) tex = PTex;\n		else if (Roll == 2) tex = PTex2;\n		else tex = PTex3; \n\n		// int RedAmount = Random::Roll(0, 50);\n		// int Alpha = Random::Roll(995, 1000) / 1000.0f;\n\n\n		EG::Particle2D::AddParticle(Pos + Math::Vec3(XPos, YPos, 0.0f), Math::Vec3(XVel, YVel, ZVel), \n			Math::Vec2(XSize, YSize), EG::RGBA16(Gray.r, Gray.g, Gray.b + 0.1f, 0.185f), tex, 0.00075f, Batch);\n	}\n}\nvoid GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Light*>& LightsToDraw)\n{\n	for (auto& L : *Lights)\n	{\n		auto R = L.Radius;\n		auto D = 2 * R;\n		EM::Vec2 dimensions(D, D);\n		auto P = EM::Vec2(L.Position.x - D, L.Position.y - D);\n\n		 \n		Enjon::Math::Vec2 scaledScreenDimensions = Enjon::Math::Vec2((float)SCREENWIDTH, (float)SCREENHEIGHT) / (Camera->GetScale() * 0.37f);\n		float MIN_DISTANCE_X = dimensions.x / 2.0f + scaledScreenDimensions.x / 2.0f;\n		float MIN_DISTANCE_Y = dimensions.y / 2.0f + scaledScreenDimensions.y / 2.0f;\n\n		//Center position of parameters passed in\n		Enjon::Math::Vec2 centerPos = P + dimensions / 2.0f;	\n		//Center position of camera\n		Enjon::Math::Vec2 centerCameraPos = Camera->GetPosition();\n		//Distance vector between two center positions\n		Enjon::Math::Vec2 distVec = centerPos - centerCameraPos;\n\n		float xDepth = MIN_DISTANCE_X - abs(distVec.x);\n		float yDepth = MIN_DISTANCE_Y - abs(distVec.y);\n		\n		if (xDepth > yDepth && yDepth > 0) LightsToDraw.push_back(&L);\n	}\n}\n\n\n#endif \n\n\n#if 0\n/**\n*  UNIT TESTS\n*/\n\n/*-- External/Engine Libraries includes --*/\n#include <Enjon.h>\n\n/*-- Standard Library includes --*/\n#include <iostream>\n#include <sstream>\n#include <string>\n\n// Button class\nclass Button\n{\n	public:\n		EGUI::Signal<> on_click;\n};\n\n// Slider class\nclass Slider\n{\n	public:\n		EGUI::Signal<> on_slide_right;\n		EGUI::Signal<> on_slide_left;\n};\n\n// TextBox\nclass TextBox\n{\n	public:\n		TextBox(std::string n) : Name(n) \n		{ \n			text = \"\"; \n\n			this->text.on_change().connect([&](std::string S)\n			{\n				std::cout << this->Name << \" changed to: \" << S << std::endl;\n			});\n		}\n\n		void SetText(std::string S) { this->text = S; }\n\n	public:\n		EGUI::Property<std::string> text;\n\n	private:\n		std::string Name;\n};\n\n\n#undef main\nint main(int argc, char** argv)\n{\n	// Create button\n	Button UpButton;\n	Button DownButton;\n\n	// Create slider\n	Slider slider;\n\n	// Create TextBox\n	TextBox TB(\"Delays\");\n	TextBox TB2(\"Other Delays\");\n\n	std::vector<TextBox*> TextBoxes;\n	TextBoxes.push_back(&TB);\n	TextBoxes.push_back(&TB2);\n\n	// Create Property\n	EGUI::Property<float> DelayValue;\n\n	// Connect value of text to delay value\n	DelayValue.connect_from(::atof(TB.text.get().c_str()));\n\n	// Connect button click to setting textbox\n	UpButton.on_click.connect([&]()\n	{\n		for (auto T : TextBoxes)\n		{\n			// Get value of string\n			float V = ::atof(T->text.get().c_str());\n\n			// Increment by 1\n			V += 1.0f;\n\n			// Set back to text\n			T->text = std::to_string(V);\n		}\n	});\n\n\n	UpButton.on_click.emit();\n\n	return 0;\n}\n\n\n\n\n#endif\n\n/**\n* SYSTEMS TEST\n*/\n\n#if 1\n\n#define FULLSCREENMODE   1\n#define SECOND_DISPLAY   0\n\n#if FULLSCREENMODE\n	#if SECOND_DISPLAY\n		#define SCREENWIDTH 1440\n		#define SCREENHEIGHT 900\n	#else\n		#define SCREENWIDTH  1920\n		#define SCREENHEIGHT 1080\n	#endif\n	#define SCREENRES    EG::FULLSCREEN\n#else\n	#define SCREENWIDTH  1024\n	#define SCREENHEIGHT 768\n	#define SCREENRES EG::DEFAULT\n#endif \n\n/*-- External/Engine Libraries includes --*/\n#include <Enjon.h>\n#include <sajson/sajson.h>\n\n/*-- Entity Component System includes --*/\n#include <ECS/ComponentSystems.h>\n#include <ECS/PlayerControllerSystem.h>\n#include <ECS/Transform3DSystem.h>\n#include <ECS/CollisionSystem.h>\n#include <ECS/Animation2DSystem.h>\n#include <ECS/InventorySystem.h> \n#include <ECS/Renderer2DSystem.h>\n#include <ECS/AIControllerSystem.h> \n#include <ECS/AttributeSystem.h>\n#include <ECS/EffectSystem.h>\n#include <ECS/EntityFactory.h>\n#include <ECS/Entity.h>\n#include <Loot.h>\n\n/*-- IsoARPG includes --*/\n#include \"EnjonAnimation.h\"\n#include \"AnimationManager.h\"\n#include \"SpatialHash.h\"\n#include \"Level.h\"\n\n/*-- Standard Library includes --*/\n#include <stdio.h>\n#include <iostream> \n#include <time.h>\n#include <stdlib.h>\n#include <vector>\n\nusing namespace ECS;\nusing namespace Systems;\n\nnamespace Enjon { namespace GUI {\n\n	// Something like this eventually for global gui references...\n	namespace ButtonManager\n	{\n		std::unordered_map<std::string, GUIButton*> Buttons;\n\n		void Add(std::string S, GUIButton* B)\n		{\n			Buttons[S] = B;\n		}\n\n		GUIButton* Get(const std::string S)\n		{\n			auto search = Buttons.find(S);\n			if (search != Buttons.end())\n			{\n				return search->second;\n			}	\n\n			return nullptr;\n		}\n	};\n\n	// This is stupid, but it's for testing...\n	namespace TextBoxManager\n	{\n		std::unordered_map<std::string, GUITextBox*> TextBoxes;\n\n		void Add(std::string S, GUITextBox* T)\n		{\n			TextBoxes[S] = T;\n		}\n\n		GUITextBox* Get(const std::string S)\n		{\n			auto search = TextBoxes.find(S);\n			if (search != TextBoxes.end())\n			{\n				return search->second;\n			}\n			return nullptr;\n		}\n	};\n\n	namespace GUIManager\n	{\n		std::unordered_map<std::string, GUIElementBase*> Elements;\n\n		void Add(std::string S, GUIElementBase* E)\n		{\n			Elements[S] = E;\n		}\n\n		GUIElementBase* Get(const std::string S)\n		{\n			auto search = Elements.find(S);\n			if (search != Elements.end())\n			{\n				return search->second;\n			}\n\n			return nullptr;\n		}\n	}\n}}\n\nnamespace CameraManager\n{\n	std::unordered_map<std::string, EG::Camera2D*> Cameras;\n\n	void AddCamera(std::string S, EG::Camera2D* C)\n	{\n		Cameras[S] = C;\n	}\n\n	EG::Camera2D* GetCamera(const std::string S)\n	{\n		auto search = Cameras.find(S);\n		if (search != Cameras.end())\n		{\n			return search->second;\n		}\n		return nullptr;\n	}\n};\n\nstruct SceneNode\n{\n\n};\n\nclass SceneGraph\n{\n	public:\n\n	private:\n};\n\nnamespace CursorManager\n{\n	std::unordered_map<std::string, SDL_Cursor*> Cursors;\n\n	void Init()\n	{\n		Cursors[\"Arrow\"] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);\n		Cursors[\"IBeam\"] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);\n	}\n\n	SDL_Cursor* Get(const std::string S)\n	{\n		auto search = Cursors.find(S);\n		if (search != Cursors.end())\n		{\n			return search->second;\n		}\n		return nullptr;\n	}\n\n};\n\n// Just need to get where I can group together GUIElements, transform them together, and then\n// access individual GUIElements with the mouse\nusing namespace Enjon;\nusing namespace GUI;\n\n/* Function Declarations */\nbool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera);\nImageFrame GetImageFrame(const sajson::value& Frame, const std::string Name);\nvoid DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White());\nAnim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc);\nvoid CalculateAABBWithParent(EP::AABB* A, GUIButton* Button);\nvoid DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);\nbool IsModifier(unsigned int Key);\n\n\nconst std::string AnimTextureDir(\"../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png\");\nconst std::string AnimTextureJSONDir(\"../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json\");\nconst std::string AnimationDir(\"../IsoARPG/Profiles/Animations/Player/PlayerAttackOHLSEAnimation.json\");\n\nGUIElementBase* SelectedGUIElement = nullptr;\nGUIElementBase* KeyboardFocus = nullptr;\nGUIElementBase* MouseFocus = nullptr;\n\nEG::GLTexture MouseTexture;\n\nfloat caret_count = 0.0f;\nbool caret_on = true;\n\n#undef main\nint main(int argc, char** argv) {\n\n	Enjon::Init();\n\n	float t = 0.0f;\n	float FPS = 0.0f;\n	float TimeIncrement = 0.0f;\n\n	// Create a window\n	EG::Window Window;\n	Window.Init(\"Unit Test\", SCREENWIDTH, SCREENHEIGHT, SCREENRES);\n	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);\n\n	// Init cursor manager\n	CursorManager::Init();\n\n	// Set to default cursor\n	SDL_SetCursor(CursorManager::Get(\"Arrow\"));\n\n	EU::FPSLimiter Limiter;\n	Limiter.Init(60);\n\n	// Init ShaderManager\n	EG::ShaderManager::Init(); \n\n	// Init FontManager\n	EG::FontManager::Init();\n\n	// Shader for frame buffer\n	EG::GLSLProgram* BasicShader	= EG::ShaderManager::GetShader(\"Basic\");\n	EG::GLSLProgram* TextShader		= EG::ShaderManager::GetShader(\"Text\");  \n\n	// UI Batch\n	EG::SpriteBatch* UIBatch = new EG::SpriteBatch();\n	UIBatch->Init();\n\n	EG::SpriteBatch* SceneBatch = new EG::SpriteBatch();\n	SceneBatch->Init();\n\n	EG::SpriteBatch* BGBatch = new EG::SpriteBatch();\n	BGBatch->Init();\n\n	const float W = SCREENWIDTH;\n	const float H = SCREENHEIGHT;\n\n	// Create Camera\n	EG::Camera2D* Camera = new EG::Camera2D;\n	Camera->Init(W, H);\n\n	// Create HUDCamera\n	EG::Camera2D* HUDCamera = new EG::Camera2D;\n	HUDCamera->Init(W, H);\n\n	// Register cameras with manager\n	CameraManager::AddCamera(\"HUDCamera\", HUDCamera);\n	CameraManager::AddCamera(\"SceneCamera\", Camera);\n\n	// InputManager\n	EI::InputManager Input = EI::InputManager();\n\n	// Matricies for shaders\n	EM::Mat4 Model, View, Projection;\n\n    using sajson::literal;\n    std::string json = EU::read_file_sstream(AnimTextureJSONDir.c_str());\n    const sajson::document& doc = sajson::parse(sajson::string(json.c_str(), json.length()));\n\n    if (!doc.is_valid())\n    {\n        std::cout << \"Invalid json: \" << doc.get_error_message() << std::endl;;\n    }\n\n\n    // Get root and length of json file\n    const auto& root = doc.get_root();\n    const auto len = root.get_length();\n\n    // // Get handle to meta deta\n    const auto meta = root.find_object_key(literal(\"meta\"));\n    assert(meta < len);\n    const auto& Meta = root.get_object_value(meta);\n\n    // // Get handle to frame data\n    const auto frames = root.find_object_key(literal(\"frames\"));\n    assert(frames < len);\n    const auto& Frames = root.get_object_value(frames);\n\n    // // Get image size\n    auto ISize = Meta.get_value_of_key(literal(\"size\"));\n    float AWidth = ISize.get_value_of_key(literal(\"w\")).get_safe_float_value();\n    float AHeight = ISize.get_value_of_key(literal(\"h\")).get_safe_float_value();\n\n    Atlas atlas = {	EM::Vec2(AWidth, AHeight), \n    				EI::ResourceManager::GetTexture(AnimTextureDir.c_str())\n    			  };\n\n	// Create animation\n	Anim Test = CreateAnimation(std::string(\"Player_Attack_OH_L_SE\"), Frames);\n\n	// Set up mouse texture to default\n	MouseTexture = EI::ResourceManager::GetTexture(\"../assets/Textures/mouse_cursor_20.png\");\n\n	////////////////////////////////\n	// ANIMATION EDITOR ////////////\n\n	GUIButton 			PlayButton;\n	GUIButton 			NextFrame;\n	GUIButton 			PreviousFrame;\n	GUIButton 			OffsetUp;\n	GUIButton 			OffsetDown;\n	GUIButton 			OffsetLeft;\n	GUIButton 			OffsetRight;\n	GUIButton 			DelayUp;\n	GUIButton 			DelayDown;\n	GUIButton			ToggleOnionSkin;\n	GUITextBox 			InputText;\n	GUIAnimationElement SceneAnimation;\n\n	// Set up ToggleOnionSkin\n	ToggleOnionSkin.Type = GUIType::BUTTON;\n	ToggleOnionSkin.State = ButtonState::INACTIVE;\n\n	// Set up Scene Animtation\n	SceneAnimation.CurrentAnimation = &Test;\n	SceneAnimation.CurrentIndex = 0;\n	SceneAnimation.Position = EM::Vec2(0.0f);\n	SceneAnimation.State = ButtonState::INACTIVE;\n	SceneAnimation.HoverState = HoveredState::OFF_HOVER;\n	SceneAnimation.Type = GUIType::SCENE_ANIMATION;\n\n	// Set up text box's text\n	InputText.Text = std::string(\"\");\n	InputText.CursorIndex = 0;\n\n	EG::ColorRGBA16 PlayButtonColor = EG::RGBA16_White();\n	EG::ColorRGBA16 InputTextColor = EG::RGBA16(0.05f, 0.05f, 0.05f, 0.4f);\n\n	PlayButton.Type = GUIType::BUTTON;\n	InputText.Type = GUIType::TEXTBOX;\n\n	GUIGroup Group;\n	Group.Position = EM::Vec2(0.0f, -200.0f);\n\n	// Add PlayButton to Group\n	GUI::AddToGroup(&Group, &PlayButton);\n	GUI::AddToGroup(&Group, &NextFrame);\n	GUI::AddToGroup(&Group, &PreviousFrame);\n	GUI::AddToGroup(&Group, &InputText);\n\n	// Set up play button image frames\n	PlayButton.Frames.push_back(GetImageFrame(Frames, \"playbuttonup\"));\n	PlayButton.Frames.push_back(GetImageFrame(Frames, \"playbuttondown\"));\n\n	// Set up PlayButton offsets\n	{\n		auto xo = 0.0f;\n		auto yo = 0.0f;\n		PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.x = xo;\n		PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.y = yo;\n		PlayButton.Frames.at(ButtonState::ACTIVE).Offsets.x = xo;\n		PlayButton.Frames.at(ButtonState::ACTIVE).Offsets.y = yo;\n	}\n\n\n	// Set up PlayButton position within the group\n	PlayButton.Position = EM::Vec2(10.0f, 20.0f);\n\n	// Set state to inactive\n	PlayButton.State = ButtonState::INACTIVE;\n	PlayButton.HoverState = HoveredState::OFF_HOVER;\n\n	// Set up Scaling Factor\n	PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor = 1.0f;\n	PlayButton.Frames.at(ButtonState::ACTIVE).ScalingFactor = 1.0f;\n\n	// Set up PlayButton AABB\n	PlayButton.AABB.Min =  EM::Vec2(PlayButton.Position.x + Group.Position.x + PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.x * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor,\n									PlayButton.Position.y + Group.Position.y + PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.y * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor); \n	PlayButton.AABB.Max = PlayButton.AABB.Min + EM::Vec2(PlayButton.Frames.at(ButtonState::INACTIVE).SourceSize.x * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor, \n										     PlayButton.Frames.at(ButtonState::INACTIVE).SourceSize.y * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor);\n\n	// Set up InputText position within the group\n	InputText.Position = EM::Vec2(100.0f, 60.0f);\n\n	// Set states to inactive\n	InputText.State = ButtonState::INACTIVE;\n	InputText.HoverState = HoveredState::OFF_HOVER;\n\n	// Set up InputText AABB\n	// This will be dependent on the size of the text, or it will be static, or it will be dependent on some image frame\n	InputText.AABB.Min = InputText.Position + Group.Position;\n	InputText.AABB.Max = InputText.AABB.Min + EM::Vec2(200.0f, 20.0f);\n\n	// Calculate Group's AABB by its children's AABBs \n	Group.AABB.Min = Group.Position;\n	// Figure out height\n	auto GroupHeight = InputText.AABB.Max.y - Group.AABB.Min.y;\n	auto GroupWidth = InputText.AABB.Max.x - Group.AABB.Min.x;\n	Group.AABB.Max = Group.AABB.Min + EM::Vec2(GroupWidth, GroupHeight);\n\n	// Set up ToggleOnionSkin's on_click signal\n	ToggleOnionSkin.on_click.connect([&]()\n	{\n		std::cout << \"Emiting onion skin...\" << std::endl;\n\n		ToggleOnionSkin.State = ToggleOnionSkin.State == ButtonState::INACTIVE ? ButtonState::ACTIVE : ButtonState::INACTIVE;\n	});\n\n	// Set up SceneAnimation's on_hover signal\n	SceneAnimation.on_hover.connect([&]()\n	{\n		SceneAnimation.HoverState = HoveredState::ON_HOVER;\n	});\n\n	// Set up SceneAnimation's off_hover signal\n	SceneAnimation.off_hover.connect([&]()\n	{\n		SceneAnimation.HoverState = HoveredState::OFF_HOVER;\n	});\n\n	// Set up InputText's on_click signal\n	InputText.on_click.connect([&]()\n	{\n		// Naive way first - get mouse position in UI space\n		EM::Vec2 MouseCoords = Input.GetMouseCoords();\n		CameraManager::GetCamera(\"HUDCamera\")->ConvertScreenToWorld(MouseCoords);\n\n		std::string& Text = InputText.Text;\n		auto XAdvance = InputText.Position.x;\n		uint32_t index = 0;\n\n		std::cout << \"Mouse x: \" << MouseCoords.x << std::endl;\n\n		// Get advance\n		for (auto& c : Text)\n		{\n			float Advance = EG::Fonts::GetAdvance(c, EG::FontManager::GetFont(\"WeblySleek\"), 1.0f);\n			if (XAdvance + Advance < MouseCoords.x) \n			{\n				XAdvance += Advance;\n				index++;\n				std::cout << \"XAdvance: \" << XAdvance << std::endl;\n				std::cout << \"Index: \" << index << std::endl;\n			}\n			else break;\n		}\n\n		InputText.CursorIndex = index;\n		std::cout << \"Cursor Index: \" << InputText.CursorIndex << std::endl;\n\n		// set caret on to true and count to 0\n		caret_count = 0.0f;\n		caret_on = true;\n	});\n\n	InputText.on_backspace.connect([&]()\n	{\n		auto str_len = InputText.Text.length();\n		auto cursor_index = InputText.CursorIndex;\n\n		// erase from string\n		if (str_len > 0 && cursor_index > 0)\n		{\n			auto S1 = InputText.Text.substr(0, cursor_index - 1);\n			std::string S2;\n\n			if (cursor_index + 1 < str_len) S2 = InputText.Text.substr(cursor_index, str_len);\n\n			S1.erase(cursor_index - 1);\n			InputText.Text = S1 + S2;\n			InputText.CursorIndex--;\n		}\n	});\n\n	InputText.on_keyboard.connect([&](std::string c)\n	{\n		auto str_len = InputText.Text.length();\n		auto cursor_index = InputText.CursorIndex;\n\n		// std::cout << cursor_index << std::endl;\n\n		// End of string\n		if (cursor_index >= str_len)\n		{\n			InputText.Text += c;\n			InputText.CursorIndex = str_len + 1;\n		}\n		// Cursor somewhere in the middle of the string\n		else if (cursor_index > 0)\n		{\n			auto FirstHalf = InputText.Text.substr(0, cursor_index);\n			auto SecondHalf = InputText.Text.substr(cursor_index, str_len);\n\n			FirstHalf += c; \n			InputText.Text = FirstHalf + SecondHalf;\n			InputText.CursorIndex++;\n		}\n		// Beginning of string\n		else\n		{\n			InputText.Text = c + InputText.Text;\n			InputText.CursorIndex++;\n		}\n	});\n\n	// Set up InputText's on_hover signal\n	InputText.on_hover.connect([&]()\n	{\n		// Change the mouse cursor\n		SDL_SetCursor(CursorManager::Get(\"IBeam\"));\n\n		InputText.HoverState = HoveredState::ON_HOVER;\n\n		// Change color of Box\n		InputTextColor = EG::SetOpacity(EG::RGBA16_LightGrey(), 0.3f);\n\n	});\n\n	// Set up InputText's off_hover signal\n	InputText.off_hover.connect([&]()\n	{\n		// Change mouse cursor back to defaul\n		SDL_SetCursor(CursorManager::Get(\"Arrow\"));\n\n		InputText.HoverState = HoveredState::OFF_HOVER;\n	\n		// Change color of Box\n		InputTextColor = EG::RGBA16(0.05f, 0.05f, 0.05f, 0.4f);\n	});\n\n	// Set up PlayButton's on_hover signal\n	PlayButton.on_hover.connect([&]()\n	{\n		// We'll just change a color for now\n		PlayButtonColor = EG::RGBA16_White();\n\n		// Set state to active\n		PlayButton.HoverState = HoveredState::ON_HOVER;\n	});\n\n	// Set up PlayButton's off_hover signal\n	PlayButton.off_hover.connect([&]()\n	{\n		PlayButtonColor = EG::RGBA16_LightGrey();\n\n		// Set state to inactive\n		PlayButton.HoverState = HoveredState::OFF_HOVER;\n	});\n\n	// Set up PlayButton's signal\n	PlayButton.on_click.connect([&]()\n	{\n		if (TimeIncrement <= 0.0f) \n		{\n			TimeIncrement = 0.15f;\n			PlayButton.State = ButtonState::ACTIVE;\n		}\n\n		else \n		{\n			TimeIncrement = 0.0f;\n			PlayButton.State = ButtonState::INACTIVE;\n		}\n	});\n\n	// Set up NextFrame's signal\n	NextFrame.on_click.connect([&]()\n	{\n		// If playing, then stop the time\n		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;\n\n		PlayButton.State = ButtonState::INACTIVE;\n\n		// Get Current Animation, which in this case is just Test\n		auto CurrentIndex = SceneAnimation.CurrentIndex;\n		SceneAnimation.CurrentIndex = (CurrentIndex + 1) % SceneAnimation.CurrentAnimation->TotalFrames;\n\n		// And set t = -1.0f for safety\n		t = -1.0f;\n	});\n\n	// Set up PreviousFrame's signal\n	PreviousFrame.on_click.connect([&]()\n	{\n		// If playing, then stop the time\n		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;\n\n		PlayButton.State = ButtonState::INACTIVE;\n\n		// Get Current Animation, which in this case is just Test\n		auto CurrentIndex = SceneAnimation.CurrentIndex;\n		if (CurrentIndex > 0) SceneAnimation.CurrentIndex -= 1;\n\n		// Bounds check\n		else SceneAnimation.CurrentIndex = SceneAnimation.CurrentAnimation->TotalFrames - 1;\n\n		// And set t = -1.0f for safety\n		t = -1.0f;\n	});\n\n	// Set up OffsetUp's signal\n	OffsetUp.on_click.connect([&]()\n	{\n		// If playing, then stop the time\n		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;\n\n		PlayButton.State = ButtonState::INACTIVE;\n\n		// Get Current Frame\n		auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);\n\n		// Get CurrentFrame's YOffset\n		auto YOffset = CurrentFrame->Offsets.y;\n\n		// Increment by arbitrary amount...\n		YOffset += 1.0f;\n\n		// Reset offset\n		CurrentFrame->Offsets.y = YOffset;\n	});\n\n	// Set up OffsetDown's signal\n	OffsetDown.on_click.connect([&]()\n	{\n		// If playing, then stop the time\n		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;\n\n		PlayButton.State = ButtonState::INACTIVE;\n\n		// Get Current Frame\n		auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);\n\n		// Get CurrentFrame's YOffset\n		auto YOffset = CurrentFrame->Offsets.y;\n\n		// Increment by arbitrary amount...\n		YOffset -= 1.0f;\n\n		// Reset offset\n		CurrentFrame->Offsets.y = YOffset;\n	});\n\n	// Set up OffsetLeft's signal\n	OffsetLeft.on_click.connect([&]()\n	{\n		// If playing, then stop the time\n		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;\n\n		PlayButton.State = ButtonState::INACTIVE;\n\n		// Get Current Frame\n		auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);\n\n		// Get CurrentFrame's YOffset\n		auto XOffset = CurrentFrame->Offsets.x;\n\n		// Increment by arbitrary amount...\n		XOffset -= 1.0f;\n\n		// Reset offset\n		CurrentFrame->Offsets.x = XOffset;\n	});\n\n	// Set up OffsetRight's signal\n	OffsetRight.on_click.connect([&]()\n	{\n		// If playing, then stop the time\n		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;\n\n		PlayButton.State = ButtonState::INACTIVE;\n\n		// Get Current Frame\n		auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);\n\n		// Get CurrentFrame's YOffset\n		auto XOffset = CurrentFrame->Offsets.x;\n\n		// Increment by arbitrary amount...\n		XOffset += 1.0f;\n\n		// Reset offset\n		CurrentFrame->Offsets.x = XOffset;\n	});\n\n	// Set up DelayUp's signal\n	DelayUp.on_click.connect([&]()\n	{\n		// If playing, then stop the time\n		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;\n\n		PlayButton.State = ButtonState::INACTIVE;\n\n		// Get Current Frame\n		auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);\n\n		// Get CurrentFrame's Delay\n		auto Delay = CurrentFrame->Delay;\n\n		// Increment by arbitrary amount...\n		Delay += 0.1f;\n\n		// Reset Delay\n		CurrentFrame->Delay = Delay;\n	});\n\n	// Set up DelayUp's signal\n	DelayDown.on_click.connect([&]()\n	{\n		// If playing, then stop the time\n		if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;\n\n		PlayButton.State = ButtonState::INACTIVE;\n\n		// Get Current Frame\n		auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);\n\n		// Get CurrentFrame's Delay\n		auto Delay = CurrentFrame->Delay;\n\n		// Increment by arbitrary amount...\n		if (Delay > 0.0f) Delay -= 0.1f;\n\n		// Reset Delay\n		CurrentFrame->Delay = Delay;\n	});\n\n	// Put into button manager map\n	ButtonManager::Add(\"PlayButton\", &PlayButton);\n	ButtonManager::Add(\"NextFrame\", &NextFrame);\n	ButtonManager::Add(\"PreviousFrame\", &PreviousFrame);\n	ButtonManager::Add(\"OffsetUp\", &OffsetUp);\n	ButtonManager::Add(\"OffsetDown\", &OffsetDown);\n	ButtonManager::Add(\"OffsetLeft\", &OffsetLeft);\n	ButtonManager::Add(\"OffsetRight\", &OffsetRight);\n	ButtonManager::Add(\"DelayUp\", &DelayUp);\n	ButtonManager::Add(\"DelayDown\", &DelayDown);\n\n\n	// Put into textbox manager\n	TextBoxManager::Add(\"InputText\", &InputText);\n\n	GUIManager::Add(\"PlayButton\", &PlayButton);\n	GUIManager::Add(\"NextFrame\", &NextFrame);\n	GUIManager::Add(\"PreviousFrame\", &PreviousFrame);\n	GUIManager::Add(\"OffsetUp\", &OffsetUp);\n	GUIManager::Add(\"OffsetDown\", &OffsetDown);\n	GUIManager::Add(\"OffsetLeft\", &OffsetLeft);\n	GUIManager::Add(\"OffsetRight\", &OffsetRight);\n	GUIManager::Add(\"DelayUp\", &DelayUp);\n	GUIManager::Add(\"DelayDown\", &DelayDown);\n	GUIManager::Add(\"InputText\", &InputText);\n	GUIManager::Add(\"SceneAnimation\", &SceneAnimation);\n	GUIManager::Add(\"ToggleOnionSkin\", &ToggleOnionSkin);\n\n	// Draw BG\n	BGBatch->Begin();\n	BGBatch->Add(\n					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),\n					EM::Vec4(0, 0, 1, 1),\n					EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/bg.png\").id,\n					EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.4f)\n				);\n	BGBatch->Add(\n					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),\n					EM::Vec4(0, 0, 1, 1),\n					EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/bg.png\").id,\n					EG::SetOpacity(EG::RGBA16_White(), 0.3f)\n				);\n	BGBatch->Add(\n					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),\n					EM::Vec4(0, 0, 1, 1),\n					EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/bg_cross.png\").id,\n					EG::SetOpacity(EG::RGBA16_White(), 0.1f)\n				);\n	BGBatch->End();\n\n\n	// Main loop\n	bool running = true;\n	while (running)\n	{\n		Limiter.Begin();\n\n		// Keep track of animation delays\n		t += TimeIncrement;\n\n		// Check for quit condition\n		running = ProcessInput(&Input, Camera);\n\n		// Update cameras\n		Camera->Update();\n		HUDCamera->Update();\n\n		// Set up AABB of Scene Animation\n		EGUI::AnimationElement::AABBSetup(&SceneAnimation);\n\n		// Update input\n		Input.Update();\n\n		// Set up necessary matricies\n    	Model = EM::Mat4::Identity();	\n    	View = HUDCamera->GetCameraMatrix();\n    	Projection = EM::Mat4::Identity();\n\n		/////////////////////////////////\n		// RENDERING ////////////////////\n		/////////////////////////////////\n\n		//Enable alpha blending\n		glEnable(GL_BLEND);\n\n		//Set blend function type\n		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);\n\n		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0));\n		// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.02f, 0.0f, 0.05f, 1.0f));\n\n		// Basic shader for UI\n		BasicShader->Use();\n		{\n			BasicShader->SetUniformMat4(\"model\", Model);\n			BasicShader->SetUniformMat4(\"projection\", Projection);\n			BasicShader->SetUniformMat4(\"view\", View);\n\n			// Draw BG\n			BGBatch->RenderBatch();\n\n			UIBatch->Begin();\n			{\n				// Draw Parent\n				auto Parent = PlayButton.Parent;\n\n				UIBatch->Add(\n								EM::Vec4(Parent->AABB.Min, Parent->AABB.Max - Parent->AABB.Min),\n								EM::Vec4(0, 0, 1, 1),\n								EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/HealthBarWhite.png\").id,\n								EG::SetOpacity(EG::RGBA16_Blue(), 0.05f)\n							);\n\n				// Draw Play button\n				auto PBF = PlayButton.Frames.at(PlayButton.State);\n				// Calculate these offsets\n				DrawFrame(PBF, PlayButton.Position + Parent->Position, atlas, UIBatch, PlayButtonColor);\n\n				// Draw PlayButton AABB\n				// Calculate the AABB (this could be set up to another signal and only done when necessary)\n				// std::cout << PlayButton.AABB.Max - PlayButton.AABB.Min << std::endl;\n				CalculateAABBWithParent(&PlayButton.AABB, &PlayButton);\n				// UIBatch->Add(\n				// 				EM::Vec4(PlayButton.AABB.Min, PlayButton.AABB.Max - PlayButton.AABB.Min), \n				// 				EM::Vec4(0, 0, 1, 1),\n				// 				EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/HealthBarWhite.png\").id,\n				// 				EG::SetOpacity(EG::RGBA16_Red(), 0.3f)\n				// 			);\n\n				// CalculateAABBWithParent(&InputText.AABB, &InputText);\n				UIBatch->Add(\n								EM::Vec4(InputText.AABB.Min, InputText.AABB.Max - InputText.AABB.Min), \n								EM::Vec4(0, 0, 1, 1),\n								EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/HealthBarWhite.png\").id,\n								InputTextColor\n							);\n			}\n			UIBatch->End();\n			UIBatch->RenderBatch();\n\n			View = Camera->GetCameraMatrix();\n			BasicShader->SetUniformMat4(\"view\", View);\n\n			SceneBatch->Begin();\n			{\n				// Draw AABB of current frame\n				auto CurrentAnimation = SceneAnimation.CurrentAnimation;\n				auto CurrentIndex = SceneAnimation.CurrentIndex;\n				auto Frame = &CurrentAnimation->Frames.at(CurrentIndex);\n				auto TotalFrames = CurrentAnimation->TotalFrames;\n				auto& Position = SceneAnimation.Position;\n\n				if (SceneAnimation.HoverState == HoveredState::ON_HOVER)\n				{\n					auto AABB_SA = &SceneAnimation.AABB;\n					SceneBatch->Add(\n								EM::Vec4(AABB_SA->Min, AABB_SA->Max - AABB_SA->Min), \n								EM::Vec4(0,0,1,1), \n								EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/selection_box.png\").id,\n								EG::RGBA16_Red()\n							  );\n				}\n\n				if (t >= Frame->Delay)\n				{\n					CurrentIndex = (CurrentIndex + 1) % TotalFrames;\n					SceneAnimation.CurrentIndex = CurrentIndex;\n					Frame = &CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);\n					t = 0.0f;\n				}\n\n				// Check for onion skin being on\n				if (ToggleOnionSkin.State == ButtonState::ACTIVE)\n				{\n					auto PreviousIndex = 0;\n\n					// Draw the scene previous and after\n					if (CurrentIndex > 0)\n					{\n						PreviousIndex = CurrentIndex - 1;\n					}	\n					else\n					{\n						PreviousIndex = TotalFrames - 1;\n					}\n\n					auto NextFrame = &CurrentAnimation->Frames.at((SceneAnimation.CurrentIndex + 1) % TotalFrames);\n					auto PreviousFrame = &CurrentAnimation->Frames.at(PreviousIndex);\n\n					DrawFrame(*PreviousFrame, Position, atlas, SceneBatch, EG::SetOpacity(EG::RGBA16_Blue(), 0.3f));\n					DrawFrame(*NextFrame, Position, atlas, SceneBatch, EG::SetOpacity(EG::RGBA16_Red(), 0.3f));\n				}\n\n				// Draw Scene animation\n				DrawFrame(*Frame, Position,	atlas, SceneBatch);\n\n			}\n			SceneBatch->End();\n			SceneBatch->RenderBatch();\n\n		}\n		BasicShader->Unuse();\n\n		// Shader for text\n		TextShader->Use();\n		{\n			View = HUDCamera->GetCameraMatrix();\n\n			TextShader->SetUniformMat4(\"model\", Model);\n			TextShader->SetUniformMat4(\"projection\", Projection);\n			TextShader->SetUniformMat4(\"view\", View);\n\n			UIBatch->Begin();\n			{\n				// Get font for use\n				auto CurrentFont = EG::FontManager::GetFont(\"WeblySleek\");\n				auto XOffset = 110.0f;\n				auto scale = 1.0f;\n\n				EG::Fonts::PrintText(HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 30.0f, scale, std::string(\"FPS: \"), CurrentFont, *UIBatch, \n												EG::SetOpacity(EG::RGBA16_White(), 0.8f));\n				EG::Fonts::PrintText(HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 50.0f, HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 30.0f, scale, std::to_string((uint32_t)FPS), CurrentFont, *UIBatch, \n												EG::SetOpacity(EG::RGBA16_White(), 0.8f));\n\n				auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);\n\n				// Display current frame information\n				EG::Fonts::PrintText(	\n										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, \n										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, scale, \n										std::string(\"Animation: \"), \n										CurrentFont, \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n				// Display current frame information\n				EG::Fonts::PrintText(	\n										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, \n										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, scale, \n										Test.Name, \n										CurrentFont, \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n				// Current Frame Name\n				EG::Fonts::PrintText(	\n										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, \n										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, scale, \n										std::string(\"Frame: \"), \n										CurrentFont, \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n				EG::Fonts::PrintText(	\n										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, \n										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, scale, \n										std::to_string(SceneAnimation.CurrentIndex), \n										CurrentFont, \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n				// Current Frame Delay\n				EG::Fonts::PrintText(	\n										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, \n										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 110.0f, scale, \n										std::string(\"Delay: \"), \n										CurrentFont, \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n				EG::Fonts::PrintText(	\n										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, \n										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 110.0f, scale, \n										std::to_string(CurrentFrame->Delay), \n										CurrentFont, \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n				// Current Frame Y offset\n				EG::Fonts::PrintText(	\n										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, \n										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, scale, \n										std::string(\"Y Offset: \"), \n										CurrentFont, \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n				EG::Fonts::PrintText(	\n										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, \n										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, scale, \n										std::to_string(static_cast<int32_t>(CurrentFrame->Offsets.y)), \n										CurrentFont, \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n				// Current Frame X Offset\n				EG::Fonts::PrintText(	\n										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, \n										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 150.0f, scale, \n										std::string(\"X Offset: \"), \n										CurrentFont, \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n				EG::Fonts::PrintText(	\n										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, \n										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 150.0f, scale, \n										std::to_string(static_cast<int32_t>(CurrentFrame->Offsets.x)), \n										CurrentFont, \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n				EG::Fonts::PrintText(	\n										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, \n										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 170.0f, scale, \n										std::string(\"Onion Skin: \"), \n										CurrentFont, \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n				auto OnionString = ToggleOnionSkin.State == ButtonState::ACTIVE ? std::string(\"On\") : std::string(\"Off\");\n				EG::Fonts::PrintText(	\n										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, \n										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 170.0f, scale, \n										OnionString, \n										CurrentFont, \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n\n				// Print out text box's text w/ shadow\n				// Could totally load these styles from JSON, which would be a cool way to add themes to the editor\n				auto Padding = EM::Vec2(5.0f, 5.0f);\n				auto ITextHeight = InputText.AABB.Max.y - InputText.AABB.Min.y; // InputTextHeight\n				auto TextHeight = ITextHeight - 20.0f;\n				EG::Fonts::PrintText(	\n										InputText.Position.x + InputText.Parent->Position.x + Padding.x, \n										InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, \n										InputText.Text, \n										EG::FontManager::GetFont(\"WeblySleek\"), \n										*UIBatch, \n										EG::RGBA16_LightGrey()\n									);\n\n				caret_count += 0.1f;\n\n				if (caret_count >= 4.0f)\n				{\n					caret_count = 0.0f;\n					caret_on = !caret_on;	\n				}\n\n				if (KeyboardFocus && caret_on)\n				{\n					// Print out caret, make it a yellow line\n					// Need to get text from InputText\n					auto Text = InputText.Text;\n					auto XAdvance = InputText.Position.x + InputText.Parent->Position.x + Padding.x;\n\n					// Get xadvance of all characters\n					for (auto i = 0; i < InputText.CursorIndex; ++i)\n					{\n						XAdvance += EG::Fonts::GetAdvance(InputText.Text[i], CurrentFont, scale);\n					}\n					UIBatch->Add(\n									EM::Vec4(XAdvance + 0.2f, InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 10.0f),\n									EM::Vec4(0, 0, 1, 1),\n									EI::ResourceManager::GetTexture(\"../IsoARPG/Assets/Textures/HealthBarWhite.png\").id,\n									EG::RGBA16_LightGrey()\n								);\n				}\n\n\n			}\n			UIBatch->End();\n			UIBatch->RenderBatch();\n		}\n		TextShader->Unuse();\n\n		Window.SwapBuffer();\n\n		FPS = Limiter.End();\n	}\n\n	return 0;\n}\n\nbool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)\n{\n	static bool WasHovered = false;\n	static EM::Vec2 MouseFrameOffset(0.0f);\n	unsigned int CurrentKey = 0;\n	static std::string str = \"\";\n	char CurrentChar = 0;\n\n	if (KeyboardFocus)\n	{\n		SDL_StartTextInput();\n	}\n	else \n	{\n		SDL_StopTextInput();\n		CurrentChar = 0;\n	}\n\n    SDL_Event event;\n    while (SDL_PollEvent(&event)) {\n        switch (event.type) {\n            case SDL_QUIT:\n                return false;\n                break;\n			case SDL_KEYUP:\n				Input->ReleaseKey(event.key.keysym.sym); \n				CurrentKey = 0;\n				break;\n			case SDL_KEYDOWN:\n				Input->PressKey(event.key.keysym.sym);\n				CurrentKey = event.key.keysym.sym;\n				break;\n			case SDL_MOUSEBUTTONDOWN:\n				Input->PressKey(event.button.button);\n				break;\n			case SDL_MOUSEBUTTONUP:\n				Input->ReleaseKey(event.button.button);\n				break;\n			case SDL_MOUSEMOTION:\n				Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);\n				break;\n			case SDL_MOUSEWHEEL:\n				Camera->SetScale(Camera->GetScale() + (event.wheel.y) * 0.05f);\n				if (Camera->GetScale() < 0.1f) Camera->SetScale(0.1f);\n			case SDL_TEXTINPUT:\n				str = event.text.text;\n				CurrentChar = event.text.text[0];\n				std::cout << str << std::endl;\n			default:\n				break;\n		}\n    }\n\n    if (SelectedGUIElement)\n    {\n    	switch (SelectedGUIElement->Type)\n    	{\n    		case GUIType::BUTTON:\n    			// std::cout << \"Selected Button!\" << std::endl;\n    			break;\n    		case GUIType::TEXTBOX:\n    			// std::cout << \"Selected TextBox!\" << std::endl;\n    			break;\n    		default:\n    			break;\n    	}\n    }\n\n	// Get Mouse Position\n	auto MousePos = Input->GetMouseCoords();\n	CameraManager::GetCamera(\"HUDCamera\")->ConvertScreenToWorld(MousePos);\n\n	// Get play button\n	auto PlayButton = static_cast<GUIButton*>(GUIManager::Get(\"PlayButton\"));\n	auto AABB_PB = &PlayButton->AABB;\n\n	// Check whether the mouse is hovered over the play button\n	auto MouseOverButton = EP::AABBvsPoint(AABB_PB, MousePos);\n\n	if (MouseOverButton)\n	{\n		if (PlayButton->HoverState == HoveredState::OFF_HOVER)\n		{\n			std::cout << \"Entering Hover...\" << std::endl;\n\n			// Emit on hover action\n			PlayButton->on_hover.emit();\n		}\n	}\n\n	// If the mouse was hovering and has now left\n	else if (PlayButton->HoverState == HoveredState::ON_HOVER)\n	{\n		std::cout << \"Exiting Hover...\" << std::endl;\n\n		// Emit off hover action\n		PlayButton->off_hover.emit();\n	}\n\n	// Get InputText\n	auto InputText = static_cast<GUITextBox*>(GUIManager::Get(\"InputText\"));\n	auto AABB_IT = &InputText->AABB;\n\n	// Check whether mouse is over the input text\n	auto MouseOverText = EP::AABBvsPoint(AABB_IT, MousePos);\n\n	if (MouseOverText)\n	{\n		if (InputText->HoverState == HoveredState::OFF_HOVER)\n		{\n			std::cout << \"Entering Hover...\" << std::endl;\n\n			// Emit on_hover action\n			InputText->on_hover.emit();\n		}\n	}\n\n	// If the mouse was hovering and has now left\n	else if (InputText->HoverState == HoveredState::ON_HOVER)\n	{\n		std::cout << \"Exiting Hover...\" << std::endl;\n\n		// Emit off hover action\n		InputText->off_hover.emit();\n	}\n\n	// Get SceneAnimation\n	auto SceneAnimation = static_cast<GUIAnimationElement*>(GUIManager::Get(\"SceneAnimation\"));\n	auto SceneMousePos = Input->GetMouseCoords();\n	CameraManager::GetCamera(\"SceneCamera\")->ConvertScreenToWorld(SceneMousePos);\n	auto AABB_SA = &SceneAnimation->AABB;\n\n	// Check whether mouse is over scene animation\n	auto MouseOverAnimation = EP::AABBvsPoint(AABB_SA, SceneMousePos);\n	if (MouseOverAnimation)\n	{\n		if (SceneAnimation->HoverState == HoveredState::OFF_HOVER)\n		{\n			std::cout << \"Entering Hover...\" << std::endl;\n\n			// Emit on hover action\n			SceneAnimation->on_hover.emit();\n		}\n	}\n\n	// If mouse was hovering nad has now left\n	else if (SceneAnimation->HoverState == HoveredState::ON_HOVER)\n	{\n		std::cout << \"Exiting Hover...\" << std::endl;\n\n		// Emit off hover action\n			SceneAnimation->off_hover.emit();\n	}\n\n\n    // Basic check for click\n    // These events need to be captured and passed to the GUI manager as signals\n    if (Input->IsKeyPressed(SDL_BUTTON_LEFT))\n    {\n    	auto X = MousePos.x;\n    	auto Y = MousePos.y;\n\n    	std::cout << \"Mouse Pos: \" << MousePos << std::endl;\n\n    	// Do AABB test with PlayButton\n    	if (MouseOverButton)\n    	{\n    		SelectedGUIElement = PlayButton;\n    		PlayButton->on_click.emit();\n    		MouseFocus = nullptr;\n    	}\n\n    	else if (MouseOverText)\n    	{\n    		SelectedGUIElement = InputText;\n    		KeyboardFocus = InputText;\n    		MouseFocus = nullptr; 			// The way to do this eventually is set all of these focuses here to this element but define whether or not it can move\n    		InputText->on_click.emit();\n    	}\n\n    	else if (MouseOverAnimation)\n    	{\n    		SelectedGUIElement = SceneAnimation;\n    		MouseFocus = SceneAnimation;\n    		MouseFrameOffset = EM::Vec2(SceneMousePos.x - SceneAnimation->AABB.Min.x, SceneMousePos.y - SceneAnimation->AABB.Min.y);\n    	}\n\n    	else\n    	{\n    		// This is incredibly not thought out at all...\n    		SelectedGUIElement = nullptr;\n    		MouseFocus = nullptr;\n    		KeyboardFocus = nullptr;\n    	}\n    }\n\n    // NOTE(John): Again, these input manager states will be hot loaded in, so this will be cleaned up eventaully...\n	if (MouseFocus)\n	{\n		if (Input->IsKeyDown(SDL_BUTTON_LEFT))\n		{\n			auto X = SceneMousePos.x;\n			auto Y = SceneMousePos.y;\n\n			// Turn off the play button\n			if (PlayButton->State == ButtonState::ACTIVE) PlayButton->on_click.emit();\n\n			if (MouseFocus->Type == GUIType::SCENE_ANIMATION)\n			{\n				auto Anim = static_cast<GUIAnimationElement*>(MouseFocus);\n				auto CurrentAnimation = Anim->CurrentAnimation;	\n\n				// Find bottom corner of current frame\n				auto BottomCorner = Anim->AABB.Min;\n\n				// Update offsets\n				CurrentAnimation->Frames.at(Anim->CurrentIndex).Offsets = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);\n			}\n		}\n	}\n\n	if (Input->IsKeyPressed(SDLK_ESCAPE))\n	{\n		return false;	\n	}\n\n	if (KeyboardFocus && CurrentKey != 0)\n	{\n		// Check for modifiers first\n		if (!IsModifier(CurrentKey))\n		{\n			if (CurrentKey == SDLK_BACKSPACE) InputText->on_backspace.emit();\n			else if (CurrentKey == SDLK_LEFT)\n			{\n				if (InputText->CursorIndex > 0) InputText->CursorIndex--;\n			}\n			else if (CurrentKey == SDLK_RIGHT)\n			{\n				if (InputText->CursorIndex < InputText->Text.length()) InputText->CursorIndex++;\n			}\n			else InputText->on_keyboard.emit(str);\n		}\n	}\n\n\n	else if (KeyboardFocus == nullptr)\n	{\n		if (Input->IsKeyDown(SDLK_e))\n		{\n			Camera->SetScale(Camera->GetScale() + 0.05f);\n		}\n		if (Input->IsKeyDown(SDLK_q))\n		{\n			auto S = Camera->GetScale();\n			if (S > 0.1f) Camera->SetScale(S - 0.05f);\n		}\n		if (Input->IsKeyPressed(SDLK_SPACE))\n		{\n			// Get button from button manager\n			auto PlayButton = ButtonManager::Get(\"PlayButton\");\n\n			// Press play\n			PlayButton->on_click.emit();\n		}\n		if (Input->IsKeyDown(SDLK_RIGHT))\n		{\n			// Get button from button manager\n			auto OffsetRight = ButtonManager::Get(\"OffsetRight\");\n\n			// Press next frame\n			OffsetRight->on_click.emit();	\n		}\n		if (Input->IsKeyDown(SDLK_LEFT))\n		{\n			// Get button from button manager\n			auto OffsetLeft = ButtonManager::Get(\"OffsetLeft\");\n\n			// Press next frame\n			OffsetLeft->on_click.emit();\n		}\n		if (Input->IsKeyDown(SDLK_UP))\n		{\n			// Get button from button manager\n			auto OffsetUp = ButtonManager::Get(\"OffsetUp\");\n\n			// Press offset up\n			OffsetUp->on_click.emit();\n		}\n		if (Input->IsKeyDown(SDLK_DOWN))\n		{\n			// Get button from button manager\n			auto OffsetDown = ButtonManager::Get(\"OffsetDown\");\n\n			// Press offset Down\n			if (OffsetDown)\n			{\n				OffsetDown->on_click.emit();\n			}\n		}\n		if (Input->IsKeyPressed(SDLK_m))\n		{\n			// Get button from button manager\n			auto NextFrame = ButtonManager::Get(\"NextFrame\");\n\n			// Press offset Down\n			if (NextFrame)\n			{\n				NextFrame->on_click.emit();\n			}\n		}\n		if (Input->IsKeyPressed(SDLK_n))\n		{\n			// Get button from button manager\n			auto PreviousFrame = ButtonManager::Get(\"PreviousFrame\");\n\n			// Press offset Down\n			if (PreviousFrame)\n			{\n				PreviousFrame->on_click.emit();\n			}\n\n		}\n		if (Input->IsKeyPressed(SDLK_LEFTBRACKET))\n		{\n			// Get button from button manager\n			auto DelayDown = ButtonManager::Get(\"DelayDown\");\n\n			// Emit\n			if (DelayDown)\n			{\n				DelayDown->on_click.emit();	\n			}	\n		}\n		if (Input->IsKeyPressed(SDLK_RIGHTBRACKET))\n		{\n			// Get button from button manager\n			auto DelayUp = ButtonManager::Get(\"DelayUp\");\n\n			// Emit\n			if (DelayUp)\n			{\n				DelayUp->on_click.emit();\n			}\n		}\n		if (Input->IsKeyPressed(SDLK_o))\n		{\n			// Get button from button manager\n			auto ToggleOnionSkin = static_cast<GUIButton*>(GUIManager::Get(\"ToggleOnionSkin\"));\n\n			// Emit\n			if (ToggleOnionSkin)\n			{\n				ToggleOnionSkin->on_click.emit();\n			}\n		}\n	}\n\n\n\n	return true;\n}\n\nImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name)\n{\n	using namespace sajson;\n\n    // Get an image for testing\n    auto image = Frames.find_object_key(literal(Name.c_str()));\n    assert(image < Frames.get_length());\n    const auto& Image = Frames.get_object_value(image);\n   \n   	// Get sub objects \n    const auto imageframe = Image.find_object_key(literal(\"frame\"));\n    const auto& imageFrame = Image.get_object_value(imageframe);\n	const auto sss = Image.find_object_key(literal(\"spriteSourceSize\"));\n	const auto& SSS = Image.get_object_value(sss);\n\n	// UV information\n	float x = imageFrame.get_value_of_key(literal(\"x\")).get_safe_float_value();\n	float y = imageFrame.get_value_of_key(literal(\"y\")).get_safe_float_value();\n	float z = imageFrame.get_value_of_key(literal(\"w\")).get_safe_float_value();\n	float w = imageFrame.get_value_of_key(literal(\"h\")).get_safe_float_value();\n\n	// Size information\n	EM::Vec2 SourceSize(SSS.get_value_of_key(literal(\"w\")).get_safe_float_value(), \n						SSS.get_value_of_key(literal(\"h\")).get_safe_float_value());\n\n	// Return frame\n	ImageFrame IF = {	\n						EM::Vec4(x, y, z, w), \n					  	EM::Vec2(0.0f),\n					  	SourceSize,\n					  	0.0f,\n					  	1.0f, \n					  	Name, \n					  	0\n					};\n\n\n	// Need to read this value from .json \n	// Also, the TextureDir needs to be formatted at beginning of program, since it's OS specific \n	// 	in the way that forward or backslashes are read\n	IF.TextureID = EI::ResourceManager::GetTexture(AnimTextureDir).id;\n\n	// ImageFrame IF;\n	return IF;\n}\n\nvoid DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color)\n{\n	float ScalingFactor = 1.0f;\n	auto& Dims = Image.UVs;\n	auto& SSize = Image.SourceSize;\n	auto& Offsets = Image.Offsets;\n\n	auto AWidth = A.AtlasSize.x;\n	auto AHeight = A.AtlasSize.y;\n\n	Batch->Add(\n				EM::Vec4(Position.x + Offsets.x * ScalingFactor, \n						Position.y + Offsets.y * ScalingFactor, \n						EM::Vec2(SSize.x, SSize.y) * ScalingFactor), \n				EM::Vec4(Dims.x / AWidth, \n						(AHeight - Dims.y - Dims.w) / AHeight, \n						 Dims.z / AWidth, \n						 Dims.w / AHeight), \n				A.Texture.id, \n				Color\n			  );\n}\n\nAnim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc)\n{\n	// need to parse the file for a specific animatioa\n	Anim A;\n\n	// This doc will need to be passed in, but for now, just lazy load it...\n    using sajson::literal;\n    std::string json = EU::read_file(AnimationDir.c_str());\n    const sajson::document& doc = sajson::parse(sajson::string(json.c_str(), json.length()));\n\n    if (!doc.is_valid())\n    {\n        std::cout << \"Invalid json: \" << doc.get_error_message() << std::endl;\n    }\n\n    // Get root and length of animation json file\n    const auto& anim_root = doc.get_root();\n    const auto len = anim_root.get_length();\n\n    // Get handle to animation\n    const auto anim = anim_root.find_object_key(literal(AnimName.c_str()));\n    assert(anim < len);\n    const auto& Anim = anim_root.get_object_value(anim);\n    const auto anim_len = Anim.get_length();\n\n    // Get frames array and delays array\n    std::vector<std::string> frames;\n\n    // Frames\n    const auto fr = Anim.find_object_key(literal(\"frames\"));\n    assert(fr < anim_len);\n    const auto& Frames = Anim.get_object_value(fr);\n    const auto frames_len = Frames.get_length();\n    frames.reserve(frames_len);\n\n    // Delays\n    const auto de = Anim.find_object_key(literal(\"delays\"));\n    assert(de < anim_len);\n    const auto& Delays = Anim.get_object_value(de);\n\n    // YOffset\n    const auto yos = Anim.find_object_key(literal(\"yoffsets\"));\n    assert(yos < anim_len);\n    const auto& YOffset = Anim.get_object_value(yos);\n\n    // XOffset\n    const auto xos = Anim.find_object_key(literal(\"xoffsets\"));\n    assert(xos < anim_len);\n    const auto& XOffset = Anim.get_object_value(xos);\n\n    // Get iframe, get its delay and offsets, push into A.frames\n    for (auto i = 0; i < frames_len; i++)\n    {\n    	auto IF = GetImageFrame(FramesDoc, Frames.get_array_element(i).get_string_value());\n    	IF.Delay = Delays.get_array_element(i).get_safe_float_value();\n    	IF.Offsets.x = XOffset.get_array_element(i).get_safe_float_value();\n    	IF.Offsets.y = YOffset.get_array_element(i).get_safe_float_value();\n\n    	// push back into A.frames\n    	A.Frames.push_back(IF);\n    }\n\n    // Get total number of frames in vector\n    A.TotalFrames = A.Frames.size();\n\n    // Set animation name\n    A.Name = AnimName;\n\n	return A;\n}\n\nvoid CalculateAABBWithParent(EP::AABB* A, GUIButton* Button)\n{\n	auto Parent = Button->Parent;\n	auto PPos = &Parent->Position;\n\n	// Set up PlayButton AABB\n	Button->AABB.Min =  EM::Vec2(Button->Position.x + PPos->x + Button->Frames.at(ButtonState::INACTIVE).Offsets.x * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor,\n									Button->Position.y + PPos->y + Button->Frames.at(ButtonState::INACTIVE).Offsets.y * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor); \n	Button->AABB.Max = Button->AABB.Min + EM::Vec2(Button->Frames.at(ButtonState::INACTIVE).SourceSize.x * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor, \n										     Button->Frames.at(ButtonState::INACTIVE).SourceSize.y * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor); \n}\n\nvoid DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager)\n{\n	float size = 16.0f; \n	std::cout << InputManager->GetMouseCoords() << std::endl;\n	auto MouseCoords = InputManager->GetMouseCoords();\n	CameraManager::GetCamera(\"HUDCamera\")->ConvertScreenToWorld(MouseCoords);\n	Enjon::Math::Vec4 destRect(MouseCoords.x, MouseCoords.y - size, size, size);\n	Enjon::Math::Vec4 uvRect(0, 0, 1, 1);\n	Batch->Add(destRect, uvRect, MouseTexture.id);\n}\n\nbool IsModifier(unsigned int Key)\n{\n	if (Key == SDLK_LSHIFT || \n		Key == SDLK_RSHIFT || \n		Key == SDLK_LCTRL  ||\n		Key == SDLK_RCTRL  ||\n		Key == SDLK_CAPSLOCK)\n	return true;\n\n	else return false; \n}\n\n7h15150urw1r3l355n37w0rkk3y\n\n#endif\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+			"file": "src/main.cpp",
+			"file_size": 115411,
+			"file_write_time": 131107577522411162,
 			"settings":
 			{
-				"buffer_size": 1788,
+				"buffer_size": 112008,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/E/Development/Enjon/include/GUI/Property.h",
+			"file": "/E/Programs/SublimeText/Data/Packages/User/Preferences.sublime-settings",
 			"settings":
 			{
-				"buffer_size": 5239,
+				"buffer_size": 67,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "include/ECS/Masks.h",
+			"file": "/E/Development/Enjon/shaders/basic.f.glsl",
 			"settings":
 			{
-				"buffer_size": 1107,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/main.cpp",
-			"settings":
-			{
-				"buffer_size": 103847,
+				"buffer_size": 1400,
 				"line_ending": "Windows"
 			}
 		},
@@ -131,7 +126,7 @@
 			"file": "/E/Development/Enjon/include/GUI/GUIButton.h",
 			"settings":
 			{
-				"buffer_size": 225,
+				"buffer_size": 493,
 				"line_ending": "Windows"
 			}
 		},
@@ -139,15 +134,23 @@
 			"file": "/E/Development/Enjon/include/GUI/GUIElement.h",
 			"settings":
 			{
-				"buffer_size": 1837,
+				"buffer_size": 1552,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/E/Development/Enjon/proc/dump.txt",
+			"file": "/E/Development/Enjon/include/GUI/GUIAnimationElement.h",
 			"settings":
 			{
-				"buffer_size": 2727,
+				"buffer_size": 451,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Development/Enjon/src/GUIAnimationElement.cpp",
+			"settings":
+			{
+				"buffer_size": 915,
 				"line_ending": "Windows"
 			}
 		},
@@ -155,7 +158,7 @@
 			"file": "/E/Development/Enjon/include/Enjon.h",
 			"settings":
 			{
-				"buffer_size": 1771,
+				"buffer_size": 1808,
 				"line_ending": "Windows"
 			}
 		},
@@ -163,7 +166,7 @@
 			"file": "/E/Development/Enjon/include/Graphics/Font.h",
 			"settings":
 			{
-				"buffer_size": 1270,
+				"buffer_size": 1531,
 				"line_ending": "Windows"
 			}
 		},
@@ -171,7 +174,7 @@
 			"file": "/E/Development/Enjon/src/Font.cpp",
 			"settings":
 			{
-				"buffer_size": 4641,
+				"buffer_size": 4962,
 				"line_ending": "Windows"
 			}
 		},
@@ -227,7 +230,7 @@
 			"file": "assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json",
 			"settings":
 			{
-				"buffer_size": 2663,
+				"buffer_size": 2667,
 				"line_ending": "Windows"
 			}
 		}
@@ -259,13 +262,13 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 399.0,
+		"height": 357.0,
 		"last_filter": "packagein",
 		"selected_items":
 		[
 			[
 				"packagein",
-				"Package Control: Install Package"
+				"Package Control: Disable Package"
 			],
 			[
 				"pack",
@@ -292,7 +295,7 @@
 				"Preferences: Browse Packages"
 			]
 		],
-		"width": 408.0
+		"width": 400.0
 	},
 	"console":
 	{
@@ -316,16 +319,22 @@
 	"expanded_folders":
 	[
 		"/E/Development/Enjon/include",
-		"/E/Development/Enjon/include/Graphics",
-		"/E/Development/Enjon/include/IO",
+		"/E/Development/Enjon/include/Utils",
 		"/E/Development/Enjon/src",
 		"/E/Development/Enjon/IsoARPG",
-		"/E/Development/Enjon/IsoARPG/include",
-		"/E/Development/Enjon/IsoARPG/src",
-		"/E/Development/Enjon/IsoARPG/src/ECS"
+		"/E/Development/Enjon/shaders"
 	],
 	"file_history":
 	[
+		"/E/Development/Enjon/proc/rel.bat",
+		"/E/Development/Enjon/proc/shell.bat",
+		"/E/Development/Enjon/deps/include/sajson/sajson.h",
+		"/E/Development/Enjon/proc/dump.txt",
+		"/E/Development/Enjon/shaders/text.v.glsl",
+		"/E/Development/Enjon/shaders/text.f.glsl",
+		"/E/Development/Enjon/IsoARPG/include/ECS/Masks.h",
+		"/E/Development/Enjon/include/GUI/Property.h",
+		"/E/Development/Enjon/include/GUI/Signal.h",
 		"/E/Development/Enjon/include/GUI/GUI.h",
 		"/E/Development/Enjon/src/ImageLoader.cpp",
 		"/E/Development/Enjon/include/Graphics/Window.h",
@@ -335,7 +344,6 @@
 		"/E/Development/Enjon/include/Enjon.h",
 		"/E/Development/Enjon/IsoARPG/src/SpatialHash.cpp",
 		"/E/Development/Enjon/IsoARPG/src/ECS/CollisionSystem.cpp",
-		"/E/Development/Enjon/include/GUI/Property.h",
 		"/C/Users/John/Downloads/Property.hpp",
 		"/E/Development/Enjon/IsoARPG/assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json",
 		"/E/Development/Enjon/shaders/deferred.f.glsl",
@@ -367,7 +375,6 @@
 		"/E/Development/Enjon/IsoARPG/assets/Textures/Test/AnimationTest2.json",
 		"/E/Development/Enjon/IsoARPG/assets/Textures/spineboy/spineboy.json",
 		"/E/Development/Enjon/IsoARPG/assets/Textures/spineboy/spineboy.atlas",
-		"/E/Development/Enjon/proc/rel.bat",
 		"/E/Development/Enjon/deps/spine-cpp/include/spinecpp/spinecpp.h",
 		"/E/Development/Enjon/include/Utils/Timing.h",
 		"/E/Development/Enjon/IsoARPG/include/ECS/EntityFactory.h",
@@ -380,9 +387,7 @@
 		"/E/Development/Enjon/IsoARPG/include/EnjonAnimation.h",
 		"/E/Development/Enjon/IsoARPG/src/EnjonAnimation.cpp",
 		"/E/Development/Enjon/proc/clean.bat",
-		"/E/Development/Enjon/proc/dump.txt",
 		"/E/Development/Enjon/IsoARPG/src/Loot.cpp",
-		"/E/Development/Enjon/IsoARPG/include/ECS/Masks.h",
 		"/E/Development/Enjon/src/SpriteSheetManager.cpp",
 		"/E/Development/Enjon/IsoARPG/include/ECS/ECS.h",
 		"/E/Development/Enjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
@@ -448,12 +453,7 @@
 		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/BehaviorTreeManager.h",
 		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/TestTree.h",
 		"/D/C++Projects/VS/3DEnjon/shaders/no_camera.v.glsl",
-		"/D/C++Projects/VS/3DEnjon/shaders/no_camera.f.glsl",
-		"/D/Programs/SublimeText/Data/Packages/User/Preferences.sublime-settings",
-		"/D/C++Projects/VS/3DEnjon/shaders/framebuffers.v.glsl",
-		"/D/C++Projects/VS/3DEnjon/shaders/framebuffers.f.glsl",
-		"/D/C++Projects/VS/HQHT/UI/css/style.css",
-		"/D/C++Projects/VS/HQHT/UI/index.html"
+		"/D/C++Projects/VS/3DEnjon/shaders/no_camera.f.glsl"
 	],
 	"find":
 	{
@@ -472,6 +472,13 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"scale",
+			"()",
+			"EntityBatch",
+			"0.3f",
+			"TextBoxes",
+			"ButtonManager",
+			"Image",
 			".",
 			"std::cout",
 			"K",
@@ -592,14 +599,7 @@
 			"NEAREST",
 			"target",
 			"LINEAR",
-			"NEAREST",
-			"*NAP",
-			"->",
-			"* ",
-			"fullscre",
-			"fullscren",
-			" \"",
-			"P"
+			"NEAREST"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -617,124 +617,24 @@
 	"groups":
 	[
 		{
-			"selected": 3,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "/E/Development/Enjon/include/GUI/Signal.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1788,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1108,
-								1108
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 17,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "/E/Development/Enjon/include/GUI/Property.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5239,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2445,
-								2445
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "include/ECS/Masks.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1107,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								324,
-								324
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 13,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
 					"file": "src/main.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 103847,
+						"buffer_size": 112008,
 						"regions":
 						{
-							"bookmark_e":
-							{
-								"flags": 144,
-								"regions":
-								[
-									[
-										72463,
-										72463
-									]
-								]
-							}
 						},
 						"selection":
 						[
 							[
-								74603,
-								74603
+								111972,
+								111972
 							]
 						],
 						"settings":
@@ -788,37 +688,38 @@
 								3,
 								46
 							],
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 							"spell_check": false,
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 29716.0,
+						"translation.y": 47101.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "/E/Development/Enjon/include/Graphics/Animations.h",
+					"buffer": 1,
+					"file": "/E/Programs/SublimeText/Data/Packages/User/Preferences.sublime-settings",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 486,
+						"buffer_size": 67,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								127,
-								127
+								67,
+								67
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -828,68 +729,12 @@
 					"type": "text"
 				},
 				{
-					"buffer": 5,
-					"file": "/E/Development/Enjon/include/GUI/GUIButton.h",
-					"semi_transient": false,
+					"buffer": 2,
+					"file": "/E/Development/Enjon/shaders/basic.f.glsl",
+					"semi_transient": true,
 					"settings":
 					{
-						"buffer_size": 225,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								61,
-								61
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "/E/Development/Enjon/include/GUI/GUIElement.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1837,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								990,
-								990
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "/E/Development/Enjon/proc/dump.txt",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2727,
+						"buffer_size": 1400,
 						"regions":
 						{
 						},
@@ -902,7 +747,96 @@
 						],
 						"settings":
 						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 84.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/E/Development/Enjon/include/Graphics/Animations.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 486,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								172,
+								172
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/E/Development/Enjon/include/GUI/GUIButton.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 493,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								391,
+								391
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/E/Development/Enjon/include/GUI/GUIElement.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1552,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								116,
+								116
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
+							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -912,24 +846,83 @@
 					"type": "text"
 				},
 				{
-					"buffer": 8,
-					"file": "/E/Development/Enjon/include/Enjon.h",
+					"buffer": 6,
+					"file": "/E/Development/Enjon/include/GUI/GUIAnimationElement.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1771,
+						"buffer_size": 451,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								953,
-								953
+								434,
+								434
 							]
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/E/Development/Enjon/src/GUIAnimationElement.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 915,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								183,
+								183
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "/E/Development/Enjon/include/Enjon.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1808,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1092,
+								1092
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
@@ -945,19 +938,20 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1270,
+						"buffer_size": 1531,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								487,
-								487
+								1116,
+								1116
 							]
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
@@ -965,7 +959,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 12,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
@@ -974,27 +968,28 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4641,
+						"buffer_size": 4962,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2664,
-								2664
+								3759,
+								3759
 							]
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 630.0,
+						"translation.y": 1322.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
@@ -1016,6 +1011,7 @@
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
@@ -1023,7 +1019,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
@@ -1045,6 +1041,7 @@
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
@@ -1052,7 +1049,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 16,
 					"type": "text"
 				},
 				{
@@ -1074,13 +1071,14 @@
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 16,
+					"stack_index": 14,
 					"type": "text"
 				},
 				{
@@ -1102,6 +1100,7 @@
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
@@ -1109,7 +1108,7 @@
 						"translation.y": 1224.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 15,
+					"stack_index": 17,
 					"type": "text"
 				},
 				{
@@ -1131,6 +1130,7 @@
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
@@ -1138,7 +1138,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 15,
 					"type": "text"
 				},
 				{
@@ -1154,19 +1154,20 @@
 						"selection":
 						[
 							[
-								366,
-								366
+								376,
+								376
 							]
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 							"syntax": "Packages/JavaScript/JSON.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 14,
+					"stack_index": 12,
 					"type": "text"
 				},
 				{
@@ -1175,19 +1176,20 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2663,
+						"buffer_size": 2667,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1,
-								1
+								223,
+								223
 							]
 						],
 						"settings":
 						{
+							"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
@@ -1195,7 +1197,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 13,
 					"type": "text"
 				}
 			]
@@ -1285,7 +1287,7 @@
 	"show_minimap": true,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": true,
+	"side_bar_visible": false,
 	"side_bar_width": 171.0,
 	"status_bar_visible": false,
 	"template_settings":

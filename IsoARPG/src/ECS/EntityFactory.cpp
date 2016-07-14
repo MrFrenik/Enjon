@@ -165,6 +165,7 @@ namespace ECS { namespace Factory {
 			AS->LootProfiles[AI] = Loot::GetProfile(N);
 			
 			// Set up masks
+			// AS->Masks[AI] |= (Masks::Type::AI | Masks::GeneralOptions::COLLIDABLE);
 			AS->Masks[AI] |= (Masks::Type::AI | Masks::GeneralOptions::COLLIDABLE);
 
 			// Set up parent

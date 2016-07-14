@@ -21,8 +21,8 @@
 * MAIN GAME
 */
 
-#if 0
-#define FULLSCREENMODE   0
+#if 1
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -361,7 +361,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 20;
+	static uint32 AmountDrawn = 1;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -724,6 +724,11 @@ int main(int argc, char** argv)
 				// Entity id
 				Graphics::Fonts::PrintText(EntityPosition->x + 20.0f, EntityPosition->y - 20.0f, 0.4f, std::string("ID: ") + std::to_string(e), Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
 															Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+				// Entity Type
+				std::string Type;
+				if (World->AttributeSystem->Masks[e] & Masks::Type::AI) Type = "AI";
+				else Type = "Unknown";
+
 
 				// Entity Position 
 				auto X = EntityPosition->x;
@@ -732,6 +737,12 @@ int main(int argc, char** argv)
 				Graphics::Fonts::PrintText(	EntityPosition->x + 20.0f, 
 											EntityPosition->y - 40.0f, 
 											0.4f, std::string("<") + std::to_string(X) + std::string(", ") + std::to_string(Y) + (", ") + std::to_string(Z) + std::string(">"), 
+											Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
+															Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				Graphics::Fonts::PrintText( EntityPosition->x + 20.0f, 
+											EntityPosition->y - 60.0f, 
+											0.4f, std::string("Type: ") + Type, 
 											Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
 															Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
@@ -1471,6 +1482,19 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	if (Input->IsKeyPressed(SDLK_p)) {
 		Paused = !Paused;
 	}
+
+	if (Input->IsKeyPressed(SDLK_i)) 
+	{
+		// Get camera position
+		auto CamPos = Camera->GetPosition();
+		
+		// HERE AND QUEER!	
+		float height = 10.0f;
+		static Math::Vec2 enemydims(222.0f, 200.0f);
+		eid32 ai = Factory::CreateAI(World, Math::Vec3(CamPos.x, CamPos.y, height),
+																enemydims, EG::SpriteSheetManager::GetSpriteSheet("Beast"), "Enemy", 0.05f); 
+		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
+	}
 }
 
 void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager)
@@ -1742,9 +1766,9 @@ int main(int argc, char** argv)
 * SYSTEMS TEST
 */
 
-#if 1
+#if 0
 
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -1942,6 +1966,9 @@ GUIElementBase* KeyboardFocus = nullptr;
 GUIElementBase* MouseFocus = nullptr;
 
 EG::GLTexture MouseTexture;
+
+float caret_count = 0.0f;
+bool caret_on = true;
 
 #undef main
 int main(int argc, char** argv) {
@@ -2167,10 +2194,6 @@ int main(int argc, char** argv) {
 	// Set up InputText's on_click signal
 	InputText.on_click.connect([&]()
 	{
-		// For now, just change the text to empty string
-		// Will need to eventually set this box to the selected component, then hot-swap in input manager controls for this particular gui-element
-		// Find where the cursor is by the mouse
-
 		// Naive way first - get mouse position in UI space
 		EM::Vec2 MouseCoords = Input.GetMouseCoords();
 		CameraManager::GetCamera("HUDCamera")->ConvertScreenToWorld(MouseCoords);
@@ -2198,6 +2221,9 @@ int main(int argc, char** argv) {
 		InputText.CursorIndex = index;
 		std::cout << "Cursor Index: " << InputText.CursorIndex << std::endl;
 
+		// set caret on to true and count to 0
+		caret_count = 0.0f;
+		caret_on = true;
 	});
 
 	InputText.on_backspace.connect([&]()
@@ -2593,12 +2619,12 @@ int main(int argc, char** argv) {
 				// Calculate the AABB (this could be set up to another signal and only done when necessary)
 				// std::cout << PlayButton.AABB.Max - PlayButton.AABB.Min << std::endl;
 				CalculateAABBWithParent(&PlayButton.AABB, &PlayButton);
-				UIBatch->Add(
-								EM::Vec4(PlayButton.AABB.Min, PlayButton.AABB.Max - PlayButton.AABB.Min), 
-								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16_Red(), 0.3f)
-							);
+				// UIBatch->Add(
+				// 				EM::Vec4(PlayButton.AABB.Min, PlayButton.AABB.Max - PlayButton.AABB.Min), 
+				// 				EM::Vec4(0, 0, 1, 1),
+				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+				// 				EG::SetOpacity(EG::RGBA16_Red(), 0.3f)
+				// 			);
 
 				// CalculateAABBWithParent(&InputText.AABB, &InputText);
 				UIBatch->Add(
@@ -2791,7 +2817,7 @@ int main(int argc, char** argv) {
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
-				auto OnionString = ToggleOnionSkin.State == ButtonState::ACTIVE ? std::string("ON") : std::string("OFF");
+				auto OnionString = ToggleOnionSkin.State == ButtonState::ACTIVE ? std::string("On") : std::string("Off");
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
 										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 170.0f, scale, 
@@ -2814,9 +2840,8 @@ int main(int argc, char** argv) {
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
-				static float caret_count = 0.0f;
+
 				caret_count += 0.1f;
-				static bool caret_on = true;
 
 				if (caret_count >= 4.0f)
 				{
@@ -3396,6 +3421,7 @@ bool IsModifier(unsigned int Key)
 	else return false; 
 }
 
+7h15150urw1r3l355n37w0rkk3y
 
 #endif
 

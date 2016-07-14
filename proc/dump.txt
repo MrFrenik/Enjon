@@ -1,5 +1,3 @@
-Atlas.cpp
-Generating Code...
 Skipping... (no relevant changes detected)
 WeightedMeshAttachment.cpp
 TransformConstraint.cpp
@@ -18,6 +16,7 @@ BoundingBoxAttachment.cpp
 Bone.cpp
 AttachmentLoader.cpp
 AtlasAttachmentLoader.cpp
+Atlas.cpp
 AnimationStateData.cpp
 AnimationState.cpp
 Animation.cpp

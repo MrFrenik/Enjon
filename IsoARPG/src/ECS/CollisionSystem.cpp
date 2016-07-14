@@ -104,10 +104,15 @@ namespace ECS{ namespace Systems { namespace Collision {
 					// NOTE(John): I can only imagine how much branching this causes... Ugh.
 					if (Mask == (COLLISION_ITEM | COLLISION_ITEM)) 			{ CollideWithDebris(Manager, collider, e);		continue; }
 					if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
-					if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
-					if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithProjectile(Manager, collider, e); 	
-																		      else 										    	CollideWithProjectile(Manager, e, collider); 
-																		      continue; 
+					if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ 
+																				if (AType == Component::EntityType::ENEMY) 			CollideWithEnemy(Manager, e, collider); 	
+																				else 												CollideWithEnemy(Manager, collider, e);
+																				continue; 
+																			}
+					if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ 
+																				if (AType == Component::EntityType::PROJECTILE) 	CollideWithProjectile(Manager, collider, e); 	
+																		      	else 										    	CollideWithProjectile(Manager, e, collider); 
+																		      	continue;
 																		  	} 
 																		  	
 					if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
