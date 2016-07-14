@@ -13,6 +13,7 @@
 #include "Math/Random.h"
 #include "Graphics/SpriteSheet.h"
 #include "IO/ResourceManager.h"
+#include "Defines.h"
 
 
 #include <stdlib.h>
@@ -30,6 +31,8 @@ namespace ECS { namespace Systems {
 	///////////////////////////
 
 	namespace EntitySystem {
+
+		eid32 FindNextAvailableEntity(EntityManager* Manager);
 
 		// Creates new EntityManager and returns it
 		struct EntityManager* NewEntityManager(int Width, int Height, Enjon::Graphics::Camera2D* Camera, Level* Lvl)
@@ -76,9 +79,10 @@ namespace ECS { namespace Systems {
 			return Manager;
 		} 
 
-		// NOTE(John): Creating and Removing entities is buggy right now in the way that it manager ids
+		// NOTE(John): Creating and Removing entities is buggy right now in the way that it manages ids
 		// TODO(John): This is busted, so fix it to be similar to how particle batches create particles
 		// Creates blank entity and returns eid
+
 		eid32 CreateEntity(struct EntityManager* Manager, bitmask32 Components)
 		{
 			eid32 Entity;
@@ -88,6 +92,9 @@ namespace ECS { namespace Systems {
 			{
 				// Set id of entity to next available one
 				Entity = Manager->NextAvailableID; 
+
+				// Push back into map
+				Manager->Entities.push_back(Entity);
 
 				// Increment both NextAvailableID and Length if they're equal
 				if (Manager->NextAvailableID == Manager->MaxAvailableID) 
@@ -114,6 +121,55 @@ namespace ECS { namespace Systems {
 			return MAX_ENTITIES;
 		}
 
+		// eid32 CreateEntity(struct EntityManager* Manager, bitmask32 Components)
+		// {
+		// 	// Find next available ID and assign to entity
+		// 	eid32 Entity = FindNextAvailableEntity(Manager);
+
+		// 	if (Entity < MAX_ENTITIES)
+		// 	{
+		// 		// Increment Length
+		// 		Manager->Length++;
+
+		// 		// Set bitfield up
+		// 		Manager->Masks[Entity] = Components;
+
+		// 		return Entity;	
+		// 	}
+			
+		// 	// Otherwise return MAX_ENTITIES as an error
+		// 	return MAX_ENTITIES;
+		// }
+
+		eid32 FindNextAvailableEntity(EntityManager* Manager)
+		{
+			// Get next available id
+			auto NAID = Manager->NextAvailableID;
+			
+			for (auto i = NAID; i < MAX_ENTITIES; ++i)
+			{
+				if (Manager->Masks[i] == COMPONENT_NONE)
+				{
+					Manager->NextAvailableID = i;
+					return i;
+				}
+			}
+
+			// Loop from beginning to NAID - 1
+			for (auto i = 0; i < NAID - 1; ++i)
+			{
+				if (Manager->Masks[i] == COMPONENT_NONE)
+				{
+					Manager->NextAvailableID = i;
+					return i;
+				}
+			}
+
+			// Not sure about this...
+			Manager->NextAvailableID = MAX_ENTITIES;
+			return MAX_ENTITIES;
+		}
+
 		// Removes selected entity from manager by setting bitfield to COMPONENT_NONE
 		void RemoveEntity(struct EntityManager* Manager, eid32 Entity)
 		{
@@ -129,6 +185,9 @@ namespace ECS { namespace Systems {
 
 			// Decrement length
 			if (Manager->Length > 0) Manager->Length--; 
+
+			// Pop entity
+			if (Manager->Entities.size()) Manager->Entities.pop_back();
 
 			// Set next available entity id to entity
 			Manager->NextAvailableID = Entity; 

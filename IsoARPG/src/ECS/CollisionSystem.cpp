@@ -101,12 +101,17 @@ namespace ECS{ namespace Systems { namespace Collision {
 					// Get collision mask for A and B
 					Enjon::uint32 Mask = GetCollisionType(Manager, e, collider);
 
+
 					// NOTE(John): I can only imagine how much branching this causes... Ugh.
-					if (Mask == (COLLISION_ITEM | COLLISION_ITEM)) 			{ CollideWithDebris(Manager, collider, e);		continue; }
-					if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
+					if (Mask == (COLLISION_ITEM | COLLISION_ITEM)) 			{ 
+																				CollideWithDebris(Manager, collider, e);		continue; 
+																			}
+					if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ 
+																				CollideWithEnemy(Manager, e, collider); 		continue; 
+																			}
 					if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ 
-																				if (AType == Component::EntityType::ENEMY) 			CollideWithEnemy(Manager, e, collider); 	
-																				else 												CollideWithEnemy(Manager, collider, e);
+																				if (AType == Component::EntityType::ENEMY)		CollideWithEnemy(Manager, e, collider); 	
+																				else 											CollideWithEnemy(Manager, collider, e);
 																				continue; 
 																			}
 					if (Mask == (COLLISION_PROJECTILE | COLLISION_ENEMY)) 	{ 
@@ -115,46 +120,58 @@ namespace ECS{ namespace Systems { namespace Collision {
 																		      	continue;
 																		  	} 
 																		  	
-					if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
-																			  else 											CollideWithDebris(Manager, e, collider); 
-																			  continue; 
+					if (Mask == (COLLISION_ITEM | COLLISION_PLAYER)) 		{ 
+																				if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
+																			  	else 										CollideWithDebris(Manager, e, collider); 
+																			  	continue; 
 																			} 
 
-					if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) 		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
-																			  else 											CollideWithDebris(Manager, e, collider); 
-																			  continue; 
+					if (Mask == (COLLISION_ITEM | COLLISION_ENEMY)) 		{ 
+																				if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e); 		
+																			  	else										CollideWithDebris(Manager, e, collider); 
+																			  	continue; 
 																			} 
 
-					if (Mask == (COLLISION_ITEM | COLLISION_EXPLOSIVE))		{ if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e);
-																			  else 											CollideWithDebris(Manager, e, collider); 		
-																			  continue; 
+					if (Mask == (COLLISION_ITEM | COLLISION_EXPLOSIVE))		{ 
+																				if (AType == Component::EntityType::ITEM) 	CollideWithDebris(Manager, collider, e);
+																			  	else 										CollideWithDebris(Manager, e, collider); 		
+																			  	continue; 
 																			} 
 
-					if (Mask == (COLLISION_ITEM | COLLISION_VORTEX))		{ if (AType == Component::EntityType::ITEM) 	CollideWithVortex(Manager, collider, e);
-																			  else 											CollideWithVortex(Manager, e, collider); 		
-																			  continue; 
+					if (Mask == (COLLISION_ITEM | COLLISION_VORTEX))		{ 
+																				if (AType == Component::EntityType::ITEM) 	CollideWithVortex(Manager, collider, e);
+																			  	else										CollideWithVortex(Manager, e, collider); 		
+																			  	continue; 
 																			} 
 
-					if (Mask == (COLLISION_PROJECTILE | COLLISION_VORTEX))	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithVortex(Manager, collider, e);
-																			  else 												CollideWithVortex(Manager, e, collider); 		
-																			  continue; 
+					if (Mask == (COLLISION_PROJECTILE | COLLISION_VORTEX))	{ 
+																				if (AType == Component::EntityType::PROJECTILE) 	CollideWithVortex(Manager, collider, e);
+																			  	else 												CollideWithVortex(Manager, e, collider); 		
+																			  	continue; 
 																			} 
 
-					if (Mask == (COLLISION_PROJECTILE | COLLISION_EXPLOSIVE)){ if (AType == Component::EntityType::PROJECTILE) 	CollideWithDebris(Manager, collider, e);
-																			  else 													CollideWithDebris(Manager, e, collider); 		
-																			  continue; 
+					if (Mask == (COLLISION_PROJECTILE | COLLISION_EXPLOSIVE)){ 
+																				if (AType == Component::EntityType::PROJECTILE) 	CollideWithDebris(Manager, collider, e);
+																			  	else 												CollideWithDebris(Manager, e, collider); 		
+																			  	continue; 
 																			} 
 
-					if (Mask == (COLLISION_PROJECTILE | COLLISION_WEAPON))	{ if (AType == Component::EntityType::PROJECTILE) 	CollideWithDebris(Manager, collider, e);
-																			  else 												CollideWithDebris(Manager, e, collider); 		
-																			  continue; 
+					if (Mask == (COLLISION_PROJECTILE | COLLISION_WEAPON))	{ 
+																				if (AType == Component::EntityType::PROJECTILE) 	CollideWithDebris(Manager, collider, e);
+																			  	else 												CollideWithDebris(Manager, e, collider); 		
+																			  	continue; 
 																			} 
 
-					if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ CollideWithEnemy(Manager, e, collider); 		continue; }
+					if (Mask == (COLLISION_ENEMY | COLLISION_PLAYER)) 		{ 
+																				if (AType == Component::EntityType::PLAYER) 	CollideWithEnemy(Manager, e, collider); 		
+																				else 											CollideWithEnemy(Manager, collider, e);
+																				continue; 
+																			}
 
-					if (Mask == (COLLISION_EXPLOSIVE | COLLISION_ENEMY))	{ if (AType == Component::EntityType::ENEMY) 	CollideWithExplosive(Manager, e, collider);  	
-																			  else 											CollideWithExplosive(Manager, collider, e); 
-																			  continue; 
+					if (Mask == (COLLISION_EXPLOSIVE | COLLISION_ENEMY))	{ 
+																				if (AType == Component::EntityType::ENEMY) 	CollideWithExplosive(Manager, e, collider);  	
+																			  	else										CollideWithExplosive(Manager, collider, e); 
+																			  	continue; 
 																			}
 				}
 			}	

@@ -14,6 +14,7 @@
 #include "Level.h"
 
 #include <vector>
+#include <unordered_map>
 
 #define SCREEN_VERTICAL_CENTER			1440 / 2
 #define SCREEN_HORIZONTAL_CENTER		900 / 2
@@ -67,6 +68,8 @@ namespace ECS { namespace Systems {
 		Enjon::Graphics::Camera2D* Camera;
 
 		Level* Lvl;
+
+		std::vector<eid32> Entities;
 	};
 
 	////////////////////

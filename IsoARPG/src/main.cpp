@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -84,7 +84,7 @@ typedef struct
 float LightZ = 0.03f;
 
 typedef struct 
-{
+{	
 	EM::Vec2 Position;
 	EM::Vec2 Dimensions; 
 	float Angle;
@@ -361,7 +361,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 0;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -372,12 +372,12 @@ int main(int argc, char** argv)
 
 	// Create random dude to see what he looks like
 	{
-		float height = 0.0f;
-		float h = 300.0f;
-		float w = h * 0.707f;
-		eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
-																EM::Vec2(w, h), EG::SpriteSheetManager::GetSpriteSheet("Enemy"), "Enemy", 0.05f); 
-		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
+		// float height = 0.0f;
+		// float h = 300.0f;
+		// float w = h * 0.707f;
+		// eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
+		// 														EM::Vec2(w, h), EG::SpriteSheetManager::GetSpriteSheet("Enemy"), "Enemy", 0.05f); 
+		// World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
 	}
 
 	// Create player
@@ -407,7 +407,7 @@ int main(int argc, char** argv)
 	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 5000;
+	AmountDrawn = 0;
 
 	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
@@ -437,7 +437,7 @@ int main(int argc, char** argv)
 		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(50, 100) / 50.0f;
 	}
 
-	for (uint32 e = 0; e < 100; e++)
+	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
 		auto s = ER::Roll(20, 40);
 		eid32 Box = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
@@ -447,7 +447,7 @@ int main(int argc, char** argv)
 
 	}
 
-	for (uint32 e = 0; e < 50; e++)
+	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
 		auto s = ER::Roll(50, 80);
 		eid32 BiggerBox = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
@@ -1109,7 +1109,7 @@ int main(int argc, char** argv)
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 200.0f, 
 										0.4f, "Entities: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 200.0f, 
-										0.4f, std::to_string(World->Length), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+										0.4f, std::to_string(World->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 		// Renderer size
 		Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 220.0f, 
@@ -1491,7 +1491,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		// HERE AND QUEER!	
 		float height = 10.0f;
 		static Math::Vec2 enemydims(222.0f, 200.0f);
-		eid32 ai = Factory::CreateAI(World, Math::Vec3(CamPos.x, CamPos.y, height),
+		eid32 ai = Factory::CreateAI(World, Math::Vec3(CamPos.x + 100.0f, CamPos.y + 100.0f, height),
 																enemydims, EG::SpriteSheetManager::GetSpriteSheet("Beast"), "Enemy", 0.05f); 
 		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
 	}
@@ -3420,8 +3420,6 @@ bool IsModifier(unsigned int Key)
 
 	else return false; 
 }
-
-7h15150urw1r3l355n37w0rkk3y
 
 #endif
 

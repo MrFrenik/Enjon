@@ -187,6 +187,8 @@ namespace ECS { namespace Factory {
 			AC->SO = AC->Brain->CreateStateObject();
 			AC->BB = AC->Brain->CreateBlackBoard();
 
+			// NOTE(John): Who owns this memory? When an entity is deleted, need to clean this mess up.
+			// Make an 'on-kill' function of some sort that each entity has and will be called on its removal by the entity manager
 			AC->BB->AddComponent(std::string("EID"), new BlackBoardComponent<eid32>(AI));
 			AC->BB->AddComponent(std::string("EntityManager"), new BlackBoardComponent<Systems::EntityManager*>(Manager));
 			AC->BB->AddComponent(std::string("TargetPosition"), new BlackBoardComponent<EM::Vec3>(EM::Vec3(0.0f, 0.0f, 0.0f)));
