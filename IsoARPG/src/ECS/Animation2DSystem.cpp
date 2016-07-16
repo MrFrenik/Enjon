@@ -318,7 +318,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 								if (CurrentWeapon == Weapons::BOW && ActiveFrame == *BeginningFrame + 3)
 								{
-									for (auto i = 0; i < 10; i++)
+									for (auto i = 0; i < 1; i++)
 									{
 										// Create an arrow projectile entity for now...
 										static Enjon::Graphics::SpriteSheet ItemSheet;

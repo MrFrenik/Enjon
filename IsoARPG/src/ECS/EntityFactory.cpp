@@ -257,7 +257,7 @@ namespace ECS { namespace Factory {
 			AS->Groups[Item].Parent = Item;
 
 			// Set up Inventory... This has to be fixed and is a problem with having a general ECS
-			Manager->InventorySystem->Inventories->WeaponEquipped = NULL_ENTITY;
+			Manager->InventorySystem->Inventories[Item].WeaponEquipped = NULL_ENTITY;
 
 			return Item;
 		} 
@@ -324,7 +324,7 @@ namespace ECS { namespace Factory {
 			AS->WeaponProfiles[Weapon] = WP;
 
 			// Set up Inventory... This has to be fixed and is a problem with having a general ECS
-			Manager->InventorySystem->Inventories->WeaponEquipped = NULL_ENTITY;
+			Manager->InventorySystem->Inventories[Weapon].WeaponEquipped = NULL_ENTITY;
 
 			return Weapon;
 		}

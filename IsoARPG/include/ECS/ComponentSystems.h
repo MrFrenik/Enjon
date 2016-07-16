@@ -41,6 +41,7 @@ namespace ECS { namespace Systems {
 	struct EntityManager
 	{
 		eid32 NextAvailableID;
+		eid32 MinID;
 		eid32 MaxAvailableID;
 		eid32 Length;
 

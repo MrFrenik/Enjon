@@ -50,6 +50,9 @@ namespace ECS { namespace Systems {
 			// Initialize LastUsedID to 0
 			Manager->MaxAvailableID = 0;
 
+			// Initialize LastUsedID to 0
+			Manager->MinID = 0;
+
 			// Initialize the component systems
 			Manager->TransformSystem			= Transform::NewTransform3DSystem(Manager);
 			Manager->PlayerControllerSystem 	= PlayerController::NewPlayerControllerSystem(Manager);
@@ -83,6 +86,7 @@ namespace ECS { namespace Systems {
 		// TODO(John): This is busted, so fix it to be similar to how particle batches create particles
 		// Creates blank entity and returns eid
 
+		/*
 		eid32 CreateEntity(struct EntityManager* Manager, bitmask32 Components)
 		{
 			eid32 Entity;
@@ -120,33 +124,37 @@ namespace ECS { namespace Systems {
 			// Otherwise return MAX_ENTITIES as an error
 			return MAX_ENTITIES;
 		}
+		*/
 
-		// eid32 CreateEntity(struct EntityManager* Manager, bitmask32 Components)
-		// {
-		// 	// Find next available ID and assign to entity
-		// 	eid32 Entity = FindNextAvailableEntity(Manager);
+		eid32 CreateEntity(struct EntityManager* Manager, bitmask32 Components)
+		{
+			// Find next available ID and assign to entity
+			eid32 Entity = FindNextAvailableEntity(Manager);
 
-		// 	if (Entity < MAX_ENTITIES)
-		// 	{
-		// 		// Increment Length
-		// 		Manager->Length++;
+			if (Entity < MAX_ENTITIES)
+			{
+				// Increment Length
+				Manager->Length++;
 
-		// 		// Set bitfield up
-		// 		Manager->Masks[Entity] = Components;
+				// Set bitfield up
+				Manager->Masks[Entity] = Components;
 
-		// 		return Entity;	
-		// 	}
+				// Set max id
+				if (Manager->MaxAvailableID < Manager->NextAvailableID) Manager->MaxAvailableID = Manager->NextAvailableID;
+
+				return Entity;	
+			}
 			
-		// 	// Otherwise return MAX_ENTITIES as an error
-		// 	return MAX_ENTITIES;
-		// }
+			// Otherwise return MAX_ENTITIES as an error
+			return MAX_ENTITIES;
+		}
 
 		eid32 FindNextAvailableEntity(EntityManager* Manager)
 		{
 			// Get next available id
 			auto NAID = Manager->NextAvailableID;
 			
-			for (auto i = NAID; i < MAX_ENTITIES; ++i)
+			for (auto i = NAID; i < MAX_ENTITIES-1; ++i)
 			{
 				if (Manager->Masks[i] == COMPONENT_NONE)
 				{
@@ -182,6 +190,9 @@ namespace ECS { namespace Systems {
 
 			// Set component mask to COMPONENT_NONE to remove
 			Manager->Masks[Entity] = COMPONENT_NONE;
+
+			// Not sure about that...
+			if (Entity < Manager->MinID) Manager->MinID = Entity;
 
 			// Decrement length
 			if (Manager->Length > 0) Manager->Length--; 
