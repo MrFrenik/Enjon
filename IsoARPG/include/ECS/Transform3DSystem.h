@@ -19,7 +19,10 @@ namespace ECS{ namespace Systems { namespace Transform {
 		void Update(Transform3DSystem* System, Enjon::Graphics::Particle2D::ParticleBatch2D* Batch);
 
 		// Creates new Transform3DSystem
-		Transform3DSystem* NewTransform3DSystem(Systems::EntityManager* Manager);		
+		Transform3DSystem* NewTransform3DSystem(Systems::EntityManager* Manager);	
+
+		// Resets transform component of entity
+		void Reset(Systems::EntityManager* Manager, eid32 Entity);	
 }}}
 
 

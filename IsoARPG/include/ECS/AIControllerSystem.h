@@ -18,7 +18,9 @@ namespace ECS { namespace Systems { namespace AIController {
 	struct AIControllerSystem* NewAIControllerSystem(struct EntityManager* Manager);
 	
 	// Updates Controller of AI it is attached to
-	void Update(struct AIControllerSystem* System, eid32 Player);	
+	void Update(struct AIControllerSystem* System, eid32 Player);
+
+	void Reset(struct EntityManager* Manager, eid32 Entity);	
 }}}
 
 

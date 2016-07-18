@@ -15,6 +15,19 @@ namespace ECS{ namespace Systems { namespace Attributes {
 	{
 
 	}	
+
+	void Reset(Systems::EntityManager* Manager, eid32 Entity)
+	{
+		auto System = Manager->AttributeSystem;
+
+		System->HealthComponents[Entity].Health = 0.0f;
+		System->HealthComponents[Entity].Entity = 0;
+		System->Masks[Entity] = 0;
+		System->Groups[Entity].Entity = 0;
+		System->Groups[Entity].Parent = 0;
+		System->LootProfiles[Entity] = nullptr;
+		System->WeaponProfiles[Entity] = nullptr;
+	}
 }}}
 
 

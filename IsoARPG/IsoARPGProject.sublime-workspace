@@ -88,42 +88,10 @@
 	"buffers":
 	[
 		{
-			"file": "src/ECS/CollisionSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 37246,
-				"line_ending": "Windows"
-			}
-		},
-		{
 			"file": "src/main.cpp",
 			"settings":
 			{
 				"buffer_size": 112917,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/E/Development/Enjon/proc/build.bat",
-			"settings":
-			{
-				"buffer_size": 444,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/PlayerControllerSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 8545,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/Animation2DSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 18349,
 				"line_ending": "Windows"
 			}
 		},
@@ -139,7 +107,23 @@
 			"file": "src/ECS/ComponentSystems.cpp",
 			"settings":
 			{
-				"buffer_size": 6136,
+				"buffer_size": 6326,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/ECS/Animation2DSystem.cpp",
+			"settings":
+			{
+				"buffer_size": 18348,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/ECS/EntityFactory.cpp",
+			"settings":
+			{
+				"buffer_size": 16592,
 				"line_ending": "Windows"
 			}
 		},
@@ -147,7 +131,7 @@
 			"file": "include/ECS/ComponentSystems.h",
 			"settings":
 			{
-				"buffer_size": 2772,
+				"buffer_size": 2787,
 				"line_ending": "Windows"
 			}
 		}
@@ -247,6 +231,9 @@
 	],
 	"file_history":
 	[
+		"/E/Development/Enjon/IsoARPG/src/ECS/PlayerControllerSystem.cpp",
+		"/E/Development/Enjon/proc/build.bat",
+		"/E/Development/Enjon/IsoARPG/src/ECS/CollisionSystem.cpp",
 		"/E/Development/Enjon/proc/debug.bat",
 		"/E/Development/Enjon/src/Graphics/ParticleEngine2D.cpp",
 		"/E/Programs/SublimeText/Data/Packages/User/Preferences.sublime-settings",
@@ -283,7 +270,6 @@
 		"/E/Development/Enjon/include/Graphics/Window.h",
 		"/E/Development/Enjon/src/Window.cpp",
 		"/E/Development/Enjon/IsoARPG/src/SpatialHash.cpp",
-		"/E/Development/Enjon/IsoARPG/src/ECS/CollisionSystem.cpp",
 		"/C/Users/John/Downloads/Property.hpp",
 		"/E/Development/Enjon/shaders/deferred.f.glsl",
 		"/E/Development/Enjon/shaders/basic.f.glsl",
@@ -294,7 +280,6 @@
 		"/E/Development/Enjon/deps/spine-cpp/third_party/sajson/sajson.h",
 		"/E/Development/Enjon/IsoARPG/assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE",
 		"/E/Development/Enjon/IsoARPG/include/ECS/PlayerControllerSystem.h",
-		"/E/Development/Enjon/IsoARPG/src/ECS/PlayerControllerSystem.cpp",
 		"/E/Development/Enjon/IsoARPG/src/ECS/Animation2DSystem.cpp",
 		"/E/Development/Enjon/IsoARPG/include/ECS/Components.h",
 		"/E/Development/Enjon/IsoARPG/assets/Textures/TexturePackerTest/test.json",
@@ -373,8 +358,7 @@
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/Animation2DSystem.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/Level.h",
 		"/D/C++Projects/VS/3DEnjon/src/FrameBufferObject.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/ComponentSystems.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Masks.h"
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/ComponentSystems.cpp"
 	],
 	"find":
 	{
@@ -538,40 +522,11 @@
 	"groups":
 	[
 		{
-			"selected": 4,
+			"selected": 2,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "src/ECS/CollisionSystem.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 37246,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6464,
-								6464
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
 					"file": "src/main.cpp",
 					"semi_transient": false,
 					"settings":
@@ -600,93 +555,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "/E/Development/Enjon/proc/build.bat",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 444,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								44,
-								44
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Batch File/Batch File.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "src/ECS/PlayerControllerSystem.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8545,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								4491,
-								4491
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1597.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "src/ECS/Animation2DSystem.cpp",
-					"semi_transient": true,
-					"settings":
-					{
-						"buffer_size": 18349,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								9715,
-								9715
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 3043.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
+					"buffer": 1,
 					"file": "/E/Development/Enjon/proc/rel.bat",
 					"semi_transient": false,
 					"settings":
@@ -710,53 +579,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "src/ECS/ComponentSystems.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6136,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								5449,
-								5449
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 2026.0,
-						"zoom_level": 1.0
-					},
 					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
-					"file": "include/ECS/ComponentSystems.h",
+					"buffer": 2,
+					"file": "src/ECS/ComponentSystems.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2772,
+						"buffer_size": 6326,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1746,
-								1746
+								5491,
+								5491
 							]
 						],
 						"settings":
@@ -765,10 +605,97 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 378.0,
+						"translation.y": 2236.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "src/ECS/Animation2DSystem.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 18348,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								13468,
+								13468
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 4047.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/ECS/EntityFactory.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 16592,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								11787,
+								11787
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 3846.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "include/ECS/ComponentSystems.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2787,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2786,
+								2786
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 486.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
 					"type": "text"
 				}
 			]
@@ -859,7 +786,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 270.0,
+	"side_bar_width": 249.0,
 	"status_bar_visible": false,
 	"template_settings":
 	{

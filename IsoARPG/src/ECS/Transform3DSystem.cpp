@@ -219,7 +219,11 @@ namespace ECS{ namespace Systems { namespace Transform {
 				{
 					if ((Manager->AttributeSystem->Masks[e] & Masks::WeaponSubOptions::GRENADE) == 0 &&
 						(Manager->AttributeSystem->Masks[e] & Masks::WeaponOptions::EXPLOSIVE) == 0)
-					EntitySystem::RemoveEntity(Manager, e);
+					{
+						EntitySystem::RemoveEntity(Manager, e);
+						continue;
+					}
+					
 				}
 
 				*GroundPosition = Enjon::Math::CartesianToIso(Transform->CartesianPosition);
@@ -316,7 +320,46 @@ namespace ECS{ namespace Systems { namespace Transform {
 			}
 		}
 	}
+
+	// Resets transform component of entity
+	void Reset(Systems::EntityManager* Manager, eid32 Entity)
+	{
+		// Get handle to transforms
+		auto Transform = &Manager->TransformSystem->Transforms[Entity];
+
+		Transform->Position 			= EM::Vec3(0.0f, 0.0f, 0.0f);
+		Transform->Velocity 			= EM::Vec3(0.0f, 0.0f, 0.0f);
+		Transform->VelocityGoal 		= EM::Vec3(0.0f, 0.0f, 0.0f);
+		Transform->ViewVector 			= EM::Vec2(0.0f, 0.0f);
+		Transform->AttackVector 		= EM::Vec2(0.0f, 0.0f);
+		Transform->CartesianPosition 	= EM::Vec2(0.0f, 0.0f);
+		Transform->AABB 				= {EM::Vec2(0.0f, 0.0f), EM::Vec2(0.0f, 0.0f)};
+		Transform->AABBPadding 			= EM::Vec2(0.0f, 0.0f);
+		Transform->GroundPosition 		= EM::Vec2(0.0f, 0.0f);
+		Transform->Dimensions 			= EM::Vec2(0.0f, 0.0f);
+		Transform->GroundPositionOffset = EM::Vec2(0.0f, 0.0f);
+
+		Transform->Angle 				= 0.0f;
+		Transform->BaseHeight 			= 0.0f;
+		Transform->VelocityGoalScale 	= 0.0f;
+		Transform->Mass 				= 0.0f;
+		Transform->Entity 				= 0;
+	}
+
 }}}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

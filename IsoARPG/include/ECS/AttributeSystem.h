@@ -33,6 +33,8 @@ namespace ECS{ namespace Systems { namespace Attributes {
 	// Updates any Attributes Components of entity it is attached to
 	void Update(struct AttributeSystem* System);
 
+	void Reset(Systems::EntityManager* Manager, eid32 Entity);
+
 }}}
 
 #endif

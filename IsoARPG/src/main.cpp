@@ -407,7 +407,7 @@ int main(int argc, char** argv)
 	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 0;
+	AmountDrawn = 1000;
 
 	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
@@ -885,8 +885,8 @@ int main(int argc, char** argv)
 		Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[Player].CartesianPosition) + Math::Vec2(45.0f, 35.0f));
 		float boxRadius = 10.0f;
 		BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle - 90)), sin(Math::ToRadians(AimAngle - 90))));
-		EntityBatch.Add(Math::Vec4(BoxCoords, 100, 50), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png").id, 
-							Graphics::SetOpacity(Graphics::RGBA16_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 45), Graphics::CoordinateFormat::ISOMETRIC);
+		// EntityBatch.Add(Math::Vec4(BoxCoords, 100, 50), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png").id, 
+		// 					Graphics::SetOpacity(Graphics::RGBA16_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 45), Graphics::CoordinateFormat::ISOMETRIC);
 
 
 		Enjon::Math::Vec2 AimCoords(World->TransformSystem->Transforms[Player].Position.XY() + Math::Vec2(100.0f, -100.0f));
@@ -1389,7 +1389,7 @@ int main(int argc, char** argv)
 		glUseProgram(shader);
 
 		// Draw Cursor
-		// DrawCursor(&HUDBatch, &Input);
+		DrawCursor(&HUDBatch, &Input);
 
 
 
@@ -1414,7 +1414,8 @@ int main(int argc, char** argv)
 			TileOverlayTimeString = std::to_string(TileOverlayRunTime);
 			AITimeString = std::to_string(AIRunTime);
 
-			Loot::PrintCounts();
+			// Print loot counts for debugging
+			// Loot::PrintCounts();
 
 			counter = 0.0f;
 		}
@@ -1487,11 +1488,13 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	{
 		// Get camera position
 		auto CamPos = Camera->GetPosition();
+		auto MouseCoords = Input->GetMouseCoords();	
+		Camera->ConvertScreenToWorld(MouseCoords);
 		
 		// HERE AND QUEER!	
 		float height = 10.0f;
 		static Math::Vec2 enemydims(222.0f, 200.0f);
-		eid32 ai = Factory::CreateAI(World, Math::Vec3(CamPos.x + 100.0f, CamPos.y + 100.0f, height),
+		eid32 ai = Factory::CreateAI(World, Math::Vec3(MouseCoords.x, MouseCoords.y, height),
 																enemydims, EG::SpriteSheetManager::GetSpriteSheet("Beast"), "Enemy", 0.05f); 
 		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
 	}

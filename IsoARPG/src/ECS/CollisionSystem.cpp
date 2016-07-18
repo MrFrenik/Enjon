@@ -94,6 +94,9 @@ namespace ECS{ namespace Systems { namespace Collision {
 				// This will cause unnecessary branching. Figure out a way to take it out of the loop.
 				if (collider != e)
 				{
+					// Make sure both entities are not null here. This is really hacky and needs to be dealt with more effectively. 
+					if (Manager->Masks[e] == COMPONENT_NONE || Manager->Masks[collider] == COMPONENT_NONE) continue;
+
 					// Get EntityType of collider and entity
 					Component::EntityType AType = Manager->Types[collider];
 					Component::EntityType BType = Manager->Types[e];

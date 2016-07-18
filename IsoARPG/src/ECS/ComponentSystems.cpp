@@ -128,13 +128,15 @@ namespace ECS { namespace Systems {
 
 		eid32 CreateEntity(struct EntityManager* Manager, bitmask32 Components)
 		{
-			// Find next available ID and assign to entity
 			eid32 Entity = FindNextAvailableEntity(Manager);
 
+			// Find next available ID and assign to entity
 			if (Entity < MAX_ENTITIES)
 			{
 				// Increment Length
 				Manager->Length++;
+
+				Manager->Entities.push_back(Entity);
 
 				// Set bitfield up
 				Manager->Masks[Entity] = Components;
@@ -154,21 +156,21 @@ namespace ECS { namespace Systems {
 			// Get next available id
 			auto NAID = Manager->NextAvailableID;
 			
-			for (auto i = NAID; i < MAX_ENTITIES-1; ++i)
+			for (auto i = NAID; i < MAX_ENTITIES - 1; ++i)
 			{
 				if (Manager->Masks[i] == COMPONENT_NONE)
 				{
-					Manager->NextAvailableID = i;
+					Manager->NextAvailableID = i+1;
 					return i;
 				}
 			}
 
 			// Loop from beginning to NAID - 1
-			for (auto i = 0; i < NAID - 1; ++i)
+			for (auto i = 0; i < NAID - 2; ++i)
 			{
 				if (Manager->Masks[i] == COMPONENT_NONE)
 				{
-					Manager->NextAvailableID = i;
+					Manager->NextAvailableID = i+1;
 					return i;
 				}
 			}
@@ -187,6 +189,24 @@ namespace ECS { namespace Systems {
 			{
 				// Manager->AttributeSystem->WeaponProfiles.erase(Entity);
 			}
+
+			// Get handle to entity mask
+			auto Mask = Manager->Masks[Entity];
+
+			// Reset Transform component
+			if (Mask & COMPONENT_TRANSFORM3D)
+			{
+				Transform::Reset(Manager, Entity);
+			}
+
+			// Reset AIController component
+			if (Mask & COMPONENT_AICONTROLLER)
+			{
+				AIController::Reset(Manager, Entity);
+			}
+
+			// Reset Attribute System
+			Attributes::Reset(Manager, Entity);
 
 			// Set component mask to COMPONENT_NONE to remove
 			Manager->Masks[Entity] = COMPONENT_NONE;

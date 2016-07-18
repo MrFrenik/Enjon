@@ -35,6 +35,23 @@ namespace ECS { namespace Systems { namespace AIController {
 			}
 		}
 	}
+
+	void Reset(struct EntityManager* Manager, eid32 Entity)
+	{
+		auto AIController = &Manager->AIControllerSystem->AIControllers[Entity];
+
+		// Free memory / The behavior tree is managed by the BT Manager
+		delete AIController->SO;
+		delete AIController->BB;
+
+		// Set to null
+		AIController->Brain = nullptr;
+		AIController->SO = nullptr;
+		AIController->BB = nullptr;
+
+
+		AIController->Entity = 0;
+	}	
 }}}
 
 

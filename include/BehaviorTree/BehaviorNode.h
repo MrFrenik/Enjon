@@ -66,13 +66,13 @@ namespace BT
 				State = BehaviorNodeState::RUNNING;
 			}
 
-			BehaviorTree() : Root(nullptr), BB(new BlackBoard()) 
+			BehaviorTree() : Root(nullptr), BB(nullptr) 
 			{
 				// Set up BB with empty state object
-				StateObject* SO = CreateStateObject();
+				// StateObject* SO = CreateStateObject();
 
 				// Put in BB
-				BB->AddComponent("States", new BlackBoardComponent<StateObject*>(SO));
+				// BB->AddComponent("States", new BlackBoardComponent<StateObject*>(SO));
 
 				State = BehaviorNodeState::RUNNING;
 			}
@@ -80,6 +80,7 @@ namespace BT
 			void End() { SetTreeIndicies(); }
 
 			~BehaviorTree(){}
+
 
 			inline StateObject* BehaviorTree::CreateStateObject()
 			{

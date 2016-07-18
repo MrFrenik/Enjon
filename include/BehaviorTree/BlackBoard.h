@@ -42,11 +42,7 @@ namespace BT
 			BlackBoard(){}
 			~BlackBoard()
 			{
-				for (auto itr = Components.begin(); itr != Components.end(); itr++)
-				{
-					delete itr->second;
-					Components.erase(itr);
-				}
+				RemoveComponents();
 			}
 
 			void AddComponent(std::string S, BlackBoardComponentBase* B)
@@ -56,6 +52,15 @@ namespace BT
 
 			template <typename T>
 			inline BlackBoardComponent<T>* GetComponent(std::string S) { return static_cast<BlackBoardComponent<T>*>(Components[S]); }
+
+			inline void RemoveComponents()
+			{
+				for (auto itr = Components.begin(); itr != Components.end(); ++itr)
+				{
+					auto val = (*itr).second;
+					delete val;
+				}
+			}
 
 		private:
 			std::unordered_map<std::string, BlackBoardComponentBase*> Components;
