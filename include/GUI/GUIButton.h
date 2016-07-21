@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+#include "Defines.h"
 #include "GUI/GUIElement.h"
 #include "Graphics/Animations.h"
 
@@ -16,7 +17,7 @@ namespace Enjon { namespace GUI {
 			std::cout << "Initialized Button..." << std::endl;
 		}
 
-		std::vector<ImageFrame> Frames;   // Could totally put this in a resource manager of some sort
+		std::vector<EA::ImageFrame> Frames;   // Could totally put this in a resource manager of some sort
 	};
 
 	inline void DoSomething(GUIButton* Button)

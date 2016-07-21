@@ -4,7 +4,7 @@
 #include "GUI/GUIElement.h"
 #include "Graphics/Animations.h"
 #include "Math/Vec2.h"
-
+#include "Defines.h"
 
 namespace Enjon { namespace GUI {
 
@@ -13,7 +13,7 @@ namespace Enjon { namespace GUI {
 	{
 		void Init() {}
 
-		Anim* CurrentAnimation;
+		EA::Anim* CurrentAnimation;
 		uint32_t CurrentIndex;
 	};
 

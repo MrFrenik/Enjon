@@ -16,6 +16,7 @@
 #define EU 		Enjon::Utils
 #define EGUI 	Enjon::GUI
 #define EP		Enjon::Physics
+#define EA		Enjon::Animation
 
 
 #endif

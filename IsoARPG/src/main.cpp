@@ -21,8 +21,8 @@
 * MAIN GAME
 */
 
-#if 1
-#define FULLSCREENMODE   0
+#if 0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -407,9 +407,9 @@ int main(int argc, char** argv)
 	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 1000;
+	AmountDrawn = 100;
 
-	for (uint32 e = 0; e < AmountDrawn; e++)
+	for (uint32 e = 0; e < AmountDrawn * 500; e++)
 	{
 		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
 										Enjon::Math::Vec2(ER::Roll(5, 10), ER::Roll(1, 5)), EG::SpriteSheetManager::GetSpriteSheet("VerticleBar"), Masks::Type::ITEM, Component::EntityType::ITEM);
@@ -1769,9 +1769,9 @@ int main(int argc, char** argv)
 * SYSTEMS TEST
 */
 
-#if 0
+#if 1
 
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -1811,6 +1811,7 @@ int main(int argc, char** argv)
 /*-- IsoARPG includes --*/
 #include "EnjonAnimation.h"
 #include "AnimationManager.h"
+#include "AnimManager.h"
 #include "SpatialHash.h"
 #include "Level.h"
 
@@ -1823,6 +1824,7 @@ int main(int argc, char** argv)
 
 using namespace ECS;
 using namespace Systems;
+using namespace EA;
 
 namespace Enjon { namespace GUI {
 
@@ -1952,13 +1954,9 @@ using namespace GUI;
 
 /* Function Declarations */
 bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera);
-ImageFrame GetImageFrame(const sajson::value& Frame, const std::string Name);
-void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White());
-Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc);
 void CalculateAABBWithParent(EP::AABB* A, GUIButton* Button);
 void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);
 bool IsModifier(unsigned int Key);
-
 
 const std::string AnimTextureDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png");
 const std::string AnimTextureJSONDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json");
@@ -2070,8 +2068,11 @@ int main(int argc, char** argv) {
     				EI::ResourceManager::GetTexture(AnimTextureDir.c_str())
     			  };
 
+    AnimManager::Init();
+
 	// Create animation
-	Anim Test = CreateAnimation(std::string("Player_Attack_OH_L_SE"), Frames);
+	// Anim* Test = CreateAnimation(std::string("Player_Attack_OH_L_SE"), Frames, atlas, AnimationDir);
+	Anim* Test = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
 
 	// Set up mouse texture to default
 	MouseTexture = EI::ResourceManager::GetTexture("../assets/Textures/mouse_cursor_20.png");
@@ -2097,7 +2098,7 @@ int main(int argc, char** argv) {
 	ToggleOnionSkin.State = ButtonState::INACTIVE;
 
 	// Set up Scene Animtation
-	SceneAnimation.CurrentAnimation = &Test;
+	SceneAnimation.CurrentAnimation = Test;
 	SceneAnimation.CurrentIndex = 0;
 	SceneAnimation.Position = EM::Vec2(0.0f);
 	SceneAnimation.State = ButtonState::INACTIVE;
@@ -2124,8 +2125,8 @@ int main(int argc, char** argv) {
 	GUI::AddToGroup(&Group, &InputText);
 
 	// Set up play button image frames
-	PlayButton.Frames.push_back(GetImageFrame(Frames, "playbuttonup"));
-	PlayButton.Frames.push_back(GetImageFrame(Frames, "playbuttondown"));
+	PlayButton.Frames.push_back(EA::GetImageFrame(Frames, "playbuttonup", AnimTextureDir));
+	PlayButton.Frames.push_back(EA::GetImageFrame(Frames, "playbuttondown", AnimTextureDir));
 
 	// Set up PlayButton offsets
 	{
@@ -2739,7 +2740,7 @@ int main(int argc, char** argv) {
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
 										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, scale, 
-										Test.Name, 
+										Test->Name, 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
@@ -3244,149 +3245,7 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		}
 	}
 
-
-
 	return true;
-}
-
-ImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name)
-{
-	using namespace sajson;
-
-    // Get an image for testing
-    auto image = Frames.find_object_key(literal(Name.c_str()));
-    assert(image < Frames.get_length());
-    const auto& Image = Frames.get_object_value(image);
-   
-   	// Get sub objects 
-    const auto imageframe = Image.find_object_key(literal("frame"));
-    const auto& imageFrame = Image.get_object_value(imageframe);
-	const auto sss = Image.find_object_key(literal("spriteSourceSize"));
-	const auto& SSS = Image.get_object_value(sss);
-
-	// UV information
-	float x = imageFrame.get_value_of_key(literal("x")).get_safe_float_value();
-	float y = imageFrame.get_value_of_key(literal("y")).get_safe_float_value();
-	float z = imageFrame.get_value_of_key(literal("w")).get_safe_float_value();
-	float w = imageFrame.get_value_of_key(literal("h")).get_safe_float_value();
-
-	// Size information
-	EM::Vec2 SourceSize(SSS.get_value_of_key(literal("w")).get_safe_float_value(), 
-						SSS.get_value_of_key(literal("h")).get_safe_float_value());
-
-	// Return frame
-	ImageFrame IF = {	
-						EM::Vec4(x, y, z, w), 
-					  	EM::Vec2(0.0f),
-					  	SourceSize,
-					  	0.0f,
-					  	1.0f, 
-					  	Name, 
-					  	0
-					};
-
-
-	// Need to read this value from .json 
-	// Also, the TextureDir needs to be formatted at beginning of program, since it's OS specific 
-	// 	in the way that forward or backslashes are read
-	IF.TextureID = EI::ResourceManager::GetTexture(AnimTextureDir).id;
-
-	// ImageFrame IF;
-	return IF;
-}
-
-void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color)
-{
-	float ScalingFactor = 1.0f;
-	auto& Dims = Image.UVs;
-	auto& SSize = Image.SourceSize;
-	auto& Offsets = Image.Offsets;
-
-	auto AWidth = A.AtlasSize.x;
-	auto AHeight = A.AtlasSize.y;
-
-	Batch->Add(
-				EM::Vec4(Position.x + Offsets.x * ScalingFactor, 
-						Position.y + Offsets.y * ScalingFactor, 
-						EM::Vec2(SSize.x, SSize.y) * ScalingFactor), 
-				EM::Vec4(Dims.x / AWidth, 
-						(AHeight - Dims.y - Dims.w) / AHeight, 
-						 Dims.z / AWidth, 
-						 Dims.w / AHeight), 
-				A.Texture.id, 
-				Color
-			  );
-}
-
-Anim CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc)
-{
-	// need to parse the file for a specific animatioa
-	Anim A;
-
-	// This doc will need to be passed in, but for now, just lazy load it...
-    using sajson::literal;
-    std::string json = EU::read_file(AnimationDir.c_str());
-    const sajson::document& doc = sajson::parse(sajson::string(json.c_str(), json.length()));
-
-    if (!doc.is_valid())
-    {
-        std::cout << "Invalid json: " << doc.get_error_message() << std::endl;
-    }
-
-    // Get root and length of animation json file
-    const auto& anim_root = doc.get_root();
-    const auto len = anim_root.get_length();
-
-    // Get handle to animation
-    const auto anim = anim_root.find_object_key(literal(AnimName.c_str()));
-    assert(anim < len);
-    const auto& Anim = anim_root.get_object_value(anim);
-    const auto anim_len = Anim.get_length();
-
-    // Get frames array and delays array
-    std::vector<std::string> frames;
-
-    // Frames
-    const auto fr = Anim.find_object_key(literal("frames"));
-    assert(fr < anim_len);
-    const auto& Frames = Anim.get_object_value(fr);
-    const auto frames_len = Frames.get_length();
-    frames.reserve(frames_len);
-
-    // Delays
-    const auto de = Anim.find_object_key(literal("delays"));
-    assert(de < anim_len);
-    const auto& Delays = Anim.get_object_value(de);
-
-    // YOffset
-    const auto yos = Anim.find_object_key(literal("yoffsets"));
-    assert(yos < anim_len);
-    const auto& YOffset = Anim.get_object_value(yos);
-
-    // XOffset
-    const auto xos = Anim.find_object_key(literal("xoffsets"));
-    assert(xos < anim_len);
-    const auto& XOffset = Anim.get_object_value(xos);
-
-    // Get iframe, get its delay and offsets, push into A.frames
-    for (auto i = 0; i < frames_len; i++)
-    {
-    	auto IF = GetImageFrame(FramesDoc, Frames.get_array_element(i).get_string_value());
-    	IF.Delay = Delays.get_array_element(i).get_safe_float_value();
-    	IF.Offsets.x = XOffset.get_array_element(i).get_safe_float_value();
-    	IF.Offsets.y = YOffset.get_array_element(i).get_safe_float_value();
-
-    	// push back into A.frames
-    	A.Frames.push_back(IF);
-    }
-
-    // Get total number of frames in vector
-    A.TotalFrames = A.Frames.size();
-
-    // Set animation name
-    A.Name = AnimName;
-
-	return A;
 }
 
 void CalculateAABBWithParent(EP::AABB* A, GUIButton* Button)
