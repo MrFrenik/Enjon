@@ -12,6 +12,7 @@
 #include "Utils/Timing.h"
 #include "Utils/FileUtils.h"
 #include "Utils/Errors.h"
+#include "Utils/json.h"
 
 #include "Math/Maths.h"
 #include "Math/Random.h"

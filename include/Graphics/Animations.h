@@ -8,12 +8,16 @@
 #include "IO/ResourceManager.h"
 #include "Math/Vec2.h"
 #include "Utils/FileUtils.h"
+#include "Utils/json.h"
+
 #include <sajson/sajson.h>
 
 #include <vector>
 #include <string>
 
 namespace Enjon { namespace Animation {
+
+	using json = nlohmann::json;
 
 	typedef struct 
 	{
@@ -41,13 +45,13 @@ namespace Enjon { namespace Animation {
 	} Anim;
 
 	// Creates image frame and returns
-	ImageFrame GetImageFrame(const sajson::value& Frames, const std::string Name, const std::string Path);
+	ImageFrame GetImageFrame(json& Frames, const std::string Name, const std::string Path);
 
 	// Creates animation and returns
-	Anim* CreateAnimation(const std::string& AnimName, const sajson::value& FramesDoc, EA::Atlas atlas, const std::string Path);
+	Anim* CreateAnimation(const std::string& AnimName, json& FramesDoc, EA::Atlas atlas, const std::string Path);
 	
 	// Draws a single animation frame	
-	void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, const Atlas& A, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White());
+	void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White());
 
 }}
 

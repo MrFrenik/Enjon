@@ -65,6 +65,12 @@ namespace ECS { namespace Factory {
 			Animation2D->CurrentAnimation = AnimationManager::GetAnimation("Player", "Walk");
 			Animation2D->SetStart = 0;
 
+			// Set up AnimComponent
+			Component::AnimComponent* AnimComponent = &Manager->Animation2DSystem->AnimComponents[Player];
+			AnimComponent->CurrentIndex = 0;
+			AnimComponent->CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
+			AnimComponent->AnimationTimer = 0.0f;	
+
 			// Set up renderer component
 			Manager->Renderer2DSystem->Renderers[Player].Format = EG::CoordinateFormat::CARTESIAN;
 

@@ -39,7 +39,24 @@ namespace ECS { namespace Systems { namespace Animation2D {
 		System->Manager = Manager;
 		return System;
 	}
-	
+
+	void Update(struct EntityManager* Manager)
+	{
+		// Attack speed
+		// TODO(John): Make this dependent on equipped weapon and player stats
+		static float AttackSpeed = 1.0f;
+
+		// Get System
+		struct Animation2DSystem* System = Manager->Animation2DSystem;
+		// Loop through all entities with animations
+		for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
+		{
+
+		}
+
+	}
+
+	/*	
 	void Update(struct EntityManager* Manager)
 	{
 		// Attack speed
@@ -92,6 +109,12 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					Enjon::uint32* SetStart = &AnimationComponent->SetStart;
 					const Animate::Animation* CurrentAnimation = AnimationComponent->CurrentAnimation;
 
+
+					Component::AnimComponent* AnimComponent = &Manager->Animation2DSystem->AnimComponents[e];
+					Enjon::uint32* AnimSetStart = &AnimComponent->SetStart;
+					const EA::Anim* CurrentAnim = AnimComponent->CurrentAnimation;
+
+
 					// Get what the current animation is based on the player state
 					switch(PlayerState)
 					{
@@ -99,7 +122,12 @@ namespace ECS { namespace Systems { namespace Animation2D {
 						case EntityAnimationState::ATTACKING:
 							switch(CurrentWeapon)
 							{
-								case Weapons::DAGGER: 	CurrentAnimation = AnimationManager::GetAnimation("Player", "attack_dagger"); break;
+								case Weapons::DAGGER: 	
+														{
+															CurrentAnim = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
+															CurrentAnimation = AnimationManager::GetAnimation("Player", "attack_dagger"); 
+															break;
+														}
 								case Weapons::BOW: 		CurrentAnimation = AnimationManager::GetAnimation("Player", "attack_bow"); break;
 								case Weapons::AXE: 		CurrentAnimation = AnimationManager::GetAnimation("Player", "attack_axe"); break;
 								default: 				CurrentAnimation = AnimationManager::GetAnimation("Player", "attack_dagger"); break;
@@ -425,6 +453,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 			}
 		} 
 	}
+	*/
 
 }}}
 

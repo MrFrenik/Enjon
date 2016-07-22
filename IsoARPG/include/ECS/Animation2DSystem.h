@@ -9,6 +9,7 @@ struct Animation2DSystem
 {
 	ECS::Systems::EntityManager* Manager;
 	ECS::Component::Animation2D Animations[MAX_ENTITIES];
+	ECS::Component::AnimComponent AnimComponents[MAX_ENTITIES];
 };
 
 namespace ECS { namespace Systems { namespace Animation2D {

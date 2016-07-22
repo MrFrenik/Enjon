@@ -55,4 +55,3 @@ Systems:
 	- EntityManager:
 		- Adding / Removing entities is busted. Fix it.
 
-"A well-schooled electorate, being necessary to the security of a free State, the right of the people to keep and read Books, shall not be infringed.'

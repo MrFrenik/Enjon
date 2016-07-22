@@ -5,6 +5,7 @@
 #include "Math/Maths.h"
 #include "Graphics/SpriteSheet.h"
 #include "Graphics/SpriteBatch.h"
+#include "Graphics/Animations.h"
 #include "BehaviorTreeManager.h"
 #include "IO/InputManager.h"
 #include "Graphics/Color.h"
@@ -12,6 +13,7 @@
 #include "Defines.h"
 
 #include "EnjonAnimation.h"
+#include "AnimManager.h"
 
 #include <unordered_map>
 #include <utility>
@@ -97,6 +99,16 @@ namespace ECS { namespace Component {
 		const Animate::Animation* CurrentAnimation;
 		eid32 Entity;
 	} Animation2D;	
+
+	// AnimComponent
+	typedef struct 
+	{
+		float AnimationTimer;
+		Enjon::uint32 CurrentIndex;
+		Enjon::uint32 SetStart;
+		const EA::Anim* CurrentAnimation;
+		eid32 Entity;
+	} AnimComponent;
 
 	// Label struct
 	typedef struct

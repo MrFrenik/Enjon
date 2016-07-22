@@ -21,8 +21,8 @@
 * MAIN GAME
 */
 
-#if 0
-#define FULLSCREENMODE   1
+#if 1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -61,6 +61,7 @@
 /*-- IsoARPG includes --*/
 #include "EnjonAnimation.h"
 #include "AnimationManager.h"
+#include "AnimManager.h"
 #include "SpatialHash.h"
 #include "Level.h"
 #include "BehaviorTreeManager.h"
@@ -183,6 +184,9 @@ int main(int argc, char** argv)
 
 	// Init AnimationManager
 	AnimationManager::Init(); 
+
+	// Init AnimManager
+	AnimManager::Init();
 
 	// Init FontManager
 	Enjon::Graphics::FontManager::Init();
@@ -407,7 +411,7 @@ int main(int argc, char** argv)
 	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 100;
+	AmountDrawn = 0;
 
 	for (uint32 e = 0; e < AmountDrawn * 500; e++)
 	{
@@ -1670,92 +1674,75 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 /*-- External/Engine Libraries includes --*/
 #include <Enjon.h>
 
+/*-- IsoARPG Includes --*/
+#include "AnimManager.h"
+
 /*-- Standard Library includes --*/
 #include <iostream>
 #include <sstream>
 #include <string>
 
-// Button class
-class Button
-{
-	public:
-		EGUI::Signal<> on_click;
-};
-
-// Slider class
-class Slider
-{
-	public:
-		EGUI::Signal<> on_slide_right;
-		EGUI::Signal<> on_slide_left;
-};
-
-// TextBox
-class TextBox
-{
-	public:
-		TextBox(std::string n) : Name(n) 
-		{ 
-			text = ""; 
-
-			this->text.on_change().connect([&](std::string S)
-			{
-				std::cout << this->Name << " changed to: " << S << std::endl;
-			});
-		}
-
-		void SetText(std::string S) { this->text = S; }
-
-	public:
-		EGUI::Property<std::string> text;
-
-	private:
-		std::string Name;
-};
-
+using json = nlohmann::json;
+const int SCREENWIDTH = 1024;
+const int SCREENHEIGHT = 768;
 
 #undef main
 int main(int argc, char** argv)
 {
-	// Create button
-	Button UpButton;
-	Button DownButton;
 
-	// Create slider
-	Slider slider;
+	Enjon::Init();
 
-	// Create TextBox
-	TextBox TB("Delays");
-	TextBox TB2("Other Delays");
+	float t = 0.0f;
+	float FPS = 0.0f;
+	float TimeIncrement = 0.0f;
 
-	std::vector<TextBox*> TextBoxes;
-	TextBoxes.push_back(&TB);
-	TextBoxes.push_back(&TB2);
+	// Create a window
+	EG::Window Window;
+	Window.Init("Unit Test", SCREENWIDTH, SCREENHEIGHT);
+	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
 
-	// Create Property
-	EGUI::Property<float> DelayValue;
+	EU::FPSLimiter Limiter;
+	Limiter.Init(60);
 
-	// Connect value of text to delay value
-	DelayValue.connect_from(::atof(TB.text.get().c_str()));
+	// Init ShaderManager
+	EG::ShaderManager::Init(); 
 
-	// Connect button click to setting textbox
-	UpButton.on_click.connect([&]()
-	{
-		for (auto T : TextBoxes)
-		{
-			// Get value of string
-			float V = ::atof(T->text.get().c_str());
+	// Init FontManager
+	EG::FontManager::Init();
 
-			// Increment by 1
-			V += 1.0f;
+	// Shader for frame buffer
+	EG::GLSLProgram* BasicShader	= EG::ShaderManager::GetShader("Basic");
+	EG::GLSLProgram* TextShader		= EG::ShaderManager::GetShader("Text");  
 
-			// Set back to text
-			T->text = std::to_string(V);
-		}
-	});
+	// UI Batch
+	EG::SpriteBatch* UIBatch = new EG::SpriteBatch();
+	UIBatch->Init();
 
+	EG::SpriteBatch* SceneBatch = new EG::SpriteBatch();
+	SceneBatch->Init();
 
-	UpButton.on_click.emit();
+	EG::SpriteBatch* BGBatch = new EG::SpriteBatch();
+	BGBatch->Init();
+
+	const float W = SCREENWIDTH;
+	const float H = SCREENHEIGHT;
+
+	// Create Camera
+	EG::Camera2D* Camera = new EG::Camera2D;
+	Camera->Init(W, H);
+
+	// Create HUDCamera
+	EG::Camera2D* HUDCamera = new EG::Camera2D;
+	HUDCamera->Init(W, H);
+
+	// InputManager
+	EI::InputManager Input = EI::InputManager();
+
+	// Matricies for shaders
+	EM::Mat4 Model, View, Projection;
+
+	AnimManager::Init();
+
 
 	return 0;
 }
@@ -1769,7 +1756,7 @@ int main(int argc, char** argv)
 * SYSTEMS TEST
 */
 
-#if 1
+#if 0
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -2035,39 +2022,61 @@ int main(int argc, char** argv) {
 	// Matricies for shaders
 	EM::Mat4 Model, View, Projection;
 
-    using sajson::literal;
-    std::string json = EU::read_file_sstream(AnimTextureJSONDir.c_str());
-    const sajson::document& doc = sajson::parse(sajson::string(json.c_str(), json.length()));
+	auto Json = EU::read_file_sstream(AnimTextureJSONDir.c_str());
+    
+   	// parse and serialize JSON
+   	json j_complete = json::parse(Json);
 
-    if (!doc.is_valid())
-    {
-        std::cout << "Invalid json: " << doc.get_error_message() << std::endl;;
-    }
+   	// Get handle to frames data
+   	auto Frames = j_complete.at("frames");
+
+    // Get handle to meta deta
+    const auto Meta = j_complete.at("meta");
+
+    // Get image size
+    auto ISize = Meta.at("size");
+    float AWidth = ISize.at("w");
+    float AHeight = ISize.at("h");
+
+    Atlas atlas = {	
+    			EM::Vec2(AWidth, AHeight), 
+				EI::ResourceManager::GetTexture(AnimTextureDir.c_str())
+		  	};
+
+    // using sajson::literal;
+    // std::string json = EU::read_file_sstream(AnimTextureJSONDir.c_str());
+    // const sajson::document& doc = sajson::parse(sajson::string(json.c_str(), json.length()));
+
+    // if (!doc.is_valid())
+    // {
+    //     std::cout << "Invalid json: " << doc.get_error_message() << std::endl;;
+    // }
 
 
     // Get root and length of json file
-    const auto& root = doc.get_root();
-    const auto len = root.get_length();
+    // const auto& root = doc.get_root();
+    // const auto len = root.get_length();
 
-    // // Get handle to meta deta
-    const auto meta = root.find_object_key(literal("meta"));
-    assert(meta < len);
-    const auto& Meta = root.get_object_value(meta);
+    // // // Get handle to meta deta
+    // const auto meta = root.find_object_key(literal("meta"));
+    // assert(meta < len);
+    // const auto& Meta = root.get_object_value(meta);
 
-    // // Get handle to frame data
-    const auto frames = root.find_object_key(literal("frames"));
-    assert(frames < len);
-    const auto& Frames = root.get_object_value(frames);
+    // // // Get handle to frame data
+    // const auto frames = root.find_object_key(literal("frames"));
+    // assert(frames < len);
+    // const auto& Frames = root.get_object_value(frames);
 
-    // // Get image size
-    auto ISize = Meta.get_value_of_key(literal("size"));
-    float AWidth = ISize.get_value_of_key(literal("w")).get_safe_float_value();
-    float AHeight = ISize.get_value_of_key(literal("h")).get_safe_float_value();
+    // // // Get image size
+    // auto ISize = Meta.get_value_of_key(literal("size"));
+    // float AWidth = ISize.get_value_of_key(literal("w")).get_safe_float_value();
+    // float AHeight = ISize.get_value_of_key(literal("h")).get_safe_float_value();
 
-    Atlas atlas = {	EM::Vec2(AWidth, AHeight), 
-    				EI::ResourceManager::GetTexture(AnimTextureDir.c_str())
-    			  };
+    // Atlas atlas = {	EM::Vec2(AWidth, AHeight), 
+    // 				EI::ResourceManager::GetTexture(AnimTextureDir.c_str())
+    // 			  };
 
+    // Init animation manager
     AnimManager::Init();
 
 	// Create animation
@@ -2127,6 +2136,9 @@ int main(int argc, char** argv) {
 	// Set up play button image frames
 	PlayButton.Frames.push_back(EA::GetImageFrame(Frames, "playbuttonup", AnimTextureDir));
 	PlayButton.Frames.push_back(EA::GetImageFrame(Frames, "playbuttondown", AnimTextureDir));
+
+	PlayButton.Frames.at(ButtonState::INACTIVE).TextureAtlas = atlas;
+	PlayButton.Frames.at(ButtonState::ACTIVE).TextureAtlas = atlas;
 
 	// Set up PlayButton offsets
 	{
@@ -2617,7 +2629,7 @@ int main(int argc, char** argv) {
 				// Draw Play button
 				auto PBF = PlayButton.Frames.at(PlayButton.State);
 				// Calculate these offsets
-				DrawFrame(PBF, PlayButton.Position + Parent->Position, atlas, UIBatch, PlayButtonColor);
+				DrawFrame(PBF, PlayButton.Position + Parent->Position, UIBatch, PlayButtonColor);
 
 				// Draw PlayButton AABB
 				// Calculate the AABB (this could be set up to another signal and only done when necessary)
@@ -2690,12 +2702,12 @@ int main(int argc, char** argv) {
 					auto NextFrame = &CurrentAnimation->Frames.at((SceneAnimation.CurrentIndex + 1) % TotalFrames);
 					auto PreviousFrame = &CurrentAnimation->Frames.at(PreviousIndex);
 
-					DrawFrame(*PreviousFrame, Position, atlas, SceneBatch, EG::SetOpacity(EG::RGBA16_Blue(), 0.3f));
-					DrawFrame(*NextFrame, Position, atlas, SceneBatch, EG::SetOpacity(EG::RGBA16_Red(), 0.3f));
+					DrawFrame(*PreviousFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA16_Blue(), 0.3f));
+					DrawFrame(*NextFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA16_Red(), 0.3f));
 				}
 
 				// Draw Scene animation
-				DrawFrame(*Frame, Position,	atlas, SceneBatch);
+				DrawFrame(*Frame, Position,	SceneBatch);
 
 			}
 			SceneBatch->End();
