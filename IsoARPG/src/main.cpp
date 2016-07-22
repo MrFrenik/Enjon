@@ -21,7 +21,7 @@
 * MAIN GAME
 */
 
-#if 1
+#if 0
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
@@ -1756,7 +1756,7 @@ int main(int argc, char** argv)
 * SYSTEMS TEST
 */
 
-#if 0
+#if 1
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -1957,6 +1957,8 @@ EG::GLTexture MouseTexture;
 
 float caret_count = 0.0f;
 bool caret_on = true;
+
+float TimeScale = 1.0f;
 
 #undef main
 int main(int argc, char** argv) {
@@ -2571,7 +2573,7 @@ int main(int argc, char** argv) {
 		Limiter.Begin();
 
 		// Keep track of animation delays
-		t += TimeIncrement;
+		t += TimeIncrement * TimeScale;
 
 		// Check for quit condition
 		running = ProcessInput(&Input, Camera);
@@ -2838,6 +2840,23 @@ int main(int argc, char** argv) {
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
 										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 170.0f, scale, 
 										OnionString, 
+										CurrentFont, 
+										*UIBatch, 
+										EG::RGBA16_LightGrey()
+									);
+
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 190.0f, scale, 
+										std::string("Time Scale: "), 
+										CurrentFont, 
+										*UIBatch, 
+										EG::RGBA16_LightGrey()
+									);
+				EG::Fonts::PrintText(	
+										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 190.0f, scale, 
+										std::to_string(TimeScale), 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
@@ -3254,6 +3273,16 @@ bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 			{
 				ToggleOnionSkin->on_click.emit();
 			}
+		}
+
+		if (Input->IsKeyDown(SDLK_t))
+		{
+			if (TimeScale > 0.0f) TimeScale -= 0.01f;
+		}
+
+		if (Input->IsKeyDown(SDLK_y))
+		{
+			if (TimeScale < 1.0f) TimeScale += 0.01f;
 		}
 	}
 
