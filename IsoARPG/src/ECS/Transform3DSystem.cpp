@@ -102,7 +102,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 
 					Velocity->z = 0.0f;
 					Position->z = Transform->BaseHeight;
-					Position->y = GroundPosition->y + Position->z;
+					// Position->y = GroundPosition->y + Position->z;
 				} 
 
 				if (Manager->AttributeSystem->Masks[e] & (Masks::WeaponSubOptions::GRENADE))
@@ -226,9 +226,11 @@ namespace ECS{ namespace Systems { namespace Transform {
 					
 				}
 
+				
 				*GroundPosition = Enjon::Math::CartesianToIso(Transform->CartesianPosition);
 				Position->y = GroundPosition->y + Position->z - GPO->y;
 				Position->x = GroundPosition->x - GPO->x;
+
 
 				// Set up AABB
 				Enjon::Physics::AABB* AABB = &Manager->TransformSystem->Transforms[e].AABB;
