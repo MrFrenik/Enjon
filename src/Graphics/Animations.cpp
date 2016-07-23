@@ -209,9 +209,8 @@ namespace Enjon { namespace Animation {
 	}
 
 	// Draws a single animation frame	
-	void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color)
+	void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color, float ScalingFactor, float Depth)
 	{
-		float ScalingFactor = 1.0f;
 		auto& Dims = Image.UVs;
 		auto& SSize = Image.SourceSize;
 		auto& Offsets = Image.Offsets;
@@ -229,7 +228,8 @@ namespace Enjon { namespace Animation {
 							 Dims.z / AWidth, 
 							 Dims.w / AHeight), 
 					A.Texture.id, 
-					Color
+					Color,
+					Depth
 				  );
 	}
 

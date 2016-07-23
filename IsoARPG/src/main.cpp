@@ -21,8 +21,8 @@
 * MAIN GAME
 */
 
-#if 0
-#define FULLSCREENMODE   0
+#if 1
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -385,7 +385,7 @@ int main(int argc, char** argv)
 	}
 
 	// Create player
-	eid32 Player = Factory::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(100.0f, 100.0f), &PlayerSheet, 
+	eid32 Player = Factory::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(30.0f, 30.0f), &PlayerSheet, 
 		"Player", 0.4f, Math::Vec3(1, 1, 0)); 
 
 	// Set player for world
@@ -948,8 +948,22 @@ int main(int argc, char** argv)
 		}
 		else dims = Math::Vec2(100.0f, 100.0f);
 
-		// Draw player
-		EntityBatch.Add(Math::Vec4(*PlayerPosition, dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
+		//////////////////////////////////////////
+		// DRAW PLAYER ///////////////////////////
+		//////////////////////////////////////////
+
+		// EntityBatch.Add(Math::Vec4(*PlayerPosition, dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
+
+		{
+			// void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White(), float ScalingFactor = 1.0f);
+			// Get handle to image frame
+			auto CurrentIndex = World->Animation2DSystem->AnimComponents[Player].CurrentIndex;
+			auto Image = &World->Animation2DSystem->AnimComponents[Player].CurrentAnimation->Frames.at(CurrentIndex);
+
+			EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::RGBA16_White(), 0.8f, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
+		}
+
+		//////////////////////////////////////////
 
 		Enjon::Math::Vec2* A = &World->TransformSystem->Transforms[Player].CartesianPosition;
 		Enjon::Physics::AABB* AABB = &World->TransformSystem->Transforms[Sword].AABB;
@@ -1756,7 +1770,7 @@ int main(int argc, char** argv)
 * SYSTEMS TEST
 */
 
-#if 1
+#if 0
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0

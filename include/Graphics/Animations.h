@@ -51,7 +51,7 @@ namespace Enjon { namespace Animation {
 	Anim* CreateAnimation(const std::string& AnimName, json& FramesDoc, EA::Atlas atlas, const std::string Path);
 	
 	// Draws a single animation frame	
-	void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White());
+	void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White(), float ScalingFactor = 1.0f, float Depth = 1.0f);
 
 }}
 

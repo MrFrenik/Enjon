@@ -51,7 +51,102 @@ namespace ECS { namespace Systems { namespace Animation2D {
 		// Loop through all entities with animations
 		for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
 		{
+			static float damaged_counter = 0.0f;
 
+			// If has an animation component
+			if (Manager->Masks[e] & COMPONENT_ANIMATION2D)
+			{
+				// If damaged
+				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::DAMAGED)
+				{
+					Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16(100.0f, 0.0f, 0.0f, 100.0f);  // damaged color for now 
+					damaged_counter += 0.1f;
+					if (damaged_counter >= 0.5f)
+					{
+						Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16_White();  
+						Manager->AttributeSystem->Masks[e] &= ~Masks::GeneralOptions::DAMAGED;
+						damaged_counter = 0.0f;
+					}						
+				}
+
+				// If is a player
+				if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
+				{
+					// Get necessary items
+					Transform3DSystem* TransformSystem = Manager->TransformSystem;
+					Enjon::Math::Vec2* ViewVector = &TransformSystem->Transforms[e].ViewVector;
+					Enjon::Math::Vec2* AttackVector = &TransformSystem->Transforms[e].AttackVector;
+					Enjon::Math::Vec3* Velocity = &TransformSystem->Transforms[e].Velocity;
+					Enjon::Math::Vec3* Position = &TransformSystem->Transforms[e].Position;
+
+
+					Component::AnimComponent* AnimComponent = &Manager->Animation2DSystem->AnimComponents[e];
+					Enjon::uint32* SetStart = &AnimComponent->SetStart;
+					const EA::Anim* CurrentAnimation = AnimComponent->CurrentAnimation;
+
+
+					// Get what the current animation is based on the player state
+					switch(PlayerState)
+					{
+						case EntityAnimationState::WALKING: 	CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");	break;
+						case EntityAnimationState::ATTACKING:
+							switch(CurrentWeapon)
+							{
+								case Weapons::DAGGER: 	
+														{
+															CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
+															break;
+														}
+								case Weapons::BOW: 		CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE"); break;
+								case Weapons::AXE: 		CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE"); break;
+								default: 				CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE"); break;
+							}
+							break;
+					}
+
+					if (PlayerState == EntityAnimationState::ATTACKING && !(*SetStart))
+					{
+						*SetStart = TRUE;
+					}
+
+
+					if (PlayerState == EntityAnimationState::ATTACKING)
+					{
+						// Increase timer (should do this with delta time passed in)
+						AnimComponent->AnimationTimer += 0.1f;
+
+						// Get handle to current frame
+						auto* Frame = &CurrentAnimation->Frames.at(AnimComponent->CurrentIndex);
+
+						if (AnimComponent->AnimationTimer >= Frame->Delay)
+						{
+							// Reset timer
+							AnimComponent->AnimationTimer = 0.0f;
+
+							// Increase current index
+							AnimComponent->CurrentIndex++;
+
+							std::cout << "Current Index: " << AnimComponent->CurrentIndex << std::endl;
+						}
+
+						// Bounds checking
+						if (AnimComponent->CurrentIndex >= CurrentAnimation->Frames.size())
+						{
+							// Reset current index
+							AnimComponent->CurrentIndex = 0;
+
+							// Reset player state
+							PlayerState = EntityAnimationState::IDLE;
+
+							// Reset start
+							*SetStart = FALSE;
+
+							std::cout << "Done Attacking!" << std::endl;
+						}
+					}
+
+				}
+			}
 		}
 
 	}

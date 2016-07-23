@@ -39,7 +39,7 @@ namespace ECS { namespace Factory {
 			Transform->VelocityGoal = VelocityGoal; 
 			Transform->ViewVector = Enjon::Math::Vec2(1, 1);
 			Transform->AttackVector = Enjon::Math::Vec2(1, 1);
-			Transform->GroundPosition = Enjon::Math::Vec2(Position.x + Dimensions.x / 2.0f, Position.y);
+			Transform->GroundPosition = Enjon::Math::Vec2(Position.x + Dimensions.x / 2.0f - 50.0f, Position.y - 30.0f);
 			Transform->GroundPositionOffset = Enjon::Math::Vec2(Transform->Dimensions.x / 2.0f - Systems::TILE_SIZE, 0.0f);
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
