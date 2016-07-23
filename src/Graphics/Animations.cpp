@@ -3,6 +3,8 @@
 
 namespace Enjon { namespace Animation {  
 
+	using json = nlohmann::json;
+
 	// Creates image frame and returns
 	ImageFrame GetImageFrame(json& Frames, const std::string Name, const std::string Path)
 	{

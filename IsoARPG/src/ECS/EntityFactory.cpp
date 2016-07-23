@@ -10,6 +10,7 @@
 #include "ECS/Entity.h"
 #include "ECS/AIControllerSystem.h"
 #include "BehaviorTreeManager.h"
+#include "AnimManager.h"
 
 #include "Defines.h"
 #include "System/Types.h"

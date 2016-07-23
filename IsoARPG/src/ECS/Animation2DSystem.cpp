@@ -5,6 +5,7 @@
 #include "ECS/Renderer2DSystem.h"
 #include "ECS/PlayerControllerSystem.h"
 #include "ECS/EntityFactory.h"
+#include "AnimManager.h"
 
 #include <Graphics/Camera2D.h>
 #include <Graphics/SpriteSheetManager.h>
@@ -13,8 +14,6 @@
 #include <iostream>
 
 namespace ECS { namespace Systems { namespace Animation2D {
-
-	//enJon sux dick
 
 	// TESTING THIS ONLY
 	static EntityAnimationState PlayerState = EntityAnimationState::WALKING;
@@ -113,7 +112,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					if (PlayerState == EntityAnimationState::ATTACKING)
 					{
 						// Increase timer (should do this with delta time passed in)
-						AnimComponent->AnimationTimer += 0.1f;
+						AnimComponent->AnimationTimer += 0.3f;
 
 						// Get handle to current frame
 						auto* Frame = &CurrentAnimation->Frames.at(AnimComponent->CurrentIndex);
@@ -143,6 +142,67 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 							std::cout << "Done Attacking!" << std::endl;
 						}
+
+						eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+						eid32 id = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+
+						Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
+						Manager->Camera->ConvertScreenToWorld(MousePos);
+						Enjon::Math::Vec2 Pos = Manager->TransformSystem->Transforms[id].Position.XY();
+
+						// Find vector between the two and normalize
+						static Enjon::Math::Vec2 AttackVelocity;
+
+						if (AnimComponent->CurrentIndex == 1)
+						{
+							// Activate collision with dagger "hit frame"
+							if (CurrentWeapon == Weapons::DAGGER)
+							{
+								AttackVelocity = Enjon::Math::Vec2::Normalize(MousePos - Enjon::Math::Vec2(Pos.x + 32.0f, Pos.y + 32.0f));
+
+								float speed = 50.0f;
+
+								if (!PlayerController::GetTargeting())
+								{
+									// Set attack vector of player to this velocity
+									int Mult = 1.0f;
+									Enjon::Math::Vec2 AttackVector;
+									// X < 0
+									if (AttackVelocity.x < 0 && AttackVelocity.x >= -0.3f) AttackVector.x = 0.0f;
+									else if (AttackVelocity.x < 0 && AttackVelocity.x < -0.3f) AttackVector.x = -1.0f;
+									// X > 0
+									if (AttackVelocity.x >= 0 && AttackVelocity.x < 0.5f) AttackVector.x = 0.0f;
+									else if (AttackVelocity.x >= 0 && AttackVelocity.x >= 0.5f) AttackVector.x = 1.0f;
+									// Y < 0
+									if (AttackVelocity.y < 0 && AttackVelocity.y > -0.3f) AttackVector.y = 0.0f;
+									else if (AttackVelocity.y < 0 && AttackVelocity.y <= -0.3f) AttackVector.y = -1.0f;
+									// Y > 0
+									if (AttackVelocity.y >= 0 && AttackVelocity.y < 0.3f) AttackVector.y = 0.0f;
+									else if (AttackVelocity.y >= 0 && AttackVelocity.y >= 0.3f) AttackVector.y = 1.0f;
+
+
+									Manager->TransformSystem->Transforms[e].AttackVector = AttackVector;
+
+								}
+							}
+
+						}
+						
+						else if (AnimComponent->CurrentIndex == 5)
+						{
+							// Make Weapon visible and collidable
+							eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+							Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);
+
+							// Move player in direction of attack vector
+							*Velocity = 5.0f * Enjon::Math::Vec3(AttackVelocity, 0.0f);
+						}
+
+						else 
+						{ 
+							eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
+							EntitySystem::RemoveComponents(Manager, Weapon, COMPONENT_RENDERER2D | COMPONENT_TRANSFORM3D);
+						} 
 					}
 
 				}

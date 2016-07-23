@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"Playerattackohls",
+				"Player_Attack_OH_L_SE"
+			],
+			[
 				"Components",
 				"Components	(main.cpp)"
 			],
@@ -91,55 +95,23 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 113053,
+				"buffer_size": 110885,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "SCRUM.txt",
+			"file": "/E/Development/Enjon/include/Enjon.h",
 			"settings":
 			{
-				"buffer_size": 1855,
+				"buffer_size": 2041,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "src/ECS/ComponentSystems.cpp",
+			"file": "include/ECS/Components.h",
 			"settings":
 			{
-				"buffer_size": 6812,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/AttributeSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 900,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "include/ECS/AttributeSystem.h",
-			"settings":
-			{
-				"buffer_size": 1214,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "include/ECS/AIControllerSystem.h",
-			"settings":
-			{
-				"buffer_size": 706,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "src/ECS/AIControllerSystem.cpp",
-			"settings":
-			{
-				"buffer_size": 1594,
+				"buffer_size": 5077,
 				"line_ending": "Windows"
 			}
 		},
@@ -147,23 +119,63 @@
 			"file": "src/ECS/EntityFactory.cpp",
 			"settings":
 			{
-				"buffer_size": 16592,
+				"buffer_size": 16928,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/E/Development/Enjon/include/BehaviorTree/BehaviorNode.h",
+			"file": "include/ECS/Transform3DSystem.h",
 			"settings":
 			{
-				"buffer_size": 7792,
+				"buffer_size": 736,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/E/Development/Enjon/include/BehaviorTree/BlackBoard.h",
+			"file": "/E/Development/Enjon/include/Graphics/Animations.h",
 			"settings":
 			{
-				"buffer_size": 1215,
+				"buffer_size": 1311,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Development/Enjon/src/Graphics/Animations.cpp",
+			"settings":
+			{
+				"buffer_size": 7134,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/ECS/Animation2DSystem.cpp",
+			"settings":
+			{
+				"buffer_size": 24869,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "include/ECS/PlayerControllerSystem.h",
+			"settings":
+			{
+				"buffer_size": 1015,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json",
+			"settings":
+			{
+				"buffer_size": 2873,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
+			"settings":
+			{
+				"buffer_size": 512,
 				"line_ending": "Windows"
 			}
 		}
@@ -256,53 +268,73 @@
 	"expanded_folders":
 	[
 		"/E/Development/Enjon/include",
-		"/E/Development/Enjon/include/BehaviorTree",
-		"/E/Development/Enjon/include/Math",
 		"/E/Development/Enjon/src",
-		"/E/Development/Enjon/src/Math",
+		"/E/Development/Enjon/src/Graphics",
 		"/E/Development/Enjon/IsoARPG",
 		"/E/Development/Enjon/IsoARPG/include",
-		"/E/Development/Enjon/IsoARPG/include/ECS",
+		"/E/Development/Enjon/IsoARPG/profiles",
+		"/E/Development/Enjon/IsoARPG/profiles/Animations",
+		"/E/Development/Enjon/IsoARPG/profiles/Animations/Player",
 		"/E/Development/Enjon/IsoARPG/src",
 		"/E/Development/Enjon/IsoARPG/src/ECS"
 	],
 	"file_history":
 	[
+		"/E/Development/Enjon/proc/rel.bat",
+		"/E/Development/Enjon/proc/clean.bat",
+		"/E/Development/Enjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
+		"/E/Development/Enjon/IsoARPG/src/AnimManager.cpp",
+		"/E/Development/Enjon/IsoARPG/include/AnimManager.h",
+		"/E/Development/Enjon/src/Graphics/Animations.cpp",
+		"/E/Development/Enjon/include/Graphics/Animations.h",
+		"/E/Development/Enjon/include/Utils/json.h",
+		"/E/Development/Enjon/include/BehaviorTree/BlackBoard.h",
+		"/E/Development/Enjon/include/BehaviorTree/BehaviorNode.h",
+		"/E/Development/Enjon/IsoARPG/src/ECS/EntityFactory.cpp",
+		"/E/Development/Enjon/IsoARPG/src/ECS/AIControllerSystem.cpp",
+		"/E/Development/Enjon/IsoARPG/include/ECS/AIControllerSystem.h",
+		"/E/Development/Enjon/IsoARPG/include/ECS/AttributeSystem.h",
+		"/E/Development/Enjon/IsoARPG/src/ECS/AttributeSystem.cpp",
+		"/E/Development/Enjon/IsoARPG/src/ECS/ComponentSystems.cpp",
+		"/E/Development/Enjon/IsoARPG/include/ECS/Animation2DSystem.h",
+		"/E/Development/Enjon/include/Utils/FileUtils.h",
+		"/E/Development/Enjon/IsoARPG/src/ECS/Animation2DSystem.cpp",
+		"/E/Development/Enjon/IsoARPG/include/ECS/Components.h",
+		"/E/Development/Enjon/proc/dump.txt",
+		"/E/Development/Enjon/include/Enjon.h",
+		"/E/Development/Enjon/IsoARPG/SCRUM.txt",
+		"/E/Development/Enjon/IsoARPG/profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
+		"/E/Development/Enjon/IsoARPG/src/AnimationManager.cpp",
+		"/E/Development/Enjon/IsoARPG/src/ECS/AnimManager.cpp",
+		"/E/Development/Enjon/IsoARPG/include/ECS/Anim.h",
+		"/E/Development/Enjon/include/Defines.h",
+		"/E/Development/Enjon/src/Graphics/GUIAnimationElement.cpp",
+		"/E/Development/Enjon/include/GUI/GUIAnimationElement.h",
+		"/E/Development/Enjon/include/GUI/GUIButton.h",
 		"/E/Development/Enjon/IsoARPG/src/ECS/CollisionSystem.cpp",
 		"/E/Development/Enjon/include/Math/Vec2.h",
 		"/E/Development/Enjon/include/Math/Vec3.h",
-		"/E/Development/Enjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
 		"/E/Development/Enjon/IsoARPG/include/ECS/Transform3DSystem.h",
 		"/E/Development/Enjon/IsoARPG/include/ECS/ComponentSystems.h",
-		"/E/Development/Enjon/IsoARPG/src/ECS/EntityFactory.cpp",
-		"/E/Development/Enjon/IsoARPG/src/ECS/Animation2DSystem.cpp",
-		"/E/Development/Enjon/proc/rel.bat",
 		"/E/Development/Enjon/IsoARPG/src/ECS/PlayerControllerSystem.cpp",
 		"/E/Development/Enjon/proc/build.bat",
 		"/E/Development/Enjon/proc/debug.bat",
 		"/E/Development/Enjon/src/Graphics/ParticleEngine2D.cpp",
 		"/E/Programs/SublimeText/Data/Packages/User/Preferences.sublime-settings",
 		"/E/Development/Enjon/IsoARPG/src/main.cpp",
-		"/E/Development/Enjon/include/Enjon.h",
 		"/E/Development/Enjon/src/Enjon.cpp",
 		"/E/Development/Enjon/src/GUIAnimationElement.cpp",
 		"/E/Development/Enjon/src/SpriteSheetManager.cpp",
 		"/E/Development/Enjon/IsoARPG/assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json",
-		"/E/Development/Enjon/IsoARPG/profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
 		"/E/Development/Enjon/src/FontManager.cpp",
 		"/E/Development/Enjon/include/Graphics/Color.h",
-		"/E/Development/Enjon/include/Defines.h",
 		"/E/Development/Enjon/include/Physics/AABB.h",
 		"/E/Development/Enjon/src/AABB.cpp",
-		"/E/Development/Enjon/include/Graphics/Animations.h",
 		"/E/Development/Enjon/src/Font.cpp",
 		"/E/Development/Enjon/include/Graphics/Font.h",
-		"/E/Development/Enjon/include/GUI/GUIAnimationElement.h",
 		"/E/Development/Enjon/include/GUI/GUIElement.h",
-		"/E/Development/Enjon/include/GUI/GUIButton.h",
 		"/E/Development/Enjon/proc/shell.bat",
 		"/E/Development/Enjon/deps/include/sajson/sajson.h",
-		"/E/Development/Enjon/proc/dump.txt",
 		"/E/Development/Enjon/shaders/text.v.glsl",
 		"/E/Development/Enjon/shaders/text.f.glsl",
 		"/E/Development/Enjon/IsoARPG/include/ECS/Masks.h",
@@ -317,13 +349,11 @@
 		"/E/Development/Enjon/shaders/deferred.f.glsl",
 		"/E/Development/Enjon/shaders/basic.f.glsl",
 		"/E/Development/Enjon/src/ShaderManager.cpp",
-		"/E/Development/Enjon/include/Utils/FileUtils.h",
 		"/E/Development/Enjon/IsoARPG/assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE_no_trim.json",
 		"/E/Development/Enjon/IsoARPG/assets/Textures/Animations/Player/Attack/OH_L/SE/stuff.xml",
 		"/E/Development/Enjon/deps/spine-cpp/third_party/sajson/sajson.h",
 		"/E/Development/Enjon/IsoARPG/assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE",
 		"/E/Development/Enjon/IsoARPG/include/ECS/PlayerControllerSystem.h",
-		"/E/Development/Enjon/IsoARPG/include/ECS/Components.h",
 		"/E/Development/Enjon/IsoARPG/assets/Textures/TexturePackerTest/test.json",
 		"/E/Development/Enjon/IsoARPG/profiles/Animations/test.json",
 		"/E/Development/Enjon/IsoARPG/assets/Textures/Animations/Player/Attack/OH_L/SE/PlayerAttackOHLSEAnimation.json",
@@ -344,16 +374,13 @@
 		"/E/Development/Enjon/IsoARPG/src/BehaviorTreeManager.cpp",
 		"/E/Development/Enjon/IsoARPG/include/BehaviorTreeManager.h",
 		"/E/Development/Enjon/src/Timing.cpp",
-		"/E/Development/Enjon/IsoARPG/src/AnimationManager.cpp",
 		"/E/Development/Enjon/IsoARPG/include/AnimationManager.h",
 		"/E/Development/Enjon/IsoARPG/include/EnjonAnimation.h",
 		"/E/Development/Enjon/IsoARPG/src/EnjonAnimation.cpp",
-		"/E/Development/Enjon/proc/clean.bat",
 		"/E/Development/Enjon/IsoARPG/src/Loot.cpp",
 		"/E/Development/Enjon/IsoARPG/include/ECS/ECS.h",
 		"/E/Development/Enjon/include/BehaviorTree/Wait.h",
 		"/E/Development/Enjon/IsoARPG/include/TestTree.h",
-		"/E/Development/Enjon/IsoARPG/include/ECS/Animation2DSystem.h",
 		"/E/Development/Enjon/IsoARPG/include/Animation.h",
 		"/E/Development/Enjon/IsoARPG/src/Animation.cpp",
 		"/E/Development/Enjon/deps/spine-cpp/include/spinecpp/Animation.h",
@@ -380,22 +407,7 @@
 		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/BBWrite.h",
 		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/ConditionalDecorator.h",
 		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/ConditionalTask.h",
-		"/D/C++Projects/VS/Source-2016-04-10/Source/Test/src/main.cpp",
-		"/D/C++Projects/VS/3DEnjon/include/Enjon.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/main.cpp",
-		"/D/C++Projects/VS/StaticPolyImmutable/Source/Test/src/main.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/BehaviorTreeManager.h",
-		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/BehaviorTree.h",
-		"/D/C++Projects/VS/3DEnjon/src/BehaviorTree.cpp",
-		"/D/C++Projects/VS/3DEnjon/shaders/deferred.f.glsl",
-		"/D/C++Projects/VS/3DEnjon/shaders/deferred.v.glsl",
-		"/D/C++Projects/VS/3DEnjon/shaders/normal.f.glsl",
-		"/D/C++Projects/VS/3DEnjon/shaders/normal.v.glsl",
-		"/D/C++Projects/VS/3DEnjon/shaders/diffuse.v.glsl",
-		"/D/C++Projects/VS/3DEnjon/src/ShaderManager.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/EntityFactory.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/EntityFactory.cpp",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/ECS/PlayerControllerSystem.cpp"
+		"/D/C++Projects/VS/Source-2016-04-10/Source/Test/src/main.cpp"
 	],
 	"find":
 	{
@@ -414,6 +426,25 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"#if",
+			"ImageFrame",
+			"parse",
+			"#if",
+			"amountdrawn",
+			"Test",
+			"Name",
+			"Test",
+			"anim",
+			"Anim",
+			"PlayerAnimations",
+			"atlas",
+			"ISize",
+			"AWidth",
+			"inline",
+			"GetImageFra",
+			"CreateA",
+			"GetImageFram",
+			"#if",
 			"amountdrawn",
 			"#if",
 			"#",
@@ -522,26 +553,7 @@
 			"ViewVector.",
 			"AttackVector",
 			"ArrowVelocity",
-			"Anim.get_length()",
-			"s",
-			"Meta",
-			"meta",
-			"imageframe",
-			"ImageFrame",
-			"Box",
-			"box",
-			"Box",
-			"box",
-			"Frames",
-			"400",
-			"auto",
-			"Size",
-			"size",
-			"Size",
-			"Site",
-			"100",
-			"auto",
-			"#if"
+			"Anim.get_length()"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -559,7 +571,7 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 10,
 			"sheets":
 			[
 				{
@@ -568,15 +580,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 113053,
+						"buffer_size": 110885,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								12446,
-								12446
+								66812,
+								66812
 							]
 						],
 						"settings":
@@ -585,7 +597,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 5292.0,
+						"translation.y": 24372.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
@@ -593,77 +605,19 @@
 				},
 				{
 					"buffer": 1,
-					"file": "SCRUM.txt",
+					"file": "/E/Development/Enjon/include/Enjon.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1855,
+						"buffer_size": 2041,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1855,
-								1705
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 252.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "src/ECS/ComponentSystems.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6812,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								5797,
-								5797
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 542.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "src/ECS/AttributeSystem.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 900,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								701,
-								701
+								946,
+								946
 							]
 						],
 						"settings":
@@ -679,77 +633,20 @@
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "include/ECS/AttributeSystem.h",
+					"buffer": 2,
+					"file": "include/ECS/Components.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1214,
+						"buffer_size": 5077,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1140,
-								1140
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "include/ECS/AIControllerSystem.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 706,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								631,
-								631
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "src/ECS/AIControllerSystem.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1594,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1386,
-								1386
+								370,
+								370
 							]
 						],
 						"settings":
@@ -765,12 +662,41 @@
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 3,
 					"file": "src/ECS/EntityFactory.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 16592,
+						"buffer_size": 16928,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								416,
+								416
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "include/ECS/Transform3DSystem.h",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 736,
 						"regions":
 						{
 						},
@@ -783,31 +709,30 @@
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 1043.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
-					"file": "/E/Development/Enjon/include/BehaviorTree/BehaviorNode.h",
+					"buffer": 5,
+					"file": "/E/Development/Enjon/include/Graphics/Animations.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7792,
+						"buffer_size": 1311,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1641,
-								1641
+								492,
+								492
 							]
 						],
 						"settings":
@@ -816,7 +741,94 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 787.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/E/Development/Enjon/src/Graphics/Animations.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7134,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								107,
+								79
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "src/ECS/Animation2DSystem.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 24869,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6599,
+								6599
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2016.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "include/ECS/PlayerControllerSystem.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1015,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								198,
+								198
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 9,
@@ -824,31 +836,59 @@
 				},
 				{
 					"buffer": 9,
-					"file": "/E/Development/Enjon/include/BehaviorTree/BlackBoard.h",
+					"file": "assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1215,
+						"buffer_size": 2873,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								683,
-								683
+								84,
+								84
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 180.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 512,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								88,
+								88
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -938,8 +978,8 @@
 	"show_minimap": false,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": true,
-	"side_bar_width": 188.0,
+	"side_bar_visible": false,
+	"side_bar_width": 195.0,
 	"status_bar_visible": false,
 	"template_settings":
 	{

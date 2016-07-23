@@ -16,9 +16,7 @@
 #include <string>
 
 namespace Enjon { namespace Animation {
-
-	using json = nlohmann::json;
-
+	
 	typedef struct 
 	{
 		EM::Vec2 AtlasSize;
@@ -45,10 +43,10 @@ namespace Enjon { namespace Animation {
 	} Anim;
 
 	// Creates image frame and returns
-	ImageFrame GetImageFrame(json& Frames, const std::string Name, const std::string Path);
+	ImageFrame GetImageFrame(nlohmann::json& Frames, const std::string Name, const std::string Path);
 
 	// Creates animation and returns
-	Anim* CreateAnimation(const std::string& AnimName, json& FramesDoc, EA::Atlas atlas, const std::string Path);
+	Anim* CreateAnimation(const std::string& AnimName, nlohmann::json& FramesDoc, EA::Atlas atlas, const std::string Path);
 	
 	// Draws a single animation frame	
 	void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White(), float ScalingFactor = 1.0f, float Depth = 1.0f);

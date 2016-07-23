@@ -21,7 +21,7 @@
 * MAIN GAME
 */
 
-#if 1
+#if 0
 #define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
@@ -82,7 +82,7 @@ typedef struct
 	EM::Vec3 Falloff;
 } Light;
 
-float LightZ = 0.03f;
+float LightZ = -0.13f;
 
 typedef struct 
 {	
@@ -1770,7 +1770,7 @@ int main(int argc, char** argv)
 * SYSTEMS TEST
 */
 
-#if 0
+#if 1
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -1826,6 +1826,8 @@ int main(int argc, char** argv)
 using namespace ECS;
 using namespace Systems;
 using namespace EA;
+
+using json = nlohmann::json;
 
 namespace Enjon { namespace GUI {
 
