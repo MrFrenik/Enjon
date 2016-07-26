@@ -140,11 +140,13 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					if (Input->IsKeyPressed(SDLK_1)) {
 						// Set current weapon to dagger
 						Animation2D::SetCurrentWeapon(Animation2D::Weapons::DAGGER);
+						std::cout << "Selected Dagger" << std::endl;
 					}
 
 					if (Input->IsKeyPressed(SDLK_2)) {
 						// Set current weapon to bow
 						Animation2D::SetCurrentWeapon(Animation2D::Weapons::BOW);
+						std::cout << "Selected Bow" << std::endl;
 					}
 
 					if (Input->IsKeyPressed(SDLK_3)) {

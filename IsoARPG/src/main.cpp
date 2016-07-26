@@ -750,6 +750,14 @@ int main(int argc, char** argv)
 											Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
 															Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
+				auto EntityHealth = World->AttributeSystem->HealthComponents[e].Health;
+
+				Graphics::Fonts::PrintText( EntityPosition->x + 20.0f, 
+											EntityPosition->y - 80.0f, 
+											0.4f, std::string("Health: ") + std::to_string(EntityHealth), 
+											Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
+															Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
 				// If target
 				if (e == World->PlayerControllerSystem->CurrentTarget)
 				{
@@ -2061,45 +2069,11 @@ int main(int argc, char** argv) {
 				EI::ResourceManager::GetTexture(AnimTextureDir.c_str())
 		  	};
 
-    // using sajson::literal;
-    // std::string json = EU::read_file_sstream(AnimTextureJSONDir.c_str());
-    // const sajson::document& doc = sajson::parse(sajson::string(json.c_str(), json.length()));
-
-    // if (!doc.is_valid())
-    // {
-    //     std::cout << "Invalid json: " << doc.get_error_message() << std::endl;;
-    // }
-
-
-    // Get root and length of json file
-    // const auto& root = doc.get_root();
-    // const auto len = root.get_length();
-
-    // // // Get handle to meta deta
-    // const auto meta = root.find_object_key(literal("meta"));
-    // assert(meta < len);
-    // const auto& Meta = root.get_object_value(meta);
-
-    // // // Get handle to frame data
-    // const auto frames = root.find_object_key(literal("frames"));
-    // assert(frames < len);
-    // const auto& Frames = root.get_object_value(frames);
-
-    // // // Get image size
-    // auto ISize = Meta.get_value_of_key(literal("size"));
-    // float AWidth = ISize.get_value_of_key(literal("w")).get_safe_float_value();
-    // float AHeight = ISize.get_value_of_key(literal("h")).get_safe_float_value();
-
-    // Atlas atlas = {	EM::Vec2(AWidth, AHeight), 
-    // 				EI::ResourceManager::GetTexture(AnimTextureDir.c_str())
-    // 			  };
-
     // Init animation manager
     AnimManager::Init();
 
 	// Create animation
-	// Anim* Test = CreateAnimation(std::string("Player_Attack_OH_L_SE"), Frames, atlas, AnimationDir);
-	Anim* Test = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
+	Anim* Test = AnimManager::GetAnimation("Player_Attack_OH_L_SW");
 
 	// Set up mouse texture to default
 	MouseTexture = EI::ResourceManager::GetTexture("../assets/Textures/mouse_cursor_20.png");
