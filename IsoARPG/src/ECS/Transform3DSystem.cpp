@@ -1,6 +1,7 @@
 #include "ECS/ECS.h"
 #include "Loot.h"
 
+#include <Graphics/SpriteSheetManager.h>
 #include <Utils/Errors.h>
 
 #include <string>

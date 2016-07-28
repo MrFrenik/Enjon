@@ -13,6 +13,7 @@
 
 #include <Graphics/Camera2D.h>
 #include <Graphics/ParticleEngine2D.h>
+#include <Graphics/SpriteSheetManager.h>
 #include <Graphics/FontManager.h>
 #include <Graphics/Color.h>
 #include <Defines.h>

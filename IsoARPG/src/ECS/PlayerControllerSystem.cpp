@@ -1,5 +1,5 @@
 
-#include "Graphics/SpriteSheet.h"
+#include <Graphics/SpriteSheetManager.h>
 
 #include "ECS/PlayerControllerSystem.h"
 #include "ECS/AttributeSystem.h"

@@ -21,7 +21,7 @@
 * MAIN GAME
 */
 
-#if 1
+#if 0
 #define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
@@ -120,7 +120,7 @@ using namespace ECS;
 using namespace Systems;
 
 /*-- Function Declarations --*/
-void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* Manager, ECS::eid32 Entity);
+void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, ECS::Systems::EntityManager* Manager, ECS::eid32 Entity);
 void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager);
 void DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math::Vec3 Pos);
 void DrawBox(Enjon::Graphics::SpriteBatch* Batch, Enjon::Graphics::SpriteBatch* LightBatch, ECS::Systems::EntityManager* Manager);
@@ -350,7 +350,7 @@ int main(int argc, char** argv)
 	/////////////////
 
 	// Create new EntityManager
-	struct EntityManager* World = EntitySystem::NewEntityManager(level.GetWidth(), level.GetWidth(), &Camera, &level);
+	ECS::Systems::EntityManager* World = EntitySystem::NewEntityManager(level.GetWidth(), level.GetWidth(), &Camera, &level);
 
 	// Init loot system
 	Loot::Init();
@@ -366,7 +366,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1000;
+	static uint32 AmountDrawn = 10;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = 10.0f;
@@ -1460,7 +1460,7 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, struct EntityManager* World, ECS::eid32 Entity)
+void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* Camera, ECS::Systems::EntityManager* World, ECS::eid32 Entity)
 {
     SDL_Event event;
 //    //Will keep looping until there are no more events to process
@@ -1793,7 +1793,7 @@ int main(int argc, char** argv)
 * SYSTEMS TEST
 */
 
-#if 0
+#if 1
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -1815,6 +1815,8 @@ int main(int argc, char** argv)
 
 /*-- External/Engine Libraries includes --*/
 #include <Enjon.h>
+#include <Editor/AnimationEditor.h>
+#include <GUI/GUIAnimationElement.h>
 #include <sajson/sajson.h>
 
 /*-- Entity Component System includes --*/
@@ -1851,127 +1853,6 @@ using namespace Systems;
 using namespace EA;
 
 using json = nlohmann::json;
-
-namespace Enjon { namespace GUI {
-
-	// Something like this eventually for global gui references...
-	namespace ButtonManager
-	{
-		std::unordered_map<std::string, GUIButton*> Buttons;
-
-		void Add(std::string S, GUIButton* B)
-		{
-			Buttons[S] = B;
-		}
-
-		GUIButton* Get(const std::string S)
-		{
-			auto search = Buttons.find(S);
-			if (search != Buttons.end())
-			{
-				return search->second;
-			}	
-
-			return nullptr;
-		}
-	};
-
-	// This is stupid, but it's for testing...
-	namespace TextBoxManager
-	{
-		std::unordered_map<std::string, GUITextBox*> TextBoxes;
-
-		void Add(std::string S, GUITextBox* T)
-		{
-			TextBoxes[S] = T;
-		}
-
-		GUITextBox* Get(const std::string S)
-		{
-			auto search = TextBoxes.find(S);
-			if (search != TextBoxes.end())
-			{
-				return search->second;
-			}
-			return nullptr;
-		}
-	};
-
-	namespace GUIManager
-	{
-		std::unordered_map<std::string, GUIElementBase*> Elements;
-
-		void Add(std::string S, GUIElementBase* E)
-		{
-			Elements[S] = E;
-		}
-
-		GUIElementBase* Get(const std::string S)
-		{
-			auto search = Elements.find(S);
-			if (search != Elements.end())
-			{
-				return search->second;
-			}
-
-			return nullptr;
-		}
-	}
-}}
-
-namespace CameraManager
-{
-	std::unordered_map<std::string, EG::Camera2D*> Cameras;
-
-	void AddCamera(std::string S, EG::Camera2D* C)
-	{
-		Cameras[S] = C;
-	}
-
-	EG::Camera2D* GetCamera(const std::string S)
-	{
-		auto search = Cameras.find(S);
-		if (search != Cameras.end())
-		{
-			return search->second;
-		}
-		return nullptr;
-	}
-};
-
-struct SceneNode
-{
-
-};
-
-class SceneGraph
-{
-	public:
-
-	private:
-};
-
-namespace CursorManager
-{
-	std::unordered_map<std::string, SDL_Cursor*> Cursors;
-
-	void Init()
-	{
-		Cursors["Arrow"] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
-		Cursors["IBeam"] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
-	}
-
-	SDL_Cursor* Get(const std::string S)
-	{
-		auto search = Cursors.find(S);
-		if (search != Cursors.end())
-		{
-			return search->second;
-		}
-		return nullptr;
-	}
-
-};
 
 // Just need to get where I can group together GUIElements, transform them together, and then
 // access individual GUIElements with the mouse

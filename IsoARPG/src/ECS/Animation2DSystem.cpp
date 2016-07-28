@@ -49,6 +49,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 		// Get System
 		struct Animation2DSystem* System = Manager->Animation2DSystem;
 		// Loop through all entities with animations
+
 		for (eid32 e = 0; e < Manager->MaxAvailableID; e++)
 		{
 			static float damaged_counter = 0.0f;
@@ -270,8 +271,8 @@ namespace ECS { namespace Systems { namespace Animation2D {
 				}
 			}
 		}
-
 	}
+
 
 	/*	
 	void Update(struct EntityManager* Manager)

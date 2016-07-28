@@ -1,9 +1,10 @@
 #ifndef COMPONENT_SYSTEMS_H
 #define COMPONENT_SYSTEMS_H
 
-#include <SDL2/SDL.h> 
+#include <SDL2/SDL.h>
 
-#include "Enjon.h"
+#include "Graphics/ParticleEngine2D.h"
+#include "Graphics/Camera2D.h"
 
 #include "ECS/Components.h"
 #include "ECS/Entity.h"

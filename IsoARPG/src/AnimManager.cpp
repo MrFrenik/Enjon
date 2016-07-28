@@ -55,40 +55,6 @@ namespace AnimManager {
 
 	json InitFrames(EA::Atlas& atlas)
 	{
-	    // std::string json = EU::read_file_sstream(AnimTextureJSONDir.c_str());
-	    // const sajson::document& doc = sajson::parse(sajson::string(json.c_str(), json.length()));
-
-	    // if (!doc.is_valid())
-	    // {
-	    //     std::cout << "Invalid json: " << doc.get_error_message() << std::endl;;
-	    // }
-
-	    // // Get root and length of json file
-	    // const auto& root = doc.get_root();
-	    // const auto len = root.get_length();
-
-	    // // // Get handle to meta deta
-	    // const auto meta = root.find_object_key(literal("meta"));
-	    // assert(meta < len);
-	    // const auto& Meta = root.get_object_value(meta);
-
-	    // // // Get handle to frame data
-	    // const auto frames = root.find_object_key(literal("frames"));
-	    // assert(frames < len);
-	    // const auto& Frames = root.get_object_value(frames);
-
-	    // // // Get image size
-	    // auto ISize = Meta.get_value_of_key(literal("size"));
-	    // float AWidth = ISize.get_value_of_key(literal("w")).get_safe_float_value();
-	    // float AHeight = ISize.get_value_of_key(literal("h")).get_safe_float_value();
-
-	    // atlas = {	
-	    // 			EM::Vec2(AWidth, AHeight), 
-    	// 			EI::ResourceManager::GetTexture(AnimTextureDir.c_str())
-			  // 	};
-
-	    // std::string j_string = EU::read_file_sstream(AnimTextureJSONDir.c_str());
-
 		auto Json = EU::read_file_sstream(AnimTextureJSONDir.c_str());
 	    
 	   	// parse and serialize JSON

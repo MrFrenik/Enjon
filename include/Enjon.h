@@ -12,7 +12,7 @@
 #include "Utils/Timing.h"
 #include "Utils/FileUtils.h"
 #include "Utils/Errors.h"
-//#include "Utils/json.h"
+#include "Utils/json.h"
 
 #include "Math/Maths.h"
 #include "Math/Random.h"
@@ -36,7 +36,7 @@
 #include "Graphics/FrameBufferObject.h"
 #include "Graphics/DeferredRenderer.h"
 #include "Graphics/GBuffer.h"
-//#include "Graphics/Animations.h"
+#include "Graphics/Animations.h"
 
 #include "GUI/Signal.h"
 #include "GUI/Property.h"

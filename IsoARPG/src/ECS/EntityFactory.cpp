@@ -12,6 +12,9 @@
 #include "BehaviorTreeManager.h"
 #include "AnimManager.h"
 
+#include <BehaviorTree/BT.h>
+#include <Graphics/SpriteSheetManager.h>
+
 #include "Defines.h"
 #include "System/Types.h"
 
