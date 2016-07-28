@@ -2,6 +2,7 @@
 #define ANIMATION_EDITOR_H
 
 /*-- Enjon includes --*/
+#include "IO/InputManager.h"
 #include "GUI/GUIButton.h"
 #include "GUI/GUIElement.h"
 #include "Graphics/Camera2D.h"
@@ -55,7 +56,7 @@ namespace CursorManager
 
 namespace Enjon { namespace AnimationEditor {
 
-	bool Init();
+	bool Init(EI::InputManager* Input, float ScreenWidth, float ScreenHeight);
 
 	bool Update();		
 

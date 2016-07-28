@@ -1793,7 +1793,7 @@ int main(int argc, char** argv)
 * SYSTEMS TEST
 */
 
-#if 1
+#if 0
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -1939,7 +1939,10 @@ int main(int argc, char** argv) {
 	CameraManager::AddCamera("SceneCamera", Camera);
 
 	// InputManager
-	EI::InputManager Input = EI::InputManager();
+	EI::InputManager Input;
+
+	// Init AnimationEditor
+	Enjon::AnimationEditor::Init();
 
 	// Matricies for shaders
 	EM::Mat4 Model, View, Projection;
@@ -2451,6 +2454,9 @@ int main(int argc, char** argv) {
 				);
 	BGBatch->End();
 
+	// Main Animation Editor Loop
+
+
 
 	// Main loop
 	bool running = true;
@@ -2640,7 +2646,7 @@ int main(int argc, char** argv) {
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
 										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, scale, 
-										Test->Name, 
+										SceneAnimation.CurrentAnimation->Name, 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
@@ -3214,7 +3220,143 @@ bool IsModifier(unsigned int Key)
 
 
 
+/**
+* SYSTEMS TEST
+*/
 
+#if 1
+
+#define FULLSCREENMODE   0
+#define SECOND_DISPLAY   0
+
+#if FULLSCREENMODE
+	#if SECOND_DISPLAY
+		#define SCREENWIDTH 1440
+		#define SCREENHEIGHT 900
+	#else
+		#define SCREENWIDTH  1920
+		#define SCREENHEIGHT 1080
+	#endif
+	#define SCREENRES    EG::FULLSCREEN
+#else
+	#define SCREENWIDTH  1024
+	#define SCREENHEIGHT 768
+	#define SCREENRES EG::DEFAULT
+#endif 
+
+/*-- External/Engine Libraries includes --*/
+#include <Enjon.h>
+#include <Editor/AnimationEditor.h>
+#include <GUI/GUIAnimationElement.h>
+#include <sajson/sajson.h>
+
+/*-- Entity Component System includes --*/
+#include <ECS/ComponentSystems.h>
+#include <ECS/PlayerControllerSystem.h>
+#include <ECS/Transform3DSystem.h>
+#include <ECS/CollisionSystem.h>
+#include <ECS/Animation2DSystem.h>
+#include <ECS/InventorySystem.h> 
+#include <ECS/Renderer2DSystem.h>
+#include <ECS/AIControllerSystem.h> 
+#include <ECS/AttributeSystem.h>
+#include <ECS/EffectSystem.h>
+#include <ECS/EntityFactory.h>
+#include <ECS/Entity.h>
+#include <Loot.h>
+
+/*-- IsoARPG includes --*/
+#include "EnjonAnimation.h"
+#include "AnimationManager.h"
+#include "AnimManager.h"
+#include "SpatialHash.h"
+#include "Level.h"
+
+/*-- Standard Library includes --*/
+#include <stdio.h>
+#include <iostream> 
+#include <time.h>
+#include <stdlib.h>
+#include <vector>
+
+using namespace ECS;
+using namespace Systems;
+using namespace EA;
+
+using json = nlohmann::json;
+
+// Just need to get where I can group together GUIElements, transform them together, and then
+// access individual GUIElements with the mouse
+using namespace Enjon;
+using namespace GUI;
+
+const std::string AnimTextureDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png");
+const std::string AnimTextureJSONDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json");
+const std::string AnimationDir("../IsoARPG/Profiles/Animations/Player/PlayerAttackOHLSEAnimation.json");
+
+#undef main
+int main(int argc, char** argv) {
+
+	Enjon::Init();
+
+	float t = 0.0f;
+	float FPS = 0.0f;
+	float TimeIncrement = 0.0f;
+
+	// Create a window
+	EG::Window Window;
+	Window.Init("Unit Test", SCREENWIDTH, SCREENHEIGHT, SCREENRES);
+	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
+
+	EU::FPSLimiter Limiter;
+	Limiter.Init(60);
+
+	// Init ShaderManager
+	EG::ShaderManager::Init(); 
+
+	// Init FontManager
+	EG::FontManager::Init();
+
+	// InputManager
+	EI::InputManager Input;
+
+    // Init animation manager
+    AnimManager::Init();
+
+	// Init AnimationEditor
+	Enjon::AnimationEditor::Init(&Input, SCREENWIDTH, SCREENHEIGHT);
+
+	// Main loop Animation Editor Loop
+	bool running = true;
+	while (running)
+	{
+		Limiter.Begin();
+
+		// Update Animation Editor
+		running = Enjon::AnimationEditor::Update();
+
+		//Enable alpha blending
+		glEnable(GL_BLEND);
+
+		//Set blend function type
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0));
+
+		// Render scene
+		Enjon::AnimationEditor::Draw();
+
+		Window.SwapBuffer();
+
+		FPS = Limiter.End();
+	}
+
+	return 0;
+}
+
+
+
+#endif
 
 
 
