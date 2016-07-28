@@ -10,7 +10,7 @@
 
 namespace Enjon { namespace Input { namespace ResourceManager { 
 
-		Enjon::Graphics::GLTexture GetTexture(const std::string& texturePath);
+		Enjon::Graphics::GLTexture GetTexture(const std::string& texturePath, GLint params = GL_NEAREST);
 
 }}}
 

@@ -190,8 +190,8 @@ namespace Enjon { namespace AnimationEditor {
 	EG::SpriteBatch* SceneBatch 	= nullptr;
 	EG::SpriteBatch* BGBatch 		= nullptr;
 
-	EG::Camera2D* Camera 			= nullptr;
-	EG::Camera2D* HUDCamera 		= nullptr;
+	EG::Camera2D Camera;
+	EG::Camera2D HUDCamera;
 
 	EG::ColorRGBA16 PlayButtonColor;
 	EG::ColorRGBA16 InputTextColor;
@@ -222,16 +222,14 @@ namespace Enjon { namespace AnimationEditor {
 		SCREENHEIGHT = SH;
 
 		// Create Camera
-		Camera = new EG::Camera2D;
-		Camera->Init(W, H);
+		Camera.Init(W, H);
 
 		// Create HUDCamera
-		HUDCamera = new EG::Camera2D;
-		HUDCamera->Init(W, H);
+		HUDCamera.Init(W, H);
 
 		// Register cameras with manager
-		CameraManager::AddCamera("HUDCamera", HUDCamera);
-		CameraManager::AddCamera("SceneCamera", Camera);
+		CameraManager::AddCamera("HUDCamera", &HUDCamera);
+		CameraManager::AddCamera("SceneCamera", &Camera);
 	
 		auto Json = EU::read_file_sstream(AnimTextureJSONDir.c_str());
 	    
@@ -251,7 +249,7 @@ namespace Enjon { namespace AnimationEditor {
 
 	    atlas = {	
 	    			EM::Vec2(AWidth, AHeight), 
-					EI::ResourceManager::GetTexture(AnimTextureDir.c_str())
+					EI::ResourceManager::GetTexture(AnimTextureDir.c_str(), GL_LINEAR)
 			  	};
 		
 		// Set up ToggleOnionSkin
@@ -699,19 +697,19 @@ namespace Enjon { namespace AnimationEditor {
 		BGBatch->Add(
 						EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png").id,
+						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png", GL_LINEAR).id,
 						EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.4f)
 					);
 		BGBatch->Add(
 						EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png").id,
+						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png", GL_LINEAR).id,
 						EG::SetOpacity(EG::RGBA16_White(), 0.3f)
 					);
 		BGBatch->Add(
 						EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg_cross.png").id,
+						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg_cross.png", GL_LINEAR).id,
 						EG::SetOpacity(EG::RGBA16_White(), 0.1f)
 					);
 		BGBatch->End();
@@ -726,11 +724,11 @@ namespace Enjon { namespace AnimationEditor {
 		t += TimeIncrement * TimeScale;
 
 		// Check for quit condition
-		IsRunning = ProcessInput(Input, Camera);
+		IsRunning = ProcessInput(Input, &Camera);
 
 		// Update cameras
-		Camera->Update();
-		HUDCamera->Update();
+		Camera.Update();
+		HUDCamera.Update();
 
 		// Set up AABB of Scene Animation
 		EGUI::AnimationElement::AABBSetup(&SceneAnimation);
@@ -745,7 +743,7 @@ namespace Enjon { namespace AnimationEditor {
 	{
 		// Set up necessary matricies
     	auto Model 		= EM::Mat4::Identity();	
-    	auto View 		= HUDCamera->GetCameraMatrix();
+    	auto View 		= HUDCamera.GetCameraMatrix();
     	auto Projection = EM::Mat4::Identity();
 
 		// Basic shader for UI
@@ -758,6 +756,7 @@ namespace Enjon { namespace AnimationEditor {
 			// Draw BG
 			BGBatch->RenderBatch();
 
+			/*
 			UIBatch->Begin();
 			{
 				// Draw Parent
@@ -796,8 +795,9 @@ namespace Enjon { namespace AnimationEditor {
 			}
 			UIBatch->End();
 			UIBatch->RenderBatch();
+			*/
 
-			View = Camera->GetCameraMatrix();
+			View = Camera.GetCameraMatrix();
 			BasicShader->SetUniformMat4("view", View);
 
 			SceneBatch->Begin();
@@ -863,7 +863,7 @@ namespace Enjon { namespace AnimationEditor {
 		// Shader for text
 		TextShader->Use();
 		{
-			View = HUDCamera->GetCameraMatrix();
+			View = HUDCamera.GetCameraMatrix();
 
 			TextShader->SetUniformMat4("model", Model);
 			TextShader->SetUniformMat4("projection", Projection);
@@ -880,8 +880,8 @@ namespace Enjon { namespace AnimationEditor {
 
 				// Display current frame information
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, scale, 
 										std::string("Animation: "), 
 										CurrentFont, 
 										*UIBatch, 
@@ -889,8 +889,8 @@ namespace Enjon { namespace AnimationEditor {
 									);
 				// Display current frame information
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, scale, 
 										SceneAnimation.CurrentAnimation->Name, 
 										CurrentFont, 
 										*UIBatch, 
@@ -898,16 +898,16 @@ namespace Enjon { namespace AnimationEditor {
 									);
 				// Current Frame Name
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, scale, 
 										std::string("Frame: "), 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 90.0f, scale, 
 										std::to_string(SceneAnimation.CurrentIndex), 
 										CurrentFont, 
 										*UIBatch, 
@@ -915,16 +915,16 @@ namespace Enjon { namespace AnimationEditor {
 									);
 				// Current Frame Delay
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 110.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 110.0f, scale, 
 										std::string("Delay: "), 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 110.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 110.0f, scale, 
 										std::to_string(CurrentFrame->Delay), 
 										CurrentFont, 
 										*UIBatch, 
@@ -932,16 +932,16 @@ namespace Enjon { namespace AnimationEditor {
 									);
 				// Current Frame Y offset
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, scale, 
 										std::string("Y Offset: "), 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 130.0f, scale, 
 										std::to_string(static_cast<int32_t>(CurrentFrame->Offsets.y)), 
 										CurrentFont, 
 										*UIBatch, 
@@ -949,24 +949,24 @@ namespace Enjon { namespace AnimationEditor {
 									);
 				// Current Frame X Offset
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 150.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 150.0f, scale, 
 										std::string("X Offset: "), 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 150.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 150.0f, scale, 
 										std::to_string(static_cast<int32_t>(CurrentFrame->Offsets.x)), 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 170.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 170.0f, scale, 
 										std::string("Onion Skin: "), 
 										CurrentFont, 
 										*UIBatch, 
@@ -974,8 +974,8 @@ namespace Enjon { namespace AnimationEditor {
 									);
 				auto OnionString = ToggleOnionSkin.State == ButtonState::ACTIVE ? std::string("On") : std::string("Off");
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 170.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 170.0f, scale, 
 										OnionString, 
 										CurrentFont, 
 										*UIBatch, 
@@ -983,16 +983,16 @@ namespace Enjon { namespace AnimationEditor {
 									);
 
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 190.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 190.0f, scale, 
 										std::string("Time Scale: "), 
 										CurrentFont, 
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
 				EG::Fonts::PrintText(	
-										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 190.0f, scale, 
+										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 190.0f, scale, 
 										std::to_string(TimeScale), 
 										CurrentFont, 
 										*UIBatch, 

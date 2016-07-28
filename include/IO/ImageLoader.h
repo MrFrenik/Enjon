@@ -14,7 +14,7 @@ namespace Enjon { namespace Graphics {
 	class ImageLoader
 	{
 	public:
-		static GLTexture LoadPNG( std::string filePath );
+		static GLTexture LoadPNG(std::string filePath, GLint params = GL_NEAREST);
 		static void LoadPNG(std::string filePath, std::vector<unsigned char>* out, 
 													unsigned long width, unsigned long height);
 

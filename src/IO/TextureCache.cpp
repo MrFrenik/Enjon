@@ -17,7 +17,7 @@ namespace Enjon { namespace Graphics {
 	{
 	}
 
-	GLTexture TextureCache::GetTexture(std::string texturePath)
+	GLTexture TextureCache::GetTexture(std::string texturePath, GLint params)
 	{
 		//Set mit to map iterator; lookup texture to see if it's in map
 		auto mit = m_textureMap.find(texturePath);
@@ -25,7 +25,7 @@ namespace Enjon { namespace Graphics {
 		//Check to see if it's not in map
 		if(mit == m_textureMap.end())
 		{
-			GLTexture newTexture = ImageLoader::LoadPNG(texturePath);
+			GLTexture newTexture = ImageLoader::LoadPNG(texturePath, params);
 			
 			//Insert it into map
 			m_textureMap.insert(make_pair(texturePath, newTexture));

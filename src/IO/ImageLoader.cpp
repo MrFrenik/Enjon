@@ -8,7 +8,7 @@
 namespace Enjon { namespace Graphics {
 
 
-	GLTexture ImageLoader::LoadPNG(std::string filePath)
+	GLTexture ImageLoader::LoadPNG(std::string filePath, GLint params)
 	{
 		GLTexture texture = {}; 
 		
@@ -37,8 +37,8 @@ namespace Enjon { namespace Graphics {
 
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, params);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, params);
 		
 		glGenerateMipmap(GL_TEXTURE_2D);
 
