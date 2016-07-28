@@ -72,7 +72,7 @@ namespace ECS { namespace Factory {
 			// Set up AnimComponent
 			Component::AnimComponent* AnimComponent = &Manager->Animation2DSystem->AnimComponents[Player];
 			AnimComponent->CurrentIndex = 0;
-			AnimComponent->CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_R_SE");
+			AnimComponent->CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
 			AnimComponent->AnimationTimer = 0.0f;	
 
 			// Set up renderer component

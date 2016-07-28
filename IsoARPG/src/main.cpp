@@ -21,8 +21,8 @@
 * MAIN GAME
 */
 
-#if 0
-#define FULLSCREENMODE   1
+#if 1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -42,6 +42,7 @@
 
 /*-- External/Engine Libraries includes --*/
 #include <Enjon.h>
+#include <Editor/AnimationEditor.h>
 
 /*-- Entity Component System includes --*/
 #include <ECS/ComponentSystems.h>
@@ -101,6 +102,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 bool DebugInfo = false;
+bool AnimationEditorOn = false;
 
 const int LEVELSIZE = 20;
 
@@ -166,6 +168,8 @@ int main(int argc, char** argv)
 	// Hide/Show mouse
 	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
 
+	// Create InputManager
+	Input::InputManager Input;
 
 	// Create Camera
 	Graphics::Camera2D Camera;
@@ -194,6 +198,9 @@ int main(int argc, char** argv)
 
 	// Init BehaviorTreeManager
 	BTManager::Init();
+
+	// Init AnimationEditor
+	Enjon::AnimationEditor::Init(&Input, SCREENWIDTH, SCREENHEIGHT);
 	
 	// Init level
 	Enjon::Graphics::SpriteBatch TileBatch;
@@ -341,8 +348,7 @@ int main(int argc, char** argv)
 	EG::FrameBufferObject* NormalsFBO 	= new EG::FrameBufferObject(DWidth, DHeight);
 	EG::FrameBufferObject* DeferredFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
 
-	// Create InputManager
-	Input::InputManager Input;
+	
 
 
 	/////////////////
@@ -568,85 +574,96 @@ int main(int argc, char** argv)
 		ViewPort = Math::Vec2(SCREENWIDTH, SCREENHEIGHT) / Camera.GetScale();
 		CameraDims = Math::Vec4(*PlayerStuff, quadDimsStuff / Camera.GetScale());
 
-		if (!Paused)
+		// AnimationEditor
+		if (AnimationEditorOn)
 		{
-			StartTicks = SDL_GetTicks();
-			// Check whether or not overlays are dirty and then reset overlay batch if needed
-			if (World->Lvl->GetOverlaysDirty())
-			{
-				OverlayBatch.Begin();
-				World->Lvl->DrawTileOverlays(OverlayBatch);
-				OverlayBatch.End();
-			}
-
-			// Clear entities from Renderer system vector
-			World->Renderer2DSystem->Entities.clear();
-
-			// Clear entities from collision system vectors
-			World->CollisionSystem->Entities.clear();
-
-			// Clear entities from PlayerControllerSystem targets vector
-			World->PlayerControllerSystem->Targets.clear();
-
-			// Draw some random assed fire
-			EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
-	
-			TileOverlayRunTime = SDL_GetTicks() - StartTicks;		
-			StartTicks = SDL_GetTicks();
-			SpatialHash::ClearCells(World->Grid);
-			ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
-
-			StartTicks = SDL_GetTicks();
-			AIController::Update(World->AIControllerSystem, Player);
-			AIRunTime = SDL_GetTicks() - StartTicks;
-
-			Animation2D::Update(World);
-
-			StartTicks = SDL_GetTicks();
-			Transform::Update(World->TransformSystem, LightParticleBatch);
-			TransformRunTime = (SDL_GetTicks() - StartTicks);
-
-			StartTicks = SDL_GetTicks();	
-			Collision::Update(World);
-			CollisionRunTime = (SDL_GetTicks() - StartTicks);
-
-			// Apply effects
-			StartTicks = SDL_GetTicks();	
-			Effect::Update(World);
-			EffectRunTime = (SDL_GetTicks() - StartTicks);
-
-			Renderer2D::Update(World); 
-
-			auto LvlSize = level.GetDims();
-			EM::IsoToCartesian(LvlSize);
-			static float SmokeCount = 0.0f;
-			SmokeCount += 0.005f;
-			Enjon::uint32 SR = Enjon::Random::Roll(0, 3);
-			if (SmokeCount > 10.0f)
-			{
-				for (Enjon::uint32 i = 0; i < 3; i++)
-				{
-					DrawSmoke(LightParticleBatch, EM::Vec3(Enjon::Random::Roll(-LvlSize.x, LvlSize.x), Enjon::Random::Roll(-LvlSize.y * 2.0f, LvlSize.y * 2.0f), 0.0f));
-				}
-				SmokeCount = 0.0f;
-			}
-
-			// Updates the world's particle engine
-			World->ParticleEngine->Update();
-		
-			PlayerController::Update(World->PlayerControllerSystem);
+			// Update editor
+			AnimationEditorOn = Enjon::AnimationEditor::Update();	
 		}
 
-		// Check for input
-		ProcessInput(&Input, &Camera, World, Player); 
+		// Game
+		else
+		{
+			if (!Paused)
+			{
+				StartTicks = SDL_GetTicks();
+				// Check whether or not overlays are dirty and then reset overlay batch if needed
+				if (World->Lvl->GetOverlaysDirty())
+				{
+					OverlayBatch.Begin();
+					World->Lvl->DrawTileOverlays(OverlayBatch);
+					OverlayBatch.End();
+				}
+
+				// Clear entities from Renderer system vector
+				World->Renderer2DSystem->Entities.clear();
+
+				// Clear entities from collision system vectors
+				World->CollisionSystem->Entities.clear();
+
+				// Clear entities from PlayerControllerSystem targets vector
+				World->PlayerControllerSystem->Targets.clear();
+
+				// Draw some random assed fire
+				EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
+		
+				TileOverlayRunTime = SDL_GetTicks() - StartTicks;		
+				StartTicks = SDL_GetTicks();
+				SpatialHash::ClearCells(World->Grid);
+				ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
+
+				StartTicks = SDL_GetTicks();
+				AIController::Update(World->AIControllerSystem, Player);
+				AIRunTime = SDL_GetTicks() - StartTicks;
+
+				Animation2D::Update(World);
+
+				StartTicks = SDL_GetTicks();
+				Transform::Update(World->TransformSystem, LightParticleBatch);
+				TransformRunTime = (SDL_GetTicks() - StartTicks);
+
+				StartTicks = SDL_GetTicks();	
+				Collision::Update(World);
+				CollisionRunTime = (SDL_GetTicks() - StartTicks);
+
+				// Apply effects
+				StartTicks = SDL_GetTicks();	
+				Effect::Update(World);
+				EffectRunTime = (SDL_GetTicks() - StartTicks);
+
+				Renderer2D::Update(World); 
+
+				auto LvlSize = level.GetDims();
+				EM::IsoToCartesian(LvlSize);
+				static float SmokeCount = 0.0f;
+				SmokeCount += 0.005f;
+				Enjon::uint32 SR = Enjon::Random::Roll(0, 3);
+				if (SmokeCount > 10.0f)
+				{
+					for (Enjon::uint32 i = 0; i < 3; i++)
+					{
+						DrawSmoke(LightParticleBatch, EM::Vec3(Enjon::Random::Roll(-LvlSize.x, LvlSize.x), Enjon::Random::Roll(-LvlSize.y * 2.0f, LvlSize.y * 2.0f), 0.0f));
+					}
+					SmokeCount = 0.0f;
+				}
+
+				// Updates the world's particle engine
+				World->ParticleEngine->Update();
+			
+				PlayerController::Update(World->PlayerControllerSystem);
+			}
+
+			// Check for input
+			ProcessInput(&Input, &Camera, World, Player); 
 
 
-		//LERP camera to center of player position
-		static Math::Vec2 m_velocity;
-		static float scale = 6.0f; 
-		m_velocity.x = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, Camera.GetPosition().x, 8.0f);
-		m_velocity.y = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.y, Camera.GetPosition().y, scale); 
-		Camera.SetPosition(m_velocity);
+			//LERP camera to center of player position
+			static Math::Vec2 m_velocity;
+			static float scale = 6.0f; 
+			m_velocity.x = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, Camera.GetPosition().x, 8.0f);
+			m_velocity.y = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.y, Camera.GetPosition().y, scale); 
+			Camera.SetPosition(m_velocity);
+		}
 
 		////////////////////////////////////////////////
 
@@ -666,768 +683,778 @@ int main(int argc, char** argv)
 
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
 
-
-		// Set up shader
-		Math::Mat4 model, view, projection;
-		model = Math::Mat4::Identity();
-		view = Camera.GetCameraMatrix();
-		projection = Math::Mat4::Identity();
-
-		// Draw Entities
-		EntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); 
-		NormalsBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT);
-		MapEntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); 
-		LightBatch.Begin();
-		TextBatch.Begin(); 
-		HUDBatch.Begin();
-		DeferredBatch.Begin();
-
-		static uint32 Row = 0;
-		static uint32 Col = 0;
-		static uint32 i = 0;
-		static Math::Vec2 enemydims2(180.0f, 222.0f);
-		static Math::Vec2 dims(100.0f, 100.0f);
-		static Math::Vec2 arrowDims(64.0f, 64.0f);
-		static Math::Vec2 itemDims(20.0f, 20.0f);
-		static Math::Vec4 uv(0, 0, 1, 1);
-		static Math::Vec2 pos(-1000, -1000);
-		static Graphics::GLTexture beast = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png"); 
-		static Graphics::GLTexture playertexture = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/pixelanimtest.png"); 
-		static Graphics::GLTexture groundtiletexture = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledblue.png"); 
-		static Graphics::GLTexture orb = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"); 
-		static Graphics::SpriteSheet ArrowSheet;
-		if (!ArrowSheet.IsInit()) ArrowSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1)); 
-
-		EM::Vec2 PC = World->TransformSystem->Transforms[Player].Position.XY();
-	
-		// Draw enemies
-		for (eid32 n = 0; n < World->Renderer2DSystem->Entities.size(); n++)
+		if (AnimationEditorOn)
 		{
-			ECS::eid32 e = World->Renderer2DSystem->Entities.at(n);
+			// Show mouse
+			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
+	
+			// Render AnimationEditor scene
+			Enjon::AnimationEditor::Draw();
+		}
 
-			if (e == Player || e == Sword || e == Bow) continue;
+		// Render game scene
+		else
+		{
+			// Set up shader
+			Math::Mat4 model, view, projection;
+			model = Math::Mat4::Identity();
+			view = Camera.GetCameraMatrix();
+			projection = Math::Mat4::Identity();
 
-			// Don't draw if the entity doesn't exist anymore
-			bitmask32 Mask = World->Masks[e];
-			if ((Mask & COMPONENT_RENDERER2D) != COMPONENT_RENDERER2D) continue;
+			// Draw Entities
+			EntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); 
+			NormalsBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT);
+			MapEntityBatch.Begin(Enjon::Graphics::GlyphSortType::BACK_TO_FRONT); 
+			LightBatch.Begin();
+			TextBatch.Begin(); 
+			HUDBatch.Begin();
+			DeferredBatch.Begin();
 
-			Math::Vec3* EntityPosition; 
-			Math::Vec2* Ground;
-			char buffer[25];
+			static uint32 Row = 0;
+			static uint32 Col = 0;
+			static uint32 i = 0;
+			static Math::Vec2 enemydims2(180.0f, 222.0f);
+			static Math::Vec2 dims(100.0f, 100.0f);
+			static Math::Vec2 arrowDims(64.0f, 64.0f);
+			static Math::Vec2 itemDims(20.0f, 20.0f);
+			static Math::Vec4 uv(0, 0, 1, 1);
+			static Math::Vec2 pos(-1000, -1000);
+			static Graphics::GLTexture beast = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png"); 
+			static Graphics::GLTexture playertexture = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/pixelanimtest.png"); 
+			static Graphics::GLTexture groundtiletexture = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledblue.png"); 
+			static Graphics::GLTexture orb = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"); 
+			static Graphics::SpriteSheet ArrowSheet;
+			if (!ArrowSheet.IsInit()) ArrowSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Enjon::Math::iVec2(8, 1)); 
+
+			EM::Vec2 PC = World->TransformSystem->Transforms[Player].Position.XY();
 		
-			EG::SpriteSheet* ESpriteSheet = World->Animation2DSystem->Animations[e].Sheet;	
-			EntityPosition = &World->TransformSystem->Transforms[e].Position;
-			Ground = &World->TransformSystem->Transforms[e].GroundPosition;
-			const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[e].Color;
-			auto EDims = &World->TransformSystem->Transforms[e].Dimensions;
-
-			// If AI
-			if (Mask & COMPONENT_AICONTROLLER)
+			// Draw enemies
+			for (eid32 n = 0; n < World->Renderer2DSystem->Entities.size(); n++)
 			{
-				EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), uv, ESpriteSheet->texture.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
+				ECS::eid32 e = World->Renderer2DSystem->Entities.at(n);
 
-				// Print Entity info if debug info is on
-				if (DebugInfo)
+				if (e == Player || e == Sword || e == Bow) continue;
+
+				// Don't draw if the entity doesn't exist anymore
+				bitmask32 Mask = World->Masks[e];
+				if ((Mask & COMPONENT_RENDERER2D) != COMPONENT_RENDERER2D) continue;
+
+				Math::Vec3* EntityPosition; 
+				Math::Vec2* Ground;
+				char buffer[25];
+			
+				EG::SpriteSheet* ESpriteSheet = World->Animation2DSystem->Animations[e].Sheet;	
+				EntityPosition = &World->TransformSystem->Transforms[e].Position;
+				Ground = &World->TransformSystem->Transforms[e].GroundPosition;
+				const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[e].Color;
+				auto EDims = &World->TransformSystem->Transforms[e].Dimensions;
+
+				// If AI
+				if (Mask & COMPONENT_AICONTROLLER)
 				{
-					// Entity id
-					Graphics::Fonts::PrintText(EntityPosition->x + 20.0f, EntityPosition->y - 20.0f, 0.4f, std::string("ID: ") + std::to_string(e), Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
-																Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-					// Entity Type
-					std::string Type;
-					if (World->AttributeSystem->Masks[e] & Masks::Type::AI) Type = "AI";
-					else Type = "Unknown";
+					EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), uv, ESpriteSheet->texture.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
+
+					// Print Entity info if debug info is on
+					if (DebugInfo)
+					{
+						// Entity id
+						Graphics::Fonts::PrintText(EntityPosition->x + 20.0f, EntityPosition->y - 20.0f, 0.4f, std::string("ID: ") + std::to_string(e), Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
+																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+						// Entity Type
+						std::string Type;
+						if (World->AttributeSystem->Masks[e] & Masks::Type::AI) Type = "AI";
+						else Type = "Unknown";
 
 
-					// Entity Position 
-					auto X = EntityPosition->x;
-					auto Y = EntityPosition->y;
-					auto Z = EntityPosition->z;
+						// Entity Position 
+						auto X = EntityPosition->x;
+						auto Y = EntityPosition->y;
+						auto Z = EntityPosition->z;
 
-					Graphics::Fonts::PrintText(	EntityPosition->x + 20.0f, 
-												EntityPosition->y - 40.0f, 
-												0.4f, std::string("<") + std::to_string(X) + std::string(", ") + std::to_string(Y) + (", ") + std::to_string(Z) + std::string(">"), 
-												Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
-																Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+						Graphics::Fonts::PrintText(	EntityPosition->x + 20.0f, 
+													EntityPosition->y - 40.0f, 
+													0.4f, std::string("<") + std::to_string(X) + std::string(", ") + std::to_string(Y) + (", ") + std::to_string(Z) + std::string(">"), 
+													Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
+																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
-					Graphics::Fonts::PrintText( EntityPosition->x + 20.0f, 
-												EntityPosition->y - 60.0f, 
-												0.4f, std::string("Type: ") + Type, 
-												Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
-																Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+						Graphics::Fonts::PrintText( EntityPosition->x + 20.0f, 
+													EntityPosition->y - 60.0f, 
+													0.4f, std::string("Type: ") + Type, 
+													Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
+																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
-					auto EntityHealth = World->AttributeSystem->HealthComponents[e].Health;
+						auto EntityHealth = World->AttributeSystem->HealthComponents[e].Health;
 
-					Graphics::Fonts::PrintText( EntityPosition->x + 20.0f, 
-												EntityPosition->y - 80.0f, 
-												0.4f, std::string("Health: ") + std::to_string(EntityHealth), 
-												Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
-																Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+						Graphics::Fonts::PrintText( EntityPosition->x + 20.0f, 
+													EntityPosition->y - 80.0f, 
+													0.4f, std::string("Health: ") + std::to_string(EntityHealth), 
+													Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
+																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+					}
+
+					// If target
+					if (e == World->PlayerControllerSystem->CurrentTarget)
+					{
+						Math::Vec2 ReticleDims(94.0f, 47.0f);
+						Math::Vec2 Position = World->TransformSystem->Transforms[e].GroundPosition - Math::Vec2(15.0f, 5.0f);
+						EntityBatch.Add(Math::Vec4(Position.x, Position.y, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), TargetSheet.texture.id, Enjon::Graphics::RGBA16_Red(), Position.y);
+					}
+
+				}
+				else if (World->Types[e] == ECS::Component::EntityType::ITEM)
+				{
+					EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), ESpriteSheet->GetUV(0), ESpriteSheet->texture.id, *Color, EntityPosition->y, 
+											World->TransformSystem->Transforms[e].Angle, World->Renderer2DSystem->Renderers[e].Format);
+				}
+				else
+				{
+					auto Sheet = World->Animation2DSystem->Animations[e].Sheet;
+					auto Dims = World->TransformSystem->Transforms[e].Dimensions;
+					static int index;
+
+					// Get attack vector and draw arrow based on that
+					Enjon::Math::Vec2* AttackVector = &World->TransformSystem->Transforms[Player].AttackVector;
+					if		(*AttackVector == EAST)				index = 0;
+					else if (*AttackVector == NORTHEAST)		index = 1;
+					else if (*AttackVector == NORTH)			index = 2;
+					else if (*AttackVector == NORTHWEST)		index = 3;
+					else if (*AttackVector == WEST)				index = 4;
+					else if (*AttackVector == SOUTHWEST)		index = 5;
+					else if (*AttackVector == SOUTH)			index = 6;
+					else if (*AttackVector == SOUTHEAST)		index = 7;
+					else										index = 0;
+
+					EntityBatch.Add(Math::Vec4(EntityPosition->XY(), Dims), Sheet->GetUV(index), Sheet->texture.id, *Color, EntityPosition->y, World->TransformSystem->Transforms[e].Angle, 
+										World->Renderer2DSystem->Renderers[e].Format);
 				}
 
-				// If target
-				if (e == World->PlayerControllerSystem->CurrentTarget)
+				Ground = &World->TransformSystem->Transforms[e].GroundPosition;
+				auto EAABB = &World->TransformSystem->Transforms[e].AABB;
+				if (World->Types[e] != ECS::Component::EntityType::ITEM)
 				{
-					Math::Vec2 ReticleDims(94.0f, 47.0f);
-					Math::Vec2 Position = World->TransformSystem->Transforms[e].GroundPosition - Math::Vec2(15.0f, 5.0f);
-					EntityBatch.Add(Math::Vec4(Position.x, Position.y, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), TargetSheet.texture.id, Enjon::Graphics::RGBA16_Red(), Position.y);
+					EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
+											Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);
+		
+					float XDiff = World->TransformSystem->Transforms[e].AABBPadding.x;
+					float YDiff = World->TransformSystem->Transforms[e].AABBPadding.y;
+					// Enjon::Math::Vec2 EAABBIsoMin(Enjon::Math::CartesianToIso(EAABB->Min) + Math::Vec2(XDiff / 2.0f, XDiff / 2.0f));
+					Enjon::Math::Vec2 EAABBIsoMin(Enjon::Math::CartesianToIso(EAABB->Min));
+					auto EAABBIsoMax(EM::CartesianToIso(EAABB->Max));
+					// float EAABBHeight = EAABB->Max.y - EAABB->Min.y, EAABBWidth = EAABB->Max.x - EAABB->Min.y;
+					// EntityBatch.Add(Math::Vec4(EAABBIsoMin, Math::Vec2(abs(EAABB->Max.x - EAABB->Min.x), abs(EAABB->Max.y - EAABB->Min.y))), 
+					// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
+					// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
+					// EntityBatch.Add(Math::Vec4(EAABBIsoMin.x, EAABBIsoMin.y, Math::Vec2(XDiff, YDiff)), 
+					// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
+					// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
+				}
+			}
+
+
+			// Draw player
+
+			// Draw box
+			// For a box, need 4 faces, so 4 quads
+			// DrawBox(&EntityBatch, &EntityBatch, World);
+
+			// Dashing state if dashing
+			Graphics::SpriteSheet* Sheet = World->Animation2DSystem->Animations[Player].Sheet; 
+			Enjon::uint32 Frame = World->Animation2DSystem->Animations[Player].CurrentFrame;
+
+			auto Vel = &World->TransformSystem->Transforms[Player].Velocity;
+			if (IsDashing && !(Vel->x == 0 && Vel->y == 0))
+			{
+				// Make unable to collide with enemy
+				World->AttributeSystem->Masks[Player] &= ~Masks::GeneralOptions::COLLIDABLE;
+
+				float DashAmount = 10.0f;
+				auto Pos = &World->TransformSystem->Transforms[Player].Position;
+				auto V = EM::Vec2::Normalize(Vel->XY());
+				V *= 5.0f;
+				Pos->x += V.x;
+				Pos->y += V.y;
+
+				// Setting the "alarm"
+				DashingCounter += 0.05f;
+				if (DashingCounter >= 1.0f) { IsDashing = false; DashingCounter = 0.0f; }
+				float Opacity = 0.5f;
+				for (int i = 0; i < 5; i++)
+				{
+					Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
+					Enjon::Graphics::ColorRGBA16 DashColor = World->Renderer2DSystem->Renderers[Player].Color;
+					// DashColor.r += (i + i*2.9f);
+					DashColor.g += (i + i*20.75f);
+					DashColor.b += (i*5.25f);
+					Enjon::Math::Vec2 PP = World->TransformSystem->Transforms[Player].Position.XY();
+					Enjon::Math::Vec2 PV = World->TransformSystem->Transforms[Player].Velocity.XY();
+					PP.x -= (i + i*2.75f) * PV.x;
+					PP.y -= (i + i*2.75f) * PV.y;
+					EntityBatch.Add(Math::Vec4(PP, dims), Sheet->GetUV(Frame - i), Sheet->texture.id, Graphics::SetOpacity(DashColor, Opacity), PP.y - World->TransformSystem->Transforms[Player].Position.z);
+					Opacity -= 0.05f;
+
+					// Add a particle pos, vel, size, color, texture, decay, batch
+					EG::Particle2D::AddParticle(EM::Vec3(PP + EM::Vec2(40.0f, 50.0f), 0.0f), EM::Vec3(PV * -1.0f, 0.0f), EM::Vec2(2.0f, 2.0f), DashColor, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png").id, 0.05f, World->ParticleEngine->ParticleBatches[0]);
+					// Add a particle pos, vel, size, color, texture, decay, batch
+					EG::Particle2D::AddParticle(EM::Vec3(PP + EM::Vec2(40.0f, 30.0f), 0.0f), EM::Vec3(PV * -1.0f, 0.0f), EM::Vec2(Random::Roll(25, 100), Random::Roll(25, 100)), 
+						EG::SetOpacity(DashColor, 0.05f), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/smoke_1.png").id, 0.025f, LightParticleBatch);
+				}
+			}
+
+			else 
+			{
+				static float slide_counter = 0.0f;
+				slide_counter += 0.05f;
+				if (slide_counter >= 1.0f)
+				{
+					World->TransformSystem->Transforms[Player].VelocityGoalScale = 0.3f;
+					slide_counter = 0.0f;
+					// Make able to collide with enemy again
+					World->AttributeSystem->Masks[Player] |= Masks::GeneralOptions::COLLIDABLE;
 				}
 
 			}
-			else if (World->Types[e] == ECS::Component::EntityType::ITEM)
+			// Get angle from mouse to coordinates
+			Math::Vec2 MouseCoords = Input.GetMouseCoords();
+			Camera.ConvertScreenToWorld(MouseCoords);
+			static Math::Vec2 right(1.0f, 0.0f);
+			Math::Vec2 Diff = Math::Vec2::Normalize(World->TransformSystem->Transforms[Player].Position.XY() - MouseCoords);
+			float DotProduct = Diff.DotProduct(right);
+			float AimAngle = acos(DotProduct) * 180.0f / M_PI;
+			if (Diff.y < 0.0f) AimAngle *= -1; 
+			// printf("Aim Angle: %.2f\n", AimAngle);
+
+
+			// Draw player "spell" box for testing purposes
+			// Get the box coords in cartesian view, then translate to iso coords
+			static float rotation_count = 0.0f;
+			rotation_count += 1.25f;
+			Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[Player].CartesianPosition) + Math::Vec2(45.0f, 35.0f));
+			float boxRadius = 10.0f;
+			BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle - 90)), sin(Math::ToRadians(AimAngle - 90))));
+			// EntityBatch.Add(Math::Vec4(BoxCoords, 100, 50), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png").id, 
+			// 					Graphics::SetOpacity(Graphics::RGBA16_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 45), Graphics::CoordinateFormat::ISOMETRIC);
+
+
+			Enjon::Math::Vec2 AimCoords(World->TransformSystem->Transforms[Player].Position.XY() + Math::Vec2(100.0f, -100.0f));
+			float aimRadius = 0.25f;
+			AimCoords = AimCoords - aimRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle)), sin(Math::ToRadians(AimAngle))));
+
+			// Draw player "aim" box for testing purposes
+			static float aim_count = 0.0f;
+			static float aim_count2 = 0.0f;
+			aim_count += 0.5f;
+			static Enjon::uint32 aim_index = 0;
+			static Graphics::ColorRGBA16 AimColor;
+			if (aim_count >= 1.0f)
 			{
-				EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), ESpriteSheet->GetUV(0), ESpriteSheet->texture.id, *Color, EntityPosition->y, 
-										World->TransformSystem->Transforms[e].Angle, World->Renderer2DSystem->Renderers[e].Format);
-			}
-			else
-			{
-				auto Sheet = World->Animation2DSystem->Animations[e].Sheet;
-				auto Dims = World->TransformSystem->Transforms[e].Dimensions;
-				static int index;
-
-				// Get attack vector and draw arrow based on that
-				Enjon::Math::Vec2* AttackVector = &World->TransformSystem->Transforms[Player].AttackVector;
-				if		(*AttackVector == EAST)				index = 0;
-				else if (*AttackVector == NORTHEAST)		index = 1;
-				else if (*AttackVector == NORTH)			index = 2;
-				else if (*AttackVector == NORTHWEST)		index = 3;
-				else if (*AttackVector == WEST)				index = 4;
-				else if (*AttackVector == SOUTHWEST)		index = 5;
-				else if (*AttackVector == SOUTH)			index = 6;
-				else if (*AttackVector == SOUTHEAST)		index = 7;
-				else										index = 0;
-
-				EntityBatch.Add(Math::Vec4(EntityPosition->XY(), Dims), Sheet->GetUV(index), Sheet->texture.id, *Color, EntityPosition->y, World->TransformSystem->Transforms[e].Angle, 
-									World->Renderer2DSystem->Renderers[e].Format);
-			}
-
-			Ground = &World->TransformSystem->Transforms[e].GroundPosition;
-			auto EAABB = &World->TransformSystem->Transforms[e].AABB;
-			if (World->Types[e] != ECS::Component::EntityType::ITEM)
-			{
-				EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);
-	
-				float XDiff = World->TransformSystem->Transforms[e].AABBPadding.x;
-				float YDiff = World->TransformSystem->Transforms[e].AABBPadding.y;
-				// Enjon::Math::Vec2 EAABBIsoMin(Enjon::Math::CartesianToIso(EAABB->Min) + Math::Vec2(XDiff / 2.0f, XDiff / 2.0f));
-				Enjon::Math::Vec2 EAABBIsoMin(Enjon::Math::CartesianToIso(EAABB->Min));
-				auto EAABBIsoMax(EM::CartesianToIso(EAABB->Max));
-				// float EAABBHeight = EAABB->Max.y - EAABB->Min.y, EAABBWidth = EAABB->Max.x - EAABB->Min.y;
-				// EntityBatch.Add(Math::Vec4(EAABBIsoMin, Math::Vec2(abs(EAABB->Max.x - EAABB->Min.x), abs(EAABB->Max.y - EAABB->Min.y))), 
-				// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
-				// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
-				// EntityBatch.Add(Math::Vec4(EAABBIsoMin.x, EAABBIsoMin.y, Math::Vec2(XDiff, YDiff)), 
-				// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
-				// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
-			}
-		}
-
-
-		// Draw player
-
-		// Draw box
-		// For a box, need 4 faces, so 4 quads
-		// DrawBox(&EntityBatch, &EntityBatch, World);
-
-		// Dashing state if dashing
-		Graphics::SpriteSheet* Sheet = World->Animation2DSystem->Animations[Player].Sheet; 
-		Enjon::uint32 Frame = World->Animation2DSystem->Animations[Player].CurrentFrame;
-
-		auto Vel = &World->TransformSystem->Transforms[Player].Velocity;
-		if (IsDashing && !(Vel->x == 0 && Vel->y == 0))
-		{
-			// Make unable to collide with enemy
-			World->AttributeSystem->Masks[Player] &= ~Masks::GeneralOptions::COLLIDABLE;
-
-			float DashAmount = 10.0f;
-			auto Pos = &World->TransformSystem->Transforms[Player].Position;
-			auto V = EM::Vec2::Normalize(Vel->XY());
-			V *= 5.0f;
-			Pos->x += V.x;
-			Pos->y += V.y;
-
-			// Setting the "alarm"
-			DashingCounter += 0.05f;
-			if (DashingCounter >= 1.0f) { IsDashing = false; DashingCounter = 0.0f; }
-			float Opacity = 0.5f;
-			for (int i = 0; i < 5; i++)
-			{
-				Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
-				Enjon::Graphics::ColorRGBA16 DashColor = World->Renderer2DSystem->Renderers[Player].Color;
-				// DashColor.r += (i + i*2.9f);
-				DashColor.g += (i + i*20.75f);
-				DashColor.b += (i*5.25f);
-				Enjon::Math::Vec2 PP = World->TransformSystem->Transforms[Player].Position.XY();
-				Enjon::Math::Vec2 PV = World->TransformSystem->Transforms[Player].Velocity.XY();
-				PP.x -= (i + i*2.75f) * PV.x;
-				PP.y -= (i + i*2.75f) * PV.y;
-				EntityBatch.Add(Math::Vec4(PP, dims), Sheet->GetUV(Frame - i), Sheet->texture.id, Graphics::SetOpacity(DashColor, Opacity), PP.y - World->TransformSystem->Transforms[Player].Position.z);
-				Opacity -= 0.05f;
-
-				// Add a particle pos, vel, size, color, texture, decay, batch
-				EG::Particle2D::AddParticle(EM::Vec3(PP + EM::Vec2(40.0f, 50.0f), 0.0f), EM::Vec3(PV * -1.0f, 0.0f), EM::Vec2(2.0f, 2.0f), DashColor, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png").id, 0.05f, World->ParticleEngine->ParticleBatches[0]);
-				// Add a particle pos, vel, size, color, texture, decay, batch
-				EG::Particle2D::AddParticle(EM::Vec3(PP + EM::Vec2(40.0f, 30.0f), 0.0f), EM::Vec3(PV * -1.0f, 0.0f), EM::Vec2(Random::Roll(25, 100), Random::Roll(25, 100)), 
-					EG::SetOpacity(DashColor, 0.05f), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/smoke_1.png").id, 0.025f, LightParticleBatch);
-			}
-		}
-
-		else 
-		{
-			static float slide_counter = 0.0f;
-			slide_counter += 0.05f;
-			if (slide_counter >= 1.0f)
-			{
-				World->TransformSystem->Transforms[Player].VelocityGoalScale = 0.3f;
-				slide_counter = 0.0f;
-				// Make able to collide with enemy again
-				World->AttributeSystem->Masks[Player] |= Masks::GeneralOptions::COLLIDABLE;
-			}
-
-		}
-		// Get angle from mouse to coordinates
-		Math::Vec2 MouseCoords = Input.GetMouseCoords();
-		Camera.ConvertScreenToWorld(MouseCoords);
-		static Math::Vec2 right(1.0f, 0.0f);
-		Math::Vec2 Diff = Math::Vec2::Normalize(World->TransformSystem->Transforms[Player].Position.XY() - MouseCoords);
-		float DotProduct = Diff.DotProduct(right);
-		float AimAngle = acos(DotProduct) * 180.0f / M_PI;
-		if (Diff.y < 0.0f) AimAngle *= -1; 
-		// printf("Aim Angle: %.2f\n", AimAngle);
-
-
-		// Draw player "spell" box for testing purposes
-		// Get the box coords in cartesian view, then translate to iso coords
-		static float rotation_count = 0.0f;
-		rotation_count += 1.25f;
-		Enjon::Math::Vec2 BoxCoords(Math::CartesianToIso(World->TransformSystem->Transforms[Player].CartesianPosition) + Math::Vec2(45.0f, 35.0f));
-		float boxRadius = 10.0f;
-		BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle - 90)), sin(Math::ToRadians(AimAngle - 90))));
-		// EntityBatch.Add(Math::Vec4(BoxCoords, 100, 50), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png").id, 
-		// 					Graphics::SetOpacity(Graphics::RGBA16_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 45), Graphics::CoordinateFormat::ISOMETRIC);
-
-
-		Enjon::Math::Vec2 AimCoords(World->TransformSystem->Transforms[Player].Position.XY() + Math::Vec2(100.0f, -100.0f));
-		float aimRadius = 0.25f;
-		AimCoords = AimCoords - aimRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle)), sin(Math::ToRadians(AimAngle))));
-
-		// Draw player "aim" box for testing purposes
-		static float aim_count = 0.0f;
-		static float aim_count2 = 0.0f;
-		aim_count += 0.5f;
-		static Enjon::uint32 aim_index = 0;
-		static Graphics::ColorRGBA16 AimColor;
-		if (aim_count >= 1.0f)
-		{
-			if (aim_index == 0)
-			{
-				aim_count2 += 0.05f;
-				if (aim_count2 >= 1.0f)
+				if (aim_index == 0)
 				{
-					aim_count2 = 0.0f;
-					aim_count = 0.0f;
-					aim_index++;
-				}	
-			}
-			else if (aim_index == 7)
-			{
-				AimColor = Graphics::RGBA16_Red();
-				aim_count2 += 0.025f;
-				if (aim_count2 >= 1.0f)
+					aim_count2 += 0.05f;
+					if (aim_count2 >= 1.0f)
+					{
+						aim_count2 = 0.0f;
+						aim_count = 0.0f;
+						aim_index++;
+					}	
+				}
+				else if (aim_index == 7)
+				{
+					AimColor = Graphics::RGBA16_Red();
+					aim_count2 += 0.025f;
+					if (aim_count2 >= 1.0f)
+					{
+						AimColor = Graphics::RGBA16_White();
+						aim_index = 0;
+						aim_count = 0.0f;
+						aim_count2 = 0.0f;
+					}
+
+				}
+				else
 				{
 					AimColor = Graphics::RGBA16_White();
-					aim_index = 0;
+					aim_index++;
 					aim_count = 0.0f;
-					aim_count2 = 0.0f;
 				}
-
 			}
-			else
+			static Graphics::SpriteSheet AimSheet;
+			AimSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png"), Math::iVec2(1, 1));
+
+
+			Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
+			const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[Player].Color;
+			Enjon::Math::Vec2* PlayerPosition = &World->TransformSystem->Transforms[Player].Position.XY();
+			if (World->Animation2DSystem->Animations[Player].Sheet == EG::SpriteSheetManager::GetSpriteSheet("PlayerSheet2"))
 			{
-				AimColor = Graphics::RGBA16_White();
-				aim_index++;
-				aim_count = 0.0f;
+				dims = Math::Vec2(115.0f, 115.0f);
 			}
-		}
-		static Graphics::SpriteSheet AimSheet;
-		AimSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png"), Math::iVec2(1, 1));
+			else dims = Math::Vec2(100.0f, 100.0f);
 
+			//////////////////////////////////////////
+			// DRAW PLAYER ///////////////////////////
+			//////////////////////////////////////////
 
-		Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
-		const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[Player].Color;
-		Enjon::Math::Vec2* PlayerPosition = &World->TransformSystem->Transforms[Player].Position.XY();
-		if (World->Animation2DSystem->Animations[Player].Sheet == EG::SpriteSheetManager::GetSpriteSheet("PlayerSheet2"))
-		{
-			dims = Math::Vec2(115.0f, 115.0f);
-		}
-		else dims = Math::Vec2(100.0f, 100.0f);
+			// EntityBatch.Add(Math::Vec4(*PlayerPosition, dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
 
-		//////////////////////////////////////////
-		// DRAW PLAYER ///////////////////////////
-		//////////////////////////////////////////
+			{
+				// void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White(), float ScalingFactor = 1.0f);
+				// Get handle to image frame
+				auto CurrentIndex = World->Animation2DSystem->AnimComponents[Player].CurrentIndex;
+				auto Image = &World->Animation2DSystem->AnimComponents[Player].CurrentAnimation->Frames.at(CurrentIndex);
 
-		// EntityBatch.Add(Math::Vec4(*PlayerPosition, dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
+				EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::RGBA16_White(), 1.0f, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
+			}
 
-		{
-			// void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White(), float ScalingFactor = 1.0f);
-			// Get handle to image frame
-			auto CurrentIndex = World->Animation2DSystem->AnimComponents[Player].CurrentIndex;
-			auto Image = &World->Animation2DSystem->AnimComponents[Player].CurrentAnimation->Frames.at(CurrentIndex);
+			//////////////////////////////////////////
 
-			EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::RGBA16_White(), 1.0f, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
-		}
+			Enjon::Math::Vec2* A = &World->TransformSystem->Transforms[Player].CartesianPosition;
+			Enjon::Physics::AABB* AABB = &World->TransformSystem->Transforms[Sword].AABB;
+			Enjon::Math::Vec2 AV = World->TransformSystem->Transforms[Player].AttackVector;
+			float XDiff = TILE_SIZE;
+			Enjon::Math::Vec2 AABBIsomin(Enjon::Math::CartesianToIso(AABB->Min) + Math::Vec2(XDiff, 0.0f));
+			Enjon::Math::Vec2 AABBIsomax(Enjon::Math::CartesianToIso(AABB->Max));
+			float AABBHeight = AABB->Max.y - AABB->Min.y, AABBWidth = AABB->Max.x - AABB->Min.y;
 
-		//////////////////////////////////////////
+			// Draw player ground tile 
+			const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;
+			EntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
+										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f));
+			// Draw player shadow
+			EntityBatch.Add(Math::Vec4(GroundPosition->x - 20.0f, GroundPosition->y - 20.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
+										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
 
-		Enjon::Math::Vec2* A = &World->TransformSystem->Transforms[Player].CartesianPosition;
-		Enjon::Physics::AABB* AABB = &World->TransformSystem->Transforms[Sword].AABB;
-		Enjon::Math::Vec2 AV = World->TransformSystem->Transforms[Player].AttackVector;
-		float XDiff = TILE_SIZE;
-		Enjon::Math::Vec2 AABBIsomin(Enjon::Math::CartesianToIso(AABB->Min) + Math::Vec2(XDiff, 0.0f));
-		Enjon::Math::Vec2 AABBIsomax(Enjon::Math::CartesianToIso(AABB->Max));
-		float AABBHeight = AABB->Max.y - AABB->Min.y, AABBWidth = AABB->Max.x - AABB->Min.y;
+		
+			///////////////////////////////
+			// BEAMS //////////////////////	
+			///////////////////////////////
 
-		// Draw player ground tile 
-		const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;
-		EntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f));
-		// Draw player shadow
-		EntityBatch.Add(Math::Vec4(GroundPosition->x - 20.0f, GroundPosition->y - 20.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
-									Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
+			/*
+			EG::ColorRGBA16 C = EG::RGBA16_ZombieGreen();
+			EM::Vec2 Norm;
 
-	
-		///////////////////////////////
-		// BEAMS //////////////////////	
-		///////////////////////////////
-
-		/*
-		EG::ColorRGBA16 C = EG::RGBA16_ZombieGreen();
-		EM::Vec2 Norm;
-
-		// First segment
-		{
-			// Random verticle bar to test rotations
-			EM::Vec2 BeamDims = BeamSegments.at(0).Dimensions;
-			EM::Vec2 BeamPos = World->TransformSystem->Transforms[Player].Position.XY() + EM::Vec2(BeamDims.y / 2.0f + 60.0f, 40.0f);
-			Enjon::Math::Vec2 MousePos = Input.GetMouseCoords();
-			Camera.ConvertScreenToWorld(MousePos);
-			MousePos = EM::IsoToCartesian(MousePos);
-			BeamPos = EM::IsoToCartesian(BeamPos);
-			EM::Vec2 R(1,0);
-			Norm = EM::Vec2::Normalize(MousePos - BeamPos);
-			auto a = acos(Norm.DotProduct(R)) * 180.0f / M_PI;
-			if (Norm.y < 0) a *= -1;
-			BeamPos = EM::CartesianToIso(BeamPos);
-			auto BeamX = BeamPos.x;
-			auto BeamY = BeamPos.y;
-			auto Rad = 0.5f * BeamDims.x;
-			BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
-			BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
-			BeamSegments.at(0).Position = BeamPos;
-			BeamSegments.at(0).Angle = a;
-
-			// Beam 1
-			EntityBatch.Add(EM::Vec4(BeamPos, BeamDims), EM::Vec4(0, 0, 1, 1), 
-							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/VerticleBar.png").id, C, BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
-		}
-
-
-
-		// Rest of the segments
-		{
-			for (Enjon::uint32 i = 1; i < BeamSegments.size(); i++)
+			// First segment
 			{
 				// Random verticle bar to test rotations
-				EM::Vec2 BeamDims = BeamSegments.at(i).Dimensions;
-				EM::Vec2 BeamPos = BeamSegments.at(i - 1).Position;
-				float O = BeamSegments.at(0).Angle;
-				float A = BeamSegments.at(i - 1).Angle;
-				float B = BeamSegments.at(i).Angle;
-				float Difference = BeamSegments.at(i - 1).Angle - BeamSegments.at(i).Angle;
-				// if ((O >= 170 && B <= -180) || (O <= -170 && B >= 170)) { Difference *= -1;}
-				float a;
-				if (abs(Difference) > 290) a = B + Difference;
-				else a = B + Difference * 0.5f;
-				// a += ER::Roll(-7, 7);
+				EM::Vec2 BeamDims = BeamSegments.at(0).Dimensions;
+				EM::Vec2 BeamPos = World->TransformSystem->Transforms[Player].Position.XY() + EM::Vec2(BeamDims.y / 2.0f + 60.0f, 40.0f);
+				Enjon::Math::Vec2 MousePos = Input.GetMouseCoords();
+				Camera.ConvertScreenToWorld(MousePos);
+				MousePos = EM::IsoToCartesian(MousePos);
+				BeamPos = EM::IsoToCartesian(BeamPos);
+				EM::Vec2 R(1,0);
+				Norm = EM::Vec2::Normalize(MousePos - BeamPos);
+				auto a = acos(Norm.DotProduct(R)) * 180.0f / M_PI;
+				if (Norm.y < 0) a *= -1;
+				BeamPos = EM::CartesianToIso(BeamPos);
+				auto BeamX = BeamPos.x;
+				auto BeamY = BeamPos.y;
 				auto Rad = 0.5f * BeamDims.x;
-				BeamDims.y += i * sin(t);
 				BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
 				BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
-				BeamSegments.at(i).Position = BeamPos;
-				BeamSegments.at(i).Angle = a;
+				BeamSegments.at(0).Position = BeamPos;
+				BeamSegments.at(0).Angle = a;
 
+				// Beam 1
 				EntityBatch.Add(EM::Vec4(BeamPos, BeamDims), EM::Vec4(0, 0, 1, 1), 
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/VerticleBar.png").id, EG::SetOpacity(C, (sin(t) + 1.1f) / 2.0f), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
-			}	
-		}
-		*/
-
-		/*
-		{
-			static float SegCounter = 0.0f;
-			SegCounter += 0.1f;
-			if (SegCounter > 5.0f)
-			{
-				printf("%.2f, %.2f\n", BeamSegments.at(0).Angle, BeamSegments.at(19).Angle);
-				SegCounter = 0.0f;
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/VerticleBar.png").id, C, BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
 			}
-		}
-		*/
-
-		////////////////////////////////////////////////
-		////////////////////////////////////////////////
-
-		// Add the health bar for shiggles
-		// float X = HUDCamera.GetPosition().x - 190.0f;
-		// float Y = HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f;
-		// HUDBatch.Add(EM::Vec4(X, Y, 400.0f, 10.0f),
-		// 			 EM::Vec4(0, 0, 1, 1), 
-		// 			  HealthSheet.texture.id, 
-		// 			  EG::RGBA16_Red());
-
-		auto F = EG::FontManager::GetFont("Bold");
-
-		if (Paused)
-		{
-			// Draw paused text
-			Enjon::Graphics::Fonts::PrintText(Camera.GetPosition().x - 110.0f, Camera.GetPosition().y - 30.0f, 1.0f, "Paused", F, TextBatch);
-		}
-
-		if (DebugInfo)
-		{
-			// Profiling info
-			// Add FPS
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
-											0.4f, "FPS: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
-											0.4f, FPSString, F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-
-			// Add CollisionTime
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 80.0f, 
-											0.4f, "Collisions: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 80.0f, 
-											0.4f, CollisionTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-
-			// Add RenderTime
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
-											0.4f, "Rendering: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
-											0.4f, RenderTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-
-			// Add EffectTime
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, 
-											0.4f, "Effects: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, 
-											0.4f, EffectTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-
-			// Add TileOverlayTime
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
-											0.4f, "TileOverlay: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
-											0.4f, TileOverlayTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-
-			// // Add LightsToDraw
-			Enjon::uint32 LightsSize = LightsToDraw.size(); 
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 160.0f, 
-											0.4f, "LightsToDraw: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 160.0f, 
-											0.4f, std::to_string(LightsSize), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-
-			// // LightZ
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 180.0f, 
-											0.4f, "LightZ: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 180.0f, 
-											0.4f, std::to_string(LightZ), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-
-			// Entities
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 200.0f, 
-											0.4f, "Entities: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 200.0f, 
-											0.4f, std::to_string(World->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-
-			// Renderer size
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 220.0f, 
-											0.4f, "Entities Drawn: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 220.0f, 
-											0.4f, std::to_string(World->Renderer2DSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-
-			// Collisions size
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 240.0f, 
-											0.4f, "Collisions size: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 240.0f, 
-											0.4f, std::to_string(World->CollisionSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-
-			// Transform run time
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 260.0f, 
-											0.4f, "Transforms: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 260.0f, 
-											0.4f, TransformTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-
-			// AI run time
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 280.0f, 
-											0.4f, "AI: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
-			Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 280.0f, 
-											0.4f, AITimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-
-		}
-
-		// // Draw Isometric compass
-		// MapEntityBatch.Add(EM::Vec4(HUDCamera.GetPosition() - EM::Vec2(SCREENWIDTH / 2.0f - 30.0f, -SCREENHEIGHT / 2.0f + 250.0f), 150.0f, 75.0f), 
-		// 				EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Coordinates.png").id, EG::RGBA16_White());
-
-		// Add particles to entity batch
-		EG::Particle2D::Draw(World->ParticleEngine, &Camera);
-
-		// Draw only the world that surrounds the player
-		{
-			// auto TW = 256.0f / 2.0f;
-			// EM::Vec2* PGP = &World->TransformSystem->Transforms[Player].CartesianPosition;
-			// uint32 R = -PGP->x / TW;
-			// uint32 C = -PGP->y / TW;
-
-			// // 12 block radius might be the smallest I'd like to go
-			// uint32 Radius = 12;
-			// uint32 Padding = 2;
-
-			// uint32 MinR = R - Radius;
-			// uint32 MaxR = R + Radius + Padding;
-			// uint32 MinC = C - Radius;
-			// uint32 MaxC = C + Radius + Padding;
 
 
-			// if (C <= Radius) MinC = 0;
-			// if (R <= Radius) MinR = 0;
-			// if (C >= LEVELSIZE - Radius - Padding) MaxC = LEVELSIZE;
-			// if (R >= LEVELSIZE - Radius - Padding) MaxR = LEVELSIZE;
 
-			// auto IsoTiles = level.GetIsoTiles();
-			// for (uint32 i = MinR; i < MaxR; i++)
-			// {
-			// 	for (uint32 j = MinC; j < MaxC; j++)
-			// 	{
-			// 		auto T = IsoTiles[LEVELSIZE * i + j];
-
-			// 		// If front wall, then lower opacity
-			// 		EG::ColorRGBA16 Color = EG::RGBA16_White();
-			// 		if (i == 0 || i >= LEVELSIZE - 1 || j == 0 || j >= LEVELSIZE - 1) Color = EG::SetOpacity(Color, 0.5f);
-			// 		EntityBatch.Add(Enjon::Math::Vec4(T->pos, T->dims), T->Sheet->GetUV(T->index), T->Sheet->texture.id, Color, T->depth);
-			// 	}
-			// }
-		}
-
-		/*-- RANDOM DRAWING --*/
-
-		// Add some random polygon
-		// std::vector<EM::Vec2> Points;
-		// Points.push_back(EM::Vec2(-1500, -1400));	// BL
-		// Points.push_back(EM::Vec2(-800, -1400));	// BR
-		// Points.push_back(EM::Vec2(-850, -1200));	// TR
-		// Points.push_back(EM::Vec2(-900, -1200));	// TL
-		// EntityBatch.AddPolygon(Points, EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::RGBA16_Orange(), Points.at(0).y, EG::CoordinateFormat::ISOMETRIC);
-
-		// Add a random cube 
-		// static EG::SpriteSheet* BoxSheet = EG::SpriteSheetManager::GetSpriteSheet("BoxSheet");
-		// EM::Vec2 BoxPos = World->TransformSystem->Transforms[Player].Position.XY();
-		// EntityBatch.Add(
-		// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
-		// 	BoxSheet->GetUV(0), 
-		// 	BoxSheet->texture.id
-		// 	EG::SetOpacity(EG::RGBA16_White(), 0.05f)
-		// 	);
-		// NormalsBatch.Add(
-		// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
-		// 	BoxSheet->GetUV(1),
-		// 	BoxSheet->texture.id,
-		// 	EG::SetOpacity(EG::RGBA16_White(), 0.5f)
-		// 	);
-
-
-		EntityBatch.End();
-		TextBatch.End(); 
-		LightBatch.End();
-		MapEntityBatch.End(); 
-		HUDBatch.End();
-		NormalsBatch.End();
-	
-		// Diffuse and Position Rendering
-		DiffuseFBO->Bind();
-		{
-			DiffuseShader->Use();
+			// Rest of the segments
 			{
-				// Set up uniforms
-				DiffuseShader->SetUniformMat4("model", model);
-				DiffuseShader->SetUniformMat4("view", view);
-				DiffuseShader->SetUniformMat4("projection", projection);
-
-				// Draw ground tiles
-				GroundTileBatch.RenderBatch();
-				// Draw TileOverlays
-				OverlayBatch.RenderBatch();
-				// Draw entities		
-				EntityBatch.RenderBatch();
-
-				ParticleBatch.RenderBatch();
-			}
-			DiffuseShader->Unuse();
-		}
-		DiffuseFBO->Unbind();
-
-		// Normals Rendering
-		NormalsFBO->Bind();
-		{
-			NormalsShader->Use();
-			{
-				// Set up uniforms
-				NormalsShader->SetUniformMat4("model", model);
-				NormalsShader->SetUniformMat4("view", view);
-				NormalsShader->SetUniformMat4("projection", projection);
-
-				GroundTileNormalsBatch.RenderBatch();
-				NormalsBatch.RenderBatch();
-			}
-			NormalsShader->Unuse();
-		}
-		NormalsFBO->Unbind();
-
-		// Deferred Render
-		glDisable(GL_DEPTH_TEST);
-		glBlendFunc(GL_ONE, GL_ONE);
-		DeferredFBO->Bind();
-		{
-			DeferredShader->Use();
-			{
-				static GLuint m_diffuseID 	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_diffuse");
-				static GLuint m_normalsID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_normals");
-				static GLuint m_positionID  = glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_position");
-
-				EM::Vec3 CP = EM::Vec3(Camera.GetPosition(), 1.0f);
-
-				// Bind diffuse
-				glActiveTexture(GL_TEXTURE0);
-				glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, DiffuseFBO->GetDiffuseTexture());
-				glUniform1i(m_diffuseID, 0);
-
-				// Bind normals
-				glActiveTexture(GL_TEXTURE1);
-				glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, NormalsFBO->GetDiffuseTexture());
-				glUniform1i(m_normalsID, 1);
-
-				// Bind position
-				glActiveTexture(GL_TEXTURE2);
-				glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, DiffuseFBO->GetPositionTexture());
-				glUniform1i(m_positionID, 2);
-
-				glUniform1i(glGetUniformLocation(DeferredShader->GetProgramID(), "NumberOfLights"), LightsToDraw.size());
-
-				auto CameraScale = Camera.GetScale();
-				for (GLuint i = 0; i < LightsToDraw.size(); i++)
+				for (Enjon::uint32 i = 1; i < BeamSegments.size(); i++)
 				{
-					auto L = LightsToDraw.at(i);
+					// Random verticle bar to test rotations
+					EM::Vec2 BeamDims = BeamSegments.at(i).Dimensions;
+					EM::Vec2 BeamPos = BeamSegments.at(i - 1).Position;
+					float O = BeamSegments.at(0).Angle;
+					float A = BeamSegments.at(i - 1).Angle;
+					float B = BeamSegments.at(i).Angle;
+					float Difference = BeamSegments.at(i - 1).Angle - BeamSegments.at(i).Angle;
+					// if ((O >= 170 && B <= -180) || (O <= -170 && B >= 170)) { Difference *= -1;}
+					float a;
+					if (abs(Difference) > 290) a = B + Difference;
+					else a = B + Difference * 0.5f;
+					// a += ER::Roll(-7, 7);
+					auto Rad = 0.5f * BeamDims.x;
+					BeamDims.y += i * sin(t);
+					BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
+					BeamPos = BeamPos + Rad * EM::CartesianToIso(Math::Vec2(cos(EM::ToRadians(a)), sin(EM::ToRadians(a))));
+					BeamSegments.at(i).Position = BeamPos;
+					BeamSegments.at(i).Angle = a;
 
-					glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Position").c_str()), L->Position.x, L->Position.y, L->Position.z + LightZ);
-					glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Color").c_str()), L->Color.r, L->Color.g, L->Color.b, L->Color.a);
-					glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Radius").c_str()), L->Radius / CameraScale);
-					glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Falloff").c_str()), L->Falloff.x, L->Falloff.y, L->Falloff.z);
+					EntityBatch.Add(EM::Vec4(BeamPos, BeamDims), EM::Vec4(0, 0, 1, 1), 
+									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/VerticleBar.png").id, EG::SetOpacity(C, (sin(t) + 1.1f) / 2.0f), BeamPos.y, EM::ToRadians(a), EG::CoordinateFormat::ISOMETRIC);
+				}	
+			}
+			*/
+
+			/*
+			{
+				static float SegCounter = 0.0f;
+				SegCounter += 0.1f;
+				if (SegCounter > 5.0f)
+				{
+					printf("%.2f, %.2f\n", BeamSegments.at(0).Angle, BeamSegments.at(19).Angle);
+					SegCounter = 0.0f;
 				}
+			}
+			*/
 
-				// Set uniforms
-				glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
-							 SCREENWIDTH, SCREENHEIGHT);
-				glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.8f);
-				glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
+			////////////////////////////////////////////////
+			////////////////////////////////////////////////
 
-				glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
-												Camera.GetCameraMatrix().Invert().elements);
-				glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "View"), 1, 0, 
-												Camera.GetCameraMatrix().elements);
-				glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), "Scale"), Camera.GetScale());
+			// Add the health bar for shiggles
+			// float X = HUDCamera.GetPosition().x - 190.0f;
+			// float Y = HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f;
+			// HUDBatch.Add(EM::Vec4(X, Y, 400.0f, 10.0f),
+			// 			 EM::Vec4(0, 0, 1, 1), 
+			// 			  HealthSheet.texture.id, 
+			// 			  EG::RGBA16_Red());
+
+			auto F = EG::FontManager::GetFont("Bold");
+
+			if (Paused)
+			{
+				// Draw paused text
+				Enjon::Graphics::Fonts::PrintText(Camera.GetPosition().x - 110.0f, Camera.GetPosition().y - 30.0f, 1.0f, "Paused", F, TextBatch);
+			}
+
+			if (DebugInfo)
+			{
+				// Profiling info
+				// Add FPS
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
+												0.4f, "FPS: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
+												0.4f, FPSString, F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// Add CollisionTime
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 80.0f, 
+												0.4f, "Collisions: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 80.0f, 
+												0.4f, CollisionTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// Add RenderTime
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
+												0.4f, "Rendering: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
+												0.4f, RenderTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// Add EffectTime
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, 
+												0.4f, "Effects: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, 
+												0.4f, EffectTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// Add TileOverlayTime
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
+												0.4f, "TileOverlay: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
+												0.4f, TileOverlayTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// // Add LightsToDraw
+				Enjon::uint32 LightsSize = LightsToDraw.size(); 
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 160.0f, 
+												0.4f, "LightsToDraw: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 160.0f, 
+												0.4f, std::to_string(LightsSize), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// // LightZ
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 180.0f, 
+												0.4f, "LightZ: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 180.0f, 
+												0.4f, std::to_string(LightZ), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// Entities
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 200.0f, 
+												0.4f, "Entities: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 200.0f, 
+												0.4f, std::to_string(World->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// Renderer size
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 220.0f, 
+												0.4f, "Entities Drawn: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 220.0f, 
+												0.4f, std::to_string(World->Renderer2DSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// Collisions size
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 240.0f, 
+												0.4f, "Collisions size: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 240.0f, 
+												0.4f, std::to_string(World->CollisionSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// Transform run time
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 260.0f, 
+												0.4f, "Transforms: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 260.0f, 
+												0.4f, TransformTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// AI run time
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 280.0f, 
+												0.4f, "AI: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 280.0f, 
+												0.4f, AITimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+			}
+
+			// // Draw Isometric compass
+			// MapEntityBatch.Add(EM::Vec4(HUDCamera.GetPosition() - EM::Vec2(SCREENWIDTH / 2.0f - 30.0f, -SCREENHEIGHT / 2.0f + 250.0f), 150.0f, 75.0f), 
+			// 				EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Coordinates.png").id, EG::RGBA16_White());
+
+			// Add particles to entity batch
+			EG::Particle2D::Draw(World->ParticleEngine, &Camera);
+
+			// Draw only the world that surrounds the player
+			{
+				// auto TW = 256.0f / 2.0f;
+				// EM::Vec2* PGP = &World->TransformSystem->Transforms[Player].CartesianPosition;
+				// uint32 R = -PGP->x / TW;
+				// uint32 C = -PGP->y / TW;
+
+				// // 12 block radius might be the smallest I'd like to go
+				// uint32 Radius = 12;
+				// uint32 Padding = 2;
+
+				// uint32 MinR = R - Radius;
+				// uint32 MaxR = R + Radius + Padding;
+				// uint32 MinC = C - Radius;
+				// uint32 MaxC = C + Radius + Padding;
 
 
-				// Render	
+				// if (C <= Radius) MinC = 0;
+				// if (R <= Radius) MinR = 0;
+				// if (C >= LEVELSIZE - Radius - Padding) MaxC = LEVELSIZE;
+				// if (R >= LEVELSIZE - Radius - Padding) MaxR = LEVELSIZE;
+
+				// auto IsoTiles = level.GetIsoTiles();
+				// for (uint32 i = MinR; i < MaxR; i++)
+				// {
+				// 	for (uint32 j = MinC; j < MaxC; j++)
+				// 	{
+				// 		auto T = IsoTiles[LEVELSIZE * i + j];
+
+				// 		// If front wall, then lower opacity
+				// 		EG::ColorRGBA16 Color = EG::RGBA16_White();
+				// 		if (i == 0 || i >= LEVELSIZE - 1 || j == 0 || j >= LEVELSIZE - 1) Color = EG::SetOpacity(Color, 0.5f);
+				// 		EntityBatch.Add(Enjon::Math::Vec4(T->pos, T->dims), T->Sheet->GetUV(T->index), T->Sheet->texture.id, Color, T->depth);
+				// 	}
+				// }
+			}
+
+			/*-- RANDOM DRAWING --*/
+
+			// Add some random polygon
+			// std::vector<EM::Vec2> Points;
+			// Points.push_back(EM::Vec2(-1500, -1400));	// BL
+			// Points.push_back(EM::Vec2(-800, -1400));	// BR
+			// Points.push_back(EM::Vec2(-850, -1200));	// TR
+			// Points.push_back(EM::Vec2(-900, -1200));	// TL
+			// EntityBatch.AddPolygon(Points, EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::RGBA16_Orange(), Points.at(0).y, EG::CoordinateFormat::ISOMETRIC);
+
+			// Add a random cube 
+			// static EG::SpriteSheet* BoxSheet = EG::SpriteSheetManager::GetSpriteSheet("BoxSheet");
+			// EM::Vec2 BoxPos = World->TransformSystem->Transforms[Player].Position.XY();
+			// EntityBatch.Add(
+			// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
+			// 	BoxSheet->GetUV(0), 
+			// 	BoxSheet->texture.id
+			// 	EG::SetOpacity(EG::RGBA16_White(), 0.05f)
+			// 	);
+			// NormalsBatch.Add(
+			// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
+			// 	BoxSheet->GetUV(1),
+			// 	BoxSheet->texture.id,
+			// 	EG::SetOpacity(EG::RGBA16_White(), 0.5f)
+			// 	);
+
+
+			EntityBatch.End();
+			TextBatch.End(); 
+			LightBatch.End();
+			MapEntityBatch.End(); 
+			HUDBatch.End();
+			NormalsBatch.End();
+		
+			// Diffuse and Position Rendering
+			DiffuseFBO->Bind();
+			{
+				DiffuseShader->Use();
 				{
-					glBindVertexArray(quadVAO);
-					glDrawArrays(GL_TRIANGLES, 0, 6);
-					glBindVertexArray(0);
+					// Set up uniforms
+					DiffuseShader->SetUniformMat4("model", model);
+					DiffuseShader->SetUniformMat4("view", view);
+					DiffuseShader->SetUniformMat4("projection", projection);
 
+					// Draw ground tiles
+					GroundTileBatch.RenderBatch();
+					// Draw TileOverlays
+					OverlayBatch.RenderBatch();
+					// Draw entities		
+					EntityBatch.RenderBatch();
+
+					ParticleBatch.RenderBatch();
+				}
+				DiffuseShader->Unuse();
+			}
+			DiffuseFBO->Unbind();
+
+			// Normals Rendering
+			NormalsFBO->Bind();
+			{
+				NormalsShader->Use();
+				{
+					// Set up uniforms
+					NormalsShader->SetUniformMat4("model", model);
+					NormalsShader->SetUniformMat4("view", view);
+					NormalsShader->SetUniformMat4("projection", projection);
+
+					GroundTileNormalsBatch.RenderBatch();
+					NormalsBatch.RenderBatch();
+				}
+				NormalsShader->Unuse();
+			}
+			NormalsFBO->Unbind();
+
+			// Deferred Render
+			glDisable(GL_DEPTH_TEST);
+			glBlendFunc(GL_ONE, GL_ONE);
+			DeferredFBO->Bind();
+			{
+				DeferredShader->Use();
+				{
+					static GLuint m_diffuseID 	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_diffuse");
+					static GLuint m_normalsID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_normals");
+					static GLuint m_positionID  = glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_position");
+
+					EM::Vec3 CP = EM::Vec3(Camera.GetPosition(), 1.0f);
+
+					// Bind diffuse
 					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, 0);
+					glEnable(GL_TEXTURE_2D);
+					glBindTexture(GL_TEXTURE_2D, DiffuseFBO->GetDiffuseTexture());
+					glUniform1i(m_diffuseID, 0);
+
+					// Bind normals
+					glActiveTexture(GL_TEXTURE1);
+					glEnable(GL_TEXTURE_2D);
+					glBindTexture(GL_TEXTURE_2D, NormalsFBO->GetDiffuseTexture());
+					glUniform1i(m_normalsID, 1);
+
+					// Bind position
+					glActiveTexture(GL_TEXTURE2);
+					glEnable(GL_TEXTURE_2D);
+					glBindTexture(GL_TEXTURE_2D, DiffuseFBO->GetPositionTexture());
+					glUniform1i(m_positionID, 2);
+
+					glUniform1i(glGetUniformLocation(DeferredShader->GetProgramID(), "NumberOfLights"), LightsToDraw.size());
+
+					auto CameraScale = Camera.GetScale();
+					for (GLuint i = 0; i < LightsToDraw.size(); i++)
+					{
+						auto L = LightsToDraw.at(i);
+
+						glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Position").c_str()), L->Position.x, L->Position.y, L->Position.z + LightZ);
+						glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Color").c_str()), L->Color.r, L->Color.g, L->Color.b, L->Color.a);
+						glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Radius").c_str()), L->Radius / CameraScale);
+						glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Falloff").c_str()), L->Falloff.x, L->Falloff.y, L->Falloff.z);
+					}
+
+					// Set uniforms
+					glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
+								 SCREENWIDTH, SCREENHEIGHT);
+					glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.8f);
+					glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
+
+					glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
+													Camera.GetCameraMatrix().Invert().elements);
+					glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "View"), 1, 0, 
+													Camera.GetCameraMatrix().elements);
+					glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), "Scale"), Camera.GetScale());
+
+
+					// Render	
+					{
+						glBindVertexArray(quadVAO);
+						glDrawArrays(GL_TRIANGLES, 0, 6);
+						glBindVertexArray(0);
+
+						glActiveTexture(GL_TEXTURE0);
+						glBindTexture(GL_TEXTURE_2D, 0);
+					}
 				}
+				DeferredShader->Unuse();
 			}
-			DeferredShader->Unuse();
-		}
-		DeferredFBO->Unbind();
+			DeferredFBO->Unbind();
 
-		// Set blend function back to normalized
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			// Set blend function back to normalized
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		// Do any post processing here, of course...
-		// Bind default buffer and render deferred render texture
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			// Do any post processing here, of course...
+			// Bind default buffer and render deferred render texture
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		ScreenShader->Use();
-		{
-			DeferredBatch.Begin();
+			ScreenShader->Use();
 			{
-				DeferredBatch.Add(
-					EM::Vec4(-1, -1, 2, 2),
-					EM::Vec4(0, 0, 1, 1), 
-					DeferredFBO->GetDiffuseTexture()
-					);
+				DeferredBatch.Begin();
+				{
+					DeferredBatch.Add(
+						EM::Vec4(-1, -1, 2, 2),
+						EM::Vec4(0, 0, 1, 1), 
+						DeferredFBO->GetDiffuseTexture()
+						);
+				}
+				DeferredBatch.End();
+				DeferredBatch.RenderBatch();
 			}
-			DeferredBatch.End();
-			DeferredBatch.RenderBatch();
+			ScreenShader->Unuse();
+
+			// Draw Text
+			auto shader = Graphics::ShaderManager::GetShader("Text")->GetProgramID();
+			glUseProgram(shader);
+			{
+				glUniform1i(glGetUniformLocation(shader, "tex"),
+							 0);
+				glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
+									1, 0, model.elements);
+				glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
+									1, 0, view.elements);
+				glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
+									1, 0, projection.elements);
+			} 
+
+
+			TextBatch.RenderBatch();
+
+			// Draw Text
+			shader = Graphics::ShaderManager::GetShader("Text")->GetProgramID();
+			glUseProgram(shader);
+			{
+				glUniform1i(glGetUniformLocation(shader, "tex"),
+							 0);
+				glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
+									1, 0, model.elements);
+				glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
+									1, 0, view.elements);
+				glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
+									1, 0, projection.elements);
+			} 
+
+			// Render HUD camera	
+			view = HUDCamera.GetCameraMatrix();
+			glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
+								1, 0, view.elements);
+			HUDBatch.RenderBatch();
+
+
+			shader = Graphics::ShaderManager::GetShader("Basic")->GetProgramID();
+			glUseProgram(shader);
+
+			// Draw Cursor
+			DrawCursor(&HUDBatch, &Input);
 		}
-		ScreenShader->Unuse();
-
-		// Draw Text
-		auto shader = Graphics::ShaderManager::GetShader("Text")->GetProgramID();
-		glUseProgram(shader);
-		{
-			glUniform1i(glGetUniformLocation(shader, "tex"),
-						 0);
-			glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
-								1, 0, model.elements);
-			glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
-								1, 0, view.elements);
-			glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
-								1, 0, projection.elements);
-		} 
-
-
-		TextBatch.RenderBatch();
-
-		// Draw Text
-		shader = Graphics::ShaderManager::GetShader("Text")->GetProgramID();
-		glUseProgram(shader);
-		{
-			glUniform1i(glGetUniformLocation(shader, "tex"),
-						 0);
-			glUniformMatrix4fv(glGetUniformLocation(shader, "model"),
-								1, 0, model.elements);
-			glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
-								1, 0, view.elements);
-			glUniformMatrix4fv(glGetUniformLocation(shader, "projection"),
-								1, 0, projection.elements);
-		} 
-
-		// Render HUD camera	
-		view = HUDCamera.GetCameraMatrix();
-		glUniformMatrix4fv(glGetUniformLocation(shader, "view"),
-							1, 0, view.elements);
-		HUDBatch.RenderBatch();
-
-
-		shader = Graphics::ShaderManager::GetShader("Basic")->GetProgramID();
-		glUseProgram(shader);
-
-		// Draw Cursor
-		DrawCursor(&HUDBatch, &Input);
-
-
 
 		Window.SwapBuffer();
 
@@ -1517,7 +1544,8 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	}
 
 	if (Input->IsKeyPressed(SDLK_p)) {
-		Paused = !Paused;
+		// Paused = !Paused;
+		AnimationEditorOn = !AnimationEditorOn;
 	}
 
 	if (Input->IsKeyPressed(SDLK_i)) 
@@ -3224,7 +3252,7 @@ bool IsModifier(unsigned int Key)
 * SYSTEMS TEST
 */
 
-#if 1
+#if 0
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
