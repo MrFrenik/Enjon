@@ -53,5 +53,12 @@ Systems:
 		- Every entity needs an OnDestroy function to handle all of its dependency cleanup as well as calling any other functions	
 
 	- EntityManager:
-		- Adding / Removing entities is busted. Fix it.
+		- √ Adding / Removing entities is busted. Fix it.
 
+Editor:
+	- Be able to integrate live editing (animations, level creation, particle effects) into game engine
+
+	- Animation Editor:
+		- Allow hot-loading of animations for editing
+		- Be able to save changes back out to json files that were loaded in then reload AnimManager
+		

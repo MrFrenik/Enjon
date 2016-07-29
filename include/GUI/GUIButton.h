@@ -24,6 +24,18 @@ namespace Enjon { namespace GUI {
 	{
 		std::cout << "Hello!" << std::endl;
 	}
+
+	// TextBox
+	struct GUIDropDownButton : GUIElement<GUIDropDownButton>
+	{
+		void Init()
+		{}
+
+		ButtonState State;
+		HoveredState HoverState;
+		std::string Text;
+		EM::Vec2 Dimensions;
+	};
 }}
 
 

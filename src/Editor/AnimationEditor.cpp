@@ -17,6 +17,7 @@
 
 /*-- Standard Library includes --*/
 #include <unordered_map>
+#include <string>
 
 /*-- 3rd Party Includes --*/
 #include <SDL2/SDL.h>
@@ -168,6 +169,8 @@ namespace Enjon { namespace AnimationEditor {
 	GUIButton			ToggleOnionSkin;
 	GUITextBox 			InputText;
 	GUIAnimationElement SceneAnimation;
+	GUIDropDownButton 	AnimationSelection;	
+	GUIGroup 			Group;
 
 	Atlas atlas;
 	float AWidth;
@@ -195,6 +198,7 @@ namespace Enjon { namespace AnimationEditor {
 
 	EG::ColorRGBA16 PlayButtonColor;
 	EG::ColorRGBA16 InputTextColor;
+	EG::ColorRGBA16 AnimationSelectionColor;
 
 	/*-- Function Definitions --*/
 	bool Init(EI::InputManager* Input_Mgr, float SW, float SH)
@@ -264,19 +268,51 @@ namespace Enjon { namespace AnimationEditor {
 		SceneAnimation.HoverState = HoveredState::OFF_HOVER;
 		SceneAnimation.Type = GUIType::SCENE_ANIMATION;
 
+		// Set up AnimationSelection's text with name of current animation
+		AnimationSelection.Text = SceneAnimation.CurrentAnimation->Name;
+		AnimationSelection.Type = GUIType::BUTTON;
+		AnimationSelection.State = ButtonState::INACTIVE;
+		AnimationSelection.HoverState = HoveredState::OFF_HOVER;
+		AnimationSelection.Position = EM::Vec2 (
+													HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 105.0f,
+													HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 75.0f 
+												);
+
+		// Calculate AnimationSelection's dimensions
+		// Naive way first - get mouse position in UI space
+		{
+			std::string& T = AnimationSelection.Text;
+			float A = 0.0f;
+
+			std::cout << T << std::endl;
+
+			// Get advance
+			for (auto& c : T)
+			{
+				// Summation of all characters
+				A += EG::Fonts::GetAdvance(c, EG::FontManager::GetFont("WeblySleek"), 1.0f);
+			}
+
+			float Padding = 20.0f;
+			std::cout << "A: " << A << std::endl;
+			AnimationSelection.Dimensions = EM::Vec2(A + Padding, 20.0f);
+		}
+
+
 		// Set up text box's text
 		InputText.Text = std::string("");
 		InputText.CursorIndex = 0;
 
 		// Set up colors of buttons
-		PlayButtonColor = EG::RGBA16_White();
-		InputTextColor = EG::RGBA16(0.05f, 0.05f, 0.05f, 0.4f);
+		PlayButtonColor 		= EG::RGBA16_White();
+		InputTextColor 			= EG::RGBA16(0.05f, 0.05f, 0.05f, 0.4f);
+		AnimationSelectionColor = EG::RGBA16(0.25f, 0.25f, 0.25f, 0.3f);
 
 		PlayButton.Type = GUIType::BUTTON;
 		InputText.Type = GUIType::TEXTBOX;
 
-		GUIGroup Group;
-		Group.Position = EM::Vec2(0.0f, -200.0f);
+		// Set up Group
+		Group.Position = EM::Vec2(0.0f, -400.0f);
 
 		// Add PlayButton to Group
 		GUI::AddToGroup(&Group, &PlayButton);
@@ -288,30 +324,29 @@ namespace Enjon { namespace AnimationEditor {
 		PlayButton.Frames.push_back(EA::GetImageFrame(Frames, "playbuttonup", AnimTextureDir));
 		PlayButton.Frames.push_back(EA::GetImageFrame(Frames, "playbuttondown", AnimTextureDir));
 
-		PlayButton.Frames.at(ButtonState::INACTIVE).TextureAtlas = atlas;
-		PlayButton.Frames.at(ButtonState::ACTIVE).TextureAtlas = atlas;
+		PlayButton.Frames.at(ButtonState::INACTIVE).TextureAtlas 	= atlas;
+		PlayButton.Frames.at(ButtonState::ACTIVE).TextureAtlas 		= atlas;
 
 		// Set up PlayButton offsets
 		{
 			auto xo = 0.0f;
 			auto yo = 0.0f;
-			PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.x = xo;
-			PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.y = yo;
-			PlayButton.Frames.at(ButtonState::ACTIVE).Offsets.x = xo;
-			PlayButton.Frames.at(ButtonState::ACTIVE).Offsets.y = yo;
+			PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.x 	= xo;
+			PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.y 	= yo;
+			PlayButton.Frames.at(ButtonState::ACTIVE).Offsets.x 	= xo;
+			PlayButton.Frames.at(ButtonState::ACTIVE).Offsets.y 	= yo;
 		}
-
 
 		// Set up PlayButton position within the group
 		PlayButton.Position = EM::Vec2(10.0f, 20.0f);
 
 		// Set state to inactive
-		PlayButton.State = ButtonState::INACTIVE;
-		PlayButton.HoverState = HoveredState::OFF_HOVER;
+		PlayButton.State 		= ButtonState::INACTIVE;
+		PlayButton.HoverState 	= HoveredState::OFF_HOVER;
 
 		// Set up Scaling Factor
-		PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor = 1.0f;
-		PlayButton.Frames.at(ButtonState::ACTIVE).ScalingFactor = 1.0f;
+		PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor 	= 1.0f;
+		PlayButton.Frames.at(ButtonState::ACTIVE).ScalingFactor 	= 1.0f;
 
 		// Set up PlayButton AABB
 		PlayButton.AABB.Min =  EM::Vec2(PlayButton.Position.x + Group.Position.x + PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.x * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor,
@@ -323,13 +358,18 @@ namespace Enjon { namespace AnimationEditor {
 		InputText.Position = EM::Vec2(100.0f, 60.0f);
 
 		// Set states to inactive
-		InputText.State = ButtonState::INACTIVE;
-		InputText.HoverState = HoveredState::OFF_HOVER;
+		InputText.State 		= ButtonState::INACTIVE;
+		InputText.HoverState 	= HoveredState::OFF_HOVER;
 
 		// Set up InputText AABB
 		// This will be dependent on the size of the text, or it will be static, or it will be dependent on some image frame
 		InputText.AABB.Min = InputText.Position + Group.Position;
 		InputText.AABB.Max = InputText.AABB.Min + EM::Vec2(200.0f, 20.0f);
+
+		// Set up AnimationSelection AABB
+		// Calculate size of button
+		AnimationSelection.AABB.Min = AnimationSelection.Position;
+		AnimationSelection.AABB.Max = AnimationSelection.AABB.Min + AnimationSelection.Dimensions;
 
 		// Calculate Group's AABB by its children's AABBs 
 		Group.AABB.Min = Group.Position;
@@ -344,6 +384,35 @@ namespace Enjon { namespace AnimationEditor {
 			std::cout << "Emiting onion skin..." << std::endl;
 
 			ToggleOnionSkin.State = ToggleOnionSkin.State == ButtonState::INACTIVE ? ButtonState::ACTIVE : ButtonState::INACTIVE;
+		});
+
+
+		// Set up AnimationSelection's on_hover signal
+		AnimationSelection.on_hover.connect([&]()
+		{
+			AnimationSelection.HoverState = HoveredState::ON_HOVER;
+			AnimationSelectionColor = EG::SetOpacity(EG::RGBA16_LightGrey(), 0.3f);
+		});
+
+		// Set up AnimationSelection's off_hover signal
+		AnimationSelection.off_hover.connect([&]()
+		{
+			AnimationSelection.HoverState = HoveredState::OFF_HOVER;
+			AnimationSelectionColor = EG::RGBA16(0.25f, 0.25f, 0.25f, 0.3f);
+		});
+
+		// Set up AnimationSelection's on_click signal
+		AnimationSelection.on_click.connect([&]()
+		{
+			// Need a drop down box here with all the options to be selected
+			// For now, we can just switch the animations
+			auto& name = SceneAnimation.CurrentAnimation->Name;
+
+			if (name.compare("Player_Attack_OH_L_SE") == 0) SceneAnimation.CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SW");
+			else 											SceneAnimation.CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
+
+			// Change text of animation selection
+			AnimationSelection.Text = SceneAnimation.CurrentAnimation->Name;
 		});
 
 		// Set up SceneAnimation's on_hover signal
@@ -675,7 +744,6 @@ namespace Enjon { namespace AnimationEditor {
 		ButtonManager::Add("DelayUp", &DelayUp);
 		ButtonManager::Add("DelayDown", &DelayDown);
 
-
 		// Put into textbox manager
 		TextBoxManager::Add("InputText", &InputText);
 
@@ -691,6 +759,7 @@ namespace Enjon { namespace AnimationEditor {
 		GUIManager::Add("InputText", &InputText);
 		GUIManager::Add("SceneAnimation", &SceneAnimation);
 		GUIManager::Add("ToggleOnionSkin", &ToggleOnionSkin);
+		GUIManager::Add("AnimationSelection", &AnimationSelection);
 
 		// Draw BG
 		BGBatch->Begin();
@@ -756,7 +825,6 @@ namespace Enjon { namespace AnimationEditor {
 			// Draw BG
 			BGBatch->RenderBatch();
 
-			/*
 			UIBatch->Begin();
 			{
 				// Draw Parent
@@ -786,16 +854,30 @@ namespace Enjon { namespace AnimationEditor {
 				// 			);
 
 				// CalculateAABBWithParent(&InputText.AABB, &InputText);
+				// UIBatch->Add(
+				// 				EM::Vec4(InputText.AABB.Min, InputText.AABB.Max - InputText.AABB.Min), 
+				// 				EM::Vec4(0, 0, 1, 1),
+				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+				// 				InputTextColor
+				// 			);
+
 				UIBatch->Add(
 								EM::Vec4(InputText.AABB.Min, InputText.AABB.Max - InputText.AABB.Min), 
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 								InputTextColor
 							);
+
+				UIBatch->Add(
+								EM::Vec4(AnimationSelection.AABB.Min, AnimationSelection.AABB.Max - AnimationSelection.AABB.Min),
+								EM::Vec4(0, 0, 1, 1),
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								AnimationSelectionColor	
+							);
+
 			}
 			UIBatch->End();
 			UIBatch->RenderBatch();
-			*/
 
 			View = Camera.GetCameraMatrix();
 			BasicShader->SetUniformMat4("view", View);
@@ -812,12 +894,13 @@ namespace Enjon { namespace AnimationEditor {
 				if (SceneAnimation.HoverState == HoveredState::ON_HOVER)
 				{
 					auto AABB_SA = &SceneAnimation.AABB;
-					SceneBatch->Add(
+					SceneBatch->Add
+							(
 								EM::Vec4(AABB_SA->Min, AABB_SA->Max - AABB_SA->Min), 
 								EM::Vec4(0,0,1,1), 
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/selection_box.png").id,
 								EG::RGBA16_Red()
-							  );
+							);
 				}
 
 				if (t >= Frame->Delay)
@@ -887,15 +970,14 @@ namespace Enjon { namespace AnimationEditor {
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
-				// Display current frame information
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, scale, 
-										SceneAnimation.CurrentAnimation->Name, 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_LightGrey()
-									);
+				// EG::Fonts::PrintText(	
+				// 						HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+				// 						HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 70.0f, scale, 
+				// 						AnimationSelection.Text, 
+				// 						CurrentFont, 
+				// 						*UIBatch, 
+				// 						EG::RGBA16_LightGrey()
+				// 					);
 				// Current Frame Name
 				EG::Fonts::PrintText(	
 										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
@@ -1002,16 +1084,34 @@ namespace Enjon { namespace AnimationEditor {
 				// Print out text box's text w/ shadow
 				// Could totally load these styles from JSON, which would be a cool way to add themes to the editor
 				auto Padding = EM::Vec2(5.0f, 5.0f);
-				auto ITextHeight = InputText.AABB.Max.y - InputText.AABB.Min.y; // InputTextHeight
-				auto TextHeight = ITextHeight - 20.0f;
-				EG::Fonts::PrintText(	
-										InputText.Position.x + InputText.Parent->Position.x + Padding.x, 
-										InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 
-										InputText.Text, 
-										EG::FontManager::GetFont("WeblySleek"), 
-										*UIBatch, 
-										EG::RGBA16_LightGrey()
-									);
+
+				{
+					auto ITextHeight = InputText.AABB.Max.y - InputText.AABB.Min.y; // InputTextHeight
+					auto TextHeight = ITextHeight - 20.0f;
+					EG::Fonts::PrintText(	
+											InputText.Position.x + InputText.Parent->Position.x + Padding.x, 
+											InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 
+											InputText.Text, 
+											EG::FontManager::GetFont("WeblySleek"), 
+											*UIBatch, 
+											EG::RGBA16_LightGrey()
+										);
+				}
+
+				// Print out AnimationSelection text
+				{
+					auto ATextHeight = AnimationSelection.AABB.Max.y - AnimationSelection.AABB.Min.y;
+					auto TextHeight = ATextHeight - 20.0f;
+					EG::Fonts::PrintText(	
+											AnimationSelection.Position.x + Padding.x, 
+											AnimationSelection.Position.y + Padding.y + TextHeight, 1.0f, 
+											AnimationSelection.Text, 
+											EG::FontManager::GetFont("WeblySleek"), 
+											*UIBatch, 
+											EG::RGBA16_LightGrey()
+										);
+				}
+
 
 				caret_count += 0.1f;
 
@@ -1027,6 +1127,8 @@ namespace Enjon { namespace AnimationEditor {
 					// Need to get text from InputText
 					auto Text = InputText.Text;
 					auto XAdvance = InputText.Position.x + InputText.Parent->Position.x + Padding.x;
+					auto ITextHeight = InputText.AABB.Max.y - InputText.AABB.Min.y; // InputTextHeight
+					auto TextHeight = ITextHeight - 20.0f;
 
 					// Get xadvance of all characters
 					for (auto i = 0; i < InputText.CursorIndex; ++i)
@@ -1151,6 +1253,31 @@ namespace Enjon { namespace AnimationEditor {
 			PlayButton->off_hover.emit();
 		}
 
+		// Get animation selection button
+		auto AnimationSelection = static_cast<GUIDropDownButton*>(GUIManager::Get("AnimationSelection"));
+		auto AABB_AS = &AnimationSelection->AABB;
+
+		// Check whether mouse button over animation selection button
+		auto MouseOverAnimationSelection = EP::AABBvsPoint(AABB_AS, MousePos);
+
+		if (MouseOverAnimationSelection)
+		{
+			if (AnimationSelection->HoverState == HoveredState::OFF_HOVER)
+			{
+				std::cout << "Entering Hover..." << std::endl;
+
+				// Emit on hover action
+				AnimationSelection->on_hover.emit();
+			}
+		}
+		else if (AnimationSelection->HoverState == HoveredState::ON_HOVER)
+		{
+			std::cout << "Exiting Hover..." << std::endl;
+
+			// Emit off hover action
+			AnimationSelection->off_hover.emit();
+		}
+
 		// Get InputText
 		auto InputText = static_cast<GUITextBox*>(GUIManager::Get("InputText"));
 		auto AABB_IT = &InputText->AABB;
@@ -1221,6 +1348,13 @@ namespace Enjon { namespace AnimationEditor {
 	    	{
 	    		SelectedGUIElement = PlayButton;
 	    		PlayButton->on_click.emit();
+	    		MouseFocus = nullptr;
+	    	}
+
+	    	else if (MouseOverAnimationSelection)
+	    	{
+	    		SelectedGUIElement = AnimationSelection;
+	    		AnimationSelection->on_click.emit();
 	    		MouseFocus = nullptr;
 	    	}
 

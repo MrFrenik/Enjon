@@ -2,7 +2,7 @@
 	"Player_Attack_OH_L_SE": 
 	{
 		"file": "Player_Attack_OH_L_SE.json",
-		"delays": [0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.8, 0.8, 1.2],
+		"delays": [0.8, 0.7, 0.5, 0.5, 0.5, 0.3, 0.4, 0.7, 0.8, 2.0],
 		"frames": ["PAOLSE_01", "PAOLSE_02",  "PAOLSE_03",  "PAOLSE_04",  "PAOLSE_05",  "PAOLSE_06", "PAOLSE_07", "PAOLSE_08", "PAOLSE_09", "PAOLSE_10"],
 		"yoffsets": [-12.0,  -8.0, -11.0, -10.0,  -6.0,   -9.0, -13.0, -1.0, -11.0, -11.0],
 		"xoffsets": [-49.0, -57.0, -25.0, -30.0, -29.0,  -87.0, -71.0, -4.0, -66.0, -62.0],
