@@ -2,12 +2,6 @@
 	"folders":
 	[
 		{
-			"path": "E:\\Development\\Enjon\\include"
-		},
-		{
-			"path": "E:\\Development\\Enjon\\src"
-		},
-		{
 			"path": "."
 		},
 		{
@@ -15,6 +9,12 @@
 		},
 		{
 			"path": "E:\\Development\\Enjon\\deps\\spine-cpp"
+		},
+		{
+			"path": "C:\\Users\\j.staud\\Desktop\\enjon\\include"
+		},
+		{
+			"path": "C:\\Users\\j.staud\\Desktop\\enjon\\src"
 		}
 	]
 }

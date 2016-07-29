@@ -102,7 +102,7 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 bool DebugInfo = false;
-bool AnimationEditorOn = false;
+bool AnimationEditorOn = true;
 
 const int LEVELSIZE = 20;
 
@@ -672,8 +672,6 @@ int main(int argc, char** argv)
 		///////////////
 
 		StartTicks = SDL_GetTicks();
-		
-		// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, Enjon::Graphics::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
 
 		//Enable alpha blending
 		glEnable(GL_BLEND);
@@ -695,6 +693,9 @@ int main(int argc, char** argv)
 		// Render game scene
 		else
 		{
+			// Hide mouse
+			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
+
 			// Set up shader
 			Math::Mat4 model, view, projection;
 			model = Math::Mat4::Identity();
