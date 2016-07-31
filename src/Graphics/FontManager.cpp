@@ -7,12 +7,13 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 	/* Init the FontManager */
 	void Init()
 	{
-		AddFont(Fonts, "Bold", Fonts::CreateFont("../assets/fonts/TheBoldFont/TheBoldFont.ttf", 32));
-		AddFont(Fonts, "Sofia", Fonts::CreateFont("../assets/fonts/SofiaPro/SofiaPro.otf", 32));
-		AddFont(Fonts, "Corbert", Fonts::CreateFont("../assets/fonts/CorbertRegular/CorbertRegular.otf", 32));
+		AddFont(Fonts, "Bold_12", Fonts::CreateFont("../assets/fonts/TheBoldFont/TheBoldFont.ttf", 12));
+		AddFont(Fonts, "Bold_32", Fonts::CreateFont("../assets/fonts/TheBoldFont/TheBoldFont.ttf", 32));
+		AddFont(Fonts, "Sofia", Fonts::CreateFont("../assets/fonts/SofiaPro/SofiaPro.otf", 14));
+		AddFont(Fonts, "Corbert_14", Fonts::CreateFont("../assets/fonts/CorbertRegular/CorbertRegular.otf", 14));
 		AddFont(Fonts, "Dense", Fonts::CreateFont("../assets/fonts/DenseRegular/DenseRegular.otf", 64));
-		AddFont(Fonts, "8Bit", Fonts::CreateFont("../assets/fonts/8BitWonder/8BitWonder.ttf", 24));
-		AddFont(Fonts, "TallBold", Fonts::CreateFont("../assets/fonts/TallBolder/TallBolder.ttf", 32));
+		AddFont(Fonts, "8Bit", Fonts::CreateFont("../assets/fonts/8BitWonder/8BitWonder.ttf", 8));
+		AddFont(Fonts, "TallBold", Fonts::CreateFont("../assets/fonts/TallBolder/TallBolder.ttf", 12));
 		AddFont(Fonts, "BebasNeue", Fonts::CreateFont("../assets/fonts/BebasNeue/BebasNeue.otf", 16));
 		AddFont(Fonts, "WeblySleek", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 14));
 	}

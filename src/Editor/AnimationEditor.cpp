@@ -283,7 +283,7 @@ namespace Enjon { namespace AnimationEditor {
 		AnimationSelection.HoverState = HoveredState::OFF_HOVER;
 		AnimationSelection.Position = EM::Vec2 (
 													HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 105.0f,
-													HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 75.0f 
+													HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f 
 												);
 
 		// Calculate AnimationSelection's dimensions
@@ -873,13 +873,6 @@ namespace Enjon { namespace AnimationEditor {
 								InputTextColor
 							);
 
-				// Draw animation selection AABB
-				UIBatch->Add(
-								EM::Vec4(AnimationSelection.AABB.Min, AnimationSelection.AABB.Max - AnimationSelection.AABB.Min),
-								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								AnimationSelectionColor	
-							);
 
 			}
 			UIBatch->End();
@@ -958,36 +951,71 @@ namespace Enjon { namespace AnimationEditor {
 			TextShader->SetUniformMat4("projection", Projection);
 			TextShader->SetUniformMat4("view", View);
 
-			glEnable(GL_SCISSOR_TEST);
-			UIBatch->Begin();
+			// glEnable(GL_SCISSOR_TEST);
+			UIBatch->Begin(EG::GlyphSortType::FRONT_TO_BACK);
 			{
 
 				// Get font for use
-				auto CurrentFont = EG::FontManager::GetFont("WeblySleek");
+				auto CurrentFont = EG::FontManager::GetFont("Corbert_14");
 				auto XOffset = 110.0f;
 				auto scale = 1.0f;
 				auto YOffset = 70.0f;
-				auto ClipYOffset = YOffset - 20.0f;
+				auto ClipYOffset = YOffset - 25.0f;
+				auto Difference = YOffset - ClipYOffset;
 
 				auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
 
 				// Scissor out entire info area
 				auto ClipWidth = 300.0f;
-				auto ClipHeight = 400.0f;
-				glScissor(
-							HUDCamera.GetPosition().x + 2.0f, 
-							HUDCamera.GetPosition().y + SCREENHEIGHT - ClipHeight - ClipYOffset, 
-							ClipWidth, 
-							ClipHeight
-						);
+				auto ClipHeight = 350.0f;
+				// glScissor(
+				// 			HUDCamera.GetPosition().x + 2.0f, 
+				// 			HUDCamera.GetPosition().y + SCREENHEIGHT - ClipHeight, 
+				// 			ClipWidth, 
+				// 			ClipHeight
+				// 		);
+
+				EM::Vec2 TitleBarBL(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipYOffset - Difference);
+
+				// Draw Title Bar 
+				UIBatch->Add(
+								EM::Vec4(TitleBarBL.x, TitleBarBL.y, ClipWidth, Difference),
+								EM::Vec4(0, 0, 1, 1),
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								EG::SetOpacity(EG::RGBA16_Black(), 0.3f),
+								-100.0f
+							);
+
+				// Draw title of widget
+				std::string WidgetTitle("Animation Editor");
+
+				// Calculate total width of title to find placement
+				float TitleAdvance = 0.0f;
+				for (auto& c : WidgetTitle)
+				{
+					TitleAdvance += EG::Fonts::GetAdvance(c, CurrentFont, 1.0f);
+				}
+
+				EG::Fonts::PrintText(
+										TitleBarBL.x + ClipWidth / 2.0f - TitleAdvance / 2.0f,
+										TitleBarBL.y + Difference / 3.0f,
+										1.0f,
+										WidgetTitle,
+										CurrentFont,
+										*UIBatch,
+										EG::RGBA16_White()
+									);
+
 
 				// Draw the clipping area
 				UIBatch->Add(
-								EM::Vec4(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipHeight - ClipYOffset, ClipWidth, ClipHeight),
+								EM::Vec4(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipHeight - ClipYOffset, ClipWidth, ClipHeight - Difference),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.4f)
+								EG::RGBA16(0.24f, 0.22f, 0.35f, 0.3f)
 							);
+
+				YOffset += 25.0f;
 
 				// Display current frame information
 				EG::Fonts::PrintText(	
@@ -999,23 +1027,30 @@ namespace Enjon { namespace AnimationEditor {
 										EG::RGBA16_LightGrey()
 									);
 
-				if (AnimationSelection.State)
-				{
-					YOffset += 5.0f;
-					// Draw box for group for now
-					UIBatch->Add(
-									EM::Vec4(
-												HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + 10.0f,
-												HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset - 20.0f * 3.0f, 
-												200.0f, 20.0f * 3.0f
-											),
-									EM::Vec4(0, 0, 1, 1),
-									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
-									EG::SetOpacity(EG::RGBA16_MidGrey(), 0.3f)
-								);
+				// Draw animation selection AABB
+				auto Padding = EM::Vec2(5.0f, 5.0f);
+				UIBatch->Add(
+								EM::Vec4(AnimationSelection.AABB.Min, AnimationSelection.AABB.Max + EM::Vec2(4.0f * Padding.x, 0.0f) - AnimationSelection.AABB.Min),
+								EM::Vec4(0, 0, 1, 1),
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								AnimationSelectionColor	
+							);
 
-					YOffset += 20.0f * 3.0f;
+				// Print out AnimationSelection text
+				{
+					auto ATextHeight = AnimationSelection.AABB.Max.y - AnimationSelection.AABB.Min.y;
+					auto TextHeight = ATextHeight - 20.0f;
+					EG::Fonts::PrintText(	
+											AnimationSelection.AABB.Min.x + Padding.x, 
+											AnimationSelection.AABB.Min.y + Padding.y, 1.0f, 
+											AnimationSelection.Text, 
+											CurrentFont, 
+											*UIBatch, 
+											EG::RGBA16_LightGrey()
+										);
 				}
+
+				auto AnimationSelectionYOffset = YOffset;	
 				
 				YOffset += 20.0f;	
 				// Current Frame Name
@@ -1027,6 +1062,9 @@ namespace Enjon { namespace AnimationEditor {
 										*UIBatch, 
 										EG::RGBA16_LightGrey()
 									);
+
+
+
 				EG::Fonts::PrintText(	
 										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
 										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
@@ -1126,6 +1164,55 @@ namespace Enjon { namespace AnimationEditor {
 										EG::RGBA16_LightGrey()
 									);
 
+				if (AnimationSelection.State)
+				{
+					YOffset = AnimationSelectionYOffset;
+					YOffset += 5.0f;
+					// Draw box for group for now
+					UIBatch->Add(
+									EM::Vec4(
+												HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + 10.0f,
+												HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset - 20.0f * 3.0f, 
+												200.0f, 20.0f * 3.0f
+											),
+									EM::Vec4(0, 0, 1, 1),
+									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
+									EG::SetOpacity(EG::RGBA16_DarkGrey(), 1.0f)
+								);
+
+					YOffset += 20.0f;
+					EG::Fonts::PrintText(	
+											HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + 15.0f, 
+											HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
+											std::string("Animation_1"), 
+											CurrentFont, 
+											*UIBatch, 
+											EG::RGBA16_LightGrey()
+										);
+					YOffset += 20.0f;
+					EG::Fonts::PrintText(	
+											HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + 15.0f, 
+											HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
+											std::string("Animation_2"), 
+											CurrentFont, 
+											*UIBatch, 
+											EG::RGBA16_LightGrey()
+										);
+
+					YOffset -= 20.0f * 2.0f - 5.0f;
+				}
+
+
+
+			}
+			UIBatch->End();
+			UIBatch->RenderBatch();
+			glDisable(GL_SCISSOR_TEST);
+
+			caret_count += 0.1f;
+
+			UIBatch->Begin();
+			{
 				// Print out text box's text w/ shadow
 				// Could totally load these styles from JSON, which would be a cool way to add themes to the editor
 				auto Padding = EM::Vec2(5.0f, 5.0f);
@@ -1142,33 +1229,6 @@ namespace Enjon { namespace AnimationEditor {
 											EG::RGBA16_LightGrey()
 										);
 				}
-
-				// Print out AnimationSelection text
-				{
-					auto ATextHeight = AnimationSelection.AABB.Max.y - AnimationSelection.AABB.Min.y;
-					auto TextHeight = ATextHeight - 20.0f;
-					EG::Fonts::PrintText(	
-											AnimationSelection.Position.x + Padding.x, 
-											AnimationSelection.Position.y + Padding.y + TextHeight, 1.0f, 
-											AnimationSelection.Text, 
-											EG::FontManager::GetFont("WeblySleek"), 
-											*UIBatch, 
-											EG::RGBA16_LightGrey()
-										);
-				}
-
-
-
-
-			}
-			UIBatch->End();
-			UIBatch->RenderBatch();
-			glDisable(GL_SCISSOR_TEST);
-
-			caret_count += 0.1f;
-
-			UIBatch->Begin();
-			{
 				if (caret_count >= 4.0f)
 				{
 					caret_count = 0.0f;
@@ -1219,26 +1279,26 @@ namespace Enjon { namespace AnimationEditor {
 							10
 						);
 
-				UIBatch->Add(
-								EM::Vec4(
-											HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-											HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 420.0f, 
-											200, 10
-										), 
-								EM::Vec4(0, 0, 1, 1), 
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16_Green(), 1.0f),
-								-100
-							);
+				// UIBatch->Add(
+				// 				EM::Vec4(
+				// 							HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+				// 							HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 420.0f, 
+				// 							200, 10
+				// 						), 
+				// 				EM::Vec4(0, 0, 1, 1), 
+				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+				// 				EG::SetOpacity(EG::RGBA16_Green(), 1.0f),
+				// 				-100
+				// 			);
 
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 420.0f, scale, 
-										std::string("This is a clipping mask testasdfasdfasdfsadfsadfsdf"), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_LightGrey()
-									);
+				// EG::Fonts::PrintText(	
+				// 						HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
+				// 						HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 420.0f, scale, 
+				// 						std::string("This is a clipping mask testasdfasdfasdfsadfsadfsdf"), 
+				// 						CurrentFont, 
+				// 						*UIBatch, 
+				// 						EG::RGBA16_LightGrey()
+				// 					);
 
 			}
 			UIBatch->End();
@@ -1453,7 +1513,7 @@ namespace Enjon { namespace AnimationEditor {
 	    	{
 	    		SelectedGUIElement = AnimationSelection;
 	    		AnimationSelection->on_click.emit();
-	    		MouseFocus = nullptr;
+	    		MouseFocus = AnimationSelection;
 	    	}
 
 	    	else if (MouseOverText)
@@ -1466,6 +1526,9 @@ namespace Enjon { namespace AnimationEditor {
 
 	    	else if (MouseOverAnimation)
 	    	{
+				// Turn off the play button
+				if (PlayButton->State == ButtonState::ACTIVE) PlayButton->on_click.emit();
+
 	    		SelectedGUIElement = SceneAnimation;
 	    		MouseFocus = SceneAnimation;
 	    		MouseFrameOffset = EM::Vec2(SceneMousePos.x - SceneAnimation->AABB.Min.x, SceneMousePos.y - SceneAnimation->AABB.Min.y);
@@ -1473,6 +1536,12 @@ namespace Enjon { namespace AnimationEditor {
 
 	    	else
 	    	{
+	    		// Deselect current thing if was selected
+	    		if (MouseFocus) 
+    			{
+		    		if (MouseFocus == AnimationSelection && AnimationSelection->State) MouseFocus->on_click.emit();
+		    	}
+
 	    		// This is incredibly not thought out at all...
 	    		SelectedGUIElement = nullptr;
 	    		MouseFocus = nullptr;
@@ -1487,9 +1556,6 @@ namespace Enjon { namespace AnimationEditor {
 			{
 				auto X = SceneMousePos.x;
 				auto Y = SceneMousePos.y;
-
-				// Turn off the play button
-				if (PlayButton->State == ButtonState::ACTIVE) PlayButton->on_click.emit();
 
 				if (MouseFocus->Type == GUIType::SCENE_ANIMATION)
 				{

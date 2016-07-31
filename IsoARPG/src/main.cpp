@@ -1114,7 +1114,7 @@ int main(int argc, char** argv)
 			// 			  HealthSheet.texture.id, 
 			// 			  EG::RGBA16_Red());
 
-			auto F = EG::FontManager::GetFont("Bold");
+			auto F = EG::FontManager::GetFont("Bold_32");
 
 			if (Paused)
 			{

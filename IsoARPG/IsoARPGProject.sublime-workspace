@@ -92,14 +92,6 @@
 	"buffers":
 	[
 		{
-			"file": "profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
-			"settings":
-			{
-				"buffer_size": 1714,
-				"line_ending": "Windows"
-			}
-		},
-		{
 			"file": "src/main.cpp",
 			"settings":
 			{
@@ -108,15 +100,39 @@
 			}
 		},
 		{
-			"file": "assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json",
+			"file": "/E/Development/Enjon/include/IO/ImageLoader.h",
 			"settings":
 			{
-				"buffer_size": 7272,
+				"buffer_size": 974,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/C/Users/j.staud/Desktop/enjon/src/Editor/AnimationEditor.cpp",
+			"file": "/E/Development/Enjon/include/IO/ResourceManager.h",
+			"settings":
+			{
+				"buffer_size": 782,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Development/Enjon/include/IO/TextureCache.h",
+			"settings":
+			{
+				"buffer_size": 918,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Development/Enjon/include/Editor/AnimationEditor.h",
+			"settings":
+			{
+				"buffer_size": 1187,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Development/Enjon/src/Editor/AnimationEditor.cpp",
 			"settings":
 			{
 				"buffer_size": 47912,
@@ -124,7 +140,7 @@
 			}
 		},
 		{
-			"file": "/C/Users/j.staud/Desktop/enjon/include/GUI/GUIButton.h",
+			"file": "/E/Development/Enjon/include/GUI/GUIButton.h",
 			"settings":
 			{
 				"buffer_size": 707,
@@ -132,10 +148,50 @@
 			}
 		},
 		{
-			"file": "/C/Users/j.staud/Desktop/enjon/include/Graphics/Font.h",
+			"file": "SCRUM.txt",
 			"settings":
 			{
-				"buffer_size": 1531,
+				"buffer_size": 1984,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Development/Enjon/src/Graphics/Animations.cpp",
+			"settings":
+			{
+				"buffer_size": 3107,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/ECS/Animation2DSystem.cpp",
+			"settings":
+			{
+				"buffer_size": 27612,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "include/ECS/Animation2DSystem.h",
+			"settings":
+			{
+				"buffer_size": 896,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
+			"settings":
+			{
+				"buffer_size": 1714,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json",
+			"settings":
+			{
+				"buffer_size": 7272,
 				"line_ending": "Windows"
 			}
 		}
@@ -227,22 +283,17 @@
 	},
 	"expanded_folders":
 	[
-		"/C/Users/j.staud/Desktop/enjon/include",
-		"/C/Users/j.staud/Desktop/enjon/include/GUI",
-		"/C/Users/j.staud/Desktop/enjon/src/Editor"
+		"/E/Development/Enjon/IsoARPG/src/ECS"
 	],
 	"file_history":
 	[
-		"/C/Users/j.staud/Desktop/enjon/IsoARPG/include/ECS/Components.h",
-		"/C/Users/j.staud/Desktop/enjon/IsoARPG/include/ECS/Animation2DSystem.h",
-		"/C/Users/j.staud/Desktop/enjon/IsoARPG/src/ECS/Animation2DSystem.cpp",
-		"/C/Users/j.staud/Desktop/enjon/IsoARPG/include/ECS/ComponentSystems.h",
-		"/C/Users/j.staud/Desktop/enjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
-		"/C/Users/j.staud/Desktop/enjon/IsoARPG/include/ECS/Transform3DSystem.h",
 		"/E/Development/Enjon/src/IO/ImageLoader.cpp",
-		"/E/Development/Enjon/src/Graphics/Animations.cpp",
-		"/E/Development/Enjon/include/Editor/AnimationEditor.h",
-		"/E/Development/Enjon/src/Editor/AnimationEditor.cpp",
+		"/E/Development/Enjon/IsoARPG/include/ECS/ComponentSystems.h",
+		"/E/Development/Enjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
+		"/E/Development/Enjon/IsoARPG/include/ECS/Transform3DSystem.h",
+		"/E/Development/Enjon/IsoARPG/include/ECS/Components.h",
+		"/E/Development/Enjon/src/IO/TextureCache.cpp",
+		"/E/Development/Enjon/src/IO/ResourceManager.cpp",
 		"/E/Development/Enjon/proc/rel.bat",
 		"/E/Development/Enjon/proc/dump.txt",
 		"/E/Development/Enjon/IsoARPG/src/ECS/PlayerControllerSystem.cpp",
@@ -257,8 +308,8 @@
 		"/E/Development/Enjon/include/Editor/MiscManagers.h",
 		"/E/Development/Enjon/IsoARPG/include/ECS/PlayerControllerSystem.h",
 		"/E/Development/Enjon/proc/clean.bat",
-		"/E/Development/Enjon/IsoARPG/src/ECS/Transform3DSystem.cpp",
 		"/E/Development/Enjon/IsoARPG/include/AnimManager.h",
+		"/E/Development/Enjon/src/Graphics/Animations.cpp",
 		"/E/Development/Enjon/include/BehaviorTree/BlackBoard.h",
 		"/E/Development/Enjon/include/BehaviorTree/BehaviorNode.h",
 		"/E/Development/Enjon/IsoARPG/src/ECS/AIControllerSystem.cpp",
@@ -269,7 +320,6 @@
 		"/E/Development/Enjon/IsoARPG/include/ECS/Animation2DSystem.h",
 		"/E/Development/Enjon/include/Utils/FileUtils.h",
 		"/E/Development/Enjon/IsoARPG/src/ECS/Animation2DSystem.cpp",
-		"/E/Development/Enjon/IsoARPG/include/ECS/Components.h",
 		"/E/Development/Enjon/IsoARPG/SCRUM.txt",
 		"/E/Development/Enjon/IsoARPG/profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
 		"/E/Development/Enjon/IsoARPG/src/AnimationManager.cpp",
@@ -280,8 +330,6 @@
 		"/E/Development/Enjon/include/GUI/GUIButton.h",
 		"/E/Development/Enjon/include/Math/Vec2.h",
 		"/E/Development/Enjon/include/Math/Vec3.h",
-		"/E/Development/Enjon/IsoARPG/include/ECS/Transform3DSystem.h",
-		"/E/Development/Enjon/IsoARPG/include/ECS/ComponentSystems.h",
 		"/E/Development/Enjon/proc/build.bat",
 		"/E/Development/Enjon/proc/debug.bat",
 		"/E/Development/Enjon/src/Graphics/ParticleEngine2D.cpp",
@@ -360,7 +408,13 @@
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Entity.h",
 		"/D/C++Projects/VS/3DEnjon/proc/dump.txt",
 		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/BehaviorNode.h",
-		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/Sequence.h"
+		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/Sequence.h",
+		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Components.h",
+		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/Wait.h",
+		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/BlackBoard.h",
+		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/Selector.h",
+		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/Repeater.h",
+		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/Inverter.h"
 	],
 	"find":
 	{
@@ -379,12 +433,15 @@
 		"case_sensitive": false,
 		"find_history":
 		[
-			"YOffset",
-			"190.0f",
-			"170.0f",
-			"150.0f",
-			"130.0f",
-			"110.0f",
+			");",
+			"XOffset",
+			"InputText",
+			"Text",
+			"Camera",
+			"->",
+			"Camera",
+			"GetCameraMatrix",
+			"Camera",
 			"#if",
 			"ProcessInput",
 			"#if",
@@ -503,10 +560,7 @@
 			"TS",
 			"ts",
 			"TS",
-			"OffsetDown",
-			"YOffset",
-			"0.2f",
-			"0.0"
+			"OffsetDown"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -524,41 +578,11 @@
 	"groups":
 	[
 		{
-			"selected": 3,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1714,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								451,
-								451
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
-							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
 					"file": "src/main.cpp",
 					"semi_transient": false,
 					"settings":
@@ -570,8 +594,8 @@
 						"selection":
 						[
 							[
-								2075,
-								2075
+								0,
+								0
 							]
 						],
 						"settings":
@@ -581,14 +605,331 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1034.0,
+						"translation.y": 42.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/E/Development/Enjon/include/IO/ImageLoader.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 974,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								546,
+								546
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/E/Development/Enjon/include/IO/ResourceManager.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 782,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								516,
+								516
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/E/Development/Enjon/include/IO/TextureCache.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 918,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								569,
+								569
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/E/Development/Enjon/include/Editor/AnimationEditor.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1187,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 84.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/E/Development/Enjon/src/Editor/AnimationEditor.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 47912,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"auto_name": "",
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 4120.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
+					"buffer": 6,
+					"file": "/E/Development/Enjon/include/GUI/GUIButton.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 707,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								528,
+								528
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "SCRUM.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1984,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1983,
+								1983
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "/E/Development/Enjon/src/Graphics/Animations.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3107,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1739,
+								1738
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 49.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "src/ECS/Animation2DSystem.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 27612,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9895,
+								9895
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "include/ECS/Animation2DSystem.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 896,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								141,
+								141
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1714,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								133,
+								133
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 12,
 					"file": "assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.json",
 					"semi_transient": false,
 					"settings":
@@ -614,94 +955,7 @@
 						"translation.y": 965.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "/C/Users/j.staud/Desktop/enjon/src/Editor/AnimationEditor.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 47912,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								27471,
-								27471
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 12312.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "/C/Users/j.staud/Desktop/enjon/include/GUI/GUIButton.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 707,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								647,
-								647
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "/C/Users/j.staud/Desktop/enjon/include/Graphics/Font.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1531,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1516,
-								1516
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 55.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
+					"stack_index": 12,
 					"type": "text"
 				}
 			]
@@ -709,7 +963,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 70.0
+		"height": 24.0
 	},
 	"input":
 	{
@@ -792,7 +1046,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 212.0,
+	"side_bar_width": 199.0,
 	"status_bar_visible": false,
 	"template_settings":
 	{
