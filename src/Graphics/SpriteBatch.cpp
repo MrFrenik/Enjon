@@ -256,7 +256,7 @@ namespace Enjon { namespace Graphics {
 		X = Dims.x + Dims.z;
 		Y = Dims.y - Thickness;
 		Width = Thickness;
-		Height = Dims.w + Thickness;
+		Height = Dims.w + 2.0f * Thickness;
 
 		Batch->Add(
 					EM::Vec4(X, Y, Width, Height), 
@@ -288,7 +288,7 @@ namespace Enjon { namespace Graphics {
 		X = Dims.x - Thickness;
 		Y = Dims.y - Thickness;
 		Width = Thickness;
-		Height = Dims.w + Thickness;
+		Height = Dims.w + 2.0f * Thickness;
 
 		Batch->Add(
 					EM::Vec4(X, Y, Width, Height), 

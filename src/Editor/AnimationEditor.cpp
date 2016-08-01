@@ -415,7 +415,7 @@ namespace Enjon { namespace AnimationEditor {
 		AnimationSelection.off_hover.connect([&]()
 		{
 			AnimationSelection.HoverState = HoveredState::OFF_HOVER;
-			AnimationSelectionColor = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+			if (!AnimationSelection.State) AnimationSelectionColor = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 		});
 
 		// Set up AnimationSelection's on_click signal
@@ -430,6 +430,7 @@ namespace Enjon { namespace AnimationEditor {
 			} 
 			else
 			{
+				AnimationSelectionColor = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 				AnimationSelection.State = ButtonState::INACTIVE;
 				std::cout << "Inactive, bitches!" << std::endl;
 			} 
@@ -783,18 +784,18 @@ namespace Enjon { namespace AnimationEditor {
 
 		// Draw BG
 		BGBatch->Begin();
-		BGBatch->Add(
-						EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
-						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png", GL_LINEAR).id,
-						EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.4f)
-					);
-		BGBatch->Add(
-						EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
-						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png", GL_LINEAR).id,
-						EG::SetOpacity(EG::RGBA16_White(), 0.3f)
-					);
+		// BGBatch->Add(
+		// 				EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
+		// 				EM::Vec4(0, 0, 1, 1),
+		// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png", GL_LINEAR).id,
+		// 				EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.4f)
+		// 			);
+		// BGBatch->Add(
+		// 				EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
+		// 				EM::Vec4(0, 0, 1, 1),
+		// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png", GL_LINEAR).id,
+		// 				EG::SetOpacity(EG::RGBA16_White(), 0.3f)
+		// 			);
 		BGBatch->Add(
 						EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
 						EM::Vec4(0, 0, 1, 1),
@@ -853,12 +854,12 @@ namespace Enjon { namespace AnimationEditor {
 				// Draw Parent
 				auto Parent = PlayButton.Parent;
 
-				UIBatch->Add(
-								EM::Vec4(Parent->AABB.Min, Parent->AABB.Max - Parent->AABB.Min),
-								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16_Blue(), 0.05f)
-							);
+				// UIBatch->Add(
+				// 				EM::Vec4(Parent->AABB.Min, Parent->AABB.Max - Parent->AABB.Min),
+				// 				EM::Vec4(0, 0, 1, 1),
+				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+				// 				EG::SetOpacity(EG::RGBA16_Blue(), 0.05f)
+				// 			);
 
 				// Draw Play button
 				auto PBF = PlayButton.Frames.at(PlayButton.State);
@@ -894,13 +895,14 @@ namespace Enjon { namespace AnimationEditor {
 				if (SceneAnimation.HoverState == HoveredState::ON_HOVER)
 				{
 					auto AABB_SA = &SceneAnimation.AABB;
-					SceneBatch->Add
-							(
-								EM::Vec4(AABB_SA->Min, AABB_SA->Max - AABB_SA->Min), 
-								EM::Vec4(0,0,1,1), 
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/selection_box.png").id,
-								EG::RGBA16_Red()
-							);
+
+					// Draw border around animation
+					EG::DrawRectBorder 	(
+											SceneBatch,
+											EM::Vec4(AABB_SA->Min, AABB_SA->Max - AABB_SA->Min),
+											1.0f, 
+											EG::RGBA16_Red()	
+										);
 				}
 
 				if (t >= Frame->Delay)
@@ -979,7 +981,7 @@ namespace Enjon { namespace AnimationEditor {
 
 				// Draw shadow
 				UIBatch->Add(
-								EM::Vec4(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 10.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipHeight - ClipYOffset - 5.0f, ClipWidth, ClipHeight - Difference),
+								EM::Vec4(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 5.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipHeight - ClipYOffset - 5.0f, ClipWidth, ClipHeight - Difference),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 								EG::SetOpacity(EG::RGBA16_Black(), 0.5f)
@@ -1004,7 +1006,7 @@ namespace Enjon { namespace AnimationEditor {
 								EM::Vec4(TitleBarBL.x, TitleBarBL.y, ClipWidth, Difference),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::RGBA16(0.15f, 0.15f, 0.15f, 1.0f),
+								EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f),
 								-100.0f
 							);
 
@@ -1026,7 +1028,7 @@ namespace Enjon { namespace AnimationEditor {
 										WidgetTitle,
 										TitleFont,
 										*UIBatch,
-										EG::RGBA16_White()
+										EG::RGBA16_MidGrey()
 									);
 
 
@@ -1035,7 +1037,7 @@ namespace Enjon { namespace AnimationEditor {
 								EM::Vec4(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 5.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipHeight - ClipYOffset, ClipWidth, ClipHeight - Difference),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::RGBA16(0.15, 0.15, 0.15, 1.0f)
+								EG::RGBA16(0.12, 0.12, 0.12, 1.0f)
 							);
 
 
@@ -1049,7 +1051,7 @@ namespace Enjon { namespace AnimationEditor {
 													Difference
 												),
 										1.5f,
-										EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.3f)
+										EG::SetOpacity(EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0f), 0.6f)
 									); 
 
 				YOffset += 25.0f;
@@ -1267,7 +1269,7 @@ namespace Enjon { namespace AnimationEditor {
 												std::string("Animation_") + std::to_string(i), 
 												F, 
 												*UIBatch, 
-												EG::RGBA16_White()
+												EG::RGBA16_MidGrey()
 											);
 
 						EG::DrawRectBorder	(

@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -679,10 +679,11 @@ int main(int argc, char** argv)
 		//Set blend function type
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
 
 		if (AnimationEditorOn)
 		{
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.06, 0.06, 0.06, 1.0));
+	
 			// Show mouse
 			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
 	
@@ -693,6 +694,8 @@ int main(int argc, char** argv)
 		// Render game scene
 		else
 		{
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
+
 			// Hide mouse
 			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
 
@@ -758,7 +761,7 @@ int main(int argc, char** argv)
 					// Print Entity info if debug info is on
 					if (DebugInfo)
 					{
-						auto CF = EG::FontManager::GetFont("Reduction_24");
+						auto CF = EG::FontManager::GetFont("WeblySleek_32");
 
 						// Entity id
 						Graphics::Fonts::PrintText(	EntityPosition->x + 20.0f, 
@@ -1123,7 +1126,7 @@ int main(int argc, char** argv)
 			// 			  HealthSheet.texture.id, 
 			// 			  EG::RGBA16_Red());
 
-			auto F = EG::FontManager::GetFont("Reduction_24");
+			auto F = EG::FontManager::GetFont("WeblySleek_32");
 
 			if (Paused)
 			{
@@ -1731,7 +1734,7 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 		auto P = EM::Vec2(L.Position.x - D, L.Position.y - D);
 
 		 
-		Enjon::Math::Vec2 scaledScreenDimensions = Enjon::Math::Vec2((float)SCREENWIDTH, (float)SCREENHEIGHT) / (Camera->GetScale() * 0.37f);
+		Enjon::Math::Vec2 scaledScreenDimensions = Enjon::Math::Vec2((float)SCREENWIDTH, (float)SCREENHEIGHT) / ((Camera->GetScale() * 0.2f));
 		float MIN_DISTANCE_X = dimensions.x / 2.0f + scaledScreenDimensions.x / 2.0f;
 		float MIN_DISTANCE_Y = dimensions.y / 2.0f + scaledScreenDimensions.y / 2.0f;
 
@@ -1745,7 +1748,11 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 		float xDepth = MIN_DISTANCE_X - abs(distVec.x);
 		float yDepth = MIN_DISTANCE_Y - abs(distVec.y);
 		
-		if (xDepth > yDepth && yDepth > 0) LightsToDraw.push_back(&L);
+		if (xDepth > yDepth && yDepth > 0) 
+		{
+			L.Radius = std::min(1.0f - distVec.x / SCREENWIDTH / 2.0f, 1.0f - distVec.y / SCREENHEIGHT / 2.0f);
+			LightsToDraw.push_back(&L);
+		}
 	}
 }
 

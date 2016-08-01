@@ -17,6 +17,7 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 		AddFont(Fonts, "TallBold", Fonts::CreateFont("../assets/fonts/TallBolder/TallBolder.ttf", 12));
 		AddFont(Fonts, "BebasNeue", Fonts::CreateFont("../assets/fonts/BebasNeue/BebasNeue.otf", 16));
 		AddFont(Fonts, "WeblySleek", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 14));
+		AddFont(Fonts, "WeblySleek_32", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 32));
 		AddFont(Fonts, "WeblySleek_10", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 10));
 		AddFont(Fonts, "WeblySleek_12", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 12));
 		AddFont(Fonts, "Reduction_10", Fonts::CreateFont("../assets/fonts/Reduction/Reduction.ttf", 10));
