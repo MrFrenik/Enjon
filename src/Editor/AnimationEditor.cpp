@@ -338,6 +338,40 @@ namespace Enjon { namespace AnimationEditor {
 
 				// Deactive animation selection
 				AnimationSelection.on_click.emit();
+
+				// Calculate AnimationSelection's dimensions
+				{
+					std::string& T = AnimationSelection.Text;
+					float A = 0.0f;
+					auto period_count = 0;
+					auto index = 0;
+
+					std::cout << T << std::endl;
+
+					// Get advance
+					for (auto& c : T)
+					{
+						// Summation of all characters
+						A += EG::Fonts::GetAdvance(c, EG::FontManager::GetFont("WeblySleek"), 1.0f);
+
+						if (A > 110.0f) 
+						{
+							c = '.';
+							period_count++;
+						}
+
+						if (period_count >= 4)
+						{
+							// Get substring and replace it
+							T = T.substr(0, index);
+							break;			
+						} 
+
+						index++;
+					}
+
+					AnimationSelection.Dimensions = EM::Vec2(A, 20.0f);
+				}
 			});
 
 			// Push back into drop down list
@@ -346,10 +380,11 @@ namespace Enjon { namespace AnimationEditor {
 
 
 		// Calculate AnimationSelection's dimensions
-		// Naive way first - get mouse position in UI space
 		{
 			std::string& T = AnimationSelection.Text;
 			float A = 0.0f;
+			auto period_count = 0;
+			auto index = 0;
 
 			std::cout << T << std::endl;
 
@@ -358,11 +393,24 @@ namespace Enjon { namespace AnimationEditor {
 			{
 				// Summation of all characters
 				A += EG::Fonts::GetAdvance(c, EG::FontManager::GetFont("WeblySleek"), 1.0f);
+
+				if (A > 110.0f) 
+				{
+					c = '.';
+					period_count++;
+				}
+
+				if (period_count >= 4)
+				{
+					// Get substring and replace it
+					T = T.substr(0, index);
+					break;			
+				} 
+
+				index++;
 			}
 
-			float Padding = 40.0f;
-			std::cout << "A: " << A << std::endl;
-			AnimationSelection.Dimensions = EM::Vec2(A + Padding, 20.0f);
+			AnimationSelection.Dimensions = EM::Vec2(A, 20.0f);
 		}
 
 
@@ -454,12 +502,35 @@ namespace Enjon { namespace AnimationEditor {
 		auto GroupWidth = InputText.AABB.Max.x - Group.AABB.Min.x;
 		Group.AABB.Max = Group.AABB.Min + EM::Vec2(GroupWidth, GroupHeight);
 
+
+		// Set up OntionSkin AABB
+		ToggleOnionSkin.AABB.Min = AnimationSelection.AABB.Max - EM::Vec2(18.0f, 6.0f * 20.0f - 5.0f);
+		ToggleOnionSkin.AABB.Max = ToggleOnionSkin.AABB.Min + EM::Vec2(10.0f, 10.0f);
+		ToggleOnionSkin.Color = EG::RGBA16_DarkGrey();
+
+		// Set up ToggleOnionSkin's on_hover signal
+		ToggleOnionSkin.on_hover.connect([&]()
+		{
+			ToggleOnionSkin.HoverState = HoveredState::ON_HOVER;
+			if (!ToggleOnionSkin.State) ToggleOnionSkin.Color = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
+		});
+
+		// Set up ToggleOnionSkin's off_hover signal
+		ToggleOnionSkin.off_hover.connect([&]()
+		{
+			ToggleOnionSkin.HoverState = HoveredState::OFF_HOVER;
+			if (!ToggleOnionSkin.State) ToggleOnionSkin.Color = EG::RGBA16_DarkGrey();
+		});
+
 		// Set up ToggleOnionSkin's on_click signal
 		ToggleOnionSkin.on_click.connect([&]()
 		{
 			std::cout << "Emiting onion skin..." << std::endl;
 
+			// Toggle onion skin being on and off
 			ToggleOnionSkin.State = ToggleOnionSkin.State == ButtonState::INACTIVE ? ButtonState::ACTIVE : ButtonState::INACTIVE;
+
+			ToggleOnionSkin.Color = ToggleOnionSkin.State == ButtonState::INACTIVE ? EG::RGBA16_DarkGrey() : EG::RGBA16_LimeGreen();
 		});
 
 
@@ -1057,7 +1128,7 @@ namespace Enjon { namespace AnimationEditor {
 				auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
 
 				// Scissor out entire info area
-				auto ClipWidth = 300.0f;
+				auto ClipWidth = 250.0f;
 				auto ClipHeight = 350.0f;
 				// glScissor(
 				// 			HUDCamera.GetPosition().x + 2.0f, 
@@ -1277,15 +1348,29 @@ namespace Enjon { namespace AnimationEditor {
 										*UIBatch, 
 										EG::RGBA16_MidGrey()
 									);
-				auto OnionString = ToggleOnionSkin.State == ButtonState::ACTIVE ? std::string("On") : std::string("Off");
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										OnionString, 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_White()
+
+				// ToggleOnionSkin Shadow
+				UIBatch->Add(
+								EM::Vec4(ToggleOnionSkin.AABB.Min + EM::Vec2(1.5f, -1.5f), ToggleOnionSkin.AABB.Max - ToggleOnionSkin.AABB.Min), 
+								EM::Vec4(0, 0, 1, 1), 
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								EG::SetOpacity(EG::RGBA16_Black(), 0.4f)
+							);
+
+				EG::DrawRectBorder	(
+										UIBatch, 
+										EM::Vec4(ToggleOnionSkin.AABB.Min, ToggleOnionSkin.AABB.Max - ToggleOnionSkin.AABB.Min),
+										1.0f,
+										EG::SetOpacity(EG::RGBA16_MidGrey(), 0.4f)
 									);
+
+
+				UIBatch->Add(
+								EM::Vec4(ToggleOnionSkin.AABB.Min, ToggleOnionSkin.AABB.Max - ToggleOnionSkin.AABB.Min), 
+								EM::Vec4(0, 0, 1, 1), 
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								ToggleOnionSkin.Color
+							);
 
 				YOffset += 20.0f;	
 				EG::Fonts::PrintText(	
@@ -1565,6 +1650,31 @@ namespace Enjon { namespace AnimationEditor {
 			PlayButton->off_hover.emit();
 		}
 
+		// Get Toggle Onion skin button
+		auto ToggleOnionSkin = static_cast<GUIButton*>(GUIManager::Get("ToggleOnionSkin"));
+		auto AABB_OS = &ToggleOnionSkin->AABB;
+
+		// Check whether mouse button over toggle onion skin button
+		auto MouseOverOnionSkin = EP::AABBvsPoint(AABB_OS, MousePos);
+
+		if (MouseOverOnionSkin)
+		{
+			if (ToggleOnionSkin->HoverState == HoveredState::OFF_HOVER)
+			{
+				std::cout << "Hovering onion skin" << std::endl;
+
+				// Emit hover action
+				ToggleOnionSkin->on_hover.emit();
+			}
+		}
+		else if (ToggleOnionSkin->HoverState == HoveredState::ON_HOVER)
+		{
+			std::cout << "Exiting Hover..." << std::endl;
+
+			// Emit off hover action
+			ToggleOnionSkin->off_hover.emit();
+		}
+
 		// Get animation selection button
 		auto AnimationSelection = static_cast<GUIDropDownButton*>(GUIManager::Get("AnimationSelection"));
 		auto AABB_AS = &AnimationSelection->AABB;
@@ -1708,6 +1818,12 @@ namespace Enjon { namespace AnimationEditor {
 	    		SelectedGUIElement = PlayButton;
 	    		PlayButton->on_click.emit();
 	    		MouseFocus = nullptr;
+	    	}
+
+	    	else if (MouseOverOnionSkin)
+	    	{
+	    		ToggleOnionSkin->on_click.emit();
+	    		if (AnimationSelection->State) AnimationSelection->on_click.emit();
 	    	}
 
 	    	// Do AABB test with AnimationSelection List Element
