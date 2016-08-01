@@ -36,6 +36,7 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<GUIElementBase*> off_hover;
 		EM::Vec2 Dimensions;
 		std::vector<GUIButton*> List;
+		EG::ColorRGBA16 TextColor;
 	};
 
 	// TextBox

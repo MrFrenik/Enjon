@@ -304,20 +304,27 @@ namespace Enjon { namespace AnimationEditor {
 			// Set up color
 			b->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 
+			// Set up text color
+			b->TextColor = EG::RGBA16_MidGrey();
+
 			// Set up off_hover signal
 			b->on_hover.connect([&](GUIElementBase* b)
 			{
+				auto d = static_cast<GUITextButton*>(b);
 				std::cout << "Entering list element..." << std::endl;
-				b->HoverState = HoveredState::ON_HOVER;
-				b->Color = EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0f);
+				d->HoverState = HoveredState::ON_HOVER;
+				d->Color = EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0f);
+				d->TextColor = EG::RGBA16_White();
 			});
 
 			// Set up on_hover signal
 			b->off_hover.connect([&](GUIElementBase* b)
 			{
+				auto d = static_cast<GUITextButton*>(b);
 				std::cout << "Leaving list element..." << std::endl;
-				b->HoverState = HoveredState::OFF_HOVER;
-				b->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+				d->HoverState = HoveredState::OFF_HOVER;
+				d->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+				d->TextColor = EG::RGBA16_MidGrey();
 			});
 
 			// Set up on_hover signal
@@ -353,7 +360,7 @@ namespace Enjon { namespace AnimationEditor {
 				A += EG::Fonts::GetAdvance(c, EG::FontManager::GetFont("WeblySleek"), 1.0f);
 			}
 
-			float Padding = 20.0f;
+			float Padding = 40.0f;
 			std::cout << "A: " << A << std::endl;
 			AnimationSelection.Dimensions = EM::Vec2(A + Padding, 20.0f);
 		}
@@ -1156,14 +1163,14 @@ namespace Enjon { namespace AnimationEditor {
 										UIBatch,
 										EM::Vec4(
 													AnimationSelection.AABB.Min, 
-													AnimationSelection.AABB.Max + EM::Vec2(4.0f * Padding.x, 0.0f) - AnimationSelection.AABB.Min 
+													AnimationSelection.AABB.Max - AnimationSelection.AABB.Min 
 												),
 										1.0f,
 										EG::SetOpacity(EG::RGBA16(0.18, 0.18, 0.18, 1.0f), 0.5f)
 									); 
 
 				UIBatch->Add(
-								EM::Vec4(AnimationSelection.AABB.Min, AnimationSelection.AABB.Max + EM::Vec2(4.0f * Padding.x, 0.0f) - AnimationSelection.AABB.Min),
+								EM::Vec4(AnimationSelection.AABB.Min, AnimationSelection.AABB.Max - AnimationSelection.AABB.Min),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 								AnimationSelectionColor	
@@ -1311,11 +1318,12 @@ namespace Enjon { namespace AnimationEditor {
 									EM::Vec4(
 												HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset - XPadding + 5.0f,
 												HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset - 20.0f * Amount - 5.0f, 
-												GroupWidth, 20.0f * Amount
+												GroupWidth, 
+												20.0f * Amount
 											),
 									EM::Vec4(0, 0, 1, 1),
 									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
-									EG::SetOpacity(EG::RGBA16_Black(), 0.2f)
+									EG::SetOpacity(EG::RGBA16_Black(), 0.4f)
 								);
 
 					// Draw border for group for now
@@ -1327,7 +1335,7 @@ namespace Enjon { namespace AnimationEditor {
 														GroupWidth, 
 														20.0f * Amount
 													),
-											1.0f,
+											2.0f,
 											EG::RGBA16_DarkGrey()
 										);
 
@@ -1336,23 +1344,11 @@ namespace Enjon { namespace AnimationEditor {
 					{
 						YOffset += 20.0f;
 
-						// Draw box
-						// UIBatch->Add(
-						// 				EM::Vec4(
-						// 							HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset - XPadding,
-						// 							HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, 
-						// 							GroupWidth, 20.0f
-						// 						),
-						// 				EM::Vec4(0, 0, 1, 1),
-						// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
-						// 				AnimationSelection.List.at(i).Color
-						// 			);
-
 						// Draw AABB of list element
 						UIBatch->Add(
 										EM::Vec4(
 													AnimationSelection.List.at(i)->AABB.Min,
-													AnimationSelection.List.at(i)->AABB.Max - AnimationSelection.List.at(i)->AABB.Min
+													AnimationSelection.List.at(i)->AABB.Max - AnimationSelection.List.at(i)->AABB.Min - EM::Vec2(15.0f, 0.0f)
 												),
 										EM::Vec4(0, 0, 1, 1),
 										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
@@ -1365,7 +1361,7 @@ namespace Enjon { namespace AnimationEditor {
 												AnimationSelection.List.at(i)->Text, 
 												F, 
 												*UIBatch, 
-												EG::RGBA16_MidGrey()
+												AnimationSelection.List.at(i)->TextColor	
 											);
 
 						EG::DrawRectBorder	(
@@ -1453,7 +1449,7 @@ namespace Enjon { namespace AnimationEditor {
 			{
 				UIBatch->Add(
 								EM::Vec4(
-											AnimationSelection.AABB.Max - EM::Vec2(3.0f, 18.0f), 
+											AnimationSelection.AABB.Max - EM::Vec2(18.0f, 18.0f), 
 											EM::Vec2(16, 16)
 									     ),
 								EM::Vec4(0, 0, 1, 1),
