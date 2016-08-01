@@ -19,6 +19,9 @@ namespace AnimManager {
 
 	// Delete all animations and clear any memory used
 	void DeleteAnimations();
+
+	// Get access to map for traversal
+	std::unordered_map<std::string, EA::Anim*>* GetAnimationMap();
 }
 
 #endif

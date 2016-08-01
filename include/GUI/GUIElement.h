@@ -3,6 +3,7 @@
 
 #include "Defines.h" 
 
+#include "Graphics/Color.h"
 #include "Physics/AABB.h"
 
 #include "GUI/Signal.h"
@@ -29,11 +30,13 @@ namespace Enjon { namespace GUI {
 		EP::AABB AABB;
 		GUIType Type;
 
+		std::string Text;
 		ButtonState State;
 		HoveredState HoverState;
 		EGUI::Signal<> on_click;
 		EGUI::Signal<> on_hover;
 		EGUI::Signal<> off_hover;
+		EG::ColorRGBA16 Color;
 	};
 
 	template <typename T>

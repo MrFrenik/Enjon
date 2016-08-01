@@ -79,4 +79,9 @@ namespace AnimManager {
 		return Frames;
 
 	}
+
+	std::unordered_map<std::string, EA::Anim*>* GetAnimationMap()
+	{
+		return &Animations;
+	}
 }

@@ -1,7 +1,7 @@
 @echo off
 pushd bin
-cl -Zi -Gm /Femain.exe ^
-..\src\*.cpp ..\src\Graphics\*.cpp ..\src\IO\*.cpp ..\src\Math\*.cpp  ..\src\Physics\*.cpp ..\src\Utils\*.cpp ^
+cl /w -Zi /MP /Femain.exe ^
+..\src\*.cpp ..\src\Graphics\*.cpp ..\src\IO\*.cpp ..\src\Math\*.cpp  ..\src\Physics\*.cpp ..\src\Utils\*.cpp  ..\src\Editor\*.cpp ^
 ..\IsoARPG\src\*.cpp ..\IsoARPG\src\ECS\*.cpp ^
 /I ..\include /I ..\deps\include /I ..\IsoARPG\include /I ..\IsoARPG\include\ECS ^
 /EHsc /link /SUBSYSTEM:CONSOLE /NODEFAULTLIB:msvcrt.lib /LIBPATH:"..\deps\lib\" Opengl32.lib SDL2.lib SDL2main.lib glew32.lib glew32s.lib freetype.lib

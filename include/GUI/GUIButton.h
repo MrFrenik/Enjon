@@ -26,15 +26,26 @@ namespace Enjon { namespace GUI {
 	}
 
 	// TextBox
+	struct GUITextButton : GUIElement<GUITextButton>
+	{
+		void Init()
+		{}
+
+		EGUI::Signal<GUIElementBase*> on_click;
+		EGUI::Signal<GUIElementBase*> on_hover;
+		EGUI::Signal<GUIElementBase*> off_hover;
+		EM::Vec2 Dimensions;
+		std::vector<GUIButton*> List;
+	};
+
+	// TextBox
 	struct GUIDropDownButton : GUIElement<GUIDropDownButton>
 	{
 		void Init()
 		{}
 
-		ButtonState State;
-		HoveredState HoverState;
-		std::string Text;
 		EM::Vec2 Dimensions;
+		std::vector<GUITextButton*> List;
 	};
 }}
 

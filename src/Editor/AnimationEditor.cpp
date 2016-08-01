@@ -286,6 +286,58 @@ namespace Enjon { namespace AnimationEditor {
 													HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f 
 												);
 
+		// Add animations to AnimationSelection drop down button
+		for (auto& a : *AnimManager::GetAnimationMap())
+		{
+			// Make button to be pushed back
+			auto b = new GUITextButton();
+
+			// Set up button state
+			b->State = ButtonState::INACTIVE;
+
+			// Set up hover state
+			b->HoverState = HoveredState::OFF_HOVER;
+
+			// Give name of button name of current animation
+			b->Text = a.first;
+
+			// Set up color
+			b->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+
+			// Set up off_hover signal
+			b->on_hover.connect([&](GUIElementBase* b)
+			{
+				std::cout << "Entering list element..." << std::endl;
+				b->HoverState = HoveredState::ON_HOVER;
+				b->Color = EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0f);
+			});
+
+			// Set up on_hover signal
+			b->off_hover.connect([&](GUIElementBase* b)
+			{
+				std::cout << "Leaving list element..." << std::endl;
+				b->HoverState = HoveredState::OFF_HOVER;
+				b->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+			});
+
+			// Set up on_hover signal
+			b->on_click.connect([&](GUIElementBase* b)
+			{
+				// Set Current animation to this
+				SceneAnimation.CurrentAnimation = AnimManager::GetAnimation(b->Text);
+
+				// Set text of animation selection
+				AnimationSelection.Text = b->Text;
+
+				// Deactive animation selection
+				AnimationSelection.on_click.emit();
+			});
+
+			// Push back into drop down list
+			AnimationSelection.List.push_back(b);
+		}
+
+
 		// Calculate AnimationSelection's dimensions
 		// Naive way first - get mouse position in UI space
 		{
@@ -426,13 +478,11 @@ namespace Enjon { namespace AnimationEditor {
 			{
 				AnimationSelectionColor = EG::RGBA16(0.08f, 0.08f, 0.08f, 1.0f);
 				AnimationSelection.State = ButtonState::ACTIVE;
-				std::cout << "Active, bitches!" << std::endl;
 			} 
 			else
 			{
 				AnimationSelectionColor = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 				AnimationSelection.State = ButtonState::INACTIVE;
-				std::cout << "Inactive, bitches!" << std::endl;
 			} 
 		});
 
@@ -823,6 +873,38 @@ namespace Enjon { namespace AnimationEditor {
 		// Set up AABB of Scene Animation
 		EGUI::AnimationElement::AABBSetup(&SceneAnimation);
 
+		// Set up AABB's of AnimationSelection list elements
+		auto Offset = 20.0f;
+		auto Position = AnimationSelection.AABB.Min;
+		auto Dimensions = AnimationSelection.Dimensions;
+		for (auto e : AnimationSelection.List)
+		{
+			auto AABB_e = &e->AABB;
+
+			// UIBatch->Add(
+			// 				EM::Vec4(
+			// 							HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset - XPadding,
+			// 							HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, 
+			// 							GroupWidth, 20.0f
+			// 						),
+			// 				EM::Vec4(0, 0, 1, 1),
+			// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
+			// 				AnimationSelection.List.at(i).Color
+			// 			);
+
+			// Calculate min
+			AABB_e->Min = EM::Vec2(Position - EM::Vec2(0.0f, Offset));
+
+			// Calculate max
+			AABB_e->Max = AABB_e->Min + EM::Vec2(200.0f, 20.0f);
+
+
+			// Offset += 20.0f;
+
+			// Add to position
+			Position.y -= Offset;
+		}
+
 		// Update input
 		Input->Update();
 
@@ -1094,11 +1176,12 @@ namespace Enjon { namespace AnimationEditor {
 					EG::Fonts::PrintText(	
 											AnimationSelection.AABB.Min.x + Padding.x, 
 											AnimationSelection.AABB.Min.y + Padding.y, 1.0f, 
-											AnimationSelection.Text + std::string("              v"), 
+											AnimationSelection.Text, 
 											CurrentFont, 
 											*UIBatch, 
 											EG::RGBA16_White()
 										);
+
 				}
 
 				auto AnimationSelectionYOffset = YOffset;	
@@ -1220,7 +1303,7 @@ namespace Enjon { namespace AnimationEditor {
 					YOffset = AnimationSelectionYOffset;
 					YOffset += 5.0f;
 					float XPadding = 5.0f;
-					auto Amount = 20;
+					auto Amount = AnimationSelection.List.size();
 					auto GroupWidth = 185.0f;
 
 					// Draw shadow for group for now
@@ -1234,6 +1317,7 @@ namespace Enjon { namespace AnimationEditor {
 									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
 									EG::SetOpacity(EG::RGBA16_Black(), 0.2f)
 								);
+
 					// Draw border for group for now
 					EG::DrawRectBorder	(
 											UIBatch, 
@@ -1247,26 +1331,38 @@ namespace Enjon { namespace AnimationEditor {
 											EG::RGBA16_DarkGrey()
 										);
 
-					// Draw box for group for now
-					UIBatch->Add(
-									EM::Vec4(
-												HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset - XPadding,
-												HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset - 20.0f * Amount, 
-												GroupWidth, 20.0f * Amount
-											),
-									EM::Vec4(0, 0, 1, 1),
-									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
-									EG::RGBA16(0.08f, 0.08f, 0.08f, 1.0f)
-								);
-
+					auto F = EG::FontManager::GetFont("WeblySleek_10");
 					for (auto i = 0; i < Amount; ++i)
 					{
 						YOffset += 20.0f;
-						auto F = EG::FontManager::GetFont("WeblySleek_10");
+
+						// Draw box
+						// UIBatch->Add(
+						// 				EM::Vec4(
+						// 							HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset - XPadding,
+						// 							HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, 
+						// 							GroupWidth, 20.0f
+						// 						),
+						// 				EM::Vec4(0, 0, 1, 1),
+						// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
+						// 				AnimationSelection.List.at(i).Color
+						// 			);
+
+						// Draw AABB of list element
+						UIBatch->Add(
+										EM::Vec4(
+													AnimationSelection.List.at(i)->AABB.Min,
+													AnimationSelection.List.at(i)->AABB.Max - AnimationSelection.List.at(i)->AABB.Min
+												),
+										EM::Vec4(0, 0, 1, 1),
+										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
+										AnimationSelection.List.at(i)->Color	
+									);
+
 						EG::Fonts::PrintText(	
 												HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + XPadding, 
 												HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset + 6.0f, scale, 
-												std::string("Animation_") + std::to_string(i), 
+												AnimationSelection.List.at(i)->Text, 
 												F, 
 												*UIBatch, 
 												EG::RGBA16_MidGrey()
@@ -1284,27 +1380,6 @@ namespace Enjon { namespace AnimationEditor {
 												EG::RGBA16(0.06f, 0.06f, 0.06f, 1.0f)
 											);
 					}
-
-					// YOffset += 20.0f;
-					// EG::Fonts::PrintText(	
-					// 						HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + XPadding, 
-					// 						HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-					// 						std::string("Animation_1"), 
-					// 						CurrentFont, 
-					// 						*UIBatch, 
-					// 						EG::RGBA16_LightGrey()
-					// 					);
-					// YOffset += 20.0f;
-					// EG::Fonts::PrintText(	
-					// 						HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + XPadding, 
-					// 						HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-					// 						std::string("Animation_2"), 
-					// 						CurrentFont, 
-					// 						*UIBatch, 
-					// 						EG::RGBA16_LightGrey()
-					// 					);
-
-					// YOffset -= 20.0f * Amount - 5.0f;
 				}
 
 
@@ -1370,6 +1445,27 @@ namespace Enjon { namespace AnimationEditor {
 		}
 
 		TextShader->Unuse();
+
+		BasicShader->Use();
+		BasicShader->SetUniformMat4("view", HUDCamera.GetCameraMatrix());
+		{
+			UIBatch->Begin();
+			{
+				UIBatch->Add(
+								EM::Vec4(
+											AnimationSelection.AABB.Max - EM::Vec2(3.0f, 18.0f), 
+											EM::Vec2(16, 16)
+									     ),
+								EM::Vec4(0, 0, 1, 1),
+								EI::ResourceManager::GetTexture("../Assets/Textures/gui_down_arrow.png").id,
+								EG::RGBA16_White()	
+							);
+			}
+			UIBatch->End();
+			UIBatch->RenderBatch();
+		}
+		BasicShader->Unuse();
+	
 		return true;
 	}
 
@@ -1525,6 +1621,53 @@ namespace Enjon { namespace AnimationEditor {
 			InputText->off_hover.emit();
 		}
 
+		// Check list components for being hovered over
+		static EGUI::GUITextButton* ListElement = nullptr;
+		if (AnimationSelection->State == ButtonState::ACTIVE)
+		{
+			bool Found = false;
+			for (auto i = 0; i < AnimationSelection->List.size(); ++i)
+			{
+				auto e = AnimationSelection->List.at(i);
+
+				if (EP::AABBvsPoint(&e->AABB, MousePos))
+				{
+					// If previously assigned but now not the same, then emit off hover
+					if (ListElement && ListElement != e)
+					{
+						if (ListElement->HoverState == HoveredState::ON_HOVER) ListElement->off_hover.emit(ListElement);
+					}
+
+					// Assign list element
+					ListElement = e;
+
+					// If not hoverstate active, then emit
+					if (ListElement->HoverState == HoveredState::OFF_HOVER) 
+					{
+						ListElement = e;
+						e->on_hover.emit(e);
+					}
+
+					// Found, so break out of loop
+					Found = true;
+					break;
+				}
+			}
+			// Nothing was selected but previous list element assigned
+			if (!Found && ListElement)
+			{
+				ListElement->off_hover.emit(ListElement);
+				ListElement = nullptr;
+			}
+		}
+		// If there was something, need to get rid of it
+		else if (ListElement)
+		{
+			ListElement->off_hover.emit(ListElement);
+			ListElement = nullptr;
+		}
+
+
 		// Get SceneAnimation
 		auto SceneAnimation = static_cast<GUIAnimationElement*>(GUIManager::Get("SceneAnimation"));
 		auto SceneMousePos = Input->GetMouseCoords();
@@ -1571,6 +1714,15 @@ namespace Enjon { namespace AnimationEditor {
 	    		MouseFocus = nullptr;
 	    	}
 
+	    	// Do AABB test with AnimationSelection List Element
+	    	else if (ListElement)
+	    	{
+	    		ListElement->on_click.emit(ListElement);
+	    		ListElement->off_hover.emit(ListElement);
+	    		ListElement = nullptr;
+	    		MouseFocus = nullptr;
+	    	}
+
 	    	else if (MouseOverAnimationSelection)
 	    	{
 	    		SelectedGUIElement = AnimationSelection;
@@ -1602,6 +1754,7 @@ namespace Enjon { namespace AnimationEditor {
 	    		if (MouseFocus) 
     			{
 		    		if (MouseFocus == AnimationSelection && AnimationSelection->State) MouseFocus->on_click.emit();
+		    		std::cout << "Here..." << std::endl;
 		    	}
 
 	    		// This is incredibly not thought out at all...
