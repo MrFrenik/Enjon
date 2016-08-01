@@ -954,9 +954,9 @@ namespace Enjon { namespace AnimationEditor {
 			// glEnable(GL_SCISSOR_TEST);
 			UIBatch->Begin(EG::GlyphSortType::FRONT_TO_BACK);
 			{
-
 				// Get font for use
-				auto CurrentFont = EG::FontManager::GetFont("Corbert_14");
+				// auto CurrentFont = EG::FontManager::GetFont("Corbert_14");
+				auto CurrentFont = EG::FontManager::GetFont("Reduction_10");
 				auto XOffset = 110.0f;
 				auto scale = 1.0f;
 				auto YOffset = 70.0f;
@@ -977,23 +977,50 @@ namespace Enjon { namespace AnimationEditor {
 
 				EM::Vec2 TitleBarBL(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipYOffset - Difference);
 
-				// Draw Title Bar 
+				// Draw Widget border
+				EG::DrawRectBorder	(
+										UIBatch,
+										EM::Vec4(
+													HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f, 
+													HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipHeight - ClipYOffset, 
+													ClipWidth, 
+													ClipHeight
+												),
+										1.0f,
+										EG::SetOpacity(EG::RGBA16_MidGrey(), 0.6f)
+									); 
+
+				// Draw Title border
+				EG::DrawRectBorder	(
+										UIBatch,
+										EM::Vec4(
+													TitleBarBL.x, 
+													TitleBarBL.y, 
+													ClipWidth, 
+													Difference
+												),
+										1.0f,
+										EG::SetOpacity(EG::RGBA16_MidGrey(), 0.6f)
+									); 
+
+				// Draw Title Bar
 				UIBatch->Add(
 								EM::Vec4(TitleBarBL.x, TitleBarBL.y, ClipWidth, Difference),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16_Black(), 0.3f),
+								EG::SetOpacity(EG::RGBA16(0.2f, 0.20f, 0.61f, 1.0f), 0.2f),
 								-100.0f
 							);
 
 				// Draw title of widget
 				std::string WidgetTitle("Animation Editor");
 
+				auto TitleFont = EG::FontManager::GetFont("Reduction_10");
 				// Calculate total width of title to find placement
 				float TitleAdvance = 0.0f;
 				for (auto& c : WidgetTitle)
 				{
-					TitleAdvance += EG::Fonts::GetAdvance(c, CurrentFont, 1.0f);
+					TitleAdvance += EG::Fonts::GetAdvance(c, TitleFont, 1.0f);
 				}
 
 				EG::Fonts::PrintText(
@@ -1001,7 +1028,7 @@ namespace Enjon { namespace AnimationEditor {
 										TitleBarBL.y + Difference / 3.0f,
 										1.0f,
 										WidgetTitle,
-										CurrentFont,
+										TitleFont,
 										*UIBatch,
 										EG::RGBA16_White()
 									);
@@ -1012,7 +1039,7 @@ namespace Enjon { namespace AnimationEditor {
 								EM::Vec4(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipHeight - ClipYOffset, ClipWidth, ClipHeight - Difference),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::RGBA16(0.24f, 0.22f, 0.35f, 0.3f)
+								EG::SetOpacity(EG::RGBA16_LightPurple(), 0.3f)
 							);
 
 				YOffset += 25.0f;
@@ -1046,7 +1073,7 @@ namespace Enjon { namespace AnimationEditor {
 											AnimationSelection.Text, 
 											CurrentFont, 
 											*UIBatch, 
-											EG::RGBA16_LightGrey()
+											EG::RGBA16_LimeGreen()
 										);
 				}
 
@@ -1168,10 +1195,24 @@ namespace Enjon { namespace AnimationEditor {
 				{
 					YOffset = AnimationSelectionYOffset;
 					YOffset += 5.0f;
+					float XPadding = 5.0f;
+					// Draw border for group for now
+					EG::DrawRectBorder	(
+											UIBatch, 
+											EM::Vec4(
+														HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset - XPadding,
+														HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset - 20.0f * 3.0f, 
+														200.0f, 
+														20.0f * 3.0f
+													),
+											1.0f,
+											EG::RGBA16_LightGrey()
+										);
+
 					// Draw box for group for now
 					UIBatch->Add(
 									EM::Vec4(
-												HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + 10.0f,
+												HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset - XPadding,
 												HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset - 20.0f * 3.0f, 
 												200.0f, 20.0f * 3.0f
 											),
@@ -1182,7 +1223,7 @@ namespace Enjon { namespace AnimationEditor {
 
 					YOffset += 20.0f;
 					EG::Fonts::PrintText(	
-											HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + 15.0f, 
+											HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + XPadding, 
 											HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
 											std::string("Animation_1"), 
 											CurrentFont, 
@@ -1191,7 +1232,7 @@ namespace Enjon { namespace AnimationEditor {
 										);
 					YOffset += 20.0f;
 					EG::Fonts::PrintText(	
-											HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + 15.0f, 
+											HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + XPadding, 
 											HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
 											std::string("Animation_2"), 
 											CurrentFont, 
@@ -1262,49 +1303,6 @@ namespace Enjon { namespace AnimationEditor {
 			}
 			UIBatch->End();
 			UIBatch->RenderBatch();
-
-			// Try to render a clipping mask and then do stuff and things with it and stuff
-			UIBatch->Begin(EG::GlyphSortType::FRONT_TO_BACK);
-			{
-				// Get font for use
-				auto CurrentFont = EG::FontManager::GetFont("WeblySleek");
-				auto XOffset = 110.0f;
-				auto scale = 1.0f;
-
-				glEnable(GL_SCISSOR_TEST);
-				glScissor(
-							HUDCamera.GetPosition().x + XOffset, 
-							HUDCamera.GetPosition().y + SCREENHEIGHT - 420.0f, 
-							200, 
-							10
-						);
-
-				// UIBatch->Add(
-				// 				EM::Vec4(
-				// 							HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-				// 							HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 420.0f, 
-				// 							200, 10
-				// 						), 
-				// 				EM::Vec4(0, 0, 1, 1), 
-				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-				// 				EG::SetOpacity(EG::RGBA16_Green(), 1.0f),
-				// 				-100
-				// 			);
-
-				// EG::Fonts::PrintText(	
-				// 						HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-				// 						HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 420.0f, scale, 
-				// 						std::string("This is a clipping mask testasdfasdfasdfsadfsadfsdf"), 
-				// 						CurrentFont, 
-				// 						*UIBatch, 
-				// 						EG::RGBA16_LightGrey()
-				// 					);
-
-			}
-			UIBatch->End();
-			UIBatch->RenderBatch();
-			glDisable(GL_SCISSOR_TEST);
-
 		}
 
 		TextShader->Unuse();

@@ -1,4 +1,5 @@
 #include "Graphics/SpriteBatch.h"
+#include "IO/ResourceManager.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,5 +218,87 @@ namespace Enjon { namespace Graphics {
 	{
 		return (a->texture < b->texture);
 	}
+
+	void DrawRectBorder(SpriteBatch* Batch, const EM::Vec4& Dims, float Thickness, const EG::ColorRGBA16& Color)
+	{
+		/*
+			|-  z  -|
+			--------- -
+			|		| |
+			|		| w
+			|		| |
+			--------- -
+		 (x, y)
+		*/
+
+		float X, Y, Width, Height;
+
+		//////////////////////
+		// TOP BORDER ////////
+
+		// Get Necessary dimensions 
+		X = Dims.x;
+		Y = Dims.y + Dims.w;
+		Width = Dims.z;
+		Height = Thickness;
+
+		Batch->Add(
+					EM::Vec4(X, Y, Width, Height), 
+					EM::Vec4(0, 0, 1, 1),
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+					Color 
+				  );
+
+		////////////////////////
+		// RIGHT BORDER ////////
+
+		// Get Necessary dimensions 
+		X = Dims.x + Dims.z;
+		Y = Dims.y - Thickness;
+		Width = Thickness;
+		Height = Dims.w + Thickness;
+
+		Batch->Add(
+					EM::Vec4(X, Y, Width, Height), 
+					EM::Vec4(0, 0, 1, 1),
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+					Color 
+				  );
+
+		/////////////////////////
+		// BOTTOM BORDER ////////
+
+		// Get Necessary dimensions 
+		X = Dims.x;
+		Y = Dims.y - Thickness;
+		Width = Dims.z;
+		Height = Thickness;
+
+		Batch->Add(
+					EM::Vec4(X, Y, Width, Height), 
+					EM::Vec4(0, 0, 1, 1),
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+					Color 
+				  );
+
+		///////////////////////
+		// LEFT BORDER ////////
+
+		// Get Necessary dimensions 
+		X = Dims.x - Thickness;
+		Y = Dims.y - Thickness;
+		Width = Thickness;
+		Height = Dims.w + Thickness;
+
+		Batch->Add(
+					EM::Vec4(X, Y, Width, Height), 
+					EM::Vec4(0, 0, 1, 1),
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+					Color 
+				  );
+
+	}
+
+
 
 }}

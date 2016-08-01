@@ -11,6 +11,8 @@ out vec4 color;
 
 uniform sampler2D tex;
 
+#define ALPHA_VALUE_BORDER 0.0
+
 void main() 
 {
 	// Sample the texture

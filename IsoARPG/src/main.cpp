@@ -758,9 +758,17 @@ int main(int argc, char** argv)
 					// Print Entity info if debug info is on
 					if (DebugInfo)
 					{
+						auto CF = EG::FontManager::GetFont("Reduction_24");
+
 						// Entity id
-						Graphics::Fonts::PrintText(EntityPosition->x + 20.0f, EntityPosition->y - 20.0f, 0.4f, std::string("ID: ") + std::to_string(e), Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
-																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+						Graphics::Fonts::PrintText(	EntityPosition->x + 20.0f, 
+													EntityPosition->y - 20.0f, 
+													0.4f, 
+													std::string("ID: ") + std::to_string(e), 
+													CF, 
+													TextBatch, 
+													EG::SetOpacity(Graphics::RGBA16_White(), 0.8f)
+												);
 						// Entity Type
 						std::string Type;
 						if (World->AttributeSystem->Masks[e] & Masks::Type::AI) Type = "AI";
@@ -772,16 +780,17 @@ int main(int argc, char** argv)
 						auto Y = EntityPosition->y;
 						auto Z = EntityPosition->z;
 
+
 						Graphics::Fonts::PrintText(	EntityPosition->x + 20.0f, 
 													EntityPosition->y - 40.0f, 
 													0.4f, std::string("<") + std::to_string(X) + std::string(", ") + std::to_string(Y) + (", ") + std::to_string(Z) + std::string(">"), 
-													Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
+													CF, TextBatch, 
 																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 						Graphics::Fonts::PrintText( EntityPosition->x + 20.0f, 
 													EntityPosition->y - 60.0f, 
 													0.4f, std::string("Type: ") + Type, 
-													Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
+													CF, TextBatch, 
 																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 						auto EntityHealth = World->AttributeSystem->HealthComponents[e].Health;
@@ -789,7 +798,7 @@ int main(int argc, char** argv)
 						Graphics::Fonts::PrintText( EntityPosition->x + 20.0f, 
 													EntityPosition->y - 80.0f, 
 													0.4f, std::string("Health: ") + std::to_string(EntityHealth), 
-													Graphics::FontManager::GetFont(std::string("Bold")), TextBatch, 
+													CF, TextBatch, 
 																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 					}
 
@@ -1114,7 +1123,7 @@ int main(int argc, char** argv)
 			// 			  HealthSheet.texture.id, 
 			// 			  EG::RGBA16_Red());
 
-			auto F = EG::FontManager::GetFont("Bold_32");
+			auto F = EG::FontManager::GetFont("Reduction_24");
 
 			if (Paused)
 			{
@@ -1124,6 +1133,18 @@ int main(int argc, char** argv)
 
 			if (DebugInfo)
 			{
+				// Draw box around area
+				HUDBatch.Add(	
+								EM::Vec4(
+											HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 10.0f, 
+											HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f - 20.0f * 12.0f,
+											300.0f, 
+											20.0f + 20.0f * 12.0f
+										), 
+								EM::Vec4(), 
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								EG::SetOpacity(EG::RGBA16_LightPurple(), 0.3f)
+							);
 				// Profiling info
 				// Add FPS
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 

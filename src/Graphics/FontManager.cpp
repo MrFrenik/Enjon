@@ -16,6 +16,9 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 		AddFont(Fonts, "TallBold", Fonts::CreateFont("../assets/fonts/TallBolder/TallBolder.ttf", 12));
 		AddFont(Fonts, "BebasNeue", Fonts::CreateFont("../assets/fonts/BebasNeue/BebasNeue.otf", 16));
 		AddFont(Fonts, "WeblySleek", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 14));
+		AddFont(Fonts, "Reduction_10", Fonts::CreateFont("../assets/fonts/Reduction/Reduction.ttf", 10));
+		AddFont(Fonts, "Reduction_24", Fonts::CreateFont("../assets/fonts/Reduction/Reduction.ttf", 24));
+		AddFont(Fonts, "VCR_OSD_MONO", Fonts::CreateFont("../assets/fonts/VCR_OSD_MONO/VCR_OSD_MONO.ttf", 14));
 	}
 
 	/* Add font to FontManager */
@@ -30,7 +33,7 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 	{
 		auto it = Fonts.find(FontName);
 		if (it != Fonts.end()) return it->second;
-		else return Fonts["Bold"];
+		else return Fonts["Bold_32"];
 	}
 
 	// Delete all animations and clear any memory used
