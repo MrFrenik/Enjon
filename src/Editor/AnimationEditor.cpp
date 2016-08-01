@@ -352,9 +352,9 @@ namespace Enjon { namespace AnimationEditor {
 					for (auto& c : T)
 					{
 						// Summation of all characters
-						A += EG::Fonts::GetAdvance(c, EG::FontManager::GetFont("WeblySleek"), 1.0f);
+						A += EG::Fonts::GetAdvance(c, EG::FontManager::GetFont("WeblySleek_10"), 1.0f);
 
-						if (A > 110.0f) 
+						if (A > 90.0f) 
 						{
 							c = '.';
 							period_count++;
@@ -370,7 +370,8 @@ namespace Enjon { namespace AnimationEditor {
 						index++;
 					}
 
-					AnimationSelection.Dimensions = EM::Vec2(A, 20.0f);
+
+					AnimationSelection.Dimensions = EM::Vec2(A + 20.0f, 20.0f);
 				}
 			});
 
@@ -392,9 +393,9 @@ namespace Enjon { namespace AnimationEditor {
 			for (auto& c : T)
 			{
 				// Summation of all characters
-				A += EG::Fonts::GetAdvance(c, EG::FontManager::GetFont("WeblySleek"), 1.0f);
+				A += EG::Fonts::GetAdvance(c, EG::FontManager::GetFont("WeblySleek_10"), 1.0f);
 
-				if (A > 110.0f) 
+				if (A > 90.0f) 
 				{
 					c = '.';
 					period_count++;
@@ -410,7 +411,9 @@ namespace Enjon { namespace AnimationEditor {
 				index++;
 			}
 
-			AnimationSelection.Dimensions = EM::Vec2(A, 20.0f);
+			std::cout << "A: " << A << std::endl;
+
+			AnimationSelection.Dimensions = EM::Vec2(A + 20.0f, 20.0f);
 		}
 
 
@@ -1255,7 +1258,7 @@ namespace Enjon { namespace AnimationEditor {
 											AnimationSelection.AABB.Min.x + Padding.x, 
 											AnimationSelection.AABB.Min.y + Padding.y, 1.0f, 
 											AnimationSelection.Text, 
-											CurrentFont, 
+											EG::FontManager::GetFont("WeblySleek_10"), 
 											*UIBatch, 
 											EG::RGBA16_White()
 										);
