@@ -11,6 +11,25 @@ namespace Enjon { namespace GUI {
 	// AnimationFrameElement
 	struct GUIAnimationElement : GUIElement<GUIAnimationElement>
 	{
+		GUIAnimationElement()
+		{
+			// Set up type
+			this->Type = GUIType::TEXT_BOX; 
+
+			// Set up SceneAnimation's on_hover signal
+			this->on_hover.connect([&]()
+			{
+				this->HoverState = HoveredState::ON_HOVER;
+			});
+
+			// Set up SceneAnimation's off_hover signal
+			this->off_hover.connect([&]()
+			{
+				this->HoverState = HoveredState::OFF_HOVER;
+			});
+
+		}
+
 		void Init() {}
 
 		EA::Anim* CurrentAnimation;

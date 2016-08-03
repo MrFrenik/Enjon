@@ -6,15 +6,53 @@
 namespace Enjon { namespace Input {
 
 	InputManager::InputManager() : m_mouseCoords(0.0f)
-	{}
+	{
+		int MaxJoysticks = SDL_NumJoysticks();
+		int ControllerIndex = 0;
+		for(int JoystickIndex = 0; JoystickIndex < MaxJoysticks; ++JoystickIndex)
+		{
+		    if (!SDL_IsGameController(JoystickIndex))
+		    {
+		        continue;
+		    }
+		    if (ControllerIndex >= MAX_CONTROLLERS)
+		    {
+		        break;
+		    }
 
-	InputManager::~InputManager(){}
+		    auto CHandle = SDL_GameControllerOpen(JoystickIndex);
+
+		    // Push back controller handle
+		    ControllerHandles.push_back(CHandle);
+		    ControllerIndex++;
+
+		    GamePadController = {};
+		   	GamePadController.ControllerHandle = CHandle; 
+		}	
+	}
+
+	InputManager::~InputManager()
+	{
+		for (auto& p : ControllerHandles)
+		{
+			SDL_GameControllerClose(p);
+		}
+
+		SDL_GameControllerClose(GamePadController.ControllerHandle);
+	}
 
 	void InputManager::Update()
 	{ 
+		// Update keyboard keys
 		for(auto& it : m_keyMap)
 		{
 			m_previousKeyMap[it.first] = it.second;
+		}
+
+		// Update Game Controller button keys
+		for (auto& it : GamePadController.m_buttonMap)
+		{
+			GamePadController.m_previousButtonMap[it.first] = it.second;
 		}
 	}
 
@@ -64,6 +102,49 @@ namespace Enjon { namespace Input {
 	{
 		m_mouseCoords.x = x;
 		m_mouseCoords.y = y;
+	}
+
+	////////////////////////////
+	// Controller //////////////
+
+	void Controller::PressButton(unsigned int buttonID)
+	{
+		m_buttonMap[buttonID] = true;
+	}
+
+	void Controller::ReleaseButton(unsigned int buttonID)
+	{
+		m_buttonMap[buttonID] = false;
+	}
+
+	bool Controller::IsButtonDown(unsigned int buttonID)
+	{
+		auto it = m_buttonMap.find(buttonID);
+
+		if(it != m_buttonMap.end()){
+			return it->second;
+		}
+
+		else return false;
+	}
+
+	bool Controller::WasButtonDown(unsigned int buttonID)
+	{
+		auto it = m_previousButtonMap.find(buttonID);
+	
+		if(it != m_previousButtonMap.end()){
+			return it->second;
+		}
+	
+		else return false;
+	}
+
+	bool Controller::IsButtonPressed(unsigned int buttonID)
+	{
+		if(IsButtonDown(buttonID) == true && WasButtonDown(buttonID) == false) 
+			return true; 
+		else 
+			return false;
 	}
 }}
 

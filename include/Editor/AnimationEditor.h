@@ -47,13 +47,6 @@ namespace CameraManager
 	EG::Camera2D* GetCamera(const std::string S);
 };
 
-namespace CursorManager
-{
-	void Init();
-
-	SDL_Cursor* Get(const std::string S);
-};
-
 namespace Enjon { namespace AnimationEditor {
 
 	bool Init(EI::InputManager* Input, float ScreenWidth, float ScreenHeight);

@@ -39,12 +39,14 @@ namespace ECS { namespace Systems { namespace PlayerController {
 			if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
 			{ 
 				Enjon::Input::InputManager* Input = System->PlayerControllers[e].Input; 
+				Component::Transform3D* Transform = &Manager->TransformSystem->Transforms[e];
 
 				SDL_Event event;
 				static SDL_Joystick* Stick;
 				static int joyX;
 				static int joyY;
-				const static int JOY_DEADZONE = 3000;
+				const static int JOY_DEADZONE = 4500;
+				static float goal = 2.5f;
 
 				while (SDL_PollEvent(&event)) {
 					switch (event.type) {
@@ -66,26 +68,104 @@ namespace ECS { namespace Systems { namespace PlayerController {
 							Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 							break;
 						case SDL_JOYAXISMOTION:
-							switch(event.jaxis.axis)
+							if (event.jaxis.axis == 0) 
 							{
-								case 0: 
-									if (event.jaxis.value < -JOY_DEADZONE)
-									{
-										printf ("Left\n");
-									}
-									if (event.jaxis.value > JOY_DEADZONE)
-										printf("Right\n");
-									break;
-								case 1:
-									if (event.jaxis.value < -JOY_DEADZONE)
-										printf("Up\n");
-									if (event.jaxis.value > JOY_DEADZONE)
-										printf("Down\n");
-									break;
+								float value = static_cast<float>(event.jaxis.value) / 32768.0f;
+	
+								if (event.jaxis.value < -JOY_DEADZONE)
+								{
+									Input->GamePadController.Axis0Value = value;
+								}
+								else if (event.jaxis.value > JOY_DEADZONE)
+								{
+									Input->GamePadController.Axis0Value = value;
+								}
+								else
+								{
+									Input->GamePadController.Axis0Value = 0.0f;
+								}
+
+							}
+							if (event.jaxis.axis == 1)
+							{
+								float value = -1.0f * static_cast<float>(event.jaxis.value) / 32768.0f;
+
+								if (event.jaxis.value < -JOY_DEADZONE)
+								{
+									Input->GamePadController.Axis1Value = value;
+								}
+								else if (event.jaxis.value > JOY_DEADZONE)
+								{
+									Input->GamePadController.Axis1Value = value;
+								}
+								else
+								{
+									Input->GamePadController.Axis1Value = 0.0f;
+								}
+							}
+
+							if (event.jaxis.axis == 2)
+							{
+								float value = static_cast<float>(event.jaxis.value) / 32768.0f;
+
+								if (event.jaxis.value < -JOY_DEADZONE)
+								{
+									// std::cout << "Right stick L: " << value << std::endl;
+								}
+								else if (event.jaxis.value > JOY_DEADZONE)
+								{
+									// std::cout << "Right stick R: " << value << std::endl;
+								}
+							}
+
+							if (event.jaxis.axis == 3)
+							{
+								float value = -1.0f * static_cast<float>(event.jaxis.value) / 32768.0f;
+
+								if (event.jaxis.value < -JOY_DEADZONE)
+								{
+									// std::cout << "Right stick U: " << value << std::endl;
+								}
+								else if (event.jaxis.value > JOY_DEADZONE)
+								{
+									// std::cout << "Right stick D: " << value << std::endl;
+								}
+							}
+
+							if (event.jaxis.axis == 4)
+							{
+								float value = static_cast<float>(event.jaxis.value) / 32768.0f;
+
+								if (event.jaxis.value < -JOY_DEADZONE)
+								{
+									// std::cout << "Trigger L: " << value << std::endl;
+								}
+								else if (event.jaxis.value > JOY_DEADZONE)
+								{
+									// std::cout << "Trigger L: " << value << std::endl;
+								}
+							}
+
+							if (event.jaxis.axis == 5)
+							{
+								float value = static_cast<float>(event.jaxis.value) / 32768.0f;
+
+								if (event.jaxis.value < -JOY_DEADZONE)
+								{
+									Input->ReleaseKey(SDL_BUTTON_LEFT);
+								}
+								else if (event.jaxis.value > JOY_DEADZONE)
+								{
+									Input->PressKey(SDL_BUTTON_LEFT);
+								}
 							}
 							break;
-						case SDL_JOYBUTTONDOWN:
-							printf("Button down!\n");
+						
+						case SDL_CONTROLLERBUTTONDOWN:
+							Input->GamePadController.PressButton(static_cast<unsigned int>(event.cbutton.button));
+							break;
+						case SDL_CONTROLLERBUTTONUP:
+							Input->GamePadController.ReleaseButton(static_cast<unsigned int>(event.cbutton.button));
 							break;
 						default:
 							break;
@@ -93,18 +173,15 @@ namespace ECS { namespace Systems { namespace PlayerController {
 			    } 
 
 				// NOTE(John): I don't like this here...
-				static float goal = 2.5f;
 				static float Multiplier = 1.0f;
 				static eid32 id = 0;
-				Component::Transform3D* Transform = &Manager->TransformSystem->Transforms[e];
 				Component::Animation2D* Animation = &Manager->Animation2DSystem->Animations[e];
-				
-				// if (Input->IsKeyPressed(SDL_BUTTON_LEFT)) {
-				// 	// Set to attack?
-				// 	Animation2D::SetPlayerState(Animation2D::EntityAnimationState::ATTACKING);  // NOTE(John): THIS IS FUCKING AWFUL
-				// }
+			
+				// Get handle to controller
+				auto Controller = &Input->GamePadController;
+				auto CHandle = Controller->ControllerHandle;
 
-				if (Input->IsKeyDown(SDL_BUTTON_LEFT)) 
+				if (Input->IsKeyPressed(SDL_BUTTON_LEFT)) 
 				{
 					// Set to attack?
 					Animation2D::SetPlayerState(Animation2D::EntityAnimationState::ATTACKING);  // NOTE(John): THIS IS FUCKING AWFUL
@@ -117,8 +194,6 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					auto P = Manager->TransformSystem->Transforms[Manager->Player].Position + Enjon::Math::Vec3(50.0f, 20.0f, 0.0f);
 					Factory::CreateVortex(Manager, P);
 					RightButtonDown = true;
-
-				
 				}
 
 				else if (RightButtonDown)
@@ -156,25 +231,29 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					}
 				}
 
-				if (Input->IsKeyDown(SDLK_w)) {
+				if (Input->IsKeyDown(SDLK_w) || Controller->Axis1Value > 0) {
 
-					Transform->VelocityGoal.y = Multiplier * goal / 2.0f;
+					auto Val = Controller->Axis1Value;
+					Transform->VelocityGoal.y = Val ? Val * Multiplier * goal : Multiplier * goal;
 					Transform->ViewVector.y = 1.0f;
 				}
-				if (Input->IsKeyDown(SDLK_s)) {
+				if (Input->IsKeyDown(SDLK_s) || Controller->Axis1Value < 0) {
 
-					Transform->VelocityGoal.y = Multiplier * -goal / 2.0f;
+					auto Val = Controller->Axis1Value;
+					Transform->VelocityGoal.y = Val ? Val * Multiplier * goal : Multiplier * -goal;
 					Transform->ViewVector.y = -1.0f;
 				}
-				if (Input->IsKeyDown(SDLK_a)) {
+				if (Input->IsKeyDown(SDLK_a) || Controller->Axis0Value < 0) {
 
-					Transform->VelocityGoal.x = Multiplier * -goal;
+					auto Val = Controller->Axis0Value;
+					Transform->VelocityGoal.x = Val ? Val * Multiplier * goal : Multiplier * -goal;
 					Transform->ViewVector.x = -1.0f; 
 				}
 
-				if (Input->IsKeyDown(SDLK_d)) {
+				if (Input->IsKeyDown(SDLK_d) || Controller->Axis0Value > 0) {
 
-					Transform->VelocityGoal.x = Multiplier * goal;
+					auto Val = Controller->Axis0Value;
+					Transform->VelocityGoal.x = Val ? Val * Multiplier * goal : Multiplier * goal;
 					Transform->ViewVector.x = 1.0f; 
 				}
 
@@ -183,21 +262,24 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					Targeting = !Targeting;
 				}
 
-				if (Input->IsKeyPressed(SDLK_SPACE)) {
+				static bool Jumping = false;
+				if (Input->IsKeyPressed(SDLK_SPACE) || Controller->IsButtonPressed(static_cast<unsigned int>(SDL_CONTROLLER_BUTTON_A))) {
 					// Keep from double jumping
 					if (Transform->Position.z <= Transform->BaseHeight) Transform->Velocity.z = 1.0f * goal;
+					Jumping = true;
 				}
 
-				if (!Input->IsKeyPressed(SDLK_SPACE)) {
+				if (!Jumping) {
 					Transform->VelocityGoal.z = 2 * -9.8f;	
+					Jumping = false;
 				}
 
-				if (!Input->WasKeyDown(SDLK_w) && !Input->WasKeyDown(SDLK_s))
+				if (!Input->WasKeyDown(SDLK_w) && !Input->WasKeyDown(SDLK_s) && !Controller->Axis1Value)
 				{
 					if (Manager->TransformSystem->Transforms[e].ViewVector.x != 0) Manager->TransformSystem->Transforms[e].ViewVector.y = 0;
 				} 
 				
-				if (!Input->WasKeyDown(SDLK_a) && !Input->WasKeyDown(SDLK_d))
+				if (!Input->WasKeyDown(SDLK_a) && !Input->WasKeyDown(SDLK_d) && !Controller->Axis0Value)
 				{
 					if (Manager->TransformSystem->Transforms[e].ViewVector.y != 0) Manager->TransformSystem->Transforms[e].ViewVector.x = 0;
 				} 
@@ -205,7 +287,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				if (Input->IsKeyDown(SDLK_LCTRL)) {
 					goal = WALKPACE / 2.0f;
 				}
-				else if (Input->IsKeyDown(SDLK_LSHIFT)) {
+				else if (Input->IsKeyDown(SDLK_LSHIFT) || Controller->IsButtonDown(static_cast<unsigned int>(SDL_CONTROLLER_BUTTON_X))) {
 					goal = SPRINTPACE;
 				}
  				else goal = WALKPACE;
@@ -226,8 +308,8 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					}
 				}
 			
-				if (!Input->IsKeyDown(SDLK_w) && !Input->IsKeyDown(SDLK_s)) Transform->VelocityGoal.y = 0;
-				if (!Input->IsKeyDown(SDLK_a) && !Input->IsKeyDown(SDLK_d)) Transform->VelocityGoal.x = 0;
+				if (!Input->IsKeyDown(SDLK_w) && !Input->IsKeyDown(SDLK_s) && !Controller->Axis1Value) Transform->VelocityGoal.y = 0;
+				if (!Input->IsKeyDown(SDLK_a) && !Input->IsKeyDown(SDLK_d) && !Controller->Axis0Value) Transform->VelocityGoal.x = 0;
 
 			}
 		}

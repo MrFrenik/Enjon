@@ -185,8 +185,6 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 							// Increase current index
 							AnimComponent->CurrentIndex++;
-
-							std::cout << "Current Index: " << AnimComponent->CurrentIndex << std::endl;
 						}
 
 						// Bounds checking
@@ -200,8 +198,6 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 							// Reset start
 							*SetStart = FALSE;
-
-							std::cout << "Done Attacking!" << std::endl;
 						}
 
 						eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;

@@ -4,6 +4,7 @@
 #include "Graphics/ShaderManager.h"
 #include "Graphics/FontManager.h"
 #include "Graphics/SpriteBatch.h"
+#include "Graphics/CursorManager.h"
 #include "GUI/GUIAnimationElement.h"
 #include "Physics/AABB.h"
 #include "Defines.h"
@@ -112,31 +113,10 @@ namespace CameraManager
 	}
 };
 
-namespace CursorManager
-{
-	std::unordered_map<std::string, SDL_Cursor*> Cursors;
-
-	void Init()
-	{
-		Cursors["Arrow"] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
-		Cursors["IBeam"] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
-	}
-
-	SDL_Cursor* Get(const std::string S)
-	{
-		auto search = Cursors.find(S);
-		if (search != Cursors.end())
-		{
-			return search->second;
-		}
-		return nullptr;
-	}
-
-};
-
 namespace Enjon { namespace AnimationEditor {
 
 	using namespace GUI;
+	using namespace Graphics;
 
 	/*-- Function Delcarations --*/
 	bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera);
@@ -157,6 +137,11 @@ namespace Enjon { namespace AnimationEditor {
 	////////////////////////////////
 	// ANIMATION EDITOR ////////////
 
+	GUIGroup 			Group;
+	GUIGroup 			AnimationInfoGroup;
+	GUIGroup 			AnimationSelectionGroup;
+	GUIGroup			PlayerAnimationGroup;	
+	GUIGroup			AnimationWidget;
 	GUIButton 			PlayButton;
 	GUIButton 			NextFrame;
 	GUIButton 			PreviousFrame;
@@ -166,16 +151,10 @@ namespace Enjon { namespace AnimationEditor {
 	GUIButton 			OffsetRight;
 	GUIButton 			DelayUp;
 	GUIButton 			DelayDown;
-	GUIButton			ToggleOnionSkin;
-	GUIButton 			PlayerAttackOLSEButton; 		// Obviously these need to be generated procedurally...
-	GUIButton 			PlayerAttackOLSWButton;
 	GUITextBox 			InputText;
-	GUIAnimationElement SceneAnimation;
+	GUIRadialButton		ToggleOnionSkin;
 	GUIDropDownButton 	AnimationSelection;	
-	GUIGroup 			Group;
-	GUIGroup 			AnimationInfoGroup;
-	GUIGroup 			AnimationSelectionGroup;
-	GUIGroup			PlayerAnimationGroup;	
+	GUIAnimationElement SceneAnimation;
 	
 	
 	Atlas atlas;
@@ -263,10 +242,6 @@ namespace Enjon { namespace AnimationEditor {
 	    			EM::Vec2(AWidth, AHeight), 
 					EI::ResourceManager::GetTexture(AnimTextureDir.c_str(), GL_LINEAR)
 			  	};
-		
-		// Set up ToggleOnionSkin
-		ToggleOnionSkin.Type = GUIType::BUTTON;
-		ToggleOnionSkin.State = ButtonState::INACTIVE;
 
 		// Set up Scene Animtation
 		SceneAnimation.CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
@@ -278,9 +253,9 @@ namespace Enjon { namespace AnimationEditor {
 
 		// Set up AnimationSelection's text with name of current animation
 		AnimationSelection.Text = SceneAnimation.CurrentAnimation->Name;
-		AnimationSelection.Type = GUIType::BUTTON;
-		AnimationSelection.State = ButtonState::INACTIVE;
-		AnimationSelection.HoverState = HoveredState::OFF_HOVER;
+		// AnimationSelection.Type = GUIType::BUTTON;
+		// AnimationSelection.State = ButtonState::INACTIVE;
+		// AnimationSelection.HoverState = HoveredState::OFF_HOVER;
 		AnimationSelection.Position = EM::Vec2 (
 													HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 105.0f,
 													HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f 
@@ -292,40 +267,8 @@ namespace Enjon { namespace AnimationEditor {
 			// Make button to be pushed back
 			auto b = new GUITextButton();
 
-			// Set up button state
-			b->State = ButtonState::INACTIVE;
-
-			// Set up hover state
-			b->HoverState = HoveredState::OFF_HOVER;
-
 			// Give name of button name of current animation
 			b->Text = a.first;
-
-			// Set up color
-			b->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
-
-			// Set up text color
-			b->TextColor = EG::RGBA16_MidGrey();
-
-			// Set up off_hover signal
-			b->on_hover.connect([&](GUIElementBase* b)
-			{
-				auto d = static_cast<GUITextButton*>(b);
-				std::cout << "Entering list element..." << std::endl;
-				d->HoverState = HoveredState::ON_HOVER;
-				d->Color = EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0f);
-				d->TextColor = EG::RGBA16_White();
-			});
-
-			// Set up on_hover signal
-			b->off_hover.connect([&](GUIElementBase* b)
-			{
-				auto d = static_cast<GUITextButton*>(b);
-				std::cout << "Leaving list element..." << std::endl;
-				d->HoverState = HoveredState::OFF_HOVER;
-				d->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
-				d->TextColor = EG::RGBA16_MidGrey();
-			});
 
 			// Set up on_hover signal
 			b->on_click.connect([&](GUIElementBase* b)
@@ -379,7 +322,6 @@ namespace Enjon { namespace AnimationEditor {
 			AnimationSelection.List.push_back(b);
 		}
 
-
 		// Calculate AnimationSelection's dimensions
 		{
 			std::string& T = AnimationSelection.Text;
@@ -416,21 +358,8 @@ namespace Enjon { namespace AnimationEditor {
 			AnimationSelection.Dimensions = EM::Vec2(A + 20.0f, 20.0f);
 		}
 
-
-		// Set up text box's text
-		InputText.Text = std::string("");
-		InputText.CursorIndex = 0;
-
 		// Set up colors of buttons
 		PlayButtonColor 		= EG::RGBA16_White();
-		InputTextColor 			= EG::RGBA16(0.05f, 0.05f, 0.05f, 0.4f);
-		AnimationSelectionColor = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
-		PlayerAttackOLSWColor	= EG::RGBA16(0.25f, 0.25f, 0.25f, 0.3f);
-		PlayerAttackOLSEColor	= EG::RGBA16(0.25f, 0.25f, 0.25f, 0.3f);
-
-
-		PlayButton.Type = GUIType::BUTTON;
-		InputText.Type = GUIType::TEXTBOX;
 
 		// Set up Group
 		Group.Position = EM::Vec2(0.0f, -400.0f);
@@ -461,10 +390,6 @@ namespace Enjon { namespace AnimationEditor {
 		// Set up PlayButton position within the group
 		PlayButton.Position = EM::Vec2(10.0f, 20.0f);
 
-		// Set state to inactive
-		PlayButton.State 		= ButtonState::INACTIVE;
-		PlayButton.HoverState 	= HoveredState::OFF_HOVER;
-
 		// Set up Scaling Factor
 		PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor 	= 1.0f;
 		PlayButton.Frames.at(ButtonState::ACTIVE).ScalingFactor 	= 1.0f;
@@ -477,10 +402,6 @@ namespace Enjon { namespace AnimationEditor {
 
 		// Set up InputText position within the group
 		InputText.Position = EM::Vec2(100.0f, 60.0f);
-
-		// Set states to inactive
-		InputText.State 		= ButtonState::INACTIVE;
-		InputText.HoverState 	= HoveredState::OFF_HOVER;
 
 		// Set up InputText AABB
 		// This will be dependent on the size of the text, or it will be static, or it will be dependent on some image frame
@@ -505,208 +426,9 @@ namespace Enjon { namespace AnimationEditor {
 		auto GroupWidth = InputText.AABB.Max.x - Group.AABB.Min.x;
 		Group.AABB.Max = Group.AABB.Min + EM::Vec2(GroupWidth, GroupHeight);
 
-
 		// Set up OntionSkin AABB
 		ToggleOnionSkin.AABB.Min = AnimationSelection.AABB.Max - EM::Vec2(18.0f, 6.0f * 20.0f - 5.0f);
 		ToggleOnionSkin.AABB.Max = ToggleOnionSkin.AABB.Min + EM::Vec2(10.0f, 10.0f);
-		ToggleOnionSkin.Color = EG::RGBA16_DarkGrey();
-
-		// Set up ToggleOnionSkin's on_hover signal
-		ToggleOnionSkin.on_hover.connect([&]()
-		{
-			ToggleOnionSkin.HoverState = HoveredState::ON_HOVER;
-			if (!ToggleOnionSkin.State) ToggleOnionSkin.Color = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
-		});
-
-		// Set up ToggleOnionSkin's off_hover signal
-		ToggleOnionSkin.off_hover.connect([&]()
-		{
-			ToggleOnionSkin.HoverState = HoveredState::OFF_HOVER;
-			if (!ToggleOnionSkin.State) ToggleOnionSkin.Color = EG::RGBA16_DarkGrey();
-		});
-
-		// Set up ToggleOnionSkin's on_click signal
-		ToggleOnionSkin.on_click.connect([&]()
-		{
-			std::cout << "Emiting onion skin..." << std::endl;
-
-			// Toggle onion skin being on and off
-			ToggleOnionSkin.State = ToggleOnionSkin.State == ButtonState::INACTIVE ? ButtonState::ACTIVE : ButtonState::INACTIVE;
-
-			ToggleOnionSkin.Color = ToggleOnionSkin.State == ButtonState::INACTIVE ? EG::RGBA16_DarkGrey() : EG::RGBA16_LimeGreen();
-		});
-
-
-		// Set up AnimationSelection's on_hover signal
-		AnimationSelection.on_hover.connect([&]()
-		{
-			AnimationSelection.HoverState = HoveredState::ON_HOVER;
-			AnimationSelectionColor = EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0f);
-		});
-
-		// Set up AnimationSelection's off_hover signal
-		AnimationSelection.off_hover.connect([&]()
-		{
-			AnimationSelection.HoverState = HoveredState::OFF_HOVER;
-			if (!AnimationSelection.State) AnimationSelectionColor = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
-		});
-
-		// Set up AnimationSelection's on_click signal
-		AnimationSelection.on_click.connect([&]()
-		{
-			// Need a drop down box here with all the options to be selected
-			if (AnimationSelection.State == ButtonState::INACTIVE)
-			{
-				AnimationSelectionColor = EG::RGBA16(0.08f, 0.08f, 0.08f, 1.0f);
-				AnimationSelection.State = ButtonState::ACTIVE;
-			} 
-			else
-			{
-				AnimationSelectionColor = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
-				AnimationSelection.State = ButtonState::INACTIVE;
-			} 
-		});
-
-		// Set up SceneAnimation's on_hover signal
-		SceneAnimation.on_hover.connect([&]()
-		{
-			SceneAnimation.HoverState = HoveredState::ON_HOVER;
-		});
-
-		// Set up SceneAnimation's off_hover signal
-		SceneAnimation.off_hover.connect([&]()
-		{
-			SceneAnimation.HoverState = HoveredState::OFF_HOVER;
-		});
-
-		// Set up InputText's on_click signal
-		InputText.on_click.connect([&]()
-		{
-			// Naive way first - get mouse position in UI space
-			EM::Vec2 MouseCoords = Input->GetMouseCoords();
-			CameraManager::GetCamera("HUDCamera")->ConvertScreenToWorld(MouseCoords);
-
-			std::string& Text = InputText.Text;
-			auto XAdvance = InputText.Position.x;
-			uint32_t index = 0;
-
-			std::cout << "Mouse x: " << MouseCoords.x << std::endl;
-
-			// Get advance
-			for (auto& c : Text)
-			{
-				float Advance = EG::Fonts::GetAdvance(c, EG::FontManager::GetFont("WeblySleek"), 1.0f);
-				if (XAdvance + Advance < MouseCoords.x) 
-				{
-					XAdvance += Advance;
-					index++;
-					std::cout << "XAdvance: " << XAdvance << std::endl;
-					std::cout << "Index: " << index << std::endl;
-				}
-				else break;
-			}
-
-			InputText.CursorIndex = index;
-			std::cout << "Cursor Index: " << InputText.CursorIndex << std::endl;
-
-			// set caret on to true and count to 0
-			caret_count = 0.0f;
-			caret_on = true;
-		});
-
-		InputText.on_backspace.connect([&]()
-		{
-			auto str_len = InputText.Text.length();
-			auto cursor_index = InputText.CursorIndex;
-
-			// erase from string
-			if (str_len > 0 && cursor_index > 0)
-			{
-				auto S1 = InputText.Text.substr(0, cursor_index - 1);
-				std::string S2;
-
-				if (cursor_index + 1 < str_len) S2 = InputText.Text.substr(cursor_index, str_len);
-
-				S1.erase(cursor_index - 1);
-				InputText.Text = S1 + S2;
-				InputText.CursorIndex--;
-			}
-		});
-
-		InputText.on_keyboard.connect([&](std::string c)
-		{
-			auto str_len = InputText.Text.length();
-			auto cursor_index = InputText.CursorIndex;
-
-			// std::cout << cursor_index << std::endl;
-
-			// End of string
-			if (cursor_index >= str_len)
-			{
-				InputText.Text += c;
-				InputText.CursorIndex = str_len + 1;
-			}
-			// Cursor somewhere in the middle of the string
-			else if (cursor_index > 0)
-			{
-				auto FirstHalf = InputText.Text.substr(0, cursor_index);
-				auto SecondHalf = InputText.Text.substr(cursor_index, str_len);
-
-				FirstHalf += c; 
-				InputText.Text = FirstHalf + SecondHalf;
-				InputText.CursorIndex++;
-			}
-			// Beginning of string
-			else
-			{
-				InputText.Text = c + InputText.Text;
-				InputText.CursorIndex++;
-			}
-		});
-
-		// Set up InputText's on_hover signal
-		InputText.on_hover.connect([&]()
-		{
-			// Change the mouse cursor
-			SDL_SetCursor(CursorManager::Get("IBeam"));
-
-			InputText.HoverState = HoveredState::ON_HOVER;
-
-			// Change color of Box
-			InputTextColor = EG::SetOpacity(EG::RGBA16_LightGrey(), 0.3f);
-
-		});
-
-		// Set up InputText's off_hover signal
-		InputText.off_hover.connect([&]()
-		{
-			// Change mouse cursor back to defaul
-			SDL_SetCursor(CursorManager::Get("Arrow"));
-
-			InputText.HoverState = HoveredState::OFF_HOVER;
-		
-			// Change color of Box
-			InputTextColor = EG::RGBA16(0.05f, 0.05f, 0.05f, 0.4f);
-		});
-
-		// Set up PlayButton's on_hover signal
-		PlayButton.on_hover.connect([&]()
-		{
-			// We'll just change a color for now
-			PlayButtonColor = EG::RGBA16_White();
-
-			// Set state to active
-			PlayButton.HoverState = HoveredState::ON_HOVER;
-		});
-
-		// Set up PlayButton's off_hover signal
-		PlayButton.off_hover.connect([&]()
-		{
-			PlayButtonColor = EG::RGBA16_LightGrey();
-
-			// Set state to inactive
-			PlayButton.HoverState = HoveredState::OFF_HOVER;
-		});
 
 		// Set up PlayButton's signal
 		PlayButton.on_click.connect([&]()
@@ -962,25 +684,11 @@ namespace Enjon { namespace AnimationEditor {
 		{
 			auto AABB_e = &e->AABB;
 
-			// UIBatch->Add(
-			// 				EM::Vec4(
-			// 							HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset - XPadding,
-			// 							HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, 
-			// 							GroupWidth, 20.0f
-			// 						),
-			// 				EM::Vec4(0, 0, 1, 1),
-			// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
-			// 				AnimationSelection.List.at(i).Color
-			// 			);
-
 			// Calculate min
 			AABB_e->Min = EM::Vec2(Position - EM::Vec2(0.0f, Offset));
 
 			// Calculate max
 			AABB_e->Max = AABB_e->Min + EM::Vec2(200.0f, 20.0f);
-
-
-			// Offset += 20.0f;
 
 			// Add to position
 			Position.y -= Offset;
@@ -1017,25 +725,18 @@ namespace Enjon { namespace AnimationEditor {
 				// Draw Parent
 				auto Parent = PlayButton.Parent;
 
-				// UIBatch->Add(
-				// 				EM::Vec4(Parent->AABB.Min, Parent->AABB.Max - Parent->AABB.Min),
-				// 				EM::Vec4(0, 0, 1, 1),
-				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-				// 				EG::SetOpacity(EG::RGBA16_Blue(), 0.05f)
-				// 			);
-
 				// Draw Play button
 				auto PBF = PlayButton.Frames.at(PlayButton.State);
 				// Calculate these offsets
 				CalculateAABBWithParent(&PlayButton.AABB, &PlayButton);
-				DrawFrame(PBF, PlayButton.Position + Parent->Position, UIBatch, PlayButtonColor);
+				DrawFrame(PBF, PlayButton.Position + Parent->Position, UIBatch, PlayButton.Color);
 
 				// Draw input text
 				UIBatch->Add(
 								EM::Vec4(InputText.AABB.Min, InputText.AABB.Max - InputText.AABB.Min), 
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								InputTextColor
+								InputText.Color
 							);
 
 
@@ -1247,7 +948,7 @@ namespace Enjon { namespace AnimationEditor {
 								EM::Vec4(AnimationSelection.AABB.Min, AnimationSelection.AABB.Max - AnimationSelection.AABB.Min),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								AnimationSelectionColor	
+								AnimationSelection.Color	
 							);
 
 				// Print out AnimationSelection text
@@ -1614,7 +1315,7 @@ namespace Enjon { namespace AnimationEditor {
 	    		case GUIType::BUTTON:
 	    			// std::cout << "Selected Button!" << std::endl;
 	    			break;
-	    		case GUIType::TEXTBOX:
+	    		case GUIType::TEXT_BOX:
 	    			// std::cout << "Selected TextBox!" << std::endl;
 	    			break;
 	    		default:
@@ -1654,7 +1355,7 @@ namespace Enjon { namespace AnimationEditor {
 		}
 
 		// Get Toggle Onion skin button
-		auto ToggleOnionSkin = static_cast<GUIButton*>(GUIManager::Get("ToggleOnionSkin"));
+		auto ToggleOnionSkin = static_cast<GUIRadialButton*>(GUIManager::Get("ToggleOnionSkin"));
 		auto AABB_OS = &ToggleOnionSkin->AABB;
 
 		// Check whether mouse button over toggle onion skin button
@@ -1744,7 +1445,7 @@ namespace Enjon { namespace AnimationEditor {
 					// If previously assigned but now not the same, then emit off hover
 					if (ListElement && ListElement != e)
 					{
-						if (ListElement->HoverState == HoveredState::ON_HOVER) ListElement->off_hover.emit(ListElement);
+						if (ListElement->HoverState == HoveredState::ON_HOVER) ListElement->off_hover.emit();
 					}
 
 					// Assign list element
@@ -1754,7 +1455,7 @@ namespace Enjon { namespace AnimationEditor {
 					if (ListElement->HoverState == HoveredState::OFF_HOVER) 
 					{
 						ListElement = e;
-						e->on_hover.emit(e);
+						e->on_hover.emit();
 					}
 
 					// Found, so break out of loop
@@ -1765,14 +1466,14 @@ namespace Enjon { namespace AnimationEditor {
 			// Nothing was selected but previous list element assigned
 			if (!Found && ListElement)
 			{
-				ListElement->off_hover.emit(ListElement);
+				ListElement->off_hover.emit();
 				ListElement = nullptr;
 			}
 		}
 		// If there was something, need to get rid of it
 		else if (ListElement)
 		{
-			ListElement->off_hover.emit(ListElement);
+			ListElement->off_hover.emit();
 			ListElement = nullptr;
 		}
 
@@ -1833,7 +1534,7 @@ namespace Enjon { namespace AnimationEditor {
 	    	else if (ListElement)
 	    	{
 	    		ListElement->on_click.emit(ListElement);
-	    		ListElement->off_hover.emit(ListElement);
+	    		ListElement->off_hover.emit();
 	    		ListElement = nullptr;
 	    		MouseFocus = nullptr;
 	    	}
@@ -1850,7 +1551,9 @@ namespace Enjon { namespace AnimationEditor {
 	    		SelectedGUIElement = InputText;
 	    		KeyboardFocus = InputText;
 	    		MouseFocus = nullptr; 			// The way to do this eventually is set all of these focuses here to this element but define whether or not it can move
-	    		InputText->on_click.emit();
+	    		auto P = MousePos;
+	    		CameraManager::GetCamera("HUDCamera")->ConvertScreenToWorld(P);
+	    		InputText->on_click.emit(P);
 	    	}
 
 	    	else if (MouseOverAnimation)
@@ -1869,7 +1572,6 @@ namespace Enjon { namespace AnimationEditor {
 	    		if (MouseFocus) 
     			{
 		    		if (MouseFocus == AnimationSelection && AnimationSelection->State) MouseFocus->on_click.emit();
-		    		std::cout << "Here..." << std::endl;
 		    	}
 
 	    		// This is incredibly not thought out at all...

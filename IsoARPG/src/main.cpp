@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -116,6 +116,7 @@ Enjon::uint32 RenderTime = 0;
 Enjon::uint32 EffectRunTime = 0;
 Enjon::uint32 ParticleCount = 0;
 Enjon::uint32 TileOverlayRunTime = 0;
+Enjon::uint32 PlayerControllerTime = 0;
 
 using namespace Enjon;
 using namespace ECS;
@@ -147,6 +148,7 @@ int main(int argc, char** argv)
 	std::string EffectTimeString = "0";
 	std::string TileOverlayTimeString = "0";
 	std::string AITimeString = "0";
+	std::string PlayerControllerTimeString = "0";
 
 	// Init Limiter
 	Enjon::Utils::FPSLimiter Limiter; 
@@ -650,7 +652,9 @@ int main(int argc, char** argv)
 				// Updates the world's particle engine
 				World->ParticleEngine->Update();
 			
+				StartTicks = SDL_GetTicks();	
 				PlayerController::Update(World->PlayerControllerSystem);
+				PlayerControllerTime = (SDL_GetTicks() - StartTicks);
 			}
 
 			// Check for input
@@ -1222,6 +1226,12 @@ int main(int argc, char** argv)
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 280.0f, 
 												0.4f, AITimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
+				// Player Controller run time
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 300.0f, 
+												0.4f, "PlayerController: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 300.0f, 
+												0.4f, PlayerControllerTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
 			}
 
 			// // Draw Isometric compass
@@ -1501,6 +1511,7 @@ int main(int argc, char** argv)
 			EffectTimeString = std::to_string(EffectRunTime);
 			TileOverlayTimeString = std::to_string(TileOverlayRunTime);
 			AITimeString = std::to_string(AIRunTime);
+			PlayerControllerTimeString = std::to_string(PlayerControllerTime);
 
 			// Print loot counts for debugging
 			// Loot::PrintCounts();
