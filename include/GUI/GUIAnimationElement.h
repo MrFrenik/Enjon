@@ -6,6 +6,8 @@
 #include "Math/Vec2.h"
 #include "Defines.h"
 
+#include "AnimManager.h"
+
 namespace Enjon { namespace GUI {
 
 	// AnimationFrameElement
@@ -14,7 +16,15 @@ namespace Enjon { namespace GUI {
 		GUIAnimationElement()
 		{
 			// Set up type
-			this->Type = GUIType::TEXT_BOX; 
+			this->Type = GUIType::SCENE_ANIMATION;
+
+			// Set up states
+			this->State = ButtonState::INACTIVE;
+			this->HoverState = HoveredState::OFF_HOVER;
+
+			// Set up member variables
+			this->CurrentIndex = 0;
+			this->CurrentAnimation = nullptr;
 
 			// Set up SceneAnimation's on_hover signal
 			this->on_hover.connect([&]()

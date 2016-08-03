@@ -5,9 +5,12 @@
 
 #include "Graphics/Color.h"
 #include "Graphics/Font.h"
+#include "Graphics/SpriteBatch.h"
 #include "Graphics/FontManager.h"
 #include "Graphics/CursorManager.h"
+#include "IO/ResourceManager.h"
 #include "Math/Vec2.h"
+#include "Math/Vec4.h"
 #include "Physics/AABB.h"
 
 #include "GUI/Signal.h"
@@ -22,12 +25,13 @@ namespace Enjon { namespace GUI {
 
 	enum ButtonState { INACTIVE, ACTIVE };
 	enum HoveredState { OFF_HOVER, ON_HOVER };
-	enum GUIType { BUTTON, TEXT_BOX, SCENE_ANIMATION, GROUP, TEXT_BUTTON , DROP_DOWN_BUTTON, RADIAL_BUTTON };
+	enum GUIType { BUTTON, TEXT_BOX, SCENE_ANIMATION, GROUP, TEXT_BUTTON , DROP_DOWN_BUTTON, RADIAL_BUTTON, VALUE_BUTTON };
 
 	// GUI Element
 	struct GUIElementBase
 	{
 		virtual void Init() = 0;
+		virtual void Draw(EG::SpriteBatch* Batch) = 0;
 
 		GUIElementBase* Parent;
 		EM::Vec2 Position;
@@ -36,6 +40,7 @@ namespace Enjon { namespace GUI {
 
 		EM::Vec2 Dimensions;
 		std::string Text;
+		std::string Name;
 		ButtonState State;
 		HoveredState HoverState;
 		EGUI::Signal<> on_click;
@@ -51,6 +56,11 @@ namespace Enjon { namespace GUI {
 		{
 			static_cast<T*>(this)->Init();
 		}
+
+		void Draw(EG::SpriteBatch* Batch)
+		{
+			static_cast<T*>(this)->Draw(Batch);
+		}
 	};
 
 
@@ -63,6 +73,7 @@ namespace Enjon { namespace GUI {
 			Type = GUIType::TEXT_BOX; 
 
 			// Initialize members
+			this->Name 			= std::string("GUITextBox");
 			this->Text 			= std::string("");
 			this->CursorIndex 	= 0;
 			this->TextColor 	= EG::RGBA16_White();
@@ -75,8 +86,7 @@ namespace Enjon { namespace GUI {
 			this->HoverState 	= HoveredState::OFF_HOVER;
 
 			// Get font
-			this->TextFont = EG::FontManager::GetFont("Weblysleek_10");
-			this->FontScale		= 1.0f;
+			this->FontScale = 1.0f;
 
 			// Set up TextBox's on_hover signal
 			this->on_hover.connect([&]()
@@ -198,20 +208,116 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<EM::Vec2&> on_click;	
 		EGUI::Signal<std::string> on_keyboard;
 		EGUI::Signal<> on_backspace;
+		EGUI::Signal<> on_enter;
 	};
 
 	// Group is responsible for holding other gui elements and then transforming them together
 	struct GUIGroup : GUIElement<GUIGroup>
 	{
-		GUIGroup() { Type = GUIType::GROUP; }
+		GUIGroup() 
+		{ 
+			// Init
+			this->Init();
+		}
+
+		GUIGroup(EM::Vec2 P)
+		{
+			this->Position = P;
+
+			// Init
+			this->Init();
+		}
 	
 		void Init()
 		{
-			std::cout << "Yeah..." << std::endl;
+			// Set up type
+			this->Type = GUIType::GROUP; 
+
+			// Set up member variables
+			this->ElementIndex 	= 1;
+			this->X0Offset 		= 10.0f;
+			this->X1Offset		= 100.0f;
+			this->YOffset 		= 20.0f;						// Not exact way but close estimate for now
+			this->Name 			= std::string("GUIGroup");		// Default Name
+			this->Dimensions	= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
+			this->TextColor		= EG::RGBA16_MidGrey();
+			this->Color 		= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
+
+			// Get font
+			if (!EG::FontManager::IsInit()) EG::FontManager::Init();
+			this->TextFont = EG::FontManager::GetFont("WeblySleek_12");
+			this->FontScale = 1.0f;
+
+			// Set up GUIGroup's on_hover signal
+			this->on_hover.connect([&]()
+			{
+				this->HoverState = HoveredState::ON_HOVER;
+			});
+
+			// Set up GUIGroup's off_hover signal
+			this->off_hover.connect([&]()
+			{
+				this->HoverState = HoveredState::OFF_HOVER;
+			});
+		}
+
+		void AddToGroup(GUIElementBase* Element, const std::string& Name)
+		{
+			// Push back into group's children
+			this->Children.push_back(Element);
+
+			// Set Group as parent of child
+			Element->Parent = this;
+
+			// Set up position of Element in relation to group
+			Element->Position = EM::Vec2(Position.x + this->X1Offset, Position.y + Dimensions.y - this->ElementIndex * this->YOffset);
+			Element->Name = Name;
+
+			// Increment element index
+			this->ElementIndex++;	
+		}
+
+		void Draw(EG::SpriteBatch* Batch)
+		{
+			// Draw Group border
+			Batch->Add(	
+						EM::Vec4(this->Position, this->Dimensions),
+						EM::Vec4(0, 0, 1, 1),
+						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						this->Color
+					);
+
+			auto F = EG::FontManager::GetFont("WeblySleek_12");
+
+			// Try and draw this shiz
+			for(auto& E : Children)
+			{
+				// Print name of child
+				EG::Fonts::PrintText(
+										this->Position.x + X0Offset, 								// X Position
+										E->Position.y + 5.0f,										// Y Position
+										this->FontScale,											// Font Scale
+										E->Name + std::string(":"),									// Child Name
+										this->TextFont,												// Font
+										*Batch,														// SpriteBatch
+										this->TextColor												// Font Color
+									);
+
+				// Print Child contents
+				E->Draw(Batch);
+			}
+
 		}
 
 		// Vector of children
 		std::vector<GUIElementBase*> Children;
+		EG::Fonts::Font* TextFont;
+		EG::ColorRGBA16 TextColor;
+		float FontScale;
+		float X0Offset;
+		float X1Offset;
+		float YOffset;
+		int32_t ElementIndex;
 	};
 
 	inline GUIGroup* AddToGroup(GUIGroup* Group, GUIElementBase* Element)

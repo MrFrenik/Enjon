@@ -8,6 +8,9 @@
 
 namespace Enjon { namespace Graphics { namespace FontManager {
 
+	/* Checks init status of manager */
+	bool IsInit();
+
 	/* Init the FontManager */
 	void Init();
 

@@ -28,49 +28,6 @@ using json = nlohmann::json;
 
 namespace Enjon { namespace GUI {
 
-	// Something like this eventually for global gui references...
-	namespace ButtonManager
-	{
-		std::unordered_map<std::string, GUIButton*> Buttons;
-
-		void Add(std::string S, GUIButton* B)
-		{
-			Buttons[S] = B;
-		}
-
-		GUIButton* Get(const std::string S)
-		{
-			auto search = Buttons.find(S);
-			if (search != Buttons.end())
-			{
-				return search->second;
-			}	
-
-			return nullptr;
-		}
-	};
-
-	// This is stupid, but it's for testing...
-	namespace TextBoxManager
-	{
-		std::unordered_map<std::string, GUITextBox*> TextBoxes;
-
-		void Add(std::string S, GUITextBox* T)
-		{
-			TextBoxes[S] = T;
-		}
-
-		GUITextBox* Get(const std::string S)
-		{
-			auto search = TextBoxes.find(S);
-			if (search != TextBoxes.end())
-			{
-				return search->second;
-			}
-			return nullptr;
-		}
-	};
-
 	namespace GUIManager
 	{
 		std::unordered_map<std::string, GUIElementBase*> Elements;
@@ -138,6 +95,7 @@ namespace Enjon { namespace AnimationEditor {
 	// ANIMATION EDITOR ////////////
 
 	GUIGroup 			Group;
+	GUIGroup			AnimationPanel;
 	GUIGroup 			AnimationInfoGroup;
 	GUIGroup 			AnimationSelectionGroup;
 	GUIGroup			PlayerAnimationGroup;	
@@ -151,6 +109,8 @@ namespace Enjon { namespace AnimationEditor {
 	GUIButton 			OffsetRight;
 	GUIButton 			DelayUp;
 	GUIButton 			DelayDown;
+	GUIValueButton		AnimationFrame;
+	GUIValueButton		AnimationDelay;
 	GUITextBox 			InputText;
 	GUIRadialButton		ToggleOnionSkin;
 	GUIDropDownButton 	AnimationSelection;	
@@ -180,12 +140,6 @@ namespace Enjon { namespace AnimationEditor {
 
 	EG::Camera2D Camera;
 	EG::Camera2D HUDCamera;
-
-	EG::ColorRGBA16 PlayButtonColor;
-	EG::ColorRGBA16 InputTextColor;
-	EG::ColorRGBA16 AnimationSelectionColor;
-	EG::ColorRGBA16 PlayerAttackOLSEColor;
-	EG::ColorRGBA16 PlayerAttackOLSWColor;
 
 	/*-- Function Definitions --*/
 	bool Init(EI::InputManager* Input_Mgr, float SW, float SH)
@@ -244,22 +198,16 @@ namespace Enjon { namespace AnimationEditor {
 			  	};
 
 		// Set up Scene Animtation
-		SceneAnimation.CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
-		SceneAnimation.CurrentIndex = 0;
 		SceneAnimation.Position = EM::Vec2(0.0f);
-		SceneAnimation.State = ButtonState::INACTIVE;
-		SceneAnimation.HoverState = HoveredState::OFF_HOVER;
-		SceneAnimation.Type = GUIType::SCENE_ANIMATION;
+		SceneAnimation.CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
 
 		// Set up AnimationSelection's text with name of current animation
-		AnimationSelection.Text = SceneAnimation.CurrentAnimation->Name;
-		// AnimationSelection.Type = GUIType::BUTTON;
-		// AnimationSelection.State = ButtonState::INACTIVE;
-		// AnimationSelection.HoverState = HoveredState::OFF_HOVER;
+		AnimationSelection.Text = SceneAnimation.CurrentAnimation->Name;  // Can set up signal for when this changes to emit
 		AnimationSelection.Position = EM::Vec2 (
 													HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 105.0f,
 													HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f 
 												);
+		AnimationSelection.CalculateDimensions();
 
 		// Add animations to AnimationSelection drop down button
 		for (auto& a : *AnimManager::GetAnimationMap())
@@ -282,85 +230,14 @@ namespace Enjon { namespace AnimationEditor {
 				// Deactive animation selection
 				AnimationSelection.on_click.emit();
 
-				// Calculate AnimationSelection's dimensions
-				{
-					std::string& T = AnimationSelection.Text;
-					float A = 0.0f;
-					auto period_count = 0;
-					auto index = 0;
-
-					std::cout << T << std::endl;
-
-					// Get advance
-					for (auto& c : T)
-					{
-						// Summation of all characters
-						A += EG::Fonts::GetAdvance(c, EG::FontManager::GetFont("WeblySleek_10"), 1.0f);
-
-						if (A > 90.0f) 
-						{
-							c = '.';
-							period_count++;
-						}
-
-						if (period_count >= 4)
-						{
-							// Get substring and replace it
-							T = T.substr(0, index);
-							break;			
-						} 
-
-						index++;
-					}
-
-
-					AnimationSelection.Dimensions = EM::Vec2(A + 20.0f, 20.0f);
-				}
+				AnimationSelection.CalculateDimensions();
 			});
 
 			// Push back into drop down list
 			AnimationSelection.List.push_back(b);
 		}
 
-		// Calculate AnimationSelection's dimensions
-		{
-			std::string& T = AnimationSelection.Text;
-			float A = 0.0f;
-			auto period_count = 0;
-			auto index = 0;
-
-			std::cout << T << std::endl;
-
-			// Get advance
-			for (auto& c : T)
-			{
-				// Summation of all characters
-				A += EG::Fonts::GetAdvance(c, EG::FontManager::GetFont("WeblySleek_10"), 1.0f);
-
-				if (A > 90.0f) 
-				{
-					c = '.';
-					period_count++;
-				}
-
-				if (period_count >= 4)
-				{
-					// Get substring and replace it
-					T = T.substr(0, index);
-					break;			
-				} 
-
-				index++;
-			}
-
-			std::cout << "A: " << A << std::endl;
-
-			AnimationSelection.Dimensions = EM::Vec2(A + 20.0f, 20.0f);
-		}
-
-		// Set up colors of buttons
-		PlayButtonColor 		= EG::RGBA16_White();
-
+		// Calculate AnimationSelection's dimension
 		// Set up Group
 		Group.Position = EM::Vec2(0.0f, -400.0f);
 
@@ -607,20 +484,7 @@ namespace Enjon { namespace AnimationEditor {
 			CurrentFrame->Delay = Delay;
 		});
 
-		// Put into button manager map
-		ButtonManager::Add("PlayButton", &PlayButton);
-		ButtonManager::Add("NextFrame", &NextFrame);
-		ButtonManager::Add("PreviousFrame", &PreviousFrame);
-		ButtonManager::Add("OffsetUp", &OffsetUp);
-		ButtonManager::Add("OffsetDown", &OffsetDown);
-		ButtonManager::Add("OffsetLeft", &OffsetLeft);
-		ButtonManager::Add("OffsetRight", &OffsetRight);
-		ButtonManager::Add("DelayUp", &DelayUp);
-		ButtonManager::Add("DelayDown", &DelayDown);
-
-		// Put into textbox manager
-		TextBoxManager::Add("InputText", &InputText);
-
+		// Add to GUIManager
 		GUIManager::Add("PlayButton", &PlayButton);
 		GUIManager::Add("NextFrame", &NextFrame);
 		GUIManager::Add("PreviousFrame", &PreviousFrame);
@@ -635,28 +499,33 @@ namespace Enjon { namespace AnimationEditor {
 		GUIManager::Add("ToggleOnionSkin", &ToggleOnionSkin);
 		GUIManager::Add("AnimationSelection", &AnimationSelection);
 
+
+		// Set up AnimationPanel Group
+		AnimationPanel.Position = EM::Vec2(100.0f, 0.0f);
+		// AnimationPanel.TextFont = EG::FontManager::GetFont("WeblySleek");
+		AnimationPanel.AddToGroup(&AnimationSelection, "Animation");
+		// AnimationPanel.AddToGroup(&PreviousFrame, "PreviousFrame");
+		// AnimationPanel.AddToGroup(&NextFrame, "NextFrame");
+		// AnimationPanel.AddToGroup(&OffsetDown, "OffsetDown");
+		// AnimationPanel.AddToGroup(&OffsetUp, "OffsetUp");
+		// AnimationPanel.AddToGroup(&DelayDown, "DelayDown");
+		// AnimationPanel.AddToGroup(&DelayUp, "DelayUp");
+		// AnimationPanel.AddToGroup(&ToggleOnionSkin, "ToggleOnionSkin");
+		// AnimationPanel.AddToGroup(&AnimationFrame, "Frame");
+		// AnimationPanel.AddToGroup(&AnimationDelay, "Delay");
+
+
 		// Draw BG
 		BGBatch->Begin();
-		// BGBatch->Add(
-		// 				EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
-		// 				EM::Vec4(0, 0, 1, 1),
-		// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png", GL_LINEAR).id,
-		// 				EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.4f)
-		// 			);
-		// BGBatch->Add(
-		// 				EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
-		// 				EM::Vec4(0, 0, 1, 1),
-		// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png", GL_LINEAR).id,
-		// 				EG::SetOpacity(EG::RGBA16_White(), 0.3f)
-		// 			);
-		BGBatch->Add(
+		{
+			BGBatch->Add(
 						EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
 						EM::Vec4(0, 0, 1, 1),
 						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg_cross.png", GL_LINEAR).id,
 						EG::SetOpacity(EG::RGBA16_White(), 0.1f)
 					);
-		BGBatch->End();
-
+			BGBatch->End();
+		}
 		
 		return true;	
 	}
@@ -1167,6 +1036,8 @@ namespace Enjon { namespace AnimationEditor {
 					}
 				}
 
+				// Draw AnimationPanel
+				AnimationPanel.Draw(UIBatch);
 
 
 			}
@@ -1641,7 +1512,7 @@ namespace Enjon { namespace AnimationEditor {
 			if (Input->IsKeyPressed(SDLK_SPACE))
 			{
 				// Get button from button manager
-				auto PlayButton = ButtonManager::Get("PlayButton");
+				auto PlayButton = static_cast<GUIButton*>(GUIManager::Get("PlayButton"));
 
 				// Press play
 				PlayButton->on_click.emit();
@@ -1649,7 +1520,7 @@ namespace Enjon { namespace AnimationEditor {
 			if (Input->IsKeyDown(SDLK_RIGHT))
 			{
 				// Get button from button manager
-				auto OffsetRight = ButtonManager::Get("OffsetRight");
+				auto OffsetRight = static_cast<GUIButton*>(GUIManager::Get("OffsetRight"));
 
 				// Press next frame
 				OffsetRight->on_click.emit();	
@@ -1657,7 +1528,7 @@ namespace Enjon { namespace AnimationEditor {
 			if (Input->IsKeyDown(SDLK_LEFT))
 			{
 				// Get button from button manager
-				auto OffsetLeft = ButtonManager::Get("OffsetLeft");
+				auto OffsetLeft = static_cast<GUIButton*>(GUIManager::Get("OffsetLeft"));
 
 				// Press next frame
 				OffsetLeft->on_click.emit();
@@ -1665,7 +1536,7 @@ namespace Enjon { namespace AnimationEditor {
 			if (Input->IsKeyDown(SDLK_UP))
 			{
 				// Get button from button manager
-				auto OffsetUp = ButtonManager::Get("OffsetUp");
+				auto OffsetUp = static_cast<GUIButton*>(GUIManager::Get("OffsetUp"));
 
 				// Press offset up
 				OffsetUp->on_click.emit();
@@ -1673,7 +1544,7 @@ namespace Enjon { namespace AnimationEditor {
 			if (Input->IsKeyDown(SDLK_DOWN))
 			{
 				// Get button from button manager
-				auto OffsetDown = ButtonManager::Get("OffsetDown");
+				auto OffsetDown = static_cast<GUIButton*>(GUIManager::Get("OffsetDown"));
 
 				// Press offset Down
 				if (OffsetDown)
@@ -1684,7 +1555,7 @@ namespace Enjon { namespace AnimationEditor {
 			if (Input->IsKeyPressed(SDLK_m))
 			{
 				// Get button from button manager
-				auto NextFrame = ButtonManager::Get("NextFrame");
+				auto NextFrame = static_cast<GUIButton*>(GUIManager::Get("NextFrame"));
 
 				// Press offset Down
 				if (NextFrame)
@@ -1695,7 +1566,7 @@ namespace Enjon { namespace AnimationEditor {
 			if (Input->IsKeyPressed(SDLK_n))
 			{
 				// Get button from button manager
-				auto PreviousFrame = ButtonManager::Get("PreviousFrame");
+				auto PreviousFrame = static_cast<GUIButton*>(GUIManager::Get("PreviousFrame"));
 
 				// Press offset Down
 				if (PreviousFrame)
@@ -1707,7 +1578,7 @@ namespace Enjon { namespace AnimationEditor {
 			if (Input->IsKeyPressed(SDLK_LEFTBRACKET))
 			{
 				// Get button from button manager
-				auto DelayDown = ButtonManager::Get("DelayDown");
+				auto DelayDown = static_cast<GUIButton*>(GUIManager::Get("DelayDown"));
 
 				// Emit
 				if (DelayDown)
@@ -1718,7 +1589,7 @@ namespace Enjon { namespace AnimationEditor {
 			if (Input->IsKeyPressed(SDLK_RIGHTBRACKET))
 			{
 				// Get button from button manager
-				auto DelayUp = ButtonManager::Get("DelayUp");
+				auto DelayUp = static_cast<GUIButton*>(GUIManager::Get("DelayUp"));
 
 				// Emit
 				if (DelayUp)

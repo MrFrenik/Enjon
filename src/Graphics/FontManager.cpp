@@ -3,6 +3,10 @@
 namespace Enjon { namespace Graphics { namespace FontManager {
 
 	std::unordered_map<std::string, Fonts::Font*> Fonts;
+	bool Initialized = false;
+
+	/* Checks init status of manager */
+	bool IsInit() { return Initialized; }
 
 	/* Init the FontManager */
 	void Init()
@@ -25,6 +29,9 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 		// AddFont(Fonts, "VCR_OSD_MONO", Fonts::CreateFont("../assets/fonts/VCR_OSD_MONO/VCR_OSD_MONO.ttf", 14));
 		// AddFont(Fonts, "Villeray_Semilight", Fonts::CreateFont("../assets/fonts/Villeray/Villeray-Semilight.ttf", 10));
 		// AddFont(Fonts, "Villeray_Bold", Fonts::CreateFont("../assets/fonts/Villeray/Villeray-Bold.ttf", 10));
+
+		// Set to being initialized
+		Initialized = true;
 	}
 
 	/* Add font to FontManager */
@@ -39,7 +46,11 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 	{
 		auto it = Fonts.find(FontName);
 		if (it != Fonts.end()) return it->second;
-		else return Fonts["Bold_32"];
+		else 
+		{
+			std::cout << FontName << " not found." << std::endl;
+			return Fonts["WeblySleek"];
+		}
 	}
 
 	// Delete all animations and clear any memory used
