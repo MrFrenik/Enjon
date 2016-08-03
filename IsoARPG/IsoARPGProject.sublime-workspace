@@ -95,23 +95,55 @@
 			"file": "src/main.cpp",
 			"settings":
 			{
-				"buffer_size": 113480,
+				"buffer_size": 114282,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/E/Development/Enjon/include/Math/Vec2.h",
+			"file": "/E/Development/Enjon/include/IO/InputManager.h",
 			"settings":
 			{
-				"buffer_size": 2405,
+				"buffer_size": 2076,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/E/Development/Enjon/include/Editor/AnimationEditor.h",
+			"file": "/E/Development/Enjon/src/IO/InputManager.cpp",
 			"settings":
 			{
-				"buffer_size": 1187,
+				"buffer_size": 3379,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/ECS/PlayerControllerSystem.cpp",
+			"settings":
+			{
+				"buffer_size": 11585,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
+			"settings":
+			{
+				"buffer_size": 1714,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "include/ECS/PlayerControllerSystem.h",
+			"settings":
+			{
+				"buffer_size": 1015,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/ECS/Animation2DSystem.cpp",
+			"settings":
+			{
+				"buffer_size": 27475,
 				"line_ending": "Windows"
 			}
 		},
@@ -119,66 +151,23 @@
 			"file": "/E/Development/Enjon/src/Editor/AnimationEditor.cpp",
 			"settings":
 			{
-				"buffer_size": 59141,
+				"buffer_size": 50666,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"contents": "Package Control Messages\n========================\n\nMaterial Theme\n--------------\n\n  Material Theme for Sublime Text 3\n  https://github.com/equinusocio/material-theme\n  \n  Version 3.1.0\n  ********************************************************************************\n  \n  📣 BUGFIXES:\n      * Fix json filetype icon[b0e97b8]\n      * Improve Lighter contrast [9ef73de]\n      * Update json and ruby file icons [72713c4]\n  \n  \n  📣 FEATURES:\n      * Add Bright-teal accent [a78a942]\n      * New Acid-lime accent color [7626f89]\n      * New Breaking Bad color [66e3ea7]\n      * New Sky accent color [3e6639a]\n      * New Graphite accent color [643f09d]\n      * New Tomato accent color [196dcce]\n      * New theme icon for your Sublime Text (Check the readme file) [d0e076c]\n      * New theme configurator popup and menu [2a9599e] 🎉\n        🎉 You can access it through the context menu (right click), under the Tools menu and through the command palette by searching \"Material Theme\"\n  \n  \n  ********************************************************************************\n  Check the official changelog ( https://github.com/equinusocio/material-theme/blob/master/CHANGELOG.md  )\n\n  Material Theme for Sublime Text 3\n  https://github.com/equinusocio/material-theme\n  \n  Version 3.0.4\n  ********************************************************************************\n  \n  📣 Bugfixes:\n      * Fix popupCss and phantomCss conflicts [460f3f6]\n  \n  ********************************************************************************\n  Check the official changelog ( https://github.com/equinusocio/material-theme/blob/master/CHANGELOG.md  )\n",
+			"file": "/E/Development/Enjon/include/Graphics/CursorManager.h",
 			"settings":
 			{
-				"buffer_size": 1627,
-				"line_ending": "Windows",
-				"name": "Package Control Messages",
-				"read_only": true,
-				"scratch": true
-			}
-		},
-		{
-			"file": "/E/Development/Enjon/include/Graphics/SpriteBatch.h",
-			"settings":
-			{
-				"buffer_size": 7885,
+				"buffer_size": 406,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/E/Development/Enjon/src/Graphics/SpriteBatch.cpp",
+			"file": "/E/Development/Enjon/src/Graphics/CursorManager.cpp",
 			"settings":
 			{
-				"buffer_size": 8747,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/E/Development/Enjon/shaders/text.f.glsl",
-			"settings":
-			{
-				"buffer_size": 285,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/E/Development/Enjon/include/Graphics/Color.h",
-			"settings":
-			{
-				"buffer_size": 4590,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/E/Development/Enjon/src/Graphics/FontManager.cpp",
-			"settings":
-			{
-				"buffer_size": 2548,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/E/Development/Enjon/include/GUI/GUIButton.h",
-			"settings":
-			{
-				"buffer_size": 976,
+				"buffer_size": 659,
 				"line_ending": "Windows"
 			}
 		}
@@ -270,11 +259,25 @@
 	},
 	"expanded_folders":
 	[
-		"/E/Development/Enjon/include"
+		"/E/Development/Enjon/IsoARPG",
+		"/E/Development/Enjon/IsoARPG/include",
+		"/E/Development/Enjon/IsoARPG/profiles/Animations",
+		"/E/Development/Enjon/IsoARPG/profiles/Animations/Player",
+		"/E/Development/Enjon/IsoARPG/src",
+		"/E/Development/Enjon/IsoARPG/src/ECS"
 	],
 	"file_history":
 	[
+		"/E/Development/Enjon/include/GUI/GUIElement.h",
+		"/E/Development/Enjon/include/GUI/GUIButton.h",
+		"/E/Development/Enjon/include/GUI/GUIAnimationElement.h",
+		"/E/Development/Enjon/include/Editor/AnimationEditor.h",
+		"/E/Development/Enjon/src/Graphics/SpriteBatch.cpp",
 		"/E/Development/Enjon/include/Graphics/SpriteBatch.h",
+		"/E/Development/Enjon/include/Math/Vec2.h",
+		"/E/Development/Enjon/src/Graphics/FontManager.cpp",
+		"/E/Development/Enjon/include/Graphics/Color.h",
+		"/E/Development/Enjon/shaders/text.f.glsl",
 		"/E/Development/Enjon/src/Graphics/GLSLProgram.cpp",
 		"/E/Development/Enjon/include/Graphics/GLSLProgram.h",
 		"/E/Development/Enjon/include/IO/ImageLoader.h",
@@ -300,7 +303,6 @@
 		"/E/Development/Enjon/include/Enjon.h",
 		"/E/Development/Enjon/IsoARPG/src/ECS/CollisionSystem.cpp",
 		"/E/Development/Enjon/IsoARPG/src/AnimManager.cpp",
-		"/E/Development/Enjon/include/GUI/GUIAnimationElement.h",
 		"/E/Development/Enjon/include/Utils/json.h",
 		"/E/Development/Enjon/include/Graphics/Animations.h",
 		"/E/Development/Enjon/IsoARPG/include/ECS/EntityFactory.h",
@@ -321,8 +323,6 @@
 		"/E/Development/Enjon/IsoARPG/include/ECS/Anim.h",
 		"/E/Development/Enjon/include/Defines.h",
 		"/E/Development/Enjon/src/Graphics/GUIAnimationElement.cpp",
-		"/E/Development/Enjon/include/GUI/GUIButton.h",
-		"/E/Development/Enjon/include/Math/Vec2.h",
 		"/E/Development/Enjon/include/Math/Vec3.h",
 		"/E/Development/Enjon/proc/build.bat",
 		"/E/Development/Enjon/proc/debug.bat",
@@ -333,16 +333,13 @@
 		"/E/Development/Enjon/src/GUIAnimationElement.cpp",
 		"/E/Development/Enjon/src/SpriteSheetManager.cpp",
 		"/E/Development/Enjon/src/FontManager.cpp",
-		"/E/Development/Enjon/include/Graphics/Color.h",
 		"/E/Development/Enjon/include/Physics/AABB.h",
 		"/E/Development/Enjon/src/AABB.cpp",
 		"/E/Development/Enjon/src/Font.cpp",
 		"/E/Development/Enjon/include/Graphics/Font.h",
-		"/E/Development/Enjon/include/GUI/GUIElement.h",
 		"/E/Development/Enjon/proc/shell.bat",
 		"/E/Development/Enjon/deps/include/sajson/sajson.h",
 		"/E/Development/Enjon/shaders/text.v.glsl",
-		"/E/Development/Enjon/shaders/text.f.glsl",
 		"/E/Development/Enjon/IsoARPG/include/ECS/Masks.h",
 		"/E/Development/Enjon/include/GUI/Property.h",
 		"/E/Development/Enjon/include/GUI/Signal.h",
@@ -398,10 +395,7 @@
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/src/Level.cpp",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/AttributeSystem.h",
 		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Entity.h",
-		"/D/C++Projects/VS/3DEnjon/proc/dump.txt",
-		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/BehaviorNode.h",
-		"/D/C++Projects/VS/3DEnjon/include/BehaviorTree/Sequence.h",
-		"/D/C++Projects/VS/3DEnjon/IsoARPG/include/ECS/Components.h"
+		"/D/C++Projects/VS/3DEnjon/proc/dump.txt"
 	],
 	"find":
 	{
@@ -420,6 +414,49 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"Target",
+			"1",
+			"FPS = ",
+			"static_cast<float>(event.jaxis.value) / 32768.0f",
+			" / 2.0f",
+			"r.",
+			"Input->",
+			"r.",
+			"Input->",
+			"Controller",
+			"C",
+			"Gamepad",
+			"Controllers",
+			"keyID",
+			"KeyMap",
+			"keyID",
+			"ke",
+			"Ke",
+			"Input->ControllerHandles[ControllerIndex]",
+			"ControllerHandles",
+			"32767",
+			"PlayButton.",
+			"SceneAnimation.",
+			"ListElement",
+			"d->",
+			"b->",
+			"b",
+			"AnimationSelectionColor",
+			"AnimationSelection.",
+			"AnimationSelection",
+			"AnimationSelectionColor",
+			"AnimationSelection.",
+			"InputTextColor",
+			"InputText.",
+			"InputText.o",
+			"InputText.",
+			"PlayButton.",
+			"InputText.",
+			"ToggleOnionSkin.",
+			"PlayerAttackOLSEButton",
+			"GUIType::",
+			"TEXTBOX",
+			"ToggleOnionSkin",
 			"08",
 			"WeblySleek",
 			"Reduction_24",
@@ -504,50 +541,7 @@
 			"GetImageFram",
 			"#if",
 			"amountdrawn",
-			"#if",
-			"#",
-			"0.0f",
-			"Enemy",
-			"std::cout",
-			"AmountDrawn",
-			"#if",
-			"if",
-			"string",
-			"scale",
-			"()",
-			"EntityBatch",
-			"0.3f",
-			"TextBoxes",
-			"ButtonManager",
-			"Image",
-			".",
-			"std::cout",
-			"K",
-			"std::cout",
-			"0.3f",
-			"0.5f",
-			"0.3f",
-			"MouseOverButton",
-			"TextBox",
-			"GetButton",
-			"AddButton",
-			"height",
-			"std::cout",
-			"PlayButton",
-			"TextBox",
-			"Font",
-			"Group.",
-			"PlayButton",
-			"DrawFrame",
-			"AABB",
-			"PAABB",
-			"29.0f",
-			"2f",
-			"0",
-			"0.8f",
-			"SSize",
-			"SS",
-			"130"
+			"#if"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -565,7 +559,7 @@
 	"groups":
 	[
 		{
-			"selected": 4,
+			"selected": 6,
 			"sheets":
 			[
 				{
@@ -574,45 +568,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 113480,
+						"buffer_size": 114282,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								67575,
-								67575
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 80.0,
-						"translation.y": 24057.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "/E/Development/Enjon/include/Math/Vec2.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2405,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1278,
-								1278
+								383,
+								383
 							]
 						],
 						"settings":
@@ -629,25 +593,24 @@
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "/E/Development/Enjon/include/Editor/AnimationEditor.h",
+					"buffer": 1,
+					"file": "/E/Development/Enjon/include/IO/InputManager.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1187,
+						"buffer_size": 2076,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								531,
+								531
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"translate_tabs_to_spaces": false
 						},
@@ -655,24 +618,169 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "/E/Development/Enjon/src/Editor/AnimationEditor.cpp",
+					"buffer": 2,
+					"file": "/E/Development/Enjon/src/IO/InputManager.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 59141,
+						"buffer_size": 3379,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								27604,
-								27604
+								947,
+								947
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 117.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "src/ECS/PlayerControllerSystem.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11585,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3460,
+								3460
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2205.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "profiles/Animations/Player/PlayerAttackOHLSEAnimation.json",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1714,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1277,
+								1277
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "include/ECS/PlayerControllerSystem.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1015,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								198,
+								198
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "src/ECS/Animation2DSystem.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 27475,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7249,
+								7249
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 101.0,
+						"translation.y": 2340.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/E/Development/Enjon/src/Editor/AnimationEditor.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 50666,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								35264,
+								35264
 							]
 						],
 						"settings":
@@ -683,156 +791,35 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 13536.0,
+						"translation.y": 15032.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1627,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1627,
-								1627
-							]
-						],
-						"settings":
-						{
-							"auto_indent": false,
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"tab_width": 2,
-							"word_wrap": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 252.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "/E/Development/Enjon/include/Graphics/SpriteBatch.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 7885,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								7641,
-								7641
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 2572.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "/E/Development/Enjon/src/Graphics/SpriteBatch.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8747,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								7801,
-								7801
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 3342.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "/E/Development/Enjon/shaders/text.f.glsl",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 285,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								91,
-								91
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
 					"buffer": 8,
-					"file": "/E/Development/Enjon/include/Graphics/Color.h",
+					"file": "/E/Development/Enjon/include/Graphics/CursorManager.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4590,
+						"buffer_size": 406,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3924,
-								3924
+								237,
+								237
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 1470.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 8,
@@ -840,62 +827,30 @@
 				},
 				{
 					"buffer": 9,
-					"file": "/E/Development/Enjon/src/Graphics/FontManager.cpp",
+					"file": "/E/Development/Enjon/src/Graphics/CursorManager.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2548,
+						"buffer_size": 659,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								402,
+								402
 							]
 						],
 						"settings":
 						{
-							"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "/E/Development/Enjon/include/GUI/GUIButton.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 976,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 10,
+					"stack_index": 9,
 					"type": "text"
 				}
 			]
@@ -903,7 +858,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 24.0
+		"height": 70.0
 	},
 	"input":
 	{
@@ -948,7 +903,7 @@
 	"project": "IsoARPGProject.sublime-project",
 	"replace":
 	{
-		"height": 44.0
+		"height": 42.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -986,7 +941,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 199.0,
+	"side_bar_width": 210.0,
 	"status_bar_visible": false,
 	"template_settings":
 	{

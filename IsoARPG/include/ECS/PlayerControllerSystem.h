@@ -6,7 +6,7 @@
 #include "ECS/ComponentSystems.h"
 #include "SpatialHash.h"
 
-#define	WALKPACE 	5.0f
+#define	WALKPACE 	7.0f
 #define SPRINTPACE 	WALKPACE * 2.0f
 
 struct PlayerControllerSystem

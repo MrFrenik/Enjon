@@ -760,7 +760,6 @@ int main(int argc, char** argv)
 				// If AI
 				if (Mask & COMPONENT_AICONTROLLER)
 				{
-					EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), uv, ESpriteSheet->texture.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
 
 					// Print Entity info if debug info is on
 					if (DebugInfo)
@@ -814,8 +813,10 @@ int main(int argc, char** argv)
 					{
 						Math::Vec2 ReticleDims(94.0f, 47.0f);
 						Math::Vec2 Position = World->TransformSystem->Transforms[e].GroundPosition - Math::Vec2(15.0f, 5.0f);
-						EntityBatch.Add(Math::Vec4(Position.x, Position.y, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), TargetSheet.texture.id, Enjon::Graphics::RGBA16_Red(), Position.y);
+						EntityBatch.Add(Math::Vec4(Position.x, Position.y, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), TargetSheet.texture.id, Enjon::Graphics::RGBA16_Red(), 1000);
 					}
+
+					EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), uv, ESpriteSheet->texture.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
 
 				}
 				else if (World->Types[e] == ECS::Component::EntityType::ITEM)

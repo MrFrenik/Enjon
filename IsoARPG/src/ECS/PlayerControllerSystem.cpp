@@ -104,6 +104,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 								}
 							}
 
+							// Right stick L/R
 							if (event.jaxis.axis == 2)
 							{
 								float value = static_cast<float>(event.jaxis.value) / 32768.0f;
@@ -118,6 +119,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 								}
 							}
 
+							// Right stick U/D
 							if (event.jaxis.axis == 3)
 							{
 								float value = -1.0f * static_cast<float>(event.jaxis.value) / 32768.0f;
