@@ -80,6 +80,7 @@ namespace Enjon { namespace GUI {
 			this->Color 	 	= EG::RGBA16_DarkGrey();
 			this->caret_on 		= false;
 			this->caret_count 	= 0.0f;
+			this->TextFont 		= nullptr;
 
 			// Initial states
 			this->State 		= ButtonState::INACTIVE;
@@ -242,10 +243,9 @@ namespace Enjon { namespace GUI {
 			this->Dimensions	= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
 			this->TextColor		= EG::RGBA16_MidGrey();
 			this->Color 		= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
+			this->TextFont 		= nullptr;
 
 			// Get font
-			if (!EG::FontManager::IsInit()) EG::FontManager::Init();
-			this->TextFont = EG::FontManager::GetFont("WeblySleek_12");
 			this->FontScale = 1.0f;
 
 			// Set up GUIGroup's on_hover signal
@@ -287,7 +287,7 @@ namespace Enjon { namespace GUI {
 						this->Color
 					);
 
-			auto F = EG::FontManager::GetFont("WeblySleek_12");
+			if (this->TextFont == nullptr) this->TextFont = EG::FontManager::GetFont("WeblySleek_12");
 
 			// Try and draw this shiz
 			for(auto& E : Children)

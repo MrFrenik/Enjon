@@ -69,6 +69,7 @@ namespace Enjon { namespace GUI {
 			this->Name 			= std::string("GUITextButton");
 
 			// Get font
+			this->TextFont 		= nullptr;
 			this->FontScale		= 1.0f;
 
 			// Set up off_hover signal
@@ -158,8 +159,7 @@ namespace Enjon { namespace GUI {
 			this->HoverState = HoveredState::OFF_HOVER;
 
 			// Get font
-			if (!EG::FontManager::IsInit()) EG::FontManager::Init();
-			this->TextFont = EG::FontManager::GetFont("WeblySleek_10");
+			this->TextFont 		= nullptr;
 			this->FontScale = 1.0f;
 			this->Name = std::string("GUIDropDownButton");
 			this->TextColor		= EG::RGBA16_MidGrey();
@@ -201,6 +201,8 @@ namespace Enjon { namespace GUI {
 
 		void Draw(EG::SpriteBatch* Batch)
 		{
+			if (this->TextFont == nullptr) this->TextFont = EG::FontManager::GetFont("WeblySleek_10");
+
 			Batch->Add(
 							EM::Vec4(Position.x, Position.y, 100.0f, 20.0f),
 							EM::Vec4(0, 0, 1, 1),
@@ -228,6 +230,8 @@ namespace Enjon { namespace GUI {
 
 			std::cout << T << std::endl;
 
+			if (this->TextFont == nullptr) this->TextFont = EG::FontManager::GetFont("WeblySleek_10");
+
 			// Get advance
 			for (auto& c : T)
 			{
@@ -245,8 +249,6 @@ namespace Enjon { namespace GUI {
 					// Get substring and replace it
 					T = T.substr(0, index);
 					break;			
-			if (!EG::FontManager::IsInit()) EG::FontManager::Init(); 		// Make sure FontManager is initialized
-			this->TextFont = EG::FontManager::GetFont("WeblySleek_10");
 				} 
 
 				index++;

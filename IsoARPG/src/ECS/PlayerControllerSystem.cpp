@@ -178,10 +178,132 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				static float Multiplier = 1.0f;
 				static eid32 id = 0;
 				Component::Animation2D* Animation = &Manager->Animation2DSystem->Animations[e];
-			
-				// Get handle to controller
-				auto Controller = &Input->GamePadController;
-				auto CHandle = Controller->ControllerHandle;
+
+				// Game Controller			
+				if (Input->GamePadController.ControllerHandle)
+				{
+					std::cout << "Here" << std::endl;
+					auto Controller = &Input->GamePadController;
+					auto CHandle = Controller->ControllerHandle;
+	
+					if (Input->IsKeyDown(SDLK_w) || Controller->Axis1Value > 0) {
+
+						auto Val = Controller->Axis1Value;
+						Transform->VelocityGoal.y = Val ? Val * Multiplier * goal : Multiplier * goal;
+						Transform->ViewVector.y = 1.0f;
+					}
+					if (Input->IsKeyDown(SDLK_s) || Controller->Axis1Value < 0) {
+
+						auto Val = Controller->Axis1Value;
+						Transform->VelocityGoal.y = Val ? Val * Multiplier * goal : Multiplier * -goal;
+						Transform->ViewVector.y = -1.0f;
+					}
+					if (Input->IsKeyDown(SDLK_a) || Controller->Axis0Value < 0) {
+
+						auto Val = Controller->Axis0Value;
+						Transform->VelocityGoal.x = Val ? Val * Multiplier * goal : Multiplier * -goal;
+						Transform->ViewVector.x = -1.0f; 
+					}
+
+					if (Input->IsKeyDown(SDLK_d) || Controller->Axis0Value > 0) {
+
+						auto Val = Controller->Axis0Value;
+						Transform->VelocityGoal.x = Val ? Val * Multiplier * goal : Multiplier * goal;
+						Transform->ViewVector.x = 1.0f; 
+					}
+
+					if (!Input->WasKeyDown(SDLK_w) && !Input->WasKeyDown(SDLK_s) && !Controller->Axis1Value)
+					{
+						if (Manager->TransformSystem->Transforms[e].ViewVector.x != 0) Manager->TransformSystem->Transforms[e].ViewVector.y = 0;
+					} 
+					
+					if (!Input->WasKeyDown(SDLK_a) && !Input->WasKeyDown(SDLK_d) && !Controller->Axis0Value)
+					{
+						if (Manager->TransformSystem->Transforms[e].ViewVector.y != 0) Manager->TransformSystem->Transforms[e].ViewVector.x = 0;
+					} 
+
+					static bool Jumping = false;
+					if (Input->IsKeyPressed(SDLK_SPACE) || Controller->IsButtonPressed(static_cast<unsigned int>(SDL_CONTROLLER_BUTTON_A))) {
+						// Keep from double jumping
+						if (Transform->Position.z <= Transform->BaseHeight) Transform->Velocity.z = 1.0f * goal;
+						Jumping = true;
+					}
+
+					if (!Jumping) {
+						Transform->VelocityGoal.z = 2 * -9.8f;	
+						Jumping = false;
+					}
+
+					if (Input->IsKeyDown(SDLK_LCTRL)) {
+						goal = WALKPACE / 2.0f;
+					}
+					else if (Input->IsKeyDown(SDLK_LSHIFT) || Controller->IsButtonDown(static_cast<unsigned int>(SDL_CONTROLLER_BUTTON_X))) {
+						goal = SPRINTPACE;
+					}
+	 				else goal = WALKPACE;
+
+					if (!Input->IsKeyDown(SDLK_w) && !Input->IsKeyDown(SDLK_s) && !Controller->Axis1Value) Transform->VelocityGoal.y = 0;
+					if (!Input->IsKeyDown(SDLK_a) && !Input->IsKeyDown(SDLK_d) && !Controller->Axis0Value) Transform->VelocityGoal.x = 0;
+				}
+
+				// No Controller
+				else
+				{
+					if (Input->IsKeyDown(SDLK_w)) {
+
+						Transform->VelocityGoal.y = Multiplier * goal;
+						Transform->ViewVector.y = 1.0f;
+					}
+					if (Input->IsKeyDown(SDLK_s)) {
+
+						Transform->VelocityGoal.y = Multiplier * -goal;
+						Transform->ViewVector.y = -1.0f;
+					}
+					if (Input->IsKeyDown(SDLK_a)) {
+
+						Transform->VelocityGoal.x = Multiplier * -goal;
+						Transform->ViewVector.x = -1.0f; 
+					}
+
+					if (Input->IsKeyDown(SDLK_d)) {
+
+						Transform->VelocityGoal.x = Multiplier * goal;
+						Transform->ViewVector.x = 1.0f; 
+					}
+
+					if (!Input->WasKeyDown(SDLK_w) && !Input->WasKeyDown(SDLK_s))
+					{
+						if (Manager->TransformSystem->Transforms[e].ViewVector.x != 0) Manager->TransformSystem->Transforms[e].ViewVector.y = 0;
+					} 
+					
+					if (!Input->WasKeyDown(SDLK_a) && !Input->WasKeyDown(SDLK_d))
+					{
+						if (Manager->TransformSystem->Transforms[e].ViewVector.y != 0) Manager->TransformSystem->Transforms[e].ViewVector.x = 0;
+					} 
+
+					static bool Jumping = false;
+					if (Input->IsKeyPressed(SDLK_SPACE)) {
+						// Keep from double jumping
+						if (Transform->Position.z <= Transform->BaseHeight) Transform->Velocity.z = 1.0f * goal;
+						Jumping = true;
+					}
+
+					if (!Jumping) {
+						Transform->VelocityGoal.z = 2 * -9.8f;	
+						Jumping = false;
+					}
+
+					if (Input->IsKeyDown(SDLK_LCTRL)) {
+						goal = WALKPACE / 2.0f;
+					}
+					else if (Input->IsKeyDown(SDLK_LSHIFT)) {
+						goal = SPRINTPACE;
+					}
+	 				else goal = WALKPACE;
+
+					if (!Input->IsKeyDown(SDLK_w) && !Input->IsKeyDown(SDLK_s)) Transform->VelocityGoal.y = 0;
+					if (!Input->IsKeyDown(SDLK_a) && !Input->IsKeyDown(SDLK_d)) Transform->VelocityGoal.x = 0;
+				}
 
 				if (Input->IsKeyPressed(SDL_BUTTON_LEFT)) 
 				{
@@ -233,66 +355,11 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					}
 				}
 
-				if (Input->IsKeyDown(SDLK_w) || Controller->Axis1Value > 0) {
-
-					auto Val = Controller->Axis1Value;
-					Transform->VelocityGoal.y = Val ? Val * Multiplier * goal : Multiplier * goal;
-					Transform->ViewVector.y = 1.0f;
-				}
-				if (Input->IsKeyDown(SDLK_s) || Controller->Axis1Value < 0) {
-
-					auto Val = Controller->Axis1Value;
-					Transform->VelocityGoal.y = Val ? Val * Multiplier * goal : Multiplier * -goal;
-					Transform->ViewVector.y = -1.0f;
-				}
-				if (Input->IsKeyDown(SDLK_a) || Controller->Axis0Value < 0) {
-
-					auto Val = Controller->Axis0Value;
-					Transform->VelocityGoal.x = Val ? Val * Multiplier * goal : Multiplier * -goal;
-					Transform->ViewVector.x = -1.0f; 
-				}
-
-				if (Input->IsKeyDown(SDLK_d) || Controller->Axis0Value > 0) {
-
-					auto Val = Controller->Axis0Value;
-					Transform->VelocityGoal.x = Val ? Val * Multiplier * goal : Multiplier * goal;
-					Transform->ViewVector.x = 1.0f; 
-				}
-
 				if (Input->IsKeyPressed(SDLK_t)) {
 
 					Targeting = !Targeting;
 				}
 
-				static bool Jumping = false;
-				if (Input->IsKeyPressed(SDLK_SPACE) || Controller->IsButtonPressed(static_cast<unsigned int>(SDL_CONTROLLER_BUTTON_A))) {
-					// Keep from double jumping
-					if (Transform->Position.z <= Transform->BaseHeight) Transform->Velocity.z = 1.0f * goal;
-					Jumping = true;
-				}
-
-				if (!Jumping) {
-					Transform->VelocityGoal.z = 2 * -9.8f;	
-					Jumping = false;
-				}
-
-				if (!Input->WasKeyDown(SDLK_w) && !Input->WasKeyDown(SDLK_s) && !Controller->Axis1Value)
-				{
-					if (Manager->TransformSystem->Transforms[e].ViewVector.x != 0) Manager->TransformSystem->Transforms[e].ViewVector.y = 0;
-				} 
-				
-				if (!Input->WasKeyDown(SDLK_a) && !Input->WasKeyDown(SDLK_d) && !Controller->Axis0Value)
-				{
-					if (Manager->TransformSystem->Transforms[e].ViewVector.y != 0) Manager->TransformSystem->Transforms[e].ViewVector.x = 0;
-				} 
-
-				if (Input->IsKeyDown(SDLK_LCTRL)) {
-					goal = WALKPACE / 2.0f;
-				}
-				else if (Input->IsKeyDown(SDLK_LSHIFT) || Controller->IsButtonDown(static_cast<unsigned int>(SDL_CONTROLLER_BUTTON_X))) {
-					goal = SPRINTPACE;
-				}
- 				else goal = WALKPACE;
 
 				if (Input->IsKeyPressed(SDLK_TAB)) {
 
@@ -309,10 +376,6 @@ namespace ECS { namespace Systems { namespace PlayerController {
 						System->CurrentTarget = System->Targets[System->CurrentIndex];
 					}
 				}
-			
-				if (!Input->IsKeyDown(SDLK_w) && !Input->IsKeyDown(SDLK_s) && !Controller->Axis1Value) Transform->VelocityGoal.y = 0;
-				if (!Input->IsKeyDown(SDLK_a) && !Input->IsKeyDown(SDLK_d) && !Controller->Axis0Value) Transform->VelocityGoal.x = 0;
-
 			}
 		}
 	}

@@ -5,8 +5,12 @@
 
 namespace Enjon { namespace Input {
 
-	InputManager::InputManager() : m_mouseCoords(0.0f)
+	InputManager::InputManager() : m_mouseCoords(0.0f) 
 	{
+		// Set up GamePadController
+		GamePadController = {};
+		GamePadController.ControllerHandle = nullptr;
+
 		int MaxJoysticks = SDL_NumJoysticks();
 		int ControllerIndex = 0;
 		for(int JoystickIndex = 0; JoystickIndex < MaxJoysticks; ++JoystickIndex)
@@ -21,24 +25,14 @@ namespace Enjon { namespace Input {
 		    }
 
 		    auto CHandle = SDL_GameControllerOpen(JoystickIndex);
-
-		    // Push back controller handle
-		    ControllerHandles.push_back(CHandle);
-		    ControllerIndex++;
-
-		    GamePadController = {};
 		   	GamePadController.ControllerHandle = CHandle; 
+		    ControllerIndex++;
 		}	
 	}
 
 	InputManager::~InputManager()
 	{
-		for (auto& p : ControllerHandles)
-		{
-			SDL_GameControllerClose(p);
-		}
-
-		SDL_GameControllerClose(GamePadController.ControllerHandle);
+		if (GamePadController.ControllerHandle) SDL_GameControllerClose(GamePadController.ControllerHandle);
 	}
 
 	void InputManager::Update()
