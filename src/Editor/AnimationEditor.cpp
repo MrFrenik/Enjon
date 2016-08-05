@@ -497,6 +497,7 @@ namespace Enjon { namespace AnimationEditor {
 		GUIManager::Add("SceneAnimation", &SceneAnimation);
 		GUIManager::Add("ToggleOnionSkin", &ToggleOnionSkin);
 		GUIManager::Add("AnimationSelection", &AnimationSelection);
+		GUIManager::Add("Delay", &AnimationDelay);
 
 
 		// Set up AnimationPanel Group

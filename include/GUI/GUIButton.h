@@ -177,6 +177,9 @@ namespace Enjon { namespace GUI {
 			ValueDown.Dimensions 	= EM::Vec2(20.0f, 18.0f);
 			ValueText.Dimensions 	= EM::Vec2(85.0f, 18.0f);
 
+			ValueText.Text = "0.50";
+
+			// These aren't working...
 			ValueUp.Parent 		= this;
 			ValueDown.Parent 	= this;
 			ValueUp.Parent 		= this;
@@ -212,7 +215,7 @@ namespace Enjon { namespace GUI {
 						ValueText.Color, 
 						0.0f, 
 						EG::SpriteBatch::DrawOptions::BORDER, 
-						EG::RGBA16_Black()
+						EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f)					
 					);
 			
 			// Draw Text Box
