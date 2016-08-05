@@ -210,12 +210,19 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 		return (ch.Advance >> 6) * scale;
 	}
 
+	float GetHeight(char c, Font* F, float scale)
+	{
+		Character ch = F->Characters[c];
+
+		return (ch.Size.y + ch.Bearing.y) * scale;
+	}
+
 	/* Adds a string of tex at (x,y) to given spritebatch */
-	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, Enjon::Graphics::ColorRGBA16 Color, TextStyle Style, float Angle)
+	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, Enjon::Graphics::ColorRGBA16 Color, TextStyle Style, float Angle, float Depth)
 	{
 	    if (Style == TextStyle::SHADOW) 
 	    {
-	    	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, EG::RGBA16_Black(), TextStyle::DEFAULT, Angle);
+	    	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, EG::RGBA16_Black(), TextStyle::DEFAULT, Angle, Depth);
 	    }
 
 		// Iterate through all characters
@@ -234,8 +241,8 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	        Enjon::Math::Vec4 UV(0, 0, 1, 1);
 
 	        // Add to batch
-	        if (Angle) Batch.Add(DestRect, UV, ch.TextureID, Color, 0.0f, Angle);
-	        else Batch.Add(DestRect, UV, ch.TextureID, Color);
+	        if (Angle) Batch.Add(DestRect, UV, ch.TextureID, Color, Depth, Angle);
+	        else Batch.Add(DestRect, UV, ch.TextureID, Color, Depth);
 
 	        // Advance to next character
 	        x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))

@@ -58,7 +58,7 @@ namespace Enjon { namespace Graphics {
 		if (Options & DrawOptions::BORDER)
 		{
 			// Draw border
-			DrawRectBorder(this, destRect, BorderThickness, BorderColor);
+			DrawRectBorder(this, destRect, BorderThickness, BorderColor, depth);
 		}
 
 		// Place back new glyph
@@ -231,7 +231,7 @@ namespace Enjon { namespace Graphics {
 		return (a->texture < b->texture);
 	}
 
-	void DrawRectBorder(SpriteBatch* Batch, const EM::Vec4& Dims, float Thickness, const EG::ColorRGBA16& Color)
+	void DrawRectBorder(SpriteBatch* Batch, const EM::Vec4& Dims, float Thickness, const EG::ColorRGBA16& Color, float Depth)
 	{
 		/*
 			|-  z  -|
@@ -258,7 +258,8 @@ namespace Enjon { namespace Graphics {
 					EM::Vec4(X, Y, Width, Height), 
 					EM::Vec4(0, 0, 1, 1),
 					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-					Color 
+					Color,
+					Depth
 				  );
 
 		////////////////////////
@@ -274,7 +275,8 @@ namespace Enjon { namespace Graphics {
 					EM::Vec4(X, Y, Width, Height), 
 					EM::Vec4(0, 0, 1, 1),
 					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-					Color 
+					Color,
+					Depth 
 				  );
 
 		/////////////////////////
@@ -290,7 +292,8 @@ namespace Enjon { namespace Graphics {
 					EM::Vec4(X, Y, Width, Height), 
 					EM::Vec4(0, 0, 1, 1),
 					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-					Color 
+					Color,
+					Depth 
 				  );
 
 		///////////////////////
@@ -306,7 +309,8 @@ namespace Enjon { namespace Graphics {
 					EM::Vec4(X, Y, Width, Height), 
 					EM::Vec4(0, 0, 1, 1),
 					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-					Color 
+					Color,
+					Depth 
 				  );
 
 	}

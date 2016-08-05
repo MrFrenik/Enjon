@@ -48,6 +48,7 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<> on_hover;
 		EGUI::Signal<> off_hover;
 		EG::ColorRGBA16 Color;
+		float Depth;
 	};
 
 	template <typename T>
@@ -83,6 +84,7 @@ namespace Enjon { namespace GUI {
 			caret_count 	= 0.0f;
 			TextFont 		= nullptr;
 			KeyboardInFocus = false;
+			Dimensions 		= EM::Vec2(100.0f, 20.0f);
 
 			// Initial states
 			State 		= ButtonState::INACTIVE;
@@ -210,12 +212,14 @@ namespace Enjon { namespace GUI {
 		{
 			auto Padding = EM::Vec2(5.0f, 5.0f);
 
+			if (TextFont == nullptr) TextFont = EG::FontManager::GetFont("WeblySleek_12");
+
 			{
 				auto ITextHeight = AABB.Max.y - AABB.Min.y; // InputTextHeight
 				auto TextHeight = ITextHeight - 20.0f;
 				EG::Fonts::PrintText(	
-										Position.x + Parent->Position.x + Padding.x, 
-										Position.y + Parent->Position.y + Padding.y + TextHeight, 1.0f, 
+										AABB.Min.x + Padding.x, 
+										AABB.Min.y + Padding.y, 1.0f, 
 										Text, 
 										TextFont, 
 										*Batch, 
@@ -294,13 +298,13 @@ namespace Enjon { namespace GUI {
 			// Set up member variables
 			ElementIndex 	= 2;
 			X0Offset 		= 15.0f;
-			X1Offset		= 100.0f;
-			YOffset 		= 20.0f;						// Not exact way but close estimate for now
+			X1Offset		= 140.0f;
+			YOffset 		= 25.0f;						// Not exact way but close estimate for now
 			TitlePadding 	= 15.0f;
 			Name 			= std::string("GUIGroup");		// Default Name
-			Dimensions	= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
+			Dimensions		= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
 			TextColor		= EG::RGBA16_MidGrey();
-			Color 		= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
+			Color 			= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
 			TextFont 		= nullptr;
 
 			// Get font
@@ -328,7 +332,7 @@ namespace Enjon { namespace GUI {
 			Element->Parent = this;
 
 			// Set up position of Element in relation to group
-			Element->Position = EM::Vec2(Position.x + X1Offset, Position.y + Dimensions.y - ElementIndex * YOffset - TitlePadding);
+			Element->Position = EM::Vec2(Position.x + Dimensions.x - X1Offset, Position.y + Dimensions.y - ElementIndex * YOffset - TitlePadding);
 			Element->Name = Name;
 
 			// Increment element index
@@ -342,7 +346,7 @@ namespace Enjon { namespace GUI {
 			for(auto C : Children)
 			{
 				// Update position
-				C->Position = EM::Vec2(Position.x + X1Offset, Position.y + Dimensions.y - index * YOffset - TitlePadding);
+				C->Position = EM::Vec2(Position.x + Dimensions.x - X1Offset, Position.y + Dimensions.y - index * YOffset - TitlePadding);
 
 				// Update AABB
 				C->AABB.Min = C->Position;
@@ -350,6 +354,7 @@ namespace Enjon { namespace GUI {
 
 				// Call update on child
 				C->Update();
+				index++;
 			}
 		}
 

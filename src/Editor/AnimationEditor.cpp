@@ -222,7 +222,7 @@ namespace Enjon { namespace AnimationEditor {
 			// Give name of button name of current animation
 			b->Text = a.first;
 
-			b->Dimensions = EM::Vec2(160.0f, AnimationSelection.YOffset - 2.0f);
+			// b->Dimensions = EM::Vec2(160.0f, AnimationSelection.YOffset - 2.0f);
 
 			// Set up on_hover signal
 			b->on_click.connect([&](GUIElementBase* b)
@@ -287,6 +287,8 @@ namespace Enjon { namespace AnimationEditor {
 		InputText.AABB.Min = InputText.Position + Group.Position;
 		InputText.AABB.Max = InputText.AABB.Min + EM::Vec2(200.0f, 20.0f);
 		InputText.TextFont = EG::FontManager::GetFont("WeblySleek_12"); 
+
+		AnimationFrame.ValueText.TextFont = EG::FontManager::GetFont("WeblySleek_12");
 
 		// Set up AnimationSelection AABB
 		// Calculate size of button
@@ -510,7 +512,7 @@ namespace Enjon { namespace AnimationEditor {
 		// AnimationPanel.AddToGroup(&DelayUp, "DelayUp");
 		// AnimationPanel.AddToGroup(&ToggleOnionSkin, "ToggleOnionSkin");
 		// AnimationPanel.AddToGroup(&AnimationFrame, "Frame");
-		// AnimationPanel.AddToGroup(&AnimationDelay, "Delay");
+		AnimationPanel.AddToGroup(&AnimationDelay, "Delay");
 
 
 		// Draw BG

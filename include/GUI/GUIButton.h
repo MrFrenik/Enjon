@@ -24,6 +24,7 @@ namespace Enjon { namespace GUI {
 			this->HoverState 	= HoveredState::OFF_HOVER;
 			this->Color 		= EG::RGBA16_LightGrey();
 			this->Name 			= std::string("GUIButton");
+			Dimensions 			= EM::Vec2(130.0f, 20.0f);
 
 			// Set up PlayButton's on_hover signal
 			this->on_hover.connect([&]()
@@ -81,6 +82,9 @@ namespace Enjon { namespace GUI {
 			this->Name 			= std::string("GUITextButton");
 			this->TextPadding	= EM::Vec2(5.0f, 5.0f);
 
+			// Dimensions
+			Dimensions 			= EM::Vec2(160.0f, 18.0f);
+
 			// Get font
 			this->TextFont 		= nullptr;
 			this->FontScale		= 1.0f;
@@ -124,9 +128,9 @@ namespace Enjon { namespace GUI {
 						EM::Vec4(0, 0, 1, 1),
 						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
 						this->Color,
-						0.0f,
+						this->Depth,
 						EG::SpriteBatch::DrawOptions::BORDER,
-						EG::SetOpacity(EG::RGBA16_Black(), 0.5f)
+						EG::SetOpacity(EG::RGBA16(0.08f, 0.08f, 0.08f, 1.0f), 1.0f)
 					);
 
 			// Draw text
@@ -137,7 +141,10 @@ namespace Enjon { namespace GUI {
 									this->Text, 
 									this->TextFont, 
 									*Batch, 
-									this->TextColor 
+									this->TextColor,
+									EG::Fonts::TextStyle::SHADOW,
+									0.0f, 
+									2.0f
 								);
 		}
 
@@ -164,6 +171,15 @@ namespace Enjon { namespace GUI {
 
 			this->Value = 0.0f;
 			this->Step = 0.1f;
+			this->Dimensions = EM::Vec2(145.0f, 18.0f);
+
+			ValueUp.Dimensions 		= EM::Vec2(20.0f, 18.0f);
+			ValueDown.Dimensions 	= EM::Vec2(20.0f, 18.0f);
+			ValueText.Dimensions 	= EM::Vec2(85.0f, 18.0f);
+
+			ValueUp.Parent 		= this;
+			ValueDown.Parent 	= this;
+			ValueUp.Parent 		= this;
 
 			// Set up connect for Value Up
 			this->ValueUp.on_click.connect([&]()
@@ -186,14 +202,81 @@ namespace Enjon { namespace GUI {
 			});
 		}
 
-		void Draw(EG::SpriteBatch* TB)
+		void Draw(EG::SpriteBatch* Batch)
 		{
+			// Draw Value Up
+			Batch->Add(
+						EM::Vec4(ValueText.AABB.Min, ValueText.AABB.Max - ValueText.AABB.Min),
+						EM::Vec4(0, 0, 1, 1),
+						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						ValueText.Color, 
+						0.0f, 
+						EG::SpriteBatch::DrawOptions::BORDER, 
+						EG::RGBA16_Black()
+					);
 			
+			// Draw Text Box
+			ValueText.Draw(Batch);
+
+			// Draw Value Up
+			Batch->Add(
+						EM::Vec4(ValueUp.AABB.Min, ValueUp.AABB.Max - ValueUp.AABB.Min),
+						EM::Vec4(0, 0, 1, 1),
+						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						ValueUp.Color,
+						0.0f, 
+						EG::SpriteBatch::DrawOptions::BORDER, 
+						EG::RGBA16_Black()
+					);
+
+
+			auto F = EG::FontManager::GetFont("WeblySleek");
+			EG::Fonts::PrintText(	
+									ValueUp.Position.x + ValueUp.Dimensions.x / 2.0f - EG::Fonts::GetAdvance('+', F, 1.0f) / 2.0f, 
+									ValueUp.Position.y + ValueUp.Dimensions.y / 2.0f - EG::Fonts::GetHeight('-', F, 1.0f) / 2.0f, 
+									1.0f, 
+									"+", 
+									EG::FontManager::GetFont("WeblySleek"), 
+									*Batch, 
+									ValueText.TextColor	
+								);
+
+			// Draw Value Down
+			Batch->Add(
+						EM::Vec4(ValueDown.AABB.Min, ValueDown.AABB.Max - ValueDown.AABB.Min),
+						EM::Vec4(0, 0, 1, 1),
+						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						ValueDown.Color,
+						0.0f, 
+						EG::SpriteBatch::DrawOptions::BORDER, 
+						EG::RGBA16_Black()
+					);
+
+			EG::Fonts::PrintText(	
+									ValueDown.Position.x + ValueDown.Dimensions.x / 2.0f - EG::Fonts::GetAdvance('-', F, 1.0f) / 2.0f, 
+									ValueDown.Position.y + ValueDown.Dimensions.y / 2.0f - EG::Fonts::GetHeight('-', F, 1.0f) / 2.0f, 
+									1.0f, 
+									"-", 
+									EG::FontManager::GetFont("WeblySleek"), 
+									*Batch, 
+									ValueText.TextColor	
+								);
 		}
 
 		void Update()
 		{
-			
+			// Update positions and AABB of Value Text
+			ValueText.Position = Position;
+			ValueText.AABB.Min = ValueText.Position;
+			ValueText.AABB.Max = ValueText.AABB.Min + ValueText.Dimensions;	
+
+			ValueUp.Position = EM::Vec2(Position.x + ValueText.Dimensions.x, Position.y);
+			ValueUp.AABB.Min = ValueUp.Position;
+			ValueUp.AABB.Max = ValueUp.AABB.Min + ValueUp.Dimensions;	
+
+			ValueDown.Position = EM::Vec2(ValueUp.Position.x + ValueUp.Dimensions.x, Position.y);
+			ValueDown.AABB.Min = ValueDown.Position;
+			ValueDown.AABB.Max = ValueDown.AABB.Min + ValueDown.Dimensions;	
 		}
 
 		void Init() {}
@@ -341,6 +424,7 @@ namespace Enjon { namespace GUI {
 				// Draw each child
 				for(auto C : this->List)
 				{
+					C->Depth = 1.0f;
 					C->Draw(Batch);
 				}
 
