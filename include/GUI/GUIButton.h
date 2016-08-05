@@ -8,6 +8,7 @@
 #include "GUI/GUIElement.h"
 #include "Graphics/Animations.h"
 #include "Math/Vec2.h"
+#include "Math/Maths.h"
 
 namespace Enjon { namespace GUI {
 
@@ -47,6 +48,17 @@ namespace Enjon { namespace GUI {
 		void Init()
 		{}
 
+		void Update()
+		{
+			
+		}
+
+
+		void Draw(EG::SpriteBatch* TB)
+		{
+			
+		}
+
 		std::vector<EA::ImageFrame> Frames;   // Could totally put this in a resource manager of some sort
 	};
 
@@ -65,8 +77,9 @@ namespace Enjon { namespace GUI {
 			this->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 
 			// Set up text color
-			this->TextColor = EG::RGBA16_MidGrey();
+			this->TextColor 	= EG::RGBA16_White();
 			this->Name 			= std::string("GUITextButton");
+			this->TextPadding	= EM::Vec2(5.0f, 5.0f);
 
 			// Get font
 			this->TextFont 		= nullptr;
@@ -92,6 +105,43 @@ namespace Enjon { namespace GUI {
 		void Init()
 		{}
 
+		void Update()
+		{
+			
+		}
+
+		void Draw(EG::SpriteBatch* Batch)
+		{
+			// If null
+			if (this->TextFont == nullptr) this->TextFont = EG::FontManager::GetFont("WeblySleek_10");
+
+			// Draw box
+			Batch->Add(
+						EM::Vec4(
+									this->AABB.Min,
+									this->AABB.Max - this->AABB.Min
+								),
+						EM::Vec4(0, 0, 1, 1),
+						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
+						this->Color,
+						0.0f,
+						EG::SpriteBatch::DrawOptions::BORDER,
+						EG::SetOpacity(EG::RGBA16_Black(), 0.5f)
+					);
+
+			// Draw text
+			EG::Fonts::PrintText(	
+									Position.x + TextPadding.x, 
+									Position.y + TextPadding.y, 
+									this->FontScale, 
+									this->Text, 
+									this->TextFont, 
+									*Batch, 
+									this->TextColor 
+								);
+		}
+
+		EM::Vec2 TextPadding;
 		EGUI::Signal<GUIElementBase*> on_click;
 		EGUI::Signal<> on_hover;
 		EGUI::Signal<> off_hover;
@@ -136,6 +186,16 @@ namespace Enjon { namespace GUI {
 			});
 		}
 
+		void Draw(EG::SpriteBatch* TB)
+		{
+			
+		}
+
+		void Update()
+		{
+			
+		}
+
 		void Init() {}
 
 		float Value;
@@ -162,8 +222,11 @@ namespace Enjon { namespace GUI {
 			this->TextFont 		= nullptr;
 			this->FontScale = 1.0f;
 			this->Name = std::string("GUIDropDownButton");
-			this->TextColor		= EG::RGBA16_MidGrey();
+			this->TextColor		= EG::RGBA16_White();
 			this->TextPadding = EM::Vec2(5.0f, 6.0f);
+			this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			this->YOffset = 20.0f;
+			this->XPadding = 1.0f;
 
 			// Set up Drop Down Menu Button's on_hover signal
 			this->on_hover.connect([&]()
@@ -186,11 +249,13 @@ namespace Enjon { namespace GUI {
 				if (this->State == ButtonState::INACTIVE)
 				{
 					this->Color = EG::RGBA16(0.08f, 0.08f, 0.08f, 1.0f);
+					this->BorderColor = EG::SetOpacity(EG::RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
 					this->State = ButtonState::ACTIVE;
 				} 
 				else
 				{
 					this->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+					this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 					this->State = ButtonState::INACTIVE;
 				} 
 			});
@@ -199,15 +264,32 @@ namespace Enjon { namespace GUI {
 		void Init()
 		{}
 
+		void Update() 
+		{
+			// Loop through all children and update their AABB's and positions
+			auto index = 1;
+			for (auto C : List)
+			{
+				// Update AABB of child
+				C->Position = EM::Vec2(Position.x + XPadding, Position.y - YOffset * index);
+				C->AABB.Min = C->Position;
+				C->AABB.Max = C->AABB.Min + C->Dimensions;
+				index++;
+			}
+		}
+
 		void Draw(EG::SpriteBatch* Batch)
 		{
 			if (this->TextFont == nullptr) this->TextFont = EG::FontManager::GetFont("WeblySleek_10");
 
 			Batch->Add(
-							EM::Vec4(Position.x, Position.y, 100.0f, 20.0f),
+							EM::Vec4(Position.x, Position.y, this->Dimensions),
 							EM::Vec4(0, 0, 1, 1),
 							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-							Color	
+							Color, 
+							0.0f, 
+							(EG::SpriteBatch::DrawOptions::BORDER), 
+							this->BorderColor	
 						);
 
 			EG::Fonts::PrintText(	
@@ -219,6 +301,50 @@ namespace Enjon { namespace GUI {
 									*Batch, 
 									this->TextColor	
 								);
+
+			EG::Fonts::PrintText(	
+									Position.x + TextPadding.x + 112.0f, 
+									Position.y + TextPadding.y + 4.0f, 
+									this->FontScale * 0.8f, 
+									"d", 
+									EG::FontManager::GetFont("Arrows7"), 
+									*Batch, 
+									this->TextColor, 
+									EG::Fonts::TextStyle::SHADOW,
+									EM::ToRadians(180.0f)
+								);
+
+			// If activated
+			if (this->State)
+			{
+				float XPadding = 5.0f;
+				auto Amount = this->List.size();
+				auto GroupWidth = 160.0f;
+
+				// Draw box for group
+				Batch->Add(
+							EM::Vec4(
+										this->Position.x,
+										this->Position.y - this->YOffset * Amount - 2.0f, 
+										GroupWidth, 
+										20.0f * Amount
+									),
+							EM::Vec4(0, 0, 1, 1),
+							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
+							EG::RGBA16_DarkGrey(), 
+							0.0f,
+							EG::SpriteBatch::DrawOptions::BORDER | EG::SpriteBatch::DrawOptions::SHADOW,
+							EG::RGBA16_DarkGrey(), 
+							1.0f
+						);
+
+				// Draw each child
+				for(auto C : this->List)
+				{
+					C->Draw(Batch);
+				}
+
+			}	
 		}
 
 		void CalculateDimensions()
@@ -260,8 +386,11 @@ namespace Enjon { namespace GUI {
 		std::vector<GUITextButton*> List;
 		EG::Fonts::Font* TextFont;
 		EG::ColorRGBA16 TextColor;
+		EG::ColorRGBA16 BorderColor;
 		EM::Vec2 TextPadding;
+		float XPadding;
 		float FontScale;
+		float YOffset;
 	};
 
 
@@ -308,6 +437,16 @@ namespace Enjon { namespace GUI {
 		}
 
 		void Init() {}
+
+		void Update()
+		{
+			
+		}
+
+		void Draw(EG::SpriteBatch* TB)
+		{
+			
+		}
 
 		EG::ColorRGBA16 ActiveColor;
 		EG::ColorRGBA16 InactiveColor;

@@ -42,6 +42,16 @@ namespace Enjon { namespace GUI {
 
 		void Init() {}
 
+		void Update()
+		{
+			
+		}
+
+		void Draw(EG::SpriteBatch* TB)
+		{
+
+		}
+
 		EA::Anim* CurrentAnimation;
 		uint32_t CurrentIndex;
 	};

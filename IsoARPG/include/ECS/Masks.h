@@ -36,12 +36,12 @@ namespace ECS { namespace Masks {
 
 	enum PlayerOptions : EntityMask
 	{
-
+		
 	};
 
 	enum AIOptions : EntityMask
 	{
-
+		
 	};
 
 	enum GeneralOptions: EntityMask

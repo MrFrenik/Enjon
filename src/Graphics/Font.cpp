@@ -3,7 +3,23 @@
 #include "Graphics/Font.h"
 #include "Utils/Errors.h"
 
+#include <stdexcept>
+
+#include <freetype/ftglyph.h>
+#include <freetype/ftoutln.h>
+#include <freetype/fttrigon.h>
+
 namespace Enjon { namespace Graphics { namespace Fonts {
+
+	// This Function Gets The First Power Of 2 >= The
+	// Int That We Pass It.
+	int next_p2 (int a )
+	{
+	    int rval=1;
+	    // rval<<=1 Is A Prettier Way Of Writing rval*=2;
+	    while(rval<a) rval<<=1;
+	    return rval;
+	}
 
 	/* Inits a particular font with a particular size and stores in a returned map */
 	void Init(char* filePath, GLuint size, Font* font)
@@ -23,9 +39,10 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	    FT_Set_Pixel_Sizes(face, 0, size);
 
 	    // Disable byte-alignment restriction
-	    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); 
+	    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	    // Load first 128 characters of ASCII set
+	   
 	    for (GLubyte c = 0; c < 128; c++)
 	    {
 	        // Load character glyph 
@@ -38,8 +55,9 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	        GLuint texture;
 	        glGenTextures(1, &texture);
 	        glBindTexture(GL_TEXTURE_2D, texture);
+
 	        glTexImage2D(
-	            GL_TEXTURE_2D,
+	        	GL_TEXTURE_2D,
 	            0,
 	            GL_RED,
 	            face->glyph->bitmap.width,
@@ -49,11 +67,12 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	            GL_UNSIGNED_BYTE,
 	            face->glyph->bitmap.buffer
 	        );
-	        // Set texture options
+
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
 	        // Now store character for later use
 	        Character character = {
 	            texture,
@@ -69,8 +88,74 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	        if (character.Size.y > font->MaxHeight) font->MaxHeight = character.Size.y;
 	        if (character.Size.x > font->MaxWidth) font->MaxWidth = character.Size.x;
 
+	        // Unbind texture
+		    glBindTexture(GL_TEXTURE_2D, 0);
 	    }
-	    glBindTexture(GL_TEXTURE_2D, 0);
+	    
+
+	    /*
+	    for (GLubyte c = 0; c < 128; c++)
+	    {
+		    // Load The Glyph For Our Character.
+		    if(FT_Load_Glyph( face, FT_Get_Char_Index( face, c ), FT_LOAD_DEFAULT ))
+		        throw std::runtime_error("FT_Load_Glyph failed");
+		 
+		    // Move The Face's Glyph Into A Glyph Object.
+		    FT_Glyph glyph;
+		    if(FT_Get_Glyph( face->glyph, &glyph ))
+		        throw std::runtime_error("FT_Get_Glyph failed");
+		 
+		    // Convert The Glyph To A Bitmap.
+		    FT_Glyph_To_Bitmap( &glyph, ft_render_mode_normal, 0, 1 );
+		    FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
+
+		    // This Reference Will Make Accessing The Bitmap Easier.
+		    FT_Bitmap& bitmap=bitmap_glyph->bitmap;
+		 
+			// Use Our Helper Function To Get The Widths Of
+			// The Bitmap Data That We Will Need In Order To Create
+			// Our Texture.
+			int width = next_p2( bitmap.width );
+			int height = next_p2( bitmap.rows );
+			 
+			// Allocate Memory For The Texture Data.
+			GLubyte* expanded_data = new GLubyte[ 2 * width * height];
+			 
+			// Here We Fill In The Data For The Expanded Bitmap.
+			// Notice That We Are Using A Two Channel Bitmap (One For
+			// Channel Luminosity And One For Alpha), But We Assign
+			// Both Luminosity And Alpha To The Value That We
+			// Find In The FreeType Bitmap.
+			// We Use The ?: Operator To Say That Value Which We Use
+			// Will Be 0 If We Are In The Padding Zone, And Whatever
+			// Is The FreeType Bitmap Otherwise.
+			for(int j=0; j <height;j++) 
+			{
+			    for(int i=0; i < width; i++)
+			    {
+			        expanded_data[2*(i+j*width)]= expanded_data[2*(i+j*width)+1] =
+			            (i>=bitmap.width || j>=bitmap.rows) ?
+			            0 : bitmap.buffer[i + bitmap.width*j];
+			    }
+			}
+			// Now We Just Setup Some Texture Parameters.
+			GLuint texture;
+			glGenTextures(1, &texture);
+			glBindTexture( GL_TEXTURE_2D, texture);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+			 
+			// Here We Actually Create The Texture Itself, Notice
+			// That We Are Using GL_LUMINANCE_ALPHA To Indicate That
+			// We Are Using 2 Channel Data.
+			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+			    GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data );
+			
+			 
+			// With The Texture Created, We Don't Need The Expanded Data Anymore.
+			delete [] expanded_data;
+	    }
+	    */
 
 	    // Destroy FreeType once we're finished
 	    FT_Done_Face(face);
@@ -126,11 +211,11 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	}
 
 	/* Adds a string of tex at (x,y) to given spritebatch */
-	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, Enjon::Graphics::ColorRGBA16 Color, TextStyle Style)
+	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, Enjon::Graphics::ColorRGBA16 Color, TextStyle Style, float Angle)
 	{
 	    if (Style == TextStyle::SHADOW) 
 	    {
-	    	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, EG::RGBA16_Black(), TextStyle::DEFAULT);
+	    	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, EG::RGBA16_Black(), TextStyle::DEFAULT, Angle);
 	    }
 
 		// Iterate through all characters
@@ -149,7 +234,8 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	        Enjon::Math::Vec4 UV(0, 0, 1, 1);
 
 	        // Add to batch
-	        Batch.Add(DestRect, UV, ch.TextureID, Color);
+	        if (Angle) Batch.Add(DestRect, UV, ch.TextureID, Color, 0.0f, Angle);
+	        else Batch.Add(DestRect, UV, ch.TextureID, Color);
 
 	        // Advance to next character
 	        x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))

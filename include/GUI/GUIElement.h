@@ -31,7 +31,8 @@ namespace Enjon { namespace GUI {
 	struct GUIElementBase
 	{
 		virtual void Init() = 0;
-		virtual void Draw(EG::SpriteBatch* Batch) = 0;
+		virtual void Update() = 0;
+		virtual void Draw(EG::SpriteBatch* TextBatch) = 0;
 
 		GUIElementBase* Parent;
 		EM::Vec2 Position;
@@ -73,123 +74,178 @@ namespace Enjon { namespace GUI {
 			Type = GUIType::TEXT_BOX; 
 
 			// Initialize members
-			this->Name 			= std::string("GUITextBox");
-			this->Text 			= std::string("");
-			this->CursorIndex 	= 0;
-			this->TextColor 	= EG::RGBA16_White();
-			this->Color 	 	= EG::RGBA16_DarkGrey();
-			this->caret_on 		= false;
-			this->caret_count 	= 0.0f;
-			this->TextFont 		= nullptr;
+			Name 			= std::string("GUITextBox");
+			Text 			= std::string("");
+			CursorIndex 	= 0;
+			TextColor 	= EG::RGBA16_White();
+			Color 	 	= EG::RGBA16_DarkGrey();
+			caret_on 		= false;
+			caret_count 	= 0.0f;
+			TextFont 		= nullptr;
+			KeyboardInFocus = false;
 
 			// Initial states
-			this->State 		= ButtonState::INACTIVE;
-			this->HoverState 	= HoveredState::OFF_HOVER;
+			State 		= ButtonState::INACTIVE;
+			HoverState 	= HoveredState::OFF_HOVER;
 
 			// Get font
-			this->FontScale = 1.0f;
+			FontScale = 1.0f;
 
 			// Set up TextBox's on_hover signal
-			this->on_hover.connect([&]()
+			on_hover.connect([&]()
 			{
 				// Change the mouse cursor
 				SDL_SetCursor(EG::CursorManager::Get("IBeam"));
 
-				this->HoverState = HoveredState::ON_HOVER;
+				HoverState = HoveredState::ON_HOVER;
 
 				// Change color of Box
-				this->Color = EG::SetOpacity(EG::RGBA16_LightGrey(), 0.3f);
+				Color = EG::SetOpacity(EG::RGBA16_LightGrey(), 0.3f);
 
 			});
 
 			// Set up TextBox's off_hover signal
-			this->off_hover.connect([&]()
+			off_hover.connect([&]()
 			{
 				// Change mouse cursor back to defaul
 				SDL_SetCursor(EG::CursorManager::Get("Arrow"));
 
-				this->HoverState = HoveredState::OFF_HOVER;
+				HoverState = HoveredState::OFF_HOVER;
 			
 				// Change color of Box
-				this->Color = EG::RGBA16_DarkGrey();
+				Color = EG::RGBA16_DarkGrey();
 			});
 
 			// Set up TextBox's on_keyboard signal
-			this->on_keyboard.connect([&](std::string c)
+			on_keyboard.connect([&](std::string c)
 			{
-				auto str_len = this->Text.length();
-				auto cursor_index = this->CursorIndex;
+				auto str_len = Text.length();
+				auto cursor_index = CursorIndex;
 
 				// std::cout << cursor_index << std::endl;
 
 				// End of string
 				if (cursor_index >= str_len)
 				{
-					this->Text += c;
-					this->CursorIndex = str_len + 1;
+					Text += c;
+					CursorIndex = str_len + 1;
 				}
 				// Cursor somewhere in the middle of the string
 				else if (cursor_index > 0)
 				{
-					auto FirstHalf = this->Text.substr(0, cursor_index);
-					auto SecondHalf = this->Text.substr(cursor_index, str_len);
+					auto FirstHalf = Text.substr(0, cursor_index);
+					auto SecondHalf = Text.substr(cursor_index, str_len);
 
 					FirstHalf += c; 
-					this->Text = FirstHalf + SecondHalf;
-					this->CursorIndex++;
+					Text = FirstHalf + SecondHalf;
+					CursorIndex++;
 				}
 				// Beginning of string
 				else
 				{
-					this->Text = c + this->Text;
-					this->CursorIndex++;
+					Text = c + Text;
+					CursorIndex++;
 				}
 			});
 
 			// Set up TextBox's on_backspace signal
-			this->on_backspace.connect([&]()
+			on_backspace.connect([&]()
 			{
-				auto str_len = this->Text.length();
-				auto cursor_index = this->CursorIndex;
+				auto str_len = Text.length();
+				auto cursor_index = CursorIndex;
 
 				// erase from string
 				if (str_len > 0 && cursor_index > 0)
 				{
-					auto S1 = this->Text.substr(0, cursor_index - 1);
+					auto S1 = Text.substr(0, cursor_index - 1);
 					std::string S2;
 
-					if (cursor_index + 1 < str_len) S2 = this->Text.substr(cursor_index, str_len);
+					if (cursor_index + 1 < str_len) S2 = Text.substr(cursor_index, str_len);
 
 					S1.erase(cursor_index - 1);
-					this->Text = S1 + S2;
-					this->CursorIndex--;
+					Text = S1 + S2;
+					CursorIndex--;
 				}
 			});
 
-			this->on_click.connect([&](EM::Vec2& MouseCoords)
+			on_click.connect([&](float MouseX)
 			{
-				std::string& Text = this->Text;
-				auto XAdvance = this->Position.x;
+				auto XAdvance = Position.x;
 				uint32_t index = 0;
 
 				// Get advance
 				for (auto& c : Text)
 				{
-					float Advance = EG::Fonts::GetAdvance(c, this->TextFont, this->FontScale);
-					if (XAdvance + Advance < MouseCoords.x) 
+					float Advance = EG::Fonts::GetAdvance(c, TextFont, FontScale);
+					if (XAdvance + Advance < MouseX) 
 					{
 						XAdvance += Advance;
 						index++;
 					}
 					else break;
 				}
-
-				this->CursorIndex = index;
+				CursorIndex = index;
 
 				// set caret on to true and count to 0
-				this->caret_count = 0.0f;
-				this->caret_on = true;
+				caret_count = 0.0f;
+				caret_on = true;
+
+				KeyboardInFocus = true;
 			});
+		}
+
+		void Update()
+		{
+			caret_count += 0.1f;
+
+
+			if (caret_count >= 4.0f)
+			{
+				caret_count = 0.0f;
+				caret_on = !caret_on;	
+			}
+		}
+
+		void Draw(EG::SpriteBatch* Batch)
+		{
+			auto Padding = EM::Vec2(5.0f, 5.0f);
+
+			{
+				auto ITextHeight = AABB.Max.y - AABB.Min.y; // InputTextHeight
+				auto TextHeight = ITextHeight - 20.0f;
+				EG::Fonts::PrintText(	
+										Position.x + Parent->Position.x + Padding.x, 
+										Position.y + Parent->Position.y + Padding.y + TextHeight, 1.0f, 
+										Text, 
+										TextFont, 
+										*Batch, 
+										EG::RGBA16_LightGrey()
+									);
+			}
+			
+			if (KeyboardInFocus && caret_on)
+			{
+	
+				auto CurrentFont = TextFont;
+				auto scale = FontScale;
+				auto Padding = EM::Vec2(5.0f, 5.0f);
+				auto XAdvance = Position.x + Parent->Position.x + Padding.x;
+				auto ITextHeight = AABB.Max.y - AABB.Min.y; // InputTextHeight
+				auto TextHeight = ITextHeight - 20.0f;
+
+				// Get xadvance of all characters
+				for (auto i = 0; i < CursorIndex; ++i)
+				{
+					XAdvance += EG::Fonts::GetAdvance(Text[i], CurrentFont, scale);
+				}
+				Batch->Add(
+								EM::Vec4(XAdvance + 0.2f, Position.y + Parent->Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
+								EM::Vec4(0, 0, 1, 1),
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								EG::RGBA16_LightGrey()
+							);
+			}
+
 		}
 
 		void Init()
@@ -204,9 +260,10 @@ namespace Enjon { namespace GUI {
 		float caret_count;
 		int32_t CursorIndex;
 		int32_t caret_on;
+		int32_t KeyboardInFocus;
 
 	
-		EGUI::Signal<EM::Vec2&> on_click;	
+		EGUI::Signal<float> on_click;	
 		EGUI::Signal<std::string> on_keyboard;
 		EGUI::Signal<> on_backspace;
 		EGUI::Signal<> on_enter;
@@ -218,89 +275,144 @@ namespace Enjon { namespace GUI {
 		GUIGroup() 
 		{ 
 			// Init
-			this->Init();
+			Init();
 		}
 
 		GUIGroup(EM::Vec2 P)
 		{
-			this->Position = P;
+			Position = P;
 
 			// Init
-			this->Init();
+			Init();
 		}
 	
 		void Init()
 		{
 			// Set up type
-			this->Type = GUIType::GROUP; 
+			Type = GUIType::GROUP; 
 
 			// Set up member variables
-			this->ElementIndex 	= 1;
-			this->X0Offset 		= 10.0f;
-			this->X1Offset		= 100.0f;
-			this->YOffset 		= 20.0f;						// Not exact way but close estimate for now
-			this->Name 			= std::string("GUIGroup");		// Default Name
-			this->Dimensions	= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
-			this->TextColor		= EG::RGBA16_MidGrey();
-			this->Color 		= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
-			this->TextFont 		= nullptr;
+			ElementIndex 	= 2;
+			X0Offset 		= 15.0f;
+			X1Offset		= 100.0f;
+			YOffset 		= 20.0f;						// Not exact way but close estimate for now
+			TitlePadding 	= 15.0f;
+			Name 			= std::string("GUIGroup");		// Default Name
+			Dimensions	= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
+			TextColor		= EG::RGBA16_MidGrey();
+			Color 		= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
+			TextFont 		= nullptr;
 
 			// Get font
-			this->FontScale = 1.0f;
+			FontScale = 1.0f;
 
 			// Set up GUIGroup's on_hover signal
-			this->on_hover.connect([&]()
+			on_hover.connect([&]()
 			{
-				this->HoverState = HoveredState::ON_HOVER;
+				HoverState = HoveredState::ON_HOVER;
 			});
 
 			// Set up GUIGroup's off_hover signal
-			this->off_hover.connect([&]()
+			off_hover.connect([&]()
 			{
-				this->HoverState = HoveredState::OFF_HOVER;
+				HoverState = HoveredState::OFF_HOVER;
 			});
 		}
 
 		void AddToGroup(GUIElementBase* Element, const std::string& Name)
 		{
 			// Push back into group's children
-			this->Children.push_back(Element);
+			Children.push_back(Element);
 
 			// Set Group as parent of child
 			Element->Parent = this;
 
 			// Set up position of Element in relation to group
-			Element->Position = EM::Vec2(Position.x + this->X1Offset, Position.y + Dimensions.y - this->ElementIndex * this->YOffset);
+			Element->Position = EM::Vec2(Position.x + X1Offset, Position.y + Dimensions.y - ElementIndex * YOffset - TitlePadding);
 			Element->Name = Name;
 
 			// Increment element index
-			this->ElementIndex++;	
+			ElementIndex++;	
+		}
+
+		void Update()
+		{
+			// Loop through all children and update their positions based on their index in the vector
+			auto index = 2;
+			for(auto C : Children)
+			{
+				// Update position
+				C->Position = EM::Vec2(Position.x + X1Offset, Position.y + Dimensions.y - index * YOffset - TitlePadding);
+
+				// Update AABB
+				C->AABB.Min = C->Position;
+				C->AABB.Max = C->AABB.Min + C->Dimensions;
+
+				// Call update on child
+				C->Update();
+			}
 		}
 
 		void Draw(EG::SpriteBatch* Batch)
 		{
 			// Draw Group border
 			Batch->Add(	
-						EM::Vec4(this->Position, this->Dimensions),
+						EM::Vec4(Position, Dimensions),
 						EM::Vec4(0, 0, 1, 1),
 						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						this->Color
+						Color,
+						0.0f,
+						EG::SpriteBatch::DrawOptions::BORDER | EG::SpriteBatch::DrawOptions::SHADOW,
+						EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.4f),
+						1.0f
 					);
 
-			if (this->TextFont == nullptr) this->TextFont = EG::FontManager::GetFont("WeblySleek_12");
+			if (TextFont == nullptr) TextFont = EG::FontManager::GetFont("WeblySleek_12");
+
+			// Draw Title border
+			Batch->Add(	
+						EM::Vec4(Position.x, Position.y + Dimensions.y - YOffset, Dimensions.x, YOffset),
+						EM::Vec4(0, 0, 1, 1),
+						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						Color,
+						0.0f,
+						EG::SpriteBatch::DrawOptions::BORDER,
+						EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.8f),
+						1.0f
+					);
+
+			// Draw title of widget
+			auto TitleFont = EG::FontManager::GetFont("WeblySleek");
+			// Calculate total width of title to find placement
+			float TitleAdvance = 0.0f;
+			for (auto& c : Name)
+			{
+				TitleAdvance += EG::Fonts::GetAdvance(c, TitleFont, 1.0f);
+			}
+
+			EG::Fonts::PrintText(
+									Position.x + Dimensions.x / 2.0f - TitleAdvance / 2.0f,
+									Position.y + Dimensions.y - YOffset + 5.0f,
+									1.0f,
+									Name,
+									TitleFont,
+									*Batch,
+									EG::RGBA16_MidGrey()
+								);
+
 
 			// Try and draw this shiz
 			for(auto& E : Children)
 			{
 				// Print name of child
 				EG::Fonts::PrintText(
-										this->Position.x + X0Offset, 								// X Position
+										Position.x + X0Offset, 								// X Position
 										E->Position.y + 5.0f,										// Y Position
-										this->FontScale,											// Font Scale
+										FontScale,											// Font Scale
 										E->Name + std::string(":"),									// Child Name
-										this->TextFont,												// Font
+										TextFont,												// Font
 										*Batch,														// SpriteBatch
-										this->TextColor												// Font Color
+										TextColor												// Font Color
 									);
 
 				// Print Child contents
@@ -313,24 +425,13 @@ namespace Enjon { namespace GUI {
 		std::vector<GUIElementBase*> Children;
 		EG::Fonts::Font* TextFont;
 		EG::ColorRGBA16 TextColor;
+		float TitlePadding;
 		float FontScale;
 		float X0Offset;
 		float X1Offset;
 		float YOffset;
 		int32_t ElementIndex;
 	};
-
-	inline GUIGroup* AddToGroup(GUIGroup* Group, GUIElementBase* Element)
-	{
-		// Push back into group's children
-		Group->Children.push_back(Element);
-
-		// Set Group as parent of child
-		Element->Parent = Group;
-
-		return Group;
-	}
-
 
 }}
 

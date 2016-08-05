@@ -46,6 +46,9 @@ namespace Enjon { namespace Graphics {
 		Vertex bottomRight;
 	};
 
+	using DrawOption = Enjon::uint32;
+
+
 	inline Enjon::Math::Vec2 RotatePoint(const Enjon::Math::Vec2* Pos, float angle)
 	{
 		Enjon::Math::Vec2 NewVec;
@@ -193,7 +196,17 @@ namespace Enjon { namespace Graphics {
 	// TODO(John)::Might even consider making this strictly POD
 	class SpriteBatch
 	{
+
 	public:
+
+		enum DrawOptions : DrawOption
+		{
+			DEFAULT_DRAW 	= 0x00000000, 
+			BORDER 			= 0x00000001, 
+			SHADOW 			= 0x00000002
+		};
+	
+
 		SpriteBatch();
 		~SpriteBatch();
 
@@ -203,10 +216,11 @@ namespace Enjon { namespace Graphics {
 		void End();
 
 		/* Adds glpyh to spritebatch to be rendered */
-		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture = 0, const ColorRGBA16& color = RGBA16(1.0f), float depth = 0.0f);
+		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture = 0, const ColorRGBA16& color = RGBA16(1.0f), float depth = 0.0f, DrawOption Options = DrawOptions::DEFAULT_DRAW, 
+					EG::ColorRGBA16 BorderColor = EG::RGBA16_White(), float BorderThickness = 1.0f);
 
 		/* Adds glpyh to spritebatch to be rendered with specified rotation */
-		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, CoordinateFormat Format = CoordinateFormat::CARTESIAN);
+		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, CoordinateFormat Format = CoordinateFormat::CARTESIAN, DrawOption Options = DrawOptions::DEFAULT_DRAW);
 
 		/* Adds polygon glyph to spritebatch to be rendered */
 		void AddPolygon(std::vector<Enjon::Math::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color = Enjon::Graphics::RGBA16_White(), float depth = 0.0f, CoordinateFormat = CoordinateFormat::CARTESIAN);
@@ -222,7 +236,6 @@ namespace Enjon { namespace Graphics {
 
 		/* Gets the size of the render batch */
 		inline unsigned int GetRenderBatchesSize() const { return m_renderBatches.size(); }
-
 
 
 	private:

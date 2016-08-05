@@ -47,14 +47,26 @@ namespace Enjon { namespace Graphics {
 		CreateRenderBatches();
 	} 
 
-	void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color /* = ColorRGBA16(255) */, float depth /* = 0.0f ) */ )
+	void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color /* = ColorRGBA16(255) */, float depth /* = 0.0f ) */, DrawOption Options, EG::ColorRGBA16 BorderColor, float BorderThickness)
 	{ 
+		if (Options & DrawOptions::SHADOW)
+		{
+			// Make this a shadow texture
+			m_glyphs.emplace_back(NewGlyph(EM::Vec4(destRect.x + 5.0f, destRect.y - 5.0f, destRect.z, destRect.w), uvRect, texture, depth, EG::SetOpacity(RGBA16_Black(), 0.3f)));
+		}
+
+		if (Options & DrawOptions::BORDER)
+		{
+			// Draw border
+			DrawRectBorder(this, destRect, BorderThickness, BorderColor);
+		}
+
 		// Place back new glyph
 		m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color));
 	}
 
 	/* Adds glpyh to spritebatch to be rendered with specified rotation */
-	void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, Graphics::CoordinateFormat format)
+	void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, Graphics::CoordinateFormat format, DrawOption Options)
 	{
 		// Place back new glyph
 		m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color, angle, format));

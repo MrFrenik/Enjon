@@ -24,11 +24,12 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 		AddFont(Fonts, "WeblySleek_32", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 32));
 		AddFont(Fonts, "WeblySleek_10", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 10));
 		AddFont(Fonts, "WeblySleek_12", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 12));
-		// AddFont(Fonts, "Reduction_10", Fonts::CreateFont("../assets/fonts/Reduction/Reduction.ttf", 10));
-		// AddFont(Fonts, "Reduction_24", Fonts::CreateFont("../assets/fonts/Reduction/Reduction.ttf", 24));
-		// AddFont(Fonts, "VCR_OSD_MONO", Fonts::CreateFont("../assets/fonts/VCR_OSD_MONO/VCR_OSD_MONO.ttf", 14));
-		// AddFont(Fonts, "Villeray_Semilight", Fonts::CreateFont("../assets/fonts/Villeray/Villeray-Semilight.ttf", 10));
-		// AddFont(Fonts, "Villeray_Bold", Fonts::CreateFont("../assets/fonts/Villeray/Villeray-Bold.ttf", 10));
+		AddFont(Fonts, "Reduction_10", Fonts::CreateFont("../assets/fonts/Reduction/Reduction.ttf", 10));
+		AddFont(Fonts, "Reduction_24", Fonts::CreateFont("../assets/fonts/Reduction/Reduction.ttf", 24));
+		AddFont(Fonts, "VCR_OSD_MONO", Fonts::CreateFont("../assets/fonts/VCR_OSD_MONO/VCR_OSD_MONO.ttf", 14));
+		AddFont(Fonts, "Villeray_Semilight", Fonts::CreateFont("../assets/fonts/Villeray/Villeray-Semilight.ttf", 10));
+		AddFont(Fonts, "Villeray_Bold", Fonts::CreateFont("../assets/fonts/Villeray/Villeray-Bold.ttf", 10));
+		AddFont(Fonts, "Arrows7", Fonts::CreateFont("../assets/fonts/Arrows7/Arrows7.ttf", 10));
 
 		// Set to being initialized
 		Initialized = true;

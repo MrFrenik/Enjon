@@ -137,6 +137,7 @@ namespace Enjon { namespace AnimationEditor {
 	EG::SpriteBatch* UIBatch 		= nullptr;
 	EG::SpriteBatch* SceneBatch 	= nullptr;
 	EG::SpriteBatch* BGBatch 		= nullptr;
+	EG::SpriteBatch* UIObjectBatch 	= nullptr;
 
 	EG::Camera2D Camera;
 	EG::Camera2D HUDCamera;
@@ -157,6 +158,9 @@ namespace Enjon { namespace AnimationEditor {
 
 		BGBatch = new EG::SpriteBatch();
 		BGBatch->Init();
+
+		UIObjectBatch = new EG::SpriteBatch();
+		UIObjectBatch->Init();
 
 		Input = Input_Mgr;
 
@@ -218,6 +222,8 @@ namespace Enjon { namespace AnimationEditor {
 			// Give name of button name of current animation
 			b->Text = a.first;
 
+			b->Dimensions = EM::Vec2(160.0f, AnimationSelection.YOffset - 2.0f);
+
 			// Set up on_hover signal
 			b->on_click.connect([&](GUIElementBase* b)
 			{
@@ -239,13 +245,7 @@ namespace Enjon { namespace AnimationEditor {
 
 		// Calculate AnimationSelection's dimension
 		// Set up Group
-		Group.Position = EM::Vec2(0.0f, -400.0f);
-
-		// Add PlayButton to Group
-		GUI::AddToGroup(&Group, &PlayButton);
-		GUI::AddToGroup(&Group, &NextFrame);
-		GUI::AddToGroup(&Group, &PreviousFrame);
-		GUI::AddToGroup(&Group, &InputText);
+		Group.Position = EM::Vec2(0.0f, -200.0f);
 
 		// Set up play button image frames
 		PlayButton.Frames.push_back(EA::GetImageFrame(Frames, "playbuttonup", AnimTextureDir));
@@ -266,6 +266,7 @@ namespace Enjon { namespace AnimationEditor {
 
 		// Set up PlayButton position within the group
 		PlayButton.Position = EM::Vec2(10.0f, 20.0f);
+		PlayButton.Parent = &Group;
 
 		// Set up Scaling Factor
 		PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor 	= 1.0f;
@@ -279,22 +280,18 @@ namespace Enjon { namespace AnimationEditor {
 
 		// Set up InputText position within the group
 		InputText.Position = EM::Vec2(100.0f, 60.0f);
+		InputText.Parent = &Group;
 
 		// Set up InputText AABB
 		// This will be dependent on the size of the text, or it will be static, or it will be dependent on some image frame
 		InputText.AABB.Min = InputText.Position + Group.Position;
 		InputText.AABB.Max = InputText.AABB.Min + EM::Vec2(200.0f, 20.0f);
+		InputText.TextFont = EG::FontManager::GetFont("WeblySleek_12"); 
 
 		// Set up AnimationSelection AABB
 		// Calculate size of button
 		AnimationSelection.AABB.Min = AnimationSelection.Position;
 		AnimationSelection.AABB.Max = AnimationSelection.AABB.Min + AnimationSelection.Dimensions;
-
-		// Add AnimationSelectionGroup to AnimationInfoGroup
-		GUI::AddToGroup(&AnimationInfoGroup, &AnimationSelectionGroup);
-
-		// Add AnimationSelection to group
-		GUI::AddToGroup(&AnimationSelectionGroup, &AnimationSelection);
 
 		// Calculate Group's AABB by its children's AABBs 
 		Group.AABB.Min = Group.Position;
@@ -501,7 +498,8 @@ namespace Enjon { namespace AnimationEditor {
 
 
 		// Set up AnimationPanel Group
-		AnimationPanel.Position = EM::Vec2(100.0f, 0.0f);
+		AnimationPanel.Name = "Animation Editor";
+		AnimationPanel.Position = EM::Vec2(150.0f, 0.0f);
 		// AnimationPanel.TextFont = EG::FontManager::GetFont("WeblySleek");
 		AnimationPanel.AddToGroup(&AnimationSelection, "Animation");
 		// AnimationPanel.AddToGroup(&PreviousFrame, "PreviousFrame");
@@ -545,23 +543,10 @@ namespace Enjon { namespace AnimationEditor {
 		// Set up AABB of Scene Animation
 		EGUI::AnimationElement::AABBSetup(&SceneAnimation);
 
-		// Set up AABB's of AnimationSelection list elements
-		auto Offset = 20.0f;
-		auto Position = AnimationSelection.AABB.Min;
-		auto Dimensions = AnimationSelection.Dimensions;
-		for (auto e : AnimationSelection.List)
-		{
-			auto AABB_e = &e->AABB;
+		InputText.Update();
 
-			// Calculate min
-			AABB_e->Min = EM::Vec2(Position - EM::Vec2(0.0f, Offset));
-
-			// Calculate max
-			AABB_e->Max = AABB_e->Min + EM::Vec2(200.0f, 20.0f);
-
-			// Add to position
-			Position.y -= Offset;
-		}
+		// Update AnimationPanel
+		AnimationPanel.Update();
 
 		// Update input
 		Input->Update();
@@ -703,12 +688,6 @@ namespace Enjon { namespace AnimationEditor {
 				// Scissor out entire info area
 				auto ClipWidth = 250.0f;
 				auto ClipHeight = 350.0f;
-				// glScissor(
-				// 			HUDCamera.GetPosition().x + 2.0f, 
-				// 			HUDCamera.GetPosition().y + SCREENHEIGHT - ClipHeight, 
-				// 			ClipWidth, 
-				// 			ClipHeight
-				// 		);
 
 				EM::Vec2 TitleBarBL(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 5.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipYOffset - Difference);
 
@@ -963,167 +942,23 @@ namespace Enjon { namespace AnimationEditor {
 										EG::RGBA16_White()
 									);
 
-				if (AnimationSelection.State)
-				{
-					YOffset = AnimationSelectionYOffset;
-					YOffset += 5.0f;
-					float XPadding = 5.0f;
-					auto Amount = AnimationSelection.List.size();
-					auto GroupWidth = 185.0f;
-
-					// Draw shadow for group for now
-					UIBatch->Add(
-									EM::Vec4(
-												HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset - XPadding + 5.0f,
-												HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset - 20.0f * Amount - 5.0f, 
-												GroupWidth, 
-												20.0f * Amount
-											),
-									EM::Vec4(0, 0, 1, 1),
-									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
-									EG::SetOpacity(EG::RGBA16_Black(), 0.4f)
-								);
-
-					// Draw border for group for now
-					EG::DrawRectBorder	(
-											UIBatch, 
-											EM::Vec4(
-														HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset - XPadding,
-														HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset - 20.0f * Amount, 
-														GroupWidth, 
-														20.0f * Amount
-													),
-											2.0f,
-											EG::RGBA16_DarkGrey()
-										);
-
-					auto F = EG::FontManager::GetFont("WeblySleek_10");
-					for (auto i = 0; i < Amount; ++i)
-					{
-						YOffset += 20.0f;
-
-						// Draw AABB of list element
-						UIBatch->Add(
-										EM::Vec4(
-													AnimationSelection.List.at(i)->AABB.Min,
-													AnimationSelection.List.at(i)->AABB.Max - AnimationSelection.List.at(i)->AABB.Min - EM::Vec2(15.0f, 0.0f)
-												),
-										EM::Vec4(0, 0, 1, 1),
-										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
-										AnimationSelection.List.at(i)->Color	
-									);
-
-						EG::Fonts::PrintText(	
-												HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset + XPadding, 
-												HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset + 6.0f, scale, 
-												AnimationSelection.List.at(i)->Text, 
-												F, 
-												*UIBatch, 
-												AnimationSelection.List.at(i)->TextColor	
-											);
-
-						EG::DrawRectBorder	(
-												UIBatch, 
-												EM::Vec4(
-															HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset - XPadding,
-															HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, 
-															GroupWidth, 
-															20.0f
-														),
-												1.0f,
-												EG::RGBA16(0.06f, 0.06f, 0.06f, 1.0f)
-											);
-					}
-				}
 
 				// Draw AnimationPanel
 				AnimationPanel.Draw(UIBatch);
 
+				// Draw InputText
+				InputText.Draw(UIBatch);
 
 			}
 			UIBatch->End();
 			UIBatch->RenderBatch();
-			glDisable(GL_SCISSOR_TEST);
 
-			caret_count += 0.1f;
-
-			UIBatch->Begin();
-			{
-				// Print out text box's text w/ shadow
-				// Could totally load these styles from JSON, which would be a cool way to add themes to the editor
-				auto Padding = EM::Vec2(5.0f, 5.0f);
-
-				{
-					auto ITextHeight = InputText.AABB.Max.y - InputText.AABB.Min.y; // InputTextHeight
-					auto TextHeight = ITextHeight - 20.0f;
-					EG::Fonts::PrintText(	
-											InputText.Position.x + InputText.Parent->Position.x + Padding.x, 
-											InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 
-											InputText.Text, 
-											EG::FontManager::GetFont("WeblySleek"), 
-											*UIBatch, 
-											EG::RGBA16_LightGrey()
-										);
-				}
-				if (caret_count >= 4.0f)
-				{
-					caret_count = 0.0f;
-					caret_on = !caret_on;	
-				}
-
-				if (KeyboardFocus && caret_on)
-				{
-					// Print out caret, make it a yellow line
-					// Need to get text from InputText
-					auto CurrentFont = EG::FontManager::GetFont("WeblySleek");
-					auto scale = 1.0f;
-					auto Padding = EM::Vec2(5.0f, 5.0f);
-					auto Text = InputText.Text;
-					auto XAdvance = InputText.Position.x + InputText.Parent->Position.x + Padding.x;
-					auto ITextHeight = InputText.AABB.Max.y - InputText.AABB.Min.y; // InputTextHeight
-					auto TextHeight = ITextHeight - 20.0f;
-
-					// Get xadvance of all characters
-					for (auto i = 0; i < InputText.CursorIndex; ++i)
-					{
-						XAdvance += EG::Fonts::GetAdvance(InputText.Text[i], CurrentFont, scale);
-					}
-					UIBatch->Add(
-									EM::Vec4(XAdvance + 0.2f, InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
-									EM::Vec4(0, 0, 1, 1),
-									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-									EG::RGBA16_LightGrey()
-								);
-				}
-			}
-			UIBatch->End();
-			UIBatch->RenderBatch();
 		}
-
 		TextShader->Unuse();
-
-		BasicShader->Use();
-		BasicShader->SetUniformMat4("view", HUDCamera.GetCameraMatrix());
-		{
-			UIBatch->Begin();
-			{
-				UIBatch->Add(
-								EM::Vec4(
-											AnimationSelection.AABB.Max - EM::Vec2(18.0f, 18.0f), 
-											EM::Vec2(16, 16)
-									     ),
-								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../Assets/Textures/gui_down_arrow.png").id,
-								EG::RGBA16_White()	
-							);
-			}
-			UIBatch->End();
-			UIBatch->RenderBatch();
-		}
-		BasicShader->Unuse();
 	
 		return true;
 	}
+
 
 
 	bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
@@ -1422,9 +1257,7 @@ namespace Enjon { namespace AnimationEditor {
 	    		SelectedGUIElement = InputText;
 	    		KeyboardFocus = InputText;
 	    		MouseFocus = nullptr; 			// The way to do this eventually is set all of these focuses here to this element but define whether or not it can move
-	    		auto P = MousePos;
-	    		CameraManager::GetCamera("HUDCamera")->ConvertScreenToWorld(P);
-	    		InputText->on_click.emit(P);
+	    		InputText->on_click.emit(MousePos.x);
 	    	}
 
 	    	else if (MouseOverAnimation)
@@ -1500,6 +1333,9 @@ namespace Enjon { namespace AnimationEditor {
 
 		else if (KeyboardFocus == nullptr)
 		{
+			// Switch off input text
+			InputText->KeyboardInFocus = false;
+
 			if (Input->IsKeyDown(SDLK_e))
 			{
 				Camera->SetScale(Camera->GetScale() + 0.05f);
