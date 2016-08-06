@@ -47,6 +47,11 @@ namespace Enjon { namespace GUI {
 			
 		}
 
+		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		{
+			return true;
+		}
+
 		void Draw(EG::SpriteBatch* TB)
 		{
 

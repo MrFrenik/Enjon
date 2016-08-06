@@ -54,6 +54,10 @@ namespace Enjon { namespace GUI {
 			
 		}
 
+		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		{
+			return true;		
+		}
 
 		void Draw(EG::SpriteBatch* TB)
 		{
@@ -114,6 +118,11 @@ namespace Enjon { namespace GUI {
 			
 		}
 
+		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		{
+			return true;	
+		}
+
 		void Draw(EG::SpriteBatch* Batch)
 		{
 			// If null
@@ -172,6 +181,7 @@ namespace Enjon { namespace GUI {
 			this->Value = 0.0f;
 			this->Step = 0.1f;
 			this->Dimensions = EM::Vec2(145.0f, 18.0f);
+			this->Depth = 0.0f;
 
 			ValueUp.Dimensions 		= EM::Vec2(20.0f, 18.0f);
 			ValueDown.Dimensions 	= EM::Vec2(20.0f, 18.0f);
@@ -203,6 +213,69 @@ namespace Enjon { namespace GUI {
 				// Set value to text
 				Value = std::atof(ValueText.Text.c_str());
 			});
+
+			this->check_children.connect([&](EI::InputManager* Input, EG::Camera2D* Camera)
+			{
+			    auto MousePos = Input->GetMouseCoords();
+			    Camera->ConvertScreenToWorld(MousePos);
+
+			    // Check for collision with ValueText
+			    auto MouseOverText = EP::AABBvsPoint(&ValueText.AABB, MousePos);
+			    if (MouseOverText)
+			    {
+			    	std::cout << "Over text" << std::endl;
+			    	ValueText.on_hover.emit();	
+			    } 
+			    else
+			    {
+			    	if (ValueText.HoverState = HoveredState::ON_HOVER) ValueText.off_hover.emit();
+			    }
+			});
+		}
+
+		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		{
+		    SDL_Event event;
+		    while (SDL_PollEvent(&event)) 
+		    {
+		        switch (event.type) 
+		        {
+					case SDL_KEYUP:
+						Input->ReleaseKey(event.key.keysym.sym); 
+						break;
+					case SDL_KEYDOWN:
+						Input->PressKey(event.key.keysym.sym);
+						break;
+					case SDL_MOUSEBUTTONDOWN:
+						Input->PressKey(event.button.button);
+						break;
+					case SDL_MOUSEBUTTONUP:
+						Input->ReleaseKey(event.button.button);
+						break;
+					case SDL_MOUSEMOTION:
+						Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+						break;
+					default:
+						break;
+				}
+		    }
+
+		    auto MousePos = Input->GetMouseCoords();
+		    Camera->ConvertScreenToWorld(MousePos);
+
+		    // Check for collision with ValueText
+		    auto MouseOverText = EP::AABBvsPoint(&ValueText.AABB, MousePos);
+		    if (MouseOverText)
+		    {
+		    	ValueText.on_hover.emit();	
+		    } 
+		    else
+		    {
+		    	if (ValueText.HoverState = HoveredState::ON_HOVER) ValueText.off_hover.emit();
+		    }
+
+
+			return false;
 		}
 
 		void Draw(EG::SpriteBatch* Batch)
@@ -337,13 +410,22 @@ namespace Enjon { namespace GUI {
 					this->Color = EG::RGBA16(0.08f, 0.08f, 0.08f, 1.0f);
 					this->BorderColor = EG::SetOpacity(EG::RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
 					this->State = ButtonState::ACTIVE;
+					this->Depth = 1.0f;
 				} 
 				else
 				{
 					this->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 					this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 					this->State = ButtonState::INACTIVE;
+					this->Depth = 0.0f;
 				} 
+			});
+
+			// Set up lose focus
+			this->lose_focus.connect([&]()
+			{
+				// Set to inactive
+				if (State) this->on_click.emit();
 			});
 		}
 
@@ -362,6 +444,98 @@ namespace Enjon { namespace GUI {
 				C->AABB.Max = C->AABB.Min + C->Dimensions;
 				index++;
 			}
+		}
+
+		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		{
+		    SDL_Event event;
+		    while (SDL_PollEvent(&event)) 
+		    {
+		        switch (event.type) 
+		        {
+					case SDL_KEYUP:
+						Input->ReleaseKey(event.key.keysym.sym); 
+						break;
+					case SDL_KEYDOWN:
+						Input->PressKey(event.key.keysym.sym);
+						break;
+					case SDL_MOUSEBUTTONDOWN:
+						Input->PressKey(event.button.button);
+						break;
+					case SDL_MOUSEBUTTONUP:
+						Input->ReleaseKey(event.button.button);
+						break;
+					case SDL_MOUSEMOTION:
+						Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+						break;
+					default:
+						break;
+				}
+		    }
+
+		    auto MousePos = Input->GetMouseCoords();
+		    Camera->ConvertScreenToWorld(MousePos);
+
+		    // Check list components for being hovered over
+			static EGUI::GUITextButton* ListElement = nullptr;
+			if (State == ButtonState::ACTIVE)
+			{
+				bool Found = false;
+				for (auto i = 0; i < List.size(); ++i)
+				{
+					auto e = List.at(i);
+
+					if (EP::AABBvsPoint(&e->AABB, MousePos))
+					{
+						// If previously assigned but now not the same, then emit off hover
+						if (ListElement && ListElement != e)
+						{
+							if (ListElement->HoverState == HoveredState::ON_HOVER) ListElement->off_hover.emit();
+						}
+
+						// Assign list element
+						ListElement = e;
+
+						// If not hoverstate active, then emit
+						if (ListElement->HoverState == HoveredState::OFF_HOVER) 
+						{
+							ListElement = e;
+							e->on_hover.emit();
+						}
+
+						// Found, so break out of loop
+						Found = true;
+						break;
+					}
+				}
+				// Nothing was selected but previous list element assigned
+				if (!Found && ListElement)
+				{
+					ListElement->off_hover.emit();
+					ListElement = nullptr;
+					return false;
+				}
+			}
+			// If there was something, need to get rid of it
+			else if (ListElement)
+			{
+				ListElement->off_hover.emit();
+				ListElement = nullptr;
+			}
+
+			if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
+		    {
+		    	// Do AABB test with AnimationSelection List Element
+		    	if (ListElement)
+		    	{
+		    		ListElement->on_click.emit(ListElement);
+		    		ListElement->off_hover.emit();
+		    		ListElement = nullptr;
+		    		return true;
+		    	}
+		    }
+
+		    return false;
 		}
 
 		void Draw(EG::SpriteBatch* Batch)
@@ -427,7 +601,7 @@ namespace Enjon { namespace GUI {
 				// Draw each child
 				for(auto C : this->List)
 				{
-					C->Depth = 1.0f;
+					C->Depth = this->Depth + 1.0f;
 					C->Draw(Batch);
 				}
 
@@ -533,6 +707,11 @@ namespace Enjon { namespace GUI {
 		void Draw(EG::SpriteBatch* TB)
 		{
 			
+		}
+
+		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		{
+			return true;	
 		}
 
 		EG::ColorRGBA16 ActiveColor;

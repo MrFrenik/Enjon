@@ -7,6 +7,7 @@
 #include "Graphics/CursorManager.h"
 #include "GUI/GUIAnimationElement.h"
 #include "Physics/AABB.h"
+#include "Utils/Errors.h"
 #include "Defines.h"
 
 /*-- IsoARPG includes --*/
@@ -37,14 +38,16 @@ namespace Enjon { namespace GUI {
 			Elements[S] = E;
 		}
 
-		GUIElementBase* Get(const std::string S)
+		template <typename T>
+		T* Get(const std::string S)
 		{
 			auto search = Elements.find(S);
 			if (search != Elements.end())
 			{
-				return search->second;
+				return static_cast<T*>(search->second);
 			}
 
+			EU::FatalError(std::string("GUIElement does not exist: ") + S);
 			return nullptr;
 		}
 	}
@@ -76,9 +79,10 @@ namespace Enjon { namespace AnimationEditor {
 	using namespace Graphics;
 
 	/*-- Function Delcarations --*/
-	bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera);
+	bool ProcessInput(EI::InputManager* Input);
 	void CalculateAABBWithParent(EP::AABB* A, GUIButton* Button);
 	bool IsModifier(unsigned int Key);
+	bool HasChildren(GUIElementBase* E);
 
 	/*-- Constants --*/
 	const std::string AnimTextureDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png");
@@ -498,6 +502,7 @@ namespace Enjon { namespace AnimationEditor {
 		GUIManager::Add("ToggleOnionSkin", &ToggleOnionSkin);
 		GUIManager::Add("AnimationSelection", &AnimationSelection);
 		GUIManager::Add("Delay", &AnimationDelay);
+		GUIManager::Add("AnimationPanel", &AnimationPanel);
 
 
 		// Set up AnimationPanel Group
@@ -537,7 +542,7 @@ namespace Enjon { namespace AnimationEditor {
 		t += TimeIncrement * TimeScale;
 
 		// Check for quit condition
-		IsRunning = ProcessInput(Input, &Camera);
+		IsRunning = ProcessInput(Input);
 
 		// Update cameras
 		Camera.Update();
@@ -962,9 +967,138 @@ namespace Enjon { namespace AnimationEditor {
 		return true;
 	}
 
+	bool ProcessInput(EI::InputManager* Input)
+	{
+	    SDL_Event event;
+	    while (SDL_PollEvent(&event)) 
+	    {
+	        switch (event.type) 
+	        {
+	            case SDL_QUIT:
+	                return false;
+	                break;
+				case SDL_KEYUP:
+					Input->ReleaseKey(event.key.keysym.sym); 
+					break;
+				case SDL_KEYDOWN:
+					Input->PressKey(event.key.keysym.sym);
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					Input->PressKey(event.button.button);
+					break;
+				case SDL_MOUSEBUTTONUP:
+					Input->ReleaseKey(event.button.button);
+					break;
+				case SDL_MOUSEMOTION:
+					Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+					break;
+				default:
+					break;
+			}
+	    }
+
+	    if (Input->IsKeyPressed(SDLK_ESCAPE))
+	    {
+	    	return false;
+	    }
 
 
-	bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		// Just use group for now to see if shit gon' get cray cray
+		auto G = GUIManager::Get<GUIGroup>("AnimationPanel");
+		static GUIElementBase* E = nullptr;
+		static GUIElementBase* MouseFocus = nullptr;
+
+		// If Mouse Focus
+		bool ProcessMouse = false;
+		if (MouseFocus)
+		{
+			// Check if mouse focus is done processing itself
+			ProcessMouse = MouseFocus->ProcessInput(Input, CameraManager::GetCamera("HUDCamera"));
+
+			// If done, then return from function
+			if (ProcessMouse) 
+			{
+				MouseFocus = nullptr;
+				return true;
+			}
+		}
+
+		// Get Mouse Coords
+		auto MouseCoords = Input->GetMouseCoords();
+		CameraManager::GetCamera("HUDCamera")->ConvertScreenToWorld(MouseCoords);
+
+		bool ChildFound = false;
+		for (auto C : G->Children)
+		{
+			auto AABB = &C->AABB;
+
+			C->check_children.emit(Input, CameraManager::GetCamera("HUDCamera"));
+
+			if (EP::AABBvsPoint(AABB, MouseCoords))
+			{
+				// Set to true
+				ChildFound = true;
+
+				// Set on hover
+				C->on_hover.emit();
+
+				// If clicked while hovering
+				if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
+				{
+					C->on_click.emit();
+
+					if (MouseFocus == nullptr) 
+					{
+						std::cout << "Gaining Focus: " << C->Name << std::endl;
+						MouseFocus = C;
+					}
+
+					// If not mouse focus
+					else if (MouseFocus != C && C->Depth >= MouseFocus->Depth && !ProcessMouse) 
+					{
+						std::cout << "Switching Focus: " << MouseFocus->Name << " to " << C->Name << std::endl;
+
+						// Lose focus
+						MouseFocus->lose_focus.emit();
+	
+						// Set focus	
+						MouseFocus = C;
+					}
+
+				}
+			}
+
+			else
+			{
+				C->off_hover.emit();
+			}
+		}
+
+
+		// If no children are found
+		if (!ChildFound)
+		{
+			std::cout << "No child..." << std::endl;
+
+			if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
+			{
+				if (MouseFocus) 
+				{
+					MouseFocus->lose_focus.emit();
+					MouseFocus = nullptr;		
+				}
+			}
+		}
+
+
+
+
+		return true;
+	}
+
+
+	/*
+	bool ProcessInput(EI::InputManager* Input)
 	{
 		static bool WasHovered = false;
 		static EM::Vec2 MouseFrameOffset(0.0f);
@@ -1015,21 +1149,6 @@ namespace Enjon { namespace AnimationEditor {
 				default:
 					break;
 			}
-	    }
-
-	    if (SelectedGUIElement)
-	    {
-	    	switch (SelectedGUIElement->Type)
-	    	{
-	    		case GUIType::BUTTON:
-	    			// std::cout << "Selected Button!" << std::endl;
-	    			break;
-	    		case GUIType::TEXT_BOX:
-	    			// std::cout << "Selected TextBox!" << std::endl;
-	    			break;
-	    		default:
-	    			break;
-	    	}
 	    }
 
 		// Get Mouse Position
@@ -1461,6 +1580,7 @@ namespace Enjon { namespace AnimationEditor {
 
 		return true;
 	}
+	*/
 
 	void CalculateAABBWithParent(EP::AABB* A, GUIButton* Button)
 	{
@@ -1484,6 +1604,15 @@ namespace Enjon { namespace AnimationEditor {
 		return true;
 
 		else return false; 
+	}
+
+	bool HasChildren(GUIElementBase* E)
+	{
+		if (E->Type == GUIType::DROP_DOWN_BUTTON ||
+			E->Type == GUIType::GROUP)
+		return true;
+
+		return false;
 	}
 
 }}

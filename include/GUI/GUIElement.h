@@ -6,15 +6,18 @@
 #include "Graphics/Color.h"
 #include "Graphics/Font.h"
 #include "Graphics/SpriteBatch.h"
+#include "Graphics/Camera2D.h"
 #include "Graphics/FontManager.h"
 #include "Graphics/CursorManager.h"
 #include "IO/ResourceManager.h"
+#include "IO/InputManager.h"
 #include "Math/Vec2.h"
 #include "Math/Vec4.h"
 #include "Physics/AABB.h"
-
 #include "GUI/Signal.h"
 #include "GUI/Property.h"
+
+#include <SDL2/SDL.h>
 
 
 #include <vector>
@@ -33,6 +36,7 @@ namespace Enjon { namespace GUI {
 		virtual void Init() = 0;
 		virtual void Update() = 0;
 		virtual void Draw(EG::SpriteBatch* TextBatch) = 0;
+		virtual bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera) = 0;
 
 		GUIElementBase* Parent;
 		EM::Vec2 Position;
@@ -47,6 +51,8 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<> on_click;
 		EGUI::Signal<> on_hover;
 		EGUI::Signal<> off_hover;
+		EGUI::Signal<> lose_focus;
+		EGUI::Signal<EI::InputManager*, EG::Camera2D*> check_children;
 		EG::ColorRGBA16 Color;
 		float Depth;
 	};
@@ -62,6 +68,16 @@ namespace Enjon { namespace GUI {
 		void Draw(EG::SpriteBatch* Batch)
 		{
 			static_cast<T*>(this)->Draw(Batch);
+		}
+
+		void Update()
+		{
+			static_cast<T*>(this)->Update();
+		}
+
+		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		{
+			return static_cast<T*>(this)->ProcessInput(Input, Camera);
 		}
 	};
 
@@ -255,6 +271,11 @@ namespace Enjon { namespace GUI {
 		void Init()
 		{}
 
+		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		{
+			return true;
+		}
+
 		ButtonState State;
 		HoveredState HoverState;
 		std::string Text;
@@ -356,6 +377,11 @@ namespace Enjon { namespace GUI {
 				C->Update();
 				index++;
 			}
+		}
+
+		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		{
+			return true;			
 		}
 
 		void Draw(EG::SpriteBatch* Batch)
