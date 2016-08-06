@@ -167,7 +167,8 @@ namespace Enjon { namespace GUI {
 	};
 
 	// Value Text Box Button (Acts as a button group, which maybe would be better)
-	struct GUIValueButton : GUIElement<GUIValueButton>
+	template <typename T>
+	struct GUIValueButton : GUIElement<GUIValueButton<T>>
 	{
 		GUIValueButton() 
 		{ 
@@ -178,16 +179,21 @@ namespace Enjon { namespace GUI {
 			this->State = ButtonState::INACTIVE;
 			this->HoverState = HoveredState::OFF_HOVER;
 
-			this->Value = 0.0f;
-			this->Step = 0.1f;
+			this->Value = 0;
+			this->Step = 1;
+			this->MaxValue = 10;
+			this->MinValue = 0;
 			this->Dimensions = EM::Vec2(145.0f, 18.0f);
 			this->Depth = 0.0f;
+			this->JustFocused = false;
+			this->LoopValues = false;
 
-			ValueUp.Dimensions 		= EM::Vec2(20.0f, 18.0f);
-			ValueDown.Dimensions 	= EM::Vec2(20.0f, 18.0f);
+			ValueUp.Dimensions 		= EM::Vec2(16.0f, 16.0f);
+			ValueDown.Dimensions 	= EM::Vec2(16.0f, 16.0f);
 			ValueText.Dimensions 	= EM::Vec2(85.0f, 18.0f);
 
 			ValueText.Text = "0.50";
+			ValueText.MaxStringLength = 10;
 
 			// These aren't working...
 			ValueUp.Parent 		= this;
@@ -197,21 +203,64 @@ namespace Enjon { namespace GUI {
 			// Set up connect for Value Up
 			this->ValueUp.on_click.connect([&]()
 			{
+				// Get value of ValueText
+				auto V = std::atof(ValueText.Text.c_str());
+
 				// Value goes up
-				Value += Step;
+				V += Step;
+
+				if (V > MaxValue) 
+				{ 
+					if (LoopValues) V = MinValue;
+					else V = MaxValue; 
+				}
+
+				std::cout << "Value: " << V << ", Step: " << Step << std::endl;
+
+				// Reset value and reset string
+				Value = static_cast<T>(V);
+				SetText();
 			});
 
 			// Set up connect for Value Down
 			this->ValueDown.on_click.connect([&]()
 			{
+				// Get value of ValueText
+				auto V = std::atof(ValueText.Text.c_str());
+
 				// Value goes up
-				Value -= Step;
+				V -= Step;
+
+				if (V < MinValue) 
+				{ 
+					if (LoopValues) V = MaxValue;
+					else V = MinValue; 
+				}
+
+				// Reset value and reset string
+				Value = static_cast<T>(V);
+				SetText();
 			});
 
 			this->ValueText.on_enter.connect([&]()
 			{
 				// Set value to text
-				Value = std::atof(ValueText.Text.c_str());
+				auto Val = std::atof(ValueText.Text.c_str());
+				Value = static_cast<T>(Val);
+			});
+
+			this->lose_focus.connect([&]()
+			{
+				// Turn ValueText caret
+				ValueText.lose_focus.emit();
+
+				// Turn off just focused
+				JustFocused = false;
+			});
+
+			this->on_click.connect([&]()
+			{
+				JustFocused = true;
 			});
 
 			this->check_children.connect([&](EI::InputManager* Input, EG::Camera2D* Camera)
@@ -223,7 +272,6 @@ namespace Enjon { namespace GUI {
 			    auto MouseOverText = EP::AABBvsPoint(&ValueText.AABB, MousePos);
 			    if (MouseOverText)
 			    {
-			    	std::cout << "Over text" << std::endl;
 			    	ValueText.on_hover.emit();	
 			    } 
 			    else
@@ -233,8 +281,16 @@ namespace Enjon { namespace GUI {
 			});
 		}
 
+		void SetText()
+		{
+			ValueText.Text = std::to_string(Value.get());	
+		}
+
 		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		{
+			unsigned int CurrentKey = 0;
+			char CurrentChar = 0;
+
 		    SDL_Event event;
 		    while (SDL_PollEvent(&event)) 
 		    {
@@ -242,9 +298,11 @@ namespace Enjon { namespace GUI {
 		        {
 					case SDL_KEYUP:
 						Input->ReleaseKey(event.key.keysym.sym); 
+						CurrentKey = 0;
 						break;
 					case SDL_KEYDOWN:
 						Input->PressKey(event.key.keysym.sym);
+						CurrentKey = event.key.keysym.sym;
 						break;
 					case SDL_MOUSEBUTTONDOWN:
 						Input->PressKey(event.button.button);
@@ -255,6 +313,7 @@ namespace Enjon { namespace GUI {
 					case SDL_MOUSEMOTION:
 						Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 						break;
+					case SDL_MOUSEWHEEL:
 					default:
 						break;
 				}
@@ -274,6 +333,78 @@ namespace Enjon { namespace GUI {
 		    	if (ValueText.HoverState = HoveredState::ON_HOVER) ValueText.off_hover.emit();
 		    }
 
+		    // Check if over value up
+		    auto MouseOverValueUp = EP::AABBvsPoint(&ValueUp.AABB, MousePos);
+		    if (MouseOverValueUp)
+		    {
+		    	ValueUp.on_hover.emit();
+		    }
+
+		    // Check if over value down
+		    auto MouseOverValueDown = EP::AABBvsPoint(&ValueDown.AABB, MousePos);
+		    if (MouseOverValueDown)
+		    {
+		    	ValueDown.on_hover.emit();
+		    }
+
+
+		    if (Input->IsKeyPressed(SDL_BUTTON_LEFT) || JustFocused)
+		    {
+		    	if (JustFocused) JustFocused = false;
+
+		    	if (MouseOverText)
+		    	{
+		    		ValueText.on_click.emit(MousePos.x);
+		    	}
+		    	else ValueText.lose_focus.emit();
+
+		    	if (MouseOverValueUp)
+		    	{
+		    		ValueUp.on_click.emit();
+		    		return true;
+		    	}
+
+		    	if (MouseOverValueDown)
+		    	{
+		    		ValueDown.on_click.emit();
+		    		return true;
+		    	}
+
+		    }
+
+		    // Text Input
+			if (ValueText.KeyboardInFocus)
+			{
+				auto str = ValueText.GetNumericString(Input);
+
+				// Check for modifiers first
+				if (!ValueText.IsModifier(str[0]))
+				{
+					if (Input->IsKeyPressed(SDLK_BACKSPACE)) ValueText.on_backspace.emit();
+					
+					else if (Input->IsKeyPressed(SDLK_LEFT))
+					{
+						if (ValueText.CursorIndex > 0) ValueText.CursorIndex--;
+					}
+				
+					else if (Input->IsKeyPressed(SDLK_RIGHT))
+					{
+						if (ValueText.CursorIndex < ValueText.Text.length()) ValueText.CursorIndex++;
+					}
+
+					else if (Input->IsKeyPressed(SDLK_PERIOD))
+					{
+						if (ValueText.Text.find('.') == std::string::npos) ValueText.on_keyboard.emit(".");
+					}
+
+					else if (Input->IsKeyPressed(SDLK_RETURN))
+					{
+						ValueText.on_enter.emit();
+					}
+			
+					else if (str.compare("") != 0) ValueText.on_keyboard.emit(str);
+				}
+			}
 
 			return false;
 		}
@@ -281,15 +412,6 @@ namespace Enjon { namespace GUI {
 		void Draw(EG::SpriteBatch* Batch)
 		{
 			// Draw Value Up
-			Batch->Add(
-						EM::Vec4(ValueText.AABB.Min, ValueText.AABB.Max - ValueText.AABB.Min),
-						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						ValueText.Color, 
-						0.0f, 
-						EG::SpriteBatch::DrawOptions::BORDER, 
-						EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f)					
-					);
 			
 			// Draw Text Box
 			ValueText.Draw(Batch);
@@ -344,24 +466,32 @@ namespace Enjon { namespace GUI {
 			// Update positions and AABB of Value Text
 			ValueText.Position = Position;
 			ValueText.AABB.Min = ValueText.Position;
-			ValueText.AABB.Max = ValueText.AABB.Min + ValueText.Dimensions;	
+			ValueText.AABB.Max = ValueText.AABB.Min + ValueText.Dimensions;
 
-			ValueUp.Position = EM::Vec2(Position.x + ValueText.Dimensions.x, Position.y);
+			ValueUp.Position = EM::Vec2(Position.x + ValueText.Dimensions.x + 3.0f, Position.y + 1.0f);
 			ValueUp.AABB.Min = ValueUp.Position;
 			ValueUp.AABB.Max = ValueUp.AABB.Min + ValueUp.Dimensions;	
 
-			ValueDown.Position = EM::Vec2(ValueUp.Position.x + ValueUp.Dimensions.x, Position.y);
+			ValueDown.Position = EM::Vec2(ValueUp.Position.x + ValueUp.Dimensions.x + 2.0f, Position.y + 1.0f);
 			ValueDown.AABB.Min = ValueDown.Position;
 			ValueDown.AABB.Max = ValueDown.AABB.Min + ValueDown.Dimensions;	
+
+			// Call update on Input Text
+			ValueText.Update();
 		}
 
 		void Init() {}
 
-		float Value;
-		float Step;
+		Property<T> Value; 
+		// T Value;
+		T Step;
+		T MaxValue;
+		T MinValue;
 		GUIButton ValueUp;
 		GUIButton ValueDown;
 		GUITextBox ValueText;
+		uint32_t LoopValues;
+
 	};
 
 	// DropDownMenuButton

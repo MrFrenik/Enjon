@@ -98,27 +98,27 @@ namespace Enjon { namespace AnimationEditor {
 	////////////////////////////////
 	// ANIMATION EDITOR ////////////
 
-	GUIGroup 			Group;
-	GUIGroup			AnimationPanel;
-	GUIGroup 			AnimationInfoGroup;
-	GUIGroup 			AnimationSelectionGroup;
-	GUIGroup			PlayerAnimationGroup;	
-	GUIGroup			AnimationWidget;
-	GUIButton 			PlayButton;
-	GUIButton 			NextFrame;
-	GUIButton 			PreviousFrame;
-	GUIButton 			OffsetUp;
-	GUIButton 			OffsetDown;
-	GUIButton 			OffsetLeft;
-	GUIButton 			OffsetRight;
-	GUIButton 			DelayUp;
-	GUIButton 			DelayDown;
-	GUIValueButton		AnimationFrame;
-	GUIValueButton		AnimationDelay;
-	GUITextBox 			InputText;
-	GUIRadialButton		ToggleOnionSkin;
-	GUIDropDownButton 	AnimationSelection;	
-	GUIAnimationElement SceneAnimation;
+	GUIGroup 					Group;
+	GUIGroup					AnimationPanel;
+	GUIGroup 					AnimationInfoGroup;
+	GUIGroup 					AnimationSelectionGroup;
+	GUIGroup					PlayerAnimationGroup;	
+	GUIGroup					AnimationWidget;
+	GUIButton 					PlayButton;
+	GUIButton 					NextFrame;
+	GUIButton 					PreviousFrame;
+	GUIButton 					OffsetUp;
+	GUIButton 					OffsetDown;
+	GUIButton 					OffsetLeft;
+	GUIButton 					OffsetRight;
+	GUIButton 					DelayUp;
+	GUIButton 					DelayDown;
+	GUITextBox 					InputText;
+	GUIRadialButton				ToggleOnionSkin;
+	GUIDropDownButton 			AnimationSelection;	
+	GUIAnimationElement 		SceneAnimation;
+	GUIValueButton<float>		AnimationDelay;
+	GUIValueButton<uint32_t>	AnimationFrame;
 	
 	
 	Atlas atlas;
@@ -226,8 +226,6 @@ namespace Enjon { namespace AnimationEditor {
 			// Give name of button name of current animation
 			b->Text = a.first;
 
-			// b->Dimensions = EM::Vec2(160.0f, AnimationSelection.YOffset - 2.0f);
-
 			// Set up on_hover signal
 			b->on_click.connect([&](GUIElementBase* b)
 			{
@@ -241,6 +239,13 @@ namespace Enjon { namespace AnimationEditor {
 				AnimationSelection.on_click.emit();
 
 				AnimationSelection.CalculateDimensions();
+
+				AnimationFrame.MaxValue = SceneAnimation.CurrentAnimation->Frames.size() - 1;
+				AnimationFrame.Value = 0;
+				AnimationFrame.SetText();
+
+				AnimationDelay.Value = SceneAnimation.CurrentAnimation->Frames.at(0).Delay;
+				AnimationDelay.SetText();
 			});
 
 			// Push back into drop down list
@@ -326,165 +331,27 @@ namespace Enjon { namespace AnimationEditor {
 			}
 		});
 
-		// Set up NextFrame's signal
-		NextFrame.on_click.connect([&]()
+		// Additional on click properties for buttons
+		AnimationFrame.on_click.connect([&]()
 		{
-			// If playing, then stop the time
-			if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
-
-			PlayButton.State = ButtonState::INACTIVE;
-
-			// Get Current Animation, which in this case is just Test
-			auto CurrentIndex = SceneAnimation.CurrentIndex;
-			SceneAnimation.CurrentIndex = (CurrentIndex + 1) % SceneAnimation.CurrentAnimation->TotalFrames;
-
-			// And set t = -1.0f for safety
-			t = -1.0f;
+			if (PlayButton.State) PlayButton.on_click.emit();
 		});
 
-		// Set up PreviousFrame's signal
-		PreviousFrame.on_click.connect([&]()
+		AnimationDelay.on_click.connect([&]()
 		{
-			// If playing, then stop the time
-			if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
-
-			PlayButton.State = ButtonState::INACTIVE;
-
-			// Get Current Animation, which in this case is just Test
-			auto CurrentIndex = SceneAnimation.CurrentIndex;
-			if (CurrentIndex > 0) SceneAnimation.CurrentIndex -= 1;
-
-			// Bounds check
-			else SceneAnimation.CurrentIndex = SceneAnimation.CurrentAnimation->TotalFrames - 1;
-
-			// And set t = -1.0f for safety
-			t = -1.0f;
+			if (PlayButton.State) PlayButton.on_click.emit();
 		});
 
-		// Set up OffsetUp's signal
-		OffsetUp.on_click.connect([&]()
+		AnimationDelay.lose_focus.connect([&]()
 		{
-			// If playing, then stop the time
-			if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
-
-			PlayButton.State = ButtonState::INACTIVE;
-
-			// Get Current Frame
-			auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
-
-			// Get CurrentFrame's YOffset
-			auto YOffset = CurrentFrame->Offsets.y;
-
-			// Increment by arbitrary amount...
-			YOffset += 1.0f;
-
-			// Reset offset
-			CurrentFrame->Offsets.y = YOffset;
+			// Set current frame's delay to this value
+			SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay = AnimationDelay.Value.get();
 		});
 
-		// Set up OffsetDown's signal
-		OffsetDown.on_click.connect([&]()
+		AnimationFrame.lose_focus.connect([&]()
 		{
-			// If playing, then stop the time
-			if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
-
-			PlayButton.State = ButtonState::INACTIVE;
-
-			// Get Current Frame
-			auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
-
-			// Get CurrentFrame's YOffset
-			auto YOffset = CurrentFrame->Offsets.y;
-
-			// Increment by arbitrary amount...
-			YOffset -= 1.0f;
-
-			// Reset offset
-			CurrentFrame->Offsets.y = YOffset;
-		});
-
-		// Set up OffsetLeft's signal
-		OffsetLeft.on_click.connect([&]()
-		{
-			// If playing, then stop the time
-			if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
-
-			PlayButton.State = ButtonState::INACTIVE;
-
-			// Get Current Frame
-			auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
-
-			// Get CurrentFrame's YOffset
-			auto XOffset = CurrentFrame->Offsets.x;
-
-			// Increment by arbitrary amount...
-			XOffset -= 1.0f;
-
-			// Reset offset
-			CurrentFrame->Offsets.x = XOffset;
-		});
-
-		// Set up OffsetRight's signal
-		OffsetRight.on_click.connect([&]()
-		{
-			// If playing, then stop the time
-			if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
-
-			PlayButton.State = ButtonState::INACTIVE;
-
-			// Get Current Frame
-			auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
-
-			// Get CurrentFrame's YOffset
-			auto XOffset = CurrentFrame->Offsets.x;
-
-			// Increment by arbitrary amount...
-			XOffset += 1.0f;
-
-			// Reset offset
-			CurrentFrame->Offsets.x = XOffset;
-		});
-
-		// Set up DelayUp's signal
-		DelayUp.on_click.connect([&]()
-		{
-			// If playing, then stop the time
-			if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
-
-			PlayButton.State = ButtonState::INACTIVE;
-
-			// Get Current Frame
-			auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
-
-			// Get CurrentFrame's Delay
-			auto Delay = CurrentFrame->Delay;
-
-			// Increment by arbitrary amount...
-			Delay += 0.1f;
-
-			// Reset Delay
-			CurrentFrame->Delay = Delay;
-		});
-
-		// Set up DelayUp's signal
-		DelayDown.on_click.connect([&]()
-		{
-			// If playing, then stop the time
-			if (TimeIncrement != 0.0f) TimeIncrement = 0.0f;
-
-			PlayButton.State = ButtonState::INACTIVE;
-
-			// Get Current Frame
-			auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
-
-			// Get CurrentFrame's Delay
-			auto Delay = CurrentFrame->Delay;
-
-			// Increment by arbitrary amount...
-			if (Delay > 0.0f) Delay -= 0.1f;
-
-			// Reset Delay
-			CurrentFrame->Delay = Delay;
+			// Set current frame's delay to this value
+			SceneAnimation.CurrentIndex = AnimationFrame.Value.get();
 		});
 
 		// Add to GUIManager
@@ -507,19 +374,17 @@ namespace Enjon { namespace AnimationEditor {
 
 		// Set up AnimationPanel Group
 		AnimationPanel.Name = "Animation Editor";
-		AnimationPanel.Position = EM::Vec2(150.0f, 0.0f);
-		// AnimationPanel.TextFont = EG::FontManager::GetFont("WeblySleek");
+		AnimationPanel.Position = EM::Vec2(150.0f, 0.0f);														// Set position of group
+		AnimationDelay.Step = 0.1f;
+		AnimationFrame.MaxValue = SceneAnimation.CurrentAnimation->Frames.size() - 1;
+		AnimationFrame.Value = SceneAnimation.CurrentIndex;
+		AnimationFrame.LoopValues = true;
+		AnimationDelay.Value = SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay;
+		AnimationFrame.SetText();
+		AnimationDelay.SetText();
 		AnimationPanel.AddToGroup(&AnimationSelection, "Animation");
-		// AnimationPanel.AddToGroup(&PreviousFrame, "PreviousFrame");
-		// AnimationPanel.AddToGroup(&NextFrame, "NextFrame");
-		// AnimationPanel.AddToGroup(&OffsetDown, "OffsetDown");
-		// AnimationPanel.AddToGroup(&OffsetUp, "OffsetUp");
-		// AnimationPanel.AddToGroup(&DelayDown, "DelayDown");
-		// AnimationPanel.AddToGroup(&DelayUp, "DelayUp");
-		// AnimationPanel.AddToGroup(&ToggleOnionSkin, "ToggleOnionSkin");
-		// AnimationPanel.AddToGroup(&AnimationFrame, "Frame");
+		AnimationPanel.AddToGroup(&AnimationFrame, "Frame");
 		AnimationPanel.AddToGroup(&AnimationDelay, "Delay");
-
 
 		// Draw BG
 		BGBatch->Begin();
@@ -1007,6 +872,7 @@ namespace Enjon { namespace AnimationEditor {
 		auto G = GUIManager::Get<GUIGroup>("AnimationPanel");
 		static GUIElementBase* E = nullptr;
 		static GUIElementBase* MouseFocus = nullptr;
+		static bool PrintedDebugNoChild = false;
 
 		// If Mouse Focus
 		bool ProcessMouse = false;
@@ -1018,6 +884,8 @@ namespace Enjon { namespace AnimationEditor {
 			// If done, then return from function
 			if (ProcessMouse) 
 			{
+				std::cout << "Losing focus after processing complete..." << std::endl;
+				MouseFocus->lose_focus.emit();
 				MouseFocus = nullptr;
 				return true;
 			}
@@ -1038,6 +906,9 @@ namespace Enjon { namespace AnimationEditor {
 			{
 				// Set to true
 				ChildFound = true;
+
+				// Set debug to false
+				PrintedDebugNoChild = false;
 
 				// Set on hover
 				C->on_hover.emit();
@@ -1078,19 +949,32 @@ namespace Enjon { namespace AnimationEditor {
 		// If no children are found
 		if (!ChildFound)
 		{
-			std::cout << "No child..." << std::endl;
+			if (!PrintedDebugNoChild) 
+			{
+				std::cout << "No child..." << std::endl;
+				PrintedDebugNoChild = true;
+			}
 
 			if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
 			{
 				if (MouseFocus) 
 				{
+					std::cout << "Losing all focus..." << std::endl;
+
 					MouseFocus->lose_focus.emit();
-					MouseFocus = nullptr;		
+					MouseFocus = nullptr;	
+					PrintedDebugNoChild = false;	
 				}
 			}
 		}
 
-
+		if (!MouseFocus)
+		{
+			if (Input->IsKeyPressed(SDLK_SPACE))
+			{
+				PlayButton.on_click.emit();
+			}
+		}
 
 
 		return true;

@@ -54,6 +54,7 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<> lose_focus;
 		EGUI::Signal<EI::InputManager*, EG::Camera2D*> check_children;
 		EG::ColorRGBA16 Color;
+		uint32_t JustFocused;
 		float Depth;
 	};
 
@@ -94,13 +95,15 @@ namespace Enjon { namespace GUI {
 			Name 			= std::string("GUITextBox");
 			Text 			= std::string("");
 			CursorIndex 	= 0;
-			TextColor 	= EG::RGBA16_White();
-			Color 	 	= EG::RGBA16_DarkGrey();
+			TextColor 		= EG::RGBA16_White();
+			Color 	 		= EG::RGBA16_DarkGrey();
+			BorderColor 	= EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 			caret_on 		= false;
 			caret_count 	= 0.0f;
 			TextFont 		= nullptr;
 			KeyboardInFocus = false;
 			Dimensions 		= EM::Vec2(100.0f, 20.0f);
+			MaxStringLength = 20;
 
 			// Initial states
 			State 		= ButtonState::INACTIVE;
@@ -110,7 +113,7 @@ namespace Enjon { namespace GUI {
 			FontScale = 1.0f;
 
 			// Set up TextBox's on_hover signal
-			on_hover.connect([&]()
+			this->on_hover.connect([&]()
 			{
 				// Change the mouse cursor
 				SDL_SetCursor(EG::CursorManager::Get("IBeam"));
@@ -123,7 +126,7 @@ namespace Enjon { namespace GUI {
 			});
 
 			// Set up TextBox's off_hover signal
-			off_hover.connect([&]()
+			this->off_hover.connect([&]()
 			{
 				// Change mouse cursor back to defaul
 				SDL_SetCursor(EG::CursorManager::Get("Arrow"));
@@ -135,12 +138,13 @@ namespace Enjon { namespace GUI {
 			});
 
 			// Set up TextBox's on_keyboard signal
-			on_keyboard.connect([&](std::string c)
+			this->on_keyboard.connect([&](std::string c)
 			{
 				auto str_len = Text.length();
 				auto cursor_index = CursorIndex;
 
-				// std::cout << cursor_index << std::endl;
+				// Don't exceed max length
+				if (str_len >= MaxStringLength) return;
 
 				// End of string
 				if (cursor_index >= str_len)
@@ -167,7 +171,7 @@ namespace Enjon { namespace GUI {
 			});
 
 			// Set up TextBox's on_backspace signal
-			on_backspace.connect([&]()
+			this->on_backspace.connect([&]()
 			{
 				auto str_len = Text.length();
 				auto cursor_index = CursorIndex;
@@ -186,10 +190,13 @@ namespace Enjon { namespace GUI {
 				}
 			});
 
-			on_click.connect([&](float MouseX)
+			this->on_click.connect([&](float MouseX)
 			{
 				auto XAdvance = Position.x;
 				uint32_t index = 0;
+
+				// Set border color to active
+				BorderColor 	= EG::SetOpacity(EG::RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
 
 				// Get advance
 				for (auto& c : Text)
@@ -210,17 +217,33 @@ namespace Enjon { namespace GUI {
 
 				KeyboardInFocus = true;
 			});
+
+			this->lose_focus.connect([&]()
+			{
+				KeyboardInFocus = false;
+				caret_on 		= false;
+				BorderColor 	= EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			});
+
+			this->on_enter.connect([&]()
+			{
+				// Lose focus
+				this->lose_focus.emit();
+			});
+
 		}
 
 		void Update()
 		{
 			caret_count += 0.1f;
 
-
-			if (caret_count >= 4.0f)
+			if (KeyboardInFocus)
 			{
-				caret_count = 0.0f;
-				caret_on = !caret_on;	
+				if (caret_count >= 4.0f)
+				{
+					caret_count = 0.0f;
+					caret_on = !caret_on;	
+				}
 			}
 		}
 
@@ -228,28 +251,39 @@ namespace Enjon { namespace GUI {
 		{
 			auto Padding = EM::Vec2(5.0f, 5.0f);
 
+			// Make sure font isn't null
 			if (TextFont == nullptr) TextFont = EG::FontManager::GetFont("WeblySleek_12");
 
-			{
-				auto ITextHeight = AABB.Max.y - AABB.Min.y; // InputTextHeight
-				auto TextHeight = ITextHeight - 20.0f;
-				EG::Fonts::PrintText(	
-										AABB.Min.x + Padding.x, 
-										AABB.Min.y + Padding.y, 1.0f, 
-										Text, 
-										TextFont, 
-										*Batch, 
-										EG::RGBA16_LightGrey()
-									);
-			}
+			// Draw box		
+			Batch->Add(
+						EM::Vec4(AABB.Min, AABB.Max - AABB.Min),
+						EM::Vec4(0, 0, 1, 1),
+						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						Color, 
+						0.0f, 
+						EG::SpriteBatch::DrawOptions::BORDER, 
+						BorderColor
+					);
+
+			// Print text
+			auto ITextHeight = AABB.Max.y - AABB.Min.y; // InputTextHeight
+			auto TextHeight = ITextHeight - 20.0f;
+			EG::Fonts::PrintText(	
+									AABB.Min.x + Padding.x, 
+									AABB.Min.y + Padding.y, 1.0f, 
+									Text, 
+									TextFont, 
+									*Batch, 
+									EG::RGBA16_LightGrey()
+								);
 			
+			// Draw Caret if on
 			if (KeyboardInFocus && caret_on)
 			{
-	
 				auto CurrentFont = TextFont;
 				auto scale = FontScale;
-				auto Padding = EM::Vec2(5.0f, 5.0f);
-				auto XAdvance = Position.x + Parent->Position.x + Padding.x;
+				auto Padding = EM::Vec2(5.0f, 7.0f);
+				auto XAdvance = Position.x + Padding.x;
 				auto ITextHeight = AABB.Max.y - AABB.Min.y; // InputTextHeight
 				auto TextHeight = ITextHeight - 20.0f;
 
@@ -259,13 +293,74 @@ namespace Enjon { namespace GUI {
 					XAdvance += EG::Fonts::GetAdvance(Text[i], CurrentFont, scale);
 				}
 				Batch->Add(
-								EM::Vec4(XAdvance + 0.2f, Position.y + Parent->Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
+								EM::Vec4(XAdvance + 0.2f, Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 								EG::RGBA16_LightGrey()
 							);
 			}
 
+		}
+	
+		bool IsModifier(unsigned int Key)
+		{
+			if (Key == SDLK_LSHIFT || 
+				Key == SDLK_RSHIFT || 
+				Key == SDLK_LCTRL  ||
+				Key == SDLK_RCTRL  ||
+				Key == SDLK_CAPSLOCK)
+			return true;
+
+			else return false; 
+		}
+
+		std::string GetNumericString(EI::InputManager* Input)
+		{
+			std::string str = "";
+
+			// Quick and dirty way so far...
+			if (Input->IsKeyPressed(SDLK_0))
+			{
+				str += "0";
+			}
+			if (Input->IsKeyPressed(SDLK_1))
+			{
+				str += "1";
+			}
+			if (Input->IsKeyPressed(SDLK_2))
+			{
+				str += "2";
+			}
+			if (Input->IsKeyPressed(SDLK_3))
+			{
+				str += "3";
+			}
+			if (Input->IsKeyPressed(SDLK_4))
+			{
+				str += "4";
+			}
+			if (Input->IsKeyPressed(SDLK_5))
+			{
+				str += "5";
+			}
+			if (Input->IsKeyPressed(SDLK_6))
+			{
+				str += "6";
+			}
+			if (Input->IsKeyPressed(SDLK_7))
+			{
+				str += "7";
+			}
+			if (Input->IsKeyPressed(SDLK_8))
+			{
+				str += "8";
+			}
+			if (Input->IsKeyPressed(SDLK_9))
+			{
+				str += "9";
+			}
+
+			return str;
 		}
 
 		void Init()
@@ -280,12 +375,14 @@ namespace Enjon { namespace GUI {
 		HoveredState HoverState;
 		std::string Text;
 		EG::ColorRGBA16 TextColor;
+		EG::ColorRGBA16 BorderColor;
 		EG::Fonts::Font* TextFont;
 		float FontScale;
 		float caret_count;
 		int32_t CursorIndex;
 		int32_t caret_on;
 		int32_t KeyboardInFocus;
+		uint32_t MaxStringLength;
 
 	
 		EGUI::Signal<float> on_click;	
