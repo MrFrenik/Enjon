@@ -206,7 +206,7 @@ namespace Enjon { namespace GUI {
 			this->ValueUp.on_click.connect([&]()
 			{
 				// Get value of ValueText
-				auto V = std::atof(ValueText.Text.c_str());
+				auto V = static_cast<T>(std::atof(ValueText.Text.c_str()));
 
 				// Value goes up
 				V += Step;
@@ -228,7 +228,7 @@ namespace Enjon { namespace GUI {
 			this->ValueDown.on_click.connect([&]()
 			{
 				// Get value of ValueText
-				auto V = std::atof(ValueText.Text.c_str());
+				auto V = static_cast<T>(std::atof(ValueText.Text.c_str()));
 
 				// Value goes up
 				V -= Step;
@@ -236,33 +236,37 @@ namespace Enjon { namespace GUI {
 				if (V < MinValue) 
 				{ 
 					if (LoopValues) V = MaxValue;
-					else V = MinValue; 
+					else 			V = MinValue;
 				}
 
 				// Reset value and reset string
-				Value = static_cast<T>(V);
+				Value = V;
 				SetText();
 			});
 
 			this->ValueText.on_enter.connect([&]()
 			{
 				// Set value to text
-				auto Val = std::atof(ValueText.Text.c_str());
-				Value = static_cast<T>(Val);
+				auto Val = static_cast<T>(std::atof(ValueText.Text.c_str()));
+				if (Val > MaxValue) Set(MaxValue);
+				else if (Val <= MinValue || ValueText.Text.compare("") == 0) Set(MinValue);
+				else Set(Val);
+
+				std::cout << "Value after entering: "<< Value.get() << std::endl;
+
 			});
 
 			this->lose_focus.connect([&]()
 			{
+				std::cout << "Here, too!" << std::endl;
+
 				// Turn ValueText caret
 				ValueText.lose_focus.emit();
 
 				// Turn off just focused
 				JustFocused = false;
-	
-				auto& S = this->ValueText.Text;
-				auto v = std::atof(S.c_str());
-				if (v > this->MaxValue) this->Set(this->MaxValue);
-				if (v < this->MinValue || S.compare("") == 0) this->Set(this->MinValue);
+
+				ValueText.on_enter.emit();
 			});
 
 			this->on_click.connect([&]()
@@ -308,7 +312,7 @@ namespace Enjon { namespace GUI {
 		void Set(T Val)
 		{
 			Value = static_cast<T>(Val);
-			ValueText.Text = std::to_string(Val);
+			ValueText.Text = std::to_string(Value.get());
 		}
 
 		void SetText()

@@ -119,6 +119,8 @@ namespace Enjon { namespace AnimationEditor {
 	GUIAnimationElement 		SceneAnimation;
 	GUIValueButton<float>		AnimationDelay;
 	GUIValueButton<uint32_t>	AnimationFrame;
+	GUIValueButton<int32_t>		AnimationXOffset;
+	GUIValueButton<int32_t>		AnimationYOffset;
 	
 	
 	Atlas atlas;
@@ -246,6 +248,8 @@ namespace Enjon { namespace AnimationEditor {
 
 				AnimationDelay.Value = SceneAnimation.CurrentAnimation->Frames.at(0).Delay;
 				AnimationDelay.SetText();
+
+				SceneAnimation.CurrentIndex = 0;
 			});
 
 			// Push back into drop down list
@@ -342,29 +346,39 @@ namespace Enjon { namespace AnimationEditor {
 			if (PlayButton.State) PlayButton.on_click.emit();
 		});
 
+		AnimationXOffset.on_click.connect([&]()
+		{
+			if (PlayButton.State) PlayButton.on_click.emit();
+		});
+
+		AnimationYOffset.on_click.connect([&]()
+		{
+			if (PlayButton.State) PlayButton.on_click.emit();
+		});
+
 		AnimationDelay.lose_focus.connect([&]()
 		{
-			// Set current frame's delay to this value
-			AnimationDelay.Set(std::atof(AnimationDelay.ValueText.Text.c_str()));
-			SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay = AnimationDelay.Value.get();
-			auto v = SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay;
-			std::cout << "Animation delay losing focus..." << std::endl;
-			std::cout << "Animation: " << SceneAnimation.CurrentAnimation->Name << ", Delay: " << v << std::endl;
+			auto V = AnimationFrame.Value.get();
+			SceneAnimation.CurrentAnimation->Frames.at(V).Delay = AnimationDelay.Value.get();
 		});
 
 		AnimationFrame.lose_focus.connect([&]()
 		{
-			// Set current frame's delay to this value
-			auto& S = AnimationFrame.ValueText.Text;
-			auto v = std::atoi(S.c_str());
-			if (v > AnimationFrame.MaxValue) AnimationFrame.Set(AnimationFrame.MaxValue);
-			if (v < AnimationFrame.MinValue || S.compare("") == 0) AnimationFrame.Set(AnimationFrame.MinValue);
-
-			AnimationDelay.Set(std::atoi(AnimationDelay.ValueText.Text.c_str()));
+			auto SA = SceneAnimation.CurrentAnimation;
 			SceneAnimation.CurrentIndex = AnimationFrame.Value.get();
-
 			AnimationDelay.Set(SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay);
-			std::cout << "Animation frame losing focus..." << std::endl;
+			AnimationXOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.x);
+			AnimationYOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.y);
+		});
+
+		AnimationXOffset.lose_focus.connect([&]()
+		{
+			SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Offsets.x = AnimationXOffset.Value.get();
+		});
+
+		AnimationYOffset.lose_focus.connect([&]()
+		{
+			SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Offsets.y = AnimationYOffset.Value.get();
 		});
 
 		// Add to GUIManager
@@ -389,15 +403,30 @@ namespace Enjon { namespace AnimationEditor {
 		AnimationPanel.Name = "Animation Editor";
 		AnimationPanel.Position = EM::Vec2(150.0f, 0.0f);														// Set position of group
 		AnimationDelay.Step = 0.1f;
+		AnimationDelay.MinValue = 0.000001f;
 		AnimationFrame.MaxValue = SceneAnimation.CurrentAnimation->Frames.size() - 1;
+		AnimationFrame.MinValue = 0;
 		AnimationFrame.Value = SceneAnimation.CurrentIndex;
 		AnimationFrame.LoopValues = true;
 		AnimationDelay.Value = SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay;
+		AnimationXOffset.MaxValue = SCREENWIDTH / 2.0f;
+		AnimationXOffset.MinValue = -SCREENWIDTH / 2.0f;
+		AnimationYOffset.MaxValue = SCREENHEIGHT / 2.0f;
+		AnimationYOffset.MinValue = -SCREENHEIGHT / 2.0f;
+		// AnimationXOffset.LoopValues = true;
+		// AnimationYOffset.LoopValues = true;
+		AnimationXOffset.Set(SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Offsets.x);
+		AnimationYOffset.Set(SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Offsets.y);
+		AnimationXOffset.Step = 1;
+		AnimationYOffset.Step = 1;
 		AnimationFrame.SetText();
 		AnimationDelay.SetText();
+
 		AnimationPanel.AddToGroup(&AnimationSelection, "Animation");
 		AnimationPanel.AddToGroup(&AnimationFrame, "Frame");
 		AnimationPanel.AddToGroup(&AnimationDelay, "Delay");
+		AnimationPanel.AddToGroup(&AnimationXOffset, "XOffset");
+		AnimationPanel.AddToGroup(&AnimationYOffset, "YOffset");
 
 		// Draw BG
 		BGBatch->Begin();
@@ -436,8 +465,11 @@ namespace Enjon { namespace AnimationEditor {
 
 		if (PlayButton.State)
 		{
+			auto SA = SceneAnimation.CurrentAnimation;
 			AnimationFrame.Set(SceneAnimation.CurrentIndex);
-			AnimationDelay.Set(SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay);
+			AnimationDelay.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Delay);
+			AnimationXOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.x);
+			AnimationYOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.y);
 		}
 
 		// Update input
