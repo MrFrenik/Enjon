@@ -54,6 +54,7 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<> lose_focus;
 		EGUI::Signal<EI::InputManager*, EG::Camera2D*> check_children;
 		EG::ColorRGBA16 Color;
+		EG::ColorRGBA16 BorderColor;
 		uint32_t JustFocused;
 		float Depth;
 	};
@@ -375,7 +376,6 @@ namespace Enjon { namespace GUI {
 		HoveredState HoverState;
 		std::string Text;
 		EG::ColorRGBA16 TextColor;
-		EG::ColorRGBA16 BorderColor;
 		EG::Fonts::Font* TextFont;
 		float FontScale;
 		float caret_count;
@@ -424,6 +424,7 @@ namespace Enjon { namespace GUI {
 			TextColor		= EG::RGBA16_MidGrey();
 			Color 			= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
 			TextFont 		= nullptr;
+			HoveredElement	= nullptr;
 
 			// Get font
 			FontScale = 1.0f;
@@ -495,6 +496,7 @@ namespace Enjon { namespace GUI {
 						1.0f
 					);
 
+
 			if (TextFont == nullptr) TextFont = EG::FontManager::GetFont("WeblySleek_12");
 
 			// Draw Title border
@@ -532,6 +534,21 @@ namespace Enjon { namespace GUI {
 			// Try and draw this shiz
 			for(auto& E : Children)
 			{
+				// Draw border around hovered element
+				if (HoveredElement == E)
+				{
+					Batch->Add(	
+								EM::Vec4(Position.x, E->Position.y, Dimensions.x, E->Dimensions.y),
+								EM::Vec4(0, 0, 1, 1),
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								EG::SetOpacity(EG::RGBA16_MidGrey(), 0.1f),
+								0.0f,
+								EG::SpriteBatch::DrawOptions::BORDER,
+								EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.4f),
+								1.0f
+							);
+				}
+
 				// Print name of child
 				EG::Fonts::PrintText(
 										Position.x + X0Offset, 								// X Position
@@ -551,6 +568,7 @@ namespace Enjon { namespace GUI {
 
 		// Vector of children
 		std::vector<GUIElementBase*> Children;
+		GUIElementBase* HoveredElement;
 		EG::Fonts::Font* TextFont;
 		EG::ColorRGBA16 TextColor;
 		float TitlePadding;

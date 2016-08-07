@@ -22,15 +22,17 @@ namespace Enjon { namespace GUI {
 			// Set up initial states	
 			this->State 		= ButtonState::INACTIVE;
 			this->HoverState 	= HoveredState::OFF_HOVER;
-			this->Color 		= EG::RGBA16_LightGrey();
+			this->Color 		= EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 			this->Name 			= std::string("GUIButton");
-			Dimensions 			= EM::Vec2(130.0f, 20.0f);
+			this->Dimensions 	= EM::Vec2(130.0f, 20.0f);
+			this->BorderColor 	= EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 
 			// Set up PlayButton's on_hover signal
 			this->on_hover.connect([&]()
 			{
 				// We'll just change a color for now
-				this->Color = EG::RGBA16_White();
+				// this->Color = EG::RGBA16(0.16f, 0.16f, 0.16f, 1.0f);
+				this->Color = EG::RGBA16_MidGrey();
 
 				// Set state to active
 				this->HoverState = HoveredState::ON_HOVER;
@@ -39,7 +41,7 @@ namespace Enjon { namespace GUI {
 			// Set up PlayButton's off_hover signal
 			this->off_hover.connect([&]()
 			{
-				this->Color = EG::RGBA16_LightGrey();
+				this->Color 		= EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 
 				// Set state to inactive
 				this->HoverState = HoveredState::OFF_HOVER;
@@ -256,6 +258,11 @@ namespace Enjon { namespace GUI {
 
 				// Turn off just focused
 				JustFocused = false;
+	
+				auto& S = this->ValueText.Text;
+				auto v = std::atof(S.c_str());
+				if (v > this->MaxValue) this->Set(this->MaxValue);
+				if (v < this->MinValue || S.compare("") == 0) this->Set(this->MinValue);
 			});
 
 			this->on_click.connect([&]()
@@ -278,7 +285,30 @@ namespace Enjon { namespace GUI {
 			    {
 			    	if (ValueText.HoverState = HoveredState::ON_HOVER) ValueText.off_hover.emit();
 			    }
+	
+			    // Check if over value up
+			    auto MouseOverValueUp = EP::AABBvsPoint(&ValueUp.AABB, MousePos);
+			    if (MouseOverValueUp)
+			    {
+			    	ValueUp.on_hover.emit();
+			    }
+			    else if (ValueUp.HoverState) ValueUp.off_hover.emit();
+
+			    // Check if over value down
+			    auto MouseOverValueDown = EP::AABBvsPoint(&ValueDown.AABB, MousePos);
+			    if (MouseOverValueDown)
+			    {
+			    	ValueDown.on_hover.emit();
+			    }
+			    else if (ValueDown.HoverState) ValueDown.off_hover.emit();
 			});
+
+		}
+
+		void Set(T Val)
+		{
+			Value = static_cast<T>(Val);
+			ValueText.Text = std::to_string(Val);
 		}
 
 		void SetText()
@@ -339,6 +369,7 @@ namespace Enjon { namespace GUI {
 		    {
 		    	ValueUp.on_hover.emit();
 		    }
+		    else if (ValueUp.HoverState) ValueUp.off_hover.emit();
 
 		    // Check if over value down
 		    auto MouseOverValueDown = EP::AABBvsPoint(&ValueDown.AABB, MousePos);
@@ -346,6 +377,7 @@ namespace Enjon { namespace GUI {
 		    {
 		    	ValueDown.on_hover.emit();
 		    }
+		    else if (ValueDown.HoverState) ValueDown.off_hover.emit();
 
 
 		    if (Input->IsKeyPressed(SDL_BUTTON_LEFT) || JustFocused)
@@ -367,6 +399,12 @@ namespace Enjon { namespace GUI {
 		    	if (MouseOverValueDown)
 		    	{
 		    		ValueDown.on_click.emit();
+		    		return true;
+		    	}
+
+		    	if (ValueText.KeyboardInFocus && !MouseOverText)
+		    	{
+		    		ValueText.lose_focus.emit();
 		    		return true;
 		    	}
 
@@ -411,8 +449,6 @@ namespace Enjon { namespace GUI {
 
 		void Draw(EG::SpriteBatch* Batch)
 		{
-			// Draw Value Up
-			
 			// Draw Text Box
 			ValueText.Draw(Batch);
 
@@ -424,7 +460,7 @@ namespace Enjon { namespace GUI {
 						ValueUp.Color,
 						0.0f, 
 						EG::SpriteBatch::DrawOptions::BORDER, 
-						EG::RGBA16_Black()
+						ValueUp.BorderColor
 					);
 
 
@@ -447,7 +483,7 @@ namespace Enjon { namespace GUI {
 						ValueDown.Color,
 						0.0f, 
 						EG::SpriteBatch::DrawOptions::BORDER, 
-						EG::RGBA16_Black()
+						ValueDown.BorderColor
 					);
 
 			EG::Fonts::PrintText(	
@@ -777,7 +813,6 @@ namespace Enjon { namespace GUI {
 		std::vector<GUITextButton*> List;
 		EG::Fonts::Font* TextFont;
 		EG::ColorRGBA16 TextColor;
-		EG::ColorRGBA16 BorderColor;
 		EM::Vec2 TextPadding;
 		float XPadding;
 		float FontScale;

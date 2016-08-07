@@ -345,13 +345,26 @@ namespace Enjon { namespace AnimationEditor {
 		AnimationDelay.lose_focus.connect([&]()
 		{
 			// Set current frame's delay to this value
+			AnimationDelay.Set(std::atof(AnimationDelay.ValueText.Text.c_str()));
 			SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay = AnimationDelay.Value.get();
+			auto v = SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay;
+			std::cout << "Animation delay losing focus..." << std::endl;
+			std::cout << "Animation: " << SceneAnimation.CurrentAnimation->Name << ", Delay: " << v << std::endl;
 		});
 
 		AnimationFrame.lose_focus.connect([&]()
 		{
 			// Set current frame's delay to this value
+			auto& S = AnimationFrame.ValueText.Text;
+			auto v = std::atoi(S.c_str());
+			if (v > AnimationFrame.MaxValue) AnimationFrame.Set(AnimationFrame.MaxValue);
+			if (v < AnimationFrame.MinValue || S.compare("") == 0) AnimationFrame.Set(AnimationFrame.MinValue);
+
+			AnimationDelay.Set(std::atoi(AnimationDelay.ValueText.Text.c_str()));
 			SceneAnimation.CurrentIndex = AnimationFrame.Value.get();
+
+			AnimationDelay.Set(SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay);
+			std::cout << "Animation frame losing focus..." << std::endl;
 		});
 
 		// Add to GUIManager
@@ -420,6 +433,12 @@ namespace Enjon { namespace AnimationEditor {
 
 		// Update AnimationPanel
 		AnimationPanel.Update();
+
+		if (PlayButton.State)
+		{
+			AnimationFrame.Set(SceneAnimation.CurrentIndex);
+			AnimationDelay.Set(SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay);
+		}
 
 		// Update input
 		Input->Update();
@@ -913,6 +932,9 @@ namespace Enjon { namespace AnimationEditor {
 				// Set on hover
 				C->on_hover.emit();
 
+				// Set the hovered element
+				G->HoveredElement = C;
+
 				// If clicked while hovering
 				if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
 				{
@@ -954,6 +976,9 @@ namespace Enjon { namespace AnimationEditor {
 				std::cout << "No child..." << std::endl;
 				PrintedDebugNoChild = true;
 			}
+
+			// No hovered element
+			G->HoveredElement = nullptr;
 
 			if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
 			{
