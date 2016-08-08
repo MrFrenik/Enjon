@@ -189,10 +189,11 @@ namespace Enjon { namespace GUI {
 			this->Depth = 0.0f;
 			this->JustFocused = false;
 			this->LoopValues = false;
+			this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 
-			ValueUp.Dimensions 		= EM::Vec2(16.0f, 16.0f);
-			ValueDown.Dimensions 	= EM::Vec2(16.0f, 16.0f);
-			ValueText.Dimensions 	= EM::Vec2(85.0f, 18.0f);
+			ValueUp.Dimensions 		= EM::Vec2(15.0f, 16.0f);
+			ValueDown.Dimensions 	= EM::Vec2(15.0f, 16.0f);
+			ValueText.Dimensions 	= EM::Vec2(92.0f, 18.0f);
 
 			ValueText.Text = "0.50";
 			ValueText.MaxStringLength = 10;
@@ -222,6 +223,16 @@ namespace Enjon { namespace GUI {
 				// Reset value and reset string
 				Value = static_cast<T>(V);
 				SetText();
+			});
+
+			this->on_hover.connect([&]()
+			{
+				this->HoverState = HoveredState::ON_HOVER;
+			});
+
+			this->off_hover.connect([&]()
+			{
+				this->HoverState = HoveredState::OFF_HOVER;
 			});
 
 			// Set up connect for Value Down
@@ -267,11 +278,18 @@ namespace Enjon { namespace GUI {
 				JustFocused = false;
 
 				ValueText.on_enter.emit();
+
+				this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+
+				this->State = ButtonState::INACTIVE;
 			});
 
 			this->on_click.connect([&]()
 			{
 				JustFocused = true;
+
+
+				this->State = ButtonState::ACTIVE;
 			});
 
 			this->check_children.connect([&](EI::InputManager* Input, EG::Camera2D* Camera)
@@ -390,6 +408,7 @@ namespace Enjon { namespace GUI {
 
 		    	if (MouseOverText)
 		    	{
+					this->BorderColor = EG::SetOpacity(EG::RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
 		    		ValueText.on_click.emit(MousePos.x);
 		    	}
 		    	else ValueText.lose_focus.emit();
@@ -442,6 +461,7 @@ namespace Enjon { namespace GUI {
 					else if (Input->IsKeyPressed(SDLK_RETURN))
 					{
 						ValueText.on_enter.emit();
+						return true;
 					}
 			
 					else if (str.compare("") != 0) ValueText.on_keyboard.emit(str);
@@ -453,52 +473,73 @@ namespace Enjon { namespace GUI {
 
 		void Draw(EG::SpriteBatch* Batch)
 		{
+			if (!this->HoverState)
+			{
+				Batch->Add(
+							EM::Vec4(AABB.Min, AABB.Max - AABB.Min - EM::Vec2(21, 0)),
+							EM::Vec4(0, 0, 1, 1),
+							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+							ValueText.Color,
+							0.0f 
+						);
+			}
+
+			Batch->Add(
+						EM::Vec4(this->AABB.Min, this->AABB.Max - this->AABB.Min - EM::Vec2(21, 0)),
+						EM::Vec4(0, 0, 1, 1),
+						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						ValueText.Color,
+						0.0f, 
+						EG::SpriteBatch::DrawOptions::BORDER, 
+						this->BorderColor
+					);
+
 			// Draw Text Box
 			ValueText.Draw(Batch);
 
-			// Draw Value Up
-			Batch->Add(
-						EM::Vec4(ValueUp.AABB.Min, ValueUp.AABB.Max - ValueUp.AABB.Min),
-						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						ValueUp.Color,
-						0.0f, 
-						EG::SpriteBatch::DrawOptions::BORDER, 
-						ValueUp.BorderColor
-					);
+			if (this->HoverState)
+			{
+				// Draw Value Up
+				Batch->Add(
+							EM::Vec4(ValueUp.AABB.Min, ValueUp.AABB.Max - ValueUp.AABB.Min),
+							EM::Vec4(0, 0, 1, 1),
+							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+							ValueUp.Color,
+							0.0f 
+						);
 
 
-			auto F = EG::FontManager::GetFont("WeblySleek");
-			EG::Fonts::PrintText(	
-									ValueUp.Position.x + ValueUp.Dimensions.x / 2.0f - EG::Fonts::GetAdvance('+', F, 1.0f) / 2.0f, 
-									ValueUp.Position.y + ValueUp.Dimensions.y / 2.0f - EG::Fonts::GetHeight('-', F, 1.0f) / 2.0f, 
-									1.0f, 
-									"+", 
-									EG::FontManager::GetFont("WeblySleek"), 
-									*Batch, 
-									ValueText.TextColor	
-								);
+				auto F = EG::FontManager::GetFont("WeblySleek");
+				EG::Fonts::PrintText(	
+										ValueUp.Position.x + ValueUp.Dimensions.x / 2.0f - EG::Fonts::GetAdvance('+', F, 1.0f) / 2.0f, 
+										ValueUp.Position.y + ValueUp.Dimensions.y / 2.0f - EG::Fonts::GetHeight('-', F, 1.0f) / 2.0f, 
+										1.0f, 
+										"+", 
+										EG::FontManager::GetFont("WeblySleek"), 
+										*Batch, 
+										ValueText.TextColor	
+									);
 
-			// Draw Value Down
-			Batch->Add(
-						EM::Vec4(ValueDown.AABB.Min, ValueDown.AABB.Max - ValueDown.AABB.Min),
-						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						ValueDown.Color,
-						0.0f, 
-						EG::SpriteBatch::DrawOptions::BORDER, 
-						ValueDown.BorderColor
-					);
+				// Draw Value Down
+				Batch->Add(
+							EM::Vec4(ValueDown.AABB.Min, ValueDown.AABB.Max - ValueDown.AABB.Min),
+							EM::Vec4(0, 0, 1, 1),
+							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+							ValueDown.Color,
+							0.0f 
+						);
 
-			EG::Fonts::PrintText(	
-									ValueDown.Position.x + ValueDown.Dimensions.x / 2.0f - EG::Fonts::GetAdvance('-', F, 1.0f) / 2.0f, 
-									ValueDown.Position.y + ValueDown.Dimensions.y / 2.0f - EG::Fonts::GetHeight('-', F, 1.0f) / 2.0f, 
-									1.0f, 
-									"-", 
-									EG::FontManager::GetFont("WeblySleek"), 
-									*Batch, 
-									ValueText.TextColor	
-								);
+				EG::Fonts::PrintText(	
+										ValueDown.Position.x + ValueDown.Dimensions.x / 2.0f - EG::Fonts::GetAdvance('-', F, 1.0f) / 2.0f, 
+										ValueDown.Position.y + ValueDown.Dimensions.y / 2.0f - EG::Fonts::GetHeight('-', F, 1.0f) / 2.0f, 
+										1.0f, 
+										"-", 
+										EG::FontManager::GetFont("WeblySleek"), 
+										*Batch, 
+										ValueText.TextColor	
+									);
+
+			}
 		}
 
 		void Update()
@@ -508,11 +549,11 @@ namespace Enjon { namespace GUI {
 			ValueText.AABB.Min = ValueText.Position;
 			ValueText.AABB.Max = ValueText.AABB.Min + ValueText.Dimensions;
 
-			ValueUp.Position = EM::Vec2(Position.x + ValueText.Dimensions.x + 3.0f, Position.y + 1.0f);
+			ValueUp.Position = EM::Vec2(Position.x + ValueText.Dimensions.x + 2.0f, Position.y + 1.0f);
 			ValueUp.AABB.Min = ValueUp.Position;
 			ValueUp.AABB.Max = ValueUp.AABB.Min + ValueUp.Dimensions;	
 
-			ValueDown.Position = EM::Vec2(ValueUp.Position.x + ValueUp.Dimensions.x + 2.0f, Position.y + 1.0f);
+			ValueDown.Position = EM::Vec2(ValueUp.Position.x + ValueUp.Dimensions.x, Position.y + 1.0f);
 			ValueDown.AABB.Min = ValueDown.Position;
 			ValueDown.AABB.Max = ValueDown.AABB.Min + ValueDown.Dimensions;	
 
@@ -834,6 +875,8 @@ namespace Enjon { namespace GUI {
 			// Load in color themes from data
 			this->ActiveColor 	= EG::RGBA16_LimeGreen();
 			this->InactiveColor = EG::RGBA16_DarkGrey();
+			this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			this->Dimensions = EM::Vec2(10.0f, 10.0f);
 
 			// Set up initial color
 			this->Color = this->InactiveColor;
@@ -870,11 +913,28 @@ namespace Enjon { namespace GUI {
 
 		void Update()
 		{
-			
+			// this->Position.y += 8.0f;
+			// this->AABB.Min.y = Position.y;
+			// this->AABB.Max.y = this->AABB.Min.y + this->Dimensions.y;
 		}
 
-		void Draw(EG::SpriteBatch* TB)
+		void Draw(EG::SpriteBatch* Batch)
 		{
+			Batch->Add(
+						EM::Vec4(
+									this->Position.x,
+									this->Position.y, 
+									this->Dimensions
+								),
+						EM::Vec4(0, 0, 1, 1),
+						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
+						this->Color, 
+						0.0f,
+						EG::SpriteBatch::DrawOptions::BORDER | EG::SpriteBatch::DrawOptions::SHADOW,
+						this->BorderColor, 
+						1.0f, 
+						EM::Vec2(2.0f, 2.0f)	
+					);
 			
 		}
 

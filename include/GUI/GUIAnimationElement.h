@@ -49,7 +49,68 @@ namespace Enjon { namespace GUI {
 
 		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		{
-			return true;
+			unsigned int CurrentKey = 0;
+			char CurrentChar = 0;
+			static EM::Vec2 MouseFrameOffset(0.0f);
+			static bool JustFocused = true;
+
+		    SDL_Event event;
+		    while (SDL_PollEvent(&event)) 
+		    {
+		        switch (event.type) 
+		        {
+					case SDL_KEYUP:
+						Input->ReleaseKey(event.key.keysym.sym); 
+						CurrentKey = 0;
+						break;
+					case SDL_KEYDOWN:
+						Input->PressKey(event.key.keysym.sym);
+						CurrentKey = event.key.keysym.sym;
+						break;
+					case SDL_MOUSEBUTTONDOWN:
+						Input->PressKey(event.button.button);
+						break;
+					case SDL_MOUSEBUTTONUP:
+						Input->ReleaseKey(event.button.button);
+						break;
+					case SDL_MOUSEMOTION:
+						Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+						break;
+					case SDL_MOUSEWHEEL:
+					default:
+						break;
+				}
+		    }
+
+		    auto MousePos = Input->GetMouseCoords();
+		    Camera->ConvertScreenToWorld(MousePos);
+
+		    if (Input->IsKeyDown(SDL_BUTTON_LEFT))
+		    {
+				auto X = MousePos.x;
+				auto Y = MousePos.y;
+
+	    		if (JustFocused) 
+	    		{
+	    			MouseFrameOffset = EM::Vec2(MousePos.x - this->AABB.Min.x, MousePos.y - this->AABB.Min.y);
+	    			JustFocused = false;
+	    		}
+
+				// Update offsets
+				this->CurrentAnimation->Frames.at(this->CurrentIndex).Offsets = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
+
+				// Emit that value has changed
+				this->on_value_change.emit();
+		    }
+
+	    	else 
+	    	{
+	    		this->lose_focus.emit();
+	    		JustFocused = true;
+	    		return true;
+	    	}
+
+			return false;
 		}
 
 		void Draw(EG::SpriteBatch* TB)
@@ -59,6 +120,7 @@ namespace Enjon { namespace GUI {
 
 		EA::Anim* CurrentAnimation;
 		uint32_t CurrentIndex;
+		EGUI::Signal<> on_value_change;
 	};
 
 	namespace AnimationElement

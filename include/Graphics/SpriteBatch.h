@@ -217,7 +217,7 @@ namespace Enjon { namespace Graphics {
 
 		/* Adds glpyh to spritebatch to be rendered */
 		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture = 0, const ColorRGBA16& color = RGBA16(1.0f), float depth = 0.0f, DrawOption Options = DrawOptions::DEFAULT_DRAW, 
-					EG::ColorRGBA16 BorderColor = EG::RGBA16_White(), float BorderThickness = 1.0f);
+					EG::ColorRGBA16 BorderColor = EG::RGBA16_White(), float BorderThickness = 1.0f, const EM::Vec2& ShadowOffset = EM::Vec2(5.0f, 5.0f));
 
 		/* Adds glpyh to spritebatch to be rendered with specified rotation */
 		void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, CoordinateFormat Format = CoordinateFormat::CARTESIAN, DrawOption Options = DrawOptions::DEFAULT_DRAW);

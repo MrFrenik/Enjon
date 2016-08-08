@@ -98,26 +98,14 @@ namespace Enjon { namespace AnimationEditor {
 	////////////////////////////////
 	// ANIMATION EDITOR ////////////
 
-	GUIGroup 					Group;
+	GUIGroup					SceneGroup;
 	GUIGroup					AnimationPanel;
-	GUIGroup 					AnimationInfoGroup;
-	GUIGroup 					AnimationSelectionGroup;
-	GUIGroup					PlayerAnimationGroup;	
-	GUIGroup					AnimationWidget;
 	GUIButton 					PlayButton;
-	GUIButton 					NextFrame;
-	GUIButton 					PreviousFrame;
-	GUIButton 					OffsetUp;
-	GUIButton 					OffsetDown;
-	GUIButton 					OffsetLeft;
-	GUIButton 					OffsetRight;
-	GUIButton 					DelayUp;
-	GUIButton 					DelayDown;
-	GUITextBox 					InputText;
-	GUIRadialButton				ToggleOnionSkin;
+	GUIRadialButton				AnimationOnionSkin;
 	GUIDropDownButton 			AnimationSelection;	
 	GUIAnimationElement 		SceneAnimation;
 	GUIValueButton<float>		AnimationDelay;
+	GUIValueButton<float>		AnimationTimeScale;
 	GUIValueButton<uint32_t>	AnimationFrame;
 	GUIValueButton<int32_t>		AnimationXOffset;
 	GUIValueButton<int32_t>		AnimationYOffset;
@@ -133,7 +121,7 @@ namespace Enjon { namespace AnimationEditor {
 	float caret_count = 0.0f;
 	bool caret_on = true;
 	float TimeScale = 1.0f;
-	float TimeIncrement = 0.0f;
+	float TimeIncrement = 0.15f;
 	float t = 0.0f;
 
 	bool IsRunning = true;
@@ -213,10 +201,6 @@ namespace Enjon { namespace AnimationEditor {
 
 		// Set up AnimationSelection's text with name of current animation
 		AnimationSelection.Text = SceneAnimation.CurrentAnimation->Name;  // Can set up signal for when this changes to emit
-		AnimationSelection.Position = EM::Vec2 (
-													HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 105.0f,
-													HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f 
-												);
 		AnimationSelection.CalculateDimensions();
 
 		// Add animations to AnimationSelection drop down button
@@ -242,12 +226,18 @@ namespace Enjon { namespace AnimationEditor {
 
 				AnimationSelection.CalculateDimensions();
 
+				// Reset animation frame
 				AnimationFrame.MaxValue = SceneAnimation.CurrentAnimation->Frames.size() - 1;
-				AnimationFrame.Value = 0;
-				AnimationFrame.SetText();
+				AnimationFrame.Set(0);
 
-				AnimationDelay.Value = SceneAnimation.CurrentAnimation->Frames.at(0).Delay;
-				AnimationDelay.SetText();
+				// Reset animation delay
+				AnimationDelay.Set(SceneAnimation.CurrentAnimation->Frames.at(0).Delay);
+
+				// Reset animation x offset
+				AnimationXOffset.Set(SceneAnimation.CurrentAnimation->Frames.at(0).Offsets.x);
+
+				// Reset animation y offset
+				AnimationYOffset.Set(SceneAnimation.CurrentAnimation->Frames.at(0).Offsets.y);
 
 				SceneAnimation.CurrentIndex = 0;
 			});
@@ -256,82 +246,27 @@ namespace Enjon { namespace AnimationEditor {
 			AnimationSelection.List.push_back(b);
 		}
 
-		// Calculate AnimationSelection's dimension
-		// Set up Group
-		Group.Position = EM::Vec2(0.0f, -200.0f);
-
-		// Set up play button image frames
-		PlayButton.Frames.push_back(EA::GetImageFrame(Frames, "playbuttonup", AnimTextureDir));
-		PlayButton.Frames.push_back(EA::GetImageFrame(Frames, "playbuttondown", AnimTextureDir));
-
-		PlayButton.Frames.at(ButtonState::INACTIVE).TextureAtlas 	= atlas;
-		PlayButton.Frames.at(ButtonState::ACTIVE).TextureAtlas 		= atlas;
-
-		// Set up PlayButton offsets
-		{
-			auto xo = 0.0f;
-			auto yo = 0.0f;
-			PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.x 	= xo;
-			PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.y 	= yo;
-			PlayButton.Frames.at(ButtonState::ACTIVE).Offsets.x 	= xo;
-			PlayButton.Frames.at(ButtonState::ACTIVE).Offsets.y 	= yo;
-		}
-
-		// Set up PlayButton position within the group
-		PlayButton.Position = EM::Vec2(10.0f, 20.0f);
-		PlayButton.Parent = &Group;
-
-		// Set up Scaling Factor
-		PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor 	= 1.0f;
-		PlayButton.Frames.at(ButtonState::ACTIVE).ScalingFactor 	= 1.0f;
-
-		// Set up PlayButton AABB
-		PlayButton.AABB.Min =  EM::Vec2(PlayButton.Position.x + Group.Position.x + PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.x * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor,
-										PlayButton.Position.y + Group.Position.y + PlayButton.Frames.at(ButtonState::INACTIVE).Offsets.y * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor); 
-		PlayButton.AABB.Max = PlayButton.AABB.Min + EM::Vec2(PlayButton.Frames.at(ButtonState::INACTIVE).SourceSize.x * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor, 
-											     PlayButton.Frames.at(ButtonState::INACTIVE).SourceSize.y * PlayButton.Frames.at(ButtonState::INACTIVE).ScalingFactor);
-
-		// Set up InputText position within the group
-		InputText.Position = EM::Vec2(100.0f, 60.0f);
-		InputText.Parent = &Group;
-
-		// Set up InputText AABB
-		// This will be dependent on the size of the text, or it will be static, or it will be dependent on some image frame
-		InputText.AABB.Min = InputText.Position + Group.Position;
-		InputText.AABB.Max = InputText.AABB.Min + EM::Vec2(200.0f, 20.0f);
-		InputText.TextFont = EG::FontManager::GetFont("WeblySleek_12"); 
-
 		AnimationFrame.ValueText.TextFont = EG::FontManager::GetFont("WeblySleek_12");
 
 		// Set up AnimationSelection AABB
-		// Calculate size of button
 		AnimationSelection.AABB.Min = AnimationSelection.Position;
 		AnimationSelection.AABB.Max = AnimationSelection.AABB.Min + AnimationSelection.Dimensions;
-
-		// Calculate Group's AABB by its children's AABBs 
-		Group.AABB.Min = Group.Position;
-		// Figure out height
-		auto GroupHeight = InputText.AABB.Max.y - Group.AABB.Min.y;
-		auto GroupWidth = InputText.AABB.Max.x - Group.AABB.Min.x;
-		Group.AABB.Max = Group.AABB.Min + EM::Vec2(GroupWidth, GroupHeight);
-
-		// Set up OntionSkin AABB
-		ToggleOnionSkin.AABB.Min = AnimationSelection.AABB.Max - EM::Vec2(18.0f, 6.0f * 20.0f - 5.0f);
-		ToggleOnionSkin.AABB.Max = ToggleOnionSkin.AABB.Min + EM::Vec2(10.0f, 10.0f);
 
 		// Set up PlayButton's signal
 		PlayButton.on_click.connect([&]()
 		{
-			if (TimeIncrement <= 0.0f) 
+			if (PlayButton.State)
 			{
-				TimeIncrement = 0.15f;
-				PlayButton.State = ButtonState::ACTIVE;
-			}
-
-			else 
-			{
-				TimeIncrement = 0.0f;
 				PlayButton.State = ButtonState::INACTIVE;
+				auto SA = SceneAnimation.CurrentAnimation;
+				AnimationFrame.Set(SceneAnimation.CurrentIndex);
+				AnimationDelay.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Delay);
+				AnimationXOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.x);
+				AnimationYOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.y);
+			}
+			else
+			{
+				PlayButton.State = ButtonState::ACTIVE;
 			}
 		});
 
@@ -381,52 +316,59 @@ namespace Enjon { namespace AnimationEditor {
 			SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Offsets.y = AnimationYOffset.Value.get();
 		});
 
+		AnimationTimeScale.lose_focus.connect([&]()
+		{
+			TimeScale = AnimationTimeScale.Value.get();
+		});
+
+		SceneAnimation.on_value_change.connect([&]()
+		{
+			// Reset offsets
+			auto SA = SceneAnimation.CurrentAnimation;
+			AnimationXOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.x);
+			AnimationYOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.y);
+		});
+
 		// Add to GUIManager
 		GUIManager::Add("PlayButton", &PlayButton);
-		GUIManager::Add("NextFrame", &NextFrame);
-		GUIManager::Add("PreviousFrame", &PreviousFrame);
-		GUIManager::Add("OffsetUp", &OffsetUp);
-		GUIManager::Add("OffsetDown", &OffsetDown);
-		GUIManager::Add("OffsetLeft", &OffsetLeft);
-		GUIManager::Add("OffsetRight", &OffsetRight);
-		GUIManager::Add("DelayUp", &DelayUp);
-		GUIManager::Add("DelayDown", &DelayDown);
-		GUIManager::Add("InputText", &InputText);
-		GUIManager::Add("SceneAnimation", &SceneAnimation);
-		GUIManager::Add("ToggleOnionSkin", &ToggleOnionSkin);
-		GUIManager::Add("AnimationSelection", &AnimationSelection);
-		GUIManager::Add("Delay", &AnimationDelay);
 		GUIManager::Add("AnimationPanel", &AnimationPanel);
-
+		GUIManager::Add("SceneGroup", &SceneGroup);
 
 		// Set up AnimationPanel Group
 		AnimationPanel.Name = "Animation Editor";
 		AnimationPanel.Position = EM::Vec2(150.0f, 0.0f);														// Set position of group
+
 		AnimationDelay.Step = 0.1f;
 		AnimationDelay.MinValue = 0.000001f;
+		AnimationDelay.Set(SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay); 
+
 		AnimationFrame.MaxValue = SceneAnimation.CurrentAnimation->Frames.size() - 1;
 		AnimationFrame.MinValue = 0;
-		AnimationFrame.Value = SceneAnimation.CurrentIndex;
+		AnimationFrame.Set(SceneAnimation.CurrentIndex);
 		AnimationFrame.LoopValues = true;
-		AnimationDelay.Value = SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Delay;
+
 		AnimationXOffset.MaxValue = SCREENWIDTH / 2.0f;
 		AnimationXOffset.MinValue = -SCREENWIDTH / 2.0f;
+		AnimationXOffset.Step = 1;
+		AnimationXOffset.Set(SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Offsets.x);
+
 		AnimationYOffset.MaxValue = SCREENHEIGHT / 2.0f;
 		AnimationYOffset.MinValue = -SCREENHEIGHT / 2.0f;
-		// AnimationXOffset.LoopValues = true;
-		// AnimationYOffset.LoopValues = true;
-		AnimationXOffset.Set(SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Offsets.x);
-		AnimationYOffset.Set(SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Offsets.y);
-		AnimationXOffset.Step = 1;
 		AnimationYOffset.Step = 1;
-		AnimationFrame.SetText();
-		AnimationDelay.SetText();
+		AnimationYOffset.Set(SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Offsets.y);
+
+		AnimationTimeScale.MaxValue = 1.0f;
+		AnimationTimeScale.MinValue = 0.000001f;
+		AnimationTimeScale.Step = 0.1f;
+		AnimationTimeScale.Set(1.0f);
 
 		AnimationPanel.AddToGroup(&AnimationSelection, "Animation");
 		AnimationPanel.AddToGroup(&AnimationFrame, "Frame");
 		AnimationPanel.AddToGroup(&AnimationDelay, "Delay");
 		AnimationPanel.AddToGroup(&AnimationXOffset, "XOffset");
 		AnimationPanel.AddToGroup(&AnimationYOffset, "YOffset");
+		AnimationPanel.AddToGroup(&AnimationTimeScale, "Time Scale");
+		AnimationPanel.AddToGroup(&AnimationOnionSkin, "Onion Skin");
 
 		// Draw BG
 		BGBatch->Begin();
@@ -445,11 +387,14 @@ namespace Enjon { namespace AnimationEditor {
 
 	bool Update()
 	{
-		// Keep track of animation delays
-		t += TimeIncrement * TimeScale;
-
 		// Check for quit condition
 		IsRunning = ProcessInput(Input);
+
+		// Update input
+		Input->Update();
+
+		// Keep track of animation delays
+		if (PlayButton.State) t += TimeIncrement * TimeScale;
 
 		// Update cameras
 		Camera.Update();
@@ -457,8 +402,6 @@ namespace Enjon { namespace AnimationEditor {
 
 		// Set up AABB of Scene Animation
 		EGUI::AnimationElement::AABBSetup(&SceneAnimation);
-
-		InputText.Update();
 
 		// Update AnimationPanel
 		AnimationPanel.Update();
@@ -472,8 +415,6 @@ namespace Enjon { namespace AnimationEditor {
 			AnimationYOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.y);
 		}
 
-		// Update input
-		Input->Update();
 
 		return IsRunning;
 	}		
@@ -485,9 +426,6 @@ namespace Enjon { namespace AnimationEditor {
     	auto View 		= HUDCamera.GetCameraMatrix();
     	auto Projection = EM::Mat4::Identity();
 
-    	// Set up clipping mask for entire Animation Info group
-
-
 		// Basic shader for UI
 		BasicShader->Use();
 		{
@@ -498,30 +436,7 @@ namespace Enjon { namespace AnimationEditor {
 			// Draw BG
 			BGBatch->RenderBatch();
 
-			UIBatch->Begin();
-			{
-				// Draw Parent
-				auto Parent = PlayButton.Parent;
-
-				// Draw Play button
-				auto PBF = PlayButton.Frames.at(PlayButton.State);
-				// Calculate these offsets
-				CalculateAABBWithParent(&PlayButton.AABB, &PlayButton);
-				DrawFrame(PBF, PlayButton.Position + Parent->Position, UIBatch, PlayButton.Color);
-
-				// Draw input text
-				UIBatch->Add(
-								EM::Vec4(InputText.AABB.Min, InputText.AABB.Max - InputText.AABB.Min), 
-								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								InputText.Color
-							);
-
-
-			}
-			UIBatch->End();
-			UIBatch->RenderBatch();
-
+			// Reset camera to HUD
 			View = Camera.GetCameraMatrix();
 			BasicShader->SetUniformMat4("view", View);
 
@@ -556,7 +471,7 @@ namespace Enjon { namespace AnimationEditor {
 				}
 
 				// Check for onion skin being on
-				if (ToggleOnionSkin.State == ButtonState::ACTIVE)
+				if (AnimationOnionSkin.State)
 				{
 					auto PreviousIndex = 0;
 
@@ -587,7 +502,6 @@ namespace Enjon { namespace AnimationEditor {
 		}
 		BasicShader->Unuse();
 
-		// Shader for text
 		TextShader->Use();
 		{
 			View = HUDCamera.GetCameraMatrix();
@@ -599,292 +513,22 @@ namespace Enjon { namespace AnimationEditor {
 			// glEnable(GL_SCISSOR_TEST);
 			UIBatch->Begin(EG::GlyphSortType::FRONT_TO_BACK);
 			{
-				// Get font for use
-				auto CurrentFont = EG::FontManager::GetFont("WeblySleek_12");
-				auto XOffset = 110.0f;
-				auto scale = 1.0f;
-				auto YOffset = 70.0f;
-				auto ClipYOffset = YOffset - 25.0f;
-				auto Difference = YOffset - ClipYOffset;
-
-				auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
-
-				// Scissor out entire info area
-				auto ClipWidth = 250.0f;
-				auto ClipHeight = 350.0f;
-
-				EM::Vec2 TitleBarBL(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 5.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipYOffset - Difference);
-
-				// Draw shadow
-				UIBatch->Add(
-								EM::Vec4(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 5.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipHeight - ClipYOffset - 5.0f, ClipWidth, ClipHeight - Difference),
-								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16_Black(), 0.5f)
-							);
-
-				// Draw Widget border
-				EG::DrawRectBorder	(
-										UIBatch,
-										EM::Vec4(
-													HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 5.0f, 
-													HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipHeight - ClipYOffset, 
-													ClipWidth, 
-													ClipHeight
-												),
-										1.0f,
-										EG::SetOpacity(EG::RGBA16_DarkGrey(), 1.0f)
-									); 
-
-
-				// Draw Title Bar
-				UIBatch->Add(
-								EM::Vec4(TitleBarBL.x, TitleBarBL.y, ClipWidth, Difference),
-								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f),
-								-100.0f
-							);
-
-				// Draw title of widget
-				std::string WidgetTitle("Animation Editor");
-
-				auto TitleFont = EG::FontManager::GetFont("WeblySleek");
-				// Calculate total width of title to find placement
-				float TitleAdvance = 0.0f;
-				for (auto& c : WidgetTitle)
-				{
-					TitleAdvance += EG::Fonts::GetAdvance(c, TitleFont, 1.0f);
-				}
-
-				EG::Fonts::PrintText(
-										TitleBarBL.x + ClipWidth / 2.0f - TitleAdvance / 2.0f,
-										TitleBarBL.y + Difference / 3.0f,
-										1.0f,
-										WidgetTitle,
-										TitleFont,
-										*UIBatch,
-										EG::RGBA16_MidGrey()
-									);
-
-
-				// Draw the clipping area
-				UIBatch->Add(
-								EM::Vec4(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 5.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - ClipHeight - ClipYOffset, ClipWidth, ClipHeight - Difference),
-								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::RGBA16(0.12, 0.12, 0.12, 1.0f)
-							);
-
-
-				// Draw Title border
-				EG::DrawRectBorder	(
-										UIBatch,
-										EM::Vec4(
-													TitleBarBL.x, 
-													TitleBarBL.y, 
-													ClipWidth, 
-													Difference
-												),
-										1.5f,
-										EG::SetOpacity(EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0f), 0.6f)
-									); 
-
-				YOffset += 25.0f;
-
-				// Display current frame information
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										std::string("Animation: "), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_MidGrey()
-									);
-
-				// Draw animation selection AABB
-				auto Padding = EM::Vec2(5.0f, 5.0f);
-
-				// Draw Border of animation selection AABB
-				EG::DrawRectBorder	(
-										UIBatch,
-										EM::Vec4(
-													AnimationSelection.AABB.Min, 
-													AnimationSelection.AABB.Max - AnimationSelection.AABB.Min 
-												),
-										1.0f,
-										EG::SetOpacity(EG::RGBA16(0.18, 0.18, 0.18, 1.0f), 0.5f)
-									); 
-
-				UIBatch->Add(
-								EM::Vec4(AnimationSelection.AABB.Min, AnimationSelection.AABB.Max - AnimationSelection.AABB.Min),
-								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								AnimationSelection.Color	
-							);
-
-				// Print out AnimationSelection text
-				{
-					auto ATextHeight = AnimationSelection.AABB.Max.y - AnimationSelection.AABB.Min.y;
-					auto TextHeight = ATextHeight - 20.0f;
-					EG::Fonts::PrintText(	
-											AnimationSelection.AABB.Min.x + Padding.x, 
-											AnimationSelection.AABB.Min.y + Padding.y, 1.0f, 
-											AnimationSelection.Text, 
-											EG::FontManager::GetFont("WeblySleek_10"), 
-											*UIBatch, 
-											EG::RGBA16_White()
-										);
-
-				}
-
-				auto AnimationSelectionYOffset = YOffset;	
-				
-				YOffset += 20.0f;	
-				// Current Frame Name
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										std::string("Frame: "), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_MidGrey()
-									);
-
-
-
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										std::to_string(SceneAnimation.CurrentIndex), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_White()
-									);
-				YOffset += 20.0f;	
-				// Current Frame Delay
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										std::string("Delay: "), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_MidGrey()
-									);
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										std::to_string(CurrentFrame->Delay), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_White()
-									);
-				YOffset += 20.0f;	
-				// Current Frame Y offset
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										std::string("Y Offset: "), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_MidGrey()
-									);
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										std::to_string(static_cast<int32_t>(CurrentFrame->Offsets.y)), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_White()
-									);
-				YOffset += 20.0f;	
-				// Current Frame X Offset
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										std::string("X Offset: "), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_MidGrey()
-									);
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										std::to_string(static_cast<int32_t>(CurrentFrame->Offsets.x)), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_White()
-									);
-				YOffset += 20.0f;	
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										std::string("Onion Skin: "), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_MidGrey()
-									);
-
-				// ToggleOnionSkin Shadow
-				UIBatch->Add(
-								EM::Vec4(ToggleOnionSkin.AABB.Min + EM::Vec2(1.5f, -1.5f), ToggleOnionSkin.AABB.Max - ToggleOnionSkin.AABB.Min), 
-								EM::Vec4(0, 0, 1, 1), 
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16_Black(), 0.4f)
-							);
-
-				EG::DrawRectBorder	(
-										UIBatch, 
-										EM::Vec4(ToggleOnionSkin.AABB.Min, ToggleOnionSkin.AABB.Max - ToggleOnionSkin.AABB.Min),
-										1.0f,
-										EG::SetOpacity(EG::RGBA16_MidGrey(), 0.4f)
-									);
-
-
-				UIBatch->Add(
-								EM::Vec4(ToggleOnionSkin.AABB.Min, ToggleOnionSkin.AABB.Max - ToggleOnionSkin.AABB.Min), 
-								EM::Vec4(0, 0, 1, 1), 
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								ToggleOnionSkin.Color
-							);
-
-				YOffset += 20.0f;	
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										std::string("Time Scale: "), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_MidGrey()
-									);
-				EG::Fonts::PrintText(	
-										HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
-										HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - YOffset, scale, 
-										std::to_string(TimeScale), 
-										CurrentFont, 
-										*UIBatch, 
-										EG::RGBA16_White()
-									);
-
-
 				// Draw AnimationPanel
 				AnimationPanel.Draw(UIBatch);
-
-				// Draw InputText
-				InputText.Draw(UIBatch);
-
 			}
 			UIBatch->End();
 			UIBatch->RenderBatch();
-
 		}
 		TextShader->Unuse();
-	
+
 		return true;
 	}
 
 	bool ProcessInput(EI::InputManager* Input)
 	{
+		auto Camera = CameraManager::GetCamera("SceneCamera");
+		static EM::Vec2 MouseFrameOffset(0.0f);
+
 	    SDL_Event event;
 	    while (SDL_PollEvent(&event)) 
 	    {
@@ -908,6 +552,9 @@ namespace Enjon { namespace AnimationEditor {
 				case SDL_MOUSEMOTION:
 					Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 					break;
+				case SDL_MOUSEWHEEL:
+					Camera->SetScale(Camera->GetScale() + (event.wheel.y) * 0.05f);
+					if (Camera->GetScale() < 0.1f) Camera->SetScale(0.1f);
 				default:
 					break;
 			}
@@ -930,16 +577,33 @@ namespace Enjon { namespace AnimationEditor {
 		if (MouseFocus)
 		{
 			// Check if mouse focus is done processing itself
-			ProcessMouse = MouseFocus->ProcessInput(Input, CameraManager::GetCamera("HUDCamera"));
-
-			// If done, then return from function
-			if (ProcessMouse) 
+			if (MouseFocus->Type == GUIType::SCENE_ANIMATION)
 			{
-				std::cout << "Losing focus after processing complete..." << std::endl;
-				MouseFocus->lose_focus.emit();
-				MouseFocus = nullptr;
-				return true;
+				ProcessMouse = MouseFocus->ProcessInput(Input, CameraManager::GetCamera("SceneCamera"));
+		
+				// If done, then return from function
+				if (ProcessMouse && !Input->IsKeyDown(SDL_BUTTON_LEFT)) 
+				{
+					std::cout << "Losing focus after processing complete..." << std::endl;
+					MouseFocus->lose_focus.emit();
+					MouseFocus = nullptr;
+					return true;
+				}
 			}
+			else
+			{
+				ProcessMouse = MouseFocus->ProcessInput(Input, CameraManager::GetCamera("HUDCamera"));
+	
+				// If done, then return from function
+				if (ProcessMouse) 
+				{
+					std::cout << "Losing focus after processing complete..." << std::endl;
+					MouseFocus->lose_focus.emit();
+					MouseFocus = nullptr;
+					return true;
+				}
+			}
+
 		}
 
 		// Get Mouse Coords
@@ -999,6 +663,53 @@ namespace Enjon { namespace AnimationEditor {
 			}
 		}
 
+		// See whether or not scene animation is covered
+		if (!ChildFound)
+		{
+			// Get SceneAnimation
+			auto SceneMousePos = Input->GetMouseCoords();
+			CameraManager::GetCamera("SceneCamera")->ConvertScreenToWorld(SceneMousePos);
+			auto AABB_SA = &SceneAnimation.AABB;
+
+			// Check whether mouse is over scene animation
+			auto MouseOverAnimation = EP::AABBvsPoint(AABB_SA, SceneMousePos);
+			if (MouseOverAnimation)
+			{
+				if (SceneAnimation.HoverState == HoveredState::OFF_HOVER)
+				{
+					std::cout << "Entering Hover..." << std::endl;
+
+					// Emit on hover action
+					SceneAnimation.on_hover.emit();
+
+					ChildFound = true;
+				}
+			}
+
+			// If mouse was hovering nad has now left
+			else if (SceneAnimation.HoverState == HoveredState::ON_HOVER)
+			{
+				std::cout << "Exiting Hover..." << std::endl;
+
+				// Emit off hover action
+				SceneAnimation.off_hover.emit();
+
+				ChildFound = false;
+			}
+
+			if (MouseOverAnimation && Input->IsKeyDown(SDL_BUTTON_LEFT))
+			{
+				auto X = SceneMousePos.x;
+				auto Y = SceneMousePos.y;
+
+				// Turn off the play button
+				if (PlayButton.State) PlayButton.on_click.emit();
+
+				// Set mouse focus
+	    		MouseFocus = &SceneAnimation;
+			}
+		}
+
 
 		// If no children are found
 		if (!ChildFound)
@@ -1023,15 +734,19 @@ namespace Enjon { namespace AnimationEditor {
 					PrintedDebugNoChild = false;	
 				}
 			}
+
 		}
 
 		if (!MouseFocus)
 		{
+
+	
 			if (Input->IsKeyPressed(SDLK_SPACE))
 			{
 				PlayButton.on_click.emit();
 			}
 		}
+
 
 
 		return true;

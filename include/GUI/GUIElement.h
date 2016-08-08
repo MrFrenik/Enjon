@@ -98,7 +98,7 @@ namespace Enjon { namespace GUI {
 			CursorIndex 	= 0;
 			TextColor 		= EG::RGBA16_White();
 			Color 	 		= EG::RGBA16_DarkGrey();
-			BorderColor 	= EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			BorderColor 	= Color;
 			caret_on 		= false;
 			caret_count 	= 0.0f;
 			TextFont 		= nullptr;
@@ -122,8 +122,7 @@ namespace Enjon { namespace GUI {
 				HoverState = HoveredState::ON_HOVER;
 
 				// Change color of Box
-				Color = EG::SetOpacity(EG::RGBA16_LightGrey(), 0.3f);
-
+				Color = EG::SetOpacity(EG::RGBA16(0.2f, 0.2f, 0.2f, 1.0f), 0.3f);
 			});
 
 			// Set up TextBox's off_hover signal
@@ -223,7 +222,7 @@ namespace Enjon { namespace GUI {
 			{
 				KeyboardInFocus = false;
 				caret_on 		= false;
-				BorderColor 	= EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+				BorderColor 	= EG::SetOpacity(Color, 0.5f);
 			});
 
 			this->on_enter.connect([&]()
@@ -261,9 +260,9 @@ namespace Enjon { namespace GUI {
 						EM::Vec4(0, 0, 1, 1),
 						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						Color, 
-						0.0f, 
-						EG::SpriteBatch::DrawOptions::BORDER, 
-						BorderColor
+						0.0f
+						// EG::SpriteBatch::DrawOptions::BORDER, 
+						// BorderColor
 					);
 
 			// Print text
@@ -489,10 +488,10 @@ namespace Enjon { namespace GUI {
 						EM::Vec4(Position, Dimensions),
 						EM::Vec4(0, 0, 1, 1),
 						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						Color,
+						EG::SetOpacity(Color, 0.4f),
 						0.0f,
 						EG::SpriteBatch::DrawOptions::BORDER | EG::SpriteBatch::DrawOptions::SHADOW,
-						EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.4f),
+						EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.2f),
 						1.0f
 					);
 
@@ -522,12 +521,12 @@ namespace Enjon { namespace GUI {
 
 			EG::Fonts::PrintText(
 									Position.x + Dimensions.x / 2.0f - TitleAdvance / 2.0f,
-									Position.y + Dimensions.y - YOffset + 5.0f,
+									Position.y + Dimensions.y - YOffset + EG::Fonts::GetHeight(Name[0], TitleFont, 1.0f) / 2.0f,
 									1.0f,
 									Name,
 									TitleFont,
 									*Batch,
-									EG::RGBA16_MidGrey()
+									EG::SetOpacity(EG::RGBA16_MidGrey(), 0.6f)
 								);
 
 
@@ -541,23 +540,23 @@ namespace Enjon { namespace GUI {
 								EM::Vec4(Position.x, E->Position.y, Dimensions.x, E->Dimensions.y),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16_MidGrey(), 0.1f),
+								EG::SetOpacity(EG::RGBA16(0.2f, 0.2f, 0.2f, 1.0f), 0.1f),
 								0.0f,
 								EG::SpriteBatch::DrawOptions::BORDER,
-								EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.4f),
+								EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.2f),
 								1.0f
 							);
 				}
 
 				// Print name of child
 				EG::Fonts::PrintText(
-										Position.x + X0Offset, 								// X Position
-										E->Position.y + 5.0f,										// Y Position
-										FontScale,											// Font Scale
-										E->Name + std::string(":"),									// Child Name
-										TextFont,												// Font
-										*Batch,														// SpriteBatch
-										TextColor												// Font Color
+										Position.x + X0Offset, 																						// X Position
+										E->Position.y + E->Dimensions.y / 2.0f - EG::Fonts::GetHeight(E->Name[0], TextFont, FontScale) / 6.0f,		// Y Position
+										FontScale,																									// Font Scale
+										E->Name + std::string(":"),																					// Child Name
+										TextFont,																									// Font
+										*Batch,																										// SpriteBatch
+										TextColor																									// Font Color
 									);
 
 				// Print Child contents
