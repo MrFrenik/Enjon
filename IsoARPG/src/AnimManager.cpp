@@ -28,6 +28,7 @@ namespace AnimManager {
 		AddAnimation(Animations, "Player_Attack_OH_L_SE", EA::CreateAnimation("Player_Attack_OH_L_SE", Frames, atlas, AnimationDir));
 		AddAnimation(Animations, "Player_Attack_OH_R_SE", EA::CreateAnimation("Player_Attack_OH_R_SE", Frames, atlas, AnimationDir));
 		AddAnimation(Animations, "Player_Attack_OH_L_SW", EA::CreateAnimation("Player_Attack_OH_L_SW", Frames, atlas, AnimationDir));
+		AddAnimation(Animations, "CB", 					  EA::CreateAnimation("CB", 				   Frames, atlas, AnimationDir));
 	}
 
 	// Add animations to the animation manager

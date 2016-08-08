@@ -49,8 +49,6 @@ namespace Enjon { namespace GUI {
 
 		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
 		{
-			unsigned int CurrentKey = 0;
-			char CurrentChar = 0;
 			static EM::Vec2 MouseFrameOffset(0.0f);
 			static bool JustFocused = true;
 
@@ -61,11 +59,9 @@ namespace Enjon { namespace GUI {
 		        {
 					case SDL_KEYUP:
 						Input->ReleaseKey(event.key.keysym.sym); 
-						CurrentKey = 0;
 						break;
 					case SDL_KEYDOWN:
 						Input->PressKey(event.key.keysym.sym);
-						CurrentKey = event.key.keysym.sym;
 						break;
 					case SDL_MOUSEBUTTONDOWN:
 						Input->PressKey(event.button.button);
@@ -76,7 +72,6 @@ namespace Enjon { namespace GUI {
 					case SDL_MOUSEMOTION:
 						Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 						break;
-					case SDL_MOUSEWHEEL:
 					default:
 						break;
 				}
@@ -94,6 +89,9 @@ namespace Enjon { namespace GUI {
 	    		{
 	    			MouseFrameOffset = EM::Vec2(MousePos.x - this->AABB.Min.x, MousePos.y - this->AABB.Min.y);
 	    			JustFocused = false;
+
+	    			// Just clicked
+	    			this->on_click.emit();
 	    		}
 
 				// Update offsets

@@ -30,9 +30,8 @@ namespace Enjon { namespace GUI {
 			// Set up PlayButton's on_hover signal
 			this->on_hover.connect([&]()
 			{
-				// We'll just change a color for now
-				// this->Color = EG::RGBA16(0.16f, 0.16f, 0.16f, 1.0f);
-				this->Color = EG::RGBA16_MidGrey();
+				// Change color
+				this->Color = EG::RGBA16(0.2f, 0.2f, 0.2f, 1.0f);
 
 				// Set state to active
 				this->HoverState = HoveredState::ON_HOVER;
@@ -41,7 +40,7 @@ namespace Enjon { namespace GUI {
 			// Set up PlayButton's off_hover signal
 			this->off_hover.connect([&]()
 			{
-				this->Color 		= EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+				this->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 
 				// Set state to inactive
 				this->HoverState = HoveredState::OFF_HOVER;
@@ -67,6 +66,7 @@ namespace Enjon { namespace GUI {
 		}
 
 		std::vector<EA::ImageFrame> Frames;   // Could totally put this in a resource manager of some sort
+		EG::Fonts::Font* TextFont;
 	};
 
 	// Button with Text
@@ -190,10 +190,15 @@ namespace Enjon { namespace GUI {
 			this->JustFocused = false;
 			this->LoopValues = false;
 			this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			this->FontScale = 1.0f;
+			this->YOffset = 0.0f;
 
 			ValueUp.Dimensions 		= EM::Vec2(15.0f, 16.0f);
 			ValueDown.Dimensions 	= EM::Vec2(15.0f, 16.0f);
 			ValueText.Dimensions 	= EM::Vec2(92.0f, 18.0f);
+
+			ValueUp.Text = "+";
+			ValueDown.Text = "-";
 
 			ValueText.Text = "0.50";
 			ValueText.MaxStringLength = 10;
@@ -511,10 +516,10 @@ namespace Enjon { namespace GUI {
 
 				auto F = EG::FontManager::GetFont("WeblySleek");
 				EG::Fonts::PrintText(	
-										ValueUp.Position.x + ValueUp.Dimensions.x / 2.0f - EG::Fonts::GetAdvance('+', F, 1.0f) / 2.0f, 
-										ValueUp.Position.y + ValueUp.Dimensions.y / 2.0f - EG::Fonts::GetHeight('-', F, 1.0f) / 2.0f, 
-										1.0f, 
-										"+", 
+										ValueUp.Position.x + ValueUp.Dimensions.x / 2.0f - EG::Fonts::GetAdvance(ValueUp.Text[0], F, FontScale) / 2.0f, 
+										ValueUp.Position.y + ValueUp.Dimensions.y / 2.0f - EG::Fonts::GetHeight(ValueDown.Text[0], F, FontScale) / 2.0f + YOffset, 
+										FontScale, 
+										ValueUp.Text, 
 										EG::FontManager::GetFont("WeblySleek"), 
 										*Batch, 
 										ValueText.TextColor	
@@ -530,10 +535,10 @@ namespace Enjon { namespace GUI {
 						);
 
 				EG::Fonts::PrintText(	
-										ValueDown.Position.x + ValueDown.Dimensions.x / 2.0f - EG::Fonts::GetAdvance('-', F, 1.0f) / 2.0f, 
-										ValueDown.Position.y + ValueDown.Dimensions.y / 2.0f - EG::Fonts::GetHeight('-', F, 1.0f) / 2.0f, 
-										1.0f, 
-										"-", 
+										ValueDown.Position.x + ValueDown.Dimensions.x / 2.0f - EG::Fonts::GetAdvance(ValueDown.Text[0], F, FontScale) / 2.0f, 
+										ValueDown.Position.y + ValueDown.Dimensions.y / 2.0f - EG::Fonts::GetHeight(ValueDown.Text[0], F, FontScale) / 2.0f + YOffset, 
+										FontScale, 
+										ValueDown.Text, 
 										EG::FontManager::GetFont("WeblySleek"), 
 										*Batch, 
 										ValueText.TextColor	
@@ -549,13 +554,13 @@ namespace Enjon { namespace GUI {
 			ValueText.AABB.Min = ValueText.Position;
 			ValueText.AABB.Max = ValueText.AABB.Min + ValueText.Dimensions;
 
-			ValueUp.Position = EM::Vec2(Position.x + ValueText.Dimensions.x + 2.0f, Position.y + 1.0f);
-			ValueUp.AABB.Min = ValueUp.Position;
-			ValueUp.AABB.Max = ValueUp.AABB.Min + ValueUp.Dimensions;	
-
-			ValueDown.Position = EM::Vec2(ValueUp.Position.x + ValueUp.Dimensions.x, Position.y + 1.0f);
+			ValueDown.Position = EM::Vec2(Position.x + ValueText.Dimensions.x + 2.0f, Position.y + 1.0f);
 			ValueDown.AABB.Min = ValueDown.Position;
 			ValueDown.AABB.Max = ValueDown.AABB.Min + ValueDown.Dimensions;	
+
+			ValueUp.Position = EM::Vec2(ValueDown.Position.x + ValueDown.Dimensions.x, Position.y + 1.0f);
+			ValueUp.AABB.Min = ValueUp.Position;
+			ValueUp.AABB.Max = ValueUp.AABB.Min + ValueUp.Dimensions;	
 
 			// Call update on Input Text
 			ValueText.Update();
@@ -568,6 +573,8 @@ namespace Enjon { namespace GUI {
 		T Step;
 		T MaxValue;
 		T MinValue;
+		float FontScale;
+		float YOffset;
 		GUIButton ValueUp;
 		GUIButton ValueDown;
 		GUITextBox ValueText;
@@ -595,8 +602,10 @@ namespace Enjon { namespace GUI {
 			this->TextColor		= EG::RGBA16_White();
 			this->TextPadding = EM::Vec2(5.0f, 6.0f);
 			this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			this->Dimensions = EM::Vec2(123.0f, 20.0f);
 			this->YOffset = 20.0f;
 			this->XPadding = 1.0f;
+			this->Visibility = VisibleState::VISIBLE;
 
 			// Set up Drop Down Menu Button's on_hover signal
 			this->on_hover.connect([&]()
@@ -852,7 +861,7 @@ namespace Enjon { namespace GUI {
 				index++;
 			}
 
-			this->Dimensions = EM::Vec2(A + 20.0f, 20.0f);
+			// this->Dimensions = EM::Vec2(A + 20.0f, 20.0f);
 		}
 
 		std::vector<GUITextButton*> List;
@@ -913,9 +922,7 @@ namespace Enjon { namespace GUI {
 
 		void Update()
 		{
-			// this->Position.y += 8.0f;
-			// this->AABB.Min.y = Position.y;
-			// this->AABB.Max.y = this->AABB.Min.y + this->Dimensions.y;
+
 		}
 
 		void Draw(EG::SpriteBatch* Batch)

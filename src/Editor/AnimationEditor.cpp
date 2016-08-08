@@ -6,6 +6,7 @@
 #include "Graphics/SpriteBatch.h"
 #include "Graphics/CursorManager.h"
 #include "GUI/GUIAnimationElement.h"
+#include "GUI/GUIGroup.h"
 #include "Physics/AABB.h"
 #include "Utils/Errors.h"
 #include "Defines.h"
@@ -80,9 +81,6 @@ namespace Enjon { namespace AnimationEditor {
 
 	/*-- Function Delcarations --*/
 	bool ProcessInput(EI::InputManager* Input);
-	void CalculateAABBWithParent(EP::AABB* A, GUIButton* Button);
-	bool IsModifier(unsigned int Key);
-	bool HasChildren(GUIElementBase* E);
 
 	/*-- Constants --*/
 	const std::string AnimTextureDir("../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png");
@@ -101,6 +99,7 @@ namespace Enjon { namespace AnimationEditor {
 	GUIGroup					SceneGroup;
 	GUIGroup					AnimationPanel;
 	GUIButton 					PlayButton;
+	GUIButton 					AnimationPanelIcon;
 	GUIRadialButton				AnimationOnionSkin;
 	GUIDropDownButton 			AnimationSelection;	
 	GUIAnimationElement 		SceneAnimation;
@@ -118,11 +117,12 @@ namespace Enjon { namespace AnimationEditor {
 	float SCREENWIDTH;
 	float SCREENHEIGHT;
 
-	float caret_count = 0.0f;
-	bool caret_on = true;
 	float TimeScale = 1.0f;
 	float TimeIncrement = 0.15f;
 	float t = 0.0f;
+
+	float CameraScaleVelocityGoal = 0.0f;
+	float CameraScaleVelocity = 0.0f;
 
 	bool IsRunning = true;
 	
@@ -270,6 +270,14 @@ namespace Enjon { namespace AnimationEditor {
 			}
 		});
 
+		PlayButton.Dimensions = EM::Vec2(16.0f, 10.0f);
+		PlayButton.AABB.Min = PlayButton.Position;
+		PlayButton.AABB.Max = PlayButton.AABB.Min + PlayButton.Dimensions;
+		PlayButton.Text = "J";
+		PlayButton.TextFont = EG::FontManager::GetFont("Arrows7");
+		PlayButton.State = ButtonState::INACTIVE;
+
+
 		// Additional on click properties for buttons
 		AnimationFrame.on_click.connect([&]()
 		{
@@ -329,14 +337,45 @@ namespace Enjon { namespace AnimationEditor {
 			AnimationYOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.y);
 		});
 
+		SceneAnimation.on_click.connect([&]()
+		{
+			if (!AnimationPanel.Visibility) AnimationPanelIcon.on_click.emit();
+		});
+
+		AnimationPanelIcon.on_click.connect([&]()
+		{
+			// Turn on animation panel
+			AnimationPanel.Visibility = VisibleState::VISIBLE;
+
+			// Turn off icon
+			AnimationPanelIcon.Visibility = VisibleState::HIDDEN;
+		});
+
+		AnimationPanel.MinimizeButton.on_click.connect([&]()
+		{
+			std::cout << "Here, queer!" << std::endl;
+			// Turn on icon
+			AnimationPanelIcon.Visibility = VisibleState::VISIBLE;
+		});
+
 		// Add to GUIManager
 		GUIManager::Add("PlayButton", &PlayButton);
 		GUIManager::Add("AnimationPanel", &AnimationPanel);
 		GUIManager::Add("SceneGroup", &SceneGroup);
 
+		// Set up Animation Icon button
+		AnimationPanelIcon.Name = "Animation Icon";
+		AnimationPanelIcon.Position = EM::Vec2(-SCREENWIDTH / 2.0f + 20.0f, -SCREENHEIGHT / 2.0f + 20.0f);
+		AnimationPanelIcon.Dimensions = EM::Vec2(12.0f, 12.0f);
+		AnimationPanelIcon.AABB.Min = AnimationPanelIcon.Position;
+		AnimationPanelIcon.AABB.Max = AnimationPanelIcon.AABB.Min + AnimationPanelIcon.Dimensions;
+		AnimationPanelIcon.Text = "x";
+		AnimationPanelIcon.TextFont = EG::FontManager::GetFont("Arrows7");
+		AnimationPanelIcon.Visibility = VisibleState::HIDDEN;
+
 		// Set up AnimationPanel Group
 		AnimationPanel.Name = "Animation Editor";
-		AnimationPanel.Position = EM::Vec2(150.0f, 0.0f);														// Set position of group
+		AnimationPanel.Position = EM::Vec2(-SCREENWIDTH / 2.0f + 40.0f, 20.0f);														// Set position of group
 
 		AnimationDelay.Step = 0.1f;
 		AnimationDelay.MinValue = 0.000001f;
@@ -346,6 +385,11 @@ namespace Enjon { namespace AnimationEditor {
 		AnimationFrame.MinValue = 0;
 		AnimationFrame.Set(SceneAnimation.CurrentIndex);
 		AnimationFrame.LoopValues = true;
+		AnimationFrame.ValueUp.Text = ">";
+		AnimationFrame.ValueDown.Text = "<";
+		AnimationFrame.FontScale = 0.8f;
+		AnimationFrame.YOffset = 3.0f;
+
 
 		AnimationXOffset.MaxValue = SCREENWIDTH / 2.0f;
 		AnimationXOffset.MinValue = -SCREENWIDTH / 2.0f;
@@ -369,6 +413,7 @@ namespace Enjon { namespace AnimationEditor {
 		AnimationPanel.AddToGroup(&AnimationYOffset, "YOffset");
 		AnimationPanel.AddToGroup(&AnimationTimeScale, "Time Scale");
 		AnimationPanel.AddToGroup(&AnimationOnionSkin, "Onion Skin");
+		AnimationPanel.AddToGroup(&PlayButton, "Controls");
 
 		// Draw BG
 		BGBatch->Begin();
@@ -400,6 +445,19 @@ namespace Enjon { namespace AnimationEditor {
 		Camera.Update();
 		HUDCamera.Update();
 
+		// Zoom in with camera velocity
+		float Max = 0.2f;
+		CameraScaleVelocity = Enjon::Math::Lerp(CameraScaleVelocityGoal, CameraScaleVelocity, 0.0065f);
+		if (std::fabs(CameraScaleVelocity) > Max) 
+		{
+			if (CameraScaleVelocity < 0.0f)  CameraScaleVelocity = -Max;
+			else CameraScaleVelocity = Max;
+		}
+
+		// Set scale of camera
+		Camera.SetScale(Camera.GetScale() + CameraScaleVelocity);
+		if (Camera.GetScale() < 0.1f) Camera.SetScale(0.1f);
+
 		// Set up AABB of Scene Animation
 		EGUI::AnimationElement::AABBSetup(&SceneAnimation);
 
@@ -414,7 +472,6 @@ namespace Enjon { namespace AnimationEditor {
 			AnimationXOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.x);
 			AnimationYOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.y);
 		}
-
 
 		return IsRunning;
 	}		
@@ -514,7 +571,84 @@ namespace Enjon { namespace AnimationEditor {
 			UIBatch->Begin(EG::GlyphSortType::FRONT_TO_BACK);
 			{
 				// Draw AnimationPanel
-				AnimationPanel.Draw(UIBatch);
+				if (AnimationPanel.Visibility) AnimationPanel.Draw(UIBatch);
+
+				// Draw AnimationIcon
+				if (AnimationPanelIcon.Visibility)
+				{
+					// Draw border
+					UIBatch->Add(
+									EM::Vec4(AnimationPanelIcon.Position, AnimationPanelIcon.Dimensions),
+									EM::Vec4(0, 0, 1, 1),
+									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+									AnimationPanelIcon.Color
+								);
+
+					// Draw text
+					EG::Fonts::PrintText(
+											AnimationPanelIcon.Position.x + EG::Fonts::GetAdvance(AnimationPanelIcon.Text[0], AnimationPanelIcon.TextFont, 1.0f) / 2.0f + 3.0f,
+											AnimationPanelIcon.Position.y + EG::Fonts::GetHeight(AnimationPanelIcon.Text[0], AnimationPanelIcon.TextFont, 1.0f) / 2.0f,
+											1.0f,
+											AnimationPanelIcon.Text,
+											AnimationPanelIcon.TextFont,
+											*UIBatch,
+											EG::SetOpacity(EG::RGBA16_MidGrey(), 0.6f), 
+											EG::Fonts::TextStyle::SHADOW,
+											EM::ToRadians(180.0f)
+										);
+				}
+
+				if (AnimationPanel.Visibility)
+				{
+					// Draw Playbutton
+					UIBatch->Add(
+									EM::Vec4(PlayButton.Position, PlayButton.Dimensions), 
+									EM::Vec4(0, 0, 1, 1), 
+									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+									PlayButton.Color,
+									0.0f,
+									EG::SpriteBatch::DrawOptions::BORDER | EG::SpriteBatch::DrawOptions::SHADOW,
+									EG::SetOpacity(EG::RGBA16_MidGrey(), 0.3f),
+									1.0f,
+									EM::Vec2(2.0f, 2.0f)
+								);
+		
+					// Draw text
+					if (!PlayButton.State)
+					{
+						EG::Fonts::PrintText(
+												PlayButton.Position.x + EG::Fonts::GetHeight(PlayButton.Text[0], PlayButton.TextFont, 1.0f) / 2.0f + 2.0f,
+												PlayButton.Position.y + EG::Fonts::GetAdvance(PlayButton.Text[0], PlayButton.TextFont, 1.0f) / 2.0f + 1.0f,
+												1.0f,
+												PlayButton.Text,
+												PlayButton.TextFont,
+												*UIBatch,
+												EG::SetOpacity(EG::RGBA16_MidGrey(), 0.6f), 
+												EG::Fonts::TextStyle::SHADOW,
+												EM::ToRadians(-90.0f)
+											);
+					}
+					else
+					{
+						// Draw Playbutton
+						auto Offset = EM::Vec2(PlayButton.Dimensions.x / 4.0f, PlayButton.Dimensions.y / 4.0f);
+						UIBatch->Add(
+										EM::Vec4(PlayButton.Position + Offset, PlayButton.Dimensions.x / 2.0f, PlayButton.Dimensions.y / 1.5f), 
+										EM::Vec4(0, 0, 1, 1), 
+										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+										EG::SetOpacity(EG::RGBA16_MidGrey(), 0.6f),
+										0.0f,
+										EG::SpriteBatch::DrawOptions::SHADOW,
+										EG::RGBA16_White(),
+										1.0f,
+										EM::Vec2(1.0f, 1.0f)
+									);
+
+					}
+				}
+
+
+
 			}
 			UIBatch->End();
 			UIBatch->RenderBatch();
@@ -553,8 +687,9 @@ namespace Enjon { namespace AnimationEditor {
 					Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 					break;
 				case SDL_MOUSEWHEEL:
-					Camera->SetScale(Camera->GetScale() + (event.wheel.y) * 0.05f);
-					if (Camera->GetScale() < 0.1f) Camera->SetScale(0.1f);
+					// Camera->SetScale(Camera->GetScale() + (event.wheel.y) * 0.05f);
+					// if (Camera->GetScale() < 0.1f) Camera->SetScale(0.1f);
+					CameraScaleVelocity += event.wheel.y * 0.05f;
 				default:
 					break;
 			}
@@ -589,7 +724,24 @@ namespace Enjon { namespace AnimationEditor {
 					MouseFocus = nullptr;
 					return true;
 				}
+				else return true;	
 			}
+
+			else if (MouseFocus->Type == GUIType::GROUP)
+			{
+				ProcessMouse = MouseFocus->ProcessInput(Input, CameraManager::GetCamera("HUDCamera"));
+		
+				// If done, then return from function
+				if (ProcessMouse && !Input->IsKeyDown(SDL_BUTTON_LEFT)) 
+				{
+					std::cout << "Losing focus after processing complete..." << std::endl;
+					MouseFocus->lose_focus.emit();
+					MouseFocus = nullptr;
+					return true;
+				}
+				else return true;
+			}
+
 			else
 			{
 				ProcessMouse = MouseFocus->ProcessInput(Input, CameraManager::GetCamera("HUDCamera"));
@@ -610,58 +762,76 @@ namespace Enjon { namespace AnimationEditor {
 		auto MouseCoords = Input->GetMouseCoords();
 		CameraManager::GetCamera("HUDCamera")->ConvertScreenToWorld(MouseCoords);
 
-		bool ChildFound = false;
-		for (auto C : G->Children)
+		// Check for minimize button in 
+		auto MouseOverMinimizeButton = EP::AABBvsPoint(&G->MinimizeButton.AABB, MouseCoords);
+		if (MouseOverMinimizeButton)
 		{
-			auto AABB = &C->AABB;
+			if (!G->MinimizeButton.HoverState) G->MinimizeButton.on_hover.emit();
 
-			C->check_children.emit(Input, CameraManager::GetCamera("HUDCamera"));
-
-			if (EP::AABBvsPoint(AABB, MouseCoords))
+			if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
 			{
-				// Set to true
-				ChildFound = true;
-
-				// Set debug to false
-				PrintedDebugNoChild = false;
-
-				// Set on hover
-				C->on_hover.emit();
-
-				// Set the hovered element
-				G->HoveredElement = C;
-
-				// If clicked while hovering
-				if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
-				{
-					C->on_click.emit();
-
-					if (MouseFocus == nullptr) 
-					{
-						std::cout << "Gaining Focus: " << C->Name << std::endl;
-						MouseFocus = C;
-					}
-
-					// If not mouse focus
-					else if (MouseFocus != C && C->Depth >= MouseFocus->Depth && !ProcessMouse) 
-					{
-						std::cout << "Switching Focus: " << MouseFocus->Name << " to " << C->Name << std::endl;
-
-						// Lose focus
-						MouseFocus->lose_focus.emit();
-	
-						// Set focus	
-						MouseFocus = C;
-					}
-
-				}
-			}
-
-			else
-			{
-				C->off_hover.emit();
+				G->MinimizeButton.on_click.emit();
+				return true;
 			}
 		}
+		else if (G->MinimizeButton.HoverState) G->MinimizeButton.off_hover.emit();
+
+		bool ChildFound = false;
+
+		if (G->Visibility)
+		{
+			for (auto C : G->Children)
+			{
+				auto AABB = &C->AABB;
+
+				C->check_children.emit(Input, CameraManager::GetCamera("HUDCamera"));
+
+				if (EP::AABBvsPoint(AABB, MouseCoords))
+				{
+					// Set to true
+					ChildFound = true;
+
+					// Set debug to false
+					PrintedDebugNoChild = false;
+
+					// Set on hover
+					C->on_hover.emit();
+
+					// Set the hovered element
+					G->HoveredElement = C;
+
+					// If clicked while hovering
+					if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
+					{
+						C->on_click.emit();
+
+						if (MouseFocus == nullptr) 
+						{
+							std::cout << "Gaining Focus: " << C->Name << std::endl;
+							MouseFocus = C;
+						}
+
+						// If not mouse focus
+						else if (MouseFocus != C && C->Depth >= MouseFocus->Depth && !ProcessMouse) 
+						{
+							std::cout << "Switching Focus: " << MouseFocus->Name << " to " << C->Name << std::endl;
+
+							// Lose focus
+							MouseFocus->lose_focus.emit();
+		
+							// Set focus	
+							MouseFocus = C;
+						}
+					}
+				}
+
+				else
+				{
+					C->off_hover.emit();
+				}
+			}
+		}
+
 
 		// See whether or not scene animation is covered
 		if (!ChildFound)
@@ -699,17 +869,70 @@ namespace Enjon { namespace AnimationEditor {
 
 			if (MouseOverAnimation && Input->IsKeyDown(SDL_BUTTON_LEFT))
 			{
-				auto X = SceneMousePos.x;
-				auto Y = SceneMousePos.y;
-
 				// Turn off the play button
 				if (PlayButton.State) PlayButton.on_click.emit();
 
 				// Set mouse focus
 	    		MouseFocus = &SceneAnimation;
 			}
-		}
 
+			if (AnimationPanel.Visibility)
+			{
+				auto MouseOverAnimationPanel = EP::AABBvsPoint(&AnimationPanel.AABB, MouseCoords);
+				if (MouseOverAnimationPanel && !AnimationPanel.MinimizeButton.HoverState)
+				{
+					if (!AnimationPanel.HoverState) AnimationPanel.on_hover.emit();
+					ChildFound = true;
+				}
+				else
+				{
+					if (AnimationPanel.HoverState) AnimationPanel.off_hover.emit();
+					ChildFound = false;
+				}
+
+				if (MouseOverAnimationPanel && Input->IsKeyDown(SDL_BUTTON_LEFT))
+				{
+					// Set mouse focus
+		    		MouseFocus = &AnimationPanel;
+				}
+			}	
+
+			if (AnimationPanelIcon.Visibility)
+			{
+				auto MouseOverAnimationIcon = EP::AABBvsPoint(&AnimationPanelIcon.AABB, MouseCoords);
+				if (MouseOverAnimationIcon)
+				{
+					if (!AnimationPanelIcon.HoverState) AnimationPanelIcon.on_hover.emit();
+					ChildFound = true;
+				}
+				else
+				{
+					if (AnimationPanelIcon.HoverState) AnimationPanelIcon.off_hover.emit();
+					ChildFound = false;
+				}
+
+				if (MouseOverAnimationIcon && Input->IsKeyPressed(SDL_BUTTON_LEFT))
+				{
+					AnimationPanelIcon.on_click.emit();
+				}
+			}
+
+			auto MouseOverPlayButton = EP::AABBvsPoint(&PlayButton.AABB, MouseCoords);
+			if (MouseOverPlayButton)
+			{
+				if (!PlayButton.HoverState) PlayButton.on_hover.emit();
+				ChildFound = true;
+			}
+			else
+			{
+				if (PlayButton.HoverState) PlayButton.off_hover.emit();
+			}
+
+			if (MouseOverPlayButton && Input->IsKeyPressed(SDL_BUTTON_LEFT))
+			{
+				PlayButton.on_click.emit();
+			}
+		}
 
 		// If no children are found
 		if (!ChildFound)
@@ -734,13 +957,10 @@ namespace Enjon { namespace AnimationEditor {
 					PrintedDebugNoChild = false;	
 				}
 			}
-
 		}
 
 		if (!MouseFocus)
 		{
-
-	
 			if (Input->IsKeyPressed(SDLK_SPACE))
 			{
 				PlayButton.on_click.emit();
@@ -751,524 +971,4 @@ namespace Enjon { namespace AnimationEditor {
 
 		return true;
 	}
-
-
-	/*
-	bool ProcessInput(EI::InputManager* Input)
-	{
-		static bool WasHovered = false;
-		static EM::Vec2 MouseFrameOffset(0.0f);
-		unsigned int CurrentKey = 0;
-		static std::string str = "";
-		char CurrentChar = 0;
-
-		if (KeyboardFocus)
-		{
-			SDL_StartTextInput();
-		}
-		else 
-		{
-			SDL_StopTextInput();
-			CurrentChar = 0;
-		}
-
-	    SDL_Event event;
-	    while (SDL_PollEvent(&event)) {
-	        switch (event.type) {
-	            case SDL_QUIT:
-	                return false;
-	                break;
-				case SDL_KEYUP:
-					Input->ReleaseKey(event.key.keysym.sym); 
-					CurrentKey = 0;
-					break;
-				case SDL_KEYDOWN:
-					Input->PressKey(event.key.keysym.sym);
-					CurrentKey = event.key.keysym.sym;
-					break;
-				case SDL_MOUSEBUTTONDOWN:
-					Input->PressKey(event.button.button);
-					break;
-				case SDL_MOUSEBUTTONUP:
-					Input->ReleaseKey(event.button.button);
-					break;
-				case SDL_MOUSEMOTION:
-					Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
-					break;
-				case SDL_MOUSEWHEEL:
-					Camera->SetScale(Camera->GetScale() + (event.wheel.y) * 0.05f);
-					if (Camera->GetScale() < 0.1f) Camera->SetScale(0.1f);
-				case SDL_TEXTINPUT:
-					str = event.text.text;
-					CurrentChar = event.text.text[0];
-					std::cout << str << std::endl;
-				default:
-					break;
-			}
-	    }
-
-		// Get Mouse Position
-		auto MousePos = Input->GetMouseCoords();
-		CameraManager::GetCamera("HUDCamera")->ConvertScreenToWorld(MousePos);
-
-		// Get play button
-		auto PlayButton = static_cast<GUIButton*>(GUIManager::Get("PlayButton"));
-		auto AABB_PB = &PlayButton->AABB;
-
-		// Check whether the mouse is hovered over the play button
-		auto MouseOverButton = EP::AABBvsPoint(AABB_PB, MousePos);
-
-		if (MouseOverButton)
-		{
-			if (PlayButton->HoverState == HoveredState::OFF_HOVER)
-			{
-				std::cout << "Entering Hover..." << std::endl;
-
-				// Emit on hover action
-				PlayButton->on_hover.emit();
-			}
-		}
-
-		// If the mouse was hovering and has now left
-		else if (PlayButton->HoverState == HoveredState::ON_HOVER)
-		{
-			std::cout << "Exiting Hover..." << std::endl;
-
-			// Emit off hover action
-			PlayButton->off_hover.emit();
-		}
-
-		// Get Toggle Onion skin button
-		auto ToggleOnionSkin = static_cast<GUIRadialButton*>(GUIManager::Get("ToggleOnionSkin"));
-		auto AABB_OS = &ToggleOnionSkin->AABB;
-
-		// Check whether mouse button over toggle onion skin button
-		auto MouseOverOnionSkin = EP::AABBvsPoint(AABB_OS, MousePos);
-
-		if (MouseOverOnionSkin)
-		{
-			if (ToggleOnionSkin->HoverState == HoveredState::OFF_HOVER)
-			{
-				std::cout << "Hovering onion skin" << std::endl;
-
-				// Emit hover action
-				ToggleOnionSkin->on_hover.emit();
-			}
-		}
-		else if (ToggleOnionSkin->HoverState == HoveredState::ON_HOVER)
-		{
-			std::cout << "Exiting Hover..." << std::endl;
-
-			// Emit off hover action
-			ToggleOnionSkin->off_hover.emit();
-		}
-
-		// Get animation selection button
-		auto AnimationSelection = static_cast<GUIDropDownButton*>(GUIManager::Get("AnimationSelection"));
-		auto AABB_AS = &AnimationSelection->AABB;
-
-		// Check whether mouse button over animation selection button
-		auto MouseOverAnimationSelection = EP::AABBvsPoint(AABB_AS, MousePos);
-
-		if (MouseOverAnimationSelection)
-		{
-			if (AnimationSelection->HoverState == HoveredState::OFF_HOVER)
-			{
-				std::cout << "Entering Hover..." << std::endl;
-
-				// Emit on hover action
-				AnimationSelection->on_hover.emit();
-			}
-		}
-		else if (AnimationSelection->HoverState == HoveredState::ON_HOVER)
-		{
-			std::cout << "Exiting Hover..." << std::endl;
-
-			// Emit off hover action
-			AnimationSelection->off_hover.emit();
-		}
-
-		// Get InputText
-		auto InputText = static_cast<GUITextBox*>(GUIManager::Get("InputText"));
-		auto AABB_IT = &InputText->AABB;
-
-		// Check whether mouse is over the input text
-		auto MouseOverText = EP::AABBvsPoint(AABB_IT, MousePos);
-
-		if (MouseOverText)
-		{
-			if (InputText->HoverState == HoveredState::OFF_HOVER)
-			{
-				std::cout << "Entering Hover..." << std::endl;
-
-				// Emit on_hover action
-				InputText->on_hover.emit();
-			}
-		}
-
-		// If the mouse was hovering and has now left
-		else if (InputText->HoverState == HoveredState::ON_HOVER)
-		{
-			std::cout << "Exiting Hover..." << std::endl;
-
-			// Emit off hover action
-			InputText->off_hover.emit();
-		}
-
-		// Check list components for being hovered over
-		static EGUI::GUITextButton* ListElement = nullptr;
-		if (AnimationSelection->State == ButtonState::ACTIVE)
-		{
-			bool Found = false;
-			for (auto i = 0; i < AnimationSelection->List.size(); ++i)
-			{
-				auto e = AnimationSelection->List.at(i);
-
-				if (EP::AABBvsPoint(&e->AABB, MousePos))
-				{
-					// If previously assigned but now not the same, then emit off hover
-					if (ListElement && ListElement != e)
-					{
-						if (ListElement->HoverState == HoveredState::ON_HOVER) ListElement->off_hover.emit();
-					}
-
-					// Assign list element
-					ListElement = e;
-
-					// If not hoverstate active, then emit
-					if (ListElement->HoverState == HoveredState::OFF_HOVER) 
-					{
-						ListElement = e;
-						e->on_hover.emit();
-					}
-
-					// Found, so break out of loop
-					Found = true;
-					break;
-				}
-			}
-			// Nothing was selected but previous list element assigned
-			if (!Found && ListElement)
-			{
-				ListElement->off_hover.emit();
-				ListElement = nullptr;
-			}
-		}
-		// If there was something, need to get rid of it
-		else if (ListElement)
-		{
-			ListElement->off_hover.emit();
-			ListElement = nullptr;
-		}
-
-
-		// Get SceneAnimation
-		auto SceneAnimation = static_cast<GUIAnimationElement*>(GUIManager::Get("SceneAnimation"));
-		auto SceneMousePos = Input->GetMouseCoords();
-		CameraManager::GetCamera("SceneCamera")->ConvertScreenToWorld(SceneMousePos);
-		auto AABB_SA = &SceneAnimation->AABB;
-
-		// Check whether mouse is over scene animation
-		auto MouseOverAnimation = EP::AABBvsPoint(AABB_SA, SceneMousePos);
-		if (MouseOverAnimation)
-		{
-			if (SceneAnimation->HoverState == HoveredState::OFF_HOVER)
-			{
-				std::cout << "Entering Hover..." << std::endl;
-
-				// Emit on hover action
-				SceneAnimation->on_hover.emit();
-			}
-		}
-
-		// If mouse was hovering nad has now left
-		else if (SceneAnimation->HoverState == HoveredState::ON_HOVER)
-		{
-			std::cout << "Exiting Hover..." << std::endl;
-
-			// Emit off hover action
-				SceneAnimation->off_hover.emit();
-		}
-
-
-	    // Basic check for click
-	    // These events need to be captured and passed to the GUI manager as signals
-	    if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
-	    {
-	    	auto X = MousePos.x;
-	    	auto Y = MousePos.y;
-
-	    	std::cout << "Mouse Pos: " << MousePos << std::endl;
-
-	    	// Do AABB test with PlayButton
-	    	if (MouseOverButton)
-	    	{
-	    		SelectedGUIElement = PlayButton;
-	    		PlayButton->on_click.emit();
-	    		MouseFocus = nullptr;
-	    	}
-
-	    	else if (MouseOverOnionSkin)
-	    	{
-	    		ToggleOnionSkin->on_click.emit();
-	    		if (AnimationSelection->State) AnimationSelection->on_click.emit();
-	    	}
-
-	    	// Do AABB test with AnimationSelection List Element
-	    	else if (ListElement)
-	    	{
-	    		ListElement->on_click.emit(ListElement);
-	    		ListElement->off_hover.emit();
-	    		ListElement = nullptr;
-	    		MouseFocus = nullptr;
-	    	}
-
-	    	else if (MouseOverAnimationSelection)
-	    	{
-	    		SelectedGUIElement = AnimationSelection;
-	    		AnimationSelection->on_click.emit();
-	    		MouseFocus = AnimationSelection;
-	    	}
-
-	    	else if (MouseOverText)
-	    	{
-	    		SelectedGUIElement = InputText;
-	    		KeyboardFocus = InputText;
-	    		MouseFocus = nullptr; 			// The way to do this eventually is set all of these focuses here to this element but define whether or not it can move
-	    		InputText->on_click.emit(MousePos.x);
-	    	}
-
-	    	else if (MouseOverAnimation)
-	    	{
-				// Turn off the play button
-				if (PlayButton->State == ButtonState::ACTIVE) PlayButton->on_click.emit();
-
-	    		SelectedGUIElement = SceneAnimation;
-	    		MouseFocus = SceneAnimation;
-	    		MouseFrameOffset = EM::Vec2(SceneMousePos.x - SceneAnimation->AABB.Min.x, SceneMousePos.y - SceneAnimation->AABB.Min.y);
-	    	}
-
-	    	else
-	    	{
-	    		// Deselect current thing if was selected
-	    		if (MouseFocus) 
-    			{
-		    		if (MouseFocus == AnimationSelection && AnimationSelection->State) MouseFocus->on_click.emit();
-		    	}
-
-	    		// This is incredibly not thought out at all...
-	    		SelectedGUIElement = nullptr;
-	    		MouseFocus = nullptr;
-	    		KeyboardFocus = nullptr;
-	    	}
-	    }
-
-	    // NOTE(John): Again, these input manager states will be hot loaded in, so this will be cleaned up eventaully...
-		if (MouseFocus)
-		{
-			if (Input->IsKeyDown(SDL_BUTTON_LEFT))
-			{
-				auto X = SceneMousePos.x;
-				auto Y = SceneMousePos.y;
-
-				if (MouseFocus->Type == GUIType::SCENE_ANIMATION)
-				{
-					auto Anim = static_cast<GUIAnimationElement*>(MouseFocus);
-					auto CurrentAnimation = Anim->CurrentAnimation;	
-
-					// Find bottom corner of current frame
-					auto BottomCorner = Anim->AABB.Min;
-
-					// Update offsets
-					CurrentAnimation->Frames.at(Anim->CurrentIndex).Offsets = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
-				}
-			}
-		}
-
-		if (Input->IsKeyPressed(SDLK_ESCAPE))
-		{
-			return false;	
-		}
-
-		if (KeyboardFocus && CurrentKey != 0)
-		{
-			// Check for modifiers first
-			if (!IsModifier(CurrentKey))
-			{
-			if (CurrentKey == SDLK_BACKSPACE) InputText->on_backspace.emit();
-				else if (CurrentKey == SDLK_LEFT)
-				{
-					if (InputText->CursorIndex > 0) InputText->CursorIndex--;
-				}
-				else if (CurrentKey == SDLK_RIGHT)
-				{
-					if (InputText->CursorIndex < InputText->Text.length()) InputText->CursorIndex++;
-				}
-				else InputText->on_keyboard.emit(str);
-			}
-		}
-
-
-		else if (KeyboardFocus == nullptr)
-		{
-			// Switch off input text
-			InputText->KeyboardInFocus = false;
-
-			if (Input->IsKeyDown(SDLK_e))
-			{
-				Camera->SetScale(Camera->GetScale() + 0.05f);
-			}
-			if (Input->IsKeyDown(SDLK_q))
-			{
-				auto S = Camera->GetScale();
-				if (S > 0.1f) Camera->SetScale(S - 0.05f);
-			}
-			if (Input->IsKeyPressed(SDLK_SPACE))
-			{
-				// Get button from button manager
-				auto PlayButton = static_cast<GUIButton*>(GUIManager::Get("PlayButton"));
-
-				// Press play
-				PlayButton->on_click.emit();
-			}
-			if (Input->IsKeyDown(SDLK_RIGHT))
-			{
-				// Get button from button manager
-				auto OffsetRight = static_cast<GUIButton*>(GUIManager::Get("OffsetRight"));
-
-				// Press next frame
-				OffsetRight->on_click.emit();	
-			}
-			if (Input->IsKeyDown(SDLK_LEFT))
-			{
-				// Get button from button manager
-				auto OffsetLeft = static_cast<GUIButton*>(GUIManager::Get("OffsetLeft"));
-
-				// Press next frame
-				OffsetLeft->on_click.emit();
-			}
-			if (Input->IsKeyDown(SDLK_UP))
-			{
-				// Get button from button manager
-				auto OffsetUp = static_cast<GUIButton*>(GUIManager::Get("OffsetUp"));
-
-				// Press offset up
-				OffsetUp->on_click.emit();
-			}
-			if (Input->IsKeyDown(SDLK_DOWN))
-			{
-				// Get button from button manager
-				auto OffsetDown = static_cast<GUIButton*>(GUIManager::Get("OffsetDown"));
-
-				// Press offset Down
-				if (OffsetDown)
-				{
-					OffsetDown->on_click.emit();
-				}
-			}
-			if (Input->IsKeyPressed(SDLK_m))
-			{
-				// Get button from button manager
-				auto NextFrame = static_cast<GUIButton*>(GUIManager::Get("NextFrame"));
-
-				// Press offset Down
-				if (NextFrame)
-				{
-					NextFrame->on_click.emit();
-				}
-			}
-			if (Input->IsKeyPressed(SDLK_n))
-			{
-				// Get button from button manager
-				auto PreviousFrame = static_cast<GUIButton*>(GUIManager::Get("PreviousFrame"));
-
-				// Press offset Down
-				if (PreviousFrame)
-				{
-					PreviousFrame->on_click.emit();
-				}
-
-			}
-			if (Input->IsKeyPressed(SDLK_LEFTBRACKET))
-			{
-				// Get button from button manager
-				auto DelayDown = static_cast<GUIButton*>(GUIManager::Get("DelayDown"));
-
-				// Emit
-				if (DelayDown)
-				{
-					DelayDown->on_click.emit();	
-				}	
-			}
-			if (Input->IsKeyPressed(SDLK_RIGHTBRACKET))
-			{
-				// Get button from button manager
-				auto DelayUp = static_cast<GUIButton*>(GUIManager::Get("DelayUp"));
-
-				// Emit
-				if (DelayUp)
-				{
-					DelayUp->on_click.emit();
-				}
-			}
-			if (Input->IsKeyPressed(SDLK_o))
-			{
-				// Get button from button manager
-				auto ToggleOnionSkin = static_cast<GUIButton*>(GUIManager::Get("ToggleOnionSkin"));
-
-				// Emit
-				if (ToggleOnionSkin)
-				{
-					ToggleOnionSkin->on_click.emit();
-				}
-			}
-
-			if (Input->IsKeyDown(SDLK_t))
-			{
-				if (TimeScale > 0.0f) TimeScale -= 0.01f;
-			}
-
-			if (Input->IsKeyDown(SDLK_y))
-			{
-				if (TimeScale < 1.0f) TimeScale += 0.01f;
-			}
-		}
-
-		return true;
-	}
-	*/
-
-	void CalculateAABBWithParent(EP::AABB* A, GUIButton* Button)
-	{
-		auto Parent = Button->Parent;
-		auto PPos = &Parent->Position;
-
-		// Set up PlayButton AABB
-		Button->AABB.Min =  EM::Vec2(Button->Position.x + PPos->x + Button->Frames.at(ButtonState::INACTIVE).Offsets.x * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor,
-										Button->Position.y + PPos->y + Button->Frames.at(ButtonState::INACTIVE).Offsets.y * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor); 
-		Button->AABB.Max = Button->AABB.Min + EM::Vec2(Button->Frames.at(ButtonState::INACTIVE).SourceSize.x * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor, 
-											     Button->Frames.at(ButtonState::INACTIVE).SourceSize.y * Button->Frames.at(ButtonState::INACTIVE).ScalingFactor); 
-	}
-
-	bool IsModifier(unsigned int Key)
-	{
-		if (Key == SDLK_LSHIFT || 
-			Key == SDLK_RSHIFT || 
-			Key == SDLK_LCTRL  ||
-			Key == SDLK_RCTRL  ||
-			Key == SDLK_CAPSLOCK)
-		return true;
-
-		else return false; 
-	}
-
-	bool HasChildren(GUIElementBase* E)
-	{
-		if (E->Type == GUIType::DROP_DOWN_BUTTON ||
-			E->Type == GUIType::GROUP)
-		return true;
-
-		return false;
-	}
-
 }}

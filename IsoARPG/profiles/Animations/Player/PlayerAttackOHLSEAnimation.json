@@ -25,5 +25,14 @@
 		"yoffsets": [-26.0, -12.0, -14.0,  -19.0, -19.0,  -19.0,  -15.0, -15.0, -9.0,  -9.0],
 		"xoffsets": [-20.0, -17.0, -19.0,  -36.0, -113.0, -114.0, -78.0, -19.0, -17.0, -17.0],
 		"image_path": "../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png"
+	},
+	"CB":
+	{
+		"file": "Player_Attack_OH_L_SE.json",
+		"delays": [0.2, 0.7, 1.1, 0.4, 0.6, 1.2, 0.8, 0.3],
+		"frames": ["CB_01", "CB_02",  "CB_03",  "CB_04",  "CB_05",  "CB_06", "CB_07", "CB_08"],
+		"yoffsets": [0.0, 	0.0, 	0.0,  28.0, 109.0, 158.0, 113.0, 38.0],
+		"xoffsets": [-30.0, -30.0, -30.0,  -29.0, -28.0, -28.0,  -29.0, -29.0],
+		"image_path": "../IsoARPG/Assets/Textures/Animations/Player/Attack/OH_L/SE/Player_Attack_OH_L_SE.png"
 	}	
 }

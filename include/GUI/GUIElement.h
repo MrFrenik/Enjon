@@ -29,6 +29,7 @@ namespace Enjon { namespace GUI {
 	enum ButtonState { INACTIVE, ACTIVE };
 	enum HoveredState { OFF_HOVER, ON_HOVER };
 	enum GUIType { BUTTON, TEXT_BOX, SCENE_ANIMATION, GROUP, TEXT_BUTTON , DROP_DOWN_BUTTON, RADIAL_BUTTON, VALUE_BUTTON };
+	enum VisibleState { HIDDEN, VISIBLE };
 
 	// GUI Element
 	struct GUIElementBase
@@ -48,6 +49,7 @@ namespace Enjon { namespace GUI {
 		std::string Name;
 		ButtonState State;
 		HoveredState HoverState;
+		VisibleState Visibility;
 		EGUI::Signal<> on_click;
 		EGUI::Signal<> on_hover;
 		EGUI::Signal<> off_hover;
@@ -390,193 +392,6 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<> on_enter;
 	};
 
-	// Group is responsible for holding other gui elements and then transforming them together
-	struct GUIGroup : GUIElement<GUIGroup>
-	{
-		GUIGroup() 
-		{ 
-			// Init
-			Init();
-		}
-
-		GUIGroup(EM::Vec2 P)
-		{
-			Position = P;
-
-			// Init
-			Init();
-		}
-	
-		void Init()
-		{
-			// Set up type
-			Type = GUIType::GROUP; 
-
-			// Set up member variables
-			ElementIndex 	= 2;
-			X0Offset 		= 15.0f;
-			X1Offset		= 140.0f;
-			YOffset 		= 25.0f;						// Not exact way but close estimate for now
-			TitlePadding 	= 15.0f;
-			Name 			= std::string("GUIGroup");		// Default Name
-			Dimensions		= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
-			TextColor		= EG::RGBA16_MidGrey();
-			Color 			= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
-			TextFont 		= nullptr;
-			HoveredElement	= nullptr;
-
-			// Get font
-			FontScale = 1.0f;
-
-			// Set up GUIGroup's on_hover signal
-			on_hover.connect([&]()
-			{
-				HoverState = HoveredState::ON_HOVER;
-			});
-
-			// Set up GUIGroup's off_hover signal
-			off_hover.connect([&]()
-			{
-				HoverState = HoveredState::OFF_HOVER;
-			});
-		}
-
-		void AddToGroup(GUIElementBase* Element, const std::string& Name)
-		{
-			// Push back into group's children
-			Children.push_back(Element);
-
-			// Set Group as parent of child
-			Element->Parent = this;
-
-			// Set up position of Element in relation to group
-			Element->Position = EM::Vec2(Position.x + Dimensions.x - X1Offset, Position.y + Dimensions.y - ElementIndex * YOffset - TitlePadding);
-			Element->Name = Name;
-
-			// Increment element index
-			ElementIndex++;	
-		}
-
-		void Update()
-		{
-			// Loop through all children and update their positions based on their index in the vector
-			auto index = 2;
-			for(auto C : Children)
-			{
-				// Update position
-				C->Position = EM::Vec2(Position.x + Dimensions.x - X1Offset, Position.y + Dimensions.y - index * YOffset - TitlePadding);
-
-				// Update AABB
-				C->AABB.Min = C->Position;
-				C->AABB.Max = C->AABB.Min + C->Dimensions;
-
-				// Call update on child
-				C->Update();
-				index++;
-			}
-		}
-
-		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
-		{
-			return true;			
-		}
-
-		void Draw(EG::SpriteBatch* Batch)
-		{
-			// Draw Group border
-			Batch->Add(	
-						EM::Vec4(Position, Dimensions),
-						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						EG::SetOpacity(Color, 0.4f),
-						0.0f,
-						EG::SpriteBatch::DrawOptions::BORDER | EG::SpriteBatch::DrawOptions::SHADOW,
-						EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.2f),
-						1.0f
-					);
-
-
-			if (TextFont == nullptr) TextFont = EG::FontManager::GetFont("WeblySleek_12");
-
-			// Draw Title border
-			Batch->Add(	
-						EM::Vec4(Position.x, Position.y + Dimensions.y - YOffset, Dimensions.x, YOffset),
-						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						Color,
-						0.0f,
-						EG::SpriteBatch::DrawOptions::BORDER,
-						EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.8f),
-						1.0f
-					);
-
-			// Draw title of widget
-			auto TitleFont = EG::FontManager::GetFont("WeblySleek");
-			// Calculate total width of title to find placement
-			float TitleAdvance = 0.0f;
-			for (auto& c : Name)
-			{
-				TitleAdvance += EG::Fonts::GetAdvance(c, TitleFont, 1.0f);
-			}
-
-			EG::Fonts::PrintText(
-									Position.x + Dimensions.x / 2.0f - TitleAdvance / 2.0f,
-									Position.y + Dimensions.y - YOffset + EG::Fonts::GetHeight(Name[0], TitleFont, 1.0f) / 2.0f,
-									1.0f,
-									Name,
-									TitleFont,
-									*Batch,
-									EG::SetOpacity(EG::RGBA16_MidGrey(), 0.6f)
-								);
-
-
-			// Try and draw this shiz
-			for(auto& E : Children)
-			{
-				// Draw border around hovered element
-				if (HoveredElement == E)
-				{
-					Batch->Add(	
-								EM::Vec4(Position.x, E->Position.y, Dimensions.x, E->Dimensions.y),
-								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16(0.2f, 0.2f, 0.2f, 1.0f), 0.1f),
-								0.0f,
-								EG::SpriteBatch::DrawOptions::BORDER,
-								EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.2f),
-								1.0f
-							);
-				}
-
-				// Print name of child
-				EG::Fonts::PrintText(
-										Position.x + X0Offset, 																						// X Position
-										E->Position.y + E->Dimensions.y / 2.0f - EG::Fonts::GetHeight(E->Name[0], TextFont, FontScale) / 6.0f,		// Y Position
-										FontScale,																									// Font Scale
-										E->Name + std::string(":"),																					// Child Name
-										TextFont,																									// Font
-										*Batch,																										// SpriteBatch
-										TextColor																									// Font Color
-									);
-
-				// Print Child contents
-				E->Draw(Batch);
-			}
-
-		}
-
-		// Vector of children
-		std::vector<GUIElementBase*> Children;
-		GUIElementBase* HoveredElement;
-		EG::Fonts::Font* TextFont;
-		EG::ColorRGBA16 TextColor;
-		float TitlePadding;
-		float FontScale;
-		float X0Offset;
-		float X1Offset;
-		float YOffset;
-		int32_t ElementIndex;
-	};
 
 }}
 
