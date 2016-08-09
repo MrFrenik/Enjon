@@ -43,8 +43,11 @@ namespace ECS { namespace Factory {
 			Transform->VelocityGoal = VelocityGoal; 
 			Transform->ViewVector = Enjon::Math::Vec2(1, 1);
 			Transform->AttackVector = Enjon::Math::Vec2(1, 1);
-			Transform->GroundPosition = Enjon::Math::Vec2(Position.x + Dimensions.x / 2.0f, Position.y - 10.0f);
-			Transform->GroundPositionOffset = Enjon::Math::Vec2(Transform->Dimensions.x / 2.0f - Systems::TILE_SIZE - 10.0f, -10.0f);
+			// Transform->GroundPosition = Enjon::Math::Vec2(Position.x + Dimensions.x / 2.0f, Position.y - 10.0f);
+			// Transform->GroundPosition = Enjon::Math::Vec2(Position.x, Position.y);
+			// Transform->GroundPositionOffset = Enjon::Math::Vec2(Transform->Dimensions.x / 2.0f - Systems::TILE_SIZE - 10.0f, -10.0f);
+			Transform->GroundPositionOffset = Enjon::Math::Vec2(-35.0f,-10.0f);
+			Transform->GroundPosition = Enjon::Math::Vec2(Position.x, Position.y) + Transform->GroundPositionOffset;
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
@@ -72,7 +75,7 @@ namespace ECS { namespace Factory {
 			// Set up AnimComponent
 			Component::AnimComponent* AnimComponent = &Manager->Animation2DSystem->AnimComponents[Player];
 			AnimComponent->CurrentIndex = 0;
-			AnimComponent->CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
+			AnimComponent->CurrentAnimation = AnimManager::GetAnimation("Enemy_Pixel");
 			AnimComponent->AnimationTimer = 0.0f;	
 
 			// Set up renderer component

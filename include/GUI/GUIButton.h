@@ -24,7 +24,8 @@ namespace Enjon { namespace GUI {
 			this->HoverState 	= HoveredState::OFF_HOVER;
 			this->Color 		= EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 			this->Name 			= std::string("GUIButton");
-			this->Dimensions 	= EM::Vec2(130.0f, 20.0f);
+			this->TextColor 	= EG::RGBA16_LightGrey();
+			this->Dimensions 	= EM::Vec2(10.0f, 10.0f);
 			this->BorderColor 	= EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 
 			// Set up PlayButton's on_hover signal
@@ -163,7 +164,6 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<GUIElementBase*> on_click;
 		EGUI::Signal<> on_hover;
 		EGUI::Signal<> off_hover;
-		EG::ColorRGBA16 TextColor;
 		EG::Fonts::Font* TextFont;
 		float FontScale;
 	};
@@ -866,7 +866,6 @@ namespace Enjon { namespace GUI {
 
 		std::vector<GUITextButton*> List;
 		EG::Fonts::Font* TextFont;
-		EG::ColorRGBA16 TextColor;
 		EM::Vec2 TextPadding;
 		float XPadding;
 		float FontScale;

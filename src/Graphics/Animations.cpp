@@ -79,6 +79,9 @@ namespace Enjon { namespace Animation {
 		// Get Image Path
 		const auto IPath = Anima.at("image_path");
 
+		// Get File Path
+		const auto FPath = Anima.at("file_path");
+
 		// Get Length of frames
 		const auto frames_len = Frames.size(); 
 
@@ -102,6 +105,8 @@ namespace Enjon { namespace Animation {
 
 	    // Set animation name
 	    A->Name = AnimName;
+
+	    A->FilePath = FPath;
 
 		return A;
 	}

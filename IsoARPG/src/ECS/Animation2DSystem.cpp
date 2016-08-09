@@ -87,60 +87,62 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 
 					// Get what the current animation is based on the player state
-					switch(PlayerState)
+					if (PlayerState == EntityAnimationState::WALKING)
 					{
-						case EntityAnimationState::WALKING: 	
-						{
-							// Get direction to mouse
-							Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
-							Manager->Camera->ConvertScreenToWorld(MousePos);
-	
-							if (MousePos.x <= Position->x)
-							{
-								if (attack_switch) 	Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SW");
-								else 				Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SW");	
-								if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
-							}
-							else if (MousePos.x > Position->x)  
-							{
-								if (attack_switch) 	Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
-								else 				Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");	
-								if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
-							}
-							attack_switch = false;
-							break;
-						}
+						// Get direction to mouse
+						// Enjon::Math::Vec2 MousePos = Manager->PlayerControllerSystem->PlayerControllers[e].Input->GetMouseCoords();
+						// Manager->Camera->ConvertScreenToWorld(MousePos);
 
-						case EntityAnimationState::ATTACKING:
-						{
-							attack_switch = !attack_switch;
-
-							switch(CurrentWeapon)
-							{
-								case Weapons::DAGGER: 	
-														{
-															if (!(*SetStart))
-															{
-																if (attack_switch) 	CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
-																else 				CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
-															}
-															break;
-														}
-								case Weapons::BOW: 		CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE"); break;
-								case Weapons::AXE: 		CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE"); break;
-								default: 				CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE"); break;
-							}
-
-							break;
-						}
+						// if (MousePos.x <= Position->x)
+						// {
+						// 	if (attack_switch) 	Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Pixel");
+						// 	else 				Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Pixel");	
+						// 	if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
+						// }
+						// else if (MousePos.x > Position->x)  
+						// {
+						// 	if (attack_switch) 	Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Pixel");
+						// 	else 				Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Pixel");	
+						// 	if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
+						// }
+						
+						Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Pixel");
+						attack_switch = false;
 					}
 
-					// Reset animcomponent
-					Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = CurrentAnimation;
+					else if (PlayerState == EntityAnimationState::ATTACKING)
+					{
+						attack_switch = !attack_switch;
+
+						switch(CurrentWeapon)
+						{
+							case Weapons::DAGGER: 	
+													{
+														if (!(*SetStart))
+														{
+															if (attack_switch) 	CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
+															else 				CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
+														}
+														break;
+													}
+							case Weapons::BOW: 		CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE"); break;
+							case Weapons::AXE: 		CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE"); break;
+							default: 				CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE"); break;
+						}
+					}
+					
+					else
+					{
+						Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Pixel");
+						break;
+					}
 
 					if (PlayerState == EntityAnimationState::ATTACKING && !(*SetStart))
 					{
 						*SetStart = TRUE;
+
+						// Reset current index
+						AnimComponent->CurrentIndex = 0;
 
 						if (PlayerController::GetTargeting())
 						{
@@ -264,7 +266,33 @@ namespace ECS { namespace Systems { namespace Animation2D {
 						} 
 					}
 
+					else if (PlayerState == EntityAnimationState::WALKING)
+					{
+						// Increase timer (should do this with delta time passed in)
+						AnimComponent->AnimationTimer += 0.3f * 0.2f;
+
+						// Get handle to current frame
+						auto* Frame = &CurrentAnimation->Frames.at(AnimComponent->CurrentIndex);
+
+						if (AnimComponent->AnimationTimer >= Frame->Delay)
+						{
+							// Reset timer
+							AnimComponent->AnimationTimer = 0.0f;
+
+							// Increase current index
+							AnimComponent->CurrentIndex++;
+						}
+
+						// Bounds checking
+						if (AnimComponent->CurrentIndex >= CurrentAnimation->Frames.size())
+						{
+							// Reset current index
+							AnimComponent->CurrentIndex = 0;
+						}
+					}
+
 				}
+
 			}
 		}
 	}

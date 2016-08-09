@@ -30,6 +30,7 @@ namespace Enjon { namespace GUI {
 	enum HoveredState { OFF_HOVER, ON_HOVER };
 	enum GUIType { BUTTON, TEXT_BOX, SCENE_ANIMATION, GROUP, TEXT_BUTTON , DROP_DOWN_BUTTON, RADIAL_BUTTON, VALUE_BUTTON };
 	enum VisibleState { HIDDEN, VISIBLE };
+	enum ClickState { NOT_CLICKABLE, CLICKABLE };
 
 	// GUI Element
 	struct GUIElementBase
@@ -50,6 +51,7 @@ namespace Enjon { namespace GUI {
 		ButtonState State;
 		HoveredState HoverState;
 		VisibleState Visibility;
+		ClickState Clickability;
 		EGUI::Signal<> on_click;
 		EGUI::Signal<> on_hover;
 		EGUI::Signal<> off_hover;
@@ -57,6 +59,7 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<EI::InputManager*, EG::Camera2D*> check_children;
 		EG::ColorRGBA16 Color;
 		EG::ColorRGBA16 BorderColor;
+		EG::ColorRGBA16 TextColor;
 		uint32_t JustFocused;
 		float Depth;
 	};
@@ -67,6 +70,9 @@ namespace Enjon { namespace GUI {
 		void Init()
 		{
 			static_cast<T*>(this)->Init();
+
+			// By default
+			static_cast<T*>(this)->Clickability = ClickState::CLICKABLE;
 		}
 
 		void Draw(EG::SpriteBatch* Batch)
@@ -376,7 +382,6 @@ namespace Enjon { namespace GUI {
 		ButtonState State;
 		HoveredState HoverState;
 		std::string Text;
-		EG::ColorRGBA16 TextColor;
 		EG::Fonts::Font* TextFont;
 		float FontScale;
 		float caret_count;

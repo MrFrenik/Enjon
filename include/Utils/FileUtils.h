@@ -5,6 +5,8 @@
 #include <sstream>
 #include <string>
 
+#include "Utils/json.h"
+
 namespace Enjon { namespace Utils { 
 
 	inline std::string read_file_sstream(const char* filePath)
@@ -61,6 +63,18 @@ namespace Enjon { namespace Utils {
 		return result; 
 	}
 
+	inline bool save_to_json(const char* filePath, nlohmann::json& content, uint32_t format_width = 4)
+	{
+		std::ofstream myfile(filePath);
+
+		if (myfile.fail()) return false;
+
+		myfile << content.dump(format_width);
+		myfile.close();
+
+		return true;
+	}
+
 	inline void ConvertToWchar(char* buffer, wchar_t* wcstring)
 	{
 		 size_t origsize = strlen(buffer) + 1;
@@ -69,13 +83,6 @@ namespace Enjon { namespace Utils {
 		//wchar_t string[newsize];
 		mbstowcs_s(&convertedChars, wcstring, origsize, buffer, _TRUNCATE);
 		//wcscpy_s(wcstring, string);
-	}
-
-	inline void parse_JSON(const char* filePath)
-	{
-		std::string JSON_file = read_file(filePath); 
-		// How exactly do I want to parse and store the data of the JSON object? 
-		// Should I create a JSON struct and use that?
 	}
 	
 	inline int convert_buffer_to_int(char* buffer, int digits)

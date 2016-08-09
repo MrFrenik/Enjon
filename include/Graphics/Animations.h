@@ -39,6 +39,7 @@ namespace Enjon { namespace Animation {
 	{
 		std::vector<ImageFrame> Frames;
 		uint32_t TotalFrames;
+		std::string FilePath;
 		std::string Name;
 	} Anim;
 

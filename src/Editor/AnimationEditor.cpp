@@ -99,6 +99,7 @@ namespace Enjon { namespace AnimationEditor {
 	GUIGroup					SceneGroup;
 	GUIGroup					AnimationPanel;
 	GUIButton 					PlayButton;
+	GUIButton 					SaveAnimationToFile;
 	GUIButton 					AnimationPanelIcon;
 	GUIRadialButton				AnimationOnionSkin;
 	GUIDropDownButton 			AnimationSelection;	
@@ -303,6 +304,7 @@ namespace Enjon { namespace AnimationEditor {
 		{
 			auto V = AnimationFrame.Value.get();
 			SceneAnimation.CurrentAnimation->Frames.at(V).Delay = AnimationDelay.Value.get();
+			SaveAnimationToFile.Text = "1";
 		});
 
 		AnimationFrame.lose_focus.connect([&]()
@@ -317,11 +319,13 @@ namespace Enjon { namespace AnimationEditor {
 		AnimationXOffset.lose_focus.connect([&]()
 		{
 			SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Offsets.x = AnimationXOffset.Value.get();
+			SaveAnimationToFile.Text = "1";
 		});
 
 		AnimationYOffset.lose_focus.connect([&]()
 		{
 			SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex).Offsets.y = AnimationYOffset.Value.get();
+			SaveAnimationToFile.Text = "1";
 		});
 
 		AnimationTimeScale.lose_focus.connect([&]()
@@ -335,6 +339,7 @@ namespace Enjon { namespace AnimationEditor {
 			auto SA = SceneAnimation.CurrentAnimation;
 			AnimationXOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.x);
 			AnimationYOffset.Set(SA->Frames.at(SceneAnimation.CurrentIndex).Offsets.y);
+			SaveAnimationToFile.Text = "1";
 		});
 
 		SceneAnimation.on_click.connect([&]()
@@ -353,9 +358,59 @@ namespace Enjon { namespace AnimationEditor {
 
 		AnimationPanel.MinimizeButton.on_click.connect([&]()
 		{
-			std::cout << "Here, queer!" << std::endl;
 			// Turn on icon
 			AnimationPanelIcon.Visibility = VisibleState::VISIBLE;
+		});
+
+		SaveAnimationToFile.on_click.connect([&]()
+		{
+			// Get file path
+			auto FilePath = SceneAnimation.CurrentAnimation->FilePath.c_str();
+
+			// Get JSON string
+			auto Json = EU::read_file_sstream(FilePath);
+
+		   	// Parese and serialize JSON
+		   	json j_complete = json::parse(Json);
+
+		   	// Get name of aniamtion
+		   	auto Name = SceneAnimation.CurrentAnimation->Name;
+
+		   	// Set info
+		   	auto i = 0;
+		   	for (auto& frame : SceneAnimation.CurrentAnimation->Frames)
+		   	{
+		   		// Delay
+		   		j_complete.at(Name).at("delays").at(i) = frame.Delay;
+
+		   		// Xoffset
+		   		j_complete.at(Name).at("xoffsets").at(i) = frame.Offsets.x;
+
+		   		// Yoffset
+		   		j_complete.at(Name).at("yoffsets").at(i) = frame.Offsets.y;
+
+		   		// Increment index
+		   		i++;
+		   	}
+
+		   	// Save to file
+		   	EU::save_to_json(FilePath, j_complete, 4);
+
+		   	// Set text to check mark
+		   	SaveAnimationToFile.Text = "u";
+		   	SaveAnimationToFile.TextColor = EG::RGBA16_LimeGreen();
+		});
+
+		SaveAnimationToFile.on_hover.connect([&]()
+		{
+			if (SaveAnimationToFile.Text.compare("u") == 0) SaveAnimationToFile.TextColor = EG::RGBA16_LimeGreen();
+			else 											SaveAnimationToFile.TextColor = EG::RGBA16_MidGrey(); 
+		});
+
+		SaveAnimationToFile.off_hover.connect([&]()
+		{
+			if (SaveAnimationToFile.Text.compare("u") == 0) SaveAnimationToFile.TextColor = EG::SetOpacity(EG::RGBA16_LimeGreen(), 0.4f);
+			else 											SaveAnimationToFile.TextColor = EG::SetOpacity(EG::RGBA16_MidGrey(), 0.4f); 
 		});
 
 		// Add to GUIManager
@@ -390,7 +445,6 @@ namespace Enjon { namespace AnimationEditor {
 		AnimationFrame.FontScale = 0.8f;
 		AnimationFrame.YOffset = 3.0f;
 
-
 		AnimationXOffset.MaxValue = SCREENWIDTH / 2.0f;
 		AnimationXOffset.MinValue = -SCREENWIDTH / 2.0f;
 		AnimationXOffset.Step = 1;
@@ -406,6 +460,13 @@ namespace Enjon { namespace AnimationEditor {
 		AnimationTimeScale.Step = 0.1f;
 		AnimationTimeScale.Set(1.0f);
 
+		SaveAnimationToFile.Name = "Save";
+		SaveAnimationToFile.Text = "u";
+		SaveAnimationToFile.TextColor = EG::RGBA16_LimeGreen();
+		SaveAnimationToFile.TextFont = EG::FontManager::GetFont("CutOut");
+		SaveAnimationToFile.Visibility = VisibleState::VISIBLE;
+		SaveAnimationToFile.Clickability = ClickState::NOT_CLICKABLE;
+
 		AnimationPanel.AddToGroup(&AnimationSelection, "Animation");
 		AnimationPanel.AddToGroup(&AnimationFrame, "Frame");
 		AnimationPanel.AddToGroup(&AnimationDelay, "Delay");
@@ -414,6 +475,7 @@ namespace Enjon { namespace AnimationEditor {
 		AnimationPanel.AddToGroup(&AnimationTimeScale, "Time Scale");
 		AnimationPanel.AddToGroup(&AnimationOnionSkin, "Onion Skin");
 		AnimationPanel.AddToGroup(&PlayButton, "Controls");
+		AnimationPanel.AddToGroup(&SaveAnimationToFile, "Save");
 
 		// Draw BG
 		BGBatch->Begin();
@@ -633,7 +695,7 @@ namespace Enjon { namespace AnimationEditor {
 						// Draw Playbutton
 						auto Offset = EM::Vec2(PlayButton.Dimensions.x / 4.0f, PlayButton.Dimensions.y / 4.0f);
 						UIBatch->Add(
-										EM::Vec4(PlayButton.Position + Offset, PlayButton.Dimensions.x / 2.0f, PlayButton.Dimensions.y / 1.5f), 
+										EM::Vec4(PlayButton.Position + Offset, PlayButton.Dimensions.x / 2.0f, PlayButton.Dimensions.y / 1.75f), 
 										EM::Vec4(0, 0, 1, 1), 
 										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 										EG::SetOpacity(EG::RGBA16_MidGrey(), 0.6f),
@@ -643,12 +705,19 @@ namespace Enjon { namespace AnimationEditor {
 										1.0f,
 										EM::Vec2(1.0f, 1.0f)
 									);
-
 					}
+
+					EG::Fonts::PrintText(
+											SaveAnimationToFile.Position.x,
+											SaveAnimationToFile.Position.y + 2.0f,
+											1.0f,
+											SaveAnimationToFile.Text,
+											SaveAnimationToFile.TextFont,
+											*UIBatch,
+											SaveAnimationToFile.TextColor
+										);
+
 				}
-
-
-
 			}
 			UIBatch->End();
 			UIBatch->RenderBatch();
@@ -687,8 +756,6 @@ namespace Enjon { namespace AnimationEditor {
 					Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 					break;
 				case SDL_MOUSEWHEEL:
-					// Camera->SetScale(Camera->GetScale() + (event.wheel.y) * 0.05f);
-					// if (Camera->GetScale() < 0.1f) Camera->SetScale(0.1f);
 					CameraScaleVelocity += event.wheel.y * 0.05f;
 				default:
 					break;

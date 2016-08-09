@@ -83,7 +83,7 @@ typedef struct
 	EM::Vec3 Falloff;
 } Light;
 
-float LightZ = -0.13f;
+float LightZ = -0.05f;
 
 typedef struct 
 {	
@@ -276,7 +276,7 @@ int main(int argc, char** argv)
 	EG::SpriteSheet TargetSheet;
 	EG::SpriteSheet HealthSheet;
 	PlayerSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/pixelanimtestframessplit.png"), Enjon::Math::iVec2(6, 24));
-	EnemySheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png"), Math::iVec2(1, 1));
+	EnemySheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast2.png"), Math::iVec2(1, 1));
 	EnemySheet2.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/enemy.png"), Math::iVec2(1, 1));
 	ItemSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb.png"), Math::iVec2(1, 1));
 	ArrowSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"), Math::iVec2(8, 1));
@@ -377,7 +377,7 @@ int main(int argc, char** argv)
 	static uint32 AmountDrawn = 10;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
-		float height = 10.0f;
+		float height = 0.0f;
 		eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
 																enemydims, &EnemySheet, "Enemy", 0.05f); 
 		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
@@ -394,7 +394,7 @@ int main(int argc, char** argv)
 	}
 
 	// Create player
-	eid32 Player = Factory::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(30.0f, 30.0f), &PlayerSheet, 
+	eid32 Player = Factory::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(222.0f, 200.0f), &PlayerSheet, 
 		"Player", 0.4f, Math::Vec3(1, 1, 0)); 
 
 	// Set player for world
@@ -470,7 +470,7 @@ int main(int argc, char** argv)
 	}
 
 	// Set position to player
-	Camera.SetPosition(Math::Vec2(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, World->TransformSystem->Transforms[Player].Position.y)); 
+	Camera.SetPosition(Math::Vec2(World->TransformSystem->Transforms[Player].Position.x, World->TransformSystem->Transforms[Player].Position.y)); 
 
 	GLfloat quadVertices[] = {   // Vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // Positions   // TexCoords
@@ -501,7 +501,7 @@ int main(int argc, char** argv)
 
 	const GLfloat constant = 1.0f; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)
     const GLfloat linear = 0.1f;
-    const GLfloat quadratic = 40.0f;
+    const GLfloat quadratic = 30.0f;
     // Then calculate radius of light volume/sphere
 
    	float LevelWidth = level.GetWidth();
@@ -558,7 +558,7 @@ int main(int argc, char** argv)
 			auto L = &Lights.at(0);
 			const EM::Vec3* P = &World->TransformSystem->Transforms[Player].Position;
 			L->Position = EM::Vec3(P->x, P->y - P->z, LightZ);
-			L->Color = EG::RGBA16(6.0f, 4.0f, 6.0f, 1.0f);
+			L->Color = EG::RGBA16(4.0f, 3.0f, 3.0f, 1.0f);
 		}
 
 		// Clear lights
@@ -614,9 +614,9 @@ int main(int argc, char** argv)
 				SpatialHash::ClearCells(World->Grid);
 				ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
 
-				StartTicks = SDL_GetTicks();
-				AIController::Update(World->AIControllerSystem, Player);
-				AIRunTime = SDL_GetTicks() - StartTicks;
+				// StartTicks = SDL_GetTicks();
+				// AIController::Update(World->AIControllerSystem, Player);
+				// AIRunTime = SDL_GetTicks() - StartTicks;
 
 				Animation2D::Update(World);
 
@@ -664,7 +664,7 @@ int main(int argc, char** argv)
 			//LERP camera to center of player position
 			static Math::Vec2 m_velocity;
 			static float scale = 6.0f; 
-			m_velocity.x = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.x + 100.0f / 2.0f, Camera.GetPosition().x, 8.0f);
+			m_velocity.x = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.x, Camera.GetPosition().x, 8.0f);
 			m_velocity.y = Enjon::Math::Lerp(World->TransformSystem->Transforms[Player].Position.y, Camera.GetPosition().y, scale); 
 			Camera.SetPosition(m_velocity);
 		}
@@ -727,7 +727,7 @@ int main(int argc, char** argv)
 			static Math::Vec2 itemDims(20.0f, 20.0f);
 			static Math::Vec4 uv(0, 0, 1, 1);
 			static Math::Vec2 pos(-1000, -1000);
-			static Graphics::GLTexture beast = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png"); 
+			static Graphics::GLTexture beast = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast2.png"); 
 			static Graphics::GLTexture playertexture = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/pixelanimtest.png"); 
 			static Graphics::GLTexture groundtiletexture = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledblue.png"); 
 			static Graphics::GLTexture orb = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/arrows.png"); 
@@ -1020,7 +1020,7 @@ int main(int argc, char** argv)
 				auto CurrentIndex = World->Animation2DSystem->AnimComponents[Player].CurrentIndex;
 				auto Image = &World->Animation2DSystem->AnimComponents[Player].CurrentAnimation->Frames.at(CurrentIndex);
 
-				EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::RGBA16_White(), 1.0f, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
+				EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::RGBA16_White(), 1.5f, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
 			}
 
 			//////////////////////////////////////////
@@ -1593,8 +1593,8 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		Camera->ConvertScreenToWorld(MouseCoords);
 		
 		// HERE AND QUEER!	
-		float height = 10.0f;
-		static Math::Vec2 enemydims(222.0f, 200.0f);
+		float height = 0.0f;
+		static Math::Vec2 enemydims(222.0f, 220.0f);
 		eid32 ai = Factory::CreateAI(World, Math::Vec3(MouseCoords.x, MouseCoords.y, height),
 																enemydims, EG::SpriteSheetManager::GetSpriteSheet("Beast"), "Enemy", 0.05f); 
 		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
@@ -3428,6 +3428,51 @@ int main(int argc, char** argv) {
 #endif
 
 
+#if 0
+#include "Enjon.h"
+#include "Utils/json.h"
+
+#include <vector>
+#include <fstream>
+
+using json = nlohmann::json;
+
+const std::string AnimTextureJSONDir("../IsoARPG/Profiles/Animations/Player/test.json");
+
+// #define JPATCH(x) 			R"([(x)])"_json
+#define JPATCH(x) 			R"()"_json
+#define STRING(x)			#x
+#define JSTRING(x) 			STRING(x)
+#define JOP(x, y, z) 		{"op": x, "path": y, "value", z}
+
+#undef main
+int main(int argc, char** argv)
+{
+	auto Json = EU::read_file_sstream(AnimTextureJSONDir.c_str());
+    
+   	// parse and serialize JSON
+   	json j_complete = json::parse(Json);
+
+   	// Get data
+   	auto Data = j_complete.at("T1").at("data");
+
+   	// Make new data to patch it
+   	std::vector<float> NewData;
+   	for (auto& d : Data)
+   	{
+   		NewData.push_back(50.0f);
+   	}
+
+   	j_complete.at("T1").at("data") = NewData;
+
+	std::ofstream myfile(AnimTextureJSONDir.c_str());
+	myfile << j_complete.dump(4);
+	myfile.close();
+
+	return 0;
+}
+
+#endif
 
 
 
