@@ -103,6 +103,7 @@ bool Paused = false;
 bool IsDashing = false;
 bool DebugInfo = false;
 bool AnimationEditorOn = true;
+bool DeferredRenderingOn = true;
 
 const int LEVELSIZE = 20;
 
@@ -341,6 +342,7 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* DiffuseShader 	= EG::ShaderManager::GetShader("DiffuseShader");
 	EG::GLSLProgram* NormalsShader 	= EG::ShaderManager::GetShader("NormalsShader");
 	EG::GLSLProgram* ScreenShader 	= EG::ShaderManager::GetShader("NoCameraProjection");
+	EG::GLSLProgram* BasicShader 	= EG::ShaderManager::GetShader("Basic");
 
 	// FBO
 	// float DWidth = SCREENWIDTH * 0.9f;
@@ -686,7 +688,8 @@ int main(int argc, char** argv)
 
 		if (AnimationEditorOn)
 		{
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.06, 0.06, 0.06, 1.0));
+			// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.06, 0.06, 0.06, 1.0));
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.16f, 0.17f, 0.19f, 1.0f));
 	
 			// Show mouse
 			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
@@ -1312,16 +1315,156 @@ int main(int argc, char** argv)
 			MapEntityBatch.End(); 
 			HUDBatch.End();
 			NormalsBatch.End();
-		
-			// Diffuse and Position Rendering
-			DiffuseFBO->Bind();
+
+			// Deferred rendering pass if enabled		
+			if (DeferredRenderingOn)
 			{
-				DiffuseShader->Use();
+				DiffuseFBO->Bind();
+				{
+					DiffuseShader->Use();
+					{
+						// Set up uniforms
+						DiffuseShader->SetUniformMat4("model", model);
+						DiffuseShader->SetUniformMat4("view", view);
+						DiffuseShader->SetUniformMat4("projection", projection);
+
+						// Draw ground tiles
+						GroundTileBatch.RenderBatch();
+						// Draw TileOverlays
+						OverlayBatch.RenderBatch();
+						// Draw entities		
+						EntityBatch.RenderBatch();
+
+						ParticleBatch.RenderBatch();
+					}
+					DiffuseShader->Unuse();
+				}
+				DiffuseFBO->Unbind();
+
+				// Normals Rendering
+				NormalsFBO->Bind();
+				{
+					NormalsShader->Use();
+					{
+						// Set up uniforms
+						NormalsShader->SetUniformMat4("model", model);
+						NormalsShader->SetUniformMat4("view", view);
+						NormalsShader->SetUniformMat4("projection", projection);
+
+						// GroundTileNormalsBatch.RenderBatch();
+						NormalsBatch.RenderBatch();
+					}
+					NormalsShader->Unuse();
+				}
+				NormalsFBO->Unbind();
+
+				// Deferred Render
+				glDisable(GL_DEPTH_TEST);
+				glBlendFunc(GL_ONE, GL_ONE);
+				DeferredFBO->Bind();
+				{
+					DeferredShader->Use();
+					{
+						static GLuint m_diffuseID 	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_diffuse");
+						static GLuint m_normalsID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_normals");
+						static GLuint m_positionID  = glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_position");
+
+						EM::Vec3 CP = EM::Vec3(Camera.GetPosition(), 1.0f);
+
+						// Bind diffuse
+						glActiveTexture(GL_TEXTURE0);
+						glEnable(GL_TEXTURE_2D);
+						glBindTexture(GL_TEXTURE_2D, DiffuseFBO->GetDiffuseTexture());
+						glUniform1i(m_diffuseID, 0);
+
+						// Bind normals
+						glActiveTexture(GL_TEXTURE1);
+						glEnable(GL_TEXTURE_2D);
+						glBindTexture(GL_TEXTURE_2D, NormalsFBO->GetDiffuseTexture());
+						glUniform1i(m_normalsID, 1);
+
+						// Bind position
+						glActiveTexture(GL_TEXTURE2);
+						glEnable(GL_TEXTURE_2D);
+						glBindTexture(GL_TEXTURE_2D, DiffuseFBO->GetPositionTexture());
+						glUniform1i(m_positionID, 2);
+
+						glUniform1i(glGetUniformLocation(DeferredShader->GetProgramID(), "NumberOfLights"), LightsToDraw.size());
+
+						auto CameraScale = Camera.GetScale();
+						for (GLuint i = 0; i < LightsToDraw.size(); i++)
+						{
+							auto L = LightsToDraw.at(i);
+
+							glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Position").c_str()), L->Position.x, L->Position.y, L->Position.z + LightZ);
+							glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Color").c_str()), L->Color.r, L->Color.g, L->Color.b, L->Color.a);
+							glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Radius").c_str()), L->Radius / CameraScale);
+							glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Falloff").c_str()), L->Falloff.x, L->Falloff.y, L->Falloff.z);
+						}
+
+						// Set uniforms
+						glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
+									 SCREENWIDTH, SCREENHEIGHT);
+						// glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.8f);
+						glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 1.0f, 1.0f, 1.0f, 1.0f);
+						glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
+
+						glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
+														Camera.GetCameraMatrix().Invert().elements);
+						glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "View"), 1, 0, 
+														Camera.GetCameraMatrix().elements);
+						glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), "Scale"), Camera.GetScale());
+
+
+						// Render	
+						{
+							glBindVertexArray(quadVAO);
+							glDrawArrays(GL_TRIANGLES, 0, 6);
+							glBindVertexArray(0);
+
+							glActiveTexture(GL_TEXTURE0);
+							glBindTexture(GL_TEXTURE_2D, 0);
+						}
+					}
+					DeferredShader->Unuse();
+				}
+				DeferredFBO->Unbind();
+
+				// Set blend function back to normalized
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+				// Do any post processing here, of course...
+				// Bind default buffer and render deferred render texture
+				Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+				ScreenShader->Use();
+				{
+					DeferredBatch.Begin();
+					{
+						DeferredBatch.Add(
+							EM::Vec4(-1, -1, 2, 2),
+							EM::Vec4(0, 0, 1, 1), 
+							DeferredFBO->GetDiffuseTexture()
+							);
+					}
+					DeferredBatch.End();
+					DeferredBatch.RenderBatch();
+				}
+				ScreenShader->Unuse();
+
+			}
+
+			// Standard pass if deferred disabled
+			else
+			{
+
+				BasicShader->Use();
 				{
 					// Set up uniforms
-					DiffuseShader->SetUniformMat4("model", model);
-					DiffuseShader->SetUniformMat4("view", view);
-					DiffuseShader->SetUniformMat4("projection", projection);
+					BasicShader->SetUniformMat4("model", model);
+					BasicShader->SetUniformMat4("view", view);
+					BasicShader->SetUniformMat4("projection", projection);
 
 					// Draw ground tiles
 					GroundTileBatch.RenderBatch();
@@ -1329,123 +1472,11 @@ int main(int argc, char** argv)
 					OverlayBatch.RenderBatch();
 					// Draw entities		
 					EntityBatch.RenderBatch();
-
+					// Draw particles
 					ParticleBatch.RenderBatch();
 				}
-				DiffuseShader->Unuse();
+				BasicShader->Unuse();
 			}
-			DiffuseFBO->Unbind();
-
-			// Normals Rendering
-			NormalsFBO->Bind();
-			{
-				NormalsShader->Use();
-				{
-					// Set up uniforms
-					NormalsShader->SetUniformMat4("model", model);
-					NormalsShader->SetUniformMat4("view", view);
-					NormalsShader->SetUniformMat4("projection", projection);
-
-					GroundTileNormalsBatch.RenderBatch();
-					NormalsBatch.RenderBatch();
-				}
-				NormalsShader->Unuse();
-			}
-			NormalsFBO->Unbind();
-
-			// Deferred Render
-			glDisable(GL_DEPTH_TEST);
-			glBlendFunc(GL_ONE, GL_ONE);
-			DeferredFBO->Bind();
-			{
-				DeferredShader->Use();
-				{
-					static GLuint m_diffuseID 	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_diffuse");
-					static GLuint m_normalsID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_normals");
-					static GLuint m_positionID  = glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_position");
-
-					EM::Vec3 CP = EM::Vec3(Camera.GetPosition(), 1.0f);
-
-					// Bind diffuse
-					glActiveTexture(GL_TEXTURE0);
-					glEnable(GL_TEXTURE_2D);
-					glBindTexture(GL_TEXTURE_2D, DiffuseFBO->GetDiffuseTexture());
-					glUniform1i(m_diffuseID, 0);
-
-					// Bind normals
-					glActiveTexture(GL_TEXTURE1);
-					glEnable(GL_TEXTURE_2D);
-					glBindTexture(GL_TEXTURE_2D, NormalsFBO->GetDiffuseTexture());
-					glUniform1i(m_normalsID, 1);
-
-					// Bind position
-					glActiveTexture(GL_TEXTURE2);
-					glEnable(GL_TEXTURE_2D);
-					glBindTexture(GL_TEXTURE_2D, DiffuseFBO->GetPositionTexture());
-					glUniform1i(m_positionID, 2);
-
-					glUniform1i(glGetUniformLocation(DeferredShader->GetProgramID(), "NumberOfLights"), LightsToDraw.size());
-
-					auto CameraScale = Camera.GetScale();
-					for (GLuint i = 0; i < LightsToDraw.size(); i++)
-					{
-						auto L = LightsToDraw.at(i);
-
-						glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Position").c_str()), L->Position.x, L->Position.y, L->Position.z + LightZ);
-						glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Color").c_str()), L->Color.r, L->Color.g, L->Color.b, L->Color.a);
-						glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Radius").c_str()), L->Radius / CameraScale);
-						glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Falloff").c_str()), L->Falloff.x, L->Falloff.y, L->Falloff.z);
-					}
-
-					// Set uniforms
-					glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
-								 SCREENWIDTH, SCREENHEIGHT);
-					glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.8f);
-					glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
-
-					glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
-													Camera.GetCameraMatrix().Invert().elements);
-					glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "View"), 1, 0, 
-													Camera.GetCameraMatrix().elements);
-					glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), "Scale"), Camera.GetScale());
-
-
-					// Render	
-					{
-						glBindVertexArray(quadVAO);
-						glDrawArrays(GL_TRIANGLES, 0, 6);
-						glBindVertexArray(0);
-
-						glActiveTexture(GL_TEXTURE0);
-						glBindTexture(GL_TEXTURE_2D, 0);
-					}
-				}
-				DeferredShader->Unuse();
-			}
-			DeferredFBO->Unbind();
-
-			// Set blend function back to normalized
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			// Do any post processing here, of course...
-			// Bind default buffer and render deferred render texture
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-			ScreenShader->Use();
-			{
-				DeferredBatch.Begin();
-				{
-					DeferredBatch.Add(
-						EM::Vec4(-1, -1, 2, 2),
-						EM::Vec4(0, 0, 1, 1), 
-						DeferredFBO->GetDiffuseTexture()
-						);
-				}
-				DeferredBatch.End();
-				DeferredBatch.RenderBatch();
-			}
-			ScreenShader->Unuse();
 
 			// Draw Text
 			auto shader = Graphics::ShaderManager::GetShader("Text")->GetProgramID();
@@ -1603,6 +1634,10 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	{
 		// Switch debug info
 		DebugInfo = !DebugInfo;
+	}
+	if (Input->IsKeyPressed(SDLK_o))
+	{
+		DeferredRenderingOn = !DeferredRenderingOn;
 	}
 }
 

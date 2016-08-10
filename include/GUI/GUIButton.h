@@ -228,6 +228,7 @@ namespace Enjon { namespace GUI {
 				// Reset value and reset string
 				Value = static_cast<T>(V);
 				SetText();
+				this->lose_focus.emit();
 			});
 
 			this->on_hover.connect([&]()
@@ -258,6 +259,7 @@ namespace Enjon { namespace GUI {
 				// Reset value and reset string
 				Value = V;
 				SetText();
+				this->lose_focus.emit();
 			});
 
 			this->ValueText.on_enter.connect([&]()

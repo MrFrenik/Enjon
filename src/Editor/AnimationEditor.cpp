@@ -1032,6 +1032,18 @@ namespace Enjon { namespace AnimationEditor {
 			{
 				PlayButton.on_click.emit();
 			}
+
+			if (Input->IsKeyPressed(SDLK_m))
+			{
+				AnimationFrame.ValueUp.on_click.emit();
+				if (PlayButton.State) PlayButton.on_click.emit();
+			}
+
+			if (Input->IsKeyPressed(SDLK_n))
+			{
+				AnimationFrame.ValueDown.on_click.emit();
+				if (PlayButton.State) PlayButton.on_click.emit();
+			}
 		}
 
 

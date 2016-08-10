@@ -269,7 +269,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 					else if (PlayerState == EntityAnimationState::WALKING)
 					{
 						// Increase timer (should do this with delta time passed in)
-						AnimComponent->AnimationTimer += 0.3f * 0.2f;
+						AnimComponent->AnimationTimer += 0.15f;
 
 						// Get handle to current frame
 						auto* Frame = &CurrentAnimation->Frames.at(AnimComponent->CurrentIndex);
