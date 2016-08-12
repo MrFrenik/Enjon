@@ -83,7 +83,7 @@ typedef struct
 	EM::Vec3 Falloff;
 } Light;
 
-float LightZ = 0.13f;
+float LightZ = -0.25f;
 
 typedef struct 
 {	
@@ -556,12 +556,14 @@ int main(int argc, char** argv)
 		// Update Input Manager
 		Input.Update();	
 
+		/*
 		{
 			auto L = &Lights.at(0);
 			const EM::Vec3* P = &World->TransformSystem->Transforms[Player].Position;
 			L->Position = EM::Vec3(P->x, P->y - P->z, LightZ);
 			L->Color = EG::RGBA16(4.0f, 3.0f, 3.0f, 1.0f);
 		}
+		*/
 
 		// Clear lights
 		LightsToDraw.clear();
@@ -1357,7 +1359,7 @@ int main(int argc, char** argv)
 						NormalsShader->SetUniformMat4("view", view);
 						NormalsShader->SetUniformMat4("projection", projection);
 
-						// GroundTileNormalsBatch.RenderBatch();
+						GroundTileNormalsBatch.RenderBatch();
 						NormalsBatch.RenderBatch();
 					}
 					NormalsShader->Unuse();
@@ -1412,7 +1414,7 @@ int main(int argc, char** argv)
 						glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
 									 SCREENWIDTH, SCREENHEIGHT);
 						// glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.8f);
-						glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 1.0f, 1.0f, 1.0f, 1.0f);
+						glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.3f, 0.4f, 1.0f);
 						glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
 
 						glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
@@ -1458,7 +1460,6 @@ int main(int argc, char** argv)
 					DeferredBatch.RenderBatch();
 				}
 				ScreenShader->Unuse();
-
 			}
 
 			// Standard pass if deferred disabled

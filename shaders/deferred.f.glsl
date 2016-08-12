@@ -82,7 +82,7 @@ void main()
             vec3 N = normalize(NormalMap * 2.0 - 1.0);
             vec3 L = normalize(LightDir);
 
-            // vec3 HalfwayDir = normalize(LightDir + ViewDir);
+            vec3 HalfwayDir = normalize(LightDir + ViewDir);
 
             // float spec = pow(max(dot(N, HalfwayDir), 0.0), 256.0);
 
@@ -93,16 +93,16 @@ void main()
 
             //Pre-multiply light color with intensity
             //Then perform "N dot L" to determine our diffuse term
-            // vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * max(dot(N, L), 0.0);
+            vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * max(dot(N, L), 0.0);
             
             //calculate attenuation
             vec3 Falloff = Lights[i].Falloff;
 
-            float Attenuation = 0.5 / (Falloff.x + (Falloff.y*D) + (Falloff.z*D*D));
+            float Attenuation = 1.5 / (Falloff.x + (Falloff.y*D) + (Falloff.z*D*D));
 
-            vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * Attenuation;
+            // vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * Attenuation;
 
-            // Diffuse *= Attenuation * LightColor.a;
+            Diffuse *= Attenuation * LightColor.a;
             // Specular *= Attenuation / 2.0f;
             // Lighting += Diffuse + Specular;
             Lighting += Diffuse;
