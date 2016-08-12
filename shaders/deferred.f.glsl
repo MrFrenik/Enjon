@@ -67,19 +67,19 @@ void main()
         vec3 LightPosVS = (View * vec4(Lights[i].Position.xyz, 1.0f)).xyz;
 
         // //The delta position of light
-        vec3 LightDir = vec3(LightPosVS.xy - Position.xy, Lights[i].Position.z);
+        vec3 LightDir = 1.0 / Scale * vec3(LightPosVS.xy - Position.xy, Lights[i].Position.z);
 
         // //Determine distance (used for attenuation) BEFORE we normalize our LightDir
         float D = length(LightDir);
 
-        if (D < Lights[i].Radius / Scale) 
-        {
+        // if (D < Lights[i].Radius / Scale) 
+        // {
             LightDir = normalize(LightDir);
 
             LightDir.x *= Resolution.x / Resolution.y;
         
             //normalize our vectors
-            vec3 N = normalize(NormalMap * 2.0 - 1.0);
+            // vec3 N = normalize(NormalMap * 2.0 - 1.0);
             vec3 L = normalize(LightDir);
 
             vec3 HalfwayDir = normalize(LightDir + ViewDir);
@@ -93,12 +93,13 @@ void main()
 
             //Pre-multiply light color with intensity
             //Then perform "N dot L" to determine our diffuse term
-            vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * max(dot(N, L), 0.0);
+            // vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * max(dot(N, L), 0.0);
+            vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * max(1.0 - L, 0.0);
             
             //calculate attenuation
             vec3 Falloff = Lights[i].Falloff;
 
-            float Attenuation = 1.5 / (Falloff.x + (Falloff.y*D) + (Falloff.z*D*D));
+            float Attenuation = 1.0 / (Falloff.x + (Falloff.y*D) + (Falloff.z*D*D));
 
             // vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * Attenuation;
 
@@ -106,7 +107,7 @@ void main()
             // Specular *= Attenuation / 2.0f;
             // Lighting += Diffuse + Specular;
             Lighting += Diffuse;
-        }
+        // }
     }
 
     // color = texture2D(u_position, fs_in.TexCoords);
@@ -114,7 +115,7 @@ void main()
 
 
     // Emissiveness
-    if (DiffuseColor.r >= 1.0 || DiffuseColor.g >= 1.0 || DiffuseColor.b >= 1.0) color += DiffuseColor * DiffuseColor.a;
+    // if (DiffuseColor.r >= 1.0 || DiffuseColor.g >= 1.0 || DiffuseColor.b >= 1.0) color += DiffuseColor * DiffuseColor.a;
 
     diffuse = color;
     position = color;

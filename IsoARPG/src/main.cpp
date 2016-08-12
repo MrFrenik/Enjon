@@ -83,7 +83,7 @@ typedef struct
 	EM::Vec3 Falloff;
 } Light;
 
-float LightZ = -0.25f;
+float LightZ = 0.1f;
 
 typedef struct 
 {	
@@ -338,11 +338,12 @@ int main(int argc, char** argv)
 	EG::Particle2D::ParticleBatch2D* TextParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
 	EG::Particle2D::ParticleBatch2D* SmokeBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
 
-	EG::GLSLProgram* DeferredShader = EG::ShaderManager::GetShader("DeferredShader");
-	EG::GLSLProgram* DiffuseShader 	= EG::ShaderManager::GetShader("DiffuseShader");
-	EG::GLSLProgram* NormalsShader 	= EG::ShaderManager::GetShader("NormalsShader");
-	EG::GLSLProgram* ScreenShader 	= EG::ShaderManager::GetShader("NoCameraProjection");
-	EG::GLSLProgram* BasicShader 	= EG::ShaderManager::GetShader("Basic");
+	EG::GLSLProgram* DeferredShader 	= EG::ShaderManager::GetShader("DeferredShader");
+	EG::GLSLProgram* DiffuseShader 		= EG::ShaderManager::GetShader("DiffuseShader");
+	EG::GLSLProgram* NormalsShader 		= EG::ShaderManager::GetShader("NormalsShader");
+	EG::GLSLProgram* ScreenShader 		= EG::ShaderManager::GetShader("NoCameraProjection");
+	EG::GLSLProgram* BasicShader 		= EG::ShaderManager::GetShader("Basic");
+	EG::GLSLProgram* BasicLightShader 	= EG::ShaderManager::GetShader("BasicLighting");
 
 	// FBO
 	// float DWidth = SCREENWIDTH * 0.9f;
@@ -503,14 +504,15 @@ int main(int argc, char** argv)
 
 	const GLfloat constant = 1.0f; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)
     const GLfloat linear = 0.1f;
-    const GLfloat quadratic = 30.0f;
+    const GLfloat quadratic = 7.0f;
     // Then calculate radius of light volume/sphere
 
    	float LevelWidth = level.GetWidth();
    	float LevelHeight = level.GetHeight(); 
 	for (GLuint i = 0; i < NUM_LIGHTS; i++)
 	{
-		EG::ColorRGBA16 Color = EG::RGBA16(ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, 2.5f);
+		// EG::ColorRGBA16 Color = EG::RGBA16(ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, 2.5f);
+		EG::ColorRGBA16 Color = EG::RGBA16(0.2f, 0.2f, ER::Roll(250, 500) / 255.0f, 1.0f);
 	    GLfloat maxBrightness = std::fmaxf(std::fmaxf(Color.r, Color.g), Color.b);  // max(max(lightcolor.r, lightcolor.g), lightcolor.b)
 	    GLfloat Radius = (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2 * quadratic);
 		Light L = {
@@ -1414,7 +1416,7 @@ int main(int argc, char** argv)
 						glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
 									 SCREENWIDTH, SCREENHEIGHT);
 						// glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.8f);
-						glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.3f, 0.4f, 1.0f);
+						glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.4f, 0.4f, 0.5f, 1.0f);
 						glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
 
 						glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
