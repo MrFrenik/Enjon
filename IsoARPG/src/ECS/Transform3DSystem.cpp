@@ -246,6 +246,24 @@ namespace ECS{ namespace Systems { namespace Transform {
 					continue;	
 				}
 
+				// Set up animation based on velocity
+				if (Manager->Types[e] == Component::EntityType::PLAYER)
+				{
+					if (Animation2D::GetPlayerState() != Animation2D::EntityAnimationState::ATTACKING)
+					{
+						if (Velocity->y == 0 && Velocity->x == 0)
+						{
+							if (Animation2D::GetPlayerState() != Animation2D::EntityAnimationState::IDLE) Manager->Animation2DSystem->AnimComponents[e].CurrentIndex = 0;
+							Animation2D::SetPlayerState(Animation2D::EntityAnimationState::IDLE);
+						}
+						else
+						{
+							if (Animation2D::GetPlayerState() != Animation2D::EntityAnimationState::WALKING) Manager->Animation2DSystem->AnimComponents[e].CurrentIndex = 0;
+	 						Animation2D::SetPlayerState(Animation2D::EntityAnimationState::WALKING);
+						}
+					}
+				}
+
 				// Go through the items in this entity's inventory and set to this position
 				// NOTE(John): Note sure if I like this here... or at all...
 				std::vector<eid32>* Items = &Manager->InventorySystem->Inventories[e].Items;

@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -83,7 +83,7 @@ typedef struct
 	EM::Vec3 Falloff;
 } Light;
 
-float LightZ = -0.05f;
+float LightZ = 0.13f;
 
 typedef struct 
 {	
@@ -177,7 +177,7 @@ int main(int argc, char** argv)
 	// Create Camera
 	Graphics::Camera2D Camera;
 	Camera.Init(screenWidth, screenHeight);
-	Camera.SetScale(1.0f); 
+	Camera.SetScale(0.75f); 
 	
 	// Create HUDCamera
 	Graphics::Camera2D HUDCamera;
@@ -379,7 +379,7 @@ int main(int argc, char** argv)
 	static uint32 AmountDrawn = 10;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
-		float height = 0.0f;
+		float height = -50.0f;
 		eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
 																enemydims, &EnemySheet, "Enemy", 0.05f); 
 		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
@@ -616,9 +616,9 @@ int main(int argc, char** argv)
 				SpatialHash::ClearCells(World->Grid);
 				ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
 
-				// StartTicks = SDL_GetTicks();
-				// AIController::Update(World->AIControllerSystem, Player);
-				// AIRunTime = SDL_GetTicks() - StartTicks;
+				StartTicks = SDL_GetTicks();
+				AIController::Update(World->AIControllerSystem, Player);
+				AIRunTime = SDL_GetTicks() - StartTicks;
 
 				Animation2D::Update(World);
 
@@ -1148,9 +1148,9 @@ int main(int argc, char** argv)
 				HUDBatch.Add(	
 								EM::Vec4(
 											HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 10.0f, 
-											HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f - 20.0f * 12.0f,
+											HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f - 20.0f * 14.0f,
 											300.0f, 
-											20.0f + 20.0f * 12.0f
+											20.0f + 20.0f * 14.0f
 										), 
 								EM::Vec4(), 
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
@@ -1235,6 +1235,12 @@ int main(int argc, char** argv)
 												0.4f, "PlayerController: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 300.0f, 
 												0.4f, PlayerControllerTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				// Camera scale
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 320.0f, 
+												0.4f, "Camera Scale: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 320.0f, 
+												0.4f, std::to_string(Camera.GetScale()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 			}
 
@@ -1625,7 +1631,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		
 		// HERE AND QUEER!	
 		float height = 0.0f;
-		static Math::Vec2 enemydims(222.0f, 220.0f);
+		static Math::Vec2 enemydims(220.0f, 220.0f);
 		eid32 ai = Factory::CreateAI(World, Math::Vec3(MouseCoords.x, MouseCoords.y, height),
 																enemydims, EG::SpriteSheetManager::GetSpriteSheet("Beast"), "Enemy", 0.05f); 
 		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);

@@ -593,6 +593,7 @@ namespace Enjon { namespace AnimationEditor {
 				if (AnimationOnionSkin.State)
 				{
 					auto PreviousIndex = 0;
+					auto SecondPreviousIndex = 0;
 
 					// Draw the scene previous and after
 					if (CurrentIndex > 0)
@@ -604,11 +605,17 @@ namespace Enjon { namespace AnimationEditor {
 						PreviousIndex = TotalFrames - 1;
 					}
 
+					if (CurrentIndex >= 2) SecondPreviousIndex = CurrentIndex - 2;
+
 					auto NextFrame = &CurrentAnimation->Frames.at((SceneAnimation.CurrentIndex + 1) % TotalFrames);
 					auto PreviousFrame = &CurrentAnimation->Frames.at(PreviousIndex);
+					auto SecondPreviousFrame = &CurrentAnimation->Frames.at(SecondPreviousIndex);
 
 					DrawFrame(*PreviousFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA16_Blue(), 0.3f));
 					DrawFrame(*NextFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA16_Red(), 0.3f));
+
+					// DrawFrame(*SecondPreviousFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA16_White(), 0.1f));
+					// DrawFrame(*PreviousFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA16_White(), 0.3f));
 				}
 
 				// Draw Scene animation

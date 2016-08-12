@@ -251,12 +251,12 @@ namespace ECS { namespace Systems { namespace PlayerController {
 				{
 					if (Input->IsKeyDown(SDLK_w)) {
 
-						Transform->VelocityGoal.y = Multiplier * goal;
+						Transform->VelocityGoal.y = Multiplier * goal / 2.0f;
 						Transform->ViewVector.y = 1.0f;
 					}
 					if (Input->IsKeyDown(SDLK_s)) {
 
-						Transform->VelocityGoal.y = Multiplier * -goal;
+						Transform->VelocityGoal.y = Multiplier * -goal / 2.0f;
 						Transform->ViewVector.y = -1.0f;
 					}
 					if (Input->IsKeyDown(SDLK_a)) {
@@ -305,7 +305,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					if (!Input->IsKeyDown(SDLK_a) && !Input->IsKeyDown(SDLK_d)) Transform->VelocityGoal.x = 0;
 				}
 
-				if (Input->IsKeyPressed(SDL_BUTTON_LEFT)) 
+				if (Input->IsKeyDown(SDL_BUTTON_LEFT)) 
 				{
 					// Set to attack?
 					Animation2D::SetPlayerState(Animation2D::EntityAnimationState::ATTACKING);  // NOTE(John): THIS IS FUCKING AWFUL

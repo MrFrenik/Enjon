@@ -22,6 +22,7 @@ namespace Enjon { namespace Graphics { namespace SpriteSheetManager {
 		AddSpriteSheet(Sheets, std::string("Dude"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/dude.png"), Enjon::Math::iVec2(1, 1));
 		AddSpriteSheet(Sheets, std::string("Enemy"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/enemy.png"), Enjon::Math::iVec2(1, 1));
 		AddSpriteSheet(Sheets, std::string("Beast"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast2.png"), Enjon::Math::iVec2(1, 1));
+		AddSpriteSheet(Sheets, std::string("2g"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2g_transparent.png"), Enjon::Math::iVec2(1, 1));
 	}
 
 	/* Add spritesheets to the spritesheetmanager */
