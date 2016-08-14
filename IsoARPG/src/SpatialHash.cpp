@@ -12,15 +12,15 @@ namespace SpatialHash {
 	{
 		if (grid == nullptr) Enjon::Utils::FatalError("SPATIALHASH::INIT::Cannot operate on null data.");
 
-		grid->rows = ceil(height / cell_size);
-		grid->cols = ceil(width / cell_size);
+		grid->rows = ceil((height) / cell_size);
+		grid->cols = ceil((width) / cell_size);
 
 		// Allocate correct memory size for cells
-		grid->cells.resize(grid->rows * grid->cols + 1);
+		grid->cells.resize(grid->rows * grid->cols);
 
 		// Set origin of grid
 		// This needs to be passed in by world that creates it
-		grid->Origin = EM::Vec2(CELL_SIZE / 2.0f, 0.0f);
+		grid->Origin = EM::Vec2(0.0f);
 	}
 
 	/* Finds particular cell that a given entity belongs to based on its position */
@@ -148,10 +148,10 @@ namespace SpatialHash {
 		auto MaxC = C + 2 * DebugRadius.x > G->cols ? G->cols : C + 2 * DebugRadius.x;
 
 		// Make sure in bounds
-		if (R > G->rows - 1) R = G->rows - 1;
+		if (R > G->rows - 1) R = G->rows;
 		if (R < 0) R = 0;
 
-		if (C > G->cols - 1) C = G->cols - 1;
+		if (C > G->cols - 1) C = G->cols;
 		if (C < 0) C = 0;
 
 		// Set width and height
@@ -185,7 +185,7 @@ namespace SpatialHash {
 		{
 			for (auto c = C; c < MaxC; c++)
 			{
-				EG::ColorRGBA16 Color = EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.4f);
+				EG::ColorRGBA16 Color = EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.3f);
 				auto index = r * G->cols + c;
 				auto size = G->cells.at(index).entities.size();
 				if (size) Color = EG::SetOpacity(EG::RGBA16_Green(), 0.4f);
@@ -205,6 +205,67 @@ namespace SpatialHash {
 			CurrentX = X;
 			CurrentY = Y;
 		}
-		
+	}
+
+	void DrawActiveCell(Grid* G, EG::SpriteBatch* Batch, EM::Vec2& Position)
+	{
+		// Get cell of position
+		auto StartCell = FindCellCoordinates(G, &Position);
+
+		// Set radius
+		auto R = (int)(StartCell.y);
+		auto C = (int)(StartCell.x);
+
+		if (R > G->rows || R < 0) return;
+		if (C > G->cols || C < 0) return;
+
+		// Set width and height
+		auto Width = CELL_SIZE * 2.0f;
+		auto Height = CELL_SIZE;
+
+		// Get X and Y
+		auto X = G->Origin.x;
+		auto Y = G->Origin.y;
+
+		// Get row offset
+		for (auto i = 0; i < R; i++)
+		{
+			X -= Width / 2.0f;
+			Y += Height / 2.0f;
+		}
+
+		// Get column offset
+		for (auto i = 0; i < C; i++)
+		{
+			X += Width / 2.0f; 
+			Y += Height / 2.0f;
+		}
+	
+		// Draw actived tile
+		EG::ColorRGBA16 Color = EG::SetOpacity(EG::RGBA16_Orange(), 1.0f);
+		auto index = R * G->cols + C;
+		Batch->Add(
+					EM::Vec4(X, Y, Width - 5.0f, Height - 5.0f), 
+					EM::Vec4(0, 0, 1, 1), 
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
+					Color
+				);
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

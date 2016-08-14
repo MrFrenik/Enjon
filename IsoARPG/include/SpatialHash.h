@@ -46,6 +46,8 @@ namespace SpatialHash {
 	void GetNeighborCells(Grid* grid, int index, std::vector<ECS::eid32>* Entities);
 
 	void DrawGrid(Grid* G, EG::SpriteBatch* Batch, EM::Vec2& Position = EM::Vec2(0.0f));
+
+	void DrawActiveCell(Grid* G, EG::SpriteBatch* Batch, EM::Vec2& Position);
 }
 
 #endif

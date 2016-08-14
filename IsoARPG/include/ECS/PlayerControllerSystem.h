@@ -7,7 +7,7 @@
 #include "SpatialHash.h"
 
 #define	WALKPACE 	2.0f
-#define SPRINTPACE 	WALKPACE * 2.0f
+#define SPRINTPACE 	WALKPACE * 6.0f
 
 struct PlayerControllerSystem
 {

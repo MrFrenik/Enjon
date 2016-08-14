@@ -83,7 +83,7 @@ typedef struct
 	EM::Vec3 Falloff;
 } Light;
 
-float LightZ = -0.14f;
+float LightZ = -0.35f;
 
 typedef struct 
 {	
@@ -102,10 +102,11 @@ bool ShowMap = false;
 bool Paused = false;
 bool IsDashing = false;
 bool DebugInfo = false;
+bool DebugEntityInfo = false;
 bool AnimationEditorOn = true;
 bool DeferredRenderingOn = true;
 
-const int LEVELSIZE = 200;
+const int LEVELSIZE = 100;
 
 float DashingCounter = 0.0f;
 
@@ -444,7 +445,7 @@ int main(int argc, char** argv)
 	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 20;
+	AmountDrawn = 0;
 
 	for (uint32 e = 0; e < AmountDrawn * 500; e++)
 	{
@@ -643,7 +644,7 @@ int main(int argc, char** argv)
 				ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
 
 				StartTicks = SDL_GetTicks();
-				AIController::Update(World->AIControllerSystem, Player);
+				// AIController::Update(World->AIControllerSystem, Player);
 				AIRunTime = SDL_GetTicks() - StartTicks;
 
 				Animation2D::Update(World);
@@ -791,7 +792,7 @@ int main(int argc, char** argv)
 				{
 
 					// Print Entity info if debug info is on
-					if (DebugInfo)
+					if (DebugEntityInfo)
 					{
 						auto CF = EG::FontManager::GetFont("WeblySleek_32");
 
@@ -835,6 +836,14 @@ int main(int argc, char** argv)
 													0.4f, std::string("Health: ") + std::to_string(EntityHealth), 
 													CF, TextBatch, 
 																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+						auto Cells =  SpatialHash::FindCellCoordinates(World->Grid, &World->TransformSystem->Transforms[e].CartesianPosition);
+
+						Graphics::Fonts::PrintText( EntityPosition->x + 20.0f, 
+													EntityPosition->y - 100.0f, 
+													0.4f, std::string("Grid Cell: ") + "(" + std::to_string(Cells.x) + ", " + std::to_string(Cells.y) + ")", 
+													CF, TextBatch, 
+													Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 					}
 
 					// If target
@@ -1058,7 +1067,7 @@ int main(int argc, char** argv)
 				EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::RGBA16_White(), 1.5f, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
 
 				// Print Entity info if debug info is on
-				if (DebugInfo)
+				if (DebugEntityInfo)
 				{
 					auto CF = EG::FontManager::GetFont("WeblySleek_32");
 
@@ -1336,7 +1345,7 @@ int main(int argc, char** argv)
 												0.4f, "Spatial Grid: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 340.0f, 
 												0.4f, "Rows: " + std::to_string(World->Grid->rows) + ", ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
-				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 260.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 340.0f, 
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 270.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 340.0f, 
 												0.4f, "Cols: " + std::to_string(World->Grid->cols), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
 			}
@@ -1422,6 +1431,11 @@ int main(int argc, char** argv)
 				DebugSpatialBatch.Begin();
 				{
 					SpatialHash::DrawGrid(World->Grid, &DebugSpatialBatch, World->TransformSystem->Transforms[World->Player].CartesianPosition);
+
+					auto MP = Input.GetMouseCoords();
+					Camera.ConvertScreenToWorld(MP);
+					MP = EM::IsoToCartesian(MP - EM::Vec2(70.0f, 0.0f));
+					SpatialHash::DrawActiveCell(World->Grid, &DebugSpatialBatch, MP);
 				}
 				DebugSpatialBatch.End();
 			}
@@ -1756,7 +1770,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		
 		// HERE AND QUEER!	
 		float height = 0.0f;
-		static Math::Vec2 enemydims(220.0f, 220.0f);
+		static Math::Vec2 enemydims(100.0f, 100.0f);
 		eid32 ai = Factory::CreateAI(World, Math::Vec3(MouseCoords.x, MouseCoords.y, height),
 																enemydims, EG::SpriteSheetManager::GetSpriteSheet("Beast"), "Enemy", 0.05f); 
 		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
@@ -1775,6 +1789,32 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	{
 		World->Lvl->DrawDebugEnabled();
 		std::cout << "Debug draw..." << std::endl;
+	}
+
+	if (Input->IsKeyPressed(SDLK_g))
+	{
+		DebugEntityInfo = !DebugEntityInfo;
+	}
+
+	if (Input->IsKeyPressed(SDLK_b))
+	{
+		// Get camera position
+		auto CamPos = Camera->GetPosition();
+		auto MouseCoords = Input->GetMouseCoords();	
+		Camera->ConvertScreenToWorld(MouseCoords);
+
+		eid32 id = Factory::CreateItem(
+										World, 
+										Math::Vec3(MouseCoords.x, MouseCoords.y, 0.0f), 
+										Enjon::Math::Vec2(ER::Roll(50, 60), ER::Roll(50, 60)), 
+										EG::SpriteSheetManager::GetSpriteSheet("Box"), 
+										Masks::Type::ITEM, 
+										Component::EntityType::ITEM
+									  );
+
+		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
+		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(50, 100) / 50.0f;
 	}
 }
 

@@ -58,7 +58,16 @@ Systems:
 Editor:
 	- Be able to integrate live editing (animations, level creation, particle effects) into game engine
 
+	- Be able to create entity and drop into game for quick testing:
+		- This includes being able to add/remove components and edit their properties
+		- Need to be able to save this data out to JSON as well for later editing
+
 	- Animation Editor:
-		- Allow hot-loading of animations for editing
-		- Be able to save changes back out to json files that were loaded in then reload AnimManager
+		- √ Allow hot-loading of animations for editing 
+		- √ Be able to save changes back out to json files that were loaded in then reload AnimManager
+
+	- Behavior Tree Editor:
+		- I have no idea how to go about this, but need to be able to do a behavior tree editor
+		- Since the code for the behavior nodes needs to be defined in code, maybe just create a bunch of 
+			stock behavior nodes that will be used and then can be chained together for different functionality
 		

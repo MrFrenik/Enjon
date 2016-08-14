@@ -355,10 +355,10 @@ namespace ECS { namespace Systems { namespace PlayerController {
 					}
 				}
 
-				if (Input->IsKeyPressed(SDLK_t)) {
+				// if (Input->IsKeyPressed(SDLK_t)) {
 
-					Targeting = !Targeting;
-				}
+				// 	Targeting = !Targeting;
+				// }
 
 
 				if (Input->IsKeyPressed(SDLK_TAB)) {

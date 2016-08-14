@@ -34,7 +34,7 @@ void Level::Init(float x, float y, int rows, int cols)
 	m_OverlaysDirty = false;
 	
 	// float tilewidth = 512.0f;
-	float tilewidth = 200.0f;
+	float tilewidth = 128.0f;
 	float tileheight = tilewidth / 2.0f;
 	float wallWidth = tilewidth;
 	float wallHeight = 7.6f * tilewidth;
@@ -45,6 +45,9 @@ void Level::Init(float x, float y, int rows, int cols)
 
 	m_width = (int)(tilewidth / 2.0f) * cols;
 	m_height = (int)(tileheight / 2.0f) * rows;
+
+	// m_width = (int)(tilewidth) * cols;
+	// m_height = (int)(tileheight) * rows;
 
 	m_cartesianWidth = tilewidth / 2.0f * cols;
 	m_cartesianHeight = tilewidth / 2.0f * rows;
@@ -176,7 +179,7 @@ void Level::DrawDebugActiveTile(EG::SpriteBatch& Batch, EM::Vec2& Position)
 	// auto x_percentage = 
 
 
-
+	/*
 	auto T = &m_cartesiantiles.at((m_rows - 1) * (m_cols));
 	TilePostiion = T->pos;
 	Dimensions = T->dims;
@@ -205,6 +208,7 @@ void Level::DrawDebugActiveTile(EG::SpriteBatch& Batch, EM::Vec2& Position)
 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 				EG::SetOpacity(EG::RGBA16_Blue(), 1.0f)
 			);
+	*/
 
 }
 
