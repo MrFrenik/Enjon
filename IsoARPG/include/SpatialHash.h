@@ -25,6 +25,7 @@ namespace SpatialHash {
 	{
 		int rows;
 		int cols;
+		EM::Vec2 Origin;
 		std::vector<Cell> cells; 
 		std::vector<Enjon::uint32> dirtyCells;
 	} Grid; 
@@ -33,7 +34,7 @@ namespace SpatialHash {
 	void Init(Grid* grid, int width, int height, int cell_size = CELL_SIZE); 
 
 	/* Finds particular cell that a given entity belongs to based on its position */
-	int FindCell(Grid* grid, ECS::eid32 entity, const V2* position, int cell_size = CELL_SIZE); 
+	EM::Vec2 FindCells(Grid* grid, ECS::eid32 entity, const V2* position, int cell_size = CELL_SIZE); 
 
 	/* Overloaded function that finds particular cell that a given entity belongs to based on its AABB (preferred method) */
 	std::vector<ECS::eid32> FindCell(Grid* grid, ECS::eid32 entity, const Enjon::Physics::AABB* AABB, int cell_size = CELL_SIZE); 
@@ -43,6 +44,8 @@ namespace SpatialHash {
 
 	/* Finds all neighboring cells to a given entitiy's cell and stores those in a passed in entities vector */
 	void GetNeighborCells(Grid* grid, int index, std::vector<ECS::eid32>* Entities);
+
+	void DrawGrid(Grid* G, EG::SpriteBatch* Batch);
 }
 
 #endif

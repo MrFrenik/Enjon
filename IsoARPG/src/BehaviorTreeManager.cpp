@@ -1,8 +1,10 @@
 #include "BehaviorTreeManager.h"
 
 #include "TestTree.h"
+#include "BeastTree.h"
 
 using namespace BT;
+using namespace BeastBehaviorTree;
 
 namespace BTManager
 {
@@ -11,6 +13,7 @@ namespace BTManager
 	void Init()
 	{
 		AddBehaviorTree(Trees, "TestTree", TestTree());	
+		AddBehaviorTree(Trees, "BeastTree", BeastTree());
 	}
 
 	/* Add spritesheets to the spritesheetmanager */

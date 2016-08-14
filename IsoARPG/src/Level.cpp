@@ -21,90 +21,73 @@ void Level::Init(float x, float y, int rows, int cols)
 	// TODO(John): Levels will be generated dynamically and randomly seeded as well
 	// TODO(John): Bound entities within the level 
 
-	// m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/stone.png"), Enjon::Math::iVec2(3, 1));
-	m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png"), Enjon::Math::iVec2(1, 1));
-	m_wallSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/wall_chunk.png"), Enjon::Math::iVec2(1, 1));
+	// m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png"), EM::iVec2(1, 1));
+	m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledred.png"), EM::iVec2(1, 1));
+	// m_wallSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/wall_chunk.png"), EM::iVec2(1, 1));
+
+	// Set debug draw to false
+	m_DrawDebugEnabled = true;
 
 	CurrentOverlayIndex = 0;
 
 	// Overlays are clean
 	m_OverlaysDirty = false;
 	
-	//Push tiles back into level data 
-	float currentX = x;
-	float currentY = y; 
-	float tilewidth = 512.0f;
+	// float tilewidth = 512.0f;
+	float tilewidth = 200.0f;
 	float tileheight = tilewidth / 2.0f;
 	float wallWidth = tilewidth;
 	float wallHeight = 7.6f * tilewidth;
-	int checker = 0;
 	unsigned int index = 0;
 
-	m_width = (int)tilewidth * cols / 2.0f;
-	m_height = (int)tileheight * rows / 2.0f;
+	m_rows = rows;
+	m_cols = cols;
+
+	m_width = (int)(tilewidth / 2.0f) * cols;
+	m_height = (int)(tileheight / 2.0f) * rows;
+
+	m_cartesianWidth = tilewidth / 2.0f * cols;
+	m_cartesianHeight = tilewidth / 2.0f * rows;
+
+	// float X = x + (cols * tilewidth / 2.0f);
+	float X = x;
+	float Y = y;
+	float currentX = X;
+	float currentY = Y; 
 
 	//Grab Iso and Cartesian tile data
 	for (int i = 0; i < rows; i++)
 	{ 
 		for (int j = 0; j < cols; j++)
 		{
-			checker++;
+			//Add coordinates of iso world to tile data
+			Tile tile(EM::Vec2(currentX, currentY), EM::Vec2(tilewidth, tileheight), 2.0f, &m_tilesheet, 1);
+			m_mapTiles.emplace_back(tile);
+			m_GroundTiles.emplace_back(tile);
 
-			// Add a wall at edges
-			if (IsBorder(i, j, rows, cols))
-			{
-				// Need to find out where to place these, whether at front or back of rendering process
-				if (IsFront(i, j, rows, cols))
-				{
-					// Add a wall to front render iso world
-					m_isoTilesFront.emplace_back(Tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(wallWidth, wallHeight), currentY, &m_wallSheet, index));
-					
-					m_isotiles.emplace_back(Tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(wallWidth, wallHeight), currentY, &m_wallSheet, index));
-				}
-				else
-				{
-					// Add a wall to iso world
-					m_isotiles.emplace_back(Tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(wallWidth, wallHeight), currentY, &m_wallSheet, index));
-					// Add coordinates of 2D world to cartesian data
-				}
-
-				//Add coordinates of 2d world to level data vector
-				m_cartesiantiles.emplace_back(Tile(Enjon::Math::IsoToCartesian(Enjon::Math::Vec2(currentX, currentY)), 
-												Enjon::Math::Vec2(tilewidth / 2.0f), 2.0f, &m_tilesheet, index));
-
-			}
-
-			// Add tile
-			 else
-			 {
-				//Add coordinates of iso world to tile data
-				index = Enjon::Random::Roll(0, 2);
-				if (index == 0 || index == 1) index = Enjon::Random::Roll(0, 2);
-				if (index == 0) index = Enjon::Random::Roll(0, 2);
-				// Tile tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(tilewidth, tileheight), 2.0f, &m_tilesheet, index);
-				Tile tile(Enjon::Math::Vec2(currentX, currentY), Enjon::Math::Vec2(tilewidth, tileheight), 2.0f, &m_tilesheet, 1);
-				// m_isotiles.emplace_back(tile);
-				m_mapTiles.emplace_back(tile);
-				m_GroundTiles.emplace_back(tile);
-
-				//Add coordinates of 2d world to level data vector
-				m_cartesiantiles.emplace_back(Tile(Enjon::Math::IsoToCartesian(Enjon::Math::Vec2(currentX, currentY)), 
-												Enjon::Math::Vec2(tilewidth / 2.0f), 2.0f, &m_tilesheet, index));
-			 }
+			// //Add coordinates of 2d world to level data vector
+			m_cartesiantiles.emplace_back(
+											Tile(
+													// Enjon::Math::IsoToCartesian(Enjon::Math::Vec2(currentX + tilewidth / 2.0f, currentY + tileheight)), 
+													Enjon::Math::IsoToCartesian(Enjon::Math::Vec2(currentX, currentY)), 
+													Enjon::Math::Vec2(tilewidth / 2.0f), 
+													2.0f, 
+													&m_tilesheet, 
+													index
+												)
+										);
 
 			//Increment currentX and currentY	
-			currentX += (tilewidth / 2.0f);
-			currentY -= (tileheight / 2.0f);
-
+			currentX -= (tilewidth / 2.0f);
+			currentY += (tileheight / 2.0f);
 		}
 
-		//Go down a row
-		x -= tilewidth / 2.0f;
-		y -= tileheight / 2.0f;
-		currentX = x;
-		currentY = y;
-		checker++;
-	} 
+		//Go up a row
+		X += tilewidth / 2.0f;
+		Y += tileheight / 2.0f;
+		currentX = X;
+		currentY = Y;
+	}
 
 	// Resize glyph pointers to glyph vector size
 	m_isoTilePointers.resize(m_isotiles.size()); 
@@ -133,8 +116,7 @@ bool Level::IsBorder(int i, int j, int rows, int cols)
 
 void Level::DrawGroundTiles(Enjon::Graphics::SpriteBatch& Batch, EG::SpriteBatch& Normals)
 {
-	auto C = Enjon::Graphics::RGBA16_White();
-	// auto DC = Enjon::Random::Roll(100, 200) / 255.0f;
+	auto C = EG::RGBA16_White();
 	auto DC = 190.0f / 255.0f;
 	C.r -= DC;
 	C.g -= DC;
@@ -142,10 +124,88 @@ void Level::DrawGroundTiles(Enjon::Graphics::SpriteBatch& Batch, EG::SpriteBatch
 	//Add level information to Batch
 	for (Tile& tile : m_GroundTiles)
 	{
-		//Batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.texture.id);
-		Batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id, C, 0, 0, EG::CoordinateFormat::ISOMETRIC);
-		Normals.Add(EM::Vec4(tile.pos, tile.dims), EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png").id, EG::RGBA16_White(), 0, 0, EG::CoordinateFormat::ISOMETRIC);
+		Batch.Add(
+					EM::Vec4(tile.pos, EM::Vec2(tile.dims.x, tile.dims.y)), 
+					tile.Sheet->GetUV(tile.index), 
+					tile.Sheet->texture.id, 
+					C, 
+					0 
+				);
+
+		// Normals.Add(
+		// 				EM::Vec4(tile.pos, tile.dims), 
+		// 				EM::Vec4(0, 0, 1, 1), 
+		// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png").id, 
+		// 				EG::RGBA16_White(), 
+		// 				0
+		// 			);
 	}
+}
+
+void Level::DrawDebugTiles(Enjon::Graphics::SpriteBatch& Batch)
+{
+	for (Tile& tile : m_GroundTiles)
+	{
+		Batch.Add(
+					EM::Vec4(tile.pos, EM::Vec2(tile.dims.x, tile.dims.y)), 
+					EM::Vec4(0, 0, 1, 1), 
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id, 
+					EG::SetOpacity(EG::RGBA16_Red(), 0.5f)
+				);
+	}
+
+	for (Tile& tile : m_cartesiantiles)
+	{
+		Batch.Add(
+					EM::Vec4(tile.pos, EM::Vec2(tile.dims.x, tile.dims.y)), 
+					EM::Vec4(0, 0, 1, 1), 
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
+					EG::SetOpacity(EG::RGBA16_Red(), 0.5f)
+				);
+	}
+}
+
+void Level::DrawDebugActiveTile(EG::SpriteBatch& Batch, EM::Vec2& Position)
+{
+	EM::Vec2 TilePostiion;
+	EM::Vec2 Dimensions;
+
+	// Find the tile that the position is covering
+	auto CartPos = EM::IsoToCartesian(Position);
+
+	// auto x_percentage = 
+
+
+
+	auto T = &m_cartesiantiles.at((m_rows - 1) * (m_cols));
+	TilePostiion = T->pos;
+	Dimensions = T->dims;
+
+	Batch.Add(
+				EM::Vec4(TilePostiion, Dimensions), 
+				EM::Vec4(0, 0, 1, 1),
+				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+				EG::SetOpacity(EG::RGBA16_Green(), 1.0f)
+			);
+
+	T = &m_cartesiantiles.at((0) * (m_cols));
+	TilePostiion = T->pos;
+	Dimensions = T->dims;
+
+	Batch.Add(
+				EM::Vec4(TilePostiion, Dimensions), 
+				EM::Vec4(0, 0, 1, 1),
+				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+				EG::SetOpacity(EG::RGBA16_Green(), 1.0f)
+			);
+
+	Batch.Add(
+				EM::Vec4(CartPos, Dimensions), 
+				EM::Vec4(0, 0, 1, 1),
+				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+				EG::SetOpacity(EG::RGBA16_Blue(), 1.0f)
+			);
+
 }
 
 void Level::DrawIsoLevel(Enjon::Graphics::SpriteBatch& batch)
@@ -153,8 +213,7 @@ void Level::DrawIsoLevel(Enjon::Graphics::SpriteBatch& batch)
 	//Add level information to batch
 	for (Tile& tile : m_isotiles)
 	{
-		//batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.texture.id);
-		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id);
+		batch.Add(EM::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id);
 	} 
 }
 
@@ -162,18 +221,20 @@ void Level::DrawIsoLevelFront(Enjon::Graphics::SpriteBatch& batch)
 {
 	for (Tile& tile : m_isoTilesFront)
 	{
-		//batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.texture.id);
-		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id);
+		batch.Add(EM::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), tile.Sheet->texture.id);
 	}
 }
 
-void Level::DrawCartesianLevel(Enjon::Graphics::SpriteBatch& batch)
+void Level::DrawCartesianLevel(Enjon::Graphics::SpriteBatch& Batch)
 { 
 	for (Tile& tile : m_cartesiantiles)
 	{
-		// batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), tile.Sheet->texture.id, Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_White(), 0.25f));
-		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), Enjon::Math::Vec4(0, 0, 1, 1), 0, 
-				  Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_Orange(), 0.1f));
+		Batch.Add(
+					EM::Vec4(tile.pos, tile.dims), 
+					EM::Vec4(0, 0, 1, 1), 
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+				  	Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_Orange(), 0.1f)
+				  );
 	}
 } 
 
@@ -181,7 +242,7 @@ void Level::DrawMap(Enjon::Graphics::SpriteBatch& batch)
 {
 	for (Tile& tile : m_mapTiles)
 	{
-		batch.Add(Enjon::Math::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), 0, Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_Black(), 0.2f), 100.0f);
+		batch.Add(EM::Vec4(tile.pos, tile.dims), tile.Sheet->GetUV(tile.index), 0, Enjon::Graphics::SetOpacity(Enjon::Graphics::RGBA16_Black(), 0.2f), 100.0f);
 	}	
 }
 
@@ -189,14 +250,14 @@ void Level::DrawTileOverlays(Enjon::Graphics::SpriteBatch& batch)
 {
 	for (TileOverlay& TO : m_TileOverlays)
 	{
-		batch.Add(TO.DestRect, Enjon::Math::Vec4(0, 0, 1, 1), TO.Tex.id, TO.Color);
+		batch.Add(TO.DestRect, EM::Vec4(0, 0, 1, 1), TO.Tex.id, TO.Color);
 	}
 
 	// Set to not dirty
 	m_OverlaysDirty = false;
 }
 
-void Level::AddTileOverlay(Enjon::Graphics::GLTexture Tex, Enjon::Math::Vec4 DestRect, Enjon::Graphics::ColorRGBA16 Color)
+void Level::AddTileOverlay(Enjon::Graphics::GLTexture Tex, EM::Vec4 DestRect, Enjon::Graphics::ColorRGBA16 Color)
 {
 	struct TileOverlay TO = TileOverlay{Tex, DestRect, Color};
 	if (m_TileOverlays.size() == MAX_TILE_OVERLAY - 1)
@@ -207,6 +268,7 @@ void Level::AddTileOverlay(Enjon::Graphics::GLTexture Tex, Enjon::Math::Vec4 Des
 	else m_TileOverlays.push_back(TO);
 	m_OverlaysDirty = true;
 }
+
 
 void Level::CleanOverlays()
 {

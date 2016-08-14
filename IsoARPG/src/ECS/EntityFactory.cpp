@@ -77,6 +77,7 @@ namespace ECS { namespace Factory {
 			AnimComponent->CurrentIndex = 0;
 			AnimComponent->CurrentAnimation = AnimManager::GetAnimation("Enemy_Pixel");
 			AnimComponent->AnimationTimer = 0.0f;	
+			AnimComponent->SetStart = false;
 
 			// Set up renderer component
 			Manager->Renderer2DSystem->Renderers[Player].Format = EG::CoordinateFormat::CARTESIAN;
@@ -137,8 +138,10 @@ namespace ECS { namespace Factory {
 			Transform->VelocityGoalScale = VelocityScale;
 			Transform->ViewVector = Enjon::Math::Vec2(1, 1);
 			Transform->AttackVector = Enjon::Math::Vec2(1, 1);
-			Transform->GroundPosition = Enjon::Math::Vec2(Position.XY());
-			Transform->GroundPositionOffset = Enjon::Math::Vec2(Transform->Dimensions.x / 2.0f - Systems::TILE_SIZE, 0.0f);
+			// Transform->GroundPosition = Enjon::Math::Vec2(Position.XY());
+			// Transform->GroundPositionOffset = Enjon::Math::Vec2(Transform->Dimensions.x / 2.0f - Systems::TILE_SIZE, 0.0f);
+			Transform->GroundPositionOffset = Enjon::Math::Vec2(-35.0f,-10.0f);
+			Transform->GroundPosition = Enjon::Math::Vec2(Position.x, Position.y) + Transform->GroundPositionOffset;
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);
@@ -157,6 +160,13 @@ namespace ECS { namespace Factory {
 			// These are redundant...
 			Animation2D->CurrentFrame = 0; 
 			Animation2D->BeginningFrame = 0;
+
+			// Set up AnimComponent
+			Component::AnimComponent* AnimComponent = &Manager->Animation2DSystem->AnimComponents[AI];
+			AnimComponent->CurrentIndex = 0;
+			AnimComponent->CurrentAnimation = AnimManager::GetAnimation("Enemy_Pixel");
+			AnimComponent->AnimationTimer = 0.0f;	
+			AnimComponent->SetStart = false;
 
 			// Set up renderer component
 			Manager->Renderer2DSystem->Renderers[AI].Format = EG::CoordinateFormat::CARTESIAN;
@@ -196,7 +206,7 @@ namespace ECS { namespace Factory {
 
 			// Set up brain
 			auto AC = &Manager->AIControllerSystem->AIControllers[AI];
-			AC->Brain = BTManager::GetBehaviorTree("TestTree");
+			AC->Brain = BTManager::GetBehaviorTree("BeastTree");
 			AC->SO = AC->Brain->CreateStateObject();
 			AC->BB = AC->Brain->CreateBlackBoard();
 
@@ -206,7 +216,7 @@ namespace ECS { namespace Factory {
 			AC->BB->AddComponent(std::string("EntityManager"), new BlackBoardComponent<Systems::EntityManager*>(Manager));
 			AC->BB->AddComponent(std::string("TargetPosition"), new BlackBoardComponent<EM::Vec3>(EM::Vec3(0.0f, 0.0f, 0.0f)));
 			AC->BB->AddComponent(std::string("MovementLoop"), new BlackBoardComponent<u32>(0));
-			AC->BB->AddComponent(std::string("Timer"), new BlackBoardComponent<Timer*>(new Timer{0.0f, 0.01f, 1.0f}));
+			AC->BB->AddComponent(std::string("Timer"), new BlackBoardComponent<Timer*>(new Timer{0.0f, 0.01f, 3.0f}));
 
 
 			return AI;

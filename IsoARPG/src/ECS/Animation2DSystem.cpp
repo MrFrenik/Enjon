@@ -60,6 +60,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 			if (Manager->Masks[e] & COMPONENT_ANIMATION2D)
 			{
 				// If damaged
+				// NOTE(John): Belongs in renderer system
 				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::DAMAGED)
 				{
 					Manager->Renderer2DSystem->Renderers[e].Color = Enjon::Graphics::RGBA16(100.0f, 0.0f, 0.0f, 100.0f);  // damaged color for now 
@@ -327,6 +328,61 @@ namespace ECS { namespace Systems { namespace Animation2D {
 						}
 					}
 
+				}
+
+				// If AI
+				else if (Manager->Masks[e] & COMPONENT_AICONTROLLER)
+				{
+					// Get necessary items
+					Transform3DSystem* TransformSystem = Manager->TransformSystem;
+					Enjon::Math::Vec2* ViewVector = &TransformSystem->Transforms[e].ViewVector;
+					Enjon::Math::Vec2* AttackVector = &TransformSystem->Transforms[e].AttackVector;
+					Enjon::Math::Vec3* Velocity = &TransformSystem->Transforms[e].Velocity;
+					Enjon::Math::Vec3* Position = &TransformSystem->Transforms[e].Position;
+
+					Component::AnimComponent* AnimComponent = &Manager->Animation2DSystem->AnimComponents[e];
+					Enjon::uint32* SetStart = &AnimComponent->SetStart;
+					auto CurrentAnimation = AnimComponent->CurrentAnimation;
+					auto State = AnimComponent->AnimState;
+
+					// Walking
+					if (State == Component::AnimationState::WALKING)
+					{
+						if (ViewVector->x > 0) Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Walk");
+						else 				 Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Walk_Mirror");
+					}
+
+					// Idle
+					else
+					{
+						Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Pixel");
+						AnimComponent->SetStart = false;
+					}
+
+					if (State == Component::AnimationState::WALKING || State == Component::AnimationState::IDLE)
+					{
+						// Increase timer (should do this with delta time passed in)
+						AnimComponent->AnimationTimer += 0.15f;
+
+						// Get handle to current frame
+						auto* Frame = &CurrentAnimation->Frames.at(AnimComponent->CurrentIndex);
+
+						if (AnimComponent->AnimationTimer >= Frame->Delay)
+						{
+							// Reset timer
+							AnimComponent->AnimationTimer = 0.0f;
+
+							// Increase current index
+							AnimComponent->CurrentIndex++;
+						}
+
+						// Bounds checking
+						if (AnimComponent->CurrentIndex >= CurrentAnimation->Frames.size())
+						{
+							// Reset current index
+							AnimComponent->CurrentIndex = 0;
+						}
+					}
 				}
 
 			}

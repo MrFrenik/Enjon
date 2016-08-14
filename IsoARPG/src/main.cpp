@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -83,7 +83,7 @@ typedef struct
 	EM::Vec3 Falloff;
 } Light;
 
-float LightZ = 0.1f;
+float LightZ = -0.14f;
 
 typedef struct 
 {	
@@ -251,12 +251,22 @@ int main(int argc, char** argv)
 	EG::SpriteBatch GroundTileNormalsBatch;
 	GroundTileNormalsBatch.Init();
 
+	EG::SpriteBatch GroundTileDebugBatch;
+	GroundTileDebugBatch.Init();
+
+	EG::SpriteBatch DebugActiveTileBatch;
+	DebugActiveTileBatch.Init();
+
 	EG::SpriteBatch DeferredBatch;
 	DeferredBatch.Init();
 
+	EG::SpriteBatch DebugSpatialBatch;
+	DebugSpatialBatch.Init();
+
+
 	Level level;
 	Graphics::GLTexture TileTexture;
-	level.Init(Camera.GetPosition().x, Camera.GetPosition().y, LEVELSIZE, LEVELSIZE);
+	level.Init(0, 0, LEVELSIZE, LEVELSIZE);
 	TileTexture = Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledblue.png");
 	
 	float x = Camera.GetPosition().x;
@@ -294,8 +304,11 @@ int main(int argc, char** argv)
 
 	GroundTileBatch.Begin();
 	GroundTileNormalsBatch.Begin();
+	GroundTileDebugBatch.Begin();
 	level.DrawGroundTiles(GroundTileBatch, GroundTileNormalsBatch);
+	level.DrawDebugTiles(GroundTileDebugBatch);
 	GroundTileNormalsBatch.End();
+	GroundTileDebugBatch.End();
 	GroundTileBatch.End();
 
 	// GroundTileNormalsBatch.Begin();
@@ -353,8 +366,6 @@ int main(int argc, char** argv)
 	EG::FrameBufferObject* NormalsFBO 	= new EG::FrameBufferObject(DWidth, DHeight);
 	EG::FrameBufferObject* DeferredFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
 
-	
-
 
 	/////////////////
 	// Testing ECS //   
@@ -362,6 +373,11 @@ int main(int argc, char** argv)
 
 	// Create new EntityManager
 	ECS::Systems::EntityManager* World = EntitySystem::NewEntityManager(level.GetWidth(), level.GetWidth(), &Camera, &level);
+
+	// Draw debug spatial grid
+	DebugSpatialBatch.Begin();
+	SpatialHash::DrawGrid(World->Grid, &DebugSpatialBatch);
+	DebugSpatialBatch.End();
 
 	// Init loot system
 	Loot::Init();
@@ -377,11 +393,13 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 10;
+	static uint32 AmountDrawn = 0;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = -50.0f;
-		eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
+		// eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
+		// 														enemydims, &EnemySheet, "Enemy", 0.05f); 
+		eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(level.GetWidth(), 0), Random::Roll(level.GetHeight() * 2, 0))), height),
 																enemydims, &EnemySheet, "Enemy", 0.05f); 
 		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
 	}
@@ -397,7 +415,10 @@ int main(int argc, char** argv)
 	}
 
 	// Create player
-	eid32 Player = Factory::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(222.0f, 200.0f), &PlayerSheet, 
+	// eid32 Player = Factory::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(222.0f, 200.0f), &PlayerSheet, 
+	// 	"Player", 0.4f, Math::Vec3(1, 1, 0)); 
+
+	eid32 Player = Factory::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(level.GetWidth()/2, level.GetHeight()/2)), 0.0f), Math::Vec2(222.0f, 200.0f), &PlayerSheet, 
 		"Player", 0.4f, Math::Vec3(1, 1, 0)); 
 
 	// Set player for world
@@ -516,7 +537,8 @@ int main(int argc, char** argv)
 	    GLfloat maxBrightness = std::fmaxf(std::fmaxf(Color.r, Color.g), Color.b);  // max(max(lightcolor.r, lightcolor.g), lightcolor.b)
 	    GLfloat Radius = (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2 * quadratic);
 		Light L = {
-					  EM::Vec3(ER::Roll(0, -LevelWidth), ER::Roll(0, -LevelHeight), LightZ), 
+					  // EM::Vec3(ER::Roll(0, -LevelWidth), ER::Roll(0, -LevelHeight), LightZ), 
+					  EM::Vec3(ER::Roll(0, LevelWidth), ER::Roll(0, LevelHeight), LightZ), 
 					  Color, 
 					  Radius, 
 					  EM::Vec3(constant, linear, quadratic)
@@ -823,7 +845,13 @@ int main(int argc, char** argv)
 						EntityBatch.Add(Math::Vec4(Position.x, Position.y, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), TargetSheet.texture.id, Enjon::Graphics::RGBA16_Red(), 1000);
 					}
 
-					EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), uv, ESpriteSheet->texture.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
+					// EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), uv, ESpriteSheet->texture.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
+
+					auto CurrentIndex = World->Animation2DSystem->AnimComponents[e].CurrentIndex;
+					auto Image = &World->Animation2DSystem->AnimComponents[e].CurrentAnimation->Frames.at(CurrentIndex);
+					auto Position = EntityPosition->XY();
+
+					EA::DrawFrame(*Image, Position, &EntityBatch, *Color, 1.5f, Position.y - World->TransformSystem->Transforms[e].Position.z);
 
 				}
 				else if (World->Types[e] == ECS::Component::EntityType::ITEM)
@@ -1028,6 +1056,62 @@ int main(int argc, char** argv)
 				auto Image = &World->Animation2DSystem->AnimComponents[Player].CurrentAnimation->Frames.at(CurrentIndex);
 
 				EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::RGBA16_White(), 1.5f, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
+
+				// Print Entity info if debug info is on
+				if (DebugInfo)
+				{
+					auto CF = EG::FontManager::GetFont("WeblySleek_32");
+
+					// Entity id
+					Graphics::Fonts::PrintText(	PlayerPosition->x + 20.0f, 
+												PlayerPosition->y - 20.0f, 
+												0.4f, 
+												std::string("ID: ") + std::to_string(Player), 
+												CF, 
+												TextBatch, 
+												EG::SetOpacity(Graphics::RGBA16_White(), 0.8f)
+											);
+					// Entity Type
+					std::string Type;
+					if (World->AttributeSystem->Masks[Player] & Masks::Type::AI) Type = "Player";
+					else Type = "Unknown";
+
+
+					// Entity Position 
+					auto X = PlayerPosition->x;
+					auto Y = PlayerPosition->y;
+					auto Z = World->TransformSystem->Transforms[Player].Position.z;
+
+
+					Graphics::Fonts::PrintText(	PlayerPosition->x + 20.0f, 
+												PlayerPosition->y - 40.0f, 
+												0.4f, std::string("<") + std::to_string(X) + std::string(", ") + std::to_string(Y) + (", ") + std::to_string(Z) + std::string(">"), 
+												CF, TextBatch, 
+																Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+					Graphics::Fonts::PrintText( PlayerPosition->x + 20.0f, 
+												PlayerPosition->y - 60.0f, 
+												0.4f, std::string("Type: ") + Type, 
+												CF, TextBatch, 
+																Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+					auto EntityHealth = World->AttributeSystem->HealthComponents[Player].Health;
+
+					Graphics::Fonts::PrintText( PlayerPosition->x + 20.0f, 
+												PlayerPosition->y - 80.0f, 
+												0.4f, std::string("Health: ") + std::to_string(EntityHealth), 
+												CF, TextBatch, 
+																Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+					auto Cells =  SpatialHash::FindCells(World->Grid, Player, &World->TransformSystem->Transforms[Player].CartesianPosition);
+
+					Graphics::Fonts::PrintText( PlayerPosition->x + 20.0f, 
+												PlayerPosition->y - 100.0f, 
+												0.4f, std::string("Grid Cell: ") + "(" + std::to_string(Cells.x) + ", " + std::to_string(Cells.y) + ")", 
+												CF, TextBatch, 
+												Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+				}
 			}
 
 			//////////////////////////////////////////
@@ -1148,13 +1232,14 @@ int main(int argc, char** argv)
 
 			if (DebugInfo)
 			{
+				static auto NumberOfDebugEntries = 15;
 				// Draw box around area
 				HUDBatch.Add(	
 								EM::Vec4(
 											HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 10.0f, 
-											HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f - 20.0f * 14.0f,
-											300.0f, 
-											20.0f + 20.0f * 14.0f
+											HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f - 20.0f * NumberOfDebugEntries,
+											340.0f, 
+											20.0f + 20.0f * NumberOfDebugEntries
 										), 
 								EM::Vec4(), 
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
@@ -1246,6 +1331,14 @@ int main(int argc, char** argv)
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 320.0f, 
 												0.4f, std::to_string(Camera.GetScale()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
+				// Spatial Hash
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 340.0f, 
+												0.4f, "Spatial Grid: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 340.0f, 
+												0.4f, "Rows: " + std::to_string(World->Grid->rows) + ", ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 260.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 340.0f, 
+												0.4f, "Cols: " + std::to_string(World->Grid->cols), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
 			}
 
 			// // Draw Isometric compass
@@ -1318,6 +1411,21 @@ int main(int argc, char** argv)
 			// 	EG::SetOpacity(EG::RGBA16_White(), 0.5f)
 			// 	);
 
+			if (level.IsDrawDebugEnabled())
+			{
+				DebugActiveTileBatch.Begin();
+				{
+					level.DrawDebugActiveTile(DebugActiveTileBatch, World->TransformSystem->Transforms[World->Player].Position.XY());
+				}
+				DebugActiveTileBatch.End();
+
+				DebugSpatialBatch.Begin();
+				{
+					SpatialHash::DrawGrid(World->Grid, &DebugSpatialBatch);
+				}
+				DebugSpatialBatch.End();
+			}
+
 
 			EntityBatch.End();
 			TextBatch.End(); 
@@ -1338,13 +1446,20 @@ int main(int argc, char** argv)
 						DiffuseShader->SetUniformMat4("view", view);
 						DiffuseShader->SetUniformMat4("projection", projection);
 
-						// Draw ground tiles
+
 						GroundTileBatch.RenderBatch();
+						// Draw debug ground tiles
+						if (level.IsDrawDebugEnabled()) 
+						{
+							GroundTileDebugBatch.RenderBatch();	
+							DebugActiveTileBatch.RenderBatch();
+							DebugSpatialBatch.RenderBatch();
+						}
 						// Draw TileOverlays
 						OverlayBatch.RenderBatch();
 						// Draw entities		
 						EntityBatch.RenderBatch();
-
+						// Draw particles 	
 						ParticleBatch.RenderBatch();
 					}
 					DiffuseShader->Unuse();
@@ -1477,6 +1592,13 @@ int main(int argc, char** argv)
 
 					// Draw ground tiles
 					GroundTileBatch.RenderBatch();
+					// Draw debug ground tiles
+					if (level.IsDrawDebugEnabled()) 
+					{
+						GroundTileDebugBatch.RenderBatch();	
+						DebugActiveTileBatch.RenderBatch();
+						DebugSpatialBatch.RenderBatch();
+					}
 					// Draw TileOverlays
 					OverlayBatch.RenderBatch();
 					// Draw entities		
@@ -1647,6 +1769,12 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	if (Input->IsKeyPressed(SDLK_o))
 	{
 		DeferredRenderingOn = !DeferredRenderingOn;
+	}
+
+	if (Input->IsKeyPressed(SDLK_u))
+	{
+		World->Lvl->DrawDebugEnabled();
+		std::cout << "Debug draw..." << std::endl;
 	}
 }
 

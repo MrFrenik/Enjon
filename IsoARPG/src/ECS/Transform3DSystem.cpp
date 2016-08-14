@@ -201,12 +201,13 @@ namespace ECS{ namespace Systems { namespace Transform {
 				// Set up CartesianPosition
 				Transform->CartesianPosition = Enjon::Math::IsoToCartesian(*GroundPosition);
 
+
 				// Make sure that position is within bounds of World
 				int Width = Manager->Width, Height = Manager->Height;
 				bool CollideWithLevel = false;
 				float Multiplier = -0.5f;
 
-				if ((Manager->Types[e] & Component::EntityType::ENEMY) == 0)
+				if ((Manager->Types[e] & Component::EntityType::ENEMY | Component::EntityType::PLAYER) == 0)
 				{
 					if (Transform->CartesianPosition.x < -Width + TileWidth * 2.0f) { Transform->CartesianPosition.x = -Width + TileWidth * 2.0f; Velocity->x *= Multiplier; VelocityGoal->x *= Multiplier; CollideWithLevel = true; }   
 					if (Transform->CartesianPosition.x > -TileWidth) { Transform->CartesianPosition.x = -TileWidth; Velocity->x *= Multiplier; VelocityGoal->x *= Multiplier; CollideWithLevel = true; }
@@ -241,6 +242,13 @@ namespace ECS{ namespace Systems { namespace Transform {
 				V2 Max(CP->x + TILE_SIZE + Dims->x, CP->y + TILE_SIZE + Dims->y);
 				*AABB = {Min, Max};
 
+				// if (Manager->Types[e] == Component::EntityType::PLAYER) 
+				// {
+				// 	std::cout << "Cartesian Position: " << Transform->CartesianPosition << std::endl;
+				// 	std::cout << "AABB Min: " << AABB->Min << std::endl;
+				// 	std::cout << "AABB Max: " << AABB->Max << std::endl;
+				// }
+
 				if (Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM)
 				{
 					continue;	
@@ -260,6 +268,26 @@ namespace ECS{ namespace Systems { namespace Transform {
 						{
 							if (Animation2D::GetPlayerState() != Animation2D::EntityAnimationState::WALKING) Manager->Animation2DSystem->AnimComponents[e].CurrentIndex = 0;
 	 						Animation2D::SetPlayerState(Animation2D::EntityAnimationState::WALKING);
+						}
+					}
+				}
+
+				if (Manager->Types[e] == Component::EntityType::ENEMY)
+				{
+					auto AnimComponent = &Manager->Animation2DSystem->AnimComponents[e];
+					auto State = AnimComponent->AnimState;
+
+					if (State != Component::AnimationState::ATTACKING)
+					{
+						if (Velocity->y == 0 && Velocity->x == 0)
+						{
+							if (State != Component::AnimationState::IDLE) Manager->Animation2DSystem->AnimComponents[e].CurrentIndex = 0;
+							AnimComponent->AnimState = Component::AnimationState::IDLE;
+						}
+						else
+						{
+							if (State != Component::AnimationState::WALKING) Manager->Animation2DSystem->AnimComponents[e].CurrentIndex = 0;
+							AnimComponent->AnimState = Component::AnimationState::WALKING;
 						}
 					}
 				}

@@ -88,6 +88,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 			// }
 
 			// TODO(John): Keep a mapping of already checked pairs to cut this time down
+
+			// if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER) std::cout << "Entities in Cell: " << Entities.size() << std::endl;
 		
 			// Collide with entities 
 			for (eid32 collider : Entities)

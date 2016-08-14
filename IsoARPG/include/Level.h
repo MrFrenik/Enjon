@@ -10,6 +10,7 @@
 #include <Graphics/Color.h>
 #include <Math/Maths.h>
 #include <Math/Random.h>
+#include <System/Types.h>
 
 #define MAX_TILE_OVERLAY	1000
 
@@ -49,6 +50,8 @@ public:
 	void DrawMap(Enjon::Graphics::SpriteBatch& batch);
 	void DrawTileOverlays(Enjon::Graphics::SpriteBatch& batch);
  	void DrawGroundTiles(Enjon::Graphics::SpriteBatch& Batch, EG::SpriteBatch& Normals);
+	void DrawDebugTiles(Enjon::Graphics::SpriteBatch& batch);
+	void DrawDebugActiveTile(EG::SpriteBatch& Batch, EM::Vec2& Position);
 	void AddTileOverlay(Enjon::Graphics::GLTexture Tex, Enjon::Math::Vec4 DestRectf, Enjon::Graphics::ColorRGBA16 Color = Enjon::Graphics::RGBA16_White());
 	void CleanOverlays();
 	bool GetOverlaysDirty();
@@ -56,6 +59,12 @@ public:
 	inline int GetHeight() { return m_height; }
 	inline int GetWidth() { return m_width; }
 	inline Enjon::Math::Vec2 GetDims() { return Enjon::Math::Vec2(m_width, m_height); }
+	inline void DrawDebugEnabled() 
+	{ 
+		if (m_DrawDebugEnabled) m_DrawDebugEnabled = false;
+		else m_DrawDebugEnabled = true; 
+	}
+	inline Enjon::uint32 IsDrawDebugEnabled() { return m_DrawDebugEnabled; }
 
 	inline std::vector<Tile*> GetIsoTiles() { return m_isoTilePointers; }
 
@@ -77,8 +86,14 @@ private:
 
 	int m_width;
 	int m_height;
+	int m_rows;
+	int m_cols;
+
+	float m_cartesianWidth;
+	float m_cartesianHeight;
 
 	bool m_OverlaysDirty;
+	Enjon::uint32 m_DrawDebugEnabled;
 
 private:
 	bool IsBorder(int i, int j, int rows, int cols);

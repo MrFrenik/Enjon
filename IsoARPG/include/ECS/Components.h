@@ -31,6 +31,8 @@ namespace ECS { namespace Component {
 	enum ArmorType 					{ HELM, CHEST, ARMS, LEGS, BOOTS };									// Neither are these...
 	enum StatsType 					{ WEAPONTYPE, ARMORTYPE };
 
+	enum AnimationState 			{ IDLE, WALKING, ATTACKING };
+
 	// Transform struct
 	typedef struct
 	{
@@ -107,6 +109,7 @@ namespace ECS { namespace Component {
 		Enjon::uint32 SetStart;
 		const EA::Anim* CurrentAnimation;
 		eid32 Entity;
+		AnimationState AnimState;
 	} AnimComponent;
 
 	// Label struct

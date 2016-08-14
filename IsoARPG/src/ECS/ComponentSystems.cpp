@@ -73,6 +73,8 @@ namespace ECS { namespace Systems {
 			Manager->Grid = new SpatialHash::Grid;
 			SpatialHash::Init(Manager->Grid, Manager->Width, Manager->Height);
 
+			std::cout << "Width: " << Manager->Width << ", Height: " << Manager->Height << std::endl;
+
 			// Set up camera
 			Manager->Camera = Camera;
 

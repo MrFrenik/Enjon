@@ -1,6 +1,10 @@
 #include "SpatialHash.h"
 #include <stdio.h>
 
+#include <Graphics/SpriteBatch.h>
+#include <IO/ResourceManager.h>
+
+
 namespace SpatialHash {
 
 	/* Inits spatial grid based on width, height of level and given cell size */ 
@@ -16,11 +20,10 @@ namespace SpatialHash {
 	}
 
 	/* Finds particular cell that a given entity belongs to based on its position */
-	int FindCell(Grid* grid, ECS::eid32 entity, const V2* position, int cell_size)
+	EM::Vec2 FindCells(Grid* grid, ECS::eid32 entity, const V2* position, int cell_size)
 	{
-		// Take position out of negative space
-		int posX = -position->x;
-		int posY = -position->y; 
+		int posX = position->x;
+		int posY = position->y; 
 
 		int row = floor(posY / cell_size);
 		int col = floor(posX / cell_size);
@@ -30,9 +33,8 @@ namespace SpatialHash {
 		if (index < 0) index = 0;
 		if (index > max - 1) index = max - 1;
 
-		grid->cells[index].entities.push_back(entity);
 
-		return index;
+		return EM::Vec2(col, row);
 	}
 
 	/* Overloaded function that finds particular cell that a given entity belongs to based on its AABB (preferred method) */
@@ -40,12 +42,11 @@ namespace SpatialHash {
 	{
 		std::vector<ECS::eid32> entities;
 
-		// Get individual elements of min and max and negate them to bring them into positive cell space
-		// Stupid, figure out how to put the LEVEL into positive space and then let that trickle down throughout the code
-		int min_y = -AABB->Min.y;	
-		int min_x = -AABB->Min.x;	
-		int max_y = -AABB->Max.y;	
-		int max_x = -AABB->Max.x;	
+		// AABB elements
+		int min_y = AABB->Min.y;	
+		int min_x = AABB->Min.x;	
+		int max_y = AABB->Max.y;	
+		int max_x = AABB->Max.x;	
 
 		// Min row and col
 		int min_row = floor(min_y / cell_size);
@@ -57,11 +58,16 @@ namespace SpatialHash {
 
 		int max_allowed_index = grid->rows * grid->cols;
 
-		// Find all cells that entity belongs to and place it in them
-		for (int i = max_row; i <= min_row; i++)
+		for (int i = min_row; i <= max_row; i++)
 		{
-			for (int j = max_col; j <= min_col; j++)
+			if (i >= grid->rows) continue;
+			if (i < 0) continue;
+
+			for (int j = min_col; j <= max_col; j++)
 			{
+				if (j >= grid->cols) continue;
+				if (j < 0) continue;
+
 				int index = i * grid->cols + j;
 				if (index < 0 || index >= max_allowed_index) continue;
 
@@ -122,5 +128,65 @@ namespace SpatialHash {
 		if (Right < max)	   if (!grid->cells[Right].entities.empty()) 			Entities->insert(Entities->end(), grid->cells[Right].entities.begin(), grid->cells[Right].entities.end());
 		if (BottomLeft < max)  if (!grid->cells[BottomLeft].entities.empty()) 		Entities->insert(Entities->end(), grid->cells[BottomLeft].entities.begin(), grid->cells[BottomLeft].entities.end());
 		if (BottomRight < max) if (!grid->cells[BottomRight].entities.empty()) 		Entities->insert(Entities->end(), grid->cells[BottomRight].entities.begin(), grid->cells[BottomRight].entities.end());
+	}
+
+	void DrawGrid(Grid* G, EG::SpriteBatch* Batch)
+	{
+		G->Origin = EM::Vec2(CELL_SIZE / 2.0f, 0.0f);
+
+		auto X = G->Origin.x;
+		auto Y = G->Origin.y;
+		auto CurrentX = X;
+		auto CurrentY = Y;
+
+		std::cout << G->rows << ", " << G->cols << std::endl;
+
+		auto Width = CELL_SIZE * 2.0f;
+		auto Height = CELL_SIZE;
+	
+		for (auto r = 0; r < G->rows; r++)
+		{
+			for (auto c = 0; c < G->cols; c++)
+			{
+				EG::ColorRGBA16 Color = EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.4f);
+				auto index = r * G->cols + c;
+				auto size = G->cells.at(index).entities.size();
+				if (size) Color = EG::RGBA16_Green();
+				Batch->Add(
+							EM::Vec4(CurrentX, CurrentY, Width - 5.0f, Height - 5.0f), 
+							EM::Vec4(0, 0, 1, 1), 
+							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
+							Color
+						);
+
+				CurrentX += Width / 2.0f;
+				CurrentY += Height / 2.0f;
+			}
+
+			X -= Width / 2.0f;
+			Y += Height / 2.0f;
+			CurrentX = X;
+			CurrentY = Y;
+		}
+
+		// Batch->Add(
+		// 			EM::Vec4(CurrentX, CurrentY, Width - 5.0f, Height - 5.0f), 
+		// 			EM::Vec4(0, 0, 1, 1), 
+		// 			EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
+		// 			Color
+		// 		);
+
+
+	}
+
+	void DrawActiveCell(Grid* G, EG::SpriteBatch* Batch, EM::Vec2& Position)
+	{
+		// Batch->Add(
+		// 			EM::Vec4(CurrentX, CurrentY, Width - 5.0f, Height - 5.0f), 
+		// 			EM::Vec4(0, 0, 1, 1), 
+		// 			EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
+		// 			EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.4f) 
+		// 		);
+
 	}
 }
