@@ -170,22 +170,6 @@ namespace ECS { namespace Systems { namespace Animation2D {
 						}
 					}
 
-					// Debug print player state
-					std::string state_string;
-					if (PlayerState == EntityAnimationState::ATTACKING) state_string = "Attacking";
-					else if (PlayerState == EntityAnimationState::WALKING) state_string = "Walking";
-					else if (PlayerState == EntityAnimationState::IDLE) state_string = "Idle";
-					else state_string = "Unknown";
-
-					static auto t = 0.0f;
-					t += 0.1f;
-					if (t >= 3.0f)
-					{
-						std::cout << "Player State: " << state_string << std::endl;
-						t = 0.0f;
-					}
-
-
 					if (PlayerState == EntityAnimationState::ATTACKING)
 					{
 						// if (AnimComponent->CurrentIndex > CurrentAnimation->Frames.size()) AnimComponent->CurrentIndex = 0;

@@ -25,6 +25,7 @@ namespace SpatialHash {
 	{
 		int rows;
 		int cols;
+		int CellSize;
 		EM::Vec2 Origin;
 		std::vector<Cell> cells; 
 		std::vector<Enjon::uint32> dirtyCells;
@@ -34,10 +35,10 @@ namespace SpatialHash {
 	void Init(Grid* grid, int width, int height, int cell_size = CELL_SIZE); 
 
 	/* Finds particular cell that a given entity belongs to based on its position */
-	EM::Vec2 FindCellCoordinates(Grid* grid, const V2* position, int cell_size = CELL_SIZE); 
+	EM::Vec2 FindCellCoordinates(Grid* grid, const V2* position); 
 
 	/* Overloaded function that finds particular cell that a given entity belongs to based on its AABB (preferred method) */
-	std::vector<ECS::eid32> FindCell(Grid* grid, ECS::eid32 entity, const Enjon::Physics::AABB* AABB, int cell_size = CELL_SIZE); 
+	std::vector<ECS::eid32> FindCell(Grid* grid, ECS::eid32 entity, const Enjon::Physics::AABB* AABB); 
 
 	/* Clears all entity vectors from every cell in the spatial grid */
 	void ClearCells(Grid* grid);
@@ -48,6 +49,10 @@ namespace SpatialHash {
 	void DrawGrid(Grid* G, EG::SpriteBatch* Batch, EM::Vec2& Position = EM::Vec2(0.0f));
 
 	void DrawActiveCell(Grid* G, EG::SpriteBatch* Batch, EM::Vec2& Position);
+
+	EM::Vec4 GetCellDimensions(Grid* G, EM::Vec2& Cell);
+
+	EM::Vec2 FindCellCoordinatesFromIndex(Grid* G, Enjon::uint32 Index);
 }
 
 #endif

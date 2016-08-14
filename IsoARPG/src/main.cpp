@@ -178,7 +178,7 @@ int main(int argc, char** argv)
 	// Create Camera
 	Graphics::Camera2D Camera;
 	Camera.Init(screenWidth, screenHeight);
-	Camera.SetScale(0.75f); 
+	Camera.SetScale(0.55f); 
 	
 	// Create HUDCamera
 	Graphics::Camera2D HUDCamera;
@@ -1434,8 +1434,51 @@ int main(int argc, char** argv)
 
 					auto MP = Input.GetMouseCoords();
 					Camera.ConvertScreenToWorld(MP);
-					MP = EM::IsoToCartesian(MP - EM::Vec2(70.0f, 0.0f));
+					MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
 					SpatialHash::DrawActiveCell(World->Grid, &DebugSpatialBatch, MP);
+
+					static float t = 0.0f;
+					static auto index = 0;
+					static auto MaxI = World->Grid->rows * World->Grid->cols;
+					t += 0.1f;
+
+					if (t > 0.2f)
+					{
+						index++;
+						if (index > MaxI - 1) index = 0;	
+						t = 0.0f;
+					}
+
+					auto CellCoordinates = SpatialHash::FindCellCoordinatesFromIndex(World->Grid, index);
+					auto CellDimensions = SpatialHash::GetCellDimensions(World->Grid, CellCoordinates);
+					auto Color = EG::RGBA16_Yellow();
+
+					if (World->Grid->cells.at(index).entities.size())
+					{
+						Color = EG::RGBA16_Red();
+
+						for (auto& e : World->Grid->cells.at(index).entities)
+						{
+							auto Damage = Enjon::Random::Roll(5, 10);
+
+							// Get health and color of entity
+							Component::HealthComponent* HealthComponent = &World->AttributeSystem->HealthComponents[e];
+							Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[e].Color;
+
+							// Set option to damaged
+							World->AttributeSystem->Masks[e] |= Masks::GeneralOptions::DAMAGED;
+					
+							// Decrement by some arbitrary amount for now	
+							HealthComponent->Health -= Damage;
+						}
+					}
+
+					DebugSpatialBatch.Add(
+											EM::Vec4(CellDimensions.x, CellDimensions.y, CellDimensions.z - 5.0f, CellDimensions.w - 5.0f), 
+											EM::Vec4(0, 0, 1, 1), 
+											EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
+											Color
+										);
 				}
 				DebugSpatialBatch.End();
 			}
