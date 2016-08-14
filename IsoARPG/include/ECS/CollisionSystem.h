@@ -8,6 +8,7 @@
 struct CollisionSystem
 {
 	ECS::Systems::EntityManager* Manager;
+	ECS::Component::CollisionComponent CollisionComponents[MAX_ENTITIES];	
 	std::vector<Enjon::uint32> Entities;
 };
 

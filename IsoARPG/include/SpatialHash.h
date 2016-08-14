@@ -53,6 +53,10 @@ namespace SpatialHash {
 	EM::Vec4 GetCellDimensions(Grid* G, EM::Vec2& Cell);
 
 	EM::Vec2 FindCellCoordinatesFromIndex(Grid* G, Enjon::uint32 Index);
+
+	void FindCells(Grid* G, ECS::eid32 Entity, const EP::AABB* AABB, EM::Vec4* CellRange);
+
+	std::vector<ECS::eid32> GetEntitiesFromCells(Grid* G, EM::Vec4& Cells);
 }
 
 #endif

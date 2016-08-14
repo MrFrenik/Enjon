@@ -259,6 +259,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 						{ 
 							eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;
 							EntitySystem::RemoveComponents(Manager, Weapon, COMPONENT_RENDERER2D | COMPONENT_TRANSFORM3D);
+							// Manager->Masks[Weapon] |= (COMPONENT_TRANSFORM3D);
 						} 
 					}
 

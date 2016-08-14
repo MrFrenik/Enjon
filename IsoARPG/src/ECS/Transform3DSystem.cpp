@@ -76,8 +76,6 @@ namespace ECS{ namespace Systems { namespace Transform {
 				Enjon::Math::Vec2* GroundPosition = &Transform->GroundPosition; 
 				float TileWidth = 32.0f;
 
-				// Push back into collision system
-				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::COLLIDABLE) Manager->CollisionSystem->Entities.push_back(e);
 
 				// Push back into renderer system
 				if (Manager->Masks[e] & COMPONENT_RENDERER2D && Manager->Camera->IsBoundBoxInCamView(Position->XY(), Manager->TransformSystem->Transforms[e].Dimensions))
@@ -244,10 +242,6 @@ namespace ECS{ namespace Systems { namespace Transform {
 				V2 Max(CP->x + TILE_SIZE + Dims->x, CP->y + TILE_SIZE + Dims->y);
 				*AABB = {Min, Max};
 
-				if (Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM)
-				{
-					continue;	
-				}
 
 				// Set up animation based on velocity
 				if (Manager->Types[e] == Component::EntityType::PLAYER)
@@ -287,8 +281,30 @@ namespace ECS{ namespace Systems { namespace Transform {
 					}
 				}
 
+				// Push back into collision system
+				if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::COLLIDABLE) 
+				{
+					Manager->CollisionSystem->Entities.push_back(e);
+
+					// Find cell
+					SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[e].Cells);
+				}
+
+				else if ((Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0)
+				{
+					// Find cell
+					SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[e].Cells);
+				}
+
 				// Go through the items in this entity's inventory and set to this position
 				// NOTE(John): Note sure if I like this here... or at all...
+
+				// Be careful, cause this has fucked me up...
+				if (Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM)
+				{
+					continue;	
+				}
+
 				std::vector<eid32>* Items = &Manager->InventorySystem->Inventories[e].Items;
 				eid32 WeaponEquipped = Manager->InventorySystem->Inventories[e].WeaponEquipped;
 				for (eid32 i : *Items)
@@ -359,8 +375,19 @@ namespace ECS{ namespace Systems { namespace Transform {
 					else									WeaponTransform->AABB = NW;
 				}
 
-				// Push weapon back into collision system
-				Manager->CollisionSystem->Entities.push_back(WeaponEquipped);
+				if (Manager->Masks[WeaponEquipped] & COMPONENT_TRANSFORM3D)
+				{
+					// Push weapon back into collision system
+					Manager->CollisionSystem->Entities.push_back(WeaponEquipped);
+
+					if (Manager->AttributeSystem->Masks[WeaponEquipped] & Masks::Type::WEAPON && Manager->Masks[WeaponEquipped] & COMPONENT_TRANSFORM3D)
+					{
+						std::cout << "Hitting" << std::endl;
+					}
+
+					SpatialHash::FindCells(Manager->Grid, WeaponEquipped, AABB, &Manager->CollisionSystem->CollisionComponents[WeaponEquipped].Cells);
+				}
+
 			}
 		}
 	}

@@ -55,8 +55,80 @@ namespace SpatialHash {
 		return EM::Vec2(C, R);
 	}
 
+	std::vector<ECS::eid32> GetEntitiesFromCells(Grid* G, EM::Vec4& Cells)
+	{
+		std::vector<ECS::eid32> Entities;
+
+		auto MinCol = Cells.x;
+		auto MinRow = Cells.y;
+		auto MaxCol = Cells.z;
+		auto MaxRow = Cells.w;
+
+		auto max_allowed_index = G->rows * G->cols;
+
+		for (auto i = MinRow; i <= MaxRow; i++)
+		{
+			for (int j = MinCol; j <= MaxCol; j++)
+			{
+				auto index = i * G->cols + j;
+				if (index < 0 || index >= max_allowed_index) continue;
+
+				// Add all entities in this cell into entities vector for return 
+				Entities.insert(Entities.end(), G->cells[index].entities.begin(), G->cells[index].entities.end());
+			}
+		}
+
+		return Entities;
+	}
+
+	void FindCells(Grid* G, ECS::eid32 Entity, const EP::AABB* AABB, EM::Vec4* CellRange)
+	{
+		// AABB elements
+		int min_y = AABB->Min.y;	
+		int min_x = AABB->Min.x;	
+		int max_y = AABB->Max.y;	
+		int max_x = AABB->Max.x;	
+
+		// Min row and col
+		int min_row = floor(min_y / G->CellSize);
+		int min_col = floor(min_x / G->CellSize);
+
+		// Max row and col
+		int max_row = floor(max_y / G->CellSize);
+		int max_col = floor(max_x / G->CellSize);
+
+		// Set cell range
+		CellRange->x = min_col;
+		CellRange->y = min_row;
+		CellRange->z = max_col;
+		CellRange->w = max_row;
+
+		int max_allowed_index = G->rows * G->cols;
+
+		for (int i = min_row; i <= max_row; i++)
+		{
+			if (i >= G->rows) continue;
+			if (i < 0) continue;
+
+			for (int j = min_col; j <= max_col; j++)
+			{
+				if (j >= G->cols) continue;
+				if (j < 0) continue;
+
+				int index = i * G->cols + j;
+				if (index < 0 || index >= max_allowed_index) continue;
+
+				// Then push back this entity
+				G->cells[index].entities.push_back(Entity);
+
+				// Keep track of "dirty" cells here
+				G->dirtyCells.push_back(index);
+			}
+		}
+	}
+
 	/* Overloaded function that finds particular cell that a given entity belongs to based on its AABB (preferred method) */
-	std::vector<ECS::eid32> FindCell(Grid* grid, ECS::eid32 entity, const Enjon::Physics::AABB* AABB)
+	std::vector<ECS::eid32> FindCell(Grid* grid, ECS::eid32 entity, const EP::AABB* AABB)
 	{
 		std::vector<ECS::eid32> entities;
 

@@ -67,29 +67,13 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 			// If entity has no transform, then continue
 			// Could I pull this out of the loop to get rid of unnecessary branching?
-			if (!(Manager->Masks[e] & COMPONENT_TRANSFORM3D)) continue;
-			
-			// Get the cell(s) that entity belongs to
-			const Enjon::Math::Vec2* EPosition = &Enjon::Math::IsoToCartesian(Manager->TransformSystem->Transforms[e].GroundPosition);
-			std::vector<eid32> Entities = SpatialHash::FindCell(Manager->Grid, e, &Manager->TransformSystem->Transforms[e].AABB);
 
-			// Use these same entities for targets if player
-			// if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER)
-			// {
-			// 	// printf("size: %d\n", Entities.size());
-			// 	std::vector<eid32>* Targets = &Manager->PlayerControllerSystem->Targets;
-			// 	for (eid32 it = 0; it < Entities.size(); it++)
-			// 	{
-			// 		if (Manager->Masks[Entities[it]] & COMPONENT_AICONTROLLER)
-			// 		{
-			// 			Targets->push_back(Entities[it]);	
-			// 		}
-			// 	}
-			// }
+			std::vector<eid32> Entities;
+
+			if (Manager->AttributeSystem->Masks[e] & Masks::Type::WEAPON) Entities = SpatialHash::FindCell(Manager->Grid, e, &Manager->TransformSystem->Transforms[e].AABB);
+			else 														  Entities = SpatialHash::GetEntitiesFromCells(Manager->Grid, Manager->CollisionSystem->CollisionComponents[e].Cells);
 
 			// TODO(John): Keep a mapping of already checked pairs to cut this time down
-
-			// if (Manager->Masks[e] & COMPONENT_PLAYERCONTROLLER) std::cout << "Entities in Cell: " << Entities.size() << std::endl;
 		
 			// Collide with entities 
 			for (eid32 collider : Entities)
@@ -98,7 +82,7 @@ namespace ECS{ namespace Systems { namespace Collision {
 				if (collider != e)
 				{
 					// Make sure both entities are not null here. This is really hacky and needs to be dealt with more effectively. 
-					if (Manager->Masks[e] == COMPONENT_NONE || Manager->Masks[collider] == COMPONENT_NONE) continue;
+					// if (Manager->Masks[e] == COMPONENT_NONE || Manager->Masks[collider] == COMPONENT_NONE) continue;
 
 					// Get EntityType of collider and entity
 					Component::EntityType AType = Manager->Types[collider];

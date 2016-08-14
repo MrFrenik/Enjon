@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -639,6 +639,7 @@ int main(int argc, char** argv)
 				EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 		
 				TileOverlayRunTime = SDL_GetTicks() - StartTicks;		
+				
 				StartTicks = SDL_GetTicks();
 				SpatialHash::ClearCells(World->Grid);
 				ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck

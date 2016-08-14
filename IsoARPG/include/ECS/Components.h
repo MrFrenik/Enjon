@@ -85,7 +85,7 @@ namespace ECS { namespace Component {
 	// Collision struct
 	typedef struct
 	{
-		Enjon::Math::Vec3 CartesianCoords;
+		EM::Vec4 Cells;
 		eid32 Entity;
 	} CollisionComponent;
 
