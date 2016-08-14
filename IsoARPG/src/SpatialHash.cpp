@@ -17,10 +17,14 @@ namespace SpatialHash {
 
 		// Allocate correct memory size for cells
 		grid->cells.resize(grid->rows * grid->cols + 1);
+
+		// Set origin of grid
+		// This needs to be passed in by world that creates it
+		grid->Origin = EM::Vec2(CELL_SIZE / 2.0f, 0.0f);
 	}
 
 	/* Finds particular cell that a given entity belongs to based on its position */
-	EM::Vec2 FindCells(Grid* grid, ECS::eid32 entity, const V2* position, int cell_size)
+	EM::Vec2 FindCellCoordinates(Grid* grid, const V2* position, int cell_size)
 	{
 		int posX = position->x;
 		int posY = position->y; 
@@ -99,7 +103,6 @@ namespace SpatialHash {
 
 		// Clear dirty cells
 		grid->dirtyCells.clear();
-
 	}
 
 
@@ -130,28 +133,62 @@ namespace SpatialHash {
 		if (BottomRight < max) if (!grid->cells[BottomRight].entities.empty()) 		Entities->insert(Entities->end(), grid->cells[BottomRight].entities.begin(), grid->cells[BottomRight].entities.end());
 	}
 
-	void DrawGrid(Grid* G, EG::SpriteBatch* Batch)
+	void DrawGrid(Grid* G, EG::SpriteBatch* Batch, EM::Vec2& Position)
 	{
-		G->Origin = EM::Vec2(CELL_SIZE / 2.0f, 0.0f);
+		// Get starting cell
+		auto StartCell = FindCellCoordinates(G, &Position);
+		EM::Vec2 DebugRadius(40);
 
-		auto X = G->Origin.x;
-		auto Y = G->Origin.y;
-		auto CurrentX = X;
-		auto CurrentY = Y;
+		// Set radius
+		auto R = (int)(StartCell.y - DebugRadius.y);
+		auto C = (int)(StartCell.x - DebugRadius.x);
 
-		std::cout << G->rows << ", " << G->cols << std::endl;
+		// Set max row and column
+		auto MaxR = R + 2 * DebugRadius.y > G->rows ? G->rows : R + 2 * DebugRadius.y;
+		auto MaxC = C + 2 * DebugRadius.x > G->cols ? G->cols : C + 2 * DebugRadius.x;
 
+		// Make sure in bounds
+		if (R > G->rows - 1) R = G->rows - 1;
+		if (R < 0) R = 0;
+
+		if (C > G->cols - 1) C = G->cols - 1;
+		if (C < 0) C = 0;
+
+		// Set width and height
 		auto Width = CELL_SIZE * 2.0f;
 		auto Height = CELL_SIZE;
-	
-		for (auto r = 0; r < G->rows; r++)
+
+		// Get X and Y
+		auto X = G->Origin.x;
+		auto Y = G->Origin.y;
+
+		// Get row offset
+		for (auto i = 0; i < R; i++)
 		{
-			for (auto c = 0; c < G->cols; c++)
+			X -= Width / 2.0f;
+			Y += Height / 2.0f;
+		}
+
+		// Get column offset
+		for (auto i = 0; i < C; i++)
+		{
+			X += Width / 2.0f; 
+			Y += Height / 2.0f;
+		}
+
+		// Set current x and y
+		auto CurrentX = X;
+		auto CurrentY = Y;
+	
+		// Draw spatial grid
+		for (auto r = R; r < MaxR; r++)
+		{
+			for (auto c = C; c < MaxC; c++)
 			{
 				EG::ColorRGBA16 Color = EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.4f);
 				auto index = r * G->cols + c;
 				auto size = G->cells.at(index).entities.size();
-				if (size) Color = EG::RGBA16_Green();
+				if (size) Color = EG::SetOpacity(EG::RGBA16_Green(), 0.4f);
 				Batch->Add(
 							EM::Vec4(CurrentX, CurrentY, Width - 5.0f, Height - 5.0f), 
 							EM::Vec4(0, 0, 1, 1), 
@@ -168,25 +205,6 @@ namespace SpatialHash {
 			CurrentX = X;
 			CurrentY = Y;
 		}
-
-		// Batch->Add(
-		// 			EM::Vec4(CurrentX, CurrentY, Width - 5.0f, Height - 5.0f), 
-		// 			EM::Vec4(0, 0, 1, 1), 
-		// 			EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
-		// 			Color
-		// 		);
-
-
-	}
-
-	void DrawActiveCell(Grid* G, EG::SpriteBatch* Batch, EM::Vec2& Position)
-	{
-		// Batch->Add(
-		// 			EM::Vec4(CurrentX, CurrentY, Width - 5.0f, Height - 5.0f), 
-		// 			EM::Vec4(0, 0, 1, 1), 
-		// 			EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
-		// 			EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.4f) 
-		// 		);
-
+		
 	}
 }

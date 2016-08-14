@@ -154,15 +154,15 @@ void Level::DrawDebugTiles(Enjon::Graphics::SpriteBatch& Batch)
 				);
 	}
 
-	for (Tile& tile : m_cartesiantiles)
-	{
-		Batch.Add(
-					EM::Vec4(tile.pos, EM::Vec2(tile.dims.x, tile.dims.y)), 
-					EM::Vec4(0, 0, 1, 1), 
-					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
-					EG::SetOpacity(EG::RGBA16_Red(), 0.5f)
-				);
-	}
+	// for (Tile& tile : m_cartesiantiles)
+	// {
+	// 	Batch.Add(
+	// 				EM::Vec4(tile.pos, EM::Vec2(tile.dims.x, tile.dims.y)), 
+	// 				EM::Vec4(0, 0, 1, 1), 
+	// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
+	// 				EG::SetOpacity(EG::RGBA16_Red(), 0.5f)
+	// 			);
+	// }
 }
 
 void Level::DrawDebugActiveTile(EG::SpriteBatch& Batch, EM::Vec2& Position)

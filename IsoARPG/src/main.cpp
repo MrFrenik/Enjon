@@ -105,7 +105,7 @@ bool DebugInfo = false;
 bool AnimationEditorOn = true;
 bool DeferredRenderingOn = true;
 
-const int LEVELSIZE = 50;
+const int LEVELSIZE = 200;
 
 float DashingCounter = 0.0f;
 
@@ -1103,7 +1103,7 @@ int main(int argc, char** argv)
 												CF, TextBatch, 
 																Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
-					auto Cells =  SpatialHash::FindCells(World->Grid, Player, &World->TransformSystem->Transforms[Player].CartesianPosition);
+					auto Cells =  SpatialHash::FindCellCoordinates(World->Grid, &World->TransformSystem->Transforms[Player].CartesianPosition);
 
 					Graphics::Fonts::PrintText( PlayerPosition->x + 20.0f, 
 												PlayerPosition->y - 100.0f, 
@@ -1421,7 +1421,7 @@ int main(int argc, char** argv)
 
 				DebugSpatialBatch.Begin();
 				{
-					SpatialHash::DrawGrid(World->Grid, &DebugSpatialBatch);
+					SpatialHash::DrawGrid(World->Grid, &DebugSpatialBatch, World->TransformSystem->Transforms[World->Player].CartesianPosition);
 				}
 				DebugSpatialBatch.End();
 			}
