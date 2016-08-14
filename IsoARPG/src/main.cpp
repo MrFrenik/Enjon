@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -105,7 +105,7 @@ bool DebugInfo = false;
 bool AnimationEditorOn = true;
 bool DeferredRenderingOn = true;
 
-const int LEVELSIZE = 20;
+const int LEVELSIZE = 50;
 
 float DashingCounter = 0.0f;
 
@@ -444,11 +444,11 @@ int main(int argc, char** argv)
 	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
 
-	AmountDrawn = 0;
+	AmountDrawn = 20;
 
 	for (uint32 e = 0; e < AmountDrawn * 500; e++)
 	{
-		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
+		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(level.GetWidth(), 0), Random::Roll(level.GetHeight() * 2, 0))), 0.0f), 
 										Enjon::Math::Vec2(ER::Roll(5, 10), ER::Roll(1, 5)), EG::SpriteSheetManager::GetSpriteSheet("VerticleBar"), Masks::Type::ITEM, Component::EntityType::ITEM);
 		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
 		World->Renderer2DSystem->Renderers[id].Format = EG::CoordinateFormat::ISOMETRIC;
@@ -458,7 +458,7 @@ int main(int argc, char** argv)
 
 	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
-		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
+		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(level.GetWidth(), 0), Random::Roll(level.GetHeight() * 2, 0))), 0.0f), 
 										Enjon::Math::Vec2(ER::Roll(5, 10), ER::Roll(2, 5)), EG::SpriteSheetManager::GetSpriteSheet("Box"), Masks::Type::ITEM, Component::EntityType::ITEM);
 		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
 		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
@@ -467,7 +467,7 @@ int main(int argc, char** argv)
 
 	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
-		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
+		eid32 id = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(level.GetWidth(), 0), Random::Roll(level.GetHeight() * 2, 0))), 0.0f), 
 										Enjon::Math::Vec2(ER::Roll(10, 20), ER::Roll(10, 20)), EG::SpriteSheetManager::GetSpriteSheet("BoxDebris"), Masks::Type::ITEM, Component::EntityType::ITEM);
 		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
 		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
@@ -477,7 +477,7 @@ int main(int argc, char** argv)
 	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
 		auto s = ER::Roll(20, 40);
-		eid32 Box = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
+		eid32 Box = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(level.GetWidth(), 0), Random::Roll(level.GetHeight() * 2, 0))), 0.0f), 
 										Enjon::Math::Vec2(s, s), EG::SpriteSheetManager::GetSpriteSheet("Box"), Masks::Type::ITEM, Component::EntityType::ITEM);
 		World->TransformSystem->Transforms[Box].Mass = 2.5f - ER::Roll(1, 50) / 50.0f;
 		World->TransformSystem->Transforms[Box].AABBPadding = 15.0f;
@@ -487,7 +487,7 @@ int main(int argc, char** argv)
 	for (uint32 e = 0; e < AmountDrawn; e++)
 	{
 		auto s = ER::Roll(50, 80);
-		eid32 BiggerBox = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), 0.0f), 
+		eid32 BiggerBox = Factory::CreateItem(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(level.GetWidth(), 0), Random::Roll(level.GetHeight() * 2, 0))), 0.0f), 
 										Enjon::Math::Vec2(s, s), EG::SpriteSheetManager::GetSpriteSheet("Box"), Masks::Type::ITEM, Component::EntityType::ITEM);
 		World->TransformSystem->Transforms[BiggerBox].Mass = 5.0f - ER::Roll(1, 100) / 50.0f;
 		World->TransformSystem->Transforms[BiggerBox].AABBPadding = 15.0f;

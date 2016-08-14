@@ -152,12 +152,14 @@ namespace ECS{ namespace Systems { namespace Transform {
 
 							Manager->Camera->ShakeScreen(Enjon::Random::Roll(30, 40));
 							Manager->AttributeSystem->Masks[e] |= Masks::GeneralOptions::EXPLODED;
-							ECS::Systems::EntitySystem::RemoveEntity(Manager, e);
 
 							// TODO(John): Make a "spawn" function that gets called for any entity that has a factory component
 							ECS::eid32 Explosion = Factory::CreateWeapon(Manager, Enjon::Math::Vec3(Manager->TransformSystem->Transforms[e].Position.XY(), 0.0f), Enjon::Math::Vec2(16.0f, 16.0f), 
 																		Enjon::Graphics::SpriteSheetManager::GetSpriteSheet("Orb"), 
 																		Masks::Type::WEAPON | Masks::WeaponOptions::EXPLOSIVE, Component::EntityType::EXPLOSIVE, "Explosion");
+
+							// Remove explosion
+							ECS::Systems::EntitySystem::RemoveEntity(Manager, e);
 
 							Manager->AttributeSystem->Masks[Explosion] |= Masks::GeneralOptions::COLLIDABLE;
 
@@ -241,13 +243,6 @@ namespace ECS{ namespace Systems { namespace Transform {
 				V2 Min(CP->x - Dims->x, CP->y - Dims->y);
 				V2 Max(CP->x + TILE_SIZE + Dims->x, CP->y + TILE_SIZE + Dims->y);
 				*AABB = {Min, Max};
-
-				// if (Manager->Types[e] == Component::EntityType::PLAYER) 
-				// {
-				// 	std::cout << "Cartesian Position: " << Transform->CartesianPosition << std::endl;
-				// 	std::cout << "AABB Min: " << AABB->Min << std::endl;
-				// 	std::cout << "AABB Max: " << AABB->Max << std::endl;
-				// }
 
 				if (Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM)
 				{
