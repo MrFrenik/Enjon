@@ -9,6 +9,7 @@
 #include "ECS/AttributeSystem.h"
 #include "ECS/Entity.h"
 #include "ECS/AIControllerSystem.h"
+#include "ECS/CollisionSystem.h"
 #include "BehaviorTreeManager.h"
 #include "AnimManager.h"
 
@@ -81,6 +82,10 @@ namespace ECS { namespace Factory {
 
 			// Set up Inventory System
 			Manager->InventorySystem->Inventories[Player].Entity = Player;
+
+			// Set up Collision System
+			Manager->CollisionSystem->CollisionComponents[Player].ObstructionValue = 1.0f;
+			Manager->CollisionSystem->CollisionComponents[Player].Cells = EM::Vec4(0, 0, 0, 0);
 
 			// Set up Label 
 			// NOTE(John): This isn't the best way to do this; most likely will throw an error at some point
@@ -165,6 +170,10 @@ namespace ECS { namespace Factory {
 
 			// Set up renderer component
 			Manager->Renderer2DSystem->Renderers[AI].Format = EG::CoordinateFormat::CARTESIAN;
+
+			// Set up Collision system
+			Manager->CollisionSystem->CollisionComponents[AI].ObstructionValue = 1.0f;
+			Manager->CollisionSystem->CollisionComponents[AI].Cells = EM::Vec4(0, 0, 0, 0);
 			
 			// Set up Label
 			// NOTE(John): This isn't the best way to do this; most likely will throw an error at some point
@@ -260,6 +269,10 @@ namespace ECS { namespace Factory {
 			// NOTE(John): This isn't the best way to do this; most likely will throw an error at some point
 			Manager->LabelSystem->Labels[Item].Name = Name;
 
+			// Set up Collision system
+			Manager->CollisionSystem->CollisionComponents[Item].ObstructionValue = 0.1f;
+			Manager->CollisionSystem->CollisionComponents[Item].Cells = EM::Vec4(0, 0, 0, 0);
+
 			// Set up Renderer
 			Manager->Renderer2DSystem->Renderers[Item].Color = Color;
 
@@ -329,6 +342,10 @@ namespace ECS { namespace Factory {
 			// Set up type
 			Manager->Types[Weapon] = Type;
 
+			// Set up Collision system
+			Manager->CollisionSystem->CollisionComponents[Weapon].ObstructionValue = 0.0f;
+			Manager->CollisionSystem->CollisionComponents[Weapon].Cells = EM::Vec4(0, 0, 0, 0);
+
 			// Set up Attributes
 			AttributeSystem* AS = Manager->AttributeSystem;		
 			AS->Masks[Weapon] = Mask;
@@ -364,6 +381,10 @@ namespace ECS { namespace Factory {
 			Manager->TransformSystem->Transforms[Explosion].GroundPositionOffset = Enjon::Math::Vec2(0.0f, 0.0f);
 
 			Manager->TransformSystem->Transforms[Explosion].AABBPadding = Enjon::Math::Vec2(500, 500);
+
+			// Set up Collision system
+			Manager->CollisionSystem->CollisionComponents[Explosion].ObstructionValue = 1.0f;
+			Manager->CollisionSystem->CollisionComponents[Explosion].Cells = EM::Vec4(0, 0, 0, 0);
 		}
 
 		void CreateVortex(Systems::EntityManager* Manager, EM::Vec3 Pos)
@@ -386,6 +407,10 @@ namespace ECS { namespace Factory {
 			Manager->TransformSystem->Transforms[Vortex].BaseHeight = 0.0f;
 			Manager->TransformSystem->Transforms[Vortex].MaxHeight = 0.0f;
 			Manager->TransformSystem->Transforms[Vortex].GroundPositionOffset = EM::Vec2(0.0f, -120.0f);
+
+			// Set up Collision system
+			Manager->CollisionSystem->CollisionComponents[Vortex].ObstructionValue = 1.0f;
+			Manager->CollisionSystem->CollisionComponents[Vortex].Cells = EM::Vec4(0, 0, 0, 0);
 
 			auto C = EG::RGBA16(static_cast<float>(ER::Roll(0, 20)) / 10.0f, 
 								static_cast<float>(ER::Roll(0, 20)) / 10.0f, 

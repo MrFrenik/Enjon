@@ -19,6 +19,7 @@ namespace SpatialHash {
 	typedef struct 
 	{
 		std::vector<ECS::eid32> entities;
+		float ObstructionValue;
 	} Cell;
 
 	typedef struct                 
@@ -54,7 +55,7 @@ namespace SpatialHash {
 
 	EM::Vec2 FindCellCoordinatesFromIndex(Grid* G, Enjon::uint32 Index);
 
-	void FindCells(Grid* G, ECS::eid32 Entity, const EP::AABB* AABB, EM::Vec4* CellRange);
+	void FindCells(Grid* G, ECS::eid32 Entity, const EP::AABB* AABB, EM::Vec4* CellRange, float ObstructionValue);
 
 	std::vector<ECS::eid32> GetEntitiesFromCells(Grid* G, EM::Vec4& Cells);
 }

@@ -19,6 +19,12 @@ namespace SpatialHash {
 		// Allocate correct memory size for cells
 		grid->cells.resize(grid->rows * grid->cols);
 
+		// Set each cell's obstruction value to 0.0f
+		for (auto& c : grid->cells)
+		{
+			c.ObstructionValue = 0.0f;
+		}
+
 		// Set origin of grid
 		// This needs to be passed in by world that creates it
 		grid->Origin = EM::Vec2(0.0f);
@@ -81,7 +87,7 @@ namespace SpatialHash {
 		return Entities;
 	}
 
-	void FindCells(Grid* G, ECS::eid32 Entity, const EP::AABB* AABB, EM::Vec4* CellRange)
+	void FindCells(Grid* G, ECS::eid32 Entity, const EP::AABB* AABB, EM::Vec4* CellRange, float ObstructionValue)
 	{
 		// AABB elements
 		int min_y = AABB->Min.y;	
@@ -96,6 +102,16 @@ namespace SpatialHash {
 		// Max row and col
 		int max_row = floor(max_y / G->CellSize);
 		int max_col = floor(max_x / G->CellSize);
+
+
+		for (auto i = CellRange->y; i < CellRange->w; i++)
+		{
+			for (auto j = CellRange->x; j < CellRange->z; j++)
+			{
+				auto index = i * G->cols + j;
+				if (G->cells[index].ObstructionValue > 0) G->cells[index].ObstructionValue -= ObstructionValue;
+			}
+		}
 
 		// Set cell range
 		CellRange->x = min_col;
@@ -120,6 +136,8 @@ namespace SpatialHash {
 
 				// Then push back this entity
 				G->cells[index].entities.push_back(Entity);
+
+				if (G->cells[index].ObstructionValue < 1.0f) G->cells[index].ObstructionValue += ObstructionValue;
 
 				// Keep track of "dirty" cells here
 				G->dirtyCells.push_back(index);
@@ -185,6 +203,9 @@ namespace SpatialHash {
 		for (Enjon::uint32 i : grid->dirtyCells)
 		{
 			grid->cells[i].entities.clear();
+
+			// Reset OB value
+			grid->cells[i].ObstructionValue = 0.0f;
 		}
 
 		// Clear dirty cells
@@ -271,10 +292,12 @@ namespace SpatialHash {
 		{
 			for (auto c = C; c < MaxC; c++)
 			{
-				EG::ColorRGBA16 Color = EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.3f);
 				auto index = r * G->cols + c;
 				auto size = G->cells.at(index).entities.size();
-				if (size) Color = EG::SetOpacity(EG::RGBA16_Green(), 0.4f);
+				auto OV = G->cells.at(index).ObstructionValue;
+
+				EG::ColorRGBA16 Color = EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.3f);
+				if (size) Color = EG::SetOpacity(EG::RGBA16_Green(), OV);
 				Batch->Add(
 							EM::Vec4(CurrentX, CurrentY, Width - 5.0f, Height - 5.0f), 
 							EM::Vec4(0, 0, 1, 1), 

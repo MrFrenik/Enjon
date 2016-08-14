@@ -86,6 +86,7 @@ namespace ECS { namespace Component {
 	typedef struct
 	{
 		EM::Vec4 Cells;
+		float ObstructionValue;
 		eid32 Entity;
 	} CollisionComponent;
 

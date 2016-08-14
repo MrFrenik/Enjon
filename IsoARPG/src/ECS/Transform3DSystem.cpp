@@ -287,13 +287,13 @@ namespace ECS{ namespace Systems { namespace Transform {
 					Manager->CollisionSystem->Entities.push_back(e);
 
 					// Find cell
-					SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[e].Cells);
+					SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[e].Cells, Manager->CollisionSystem->CollisionComponents[e].ObstructionValue);
 				}
 
 				else if ((Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0)
 				{
 					// Find cell
-					SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[e].Cells);
+					SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[e].Cells, Manager->CollisionSystem->CollisionComponents[e].ObstructionValue);
 				}
 
 				// Go through the items in this entity's inventory and set to this position
@@ -385,7 +385,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 						std::cout << "Hitting" << std::endl;
 					}
 
-					SpatialHash::FindCells(Manager->Grid, WeaponEquipped, AABB, &Manager->CollisionSystem->CollisionComponents[WeaponEquipped].Cells);
+					SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[WeaponEquipped].Cells, Manager->CollisionSystem->CollisionComponents[WeaponEquipped].ObstructionValue);
 				}
 
 			}
