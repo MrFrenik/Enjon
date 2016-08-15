@@ -8,6 +8,7 @@
 
 #include "System/Config.h"
 #include "System/Types.h"
+#include "System/Containers.h"
 
 #include "Utils/Timing.h"
 #include "Utils/FileUtils.h"

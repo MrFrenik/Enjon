@@ -21,7 +21,7 @@
 * MAIN GAME
 */
 
-#if 1
+#if 0
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
@@ -3944,14 +3944,10 @@ int main(int argc, char** argv) {
 #endif
 
 
-#if 0
+#if 1
 #include "Enjon.h"
-#include "Utils/json.h"
 
-#include <vector>
 #include <iostream>
-#include <queue>
-#include <unordered_set>
 
 namespace PathFinding {
 	
@@ -3964,13 +3960,6 @@ namespace PathFinding {
 		float FCost;
 		Enjon::uint32 Index;
 		Node* Parent;
-	};	
-
-	struct CompareNode
-	{
-		bool operator() (Node& A, Node& B) {
-			return A.FCost > B.FCost;
-		}
 	};
 
 }
@@ -3991,31 +3980,53 @@ bool SetFind(std::unordered_set<T>& S, T Val)
 	return false;
 }
 
+
+using namespace Enjon;
+using namespace PathFinding;
+
+typedef HeapItem<Node, float> HeapNode;
+
+int32 CompareNode(HeapNode* A, HeapNode* B)
+{
+	if (A->PriorityValue == B->PriorityValue)  	return 0;
+	if (A->PriorityValue >  B->PriorityValue) 	return 1;
+	if (A->PriorityValue <  B->PriorityValue) 	return -1;
+}
+
 #undef main
 int main(int argc, char** argv)
 {
-	std::priority_queue<PathFinding::Node, std::vector<PathFinding::Node>, PathFinding::CompareNode> OpenSet;
-	std::unordered_set<Enjon::uint32> ClosedSet;
+	Heap<Node, float> OpenSet(100, CompareNode);
 
-	OpenSet.push({EM::Vec2(0.0f), 4, 3, 1, 8,  1,  nullptr});
-	OpenSet.push({EM::Vec2(0.0f), 4, 3, 1, 1,  2,  nullptr});
-	OpenSet.push({EM::Vec2(0.0f), 4, 3, 1, 9,  23, nullptr});
-	OpenSet.push({EM::Vec2(0.0f), 4, 3, 1, 20, 12, nullptr});
-	OpenSet.push({EM::Vec2(0.0f), 4, 3, 1, 32, 4,  nullptr});
-	OpenSet.push({EM::Vec2(0.0f), 4, 3, 1, 50, 6,  nullptr});
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 30));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 3));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 4));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 25));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 125));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 23));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 9));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 9));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 1));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 2));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 5));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 23));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 9));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 9));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 1));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 2));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 5));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 234));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 12412));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 235));
+	OpenSet.Add(HeapItem<Node, float>({EM::Vec2(0.0f), 0, 0, 0, 0, 0, nullptr}, 0));
 
-	while(OpenSet.size())
+	while (OpenSet.Count())
 	{
-		auto N = PopHeap<PathFinding::Node, PathFinding::CompareNode>(OpenSet);
+		auto N = OpenSet.Pop();
 
-		std::cout << N.FCost << std::endl;
-
-		// Add N to set
-		ClosedSet.insert(N.Index);
+		std::cout << "Value: " << N.PriorityValue << std::endl;
 	}
 
-	std::cout << SetFind<Enjon::uint32>(ClosedSet, 2) << std::endl;
-	std::cout << SetFind<Enjon::uint32>(ClosedSet, 3) << std::endl;
 
 	return 0;
 }
