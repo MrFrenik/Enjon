@@ -2189,15 +2189,15 @@ namespace PathFinding {
 			// Otherwise, we need to get neighbors and process those
 			for (Node& Neighbor : GetNeighbors(G, CurrentNode))
 			{
-				// if (G->cells.at(Neighbor.Index).ObstructionValue >= 1.0f || SetFind<Enjon::uint32>(ClosedSet, Neighbor.Index))
-				// {
-				// 	continue;
-				// }
-
-				if (SetFind<Enjon::uint32>(ClosedSet, Neighbor.Index))
+				if (G->cells.at(Neighbor.Index).ObstructionValue >= 1.0f || SetFind<Enjon::uint32>(ClosedSet, Neighbor.Index))
 				{
 					continue;
 				}
+
+				// if (SetFind<Enjon::uint32>(ClosedSet, Neighbor.Index))
+				// {
+				// 	continue;
+				// }
 
 				// Get new movment cost
 				Enjon::uint32 NewMovementCostToNeighbor = CurrentNode.GCost + GetDistance(CurrentNode, Neighbor);
@@ -2208,6 +2208,7 @@ namespace PathFinding {
 				{
 					Neighbor.GCost = NewMovementCostToNeighbor;
 					Neighbor.HCost = GetDistance(Neighbor, EndNode);
+					Neighbor.FCost = Neighbor.GCost + Neighbor.FCost;
 					// Neighbor.Parent = &CurrentNode;
 					G->cells.at(Neighbor.Index).ParentIndex = CurrentNode.Index;
 
@@ -2229,7 +2230,6 @@ namespace PathFinding {
 	{
 		std::vector<Node> Neighbors;
 
-		auto MaxIndex = G->rows * G->cols;
 		auto CNC = CurrentNode.GridCoordinates.x;
 		auto CNR = CurrentNode.GridCoordinates.y;
 
