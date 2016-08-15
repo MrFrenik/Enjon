@@ -270,7 +270,7 @@ namespace ECS { namespace Factory {
 			Manager->LabelSystem->Labels[Item].Name = Name;
 
 			// Set up Collision system
-			Manager->CollisionSystem->CollisionComponents[Item].ObstructionValue = 0.1f;
+			Manager->CollisionSystem->CollisionComponents[Item].ObstructionValue = 0.01f;
 			Manager->CollisionSystem->CollisionComponents[Item].Cells = EM::Vec4(0, 0, 0, 0);
 
 			// Set up Renderer

@@ -72,6 +72,10 @@
 #include <iostream> 
 #include <time.h>
 #include <stdlib.h>
+#include <queue>
+#include <unordered_set>
+#include <functional>
+#include <algorithm>
 
 #define NUM_LIGHTS 	10
 
@@ -119,6 +123,63 @@ Enjon::uint32 EffectRunTime = 0;
 Enjon::uint32 ParticleCount = 0;
 Enjon::uint32 TileOverlayRunTime = 0;
 Enjon::uint32 PlayerControllerTime = 0;
+
+namespace PathFinding {
+	
+	struct Node 
+	{
+		EM::Vec2 GridCoordinates;
+		float GCost;
+		float HCost;
+		float WCost;
+		float FCost;
+		Enjon::uint32 Index;
+		Node* Parent;
+	};	
+
+	struct CompareNode
+	{
+		bool operator() (Node& A, Node& B) {
+			return A.FCost > B.FCost;
+		}
+	};
+
+	bool operator==(Node& A, Node& B) {
+		return A.Index == B.Index;	
+	}
+
+	bool operator!=(Node& A, Node& B) {
+		return A.Index != B.Index;	
+	}
+
+	std::vector<Node> FindPath(SpatialHash::Grid* G, EM::Vec2& Start, EM::Vec2& End);
+
+	Enjon::uint32 GetDistance(Node& A, Node& B);
+
+	Node CreateNodeFromPosition(SpatialHash::Grid* G, EM::Vec2& Position);
+
+	Node CreateNodeFromGridCoordinates(SpatialHash::Grid* G, EM::Vec2& GridCoordinates);
+
+	std::vector<Node> GetNeighbors(SpatialHash::Grid* G, Node& CurrentNode);
+
+	Node CreateNodeFromIndex(SpatialHash::Grid* G, Enjon::uint32 Index);
+}
+
+template <typename T, typename K>
+T PopHeap(std::priority_queue<T, std::vector<T>, K>& Q)
+{
+	T Val = Q.top();
+	Q.pop();
+	return Val;
+}
+
+template <typename T>
+bool SetFind(std::unordered_set<T>& S, T Val) 
+{
+	auto it = S.find(Val);
+	if (it != S.end()) return true;
+	return false;
+}
 
 using namespace Enjon;
 using namespace ECS;
@@ -639,7 +700,7 @@ int main(int argc, char** argv)
 				EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 		
 				TileOverlayRunTime = SDL_GetTicks() - StartTicks;		
-				
+
 				StartTicks = SDL_GetTicks();
 				SpatialHash::ClearCells(World->Grid);
 				ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
@@ -838,7 +899,7 @@ int main(int argc, char** argv)
 													CF, TextBatch, 
 																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
-						auto Cells =  SpatialHash::FindCellCoordinates(World->Grid, &World->TransformSystem->Transforms[e].CartesianPosition);
+						auto Cells =  SpatialHash::FindGridCoordinates(World->Grid, World->TransformSystem->Transforms[e].CartesianPosition);
 
 						Graphics::Fonts::PrintText( EntityPosition->x + 20.0f, 
 													EntityPosition->y - 100.0f, 
@@ -1113,7 +1174,7 @@ int main(int argc, char** argv)
 												CF, TextBatch, 
 																Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
 
-					auto Cells =  SpatialHash::FindCellCoordinates(World->Grid, &World->TransformSystem->Transforms[Player].CartesianPosition);
+					auto Cells =  SpatialHash::FindGridCoordinates(World->Grid, World->TransformSystem->Transforms[Player].CartesianPosition);
 
 					Graphics::Fonts::PrintText( PlayerPosition->x + 20.0f, 
 												PlayerPosition->y - 100.0f, 
@@ -1358,6 +1419,7 @@ int main(int argc, char** argv)
 			// Add particles to entity batch
 			EG::Particle2D::Draw(World->ParticleEngine, &Camera);
 
+			/*
 			// Draw only the world that surrounds the player
 			{
 				// auto TW = 256.0f / 2.0f;
@@ -1394,32 +1456,32 @@ int main(int argc, char** argv)
 				// 	}
 				// }
 			}
+			{
+				// Add some random polygon
+				// std::vector<EM::Vec2> Points;
+				// Points.push_back(EM::Vec2(-1500, -1400));	// BL
+				// Points.push_back(EM::Vec2(-800, -1400));	// BR
+				// Points.push_back(EM::Vec2(-850, -1200));	// TR
+				// Points.push_back(EM::Vec2(-900, -1200));	// TL
+				// EntityBatch.AddPolygon(Points, EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::RGBA16_Orange(), Points.at(0).y, EG::CoordinateFormat::ISOMETRIC);
 
-			/*-- RANDOM DRAWING --*/
-
-			// Add some random polygon
-			// std::vector<EM::Vec2> Points;
-			// Points.push_back(EM::Vec2(-1500, -1400));	// BL
-			// Points.push_back(EM::Vec2(-800, -1400));	// BR
-			// Points.push_back(EM::Vec2(-850, -1200));	// TR
-			// Points.push_back(EM::Vec2(-900, -1200));	// TL
-			// EntityBatch.AddPolygon(Points, EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::RGBA16_Orange(), Points.at(0).y, EG::CoordinateFormat::ISOMETRIC);
-
-			// Add a random cube 
-			// static EG::SpriteSheet* BoxSheet = EG::SpriteSheetManager::GetSpriteSheet("BoxSheet");
-			// EM::Vec2 BoxPos = World->TransformSystem->Transforms[Player].Position.XY();
-			// EntityBatch.Add(
-			// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
-			// 	BoxSheet->GetUV(0), 
-			// 	BoxSheet->texture.id
-			// 	EG::SetOpacity(EG::RGBA16_White(), 0.05f)
-			// 	);
-			// NormalsBatch.Add(
-			// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
-			// 	BoxSheet->GetUV(1),
-			// 	BoxSheet->texture.id,
-			// 	EG::SetOpacity(EG::RGBA16_White(), 0.5f)
-			// 	);
+				// Add a random cube 
+				// static EG::SpriteSheet* BoxSheet = EG::SpriteSheetManager::GetSpriteSheet("BoxSheet");
+				// EM::Vec2 BoxPos = World->TransformSystem->Transforms[Player].Position.XY();
+				// EntityBatch.Add(
+				// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
+				// 	BoxSheet->GetUV(0), 
+				// 	BoxSheet->texture.id
+				// 	EG::SetOpacity(EG::RGBA16_White(), 0.05f)
+				// 	);
+				// NormalsBatch.Add(
+				// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
+				// 	BoxSheet->GetUV(1),
+				// 	BoxSheet->texture.id,
+				// 	EG::SetOpacity(EG::RGBA16_White(), 0.5f)
+				// 	);
+			}
+			*/
 
 			if (level.IsDrawDebugEnabled())
 			{
@@ -1450,7 +1512,7 @@ int main(int argc, char** argv)
 						t = 0.0f;
 					}
 
-					auto CellCoordinates = SpatialHash::FindCellCoordinatesFromIndex(World->Grid, index);
+					auto CellCoordinates = SpatialHash::FindGridCoordinatesFromIndex(World->Grid, index);
 					auto CellDimensions = SpatialHash::GetCellDimensions(World->Grid, CellCoordinates);
 					auto Color = EG::RGBA16_Yellow();
 
@@ -1480,6 +1542,28 @@ int main(int argc, char** argv)
 											EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
 											Color
 										);
+
+
+					// Let's do some pathfinding here, queer!
+					auto Path = PathFinding::FindPath(World->Grid, World->TransformSystem->Transforms[World->Player].CartesianPosition, MP);
+
+					// Draw each node in path
+					for (auto& N : Path)
+					{
+						auto Index = N.Index;
+
+						// Get parent of index from spatial hash
+						auto Coords = SpatialHash::FindGridCoordinatesFromIndex(World->Grid, World->Grid->cells.at(Index).ParentIndex);
+
+						auto Dims = SpatialHash::GetCellDimensions(World->Grid, Coords);
+
+						DebugSpatialBatch.Add(
+												EM::Vec4(Dims.x, Dims.y, Dims.z - 5.0f, Dims.w - 5.0f), 
+												EM::Vec4(0, 0, 1, 1), 
+												EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
+												EG::RGBA16_Black()
+											);
+					}
 				}
 				DebugSpatialBatch.End();
 			}
@@ -1589,7 +1673,7 @@ int main(int argc, char** argv)
 						glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
 									 SCREENWIDTH, SCREENHEIGHT);
 						// glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.8f);
-						glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.4f, 0.4f, 0.5f, 1.0f);
+						glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.6f, 0.6f, 0.7f, 1.0f);
 						glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
 
 						glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
@@ -2022,6 +2106,182 @@ void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Lig
 			LightsToDraw.push_back(&L);
 		}
 	}
+}
+
+namespace PathFinding {
+
+	// struct Node 
+	// {
+	// 	EM::Vec2 GridCoordinates;
+	// 	float GCost;
+	// 	float HCost;
+	// 	float WCost;
+	// 	float FCost;
+	// 	Enjon::uint32 Index;
+	// 	Node* Parent;
+	// };	
+
+	Node CreateNodeFromPosition(SpatialHash::Grid* G, EM::Vec2& Position)
+	{
+		// Create node
+		Node N = {SpatialHash::FindGridCoordinates(G, Position), 0, 0, 0, 0, 0, nullptr};
+		
+		// Set its index
+		N.Index = SpatialHash::GetGridIndexFromCoordinates(G, N.GridCoordinates);
+
+		return N;	
+	}
+
+	Node CreateNodeFromGridCoordinates(SpatialHash::Grid* G, EM::Vec2& GridCoordinates)
+	{
+		return {GridCoordinates, 0, 0, 0, 0, SpatialHash::GetGridIndexFromCoordinates(G, GridCoordinates), nullptr};
+	}
+
+	Node CreateNodeFromIndex(SpatialHash::Grid* G, Enjon::uint32 Index)
+	{
+		return {SpatialHash::FindGridCoordinatesFromIndex(G, Index), 0, 0, 0, 0, Index, nullptr};
+	}
+
+	std::vector<Node> FindPath(SpatialHash::Grid* G, EM::Vec2& Start, EM::Vec2& End)
+	{
+		std::vector<Node> Path;
+
+		// Get start and end nodes
+		Node StartNode = CreateNodeFromPosition(G, Start);
+		Node EndNode = CreateNodeFromPosition(G, End);
+
+		if (StartNode == EndNode) return Path;
+
+
+		// Create open and closed sets as well set for random access of items in open set
+		std::priority_queue<Node, std::vector<Node>, CompareNode> OpenSet;
+		std::unordered_set<Enjon::uint32> OpenSetIndicies;
+		std::unordered_set<Enjon::uint32> ClosedSet;
+
+		// Add start node to open set
+		OpenSet.push(StartNode);
+
+		// Keep processing while open set contains items
+		while(OpenSet.size())
+		{
+			// Get current node to process and add to closed set
+			Node CurrentNode = PopHeap<Node, CompareNode>(OpenSet);
+			ClosedSet.insert(CurrentNode.Index);
+
+			// Fill path if at endnode 
+			if (CurrentNode == EndNode)
+			{
+				// Retrace path
+				while (CurrentNode != StartNode)
+				{
+					Path.push_back(CurrentNode);
+
+					// Get new node from current node's parent index
+					CurrentNode = CreateNodeFromIndex(G, G->cells.at(CurrentNode.Index).ParentIndex);
+				}
+
+				// Reverse path
+				std::reverse(Path.begin(), Path.end());
+
+				return Path;
+			}
+
+			// Otherwise, we need to get neighbors and process those
+			for (Node& Neighbor : GetNeighbors(G, CurrentNode))
+			{
+				// if (G->cells.at(Neighbor.Index).ObstructionValue >= 1.0f || SetFind<Enjon::uint32>(ClosedSet, Neighbor.Index))
+				// {
+				// 	continue;
+				// }
+
+				if (SetFind<Enjon::uint32>(ClosedSet, Neighbor.Index))
+				{
+					continue;
+				}
+
+				// Get new movment cost
+				Enjon::uint32 NewMovementCostToNeighbor = CurrentNode.GCost + GetDistance(CurrentNode, Neighbor);
+
+				auto NeighborInOpenSet = SetFind<Enjon::uint32>(OpenSetIndicies, Neighbor.Index);
+
+				if (NewMovementCostToNeighbor < Neighbor.GCost || !NeighborInOpenSet)
+				{
+					Neighbor.GCost = NewMovementCostToNeighbor;
+					Neighbor.HCost = GetDistance(Neighbor, EndNode);
+					// Neighbor.Parent = &CurrentNode;
+					G->cells.at(Neighbor.Index).ParentIndex = CurrentNode.Index;
+
+					if (!NeighborInOpenSet)
+					{
+						OpenSet.push(Neighbor);
+					}
+				}
+
+			}
+		}
+
+
+
+		return Path;
+	}
+
+	std::vector<Node> GetNeighbors(SpatialHash::Grid* G, Node& CurrentNode)
+	{
+		std::vector<Node> Neighbors;
+
+		auto MaxIndex = G->rows * G->cols;
+		auto CNC = CurrentNode.GridCoordinates.x;
+		auto CNR = CurrentNode.GridCoordinates.y;
+
+		auto Top = CNR + 1;
+		auto Bottom = CNR - 1;
+		auto Left = CNC - 1;
+		auto Right = CNC + 1;
+
+		bool TopValid = Top < G->rows;
+		bool BottomValid = Bottom > 0;
+		bool LeftValid = Left > 0;
+		bool RightValid = Right < G->cols;
+		
+		// Top left
+		if (LeftValid && TopValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Left, Top)));	
+
+		// Top 
+		if (TopValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(CNC, Top)));
+
+		// Top Right
+		if (RightValid && TopValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Right, Top)));
+
+		// Right
+		if (RightValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Right, CNR)));
+
+		// Bottom Right
+		if (RightValid && BottomValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Right, Bottom)));
+
+		// Bottom
+		if (BottomValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(CNC, Bottom)));
+
+		// Bottom Left
+		if (LeftValid && BottomValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Left, Bottom)));
+
+		// Left
+		if (LeftValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Left, CNR)));
+
+
+		return Neighbors;
+	}
+
+	Enjon::uint32 GetDistance(Node& A, Node& B)
+	{
+		auto distX = static_cast<Enjon::uint32>(abs(A.GridCoordinates.x - B.GridCoordinates.x));
+		auto distY = static_cast<Enjon::uint32>(abs(A.GridCoordinates.y - B.GridCoordinates.y));
+
+		if (distX > distY)
+			return 14 * distY + 10 * (distX - distY);
+		else
+			return 14 * distX + 10 * (distY - distX);
+	}
+
 }
 
 
@@ -3689,41 +3949,73 @@ int main(int argc, char** argv) {
 #include "Utils/json.h"
 
 #include <vector>
-#include <fstream>
+#include <iostream>
+#include <queue>
+#include <unordered_set>
 
-using json = nlohmann::json;
+namespace PathFinding {
+	
+	struct Node 
+	{
+		EM::Vec2 GridCoordinates;
+		float GCost;
+		float HCost;
+		float WCost;
+		float FCost;
+		Enjon::uint32 Index;
+		Node* Parent;
+	};	
 
-const std::string AnimTextureJSONDir("../IsoARPG/Profiles/Animations/Player/test.json");
+	struct CompareNode
+	{
+		bool operator() (Node& A, Node& B) {
+			return A.FCost > B.FCost;
+		}
+	};
 
-// #define JPATCH(x) 			R"([(x)])"_json
-#define JPATCH(x) 			R"()"_json
-#define STRING(x)			#x
-#define JSTRING(x) 			STRING(x)
-#define JOP(x, y, z) 		{"op": x, "path": y, "value", z}
+}
+
+template <typename T, typename K>
+T PopHeap(std::priority_queue<T, std::vector<T>, K>& Q)
+{
+	T Val = Q.top();
+	Q.pop();
+	return Val;
+}
+
+template <typename T>
+bool SetFind(std::unordered_set<T>& S, T Val)
+{
+	auto it = S.find(Val);
+	if (it != S.end()) return true;
+	return false;
+}
 
 #undef main
 int main(int argc, char** argv)
 {
-	auto Json = EU::read_file_sstream(AnimTextureJSONDir.c_str());
-    
-   	// parse and serialize JSON
-   	json j_complete = json::parse(Json);
+	std::priority_queue<PathFinding::Node, std::vector<PathFinding::Node>, PathFinding::CompareNode> OpenSet;
+	std::unordered_set<Enjon::uint32> ClosedSet;
 
-   	// Get data
-   	auto Data = j_complete.at("T1").at("data");
+	OpenSet.push({EM::Vec2(0.0f), 4, 3, 1, 8,  1,  nullptr});
+	OpenSet.push({EM::Vec2(0.0f), 4, 3, 1, 1,  2,  nullptr});
+	OpenSet.push({EM::Vec2(0.0f), 4, 3, 1, 9,  23, nullptr});
+	OpenSet.push({EM::Vec2(0.0f), 4, 3, 1, 20, 12, nullptr});
+	OpenSet.push({EM::Vec2(0.0f), 4, 3, 1, 32, 4,  nullptr});
+	OpenSet.push({EM::Vec2(0.0f), 4, 3, 1, 50, 6,  nullptr});
 
-   	// Make new data to patch it
-   	std::vector<float> NewData;
-   	for (auto& d : Data)
-   	{
-   		NewData.push_back(50.0f);
-   	}
+	while(OpenSet.size())
+	{
+		auto N = PopHeap<PathFinding::Node, PathFinding::CompareNode>(OpenSet);
 
-   	j_complete.at("T1").at("data") = NewData;
+		std::cout << N.FCost << std::endl;
 
-	std::ofstream myfile(AnimTextureJSONDir.c_str());
-	myfile << j_complete.dump(4);
-	myfile.close();
+		// Add N to set
+		ClosedSet.insert(N.Index);
+	}
+
+	std::cout << SetFind<Enjon::uint32>(ClosedSet, 2) << std::endl;
+	std::cout << SetFind<Enjon::uint32>(ClosedSet, 3) << std::endl;
 
 	return 0;
 }

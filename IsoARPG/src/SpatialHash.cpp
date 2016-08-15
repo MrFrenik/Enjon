@@ -7,50 +7,50 @@
 namespace SpatialHash {
 
 	/* Inits spatial grid based on width, height of level and given cell size */ 
-	void Init(Grid* grid, int width, int height, int cell_size)
+	void Init(Grid* G, int width, int height, int cell_size)
 	{
-		if (grid == nullptr) Enjon::Utils::FatalError("SPATIALHASH::INIT::Cannot operate on null data.");
+		if (G == nullptr) Enjon::Utils::FatalError("SPATIALHASH::INIT::Cannot operate on null data.");
 
-		grid->CellSize = cell_size;
+		G->CellSize = cell_size;
 
-		grid->rows = ceil((height) / cell_size);
-		grid->cols = ceil((width) / cell_size);
+		G->rows = ceil((height) / cell_size);
+		G->cols = ceil((width) / cell_size);
 
 		// Allocate correct memory size for cells
-		grid->cells.resize(grid->rows * grid->cols);
+		G->cells.resize(G->rows * G->cols);
 
 		// Set each cell's obstruction value to 0.0f
-		for (auto& c : grid->cells)
+		for (auto& c : G->cells)
 		{
 			c.ObstructionValue = 0.0f;
 		}
 
-		// Set origin of grid
+		// Set origin of G
 		// This needs to be passed in by world that creates it
-		grid->Origin = EM::Vec2(0.0f);
+		G->Origin = EM::Vec2(0.0f);
 	}
 
 	/* Finds particular cell that a given entity belongs to based on its position */
-	EM::Vec2 FindCellCoordinates(Grid* grid, const V2* position)
+	EM::Vec2 FindGridCoordinates(Grid* G, V2& Position)
 	{
-		int posX = position->x;
-		int posY = position->y; 
+		int posX = Position.x;
+		int posY = Position.y; 
 
 		// Get indicies for row and column
-		int row = floor(posY / grid->CellSize);
-		int col = floor(posX / grid->CellSize);
+		int row = floor(posY / G->CellSize);
+		int col = floor(posX / G->CellSize);
 
 		// Bound row and column
-		if (row > grid->rows - 1) row = grid->rows - 1;
+		if (row > G->rows - 1) row = G->rows - 1;
 		if (row < 0) row = 0;
-		if (col > grid->cols - 1) col = grid->cols - 1;
+		if (col > G->cols - 1) col = G->cols - 1;
 		if (col < 0) col = 0;
 
 
 		return EM::Vec2(col, row);
 	}
 
-	EM::Vec2 FindCellCoordinatesFromIndex(Grid* G, Enjon::uint32 Index)
+	EM::Vec2 FindGridCoordinatesFromIndex(Grid* G, Enjon::uint32 Index)
 	{
 		// Calculate row
 		auto R = floor(Index / G->cols);
@@ -146,7 +146,7 @@ namespace SpatialHash {
 	}
 
 	/* Overloaded function that finds particular cell that a given entity belongs to based on its AABB (preferred method) */
-	std::vector<ECS::eid32> FindCell(Grid* grid, ECS::eid32 entity, const EP::AABB* AABB)
+	std::vector<ECS::eid32> FindCell(Grid* G, ECS::eid32 entity, const EP::AABB* AABB)
 	{
 		std::vector<ECS::eid32> entities;
 
@@ -157,36 +157,36 @@ namespace SpatialHash {
 		int max_x = AABB->Max.x;	
 
 		// Min row and col
-		int min_row = floor(min_y / grid->CellSize);
-		int min_col = floor(min_x / grid->CellSize);
+		int min_row = floor(min_y / G->CellSize);
+		int min_col = floor(min_x / G->CellSize);
 
 		// Max row and col
-		int max_row = floor(max_y / grid->CellSize);
-		int max_col = floor(max_x / grid->CellSize);
+		int max_row = floor(max_y / G->CellSize);
+		int max_col = floor(max_x / G->CellSize);
 
-		int max_allowed_index = grid->rows * grid->cols;
+		int max_allowed_index = G->rows * G->cols;
 
 		for (int i = min_row; i <= max_row; i++)
 		{
-			if (i >= grid->rows) continue;
+			if (i >= G->rows) continue;
 			if (i < 0) continue;
 
 			for (int j = min_col; j <= max_col; j++)
 			{
-				if (j >= grid->cols) continue;
+				if (j >= G->cols) continue;
 				if (j < 0) continue;
 
-				int index = i * grid->cols + j;
+				int index = i * G->cols + j;
 				if (index < 0 || index >= max_allowed_index) continue;
 
 				// Add all entities in this cell into entities vector for return 
-				entities.insert(entities.end(), grid->cells[index].entities.begin(), grid->cells[index].entities.end());
+				entities.insert(entities.end(), G->cells[index].entities.begin(), G->cells[index].entities.end());
 
 				// Then push back this entity
-				grid->cells[index].entities.push_back(entity);
+				G->cells[index].entities.push_back(entity);
 
 				// Keep track of "dirty" cells here
-				grid->dirtyCells.push_back(index);
+				G->dirtyCells.push_back(index);
 			}
 		}
 
@@ -195,55 +195,60 @@ namespace SpatialHash {
 
 	/* Clears all entity vectors from every cell in the spatial grid */
 	// NOTE(John): This does not scale with large levels, because I'm having to clear ALL cells instead of "dirty" ones
-	void ClearCells(Grid* grid) 
+	void ClearCells(Grid* G) 
 	{
-		if (grid == nullptr) Enjon::Utils::FatalError("SPATIALHASH::CLEARCELLS::Cannot operate on null data.");
+		if (G == nullptr) Enjon::Utils::FatalError("SPATIALHASH::CLEARCELLS::Cannot operate on null data.");
 
 		// Loop through dirty cells and clear entities from those
-		for (Enjon::uint32 i : grid->dirtyCells)
+		for (Enjon::uint32 i : G->dirtyCells)
 		{
-			grid->cells[i].entities.clear();
+			G->cells[i].entities.clear();
 
 			// Reset OB value
-			grid->cells[i].ObstructionValue = 0.0f;
+			G->cells[i].ObstructionValue = 0.0f;
 		}
 
 		// Clear dirty cells
-		grid->dirtyCells.clear();
+		G->dirtyCells.clear();
 	}
 
 
 	/* Finds all neighboring cells to a given entitiy's cell and stores those in a passed in entities vector */
 	// TODO(John): Create a pair checking function to maintain and update pairs of entities that have already been checked with one another
 	// NOTE(John): As of now, this is incredibly too slow to work...
-	void GetNeighborCells(Grid* grid, int index, std::vector<ECS::eid32>* Entities)
+	void GetNeighborCells(Grid* G, int index, std::vector<ECS::eid32>* Entities)
 	{
 		// Grab all neighbor cell indexes	
-		int Top = index - grid->cols; 
+		int Top = index - G->cols; 
 		int TopLeft = Top - 1; 
 		int TopRight = Top + 1; 
 		int Left = index - 1;
 		int Right = index + 1;
-		int BottomLeft = index + grid->cols - 1;
-		int Bottom = index + grid->cols;
-		int BottomRight = index + grid->cols + 1;
-		int max = grid->rows * grid->cols;
+		int BottomLeft = index + G->cols - 1;
+		int Bottom = index + G->cols;
+		int BottomRight = index + G->cols + 1;
+		int max = G->rows * G->cols;
 
 		// If valid, append to entities
-		if (Top >= 0)		   if (!grid->cells[Top].entities.empty())  			Entities->insert(Entities->end(), grid->cells[Top].entities.begin(), grid->cells[Top].entities.end()); 
-		if (Bottom < max)	   if (!grid->cells[Bottom].entities.empty()) 			Entities->insert(Entities->end(), grid->cells[Bottom].entities.begin(), grid->cells[Bottom].entities.end());
-		if (TopLeft >= 0)	   if (!grid->cells[TopLeft].entities.empty()) 			Entities->insert(Entities->end(), grid->cells[TopLeft].entities.begin(), grid->cells[TopLeft].entities.end());
-		if (TopRight >= 0)	   if (!grid->cells[TopRight].entities.empty()) 		Entities->insert(Entities->end(), grid->cells[TopRight].entities.begin(), grid->cells[TopRight].entities.end());
-		if (Left >= 0)		   if (!grid->cells[Left].entities.empty()) 			Entities->insert(Entities->end(), grid->cells[Left].entities.begin(), grid->cells[Left].entities.end());
-		if (Right < max)	   if (!grid->cells[Right].entities.empty()) 			Entities->insert(Entities->end(), grid->cells[Right].entities.begin(), grid->cells[Right].entities.end());
-		if (BottomLeft < max)  if (!grid->cells[BottomLeft].entities.empty()) 		Entities->insert(Entities->end(), grid->cells[BottomLeft].entities.begin(), grid->cells[BottomLeft].entities.end());
-		if (BottomRight < max) if (!grid->cells[BottomRight].entities.empty()) 		Entities->insert(Entities->end(), grid->cells[BottomRight].entities.begin(), grid->cells[BottomRight].entities.end());
+		if (Top >= 0)		   if (!G->cells[Top].entities.empty())  			Entities->insert(Entities->end(), G->cells[Top].entities.begin(), G->cells[Top].entities.end()); 
+		if (Bottom < max)	   if (!G->cells[Bottom].entities.empty()) 			Entities->insert(Entities->end(), G->cells[Bottom].entities.begin(), G->cells[Bottom].entities.end());
+		if (TopLeft >= 0)	   if (!G->cells[TopLeft].entities.empty()) 			Entities->insert(Entities->end(), G->cells[TopLeft].entities.begin(), G->cells[TopLeft].entities.end());
+		if (TopRight >= 0)	   if (!G->cells[TopRight].entities.empty()) 		Entities->insert(Entities->end(), G->cells[TopRight].entities.begin(), G->cells[TopRight].entities.end());
+		if (Left >= 0)		   if (!G->cells[Left].entities.empty()) 			Entities->insert(Entities->end(), G->cells[Left].entities.begin(), G->cells[Left].entities.end());
+		if (Right < max)	   if (!G->cells[Right].entities.empty()) 			Entities->insert(Entities->end(), G->cells[Right].entities.begin(), G->cells[Right].entities.end());
+		if (BottomLeft < max)  if (!G->cells[BottomLeft].entities.empty()) 		Entities->insert(Entities->end(), G->cells[BottomLeft].entities.begin(), G->cells[BottomLeft].entities.end());
+		if (BottomRight < max) if (!G->cells[BottomRight].entities.empty()) 		Entities->insert(Entities->end(), G->cells[BottomRight].entities.begin(), G->cells[BottomRight].entities.end());
+	}
+
+	Enjon::uint32 GetGridIndexFromCoordinates(Grid* G, EM::Vec2& Coordinates)
+	{
+		return Coordinates.y * G->cols + Coordinates.x;
 	}
 
 	void DrawGrid(Grid* G, EG::SpriteBatch* Batch, EM::Vec2& Position)
 	{
 		// Get starting cell
-		auto StartCell = FindCellCoordinates(G, &Position);
+		auto StartCell = FindGridCoordinates(G, Position);
 		EM::Vec2 DebugRadius(40);
 
 		// Set radius
@@ -321,18 +326,15 @@ namespace SpatialHash {
 	{
 		EM::Vec4 CellDimensions;
 
-		// Set radius
+		// Get row and column
 		auto R = (int)(Cell.y);
 		auto C = (int)(Cell.x);
-
-		// if (R > G->rows || R < 0) CellDimensions.y = 0;
-		// if (C > G->cols || C < 0) CellDimensions.x = 0;
 
 		// Set width and height
 		auto Width = CELL_SIZE * 2.0f;
 		auto Height = CELL_SIZE;
 
-		// Get X and Y
+		// Get origin X and Y
 		CellDimensions.x = G->Origin.x;
 		CellDimensions.y = G->Origin.y;
 
@@ -340,31 +342,13 @@ namespace SpatialHash {
 		CellDimensions.z = Width;
 		CellDimensions.w = Height;
 
-		// Get row offset
-		// for (auto i = 0; i < R; i++)
-		// {
-		// 	CellDimensions.x -= Width / 2.0f;
-		// 	CellDimensions.y += Height / 2.0f;
-		// }
+		// Calculate final X
+		CellDimensions.x -= (Width / 2.0f) * R;
+		CellDimensions.x += (Width / 2.0f) * C;
 
-		// // Get column offset
-		// for (auto i = 0; i < C; i++)
-		// {
-		// 	CellDimensions.x += Width / 2.0f; 
-		// 	CellDimensions.y += Height / 2.0f;
-		// }
-
-		// auto AR = R > 0 ? R - 1 : 0;
-		// auto AC = C > 0 ? C - 1 : 0;
-
-		auto AR = R;
-		auto AC = C;
-
-		CellDimensions.x -= (Width / 2.0f) * AR;
-		CellDimensions.x += (Width / 2.0f) * AC;
-
-		CellDimensions.y += (Height / 2.0f) * AR;
-		CellDimensions.y += (Height / 2.0f) * AC;
+		// Calculate final Y
+		CellDimensions.y += (Height / 2.0f) * R;
+		CellDimensions.y += (Height / 2.0f) * C;
 
 		return CellDimensions;
 	}
@@ -372,7 +356,7 @@ namespace SpatialHash {
 	void DrawActiveCell(Grid* G, EG::SpriteBatch* Batch, EM::Vec2& Position)
 	{
 		// Get cell of position
-		auto StartCell = FindCellCoordinates(G, &Position);
+		auto StartCell = FindGridCoordinates(G, Position);
 
 		// Get dimensions of cell
 		auto CellDimensions = GetCellDimensions(G, StartCell);

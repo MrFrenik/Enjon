@@ -19,6 +19,7 @@ namespace SpatialHash {
 	typedef struct 
 	{
 		std::vector<ECS::eid32> entities;
+		Enjon::uint32 ParentIndex;
 		float ObstructionValue;
 	} Cell;
 
@@ -36,7 +37,7 @@ namespace SpatialHash {
 	void Init(Grid* grid, int width, int height, int cell_size = CELL_SIZE); 
 
 	/* Finds particular cell that a given entity belongs to based on its position */
-	EM::Vec2 FindCellCoordinates(Grid* grid, const V2* position); 
+	EM::Vec2 FindGridCoordinates(Grid* grid, V2& position); 
 
 	/* Overloaded function that finds particular cell that a given entity belongs to based on its AABB (preferred method) */
 	std::vector<ECS::eid32> FindCell(Grid* grid, ECS::eid32 entity, const Enjon::Physics::AABB* AABB); 
@@ -53,11 +54,13 @@ namespace SpatialHash {
 
 	EM::Vec4 GetCellDimensions(Grid* G, EM::Vec2& Cell);
 
-	EM::Vec2 FindCellCoordinatesFromIndex(Grid* G, Enjon::uint32 Index);
+	EM::Vec2 FindGridCoordinatesFromIndex(Grid* G, Enjon::uint32 Index);
 
 	void FindCells(Grid* G, ECS::eid32 Entity, const EP::AABB* AABB, EM::Vec4* CellRange, float ObstructionValue);
 
 	std::vector<ECS::eid32> GetEntitiesFromCells(Grid* G, EM::Vec4& Cells);
+
+	Enjon::uint32 GetGridIndexFromCoordinates(Grid* G, EM::Vec2& Coordinates);
 }
 
 #endif
