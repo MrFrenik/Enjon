@@ -5,7 +5,13 @@
 #include <Graphics/SpriteSheet.h>
 #include <Math/Maths.h>
 
+using namespace PathFinding;
+
+const float MIN_DISTANCE 	= 300.0f;
+const float AISpeed 		= 2.0f;
+
 namespace ECS { namespace Systems { namespace AIController {
+
 
 	struct AIControllerSystem* NewAIControllerSystem(struct EntityManager* Manager)
 	{ 
@@ -23,15 +29,141 @@ namespace ECS { namespace Systems { namespace AIController {
 		for (eid32 ai = 0; ai < Manager->MaxAvailableID; ai++)
 		{
 			// Check to see if entity has ai controller
+			// if ((Manager->Masks[ai] & (COMPONENT_AICONTROLLER | COMPONENT_TRANSFORM3D)) == (COMPONENT_AICONTROLLER | COMPONENT_TRANSFORM3D))
+			// {
+			// 	// Get AI behavior tree and blackboard
+			// 	auto AC = &Manager->AIControllerSystem->AIControllers[ai];
+			// 	auto Brain = AC->Brain;
+			// 	auto BB = AC->BB;
+
+			// 	// Run the tree
+			// 	Brain->Run(BB);
+			// }
+
 			if ((Manager->Masks[ai] & (COMPONENT_AICONTROLLER | COMPONENT_TRANSFORM3D)) == (COMPONENT_AICONTROLLER | COMPONENT_TRANSFORM3D))
 			{
 				// Get AI behavior tree and blackboard
 				auto AC = &Manager->AIControllerSystem->AIControllers[ai];
-				auto Brain = AC->Brain;
-				auto BB = AC->BB;
+				auto TS = &Manager->TransformSystem;
+				auto AICartesianPositon = &Manager->TransformSystem->Transforms[ai].CartesianPosition;
+				auto PlayerCartesianPosition = &Manager->TransformSystem->Transforms[Manager->Player].CartesianPosition;
+				auto PlayerPosition = Manager->TransformSystem->Transforms[Manager->Player].Position.XY();
+				auto AIPosition = Manager->TransformSystem->Transforms[ai].Position.XY();
+				auto AIVelocity = &Manager->TransformSystem->Transforms[ai].Velocity;
+				auto AIVelocityGoal = &Manager->TransformSystem->Transforms[ai].VelocityGoal;
+				auto PathFindingComponent = &Manager->AIControllerSystem->PathFindingComponents[ai];
 
-				// Run the tree
-				Brain->Run(BB);
+				bool leave = false;
+
+				// Find Path to player
+				if (!PathFindingComponent->HasPath)
+				{
+					// Don't keep updating if you're already there
+					float D = (PlayerPosition - AIPosition).Length();
+					if (D <= MIN_DISTANCE) 
+					{
+						AIVelocity->x = 0.0f;
+						AIVelocity->y = 0.0f;
+						PathFindingComponent->HasPath = false;
+						leave = true;
+						std::cout << "Leaving!" << std::endl;
+					}
+
+					if (!leave)
+					{
+						PathFindingComponent->Path = PathFinding::FindPath(Manager->Grid, *AICartesianPositon, *PlayerCartesianPosition);
+						PathFindingComponent->PathSize = PathFindingComponent->Path.size();
+
+						if (PathFindingComponent->PathSize)
+						{
+							PathFindingComponent->HasPath = true;
+
+							std::cout << "Getting path..." << std::endl; 
+			
+							// Get path information
+							PathFindingComponent->CurrentPathIndex = 0;
+							PathFindingComponent->TimeOnNode = 0.0f;
+							auto Index = PathFindingComponent->Path.at(PathFindingComponent->CurrentPathIndex).Index;
+							auto Coords = SpatialHash::FindGridCoordinatesFromIndex(Manager->Grid, Manager->Grid->cells.at(Index).ParentIndex);
+							PathFindingComponent->CurrentCellDimensions = SpatialHash::GetCellDimensions(Manager->Grid, Coords);
+							PathFindingComponent->CellPosition = EM::Vec2(PathFindingComponent->CurrentCellDimensions.x, PathFindingComponent->CurrentCellDimensions.y);
+						}
+
+						else PathFindingComponent->HasPath = false;
+					}
+				}
+
+				if (PathFindingComponent->HasPath && !leave)
+				{
+					auto Distance = (PathFindingComponent->CellPosition - AIPosition).Length();
+
+					if (Distance <= 40.0f)
+					{
+						PathFindingComponent->CurrentPathIndex++;
+
+						PathFindingComponent->TimeOnNode = 0.0f;
+
+						if (PathFindingComponent->CurrentPathIndex >= PathFindingComponent->PathSize)
+						{
+							PathFindingComponent->HasPath = false;
+							PathFindingComponent->CurrentPathIndex = 0;
+							continue;
+						}
+
+						auto Index = PathFindingComponent->Path.at(PathFindingComponent->CurrentPathIndex).Index;
+
+						// Get parent of index from spatial hash
+						auto Coords = SpatialHash::FindGridCoordinatesFromIndex(Manager->Grid, Manager->Grid->cells.at(Index).ParentIndex);
+						PathFindingComponent->CurrentCellDimensions = SpatialHash::GetCellDimensions(Manager->Grid, Coords);
+						PathFindingComponent->CellPosition = EM::Vec2(PathFindingComponent->CurrentCellDimensions.x, PathFindingComponent->CurrentCellDimensions.y);
+					}
+
+					else
+					{
+						PathFindingComponent->TimeOnNode += 0.1f;
+
+						// Stuck
+						if (PathFindingComponent->TimeOnNode >= 7.0f)
+						{
+							std::cout << "Re-routing..." << std::endl;
+							// Refind path next frame
+							PathFindingComponent->HasPath = false;
+						}
+
+						// Look ahead and decide whether or not to reroute
+						auto NextIndex = PathFindingComponent->CurrentPathIndex + 2;
+						auto AfterNextIndex = PathFindingComponent->CurrentPathIndex + 3;
+
+						if (NextIndex < PathFindingComponent->PathSize)
+						{
+							// Reroute
+							if (Manager->Grid->cells.at(PathFindingComponent->Path.at(NextIndex).Index).ObstructionValue >= 1.0f)
+							{
+								PathFindingComponent->HasPath = false;
+							}
+						}
+
+						if (AfterNextIndex < PathFindingComponent->PathSize)
+						{
+							// Reroute
+							if (Manager->Grid->cells.at(PathFindingComponent->Path.at(AfterNextIndex).Index).ObstructionValue >= 1.0f)
+							{
+								PathFindingComponent->HasPath = false;
+							}
+						}
+					}
+
+					// Find vector
+					auto Difference = EM::Vec2::Normalize(PathFindingComponent->CellPosition - AIPosition);
+
+					AIVelocity->x = Difference.x * AISpeed;
+					AIVelocity->y = Difference.y * AISpeed;
+
+					if (AIVelocity->x < 0) 	Manager->TransformSystem->Transforms[ai].ViewVector.x = -1;
+					else 					Manager->TransformSystem->Transforms[ai].ViewVector.x = 1;
+
+				}
+
 			}
 		}
 	}

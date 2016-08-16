@@ -84,7 +84,7 @@ namespace ECS { namespace Factory {
 			Manager->InventorySystem->Inventories[Player].Entity = Player;
 
 			// Set up Collision System
-			Manager->CollisionSystem->CollisionComponents[Player].ObstructionValue = 1.0f;
+			Manager->CollisionSystem->CollisionComponents[Player].ObstructionValue = 0.5f;
 			Manager->CollisionSystem->CollisionComponents[Player].Cells = EM::Vec4(0, 0, 0, 0);
 
 			// Set up Label 
@@ -172,7 +172,7 @@ namespace ECS { namespace Factory {
 			Manager->Renderer2DSystem->Renderers[AI].Format = EG::CoordinateFormat::CARTESIAN;
 
 			// Set up Collision system
-			Manager->CollisionSystem->CollisionComponents[AI].ObstructionValue = 1.0f;
+			Manager->CollisionSystem->CollisionComponents[AI].ObstructionValue = 0.8f;
 			Manager->CollisionSystem->CollisionComponents[AI].Cells = EM::Vec4(0, 0, 0, 0);
 			
 			// Set up Label
@@ -270,7 +270,7 @@ namespace ECS { namespace Factory {
 			Manager->LabelSystem->Labels[Item].Name = Name;
 
 			// Set up Collision system
-			Manager->CollisionSystem->CollisionComponents[Item].ObstructionValue = 0.01f;
+			Manager->CollisionSystem->CollisionComponents[Item].ObstructionValue = 0.5f;
 			Manager->CollisionSystem->CollisionComponents[Item].Cells = EM::Vec4(0, 0, 0, 0);
 
 			// Set up Renderer

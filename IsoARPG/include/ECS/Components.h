@@ -65,6 +65,7 @@ namespace ECS { namespace Component {
 		eid32 Entity;
 	} PositionComponent;
 
+
 	// Velocity struct
 	typedef struct
 	{

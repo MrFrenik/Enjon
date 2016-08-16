@@ -4,11 +4,28 @@
 #include "ECS/Components.h"
 #include "ECS/Entity.h"
 #include "ECS/ComponentSystems.h"
+#include "PathFinding.h"
+
+namespace ECS { namespace Component { 
+	
+	typedef struct 
+	{
+		std::deque<PathFinding::Node> Path;
+		eid32 CurrentPathIndex;
+		eid32 PathSize;
+		EM::Vec4 CurrentCellDimensions;
+		EM::Vec2 CellPosition;
+		eid32 HasPath;
+		float TimeOnNode;
+	} PathFindingComponent;
+
+}}
 
 struct AIControllerSystem
 {
 	ECS::Systems::EntityManager* Manager;
 	ECS::Component::AIController AIControllers[MAX_ENTITIES];
+	ECS::Component::PathFindingComponent PathFindingComponents[MAX_ENTITIES];
 };
 
 namespace ECS { namespace Systems { namespace AIController {
@@ -21,6 +38,8 @@ namespace ECS { namespace Systems { namespace AIController {
 	void Update(struct AIControllerSystem* System, eid32 Player);
 
 	void Reset(struct EntityManager* Manager, eid32 Entity);	
+
+	std::deque<PathFinding::Node>* GetPath();
 }}}
 
 
