@@ -4,7 +4,7 @@
 
 using namespace Enjon;
 
-const int MAX_ITERATIONS = 100;
+const int MAX_ITERATIONS = 1000;
 
 namespace PathFinding {
 

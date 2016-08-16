@@ -7,8 +7,9 @@
 
 using namespace PathFinding;
 
-const float MIN_DISTANCE 	= 300.0f;
-const float AISpeed 		= 2.0f;
+const float MIN_DISTANCE 							= 300.0f;
+const float MAX_DISTANCE_TARGET_FROM_FINAL_NODE 	= 650.0f;
+const float AISpeed 								= 3.0f;
 
 namespace ECS { namespace Systems { namespace AIController {
 
@@ -64,6 +65,8 @@ namespace ECS { namespace Systems { namespace AIController {
 					{
 						AIVelocity->x = 0.0f;
 						AIVelocity->y = 0.0f;
+						AIVelocityGoal->x = 0.0f;
+						AIVelocityGoal->y = 0.0f;
 						PathFindingComponent->HasPath = false;
 						leave = true;
 						std::cout << "Leaving!" << std::endl;
@@ -99,7 +102,7 @@ namespace ECS { namespace Systems { namespace AIController {
 
 					if (Distance <= 40.0f)
 					{
-						PathFindingComponent->CurrentPathIndex++;
+						PathFindingComponent->CurrentPathIndex ++;
 
 						PathFindingComponent->TimeOnNode = 0.0f;
 
@@ -123,7 +126,7 @@ namespace ECS { namespace Systems { namespace AIController {
 						PathFindingComponent->TimeOnNode += 0.1f;
 
 						// Stuck
-						if (PathFindingComponent->TimeOnNode >= 7.0f)
+						if (PathFindingComponent->TimeOnNode >= 4.0f)
 						{
 							std::cout << "Re-routing..." << std::endl;
 							// Refind path next frame
@@ -131,10 +134,10 @@ namespace ECS { namespace Systems { namespace AIController {
 						}
 
 						// Look ahead and decide whether or not to reroute
-						auto NextIndex = PathFindingComponent->CurrentPathIndex + 2;
-						auto AfterNextIndex = PathFindingComponent->CurrentPathIndex + 3;
+						auto NextIndex = PathFindingComponent->Path.size() - PathFindingComponent->Path.size() / 2;
+						auto AfterNextIndex = PathFindingComponent->Path.size() - (PathFindingComponent->Path.size() / 2) - 1;
 
-						if (NextIndex < PathFindingComponent->PathSize)
+						if (NextIndex < PathFindingComponent->PathSize && AfterNextIndex > 0)
 						{
 							// Reroute
 							if (Manager->Grid->cells.at(PathFindingComponent->Path.at(NextIndex).Index).ObstructionValue >= 1.0f)
@@ -143,7 +146,7 @@ namespace ECS { namespace Systems { namespace AIController {
 							}
 						}
 
-						if (AfterNextIndex < PathFindingComponent->PathSize)
+						if (AfterNextIndex < PathFindingComponent->PathSize && AfterNextIndex > 0)
 						{
 							// Reroute
 							if (Manager->Grid->cells.at(PathFindingComponent->Path.at(AfterNextIndex).Index).ObstructionValue >= 1.0f)
@@ -151,6 +154,19 @@ namespace ECS { namespace Systems { namespace AIController {
 								PathFindingComponent->HasPath = false;
 							}
 						}
+
+						// Check to make sure that target has not completely left the path
+
+						auto TargetIndex = PathFindingComponent->Path.at(PathFindingComponent->Path.size() - 1).Index;
+						auto Coords = SpatialHash::FindGridCoordinatesFromIndex(Manager->Grid, Manager->Grid->cells.at(TargetIndex).ParentIndex);
+						auto CellDims = SpatialHash::GetCellDimensions(Manager->Grid, Coords);
+						auto CP = EM::Vec2(CellDims.x, CellDims.y);
+						auto D = (PlayerPosition - CP).Length();
+						if (D >= MAX_DISTANCE_TARGET_FROM_FINAL_NODE)
+						{
+							PathFindingComponent->HasPath = false;
+						}
+
 					}
 
 					// Find vector

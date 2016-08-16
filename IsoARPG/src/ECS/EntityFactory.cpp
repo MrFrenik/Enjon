@@ -84,7 +84,7 @@ namespace ECS { namespace Factory {
 			Manager->InventorySystem->Inventories[Player].Entity = Player;
 
 			// Set up Collision System
-			Manager->CollisionSystem->CollisionComponents[Player].ObstructionValue = 0.5f;
+			Manager->CollisionSystem->CollisionComponents[Player].ObstructionValue = 0.1f;
 			Manager->CollisionSystem->CollisionComponents[Player].Cells = EM::Vec4(0, 0, 0, 0);
 
 			// Set up Label 
@@ -172,7 +172,7 @@ namespace ECS { namespace Factory {
 			Manager->Renderer2DSystem->Renderers[AI].Format = EG::CoordinateFormat::CARTESIAN;
 
 			// Set up Collision system
-			Manager->CollisionSystem->CollisionComponents[AI].ObstructionValue = 0.8f;
+			Manager->CollisionSystem->CollisionComponents[AI].ObstructionValue = 0.1f;
 			Manager->CollisionSystem->CollisionComponents[AI].Cells = EM::Vec4(0, 0, 0, 0);
 			
 			// Set up Label
@@ -244,7 +244,7 @@ namespace ECS { namespace Factory {
 			Transform->Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
 			Transform->VelocityGoalScale = 0.3f;
 			Transform->Dimensions = Dimensions;
-			Transform->GroundPosition = Enjon::Math::Vec2(Position.XY());
+			Transform->GroundPosition = Enjon::Math::Vec2(Position.XY() - Dimensions / 2.0f);
 			Transform->CartesianPosition = Enjon::Math::IsoToCartesian(Transform->GroundPosition);
 			Transform->BaseHeight = Position.z;
 			Transform->AABBPadding = Enjon::Math::Vec2(0.0f, 0.0f);

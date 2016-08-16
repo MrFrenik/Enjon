@@ -3,6 +3,7 @@
 #include "ECS/Transform3DSystem.h"
 #include "ECS/AttributeSystem.h"
 #include "ECS/InventorySystem.h"
+#include "ECS/AIControllerSystem.h"
 #include "ECS/PlayerControllerSystem.h"
 #include "ECS/Renderer2DSystem.h"
 #include "ECS/EffectSystem.h"
@@ -641,7 +642,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 			{
 				// Get minimum translation distance
 				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
-				*EntityVelocity = 0.85f * *EntityVelocity + -0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+				// *EntityVelocity = 0.85f * *EntityVelocity + -0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+				*ColliderVelocity = 0.85f * *ColliderVelocity + 0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
 			}
 		}
 
@@ -734,6 +736,33 @@ namespace ECS{ namespace Systems { namespace Collision {
 		// Height not the same... Testing
 		if (abs(EntityPosition->z - ColliderPosition->z) > 100.0f) return;
 
+		
+		Enjon::Math::Vec2 Difference = Enjon::Math::Vec2::Normalize(EntityPosition->XY() - ColliderPosition->XY());
+
+		/*
+		auto Distance = (EntityPosition->XY() - ColliderPosition->XY()).Length();
+		std::cout << "Distance: " << Distance << std::endl;
+
+		// Check for possible collision
+		if (Distance <= 350.0f)
+		{
+			auto ColliderPathFinding = &Manager->AIControllerSystem->PathFindingComponents[B_ID];
+
+			if (A_ID < B_ID && EntityVelocity->x != 0 && EntityVelocity->y != 0)
+			{
+				Manager->AIControllerSystem->PathFindingComponents[A_ID].HasPath = false;
+			}
+			else
+			{
+				if (EntityVelocity->x == 0 && EntityVelocity->y == 0 && ColliderVelocity->x != 0 && ColliderVelocity->y != 0)
+				{
+					Manager->AIControllerSystem->PathFindingComponents[B_ID].HasPath = false;
+				}
+			}
+		}
+		*/
+
+
 		// Collision didn't happen
 		if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) { return; }
 	
@@ -751,7 +780,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 			// if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
 			// 	*ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd) * 1.0f, 0.0f);
-			Enjon::Math::Vec2 Difference = Enjon::Math::Vec2::Normalize(EntityPosition->XY() - ColliderPosition->XY());
+
+
 
 			// if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
 			// 	*ColliderPosition -= Enjon::Math::Vec3(Difference * 30.0f, 0.0f);

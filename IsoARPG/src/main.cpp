@@ -656,6 +656,10 @@ int main(int argc, char** argv)
 
 				Animation2D::Update(World);
 
+				StartTicks = SDL_GetTicks();
+				if (AIControllerEnabled) AIController::Update(World->AIControllerSystem, Player);
+				AIRunTime = SDL_GetTicks() - StartTicks;
+
 				StartTicks = SDL_GetTicks();	
 				Collision::Update(World);
 				CollisionRunTime = (SDL_GetTicks() - StartTicks);
@@ -684,9 +688,6 @@ int main(int argc, char** argv)
 				// Updates the world's particle engine
 				World->ParticleEngine->Update();
 
-				StartTicks = SDL_GetTicks();
-				if (AIControllerEnabled) AIController::Update(World->AIControllerSystem, Player);
-				AIRunTime = SDL_GetTicks() - StartTicks;
 			
 				StartTicks = SDL_GetTicks();	
 				PlayerController::Update(World->PlayerControllerSystem);
@@ -1909,7 +1910,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		eid32 id = Factory::CreateItem(
 										World, 
 										Math::Vec3(MouseCoords.x, MouseCoords.y, 0.0f), 
-										Enjon::Math::Vec2(ER::Roll(100, 150), ER::Roll(100, 150)), 
+										Enjon::Math::Vec2(300, 300 * 1.1f), 
 										EG::SpriteSheetManager::GetSpriteSheet("Box"), 
 										Masks::Type::ITEM, 
 										Component::EntityType::ITEM
@@ -1918,7 +1919,9 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		// World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
 		World->CollisionSystem->CollisionComponents[id].ObstructionValue = 1.0f;
 		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
-		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(100, 150) / 50.0f;
+		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
+		World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(70, 70);
+		World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-35.0f, -65.0f);
 	}
 
 	if (Input->IsKeyPressed(SDLK_n))
