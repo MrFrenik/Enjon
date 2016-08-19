@@ -4,7 +4,7 @@
 
 using namespace Enjon;
 
-const int MAX_ITERATIONS = 1000;
+const int MAX_ITERATIONS = 2500;
 
 namespace PathFinding {
 
@@ -200,7 +200,6 @@ namespace PathFinding {
 
 		if (StartNode == EndNode) return Path;
 
-
 		// Create open and closed sets as well set for random access of items in open set
 		Heap<Node, float> OpenSet(G->rows * G->cols, CompareHeapNode);
 		std::unordered_set<Enjon::uint32> OpenSetIndicies;
@@ -241,16 +240,17 @@ namespace PathFinding {
 				}
 
 				// Get new movment cost
-				Enjon::uint32 NewMovementCostToNeighbor = CurrentNode.GCost + GetDistance(CurrentNode, Neighbor);
+				Enjon::uint32 NewMovementCostToNeighbor = CurrentNode.GCost + GetDistance(CurrentNode, Neighbor) + CurrentNode.WCost;
 
 				auto NeighborInOpenSet = SetFind<Enjon::uint32>(OpenSetIndicies, Neighbor.Index);
 
 				if (NewMovementCostToNeighbor < Neighbor.GCost || !NeighborInOpenSet)
+				// if (!NeighborInOpenSet)
 				{
 					Neighbor.GCost = NewMovementCostToNeighbor;
 					Neighbor.HCost = GetDistance(Neighbor, EndNode);
-					Neighbor.WCost = G->cells.at(Neighbor.Index).ObstructionValue;
-					Neighbor.FCost = Neighbor.GCost + Neighbor.HCost + Neighbor.WCost;
+					Neighbor.WCost = G->cells.at(Neighbor.Index).ObstructionValue * 100.0f;
+					Neighbor.FCost = Neighbor.GCost + Neighbor.HCost;
 					// Neighbor.Parent = &CurrentNode;
 					G->cells.at(Neighbor.Index).ParentIndex = CurrentNode.Index;
 
@@ -287,27 +287,32 @@ namespace PathFinding {
 		bool BottomValid = Bottom > 0;
 		bool LeftValid = Left > 0;
 		bool RightValid = Right < G->cols;
+
+		auto TopLNeighborIndex 		= (Top * G->cols + CNC);
+		auto BottomNeighborIndex 	= (Bottom * G->cols + CNC);
+		auto RightNeighborIndex 	= (CNR * G->cols + Right);
+		auto LeftNeightborIndex 	= (CNR * G->cols + Left);
 		
 		// Top left
-		if (LeftValid && TopValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Left, Top)));	
+		if (LeftValid && TopValid && G->cells.at(TopLNeighborIndex).ObstructionValue < 1.0f && G->cells.at(LeftNeightborIndex).ObstructionValue < 1.0f) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Left, Top)));	
 
 		// Top 
 		if (TopValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(CNC, Top)));
 
 		// Top Right
-		if (RightValid && TopValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Right, Top)));
+		if (RightValid && TopValid && G->cells.at(TopLNeighborIndex).ObstructionValue < 1.0f && G->cells.at(RightNeighborIndex).ObstructionValue < 1.0f) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Right, Top)));
 
 		// Right
 		if (RightValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Right, CNR)));
 
 		// Bottom Right
-		if (RightValid && BottomValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Right, Bottom)));
+		if (RightValid && BottomValid && G->cells.at(BottomNeighborIndex).ObstructionValue < 1.0f && G->cells.at(RightNeighborIndex).ObstructionValue < 1.0f) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Right, Bottom)));
 
 		// Bottom
 		if (BottomValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(CNC, Bottom)));
 
 		// Bottom Left
-		if (LeftValid && BottomValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Left, Bottom)));
+		if (LeftValid && BottomValid && G->cells.at(BottomNeighborIndex).ObstructionValue < 1.0f && G->cells.at(LeftNeightborIndex).ObstructionValue < 1.0f) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Left, Bottom)));
 
 		// Left
 		if (LeftValid) Neighbors.emplace_back(CreateNodeFromGridCoordinates(G, EM::Vec2(Left, CNR)));

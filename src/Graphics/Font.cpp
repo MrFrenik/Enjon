@@ -68,7 +68,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	            face->glyph->bitmap.buffer
 	        );
 
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -182,9 +182,9 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	}
 
 	/* Gets character stats from given font */
-	CharacterStats GetCharacterAttributes(Enjon::Math::Vec2 Pos, float scale, Font* F, std::string::const_iterator c, float* advance)
+	CharacterStats GetCharacterAttributes(Enjon::Math::Vec2 Pos, float scale, Font* F, char c, float* advance)
 	{
-		Character ch = F->Characters[*c];
+		Character ch = F->Characters[c];
 
 		float x = Pos.x;
 		float y = Pos.y;

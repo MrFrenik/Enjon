@@ -65,6 +65,8 @@ namespace SpatialHash {
 	{
 		std::vector<ECS::eid32> Entities;
 
+		auto Border = 4;
+
 		auto MinCol = Cells.x;
 		auto MinRow = Cells.y;
 		auto MaxCol = Cells.z;
@@ -72,9 +74,9 @@ namespace SpatialHash {
 
 		auto max_allowed_index = G->rows * G->cols;
 
-		for (auto i = MinRow; i <= MaxRow; i++)
+		for (auto i = MinRow - Border; i <= MaxRow + Border; i++)
 		{
-			for (int j = MinCol; j <= MaxCol; j++)
+			for (int j = MinCol - Border; j <= MaxCol + Border; j++)
 			{
 				auto index = i * G->cols + j;
 				if (index < 0 || index >= max_allowed_index) continue;
@@ -109,7 +111,7 @@ namespace SpatialHash {
 			for (auto j = CellRange->x; j < CellRange->z; j++)
 			{
 				auto index = i * G->cols + j;
-				if (G->cells[index].ObstructionValue > 0) G->cells[index].ObstructionValue -= ObstructionValue;
+				// if (G->cells[index].ObstructionValue > 0) G->cells[index].ObstructionValue -= ObstructionValue;
 			}
 		}
 
@@ -137,13 +139,102 @@ namespace SpatialHash {
 				// Then push back this entity
 				G->cells[index].entities.push_back(Entity);
 
-				if (G->cells[index].ObstructionValue < 1.0f) G->cells[index].ObstructionValue += ObstructionValue;
+				// if (G->cells[index].ObstructionValue < 1.0f) G->cells[index].ObstructionValue += ObstructionValue;
 
 				// Keep track of "dirty" cells here
 				G->dirtyCells.push_back(index);
 			}
 		}
 	}
+
+	/*
+	void FindCells(Grid* G, ECS::eid32 Entity, const EP::AABB* AABB, EM::Vec4* CellRange, float ObstructionValue)
+	{
+		// AABB elements
+		int min_y = AABB->Min.y;	
+		int min_x = AABB->Min.x;	
+		int max_y = AABB->Max.y;	
+		int max_x = AABB->Max.x;	
+
+		// Min row and col
+		int min_row = floor(min_y / G->CellSize);
+		int min_col = floor(min_x / G->CellSize);
+
+		// Max row and col
+		int max_row = floor(max_y / G->CellSize);
+		int max_col = floor(max_x / G->CellSize);
+
+		auto Border = 0;
+		auto AdditiveValue = 0.7f;
+
+		auto MinRow = CellRange->y - Border > 0 ? CellRange->y - Border : 0;
+		auto MinCol = CellRange->x - Border > 0 ? CellRange->x - Border : 0;
+		auto MaxRow = CellRange->w + Border < G->rows ? CellRange->w + Border : G->rows;
+		auto MaxCol = CellRange->z + Border < G->cols ? CellRange->z + Border : G->cols;
+
+		for (auto i = MinRow; i < MaxRow; i++)
+		{
+			for (auto j = MinCol; j < MaxCol; j++)
+			{
+				auto index = i * G->cols + j;
+				if (i < CellRange->y || i > CellRange->w || j < CellRange->x || j > CellRange->z)
+				{
+					if (G->cells[index].ObstructionValue > 0) G->cells[index].ObstructionValue -= ObstructionValue;
+					G->cells[index].ObstructionValue += AdditiveValue;
+
+				}
+				else
+				{
+					if (G->cells[index].ObstructionValue > 0) G->cells[index].ObstructionValue -= ObstructionValue;
+				}
+			}
+		}
+
+		// Set cell range
+		CellRange->x = min_col;
+		CellRange->y = min_row;
+		CellRange->z = max_col;
+		CellRange->w = max_row;
+
+		MinRow = CellRange->y - Border > 0 ? CellRange->y - Border : 0;
+		MinCol = CellRange->x - Border > 0 ? CellRange->x - Border : 0;
+		MaxRow = CellRange->w + Border < G->rows ? CellRange->w + Border : G->rows;
+		MaxCol = CellRange->z + Border < G->cols ? CellRange->z + Border : G->cols;
+
+		int max_allowed_index = G->rows * G->cols;
+
+		for (int i = MinRow; i < MaxRow; i++)
+		{
+			if (i >= G->rows) continue;
+			if (i < 0) continue;
+
+			for (int j = MinCol; j <= MaxCol; j++)
+			{
+				if (j >= G->cols) continue;
+				if (j < 0) continue;
+
+				int index = i * G->cols + j;
+
+				// Then push back this entity
+				G->cells[index].entities.push_back(Entity);
+
+				// Keep track of "dirty" cells here
+				G->dirtyCells.push_back(index);
+
+				if (i < CellRange->y || i > CellRange->w || j < CellRange->x || j > CellRange->z)
+				{
+					if (G->cells[index].ObstructionValue < 1.0f) G->cells[index].ObstructionValue += ObstructionValue;
+					G->cells[index].ObstructionValue -= AdditiveValue;
+
+				}
+				else
+				{
+					if (G->cells[index].ObstructionValue < 1.0f) G->cells[index].ObstructionValue += ObstructionValue;
+				}
+			}
+		}
+	}
+	*/
 
 	/* Overloaded function that finds particular cell that a given entity belongs to based on its AABB (preferred method) */
 	std::vector<ECS::eid32> FindCell(Grid* G, ECS::eid32 entity, const EP::AABB* AABB)
@@ -205,7 +296,7 @@ namespace SpatialHash {
 			G->cells[i].entities.clear();
 
 			// Reset OB value
-			G->cells[i].ObstructionValue = 0.0f;
+			// G->cells[i].ObstructionValue = 0.0f;
 		}
 
 		// Clear dirty cells
@@ -302,7 +393,7 @@ namespace SpatialHash {
 				auto OV = G->cells.at(index).ObstructionValue;
 
 				EG::ColorRGBA16 Color = EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.3f);
-				if (size) Color = EG::SetOpacity(EG::RGBA16_Green(), OV);
+				if (size || OV != 0.0f) Color = EG::SetOpacity(EG::RGBA16_Green(), OV);
 				Batch->Add(
 							EM::Vec4(CurrentX, CurrentY, Width - 5.0f, Height - 5.0f), 
 							EM::Vec4(0, 0, 1, 1), 

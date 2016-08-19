@@ -18,8 +18,10 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 		AddFont(Fonts, "Corbert_16", Fonts::CreateFont("../assets/fonts/CorbertRegular/CorbertRegular.otf", 16));
 		AddFont(Fonts, "Dense", Fonts::CreateFont("../assets/fonts/DenseRegular/DenseRegular.otf", 64));
 		AddFont(Fonts, "8Bit", Fonts::CreateFont("../assets/fonts/8BitWonder/8BitWonder.ttf", 8));
+		AddFont(Fonts, "8Bit_32", Fonts::CreateFont("../assets/fonts/8BitWonder/8BitWonder.ttf", 32));
 		AddFont(Fonts, "TallBold", Fonts::CreateFont("../assets/fonts/TallBolder/TallBolder.ttf", 12));
 		AddFont(Fonts, "BebasNeue", Fonts::CreateFont("../assets/fonts/BebasNeue/BebasNeue.otf", 16));
+		AddFont(Fonts, "BebasNeue_32", Fonts::CreateFont("../assets/fonts/BebasNeue/BebasNeue.otf", 32));
 		AddFont(Fonts, "WeblySleek", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 14));
 		AddFont(Fonts, "WeblySleek_32", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 32));
 		AddFont(Fonts, "WeblySleek_10", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 10));

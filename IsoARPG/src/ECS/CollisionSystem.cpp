@@ -95,10 +95,12 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 					// NOTE(John): I can only imagine how much branching this causes... Ugh.
 					if (Mask == (COLLISION_ITEM | COLLISION_ITEM)) 			{ 
-																				CollideWithDebris(Manager, collider, e);		continue; 
+																				// CollideWithDebris(Manager, collider, e);		continue; 
+																				continue; 
 																			}
 					if (Mask == (COLLISION_ENEMY | COLLISION_ENEMY)) 		{ 
 																				CollideWithEnemy(Manager, e, collider); 		continue; 
+																				// continue;
 																			}
 					if (Mask == (COLLISION_WEAPON | COLLISION_ENEMY)) 		{ 
 																				if (AType == Component::EntityType::ENEMY)		CollideWithEnemy(Manager, e, collider); 	
@@ -635,15 +637,28 @@ namespace ECS{ namespace Systems { namespace Collision {
 			{
 				{
 					V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
-					*EntityVelocity = 0.98f * *EntityVelocity + -0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+					// *EntityVelocity = 0.98f * *EntityVelocity + -0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+					*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), EntityPosition->z); 
 				}
 			}
 			else
 			{
 				// Get minimum translation distance
-				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
+				// V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
 				// *EntityVelocity = 0.85f * *EntityVelocity + -0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
-				*ColliderVelocity = 0.85f * *ColliderVelocity + 0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+
+				V2 Direction = *A - *B;
+				Direction.x += ER::Roll(-10, 10);
+				Direction.y += ER::Roll(-10, 10);
+				Direction = EM::Vec2::Normalize(Direction);
+				if (Direction.x == 0) Direction.x = (float)ER::Roll(-100, 100) / 100.0f;
+				if (Direction.y == 0) Direction.y = (float)ER::Roll(-100, 100) / 100.0f;
+				float Length = Direction.Length();
+				float Impulse = 25.0f / (Length + 0.001f);
+
+				*EntityVelocity = (1.0f / AMass) * 0.1f * -Impulse * EM::Vec3(EM::CartesianToIso(Direction), EntityVelocity->z);
+				*ColliderVelocity = (1.0f / BMass) * 0.1f * Impulse * EM::Vec3(EM::CartesianToIso(Direction), EntityVelocity->z);
+				// *ColliderVelocity = 1.0f * *ColliderVelocity + 0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
 			}
 		}
 
@@ -733,11 +748,37 @@ namespace ECS{ namespace Systems { namespace Collision {
 		Enjon::Physics::AABB* AABB_A = &Manager->TransformSystem->Transforms[A_ID].AABB;
 		Enjon::Physics::AABB* AABB_B = &Manager->TransformSystem->Transforms[B_ID].AABB;
 
+		Enjon::Math::Vec2 Difference = Enjon::Math::Vec2::Normalize(EntityPosition->XY() - ColliderPosition->XY());
+
+		/*
+		auto Distance = (EntityPosition->XY() - ColliderPosition->XY()).Length();
+		// std::cout << "Distance: " << Distance << std::endl;
+
+		if (Distance <= 300.0f)
+		{
+			auto ColliderPathFinding = &Manager->AIControllerSystem->PathFindingComponents[B_ID];
+
+			if (A_ID < B_ID && EntityVelocity->x != 0 && EntityVelocity->y != 0)
+			{
+				if ((Manager->Masks[A_ID] & COMPONENT_PLAYERCONTROLLER) == 0) *EntityVelocity += EM::Vec3(Difference * 0.2f, 0.0f); 
+			}
+			else
+			{
+				if (EntityVelocity->x == 0 && EntityVelocity->y == 0 && ColliderVelocity->x != 0 && ColliderVelocity->y != 0)
+				{
+					if ((Manager->Masks[B_ID] & COMPONENT_PLAYERCONTROLLER) == 0) *ColliderVelocity -= EM::Vec3(Difference * 0.2f, 0.0f); 
+				}
+			}
+
+			if ((Manager->Masks[B_ID] & COMPONENT_PLAYERCONTROLLER) == 0) *ColliderVelocity -= EM::Vec3(Difference * 0.2f, 0.0f); 
+		}
+		*/
+
 		// Height not the same... Testing
 		if (abs(EntityPosition->z - ColliderPosition->z) > 100.0f) return;
 
 		
-		Enjon::Math::Vec2 Difference = Enjon::Math::Vec2::Normalize(EntityPosition->XY() - ColliderPosition->XY());
+		// Enjon::Math::Vec2 Difference = Enjon::Math::Vec2::Normalize(EntityPosition->XY() - ColliderPosition->XY());
 
 		/*
 		auto Distance = (EntityPosition->XY() - ColliderPosition->XY()).Length();
@@ -771,8 +812,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 			// Get minimum translation distance
 			V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
 
-			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::ITEM) *EntityVelocity = 0.25f * EM::Vec3(EM::CartesianToIso(mtd), 20.0f);
-			else 
+			// if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::ITEM) *EntityVelocity = 0.25f * EM::Vec3(EM::CartesianToIso(mtd), 20.0f);
+			// else 
 			{
 				*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), EntityPosition->z); 
 			}
@@ -806,12 +847,15 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
 			{
+				// NOTE(John): This could cause some trouble eventually
+				if (Manager->AttributeSystem->Masks[B_ID] & Masks::GeneralOptions::DAMAGED) return;
+
 				// Get min and max damage of weapon
 				auto DC = Manager->AttributeSystem->WeaponProfiles[A_ID]->Damage;
-				auto MiD = DC.Min;
-				auto MaD = DC.Max;
+				float MiD = DC.Min;
+				float MaD = DC.Max;
 
-				auto Damage = Enjon::Random::Roll(MiD, MaD);
+				float Damage = static_cast<float>(Enjon::Random::Roll(MiD, MaD));
 
 				// Get health and color of entity
 				Component::HealthComponent* HealthComponent = &Manager->AttributeSystem->HealthComponents[B_ID];
@@ -826,22 +870,50 @@ namespace ECS{ namespace Systems { namespace Collision {
 				// Decrement by some arbitrary amount for now	
 				HealthComponent->Health -= Damage;
 
-				// printf("Hit for %d damage.\n", Damage);
-
 				// Add blood particle effect (totally a test)...
-				const EM::Vec3* PP = &Manager->TransformSystem->Transforms[B_ID].Position;
+				// EM::Vec3* PP = &Manager->TransformSystem->Transforms[B_ID].Position;
 				static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/blood_1.png").id;
 
 				EG::ColorRGBA16 R = EG::RGBA16(1.0f, 0.01f, 0.01f, 1.0f);
 
-				// Add 100 at a time
-				// for (Enjon::uint32 i = 0; i < 2; i++)
-				// {
-					float XPos = Enjon::Random::Roll(-50, 100), YPos = Enjon::Random::Roll(-50, 100), ZVel = Enjon::Random::Roll(-10, 10), XVel = Enjon::Random::Roll(-10, 10), 
-									YSize = Enjon::Random::Roll(10, 20), XSize = Enjon::Random::Roll(10, 20);
+				float XPos = Enjon::Random::Roll(-50, 100), YPos = Enjon::Random::Roll(-50, 100), ZVel = Enjon::Random::Roll(-10, 10), XVel = Enjon::Random::Roll(-10, 10), 
+								YSize = Enjon::Random::Roll(10, 20), XSize = Enjon::Random::Roll(10, 20);
 
-					EG::Particle2D::AddParticle(EM::Vec3(PP->x + 50.0f + XVel, PP->y + 50.0f + ZVel, 0.0f), EM::Vec3(XVel, XVel, ZVel), 
-						EM::Vec2(XSize * 1.5f, YSize * 1.5f), R, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches[0]);
+				EG::Particle2D::AddParticle(EM::Vec3(ColliderPosition->x + 50.0f + XVel, ColliderPosition->y + 50.0f + ZVel, 0.0f), EM::Vec3(XVel, XVel, ZVel), 
+					EM::Vec2(XSize * 1.5f, YSize * 1.5f), R, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches.at(0));
+
+				// Print out that damage, son!
+				auto DamageString = std::to_string(static_cast<Enjon::uint32>(Damage));
+
+				auto x_pos_advance = -5.0f;
+				auto DamageColor = EG::RGBA16_White();
+				if 		(Damage >= 0.8f * ((MaD - MiD) + MiD)) 							DamageColor = EG::RGBA16_Red();
+				else if (Damage >= 0.4f * ((MaD - MiD) + MiD)) 							DamageColor = EG::RGBA16_Orange();
+				else 																	DamageColor = EG::RGBA16_ZombieGreen();
+				for (auto c : DamageString)
+				{
+					auto x_advance = 0.0f;
+					auto F = EG::FontManager::GetFont("8Bit_32");
+					auto CS = EG::Fonts::GetCharacterAttributes(EM::Vec2(ColliderPosition->x, ColliderPosition->y + 50.0f), 1.0f, F, c, &x_advance);
+
+					EG::Particle2D::AddParticle(
+													EM::Vec3(ColliderPosition->x + x_pos_advance, ColliderPosition->y + 200.0f, 0.0f), 
+													EM::Vec3(0.0f, 0.0f, 2.0f), 
+													EM::Vec2(
+																EG::Fonts::GetAdvance(c, F, 1.0f), 
+																EG::Fonts::GetHeight(c, F, 1.0f)
+															), 
+													DamageColor,
+													CS.TextureID, 
+													0.005f, 
+													Manager->ParticleEngine->ParticleBatches.at(2)
+												);
+
+					x_pos_advance += 30.0f;
+				}
+
+				x_pos_advance = 0.0f;
+
 
 					// Blood!
 					DrawBlood(Manager, ColliderPosition->XY());

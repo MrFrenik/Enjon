@@ -382,7 +382,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 
 					if (Manager->AttributeSystem->Masks[WeaponEquipped] & Masks::Type::WEAPON && Manager->Masks[WeaponEquipped] & COMPONENT_TRANSFORM3D)
 					{
-						std::cout << "Hitting" << std::endl;
+						// std::cout << "Hitting" << std::endl;
 					}
 
 					SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[WeaponEquipped].Cells, Manager->CollisionSystem->CollisionComponents[WeaponEquipped].ObstructionValue);

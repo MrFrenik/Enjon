@@ -172,7 +172,7 @@ namespace ECS { namespace Factory {
 			Manager->Renderer2DSystem->Renderers[AI].Format = EG::CoordinateFormat::CARTESIAN;
 
 			// Set up Collision system
-			Manager->CollisionSystem->CollisionComponents[AI].ObstructionValue = 0.1f;
+			Manager->CollisionSystem->CollisionComponents[AI].ObstructionValue = 0.0f;
 			Manager->CollisionSystem->CollisionComponents[AI].Cells = EM::Vec4(0, 0, 0, 0);
 			
 			// Set up Label
@@ -431,7 +431,7 @@ namespace ECS { namespace Factory {
 					EM::Vec2(Size.x, Size.y), C, PTex, 0.025f, Manager->ParticleEngine->ParticleBatches.at(0));
 			}
 
-			std::cout << "ID: " << Vortex << std::endl;
+			// std::cout << "ID: " << Vortex << std::endl;
 			index = (index + 1) % 4;
 		}
 

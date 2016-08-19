@@ -112,7 +112,7 @@ bool AnimationEditorOn = true;
 bool DeferredRenderingOn = true;
 bool AIControllerEnabled = false;
 
-const int LEVELSIZE = 50;
+const int LEVELSIZE = 20;
 
 float DashingCounter = 0.0f;
 
@@ -355,8 +355,8 @@ int main(int argc, char** argv)
 	// Create particle batchs to be used by World
 	EG::Particle2D::ParticleBatch2D* LightParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
 	EG::Particle2D::ParticleBatch2D* TestParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
-	EG::Particle2D::ParticleBatch2D* TextParticleBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
 	EG::Particle2D::ParticleBatch2D* SmokeBatch = EG::Particle2D::NewParticleBatch(&EntityBatch);
+	EG::Particle2D::ParticleBatch2D* TextParticleBatch = EG::Particle2D::NewParticleBatch(&TextBatch);
 
 	EG::GLSLProgram* DeferredShader 	= EG::ShaderManager::GetShader("DeferredShader");
 	EG::GLSLProgram* DiffuseShader 		= EG::ShaderManager::GetShader("DiffuseShader");
@@ -723,8 +723,8 @@ int main(int argc, char** argv)
 
 		if (AnimationEditorOn)
 		{
-			// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.06, 0.06, 0.06, 1.0));
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.16f, 0.17f, 0.19f, 1.0f));
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.06, 0.06, 0.06, 1.0));
+			// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.16f, 0.17f, 0.19f, 1.0f));
 	
 			// Show mouse
 			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
@@ -1439,13 +1439,20 @@ int main(int argc, char** argv)
 
 				DebugSpatialBatch.Begin();
 				{
-					SpatialHash::DrawGrid(World->Grid, &DebugSpatialBatch, World->TransformSystem->Transforms[World->Player].CartesianPosition);
-
 					auto MP = Input.GetMouseCoords();
 					Camera.ConvertScreenToWorld(MP);
 					MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
 					SpatialHash::DrawActiveCell(World->Grid, &DebugSpatialBatch, MP);
 
+					// Get index of MP
+					auto MPGridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
+					auto Index = MPGridCoords.y * World->Grid->cols + MPGridCoords.x;
+
+					// std::cout << "Grid Coords: <" << MPGridCoords.x << ", " << MPGridCoords.y << ">, ObstructionValue: " << World->Grid->cells.at(Index).ObstructionValue << std::endl;
+
+					SpatialHash::DrawGrid(World->Grid, &DebugSpatialBatch, World->TransformSystem->Transforms[World->Player].CartesianPosition);
+
+					/*
 					static float t = 0.0f;
 					static auto index = 0;
 					static auto MaxI = World->Grid->rows * World->Grid->cols;
@@ -1488,6 +1495,7 @@ int main(int argc, char** argv)
 											EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
 											Color
 										);
+					*/
 
 
 					// Let's do some pathfinding here, queer!
@@ -1892,7 +1900,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	if (Input->IsKeyPressed(SDLK_u))
 	{
 		World->Lvl->DrawDebugEnabled();
-		std::cout << "Debug draw..." << std::endl;
+		// std::cout << "Debug draw..." << std::endl;
 	}
 
 	if (Input->IsKeyPressed(SDLK_g))
@@ -1906,12 +1914,21 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		auto CamPos = Camera->GetPosition();
 		auto MouseCoords = Input->GetMouseCoords();	
 		Camera->ConvertScreenToWorld(MouseCoords);
+		MouseCoords = EM::IsoToCartesian(MouseCoords + EM::Vec2(0.0f, 10.0f));
+
+		// Get grid coordinate
+		// Snap to grid
+		auto GridCoord = SpatialHash::FindGridCoordinates(World->Grid, MouseCoords);
+
+		// Find Isometric coordinates of GridCoords
+		auto CellDimensions = SpatialHash::GetCellDimensions(World->Grid, GridCoord);
+
 
 		eid32 id = Factory::CreateItem(
 										World, 
-										Math::Vec3(MouseCoords.x, MouseCoords.y, 0.0f), 
-										Enjon::Math::Vec2(300, 300 * 1.1f), 
-										EG::SpriteSheetManager::GetSpriteSheet("Box"), 
+										Math::Vec3(CellDimensions.x, CellDimensions.y, 0.0f), 
+										Enjon::Math::Vec2(CellDimensions.z - 5.0f, CellDimensions.w - 5.0f), 
+										EG::SpriteSheetManager::GetSpriteSheet("Tile"), 
 										Masks::Type::ITEM, 
 										Component::EntityType::ITEM
 									  );
@@ -1920,9 +1937,35 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		World->CollisionSystem->CollisionComponents[id].ObstructionValue = 1.0f;
 		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
 		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
-		World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(70, 70);
-		World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-35.0f, -65.0f);
+		World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(0, 0);
+		World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-5.0f, -5.0f);
+		World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA16_White(), 0.3f);
 	}
+
+	if (Input->IsKeyPressed(SDLK_x))
+	{
+		// Get camera position
+		auto CamPos = Camera->GetPosition();
+		auto MouseCoords = Input->GetMouseCoords();	
+		Camera->ConvertScreenToWorld(MouseCoords);
+		MouseCoords = EM::IsoToCartesian(MouseCoords + EM::Vec2(0.0f, 10.0f));
+
+		// Get grid coordinate
+		// Snap to grid
+		auto GridCoord = SpatialHash::FindGridCoordinates(World->Grid, MouseCoords);
+
+		auto Index = GridCoord.y * World->Grid->cols + GridCoord.x;
+
+		for (auto& e : World->Grid->cells.at(Index).entities)
+		{
+			if (World->Types[e] != Component::EntityType::ENEMY && World->Types[e] != Component::EntityType::PLAYER)
+			{
+				EntitySystem::RemoveEntity(World, e);
+			}
+		}
+	}
+
+
 
 	if (Input->IsKeyPressed(SDLK_n))
 	{
@@ -1943,12 +1986,72 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
 		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
 		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(50, 100) / 50.0f;
-		World->CollisionSystem->CollisionComponents[id].ObstructionValue = 0.05f;
+		World->CollisionSystem->CollisionComponents[id].ObstructionValue = 0.1f;
 	}
 
 	if (Input->IsKeyPressed(SDLK_j))
 	{
 		AIControllerEnabled = !AIControllerEnabled;
+	}
+
+	if (Input->IsKeyDown(SDLK_l))
+	{
+		// Paint tile as obstructed
+		auto MP = Input->GetMouseCoords();
+		Camera->ConvertScreenToWorld(MP);
+		MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
+
+		auto GridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
+
+		auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
+
+		// Turn tile obstructed
+		World->Grid->cells.at(Index).ObstructionValue = 1.0f;
+	}
+
+	if (Input->IsKeyPressed(SDLK_SEMICOLON))
+	{
+		// Paint tile as obstructed
+		auto MP = Input->GetMouseCoords();
+		Camera->ConvertScreenToWorld(MP);
+		MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
+
+		auto GridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
+
+		auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
+
+		// Turn tile obstructed
+		World->Grid->cells.at(Index).ObstructionValue += 0.1f;
+	}
+
+	if (Input->IsKeyPressed(SDLK_QUOTE))
+	{
+		// Paint tile as obstructed
+		auto MP = Input->GetMouseCoords();
+		Camera->ConvertScreenToWorld(MP);
+		MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
+
+		auto GridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
+
+		auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
+
+		// Turn tile obstructed
+		World->Grid->cells.at(Index).ObstructionValue += 0.1f;
+	}
+
+	if (Input->IsKeyDown(SDLK_k))
+	{
+		// Paint tile as unobstructed
+		auto MP = Input->GetMouseCoords();
+		Camera->ConvertScreenToWorld(MP);
+		MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
+
+		auto GridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
+
+		auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
+
+		// Turn tile obstructed
+		World->Grid->cells.at(Index).ObstructionValue = 0.0f;
 	}
 }
 

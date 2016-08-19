@@ -9,7 +9,7 @@ using namespace PathFinding;
 
 const float MIN_DISTANCE 							= 300.0f;
 const float MAX_DISTANCE_TARGET_FROM_FINAL_NODE 	= 650.0f;
-const float AISpeed 								= 3.0f;
+const float AISpeed 								= 6.0f;
 
 namespace ECS { namespace Systems { namespace AIController {
 
@@ -48,6 +48,7 @@ namespace ECS { namespace Systems { namespace AIController {
 				auto TS = &Manager->TransformSystem;
 				auto AICartesianPositon = &Manager->TransformSystem->Transforms[ai].CartesianPosition;
 				auto PlayerCartesianPosition = &Manager->TransformSystem->Transforms[Manager->Player].CartesianPosition;
+				// *PlayerCartesianPosition = *PlayerCartesianPosition + EM::Vec2(ai * 10.0f, ai * 10.0f);
 				auto PlayerPosition = Manager->TransformSystem->Transforms[Manager->Player].Position.XY();
 				auto AIPosition = Manager->TransformSystem->Transforms[ai].Position.XY();
 				auto AIVelocity = &Manager->TransformSystem->Transforms[ai].Velocity;
@@ -69,7 +70,7 @@ namespace ECS { namespace Systems { namespace AIController {
 						AIVelocityGoal->y = 0.0f;
 						PathFindingComponent->HasPath = false;
 						leave = true;
-						std::cout << "Leaving!" << std::endl;
+						// std::cout << "Leaving!" << std::endl;
 					}
 
 					if (!leave)
@@ -81,7 +82,7 @@ namespace ECS { namespace Systems { namespace AIController {
 						{
 							PathFindingComponent->HasPath = true;
 
-							std::cout << "Getting path..." << std::endl; 
+							// std::cout << "Getting path..." << std::endl; 
 			
 							// Get path information
 							PathFindingComponent->CurrentPathIndex = 0;
@@ -126,14 +127,15 @@ namespace ECS { namespace Systems { namespace AIController {
 						PathFindingComponent->TimeOnNode += 0.1f;
 
 						// Stuck
-						if (PathFindingComponent->TimeOnNode >= 4.0f)
+						if (PathFindingComponent->TimeOnNode >= 7.0f)
 						{
-							std::cout << "Re-routing..." << std::endl;
+							// std::cout << "Re-routing..." << std::endl;
 							// Refind path next frame
 							PathFindingComponent->HasPath = false;
 						}
 
 						// Look ahead and decide whether or not to reroute
+						/*
 						auto NextIndex = PathFindingComponent->Path.size() - PathFindingComponent->Path.size() / 2;
 						auto AfterNextIndex = PathFindingComponent->Path.size() - (PathFindingComponent->Path.size() / 2) - 1;
 
@@ -154,6 +156,7 @@ namespace ECS { namespace Systems { namespace AIController {
 								PathFindingComponent->HasPath = false;
 							}
 						}
+						*/
 
 						// Check to make sure that target has not completely left the path
 
@@ -170,7 +173,12 @@ namespace ECS { namespace Systems { namespace AIController {
 					}
 
 					// Find vector
-					auto Difference = EM::Vec2::Normalize(PathFindingComponent->CellPosition - AIPosition);
+					auto Difference = EM::Vec2::Normalize((PathFindingComponent->CellPosition + EM::Vec2(32.0f, 16.0f))  - AIPosition);
+
+					// if (Difference.x > 0) Difference.x -= 0.5f;
+					// if (Difference.x < 0) Difference.x += 0.5f;
+					// if (Difference.y > 0) Difference.y -= 0.5f;
+					// if (Difference.y < 0) Difference.y += 0.5f;
 
 					AIVelocity->x = Difference.x * AISpeed;
 					AIVelocity->y = Difference.y * AISpeed;
