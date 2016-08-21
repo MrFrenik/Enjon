@@ -56,12 +56,14 @@ namespace ECS{ namespace Systems { namespace Transform {
 
 				// If an item
 				
-				if ((Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0)
+				if ((Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM) && 
+					(Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0 ||
+					(Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::DEBRIS))
 				{
 					// Need to see whether or not the player is within range before I turn on its collision component
 					Enjon::Math::Vec3* P = &Manager->TransformSystem->Transforms[e].Position;
 
-					if (PGP->DistanceTo(*GP) <= 2000) Manager->CollisionSystem->Entities.push_back(e);
+					if (PGP->DistanceTo(*GP) <= 1200) Manager->CollisionSystem->Entities.push_back(e);
 
 					if (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::DEBRIS)
 						Manager->TransformSystem->Transforms[e].Angle += 0.01f * Manager->TransformSystem->Transforms[e].Velocity.x;
@@ -287,14 +289,14 @@ namespace ECS{ namespace Systems { namespace Transform {
 					Manager->CollisionSystem->Entities.push_back(e);
 
 					// Find cell
-					SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[e].Cells, Manager->CollisionSystem->CollisionComponents[e].ObstructionValue);
+					// SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[e].Cells, Manager->CollisionSystem->CollisionComponents[e].ObstructionValue);
 				}
 
-				else if ((Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0)
-				{
+				// else if ((Manager->AttributeSystem->Masks[e] & Masks::Type::ITEM) && (Manager->AttributeSystem->Masks[e] & Masks::GeneralOptions::PICKED_UP) == 0)
+				// {
 					// Find cell
-					SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[e].Cells, Manager->CollisionSystem->CollisionComponents[e].ObstructionValue);
-				}
+					// SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[e].Cells, Manager->CollisionSystem->CollisionComponents[e].ObstructionValue);
+				// }
 
 				// Go through the items in this entity's inventory and set to this position
 				// NOTE(John): Note sure if I like this here... or at all...
@@ -385,7 +387,7 @@ namespace ECS{ namespace Systems { namespace Transform {
 						// std::cout << "Hitting" << std::endl;
 					}
 
-					SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[WeaponEquipped].Cells, Manager->CollisionSystem->CollisionComponents[WeaponEquipped].ObstructionValue);
+					// SpatialHash::FindCells(Manager->Grid, e, AABB, &Manager->CollisionSystem->CollisionComponents[WeaponEquipped].Cells, Manager->CollisionSystem->CollisionComponents[WeaponEquipped].ObstructionValue);
 				}
 
 			}

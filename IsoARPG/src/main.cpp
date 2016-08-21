@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -112,7 +112,7 @@ bool AnimationEditorOn = true;
 bool DeferredRenderingOn = true;
 bool AIControllerEnabled = false;
 
-const int LEVELSIZE = 20;
+const int LEVELSIZE = 100;
 
 float DashingCounter = 0.0f;
 
@@ -400,7 +400,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 10;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = -50.0f;
@@ -450,6 +450,10 @@ int main(int argc, char** argv)
 	World->InventorySystem->Inventories[Player].Items.push_back(Bow);
 	// Equip sword
 	World->InventorySystem->Inventories[Player].WeaponEquipped = Sword;
+
+	{
+		eid32 Debris = Factory::CreateBoxDebris(World, EM::Vec3(1000, 1000, 0), EM::Vec3(2, 2, 0));
+	}
 
 	AmountDrawn = 0;
 
@@ -648,7 +652,7 @@ int main(int argc, char** argv)
 
 				StartTicks = SDL_GetTicks();
 				SpatialHash::ClearCells(World->Grid);
-				ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): As the levels increase, THIS becomes the true bottleneck
+				ClearEntitiesRunTime = (SDL_GetTicks() - StartTicks); // NOTE(John): Only clearing cells that are marked as dirty
 
 				StartTicks = SDL_GetTicks();
 				Transform::Update(World->TransformSystem, LightParticleBatch);
@@ -656,13 +660,13 @@ int main(int argc, char** argv)
 
 				Animation2D::Update(World);
 
-				StartTicks = SDL_GetTicks();
-				if (AIControllerEnabled) AIController::Update(World->AIControllerSystem, Player);
-				AIRunTime = SDL_GetTicks() - StartTicks;
-
 				StartTicks = SDL_GetTicks();	
 				Collision::Update(World);
 				CollisionRunTime = (SDL_GetTicks() - StartTicks);
+
+				StartTicks = SDL_GetTicks();
+				if (AIControllerEnabled) AIController::Update(World->AIControllerSystem, Player);
+				AIRunTime = SDL_GetTicks() - StartTicks;
 
 				// Apply effects
 				StartTicks = SDL_GetTicks();	
@@ -795,6 +799,11 @@ int main(int argc, char** argv)
 				const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[e].Color;
 				auto EDims = &World->TransformSystem->Transforms[e].Dimensions;
 
+				Ground = &World->TransformSystem->Transforms[e].GroundPosition;
+				auto EAABB = &World->TransformSystem->Transforms[e].AABB;
+				EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), EG::SpriteSheetManager::GetSpriteSheet("Orb2")->texture.id,
+										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);
+
 				// If AI
 				if (Mask & COMPONENT_AICONTROLLER)
 				{
@@ -898,26 +907,26 @@ int main(int argc, char** argv)
 										World->Renderer2DSystem->Renderers[e].Format);
 				}
 
-				Ground = &World->TransformSystem->Transforms[e].GroundPosition;
-				auto EAABB = &World->TransformSystem->Transforms[e].AABB;
-				if (World->Types[e] != ECS::Component::EntityType::ITEM)
-				{
-					EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-											Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);
+				// Ground = &World->TransformSystem->Transforms[e].GroundPosition;
+				// auto EAABB = &World->TransformSystem->Transforms[e].AABB;
+				// if (World->Types[e] != ECS::Component::EntityType::ITEM)
+				// {
+				// 	EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
+				// 							Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);
 		
-					float XDiff = World->TransformSystem->Transforms[e].AABBPadding.x;
-					float YDiff = World->TransformSystem->Transforms[e].AABBPadding.y;
-					// Enjon::Math::Vec2 EAABBIsoMin(Enjon::Math::CartesianToIso(EAABB->Min) + Math::Vec2(XDiff / 2.0f, XDiff / 2.0f));
-					Enjon::Math::Vec2 EAABBIsoMin(Enjon::Math::CartesianToIso(EAABB->Min));
-					auto EAABBIsoMax(EM::CartesianToIso(EAABB->Max));
-					// float EAABBHeight = EAABB->Max.y - EAABB->Min.y, EAABBWidth = EAABB->Max.x - EAABB->Min.y;
-					// EntityBatch.Add(Math::Vec4(EAABBIsoMin, Math::Vec2(abs(EAABB->Max.x - EAABB->Min.x), abs(EAABB->Max.y - EAABB->Min.y))), 
-					// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
-					// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
-					// EntityBatch.Add(Math::Vec4(EAABBIsoMin.x, EAABBIsoMin.y, Math::Vec2(XDiff, YDiff)), 
-					// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
-					// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
-				}
+				// 	float XDiff = World->TransformSystem->Transforms[e].AABBPadding.x;
+				// 	float YDiff = World->TransformSystem->Transforms[e].AABBPadding.y;
+				// 	// Enjon::Math::Vec2 EAABBIsoMin(Enjon::Math::CartesianToIso(EAABB->Min) + Math::Vec2(XDiff / 2.0f, XDiff / 2.0f));
+				// 	Enjon::Math::Vec2 EAABBIsoMin(Enjon::Math::CartesianToIso(EAABB->Min));
+				// 	auto EAABBIsoMax(EM::CartesianToIso(EAABB->Max));
+				// 	// float EAABBHeight = EAABB->Max.y - EAABB->Min.y, EAABBWidth = EAABB->Max.x - EAABB->Min.y;
+				// 	// EntityBatch.Add(Math::Vec4(EAABBIsoMin, Math::Vec2(abs(EAABB->Max.x - EAABB->Min.x), abs(EAABB->Max.y - EAABB->Min.y))), 
+				// 	// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
+				// 	// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
+				// 	// EntityBatch.Add(Math::Vec4(EAABBIsoMin.x, EAABBIsoMin.y, Math::Vec2(XDiff, YDiff)), 
+				// 	// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
+				// 	// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
+				// }
 			}
 
 
@@ -1147,7 +1156,7 @@ int main(int argc, char** argv)
 										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f));
 			// Draw player shadow
 			EntityBatch.Add(Math::Vec4(GroundPosition->x - 20.0f, GroundPosition->y - 20.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
-										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1.0f, Enjon::Math::ToRadians(120.0f));
+										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 10000.0f, Enjon::Math::ToRadians(120.0f));
 
 		
 			///////////////////////////////
@@ -1987,6 +1996,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
 		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(50, 100) / 50.0f;
 		World->CollisionSystem->CollisionComponents[id].ObstructionValue = 0.1f;
+		World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(-10, -10);
 	}
 
 	if (Input->IsKeyPressed(SDLK_j))

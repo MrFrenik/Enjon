@@ -34,7 +34,8 @@ void Level::Init(float x, float y, int rows, int cols)
 	m_OverlaysDirty = false;
 	
 	// float tilewidth = 512.0f;
-	float tilewidth = 128.0f;
+	// float tilewidth = 128.0f;
+	float tilewidth = 64.0f;
 	float tileheight = tilewidth / 2.0f;
 	float wallWidth = tilewidth;
 	float wallHeight = 7.6f * tilewidth;

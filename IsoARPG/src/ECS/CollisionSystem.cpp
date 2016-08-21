@@ -25,6 +25,11 @@
 #include <SDL2/SDL.h>
 #include <time.h>
 
+#include <unordered_set>
+#include <limits.h>
+
+#define MAX_COLLISION_INDICIES 
+
 namespace ECS{ namespace Systems { namespace Collision {
 
 	// Collision BitMasks
@@ -37,6 +42,10 @@ namespace ECS{ namespace Systems { namespace Collision {
 	Enjon::uint32 COLLISION_EXPLOSIVE	= 0x00000020;
 	Enjon::uint32 COLLISION_PROP		= 0x00000040;
 	Enjon::uint32 COLLISION_VORTEX  	= 0x00000080;
+
+	auto NumberOfCollisionLoops = 0;
+	std::unordered_map<std::string, Enjon::uint32> CollisionPairsWithLastFrameUpdate;
+	std::unordered_set<const char*> CollisionPairs;   
 
 	/*-- Function Declarations --*/
 	void DrawBlood(ECS::Systems::EntityManager* Manager, Enjon::Math::Vec2 Pos);
@@ -58,32 +67,59 @@ namespace ECS{ namespace Systems { namespace Collision {
 		static Enjon::uint32 GetCellsTime = 0;
 		static Enjon::uint32 CollisionCheckTime = 0;
 
+		auto NumberOfChecks = 0;
+		
+		// TODO(John): This is way too slow to be creating and destroying a set each frame / creating something once and update its values each frame instead,
+		// 				preferably something that has an O(1) lookup time	
+
 		// This could really be unecessary writing...
 		eid32 size = Manager->CollisionSystem->Entities.empty() ? 0 : Manager->CollisionSystem->Entities.size();	
 		
 		for (eid32 n = 0; n < size; n++)
 		{
+	
 			// Get entity
 			eid32 e = Manager->CollisionSystem->Entities[n];
 
-			// If entity has no transform, then continue
-			// Could I pull this out of the loop to get rid of unnecessary branching?
-
+			// Get entities
 			std::vector<eid32> Entities;
-
-			if (Manager->AttributeSystem->Masks[e] & Masks::Type::WEAPON) Entities = SpatialHash::FindCell(Manager->Grid, e, &Manager->TransformSystem->Transforms[e].AABB);
-			else 														  Entities = SpatialHash::GetEntitiesFromCells(Manager->Grid, Manager->CollisionSystem->CollisionComponents[e].Cells);
-
-			// TODO(John): Keep a mapping of already checked pairs to cut this time down
+			// if (Manager->AttributeSystem->Masks[e] & Masks::Type::WEAPON) Entities = SpatialHash::FindCell(Manager->Grid, e, &Manager->TransformSystem->Transforms[e].AABB);
+			Entities = SpatialHash::FindCell(Manager->Grid, e, &Manager->TransformSystem->Transforms[e].AABB);
+			// else 														  Entities = SpatialHash::GetEntitiesFromCells(Manager->Grid, Manager->CollisionSystem->CollisionComponents[e].Cells);
 		
 			// Collide with entities 
 			for (eid32 collider : Entities)
 			{
+				bool FoundCollisionPair = false;
+				bool NeedToUpdateCollisionPairFrame = false;
+				std::string HashString;
+	
+				if (e == collider) continue;
+				if (e > collider) 	HashString = std::to_string(e) + std::to_string(collider);
+				else 				HashString = std::to_string(collider) + std::to_string(e);
+
 				// This will cause unnecessary branching. Figure out a way to take it out of the loop.
-				if (collider != e)
+				// if (CollisionPairs.find(HashString.c_str()) == CollisionPairs.end())
+
+				// Search for key
+				auto CollisionPairIterator = CollisionPairsWithLastFrameUpdate.find(HashString);
+
+				// Set whether or not found the pair
+				FoundCollisionPair = CollisionPairIterator != CollisionPairsWithLastFrameUpdate.end();
+
+				// If found, determine whether or not this frame matches the one needing to be checked
+				if (FoundCollisionPair) NeedToUpdateCollisionPairFrame = CollisionPairIterator->second != NumberOfCollisionLoops;
+
+				if (!FoundCollisionPair || NeedToUpdateCollisionPairFrame)
 				{
-					// Make sure both entities are not null here. This is really hacky and needs to be dealt with more effectively. 
-					// if (Manager->Masks[e] == COMPONENT_NONE || Manager->Masks[collider] == COMPONENT_NONE) continue;
+					// Increment number of checks
+					NumberOfChecks++;
+
+					// Hash and put back into pair
+					// CollisionPairs.insert(HashString.c_str());
+
+					// Update or insert new pair into map with current collision loop as its value
+					CollisionPairsWithLastFrameUpdate[HashString] = NumberOfCollisionLoops;
 
 					// Get EntityType of collider and entity
 					Component::EntityType AType = Manager->Types[collider];
@@ -169,6 +205,26 @@ namespace ECS{ namespace Systems { namespace Collision {
 				}
 			}	
 		}
+
+		static auto t = 0.0f;
+		t += 0.1f;
+		if (t > 10.0f)
+		{
+			std::cout << "Number Of Collision pairs: " << CollisionPairsWithLastFrameUpdate.size() << std::endl;
+			// std::cout << "Number Of Collision pairs: " << CollisionPairs.size() << std::endl;
+			t = 0.0f;
+		}
+
+		if (CollisionPairsWithLastFrameUpdate.size() > 100000)
+		{
+			CollisionPairsWithLastFrameUpdate.clear();
+		}
+
+		// CollisionPairs.clear();
+
+		// Increment number of collision loops
+		NumberOfCollisionLoops = (NumberOfCollisionLoops + 1) % UINT_MAX;
+
 
 	} // Collision Update
 	
@@ -639,25 +695,27 @@ namespace ECS{ namespace Systems { namespace Collision {
 					V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
 					// *EntityVelocity = 0.98f * *EntityVelocity + -0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
 					*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), EntityPosition->z); 
+					// *ColliderVelocity = 0.98f * *ColliderVelocity + 0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+					// *ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), ColliderPosition->z); 
 				}
 			}
 			else
 			{
 				// Get minimum translation distance
-				// V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
-				// *EntityVelocity = 0.85f * *EntityVelocity + -0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
+				*EntityVelocity = 0.85f * *EntityVelocity + -0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
 
-				V2 Direction = *A - *B;
-				Direction.x += ER::Roll(-10, 10);
-				Direction.y += ER::Roll(-10, 10);
-				Direction = EM::Vec2::Normalize(Direction);
-				if (Direction.x == 0) Direction.x = (float)ER::Roll(-100, 100) / 100.0f;
-				if (Direction.y == 0) Direction.y = (float)ER::Roll(-100, 100) / 100.0f;
-				float Length = Direction.Length();
-				float Impulse = 25.0f / (Length + 0.001f);
+				// V2 Direction = *A - *B;
+				// Direction.x += ER::Roll(-10, 10);
+				// Direction.y += ER::Roll(-10, 10);
+				// Direction = EM::Vec2::Normalize(Direction);
+				// if (Direction.x == 0) Direction.x = (float)ER::Roll(-100, 100) / 100.0f;
+				// if (Direction.y == 0) Direction.y = (float)ER::Roll(-100, 100) / 100.0f;
+				// float Length = Direction.Length();
+				// float Impulse = 25.0f / (Length + 0.001f);
 
-				*EntityVelocity = (1.0f / AMass) * 0.1f * -Impulse * EM::Vec3(EM::CartesianToIso(Direction), EntityVelocity->z);
-				*ColliderVelocity = (1.0f / BMass) * 0.1f * Impulse * EM::Vec3(EM::CartesianToIso(Direction), EntityVelocity->z);
+				// *EntityVelocity = (1.0f / AMass) * 0.05f * -Impulse * EM::Vec3(EM::CartesianToIso(Direction), EntityVelocity->z);
+				// *ColliderVelocity = (1.0f / BMass) * 0.1f * Impulse * EM::Vec3(EM::CartesianToIso(Direction), EntityVelocity->z);
 				// *ColliderVelocity = 1.0f * *ColliderVelocity + 0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
 			}
 		}
@@ -750,59 +808,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 		Enjon::Math::Vec2 Difference = Enjon::Math::Vec2::Normalize(EntityPosition->XY() - ColliderPosition->XY());
 
-		/*
-		auto Distance = (EntityPosition->XY() - ColliderPosition->XY()).Length();
-		// std::cout << "Distance: " << Distance << std::endl;
-
-		if (Distance <= 300.0f)
-		{
-			auto ColliderPathFinding = &Manager->AIControllerSystem->PathFindingComponents[B_ID];
-
-			if (A_ID < B_ID && EntityVelocity->x != 0 && EntityVelocity->y != 0)
-			{
-				if ((Manager->Masks[A_ID] & COMPONENT_PLAYERCONTROLLER) == 0) *EntityVelocity += EM::Vec3(Difference * 0.2f, 0.0f); 
-			}
-			else
-			{
-				if (EntityVelocity->x == 0 && EntityVelocity->y == 0 && ColliderVelocity->x != 0 && ColliderVelocity->y != 0)
-				{
-					if ((Manager->Masks[B_ID] & COMPONENT_PLAYERCONTROLLER) == 0) *ColliderVelocity -= EM::Vec3(Difference * 0.2f, 0.0f); 
-				}
-			}
-
-			if ((Manager->Masks[B_ID] & COMPONENT_PLAYERCONTROLLER) == 0) *ColliderVelocity -= EM::Vec3(Difference * 0.2f, 0.0f); 
-		}
-		*/
-
 		// Height not the same... Testing
 		if (abs(EntityPosition->z - ColliderPosition->z) > 100.0f) return;
-
-		
-		// Enjon::Math::Vec2 Difference = Enjon::Math::Vec2::Normalize(EntityPosition->XY() - ColliderPosition->XY());
-
-		/*
-		auto Distance = (EntityPosition->XY() - ColliderPosition->XY()).Length();
-		std::cout << "Distance: " << Distance << std::endl;
-
-		// Check for possible collision
-		if (Distance <= 350.0f)
-		{
-			auto ColliderPathFinding = &Manager->AIControllerSystem->PathFindingComponents[B_ID];
-
-			if (A_ID < B_ID && EntityVelocity->x != 0 && EntityVelocity->y != 0)
-			{
-				Manager->AIControllerSystem->PathFindingComponents[A_ID].HasPath = false;
-			}
-			else
-			{
-				if (EntityVelocity->x == 0 && EntityVelocity->y == 0 && ColliderVelocity->x != 0 && ColliderVelocity->y != 0)
-				{
-					Manager->AIControllerSystem->PathFindingComponents[B_ID].HasPath = false;
-				}
-			}
-		}
-		*/
-
 
 		// Collision didn't happen
 		if (!Enjon::Physics::AABBvsAABB(AABB_A, AABB_B)) { return; }
@@ -817,17 +824,16 @@ namespace ECS{ namespace Systems { namespace Collision {
 			{
 				*EntityPosition -= Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), EntityPosition->z); 
 			}
-			// Manager->TransformSystem->Transforms[A_ID].GroundPosition -= Enjon::Math::CartesianToIso(mtd); 
+			Manager->TransformSystem->Transforms[A_ID].GroundPosition -= Enjon::Math::CartesianToIso(mtd); 
+
+			if (!Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
+				*ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), 0.0f);
+
 
 			// if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
-			// 	*ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd) * 1.0f, 0.0f);
-
-
-
-			// if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
-			// 	*ColliderPosition -= Enjon::Math::Vec3(Difference * 30.0f, 0.0f);
+				// *ColliderPosition -= Enjon::Math::Vec3(Difference * 30.0f, 0.0f);
 			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
-				*ColliderVelocity = 2.0f * Enjon::Math::Vec3(Difference, 0.0f);
+				*ColliderVelocity += -2.0f * Enjon::Math::Vec3(Difference, 0.0f);
 
 			// Update velocities based on "bounce" factor
 			float bf; // Bounce factor 
@@ -841,8 +847,8 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 			else bf = 1.0f;
 
-			ColliderVelocity->x = -ColliderVelocity->x * bf;
-			ColliderVelocity->y = -ColliderVelocity->y * bf;
+			// ColliderVelocity->x = -ColliderVelocity->x * bf;
+			// ColliderVelocity->y = -ColliderVelocity->y * bf;
 
 
 			if (Manager->AttributeSystem->Masks[A_ID] & Masks::Type::WEAPON)
@@ -876,11 +882,23 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 				EG::ColorRGBA16 R = EG::RGBA16(1.0f, 0.01f, 0.01f, 1.0f);
 
-				float XPos = Enjon::Random::Roll(-50, 100), YPos = Enjon::Random::Roll(-50, 100), ZVel = Enjon::Random::Roll(-10, 10), XVel = Enjon::Random::Roll(-10, 10), 
-								YSize = Enjon::Random::Roll(10, 20), XSize = Enjon::Random::Roll(10, 20);
+				for (auto p = 0; p < 100; p++)
+				{
+					float XPos = Enjon::Random::Roll(-50, 100), YPos = Enjon::Random::Roll(-50, 100), ZVel = Enjon::Random::Roll(-10, 10), XVel = Enjon::Random::Roll(-10, 10), 
+									YSize = Enjon::Random::Roll(10, 20), XSize = Enjon::Random::Roll(10, 20);
 
-				EG::Particle2D::AddParticle(EM::Vec3(ColliderPosition->x + 50.0f + XVel, ColliderPosition->y + 50.0f + ZVel, 0.0f), EM::Vec3(XVel, XVel, ZVel), 
-					EM::Vec2(XSize * 1.5f, YSize * 1.5f), R, PTex, 0.05f, Manager->ParticleEngine->ParticleBatches.at(0));
+					// EG::Particle2D::AddParticle(EM::Vec3(ColliderPosition->x + 50.0f + XVel, ColliderPosition->y + 50.0f + ZVel, 0.0f), EM::Vec3(XVel, XVel, ZVel), 
+					// 	EM::Vec2(XSize * 1.5f, YSize * 1.5f), R, PTex, 0.005f, Manager->ParticleEngine->ParticleBatches.at(0));
+
+					EG::Particle2D::AddParticle(
+												EM::Vec3(ColliderPosition->x + 50.0f + XVel, ColliderPosition->y + 50.0f + ZVel, 50.0f), 
+												15.0f * EM::Vec3(
+															-Difference.x + static_cast<float>(ER::Roll(-2, 2)) / 10.0f, 
+															-Difference.y + static_cast<float>(ER::Roll(-2, 2)) / 10.0f, 
+															static_cast<float>(ER::Roll(-2, 2)) / 10.0f
+														), 
+						EM::Vec2(XSize * 1.5f, YSize * 1.5f), R, PTex, 0.005f, Manager->ParticleEngine->ParticleBatches.at(0));
+				}
 
 				// Print out that damage, son!
 				auto DamageString = std::to_string(static_cast<Enjon::uint32>(Damage));
@@ -944,6 +962,21 @@ namespace ECS{ namespace Systems { namespace Collision {
 					// Put body overlay onto the world
 					// DrawBody(Manager, ColliderPosition->XY());
 
+					// Let's try and make an explosion of debris
+					auto max_debris = ER::Roll(15, 20);
+					for (auto e = 0; e < max_debris; e++)
+					{
+						auto id = ECS::Factory::CreateGib(
+																	Manager, 
+																	*ColliderPosition, 
+																	20.0f * EM::Vec3(
+																						-Difference.x + static_cast<float>(ER::Roll(-2, 2)) / 10.0f, 
+																						-Difference.y + static_cast<float>(ER::Roll(-2, 2)) / 10.0f, 
+																						0.0f
+																					)
+																);
+					}
+
 					// Remove collider
 					EntitySystem::RemoveEntity(Manager, B_ID);
 					
@@ -966,22 +999,25 @@ namespace ECS{ namespace Systems { namespace Collision {
 
 	void DrawBlood(ECS::Systems::EntityManager* Manager, Enjon::Math::Vec2 PP)
 	{
-		auto I = Enjon::Random::Roll(0, 2);
-		Enjon::Graphics::GLTexture S;
-		switch(I)
+		for (auto i = 0; i < 5; i++)
 		{
-			case 0: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/blood_1.png"); break;
-			case 1: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/blood_2.png"); break;
-			case 2: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/blood_3.png"); break;
-			default: break;
+			auto I = Enjon::Random::Roll(0, 2);
+			Enjon::Graphics::GLTexture S;
+			switch(I)
+			{
+				case 0: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/blood_1.png"); break;
+				case 1: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/blood_2.png"); break;
+				case 2: S = Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/blood_3.png"); break;
+				default: break;
+			}
+			auto alpha = Enjon::Random::Roll(50, 255) / 255.0f;
+			auto X = (float)Enjon::Random::Roll(-50, 100);
+			auto Y = (float)Enjon::Random::Roll(-100, 50);
+			auto C = Enjon::Graphics::RGBA16_White();
+			auto DC = Enjon::Random::Roll(80, 100) / 255.0f;
+			C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, alpha);
+			Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(PP.x + X, PP.y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(50, 100)), C);
 		}
-		auto alpha = Enjon::Random::Roll(50, 255) / 255.0f;
-		auto X = (float)Enjon::Random::Roll(-50, 100);
-		auto Y = (float)Enjon::Random::Roll(-100, 50);
-		auto C = Enjon::Graphics::RGBA16_White();
-		auto DC = Enjon::Random::Roll(80, 100) / 255.0f;
-		C = Enjon::Graphics::RGBA16(C.r - DC, C.g - DC, C.b - DC, alpha);
-		Manager->Lvl->AddTileOverlay(S, Enjon::Math::Vec4(PP.x + X, PP.y + Y, (float)Enjon::Random::Roll(50, 100), (float)Enjon::Random::Roll(50, 100)), C);
 	}
 
 }}}

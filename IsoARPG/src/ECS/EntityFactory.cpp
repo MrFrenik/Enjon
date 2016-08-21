@@ -435,6 +435,46 @@ namespace ECS { namespace Factory {
 			index = (index + 1) % 4;
 		}
 
+		eid32 CreateBoxDebris(Systems::EntityManager* Manager, EM::Vec3& Position, EM::Vec3& Velocity)
+		{
+			eid32 id = Factory::CreateItem(
+											Manager, 
+											Position, 
+											EM::Vec2(ER::Roll(5, 10), ER::Roll(1, 5)), 
+											EG::SpriteSheetManager::GetSpriteSheet("VerticleBar"), 
+											Masks::Type::ITEM, 
+											Component::EntityType::ITEM
+											);
+			Manager->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
+			Manager->Renderer2DSystem->Renderers[id].Format = EG::CoordinateFormat::ISOMETRIC;
+			Manager->Renderer2DSystem->Renderers[id].Color = EG::RGBA16(0.5f, 0.2f, 0.1f, 1.0f);
+			Manager->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+			Manager->TransformSystem->Transforms[id].Velocity = Velocity;
+	
+			return id;
+		}
+
+		eid32 CreateGib(Systems::EntityManager* Manager, EM::Vec3& Position, EM::Vec3& Velocity)
+		{
+			auto gib_size = ER::Roll(1, 10);
+			eid32 id = Factory::CreateItem(
+											Manager, 
+											Position, 
+											EM::Vec2(gib_size), 
+											EG::SpriteSheetManager::GetSpriteSheet("Orb2"), 
+											Masks::Type::ITEM, 
+											Component::EntityType::ITEM
+											);
+			Manager->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
+			Manager->Renderer2DSystem->Renderers[id].Format = EG::CoordinateFormat::ISOMETRIC;
+			Manager->Renderer2DSystem->Renderers[id].Color = EG::RGBA16_Red();
+			Manager->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+			Manager->TransformSystem->Transforms[id].Velocity = Velocity;
+			Manager->TransformSystem->Transforms[id].BaseHeight = 0.0f;
+	
+			return id;
+		}
+
 		void CreateBeam(Systems::EntityManager* Manager, EM::Vec3 Pos)
 		{
 
