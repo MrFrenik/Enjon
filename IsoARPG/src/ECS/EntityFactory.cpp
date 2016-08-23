@@ -59,6 +59,7 @@ namespace ECS { namespace Factory {
 			Transform->AABB = {Min, Max};
 
 			// Set up Input
+			// TODO(John): Each entity with a player controller needs its own InputManager
 			Manager->PlayerControllerSystem->PlayerControllers[Player].Input = Input;
 			
 			// Set up Animation2D

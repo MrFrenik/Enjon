@@ -108,7 +108,8 @@ bool Paused = false;
 bool IsDashing = false;
 bool DebugInfo = false;
 bool DebugEntityInfo = false;
-bool AnimationEditorOn = true;
+bool AnimationEditorOn = false;
+bool ParticleEditorOn = false;
 bool DeferredRenderingOn = true;
 bool AIControllerEnabled = false;
 
@@ -801,8 +802,8 @@ int main(int argc, char** argv)
 
 				Ground = &World->TransformSystem->Transforms[e].GroundPosition;
 				auto EAABB = &World->TransformSystem->Transforms[e].AABB;
-				EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), EG::SpriteSheetManager::GetSpriteSheet("Orb2")->texture.id,
-										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);
+				// EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), EG::SpriteSheetManager::GetSpriteSheet("Orb2")->texture.id,
+				// 						Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);
 
 				// If AI
 				if (Mask & COMPONENT_AICONTROLLER)
@@ -1153,10 +1154,10 @@ int main(int argc, char** argv)
 			// Draw player ground tile 
 			const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;
 			EntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f));
+										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 10000000.0f);
 			// Draw player shadow
 			EntityBatch.Add(Math::Vec4(GroundPosition->x - 20.0f, GroundPosition->y - 20.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
-										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 10000.0f, Enjon::Math::ToRadians(120.0f));
+										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1000000.0f, Enjon::Math::ToRadians(120.0f));
 
 		
 			///////////////////////////////
@@ -1561,6 +1562,14 @@ int main(int argc, char** argv)
 				DebugSpatialBatch.End();
 			}
 
+			// Draw player again, this time transparent, so he doesn't get "occluded" behind anything
+			{
+				auto CurrentIndex = World->Animation2DSystem->AnimComponents[Player].CurrentIndex;
+				auto Image = &World->Animation2DSystem->AnimComponents[Player].CurrentAnimation->Frames.at(CurrentIndex);
+
+				EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::SetOpacity(EG::RGBA16_White(), 0.1f), 1.5f, -10000.0f);
+			}
+
 
 			EntityBatch.End();
 			TextBatch.End(); 
@@ -1909,7 +1918,6 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	if (Input->IsKeyPressed(SDLK_u))
 	{
 		World->Lvl->DrawDebugEnabled();
-		// std::cout << "Debug draw..." << std::endl;
 	}
 
 	if (Input->IsKeyPressed(SDLK_g))
@@ -1917,7 +1925,84 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		DebugEntityInfo = !DebugEntityInfo;
 	}
 
-	if (Input->IsKeyPressed(SDLK_b))
+	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyDown(SDLK_b))
+	{
+		// Get camera position
+		auto CamPos = Camera->GetPosition();
+		auto MouseCoords = Input->GetMouseCoords();	
+		Camera->ConvertScreenToWorld(MouseCoords);
+		MouseCoords = EM::IsoToCartesian(MouseCoords + EM::Vec2(0.0f, 10.0f));
+
+		// Get grid coordinate
+		// Snap to grid
+		auto GridCoord = SpatialHash::FindGridCoordinates(World->Grid, MouseCoords);
+
+		// Find Isometric coordinates of GridCoords
+		auto CellDimensions = SpatialHash::GetCellDimensions(World->Grid, GridCoord);
+
+		// eid32 id = Factory::CreateItem(
+		// 								World, 
+		// 								Math::Vec3(CellDimensions.x, CellDimensions.y, 0.0f), 
+		// 								Enjon::Math::Vec2(CellDimensions.z - 5.0f, CellDimensions.w - 5.0f), 
+		// 								EG::SpriteSheetManager::GetSpriteSheet("DiagonalTile"), 
+		// 								Masks::Type::ITEM, 
+		// 								Component::EntityType::ITEM
+		// 							  );
+
+		eid32 id = Factory::CreateItem(
+										World, 
+										Math::Vec3(CellDimensions.x, CellDimensions.y, 0.0f), 
+										Enjon::Math::Vec2(700.0f, 700.0f), 
+										EG::SpriteSheetManager::GetSpriteSheet("Box"), 
+										Masks::Type::ITEM, 
+										Component::EntityType::ITEM
+									  );
+
+		// World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
+		World->CollisionSystem->CollisionComponents[id].ObstructionValue = 1.0f;
+		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
+		World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(0, 0);
+		World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-5.0f, -5.0f);
+		World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA16_White(), 0.3f);
+
+	}
+
+	else if (Input->IsKeyDown(SDLK_LCTRL) && Input->IsKeyDown(SDLK_b))
+	{
+		// Get camera position
+		auto CamPos = Camera->GetPosition();
+		auto MouseCoords = Input->GetMouseCoords();	
+		Camera->ConvertScreenToWorld(MouseCoords);
+		MouseCoords = EM::IsoToCartesian(MouseCoords + EM::Vec2(0.0f, 10.0f));
+
+		// Get grid coordinate
+		// Snap to grid
+		auto GridCoord = SpatialHash::FindGridCoordinates(World->Grid, MouseCoords);
+
+		// Find Isometric coordinates of GridCoords
+		auto CellDimensions = SpatialHash::GetCellDimensions(World->Grid, GridCoord);
+
+
+		eid32 id = Factory::CreateItem(
+										World, 
+										Math::Vec3(CellDimensions.x, CellDimensions.y, 0.0f), 
+										Enjon::Math::Vec2(CellDimensions.z - 5.0f, CellDimensions.w - 5.0f), 
+										EG::SpriteSheetManager::GetSpriteSheet("DiagonalTileDown"), 
+										Masks::Type::ITEM, 
+										Component::EntityType::ITEM
+									  );
+
+		// World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
+		World->CollisionSystem->CollisionComponents[id].ObstructionValue = 1.0f;
+		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
+		World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(0, 0);
+		World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-5.0f, -5.0f);
+		World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA16_White(), 0.3f);
+	}
+
+	else if (Input->IsKeyDown(SDLK_b))
 	{
 		// Get camera position
 		auto CamPos = Camera->GetPosition();
@@ -2019,7 +2104,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		World->Grid->cells.at(Index).ObstructionValue = 1.0f;
 	}
 
-	if (Input->IsKeyPressed(SDLK_SEMICOLON))
+	if (Input->IsKeyDown(SDLK_SEMICOLON))
 	{
 		// Paint tile as obstructed
 		auto MP = Input->GetMouseCoords();
@@ -2031,7 +2116,8 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
 
 		// Turn tile obstructed
-		World->Grid->cells.at(Index).ObstructionValue += 0.1f;
+		// World->Grid->cells.at(Index).ObstructionValue += 0.1f;
+		World->Grid->cells.at(Index).ObstructionValue = 0.5f;
 	}
 
 	if (Input->IsKeyPressed(SDLK_QUOTE))
@@ -2046,7 +2132,8 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
 
 		// Turn tile obstructed
-		World->Grid->cells.at(Index).ObstructionValue += 0.1f;
+		if (Input->IsKeyDown(SDLK_LSHIFT) && World->Grid->cells.at(Index).ObstructionValue < 1.0f) 	World->Grid->cells.at(Index).ObstructionValue += 0.1f;
+		else if (World->Grid->cells.at(Index).ObstructionValue < 0.0f) 								World->Grid->cells.at(Index).ObstructionValue -= 0.1f;
 	}
 
 	if (Input->IsKeyDown(SDLK_k))

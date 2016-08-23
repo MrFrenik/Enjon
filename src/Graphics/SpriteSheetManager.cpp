@@ -27,6 +27,8 @@ namespace Enjon { namespace Graphics { namespace SpriteSheetManager {
 		AddSpriteSheet(Sheets, std::string("2g"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2g_transparent.png"), Enjon::Math::iVec2(1, 1));
 		AddSpriteSheet(Sheets, std::string("Tile"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png"), Enjon::Math::iVec2(1, 1));
 		AddSpriteSheet(Sheets, std::string("Gib"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/gib.png"), Enjon::Math::iVec2(1, 1));
+		AddSpriteSheet(Sheets, std::string("DiagonalTile"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/diagonal_tile.png"), Enjon::Math::iVec2(1, 1));
+		AddSpriteSheet(Sheets, std::string("DiagonalTileDown"), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/diagonal_tile_down.png"), Enjon::Math::iVec2(1, 1));
 	}
 
 	/* Add spritesheets to the spritesheetmanager */

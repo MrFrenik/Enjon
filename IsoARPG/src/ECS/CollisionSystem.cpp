@@ -703,19 +703,20 @@ namespace ECS{ namespace Systems { namespace Collision {
 			{
 				// Get minimum translation distance
 				V2 mtd = Enjon::Physics::MinimumTranslation(AABB_B, AABB_A);
-				*EntityVelocity = 0.85f * *EntityVelocity + -0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
+				// *EntityVelocity = 0.85f * *EntityVelocity + -0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
 
-				// V2 Direction = *A - *B;
-				// Direction.x += ER::Roll(-10, 10);
-				// Direction.y += ER::Roll(-10, 10);
-				// Direction = EM::Vec2::Normalize(Direction);
-				// if (Direction.x == 0) Direction.x = (float)ER::Roll(-100, 100) / 100.0f;
-				// if (Direction.y == 0) Direction.y = (float)ER::Roll(-100, 100) / 100.0f;
-				// float Length = Direction.Length();
-				// float Impulse = 25.0f / (Length + 0.001f);
+				V2 Direction = *A - *B;
+				Direction.x += ER::Roll(-10, 10);
+				Direction.y += ER::Roll(-10, 10);
+				Direction = EM::Vec2::Normalize(Direction);
+				if (Direction.x == 0) Direction.x = (float)ER::Roll(-100, 100) / 100.0f;
+				if (Direction.y == 0) Direction.y = (float)ER::Roll(-100, 100) / 100.0f;
+				float Length = Direction.Length();
+				float Impulse = 25.0f / (Length + 0.001f);
+				*ColliderPosition += Enjon::Math::Vec3(Enjon::Math::CartesianToIso(mtd), EntityPosition->z);
 
 				// *EntityVelocity = (1.0f / AMass) * 0.05f * -Impulse * EM::Vec3(EM::CartesianToIso(Direction), EntityVelocity->z);
-				// *ColliderVelocity = (1.0f / BMass) * 0.1f * Impulse * EM::Vec3(EM::CartesianToIso(Direction), EntityVelocity->z);
+				// *ColliderVelocity = (1.0f / BMass) * 0.05f * Impulse * EM::Vec3(EM::CartesianToIso(Direction), EntityVelocity->z);
 				// *ColliderVelocity = 1.0f * *ColliderVelocity + 0.05f * EM::Vec3(EM::CartesianToIso(mtd), 0.0f);
 			}
 		}

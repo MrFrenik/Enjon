@@ -22,11 +22,12 @@ void Level::Init(float x, float y, int rows, int cols)
 	// TODO(John): Bound entities within the level 
 
 	// m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png"), EM::iVec2(1, 1));
-	m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledred.png"), EM::iVec2(1, 1));
+	// m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledred.png"), EM::iVec2(1, 1));
+	m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/grid_square.png"), EM::iVec2(1, 1));
 	// m_wallSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/wall_chunk.png"), EM::iVec2(1, 1));
 
 	// Set debug draw to false
-	m_DrawDebugEnabled = true;
+	m_DrawDebugEnabled = false;
 
 	CurrentOverlayIndex = 0;
 
@@ -154,7 +155,8 @@ void Level::DrawDebugTiles(Enjon::Graphics::SpriteBatch& Batch)
 					EM::Vec4(tile.pos, EM::Vec2(tile.dims.x, tile.dims.y)), 
 					EM::Vec4(0, 0, 1, 1), 
 					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id, 
-					EG::SetOpacity(EG::RGBA16_Red(), 0.5f)
+					// EG::SetOpacity(EG::RGBA16_Red(), 0.5f)
+					EG::RGBA16_White()
 				);
 	}
 

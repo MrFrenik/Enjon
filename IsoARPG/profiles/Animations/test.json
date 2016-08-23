@@ -1,8 +1,0 @@
-{
-	"test": 
-	{
-		"file": "Animation.json",
-		"delays": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
-		"frames": ["2g", "beast", "bluebutton", "box", "box_debris", "pixelanimtest"]
-	}
-}
