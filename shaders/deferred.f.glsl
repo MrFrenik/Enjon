@@ -10,6 +10,7 @@ out vec4 color;
 uniform sampler2D u_diffuse;
 uniform sampler2D u_normals;
 uniform sampler2D u_position;
+uniform sampler2D u_depth;
 
 // Vertex information
 in DATA
@@ -23,6 +24,7 @@ struct Light {
     vec4 Color;
     vec3 Falloff;
     float Radius;
+    float Depth;
 };
 
 const int N_LIGHTS = 100;
@@ -37,101 +39,87 @@ uniform vec3 ViewPos;         //attenuation coefficients
 uniform mat4 CameraInverse;
 uniform mat4 View;
 uniform float Scale;
+uniform float LightDepth;
 
 void main()
 {
     //RGBA of our diffuse color
     vec4 DiffuseColor = texture2D(u_diffuse, fs_in.TexCoords);
 
+    vec4 DepthColor = texture2D(u_depth, fs_in.TexCoords);
+    float Depth = DepthColor.r * DepthColor.a;
+
     vec4 FragPos = texture2D(u_position, fs_in.TexCoords);
+    FragPos.z = Depth;
 
     // //RGB of our normal map
     vec3 NormalMap = texture2D(u_normals, fs_in.TexCoords).rgb;
+    vec4 NormalColor = texture2D(u_normals, fs_in.TexCoords);
 
     // Hardcoded ambient light
     vec3 Lighting = AmbientColor.rgb * AmbientColor.a * DiffuseColor.rgb;
 
-    // vec3 Position = (CameraInverse * vec4(FragPos.xyz, 1.0f) / FragPos.w).xyz;
     vec3 Position = FragPos.xyz;
 
     vec3 CamView = (View * vec4(ViewPos, 1.0f)).xyz;
 
-    // vec3 ViewDir = normalize(vec3(ViewPos.xy - Position.xy, ViewPos.z));
+    vec3 ViewDir = normalize(vec3(ViewPos.xy - Position.xy, ViewPos.z));
 
-    for (int i = 0; i < NumberOfLights; i++)
-    {
-        // Get view direction
-        vec3 ViewDir = normalize(vec3(CamView.xy - Position.xy, CamView.z - Lights[i].Position.z));
-    
-        // vec3 LightPosVS = (vec4(Lights[i].Position.xyz, 1.0f)).xyz;
-        vec3 LightPosVS = (View * vec4(Lights[i].Position.xyz, 1.0f)).xyz;
+        for (int i = 0; i < NumberOfLights; i++)
+        {
+            vec3 LightPosVS = (View * vec4(Lights[i].Position.xyz, 1.0f)).xyz;
 
-        // //The delta position of light
-        vec3 LightDir = 1.0 / Scale * vec3(LightPosVS.xy - Position.xy, Lights[i].Position.z);
+            // Calculate isometric light depth
+            vec3 LightDir = (1.0 / Scale) * vec3(LightPosVS.xy - Position.xy, Lights[i].Position.z);
+            // vec3 LightDir = vec3(LightPosVS.xy - Position.xy, Lights[i].Position.z);
 
-        // //Determine distance (used for attenuation) BEFORE we normalize our LightDir
-        float D = length(LightDir);
+            // //Determine distance (used for attenuation) BEFORE we normalize our LightDir
+            float D = length(LightDir);
 
-        // if (D < Lights[i].Radius / Scale) 
-        // {
             LightDir = normalize(LightDir);
 
             LightDir.x *= Resolution.x / Resolution.y;
+
+            vec3 L = normalize(LightDir);
         
             //normalize our vectors
-            // vec3 N = normalize(NormalMap * 2.0 - 1.0);
-            vec3 L = normalize(LightDir);
+            // vec3 N = normalize((NormalMap - 0.5) * 2.0);
 
-            vec3 HalfwayDir = normalize(LightDir + ViewDir);
+            // vec3 HalfwayDir = normalize(LightDir + ViewDir);
 
-            // float spec = pow(max(dot(N, HalfwayDir), 0.0), 256.0);
+            // float spec = pow(max(dot(N, HalfwayDir), 0.0), 1024.0);
 
             // Get light color
             vec4 LightColor = Lights[i].Color;
 
             // vec3 Specular = LightColor.rgb * spec;
 
+            float Intensity = 1.0f;
+
+            vec3 Diffuse = Intensity * LightColor.rbg * DiffuseColor.rgb * max(1.0 - D/Lights[i].Radius, 0.0);
+
             //Pre-multiply light color with intensity
             //Then perform "N dot L" to determine our diffuse term
-            // vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * max(dot(N, L), 0.0);
-            vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * max(1.0 - L, 0.0);
+            // vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * max(dot(N, LightDir), 0.0);
+            // vec3 Diffuse = LightColor.rgb * max(D/Lights[i].Radius, 0.0);
             
             //calculate attenuation
             vec3 Falloff = Lights[i].Falloff;
 
-            float Attenuation = 1.0 / (Falloff.x + (Falloff.y*D) + (Falloff.z*D*D));
-
-            // vec3 Diffuse = LightColor.rgb * DiffuseColor.rgb * Attenuation;
+            float Attenuation = 1.0 / (Falloff.x + Falloff.y * D + Falloff.z * D * D);
 
             Diffuse *= Attenuation * LightColor.a;
-            // Specular *= Attenuation / 2.0f;
-            // Lighting += Diffuse + Specular;
+
             Lighting += Diffuse;
-        // }
-    }
+        }
 
-    // color = texture2D(u_position, fs_in.TexCoords);
+    // Lighting.r = clamp(Lighting.r, 0, 1);
+    // Lighting.g = clamp(Lighting.g, 0, 1);
+    // Lighting.b = clamp(Lighting.b, 0, 1);
+    
     color = vec4(Lighting, 1.0);
-
-
-    // Emissiveness
-    // if (DiffuseColor.r >= 1.0 || DiffuseColor.g >= 1.0 || DiffuseColor.b >= 1.0) color += DiffuseColor * DiffuseColor.a;
 
     diffuse = color;
     position = color;
     normals = color;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -46,7 +46,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 	{
 		// Attack speed
 		// TODO(John): Make this dependent on equipped weapon and player stats
-		static float AttackSpeed = 0.8f;
+		static float AttackSpeed = 0.4f;
 
 		// Get System
 		struct Animation2DSystem* System = Manager->Animation2DSystem;
@@ -118,8 +118,8 @@ namespace ECS { namespace Systems { namespace Animation2D {
 													{
 														if (!(*SetStart))
 														{
-															if (attack_switch) 	CurrentAnimation = AnimManager::GetAnimation("Enemy_Attack");
-															else 				CurrentAnimation = AnimManager::GetAnimation("Enemy_Attack");
+															if (ViewVector->x > 0) 	CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SW");
+															else 					CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
 														}
 														break;
 													}
@@ -157,14 +157,14 @@ namespace ECS { namespace Systems { namespace Animation2D {
 	
 							if (MousePos.x <= Position->x)
 							{
-								if (attack_switch) 	Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Attack_Mirror");
-								else 				Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Attack_Mirror");	
+								if (attack_switch) 	Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SW");
+								else 				Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SW");	
 								if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
 							}
 							else if (MousePos.x > Position->x)  
 							{
-								if (attack_switch) 	Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Attack");
-								else 				Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Enemy_Attack");	
+								if (attack_switch) 	Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");
+								else 				Manager->Animation2DSystem->AnimComponents[e].CurrentAnimation = AnimManager::GetAnimation("Player_Attack_OH_L_SE");	
 								if (Velocity->x != 0.0f || Velocity->y != 0.0f && CurrentWeapon != Weapons::BOW) *AttackVector = *ViewVector; 
 							}
 						}
@@ -245,7 +245,7 @@ namespace ECS { namespace Systems { namespace Animation2D {
 
 						}
 						
-						else if (AnimComponent->CurrentIndex == 10)
+						else if (AnimComponent->CurrentIndex == 5)
 						{
 							// Make Weapon visible and collidable
 							eid32 Weapon = Manager->InventorySystem->Inventories[e].WeaponEquipped;

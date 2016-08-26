@@ -35,7 +35,7 @@ namespace Enjon { namespace Graphics {
 		glTexImage2D(
 				GL_TEXTURE_2D, 
 				0, 
-				GL_RGBA, 
+				GL_RGBA8, 
 				width, 
 				height, 
 				0, 
@@ -44,7 +44,7 @@ namespace Enjon { namespace Graphics {
 				&(out[0])
 		);
 
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, params);
 		// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, params);

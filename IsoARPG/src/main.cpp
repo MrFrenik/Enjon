@@ -43,6 +43,7 @@
 /*-- External/Engine Libraries includes --*/
 #include <Enjon.h>
 #include <Editor/AnimationEditor.h>
+#include <Editor/LightEditor.h>
 
 /*-- Entity Component System includes --*/
 #include <ECS/ComponentSystems.h>
@@ -78,7 +79,7 @@
 #include <functional>
 #include <algorithm>
 
-#define NUM_LIGHTS 	10
+#define NUM_LIGHTS 	1
 
 typedef struct
 {
@@ -102,16 +103,17 @@ std::vector<BeamSegment> BeamSegments;
 char buffer[256];
 char buffer2[256];
 char buffer3[256];
-bool isRunning = true;
-bool ShowMap = false;
-bool Paused = false;
-bool IsDashing = false;
-bool DebugInfo = false;
-bool DebugEntityInfo = false;
-bool AnimationEditorOn = false;
-bool ParticleEditorOn = false;
-bool DeferredRenderingOn = true;
-bool AIControllerEnabled = false;
+bool isRunning 				= true;
+bool ShowMap 				= false;
+bool Paused 				= false;
+bool IsDashing 				= false;
+bool DebugInfo 				= false;
+bool DebugEntityInfo 		= false;
+bool AnimationEditorOn 		= false;
+bool ParticleEditorOn 		= false;
+bool DeferredRenderingOn 	= true;
+bool AIControllerEnabled 	= false;
+bool LightEditorOn 			= true;
 
 const int LEVELSIZE = 100;
 
@@ -185,7 +187,7 @@ int main(int argc, char** argv)
 	// Create Camera
 	Graphics::Camera2D Camera;
 	Camera.Init(screenWidth, screenHeight);
-	Camera.SetScale(0.55f); 
+	Camera.SetScale(1.0f); 
 	
 	// Create HUDCamera
 	Graphics::Camera2D HUDCamera;
@@ -212,7 +214,8 @@ int main(int argc, char** argv)
 
 	// Init AnimationEditor
 	Enjon::AnimationEditor::Init(&Input, SCREENWIDTH, SCREENHEIGHT);
-	
+
+
 	// Init level
 	Enjon::Graphics::SpriteBatch TileBatch;
 	TileBatch.Init();
@@ -255,6 +258,9 @@ int main(int argc, char** argv)
 
 	EG::SpriteBatch NormalsBatch;
 	NormalsBatch.Init();
+
+	EG::SpriteBatch DepthBatch;
+	DepthBatch.Init();
 
 	EG::SpriteBatch GroundTileNormalsBatch;
 	GroundTileNormalsBatch.Init();
@@ -362,17 +368,21 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* DeferredShader 	= EG::ShaderManager::GetShader("DeferredShader");
 	EG::GLSLProgram* DiffuseShader 		= EG::ShaderManager::GetShader("DiffuseShader");
 	EG::GLSLProgram* NormalsShader 		= EG::ShaderManager::GetShader("NormalsShader");
+	EG::GLSLProgram* DepthShader 		= EG::ShaderManager::GetShader("DepthShader");
 	EG::GLSLProgram* ScreenShader 		= EG::ShaderManager::GetShader("NoCameraProjection");
 	EG::GLSLProgram* BasicShader 		= EG::ShaderManager::GetShader("Basic");
 	EG::GLSLProgram* BasicLightShader 	= EG::ShaderManager::GetShader("BasicLighting");
 
 	// FBO
-	// float DWidth = SCREENWIDTH * 0.9f;
 	float DWidth = SCREENWIDTH;
-	float DHeight = DWidth * 0.5625f;
-	EG::FrameBufferObject* DiffuseFBO 	= new EG::FrameBufferObject(DWidth, DHeight);
-	EG::FrameBufferObject* NormalsFBO 	= new EG::FrameBufferObject(DWidth, DHeight);
+	float DHeight = SCREENHEIGHT;
+	EG::FrameBufferObject* DiffuseFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
+	EG::FrameBufferObject* NormalsFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
+	EG::FrameBufferObject* DepthFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
 	EG::FrameBufferObject* DeferredFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
+
+	// Init LightEditor
+	Enjon::LightEditor::Init(&Input, &Window, SCREENWIDTH, SCREENHEIGHT, DiffuseFBO, NormalsFBO, DepthFBO, DeferredFBO);
 
 
 	/////////////////
@@ -537,7 +547,7 @@ int main(int argc, char** argv)
 
 	const GLfloat constant = 1.0f; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)
     const GLfloat linear = 0.1f;
-    const GLfloat quadratic = 7.0f;
+    const GLfloat quadratic = 5.0f;
     // Then calculate radius of light volume/sphere
 
    	float LevelWidth = level.GetWidth();
@@ -545,8 +555,9 @@ int main(int argc, char** argv)
 	for (GLuint i = 0; i < NUM_LIGHTS; i++)
 	{
 		// EG::ColorRGBA16 Color = EG::RGBA16(ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, 2.5f);
-		EG::ColorRGBA16 Color = EG::RGBA16(0.2f, 0.2f, ER::Roll(250, 500) / 255.0f, 1.0f);
+		EG::ColorRGBA16 Color = EG::RGBA16(0.6f, 0.7f, ER::Roll(0, 255) / 255.0f, 1.0f);
 	    GLfloat maxBrightness = std::fmaxf(std::fmaxf(Color.r, Color.g), Color.b);  // max(max(lightcolor.r, lightcolor.g), lightcolor.b)
+	    // GLfloat maxBrightness = 100.0f;  // max(max(lightcolor.r, lightcolor.g), lightcolor.b)
 	    GLfloat Radius = (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2 * quadratic);
 		Light L = {
 					  // EM::Vec3(ER::Roll(0, -LevelWidth), ER::Roll(0, -LevelHeight), LightZ), 
@@ -589,17 +600,19 @@ int main(int argc, char** argv)
 		// Update HUDCamera
 		HUDCamera.Update();
 
-		// Update Input Manager
-		Input.Update();	
 
-		/*
 		{
 			auto L = &Lights.at(0);
-			const EM::Vec3* P = &World->TransformSystem->Transforms[Player].Position;
-			L->Position = EM::Vec3(P->x, P->y - P->z, LightZ);
-			L->Color = EG::RGBA16(4.0f, 3.0f, 3.0f, 1.0f);
+			// const EM::Vec3* P = &World->TransformSystem->Transforms[Player].Position;
+			// EM::Vec2 AddOn = EM::CartesianToIso(EM::Vec2(150 * cos(t), 150 * sin(t)));
+			// Calculate z
+			// auto Difference = EM::Vec2::Normalize(P->XY() - L->Position.XY());
+			// L->Position = EM::Vec3(P->x + AddOn.x - 200.0f, P->y - P->z + AddOn.y, 0.0f);
+			auto MP = Input.GetMouseCoords();
+			Camera.ConvertScreenToWorld(MP);
+			L->Position = EM::Vec3(MP, 0.0f);
+			L->Color = EG::RGBA16(1.0f, 0.5f, 0.0f, 1.0f);
 		}
-		*/
 
 		// Clear lights
 		LightsToDraw.clear();
@@ -623,9 +636,18 @@ int main(int argc, char** argv)
 			AnimationEditorOn = Enjon::AnimationEditor::Update();	
 		}
 
+		else if (LightEditorOn)
+		{
+			// Update editor
+			LightEditorOn = Enjon::LightEditor::Update();
+		}
+
 		// Game
 		else
 		{
+			// Update Input Manager
+			Input.Update();	
+
 			if (!Paused)
 			{
 				StartTicks = SDL_GetTicks();
@@ -729,13 +751,24 @@ int main(int argc, char** argv)
 		if (AnimationEditorOn)
 		{
 			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.06, 0.06, 0.06, 1.0));
-			// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.16f, 0.17f, 0.19f, 1.0f));
 	
 			// Show mouse
 			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
 	
 			// Render AnimationEditor scene
 			Enjon::AnimationEditor::Draw();
+		}
+
+		else if (LightEditorOn)
+		{
+			// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.06, 0.06, 0.06, 1.0));
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0f, 0.0f, 0.0f, 0.0f));
+	
+			// Show mouse
+			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
+	
+			// Render AnimationEditor scene
+			Enjon::LightEditor::Draw();
 		}
 
 		// Render game scene
@@ -760,6 +793,7 @@ int main(int argc, char** argv)
 			TextBatch.Begin(); 
 			HUDBatch.Begin();
 			DeferredBatch.Begin();
+			DepthBatch.Begin();
 
 			static uint32 Row = 0;
 			static uint32 Col = 0;
@@ -878,7 +912,23 @@ int main(int argc, char** argv)
 					auto Image = &World->Animation2DSystem->AnimComponents[e].CurrentAnimation->Frames.at(CurrentIndex);
 					auto Position = EntityPosition->XY();
 
-					EA::DrawFrame(*Image, Position, &EntityBatch, *Color, 1.5f, Position.y - World->TransformSystem->Transforms[e].Position.z);
+					// EA::DrawFrame(*Image, Position, &EntityBatch, *Color, 1.8f, Position.y - World->TransformSystem->Transforms[e].Position.z);
+
+					EntityBatch.Add(
+									EM::Vec4(Position, 300.0f, 300.0f * 0.87f),
+									EM::Vec4(0, 0, 1, 1),
+									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png").id,
+									*Color,
+									Position.y - World->TransformSystem->Transforms[e].Position.z
+									);
+
+					NormalsBatch.Add(
+									EM::Vec4(Position, 300.0f, 300.0f * 0.87f),
+									EM::Vec4(0, 0, 1, 1),
+									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_NormalDepth.png").id,
+									EG::RGBA16_White(),
+									Position.y - World->TransformSystem->Transforms[e].Position.z
+									);
 
 				}
 				else if (World->Types[e] == ECS::Component::EntityType::ITEM)
@@ -1141,6 +1191,13 @@ int main(int argc, char** argv)
 				}
 			}
 
+			// Draw some player 1 shit...
+			Graphics::Fonts::PrintText( PlayerPosition->x - 65.0f, 
+										PlayerPosition->y + 170.0f, 
+										1.0f, "P1", 
+										EG::FontManager::GetFont("8Bit_32"), TextBatch, 
+										Graphics::SetOpacity(Graphics::RGBA16_Orange(), 0.8f));
+
 			//////////////////////////////////////////
 
 			Enjon::Math::Vec2* A = &World->TransformSystem->Transforms[Player].CartesianPosition;
@@ -1156,7 +1213,8 @@ int main(int argc, char** argv)
 			EntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
 										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 10000000.0f);
 			// Draw player shadow
-			EntityBatch.Add(Math::Vec4(GroundPosition->x - 20.0f, GroundPosition->y - 20.0f, 45.0f, 128.0f), Sheet->GetUV(Frame), Sheet->texture.id,
+			EntityBatch.Add(Math::Vec4(GroundPosition->x - 20.0f, GroundPosition->y - 20.0f, 200.0f, 300.0f), EM::Vec4(0, 0, 1, 1), 
+										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/mainDudeSmall.png").id,
 										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1000000.0f, Enjon::Math::ToRadians(120.0f));
 
 		
@@ -1562,13 +1620,41 @@ int main(int argc, char** argv)
 				DebugSpatialBatch.End();
 			}
 
+
+			// Other shit
+
 			// Draw player again, this time transparent, so he doesn't get "occluded" behind anything
 			{
 				auto CurrentIndex = World->Animation2DSystem->AnimComponents[Player].CurrentIndex;
 				auto Image = &World->Animation2DSystem->AnimComponents[Player].CurrentAnimation->Frames.at(CurrentIndex);
 
-				EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::SetOpacity(EG::RGBA16_White(), 0.1f), 1.5f, -10000.0f);
+				// EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::SetOpacity(EG::RGBA16_White(), 0.1f), 1.5f, -10000.0f);
+
+				// EntityBatch.Add(
+				// 				EM::Vec4(PlayerPosition->x - 100.0f, PlayerPosition->y - 50.0f, 196 * 0.71f, 196),
+				// 				EM::Vec4(0, 0, 1, 1), 
+				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/mainDudeSmall.png", GL_LINEAR).id,
+				// 				EG::RGBA16_White(),
+				// 				PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z				
+				// 				);
+
+				// NormalsBatch.Add(
+				// 				EM::Vec4(PlayerPosition->x - 100.0f, PlayerPosition->y - 50.0f, 196 * 0.71f, 196),
+				// 				EM::Vec4(0, 0, 1, 1), 
+				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/mainDudeSmallNormal.png", GL_LINEAR).id,
+				// 				EG::RGBA16_White(),
+				// 				PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z				
+				// 				);
+
+				// DepthBatch.Add(
+				// 				EM::Vec4(PlayerPosition->x - 100.0f, PlayerPosition->y - 50.0f, 196 * 0.71f, 196),
+				// 				EM::Vec4(0, 0, 1, 1), 
+				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/mainDudeSmallDepth.png", GL_LINEAR).id,
+				// 				EG::RGBA16_White(),
+				// 				PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z				
+				// 				);
 			}
+
 
 
 			EntityBatch.End();
@@ -1577,6 +1663,7 @@ int main(int argc, char** argv)
 			MapEntityBatch.End(); 
 			HUDBatch.End();
 			NormalsBatch.End();
+			DepthBatch.End();
 
 			// Deferred rendering pass if enabled		
 			if (DeferredRenderingOn)
@@ -1590,8 +1677,8 @@ int main(int argc, char** argv)
 						DiffuseShader->SetUniformMat4("view", view);
 						DiffuseShader->SetUniformMat4("projection", projection);
 
-
 						GroundTileBatch.RenderBatch();
+
 						// Draw debug ground tiles
 						if (level.IsDrawDebugEnabled()) 
 						{
@@ -1627,6 +1714,22 @@ int main(int argc, char** argv)
 				}
 				NormalsFBO->Unbind();
 
+				// Depth Rendering
+				DepthFBO->Bind();
+				{
+					DepthShader->Use();
+					{
+						// Set up uniforms
+						DepthShader->SetUniformMat4("model", model);
+						DepthShader->SetUniformMat4("view", view);
+						DepthShader->SetUniformMat4("projection", projection);
+
+						DepthBatch.RenderBatch();
+					}
+					DepthShader->Unuse();
+				}
+				DepthFBO->Unbind();
+
 				// Deferred Render
 				glDisable(GL_DEPTH_TEST);
 				glBlendFunc(GL_ONE, GL_ONE);
@@ -1634,9 +1737,10 @@ int main(int argc, char** argv)
 				{
 					DeferredShader->Use();
 					{
-						static GLuint m_diffuseID 	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_diffuse");
-						static GLuint m_normalsID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_normals");
-						static GLuint m_positionID  = glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_position");
+						GLuint m_diffuseID 	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_diffuse");
+						GLuint m_normalsID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_normals");
+						GLuint m_positionID  = glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_position");
+						GLuint m_depthID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_depth");
 
 						EM::Vec3 CP = EM::Vec3(Camera.GetPosition(), 1.0f);
 
@@ -1658,6 +1762,12 @@ int main(int argc, char** argv)
 						glBindTexture(GL_TEXTURE_2D, DiffuseFBO->GetPositionTexture());
 						glUniform1i(m_positionID, 2);
 
+						// Bind depth
+						glActiveTexture(GL_TEXTURE3);
+						glEnable(GL_TEXTURE_2D);
+						glBindTexture(GL_TEXTURE_2D, DepthFBO->GetDiffuseTexture());
+						glUniform1i(m_depthID, 3);
+
 						glUniform1i(glGetUniformLocation(DeferredShader->GetProgramID(), "NumberOfLights"), LightsToDraw.size());
 
 						auto CameraScale = Camera.GetScale();
@@ -1669,13 +1779,15 @@ int main(int argc, char** argv)
 							glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Color").c_str()), L->Color.r, L->Color.g, L->Color.b, L->Color.a);
 							glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Radius").c_str()), L->Radius / CameraScale);
 							glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Falloff").c_str()), L->Falloff.x, L->Falloff.y, L->Falloff.z);
+							glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Depth").c_str()), L->Position.y);
 						}
 
 						// Set uniforms
 						glUniform2f(glGetUniformLocation(DeferredShader->GetProgramID(), "Resolution"),
 									 SCREENWIDTH, SCREENHEIGHT);
 						// glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.3f, 0.5f, 0.8f, 0.8f);
-						glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.6f, 0.6f, 0.7f, 1.0f);
+						glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.4f, 0.4f, 0.4f, 1.0f);
+						// glUniform4f(glGetUniformLocation(DeferredShader->GetProgramID(), "AmbientColor"), 0.0f, 0.0f, 0.0f, 1.0f);
 						glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), "ViewPos"), CP.x, CP.y, CP.z);
 
 						glUniformMatrix4fv(glGetUniformLocation(DeferredShader->GetProgramID(), "InverseCameraMatrix"), 1, 0, 
@@ -1886,8 +1998,13 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		ShowMap = !ShowMap;
 	}
 
+	if (Input->IsKeyPressed(SDLK_0))
+	{
+		LightEditorOn = !LightEditorOn;
+	}
+
 	if (Input->IsKeyPressed(SDLK_p)) {
-		// Paused = !Paused;
+
 		AnimationEditorOn = !AnimationEditorOn;
 	}
 

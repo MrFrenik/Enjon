@@ -22,8 +22,8 @@ void Level::Init(float x, float y, int rows, int cols)
 	// TODO(John): Bound entities within the level 
 
 	// m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png"), EM::iVec2(1, 1));
-	// m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledred.png"), EM::iVec2(1, 1));
-	m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/grid_square.png"), EM::iVec2(1, 1));
+	m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledred.png"), EM::iVec2(1, 1));
+	// m_tilesheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/grid_square.png"), EM::iVec2(1, 1));
 	// m_wallSheet.Init(Enjon::Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/wall_chunk.png"), EM::iVec2(1, 1));
 
 	// Set debug draw to false
@@ -35,8 +35,8 @@ void Level::Init(float x, float y, int rows, int cols)
 	m_OverlaysDirty = false;
 	
 	// float tilewidth = 512.0f;
-	// float tilewidth = 128.0f;
-	float tilewidth = 64.0f;
+	float tilewidth = 128.0f;
+	// float tilewidth = 64.0f;
 	float tileheight = tilewidth / 2.0f;
 	float wallWidth = tilewidth;
 	float wallHeight = 7.6f * tilewidth;

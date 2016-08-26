@@ -1,6 +1,9 @@
 #version 330 core
+in vec2 TexCoords;
 
-layout (location = 1) out vec4 depth;		// Normal
+layout (location = 0) out vec4 diffuse;  	// Diffuse
+layout (location = 1) out vec4 position;
+layout (location = 2) out vec4 normals;
 
 in DATA
 {
@@ -9,10 +12,14 @@ in DATA
 	vec4 Color;
 } fs_in;
 
+in vec4 FragPos;
+
 uniform sampler2D texture1;
 
 void main()
-{ 
-	depth = vec4(0, 0, 0, 1);
-	depth.r = gl_FragCoord.z;            
+{             
+    diffuse = fs_in.Color * texture2D(texture1, fs_in.TexCoords);
+    position = FragPos;
+    normals = fs_in.Color * texture2D(texture1, fs_in.TexCoords);
 }
+

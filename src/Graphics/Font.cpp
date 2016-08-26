@@ -91,71 +91,6 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	        // Unbind texture
 		    glBindTexture(GL_TEXTURE_2D, 0);
 	    }
-	    
-
-	    /*
-	    for (GLubyte c = 0; c < 128; c++)
-	    {
-		    // Load The Glyph For Our Character.
-		    if(FT_Load_Glyph( face, FT_Get_Char_Index( face, c ), FT_LOAD_DEFAULT ))
-		        throw std::runtime_error("FT_Load_Glyph failed");
-		 
-		    // Move The Face's Glyph Into A Glyph Object.
-		    FT_Glyph glyph;
-		    if(FT_Get_Glyph( face->glyph, &glyph ))
-		        throw std::runtime_error("FT_Get_Glyph failed");
-		 
-		    // Convert The Glyph To A Bitmap.
-		    FT_Glyph_To_Bitmap( &glyph, ft_render_mode_normal, 0, 1 );
-		    FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
-
-		    // This Reference Will Make Accessing The Bitmap Easier.
-		    FT_Bitmap& bitmap=bitmap_glyph->bitmap;
-		 
-			// Use Our Helper Function To Get The Widths Of
-			// The Bitmap Data That We Will Need In Order To Create
-			// Our Texture.
-			int width = next_p2( bitmap.width );
-			int height = next_p2( bitmap.rows );
-			 
-			// Allocate Memory For The Texture Data.
-			GLubyte* expanded_data = new GLubyte[ 2 * width * height];
-			 
-			// Here We Fill In The Data For The Expanded Bitmap.
-			// Notice That We Are Using A Two Channel Bitmap (One For
-			// Channel Luminosity And One For Alpha), But We Assign
-			// Both Luminosity And Alpha To The Value That We
-			// Find In The FreeType Bitmap.
-			// We Use The ?: Operator To Say That Value Which We Use
-			// Will Be 0 If We Are In The Padding Zone, And Whatever
-			// Is The FreeType Bitmap Otherwise.
-			for(int j=0; j <height;j++) 
-			{
-			    for(int i=0; i < width; i++)
-			    {
-			        expanded_data[2*(i+j*width)]= expanded_data[2*(i+j*width)+1] =
-			            (i>=bitmap.width || j>=bitmap.rows) ?
-			            0 : bitmap.buffer[i + bitmap.width*j];
-			    }
-			}
-			// Now We Just Setup Some Texture Parameters.
-			GLuint texture;
-			glGenTextures(1, &texture);
-			glBindTexture( GL_TEXTURE_2D, texture);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-			 
-			// Here We Actually Create The Texture Itself, Notice
-			// That We Are Using GL_LUMINANCE_ALPHA To Indicate That
-			// We Are Using 2 Channel Data.
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-			    GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data );
-			
-			 
-			// With The Texture Created, We Don't Need The Expanded Data Anymore.
-			delete [] expanded_data;
-	    }
-	    */
 
 	    // Destroy FreeType once we're finished
 	    FT_Done_Face(face);
@@ -238,7 +173,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	        GLfloat h = ch.Size.y * scale;
 
 	        Enjon::Math::Vec4 DestRect(xpos, ypos, w, h);
-	        Enjon::Math::Vec4 UV(0, 0, 1, 1);
+	        Enjon::Math::Vec4 UV(0.01, 0.01, 0.99, 0.99);
 
 	        // Add to batch
 	        if (Angle) Batch.Add(DestRect, UV, ch.TextureID, Color, Depth, Angle);
