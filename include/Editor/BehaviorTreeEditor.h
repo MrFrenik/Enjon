@@ -14,7 +14,6 @@
 /*-- 3rd Party Includes --*/
 #include <SDL2/SDL.h>
 
-
 namespace Enjon { namespace BehaviorTreeEditor {
 
 	bool Init(EI::InputManager* Input, float ScreenWidth, float ScreenHeight);

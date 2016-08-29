@@ -43,8 +43,10 @@
 /*-- External/Engine Libraries includes --*/
 #include <Enjon.h>
 #include <Editor/AnimationEditor.h>
+#include <Editor/BehaviorTreeEditor.h>
 #include <Editor/LightEditor.h>
 #include <System/Internals.h>
+#include <BehaviorTree/BehaviorTreeManager.h>
 
 /*-- Entity Component System includes --*/
 #include <ECS/ComponentSystems.h>
@@ -66,7 +68,6 @@
 #include "AnimationManager.h"
 #include "AnimManager.h"
 #include "Level.h"
-#include "BehaviorTreeManager.h"
 #include "Loot.h"
 
 /*-- Standard Library includes --*/
@@ -219,6 +220,9 @@ int main(int argc, char** argv)
 
 	// Init AnimationEditor
 	Enjon::AnimationEditor::Init(&Input, SCREENWIDTH, SCREENHEIGHT);
+
+	// Init BehaviorTreeEditor
+	Enjon::BehaviorTreeEditor::Init(&Input, SCREENWIDTH, SCREENHEIGHT);
 
 
 	// Init level
@@ -416,7 +420,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 100;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = -50.0f;

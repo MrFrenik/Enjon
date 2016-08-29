@@ -10,7 +10,7 @@
 #include "ECS/Entity.h"
 #include "ECS/AIControllerSystem.h"
 #include "ECS/CollisionSystem.h"
-#include "BehaviorTreeManager.h"
+#include "BehaviorTree/BehaviorTreeManager.h"
 #include "AnimManager.h"
 
 #include <BehaviorTree/BT.h>

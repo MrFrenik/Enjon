@@ -964,19 +964,19 @@ namespace ECS{ namespace Systems { namespace Collision {
 					// DrawBody(Manager, ColliderPosition->XY());
 
 					// Let's try and make an explosion of debris
-					auto max_debris = ER::Roll(15, 20);
-					for (auto e = 0; e < max_debris; e++)
-					{
-						auto id = ECS::Factory::CreateGib(
-																	Manager, 
-																	*ColliderPosition, 
-																	20.0f * EM::Vec3(
-																						-Difference.x + static_cast<float>(ER::Roll(-2, 2)) / 10.0f, 
-																						-Difference.y + static_cast<float>(ER::Roll(-2, 2)) / 10.0f, 
-																						0.0f
-																					)
-																);
-					}
+					// auto max_debris = ER::Roll(15, 20);
+					// for (auto e = 0; e < max_debris; e++)
+					// {
+					// 	auto id = ECS::Factory::CreateGib(
+					// 												Manager, 
+					// 												*ColliderPosition, 
+					// 												20.0f * EM::Vec3(
+					// 																	-Difference.x + static_cast<float>(ER::Roll(-2, 2)) / 10.0f, 
+					// 																	-Difference.y + static_cast<float>(ER::Roll(-2, 2)) / 10.0f, 
+					// 																	0.0f
+					// 																)
+					// 											);
+					// }
 
 					// Remove collider
 					EntitySystem::RemoveEntity(Manager, B_ID);

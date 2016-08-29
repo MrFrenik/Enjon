@@ -83,11 +83,11 @@ namespace BT
 			void (*Action)(BehaviorTree*);
 	};
 
-	class FindRandomLocationTask : public Task<FindRandomLocationTask>
+	class FindRandomLocation : public Task<FindRandomLocation>
 	{
 		public:
 
-		FindRandomLocationTask(BehaviorTree* BT)
+		FindRandomLocation(BehaviorTree* BT)
 		{
 			this->BTree = BT;
 			this->Action = [](BT::BehaviorTree* BT)
@@ -106,7 +106,7 @@ namespace BT
 
 		std::string String()
 		{
-			return std::string("FindRandomLocationTask");
+			return std::string("FindRandomLocation");
 		}
 
 		BehaviorNodeState Run()
@@ -133,11 +133,11 @@ namespace BT
 			void (*Action)(BehaviorTree*);
 	};
 
-	class SetPlayerLocationAsTargetTask : public Task<SetPlayerLocationAsTargetTask>
+	class SetPlayerLocationAsTarget : public Task<SetPlayerLocationAsTarget>
 	{
 		public:
 
-		SetPlayerLocationAsTargetTask(BehaviorTree* BT)
+		SetPlayerLocationAsTarget(BehaviorTree* BT)
 		{
 			this->BTree = BT;
 			this->Action = [](BT::BehaviorTree* BT)
@@ -154,7 +154,7 @@ namespace BT
 
 		std::string String()
 		{
-			return std::string("SetPlayerLocationAsTargetTask");
+			return std::string("SetPlayerLocationAsTarget");
 		}
 
 		BehaviorNodeState Run()
@@ -181,11 +181,11 @@ namespace BT
 			void (*Action)(BehaviorTree*);
 	};
 
-	class StopMovingTask : public Task<StopMovingTask>
+	class StopMoving : public Task<StopMoving>
 	{
 		public:
 
-		StopMovingTask(BehaviorTree* BT)
+		StopMoving(BehaviorTree* BT)
 		{
 			this->BTree = BT;
 			this->Action = [](BT::BehaviorTree* BT)
@@ -200,7 +200,7 @@ namespace BT
 
 		std::string String()
 		{
-			return std::string("StopMovingTask");
+			return std::string("StopMoving");
 		}
 
 		BehaviorNodeState Run()
@@ -228,11 +228,11 @@ namespace BT
 			void (*Action)(BehaviorTree*);
 	};
 
-	class MoveToTargetLocationTask : public Task<MoveToTargetLocationTask>
+	class MoveToTargetLocation : public Task<MoveToTargetLocation>
 	{
 		public:
 
-		MoveToTargetLocationTask(BehaviorTree* BT)
+		MoveToTargetLocation(BehaviorTree* BT)
 		{
 			this->BTree = BT;
 			this->Action = [](BT::BehaviorTree* BT)
@@ -254,7 +254,7 @@ namespace BT
 
 		std::string String()
 		{
-			return std::string("MoveToTargetLocationTask");
+			return std::string("MoveToTargetLocation");
 		}
 
 		BehaviorNodeState Run()

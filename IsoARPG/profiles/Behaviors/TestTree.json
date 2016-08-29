@@ -1,0 +1,60 @@
+{
+	"TestTree": 
+	{
+		"Sequence": 
+		{
+			"Order": 0,
+			"Children": 
+			{
+				"SetPlayerLocationAsTarget":
+				{
+					"Order": 0
+				},
+				"RepeatUntilFail":
+				{
+					"Order": 1,
+					"Children":
+					{
+						"Sequence": 
+						{
+							"Order": 0,
+							"Children": 
+							{
+								"Inverter": 
+								{
+									"Order": 0, 
+									"Children":
+									{
+										"IsTargetWithinRange": 
+										{
+											"Order": 0
+										}
+									}
+								},
+								"MoveToTargetLocation":
+								{
+									"Order": 1
+								}
+							}
+						}
+					}
+				},
+				"Sequence":
+				{
+					"Order": 2,
+					"Children": 
+					{
+						"StopMoving":
+						{
+							"Order": 0
+						},
+						"WaitWBBRead": 
+						{
+							"Order": 1
+						}
+					}
+				}
+			}
+		}
+	}
+}

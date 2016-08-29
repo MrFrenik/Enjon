@@ -30,9 +30,6 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				// auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				// auto SS = &SO->GetData()->States;
-
 				auto SO = &BTree->GetBlackBoard()->SO;
 				auto SS = &SO->States;
 				SO->CurrentNode = this;
@@ -87,7 +84,6 @@ namespace BT
 				if (S == BehaviorNodeState::FAILURE)
 				{
 					State = BehaviorNodeState::FAILURE;
-					std::cout << "Sequence failed!" << std::endl;
 					SS->at(this->TreeIndex) = BehaviorNodeState::FAILURE;
 					return BehaviorNodeState::FAILURE;
 				}

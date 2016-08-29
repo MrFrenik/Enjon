@@ -53,10 +53,10 @@ namespace BT
 
 	};	
 
-	class IsTargetWithinRangeConditional : public Task<IsTargetWithinRangeConditional>
+	class IsTargetWithinRange : public Task<IsTargetWithinRange>
 	{
 		public:
-			IsTargetWithinRangeConditional(BehaviorTree* BT) 
+			IsTargetWithinRange(BehaviorTree* BT) 
 			{ 
 				BTree = BT; 
 				Action = [](BT::BehaviorTree* BT)
@@ -84,13 +84,13 @@ namespace BT
 
 				Init(); 
 			}
-			~IsTargetWithinRangeConditional() {}
+			~IsTargetWithinRange() {}
 
 			void Init() { State = BehaviorNodeState::INVALID; }
 
 			std::string String()
 			{
-				return std::string("IsTargetWithinRangeConditional");
+				return std::string("IsTargetWithinRange");
 			}
 
 			BehaviorNodeState Run()

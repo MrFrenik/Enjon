@@ -19,10 +19,10 @@ inline BT::BehaviorTree* TestTree()
 	BT::Sequence* SEQ3 = new BT::Sequence(BT);
 
 	// Set PLayer location
-	BT::SetPlayerLocationAsTargetTask* ST1 = new BT::SetPlayerLocationAsTargetTask(BT);
+	BT::SetPlayerLocationAsTarget* ST1 = new BT::SetPlayerLocationAsTarget(BT);
 
 	// Move to location
-	BT::MoveToTargetLocationTask* ST2 = new BT::MoveToTargetLocationTask(BT);
+	BT::MoveToTargetLocation* ST2 = new BT::MoveToTargetLocation(BT);
 
 	// Repeat until fail
 	BT::RepeatUntilFail* RUF = new BT::RepeatUntilFail(BT);
@@ -31,11 +31,11 @@ inline BT::BehaviorTree* TestTree()
 	BT::Inverter* INV = new BT::Inverter(BT);
 
 	// Check if target within range
-	BT::IsTargetWithinRangeConditional* CT = new BT::IsTargetWithinRangeConditional(BT);
+	BT::IsTargetWithinRange* CT = new BT::IsTargetWithinRange(BT);
 
 	BT::WaitWBBRead* W = new BT::WaitWBBRead(BT);
 
-	BT::StopMovingTask* ST3 = new BT::StopMovingTask(BT);
+	BT::StopMoving* ST3 = new BT::StopMoving(BT);
 
 	// Build tree
 	BT->SetRoot(SEQ);

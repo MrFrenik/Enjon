@@ -1,10 +1,7 @@
-#include "BehaviorTreeManager.h"
-
+#include "BehaviorTree/BehaviorTreeManager.h"
 #include "TestTree.h"
-#include "BeastTree.h"
 
 using namespace BT;
-using namespace BeastBehaviorTree;
 
 namespace BTManager
 {

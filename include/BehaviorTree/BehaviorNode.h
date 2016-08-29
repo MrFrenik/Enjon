@@ -26,13 +26,13 @@ namespace BT
 	{
 		public:
 
-			virtual void Init() 									= 0; 
-			virtual BehaviorNodeState Run()							= 0;
-			virtual u32 GetChildSize() 								= 0;
-			virtual	std::vector<BehaviorNodeBase*> GetAllChildren()	= 0; 
-			virtual u32 SetIndicies(u32 I)  						= 0;
-			virtual void Reset() 									= 0;
-			virtual std::string String()							= 0;
+			virtual void Init() = 0; 
+			virtual BehaviorNodeState Run() = 0;
+			virtual u32 GetChildSize() = 0;
+			virtual	std::vector<BehaviorNodeBase*> GetAllChildren() = 0; 
+			virtual u32 SetIndicies(u32 I) = 0;
+			virtual void Reset() = 0;
+			virtual std::string String() = 0;
 
 			inline BehaviorNodeState GetState() const { return State; }
 			inline void SetState(BehaviorNodeState S) { State = S; }
@@ -59,7 +59,7 @@ namespace BT
 	class BlackBoardComponentBase
 	{
 		public:
-			virtual void Init() 	= 0;
+			virtual void Init() = 0;
 	};
 
 	template <typename T>
@@ -73,7 +73,7 @@ namespace BT
 				this->InternalData.Value = Data;
 			}
 
-			virtual void Init(){}
+			void Init(){}
 
 			// Get and set data
 			inline T GetData() { return InternalData.Value; }
