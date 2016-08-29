@@ -13,6 +13,7 @@ namespace BT
 				: Composite(L)
 			{ 
 				this->BB = BB; Init(); 
+				Type = BehaviorNodeType::COMPOSITE;
 			}
 
 			~Selector(){}

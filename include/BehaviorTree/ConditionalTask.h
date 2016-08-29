@@ -15,6 +15,7 @@ namespace BT
 				BTree = BT; 
 				Action = A;
 				Init(); 
+				Type = BehaviorNodeType::LEAF;
 			}
 			~ConditionalTask() {}
 
@@ -82,6 +83,7 @@ namespace BT
 					   		return false;
 					   };
 
+				Type = BehaviorNodeType::LEAF;
 				Init(); 
 			}
 			~IsTargetWithinRange() {}
@@ -92,6 +94,9 @@ namespace BT
 			{
 				return std::string("IsTargetWithinRange");
 			}
+
+			void AddChild(BehaviorNodeBase* B)
+			{}
 
 			BehaviorNodeState Run()
 			{

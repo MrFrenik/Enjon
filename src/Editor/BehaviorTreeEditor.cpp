@@ -1,6 +1,7 @@
 /*-- Enjon includes --*/
 #include "Enjon.h"
 #include "Editor/BehaviorTreeEditor.h"
+#include "BehaviorTree/BT.h"
 #include "IO/InputManager.h"
 #include "IO/ResourceManager.h"
 #include "Graphics/ShaderManager.h"
@@ -29,18 +30,159 @@
 using namespace EA;
 using json = nlohmann::json;
 
-void PrintJSONChild(json& Object)
+struct BTObject
+{
+	std::string Name;
+	Enjon::uint32 Index;
+	std::vector<BTObject*> Objects;  
+};
+
+void FillJSONObjects(json& Object, struct BTObject* BTO)
 {
 	for (auto it = Object.begin(); it != Object.end(); ++it)
 	{
-		std::cout << it.key() << std::endl;
-	
+		// Recurse through children
 		if (it.value().is_object())
 		{
-			PrintJSONChild(it.value());
+			// Make new struct
+			struct BTObject* O = new struct BTObject{};
+			O->Name = it.key();
+			 FillJSONObjects(it.value(), O);
+			 BTO->Objects.push_back(O);
+		}
+	}
+
+
+}
+
+void PrintJSONObjects(struct BTObject& O, int depth = 0)
+{
+	for (auto& o : O.Objects)
+	{
+		for (auto i = 0; i < depth; i++)
+		{
+			std::cout << '\t';
+		}
+
+		std::cout << o->Name << std::endl;
+		PrintJSONObjects(*o, depth + 1);
+
+	}
+}
+
+void FillBT(json& Object, BT::BehaviorTree* BTree, BT::BehaviorNodeBase* Node)
+{
+	// Loop through object
+	for (auto it = Object.begin(); it != Object.end(); ++it)
+	{
+		// Recurse through children
+		if (it.value().is_object())
+		{
+			// Make new struct
+			auto KeyName = it.key().substr(3, it.key().length() - 1);
+
+			if (!KeyName.compare("Sequence"))
+			{
+				auto NewNode = new BT::Sequence(BTree);
+				FillBT(it.value(), BTree, NewNode);
+				Node->AddChild(NewNode);
+			}
+			else if (!KeyName.compare("SetPlayerLocationAsTarget"))
+			{
+				auto NewNode = new BT::SetPlayerLocationAsTarget(BTree);
+				Node->AddChild(NewNode);
+			}
+			else if (!KeyName.compare("RepeatUntilFail"))
+			{
+				auto NewNode = new BT::RepeatUntilFail(BTree);
+				FillBT(it.value(), BTree, NewNode);
+				Node->AddChild(NewNode);
+			}
+			else if (!KeyName.compare("IsTargetWithinRange"))
+			{
+				auto NewNode = new BT::IsTargetWithinRange(BTree);
+				Node->AddChild(NewNode);
+			}
+			else if (!KeyName.compare("MoveToTargetLocation"))
+			{
+				auto NewNode = new BT::MoveToTargetLocation(BTree);
+				Node->AddChild(NewNode);
+			}
+			else if (!KeyName.compare("StopMoving"))
+			{
+				auto NewNode = new BT::StopMoving(BTree);
+				Node->AddChild(NewNode);
+			}
+			else if (!KeyName.compare("WaitWBBRead"))
+			{
+				auto NewNode = new BT::WaitWBBRead(BTree);
+				Node->AddChild(NewNode);
+			}
+			else if (!KeyName.compare("Inverter"))
+			{
+				auto NewNode = new BT::Inverter(BTree);
+				FillBT(it.value(), BTree, NewNode);
+				Node->AddChild(NewNode);
+			}
+			else
+			{
+				// Couldn't find it, so error
+				Enjon::Utils::FatalError("BehaviorTreeEditor::FillBT::Node not found in JSON file: " + KeyName);
+			}
 		}
 	}
 }
+
+void PrintBTree(BT::BehaviorNodeBase* Root, int depth = 0)
+{
+	std::cout << Root->String() << std::endl;
+
+	if (Root->Type == BT::BehaviorNodeType::COMPOSITE)
+	{
+		for (auto c : static_cast<BT::Sequence*>(Root)->Children)
+		{
+			if (c->Type == BT::BehaviorNodeType::COMPOSITE || 
+				c->Type == BT::BehaviorNodeType::DECORATOR)
+				PrintBTree(c, depth + 1);
+		}
+	}
+	else if (Root->Type == BT::BehaviorNodeType::DECORATOR)
+	{
+		if (static_cast<BT::Inverter*>(Root)->Child->Type == BT::BehaviorNodeType::COMPOSITE || 
+			static_cast<BT::Inverter*>(Root)->Child->Type == BT::BehaviorNodeType::DECORATOR)
+			PrintBTree(static_cast<BT::Inverter*>(Root)->Child, depth + 1);
+	}
+}
+
+BT::BehaviorTree* CreateBehaviorTreeFromJSON(json& Object, std::string TreeName)
+{
+	BT::BehaviorTree* BTree = new BT::BehaviorTree();
+
+	// Get root from JSON
+	auto RootObject = Object.at(TreeName);
+	auto RootKeyName = RootObject.begin().key();
+	auto RootName = RootKeyName.substr(3, RootKeyName.length() - 1);	
+
+	// TODO(John): Have a map of function pointers that will create a BT type and return it for me
+	if (!RootName.compare("Sequence"))
+	{
+		BTree->Root = new  BT::Sequence(BTree);
+	}
+
+	// Make sure valid
+	if (BTree->Root == nullptr) 
+	{
+		Enjon::Utils::FatalError("BehaviorTreeEditor::CreateBehaviorTreeFromJSON::Root null.");
+	}
+
+	// Now need to fill this fucker up!
+	FillBT(RootObject, BTree, BTree->Root);
+
+	return BTree;
+}
+
+
+
 
 namespace Enjon { namespace BehaviorTreeEditor {
 
@@ -101,9 +243,20 @@ namespace Enjon { namespace BehaviorTreeEditor {
 	    
 	   	// parse and serialize JSON
 	   	json j_complete = json::parse(Json);
+	   	json TestTree = j_complete.at("TestTree");
+
+	   	// Create root Object
+	   	struct BTObject Root = {};
 
 	   	// Get handle to frames data
-	   	PrintJSONChild(j_complete);
+	    FillJSONObjects(TestTree, &Root);
+
+	    // Print objects
+	    // PrintJSONObjects(Root, 0);
+
+	    auto BTree = CreateBehaviorTreeFromJSON(j_complete, std::string("TestTree"));
+
+	    PrintBTree(BTree->Root);
 
 		return true;	
 	}

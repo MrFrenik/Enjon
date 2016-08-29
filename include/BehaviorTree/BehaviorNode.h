@@ -21,6 +21,7 @@ namespace BT
 	class BlackBoard;
 
 	enum BehaviorNodeState { RUNNING, SUCCESS, FAILURE, INVALID };
+	enum BehaviorNodeType 	{ LEAF, COMPOSITE, DECORATOR };
 
 	class BehaviorNodeBase
 	{
@@ -33,12 +34,16 @@ namespace BT
 			virtual u32 SetIndicies(u32 I) = 0;
 			virtual void Reset() = 0;
 			virtual std::string String() = 0;
+			virtual void AddChild(BehaviorNodeBase* B) = 0;
 
 			inline BehaviorNodeState GetState() const { return State; }
 			inline void SetState(BehaviorNodeState S) { State = S; }
 			inline BlackBoard* GetBB() { return BB; }
 			inline void SetParent(BehaviorNodeBase* P) { Parent = P; }
 			u32 GetIndex() const { return TreeIndex; }
+
+		public:
+			BehaviorNodeType Type;
 
 		protected:
 			BehaviorNodeState State;
@@ -184,9 +189,10 @@ namespace BT
 			inline BlackBoard* GetBlackBoard() { return BB; }
 			inline BehaviorNodeState GetState() const { return State; }
 
+		public:
+			BehaviorNodeBase* Root;
 
 		private:
-			BehaviorNodeBase* Root;
 			BlackBoard* BB;
 			BehaviorNodeState State;
 
@@ -272,7 +278,7 @@ namespace BT
 				Child->Reset();
 			}
 
-		protected:
+		public:
 			BehaviorNodeBase* Child;
 
 	};
@@ -299,11 +305,11 @@ namespace BT
 				State = BehaviorNodeState::INVALID;
 			}
 
-			Composite* AddChild(BehaviorNodeBase* N)
+			void AddChild(BehaviorNodeBase* N)
 			{
 				if (N) Children.push_back(N);
 
-				return this;
+				// return this;
 			}
 
 			void AddChildren(std::initializer_list<BehaviorNodeBase*> V)
@@ -369,7 +375,7 @@ namespace BT
 
 			inline std::vector<BehaviorNodeBase*> GetAllChildren() { return Children; }
 
-		protected:
+		public:
 			std::vector<BehaviorNodeBase*> Children;
 			std::vector<BehaviorNodeBase*>::const_iterator Itr;
 			BehaviorNodeBase* CurrentNode;

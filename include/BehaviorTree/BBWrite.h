@@ -21,6 +21,7 @@ namespace BT
 							};
 				Init(); 
 				Child = B; 
+				Type = BehaviorNodeType::DECORATOR;
 			}
 
 			~BBWrite(){}

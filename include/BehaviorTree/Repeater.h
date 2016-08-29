@@ -10,10 +10,10 @@ namespace BT
 		public:
 
 			Repeater() {}
-			Repeater(BlackBoard* BB, i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = nullptr; }
-			Repeater(BlackBoard* BB, BehaviorNodeBase* B, i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = B; }
-			Repeater(BehaviorTree* BT, BehaviorNodeBase* B, i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = B; }
-			Repeater(BehaviorTree* BT, i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = nullptr; }
+			Repeater(BlackBoard* BB, i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = nullptr; Type = BehaviorNodeType::DECORATOR; }
+			Repeater(BlackBoard* BB, BehaviorNodeBase* B, i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = B; Type = BehaviorNodeType::DECORATOR;}
+			Repeater(BehaviorTree* BT, BehaviorNodeBase* B, i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = B; Type = BehaviorNodeType::DECORATOR;}
+			Repeater(BehaviorTree* BT, i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = nullptr; Type = BehaviorNodeType::DECORATOR; }
 			~Repeater() {}
 
 			std::string String()

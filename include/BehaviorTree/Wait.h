@@ -35,6 +35,7 @@ namespace BT
 				Clock.x = 0.0f;
 				CurrentLoop = 0;
 				State = BehaviorNodeState::INVALID;
+				Type = BehaviorNodeType::LEAF;
 
 			}
 
@@ -118,6 +119,7 @@ namespace BT
 			void Init()
 			{
 				State = BehaviorNodeState::INVALID;
+				Type = BehaviorNodeType::LEAF;
 			}
 
 			std::string String()

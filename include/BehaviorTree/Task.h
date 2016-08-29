@@ -24,6 +24,9 @@ namespace BT
 				return static_cast<T*>(this)->Run();
 			}
 
+			void AddChild(BehaviorNodeBase* B)
+			{}
+
 			void Reset()
 			{
 				// Get State Object from BlackBoard
@@ -51,6 +54,7 @@ namespace BT
 			this->BTree = BT;
 			this->Action = Action;
 			State = BehaviorNodeState::INVALID;
+			Type = BehaviorNodeType::LEAF;
 		}
 
 		BehaviorNodeState Run()
@@ -102,6 +106,7 @@ namespace BT
 						   };
 
 			State = BehaviorNodeState::INVALID;
+			Type = BehaviorNodeType::LEAF;
 		}
 
 		std::string String()
@@ -150,6 +155,7 @@ namespace BT
 						   };
 
 			State = BehaviorNodeState::INVALID;
+			Type = BehaviorNodeType::LEAF;
 		}
 
 		std::string String()
@@ -196,6 +202,7 @@ namespace BT
 							 };
 
 			State = BehaviorNodeState::INVALID;
+			Type = BehaviorNodeType::LEAF;
 		}
 
 		std::string String()
@@ -250,6 +257,7 @@ namespace BT
 							 };
 
 			State = BehaviorNodeState::INVALID;
+			Type = BehaviorNodeType::LEAF;
 		}
 
 		std::string String()

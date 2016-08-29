@@ -9,7 +9,7 @@ namespace BT
 	{
 		public:
 
-			Inverter(BehaviorTree* BT, BehaviorNodeBase* B = nullptr) { this->BTree = BT; Init(); Child = B; }
+			Inverter(BehaviorTree* BT, BehaviorNodeBase* B = nullptr) { this->BTree = BT; Init(); Child = B; Type = BehaviorNodeType::DECORATOR; }
 			~Inverter() {}
 
 			void Init() { State = BehaviorNodeState::INVALID; Child = nullptr; }

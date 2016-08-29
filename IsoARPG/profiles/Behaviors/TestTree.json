@@ -1,57 +1,32 @@
 {
 	"TestTree": 
 	{
-		"Sequence": 
+		"00_Sequence": 
 		{
-			"Order": 0,
-			"Children": 
+			"00_SetPlayerLocationAsTarget":
 			{
-				"SetPlayerLocationAsTarget":
+			},
+			"01_RepeatUntilFail":
+			{
+				"00_Sequence": 
 				{
-					"Order": 0
-				},
-				"RepeatUntilFail":
-				{
-					"Order": 1,
-					"Children":
+					"00_Inverter": 
 					{
-						"Sequence": 
+						"00_IsTargetWithinRange": 
 						{
-							"Order": 0,
-							"Children": 
-							{
-								"Inverter": 
-								{
-									"Order": 0, 
-									"Children":
-									{
-										"IsTargetWithinRange": 
-										{
-											"Order": 0
-										}
-									}
-								},
-								"MoveToTargetLocation":
-								{
-									"Order": 1
-								}
-							}
 						}
+					},
+					"01_MoveToTargetLocation":
+					{
 					}
 				},
-				"Sequence":
+				"01_Sequence":
 				{
-					"Order": 2,
-					"Children": 
+					"00_StopMoving":
 					{
-						"StopMoving":
-						{
-							"Order": 0
-						},
-						"WaitWBBRead": 
-						{
-							"Order": 1
-						}
+					},
+					"01_WaitWBBRead": 
+					{
 					}
 				}
 			}

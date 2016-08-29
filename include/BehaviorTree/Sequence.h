@@ -13,11 +13,13 @@ namespace BT
 			Sequence(BlackBoard* BB, std::initializer_list<BehaviorNodeBase*> L = {}) : Composite(L)
 			{ 
 				this->BB = BB; Init(); 
+				Type = BehaviorNodeType::COMPOSITE;
 			}
 
 			Sequence(BehaviorTree* BT, std::initializer_list<BehaviorNodeBase*> L = {}) : Composite(L)
 			{ 
 				this->BTree = BT; Init(); 
+				Type = BehaviorNodeType::COMPOSITE;
 			}
 
 			~Sequence(){}

@@ -26,6 +26,7 @@ namespace BT
 			{
 				State = BehaviorNodeState::INVALID;
 				Child = nullptr;
+				Type = BehaviorNodeType::DECORATOR;
 			}
 
 			std::string String()
