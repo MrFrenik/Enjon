@@ -1,5 +1,5 @@
-#ifndef GUI_ANIMATION_ELEMENT_H
-#define GUI_ANIMATION_ELEMENT_H
+#ifndef ENJON_GUI_ANIMATION_ELEMENT_H
+#define ENJON_GUI_ANIMATION_ELEMENT_H
 
 #include "GUI/GUIElement.h"
 #include "Graphics/Animations.h"

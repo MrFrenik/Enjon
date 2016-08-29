@@ -1,5 +1,5 @@
-#ifndef CURSOR_MANAGER_H
-#define CURSOR_MANAGER_H
+#ifndef ENJON_CURSOR_MANAGER_H
+#define ENJON_CURSOR_MANAGER_H
 
 #include <SDL2/SDL.h>
 #include "Utils/Errors.h"

@@ -70,8 +70,8 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 	        // Now store character for later use
 	        Character character = {
@@ -131,7 +131,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
         GLfloat h = ch.Size.y * scale;
 
         Enjon::Math::Vec4 DestRect(xpos, ypos, w, h);
-        Enjon::Math::Vec4 UV(0, 0, 1, 1);
+        Enjon::Math::Vec4 UV(0.01f, 0.01f, 0.98f, 0.98f);
 
         *advance = x + (ch.Advance >> 6) * scale;
 
@@ -173,7 +173,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	        GLfloat h = ch.Size.y * scale;
 
 	        Enjon::Math::Vec4 DestRect(xpos, ypos, w, h);
-	        Enjon::Math::Vec4 UV(0.01, 0.01, 0.99, 0.99);
+	        Enjon::Math::Vec4 UV(0.01f, 0.01f, 0.98f, 0.98f);
 
 	        // Add to batch
 	        if (Angle) Batch.Add(DestRect, UV, ch.TextureID, Color, Depth, Angle);

@@ -95,7 +95,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 	}
 
 	/* Adds a particle to a batch */
-	uint32 AddParticle(Math::Vec3 P, Math::Vec3 V, Math::Vec2 D, ColorRGBA16 C, GLuint ID, float DR, ParticleBatch2D* PB)
+	uint32 AddParticle(Math::Vec3 P, Math::Vec3 V, Math::Vec2 D, ColorRGBA16 C, GLuint ID, float DR, ParticleBatch2D* PB, EM::Vec4 UV)
 	{
 		// Get next available index in particles
 		uint32 i = FindNextAvailableParticle(PB);
@@ -111,6 +111,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		p->DecayRate = DR; 
 		p->Color = C;
 		p->TexID = ID;
+		p->UV = UV;
 
 		return 1;
 	}
@@ -187,7 +188,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 					if (P.LifeTime > 0.0f && P.Color.a > 0.0f)
 					{
 						// Add particle to sprite batch to be rendered
-						PB->SB->Add(Math::Vec4(P.Position.XY(), P.Dimensions), Math::Vec4(0, 0, 1, 1), P.TexID, P.Color, P.Position.y - P.Position.z);
+						PB->SB->Add(Math::Vec4(P.Position.XY(), P.Dimensions), P.UV, P.TexID, P.Color, P.Position.y - P.Position.z);
 					}
 				}
 			}

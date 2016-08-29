@@ -1,5 +1,5 @@
-#ifndef PARTICLE_ENGINE_2D_H
-#define PARTICLE_ENGINE_2D_H
+#ifndef ENJON_PARTICLE_ENGINE_2D_H
+#define ENJON_PARTICLE_ENGINE_2D_H
 
 #include <vector>
 #include <iostream>
@@ -28,6 +28,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		float DecayRate;	
 		ColorRGBA16 Color;	
 		GLuint TexID; //< Not too sure about the cache coherency of this being here
+		EM::Vec4 UV;
 	} Particle;
 
 	/* 2D Particle Batch struct which will be registered with particle engine and is used to draw particles */
@@ -64,7 +65,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 	uint32 AddParticleBatch(ParticleEngine2D* PE, ParticleBatch2D* PB);
 
 	/* Adds a particle to a batch */
-	uint32 AddParticle(Math::Vec3 P, Math::Vec3 V, Math::Vec2 D, ColorRGBA16 C, GLuint ID, float DR, ParticleBatch2D* PB);
+	uint32 AddParticle(Math::Vec3 P, Math::Vec3 V, Math::Vec2 D, ColorRGBA16 C, GLuint ID, float DR, ParticleBatch2D* PB, EM::Vec4 UV = EM::Vec4(0, 0, 1, 1));
 
 	/* Frees memory of given particle engine */
 	uint32 FreeEngine(ParticleEngine2D* PE);

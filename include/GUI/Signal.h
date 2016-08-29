@@ -1,5 +1,5 @@
-#ifndef SIGNAL_H
-#define SIGNAL_H
+#ifndef ENJON_SIGNAL_H
+#define ENJON_SIGNAL_H
 
 #include <functional>
 #include <unordered_map>

@@ -1,5 +1,5 @@
-#ifndef CONDITIONAL_DECORATOR_H
-#define CONDITIONAL_DECORATOR_H
+#ifndef ENJON_CONDITIONAL_DECORATOR_H
+#define ENJON_CONDITIONAL_DECORATOR_H
 
 #include "BehaviorNode.h"
 
@@ -28,11 +28,20 @@ namespace BT
 				Child = nullptr;
 			}
 
+			std::string String()
+			{
+				return std::string("ConditionalDecorator");
+			}
+
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
+				// auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
+				// auto SS = &SO->GetData()->States;
+
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				SO->CurrentNode = this;
 
 				if (Child == nullptr) 
 				{
@@ -69,8 +78,12 @@ namespace BT
 			inline void Reset()
 			{
 				// Get State Object from BlackBoard
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
+				// auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
+				// auto SS = &SO->GetData()->States;
+
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				
 				SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;			
 				State = BehaviorNodeState::RUNNING;
 			}

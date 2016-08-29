@@ -1,5 +1,5 @@
-#ifndef ANIMATION_EDITOR_H
-#define ANIMATION_EDITOR_H
+#ifndef ENJON_ANIMATION_EDITOR_H
+#define ENJON_ANIMATION_EDITOR_H
 
 /*-- Enjon includes --*/
 #include "IO/InputManager.h"

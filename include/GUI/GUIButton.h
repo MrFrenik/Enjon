@@ -1,5 +1,5 @@
-#ifndef GUIBUTTON_H
-#define GUIBUTTON_H
+#ifndef ENJON_GUIBUTTON_H
+#define ENJON_GUIBUTTON_H
 
 #include <iostream>
 

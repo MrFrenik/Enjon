@@ -1,5 +1,5 @@
-#ifndef GLTEXTURE_H
-#define GLTEXTURE_H
+#ifndef ENJON_GLTEXTURE_H
+#define ENJON_GLTEXTURE_H
 
 #include <GLEW/glew.h>
 

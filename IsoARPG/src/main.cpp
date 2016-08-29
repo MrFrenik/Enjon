@@ -22,7 +22,7 @@
 */
 
 #if 1
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -44,6 +44,7 @@
 #include <Enjon.h>
 #include <Editor/AnimationEditor.h>
 #include <Editor/LightEditor.h>
+#include <System/Internals.h>
 
 /*-- Entity Component System includes --*/
 #include <ECS/ComponentSystems.h>
@@ -58,16 +59,15 @@
 #include <ECS/EffectSystem.h>
 #include <ECS/EntityFactory.h>
 #include <ECS/Entity.h>
-#include <Loot.h>
+
 
 /*-- IsoARPG includes --*/
 #include "EnjonAnimation.h"
 #include "AnimationManager.h"
 #include "AnimManager.h"
-#include "SpatialHash.h"
 #include "Level.h"
 #include "BehaviorTreeManager.h"
-#include "PathFinding.h"
+#include "Loot.h"
 
 /*-- Standard Library includes --*/
 #include <stdio.h>
@@ -90,6 +90,10 @@ typedef struct
 } Light;
 
 float LightZ = -0.35f;
+float LightIntensity = 5.0f;
+
+// Vector of lights
+std::vector<Light> Lights;
 
 typedef struct 
 {	
@@ -113,9 +117,10 @@ bool AnimationEditorOn 		= false;
 bool ParticleEditorOn 		= false;
 bool DeferredRenderingOn 	= true;
 bool AIControllerEnabled 	= false;
-bool LightEditorOn 			= true;
+bool LightEditorOn 			= false;
+bool DrawSplineOn 			= false;
 
-const int LEVELSIZE = 100;
+const int LEVELSIZE = 20;
 
 float DashingCounter = 0.0f;
 
@@ -411,7 +416,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 10;
+	static uint32 AmountDrawn = 1;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = -50.0f;
@@ -542,8 +547,6 @@ int main(int argc, char** argv)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
     glBindVertexArray(0);
 
-    // Vector of lights
-	std::vector<Light> Lights;
 
 	const GLfloat constant = 1.0f; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)
     const GLfloat linear = 0.1f;
@@ -603,15 +606,14 @@ int main(int argc, char** argv)
 
 		{
 			auto L = &Lights.at(0);
-			// const EM::Vec3* P = &World->TransformSystem->Transforms[Player].Position;
-			// EM::Vec2 AddOn = EM::CartesianToIso(EM::Vec2(150 * cos(t), 150 * sin(t)));
-			// Calculate z
-			// auto Difference = EM::Vec2::Normalize(P->XY() - L->Position.XY());
-			// L->Position = EM::Vec3(P->x + AddOn.x - 200.0f, P->y - P->z + AddOn.y, 0.0f);
-			auto MP = Input.GetMouseCoords();
-			Camera.ConvertScreenToWorld(MP);
-			L->Position = EM::Vec3(MP, 0.0f);
-			L->Color = EG::RGBA16(1.0f, 0.5f, 0.0f, 1.0f);
+			const EM::Vec3* P = &World->TransformSystem->Transforms[Player].Position;
+			EM::Vec2 AddOn = EM::CartesianToIso(EM::Vec2(150 * cos(t), 150 * sin(t)));
+			L->Position = EM::Vec3(P->x + AddOn.x, P->y - P->z + AddOn.y, 0.0f);
+			// L->Color = EG::RGBA16(0.8f, 0.7f, 0.6f, 1.0f);
+			L->Color = EG::RGBA16(0.3f, 0.2f, 1.0f, 1.0f);
+			// auto MP = Input.GetMouseCoords();
+			// Camera.ConvertScreenToWorld(MP);
+			// L->Position = EM::Vec3(MP, 0.0f);
 		}
 
 		// Clear lights
@@ -669,7 +671,7 @@ int main(int argc, char** argv)
 				World->PlayerControllerSystem->Targets.clear();
 
 				// Draw some random assed fire
-				EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
+				// EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 		
 				TileOverlayRunTime = SDL_GetTicks() - StartTicks;		
 
@@ -896,6 +898,16 @@ int main(int argc, char** argv)
 													0.4f, std::string("Grid Cell: ") + "(" + std::to_string(Cells.x) + ", " + std::to_string(Cells.y) + ")", 
 													CF, TextBatch, 
 													Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+
+						auto Node = World->AIControllerSystem->AIControllers[e].BB.SO.CurrentNode;
+						if (Node != nullptr)
+						{
+							Graphics::Fonts::PrintText( EntityPosition->x + 20.0f, 
+														EntityPosition->y - 120.0f, 
+														0.4f, std::string("RUNNING: ") + Node->String(), 
+														CF, TextBatch, 
+														Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+						}
 					}
 
 					// If target
@@ -912,23 +924,23 @@ int main(int argc, char** argv)
 					auto Image = &World->Animation2DSystem->AnimComponents[e].CurrentAnimation->Frames.at(CurrentIndex);
 					auto Position = EntityPosition->XY();
 
-					// EA::DrawFrame(*Image, Position, &EntityBatch, *Color, 1.8f, Position.y - World->TransformSystem->Transforms[e].Position.z);
+					EA::DrawFrame(*Image, Position, &EntityBatch, *Color, 1.8f, Position.y - World->TransformSystem->Transforms[e].Position.z);
 
-					EntityBatch.Add(
-									EM::Vec4(Position, 300.0f, 300.0f * 0.87f),
-									EM::Vec4(0, 0, 1, 1),
-									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png").id,
-									*Color,
-									Position.y - World->TransformSystem->Transforms[e].Position.z
-									);
+					// EntityBatch.Add(
+					// 				EM::Vec4(Position, 300.0f, 300.0f * 0.87f),
+					// 				EM::Vec4(0, 0, 1, 1),
+					// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png").id,
+					// 				*Color,
+					// 				Position.y - World->TransformSystem->Transforms[e].Position.z
+					// 				);
 
-					NormalsBatch.Add(
-									EM::Vec4(Position, 300.0f, 300.0f * 0.87f),
-									EM::Vec4(0, 0, 1, 1),
-									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_NormalDepth.png").id,
-									EG::RGBA16_White(),
-									Position.y - World->TransformSystem->Transforms[e].Position.z
-									);
+					// NormalsBatch.Add(
+					// 				EM::Vec4(Position, 300.0f, 300.0f * 0.87f),
+					// 				EM::Vec4(0, 0, 1, 1),
+					// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_NormalDepth.png").id,
+					// 				EG::RGBA16_White(),
+					// 				Position.y - World->TransformSystem->Transforms[e].Position.z
+					// 				);
 
 				}
 				else if (World->Types[e] == ECS::Component::EntityType::ITEM)
@@ -1192,7 +1204,7 @@ int main(int argc, char** argv)
 			}
 
 			// Draw some player 1 shit...
-			Graphics::Fonts::PrintText( PlayerPosition->x - 65.0f, 
+			Graphics::Fonts::PrintText( PlayerPosition->x, 
 										PlayerPosition->y + 170.0f, 
 										1.0f, "P1", 
 										EG::FontManager::GetFont("8Bit_32"), TextBatch, 
@@ -1426,6 +1438,9 @@ int main(int argc, char** argv)
 
 			}
 
+			// Draw random particle for sub image splitting
+			// Get a texture of a text character
+
 			// // Draw Isometric compass
 			// MapEntityBatch.Add(EM::Vec4(HUDCamera.GetPosition() - EM::Vec2(SCREENWIDTH / 2.0f - 30.0f, -SCREENHEIGHT / 2.0f + 250.0f), 150.0f, 75.0f), 
 			// 				EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Coordinates.png").id, EG::RGBA16_White());
@@ -1629,32 +1644,26 @@ int main(int argc, char** argv)
 				auto Image = &World->Animation2DSystem->AnimComponents[Player].CurrentAnimation->Frames.at(CurrentIndex);
 
 				// EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::SetOpacity(EG::RGBA16_White(), 0.1f), 1.5f, -10000.0f);
-
-				// EntityBatch.Add(
-				// 				EM::Vec4(PlayerPosition->x - 100.0f, PlayerPosition->y - 50.0f, 196 * 0.71f, 196),
-				// 				EM::Vec4(0, 0, 1, 1), 
-				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/mainDudeSmall.png", GL_LINEAR).id,
-				// 				EG::RGBA16_White(),
-				// 				PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z				
-				// 				);
-
-				// NormalsBatch.Add(
-				// 				EM::Vec4(PlayerPosition->x - 100.0f, PlayerPosition->y - 50.0f, 196 * 0.71f, 196),
-				// 				EM::Vec4(0, 0, 1, 1), 
-				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/mainDudeSmallNormal.png", GL_LINEAR).id,
-				// 				EG::RGBA16_White(),
-				// 				PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z				
-				// 				);
-
-				// DepthBatch.Add(
-				// 				EM::Vec4(PlayerPosition->x - 100.0f, PlayerPosition->y - 50.0f, 196 * 0.71f, 196),
-				// 				EM::Vec4(0, 0, 1, 1), 
-				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/mainDudeSmallDepth.png", GL_LINEAR).id,
-				// 				EG::RGBA16_White(),
-				// 				PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z				
-				// 				);
 			}
 
+			// Draw spline
+			if (DrawSplineOn)
+			{
+				static auto offset = 0.0f;
+				offset += 0.01f;
+				auto MP = Input.GetMouseCoords();
+				Camera.ConvertScreenToWorld(MP);
+				auto CO = cos(offset);
+				auto SO = sin(offset);
+				EG::Shapes::DrawSpline(
+										&EntityBatch,
+										EM::Vec4(200.0f, 300.0f + 40 * SO, MP),
+										EM::Vec4(300.0f + 30 * CO, 600.0f + 30 * SO, 500.0f + 50 * CO, 100.0f + 20 * SO),
+										30.0f + 25 * SO,
+										200,
+										EG::RGBA16_LightPurple()
+									);
+			}
 
 
 			EntityBatch.End();
@@ -1780,6 +1789,7 @@ int main(int argc, char** argv)
 							glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Radius").c_str()), L->Radius / CameraScale);
 							glUniform3f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Falloff").c_str()), L->Falloff.x, L->Falloff.y, L->Falloff.z);
 							glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Depth").c_str()), L->Position.y);
+							glUniform1f(glGetUniformLocation(DeferredShader->GetProgramID(), ("Lights[" + std::to_string(i) + "].Intensity").c_str()), LightIntensity);
 						}
 
 						// Set uniforms
@@ -1987,6 +1997,22 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	if (Input->IsKeyDown(SDLK_DOWN)){
 		LightZ -= 0.01f;
 	}
+	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyDown(SDLK_LEFT))
+	{
+		Lights.at(0).Falloff.z -= 0.1f;
+	}
+	else if (Input->IsKeyDown(SDLK_LEFT))
+	{
+		LightIntensity -= 0.1f;	
+	}
+	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyDown(SDLK_RIGHT))
+	{
+		Lights.at(0).Falloff.z += 0.1f;
+	}
+	else if (Input->IsKeyDown(SDLK_RIGHT))
+	{
+		LightIntensity += 0.1f;	
+	}
 
 	if (Input->IsKeyPressed(SDLK_c)) {
 		printf("Dashing\n");
@@ -2177,8 +2203,90 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 	}
 
 
+	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyPressed(SDLK_n))
+	{
+		auto PlayerPosition = &World->TransformSystem->Transforms[World->Player].Position;
+		auto Position = EM::Vec2(PlayerPosition->x, PlayerPosition->y + 200.0f);
+		
+		// auto x_advance = 0.0f;
+		// auto F = EG::FontManager::GetFont("8Bit_32");
+		// auto c = 'H';
+		// auto CS = EG::Fonts::GetCharacterAttributes(EM::Vec2(PlayerPosition->x, PlayerPosition->y + 50.0f), 1.0f, F, c, &x_advance);
+		// auto TextureID = CS.TextureID;
+		// auto Width = EG::Fonts::GetAdvance(c, F);
+		// auto Height = EG::Fonts::GetHeight(c, F);
 
-	if (Input->IsKeyPressed(SDLK_n))
+		auto TextureID = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png").id;
+		auto Width = 200.0f;
+		auto Height = 200.0f;
+		auto Center = EM::Vec2(Position.x + Width / 2.0f, Position.y + Height / 2.0f);
+		auto Row = 10;
+		auto Col = Row;
+		auto CurrentUAdvance = 0.0f;
+		auto CurrentVAdvance = 0.0f;
+		auto UAdvance = (1.0f / static_cast<float>(Col));
+		auto VAdvance = (1.0f / static_cast<float>(Row));
+
+		for (auto r = 0; r < Row; r++)
+		{
+			for (auto c = 0; c < Col; c++)
+			{
+				// Calculate velocity based off of center
+
+				auto Velocity = EM::Vec3(EM::CartesianToIso(EM::Vec2(ER::Roll(-3, 3), ER::Roll(-3, 3))), -1.0f);
+				EG::Particle2D::AddParticle(
+												EM::Vec3(Position, 0.0f), 
+												Velocity, 
+												EM::Vec2(
+															Width / Col,
+															Height / Row
+														), 
+												EG::RGBA16_White(),
+												TextureID, 
+												0.0005f, 
+												World->ParticleEngine->ParticleBatches.at(0),
+												EM::Vec4(CurrentUAdvance, CurrentVAdvance, CurrentUAdvance + UAdvance, CurrentVAdvance + VAdvance)
+											);
+
+				CurrentUAdvance += UAdvance;
+
+			}
+
+			CurrentVAdvance += VAdvance;
+			CurrentUAdvance = 0.0f;
+		}
+
+		// EG::Particle2D::AddParticle(
+		// 								EM::Vec3(Position, 0.0f), 
+		// 								EM::Vec3(-1.0f, 0.0f, 0.0f), 
+		// 								EM::Vec2(
+		// 											Width / 2.0f,
+		// 											Height
+		// 										), 
+		// 								EG::RGBA16_Red(),
+		// 								CS.TextureID, 
+		// 								0.0005f, 
+		// 								World->ParticleEngine->ParticleBatches.at(2),
+		// 								EM::Vec4(0.0f, 0.0f, 0.5f, 1.0f)
+		// 							);
+
+		// EG::Particle2D::AddParticle(
+		// 								EM::Vec3(Position, 0.0f), 
+		// 								EM::Vec3(1.0f, 0.0f, 0.0f), 
+		// 								EM::Vec2(
+		// 											Width / 2.0f,
+		// 											Height
+		// 										), 
+		// 								EG::RGBA16_Red(),
+		// 								CS.TextureID, 
+		// 								0.0005f, 
+		// 								World->ParticleEngine->ParticleBatches.at(2),
+		// 								EM::Vec4(0.5f, 0.0f, 1.0f, 1.0f)
+		// 							);
+
+	}
+
+	else if (Input->IsKeyPressed(SDLK_n))
 	{
 		// Get camera position
 		auto CamPos = Camera->GetPosition();
@@ -2267,6 +2375,12 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		// Turn tile obstructed
 		World->Grid->cells.at(Index).ObstructionValue = 0.0f;
 	}
+
+	if (Input->IsKeyPressed(SDLK_9))
+	{
+		DrawSplineOn = !DrawSplineOn;
+	}
+
 }
 
 void DrawCursor(Enjon::Graphics::SpriteBatch* Batch, Enjon::Input::InputManager* InputManager)

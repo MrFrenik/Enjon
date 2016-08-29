@@ -1,5 +1,5 @@
-#ifndef SPRITE_H
-#define SPRITE_H 
+#ifndef ENJON_SPRITE_H
+#define ENJON_SPRITE_H 
 
 #include <string>
 

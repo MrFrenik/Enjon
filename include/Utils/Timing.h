@@ -1,5 +1,5 @@
-#ifndef TIMING_H
-#define TIMING_H
+#ifndef ENJON_TIMING_H
+#define ENJON_TIMING_H
 
 #include <SDL2/SDL.h> 
 

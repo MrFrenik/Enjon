@@ -1,5 +1,5 @@
-#ifndef WINDOW_H
-#define WINDOW_H 
+#ifndef ENJON_WINDOW_H
+#define ENJON_WINDOW_H 
 
 #include <string>
 

@@ -5,8 +5,8 @@
 * @Last Modified time: 	2016-23-05 16:51:00
 =============================================================*/
 
-#ifndef DEFINES_H
-#define DEFINES_H
+#ifndef ENJON_DEFINES_H
+#define ENJON_DEFINES_H
 
 
 #define EG 		Enjon::Graphics

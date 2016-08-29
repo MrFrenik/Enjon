@@ -1,5 +1,5 @@
-#ifndef VERTEX_H
-#define VERTEX_H
+#ifndef ENJON_VERTEX_H
+#define ENJON_VERTEX_H
 
 #include <GLEW/glew.h>
 

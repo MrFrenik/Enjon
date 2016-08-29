@@ -1,5 +1,5 @@
-#ifndef CONTAINERS_H
-#define CONTAINERS_H
+#ifndef ENJON_CONTAINERS_H
+#define ENJON_CONTAINERS_H
 
 #include "System/Types.h"
 

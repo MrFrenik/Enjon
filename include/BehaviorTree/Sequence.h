@@ -1,5 +1,5 @@
-#ifndef SEQUENCE_H
-#define SEQUENCE_H
+#ifndef ENJON_SEQUENCE_H
+#define ENJON_SEQUENCE_H
 
 #include "BehaviorNode.h"
 
@@ -22,11 +22,20 @@ namespace BT
 
 			~Sequence(){}
 
+			std::string String()
+			{
+				return std::string("Sequence");
+			}
+
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
+				// auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
+				// auto SS = &SO->GetData()->States;
+
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				SO->CurrentNode = this;
 
 				// Will fail if there are no children
 				if (Children.size() == 0)

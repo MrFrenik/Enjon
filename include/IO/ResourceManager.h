@@ -1,5 +1,5 @@
-#ifndef RESOURCEMANAGER_H
-#define RESOURCEMANAGER_H
+#ifndef ENJON_RESOURCEMANAGER_H
+#define ENJON_RESOURCEMANAGER_H
 
 #include <string>
 

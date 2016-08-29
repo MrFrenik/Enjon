@@ -1,5 +1,5 @@
-#ifndef VEC2_H
-#define VEC2_H
+#ifndef ENJON_VEC2_H
+#define ENJON_VEC2_H
 
 #include <iostream>
 

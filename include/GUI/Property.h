@@ -1,5 +1,5 @@
-#ifndef PROPERTY_H
-#define PROPERTY_H
+#ifndef ENJON_PROPERTY_H
+#define ENJON_PROPERTY_H
 
 #include "Signal.h"
 

@@ -1,5 +1,5 @@
-#ifndef SPRITESHEET_H
-#define SPRITESHEET_H
+#ifndef ENJON_SPRITESHEET_H
+#define ENJON_SPRITESHEET_H
 
 #include "Graphics/GLTexture.h"
 #include "Math/Maths.h"

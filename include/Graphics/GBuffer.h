@@ -1,5 +1,5 @@
-#ifndef GBUFFER_H
-#define GBUFFER_H
+#ifndef ENJON_GBUFFER_H
+#define ENJON_GBUFFER_H
 
 #include "System/Types.h"
 #include "GLEW/glew.h"

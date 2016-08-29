@@ -5,8 +5,8 @@
 * @Last Modified time: 	2015-11-20 16:23:59
 =============================================================*/
 
-#ifndef CAMERA3D_H
-#define CAMERA3D_H
+#ifndef ENJON_CAMERA3D_H
+#define ENJON_CAMERA3D_H
 
 #include "Defines.h"
 #include "Math/Maths.h"

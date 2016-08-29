@@ -1,5 +1,5 @@
-#ifndef ANIMATIONS_H
-#define ANIMATIONS_H
+#ifndef ENJON_ANIMATIONS_H
+#define ENJON_ANIMATIONS_H
 
 /*-- External/Engine Libraries includes --*/
 #include "Graphics/GLTexture.h"

@@ -1,5 +1,5 @@
-#ifndef BT_H
-#define BT_H
+#ifndef ENJON_BT_H
+#define ENJON_BT_H
 
 #include "BehaviorNode.h"
 #include "Sequence.h"
@@ -11,6 +11,7 @@
 #include "BBWrite.h"
 #include "Inverter.h"
 #include "BehaviorTree.h"
+#include "Task.h"
 #include "BlackBoard.h"
 
 #endif

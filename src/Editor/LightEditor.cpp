@@ -15,7 +15,6 @@
 #include "EnjonAnimation.h"
 #include "AnimationManager.h"
 #include "AnimManager.h"
-#include "SpatialHash.h"
 #include "Level.h"
 
 /*-- Standard Library includes --*/

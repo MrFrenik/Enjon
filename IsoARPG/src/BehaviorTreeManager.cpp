@@ -13,7 +13,6 @@ namespace BTManager
 	void Init()
 	{
 		AddBehaviorTree(Trees, "TestTree", TestTree());	
-		AddBehaviorTree(Trees, "BeastTree", BeastTree());
 	}
 
 	/* Add spritesheets to the spritesheetmanager */

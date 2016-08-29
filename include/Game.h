@@ -5,8 +5,8 @@
 * @Last Modified time: 	2015-11-20 11:21:47
 =============================================================*/
 
-#ifndef GAME_H
-#define GAME_H
+#ifndef ENJON_GAME_H
+#define ENJON_GAME_H
 
 #include <stdlib.h>
 #include "Utils/Errors.h"

@@ -1,5 +1,5 @@
-#ifndef GUI_GROUP_H
-#define GUI_GROUP_H
+#ifndef ENJON_GUI_GROUP_H
+#define ENJON_GUI_GROUP_H
 
 #include "GUIElement.h"
 #include "GUIButton.h"

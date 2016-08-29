@@ -1,5 +1,5 @@
-#ifndef SPRITE_SHEET_MANAGER_H
-#define SPRITE_SHEET_MANAGER_H
+#ifndef ENJON_SPRITE_SHEET_MANAGER_H
+#define ENJON_SPRITE_SHEET_MANAGER_H
 
 #include "Graphics/SpriteSheet.h"
 #include "IO/ResourceManager.h"

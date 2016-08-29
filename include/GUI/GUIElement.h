@@ -1,5 +1,5 @@
-#ifndef GUIELEMENT_H
-#define GUIELEMENT_H
+#ifndef ENJON_GUIELEMENT_H
+#define ENJON_GUIELEMENT_H
 
 #include "Defines.h" 
 

@@ -1,5 +1,5 @@
-#ifndef CAMERA2D_H
-#define CAMERA2D_H
+#ifndef ENJON_CAMERA2D_H
+#define ENJON_CAMERA2D_H
 
 #include "Math/Maths.h"
 #include "Math/Random.h"

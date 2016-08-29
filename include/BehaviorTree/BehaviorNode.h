@@ -1,20 +1,24 @@
-#ifndef BEHAVIORNODE_H
-#define BEHAVIORNODE_H
+#ifndef ENJON_BEHAVIORNODE_H
+#define ENJON_BEHAVIORNODE_H
 
 #include <cstdint>
 #include <vector>
 #include <iostream>
+#include <unordered_map>
 #include <initializer_list>
 
-#include "BlackBoard.h"
+#include "Utils/Errors.h"
+#include "System/Internals.h"
+
+// #include "BlackBoard.h"
 
 typedef uint32_t u32;
 typedef int32_t  i32;
 
-
 namespace BT
 {
 	class BehaviorTree; 
+	class BlackBoard;
 
 	enum BehaviorNodeState { RUNNING, SUCCESS, FAILURE, INVALID };
 
@@ -28,6 +32,7 @@ namespace BT
 			virtual	std::vector<BehaviorNodeBase*> GetAllChildren()	= 0; 
 			virtual u32 SetIndicies(u32 I)  						= 0;
 			virtual void Reset() 									= 0;
+			virtual std::string String()							= 0;
 
 			inline BehaviorNodeState GetState() const { return State; }
 			inline void SetState(BehaviorNodeState S) { State = S; }
@@ -35,45 +40,92 @@ namespace BT
 			inline void SetParent(BehaviorNodeBase* P) { Parent = P; }
 			u32 GetIndex() const { return TreeIndex; }
 
-
 		protected:
 			BehaviorNodeState State;
 			BehaviorNodeBase* Parent;
 			BehaviorTree* BTree;
 			BlackBoard* BB;
+			std::string Name;
 			u32 TreeIndex;
 	};
 
-	struct StateObject
+	class StateObject
 	{
-		std::vector<BehaviorNodeState> States;
-		BehaviorNodeBase* CurrentNode;
+		public:
+			std::vector<BehaviorNodeState> States;
+			BehaviorNodeBase* CurrentNode;
 	};
+
+	class BlackBoardComponentBase
+	{
+		public:
+			virtual void Init() 	= 0;
+	};
+
+	template <typename T>
+	class BlackBoardComponent : public BlackBoardComponentBase
+	{
+		public:
+
+			BlackBoardComponent(){}
+			BlackBoardComponent(T Data)
+			{
+				this->InternalData.Value = Data;
+			}
+
+			virtual void Init(){}
+
+			// Get and set data
+			inline T GetData() { return InternalData.Value; }
+			inline void SetData(T t) { InternalData.Value = t; }
+
+		protected:
+			Enjon::Internals::Internal<T> InternalData;
+	};
+
+	class BlackBoard
+	{
+		public:
+			BlackBoard(){}
+			~BlackBoard()
+			{
+				RemoveComponents();
+			}
+
+			void AddComponent(std::string S, BlackBoardComponentBase* B)
+			{
+				Components[S] = B;
+			}
+
+			template <typename T>
+			inline BlackBoardComponent<T>* GetComponent(std::string S) 
+			{
+				auto it = Components.find(S);
+				if (it != Components.end()) return static_cast<BlackBoardComponent<T>*>(Components[S]);
+				else Enjon::Utils::FatalError("BlackBoard Component Does Not Exist: " + S);
+			}
+
+			inline void RemoveComponents()
+			{
+				for (auto itr = Components.begin(); itr != Components.end(); ++itr)
+				{
+					auto val = (*itr).second;
+					delete val;
+				}
+			}
+
+		public:
+			StateObject SO;
+			std::unordered_map<std::string, BlackBoardComponentBase*> Components;
+	};	
 
 	// A wrapper for our nodes
 	class BehaviorTree
 	{
 		public:
 
-			BehaviorTree(BehaviorNodeBase* R, BlackBoard* bb) : Root(R), BB(bb) 
-			{
-				// Set up BB with empty state object
-				StateObject* SO = CreateStateObject();
-
-				// Put in BB
-				BB->AddComponent("States", new BlackBoardComponent<StateObject*>(SO));
-
-				State = BehaviorNodeState::RUNNING;
-			}
-
 			BehaviorTree() : Root(nullptr), BB(nullptr) 
 			{
-				// Set up BB with empty state object
-				// StateObject* SO = CreateStateObject();
-
-				// Put in BB
-				// BB->AddComponent("States", new BlackBoardComponent<StateObject*>(SO));
-
 				State = BehaviorNodeState::RUNNING;
 			}
 
@@ -82,9 +134,9 @@ namespace BT
 			~BehaviorTree(){}
 
 
-			inline StateObject* BehaviorTree::CreateStateObject()
+			inline StateObject BehaviorTree::CreateStateObject()
 			{
-				StateObject* SO = new StateObject();
+				StateObject SO;
 
 				// Return SO if no root
 				if (Root == nullptr) return SO;
@@ -95,21 +147,24 @@ namespace BT
 				// Push back states into SO
 				for (u32 i = 0; i < S; i++)
 				{
-					SO->States.push_back(BehaviorNodeState::INVALID);
+					SO.States.push_back(BehaviorNodeState::INVALID);
 				}
 
 				return SO;
 			}
 
-			inline BlackBoard* CreateBlackBoard()
+			inline BlackBoard CreateBlackBoard()
 			{
 				// Make SO
 				auto SO = CreateStateObject();	
 
-				BlackBoard* BB = new BlackBoard();
+				// Make BB
+				BlackBoard BB;
 
 				// Put in BB
-				BB->AddComponent("States", new BlackBoardComponent<StateObject*>(SO));
+				BB.SO = SO;
+
+				BB.SO.CurrentNode = this->Root;
 
 				return BB;
 			}
@@ -140,7 +195,6 @@ namespace BT
 			inline void BehaviorTree::SetTreeIndicies()
 			{
 				u32 i = 0;
-				std::cout << "Root: " << i << std::endl;
 				auto R = Root->SetIndicies(i);
 			}
 	};
@@ -199,7 +253,6 @@ namespace BT
 			inline u32 SetIndicies(u32 I) 
 			{ 
 				this->TreeIndex = I; 
-				std::cout << "Dec: " << I << std::endl;
 
 				// Call child's set indicies and get return value
 				auto U = Child->SetIndicies(I + 1);
@@ -209,8 +262,8 @@ namespace BT
 			void Reset()
 			{
 				// Get State Object from BlackBoard
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
 
 				// Reset state
 				SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
@@ -269,8 +322,8 @@ namespace BT
 
 			void Reset()
 			{
-				auto S = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				S->GetData()->States.at(this->TreeIndex) = BehaviorNodeState::RUNNING;
+				auto S = &BTree->GetBlackBoard()->SO;
+				S->States.at(this->TreeIndex) = BehaviorNodeState::RUNNING;
 				Itr = Children.begin();
 		
 				// Reset all its children		
@@ -302,7 +355,6 @@ namespace BT
 			inline u32 SetIndicies(u32 I)
 			{
 				this->TreeIndex = I;
-				std::cout << "Comp: " << I << std::endl;
 
 				u32 U = I;
 
@@ -323,72 +375,6 @@ namespace BT
 			BehaviorNodeBase* CurrentNode;
 	};
 
-	template <typename T>
-	class Task : public BehaviorNode<Task<T>>
-	{
-		public:
-
-			void Init()
-			{
-				static_cast<T*>(this)->Init();
-			}
-
-			BehaviorNodeState Run()
-			{
-				return static_cast<T*>(this)->Run();
-			}
-
-			void Reset()
-			{
-				// Get State Object from BlackBoard
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
-
-				// Reset state
-				SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
-			}
-
-			inline u32 GetChildSize() { return 0; }
-
-			inline u32 SetIndicies(u32 I) { this->TreeIndex = I; std::cout << "Task: " << I << std::endl; return I; }
-
-			inline std::vector<BehaviorNodeBase*> GetAllChildren() { std::vector<BehaviorNodeBase*> C; return C; }
-	};
-
-
-	class SimpleTask : public Task<SimpleTask>
-	{
-		public:
-
-		SimpleTask(BehaviorTree* BT, void (*Action)(BehaviorTree*))
-		{
-			this->BTree = BT;
-			this->Action = Action;
-			State = BehaviorNodeState::INVALID;
-		}
-
-		BehaviorNodeState Run()
-		{
-			if (State != BehaviorNodeState::RUNNING)
-			{
-				State = BehaviorNodeState::RUNNING;
-			}
-
-			// Get State Object from BlackBoard
-			auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-
-			Action(BTree);
-
-			State = BehaviorNodeState::SUCCESS;
-
-			SO->GetData()->States.at(this->TreeIndex) = BehaviorNodeState::SUCCESS;	
-
-			return BehaviorNodeState::SUCCESS;
-		};
-
-	private:
-		void (*Action)(BehaviorTree*);
-	};
 
 
 }

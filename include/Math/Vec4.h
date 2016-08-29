@@ -1,5 +1,5 @@
-#ifndef VEC4_H
-#define VEC4_H
+#ifndef ENJON_VEC4_H
+#define ENJON_VEC4_H
 
 #include <iostream>
 #include "Math/Vec2.h"

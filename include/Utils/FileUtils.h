@@ -1,5 +1,5 @@
-#ifndef FILEUTILS_H
-#define FILEUTILS_H
+#ifndef ENJON_FILEUTILS_H
+#define ENJON_FILEUTILS_H
 
 #include <fstream>
 #include <sstream>

@@ -1,5 +1,5 @@
-#ifndef SELECTOR_H
-#define SELECTOR_H
+#ifndef ENJON_SELECTOR_H
+#define ENJON_SELECTOR_H
 
 #include "BehaviorNode.h"
 
@@ -17,11 +17,20 @@ namespace BT
 
 			~Selector(){}
 
+			std::string String()
+			{
+				return std::string("Selector");
+			}
+
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
+				// auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
+				// auto SS = &SO->GetData()->States;
+
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				SO->CurrentNode = this;
 
 				if (Children.size() == 0) 
 				{

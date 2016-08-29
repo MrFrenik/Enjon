@@ -1,5 +1,5 @@
-#ifndef MATHS_H
-#define MATHS_H
+#ifndef ENJON_MATHS_H
+#define ENJON_MATHS_H
 /* Enjon::Math Includes */
 
 #include <cmath>

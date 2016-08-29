@@ -1,5 +1,5 @@
-#ifndef PICOPNG_H
-#define PICOPNG_H
+#ifndef ENJON_PICOPNG_H
+#define ENJON_PICOPNG_H
 
 #include <vector>
 

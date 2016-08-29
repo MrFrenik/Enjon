@@ -18,6 +18,9 @@
 #include "Math/Maths.h"
 #include "Math/Random.h"
 
+#include "AI/PathFinding.h"
+#include "AI/SpatialHash.h"
+
 #include "Graphics/Window.h"
 #include "Graphics/Camera2D.h"
 #include "Graphics/SpriteSheet.h"
@@ -38,6 +41,7 @@
 #include "Graphics/DeferredRenderer.h"
 #include "Graphics/GBuffer.h"
 #include "Graphics/Animations.h"
+#include "Graphics/Shapes.h"
 
 #include "GUI/Signal.h"
 #include "GUI/Property.h"

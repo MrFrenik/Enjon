@@ -1,5 +1,5 @@
-#ifndef ERRORS_H
-#define ERRORS_H
+#ifndef ENJON_ERRORS_H
+#define ENJON_ERRORS_H
 
 #include <cstdlib>
 #include <iostream> 

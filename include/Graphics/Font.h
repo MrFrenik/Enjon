@@ -1,5 +1,5 @@
-#ifndef FONT_H
-#define FONT_H
+#ifndef ENJON_FONT_H
+#define ENJON_FONT_H
 
 #include <unordered_map>
 
@@ -46,9 +46,9 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 
 	CharacterStats GetCharacterAttributes(Enjon::Math::Vec2 Pos, float scale, Font* F, char c, float* advance);
 
-	float GetAdvance(char c, Font* F, float scale);
+	float GetAdvance(char c, Font* F, float scale = 1.0f);
 
-	float GetHeight(char c, Font* F, float scale);
+	float GetHeight(char c, Font* F, float scale = 1.0f);
 
 	/* Creates and returns new font */
 	Font* CreateFont(char* filePath, GLuint size);

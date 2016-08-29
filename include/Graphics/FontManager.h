@@ -1,5 +1,5 @@
-#ifndef FONT_MANAGER_H
-#define FONT_MANAGER_H
+#ifndef ENJON_FONT_MANAGER_H
+#define ENJON_FONT_MANAGER_H
 
 #include "Graphics/Font.h"
 #include "Utils/Errors.h"

@@ -1,15 +1,28 @@
-#ifndef BBWRITE_H
-#define BBWRITE_H
+#ifndef ENJON_BBWRITE_H
+#define ENJON_BBWRITE_H
 
 #include "BehaviorNode.h"
 
 namespace BT
 {
-	class BBWrite : public Decorator<BBWrite>
+	template <typename T>
+	class BBWrite : public Decorator<BBWrite<T>>
 	{
 		public:
 
-			BBWrite(BehaviorTree* BT, void (*A)(BehaviorTree* BT), BehaviorNodeBase* B = nullptr){ BTree = BT; Action = A; Init(); Child = B; }
+			BBWrite(BehaviorTree* BT, std::string ComponentName, T Value, BehaviorNodeBase* B = nullptr)
+			{ 
+				BTree = BT; 
+				ComponentKey = ComponentName;
+				ComponentValue = Value;
+				Action = [](BT::BehaviorTree* BT, BBWrite* BBW)
+							{
+						   		BT->GetBlackBoard()->GetComponent<T>(BBW->ComponentKey)->SetData(BBW->ComponentValue);
+							};
+				Init(); 
+				Child = B; 
+			}
+
 			~BBWrite(){}
 
 			void Init()
@@ -17,11 +30,17 @@ namespace BT
 				State = BehaviorNodeState::INVALID;	
 			}
 
+			std::string String()
+			{
+				return std::string("BBWrite");
+			}
+
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				SO->CurrentNode = this;
 
 				if (Child == nullptr) 
 				{
@@ -46,7 +65,7 @@ namespace BT
 				{
 					State = BehaviorNodeState::SUCCESS;
 					SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
-					Action(BTree);
+					Action(BTree, this);
 					return BehaviorNodeState::SUCCESS;
 				}
 				if (S == BehaviorNodeState::FAILURE)
@@ -60,7 +79,9 @@ namespace BT
 			}
 
 		private:
-			void (*Action)(BehaviorTree* BT);
+			void (*Action)(BehaviorTree* BT, BBWrite* BBW);
+			std::string ComponentKey;
+			T ComponentValue;
 
 
 

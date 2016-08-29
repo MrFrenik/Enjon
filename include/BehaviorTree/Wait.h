@@ -1,14 +1,18 @@
-#ifndef WAIT_H
-#define WAIT_H
+#ifndef ENJON_WAIT_H
+#define ENJON_WAIT_H
 
-#include "BehaviorNode.h"
+#include "BehaviorTree/BehaviorNode.h"
+#include "BehaviorTree/Task.h"
+#include "Math/Vec3.h"
 
-typedef struct 
-{
-	float CurrentTime;
-	float DT;
-	float Time;	
-} Timer;
+// struct Timer
+// {
+	// Unioned with Vec3
+
+// 	float CurrentTime;   	-- x
+// 	float DT;  				-- y
+// 	float Time;				-- z
+// };
 
 namespace BT
 {
@@ -16,7 +20,7 @@ namespace BT
 	{
 		public:
 
-			Wait(BehaviorTree* BT, Timer T, i32 L = 0)
+			Wait(BehaviorTree* BT, EM::Vec3 T, i32 L = 0)
 			{
 				this->BTree = BT;
 				Clock = T;
@@ -28,18 +32,23 @@ namespace BT
 
 			void Init()
 			{
-				Clock.CurrentTime = 0.0f;
+				Clock.x = 0.0f;
 				CurrentLoop = 0;
 				State = BehaviorNodeState::INVALID;
 
 			}
 
+			std::string String()
+			{
+				return std::string("Wait");
+			}
+
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				// auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				SO->CurrentNode = this;
 
 				if (SS->at(this->TreeIndex) != BehaviorNodeState::RUNNING)
 				{
@@ -47,29 +56,26 @@ namespace BT
 					Reset();
 				}
 
-				Clock.CurrentTime += Clock.DT;
-				if (Clock.CurrentTime >= Clock.Time)
+				Clock.x += Clock.y;
+				if (Clock.x >= Clock.z)
 				{
 					if (TotalLoops > CurrentLoop)
 					{
 						u32 D = TotalLoops - CurrentLoop;
 						CurrentLoop++;
-						Clock.CurrentTime = 0.0f;
-						// std::cout << D << " more loop(s) to go." << std::endl;
+						Clock.x = 0.0f;
 					}
 					else
 					{
 						SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
 						State = BehaviorNodeState::SUCCESS;
-						// std::cout << "Done Waiting!" << std::endl;
 						return BehaviorNodeState::SUCCESS;
 					}
 				}
 
 				else
 				{
-					float D = Clock.Time - Clock.CurrentTime; 
-					// std::cout << D << " more to go." << std::endl;
+					float D = Clock.z - Clock.x; 
 					SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
 					return BehaviorNodeState::RUNNING;
 				}
@@ -81,19 +87,18 @@ namespace BT
 			inline void Reset()
 			{
 				// Get State Object from BlackBoard
-				// auto SO = static_cast<BlackBoardComponent<StateObject*>*>(BTree->GetBlackBoard()->GetComponent("States"));
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
 
 				SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
 
 				State = BehaviorNodeState::RUNNING;
-				Clock.CurrentTime = 0.0f;
+				Clock.x = 0.0f;
 				CurrentLoop = 0;
 			}
 
 		private:
-			Timer Clock;
+			EM::Vec3 Clock;
 			i32 TotalLoops;
 			i32 CurrentLoop;
 	};
@@ -115,12 +120,18 @@ namespace BT
 				State = BehaviorNodeState::INVALID;
 			}
 
+			std::string String()
+			{
+				return std::string("WaitWBBRead");
+			}
+
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
-				auto Clock = BTree->GetBlackBoard()->GetComponent<Timer*>("Timer")->GetData();
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				auto Clock = &BTree->GetBlackBoard()->GetComponent<EM::Vec3>("Timer")->GetData();
+				SO->CurrentNode = this;
 
 				if (SS->at(this->TreeIndex) != BehaviorNodeState::RUNNING)
 				{
@@ -128,8 +139,8 @@ namespace BT
 					Reset();
 				}
 
-				Clock->CurrentTime += Clock->DT;
-				if (Clock->CurrentTime >= Clock->Time)
+				Clock->x += Clock->y;
+				if (Clock->x >= Clock->z)
 				{
 					SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
 					State = BehaviorNodeState::SUCCESS;
@@ -138,7 +149,9 @@ namespace BT
 
 				else
 				{
-					float D = Clock->Time - Clock->CurrentTime; 
+					float D = Clock->z - Clock->x; 
+					BTree->GetBlackBoard()->GetComponent<EM::Vec3>("Timer")->SetData(*Clock);
+					// std::cout << "Time Left: " << D << std::endl;
 					SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
 					return BehaviorNodeState::RUNNING;
 				}
@@ -150,14 +163,15 @@ namespace BT
 			inline void Reset()
 			{
 				// Get State Object from BlackBoard
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
-				auto Clock = BTree->GetBlackBoard()->GetComponent<Timer*>("Timer")->GetData();
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				auto Clock = &BTree->GetBlackBoard()->GetComponent<EM::Vec3>("Timer")->GetData();
 
 				SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
 
 				State = BehaviorNodeState::RUNNING;
-				Clock->CurrentTime = 0.0f;
+				Clock->x = 0.0f;
+				BTree->GetBlackBoard()->GetComponent<EM::Vec3>("Timer")->SetData(*Clock);
 			}
 
 		private:

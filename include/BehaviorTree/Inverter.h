@@ -1,5 +1,5 @@
-#ifndef INVERTER_H
-#define INVERTER_H
+#ifndef ENJON_INVERTER_H
+#define ENJON_INVERTER_H
 
 #include "BehaviorNode.h"
 
@@ -14,11 +14,17 @@ namespace BT
 
 			void Init() { State = BehaviorNodeState::INVALID; Child = nullptr; }
 
+			std::string String()
+			{
+				return std::string("Inverter");
+			}
+
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				SO->CurrentNode = this;
 
 				if (State != BehaviorNodeState::RUNNING)
 				{

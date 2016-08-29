@@ -1,5 +1,5 @@
-#ifndef TEXTURECACHE_H
-#define TEXTURECACHE_H
+#ifndef ENJON_TEXTURECACHE_H
+#define ENJON_TEXTURECACHE_H
 
 #include <map>
 #include <string>

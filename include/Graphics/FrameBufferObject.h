@@ -1,5 +1,5 @@
-#ifndef FRAME_BUFFER_OBJECT_H
-#define FRAME_BUFFER_OBJECT_H
+#ifndef ENJON_FRAME_BUFFER_OBJECT_H
+#define ENJON_FRAME_BUFFER_OBJECT_H
 
 #include "System/Types.h"
 #include "GLEW/glew.h"

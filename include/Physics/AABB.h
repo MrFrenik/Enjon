@@ -1,5 +1,5 @@
-#ifndef AABB_H
-#define AABB_H
+#ifndef ENJON_AABB_H
+#define ENJON_AABB_H
 
 #include "Math/Maths.h"
 #include "Defines.h"

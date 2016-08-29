@@ -1,5 +1,5 @@
-#ifndef SPRITEBATCH_H
-#define SPRITEBATCH_H
+#ifndef ENJON_SPRITEBATCH_H
+#define ENJON_SPRITEBATCH_H
 
 #include "Graphics/Vertex.h"
 

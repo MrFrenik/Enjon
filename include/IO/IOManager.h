@@ -1,5 +1,5 @@
-#ifndef IOMANAGER_H
-#define IOMANAGER_H
+#ifndef ENJON_IOMANAGER_H
+#define ENJON_IOMANAGER_H
 
 #include <vector>
 #include <string>

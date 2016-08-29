@@ -1,5 +1,5 @@
-#ifndef BEHAVIOR_TREE_H
-#define BEHAVIOR_TREE_H
+#ifndef ENJON_BEHAVIOR_TREE_H
+#define ENJON_BEHAVIOR_TREE_H
 
 #include "BehaviorNode.h"
 

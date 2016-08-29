@@ -1,5 +1,5 @@
-#ifndef COLOR_H
-#define COLOR_H
+#ifndef ENJON_COLOR_H
+#define ENJON_COLOR_H
 
 #include <GLEW/glew.h> 
 

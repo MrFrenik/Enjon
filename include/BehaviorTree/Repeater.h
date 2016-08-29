@@ -1,5 +1,5 @@
-#ifndef REPEATER_H
-#define REPEATER_H
+#ifndef ENJON_REPEATER_H
+#define ENJON_REPEATER_H
 
 #include "BehaviorNode.h"
 
@@ -16,11 +16,17 @@ namespace BT
 			Repeater(BehaviorTree* BT, i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = nullptr; }
 			~Repeater() {}
 
+			std::string String()
+			{
+				return std::string("Repeater");
+			}
+
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				SO->CurrentNode = this;
 
 				if (SS->at(this->TreeIndex) != BehaviorNodeState::RUNNING)
 				{
@@ -80,6 +86,74 @@ namespace BT
 			i32 Count;
 	};
 
+	class RepeatUntilFail : public Decorator<RepeatUntilFail>
+	{
+		public:
+
+			RepeatUntilFail() {}
+			RepeatUntilFail(BlackBoard* BB, i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = nullptr; }
+			RepeatUntilFail(BlackBoard* BB, BehaviorNodeBase* B, i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = B; }
+			RepeatUntilFail(BehaviorTree* BT, BehaviorNodeBase* B, i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = B; }
+			RepeatUntilFail(BehaviorTree* BT, i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = nullptr; }
+			~RepeatUntilFail() {}
+
+			std::string String()
+			{
+				return std::string("RepeatUntilFail");
+			}
+
+			BehaviorNodeState Run()
+			{
+				// Get State Object from BlackBoard
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				SO->CurrentNode = this;
+
+				if (SS->at(this->TreeIndex) != BehaviorNodeState::RUNNING)
+				{
+					SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
+					State = BehaviorNodeState::RUNNING;
+				}
+
+				if (Child == nullptr) 
+				{
+					SS->at(this->TreeIndex) = BehaviorNodeState::FAILURE;
+					return BehaviorNodeState::FAILURE;
+				}
+
+				// Process child
+				Child->Run();
+
+				// Get child's state after running
+				BehaviorNodeState S = SS->at(Child->GetIndex());
+
+				if (S == BehaviorNodeState::RUNNING)
+				{
+					SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
+					return BehaviorNodeState::RUNNING;
+				}
+
+				// Success, so repeat
+				else if (S == BehaviorNodeState::SUCCESS)
+				{
+					State = BehaviorNodeState::RUNNING;
+					SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
+					return BehaviorNodeState::RUNNING;
+				}
+
+				// Failure, so leave repeat
+				else 
+				{
+					State = BehaviorNodeState::SUCCESS;
+					SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
+					return BehaviorNodeState::SUCCESS;
+				}
+			}
+
+		private:
+			i32 Count;
+	};
+
 	// This is a lazy class
 	// When monitoring is implemented, this will go away
 	class RepeaterWithBBRead : public Decorator<RepeaterWithBBRead>
@@ -97,11 +171,20 @@ namespace BT
 		
 			~RepeaterWithBBRead() {}
 
+			std::string String()
+			{
+				return std::string("RepeaterWithBBRead");
+			}
+
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				auto SS = &SO->GetData()->States;
+				// auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
+				// auto SS = &SO->GetData()->States;
+
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				SO->CurrentNode = this;
 
 				if (SS->at(this->TreeIndex) != BehaviorNodeState::RUNNING)
 				{
@@ -142,7 +225,7 @@ namespace BT
 
 					else
 					{
-						if (Count <= 0)
+						if (Count == 0)
 						{
 							State = BehaviorNodeState::SUCCESS;
 							SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
@@ -162,6 +245,7 @@ namespace BT
 			i32 Count;
 			i32 (*Action)(BehaviorTree*);
 	};
+
 
 }
 

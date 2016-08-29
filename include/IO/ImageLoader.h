@@ -1,5 +1,5 @@
-#ifndef IMAGELOADER_H
-#define IMAGELOADER_H
+#ifndef ENJON_IMAGELOADER_H
+#define ENJON_IMAGELOADER_H
 
 #include <string>
 

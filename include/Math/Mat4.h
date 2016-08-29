@@ -1,5 +1,5 @@
-#ifndef MAT4_H
-#define MAT4_H
+#ifndef ENJON_MAT4_H
+#define ENJON_MAT4_H
 
 #include "Math/Maths.h"
 

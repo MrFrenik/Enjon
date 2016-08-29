@@ -1,5 +1,5 @@
-#ifndef SHADERMANAGER_H
-#define SHADERMANAGER_H
+#ifndef ENJON_SHADERMANAGER_H
+#define ENJON_SHADERMANAGER_H
 
 #include <map>
 

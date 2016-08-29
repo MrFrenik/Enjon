@@ -1,5 +1,5 @@
-#ifndef GLSLPROGRAM_H
-#define GLSLPROGRAM_H
+#ifndef ENJON_GLSLPROGRAM_H
+#define ENJON_GLSLPROGRAM_H
 
 #include <GLEW/glew.h>
 #include <Math/Maths.h>

@@ -1,5 +1,5 @@
-#ifndef DEFERRED_RENDERER_H
-#define DEFERRED_RENDERER_H
+#ifndef ENJON_DEFERRED_RENDERER_H
+#define ENJON_DEFERRED_RENDERER_H
 
 #include "System/Types.h"
 #include "Defines.h"

@@ -25,6 +25,7 @@ struct Light {
     vec3 Falloff;
     float Radius;
     float Depth;
+    float Intensity;
 };
 
 const int N_LIGHTS = 100;
@@ -94,9 +95,7 @@ void main()
 
             // vec3 Specular = LightColor.rgb * spec;
 
-            float Intensity = 1.0f;
-
-            vec3 Diffuse = Intensity * LightColor.rbg * DiffuseColor.rgb * max(1.0 - D/Lights[i].Radius, 0.0);
+            vec3 Diffuse = Lights[i].Intensity * LightColor.rgb * DiffuseColor.rgb * max(1.0 - D/Lights[i].Radius, 0.0);
 
             //Pre-multiply light color with intensity
             //Then perform "N dot L" to determine our diffuse term
@@ -106,7 +105,7 @@ void main()
             //calculate attenuation
             vec3 Falloff = Lights[i].Falloff;
 
-            float Attenuation = 1.0 / (Falloff.x + Falloff.y * D + Falloff.z * D * D);
+            float Attenuation = 1.0 / (Falloff.x + Falloff.y * D + Falloff.z * D * D) / Scale;
 
             Diffuse *= Attenuation * LightColor.a;
 
