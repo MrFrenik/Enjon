@@ -9,7 +9,9 @@ namespace BTManager
 
 	void Init()
 	{
-		// AddBehaviorTree(Trees, "TestTree", TestTree());	
+		// Trees are added from the Editor
+		// Not sure how I feel about that...
+		// Maybe I should load them in from here instead...
 	}
 
 	/* Add spritesheets to the spritesheetmanager */
@@ -34,6 +36,16 @@ namespace BTManager
 		{
 			printf("Behavior Tree Not found!");
 			return nullptr;
+		}
+	}
+
+	void DebugPrintTrees()
+	{
+		std::cout << "Trees: " << std::endl;
+
+		for (auto it = Trees.begin(); it != Trees.end(); ++it)
+		{
+			std::cout << "\t" << it->first << std::endl;
 		}
 	}
 

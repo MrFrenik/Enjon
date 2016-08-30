@@ -10,6 +10,7 @@
 
 namespace BT
 {
+	// Base Task - not to be used
 	template <typename T>
 	class Task : public BehaviorNode<Task<T>>
 	{
@@ -100,10 +101,10 @@ namespace BT
 						   		auto P = BT->GetBlackBoard()->GetComponent<EM::Vec3>("TargetPosition");
 						   		auto Manager = ECS::Systems::EntitySystem::World();
 
-						   		auto W = Manager->Lvl->GetWidth();
-						   		auto H = Manager->Lvl->GetHeight();
+						   		auto W = static_cast<Enjon::int32>(Manager->Lvl->GetWidth() / 2.0f);
+						   		auto H = static_cast<Enjon::int32>(Manager->Lvl->GetHeight() / 2.0f);
 
-						   		P->SetData(EM::Vec3(W, H, 0.0f));
+						   		P->SetData(EM::Vec3(ER::Roll(-W, W), ER::Roll(-H, H), 0.0f));
 						   };
 
 			State = BehaviorNodeState::INVALID;
@@ -134,6 +135,58 @@ namespace BT
 
 			return BehaviorNodeState::SUCCESS;
 		};
+
+		private:
+			void (*Action)(BehaviorTree*);
+	};
+
+	class SetViewVectorToTarget : public Task<SetViewVectorToTarget>
+	{
+		public:
+			SetViewVectorToTarget(BehaviorTree* BT)
+			{
+				this->BTree = BT;
+				this->Action = [](BT::BehaviorTree* BT)
+							   {
+							   		auto P = BT->GetBlackBoard()->GetComponent<EM::Vec3>("TargetPosition")->GetData();
+							   		auto ID = BT->GetBlackBoard()->GetComponent<Enjon::uint32>("EID")->GetData();
+							   		auto Manager = ECS::Systems::EntitySystem::World();
+							   		auto Position = &Manager->TransformSystem->Transforms[ID].Position;
+
+							   		// Calculate view vector and set
+							   		auto View = EM::Vec2::Normalize((P - *Position).XY());
+
+							   		Manager->TransformSystem->Transforms[ID].ViewVector = View;
+							   };
+
+				State = BehaviorNodeState::INVALID;
+				Type = BehaviorNodeType::LEAF;
+			}
+
+			std::string String()
+			{
+				return std::string("SetViewVectorToTarget");
+			}
+
+			BehaviorNodeState Run()
+			{
+				// Get State Object from BlackBoard
+				auto SO = &BTree->GetBlackBoard()->SO;
+				SO->CurrentNode = this;
+
+				if (State != BehaviorNodeState::RUNNING)
+				{
+					State = BehaviorNodeState::RUNNING;
+				}
+
+				Action(BTree);
+
+				State = BehaviorNodeState::SUCCESS;
+
+				SO->States.at(this->TreeIndex) = BehaviorNodeState::SUCCESS;	
+
+				return BehaviorNodeState::SUCCESS;
+			};
 
 		private:
 			void (*Action)(BehaviorTree*);

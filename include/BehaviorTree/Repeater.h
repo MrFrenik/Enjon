@@ -154,6 +154,64 @@ namespace BT
 			i32 Count;
 	};
 
+	class RepeatForever : public Decorator<RepeatForever>
+	{
+		public:
+
+			RepeatForever() {}
+			RepeatForever(BehaviorTree* BT, i32 C = 1)
+			{ 
+				this->BTree = BT; 
+				State = BehaviorNodeState::INVALID; 
+				Child = nullptr; 
+			}
+			~RepeatForever() {}
+
+			std::string String()
+			{
+				return std::string("RepeatForever");
+			}
+
+			BehaviorNodeState Run()
+			{
+				// Get State Object from BlackBoard
+				auto SO = &BTree->GetBlackBoard()->SO;
+				auto SS = &SO->States;
+				SO->CurrentNode = this;
+
+				if (SS->at(this->TreeIndex) != BehaviorNodeState::RUNNING)
+				{
+					SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
+					State = BehaviorNodeState::RUNNING;
+				}
+
+				if (Child == nullptr) 
+				{
+					SS->at(this->TreeIndex) = BehaviorNodeState::FAILURE;
+					return BehaviorNodeState::FAILURE;
+				}
+
+				// Process child
+				Child->Run();
+
+				// Get child's state after running
+				BehaviorNodeState S = SS->at(Child->GetIndex());
+
+				if (S == BehaviorNodeState::RUNNING)
+				{
+					SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
+					return BehaviorNodeState::RUNNING;
+				}
+
+				// Success, so repeat
+				else
+				{
+					SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
+					return BehaviorNodeState::SUCCESS;
+				}
+			}
+	};
+
 	// This is a lazy class
 	// When monitoring is implemented, this will go away
 	class RepeaterWithBBRead : public Decorator<RepeaterWithBBRead>

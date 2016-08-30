@@ -219,7 +219,6 @@ namespace ECS { namespace Factory {
 			// Make an 'on-kill' function of some sort that each entity has and will be called on its removal by the entity manager
 			AC->BB.AddComponent("EID", new BT::BlackBoardComponent<Enjon::uint32>(AI));
 			AC->BB.AddComponent("TargetPosition", new BT::BlackBoardComponent<EM::Vec3>(EM::Vec3(0.0f, 0.0f, 0.0f)));
-			AC->BB.AddComponent("LoopCounter", new BT::BlackBoardComponent<Enjon::uint32>(0));
 			AC->BB.AddComponent("Timer", new BT::BlackBoardComponent<EM::Vec3>(EM::Vec3(0.0f, 0.01f, 0.5f)));
 
 

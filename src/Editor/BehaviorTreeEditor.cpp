@@ -132,33 +132,23 @@ void FillBT(json& Object, BT::BehaviorTree* BTree, BT::BehaviorNodeBase* Node)
 				FillBT(it.value(), BTree, NewNode);
 				Node->AddChild(NewNode);
 			}
+			else if (!KeyName.compare("RepeatForever"))
+			{
+				auto NewNode = new::BT::RepeatForever(BTree);
+				FillBT(it.value(), BTree, NewNode);
+				Node->AddChild(NewNode);
+			}
+			else if (!KeyName.compare("SetViewVectorToTarget"))
+			{
+				auto NewNode = new::BT::SetViewVectorToTarget(BTree);
+				Node->AddChild(NewNode);
+			}
 			else
 			{
 				// Couldn't find it, so error
 				Enjon::Utils::FatalError("BehaviorTreeEditor::FillBT::Node not found in JSON file: " + KeyName);
 			}
 		}
-	}
-}
-
-void PrintBTree(BT::BehaviorNodeBase* Root, int depth = 0)
-{
-	std::cout << Root->String() << std::endl;
-
-	if (Root->Type == BT::BehaviorNodeType::COMPOSITE)
-	{
-		for (auto c : static_cast<BT::Sequence*>(Root)->Children)
-		{
-			if (c->Type == BT::BehaviorNodeType::COMPOSITE || 
-				c->Type == BT::BehaviorNodeType::DECORATOR)
-				PrintBTree(c, depth + 1);
-		}
-	}
-	else if (Root->Type == BT::BehaviorNodeType::DECORATOR)
-	{
-		if (static_cast<BT::Inverter*>(Root)->Child->Type == BT::BehaviorNodeType::COMPOSITE || 
-			static_cast<BT::Inverter*>(Root)->Child->Type == BT::BehaviorNodeType::DECORATOR)
-			PrintBTree(static_cast<BT::Inverter*>(Root)->Child, depth + 1);
 	}
 }
 
@@ -176,10 +166,13 @@ BT::BehaviorTree* CreateBehaviorTreeFromJSON(json& Object, std::string TreeName)
 	{
 		BTree->Root = new  BT::Sequence(BTree);
 	}
-
-	// Make sure valid
-	if (BTree->Root == nullptr) 
+	else if (!RootName.compare("RepeatForever"))
 	{
+		BTree->Root = new BT::RepeatForever(BTree);
+	}
+	else
+	{
+		// Couldn't find root, so error
 		Enjon::Utils::FatalError("BehaviorTreeEditor::CreateBehaviorTreeFromJSON::Root null.");
 	}
 
@@ -251,14 +244,21 @@ namespace Enjon { namespace BehaviorTreeEditor {
 		Input = _Input;
 
 		auto Json = EU::read_file_sstream("../IsoARPG/Profiles/Behaviors/TestTree.json");
-	    
+
 	   	// parse and serialize JSON
 	   	json j_complete = json::parse(Json);
 
-	    auto BTree = CreateBehaviorTreeFromJSON(j_complete, std::string("TestTree"));
+		// Load in all trees and see if they get added
+		for (auto it = j_complete.begin(); it != j_complete.end(); ++it)
+		{
+			auto TreeName = it.key();
+		    auto BTree = CreateBehaviorTreeFromJSON(j_complete, TreeName);
 
-	    // Add to BT Manager
-	    BTManager::AddBehaviorTree("TestTree", BTree);
+		    // Add to BT Manager
+		    BTManager::AddBehaviorTree(TreeName, BTree);
+		}
+
+		BTManager::DebugPrintTrees();
 
 		return true;	
 	}

@@ -6,7 +6,10 @@
 			"00_SetPlayerLocationAsTarget":
 			{
 			},
-			"01_RepeatUntilFail":
+			"01_SetViewVectorToTarget":
+			{
+			},
+			"02_RepeatUntilFail":
 			{
 				"00_Sequence": 
 				{
@@ -23,13 +26,51 @@
 					}
 				}
 			},
-			"01_Sequence":
+			"03_Sequence":
 			{
-				"00_StopMoving":
+				"00_StopMoving": 
 				{
 				},
 				"01_WaitWBBRead": 
 				{
+				}
+			}
+		}
+	},
+	"Boobs":
+	{
+		"00_RepeatForever": 
+		{
+			"00_Sequence":
+			{
+				"00_FindRandomLocation": 
+				{
+				},
+				"01_RepeatUntilFail":
+				{
+					"00_Sequence":
+					{
+						"00_Inverter":
+						{
+							"00_IsTargetWithinRange":
+							{
+								"Distance": 100.0
+							}
+						},
+						"01_MoveToTargetLocation":
+						{
+							"Speed": 20.0
+						}
+					}
+				},
+				"02_Sequence":
+				{
+					"00_StopMoving": 
+					{
+					},
+					"01_WaitWBBRead": 
+					{
+					}
 				}
 			}
 		}

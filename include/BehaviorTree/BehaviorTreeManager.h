@@ -11,6 +11,7 @@ namespace BTManager
 
 	void AddBehaviorTree(std::unordered_map<std::string, BT::BehaviorTree*>& M, std::string N, BT::BehaviorTree* T);
 	void AddBehaviorTree(std::string N, BT::BehaviorTree* T);
+	void DebugPrintTrees();
 
 	BT::BehaviorTree* GetBehaviorTree(std::string N);
 }
