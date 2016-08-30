@@ -89,6 +89,7 @@ void FillBT(json& Object, BT::BehaviorTree* BTree, BT::BehaviorNodeBase* Node)
 			}
 			else if (!KeyName.compare("SetPlayerLocationAsTarget"))
 			{
+				std::cout << "Here!" << std::endl;
 				auto NewNode = new BT::SetPlayerLocationAsTarget(BTree);
 				Node->AddChild(NewNode);
 			}
@@ -176,7 +177,10 @@ BT::BehaviorTree* CreateBehaviorTreeFromJSON(json& Object, std::string TreeName)
 	}
 
 	// Now need to fill this fucker up!
-	FillBT(RootObject, BTree, BTree->Root);
+	FillBT(RootObject.at(RootKeyName), BTree, BTree->Root);
+
+	// Finalize BTree
+	BTree->End();
 
 	return BTree;
 }
@@ -256,7 +260,9 @@ namespace Enjon { namespace BehaviorTreeEditor {
 
 	    auto BTree = CreateBehaviorTreeFromJSON(j_complete, std::string("TestTree"));
 
-	    PrintBTree(BTree->Root);
+	    auto BB = BTree->CreateBlackBoard();
+
+	    std::cout << BB.SO.States.size() << std::endl;
 
 		return true;	
 	}
