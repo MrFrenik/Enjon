@@ -420,7 +420,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 100;
+	static uint32 AmountDrawn = 1;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = -50.0f;

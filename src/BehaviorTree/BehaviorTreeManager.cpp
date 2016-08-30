@@ -9,7 +9,7 @@ namespace BTManager
 
 	void Init()
 	{
-		AddBehaviorTree(Trees, "TestTree", TestTree());	
+		// AddBehaviorTree(Trees, "TestTree", TestTree());	
 	}
 
 	/* Add spritesheets to the spritesheetmanager */
@@ -18,6 +18,11 @@ namespace BTManager
 		// Insert into map
 		// NOTE(John): Will overwrite the pre-existing kv pair if already exists!
 		M[N] = T;
+	}
+
+	void AddBehaviorTree(std::string N, BehaviorTree* T)
+	{
+		Trees[N] = T;
 	}
 
 	/* Get specificed animation with given name */

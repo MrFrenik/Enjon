@@ -3,6 +3,7 @@
 
 #include "BehaviorNode.h"
 #include "ECS/Transform3DSystem.h"
+#include "System/Internals.h"
 
 namespace BT
 {
@@ -29,9 +30,6 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				// auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				// auto SS = &SO->GetData()->States;
-
 				auto SO = &BTree->GetBlackBoard()->SO;
 				auto SS = &SO->States;
 				SO->CurrentNode = this;
@@ -60,7 +58,7 @@ namespace BT
 			IsTargetWithinRange(BehaviorTree* BT) 
 			{ 
 				BTree = BT; 
-				Action = [](BT::BehaviorTree* BT)
+				Action = [](BT::BehaviorTree* BT, Enjon::Internals::EFloat& D)
 					   {
 					   		auto P = BT->GetBlackBoard()->GetComponent<EM::Vec3>("TargetPosition");
 					   		auto Manager = ECS::Systems::EntitySystem::World();
@@ -75,7 +73,7 @@ namespace BT
 
 					   		auto Distance = AI->DistanceTo(Target.XY());
 
-					   		if (Distance <= 100.0f) 
+					   		if (Distance <= D.Value) 
 					   		{
 					   			return true;
 					   		}
@@ -112,14 +110,17 @@ namespace BT
 				}
 
 				// Run the action
-				bool B = Action(BTree);
+				bool B = Action(BTree, Distance);
 
 				if (B) 	{ State = BehaviorNodeState::SUCCESS; SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS; return BehaviorNodeState::SUCCESS; } 
 				else	{ State = BehaviorNodeState::FAILURE; SS->at(this->TreeIndex) = BehaviorNodeState::FAILURE; return BehaviorNodeState::FAILURE; }
 			}
 
+		public:
+			Enjon::Internals::EFloat Distance;
+
 		private:
-			bool (*Action)(BehaviorTree* BT);
+			bool (*Action)(BehaviorTree*, Enjon::Internals::EFloat&);
 
 	};	
 

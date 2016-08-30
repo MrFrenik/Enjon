@@ -6,6 +6,7 @@
 #include "ECS/ComponentSystems.h"
 #include "ECS/Transform3DSystem.h"
 #include "ECS/AttributeSystem.h"
+#include "System/Internals.h"
 
 namespace BT
 {
@@ -242,7 +243,7 @@ namespace BT
 		MoveToTargetLocation(BehaviorTree* BT)
 		{
 			this->BTree = BT;
-			this->Action = [](BT::BehaviorTree* BT)
+			this->Action = [](BT::BehaviorTree* BT, Enjon::Internals::EFloat& Speed)
 							 {
 						   		auto Target = BT->GetBlackBoard()->GetComponent<EM::Vec3>("TargetPosition")->GetData();
 						   		auto Manager = ECS::Systems::EntitySystem::World();
@@ -253,11 +254,14 @@ namespace BT
 								Enjon::Math::Vec3 Direction = EM::Vec3::Normalize(Target - *Position);
 
 								// Store the speed somewhere in the transform system
-								Manager->TransformSystem->Transforms[ID].Velocity = Direction * 2.0f;
+								Manager->TransformSystem->Transforms[ID].Velocity = Direction * Speed.Value;
 							 };
 
 			State = BehaviorNodeState::INVALID;
 			Type = BehaviorNodeType::LEAF;
+
+			// Default speed value
+			Speed.Value = 1.0f;
 		}
 
 		std::string String()
@@ -277,7 +281,7 @@ namespace BT
 			}
 
 
-			Action(BTree);
+			Action(BTree, Speed);
 
 			State = BehaviorNodeState::SUCCESS;
 
@@ -286,8 +290,11 @@ namespace BT
 			return BehaviorNodeState::SUCCESS;
 		};
 
+		public:
+			Enjon::Internals::EFloat Speed;	
+
 		private:
-			void (*Action)(BehaviorTree*);
+			void (*Action)(BehaviorTree*, Enjon::Internals::EFloat& Speed);
 	};
 }
 

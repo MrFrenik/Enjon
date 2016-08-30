@@ -2,6 +2,7 @@
 #include "Enjon.h"
 #include "Editor/BehaviorTreeEditor.h"
 #include "BehaviorTree/BT.h"
+#include "BehaviorTree/BehaviorTreeManager.h"
 #include "IO/InputManager.h"
 #include "IO/ResourceManager.h"
 #include "Graphics/ShaderManager.h"
@@ -89,8 +90,12 @@ void FillBT(json& Object, BT::BehaviorTree* BTree, BT::BehaviorNodeBase* Node)
 			}
 			else if (!KeyName.compare("SetPlayerLocationAsTarget"))
 			{
-				std::cout << "Here!" << std::endl;
 				auto NewNode = new BT::SetPlayerLocationAsTarget(BTree);
+				Node->AddChild(NewNode);
+			}
+			else if (!KeyName.compare("FindRandomLocation"))
+			{
+				auto NewNode = new BT::FindRandomLocation(BTree);
 				Node->AddChild(NewNode);
 			}
 			else if (!KeyName.compare("RepeatUntilFail"))
@@ -102,11 +107,13 @@ void FillBT(json& Object, BT::BehaviorTree* BTree, BT::BehaviorNodeBase* Node)
 			else if (!KeyName.compare("IsTargetWithinRange"))
 			{
 				auto NewNode = new BT::IsTargetWithinRange(BTree);
+				NewNode->Distance.Value = it.value().at("Distance");
 				Node->AddChild(NewNode);
 			}
 			else if (!KeyName.compare("MoveToTargetLocation"))
 			{
 				auto NewNode = new BT::MoveToTargetLocation(BTree);
+				NewNode->Speed.Value = it.value().at("Speed");
 				Node->AddChild(NewNode);
 			}
 			else if (!KeyName.compare("StopMoving"))
@@ -247,22 +254,11 @@ namespace Enjon { namespace BehaviorTreeEditor {
 	    
 	   	// parse and serialize JSON
 	   	json j_complete = json::parse(Json);
-	   	json TestTree = j_complete.at("TestTree");
-
-	   	// Create root Object
-	   	struct BTObject Root = {};
-
-	   	// Get handle to frames data
-	    FillJSONObjects(TestTree, &Root);
-
-	    // Print objects
-	    // PrintJSONObjects(Root, 0);
 
 	    auto BTree = CreateBehaviorTreeFromJSON(j_complete, std::string("TestTree"));
 
-	    auto BB = BTree->CreateBlackBoard();
-
-	    std::cout << BB.SO.States.size() << std::endl;
+	    // Add to BT Manager
+	    BTManager::AddBehaviorTree("TestTree", BTree);
 
 		return true;	
 	}
