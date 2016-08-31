@@ -27,9 +27,24 @@
 namespace Enjon { namespace GUI {
 
 	enum ButtonState { INACTIVE, ACTIVE };
+
 	enum HoveredState { OFF_HOVER, ON_HOVER };
-	enum GUIType { BUTTON, TEXT_BOX, SCENE_ANIMATION, GROUP, TEXT_BUTTON , DROP_DOWN_BUTTON, RADIAL_BUTTON, VALUE_BUTTON };
+	
+	enum GUIType 
+	{ 
+		BUTTON, 
+		TEXT_BOX, 
+		SCENE_ANIMATION, 
+		GROUP, 
+		TEXT_BUTTON, 
+		DROP_DOWN_BUTTON, 
+		RADIAL_BUTTON, 
+		VALUE_BUTTON, 
+		SCENE_ELEMENT
+	};
+
 	enum VisibleState { HIDDEN, VISIBLE };
+
 	enum ClickState { NOT_CLICKABLE, CLICKABLE };
 
 	// GUI Element

@@ -7,15 +7,124 @@
 namespace Enjon { namespace GUI { 
 
 	// Group is responsible for holding other gui elements and then transforming them together
-	struct GUIGroup : GUIElement<GUIGroup>
+	struct GUISceneGroup : GUIElement<GUISceneGroup>
 	{
-		GUIGroup() 
+		GUISceneGroup() 
 		{ 
 			// Init
 			Init();
 		}
 
-		GUIGroup(EM::Vec2 P)
+		GUISceneGroup(EM::Vec2 P)
+		{
+			Position = P;
+
+			// Init
+			Init();
+		}
+	
+		void Init()
+		{
+			// Set up type
+			Type = GUIType::GROUP; 
+
+			// Set up member variables
+			Name 			= std::string("GUISceneGroup");		// Default Name
+			Dimensions		= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
+			TextColor		= EG::RGBA16_MidGrey();
+			Color 			= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
+			TextFont 		= nullptr;
+			HoveredElement	= nullptr;
+			Visibility 		= VisibleState::VISIBLE;
+
+			// Set up MinimizeButton button
+			MinimizeButton.Dimensions = EM::Vec2(12.0f, 12.0f);
+
+			// Set up GUISceneGroup's on_hover signal
+			on_hover.connect([&]()
+			{
+				HoverState = HoveredState::ON_HOVER;
+			});
+
+			// Set up GUISceneGroup's off_hover signal
+			off_hover.connect([&]()
+			{
+				HoverState = HoveredState::OFF_HOVER;
+			});
+		}
+
+		void AddToGroup(GUIElementBase* Element, const std::string& Name)
+		{
+			// Push back into group's children
+			Children.push_back(Element);
+
+			// Set Group as parent of child
+			Element->Parent = this;
+		}
+
+		void Update()
+		{
+		}
+
+		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		{
+			static EM::Vec2 MouseFrameOffset(0.0f);
+			static bool JustFocused = true;
+
+		    SDL_Event event;
+		    while (SDL_PollEvent(&event)) 
+		    {
+		        switch (event.type) 
+		        {
+					case SDL_KEYUP:
+						Input->ReleaseKey(event.key.keysym.sym); 
+						break;
+					case SDL_KEYDOWN:
+						Input->PressKey(event.key.keysym.sym);
+						break;
+					case SDL_MOUSEBUTTONDOWN:
+						Input->PressKey(event.button.button);
+						break;
+					case SDL_MOUSEBUTTONUP:
+						Input->ReleaseKey(event.button.button);
+						break;
+					case SDL_MOUSEMOTION:
+						Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+						break;
+					default:
+						break;
+				}
+		    }
+
+			return false;			
+		}
+
+		void Draw(EG::SpriteBatch* Batch)
+		{
+			// Try and draw this shiz
+			for(auto& E : Children)
+			{
+				// Print Child contents
+				E->Draw(Batch);
+			}
+
+		}
+
+		// Vector of children
+		std::vector<GUIElementBase*> Children;
+		GUIElementBase* HoveredElement;
+	};
+
+	// Group is responsible for holding other gui elements and then transforming them together
+	struct GUIVerticleGroup : GUIElement<GUIVerticleGroup>
+	{
+		GUIVerticleGroup() 
+		{ 
+			// Init
+			Init();
+		}
+
+		GUIVerticleGroup(EM::Vec2 P)
 		{
 			Position = P;
 
@@ -34,7 +143,7 @@ namespace Enjon { namespace GUI {
 			X1Offset		= 140.0f;
 			YOffset 		= 25.0f;						// Not exact way but close estimate for now
 			TitlePadding 	= 15.0f;
-			Name 			= std::string("GUIGroup");		// Default Name
+			Name 			= std::string("GUIVerticleGroup");		// Default Name
 			Dimensions		= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
 			TextColor		= EG::RGBA16_MidGrey();
 			Color 			= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
@@ -48,7 +157,7 @@ namespace Enjon { namespace GUI {
 			// Get font
 			FontScale = 1.0f;
 
-			// Set up GUIGroup's on_hover signal
+			// Set up GUIVerticleGroup's on_hover signal
 			on_hover.connect([&]()
 			{
 				HoverState = HoveredState::ON_HOVER;
@@ -56,7 +165,7 @@ namespace Enjon { namespace GUI {
 				Color = EG::RGBA16(0.2f, 0.2f, 0.2f, 0.5f);
 			});
 
-			// Set up GUIGroup's off_hover signal
+			// Set up GUIVerticleGroup's off_hover signal
 			off_hover.connect([&]()
 			{
 				HoverState = HoveredState::OFF_HOVER;

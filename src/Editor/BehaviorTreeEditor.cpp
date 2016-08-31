@@ -31,167 +31,17 @@
 using namespace EA;
 using json = nlohmann::json;
 
-struct BTObject
-{
-	std::string Name;
-	Enjon::uint32 Index;
-	std::vector<BTObject*> Objects;  
-};
-
-void FillJSONObjects(json& Object, struct BTObject* BTO)
-{
-	for (auto it = Object.begin(); it != Object.end(); ++it)
-	{
-		// Recurse through children
-		if (it.value().is_object())
-		{
-			// Make new struct
-			struct BTObject* O = new struct BTObject{};
-			O->Name = it.key();
-			 FillJSONObjects(it.value(), O);
-			 BTO->Objects.push_back(O);
-		}
-	}
-
-
-}
-
-void PrintJSONObjects(struct BTObject& O, int depth = 0)
-{
-	for (auto& o : O.Objects)
-	{
-		for (auto i = 0; i < depth; i++)
-		{
-			std::cout << '\t';
-		}
-
-		std::cout << o->Name << std::endl;
-		PrintJSONObjects(*o, depth + 1);
-
-	}
-}
-
-void FillBT(json& Object, BT::BehaviorTree* BTree, BT::BehaviorNodeBase* Node)
-{
-	// Loop through object
-	for (auto it = Object.begin(); it != Object.end(); ++it)
-	{
-		// Recurse through children
-		if (it.value().is_object())
-		{
-			// Make new struct
-			auto KeyName = it.key().substr(3, it.key().length() - 1);
-
-			if (!KeyName.compare("Sequence"))
-			{
-				auto NewNode = new BT::Sequence(BTree);
-				FillBT(it.value(), BTree, NewNode);
-				Node->AddChild(NewNode);
-			}
-			else if (!KeyName.compare("SetPlayerLocationAsTarget"))
-			{
-				auto NewNode = new BT::SetPlayerLocationAsTarget(BTree);
-				Node->AddChild(NewNode);
-			}
-			else if (!KeyName.compare("FindRandomLocation"))
-			{
-				auto NewNode = new BT::FindRandomLocation(BTree);
-				Node->AddChild(NewNode);
-			}
-			else if (!KeyName.compare("RepeatUntilFail"))
-			{
-				auto NewNode = new BT::RepeatUntilFail(BTree);
-				FillBT(it.value(), BTree, NewNode);
-				Node->AddChild(NewNode);
-			}
-			else if (!KeyName.compare("IsTargetWithinRange"))
-			{
-				auto NewNode = new BT::IsTargetWithinRange(BTree);
-				NewNode->Distance.Value = it.value().at("Distance");
-				Node->AddChild(NewNode);
-			}
-			else if (!KeyName.compare("MoveToTargetLocation"))
-			{
-				auto NewNode = new BT::MoveToTargetLocation(BTree);
-				NewNode->Speed.Value = it.value().at("Speed");
-				Node->AddChild(NewNode);
-			}
-			else if (!KeyName.compare("StopMoving"))
-			{
-				auto NewNode = new BT::StopMoving(BTree);
-				Node->AddChild(NewNode);
-			}
-			else if (!KeyName.compare("WaitWBBRead"))
-			{
-				auto NewNode = new BT::WaitWBBRead(BTree);
-				Node->AddChild(NewNode);
-			}
-			else if (!KeyName.compare("Inverter"))
-			{
-				auto NewNode = new BT::Inverter(BTree);
-				FillBT(it.value(), BTree, NewNode);
-				Node->AddChild(NewNode);
-			}
-			else if (!KeyName.compare("RepeatForever"))
-			{
-				auto NewNode = new::BT::RepeatForever(BTree);
-				FillBT(it.value(), BTree, NewNode);
-				Node->AddChild(NewNode);
-			}
-			else if (!KeyName.compare("SetViewVectorToTarget"))
-			{
-				auto NewNode = new::BT::SetViewVectorToTarget(BTree);
-				Node->AddChild(NewNode);
-			}
-			else
-			{
-				// Couldn't find it, so error
-				Enjon::Utils::FatalError("BehaviorTreeEditor::FillBT::Node not found in JSON file: " + KeyName);
-			}
-		}
-	}
-}
-
-BT::BehaviorTree* CreateBehaviorTreeFromJSON(json& Object, std::string TreeName)
-{
-	BT::BehaviorTree* BTree = new BT::BehaviorTree();
-
-	// Get root from JSON
-	auto RootObject = Object.at(TreeName);
-	auto RootKeyName = RootObject.begin().key();
-	auto RootName = RootKeyName.substr(3, RootKeyName.length() - 1);	
-
-	// TODO(John): Have a map of function pointers that will create a BT type and return it for me
-	if (!RootName.compare("Sequence"))
-	{
-		BTree->Root = new  BT::Sequence(BTree);
-	}
-	else if (!RootName.compare("RepeatForever"))
-	{
-		BTree->Root = new BT::RepeatForever(BTree);
-	}
-	else
-	{
-		// Couldn't find root, so error
-		Enjon::Utils::FatalError("BehaviorTreeEditor::CreateBehaviorTreeFromJSON::Root null.");
-	}
-
-	// Now need to fill this fucker up!
-	FillBT(RootObject.at(RootKeyName), BTree, BTree->Root);
-
-	// Finalize BTree
-	BTree->End();
-
-	return BTree;
-}
-
-
-
-
 namespace Enjon { namespace BehaviorTreeEditor {
 
 	using namespace GUI;
 	using namespace Graphics;
+
+	// struct GUINode
+	// {
+
+	// };
+
+
 
 	/*-- Function Delcarations --*/
 	bool ProcessInput(EI::InputManager* Input);
@@ -220,6 +70,11 @@ namespace Enjon { namespace BehaviorTreeEditor {
 
 	EM::Vec2 CameraScaleVelocity;
 
+	// GUI Elements
+	GUISceneGroup 		BehaviorNodeSceneGroup;
+	GUISceneElement 	RootNode;
+
+
 	/*-- Function Definitions --*/
 	bool Init(EI::InputManager* _Input, float SW, float SH)
 	{
@@ -243,22 +98,10 @@ namespace Enjon { namespace BehaviorTreeEditor {
 		// Set input
 		Input = _Input;
 
-		auto Json = EU::read_file_sstream("../IsoARPG/Profiles/Behaviors/TestTree.json");
 
-	   	// parse and serialize JSON
-	   	json j_complete = json::parse(Json);
+		// Need to be have root node element
+		// Need to have BB element
 
-		// Load in all trees and see if they get added
-		for (auto it = j_complete.begin(); it != j_complete.end(); ++it)
-		{
-			auto TreeName = it.key();
-		    auto BTree = CreateBehaviorTreeFromJSON(j_complete, TreeName);
-
-		    // Add to BT Manager
-		    BTManager::AddBehaviorTree(TreeName, BTree);
-		}
-
-		BTManager::DebugPrintTrees();
 
 		return true;	
 	}
@@ -327,6 +170,62 @@ namespace Enjon { namespace BehaviorTreeEditor {
 				case SDL_MOUSEWHEEL:
 				default:
 					break;
+			}
+
+			auto G = &BehaviorNodeSceneGroup;
+
+			if (G->Visibility)
+			{
+				for (auto C : G->Children)
+				{
+					auto AABB = &C->AABB;
+
+					C->check_children.emit(Input, &Camera);
+
+					if (EP::AABBvsPoint(AABB, MouseCoords))
+					{
+						// Set to true
+						ChildFound = true;
+
+						// Set debug to false
+						PrintedDebugNoChild = false;
+
+						// Set on hover
+						C->on_hover.emit();
+
+						// Set the hovered element
+						G->HoveredElement = C;
+
+						// If clicked while hovering
+						if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
+						{
+							C->on_click.emit();
+
+							if (MouseFocus == nullptr) 
+							{
+								std::cout << "Gaining Focus: " << C->Name << std::endl;
+								MouseFocus = C;
+							}
+
+							// If not mouse focus
+							else if (MouseFocus != C && C->Depth >= MouseFocus->Depth && !ProcessMouse) 
+							{
+								std::cout << "Switching Focus: " << MouseFocus->Name << " to " << C->Name << std::endl;
+
+								// Lose focus
+								MouseFocus->lose_focus.emit();
+			
+								// Set focus	
+								MouseFocus = C;
+							}
+						}
+					}
+
+					else
+					{
+						C->off_hover.emit();
+					}
+				}
 			}
 	    }
 

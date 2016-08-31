@@ -30,7 +30,6 @@ GamePlay:
 Systems: 
 	- General:
 		- Separate characters into layers: head gear, armor, legs, weapons, etc.
-		- Vortex is created every frame that the right click is held. 
 
 	- Effects:
 		- √ Develop particle engine
@@ -55,10 +54,17 @@ Systems:
 	- EntityManager:
 		- √ Adding / Removing entities is busted. Fix it.
 
+	- Debugging:
+		- Create profiling system with options to turn on and off debug options
+		- Create logging system to save debug logs to file as well as ability to render error messages to screen
+		- World()->DebugPrintToScreen(const char* message), or something like that
+
 Editor:
 	- Be able to integrate live editing (animations, level creation, particle effects) into game engine
+	- Create console for quickly executing commands
 
-	- Be able to create entity and drop into game for quick testing:
+	- Archetype/Entity Editor:
+		- Be able to create entity and drop into game for quick testing:
 		- This includes being able to add/remove components and edit their properties
 		- Need to be able to save this data out to JSON as well for later editing
 
@@ -67,7 +73,41 @@ Editor:
 		- √ Be able to save changes back out to json files that were loaded in then reload AnimManager
 
 	- Behavior Tree Editor:
-		- I have no idea how to go about this, but need to be able to do a behavior tree editor
-		- Since the code for the behavior nodes needs to be defined in code, maybe just create a bunch of 
-			stock behavior nodes that will be used and then can be chained together for different functionality
-		
+		- √ Create stock behaviors that can be loaded from script files to create behavior trees
+		- Be able to edit behavior scripts in-game, save back to file and hot-load into AI
+		- GUI based editor with drag and drop nodes with ability to edit data easily including parenting nodes
+		- Ability to create new tree or edit existing one: 
+			- Creating new tree:
+				- Create Root
+				- Add nodes through editing parenting system and if node is able to have child/children
+				- Edit appropriate properties of nodes
+				- Save tree:
+					- Check whether name is valid (i.e. empty string):
+						- If not, print error and don't save
+					- Check whether or not tree exists:
+						- If so, print warning and give option to save over or cancel save
+					- Otherwise just save new tree
+				- Load tree:
+					- Select tree from drop down list of available trees from BTManager
+					- Create Pre-Order Depth-First-Search (Rt-L-R) function to step through the BTree:
+						- For each node, create and populate GUI node element with its appropriate data and link to parent
+
+	- Event editor: 
+		- Something similar to designing BluePrints or Events in UE4
+		- Just like behavior trees, create a large group of stock functionalities that when strung together can be used to create complex lambdas through scripting
+		- GUI based editor with drag and drop nodes with ability to edit data easily as well as parent actions easily
+
+Known Bugs:
+		- Vortex is created every frame that the right click is held. 
+
+
+
+
+
+
+
+
+
+
+
+

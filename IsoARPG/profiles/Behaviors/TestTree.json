@@ -17,7 +17,7 @@
 					{
 						"00_IsTargetWithinRange": 
 						{
-							"Distance": 300.0
+							"Distance": 200.0
 						}
 					},
 					"01_MoveToTargetLocation":

@@ -115,10 +115,10 @@ bool IsDashing 				= false;
 bool DebugInfo 				= false;
 bool DebugEntityInfo 		= false;
 bool AnimationEditorOn 		= false;
+bool BehaviorTreeEditorOn 	= false;
 bool ParticleEditorOn 		= false;
 bool DeferredRenderingOn 	= true;
 bool AIControllerEnabled 	= false;
-bool LightEditorOn 			= false;
 bool DrawSplineOn 			= false;
 
 const int LEVELSIZE = 20;
@@ -642,10 +642,10 @@ int main(int argc, char** argv)
 			AnimationEditorOn = Enjon::AnimationEditor::Update();	
 		}
 
-		else if (LightEditorOn)
+		else if (BehaviorTreeEditorOn)
 		{
 			// Update editor
-			LightEditorOn = Enjon::LightEditor::Update();
+			BehaviorTreeEditorOn = Enjon::BehaviorTreeEditor::Update();
 		}
 
 		// Game
@@ -765,16 +765,15 @@ int main(int argc, char** argv)
 			Enjon::AnimationEditor::Draw();
 		}
 
-		else if (LightEditorOn)
+		else if (BehaviorTreeEditorOn)
 		{
-			// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.06, 0.06, 0.06, 1.0));
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0f, 0.0f, 0.0f, 0.0f));
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.06, 0.06, 0.06, 1.0));
 	
 			// Show mouse
 			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
 	
 			// Render AnimationEditor scene
-			Enjon::LightEditor::Draw();
+			Enjon::BehaviorTreeEditor::Draw();
 		}
 
 		// Render game scene
@@ -2030,7 +2029,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 
 	if (Input->IsKeyPressed(SDLK_0))
 	{
-		LightEditorOn = !LightEditorOn;
+		BehaviorTreeEditorOn = !BehaviorTreeEditorOn;
 	}
 
 	if (Input->IsKeyPressed(SDLK_p)) {
@@ -4326,6 +4325,23 @@ int main(int argc, char** argv)
 
 	return 0;
 }
+
+#endif
+
+
+#if 0
+
+#include <iostream>
+#include <unordered_map>
+
+
+int main(int argc, char** argv)
+{
+
+
+	return 0;	
+}
+
 
 #endif
 

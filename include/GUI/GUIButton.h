@@ -7,7 +7,6 @@
 #include "Graphics/Color.h"
 #include "GUI/GUIElement.h"
 #include "Graphics/Animations.h"
-#include "Math/Vec2.h"
 #include "Math/Maths.h"
 
 namespace Enjon { namespace GUI {
@@ -85,7 +84,7 @@ namespace Enjon { namespace GUI {
 			this->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 
 			// Set up text color
-			this->TextColor 	= EG::RGBA16_White();
+			this->TextColor 	= EG::RGBA16_MidGrey();
 			this->Name 			= std::string("GUITextButton");
 			this->TextPadding	= EM::Vec2(5.0f, 5.0f);
 
@@ -601,7 +600,7 @@ namespace Enjon { namespace GUI {
 			this->TextFont 		= nullptr;
 			this->FontScale = 1.0f;
 			this->Name = std::string("GUIDropDownButton");
-			this->TextColor		= EG::RGBA16_White();
+			this->TextColor		= EG::RGBA16_LightGrey();
 			this->TextPadding = EM::Vec2(5.0f, 6.0f);
 			this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 			this->Dimensions = EM::Vec2(123.0f, 20.0f);

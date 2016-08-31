@@ -95,8 +95,8 @@ namespace Enjon { namespace AnimationEditor {
 	////////////////////////////////
 	// ANIMATION EDITOR ////////////
 
-	GUIGroup					SceneGroup;
-	GUIGroup					AnimationPanel;
+	GUIVerticleGroup					SceneGroup;
+	GUIVerticleGroup					AnimationPanel;
 	GUIButton 					PlayButton;
 	GUIButton 					SaveAnimationToFile;
 	GUIButton 					AnimationPanelIcon;
@@ -567,6 +567,19 @@ namespace Enjon { namespace AnimationEditor {
 				auto TotalFrames = CurrentAnimation->TotalFrames;
 				auto& Position = SceneAnimation.Position;
 
+				// Add a ground tile
+				{
+					auto W = 64.0f;
+					auto H = W / 2.0f;
+					SceneBatch->Add(
+										EM::Vec4(-W / 2.0f, -H / 2.0f, W, H),
+										EM::Vec4(0, 0, 1, 1),
+										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
+										EG::SetOpacity(EG::RGBA16_Black(), 0.3f)
+									);
+
+				}
+
 				if (SceneAnimation.HoverState == HoveredState::ON_HOVER)
 				{
 					auto AABB_SA = &SceneAnimation.AABB;
@@ -775,7 +788,7 @@ namespace Enjon { namespace AnimationEditor {
 
 
 		// Just use group for now to see if shit gon' get cray cray
-		auto G = GUIManager::Get<GUIGroup>("AnimationPanel");
+		auto G = GUIManager::Get<GUIVerticleGroup>("AnimationPanel");
 		static GUIElementBase* E = nullptr;
 		static GUIElementBase* MouseFocus = nullptr;
 		static bool PrintedDebugNoChild = false;
