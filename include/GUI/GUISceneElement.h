@@ -20,6 +20,8 @@ namespace Enjon { namespace GUI {
 			this->HoverState = HoveredState::OFF_HOVER;
 			this->Dimensions = EM::Vec2(100.0f);
 			this->Position = EM::Vec2(0.0f);
+			this->AABB.Min = this->Position;
+			this->AABB.Max = this->AABB.Min + this->Dimensions;
 
 			// Set up SceneAnimation's on_hover signal
 			this->on_hover.connect([&]()
@@ -39,7 +41,9 @@ namespace Enjon { namespace GUI {
 
 		void Update()
 		{
-			
+			// Update AABB
+			this->AABB.Min = this->Position;
+			this->AABB.Max = this->AABB.Min + this->Dimensions;
 		}
 
 		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
@@ -90,10 +94,7 @@ namespace Enjon { namespace GUI {
 	    		}
 
 				// Update Position
-				// this->CurrentAnimation->Frames.at(this->CurrentIndex).Offsets = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
 				this->Position = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
-				this->AABB.Min = this->Position;
-				this->AABB.Max = AABB.Min + this->Dimensions;
 
 				// Emit that value has changed
 				this->on_value_change.emit();
@@ -112,8 +113,8 @@ namespace Enjon { namespace GUI {
 		void Draw(EG::SpriteBatch* Batch)
 		{
 			Batch->Add(
-							EM::Vec4(AABB.Min, AABB.Max - AABB.Min),
-							EM::Vec4(),
+							EM::Vec4(Position, Dimensions),
+							EM::Vec4(0, 0, 1, 1),
 							EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id
 						);
 

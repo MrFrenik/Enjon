@@ -9,7 +9,8 @@
 #include "Graphics/FontManager.h"
 #include "Graphics/SpriteBatch.h"
 #include "Graphics/CursorManager.h"
-#include "GUI/GUIGroup.h"
+#include "Graphics/Shapes.h"
+#include "GUI/GUI.h"
 #include "Physics/AABB.h"
 #include "Utils/Errors.h"
 #include "Defines.h"
@@ -23,6 +24,7 @@
 /*-- Standard Library includes --*/
 #include <unordered_map>
 #include <vector>
+#include <algorithm>
 #include <string>
 
 /*-- 3rd Party Includes --*/
@@ -31,25 +33,181 @@
 using namespace EA;
 using json = nlohmann::json;
 
+namespace Enjon { namespace GUI { 
+	
+	struct GUIBTNode : GUIElement<GUIBTNode>
+	{
+		GUIBTNode()
+		{
+			// Set up type
+			this->Type = GUIType::SCENE_ELEMENT;
+
+			// Set up states
+			this->State = ButtonState::INACTIVE;
+			this->HoverState = HoveredState::OFF_HOVER;
+			this->Dimensions = EM::Vec2(100.0f);
+			this->Position = EM::Vec2(0.0f);
+			this->AABB.Min = this->Position;
+			this->AABB.Max = this->AABB.Min + this->Dimensions;
+			this->ParentNode = nullptr;
+
+			// Set up SceneAnimation's on_hover signal
+			this->on_hover.connect([&]()
+			{
+				this->HoverState = HoveredState::ON_HOVER;
+			});
+
+			// Set up SceneAnimation's off_hover signal
+			this->off_hover.connect([&]()
+			{
+				this->HoverState = HoveredState::OFF_HOVER;
+			});
+
+		}
+
+		void Init() {}
+
+		void Update()
+		{
+			// Update AABB
+			this->AABB.Min = this->Position;
+			this->AABB.Max = this->AABB.Min + this->Dimensions;
+		}
+
+		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		{
+			static EM::Vec2 MouseFrameOffset(0.0f);
+			static bool JustFocused = true;
+
+		    SDL_Event event;
+		    while (SDL_PollEvent(&event)) 
+		    {
+		        switch (event.type) 
+		        {
+					case SDL_KEYUP:
+						Input->ReleaseKey(event.key.keysym.sym); 
+						break;
+					case SDL_KEYDOWN:
+						Input->PressKey(event.key.keysym.sym);
+						break;
+					case SDL_MOUSEBUTTONDOWN:
+						Input->PressKey(event.button.button);
+						break;
+					case SDL_MOUSEBUTTONUP:
+						Input->ReleaseKey(event.button.button);
+						break;
+					case SDL_MOUSEMOTION:
+						Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+						break;
+					default:
+						break;
+				}
+		    }
+
+		    auto MousePos = Input->GetMouseCoords();
+		    Camera->ConvertScreenToWorld(MousePos);
+
+		    if (Input->IsKeyDown(SDL_BUTTON_LEFT))
+		    {
+				auto X = MousePos.x;
+				auto Y = MousePos.y;
+
+	    		if (JustFocused) 
+	    		{
+	    			MouseFrameOffset = EM::Vec2(MousePos.x - this->AABB.Min.x, MousePos.y - this->AABB.Min.y);
+	    			JustFocused = false;
+
+	    			// Just clicked
+	    			this->on_click.emit();
+	    		}
+
+				// Update Position
+				this->Position = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
+
+				// Emit that value has changed
+				this->on_value_change.emit();
+		    }
+
+	    	else 
+	    	{
+	    		this->lose_focus.emit();
+	    		JustFocused = true;
+	    		return true;
+	    	}
+
+			return false;
+		}
+
+		void Draw(EG::SpriteBatch* Batch)
+		{
+			Batch->Add(
+							EM::Vec4(Position, Dimensions),
+							EM::Vec4(0, 0, 1, 1),
+							EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id
+						);
+
+			// Draw lines to children
+			for (auto c : Children)
+			{
+				// Get bottom center of this
+				EM::Vec2 ParentCenter(this->Position.x + this->Dimensions.x / 2.0f, this->Position.y);
+				EM::Vec2 ChildCenter(c->Position.x + c->Dimensions.x / 2.0f, c->Position.y + c->Dimensions.y);
+				EG::Shapes::DrawLine(Batch, EM::Vec4(ParentCenter, ChildCenter), 5.0f, EG::RGBA16_LightGrey());
+				// EG::Shapes::DrawSpline(Batch, EM::Vec4(ParentCenter, ChildCenter), EM::Vec4(ParentCenter - EM::Vec2(20.0), ChildCenter + EM::Vec2(20.0f)), 5.0f, 200, EG::RGBA16_LightGrey());
+			}
+
+		}
+
+		void AddChild(GUIBTNode* Child)
+		{
+			if (Children.size() < MaxChildren)
+			{
+				// Need to make sure child isn't present already in vector
+				if (std::find(Children.begin(), Children.end(), Child) == Children.end())
+				{
+					// Make sure child doesn't already have a parent
+					if (Child->ParentNode == nullptr)
+					{
+						// Push back
+						Children.push_back(Child);
+						// Set parent as this
+						Child->ParentNode = this;
+
+						return;
+					}	
+					// Otherwise, parent already set
+					std::cout << "GUIBTNode::AddChild::GUIBTNode Child parent already assigned." << std::endl;
+				}
+				// Otherwise, we already contain that child
+				std::cout << "GUIBTNode::AddChild::GUIBTNode Child already in vector." << std::endl;
+			}
+			// Otherwise, we have too many children as it is
+			std::cout << "GUIBTNode::AddChild::Max children reached" << std::endl;
+			std::cout << "Children size: " << Children.size() << std::endl;
+			std::cout << "MaxChildren: " << MaxChildren << std::endl;
+
+		}
+
+		EGUI::Signal<> on_value_change;
+		BT::BehaviorNodeType BehaviorType;
+		Enjon::uint32 MaxChildren;
+		std::vector<GUIBTNode*> Children;
+		GUIBTNode* ParentNode;
+	};
+}}
+
 namespace Enjon { namespace BehaviorTreeEditor {
 
 	using namespace GUI;
 	using namespace Graphics;
-
-	// struct GUINode
-	// {
-
-	// };
-
-
 
 	/*-- Function Delcarations --*/
 	bool ProcessInput(EI::InputManager* Input);
 
 	EI::InputManager* Input = nullptr;
 
-	////////////////////////////
-	// LIGHT EDITOR ////////////
+	////////////////////////////////////
+	// BEHAVIOR TREE EDITOR ////////////
 	
 	float SCREENWIDTH;
 	float SCREENHEIGHT;
@@ -72,7 +230,10 @@ namespace Enjon { namespace BehaviorTreeEditor {
 
 	// GUI Elements
 	GUISceneGroup 		BehaviorNodeSceneGroup;
-	GUISceneElement 	RootNode;
+	GUIBTNode 			SequenceNode;
+	GUIBTNode 			SelectorNode;
+	GUIBTNode 			LeafNode;
+	GUIBTNode 			DecoratorNode;
 
 
 	/*-- Function Definitions --*/
@@ -95,12 +256,44 @@ namespace Enjon { namespace BehaviorTreeEditor {
 		// Create HUDCamera
 		HUDCamera.Init(SCREENWIDTH, SCREENHEIGHT);
 
+		// Init spritebatches
+		// TODO(John): Put in a debug statement that says whether or not a spritebatch is initialized or not
+		// Or, if it's not initialized, then do so when begin is called
+		UIBatch.Init();
+		SceneBatch.Init();
+
 		// Set input
 		Input = _Input;
 
+		// Set up Sequence as root
+		SequenceNode.MaxChildren = 10;
+		SequenceNode.BehaviorType = BT::BehaviorNodeType::COMPOSITE;
+		SequenceNode.ParentNode = &SequenceNode;
 
-		// Need to be have root node element
-		// Need to have BB element
+		// Set up Selector
+		SelectorNode.MaxChildren = 10;
+		SelectorNode.BehaviorType = BT::BehaviorNodeType::COMPOSITE;
+
+		// Set up Decorator
+		DecoratorNode.MaxChildren = 1;
+		DecoratorNode.BehaviorType = BT::BehaviorNodeType::DECORATOR;
+
+		// Set up Leaf
+		LeafNode.MaxChildren = 0;
+		LeafNode.BehaviorType = BT::BehaviorNodeType::LEAF;
+
+
+
+		// Add SceneELement to group
+		BehaviorNodeSceneGroup.AddToGroup(&SequenceNode, 	"Sequence");
+		BehaviorNodeSceneGroup.AddToGroup(&DecoratorNode, 	"Decorator");
+		BehaviorNodeSceneGroup.AddToGroup(&LeafNode, 		"Leaf");
+		BehaviorNodeSceneGroup.AddToGroup(&SelectorNode, 	"Selector");
+
+		// Build Tree
+		SequenceNode.AddChild(&SelectorNode);
+			SelectorNode.AddChild(&DecoratorNode);
+			SelectorNode.AddChild(&LeafNode);
 
 
 		return true;	
@@ -118,6 +311,9 @@ namespace Enjon { namespace BehaviorTreeEditor {
 		Camera.Update();
 		HUDCamera.Update();
 
+		// Update scene group
+		BehaviorNodeSceneGroup.Update();
+
 		return IsRunning;
 	}		
 
@@ -125,19 +321,23 @@ namespace Enjon { namespace BehaviorTreeEditor {
 	{
 		// Set up necessary matricies
     	auto Model 		= EM::Mat4::Identity();	
-    	auto View 		= HUDCamera.GetCameraMatrix();
+    	auto View 		= Camera.GetCameraMatrix();
     	auto Projection = EM::Mat4::Identity();
 
-    	// Draw some shit
-    	{
-    		SceneBatch.Begin();
-    		UIBatch.Begin();
-    		{
+		BasicShader->Use();
+		{
+			BasicShader->SetUniformMat4("model", Model);
+			BasicShader->SetUniformMat4("projection", Projection);
+			BasicShader->SetUniformMat4("view", View);
 
-    		}
-    		SceneBatch.End();
-    		UIBatch.End();
-    	}
+	    		SceneBatch.Begin();
+		    	{
+		    		BehaviorNodeSceneGroup.Draw(&SceneBatch);
+		    	}
+		    	SceneBatch.End();
+		    	SceneBatch.RenderBatch();
+		}
+		BasicShader->Unuse();
 
 		return true;
 	}
@@ -171,8 +371,64 @@ namespace Enjon { namespace BehaviorTreeEditor {
 				default:
 					break;
 			}
+	
+			static GUIElementBase* E = nullptr;
+			static GUIElementBase* MouseFocus = nullptr;
+			static bool PrintedDebugNoChild = false;
+			bool ProcessMouse = false;
 
+			auto MouseCoords = Input->GetMouseCoords();
+			Camera.ConvertScreenToWorld(MouseCoords);
+			bool ChildFound = false;
 			auto G = &BehaviorNodeSceneGroup;
+
+			if (MouseFocus)
+			{
+				// Check if mouse focus is done processing itself
+				if (MouseFocus->Type == GUIType::SCENE_ELEMENT)
+				{
+					ProcessMouse = MouseFocus->ProcessInput(Input, &Camera);
+			
+					// If done, then return from function
+					if (ProcessMouse && !Input->IsKeyDown(SDL_BUTTON_LEFT)) 
+					{
+						std::cout << "Losing focus after processing complete..." << std::endl;
+						MouseFocus->lose_focus.emit();
+						MouseFocus = nullptr;
+						return true;
+					}
+					else return true;	
+				}
+
+				else if (MouseFocus->Type == GUIType::GROUP)
+				{
+					ProcessMouse = MouseFocus->ProcessInput(Input, &HUDCamera);
+			
+					// If done, then return from function
+					if (ProcessMouse && !Input->IsKeyDown(SDL_BUTTON_LEFT)) 
+					{
+						std::cout << "Losing focus after processing complete..." << std::endl;
+						MouseFocus->lose_focus.emit();
+						MouseFocus = nullptr;
+						return true;
+					}
+					else return true;
+				}
+
+				else
+				{
+					ProcessMouse = MouseFocus->ProcessInput(Input, &HUDCamera);
+		
+					// If done, then return from function
+					if (ProcessMouse) 
+					{
+						std::cout << "Losing focus after processing complete..." << std::endl;
+						MouseFocus->lose_focus.emit();
+						MouseFocus = nullptr;
+						return true;
+					}
+				}
+			}
 
 			if (G->Visibility)
 			{
@@ -186,9 +442,6 @@ namespace Enjon { namespace BehaviorTreeEditor {
 					{
 						// Set to true
 						ChildFound = true;
-
-						// Set debug to false
-						PrintedDebugNoChild = false;
 
 						// Set on hover
 						C->on_hover.emit();

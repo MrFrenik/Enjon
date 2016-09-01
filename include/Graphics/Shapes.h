@@ -54,7 +54,7 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 			Batch->Add(
 						EM::Vec4(X, Y, Length + 1, Thickness),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
+						EI::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
 						Color,
 						0.0f,
 						EM::ToRadians(Angle)
@@ -64,6 +64,28 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 			Px = X;
 			Py = Y;
 		}
+	}
+
+	inline void DrawLine(EG::SpriteBatch* Batch, EM::Vec4& StartAndEndPoints, float Thickness = 2.0f, EG::ColorRGBA16& Color = EG::RGBA16_White())
+	{
+		// Get direction vector from Next to previous
+		auto Difference = EM::Vec2(StartAndEndPoints.z, StartAndEndPoints.w) - EM::Vec2(StartAndEndPoints.x, StartAndEndPoints.y);
+		auto Length = Difference.Length();
+		auto Direction = EM::Vec2::Normalize(Difference);
+
+		// Get angle of direction vector
+		auto R = EM::Vec2(1, 0);
+		float Angle = acos(R.DotProduct(Direction)) * 180.0f / M_PI;
+		if (Direction.y < 0.0f) Angle *= -1; 
+
+		Batch->Add(
+					EM::Vec4(StartAndEndPoints.x + Difference.x / 2.0f, StartAndEndPoints.y + Difference.y / 2.0f, Length + 1, Thickness),
+					EM::Vec4(0, 0, 1, 1),
+					EI::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
+					Color,
+					0.0f,
+					EM::ToRadians(Angle)
+				);
 	}
 
 }}}

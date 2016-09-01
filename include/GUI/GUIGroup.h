@@ -33,12 +33,8 @@ namespace Enjon { namespace GUI {
 			Dimensions		= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
 			TextColor		= EG::RGBA16_MidGrey();
 			Color 			= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
-			TextFont 		= nullptr;
 			HoveredElement	= nullptr;
 			Visibility 		= VisibleState::VISIBLE;
-
-			// Set up MinimizeButton button
-			MinimizeButton.Dimensions = EM::Vec2(12.0f, 12.0f);
 
 			// Set up GUISceneGroup's on_hover signal
 			on_hover.connect([&]()
@@ -64,6 +60,11 @@ namespace Enjon { namespace GUI {
 
 		void Update()
 		{
+			// Update each child in group
+			for (auto& E : Children)
+			{
+				E->Update();
+			}
 		}
 
 		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
