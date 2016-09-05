@@ -222,7 +222,7 @@ namespace Enjon { namespace GUI {
 			auto Advance = 0.0f;
 			auto Height = 0.0f;
 
-			if (this->TextFont == nullptr) this->TextFont = EG::FontManager::GetFont("WeblySleek_10");
+			if (this->TextFont == nullptr) this->TextFont = EG::FontManager::GetFont("WeblySleek_32");
 
 			for (auto& c : this->Name)
 			{
@@ -235,7 +235,7 @@ namespace Enjon { namespace GUI {
 
 			EG::Fonts::PrintText(		
 									Position.x + Dimensions.x / 2.0f - Advance / 2.0f, 
-									Position.y + Dimensions.y / 2.0f - Height / 2.0f, 
+									Position.y + Dimensions.y / 2.0f, 
 									1.0f, 
 									this->Name, 
 									this->TextFont, 
