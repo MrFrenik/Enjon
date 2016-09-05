@@ -201,21 +201,6 @@ namespace Enjon { namespace Math {
 		return (x * other.x) + (y * other.y);
 	}
 
-	float Vec2::CrossProduct(const Vec2& a, const Vec2& b)
-	{
-		return (a.x * b.y) - (a.y * b.x);
-	}
-	
-	Vec2 Vec2::CrossProduct(const Vec2& a, float s)
-	{
-		return Vec2(s * a.y, -s * a.x);
-	}
-	
-	Vec2 Vec2::CrossProduct(float s, const Vec2& a)
-	{
-		return Vec2(-s * a.y, s * a.x);
-	} 
-
 	float Vec2::DistanceTo(const Vec2& other)
 	{
 		return sqrt(pow(other.x - x,2)+pow(other.y - y,2));

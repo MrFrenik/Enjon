@@ -43,10 +43,6 @@ namespace ECS { namespace Systems {
 		// Sets up WorldObject and returns it
 		struct EntityManager* NewEntityManager(int Width, int Height, EG::Camera2D* Camera, Level* Lvl)
 		{
-			// struct EntityManager* Manager = new EntityManager;
-
-			// if (Manager == nullptr) Enjon::Utils::FatalError("COMPOPNENT_SYSTEMS::NEW_ENTITY_MANAGER::Manager is null"); 
-
 			// Set up world object
 
 			// Initialize NextAvailableID to 0

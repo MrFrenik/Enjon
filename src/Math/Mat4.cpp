@@ -7,7 +7,8 @@ namespace Enjon { namespace Math {
 	Mat4::Mat4()
 	{
 		//Set each element to 0.0f
-		for (int i = 0; i < 4 * 4; i++) this->elements[i] = 0.0f;
+		// for (int i = 0; i < 4 * 4; i++) this->elements[i] = 0.0f;
+		*this = Mat4::Identity();
 	}
 
 	Mat4::Mat4(float diagonal)
@@ -178,6 +179,41 @@ namespace Enjon { namespace Math {
 		result.elements[2 + 2 * 4] = z * z * (1 - c) + c;	
 
 		return result; 
+	}
+
+	Mat4 Mat4::LookAt(Vec3& Position, Vec3& Target, Vec3& Up)
+	{
+		// Get direction and right vectors
+		Vec3 ZAxis = Vec3::Normalize(Position - Target);
+		auto YAxis = Up;
+		Vec3 XAxis = Vec3::Normalize(Up.CrossProduct(ZAxis));
+		YAxis = ZAxis.CrossProduct(XAxis);
+		XAxis = Vec3::Normalize(XAxis);
+		YAxis = Vec3::Normalize(YAxis);
+
+		Mat4 LA(1.0f);
+		LA.elements[0] = XAxis.x;
+		LA.elements[1] = YAxis.x;
+		LA.elements[2] = ZAxis.x;
+		LA.elements[3] = 0.0f;
+
+		LA.elements[4] = XAxis.y;
+		LA.elements[5] = YAxis.y;
+		LA.elements[6] = ZAxis.y;
+		LA.elements[7] = 0.0f;
+
+		LA.elements[8]  = XAxis.z;
+		LA.elements[9]  = YAxis.z;
+		LA.elements[10] = ZAxis.z;
+		LA.elements[11] = 0.0f;
+
+		// Mat4 Translation(1.0f);
+		LA.elements[12] = XAxis.DotProduct(Position * -1.0f);	
+		LA.elements[13] = YAxis.DotProduct(Position * -1.0f);	
+		LA.elements[14] = ZAxis.DotProduct(Position * -1.0f);
+		LA.elements[15] = 1.0f;
+
+		return LA;
 	}
 
 	Mat4& Mat4::Invert()

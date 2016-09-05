@@ -87,12 +87,26 @@ namespace Enjon { namespace Math {
 	
 	float Vec3::Length() const 
 	{
-		return sqrt((x * x) + (y * y));
+		return sqrt((x * x) + (y * y) + (z * z));
 	}
 		
 	Vec3 operator/(Vec3 left, float value)
 	{
 		return Vec3(left.x / value, left.y / value, left.z / value);
+	}
+
+	float Vec3::DotProduct(const Vec3& other)
+	{
+		return x * other.x + y * other.y + z * other.z;
+	}
+
+	Vec3 Vec3::CrossProduct(const Vec3& other)
+	{
+		return Vec3(
+					y * other.z - z * other.y, 
+					z * other.x - x * other.z, 
+					x * other.y - y * other.x
+					);	
 	}
 
 }}

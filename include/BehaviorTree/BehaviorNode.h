@@ -9,11 +9,10 @@
 
 #include "Utils/Errors.h"
 #include "System/Internals.h"
+#include "System/Types.h"
 
-// #include "BlackBoard.h"
-
-typedef uint32_t u32;
-typedef int32_t  i32;
+typedef Enjon::uint32 u32;
+typedef Enjon::int32  i32;
 
 namespace BT
 {
@@ -308,8 +307,6 @@ namespace BT
 			void AddChild(BehaviorNodeBase* N)
 			{
 				if (N) Children.push_back(N);
-
-				// return this;
 			}
 
 			void AddChildren(std::initializer_list<BehaviorNodeBase*> V)

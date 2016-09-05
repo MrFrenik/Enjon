@@ -1,5 +1,6 @@
 #include "Graphics/SpriteBatch.h"
 #include "IO/ResourceManager.h"
+#include "Graphics/Shapes.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,7 +50,7 @@ namespace Enjon { namespace Graphics {
 
 	void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, 
 						const ColorRGBA16& color /* = ColorRGBA16(255) */, float depth /* = 0.0f ) */, DrawOption Options, 
-						EG::ColorRGBA16 BorderColor, float BorderThickness, const EM::Vec2& ShadowOffset)
+						EG::ColorRGBA16 BorderColor, float BorderThickness, const EM::Vec2& ShadowOffset, float BorderRadius)
 	{ 
 		if (Options & DrawOptions::SHADOW)
 		{
@@ -60,7 +61,7 @@ namespace Enjon { namespace Graphics {
 		if (Options & DrawOptions::BORDER)
 		{
 			// Draw border
-			DrawRectBorder(this, destRect, BorderThickness, BorderColor, depth);
+			DrawRectBorder(this, destRect, BorderThickness, BorderColor, depth, BorderRadius);
 		}
 
 		// Place back new glyph
@@ -233,7 +234,7 @@ namespace Enjon { namespace Graphics {
 		return (a->texture < b->texture);
 	}
 
-	void DrawRectBorder(SpriteBatch* Batch, const EM::Vec4& Dims, float Thickness, const EG::ColorRGBA16& Color, float Depth)
+	void DrawRectBorder(SpriteBatch* Batch, const EM::Vec4& Dims, float Thickness, EG::ColorRGBA16& Color, float Depth, float BorderRadius)
 	{
 		/*
 			|-  z  -|
@@ -245,75 +246,112 @@ namespace Enjon { namespace Graphics {
 		 (x, y)
 		*/
 
-		float X, Y, Width, Height;
+		float X, Y, Width, Height, EndX, EndY, BorderEndX, BorderEndY, ControlX, ControlY, ControlEndX, ControlEndY;
+
+		float BorderThickness = BorderRadius;
 
 		//////////////////////
 		// TOP BORDER ////////
 
 		// Get Necessary dimensions 
 		X = Dims.x;
-		Y = Dims.y + Dims.w;
-		Width = Dims.z;
-		Height = Thickness;
+		Y = Dims.y + Dims.w + Thickness / 2.0f;
+		EndX = Dims.x + Dims.z;
+		EndY = Y;
 
-		Batch->Add(
-					EM::Vec4(X, Y, Width, Height), 
-					EM::Vec4(0, 0, 1, 1),
-					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-					Color,
-					Depth
-				  );
+		EG::Shapes::DrawLine(Batch, EM::Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
+		EG::Shapes::DrawHollowCircle(
+										Batch, 
+										EM::Vec2(
+													EndX + 1.0f, 
+													EndY - BorderRadius / 4.0f
+												), 
+										EM::Vec2(0.0f, 90.0f), 
+										Thickness, 
+										BorderThickness, 
+										90, 
+										Color,
+										Depth - 1.0f
+									);
 
 		////////////////////////
 		// RIGHT BORDER ////////
 
 		// Get Necessary dimensions 
-		X = Dims.x + Dims.z;
-		Y = Dims.y - Thickness;
-		Width = Thickness;
-		Height = Dims.w + 2.0f * Thickness;
+		X = Dims.x + Dims.z + Thickness / 2.0f;
+		Y = Dims.y + Dims.w;
+		EndX = X;
+		EndY = Dims.y;
 
-		Batch->Add(
-					EM::Vec4(X, Y, Width, Height), 
-					EM::Vec4(0, 0, 1, 1),
-					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-					Color,
-					Depth 
-				  );
+		EG::Shapes::DrawLine(Batch, EM::Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
+		EG::Shapes::DrawHollowCircle(
+										Batch, 
+										EM::Vec2(
+													EndX - BorderRadius / 4.0f, 
+													EndY - BorderRadius / 8.0f + 1.0f
+												), 
+										EM::Vec2(270.0f, 360.0f), 
+										Thickness, 
+										BorderThickness, 
+										360, 
+										Color,
+										Depth - 1.0f
+									);
 
 		/////////////////////////
 		// BOTTOM BORDER ////////
 
 		// Get Necessary dimensions 
 		X = Dims.x;
-		Y = Dims.y - Thickness;
-		Width = Dims.z;
-		Height = Thickness;
+		Y = Dims.y - Thickness / 2.0f;
+		EndX = Dims.x + Dims.z;
+		EndY = Y;
 
-		Batch->Add(
-					EM::Vec4(X, Y, Width, Height), 
-					EM::Vec4(0, 0, 1, 1),
-					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-					Color,
-					Depth 
-				  );
+		EG::Shapes::DrawLine(Batch, EM::Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
+		EG::Shapes::DrawHollowCircle(
+										Batch, 
+										EM::Vec2(
+													X - 1.0f, 
+													Y + BorderRadius / 8.0f + 2.0f
+												), 
+										EM::Vec2(270.0f, 360.0f), 
+										Thickness, 
+										BorderThickness, 
+										360, 
+										Color,
+										Depth - 1.0f
+									);
 
 		///////////////////////
 		// LEFT BORDER ////////
 
 		// Get Necessary dimensions 
-		X = Dims.x - Thickness;
-		Y = Dims.y - Thickness;
-		Width = Thickness;
-		Height = Dims.w + 2.0f * Thickness;
+		X = Dims.x - Thickness / 2.0f;
+		Y = Dims.y;
+		EndX = X;
+		EndY = Dims.y + Dims.w;
 
-		Batch->Add(
-					EM::Vec4(X, Y, Width, Height), 
-					EM::Vec4(0, 0, 1, 1),
-					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-					Color,
-					Depth 
-				  );
+		EG::Shapes::DrawLine(Batch, EM::Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
+
+		X = Dims.x;
+		Y = Dims.y + Dims.w + Thickness / 2.0f;
+		EndX = Dims.x + Dims.z;
+		EndY = Y;
+
+		EG::Shapes::DrawHollowCircle(
+										Batch, 
+										EM::Vec2(
+													X - 1.0f, 
+													EndY - BorderRadius / 4.0f
+												), 
+										EM::Vec2(270.0f, 360.0f), 
+										Thickness, 
+										BorderThickness, 
+										360, 
+										Color,
+										Depth - 1.0f
+									);
+
 
 	}
 

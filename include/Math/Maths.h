@@ -37,6 +37,11 @@ namespace Enjon { namespace Math {
 	{
 		return degrees * (float)(M_PI / 180.0f);
 	} 
+
+	inline float ToDegrees(float radians)
+	{
+		return radians * (180.0f / (float)M_PI); 
+	}
 	
 	inline Math::Vec2 IsoToCartesian(const Enjon::Math::Vec2& point)
 	{

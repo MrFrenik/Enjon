@@ -66,7 +66,7 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 		}
 	}
 
-	inline void DrawLine(EG::SpriteBatch* Batch, EM::Vec4& StartAndEndPoints, float Thickness = 2.0f, EG::ColorRGBA16& Color = EG::RGBA16_White())
+	inline void DrawLine(EG::SpriteBatch* Batch, EM::Vec4& StartAndEndPoints, float Thickness = 2.0f, EG::ColorRGBA16& Color = EG::RGBA16_White(), float Depth = 0.0f)
 	{
 		// Get direction vector from Next to previous
 		auto Difference = EM::Vec2(StartAndEndPoints.z, StartAndEndPoints.w) - EM::Vec2(StartAndEndPoints.x, StartAndEndPoints.y);
@@ -83,9 +83,42 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 					EM::Vec4(0, 0, 1, 1),
 					EI::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
 					Color,
-					0.0f,
+					Depth,
 					EM::ToRadians(Angle)
 				);
+	}
+
+	inline void DrawHollowCircle(EG::SpriteBatch* Batch, EM::Vec2& Point, EM::Vec2& StartAndEndAngles, float Radius, float Thickness = 2.0f, Enjon::uint32 NumberOfPoints = 360, EG::ColorRGBA16& Color = EG::RGBA16_White(), float Depth = 0.0f)
+	{
+		for (auto i = StartAndEndAngles.x; i <= StartAndEndAngles.y; i += 1)
+		{
+			// Find line between point and next point
+			auto X = Radius * cos(i) + Point.x;
+			auto Y = Radius * sin(i) + Point.y;
+			auto NextX = Radius * cos(i + 1) + Point.x;
+			auto NextY = Radius * sin(i + 1) + Point.y;
+
+			// Get direction vector from Next to previous
+			// auto Difference = EM::Vec2(NextX, NextY) - EM::Vec2(X, X);
+			auto Difference = EM::Vec2(X, Y) - EM::Vec2(Point.x, Point.y);
+			auto Length = Difference.Length();
+			auto Direction = EM::Vec2::Normalize(Difference);
+
+			// Get angle of direction vector
+			auto R = EM::Vec2(1, 0);
+			float Angle = acos(R.DotProduct(Direction)) * 180.0f / M_PI;
+			if (Direction.y < 0.0f) Angle *= -1; 
+
+			Batch->Add(
+						EM::Vec4(Point.x, Point.y, EM::Vec2(Length, Thickness)),
+						EM::Vec4(0, 0, 1, 1),
+						EI::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
+						Color,
+						Depth,
+						EM::ToRadians(Angle)
+					);
+		}
+
 	}
 
 }}}

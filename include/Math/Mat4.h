@@ -37,6 +37,7 @@ namespace Enjon { namespace Math {
 		static Mat4 Translate(const Vec3& vector);
 		static Mat4 Rotate(float angle, const Vec3& axis);
 		static Mat4 Inverse(const Mat4& M);
+		static Mat4 LookAt(Vec3& Position, Vec3& Target, Vec3& Up);
 
 	};
 

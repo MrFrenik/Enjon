@@ -66,7 +66,6 @@ namespace BT
 						Count--;
 						if (Count <= 0)
 						{
-							std::cout << "Repeater succeeded." << std::endl;
 							State = BehaviorNodeState::SUCCESS;
 							SS->at(this->TreeIndex) = BehaviorNodeState::SUCCESS;
 							return BehaviorNodeState::SUCCESS;
@@ -74,7 +73,6 @@ namespace BT
 						else
 						{
 							State = BehaviorNodeState::RUNNING;
-							std::cout << "Running again..." << std::endl;
 							SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
 							return BehaviorNodeState::RUNNING;
 						}
@@ -237,9 +235,6 @@ namespace BT
 			BehaviorNodeState Run()
 			{
 				// Get State Object from BlackBoard
-				// auto SO = BTree->GetBlackBoard()->GetComponent<StateObject*>("States");
-				// auto SS = &SO->GetData()->States;
-
 				auto SO = &BTree->GetBlackBoard()->SO;
 				auto SS = &SO->States;
 				SO->CurrentNode = this;

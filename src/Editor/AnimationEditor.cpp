@@ -95,8 +95,8 @@ namespace Enjon { namespace AnimationEditor {
 	////////////////////////////////
 	// ANIMATION EDITOR ////////////
 
-	GUIVerticleGroup					SceneGroup;
-	GUIVerticleGroup					AnimationPanel;
+	GUIVerticleGroup			SceneGroup;
+	GUIVerticleGroup			AnimationPanel;
 	GUIButton 					PlayButton;
 	GUIButton 					SaveAnimationToFile;
 	GUIButton 					AnimationPanelIcon;
@@ -121,17 +121,18 @@ namespace Enjon { namespace AnimationEditor {
 	float TimeIncrement = 0.15f;
 	float t = 0.0f;
 
-	float CameraScaleVelocityGoal = 0.0f;
-	float CameraScaleVelocity = 0.0f;
+	float CameraScaleVelocityGoal 	= 0.0f;
+	float CameraScaleVelocity 		= 0.0f;
 
 	bool IsRunning = true;
 	
 	EG::GLSLProgram* BasicShader 	= nullptr;
 	EG::GLSLProgram* TextShader 	= nullptr;
-	EG::SpriteBatch* UIBatch 		= nullptr;
-	EG::SpriteBatch* SceneBatch 	= nullptr;
-	EG::SpriteBatch* BGBatch 		= nullptr;
-	EG::SpriteBatch* UIObjectBatch 	= nullptr;
+
+	EG::SpriteBatch UIBatch;
+	EG::SpriteBatch SceneBatch;
+	EG::SpriteBatch BGBatch;
+	EG::SpriteBatch UIObjectBatch;
 
 	EG::Camera2D Camera;
 	EG::Camera2D HUDCamera;
@@ -143,32 +144,24 @@ namespace Enjon { namespace AnimationEditor {
 		BasicShader		= EG::ShaderManager::GetShader("Basic");
 		TextShader		= EG::ShaderManager::GetShader("Text");  
 
-		// UI Batch
-		UIBatch = new EG::SpriteBatch();
-		UIBatch->Init();
+		// Initialize batches
+		UIBatch.Init();
+		SceneBatch.Init();
+		BGBatch.Init();
+		UIObjectBatch.Init();
 
-		SceneBatch = new EG::SpriteBatch();
-		SceneBatch->Init();
-
-		BGBatch = new EG::SpriteBatch();
-		BGBatch->Init();
-
-		UIObjectBatch = new EG::SpriteBatch();
-		UIObjectBatch->Init();
-
+		// Set input manager
 		Input = Input_Mgr;
 
-		const float W = SW;
-		const float H = SH;
-
+		// Set screen width and height
 		SCREENWIDTH = SW;
 		SCREENHEIGHT = SH;
 
 		// Create Camera
-		Camera.Init(W, H);
+		Camera.Init(SCREENWIDTH, SCREENHEIGHT);
 
 		// Create HUDCamera
-		HUDCamera.Init(W, H);
+		HUDCamera.Init(SCREENWIDTH, SCREENHEIGHT);
 
 		// Register cameras with manager
 		CameraManager::AddCamera("HUDCamera", &HUDCamera);
@@ -224,6 +217,7 @@ namespace Enjon { namespace AnimationEditor {
 				// Deactive animation selection
 				AnimationSelection.on_click.emit();
 
+				// Resize dimensions 
 				AnimationSelection.CalculateDimensions();
 
 				// Reset animation frame
@@ -477,15 +471,15 @@ namespace Enjon { namespace AnimationEditor {
 		AnimationPanel.AddToGroup(&SaveAnimationToFile, "Save");
 
 		// Draw BG
-		BGBatch->Begin();
+		BGBatch.Begin();
 		{
-			BGBatch->Add(
+			BGBatch.Add(
 						EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
 						EM::Vec4(0, 0, 1, 1),
 						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg_cross.png", GL_LINEAR).id,
 						EG::SetOpacity(EG::RGBA16_White(), 0.1f)
 					);
-			BGBatch->End();
+			BGBatch.End();
 		}
 		
 		return true;	
@@ -552,13 +546,13 @@ namespace Enjon { namespace AnimationEditor {
 			BasicShader->SetUniformMat4("view", View);
 
 			// Draw BG
-			BGBatch->RenderBatch();
+			BGBatch.RenderBatch();
 
 			// Reset camera to HUD
 			View = Camera.GetCameraMatrix();
 			BasicShader->SetUniformMat4("view", View);
 
-			SceneBatch->Begin();
+			SceneBatch.Begin();
 			{
 				// Draw AABB of current frame
 				auto CurrentAnimation = SceneAnimation.CurrentAnimation;
@@ -571,7 +565,7 @@ namespace Enjon { namespace AnimationEditor {
 				{
 					auto W = 64.0f;
 					auto H = W / 2.0f;
-					SceneBatch->Add(
+					SceneBatch.Add(
 										EM::Vec4(-W / 2.0f, -H / 2.0f, W, H),
 										EM::Vec4(0, 0, 1, 1),
 										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
@@ -586,7 +580,7 @@ namespace Enjon { namespace AnimationEditor {
 
 					// Draw border around animation
 					EG::DrawRectBorder 	(
-											SceneBatch,
+											&SceneBatch,
 											EM::Vec4(AABB_SA->Min, AABB_SA->Max - AABB_SA->Min),
 											1.0f, 
 											EG::RGBA16_Red()	
@@ -623,19 +617,16 @@ namespace Enjon { namespace AnimationEditor {
 					auto PreviousFrame = &CurrentAnimation->Frames.at(PreviousIndex);
 					auto SecondPreviousFrame = &CurrentAnimation->Frames.at(SecondPreviousIndex);
 
-					DrawFrame(*PreviousFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA16_Blue(), 0.3f));
-					DrawFrame(*NextFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA16_Red(), 0.3f));
-
-					// DrawFrame(*SecondPreviousFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA16_White(), 0.1f));
-					// DrawFrame(*PreviousFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA16_White(), 0.3f));
+					DrawFrame(*PreviousFrame, Position, &SceneBatch, EG::SetOpacity(EG::RGBA16_Blue(), 0.3f));
+					DrawFrame(*NextFrame, Position, &SceneBatch, EG::SetOpacity(EG::RGBA16_Red(), 0.3f));
 				}
 
 				// Draw Scene animation
-				DrawFrame(*Frame, Position,	SceneBatch);
+				DrawFrame(*Frame, Position,	&SceneBatch);
 
 			}
-			SceneBatch->End();
-			SceneBatch->RenderBatch();
+			SceneBatch.End();
+			SceneBatch.RenderBatch();
 
 		}
 		BasicShader->Unuse();
@@ -649,16 +640,16 @@ namespace Enjon { namespace AnimationEditor {
 			TextShader->SetUniformMat4("view", View);
 
 			// glEnable(GL_SCISSOR_TEST);
-			UIBatch->Begin(EG::GlyphSortType::FRONT_TO_BACK);
+			UIBatch.Begin(EG::GlyphSortType::FRONT_TO_BACK);
 			{
 				// Draw AnimationPanel
-				if (AnimationPanel.Visibility) AnimationPanel.Draw(UIBatch);
+				if (AnimationPanel.Visibility) AnimationPanel.Draw(&UIBatch);
 
 				// Draw AnimationIcon
 				if (AnimationPanelIcon.Visibility)
 				{
 					// Draw border
-					UIBatch->Add(
+					UIBatch.Add(
 									EM::Vec4(AnimationPanelIcon.Position, AnimationPanelIcon.Dimensions),
 									EM::Vec4(0, 0, 1, 1),
 									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
@@ -672,7 +663,7 @@ namespace Enjon { namespace AnimationEditor {
 											1.0f,
 											AnimationPanelIcon.Text,
 											AnimationPanelIcon.TextFont,
-											*UIBatch,
+											UIBatch,
 											EG::SetOpacity(EG::RGBA16_MidGrey(), 0.6f), 
 											EG::Fonts::TextStyle::SHADOW,
 											EM::ToRadians(180.0f)
@@ -682,7 +673,7 @@ namespace Enjon { namespace AnimationEditor {
 				if (AnimationPanel.Visibility)
 				{
 					// Draw Playbutton
-					UIBatch->Add(
+					UIBatch.Add(
 									EM::Vec4(PlayButton.Position, PlayButton.Dimensions), 
 									EM::Vec4(0, 0, 1, 1), 
 									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
@@ -703,7 +694,7 @@ namespace Enjon { namespace AnimationEditor {
 												1.0f,
 												PlayButton.Text,
 												PlayButton.TextFont,
-												*UIBatch,
+												UIBatch,
 												EG::SetOpacity(EG::RGBA16_MidGrey(), 0.6f), 
 												EG::Fonts::TextStyle::SHADOW,
 												EM::ToRadians(-90.0f)
@@ -713,7 +704,7 @@ namespace Enjon { namespace AnimationEditor {
 					{
 						// Draw Playbutton
 						auto Offset = EM::Vec2(PlayButton.Dimensions.x / 4.0f, PlayButton.Dimensions.y / 4.0f);
-						UIBatch->Add(
+						UIBatch.Add(
 										EM::Vec4(PlayButton.Position + Offset, PlayButton.Dimensions.x / 2.0f, PlayButton.Dimensions.y / 1.75f), 
 										EM::Vec4(0, 0, 1, 1), 
 										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
@@ -732,14 +723,14 @@ namespace Enjon { namespace AnimationEditor {
 											1.0f,
 											SaveAnimationToFile.Text,
 											SaveAnimationToFile.TextFont,
-											*UIBatch,
+											UIBatch,
 											SaveAnimationToFile.TextColor
 										);
 
 				}
 			}
-			UIBatch->End();
-			UIBatch->RenderBatch();
+			UIBatch.End();
+			UIBatch.RenderBatch();
 		}
 		TextShader->Unuse();
 

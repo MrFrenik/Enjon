@@ -18,6 +18,8 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("DepthShader", "../shaders/depth.v.glsl", "../shaders/depth.f.glsl");
 		ShaderManager::AddShader("NoCameraProjection", "../shaders/no_camera.v.glsl", "../shaders/no_camera.f.glsl");
 		ShaderManager::AddShader("BasicLighting", "../shaders/lighting_basic.v.glsl", "../shaders/lighting_basic.f.glsl");
+		ShaderManager::AddShader("Learn", "../shaders/learn.v.glsl", "../shaders/learn.f.glsl");
+		ShaderManager::AddShader("Lamp", "../shaders/learn.v.glsl", "../shaders/lamplight.f.glsl");
 	}
 
 	void AddShader(const char* shadername, const char* vertpath, const char* fragpath)

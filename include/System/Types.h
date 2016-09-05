@@ -3,6 +3,11 @@
 
 #include "System/Config.h"
 
+#include <cstdint>
+#include <vector>
+#include <iostream>
+#include <unordered_map>
+#include <initializer_list>
 #include <type_traits>
 #include <memory>
 

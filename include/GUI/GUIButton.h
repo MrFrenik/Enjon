@@ -939,7 +939,7 @@ namespace Enjon { namespace GUI {
 						0.0f,
 						EG::SpriteBatch::DrawOptions::BORDER | EG::SpriteBatch::DrawOptions::SHADOW,
 						this->BorderColor, 
-						1.0f, 
+						1.0f,
 						EM::Vec2(2.0f, 2.0f)	
 					);
 			

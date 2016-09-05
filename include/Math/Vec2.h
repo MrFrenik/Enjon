@@ -43,11 +43,7 @@ namespace Enjon { namespace Math {
 		Vec2& operator/=(const Vec2& other); 
 		Vec2& operator*=(const float& scalar);
 
-
 		float DotProduct(const Vec2& other);
-		float CrossProduct(const Vec2& a, const Vec2& b);
-		Vec2 CrossProduct(const Vec2& a, float s);
-		Vec2 CrossProduct(float s, const Vec2& a);
 
 		float Distance(const Vec2& a, const Vec2& b);
 		float DistanceTo(const Vec2& other);

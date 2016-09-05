@@ -30,7 +30,7 @@ namespace Enjon { namespace Math {
 			this->x = a.x;
 			this->y = a.y;
 			this->z = val;
-		} 
+		}
 
 		Vec2 inline XY() const { return Vec2(this->x, this->y); }
 	
@@ -53,6 +53,9 @@ namespace Enjon { namespace Math {
 		Vec3& operator*=(const Vec3& other);
 		Vec3& operator/=(const Vec3& other);
 
+		float DotProduct(const Vec3& other);
+		Vec3 CrossProduct(const Vec3& other);
+
 		inline static Vec3 XAxis() { return Vec3(1.0f, 0.0f, 0.0f); }
 		inline static Vec3 YAxis() { return Vec3(0.0f, 1.0f, 0.0f); }
 		inline static Vec3 ZAxis() { return Vec3(0.0f, 0.0f, 1.0f); } 
@@ -60,7 +63,6 @@ namespace Enjon { namespace Math {
 		float Vec3::Length() const; 
 
 		static Vec3 inline Normalize(const Vec3& vec) { return vec / vec.Length(); }
-		
 	}; 
 		
 

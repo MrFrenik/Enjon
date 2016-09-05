@@ -45,22 +45,53 @@ namespace Enjon { namespace GUI {
 			// Set up states
 			this->State = ButtonState::INACTIVE;
 			this->HoverState = HoveredState::OFF_HOVER;
-			this->Dimensions = EM::Vec2(100.0f);
+			this->Dimensions = EM::Vec2(200.0f, 100.0f);
 			this->Position = EM::Vec2(0.0f);
 			this->AABB.Min = this->Position;
 			this->AABB.Max = this->AABB.Min + this->Dimensions;
 			this->ParentNode = nullptr;
+			this->BorderColor = EG::RGBA16_MidGrey();
+			this->DrawingParentingLine = false;
+			this->TargetPosition = EM::Vec2(-999999.0f);
+			this->Targeting = false;
 
-			// Set up SceneAnimation's on_hover signal
+			// Set up GUIBTNode's on_hover signal
 			this->on_hover.connect([&]()
 			{
 				this->HoverState = HoveredState::ON_HOVER;
 			});
 
-			// Set up SceneAnimation's off_hover signal
+			// Set up GUIBTNode's off_hover signal
 			this->off_hover.connect([&]()
 			{
 				this->HoverState = HoveredState::OFF_HOVER;
+			});
+
+			// Set up GUIBTNode's lose_focus signal
+			this->lose_focus.connect([&]()
+			{
+				if (!Targeting) return;
+
+				// Leave if not in group
+				if (this->Group == nullptr) return;
+
+				else
+				{
+					for (auto& C : Group->Children)
+					{
+						// Don't process this
+						if (C == this) continue;
+
+						if (EP::AABBvsPoint(&C->AABB, TargetPosition)) 
+						{
+							std::cout << "Intersected!" << std::endl;	
+
+							// Add child
+							this->AddChild(static_cast<GUIBTNode*>(C));
+							return;
+						}
+					}
+				}
 			});
 
 		}
@@ -107,7 +138,20 @@ namespace Enjon { namespace GUI {
 		    auto MousePos = Input->GetMouseCoords();
 		    Camera->ConvertScreenToWorld(MousePos);
 
-		    if (Input->IsKeyDown(SDL_BUTTON_LEFT))
+    		if (Input->IsKeyDown(SDLK_LALT))
+    		{
+			    if (Input->IsKeyPressed(SDL_BUTTON_LEFT)) 
+			    {
+			    	if (this->ParentNode != nullptr) 
+			    	{
+				    	std::cout << "Removing..." << std::endl;
+			    		this->ParentNode->RemoveChild(this);
+			    		this->ParentNode = nullptr;
+			    	}
+			    }
+    		}
+
+		    else if (Input->IsKeyDown(SDL_BUTTON_LEFT))
 		    {
 				auto X = MousePos.x;
 				auto Y = MousePos.y;
@@ -121,17 +165,37 @@ namespace Enjon { namespace GUI {
 	    			this->on_click.emit();
 	    		}
 
-				// Update Position
-				this->Position = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
+		    	
+		    	if (Input->IsKeyDown(SDLK_LSHIFT))
+		    	{
+		    		// Draw line from Connection point to mouse
+		    		DrawingParentingLine = true;
 
-				// Emit that value has changed
-				this->on_value_change.emit();
+		    		TargetPosition = MousePos;
+
+		    		Targeting = true;
+		    	}
+
+		    	else
+		    	{
+	    			// Change border color to active
+	    			this->BorderColor = EG::RGBA16_Yellow();
+
+					// Update Position
+					this->Position = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
+
+					// Emit that value has changed
+					this->on_value_change.emit();
+		    	}
 		    }
 
 	    	else 
 	    	{
 	    		this->lose_focus.emit();
+    			this->BorderColor = EG::RGBA16_MidGrey();
+    			this->DrawingParentingLine = false;
 	    		JustFocused = true;
+				Targeting = false;
 	    		return true;
 	    	}
 
@@ -140,26 +204,73 @@ namespace Enjon { namespace GUI {
 
 		void Draw(EG::SpriteBatch* Batch)
 		{
+			auto BorderThickness = 10.0f;
+
 			Batch->Add(
 							EM::Vec4(Position, Dimensions),
 							EM::Vec4(0, 0, 1, 1),
-							EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id
+							EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
+							EG::RGBA16_DarkGrey(),
+							Depth,
+							EG::SpriteBatch::DrawOptions::BORDER | EG::SpriteBatch::DrawOptions::SHADOW,
+							BorderColor,
+							BorderThickness,
+							EM::Vec2(2.0f, 2.0f),
+							16.0f
 						);
 
+			auto Advance = 0.0f;
+			auto Height = 0.0f;
+
+			if (this->TextFont == nullptr) this->TextFont = EG::FontManager::GetFont("WeblySleek_10");
+
+			for (auto& c : this->Name)
+			{
+				// Get advance
+				Advance += EG::Fonts::GetAdvance(c, this->TextFont, 1.0f);
+
+				// Get height
+				Height += EG::Fonts::GetHeight(c, this->TextFont, 1.0f);
+			}
+
+			EG::Fonts::PrintText(		
+									Position.x + Dimensions.x / 2.0f - Advance / 2.0f, 
+									Position.y + Dimensions.y / 2.0f - Height / 2.0f, 
+									1.0f, 
+									this->Name, 
+									this->TextFont, 
+									*Batch, 
+									EG::SetOpacity(Graphics::RGBA16_White(), 0.8f)
+								);
+
+
+
 			// Draw lines to children
+			EM::Vec2 ParentCenter(this->Position.x + this->Dimensions.x / 2.0f, this->Position.y);
 			for (auto c : Children)
 			{
 				// Get bottom center of this
-				EM::Vec2 ParentCenter(this->Position.x + this->Dimensions.x / 2.0f, this->Position.y);
 				EM::Vec2 ChildCenter(c->Position.x + c->Dimensions.x / 2.0f, c->Position.y + c->Dimensions.y);
-				EG::Shapes::DrawLine(Batch, EM::Vec4(ParentCenter, ChildCenter), 5.0f, EG::RGBA16_LightGrey());
-				// EG::Shapes::DrawSpline(Batch, EM::Vec4(ParentCenter, ChildCenter), EM::Vec4(ParentCenter - EM::Vec2(20.0), ChildCenter + EM::Vec2(20.0f)), 5.0f, 200, EG::RGBA16_LightGrey());
+				EG::Shapes::DrawLine(Batch, EM::Vec4(ParentCenter, ChildCenter), 5.0f, EG::RGBA16_LightGrey(), Depth - 2.0f);
 			}
 
+			// If parenting line being drawn
+			if (DrawingParentingLine)
+			{
+				EG::Shapes::DrawLine(Batch, EM::Vec4(ParentCenter, TargetPosition), 5.0f, EG::RGBA16_LightGrey(), Depth - 2.0f);
+			}
+		}
+
+		void RemoveChild(GUIBTNode* Child)
+		{
+			this->Children.erase(std::remove(this->Children.begin(), this->Children.end(), Child), this->Children.end());
 		}
 
 		void AddChild(GUIBTNode* Child)
 		{
+			// Leave if this is our parent
+			if (this->ParentNode != nullptr && Child == this->ParentNode) return;
+
 			if (Children.size() < MaxChildren)
 			{
 				// Need to make sure child isn't present already in vector
@@ -192,7 +303,13 @@ namespace Enjon { namespace GUI {
 		BT::BehaviorNodeType BehaviorType;
 		Enjon::uint32 MaxChildren;
 		std::vector<GUIBTNode*> Children;
+		EG::ColorRGBA16 BorderColor;
 		GUIBTNode* ParentNode;
+		EG::Fonts::Font* TextFont;
+		Enjon::uint32 DrawingParentingLine;
+		EM::Vec2 TargetPosition;
+		GUISceneGroup* Group;
+		Enjon::uint32 Targeting;
 	};
 }}
 
@@ -240,7 +357,7 @@ namespace Enjon { namespace BehaviorTreeEditor {
 	bool Init(EI::InputManager* _Input, float SW, float SH)
 	{
 		// Shader for frame buffer
-		BasicShader			= EG::ShaderManager::GetShader("Basic");
+		BasicShader			= EG::ShaderManager::GetShader("Text");
 		TextShader			= EG::ShaderManager::GetShader("Text");
 
 		// UI Batch
@@ -268,20 +385,24 @@ namespace Enjon { namespace BehaviorTreeEditor {
 		// Set up Sequence as root
 		SequenceNode.MaxChildren = 10;
 		SequenceNode.BehaviorType = BT::BehaviorNodeType::COMPOSITE;
-		SequenceNode.ParentNode = &SequenceNode;
+		SequenceNode.Name = "Sequence";
 
-		// Set up Selector
+		// Set up Sequence as root
 		SelectorNode.MaxChildren = 10;
 		SelectorNode.BehaviorType = BT::BehaviorNodeType::COMPOSITE;
+		SelectorNode.Name = "Selector";
 
-		// Set up Decorator
+
+		// Set up Sequence as root
 		DecoratorNode.MaxChildren = 1;
 		DecoratorNode.BehaviorType = BT::BehaviorNodeType::DECORATOR;
+		DecoratorNode.Name = "Decorator";
 
-		// Set up Leaf
+
+		// Set up Sequence as root
 		LeafNode.MaxChildren = 0;
 		LeafNode.BehaviorType = BT::BehaviorNodeType::LEAF;
-
+		LeafNode.Name = "Leaf";
 
 
 		// Add SceneELement to group
@@ -289,11 +410,10 @@ namespace Enjon { namespace BehaviorTreeEditor {
 		BehaviorNodeSceneGroup.AddToGroup(&DecoratorNode, 	"Decorator");
 		BehaviorNodeSceneGroup.AddToGroup(&LeafNode, 		"Leaf");
 		BehaviorNodeSceneGroup.AddToGroup(&SelectorNode, 	"Selector");
-
-		// Build Tree
-		SequenceNode.AddChild(&SelectorNode);
-			SelectorNode.AddChild(&DecoratorNode);
-			SelectorNode.AddChild(&LeafNode);
+		SequenceNode.Group = &BehaviorNodeSceneGroup;
+		DecoratorNode.Group = &BehaviorNodeSceneGroup;
+		LeafNode.Group = &BehaviorNodeSceneGroup;
+		SelectorNode.Group = &BehaviorNodeSceneGroup;
 
 
 		return true;	
@@ -324,20 +444,20 @@ namespace Enjon { namespace BehaviorTreeEditor {
     	auto View 		= Camera.GetCameraMatrix();
     	auto Projection = EM::Mat4::Identity();
 
-		BasicShader->Use();
+		TextShader->Use();
 		{
-			BasicShader->SetUniformMat4("model", Model);
-			BasicShader->SetUniformMat4("projection", Projection);
-			BasicShader->SetUniformMat4("view", View);
+			TextShader->SetUniformMat4("model", Model);
+			TextShader->SetUniformMat4("projection", Projection);
+			TextShader->SetUniformMat4("view", View);
 
-	    		SceneBatch.Begin();
+	    		SceneBatch.Begin(EG::GlyphSortType::FRONT_TO_BACK);
 		    	{
 		    		BehaviorNodeSceneGroup.Draw(&SceneBatch);
 		    	}
 		    	SceneBatch.End();
 		    	SceneBatch.RenderBatch();
 		}
-		BasicShader->Unuse();
+		TextShader->Unuse();
 
 		return true;
 	}
@@ -392,7 +512,7 @@ namespace Enjon { namespace BehaviorTreeEditor {
 					// If done, then return from function
 					if (ProcessMouse && !Input->IsKeyDown(SDL_BUTTON_LEFT)) 
 					{
-						std::cout << "Losing focus after processing complete..." << std::endl;
+						// std::cout << "Losing focus after processing complete..." << std::endl;
 						MouseFocus->lose_focus.emit();
 						MouseFocus = nullptr;
 						return true;
@@ -400,34 +520,19 @@ namespace Enjon { namespace BehaviorTreeEditor {
 					else return true;	
 				}
 
-				else if (MouseFocus->Type == GUIType::GROUP)
-				{
-					ProcessMouse = MouseFocus->ProcessInput(Input, &HUDCamera);
-			
-					// If done, then return from function
-					if (ProcessMouse && !Input->IsKeyDown(SDL_BUTTON_LEFT)) 
-					{
-						std::cout << "Losing focus after processing complete..." << std::endl;
-						MouseFocus->lose_focus.emit();
-						MouseFocus = nullptr;
-						return true;
-					}
-					else return true;
-				}
-
-				else
-				{
-					ProcessMouse = MouseFocus->ProcessInput(Input, &HUDCamera);
+				// else
+				// {
+				// 	ProcessMouse = MouseFocus->ProcessInput(Input, &HUDCamera);
 		
-					// If done, then return from function
-					if (ProcessMouse) 
-					{
-						std::cout << "Losing focus after processing complete..." << std::endl;
-						MouseFocus->lose_focus.emit();
-						MouseFocus = nullptr;
-						return true;
-					}
-				}
+				// 	// If done, then return from function
+				// 	if (ProcessMouse) 
+				// 	{
+				// 		std::cout << "Losing focus after processing complete..." << std::endl;
+				// 		MouseFocus->lose_focus.emit();
+				// 		MouseFocus = nullptr;
+				// 		return true;
+				// 	}
+				// }
 			}
 
 			if (G->Visibility)
@@ -458,6 +563,7 @@ namespace Enjon { namespace BehaviorTreeEditor {
 							{
 								std::cout << "Gaining Focus: " << C->Name << std::endl;
 								MouseFocus = C;
+								MouseFocus->ProcessInput(Input, &Camera);
 							}
 
 							// If not mouse focus
@@ -470,6 +576,7 @@ namespace Enjon { namespace BehaviorTreeEditor {
 			
 								// Set focus	
 								MouseFocus = C;
+								MouseFocus->ProcessInput(Input, &Camera);
 							}
 						}
 					}

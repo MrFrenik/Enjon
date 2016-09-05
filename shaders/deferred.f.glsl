@@ -72,7 +72,6 @@ void main()
 
             // Calculate isometric light depth
             vec3 LightDir = (1.0 / Scale) * vec3(LightPosVS.xy - Position.xy, Lights[i].Position.z);
-            // vec3 LightDir = vec3(LightPosVS.xy - Position.xy, Lights[i].Position.z);
 
             // //Determine distance (used for attenuation) BEFORE we normalize our LightDir
             float D = length(LightDir);

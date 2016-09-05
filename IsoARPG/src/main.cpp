@@ -1750,8 +1750,8 @@ int main(int argc, char** argv)
 					DeferredShader->Use();
 					{
 						GLuint m_diffuseID 	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_diffuse");
-						GLuint m_normalsID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_normals");
-						GLuint m_positionID  = glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_position");
+						GLuint m_normalsID  = glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_normals");
+						GLuint m_positionID = glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_position");
 						GLuint m_depthID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_depth");
 
 						EM::Vec3 CP = EM::Vec3(Camera.GetPosition(), 1.0f);
@@ -4332,15 +4332,336 @@ int main(int argc, char** argv)
 #if 0
 
 #include <iostream>
-#include <unordered_map>
 
+#include <Enjon.h>
+#include <Graphics/Camera3D.h>
 
+// Window dimensions
+const GLuint SCREENWIDTH = 1440 , SCREENHEIGHT = 900;
+EM::Vec3 LightPos(1.2f, 1.0f, 2.0f);
+
+bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera);
+
+// The MAIN function, from here we start the application and run the game loop
+#ifdef main
+	#undef main
+#endif
 int main(int argc, char** argv)
 {
+	Enjon::Init();
+
+	float t = 0.0f;
+	float FPS = 0.0f;
+	float TimeIncrement = 0.0f;
+
+	// Create a window
+	EG::Window Window;
+	Window.Init("3D Test", SCREENWIDTH, SCREENHEIGHT);
+	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
+
+	EG::Camera3D Camera(EM::Vec3(0.0f, 0.0f, 3.0f));
+
+	EU::FPSLimiter Limiter;
+	Limiter.Init(60);
+
+	// Init ShaderManager
+	EG::ShaderManager::Init(); 
+
+	// Init FontManager
+	EG::FontManager::Init();
+
+	// InputManager
+	EI::InputManager Input;
+
+    // Setup OpenGL options
+    glEnable(GL_DEPTH_TEST);
+
+    // Build and compile our shader program
+    auto LightShader = EG::ShaderManager::GetShader("Learn");
+    auto LampShader  = EG::ShaderManager::GetShader("Lamp");
+
+   // Set up vertex data (and buffer(s)) and attribute pointers
+   // Set up vertex data (and buffer(s)) and attribute pointers
+    // Set up vertex data (and buffer(s)) and attribute pointers
+    GLfloat vertices[] = {
+        // Positions          // Normals           // Texture Coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+    };
+
+     // Positions all containers
+    EM::Vec3 cubePositions[] = {
+        EM::Vec3( 0.0f,  0.0f,  0.0f),
+        EM::Vec3( 2.0f,  5.0f, -15.0f),
+        EM::Vec3(-1.5f, -2.2f, -2.5f),
+        EM::Vec3(-3.8f, -2.0f, -12.3f),
+        EM::Vec3( 2.4f, -0.4f, -3.5f),
+        EM::Vec3(-1.7f,  3.0f, -7.5f),
+        EM::Vec3( 1.3f, -2.0f, -2.5f),
+        EM::Vec3( 1.5f,  2.0f, -2.5f),
+        EM::Vec3( 1.5f,  0.2f, -1.5f),
+        EM::Vec3(-1.3f,  1.0f, -1.5f)
+    };
+
+    // First, set the container's VAO (and VBO)
+    GLuint VBO, containerVAO;
+    glGenVertexArrays(1, &containerVAO);
+    glGenBuffers(1, &VBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindVertexArray(containerVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
+    glBindVertexArray(0);
+
+    // Then, we set the light's VAO (VBO stays the same. After all, the vertices are the same for the light object (also a 3D cube))
+    GLuint lightVAO;
+    glGenVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
+    // We only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need.
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // Set the vertex attributes (only position data for the lamp))
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0); // Note that we skip over the other data in our buffer object (we don't need the normals/textures, only positions).
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
+
+    auto DiffuseMap = EI::ResourceManager::GetTexture("../Assets/Textures/container2.png").id;
+    auto SpecularMap = EI::ResourceManager::GetTexture("../Assets/Textures/container2_specular.png").id;
+
+    LightShader->Use();
+	    LightShader->SetUniform1i("material.diffuse", 0);
+	    LightShader->SetUniform1i("material.specular", 1);
+    LightShader->Unuse();
 
 
-	return 0;	
+    // Game loop
+    bool running = true;
+    while (running)
+    {
+    	static float t = 0.0f;
+    	t += 0.0001f;
+
+    	Input.Update();
+
+    	running = ProcessInput(&Input, &Camera);
+
+    	Camera.Update();
+
+    	// Rendering
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0f));
+
+        // Create transformations
+        EM::Mat4 View, Model, Projection;
+
+        // Activate shader
+        LightShader->Use();
+        {
+        	LightShader->SetUniform3f("light.position", Camera.Position);
+        	LightShader->SetUniform3f("light.direction", Camera.Front);
+        	LightShader->SetUniform1f("light.cutOff", EM::ToRadians(12.5f));
+        	LightShader->SetUniform1f("light.outerCutOff", EM::ToRadians(17.5f));
+
+        	LightShader->SetUniform3f("light.ambient", EM::Vec3(0.1f, 0.1f, 0.1f));
+        	LightShader->SetUniform3f("light.diffuse", EM::Vec3(1.0f, 0.5f, 0.5f));
+        	LightShader->SetUniform3f("light.specular", EM::Vec3(1.0f, 1.0f, 1.0f));
+        	LightShader->SetUniform1f("light.constant", EM::ToRadians(1.0f));
+        	LightShader->SetUniform1f("light.linear", EM::ToRadians(0.09f));
+        	LightShader->SetUniform1f("light.quadratic", EM::ToRadians(3.0f));
+
+        	LightShader->SetUniform1f("material.shininess", 32.0f);
+        	LightShader->SetUniform3f("viewPos", Camera.Position);
+
+        	View = Camera.GetViewMatrix();
+	        Projection = EM::Mat4::Perspective(Camera.Zoom, (GLfloat)SCREENWIDTH / (GLfloat)SCREENHEIGHT, 0.1f, 100.0f);
+	
+			LightShader->SetUniformMat4("view", View);
+			LightShader->SetUniformMat4("projection", Projection);
+
+			// Bind texture
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, DiffuseMap);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, SpecularMap);
+
+			glBindVertexArray(containerVAO);
+			for (auto i = 0; i < 10; ++i)
+			{
+				Model = EM::Mat4::Identity();
+				Model *= EM::Mat4::Translate(cubePositions[i]);
+				// auto angle = 20.0f * i;
+				// Model *= EM::Mat4::Rotate(angle, EM::Vec3(1.0f, 0.3f, 0.5f));
+				LightShader->SetUniformMat4("model", Model);
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+			}
+			glBindVertexArray(0);
+
+        }
+        LightShader->Unuse();
+
+        // Draw lamp object
+        // LampShader->Use();
+        // {
+        // 	LampShader->SetUniformMat4("view", View);
+        // 	LampShader->SetUniformMat4("projection", Projection);
+
+        // 	Model = EM::Mat4::Identity();
+        // 	Model *= EM::Mat4::Translate(LightPos);
+        // 	Model *= EM::Mat4::Scale(EM::Vec3(0.2f, 0.2f, 0.2f));
+
+        // 	LampShader->SetUniformMat4("model", Model);
+
+        // 	// Draw light object
+        // 	glBindVertexArray(lightVAO);
+        // 	glDrawArrays(GL_TRIANGLES, 0, 36);
+        // 	glBindVertexArray(0);
+        // }
+        // LampShader->Unuse();
+
+        // Swap the screen buffers
+        Window.SwapBuffer();
+    }
+    // Properly de-allocate all resources once they've outlived their purpose
+    glDeleteVertexArrays(1, &containerVAO);
+    glDeleteVertexArrays(1, &lightVAO);
+    glDeleteBuffers(1, &VBO);
+    return 0;
 }
+
+bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera)
+{
+	static bool FirstMouse = true;
+	bool MouseMovement = false;
+	static float lastX = SCREENWIDTH / 2.0f;
+	static float lastY = SCREENHEIGHT / 2.0f;
+	static float xoffset = 0.0f;
+	static float yoffset = 0.0f;
+
+	float xPos = SCREENWIDTH / 2.0f;
+	float yPos = SCREENHEIGHT / 2.0f;
+
+    SDL_Event event;
+//    //Will keep looping until there are no more events to process
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_QUIT:
+                return false;
+                break;
+			case SDL_KEYUP:
+				Input->ReleaseKey(event.key.keysym.sym); 
+				break;
+			case SDL_KEYDOWN:
+				Input->PressKey(event.key.keysym.sym);
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				Input->PressKey(event.button.button);
+				break;
+			case SDL_MOUSEBUTTONUP:
+				Input->ReleaseKey(event.button.button);
+				break;
+			case SDL_MOUSEMOTION:
+				Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+				xPos = event.motion.x;
+				yPos = event.motion.y;
+				std::cout << "Moving" << std::endl;
+				if (FirstMouse)
+				{
+					FirstMouse = false;
+
+					lastX = event.motion.x;
+					lastY = event.motion.y;
+				}
+				MouseMovement = true;
+				break;
+			default:
+				break;
+		}
+    }
+
+    static float speed = 0.001f;
+
+	if (Input->IsKeyPressed(SDLK_ESCAPE))
+	{
+		return false;	
+	}
+	if (Input->IsKeyDown(SDLK_w))
+	{
+		Camera->Position += Camera->Speed * Camera->Front;
+	}
+	if (Input->IsKeyDown(SDLK_s))
+	{
+		Camera->Position -= Camera->Speed * Camera->Front;
+	}
+	if (Input->IsKeyDown(SDLK_a))
+	{
+		Camera->Position -= Camera->Right * Camera->Speed;
+	}
+	if (Input->IsKeyDown(SDLK_d))
+	{
+		Camera->Position += Camera->Right * Camera->Speed;
+	}
+
+	if (MouseMovement)
+	{
+		xoffset = xPos - lastX;
+		yoffset = lastY - yPos;
+		lastX = xPos;
+		lastY = yPos;
+
+		Camera->Yaw += xoffset * Camera->Sensitivity;
+		Camera->Pitch += yoffset * Camera->Sensitivity;
+
+		if (Camera->Pitch > 89.0f) Camera->Pitch = 89.0f;
+		if (Camera->Pitch < -89.0f) Camera->Pitch = -89.0f;
+	}
+
+	return true;
+}
+
 
 
 #endif
@@ -4348,12 +4669,217 @@ int main(int argc, char** argv)
 
 
 
+#if 0
+
+#include <stdio.h>
+#include <iostream>
+#include <unordered_map>
+#include "System/Types.h"
+#include "Math/Maths.h"
+#include "Defines.h"
+
+const char *generateFilename(const char *base, int number, const char *ext) {
+              char   buf[256];
+              sprintf(buf, "%s%d.%s", base, number, ext);
+              return buf;
+       }
+
+int round(int x)
+{
+	return (x % 6 == 0 ? x : x < 0 ? (-(abs(x) - (abs(x) % 6))) : x + 6 - (abs(x) % 6));	
+	// return x < 0 ? -((x + 5) / 6) * 6 : ((x + 5) / 6) * 6	;
+	// return (x % 6 == 0 ? x : x < 0 ? (-(abs(x) - (x % 6))) : x + 6 - (x % 6));	
+}
+
+int roundTo(int x)
+{
+	return ((x + 7) &~ 7);
+}
+
+void foo()
+{
+	int32_t array[6] = {2, 10, 22, -5, 3, 0};
+	std::cout << (array + sizeof(int32_t)) << std::endl;
+}
+
+float cubic_interpolation(float p1, float p, float q, float q1, float t) {
+
+	float a, b, c, d, t2, t3;
+	t2 = t * t;
+	t3 = t * t2;
+
+	// Solve for coefficients
+	a = q1 - q - p1 + p;
+	b = p1 - p - a;
+	c = q - p;
+	d = p;
+
+	return (a * t3 + b * t2 + c * t + d);
+}
+
+// float hermite_interpolation(float p1, float p, float q, float q1, float t, float tension, float bias) {
+
+// 	float t0, t1, t2, t3, a, b, c, d, control;
+
+// 	t2 = t*t;
+// 	t3 = t2*t;
+// 	control = (1.0f + bias) * (1.0f - tension) / 2.0f;
+
+// 	t0 = (q - p1) * control;
+// 	t1 = (q1 - p) * control;
+
+// 	// Solve for coefficients
+// 	a =  2*t3 - 3*t2 + 1;
+// 	b =    t3 - 2*t2 + t;
+// 	c =    t3 -   t2;
+// 	d = -2*t3 + 3*t2;
+
+// 	return (a*p + b*t0 + c*t1 + d*q);
+// }
+
+	const float kTurnRate = 1.0f;
+
+	struct gun
+	{
+		float heading;
+
+		bool turnTowardsTarget(float headingToTarget, float dt) {
+
+			// We're already there, so return
+			if (heading == headingToTarget) return true;
+
+			// Get the angular distance in radians to travel
+			float angularDistanceToTargetHeading = headingToTarget - heading;
+
+			// Rotate clockwise or counter clockwise
+			float dir = angularDistanceToTargetHeading < 0 ? -1.0f : 1.0f;
+			
+			// Find new heading for this time slice
+			float newheading = heading + kTurnRate * dt * dir;
+
+			// Need to check whether or not we'll pass our target heading this frame
+			// CLockwise
+			if (dir < 0)
+			{
+				if (newheading <= headingToTarget) 
+				{
+					// Since we were going to pass it in this frame, set our heading to be the target heading
+					heading = headingToTarget;
+					return true;
+				}
+			}
+			// Counter-CLockwise
+			else 
+			{
+				if (newheading >= headingToTarget) 
+				{
+					// Since we were going to pass it in this frame, set our heading to be the target heading
+					heading = headingToTarget;
+					return true;
+				}
+			}
+
+			// Otherwise set our heading to new heading and return false this frame
+			heading = newheading;
+
+			return false;
+		}
+	};
+ float hermite_interpolation(float y0, float y1, float y2, float y3, float t, float tension, float bias) {
+
+	float t0, t1, t2, t3, a, b, c, d, control;
+
+	t2 = t*t;
+	t3 = t2*t;
+	control = (1.0f + bias) * (1.0f - tension) / 2.0f;
+
+	t0 = (y1 - y0) * control;
+	t1 = (y3 - y1) * control;
+
+	// Solve for coefficients
+	a =  2*t3 - 3*t2 + 1;
+	b =    t3 - 2*t2 + t;
+	c =    t3 -   t2;
+	d = -2*t3 + 3*t2;
+
+	return (a*y1 + b*t0 + c*t1 + d*y2);
+}
+
+double exp(double base, int32_t pow)
+{
+	if (pow == 0) return 1.0f;
+
+	auto i = pow;
+	auto result = base;
+	if (i < 0)
+	{
+		while(i < 1)
+		{
+			result /= base;
+			i++;
+		}
+	}
+	else
+	{
+		while(i > 1)
+		{
+			result *= base;
+			i--;
+		}
+	}
+
+	return result;
+}
+
+#include "Math/Maths.h"
+
+// Coulomb constant
+const double K =  8.9875517873681764 * exp(10, 9);
+
+int main(int argc, char** argv)
+{
+	// Calculate distances
+	auto R12 = sqrt(exp(2, 2) + exp(5, 2));
+	auto R13 = sqrt(exp(3, 2) + exp(4, 2));
+
+	// Calculate magnitude of forces using Coulomb's law
+	auto F12 = (K * (2 * exp(10, -9)) * (6 * exp(10, -9))) / exp(R12, 2);
+	auto F13 = (K * (6 * exp(10, -9)) * (2 * exp(10, -9))) / exp(R13, 2);
+
+	std::cout << F12 << std::endl;
+	std::cout << F13 << std::endl;
+
+	// Get angles
+	auto Theta12 = EM::ToDegrees(atan(5.0f / 2.0f));
+	auto Theta13 = EM::ToDegrees(atan(4.0f / 2.0f));
+
+	std::cout << "Theta12: " << Theta12 << std::endl;
+	std::cout << "Theta13: " << Theta13 << std::endl;
+
+	// Find components
+	auto F12y = F12 * sin(Theta12);
+	auto F12x = F12 * cos(Theta12);
+
+	auto F13y = F13 * sin(Theta13);
+	auto F13x = F13 * cos(Theta13);
+
+	auto FTx = F13x - F12x;
+	auto FTy = F12y + F13y;
+
+	std::cout << "FTx: " << FTx << std::endl;
+	std::cout << "FTy: " << FTy << std::endl;
+
+	std::cout << EM::ToDegrees(atan(std::fabs(F12y) / std::fabs(F12x))) << std::endl;
+
+	EM::Vec2 Ft(FTx, FTy);
+
+	std::cout << Ft.Length() << std::endl;
+
+	return 0;
+}
 
 
-
-
-
-
+#endif
 
 
 
