@@ -343,7 +343,8 @@ namespace Enjon { namespace BehaviorTreeEditor {
 	EG::Camera2D Camera;
 	EG::Camera2D HUDCamera;
 
-	EM::Vec2 CameraScaleVelocity;
+	float CameraScaleVelocityGoal 	= 0.0f;
+	float CameraScaleVelocity 		= 0.0f;
 
 	// GUI Elements
 	GUISceneGroup 		BehaviorNodeSceneGroup;
@@ -351,7 +352,6 @@ namespace Enjon { namespace BehaviorTreeEditor {
 	GUIBTNode 			SelectorNode;
 	GUIBTNode 			LeafNode;
 	GUIBTNode 			DecoratorNode;
-
 
 	/*-- Function Definitions --*/
 	bool Init(EI::InputManager* _Input, float SW, float SH)
@@ -431,6 +431,18 @@ namespace Enjon { namespace BehaviorTreeEditor {
 		Camera.Update();
 		HUDCamera.Update();
 
+		float Max = 0.2f;
+		CameraScaleVelocity = Enjon::Math::Lerp(CameraScaleVelocityGoal, CameraScaleVelocity, 0.0065f);
+		if (std::fabs(CameraScaleVelocity) > Max) 
+		{
+			if (CameraScaleVelocity < 0.0f)  CameraScaleVelocity = -Max;
+			else CameraScaleVelocity = Max;
+		}
+
+		// Set scale of camera
+		Camera.SetScale(Camera.GetScale() + CameraScaleVelocity);
+		if (Camera.GetScale() < 0.1f) Camera.SetScale(0.1f);
+
 		// Update scene group
 		BehaviorNodeSceneGroup.Update();
 
@@ -450,12 +462,29 @@ namespace Enjon { namespace BehaviorTreeEditor {
 			TextShader->SetUniformMat4("projection", Projection);
 			TextShader->SetUniformMat4("view", View);
 
-	    		SceneBatch.Begin(EG::GlyphSortType::FRONT_TO_BACK);
-		    	{
-		    		BehaviorNodeSceneGroup.Draw(&SceneBatch);
-		    	}
-		    	SceneBatch.End();
-		    	SceneBatch.RenderBatch();
+    		SceneBatch.Begin(EG::GlyphSortType::FRONT_TO_BACK);
+	    	{
+	    		BehaviorNodeSceneGroup.Draw(&SceneBatch);
+	    	}
+	    	SceneBatch.End();
+	    	SceneBatch.RenderBatch();
+
+		    TextShader->SetUniformMat4("view", HUDCamera.GetCameraMatrix());
+
+    		UIBatch.Begin(EG::GlyphSortType::FRONT_TO_BACK);
+	    	{
+	    		EM::Vec2 Dims(SCREENWIDTH / 4.0f, SCREENHEIGHT);
+	    		UIBatch.Add(
+	    						EM::Vec4(SCREENWIDTH / 2.0f - Dims.x, -SCREENHEIGHT / 2.0f, Dims),
+	    						EM::Vec4(0, 0, 1, 1),
+	    						EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
+	    						EG::RGBA16_DarkGrey()
+	    					);	
+	    	}
+	    	UIBatch.End();
+	    	UIBatch.RenderBatch();
+
+
 		}
 		TextShader->Unuse();
 
@@ -464,6 +493,9 @@ namespace Enjon { namespace BehaviorTreeEditor {
 
 	bool ProcessInput(EI::InputManager* Input)
 	{
+		static EM::Vec2 MouseFrameOffset(0.0f);
+		static bool JustClickedMiddleMouse = false;
+
 	    SDL_Event event;
 	    while (SDL_PollEvent(&event)) 
 	    {
@@ -488,6 +520,7 @@ namespace Enjon { namespace BehaviorTreeEditor {
 					Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 					break;
 				case SDL_MOUSEWHEEL:
+					CameraScaleVelocity += event.wheel.y * 0.05f;
 				default:
 					break;
 			}
@@ -501,6 +534,28 @@ namespace Enjon { namespace BehaviorTreeEditor {
 			Camera.ConvertScreenToWorld(MouseCoords);
 			bool ChildFound = false;
 			auto G = &BehaviorNodeSceneGroup;
+
+			if (Input->IsKeyDown(SDL_BUTTON_MIDDLE))
+			{
+
+				auto X = MouseCoords.x;
+				auto Y = MouseCoords.y;
+
+	    		if (JustClickedMiddleMouse) 
+	    		{
+	    			MouseFrameOffset = EM::Vec2(MouseCoords.x, MouseCoords.y);
+	    			JustClickedMiddleMouse = false;
+	    		}
+
+		    	else
+		    	{// Update Position
+					Camera.SetPosition(EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y));
+		    	}
+			}
+			else
+			{
+				JustClickedMiddleMouse = false;
+			}
 
 			if (MouseFocus)
 			{
