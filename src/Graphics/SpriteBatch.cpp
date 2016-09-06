@@ -249,6 +249,7 @@ namespace Enjon { namespace Graphics {
 		float X, Y, Width, Height, EndX, EndY, BorderEndX, BorderEndY, ControlX, ControlY, ControlEndX, ControlEndY;
 
 		float BorderThickness = BorderRadius;
+		Enjon::uint32 AmountOfAngles = 360;
 
 		//////////////////////
 		// TOP BORDER ////////
@@ -263,13 +264,13 @@ namespace Enjon { namespace Graphics {
 		EG::Shapes::DrawHollowCircle(
 										Batch, 
 										EM::Vec2(
-													EndX + 1.0f, 
-													EndY - BorderRadius / 4.0f
+													EndX + 0.5f, 
+													EndY - BorderRadius / 4.0f - 0.5f
 												), 
 										EM::Vec2(0.0f, 90.0f), 
 										Thickness, 
 										BorderThickness, 
-										90, 
+										AmountOfAngles, 
 										Color,
 										Depth - 1.0f
 									);
@@ -287,13 +288,13 @@ namespace Enjon { namespace Graphics {
 		EG::Shapes::DrawHollowCircle(
 										Batch, 
 										EM::Vec2(
-													EndX - BorderRadius / 4.0f, 
-													EndY - BorderRadius / 8.0f + 1.0f
+													EndX - BorderRadius / 4.0f - 0.5f, 
+													EndY - BorderRadius / 8.0f + 1.5f
 												), 
 										EM::Vec2(270.0f, 360.0f), 
 										Thickness, 
 										BorderThickness, 
-										360, 
+										AmountOfAngles, 
 										Color,
 										Depth - 1.0f
 									);
@@ -311,13 +312,13 @@ namespace Enjon { namespace Graphics {
 		EG::Shapes::DrawHollowCircle(
 										Batch, 
 										EM::Vec2(
-													X - 1.0f, 
-													Y + BorderRadius / 8.0f + 2.0f
+													X - 0.5f, 
+													Y + BorderRadius / 8.0f + 2.5f
 												), 
 										EM::Vec2(270.0f, 360.0f), 
 										Thickness, 
 										BorderThickness, 
-										360, 
+										AmountOfAngles, 
 										Color,
 										Depth - 1.0f
 									);
@@ -341,13 +342,13 @@ namespace Enjon { namespace Graphics {
 		EG::Shapes::DrawHollowCircle(
 										Batch, 
 										EM::Vec2(
-													X - 1.0f, 
-													EndY - BorderRadius / 4.0f
+													X - 0.5f, 
+													EndY - BorderRadius / 4.0f - 0.5f
 												), 
 										EM::Vec2(270.0f, 360.0f), 
 										Thickness, 
 										BorderThickness, 
-										360, 
+										AmountOfAngles, 
 										Color,
 										Depth - 1.0f
 									);

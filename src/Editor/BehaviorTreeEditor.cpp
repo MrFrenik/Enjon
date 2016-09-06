@@ -54,17 +54,20 @@ namespace Enjon { namespace GUI {
 			this->DrawingParentingLine = false;
 			this->TargetPosition = EM::Vec2(-999999.0f);
 			this->Targeting = false;
+			this->IntersectedChild = nullptr;
 
 			// Set up GUIBTNode's on_hover signal
 			this->on_hover.connect([&]()
 			{
 				this->HoverState = HoveredState::ON_HOVER;
+    			this->BorderColor = EG::RGBA16_LightGrey();
 			});
 
 			// Set up GUIBTNode's off_hover signal
 			this->off_hover.connect([&]()
 			{
 				this->HoverState = HoveredState::OFF_HOVER;
+    			this->BorderColor = EG::RGBA16_MidGrey();
 			});
 
 			// Set up GUIBTNode's lose_focus signal
@@ -92,6 +95,9 @@ namespace Enjon { namespace GUI {
 						}
 					}
 				}
+
+				// We didn't collide with anything, so need to display box
+				std::cout << "Display options..." << std::endl;
 			});
 
 		}
@@ -138,17 +144,18 @@ namespace Enjon { namespace GUI {
 		    auto MousePos = Input->GetMouseCoords();
 		    Camera->ConvertScreenToWorld(MousePos);
 
-    		if (Input->IsKeyDown(SDLK_LALT))
+    		if (Input->IsKeyDown(SDLK_LALT) && Input->IsKeyPressed(SDL_BUTTON_LEFT))
     		{
-			    if (Input->IsKeyPressed(SDL_BUTTON_LEFT)) 
-			    {
-			    	if (this->ParentNode != nullptr) 
-			    	{
-				    	std::cout << "Removing..." << std::endl;
-			    		this->ParentNode->RemoveChild(this);
-			    		this->ParentNode = nullptr;
-			    	}
-			    }
+		    	if (this->ParentNode != nullptr) 
+		    	{
+			    	std::cout << "Removing..." << std::endl;
+		    		this->ParentNode->RemoveChild(this);
+		    		this->ParentNode = nullptr;
+		    		this->lose_focus.emit();
+		    		JustFocused = true;
+					Targeting = false;
+		    		return true;
+		    	}
     		}
 
 		    else if (Input->IsKeyDown(SDL_BUTTON_LEFT))
@@ -174,7 +181,48 @@ namespace Enjon { namespace GUI {
 		    		TargetPosition = MousePos;
 
 		    		Targeting = true;
+
+		    		auto Intersected = false;
+
+					for (auto& C : Group->Children)
+					{
+						// Don't process this
+						if (C == this) continue;
+
+						if (EP::AABBvsPoint(&C->AABB, TargetPosition)) 
+						{
+							if (IntersectedChild != nullptr && IntersectedChild != C) IntersectedChild->off_hover.emit();
+							std::cout << "Intersecting!" << std::endl;
+
+							IntersectedChild = static_cast<GUIBTNode*>(C);
+
+							IntersectedChild->on_hover.emit();
+
+							Intersected = true;
+
+							// Break out of loop
+							break;
+						}
+					}
+
+					if (!Intersected)
+					{
+						if (IntersectedChild != nullptr) 
+						{
+							IntersectedChild->off_hover.emit();
+							IntersectedChild = nullptr;
+						}
+					}
+
+					// Make sure the other gets turned off
 		    	}
+
+				else if (IntersectedChild != nullptr) 
+				{
+					IntersectedChild->off_hover.emit();
+					IntersectedChild = nullptr;
+				}
+
 
 		    	else
 		    	{
@@ -242,22 +290,69 @@ namespace Enjon { namespace GUI {
 									*Batch, 
 									EG::SetOpacity(Graphics::RGBA16_White(), 0.8f)
 								);
-
-
+			
 
 			// Draw lines to children
 			EM::Vec2 ParentCenter(this->Position.x + this->Dimensions.x / 2.0f, this->Position.y);
 			for (auto c : Children)
 			{
 				// Get bottom center of this
-				EM::Vec2 ChildCenter(c->Position.x + c->Dimensions.x / 2.0f, c->Position.y + c->Dimensions.y);
+				EM::Vec2 ChildCenter(c->Position.x + c->Dimensions.x / 2.0f, c->Position.y + c->Dimensions.y + BorderThickness + 5.0f);
+
+				// Get angle
+				auto Dir = EM::Vec2::Normalize(ParentCenter - ChildCenter);
+				auto R = EM::Vec2(1, 0);
+				auto angle = acos(Dir.DotProduct(R)) * 180.0f / M_PI + 90.0f; 
+				if (Dir.y < 0) 
+				{
+					angle *= -1.0f;
+					angle += 180.0f;
+				}
+				// else angle -= 270.0f;
+
 				EG::Shapes::DrawLine(Batch, EM::Vec4(ParentCenter, ChildCenter), 5.0f, EG::RGBA16_LightGrey(), Depth - 2.0f);
+
+				// Draw arrow
+				EG::Fonts::PrintText(		
+										ChildCenter.x, 
+										ChildCenter.y,
+										1.0f, 
+										"J", 
+										EG::FontManager::GetFont("Arrows7_32"), 
+										*Batch, 
+										EG::RGBA16_LightGrey(),
+										EG::Fonts::TextStyle::DEFAULT,
+										EM::ToRadians(angle)
+									);
 			}
 
 			// If parenting line being drawn
 			if (DrawingParentingLine)
 			{
 				EG::Shapes::DrawLine(Batch, EM::Vec4(ParentCenter, TargetPosition), 5.0f, EG::RGBA16_LightGrey(), Depth - 2.0f);
+
+				auto Dir = EM::Vec2::Normalize(ParentCenter - TargetPosition);
+				auto R = EM::Vec2(1, 0);
+				auto angle = acos(Dir.DotProduct(R)) * 180.0f / M_PI + 90.0f; 
+				if (Dir.y < 0) 
+				{
+					angle *= -1.0f;
+					angle += 180.0f;
+				}
+				// else angle -= 270.0f;
+
+				// Draw arrow
+				EG::Fonts::PrintText(		
+										TargetPosition.x, 
+										TargetPosition.y,
+										1.0f, 
+										"J", 
+										EG::FontManager::GetFont("Arrows7_32"), 
+										*Batch, 
+										EG::RGBA16_LightGrey(),
+										EG::Fonts::TextStyle::DEFAULT,
+										EM::ToRadians(angle)
+									);
 			}
 		}
 
@@ -305,6 +400,7 @@ namespace Enjon { namespace GUI {
 		std::vector<GUIBTNode*> Children;
 		EG::ColorRGBA16 BorderColor;
 		GUIBTNode* ParentNode;
+		GUIBTNode* IntersectedChild;
 		EG::Fonts::Font* TextFont;
 		Enjon::uint32 DrawingParentingLine;
 		EM::Vec2 TargetPosition;
@@ -540,16 +636,20 @@ namespace Enjon { namespace BehaviorTreeEditor {
 
 				auto X = MouseCoords.x;
 				auto Y = MouseCoords.y;
+	    		auto CamPos = Camera.GetPosition();
 
-	    		if (JustClickedMiddleMouse) 
+	    		if (!JustClickedMiddleMouse) 
 	    		{
 	    			MouseFrameOffset = EM::Vec2(MouseCoords.x, MouseCoords.y);
-	    			JustClickedMiddleMouse = false;
+	    			JustClickedMiddleMouse = true;
 	    		}
 
 		    	else
 		    	{// Update Position
-					Camera.SetPosition(EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y));
+		    		auto Speed = 0.8f;
+		    		auto Delta = Speed * (MouseCoords - MouseFrameOffset);
+					Camera.SetPosition(CamPos - Delta);
+					// MouseFrameOffset = MouseCoords;
 		    	}
 			}
 			else
@@ -574,20 +674,6 @@ namespace Enjon { namespace BehaviorTreeEditor {
 					}
 					else return true;	
 				}
-
-				// else
-				// {
-				// 	ProcessMouse = MouseFocus->ProcessInput(Input, &HUDCamera);
-		
-				// 	// If done, then return from function
-				// 	if (ProcessMouse) 
-				// 	{
-				// 		std::cout << "Losing focus after processing complete..." << std::endl;
-				// 		MouseFocus->lose_focus.emit();
-				// 		MouseFocus = nullptr;
-				// 		return true;
-				// 	}
-				// }
 			}
 
 			if (G->Visibility)

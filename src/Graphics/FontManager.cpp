@@ -33,6 +33,8 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 		AddFont(Fonts, "Villeray_Bold", Fonts::CreateFont("../assets/fonts/Villeray/Villeray-Bold.ttf", 10));
 		AddFont(Fonts, "Arrows7", Fonts::CreateFont("../assets/fonts/Arrows7/Arrows7.ttf", 10));
 		AddFont(Fonts, "Arrows7_12", Fonts::CreateFont("../assets/fonts/Arrows7/Arrows7.ttf", 12));
+		AddFont(Fonts, "Arrows7_24", Fonts::CreateFont("../assets/fonts/Arrows7/Arrows7.ttf", 24));
+		AddFont(Fonts, "Arrows7_32", Fonts::CreateFont("../assets/fonts/Arrows7/Arrows7.ttf", 32));
 		AddFont(Fonts, "CutOut", Fonts::CreateFont("../assets/fonts/CutOut/CutOut.ttf", 12));
 
 		// Set to being initialized

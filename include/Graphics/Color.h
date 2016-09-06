@@ -129,7 +129,7 @@ namespace Enjon { namespace Graphics {
 	static ColorRGBA16 inline RGBA16_Red()			        { return RGBA16(1.0f, 0.0f, 0.0f, 1.0f); }
 	static ColorRGBA16 inline RGBA16_Green()				{ return RGBA16(0.0f, 1.0f, 0.0f, 1.0f); }
 	static ColorRGBA16 inline RGBA16_Blue()					{ return RGBA16(0.0f, 0.0f, 1.0f, 1.0f); }
-	static ColorRGBA16 inline RGBA16_Yellow()               { return RGBA16(0.0f, 1.0f, 1.0f, 1.0f); }
+	static ColorRGBA16 inline RGBA16_Yellow()               { return RGBA16(1.0f, 0.8f, 0.0f, 1.0f); }
 	static ColorRGBA16 inline RGBA16_Magenta()              { return RGBA16(1.0f, 0.0f, 1.0f, 1.0f); } 
 	static ColorRGBA16 inline RGBA16_Orange()	     	    { return RGBA16(0.8f, 0.3f, 0.2f, 1.0f); }
 

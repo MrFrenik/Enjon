@@ -90,13 +90,13 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 
 	inline void DrawHollowCircle(EG::SpriteBatch* Batch, EM::Vec2& Point, EM::Vec2& StartAndEndAngles, float Radius, float Thickness = 2.0f, Enjon::uint32 NumberOfPoints = 360, EG::ColorRGBA16& Color = EG::RGBA16_White(), float Depth = 0.0f)
 	{
-		for (auto i = StartAndEndAngles.x; i <= StartAndEndAngles.y; i += 1)
+		for (auto i = StartAndEndAngles.x; i <= StartAndEndAngles.y; i += 0.5)
 		{
 			// Find line between point and next point
 			auto X = Radius * cos(i) + Point.x;
 			auto Y = Radius * sin(i) + Point.y;
-			auto NextX = Radius * cos(i + 1) + Point.x;
-			auto NextY = Radius * sin(i + 1) + Point.y;
+			auto NextX = Radius * cos(i + 0.5f) + Point.x;
+			auto NextY = Radius * sin(i + 0.5f) + Point.y;
 
 			// Get direction vector from Next to previous
 			// auto Difference = EM::Vec2(NextX, NextY) - EM::Vec2(X, X);
