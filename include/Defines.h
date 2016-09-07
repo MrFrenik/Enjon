@@ -17,6 +17,6 @@
 #define EGUI 	Enjon::GUI
 #define EP		Enjon::Physics
 #define EA		Enjon::Animation
-
+#define EN     Enjon::Internals
 
 #endif

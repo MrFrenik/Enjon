@@ -192,7 +192,6 @@ namespace Enjon { namespace GUI {
 						if (EP::AABBvsPoint(&C->AABB, TargetPosition)) 
 						{
 							if (IntersectedChild != nullptr && IntersectedChild != C) IntersectedChild->off_hover.emit();
-							std::cout << "Intersecting!" << std::endl;
 
 							IntersectedChild = static_cast<GUIBTNode*>(C);
 
@@ -294,6 +293,7 @@ namespace Enjon { namespace GUI {
 
 			// Draw lines to children
 			EM::Vec2 ParentCenter(this->Position.x + this->Dimensions.x / 2.0f, this->Position.y);
+			auto LineWidth = 10.0f;
 			for (auto c : Children)
 			{
 				// Get bottom center of this
@@ -310,26 +310,26 @@ namespace Enjon { namespace GUI {
 				}
 				// else angle -= 270.0f;
 
-				EG::Shapes::DrawLine(Batch, EM::Vec4(ParentCenter, ChildCenter), 5.0f, EG::RGBA16_LightGrey(), Depth - 2.0f);
+				EG::Shapes::DrawLine(Batch, EM::Vec4(ParentCenter, ChildCenter), LineWidth, EG::RGBA16_LightGrey(), Depth - 2.0f);
 
 				// Draw arrow
-				EG::Fonts::PrintText(		
-										ChildCenter.x, 
-										ChildCenter.y,
-										1.0f, 
-										"J", 
-										EG::FontManager::GetFont("Arrows7_32"), 
-										*Batch, 
-										EG::RGBA16_LightGrey(),
-										EG::Fonts::TextStyle::DEFAULT,
-										EM::ToRadians(angle)
-									);
+				// EG::Fonts::PrintText(		
+				// 						ChildCenter.x, 
+				// 						ChildCenter.y,
+				// 						1.0f, 
+				// 						"J", 
+				// 						EG::FontManager::GetFont("Arrows7_32"), 
+				// 						*Batch, 
+				// 						EG::RGBA16_LightGrey(),
+				// 						EG::Fonts::TextStyle::DEFAULT,
+				// 						EM::ToRadians(angle)
+				// 					);
 			}
 
 			// If parenting line being drawn
 			if (DrawingParentingLine)
 			{
-				EG::Shapes::DrawLine(Batch, EM::Vec4(ParentCenter, TargetPosition), 5.0f, EG::RGBA16_LightGrey(), Depth - 2.0f);
+				EG::Shapes::DrawLine(Batch, EM::Vec4(ParentCenter, TargetPosition), LineWidth, EG::RGBA16_LightGrey(), Depth - 2.0f);
 
 				auto Dir = EM::Vec2::Normalize(ParentCenter - TargetPosition);
 				auto R = EM::Vec2(1, 0);
@@ -342,17 +342,19 @@ namespace Enjon { namespace GUI {
 				// else angle -= 270.0f;
 
 				// Draw arrow
-				EG::Fonts::PrintText(		
-										TargetPosition.x, 
-										TargetPosition.y,
-										1.0f, 
-										"J", 
-										EG::FontManager::GetFont("Arrows7_32"), 
-										*Batch, 
-										EG::RGBA16_LightGrey(),
-										EG::Fonts::TextStyle::DEFAULT,
-										EM::ToRadians(angle)
-									);
+				// EG::Fonts::PrintText(		
+				// 						TargetPosition.x, 
+				// 						TargetPosition.y,
+				// 						1.0f, 
+				// 						"J", 
+				// 						EG::FontManager::GetFont("Arrows7_32"), 
+				// 						*Batch, 
+				// 						EG::RGBA16_LightGrey(),
+				// 						EG::Fonts::TextStyle::DEFAULT,
+				// 						EM::ToRadians(angle)
+				// 					);
+
+				EG::Shapes::DrawArrow(Batch, TargetPosition, 30.0f, EG::RGBA16_LightGrey(), Depth, angle);
 			}
 		}
 

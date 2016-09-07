@@ -121,6 +121,26 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 
 	}
 
+	inline void DrawArrow(EG::SpriteBatch* Batch, EM::Vec2& Point, float Size, EG::ColorRGBA16& Color, float Depth = 0.0f, float Angle = 0.0f)
+	{
+		std::vector<EM::Vec2> Points;
+
+		EM::Vec2 LOC = Point - EM::Vec2(Size / 2.0f, 0.0f);
+		EM::Vec2 ROC = Point + EM::Vec2(Size / 2.0f, 0.0f);
+		EM::Vec2 TOC = Point + EM::Vec2(0.0f, Size / 2.0f);
+		Points.push_back(LOC);
+		Points.push_back(ROC);
+		Points.push_back(TOC);
+		Points.push_back(TOC);
+		Batch->AddPolygon(
+							Points, 
+							EM::Vec4(0, 0, 1, 1), 
+							EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
+							Color,
+							Depth		
+						);	
+	}
+
 }}}
 
 

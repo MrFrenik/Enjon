@@ -21,7 +21,7 @@
 * MAIN GAME
 */
 
-#if 1
+#if 0
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
@@ -121,7 +121,7 @@ bool DeferredRenderingOn 	= true;
 bool AIControllerEnabled 	= false;
 bool DrawSplineOn 			= false;
 
-const int LEVELSIZE = 20;
+const int LEVELSIZE = 50;
 
 float DashingCounter = 0.0f;
 
@@ -1710,37 +1710,21 @@ int main(int argc, char** argv)
 				DiffuseFBO->Unbind();
 
 				// Normals Rendering
-				NormalsFBO->Bind();
-				{
-					NormalsShader->Use();
-					{
-						// Set up uniforms
-						NormalsShader->SetUniformMat4("model", model);
-						NormalsShader->SetUniformMat4("view", view);
-						NormalsShader->SetUniformMat4("projection", projection);
+				// NormalsFBO->Bind();
+				// {
+				// 	NormalsShader->Use();
+				// 	{
+				// 		// Set up uniforms
+				// 		NormalsShader->SetUniformMat4("model", model);
+				// 		NormalsShader->SetUniformMat4("view", view);
+				// 		NormalsShader->SetUniformMat4("projection", projection);
 
-						GroundTileNormalsBatch.RenderBatch();
-						NormalsBatch.RenderBatch();
-					}
-					NormalsShader->Unuse();
-				}
-				NormalsFBO->Unbind();
-
-				// Depth Rendering
-				DepthFBO->Bind();
-				{
-					DepthShader->Use();
-					{
-						// Set up uniforms
-						DepthShader->SetUniformMat4("model", model);
-						DepthShader->SetUniformMat4("view", view);
-						DepthShader->SetUniformMat4("projection", projection);
-
-						DepthBatch.RenderBatch();
-					}
-					DepthShader->Unuse();
-				}
-				DepthFBO->Unbind();
+				// 		GroundTileNormalsBatch.RenderBatch();
+				// 		NormalsBatch.RenderBatch();
+				// 	}
+				// 	NormalsShader->Unuse();
+				// }
+				// NormalsFBO->Unbind();
 
 				// Deferred Render
 				glDisable(GL_DEPTH_TEST);
@@ -1752,7 +1736,7 @@ int main(int argc, char** argv)
 						GLuint m_diffuseID 	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_diffuse");
 						GLuint m_normalsID  = glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_normals");
 						GLuint m_positionID = glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_position");
-						GLuint m_depthID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_depth");
+						// GLuint m_depthID  	= glGetUniformLocationARB(DeferredShader->GetProgramID(),"u_depth");
 
 						EM::Vec3 CP = EM::Vec3(Camera.GetPosition(), 1.0f);
 
@@ -1775,10 +1759,10 @@ int main(int argc, char** argv)
 						glUniform1i(m_positionID, 2);
 
 						// Bind depth
-						glActiveTexture(GL_TEXTURE3);
-						glEnable(GL_TEXTURE_2D);
-						glBindTexture(GL_TEXTURE_2D, DepthFBO->GetDiffuseTexture());
-						glUniform1i(m_depthID, 3);
+						// glActiveTexture(GL_TEXTURE3);
+						// glEnable(GL_TEXTURE_2D);
+						// glBindTexture(GL_TEXTURE_2D, DepthFBO->GetDiffuseTexture());
+						// glUniform1i(m_depthID, 3);
 
 						glUniform1i(glGetUniformLocation(DeferredShader->GetProgramID(), "NumberOfLights"), LightsToDraw.size());
 
@@ -4662,220 +4646,210 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera)
 	return true;
 }
 
-
-
 #endif
 
-
-
-
-#if 0
+#if 1
 
 #include <stdio.h>
 #include <iostream>
 #include <unordered_map>
 #include "System/Types.h"
+#include "System/Internals.h"
 #include "Math/Maths.h"
 #include "Defines.h"
 
-const char *generateFilename(const char *base, int number, const char *ext) {
-              char   buf[256];
-              sprintf(buf, "%s%d.%s", base, number, ext);
-              return buf;
-       }
-
-int round(int x)
-{
-	return (x % 6 == 0 ? x : x < 0 ? (-(abs(x) - (abs(x) % 6))) : x + 6 - (abs(x) % 6));	
-	// return x < 0 ? -((x + 5) / 6) * 6 : ((x + 5) / 6) * 6	;
-	// return (x % 6 == 0 ? x : x < 0 ? (-(abs(x) - (x % 6))) : x + 6 - (x % 6));	
-}
-
-int roundTo(int x)
-{
-	return ((x + 7) &~ 7);
-}
-
-void foo()
-{
-	int32_t array[6] = {2, 10, 22, -5, 3, 0};
-	std::cout << (array + sizeof(int32_t)) << std::endl;
-}
-
-float cubic_interpolation(float p1, float p, float q, float q1, float t) {
-
-	float a, b, c, d, t2, t3;
-	t2 = t * t;
-	t3 = t * t2;
-
-	// Solve for coefficients
-	a = q1 - q - p1 + p;
-	b = p1 - p - a;
-	c = q - p;
-	d = p;
-
-	return (a * t3 + b * t2 + c * t + d);
-}
-
-// float hermite_interpolation(float p1, float p, float q, float q1, float t, float tension, float bias) {
-
-// 	float t0, t1, t2, t3, a, b, c, d, control;
-
-// 	t2 = t*t;
-// 	t3 = t2*t;
-// 	control = (1.0f + bias) * (1.0f - tension) / 2.0f;
-
-// 	t0 = (q - p1) * control;
-// 	t1 = (q1 - p) * control;
-
-// 	// Solve for coefficients
-// 	a =  2*t3 - 3*t2 + 1;
-// 	b =    t3 - 2*t2 + t;
-// 	c =    t3 -   t2;
-// 	d = -2*t3 + 3*t2;
-
-// 	return (a*p + b*t0 + c*t1 + d*q);
-// }
-
-	const float kTurnRate = 1.0f;
-
-	struct gun
-	{
-		float heading;
-
-		bool turnTowardsTarget(float headingToTarget, float dt) {
-
-			// We're already there, so return
-			if (heading == headingToTarget) return true;
-
-			// Get the angular distance in radians to travel
-			float angularDistanceToTargetHeading = headingToTarget - heading;
-
-			// Rotate clockwise or counter clockwise
-			float dir = angularDistanceToTargetHeading < 0 ? -1.0f : 1.0f;
-			
-			// Find new heading for this time slice
-			float newheading = heading + kTurnRate * dt * dir;
-
-			// Need to check whether or not we'll pass our target heading this frame
-			// CLockwise
-			if (dir < 0)
-			{
-				if (newheading <= headingToTarget) 
-				{
-					// Since we were going to pass it in this frame, set our heading to be the target heading
-					heading = headingToTarget;
-					return true;
-				}
-			}
-			// Counter-CLockwise
-			else 
-			{
-				if (newheading >= headingToTarget) 
-				{
-					// Since we were going to pass it in this frame, set our heading to be the target heading
-					heading = headingToTarget;
-					return true;
-				}
-			}
-
-			// Otherwise set our heading to new heading and return false this frame
-			heading = newheading;
-
-			return false;
-		}
-	};
- float hermite_interpolation(float y0, float y1, float y2, float y3, float t, float tension, float bias) {
-
-	float t0, t1, t2, t3, a, b, c, d, control;
-
-	t2 = t*t;
-	t3 = t2*t;
-	control = (1.0f + bias) * (1.0f - tension) / 2.0f;
-
-	t0 = (y1 - y0) * control;
-	t1 = (y3 - y1) * control;
-
-	// Solve for coefficients
-	a =  2*t3 - 3*t2 + 1;
-	b =    t3 - 2*t2 + t;
-	c =    t3 -   t2;
-	d = -2*t3 + 3*t2;
-
-	return (a*y1 + b*t0 + c*t1 + d*y2);
-}
-
-double exp(double base, int32_t pow)
-{
-	if (pow == 0) return 1.0f;
-
-	auto i = pow;
-	auto result = base;
-	if (i < 0)
-	{
-		while(i < 1)
-		{
-			result /= base;
-			i++;
-		}
-	}
-	else
-	{
-		while(i > 1)
-		{
-			result *= base;
-			i--;
-		}
-	}
-
-	return result;
-}
-
 #include "Math/Maths.h"
 
-// Coulomb constant
-const double K =  8.9875517873681764 * exp(10, 9);
+struct ScriptNodeBase
+{
+	ScriptNodeBase() 
+	{ 
+		HasExecuted = 0; 
+	}
+
+	virtual void Execute() = 0;
+
+	ScriptNodeBase* EntryPoint;
+	ScriptNodeBase* ExitPoint;
+	Enjon::uint32 HasExecuted;
+};
+
+template <typename T>
+void GetValue(ScriptNodeBase* S, T* Value);
+
+template <typename T, typename K>
+struct ScriptNode : public ScriptNodeBase
+{
+	K Data;
+
+	void Execute()
+	{
+		static_cast<T*>(this)->Execute();	
+	}
+
+};
+
+// Base accessor node for accessing data
+struct AccessNode : public ScriptNode<AccessNode, Enjon::f32>
+{
+	void Execute(){}
+};
+
+template <typename T, typename K>
+struct ConstantValueNode : public ScriptNode<ConstantValueNode<T, K>, K>
+{
+	void Execute()
+	{
+		static_cast<T*>(this)->Execute();	
+	} 
+};
+
+struct EFloatNode : public ConstantValueNode<EFloatNode, Enjon::f32>
+{
+	EFloatNode()
+	{
+		this->Data = 1.0f;
+	}
+
+	EFloatNode(const Enjon::f32& _Value)
+	{
+		this->Data = _Value;
+	}
+
+	void Execute() {}
+};
+
+template <typename T, typename K>
+struct CastNode : public ScriptNode<CastNode<T, K>, K>
+{
+	CastNode()
+	{
+		Input = nullptr;
+	}
+
+	void Execute()
+	{
+		static_cast<T*>(this)->Execute();
+	}
+
+	void FillData(ScriptNodeBase* A, K* Data)
+	{
+		if (A != nullptr)
+		{
+			A->Execute();
+			GetValue<K>(A, Data);
+		}
+	}
+
+	ScriptNodeBase* Input;
+};
+
+struct CastToIntNode : public CastNode<CastToIntNode, Enjon::int32>
+{
+	CastToIntNode()
+	{
+		this->Data = 1;
+	}
+
+	void Execute()
+	{
+		FillData(Input, &Data);
+	}
+};
+
+template <typename T>
+struct ArithmeticNode : public ScriptNode<ArithmeticNode<T>, Enjon::f32>
+{
+	ArithmeticNode()
+	{
+		InputA = nullptr;
+		InputB = nullptr;
+	}
+
+	void Execute()
+	{
+		static_cast<T*>(this)->Execute();
+	}
+
+	void FillData(ScriptNodeBase* A, ScriptNodeBase* B, Enjon::f32* AV, Enjon::f32* BV)
+	{
+		// Execute children chain
+		if (A != nullptr)
+		{
+			A->Execute();
+			GetValue<Enjon::f32>(A, AV);
+		}
+		if (B != nullptr) 
+		{
+			B->Execute();
+			GetValue<Enjon::f32>(B, BV);
+		}
+	}
+
+	ScriptNodeBase* InputA;
+	ScriptNodeBase* InputB;
+	Enjon::f32 A_Value;
+	Enjon::f32 B_Value;
+};
+
+struct MultiplyNode : public ArithmeticNode<MultiplyNode>
+{
+	MultiplyNode()
+	{
+		this->A_Value = 1.0f;
+		this->B_Value = 1.0f;
+	}
+
+	void Execute()
+	{
+		FillData(InputA, InputB, &A_Value, &B_Value);
+		this->Data =  A_Value * B_Value;
+	}
+};
+
+struct SubtractionNode : public ArithmeticNode<SubtractionNode>
+{
+	SubtractionNode()
+	{
+		this->A_Value = 1.0f;
+		this->B_Value = 1.0f;
+	}
+
+	void Execute()
+	{
+		FillData(InputA, InputB, &A_Value, &B_Value);
+		this->Data =  A_Value - B_Value;
+	}
+};
 
 int main(int argc, char** argv)
 {
-	// Calculate distances
-	auto R12 = sqrt(exp(2, 2) + exp(5, 2));
-	auto R13 = sqrt(exp(3, 2) + exp(4, 2));
+	MultiplyNode MN;
+	SubtractionNode SN;
+	CastToIntNode CN;
+	EFloatNode A(4.45f);
+	EFloatNode B(5.2f);
+	EFloatNode C(1.0f);
 
-	// Calculate magnitude of forces using Coulomb's law
-	auto F12 = (K * (2 * exp(10, -9)) * (6 * exp(10, -9))) / exp(R12, 2);
-	auto F13 = (K * (6 * exp(10, -9)) * (2 * exp(10, -9))) / exp(R13, 2);
+	MN.InputA = &A;
+	MN.InputB = &SN;
 
-	std::cout << F12 << std::endl;
-	std::cout << F13 << std::endl;
+	SN.InputA = &C;
+	SN.InputB = &A;
 
-	// Get angles
-	auto Theta12 = EM::ToDegrees(atan(5.0f / 2.0f));
-	auto Theta13 = EM::ToDegrees(atan(4.0f / 2.0f));
+	CN.Input = &MN;
 
-	std::cout << "Theta12: " << Theta12 << std::endl;
-	std::cout << "Theta13: " << Theta13 << std::endl;
+	CN.Execute();
 
-	// Find components
-	auto F12y = F12 * sin(Theta12);
-	auto F12x = F12 * cos(Theta12);
-
-	auto F13y = F13 * sin(Theta13);
-	auto F13x = F13 * cos(Theta13);
-
-	auto FTx = F13x - F12x;
-	auto FTy = F12y + F13y;
-
-	std::cout << "FTx: " << FTx << std::endl;
-	std::cout << "FTy: " << FTy << std::endl;
-
-	std::cout << EM::ToDegrees(atan(std::fabs(F12y) / std::fabs(F12x))) << std::endl;
-
-	EM::Vec2 Ft(FTx, FTy);
-
-	std::cout << Ft.Length() << std::endl;
+	std::cout << CN.Data << std::endl;
 
 	return 0;
+}
+
+template <typename T>
+void GetValue(ScriptNodeBase* S, T* Value)
+{
+	*Value = static_cast<AccessNode*>(S)->Data;
 }
 
 

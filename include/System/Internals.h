@@ -17,7 +17,8 @@ namespace Enjon { namespace Internals {
 		VEC2, 
 		VEC3, 
 		VEC4, 
-		BOOL
+		BOOL, 
+		DOUBLE
 	};
 
 	template <typename T>
@@ -36,6 +37,32 @@ namespace Enjon { namespace Internals {
 		Internal()
 		{
 			Type = InternalType::UINT;
+			Value = 1;
+		}
+
+		Internal(const Enjon::uint32& _Value)
+		{
+			Type = InternalType::UINT;
+			Value = _Value;
+		}
+
+		Enjon::uint32 Value;
+		InternalType Type;
+	};
+
+	template <> 
+	struct Internal<Enjon::int32> 
+	{
+		Internal()
+		{
+			Type = InternalType::UINT;
+			Value = 1;
+		}
+
+		Internal(const Enjon::int32& _Value)
+		{
+			Type = InternalType::UINT;
+			Value = _Value;
 		}
 
 		Enjon::uint32 Value;
@@ -48,6 +75,13 @@ namespace Enjon { namespace Internals {
 		Internal()
 		{
 			Type = InternalType::FLOAT;
+			Value = 1.0f;
+		}
+
+		Internal(const Enjon::f32& _Value)
+		{
+			Type = InternalType::FLOAT;
+			Value = _Value;
 		}
 
 		Enjon::f32 Value;
@@ -55,14 +89,40 @@ namespace Enjon { namespace Internals {
 	};
 
 	template <> 
-	struct Internal<Enjon::bool32> 
+	struct Internal<Enjon::f64> 
+	{
+		Internal()
+		{
+			Type = InternalType::DOUBLE;
+			Value = 1.0f;
+		}
+
+		Internal(const Enjon::f64& _Value)
+		{
+			Type = InternalType::DOUBLE;
+			Value = _Value;
+		}
+
+		Enjon::f64 Value;
+		InternalType Type;
+	};
+
+	template <> 
+	struct Internal<Enjon::bool8> 
 	{
 		Internal()
 		{
 			Type = InternalType::BOOL;
+			Value = 1;
 		}
 
-		Enjon::bool32 Value;
+		Internal(const Enjon::bool8& _Value)
+		{
+			Type = InternalType::BOOL;
+			Value = _Value;
+		}
+
+		Enjon::bool8 Value;
 		InternalType Type;
 	};
 
@@ -72,6 +132,13 @@ namespace Enjon { namespace Internals {
 		Internal()
 		{
 			Type = InternalType::VEC2;
+			Value = EM::Vec2(1.0f);
+		}
+
+		Internal(const EM::Vec2& _Value)
+		{
+			Type = InternalType::VEC2;
+			Value = _Value;
 		}
 
 		EM::Vec2 Value;
@@ -84,6 +151,19 @@ namespace Enjon { namespace Internals {
 		Internal()
 		{
 			Type = InternalType::VEC3;
+			Value = EM::Vec3(1.0f, 1.0f, 1.0f);
+		}
+
+		Internal(const EM::Vec3& _Value)
+		{
+			Type = InternalType::VEC3;
+			Value = _Value;
+		}
+
+		Internal(const Enjon::f32& _x, const Enjon::f32& _y, const Enjon::f32& _z)
+		{
+			Type = InternalType::VEC3;
+			Value = EM::Vec3(_x, _y, _z);
 		}
 
 		EM::Vec3 Value;
@@ -96,6 +176,13 @@ namespace Enjon { namespace Internals {
 		Internal()
 		{
 			Type = InternalType::VEC4;
+			Value = EM::Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+
+		Internal(const EM::Vec4& _Value)
+		{
+			Type = InternalType::VEC4;
+			Value = _Value;
 		}
 
 		EM::Vec4 Value;
@@ -105,11 +192,17 @@ namespace Enjon { namespace Internals {
 	// Default int32 constructor
 	using EUint = Internal<Enjon::uint32>;
 
+	// Default int32 constructor
+	using EInt = Internal<Enjon::int32>;
+
 	// Default f32 constructor
 	using EFloat = Internal<Enjon::f32>;
 
+	// Default f32 constructor
+	using EDouble = Internal<Enjon::f64>;
+
 	// Default bool32 constructor
-	using EBool = Internal<Enjon::bool32>;
+	using EBool = Internal<Enjon::bool8>;
 
 	// Default vec2 constructor
 	using EVec2 = Internal<EM::Vec2>;
