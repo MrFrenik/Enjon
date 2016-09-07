@@ -4719,6 +4719,51 @@ struct EFloatNode : public ConstantValueNode<EFloatNode, Enjon::f32>
 	void Execute() {}
 };
 
+struct EVec2Node : public ConstantValueNode<EVec2Node, EM::Vec2>
+{
+	EVec2Node()
+	{
+		this->Data = EM::Vec2(0.0f, 0.0f);
+	}
+
+	EVec2Node(const EM::Vec2& _Value)
+	{
+		this->Data = _Value;
+	}
+
+	void Execute() {}
+};
+
+struct EVec3Node : public ConstantValueNode<EVec3Node, EM::Vec3>
+{
+	EVec3Node()
+	{
+		this->Data = EM::Vec3(0.0f, 0.0f, 0.0f);
+	}
+
+	EVec3Node(const EM::Vec3& _Value)
+	{
+		this->Data = _Value;
+	}
+
+	void Execute() {}
+};
+
+struct EVec4Node : public ConstantValueNode<EVec4Node, EM::Vec4>
+{
+	EVec4Node()
+	{
+		this->Data = EM::Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	}
+
+	EVec4Node(const EM::Vec4& _Value)
+	{
+		this->Data = _Value;
+	}
+
+	void Execute() {}
+};
+
 template <typename T, typename K>
 struct CastNode : public ScriptNode<CastNode<T, K>, K>
 {
@@ -4786,6 +4831,12 @@ struct ArithmeticNode : public ScriptNode<ArithmeticNode<T>, Enjon::f32>
 		}
 	}
 
+	void SetInputs(ScriptNodeBase* A, ScriptNodeBase* B)
+	{
+		this->InputA = A;
+		this->InputB = B;
+	}
+
 	ScriptNodeBase* InputA;
 	ScriptNodeBase* InputB;
 	Enjon::f32 A_Value;
@@ -4822,26 +4873,56 @@ struct SubtractionNode : public ArithmeticNode<SubtractionNode>
 	}
 };
 
+struct AdditionNode : public ArithmeticNode<AdditionNode>
+{
+	AdditionNode()
+	{
+		this->A_Value = 1.0f;
+		this->B_Value = 1.0f;
+	}
+
+	void Execute()
+	{
+		FillData(InputA, InputB, &A_Value, &B_Value);
+		this->Data =  A_Value + B_Value;
+	}
+};
+
+struct DivisionNode : public ArithmeticNode<DivisionNode>
+{
+	DivisionNode()
+	{
+		this->A_Value = 1.0f;
+		this->B_Value = 1.0f;
+	}
+
+	void Execute()
+	{
+		FillData(InputA, InputB, &A_Value, &B_Value);
+		this->Data =  B_Value == 0 ? A_Value / 0.00001f : A_Value / B_Value;
+	}
+};
+
 int main(int argc, char** argv)
 {
 	MultiplyNode MN;
 	SubtractionNode SN;
 	CastToIntNode CN;
+	DivisionNode DN;
+	AdditionNode AN;
 	EFloatNode A(4.45f);
 	EFloatNode B(5.2f);
-	EFloatNode C(1.0f);
+	EFloatNode C(1.2f);
+	EFloatNode D(-3.5f);
 
-	MN.InputA = &A;
-	MN.InputB = &SN;
+	MN.SetInputs(&AN, &C);
+	AN.SetInputs(&SN, &DN);
+	SN.SetInputs(&A, &DN);
+	DN.SetInputs(&B, &D);
 
-	SN.InputA = &C;
-	SN.InputB = &A;
+	MN.Execute();
 
-	CN.Input = &MN;
-
-	CN.Execute();
-
-	std::cout << CN.Data << std::endl;
+	std::cout << MN.Data << std::endl;
 
 	return 0;
 }
@@ -4849,7 +4930,7 @@ int main(int argc, char** argv)
 template <typename T>
 void GetValue(ScriptNodeBase* S, T* Value)
 {
-	*Value = static_cast<AccessNode*>(S)->Data;
+	*Value = static_cast<T>(static_cast<AccessNode*>(S)->Data);
 }
 
 
