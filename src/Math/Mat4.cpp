@@ -346,4 +346,16 @@ namespace Enjon { namespace Math {
 		Mat4 R = M;
 		return R.Invert();
 	}
+
+	std::ostream& operator<<(std::ostream& stream, const Mat4& Mat)
+	{
+		stream << "Mat4: \n\t";
+		
+		for(auto c : Mat.columns)
+		{
+			stream << c << "\n\t";
+		}	
+
+		return stream;
+	}
 }}

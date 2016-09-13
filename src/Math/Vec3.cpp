@@ -59,7 +59,24 @@ namespace Enjon { namespace Math {
 	{
 		return Vec3(left.x * scalar, left.y * scalar, left.z * scalar);
 	}
-	
+
+	Vec3 operator*(const float& scalar, Vec3 right)
+	{
+		return operator*(right, scalar);
+	}
+
+	void operator*=(Vec3& left, const float& scalar)
+	{
+		left.x *= scalar;
+		left.y *= scalar;
+		left.z *= scalar;
+	}
+
+	void operator*=(const float& scalar, Vec3 left)
+	{
+		operator*=(left, scalar);
+	}
+
 	Vec3 operator/(Vec3 left, const Vec3& right)
 	{
 		return left.Divide(right);

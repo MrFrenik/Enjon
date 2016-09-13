@@ -37,6 +37,8 @@ namespace Enjon { namespace Graphics {
 		void Clear(float val, GLbitfield mask, const ColorRGBA16& color = RGBA16_DarkGrey());
 		void SwapBuffer(); 
 
+		SDL_Window* GetWindowContext() { return m_sdlWindow; }
+
 	private:
 		SDL_Window* m_sdlWindow;
 		int m_screenWidth;

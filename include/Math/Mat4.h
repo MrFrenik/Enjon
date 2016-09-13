@@ -1,7 +1,11 @@
 #ifndef ENJON_MAT4_H
 #define ENJON_MAT4_H
 
-#include "Math/Maths.h"
+#include <ostream>
+#include <Math/Vec3.h>
+#include <Math/Vec2.h>
+#include <Math/Vec4.h>
+#include <Math/Common.h>
 
 namespace Enjon { namespace Math { 
 
@@ -10,6 +14,7 @@ namespace Enjon { namespace Math {
 		union
 		{
 			float elements[4 * 4];
+			float Elements[4][4];
 			Vec4 columns[4];
 		};
 	
@@ -38,6 +43,8 @@ namespace Enjon { namespace Math {
 		static Mat4 Rotate(float angle, const Vec3& axis);
 		static Mat4 Inverse(const Mat4& M);
 		static Mat4 LookAt(Vec3& Position, Vec3& Target, Vec3& Up);
+
+		friend std::ostream& operator<<(std::ostream& stream, const Mat4& Mat);
 
 	};
 

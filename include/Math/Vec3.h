@@ -42,9 +42,12 @@ namespace Enjon { namespace Math {
 		Vec3& Divide(const Vec3& other); 
 
 		friend Vec3 operator+(Vec3 left, const Vec3& other);
-		friend Vec3 operator-(Vec3 left, const Vec3& other); 
+		friend Vec3 operator-(Vec3 left, const Vec3& othe); 
 		friend Vec3 operator*(Vec3 left, const Vec3& other);
 		friend Vec3 operator*(Vec3 left, const float& scalar);
+		friend Vec3 operator*(const float& scalar, Vec3 right);
+		friend void operator*=(Vec3& left, const float& scalar);
+		friend void operator*=(const float& scalar, Vec3& left);
 		friend Vec3 operator/(Vec3 left, const Vec3& other);
 		friend Vec3 operator/(Vec3 left, float value);
 		

@@ -47,7 +47,7 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 
 			// Get angle of direction vector
 			auto R = EM::Vec2(1, 0);
-			float Angle = acos(R.DotProduct(Direction)) * 180.0f / M_PI;
+			float Angle = acos(R.DotProduct(Direction)) * 180.0f / EM::PI;
 			if (Direction.y < 0.0f) Angle *= -1; 
 
 			// Draw point
@@ -75,7 +75,7 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 
 		// Get angle of direction vector
 		auto R = EM::Vec2(1, 0);
-		float Angle = acos(R.DotProduct(Direction)) * 180.0f / M_PI;
+		float Angle = acos(R.DotProduct(Direction)) * 180.0f / EM::PI;
 		if (Direction.y < 0.0f) Angle *= -1; 
 
 		Batch->Add(
@@ -106,7 +106,7 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 
 			// Get angle of direction vector
 			auto R = EM::Vec2(1, 0);
-			float Angle = acos(R.DotProduct(Direction)) * 180.0f / M_PI;
+			float Angle = acos(R.DotProduct(Direction)) * 180.0f / EM::PI;
 			if (Direction.y < 0.0f) Angle *= -1; 
 
 			Batch->Add(

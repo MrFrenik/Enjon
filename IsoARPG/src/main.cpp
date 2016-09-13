@@ -420,7 +420,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 10000;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = -50.0f;
@@ -4313,18 +4313,110 @@ int main(int argc, char** argv)
 #endif
 
 
-#if 0
+#if 1
 
 #include <iostream>
 
 #include <Enjon.h>
+#include <System/Types.h>
 #include <Graphics/Camera3D.h>
+#include <Graphics/ModelAsset.h>
 
 // Window dimensions
 const GLuint SCREENWIDTH = 1440 , SCREENHEIGHT = 900;
 EM::Vec3 LightPos(1.2f, 1.0f, 2.0f);
 
+EG::ModelAsset GlobalModel;
+std::vector<EG::ModelInstance> Instances;
+
+void LoadSpriteAsset()
+{
+	EG::Vertex Verticies[] = 
+	{
+		{{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
+		{{ 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}, 
+		{{ 0.5f,  0.5f}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
+		{{-0.5f,  0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}
+	};
+
+	glGenBuffers(1, &GlobalModel.VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, GlobalModel.VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Verticies), Verticies, GL_STATIC_DRAW);
+
+	Enjon::uint32 Indicies[] = {0, 1, 2, 2, 3, 0};
+
+	glGenBuffers(1, &GlobalModel.IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GlobalModel.IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indicies), Indicies, GL_STATIC_DRAW); 
+
+    // Generate VAO for global model
+    glGenVertexArrays(1, &GlobalModel.VAO);
+    glBindVertexArray(GlobalModel.VAO);
+
+	// Tell opengl what attribute arrays we need 
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+    // Position
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex), (void*)offsetof(EG::Vertex, position));
+    glEnableVertexAttribArray(0);
+    // Color
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex), (void*)offsetof(EG::Vertex, color));
+    glEnableVertexAttribArray(1);
+    // UV
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex), (void*)offsetof(EG::Vertex, uv));
+    glEnableVertexAttribArray(2);
+
+    // Unbind the VAO
+    glBindVertexArray(0);
+
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("Default");
+    Shader->Use();
+	    Shader->SetUniform1i("tex", 0);
+    Shader->Unuse();
+
+    // Set shader
+    GlobalModel.Shader = Shader;
+	// Set texture
+    GlobalModel.Texture = EI::ResourceManager::GetTexture("../Assets/Textures/container2.png");
+    // Set draw type
+    GlobalModel.DrawType = GL_TRIANGLE_STRIP;
+    // Set draw count
+    GlobalModel.DrawCount = 6;
+
+}
+
+void LoadInstances()
+{
+
+}
+
+void RenderInstance(const EG::ModelInstance& Instance)
+{
+	// Get reference to asset pointer
+	auto Asset = Instance.Asset;
+	auto& Transform = Instance.Transform;
+	EM::Mat4 Model = EM::Mat4::Identity();
+
+	EM::Mat4 Trans = EM::Mat4::Translate(Transform.Position) * EM::QuaternionToMat4(Transform.Orientation) * EM::Mat4::Scale(Transform.Scale);
+
+	glBindVertexArray(Asset->VAO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Asset->IBO);
+	{
+		Model *= Trans;
+		Asset->Shader->SetUniformMat4("model", Model);
+		glDrawElements(Asset->DrawType, Asset->DrawCount, GL_UNSIGNED_INT, nullptr);
+	}
+	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+}
+
 bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera);
+
 
 // The MAIN function, from here we start the application and run the game loop
 #ifdef main
@@ -4343,16 +4435,36 @@ int main(int argc, char** argv)
 	Window.Init("3D Test", SCREENWIDTH, SCREENHEIGHT);
 	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
 
-	EG::Camera3D Camera(EM::Vec3(0.0f, 0.0f, 3.0f));
-
-	EU::FPSLimiter Limiter;
-	Limiter.Init(60);
-
 	// Init ShaderManager
 	EG::ShaderManager::Init(); 
 
 	// Init FontManager
 	EG::FontManager::Init();
+
+	EG::Camera3D Camera(EM::Vec3(0.0f, 0.0f, 3.0f));
+
+	// Load model data
+	LoadSpriteAsset();
+
+	EG::ModelInstance A;
+	A.Asset = &GlobalModel;
+	A.Transform.Position = EM::Vec3(0, 0, 0);
+	A.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(45), EM::Vec3(0, 1, 0));
+	Instances.push_back(A);
+
+	EG::ModelInstance B;
+	B.Asset = &GlobalModel;
+	B.Transform.Position = EM::Vec3(2, 0, 0);
+	Instances.push_back(B);
+
+	EG::ModelInstance C;
+	C.Asset = &GlobalModel;
+	C.Transform.Position = EM::Vec3(0, 0, 1);
+	Instances.push_back(C);
+
+	EU::FPSLimiter Limiter;
+	Limiter.Init(60);
+
 
 	// InputManager
 	EI::InputManager Input;
@@ -4360,199 +4472,61 @@ int main(int argc, char** argv)
     // Setup OpenGL options
     glEnable(GL_DEPTH_TEST);
 
-    // Build and compile our shader program
-    auto LightShader = EG::ShaderManager::GetShader("Learn");
-    auto LampShader  = EG::ShaderManager::GetShader("Lamp");
-
-   // Set up vertex data (and buffer(s)) and attribute pointers
-   // Set up vertex data (and buffer(s)) and attribute pointers
-    // Set up vertex data (and buffer(s)) and attribute pointers
-    GLfloat vertices[] = {
-        // Positions          // Normals           // Texture Coords
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-    };
-
-     // Positions all containers
-    EM::Vec3 cubePositions[] = {
-        EM::Vec3( 0.0f,  0.0f,  0.0f),
-        EM::Vec3( 2.0f,  5.0f, -15.0f),
-        EM::Vec3(-1.5f, -2.2f, -2.5f),
-        EM::Vec3(-3.8f, -2.0f, -12.3f),
-        EM::Vec3( 2.4f, -0.4f, -3.5f),
-        EM::Vec3(-1.7f,  3.0f, -7.5f),
-        EM::Vec3( 1.3f, -2.0f, -2.5f),
-        EM::Vec3( 1.5f,  2.0f, -2.5f),
-        EM::Vec3( 1.5f,  0.2f, -1.5f),
-        EM::Vec3(-1.3f,  1.0f, -1.5f)
-    };
-
-    // First, set the container's VAO (and VBO)
-    GLuint VBO, containerVAO;
-    glGenVertexArrays(1, &containerVAO);
-    glGenBuffers(1, &VBO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindVertexArray(containerVAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(2);
-    glBindVertexArray(0);
-
-    // Then, we set the light's VAO (VBO stays the same. After all, the vertices are the same for the light object (also a 3D cube))
-    GLuint lightVAO;
-    glGenVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);
-    // We only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need.
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // Set the vertex attributes (only position data for the lamp))
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0); // Note that we skip over the other data in our buffer object (we don't need the normals/textures, only positions).
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-
-    auto DiffuseMap = EI::ResourceManager::GetTexture("../Assets/Textures/container2.png").id;
-    auto SpecularMap = EI::ResourceManager::GetTexture("../Assets/Textures/container2_specular.png").id;
-
-    LightShader->Use();
-	    LightShader->SetUniform1i("material.diffuse", 0);
-	    LightShader->SetUniform1i("material.specular", 1);
-    LightShader->Unuse();
-
 
     // Game loop
     bool running = true;
     while (running)
     {
     	static float t = 0.0f;
-    	t += 0.0001f;
+    	t += 0.1f;
+
 
     	Input.Update();
 
     	running = ProcessInput(&Input, &Camera);
 
+    	// Camera.Update();
+    	auto MouseCoords = Input.GetMouseCoords();
+
+    	// Camera.Update(MouseCoords, EM::Vec2(SCREENWIDTH, SCREENHEIGHT));
     	Camera.Update();
 
+    	// SDL_WarpMouseInWindow(Window.GetWindowContext(), SCREENWIDTH / 2.0f, SCREENHEIGHT / 2.0f);
+
     	// Rendering
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0f));
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
 
         // Create transformations
         EM::Mat4 View, Model, Projection;
 
-        // Activate shader
-        LightShader->Use();
+    	View = Camera.GetViewMatrix();
+        Projection = EM::Mat4::Perspective(Camera.Zoom, (GLfloat)SCREENWIDTH / (GLfloat)SCREENHEIGHT, 0.1f, 100.0f);
+
+        // Change rotation over time
+        Instances.at(0).Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(t), EM::Vec3(0, 0, 1)) * EM::Quaternion::AngleAxis(EM::ToRadians(t), EM::Vec3(0, 1, 0));
+
+        auto FirstAsset = Instances.at(0).Asset;
+        auto Shader = FirstAsset->Shader;
+        Shader->Use();
         {
-        	LightShader->SetUniform3f("light.position", Camera.Position);
-        	LightShader->SetUniform3f("light.direction", Camera.Front);
-        	LightShader->SetUniform1f("light.cutOff", EM::ToRadians(12.5f));
-        	LightShader->SetUniform1f("light.outerCutOff", EM::ToRadians(17.5f));
+        	Shader->SetUniformMat4("projection", Projection);
+        	Shader->SetUniformMat4("view", View);
 
-        	LightShader->SetUniform3f("light.ambient", EM::Vec3(0.1f, 0.1f, 0.1f));
-        	LightShader->SetUniform3f("light.diffuse", EM::Vec3(1.0f, 0.5f, 0.5f));
-        	LightShader->SetUniform3f("light.specular", EM::Vec3(1.0f, 1.0f, 1.0f));
-        	LightShader->SetUniform1f("light.constant", EM::ToRadians(1.0f));
-        	LightShader->SetUniform1f("light.linear", EM::ToRadians(0.09f));
-        	LightShader->SetUniform1f("light.quadratic", EM::ToRadians(3.0f));
-
-        	LightShader->SetUniform1f("material.shininess", 32.0f);
-        	LightShader->SetUniform3f("viewPos", Camera.Position);
-
-        	View = Camera.GetViewMatrix();
-	        Projection = EM::Mat4::Perspective(Camera.Zoom, (GLfloat)SCREENWIDTH / (GLfloat)SCREENHEIGHT, 0.1f, 100.0f);
-	
-			LightShader->SetUniformMat4("view", View);
-			LightShader->SetUniformMat4("projection", Projection);
-
-			// Bind texture
+	        // Bind instance texture
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, DiffuseMap);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, SpecularMap);
+			glBindTexture(GL_TEXTURE_2D, FirstAsset->Texture.id);
 
-			glBindVertexArray(containerVAO);
-			for (auto i = 0; i < 10; ++i)
-			{
-				Model = EM::Mat4::Identity();
-				Model *= EM::Mat4::Translate(cubePositions[i]);
-				// auto angle = 20.0f * i;
-				// Model *= EM::Mat4::Rotate(angle, EM::Vec3(1.0f, 0.3f, 0.5f));
-				LightShader->SetUniformMat4("model", Model);
-				glDrawArrays(GL_TRIANGLES, 0, 36);
-			}
-			glBindVertexArray(0);
-
+	        for (auto& c : Instances)
+	        {
+		        RenderInstance(c);
+	        }
         }
-        LightShader->Unuse();
-
-        // Draw lamp object
-        // LampShader->Use();
-        // {
-        // 	LampShader->SetUniformMat4("view", View);
-        // 	LampShader->SetUniformMat4("projection", Projection);
-
-        // 	Model = EM::Mat4::Identity();
-        // 	Model *= EM::Mat4::Translate(LightPos);
-        // 	Model *= EM::Mat4::Scale(EM::Vec3(0.2f, 0.2f, 0.2f));
-
-        // 	LampShader->SetUniformMat4("model", Model);
-
-        // 	// Draw light object
-        // 	glBindVertexArray(lightVAO);
-        // 	glDrawArrays(GL_TRIANGLES, 0, 36);
-        // 	glBindVertexArray(0);
-        // }
-        // LampShader->Unuse();
+        Shader->Unuse();
 
         // Swap the screen buffers
         Window.SwapBuffer();
     }
     // Properly de-allocate all resources once they've outlived their purpose
-    glDeleteVertexArrays(1, &containerVAO);
-    glDeleteVertexArrays(1, &lightVAO);
-    glDeleteBuffers(1, &VBO);
     return 0;
 }
 
@@ -4591,7 +4565,6 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera)
 				Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 				xPos = event.motion.x;
 				yPos = event.motion.y;
-				std::cout << "Moving" << std::endl;
 				if (FirstMouse)
 				{
 					FirstMouse = false;
@@ -4648,7 +4621,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera)
 
 #endif
 
-#if 1
+#if 0
 
 #include <stdio.h>
 #include <iostream>
@@ -4937,10 +4910,27 @@ void GetValue(ScriptNodeBase* S, T* Value)
 #endif
 
 
+#if 0
+
+#include <iostream>
+#include <Math/Maths.h>
+#include <Defines.h>
 
 
+int main(int argc, char** argv)
+{
+	EM::Quaternion Q;
+	EM::Vec3 P(1, 2, 3);
+	EM::Vec3 S(0.5f, 2, 3);
 
 
+	std::cout << P * S << std::endl;
+
+	return 0;
+}
+
+
+#endif
 
 
 

@@ -9,6 +9,7 @@
 #define ENJON_CAMERA3D_H
 
 #include "Defines.h"
+#include "System/Types.h"
 #include "Math/Maths.h"
 
 
@@ -42,14 +43,21 @@ namespace Enjon { namespace Graphics {
 
 			// Responsible for updating all of the camera's vectors and view matrix
 			void Update();
+			// void Update(const EM::Vec2& MouseCoords, const EM::Vec2& ScreenDimensions);
 
 			EM::Mat4 GetViewMatrix();
+
+			void SetViewByMouse(const EM::Vec2& MouseCoords, const EM::Vec2& ScreenDimensions);
+			void RotateCamera(float Angle, const EM::Vec3& Axis);
+
+			void OffsetOrientation(const f32& Yaw, const f32& Pitch);
 
 			EM::Vec3 Position;
 			EM::Vec3 Front;
 			EM::Vec3 Up; 
 			EM::Vec3 WorldUp;
 			EM::Vec3 Right;
+			EM::Mat4 Orientation;
 			float Yaw;
 			float Pitch;
 			float Speed;

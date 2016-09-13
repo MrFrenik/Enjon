@@ -12,6 +12,7 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		// Add shaders
 		ShaderManager::AddShader("Basic", "../shaders/basic.v.glsl", "../shaders/basic.f.glsl");
 		ShaderManager::AddShader("Text","../shaders/text.v.glsl", "../shaders/text.f.glsl");
+		ShaderManager::AddShader("Default","../shaders/default.v.glsl", "../shaders/default.f.glsl");
 		ShaderManager::AddShader("DiffuseShader", "../shaders/diffuse.v.glsl", "../shaders/diffuse.f.glsl");
 		ShaderManager::AddShader("DeferredShader", "../shaders/deferred.v.glsl", "../shaders/deferred.f.glsl");
 		ShaderManager::AddShader("NormalsShader", "../shaders/normal.v.glsl", "../shaders/normal.f.glsl");
