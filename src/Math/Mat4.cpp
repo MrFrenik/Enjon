@@ -186,8 +186,8 @@ namespace Enjon { namespace Math {
 		// Get direction and right vectors
 		Vec3 ZAxis = Vec3::Normalize(Position - Target);
 		auto YAxis = Up;
-		Vec3 XAxis = Vec3::Normalize(Up.CrossProduct(ZAxis));
-		YAxis = ZAxis.CrossProduct(XAxis);
+		Vec3 XAxis = Vec3::Normalize(Up.Cross(ZAxis));
+		YAxis = ZAxis.Cross(XAxis);
 		XAxis = Vec3::Normalize(XAxis);
 		YAxis = Vec3::Normalize(YAxis);
 
@@ -208,9 +208,9 @@ namespace Enjon { namespace Math {
 		LA.elements[11] = 0.0f;
 
 		// Mat4 Translation(1.0f);
-		LA.elements[12] = XAxis.DotProduct(Position * -1.0f);	
-		LA.elements[13] = YAxis.DotProduct(Position * -1.0f);	
-		LA.elements[14] = ZAxis.DotProduct(Position * -1.0f);
+		LA.elements[12] = XAxis.Dot(Position * -1.0f);	
+		LA.elements[13] = YAxis.Dot(Position * -1.0f);	
+		LA.elements[14] = ZAxis.Dot(Position * -1.0f);
 		LA.elements[15] = 1.0f;
 
 		return LA;

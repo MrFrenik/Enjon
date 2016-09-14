@@ -42,7 +42,7 @@ namespace Enjon { namespace Math {
 		Vec3& Divide(const Vec3& other); 
 
 		friend Vec3 operator+(Vec3 left, const Vec3& other);
-		friend Vec3 operator-(Vec3 left, const Vec3& othe); 
+		friend Vec3 operator-(Vec3 left, const Vec3& other);
 		friend Vec3 operator*(Vec3 left, const Vec3& other);
 		friend Vec3 operator*(Vec3 left, const float& scalar);
 		friend Vec3 operator*(const float& scalar, Vec3 right);
@@ -55,9 +55,10 @@ namespace Enjon { namespace Math {
 		Vec3& operator-=(const Vec3& other);
 		Vec3& operator*=(const Vec3& other);
 		Vec3& operator/=(const Vec3& other);
+		Vec3 operator-();
 
-		float DotProduct(const Vec3& other);
-		Vec3 CrossProduct(const Vec3& other);
+		float Dot(const Vec3& other);
+		Vec3 Cross(const Vec3& other);
 
 		inline static Vec3 XAxis() { return Vec3(1.0f, 0.0f, 0.0f); }
 		inline static Vec3 YAxis() { return Vec3(0.0f, 1.0f, 0.0f); }

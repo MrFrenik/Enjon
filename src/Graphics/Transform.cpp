@@ -3,7 +3,7 @@
 namespace Enjon { namespace Graphics {
 
 
-	Transform Transform::operator*(Transform& Parent)
+	Transform Transform::operator*(Transform& Parent) const
 	{
 		Transform WorldSpace;
 

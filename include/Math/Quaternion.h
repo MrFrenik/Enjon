@@ -32,10 +32,18 @@ namespace Enjon { namespace Math {
 			w(_w)
 		{}
 
-		Quaternion::Quaternion(const Quaternion& Q)
+		Quaternion::Quaternion(Quaternion& Q)
 			: 
 			x(Q.x), 
 			y(Q.y), 
+			z(Q.z),
+			w(Q.w)
+		{}
+
+		Quaternion::Quaternion(const Quaternion& Q)
+			: 
+			x(Q.x),
+			y(Q.y),
 			z(Q.z),
 			w(Q.w)
 		{}
@@ -77,7 +85,7 @@ namespace Enjon { namespace Math {
 		Quaternion Normalize();
 
 		// Returns conjugate of quaternion
-		Quaternion Conjugate();
+		Quaternion Conjugate() const;
 
 		// Returns dot product with another quaternion
 		f32 Dot(Quaternion& Q);
@@ -165,7 +173,7 @@ namespace Enjon { namespace Math {
 	}
 
 	// NOTE(John): Assumes matrix is only rotational matrix and has no skew applied
-	inline Quaternion Mat4ToQuaterion(const EM::Mat4& Mat)
+	inline Quaternion Mat4ToQuaternion(const EM::Mat4& Mat)
 	{
 		Quaternion Q;
 		auto& E = Mat.elements;
@@ -175,36 +183,36 @@ namespace Enjon { namespace Math {
 		f32 FourZSquaredMinuesOne 	= E[2 * 4 + 2] - E[0 * 4 + 0] - E[1 * 4 + 1];
 		f32 FourWSquaredMinusOne 	= E[0 * 4 + 0] + E[1 * 4 + 1] + E[2 * 4 + 2];
 
-		std::vector<f32> FourSquares;
-		FourSquares.push_back(FourWSquaredMinusOne);	
-		FourSquares.push_back(FourXSquaredMinusOne);
-		FourSquares.push_back(FourYSquaredMinusOne);	
-		FourSquares.push_back(FourZSquaredMinuesOne);	
-
 		int32 BiggestIndex = 0;
 		f32 FourBiggestSquaredMinusOne = FourWSquaredMinusOne;
 
-		for (auto i = 1; i < FourSquares.size(); i++)
+		if (FourXSquaredMinusOne > FourBiggestSquaredMinusOne)
 		{
-			auto& c = FourSquares.at(i);
-
-			if (c > FourBiggestSquaredMinusOne)
-			{
-				BiggestIndex = i;
-				FourBiggestSquaredMinusOne = c;
-			}
+			FourBiggestSquaredMinusOne 	= FourXSquaredMinusOne;
+			BiggestIndex 				= 1;
+		}
+		if (FourYSquaredMinusOne > FourBiggestSquaredMinusOne)
+		{
+			FourBiggestSquaredMinusOne 	= FourYSquaredMinusOne;
+			BiggestIndex 				= 2;
+		}
+		if (FourZSquaredMinuesOne > FourBiggestSquaredMinusOne)
+		{
+			FourBiggestSquaredMinusOne 	= FourZSquaredMinuesOne;
+			BiggestIndex 				= 3;
 		}
 
-		f32 BiggestVal = std::sqrt(FourBiggestSquaredMinusOne + 1.0f) * 0.5f;
-		f32 Mult = 0.25f / BiggestVal;
+
+		f32 BiggestVal 	= std::sqrt(FourBiggestSquaredMinusOne + 1.0f) * 0.5f;
+		f32 Mult 		= 0.25f / BiggestVal;
 
 		switch(BiggestIndex)
 		{
 			case 0:
 			{
 				Q.w = BiggestVal;
-				Q.x = (E[3 * 4 + 2] - E[2 * 4 + 3]) * Mult;
-				Q.y = (E[0 * 4 + 2] - E[2 * 4 + 2]) * Mult;
+				Q.x = (E[2 * 4 + 1] - E[1 * 4 + 2]) * Mult;
+				Q.y = (E[0 * 4 + 2] - E[2 * 4 + 0]) * Mult;
 				Q.z = (E[1 * 4 + 0] - E[0 * 4 + 1]) * Mult;
 			}
 			break;
@@ -246,9 +254,11 @@ namespace Enjon { namespace Math {
 	inline Vec3 operator*(const Quaternion& Q, const Vec3& V)
 	{
 		auto Qxyz = EM::Vec3(Q.x, Q.y, Q.z);
-		Vec3 T = 2.0f * Qxyz.CrossProduct(V);
-		return (V + T * Q.w + Qxyz.CrossProduct(T));
+		Vec3 T = 2.0f * Qxyz.Cross(V);
+		return (V + Q.w * T + Qxyz.Cross(T));
 	}
+
+
 
 
 }}

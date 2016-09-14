@@ -144,56 +144,63 @@ namespace Enjon { namespace Graphics {
 		}
 	}
 
-	GLint GLSLProgram::GetUniformLocation(std::string uniformName) 
+	GLint GLSLProgram::GetUniformLocation(const std::string& uniformName) 
 	{
 		GLint location =  glGetUniformLocation(m_programID, uniformName.c_str());
 
 		if( location == GL_INVALID_INDEX )
 		{
-			std::string name = uniformName;
-			Utils::FatalError( "GLSLPROGRAM::GETUNIFORMLOCATION::" + name + "_NOT_FOUND" );
+			Utils::FatalError( "GLSLPROGRAM::GETUNIFORMLOCATION::" + uniformName + "_NOT_FOUND" );
 		}
 		return location;
 	} 
 		
-	void GLSLProgram::SetUniformMat4(std::string name, const Math::Mat4& matrix)
+	void GLSLProgram::SetUniform(const std::string& name, const Math::Mat4& matrix)
 	{
-		glUniformMatrix4fv(GetUniformLocation(name.c_str()), 1, GL_FALSE, matrix.elements);	
+		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, matrix.elements);	
 	}
 	
-	void GLSLProgram::SetUniform1fv(std::string name, float* val, int count)
+	void GLSLProgram::SetUniform(const std::string& name, float* val, int count)
 	{
-		glUniform1fv(GetUniformLocation(name.c_str()), count, val);
+		glUniform1fv(GetUniformLocation(name), count, val);
 	}
 	
-	void GLSLProgram::SetUniform1iv(std::string name, int* val, int count)
+	void GLSLProgram::SetUniform(const std::string& name, int* val, int count)
 	{
-		glUniform1iv(GetUniformLocation(name.c_str()), count, val);
+		glUniform1iv(GetUniformLocation(name), count, val);
 	}
 
-	void GLSLProgram::SetUniform1f(std::string name, const float& val)
+	void GLSLProgram::SetUniform(const std::string& name, const float& val)
 	{
-		glUniform1f(GetUniformLocation(name.c_str()), val); 
+		glUniform1f(GetUniformLocation(name), val); 
 	}
 
-	void GLSLProgram::SetUniform2f(std::string name, const Math::Vec2& vector)
+	void GLSLProgram::SetUniform(const std::string& name, const Math::Vec2& vector)
 	{
-		glUniform2f(GetUniformLocation(name.c_str()), vector.x, vector.y);
+		glUniform2f(GetUniformLocation(name), vector.x, vector.y);
 	}
 
-	void GLSLProgram::SetUniform3f(std::string name, const Math::Vec3& vector)
+	void GLSLProgram::SetUniform(const std::string& name, const Math::Vec3& vector)
 	{
-		glUniform3f(GetUniformLocation(name.c_str()), vector.x, vector.y, vector.z);
+		glUniform3f(GetUniformLocation(name), vector.x, vector.y, vector.z);
 	}
 
-	void GLSLProgram::SetUniform4f(std::string name, const Math::Vec4& vector)
+	void GLSLProgram::SetUniform(const std::string& name, const Math::Vec4& vector)
 	{
-		glUniform4f(GetUniformLocation(name.c_str()), vector.x, vector.y, vector.z, vector.w);
+		glUniform4f(GetUniformLocation(name), vector.x, vector.y, vector.z, vector.w);
 	}
 
-	void GLSLProgram::SetUniform1i(std::string name, const int& val)
+	void GLSLProgram::SetUniform(const std::string& name, const int& val)
 	{
-		glUniform1i(GetUniformLocation(name.c_str()), val);
+		glUniform1i(GetUniformLocation(name), val);
+	}
+
+	void GLSLProgram::SetUniform(const std::string& name, const EG::Transform& T)
+	{
+		glUniform3f(GetUniformLocation(name + ".position"), T.Position.x, T.Position.y, T.Position.z);	
+		glUniform4f(GetUniformLocation(name + ".orientation"), T.Orientation.x, T.Orientation.y, T.Orientation.z, T.Orientation.w);	
+		glUniform3f(GetUniformLocation(name + ".scale"), T.Scale.x, T.Scale.y, T.Scale.z);	
+
 	}
 
 }}

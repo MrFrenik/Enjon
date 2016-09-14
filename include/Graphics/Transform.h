@@ -21,7 +21,7 @@ namespace Enjon { namespace Graphics {
 			{}
 
 		// Multiplication of this transform with another
-		Transform operator*(Transform& Parent);	
+		Transform operator*(Transform& Parent) const;	
 
 		// Friend operator for dividing two transforms
 		friend Transform operator/(Transform& World, Transform& Parent);
@@ -33,8 +33,6 @@ namespace Enjon { namespace Graphics {
 		EM::Vec3 Position;
 		EM::Quaternion Orientation;
 		EM::Vec3 Scale;
-
-
 	};
 
 

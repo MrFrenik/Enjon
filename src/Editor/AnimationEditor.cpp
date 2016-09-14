@@ -541,16 +541,16 @@ namespace Enjon { namespace AnimationEditor {
 		// Basic shader for UI
 		BasicShader->Use();
 		{
-			BasicShader->SetUniformMat4("model", Model);
-			BasicShader->SetUniformMat4("projection", Projection);
-			BasicShader->SetUniformMat4("view", View);
+			BasicShader->SetUniform("model", Model);
+			BasicShader->SetUniform("projection", Projection);
+			BasicShader->SetUniform("view", View);
 
 			// Draw BG
 			BGBatch.RenderBatch();
 
 			// Reset camera to HUD
 			View = Camera.GetCameraMatrix();
-			BasicShader->SetUniformMat4("view", View);
+			BasicShader->SetUniform("view", View);
 
 			SceneBatch.Begin();
 			{
@@ -635,9 +635,9 @@ namespace Enjon { namespace AnimationEditor {
 		{
 			View = HUDCamera.GetCameraMatrix();
 
-			TextShader->SetUniformMat4("model", Model);
-			TextShader->SetUniformMat4("projection", Projection);
-			TextShader->SetUniformMat4("view", View);
+			TextShader->SetUniform("model", Model);
+			TextShader->SetUniform("projection", Projection);
+			TextShader->SetUniform("view", View);
 
 			// glEnable(GL_SCISSOR_TEST);
 			UIBatch.Begin(EG::GlyphSortType::FRONT_TO_BACK);

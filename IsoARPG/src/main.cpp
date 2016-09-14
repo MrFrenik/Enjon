@@ -4315,15 +4315,34 @@ int main(int argc, char** argv)
 
 #if 1
 
+#define FULLSCREENMODE   0
+#define SECOND_DISPLAY   0
+
+#if FULLSCREENMODE
+	#if SECOND_DISPLAY
+		#define SCREENWIDTH 1440
+		#define SCREENHEIGHT 900
+	#else
+		#define SCREENWIDTH  1920
+		#define SCREENHEIGHT 1080
+	#endif
+	#define SCREENRES    EG::FULLSCREEN
+#else
+	#define SCREENWIDTH  1024
+	#define SCREENHEIGHT 768
+	#define SCREENRES EG::DEFAULT
+#endif 
+
 #include <iostream>
 
 #include <Enjon.h>
 #include <System/Types.h>
 #include <Graphics/Camera3D.h>
 #include <Graphics/ModelAsset.h>
+#include <Graphics/Camera.h>
 
 // Window dimensions
-const GLuint SCREENWIDTH = 1440 , SCREENHEIGHT = 900;
+// const GLuint SCREENWIDTH = 1440 , SCREENHEIGHT = 900;
 EM::Vec3 LightPos(1.2f, 1.0f, 2.0f);
 
 EG::ModelAsset GlobalModel;
@@ -4375,7 +4394,7 @@ void LoadSpriteAsset()
     // Get shader and set texture
     auto Shader = EG::ShaderManager::GetShader("Default");
     Shader->Use();
-	    Shader->SetUniform1i("tex", 0);
+	    Shader->SetUniform("tex", 0);
     Shader->Unuse();
 
     // Set shader
@@ -4386,7 +4405,6 @@ void LoadSpriteAsset()
     GlobalModel.DrawType = GL_TRIANGLE_STRIP;
     // Set draw count
     GlobalModel.DrawCount = 6;
-
 }
 
 void LoadInstances()
@@ -4399,15 +4417,11 @@ void RenderInstance(const EG::ModelInstance& Instance)
 	// Get reference to asset pointer
 	auto Asset = Instance.Asset;
 	auto& Transform = Instance.Transform;
-	EM::Mat4 Model = EM::Mat4::Identity();
-
-	EM::Mat4 Trans = EM::Mat4::Translate(Transform.Position) * EM::QuaternionToMat4(Transform.Orientation) * EM::Mat4::Scale(Transform.Scale);
 
 	glBindVertexArray(Asset->VAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Asset->IBO);
 	{
-		Model *= Trans;
-		Asset->Shader->SetUniformMat4("model", Model);
+		Asset->Shader->SetUniform("transform", Transform);
 		glDrawElements(Asset->DrawType, Asset->DrawCount, GL_UNSIGNED_INT, nullptr);
 	}
 	glBindVertexArray(0);
@@ -4415,7 +4429,11 @@ void RenderInstance(const EG::ModelInstance& Instance)
 
 }
 
-bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera);
+// bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera);
+bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera);
+
+// Main window
+EG::Window Window;
 
 
 // The MAIN function, from here we start the application and run the game loop
@@ -4430,10 +4448,9 @@ int main(int argc, char** argv)
 	float FPS = 0.0f;
 	float TimeIncrement = 0.0f;
 
-	// Create a window
-	EG::Window Window;
-	Window.Init("3D Test", SCREENWIDTH, SCREENHEIGHT);
-	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
+	// Initialize window
+	Window.Init("3D Test", SCREENWIDTH, SCREENHEIGHT, SCREENRES);
+	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
 
 	// Init ShaderManager
 	EG::ShaderManager::Init(); 
@@ -4443,13 +4460,16 @@ int main(int argc, char** argv)
 
 	EG::Camera3D Camera(EM::Vec3(0.0f, 0.0f, 3.0f));
 
+	EG::Camera FPSCamera((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
+
 	// Load model data
 	LoadSpriteAsset();
 
 	EG::ModelInstance A;
 	A.Asset = &GlobalModel;
 	A.Transform.Position = EM::Vec3(0, 0, 0);
-	A.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(45), EM::Vec3(0, 1, 0));
+	A.Transform.Scale = EM::Vec3(3, 3, 3);
+	A.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(45), EM::Vec3(0, 0, 1));
 	Instances.push_back(A);
 
 	EG::ModelInstance B;
@@ -4460,6 +4480,7 @@ int main(int argc, char** argv)
 	EG::ModelInstance C;
 	C.Asset = &GlobalModel;
 	C.Transform.Position = EM::Vec3(0, 0, 1);
+	C.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(45), EM::Vec3(0, 1, 0));
 	Instances.push_back(C);
 
 	EU::FPSLimiter Limiter;
@@ -4472,18 +4493,26 @@ int main(int argc, char** argv)
     // Setup OpenGL options
     glEnable(GL_DEPTH_TEST);
 
+    // Initialize FPSCamera
+	FPSCamera.Transform.Position = EM::Vec3(2, 0, 3);
+	FPSCamera.LookAt(EM::Vec3(0, 0, 0));
+	FPSCamera.ProjType = EG::ProjectionType::Perspective;
+	FPSCamera.FieldOfView = 50.0f;
+	FPSCamera.ViewPortAspectRatio = (Enjon::f32)SCREENWIDTH / (Enjon::f32)SCREENHEIGHT;
+
 
     // Game loop
     bool running = true;
     while (running)
     {
     	static float t = 0.0f;
-    	t += 0.1f;
+    	t += 0.01f;
+    	if (t > 50000.0f) t = 0.0f;
 
 
     	Input.Update();
 
-    	running = ProcessInput(&Input, &Camera);
+    	running = ProcessInput(&Input, &FPSCamera);
 
     	// Camera.Update();
     	auto MouseCoords = Input.GetMouseCoords();
@@ -4491,26 +4520,24 @@ int main(int argc, char** argv)
     	// Camera.Update(MouseCoords, EM::Vec2(SCREENWIDTH, SCREENHEIGHT));
     	Camera.Update();
 
-    	// SDL_WarpMouseInWindow(Window.GetWindowContext(), SCREENWIDTH / 2.0f, SCREENHEIGHT / 2.0f);
+    	// Update the FPS camera
+    	EM::Vec3& CamPos = FPSCamera.Transform.Position;
 
     	// Rendering
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
 
         // Create transformations
-        EM::Mat4 View, Model, Projection;
-
-    	View = Camera.GetViewMatrix();
-        Projection = EM::Mat4::Perspective(Camera.Zoom, (GLfloat)SCREENWIDTH / (GLfloat)SCREENHEIGHT, 0.1f, 100.0f);
+        EM::Mat4 CameraMatrix;
+    	CameraMatrix = FPSCamera.GetViewMatrix();
 
         // Change rotation over time
-        Instances.at(0).Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(t), EM::Vec3(0, 0, 1)) * EM::Quaternion::AngleAxis(EM::ToRadians(t), EM::Vec3(0, 1, 0));
+        Instances.at(0).Transform.Orientation = EM::Quaternion::AngleAxis(120 * EM::ToRadians(t), EM::Vec3(0, 1, 0));
 
         auto FirstAsset = Instances.at(0).Asset;
         auto Shader = FirstAsset->Shader;
         Shader->Use();
         {
-        	Shader->SetUniformMat4("projection", Projection);
-        	Shader->SetUniformMat4("view", View);
+        	Shader->SetUniform("camera", CameraMatrix);
 
 	        // Bind instance texture
 			glActiveTexture(GL_TEXTURE0);
@@ -4530,7 +4557,7 @@ int main(int argc, char** argv)
     return 0;
 }
 
-bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera)
+bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 {
 	static bool FirstMouse = true;
 	bool MouseMovement = false;
@@ -4563,23 +4590,16 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera)
 				break;
 			case SDL_MOUSEMOTION:
 				Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
-				xPos = event.motion.x;
-				yPos = event.motion.y;
-				if (FirstMouse)
-				{
-					FirstMouse = false;
-
-					lastX = event.motion.x;
-					lastY = event.motion.y;
-				}
-				MouseMovement = true;
 				break;
 			default:
 				break;
 		}
     }
 
-    static float speed = 0.001f;
+    static float speed = 8.0f;
+    static float dt = 0.01f;
+
+    EM::Vec3 VelDir(0, 0, 0);
 
 	if (Input->IsKeyPressed(SDLK_ESCAPE))
 	{
@@ -4587,34 +4607,43 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera)
 	}
 	if (Input->IsKeyDown(SDLK_w))
 	{
-		Camera->Position += Camera->Speed * Camera->Front;
+		EM::Vec3 F = Camera->Forward();
+		F.y = 0.0f;
+		F = EM::Vec3::Normalize(F);
+		VelDir += F;
 	}
 	if (Input->IsKeyDown(SDLK_s))
 	{
-		Camera->Position -= Camera->Speed * Camera->Front;
+		EM::Vec3 B = Camera->Backward();
+		B.y = 0.0f;
+		B = EM::Vec3::Normalize(B);
+		VelDir += B;
 	}
 	if (Input->IsKeyDown(SDLK_a))
 	{
-		Camera->Position -= Camera->Right * Camera->Speed;
+		VelDir += Camera->Left();
 	}
 	if (Input->IsKeyDown(SDLK_d))
 	{
-		Camera->Position += Camera->Right * Camera->Speed;
+		VelDir += Camera->Right();
 	}
 
-	if (MouseMovement)
-	{
-		xoffset = xPos - lastX;
-		yoffset = lastY - yPos;
-		lastX = xPos;
-		lastY = yPos;
+	if (VelDir.Length()) VelDir = EM::Vec3::Normalize(VelDir);
 
-		Camera->Yaw += xoffset * Camera->Sensitivity;
-		Camera->Pitch += yoffset * Camera->Sensitivity;
+	Camera->Transform.Position += speed * dt * VelDir;
 
-		if (Camera->Pitch > 89.0f) Camera->Pitch = 89.0f;
-		if (Camera->Pitch < -89.0f) Camera->Pitch = -89.0f;
-	}
+	auto MouseSensitivity = 7.5f;
+
+	// Get mouse input and change orientation of camera
+	auto MouseCoords = Input->GetMouseCoords();
+
+	// Reset the mouse coords after having gotten the mouse coordinates
+	SDL_WarpMouseInWindow(Window.GetWindowContext(), SCREENWIDTH / 2.0f, SCREENHEIGHT / 2.0f);
+
+	Camera->OffsetOrientation(
+								(EM::ToRadians((SCREENWIDTH / 2.0f - MouseCoords.x) * dt) * MouseSensitivity), 
+								(EM::ToRadians((SCREENHEIGHT / 2.0f - MouseCoords.y) * dt) * MouseSensitivity)
+							);
 
 	return true;
 }

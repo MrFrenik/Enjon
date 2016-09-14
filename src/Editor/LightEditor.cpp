@@ -244,9 +244,9 @@ namespace Enjon { namespace LightEditor {
 				DiffuseShader->Use();
 				{
 					// Set up uniforms
-					DiffuseShader->SetUniformMat4("model", Model);
-					DiffuseShader->SetUniformMat4("view", View);
-					DiffuseShader->SetUniformMat4("projection", Projection);
+					DiffuseShader->SetUniform("model", Model);
+					DiffuseShader->SetUniform("view", View);
+					DiffuseShader->SetUniform("projection", Projection);
 
 					// Draw entities		
 					SceneBatch.RenderBatch();
@@ -261,9 +261,9 @@ namespace Enjon { namespace LightEditor {
 				NormalsShader->Use();
 				{
 					// Set up uniforms
-					NormalsShader->SetUniformMat4("model", Model);
-					NormalsShader->SetUniformMat4("view", View);
-					NormalsShader->SetUniformMat4("projection", Projection);
+					NormalsShader->SetUniform("model", Model);
+					NormalsShader->SetUniform("view", View);
+					NormalsShader->SetUniform("projection", Projection);
 
 					NormalsBatch.RenderBatch();
 				}
@@ -277,9 +277,9 @@ namespace Enjon { namespace LightEditor {
 				DepthShader->Use();
 				{
 					// Set up uniforms
-					DepthShader->SetUniformMat4("model", Model);
-					DepthShader->SetUniformMat4("view", View);
-					DepthShader->SetUniformMat4("projection", Projection);
+					DepthShader->SetUniform("model", Model);
+					DepthShader->SetUniform("view", View);
+					DepthShader->SetUniform("projection", Projection);
 
 					DepthBatch.RenderBatch();
 				}

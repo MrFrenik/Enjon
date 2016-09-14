@@ -3,6 +3,7 @@
 
 #include <GLEW/glew.h>
 #include <Math/Maths.h>
+#include <Graphics/Transform.h>
 
 #include <string>
 
@@ -19,18 +20,19 @@ namespace Enjon { namespace Graphics {
 
 		void CreateShader(const char* vertexShaderFilePath, const char* fragmentShaderFilepath); 
 		void AddAttribute(const GLchar* attributeName); 
-		GLint GetUniformLocation(std::string uniformName); 
+		GLint GetUniformLocation(const std::string& uniformName);
 		void Use();
 		void Unuse();
 
-		void SetUniform1i(std::string name, const int& val);
-		void SetUniform1fv(std::string name, float* val, int count);
-		void SetUniform1iv(std::string name, int* val, int count);
-		void SetUniform1f(std::string name, const float& val);
-		void SetUniform2f(std::string name, const Math::Vec2& vector);
-		void SetUniform3f(std::string name, const Math::Vec3& vector);
-		void SetUniform4f(std::string name, const Math::Vec4& vector);
-		void SetUniformMat4(std::string name, const Math::Mat4& matrix); 
+		void SetUniform(const std::string& name, const int& val);
+		void SetUniform(const std::string& name, float* val, int count);
+		void SetUniform(const std::string& name, int* val, int count);
+		void SetUniform(const std::string& name, const float& val);
+		void SetUniform(const std::string& name, const Math::Vec2& vector);
+		void SetUniform(const std::string& name, const Math::Vec3& vector);
+		void SetUniform(const std::string& name, const Math::Vec4& vector);
+		void SetUniform(const std::string& name, const Math::Mat4& matrix); 
+		void SetUniform(const std::string& name, const EG::Transform& T);
 		
 		GLuint inline GetProgramID() const { return m_programID; } 
 	

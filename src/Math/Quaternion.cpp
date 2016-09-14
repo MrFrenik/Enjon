@@ -25,9 +25,10 @@ namespace Enjon { namespace Math {
 		return Q;
 	}
 
-	Quaternion Quaternion::Conjugate()
+	Quaternion Quaternion::Conjugate() const
 	{
 		Quaternion Q = *this;
+		// Quaternion Q;
 		Q.x *= -1;
 		Q.y *= -1;
 		Q.z *= -1;
@@ -127,7 +128,7 @@ namespace Enjon { namespace Math {
 		auto A = EM::Vec3(Q.x, Q.y, Q.z);
 		auto B = EM::Vec3(x, y, z);
 
-		return A.DotProduct(B) + w * Q.w;	
+		return A.Dot(B) + w * Q.w;	
 	}
 
 	// Returns cross product with another quaternion

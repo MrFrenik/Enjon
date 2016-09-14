@@ -556,9 +556,9 @@ namespace Enjon { namespace BehaviorTreeEditor {
 
 		TextShader->Use();
 		{
-			TextShader->SetUniformMat4("model", Model);
-			TextShader->SetUniformMat4("projection", Projection);
-			TextShader->SetUniformMat4("view", View);
+			TextShader->SetUniform("model", Model);
+			TextShader->SetUniform("projection", Projection);
+			TextShader->SetUniform("view", View);
 
     		SceneBatch.Begin(EG::GlyphSortType::FRONT_TO_BACK);
 	    	{
@@ -567,7 +567,7 @@ namespace Enjon { namespace BehaviorTreeEditor {
 	    	SceneBatch.End();
 	    	SceneBatch.RenderBatch();
 
-		    TextShader->SetUniformMat4("view", HUDCamera.GetCameraMatrix());
+		    TextShader->SetUniform("view", HUDCamera.GetCameraMatrix());
 
     		UIBatch.Begin(EG::GlyphSortType::FRONT_TO_BACK);
 	    	{

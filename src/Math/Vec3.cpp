@@ -2,6 +2,11 @@
 
 namespace Enjon { namespace Math { 
 	
+	Vec3 Vec3::operator-()
+	{
+		return *this * -1.0f;
+	}
+
 	std::ostream& operator<<(std::ostream& stream, Vec3& vector)
 	{
 		stream << "Vector3f: (" << vector.x << ", " << vector.y << ", " << vector.z << ")";
@@ -112,12 +117,12 @@ namespace Enjon { namespace Math {
 		return Vec3(left.x / value, left.y / value, left.z / value);
 	}
 
-	float Vec3::DotProduct(const Vec3& other)
+	float Vec3::Dot(const Vec3& other)
 	{
 		return x * other.x + y * other.y + z * other.z;
 	}
 
-	Vec3 Vec3::CrossProduct(const Vec3& other)
+	Vec3 Vec3::Cross(const Vec3& other)
 	{
 		return Vec3(
 					y * other.z - z * other.y, 

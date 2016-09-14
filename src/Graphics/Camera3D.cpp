@@ -24,8 +24,8 @@ namespace Enjon { namespace Graphics {
 		this->Front = EM::Vec3::Normalize(Front);	
 
 		// Calculate right and up
-		this->Right = EM::Vec3::Normalize(this->Front.CrossProduct(this->WorldUp));
-		this->Up  	= EM::Vec3::Normalize(this->Right.CrossProduct(this->Front));
+		this->Right = EM::Vec3::Normalize(this->Front.Cross(this->WorldUp));
+		this->Up  	= EM::Vec3::Normalize(this->Right.Cross(this->Front));
 	}
 
 	// void Camera3D::Update(const EM::Vec2& MouseCoords, const EM::Vec2& ScreenDimensions)
@@ -75,7 +75,7 @@ namespace Enjon { namespace Graphics {
 		// }
 		// else
 		// {
-		// 	EM::Vec3 Axis = (Front - Position).CrossProduct(Up);
+		// 	EM::Vec3 Axis = (Front - Position).Cross(Up);
 		// 	Axis = EM::Vec3::Normalize(Axis);
 
 		// 	RotateCamera(MouseDirection.y, Axis);
