@@ -4315,7 +4315,7 @@ int main(int argc, char** argv)
 
 #if 1
 
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -4341,21 +4341,19 @@ int main(int argc, char** argv)
 #include <Graphics/ModelAsset.h>
 #include <Graphics/Camera.h>
 
-// Window dimensions
-// const GLuint SCREENWIDTH = 1440 , SCREENHEIGHT = 900;
-EM::Vec3 LightPos(1.2f, 1.0f, 2.0f);
-
 EG::ModelAsset GlobalModel;
+EG::ModelAsset Floor;
+EG::ModelAsset Wall;
 std::vector<EG::ModelInstance> Instances;
 
 void LoadSpriteAsset()
 {
-	EG::Vertex Verticies[] = 
+	EG::Vertex3 Verticies[] = 
 	{
-		{{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
-		{{ 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}, 
-		{{ 0.5f,  0.5f}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-		{{-0.5f,  0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}
+		{{-0.5f, -0.5f, 0.0f}, {0x00, 0x00, 0xff, 0xff}, {0.0f, 0.0f}},
+		{{ 0.5f, -0.5f, 0.0f}, {0xff, 0xff, 0xff, 0xff}, {1.0f, 0.0f}}, 
+		{{ 0.5f,  0.5f, 0.0f}, {0xff, 0xff, 0x00, 0xff}, {1.0f, 1.0f}},
+		{{-0.5f,  0.5f, 0.0f}, {0x00, 0xff, 0x00, 0xff}, {0.0f, 1.0f}}
 	};
 
 	glGenBuffers(1, &GlobalModel.VBO);
@@ -4378,13 +4376,13 @@ void LoadSpriteAsset()
 	glEnableVertexAttribArray(2);
 
     // Position
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex), (void*)offsetof(EG::Vertex, position));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex3), (void*)offsetof(EG::Vertex3, position));
     glEnableVertexAttribArray(0);
     // Color
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex), (void*)offsetof(EG::Vertex, color));
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(EG::Vertex3), (void*)offsetof(EG::Vertex3, color));
     glEnableVertexAttribArray(1);
     // UV
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex), (void*)offsetof(EG::Vertex, uv));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex3), (void*)offsetof(EG::Vertex3, uv));
     glEnableVertexAttribArray(2);
 
     // Unbind the VAO
@@ -4400,16 +4398,97 @@ void LoadSpriteAsset()
     // Set shader
     GlobalModel.Shader = Shader;
 	// Set texture
-    GlobalModel.Texture = EI::ResourceManager::GetTexture("../Assets/Textures/container2.png");
+    GlobalModel.Texture = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png");
     // Set draw type
     GlobalModel.DrawType = GL_TRIANGLE_STRIP;
     // Set draw count
     GlobalModel.DrawCount = 6;
 }
 
+void LoadFloorAsset()
+{
+	EG::Vertex3 Verticies[] = 
+	{
+		{{-0.5f, -0.5f, -0.5f}, EG::RGBA8_MidGrey(), {0.0f, 0.0f}},
+		{{ 0.5f, -0.5f, -0.5f}, EG::RGBA8_MidGrey(), {1.0f, 0.0f}}, 
+		{{ 0.5f, -0.5f,  0.5f}, EG::RGBA8_MidGrey(), {1.0f, 1.0f}},
+		{{-0.5f, -0.5f,  0.5f}, EG::RGBA8_MidGrey(), {0.0f, 1.0f}}
+	};
+
+	glGenBuffers(1, &Floor.VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, Floor.VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Verticies), Verticies, GL_STATIC_DRAW);
+
+	Enjon::uint32 Indicies[] = {0, 1, 2, 2, 3, 0};
+
+	glGenBuffers(1, &Floor.IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Floor.IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indicies), Indicies, GL_STATIC_DRAW); 
+
+    // Generate VAO for global model
+    glGenVertexArrays(1, &Floor.VAO);
+    glBindVertexArray(Floor.VAO);
+
+	// Tell opengl what attribute arrays we need 
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+    // Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex3), (void*)offsetof(EG::Vertex3, position));
+    glEnableVertexAttribArray(0);
+    // Color
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(EG::Vertex3), (void*)offsetof(EG::Vertex3, color));
+    glEnableVertexAttribArray(1);
+    // UV
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex3), (void*)offsetof(EG::Vertex3, uv));
+    glEnableVertexAttribArray(2);
+
+    // Unbind the VAO
+    glBindVertexArray(0);
+
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("Default");
+    Shader->Use();
+	    Shader->SetUniform("tex", 0);
+    Shader->Unuse();
+
+    // Set shader
+    Floor.Shader = Shader;
+	// Set texture
+    Floor.Texture = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/cobble_stone.png");
+    // Set draw type
+    Floor.DrawType = GL_TRIANGLE_STRIP;
+    // Set draw count
+    Floor.DrawCount = 6;
+}
+
+
 void LoadInstances()
 {
+	EG::ModelInstance A;
+	A.Asset = &GlobalModel;
+	A.Transform.Position = EM::Vec3(0, 0, 0);
+	Instances.push_back(A);
 
+	EG::ModelInstance B;
+	B.Asset = &GlobalModel;
+	B.Transform.Position = EM::Vec3(5, 0, 5);
+	B.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(45), EM::Vec3(0, 1, 0));
+	Instances.push_back(B);
+
+	auto map_size = 10;
+	for (auto i = 0; i < map_size; i++)
+	{
+		for (auto j = 0; j < map_size; j++)
+		{
+			EG::ModelInstance f;
+			f.Asset = &Floor;
+			f.Transform.Position = EM::Vec3((Enjon::f32)i, 0, (Enjon::f32)j);
+			Instances.push_back(f);
+		}
+	}
 }
 
 void RenderInstance(const EG::ModelInstance& Instance)
@@ -4418,9 +4497,20 @@ void RenderInstance(const EG::ModelInstance& Instance)
 	auto Asset = Instance.Asset;
 	auto& Transform = Instance.Transform;
 
+	static GLint CurrentTextureID = 0;
+
 	glBindVertexArray(Asset->VAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Asset->IBO);
 	{
+		if (CurrentTextureID != Asset->Texture.id)
+		{
+			CurrentTextureID = Asset->Texture.id;
+
+	        // Bind instance texture
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, Asset->Texture.id);
+		}
+
 		Asset->Shader->SetUniform("transform", Transform);
 		glDrawElements(Asset->DrawType, Asset->DrawCount, GL_UNSIGNED_INT, nullptr);
 	}
@@ -4458,34 +4548,20 @@ int main(int argc, char** argv)
 	// Init FontManager
 	EG::FontManager::Init();
 
-	EG::Camera3D Camera(EM::Vec3(0.0f, 0.0f, 3.0f));
+	EG::Camera3D Camera(EM::Vec3(0.0f, 3.0f, 3.0f));
 
 	EG::Camera FPSCamera((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
 
+	EG::SpriteBatch Batch;
+	Batch.Init();
+
 	// Load model data
 	LoadSpriteAsset();
-
-	EG::ModelInstance A;
-	A.Asset = &GlobalModel;
-	A.Transform.Position = EM::Vec3(0, 0, 0);
-	A.Transform.Scale = EM::Vec3(3, 3, 3);
-	A.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(45), EM::Vec3(0, 0, 1));
-	Instances.push_back(A);
-
-	EG::ModelInstance B;
-	B.Asset = &GlobalModel;
-	B.Transform.Position = EM::Vec3(2, 0, 0);
-	Instances.push_back(B);
-
-	EG::ModelInstance C;
-	C.Asset = &GlobalModel;
-	C.Transform.Position = EM::Vec3(0, 0, 1);
-	C.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(45), EM::Vec3(0, 1, 0));
-	Instances.push_back(C);
+	LoadFloorAsset();
+	LoadInstances();
 
 	EU::FPSLimiter Limiter;
 	Limiter.Init(60);
-
 
 	// InputManager
 	EI::InputManager Input;
@@ -4494,11 +4570,12 @@ int main(int argc, char** argv)
     glEnable(GL_DEPTH_TEST);
 
     // Initialize FPSCamera
-	FPSCamera.Transform.Position = EM::Vec3(2, 0, 3);
+	FPSCamera.Transform.Position = EM::Vec3(7, 2, 7);
 	FPSCamera.LookAt(EM::Vec3(0, 0, 0));
 	FPSCamera.ProjType = EG::ProjectionType::Perspective;
 	FPSCamera.FieldOfView = 50.0f;
 	FPSCamera.ViewPortAspectRatio = (Enjon::f32)SCREENWIDTH / (Enjon::f32)SCREENHEIGHT;
+	FPSCamera.OrthographicScale = 4.5f;
 
 
     // Game loop
@@ -4538,10 +4615,6 @@ int main(int argc, char** argv)
         Shader->Use();
         {
         	Shader->SetUniform("camera", CameraMatrix);
-
-	        // Bind instance texture
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, FirstAsset->Texture.id);
 
 	        for (auto& c : Instances)
 	        {
@@ -4599,51 +4672,116 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
     static float speed = 8.0f;
     static float dt = 0.01f;
 
-    EM::Vec3 VelDir(0, 0, 0);
 
 	if (Input->IsKeyPressed(SDLK_ESCAPE))
 	{
 		return false;	
 	}
-	if (Input->IsKeyDown(SDLK_w))
+
+	if (Camera->ProjType == EG::ProjectionType::Perspective)
 	{
-		EM::Vec3 F = Camera->Forward();
-		F.y = 0.0f;
-		F = EM::Vec3::Normalize(F);
-		VelDir += F;
+	    EM::Vec3 VelDir(0, 0, 0);
+	
+		if (Input->IsKeyDown(SDLK_w))
+		{
+			EM::Vec3 F = Camera->Forward();
+			// F.y = 0.0f;
+			// F = EM::Vec3::Normalize(F);
+			VelDir += F;
+		}
+		if (Input->IsKeyDown(SDLK_s))
+		{
+			EM::Vec3 B = Camera->Backward();
+			// B.y = 0.0f;
+			// B = EM::Vec3::Normalize(B);
+			VelDir += B;
+		}
+		if (Input->IsKeyDown(SDLK_a))
+		{
+			VelDir += Camera->Left();
+		}
+		if (Input->IsKeyDown(SDLK_d))
+		{
+			VelDir += Camera->Right();
+		}
+
+		if (VelDir.Length()) VelDir = EM::Vec3::Normalize(VelDir);
+
+		Camera->Transform.Position += speed * dt * VelDir;
+
+		std::cout << Camera->Transform.Orientation << std::endl;;
+
+		auto MouseSensitivity = 7.5f;
+
+		// Get mouse input and change orientation of camera
+		auto MouseCoords = Input->GetMouseCoords();
+
+		// Reset the mouse coords after having gotten the mouse coordinates
+		SDL_WarpMouseInWindow(Window.GetWindowContext(), SCREENWIDTH / 2.0f, SCREENHEIGHT / 2.0f);
+
+		Camera->OffsetOrientation(
+									(EM::ToRadians((SCREENWIDTH / 2.0f - MouseCoords.x) * dt) * MouseSensitivity), 
+									(EM::ToRadians((SCREENHEIGHT / 2.0f - MouseCoords.y) * dt) * MouseSensitivity)
+								);
 	}
-	if (Input->IsKeyDown(SDLK_s))
+	else if (Camera->ProjType == EG::ProjectionType::Orthographic)
 	{
-		EM::Vec3 B = Camera->Backward();
-		B.y = 0.0f;
-		B = EM::Vec3::Normalize(B);
-		VelDir += B;
+		const float PlayerSpeed = 3.0f;
+
+
+		if (Input->IsKeyDown(SDLK_q))
+		{
+			Camera->OrthographicScale += dt * 0.5f;
+			std::cout << Camera->OrthographicScale << std::endl;
+		}	
+		if (Input->IsKeyDown(SDLK_e))
+		{
+			Camera->OrthographicScale -= dt * 0.5f;
+			std::cout << Camera->OrthographicScale << std::endl;
+		}
+
+		// Get player
+		EG::ModelInstance& Player = Instances.at(0);
+
+	    EM::Vec3 VelDir(0, 0, 0);
+	
+		if (Input->IsKeyDown(SDLK_w))
+		{
+			VelDir += EM::Vec3(-1, 0, -1);
+		}
+		if (Input->IsKeyDown(SDLK_s))
+		{
+			VelDir += EM::Vec3(1, 0, 1);
+		}
+		if (Input->IsKeyDown(SDLK_a))
+		{
+			VelDir += EM::Vec3(-1.0f, 0, 1);
+		}
+		if (Input->IsKeyDown(SDLK_d))
+		{
+			VelDir += EM::Vec3(1.0f, 0, -1); 
+		}
+
+		if (VelDir.Length()) VelDir = EM::Vec3::Normalize(VelDir);
+
+		Camera->Transform.Position = Player.Transform.Position + EM::Vec3(2.5, 2, 3);
+		Camera->Transform.Orientation = EM::Quaternion(-0.17f, 0.38f, 0.07f, 0.9f);
+
+		Player.Transform.Position += PlayerSpeed * dt * VelDir;
+		Camera->Transform.Position += PlayerSpeed * dt * VelDir;
 	}
-	if (Input->IsKeyDown(SDLK_a))
+	
+
+	// Switch between perspective and orthographic camera projections
+	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyPressed(SDLK_o))
 	{
-		VelDir += Camera->Left();
+		Camera->ProjType = EG::ProjectionType::Perspective;
 	}
-	if (Input->IsKeyDown(SDLK_d))
+	else if (Input->IsKeyPressed(SDLK_o))
 	{
-		VelDir += Camera->Right();
+		Camera->ProjType = EG::ProjectionType::Orthographic;
 	}
 
-	if (VelDir.Length()) VelDir = EM::Vec3::Normalize(VelDir);
-
-	Camera->Transform.Position += speed * dt * VelDir;
-
-	auto MouseSensitivity = 7.5f;
-
-	// Get mouse input and change orientation of camera
-	auto MouseCoords = Input->GetMouseCoords();
-
-	// Reset the mouse coords after having gotten the mouse coordinates
-	SDL_WarpMouseInWindow(Window.GetWindowContext(), SCREENWIDTH / 2.0f, SCREENHEIGHT / 2.0f);
-
-	Camera->OffsetOrientation(
-								(EM::ToRadians((SCREENWIDTH / 2.0f - MouseCoords.x) * dt) * MouseSensitivity), 
-								(EM::ToRadians((SCREENHEIGHT / 2.0f - MouseCoords.y) * dt) * MouseSensitivity)
-							);
 
 	return true;
 }

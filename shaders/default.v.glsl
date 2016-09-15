@@ -29,6 +29,7 @@ uniform Transform transform;
 
 void main()
 {
+	
 	// Transform vertex position
 	vec3 pos = vertexPosition;
 	pos = transform.scale * pos;

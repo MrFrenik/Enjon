@@ -36,10 +36,10 @@ namespace Enjon { namespace Graphics {
 
 	struct UV
 	{ 
-		//UV() {}
-		//UV(float U, float V)
-		//	: u(U), v(V)
-		//{}
+		UV() {}
+		UV(float U, float V)
+			: u(U), v(V)
+		{}
 
 		float u;
 		float v;
@@ -98,15 +98,7 @@ namespace Enjon { namespace Graphics {
 	}
 	
 	struct Vertex3 
-	{ 
-		Vertex3() {}
-		Vertex3(float x, float y, float z, float u, float v, GLfloat r,  GLfloat g, GLfloat b, GLfloat a)	
-		{
-			SetPosition(x, y, z);
-			SetColor(r, g, b, a);
-			SetUV(u, v);
-		}
-
+	{
 		Position3f position;
 		ColorRGBA8 color;
 		struct UV uv;
@@ -124,14 +116,13 @@ namespace Enjon { namespace Graphics {
 			uv.v = v;
 		}
 
-		void SetColor( GLfloat r, GLfloat g, GLfloat b, GLfloat a )
+		void SetColor(GLubyte r, GLubyte g, GLubyte b, GLubyte a )
 		{
 			color.r = r;
 			color.g = g;
 			color.b = b;
 			color.a = a;
 		}
-
 	}; 
 
 }}
