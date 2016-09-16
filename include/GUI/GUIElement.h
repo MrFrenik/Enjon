@@ -117,7 +117,7 @@ namespace Enjon { namespace GUI {
 
 			// Initialize members
 			Name 			= std::string("GUITextBox");
-			Text 			= std::string("");
+			Text 			= std::string("Input Text");
 			CursorIndex 	= 0;
 			TextColor 		= EG::RGBA16_White();
 			Color 	 		= EG::RGBA16_DarkGrey();
@@ -193,6 +193,19 @@ namespace Enjon { namespace GUI {
 				}
 			});
 
+			// Set up moving cursor input
+			this->move_cursor_index.connect([&](Enjon::i32 val)
+			{
+				if (val < 0)
+				{
+					if (CursorIndex > 0) CursorIndex--;
+				}
+				else
+				{
+					if (CursorIndex < Text.length()) CursorIndex++;
+				}
+			});
+
 			// Set up TextBox's on_backspace signal
 			this->on_backspace.connect([&]()
 			{
@@ -258,6 +271,10 @@ namespace Enjon { namespace GUI {
 
 		void Update()
 		{
+			// Update its AABB
+			this->AABB.Min = this->Position;
+			this->AABB.Max = this->AABB.Min + this->Dimensions;
+
 			caret_count += 0.1f;
 
 			if (KeyboardInFocus)
@@ -283,7 +300,7 @@ namespace Enjon { namespace GUI {
 						EM::Vec4(0, 0, 1, 1),
 						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						Color, 
-						0.0f
+						-1.0f
 						// EG::SpriteBatch::DrawOptions::BORDER, 
 						// BorderColor
 					);
@@ -308,7 +325,7 @@ namespace Enjon { namespace GUI {
 				auto Padding = EM::Vec2(5.0f, 7.0f);
 				auto XAdvance = Position.x + Padding.x;
 				auto ITextHeight = AABB.Max.y - AABB.Min.y; // InputTextHeight
-				auto TextHeight = ITextHeight - 20.0f;
+				auto TextHeight = ITextHeight - 22.0f;
 
 				// Get xadvance of all characters
 				for (auto i = 0; i < CursorIndex; ++i)
@@ -319,7 +336,8 @@ namespace Enjon { namespace GUI {
 								EM::Vec4(XAdvance + 0.2f, Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::RGBA16_LightGrey()
+								EG::RGBA16_LightGrey(),
+								1.0f
 							);
 			}
 
@@ -390,8 +408,134 @@ namespace Enjon { namespace GUI {
 		{}
 
 		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
-		{
+		{ 
+			SDL_Event event;
+		    while (SDL_PollEvent(&event)) 
+		    {
+		        switch (event.type) 
+		        {
+					case SDL_KEYUP:
+						Input->ReleaseKey(event.key.keysym.sym); 
+						break;
+					case SDL_KEYDOWN:
+						Input->PressKey(event.key.keysym.sym);
+						break;
+					case SDL_MOUSEBUTTONDOWN:
+						Input->PressKey(event.button.button);
+						break;
+					case SDL_MOUSEBUTTONUP:
+						Input->ReleaseKey(event.button.button);
+						break;
+					case SDL_MOUSEMOTION:
+						Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+						break;
+					default:
+						break;
+				}
+		    }
+
+		    // Kinda ugly...
+		    if (!Input->IsKeyDown(SDLK_LSHIFT) && !Input->IsKeyDown(SDLK_RSHIFT))
+		    {
+			    if (Input->IsKeyPressed(SDLK_a)) 		on_keyboard.emit("a");
+			    if (Input->IsKeyPressed(SDLK_b)) 		on_keyboard.emit("b");
+			    if (Input->IsKeyPressed(SDLK_c)) 		on_keyboard.emit("c");
+			    if (Input->IsKeyPressed(SDLK_d)) 		on_keyboard.emit("d");
+			    if (Input->IsKeyPressed(SDLK_e)) 		on_keyboard.emit("e");
+			    if (Input->IsKeyPressed(SDLK_f))		on_keyboard.emit("f");
+			    if (Input->IsKeyPressed(SDLK_g))		on_keyboard.emit("g");
+			    if (Input->IsKeyPressed(SDLK_h))		on_keyboard.emit("h");
+			    if (Input->IsKeyPressed(SDLK_i))		on_keyboard.emit("i");
+			    if (Input->IsKeyPressed(SDLK_j))		on_keyboard.emit("j");
+			    if (Input->IsKeyPressed(SDLK_k))		on_keyboard.emit("k");
+			    if (Input->IsKeyPressed(SDLK_l))		on_keyboard.emit("l");
+			    if (Input->IsKeyPressed(SDLK_m))		on_keyboard.emit("m");
+			    if (Input->IsKeyPressed(SDLK_n))		on_keyboard.emit("n");
+			    if (Input->IsKeyPressed(SDLK_o))		on_keyboard.emit("o");
+			    if (Input->IsKeyPressed(SDLK_p))		on_keyboard.emit("p");
+			    if (Input->IsKeyPressed(SDLK_q))		on_keyboard.emit("q");
+			    if (Input->IsKeyPressed(SDLK_r))		on_keyboard.emit("r");
+			    if (Input->IsKeyPressed(SDLK_s))		on_keyboard.emit("s");
+			    if (Input->IsKeyPressed(SDLK_t))		on_keyboard.emit("t");
+			    if (Input->IsKeyPressed(SDLK_u))		on_keyboard.emit("u");
+			    if (Input->IsKeyPressed(SDLK_v))		on_keyboard.emit("v");
+			    if (Input->IsKeyPressed(SDLK_w))		on_keyboard.emit("w");
+			    if (Input->IsKeyPressed(SDLK_x))		on_keyboard.emit("x");
+			    if (Input->IsKeyPressed(SDLK_y))		on_keyboard.emit("y");
+			    if (Input->IsKeyPressed(SDLK_z))		on_keyboard.emit("z");
+
+			    if (Input->IsKeyPressed(SDLK_0))		on_keyboard.emit("0");
+			    if (Input->IsKeyPressed(SDLK_1))		on_keyboard.emit("1");
+			    if (Input->IsKeyPressed(SDLK_2))		on_keyboard.emit("2");
+			    if (Input->IsKeyPressed(SDLK_3))		on_keyboard.emit("3");
+			    if (Input->IsKeyPressed(SDLK_4))		on_keyboard.emit("4");
+			    if (Input->IsKeyPressed(SDLK_5))		on_keyboard.emit("5");
+			    if (Input->IsKeyPressed(SDLK_6))		on_keyboard.emit("6");
+			    if (Input->IsKeyPressed(SDLK_7))		on_keyboard.emit("7");
+			    if (Input->IsKeyPressed(SDLK_8))		on_keyboard.emit("8");
+			    if (Input->IsKeyPressed(SDLK_9))		on_keyboard.emit("9");
+			    if (Input->IsKeyPressed(SDLK_MINUS)) 	on_keyboard.emit("-");
+			    if (Input->IsKeyPressed(SDLK_PLUS)) 	on_keyboard.emit("+");
+		    }
+			// Modifiers
+			else 
+			{
+			    if (Input->IsKeyPressed(SDLK_a)) 		on_keyboard.emit("A");
+			    if (Input->IsKeyPressed(SDLK_b)) 		on_keyboard.emit("B");
+			    if (Input->IsKeyPressed(SDLK_c)) 		on_keyboard.emit("C");
+			    if (Input->IsKeyPressed(SDLK_d)) 		on_keyboard.emit("D");
+			    if (Input->IsKeyPressed(SDLK_e)) 		on_keyboard.emit("E");
+			    if (Input->IsKeyPressed(SDLK_f))		on_keyboard.emit("F");
+			    if (Input->IsKeyPressed(SDLK_g))		on_keyboard.emit("G");
+			    if (Input->IsKeyPressed(SDLK_h))		on_keyboard.emit("H");
+			    if (Input->IsKeyPressed(SDLK_i))		on_keyboard.emit("I");
+			    if (Input->IsKeyPressed(SDLK_j))		on_keyboard.emit("J");
+			    if (Input->IsKeyPressed(SDLK_k))		on_keyboard.emit("K");
+			    if (Input->IsKeyPressed(SDLK_l))		on_keyboard.emit("L");
+			    if (Input->IsKeyPressed(SDLK_m))		on_keyboard.emit("M");
+			    if (Input->IsKeyPressed(SDLK_n))		on_keyboard.emit("N");
+			    if (Input->IsKeyPressed(SDLK_o))		on_keyboard.emit("O");
+			    if (Input->IsKeyPressed(SDLK_p))		on_keyboard.emit("P");
+			    if (Input->IsKeyPressed(SDLK_q))		on_keyboard.emit("Q");
+			    if (Input->IsKeyPressed(SDLK_r))		on_keyboard.emit("R");
+			    if (Input->IsKeyPressed(SDLK_s))		on_keyboard.emit("S");
+			    if (Input->IsKeyPressed(SDLK_t))		on_keyboard.emit("T");
+			    if (Input->IsKeyPressed(SDLK_u))		on_keyboard.emit("U");
+			    if (Input->IsKeyPressed(SDLK_v))		on_keyboard.emit("V");
+			    if (Input->IsKeyPressed(SDLK_w))		on_keyboard.emit("W");
+			    if (Input->IsKeyPressed(SDLK_x))		on_keyboard.emit("X");
+			    if (Input->IsKeyPressed(SDLK_y))		on_keyboard.emit("Y");
+			    if (Input->IsKeyPressed(SDLK_z))		on_keyboard.emit("Z");
+
+			    if (Input->IsKeyPressed(SDLK_1))		on_keyboard.emit("!");
+			    if (Input->IsKeyPressed(SDLK_MINUS)) 	on_keyboard.emit("_");
+			    if (Input->IsKeyPressed(SDLK_PLUS)) 	on_keyboard.emit("=");
+			} 
+
+			if (Input->IsKeyPressed(SDLK_RETURN))		on_enter.emit();
+		    if (Input->IsKeyPressed(SDLK_BACKSPACE)) 	on_backspace.emit();
+		    if (Input->IsKeyPressed(SDLK_RIGHT)) 		move_cursor_index.emit(1);
+		    if (Input->IsKeyPressed(SDLK_LEFT)) 		move_cursor_index.emit(-1);
+
+	    	if (Input->IsKeyPressed(SDLK_SPACE)) 	on_keyboard.emit(" ");
+		    if (Input->IsKeyPressed(SDLK_COMMA)) 	on_keyboard.emit(",");
+		    if (Input->IsKeyPressed(SDLK_PERIOD)) 	on_keyboard.emit(".");
+		    if (Input->IsKeyPressed(SDLK_QUOTE)) 	on_keyboard.emit("'");
+
+			// Exit input box
+			if (Input->IsKeyPressed(SDLK_ESCAPE)) return false;
+
 			return true;
+		}
+
+		// Clears the text and resets the cursor position
+		inline void Clear()
+		{
+			// Reset text
+			this->Text = std::string("");
+
+			// Reset cursor position
+			this->CursorIndex = 0;
 		}
 
 		ButtonState State;
@@ -408,6 +552,7 @@ namespace Enjon { namespace GUI {
 	
 		EGUI::Signal<float> on_click;	
 		EGUI::Signal<std::string> on_keyboard;
+		EGUI::Signal<Enjon::i32> move_cursor_index;
 		EGUI::Signal<> on_backspace;
 		EGUI::Signal<> on_enter;
 	};

@@ -10,10 +10,10 @@ namespace BT
 		public:
 
 			Repeater() {}
-			Repeater(BlackBoard* BB, i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = nullptr; Type = BehaviorNodeType::DECORATOR; }
-			Repeater(BlackBoard* BB, BehaviorNodeBase* B, i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = B; Type = BehaviorNodeType::DECORATOR;}
-			Repeater(BehaviorTree* BT, BehaviorNodeBase* B, i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = B; Type = BehaviorNodeType::DECORATOR;}
-			Repeater(BehaviorTree* BT, i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = nullptr; Type = BehaviorNodeType::DECORATOR; }
+			Repeater(BlackBoard* BB, Enjon::i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = nullptr; Type = BehaviorNodeType::DECORATOR; }
+			Repeater(BlackBoard* BB, BehaviorNodeBase* B, Enjon::i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = B; Type = BehaviorNodeType::DECORATOR;}
+			Repeater(BehaviorTree* BT, BehaviorNodeBase* B, Enjon::i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = B; Type = BehaviorNodeType::DECORATOR;}
+			Repeater(BehaviorTree* BT, Enjon::i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = nullptr; Type = BehaviorNodeType::DECORATOR; }
 			~Repeater() {}
 
 			std::string String()
@@ -81,7 +81,7 @@ namespace BT
 			}
 
 		private:
-			i32 Count;
+			Enjon::i32 Count;
 	};
 
 	class RepeatUntilFail : public Decorator<RepeatUntilFail>
@@ -89,10 +89,10 @@ namespace BT
 		public:
 
 			RepeatUntilFail() {}
-			RepeatUntilFail(BlackBoard* BB, i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = nullptr; }
-			RepeatUntilFail(BlackBoard* BB, BehaviorNodeBase* B, i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = B; }
-			RepeatUntilFail(BehaviorTree* BT, BehaviorNodeBase* B, i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = B; }
-			RepeatUntilFail(BehaviorTree* BT, i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = nullptr; }
+			RepeatUntilFail(BlackBoard* BB, Enjon::i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = nullptr; }
+			RepeatUntilFail(BlackBoard* BB, BehaviorNodeBase* B, Enjon::i32 C = 1) : Count(C) { this->BB = BB; State = BehaviorNodeState::INVALID; Child = B; }
+			RepeatUntilFail(BehaviorTree* BT, BehaviorNodeBase* B, Enjon::i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = B; }
+			RepeatUntilFail(BehaviorTree* BT, Enjon::i32 C = 1) : Count(C) { this->BTree = BT; State = BehaviorNodeState::INVALID; Child = nullptr; }
 			~RepeatUntilFail() {}
 
 			std::string String()
@@ -149,7 +149,7 @@ namespace BT
 			}
 
 		private:
-			i32 Count;
+			Enjon::i32 Count;
 	};
 
 	class RepeatForever : public Decorator<RepeatForever>
@@ -157,7 +157,7 @@ namespace BT
 		public:
 
 			RepeatForever() {}
-			RepeatForever(BehaviorTree* BT, i32 C = 1)
+			RepeatForever(BehaviorTree* BT, Enjon::i32 C = 1)
 			{ 
 				this->BTree = BT; 
 				State = BehaviorNodeState::INVALID; 
@@ -216,7 +216,7 @@ namespace BT
 	{
 		public:
 
-			RepeaterWithBBRead(BehaviorTree* BT, i32 (*A)(BehaviorTree*), BehaviorNodeBase* B = nullptr, i32 C = 1) 
+			RepeaterWithBBRead(BehaviorTree* BT, Enjon::i32 (*A)(BehaviorTree*), BehaviorNodeBase* B = nullptr, Enjon::i32 C = 1) 
 				: Count(C)
 			{
 				this->Child = B;
@@ -295,8 +295,8 @@ namespace BT
 			}
 
 		private:
-			i32 Count;
-			i32 (*Action)(BehaviorTree*);
+			Enjon::i32 Count;
+			Enjon::i32 (*Action)(BehaviorTree*);
 	};
 
 

@@ -46,6 +46,8 @@ namespace Enjon {
 
 	using int32 = signed int;
 	using uint32 = unsigned int;
+	using u32 = uint32;
+	using i32 = int32;
 
 	// Older versions of MSVC do not define long long as 64 bits
 #if defined (_MSC_VER)

@@ -21,7 +21,7 @@
 * MAIN GAME
 */
 
-#if 0
+#if 1
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
@@ -44,9 +44,9 @@
 #include <Enjon.h>
 #include <Editor/AnimationEditor.h>
 #include <Editor/BehaviorTreeEditor.h>
-#include <Editor/LightEditor.h>
 #include <System/Internals.h>
 #include <BehaviorTree/BehaviorTreeManager.h>
+#include <Utils/Functions.h>
 
 /*-- Entity Component System includes --*/
 #include <ECS/ComponentSystems.h>
@@ -105,6 +105,10 @@ typedef struct
 
 std::vector<BeamSegment> BeamSegments;
 
+// Console stuff
+std::vector<std::string> ConsoleOutput;
+EGUI::GUITextBox ConsoleInputTextBox;
+
 char buffer[256];
 char buffer2[256];
 char buffer3[256];
@@ -115,11 +119,12 @@ bool IsDashing 				= false;
 bool DebugInfo 				= false;
 bool DebugEntityInfo 		= false;
 bool AnimationEditorOn 		= false;
-bool BehaviorTreeEditorOn 	= true;
+bool BehaviorTreeEditorOn 	= false;
 bool ParticleEditorOn 		= false;
 bool DeferredRenderingOn 	= true;
 bool AIControllerEnabled 	= false;
 bool DrawSplineOn 			= false;
+bool ShowConsole 			= true;
 
 const int LEVELSIZE = 50;
 
@@ -334,15 +339,6 @@ int main(int argc, char** argv)
 	GroundTileDebugBatch.End();
 	GroundTileBatch.End();
 
-	// GroundTileNormalsBatch.Begin();
-	// GroundTileNormalsBatch.Add(
-	// 	EM::Vec4(-10000, -10000, 10000, 10000), 
-	// 	EM::Vec4(0, 0, 1, 1),
-	// 	EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, 
-	// 	EG::RGBA16(0.0f, 0.0f, 1.0f, 1.0f)
-	// 	);
-	// GroundTileNormalsBatch.End();
-
 	CartesianTileBatch.Begin();
 	level.DrawCartesianLevel(CartesianTileBatch);
 	CartesianTileBatch.End();
@@ -390,10 +386,6 @@ int main(int argc, char** argv)
 	EG::FrameBufferObject* DepthFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
 	EG::FrameBufferObject* DeferredFBO 	= new EG::FrameBufferObject(SCREENWIDTH, SCREENHEIGHT);
 
-	// Init LightEditor
-	Enjon::LightEditor::Init(&Input, &Window, SCREENWIDTH, SCREENHEIGHT, DiffuseFBO, NormalsFBO, DepthFBO, DeferredFBO);
-
-
 	/////////////////
 	// Testing ECS //   
 	/////////////////
@@ -420,30 +412,14 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 10000;
+	static uint32 AmountDrawn = 1;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = -50.0f;
-		// eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
-		// 														enemydims, &EnemySheet, "Enemy", 0.05f); 
 		eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(level.GetWidth(), 0), Random::Roll(level.GetHeight() * 2, 0))), height),
 																enemydims, &EnemySheet, "Enemy", 0.05f); 
 		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
 	}
-
-	// Create random dude to see what he looks like
-	{
-		// float height = 0.0f;
-		// float h = 300.0f;
-		// float w = h * 0.707f;
-		// eid32 ai = Factory::CreateAI(World, Math::Vec3(Math::CartesianToIso(Math::Vec2(Random::Roll(-level.GetWidth(), 0), Random::Roll(-level.GetHeight() * 2, 0))), height),
-		// 														EM::Vec2(w, h), EG::SpriteSheetManager::GetSpriteSheet("Enemy"), "Enemy", 0.05f); 
-		// World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
-	}
-
-	// Create player
-	// eid32 Player = Factory::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(-level.GetWidth()/2, -level.GetHeight()/2)), 0.0f), Math::Vec2(222.0f, 200.0f), &PlayerSheet, 
-	// 	"Player", 0.4f, Math::Vec3(1, 1, 0)); 
 
 	eid32 Player = Factory::CreatePlayer(World, &Input, Math::Vec3(Math::CartesianToIso(Math::Vec2(level.GetWidth()/2, level.GetHeight()/2)), 0.0f), Math::Vec2(222.0f, 200.0f), &PlayerSheet, 
 		"Player", 0.4f, Math::Vec3(1, 1, 0)); 
@@ -588,6 +564,106 @@ int main(int argc, char** argv)
 		}
 	}
 
+	// Console text box initialization
+	ConsoleInputTextBox.Position = EM::Vec2(-SCREENWIDTH * 0.5f + 5.0f, -SCREENHEIGHT * 0.5f + 20.0f);
+	ConsoleInputTextBox.Dimensions = EM::Vec2(SCREENWIDTH - 10.0f, ConsoleInputTextBox.Dimensions.y);
+	ConsoleInputTextBox.MaxStringLength = 100;
+	ConsoleInputTextBox.KeyboardInFocus = true;
+
+	ConsoleInputTextBox.on_enter.connect([&]()
+	{
+		// Parse the string
+		auto& C = ConsoleInputTextBox.Text;
+
+		// Split the string into a vector on spaces
+		std::vector<std::string> Elements = EU::split(C, ' ');
+
+		if (!Elements.size()) return;
+
+		// Check first element for function call (totally a test)
+		if (Elements.at(0).compare("mul") == 0) 
+		{
+			// Error
+			if (Elements.size() < 3) ConsoleOutput.push_back("mul requires 2 arguments");
+
+			// Calculate the result
+			else
+			{
+				if (!EU::is_numeric(Elements.at(1)) || !EU::is_numeric(Elements.at(2))) 
+				{
+					ConsoleOutput.push_back("Cannot multiply non numeric terms: " + Elements.at(1) + ", " + Elements.at(2));
+				}
+
+				// Otherwise, multiply and push back result
+				else
+				{
+					auto Result = std::atof(Elements.at(1).c_str()) * std::atof(Elements.at(2).c_str());
+					ConsoleOutput.push_back(std::to_string(Result));
+				}
+			}
+		}
+		// Clear the elements
+		else if (Elements.at(0).compare("clear") == 0)
+		{
+			ConsoleOutput.clear();
+		}
+		else if (Elements.at(0).compare("spawn") == 0)
+		{
+			if (Elements.size() < 2) ConsoleOutput.push_back("spawn requires argument");
+
+			else
+			{
+				if (Elements.at(1).compare("ai") == 0)
+				{
+					auto CamPos = Camera.GetPosition();
+					auto MouseCoords = Input.GetMouseCoords();	
+					Camera.ConvertScreenToWorld(MouseCoords);
+					float height = 0.0f;
+					Math::Vec2 enemydims(100.0f, 100.0f);
+
+					if (Elements.size() > 2)
+					{
+						if (EU::is_numeric(Elements.at(2)))
+						{
+							auto Amount = std::atoi(Elements.at(2).c_str());
+
+							if (Amount > 100) ConsoleOutput.push_back("spawn: cannot spawn amount: " + Elements.at(2));
+							else
+							{
+								for (auto i = 0; i < Amount; i++)
+								{
+									auto ai = Factory::CreateAI(World, Math::Vec3(MouseCoords.x, MouseCoords.y, height), enemydims, EG::SpriteSheetManager::GetSpriteSheet("Beast"), "Enemy", 0.05f);
+									World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
+								}
+							}
+						}
+						else
+						{
+							auto ai = Factory::CreateAI(World, Math::Vec3(MouseCoords.x, MouseCoords.y, height), enemydims, EG::SpriteSheetManager::GetSpriteSheet("Beast"), "Enemy", 0.05f);
+							World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
+						}
+					}
+					else
+					{
+						auto ai = Factory::CreateAI(World, Math::Vec3(MouseCoords.x, MouseCoords.y, height), enemydims, EG::SpriteSheetManager::GetSpriteSheet("Beast"), "Enemy", 0.05f);
+						World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
+					}
+				}
+				else ConsoleOutput.push_back("spawn: cannot recognize argument: " + Elements.at(1));
+			}
+
+		}
+		else
+		{
+			ConsoleOutput.push_back("Cannot find operation: " + Elements.at(0));
+		}
+		
+		// Clear the console text
+		ConsoleInputTextBox.Clear();	
+
+		// Reset focus
+		ConsoleInputTextBox.KeyboardInFocus = true;
+	});
 	
 	while(isRunning)
 	{ 
@@ -613,11 +689,7 @@ int main(int argc, char** argv)
 			const EM::Vec3* P = &World->TransformSystem->Transforms[Player].Position;
 			EM::Vec2 AddOn = EM::CartesianToIso(EM::Vec2(150 * cos(t), 150 * sin(t)));
 			L->Position = EM::Vec3(P->x + AddOn.x, P->y - P->z + AddOn.y, 0.0f);
-			// L->Color = EG::RGBA16(0.8f, 0.7f, 0.6f, 1.0f);
 			L->Color = EG::RGBA16(0.3f, 0.2f, 1.0f, 1.0f);
-			// auto MP = Input.GetMouseCoords();
-			// Camera.ConvertScreenToWorld(MP);
-			// L->Position = EM::Vec3(MP, 0.0f);
 		}
 
 		// Clear lights
@@ -653,6 +725,11 @@ int main(int argc, char** argv)
 		{
 			// Update Input Manager
 			Input.Update();	
+
+			if (ShowConsole)
+			{
+				ConsoleInputTextBox.Update();
+			}
 
 			if (!Paused)
 			{
@@ -721,10 +798,12 @@ int main(int argc, char** argv)
 				// Updates the world's particle engine
 				World->ParticleEngine->Update();
 
-			
-				StartTicks = SDL_GetTicks();	
-				PlayerController::Update(World->PlayerControllerSystem);
-				PlayerControllerTime = (SDL_GetTicks() - StartTicks);
+				if (!ShowConsole) 
+				{
+					StartTicks = SDL_GetTicks();	
+					PlayerController::Update(World->PlayerControllerSystem);
+					PlayerControllerTime = (SDL_GetTicks() - StartTicks);
+				}
 			}
 
 			// Check for input
@@ -756,7 +835,7 @@ int main(int argc, char** argv)
 
 		if (AnimationEditorOn)
 		{
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.06, 0.06, 0.06, 1.0));
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.16f, 0.16f, 0.16f, 1.0));
 	
 			// Show mouse
 			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
@@ -767,7 +846,7 @@ int main(int argc, char** argv)
 
 		else if (BehaviorTreeEditorOn)
 		{
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.06, 0.06, 0.06, 1.0));
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.16f, 0.16f, 0.16f, 1.0));
 	
 			// Show mouse
 			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
@@ -1685,9 +1764,9 @@ int main(int argc, char** argv)
 					DiffuseShader->Use();
 					{
 						// Set up uniforms
-						DiffuseShader->SetUniformMat4("model", model);
-						DiffuseShader->SetUniformMat4("view", view);
-						DiffuseShader->SetUniformMat4("projection", projection);
+						DiffuseShader->SetUniform("model", model);
+						DiffuseShader->SetUniform("view", view);
+						DiffuseShader->SetUniform("projection", projection);
 
 						GroundTileBatch.RenderBatch();
 
@@ -1715,9 +1794,9 @@ int main(int argc, char** argv)
 				// 	NormalsShader->Use();
 				// 	{
 				// 		// Set up uniforms
-				// 		NormalsShader->SetUniformMat4("model", model);
-				// 		NormalsShader->SetUniformMat4("view", view);
-				// 		NormalsShader->SetUniformMat4("projection", projection);
+				// 		NormalsShader->SetUniform("model", model);
+				// 		NormalsShader->SetUniform("view", view);
+				// 		NormalsShader->SetUniform("projection", projection);
 
 				// 		GroundTileNormalsBatch.RenderBatch();
 				// 		NormalsBatch.RenderBatch();
@@ -1839,9 +1918,9 @@ int main(int argc, char** argv)
 				BasicShader->Use();
 				{
 					// Set up uniforms
-					BasicShader->SetUniformMat4("model", model);
-					BasicShader->SetUniformMat4("view", view);
-					BasicShader->SetUniformMat4("projection", projection);
+					BasicShader->SetUniform("model", model);
+					BasicShader->SetUniform("view", view);
+					BasicShader->SetUniform("projection", projection);
 
 					// Draw ground tiles
 					GroundTileBatch.RenderBatch();
@@ -1907,6 +1986,55 @@ int main(int argc, char** argv)
 			DrawCursor(&HUDBatch, &Input);
 		}
 
+		//////////////////////////////////////////////////////////////////////////////////
+		// RENDERING CONSOLE /////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////
+
+		// Draw console if on
+		if (ShowConsole)
+		{
+			auto Shader = EG::ShaderManager::GetShader("Text");
+			Shader->Use();
+			{
+				Shader->SetUniform("view", HUDCamera.GetCameraMatrix());
+
+				HUDBatch.Begin();
+				{
+					HUDBatch.Add(
+									EM::Vec4(-SCREENWIDTH * 0.5f, -SCREENHEIGHT * 0.5f, SCREENWIDTH, SCREENHEIGHT),
+									EM::Vec4(0, 0, 1, 1),
+									EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
+									EG::SetOpacity(EG::RGBA16_LightPurple(), 0.4f)
+								);
+				}
+				HUDBatch.End();
+				HUDBatch.RenderBatch();
+
+				TextBatch.Begin(EG::GlyphSortType::FRONT_TO_BACK);
+				{
+					// Render the console input text box
+					ConsoleInputTextBox.Draw(&TextBatch);
+
+					// Render the text in the console output
+					auto StartPosition = EM::Vec2(-SCREENWIDTH * 0.5f + 9.0f, -SCREENHEIGHT * 0.5f + ConsoleInputTextBox.Dimensions.y);
+					auto YOffset = 30.0f;
+					for (auto C = ConsoleOutput.rbegin(); C != ConsoleOutput.rend(); C++)
+					{
+						 EG::Fonts::PrintText(StartPosition.x, StartPosition.y + YOffset, 1.0f, *C, ConsoleInputTextBox.TextFont, TextBatch, EG::RGBA16_LightGrey());
+						 YOffset += 20.0f;
+					}
+
+				}
+				TextBatch.End();
+				TextBatch.RenderBatch();
+			}
+			Shader->Unuse();
+		}
+
+
+		///////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////
+
 		Window.SwapBuffer();
 
 		RenderTime = SDL_GetTicks() - StartTicks;
@@ -1968,404 +2096,409 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 		}
     }
 
-	if (Input->IsKeyPressed(SDLK_ESCAPE))
-	{
-		isRunning = false;	
-	}
-	if (Input->IsKeyDown(SDLK_q)){
-		if (Camera->GetScale() > 0.1f) Camera->SetScale(Camera->GetScale() - 0.01f);	
-	}
-	if (Input->IsKeyDown(SDLK_e)){
-		Camera->SetScale(Camera->GetScale() + 0.01f);
-	}
-	if (Input->IsKeyDown(SDLK_UP)){
-		LightZ += 0.01f;
-	}
-	if (Input->IsKeyDown(SDLK_DOWN)){
-		LightZ -= 0.01f;
-	}
-	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyDown(SDLK_LEFT))
-	{
-		Lights.at(0).Falloff.z -= 0.1f;
-	}
-	else if (Input->IsKeyDown(SDLK_LEFT))
-	{
-		LightIntensity -= 0.1f;	
-	}
-	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyDown(SDLK_RIGHT))
-	{
-		Lights.at(0).Falloff.z += 0.1f;
-	}
-	else if (Input->IsKeyDown(SDLK_RIGHT))
-	{
-		LightIntensity += 0.1f;	
-	}
-
-	if (Input->IsKeyPressed(SDLK_c)) {
-		printf("Dashing\n");
-		IsDashing = true;
-	}
-
-	// Stupid, but use it for now...
-	if (Input->IsKeyPressed(SDLK_m)) {
-		ShowMap = !ShowMap;
-	}
-
-	if (Input->IsKeyPressed(SDLK_0))
-	{
-		BehaviorTreeEditorOn = !BehaviorTreeEditorOn;
-	}
-
-	if (Input->IsKeyPressed(SDLK_p)) {
-
-		AnimationEditorOn = !AnimationEditorOn;
-	}
-
-	if (Input->IsKeyPressed(SDLK_i)) 
-	{
-		// Get camera position
-		auto CamPos = Camera->GetPosition();
-		auto MouseCoords = Input->GetMouseCoords();	
-		Camera->ConvertScreenToWorld(MouseCoords);
-		
-		// HERE AND QUEER!	
-		float height = 0.0f;
-		static Math::Vec2 enemydims(100.0f, 100.0f);
-		eid32 ai = Factory::CreateAI(World, Math::Vec3(MouseCoords.x, MouseCoords.y, height),
-																enemydims, EG::SpriteSheetManager::GetSpriteSheet("Beast"), "Enemy", 0.05f); 
-		World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
-	}
-	if (Input->IsKeyPressed(SDLK_h))
-	{
-		// Switch debug info
-		DebugInfo = !DebugInfo;
-	}
-	if (Input->IsKeyPressed(SDLK_o))
-	{
-		DeferredRenderingOn = !DeferredRenderingOn;
-	}
-
-	if (Input->IsKeyPressed(SDLK_u))
-	{
-		World->Lvl->DrawDebugEnabled();
-	}
-
-	if (Input->IsKeyPressed(SDLK_g))
-	{
-		DebugEntityInfo = !DebugEntityInfo;
-	}
-
-	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyDown(SDLK_b))
-	{
-		// Get camera position
-		auto CamPos = Camera->GetPosition();
-		auto MouseCoords = Input->GetMouseCoords();	
-		Camera->ConvertScreenToWorld(MouseCoords);
-		MouseCoords = EM::IsoToCartesian(MouseCoords + EM::Vec2(0.0f, 10.0f));
-
-		// Get grid coordinate
-		// Snap to grid
-		auto GridCoord = SpatialHash::FindGridCoordinates(World->Grid, MouseCoords);
-
-		// Find Isometric coordinates of GridCoords
-		auto CellDimensions = SpatialHash::GetCellDimensions(World->Grid, GridCoord);
-
-		// eid32 id = Factory::CreateItem(
-		// 								World, 
-		// 								Math::Vec3(CellDimensions.x, CellDimensions.y, 0.0f), 
-		// 								Enjon::Math::Vec2(CellDimensions.z - 5.0f, CellDimensions.w - 5.0f), 
-		// 								EG::SpriteSheetManager::GetSpriteSheet("DiagonalTile"), 
-		// 								Masks::Type::ITEM, 
-		// 								Component::EntityType::ITEM
-		// 							  );
-
-		eid32 id = Factory::CreateItem(
-										World, 
-										Math::Vec3(CellDimensions.x, CellDimensions.y, 0.0f), 
-										Enjon::Math::Vec2(700.0f, 700.0f), 
-										EG::SpriteSheetManager::GetSpriteSheet("Box"), 
-										Masks::Type::ITEM, 
-										Component::EntityType::ITEM
-									  );
-
-		// World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
-		World->CollisionSystem->CollisionComponents[id].ObstructionValue = 1.0f;
-		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
-		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
-		World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(0, 0);
-		World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-5.0f, -5.0f);
-		World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA16_White(), 0.3f);
-
-	}
-
-	else if (Input->IsKeyDown(SDLK_LCTRL) && Input->IsKeyDown(SDLK_b))
-	{
-		// Get camera position
-		auto CamPos = Camera->GetPosition();
-		auto MouseCoords = Input->GetMouseCoords();	
-		Camera->ConvertScreenToWorld(MouseCoords);
-		MouseCoords = EM::IsoToCartesian(MouseCoords + EM::Vec2(0.0f, 10.0f));
-
-		// Get grid coordinate
-		// Snap to grid
-		auto GridCoord = SpatialHash::FindGridCoordinates(World->Grid, MouseCoords);
-
-		// Find Isometric coordinates of GridCoords
-		auto CellDimensions = SpatialHash::GetCellDimensions(World->Grid, GridCoord);
-
-
-		eid32 id = Factory::CreateItem(
-										World, 
-										Math::Vec3(CellDimensions.x, CellDimensions.y, 0.0f), 
-										Enjon::Math::Vec2(CellDimensions.z - 5.0f, CellDimensions.w - 5.0f), 
-										EG::SpriteSheetManager::GetSpriteSheet("DiagonalTileDown"), 
-										Masks::Type::ITEM, 
-										Component::EntityType::ITEM
-									  );
-
-		// World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
-		World->CollisionSystem->CollisionComponents[id].ObstructionValue = 1.0f;
-		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
-		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
-		World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(0, 0);
-		World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-5.0f, -5.0f);
-		World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA16_White(), 0.3f);
-	}
-
-	else if (Input->IsKeyDown(SDLK_b))
-	{
-		// Get camera position
-		auto CamPos = Camera->GetPosition();
-		auto MouseCoords = Input->GetMouseCoords();	
-		Camera->ConvertScreenToWorld(MouseCoords);
-		MouseCoords = EM::IsoToCartesian(MouseCoords + EM::Vec2(0.0f, 10.0f));
-
-		// Get grid coordinate
-		// Snap to grid
-		auto GridCoord = SpatialHash::FindGridCoordinates(World->Grid, MouseCoords);
-
-		// Find Isometric coordinates of GridCoords
-		auto CellDimensions = SpatialHash::GetCellDimensions(World->Grid, GridCoord);
-
-
-		eid32 id = Factory::CreateItem(
-										World, 
-										Math::Vec3(CellDimensions.x, CellDimensions.y, 0.0f), 
-										Enjon::Math::Vec2(CellDimensions.z - 5.0f, CellDimensions.w - 5.0f), 
-										EG::SpriteSheetManager::GetSpriteSheet("Tile"), 
-										Masks::Type::ITEM, 
-										Component::EntityType::ITEM
-									  );
-
-		// World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
-		World->CollisionSystem->CollisionComponents[id].ObstructionValue = 1.0f;
-		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
-		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
-		World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(0, 0);
-		World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-5.0f, -5.0f);
-		World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA16_White(), 0.3f);
-	}
-
-	if (Input->IsKeyPressed(SDLK_x))
-	{
-		// Get camera position
-		auto CamPos = Camera->GetPosition();
-		auto MouseCoords = Input->GetMouseCoords();	
-		Camera->ConvertScreenToWorld(MouseCoords);
-		MouseCoords = EM::IsoToCartesian(MouseCoords + EM::Vec2(0.0f, 10.0f));
-
-		// Get grid coordinate
-		// Snap to grid
-		auto GridCoord = SpatialHash::FindGridCoordinates(World->Grid, MouseCoords);
-
-		auto Index = GridCoord.y * World->Grid->cols + GridCoord.x;
-
-		for (auto& e : World->Grid->cells.at(Index).entities)
+    if (!ShowConsole)
+    {
+		if (Input->IsKeyPressed(SDLK_ESCAPE))
 		{
-			if (World->Types[e] != Component::EntityType::ENEMY && World->Types[e] != Component::EntityType::PLAYER)
-			{
-				EntitySystem::RemoveEntity(World, e);
-			}
+			isRunning = false;	
 		}
-	}
-
-
-	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyPressed(SDLK_n))
-	{
-		auto PlayerPosition = &World->TransformSystem->Transforms[World->Player].Position;
-		auto Position = EM::Vec2(PlayerPosition->x, PlayerPosition->y + 200.0f);
-		
-		// auto x_advance = 0.0f;
-		// auto F = EG::FontManager::GetFont("8Bit_32");
-		// auto c = 'H';
-		// auto CS = EG::Fonts::GetCharacterAttributes(EM::Vec2(PlayerPosition->x, PlayerPosition->y + 50.0f), 1.0f, F, c, &x_advance);
-		// auto TextureID = CS.TextureID;
-		// auto Width = EG::Fonts::GetAdvance(c, F);
-		// auto Height = EG::Fonts::GetHeight(c, F);
-
-		auto TextureID = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png").id;
-		auto Width = 200.0f;
-		auto Height = 200.0f;
-		auto Center = EM::Vec2(Position.x + Width / 2.0f, Position.y + Height / 2.0f);
-		auto Row = 10;
-		auto Col = Row;
-		auto CurrentUAdvance = 0.0f;
-		auto CurrentVAdvance = 0.0f;
-		auto UAdvance = (1.0f / static_cast<float>(Col));
-		auto VAdvance = (1.0f / static_cast<float>(Row));
-
-		for (auto r = 0; r < Row; r++)
+		if (Input->IsKeyDown(SDLK_q)){
+			if (Camera->GetScale() > 0.1f) Camera->SetScale(Camera->GetScale() - 0.01f);	
+		}
+		if (Input->IsKeyDown(SDLK_e)){
+			Camera->SetScale(Camera->GetScale() + 0.01f);
+		}
+		if (Input->IsKeyDown(SDLK_UP)){
+			LightZ += 0.01f;
+		}
+		if (Input->IsKeyDown(SDLK_DOWN)){
+			LightZ -= 0.01f;
+		}
+		if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyDown(SDLK_LEFT))
 		{
-			for (auto c = 0; c < Col; c++)
-			{
-				// Calculate velocity based off of center
-
-				auto Velocity = EM::Vec3(EM::CartesianToIso(EM::Vec2(ER::Roll(-3, 3), ER::Roll(-3, 3))), -1.0f);
-				EG::Particle2D::AddParticle(
-												EM::Vec3(Position, 0.0f), 
-												Velocity, 
-												EM::Vec2(
-															Width / Col,
-															Height / Row
-														), 
-												EG::RGBA16_White(),
-												TextureID, 
-												0.0005f, 
-												World->ParticleEngine->ParticleBatches.at(0),
-												EM::Vec4(CurrentUAdvance, CurrentVAdvance, CurrentUAdvance + UAdvance, CurrentVAdvance + VAdvance)
-											);
-
-				CurrentUAdvance += UAdvance;
-
-			}
-
-			CurrentVAdvance += VAdvance;
-			CurrentUAdvance = 0.0f;
+			Lights.at(0).Falloff.z -= 0.1f;
+		}
+		else if (Input->IsKeyDown(SDLK_LEFT))
+		{
+			LightIntensity -= 0.1f;	
+		}
+		if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyDown(SDLK_RIGHT))
+		{
+			Lights.at(0).Falloff.z += 0.1f;
+		}
+		else if (Input->IsKeyDown(SDLK_RIGHT))
+		{
+			LightIntensity += 0.1f;	
 		}
 
-		// EG::Particle2D::AddParticle(
-		// 								EM::Vec3(Position, 0.0f), 
-		// 								EM::Vec3(-1.0f, 0.0f, 0.0f), 
-		// 								EM::Vec2(
-		// 											Width / 2.0f,
-		// 											Height
-		// 										), 
-		// 								EG::RGBA16_Red(),
-		// 								CS.TextureID, 
-		// 								0.0005f, 
-		// 								World->ParticleEngine->ParticleBatches.at(2),
-		// 								EM::Vec4(0.0f, 0.0f, 0.5f, 1.0f)
-		// 							);
+		if (Input->IsKeyPressed(SDLK_c)) {
+			printf("Dashing\n");
+			IsDashing = true;
+		}
 
-		// EG::Particle2D::AddParticle(
-		// 								EM::Vec3(Position, 0.0f), 
-		// 								EM::Vec3(1.0f, 0.0f, 0.0f), 
-		// 								EM::Vec2(
-		// 											Width / 2.0f,
-		// 											Height
-		// 										), 
-		// 								EG::RGBA16_Red(),
-		// 								CS.TextureID, 
-		// 								0.0005f, 
-		// 								World->ParticleEngine->ParticleBatches.at(2),
-		// 								EM::Vec4(0.5f, 0.0f, 1.0f, 1.0f)
-		// 							);
+		// Stupid, but use it for now...
+		if (Input->IsKeyPressed(SDLK_m)) {
+			ShowMap = !ShowMap;
+		}
 
-	}
+		if (Input->IsKeyPressed(SDLK_0))
+		{
+			BehaviorTreeEditorOn = !BehaviorTreeEditorOn;
+		}
 
-	else if (Input->IsKeyPressed(SDLK_n))
+		if (Input->IsKeyPressed(SDLK_p)) {
+
+			AnimationEditorOn = !AnimationEditorOn;
+		}
+
+		if (Input->IsKeyPressed(SDLK_i)) 
+		{
+			// Get camera position
+			auto CamPos = Camera->GetPosition();
+			auto MouseCoords = Input->GetMouseCoords();	
+			Camera->ConvertScreenToWorld(MouseCoords);
+			
+			// HERE AND QUEER!	
+			float height = 0.0f;
+			static Math::Vec2 enemydims(100.0f, 100.0f);
+			eid32 ai = Factory::CreateAI(World, Math::Vec3(MouseCoords.x, MouseCoords.y, height),
+																	enemydims, EG::SpriteSheetManager::GetSpriteSheet("Beast"), "Enemy", 0.05f); 
+			World->TransformSystem->Transforms[ai].AABBPadding = EM::Vec2(15);
+		}
+		if (Input->IsKeyPressed(SDLK_h))
+		{
+			// Switch debug info
+			DebugInfo = !DebugInfo;
+		}
+		if (Input->IsKeyPressed(SDLK_o))
+		{
+			DeferredRenderingOn = !DeferredRenderingOn;
+		}
+
+		if (Input->IsKeyPressed(SDLK_u))
+		{
+			World->Lvl->DrawDebugEnabled();
+		}
+
+		if (Input->IsKeyPressed(SDLK_g))
+		{
+			DebugEntityInfo = !DebugEntityInfo;
+		}
+
+		if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyDown(SDLK_b))
+		{
+			// Get camera position
+			auto CamPos = Camera->GetPosition();
+			auto MouseCoords = Input->GetMouseCoords();	
+			Camera->ConvertScreenToWorld(MouseCoords);
+			MouseCoords = EM::IsoToCartesian(MouseCoords + EM::Vec2(0.0f, 10.0f));
+
+			// Get grid coordinate
+			// Snap to grid
+			auto GridCoord = SpatialHash::FindGridCoordinates(World->Grid, MouseCoords);
+
+			// Find Isometric coordinates of GridCoords
+			auto CellDimensions = SpatialHash::GetCellDimensions(World->Grid, GridCoord);
+
+			eid32 id = Factory::CreateItem(
+											World, 
+											Math::Vec3(CellDimensions.x, CellDimensions.y, 0.0f), 
+											Enjon::Math::Vec2(700.0f, 700.0f), 
+											EG::SpriteSheetManager::GetSpriteSheet("Box"), 
+											Masks::Type::ITEM, 
+											Component::EntityType::ITEM
+										  );
+
+			// World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
+			World->CollisionSystem->CollisionComponents[id].ObstructionValue = 1.0f;
+			World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+			World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
+			World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(0, 0);
+			World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-5.0f, -5.0f);
+			World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA16_White(), 0.3f);
+
+		}
+
+		else if (Input->IsKeyDown(SDLK_LCTRL) && Input->IsKeyDown(SDLK_b))
+		{
+			// Get camera position
+			auto CamPos = Camera->GetPosition();
+			auto MouseCoords = Input->GetMouseCoords();	
+			Camera->ConvertScreenToWorld(MouseCoords);
+			MouseCoords = EM::IsoToCartesian(MouseCoords + EM::Vec2(0.0f, 10.0f));
+
+			// Get grid coordinate
+			// Snap to grid
+			auto GridCoord = SpatialHash::FindGridCoordinates(World->Grid, MouseCoords);
+
+			// Find Isometric coordinates of GridCoords
+			auto CellDimensions = SpatialHash::GetCellDimensions(World->Grid, GridCoord);
+
+
+			eid32 id = Factory::CreateItem(
+											World, 
+											Math::Vec3(CellDimensions.x, CellDimensions.y, 0.0f), 
+											Enjon::Math::Vec2(CellDimensions.z - 5.0f, CellDimensions.w - 5.0f), 
+											EG::SpriteSheetManager::GetSpriteSheet("DiagonalTileDown"), 
+											Masks::Type::ITEM, 
+											Component::EntityType::ITEM
+										  );
+
+			// World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
+			World->CollisionSystem->CollisionComponents[id].ObstructionValue = 1.0f;
+			World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+			World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
+			World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(0, 0);
+			World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-5.0f, -5.0f);
+			World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA16_White(), 0.3f);
+		}
+
+		else if (Input->IsKeyDown(SDLK_b))
+		{
+			// Get camera position
+			auto CamPos = Camera->GetPosition();
+			auto MouseCoords = Input->GetMouseCoords();	
+			Camera->ConvertScreenToWorld(MouseCoords);
+			MouseCoords = EM::IsoToCartesian(MouseCoords + EM::Vec2(0.0f, 10.0f));
+
+			// Get grid coordinate
+			// Snap to grid
+			auto GridCoord = SpatialHash::FindGridCoordinates(World->Grid, MouseCoords);
+
+			// Find Isometric coordinates of GridCoords
+			auto CellDimensions = SpatialHash::GetCellDimensions(World->Grid, GridCoord);
+
+
+			eid32 id = Factory::CreateItem(
+											World, 
+											Math::Vec3(CellDimensions.x, CellDimensions.y, 0.0f), 
+											Enjon::Math::Vec2(CellDimensions.z - 5.0f, CellDimensions.w - 5.0f), 
+											EG::SpriteSheetManager::GetSpriteSheet("Tile"), 
+											Masks::Type::ITEM, 
+											Component::EntityType::ITEM
+										  );
+
+			// World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
+			World->CollisionSystem->CollisionComponents[id].ObstructionValue = 1.0f;
+			World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+			World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
+			World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(0, 0);
+			World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-5.0f, -5.0f);
+			World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA16_White(), 0.3f);
+		}
+
+		if (Input->IsKeyPressed(SDLK_x))
+		{
+			// Get camera position
+			auto CamPos = Camera->GetPosition();
+			auto MouseCoords = Input->GetMouseCoords();	
+			Camera->ConvertScreenToWorld(MouseCoords);
+			MouseCoords = EM::IsoToCartesian(MouseCoords + EM::Vec2(0.0f, 10.0f));
+
+			// Get grid coordinate
+			// Snap to grid
+			auto GridCoord = SpatialHash::FindGridCoordinates(World->Grid, MouseCoords);
+
+			auto Index = GridCoord.y * World->Grid->cols + GridCoord.x;
+
+			for (auto& e : World->Grid->cells.at(Index).entities)
+			{
+				if (World->Types[e] != Component::EntityType::ENEMY && World->Types[e] != Component::EntityType::PLAYER)
+				{
+					EntitySystem::RemoveEntity(World, e);
+				}
+			}
+		}
+
+
+		if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyPressed(SDLK_n))
+		{
+			auto PlayerPosition = &World->TransformSystem->Transforms[World->Player].Position;
+			auto Position = EM::Vec2(PlayerPosition->x, PlayerPosition->y + 200.0f);
+			
+			// auto x_advance = 0.0f;
+			// auto F = EG::FontManager::GetFont("8Bit_32");
+			// auto c = 'H';
+			// auto CS = EG::Fonts::GetCharacterAttributes(EM::Vec2(PlayerPosition->x, PlayerPosition->y + 50.0f), 1.0f, F, c, &x_advance);
+			// auto TextureID = CS.TextureID;
+			// auto Width = EG::Fonts::GetAdvance(c, F);
+			// auto Height = EG::Fonts::GetHeight(c, F);
+
+			auto TextureID = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/beast.png").id;
+			auto Width = 200.0f;
+			auto Height = 200.0f;
+			auto Center = EM::Vec2(Position.x + Width / 2.0f, Position.y + Height / 2.0f);
+			auto Row = 10;
+			auto Col = Row;
+			auto CurrentUAdvance = 0.0f;
+			auto CurrentVAdvance = 0.0f;
+			auto UAdvance = (1.0f / static_cast<float>(Col));
+			auto VAdvance = (1.0f / static_cast<float>(Row));
+
+			for (auto r = 0; r < Row; r++)
+			{
+				for (auto c = 0; c < Col; c++)
+				{
+					// Calculate velocity based off of center
+
+					auto Velocity = EM::Vec3(EM::CartesianToIso(EM::Vec2(ER::Roll(-3, 3), ER::Roll(-3, 3))), -1.0f);
+					EG::Particle2D::AddParticle(
+													EM::Vec3(Position, 0.0f), 
+													Velocity, 
+													EM::Vec2(
+																Width / Col,
+																Height / Row
+															), 
+													EG::RGBA16_White(),
+													TextureID, 
+													0.0005f, 
+													World->ParticleEngine->ParticleBatches.at(0),
+													EM::Vec4(CurrentUAdvance, CurrentVAdvance, CurrentUAdvance + UAdvance, CurrentVAdvance + VAdvance)
+												);
+
+					CurrentUAdvance += UAdvance;
+
+				}
+
+				CurrentVAdvance += VAdvance;
+				CurrentUAdvance = 0.0f;
+			}
+
+			// EG::Particle2D::AddParticle(
+			// 								EM::Vec3(Position, 0.0f), 
+			// 								EM::Vec3(-1.0f, 0.0f, 0.0f), 
+			// 								EM::Vec2(
+			// 											Width / 2.0f,
+			// 											Height
+			// 										), 
+			// 								EG::RGBA16_Red(),
+			// 								CS.TextureID, 
+			// 								0.0005f, 
+			// 								World->ParticleEngine->ParticleBatches.at(2),
+			// 								EM::Vec4(0.0f, 0.0f, 0.5f, 1.0f)
+			// 							);
+
+			// EG::Particle2D::AddParticle(
+			// 								EM::Vec3(Position, 0.0f), 
+			// 								EM::Vec3(1.0f, 0.0f, 0.0f), 
+			// 								EM::Vec2(
+			// 											Width / 2.0f,
+			// 											Height
+			// 										), 
+			// 								EG::RGBA16_Red(),
+			// 								CS.TextureID, 
+			// 								0.0005f, 
+			// 								World->ParticleEngine->ParticleBatches.at(2),
+			// 								EM::Vec4(0.5f, 0.0f, 1.0f, 1.0f)
+			// 							);
+
+		}
+
+		else if (Input->IsKeyPressed(SDLK_n))
+		{
+			// Get camera position
+			auto CamPos = Camera->GetPosition();
+			auto MouseCoords = Input->GetMouseCoords();	
+			Camera->ConvertScreenToWorld(MouseCoords);
+
+			eid32 id = Factory::CreateItem(
+											World, 
+											Math::Vec3(MouseCoords.x, MouseCoords.y, 0.0f), 
+											Enjon::Math::Vec2(ER::Roll(30, 45), ER::Roll(30, 45)), 
+											EG::SpriteSheetManager::GetSpriteSheet("BoxDebris"), 
+											Masks::Type::ITEM, 
+											Component::EntityType::ITEM
+										  );
+
+			World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
+			World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
+			World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(50, 100) / 50.0f;
+			World->CollisionSystem->CollisionComponents[id].ObstructionValue = 0.1f;
+			World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(-10, -10);
+		}
+
+		if (Input->IsKeyPressed(SDLK_j))
+		{
+			AIControllerEnabled = !AIControllerEnabled;
+		}
+
+		if (Input->IsKeyDown(SDLK_l))
+		{
+			// Paint tile as obstructed
+			auto MP = Input->GetMouseCoords();
+			Camera->ConvertScreenToWorld(MP);
+			MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
+
+			auto GridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
+
+			auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
+
+			// Turn tile obstructed
+			World->Grid->cells.at(Index).ObstructionValue = 1.0f;
+		}
+
+		if (Input->IsKeyDown(SDLK_SEMICOLON))
+		{
+			// Paint tile as obstructed
+			auto MP = Input->GetMouseCoords();
+			Camera->ConvertScreenToWorld(MP);
+			MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
+
+			auto GridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
+
+			auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
+
+			// Turn tile obstructed
+			// World->Grid->cells.at(Index).ObstructionValue += 0.1f;
+			World->Grid->cells.at(Index).ObstructionValue = 0.5f;
+		}
+
+		if (Input->IsKeyPressed(SDLK_QUOTE))
+		{
+			// Paint tile as obstructed
+			auto MP = Input->GetMouseCoords();
+			Camera->ConvertScreenToWorld(MP);
+			MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
+
+			auto GridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
+
+			auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
+
+			// Turn tile obstructed
+			if (Input->IsKeyDown(SDLK_LSHIFT) && World->Grid->cells.at(Index).ObstructionValue < 1.0f) 	World->Grid->cells.at(Index).ObstructionValue += 0.1f;
+			else if (World->Grid->cells.at(Index).ObstructionValue < 0.0f) 								World->Grid->cells.at(Index).ObstructionValue -= 0.1f;
+		}
+
+		if (Input->IsKeyDown(SDLK_k))
+		{
+			// Paint tile as unobstructed
+			auto MP = Input->GetMouseCoords();
+			Camera->ConvertScreenToWorld(MP);
+			MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
+
+			auto GridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
+
+			auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
+
+			// Turn tile obstructed
+			World->Grid->cells.at(Index).ObstructionValue = 0.0f;
+		}
+
+		if (Input->IsKeyPressed(SDLK_9))
+		{
+			DrawSplineOn = !DrawSplineOn;
+		}
+    }
+
+    else if (ShowConsole)
+    {
+    	ShowConsole = ConsoleInputTextBox.ProcessInput(Input, Camera);
+    }
+
+	// Console
+	if (Input->IsKeyPressed(SDLK_BACKQUOTE))
 	{
-		// Get camera position
-		auto CamPos = Camera->GetPosition();
-		auto MouseCoords = Input->GetMouseCoords();	
-		Camera->ConvertScreenToWorld(MouseCoords);
-
-		eid32 id = Factory::CreateItem(
-										World, 
-										Math::Vec3(MouseCoords.x, MouseCoords.y, 0.0f), 
-										Enjon::Math::Vec2(ER::Roll(30, 45), ER::Roll(30, 45)), 
-										EG::SpriteSheetManager::GetSpriteSheet("BoxDebris"), 
-										Masks::Type::ITEM, 
-										Component::EntityType::ITEM
-									  );
-
-		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
-		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
-		World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(50, 100) / 50.0f;
-		World->CollisionSystem->CollisionComponents[id].ObstructionValue = 0.1f;
-		World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(-10, -10);
-	}
-
-	if (Input->IsKeyPressed(SDLK_j))
-	{
-		AIControllerEnabled = !AIControllerEnabled;
-	}
-
-	if (Input->IsKeyDown(SDLK_l))
-	{
-		// Paint tile as obstructed
-		auto MP = Input->GetMouseCoords();
-		Camera->ConvertScreenToWorld(MP);
-		MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
-
-		auto GridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
-
-		auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
-
-		// Turn tile obstructed
-		World->Grid->cells.at(Index).ObstructionValue = 1.0f;
-	}
-
-	if (Input->IsKeyDown(SDLK_SEMICOLON))
-	{
-		// Paint tile as obstructed
-		auto MP = Input->GetMouseCoords();
-		Camera->ConvertScreenToWorld(MP);
-		MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
-
-		auto GridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
-
-		auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
-
-		// Turn tile obstructed
-		// World->Grid->cells.at(Index).ObstructionValue += 0.1f;
-		World->Grid->cells.at(Index).ObstructionValue = 0.5f;
-	}
-
-	if (Input->IsKeyPressed(SDLK_QUOTE))
-	{
-		// Paint tile as obstructed
-		auto MP = Input->GetMouseCoords();
-		Camera->ConvertScreenToWorld(MP);
-		MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
-
-		auto GridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
-
-		auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
-
-		// Turn tile obstructed
-		if (Input->IsKeyDown(SDLK_LSHIFT) && World->Grid->cells.at(Index).ObstructionValue < 1.0f) 	World->Grid->cells.at(Index).ObstructionValue += 0.1f;
-		else if (World->Grid->cells.at(Index).ObstructionValue < 0.0f) 								World->Grid->cells.at(Index).ObstructionValue -= 0.1f;
-	}
-
-	if (Input->IsKeyDown(SDLK_k))
-	{
-		// Paint tile as unobstructed
-		auto MP = Input->GetMouseCoords();
-		Camera->ConvertScreenToWorld(MP);
-		MP = EM::IsoToCartesian(MP - EM::Vec2(50.0f, 0.0f));
-
-		auto GridCoords = SpatialHash::FindGridCoordinates(World->Grid, MP);
-
-		auto Index = GridCoords.y * World->Grid->cols + GridCoords.x;
-
-		// Turn tile obstructed
-		World->Grid->cells.at(Index).ObstructionValue = 0.0f;
-	}
-
-	if (Input->IsKeyPressed(SDLK_9))
-	{
-		DrawSplineOn = !DrawSplineOn;
+		ShowConsole = !ShowConsole;
 	}
 
 }
@@ -3333,9 +3466,9 @@ int main(int argc, char** argv) {
 		// Basic shader for UI
 		BasicShader->Use();
 		{
-			BasicShader->SetUniformMat4("model", Model);
-			BasicShader->SetUniformMat4("projection", Projection);
-			BasicShader->SetUniformMat4("view", View);
+			BasicShader->SetUniform("model", Model);
+			BasicShader->SetUniform("projection", Projection);
+			BasicShader->SetUniform("view", View);
 
 			// Draw BG
 			BGBatch->RenderBatch();
@@ -3380,7 +3513,7 @@ int main(int argc, char** argv) {
 			UIBatch->RenderBatch();
 
 			View = Camera->GetCameraMatrix();
-			BasicShader->SetUniformMat4("view", View);
+			BasicShader->SetUniform("view", View);
 
 			SceneBatch->Begin();
 			{
@@ -3447,9 +3580,9 @@ int main(int argc, char** argv) {
 		{
 			View = HUDCamera->GetCameraMatrix();
 
-			TextShader->SetUniformMat4("model", Model);
-			TextShader->SetUniformMat4("projection", Projection);
-			TextShader->SetUniformMat4("view", View);
+			TextShader->SetUniform("model", Model);
+			TextShader->SetUniform("projection", Projection);
+			TextShader->SetUniform("view", View);
 
 			UIBatch->Begin();
 			{
@@ -4313,9 +4446,9 @@ int main(int argc, char** argv)
 #endif
 
 
-#if 1
+#if 0
 
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -4572,7 +4705,7 @@ int main(int argc, char** argv)
     // Initialize FPSCamera
 	FPSCamera.Transform.Position = EM::Vec3(7, 2, 7);
 	FPSCamera.LookAt(EM::Vec3(0, 0, 0));
-	FPSCamera.ProjType = EG::ProjectionType::Perspective;
+	FPSCamera.ProjType = EG::ProjectionType::Orthographic;
 	FPSCamera.FieldOfView = 50.0f;
 	FPSCamera.ViewPortAspectRatio = (Enjon::f32)SCREENWIDTH / (Enjon::f32)SCREENHEIGHT;
 	FPSCamera.OrthographicScale = 4.5f;
@@ -4793,255 +4926,15 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 #include <stdio.h>
 #include <iostream>
 #include <unordered_map>
-#include "System/Types.h"
-#include "System/Internals.h"
-#include "Math/Maths.h"
-#include "Defines.h"
 
-#include "Math/Maths.h"
+#include <System/Types.h>
+#include <System/Internals.h>
+#include <Scripting/ScriptNode.h>
+#include <Math/Maths.h>
+#include <Defines.h>
 
-struct ScriptNodeBase
-{
-	ScriptNodeBase() 
-	{ 
-		HasExecuted = 0; 
-	}
-
-	virtual void Execute() = 0;
-
-	ScriptNodeBase* EntryPoint;
-	ScriptNodeBase* ExitPoint;
-	Enjon::uint32 HasExecuted;
-};
-
-template <typename T>
-void GetValue(ScriptNodeBase* S, T* Value);
-
-template <typename T, typename K>
-struct ScriptNode : public ScriptNodeBase
-{
-	K Data;
-
-	void Execute()
-	{
-		static_cast<T*>(this)->Execute();	
-	}
-
-};
-
-// Base accessor node for accessing data
-struct AccessNode : public ScriptNode<AccessNode, Enjon::f32>
-{
-	void Execute(){}
-};
-
-template <typename T, typename K>
-struct ConstantValueNode : public ScriptNode<ConstantValueNode<T, K>, K>
-{
-	void Execute()
-	{
-		static_cast<T*>(this)->Execute();	
-	} 
-};
-
-struct EFloatNode : public ConstantValueNode<EFloatNode, Enjon::f32>
-{
-	EFloatNode()
-	{
-		this->Data = 1.0f;
-	}
-
-	EFloatNode(const Enjon::f32& _Value)
-	{
-		this->Data = _Value;
-	}
-
-	void Execute() {}
-};
-
-struct EVec2Node : public ConstantValueNode<EVec2Node, EM::Vec2>
-{
-	EVec2Node()
-	{
-		this->Data = EM::Vec2(0.0f, 0.0f);
-	}
-
-	EVec2Node(const EM::Vec2& _Value)
-	{
-		this->Data = _Value;
-	}
-
-	void Execute() {}
-};
-
-struct EVec3Node : public ConstantValueNode<EVec3Node, EM::Vec3>
-{
-	EVec3Node()
-	{
-		this->Data = EM::Vec3(0.0f, 0.0f, 0.0f);
-	}
-
-	EVec3Node(const EM::Vec3& _Value)
-	{
-		this->Data = _Value;
-	}
-
-	void Execute() {}
-};
-
-struct EVec4Node : public ConstantValueNode<EVec4Node, EM::Vec4>
-{
-	EVec4Node()
-	{
-		this->Data = EM::Vec4(0.0f, 0.0f, 0.0f, 0.0f);
-	}
-
-	EVec4Node(const EM::Vec4& _Value)
-	{
-		this->Data = _Value;
-	}
-
-	void Execute() {}
-};
-
-template <typename T, typename K>
-struct CastNode : public ScriptNode<CastNode<T, K>, K>
-{
-	CastNode()
-	{
-		Input = nullptr;
-	}
-
-	void Execute()
-	{
-		static_cast<T*>(this)->Execute();
-	}
-
-	void FillData(ScriptNodeBase* A, K* Data)
-	{
-		if (A != nullptr)
-		{
-			A->Execute();
-			GetValue<K>(A, Data);
-		}
-	}
-
-	ScriptNodeBase* Input;
-};
-
-struct CastToIntNode : public CastNode<CastToIntNode, Enjon::int32>
-{
-	CastToIntNode()
-	{
-		this->Data = 1;
-	}
-
-	void Execute()
-	{
-		FillData(Input, &Data);
-	}
-};
-
-template <typename T>
-struct ArithmeticNode : public ScriptNode<ArithmeticNode<T>, Enjon::f32>
-{
-	ArithmeticNode()
-	{
-		InputA = nullptr;
-		InputB = nullptr;
-	}
-
-	void Execute()
-	{
-		static_cast<T*>(this)->Execute();
-	}
-
-	void FillData(ScriptNodeBase* A, ScriptNodeBase* B, Enjon::f32* AV, Enjon::f32* BV)
-	{
-		// Execute children chain
-		if (A != nullptr)
-		{
-			A->Execute();
-			GetValue<Enjon::f32>(A, AV);
-		}
-		if (B != nullptr) 
-		{
-			B->Execute();
-			GetValue<Enjon::f32>(B, BV);
-		}
-	}
-
-	void SetInputs(ScriptNodeBase* A, ScriptNodeBase* B)
-	{
-		this->InputA = A;
-		this->InputB = B;
-	}
-
-	ScriptNodeBase* InputA;
-	ScriptNodeBase* InputB;
-	Enjon::f32 A_Value;
-	Enjon::f32 B_Value;
-};
-
-struct MultiplyNode : public ArithmeticNode<MultiplyNode>
-{
-	MultiplyNode()
-	{
-		this->A_Value = 1.0f;
-		this->B_Value = 1.0f;
-	}
-
-	void Execute()
-	{
-		FillData(InputA, InputB, &A_Value, &B_Value);
-		this->Data =  A_Value * B_Value;
-	}
-};
-
-struct SubtractionNode : public ArithmeticNode<SubtractionNode>
-{
-	SubtractionNode()
-	{
-		this->A_Value = 1.0f;
-		this->B_Value = 1.0f;
-	}
-
-	void Execute()
-	{
-		FillData(InputA, InputB, &A_Value, &B_Value);
-		this->Data =  A_Value - B_Value;
-	}
-};
-
-struct AdditionNode : public ArithmeticNode<AdditionNode>
-{
-	AdditionNode()
-	{
-		this->A_Value = 1.0f;
-		this->B_Value = 1.0f;
-	}
-
-	void Execute()
-	{
-		FillData(InputA, InputB, &A_Value, &B_Value);
-		this->Data =  A_Value + B_Value;
-	}
-};
-
-struct DivisionNode : public ArithmeticNode<DivisionNode>
-{
-	DivisionNode()
-	{
-		this->A_Value = 1.0f;
-		this->B_Value = 1.0f;
-	}
-
-	void Execute()
-	{
-		FillData(InputA, InputB, &A_Value, &B_Value);
-		this->Data =  B_Value == 0 ? A_Value / 0.00001f : A_Value / B_Value;
-	}
-};
+using namespace Enjon;
+using namespace Scripting;
 
 int main(int argc, char** argv)
 {
@@ -5060,6 +4953,7 @@ int main(int argc, char** argv)
 	SN.SetInputs(&A, &DN);
 	DN.SetInputs(&B, &D);
 
+	// Entry point
 	MN.Execute();
 
 	std::cout << MN.Data << std::endl;
@@ -5067,37 +4961,10 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-template <typename T>
-void GetValue(ScriptNodeBase* S, T* Value)
-{
-	*Value = static_cast<T>(static_cast<AccessNode*>(S)->Data);
-}
-
-
 #endif
 
 
-#if 0
 
-#include <iostream>
-#include <Math/Maths.h>
-#include <Defines.h>
-
-
-int main(int argc, char** argv)
-{
-	EM::Quaternion Q;
-	EM::Vec3 P(1, 2, 3);
-	EM::Vec3 S(0.5f, 2, 3);
-
-
-	std::cout << P * S << std::endl;
-
-	return 0;
-}
-
-
-#endif
 
 
 

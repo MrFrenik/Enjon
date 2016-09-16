@@ -1,4 +1,4 @@
-#include "Graphics/Mesh.h"
+#include "Graphics/MeshOG.h"
 
 
 namespace Enjon { namespace Graphics {

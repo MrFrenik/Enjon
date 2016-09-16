@@ -20,7 +20,7 @@ namespace BT
 	{
 		public:
 
-			Wait(BehaviorTree* BT, EM::Vec3 T, i32 L = 0)
+			Wait(BehaviorTree* BT, EM::Vec3 T, Enjon::i32 L = 0)
 			{
 				this->BTree = BT;
 				Clock = T;
@@ -62,7 +62,7 @@ namespace BT
 				{
 					if (TotalLoops > CurrentLoop)
 					{
-						u32 D = TotalLoops - CurrentLoop;
+						Enjon::u32 D = TotalLoops - CurrentLoop;
 						CurrentLoop++;
 						Clock.x = 0.0f;
 					}
@@ -100,8 +100,8 @@ namespace BT
 
 		private:
 			EM::Vec3 Clock;
-			i32 TotalLoops;
-			i32 CurrentLoop;
+			Enjon::i32 TotalLoops;
+			Enjon::i32 CurrentLoop;
 	};
 
 	class WaitWBBRead : public Task<WaitWBBRead>

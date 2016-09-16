@@ -39,9 +39,9 @@ namespace BT
 				SS->at(this->TreeIndex) = BehaviorNodeState::RUNNING;
 			}
 
-			inline u32 GetChildSize() { return 0; }
+			inline Enjon::u32 GetChildSize() { return 0; }
 
-			inline u32 SetIndicies(u32 I) { this->TreeIndex = I; return I; }
+			inline Enjon::u32 SetIndicies(Enjon::u32 I) { this->TreeIndex = I; return I; }
 
 			inline std::vector<BehaviorNodeBase*> GetAllChildren() { std::vector<BehaviorNodeBase*> C; return C; }
 	};

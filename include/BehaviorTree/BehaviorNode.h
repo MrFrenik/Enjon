@@ -11,9 +11,6 @@
 #include "System/Internals.h"
 #include "System/Types.h"
 
-typedef Enjon::uint32 u32;
-typedef Enjon::int32  i32;
-
 namespace BT
 {
 	class BehaviorTree; 
@@ -28,9 +25,9 @@ namespace BT
 
 			virtual void Init() = 0; 
 			virtual BehaviorNodeState Run() = 0;
-			virtual u32 GetChildSize() = 0;
+			virtual Enjon::u32 GetChildSize() = 0;
 			virtual	std::vector<BehaviorNodeBase*> GetAllChildren() = 0; 
-			virtual u32 SetIndicies(u32 I) = 0;
+			virtual Enjon::u32 SetIndicies(Enjon::u32 I) = 0;
 			virtual void Reset() = 0;
 			virtual std::string String() = 0;
 			virtual void AddChild(BehaviorNodeBase* B) = 0;
@@ -39,7 +36,7 @@ namespace BT
 			inline void SetState(BehaviorNodeState S) { State = S; }
 			inline BlackBoard* GetBB() { return BB; }
 			inline void SetParent(BehaviorNodeBase* P) { Parent = P; }
-			u32 GetIndex() const { return TreeIndex; }
+			Enjon::u32 GetIndex() const { return TreeIndex; }
 
 		public:
 			BehaviorNodeType Type;
@@ -50,7 +47,7 @@ namespace BT
 			BehaviorTree* BTree;
 			BlackBoard* BB;
 			std::string Name;
-			u32 TreeIndex;
+			Enjon::u32 TreeIndex;
 	};
 
 	class StateObject
@@ -149,7 +146,7 @@ namespace BT
 				auto S = Root->GetChildSize() + 1;
 
 				// Push back states into SO
-				for (u32 i = 0; i < S; i++)
+				for (Enjon::u32 i = 0; i < S; i++)
 				{
 					SO.States.push_back(BehaviorNodeState::INVALID);
 				}
@@ -199,7 +196,7 @@ namespace BT
 	
 			inline void BehaviorTree::SetTreeIndicies()
 			{
-				u32 i = 0;
+				Enjon::u32 i = 0;
 				auto R = Root->SetIndicies(i);
 			}
 	};
@@ -235,9 +232,9 @@ namespace BT
 				}
 			}
 
-			inline u32 GetChildSize() 
+			inline Enjon::u32 GetChildSize() 
 			{ 
-				u32 S = 0;
+				Enjon::u32 S = 0;
 
 				if (Child != nullptr)
 				{
@@ -255,7 +252,7 @@ namespace BT
 				return C; 
 			}
 
-			inline u32 SetIndicies(u32 I) 
+			inline Enjon::u32 SetIndicies(Enjon::u32 I) 
 			{ 
 				this->TreeIndex = I; 
 
@@ -341,9 +338,9 @@ namespace BT
 
 			inline const std::vector<BehaviorNodeBase*>* GetChildren() { return &Children; }
 
-			inline u32 GetChildSize() 
+			inline Enjon::u32 GetChildSize() 
 			{ 
-				u32 S = 0;
+				Enjon::u32 S = 0;
 
 				for (auto C : Children)
 				{
@@ -355,11 +352,11 @@ namespace BT
 				return S;
 			}
 
-			inline u32 SetIndicies(u32 I)
+			inline Enjon::u32 SetIndicies(Enjon::u32 I)
 			{
 				this->TreeIndex = I;
 
-				u32 U = I;
+				Enjon::u32 U = I;
 
 				for(auto& C : Children) 
 				{
