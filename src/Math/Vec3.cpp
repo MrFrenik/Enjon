@@ -7,6 +7,16 @@ namespace Enjon { namespace Math {
 		return *this * -1.0f;
 	}
 
+	bool operator==(const Vec3& left, const Vec3& right) 
+	{
+		return (left.x == right.x && left.y == right.y && left.z == right.z);
+	}
+
+	bool operator!=(const Vec3& left, const Vec3& right) 
+	{
+		return !(left == right);
+	}
+
 	std::ostream& operator<<(std::ostream& stream, Vec3& vector)
 	{
 		stream << "Vector3f: (" << vector.x << ", " << vector.y << ", " << vector.z << ")";

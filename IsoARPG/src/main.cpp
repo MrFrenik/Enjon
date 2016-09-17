@@ -21,7 +21,7 @@
 * MAIN GAME
 */
 
-#if 1
+#if 0
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
@@ -124,7 +124,7 @@ bool ParticleEditorOn 		= false;
 bool DeferredRenderingOn 	= true;
 bool AIControllerEnabled 	= false;
 bool DrawSplineOn 			= false;
-bool ShowConsole 			= true;
+bool ShowConsole 			= false;
 
 const int LEVELSIZE = 50;
 
@@ -4921,7 +4921,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 
 #endif
 
-#if 0
+#if 1
 
 #include <stdio.h>
 #include <iostream>
@@ -4930,6 +4930,9 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 #include <System/Types.h>
 #include <System/Internals.h>
 #include <Scripting/ScriptNode.h>
+#include <Scripting/Vec3ScriptNode.h>
+#include <Scripting/TrigonometricScriptNode.h>
+#include <Scripting/FloatScriptNode.h>
 #include <Math/Maths.h>
 #include <Defines.h>
 
@@ -4938,25 +4941,32 @@ using namespace Scripting;
 
 int main(int argc, char** argv)
 {
-	MultiplyNode MN;
-	SubtractionNode SN;
-	CastToIntNode CN;
-	DivisionNode DN;
-	AdditionNode AN;
-	EFloatNode A(4.45f);
-	EFloatNode B(5.2f);
-	EFloatNode C(1.2f);
-	EFloatNode D(-3.5f);
+	// Calculate angle between 2 vec3's
+	EVec3Node A(0.0f, 1.0f, 0.0f);
+	EVec3Node B(1.0f, 0.0f, 0.0f);
+	EVec3Node R(1.0f, 0.0f, 0.0f);
 
-	MN.SetInputs(&AN, &C);
-	AN.SetInputs(&SN, &DN);
-	SN.SetInputs(&A, &DN);
-	DN.SetInputs(&B, &D);
+	Vec3SubtractionNode VSN;
+	Vec3DotProductNode VDPN;
+	Vec3NormalizeNode VNN;
+	CastToRadiansNode CTR;
+	CastToDegreesNode CTD;
+	InverseCosineNode ICN;
+
+	// A-- 			R 	-->
+	//    > VSN --> VNN -->  VDPN --> ICN --> CTD
+	// B--
+
+	VSN.SetInputs(&A, &B);
+	VNN.SetInputs(&VSN);
+	VDPN.SetInputs(&R, &VNN);
+	ICN.SetInputs(&VDPN);
+	CTD.SetInputs(&ICN);
 
 	// Entry point
-	MN.Execute();
+	CTD.Execute();
 
-	std::cout << MN.Data << std::endl;
+	std::cout << CTD.Data << std::endl;
 
 	return 0;
 }
