@@ -38,6 +38,7 @@ namespace Enjon { namespace Scripting {
 		{
 			FillData(InputA, InputB, &A_Value, &B_Value);
 			this->Data =  A_Value == B_Value;
+			Branch(OutputA, OutputB, Data);
 		}
 	};
 
@@ -53,6 +54,7 @@ namespace Enjon { namespace Scripting {
 		{
 			FillData(InputA, InputB, &A_Value, &B_Value);
 			this->Data =  A_Value != B_Value;
+			Branch(OutputA, OutputB, Data);
 		}
 	};
 
@@ -72,6 +74,8 @@ namespace Enjon { namespace Scripting {
 
 		void FillData(ScriptNodeBase* A, ScriptNodeBase* B, EM::Vec3* AV, EM::Vec3* BV)
 		{
+			static_cast<T*>(this)->HasExecuted = true;
+
 			// Execute children chain
 			if (A != nullptr)
 			{
@@ -113,6 +117,8 @@ namespace Enjon { namespace Scripting {
 
 		void FillData(ScriptNodeBase* A, ScriptNodeBase* B, EM::Vec3* AV, EM::Vec3* BV)
 		{
+			static_cast<T*>(this)->HasExecuted = true;
+
 			// Execute children chain
 			if (A != nullptr)
 			{
@@ -153,6 +159,8 @@ namespace Enjon { namespace Scripting {
 
 		void FillData(ScriptNodeBase* A, EM::Vec3* AV)
 		{
+			static_cast<T*>(this)->HasExecuted = true;
+			
 			// Execute child
 			if (A != nullptr)
 			{
@@ -291,6 +299,47 @@ namespace Enjon { namespace Scripting {
 		}
 	};
 
+	struct Vec3GetYComponentNode : public Vec3UnaryOperationNode<Vec3GetYComponentNode, Enjon::f32>
+	{
+		Vec3GetYComponentNode()
+		{
+			this->A_Value = EM::Vec3(1.0f, 1.0f, 1.0f);
+		}	
+
+		void Execute()
+		{
+			FillData(InputA, &A_Value);
+			this->Data = A_Value.y;
+		}
+	};
+
+	struct Vec3GetXComponentNode : public Vec3UnaryOperationNode<Vec3GetXComponentNode, Enjon::f32>
+	{
+		Vec3GetXComponentNode()
+		{
+			this->A_Value = EM::Vec3(1.0f, 1.0f, 1.0f);
+		}	
+
+		void Execute()
+		{
+			FillData(InputA, &A_Value);
+			this->Data = A_Value.x;
+		}
+	};
+
+	struct Vec3GetZComponentNode : public Vec3UnaryOperationNode<Vec3GetZComponentNode, Enjon::f32>
+	{
+		Vec3GetZComponentNode()
+		{
+			this->A_Value = EM::Vec3(1.0f, 1.0f, 1.0f);
+		}	
+
+		void Execute()
+		{
+			FillData(InputA, &A_Value);
+			this->Data = A_Value.z;
+		}
+	};
 
 }}
 

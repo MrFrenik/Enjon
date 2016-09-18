@@ -21,6 +21,8 @@ namespace Enjon { namespace Scripting {
 
 		void FillData(ScriptNodeBase* A, Enjon::f32* AV)
 		{
+			static_cast<T*>(this)->HasExecuted = true;
+			
 			// Execute childr
 			if (A != nullptr)
 			{

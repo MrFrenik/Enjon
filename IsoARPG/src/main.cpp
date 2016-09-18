@@ -4919,6 +4919,16 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	return true;
 }
 
+Math::Vec2 MouseCoords = Input.GetMouseCoords();
+Camera.ConvertScreenToWorld(MouseCoords);
+static Math::Vec2 right(1.0f, 0.0f);
+Math::Vec2 Diff = Math::Vec2::Normalize(World->TransformSystem->Transforms[Player].Position.XY() - MouseCoords);
+float DotProduct = Diff.DotProduct(right);
+float AimAngle = acos(DotProduct) * 180.0f / M_PI;
+if (Diff.y < 0.0f) AimAngle *= -1; 
+// printf("Aim Angle: %.2f\n", AimAngle);
+
+// slut balls
 #endif
 
 #if 1
@@ -4941,32 +4951,67 @@ using namespace Scripting;
 
 int main(int argc, char** argv)
 {
-	// Calculate angle between 2 vec3's
-	EVec3Node A(0.0f, 1.0f, 0.0f);
-	EVec3Node B(1.0f, 0.0f, 0.0f);
-	EVec3Node R(1.0f, 0.0f, 0.0f);
+	EM::Vec3 VecA(0.0f, 0.0f, 0.0f);
+	EM::Vec3 VecB(3.0f, 3.0f, 0.0f);
+	EM::Vec3 VecR(1.0f, 0.0f, 0.0f);
 
-	Vec3SubtractionNode VSN;
-	Vec3DotProductNode VDPN;
-	Vec3NormalizeNode VNN;
-	CastToRadiansNode CTR;
-	CastToDegreesNode CTD;
-	InverseCosineNode ICN;
+	// Scripted node functionality
+	{
+		EVec3Node A(VecA);
+		EVec3Node B(VecB);
+		EVec3Node R(VecR);
+		EFloatNode Zero(0.0f);
+		EFloatNode NegOne(-1.0f);
+		CastToDegreesNode CTD;
+		FloatMultiplicationNode FMN;
+		Vec3SubtractionNode VSN;
+		Vec3NormalizeNode VN;
+		Vec3DotProductNode VDP;
+		Vec3GetYComponentNode VGY;
+		InverseCosineNode ACOS;
+		FloatIsLessThanCompareBranchNode FLT;
 
-	// A-- 			R 	-->
-	//    > VSN --> VNN -->  VDPN --> ICN --> CTD
-	// B--
+		// Float multiply
+		FMN.SetInputs(&CTD, &NegOne);
 
-	VSN.SetInputs(&A, &B);
-	VNN.SetInputs(&VSN);
-	VDPN.SetInputs(&R, &VNN);
-	ICN.SetInputs(&VDPN);
-	CTD.SetInputs(&ICN);
+		// Cast to Degrees
+		CTD.SetInputs(&ACOS);
 
-	// Entry point
-	CTD.Execute();
+		// Acos
+		ACOS.SetInputs(&VDP);
 
-	std::cout << CTD.Data << std::endl;
+		// Dot product
+		VDP.SetInputs(&VN, &R);
+
+		// Norm
+		VN.SetInputs(&VSN);
+
+		// Subtraction
+		VSN.SetInputs(&A, &B);
+
+		// Get Y Component
+		VGY.SetInputs(&VN);
+
+		// Less than 
+		FLT.SetInputs(&VGY, &Zero);
+		FLT.SetOutputs(&FMN, &CTD);
+
+		// Entry point
+		FLT.Execute();
+
+		if 		(FMN.HasExecuted) 	std::cout << "Mul: " << FMN.Data << std::endl;
+		else if (CTD.HasExecuted)	std::cout << "Data: " << CTD.Data << std::endl;
+	}
+
+
+	// Calculated reference
+	{
+		auto Dir = EM::Vec3::Normalize(VecA - VecB);
+		auto Angle = std::acos(Dir.Dot(VecR)) * 180.0f / EM::PI;
+		if (Dir.y < 0.0f) Angle *= -1.0f;
+
+		std::cout << "Actual: " << Angle << std::endl;
+	}
 
 	return 0;
 }

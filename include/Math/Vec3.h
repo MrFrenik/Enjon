@@ -51,7 +51,7 @@ namespace Enjon { namespace Math {
 		friend Vec3 operator/(Vec3 left, const Vec3& other);
 		friend Vec3 operator/(Vec3 left, float value);
 		friend bool operator==(const Vec3& left, const Vec3& right); 
-		friend bool operator!=(Vec3 left, const Vec3& right);
+		friend bool operator!=(const Vec3& left, const Vec3& right);
 		
 		Vec3& operator+=(const Vec3& other);
 		Vec3& operator-=(const Vec3& other);

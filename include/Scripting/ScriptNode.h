@@ -18,7 +18,7 @@ namespace Enjon { namespace Scripting {
 
 		ScriptNodeBase* EntryPoint;
 		ScriptNodeBase* ExitPoint;
-		Enjon::uint32 HasExecuted;
+		Enjon::bool32 HasExecuted = false;
 	};
 
 	// CRTP script base
@@ -75,6 +75,8 @@ namespace Enjon { namespace Scripting {
 
 		void FillData(ScriptNodeBase* A, ScriptNodeBase* B, K* AV, K* BV)
 		{
+			static_cast<T*>(this)->HasExecuted = true;
+
 			// Execute children chain
 			if (A != nullptr)
 			{
@@ -88,14 +90,34 @@ namespace Enjon { namespace Scripting {
 			}
 		}
 
+		void Branch(ScriptNodeBase* A, ScriptNodeBase* B, Enjon::bool32 Data)
+		{
+			if (Data == true)
+			{
+				if (A != nullptr) A->Execute();
+			} 	
+			else
+			{
+				if (B != nullptr) B->Execute();
+			} 				
+		}
+
 		void SetInputs(ScriptNodeBase* A, ScriptNodeBase* B)
 		{
 			this->InputA = A;
 			this->InputB = B;
 		}
 
+		void SetOutputs(ScriptNodeBase* A, ScriptNodeBase* B)
+		{
+			this->OutputA = A;
+			this->OutputB = B;
+		}
+
 		ScriptNodeBase* InputA;
 		ScriptNodeBase* InputB;
+		ScriptNodeBase* OutputA;
+		ScriptNodeBase* OutputB;
 		K A_Value;
 		K B_Value;
 	};

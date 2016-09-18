@@ -1,6 +1,8 @@
 #ifndef ENJON_FLOAT_SCRIPT_NODE_H
 #define ENJON_FLOAT_SCRIPT_NODE_H
 
+#include <Scripting/ScriptNode.h>
+
 namespace Enjon { namespace Scripting { 
 
 	struct EFloatNode : public ConstantValueNode<EFloatNode, Enjon::f32>
@@ -15,7 +17,9 @@ namespace Enjon { namespace Scripting {
 			this->Data = _Value;
 		}
 
-		void Execute() {}
+		void Execute() 
+		{
+		}
 	};
 
 	////////////////////////////////////////////////////
@@ -38,6 +42,8 @@ namespace Enjon { namespace Scripting {
 
 		void FillData(ScriptNodeBase* A, ScriptNodeBase* B, Enjon::f32* AV, Enjon::f32* BV)
 		{
+			static_cast<T*>(this)->HasExecuted = true;
+
 			// Execute children chain
 			if (A != nullptr)
 			{
@@ -63,9 +69,9 @@ namespace Enjon { namespace Scripting {
 		Enjon::f32 B_Value;
 	};
 
-	struct MultiplyNode : public FloatArithmeticNode<MultiplyNode>
+	struct FloatMultiplicationNode : public FloatArithmeticNode<FloatMultiplicationNode>
 	{
-		MultiplyNode()
+		FloatMultiplicationNode()
 		{
 			this->A_Value = 1.0f;
 			this->B_Value = 1.0f;
@@ -78,9 +84,9 @@ namespace Enjon { namespace Scripting {
 		}
 	};
 
-	struct SubtractionNode : public FloatArithmeticNode<SubtractionNode>
+	struct FloatSubtractionNode : public FloatArithmeticNode<FloatSubtractionNode>
 	{
-		SubtractionNode()
+		FloatSubtractionNode()
 		{
 			this->A_Value = 1.0f;
 			this->B_Value = 1.0f;
@@ -93,9 +99,9 @@ namespace Enjon { namespace Scripting {
 		}
 	};
 
-	struct AdditionNode : public FloatArithmeticNode<AdditionNode>
+	struct FloatAdditionNode : public FloatArithmeticNode<FloatAdditionNode>
 	{
-		AdditionNode()
+		FloatAdditionNode()
 		{
 			this->A_Value = 1.0f;
 			this->B_Value = 1.0f;
@@ -108,9 +114,9 @@ namespace Enjon { namespace Scripting {
 		}
 	};
 
-	struct DivisionNode : public FloatArithmeticNode<DivisionNode>
+	struct FloatDivision : public FloatArithmeticNode<FloatDivision>
 	{
-		DivisionNode()
+		FloatDivision()
 		{
 			this->A_Value = 1.0f;
 			this->B_Value = 1.0f;
@@ -123,6 +129,105 @@ namespace Enjon { namespace Scripting {
 		}
 	};
 
+	/////////////////////////////////////////////////
+	// Float Compare ////////////////////////////////
+	/////////////////////////////////////////////////
+
+	struct FloatIsEqualCompareBranchNode : public CompareBranchNode<FloatIsEqualCompareBranchNode, Enjon::f32>
+	{
+		FloatIsEqualCompareBranchNode()
+		{
+			this->A_Value = 1.0f;
+			this->B_Value = 1.0f;
+		}
+
+		void Execute()
+		{
+			FillData(InputA, InputB, &A_Value, &B_Value);
+			this->Data =  A_Value == B_Value;
+			Branch(OutputA, OutputB, Data);
+		}
+	};
+
+	struct FloatIsNotEqualCompareBranchNode : public CompareBranchNode<FloatIsNotEqualCompareBranchNode, Enjon::f32>
+	{
+		FloatIsNotEqualCompareBranchNode()
+		{
+			this->A_Value = 1.0f;
+			this->B_Value = 1.0f;
+		}
+
+		void Execute()
+		{
+			FillData(InputA, InputB, &A_Value, &B_Value);
+			this->Data =  A_Value != B_Value;
+			Branch(OutputA, OutputB, Data);
+		}
+	};
+
+	struct FloatIsGreaterThanCompareBranchNode : public CompareBranchNode<FloatIsGreaterThanCompareBranchNode, Enjon::f32>
+	{
+		FloatIsGreaterThanCompareBranchNode()
+		{
+			this->A_Value = 1.0f;
+			this->B_Value = 1.0f;
+		}
+
+		void Execute()
+		{
+			FillData(InputA, InputB, &A_Value, &B_Value);
+			this->Data =  A_Value > B_Value;
+			Branch(OutputA, OutputB, Data);
+		}
+	};
+
+	struct FloatIsLessThanCompareBranchNode : public CompareBranchNode<FloatIsLessThanCompareBranchNode, Enjon::f32>
+	{
+		FloatIsLessThanCompareBranchNode()
+		{
+			this->A_Value = 1.0f;
+			this->B_Value = 1.0f;
+		}
+
+		void Execute()
+		{
+			FillData(InputA, InputB, &A_Value, &B_Value);
+			this->Data =  A_Value < B_Value;
+			Branch(OutputA, OutputB, Data);
+		}
+	};
+
+	struct FloatIsLessOrEqualCompareBranchNode : public CompareBranchNode<FloatIsLessOrEqualCompareBranchNode, Enjon::f32>
+	{
+		FloatIsLessOrEqualCompareBranchNode()
+		{
+			this->A_Value = 1.0f;
+			this->B_Value = 1.0f;
+		}
+
+		void Execute()
+		{
+			FillData(InputA, InputB, &A_Value, &B_Value);
+			this->Data =  A_Value <= B_Value;
+			Branch(OutputA, OutputB, Data);
+		}
+	};
+
+	struct FloatIsGreaterOrEqualCompareBranchNode : public CompareBranchNode<FloatIsGreaterOrEqualCompareBranchNode, Enjon::f32>
+	{
+		FloatIsGreaterOrEqualCompareBranchNode()
+		{
+			this->A_Value = 1.0f;
+			this->B_Value = 1.0f;
+		}
+
+		void Execute()
+		{
+			FillData(InputA, InputB, &A_Value, &B_Value);
+			this->Data =  A_Value >= B_Value;
+			Branch(OutputA, OutputB, Data);
+		}
+	};
 
 }}
 
