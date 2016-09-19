@@ -7,55 +7,7 @@
 
 namespace Enjon { namespace Scripting {
 
-	struct WorldTimeNode : public ConstantValueNode<WorldTimeNode, Enjon::f32>
-	{
-		WorldTimeNode()
-		{
-			this->Data = 0.0f;
-		}
-
-		void Execute()
-		{
-			// Get world time from world
-			this->Data = ECSS::EntitySystem::WorldTime();
-		}
-	};
-
-	template <typename T, typename K>
-	struct TransformComponentNode : public ScriptNode<TransformComponentNode<T, K>, K>
-	{
-		TransformComponentNode()
-		{
-			InputA = nullptr;
-		}
-
-		void Execute()
-		{
-			static_cast<T*>(this)->Execute();
-		}
-
-		void FillData(ScriptNodeBase* A, ECS::eid32* AV)
-		{
-			static_cast<T*>(this)->HasExecuted = true;
-
-			// Execute children chain
-			if (A != nullptr)
-			{
-				A->Execute();
-				GetValue<ECS::eid32>(A, AV);
-			}
-		}
-
-		void SetInputs(ScriptNodeBase* A)
-		{
-			this->InputA = A;
-		}
-
-		ScriptNodeBase* InputA;
-		ECS::eid32 A_Value;
-	};
-
-	struct TransformComponentGetComponentNode : public TransformComponentNode<TransformComponentGetComponentNode, ECS::Component::Transform3D*>
+	struct TransformComponentGetComponentNode : public ComponentScriptNode<TransformComponentGetComponentNode, ECS::Component::Transform3D*>
 	{
 		TransformComponentGetComponentNode()
 		{

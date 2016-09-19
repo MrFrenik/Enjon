@@ -7,8 +7,10 @@
 #include <Scripting/Vec2ScriptNode.h>
 #include <Scripting/Vec3ScriptNode.h>
 #include <Scripting/Vec4ScriptNode.h>
+#include <Scripting/RenderComponentScriptNode.h>
 #include <Scripting/TrigonometricScriptNode.h>
 #include <Scripting/TransformComponentScriptNode.h>
+#include <Scripting/WorldScriptNode.h>
 #include <Scripting/UintScriptNode.h>
 
 #endif

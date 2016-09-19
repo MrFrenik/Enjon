@@ -64,11 +64,25 @@ namespace Enjon { namespace Math {
 		friend Vec4 operator-(Vec4 left, const Vec4& other); 
 		friend Vec4 operator*(Vec4 left, const Vec4& other);
 		friend Vec4 operator/(Vec4 left, const Vec4& other);
+
+		friend Vec4 operator*(Vec4 left, const float& scalar);
+		friend Vec4 operator*(const float& scalar, Vec4 right);
+		friend void operator*=(Vec4& left, const float& scalar);
+		friend void operator*=(const float& scalar, Vec4& left);
+		friend Vec4 operator/(Vec4 left, const Vec4& other);
+		friend Vec4 operator/(Vec4 left, float value);
+		friend bool operator==(const Vec4& left, const Vec4& right); 
+		friend bool operator!=(const Vec4& left, const Vec4& right);
 		
 		Vec4& operator+=(const Vec4& other);
 		Vec4& operator-=(const Vec4& other);
 		Vec4& operator*=(const Vec4& other);
 		Vec4& operator/=(const Vec4& other);
+
+		float Vec4::Length() const;
+		float Vec4::Dot(const Vec4& other);
+		static Vec4 inline Normalize(const Vec4& vec) { return vec / vec.Length(); }
+
 	}; 
 		
 

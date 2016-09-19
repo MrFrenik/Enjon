@@ -121,6 +121,41 @@ namespace Enjon { namespace Scripting {
 		K A_Value;
 		K B_Value;
 	};
+
+	template <typename T, typename K>
+	struct ComponentScriptNode : public ScriptNode<ComponentScriptNode<T, K>, K>
+	{
+		ComponentScriptNode()
+		{
+			InputA = nullptr;
+		}
+
+		void Execute()
+		{
+			static_cast<T*>(this)->Execute();
+		}
+
+		void FillData(ScriptNodeBase* A, ECS::eid32* AV)
+		{
+			static_cast<T*>(this)->HasExecuted = true;
+
+			// Execute children chain
+			if (A != nullptr)
+			{
+				A->Execute();
+				GetValue<ECS::eid32>(A, AV);
+			}
+		}
+
+		void SetInputs(ScriptNodeBase* A)
+		{
+			this->InputA = A;
+		}
+
+		ScriptNodeBase* InputA;
+		ECS::eid32 A_Value;
+	};
+
 }}
 
 #endif

@@ -2,6 +2,8 @@
 #define ENJON_COLOR_H
 
 #include <GLEW/glew.h> 
+#include <Math/Vec4.h>
+#include <Defines.h>
 
 namespace Enjon { namespace Graphics { 
 
@@ -78,6 +80,9 @@ namespace Enjon { namespace Graphics {
 	// Strict POD struct ColoRGBA16
 	struct ColorRGBA16
 	{ 
+		ColorRGBA16() : r(0), g(0), b(0), a(0) {}
+		ColorRGBA16(const EM::Vec4& V) : r(V.x), g(V.y), b(V.z), a(V.w) {}
+
 		float r;
 		float g;
 		float b;

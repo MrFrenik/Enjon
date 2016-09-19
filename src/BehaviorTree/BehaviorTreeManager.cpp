@@ -160,7 +160,7 @@ namespace BTManager
 		// TODO(John): Have a map of function pointers that will create a BT type and return it for me
 		if (!RootName.compare("Sequence"))
 		{
-			BTree->Root = new  BT::Sequence(BTree);
+			BTree->Root = new BT::Sequence(BTree);
 		}
 		else if (!RootName.compare("RepeatForever"))
 		{

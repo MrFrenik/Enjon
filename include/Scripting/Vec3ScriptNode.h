@@ -270,7 +270,6 @@ namespace Enjon { namespace Scripting {
 		void Execute()
 		{
 			FillData(InputA, InputB, &A_Value, &B_Value);
-			std::cout << "B Value: " << B_Value << std::endl;
 			this->Data = A_Value * B_Value;
 		}
 	};

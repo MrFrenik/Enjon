@@ -126,6 +126,7 @@ bool DeferredRenderingOn 	= true;
 bool AIControllerEnabled 	= false;
 bool DrawSplineOn 			= false;
 bool ShowConsole 			= false;
+bool LimiterEnabled			= true;
 
 const int LEVELSIZE = 50;
 
@@ -654,6 +655,44 @@ int main(int argc, char** argv)
 			}
 
 		}
+		else if (Elements.at(0).compare("limiter") == 0)
+		{
+			if (Elements.size() < 2) ConsoleOutput.push_back("Limiter requires argument");
+			else
+			{
+				if (Elements.at(1).compare("enabled") == 0)
+				{
+					LimiterEnabled = true;
+				}
+				else if (Elements.at(1).compare("disabled") == 0)
+				{
+					LimiterEnabled = false;
+				}
+				else
+				{
+					ConsoleOutput.push_back("Cannot find limiter operation: " + Elements.at(1));
+				}
+			}
+		}
+		else if (Elements.at(0).compare("ai") == 0)
+		{
+			if (Elements.size() < 2) ConsoleOutput.push_back("ai requires argument");
+			else
+			{
+				if (Elements.at(1).compare("enabled") == 0)
+				{
+					AIControllerEnabled = true;
+				}
+				else if (Elements.at(1).compare("disabled") == 0)
+				{
+					AIControllerEnabled = false;
+				}
+				else
+				{
+					ConsoleOutput.push_back("Cannot find ai operation: " + Elements.at(1));
+				}
+			}
+		}
 		else
 		{
 			ConsoleOutput.push_back("Cannot find operation: " + Elements.at(0));
@@ -668,46 +707,42 @@ int main(int argc, char** argv)
 
 
 
-	///////////////////////////////////////
-	// Script Nodes ///////////////////////
-	///////////////////////////////////////
+	///////////////////////////////////////////////////////
+	// Script Nodes ///////////////////////////////////////
+	///////////////////////////////////////////////////////
 
 	EScript::EUintNode 							PlayerIDReference(Player);
-	EScript::TransformComponentGetComponentNode GetPlayerTransform;
-	EScript::TransformComponentSetPositionNode 	SetPlayerPosition;
-	EScript::EVec3Node							NewPosition;
-	EScript::Vec3AdditionVec3Node				AddVectors;
-	EScript::CosineNode 						Cosine;
+	EScript::RenderComponentGetComponentNode	GetRenderComponent;
+	EScript::RenderComponentSetColorNode 		SetColor;
+	EScript::CosineNode 						Cos;
 	EScript::SinNode 							Sin;
+	EScript::TanNode 							Tan;
+	EScript::EVec4Node 							NewColor;
 	EScript::WorldTimeNode 						WorldTime;
-	EScript::EFloatNode							Scalar(100.0f);
-	EScript::EVec3Node							ScaledVector;
-	EScript::Vec3MultiplicationFloatNode		MultiplyFloatVec;
-	EScript::EVec3Node							TranslateVector(EM::Vec3(800.0f, 800.0f, 0.0f));
+	EScript::EFloatNode 						One(1.0f);
 
-	// Set entry point to script
-	auto EntryPoint = &SetPlayerPosition;
+	// Get render component
+	GetRenderComponent.SetInputs(&PlayerIDReference);
 
-	// Set player position
-	SetPlayerPosition.SetInputs(&GetPlayerTransform, &AddVectors);
+	// Set Color
+	SetColor.SetInputs(&GetRenderComponent, &NewColor);
 
-	// Set up add vector (translate)
-	AddVectors.SetInputs(&MultiplyFloatVec, &TranslateVector);
+	// Get new color
+	NewColor.SetInputs(&Cos, &Sin, &Tan, &One);
 
-	// Set up multiply float and vector
-	MultiplyFloatVec.SetInputs(&NewPosition, &Scalar);
+	// Get cosine
+	Cos.SetInputs(&WorldTime);
 
-	// Set up new position
-	NewPosition.SetInputs(&Cosine, &Sin);
-
-	// Set up cos
-	Cosine.SetInputs(&WorldTime);
-
-	// Set up sin
+	// Get Sin
 	Sin.SetInputs(&WorldTime);
 
-	GetPlayerTransform.SetInputs(&PlayerIDReference);
+	// Set the entry point for script
+	auto EntryPoint = &SetColor;
+
+	///////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////
 	
+	// Main game loop
 	while(isRunning)
 	{
 		static float t = 0.0f;
@@ -798,8 +833,6 @@ int main(int argc, char** argv)
 				// Update world object
 				ECSS::EntitySystem::Update();
 
-				std::cout << ECSS::EntitySystem::WorldTime() << std::endl;
-
 				// Draw some random assed fire
 				// EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
 
@@ -850,20 +883,12 @@ int main(int argc, char** argv)
 				// Updates the world's particle engine
 				World->ParticleEngine->Update();
 
-				/*
 				if (!ShowConsole)
 				{
 					StartTicks = SDL_GetTicks();	
 					PlayerController::Update(World->PlayerControllerSystem);
 					PlayerControllerTime = (SDL_GetTicks() - StartTicks);
 				}
-				*/
-	
-
-				// Display Data
-				// std::cout << "Player Position: " << SetPlayerPosition.Data << std::endl;
-
-				std::cout << MultiplyFloatVec.Data << std::endl;
 			}
 
 			// Check for input
@@ -1278,15 +1303,14 @@ int main(int argc, char** argv)
 			// DRAW PLAYER ///////////////////////////
 			//////////////////////////////////////////
 
-			// EntityBatch.Add(Math::Vec4(*PlayerPosition, dims), Sheet->GetUV(Frame), Sheet->texture.id, *Color, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
-
 			{
 				// void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White(), float ScalingFactor = 1.0f);
 				// Get handle to image frame
 				auto CurrentIndex = World->Animation2DSystem->AnimComponents[Player].CurrentIndex;
 				auto Image = &World->Animation2DSystem->AnimComponents[Player].CurrentAnimation->Frames.at(CurrentIndex);
+				auto PlayerColor = &World->Renderer2DSystem->Renderers[Player].Color;
 
-				EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::RGBA16_White(), 1.5f, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
+				EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, *PlayerColor, 1.5f, PlayerPosition->y - World->TransformSystem->Transforms[Player].Position.z);
 
 				// Print Entity info if debug info is on
 				if (DebugEntityInfo)
@@ -2101,8 +2125,11 @@ int main(int argc, char** argv)
 		
 		////////////////////////////////////////////////
 
-		// End FPSLimiter
-		FPS = Limiter.End();
+		// End FPSLimiter if limiter is enabled
+		if (LimiterEnabled)
+		{
+			FPS = Limiter.End();
+		}
 
 		static float counter = 0.0f;
 		counter += 0.025f;

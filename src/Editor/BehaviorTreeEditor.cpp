@@ -513,7 +513,6 @@ namespace Enjon { namespace BehaviorTreeEditor {
 		LeafNode.Group = &BehaviorNodeSceneGroup;
 		SelectorNode.Group = &BehaviorNodeSceneGroup;
 
-
 		return true;	
 	}
 
@@ -577,7 +576,7 @@ namespace Enjon { namespace BehaviorTreeEditor {
 	    						EM::Vec4(0, 0, 1, 1),
 	    						EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
 	    						EG::RGBA16_DarkGrey()
-	    					);	
+	    					);
 	    	}
 	    	UIBatch.End();
 	    	UIBatch.RenderBatch();
