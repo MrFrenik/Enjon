@@ -21,7 +21,7 @@
 * MAIN GAME
 */
 
-#if 0
+#if 1
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
@@ -47,6 +47,7 @@
 #include <System/Internals.h>
 #include <BehaviorTree/BehaviorTreeManager.h>
 #include <Utils/Functions.h>
+#include <Scripting/ScriptingNode.h>
 
 /*-- Entity Component System includes --*/
 #include <ECS/ComponentSystems.h>
@@ -129,6 +130,8 @@ bool ShowConsole 			= false;
 const int LEVELSIZE = 50;
 
 float DashingCounter = 0.0f;
+
+Enjon::f32 StartTicks = 0.0f;
 
 Enjon::uint32 CollisionRunTime = 0;
 Enjon::uint32 TransformRunTime = 0;
@@ -322,8 +325,6 @@ int main(int argc, char** argv)
 	ReticleSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/circle_reticle.png"), Math::iVec2(1, 1));
 	TargetSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Target.png"), Math::iVec2(1, 1));
 	HealthSheet.Init(Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBar.png"), EM::iVec2(1, 1));
-
-
 	
 	// Creating tiled iso level
 	TileBatch.Begin(); 
@@ -664,9 +665,51 @@ int main(int argc, char** argv)
 		// Reset focus
 		ConsoleInputTextBox.KeyboardInFocus = true;
 	});
+
+
+
+	///////////////////////////////////////
+	// Script Nodes ///////////////////////
+	///////////////////////////////////////
+
+	EScript::EUintNode 							PlayerIDReference(Player);
+	EScript::TransformComponentGetComponentNode GetPlayerTransform;
+	EScript::TransformComponentSetPositionNode 	SetPlayerPosition;
+	EScript::EVec3Node							NewPosition;
+	EScript::Vec3AdditionVec3Node				AddVectors;
+	EScript::CosineNode 						Cosine;
+	EScript::SinNode 							Sin;
+	EScript::WorldTimeNode 						WorldTime;
+	EScript::EFloatNode							Scalar(100.0f);
+	EScript::EVec3Node							ScaledVector;
+	EScript::Vec3MultiplicationFloatNode		MultiplyFloatVec;
+	EScript::EVec3Node							TranslateVector(EM::Vec3(800.0f, 800.0f, 0.0f));
+
+	// Set entry point to script
+	auto EntryPoint = &SetPlayerPosition;
+
+	// Set player position
+	SetPlayerPosition.SetInputs(&GetPlayerTransform, &AddVectors);
+
+	// Set up add vector (translate)
+	AddVectors.SetInputs(&MultiplyFloatVec, &TranslateVector);
+
+	// Set up multiply float and vector
+	MultiplyFloatVec.SetInputs(&NewPosition, &Scalar);
+
+	// Set up new position
+	NewPosition.SetInputs(&Cosine, &Sin);
+
+	// Set up cos
+	Cosine.SetInputs(&WorldTime);
+
+	// Set up sin
+	Sin.SetInputs(&WorldTime);
+
+	GetPlayerTransform.SetInputs(&PlayerIDReference);
 	
 	while(isRunning)
-	{ 
+	{
 		static float t = 0.0f;
 		t += 0.025f;
 
@@ -682,6 +725,8 @@ int main(int argc, char** argv)
 		
 		// Update HUDCamera
 		HUDCamera.Update();
+
+		StartTicks = SDL_GetTicks();
 
 
 		{
@@ -703,7 +748,6 @@ int main(int argc, char** argv)
 		static Math::Vec2 quadDimsStuff(50.0f, 50.0f);
 		static Math::Vec2 ViewPort;
 		static Math::Vec4 CameraDims;
-		static float StartTicks = 0.0f;
 		ViewPort = Math::Vec2(SCREENWIDTH, SCREENHEIGHT) / Camera.GetScale();
 		CameraDims = Math::Vec4(*PlayerStuff, quadDimsStuff / Camera.GetScale());
 
@@ -751,8 +795,16 @@ int main(int argc, char** argv)
 				// Clear entities from PlayerControllerSystem targets vector
 				World->PlayerControllerSystem->Targets.clear();
 
+				// Update world object
+				ECSS::EntitySystem::Update();
+
+				std::cout << ECSS::EntitySystem::WorldTime() << std::endl;
+
 				// Draw some random assed fire
 				// EG::Particle2D::DrawFire(LightParticleBatch, EM::Vec3(0.0f, 0.0f, 0.0f));
+
+				// Execute script
+				EntryPoint->Execute();
 		
 				TileOverlayRunTime = SDL_GetTicks() - StartTicks;		
 
@@ -798,12 +850,20 @@ int main(int argc, char** argv)
 				// Updates the world's particle engine
 				World->ParticleEngine->Update();
 
-				if (!ShowConsole) 
+				/*
+				if (!ShowConsole)
 				{
 					StartTicks = SDL_GetTicks();	
 					PlayerController::Update(World->PlayerControllerSystem);
 					PlayerControllerTime = (SDL_GetTicks() - StartTicks);
 				}
+				*/
+	
+
+				// Display Data
+				// std::cout << "Player Position: " << SetPlayerPosition.Data << std::endl;
+
+				std::cout << MultiplyFloatVec.Data << std::endl;
 			}
 
 			// Check for input
@@ -4931,7 +4991,7 @@ if (Diff.y < 0.0f) AimAngle *= -1;
 // slut balls
 #endif
 
-#if 1
+#if 0
 
 #include <stdio.h>
 #include <iostream>
@@ -4939,16 +4999,16 @@ if (Diff.y < 0.0f) AimAngle *= -1;
 
 #include <System/Types.h>
 #include <System/Internals.h>
-#include <Scripting/ScriptNode.h>
-#include <Scripting/Vec3ScriptNode.h>
-#include <Scripting/TrigonometricScriptNode.h>
-#include <Scripting/FloatScriptNode.h>
+#include <Scripting/ScriptingNode.h>
 #include <Math/Maths.h>
 #include <Defines.h>
 
 using namespace Enjon;
 using namespace Scripting;
 
+#ifdef main
+	#undef main
+#endif
 int main(int argc, char** argv)
 {
 	EM::Vec3 VecA(0.0f, 0.0f, 0.0f);
@@ -4964,7 +5024,7 @@ int main(int argc, char** argv)
 		EFloatNode NegOne(-1.0f);
 		CastToDegreesNode CTD;
 		FloatMultiplicationNode FMN;
-		Vec3SubtractionNode VSN;
+		Vec3SubtractionVec3Node VSN;
 		Vec3NormalizeNode VN;
 		Vec3DotProductNode VDP;
 		Vec3GetYComponentNode VGY;

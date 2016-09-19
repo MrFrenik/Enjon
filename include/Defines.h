@@ -17,6 +17,8 @@
 #define EGUI 	Enjon::GUI
 #define EP		Enjon::Physics
 #define EA		Enjon::Animation
-#define EN     Enjon::Internals
+#define EN     	Enjon::Internals
+#define ECSS	ECS::Systems
+#define EScript	Enjon::Scripting
 
 #endif

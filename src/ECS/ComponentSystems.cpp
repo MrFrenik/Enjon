@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <algorithm>
+#include <cfloat>
 
 
 void printDebug(char* message);
@@ -39,6 +40,21 @@ namespace ECS { namespace Systems {
 		EntityManager WorldObject;
 
 		eid32 FindNextAvailableEntity(EntityManager* Manager);
+
+		void Update()
+		{
+			// Just some random crap for now
+			// TODO(John): Actually calculate DT eventually...
+			WorldObject.Time += 0.01f;
+
+			if (WorldObject.Time >= FLT_MAX) WorldObject.Time = 0.0f;
+		}
+
+		/* Returns world time in ticks */
+		Enjon::f32 WorldTime()
+		{
+			return WorldObject.Time;
+		}
 
 		// Sets up WorldObject and returns it
 		struct EntityManager* NewEntityManager(int Width, int Height, EG::Camera2D* Camera, Level* Lvl)

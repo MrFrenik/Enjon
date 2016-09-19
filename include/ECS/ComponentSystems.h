@@ -72,6 +72,8 @@ namespace ECS { namespace Systems {
 		Level* Lvl;
 
 		std::vector<eid32> Entities;
+
+		Enjon::f32 Time;
 	};
 
 	////////////////////
@@ -101,6 +103,11 @@ namespace ECS { namespace Systems {
 
 		/* Adds components to entity by bitwise | */
 		void AddComponents(bitmask32 Components);
+
+		/* Returns world time in ticks */
+		Enjon::f32 WorldTime();
+
+		void Update();
 	}
 }}
 

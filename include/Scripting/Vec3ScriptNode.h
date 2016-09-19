@@ -11,19 +11,56 @@ namespace Enjon { namespace Scripting {
 		EVec3Node()
 		{
 			this->Data = EM::Vec3(0.0f, 0.0f, 0.0f);
+			this->InputA = nullptr;
+			this->InputB = nullptr;
+			this->InputC = nullptr;
 		}
 
 		EVec3Node(const Enjon::f32& X, const Enjon::f32& Y, const Enjon::f32& Z)
 		{
+			this->InputA = nullptr;
+			this->InputB = nullptr;
+			this->InputC = nullptr;
 			this->Data = EM::Vec3(X, Y, Z);
 		}
 
 		EVec3Node(const EM::Vec3& _Value)
 		{
+			this->InputA = nullptr;
+			this->InputB = nullptr;
+			this->InputC = nullptr;
 			this->Data = _Value;
 		}
 
-		void Execute() {}
+		void SetInputs(ScriptNodeBase* A = nullptr, ScriptNodeBase* B = nullptr, ScriptNodeBase* C = nullptr)
+		{
+			this->InputA = A;
+			this->InputB = B;
+			this->InputC = C;
+		}
+
+		void Execute() 
+		{
+			if (InputA != nullptr)
+			{
+				InputA->Execute();
+				this->Data.x = static_cast<Enjon::f32>(static_cast<AccessNode<Enjon::f32>*>(InputA)->Data);
+			}
+			if (InputB != nullptr)
+			{
+				InputB->Execute();
+				this->Data.y = static_cast<Enjon::f32>(static_cast<AccessNode<Enjon::f32>*>(InputB)->Data);
+			}
+			if (InputC != nullptr)
+			{
+				InputC->Execute();
+				this->Data.z = static_cast<Enjon::f32>(static_cast<AccessNode<Enjon::f32>*>(InputC)->Data);
+			}
+		}
+
+		ScriptNodeBase* InputA;
+		ScriptNodeBase* InputB;
+		ScriptNodeBase* InputC;
 	};
 
 	struct Vec3IsEqualCompareBranchNode : public CompareBranchNode<Vec3IsEqualCompareBranchNode, EM::Vec3>
@@ -160,7 +197,7 @@ namespace Enjon { namespace Scripting {
 		void FillData(ScriptNodeBase* A, EM::Vec3* AV)
 		{
 			static_cast<T*>(this)->HasExecuted = true;
-			
+
 			// Execute child
 			if (A != nullptr)
 			{
@@ -176,6 +213,66 @@ namespace Enjon { namespace Scripting {
 
 		ScriptNodeBase* InputA;
 		EM::Vec3 A_Value;
+	};
+
+	template <typename T, typename K>
+	struct Vec3FloatBinaryOperationNode : public ScriptNode<Vec3FloatBinaryOperationNode<T, K>, EM::Vec3>
+	{
+		Vec3FloatBinaryOperationNode()
+		{
+			InputA = nullptr;
+		}
+
+		void Execute()
+		{
+			static_cast<T*>(this)->Execute();
+		}
+
+		void FillData(ScriptNodeBase* A, ScriptNodeBase* B, EM::Vec3* AV, Enjon::f32* BV)
+		{
+			static_cast<T*>(this)->HasExecuted = true;
+
+			// Execute child
+			if (A != nullptr)
+			{
+				A->Execute();
+				GetValue<EM::Vec3>(A, AV);
+			}
+
+			// Execute child
+			if (B != nullptr)
+			{
+				B->Execute();
+				GetValue<Enjon::f32>(B, BV);
+			}
+		}
+
+		void SetInputs(ScriptNodeBase* A, ScriptNodeBase* B)
+		{
+			this->InputA = A;
+			this->InputB = B;
+		}
+
+		ScriptNodeBase* InputA;
+		ScriptNodeBase* InputB;
+		EM::Vec3 A_Value;
+		Enjon::f32 B_Value;
+	};
+
+	struct Vec3MultiplicationFloatNode : public Vec3FloatBinaryOperationNode<Vec3MultiplicationFloatNode, EM::Vec3>
+	{
+		Vec3MultiplicationFloatNode()
+		{
+			A_Value = EM::Vec3(1.0f, 1.0f, 1.0f);
+			B_Value = 1.0f;
+		}
+
+		void Execute()
+		{
+			FillData(InputA, InputB, &A_Value, &B_Value);
+			std::cout << "B Value: " << B_Value << std::endl;
+			this->Data = A_Value * B_Value;
+		}
 	};
 
 	struct Vec3LengthNode : Vec3UnaryOperationNode<Vec3LengthNode, Enjon::f32>
@@ -221,9 +318,9 @@ namespace Enjon { namespace Scripting {
 		}
 	};
 
-	struct Vec3SubtractionNode : public Vec3ArithmeticNode<Vec3SubtractionNode>
+	struct Vec3SubtractionVec3Node : public Vec3ArithmeticNode<Vec3SubtractionVec3Node>
 	{
-		Vec3SubtractionNode()
+		Vec3SubtractionVec3Node()
 		{
 			this->A_Value = EM::Vec3(1.0f, 1.0f, 1.0f);
 			this->B_Value = EM::Vec3(1.0f, 1.0f, 1.0f);
@@ -236,9 +333,9 @@ namespace Enjon { namespace Scripting {
 		}
 	};
 
-	struct Vec3AdditionNode : public Vec3ArithmeticNode<Vec3AdditionNode>
+	struct Vec3AdditionVec3Node : public Vec3ArithmeticNode<Vec3AdditionVec3Node>
 	{
-		Vec3AdditionNode()
+		Vec3AdditionVec3Node()
 		{
 			this->A_Value = EM::Vec3(1.0f, 1.0f, 1.0f);
 			this->B_Value = EM::Vec3(1.0f, 1.0f, 1.0f);
@@ -251,9 +348,9 @@ namespace Enjon { namespace Scripting {
 		}
 	};
 
-	struct Vec3MultiplicationNode : public Vec3ArithmeticNode<Vec3MultiplicationNode>
+	struct Vec3MultiplicationVec3Node : public Vec3ArithmeticNode<Vec3MultiplicationVec3Node>
 	{
-		Vec3MultiplicationNode()
+		Vec3MultiplicationVec3Node()
 		{
 			this->A_Value = EM::Vec3(1.0f, 1.0f, 1.0f);
 			this->B_Value = EM::Vec3(1.0f, 1.0f, 1.0f);
@@ -266,9 +363,9 @@ namespace Enjon { namespace Scripting {
 		}
 	};
 
-	struct Vec3DivisionNode : public Vec3ArithmeticNode<Vec3DivisionNode>
+	struct Vec3DivisionVec3Node : public Vec3ArithmeticNode<Vec3DivisionVec3Node>
 	{
-		Vec3DivisionNode()
+		Vec3DivisionVec3Node()
 		{
 			this->A_Value = EM::Vec3(1.0f, 1.0f, 1.0f);
 			this->B_Value = EM::Vec3(1.0f, 1.0f, 1.0f);
@@ -340,7 +437,6 @@ namespace Enjon { namespace Scripting {
 			this->Data = A_Value.z;
 		}
 	};
-
 }}
 
 #endif

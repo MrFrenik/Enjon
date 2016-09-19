@@ -34,8 +34,9 @@ namespace ECS { namespace Component {
 	enum AnimationState 			{ IDLE, WALKING, ATTACKING };
 
 	// Transform struct
-	typedef struct
+	struct Transform3D
 	{
+		Transform3D(){}
 		// NOTE(John): This is getting a bit bloated...
 		// NOTE(John): Yep, make a physics component
 		Enjon::Math::Vec3 Position;
@@ -55,7 +56,7 @@ namespace ECS { namespace Component {
 		float VelocityGoalScale; 
 		float Mass;
 		eid32 Entity;
-	} Transform3D;
+	};
 
 	// Position struct
 	typedef struct
