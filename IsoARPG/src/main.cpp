@@ -48,6 +48,7 @@
 #include <BehaviorTree/BehaviorTreeManager.h>
 #include <Utils/Functions.h>
 #include <Scripting/ScriptingNode.h>
+#include <CVarsSystem.hpp>
 
 /*-- Entity Component System includes --*/
 #include <ECS/ComponentSystems.h>
@@ -605,7 +606,7 @@ int main(int argc, char** argv)
 			}
 		}
 		// Clear the elements
-		else if (Elements.at(0).compare("clear") == 0)
+		else if (Elements.at(0).compare("clear") == 0 || Elements.at(0).compare("cls") == 0)
 		{
 			ConsoleOutput.clear();
 		}
@@ -693,9 +694,27 @@ int main(int argc, char** argv)
 				}
 			}
 		}
+		else if (Elements.at(0).compare("c_help") == 0)
+		{
+			auto registeredCommands = CVarsSystem::GetRegisteredCommands();
+			ConsoleOutput.push_back("Console Variables Available:");
+			for (auto& c : registeredCommands) ConsoleOutput.push_back(c);
+		}
 		else
 		{
-			ConsoleOutput.push_back("Cannot find operation: " + Elements.at(0));
+			// Register command with CVar System
+			if (Elements.size() < 2) ConsoleOutput.push_back("need argument for cvar");
+			else
+			{
+				if (!CVAR_SET(Elements.at(0), std::atof(Elements.at(1).c_str())))
+				{
+					ConsoleOutput.push_back("Cvar does not exist: " + Elements.at(0));
+				}
+				else
+				{
+					ConsoleOutput.push_back("Set " + Elements.at(0) + ": " + Elements.at(1));
+				}
+			}
 		}
 		
 		// Clear the console text

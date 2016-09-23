@@ -117,7 +117,7 @@ namespace Enjon { namespace GUI {
 
 			// Initialize members
 			Name 			= std::string("GUITextBox");
-			Text 			= std::string("Input Text");
+			Text 			= std::string("");
 			CursorIndex 	= 0;
 			TextColor 		= EG::RGBA16_White();
 			Color 	 		= EG::RGBA16_DarkGrey();

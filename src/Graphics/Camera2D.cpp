@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "Graphics/Camera2D.h"
+#include "CvarsSystem.hpp"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -28,6 +29,11 @@ namespace Enjon { namespace Graphics {
 		m_orthoMatrix = Enjon::Math::Mat4::Orthographic(0.0f, (float)m_screenWidth, 0.0f, (float)m_screenHeight, -1, 1);
 		m_shake_counter = 0.0f;
 		m_shake_intensity = 0.0f;
+
+		// Register with CVars
+		CVAR_REGISTER("gfx_cameraScale", &m_scalar, TYPE_FLOAT);
+		CVAR_REGISTER("gfx_cameraShakeCounter", &m_shake_counter, TYPE_FLOAT);
+		CVAR_REGISTER("gfx_cameraShakeIntensity", &m_shake_intensity, TYPE_FLOAT);
 	}
 
 	void Camera2D::Update(){
