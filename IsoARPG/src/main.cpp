@@ -21,7 +21,7 @@
 * MAIN GAME
 */
 
-#if 1
+#if 0
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
@@ -4552,7 +4552,7 @@ int main(int argc, char** argv)
 #endif
 
 
-#if 0
+#if 1
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -4572,6 +4572,12 @@ int main(int argc, char** argv)
 	#define SCREENRES EG::DEFAULT
 #endif 
 
+#define PROFILE(profiled) \
+	ticks = SDL_GetTicks();
+
+#define ENDPROFILE(profiled) \
+	printf("%s: %d\n", profiled, SDL_GetTicks() - ticks);
+
 #include <iostream>
 
 #include <Enjon.h>
@@ -4579,10 +4585,13 @@ int main(int argc, char** argv)
 #include <Graphics/Camera3D.h>
 #include <Graphics/ModelAsset.h>
 #include <Graphics/Camera.h>
+#include <Generated.h>
+#include <TestComponent.h>
 
 EG::ModelAsset GlobalModel;
 EG::ModelAsset Floor;
 EG::ModelAsset Wall;
+EG::ModelAsset Cube;
 std::vector<EG::ModelInstance> Instances;
 
 void LoadSpriteAsset()
@@ -4644,6 +4653,94 @@ void LoadSpriteAsset()
     GlobalModel.DrawCount = 6;
 }
 
+void LoadCubeAsset()
+{
+	EG::Vertex3 Verticies[] = 
+	{
+		{{-0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 0.0f}},
+	    {{ 0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
+	    {{ 0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 1.0f}},
+	    {{ 0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 1.0f}},
+	    {{-0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
+	    {{-0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 0.0f}},
+
+	    {{-0.5f, -0.5f,  0.5f}, EG::RGBA8_MidGrey(), {0.0f, 0.0f}},
+	    {{ 0.5f, -0.5f,  0.5f}, EG::RGBA8_MidGrey(), {1.0f, 0.0f}},
+	    {{ 0.5f,  0.5f,  0.5f}, EG::RGBA8_MidGrey(), {1.0f, 1.0f}},
+	    {{ 0.5f,  0.5f,  0.5f}, EG::RGBA8_MidGrey(), {1.0f, 1.0f}},
+	    {{-0.5f,  0.5f,  0.5f}, EG::RGBA8_MidGrey(), {0.0f, 1.0f}},
+	    {{-0.5f, -0.5f,  0.5f}, EG::RGBA8_MidGrey(), {0.0f, 0.0f}},
+
+	    {{-0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
+	    {{-0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 1.0f}},
+	    {{-0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
+	    {{-0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
+	    {{-0.5f, -0.5f,  0.5f}, EG::RGBA8_White(), {0.0f, 0.0f}},
+	    {{-0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
+
+	    {{ 0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
+	    {{ 0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 1.0f}},
+	    {{ 0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
+	    {{ 0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
+	    {{ 0.5f, -0.5f,  0.5f}, EG::RGBA8_White(), {0.0f, 0.0f}},
+	    {{ 0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
+
+	    {{-0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
+	    {{ 0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 1.0f}},
+	    {{ 0.5f, -0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
+	    {{ 0.5f, -0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
+	    {{-0.5f, -0.5f,  0.5f}, EG::RGBA8_White(), {0.0f, 0.0f}},
+	    {{-0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
+
+	    {{-0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
+	    {{ 0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 1.0f}},
+	    {{ 0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
+	    {{ 0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
+	    {{-0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {0.0f, 0.0f}},
+	    {{-0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}}
+	};
+
+	    glGenBuffers(1, &Cube.VBO);
+	    glBindBuffer(GL_ARRAY_BUFFER, Cube.VBO);
+	    glBufferData(GL_ARRAY_BUFFER, sizeof(Verticies), Verticies, GL_STATIC_DRAW);
+
+	    glGenVertexArrays(1, &Cube.VAO);
+	    glBindVertexArray(Cube.VAO);
+
+	    glEnableVertexAttribArray(0);
+	    glEnableVertexAttribArray(1);
+	    glEnableVertexAttribArray(2);
+
+	    // Position
+	    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex3), (void*)offsetof(EG::Vertex3, position));
+	    glEnableVertexAttribArray(0);
+	    // Color
+	    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(EG::Vertex3), (void*)offsetof(EG::Vertex3, color));
+	    glEnableVertexAttribArray(1);
+	    // UV
+	    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex3), (void*)offsetof(EG::Vertex3, uv));
+	    glEnableVertexAttribArray(2);
+
+	    // Unbind VAO
+	    glBindVertexArray(0);
+
+
+	    // Get shader and set texture
+	    auto Shader = EG::ShaderManager::GetShader("Default");
+	    Shader->Use();
+	    	Shader->SetUniform("tex", 0);
+	    Shader->Unuse();
+
+	    // Set shader
+	    Cube.Shader = Shader;
+	    // Set texture
+	    Cube.Texture = EI::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png");
+	    // Set draw type
+	    Cube.DrawType = GL_TRIANGLES;
+	    // Set draw count
+	    Cube.DrawCount = 36;
+}
+
 void LoadFloorAsset()
 {
 	EG::Vertex3 Verticies[] = 
@@ -4703,6 +4800,7 @@ void LoadFloorAsset()
     Floor.DrawCount = 6;
 }
 
+const u32 ENTITY_AMOUNT = 10;
 
 void LoadInstances()
 {
@@ -4711,11 +4809,20 @@ void LoadInstances()
 	A.Transform.Position = EM::Vec3(0, 0, 0);
 	Instances.push_back(A);
 
-	EG::ModelInstance B;
-	B.Asset = &GlobalModel;
-	B.Transform.Position = EM::Vec3(5, 0, 5);
-	B.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(45), EM::Vec3(0, 1, 0));
-	Instances.push_back(B);
+	for (u32 i = 0; i < ENTITY_AMOUNT; i++)
+	{
+		EG::ModelInstance MI;
+		MI.Asset = &Cube;
+		MI.Transform.Position = EM::Vec3(ER::Roll(-20, 20), 0, ER::Roll(-20, 20));	
+		MI.Transform.Scale = EM::Vec3(ER::Roll(1, 5), ER::Roll(1, 5), ER::Roll(1, 5)) * 0.25f;
+		MI.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(ER::Roll(-180, 180)), EM::Vec3(0, 1, 0));
+		Instances.push_back(MI);
+	}
+
+	EG::ModelInstance C;
+	C.Asset = &Cube;
+	C.Transform.Position = EM::Vec3(2, 0, 4);
+	Instances.push_back(C);
 
 	auto map_size = 10;
 	for (auto i = 0; i < map_size; i++)
@@ -4738,31 +4845,160 @@ void RenderInstance(const EG::ModelInstance& Instance)
 
 	static GLint CurrentTextureID = 0;
 
-	glBindVertexArray(Asset->VAO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Asset->IBO);
+	switch(Asset->DrawType)
 	{
-		if (CurrentTextureID != Asset->Texture.id)
+		case GL_TRIANGLE_STRIP:
 		{
-			CurrentTextureID = Asset->Texture.id;
+			glBindVertexArray(Asset->VAO);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Asset->IBO);
+			{
+				if (CurrentTextureID != Asset->Texture.id)
+				{
+					CurrentTextureID = Asset->Texture.id;
 
-	        // Bind instance texture
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, Asset->Texture.id);
-		}
+			        // Bind instance texture
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, Asset->Texture.id);
+				}
 
-		Asset->Shader->SetUniform("transform", Transform);
-		glDrawElements(Asset->DrawType, Asset->DrawCount, GL_UNSIGNED_INT, nullptr);
+				Asset->Shader->SetUniform("transform", Transform);
+				glDrawElements(Asset->DrawType, Asset->DrawCount, GL_UNSIGNED_INT, nullptr);
+			}
+			glBindVertexArray(0);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		} break;
+
+		case GL_TRIANGLES:
+		{
+			glBindVertexArray(Asset->VAO);
+			{
+				if (CurrentTextureID != Asset->Texture.id)
+				{
+					CurrentTextureID = Asset->Texture.id;
+
+			        // Bind instance texture
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, Asset->Texture.id);
+				}
+
+				Asset->Shader->SetUniform("transform", Transform);
+				glDrawArrays(Asset->DrawType, 0, Asset->DrawCount);
+			}
+			glBindVertexArray(0);
+		} break;
+
 	}
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 }
 
 // bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera);
 bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera);
 
+typedef u32 entity;
+
 // Main window
 EG::Window Window;
+
+ namespace EManager 
+ {
+	std::unordered_map<u32, std::vector<ComponentBase*>> componentsMap;
+
+	typedef std::vector<ComponentBase*> ComponentList;
+
+	void AttachComponent(u32 ent, ComponentBase* component)
+	{
+		auto search = componentsMap.find(ent);
+		if (search != componentsMap.end())
+		{
+			auto components	= &search->second;
+			components->push_back(component);
+		}
+
+		// otherwise make the entity?
+		else
+		{
+			std::vector<ComponentBase*> base;
+			base.push_back(component);
+			componentsMap[ent] = base;
+		}	
+	}
+
+	// TODO(John): Make this faster by keeping the vector
+	// sorted by metatype of tehe component so that search times
+	// are at worst O(logN)
+	template <typename T>
+	T* GetComponent(u32 ent)
+	{
+		auto search = componentsMap.find(ent);
+		if (search != componentsMap.end())
+		{
+			auto components = &search->second;
+			auto TypeName = TypeCatalog::TypeName<T>();
+			for (auto& c : *components)
+			{
+				if (c->TypeName == TypeName)
+				{
+					return reinterpret_cast<T*>(c);
+				}	
+			}
+		}
+		// I don't want to do this though...
+		assert(false);
+	}
+
+	template <typename T>
+	void RemoveComponent(u32 ent)
+	{
+		auto search = componentsMap.find(ent);
+		if (search != componentsMap.end())
+		{
+			auto components = &search->second;
+			ComponentBase* castComp = nullptr;
+			for (auto i = 0; i < components->size(); i++)
+			{
+				auto castComp = dynamic_cast<T*>(components->at(i));
+				if (castComp != 0)
+				{
+					std::swap(components->at(i), components->back());
+					auto comp = dynamic_cast<T*>(components->back());
+					delete(comp);
+					components->pop_back();
+					return;
+				}
+			}
+		}
+	}
+
+	ComponentList* GetComponents(u32 ent)
+	{
+		auto search = componentsMap.find(ent);
+		if (search != componentsMap.end())
+		{
+			return &search->second;
+		}
+	}
+
+	template <typename T>
+	std::vector<T*> GetAllOfComponentType()
+	{
+		std::vector<T*> list;
+
+		for (auto& ent : componentsMap)
+		{
+			auto components = &ent.second;
+			auto TypeName = TypeCatalog::TypeName<T>();
+			for (auto& c : *components)
+			{
+				if (c->TypeName == TypeName)
+				{
+					list.push_back(reinterpret_cast<T*>(c));
+				}
+			}
+		}	
+
+		return list;
+	}
+}
 
 
 // The MAIN function, from here we start the application and run the game loop
@@ -4776,10 +5012,12 @@ int main(int argc, char** argv)
 	float t = 0.0f;
 	float FPS = 0.0f;
 	float TimeIncrement = 0.0f;
+	u32 ticks = 0;
 
 	// Initialize window
 	Window.Init("3D Test", SCREENWIDTH, SCREENHEIGHT, SCREENRES);
 	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
+
 
 	// Init ShaderManager
 	EG::ShaderManager::Init(); 
@@ -4797,6 +5035,7 @@ int main(int argc, char** argv)
 	// Load model data
 	LoadSpriteAsset();
 	LoadFloorAsset();
+	LoadCubeAsset();
 	LoadInstances();
 
 	EU::FPSLimiter Limiter;
@@ -4807,6 +5046,9 @@ int main(int argc, char** argv)
 
     // Setup OpenGL options
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_CLAMP);
+    glEnable( GL_MULTISAMPLE );
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
     // Initialize FPSCamera
 	FPSCamera.Transform.Position = EM::Vec3(7, 2, 7);
@@ -4816,15 +5058,21 @@ int main(int argc, char** argv)
 	FPSCamera.ViewPortAspectRatio = (Enjon::f32)SCREENWIDTH / (Enjon::f32)SCREENHEIGHT;
 	FPSCamera.OrthographicScale = 4.5f;
 
+	for (u32 i = 0; i < ENTITY_AMOUNT; i++)
+	{
+		entity E = i;
+		EManager::AttachComponent(E, new PositionComponent(0.0f, 0.0f, 0.0f));
+		EManager::AttachComponent(E, new VelocityComponent(1.0f, 0.0f, 1.0f));
+	}
+
 
     // Game loop
     bool running = true;
     while (running)
     {
     	static float t = 0.0f;
-    	t += 0.01f;
+    	t += 0.001f;
     	if (t > 50000.0f) t = 0.0f;
-
 
     	Input.Update();
 
@@ -4839,6 +5087,42 @@ int main(int argc, char** argv)
     	// Update the FPS camera
     	EM::Vec3& CamPos = FPSCamera.Transform.Position;
 
+    	static float timer = 0.0f;
+    	timer += 0.01f;
+    	if (timer >= 20.0f)
+    	{
+    		for (u32 i = 0; i < ENTITY_AMOUNT; i++)
+    		{
+    			auto Velocity = EManager::GetComponent<VelocityComponent>(i);
+    			Velocity->x = ER::Roll(-1.0f, 1.0f);
+    			Velocity->y = 0.0f;
+    			Velocity->z = ER::Roll(-1.0f, 1.0f);
+    		}
+    		timer = 0.0f;
+    	}
+
+    	// Update entities
+    	PROFILE("Updating_Positions_and_Velocities")
+    	for (u32 i = 1; i < ENTITY_AMOUNT; i++)
+    	{
+    		auto Position = EManager::GetComponent<PositionComponent>(i);
+    		auto Velocity = EManager::GetComponent<VelocityComponent>(i);
+
+    		Position->x += Velocity->x;
+    		Position->y += Velocity->y;
+    		Position->z += Velocity->z;
+
+    		// auto InstancePosition = &Instances.at(i).Transform.Position;
+    		// InstancePosition->x = sin(t) * 0.5f;
+    	}
+    	static float profiletime = 0.0f;
+    	profiletime += 0.01f;
+    	if (profiletime >= 1.0f)
+    	{
+	    	ENDPROFILE("Updating_Positions_and_Velocities")
+	    	profiletime = 0.0f;
+    	}
+
     	// Rendering
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
 
@@ -4848,7 +5132,9 @@ int main(int argc, char** argv)
 
         // Change rotation over time
         Instances.at(0).Transform.Orientation = EM::Quaternion::AngleAxis(120 * EM::ToRadians(t), EM::Vec3(0, 1, 0));
+        Instances.at(1).Transform.Orientation = EM::Quaternion::AngleAxis(120 * EM::ToRadians(t), EM::Vec3(0, 1, 0));
 
+        PROFILE("Rendering")
         auto FirstAsset = Instances.at(0).Asset;
         auto Shader = FirstAsset->Shader;
         Shader->Use();
@@ -4861,6 +5147,14 @@ int main(int argc, char** argv)
 	        }
         }
         Shader->Unuse();
+
+        static float rendertime = 0.0f;
+        rendertime += 0.01f;
+        if (rendertime >= 1.0f)
+        {
+        	ENDPROFILE("Rendering")
+        	rendertime = 0.0f;
+        }
 
         // Swap the screen buffers
         Window.SwapBuffer();
@@ -4948,8 +5242,6 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 
 		Camera->Transform.Position += speed * dt * VelDir;
 
-		std::cout << Camera->Transform.Orientation << std::endl;;
-
 		auto MouseSensitivity = 7.5f;
 
 		// Get mouse input and change orientation of camera
@@ -5021,18 +5313,19 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 		Camera->ProjType = EG::ProjectionType::Orthographic;
 	}
 
+	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyPressed(SDLK_m))
+	{
+		glEnable(GL_MULTISAMPLE);
+	}
+	else if (Input->IsKeyPressed(SDLK_m))
+	{
+		glDisable(GL_MULTISAMPLE);
+	}
+
 
 	return true;
 }
 
-Math::Vec2 MouseCoords = Input.GetMouseCoords();
-Camera.ConvertScreenToWorld(MouseCoords);
-static Math::Vec2 right(1.0f, 0.0f);
-Math::Vec2 Diff = Math::Vec2::Normalize(World->TransformSystem->Transforms[Player].Position.XY() - MouseCoords);
-float DotProduct = Diff.DotProduct(right);
-float AimAngle = acos(DotProduct) * 180.0f / M_PI;
-if (Diff.y < 0.0f) AimAngle *= -1; 
-// printf("Aim Angle: %.2f\n", AimAngle);
 
 // slut balls
 #endif

@@ -5,7 +5,8 @@
 #include <string>
 
 #define CVAR_REGISTER(key, val, type) 		CVarsSystem::Register(key, val, type)
-#define CVAR_SET(key, val) 					CVarsSystem::Set(key, val)	
+#define CVAR_SET(key, val) 					CVarsSystem::Set(key, val)
+#define CVAR_GET_REGISTERED()				CVarsSystem::GetRegisteredCommands()	
 
 enum CVarType
 {
