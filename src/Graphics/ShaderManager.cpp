@@ -21,6 +21,7 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("BasicLighting", "../shaders/lighting_basic.v.glsl", "../shaders/lighting_basic.f.glsl");
 		ShaderManager::AddShader("Learn", "../shaders/learn.v.glsl", "../shaders/learn.f.glsl");
 		ShaderManager::AddShader("Lamp", "../shaders/learn.v.glsl", "../shaders/lamplight.f.glsl");
+		ShaderManager::AddShader("DefaultLighting", "../shaders/defaultLight.v.glsl", "../shaders/defaultLight.f.glsl");
 	}
 
 	void AddShader(const char* shadername, const char* vertpath, const char* fragpath)
@@ -40,6 +41,7 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 
 		else
 		{
+			std::cout << "Nope!\n";
 			// Otherwise not found
 			std::string errorstr = shadername;
 			Utils::FatalError("SHADERMANAGER::GETSHADER::SHADER_NOT_FOUND::" + errorstr);

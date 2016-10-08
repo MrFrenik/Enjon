@@ -24,6 +24,7 @@ namespace Enjon { namespace Graphics {
 
 		void LookAt(EM::Vec3& Position, EM::Vec3& Up = EM::Vec3(0, 1, 0));
 		void OffsetOrientation(const f32& Yaw, const f32& Pitch);
+		EM::Vec3 GetWorldPosition();
 
 		EM::Vec3 Forward() const;
 		EM::Vec3 Backward() const;

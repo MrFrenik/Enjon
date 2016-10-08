@@ -22,7 +22,7 @@
 */
 
 #if 0
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -694,7 +694,7 @@ int main(int argc, char** argv)
 				}
 			}
 		}
-		else if (Elements.at(0).compare("c_help") == 0)
+		else if (Elements.at(0).compare("cvarlist") == 0)
 		{
 			auto registeredCommands = CVarsSystem::GetRegisteredCommands();
 			ConsoleOutput.push_back("Console Variables Available:");
@@ -4552,9 +4552,9 @@ int main(int argc, char** argv)
 #endif
 
 
-#if 1
+#if 0
 
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -4593,6 +4593,7 @@ EG::ModelAsset Floor;
 EG::ModelAsset Wall;
 EG::ModelAsset Cube;
 std::vector<EG::ModelInstance> Instances;
+EG::Camera FPSCamera;
 
 void LoadSpriteAsset()
 {
@@ -4653,92 +4654,122 @@ void LoadSpriteAsset()
     GlobalModel.DrawCount = 6;
 }
 
+struct vert3
+{
+	float Position[3];
+	float Normals[3];
+	float Tangent[3];
+	float Bitangent[3];
+	float UV[2];	
+};
+
 void LoadCubeAsset()
 {
-	EG::Vertex3 Verticies[] = 
+	// vert3 Verts[] = 
+	// {
+	// 	// Front
+	// 	{{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 0.0f}},
+	//     {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f,  0.0f}, {1.0f, 0.0f}},
+	//     {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f,  0.0f}, {1.0f, 1.0f}},
+	//     {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f,  0.0f}, {1.0f, 1.0f}},
+	//     {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f}},
+	//     {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 0.0f}},
+
+	//     // Back
+	//     {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+	//     {{ 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+	//     {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
+	//     {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
+	//     {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+	//     {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+
+	//     // Left
+	//     {{-0.5f,  0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
+	//     {{-0.5f,  0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}},
+	//     {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
+	//     {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
+	//     {{-0.5f, -0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
+	//     {{-0.5f,  0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
+
+	//     // Right
+	//     {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
+	//     {{ 0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+	//     {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+	//     {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+	//     {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+	//     {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
+
+	//     // Bottom
+	//     {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+	//     {{ 0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
+	//     {{ 0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+	//     {{ 0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+	//     {{-0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+	//     {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+
+	//     // Top
+	//     {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+	//     {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
+	//     {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+	//     {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+	//     {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+	//     {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}
+	// };
+
+	vert3 Verts[] = 
 	{
-		{{-0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 0.0f}},
-	    {{ 0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
-	    {{ 0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 1.0f}},
-	    {{ 0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 1.0f}},
-	    {{-0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
-	    {{-0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 0.0f}},
-
-	    {{-0.5f, -0.5f,  0.5f}, EG::RGBA8_MidGrey(), {0.0f, 0.0f}},
-	    {{ 0.5f, -0.5f,  0.5f}, EG::RGBA8_MidGrey(), {1.0f, 0.0f}},
-	    {{ 0.5f,  0.5f,  0.5f}, EG::RGBA8_MidGrey(), {1.0f, 1.0f}},
-	    {{ 0.5f,  0.5f,  0.5f}, EG::RGBA8_MidGrey(), {1.0f, 1.0f}},
-	    {{-0.5f,  0.5f,  0.5f}, EG::RGBA8_MidGrey(), {0.0f, 1.0f}},
-	    {{-0.5f, -0.5f,  0.5f}, EG::RGBA8_MidGrey(), {0.0f, 0.0f}},
-
-	    {{-0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
-	    {{-0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 1.0f}},
-	    {{-0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
-	    {{-0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
-	    {{-0.5f, -0.5f,  0.5f}, EG::RGBA8_White(), {0.0f, 0.0f}},
-	    {{-0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
-
-	    {{ 0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
-	    {{ 0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 1.0f}},
-	    {{ 0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
-	    {{ 0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
-	    {{ 0.5f, -0.5f,  0.5f}, EG::RGBA8_White(), {0.0f, 0.0f}},
-	    {{ 0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
-
-	    {{-0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
-	    {{ 0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 1.0f}},
-	    {{ 0.5f, -0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
-	    {{ 0.5f, -0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
-	    {{-0.5f, -0.5f,  0.5f}, EG::RGBA8_White(), {0.0f, 0.0f}},
-	    {{-0.5f, -0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
-
-	    {{-0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}},
-	    {{ 0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {1.0f, 1.0f}},
-	    {{ 0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
-	    {{ 0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {1.0f, 0.0f}},
-	    {{-0.5f,  0.5f,  0.5f}, EG::RGBA8_White(), {0.0f, 0.0f}},
-	    {{-0.5f,  0.5f, -0.5f}, EG::RGBA8_White(), {0.0f, 1.0f}}
+		// Position 		  // Normal 		 // Tangent 		 // Bitangent        // UV
+		{{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+	    {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+	    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+	    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
+	    {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+	    {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}
 	};
 
-	    glGenBuffers(1, &Cube.VBO);
-	    glBindBuffer(GL_ARRAY_BUFFER, Cube.VBO);
-	    glBufferData(GL_ARRAY_BUFFER, sizeof(Verticies), Verticies, GL_STATIC_DRAW);
 
-	    glGenVertexArrays(1, &Cube.VAO);
-	    glBindVertexArray(Cube.VAO);
+    glGenBuffers(1, &Cube.VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, Cube.VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Verts), Verts, GL_STATIC_DRAW);
 
-	    glEnableVertexAttribArray(0);
-	    glEnableVertexAttribArray(1);
-	    glEnableVertexAttribArray(2);
+    glGenVertexArrays(1, &Cube.VAO);
+    glBindVertexArray(Cube.VAO);
 
-	    // Position
-	    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex3), (void*)offsetof(EG::Vertex3, position));
-	    glEnableVertexAttribArray(0);
-	    // Color
-	    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(EG::Vertex3), (void*)offsetof(EG::Vertex3, color));
-	    glEnableVertexAttribArray(1);
-	    // UV
-	    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vertex3), (void*)offsetof(EG::Vertex3, uv));
-	    glEnableVertexAttribArray(2);
+    // Position
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Position));
+    // Normal
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Normals));
+    // Tangent
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Tangent));
+    // Bitangent
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Bitangent));
+    // UV
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, UV));
 
-	    // Unbind VAO
-	    glBindVertexArray(0);
+    // Unbind VAO
+    glBindVertexArray(0);
 
 
-	    // Get shader and set texture
-	    auto Shader = EG::ShaderManager::GetShader("Default");
-	    Shader->Use();
-	    	Shader->SetUniform("tex", 0);
-	    Shader->Unuse();
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    Shader->Unuse();
 
-	    // Set shader
-	    Cube.Shader = Shader;
-	    // Set texture
-	    Cube.Texture = EI::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png");
-	    // Set draw type
-	    Cube.DrawType = GL_TRIANGLES;
-	    // Set draw count
-	    Cube.DrawCount = 36;
+    // Set shader
+    Cube.Shader = Shader;
+    // Set texture
+    Cube.Texture = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
+    // Set draw type
+    Cube.DrawType = GL_TRIANGLES;
+    // Set draw count
+    Cube.DrawCount = 6;
 }
 
 void LoadFloorAsset()
@@ -4800,7 +4831,7 @@ void LoadFloorAsset()
     Floor.DrawCount = 6;
 }
 
-const u32 ENTITY_AMOUNT = 10;
+const u32 ENTITY_AMOUNT = 2;
 
 void LoadInstances()
 {
@@ -4881,7 +4912,21 @@ void RenderInstance(const EG::ModelInstance& Instance)
 					glBindTexture(GL_TEXTURE_2D, Asset->Texture.id);
 				}
 
-				Asset->Shader->SetUniform("transform", Transform);
+				// Bind normal
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png").id);
+
+				EM::Mat4 Model;
+				// L = T*R*S
+				// Model *= EM::Mat4::Scale(Transform.Scale);
+				Model = Model * EM::Mat4::Translate(Transform.Position) * EM::QuaternionToMat4(Transform.Orientation);
+
+				auto CamPos = FPSCamera.Transform.Position;
+
+				Asset->Shader->SetUniform("model", Model);
+				// Asset->Shader->SetUniform("transform", Transform);
+				Asset->Shader->SetUniform("lightColor", EM::Vec3(1.0f, 0.0f, 0.0f));
+				Asset->Shader->SetUniform("lightPosition", CamPos);
 				glDrawArrays(Asset->DrawType, 0, Asset->DrawCount);
 			}
 			glBindVertexArray(0);
@@ -5025,9 +5070,7 @@ int main(int argc, char** argv)
 	// Init FontManager
 	EG::FontManager::Init();
 
-	EG::Camera3D Camera(EM::Vec3(0.0f, 3.0f, 3.0f));
-
-	EG::Camera FPSCamera((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
+	FPSCamera = EG::Camera((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
 
 	EG::SpriteBatch Batch;
 	Batch.Init();
@@ -5081,9 +5124,6 @@ int main(int argc, char** argv)
     	// Camera.Update();
     	auto MouseCoords = Input.GetMouseCoords();
 
-    	// Camera.Update(MouseCoords, EM::Vec2(SCREENWIDTH, SCREENHEIGHT));
-    	Camera.Update();
-
     	// Update the FPS camera
     	EM::Vec3& CamPos = FPSCamera.Transform.Position;
 
@@ -5130,23 +5170,26 @@ int main(int argc, char** argv)
         EM::Mat4 CameraMatrix;
     	CameraMatrix = FPSCamera.GetViewMatrix();
 
-        // Change rotation over time
         Instances.at(0).Transform.Orientation = EM::Quaternion::AngleAxis(120 * EM::ToRadians(t), EM::Vec3(0, 1, 0));
-        Instances.at(1).Transform.Orientation = EM::Quaternion::AngleAxis(120 * EM::ToRadians(t), EM::Vec3(0, 1, 0));
+
+        // Change rotation over time
+        for (u32 i = 1; i < ENTITY_AMOUNT; i++)
+        {
+	        Instances.at(i).Transform.Orientation = EM::Quaternion::AngleAxis(120 * EM::ToRadians(t), EM::Vec3(0, 1, 0)) * 
+	        										EM::Quaternion::AngleAxis(80  * EM::ToRadians(t), EM::Vec3(0, 0, 1)) * 
+	        										EM::Quaternion::AngleAxis(60  * EM::ToRadians(t), EM::Vec3(1, 0, 0));
+        }
 
         PROFILE("Rendering")
-        auto FirstAsset = Instances.at(0).Asset;
-        auto Shader = FirstAsset->Shader;
-        Shader->Use();
-        {
-        	Shader->SetUniform("camera", CameraMatrix);
 
-	        for (auto& c : Instances)
-	        {
+        for (auto& c : Instances)
+        {
+        	auto Shader = c.Asset->Shader;
+        	Shader->Use();
+	        	Shader->SetUniform("camera", CameraMatrix);
 		        RenderInstance(c);
-	        }
+	        Shader->Unuse();
         }
-        Shader->Unuse();
 
         static float rendertime = 0.0f;
         rendertime += 0.01f;
@@ -5418,8 +5461,619 @@ int main(int argc, char** argv)
 #endif
 
 
+#if 1
+
+#define FULLSCREENMODE   0
+#define SECOND_DISPLAY   0
+
+#if FULLSCREENMODE
+	#if SECOND_DISPLAY
+		#define SCREENWIDTH 1440
+		#define SCREENHEIGHT 900
+	#else
+		#define SCREENWIDTH  1920
+		#define SCREENHEIGHT 1080
+	#endif
+	#define SCREENRES    EG::FULLSCREEN
+#else
+	#define SCREENWIDTH  1024
+	#define SCREENHEIGHT 768
+	#define SCREENRES EG::DEFAULT
+#endif 
+
+#define PROFILE(profiled) \
+	ticks = SDL_GetTicks();
+
+#define ENDPROFILE(profiled) \
+	printf("%s: %d\n", profiled, SDL_GetTicks() - ticks);
+
+#include <iostream>
+
+#include <Enjon.h>
+#include <System/Types.h>
+#include <Graphics/Camera3D.h>
+#include <Graphics/ModelAsset.h>
+#include <Graphics/Camera.h>
+#include <Generated.h>
+#include <TestComponent.h>
+
+EG::ModelAsset GlobalModel;
+EG::ModelAsset Floor;
+EG::ModelAsset Wall;
+EG::ModelAsset Cube;
+std::vector<EG::ModelInstance> Instances;
+EG::Camera FPSCamera;
+
+struct vert3
+{
+	float Position[3];
+	float Normals[3];
+	float Tangent[3];
+	float Bitangent[3];
+	float UV[2];	
+	GLubyte Color[4];
+};
+
+std::vector<vert3> GetQuad(EM::Vec3 pos1, EM::Vec3 pos2, EM::Vec3 pos3, EM::Vec3 pos4, EM::Vec2 uv1, EM::Vec2 uv2, EM::Vec2 uv3, EM::Vec2 uv4, EM::Vec3 nm, EG::ColorRGBA8 color = EG::RGBA8_White())
+{
+    // calculate tangent/bitangent vectors of both triangles
+    EM::Vec3 tangent1, bitangent1;
+    EM::Vec3 tangent2, bitangent2;
+    // - triangle 1
+    EM::Vec3 edge1 = pos2 - pos1;
+    EM::Vec3 edge2 = pos3 - pos1;
+    EM::Vec2 deltaUV1 = uv2 - uv1;
+    EM::Vec2 deltaUV2 = uv3 - uv1;
+
+    float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+    tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+    tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+    tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+    tangent1 = EM::Vec3::Normalize(tangent1);
+
+    bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+    bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+    bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+    bitangent1 = EM::Vec3::Normalize(bitangent1);
+
+    // - triangle 2
+    edge1 = pos3 - pos1;
+    edge2 = pos4 - pos1;
+    deltaUV1 = uv3 - uv1;
+    deltaUV2 = uv4 - uv1;
+
+    f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+    tangent2.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+    tangent2.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+    tangent2.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+    tangent2 = EM::Vec3::Normalize(tangent2);
 
 
+    bitangent2.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+    bitangent2.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+    bitangent2.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+    bitangent2 = EM::Vec3::Normalize(bitangent2);
+
+    std::vector<vert3> Quad;
+
+    // Tri 1
+    Quad.push_back({{pos1.x, pos1.y, pos1.z}, {nm.x, nm.y, nm.z}, {tangent1.x, tangent1.y, tangent1.z}, {bitangent1.x, bitangent1.y, bitangent1.z}, {uv1.x, uv1.y}, {color.r, color.g, color.b, color.a}});
+    Quad.push_back({{pos2.x, pos2.y, pos2.z}, {nm.x, nm.y, nm.z}, {tangent1.x, tangent1.y, tangent1.z}, {bitangent1.x, bitangent1.y, bitangent1.z}, {uv2.x, uv2.y}, {color.r, color.g, color.b, color.a}});
+    Quad.push_back({{pos3.x, pos3.y, pos3.z}, {nm.x, nm.y, nm.z}, {tangent1.x, tangent1.y, tangent1.z}, {bitangent1.x, bitangent1.y, bitangent1.z}, {uv3.x, uv3.y}, {color.r, color.g, color.b, color.a}});
+
+    // Tri 2
+    Quad.push_back({{pos1.x, pos1.y, pos1.z}, {nm.x, nm.y, nm.z}, {tangent2.x, tangent2.y, tangent2.z}, {bitangent2.x, bitangent2.y, bitangent2.z}, {uv1.x, uv1.y}, {color.r, color.g, color.b, color.a}});
+    Quad.push_back({{pos3.x, pos3.y, pos3.z}, {nm.x, nm.y, nm.z}, {tangent2.x, tangent2.y, tangent2.z}, {bitangent2.x, bitangent2.y, bitangent2.z}, {uv3.x, uv3.y}, {color.r, color.g, color.b, color.a}});
+    Quad.push_back({{pos4.x, pos4.y, pos4.z}, {nm.x, nm.y, nm.z}, {tangent2.x, tangent2.y, tangent2.z}, {bitangent2.x, bitangent2.y, bitangent2.z}, {uv4.x, uv4.y}, {color.r, color.g, color.b, color.a}});
+
+    return Quad;
+}
+
+void LoadCubeAsset()
+{
+	// FRONT
+	// positions
+    EM::Vec3 front_1(-1.0, 1.0, -1.0);
+    EM::Vec3 front_2(-1.0, -1.0, -1.0);
+    EM::Vec3 front_3(1.0, -1.0, -1.0);
+    EM::Vec3 front_4(1.0, 1.0, -1.0);
+    // texture coordinates
+    EM::Vec2 front_uv_1(0.0, 1.0);
+    EM::Vec2 front_uv_2(0.0, 0.0);
+    EM::Vec2 front_uv_3(1.0, 0.0);
+    EM::Vec2 front_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 front_nm(0.0, 0.0, -1.0);
+
+    auto FrontFace = GetQuad(front_1, front_2, front_3, front_4, front_uv_1, front_uv_2, front_uv_3, front_uv_4, front_nm);
+
+	// RIGHT
+	// positions
+    EM::Vec3 right_1(1.0, 1.0, -1.0);
+    EM::Vec3 right_2(1.0, -1.0, -1.0);
+    EM::Vec3 right_3(1.0, -1.0, 1.0);
+    EM::Vec3 right_4(1.0, 1.0, 1.0);
+    // texture coordinates
+    EM::Vec2 right_uv_1(0.0, 1.0);
+    EM::Vec2 right_uv_2(0.0, 0.0);
+    EM::Vec2 right_uv_3(1.0, 0.0);
+    EM::Vec2 right_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 right_nm(1.0, 0.0, 0.0);
+
+    auto RightFace = GetQuad(right_1, right_2, right_3, right_4, right_uv_1, right_uv_2, right_uv_3, right_uv_4, right_nm);
+
+	// LEFT
+	// positions
+    EM::Vec3 left_1(-1.0, 1.0, 1.0);
+    EM::Vec3 left_2(-1.0, -1.0, 1.0);
+    EM::Vec3 left_3(-1.0, -1.0, -1.0);
+    EM::Vec3 left_4(-1.0, 1.0, -1.0);
+    // texture coordinates
+    EM::Vec2 left_uv_1(0.0, 1.0);
+    EM::Vec2 left_uv_2(0.0, 0.0);
+    EM::Vec2 left_uv_3(1.0, 0.0);
+    EM::Vec2 left_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 left_nm(-1.0, 0.0, 0.0);
+
+    auto LeftFace = GetQuad(left_1, left_2, left_3, left_4, left_uv_1, left_uv_2, left_uv_3, left_uv_4, left_nm);
+
+	// BACK
+	// positions
+    EM::Vec3 back_1(-1.0,  1.0,  1.0);
+    EM::Vec3 back_2(-1.0, -1.0,  1.0);
+    EM::Vec3 back_3( 1.0, -1.0,  1.0);
+    EM::Vec3 back_4( 1.0,  1.0,  1.0);
+    // texture coordinates
+    EM::Vec2 back_uv_1(0.0, 1.0);
+    EM::Vec2 back_uv_2(0.0, 0.0);
+    EM::Vec2 back_uv_3(1.0, 0.0);
+    EM::Vec2 back_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 back_nm(0.0, 0.0, 1.0);
+
+    auto BackFace = GetQuad(back_1, back_2, back_3, back_4, back_uv_1, back_uv_2, back_uv_3, back_uv_4, back_nm);
+
+	// TOP
+	// positions
+    EM::Vec3 top_1(-1.0,  1.0,  1.0);
+    EM::Vec3 top_2(-1.0,  1.0, -1.0);
+    EM::Vec3 top_3( 1.0,  1.0, -1.0);
+    EM::Vec3 top_4( 1.0,  1.0,  1.0);
+    // texture coordinates
+    EM::Vec2 top_uv_1(0.0, 1.0);
+    EM::Vec2 top_uv_2(0.0, 0.0);
+    EM::Vec2 top_uv_3(1.0, 0.0);
+    EM::Vec2 top_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 top_nm(0.0, 1.0, 0.0);
+
+    auto TopFace = GetQuad(top_1, top_2, top_3, top_4, top_uv_1, top_uv_2, top_uv_3, top_uv_4, top_nm);
+
+	// BOTTOM
+	// positions
+    EM::Vec3 bottom_1(-1.0, -1.0,  1.0);
+    EM::Vec3 bottom_2(-1.0, -1.0, -1.0);
+    EM::Vec3 bottom_3( 1.0, -1.0, -1.0);
+    EM::Vec3 bottom_4( 1.0, -1.0,  1.0);
+    // texture coordinates
+    EM::Vec2 bottom_uv_1(0.0, 1.0);
+    EM::Vec2 bottom_uv_2(0.0, 0.0);
+    EM::Vec2 bottom_uv_3(1.0, 0.0);
+    EM::Vec2 bottom_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 bottom_nm(0.0, -1.0, 0.0);
+
+    auto BottomFace = GetQuad(bottom_1, bottom_2, bottom_3, bottom_4, bottom_uv_1, bottom_uv_2, bottom_uv_3, bottom_uv_4, bottom_nm);
+
+    vert3 Verts[] = 
+    {
+    	// FrontFace
+    	FrontFace.at(0), 
+    	FrontFace.at(1), 
+    	FrontFace.at(2), 
+    	FrontFace.at(3),
+    	FrontFace.at(4),
+    	FrontFace.at(5),
+
+    	// Right
+    	RightFace.at(0), 
+    	RightFace.at(1), 
+    	RightFace.at(2), 
+    	RightFace.at(3),
+    	RightFace.at(4),
+    	RightFace.at(5),
+
+    	// Left
+    	LeftFace.at(0), 
+    	LeftFace.at(1), 
+    	LeftFace.at(2), 
+    	LeftFace.at(3),
+    	LeftFace.at(4),
+    	LeftFace.at(5),
+
+    	// Back
+    	BackFace.at(0), 
+    	BackFace.at(1), 
+    	BackFace.at(2), 
+    	BackFace.at(3),
+    	BackFace.at(4),
+    	BackFace.at(5),
+
+    	// Top
+    	TopFace.at(0), 
+    	TopFace.at(1), 
+    	TopFace.at(2), 
+    	TopFace.at(3),
+    	TopFace.at(4),
+    	TopFace.at(5),
+
+    	// Bottom
+    	BottomFace.at(0), 
+    	BottomFace.at(1), 
+    	BottomFace.at(2), 
+    	BottomFace.at(3),
+    	BottomFace.at(4),
+    	BottomFace.at(5)
+    };
 
 
+    glGenBuffers(1, &Cube.VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, Cube.VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Verts), Verts, GL_STATIC_DRAW);
 
+    glGenVertexArrays(1, &Cube.VAO);
+    glBindVertexArray(Cube.VAO);
+
+    // Position
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Position));
+    // Normal
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Normals));
+    // Tangent
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Tangent));
+    // Bitangent
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Bitangent));
+    // UV
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, UV));
+    // Color
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vert3), (void*)offsetof(vert3, Color));
+
+    // Unbind VAO
+    glBindVertexArray(0);
+
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    Shader->Unuse();
+
+    // Set shader
+    Cube.Shader = Shader;
+    // Set texture
+    Cube.Texture = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
+    // Set draw type
+    Cube.DrawType = GL_TRIANGLES;
+    // Set draw count
+    Cube.DrawCount = 36;
+}
+
+const u32 ENTITY_AMOUNT = 5;
+
+void LoadInstances()
+{
+	for (auto i = 0; i < ENTITY_AMOUNT; i++)
+	{
+		EG::ModelInstance C;
+		C.Asset = &Cube;
+		C.Transform.Position = EM::Vec3(ER::Roll(-10, 10), ER::Roll(-10, 10), ER::Roll(-10, 10));
+		Instances.push_back(C);
+	}
+}
+
+void RenderInstance(const EG::ModelInstance& Instance)
+{
+	// Get reference to asset pointer
+	auto Asset = Instance.Asset;
+	auto& Transform = Instance.Transform;
+
+	static GLint CurrentTextureID = 0;
+
+	switch(Asset->DrawType)
+	{
+		case GL_TRIANGLE_STRIP:
+		{
+			glBindVertexArray(Asset->VAO);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Asset->IBO);
+			{
+				if (CurrentTextureID != Asset->Texture.id)
+				{
+					CurrentTextureID = Asset->Texture.id;
+
+			        // Bind instance texture
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, Asset->Texture.id);
+				}
+
+				Asset->Shader->SetUniform("transform", Transform);
+				glDrawElements(Asset->DrawType, Asset->DrawCount, GL_UNSIGNED_INT, nullptr);
+			}
+			glBindVertexArray(0);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		} break;
+
+		case GL_TRIANGLES:
+		{
+			glBindVertexArray(Asset->VAO);
+			{
+				if (CurrentTextureID != Asset->Texture.id)
+				{
+					CurrentTextureID = Asset->Texture.id;
+
+			        // Bind instance texture
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, Asset->Texture.id);
+				}
+
+				static float t = 0.0f;
+				t += 0.01f;
+
+				// Bind normal
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png").id);
+
+				EM::Mat4 Model;
+				// Model *= EM::Mat4::Scale(Transform.Scale);
+				Model *= EM::Mat4::Translate(Transform.Position);
+				Model *= EM::QuaternionToMat4(Transform.Orientation);
+
+				auto CamPos = FPSCamera.Transform.Position;
+
+				Asset->Shader->SetUniform("model", Model);
+				// Asset->Shader->SetUniform("transform", Transform);
+				Asset->Shader->SetUniform("lightPosition", CamPos);
+				glDrawArrays(Asset->DrawType, 0, Asset->DrawCount);
+			}
+			glBindVertexArray(0);
+		} break;
+
+	}
+
+}
+
+// bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera);
+bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera);
+
+typedef u32 entity;
+
+// Main window
+EG::Window Window;
+
+// The MAIN function, from here we start the application and run the game loop
+#ifdef main
+	#undef main
+#endif
+int main(int argc, char** argv)
+{
+	Enjon::Init();
+
+	float t = 0.0f;
+	float FPS = 0.0f;
+	float TimeIncrement = 0.0f;
+	u32 ticks = 0;
+
+	// Initialize window
+	Window.Init("3D Test", SCREENWIDTH, SCREENHEIGHT, SCREENRES);
+	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
+
+
+	// Init ShaderManager
+	EG::ShaderManager::Init(); 
+
+	// Init FontManager
+	EG::FontManager::Init();
+
+	FPSCamera = EG::Camera((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
+
+	EG::SpriteBatch Batch;
+	Batch.Init();
+
+	// Load model data
+	LoadCubeAsset();
+	LoadInstances();
+
+	EU::FPSLimiter Limiter;
+	Limiter.Init(60);
+
+	// InputManager
+	EI::InputManager Input;
+
+    // Setup OpenGL options
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_CLAMP);
+    glEnable( GL_MULTISAMPLE );
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+
+    // Initialize FPSCamera
+	FPSCamera.Transform.Position = EM::Vec3(7, 2, 7);
+	FPSCamera.LookAt(EM::Vec3(0, 0, 0));
+	FPSCamera.ProjType = EG::ProjectionType::Orthographic;
+	FPSCamera.FieldOfView = 50.0f;
+	FPSCamera.ViewPortAspectRatio = (Enjon::f32)SCREENWIDTH / (Enjon::f32)SCREENHEIGHT;
+	FPSCamera.OrthographicScale = 4.5f;
+
+
+    // Game loop
+    bool running = true;
+    while (running)
+    {
+    	static float t = 0.0f;
+    	t += 0.001f;
+    	if (t > 50000.0f) t = 0.0f;
+
+    	Input.Update();
+
+    	running = ProcessInput(&Input, &FPSCamera);
+
+    	// Camera.Update();
+    	auto MouseCoords = Input.GetMouseCoords();
+
+    	// Update the FPS camera
+    	EM::Vec3& CamPos = FPSCamera.Transform.Position;
+
+    	// Rendering
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
+
+        // Create transformations
+        EM::Mat4 CameraMatrix;
+    	CameraMatrix = FPSCamera.GetViewMatrix();
+
+        Instances.at(0).Transform.Orientation = EM::Quaternion::AngleAxis(120 * EM::ToRadians(t), EM::Vec3(0, 1, 0)) * 
+        										EM::Quaternion::AngleAxis(20  * EM::ToRadians(t), EM::Vec3(0, 0, 1));
+
+        for (auto& c : Instances)
+        {
+        	auto Shader = c.Asset->Shader;
+        	Shader->Use();
+	        	Shader->SetUniform("camera", CameraMatrix);
+		        RenderInstance(c);
+	        Shader->Unuse();
+        }
+
+        // Swap the screen buffers
+        Window.SwapBuffer();
+    }
+    // Properly de-allocate all resources once they've outlived their purpose
+    return 0;
+}
+
+bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
+{
+	static bool FirstMouse = true;
+	bool MouseMovement = false;
+	static float lastX = SCREENWIDTH / 2.0f;
+	static float lastY = SCREENHEIGHT / 2.0f;
+	static float xoffset = 0.0f;
+	static float yoffset = 0.0f;
+
+	float xPos = SCREENWIDTH / 2.0f;
+	float yPos = SCREENHEIGHT / 2.0f;
+
+    SDL_Event event;
+//    //Will keep looping until there are no more events to process
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_QUIT:
+                return false;
+                break;
+			case SDL_KEYUP:
+				Input->ReleaseKey(event.key.keysym.sym); 
+				break;
+			case SDL_KEYDOWN:
+				Input->PressKey(event.key.keysym.sym);
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				Input->PressKey(event.button.button);
+				break;
+			case SDL_MOUSEBUTTONUP:
+				Input->ReleaseKey(event.button.button);
+				break;
+			case SDL_MOUSEMOTION:
+				Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+				break;
+			default:
+				break;
+		}
+    }
+
+    static float speed = 8.0f;
+    static float dt = 0.01f;
+
+
+	if (Input->IsKeyPressed(SDLK_ESCAPE))
+	{
+		return false;	
+	}
+
+	if (Camera->ProjType == EG::ProjectionType::Perspective)
+	{
+	    EM::Vec3 VelDir(0, 0, 0);
+	
+		if (Input->IsKeyDown(SDLK_w))
+		{
+			EM::Vec3 F = Camera->Forward();
+			// F.y = 0.0f;
+			// F = EM::Vec3::Normalize(F);
+			VelDir += F;
+		}
+		if (Input->IsKeyDown(SDLK_s))
+		{
+			EM::Vec3 B = Camera->Backward();
+			// B.y = 0.0f;
+			// B = EM::Vec3::Normalize(B);
+			VelDir += B;
+		}
+		if (Input->IsKeyDown(SDLK_a))
+		{
+			VelDir += Camera->Left();
+		}
+		if (Input->IsKeyDown(SDLK_d))
+		{
+			VelDir += Camera->Right();
+		}
+
+		if (VelDir.Length()) VelDir = EM::Vec3::Normalize(VelDir);
+
+		Camera->Transform.Position += speed * dt * VelDir;
+
+		auto MouseSensitivity = 7.5f;
+
+		// Get mouse input and change orientation of camera
+		auto MouseCoords = Input->GetMouseCoords();
+
+		// Reset the mouse coords after having gotten the mouse coordinates
+		SDL_WarpMouseInWindow(Window.GetWindowContext(), SCREENWIDTH / 2.0f, SCREENHEIGHT / 2.0f);
+
+		Camera->OffsetOrientation(
+									(EM::ToRadians((SCREENWIDTH / 2.0f - MouseCoords.x) * dt) * MouseSensitivity), 
+									(EM::ToRadians((SCREENHEIGHT / 2.0f - MouseCoords.y) * dt) * MouseSensitivity)
+								);
+	}
+	
+
+	// Switch between perspective and orthographic camera projections
+	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyPressed(SDLK_o))
+	{
+		Camera->ProjType = EG::ProjectionType::Perspective;
+	}
+	else if (Input->IsKeyPressed(SDLK_o))
+	{
+		Camera->ProjType = EG::ProjectionType::Orthographic;
+	}
+
+	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyPressed(SDLK_m))
+	{
+		glEnable(GL_MULTISAMPLE);
+	}
+	else if (Input->IsKeyPressed(SDLK_m))
+	{
+		glDisable(GL_MULTISAMPLE);
+	}
+
+
+	return true;
+}
+
+
+// slut balls
+#endif

@@ -40,6 +40,7 @@ namespace Enjon {
 
 	using int8 = signed char;
 	using uint8 = unsigned char;
+	using u8 = uint8;
 
 	using int16 = signed short;
 	using uint16 = unsigned short;
