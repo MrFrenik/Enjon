@@ -53,18 +53,19 @@ namespace Enjon { namespace Graphics {
 	}
 
 	// Predefined Color Types
-	static ColorRGBA8 inline RGBA8_White()            { return RGBA8(255); }
-	static ColorRGBA8 inline RGBA8_Black()            { return RGBA8(0, 0, 0, 255); }
-	static ColorRGBA8 inline RGBA8_DarkGrey()         { return RGBA8(51, 51, 51, 255); }
-	static ColorRGBA8 inline RGBA8_MidGrey()          { return RGBA8(128, 128, 128, 255); }
-	static ColorRGBA8 inline RGBA8_LightGrey()        { return RGBA8(204, 204, 204, 255); }
-	static ColorRGBA8 inline RGBA8_Red()              { return RGBA8(255, 0, 0, 255); }
-	static ColorRGBA8 inline RGBA8_Green()            { return RGBA8(0, 255, 0, 255); }
-	static ColorRGBA8 inline RGBA8_Blue()             { return RGBA8(0, 0, 255, 255); }
-	static ColorRGBA8 inline RGBA8_Yellow()           { return RGBA8(0, 255, 255, 255); }
-	static ColorRGBA8 inline RGBA8_Orange()           { return RGBA8(204, 77, 51, 255); }
-	static ColorRGBA8 inline RGBA8_Magenta()          { return RGBA8(255, 0, 255, 255); }
-	static ColorRGBA8 inline RGBA8_LightBlue()        { return RGBA8(51, 77, 179, 255); }
+	static ColorRGBA8 inline RGBA8_White()          { return RGBA8(255); }
+	static ColorRGBA8 inline RGBA8_Black()          { return RGBA8(0, 0, 0, 255); }
+	static ColorRGBA8 inline RGBA8_DarkGrey()       { return RGBA8(51, 51, 51, 255); }
+	static ColorRGBA8 inline RGBA8_MidGrey()        { return RGBA8(128, 128, 128, 255); }
+	static ColorRGBA8 inline RGBA8_LightGrey()      { return RGBA8(204, 204, 204, 255); }
+	static ColorRGBA8 inline RGBA8_Red()            { return RGBA8(255, 0, 0, 255); }
+	static ColorRGBA8 inline RGBA8_Green()          { return RGBA8(0, 255, 0, 255); }
+	static ColorRGBA8 inline RGBA8_Blue()           { return RGBA8(0, 0, 255, 255); }
+	static ColorRGBA8 inline RGBA8_Yellow()         { return RGBA8(0, 255, 255, 255); }
+	static ColorRGBA8 inline RGBA8_Orange()         { return RGBA8(204, 77, 51, 255); }
+	static ColorRGBA8 inline RGBA8_Magenta()        { return RGBA8(255, 0, 255, 255); }
+	static ColorRGBA8 inline RGBA8_LightBlue()      { return RGBA8(51, 77, 179, 255); }
+	static ColorRGBA8 inline RGBA8_Purple()			{ return RGBA8(255, 0, 255, 255); } 
 
 	// Helper functions 
 	inline bool operator==(const ColorRGBA8& left, const ColorRGBA8& other)

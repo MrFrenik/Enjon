@@ -4554,7 +4554,7 @@ int main(int argc, char** argv)
 
 #if 0
 
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -4590,8 +4590,10 @@ int main(int argc, char** argv)
 
 EG::ModelAsset GlobalModel;
 EG::ModelAsset Floor;
+EG::ModelAsset NormalFloor;
 EG::ModelAsset Wall;
 EG::ModelAsset Cube;
+EG::ModelAsset SpriteWithNormal;
 std::vector<EG::ModelInstance> Instances;
 EG::Camera FPSCamera;
 
@@ -4605,19 +4607,19 @@ void LoadSpriteAsset()
 		{{-0.5f,  0.5f, 0.0f}, {0x00, 0xff, 0x00, 0xff}, {0.0f, 1.0f}}
 	};
 
-	glGenBuffers(1, &GlobalModel.VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, GlobalModel.VBO);
+	glGenBuffers(1, &GlobalModel.Mesh.VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, GlobalModel.Mesh.VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Verticies), Verticies, GL_STATIC_DRAW);
 
 	Enjon::uint32 Indicies[] = {0, 1, 2, 2, 3, 0};
 
-	glGenBuffers(1, &GlobalModel.IBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GlobalModel.IBO);
+	glGenBuffers(1, &GlobalModel.Mesh.IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GlobalModel.Mesh.IBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indicies), Indicies, GL_STATIC_DRAW); 
 
     // Generate VAO for global model
-    glGenVertexArrays(1, &GlobalModel.VAO);
-    glBindVertexArray(GlobalModel.VAO);
+    glGenVertexArrays(1, &GlobalModel.Mesh.VAO);
+    glBindVertexArray(GlobalModel.Mesh.VAO);
 
 	// Tell opengl what attribute arrays we need 
 	glEnableVertexAttribArray(0);
@@ -4647,11 +4649,11 @@ void LoadSpriteAsset()
     // Set shader
     GlobalModel.Shader = Shader;
 	// Set texture
-    GlobalModel.Texture = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png");
+	GlobalModel.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png");
     // Set draw type
-    GlobalModel.DrawType = GL_TRIANGLE_STRIP;
+    GlobalModel.Mesh.DrawType = GL_TRIANGLE_STRIP;
     // Set draw count
-    GlobalModel.DrawCount = 6;
+    GlobalModel.Mesh.DrawCount = 6;
 }
 
 struct vert3
@@ -4661,79 +4663,222 @@ struct vert3
 	float Tangent[3];
 	float Bitangent[3];
 	float UV[2];	
+	GLubyte Color[4];
 };
+
+std::vector<vert3> GetQuad(EM::Vec3 pos1, EM::Vec3 pos2, EM::Vec3 pos3, EM::Vec3 pos4, EM::Vec2 uv1, EM::Vec2 uv2, EM::Vec2 uv3, EM::Vec2 uv4, EM::Vec3 nm, EG::ColorRGBA8 color = EG::RGBA8_White())
+{
+    // calculate tangent/bitangent vectors of both triangles
+    EM::Vec3 tangent1, bitangent1;
+    EM::Vec3 tangent2, bitangent2;
+    // - triangle 1
+    EM::Vec3 edge1 = pos2 - pos1;
+    EM::Vec3 edge2 = pos3 - pos1;
+    EM::Vec2 deltaUV1 = uv2 - uv1;
+    EM::Vec2 deltaUV2 = uv3 - uv1;
+
+    float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+    tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+    tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+    tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+    tangent1 = EM::Vec3::Normalize(tangent1);
+
+    bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+    bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+    bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+    bitangent1 = EM::Vec3::Normalize(bitangent1);
+
+    // - triangle 2
+    edge1 = pos3 - pos1;
+    edge2 = pos4 - pos1;
+    deltaUV1 = uv3 - uv1;
+    deltaUV2 = uv4 - uv1;
+
+    f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+    tangent2.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+    tangent2.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+    tangent2.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+    tangent2 = EM::Vec3::Normalize(tangent2);
+
+
+    bitangent2.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+    bitangent2.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+    bitangent2.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+    bitangent2 = EM::Vec3::Normalize(bitangent2);
+
+    std::vector<vert3> Quad;
+
+    // Tri 1
+    Quad.push_back({{pos3.x, pos3.y, pos3.z}, {nm.x, nm.y, nm.z}, {tangent1.x, tangent1.y, tangent1.z}, {bitangent1.x, bitangent1.y, bitangent1.z}, {uv3.x, uv3.y}, {color.r, color.g, color.b, color.a}});
+    Quad.push_back({{pos1.x, pos1.y, pos1.z}, {nm.x, nm.y, nm.z}, {tangent1.x, tangent1.y, tangent1.z}, {bitangent1.x, bitangent1.y, bitangent1.z}, {uv1.x, uv1.y}, {color.r, color.g, color.b, color.a}});
+    Quad.push_back({{pos2.x, pos2.y, pos2.z}, {nm.x, nm.y, nm.z}, {tangent1.x, tangent1.y, tangent1.z}, {bitangent1.x, bitangent1.y, bitangent1.z}, {uv2.x, uv2.y}, {color.r, color.g, color.b, color.a}});
+
+    // Tri 2
+    Quad.push_back({{pos1.x, pos1.y, pos1.z}, {nm.x, nm.y, nm.z}, {tangent2.x, tangent2.y, tangent2.z}, {bitangent2.x, bitangent2.y, bitangent2.z}, {uv1.x, uv1.y}, {color.r, color.g, color.b, color.a}});
+    Quad.push_back({{pos3.x, pos3.y, pos3.z}, {nm.x, nm.y, nm.z}, {tangent2.x, tangent2.y, tangent2.z}, {bitangent2.x, bitangent2.y, bitangent2.z}, {uv3.x, uv3.y}, {color.r, color.g, color.b, color.a}});
+    Quad.push_back({{pos4.x, pos4.y, pos4.z}, {nm.x, nm.y, nm.z}, {tangent2.x, tangent2.y, tangent2.z}, {bitangent2.x, bitangent2.y, bitangent2.z}, {uv4.x, uv4.y}, {color.r, color.g, color.b, color.a}});
+
+    return Quad;
+}
 
 void LoadCubeAsset()
 {
-	// vert3 Verts[] = 
-	// {
-	// 	// Front
-	// 	{{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 0.0f}},
-	//     {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f,  0.0f}, {1.0f, 0.0f}},
-	//     {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f,  0.0f}, {1.0f, 1.0f}},
-	//     {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f,  0.0f}, {1.0f, 1.0f}},
-	//     {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f}},
-	//     {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 0.0f}},
+	// FRONT
+	// positions
+    EM::Vec3 front_1(-1.0, 1.0, -1.0);
+    EM::Vec3 front_2(-1.0, -1.0, -1.0);
+    EM::Vec3 front_3(1.0, -1.0, -1.0);
+    EM::Vec3 front_4(1.0, 1.0, -1.0);
+    // texture coordinates
+    EM::Vec2 front_uv_1(0.0, 1.0);
+    EM::Vec2 front_uv_2(0.0, 0.0);
+    EM::Vec2 front_uv_3(1.0, 0.0);
+    EM::Vec2 front_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 front_nm(0.0, 0.0, -1.0);
 
-	//     // Back
-	//     {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-	//     {{ 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-	//     {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-	//     {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-	//     {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
-	//     {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    auto FrontFace = GetQuad(front_1, front_2, front_3, front_4, front_uv_1, front_uv_2, front_uv_3, front_uv_4, front_nm, EG::RGBA8_Green());
 
-	//     // Left
-	//     {{-0.5f,  0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
-	//     {{-0.5f,  0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}},
-	//     {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
-	//     {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
-	//     {{-0.5f, -0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-	//     {{-0.5f,  0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
+	// RIGHT
+	// positions
+    EM::Vec3 right_1(1.0, 1.0, -1.0);
+    EM::Vec3 right_2(1.0, -1.0, -1.0);
+    EM::Vec3 right_3(1.0, -1.0, 1.0);
+    EM::Vec3 right_4(1.0, 1.0, 1.0);
+    // texture coordinates
+    EM::Vec2 right_uv_1(0.0, 1.0);
+    EM::Vec2 right_uv_2(0.0, 0.0);
+    EM::Vec2 right_uv_3(1.0, 0.0);
+    EM::Vec2 right_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 right_nm(1.0, 0.0, 0.0);
 
-	//     // Right
-	//     {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
-	//     {{ 0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-	//     {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-	//     {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-	//     {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-	//     {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
+    auto RightFace = GetQuad(right_1, right_2, right_3, right_4, right_uv_1, right_uv_2, right_uv_3, right_uv_4, right_nm, EG::RGBA8_Red());
 
-	//     // Bottom
-	//     {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
-	//     {{ 0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-	//     {{ 0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-	//     {{ 0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-	//     {{-0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-	//     {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+	// LEFT
+	// positions
+    EM::Vec3 left_1(-1.0, 1.0, 1.0);
+    EM::Vec3 left_2(-1.0, -1.0, 1.0);
+    EM::Vec3 left_3(-1.0, -1.0, -1.0);
+    EM::Vec3 left_4(-1.0, 1.0, -1.0);
+    // texture coordinates
+    EM::Vec2 left_uv_1(0.0, 1.0);
+    EM::Vec2 left_uv_2(0.0, 0.0);
+    EM::Vec2 left_uv_3(1.0, 0.0);
+    EM::Vec2 left_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 left_nm(-1.0, 0.0, 0.0);
 
-	//     // Top
-	//     {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
-	//     {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-	//     {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-	//     {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-	//     {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-	//     {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}
-	// };
+    auto LeftFace = GetQuad(left_1, left_2, left_3, left_4, left_uv_1, left_uv_2, left_uv_3, left_uv_4, left_nm, EG::RGBA8_Blue());
 
-	vert3 Verts[] = 
-	{
-		// Position 		  // Normal 		 // Tangent 		 // Bitangent        // UV
-		{{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-	    {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-	    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-	    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-	    {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-	    {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}
-	};
+	// BACK
+	// positions
+    EM::Vec3 back_1(-1.0,  1.0,  1.0);
+    EM::Vec3 back_2(-1.0, -1.0,  1.0);
+    EM::Vec3 back_3( 1.0, -1.0,  1.0);
+    EM::Vec3 back_4( 1.0,  1.0,  1.0);
+    // texture coordinates
+    EM::Vec2 back_uv_1(0.0, 1.0);
+    EM::Vec2 back_uv_2(0.0, 0.0);
+    EM::Vec2 back_uv_3(1.0, 0.0);
+    EM::Vec2 back_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 back_nm(0.0, 0.0, 1.0);
+
+    auto BackFace = GetQuad(back_1, back_2, back_3, back_4, back_uv_1, back_uv_2, back_uv_3, back_uv_4, back_nm, EG::RGBA8_Purple());
+
+	// TOP
+	// positions
+    EM::Vec3 top_1(-1.0,  1.0,  1.0);
+    EM::Vec3 top_2(-1.0,  1.0, -1.0);
+    EM::Vec3 top_3( 1.0,  1.0, -1.0);
+    EM::Vec3 top_4( 1.0,  1.0,  1.0);
+    // texture coordinates
+    EM::Vec2 top_uv_1(0.0, 1.0);
+    EM::Vec2 top_uv_2(0.0, 0.0);
+    EM::Vec2 top_uv_3(1.0, 0.0);
+    EM::Vec2 top_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 top_nm(0.0, 1.0, 0.0);
+
+    auto TopFace = GetQuad(top_1, top_2, top_3, top_4, top_uv_1, top_uv_2, top_uv_3, top_uv_4, top_nm, EG::RGBA8_Yellow());
+
+	// BOTTOM
+	// positions
+    EM::Vec3 bottom_1(-1.0, -1.0,  1.0);
+    EM::Vec3 bottom_2(-1.0, -1.0, -1.0);
+    EM::Vec3 bottom_3( 1.0, -1.0, -1.0);
+    EM::Vec3 bottom_4( 1.0, -1.0,  1.0);
+    // texture coordinates
+    EM::Vec2 bottom_uv_1(0.0, 1.0);
+    EM::Vec2 bottom_uv_2(0.0, 0.0);
+    EM::Vec2 bottom_uv_3(1.0, 0.0);
+    EM::Vec2 bottom_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 bottom_nm(0.0, -1.0, 0.0);
+
+    auto BottomFace = GetQuad(bottom_1, bottom_2, bottom_3, bottom_4, bottom_uv_1, bottom_uv_2, bottom_uv_3, bottom_uv_4, bottom_nm, EG::RGBA8_Orange());
+
+    vert3 Verts[] = 
+    {
+    	// FrontFace
+    	FrontFace.at(0), 
+    	FrontFace.at(1), 
+    	FrontFace.at(2), 
+    	FrontFace.at(3),
+    	FrontFace.at(4),
+    	FrontFace.at(5),
+
+    	// Right
+    	RightFace.at(0), 
+    	RightFace.at(1), 
+    	RightFace.at(2), 
+    	RightFace.at(3),
+    	RightFace.at(4),
+    	RightFace.at(5),
+
+    	// Left
+    	LeftFace.at(0), 
+    	LeftFace.at(1), 
+    	LeftFace.at(2), 
+    	LeftFace.at(3),
+    	LeftFace.at(4),
+    	LeftFace.at(5),
+
+    	// Back
+    	BackFace.at(0), 
+    	BackFace.at(1), 
+    	BackFace.at(2), 
+    	BackFace.at(3),
+    	BackFace.at(4),
+    	BackFace.at(5),
+
+    	// Top
+    	TopFace.at(0), 
+    	TopFace.at(1), 
+    	TopFace.at(2), 
+    	TopFace.at(3),
+    	TopFace.at(4),
+    	TopFace.at(5),
+
+    	// Bottom
+    	BottomFace.at(0), 
+    	BottomFace.at(1), 
+    	BottomFace.at(2), 
+    	BottomFace.at(3),
+    	BottomFace.at(4),
+    	BottomFace.at(5)
+    };
 
 
-    glGenBuffers(1, &Cube.VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, Cube.VBO);
+    glGenBuffers(1, &Cube.Mesh.VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, Cube.Mesh.VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Verts), Verts, GL_STATIC_DRAW);
 
-    glGenVertexArrays(1, &Cube.VAO);
-    glBindVertexArray(Cube.VAO);
+    glGenVertexArrays(1, &Cube.Mesh.VAO);
+    glBindVertexArray(Cube.Mesh.VAO);
 
     // Position
     glEnableVertexAttribArray(0);
@@ -4750,6 +4895,9 @@ void LoadCubeAsset()
     // UV
     glEnableVertexAttribArray(4);
     glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, UV));
+    // Color
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vert3), (void*)offsetof(vert3, Color));
 
     // Unbind VAO
     glBindVertexArray(0);
@@ -4765,11 +4913,12 @@ void LoadCubeAsset()
     // Set shader
     Cube.Shader = Shader;
     // Set texture
-    Cube.Texture = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
+    Cube.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
+    Cube.Material.Textures[EG::TextureSlotType::NORMAL] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
     // Set draw type
-    Cube.DrawType = GL_TRIANGLES;
+    Cube.Mesh.DrawType = GL_TRIANGLES;
     // Set draw count
-    Cube.DrawCount = 6;
+    Cube.Mesh.DrawCount = 36;
 }
 
 void LoadFloorAsset()
@@ -4782,19 +4931,19 @@ void LoadFloorAsset()
 		{{-0.5f, -0.5f,  0.5f}, EG::RGBA8_MidGrey(), {0.0f, 1.0f}}
 	};
 
-	glGenBuffers(1, &Floor.VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, Floor.VBO);
+	glGenBuffers(1, &Floor.Mesh.VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, Floor.Mesh.VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Verticies), Verticies, GL_STATIC_DRAW);
 
 	Enjon::uint32 Indicies[] = {0, 1, 2, 2, 3, 0};
 
-	glGenBuffers(1, &Floor.IBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Floor.IBO);
+	glGenBuffers(1, &Floor.Mesh.IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Floor.Mesh.IBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indicies), Indicies, GL_STATIC_DRAW); 
 
     // Generate VAO for global model
-    glGenVertexArrays(1, &Floor.VAO);
-    glBindVertexArray(Floor.VAO);
+    glGenVertexArrays(1, &Floor.Mesh.VAO);
+    glBindVertexArray(Floor.Mesh.VAO);
 
 	// Tell opengl what attribute arrays we need 
 	glEnableVertexAttribArray(0);
@@ -4824,11 +4973,287 @@ void LoadFloorAsset()
     // Set shader
     Floor.Shader = Shader;
 	// Set texture
-    Floor.Texture = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/cobble_stone.png");
+    Floor.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/cobble_stone.png");
     // Set draw type
-    Floor.DrawType = GL_TRIANGLE_STRIP;
+    Floor.Mesh.DrawType = GL_TRIANGLE_STRIP;
     // Set draw count
-    Floor.DrawCount = 6;
+    Floor.Mesh.DrawCount = 6;
+}
+
+void LoadNormalFloorAsset()
+{
+// FRONT
+	// positions
+    EM::Vec3 front_1(-1.0, 1.0, -1.0);
+    EM::Vec3 front_2(-1.0, -1.0, -1.0);
+    EM::Vec3 front_3(1.0, -1.0, -1.0);
+    EM::Vec3 front_4(1.0, 1.0, -1.0);
+    // texture coordinates
+    EM::Vec2 front_uv_1(0.0, 1.0);
+    EM::Vec2 front_uv_2(0.0, 0.0);
+    EM::Vec2 front_uv_3(1.0, 0.0);
+    EM::Vec2 front_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 front_nm(0.0, 0.0, -1.0);
+
+    auto FrontFace = GetQuad(front_1, front_2, front_3, front_4, front_uv_1, front_uv_2, front_uv_3, front_uv_4, front_nm);
+
+	// RIGHT
+	// positions
+    EM::Vec3 right_1(1.0, 1.0, -1.0);
+    EM::Vec3 right_2(1.0, -1.0, -1.0);
+    EM::Vec3 right_3(1.0, -1.0, 1.0);
+    EM::Vec3 right_4(1.0, 1.0, 1.0);
+    // texture coordinates
+    EM::Vec2 right_uv_1(0.0, 1.0);
+    EM::Vec2 right_uv_2(0.0, 0.0);
+    EM::Vec2 right_uv_3(1.0, 0.0);
+    EM::Vec2 right_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 right_nm(1.0, 0.0, 0.0);
+
+    auto RightFace = GetQuad(right_1, right_2, right_3, right_4, right_uv_1, right_uv_2, right_uv_3, right_uv_4, right_nm);
+
+	// LEFT
+	// positions
+    EM::Vec3 left_1(-1.0, 1.0, 1.0);
+    EM::Vec3 left_2(-1.0, -1.0, 1.0);
+    EM::Vec3 left_3(-1.0, -1.0, -1.0);
+    EM::Vec3 left_4(-1.0, 1.0, -1.0);
+    // texture coordinates
+    EM::Vec2 left_uv_1(0.0, 1.0);
+    EM::Vec2 left_uv_2(0.0, 0.0);
+    EM::Vec2 left_uv_3(1.0, 0.0);
+    EM::Vec2 left_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 left_nm(-1.0, 0.0, 0.0);
+
+    auto LeftFace = GetQuad(left_1, left_2, left_3, left_4, left_uv_1, left_uv_2, left_uv_3, left_uv_4, left_nm);
+
+	// BACK
+	// positions
+    EM::Vec3 back_1(-1.0,  1.0,  1.0);
+    EM::Vec3 back_2(-1.0, -1.0,  1.0);
+    EM::Vec3 back_3( 1.0, -1.0,  1.0);
+    EM::Vec3 back_4( 1.0,  1.0,  1.0);
+    // texture coordinates
+    EM::Vec2 back_uv_1(0.0, 1.0);
+    EM::Vec2 back_uv_2(0.0, 0.0);
+    EM::Vec2 back_uv_3(1.0, 0.0);
+    EM::Vec2 back_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 back_nm(0.0, 0.0, 1.0);
+
+    auto BackFace = GetQuad(back_1, back_2, back_3, back_4, back_uv_1, back_uv_2, back_uv_3, back_uv_4, back_nm);
+
+	// TOP
+	// positions
+    EM::Vec3 top_1(-1.0,  1.0,  1.0);
+    EM::Vec3 top_2(-1.0,  1.0, -1.0);
+    EM::Vec3 top_3( 1.0,  1.0, -1.0);
+    EM::Vec3 top_4( 1.0,  1.0,  1.0);
+    // texture coordinates
+    EM::Vec2 top_uv_1(0.0, 1.0);
+    EM::Vec2 top_uv_2(0.0, 0.0);
+    EM::Vec2 top_uv_3(1.0, 0.0);
+    EM::Vec2 top_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 top_nm(0.0, 1.0, 0.0);
+
+    auto TopFace = GetQuad(top_1, top_2, top_3, top_4, top_uv_1, top_uv_2, top_uv_3, top_uv_4, top_nm);
+
+	// BOTTOM
+	// positions
+    EM::Vec3 bottom_1(-1.0, -1.0,  1.0);
+    EM::Vec3 bottom_2(-1.0, -1.0, -1.0);
+    EM::Vec3 bottom_3( 1.0, -1.0, -1.0);
+    EM::Vec3 bottom_4( 1.0, -1.0,  1.0);
+    // texture coordinates
+    EM::Vec2 bottom_uv_1(0.0, 1.0);
+    EM::Vec2 bottom_uv_2(0.0, 0.0);
+    EM::Vec2 bottom_uv_3(1.0, 0.0);
+    EM::Vec2 bottom_uv_4(1.0, 1.0);
+    // normal vector
+    EM::Vec3 bottom_nm(0.0, -1.0, 0.0);
+
+    auto BottomFace = GetQuad(bottom_1, bottom_2, bottom_3, bottom_4, bottom_uv_1, bottom_uv_2, bottom_uv_3, bottom_uv_4, bottom_nm);
+
+    vert3 Verts[] = 
+    {
+    	// FrontFace
+    	FrontFace.at(0), 
+    	FrontFace.at(1), 
+    	FrontFace.at(2), 
+    	FrontFace.at(3),
+    	FrontFace.at(4),
+    	FrontFace.at(5),
+
+    	// Right
+    	RightFace.at(0), 
+    	RightFace.at(1), 
+    	RightFace.at(2), 
+    	RightFace.at(3),
+    	RightFace.at(4),
+    	RightFace.at(5),
+
+    	// Left
+    	LeftFace.at(0), 
+    	LeftFace.at(1), 
+    	LeftFace.at(2), 
+    	LeftFace.at(3),
+    	LeftFace.at(4),
+    	LeftFace.at(5),
+
+    	// Back
+    	BackFace.at(0), 
+    	BackFace.at(1), 
+    	BackFace.at(2), 
+    	BackFace.at(3),
+    	BackFace.at(4),
+    	BackFace.at(5),
+
+    	// Top
+    	TopFace.at(0), 
+    	TopFace.at(1), 
+    	TopFace.at(2), 
+    	TopFace.at(3),
+    	TopFace.at(4),
+    	TopFace.at(5),
+
+    	// Bottom
+    	BottomFace.at(0), 
+    	BottomFace.at(1), 
+    	BottomFace.at(2), 
+    	BottomFace.at(3),
+    	BottomFace.at(4),
+    	BottomFace.at(5)
+    };
+
+
+    glGenBuffers(1, &NormalFloor.Mesh.VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, NormalFloor.Mesh.VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Verts), Verts, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &NormalFloor.Mesh.VAO);
+    glBindVertexArray(NormalFloor.Mesh.VAO);
+
+    // Position
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Position));
+    // Normal
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Normals));
+    // Tangent
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Tangent));
+    // Bitangent
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Bitangent));
+    // UV
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, UV));
+    // Color
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vert3), (void*)offsetof(vert3, Color));
+
+    // Unbind VAO
+    glBindVertexArray(0);
+
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    Shader->Unuse();
+
+    // Set shader
+    NormalFloor.Shader = Shader;
+    // Set texture
+    NormalFloor.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
+    NormalFloor.Material.Textures[EG::TextureSlotType::NORMAL] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
+    // Set draw type
+    NormalFloor.Mesh.DrawType = GL_TRIANGLES;
+    // Set draw countoO
+    NormalFloor.Mesh.DrawCount = 36;	
+}
+
+void LoadNormalMappedSpriteAsset()
+{
+	// FRONT
+	// positions
+    EM::Vec3 front_1(-1.0, -1.0, -1.0);
+    EM::Vec3 front_2( 1.0, -1.0, -1.0);
+    EM::Vec3 front_3( 1.0,  1.0, -1.0);
+    EM::Vec3 front_4(-1.0,  1.0, -1.0);
+    // texture coordinates
+    EM::Vec2 front_uv_1(0.0, 0.0);
+    EM::Vec2 front_uv_2(1.0, 0.0);
+    EM::Vec2 front_uv_3(1.0, 1.0);
+    EM::Vec2 front_uv_4(0.0, 1.0);
+    // normal vector
+    EM::Vec3 front_nm(0.0, 0.0, -1.0);
+
+    auto FrontFace = GetQuad(front_1, front_2, front_3, front_4, front_uv_1, front_uv_2, front_uv_3, front_uv_4, front_nm);
+
+    vert3 Verts[] = 
+    {
+    	// FrontFace
+    	FrontFace.at(0), 
+    	FrontFace.at(1), 
+    	FrontFace.at(2), 
+    	FrontFace.at(3),
+    	FrontFace.at(4),
+    	FrontFace.at(5)
+    };
+
+
+    glGenBuffers(1, &SpriteWithNormal.Mesh.VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, SpriteWithNormal.Mesh.VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Verts), Verts, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &SpriteWithNormal.Mesh.VAO);
+    glBindVertexArray(SpriteWithNormal.Mesh.VAO);
+
+    // Position
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Position));
+    // Normal
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Normals));
+    // Tangent
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Tangent));
+    // Bitangent
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Bitangent));
+    // UV
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, UV));
+    // Color
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vert3), (void*)offsetof(vert3, Color));
+
+    // Unbind VAO
+    glBindVertexArray(0);
+
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    Shader->Unuse();
+
+    // Set shader
+    SpriteWithNormal.Shader = Shader;
+    // Set texture
+    SpriteWithNormal.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png");
+    SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Normal.png");
+    // Set draw type
+    SpriteWithNormal.Mesh.DrawType = GL_TRIANGLES;
+    // Set draw count
+    SpriteWithNormal.Mesh.DrawCount = 6;	
 }
 
 const u32 ENTITY_AMOUNT = 2;
@@ -4836,8 +5261,9 @@ const u32 ENTITY_AMOUNT = 2;
 void LoadInstances()
 {
 	EG::ModelInstance A;
-	A.Asset = &GlobalModel;
+	A.Asset = &SpriteWithNormal;
 	A.Transform.Position = EM::Vec3(0, 0, 0);
+	A.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0));
 	Instances.push_back(A);
 
 	for (u32 i = 0; i < ENTITY_AMOUNT; i++)
@@ -4855,14 +5281,15 @@ void LoadInstances()
 	C.Transform.Position = EM::Vec3(2, 0, 4);
 	Instances.push_back(C);
 
-	auto map_size = 10;
+	auto map_size = 20;
 	for (auto i = 0; i < map_size; i++)
 	{
 		for (auto j = 0; j < map_size; j++)
 		{
 			EG::ModelInstance f;
-			f.Asset = &Floor;
-			f.Transform.Position = EM::Vec3((Enjon::f32)i, 0, (Enjon::f32)j);
+			f.Asset = &NormalFloor;
+			f.Transform.Position = EM::Vec3((Enjon::f32)i * 2.0f, -1.0f, (Enjon::f32)j * 2.0f);
+			f.Transform.Scale = EM::Vec3(1.0f, 0.02f, 1.0f);
 			Instances.push_back(f);
 		}
 	}
@@ -4876,58 +5303,51 @@ void RenderInstance(const EG::ModelInstance& Instance)
 
 	static GLint CurrentTextureID = 0;
 
-	switch(Asset->DrawType)
+	switch(Asset->Mesh.DrawType)
 	{
 		case GL_TRIANGLE_STRIP:
 		{
-			glBindVertexArray(Asset->VAO);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Asset->IBO);
+			glBindVertexArray(Asset->Mesh.VAO);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Asset->Mesh.IBO);
 			{
-				if (CurrentTextureID != Asset->Texture.id)
-				{
-					CurrentTextureID = Asset->Texture.id;
+		        // Bind instance texture
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id);
 
-			        // Bind instance texture
-					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, Asset->Texture.id);
-				}
-
-				Asset->Shader->SetUniform("transform", Transform);
-				glDrawElements(Asset->DrawType, Asset->DrawCount, GL_UNSIGNED_INT, nullptr);
+				// Asset->Shader->SetUniform("transform", Transform);
+				glDrawElements(Asset->Mesh.DrawType, Asset->Mesh.DrawCount, GL_UNSIGNED_INT, nullptr);
 			}
-			glBindVertexArray(0);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
 		} break;
 
 		case GL_TRIANGLES:
 		{
-			glBindVertexArray(Asset->VAO);
+			glBindVertexArray(Asset->Mesh.VAO);
 			{
-				if (CurrentTextureID != Asset->Texture.id)
-				{
-					CurrentTextureID = Asset->Texture.id;
-
-			        // Bind instance texture
-					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, Asset->Texture.id);
-				}
+		        // Bind instance texture
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id);
 
 				// Bind normal
 				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png").id);
+				glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
 
 				EM::Mat4 Model;
 				// L = T*R*S
-				// Model *= EM::Mat4::Scale(Transform.Scale);
-				Model = Model * EM::Mat4::Translate(Transform.Position) * EM::QuaternionToMat4(Transform.Orientation);
+				Model *= EM::Mat4::Translate(Transform.Position);
+				Model *= EM::QuaternionToMat4(Transform.Orientation);
+				Model *= EM::Mat4::Scale(Transform.Scale);
 
 				auto CamPos = FPSCamera.Transform.Position;
 
+				static float t = 0.0f;
+				t += 0.001f;
+
 				Asset->Shader->SetUniform("model", Model);
-				// Asset->Shader->SetUniform("transform", Transform);
-				Asset->Shader->SetUniform("lightColor", EM::Vec3(1.0f, 0.0f, 0.0f));
-				Asset->Shader->SetUniform("lightPosition", CamPos);
-				glDrawArrays(Asset->DrawType, 0, Asset->DrawCount);
+				Asset->Shader->SetUniform("viewPos", FPSCamera.Forward());
+				Asset->Shader->SetUniform("lightPosition", 200.0f * EM::Vec3(cos(t / 8.0f), sin(t / 8.0f), sin(t / 8.0f)));
+				glDrawArrays(Asset->Mesh.DrawType, 0, Asset->Mesh.DrawCount);
 			}
 			glBindVertexArray(0);
 		} break;
@@ -5063,7 +5483,6 @@ int main(int argc, char** argv)
 	Window.Init("3D Test", SCREENWIDTH, SCREENHEIGHT, SCREENRES);
 	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
 
-
 	// Init ShaderManager
 	EG::ShaderManager::Init(); 
 
@@ -5079,6 +5498,8 @@ int main(int argc, char** argv)
 	LoadSpriteAsset();
 	LoadFloorAsset();
 	LoadCubeAsset();
+	LoadNormalMappedSpriteAsset();
+	LoadNormalFloorAsset();
 	LoadInstances();
 
 	EU::FPSLimiter Limiter;
@@ -5170,15 +5591,16 @@ int main(int argc, char** argv)
         EM::Mat4 CameraMatrix;
     	CameraMatrix = FPSCamera.GetViewMatrix();
 
-        Instances.at(0).Transform.Orientation = EM::Quaternion::AngleAxis(120 * EM::ToRadians(t), EM::Vec3(0, 1, 0));
+        Instances.at(0).Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(180), EM::Vec3(0, 0, 1)) * 
+        										EM::Quaternion::AngleAxis(EM::ToRadians(135), EM::Vec3(0, 1, 0));
 
         // Change rotation over time
-        for (u32 i = 1; i < ENTITY_AMOUNT; i++)
-        {
-	        Instances.at(i).Transform.Orientation = EM::Quaternion::AngleAxis(120 * EM::ToRadians(t), EM::Vec3(0, 1, 0)) * 
-	        										EM::Quaternion::AngleAxis(80  * EM::ToRadians(t), EM::Vec3(0, 0, 1)) * 
-	        										EM::Quaternion::AngleAxis(60  * EM::ToRadians(t), EM::Vec3(1, 0, 0));
-        }
+        // for (u32 i = 1; i < ENTITY_AMOUNT; i++)
+        // {
+	       //  Instances.at(i).Transform.Orientation = EM::Quaternion::AngleAxis(120 * EM::ToRadians(t), EM::Vec3(0, 1, 0)) * 
+	       //  										EM::Quaternion::AngleAxis(80  * EM::ToRadians(t), EM::Vec3(0, 0, 1)) * 
+	       //  										EM::Quaternion::AngleAxis(60  * EM::ToRadians(t), EM::Vec3(1, 0, 0));
+        // }
 
         PROFILE("Rendering")
 
@@ -5461,7 +5883,7 @@ int main(int argc, char** argv)
 #endif
 
 
-#if 1
+#if 0
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -5761,7 +6183,7 @@ void LoadCubeAsset()
     // Set shader
     Cube.Shader = Shader;
     // Set texture
-    Cube.Texture = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
+    Cube.Texture = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box_pixel.png");
     // Set draw type
     Cube.DrawType = GL_TRIANGLES;
     // Set draw count
@@ -5830,7 +6252,7 @@ void RenderInstance(const EG::ModelInstance& Instance)
 
 				// Bind normal
 				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png").id);
+				glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box_sheet_normal.png").id);
 
 				EM::Mat4 Model;
 				// Model *= EM::Mat4::Scale(Transform.Scale);
@@ -6077,3 +6499,205 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 
 // slut balls
 #endif
+
+
+
+
+
+
+#if 1
+
+#include <stdio.h>
+#include <cmath>
+
+struct vec3
+{
+	float x;
+	float y;
+	float z;
+};
+
+struct plane
+{
+	vec3 Normal;
+	float Distance;	
+};
+
+enum planes_types
+{
+	LEFT, 
+	RIGHT, 
+	TOP, 
+	BOTTOM, 
+	NEAR, 
+	FAR
+};
+
+struct frustum
+{
+	plane Planes[6];
+};
+
+vec3 CrossProduct(vec3 A, vec3 B)
+{
+	vec3 Cross;
+
+	Cross.x = A.y * B.z - A.z * B.y; 	
+	Cross.y = A.z * B.x - A.x * B.z;
+	Cross.z = A.x * B.y - A.y * B.x;
+
+	return Cross;
+}
+
+float VecLength(vec3 A)
+{
+	return sqrt(A.x * A.x + A.y * A.y + A.z * A.z);
+}
+
+vec3 Normalize(vec3 A)
+{
+	vec3 NormalizedVec;
+
+	float Length = VecLength(A);
+
+	NormalizedVec.x = A.x / Length;
+	NormalizedVec.y = A.y / Length;
+	NormalizedVec.z = A.z / Length;
+
+	return NormalizedVec;
+}
+
+vec3 SubtractVec(vec3 A, vec3 B)
+{
+	vec3 ReturnVec;
+	ReturnVec.x = A.x - B.x;
+	ReturnVec.y = A.y - B.y;
+	ReturnVec.z = A.z - B.z;
+
+	return ReturnVec;
+}
+
+void PrintVec3(vec3 A)
+{
+	printf("(%f, %f, %f)", A.x, A.y, A.z);	
+}
+
+float Vec3Dot(vec3 A, vec3 B)
+{
+	return (A.x * B.x + A.y * B.y + A.z * B.z);
+}
+
+plane CalculatePlane(vec3 P0, vec3 P1, vec3 P2, vec3 P3)
+{
+	plane Plane;
+
+	// Get vector from P1-P0
+	vec3 V1 = SubtractVec(P1, P0);
+	vec3 V2 = SubtractVec(P3, P2);
+
+	// Cross these two
+	vec3 Cross = CrossProduct(V1, V2);
+	// Normalize
+	vec3 Normalized = Normalize(Cross);
+
+	// Find distance from origin
+	// d = -ax - by - cz, where x = P.x, y = P.y, z = P.z
+	float Distance = -Normalized.x * P0.x + -Normalized.y * P0.y + -Normalized.z * P0.z;
+
+	Plane.Normal = Normalized;
+	Plane.Distance = Distance;
+
+	return Plane;
+}
+
+void PrintPlane(plane* Plane)
+{
+	PrintVec3(Plane->Normal);
+	printf(", D: %f\n", Plane->Distance);
+}
+
+bool SphereFrustumIntersection(frustum* Frustum, vec3 Center, float Radius)
+{
+	for (int i = 0; i < 6; i++)
+	{
+		float Value = Vec3Dot(Frustum->Planes[i].Normal, Center) + Frustum->Planes[i].Distance + Radius;
+		if (Value <= 0.0f) 
+		{
+			switch(i)
+			{
+				case LEFT: printf(" LEFT: %f\n", Value); break;
+				case RIGHT: printf(" RIGHT: %f\n", Value); break;
+				case TOP: printf(" TOP: %f\n", Value); break;
+				case BOTTOM: printf(" BOTTOM: %f\n", Value); break;
+				case NEAR: printf(" NEAR: %f\n", Value); break;
+				case FAR: printf(" FAR: %f\n", Value); break;
+			}
+			return false;
+		}
+	}
+
+	return true;
+}
+
+int main(int argc, char** argv)
+{
+	vec3 P0 = {-1.0f, 1.0f, 1.0f};
+	vec3 P1 = { 1.0f, 1.0f, 1.0f};
+	vec3 P2 = { 1.0f,-1.0f, 1.0f};
+	vec3 P3 = {-1.0f,-1.0f, 1.0f};
+
+	vec3 P4 = {-2.0f, 2.0f,-2.0f};
+	vec3 P5 = { 2.0f, 2.0f,-2.0f};
+	vec3 P6 = { 2.0f,-2.0f,-2.0f};
+	vec3 P7 = {-2.0f,-2.0f,-2.0f};
+
+	// Left plane
+	plane Top 		= CalculatePlane(P0, P4, P0, P1);
+	plane Bottom 	= CalculatePlane(P3, P7, P2, P3);
+	plane Near 		= CalculatePlane(P3, P0, P0, P1);
+	plane Far 		= CalculatePlane(P7, P4, P5, P4);
+	plane Left 		= CalculatePlane(P0, P4, P3, P0);
+	plane Right 	= CalculatePlane(P1, P5, P1, P2);
+
+	printf("Top: ");
+	PrintPlane(&Top);
+	printf("Bottom: ");
+	PrintPlane(&Bottom);
+	printf("Near: ");
+	PrintPlane(&Near);
+	printf("Far: ");
+	PrintPlane(&Far);
+	printf("Right: ");
+	PrintPlane(&Right);
+	printf("Left: ");
+	PrintPlane(&Left);
+
+	frustum Frustum;
+	Frustum.Planes[LEFT] 	= Left;
+	Frustum.Planes[RIGHT] 	= Right;
+	Frustum.Planes[TOP] 	= Top;
+	Frustum.Planes[BOTTOM] 	= Bottom;
+	Frustum.Planes[NEAR] 	= Near;
+	Frustum.Planes[FAR] 	= Far;
+
+	vec3 SphereCenter = {2.0f, 0.0f, 1.0f};
+	float Radius = 1.0f;
+
+	if (SphereFrustumIntersection(&Frustum, SphereCenter, Radius))
+		printf("Intersection!\n");
+	else
+		printf("No Intersection!\n");
+
+
+	return 0;
+}
+
+
+#endif
+
+
+
+
+
+
+
