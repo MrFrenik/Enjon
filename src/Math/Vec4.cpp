@@ -94,6 +94,22 @@ namespace Enjon { namespace Math {
 		return Divide(other);
 	} 
 
+	void operator*=(Vec4& left, const float& scalar)
+	{
+		left.x *= scalar;
+		left.y *= scalar;
+		left.z *= scalar;
+		left.w *= scalar;
+	}
+
+	void operator/=(Vec4& left, float scalar)
+	{
+		left.x /= scalar;
+		left.y /= scalar;
+		left.z /= scalar;
+		left.w /= scalar;
+	}
+
 	float Vec4::Length() const 
 	{
 		return sqrt((x * x) + (y * y) + (z * z) + (w * w));

@@ -17,6 +17,7 @@ namespace Enjon { namespace Graphics {
 	struct MaterialInstance
 	{
 		GLTexture Textures[TextureSlotCount];
+		float Shininess;
 	};
 	
 }}

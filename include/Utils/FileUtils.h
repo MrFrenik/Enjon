@@ -63,6 +63,28 @@ namespace Enjon { namespace Utils {
 		return result; 
 	}
 
+	static inline char* ReadFileContentsIntoString(char* FilePath)
+	{
+		char* Result = 0;
+
+		FILE *File = fopen(FilePath, "r");
+		if (File)
+		{
+			fseek(File, 0, SEEK_END);
+			size_t FileSize = ftell(File);
+			fseek(File, 0, SEEK_SET);
+
+			Result = (char *)malloc(FileSize + 1);
+			fread(Result, FileSize, 1, File);
+			Result[FileSize] = '\0';
+
+			fclose(File);
+		}	
+
+		return Result;
+	}
+
+
 	inline bool save_to_json(const char* filePath, nlohmann::json& content, uint32_t format_width = 4)
 	{
 		std::ofstream myfile(filePath);

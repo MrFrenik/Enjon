@@ -54,6 +54,7 @@
 #include "IO/IOManager.h"
 #include "IO/ResourceManager.h"
 #include "IO/TextureCache.h"
+#include "IO/ObjLoader.h"
 
 #include "Physics/AABB.h"
 

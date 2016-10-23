@@ -89,7 +89,7 @@ namespace Enjon { namespace Graphics {
 		return Transform.Orientation * EM::Vec3(0, -1, 0);
 	}
 
-	EM::Mat4 Camera::GetViewMatrix() const
+	EM::Mat4 Camera::GetViewProjectionMatrix() const
 	{
 		return GetProjection() * GetView();
 	}
@@ -98,21 +98,26 @@ namespace Enjon { namespace Graphics {
 	{
 		EM::Mat4 Projection;
 
-		if (ProjType == ProjectionType::Perspective)
+		switch(ProjType)
 		{
-			Projection = EM::Mat4::Perspective(FieldOfView, ViewPortAspectRatio, NearPlane, FarPlane);
-		}
-		else if (ProjType == ProjectionType::Orthographic)
-		{
-			Enjon::f32 Distance = 0.5f * (FarPlane - NearPlane);
-			Projection = EM::Mat4::Orthographic(
-													-OrthographicScale * ViewPortAspectRatio, 
-													OrthographicScale * ViewPortAspectRatio, 
-													-OrthographicScale, 
-													OrthographicScale, 
-													-Distance, 
-													Distance	
-												);
+			case ProjectionType::Perspective:
+			{
+				Projection = EM::Mat4::Perspective(FieldOfView, ViewPortAspectRatio, NearPlane, FarPlane);
+			} break;
+
+			case ProjectionType::Orthographic:
+			{
+				Enjon::f32 Distance = 0.5f * (FarPlane - NearPlane);
+				Projection = EM::Mat4::Orthographic(
+														-OrthographicScale * ViewPortAspectRatio, 
+														OrthographicScale * ViewPortAspectRatio, 
+														-OrthographicScale, 
+														OrthographicScale, 
+														-Distance, 
+														Distance	
+													);
+
+			} break;
 		}
 
 		return Projection;

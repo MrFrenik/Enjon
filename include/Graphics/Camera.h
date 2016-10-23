@@ -33,7 +33,7 @@ namespace Enjon { namespace Graphics {
 		EM::Vec3 Up() const;
 		EM::Vec3 Down() const;
 
-		EM::Mat4 GetViewMatrix() const;
+		EM::Mat4 GetViewProjectionMatrix() const;
 		EM::Mat4 GetProjection() const;
 		EM::Mat4 GetView() const;
 

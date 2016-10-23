@@ -22,7 +22,7 @@
 */
 
 #if 0
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -4552,7 +4552,7 @@ int main(int argc, char** argv)
 #endif
 
 
-#if 0
+#if 1
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -4594,6 +4594,8 @@ EG::ModelAsset NormalFloor;
 EG::ModelAsset Wall;
 EG::ModelAsset Cube;
 EG::ModelAsset SpriteWithNormal;
+EG::ModelAsset MonkeyHead;
+EG::ModelAsset OtherCube;
 std::vector<EG::ModelInstance> Instances;
 EG::Camera FPSCamera;
 
@@ -4723,159 +4725,267 @@ std::vector<vert3> GetQuad(EM::Vec3 pos1, EM::Vec3 pos2, EM::Vec3 pos3, EM::Vec3
     return Quad;
 }
 
-void LoadCubeAsset()
+void LoadMonkeyHeadAsset()
 {
+	// Get mesh
+	MonkeyHead.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/buddha.obj");
+
+    glGenBuffers(1, &MonkeyHead.Mesh.VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, MonkeyHead.Mesh.VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(EG::Vert) * MonkeyHead.Mesh.Verticies.size(), &MonkeyHead.Mesh.Verticies[0], GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &MonkeyHead.Mesh.VAO);
+    glBindVertexArray(MonkeyHead.Mesh.VAO);
+
+    // Position
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Position));
+    // Normal
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Normals));
+    // Tangent
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Tangent));
+    // Bitangent
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Bitangent));
+    // UV
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, UV));
+    // Color
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Color));
+
+    // Unbind VAO
+    glBindVertexArray(0);
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("specularMap", 2);
+    Shader->Unuse();
+
+    // Set shader
+    MonkeyHead.Shader = Shader;
+    // Textures
+	MonkeyHead.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bb8_diffuse.png");
+	MonkeyHead.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
+	MonkeyHead.Material.Shininess = 256.0f;
+    // Set draw type
+    MonkeyHead.Mesh.DrawType = GL_TRIANGLES;
+    // Set draw count
+    MonkeyHead.Mesh.DrawCount = MonkeyHead.Mesh.Verticies.size();
+}
+
+void LoadOtherCubeAsset()
+{
+	// Get mesh
+	OtherCube.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/basic_cube.obj");
+
+    glGenBuffers(1, &OtherCube.Mesh.VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, OtherCube.Mesh.VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(EG::Vert) * OtherCube.Mesh.Verticies.size(), &OtherCube.Mesh.Verticies[0], GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &OtherCube.Mesh.VAO);
+    glBindVertexArray(OtherCube.Mesh.VAO);
+
+    // Position
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Position));
+    // Normal
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Normals));
+    // Tangent
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Tangent));
+    // Bitangent
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Bitangent));
+    // UV
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, UV));
+    // Color
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Color));
+
+    // Unbind VAO
+    glBindVertexArray(0);
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    Shader->Unuse();
+
+    // Set shader
+    OtherCube.Shader = Shader;
+    // Textures
+	OtherCube.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
+	OtherCube.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
+	OtherCube.Material.Shininess = 256.0f;
+    // Set draw type
+    OtherCube.Mesh.DrawType = GL_TRIANGLES;
+    // Set draw count
+    OtherCube.Mesh.DrawCount = OtherCube.Mesh.Verticies.size();
+}
+
+void LoadCubeAsset()
 	// FRONT
+{
 	// positions
-    EM::Vec3 front_1(-1.0, 1.0, -1.0);
-    EM::Vec3 front_2(-1.0, -1.0, -1.0);
-    EM::Vec3 front_3(1.0, -1.0, -1.0);
-    EM::Vec3 front_4(1.0, 1.0, -1.0);
-    // texture coordinates
-    EM::Vec2 front_uv_1(0.0, 1.0);
-    EM::Vec2 front_uv_2(0.0, 0.0);
-    EM::Vec2 front_uv_3(1.0, 0.0);
-    EM::Vec2 front_uv_4(1.0, 1.0);
-    // normal vector
-    EM::Vec3 front_nm(0.0, 0.0, -1.0);
+ //    EM::Vec3 front_1(-1.0, 1.0, -1.0);
+ //    EM::Vec3 front_2(-1.0, -1.0, -1.0);
+ //    EM::Vec3 front_3(1.0, -1.0, -1.0);
+ //    EM::Vec3 front_4(1.0, 1.0, -1.0);
+ //    // texture coordinates
+ //    EM::Vec2 front_uv_1(0.0, 1.0);
+ //    EM::Vec2 front_uv_2(0.0, 0.0);
+ //    EM::Vec2 front_uv_3(1.0, 0.0);
+ //    EM::Vec2 front_uv_4(1.0, 1.0);
+ //    // normal vector
+ //    EM::Vec3 front_nm(0.0, 0.0, -1.0);
 
-    auto FrontFace = GetQuad(front_1, front_2, front_3, front_4, front_uv_1, front_uv_2, front_uv_3, front_uv_4, front_nm, EG::RGBA8_Green());
+ //    auto FrontFace = GetQuad(front_1, front_2, front_3, front_4, front_uv_1, front_uv_2, front_uv_3, front_uv_4, front_nm, EG::RGBA8_Green());
 
-	// RIGHT
-	// positions
-    EM::Vec3 right_1(1.0, 1.0, -1.0);
-    EM::Vec3 right_2(1.0, -1.0, -1.0);
-    EM::Vec3 right_3(1.0, -1.0, 1.0);
-    EM::Vec3 right_4(1.0, 1.0, 1.0);
-    // texture coordinates
-    EM::Vec2 right_uv_1(0.0, 1.0);
-    EM::Vec2 right_uv_2(0.0, 0.0);
-    EM::Vec2 right_uv_3(1.0, 0.0);
-    EM::Vec2 right_uv_4(1.0, 1.0);
-    // normal vector
-    EM::Vec3 right_nm(1.0, 0.0, 0.0);
+	// // RIGHT
+	// // positions
+ //    EM::Vec3 right_1(1.0, 1.0, -1.0);
+ //    EM::Vec3 right_2(1.0, -1.0, -1.0);
+ //    EM::Vec3 right_3(1.0, -1.0, 1.0);
+ //    EM::Vec3 right_4(1.0, 1.0, 1.0);
+ //    // texture coordinates
+ //    EM::Vec2 right_uv_1(0.0, 1.0);
+ //    EM::Vec2 right_uv_2(0.0, 0.0);
+ //    EM::Vec2 right_uv_3(1.0, 0.0);
+ //    EM::Vec2 right_uv_4(1.0, 1.0);
+ //    // normal vector
+ //    EM::Vec3 right_nm(1.0, 0.0, 0.0);
 
-    auto RightFace = GetQuad(right_1, right_2, right_3, right_4, right_uv_1, right_uv_2, right_uv_3, right_uv_4, right_nm, EG::RGBA8_Red());
+ //    auto RightFace = GetQuad(right_1, right_2, right_3, right_4, right_uv_1, right_uv_2, right_uv_3, right_uv_4, right_nm, EG::RGBA8_Red());
 
-	// LEFT
-	// positions
-    EM::Vec3 left_1(-1.0, 1.0, 1.0);
-    EM::Vec3 left_2(-1.0, -1.0, 1.0);
-    EM::Vec3 left_3(-1.0, -1.0, -1.0);
-    EM::Vec3 left_4(-1.0, 1.0, -1.0);
-    // texture coordinates
-    EM::Vec2 left_uv_1(0.0, 1.0);
-    EM::Vec2 left_uv_2(0.0, 0.0);
-    EM::Vec2 left_uv_3(1.0, 0.0);
-    EM::Vec2 left_uv_4(1.0, 1.0);
-    // normal vector
-    EM::Vec3 left_nm(-1.0, 0.0, 0.0);
+	// // LEFT
+	// // positions
+ //    EM::Vec3 left_1(-1.0, 1.0, 1.0);
+ //    EM::Vec3 left_2(-1.0, -1.0, 1.0);
+ //    EM::Vec3 left_3(-1.0, -1.0, -1.0);
+ //    EM::Vec3 left_4(-1.0, 1.0, -1.0);
+ //    // texture coordinates
+ //    EM::Vec2 left_uv_1(0.0, 1.0);
+ //    EM::Vec2 left_uv_2(0.0, 0.0);
+ //    EM::Vec2 left_uv_3(1.0, 0.0);
+ //    EM::Vec2 left_uv_4(1.0, 1.0);
+ //    // normal vector
+ //    EM::Vec3 left_nm(-1.0, 0.0, 0.0);
 
-    auto LeftFace = GetQuad(left_1, left_2, left_3, left_4, left_uv_1, left_uv_2, left_uv_3, left_uv_4, left_nm, EG::RGBA8_Blue());
+ //    auto LeftFace = GetQuad(left_1, left_2, left_3, left_4, left_uv_1, left_uv_2, left_uv_3, left_uv_4, left_nm, EG::RGBA8_Blue());
 
-	// BACK
-	// positions
-    EM::Vec3 back_1(-1.0,  1.0,  1.0);
-    EM::Vec3 back_2(-1.0, -1.0,  1.0);
-    EM::Vec3 back_3( 1.0, -1.0,  1.0);
-    EM::Vec3 back_4( 1.0,  1.0,  1.0);
-    // texture coordinates
-    EM::Vec2 back_uv_1(0.0, 1.0);
-    EM::Vec2 back_uv_2(0.0, 0.0);
-    EM::Vec2 back_uv_3(1.0, 0.0);
-    EM::Vec2 back_uv_4(1.0, 1.0);
-    // normal vector
-    EM::Vec3 back_nm(0.0, 0.0, 1.0);
+	// // BACK
+	// // positions
+ //    EM::Vec3 back_1(-1.0,  1.0,  1.0);
+ //    EM::Vec3 back_2(-1.0, -1.0,  1.0);
+ //    EM::Vec3 back_3( 1.0, -1.0,  1.0);
+ //    EM::Vec3 back_4( 1.0,  1.0,  1.0);
+ //    // texture coordinates
+ //    EM::Vec2 back_uv_1(0.0, 1.0);
+ //    EM::Vec2 back_uv_2(0.0, 0.0);
+ //    EM::Vec2 back_uv_3(1.0, 0.0);
+ //    EM::Vec2 back_uv_4(1.0, 1.0);
+ //    // normal vector
+ //    EM::Vec3 back_nm(0.0, 0.0, 1.0);
 
-    auto BackFace = GetQuad(back_1, back_2, back_3, back_4, back_uv_1, back_uv_2, back_uv_3, back_uv_4, back_nm, EG::RGBA8_Purple());
+ //    auto BackFace = GetQuad(back_1, back_2, back_3, back_4, back_uv_1, back_uv_2, back_uv_3, back_uv_4, back_nm, EG::RGBA8_Purple());
 
-	// TOP
-	// positions
-    EM::Vec3 top_1(-1.0,  1.0,  1.0);
-    EM::Vec3 top_2(-1.0,  1.0, -1.0);
-    EM::Vec3 top_3( 1.0,  1.0, -1.0);
-    EM::Vec3 top_4( 1.0,  1.0,  1.0);
-    // texture coordinates
-    EM::Vec2 top_uv_1(0.0, 1.0);
-    EM::Vec2 top_uv_2(0.0, 0.0);
-    EM::Vec2 top_uv_3(1.0, 0.0);
-    EM::Vec2 top_uv_4(1.0, 1.0);
-    // normal vector
-    EM::Vec3 top_nm(0.0, 1.0, 0.0);
+	// // TOP
+	// // positions
+ //    EM::Vec3 top_1(-1.0,  1.0,  1.0);
+ //    EM::Vec3 top_2(-1.0,  1.0, -1.0);
+ //    EM::Vec3 top_3( 1.0,  1.0, -1.0);
+ //    EM::Vec3 top_4( 1.0,  1.0,  1.0);
+ //    // texture coordinates
+ //    EM::Vec2 top_uv_1(0.0, 1.0);
+ //    EM::Vec2 top_uv_2(0.0, 0.0);
+ //    EM::Vec2 top_uv_3(1.0, 0.0);
+ //    EM::Vec2 top_uv_4(1.0, 1.0);
+ //    // normal vector
+ //    EM::Vec3 top_nm(0.0, 1.0, 0.0);
 
-    auto TopFace = GetQuad(top_1, top_2, top_3, top_4, top_uv_1, top_uv_2, top_uv_3, top_uv_4, top_nm, EG::RGBA8_Yellow());
+ //    auto TopFace = GetQuad(top_1, top_2, top_3, top_4, top_uv_1, top_uv_2, top_uv_3, top_uv_4, top_nm, EG::RGBA8_Yellow());
 
-	// BOTTOM
-	// positions
-    EM::Vec3 bottom_1(-1.0, -1.0,  1.0);
-    EM::Vec3 bottom_2(-1.0, -1.0, -1.0);
-    EM::Vec3 bottom_3( 1.0, -1.0, -1.0);
-    EM::Vec3 bottom_4( 1.0, -1.0,  1.0);
-    // texture coordinates
-    EM::Vec2 bottom_uv_1(0.0, 1.0);
-    EM::Vec2 bottom_uv_2(0.0, 0.0);
-    EM::Vec2 bottom_uv_3(1.0, 0.0);
-    EM::Vec2 bottom_uv_4(1.0, 1.0);
-    // normal vector
-    EM::Vec3 bottom_nm(0.0, -1.0, 0.0);
+	// // BOTTOM
+	// // positions
+ //    EM::Vec3 bottom_1(-1.0, -1.0,  1.0);
+ //    EM::Vec3 bottom_2(-1.0, -1.0, -1.0);
+ //    EM::Vec3 bottom_3( 1.0, -1.0, -1.0);
+ //    EM::Vec3 bottom_4( 1.0, -1.0,  1.0);
+ //    // texture coordinates
+ //    EM::Vec2 bottom_uv_1(0.0, 1.0);
+ //    EM::Vec2 bottom_uv_2(0.0, 0.0);
+ //    EM::Vec2 bottom_uv_3(1.0, 0.0);
+ //    EM::Vec2 bottom_uv_4(1.0, 1.0);
+ //    // normal vector
+ //    EM::Vec3 bottom_nm(0.0, -1.0, 0.0);
 
-    auto BottomFace = GetQuad(bottom_1, bottom_2, bottom_3, bottom_4, bottom_uv_1, bottom_uv_2, bottom_uv_3, bottom_uv_4, bottom_nm, EG::RGBA8_Orange());
+ //    auto BottomFace = GetQuad(bottom_1, bottom_2, bottom_3, bottom_4, bottom_uv_1, bottom_uv_2, bottom_uv_3, bottom_uv_4, bottom_nm, EG::RGBA8_Orange());
 
-    vert3 Verts[] = 
-    {
-    	// FrontFace
-    	FrontFace.at(0), 
-    	FrontFace.at(1), 
-    	FrontFace.at(2), 
-    	FrontFace.at(3),
-    	FrontFace.at(4),
-    	FrontFace.at(5),
+ //    vert3 Verts[] = 
+ //    {
+ //    	// FrontFace
+ //    	FrontFace.at(0), 
+ //    	FrontFace.at(1), 
+ //    	FrontFace.at(2), 
+ //    	FrontFace.at(3),
+ //    	FrontFace.at(4),
+ //    	FrontFace.at(5),
 
-    	// Right
-    	RightFace.at(0), 
-    	RightFace.at(1), 
-    	RightFace.at(2), 
-    	RightFace.at(3),
-    	RightFace.at(4),
-    	RightFace.at(5),
+ //    	// Right
+ //    	RightFace.at(0), 
+ //    	RightFace.at(1), 
+ //    	RightFace.at(2), 
+ //    	RightFace.at(3),
+ //    	RightFace.at(4),
+ //    	RightFace.at(5),
 
-    	// Left
-    	LeftFace.at(0), 
-    	LeftFace.at(1), 
-    	LeftFace.at(2), 
-    	LeftFace.at(3),
-    	LeftFace.at(4),
-    	LeftFace.at(5),
+ //    	// Left
+ //    	LeftFace.at(0), 
+ //    	LeftFace.at(1), 
+ //    	LeftFace.at(2), 
+ //    	LeftFace.at(3),
+ //    	LeftFace.at(4),
+ //    	LeftFace.at(5),
 
-    	// Back
-    	BackFace.at(0), 
-    	BackFace.at(1), 
-    	BackFace.at(2), 
-    	BackFace.at(3),
-    	BackFace.at(4),
-    	BackFace.at(5),
+ //    	// Back
+ //    	BackFace.at(0), 
+ //    	BackFace.at(1), 
+ //    	BackFace.at(2), 
+ //    	BackFace.at(3),
+ //    	BackFace.at(4),
+ //    	BackFace.at(5),
 
-    	// Top
-    	TopFace.at(0), 
-    	TopFace.at(1), 
-    	TopFace.at(2), 
-    	TopFace.at(3),
-    	TopFace.at(4),
-    	TopFace.at(5),
+ //    	// Top
+ //    	TopFace.at(0), 
+ //    	TopFace.at(1), 
+ //    	TopFace.at(2), 
+ //    	TopFace.at(3),
+ //    	TopFace.at(4),
+ //    	TopFace.at(5),
 
-    	// Bottom
-    	BottomFace.at(0), 
-    	BottomFace.at(1), 
-    	BottomFace.at(2), 
-    	BottomFace.at(3),
-    	BottomFace.at(4),
-    	BottomFace.at(5)
-    };
+ //    	// Bottom
+ //    	BottomFace.at(0), 
+ //    	BottomFace.at(1), 
+ //    	BottomFace.at(2), 
+ //    	BottomFace.at(3),
+ //    	BottomFace.at(4),
+ //    	BottomFace.at(5)
+ //    };
 
+	Cube.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/cube.obj");
 
     glGenBuffers(1, &Cube.Mesh.VBO);
     glBindBuffer(GL_ARRAY_BUFFER, Cube.Mesh.VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Verts), Verts, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(EG::Vert) * Cube.Mesh.Verticies.size(), &Cube.Mesh.Verticies[0], GL_STATIC_DRAW);
 
     glGenVertexArrays(1, &Cube.Mesh.VAO);
     glBindVertexArray(Cube.Mesh.VAO);
@@ -4915,6 +5025,7 @@ void LoadCubeAsset()
     // Set texture
     Cube.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
     Cube.Material.Textures[EG::TextureSlotType::NORMAL] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
+    Cube.Material.Shininess = 128.0f;
     // Set draw type
     Cube.Mesh.DrawType = GL_TRIANGLES;
     // Set draw count
@@ -4984,155 +5095,156 @@ void LoadNormalFloorAsset()
 {
 // FRONT
 	// positions
-    EM::Vec3 front_1(-1.0, 1.0, -1.0);
-    EM::Vec3 front_2(-1.0, -1.0, -1.0);
-    EM::Vec3 front_3(1.0, -1.0, -1.0);
-    EM::Vec3 front_4(1.0, 1.0, -1.0);
-    // texture coordinates
-    EM::Vec2 front_uv_1(0.0, 1.0);
-    EM::Vec2 front_uv_2(0.0, 0.0);
-    EM::Vec2 front_uv_3(1.0, 0.0);
-    EM::Vec2 front_uv_4(1.0, 1.0);
-    // normal vector
-    EM::Vec3 front_nm(0.0, 0.0, -1.0);
+ //    EM::Vec3 front_1(-1.0, 1.0, -1.0);
+ //    EM::Vec3 front_2(-1.0, -1.0, -1.0);
+ //    EM::Vec3 front_3(1.0, -1.0, -1.0);
+ //    EM::Vec3 front_4(1.0, 1.0, -1.0);
+ //    // texture coordinates
+ //    EM::Vec2 front_uv_1(0.0, 1.0);
+ //    EM::Vec2 front_uv_2(0.0, 0.0);
+ //    EM::Vec2 front_uv_3(1.0, 0.0);
+ //    EM::Vec2 front_uv_4(1.0, 1.0);
+ //    // normal vector
+ //    EM::Vec3 front_nm(0.0, 0.0, -1.0);
 
-    auto FrontFace = GetQuad(front_1, front_2, front_3, front_4, front_uv_1, front_uv_2, front_uv_3, front_uv_4, front_nm);
+ //    auto FrontFace = GetQuad(front_1, front_2, front_3, front_4, front_uv_1, front_uv_2, front_uv_3, front_uv_4, front_nm);
 
-	// RIGHT
-	// positions
-    EM::Vec3 right_1(1.0, 1.0, -1.0);
-    EM::Vec3 right_2(1.0, -1.0, -1.0);
-    EM::Vec3 right_3(1.0, -1.0, 1.0);
-    EM::Vec3 right_4(1.0, 1.0, 1.0);
-    // texture coordinates
-    EM::Vec2 right_uv_1(0.0, 1.0);
-    EM::Vec2 right_uv_2(0.0, 0.0);
-    EM::Vec2 right_uv_3(1.0, 0.0);
-    EM::Vec2 right_uv_4(1.0, 1.0);
-    // normal vector
-    EM::Vec3 right_nm(1.0, 0.0, 0.0);
+	// // RIGHT
+	// // positions
+ //    EM::Vec3 right_1(1.0, 1.0, -1.0);
+ //    EM::Vec3 right_2(1.0, -1.0, -1.0);
+ //    EM::Vec3 right_3(1.0, -1.0, 1.0);
+ //    EM::Vec3 right_4(1.0, 1.0, 1.0);
+ //    // texture coordinates
+ //    EM::Vec2 right_uv_1(0.0, 1.0);
+ //    EM::Vec2 right_uv_2(0.0, 0.0);
+ //    EM::Vec2 right_uv_3(1.0, 0.0);
+ //    EM::Vec2 right_uv_4(1.0, 1.0);
+ //    // normal vector
+ //    EM::Vec3 right_nm(1.0, 0.0, 0.0);
 
-    auto RightFace = GetQuad(right_1, right_2, right_3, right_4, right_uv_1, right_uv_2, right_uv_3, right_uv_4, right_nm);
+ //    auto RightFace = GetQuad(right_1, right_2, right_3, right_4, right_uv_1, right_uv_2, right_uv_3, right_uv_4, right_nm);
 
-	// LEFT
-	// positions
-    EM::Vec3 left_1(-1.0, 1.0, 1.0);
-    EM::Vec3 left_2(-1.0, -1.0, 1.0);
-    EM::Vec3 left_3(-1.0, -1.0, -1.0);
-    EM::Vec3 left_4(-1.0, 1.0, -1.0);
-    // texture coordinates
-    EM::Vec2 left_uv_1(0.0, 1.0);
-    EM::Vec2 left_uv_2(0.0, 0.0);
-    EM::Vec2 left_uv_3(1.0, 0.0);
-    EM::Vec2 left_uv_4(1.0, 1.0);
-    // normal vector
-    EM::Vec3 left_nm(-1.0, 0.0, 0.0);
+	// // LEFT
+	// // positions
+ //    EM::Vec3 left_1(-1.0, 1.0, 1.0);
+ //    EM::Vec3 left_2(-1.0, -1.0, 1.0);
+ //    EM::Vec3 left_3(-1.0, -1.0, -1.0);
+ //    EM::Vec3 left_4(-1.0, 1.0, -1.0);
+ //    // texture coordinates
+ //    EM::Vec2 left_uv_1(0.0, 1.0);
+ //    EM::Vec2 left_uv_2(0.0, 0.0);
+ //    EM::Vec2 left_uv_3(1.0, 0.0);
+ //    EM::Vec2 left_uv_4(1.0, 1.0);
+ //    // normal vector
+ //    EM::Vec3 left_nm(-1.0, 0.0, 0.0);
 
-    auto LeftFace = GetQuad(left_1, left_2, left_3, left_4, left_uv_1, left_uv_2, left_uv_3, left_uv_4, left_nm);
+ //    auto LeftFace = GetQuad(left_1, left_2, left_3, left_4, left_uv_1, left_uv_2, left_uv_3, left_uv_4, left_nm);
 
-	// BACK
-	// positions
-    EM::Vec3 back_1(-1.0,  1.0,  1.0);
-    EM::Vec3 back_2(-1.0, -1.0,  1.0);
-    EM::Vec3 back_3( 1.0, -1.0,  1.0);
-    EM::Vec3 back_4( 1.0,  1.0,  1.0);
-    // texture coordinates
-    EM::Vec2 back_uv_1(0.0, 1.0);
-    EM::Vec2 back_uv_2(0.0, 0.0);
-    EM::Vec2 back_uv_3(1.0, 0.0);
-    EM::Vec2 back_uv_4(1.0, 1.0);
-    // normal vector
-    EM::Vec3 back_nm(0.0, 0.0, 1.0);
+	// // BACK
+	// // positions
+ //    EM::Vec3 back_1(-1.0,  1.0,  1.0);
+ //    EM::Vec3 back_2(-1.0, -1.0,  1.0);
+ //    EM::Vec3 back_3( 1.0, -1.0,  1.0);
+ //    EM::Vec3 back_4( 1.0,  1.0,  1.0);
+ //    // texture coordinates
+ //    EM::Vec2 back_uv_1(0.0, 1.0);
+ //    EM::Vec2 back_uv_2(0.0, 0.0);
+ //    EM::Vec2 back_uv_3(1.0, 0.0);
+ //    EM::Vec2 back_uv_4(1.0, 1.0);
+ //    // normal vector
+ //    EM::Vec3 back_nm(0.0, 0.0, 1.0);
 
-    auto BackFace = GetQuad(back_1, back_2, back_3, back_4, back_uv_1, back_uv_2, back_uv_3, back_uv_4, back_nm);
+ //    auto BackFace = GetQuad(back_1, back_2, back_3, back_4, back_uv_1, back_uv_2, back_uv_3, back_uv_4, back_nm);
 
-	// TOP
-	// positions
-    EM::Vec3 top_1(-1.0,  1.0,  1.0);
-    EM::Vec3 top_2(-1.0,  1.0, -1.0);
-    EM::Vec3 top_3( 1.0,  1.0, -1.0);
-    EM::Vec3 top_4( 1.0,  1.0,  1.0);
-    // texture coordinates
-    EM::Vec2 top_uv_1(0.0, 1.0);
-    EM::Vec2 top_uv_2(0.0, 0.0);
-    EM::Vec2 top_uv_3(1.0, 0.0);
-    EM::Vec2 top_uv_4(1.0, 1.0);
-    // normal vector
-    EM::Vec3 top_nm(0.0, 1.0, 0.0);
+	// // TOP
+	// // positions
+ //    EM::Vec3 top_1(-1.0,  1.0,  1.0);
+ //    EM::Vec3 top_2(-1.0,  1.0, -1.0);
+ //    EM::Vec3 top_3( 1.0,  1.0, -1.0);
+ //    EM::Vec3 top_4( 1.0,  1.0,  1.0);
+ //    // texture coordinates
+ //    EM::Vec2 top_uv_1(0.0, 1.0);
+ //    EM::Vec2 top_uv_2(0.0, 0.0);
+ //    EM::Vec2 top_uv_3(1.0, 0.0);
+ //    EM::Vec2 top_uv_4(1.0, 1.0);
+ //    // normal vector
+ //    EM::Vec3 top_nm(0.0, 1.0, 0.0);
 
-    auto TopFace = GetQuad(top_1, top_2, top_3, top_4, top_uv_1, top_uv_2, top_uv_3, top_uv_4, top_nm);
+ //    auto TopFace = GetQuad(top_1, top_2, top_3, top_4, top_uv_1, top_uv_2, top_uv_3, top_uv_4, top_nm);
 
-	// BOTTOM
-	// positions
-    EM::Vec3 bottom_1(-1.0, -1.0,  1.0);
-    EM::Vec3 bottom_2(-1.0, -1.0, -1.0);
-    EM::Vec3 bottom_3( 1.0, -1.0, -1.0);
-    EM::Vec3 bottom_4( 1.0, -1.0,  1.0);
-    // texture coordinates
-    EM::Vec2 bottom_uv_1(0.0, 1.0);
-    EM::Vec2 bottom_uv_2(0.0, 0.0);
-    EM::Vec2 bottom_uv_3(1.0, 0.0);
-    EM::Vec2 bottom_uv_4(1.0, 1.0);
-    // normal vector
-    EM::Vec3 bottom_nm(0.0, -1.0, 0.0);
+	// // BOTTOM
+	// // positions
+ //    EM::Vec3 bottom_1(-1.0, -1.0,  1.0);
+ //    EM::Vec3 bottom_2(-1.0, -1.0, -1.0);
+ //    EM::Vec3 bottom_3( 1.0, -1.0, -1.0);
+ //    EM::Vec3 bottom_4( 1.0, -1.0,  1.0);
+ //    // texture coordinates
+ //    EM::Vec2 bottom_uv_1(0.0, 1.0);
+ //    EM::Vec2 bottom_uv_2(0.0, 0.0);
+ //    EM::Vec2 bottom_uv_3(1.0, 0.0);
+ //    EM::Vec2 bottom_uv_4(1.0, 1.0);
+ //    // normal vector
+ //    EM::Vec3 bottom_nm(0.0, -1.0, 0.0);
 
-    auto BottomFace = GetQuad(bottom_1, bottom_2, bottom_3, bottom_4, bottom_uv_1, bottom_uv_2, bottom_uv_3, bottom_uv_4, bottom_nm);
+ //    auto BottomFace = GetQuad(bottom_1, bottom_2, bottom_3, bottom_4, bottom_uv_1, bottom_uv_2, bottom_uv_3, bottom_uv_4, bottom_nm);
 
-    vert3 Verts[] = 
-    {
-    	// FrontFace
-    	FrontFace.at(0), 
-    	FrontFace.at(1), 
-    	FrontFace.at(2), 
-    	FrontFace.at(3),
-    	FrontFace.at(4),
-    	FrontFace.at(5),
+ //    vert3 Verts[] = 
+ //    {
+ //    	// FrontFace
+ //    	FrontFace.at(0), 
+ //    	FrontFace.at(1), 
+ //    	FrontFace.at(2), 
+ //    	FrontFace.at(3),
+ //    	FrontFace.at(4),
+ //    	FrontFace.at(5),
 
-    	// Right
-    	RightFace.at(0), 
-    	RightFace.at(1), 
-    	RightFace.at(2), 
-    	RightFace.at(3),
-    	RightFace.at(4),
-    	RightFace.at(5),
+ //    	// Right
+ //    	RightFace.at(0), 
+ //    	RightFace.at(1), 
+ //    	RightFace.at(2), 
+ //    	RightFace.at(3),
+ //    	RightFace.at(4),
+ //    	RightFace.at(5),
 
-    	// Left
-    	LeftFace.at(0), 
-    	LeftFace.at(1), 
-    	LeftFace.at(2), 
-    	LeftFace.at(3),
-    	LeftFace.at(4),
-    	LeftFace.at(5),
+ //    	// Left
+ //    	LeftFace.at(0), 
+ //    	LeftFace.at(1), 
+ //    	LeftFace.at(2), 
+ //    	LeftFace.at(3),
+ //    	LeftFace.at(4),
+ //    	LeftFace.at(5),
 
-    	// Back
-    	BackFace.at(0), 
-    	BackFace.at(1), 
-    	BackFace.at(2), 
-    	BackFace.at(3),
-    	BackFace.at(4),
-    	BackFace.at(5),
+ //    	// Back
+ //    	BackFace.at(0), 
+ //    	BackFace.at(1), 
+ //    	BackFace.at(2), 
+ //    	BackFace.at(3),
+ //    	BackFace.at(4),
+ //    	BackFace.at(5),
 
-    	// Top
-    	TopFace.at(0), 
-    	TopFace.at(1), 
-    	TopFace.at(2), 
-    	TopFace.at(3),
-    	TopFace.at(4),
-    	TopFace.at(5),
+ //    	// Top
+ //    	TopFace.at(0), 
+ //    	TopFace.at(1), 
+ //    	TopFace.at(2), 
+ //    	TopFace.at(3),
+ //    	TopFace.at(4),
+ //    	TopFace.at(5),
 
-    	// Bottom
-    	BottomFace.at(0), 
-    	BottomFace.at(1), 
-    	BottomFace.at(2), 
-    	BottomFace.at(3),
-    	BottomFace.at(4),
-    	BottomFace.at(5)
-    };
+ //    	// Bottom
+ //    	BottomFace.at(0), 
+ //    	BottomFace.at(1), 
+ //    	BottomFace.at(2), 
+ //    	BottomFace.at(3),
+ //    	BottomFace.at(4),
+ //    	BottomFace.at(5)
+ //    };
 
+    NormalFloor.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/basic_cube.obj");
 
     glGenBuffers(1, &NormalFloor.Mesh.VBO);
     glBindBuffer(GL_ARRAY_BUFFER, NormalFloor.Mesh.VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Verts), Verts, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(EG::Vert) * NormalFloor.Mesh.Verticies.size(), &NormalFloor.Mesh.Verticies[0], GL_STATIC_DRAW);
 
     glGenVertexArrays(1, &NormalFloor.Mesh.VAO);
     glBindVertexArray(NormalFloor.Mesh.VAO);
@@ -5172,6 +5284,7 @@ void LoadNormalFloorAsset()
     // Set texture
     NormalFloor.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
     NormalFloor.Material.Textures[EG::TextureSlotType::NORMAL] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
+    NormalFloor.Material.Shininess = 128.0f;
     // Set draw type
     NormalFloor.Mesh.DrawType = GL_TRIANGLES;
     // Set draw countoO
@@ -5260,28 +5373,27 @@ const u32 ENTITY_AMOUNT = 2;
 
 void LoadInstances()
 {
-	EG::ModelInstance A;
-	A.Asset = &SpriteWithNormal;
-	A.Transform.Position = EM::Vec3(0, 0, 0);
-	A.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0));
-	Instances.push_back(A);
+	EG::ModelInstance D;
+	D.Asset = &MonkeyHead;
+	D.Transform.Position 	= EM::Vec3(0, 0, 0);
+	// D.Transform.Scale = EM::Vec3(1, 1, 1) * 0.02f;
+	Instances.push_back(D);
 
-	for (u32 i = 0; i < ENTITY_AMOUNT; i++)
-	{
-		EG::ModelInstance MI;
-		MI.Asset = &Cube;
-		MI.Transform.Position = EM::Vec3(ER::Roll(-20, 20), 0, ER::Roll(-20, 20));	
-		MI.Transform.Scale = EM::Vec3(ER::Roll(1, 5), ER::Roll(1, 5), ER::Roll(1, 5)) * 0.25f;
-		MI.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(ER::Roll(-180, 180)), EM::Vec3(0, 1, 0));
-		Instances.push_back(MI);
-	}
+	EG::ModelInstance E;
+	E.Asset = &OtherCube;
+	E.Transform.Position 	= EM::Vec3(0, 0, 0);
+	Instances.push_back(E);
 
-	EG::ModelInstance C;
-	C.Asset = &Cube;
-	C.Transform.Position = EM::Vec3(2, 0, 4);
-	Instances.push_back(C);
+	// for (auto i = 0; i < 100; i++)
+	// {
+	// 	EG::ModelInstance f;
+	// 	f.Asset = &MonkeyHead;
+	// 	f.Transform.Position 	= EM::Vec3(ER::Roll(-20, 20), ER::Roll(-20, 20), ER::Roll(-20, 20));	
+	// 	// f.Transform.Scale 		= EM::Vec3(1, 1, 1) * 0.02f;
+	// 	Instances.push_back(f);
+	// }
 
-	auto map_size = 20;
+	auto map_size = 5;
 	for (auto i = 0; i < map_size; i++)
 	{
 		for (auto j = 0; j < map_size; j++)
@@ -5333,6 +5445,9 @@ void RenderInstance(const EG::ModelInstance& Instance)
 				glActiveTexture(GL_TEXTURE1);
 				glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
 
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/eyeball__SPECULAR.png").id);
+
 				EM::Mat4 Model;
 				// L = T*R*S
 				Model *= EM::Mat4::Translate(Transform.Position);
@@ -5344,9 +5459,19 @@ void RenderInstance(const EG::ModelInstance& Instance)
 				static float t = 0.0f;
 				t += 0.001f;
 
+				auto& Position = Instances.at(0).Transform.Position;
+
+				Asset->Shader->SetUniform("fogMin", 10.0f);
+				Asset->Shader->SetUniform("fogMax", 100.0f);
+				Asset->Shader->SetUniform("fogColor", EM::Vec4(0.8f, 0.76f, 0.85f, 1.0f));
 				Asset->Shader->SetUniform("model", Model);
-				Asset->Shader->SetUniform("viewPos", FPSCamera.Forward());
-				Asset->Shader->SetUniform("lightPosition", 200.0f * EM::Vec3(cos(t / 8.0f), sin(t / 8.0f), sin(t / 8.0f)));
+				Asset->Shader->SetUniform("viewPos", FPSCamera.Transform.Position);
+				Asset->Shader->SetUniform("camPos", FPSCamera.Transform.Position);
+				Asset->Shader->SetUniform("viewDir", FPSCamera.Forward());
+				// Asset->Shader->SetUniform("lightPosition", EM::Vec3(0.0f, 20.0f, 0.0f));
+				Asset->Shader->SetUniform("lightPosition", FPSCamera.Transform.Position);
+				Asset->Shader->SetUniform("LightColor", EM::Vec3(sin(t) * 0.5 + 0.5, cos(t) * 0.5 + 0.5, sin(t) * 0.5 + 0.5));
+				Asset->Shader->SetUniform("Shininess", Instance.Asset->Material.Shininess);
 				glDrawArrays(Asset->Mesh.DrawType, 0, Asset->Mesh.DrawCount);
 			}
 			glBindVertexArray(0);
@@ -5479,6 +5604,8 @@ int main(int argc, char** argv)
 	float TimeIncrement = 0.0f;
 	u32 ticks = 0;
 
+	// TODO(John): Make an InitSubsystems call in the engine
+
 	// Initialize window
 	Window.Init("3D Test", SCREENWIDTH, SCREENHEIGHT, SCREENRES);
 	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
@@ -5491,6 +5618,8 @@ int main(int argc, char** argv)
 
 	FPSCamera = EG::Camera((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
 
+	// auto Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/cube.obj");
+
 	EG::SpriteBatch Batch;
 	Batch.Init();
 
@@ -5500,6 +5629,8 @@ int main(int argc, char** argv)
 	LoadCubeAsset();
 	LoadNormalMappedSpriteAsset();
 	LoadNormalFloorAsset();
+	LoadOtherCubeAsset();
+	LoadMonkeyHeadAsset();
 	LoadInstances();
 
 	EU::FPSLimiter Limiter;
@@ -5534,6 +5665,8 @@ int main(int argc, char** argv)
     bool running = true;
     while (running)
     {
+    	Limiter.Begin();
+
     	static float t = 0.0f;
     	t += 0.001f;
     	if (t > 50000.0f) t = 0.0f;
@@ -5584,23 +5717,18 @@ int main(int argc, char** argv)
 	    	profiletime = 0.0f;
     	}
 
+        Limiter.End();
+
     	// Rendering
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
 
+		auto Transform = &Instances.at(0).Transform;
+		Transform->Orientation = EM::Quaternion::AngleAxis(15.0f * sin(t), EM::Vec3(0, 1, 0));
+
+
         // Create transformations
         EM::Mat4 CameraMatrix;
-    	CameraMatrix = FPSCamera.GetViewMatrix();
-
-        Instances.at(0).Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(180), EM::Vec3(0, 0, 1)) * 
-        										EM::Quaternion::AngleAxis(EM::ToRadians(135), EM::Vec3(0, 1, 0));
-
-        // Change rotation over time
-        // for (u32 i = 1; i < ENTITY_AMOUNT; i++)
-        // {
-	       //  Instances.at(i).Transform.Orientation = EM::Quaternion::AngleAxis(120 * EM::ToRadians(t), EM::Vec3(0, 1, 0)) * 
-	       //  										EM::Quaternion::AngleAxis(80  * EM::ToRadians(t), EM::Vec3(0, 0, 1)) * 
-	       //  										EM::Quaternion::AngleAxis(60  * EM::ToRadians(t), EM::Vec3(1, 0, 0));
-        // }
+    	CameraMatrix = FPSCamera.GetViewProjectionMatrix();
 
         PROFILE("Rendering")
 
@@ -5621,8 +5749,19 @@ int main(int argc, char** argv)
         	rendertime = 0.0f;
         }
 
+        // Let's output some calculations for a test
+        // I need the MVP matrix for the character 
+        // to find the NDC and then print those out
+        // So we have the camera matrix
+        // for (int i = 0; i < 102; i++)
+        // {
+        // 	auto Transform = &Instances.at(i).Transform;
+        // 	Transform->Orientation = EM::Quaternion::AngleAxis(15.0f * sin(t), EM::Vec3(0, 1, 0));
+        // }
+
         // Swap the screen buffers
         Window.SwapBuffer();
+
     }
     // Properly de-allocate all resources once they've outlived their purpose
     return 0;
@@ -6143,12 +6282,12 @@ void LoadCubeAsset()
     };
 
 
-    glGenBuffers(1, &Cube.VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, Cube.VBO);
+    glGenBuffers(1, &Cube.Mesh.VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, Cube.Mesh.VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Verts), Verts, GL_STATIC_DRAW);
 
-    glGenVertexArrays(1, &Cube.VAO);
-    glBindVertexArray(Cube.VAO);
+    glGenVertexArrays(1, &Cube.Mesh.VAO);
+    glBindVertexArray(Cube.Mesh.VAO);
 
     // Position
     glEnableVertexAttribArray(0);
@@ -6505,7 +6644,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 
 
 
-#if 1
+#if 0
 
 #include <stdio.h>
 #include <cmath>
