@@ -4572,11 +4572,13 @@ int main(int argc, char** argv)
 	#define SCREENRES EG::DEFAULT
 #endif 
 
-#define PROFILE(profiled) \
+#define PROFILE(profiled) 			\
+	static float time##profiled = 0.0f; \
 	ticks = SDL_GetTicks();
 
-#define ENDPROFILE(profiled) \
-	printf("%s: %d\n", profiled, SDL_GetTicks() - ticks);
+#define ENDPROFILE(profiled) 			\
+	time##profiled += 0.01f;			\
+	if (##profiled >= 1.0f) printf("%s: %d\n", profiled, SDL_GetTicks() - ticks);
 
 #include <iostream>
 
@@ -4585,8 +4587,9 @@ int main(int argc, char** argv)
 #include <Graphics/Camera3D.h>
 #include <Graphics/ModelAsset.h>
 #include <Graphics/Camera.h>
-#include <Generated.h>
-#include <TestComponent.h>
+#include <Entity/EntityManager.h>
+
+using u32 = uint32_t;
 
 EG::ModelAsset GlobalModel;
 EG::ModelAsset Floor;
@@ -4598,6 +4601,8 @@ EG::ModelAsset MonkeyHead;
 EG::ModelAsset OtherCube;
 std::vector<EG::ModelInstance> Instances;
 EG::Camera FPSCamera;
+
+const uint8_t RENDERING = 0;
 
 void LoadSpriteAsset()
 {
@@ -4728,7 +4733,7 @@ std::vector<vert3> GetQuad(EM::Vec3 pos1, EM::Vec3 pos2, EM::Vec3 pos3, EM::Vec3
 void LoadMonkeyHeadAsset()
 {
 	// Get mesh
-	MonkeyHead.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/buddha.obj");
+	MonkeyHead.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/monkey.obj");
 
     glGenBuffers(1, &MonkeyHead.Mesh.VBO);
     glBindBuffer(GL_ARRAY_BUFFER, MonkeyHead.Mesh.VBO);
@@ -4770,7 +4775,7 @@ void LoadMonkeyHeadAsset()
     // Set shader
     MonkeyHead.Shader = Shader;
     // Textures
-	MonkeyHead.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bb8_diffuse.png");
+	MonkeyHead.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png");
 	MonkeyHead.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
 	MonkeyHead.Material.Shininess = 256.0f;
     // Set draw type
@@ -4835,152 +4840,6 @@ void LoadOtherCubeAsset()
 void LoadCubeAsset()
 	// FRONT
 {
-	// positions
- //    EM::Vec3 front_1(-1.0, 1.0, -1.0);
- //    EM::Vec3 front_2(-1.0, -1.0, -1.0);
- //    EM::Vec3 front_3(1.0, -1.0, -1.0);
- //    EM::Vec3 front_4(1.0, 1.0, -1.0);
- //    // texture coordinates
- //    EM::Vec2 front_uv_1(0.0, 1.0);
- //    EM::Vec2 front_uv_2(0.0, 0.0);
- //    EM::Vec2 front_uv_3(1.0, 0.0);
- //    EM::Vec2 front_uv_4(1.0, 1.0);
- //    // normal vector
- //    EM::Vec3 front_nm(0.0, 0.0, -1.0);
-
- //    auto FrontFace = GetQuad(front_1, front_2, front_3, front_4, front_uv_1, front_uv_2, front_uv_3, front_uv_4, front_nm, EG::RGBA8_Green());
-
-	// // RIGHT
-	// // positions
- //    EM::Vec3 right_1(1.0, 1.0, -1.0);
- //    EM::Vec3 right_2(1.0, -1.0, -1.0);
- //    EM::Vec3 right_3(1.0, -1.0, 1.0);
- //    EM::Vec3 right_4(1.0, 1.0, 1.0);
- //    // texture coordinates
- //    EM::Vec2 right_uv_1(0.0, 1.0);
- //    EM::Vec2 right_uv_2(0.0, 0.0);
- //    EM::Vec2 right_uv_3(1.0, 0.0);
- //    EM::Vec2 right_uv_4(1.0, 1.0);
- //    // normal vector
- //    EM::Vec3 right_nm(1.0, 0.0, 0.0);
-
- //    auto RightFace = GetQuad(right_1, right_2, right_3, right_4, right_uv_1, right_uv_2, right_uv_3, right_uv_4, right_nm, EG::RGBA8_Red());
-
-	// // LEFT
-	// // positions
- //    EM::Vec3 left_1(-1.0, 1.0, 1.0);
- //    EM::Vec3 left_2(-1.0, -1.0, 1.0);
- //    EM::Vec3 left_3(-1.0, -1.0, -1.0);
- //    EM::Vec3 left_4(-1.0, 1.0, -1.0);
- //    // texture coordinates
- //    EM::Vec2 left_uv_1(0.0, 1.0);
- //    EM::Vec2 left_uv_2(0.0, 0.0);
- //    EM::Vec2 left_uv_3(1.0, 0.0);
- //    EM::Vec2 left_uv_4(1.0, 1.0);
- //    // normal vector
- //    EM::Vec3 left_nm(-1.0, 0.0, 0.0);
-
- //    auto LeftFace = GetQuad(left_1, left_2, left_3, left_4, left_uv_1, left_uv_2, left_uv_3, left_uv_4, left_nm, EG::RGBA8_Blue());
-
-	// // BACK
-	// // positions
- //    EM::Vec3 back_1(-1.0,  1.0,  1.0);
- //    EM::Vec3 back_2(-1.0, -1.0,  1.0);
- //    EM::Vec3 back_3( 1.0, -1.0,  1.0);
- //    EM::Vec3 back_4( 1.0,  1.0,  1.0);
- //    // texture coordinates
- //    EM::Vec2 back_uv_1(0.0, 1.0);
- //    EM::Vec2 back_uv_2(0.0, 0.0);
- //    EM::Vec2 back_uv_3(1.0, 0.0);
- //    EM::Vec2 back_uv_4(1.0, 1.0);
- //    // normal vector
- //    EM::Vec3 back_nm(0.0, 0.0, 1.0);
-
- //    auto BackFace = GetQuad(back_1, back_2, back_3, back_4, back_uv_1, back_uv_2, back_uv_3, back_uv_4, back_nm, EG::RGBA8_Purple());
-
-	// // TOP
-	// // positions
- //    EM::Vec3 top_1(-1.0,  1.0,  1.0);
- //    EM::Vec3 top_2(-1.0,  1.0, -1.0);
- //    EM::Vec3 top_3( 1.0,  1.0, -1.0);
- //    EM::Vec3 top_4( 1.0,  1.0,  1.0);
- //    // texture coordinates
- //    EM::Vec2 top_uv_1(0.0, 1.0);
- //    EM::Vec2 top_uv_2(0.0, 0.0);
- //    EM::Vec2 top_uv_3(1.0, 0.0);
- //    EM::Vec2 top_uv_4(1.0, 1.0);
- //    // normal vector
- //    EM::Vec3 top_nm(0.0, 1.0, 0.0);
-
- //    auto TopFace = GetQuad(top_1, top_2, top_3, top_4, top_uv_1, top_uv_2, top_uv_3, top_uv_4, top_nm, EG::RGBA8_Yellow());
-
-	// // BOTTOM
-	// // positions
- //    EM::Vec3 bottom_1(-1.0, -1.0,  1.0);
- //    EM::Vec3 bottom_2(-1.0, -1.0, -1.0);
- //    EM::Vec3 bottom_3( 1.0, -1.0, -1.0);
- //    EM::Vec3 bottom_4( 1.0, -1.0,  1.0);
- //    // texture coordinates
- //    EM::Vec2 bottom_uv_1(0.0, 1.0);
- //    EM::Vec2 bottom_uv_2(0.0, 0.0);
- //    EM::Vec2 bottom_uv_3(1.0, 0.0);
- //    EM::Vec2 bottom_uv_4(1.0, 1.0);
- //    // normal vector
- //    EM::Vec3 bottom_nm(0.0, -1.0, 0.0);
-
- //    auto BottomFace = GetQuad(bottom_1, bottom_2, bottom_3, bottom_4, bottom_uv_1, bottom_uv_2, bottom_uv_3, bottom_uv_4, bottom_nm, EG::RGBA8_Orange());
-
- //    vert3 Verts[] = 
- //    {
- //    	// FrontFace
- //    	FrontFace.at(0), 
- //    	FrontFace.at(1), 
- //    	FrontFace.at(2), 
- //    	FrontFace.at(3),
- //    	FrontFace.at(4),
- //    	FrontFace.at(5),
-
- //    	// Right
- //    	RightFace.at(0), 
- //    	RightFace.at(1), 
- //    	RightFace.at(2), 
- //    	RightFace.at(3),
- //    	RightFace.at(4),
- //    	RightFace.at(5),
-
- //    	// Left
- //    	LeftFace.at(0), 
- //    	LeftFace.at(1), 
- //    	LeftFace.at(2), 
- //    	LeftFace.at(3),
- //    	LeftFace.at(4),
- //    	LeftFace.at(5),
-
- //    	// Back
- //    	BackFace.at(0), 
- //    	BackFace.at(1), 
- //    	BackFace.at(2), 
- //    	BackFace.at(3),
- //    	BackFace.at(4),
- //    	BackFace.at(5),
-
- //    	// Top
- //    	TopFace.at(0), 
- //    	TopFace.at(1), 
- //    	TopFace.at(2), 
- //    	TopFace.at(3),
- //    	TopFace.at(4),
- //    	TopFace.at(5),
-
- //    	// Bottom
- //    	BottomFace.at(0), 
- //    	BottomFace.at(1), 
- //    	BottomFace.at(2), 
- //    	BottomFace.at(3),
- //    	BottomFace.at(4),
- //    	BottomFace.at(5)
- //    };
-
 	Cube.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/cube.obj");
 
     glGenBuffers(1, &Cube.Mesh.VBO);
@@ -5093,153 +4952,6 @@ void LoadFloorAsset()
 
 void LoadNormalFloorAsset()
 {
-// FRONT
-	// positions
- //    EM::Vec3 front_1(-1.0, 1.0, -1.0);
- //    EM::Vec3 front_2(-1.0, -1.0, -1.0);
- //    EM::Vec3 front_3(1.0, -1.0, -1.0);
- //    EM::Vec3 front_4(1.0, 1.0, -1.0);
- //    // texture coordinates
- //    EM::Vec2 front_uv_1(0.0, 1.0);
- //    EM::Vec2 front_uv_2(0.0, 0.0);
- //    EM::Vec2 front_uv_3(1.0, 0.0);
- //    EM::Vec2 front_uv_4(1.0, 1.0);
- //    // normal vector
- //    EM::Vec3 front_nm(0.0, 0.0, -1.0);
-
- //    auto FrontFace = GetQuad(front_1, front_2, front_3, front_4, front_uv_1, front_uv_2, front_uv_3, front_uv_4, front_nm);
-
-	// // RIGHT
-	// // positions
- //    EM::Vec3 right_1(1.0, 1.0, -1.0);
- //    EM::Vec3 right_2(1.0, -1.0, -1.0);
- //    EM::Vec3 right_3(1.0, -1.0, 1.0);
- //    EM::Vec3 right_4(1.0, 1.0, 1.0);
- //    // texture coordinates
- //    EM::Vec2 right_uv_1(0.0, 1.0);
- //    EM::Vec2 right_uv_2(0.0, 0.0);
- //    EM::Vec2 right_uv_3(1.0, 0.0);
- //    EM::Vec2 right_uv_4(1.0, 1.0);
- //    // normal vector
- //    EM::Vec3 right_nm(1.0, 0.0, 0.0);
-
- //    auto RightFace = GetQuad(right_1, right_2, right_3, right_4, right_uv_1, right_uv_2, right_uv_3, right_uv_4, right_nm);
-
-	// // LEFT
-	// // positions
- //    EM::Vec3 left_1(-1.0, 1.0, 1.0);
- //    EM::Vec3 left_2(-1.0, -1.0, 1.0);
- //    EM::Vec3 left_3(-1.0, -1.0, -1.0);
- //    EM::Vec3 left_4(-1.0, 1.0, -1.0);
- //    // texture coordinates
- //    EM::Vec2 left_uv_1(0.0, 1.0);
- //    EM::Vec2 left_uv_2(0.0, 0.0);
- //    EM::Vec2 left_uv_3(1.0, 0.0);
- //    EM::Vec2 left_uv_4(1.0, 1.0);
- //    // normal vector
- //    EM::Vec3 left_nm(-1.0, 0.0, 0.0);
-
- //    auto LeftFace = GetQuad(left_1, left_2, left_3, left_4, left_uv_1, left_uv_2, left_uv_3, left_uv_4, left_nm);
-
-	// // BACK
-	// // positions
- //    EM::Vec3 back_1(-1.0,  1.0,  1.0);
- //    EM::Vec3 back_2(-1.0, -1.0,  1.0);
- //    EM::Vec3 back_3( 1.0, -1.0,  1.0);
- //    EM::Vec3 back_4( 1.0,  1.0,  1.0);
- //    // texture coordinates
- //    EM::Vec2 back_uv_1(0.0, 1.0);
- //    EM::Vec2 back_uv_2(0.0, 0.0);
- //    EM::Vec2 back_uv_3(1.0, 0.0);
- //    EM::Vec2 back_uv_4(1.0, 1.0);
- //    // normal vector
- //    EM::Vec3 back_nm(0.0, 0.0, 1.0);
-
- //    auto BackFace = GetQuad(back_1, back_2, back_3, back_4, back_uv_1, back_uv_2, back_uv_3, back_uv_4, back_nm);
-
-	// // TOP
-	// // positions
- //    EM::Vec3 top_1(-1.0,  1.0,  1.0);
- //    EM::Vec3 top_2(-1.0,  1.0, -1.0);
- //    EM::Vec3 top_3( 1.0,  1.0, -1.0);
- //    EM::Vec3 top_4( 1.0,  1.0,  1.0);
- //    // texture coordinates
- //    EM::Vec2 top_uv_1(0.0, 1.0);
- //    EM::Vec2 top_uv_2(0.0, 0.0);
- //    EM::Vec2 top_uv_3(1.0, 0.0);
- //    EM::Vec2 top_uv_4(1.0, 1.0);
- //    // normal vector
- //    EM::Vec3 top_nm(0.0, 1.0, 0.0);
-
- //    auto TopFace = GetQuad(top_1, top_2, top_3, top_4, top_uv_1, top_uv_2, top_uv_3, top_uv_4, top_nm);
-
-	// // BOTTOM
-	// // positions
- //    EM::Vec3 bottom_1(-1.0, -1.0,  1.0);
- //    EM::Vec3 bottom_2(-1.0, -1.0, -1.0);
- //    EM::Vec3 bottom_3( 1.0, -1.0, -1.0);
- //    EM::Vec3 bottom_4( 1.0, -1.0,  1.0);
- //    // texture coordinates
- //    EM::Vec2 bottom_uv_1(0.0, 1.0);
- //    EM::Vec2 bottom_uv_2(0.0, 0.0);
- //    EM::Vec2 bottom_uv_3(1.0, 0.0);
- //    EM::Vec2 bottom_uv_4(1.0, 1.0);
- //    // normal vector
- //    EM::Vec3 bottom_nm(0.0, -1.0, 0.0);
-
- //    auto BottomFace = GetQuad(bottom_1, bottom_2, bottom_3, bottom_4, bottom_uv_1, bottom_uv_2, bottom_uv_3, bottom_uv_4, bottom_nm);
-
- //    vert3 Verts[] = 
- //    {
- //    	// FrontFace
- //    	FrontFace.at(0), 
- //    	FrontFace.at(1), 
- //    	FrontFace.at(2), 
- //    	FrontFace.at(3),
- //    	FrontFace.at(4),
- //    	FrontFace.at(5),
-
- //    	// Right
- //    	RightFace.at(0), 
- //    	RightFace.at(1), 
- //    	RightFace.at(2), 
- //    	RightFace.at(3),
- //    	RightFace.at(4),
- //    	RightFace.at(5),
-
- //    	// Left
- //    	LeftFace.at(0), 
- //    	LeftFace.at(1), 
- //    	LeftFace.at(2), 
- //    	LeftFace.at(3),
- //    	LeftFace.at(4),
- //    	LeftFace.at(5),
-
- //    	// Back
- //    	BackFace.at(0), 
- //    	BackFace.at(1), 
- //    	BackFace.at(2), 
- //    	BackFace.at(3),
- //    	BackFace.at(4),
- //    	BackFace.at(5),
-
- //    	// Top
- //    	TopFace.at(0), 
- //    	TopFace.at(1), 
- //    	TopFace.at(2), 
- //    	TopFace.at(3),
- //    	TopFace.at(4),
- //    	TopFace.at(5),
-
- //    	// Bottom
- //    	BottomFace.at(0), 
- //    	BottomFace.at(1), 
- //    	BottomFace.at(2), 
- //    	BottomFace.at(3),
- //    	BottomFace.at(4),
- //    	BottomFace.at(5)
- //    };
-
     NormalFloor.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/basic_cube.obj");
 
     glGenBuffers(1, &NormalFloor.Mesh.VBO);
@@ -5369,8 +5081,6 @@ void LoadNormalMappedSpriteAsset()
     SpriteWithNormal.Mesh.DrawCount = 6;	
 }
 
-const u32 ENTITY_AMOUNT = 2;
-
 void LoadInstances()
 {
 	EG::ModelInstance D;
@@ -5379,10 +5089,10 @@ void LoadInstances()
 	// D.Transform.Scale = EM::Vec3(1, 1, 1) * 0.02f;
 	Instances.push_back(D);
 
-	EG::ModelInstance E;
-	E.Asset = &OtherCube;
-	E.Transform.Position 	= EM::Vec3(0, 0, 0);
-	Instances.push_back(E);
+	// EG::ModelInstance E;
+	// E.Asset = &OtherCube;
+	// E.Transform.Position 	= EM::Vec3(0, 0, 0);
+	// Instances.push_back(E);
 
 	// for (auto i = 0; i < 100; i++)
 	// {
@@ -5392,6 +5102,11 @@ void LoadInstances()
 	// 	// f.Transform.Scale 		= EM::Vec3(1, 1, 1) * 0.02f;
 	// 	Instances.push_back(f);
 	// }
+
+	EG::ModelInstance B;
+	B.Asset = &GlobalModel;
+	B.Transform.Position = EM::Vec3(0, 0, 0);
+	Instances.push_back(B);
 
 	auto map_size = 5;
 	for (auto i = 0; i < map_size; i++)
@@ -5484,112 +5199,8 @@ void RenderInstance(const EG::ModelInstance& Instance)
 // bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera);
 bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera);
 
-typedef u32 entity;
-
 // Main window
 EG::Window Window;
-
- namespace EManager 
- {
-	std::unordered_map<u32, std::vector<ComponentBase*>> componentsMap;
-
-	typedef std::vector<ComponentBase*> ComponentList;
-
-	void AttachComponent(u32 ent, ComponentBase* component)
-	{
-		auto search = componentsMap.find(ent);
-		if (search != componentsMap.end())
-		{
-			auto components	= &search->second;
-			components->push_back(component);
-		}
-
-		// otherwise make the entity?
-		else
-		{
-			std::vector<ComponentBase*> base;
-			base.push_back(component);
-			componentsMap[ent] = base;
-		}	
-	}
-
-	// TODO(John): Make this faster by keeping the vector
-	// sorted by metatype of tehe component so that search times
-	// are at worst O(logN)
-	template <typename T>
-	T* GetComponent(u32 ent)
-	{
-		auto search = componentsMap.find(ent);
-		if (search != componentsMap.end())
-		{
-			auto components = &search->second;
-			auto TypeName = TypeCatalog::TypeName<T>();
-			for (auto& c : *components)
-			{
-				if (c->TypeName == TypeName)
-				{
-					return reinterpret_cast<T*>(c);
-				}	
-			}
-		}
-		// I don't want to do this though...
-		assert(false);
-	}
-
-	template <typename T>
-	void RemoveComponent(u32 ent)
-	{
-		auto search = componentsMap.find(ent);
-		if (search != componentsMap.end())
-		{
-			auto components = &search->second;
-			ComponentBase* castComp = nullptr;
-			for (auto i = 0; i < components->size(); i++)
-			{
-				auto castComp = dynamic_cast<T*>(components->at(i));
-				if (castComp != 0)
-				{
-					std::swap(components->at(i), components->back());
-					auto comp = dynamic_cast<T*>(components->back());
-					delete(comp);
-					components->pop_back();
-					return;
-				}
-			}
-		}
-	}
-
-	ComponentList* GetComponents(u32 ent)
-	{
-		auto search = componentsMap.find(ent);
-		if (search != componentsMap.end())
-		{
-			return &search->second;
-		}
-	}
-
-	template <typename T>
-	std::vector<T*> GetAllOfComponentType()
-	{
-		std::vector<T*> list;
-
-		for (auto& ent : componentsMap)
-		{
-			auto components = &ent.second;
-			auto TypeName = TypeCatalog::TypeName<T>();
-			for (auto& c : *components)
-			{
-				if (c->TypeName == TypeName)
-				{
-					list.push_back(reinterpret_cast<T*>(c));
-				}
-			}
-		}	
-
-		return list;
-	}
-}
-
 
 // The MAIN function, from here we start the application and run the game loop
 #ifdef main
@@ -5653,13 +5264,19 @@ int main(int argc, char** argv)
 	FPSCamera.ViewPortAspectRatio = (Enjon::f32)SCREENWIDTH / (Enjon::f32)SCREENHEIGHT;
 	FPSCamera.OrthographicScale = 4.5f;
 
-	for (u32 i = 0; i < ENTITY_AMOUNT; i++)
-	{
-		entity E = i;
-		EManager::AttachComponent(E, new PositionComponent(0.0f, 0.0f, 0.0f));
-		EManager::AttachComponent(E, new VelocityComponent(1.0f, 0.0f, 1.0f));
-	}
+	// Initialize entity manager
+	EntityManager* EManager = new EntityManager;
+	EManager->RegisterComponent<PositionComponent>();
+	EManager->RegisterComponent<VelocityComponent>();
+	EManager->RegisterComponent<MovementComponent>();
 
+	for (auto i = 0; i < MAX_ENTITIES; i++)
+	{
+		auto Handle = EManager->CreateEntity();
+		Handle->Attach<PositionComponent>();
+		Handle->Attach<VelocityComponent>();
+		Handle->Attach<MovementComponent>();
+	}
 
     // Game loop
     bool running = true;
@@ -5685,36 +5302,7 @@ int main(int argc, char** argv)
     	timer += 0.01f;
     	if (timer >= 20.0f)
     	{
-    		for (u32 i = 0; i < ENTITY_AMOUNT; i++)
-    		{
-    			auto Velocity = EManager::GetComponent<VelocityComponent>(i);
-    			Velocity->x = ER::Roll(-1.0f, 1.0f);
-    			Velocity->y = 0.0f;
-    			Velocity->z = ER::Roll(-1.0f, 1.0f);
-    		}
     		timer = 0.0f;
-    	}
-
-    	// Update entities
-    	PROFILE("Updating_Positions_and_Velocities")
-    	for (u32 i = 1; i < ENTITY_AMOUNT; i++)
-    	{
-    		auto Position = EManager::GetComponent<PositionComponent>(i);
-    		auto Velocity = EManager::GetComponent<VelocityComponent>(i);
-
-    		Position->x += Velocity->x;
-    		Position->y += Velocity->y;
-    		Position->z += Velocity->z;
-
-    		// auto InstancePosition = &Instances.at(i).Transform.Position;
-    		// InstancePosition->x = sin(t) * 0.5f;
-    	}
-    	static float profiletime = 0.0f;
-    	profiletime += 0.01f;
-    	if (profiletime >= 1.0f)
-    	{
-	    	ENDPROFILE("Updating_Positions_and_Velocities")
-	    	profiletime = 0.0f;
     	}
 
         Limiter.End();
@@ -5725,13 +5313,11 @@ int main(int argc, char** argv)
 		auto Transform = &Instances.at(0).Transform;
 		Transform->Orientation = EM::Quaternion::AngleAxis(15.0f * sin(t), EM::Vec3(0, 1, 0));
 
-
         // Create transformations
         EM::Mat4 CameraMatrix;
     	CameraMatrix = FPSCamera.GetViewProjectionMatrix();
 
-        PROFILE("Rendering")
-
+        PROFILE(RENDERING)
         for (auto& c : Instances)
         {
         	auto Shader = c.Asset->Shader;
@@ -5740,24 +5326,7 @@ int main(int argc, char** argv)
 		        RenderInstance(c);
 	        Shader->Unuse();
         }
-
-        static float rendertime = 0.0f;
-        rendertime += 0.01f;
-        if (rendertime >= 1.0f)
-        {
-        	ENDPROFILE("Rendering")
-        	rendertime = 0.0f;
-        }
-
-        // Let's output some calculations for a test
-        // I need the MVP matrix for the character 
-        // to find the NDC and then print those out
-        // So we have the camera matrix
-        // for (int i = 0; i < 102; i++)
-        // {
-        // 	auto Transform = &Instances.at(i).Transform;
-        // 	Transform->Orientation = EM::Quaternion::AngleAxis(15.0f * sin(t), EM::Vec3(0, 1, 0));
-        // }
+    	ENDPROFILE(RENDERING)
 
         // Swap the screen buffers
         Window.SwapBuffer();
