@@ -1,7 +1,3 @@
-# Blender v2.78 (sub 0) OBJ File: ''
-# www.blender.org
-mtllib basic_cube.mtl
-o Cube
 v 1.001125 -0.880227 -1.150178
 v 1.001125 -0.880227 0.849822
 v -0.998875 -0.880227 0.849822

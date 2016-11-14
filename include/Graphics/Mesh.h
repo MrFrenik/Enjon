@@ -16,7 +16,6 @@ namespace Enjon { namespace Graphics {
 		float Tangent[3];
 		float Bitangent[3];
 		float UV[2];	
-		GLubyte Color[4];
 	};
 
 	struct MeshInstance

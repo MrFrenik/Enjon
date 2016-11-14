@@ -4733,7 +4733,7 @@ std::vector<vert3> GetQuad(EM::Vec3 pos1, EM::Vec3 pos2, EM::Vec3 pos3, EM::Vec3
 void LoadMonkeyHeadAsset()
 {
 	// Get mesh
-	MonkeyHead.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/monkey.obj");
+	MonkeyHead.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/buddha.obj");
 
     glGenBuffers(1, &MonkeyHead.Mesh.VBO);
     glBindBuffer(GL_ARRAY_BUFFER, MonkeyHead.Mesh.VBO);
@@ -4757,9 +4757,6 @@ void LoadMonkeyHeadAsset()
     // UV
     glEnableVertexAttribArray(4);
     glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, UV));
-    // Color
-    glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Color));
 
     // Unbind VAO
     glBindVertexArray(0);
@@ -4776,7 +4773,7 @@ void LoadMonkeyHeadAsset()
     MonkeyHead.Shader = Shader;
     // Textures
 	MonkeyHead.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png");
-	MonkeyHead.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
+	MonkeyHead.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/gravel_normal.png");
 	MonkeyHead.Material.Shininess = 256.0f;
     // Set draw type
     MonkeyHead.Mesh.DrawType = GL_TRIANGLES;
@@ -4811,9 +4808,6 @@ void LoadOtherCubeAsset()
     // UV
     glEnableVertexAttribArray(4);
     glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, UV));
-    // Color
-    glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Color));
 
     // Unbind VAO
     glBindVertexArray(0);
@@ -4864,9 +4858,6 @@ void LoadCubeAsset()
     // UV
     glEnableVertexAttribArray(4);
     glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, UV));
-    // Color
-    glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vert3), (void*)offsetof(vert3, Color));
 
     // Unbind VAO
     glBindVertexArray(0);
@@ -4976,9 +4967,6 @@ void LoadNormalFloorAsset()
     // UV
     glEnableVertexAttribArray(4);
     glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, UV));
-    // Color
-    glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vert3), (void*)offsetof(vert3, Color));
 
     // Unbind VAO
     glBindVertexArray(0);
@@ -5074,7 +5062,7 @@ void LoadNormalMappedSpriteAsset()
     SpriteWithNormal.Shader = Shader;
     // Set texture
     SpriteWithNormal.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png");
-    SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Normal.png");
+    SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
     // Set draw type
     SpriteWithNormal.Mesh.DrawType = GL_TRIANGLES;
     // Set draw count
@@ -5104,8 +5092,10 @@ void LoadInstances()
 	// }
 
 	EG::ModelInstance B;
-	B.Asset = &GlobalModel;
+	B.Asset = &SpriteWithNormal;
 	B.Transform.Position = EM::Vec3(0, 0, 0);
+    B.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-135), EM::Vec3(0, 1, 0)) * 
+    							EM::Quaternion::AngleAxis(EM::ToRadians(180), EM::Vec3(0, 0, 1));
 	Instances.push_back(B);
 
 	auto map_size = 5;
@@ -5114,7 +5104,7 @@ void LoadInstances()
 		for (auto j = 0; j < map_size; j++)
 		{
 			EG::ModelInstance f;
-			f.Asset = &NormalFloor;
+			f.Asset = &OtherCube;
 			f.Transform.Position = EM::Vec3((Enjon::f32)i * 2.0f, -1.0f, (Enjon::f32)j * 2.0f);
 			f.Transform.Scale = EM::Vec3(1.0f, 0.02f, 1.0f);
 			Instances.push_back(f);
@@ -5183,7 +5173,6 @@ void RenderInstance(const EG::ModelInstance& Instance)
 				Asset->Shader->SetUniform("viewPos", FPSCamera.Transform.Position);
 				Asset->Shader->SetUniform("camPos", FPSCamera.Transform.Position);
 				Asset->Shader->SetUniform("viewDir", FPSCamera.Forward());
-				// Asset->Shader->SetUniform("lightPosition", EM::Vec3(0.0f, 20.0f, 0.0f));
 				Asset->Shader->SetUniform("lightPosition", FPSCamera.Transform.Position);
 				Asset->Shader->SetUniform("LightColor", EM::Vec3(sin(t) * 0.5 + 0.5, cos(t) * 0.5 + 0.5, sin(t) * 0.5 + 0.5));
 				Asset->Shader->SetUniform("Shininess", Instance.Asset->Material.Shininess);
@@ -5300,10 +5289,6 @@ int main(int argc, char** argv)
 
     	static float timer = 0.0f;
     	timer += 0.01f;
-    	if (timer >= 20.0f)
-    	{
-    		timer = 0.0f;
-    	}
 
         Limiter.End();
 
@@ -5311,7 +5296,7 @@ int main(int argc, char** argv)
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
 
 		auto Transform = &Instances.at(0).Transform;
-		Transform->Orientation = EM::Quaternion::AngleAxis(15.0f * sin(t), EM::Vec3(0, 1, 0));
+		Transform->Orientation = EM::Quaternion::AngleAxis(t, EM::Vec3(0, 1, 0));
 
         // Create transformations
         EM::Mat4 CameraMatrix;

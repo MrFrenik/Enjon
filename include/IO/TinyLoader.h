@@ -1015,8 +1015,8 @@ bool MaterialFileReader::operator()(const std::string &matId,
   LoadMtl(matMap, materials, &matIStream);
   if (!matIStream) {
     std::stringstream ss;
-    ss << "WARN: Material file [ " << filepath
-       << " ] not found. Created a default material.";
+    // ss << "WARN: Material file [ " << filepath
+    //    << " ] not found. Created a default material.";
     if (err) {
       (*err) += ss.str();
     }
@@ -1031,8 +1031,8 @@ bool MaterialStreamReader::operator()(const std::string &matId,
   LoadMtl(matMap, materials, &m_inStream);
   if (!m_inStream) {
     std::stringstream ss;
-    ss << "WARN: Material stream in error state."
-       << " Created a default material.";
+    // ss << "WARN: Material stream in error state."
+    //    << " Created a default material.";
     if (err) {
       (*err) += ss.str();
     }

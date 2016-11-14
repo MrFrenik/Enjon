@@ -38,6 +38,7 @@ namespace Enjon { namespace Input {
 
 	void ParseVertex(EU::tokenizer *Tokenizer, EG::MeshInstance* Mesh);
 
+	/*
 	EG::MeshInstance LoadMeshFromFile(char* FilePath)
 	{
 		EG::MeshInstance Mesh;
@@ -92,10 +93,6 @@ namespace Enjon { namespace Input {
 		      Vertex.Bitangent[0] = 0.0f;
 		      Vertex.Bitangent[1] = 1.0f;
 		      Vertex.Bitangent[2] = 0.0f;
-		      Vertex.Color[0] = 255;
-		      Vertex.Color[1] = 255;
-		      Vertex.Color[2] = 255;
-		      Vertex.Color[3] = 255;
 
 		      Mesh.Verticies.push_back(Vertex);
 		    }
@@ -174,8 +171,8 @@ namespace Enjon { namespace Input {
 
 		return Mesh;
 	}
+	*/
 
-	/*
 	EG::MeshInstance LoadMeshFromFile(char* FilePath)
 	{
 		EG::MeshInstance Mesh;
@@ -200,6 +197,17 @@ namespace Enjon { namespace Input {
 			{
 				default: 
 				{
+				} break;
+
+				case EU::token_type::Token_Hash:
+				{
+					// Consume the entire line until we hit the new line
+					// while(Token.Type != EU::token_type::Token_NewLine)
+					// {
+					// 	Token = EU::GetToken(&Tokenizer);
+					// 	// printf("%s\n", NullTerminatedStringFromToken(&Token));
+					// }
+
 				} break;
 
 				case EU::token_type::Token_Unknown: 
@@ -258,27 +266,36 @@ namespace Enjon { namespace Input {
 					// Vertex Position
 					else if (EU::TokenEquals(Token, "v"))
 					{
-						// Parse a Position
-						EU::token XToken 	= EU::GetToken(&Tokenizer);
-						EU::token YToken 	= EU::GetToken(&Tokenizer);
-						EU::token ZToken 	= EU::GetToken(&Tokenizer);
+						if (Tokenizer.At[0] != ' ') continue;
 
-						// Need to make new char* that are null terminated
-						char* XString = NullTerminatedStringFromToken(&XToken);
-						char* YString = NullTerminatedStringFromToken(&YToken);
-						char* ZString = NullTerminatedStringFromToken(&ZToken);
+						else
+						{
+							// Parse a Position
+							EU::token XToken 	= EU::GetToken(&Tokenizer);
+							EU::token YToken 	= EU::GetToken(&Tokenizer);
+							EU::token ZToken 	= EU::GetToken(&Tokenizer);
 
-						// Parse all vert positions as floats
-						float X = std::atof(XString); 
-						float Y = std::atof(YString); 
-						float Z = std::atof(ZString); 
+							// Need to make new char* that are null terminated
+							char* XString = NullTerminatedStringFromToken(&XToken);
+							char* YString = NullTerminatedStringFromToken(&YToken);
+							char* ZString = NullTerminatedStringFromToken(&ZToken);
 
-						TempVertexPositions.push_back(EM::Vec3(X, Y, Z));
+							// printf("XString: %s\n", XString);
+							// printf("YString: %s\n", YString);
+							// printf("ZString: %s\n", ZString);
 
-						// Delete strings to free memory
-						free(XString);
-						free(YString);
-						free(ZString);
+							// Parse all vert positions as floats
+							float X = std::atof(XString); 
+							float Y = std::atof(YString); 
+							float Z = std::atof(ZString); 
+
+							TempVertexPositions.push_back(EM::Vec3(X, Y, Z));
+
+							// Delete strings to free memory
+							free(XString);
+							free(YString);
+							free(ZString);
+						}
 					}
 
 					else if (EU::TokenEquals(Token, "s"))
@@ -297,6 +314,23 @@ namespace Enjon { namespace Input {
 
 						// Parse a face	
 						EU::token PositionToken, NormalToken, UVToken;
+
+						/*
+						for (auto& P : TempVertexPositions)
+						{
+							printf("v: %.2f %.2f %.2f\n", P.x, P.y, P.z);
+						}
+
+						for (auto& T : TempVertexUVs)
+						{
+							printf("vt: %.2f %.2f\n", T.x, T.y);
+						}
+
+						for (auto& N : TempVertexNormals)
+						{
+							printf("vn: %.2f %.2f %.2f\n", N.x, N.y, N.z);
+						}
+						*/
 
 						// Loop through the triangles
 						for (int i = 0; i < 3; i++)
@@ -348,15 +382,6 @@ namespace Enjon { namespace Input {
 							int UVIndex 		= std::atoi(UVString) - 1;
 							int NormalIndex 	= std::atoi(NormalString) - 1;
 
-							printf("Here %d: %s %s %s\n", count, PositionString, UVString, NormalString);
-
-							// Free char*s
-							free(PositionString);
-							free(UVString);
-							free(NormalString);
-
-
-
 							// Now that we have the indicies, need to grab them from our previously stored temp 
 							// positions, normals, and uvs and store them in the mesh
 							EG::Vert Vertex = {};
@@ -364,6 +389,14 @@ namespace Enjon { namespace Input {
 							EM::Vec3* Position 	= &TempVertexPositions.at(PositionIndex);
 							EM::Vec2* UV 		= &TempVertexUVs.at(UVIndex);
 							EM::Vec3* Normal 	= &TempVertexNormals.at(NormalIndex);
+
+							/*
+							printf("%d: %s %s %s\n", count, PositionString, UVString, NormalString);
+							printf("%.2f %.2f %.2f\n", Position->x, Position->y, Position->z);
+							printf("%.2f %.2f \n", UV->x, UV->y);
+							printf("%.2f %.2f %.2f\n", Normal->x, Normal->y, Normal->z);
+							printf("\n\n");
+							*/
 
 							Vertex.Position[0] = Position->x;
 							Vertex.Position[1] = Position->y;
@@ -384,12 +417,12 @@ namespace Enjon { namespace Input {
 							Vertex.Bitangent[1] = 1.0f;
 							Vertex.Bitangent[2] = 0.0f;
 
-							Vertex.Color[0] = 255;
-							Vertex.Color[1] = 255;
-							Vertex.Color[2] = 255;
-							Vertex.Color[3] = 255;
-
 							Mesh.Verticies.push_back(Vertex);
+
+							// Free char*s
+							free(PositionString);
+							free(UVString);
+							free(NormalString);
 						}
 
 					}
@@ -410,13 +443,12 @@ namespace Enjon { namespace Input {
 		free(FileContents);
 
 		// Debug print
-		printf("Positions: %d\n", TempVertexPositions.size());
-		printf("Normals: %d\n", TempVertexNormals.size());
-		printf("UVs: %d\n", TempVertexUVs.size());
+		// printf("Positions: %d\n", TempVertexPositions.size());
+		// printf("Normals: %d\n", TempVertexNormals.size());
+		// printf("UVs: %d\n", TempVertexUVs.size());
 
 		return Mesh;
 	}
-	*/
 
 	void ParseVertex(EU::tokenizer *Tokenizer, EG::MeshInstance* Mesh)
 	{

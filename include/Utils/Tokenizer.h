@@ -22,7 +22,9 @@ namespace Enjon { namespace Utils {
 		Token_Int,
 		Token_Minus,
 		Token_ForwardSlash,
-		Token_BackwardSlash
+		Token_BackwardSlash,
+		Token_Hash,
+		Token_NewLine
 	};
 
 	struct token
@@ -193,6 +195,9 @@ namespace Enjon { namespace Utils {
 			case '[': 	{Token.Type = Token_OpenBracket; }	break;
 			case ']': 	{Token.Type = Token_CloseBracket; }	break;
 			case '/': 	{Token.Type = Token_ForwardSlash; } break;
+			case '#': 	{Token.Type = Token_Hash; } 		break;
+			case '\n': 	{Token.Type = Token_NewLine; } 		break;
+			case '\r': 	{Token.Type = Token_NewLine; } 		break;
 			case '\0': 	{Token.Type = Token_EndOfStream; } 	break;
 
 			case '-': 
