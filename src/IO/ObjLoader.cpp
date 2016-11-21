@@ -10,31 +10,7 @@
 
 #include <stdio.h>
 
-namespace Enjon { namespace Input { 
-
-	/*
-	struct Vert
-	{
-		float Position[3];
-		float Normals[3];
-		float Tangent[3];
-		float Bitangent[3];
-		float UV[2];	
-		GLubyte Color[4];
-	};
-
-	struct MeshInstance
-	{
-		std::vector<Vert> Verticies;
-		std::vector<u32> Indicies;	
-		GLenum DrawType;
-		GLint DrawStart;
-		GLint DrawCount;
-		GLuint VAO;
-		GLuint VBO;
-		GLuint IBO;
-	};
-	*/
+namespace Enjon { namespace Input {
 
 	void ParseVertex(EU::tokenizer *Tokenizer, EG::MeshInstance* Mesh);
 
@@ -315,22 +291,23 @@ namespace Enjon { namespace Input {
 						// Parse a face	
 						EU::token PositionToken, NormalToken, UVToken;
 
-						/*
-						for (auto& P : TempVertexPositions)
-						{
-							printf("v: %.2f %.2f %.2f\n", P.x, P.y, P.z);
-						}
+						// for (auto& P : TempVertexPositions)
+						// {
+						// 	printf("v: %.2f %.2f %.2f\n", P.x, P.y, P.z);
+						// }
 
-						for (auto& T : TempVertexUVs)
-						{
-							printf("vt: %.2f %.2f\n", T.x, T.y);
-						}
+						// for (auto& T : TempVertexUVs)
+						// {
+						// 	printf("vt: %.2f %.2f\n", T.x, T.y);
+						// }
 
-						for (auto& N : TempVertexNormals)
-						{
-							printf("vn: %.2f %.2f %.2f\n", N.x, N.y, N.z);
-						}
-						*/
+						// for (auto& N : TempVertexNormals)
+						// {
+						// 	printf("vn: %.2f %.2f %.2f\n", N.x, N.y, N.z);
+						// }
+
+						// Need to search ahead to find out whether or not this line contains a quad
+						// or a triangle
 
 						// Loop through the triangles
 						for (int i = 0; i < 3; i++)
@@ -390,13 +367,11 @@ namespace Enjon { namespace Input {
 							EM::Vec2* UV 		= &TempVertexUVs.at(UVIndex);
 							EM::Vec3* Normal 	= &TempVertexNormals.at(NormalIndex);
 
-							/*
-							printf("%d: %s %s %s\n", count, PositionString, UVString, NormalString);
-							printf("%.2f %.2f %.2f\n", Position->x, Position->y, Position->z);
-							printf("%.2f %.2f \n", UV->x, UV->y);
-							printf("%.2f %.2f %.2f\n", Normal->x, Normal->y, Normal->z);
-							printf("\n\n");
-							*/
+							// printf("%d: %s %s %s\n", count, PositionString, UVString, NormalString);
+							// printf("%.2f %.2f %.2f\n", Position->x, Position->y, Position->z);
+							// printf("%.2f %.2f \n", UV->x, UV->y);
+							// printf("%.2f %.2f %.2f\n", Normal->x, Normal->y, Normal->z);
+							// printf("\n\n");
 
 							Vertex.Position[0] = Position->x;
 							Vertex.Position[1] = Position->y;
@@ -446,6 +421,70 @@ namespace Enjon { namespace Input {
 		// printf("Positions: %d\n", TempVertexPositions.size());
 		// printf("Normals: %d\n", TempVertexNormals.size());
 		// printf("UVs: %d\n", TempVertexUVs.size());
+
+		// Now calculate tangents for each vert in mesh
+		for (int i = 0; i < Mesh.Verticies.size(); i += 3)
+		{
+			auto& Vert1 = Mesh.Verticies.at(i);
+			auto& Vert2 = Mesh.Verticies.at(i + 1);
+			auto& Vert3 = Mesh.Verticies.at(i + 2);
+
+			EM::Vec3 pos1 = EM::Vec3(Vert1.Position[0], Vert1.Position[1], Vert1.Position[2]);
+			EM::Vec3 pos2 = EM::Vec3(Vert2.Position[0], Vert2.Position[1], Vert2.Position[2]);
+			EM::Vec3 pos3 = EM::Vec3(Vert3.Position[0], Vert3.Position[1], Vert3.Position[2]);
+
+			EM::Vec2 uv1 = EM::Vec2(Vert1.UV[0], Vert1.UV[1]);
+			EM::Vec2 uv2 = EM::Vec2(Vert2.UV[0], Vert2.UV[1]);
+			EM::Vec2 uv3 = EM::Vec2(Vert3.UV[0], Vert3.UV[1]);
+
+			// calculate tangent/bitangent vectors of both triangles
+		    EM::Vec3 tangent, bitangent;
+
+		    // - triangle 1
+		    EM::Vec3 edge1 = pos2 - pos1;
+		    EM::Vec3 edge2 = pos3 - pos1;
+		    EM::Vec2 deltaUV1 = uv2 - uv1;
+		    EM::Vec2 deltaUV2 = uv3 - uv1;
+
+		    float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+		    tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+		    tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+		    tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+		    tangent = EM::Vec3::Normalize(tangent);
+
+		    bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+		    bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+		    bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+		    bitangent = EM::Vec3::Normalize(bitangent);
+
+		    // Set tangents for the verticies
+		    Vert1.Tangent[0] = tangent.x;
+		    Vert1.Tangent[1] = tangent.y;
+		    Vert1.Tangent[2] = tangent.z;
+
+		    Vert2.Tangent[0] = tangent.x;
+		    Vert2.Tangent[1] = tangent.y;
+		    Vert2.Tangent[2] = tangent.z;
+
+		    Vert3.Tangent[0] = tangent.x;
+		    Vert3.Tangent[1] = tangent.y;
+		    Vert3.Tangent[2] = tangent.z;
+
+		    // Set bitangents for verticies
+		    Vert1.Bitangent[0] = bitangent.x;
+		    Vert1.Bitangent[1] = bitangent.y;
+		    Vert1.Bitangent[2] = bitangent.z;
+
+		    Vert2.Bitangent[0] = bitangent.x;
+		    Vert2.Bitangent[1] = bitangent.y;
+		    Vert2.Bitangent[2] = bitangent.z;
+
+		    Vert3.Bitangent[0] = bitangent.x;
+		    Vert3.Bitangent[1] = bitangent.y;
+		    Vert3.Bitangent[2] = bitangent.z;
+		}
+
 
 		return Mesh;
 	}

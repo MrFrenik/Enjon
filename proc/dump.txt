@@ -1,119 +1,70 @@
-BehaviorTree.cpp
-Game.cpp
-Animations.cpp
-Camera2D.cpp
-Camera3D.cpp
-CursorManager.cpp
-DeferredRenderer.cpp
-Font.cpp
-FontManager.cpp
-FrameBufferObject.cpp
-GBuffer.cpp
-GLSLProgram.cpp
-GUIAnimationElement.cpp
-ParticleEngine2D.cpp
-picoPNG.cpp
-ShaderManager.cpp
-Sprite.cpp
-SpriteBatch.cpp
-SpriteSheetManager.cpp
-Window.cpp
-ImageLoader.cpp
-InputManager.cpp
-IOManager.cpp
-ResourceManager.cpp
-TextureCache.cpp
-Mat4.cpp
-Vec2.cpp
-Vec3.cpp
-Vec4.cpp
-AABB.cpp
-Errors.cpp
-Timing.cpp
-AnimationEditor.cpp
-LightEditor.cpp
-PathFinding.cpp
-SpatialHash.cpp
-AIControllerSystem.cpp
-Animation2DSystem.cpp
-AttributeSystem.cpp
-CollisionSystem.cpp
-ComponentSystems.cpp
-EffectSystem.cpp
-Entity.cpp
-EntityFactory.cpp
-InventorySystem.cpp
-LabelSystem.cpp
-PlayerControllerSystem.cpp
-Renderer2DSystem.cpp
-Transform3DSystem.cpp
-AnimationManager.cpp
-AnimManager.cpp
-BehaviorTreeManager.cpp
-EnjonAnimation.cpp
-Level.cpp
-Loot.cpp
-main.cpp
-Microsoft (R) Incremental Linker Version 14.00.23918.0
-Copyright (C) Microsoft Corporation.  All rights reserved.
+***    OpenGL Version:  4.5.0 NVIDIA 364.72    ***
+XString: -1.000000
+YString: 0.000000
+ZString: 1.000000
+XString: 1.000000
+YString: 0.000000
+ZString: 1.000000
+XString: 1.000000
+YString: 0.000000
+ZString: -1.000000
+XString: -1.000000
+YString: 0.000000
+ZString: -1.000000
+v: -1.00 0.00 1.00
+v: 1.00 0.00 1.00
+v: 1.00 0.00 -1.00
+v: -1.00 0.00 -1.00
+vt: 1.00 0.00
+vt: 0.00 1.00
+vt: 0.00 0.00
+vt: 1.00 1.00
+vn: 0.00 1.00 0.00
+1: 2 1 1
+1.00 0.00 1.00
+1.00 0.00 
+0.00 1.00 0.00
 
-/out:main.exe 
-/SUBSYSTEM:CONSOLE 
-/NODEFAULTLIB:msvcrt.lib 
-"/LIBPATH:..\deps\lib" Opengl32.lib SDL2.lib SDL2main.lib glew32.lib glew32s.lib freetype.lib 
-BehaviorTree.obj 
-Game.obj 
-Animations.obj 
-Camera2D.obj 
-Camera3D.obj 
-CursorManager.obj 
-DeferredRenderer.obj 
-Font.obj 
-FontManager.obj 
-FrameBufferObject.obj 
-GBuffer.obj 
-GLSLProgram.obj 
-GUIAnimationElement.obj 
-ParticleEngine2D.obj 
-picoPNG.obj 
-ShaderManager.obj 
-Sprite.obj 
-SpriteBatch.obj 
-SpriteSheetManager.obj 
-Window.obj 
-ImageLoader.obj 
-InputManager.obj 
-IOManager.obj 
-ResourceManager.obj 
-TextureCache.obj 
-Mat4.obj 
-Vec2.obj 
-Vec3.obj 
-Vec4.obj 
-AABB.obj 
-Errors.obj 
-Timing.obj 
-AnimationEditor.obj 
-LightEditor.obj 
-PathFinding.obj 
-SpatialHash.obj 
-AIControllerSystem.obj 
-Animation2DSystem.obj 
-AttributeSystem.obj 
-CollisionSystem.obj 
-ComponentSystems.obj 
-EffectSystem.obj 
-Entity.obj 
-EntityFactory.obj 
-InventorySystem.obj 
-LabelSystem.obj 
-PlayerControllerSystem.obj 
-Renderer2DSystem.obj 
-Transform3DSystem.obj 
-AnimationManager.obj 
-AnimManager.obj 
-BehaviorTreeManager.obj 
-EnjonAnimation.obj 
-Level.obj 
-Loot.obj 
-main.obj 
+
+1: 4 2 1
+-1.00 0.00 -1.00
+0.00 1.00 
+0.00 1.00 0.00
+
+
+1: 1 3 1
+-1.00 0.00 1.00
+0.00 0.00 
+0.00 1.00 0.00
+
+
+v: -1.00 0.00 1.00
+v: 1.00 0.00 1.00
+v: 1.00 0.00 -1.00
+v: -1.00 0.00 -1.00
+vt: 1.00 0.00
+vt: 0.00 1.00
+vt: 0.00 0.00
+vt: 1.00 1.00
+vn: 0.00 1.00 0.00
+2: 2 1 1
+1.00 0.00 1.00
+1.00 0.00 
+0.00 1.00 0.00
+
+
+2: 3 4 1
+1.00 0.00 -1.00
+1.00 1.00 
+0.00 1.00 0.00
+
+
+2: 4 2 1
+-1.00 0.00 -1.00
+0.00 1.00 
+0.00 1.00 0.00
+
+
+Positions: 4
+Normals: 1
+UVs: 4

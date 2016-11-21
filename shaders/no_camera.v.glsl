@@ -13,7 +13,7 @@ out DATA
 
 void main()
 {             
-    gl_Position = vec4(vertexPosition.x, vertexPosition.y, 0.0f, 1.0f);
+    gl_Position = vec4(vertexPosition.x, vertexPosition.y, 0.0, 1.0);
     fs_out.TexCoords = vertexUV;
     fs_out.Position = vertexPosition;
     fs_out.Color = vertexColor;

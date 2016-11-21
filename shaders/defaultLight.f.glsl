@@ -2,6 +2,10 @@
 
 const float kPi = 3.13159265;
 
+layout (location = 0) out vec4 DiffuseOut;     // Diffuse
+layout (location = 1) out vec4 PositionOut;
+layout (location = 2) out vec4 NormalsOut;
+
 in VS_OUT
 {
 	vec3 FragPos;
@@ -14,7 +18,7 @@ in VS_OUT
 } fs_in;
 
 // out color
-out vec4 FragColor;
+// out vec4 FragColor;
 
 // uniforms
 uniform sampler2D diffuseMap;
@@ -85,5 +89,9 @@ void main()
     float fogDistance = length(camPos - fs_in.FragPos);
     float fog = RemapValClamped(fogDistance, fogMin, fogMax, 0.0, 1.0);
     
-    FragColor = vec4(ambient + diffuse + specular, 1.0f) * (1 - fog) + fogColor * fog;
+    // FragColor = vec4(ambient + diffuse + specular, 1.0f) * (1 - fog) + fogColor * fog;
+   // DiffuseOut = vec4(ambient + diffuse + specular, 1.0f) * (1 - fog) + fogColor * fog;
+   // DiffuseOut = (vec4(ambient + diffuse + specular, 1.0f) * (1 - fog) + fogColor * fog) * 0.0;
+    DiffuseOut = normal;
+    // NormalsOut = vec4(1.0, 1.0, 1.0, 1.0);
 }

@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream> 
 #include <string>
+#include <assert.h>
 
 #include <SDL2/SDL.h>
 
