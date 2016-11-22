@@ -10,55 +10,29 @@ namespace Enjon { namespace Graphics {
 		Width  = _Width;
 		Height = _Height;
 
-    glGenFramebuffers(1, &gBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+    glGenFramebuffers(1, &FrameBufferID);
+    glBindFramebuffer(GL_FRAMEBUFFER, FrameBufferID);
 
-    // Bind the diffuse render target
-	glBindRenderbufferEXT(GL_RENDERBUFFER, diffuse);
+    // Bind the color render target
+	glBindRenderbufferEXT(GL_RENDERBUFFER, TargetID);
 	glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, Width, Height);
-	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, diffuse);
+	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, TargetID);
 
-	// Bind the position render target
-	glBindRenderbufferEXT(GL_RENDERBUFFER, normal);
-	glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA32F_ARB, Width, Height);
-	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_RENDERBUFFER, normal);
-
-	// Bind the normal render target
-	glBindRenderbufferEXT(GL_RENDERBUFFER, albedo);
-	glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA16F_ARB, Width, Height);
-	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_RENDERBUFFER, albedo);
-
-    // - Position color buffer
-    glGenTextures(1, &gDiffuse);
-    glBindTexture(GL_TEXTURE_2D, gDiffuse);
+    // - color buffer
+    glGenTextures(1, &Texture);
+    glBindTexture(GL_TEXTURE_2D, Texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gDiffuse, 0);
-    // - Normal color buffer
-    glGenTextures(1, &gNormal);
-    glBindTexture(GL_TEXTURE_2D, gNormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
-    // - Color + Specular color buffer
-    glGenTextures(1, &gAlbedoSpec);
-    glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
-    // - Tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
-    attachments[0] = GL_COLOR_ATTACHMENT0;
-    attachments[1] = GL_COLOR_ATTACHMENT1;
-    attachments[2] = GL_COLOR_ATTACHMENT2;
-    glDrawBuffers(3, attachments);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture, 0);
+ 
     // - Create and attach depth buffer (renderbuffer)
-    glGenRenderbuffers(1, &rboDepth);
-    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glGenRenderbuffers(1, &DepthBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, DepthBuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, Width, Height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBuffer);
     // - Finally check if framebuffer is complete
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "Framebuffer not complete!" << std::endl;
@@ -76,7 +50,7 @@ namespace Enjon { namespace Graphics {
 	void RenderTarget::Bind()
 	{
 		// Bind our FBO and set the viewport to the proper size
-		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, FrameBufferID);
 		glPushAttrib(GL_VIEWPORT_BIT);
 		glViewport(0, 0, Width, Height);
 
@@ -87,14 +61,15 @@ namespace Enjon { namespace Graphics {
 		glEnable(GL_TEXTURE_2D);
 
 		// Specify what to render an start acquiring
-		// GLenum buffers[] = { GL_COLOR_ATTACHMENT0 };
-		glDrawBuffers(3, attachments);
+		GLenum buffers[] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, buffers);
 	}
 			
 	void RenderTarget::Unbind()
 	{
 		// Stop acquiring and unbind the FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glPopAttrib();
 	}
 }}
 

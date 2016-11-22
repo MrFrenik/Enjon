@@ -4589,6 +4589,7 @@ int main(int argc, char** argv)
 #include <Graphics/Camera.h>
 #include <Entity/EntityManager.h>
 #include <Graphics/RenderTarget.h>
+#include <Graphics/GBuffer.h>
 
 using u32 = uint32_t;
 
@@ -4926,12 +4927,11 @@ void LoadCubeSprite()
 
 void LoadInstances()
 {
-	// EG::ModelInstance D;
-	// D.Asset = &SpriteWithNormal;
-	// D.Transform.Position 	= EM::Vec3(5, 0, 5);
- //    D.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-135), EM::Vec3(0, 1, 0)) * 
- //    							EM::Quaternion::AngleAxis(EM::ToRadians(180), EM::Vec3(0, 0, 1));
-	// Instances.push_back(D);
+	EG::ModelInstance D;
+	D.Asset = &SpriteWithNormal;
+	D.Transform.Position 	= EM::Vec3(5, 0, 5);
+    D.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
+	Instances.push_back(D);
 
 	EG::ModelInstance B;
 	B.Asset = &MonkeyHead;
@@ -4947,18 +4947,18 @@ void LoadInstances()
  //    							EM::Quaternion::AngleAxis(EM::ToRadians(180), EM::Vec3(0, 0, 1));
  //    Instances.push_back(C);
 
-	// auto map_size = 5;
-	// for (auto i = 0; i < map_size; i++)
-	// {
-	// 	for (auto j = 0; j < map_size; j++)
-	// 	{
-	// 		EG::ModelInstance f;
-	// 		f.Asset = &NormalFloor;
-	// 		f.Transform.Position = EM::Vec3((Enjon::f32)i * 2.0f, -1.0f, (Enjon::f32)j * 2.0f);
-	// 		f.Transform.Scale = EM::Vec3(1.0f, 0.02f, 1.0f);
-	// 		Instances.push_back(f);
-	// 	}
-	// }
+	auto map_size = 5;
+	for (auto i = 0; i < map_size; i++)
+	{
+		for (auto j = 0; j < map_size; j++)
+		{
+			EG::ModelInstance f;
+			f.Asset = &NormalFloor;
+			f.Transform.Position = EM::Vec3((Enjon::f32)i * 2.0f, -1.0f, (Enjon::f32)j * 2.0f);
+			f.Transform.Scale = EM::Vec3(1.0f, 0.02f, 1.0f);
+			Instances.push_back(f);
+		}
+	}
 }
 
 void RenderInstance(const EG::ModelInstance& Instance)
@@ -5028,7 +5028,10 @@ void RenderInstance(const EG::ModelInstance& Instance)
 				Asset->Shader->SetUniform("LightColor", EM::Vec3(1.0f, 1.0f, 1.0f));
 				Asset->Shader->SetUniform("Shininess", Instance.Asset->Material.Shininess);
 				glDrawArrays(Asset->Mesh.DrawType, 0, Asset->Mesh.DrawCount);
+
 			}
+			glActiveTexture(0);
+			glBindTexture(GL_TEXTURE_2D, 0);
 			glBindVertexArray(0);
 		} break;
 
@@ -5070,7 +5073,11 @@ int main(int argc, char** argv)
 	FPSCamera = EG::Camera((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
 
 	EG::FrameBufferObject FBO((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
-	EG::RenderTarget RT((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::RenderTarget DebugTarget((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::RenderTarget BlurHorizontal((Enjon::u32)SCREENWIDTH / 4, (Enjon::u32)SCREENHEIGHT / 4);
+	EG::RenderTarget BlurVertical((Enjon::u32)SCREENWIDTH / 4, (Enjon::u32)SCREENHEIGHT / 4);
+	EG::RenderTarget Composite((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::GBuffer 	 GBuffer((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
 
 	EG::SpriteBatch CompositeBatch;
 	CompositeBatch.Init();
@@ -5078,13 +5085,15 @@ int main(int argc, char** argv)
 	EG::SpriteBatch Batch;
 	Batch.Init();
 
-	EG::GLSLProgram* CompositeProgram = EG::ShaderManager::GetShader("NoCameraProjection");
+	EG::GLSLProgram* CompositeProgram 		= EG::ShaderManager::GetShader("NoCameraProjection");
+	EG::GLSLProgram* HorizontalBlurProgram 	= EG::ShaderManager::GetShader("HorizontalBlur");
+	EG::GLSLProgram* VerticalBlurProgram 	= EG::ShaderManager::GetShader("VerticalBlur");
 
 	// Load model data
 	// LoadCubeAsset();
 	// LoadCubeSprite();
-	// LoadNormalMappedSpriteAsset();
-	// LoadNormalFloorAsset();
+	LoadNormalMappedSpriteAsset();
+	LoadNormalFloorAsset();
 	// LoadOtherCubeAsset();
 	LoadMonkeyHeadAsset();
 	LoadInstances();
@@ -5171,13 +5180,19 @@ int main(int argc, char** argv)
     	static float timer = 0.0f;
     	timer += 0.01f;
 
-        Limiter.End();
+        auto fps = Limiter.End();
+
+        printf("fps: %.2f\n", fps);
 
     	// Rendering
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
 
+		// Rotate one of the instances over time
+		auto& InstanceTransform = Instances.at(1).Transform;
+		InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * 20.0f), EM::Vec3(0, 1, 0));
+
     	// Bind FBO
-    	FBO.Bind();
+    	GBuffer.Bind();
     	{
 	        // Create transformations
 	        EM::Mat4 CameraMatrix;
@@ -5195,20 +5210,63 @@ int main(int argc, char** argv)
 	        ENDPROFILE(RENDERING)
 
     	}
-    	FBO.Unbind();
+    	GBuffer.Unbind();
+
+    	// Blur iterations
+    	Enjon::u32 NumberOfBlurIterations = 8;
+    	for (Enjon::u32 i = 0; i < NumberOfBlurIterations; i++)
+    	{
+    		bool IsEven = (i % 2 == 0);
+    		EG::RenderTarget* Target = IsEven ? &BlurHorizontal : &BlurVertical;
+    		EG::GLSLProgram* Program = IsEven ? HorizontalBlurProgram : VerticalBlurProgram;
+
+			Target->Bind();
+			{
+				Program->Use();
+				{
+					GLuint TextureID = i == 0 ? GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE) : IsEven ? BlurVertical.GetTexture() : BlurHorizontal.GetTexture();
+					CompositeBatch.Begin();
+					{
+			    		CompositeBatch.Add(
+									EM::Vec4(-1, -1, 2, 2),
+									EM::Vec4(0, 0, 1, 1), 
+									TextureID
+									);
+					}
+					CompositeBatch.End();
+					CompositeBatch.RenderBatch();
+				}
+				Program->Unuse();
+			}	
+			Target->Unbind();
+    	}
 
     	// Rendering
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		
+
     	CompositeProgram->Use();
     	{
 	    	CompositeBatch.Begin();
 	    	{
 	    		CompositeBatch.Add(
-							EM::Vec4(0, 0, 2, 2),
+							EM::Vec4(-1, 0, 1, 1),
 							EM::Vec4(0, 0, 1, 1), 
-							FBO.GetDiffuseTexture()
+							GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE)
+							);
+	    		CompositeBatch.Add(
+							EM::Vec4(0, 0, 1, 1),
+							EM::Vec4(0, 0, 1, 1), 
+							GBuffer.GetTexture(EG::GBufferTextureType::NORMAL)
+							);
+	    		CompositeBatch.Add(
+							EM::Vec4(-1, -1, 1, 1),
+							EM::Vec4(0, 0, 1, 1), 
+							BlurVertical.GetTexture()
+							);
+	    		CompositeBatch.Add(
+							EM::Vec4(0, -1, 1, 1),
+							EM::Vec4(0, 0, 1, 1), 
+							GBuffer.GetTexture(EG::GBufferTextureType::EMISSIVE)
 							);
 	    	}
 		   	CompositeBatch.End();
@@ -5334,7 +5392,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 		}
 
 		// Get player
-		// EG::ModelInstance& Player = Instances.at(0);
+		EG::ModelInstance& Player = Instances.at(0);
 
 	    EM::Vec3 VelDir(0, 0, 0);
 	
@@ -5357,11 +5415,11 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 
 		if (VelDir.Length()) VelDir = EM::Vec3::Normalize(VelDir);
 
-		// Camera->Transform.Position = Player.Transform.Position + EM::Vec3(2.5, 2, 3);
-		// Camera->Transform.Orientation = EM::Quaternion(-0.17f, 0.38f, 0.07f, 0.9f);
+		Camera->Transform.Position = Player.Transform.Position + EM::Vec3(2.5, 2, 3);
+		Camera->Transform.Orientation = EM::Quaternion(-0.17f, 0.38f, 0.07f, 0.9f);
 
-		// Player.Transform.Position += PlayerSpeed * dt * VelDir;
-		// Camera->Transform.Position += PlayerSpeed * dt * VelDir;
+		Player.Transform.Position += PlayerSpeed * dt * VelDir;
+		Camera->Transform.Position += PlayerSpeed * dt * VelDir;
 	}
 	
 

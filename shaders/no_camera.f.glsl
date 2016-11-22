@@ -13,6 +13,6 @@ uniform sampler2D tex;
 
 void main() 
 {
-	color = fs_in.Color * texture2D(tex, fs_in.TexCoords);
+	color = texture2D(tex, fs_in.TexCoords);
 }
 

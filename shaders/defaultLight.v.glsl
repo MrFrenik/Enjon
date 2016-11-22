@@ -59,7 +59,7 @@ void main()
 
 	// Output data
 	vs_out.FragPos = vec3(model * vec4(vertexPosition, 1.0));
-	vs_out.TexCoords = vertexUV;	
+	vs_out.TexCoords = vec2(vertexUV.x, -vertexUV.y);	
 	vs_out.TangentLightDir = TBN * (lightPosition - vs_out.FragPos);
 	vs_out.TangentLightPos 	= TBN * lightPosition; 					// Bring light position into tangent space
 	vs_out.TangentViewPos 	= TBN * viewPos;						// Bring camera view position into tangent space 

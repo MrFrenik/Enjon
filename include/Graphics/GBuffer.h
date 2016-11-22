@@ -3,28 +3,41 @@
 
 #include "System/Types.h"
 #include "GLEW/glew.h"
+#include "Defines.h"
+#include "Math/Vec4.h"
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon { namespace Graphics {
+
+	enum class GBufferTextureType
+	{
+		DIFFUSE,
+		NORMAL,
+		EMISSIVE,
+		DEPTH,
+		GBUFFER_TEXTURE_COUNT
+	};
 
 	class GBuffer
 	{
 	public:
-		GBuffer();
+		GBuffer(uint32 _Width, uint32 _Height);
 		~GBuffer();
-
-		bool Create(uint32 Width, uint32 Height);
 
 		void Bind();
 		void Unbind();
 
+		GLuint inline GetTexture(GBufferTextureType Type) { return Textures[(GLuint)Type]; }
+		void SetViewport(const EM::Vec4& Viewport);
+
+	private:
 		uint32 Width;
 		uint32 Height;
 		GLuint FBO;
 
-		GLuint Diffuse;
-		GLuint Specular;
-		GLuint Normals;
-		GLuint Depth;
+		GLuint TargetIDs[GBufferTextureType::GBUFFER_TEXTURE_COUNT];
+		GLuint Textures[GBufferTextureType::GBUFFER_TEXTURE_COUNT];
+
+		EM::Vec4 Viewport;
 	};
 
 }}

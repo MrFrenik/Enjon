@@ -88,6 +88,9 @@ namespace Enjon { namespace Graphics {
 		// Bind our VAO. This sets up the opengl state we need, including the vertex attribute pointers and binds the VBO 
 		glBindVertexArray(m_vao);
 
+		// Activate texture to be bound
+		glActiveTexture(GL_TEXTURE0);
+
 		for (unsigned int i = 0; i < m_renderBatches.size(); i++) 
 		{
 			// Bind the texture of the renderbatch 
