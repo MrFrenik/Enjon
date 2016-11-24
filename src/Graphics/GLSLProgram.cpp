@@ -203,6 +203,14 @@ namespace Enjon { namespace Graphics {
 
 	}
 
+	void GLSLProgram::BindTexture(const std::string& Name, const GLuint& TextureID, const GLuint Index)
+	{
+		glEnable(GL_TEXTURE_2D);
+		glActiveTexture(GL_TEXTURE0 + Index);
+		GLuint UniformID = glGetUniformLocationARB(GetProgramID(), Name.c_str());
+		glUniform1i(UniformID, Index);
+		glBindTexture(GL_TEXTURE_2D, TextureID);
+	}
 }}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

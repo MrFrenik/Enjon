@@ -15,56 +15,30 @@ namespace Enjon { namespace Graphics {
 	    glGenFramebuffers(1, &FBO);
 	    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-	    // Bind the diffuse render target
-		glBindRenderbufferEXT(GL_RENDERBUFFER, TargetIDs[(u32)GBufferTextureType::DIFFUSE]);
-		glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, Width, Height);
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, TargetIDs[(u32)GBufferTextureType::DIFFUSE]);
+	    for (u32 i = 0; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; i++)
+	    {
+		    // Bind the diffuse render target
+			glBindRenderbufferEXT(GL_RENDERBUFFER, TargetIDs[i]);
+			glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, Width, Height);
+			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_RENDERBUFFER, TargetIDs[i]);
 
-	    // Bind the normal render target
-		glBindRenderbufferEXT(GL_RENDERBUFFER, TargetIDs[(u32)GBufferTextureType::NORMAL]);
-		glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, Width, Height);
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_RENDERBUFFER, TargetIDs[(u32)GBufferTextureType::NORMAL]);
-
-	    // Bind the emissive render target
-		glBindRenderbufferEXT(GL_RENDERBUFFER, TargetIDs[(u32)GBufferTextureType::NORMAL]);
-		glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, Width, Height);
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_RENDERBUFFER, TargetIDs[(u32)GBufferTextureType::EMISSIVE]);
-
-	    // - Diffuse buffer
-	    glGenTextures(1, &Textures[(u32)GBufferTextureType::DIFFUSE]);
-	    glBindTexture(GL_TEXTURE_2D, Textures[(u32)GBufferTextureType::DIFFUSE]);
-	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Textures[(u32)GBufferTextureType::DIFFUSE], 0);
-
-	    // - Normal buffer
-	    glGenTextures(1, &Textures[(u32)GBufferTextureType::NORMAL]);
-	    glBindTexture(GL_TEXTURE_2D, Textures[(u32)GBufferTextureType::NORMAL]);
-	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, Textures[(u32)GBufferTextureType::NORMAL], 0);
-
-	    // - Emissive buffer
-	    glGenTextures(1, &Textures[(u32)GBufferTextureType::EMISSIVE]);
-	    glBindTexture(GL_TEXTURE_2D, Textures[(u32)GBufferTextureType::EMISSIVE]);
-	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, Textures[(u32)GBufferTextureType::EMISSIVE], 0);
+		    // - Diffuse buffer
+		    glGenTextures(1, &Textures[i]);
+		    glBindTexture(GL_TEXTURE_2D, Textures[i]);
+		    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
+		    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, Textures[i], 0);
+		    glBindTexture(GL_TEXTURE_2D, 0);
+	    }
 	 
 	    // - Create and attach depth buffer (renderbuffer)
-	    glGenRenderbuffers(1, &Textures[(u32)GBufferTextureType::DEPTH]);
-	    glBindRenderbuffer(GL_RENDERBUFFER, Textures[(u32)GBufferTextureType::DEPTH]);
-	    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, Width, Height);
-	    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, Textures[(u32)GBufferTextureType::DEPTH]);
+	    glGenRenderbuffers(1, &DepthBuffer);
+	    glBindRenderbuffer(GL_RENDERBUFFER, DepthBuffer);
+	    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, Width, Height);
+	    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBuffer);
 
 	    // - Finally check if framebuffer is complete
 	    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) EU::FatalError("GBuffer::Constructor::Gbuffer could not be created.");
@@ -94,10 +68,16 @@ namespace Enjon { namespace Graphics {
 
 		glActiveTextureARB(GL_TEXTURE0_ARB);
 		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_DEPTH);
 
 		// Specify what to render an start acquiring
-		GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-		glDrawBuffers(3, buffers);
+		GLenum buffers[(u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT];
+		for (auto i = 0; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; i++)
+		{
+			buffers[i] = GL_COLOR_ATTACHMENT0 + i;
+		}
+
+		glDrawBuffers((u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT, buffers);
 	}
 			
 	void GBuffer::Unbind()

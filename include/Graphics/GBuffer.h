@@ -12,8 +12,8 @@ namespace Enjon { namespace Graphics {
 	{
 		DIFFUSE,
 		NORMAL,
+		POSITION,
 		EMISSIVE,
-		DEPTH,
 		GBUFFER_TEXTURE_COUNT
 	};
 
@@ -33,6 +33,7 @@ namespace Enjon { namespace Graphics {
 		uint32 Width;
 		uint32 Height;
 		GLuint FBO;
+		GLuint DepthBuffer;
 
 		GLuint TargetIDs[GBufferTextureType::GBUFFER_TEXTURE_COUNT];
 		GLuint Textures[GBufferTextureType::GBUFFER_TEXTURE_COUNT];

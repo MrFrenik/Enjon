@@ -24,6 +24,8 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("DefaultLighting", "../shaders/defaultLight.v.glsl", "../shaders/defaultLight.f.glsl");
 		ShaderManager::AddShader("VerticalBlur", "../shaders/vertical_blur.v.glsl", "../shaders/vertical_blur.f.glsl");
 		ShaderManager::AddShader("HorizontalBlur", "../shaders/horizontal_blur.v.glsl", "../shaders/horizontal_blur.f.glsl");
+		ShaderManager::AddShader("GBuffer", "../shaders/deferred/deferred.v.glsl", "../shaders/deferred/deferred.f.glsl");
+		ShaderManager::AddShader("DeferredLight", "../shaders/deferred/deferred_light.v.glsl", "../shaders/deferred/deferred_light.f.glsl");
 	}
 
 	void AddShader(const char* shadername, const char* vertpath, const char* fragpath)

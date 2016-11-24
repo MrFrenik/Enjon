@@ -4554,7 +4554,7 @@ int main(int argc, char** argv)
 
 #if 1
 
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -4651,11 +4651,10 @@ void LoadMonkeyHeadAsset()
     glBindVertexArray(0);
 
     // Get shader and set texture
-    auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
+    auto Shader = EG::ShaderManager::GetShader("GBuffer");
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
-    	Shader->SetUniform("specularMap", 2);
     Shader->Unuse();
 
     // Set shader
@@ -4702,7 +4701,7 @@ void LoadOtherCubeAsset()
     glBindVertexArray(0);
 
     // Get shader and set texture
-    auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
+    auto Shader = EG::ShaderManager::GetShader("GBuffer");
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
@@ -4753,7 +4752,7 @@ void LoadCubeAsset()
 
 
     // Get shader and set texture
-    auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
+    auto Shader = EG::ShaderManager::GetShader("GBuffer");
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
@@ -4774,7 +4773,7 @@ void LoadCubeAsset()
 void LoadNormalFloorAsset()
 {
 	// Get mesh
-	NormalFloor.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/basic_cube.obj");
+	NormalFloor.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/quad.obj");
 
     glGenBuffers(1, &NormalFloor.Mesh.VBO);
     glBindBuffer(GL_ARRAY_BUFFER, NormalFloor.Mesh.VBO);
@@ -4803,7 +4802,7 @@ void LoadNormalFloorAsset()
     glBindVertexArray(0);
 
     // Get shader and set texture
-    auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
+    auto Shader = EG::ShaderManager::GetShader("GBuffer");
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
@@ -4853,11 +4852,10 @@ void LoadNormalMappedSpriteAsset()
     glBindVertexArray(0);
 
     // Get shader and set texture
-    auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
+    auto Shader = EG::ShaderManager::GetShader("GBuffer");
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
-    	Shader->SetUniform("specularMap", 2);
     Shader->Unuse();
 
     // Set shader
@@ -4909,7 +4907,6 @@ void LoadCubeSprite()
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
-    	Shader->SetUniform("specularMap", 2);
     Shader->Unuse();
 
     // Set shader
@@ -4955,7 +4952,8 @@ void LoadInstances()
 			EG::ModelInstance f;
 			f.Asset = &NormalFloor;
 			f.Transform.Position = EM::Vec3((Enjon::f32)i * 2.0f, -1.0f, (Enjon::f32)j * 2.0f);
-			f.Transform.Scale = EM::Vec3(1.0f, 0.02f, 1.0f);
+			f.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(90), EM::Vec3(1, 0, 0));
+			// f.Transform.Scale = EM::Vec3(1.0f, 0.0basic_cube2f, 1.0f);
 			Instances.push_back(f);
 		}
 	}
@@ -4999,8 +4997,8 @@ void RenderInstance(const EG::ModelInstance& Instance)
 				glActiveTexture(GL_TEXTURE1);
 				glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
 
-				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id);
+				// glActiveTexture(GL_TEXTURE2);
+				// glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id);
 
 				EM::Mat4 Model;
 				// L = T*R*S
@@ -5015,18 +5013,18 @@ void RenderInstance(const EG::ModelInstance& Instance)
 
 				auto& Position = Instances.at(0).Transform.Position;
 
-				Asset->Shader->SetUniform("fogMin", 10.0f);
-				Asset->Shader->SetUniform("fogMax", 100.0f);
-				Asset->Shader->SetUniform("fogColor", EM::Vec4(0.8f, 0.76f, 0.85f, 1.0f));
+				// Asset->Shader->SetUniform("fogMin", 10.0f);
+				// Asset->Shader->SetUniform("fogMax", 100.0f);
+				// Asset->Shader->SetUniform("fogColor", EM::Vec4(0.8f, 0.76f, 0.85f, 1.0f));
 				Asset->Shader->SetUniform("model", Model);
-				Asset->Shader->SetUniform("viewPos", FPSCamera.Transform.Position);
-				Asset->Shader->SetUniform("camPos", FPSCamera.Transform.Position);
-				Asset->Shader->SetUniform("viewDir", FPSCamera.Forward());
-				Asset->Shader->SetUniform("lightPosition", FPSCamera.Transform.Position);
+				// Asset->Shader->SetUniform("viewPos", FPSCamera.Transform.Position);
+				// Asset->Shader->SetUniform("camPos", FPSCamera.Transform.Position);
+				// Asset->Shader->SetUniform("viewDir", FPSCamera.Forward());
+				// Asset->Shader->SetUniform("lightPosition", FPSCamera.Transform.Position);
 				// Asset->Shader->SetUniform("lightPosition", EM::Vec3(20.0f, 20.0f, 20.0f));
 				// Asset->Shader->SetUniform("LightColor", EM::Vec3(sin(t) * 0.5 + 0.5, cos(t) * 0.5 + 0.5, sin(t) * 0.5 + 0.5));
-				Asset->Shader->SetUniform("LightColor", EM::Vec3(1.0f, 1.0f, 1.0f));
-				Asset->Shader->SetUniform("Shininess", Instance.Asset->Material.Shininess);
+				// Asset->Shader->SetUniform("LightColor", EM::Vec3(1.0f, 1.0f, 1.0f));
+				// Asset->Shader->SetUniform("Shininess", Instance.Asset->Material.Shininess);
 				glDrawArrays(Asset->Mesh.DrawType, 0, Asset->Mesh.DrawCount);
 
 			}
@@ -5078,6 +5076,7 @@ int main(int argc, char** argv)
 	EG::RenderTarget BlurVertical((Enjon::u32)SCREENWIDTH / 4, (Enjon::u32)SCREENHEIGHT / 4);
 	EG::RenderTarget Composite((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
 	EG::GBuffer 	 GBuffer((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::RenderTarget DeferredLight((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
 
 	EG::SpriteBatch CompositeBatch;
 	CompositeBatch.Init();
@@ -5088,6 +5087,8 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* CompositeProgram 		= EG::ShaderManager::GetShader("NoCameraProjection");
 	EG::GLSLProgram* HorizontalBlurProgram 	= EG::ShaderManager::GetShader("HorizontalBlur");
 	EG::GLSLProgram* VerticalBlurProgram 	= EG::ShaderManager::GetShader("VerticalBlur");
+	EG::GLSLProgram* GBufferProgram 		= EG::ShaderManager::GetShader("GBuffer");
+	EG::GLSLProgram* DeferredLightProgram 	= EG::ShaderManager::GetShader("DeferredLight");
 
 	// Load model data
 	// LoadCubeAsset();
@@ -5182,14 +5183,13 @@ int main(int argc, char** argv)
 
         auto fps = Limiter.End();
 
-        printf("fps: %.2f\n", fps);
-
     	// Rendering
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.0f, 0.0f, 0.0f, 1.0f));
 
 		// Rotate one of the instances over time
 		auto& InstanceTransform = Instances.at(1).Transform;
-		InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * 20.0f), EM::Vec3(0, 1, 0));
+		InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * 20.0f), EM::Vec3(0, 1, 0)) * 
+										EM::Quaternion::AngleAxis(EM::ToRadians(timer * 10.0f), EM::Vec3(0, 0, 1));
 
     	// Bind FBO
     	GBuffer.Bind();
@@ -5212,8 +5212,9 @@ int main(int argc, char** argv)
     	}
     	GBuffer.Unbind();
 
+    	/*
     	// Blur iterations
-    	Enjon::u32 NumberOfBlurIterations = 8;
+    	Enjon::u32 NumberOfBlurIterations = 2;
     	for (Enjon::u32 i = 0; i < NumberOfBlurIterations; i++)
     	{
     		bool IsEven = (i % 2 == 0);
@@ -5224,7 +5225,7 @@ int main(int argc, char** argv)
 			{
 				Program->Use();
 				{
-					GLuint TextureID = i == 0 ? GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE) : IsEven ? BlurVertical.GetTexture() : BlurHorizontal.GetTexture();
+					GLuint TextureID = i == 0 ? GBuffer.GetTexture(EG::GBufferTextureType::EMISSIVE) : IsEven ? BlurVertical.GetTexture() : BlurHorizontal.GetTexture();
 					CompositeBatch.Begin();
 					{
 			    		CompositeBatch.Add(
@@ -5261,12 +5262,77 @@ int main(int argc, char** argv)
 	    		CompositeBatch.Add(
 							EM::Vec4(-1, -1, 1, 1),
 							EM::Vec4(0, 0, 1, 1), 
-							BlurVertical.GetTexture()
+							GBuffer.GetTexture(EG::GBufferTextureType::POSITION)
 							);
 	    		CompositeBatch.Add(
 							EM::Vec4(0, -1, 1, 1),
 							EM::Vec4(0, 0, 1, 1), 
 							GBuffer.GetTexture(EG::GBufferTextureType::EMISSIVE)
+							);
+	    	}
+		   	CompositeBatch.End();
+		   	CompositeBatch.RenderBatch();
+		}   	
+		CompositeProgram->Unuse();
+		*/
+
+		// Light pass
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
+
+		DeferredLight.Bind();
+		{
+			DeferredLightProgram->Use();
+			{
+				DeferredLightProgram->BindTexture("DiffuseMap", GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
+				DeferredLightProgram->BindTexture("NormalMap", GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
+				DeferredLightProgram->BindTexture("PositionMap", GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
+				DeferredLightProgram->SetUniform("Resolution", EM::Vec2(SCREENWIDTH, SCREENHEIGHT));
+
+				// Render	
+				{
+					glBindVertexArray(quadVAO);
+					glDrawArrays(GL_TRIANGLES, 0, 6);
+					glBindVertexArray(0);
+
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, 0);
+				}	
+
+				// DeferredLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
+				DeferredLightProgram->SetUniform("LightPos", FPSCamera.Transform.Position);
+				DeferredLightProgram->SetUniform("LightColor", EM::Vec3(0.4f, 0.3f, 0.7f));
+				// DeferredLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
+				// DeferredLightProgram->SetUniform("InverseViewMtx", EM::Mat4::Inverse(FPSCamera.GetViewProjectionMatrix()));
+
+				// CompositeBatch.Begin();
+				// {
+				// 	CompositeBatch.Add(
+				// 						EM::Vec4(-1, -1, 2, 2),
+				// 						EM::Vec4(0, 0, 1, 1),
+				// 						GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE)
+				// 					);
+				// }
+				// CompositeBatch.End();
+				// CompositeBatch.RenderBatch();
+
+			}
+			DeferredLightProgram->Unuse();
+
+		}
+		DeferredLight.Unbind();
+
+
+		// Composite pass
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
+
+    	CompositeProgram->Use();
+    	{
+	    	CompositeBatch.Begin();
+	    	{
+	    		CompositeBatch.Add(
+							EM::Vec4(-1, -1, 2, 2),
+							EM::Vec4(0, 0, 1, 1), 
+							DeferredLight.GetTexture()
 							);
 	    	}
 		   	CompositeBatch.End();

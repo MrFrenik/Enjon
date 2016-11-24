@@ -17,6 +17,8 @@ in VS_OUT
     vec3 TangentViewDir;
 } fs_in;
 
+out vec4 FragColor;
+
 // uniforms
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
@@ -55,7 +57,6 @@ void main()
     vec3 ambient = 0.1 * color;
 
     // Diffuse
-    // vec3 lightDir = normalize(fs_in.TangentLightPos - fs_in.TangentFragPos);
     vec3 lightDir = normalize(fs_in.TangentLightDir);
     float diff = max(dot(lightDir, normal), 0.0);
     vec3 diffuse = diff * color * LightColor;
@@ -87,6 +88,8 @@ void main()
     float fog = RemapValClamped(fogDistance, fogMin, fogMax, 0.0, 1.0);
     
     DiffuseOut = vec4(color, 1.0);
-    EmissiveOut = (vec4(ambient + diffuse + specular, 1.0f) * (1 - fog) + fogColor * fog);
+    // EmissiveOut = (vec4(ambient + diffuse + specular, 1.0f) * (1 - fog) + fogColor * fog);
+    EmissiveOut = vec4(specular, 1.0);
     NormalsOut = vec4(normal, 1.0);
+    FragColor = (vec4(ambient + diffuse + specular, 1.0f) * (1 - fog) + fogColor * fog);
 }

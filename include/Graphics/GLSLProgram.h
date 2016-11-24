@@ -24,6 +24,11 @@ namespace Enjon { namespace Graphics {
 		void Use();
 		void Unuse();
 
+		void BindTexture(const std::string& name, const GLuint& TextureID, const GLuint Index);
+
+		// template <typename T>
+		// void SetUniform(const std::string& Name, const T& Val);
+
 		void SetUniform(const std::string& name, const int& val);
 		void SetUniform(const std::string& name, float* val, int count);
 		void SetUniform(const std::string& name, int* val, int count);
