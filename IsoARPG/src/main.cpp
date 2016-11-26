@@ -4604,6 +4604,7 @@ EG::ModelAsset MonkeyHead;
 EG::ModelAsset OtherCube;
 EG::ModelAsset CubeSprite;
 std::vector<EG::ModelInstance> Instances;
+std::vector<EG::ModelInstance> Animations;
 EG::Camera FPSCamera;
 
 const uint8_t RENDERING = 0;
@@ -4696,7 +4697,7 @@ void LoadNormalMappedSpriteAsset()
 	SpriteWithNormal.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/quad.obj");
 
     // Get shader and set texture
-    auto Shader = EG::ShaderManager::GetShader("GBuffer");
+    auto Shader = EG::ShaderManager::GetShader("AnimatedMaterial");
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
@@ -4705,8 +4706,8 @@ void LoadNormalMappedSpriteAsset()
     // Set shader
     SpriteWithNormal.Shader = Shader;
     // Textures
-	SpriteWithNormal.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png");
-	SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png");
+	SpriteWithNormal.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png");
+	SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test_normal.png");
 	SpriteWithNormal.Material.Shininess = 20.0f;
 }
 
@@ -4736,7 +4737,8 @@ void LoadInstances()
 	D.Asset = &SpriteWithNormal;
 	D.Transform.Position 	= EM::Vec3(5, 0, 5);
     D.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
-	Instances.push_back(D);
+    D.Transform.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f);
+	Animations.push_back(D);
 
 	EG::ModelInstance B;
 	B.Asset = &MonkeyHead;
@@ -4744,12 +4746,15 @@ void LoadInstances()
 	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.3f;
 	Instances.push_back(B);
 
-	EG::ModelInstance A;
-	A.Asset = &SpriteWithNormal;
-	A.Transform.Position 	= EM::Vec3(1, 0, 6);
-	A.Transform.Scale 		= EM::Vec3(2.0f, 1.0f, 4.0f);
-    A.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
-	Instances.push_back(A);
+	for (u32 i = 0; i < 50; ++i)
+	{
+		EG::ModelInstance M;
+		M.Asset = &MonkeyHead;
+		M.Transform.Position 	= EM::Vec3(ER::Roll(-20, 20), ER::Roll(0, 20), ER::Roll(-20, 20));
+		float Scale = (float)ER::Roll(1, 10) / 10.0f;
+		M.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.2;
+		Instances.push_back(M);
+	}
 
 	// EG::ModelInstance C;
 	// C.Asset = &CubeSprite;
@@ -4759,7 +4764,7 @@ void LoadInstances()
  //    							EM::Quaternion::AngleAxis(EM::ToRadians(180), EM::Vec3(0, 0, 1));
  //    Instances.push_back(C);
 
-	auto map_size = 5;
+	auto map_size = 20;
 	for (auto i = 0; i < map_size; i++)
 	{
 		for (auto j = 0; j < map_size; j++)
@@ -4815,6 +4820,102 @@ void RenderInstance(const EG::ModelInstance& Instance)
 	glActiveTexture(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindVertexArray(0);
+}
+
+struct Frame
+{
+	float TextureWidth;
+	float TextureHeight;
+	float FrameWidth; 
+	float FrameHeight;
+	EM::Vec4 SpriteFrame;
+};
+
+std::vector<struct Frame> SpriteFrames;
+
+void RenderAnimation(EG::ModelInstance& Instance)
+{
+	// Get reference to asset pointer
+	auto Asset = Instance.Asset;
+	auto& Transform = Instance.Transform;
+
+	static GLint CurrentTextureID = 0;
+
+	glBindVertexArray(Asset->Mesh->VAO);
+	{
+        // Bind instance texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id);
+
+		// Bind normal
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
+
+		// glActiveTexture(GL_TEXTURE2);
+		// glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id);
+
+		static float t = 0.0f;
+		static u32 CurrentFrameIndex = 0;
+
+		t += 0.01f;
+		if (t >= 1.0f)
+		{
+			CurrentFrameIndex = (CurrentFrameIndex + 1) % SpriteFrames.size();
+			t = 0.0f;
+		}
+
+		auto& CurrentFrame = SpriteFrames.at(CurrentFrameIndex);
+		float Scale = CurrentFrame.FrameWidth / CurrentFrame.FrameHeight;
+		EM::Vec4 SpriteFrame = CurrentFrame.SpriteFrame;
+
+		Transform.Scale = EM::Vec3(Scale, 1.0f, 1.0f);
+
+		EM::Mat4 Model;
+		// L = T*R*S
+		Model *= EM::Mat4::Translate(Transform.Position);
+		Model *= EM::QuaternionToMat4(Transform.Orientation);
+		Model *= EM::Mat4::Scale(Transform.Scale);
+
+		auto CamPos = FPSCamera.Transform.Position;
+
+
+		auto& Position = Instances.at(0).Transform.Position;
+
+
+		Asset->Shader->SetUniform("model", Model);
+		Asset->Shader->SetUniform("SpriteFrame", SpriteFrame);
+		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
+
+	}
+	glActiveTexture(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindVertexArray(0);
+}
+
+void LoadFrames()
+{
+	struct Frame One;
+	One.TextureWidth = 688;
+	One.TextureHeight = 493;
+	One.FrameWidth = 200;
+	One.FrameHeight = One.TextureHeight - 296;
+	One.SpriteFrame.x = 0;
+	One.SpriteFrame.y = 0;
+	One.SpriteFrame.z = One.FrameWidth / One.TextureWidth;
+	One.SpriteFrame.w = One.FrameHeight / One.TextureHeight; 
+
+	struct Frame Two;
+	Two.TextureWidth = 688;
+	Two.TextureHeight = 493;
+	Two.FrameWidth = 136;
+	Two.FrameHeight = 192;
+	Two.SpriteFrame.x = 555 / Two.TextureWidth;
+	Two.SpriteFrame.y = (Two.TextureHeight - 302) / Two.TextureHeight;
+	Two.SpriteFrame.z = Two.FrameWidth / Two.TextureWidth;
+	Two.SpriteFrame.w = Two.FrameHeight / Two.TextureHeight; 
+
+	SpriteFrames.push_back(One);
+	SpriteFrames.push_back(Two);
 }
 
 // bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera);
@@ -4881,6 +4982,8 @@ int main(int argc, char** argv)
 	LoadMonkeyHeadAsset();
 	LoadInstances();
 
+	LoadFrames();
+
 	EU::FPSLimiter Limiter;
 	Limiter.Init(60);
 
@@ -4902,18 +5005,18 @@ int main(int argc, char** argv)
 	FPSCamera.OrthographicScale = 4.5f;
 
 	// Initialize entity manager
-	EntityManager* EManager = new EntityManager;
-	EManager->RegisterComponent<PositionComponent>();
-	EManager->RegisterComponent<VelocityComponent>();
-	EManager->RegisterComponent<MovementComponent>();
+	// EntityManager* EManager = new EntityManager;
+	// EManager->RegisterComponent<PositionComponent>();
+	// EManager->RegisterComponent<VelocityComponent>();
+	// EManager->RegisterComponent<MovementComponent>();
 
-	for (auto i = 0; i < MAX_ENTITIES; i++)
-	{
-		auto Handle = EManager->CreateEntity();
-		Handle->Attach<PositionComponent>();
-		Handle->Attach<VelocityComponent>();
-		Handle->Attach<MovementComponent>();
-	}
+	// for (auto i = 0; i < MAX_ENTITIES; i++)
+	// {
+	// 	auto Handle = EManager->CreateEntity();
+	// 	Handle->Attach<PositionComponent>();
+	// 	Handle->Attach<VelocityComponent>();
+	// 	Handle->Attach<MovementComponent>();
+	// }
 
 	GLfloat quadVertices[] = {   // Vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // Positions   // TexCoords
@@ -4940,11 +5043,11 @@ int main(int argc, char** argv)
     glBindVertexArray(0);
 
     std::vector<EG::PointLight> PointLights;
-    for (u32 i = 0; i < 10; i++)
+    for (u32 i = 0; i < 50; i++)
     {
     	EG::PointLight L;
-    	L.Position = EM::Vec3(ER::Roll(-5, 5), 2.0f, ER::Roll(-4, 4));
-    	L.Parameters = EG::PointLightParameters(1.0f, 0.35f, 0.44f);
+    	L.Position = EM::Vec3(ER::Roll(-20, 20), 2.0f, ER::Roll(-20, 20));
+    	L.Parameters = EG::PointLightParameters(0.25f, 2.2f, 1.0f);
 
     	float R = (float)ER::Roll(0, 255) / 255.0f;
     	float G = (float)ER::Roll(0, 255) / 255.0f;
@@ -4952,7 +5055,7 @@ int main(int argc, char** argv)
 
     	L.Color = EG::RGBA16(R, G, B, 1.0f);
 
-    	L.Intensity = 20.0f;
+    	L.Intensity = 5.0f;
 
     	PointLights.push_back(L);
     }
@@ -4982,9 +5085,13 @@ int main(int argc, char** argv)
     	timer += 0.01f;
 
     	// Attach light to "player" position
-    	PointLights.at(0).Position = Instances.at(0).Transform.Position + EM::Vec3(cos(timer * 0.2f), sin(timer * 0.2f) * 2.0f - 1.0f + 2.0f, 0);
+    	float speed = 0.6f;
+    	PointLights.at(0).Position = Animations.at(0).Transform.Position + EM::Vec3(cos(timer * speed), 0.0f, sin(timer * speed));
+    	PointLights.at(0).Color = EG::RGBA16_Orange();
+    	PointLights.at(1).Position = Animations.at(0).Transform.Position - EM::Vec3(cos(timer * speed), 0.0f, sin(timer * speed));
+    	PointLights.at(1).Color = EG::RGBA16_ZombieGreen();
 
-        // auto fps = Limiter.End();
+        auto fps = Limiter.End();
 
         // printf("%.2f\n", fps);
 
@@ -4993,7 +5100,7 @@ int main(int argc, char** argv)
         //////////////////////////////////////////////////////////////////////////
 
 		// Rotate one of the instances over time
-		auto& InstanceTransform = Instances.at(1).Transform;
+		auto& InstanceTransform = Instances.at(0).Transform;
 		InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * 20.0f), EM::Vec3(0, 1, 0));
 
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.0f, 0.0f, 0.0f, 1.0f));
@@ -5015,6 +5122,15 @@ int main(int argc, char** argv)
 			        RenderInstance(c);
 		        Shader->Unuse();
 	        } 
+
+	        for (auto& c : Animations)
+	        {
+	        	auto Shader = c.Asset->Shader;
+	        	Shader->Use();
+	        		Shader->SetUniform("camera", CameraMatrix);
+	        		RenderAnimation(c);
+	        	Shader->Unuse();
+	        }
 	        ENDPROFILE(RENDERING)
 
     	}
@@ -5095,7 +5211,7 @@ int main(int argc, char** argv)
 
 				// Render	
 				{
-					glDrawArrays(GL_TRIANGLES, 0, 6);
+					// glDrawArrays(GL_TRIANGLES, 0, 6);
 				}
 
 				DirectionalLightProgram->SetUniform("LightPos", EM::Vec3(	
@@ -5108,7 +5224,7 @@ int main(int argc, char** argv)
 
 				// Render	
 				{
-					glDrawArrays(GL_TRIANGLES, 0, 6);
+					// glDrawArrays(GL_TRIANGLES, 0, 6);
 				}
 			}
 			DirectionalLightProgram->Unuse();
@@ -5129,7 +5245,7 @@ int main(int argc, char** argv)
 					PointLightProgram->SetUniform("LightColor", EM::Vec3(L.Color.r, L.Color.g, L.Color.b));
 					PointLightProgram->SetUniform("Falloff", L.Parameters.Falloff);
 					// PointLightProgram->SetUniform("Radius", L.Parameters.Radius);
-					PointLightProgram->SetUniform("LightIntensity", 1.0f);
+					PointLightProgram->SetUniform("LightIntensity", L.Intensity);
 
 					// Render Light to screen
 					{
@@ -5330,7 +5446,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 		}
 
 		// Get player
-		EG::ModelInstance& Player = Instances.at(0);
+		EG::ModelInstance& Player = Animations.at(0);
 
 	    EM::Vec3 VelDir(0, 0, 0);
 	
