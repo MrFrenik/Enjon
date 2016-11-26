@@ -14,7 +14,6 @@ namespace Enjon { namespace Graphics {
 		float Position[3];
 		float Normals[3];
 		float Tangent[3];
-		float Bitangent[3];
 		float UV[2];	
 	};
 

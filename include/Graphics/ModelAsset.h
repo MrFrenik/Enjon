@@ -15,7 +15,7 @@ namespace Enjon { namespace Graphics {
 	{
 		EG::GLSLProgram* Shader;
 		EG::MaterialInstance Material;
-		EG::MeshInstance Mesh;
+		EG::MeshInstance* Mesh;
 	};
 
 	struct ModelInstance

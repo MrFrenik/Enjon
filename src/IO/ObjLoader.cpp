@@ -12,10 +12,7 @@
 
 namespace Enjon { namespace Input {
 
-	void ParseVertex(EU::tokenizer *Tokenizer, EG::MeshInstance* Mesh);
-
-	/*
-	EG::MeshInstance LoadMeshFromFile(char* FilePath)
+	EG::MeshInstance LoadMeshFromFile(const char* FilePath)
 	{
 		EG::MeshInstance Mesh;
 
@@ -66,9 +63,6 @@ namespace Enjon { namespace Input {
 		      Vertex.Tangent[0] = 1.0f;
 		      Vertex.Tangent[1] = 0.0f;
 		      Vertex.Tangent[2] = 0.0f;
-		      Vertex.Bitangent[0] = 0.0f;
-		      Vertex.Bitangent[1] = 1.0f;
-		      Vertex.Bitangent[2] = 0.0f;
 
 		      Mesh.Verticies.push_back(Vertex);
 		    }
@@ -95,8 +89,8 @@ namespace Enjon { namespace Input {
 			EM::Vec2 uv2 = EM::Vec2(Vert2.UV[0], Vert2.UV[1]);
 			EM::Vec2 uv3 = EM::Vec2(Vert3.UV[0], Vert3.UV[1]);
 
-			// calculate tangent/bitangent vectors of both triangles
-		    EM::Vec3 tangent, bitangent;
+			// calculate tangent vectors of both triangles
+		    EM::Vec3 tangent;
 
 		    // - triangle 1
 		    EM::Vec3 edge1 = pos2 - pos1;
@@ -111,11 +105,6 @@ namespace Enjon { namespace Input {
 		    tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
 		    tangent = EM::Vec3::Normalize(tangent);
 
-		    bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
-		    bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
-		    bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
-		    bitangent = EM::Vec3::Normalize(bitangent);
-
 		    // Set tangents for the verticies
 		    Vert1.Tangent[0] = tangent.x;
 		    Vert1.Tangent[1] = tangent.y;
@@ -128,28 +117,42 @@ namespace Enjon { namespace Input {
 		    Vert3.Tangent[0] = tangent.x;
 		    Vert3.Tangent[1] = tangent.y;
 		    Vert3.Tangent[2] = tangent.z;
-
-		    // Set bitangents for verticies
-		    Vert1.Bitangent[0] = bitangent.x;
-		    Vert1.Bitangent[1] = bitangent.y;
-		    Vert1.Bitangent[2] = bitangent.z;
-
-		    Vert2.Bitangent[0] = bitangent.x;
-		    Vert2.Bitangent[1] = bitangent.y;
-		    Vert2.Bitangent[2] = bitangent.z;
-
-		    Vert3.Bitangent[0] = bitangent.x;
-		    Vert3.Bitangent[1] = bitangent.y;
-		    Vert3.Bitangent[2] = bitangent.z;
 		}
 
-		printf("Verts: %d\n", Mesh.Verticies.size());
+		// Create and upload mesh data
+	    glGenBuffers(1, &Mesh.VBO);
+	    glBindBuffer(GL_ARRAY_BUFFER, Mesh.VBO);
+	    glBufferData(GL_ARRAY_BUFFER, sizeof(EG::Vert) * Mesh.Verticies.size(), &Mesh.Verticies[0], GL_STATIC_DRAW);
+
+	    glGenVertexArrays(1, &Mesh.VAO);
+	    glBindVertexArray(Mesh.VAO);
+
+	    // Position
+	    glEnableVertexAttribArray(0);
+	    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Position));
+	    // Normal
+	    glEnableVertexAttribArray(1);
+	    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Normals));
+	    // Tangent
+	    glEnableVertexAttribArray(2);
+	    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Tangent));
+	    // UV
+	    glEnableVertexAttribArray(3);
+	    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, UV));
+
+	    // Unbind VAO
+	    glBindVertexArray(0);
+
+	    // Set draw type
+	    Mesh.DrawType = GL_TRIANGLES;
+	    // Set draw count
+	    Mesh.DrawCount = Mesh.Verticies.size();
 
 		return Mesh;
 	}
-	*/
 
-	EG::MeshInstance LoadMeshFromFile(char* FilePath)
+	/*
+	EG::MeshInstance LoadMeshFromFile(const char* FilePath)
 	{
 		EG::MeshInstance Mesh;
 
@@ -359,6 +362,22 @@ namespace Enjon { namespace Input {
 							int UVIndex 		= std::atoi(UVString) - 1;
 							int NormalIndex 	= std::atoi(NormalString) - 1;
 
+							if(PositionIndex >= TempVertexPositions.size())
+							{
+								EU::FatalError("Failed to load mesh: Position Index: " + std::to_string(PositionIndex) + "Positions: " + std::to_string(TempVertexPositions.size()));
+							}
+
+							if(UVIndex >= TempVertexUVs.size())
+							{
+								EU::FatalError("Failed to load mesh: UV Index: " + std::to_string(UVIndex) + "UVs: " + std::to_string(TempVertexUVs.size()));
+							}
+
+							if(NormalIndex >= TempVertexNormals.size())
+							{
+								EU::FatalError("Failed to load mesh: Normal Index: " + std::to_string(NormalIndex) + "Normals: " + std::to_string(TempVertexNormals.size()));
+							}
+
+
 							// Now that we have the indicies, need to grab them from our previously stored temp 
 							// positions, normals, and uvs and store them in the mesh
 							EG::Vert Vertex = {};
@@ -437,8 +456,8 @@ namespace Enjon { namespace Input {
 			EM::Vec2 uv2 = EM::Vec2(Vert2.UV[0], Vert2.UV[1]);
 			EM::Vec2 uv3 = EM::Vec2(Vert3.UV[0], Vert3.UV[1]);
 
-			// calculate tangent/bitangent vectors of both triangles
-		    EM::Vec3 tangent, bitangent;
+			// calculate tangent vectors of both triangles
+		    EM::Vec3 tangent;
 
 		    // - triangle 1
 		    EM::Vec3 edge1 = pos2 - pos1;
@@ -453,11 +472,6 @@ namespace Enjon { namespace Input {
 		    tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
 		    tangent = EM::Vec3::Normalize(tangent);
 
-		    bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
-		    bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
-		    bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
-		    bitangent = EM::Vec3::Normalize(bitangent);
-
 		    // Set tangents for the verticies
 		    Vert1.Tangent[0] = tangent.x;
 		    Vert1.Tangent[1] = tangent.y;
@@ -470,29 +484,10 @@ namespace Enjon { namespace Input {
 		    Vert3.Tangent[0] = tangent.x;
 		    Vert3.Tangent[1] = tangent.y;
 		    Vert3.Tangent[2] = tangent.z;
-
-		    // Set bitangents for verticies
-		    Vert1.Bitangent[0] = bitangent.x;
-		    Vert1.Bitangent[1] = bitangent.y;
-		    Vert1.Bitangent[2] = bitangent.z;
-
-		    Vert2.Bitangent[0] = bitangent.x;
-		    Vert2.Bitangent[1] = bitangent.y;
-		    Vert2.Bitangent[2] = bitangent.z;
-
-		    Vert3.Bitangent[0] = bitangent.x;
-		    Vert3.Bitangent[1] = bitangent.y;
-		    Vert3.Bitangent[2] = bitangent.z;
 		}
 
 
 		return Mesh;
 	}
-
-	void ParseVertex(EU::tokenizer *Tokenizer, EG::MeshInstance* Mesh)
-	{
-		// Read all the vertex numbers into a vertex, then
-		// push back into mesh verticies
-
-	}
+	*/
 }}

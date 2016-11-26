@@ -52,7 +52,7 @@ void main()
     vec3 Specular = vec3(0.0);
     if (DiffuseTerm > 0)
     {
-        float Shininess = 10.0;
+        float Shininess = 100.0;
         float kEnergyConservation = (8.0 + Shininess) / (8.0 * kPi);
         vec3 ViewDir = normalize(CamPos - WorldPos + CameraForward);
         vec3 ReflectDir = reflect(-LightDir, Normal);

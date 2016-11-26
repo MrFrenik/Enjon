@@ -53,31 +53,50 @@ namespace Enjon { namespace Graphics {
 
 	GBuffer::~GBuffer()
 	{
-
-	}
-
-	void GBuffer::Bind()
-	{
-		// Bind our FBO and set the viewport to the proper size
-		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-		glPushAttrib(GL_VIEWPORT_BIT);
-		glViewport((u32)Viewport.x, (u32)Viewport.y, (u32)Viewport.z, (u32)Viewport.w);
-
-		// Clear the render targets
-		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-		glActiveTextureARB(GL_TEXTURE0_ARB);
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_DEPTH);
-
-		// Specify what to render an start acquiring
-		GLenum buffers[(u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT];
-		for (auto i = 0; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; i++)
+		for (u32 i = 0; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
 		{
-			buffers[i] = GL_COLOR_ATTACHMENT0 + i;
+			glDeleteTextures(1, &Textures[i]);
+			glDeleteRenderbuffers(1, &TargetIDs[i]);
 		}
 
-		glDrawBuffers((u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT, buffers);
+		// Clean up buffers
+		glDeleteFramebuffers(1, &FBO);
+		glDeleteRenderbuffers(1, &DepthBuffer);
+	}
+
+	void GBuffer::Bind(BindType Type)
+	{
+		switch(Type)
+		{
+			case BindType::WRITE:
+			{
+				// Bind our FBO and set the viewport to the proper size
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FBO);
+				glPushAttrib(GL_VIEWPORT_BIT);
+				glViewport((u32)Viewport.x, (u32)Viewport.y, (u32)Viewport.z, (u32)Viewport.w);
+
+				// Clear the render targets
+				glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+				glActiveTextureARB(GL_TEXTURE0_ARB);
+				glEnable(GL_TEXTURE_2D);
+				glEnable(GL_DEPTH);
+
+				// Specify what to render an start acquiring
+				GLenum buffers[(u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT];
+				for (auto i = 0; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; i++)
+				{
+					buffers[i] = GL_COLOR_ATTACHMENT0 + i;
+				}
+
+				glDrawBuffers((u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT, buffers);
+			} break;
+
+			case BindType::READ:
+			{
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO);
+			} break;
+		}
 	}
 			
 	void GBuffer::Unbind()

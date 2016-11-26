@@ -88,7 +88,6 @@ void main()
     float fog = RemapValClamped(fogDistance, fogMin, fogMax, 0.0, 1.0);
     
     DiffuseOut = vec4(color, 1.0);
-    // EmissiveOut = (vec4(ambient + diffuse + specular, 1.0f) * (1 - fog) + fogColor * fog);
     EmissiveOut = vec4(specular, 1.0);
     NormalsOut = vec4(normal, 1.0);
     FragColor = (vec4(ambient + diffuse + specular, 1.0f) * (1 - fog) + fogColor * fog);

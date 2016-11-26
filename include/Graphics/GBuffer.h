@@ -17,16 +17,24 @@ namespace Enjon { namespace Graphics {
 		GBUFFER_TEXTURE_COUNT
 	};
 
+	enum class BindType
+	{
+		READ, 
+		WRITE
+	};
+
 	class GBuffer
 	{
 	public:
 		GBuffer(uint32 _Width, uint32 _Height);
 		~GBuffer();
 
-		void Bind();
+		void Bind(BindType Type = BindType::WRITE);
 		void Unbind();
 
 		GLuint inline GetTexture(GBufferTextureType Type) { return Textures[(GLuint)Type]; }
+		GLuint inline GetDepth() { return DepthBuffer; }
+		EM::Vec2 inline GetResolution() { return EM::Vec2(Width, Height); }
 		void SetViewport(const EM::Vec4& Viewport);
 
 	private:

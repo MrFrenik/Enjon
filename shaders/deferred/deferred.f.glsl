@@ -29,8 +29,8 @@ void main()
     vec4 color = texture(diffuseMap, fs_in.TexCoords);
     if (color.a < 0.5) discard;
     
-    DiffuseOut = color;
-    NormalsOut = vec4(normal, 1.0);
+    DiffuseOut  = color;
+    NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
     EmissiveOut = vec4(1.0, 1.0, 1.0, 1.0);
 }

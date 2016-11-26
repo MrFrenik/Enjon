@@ -4554,7 +4554,7 @@ int main(int argc, char** argv)
 
 #if 1
 
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -4589,6 +4589,7 @@ int main(int argc, char** argv)
 #include <Graphics/Camera.h>
 #include <Entity/EntityManager.h>
 #include <Graphics/RenderTarget.h>
+#include <Graphics/PointLight.h>
 #include <Graphics/GBuffer.h>
 
 using u32 = uint32_t;
@@ -4607,48 +4608,12 @@ EG::Camera FPSCamera;
 
 const uint8_t RENDERING = 0;
 
-struct vert3
-{
-	float Position[3];
-	float Normals[3];
-	float Tangent[3];
-	float Bitangent[3];
-	float UV[2];	
-	GLubyte Color[4];
-};
-
-
+bool DebugDrawingEnabled = false;
 
 void LoadMonkeyHeadAsset()
 {
 	// Get mesh
-	MonkeyHead.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/dragon.obj");
-
-    glGenBuffers(1, &MonkeyHead.Mesh.VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, MonkeyHead.Mesh.VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(EG::Vert) * MonkeyHead.Mesh.Verticies.size(), &MonkeyHead.Mesh.Verticies[0], GL_STATIC_DRAW);
-
-    glGenVertexArrays(1, &MonkeyHead.Mesh.VAO);
-    glBindVertexArray(MonkeyHead.Mesh.VAO);
-
-    // Position
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Position));
-    // Normal
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Normals));
-    // Tangent
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Tangent));
-    // Bitangent
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Bitangent));
-    // UV
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, UV));
-
-    // Unbind VAO
-    glBindVertexArray(0);
+	MonkeyHead.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/sphere.obj");
 
     // Get shader and set texture
     auto Shader = EG::ShaderManager::GetShader("GBuffer");
@@ -4660,45 +4625,15 @@ void LoadMonkeyHeadAsset()
     // Set shader
     MonkeyHead.Shader = Shader;
     // Textures
-	MonkeyHead.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
+	MonkeyHead.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box_pixel.png");
 	MonkeyHead.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
 	MonkeyHead.Material.Shininess = 100.0f;
-    // Set draw type
-    MonkeyHead.Mesh.DrawType = GL_TRIANGLES;
-    // Set draw count
-    MonkeyHead.Mesh.DrawCount = MonkeyHead.Mesh.Verticies.size();
 }
 
 void LoadOtherCubeAsset()
 {
 	// Get mesh
-	OtherCube.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/basic_cube.obj");
-
-    glGenBuffers(1, &OtherCube.Mesh.VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, OtherCube.Mesh.VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(EG::Vert) * OtherCube.Mesh.Verticies.size(), &OtherCube.Mesh.Verticies[0], GL_STATIC_DRAW);
-
-    glGenVertexArrays(1, &OtherCube.Mesh.VAO);
-    glBindVertexArray(OtherCube.Mesh.VAO);
-
-    // Position
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Position));
-    // Normal
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Normals));
-    // Tangent
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Tangent));
-    // Bitangent
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Bitangent));
-    // UV
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, UV));
-
-    // Unbind VAO
-    glBindVertexArray(0);
+	OtherCube.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/basic_cube.obj");
 
     // Get shader and set texture
     auto Shader = EG::ShaderManager::GetShader("GBuffer");
@@ -4713,43 +4648,12 @@ void LoadOtherCubeAsset()
 	OtherCube.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
 	OtherCube.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
 	OtherCube.Material.Shininess = 20.0f;
-    // Set draw type
-    OtherCube.Mesh.DrawType = GL_TRIANGLES;
-    // Set draw count
-    OtherCube.Mesh.DrawCount = OtherCube.Mesh.Verticies.size();
 }
 
 void LoadCubeAsset()
-	// FRONT
 {
-	Cube.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/cube.obj");
-
-    glGenBuffers(1, &Cube.Mesh.VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, Cube.Mesh.VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(EG::Vert) * Cube.Mesh.Verticies.size(), &Cube.Mesh.Verticies[0], GL_STATIC_DRAW);
-
-    glGenVertexArrays(1, &Cube.Mesh.VAO);
-    glBindVertexArray(Cube.Mesh.VAO);
-
-    // Position
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Position));
-    // Normal
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Normals));
-    // Tangent
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Tangent));
-    // Bitangent
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, Bitangent));
-    // UV
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(vert3), (void*)offsetof(vert3, UV));
-
-    // Unbind VAO
-    glBindVertexArray(0);
-
+	// Cube.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cube.obj");
+	Cube.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cube.obj");
 
     // Get shader and set texture
     auto Shader = EG::ShaderManager::GetShader("GBuffer");
@@ -4764,42 +4668,12 @@ void LoadCubeAsset()
     Cube.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
     Cube.Material.Textures[EG::TextureSlotType::NORMAL] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
     Cube.Material.Shininess = 20.0f;
-    // Set draw type
-    Cube.Mesh.DrawType = GL_TRIANGLES;
-    // Set draw count
-    Cube.Mesh.DrawCount = 36;
 }
 
 void LoadNormalFloorAsset()
 {
 	// Get mesh
-	NormalFloor.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/quad.obj");
-
-    glGenBuffers(1, &NormalFloor.Mesh.VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, NormalFloor.Mesh.VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(EG::Vert) * NormalFloor.Mesh.Verticies.size(), &NormalFloor.Mesh.Verticies[0], GL_STATIC_DRAW);
-
-    glGenVertexArrays(1, &NormalFloor.Mesh.VAO);
-    glBindVertexArray(NormalFloor.Mesh.VAO);
-
-    // Position
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Position));
-    // Normal
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Normals));
-    // Tangent
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Tangent));
-    // Bitangent
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Bitangent));
-    // UV
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, UV));
-
-    // Unbind VAO
-    glBindVertexArray(0);
+	NormalFloor.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/quad.obj");
 
     // Get shader and set texture
     auto Shader = EG::ShaderManager::GetShader("GBuffer");
@@ -4814,42 +4688,12 @@ void LoadNormalFloorAsset()
 	NormalFloor.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png");
 	NormalFloor.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
 	NormalFloor.Material.Shininess = 20.0f;
-    // Set draw type
-    NormalFloor.Mesh.DrawType = GL_TRIANGLES;
-    // Set draw count
-    NormalFloor.Mesh.DrawCount = NormalFloor.Mesh.Verticies.size();	
 }
 
 void LoadNormalMappedSpriteAsset()
 {
 	// Get mesh
-	SpriteWithNormal.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/quad.obj");
-
-    glGenBuffers(1, &SpriteWithNormal.Mesh.VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, SpriteWithNormal.Mesh.VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(EG::Vert) * SpriteWithNormal.Mesh.Verticies.size(), &SpriteWithNormal.Mesh.Verticies[0], GL_STATIC_DRAW);
-
-    glGenVertexArrays(1, &SpriteWithNormal.Mesh.VAO);
-    glBindVertexArray(SpriteWithNormal.Mesh.VAO);
-
-    // Position
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Position));
-    // Normal
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Normals));
-    // Tangent
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Tangent));
-    // Bitangent
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Bitangent));
-    // UV
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, UV));
-
-    // Unbind VAO
-    glBindVertexArray(0);
+	SpriteWithNormal.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/quad.obj");
 
     // Get shader and set texture
     auto Shader = EG::ShaderManager::GetShader("GBuffer");
@@ -4864,43 +4708,12 @@ void LoadNormalMappedSpriteAsset()
 	SpriteWithNormal.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png");
 	SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png");
 	SpriteWithNormal.Material.Shininess = 20.0f;
-    // Set draw type
-    SpriteWithNormal.Mesh.DrawType = GL_TRIANGLES;
-    // Set draw count
-    SpriteWithNormal.Mesh.DrawCount = SpriteWithNormal.Mesh.Verticies.size();
-	
 }
 
 void LoadCubeSprite()
 {
 	// Get mesh
-	CubeSprite.Mesh = EI::LoadMeshFromFile("../IsoARPG/Assets/Models/quad.obj");
-
-    glGenBuffers(1, &CubeSprite.Mesh.VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, CubeSprite.Mesh.VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(EG::Vert) * CubeSprite.Mesh.Verticies.size(), &CubeSprite.Mesh.Verticies[0], GL_STATIC_DRAW);
-
-    glGenVertexArrays(1, &CubeSprite.Mesh.VAO);
-    glBindVertexArray(CubeSprite.Mesh.VAO);
-
-    // Position
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Position));
-    // Normal
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Normals));
-    // Tangent
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Tangent));
-    // Bitangent
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Bitangent));
-    // UV
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, UV));
-
-    // Unbind VAO
-    glBindVertexArray(0);
+	CubeSprite.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/quad.obj");
 
     // Get shader and set texture
     auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
@@ -4915,11 +4728,6 @@ void LoadCubeSprite()
 	CubeSprite.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box.png");
 	CubeSprite.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box_normal.png");
 	CubeSprite.Material.Shininess = 20.0f;
-    // Set draw type
-    CubeSprite.Mesh.DrawType = GL_TRIANGLES;
-    // Set draw count
-    CubeSprite.Mesh.DrawCount = CubeSprite.Mesh.Verticies.size();
-
 }
 
 void LoadInstances()
@@ -4935,6 +4743,13 @@ void LoadInstances()
 	B.Transform.Position 	= EM::Vec3(0, 0, 0);
 	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.3f;
 	Instances.push_back(B);
+
+	EG::ModelInstance A;
+	A.Asset = &SpriteWithNormal;
+	A.Transform.Position 	= EM::Vec3(1, 0, 6);
+	A.Transform.Scale 		= EM::Vec3(2.0f, 1.0f, 4.0f);
+    A.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
+	Instances.push_back(A);
 
 	// EG::ModelInstance C;
 	// C.Asset = &CubeSprite;
@@ -4967,74 +4782,39 @@ void RenderInstance(const EG::ModelInstance& Instance)
 
 	static GLint CurrentTextureID = 0;
 
-	switch(Asset->Mesh.DrawType)
+	glBindVertexArray(Asset->Mesh->VAO);
 	{
-		case GL_TRIANGLE_STRIP:
-		{
-			glBindVertexArray(Asset->Mesh.VAO);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Asset->Mesh.IBO);
-			{
-		        // Bind instance texture
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id);
+        // Bind instance texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id);
 
-				// Asset->Shader->SetUniform("transform", Transform);
-				glDrawElements(Asset->Mesh.DrawType, Asset->Mesh.DrawCount, GL_UNSIGNED_INT, nullptr);
-			}
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
-		} break;
+		// Bind normal
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
 
-		case GL_TRIANGLES:
-		{
-			glBindVertexArray(Asset->Mesh.VAO);
-			{
-		        // Bind instance texture
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id);
+		// glActiveTexture(GL_TEXTURE2);
+		// glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id);
 
-				// Bind normal
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
+		EM::Mat4 Model;
+		// L = T*R*S
+		Model *= EM::Mat4::Translate(Transform.Position);
+		Model *= EM::QuaternionToMat4(Transform.Orientation);
+		Model *= EM::Mat4::Scale(Transform.Scale);
 
-				// glActiveTexture(GL_TEXTURE2);
-				// glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id);
+		auto CamPos = FPSCamera.Transform.Position;
 
-				EM::Mat4 Model;
-				// L = T*R*S
-				Model *= EM::Mat4::Translate(Transform.Position);
-				Model *= EM::QuaternionToMat4(Transform.Orientation);
-				Model *= EM::Mat4::Scale(Transform.Scale);
+		static float t = 0.0f;
+		t += 0.001f;
 
-				auto CamPos = FPSCamera.Transform.Position;
+		auto& Position = Instances.at(0).Transform.Position;
 
-				static float t = 0.0f;
-				t += 0.001f;
-
-				auto& Position = Instances.at(0).Transform.Position;
-
-				// Asset->Shader->SetUniform("fogMin", 10.0f);
-				// Asset->Shader->SetUniform("fogMax", 100.0f);
-				// Asset->Shader->SetUniform("fogColor", EM::Vec4(0.8f, 0.76f, 0.85f, 1.0f));
-				Asset->Shader->SetUniform("model", Model);
-				// Asset->Shader->SetUniform("viewPos", FPSCamera.Transform.Position);
-				// Asset->Shader->SetUniform("camPos", FPSCamera.Transform.Position);
-				// Asset->Shader->SetUniform("viewDir", FPSCamera.Forward());
-				// Asset->Shader->SetUniform("lightPosition", FPSCamera.Transform.Position);
-				// Asset->Shader->SetUniform("lightPosition", EM::Vec3(20.0f, 20.0f, 20.0f));
-				// Asset->Shader->SetUniform("LightColor", EM::Vec3(sin(t) * 0.5 + 0.5, cos(t) * 0.5 + 0.5, sin(t) * 0.5 + 0.5));
-				// Asset->Shader->SetUniform("LightColor", EM::Vec3(1.0f, 1.0f, 1.0f));
-				// Asset->Shader->SetUniform("Shininess", Instance.Asset->Material.Shininess);
-				glDrawArrays(Asset->Mesh.DrawType, 0, Asset->Mesh.DrawCount);
-
-			}
-			glActiveTexture(0);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glBindVertexArray(0);
-		} break;
+		Asset->Shader->SetUniform("model", Model);
+		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
 
 	}
-
+	glActiveTexture(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindVertexArray(0);
 }
 
 // bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera);
@@ -5070,13 +4850,13 @@ int main(int argc, char** argv)
 
 	FPSCamera = EG::Camera((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
 
-	EG::FrameBufferObject FBO((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
-	EG::RenderTarget DebugTarget((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
-	EG::RenderTarget BlurHorizontal((Enjon::u32)SCREENWIDTH / 4, (Enjon::u32)SCREENHEIGHT / 4);
-	EG::RenderTarget BlurVertical((Enjon::u32)SCREENWIDTH / 4, (Enjon::u32)SCREENHEIGHT / 4);
-	EG::RenderTarget Composite((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
-	EG::GBuffer 	 GBuffer((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
-	EG::RenderTarget DeferredLight((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::FrameBufferObject 	FBO((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::RenderTarget 		DebugTarget((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::RenderTarget 		BlurHorizontal((Enjon::u32)SCREENWIDTH / 4, (Enjon::u32)SCREENHEIGHT / 4);
+	EG::RenderTarget 		BlurVertical((Enjon::u32)SCREENWIDTH / 4, (Enjon::u32)SCREENHEIGHT / 4);
+	EG::RenderTarget 		Composite((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::GBuffer 	 		GBuffer((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::RenderTarget 		DeferredLight((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
 
 	EG::SpriteBatch CompositeBatch;
 	CompositeBatch.Init();
@@ -5084,18 +4864,20 @@ int main(int argc, char** argv)
 	EG::SpriteBatch Batch;
 	Batch.Init();
 
-	EG::GLSLProgram* CompositeProgram 		= EG::ShaderManager::GetShader("NoCameraProjection");
-	EG::GLSLProgram* HorizontalBlurProgram 	= EG::ShaderManager::GetShader("HorizontalBlur");
-	EG::GLSLProgram* VerticalBlurProgram 	= EG::ShaderManager::GetShader("VerticalBlur");
-	EG::GLSLProgram* GBufferProgram 		= EG::ShaderManager::GetShader("GBuffer");
-	EG::GLSLProgram* DeferredLightProgram 	= EG::ShaderManager::GetShader("DeferredLight");
+	EG::GLSLProgram* CompositeProgram 			= EG::ShaderManager::GetShader("NoCameraProjection");
+	EG::GLSLProgram* HorizontalBlurProgram 		= EG::ShaderManager::GetShader("HorizontalBlur");
+	EG::GLSLProgram* VerticalBlurProgram 		= EG::ShaderManager::GetShader("VerticalBlur");
+	EG::GLSLProgram* GBufferProgram 			= EG::ShaderManager::GetShader("GBuffer");
+	EG::GLSLProgram* DeferredLightProgram 		= EG::ShaderManager::GetShader("DeferredLight");
+	EG::GLSLProgram* DirectionalLightProgram 	= EG::ShaderManager::GetShader("DirectionalLight");
+	EG::GLSLProgram* PointLightProgram 			= EG::ShaderManager::GetShader("PointLight");
 
 	// Load model data
-	// LoadCubeAsset();
-	// LoadCubeSprite();
+	LoadCubeAsset();
+	LoadCubeSprite();
 	LoadNormalMappedSpriteAsset();
 	LoadNormalFloorAsset();
-	// LoadOtherCubeAsset();
+	LoadOtherCubeAsset();
 	LoadMonkeyHeadAsset();
 	LoadInstances();
 
@@ -5157,6 +4939,23 @@ int main(int argc, char** argv)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
     glBindVertexArray(0);
 
+    std::vector<EG::PointLight> PointLights;
+    for (u32 i = 0; i < 10; i++)
+    {
+    	EG::PointLight L;
+    	L.Position = EM::Vec3(ER::Roll(-5, 5), 2.0f, ER::Roll(-4, 4));
+    	L.Parameters = EG::PointLightParameters(1.0f, 0.35f, 0.44f);
+
+    	float R = (float)ER::Roll(0, 255) / 255.0f;
+    	float G = (float)ER::Roll(0, 255) / 255.0f;
+    	float B = (float)ER::Roll(0, 255) / 255.0f;
+
+    	L.Color = EG::RGBA16(R, G, B, 1.0f);
+
+    	L.Intensity = 20.0f;
+
+    	PointLights.push_back(L);
+    }
 
     // Game loop
     bool running = true;
@@ -5178,22 +4977,31 @@ int main(int argc, char** argv)
     	// Update the FPS camera
     	EM::Vec3& CamPos = FPSCamera.Transform.Position;
 
+
     	static float timer = 0.0f;
     	timer += 0.01f;
 
-        auto fps = Limiter.End();
+    	// Attach light to "player" position
+    	PointLights.at(0).Position = Instances.at(0).Transform.Position + EM::Vec3(cos(timer * 0.2f), sin(timer * 0.2f) * 2.0f - 1.0f + 2.0f, 0);
 
-    	// Rendering
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.0f, 0.0f, 0.0f, 1.0f));
+        // auto fps = Limiter.End();
+
+        // printf("%.2f\n", fps);
+
+        //////////////////////////////////////////////////////////////////////////
+    	// Rendering /////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
 
 		// Rotate one of the instances over time
 		auto& InstanceTransform = Instances.at(1).Transform;
-		InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * 20.0f), EM::Vec3(0, 1, 0)) * 
-										EM::Quaternion::AngleAxis(EM::ToRadians(timer * 10.0f), EM::Vec3(0, 0, 1));
+		InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * 20.0f), EM::Vec3(0, 1, 0));
+
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.0f, 0.0f, 0.0f, 1.0f));
 
     	// Bind FBO
     	GBuffer.Bind();
     	{
+	
 	        // Create transformations
 	        EM::Mat4 CameraMatrix;
 	    	CameraMatrix = FPSCamera.GetViewProjectionMatrix();
@@ -5242,104 +5050,168 @@ int main(int argc, char** argv)
 			Target->Unbind();
     	}
 
-    	// Rendering
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
-
-    	CompositeProgram->Use();
-    	{
-	    	CompositeBatch.Begin();
-	    	{
-	    		CompositeBatch.Add(
-							EM::Vec4(-1, 0, 1, 1),
-							EM::Vec4(0, 0, 1, 1), 
-							GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE)
-							);
-	    		CompositeBatch.Add(
-							EM::Vec4(0, 0, 1, 1),
-							EM::Vec4(0, 0, 1, 1), 
-							GBuffer.GetTexture(EG::GBufferTextureType::NORMAL)
-							);
-	    		CompositeBatch.Add(
-							EM::Vec4(-1, -1, 1, 1),
-							EM::Vec4(0, 0, 1, 1), 
-							GBuffer.GetTexture(EG::GBufferTextureType::POSITION)
-							);
-	    		CompositeBatch.Add(
-							EM::Vec4(0, -1, 1, 1),
-							EM::Vec4(0, 0, 1, 1), 
-							GBuffer.GetTexture(EG::GBufferTextureType::EMISSIVE)
-							);
-	    	}
-		   	CompositeBatch.End();
-		   	CompositeBatch.RenderBatch();
-		}   	
-		CompositeProgram->Unuse();
 		*/
 
-		// Light pass
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 1.0));
 
+		// Light pass
 		DeferredLight.Bind();
 		{
-			DeferredLightProgram->Use();
+			// Bind VAO
+			glBindVertexArray(quadVAO);
+
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 1.0));
+
+			glEnable(GL_BLEND);
+			glDisable(GL_DEPTH_TEST);
+			glBlendFunc(GL_ONE, GL_ONE);
+
+			// Directional lights
+			DirectionalLightProgram->Use();
 			{
-				DeferredLightProgram->BindTexture("DiffuseMap", GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
-				DeferredLightProgram->BindTexture("NormalMap", GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
-				DeferredLightProgram->BindTexture("PositionMap", GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
-				DeferredLightProgram->SetUniform("Resolution", EM::Vec2(SCREENWIDTH, SCREENHEIGHT));
+				glEnable(GL_BLEND);
+				glDisable(GL_DEPTH_TEST);
+				glBlendFunc(GL_ONE, GL_ONE);
+
+
+				DirectionalLightProgram->BindTexture("DiffuseMap", GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
+				DirectionalLightProgram->BindTexture("NormalMap", GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
+				DirectionalLightProgram->BindTexture("PositionMap", GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
+				DirectionalLightProgram->SetUniform("Resolution", GBuffer.GetResolution());
+				DirectionalLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
+				DirectionalLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
+
+
+				// Direcitonal light
+				// NOTE: Will be faster to cache uniforms rather than find them every frame
+				DirectionalLightProgram->SetUniform("LightPos", EM::Vec3(	
+																		-0.3f, 
+																		0.8f, 
+																		1.0f)
+																	);
+				DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(0.6f, 0.3f, 0.1f));
+				DirectionalLightProgram->SetUniform("LightIntensity", 0.8f);
+
 
 				// Render	
 				{
-					glBindVertexArray(quadVAO);
 					glDrawArrays(GL_TRIANGLES, 0, 6);
-					glBindVertexArray(0);
+				}
 
-					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, 0);
-				}	
+				DirectionalLightProgram->SetUniform("LightPos", EM::Vec3(	
+																		0.5f, 
+																		0.2f, 
+																		-0.8f)
+																	);
+				DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(0.2f, 0.8f, 0.4f));
+				DirectionalLightProgram->SetUniform("LightIntensity", 0.4f);
 
-				// DeferredLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
-				DeferredLightProgram->SetUniform("LightPos", FPSCamera.Transform.Position);
-				DeferredLightProgram->SetUniform("LightColor", EM::Vec3(0.4f, 0.3f, 0.7f));
-				// DeferredLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
-				// DeferredLightProgram->SetUniform("InverseViewMtx", EM::Mat4::Inverse(FPSCamera.GetViewProjectionMatrix()));
+				// Render	
+				{
+					glDrawArrays(GL_TRIANGLES, 0, 6);
+				}
+			}
+			DirectionalLightProgram->Unuse();
 
-				// CompositeBatch.Begin();
-				// {
-				// 	CompositeBatch.Add(
-				// 						EM::Vec4(-1, -1, 2, 2),
-				// 						EM::Vec4(0, 0, 1, 1),
-				// 						GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE)
-				// 					);
-				// }
-				// CompositeBatch.End();
-				// CompositeBatch.RenderBatch();
+			// Point lights
+			PointLightProgram->Use();
+			{
+				PointLightProgram->BindTexture("DiffuseMap", GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
+				PointLightProgram->BindTexture("NormalMap", GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
+				PointLightProgram->BindTexture("PositionMap", GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
+				PointLightProgram->SetUniform("Resolution", GBuffer.GetResolution());
+				// PointLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
+				// PointLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
+
+				for (auto& L : PointLights)
+				{
+					PointLightProgram->SetUniform("LightPos", L.Position);
+					PointLightProgram->SetUniform("LightColor", EM::Vec3(L.Color.r, L.Color.g, L.Color.b));
+					PointLightProgram->SetUniform("Falloff", L.Parameters.Falloff);
+					// PointLightProgram->SetUniform("Radius", L.Parameters.Radius);
+					PointLightProgram->SetUniform("LightIntensity", 1.0f);
+
+					// Render Light to screen
+					{
+						glDrawArrays(GL_TRIANGLES, 0, 6);
+					}
+				}
 
 			}
-			DeferredLightProgram->Unuse();
-
+			PointLightProgram->Unuse();
+		
+			// Unbind VAO
+			glBindVertexArray(0);
 		}
 		DeferredLight.Unbind();
 
+		glEnable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-		// Composite pass
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
+		// DeferredLight.Bind();
+		// {
+		// 	Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 1.0));
 
+		// 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		// 	glReadBuffer(GL_COLOR_ATTACHMENT0);
+		// 	glBlitFramebuffer(0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		// }
+		// DeferredLight.Unbind();
+
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 1.0));
+
+		// DeferredLight.Bind(EG::RenderTarget::BindType::READ);
+		// glReadBuffer(GL_COLOR_ATTACHMENT0);
+		// glBlitFramebuffer(0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 1.0));
+
+		// Final Composite pass
     	CompositeProgram->Use();
     	{
 	    	CompositeBatch.Begin();
 	    	{
-	    		CompositeBatch.Add(
-							EM::Vec4(-1, -1, 2, 2),
-							EM::Vec4(0, 0, 1, 1), 
-							DeferredLight.GetTexture()
-							);
+	    		if (!DebugDrawingEnabled)
+	    		{
+					DeferredLight.Bind(EG::RenderTarget::BindType::READ);
+					glReadBuffer(GL_COLOR_ATTACHMENT0);
+					glBlitFramebuffer(
+										0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, 
+										SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR
+									);
+	    		}
+	    		else
+	    		{
+		    		CompositeBatch.Add(
+								EM::Vec4(-1, 0, 1, 1),
+								EM::Vec4(0, 0, 1, 1), 
+								GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE)
+								);
+		    		CompositeBatch.Add(
+								EM::Vec4(0, 0, 1, 1),
+								EM::Vec4(0, 0, 1, 1), 
+								GBuffer.GetTexture(EG::GBufferTextureType::NORMAL)
+								);
+		    		CompositeBatch.Add(
+								EM::Vec4(-1, -1, 1, 1),
+								EM::Vec4(0, 0, 1, 1), 
+								GBuffer.GetTexture(EG::GBufferTextureType::POSITION)
+								);
+		    		CompositeBatch.Add(
+								EM::Vec4(0, -1, 1, 1),
+								EM::Vec4(0, 0, 1, 1), 
+								DeferredLight.GetTexture()
+								);
+	    		}
 	    	}
 		   	CompositeBatch.End();
 		   	CompositeBatch.RenderBatch();
 		}   	
 		CompositeProgram->Unuse();
-
+		/*
+		*/
 
         // Swap the screen buffers
         Window.SwapBuffer();
@@ -5506,6 +5378,12 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	else if (Input->IsKeyPressed(SDLK_m))
 	{
 		glDisable(GL_MULTISAMPLE);
+	}
+
+	// Enable debug drawing
+	if (Input->IsKeyPressed(SDLK_p))
+	{
+		DebugDrawingEnabled = !DebugDrawingEnabled;
 	}
 
 

@@ -7,13 +7,20 @@
 
 namespace Enjon { namespace Graphics { 
 
+
 	class RenderTarget
 	{
-		public:
+	 public:
+			static enum class BindType
+			{
+				READ, 
+				WRITE	
+			};
+
 			RenderTarget::RenderTarget(uint32 _Width, uint32 _Height);
 			~RenderTarget();
 
-			void Bind();
+			void Bind(BindType Type = BindType::WRITE);
 			void Unbind();
 
 			GLuint inline GetTexture() const 	{ return Texture; }
