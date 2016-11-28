@@ -4740,6 +4740,16 @@ void LoadInstances()
     D.Transform.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f);
 	Animations.push_back(D);
 
+	for (u32 i = 0; i < 10000; i++)
+	{
+		EG::ModelInstance C;
+		C.Asset = &SpriteWithNormal;
+		C.Transform.Position 	= EM::Vec3(ER::Roll(-50, 50), ER::Roll(0, 50), ER::Roll(-50, 50));
+	    C.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
+	    C.Transform.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f);
+		Animations.push_back(C);
+	}
+
 	EG::ModelInstance B;
 	B.Asset = &MonkeyHead;
 	B.Transform.Position 	= EM::Vec3(0, 0, 0);
@@ -4832,6 +4842,8 @@ struct Frame
 };
 
 std::vector<struct Frame> SpriteFrames;
+float frameTimer = 0.0f;
+u32 CurrentFrameIndex = 0;
 
 void RenderAnimation(EG::ModelInstance& Instance)
 {
@@ -4854,15 +4866,6 @@ void RenderAnimation(EG::ModelInstance& Instance)
 		// glActiveTexture(GL_TEXTURE2);
 		// glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id);
 
-		static float t = 0.0f;
-		static u32 CurrentFrameIndex = 0;
-
-		t += 0.01f;
-		if (t >= 1.0f)
-		{
-			CurrentFrameIndex = (CurrentFrameIndex + 1) % SpriteFrames.size();
-			t = 0.0f;
-		}
 
 		auto& CurrentFrame = SpriteFrames.at(CurrentFrameIndex);
 		float Scale = CurrentFrame.FrameWidth / CurrentFrame.FrameHeight;
@@ -4993,8 +4996,10 @@ int main(int argc, char** argv)
     // Setup OpenGL options
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_DEPTH_CLAMP);
-    glEnable( GL_MULTISAMPLE );
-    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    // glEnable( GL_MULTISAMPLE );
+    // glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_BACK);
 
     // Initialize FPSCamera
 	FPSCamera.Transform.Position = EM::Vec3(7, 2, 7);
@@ -5043,11 +5048,11 @@ int main(int argc, char** argv)
     glBindVertexArray(0);
 
     std::vector<EG::PointLight> PointLights;
-    for (u32 i = 0; i < 50; i++)
+    for (u32 i = 0; i < 100; i++)
     {
     	EG::PointLight L;
-    	L.Position = EM::Vec3(ER::Roll(-20, 20), 2.0f, ER::Roll(-20, 20));
-    	L.Parameters = EG::PointLightParameters(0.25f, 2.2f, 1.0f);
+    	L.Position = EM::Vec3(ER::Roll(-50, 50), ER::Roll(0, 10), ER::Roll(-50, 50));
+    	L.Parameters = EG::PointLightParameters(1.0f, 0.0f, 0.03f);
 
     	float R = (float)ER::Roll(0, 255) / 255.0f;
     	float G = (float)ER::Roll(0, 255) / 255.0f;
@@ -5055,7 +5060,7 @@ int main(int argc, char** argv)
 
     	L.Color = EG::RGBA16(R, G, B, 1.0f);
 
-    	L.Intensity = 5.0f;
+    	L.Intensity = 1.0f;
 
     	PointLights.push_back(L);
     }
@@ -5070,6 +5075,13 @@ int main(int argc, char** argv)
     	t += 0.001f;
     	if (t > 50000.0f) t = 0.0f;
 
+		frameTimer += 0.01f;
+		if (frameTimer >= 1.0f)
+		{
+			CurrentFrameIndex = (CurrentFrameIndex + 1) % SpriteFrames.size();
+			frameTimer = 0.0f;
+		}
+
     	Input.Update();
 
     	running = ProcessInput(&Input, &FPSCamera);
@@ -5079,7 +5091,6 @@ int main(int argc, char** argv)
 
     	// Update the FPS camera
     	EM::Vec3& CamPos = FPSCamera.Transform.Position;
-
 
     	static float timer = 0.0f;
     	timer += 0.01f;
@@ -5091,7 +5102,7 @@ int main(int argc, char** argv)
     	PointLights.at(1).Position = Animations.at(0).Transform.Position - EM::Vec3(cos(timer * speed), 0.0f, sin(timer * speed));
     	PointLights.at(1).Color = EG::RGBA16_ZombieGreen();
 
-        auto fps = Limiter.End();
+        // auto fps = Limiter.End();
 
         // printf("%.2f\n", fps);
 
@@ -5206,12 +5217,12 @@ int main(int argc, char** argv)
 																		1.0f)
 																	);
 				DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(0.6f, 0.3f, 0.1f));
-				DirectionalLightProgram->SetUniform("LightIntensity", 0.8f);
+				DirectionalLightProgram->SetUniform("LightIntensity", 0.3f);
 
 
 				// Render	
 				{
-					// glDrawArrays(GL_TRIANGLES, 0, 6);
+					glDrawArrays(GL_TRIANGLES, 0, 6);
 				}
 
 				DirectionalLightProgram->SetUniform("LightPos", EM::Vec3(	
@@ -5220,11 +5231,11 @@ int main(int argc, char** argv)
 																		-0.8f)
 																	);
 				DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(0.2f, 0.8f, 0.4f));
-				DirectionalLightProgram->SetUniform("LightIntensity", 0.4f);
+				DirectionalLightProgram->SetUniform("LightIntensity", 0.2f);
 
 				// Render	
 				{
-					// glDrawArrays(GL_TRIANGLES, 0, 6);
+					glDrawArrays(GL_TRIANGLES, 0, 6);
 				}
 			}
 			DirectionalLightProgram->Unuse();
