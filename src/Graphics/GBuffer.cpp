@@ -31,6 +31,9 @@ namespace Enjon { namespace Graphics {
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, Textures[i], 0);
+
+			glGenerateMipmap(GL_TEXTURE_2D);
+	
 		    glBindTexture(GL_TEXTURE_2D, 0);
 	    }
 	 

@@ -1,5 +1,6 @@
 #include <Graphics/Window.h>
 #include <Utils/Errors.h>
+#include <iostream>
 
 namespace Enjon { namespace Graphics {
 
@@ -13,27 +14,35 @@ namespace Enjon { namespace Graphics {
 	{
 	}
 
-	int Window::Init( std::string windowName, int screenWidth, int screenHeight, WindowFlags currentFlags /* = WindowFlags::DEFAULT */)
+	int Window::Init(std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags) 
 	{
 		m_screenWidth = screenWidth;
 		m_screenHeight = screenHeight;
 
 		Uint32 flags = SDL_WINDOW_OPENGL;
 		
-		if( currentFlags & INVISIBLE )
+		
+		if((currentFlags & WindowFlagsMask(WindowFlags::INVISIBLE)) != 0)
 		{
 			flags |= SDL_WINDOW_HIDDEN;
 		}
 		
-		if( currentFlags & FULLSCREEN )
+		
+		if((currentFlags & WindowFlagsMask(WindowFlags::FULLSCREEN)) != 0)
 		{
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 			m_isfullscreen = true;
 		}
 
-		if( currentFlags & BORDERLESS )
+
+		if((currentFlags & WindowFlagsMask(WindowFlags::BORDERLESS)) != 0)
 		{
 			flags |= SDL_WINDOW_BORDERLESS;
+		}
+
+		if((currentFlags & WindowFlagsMask(WindowFlags::RESIZABLE)) != 0)
+		{
+			flags |= SDL_WINDOW_RESIZABLE;
 		}
 
 		//Open an SDL window

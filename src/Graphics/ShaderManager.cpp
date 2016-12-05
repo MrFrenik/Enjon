@@ -30,6 +30,7 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("PointLight", "../shaders/deferred/point_light.v.glsl", "../shaders/deferred/point_light.f.glsl");
 		ShaderManager::AddShader("Depth", "../shaders/deferred/depth.v.glsl", "../shaders/deferred/depth.f.glsl");
 		ShaderManager::AddShader("AnimatedMaterial", "../shaders/deferred/animated_material.v.glsl", "../shaders/deferred/animated_material.f.glsl");
+		ShaderManager::AddShader("ScreenUI", "../shaders/screen_ui.v.glsl", "../shaders/screen_ui.f.glsl");
 	}
 
 	void AddShader(const char* shadername, const char* vertpath, const char* fragpath)

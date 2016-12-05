@@ -2,11 +2,13 @@
 #define ENJON_WINDOW_H 
 
 #include <string>
+#include <bitset>
 
 #include <SDL2/SDL.h>
 #include <GLEW/glew.h>
 
 #include "Graphics/Vertex.h"
+#include "System/Types.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -14,9 +16,19 @@
 namespace Enjon { namespace Graphics {
 
 
-	enum WindowFlags { DEFAULT = 0x0, INVISIBLE = 0x1, FULLSCREEN = 0x2, BORDERLESS = 0x4 };
+	enum WindowFlags : u32
+	{ 
+		DEFAULT 	= 0x00, 
+		INVISIBLE 	= 0x01, 
+		FULLSCREEN 	= 0x02, 
+		BORDERLESS 	= 0x04,
+		RESIZABLE 	= 0x08,
+		COUNT 
+	};
+
 	enum MouseCursorFlags{ GET_STATUS = -1, HIDE = 0, SHOW = 1 };
 
+	typedef std::bitset<static_cast<size_t>(WindowFlags::COUNT)> WindowFlagsMask;
 
 	class Window
 	{
@@ -24,7 +36,7 @@ namespace Enjon { namespace Graphics {
 		Window();
 		~Window();
 
-		int Init(std::string windowName, int screenWidth, int screenHeight, WindowFlags currentFlags = WindowFlags::DEFAULT); 
+		int Init(std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask((u32)WindowFlags::DEFAULT)); 
 		void SetWindowTitle(const char* title);
 		void SetWindowFullScreen(int screenWidth, int screenHeight);
 

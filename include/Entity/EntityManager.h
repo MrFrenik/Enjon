@@ -261,7 +261,7 @@ struct EntityManager
 		assert(Entity->HasComponent<T>());
 
 		// Assert entity manager exists
-		assert(Manager != nullptr);
+		assert(Entity != nullptr);
 
 		// Get component wrapper
 		auto CWrapper = static_cast<ComponentWrapper<T>*>(Components.at(TypeCatalog::GetType<T>()));
