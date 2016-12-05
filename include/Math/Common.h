@@ -58,6 +58,14 @@ namespace Enjon { namespace Math {
 		return goal;
 	}
 
+	template <typename T>
+	inline T Clamp(T Val, T Min, T Max)
+	{
+		if (Val < Min) return Min;
+		if (Val > Max) return Max;
+		return Val;
+	}	
+
 }}
 
 #endif

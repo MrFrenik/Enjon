@@ -4591,6 +4591,7 @@ int main(int argc, char** argv)
 #include <Entity/EntityManager.h>
 #include <Graphics/RenderTarget.h>
 #include <Graphics/PointLight.h>
+#include <Graphics/SpotLight.h>
 #include <Graphics/GBuffer.h>
 
 using u32 = uint32_t;
@@ -4624,6 +4625,7 @@ enum class DrawFrameType
 
 DrawFrameType DrawFrame = DrawFrameType::FINAL;
 
+EG::SpotLight Spot;
 
 void LoadMonkeyHeadAsset()
 {
@@ -4970,7 +4972,6 @@ int main(int argc, char** argv)
 				SCREENHEIGHT, 
 				EG::WindowFlagsMask((u32)SCREENRES)
 				| EG::WindowFlagsMask((u32)EG::WindowFlags::BORDERLESS)
-				| EG::WindowFlagsMask((u32)EG::WindowFlags::RESIZABLE)
 			);
 	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
 
@@ -5003,6 +5004,7 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* DeferredLightProgram 		= EG::ShaderManager::GetShader("DeferredLight");
 	EG::GLSLProgram* DirectionalLightProgram 	= EG::ShaderManager::GetShader("DirectionalLight");
 	EG::GLSLProgram* PointLightProgram 			= EG::ShaderManager::GetShader("PointLight");
+	EG::GLSLProgram* SpotLightProgram 			= EG::ShaderManager::GetShader("SpotLight");
 	EG::GLSLProgram* UIProgram					= EG::ShaderManager::GetShader("ScreenUI");
 
 	// Load model data
@@ -5095,6 +5097,19 @@ int main(int argc, char** argv)
     	PointLights.push_back(L);
     }
 
+	Spot = EG::SpotLight(
+						FPSCamera.Transform.Position, 
+						EG::SpotLightParameters(
+													1.0f, 
+													0.0f, 
+													0.03f, 
+													FPSCamera.Forward(),
+													std::cos(EM::ToRadians(12.5f)),
+													std::cos(EM::ToRadians(17.5))
+												), 
+						EG::RGBA16_Red()
+					);
+
     // Attach components
     auto Entity = EManager->CreateEntity();
     {
@@ -5143,10 +5158,21 @@ int main(int argc, char** argv)
 
     	// Attach light to "player" position
     	float speed = 2.6f;
-    	PointLights.at(0).Position = Animations.at(0).Transform.Position + EM::Vec3(cos(timer * speed), 0.0f, sin(timer * speed));
+    	PointLights.at(0).Position = Animations.at(0).Transform.Position + EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
     	PointLights.at(0).Color = EG::RGBA16_Orange();
-    	PointLights.at(1).Position = Animations.at(0).Transform.Position - EM::Vec3(cos(timer * speed), 0.0f, sin(timer * speed));
+    	PointLights.at(1).Position = Animations.at(0).Transform.Position - EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
     	PointLights.at(1).Color = EG::RGBA16_ZombieGreen();
+
+    	PointLights.at(2).Position = Instances.at(0).Transform.Position - EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
+    	PointLights.at(2).Color = EG::RGBA16_Orange();
+    	PointLights.at(3).Position = Instances.at(0).Transform.Position + EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
+    	PointLights.at(3).Color = EG::RGBA16_SkyBlue();
+    	PointLights.at(4).Position = Instances.at(0).Transform.Position + EM::Vec3(0.0f, 5.0f, 0.0f);
+    	PointLights.at(4).Color = EG::RGBA16_Red();
+    	PointLights.at(4).Intensity = EM::Clamp(cos(timer) * 5.0f, 0.0f, 5.0f);
+
+    	// Set up spot light
+    	Spot.Parameters.Direction = EM::Vec3(cos(timer) * speed, 0.0f, sin(timer) * speed);
 
     	// Update components
     	auto Position = Entity->GetComponent<PositionComponent>();
@@ -5169,7 +5195,7 @@ int main(int argc, char** argv)
 		auto& InstanceTransform = Instances.at(0).Transform;
 		InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * 20.0f), EM::Vec3(0, 1, 0));
 
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16_Black());
 
     	// Bind FBO
     	GBuffer.Bind();
@@ -5208,7 +5234,7 @@ int main(int argc, char** argv)
 			// Bind VAO
 			glBindVertexArray(quadVAO);
 
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.05f, 0.05f, 0.05f, 1.0));
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
 
 			glEnable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
@@ -5243,7 +5269,7 @@ int main(int argc, char** argv)
 
 				// Render	
 				{
-					// glDrawArrays(GL_TRIANGLES, 0, 6);
+					glDrawArrays(GL_TRIANGLES, 0, 6);
 				}
 
 				DirectionalLightProgram->SetUniform("LightPos", EM::Vec3(	
@@ -5281,12 +5307,33 @@ int main(int argc, char** argv)
 
 					// Render Light to screen
 					{
-						glDrawArrays(GL_TRIANGLES, 0, 6);
+						// glDrawArrays(GL_TRIANGLES, 0, 6);
 					}
 				}
 
 			}
 			PointLightProgram->Unuse();
+
+			// Do spot lights
+			SpotLightProgram->Use();
+			{
+				SpotLightProgram->BindTexture("DiffuseMap", 	GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
+				SpotLightProgram->BindTexture("NormalMap", 		GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
+				SpotLightProgram->BindTexture("PositionMap", 	GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
+				SpotLightProgram->SetUniform("Resolution", 		GBuffer.GetResolution());
+				SpotLightProgram->SetUniform("CamPos", 			FPSCamera.Transform.Position);			
+				SpotLightProgram->SetUniform("CameraForward", 	FPSCamera.Forward());
+				SpotLightProgram->SetUniform("Falloff", 		Spot.Parameters.Falloff);
+				SpotLightProgram->SetUniform("LightColor", 		EM::Vec3(Spot.Color.r, Spot.Color.g, Spot.Color.b));
+				SpotLightProgram->SetUniform("LightPos", 		Spot.Position);
+				SpotLightProgram->SetUniform("LightIntensity", 	Spot.Intensity);
+				SpotLightProgram->SetUniform("LightDirection", 	Spot.Parameters.Direction);
+				SpotLightProgram->SetUniform("InnerCutoff", 	Spot.Parameters.InnerCutoff);
+				SpotLightProgram->SetUniform("OuterCutoff", 	Spot.Parameters.OuterCutoff);
+
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+			}
+			SpotLightProgram->Unuse();
 		
 			// Unbind VAO
 			glBindVertexArray(0);
@@ -5326,7 +5373,7 @@ int main(int argc, char** argv)
 			Target->Unbind();
     	}
 
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.05f, 0.05f, 0.05f, 1.0));
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
 
 		// Final Composite pass
     	CompositeProgram->Use();
@@ -5745,6 +5792,74 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 		{
 			BlurIterations++;
 			printf("blur iterations: %d\n", BlurIterations);
+		}
+	}
+
+	if (Input->IsKeyDown(SDLK_i))
+	{
+		if (Input->IsKeyDown(SDLK_DOWN))
+		{
+			if (Spot.Parameters.InnerCutoff > 0.0f) Spot.Parameters.InnerCutoff -= 0.01f;
+		}
+		else if (Input->IsKeyDown(SDLK_UP))
+		{
+			Spot.Parameters.InnerCutoff += 0.01f;
+		}
+	}
+
+	if (Input->IsKeyDown(SDLK_u))
+	{
+		if (Input->IsKeyDown(SDLK_DOWN))
+		{
+			if (Spot.Parameters.OuterCutoff > 0.0f) Spot.Parameters.OuterCutoff -= 0.01f;
+		}
+		else if (Input->IsKeyDown(SDLK_UP))
+		{
+			Spot.Parameters.OuterCutoff += 0.01f;
+		}
+	}
+
+	if (Input->IsKeyDown(SDLK_y))
+	{
+		if (Input->IsKeyDown(SDLK_DOWN))
+		{
+			if (Spot.Intensity > 0.0f) Spot.Intensity -= 0.01f;
+		}
+		else if (Input->IsKeyDown(SDLK_UP))
+		{
+			Spot.Intensity += 0.01f;
+		}
+	}
+
+	static float movement_amount = 0.01f;
+	if (Input->IsKeyDown(SDLK_n))
+	{
+		if (Input->IsKeyDown(SDLK_DOWN))
+		{
+			Spot.Position.y -= movement_amount;
+		}
+		if (Input->IsKeyDown(SDLK_UP))
+		{
+			Spot.Position.y += movement_amount;	
+		}
+		if (Input->IsKeyDown(SDLK_LEFT))
+		{
+			Spot.Position.x -= movement_amount;	
+		}
+		if (Input->IsKeyDown(SDLK_RIGHT))
+		{
+			Spot.Position.x += movement_amount;	
+		}
+	}
+	if (Input->IsKeyDown(SDLK_m))
+	{
+		if (Input->IsKeyDown(SDLK_DOWN))
+		{
+			Spot.Position.z -= movement_amount;
+		}
+		if (Input->IsKeyDown(SDLK_UP))
+		{
+			Spot.Position.z += movement_amount;	
 		}
 	}
 
