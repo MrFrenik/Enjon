@@ -48,7 +48,7 @@
 #include <BehaviorTree/BehaviorTreeManager.h>
 #include <Utils/Functions.h>
 #include <Scripting/ScriptingNode.h>
-#include <CVarsSystem.hpp>
+#include <CVarsSystem.h>
 
 /*-- Entity Component System includes --*/
 #include <ECS/ComponentSystems.h>
@@ -4593,6 +4593,7 @@ int main(int argc, char** argv)
 #include <Graphics/PointLight.h>
 #include <Graphics/SpotLight.h>
 #include <Graphics/GBuffer.h>
+#include <Console.h>
 
 using u32 = uint32_t;
 
@@ -4611,8 +4612,9 @@ EG::Camera FPSCamera;
 
 const uint8_t RENDERING = 0;
 
-bool DebugDrawingEnabled = false;
-Enjon::u32 BlurIterations = 1;
+bool DebugDrawingEnabled 	= false;
+bool ShowConsole 			= false;
+Enjon::u32 BlurIterations 	= 1;
 
 enum class DrawFrameType
 {
@@ -4620,7 +4622,8 @@ enum class DrawFrameType
 	DIFFUSE, 
 	NORMAL, 
 	POSITION, 
-	BLUR
+	BLUR,
+	DEPTH
 };
 
 DrawFrameType DrawFrame = DrawFrameType::FINAL;
@@ -4834,14 +4837,14 @@ void RenderInstance(const EG::ModelInstance& Instance)
 		Model *= EM::QuaternionToMat4(Transform.Orientation);
 		Model *= EM::Mat4::Scale(Transform.Scale);
 
-		auto CamPos = FPSCamera.Transform.Position;
-
 		static float t = 0.0f;
 		t += 0.001f;
 
 		auto& Position = Instances.at(0).Transform.Position;
 
 		Asset->Shader->SetUniform("model", Model);
+		Asset->Shader->SetUniform("Near", 0.1f);
+		Asset->Shader->SetUniform("Far", 100.0f);
 		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
 
 	}
@@ -4906,6 +4909,8 @@ void RenderAnimation(EG::ModelInstance& Instance)
 
 		Asset->Shader->SetUniform("model", Model);
 		Asset->Shader->SetUniform("SpriteFrame", SpriteFrame);
+		Asset->Shader->SetUniform("Near", 0.1f);
+		Asset->Shader->SetUniform("Far", 100.0f);
 		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
 
 	}
@@ -4971,7 +4976,6 @@ int main(int argc, char** argv)
 				SCREENWIDTH, 
 				SCREENHEIGHT, 
 				EG::WindowFlagsMask((u32)SCREENRES)
-				| EG::WindowFlagsMask((u32)EG::WindowFlags::BORDERLESS)
 			);
 	Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
 
@@ -4982,6 +4986,9 @@ int main(int argc, char** argv)
 	EG::FontManager::Init();
 
 	FPSCamera = EG::Camera((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
+
+	// Init Console
+	Enjon::Console::Init(SCREENWIDTH, SCREENHEIGHT);
 
 	EG::FrameBufferObject 	FBO((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
 	EG::RenderTarget 		DebugTarget((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
@@ -5103,11 +5110,12 @@ int main(int argc, char** argv)
 													1.0f, 
 													0.0f, 
 													0.03f, 
-													FPSCamera.Forward(),
+													EM::Vec3(7, 0, 7),
 													std::cos(EM::ToRadians(12.5f)),
 													std::cos(EM::ToRadians(17.5))
 												), 
-						EG::RGBA16_Red()
+						EG::RGBA16_Red(),
+						10.0f
 					);
 
     // Attach components
@@ -5143,18 +5151,30 @@ int main(int argc, char** argv)
 			frameTimer = 0.0f;
 		}
 
+    	static float timer = 0.0f;
+    	timer += 0.01f;
+
     	Input.Update();
 
-    	running = ProcessInput(&Input, &FPSCamera);
+    	// Console update
+    	Enjon::Console::Update(timer);
+
+    	// Processing input
+    	if (ShowConsole) 
+    	{
+    		ShowConsole = Enjon::Console::ProcessInput(&Input);
+    	}
+
+    	else
+    	{
+	    	running = ProcessInput(&Input, &FPSCamera);
+    	}
 
     	// Camera.Update();
     	auto MouseCoords = Input.GetMouseCoords();
 
     	// Update the FPS camera
     	EM::Vec3& CamPos = FPSCamera.Transform.Position;
-
-    	static float timer = 0.0f;
-    	timer += 0.01f;
 
     	// Attach light to "player" position
     	float speed = 2.6f;
@@ -5200,7 +5220,6 @@ int main(int argc, char** argv)
     	// Bind FBO
     	GBuffer.Bind();
     	{
-	
 	        // Create transformations
 	        EM::Mat4 CameraMatrix;
 	    	CameraMatrix = FPSCamera.GetViewProjectionMatrix();
@@ -5344,7 +5363,6 @@ int main(int argc, char** argv)
 		glEnable(GL_DEPTH_TEST);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-
     	// Blur iterations
     	for (Enjon::u32 i = 0; i < BlurIterations * 2; i++)
     	{
@@ -5439,6 +5457,17 @@ int main(int argc, char** argv)
 
 	    				} break;	
 
+	    				case DrawFrameType::DEPTH:
+	    				{
+							GBuffer.Bind(EG::BindType::READ);
+							glReadBuffer(GL_COLOR_ATTACHMENT0 + (Enjon::u32)EG::GBufferTextureType::DEPTH);
+							glBlitFramebuffer(
+												0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, 
+												SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR
+											);
+
+	    				} break;	
+
 	    				default:
 	    				{
 							DeferredLight.Bind(EG::RenderTarget::BindType::READ);
@@ -5481,6 +5510,7 @@ int main(int argc, char** argv)
 		}   	
 		CompositeProgram->Unuse();
 
+		/*
 		UIProgram->Use();
 		{
 			CompositeBatch.Begin();
@@ -5518,6 +5548,12 @@ int main(int argc, char** argv)
 			CompositeBatch.RenderBatch();
 		}
 		UIProgram->Unuse();
+		*/
+
+		if (ShowConsole)
+		{
+			Enjon::Console::Draw();
+		}
 
         // Swap the screen buffers
         Window.SwapBuffer();
@@ -5781,6 +5817,11 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 		DrawFrame = DrawFrameType::BLUR;	
 	}
 
+	if (Input->IsKeyPressed(SDLK_6))
+	{
+		DrawFrame = DrawFrameType::DEPTH;	
+	}
+
 	if (Input->IsKeyDown(SDLK_b))
 	{
 		if (Input->IsKeyPressed(SDLK_DOWN))
@@ -5861,6 +5902,11 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 		{
 			Spot.Position.z += movement_amount;	
 		}
+	}
+
+	if (Input->IsKeyPressed(SDLK_BACKQUOTE))
+	{
+		ShowConsole = !ShowConsole;
 	}
 
 

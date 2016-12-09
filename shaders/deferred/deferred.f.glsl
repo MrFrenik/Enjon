@@ -6,6 +6,7 @@ layout (location = 0) out vec4 DiffuseOut;     // Diffuse
 layout (location = 1) out vec4 NormalsOut;
 layout (location = 2) out vec4 PositionOut;
 layout (location = 3) out vec4 EmissiveOut;
+layout (location = 4) out vec4 DepthOut;
 
 in VS_OUT
 {
@@ -18,6 +19,15 @@ in VS_OUT
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
 
+uniform float Near;
+uniform float Far;
+
+float LinearizeDepth(float Depth)
+{
+    float z = Depth * 2.0 - 1.0;
+    return (2.0 * Near * Far) / (Far + Near - z * (Far - Near));
+}
+
 void main()
 {
     // Translate normal to world space
@@ -28,9 +38,13 @@ void main()
     // Get diffuse color
     vec4 color = texture(diffuseMap, fs_in.TexCoords);
     if (color.a < 0.5) discard;
+
+    float Depth = LinearizeDepth(gl_FragCoord.z);
     
     DiffuseOut  = color;
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
     EmissiveOut = vec4(1.0, 1.0, 1.0, 1.0);
+    DepthOut = vec4(vec3(Depth, 0, 0), 1.0);
+
 }

@@ -53,7 +53,7 @@ namespace Enjon { namespace GUI {
 		virtual void Init() = 0;
 		virtual void Update() = 0;
 		virtual void Draw(EG::SpriteBatch* TextBatch) = 0;
-		virtual bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera) = 0;
+		virtual bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera = nullptr) = 0;
 
 		GUIElementBase* Parent;
 		EM::Vec2 Position;
