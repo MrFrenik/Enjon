@@ -13,8 +13,21 @@
 
 namespace Enjon {
 
-	std::vector<std::string> Console::Output;
+	struct OutputMessage
+	{
+		OutputMessage(){}
+		OutputMessage(std::string _Text, EG::ColorRGBA16 Color = EG::RGBA16_LightGrey())
+		{
+			Text = _Text;
+			TextColor = Color;
+		}
+
+		std::string Text;
+		EG::ColorRGBA16 TextColor;
+	};
+
 	GUI::GUITextBox Console::InputTextBox;
+	std::vector<OutputMessage> Output;
 	EG::SpriteBatch Batch;
 	EG::Camera UICamera;
 	float ScreenWidth, ScreenHeight;
@@ -63,6 +76,8 @@ namespace Enjon {
 			return false;	
 		}
 
+		InputTextBox.ProcessInput(Input, nullptr);
+
 		return true;
 	}
 
@@ -72,30 +87,22 @@ namespace Enjon {
 		{
 			Shader->SetUniform("view", HUDCamera.GetCameraMatrix());
 
+			glDisable(GL_DEPTH_TEST);
+
 			Batch.Begin();
 			{
 				Batch.Add(
 								EM::Vec4(-ScreenWidth * 0.5f, -ScreenHeight * 0.5f, ScreenWidth, ScreenHeight),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
-								EG::SetOpacity(EG::RGBA16_LightPurple(), 0.4f)
+								EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.8f)
 							);
 			}
 			Batch.End();
 			Batch.RenderBatch();
 
 			Batch.Begin(EG::GlyphSortType::FRONT_TO_BACK);
-			Batch.Begin();
 			{
-				Batch.Add(
-						EM::Vec4(EM::Vec2(0, 0), EM::Vec2(100, 0.1)),
-						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						EG::RGBA16_White() 
-						// -1.0f
-						// EG::SpriteBatch::DrawOptions::BORDER, 
-						// BorderColor
-					);
 				// Render the console input text box
 				InputTextBox.Draw(&Batch);
 
@@ -104,12 +111,14 @@ namespace Enjon {
 				auto YOffset = 30.0f;
 				for (auto C = Output.rbegin(); C != Output.rend(); C++)
 				{
-					 EG::Fonts::PrintText(StartPosition.x, StartPosition.y + YOffset, 1.0f, *C, InputTextBox.TextFont, Batch, EG::RGBA16_LightGrey());
-					 YOffset += 20.0f;
+				 	EG::Fonts::PrintText(StartPosition.x, StartPosition.y + YOffset, 1.0f, (*C).Text, InputTextBox.TextFont, Batch, (*C).TextColor);
+				 	YOffset += 20.0f;
 				}
 			}
 			Batch.End();
 			Batch.RenderBatch();
+
+			glEnable(GL_DEPTH_TEST);
 		}
 		Shader->Unuse();
 	}
@@ -127,8 +136,7 @@ namespace Enjon {
 		HUDCamera.SetScale(1.0f);
 
 		// Console text box initialization
-//		InputTextBox.Position = EM::Vec2(-ScreenWidth * 0.5f + 5.0f, -ScreenHeight * 0.5f + 20.0f);
-		InputTextBox.Position = EM::Vec2(0.0f, 0.0f);
+		InputTextBox.Position = EM::Vec2(-ScreenWidth * 0.5f + 5.0f, -ScreenHeight * 0.5f + 20.0f);
 		InputTextBox.Dimensions = EM::Vec2(ScreenWidth - 10.0f, InputTextBox.Dimensions.y);
 		InputTextBox.MaxStringLength = 100;
 		InputTextBox.KeyboardInFocus = true;
@@ -137,6 +145,13 @@ namespace Enjon {
 		{
 			// Parse the string
 			auto& C = InputTextBox.Text;
+
+			// Push back into history
+			InputTextBox.History.push_back(C);
+
+			InputTextBox.HistoryIndex = InputTextBox.History.size();
+			// InputTextBox.HistoryIndex = InputTextBox.HistoryIndex == 0 ? 0 : InputTextBox.HistoryIndex + 1;
+			printf("%d\n", InputTextBox.HistoryIndex);
 
 			// Split the string into a vector on spaces
 			std::vector<std::string> Elements = EU::split(C, ' ');
@@ -147,21 +162,20 @@ namespace Enjon {
 			if (Elements.at(0).compare("mul") == 0) 
 			{
 				// Error
-				if (Elements.size() < 3) Output.push_back("mul requires 2 arguments");
+				if (Elements.size() < 3) Output.emplace_back("Error: mul requires 2 arguments", EG::RGBA16_Red());
 
 				// Calculate the result
 				else
 				{
 					if (!EU::is_numeric(Elements.at(1)) || !EU::is_numeric(Elements.at(2))) 
 					{
-						Output.push_back("Cannot multiply non numeric terms: " + Elements.at(1) + ", " + Elements.at(2));
+						Output.emplace_back("Error: cannot multiply non numeric terms: " + Elements.at(1) + ", " + Elements.at(2), EG::RGBA16_Red());
 					}
 
 					// Otherwise, multiply and push back result
 					else
 					{
-						auto Result = std::atof(Elements.at(1).c_str()) * std::atof(Elements.at(2).c_str());
-						Output.push_back(std::to_string(Result));
+						Output.emplace_back(std::to_string(std::atof(Elements.at(1).c_str()) * std::atof(Elements.at(2).c_str())));
 					}
 				}
 			}
@@ -173,22 +187,22 @@ namespace Enjon {
 			else if (Elements.at(0).compare("cvarlist") == 0)
 			{
 				auto registeredCommands = CVarsSystem::GetRegisteredCommands();
-				Output.push_back("Console Variables Available:");
-				for (auto& c : registeredCommands) Output.push_back(c);
+				Output.emplace_back("Console Variables Available: ", EG::RGBA16_Yellow());
+				for (auto& c : registeredCommands) Output.emplace_back(c);
 			}
 			else
 			{
 				// Register command with CVar System
-				if (Elements.size() < 2) Output.push_back("need argument for cvar");
+				if (Elements.size() < 2) Output.emplace_back("Error: need argument for cvar \"" + Elements.at(0) + "\"", EG::RGBA16_Red());
 				else
 				{
 					if (!CVarsSystem::Set(Elements.at(0), std::atof(Elements.at(1).c_str())))
 					{
-						Output.push_back("Cvar does not exist: " + Elements.at(0));
+						Output.emplace_back("Error: cvar does not exist: " + Elements.at(0), EG::RGBA16_Red());
 					}
 					else
 					{
-						Output.push_back("Set " + Elements.at(0) + ": " + Elements.at(1));
+						Output.emplace_back("Set " + Elements.at(0) + ": " + Elements.at(1));
 					}
 				}
 			}

@@ -17,8 +17,7 @@ void main()
 {
 	// Sample the texture
 	vec4 sampled = vec4(1.0,1.0, 1.0, texture(tex, fs_in.uv).r);
+	if (sampled.a < 0.5) discard;
 	color = fs_in.color * sampled;
-
-	//color = fs_in.color * texture2D(tex, fs_in.uv);
 }
 

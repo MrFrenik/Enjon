@@ -26,7 +26,6 @@ namespace Enjon {
 			static void Draw();
 
 		public:
-			static std::vector<std::string> Output;
 			static GUI::GUITextBox InputTextBox;
 	};
 }

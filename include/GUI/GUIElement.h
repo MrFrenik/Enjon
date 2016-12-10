@@ -128,6 +128,7 @@ namespace Enjon { namespace GUI {
 			KeyboardInFocus = false;
 			Dimensions 		= EM::Vec2(100.0f, 20.0f);
 			MaxStringLength = 20;
+			HistoryIndex 	= 0;
 
 			// Initial states
 			State 		= ButtonState::INACTIVE;
@@ -292,7 +293,7 @@ namespace Enjon { namespace GUI {
 			auto Padding = EM::Vec2(5.0f, 5.0f);
 
 			// Make sure font isn't null
-			if (TextFont == nullptr) TextFont = EG::FontManager::GetFont("WeblySleek_12");
+			if (TextFont == nullptr) TextFont = EG::FontManager::GetFont("Sofia");
 
 			// Draw box		
 			Batch->Add(
@@ -522,6 +523,30 @@ namespace Enjon { namespace GUI {
 		    if (Input->IsKeyPressed(SDLK_PERIOD)) 	on_keyboard.emit(".");
 		    if (Input->IsKeyPressed(SDLK_QUOTE)) 	on_keyboard.emit("'");
 
+		    // History
+		    if (Input->IsKeyPressed(SDLK_DOWN))
+		    {
+		    	if (History.size())
+		    	{
+		    		HistoryIndex++;
+		    		if (HistoryIndex >= History.size()) HistoryIndex = 0;
+		    		printf("%d\n", HistoryIndex);
+		    		Text = History.at(HistoryIndex);
+		    		CursorIndex = Text.length() + 1;
+		    	}
+		    }
+		    if (Input->IsKeyPressed(SDLK_UP))
+		    {
+		    	if (History.size())
+		    	{
+		    		if (HistoryIndex > 0) 	HistoryIndex--;
+		    		else					HistoryIndex = History.size() - 1;
+		    		printf("%d\n", HistoryIndex);
+		    		Text = History.at(HistoryIndex);
+		    		CursorIndex = Text.length();
+		    	}
+		    }
+
 			// Exit input box
 			if (Input->IsKeyPressed(SDLK_ESCAPE)) return false;
 
@@ -555,6 +580,8 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<Enjon::i32> move_cursor_index;
 		EGUI::Signal<> on_backspace;
 		EGUI::Signal<> on_enter;
+		std::vector<std::string> History;
+		uint32_t HistoryIndex;
 	};
 
 

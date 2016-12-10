@@ -4555,7 +4555,7 @@ int main(int argc, char** argv)
 
 #if 1
 
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -4594,6 +4594,7 @@ int main(int argc, char** argv)
 #include <Graphics/SpotLight.h>
 #include <Graphics/GBuffer.h>
 #include <Console.h>
+#include <CVarsSystem.h>
 
 using u32 = uint32_t;
 
@@ -4623,12 +4624,25 @@ enum class DrawFrameType
 	NORMAL, 
 	POSITION, 
 	BLUR,
-	DEPTH
+	DEPTH,
+	LIGHTS
 };
 
 DrawFrameType DrawFrame = DrawFrameType::FINAL;
 
 EG::SpotLight Spot;
+
+float RotationSpeed = 20.0f;
+float VXOffset = 0.01f;
+
+struct FXAASettings
+{
+	float SpanMax;
+	float ReduceMin;
+	float ReduceMul;
+};
+
+struct FXAASettings FXAASettings{8.0f, 1.0/128.0f, 1.0/8.0f};
 
 void LoadMonkeyHeadAsset()
 {
@@ -4954,6 +4968,13 @@ EG::Window Window;
 
 EntityManager* EManager;
 
+void DrawFullScreenQuad(GLuint VAO)
+{
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
+}
+
 // The MAIN function, from here we start the application and run the game loop
 #ifdef main
 	#undef main
@@ -4987,6 +5008,13 @@ int main(int argc, char** argv)
 
 	FPSCamera = EG::Camera((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
 
+	// Register local cvars
+	Enjon::CVarsSystem::Register("rotation_speed", &RotationSpeed, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("vxoffset", &VXOffset, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("fxaa_span_max", &FXAASettings.SpanMax, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("fxaa_reduce_min", &FXAASettings.ReduceMin, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("fxaa_reduce_mul", &FXAASettings.ReduceMul, Enjon::CVarType::TYPE_FLOAT);
+
 	// Init Console
 	Enjon::Console::Init(SCREENWIDTH, SCREENHEIGHT);
 
@@ -4997,6 +5025,7 @@ int main(int argc, char** argv)
 	EG::RenderTarget 		Composite((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
 	EG::GBuffer 	 		GBuffer((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
 	EG::RenderTarget 		DeferredLight((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::RenderTarget		FXAATarget((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT); 			
 
 	EG::SpriteBatch CompositeBatch;
 	CompositeBatch.Init();
@@ -5013,6 +5042,7 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* PointLightProgram 			= EG::ShaderManager::GetShader("PointLight");
 	EG::GLSLProgram* SpotLightProgram 			= EG::ShaderManager::GetShader("SpotLight");
 	EG::GLSLProgram* UIProgram					= EG::ShaderManager::GetShader("ScreenUI");
+	EG::GLSLProgram* FXAAProgram 				= EG::ShaderManager::GetShader("FXAA");
 
 	// Load model data
 	LoadCubeAsset();
@@ -5213,7 +5243,7 @@ int main(int argc, char** argv)
 
 		// Rotate one of the instances over time
 		auto& InstanceTransform = Instances.at(0).Transform;
-		InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * 20.0f), EM::Vec3(0, 1, 0));
+		InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * RotationSpeed), EM::Vec3(0, 1, 0));
 
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16_Black());
 
@@ -5326,7 +5356,7 @@ int main(int argc, char** argv)
 
 					// Render Light to screen
 					{
-						// glDrawArrays(GL_TRIANGLES, 0, 6);
+						glDrawArrays(GL_TRIANGLES, 0, 6);
 					}
 				}
 
@@ -5393,6 +5423,28 @@ int main(int argc, char** argv)
 
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
 
+		FXAATarget.Bind();
+		{
+			FXAAProgram->Use();
+			{
+				Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+				FXAAProgram->SetUniform("resolution", EM::Vec2(SCREENWIDTH, SCREENHEIGHT));
+				FXAAProgram->SetUniform("FXAASettings", EM::Vec3(FXAASettings.SpanMax, FXAASettings.ReduceMul, FXAASettings.ReduceMin));
+				CompositeBatch.Begin();
+				{
+					CompositeBatch.Add(
+										EM::Vec4(-1, -1, 2, 2),
+										EM::Vec4(0, 0, 1, 1),
+										DeferredLight.GetTexture()
+									);
+				}
+				CompositeBatch.End();
+				CompositeBatch.RenderBatch();
+			}
+			FXAAProgram->Unuse();
+		}
+		FXAATarget.Unbind();
+
 		// Final Composite pass
     	CompositeProgram->Use();
     	{
@@ -5404,7 +5456,7 @@ int main(int argc, char** argv)
 	    			{
 	    				case DrawFrameType::FINAL:
 	    				{
-							DeferredLight.Bind(EG::RenderTarget::BindType::READ);
+							FXAATarget.Bind(EG::RenderTarget::BindType::READ);
 							glReadBuffer(GL_COLOR_ATTACHMENT0);
 							glBlitFramebuffer(
 												0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, 
@@ -5412,6 +5464,17 @@ int main(int argc, char** argv)
 											);
 
 	    				} break;	
+
+	    				case DrawFrameType::LIGHTS:
+	    				{
+							DeferredLight.Bind(EG::RenderTarget::BindType::READ);
+							glReadBuffer(GL_COLOR_ATTACHMENT0);
+							glBlitFramebuffer(
+												0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, 
+												SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR
+											);
+
+	    				} break;
 
 	    				case DrawFrameType::DIFFUSE:
 	    				{
@@ -5820,6 +5883,11 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	if (Input->IsKeyPressed(SDLK_6))
 	{
 		DrawFrame = DrawFrameType::DEPTH;	
+	}
+
+	if (Input->IsKeyPressed(SDLK_7))
+	{
+		DrawFrame = DrawFrameType::LIGHTS;	
 	}
 
 	if (Input->IsKeyDown(SDLK_b))
