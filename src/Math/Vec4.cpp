@@ -124,4 +124,9 @@ namespace Enjon { namespace Math {
 	{
 		return x * other.x + y * other.y + z * other.z + w * other.w;
 	}
+
+	Vec3 Vec4::XYZ()
+	{
+		return Vec3(this->x, this->y, this->z);
+	}
 }}

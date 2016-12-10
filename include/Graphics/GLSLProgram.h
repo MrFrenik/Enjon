@@ -3,7 +3,8 @@
 
 #include <GLEW/glew.h>
 #include <Math/Maths.h>
-#include <Graphics/Transform.h>
+#include <Math/Transform.h>
+#include <Defines.h>
 
 #include <string>
 
@@ -37,7 +38,7 @@ namespace Enjon { namespace Graphics {
 		void SetUniform(const std::string& name, const Math::Vec3& vector);
 		void SetUniform(const std::string& name, const Math::Vec4& vector);
 		void SetUniform(const std::string& name, const Math::Mat4& matrix); 
-		void SetUniform(const std::string& name, const EG::Transform& T);
+		void SetUniform(const std::string& name, const EM::Transform& T);
 		
 		GLuint inline GetProgramID() const { return m_programID; } 
 	

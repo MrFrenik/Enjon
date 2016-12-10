@@ -10,7 +10,6 @@
 
 namespace Enjon { namespace Graphics {
 
-
 	struct Position2f 
 	{ 
 		Position2f() {}

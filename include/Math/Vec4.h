@@ -50,7 +50,7 @@ namespace Enjon { namespace Math {
 			this->y = a.y;
 			this->z = a.z;
 			this->w = val;
-		} 
+		}
 
 		
 		friend std::ostream& operator<<(std::ostream& stream, Vec4& vector);	
@@ -83,6 +83,7 @@ namespace Enjon { namespace Math {
 		float Vec4::Length() const;
 		float Vec4::Dot(const Vec4& other);
 		static Vec4 inline Normalize(const Vec4& vec) { return vec / vec.Length(); }
+		Vec3 XYZ();
 
 	}; 
 		

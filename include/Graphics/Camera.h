@@ -3,7 +3,7 @@
 
 #include <Defines.h>
 #include <System/Types.h>
-#include <Graphics/Transform.h>
+#include <Math/Transform.h>
 #include <Math/Vec3.h>
 #include <Math/Vec2.h>
 #include <Math/Mat4.h>
@@ -41,7 +41,7 @@ namespace Enjon { namespace Graphics {
 		inline void SetProjection(ProjectionType Type) { ProjType = Type; }
 
 		// Member variables
-		EG::Transform Transform;
+		EM::Transform Transform;
 		Enjon::f32 FieldOfView;
 		Enjon::f32 NearPlane;
 		Enjon::f32 FarPlane;

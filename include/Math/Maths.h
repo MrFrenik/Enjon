@@ -10,6 +10,7 @@
 #include "Vec4.h"
 #include "Mat4.h"
 #include "Quaternion.h"
+#include "Transform.h"
 
 #endif
 

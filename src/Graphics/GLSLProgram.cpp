@@ -195,7 +195,7 @@ namespace Enjon { namespace Graphics {
 		glUniform1i(GetUniformLocation(name), val);
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const EG::Transform& T)
+	void GLSLProgram::SetUniform(const std::string& name, const EM::Transform& T)
 	{
 		glUniform3f(GetUniformLocation(name + ".position"), T.Position.x, T.Position.y, T.Position.z);	
 		glUniform4f(GetUniformLocation(name + ".orientation"), T.Orientation.x, T.Orientation.y, T.Orientation.z, T.Orientation.w);	

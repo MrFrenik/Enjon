@@ -8,7 +8,7 @@
 #include <Math/Mat4.h>
 #include <Math/Vec3.h>
 
-namespace Enjon { namespace Graphics {
+namespace Enjon { namespace Math {
 
 	struct Transform
 	{
@@ -18,6 +18,13 @@ namespace Enjon { namespace Graphics {
 				Position(EM::Vec3(0.0f, 0.0f, 0.0f)),
 				Orientation(EM::Quaternion(0, 0, 0, 1)),
 				Scale(EM::Vec3(1, 1, 1))
+			{}
+			
+		Transform(EM::Vec3& _Position, EM::Quaternion& _Orientation, EM::Vec3& _Scale)
+			: 
+				Position(_Position),
+				Orientation(_Orientation),
+				Scale(_Scale)
 			{}
 
 		// Multiplication of this transform with another

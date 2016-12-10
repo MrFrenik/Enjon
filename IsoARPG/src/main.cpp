@@ -4555,7 +4555,7 @@ int main(int argc, char** argv)
 
 #if 1
 
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -4595,6 +4595,7 @@ int main(int argc, char** argv)
 #include <Graphics/GBuffer.h>
 #include <Console.h>
 #include <CVarsSystem.h>
+#include <Graphics/QuadBatch.h>
 
 using u32 = uint32_t;
 
@@ -5033,6 +5034,9 @@ int main(int argc, char** argv)
 	EG::SpriteBatch Batch;
 	Batch.Init();
 
+	EG::QuadBatch QBatch;
+	QBatch.Init();
+
 	EG::GLSLProgram* CompositeProgram 			= EG::ShaderManager::GetShader("NoCameraProjection");
 	EG::GLSLProgram* HorizontalBlurProgram 		= EG::ShaderManager::GetShader("HorizontalBlur");
 	EG::GLSLProgram* VerticalBlurProgram 		= EG::ShaderManager::GetShader("VerticalBlur");
@@ -5043,6 +5047,7 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* SpotLightProgram 			= EG::ShaderManager::GetShader("SpotLight");
 	EG::GLSLProgram* UIProgram					= EG::ShaderManager::GetShader("ScreenUI");
 	EG::GLSLProgram* FXAAProgram 				= EG::ShaderManager::GetShader("FXAA");
+	EG::GLSLProgram* QuadBatchProgram 			= EG::ShaderManager::GetShader("QuadBatch");
 
 	// Load model data
 	LoadCubeAsset();
@@ -5572,6 +5577,29 @@ int main(int argc, char** argv)
 		   	CompositeBatch.RenderBatch();
 		}   	
 		CompositeProgram->Unuse();
+
+		QuadBatchProgram->Use();
+		{
+			QuadBatchProgram->SetUniform("camera", FPSCamera.GetViewProjectionMatrix());
+			QBatch.Begin();
+			{
+				for (uint32_t i = 0; i < 100; i++)
+				{
+					QBatch.Add(
+									EM::Transform(
+													EM::Vec3(i, i, i),
+													EM::Quaternion(i, i, i, 1),
+													EM::Vec3(1.0f, 1.0f, 1.0)
+												),
+									EM::Vec4(0, 0, i / 100.0f, i / 100.0f), 
+									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png").id		
+								);
+				}
+			}
+			QBatch.End();
+			QBatch.RenderBatch();
+		}
+		QuadBatchProgram->Unuse();
 
 		/*
 		UIProgram->Use();

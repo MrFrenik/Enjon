@@ -3,7 +3,7 @@
 
 #include <Defines.h>
 #include <Graphics/GLSLProgram.h>
-#include <Graphics/Transform.h>
+#include <Math/Transform.h>
 #include <Graphics/Mesh.h>
 #include <Graphics/Material.h>
 #include <IO/ResourceManager.h>
@@ -21,7 +21,7 @@ namespace Enjon { namespace Graphics {
 	struct ModelInstance
 	{
 		ModelAsset* Asset;
-		EG::Transform Transform;
+		EM::Transform Transform;
 	};
 
 }}

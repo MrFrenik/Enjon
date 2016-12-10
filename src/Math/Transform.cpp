@@ -1,6 +1,6 @@
-#include <Graphics/Transform.h>
+#include <Math/Transform.h>
 
-namespace Enjon { namespace Graphics {
+namespace Enjon { namespace Math {
 
 
 	Transform Transform::operator*(Transform& Parent) const
