@@ -1,21 +1,23 @@
 #include "Graphics/QuadBatch.h"
+#include "IO/ResourceManager.h"
+#include <stdio.h>
 
 #include <algorithm>
 
 namespace Enjon { namespace Graphics {
 
-	// struct QuadVert
-	// {
-	// 	float Position[3];
-	// 	float Normals[3];
-	// 	float Tangent[3];
-	// 	float BiTangent[3];
-	// 	float UV[2];
-	// 	float Color[4];
-	// };
-	QuadBatch::QuadBatch() : VAO(0), VBO(0)
-	{
+	static EM::Vec3 Static_TL(-1.0f, 1.0f, 0.0f);
+	static EM::Vec3 Static_BL(-1.0f, -1.0f, 0.0f);
+	static EM::Vec3 Static_TR(1.0f, 1.0f, 0.0f);
+	static EM::Vec3 Static_BR(1.0f, -1.0f, 0.0f);
+	static EM::Vec3 Static_Normal(0.0f, 0.0f, 1.0f);
+	static EM::Vec3 Static_Tangent(1.0f, 0.0f, 0.0f);
+	static EM::Vec3 Static_BiTangent(0.0f, 1.0f, 0.0f);
 
+	QuadBatch::QuadBatch()
+	{
+		// Construct the batch
+		CreateVertexArray();
 	}
 
 	QuadBatch::~QuadBatch()
@@ -38,22 +40,18 @@ namespace Enjon { namespace Graphics {
 		EM::Vec2 UV;
 
 		// Normal for all verticies
-		Normal = Model * EM::Vec4(Static_Normal, 1.0);
-		Normal /= Normal.w;
+		Normal = Model * EM::Vec4(Static_Normal, 0.0);
 		N = EM::Vec3::Normalize(Normal.XYZ());
 
 		// Tangent for all verticies
-		Tangent = Model * EM::Vec4(Static_Tangent, 1.0);
-		Tangent /= Tangent.w;
+		Tangent = Model * EM::Vec4(Static_Tangent, 0.0);
 		T = EM::Vec3::Normalize(Tangent.XYZ());
 
 		// Reorthogonalize with respect to N
 		T = EM::Vec3::Normalize(T - T.Dot(N) * N);
 
 		// Calculate Bitangent
-		Bitangent = Model * EM::Vec4(Normal.XYZ().Cross(Tangent.XYZ()), 0.0f);
-		B = EM::Vec3::Normalize(Bitangent.XYZ());
-
+		B = EM::Vec3::Normalize( ( Model * EM::Vec4( ( N.Cross(T) * 1.0), 0.0 )).XYZ());
 
 		/* Set top left vertex */
  		Position 			= Model * EM::Vec4(Static_TL, 1.0);
@@ -265,15 +263,6 @@ namespace Enjon { namespace Graphics {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	// struct QuadVert
-	// {
-	// 	Math::Vec3 	Position[3];
-	// 	Math::Vec3 	Normals[3];
-	// 	Math::Vec3 	Tangent[3];
-	// 	Math::Vec2 	UV[2];
-	// 	ColorRGBA16 Color[4];
-	// };
-
 	void QuadBatch::CreateVertexArray()
 	{
 		// Generate the vao if not already generated
@@ -294,6 +283,7 @@ namespace Enjon { namespace Graphics {
 		glEnableVertexAttribArray(2);
 		glEnableVertexAttribArray(3);
 		glEnableVertexAttribArray(4);
+		glEnableVertexAttribArray(5);
 
 		// Position
 		glVertexAttribPointer(GL_QUAD_VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(QuadVert), (void*)offsetof(QuadVert, Position));
@@ -301,7 +291,7 @@ namespace Enjon { namespace Graphics {
 		glVertexAttribPointer(GL_QUAD_VERTEX_ATTRIB_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(QuadVert), (void*)offsetof(QuadVert, Normal));
 		// Tangent
 		glVertexAttribPointer(GL_QUAD_VERTEX_ATTRIB_TANGENT, 3, GL_FLOAT, GL_FALSE, sizeof(QuadVert), (void*)offsetof(QuadVert, Tangent));
-		// Tangent
+		// Bitangent
 		glVertexAttribPointer(GL_QUAD_VERTEX_ATTRIB_BITANGENT, 3, GL_FLOAT, GL_FALSE, sizeof(QuadVert), (void*)offsetof(QuadVert, Bitangent));
 		// UV
 		glVertexAttribPointer(GL_QUAD_VERTEX_ATTRIB_UV, 2, GL_FLOAT, GL_FALSE, sizeof(QuadVert), (void*)offsetof(QuadVert, UV));

@@ -18,13 +18,6 @@
 
 namespace Enjon { namespace Graphics {
 
-	static EM::Vec3 Static_TL(-1.0f, 1.0f, 0.0f);
-	static EM::Vec3 Static_BL(-1.0f, -1.0f, 0.0f);
-	static EM::Vec3 Static_TR(1.0f, 1.0f, 0.0f);
-	static EM::Vec3 Static_BR(1.0f, -1.0f, 0.0f);
-	static EM::Vec3 Static_Normal(0.0f, 0.0f, 1.0f);
-	static EM::Vec3 Static_Tangent(1.0f, 0.0f, 0.0f);
-	static EM::Vec3 Static_BiTangent(0.0f, 1.0f, 0.0f);
 
 	struct QuadVert
 	{
@@ -46,7 +39,7 @@ namespace Enjon { namespace Graphics {
 
 	struct QuadGlyph
 	{
-		QuadGlyph(EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, EG::ColorRGBA16& Color);
+		QuadGlyph(EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, EG::ColorRGBA16& Color = RGBA16(1.0f));
 
 		GLuint Texture;
 		QuadVert TL;
@@ -78,7 +71,7 @@ namespace Enjon { namespace Graphics {
 			void End();
 
 			// Adds quadglyph to quadbatch to be rendered
-			void Add(EM::Transform& Transform, EM::Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16_White());
+			void Add(EM::Transform& Transform, EM::Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f));
 
 			// Renders entire batch to screen
 			void RenderBatch();

@@ -4791,7 +4791,8 @@ void LoadInstances()
 		Instances.push_back(M);
 	}
 
-	for (u32 i = 0; i < 100; i++)
+	/*
+	for (u32 i = 0; i < 10000; i++)
 	{
 		EG::ModelInstance C;
 		C.Asset = &SpriteWithNormal;
@@ -4800,6 +4801,7 @@ void LoadInstances()
 	    C.Transform.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f);
 		Animations.push_back(C);
 	}
+	*/
 
 
 	// EG::ModelInstance C;
@@ -5035,7 +5037,6 @@ int main(int argc, char** argv)
 	Batch.Init();
 
 	EG::QuadBatch QBatch;
-	QBatch.Init();
 
 	EG::GLSLProgram* CompositeProgram 			= EG::ShaderManager::GetShader("NoCameraProjection");
 	EG::GLSLProgram* HorizontalBlurProgram 		= EG::ShaderManager::GetShader("HorizontalBlur");
@@ -5168,6 +5169,16 @@ int main(int argc, char** argv)
 	    Velocity->z = 0.0f;
     }
 
+    std::vector<EM::Transform> Transforms;
+    for (auto i = 0; i < 10000; i++)
+    {
+    	EM::Transform t;
+		t.Position 	= EM::Vec3(ER::Roll(-50, 50), ER::Roll(0, 50), ER::Roll(-50, 50));
+	    t.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
+	    t.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f);
+	    Transforms.push_back(t);
+    }
+
     // Game loop
     bool running = true;
     while (running)
@@ -5277,6 +5288,30 @@ int main(int argc, char** argv)
 	        		RenderAnimation(c);
 	        	Shader->Unuse();
 	        }
+
+			QuadBatchProgram->Use();
+			{
+				QuadBatchProgram->SetUniform("camera", CameraMatrix);
+				QuadBatchProgram->SetUniform("NearFar", FPSCamera.GetNearFar());
+				QBatch.Begin();
+				{
+					for (uint32_t i = 0; i < Transforms.size(); i++)
+					{
+						Transforms.at(i).Scale = EM::Vec3(1, 1, 1) * EM::Clamp(sin(timer * RotationSpeed), 0.1f, 1.0f);
+						QuadBatchProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test_normal.png").id, 1);
+						QBatch.Add(
+										Transforms.at(i),
+										EM::Vec4(0, 0, 1, 1), 
+										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png").id,
+										EG::RGBA16_ZombieGreen()
+									);
+					}
+				}
+				QBatch.End();
+				QBatch.RenderBatch();
+			}
+			QuadBatchProgram->Unuse();
+
 	        ENDPROFILE(RENDERING)
 
     	}
@@ -5379,9 +5414,11 @@ int main(int argc, char** argv)
 				SpotLightProgram->SetUniform("CameraForward", 	FPSCamera.Forward());
 				SpotLightProgram->SetUniform("Falloff", 		Spot.Parameters.Falloff);
 				SpotLightProgram->SetUniform("LightColor", 		EM::Vec3(Spot.Color.r, Spot.Color.g, Spot.Color.b));
-				SpotLightProgram->SetUniform("LightPos", 		Spot.Position);
+				// SpotLightProgram->SetUniform("LightPos", 		Spot.Position);
+				SpotLightProgram->SetUniform("LightPos", 		FPSCamera.Transform.Position);
 				SpotLightProgram->SetUniform("LightIntensity", 	Spot.Intensity);
-				SpotLightProgram->SetUniform("LightDirection", 	Spot.Parameters.Direction);
+				// SpotLightProgram->SetUniform("LightDirection", 	Spot.Parameters.Direction);
+				SpotLightProgram->SetUniform("LightDirection", 	FPSCamera.Forward());
 				SpotLightProgram->SetUniform("InnerCutoff", 	Spot.Parameters.InnerCutoff);
 				SpotLightProgram->SetUniform("OuterCutoff", 	Spot.Parameters.OuterCutoff);
 
@@ -5578,28 +5615,6 @@ int main(int argc, char** argv)
 		}   	
 		CompositeProgram->Unuse();
 
-		QuadBatchProgram->Use();
-		{
-			QuadBatchProgram->SetUniform("camera", FPSCamera.GetViewProjectionMatrix());
-			QBatch.Begin();
-			{
-				for (uint32_t i = 0; i < 100; i++)
-				{
-					QBatch.Add(
-									EM::Transform(
-													EM::Vec3(i, i, i),
-													EM::Quaternion(i, i, i, 1),
-													EM::Vec3(1.0f, 1.0f, 1.0)
-												),
-									EM::Vec4(0, 0, i / 100.0f, i / 100.0f), 
-									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png").id		
-								);
-				}
-			}
-			QBatch.End();
-			QBatch.RenderBatch();
-		}
-		QuadBatchProgram->Unuse();
 
 		/*
 		UIProgram->Use();

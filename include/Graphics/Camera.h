@@ -36,6 +36,7 @@ namespace Enjon { namespace Graphics {
 		EM::Mat4 GetViewProjectionMatrix() const;
 		EM::Mat4 GetProjection() const;
 		EM::Mat4 GetView() const;
+		inline EM::Vec2 GetNearFar() const { return EM::Vec2(NearPlane, FarPlane); }
 
 		inline void SetNearFar(float Near, float Far) { NearPlane = Near; FarPlane = Far; }
 		inline void SetProjection(ProjectionType Type) { ProjType = Type; }

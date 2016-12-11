@@ -64,6 +64,8 @@ namespace Enjon
 		return registeredCommands;
 	}
 
+	
+
 	template bool CVarsSystem::Register<float>(std::string key, float* val, CVarType type);
 	template bool CVarsSystem::Register<double>(std::string key, double* val, CVarType type);
 	template bool CVarsSystem::Register<int>(std::string key, int* val, CVarType type);

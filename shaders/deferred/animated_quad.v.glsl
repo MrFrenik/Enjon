@@ -16,6 +16,7 @@ out VS_OUT
 } vs_out;
 
 uniform mat4 camera = mat4(1.0f);
+uniform vec4 SpriteFrame;
 
 void main()
 {
@@ -28,6 +29,8 @@ void main()
 	// Output data
 	vs_out.FragPos = vertexPosition;
 	vs_out.TBN = TBN;
-	vs_out.TexCoords = vec2(vertexUV.x, -vertexUV.y);
-	vs_out.FragColor = vertexColor;
+	
+	// Calculate tex coords from sprite frame
+	vec2 TexCoords = vec2(vertexUV.x, -vertexUV.y);
+	vs_out.TexCoords = SpriteFrame.xy + (TexCoords * SpriteFrame.zw);
 }
