@@ -4611,6 +4611,7 @@ EG::ModelAsset CubeSprite;
 std::vector<EG::ModelInstance> Instances;
 std::vector<EG::ModelInstance> Animations;
 EG::Camera FPSCamera;
+EG::Camera2D HUDCamera;
 
 const uint8_t RENDERING = 0;
 
@@ -4635,6 +4636,7 @@ EG::SpotLight Spot;
 
 float RotationSpeed = 20.0f;
 float VXOffset = 0.01f;
+float TextScale = 1.0f;
 
 struct FXAASettings
 {
@@ -4643,12 +4645,12 @@ struct FXAASettings
 	float ReduceMul;
 };
 
-struct FXAASettings FXAASettings{8.0f, 1.0/128.0f, 1.0/8.0f};
+struct FXAASettings FXAASettings{8.0f, 1.0/128.0f, 0.5f};
 
 void LoadMonkeyHeadAsset()
 {
 	// Get mesh
-	MonkeyHead.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
+	MonkeyHead.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/shaderball.obj");
 
     // Get shader and set texture
     auto Shader = EG::ShaderManager::GetShader("GBuffer");
@@ -4777,19 +4779,19 @@ void LoadInstances()
 	EG::ModelInstance B;
 	B.Asset = &MonkeyHead;
 	B.Transform.Position 	= EM::Vec3(0, 0, 0);
-	// B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005f;
-	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 1.0f;
+	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005f;
+	// B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 1.0f;
 	Instances.push_back(B);
 
-	for (u32 i = 0; i < 50; ++i)
-	{
-		EG::ModelInstance M;
-		M.Asset = &MonkeyHead;
-		M.Transform.Position 	= EM::Vec3(ER::Roll(-20, 20), ER::Roll(0, 20), ER::Roll(-20, 20));
-		float Scale = (float)ER::Roll(1, 10) / 10.0f;
-		M.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005;
-		Instances.push_back(M);
-	}
+	// for (u32 i = 0; i < 50; ++i)
+	// {
+	// 	EG::ModelInstance M;
+	// 	M.Asset = &MonkeyHead;
+	// 	M.Transform.Position 	= EM::Vec3(ER::Roll(-20, 20), ER::Roll(0, 20), ER::Roll(-20, 20));
+	// 	float Scale = (float)ER::Roll(1, 10) / 10.0f;
+	// 	M.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005;
+	// 	Instances.push_back(M);
+	// }
 
 	/*
 	for (u32 i = 0; i < 10000; i++)
@@ -4811,20 +4813,6 @@ void LoadInstances()
  //    C.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-135), EM::Vec3(0, 1, 0)) * 
  //    							EM::Quaternion::AngleAxis(EM::ToRadians(180), EM::Vec3(0, 0, 1));
  //    Instances.push_back(C);
-
-	auto map_size = 20;
-	for (auto i = 0; i < map_size; i++)
-	{
-		for (auto j = 0; j < map_size; j++)
-		{
-			EG::ModelInstance f;
-			f.Asset = &NormalFloor;
-			f.Transform.Position = EM::Vec3((Enjon::f32)i * 2.0f, -1.0f, (Enjon::f32)j * 2.0f);
-			f.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(90), EM::Vec3(1, 0, 0));
-			// f.Transform.Scale = EM::Vec3(1.0f, 0.0basic_cube2f, 1.0f);
-			Instances.push_back(f);
-		}
-	}
 }
 
 void RenderInstance(const EG::ModelInstance& Instance)
@@ -5010,13 +4998,8 @@ int main(int argc, char** argv)
 	EG::FontManager::Init();
 
 	FPSCamera = EG::Camera((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
+	HUDCamera.Init((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
 
-	// Register local cvars
-	Enjon::CVarsSystem::Register("rotation_speed", &RotationSpeed, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("vxoffset", &VXOffset, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("fxaa_span_max", &FXAASettings.SpanMax, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("fxaa_reduce_min", &FXAASettings.ReduceMin, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("fxaa_reduce_mul", &FXAASettings.ReduceMul, Enjon::CVarType::TYPE_FLOAT);
 
 	// Init Console
 	Enjon::Console::Init(SCREENWIDTH, SCREENHEIGHT);
@@ -5037,6 +5020,10 @@ int main(int argc, char** argv)
 	Batch.Init();
 
 	EG::QuadBatch QBatch;
+	EG::QuadBatch FloorBatch;
+
+	QBatch.Init();
+	FloorBatch.Init();
 
 	EG::GLSLProgram* CompositeProgram 			= EG::ShaderManager::GetShader("NoCameraProjection");
 	EG::GLSLProgram* HorizontalBlurProgram 		= EG::ShaderManager::GetShader("HorizontalBlur");
@@ -5046,9 +5033,10 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* DirectionalLightProgram 	= EG::ShaderManager::GetShader("DirectionalLight");
 	EG::GLSLProgram* PointLightProgram 			= EG::ShaderManager::GetShader("PointLight");
 	EG::GLSLProgram* SpotLightProgram 			= EG::ShaderManager::GetShader("SpotLight");
-	EG::GLSLProgram* UIProgram					= EG::ShaderManager::GetShader("ScreenUI");
+	EG::GLSLProgram* UIProgram					= EG::ShaderManager::GetShader("Text");
 	EG::GLSLProgram* FXAAProgram 				= EG::ShaderManager::GetShader("FXAA");
 	EG::GLSLProgram* QuadBatchProgram 			= EG::ShaderManager::GetShader("QuadBatch");
+	EG::GLSLProgram* WorldTextProgram 			= EG::ShaderManager::GetShader("WorldText");
 
 	// Load model data
 	LoadCubeAsset();
@@ -5123,7 +5111,7 @@ int main(int argc, char** argv)
     glBindVertexArray(0);
 
     std::vector<EG::PointLight> PointLights;
-    for (u32 i = 0; i < 10; i++)
+    for (u32 i = 0; i < 20; i++)
     {
     	EG::PointLight L;
     	L.Position = EM::Vec3(ER::Roll(-50, 50), ER::Roll(0, 10), ER::Roll(-50, 50));
@@ -5154,6 +5142,8 @@ int main(int argc, char** argv)
 						10.0f
 					);
 
+	float SunlightIntensity = 0.2f;
+
     // Attach components
     auto Entity = EManager->CreateEntity();
     {
@@ -5170,14 +5160,44 @@ int main(int argc, char** argv)
     }
 
     std::vector<EM::Transform> Transforms;
-    for (auto i = 0; i < 10000; i++)
+    for (auto i = 0; i < 100; i++)
     {
     	EM::Transform t;
-		t.Position 	= EM::Vec3(ER::Roll(-50, 50), ER::Roll(0, 50), ER::Roll(-50, 50));
+		t.Position 	= EM::Vec3(ER::Roll(-100, 100), ER::Roll(0, 100), ER::Roll(-100, 100));
 	    t.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
 	    t.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f);
 	    Transforms.push_back(t);
     }
+
+    // Set up floor
+    FloorBatch.Begin();
+    {
+		auto map_size = 20;
+		for (auto i = 0; i < map_size; i++)
+		{
+			for (auto j = 0; j < map_size; j++)
+			{
+				EM::Transform T;
+				T.Position = EM::Vec3((Enjon::f32)i * 2.0f, -1.0f, (Enjon::f32)j * 2.0f);
+				T.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(90), EM::Vec3(1, 0, 0));
+				FloorBatch.Add(
+								T, 
+								EM::Vec4(0, 0, 1, 1),
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png").id
+							);
+			}
+		}
+    }
+    FloorBatch.End();
+
+	// Register local cvars
+	Enjon::CVarsSystem::Register("rotation_speed", &RotationSpeed, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("vxoffset", &VXOffset, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("fxaa_span_max", &FXAASettings.SpanMax, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("fxaa_reduce_min", &FXAASettings.ReduceMin, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("fxaa_reduce_mul", &FXAASettings.ReduceMul, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("sunlight_intensity", &SunlightIntensity, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("text_scale", &TextScale, Enjon::CVarType::TYPE_FLOAT);
 
     // Game loop
     bool running = true;
@@ -5201,6 +5221,8 @@ int main(int argc, char** argv)
     	timer += 0.01f;
 
     	Input.Update();
+
+    	HUDCamera.Update();
 
     	// Console update
     	Enjon::Console::Update(timer);
@@ -5293,24 +5315,56 @@ int main(int argc, char** argv)
 			{
 				QuadBatchProgram->SetUniform("camera", CameraMatrix);
 				QuadBatchProgram->SetUniform("NearFar", FPSCamera.GetNearFar());
+
+				// Render floor
+				QuadBatchProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png").id, 1);
+				FloorBatch.RenderBatch();
+
 				QBatch.Begin();
 				{
 					for (uint32_t i = 0; i < Transforms.size(); i++)
 					{
-						Transforms.at(i).Scale = EM::Vec3(1, 1, 1) * EM::Clamp(sin(timer * RotationSpeed), 0.1f, 1.0f);
-						QuadBatchProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test_normal.png").id, 1);
+						Transforms.at(i).Scale = EM::Vec3(1, 1, 1) * float(i) / (float)Transforms.size();
 						QBatch.Add(
 										Transforms.at(i),
 										EM::Vec4(0, 0, 1, 1), 
-										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png").id,
-										EG::RGBA16_ZombieGreen()
+										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png").id
 									);
 					}
+
+					// void PrintText(EM::Transform& Transform, std::string Text, Font* F, EG::QuadBatch& Batch, EG::ColorRGBA16 Color, TextStyle Style)
 				}
 				QBatch.End();
+				// QuadBatchProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test_normal.png").id, 1);
 				QBatch.RenderBatch();
 			}
+
 			QuadBatchProgram->Unuse();
+
+			WorldTextProgram->Use();
+			{
+				WorldTextProgram->SetUniform("camera", CameraMatrix);
+				WorldTextProgram->SetUniform("NearFar", FPSCamera.GetNearFar());
+				QBatch.Begin();
+				{
+						EG::Fonts::PrintText(
+												EM::Transform(
+																Instances.at(0).Transform.Position,
+																Instances.at(0).Transform.Orientation, 
+																EM::Vec3(1, 1, 1) * TextScale
+															),
+												"Texting this shit",
+												EG::FontManager::GetFont("8Bit_32"),
+												QBatch,
+												EG::RGBA16_Orange()
+										);
+
+				}
+				QBatch.End();
+				WorldTextProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png").id, 1);
+				QBatch.RenderBatch();
+			}
+			WorldTextProgram->Unuse();
 
 	        ENDPROFILE(RENDERING)
 
@@ -5353,7 +5407,7 @@ int main(int argc, char** argv)
 																		1.0f)
 																	);
 				DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(0.6f, 0.3f, 0.1f));
-				DirectionalLightProgram->SetUniform("LightIntensity", 0.3f);
+				DirectionalLightProgram->SetUniform("LightIntensity", SunlightIntensity);
 
 
 				// Render	
@@ -5422,7 +5476,7 @@ int main(int argc, char** argv)
 				SpotLightProgram->SetUniform("InnerCutoff", 	Spot.Parameters.InnerCutoff);
 				SpotLightProgram->SetUniform("OuterCutoff", 	Spot.Parameters.OuterCutoff);
 
-				glDrawArrays(GL_TRIANGLES, 0, 6);
+				// glDrawArrays(GL_TRIANGLES, 0, 6);
 			}
 			SpotLightProgram->Unuse();
 		
@@ -5656,15 +5710,50 @@ int main(int argc, char** argv)
 		UIProgram->Unuse();
 		*/
 
+		static float FPS = 0.0f;
+
+		glDisable(GL_DEPTH_TEST);
+		UIProgram->Use();
+		{
+			CompositeBatch.Begin();
+			{
+				EG::Fonts::Font* F = EG::FontManager::GetFont("Reduction_14");
+				UIProgram->SetUniform("view", HUDCamera.GetCameraMatrix());	
+				EG::Fonts::PrintText(	
+										(float)(-SCREENWIDTH) / 2.0f + 10.0f, 
+										(float)SCREENHEIGHT / 2.0f - 40.0f, 
+										1.0f, 
+										"FPS: ", 
+										F, 
+										CompositeBatch, 
+										EG::RGBA16_White()
+									);
+
+				EG::Fonts::PrintText(	
+										(float)(-SCREENWIDTH) / 2.0f + EG::Fonts::GetStringAdvance("FPS:F", F), 
+										(float)SCREENHEIGHT / 2.0f - 40.0f, 
+										1.0f, 
+										std::to_string(FPS), 
+										EG::FontManager::GetFont("Reduction_14"), 
+										CompositeBatch, 
+										EG::RGBA16_ZombieGreen()
+									);
+			}
+			CompositeBatch.End();
+			CompositeBatch.RenderBatch();
+		}
+		UIProgram->Unuse();
+
 		if (ShowConsole)
 		{
 			Enjon::Console::Draw();
 		}
+		glEnable(GL_DEPTH_TEST);
 
         // Swap the screen buffers
         Window.SwapBuffer();
 
-        // auto fps = Limiter.End();
+        FPS = Limiter.End();
 
     }
 

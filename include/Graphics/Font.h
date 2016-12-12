@@ -7,6 +7,8 @@
 
 #include "Graphics/SpriteBatch.h"
 #include "Graphics/Color.h"
+#include "Math/Transform.h"
+#include "Graphics/QuadBatch.h"
 
 #include "ft2build.h"
 #include FT_FREETYPE_H
@@ -48,6 +50,8 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 
 	float GetAdvance(char c, Font* F, float scale = 1.0f);
 
+	float GetStringAdvance(const char* C, Font* F, float Scale = 1.0f);
+
 	float GetHeight(char c, Font* F, float scale = 1.0f);
 
 	/* Creates and returns new font */
@@ -56,6 +60,8 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	/* Adds a string of tex at (x,y) to given spritebatch */
 	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, 
 						Enjon::Graphics::ColorRGBA16 Color = Enjon::Graphics::RGBA16_White(), TextStyle Style = TextStyle::SHADOW, float Angle = 0.0f, float Depth = 0.0f);
+
+	void PrintText(EM::Transform& Transform, std::string Text, Font* F, EG::QuadBatch& Batch, EG::ColorRGBA16 Color = EG::RGBA16_White(), TextStyle Style = TextStyle::SHADOW);
 
 }}}
 

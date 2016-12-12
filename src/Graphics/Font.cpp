@@ -147,6 +147,18 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 		return (ch.Advance >> 6) * scale;
 	}
 
+	float GetStringAdvance(const char* C, Font* F, float Scale)
+	{
+		float Advance = 0.0f;
+	    std::string::const_iterator c;
+	    std::string Text(C);
+	    for (c = Text.begin(); c != Text.end(); c++)
+	    {
+	    	Advance += GetAdvance(*c, F, Scale);
+	    } 
+	    return Advance;
+	}
+
 	float GetHeight(char c, Font* F, float scale)
 	{
 		Character ch = F->Characters[c];
@@ -185,6 +197,52 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	        x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
 	    }
 
+	}
+
+	void PrintText(EM::Transform& Transform, std::string Text, Font* F, EG::QuadBatch& Batch, EG::ColorRGBA16 Color, TextStyle Style)
+	{
+		EM::Vec3& Position = Transform.Position;
+		EM::Quaternion& Rotation = Transform.Orientation;
+		EM::Vec3& Scale = Transform.Scale;
+
+		float x = Transform.Position.x;
+		float y = Transform.Position.y;
+
+	    // if (Style == TextStyle::SHADOW) 
+	    // {
+	    // 	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, EG::RGBA16_Black(), TextStyle::DEFAULT, Angle, Depth);
+	    // }
+
+		// Iterate through all characters
+	    std::string::const_iterator c;
+	    for (c = Text.begin(); c != Text.end(); c++) 
+	    {
+	        Character ch = F->Characters[*c];
+
+	        GLfloat xpos = x + ch.Bearing.x * Scale.x;
+	        GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * Scale.y;
+
+	        GLfloat w = ch.Size.x * Scale.x;
+	        GLfloat h = ch.Size.y * Scale.y;
+
+	        Enjon::Math::Vec4 UV(0.00f, 0.05f, 1.0f, 0.90f);
+
+			// void Add(EM::Transform& Transform, EM::Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f));
+	        // Add to batch
+	        Batch.Add(
+	        			EM::Transform(
+	        							EM::Vec3(xpos, ypos, Position.z),
+	        							Rotation,
+	        							Scale
+	        						),
+	        			UV,
+	        			ch.TextureID, 
+	        			Color
+	        		);
+
+	        // Advance to next character
+	        x += (ch.Advance >> 6) * Scale.x; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+	    }
 	}
 
 }}}

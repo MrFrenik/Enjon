@@ -13,7 +13,8 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 	{
 		AddFont(Fonts, "Bold_12", Fonts::CreateFont("../assets/fonts/TheBoldFont/TheBoldFont.ttf", 12));
 		AddFont(Fonts, "Bold_32", Fonts::CreateFont("../assets/fonts/TheBoldFont/TheBoldFont.ttf", 32));
-		AddFont(Fonts, "Sofia", Fonts::CreateFont("../assets/fonts/SofiaPro/SofiaPro.otf", 14));
+		AddFont(Fonts, "Sofia_64", Fonts::CreateFont("../assets/fonts/SofiaPro/SofiaPro.otf", 64));
+		AddFont(Fonts, "Sofia_14", Fonts::CreateFont("../assets/fonts/SofiaPro/SofiaPro.otf", 14));
 		AddFont(Fonts, "Corbert_12", Fonts::CreateFont("../assets/fonts/CorbertRegular/CorbertRegular.otf", 12));
 		AddFont(Fonts, "Corbert_16", Fonts::CreateFont("../assets/fonts/CorbertRegular/CorbertRegular.otf", 16));
 		AddFont(Fonts, "Dense", Fonts::CreateFont("../assets/fonts/DenseRegular/DenseRegular.otf", 64));
@@ -21,8 +22,10 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 		AddFont(Fonts, "8Bit_32", Fonts::CreateFont("../assets/fonts/8BitWonder/8BitWonder.ttf", 32));
 		AddFont(Fonts, "TallBold", Fonts::CreateFont("../assets/fonts/TallBolder/TallBolder.ttf", 12));
 		AddFont(Fonts, "BebasNeue", Fonts::CreateFont("../assets/fonts/BebasNeue/BebasNeue.otf", 16));
+		AddFont(Fonts, "BebasNeue_72", Fonts::CreateFont("../assets/fonts/BebasNeue/BebasNeue.otf", 72));
 		AddFont(Fonts, "BebasNeue_32", Fonts::CreateFont("../assets/fonts/BebasNeue/BebasNeue.otf", 32));
-		AddFont(Fonts, "WeblySleek", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 14));
+		AddFont(Fonts, "WeblySleek_128", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 128));
+		AddFont(Fonts, "WeblySleek_64", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 32));
 		AddFont(Fonts, "WeblySleek_32", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 32));
 		AddFont(Fonts, "WeblySleek_16", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 16));
 		AddFont(Fonts, "WeblySleek_14", Fonts::CreateFont("../assets/fonts/WeblySleek/weblysleekuisb.ttf", 14));
@@ -34,12 +37,16 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 		AddFont(Fonts, "VCR_OSD_MONO", Fonts::CreateFont("../assets/fonts/VCR_OSD_MONO/VCR_OSD_MONO.ttf", 14));
 		AddFont(Fonts, "Villeray_Semilight_14", Fonts::CreateFont("../assets/fonts/Villeray/Villeray-Semilight.ttf", 14));
 		AddFont(Fonts, "Villeray_Semilight_10", Fonts::CreateFont("../assets/fonts/Villeray/Villeray-Semilight.ttf", 10));
-		AddFont(Fonts, "Villeray_Bold", Fonts::CreateFont("../assets/fonts/Villeray/Villeray-Bold.ttf", 10));
+		AddFont(Fonts, "Villeray_Bold_64", Fonts::CreateFont("../assets/fonts/Villeray/Villeray-Bold.ttf", 64));
+		AddFont(Fonts, "Villeray_Bold_10", Fonts::CreateFont("../assets/fonts/Villeray/Villeray-Bold.ttf", 10));
 		AddFont(Fonts, "Arrows7", Fonts::CreateFont("../assets/fonts/Arrows7/Arrows7.ttf", 10));
 		AddFont(Fonts, "Arrows7_12", Fonts::CreateFont("../assets/fonts/Arrows7/Arrows7.ttf", 12));
 		AddFont(Fonts, "Arrows7_24", Fonts::CreateFont("../assets/fonts/Arrows7/Arrows7.ttf", 24));
 		AddFont(Fonts, "Arrows7_32", Fonts::CreateFont("../assets/fonts/Arrows7/Arrows7.ttf", 32));
 		AddFont(Fonts, "CutOut", Fonts::CreateFont("../assets/fonts/CutOut/CutOut.ttf", 12));
+		AddFont(Fonts, "SilomBol_64", Fonts::CreateFont("../assets/fonts/SilomBol/SilomBol.ttf", 64));
+		AddFont(Fonts, "SilomBol_14", Fonts::CreateFont("../assets/fonts/SilomBol/SilomBol.ttf", 14));
+		AddFont(Fonts, "MisterPixelRegular_14", Fonts::CreateFont("../assets/fonts/MisterPixel/MisterPixelRegular.ttf", 14));
 
 		// Set to being initialized
 		Initialized = true;

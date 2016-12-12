@@ -293,7 +293,7 @@ namespace Enjon { namespace GUI {
 			auto Padding = EM::Vec2(5.0f, 5.0f);
 
 			// Make sure font isn't null
-			if (TextFont == nullptr) TextFont = EG::FontManager::GetFont("Sofia");
+			if (TextFont == nullptr) TextFont = EG::FontManager::GetFont("Sofia_14");
 
 			// Draw box		
 			Batch->Add(
@@ -302,8 +302,6 @@ namespace Enjon { namespace GUI {
 						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						Color, 
 						-1.0f
-						// EG::SpriteBatch::DrawOptions::BORDER, 
-						// BorderColor
 					);
 
 			// Print text

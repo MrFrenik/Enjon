@@ -34,6 +34,7 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("ScreenUI", "../shaders/screen_ui.v.glsl", "../shaders/screen_ui.f.glsl");
 		ShaderManager::AddShader("FXAA", "../shaders/deferred/fxaa.v.glsl", "../shaders/deferred/fxaa.f.glsl");
 		ShaderManager::AddShader("QuadBatch", "../shaders/deferred/quad_batch.v.glsl", "../shaders/deferred/quad_batch.f.glsl");
+		ShaderManager::AddShader("WorldText", "../shaders/deferred/world_text.v.glsl", "../shaders/deferred/world_text.f.glsl");
 	}
 
 	void AddShader(const char* shadername, const char* vertpath, const char* fragpath)

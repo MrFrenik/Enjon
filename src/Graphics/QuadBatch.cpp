@@ -14,10 +14,8 @@ namespace Enjon { namespace Graphics {
 	static EM::Vec3 Static_Tangent(1.0f, 0.0f, 0.0f);
 	static EM::Vec3 Static_BiTangent(0.0f, 1.0f, 0.0f);
 
-	QuadBatch::QuadBatch()
+	QuadBatch::QuadBatch() : VAO(0), VBO(0)
 	{
-		// Construct the batch
-		CreateVertexArray();
 	}
 
 	QuadBatch::~QuadBatch()
