@@ -31,6 +31,7 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("SpotLight", "../shaders/deferred/spot_light.v.glsl", "../shaders/deferred/spot_light.f.glsl");
 		ShaderManager::AddShader("Depth", "../shaders/deferred/depth.v.glsl", "../shaders/deferred/depth.f.glsl");
 		ShaderManager::AddShader("AnimatedMaterial", "../shaders/deferred/animated_material.v.glsl", "../shaders/deferred/animated_material.f.glsl");
+		ShaderManager::AddShader("UVAnimation", "../shaders/deferred/uv_animation.v.glsl", "../shaders/deferred/uv_animation.f.glsl");
 		ShaderManager::AddShader("ScreenUI", "../shaders/screen_ui.v.glsl", "../shaders/screen_ui.f.glsl");
 		ShaderManager::AddShader("FXAA", "../shaders/deferred/fxaa.v.glsl", "../shaders/deferred/fxaa.f.glsl");
 		ShaderManager::AddShader("QuadBatch", "../shaders/deferred/quad_batch.v.glsl", "../shaders/deferred/quad_batch.f.glsl");

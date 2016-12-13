@@ -70,8 +70,8 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 			glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -199,7 +199,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 
 	}
 
-	void PrintText(EM::Transform& Transform, std::string Text, Font* F, EG::QuadBatch& Batch, EG::ColorRGBA16 Color, TextStyle Style)
+	void PrintText(EM::Transform& Transform, std::string Text, Font* F, EG::QuadBatch& Batch, EG::ColorRGBA16 Color, float Spacing, TextStyle Style)
 	{
 		EM::Vec3& Position = Transform.Position;
 		EM::Quaternion& Rotation = Transform.Orientation;
@@ -222,18 +222,18 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	        GLfloat xpos = x + ch.Bearing.x * Scale.x;
 	        GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * Scale.y;
 
-	        GLfloat w = ch.Size.x * Scale.x;
-	        GLfloat h = ch.Size.y * Scale.y;
+	        GLfloat w = ch.Size.x;
+	        GLfloat h = ch.Size.y;
 
 	        Enjon::Math::Vec4 UV(0.00f, 0.05f, 1.0f, 0.90f);
 
-			// void Add(EM::Transform& Transform, EM::Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f));
 	        // Add to batch
 	        Batch.Add(
+						EM::Vec2(w, h),
 	        			EM::Transform(
 	        							EM::Vec3(xpos, ypos, Position.z),
 	        							Rotation,
-	        							Scale
+	        							EM::Vec3(Scale.x, Scale.y, 1.0f)
 	        						),
 	        			UV,
 	        			ch.TextureID, 

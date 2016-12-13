@@ -4608,8 +4608,10 @@ EG::ModelAsset SpriteWithNormal;
 EG::ModelAsset MonkeyHead;
 EG::ModelAsset OtherCube;
 EG::ModelAsset CubeSprite;
+EG::ModelAsset UVAnimatedAsset;
 std::vector<EG::ModelInstance> Instances;
 std::vector<EG::ModelInstance> Animations;
+std::vector<EG::ModelInstance> UVAnimations;
 EG::Camera FPSCamera;
 EG::Camera2D HUDCamera;
 
@@ -4618,6 +4620,7 @@ const uint8_t RENDERING = 0;
 bool DebugDrawingEnabled 	= false;
 bool ShowConsole 			= false;
 Enjon::u32 BlurIterations 	= 1;
+float Tick = 0.0f;
 
 enum class DrawFrameType
 {
@@ -4636,7 +4639,10 @@ EG::SpotLight Spot;
 
 float RotationSpeed = 20.0f;
 float VXOffset = 0.01f;
-float TextScale = 1.0f;
+float TextScale = 0.01f;
+float TextSpacing = 0.0f;
+EM::Vec2 UVScalar = EM::Vec2(0.5f, 10.0f);
+EM::Vec2 UVAdditive = EM::Vec2(0, 0);
 
 struct FXAASettings
 {
@@ -4646,6 +4652,26 @@ struct FXAASettings
 };
 
 struct FXAASettings FXAASettings{8.0f, 1.0/128.0f, 0.5f};
+
+void LoadUVAnimatedAsset()
+{
+	// Get mesh
+	UVAnimatedAsset.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("UVAnimation");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    Shader->Unuse();
+
+    // Set shader
+    UVAnimatedAsset.Shader = Shader;
+    // Textures
+	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/forcefield.png");
+	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/stone_normal.png");
+	UVAnimatedAsset.Material.Shininess = 100.0f;
+}
 
 void LoadMonkeyHeadAsset()
 {
@@ -4771,17 +4797,23 @@ void LoadInstances()
 {
 	EG::ModelInstance D;
 	D.Asset = &SpriteWithNormal;
-	D.Transform.Position 	= EM::Vec3(5, 0, 5);
+	D.Transform.Position 	= EM::Vec3(4, 0, 3);
     D.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
     D.Transform.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f);
 	Animations.push_back(D);
 
+	EG::ModelInstance U;
+	U.Asset = &MonkeyHead;
+	U.Transform.Position 	= EM::Vec3(0, 0, 0);
+	U.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005f;
+	Instances.push_back(U);
+
 	EG::ModelInstance B;
-	B.Asset = &MonkeyHead;
-	B.Transform.Position 	= EM::Vec3(0, 0, 0);
-	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005f;
-	// B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 1.0f;
-	Instances.push_back(B);
+	B.Asset = &UVAnimatedAsset;
+	B.Transform.Position 	= EM::Vec3(5, 0, 5);
+	// B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005f;
+	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.75f;
+	UVAnimations.push_back(B);
 
 	// for (u32 i = 0; i < 50; ++i)
 	// {
@@ -4925,6 +4957,47 @@ void RenderAnimation(EG::ModelInstance& Instance)
 	glBindVertexArray(0);
 }
 
+void RenderUVAnimation(EG::ModelInstance& Instance)
+{
+	// Get reference to asset pointer
+	auto Asset = Instance.Asset;
+	auto& Transform = Instance.Transform;
+
+	static GLint CurrentTextureID = 0;
+
+
+	glBindVertexArray(Asset->Mesh->VAO);
+	{
+        // Bind instance texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id);
+
+		// Bind normal
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
+
+		// glActiveTexture(GL_TEXTURE2);
+		// glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id);
+
+		EM::Mat4 Model;
+		// L = T*R*S
+		Model *= EM::Mat4::Translate(Transform.Position);
+		Model *= EM::QuaternionToMat4(Transform.Orientation);
+		Model *= EM::Mat4::Scale(Transform.Scale);
+
+		Asset->Shader->SetUniform("model", Model);
+		Asset->Shader->SetUniform("Near", 0.1f);
+		Asset->Shader->SetUniform("Far", 100.0f);
+		// Asset->Shader->SetUniform("UVAdditive", UVAdditive);
+		Asset->Shader->SetUniform("UVScalar", UVScalar);
+		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
+	}
+
+	glActiveTexture(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindVertexArray(0);
+}
+
 void LoadFrames()
 {
 	struct Frame One;
@@ -5045,6 +5118,7 @@ int main(int argc, char** argv)
 	LoadNormalFloorAsset();
 	LoadOtherCubeAsset();
 	LoadMonkeyHeadAsset();
+	LoadUVAnimatedAsset();
 	LoadInstances();
 
 	LoadFrames();
@@ -5198,6 +5272,11 @@ int main(int argc, char** argv)
 	Enjon::CVarsSystem::Register("fxaa_reduce_mul", &FXAASettings.ReduceMul, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("sunlight_intensity", &SunlightIntensity, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("text_scale", &TextScale, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("text_spacing", &TextSpacing, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("uv_scalar_x", &UVScalar.x, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("uv_scalar_y", &UVScalar.y, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("uv_additive_x", &UVAdditive.x, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("uv_additive_y", &UVAdditive.y, Enjon::CVarType::TYPE_FLOAT);
 
     // Game loop
     bool running = true;
@@ -5205,6 +5284,7 @@ int main(int argc, char** argv)
     {
     	Limiter.Begin();
 
+    	Tick += 0.001f;
 
     	static float t = 0.0f;
     	t += 0.001f;
@@ -5259,6 +5339,9 @@ int main(int argc, char** argv)
     	PointLights.at(4).Color = EG::RGBA16_Red();
     	PointLights.at(4).Intensity = EM::Clamp(cos(timer) * 5.0f, 0.0f, 5.0f);
 
+    	PointLights.at(5).Position = UVAnimations.at(0).Transform.Position + EM::Vec3(cos(timer * speed), 0.0f, sin(timer * speed));
+    	PointLights.at(5).Color = EG::RGBA16_White();
+
     	// Set up spot light
     	Spot.Parameters.Direction = EM::Vec3(cos(timer) * speed, 0.0f, sin(timer) * speed);
 
@@ -5311,6 +5394,16 @@ int main(int argc, char** argv)
 	        	Shader->Unuse();
 	        }
 
+	        for (auto& c : UVAnimations)
+	        {
+	        	auto Shader = c.Asset->Shader;
+	        	Shader->Use();
+	        		Shader->SetUniform("camera", CameraMatrix);
+	        		Shader->SetUniform("Tick", Tick);
+	        		RenderUVAnimation(c);
+	        	Shader->Unuse();
+	        }
+
 			QuadBatchProgram->Use();
 			{
 				QuadBatchProgram->SetUniform("camera", CameraMatrix);
@@ -5332,10 +5425,20 @@ int main(int argc, char** argv)
 									);
 					}
 
-					// void PrintText(EM::Transform& Transform, std::string Text, Font* F, EG::QuadBatch& Batch, EG::ColorRGBA16 Color, TextStyle Style)
+					static float uv_add = 0.0f;
+					uv_add += 0.001f;
+					QBatch.Add(
+								EM::Vec2(10, 0), 
+								EM::Transform(
+												EM::Vec3(0, 2, 13),
+												EM::Quaternion::AngleAxis(EM::ToRadians(-90), EM::Vec3(0, 1, 0)),
+												EM::Vec3(1, 1, 1)
+											),
+								EM::Vec4(0.0f + uv_add * UVScalar.x, 0.0f, 1.0f + uv_add * UVScalar.y, 1.0f),
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png", GL_LINEAR).id
+						);
 				}
 				QBatch.End();
-				// QuadBatchProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test_normal.png").id, 1);
 				QBatch.RenderBatch();
 			}
 
@@ -5349,15 +5452,31 @@ int main(int argc, char** argv)
 				{
 						EG::Fonts::PrintText(
 												EM::Transform(
-																Instances.at(0).Transform.Position,
-																Instances.at(0).Transform.Orientation, 
-																EM::Vec3(1, 1, 1) * TextScale
+																Instances.at(0).Transform.Position + EM::Vec3(-2, 2, 0),
+																EM::Quaternion(0, 0, 0, 1), 
+																EM::Vec3(TextScale, TextScale, 1)
 															),
-												"Texting this shit",
+												"Testing this shit",
 												EG::FontManager::GetFont("8Bit_32"),
 												QBatch,
-												EG::RGBA16_Orange()
+												EG::RGBA16_Orange(),
+												TextSpacing
 										);
+						for (auto i = 0; i < 10; i++)
+						{
+							EG::Fonts::PrintText(
+													EM::Transform(
+																	EM::Vec3(-i * 2, i * 2, i * 2),
+																	EM::Quaternion(0, 0, 0, 1), 
+																	EM::Vec3(TextScale, TextScale, 1)
+																),
+													"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+													EG::FontManager::GetFont("8Bit_32"),
+													QBatch,
+													EG::RGBA16_Orange(),
+													TextSpacing
+											);
+						}
 
 				}
 				QBatch.End();
@@ -5738,6 +5857,27 @@ int main(int argc, char** argv)
 										CompositeBatch, 
 										EG::RGBA16_ZombieGreen()
 									);
+
+				std::string DrawCallLabel("Draw Calls: ");
+				EG::Fonts::PrintText(	
+										(float)(-SCREENWIDTH) / 2.0f + 10.0f, 
+										(float)SCREENHEIGHT / 2.0f - 60.0f, 
+										1.0f, 
+										DrawCallLabel, 
+										F, 
+										CompositeBatch, 
+										EG::RGBA16_White()
+									);
+
+				EG::Fonts::PrintText(	
+										(float)(-SCREENWIDTH) / 2.0f + EG::Fonts::GetStringAdvance(DrawCallLabel.c_str(), F), 
+										(float)SCREENHEIGHT / 2.0f - 60.0f, 
+										1.0f, 
+										std::to_string(EG::QuadBatch::DrawCallCount), 
+										EG::FontManager::GetFont("Reduction_14"), 
+										CompositeBatch, 
+										EG::RGBA16_ZombieGreen()
+									);
 			}
 			CompositeBatch.End();
 			CompositeBatch.RenderBatch();
@@ -5754,6 +5894,9 @@ int main(int argc, char** argv)
         Window.SwapBuffer();
 
         FPS = Limiter.End();
+
+        // Reset draw call count
+        EG::QuadBatch::DrawCallCount = 0;
 
     }
 

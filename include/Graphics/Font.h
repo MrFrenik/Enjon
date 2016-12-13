@@ -61,7 +61,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, 
 						Enjon::Graphics::ColorRGBA16 Color = Enjon::Graphics::RGBA16_White(), TextStyle Style = TextStyle::SHADOW, float Angle = 0.0f, float Depth = 0.0f);
 
-	void PrintText(EM::Transform& Transform, std::string Text, Font* F, EG::QuadBatch& Batch, EG::ColorRGBA16 Color = EG::RGBA16_White(), TextStyle Style = TextStyle::SHADOW);
+	void PrintText(EM::Transform& Transform, std::string Text, Font* F, EG::QuadBatch& Batch, EG::ColorRGBA16 Color = EG::RGBA16_White(), float Spacing = 1.0f, TextStyle Style = TextStyle::SHADOW);
 
 }}}
 
