@@ -4657,6 +4657,9 @@ float Exposure = 1.0f;
 float Gamma = 1.0f;
 EM::Vec3 BlurWeights(0.38f, 0.32f, 0.39f);
 EM::Vec3 BlurIterations(20, 10, 40);
+EM::Vec3 BlurRadius(0.004f, 0.004f, 0.004f);
+bool DirectionalLightEnabled = true;
+float SunlightIntensity = 0.2f;
 
 struct ToneMapSettings
 {
@@ -5294,7 +5297,6 @@ int main(int argc, char** argv)
 						10.0f
 					);
 
-	float SunlightIntensity = 0.2f;
 
     // Attach components
     auto Entity = EManager->CreateEntity();
@@ -5371,6 +5373,11 @@ int main(int argc, char** argv)
 	Enjon::CVarsSystem::Register("spot_r", &Spot.Color.r, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("spot_g", &Spot.Color.g, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("spot_b", &Spot.Color.b, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_radius_small", &BlurRadius.x, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_radius_medium", &BlurRadius.y, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_radius_large", &BlurRadius.z, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("sun_enabled", &DirectionalLightEnabled, Enjon::CVarType::TYPE_BOOL);
+	Enjon::CVarsSystem::Register("sun_intensity", &SunlightIntensity, Enjon::CVarType::TYPE_FLOAT);
 
     // Game loop
     bool running = true;
@@ -5549,7 +5556,7 @@ int main(int argc, char** argv)
 												EM::Vec3(5, 0.1 * LineWidth, 1.0)
 											),
 								EM::Vec4(0.0f + uv_add * UVScalar.x, 0.0f, 1.0f, 1.0f),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/forcefield.png", GL_LINEAR).id,
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/side_arrow.png", GL_LINEAR).id,
 								EG::RGBA16_ZombieGreen()
 						);
 				}
@@ -5617,51 +5624,54 @@ int main(int argc, char** argv)
 			glBlendFunc(GL_ONE, GL_ONE);
 
 			// Directional lights
-			DirectionalLightProgram->Use();
+			if (DirectionalLightEnabled)
 			{
-				glEnable(GL_BLEND);
-				glDisable(GL_DEPTH_TEST);
-				glBlendFunc(GL_ONE, GL_ONE);
-
-
-				DirectionalLightProgram->BindTexture("DiffuseMap", GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
-				DirectionalLightProgram->BindTexture("NormalMap", GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
-				DirectionalLightProgram->BindTexture("PositionMap", GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
-				DirectionalLightProgram->SetUniform("Resolution", GBuffer.GetResolution());
-				DirectionalLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
-				DirectionalLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
-
-
-				// Direcitonal light
-				// NOTE: Will be faster to cache uniforms rather than find them every frame
-				DirectionalLightProgram->SetUniform("LightPos", EM::Vec3(	
-																		-0.3f, 
-																		0.8f, 
-																		1.0f)
-																	);
-				DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(0.6f, 0.3f, 0.1f));
-				DirectionalLightProgram->SetUniform("LightIntensity", SunlightIntensity);
-
-
-				// Render	
+				DirectionalLightProgram->Use();
 				{
-					glDrawArrays(GL_TRIANGLES, 0, 6);
-				}
+					glEnable(GL_BLEND);
+					glDisable(GL_DEPTH_TEST);
+					glBlendFunc(GL_ONE, GL_ONE);
 
-				DirectionalLightProgram->SetUniform("LightPos", EM::Vec3(	
-																		0.5f, 
-																		0.2f, 
-																		-0.8f)
-																	);
-				DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(0.2f, 0.8f, 0.4f));
-				DirectionalLightProgram->SetUniform("LightIntensity", 0.2f);
 
-				// Render	
-				{
-					// glDrawArrays(GL_TRIANGLES, 0, 6);
+					DirectionalLightProgram->BindTexture("DiffuseMap", GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
+					DirectionalLightProgram->BindTexture("NormalMap", GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
+					DirectionalLightProgram->BindTexture("PositionMap", GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
+					DirectionalLightProgram->SetUniform("Resolution", GBuffer.GetResolution());
+					DirectionalLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
+					DirectionalLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
+
+
+					// Direcitonal light
+					// NOTE: Will be faster to cache uniforms rather than find them every frame
+					DirectionalLightProgram->SetUniform("LightPos", EM::Vec3(	
+																			-0.3f, 
+																			0.8f, 
+																			1.0f)
+																		);
+					DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(0.6f, 0.3f, 0.1f));
+					DirectionalLightProgram->SetUniform("LightIntensity", SunlightIntensity);
+
+
+					// Render	
+					{
+						glDrawArrays(GL_TRIANGLES, 0, 6);
+					}
+
+					DirectionalLightProgram->SetUniform("LightPos", EM::Vec3(	
+																			0.5f, 
+																			0.2f, 
+																			-0.8f)
+																		);
+					DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(0.2f, 0.8f, 0.4f));
+					DirectionalLightProgram->SetUniform("LightIntensity", 0.2f);
+
+					// Render	
+					{
+						// glDrawArrays(GL_TRIANGLES, 0, 6);
+					}
 				}
+				DirectionalLightProgram->Unuse();
 			}
-			DirectionalLightProgram->Unuse();
 
 			// Point lights
 			PointLightProgram->Use();
@@ -5686,8 +5696,8 @@ int main(int argc, char** argv)
 						glDrawArrays(GL_TRIANGLES, 0, 6);
 					}
 				}
-
 			}
+			
 			PointLightProgram->Unuse();
 
 			// Do spot lights
@@ -5766,6 +5776,7 @@ int main(int argc, char** argv)
 					}
 
 					Program->SetUniform("weight", BlurWeights.x);
+					Program->SetUniform("blurRadius", BlurRadius.x);
 					GLuint TextureID = i == 0 ? BrightTarget.GetTexture() : IsEven ? SmallBlurVertical.GetTexture() : SmallBlurHorizontal.GetTexture();
 					CompositeBatch.Begin();
 					{
@@ -5801,6 +5812,7 @@ int main(int argc, char** argv)
 					}
 
 					Program->SetUniform("weight", BlurWeights.y);
+					Program->SetUniform("blurRadius", BlurRadius.y);
 					GLuint TextureID = i == 0 ? BrightTarget.GetTexture() : IsEven ? MediumBlurVertical.GetTexture() : MediumBlurHorizontal.GetTexture();
 					CompositeBatch.Begin();
 					{
@@ -5836,6 +5848,7 @@ int main(int argc, char** argv)
 					}
 
 					Program->SetUniform("weight", BlurWeights.z);
+					Program->SetUniform("blurRadius", BlurRadius.z);
 					GLuint TextureID = i == 0 ? BrightTarget.GetTexture() : IsEven ? LargeBlurVertical.GetTexture() : LargeBlurHorizontal.GetTexture();
 					CompositeBatch.Begin();
 					{
