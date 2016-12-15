@@ -36,6 +36,8 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("FXAA", "../shaders/deferred/fxaa.v.glsl", "../shaders/deferred/fxaa.f.glsl");
 		ShaderManager::AddShader("QuadBatch", "../shaders/deferred/quad_batch.v.glsl", "../shaders/deferred/quad_batch.f.glsl");
 		ShaderManager::AddShader("WorldText", "../shaders/deferred/world_text.v.glsl", "../shaders/deferred/world_text.f.glsl");
+		ShaderManager::AddShader("Composite", "../shaders/deferred/composite.v.glsl", "../shaders/deferred/composite.f.glsl");
+		ShaderManager::AddShader("Bright", "../shaders/deferred/bright.v.glsl", "../shaders/deferred/bright.f.glsl");
 	}
 
 	void AddShader(const char* shadername, const char* vertpath, const char* fragpath)

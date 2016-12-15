@@ -125,6 +125,11 @@ namespace Enjon { namespace Math {
 		return Vec4(left.x / value, left.y / value, left.z / value, left.w / value);
 	}
 
+	Vec4 operator*(const float& scalar, Vec4 right)
+	{
+		return right * scalar;
+	}
+
 	float Vec4::Dot(const Vec4& other)
 	{
 		return x * other.x + y * other.y + z * other.z + w * other.w;

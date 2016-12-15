@@ -129,7 +129,7 @@ bool DrawSplineOn 			= false;
 bool ShowConsole 			= false;
 bool LimiterEnabled			= true;
 
-const int LEVELSIZE = 50;
+const int LEVELSIZE = 300;
 
 float DashingCounter = 0.0f;
 
@@ -415,7 +415,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 1;
+	static uint32 AmountDrawn = 40000;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = -50.0f;
@@ -4619,7 +4619,6 @@ const uint8_t RENDERING = 0;
 
 bool DebugDrawingEnabled 	= false;
 bool ShowConsole 			= false;
-Enjon::u32 BlurIterations 	= 1;
 float Tick = 0.0f;
 
 enum class DrawFrameType
@@ -4635,14 +4634,38 @@ enum class DrawFrameType
 
 DrawFrameType DrawFrame = DrawFrameType::FINAL;
 
+enum class BlurType
+{
+	SMALL, 
+	MEDIUM, 
+	LARGE
+};
+
+BlurType BlurArrayType = BlurType::SMALL;
+
 EG::SpotLight Spot;
 
 float RotationSpeed = 20.0f;
 float VXOffset = 0.01f;
 float TextScale = 0.01f;
 float TextSpacing = 0.0f;
-EM::Vec2 UVScalar = EM::Vec2(0.5f, 10.0f);
+EM::Vec2 UVScalar = EM::Vec2(1.0f, 0.1f);
 EM::Vec2 UVAdditive = EM::Vec2(0, 0);
+float DistanceRadius = 0.0f;
+float LineWidth = 1.0f;
+float Exposure = 1.0f;
+float Gamma = 1.0f;
+EM::Vec3 BlurWeights(0.38f, 0.32f, 0.39f);
+EM::Vec3 BlurIterations(20, 10, 40);
+
+struct ToneMapSettings
+{
+	float Exposure;
+	float Gamma;
+	float BloomScalar;
+	float Scale;
+	float Threshold;
+};
 
 struct FXAASettings
 {
@@ -4652,11 +4675,12 @@ struct FXAASettings
 };
 
 struct FXAASettings FXAASettings{8.0f, 1.0/128.0f, 0.5f};
+struct ToneMapSettings ToneMapSettings{1.0f, 1.0f, 10.0f, 1.0f, 0.0f};
 
 void LoadUVAnimatedAsset()
 {
 	// Get mesh
-	UVAnimatedAsset.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
+	UVAnimatedAsset.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/dragon.obj");
 
     // Get shader and set texture
     auto Shader = EG::ShaderManager::GetShader("UVAnimation");
@@ -4669,7 +4693,7 @@ void LoadUVAnimatedAsset()
     UVAnimatedAsset.Shader = Shader;
     // Textures
 	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/forcefield.png");
-	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/stone_normal.png");
+	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png");
 	UVAnimatedAsset.Material.Shininess = 100.0f;
 }
 
@@ -5027,6 +5051,10 @@ void LoadFrames()
 // bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera3D* Camera);
 bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera);
 
+double SmallGaussianCurve[16];
+double MediumGaussianCurve[16];
+double LargeGaussianCurve[16];
+
 // Main window
 EG::Window Window;
 
@@ -5037,6 +5065,14 @@ void DrawFullScreenQuad(GLuint VAO)
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
+}
+
+double NormalPDF(double x, double s, double m = 0.0f)
+{
+	static const double inv_sqrt_2pi = 0.3989422804014327;
+	double a = (x - m) / s;
+
+	return inv_sqrt_2pi / s * std::exp(-0.5 * a * a);
 }
 
 // The MAIN function, from here we start the application and run the game loop
@@ -5052,10 +5088,47 @@ int main(int argc, char** argv)
 	float TimeIncrement = 0.0f;
 	u32 ticks = 0;
 
+	double weight;
+	double start = -3.0;
+	double end = 3.0;
+	double denom = 2.0 * end + 1.0;
+	double num_samples = 15.0;
+	double range = end * 2.0;
+	double step = range / num_samples;
+	uint32_t i = 0;
+
+	weight = 1.74;
+	printf("Small Curve:\n");
+	for (double x = start; x <= end; x += step)
+	{
+		double pdf = NormalPDF(x, 0.23);
+		std::cout << x << ": " << pdf << '\n';
+		SmallGaussianCurve[i++] = pdf;
+	}
+
+	i = 0;
+	weight = 3.9f;
+	printf("Medium Curve:\n");
+	for (double x = start; x <= end; x += step)
+	{
+		double pdf = NormalPDF(x, 0.775);
+		std::cout << x << ": " << pdf << '\n';
+		MediumGaussianCurve[i++]= pdf;
+	}
+
+	i = 0;
+	weight = 2.53f;
+	printf("Large Curve:\n");
+	for (double x = start; x <= end; x += step)
+	{
+		double pdf = NormalPDF(x, 1.0);
+		std::cout << x << ": " << pdf << '\n';
+		LargeGaussianCurve[i++] = pdf;
+	}
+
 	// TODO(John): Make an InitSubsystems call in the engine
 
 	// Initialize window
-	// Window.Init("3D Test", SCREENWIDTH, SCREENHEIGHT, EG::WindowFlagsMask((u32)SCREENRES) | EG::WindowFlagsMask((u32)EG::WindowFlags::BORDERLESS));
 	Window.Init(
 				"3D Test", 
 				SCREENWIDTH, 
@@ -5073,17 +5146,21 @@ int main(int argc, char** argv)
 	FPSCamera = EG::Camera((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
 	HUDCamera.Init((Enjon::uint32)SCREENWIDTH, (Enjon::uint32)SCREENHEIGHT);
 
-
 	// Init Console
 	Enjon::Console::Init(SCREENWIDTH, SCREENHEIGHT);
 
 	EG::FrameBufferObject 	FBO((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
 	EG::RenderTarget 		DebugTarget((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
-	EG::RenderTarget 		BlurHorizontal((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
-	EG::RenderTarget 		BlurVertical((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::RenderTarget 		SmallBlurHorizontal((Enjon::u32)SCREENWIDTH / 4, (Enjon::u32)SCREENHEIGHT / 4);
+	EG::RenderTarget 		SmallBlurVertical((Enjon::u32)SCREENWIDTH / 4, (Enjon::u32)SCREENHEIGHT / 4);
+	EG::RenderTarget 		MediumBlurHorizontal((Enjon::u32)SCREENWIDTH  / 16, (Enjon::u32)SCREENHEIGHT  / 16);
+	EG::RenderTarget 		MediumBlurVertical((Enjon::u32)SCREENWIDTH  / 16, (Enjon::u32)SCREENHEIGHT  / 16);
+	EG::RenderTarget 		LargeBlurHorizontal((Enjon::u32)SCREENWIDTH / 64, (Enjon::u32)SCREENHEIGHT / 64);
+	EG::RenderTarget 		LargeBlurVertical((Enjon::u32)SCREENWIDTH / 64, (Enjon::u32)SCREENHEIGHT / 64);
 	EG::RenderTarget 		Composite((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
 	EG::GBuffer 	 		GBuffer((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
 	EG::RenderTarget 		DeferredLight((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::RenderTarget 		BrightTarget((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
 	EG::RenderTarget		FXAATarget((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT); 			
 
 	EG::SpriteBatch CompositeBatch;
@@ -5098,7 +5175,7 @@ int main(int argc, char** argv)
 	QBatch.Init();
 	FloorBatch.Init();
 
-	EG::GLSLProgram* CompositeProgram 			= EG::ShaderManager::GetShader("NoCameraProjection");
+	EG::GLSLProgram* CompositeProgram 			= EG::ShaderManager::GetShader("Composite");
 	EG::GLSLProgram* HorizontalBlurProgram 		= EG::ShaderManager::GetShader("HorizontalBlur");
 	EG::GLSLProgram* VerticalBlurProgram 		= EG::ShaderManager::GetShader("VerticalBlur");
 	EG::GLSLProgram* GBufferProgram 			= EG::ShaderManager::GetShader("GBuffer");
@@ -5110,6 +5187,7 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* FXAAProgram 				= EG::ShaderManager::GetShader("FXAA");
 	EG::GLSLProgram* QuadBatchProgram 			= EG::ShaderManager::GetShader("QuadBatch");
 	EG::GLSLProgram* WorldTextProgram 			= EG::ShaderManager::GetShader("WorldText");
+	EG::GLSLProgram* BrightProgram 				= EG::ShaderManager::GetShader("Bright");
 
 	// Load model data
 	LoadCubeAsset();
@@ -5212,7 +5290,7 @@ int main(int argc, char** argv)
 													std::cos(EM::ToRadians(12.5f)),
 													std::cos(EM::ToRadians(17.5))
 												), 
-						EG::RGBA16_Red(),
+						EG::RGBA16_SkyBlue(),
 						10.0f
 					);
 
@@ -5234,7 +5312,7 @@ int main(int argc, char** argv)
     }
 
     std::vector<EM::Transform> Transforms;
-    for (auto i = 0; i < 100; i++)
+    for (auto i = 0; i < 30000; i++)
     {
     	EM::Transform t;
 		t.Position 	= EM::Vec3(ER::Roll(-100, 100), ER::Roll(0, 100), ER::Roll(-100, 100));
@@ -5277,6 +5355,22 @@ int main(int argc, char** argv)
 	Enjon::CVarsSystem::Register("uv_scalar_y", &UVScalar.y, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("uv_additive_x", &UVAdditive.x, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("uv_additive_y", &UVAdditive.y, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("distance_radius", &DistanceRadius, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("line_width", &LineWidth, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("exposure", &ToneMapSettings.Exposure, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("gamma", &ToneMapSettings.Gamma, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("bloom_scalar", &ToneMapSettings.BloomScalar, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_weight_small", &BlurWeights.x, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_weight_medium", &BlurWeights.y, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_weight_large", &BlurWeights.z, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_iter_small", &BlurIterations.x, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_iter_medium", &BlurIterations.y, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_iter_large", &BlurIterations.z, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("threshold", &ToneMapSettings.Threshold, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("scale", &ToneMapSettings.Scale, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("spot_r", &Spot.Color.r, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("spot_g", &Spot.Color.g, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("spot_b", &Spot.Color.b, Enjon::CVarType::TYPE_FLOAT);
 
     // Game loop
     bool running = true;
@@ -5366,6 +5460,10 @@ int main(int argc, char** argv)
 		auto& InstanceTransform = Instances.at(0).Transform;
 		InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * RotationSpeed), EM::Vec3(0, 1, 0));
 
+		// Rotate one of the instances over time
+		auto& InstanceTransform2 = UVAnimations.at(0).Transform;
+		InstanceTransform2.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * RotationSpeed), EM::Vec3(0, 1, 0));
+
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16_Black());
 
     	// Bind FBO
@@ -5417,25 +5515,42 @@ int main(int argc, char** argv)
 				{
 					for (uint32_t i = 0; i < Transforms.size(); i++)
 					{
-						Transforms.at(i).Scale = EM::Vec3(1, 1, 1) * float(i) / (float)Transforms.size();
-						QBatch.Add(
-										Transforms.at(i),
-										EM::Vec4(0, 0, 1, 1), 
-										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png").id
-									);
+						// Check if in range of camera to be drawn or not
+						if (EM::Vec3::DistanceSquared(Transforms.at(i).Position, FPSCamera.Transform.Position) <= DistanceRadius)
+						{
+							Transforms.at(i).Position = Transforms.at(i).Position;
+							Transforms.at(i).Scale = EM::Vec3(1, 1, 1) * float(i) / (float)Transforms.size();
+							QBatch.Add(
+											Transforms.at(i) ,
+											EM::Vec4(0, 0, 1, 1), 
+											EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png").id
+										);
+						}
 					}
 
 					static float uv_add = 0.0f;
 					uv_add += 0.001f;
 					QBatch.Add(
-								EM::Vec2(10, 0), 
 								EM::Transform(
 												EM::Vec3(0, 2, 13),
 												EM::Quaternion::AngleAxis(EM::ToRadians(-90), EM::Vec3(0, 1, 0)),
-												EM::Vec3(1, 1, 1)
+												EM::Vec3(10, 1, 1)
 											),
 								EM::Vec4(0.0f + uv_add * UVScalar.x, 0.0f, 1.0f + uv_add * UVScalar.y, 1.0f),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png", GL_LINEAR).id
+						);
+
+					// Line rendering?
+					QBatch.Add(
+								EM::Transform(
+												EM::Vec3(10, -0.9, 13),
+												EM::Quaternion::AngleAxis(EM::ToRadians(-90), EM::Vec3(0, 1, 0)) * 
+												EM::Quaternion::AngleAxis(EM::ToRadians(90), EM::Vec3(0, 0, 1)),
+												EM::Vec3(5, 0.1 * LineWidth, 1.0)
+											),
+								EM::Vec4(0.0f + uv_add * UVScalar.x, 0.0f, 1.0f, 1.0f),
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/forcefield.png", GL_LINEAR).id,
+								EG::RGBA16_ZombieGreen()
 						);
 				}
 				QBatch.End();
@@ -5462,21 +5577,21 @@ int main(int argc, char** argv)
 												EG::RGBA16_Orange(),
 												TextSpacing
 										);
-						for (auto i = 0; i < 10; i++)
-						{
-							EG::Fonts::PrintText(
-													EM::Transform(
-																	EM::Vec3(-i * 2, i * 2, i * 2),
-																	EM::Quaternion(0, 0, 0, 1), 
-																	EM::Vec3(TextScale, TextScale, 1)
-																),
-													"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-													EG::FontManager::GetFont("8Bit_32"),
-													QBatch,
-													EG::RGBA16_Orange(),
-													TextSpacing
-											);
-						}
+						// for (auto i = 0; i < 10; i++)
+						// {
+						// 	EG::Fonts::PrintText(
+						// 							EM::Transform(
+						// 											EM::Vec3(-i * 2, i * 2, i * 2),
+						// 											EM::Quaternion(0, 0, 0, 1), 
+						// 											EM::Vec3(TextScale, TextScale, 1)
+						// 										),
+						// 							"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+						// 							EG::FontManager::GetFont("8Bit_32"),
+						// 							QBatch,
+						// 							EG::RGBA16_Orange(),
+						// 							TextSpacing
+						// 					);
+						// }
 
 				}
 				QBatch.End();
@@ -5486,7 +5601,6 @@ int main(int argc, char** argv)
 			WorldTextProgram->Unuse();
 
 	        ENDPROFILE(RENDERING)
-
     	}
     	GBuffer.Unbind();
 
@@ -5595,7 +5709,7 @@ int main(int argc, char** argv)
 				SpotLightProgram->SetUniform("InnerCutoff", 	Spot.Parameters.InnerCutoff);
 				SpotLightProgram->SetUniform("OuterCutoff", 	Spot.Parameters.OuterCutoff);
 
-				// glDrawArrays(GL_TRIANGLES, 0, 6);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
 			}
 			SpotLightProgram->Unuse();
 		
@@ -5608,18 +5722,121 @@ int main(int argc, char** argv)
 		glEnable(GL_DEPTH_TEST);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    	// Blur iterations
-    	for (Enjon::u32 i = 0; i < BlurIterations * 2; i++)
+		// Get bright target
+		BrightTarget.Bind();
+		{
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+
+			BrightProgram->Use();
+			{
+				BrightProgram->BindTexture("light_tex", DeferredLight.GetTexture(), 0);
+				BrightProgram->SetUniform("scale", ToneMapSettings.Scale);
+				BrightProgram->SetUniform("threshold", ToneMapSettings.Threshold);
+
+				CompositeBatch.Begin();
+				{
+		    		CompositeBatch.Add(
+								EM::Vec4(-1, -1, 2, 2),
+								EM::Vec4(0, 0, 1, 1), 
+								DeferredLight.GetTexture()
+								);
+				}
+				CompositeBatch.End();
+				CompositeBatch.RenderBatch();
+			}
+			BrightProgram->Unuse();
+		}
+		BrightTarget.Unbind();
+
+    	// Small blur
+    	for (Enjon::u32 i = 0; i < (Enjon::u32)BlurIterations.x * 2; i++)
     	{
     		bool IsEven = (i % 2 == 0);
-    		EG::RenderTarget* Target = IsEven ? &BlurHorizontal : &BlurVertical;
+    		EG::RenderTarget* Target = IsEven ? &SmallBlurHorizontal : &SmallBlurVertical;
     		EG::GLSLProgram* Program = IsEven ? HorizontalBlurProgram : VerticalBlurProgram;
 
 			Target->Bind();
 			{
 				Program->Use();
 				{
-					GLuint TextureID = i == 0 ? DeferredLight.GetTexture() : IsEven ? BlurVertical.GetTexture() : BlurHorizontal.GetTexture();
+					for (uint32_t j = 0; j < 16; j++)
+					{
+						std::string Uniform = "blurWeights[" + std::to_string(j) + "]";
+						Program->SetUniform(Uniform, SmallGaussianCurve[j]);
+					}
+
+					Program->SetUniform("weight", BlurWeights.x);
+					GLuint TextureID = i == 0 ? BrightTarget.GetTexture() : IsEven ? SmallBlurVertical.GetTexture() : SmallBlurHorizontal.GetTexture();
+					CompositeBatch.Begin();
+					{
+			    		CompositeBatch.Add(
+									EM::Vec4(-1, -1, 2, 2),
+									EM::Vec4(0, 0, 1, 1), 
+									TextureID
+									);
+					}
+					CompositeBatch.End();
+					CompositeBatch.RenderBatch();
+				}
+				Program->Unuse();
+			}	
+			Target->Unbind();
+    	}
+
+    	// Medium blur iterations
+    	for (Enjon::u32 i = 0; i < (Enjon::u32)BlurIterations.y * 2; i++)
+    	{
+    		bool IsEven = (i % 2 == 0);
+    		EG::RenderTarget* Target = IsEven ? &MediumBlurHorizontal : &MediumBlurVertical;
+    		EG::GLSLProgram* Program = IsEven ? HorizontalBlurProgram : VerticalBlurProgram;
+
+			Target->Bind();
+			{
+				Program->Use();
+				{
+					for (uint32_t j = 0; j < 16; j++)
+					{
+						std::string Uniform = "blurWeights[" + std::to_string(j) + "]";
+						Program->SetUniform(Uniform, MediumGaussianCurve[j]);
+					}
+
+					Program->SetUniform("weight", BlurWeights.y);
+					GLuint TextureID = i == 0 ? BrightTarget.GetTexture() : IsEven ? MediumBlurVertical.GetTexture() : MediumBlurHorizontal.GetTexture();
+					CompositeBatch.Begin();
+					{
+			    		CompositeBatch.Add(
+									EM::Vec4(-1, -1, 2, 2),
+									EM::Vec4(0, 0, 1, 1), 
+									TextureID
+									);
+					}
+					CompositeBatch.End();
+					CompositeBatch.RenderBatch();
+				}
+				Program->Unuse();
+			}	
+			Target->Unbind();
+    	}
+
+    	// Large blur iterations
+    	for (Enjon::u32 i = 0; i < (Enjon::u32)BlurIterations.z * 2; i++)
+    	{
+    		bool IsEven = (i % 2 == 0);
+    		EG::RenderTarget* Target = IsEven ? &LargeBlurHorizontal : &LargeBlurVertical;
+    		EG::GLSLProgram* Program = IsEven ? HorizontalBlurProgram : VerticalBlurProgram;
+
+			Target->Bind();
+			{
+				Program->Use();
+				{
+					for (uint32_t j = 0; j < 16; j++)
+					{
+						std::string Uniform = "blurWeights[" + std::to_string(j) + "]";
+						Program->SetUniform(Uniform, LargeGaussianCurve[j]);
+					}
+
+					Program->SetUniform("weight", BlurWeights.z);
+					GLuint TextureID = i == 0 ? BrightTarget.GetTexture() : IsEven ? LargeBlurVertical.GetTexture() : LargeBlurHorizontal.GetTexture();
 					CompositeBatch.Begin();
 					{
 			    		CompositeBatch.Add(
@@ -5671,15 +5888,26 @@ int main(int argc, char** argv)
 	    			{
 	    				case DrawFrameType::FINAL:
 	    				{
-							FXAATarget.Bind(EG::RenderTarget::BindType::READ);
-							glReadBuffer(GL_COLOR_ATTACHMENT0);
-							glBlitFramebuffer(
-												0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, 
-												SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR
-											);
+							CompositeProgram->BindTexture("blurTexSmall", SmallBlurVertical.GetTexture(), 1);
+							CompositeProgram->BindTexture("blurTexMedium", MediumBlurVertical.GetTexture(), 2);
+							CompositeProgram->BindTexture("blurTexLarge", LargeBlurVertical.GetTexture(), 3);
+							CompositeProgram->SetUniform("exposure", ToneMapSettings.Exposure);
+							CompositeProgram->SetUniform("gamma", ToneMapSettings.Gamma);
+							CompositeProgram->SetUniform("bloomScalar", ToneMapSettings.BloomScalar);
+							CompositeBatch.Begin();
+							{
+								CompositeBatch.Add(
+													EM::Vec4(-1, -1, 2, 2),
+													EM::Vec4(0, 0, 1, 1),
+													FXAATarget.GetTexture()
+												);
+							}
+							CompositeBatch.End();
+							CompositeBatch.RenderBatch();
 
 	    				} break;	
 
+	    				/*
 	    				case DrawFrameType::LIGHTS:
 	    				{
 							DeferredLight.Bind(EG::RenderTarget::BindType::READ);
@@ -5756,30 +5984,37 @@ int main(int argc, char** argv)
 											);
 
 	    				} break;
+	    				*/
 	    			}
 	    		}
 	    		else
 	    		{
-		    		CompositeBatch.Add(
-								EM::Vec4(-1, 0, 1, 1),
-								EM::Vec4(0, 0, 1, 1), 
-								GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE)
-								);
-		    		CompositeBatch.Add(
-								EM::Vec4(0, 0, 1, 1),
-								EM::Vec4(0, 0, 1, 1), 
-								GBuffer.GetTexture(EG::GBufferTextureType::NORMAL)
-								);
-		    		CompositeBatch.Add(
-								EM::Vec4(-1, -1, 1, 1),
-								EM::Vec4(0, 0, 1, 1), 
-								GBuffer.GetTexture(EG::GBufferTextureType::POSITION)
-								);
-		    		CompositeBatch.Add(
-								EM::Vec4(0, -1, 1, 1),
-								EM::Vec4(0, 0, 1, 1), 
-								BlurVertical.GetTexture()
-								);
+		    		// CompositeBatch.Add(
+								// EM::Vec4(-1, 0, 1, 1),
+								// EM::Vec4(0, 0, 1, 1), 
+								// GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE)
+								// );
+		    		// CompositeBatch.Add(
+								// EM::Vec4(0, 0, 1, 1),
+								// EM::Vec4(0, 0, 1, 1), 
+								// GBuffer.GetTexture(EG::GBufferTextureType::NORMAL)
+								// );
+		    		// CompositeBatch.Add(
+								// EM::Vec4(-1, -1, 1, 1),
+								// EM::Vec4(0, 0, 1, 1), 
+								// GBuffer.GetTexture(EG::GBufferTextureType::POSITION)
+								// );
+		    		// CompositeBatch.Add(
+								// EM::Vec4(-1, -1, 2, 2),
+								// EM::Vec4(0, 0, 1, 1), 
+								// BlurVertical.GetTexture()
+								// );
+					// BlurVertical.Bind(EG::RenderTarget::BindType::READ);
+					// glReadBuffer(GL_COLOR_ATTACHMENT0);
+					// glBlitFramebuffer(
+					// 					0, 0, SCREENWIDTH * 4, SCREENHEIGHT * 4, 0, 0, 
+					// 					SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR
+					// 				);
 	    		}
 
 	    	}
@@ -5893,7 +6128,7 @@ int main(int argc, char** argv)
         // Swap the screen buffers
         Window.SwapBuffer();
 
-        FPS = Limiter.End();
+        // FPS = Limiter.End();
 
         // Reset draw call count
         EG::QuadBatch::DrawCallCount = 0;
@@ -6165,20 +6400,6 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 		DrawFrame = DrawFrameType::LIGHTS;	
 	}
 
-	if (Input->IsKeyDown(SDLK_b))
-	{
-		if (Input->IsKeyPressed(SDLK_DOWN))
-		{
-			if (BlurIterations > 0) BlurIterations--;
-			printf("blur iterations: %d\n", BlurIterations);
-		}
-		else if (Input->IsKeyPressed(SDLK_UP))
-		{
-			BlurIterations++;
-			printf("blur iterations: %d\n", BlurIterations);
-		}
-	}
-
 	if (Input->IsKeyDown(SDLK_i))
 	{
 		if (Input->IsKeyDown(SDLK_DOWN))
@@ -6250,6 +6471,19 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	if (Input->IsKeyPressed(SDLK_BACKQUOTE))
 	{
 		ShowConsole = !ShowConsole;
+	}
+
+	if (Input->IsKeyPressed(SDLK_j))
+	{
+		BlurArrayType = BlurType::SMALL;
+	}
+	if (Input->IsKeyPressed(SDLK_k))
+	{
+		BlurArrayType = BlurType::MEDIUM;
+	}
+	if (Input->IsKeyPressed(SDLK_l))
+	{
+		BlurArrayType = BlurType::LARGE;
 	}
 
 

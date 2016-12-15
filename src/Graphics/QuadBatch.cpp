@@ -22,7 +22,6 @@ namespace Enjon { namespace Graphics {
 
 	QuadBatch::~QuadBatch()
 	{
-
 	}
 
 	QuadGlyph::QuadGlyph(EM::Vec2& Dimensions, EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, EG::ColorRGBA16& Color)
@@ -53,12 +52,11 @@ namespace Enjon { namespace Graphics {
 		// Calculate Bitangent
 		B = EM::Vec3::Normalize( ( Model * EM::Vec4( ( N.Cross(T) * 1.0), 0.0 )).XYZ());
 
+		// Create basis verticies
 		EM::Vec3 Basis_TL(-1.0f, 1.0f + Dimensions.y, 0.0f);
 		EM::Vec3 Basis_BL(-1.0f, -1.0f, 0.0f);
 		EM::Vec3 Basis_TR(1.0f + Dimensions.x, 1.0f + Dimensions.y, 0.0f);
 		EM::Vec3 Basis_BR(1.0f + Dimensions.x, -1.0f, 0.0f);
-
-		// Create basis verticies
 
 		/* Set top left vertex */
  		Position 			= Model * EM::Vec4(Basis_TL, 1.0);

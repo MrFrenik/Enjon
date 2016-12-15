@@ -33,6 +33,7 @@ namespace Enjon { namespace Graphics {
 		void SetUniform(const std::string& name, const int& val);
 		void SetUniform(const std::string& name, float* val, int count);
 		void SetUniform(const std::string& name, int* val, int count);
+		void SetUniform(const std::string& name, const double& val);
 		void SetUniform(const std::string& name, const float& val);
 		void SetUniform(const std::string& name, const Math::Vec2& vector);
 		void SetUniform(const std::string& name, const Math::Vec3& vector);
