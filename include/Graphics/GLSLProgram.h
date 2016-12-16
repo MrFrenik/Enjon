@@ -2,8 +2,6 @@
 #define ENJON_GLSLPROGRAM_H
 
 #include <GLEW/glew.h>
-#include <Math/Maths.h>
-#include <Math/Transform.h>
 #include <Defines.h>
 
 #include <string>
@@ -11,7 +9,18 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+namespace Enjon { namespace Math { 
+
+	struct Vec2;
+	struct Vec3;
+	struct Vec4;
+	struct Mat4;	
+	struct Transform;
+}}
+
 namespace Enjon { namespace Graphics {
+
+	class ColorRGBA16;
 
 	class GLSLProgram
 	{
@@ -35,11 +44,12 @@ namespace Enjon { namespace Graphics {
 		void SetUniform(const std::string& name, int* val, int count);
 		void SetUniform(const std::string& name, const double& val);
 		void SetUniform(const std::string& name, const float& val);
-		void SetUniform(const std::string& name, const Math::Vec2& vector);
-		void SetUniform(const std::string& name, const Math::Vec3& vector);
-		void SetUniform(const std::string& name, const Math::Vec4& vector);
-		void SetUniform(const std::string& name, const Math::Mat4& matrix); 
+		void SetUniform(const std::string& name, const EM::Vec2& vector);
+		void SetUniform(const std::string& name, const EM::Vec3& vector);
+		void SetUniform(const std::string& name, const EM::Vec4& vector);
+		void SetUniform(const std::string& name, const EM::Mat4& matrix); 
 		void SetUniform(const std::string& name, const EM::Transform& T);
+		void SetUniform(const std::string& name, const EG::ColorRGBA16& C);
 		
 		GLuint inline GetProgramID() const { return m_programID; } 
 	

@@ -17,7 +17,7 @@ namespace Enjon { namespace Graphics {
 		TextureCache();
 		~TextureCache();
 
-		GLTexture GetTexture(std::string texturePath, GLint params = GL_NEAREST);
+		GLTexture GetTexture(std::string texturePath, GLint magParams = GL_LINEAR, GLint minParams = GL_LINEAR_MIPMAP_LINEAR);
 
 	private:
 		std::map<std::string, GLTexture> m_textureMap;

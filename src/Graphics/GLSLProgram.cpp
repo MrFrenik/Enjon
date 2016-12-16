@@ -2,6 +2,8 @@
 #include <fstream>
 
 #include "Graphics/GLSLProgram.h"
+#include "Graphics/Color.h"
+#include "Math/Maths.h"
 #include "Utils/FileUtils.h"
 #include "Utils/Errors.h"
 
@@ -206,6 +208,11 @@ namespace Enjon { namespace Graphics {
 		glUniform4f(GetUniformLocation(name + ".orientation"), T.Orientation.x, T.Orientation.y, T.Orientation.z, T.Orientation.w);	
 		glUniform3f(GetUniformLocation(name + ".scale"), T.Scale.x, T.Scale.y, T.Scale.z);	
 
+	}
+
+	void GLSLProgram::SetUniform(const std::string& name, const EG::ColorRGBA16& C)
+	{
+		glUniform3f(GetUniformLocation(name), C.r, C.g, C.b);	
 	}
 
 	void GLSLProgram::BindTexture(const std::string& Name, const GLuint& TextureID, const GLuint Index)

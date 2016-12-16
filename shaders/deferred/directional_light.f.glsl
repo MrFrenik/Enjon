@@ -14,7 +14,7 @@ uniform sampler2D PositionMap;
 
 uniform vec3 CamPos;
 uniform vec3 LightColor;
-uniform vec3 LightPos;
+uniform vec3 LightDirection;
 uniform float LightIntensity;
 uniform vec2 Resolution;
 uniform vec3 CameraForward;
@@ -42,8 +42,7 @@ void main()
     vec4 Ambient = vec4(0.1, 0.2, 0.5, 0.2) * Diffuse;
 
     // Diffuse
-    // vec3 LightDir = normalize(LightPos - WorldPos);
-    vec3 LightDir = normalize(LightPos);
+    vec3 LightDir = normalize(LightDirection);
     float DiffuseTerm = max(dot(LightDir, Normal), 0.0);
     vec4 DiffuseColor = DiffuseTerm * Diffuse * vec4(LightColor, 1.0) * LightIntensity + vec4(Ambient.rgb, 1.0) * Ambient.a;
 

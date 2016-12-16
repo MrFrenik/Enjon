@@ -4590,6 +4590,7 @@ int main(int argc, char** argv)
 #include <Graphics/Camera.h>
 #include <Entity/EntityManager.h>
 #include <Graphics/RenderTarget.h>
+#include <Graphics/DirectionalLight.h>
 #include <Graphics/PointLight.h>
 #include <Graphics/SpotLight.h>
 #include <Graphics/GBuffer.h>
@@ -4644,6 +4645,7 @@ enum class BlurType
 BlurType BlurArrayType = BlurType::SMALL;
 
 EG::SpotLight Spot;
+EG::DirectionalLight Sun;
 
 float RotationSpeed = 20.0f;
 float VXOffset = 0.01f;
@@ -4677,8 +4679,20 @@ struct FXAASettings
 	float ReduceMul;
 };
 
+struct BloomSettings
+{
+	BloomSettings(EM::Vec3& BlurWeights, EM::Vec3& BlurIterations, EM::Vec3& BlurRadius)
+		: Weights(BlurWeights), Iterations(BlurIterations), Radius(BlurRadius)
+	{}
+
+	EM::Vec3 Weights;
+	EM::Vec3 Iterations;
+	EM::Vec3 Radius;
+};
+
 struct FXAASettings FXAASettings{8.0f, 1.0/128.0f, 0.5f};
 struct ToneMapSettings ToneMapSettings{1.0f, 1.0f, 10.0f, 1.0f, 0.0f};
+struct BloomSettings BloomSettings(EM::Vec3(0.25f, 0.4f, 0.3f), EM::Vec3(3, 4, 2), EM::Vec3(0.005f, 0.004f, 0.06f));
 
 void LoadUVAnimatedAsset()
 {
@@ -5297,6 +5311,12 @@ int main(int argc, char** argv)
 						10.0f
 					);
 
+	Sun = EG::DirectionalLight(
+								EM::Vec3(0.5f, 0.5f, 0.5f),
+								EG::RGBA16_Orange(),
+								1.0f
+							);
+
 
     // Attach components
     auto Entity = EManager->CreateEntity();
@@ -5362,22 +5382,22 @@ int main(int argc, char** argv)
 	Enjon::CVarsSystem::Register("exposure", &ToneMapSettings.Exposure, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("gamma", &ToneMapSettings.Gamma, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("bloom_scalar", &ToneMapSettings.BloomScalar, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("blur_weight_small", &BlurWeights.x, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("blur_weight_medium", &BlurWeights.y, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("blur_weight_large", &BlurWeights.z, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("blur_iter_small", &BlurIterations.x, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("blur_iter_medium", &BlurIterations.y, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("blur_iter_large", &BlurIterations.z, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_weight_small", &BloomSettings.Weights.x, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_weight_medium", &BloomSettings.Weights.y, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_weight_large", &BloomSettings.Weights.z, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_iter_small", &BloomSettings.Iterations.x, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_iter_medium", &BloomSettings.Iterations.y, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_iter_large", &BloomSettings.Iterations.z, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("threshold", &ToneMapSettings.Threshold, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("scale", &ToneMapSettings.Scale, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("spot_r", &Spot.Color.r, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("spot_g", &Spot.Color.g, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("spot_b", &Spot.Color.b, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("blur_radius_small", &BlurRadius.x, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("blur_radius_medium", &BlurRadius.y, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("blur_radius_large", &BlurRadius.z, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_radius_small", &BloomSettings.Radius.x, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_radius_medium", &BloomSettings.Radius.y, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("blur_radius_large", &BloomSettings.Radius.z, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("sun_enabled", &DirectionalLightEnabled, Enjon::CVarType::TYPE_BOOL);
-	Enjon::CVarsSystem::Register("sun_intensity", &SunlightIntensity, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("sun_intensity", &Sun.Intensity, Enjon::CVarType::TYPE_FLOAT);
 
     // Game loop
     bool running = true;
@@ -5643,31 +5663,14 @@ int main(int argc, char** argv)
 
 					// Direcitonal light
 					// NOTE: Will be faster to cache uniforms rather than find them every frame
-					DirectionalLightProgram->SetUniform("LightPos", EM::Vec3(	
-																			-0.3f, 
-																			0.8f, 
-																			1.0f)
-																		);
-					DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(0.6f, 0.3f, 0.1f));
-					DirectionalLightProgram->SetUniform("LightIntensity", SunlightIntensity);
+					DirectionalLightProgram->SetUniform("LightDirection", Sun.Direction);															
+					DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(Sun.Color.r, Sun.Color.g, Sun.Color.b));
+					DirectionalLightProgram->SetUniform("LightIntensity", Sun.Intensity);
 
 
 					// Render	
 					{
 						glDrawArrays(GL_TRIANGLES, 0, 6);
-					}
-
-					DirectionalLightProgram->SetUniform("LightPos", EM::Vec3(	
-																			0.5f, 
-																			0.2f, 
-																			-0.8f)
-																		);
-					DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(0.2f, 0.8f, 0.4f));
-					DirectionalLightProgram->SetUniform("LightIntensity", 0.2f);
-
-					// Render	
-					{
-						// glDrawArrays(GL_TRIANGLES, 0, 6);
 					}
 				}
 				DirectionalLightProgram->Unuse();
@@ -5759,7 +5762,7 @@ int main(int argc, char** argv)
 		BrightTarget.Unbind();
 
     	// Small blur
-    	for (Enjon::u32 i = 0; i < (Enjon::u32)BlurIterations.x * 2; i++)
+    	for (Enjon::u32 i = 0; i < (Enjon::u32)BloomSettings.Iterations.x * 2; i++)
     	{
     		bool IsEven = (i % 2 == 0);
     		EG::RenderTarget* Target = IsEven ? &SmallBlurHorizontal : &SmallBlurVertical;
@@ -5775,8 +5778,8 @@ int main(int argc, char** argv)
 						Program->SetUniform(Uniform, SmallGaussianCurve[j]);
 					}
 
-					Program->SetUniform("weight", BlurWeights.x);
-					Program->SetUniform("blurRadius", BlurRadius.x);
+					Program->SetUniform("weight", BloomSettings.Weights.x);
+					Program->SetUniform("blurRadius", BloomSettings.Radius.x);
 					GLuint TextureID = i == 0 ? BrightTarget.GetTexture() : IsEven ? SmallBlurVertical.GetTexture() : SmallBlurHorizontal.GetTexture();
 					CompositeBatch.Begin();
 					{
@@ -5795,7 +5798,7 @@ int main(int argc, char** argv)
     	}
 
     	// Medium blur iterations
-    	for (Enjon::u32 i = 0; i < (Enjon::u32)BlurIterations.y * 2; i++)
+    	for (Enjon::u32 i = 0; i < (Enjon::u32)BloomSettings.Iterations.y * 2; i++)
     	{
     		bool IsEven = (i % 2 == 0);
     		EG::RenderTarget* Target = IsEven ? &MediumBlurHorizontal : &MediumBlurVertical;
@@ -5811,8 +5814,8 @@ int main(int argc, char** argv)
 						Program->SetUniform(Uniform, MediumGaussianCurve[j]);
 					}
 
-					Program->SetUniform("weight", BlurWeights.y);
-					Program->SetUniform("blurRadius", BlurRadius.y);
+					Program->SetUniform("weight", BloomSettings.Weights.y);
+					Program->SetUniform("blurRadius", BloomSettings.Radius.y);
 					GLuint TextureID = i == 0 ? BrightTarget.GetTexture() : IsEven ? MediumBlurVertical.GetTexture() : MediumBlurHorizontal.GetTexture();
 					CompositeBatch.Begin();
 					{
@@ -5831,7 +5834,7 @@ int main(int argc, char** argv)
     	}
 
     	// Large blur iterations
-    	for (Enjon::u32 i = 0; i < (Enjon::u32)BlurIterations.z * 2; i++)
+    	for (Enjon::u32 i = 0; i < (Enjon::u32)BloomSettings.Iterations.z * 2; i++)
     	{
     		bool IsEven = (i % 2 == 0);
     		EG::RenderTarget* Target = IsEven ? &LargeBlurHorizontal : &LargeBlurVertical;
@@ -5847,8 +5850,8 @@ int main(int argc, char** argv)
 						Program->SetUniform(Uniform, LargeGaussianCurve[j]);
 					}
 
-					Program->SetUniform("weight", BlurWeights.z);
-					Program->SetUniform("blurRadius", BlurRadius.z);
+					Program->SetUniform("weight", BloomSettings.Weights.z);
+					Program->SetUniform("blurRadius", BloomSettings.Radius.z);
 					GLuint TextureID = i == 0 ? BrightTarget.GetTexture() : IsEven ? LargeBlurVertical.GetTexture() : LargeBlurHorizontal.GetTexture();
 					CompositeBatch.Begin();
 					{

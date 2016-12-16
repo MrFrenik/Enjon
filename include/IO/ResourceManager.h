@@ -11,7 +11,7 @@
 
 namespace Enjon { namespace Input { namespace ResourceManager { 
 
-		Enjon::Graphics::GLTexture GetTexture(const std::string& texturePath, GLint params = GL_NEAREST);
+		Enjon::Graphics::GLTexture GetTexture(const std::string& texturePath, GLint magParam = GL_LINEAR, GLint minParam = GL_LINEAR_MIPMAP_LINEAR);
 		Enjon::Graphics::MeshInstance* GetMesh(const char* MeshPath);
 
 }}}
