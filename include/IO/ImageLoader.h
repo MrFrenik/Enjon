@@ -14,7 +14,7 @@ namespace Enjon { namespace Graphics {
 	class ImageLoader
 	{
 	public:
-		static GLTexture LoadPNG(std::string filePath, GLint MAG_PARAM = GL_LINEAR, GLint MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR);
+		static GLTexture LoadPNG(std::string filePath, GLint MAG_PARAM = GL_LINEAR, GLint MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR, bool GenMips = true);
 		static void LoadPNG(std::string filePath, std::vector<unsigned char>* out, 
 													unsigned long width, unsigned long height);
 

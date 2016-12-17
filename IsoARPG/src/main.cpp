@@ -4654,7 +4654,7 @@ float TextSpacing = 0.0f;
 EM::Vec2 UVScalar = EM::Vec2(1.0f, 0.1f);
 EM::Vec2 UVAdditive = EM::Vec2(0, 0);
 float DistanceRadius = 0.0f;
-float LineWidth = 1.0f;
+float LineWidth = 5.0f;
 float Exposure = 1.0f;
 float Gamma = 1.0f;
 EM::Vec3 BlurWeights(0.38f, 0.32f, 0.39f);
@@ -4691,13 +4691,13 @@ struct BloomSettings
 };
 
 struct FXAASettings FXAASettings{8.0f, 1.0/128.0f, 0.5f};
-struct ToneMapSettings ToneMapSettings{1.0f, 1.0f, 10.0f, 1.0f, 0.0f};
-struct BloomSettings BloomSettings(EM::Vec3(0.25f, 0.4f, 0.3f), EM::Vec3(3, 4, 2), EM::Vec3(0.005f, 0.004f, 0.06f));
+struct ToneMapSettings ToneMapSettings{0.4f, 1.0f, 1.0f, 1.0f, 0.0f};
+struct BloomSettings BloomSettings(EM::Vec3(0.4f, 0.38f, 0.35f), EM::Vec3(10, 10, 10), EM::Vec3(0.004f, 0.004f, 0.009f));
 
 void LoadUVAnimatedAsset()
 {
 	// Get mesh
-	UVAnimatedAsset.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/dragon.obj");
+	UVAnimatedAsset.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
 
     // Get shader and set texture
     auto Shader = EG::ShaderManager::GetShader("UVAnimation");
@@ -4711,6 +4711,8 @@ void LoadUVAnimatedAsset()
     // Textures
 	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/forcefield.png");
 	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png");
+	// UVAnimatedAsset.Material.Textures[EG::TextureSlotType::EMISSIVE]= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb4.png");
+	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::EMISSIVE]= EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	UVAnimatedAsset.Material.Shininess = 100.0f;
 }
 
@@ -4720,18 +4722,21 @@ void LoadMonkeyHeadAsset()
 	MonkeyHead.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/shaderball.obj");
 
     // Get shader and set texture
+    // Kinda useless to do this here, since every other asset does it as well...
     auto Shader = EG::ShaderManager::GetShader("GBuffer");
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
     Shader->Unuse();
 
     // Set shader
     MonkeyHead.Shader = Shader;
     // Textures
-	MonkeyHead.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box_pixel.png");
+	MonkeyHead.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	MonkeyHead.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
-	MonkeyHead.Material.Shininess = 100.0f;
+	MonkeyHead.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png");
+	MonkeyHead.Material.Shininess = 100.0f; 
 }
 
 void LoadOtherCubeAsset()
@@ -4751,6 +4756,7 @@ void LoadOtherCubeAsset()
     // Textures
 	OtherCube.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
 	OtherCube.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
+	OtherCube.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	OtherCube.Material.Shininess = 20.0f;
 }
 
@@ -4771,6 +4777,7 @@ void LoadCubeAsset()
     // Set texture
     Cube.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
     Cube.Material.Textures[EG::TextureSlotType::NORMAL] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
+    Cube.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
     Cube.Material.Shininess = 20.0f;
 }
 
@@ -4791,6 +4798,7 @@ void LoadNormalFloorAsset()
     // Textures
 	NormalFloor.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
 	NormalFloor.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
+	NormalFloor.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	NormalFloor.Material.Shininess = 20.0f;
 }
 
@@ -4809,8 +4817,9 @@ void LoadNormalMappedSpriteAsset()
     // Set shader
     SpriteWithNormal.Shader = Shader;
     // Textures
-	SpriteWithNormal.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png");
-	SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test_normal.png");
+	SpriteWithNormal.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png", GL_NEAREST, GL_NEAREST);
+	SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test_normal.png", GL_NEAREST, GL_NEAREST);
+	SpriteWithNormal.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST, false);
 	SpriteWithNormal.Material.Shininess = 20.0f;
 }
 
@@ -4831,6 +4840,7 @@ void LoadCubeSprite()
     // Textures
 	CubeSprite.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box.png");
 	CubeSprite.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box_normal.png");
+	CubeSprite.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	CubeSprite.Material.Shininess = 20.0f;
 }
 
@@ -4855,37 +4865,6 @@ void LoadInstances()
 	// B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005f;
 	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.75f;
 	UVAnimations.push_back(B);
-
-	// for (u32 i = 0; i < 50; ++i)
-	// {
-	// 	EG::ModelInstance M;
-	// 	M.Asset = &MonkeyHead;
-	// 	M.Transform.Position 	= EM::Vec3(ER::Roll(-20, 20), ER::Roll(0, 20), ER::Roll(-20, 20));
-	// 	float Scale = (float)ER::Roll(1, 10) / 10.0f;
-	// 	M.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005;
-	// 	Instances.push_back(M);
-	// }
-
-	/*
-	for (u32 i = 0; i < 10000; i++)
-	{
-		EG::ModelInstance C;
-		C.Asset = &SpriteWithNormal;
-		C.Transform.Position 	= EM::Vec3(ER::Roll(-50, 50), ER::Roll(0, 50), ER::Roll(-50, 50));
-	    C.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
-	    C.Transform.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f);
-		Animations.push_back(C);
-	}
-	*/
-
-
-	// EG::ModelInstance C;
-	// C.Asset = &CubeSprite;
-	// C.Transform.Position 	= EM::Vec3(10, 0, 10);
-	// C.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.5f;
- //    C.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-135), EM::Vec3(0, 1, 0)) * 
- //    							EM::Quaternion::AngleAxis(EM::ToRadians(180), EM::Vec3(0, 0, 1));
- //    Instances.push_back(C);
 }
 
 void RenderInstance(const EG::ModelInstance& Instance)
@@ -4893,8 +4872,6 @@ void RenderInstance(const EG::ModelInstance& Instance)
 	// Get reference to asset pointer
 	auto Asset = Instance.Asset;
 	auto& Transform = Instance.Transform;
-
-	static GLint CurrentTextureID = 0;
 
 	glBindVertexArray(Asset->Mesh->VAO);
 	{
@@ -4906,8 +4883,8 @@ void RenderInstance(const EG::ModelInstance& Instance)
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
 
-		// glActiveTexture(GL_TEXTURE2);
-		// glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::EMISSIVE].id);
 
 		EM::Mat4 Model;
 		// L = T*R*S
@@ -4963,9 +4940,8 @@ void RenderAnimation(EG::ModelInstance& Instance)
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
 
-		// glActiveTexture(GL_TEXTURE2);
-		// glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id);
-
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::EMISSIVE].id);
 
 		auto& CurrentFrame = SpriteFrames.at(CurrentFrameIndex);
 		float Scale = CurrentFrame.FrameWidth / CurrentFrame.FrameHeight;
@@ -5018,7 +4994,7 @@ void RenderUVAnimation(EG::ModelInstance& Instance)
 		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
 
 		// glActiveTexture(GL_TEXTURE2);
-		// glBindTexture(GL_TEXTURE_2D, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id);
+		// glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::EMISSIVE].id);
 
 		EM::Mat4 Model;
 		// L = T*R*S
@@ -5540,32 +5516,32 @@ int main(int argc, char** argv)
 
 				QBatch.Begin();
 				{
-					for (uint32_t i = 0; i < Transforms.size(); i++)
-					{
-						// Check if in range of camera to be drawn or not
-						if (EM::Vec3::DistanceSquared(Transforms.at(i).Position, FPSCamera.Transform.Position) <= DistanceRadius)
-						{
-							Transforms.at(i).Position = Transforms.at(i).Position;
-							Transforms.at(i).Scale = EM::Vec3(1, 1, 1) * float(i) / (float)Transforms.size();
-							QBatch.Add(
-											Transforms.at(i) ,
-											EM::Vec4(0, 0, 1, 1), 
-											EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png").id
-										);
-						}
-					}
+					// for (uint32_t i = 0; i < Transforms.size(); i++)
+					// {
+					// 	// Check if in range of camera to be drawn or not
+					// 	if (EM::Vec3::DistanceSquared(Transforms.at(i).Position, FPSCamera.Transform.Position) <= DistanceRadius)
+					// 	{
+					// 		Transforms.at(i).Position = Transforms.at(i).Position;
+					// 		Transforms.at(i).Scale = EM::Vec3(1, 1, 1) * float(i) / (float)Transforms.size();
+					// 		QBatch.Add(
+					// 						Transforms.at(i) ,
+					// 						EM::Vec4(0, 0, 1, 1), 
+					// 						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png").id
+					// 					);
+					// 	}
+					// }
 
 					static float uv_add = 0.0f;
 					uv_add += 0.001f;
-					QBatch.Add(
-								EM::Transform(
-												EM::Vec3(0, 2, 13),
-												EM::Quaternion::AngleAxis(EM::ToRadians(-90), EM::Vec3(0, 1, 0)),
-												EM::Vec3(10, 1, 1)
-											),
-								EM::Vec4(0.0f + uv_add * UVScalar.x, 0.0f, 1.0f + uv_add * UVScalar.y, 1.0f),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png", GL_LINEAR).id
-						);
+					// QBatch.Add(
+					// 			EM::Transform(
+					// 							EM::Vec3(0, 2, 13),
+					// 							EM::Quaternion::AngleAxis(EM::ToRadians(-90), EM::Vec3(0, 1, 0)),
+					// 							EM::Vec3(10, 1, 1)
+					// 						),
+					// 			EM::Vec4(0.0f + uv_add * UVScalar.x, 0.0f, 1.0f + uv_add * UVScalar.y, 1.0f),
+					// 			EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png", GL_LINEAR).id
+					// 	);
 
 					// Line rendering?
 					QBatch.Add(
@@ -5580,6 +5556,7 @@ int main(int argc, char** argv)
 								EG::RGBA16_ZombieGreen()
 						);
 				}
+				QuadBatchProgram->BindTexture("emissiveMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptileblue.png").id, 2);
 				QBatch.End();
 				QBatch.RenderBatch();
 			}
@@ -5598,7 +5575,7 @@ int main(int argc, char** argv)
 																EM::Quaternion(0, 0, 0, 1), 
 																EM::Vec3(TextScale, TextScale, 1)
 															),
-												"Testing this shit",
+												"Testing Emissives",
 												EG::FontManager::GetFont("8Bit_32"),
 												QBatch,
 												EG::RGBA16_Orange(),
@@ -5623,6 +5600,7 @@ int main(int argc, char** argv)
 				}
 				QBatch.End();
 				WorldTextProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png").id, 1);
+				WorldTextProgram->BindTexture("emissiveMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptilered.png").id, 2);
 				QBatch.RenderBatch();
 			}
 			WorldTextProgram->Unuse();
@@ -5656,6 +5634,7 @@ int main(int argc, char** argv)
 					DirectionalLightProgram->BindTexture("DiffuseMap", GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
 					DirectionalLightProgram->BindTexture("NormalMap", GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
 					DirectionalLightProgram->BindTexture("PositionMap", GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
+					DirectionalLightProgram->BindTexture("EmissiveMap", GBuffer.GetTexture(EG::GBufferTextureType::EMISSIVE), 3);
 					DirectionalLightProgram->SetUniform("Resolution", GBuffer.GetResolution());
 					DirectionalLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
 					DirectionalLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
@@ -5921,86 +5900,7 @@ int main(int argc, char** argv)
 							CompositeBatch.End();
 							CompositeBatch.RenderBatch();
 
-	    				} break;	
-
-	    				/*
-	    				case DrawFrameType::LIGHTS:
-	    				{
-							DeferredLight.Bind(EG::RenderTarget::BindType::READ);
-							glReadBuffer(GL_COLOR_ATTACHMENT0);
-							glBlitFramebuffer(
-												0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, 
-												SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR
-											);
-
 	    				} break;
-
-	    				case DrawFrameType::DIFFUSE:
-	    				{
-							GBuffer.Bind(EG::BindType::READ);
-							glReadBuffer(GL_COLOR_ATTACHMENT0 + (Enjon::u32)EG::GBufferTextureType::DIFFUSE);
-							glBlitFramebuffer(
-												0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, 
-												SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR
-											);
-
-	    				} break;	
-
-	    				case DrawFrameType::NORMAL:
-	    				{
-							GBuffer.Bind(EG::BindType::READ);
-							glReadBuffer(GL_COLOR_ATTACHMENT0 + (Enjon::u32)EG::GBufferTextureType::NORMAL);
-							glBlitFramebuffer(
-												0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, 
-												SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR
-											);
-
-	    				} break;	
-
-	    				case DrawFrameType::POSITION:
-	    				{
-							GBuffer.Bind(EG::BindType::READ);
-							glReadBuffer(GL_COLOR_ATTACHMENT0 + (Enjon::u32)EG::GBufferTextureType::POSITION);
-							glBlitFramebuffer(
-												0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, 
-												SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR
-											);
-
-	    				} break;	
-
-	    				case DrawFrameType::BLUR:
-	    				{
-							BlurVertical.Bind(EG::RenderTarget::BindType::READ);
-							glReadBuffer(GL_COLOR_ATTACHMENT0);
-							glBlitFramebuffer(
-												0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, 
-												SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR
-											);
-
-	    				} break;	
-
-	    				case DrawFrameType::DEPTH:
-	    				{
-							GBuffer.Bind(EG::BindType::READ);
-							glReadBuffer(GL_COLOR_ATTACHMENT0 + (Enjon::u32)EG::GBufferTextureType::DEPTH);
-							glBlitFramebuffer(
-												0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, 
-												SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR
-											);
-
-	    				} break;	
-
-	    				default:
-	    				{
-							DeferredLight.Bind(EG::RenderTarget::BindType::READ);
-							glReadBuffer(GL_COLOR_ATTACHMENT0);
-							glBlitFramebuffer(
-												0, 0, SCREENWIDTH, SCREENHEIGHT, 0, 0, 
-												SCREENWIDTH, SCREENHEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR
-											);
-
-	    				} break;
-	    				*/
 	    			}
 	    		}
 	    		else
@@ -6039,6 +5939,25 @@ int main(int argc, char** argv)
 		}   	
 		CompositeProgram->Unuse();
 
+
+		/*
+		auto NoCameraProgram = EG::ShaderManager::GetShader("NoCameraProjection");
+		NoCameraProgram->Use();
+		{
+				Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+				CompositeBatch.Begin();
+				{
+					CompositeBatch.Add(
+										EM::Vec4(-1, -1, 2, 2),
+										EM::Vec4(0, 0, 1, 1),
+										GBuffer.GetTexture(EG::GBufferTextureType::EMISSIVE)
+									);
+				}
+				CompositeBatch.End();
+				CompositeBatch.RenderBatch();
+		}
+		NoCameraProgram->Unuse();
+		*/
 
 		/*
 		UIProgram->Use();

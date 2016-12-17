@@ -18,6 +18,7 @@ in VS_OUT
 // uniforms
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
+uniform sampler2D emissiveMap;
 
 uniform float Near;
 uniform float Far;
@@ -44,7 +45,7 @@ void main()
     DiffuseOut  = color;
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
-    EmissiveOut = vec4(1.0, 1.0, 1.0, 1.0);
+    EmissiveOut = texture2D(emissiveMap, fs_in.TexCoords) * 4;
     DepthOut = vec4(vec3(Depth, 0, 0), 1.0);
 
 }

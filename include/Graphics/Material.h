@@ -6,12 +6,13 @@
 
 namespace Enjon { namespace Graphics {
 
-	const u32 TextureSlotCount = 2;
+	const static int TextureSlotCount = 3;
 
 	enum TextureSlotType
 	{
 		DIFFUSE,
-		NORMAL
+		NORMAL,
+		EMISSIVE
 	};
 
 	struct MaterialInstance

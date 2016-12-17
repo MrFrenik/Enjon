@@ -11,6 +11,7 @@ in DATA
 uniform sampler2D DiffuseMap;
 uniform sampler2D NormalMap;
 uniform sampler2D PositionMap;
+uniform sampler2D EmissiveMap;
 
 uniform vec3 CamPos;
 uniform vec3 LightColor;
@@ -41,6 +42,8 @@ void main()
 
     vec4 Ambient = vec4(0.1, 0.2, 0.5, 0.2) * Diffuse;
 
+    vec4 Emissive = texture2D(EmissiveMap, TexCoords);
+
     // Diffuse
     vec3 LightDir = normalize(LightDirection);
     float DiffuseTerm = max(dot(LightDir, Normal), 0.0);
@@ -59,5 +62,5 @@ void main()
         Specular = vec3(0.2) * Spec * LightColor;
     }
 
-    ColorOut = DiffuseColor + vec4(Specular, 1.0);
+   ColorOut = DiffuseColor + vec4(Specular, 1.0) + Emissive;
 }

@@ -8,9 +8,9 @@ namespace Enjon { namespace Input { namespace ResourceManager {
 
 	std::unordered_map<const char*, EG::MeshInstance> MeshCache;
 
-	Enjon::Graphics::GLTexture GetTexture(const std::string& texturePath, GLint magParams, GLint minParams) 
+	Enjon::Graphics::GLTexture GetTexture(const std::string& texturePath, GLint magParams, GLint minParams, bool genmips) 
 	{ 
-		return m_textureCache.GetTexture(texturePath, magParams, minParams); 
+		return m_textureCache.GetTexture(texturePath, magParams, minParams, genmips); 
 	} 
 
 	EG::MeshInstance* GetMesh(const char* MeshPath)
