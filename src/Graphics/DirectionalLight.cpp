@@ -1,20 +1,21 @@
 #include "Graphics/DirectionalLight.h"
+#include "Math/Mat4.h"
 
 namespace Enjon { namespace Graphics {
 
 	const int DirectionalLight::DirectionalLightShadowResolution = 1024;
+	const float DirectionalLight::DirectionalLightNear = 1.0f;
+	const float DirectionalLight::DirectionalLightFar = 7.5f;
 
 	DirectionalLight::DirectionalLight()
 	{
-		Direction = EM::Vec3(1, 1, 1);
+		Position = EM::Vec3(1, 1, 1);
 		Color = EG::RGBA16_White();
 		Intensity = 1.0f;
-
-		InitDepthMap();
 	}
 
-	DirectionalLight::DirectionalLight(EM::Vec3& _Direction, EG::ColorRGBA16& _Color, float _Intensity)
-		: Direction(_Direction), Color(_Color), Intensity(_Intensity)
+	DirectionalLight::DirectionalLight(EM::Vec3& _Position, EG::ColorRGBA16& _Color, float _Intensity)
+		: Position(_Position), Color(_Color), Intensity(_Intensity)
 	{
 		InitDepthMap();
 	}
@@ -26,30 +27,55 @@ namespace Enjon { namespace Graphics {
 
 	void DirectionalLight::InitDepthMap()
 	{
-		// Set up depth buffer for shadow
-		glGenTextures(1, &DepthMap);
-		glBindTexture(GL_TEXTURE_2D, DepthMap);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, DirectionalLightShadowResolution,
-						DirectionalLightShadowResolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		DepthTarget = EG::RenderTarget(DirectionalLightShadowResolution, DirectionalLightShadowResolution);
+
+		/*
+	    glGenFramebuffers(1, &DepthFBO);
+	    glBindFramebuffer(GL_FRAMEBUFFER, DepthFBO);
+	 
+	    // - Create and attach depth buffer (renderbuffer)
+	    glGenRenderbuffers(1, &DepthBuffer);
+	    glBindRenderbuffer(GL_RENDERBUFFER, DepthBuffer);
+	    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, DirectionalLightShadowResolution, DirectionalLightShadowResolution);
+	    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBuffer);
+	    // - Finally check if framebuffer is complete
+	    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	        std::cout << "Framebuffer not complete!" << std::endl;
+
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+
+	    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	    */
 	}
 
 	void DirectionalLight::BindDepth()
 	{
+		/*
+		// Bind our FBO and set the viewport to the proper size
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, DepthFBO);
+		glPushAttrib(GL_VIEWPORT_BIT);
 		glViewport(0, 0, DirectionalLightShadowResolution, DirectionalLightShadowResolution);
-		glBindFramebuffer(GL_FRAMEBUFFER, DepthMap);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthMap, 0);
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
-		glClear(GL_DEPTH_BUFFER_BIT);
+
+		// Clear the render targets
+		glClear( GL_DEPTH_BUFFER_BIT );
+
+		// glActiveTextureARB(GL_TEXTURE0_ARB);
+		// glEnable(GL_TEXTURE_2D);
+		glEnable(GL_DEPTH);
+
+		// Specify what to render an start acquiring
+		// GLenum buffers[] = { GL_COLOR_ATTACHMENT0 };
+		// glDrawBuffers(1, buffers);
+		*/
+		DepthTarget.Bind();
 	}
 
 	void DirectionalLight::UnbindDepth()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glPopAttrib();
+		DepthTarget.Unbind();
+		// Stop acquiring and unbind the FBO
+		// glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		// glPopAttrib();
 	}
 }}

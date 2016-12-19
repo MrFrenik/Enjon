@@ -4,42 +4,61 @@
 
 namespace Enjon { namespace Graphics {
 
+	RenderTarget::RenderTarget()
+	{
+		Width = 1024;
+		Height = 1024;
+	}
+
 	RenderTarget::RenderTarget(uint32 _Width, uint32 _Height)
 	{
 		// Save extensions
 		Width  = _Width;
 		Height = _Height;
 
-    glGenFramebuffers(1, &FrameBufferID);
-    glBindFramebuffer(GL_FRAMEBUFFER, FrameBufferID);
+	    glGenFramebuffers(1, &FrameBufferID);
+	    glBindFramebuffer(GL_FRAMEBUFFER, FrameBufferID);
 
-    // Bind the color render target
-	glBindRenderbufferEXT(GL_RENDERBUFFER, TargetID);
-	glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, Width, Height);
-	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, TargetID);
+	    // Bind the color render target
+		glBindRenderbufferEXT(GL_RENDERBUFFER, TargetID);
+		glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, Width, Height);
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, TargetID);
 
-    // - color buffer
-    glGenTextures(1, &Texture);
-    glBindTexture(GL_TEXTURE_2D, Texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture, 0);
+	    // - color buffer
+	    glGenTextures(1, &Texture);
+	    glBindTexture(GL_TEXTURE_2D, Texture);
+	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture, 0);
+		glGenerateMipmap(GL_TEXTURE_2D);
 
-	glGenerateMipmap(GL_TEXTURE_2D);
- 
-    // - Create and attach depth buffer (renderbuffer)
-    glGenRenderbuffers(1, &DepthBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, DepthBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, Width, Height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBuffer);
-    // - Finally check if framebuffer is complete
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "Framebuffer not complete!" << std::endl;
+		glGenTextures(1, &DepthBuffer);
+	    glBindTexture(GL_TEXTURE_2D, DepthBuffer);
+	    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Width, Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); 
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	   	GLfloat borderColor[] = {1.0, 1.0, 1.0, 1.0}; 
+	   	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthBuffer, 0);
+	    glDrawBuffer(GL_NONE);
+	    glReadBuffer(GL_NONE);
+	 
+	    // - Create and attach depth buffer (renderbuffer)
+	    // glGenRenderbuffers(1, &DepthBuffer);
+	    // glBindRenderbuffer(GL_RENDERBUFFER, DepthBuffer);
+	    // glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, Width, Height);
+	    // glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBuffer);
+	    // - Finally check if framebuffer is complete
+	    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	        std::cout << "Framebuffer not complete!" << std::endl;
+
+	    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	RenderTarget::~RenderTarget()

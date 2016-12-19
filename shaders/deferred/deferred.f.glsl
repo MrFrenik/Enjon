@@ -23,6 +23,8 @@ uniform sampler2D emissiveMap;
 uniform float Near;
 uniform float Far;
 
+const float emissiveIntensity = 4.0;
+
 float LinearizeDepth(float Depth)
 {
     float z = Depth * 2.0 - 1.0;
@@ -45,7 +47,7 @@ void main()
     DiffuseOut  = color;
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
-    EmissiveOut = texture2D(emissiveMap, fs_in.TexCoords) * 4;
+    EmissiveOut = texture2D(emissiveMap, fs_in.TexCoords) * vec4(emissiveIntensity, emissiveIntensity, emissiveIntensity, 1.0);
     DepthOut = vec4(vec3(Depth, 0, 0), 1.0);
 
 }

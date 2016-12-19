@@ -4,6 +4,7 @@
 
 #include "Math/Vec3.h"
 #include "Graphics/Color.h"
+#include "Graphics/RenderTarget.h"
 #include "Defines.h"
 
 namespace Enjon { namespace Graphics {
@@ -16,15 +17,21 @@ namespace Enjon { namespace Graphics {
 				~DirectionalLight();
 				void BindDepth();
 				void UnbindDepth();
+				void InitDepthMap();
 
-				EM::Vec3 			Direction;
+				inline GLint GetDepthBuffer() { return DepthTarget.GetTexture(); }
+
+				EM::Vec3 			Position;
 				EG::ColorRGBA16 	Color;
 				float 				Intensity;
-				GLuint DepthMap;
-				static const int DirectionalLightShadowResolution;
+				GLuint 				DepthFBO;
+				GLuint				DepthBuffer;
 
-			private:
-				void InitDepthMap();
+				RenderTarget 		DepthTarget;
+
+				static const int DirectionalLightShadowResolution;
+				static const float DirectionalLightNear;
+				static const float DirectionalLightFar;
 	};
 }}
 

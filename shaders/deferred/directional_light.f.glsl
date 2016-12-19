@@ -11,7 +11,7 @@ in DATA
 uniform sampler2D DiffuseMap;
 uniform sampler2D NormalMap;
 uniform sampler2D PositionMap;
-uniform sampler2D EmissiveMap;
+uniform sampler2D ShadowMap;
 
 uniform vec3 CamPos;
 uniform vec3 LightColor;
@@ -19,12 +19,43 @@ uniform vec3 LightDirection;
 uniform float LightIntensity;
 uniform vec2 Resolution;
 uniform vec3 CameraForward;
+uniform mat4 LightSpaceMatrix;
+uniform vec2 ShadowBias;
 
 const float kPi = 3.13159265;
 
 vec2 CalculateTexCoord()
 {
     return gl_FragCoord.xy / Resolution;
+}
+
+float ShadowCalculation(vec4 FragPosLightSpace, float bias)
+{
+    // Perspective divide
+    vec3 ProjCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
+    ProjCoords = ProjCoords * 0.5 + 0.5;
+
+    // Get depth values
+    // float ClosestDepth = texture2D(ShadowMap, ProjCoords.xy).r;
+    float CurrentDepth = ProjCoords.z;
+
+    // PCF
+    float Shadow = 0.0;
+    vec2 TexelSize = 1.0 / textureSize(ShadowMap, 0);
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            float PCFDepth = texture2D(ShadowMap, ProjCoords.xy + vec2(x, y) * TexelSize).r;
+            Shadow += CurrentDepth - bias > PCFDepth ? 1.0 : 0.0;
+        }
+    }
+    // float Shadow = CurrentDepth - bias > ClosestDepth ? 1.0 : 0.0;
+    Shadow /= 9.0;
+
+    if (ProjCoords.z > 1.0) Shadow = 0.0;
+
+    return Shadow;
 }
 
 void main()
@@ -40,14 +71,16 @@ void main()
     // Get world position
     vec3 WorldPos = texture(PositionMap, TexCoords).xyz;
 
-    vec4 Ambient = vec4(0.1, 0.2, 0.5, 0.2) * Diffuse;
-
-    vec4 Emissive = texture2D(EmissiveMap, TexCoords);
+    vec4 FragPosLightSpace = LightSpaceMatrix * vec4(WorldPos, 1.0);
 
     // Diffuse
     vec3 LightDir = normalize(LightDirection);
     float DiffuseTerm = max(dot(LightDir, Normal), 0.0);
-    vec4 DiffuseColor = DiffuseTerm * Diffuse * vec4(LightColor, 1.0) * LightIntensity + vec4(Ambient.rgb, 1.0) * Ambient.a;
+    vec4 DiffuseColor = DiffuseTerm * Diffuse * vec4(LightColor, 1.0) * LightIntensity;
+
+    float bias = max(ShadowBias.y * (1.0 - dot(Normal, LightDir)), ShadowBias.x);
+
+    float Shadow = ShadowCalculation(FragPosLightSpace, bias);
 
     // Specular
     float specularLightWeighting = 0.0;
@@ -61,6 +94,7 @@ void main()
         float Spec = kEnergyConservation * pow(max(dot(ViewDir, ReflectDir), 0.0), Shininess); 
         Specular = vec3(0.2) * Spec * LightColor;
     }
-
-   ColorOut = DiffuseColor + vec4(Specular, 1.0) + Emissive;
+ 
+    float val = 1.0 - Shadow;
+  ColorOut = (DiffuseColor + vec4(Specular, 1.0)) * vec4(val, val, val, 1.0);
 }

@@ -26,6 +26,7 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("HorizontalBlur", "../shaders/horizontal_blur.v.glsl", "../shaders/horizontal_blur.f.glsl");
 		ShaderManager::AddShader("GBuffer", "../shaders/deferred/deferred.v.glsl", "../shaders/deferred/deferred.f.glsl");
 		ShaderManager::AddShader("DeferredLight", "../shaders/deferred/deferred_light.v.glsl", "../shaders/deferred/deferred_light.f.glsl");
+		ShaderManager::AddShader("AmbientLight", "../shaders/deferred/ambient_light.v.glsl", "../shaders/deferred/ambient_light.f.glsl");
 		ShaderManager::AddShader("DirectionalLight", "../shaders/deferred/directional_light.v.glsl", "../shaders/deferred/directional_light.f.glsl");
 		ShaderManager::AddShader("PointLight", "../shaders/deferred/point_light.v.glsl", "../shaders/deferred/point_light.f.glsl");
 		ShaderManager::AddShader("SpotLight", "../shaders/deferred/spot_light.v.glsl", "../shaders/deferred/spot_light.f.glsl");
@@ -38,6 +39,8 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("WorldText", "../shaders/deferred/world_text.v.glsl", "../shaders/deferred/world_text.f.glsl");
 		ShaderManager::AddShader("Composite", "../shaders/deferred/composite.v.glsl", "../shaders/deferred/composite.f.glsl");
 		ShaderManager::AddShader("Bright", "../shaders/deferred/bright.v.glsl", "../shaders/deferred/bright.f.glsl");
+		ShaderManager::AddShader("SimpleDepth", "../shaders/deferred/simple_depth.v.glsl", "../shaders/deferred/simple_depth.f.glsl");
+		ShaderManager::AddShader("SimpleDepthAnimation", "../shaders/deferred/simple_depth_animation.v.glsl", "../shaders/deferred/simple_depth_animation.f.glsl");
 	}
 
 	void AddShader(const char* shadername, const char* vertpath, const char* fragpath)

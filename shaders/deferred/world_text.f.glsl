@@ -21,6 +21,8 @@ uniform sampler2D emissiveMap;
 
 uniform vec2 NearFar;
 
+const float emissiveIntensity = 4.0;
+
 #define Near    NearFar.x
 #define Far     NearFar.y
 
@@ -47,6 +49,6 @@ void main()
     DiffuseOut  = color;
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
-    EmissiveOut = texture2D(emissiveMap, fs_in.TexCoords) * vec4(10, 1, 1, 1);
+    EmissiveOut = texture2D(emissiveMap, fs_in.TexCoords) * vec4(emissiveIntensity, emissiveIntensity, emissiveIntensity, 1.0);
     DepthOut = vec4(vec3(Depth, 0, 0), 1.0);
 }

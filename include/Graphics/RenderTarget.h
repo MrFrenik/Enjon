@@ -3,7 +3,9 @@
 #pragma once
 
 #include "System/Types.h"
+#include "Math/Vec2.h"
 #include "GLEW/glew.h"
+#include "Defines.h"
 
 namespace Enjon { namespace Graphics { 
 
@@ -17,13 +19,16 @@ namespace Enjon { namespace Graphics {
 				WRITE	
 			};
 
-			RenderTarget::RenderTarget(uint32 _Width, uint32 _Height);
+			RenderTarget();
+			RenderTarget(uint32 _Width, uint32 _Height);
 			~RenderTarget();
 
 			void Bind(BindType Type = BindType::WRITE);
 			void Unbind();
 
 			GLuint inline GetTexture() const 	{ return Texture; }
+			GLuint inline GetDepth() const 		{ return DepthBuffer; }
+			EM::Vec2 inline GetResolution() 	{ return EM::Vec2(Width, Height); }
 
 		private:
 			GLuint		FrameBufferID; 	// The FBO ID

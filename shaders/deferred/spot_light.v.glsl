@@ -1,7 +1,7 @@
 #version 330 core
 
 layout (location = 0) in vec2 vertexPosition;
-layout (location = 2) in vec2 vertexUV; 
+layout (location = 1) in vec2 vertexUV; 
 
 out DATA
 {
