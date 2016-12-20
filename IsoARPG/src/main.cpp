@@ -4629,9 +4629,7 @@ enum class DrawFrameType
 	EMISSIVE, 
 	NORMAL, 
 	POSITION, 
-	ID,
 	BLUR,
-	DEPTH,
 	SHADOWDEPTH,
 	LIGHTS
 };
@@ -4652,9 +4650,9 @@ EG::DirectionalLight Sun;
 
 float RotationSpeed = 20.0f;
 float VXOffset = 0.01f;
-float TextScale = 0.01f;
+float TextScale = 0.06f;
 float TextSpacing = 0.0f;
-EM::Vec2 UVScalar = EM::Vec2(1.0f, 0.1f);
+EM::Vec2 UVScalar = EM::Vec2(0.1f, 30.0f);
 EM::Vec2 UVAdditive = EM::Vec2(0, 0);
 float DistanceRadius = 0.0f;
 float LineWidth = 50.0f;
@@ -4665,14 +4663,14 @@ EM::Vec3 BlurIterations(20, 10, 40);
 EM::Vec3 BlurRadius(0.004f, 0.004f, 0.004f);
 bool DirectionalLightEnabled = true;
 float SunlightIntensity = 0.2f;
-float TempCamScale = 15.0f;
-float ShadowBiasMin = 0.002f;
+float TempCamScale = 25.0f;
+float ShadowBiasMin = 0.004f;
 float ShadowBiasMax = 0.0025f;
 bool ShadowsEnabled = true;
 bool PointLightsEnabled = true;
 
 EM::Vec3 AmbientColor(0.2f, 0.2f, 0.2f);
-float AmbientIntensity = 1.5f;
+float AmbientIntensity = 3.0f;
 
 struct ToneMapSettings
 {
@@ -4703,7 +4701,7 @@ struct BloomSettings
 
 struct FXAASettings FXAASettings{8.0f, 0.09f, 0.5f};
 struct ToneMapSettings ToneMapSettings{1.0f, 1.0f, 1.0f, 2.0f, 2.0f};
-struct BloomSettings BloomSettings(EM::Vec3(0.4f, 0.5f, 0.0f), EM::Vec3(5, 5, 1), EM::Vec3(0.004f, 0.009f, 0.009f));
+struct BloomSettings BloomSettings(EM::Vec3(0.4f, 0.5f, 0.0f), EM::Vec3(1, 4, 1), EM::Vec3(0.004f, 0.009f, 0.009f));
 
 void LoadUVAnimatedAsset()
 {
@@ -4720,9 +4718,8 @@ void LoadUVAnimatedAsset()
     // Set shader
     UVAnimatedAsset.Shader = Shader;
     // Textures
-	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/forcefield.png");
-	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png");
-	// UVAnimatedAsset.Material.Textures[EG::TextureSlotType::EMISSIVE]= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/orb4.png");
+	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_MacroVariation.png");
+	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png");
 	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::EMISSIVE]= EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	UVAnimatedAsset.Material.Shininess = 100.0f;
 }
@@ -4744,9 +4741,9 @@ void LoadMonkeyHeadAsset()
     // Set shader
     MonkeyHead.Shader = Shader;
     // Textures
-	MonkeyHead.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png");
-	MonkeyHead.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png");
-	MonkeyHead.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../Assets/Textures/matrix.png");
+	MonkeyHead.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_MacroVariation.png");
+	MonkeyHead.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png");
+	MonkeyHead.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	MonkeyHead.Material.Shininess = 100.0f; 
 }
 
@@ -4773,7 +4770,6 @@ void LoadOtherCubeAsset()
 
 void LoadCubeAsset()
 {
-	// Cube.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cube.obj");
 	Cube.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cube.obj");
 
     // Get shader and set texture
@@ -4883,23 +4879,23 @@ void LoadInstances()
 
 	EG::ModelInstance U;
 	U.Asset = &MonkeyHead;
-	U.Transform.Position 	= EM::Vec3(0, -1, 0);
-	U.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005f;
+	U.Transform.Position 	= EM::Vec3(30, -1, 25);
+	U.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.01f;
 	// U.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.5f;
 	Instances.push_back(U);
 
 	EG::ModelInstance D;
 	D.Asset = &SpriteWithNormal;
-	D.Transform.Position 	= EM::Vec3(4, -0.14f, 3);
+	D.Transform.Position 	= EM::Vec3(4, 0.91f, 3);
     D.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
-    D.Transform.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f);
-	Instances.push_back(D);
+    D.Transform.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f) * 2.0f;
+	Animations.push_back(D);
 
 	EG::ModelInstance B;
 	B.Asset = &UVAnimatedAsset;
 	B.Transform.Position 	= EM::Vec3(20, -1, 10);
 	// B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005f;
-	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 1.75f;
+	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 2.75f;
 	UVAnimations.push_back(B);
 }
 
@@ -4958,8 +4954,6 @@ void RenderInstance(const EG::ModelInstance& Instance)
 		auto& Position = Instances.at(0).Transform.Position;
 
 		Asset->Shader->SetUniform("model", Model);
-		Asset->Shader->SetUniform("Near", 0.1f);
-		Asset->Shader->SetUniform("Far", 100.0f);
 		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
 
 
@@ -5024,8 +5018,6 @@ void RenderAnimation(EG::ModelInstance& Instance)
 
 		Asset->Shader->SetUniform("model", Model);
 		Asset->Shader->SetUniform("SpriteFrame", SpriteFrame);
-		// Asset->Shader->SetUniform("Near", 0.1f);
-		// Asset->Shader->SetUniform("Far", 100.0f);
 		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
 	}
 
@@ -5098,9 +5090,6 @@ void RenderUVAnimation(EG::ModelInstance& Instance)
 		Model *= EM::Mat4::Scale(Transform.Scale);
 
 		Asset->Shader->SetUniform("model", Model);
-		// Asset->Shader->SetUniform("Near", 0.1f);
-		// Asset->Shader->SetUniform("Far", 100.0f);
-		// Asset->Shader->SetUniform("UVAdditive", UVAdditive);
 		Asset->Shader->SetUniform("UVScalar", UVScalar);
 		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
 	}
@@ -5331,9 +5320,9 @@ int main(int argc, char** argv)
 	FPSCamera.Transform.Position = EM::Vec3(7, 2, 7);
 	FPSCamera.LookAt(EM::Vec3(0, 0, 0));
 	FPSCamera.ProjType = EG::ProjectionType::Orthographic;
-	FPSCamera.FieldOfView = 50.0f;
+	FPSCamera.FieldOfView = 60.0f;
 	FPSCamera.ViewPortAspectRatio = (Enjon::f32)SCREENWIDTH / (Enjon::f32)SCREENHEIGHT;
-	FPSCamera.OrthographicScale = 4.5f;
+	FPSCamera.OrthographicScale = 12.172f;
 
 	// Initialize entity manager
 	EManager = new EntityManager;
@@ -5446,12 +5435,13 @@ int main(int argc, char** argv)
 			for (auto j = 0; j < map_size; j++)
 			{
 				EM::Transform T;
-				T.Position = EM::Vec3((Enjon::f32)i * 2.0f, -1.0f, (Enjon::f32)j * 2.0f);
+				T.Position = EM::Vec3((Enjon::f32)i * 10.0f, -1.0f, (Enjon::f32)j * 10.0f);
 				T.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(90), EM::Vec3(1, 0, 0));
+				T.Scale = EM::Vec3(5, 5, 1);
 				FloorBatch.Add(
 								T, 
 								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png").id
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Concrete_Tiles_D.png").id
 							);
 			}
 		}
@@ -5555,9 +5545,9 @@ int main(int argc, char** argv)
 
     	// Attach light to "player" position
     	float speed = 2.6f;
-    	PointLights.at(0).Position = Instances.at(1).Transform.Position + EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
+    	PointLights.at(0).Position = Animations.at(0).Transform.Position + EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
     	PointLights.at(0).Color = EG::RGBA16_Orange();
-    	PointLights.at(1).Position = Instances.at(1).Transform.Position - EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
+    	PointLights.at(1).Position = Animations.at(0).Transform.Position - EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
     	PointLights.at(1).Color = EG::RGBA16_ZombieGreen();
 
     	PointLights.at(2).Position = Instances.at(0).Transform.Position - EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
@@ -5618,14 +5608,14 @@ int main(int argc, char** argv)
 		        Shader->Unuse();
 	        } 
 
-	        // for (auto& c : Animations)
-	        // {
-	        // 	auto Shader = c.Asset->Shader;
-	        // 	Shader->Use();
-	        // 		Shader->SetUniform("camera", CameraMatrix);
-	        // 		RenderAnimation(c);
-	        // 	Shader->Unuse();
-	        // }
+	        for (auto& c : Animations)
+	        {
+	        	auto Shader = c.Asset->Shader;
+	        	Shader->Use();
+	        		Shader->SetUniform("camera", CameraMatrix);
+	        		RenderInstance(c);
+	        	Shader->Unuse();
+	        }
 
 	        for (auto& c : UVAnimations)
 	        {
@@ -5640,10 +5630,9 @@ int main(int argc, char** argv)
 			QuadBatchProgram->Use();
 			{
 				QuadBatchProgram->SetUniform("camera", CameraMatrix);
-				// QuadBatchProgram->SetUniform("NearFar", FPSCamera.GetNearFar());
 
 				// Render floor
-				QuadBatchProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png").id, 2);
+				QuadBatchProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Concrete_Tiles_N.png").id, 2);
 				QuadBatchProgram->BindTexture("emissiveMap", EI::ResourceManager::GetTexture("../Assets/Textures/black.png").id, 3);
 				FloorBatch.RenderBatch();
 
@@ -5699,12 +5688,11 @@ int main(int argc, char** argv)
 			WorldTextProgram->Use();
 			{
 				WorldTextProgram->SetUniform("camera", CameraMatrix);
-				WorldTextProgram->SetUniform("NearFar", FPSCamera.GetNearFar());
 				QBatch.Begin();
 				{
 						EG::Fonts::PrintText(
 												EM::Transform(
-																Instances.at(0).Transform.Position + EM::Vec3(-2, 2, 0),
+																Instances.at(0).Transform.Position + EM::Vec3(-3, 3, 0),
 																EM::Quaternion(0, 0, 0, 1), 
 																EM::Vec3(TextScale, TextScale, 1)
 															),
@@ -5748,43 +5736,31 @@ int main(int argc, char** argv)
     	// Shadow pass
     	ShadowDepth.Bind();
     	{
-
-    		static float rotspeed = 2.0f;
-    		static float rot = 0.001f;
-    		rot += 0.001f;
 			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16_Black());
 
 			if (ShadowsEnabled)
 			{
 				ShadowCamera.SetOrthographicScale(TempCamScale);
-				Sun.Position = Instances.at(1).Transform.Position + EM::Vec3(10, 10, 0);
+				Sun.Position = Animations.at(0).Transform.Position + EM::Vec3(10, 10, 0);
 				ShadowCamera.Transform.Position = Sun.Position;
 				auto Orient = &ShadowCamera.Transform.Orientation;
-				// ShadowCamera.Transform.Orientation = EM::Quaternion::AngleAxis(rot * rotspeed, EM::Vec3(0, 1, 0)) * 
-				// 									 EM::Mat4ToQuaternion(EM::Mat4::LookAt(
-				// 																	ShadowCamera.Transform.Position, 
-				// 																	EM::Vec3(0.0f, 0.0f, 0.0f),
-				// 																	EM::Vec3(0.0f, 1.0f, 0.0f)));
 				ShadowCamera.Transform.Orientation = EM::Mat4ToQuaternion(EM::Mat4::LookAt(
 																					ShadowCamera.Transform.Position, 
-																					Instances.at(1).Transform.Position,
+																					Animations.at(0).Transform.Position,
 																					EM::Vec3(0.0f, 1.0f, 0.0f)));
 	    		EM::Mat4 LightSpaceMatrix = ShadowCamera.GetViewProjectionMatrix();
 
 	    		SimpleDepthProgram->Use();
 	        	SimpleDepthProgram->SetUniform("LightSpaceMatrix", LightSpaceMatrix);
-	        	// SimpleDepthProgram->SetUniform("Near", ShadowCamera.GetNear());
-	        	// SimpleDepthProgram->SetUniform("Far", ShadowCamera.GetFar());
 	    		{
+					glEnable(GL_CULL_FACE);
+					glCullFace(GL_FRONT);
 
 		    		// Render scene for shadows
 		    		 for (auto& c : Instances)
 			        {
 				        RenderInstanceForShadow(c);
 			        }
-
-					glEnable(GL_CULL_FACE);
-					glCullFace(GL_FRONT);
 
 			        for (auto& c : UVAnimations)
 			        {
@@ -5794,25 +5770,16 @@ int main(int argc, char** argv)
 			        glCullFace(GL_BACK);
 					glDisable(GL_CULL_FACE);
 
+					for (auto& c : Animations)
+					{
+						RenderInstanceForShadow(c);
+					}
 
 			        // Render floor
 			        SimpleDepthProgram->SetUniform("Model", EM::Mat4::Identity());
 					FloorBatch.RenderBatch();
 	    		}
 	    		SimpleDepthProgram->Unuse();
-
-	    		SimpleDepthAnimationProgram->Use();
-	    		{
-		        	SimpleDepthAnimationProgram->SetUniform("LightSpaceMatrix", LightSpaceMatrix);
-		        	// SimpleDepthAnimationProgram->SetUniform("Near", ShadowCamera.GetNear());
-		        	// SimpleDepthAnimationProgram->SetUniform("Far", ShadowCamera.GetFar());
-
-			        // for (auto& c : Animations)
-			        // {
-			        // 	RenderAnimationForShadow(c);
-			        // }
-	    		}
-	    		SimpleDepthAnimationProgram->Unuse();
 			}
     	}	
     	ShadowDepth.Unbind();
@@ -5858,7 +5825,6 @@ int main(int argc, char** argv)
 					DirectionalLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
 					DirectionalLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
 					DirectionalLightProgram->SetUniform("LightSpaceMatrix", ShadowCamera.GetViewProjectionMatrix());
-					// DirectionalLightProgram->SetUniform("LightSpaceMatrix", LightSpaceMatrix);
 					DirectionalLightProgram->SetUniform("ShadowBias", EM::Vec2(ShadowBiasMin, ShadowBiasMax));
 
 
@@ -6211,25 +6177,6 @@ int main(int argc, char** argv)
 				NoCameraProgram->Unuse();
 			} break;
 
-			case DrawFrameType::ID:
-			{
-				DepthProgram->Use();
-				{
-						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
-						CompositeBatch.Begin();
-						{
-							CompositeBatch.Add(
-												EM::Vec4(-1, -1, 2, 2),
-												EM::Vec4(0, 0, 1, 1),
-												GBuffer.GetTexture(EG::GBufferTextureType::ID)
-											);
-						}
-						CompositeBatch.End();
-						CompositeBatch.RenderBatch();
-				}
-				DepthProgram->Unuse();
-			} break;
-
 			case DrawFrameType::SHADOWDEPTH:
 			{
 				NoCameraProgram->Use();
@@ -6481,7 +6428,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 		static float rotational_speed = 1.0f;
 
 		// Get player
-		EG::ModelInstance& Player = Instances.at(1);
+		EG::ModelInstance& Player = Animations.at(0);
 
 	    EM::Vec3 VelDir(0, 0, 0);
 	
@@ -6622,11 +6569,6 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 		DrawFrame = DrawFrameType::SHADOWDEPTH;	
 	}
 
-	if (Input->IsKeyPressed(SDLK_7))
-	{
-		DrawFrame = DrawFrameType::ID;	
-	}
-
 	if (Input->IsKeyDown(SDLK_i))
 	{
 		if (Input->IsKeyDown(SDLK_DOWN))
@@ -6717,7 +6659,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	float SunSpeed = 0.01f;
 	if (Input->IsKeyDown(SDLK_f))
 	{
-		auto& Transform = Instances.at(1).Transform;
+		auto& Transform = Animations.at(0).Transform;
 
 		if (Input->IsKeyDown(SDLK_UP))
 		{
@@ -6738,7 +6680,6 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 			Transform.Position.z -= SunSpeed;
 		}
 	}
-
 
 	return true;
 }

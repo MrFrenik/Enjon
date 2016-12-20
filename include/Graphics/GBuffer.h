@@ -14,8 +14,6 @@ namespace Enjon { namespace Graphics {
 		NORMAL,
 		POSITION,
 		EMISSIVE,
-		ID,
-		DEPTH,
 		GBUFFER_TEXTURE_COUNT
 	};
 
