@@ -15,6 +15,7 @@ namespace Enjon { namespace Graphics {
 	static EM::Vec3 Static_BiTangent(0.0f, 1.0f, 0.0f);
 
 	u32 QuadBatch::DrawCallCount = 0;
+	u32 QuadBatch::DrawCallCountID = 1;
 
 	QuadBatch::QuadBatch() : VAO(0), VBO(0)
 	{
@@ -80,6 +81,7 @@ namespace Enjon { namespace Graphics {
 		TL.Color[1] 		= Color.g;
 		TL.Color[2] 		= Color.b;
 		TL.Color[3] 		= Color.a;
+		TL.ID 				= QuadBatch::DrawCallCountID;
 
 		/* Set bottom left vertex */
  		Position 			= Model * EM::Vec4(Basis_BL, 1.0);
@@ -103,6 +105,7 @@ namespace Enjon { namespace Graphics {
 		BL.Color[1] 		= Color.g;
 		BL.Color[2] 		= Color.b;
 		BL.Color[3] 		= Color.a;
+		BL.ID 				= QuadBatch::DrawCallCountID;
 
 		/* Set top right vertex */
  		Position 			= Model * EM::Vec4(Basis_TR, 1.0);
@@ -126,6 +129,7 @@ namespace Enjon { namespace Graphics {
 		TR.Color[1] 		= Color.g;
 		TR.Color[2] 		= Color.b;
 		TR.Color[3] 		= Color.a;
+		TR.ID 				= QuadBatch::DrawCallCountID;
 
 		/* Set bottom right vertex */
  		Position 			= Model * EM::Vec4(Basis_BR, 1.0);
@@ -149,6 +153,7 @@ namespace Enjon { namespace Graphics {
 		BR.Color[1] 		= Color.g;
 		BR.Color[2] 		= Color.b;
 		BR.Color[3] 		= Color.a;
+		BR.ID 				= QuadBatch::DrawCallCountID;
 	}
 
 	QuadGlyph::QuadGlyph(EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, EG::ColorRGBA16& Color)
@@ -201,6 +206,7 @@ namespace Enjon { namespace Graphics {
 		TL.Color[1] 		= Color.g;
 		TL.Color[2] 		= Color.b;
 		TL.Color[3] 		= Color.a;
+		TL.ID 				= QuadBatch::DrawCallCountID;
 
 		/* Set bottom left vertex */
  		Position 			= Model * EM::Vec4(Static_BL, 1.0);
@@ -224,6 +230,8 @@ namespace Enjon { namespace Graphics {
 		BL.Color[1] 		= Color.g;
 		BL.Color[2] 		= Color.b;
 		BL.Color[3] 		= Color.a;
+		BL.ID 				= QuadBatch::DrawCallCountID;
+
 
 		/* Set top right vertex */
  		Position 			= Model * EM::Vec4(Static_TR, 1.0);
@@ -247,6 +255,7 @@ namespace Enjon { namespace Graphics {
 		TR.Color[1] 		= Color.g;
 		TR.Color[2] 		= Color.b;
 		TR.Color[3] 		= Color.a;
+		TR.ID 				= QuadBatch::DrawCallCountID;
 
 		/* Set bottom right vertex */
  		Position 			= Model * EM::Vec4(Static_BR, 1.0);
@@ -270,6 +279,7 @@ namespace Enjon { namespace Graphics {
 		BR.Color[1] 		= Color.g;
 		BR.Color[2] 		= Color.b;
 		BR.Color[3] 		= Color.a;
+		BR.ID 				= QuadBatch::DrawCallCountID;
 	}
 
 	void QuadBatch::Init()
@@ -315,6 +325,7 @@ namespace Enjon { namespace Graphics {
 						)
 	{
 		QuadGlyphs.emplace_back(Transform, UVRect, Texture, Color);
+		DrawCallCountID++;
 	}
 
 	// Adds quadglyph to quadbatch to be rendered with base quad defined
@@ -326,6 +337,7 @@ namespace Enjon { namespace Graphics {
 			ColorRGBA16& Color)
 	{
 		QuadGlyphs.emplace_back(Dimensions, Transform, UVRect, Texture, Color);
+		DrawCallCountID++;
 	}
 
 	void QuadBatch::RenderBatch()
@@ -423,6 +435,7 @@ namespace Enjon { namespace Graphics {
 		glEnableVertexAttribArray(3);
 		glEnableVertexAttribArray(4);
 		glEnableVertexAttribArray(5);
+		glEnableVertexAttribArray(6);
 
 		// Position
 		glVertexAttribPointer(GL_QUAD_VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(QuadVert), (void*)offsetof(QuadVert, Position));
@@ -436,6 +449,8 @@ namespace Enjon { namespace Graphics {
 		glVertexAttribPointer(GL_QUAD_VERTEX_ATTRIB_UV, 2, GL_FLOAT, GL_FALSE, sizeof(QuadVert), (void*)offsetof(QuadVert, UV));
 		// Color
 		glVertexAttribPointer(GL_QUAD_VERTEX_ATTRIB_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof(QuadVert), (void*)offsetof(QuadVert, Color));
+		// ID
+		glVertexAttribPointer(GL_QUAD_VERTEX_ATTRIB_ID, 1, GL_UNSIGNED_INT, GL_TRUE, sizeof(QuadVert), (void*)offsetof(QuadVert, ID));
 
 		// Unbind VAO
 		glBindVertexArray(0);		

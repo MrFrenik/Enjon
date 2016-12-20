@@ -1,10 +1,11 @@
 #version 330 core
 layout (location = 0) in vec3 position;
-layout (location = 1) in vec2 texCoords;
+layout (location = 1) in vec3 normals;
+layout (location = 2) in vec3 tangent;
+layout (location = 3) in vec2 texCoords;
 
 uniform mat4 LightSpaceMatrix;
 uniform mat4 Model;
-uniform vec4 SpriteFrame;
 
 out DATA
 {
@@ -18,6 +19,5 @@ void main()
     vs_out.Position = position;
 
 	// Calculate tex coords from sprite frame
-	vec2 TexCoords = vec2(texCoords.x, texCoords.y);
-	vs_out.TexCoords = SpriteFrame.xy + (TexCoords * SpriteFrame.zw);
+	vec2 TexCoords = vec2(texCoords.x, -texCoords.y);
 }

@@ -1,16 +1,16 @@
 #version 330 core
 
-layout (location = 0) out vec4 depth;  	// Diffuse
-
 in DATA
 {
 	vec3 Position;	
 	vec2 TexCoords;
 }fs_in;
 
-uniform sampler2D diffuse;
+uniform sampler2D DiffuseMap;
 uniform float Near;
 uniform float Far;
+
+out vec4 DepthColor;
 
 float LinearizeDepth(float Depth)
 {
@@ -20,9 +20,9 @@ float LinearizeDepth(float Depth)
 
 void main()
 {
+	vec4 Color = texture2D(DiffuseMap, fs_in.TexCoords);
+	if (Color.a < 0.5) discard;
 
-    float Depth = LinearizeDepth(gl_FragCoord.z);
-	vec4 color = texture(diffuse, fs_in.TexCoords);
-	if (color.a < 0.0) Depth = 0.0;
-    depth = vec4(Depth, Depth, Depth, 1.0);
+    // float Depth = LinearizeDepth(gl_FragCoord.z);
+    DepthColor = Color;
 }

@@ -15,9 +15,9 @@
 #define GL_QUAD_VERTEX_ATTRIB_BITANGENT 3
 #define GL_QUAD_VERTEX_ATTRIB_UV 		4
 #define GL_QUAD_VERTEX_ATTRIB_COLOR 	5
+#define GL_QUAD_VERTEX_ATTRIB_ID 		6
 
 namespace Enjon { namespace Graphics {
-
 
 	struct QuadVert
 	{
@@ -27,6 +27,7 @@ namespace Enjon { namespace Graphics {
 		float Bitangent[3];
 		float UV[2];
 		float Color[4];
+		u32 ID;
 	};
 
 	enum class QuadGlyphSortType
@@ -81,6 +82,7 @@ namespace Enjon { namespace Graphics {
 			void RenderBatch();
 
 		static u32 DrawCallCount; 
+		static u32 DrawCallCountID; 
 
 		private:
 			void CreateRenderBatches();
