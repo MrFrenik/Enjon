@@ -4605,6 +4605,8 @@ EG::ModelAsset Floor;
 EG::ModelAsset NormalFloor;
 EG::ModelAsset Wall;
 EG::ModelAsset Cube;
+EG::ModelAsset TopWall;
+EG::ModelAsset FrontWall;
 EG::ModelAsset SpriteWithNormal;
 EG::ModelAsset MonkeyHead;
 EG::ModelAsset OtherCube;
@@ -4662,15 +4664,16 @@ EM::Vec3 BlurWeights(0.38f, 0.32f, 0.39f);
 EM::Vec3 BlurIterations(20, 10, 40);
 EM::Vec3 BlurRadius(0.004f, 0.004f, 0.004f);
 bool DirectionalLightEnabled = true;
-float SunlightIntensity = 0.2f;
+float SunlightIntensity = 5.0f;
 float TempCamScale = 25.0f;
 float ShadowBiasMin = 0.004f;
 float ShadowBiasMax = 0.0025f;
 bool ShadowsEnabled = true;
 bool PointLightsEnabled = true;
+Enjon::u32 PointLightAmount = 20;
 
 EM::Vec3 AmbientColor(0.2f, 0.2f, 0.2f);
-float AmbientIntensity = 3.0f;
+float AmbientIntensity = 0.0f;
 
 struct ToneMapSettings
 {
@@ -4851,6 +4854,47 @@ void LoadNormalMappedSpriteAsset()
 	SpriteWithNormal.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST, false);
 	SpriteWithNormal.Material.Shininess = 20.0f;
 
+}
+
+void LoadIsometricWall()
+{
+	// Get mesh
+	TopWall.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/quad.obj");
+
+    // Get shader and set texture
+    auto TopShader = EG::ShaderManager::GetShader("GBuffer");
+    TopShader->Use();
+    	TopShader->SetUniform("diffuseMap", 0);
+    	TopShader->SetUniform("normalMap", 1);
+    	TopShader->SetUniform("emissiveMap", 2);
+    TopShader->Unuse();
+
+    // Set shader
+    TopWall.Shader = TopShader;
+    // Textures
+	TopWall.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_MacroVariation.png", GL_NEAREST, GL_NEAREST);
+	TopWall.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png", GL_NEAREST, GL_NEAREST);
+	TopWall.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST, false);
+	TopWall.Material.Shininess = 20.0f;
+
+	// Get mesh
+	FrontWall.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/quad.obj");
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("GBuffer");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
+    Shader->Unuse();
+
+    // Set shader
+    FrontWall.Shader = Shader;
+    // Textures
+	FrontWall.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_MacroVariation.png", GL_NEAREST, GL_NEAREST);
+	FrontWall.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png", GL_NEAREST, GL_NEAREST);
+	FrontWall.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST, false);
+	FrontWall.Material.Shininess = 20.0f;
 }
 
 void LoadCubeSprite()
@@ -5297,6 +5341,7 @@ int main(int argc, char** argv)
 	LoadOtherCubeAsset();
 	LoadMonkeyHeadAsset();
 	LoadUVAnimatedAsset();
+	LoadIsometricWall();
 	LoadInstances();
 
 	LoadFrames();
@@ -5363,7 +5408,7 @@ int main(int argc, char** argv)
     glBindVertexArray(0);
 
     std::vector<EG::PointLight> PointLights;
-    for (u32 i = 0; i < 20; i++)
+    for (u32 i = 0; i < PointLightAmount; i++)
     {
     	EG::PointLight L;
     	L.Position = EM::Vec3(ER::Roll(-50, 50), ER::Roll(0, 10), ER::Roll(-50, 50));
@@ -5395,7 +5440,7 @@ int main(int argc, char** argv)
 					);
 
 	Sun = EG::DirectionalLight(
-								EM::Vec3(10.0f, 10.0f, 3.0f),
+								EM::Vec3(0.1f, 0.0f, 0.0f),
 								EG::RGBA16_Orange(),
 								4.0f
 							);
@@ -5494,8 +5539,7 @@ int main(int argc, char** argv)
 	Enjon::CVarsSystem::Register("sun_b", &Sun.Color.b, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("shadows_enabled", &ShadowsEnabled, Enjon::CVarType::TYPE_BOOL);
 	Enjon::CVarsSystem::Register("pointlights_enabled", &PointLightsEnabled, Enjon::CVarType::TYPE_BOOL);
-	
-
+	Enjon::CVarsSystem::Register("pointlights_amount", &PointLightAmount, Enjon::CVarType::TYPE_UINT);
 
     // Game loop
     bool running = true;
@@ -5855,13 +5899,13 @@ int main(int argc, char** argv)
 					PointLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
 					PointLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
 
-					for (auto& L : PointLights)
+					for (Enjon::u32 i = 0; i < PointLightAmount; ++i)
 					{
-						PointLightProgram->SetUniform("LightPos", L.Position);
-						PointLightProgram->SetUniform("LightColor", EM::Vec3(L.Color.r, L.Color.g, L.Color.b));
-						PointLightProgram->SetUniform("Falloff", L.Parameters.Falloff);
-						// PointLightProgram->SetUniform("Radius", L.Parameters.Radius);
-						PointLightProgram->SetUniform("LightIntensity", L.Intensity);
+						PointLightProgram->SetUniform("LightPos", PointLights.at(i).Position);
+						PointLightProgram->SetUniform("LightColor", EM::Vec3(PointLights.at(i).Color.r, PointLights.at(i).Color.g, PointLights.at(i).Color.b));
+						PointLightProgram->SetUniform("Falloff", PointLights.at(i).Parameters.Falloff);
+						// PointLightProgram->SetUniform("Radius", PointLights.at(i).Parameters.Radius);
+						PointLightProgram->SetUniform("LightIntensity", PointLights.at(i).Intensity);
 
 						// Render Light to screen
 						{
@@ -6301,7 +6345,7 @@ int main(int argc, char** argv)
         // Swap the screen buffers
         Window.SwapBuffer();
 
-        // FPS = Limiter.End();
+        FPS = Limiter.End();
 
         // Reset draw call count
         EG::QuadBatch::DrawCallCount = 0;
@@ -6351,7 +6395,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 		}
     }
 
-    static float speed = 8.0f;
+    static float speed = 15.0f;
     static float dt = 0.01f;
 
 
@@ -6408,7 +6452,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	}
 	else if (Camera->ProjType == EG::ProjectionType::Orthographic)
 	{
-		const float PlayerSpeed = 3.0f;
+		const float PlayerSpeed = 6.0f;
 
 		Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
 

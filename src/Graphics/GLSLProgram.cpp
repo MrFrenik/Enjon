@@ -79,6 +79,30 @@ namespace Enjon { namespace Graphics {
 			Utils::FatalError("Shaders failed to link!");
 		}
 
+		int UniformCount = -1;
+		glGetProgramiv(m_programID, GL_ACTIVE_UNIFORMS, &UniformCount);
+		for (int i = 0; i < UniformCount; ++i)
+		{
+			int NameLength = -1;
+			int Number = -1;
+			GLenum Type = GL_ZERO;
+			char Name[256];
+
+			glGetActiveUniform(m_programID, 
+							   static_cast<GLuint>(i), 
+							   sizeof(Name) - 1, 
+							   &NameLength, 
+							   &Number, 
+							   &Type, 
+							   Name);
+			Name[NameLength] = 0;
+
+			GLuint Location = glGetUniformLocation(m_programID, Name);
+
+			// Cache location in map
+			UniformMap[Name] = Location;
+		}
+
 		//Always detach shaders after a successful link.
 		glDetachShader(m_programID, m_vertexShaderID);
 		glDetachShader(m_programID, m_fragmentShaderID);
@@ -159,68 +183,175 @@ namespace Enjon { namespace Graphics {
 		
 	void GLSLProgram::SetUniform(const std::string& name, const Math::Mat4& matrix)
 	{
-		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, matrix.elements);	
+		// glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, matrix.elements);	
+		auto Search = UniformMap.find(name);
+		if (Search != UniformMap.end())
+		{
+			glUniformMatrix4fv(Search->second, 1, GL_FALSE, matrix.elements);
+		}
+		else
+		{
+			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		}
 	}
 	
 	void GLSLProgram::SetUniform(const std::string& name, float* val, int count)
 	{
-		glUniform1fv(GetUniformLocation(name), count, val);
+		// glUniform1fv(GetUniformLocation(name), count, val);
+		auto Search = UniformMap.find(name);
+		if (Search != UniformMap.end())
+		{
+			glUniform1fv(Search->second, count, val);
+		}
+		else
+		{
+			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		}
 	}
 	
 	void GLSLProgram::SetUniform(const std::string& name, int* val, int count)
 	{
-		glUniform1iv(GetUniformLocation(name), count, val);
+		// glUniform1iv(GetUniformLocation(name), count, val);
+		auto Search = UniformMap.find(name);
+		if (Search != UniformMap.end())
+		{
+			glUniform1iv(Search->second, count, val);
+		}
+		else
+		{
+			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		}
 	}
 
 	void GLSLProgram::SetUniform(const std::string& name, const float& val)
 	{
-		glUniform1f(GetUniformLocation(name), val); 
+		// glUniform1f(GetUniformLocation(name), val); 
+		auto Search = UniformMap.find(name);
+		if (Search != UniformMap.end())
+		{
+			glUniform1f(Search->second, val);
+		}
+		else
+		{
+			GLuint Location = GetUniformLocation(name);
+			UniformMap[name] = Location;
+			glUniform1f(Location, val);
+			// EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		}
 	}
 
 	void GLSLProgram::SetUniform(const std::string& name, const Math::Vec2& vector)
 	{
-		glUniform2f(GetUniformLocation(name), vector.x, vector.y);
+		// glUniform2f(GetUniformLocation(name), vector.x, vector.y);
+		auto Search = UniformMap.find(name);
+		if (Search != UniformMap.end())
+		{
+			glUniform2f(Search->second, vector.x, vector.y);
+		}
+		else
+		{
+			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		}
 	}
 
 	void GLSLProgram::SetUniform(const std::string& name, const Math::Vec3& vector)
 	{
-		glUniform3f(GetUniformLocation(name), vector.x, vector.y, vector.z);
+		// glUniform3f(GetUniformLocation(name), vector.x, vector.y, vector.z);
+		auto Search = UniformMap.find(name);
+		if (Search != UniformMap.end())
+		{
+			glUniform3f(Search->second, vector.x, vector.y, vector.z);
+		}
+		else
+		{
+			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		}
 	}
 
 	void GLSLProgram::SetUniform(const std::string& name, const Math::Vec4& vector)
 	{
-		glUniform4f(GetUniformLocation(name), vector.x, vector.y, vector.z, vector.w);
+		// glUniform4f(GetUniformLocation(name), vector.x, vector.y, vector.z, vector.w);
+		auto Search = UniformMap.find(name);
+		if (Search != UniformMap.end())
+		{
+			glUniform4f(Search->second, vector.x, vector.y, vector.z, vector.w);
+		}
+		else
+		{
+			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		}
 	}
 
 	void GLSLProgram::SetUniform(const std::string& name, const int& val)
 	{
-		glUniform1i(GetUniformLocation(name), val);
+		// glUniform1i(GetUniformLocation(name), val);
+		auto Search = UniformMap.find(name);
+		if (Search != UniformMap.end())
+		{
+			glUniform1i(Search->second, val);
+		}
+		else
+		{
+			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		}
 	}
 
 	void GLSLProgram::SetUniform(const std::string& name, const double& val)
 	{
-		glUniform1f(GetUniformLocation(name), val);
+		// glUniform1f(GetUniformLocation(name), val);
+		auto Search = UniformMap.find(name);
+		if (Search != UniformMap.end())
+		{
+			glUniform1f(Search->second, val);
+		}
+		else
+		{
+			GLuint Location = GetUniformLocation(name);
+			UniformMap[name] = Location;
+			glUniform1f(Location, val);
+			// EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		}
 	}
 
 	void GLSLProgram::SetUniform(const std::string& name, const EM::Transform& T)
 	{
+		// TODO(John): Figure out a decent way to cache these
 		glUniform3f(GetUniformLocation(name + ".position"), T.Position.x, T.Position.y, T.Position.z);	
 		glUniform4f(GetUniformLocation(name + ".orientation"), T.Orientation.x, T.Orientation.y, T.Orientation.z, T.Orientation.w);	
-		glUniform3f(GetUniformLocation(name + ".scale"), T.Scale.x, T.Scale.y, T.Scale.z);	
-
+		glUniform3f(GetUniformLocation(name + ".scale"), T.Scale.x, T.Scale.y, T.Scale.z);
 	}
 
 	void GLSLProgram::SetUniform(const std::string& name, const EG::ColorRGBA16& C)
 	{
-		glUniform3f(GetUniformLocation(name), C.r, C.g, C.b);	
+		// glUniform3f(GetUniformLocation(name), C.r, C.g, C.b);	
+		auto Search = UniformMap.find(name);
+		if (Search != UniformMap.end())
+		{
+			glUniform3f(Search->second, C.r, C.g, C.b);
+		}
+		else
+		{
+			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		}
 	}
 
 	void GLSLProgram::BindTexture(const std::string& Name, const GLuint& TextureID, const GLuint Index)
 	{
 		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0 + Index);
-		GLuint UniformID = glGetUniformLocationARB(GetProgramID(), Name.c_str());
-		glUniform1i(UniformID, Index);
+		// GLuint UniformID = glGetUniformLocationARB(GetProgramID(), Name.c_str());
+
+		auto Search = UniformMap.find(Name);
+		if (Search != UniformMap.end())
+		{
+			glUniform1i(Search->second, Index);
+		}
+		else
+		{
+			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + Name);
+		}
+
+		// glUniform1i(UniformID, Index);
 		glBindTexture(GL_TEXTURE_2D, TextureID);
 	}
 }}
