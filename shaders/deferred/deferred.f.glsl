@@ -14,6 +14,8 @@ in VS_OUT
     mat3 TBN;
 } fs_in;
 
+uniform vec3 diffuseColor = vec3(1, 1, 1);
+
 // uniforms
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
@@ -32,8 +34,10 @@ void main()
     vec4 color = texture(diffuseMap, fs_in.TexCoords);
     if (color.a < 0.5) discard;
     
-    DiffuseOut  = color;
+    DiffuseOut  = color * vec4(diffuseColor, 1.0);
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
-    EmissiveOut = texture2D(emissiveMap, fs_in.TexCoords) * vec4(emissiveIntensity, emissiveIntensity, emissiveIntensity, 1.0);
+    EmissiveOut = texture2D(emissiveMap, fs_in.TexCoords) * 
+                            vec4(emissiveIntensity, emissiveIntensity, emissiveIntensity, 1.0) * 
+                            vec4(diffuseColor, 1.0);
 }

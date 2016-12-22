@@ -25,15 +25,15 @@ namespace Enjon { namespace Graphics {
 	{
 	}
 
-	QuadGlyph::QuadGlyph(EM::Vec2& Dimensions, EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, EG::ColorRGBA16& Color)
-	:	Texture(_Texture) 	
+	QuadGlyph::QuadGlyph(EM::Vec2& Dimensions, EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, EG::ColorRGBA16& Color, float _Depth)
+	:	Texture(_Texture), Depth(_Depth) 	
 	{
 		// Transform all verticies by model matrix
 		EM::Mat4 Model;
 		// L = T*R*S
 		Model *= EM::Mat4::Translate(Transform.Position);
-		Model *= EM::QuaternionToMat4(Transform.Orientation);
-		Model *= EM::Mat4::Scale(Transform.Scale);
+		// Model *= EM::QuaternionToMat4(Transform.Orientation);
+		// Model *= EM::Mat4::Scale(Transform.Scale);
 
 		EM::Vec4 Position, Normal, Tangent, Bitangent;
 		EM::Vec3 T, B, N, P;
@@ -156,15 +156,15 @@ namespace Enjon { namespace Graphics {
 		BR.ID 				= QuadBatch::DrawCallCountID;
 	}
 
-	QuadGlyph::QuadGlyph(EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, EG::ColorRGBA16& Color)
-	:	Texture(_Texture) 	
+	QuadGlyph::QuadGlyph(EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, EG::ColorRGBA16& Color, float _Depth)
+	:	Texture(_Texture), Depth(_Depth)
 	{
 		// Transform all verticies by model matrix
 		EM::Mat4 Model;
 		// L = T*R*S
 		Model *= EM::Mat4::Translate(Transform.Position);
-		Model *= EM::QuaternionToMat4(Transform.Orientation);
-		Model *= EM::Mat4::Scale(Transform.Scale);
+		// Model *= EM::QuaternionToMat4(Transform.Orientation);
+		// Model *= EM::Mat4::Scale(Transform.Scale);
 
 		EM::Vec4 Position, Normal, Tangent, Bitangent;
 		EM::Vec3 T, B, N, P;
@@ -321,22 +321,25 @@ namespace Enjon { namespace Graphics {
 						EM::Transform& Transform, 
 						EM::Vec4& UVRect, 
 						GLuint Texture, 
-						ColorRGBA16& Color
+						ColorRGBA16& Color, 
+						float Depth
 						)
 	{
-		QuadGlyphs.emplace_back(Transform, UVRect, Texture, Color);
+		QuadGlyphs.emplace_back(Transform, UVRect, Texture, Color, Depth);
 		DrawCallCountID++;
 	}
 
 	// Adds quadglyph to quadbatch to be rendered with base quad defined
 	void QuadBatch::Add(
-			EM::Vec2& Dimensions, 
-			EM::Transform& Transform, 
-			EM::Vec4& UVRect, 
-			GLuint Texture, 
-			ColorRGBA16& Color)
+					EM::Vec2& Dimensions, 
+					EM::Transform& Transform, 
+					EM::Vec4& UVRect, 
+					GLuint Texture, 
+					ColorRGBA16& Color, 
+					float Depth
+				)
 	{
-		QuadGlyphs.emplace_back(Dimensions, Transform, UVRect, Texture, Color);
+		QuadGlyphs.emplace_back(Dimensions, Transform, UVRect, Texture, Color, Depth);
 		DrawCallCountID++;
 	}
 
@@ -464,17 +467,25 @@ namespace Enjon { namespace Graphics {
 			{
 				std::stable_sort(QuadGlyphPointers.begin(), QuadGlyphPointers.end(), CompareTexture);
 			} break;
+			case QuadGlyphSortType::FRONT_TO_BACK:
+			{
+				std::stable_sort(QuadGlyphPointers.begin(), QuadGlyphPointers.end(), CompareFrontToBack);
+			} break;
+			case QuadGlyphSortType::BACK_TO_FRONT:
+			{
+				std::stable_sort(QuadGlyphPointers.begin(), QuadGlyphPointers.end(), CompareBackToFront);
+			} break;
 		}
 	}
 
 	bool QuadBatch::CompareFrontToBack(QuadGlyph* A, QuadGlyph* B)
 	{
-		return true;
+		return (A->Depth < B->Depth);
 	}
 
 	bool QuadBatch::CompareBackToFront(QuadGlyph* A, QuadGlyph* B)
 	{
-		return true;
+		return (A->Depth > B->Depth);
 	}
 
 	bool QuadBatch::CompareTexture(QuadGlyph* A, QuadGlyph* B)

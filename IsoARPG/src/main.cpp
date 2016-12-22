@@ -234,7 +234,6 @@ int main(int argc, char** argv)
 	// Init BehaviorTreeEditor
 	Enjon::BehaviorTreeEditor::Init(&Input, SCREENWIDTH, SCREENHEIGHT);
 
-
 	// Init level
 	Enjon::Graphics::SpriteBatch TileBatch;
 	TileBatch.Init();
@@ -4609,12 +4608,14 @@ EG::ModelAsset TopWall;
 EG::ModelAsset FrontWall;
 EG::ModelAsset SpriteWithNormal;
 EG::ModelAsset MonkeyHead;
+EG::ModelAsset Sphere;
 EG::ModelAsset OtherCube;
 EG::ModelAsset CubeSprite;
 EG::ModelAsset UVAnimatedAsset;
 std::vector<EG::ModelInstance> Instances;
 std::vector<EG::ModelInstance> Animations;
 std::vector<EG::ModelInstance> UVAnimations;
+std::vector<EG::ModelInstance> LightSpheres;
 EG::Camera FPSCamera;
 EG::Camera2D HUDCamera;
 
@@ -4656,13 +4657,7 @@ float TextScale = 0.06f;
 float TextSpacing = 0.0f;
 EM::Vec2 UVScalar = EM::Vec2(0.1f, 30.0f);
 EM::Vec2 UVAdditive = EM::Vec2(0, 0);
-float DistanceRadius = 0.0f;
 float LineWidth = 50.0f;
-float Exposure = 1.0f;
-float Gamma = 1.0f;
-EM::Vec3 BlurWeights(0.38f, 0.32f, 0.39f);
-EM::Vec3 BlurIterations(20, 10, 40);
-EM::Vec3 BlurRadius(0.004f, 0.004f, 0.004f);
 bool DirectionalLightEnabled = true;
 float SunlightIntensity = 5.0f;
 float TempCamScale = 25.0f;
@@ -4670,7 +4665,9 @@ float ShadowBiasMin = 0.004f;
 float ShadowBiasMax = 0.0025f;
 bool ShadowsEnabled = true;
 bool PointLightsEnabled = true;
-Enjon::u32 PointLightAmount = 20;
+Enjon::u32 PointLightAmount = 10;
+float PointLightRadius = 10.0f;
+float DistanceRadius = 1000.0f;
 
 EM::Vec3 AmbientColor(0.2f, 0.2f, 0.2f);
 float AmbientIntensity = 0.0f;
@@ -4703,7 +4700,7 @@ struct BloomSettings
 };
 
 struct FXAASettings FXAASettings{8.0f, 0.09f, 0.5f};
-struct ToneMapSettings ToneMapSettings{1.0f, 1.0f, 1.0f, 2.0f, 2.0f};
+struct ToneMapSettings ToneMapSettings{0.1f, 1.0f, 1.0f, 2.0f, 2.0f};
 struct BloomSettings BloomSettings(EM::Vec3(0.4f, 0.5f, 0.0f), EM::Vec3(1, 4, 1), EM::Vec3(0.004f, 0.009f, 0.009f));
 
 void LoadUVAnimatedAsset()
@@ -4853,7 +4850,6 @@ void LoadNormalMappedSpriteAsset()
 	SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png", GL_NEAREST, GL_NEAREST);
 	SpriteWithNormal.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST, false);
 	SpriteWithNormal.Material.Shininess = 20.0f;
-
 }
 
 void LoadIsometricWall()
@@ -4918,6 +4914,28 @@ void LoadCubeSprite()
 	CubeSprite.Material.Shininess = 20.0f;
 }
 
+void LoadSphere()
+{
+	// Get mesh
+	Sphere.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/sphere.obj");
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("GBuffer");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
+    Shader->Unuse();
+
+    // Set shader
+    Sphere.Shader = Shader;
+    // Textures
+	Sphere.Material.Textures[EG::TextureSlotType::DIFFUSE] 		= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png", GL_NEAREST, GL_NEAREST);
+	Sphere.Material.Textures[EG::TextureSlotType::NORMAL] 		= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png", GL_NEAREST, GL_NEAREST);
+	Sphere.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png", GL_NEAREST, GL_NEAREST, false);
+	Sphere.Material.Shininess = 20.0f;
+}
+
 void LoadInstances()
 {
 
@@ -4941,6 +4959,17 @@ void LoadInstances()
 	// B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005f;
 	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 2.75f;
 	UVAnimations.push_back(B);
+
+	/*
+	for (auto i = 0; i < PointLightAmount; ++i)
+	{
+		EG::ModelInstance S;
+		S.Asset = &Sphere;
+		S.Transform.Position 	= EM::Vec3(0, 0, 0);
+		S.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.1f;
+		LightSpheres.push_back(S);
+	}
+	*/
 }
 
 void RenderInstanceForShadow(const EG::ModelInstance& Instance)
@@ -4999,9 +5028,8 @@ void RenderInstance(const EG::ModelInstance& Instance)
 
 		Asset->Shader->SetUniform("model", Model);
 		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
-
-
 	}
+
 	glActiveTexture(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindVertexArray(0);
@@ -5056,9 +5084,7 @@ void RenderAnimation(EG::ModelInstance& Instance)
 
 		auto CamPos = FPSCamera.Transform.Position;
 
-
 		auto& Position = Instances.at(0).Transform.Position;
-
 
 		Asset->Shader->SetUniform("model", Model);
 		Asset->Shader->SetUniform("SpriteFrame", SpriteFrame);
@@ -5342,6 +5368,7 @@ int main(int argc, char** argv)
 	LoadMonkeyHeadAsset();
 	LoadUVAnimatedAsset();
 	LoadIsometricWall();
+	LoadSphere();
 	LoadInstances();
 
 	LoadFrames();
@@ -5412,7 +5439,7 @@ int main(int argc, char** argv)
     {
     	EG::PointLight L;
     	L.Position = EM::Vec3(ER::Roll(-50, 50), ER::Roll(0, 10), ER::Roll(-50, 50));
-    	L.Parameters = EG::PointLightParameters(1.0f, 0.0f, 0.03f);
+    	L.Parameters = EG::PointLightParameters(1.0f, 0.0f, 0.01f);
 
     	float R = (float)ER::Roll(0, 255) / 255.0f;
     	float G = (float)ER::Roll(0, 255) / 255.0f;
@@ -5506,7 +5533,6 @@ int main(int argc, char** argv)
 	Enjon::CVarsSystem::Register("uv_scalar_y", &UVScalar.y, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("uv_additive_x", &UVAdditive.x, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("uv_additive_y", &UVAdditive.y, Enjon::CVarType::TYPE_FLOAT);
-	Enjon::CVarsSystem::Register("distance_radius", &DistanceRadius, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("line_width", &LineWidth, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("exposure", &ToneMapSettings.Exposure, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("gamma", &ToneMapSettings.Gamma, Enjon::CVarType::TYPE_FLOAT);
@@ -5540,6 +5566,8 @@ int main(int argc, char** argv)
 	Enjon::CVarsSystem::Register("shadows_enabled", &ShadowsEnabled, Enjon::CVarType::TYPE_BOOL);
 	Enjon::CVarsSystem::Register("pointlights_enabled", &PointLightsEnabled, Enjon::CVarType::TYPE_BOOL);
 	Enjon::CVarsSystem::Register("pointlights_amount", &PointLightAmount, Enjon::CVarType::TYPE_UINT);
+	Enjon::CVarsSystem::Register("pointlights_radius", &PointLightRadius, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("distance_radius", &DistanceRadius, Enjon::CVarType::TYPE_FLOAT);
 
     // Game loop
     bool running = true;
@@ -5604,6 +5632,17 @@ int main(int argc, char** argv)
 
     	PointLights.at(5).Position = UVAnimations.at(0).Transform.Position + EM::Vec3(cos(timer * speed), 0.0f, sin(timer * speed));
     	PointLights.at(5).Color = EG::RGBA16_White();
+
+    	{
+	    	auto& Position = Animations.at(0).Transform.Position;
+	    	for (uint32_t i = 0; i < PointLights.size(); i++)
+	    	{
+	    		EM::Vec3 NewPosition = EM::Vec3(cos(timer * speed + i), sin(timer * speed / 10.0f + i), sin(timer * speed + i));
+	    		NewPosition = NewPosition * (PointLightRadius + sin(timer) * 3.0f);
+	    		PointLights.at(i).Position 				= Position + NewPosition + EM::Vec3(0.0f, 2.0f, 0.0f); 
+	    		// LightSpheres.at(i).Transform.Position 	= Position + NewPosition + EM::Vec3(0.0f, 2.0f, 0.0f); 
+	    	}
+    	}
 
     	// Set up spot light
     	Spot.Parameters.Direction = EM::Vec3(cos(timer) * speed, 0.0f, sin(timer) * speed);
@@ -5671,6 +5710,18 @@ int main(int argc, char** argv)
 	        	Shader->Unuse();
 	        }
 
+	        uint32_t i = 0;
+	        for (auto& c : LightSpheres)
+	        {
+	        	auto Shader = c.Asset->Shader;
+	        	Shader->Use();
+	        		auto& Color = PointLights.at(i++).Color;
+	        		Shader->SetUniform("diffuseColor", EM::Vec3(Color.r, Color.g, Color.b));
+	        		Shader->SetUniform("camera", CameraMatrix);
+	        		RenderInstance(c);
+	        	Shader->Unuse();
+	        }
+
 			QuadBatchProgram->Use();
 			{
 				QuadBatchProgram->SetUniform("camera", CameraMatrix);
@@ -5680,22 +5731,25 @@ int main(int argc, char** argv)
 				QuadBatchProgram->BindTexture("emissiveMap", EI::ResourceManager::GetTexture("../Assets/Textures/black.png").id, 3);
 				FloorBatch.RenderBatch();
 
-				QBatch.Begin();
+				QBatch.Begin(EG::QuadGlyphSortType::FRONT_TO_BACK);
 				{
-					// for (uint32_t i = 0; i < Transforms.size(); i++)
-					// {
-					// 	// Check if in range of camera to be drawn or not
-					// 	if (EM::Vec3::DistanceSquared(Transforms.at(i).Position, FPSCamera.Transform.Position) <= DistanceRadius)
-					// 	{
-					// 		Transforms.at(i).Position = Transforms.at(i).Position;
-					// 		Transforms.at(i).Scale = EM::Vec3(1, 1, 1) * float(i) / (float)Transforms.size();
-					// 		QBatch.Add(
-					// 						Transforms.at(i) ,
-					// 						EM::Vec4(0, 0, 1, 1), 
-					// 						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png").id
-					// 					);
-					// 	}
-					// }
+					for (uint32_t i = 0; i < Transforms.size(); i++)
+					{
+						// Check if in range of camera to be drawn or not
+						float Depth = EM::Vec3::DistanceSquared(Transforms.at(i).Position, FPSCamera.Transform.Position);
+						if (Depth <= DistanceRadius)
+						{
+							Transforms.at(i).Position = Transforms.at(i).Position;
+							Transforms.at(i).Scale = EM::Vec3(1, 1, 1) * float(i) / (float)Transforms.size();
+							QBatch.Add(
+										Transforms.at(i) ,
+										EM::Vec4(0, 0, 1, 1), 
+										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png").id, 
+										EG::RGBA16_White(), 
+										Depth
+									);
+						}
+					}
 
 					static float uv_add = 0.0f;
 					uv_add += 0.001f;
@@ -5724,7 +5778,11 @@ int main(int argc, char** argv)
 				}
 				QuadBatchProgram->BindTexture("emissiveMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptileblue.png").id, 2);
 				QBatch.End();
+
+				glEnable(GL_CULL_FACE);
+				glCullFace(GL_BACK);
 				QBatch.RenderBatch();
+				glDisable(GL_CULL_FACE);
 			}
 
 			QuadBatchProgram->Unuse();
@@ -5807,6 +5865,11 @@ int main(int argc, char** argv)
 			        }
 
 			        for (auto& c : UVAnimations)
+			        {
+		        		RenderInstanceForShadow(c);
+			        }
+
+			        for (auto& c : LightSpheres)
 			        {
 		        		RenderInstanceForShadow(c);
 			        }
