@@ -32,8 +32,8 @@ namespace Enjon { namespace Graphics {
 		EM::Mat4 Model;
 		// L = T*R*S
 		Model *= EM::Mat4::Translate(Transform.Position);
-		// Model *= EM::QuaternionToMat4(Transform.Orientation);
-		// Model *= EM::Mat4::Scale(Transform.Scale);
+		Model *= EM::QuaternionToMat4(Transform.Orientation);
+		Model *= EM::Mat4::Scale(Transform.Scale);
 
 		EM::Vec4 Position, Normal, Tangent, Bitangent;
 		EM::Vec3 T, B, N, P;
@@ -163,8 +163,8 @@ namespace Enjon { namespace Graphics {
 		EM::Mat4 Model;
 		// L = T*R*S
 		Model *= EM::Mat4::Translate(Transform.Position);
-		// Model *= EM::QuaternionToMat4(Transform.Orientation);
-		// Model *= EM::Mat4::Scale(Transform.Scale);
+		Model *= EM::QuaternionToMat4(Transform.Orientation);
+		Model *= EM::Mat4::Scale(Transform.Scale);
 
 		EM::Vec4 Position, Normal, Tangent, Bitangent;
 		EM::Vec3 T, B, N, P;

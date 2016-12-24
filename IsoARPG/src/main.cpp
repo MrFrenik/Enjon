@@ -4554,7 +4554,7 @@ int main(int argc, char** argv)
 
 #if 1
 
-#define FULLSCREENMODE   0
+#define FULLSCREENMODE   1
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -4600,6 +4600,7 @@ int main(int argc, char** argv)
 using u32 = uint32_t;
 
 EG::ModelAsset GlobalModel;
+EG::ModelAsset EmissiveBunny;
 EG::ModelAsset Floor;
 EG::ModelAsset NormalFloor;
 EG::ModelAsset Wall;
@@ -4610,14 +4611,23 @@ EG::ModelAsset SpriteWithNormal;
 EG::ModelAsset MonkeyHead;
 EG::ModelAsset Sphere;
 EG::ModelAsset OtherCube;
+EG::ModelAsset EmissiveCube;
 EG::ModelAsset CubeSprite;
 EG::ModelAsset UVAnimatedAsset;
+EG::ModelAsset UVAnimatedAsset2;
+EG::ModelAsset BackdropAsset;
+EG::ModelAsset BunnyAsset;
 std::vector<EG::ModelInstance> Instances;
 std::vector<EG::ModelInstance> Animations;
 std::vector<EG::ModelInstance> UVAnimations;
+std::vector<EG::ModelInstance> Backdrops;
 std::vector<EG::ModelInstance> LightSpheres;
+std::vector<EG::SpotLight> SpotLights;
+std::vector<EG::PointLight> PointLights;
+
 EG::Camera FPSCamera;
 EG::Camera2D HUDCamera;
+
 
 const uint8_t RENDERING = 0;
 
@@ -4649,28 +4659,30 @@ enum class BlurType
 BlurType BlurArrayType = BlurType::SMALL;
 
 EG::SpotLight Spot;
+EG::SpotLight Spot2;
 EG::DirectionalLight Sun;
 
 float RotationSpeed = 20.0f;
 float VXOffset = 0.01f;
-float TextScale = 0.06f;
+float TextScale = 0.02f;
 float TextSpacing = 0.0f;
-EM::Vec2 UVScalar = EM::Vec2(0.1f, 30.0f);
+EM::Vec2 UVScalar = EM::Vec2(0.02f, 3.0f);
 EM::Vec2 UVAdditive = EM::Vec2(0, 0);
 float LineWidth = 50.0f;
 bool DirectionalLightEnabled = true;
-float SunlightIntensity = 5.0f;
+float SunlightIntensity = 1.0f;
 float TempCamScale = 25.0f;
-float ShadowBiasMin = 0.004f;
-float ShadowBiasMax = 0.0025f;
+float ShadowBiasMin = 0.006f;
+float ShadowBiasMax = 0.007f;
 bool ShadowsEnabled = true;
 bool PointLightsEnabled = true;
 Enjon::u32 PointLightAmount = 10;
 float PointLightRadius = 10.0f;
-float DistanceRadius = 1000.0f;
+float DistanceRadius = 10000.0f;
+float TickEnabled = true;
 
 EM::Vec3 AmbientColor(0.2f, 0.2f, 0.2f);
-float AmbientIntensity = 0.0f;
+float AmbientIntensity = 2.0f;
 
 struct ToneMapSettings
 {
@@ -4699,9 +4711,31 @@ struct BloomSettings
 	EM::Vec3 Radius;
 };
 
-struct FXAASettings FXAASettings{8.0f, 0.09f, 0.5f};
-struct ToneMapSettings ToneMapSettings{0.1f, 1.0f, 1.0f, 2.0f, 2.0f};
-struct BloomSettings BloomSettings(EM::Vec3(0.4f, 0.5f, 0.0f), EM::Vec3(1, 4, 1), EM::Vec3(0.004f, 0.009f, 0.009f));
+struct FXAASettings FXAASettings{8.0f, 0.09f, 1.0f};
+struct ToneMapSettings ToneMapSettings{0.5f, 1.5f, 1.0f, 2.0f, 2.0f};
+struct BloomSettings BloomSettings(EM::Vec3(0.4f, 0.5f, 0.0f), EM::Vec3(5, 4, 1), EM::Vec3(0.004f, 0.009f, 0.009f));
+
+void LoadBackdropAsset()
+{
+	// Get mesh
+	BackdropAsset.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/backdrop.obj");
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("UVAnimation");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
+    Shader->Unuse();
+
+    // Set shader
+    BackdropAsset.Shader = Shader;
+    // Textures
+	BackdropAsset.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Concrete_Tiles_D.png");
+	BackdropAsset.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Concrete_Tiles_N.png");
+	BackdropAsset.Material.Textures[EG::TextureSlotType::EMISSIVE]= EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
+	BackdropAsset.Material.Shininess = 100.0f;
+}
 
 void LoadUVAnimatedAsset()
 {
@@ -4709,10 +4743,11 @@ void LoadUVAnimatedAsset()
 	UVAnimatedAsset.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
 
     // Get shader and set texture
-    auto Shader = EG::ShaderManager::GetShader("UVAnimation");
+    auto Shader = EG::ShaderManager::GetShader("GBuffer");
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
     Shader->Unuse();
 
     // Set shader
@@ -4722,6 +4757,28 @@ void LoadUVAnimatedAsset()
 	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png");
 	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::EMISSIVE]= EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	UVAnimatedAsset.Material.Shininess = 100.0f;
+}
+
+void LoadUVAnimatedAsset2()
+{
+	// Get mesh
+	UVAnimatedAsset2.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("UVAnimation");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
+    Shader->Unuse();
+
+    // Set shader
+    UVAnimatedAsset2.Shader = Shader;
+    // Textures
+	UVAnimatedAsset2.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png");
+	UVAnimatedAsset2.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png");
+	UVAnimatedAsset2.Material.Textures[EG::TextureSlotType::EMISSIVE]= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png");
+	UVAnimatedAsset2.Material.Shininess = 100.0f;
 }
 
 void LoadMonkeyHeadAsset()
@@ -4747,6 +4804,52 @@ void LoadMonkeyHeadAsset()
 	MonkeyHead.Material.Shininess = 100.0f; 
 }
 
+void LoadEmissiveCube()
+{
+	// Get mesh
+	EmissiveCube.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cube.obj");
+
+    // Get shader and set texture
+    // Kinda useless to do this here, since every other asset does it as well...
+    auto Shader = EG::ShaderManager::GetShader("GBuffer");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
+    Shader->Unuse();
+
+    // Set shader
+    EmissiveCube.Shader = Shader;
+    // Textures
+	EmissiveCube.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/cube_diffuse.png");
+	EmissiveCube.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png");
+	EmissiveCube.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive_outline.png");
+	EmissiveCube.Material.Shininess = 100.0f;
+}
+
+void LoadBunnyAsset()
+{
+	// Get mesh
+	BunnyAsset.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/bunny.obj");
+
+    // Get shader and set texture
+    // Kinda useless to do this here, since every other asset does it as well...
+    auto Shader = EG::ShaderManager::GetShader("GBuffer");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
+    Shader->Unuse();
+
+    // Set shader
+    BunnyAsset.Shader = Shader;
+    // Textures
+	BunnyAsset.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptileblue.png");
+	BunnyAsset.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
+	BunnyAsset.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
+	BunnyAsset.Material.Shininess = 100.0f; 
+}
+
 void LoadOtherCubeAsset()
 {
 	// Get mesh
@@ -4770,21 +4873,22 @@ void LoadOtherCubeAsset()
 
 void LoadCubeAsset()
 {
-	Cube.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cube.obj");
+	Cube.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/sphere.obj");
 
     // Get shader and set texture
     auto Shader = EG::ShaderManager::GetShader("GBuffer");
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
     Shader->Unuse();
 
     // Set shader
     Cube.Shader = Shader;
     // Set texture
-    Cube.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
-    Cube.Material.Textures[EG::TextureSlotType::NORMAL] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
-    Cube.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
+    Cube.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptileblue.png");
+    Cube.Material.Textures[EG::TextureSlotType::NORMAL] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png");
+    Cube.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive.png");
     Cube.Material.Shininess = 20.0f;
 }
 
@@ -4896,21 +5000,21 @@ void LoadIsometricWall()
 void LoadCubeSprite()
 {
 	// Get mesh
-	CubeSprite.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/quad.obj");
+	CubeSprite.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/dragon.obj");
 
-    // Get shader and set texture
-    auto Shader = EG::ShaderManager::GetShader("DefaultLighting");
+    auto Shader = EG::ShaderManager::GetShader("UVAnimation");
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
     Shader->Unuse();
 
     // Set shader
     CubeSprite.Shader = Shader;
     // Textures
-	CubeSprite.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box.png");
-	CubeSprite.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box_normal.png");
-	CubeSprite.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
+	CubeSprite.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png", GL_NEAREST, GL_NEAREST);
+	CubeSprite.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png", GL_NEAREST, GL_NEAREST);
+	CubeSprite.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png", GL_NEAREST, GL_NEAREST, false);
 	CubeSprite.Material.Shininess = 20.0f;
 }
 
@@ -4936,40 +5040,107 @@ void LoadSphere()
 	Sphere.Material.Shininess = 20.0f;
 }
 
+void LoadEmissiveBunny()
+{
+	// Get mesh
+	EmissiveBunny.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/bunny.obj");
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("GBuffer");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
+    Shader->Unuse();
+
+    // Set shader
+    EmissiveBunny.Shader = Shader;
+    // Textures
+	EmissiveBunny.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptilered.png", GL_NEAREST, GL_NEAREST);
+	EmissiveBunny.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png", GL_NEAREST, GL_NEAREST);
+	EmissiveBunny.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptilered.png", GL_NEAREST, GL_NEAREST, false);
+	EmissiveBunny.Material.Shininess = 20.0f;
+}
+
 void LoadInstances()
 {
+	// Shader balls
+	for (auto i = 0; i < 3; i++)
+	{
+		EG::ModelInstance U;
+		U.Asset = &MonkeyHead;
+		U.Transform.Position 	= EM::Vec3(i * 30 + 30, -1, 20);
+		U.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.02f;
+		Instances.push_back(U);
+	}
 
-	EG::ModelInstance U;
-	U.Asset = &MonkeyHead;
-	U.Transform.Position 	= EM::Vec3(30, -1, 25);
-	U.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.01f;
-	// U.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.5f;
-	Instances.push_back(U);
+	for (auto i = 0; i < 6; i++)
+	{
+		EG::ModelInstance B;
+		B.Asset = &BackdropAsset;
+		B.Transform.Position 	= EM::Vec3(i * 30 + 30, -1.0, 25);
+		B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 2.5f;
+		Backdrops.push_back(B);
+	}
+
+	EG::ModelInstance A;
+	A.Asset = &BunnyAsset;
+	A.Transform.Position 	= EM::Vec3(40, -1, 20);
+	A.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 1.5f;
+	Instances.push_back(A);
 
 	EG::ModelInstance D;
 	D.Asset = &SpriteWithNormal;
-	D.Transform.Position 	= EM::Vec3(4, 0.91f, 3);
+	D.Transform.Position 	= Instances.at(2).Transform.Position;
+	D.Transform.Position.y 	= 0.91f;
     D.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
     D.Transform.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f) * 2.0f;
 	Animations.push_back(D);
 
 	EG::ModelInstance B;
 	B.Asset = &UVAnimatedAsset;
-	B.Transform.Position 	= EM::Vec3(20, -1, 10);
-	// B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.005f;
+	B.Transform.Position 	= EM::Vec3(20, -0.67f, 19.22f);
 	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 2.75f;
-	UVAnimations.push_back(B);
+	Instances.push_back(B);
 
-	/*
 	for (auto i = 0; i < PointLightAmount; ++i)
 	{
 		EG::ModelInstance S;
 		S.Asset = &Sphere;
 		S.Transform.Position 	= EM::Vec3(0, 0, 0);
-		S.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.1f;
+		S.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.05f;
 		LightSpheres.push_back(S);
 	}
-	*/
+
+	EG::ModelInstance C;
+	C.Asset = &Cube;
+	C.Transform.Position 	= EM::Vec3(3 * 30 + 30, 1.0f, 20);
+	C.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 1.25f;
+	Instances.push_back(C);
+
+	EG::ModelInstance E;
+	E.Asset = &EmissiveBunny;
+	E.Transform.Position 	= EM::Vec3(3 * 30 + 40, 1.0f, 20);
+	E.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 1.25f;
+	Instances.push_back(E);
+
+	EG::ModelInstance F;
+	F.Asset = &EmissiveCube;
+	F.Transform.Position 	= EM::Vec3(5 * 30 - 40, 1.0f, 20);
+	F.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 1.25f;
+	Instances.push_back(F);
+
+	EG::ModelInstance Z;
+	Z.Asset = &UVAnimatedAsset2;
+	Z.Transform.Position 	= EM::Vec3(5 * 30 + 30, -0.67f, 19.22f);
+	Z.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 2.75f;
+	UVAnimations.push_back(Z);
+
+	EG::ModelInstance Y;
+	Y.Asset = &CubeSprite;
+	Y.Transform.Position 	= EM::Vec3(5 * 30 + 40, 1.0f, 19.22f);
+	Y.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 1.75f;
+	UVAnimations.push_back(Y);
 }
 
 void RenderInstanceForShadow(const EG::ModelInstance& Instance)
@@ -4990,7 +5161,6 @@ void RenderInstanceForShadow(const EG::ModelInstance& Instance)
 		Shader->BindTexture("DiffuseMap", Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id, 0);
 		Shader->SetUniform("Model", Model);
 		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
-
 	}
 	glBindVertexArray(0);
 }
@@ -5131,6 +5301,43 @@ void RenderAnimationForShadow(EG::ModelInstance& Instance)
 	glBindVertexArray(0);
 }
 
+void RenderBackdrops(EG::ModelInstance& Instance)
+{
+	// Get reference to asset pointer
+	auto Asset = Instance.Asset;
+	auto& Transform = Instance.Transform;
+
+	static GLint CurrentTextureID = 0;
+
+	glBindVertexArray(Asset->Mesh->VAO);
+	{
+        // Bind instance texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id);
+
+		// Bind normal
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::EMISSIVE].id);
+
+		EM::Mat4 Model;
+		// L = T*R*S
+		Model *= EM::Mat4::Translate(Transform.Position);
+		Model *= EM::QuaternionToMat4(Transform.Orientation);
+		Model *= EM::Mat4::Scale(Transform.Scale);
+
+		Asset->Shader->SetUniform("model", Model);
+		Asset->Shader->SetUniform("UVScalar", EM::Vec2(3.0f, 3.0f));
+		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
+	}
+
+	glActiveTexture(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindVertexArray(0);
+}
+
 void RenderUVAnimation(EG::ModelInstance& Instance)
 {
 	// Get reference to asset pointer
@@ -5150,8 +5357,8 @@ void RenderUVAnimation(EG::ModelInstance& Instance)
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
 
-		// glActiveTexture(GL_TEXTURE2);
-		// glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::EMISSIVE].id);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::EMISSIVE].id);
 
 		EM::Mat4 Model;
 		// L = T*R*S
@@ -5357,7 +5564,6 @@ int main(int argc, char** argv)
 		SimpleDepthAnimationProgram->SetUniform("DiffuseMap", 0);
 	}
 	SimpleDepthAnimationProgram->Unuse();
-	
 
 	// Load model data
 	LoadCubeAsset();
@@ -5369,6 +5575,11 @@ int main(int argc, char** argv)
 	LoadUVAnimatedAsset();
 	LoadIsometricWall();
 	LoadSphere();
+	LoadBackdropAsset();
+	LoadBunnyAsset();
+	LoadEmissiveBunny();
+	LoadUVAnimatedAsset2();
+	LoadEmissiveCube();
 	LoadInstances();
 
 	LoadFrames();
@@ -5434,7 +5645,6 @@ int main(int argc, char** argv)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
     glBindVertexArray(0);
 
-    std::vector<EG::PointLight> PointLights;
     for (u32 i = 0; i < PointLightAmount; i++)
     {
     	EG::PointLight L;
@@ -5453,21 +5663,37 @@ int main(int argc, char** argv)
     }
 
 	Spot = EG::SpotLight(
-						FPSCamera.Transform.Position, 
+						Instances.at(0).Transform.Position, 
 						EG::SpotLightParameters(
 													1.0f, 
 													0.0f, 
 													0.03f, 
 													EM::Vec3(7, 0, 7),
-													std::cos(EM::ToRadians(12.5f)),
-													std::cos(EM::ToRadians(17.5))
+													std::cos(0.8f),
+													std::cos(0.54f)
 												), 
 						EG::RGBA16(1, 0.3f, 0, 1),
-						10.0f
+						7.06f
 					);
 
+	Spot2 = EG::SpotLight(
+						Instances.at(0).Transform.Position, 
+						EG::SpotLightParameters(
+													1.0f, 
+													0.0f, 
+													0.03f, 
+													EM::Vec3(7, 0, 7),
+													std::cos(0.8f),
+													std::cos(0.54f)
+												), 
+						EG::RGBA16(0.2, 0.5f, 1.0, 1),
+						7.06f
+					);
+	SpotLights.push_back(Spot);
+	SpotLights.push_back(Spot2);
+
 	Sun = EG::DirectionalLight(
-								EM::Vec3(0.1f, 0.0f, 0.0f),
+								EM::Vec3(1.0f, 1.0f, 1.0f),
 								EG::RGBA16_Orange(),
 								4.0f
 							);
@@ -5489,13 +5715,20 @@ int main(int argc, char** argv)
     }
 
     std::vector<EM::Transform> Transforms;
-    for (auto i = 0; i < 30000; i++)
+    auto quadsize = 2;
+    for (auto k = 0; k < quadsize * 30; ++k)
     {
-    	EM::Transform t;
-		t.Position 	= EM::Vec3(ER::Roll(-100, 100), ER::Roll(0, 100), ER::Roll(-100, 100));
-	    t.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
-	    t.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f);
-	    Transforms.push_back(t);
+	    for (auto i = -quadsize; i < quadsize; i++)
+	    {
+		    for (auto j = -quadsize; j < quadsize; j++)
+		    {
+		    	EM::Transform t;
+				t.Position 	= Backdrops.at(4).Transform.Position + EM::Vec3(j * 4.0f + 2.0f, k * 4.0f + 1.0f, i * 2.0f);
+			    t.Orientation = EM::Quaternion(0, 0, 0, 1); 
+			    t.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f);
+			    Transforms.push_back(t);
+		    }
+	    }
     }
 
     // Set up floor
@@ -5568,6 +5801,7 @@ int main(int argc, char** argv)
 	Enjon::CVarsSystem::Register("pointlights_amount", &PointLightAmount, Enjon::CVarType::TYPE_UINT);
 	Enjon::CVarsSystem::Register("pointlights_radius", &PointLightRadius, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("distance_radius", &DistanceRadius, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("tick_enabled", &TickEnabled, Enjon::CVarType::TYPE_BOOL);
 
     // Game loop
     bool running = true;
@@ -5617,35 +5851,22 @@ int main(int argc, char** argv)
 
     	// Attach light to "player" position
     	float speed = 2.6f;
-    	PointLights.at(0).Position = Animations.at(0).Transform.Position + EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
-    	PointLights.at(0).Color = EG::RGBA16_Orange();
-    	PointLights.at(1).Position = Animations.at(0).Transform.Position - EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
-    	PointLights.at(1).Color = EG::RGBA16_ZombieGreen();
-
-    	PointLights.at(2).Position = Instances.at(0).Transform.Position - EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
-    	PointLights.at(2).Color = EG::RGBA16_Orange();
-    	PointLights.at(3).Position = Instances.at(0).Transform.Position + EM::Vec3(cos(timer * speed), sin(timer * speed), sin(timer * speed));
-    	PointLights.at(3).Color = EG::RGBA16_SkyBlue();
-    	PointLights.at(4).Position = Instances.at(0).Transform.Position + EM::Vec3(0.0f, 5.0f, 0.0f);
-    	PointLights.at(4).Color = EG::RGBA16_Red();
-    	PointLights.at(4).Intensity = EM::Clamp(cos(timer) * 5.0f, 0.0f, 5.0f);
-
-    	PointLights.at(5).Position = UVAnimations.at(0).Transform.Position + EM::Vec3(cos(timer * speed), 0.0f, sin(timer * speed));
-    	PointLights.at(5).Color = EG::RGBA16_White();
-
     	{
-	    	auto& Position = Animations.at(0).Transform.Position;
-	    	for (uint32_t i = 0; i < PointLights.size(); i++)
+	    	auto& Position = Instances.at(1).Transform.Position;
+	    	for (uint32_t i = 0; i < PointLightAmount; i++)
 	    	{
-	    		EM::Vec3 NewPosition = EM::Vec3(cos(timer * speed + i), sin(timer * speed / 10.0f + i), sin(timer * speed + i));
-	    		NewPosition = NewPosition * (PointLightRadius + sin(timer) * 3.0f);
+	    		EM::Vec3 NewPosition = EM::Vec3(cos(timer * speed + i), 0.0f, sin(timer * speed + i));
+	    		NewPosition = NewPosition * (PointLightRadius + sin(timer) * 2.0f);
 	    		PointLights.at(i).Position 				= Position + NewPosition + EM::Vec3(0.0f, 2.0f, 0.0f); 
-	    		// LightSpheres.at(i).Transform.Position 	= Position + NewPosition + EM::Vec3(0.0f, 2.0f, 0.0f); 
+	    		LightSpheres.at(i).Transform.Position 	= Position + NewPosition + EM::Vec3(0.0f, 2.0f, 0.0f); 
 	    	}
     	}
 
     	// Set up spot light
-    	Spot.Parameters.Direction = EM::Vec3(cos(timer) * speed, 0.0f, sin(timer) * speed);
+    	SpotLights.at(0).Position = Instances.at(2).Transform.Position + EM::Vec3(-2.0f, 8.0f, 3.0f);
+    	SpotLights.at(0).Parameters.Direction = EM::Vec3::Normalize(Instances.at(2).Transform.Position - SpotLights.at(0).Position);
+    	SpotLights.at(1).Position = Instances.at(2).Transform.Position + EM::Vec3(3.0f, 5.0f, 3.0f);
+    	SpotLights.at(1).Parameters.Direction = EM::Vec3::Normalize(Instances.at(2).Transform.Position - SpotLights.at(1).Position);
 
     	// Update components
     	auto Position = Entity->GetComponent<PositionComponent>();
@@ -5665,11 +5886,11 @@ int main(int argc, char** argv)
         //////////////////////////////////////////////////////////////////////////
 
 		// Rotate one of the instances over time
-		auto& InstanceTransform = Instances.at(0).Transform;
-		InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * RotationSpeed), EM::Vec3(0, 1, 0));
+		// auto& InstanceTransform = Instances.at(0).Transform;
+		// InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * RotationSpeed), EM::Vec3(0, 1, 0));
 
-		// Rotate one of the instances over time
-		auto& InstanceTransform2 = UVAnimations.at(0).Transform;
+		// // Rotate one of the instances over time
+		auto& InstanceTransform2 = Instances.at(5).Transform;
 		InstanceTransform2.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * RotationSpeed), EM::Vec3(0, 1, 0));
 
 		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16_Black());
@@ -5686,6 +5907,7 @@ int main(int argc, char** argv)
 	        {
 	        	auto Shader = c.Asset->Shader;
 	        	Shader->Use();
+		        	Shader->SetUniform("diffuseColor", EM::Vec3(1.0, 1.0, 1.0));
 		        	Shader->SetUniform("camera", CameraMatrix);
 			        RenderInstance(c);
 		        Shader->Unuse();
@@ -5705,8 +5927,18 @@ int main(int argc, char** argv)
 	        	auto Shader = c.Asset->Shader;
 	        	Shader->Use();
 	        		Shader->SetUniform("camera", CameraMatrix);
-	        		Shader->SetUniform("Tick", Tick);
+	        		Shader->SetUniform("Tick", TickEnabled ? Tick : 0.0f);
 	        		RenderUVAnimation(c);
+	        	Shader->Unuse();
+	        }
+
+	        for (auto& c : Backdrops)
+	        {
+	        	auto Shader = c.Asset->Shader;
+	        	Shader->Use();
+	        		Shader->SetUniform("camera", CameraMatrix);
+	        		Shader->SetUniform("Tick", 0.0f);
+	        		RenderBackdrops(c);
 	        	Shader->Unuse();
 	        }
 
@@ -5740,7 +5972,7 @@ int main(int argc, char** argv)
 						if (Depth <= DistanceRadius)
 						{
 							Transforms.at(i).Position = Transforms.at(i).Position;
-							Transforms.at(i).Scale = EM::Vec3(1, 1, 1) * float(i) / (float)Transforms.size();
+							// Transforms.at(i).Scale = EM::Vec3(1, 1, 1) * float(i) / (float)Transforms.size();
 							QBatch.Add(
 										Transforms.at(i) ,
 										EM::Vec4(0, 0, 1, 1), 
@@ -5750,7 +5982,12 @@ int main(int argc, char** argv)
 									);
 						}
 					}
+				}
+				QBatch.End();
+				QBatch.RenderBatch();
 
+				QBatch.Begin();
+				{
 					static float uv_add = 0.0f;
 					uv_add += 0.001f;
 					// QBatch.Add(
@@ -5794,37 +6031,94 @@ int main(int argc, char** argv)
 				{
 						EG::Fonts::PrintText(
 												EM::Transform(
-																Instances.at(0).Transform.Position + EM::Vec3(-3, 3, 0),
+																Instances.at(0).Transform.Position + EM::Vec3(-4, 0, 6),
 																EM::Quaternion(0, 0, 0, 1), 
 																EM::Vec3(TextScale, TextScale, 1)
 															),
-												"Testing Emissives",
+												"model loading",
 												EG::FontManager::GetFont("8Bit_32"),
 												QBatch,
-												EG::RGBA16_Orange(),
+												EG::RGBA16_White(),
 												TextSpacing
 										);
 
-						for (auto i = 0; i < 1; i++)
-						{
-							EG::Fonts::PrintText(
-													EM::Transform(
-																	EM::Vec3(-i * 2, i * 2, i * 2),
-																	EM::Quaternion(0, 0, 0, 1), 
-																	EM::Vec3(TextScale, TextScale, 1)
-																),
-													"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-													EG::FontManager::GetFont("8Bit_32"),
-													QBatch,
-													EG::RGBA16_ZombieGreen(),
-													TextSpacing
-											);
-						}
+						EG::Fonts::PrintText(
+												EM::Transform(
+																Instances.at(1).Transform.Position + EM::Vec3(-4, 0, 6),
+																EM::Quaternion(0, 0, 0, 1), 
+																EM::Vec3(TextScale, TextScale, 1)
+															),
+												"point lights",
+												EG::FontManager::GetFont("8Bit_32"),
+												QBatch,
+												EG::RGBA16_White(),
+												TextSpacing
+										);
+
+						EG::Fonts::PrintText(
+												EM::Transform(
+																Instances.at(2).Transform.Position + EM::Vec3(-4, 0, 6),
+																EM::Quaternion(0, 0, 0, 1), 
+																EM::Vec3(TextScale, TextScale, 1)
+															),
+												"spot Lights",
+												EG::FontManager::GetFont("8Bit_32"),
+												QBatch,
+												EG::RGBA16_White(),
+												TextSpacing
+										);
+
+
+						EG::Fonts::PrintText(
+												EM::Transform(
+																Backdrops.at(4).Transform.Position + EM::Vec3(-4, 0, 10),
+																EM::Quaternion(0, 0, 0, 1), 
+																EM::Vec3(TextScale, TextScale, 1)
+															),
+												"batched quads",
+												EG::FontManager::GetFont("8Bit_32"),
+												QBatch,
+												EG::RGBA16_White(),
+												TextSpacing
+										);
+
+						EG::Fonts::PrintText(
+												EM::Transform(
+																Backdrops.at(5).Transform.Position + EM::Vec3(-4, 0, 10),
+																EM::Quaternion(0, 0, 0, 1), 
+																EM::Vec3(TextScale, TextScale, 1)
+															),
+												"animated materials",
+												EG::FontManager::GetFont("8Bit_32"),
+												QBatch,
+												EG::RGBA16_White(),
+												TextSpacing
+										);
 
 				}
 				QBatch.End();
 				WorldTextProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png").id, 1);
+				WorldTextProgram->BindTexture("emissiveMap", EI::ResourceManager::GetTexture("../Assets/Textures/black.png").id, 2);
+				QBatch.End();
+				QBatch.RenderBatch();
+
+				QBatch.Begin();
+				{
+					EG::Fonts::PrintText(
+											EM::Transform(
+															Instances.at(5).Transform.Position + EM::Vec3(-4, -1, 6),
+															EM::Quaternion(0, 0, 0, 1), 
+															EM::Vec3(TextScale, TextScale, 1)
+														),
+											"emissive materials",
+											EG::FontManager::GetFont("8Bit_32"),
+											QBatch,
+											EG::RGBA16_White(),
+											TextSpacing
+									);
+				}
 				WorldTextProgram->BindTexture("emissiveMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptilered.png").id, 2);
+				QBatch.End();
 				QBatch.RenderBatch();
 			}
 			WorldTextProgram->Unuse();
@@ -5962,7 +6256,7 @@ int main(int argc, char** argv)
 					PointLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
 					PointLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
 
-					for (Enjon::u32 i = 0; i < PointLightAmount; ++i)
+					for (Enjon::u32 i = 0; i < PointLights.size(); ++i)
 					{
 						PointLightProgram->SetUniform("LightPos", PointLights.at(i).Position);
 						PointLightProgram->SetUniform("LightColor", EM::Vec3(PointLights.at(i).Color.r, PointLights.at(i).Color.g, PointLights.at(i).Color.b));
@@ -5980,30 +6274,30 @@ int main(int argc, char** argv)
 				PointLightProgram->Unuse();
 			}
 
-			/*
 			// Do spot lights
 			SpotLightProgram->Use();
 			{
-				SpotLightProgram->BindTexture("DiffuseMap", 	GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
-				SpotLightProgram->BindTexture("NormalMap", 		GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
-				SpotLightProgram->BindTexture("PositionMap", 	GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
-				SpotLightProgram->SetUniform("Resolution", 		GBuffer.GetResolution());
-				SpotLightProgram->SetUniform("CamPos", 			FPSCamera.Transform.Position);			
-				SpotLightProgram->SetUniform("CameraForward", 	FPSCamera.Forward());
-				SpotLightProgram->SetUniform("Falloff", 		Spot.Parameters.Falloff);
-				SpotLightProgram->SetUniform("LightColor", 		EM::Vec3(Spot.Color.r, Spot.Color.g, Spot.Color.b));
-				// SpotLightProgram->SetUniform("LightPos", 		Spot.Position);
-				SpotLightProgram->SetUniform("LightPos", 		FPSCamera.Transform.Position);
-				SpotLightProgram->SetUniform("LightIntensity", 	Spot.Intensity);
-				// SpotLightProgram->SetUniform("LightDirection", 	Spot.Parameters.Direction);
-				SpotLightProgram->SetUniform("LightDirection", 	FPSCamera.Forward());
-				SpotLightProgram->SetUniform("InnerCutoff", 	Spot.Parameters.InnerCutoff);
-				SpotLightProgram->SetUniform("OuterCutoff", 	Spot.Parameters.OuterCutoff);
+				for (auto& S : SpotLights)
+				{
+					SpotLightProgram->BindTexture("DiffuseMap", 	GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
+					SpotLightProgram->BindTexture("NormalMap", 		GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
+					SpotLightProgram->BindTexture("PositionMap", 	GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
+					SpotLightProgram->SetUniform("Resolution", 		GBuffer.GetResolution());
+					SpotLightProgram->SetUniform("CamPos", 			FPSCamera.Transform.Position);			
+					SpotLightProgram->SetUniform("CameraForward", 	FPSCamera.Forward());
+					SpotLightProgram->SetUniform("Falloff", 		S.Parameters.Falloff);
+					SpotLightProgram->SetUniform("LightColor", 		EM::Vec3(S.Color.r, S.Color.g, S.Color.b));
+					SpotLightProgram->SetUniform("LightPos", 		S.Position);
+					SpotLightProgram->SetUniform("LightIntensity", 	S.Intensity);
+					SpotLightProgram->SetUniform("LightDirection", 	S.Parameters.Direction);
+					SpotLightProgram->SetUniform("InnerCutoff", 	S.Parameters.InnerCutoff);
+					SpotLightProgram->SetUniform("OuterCutoff", 	S.Parameters.OuterCutoff);
 
-				glDrawArrays(GL_TRIANGLES, 0, 6);
+					glDrawArrays(GL_TRIANGLES, 0, 6);
+				}
+
 			}
 			SpotLightProgram->Unuse();
-			*/
 		
 			// Unbind VAO
 			glBindVertexArray(0);
@@ -6393,6 +6687,27 @@ int main(int argc, char** argv)
 										CompositeBatch, 
 										EG::RGBA16_ZombieGreen()
 									);
+
+				// DrawCallLabel = std::string("Point Lights: ");
+				// EG::Fonts::PrintText(	
+				// 						(float)(-SCREENWIDTH) / 2.0f + 10.0f, 
+				// 						(float)SCREENHEIGHT / 2.0f - 80.0f, 
+				// 						1.0f, 
+				// 						DrawCallLabel, 
+				// 						F, 
+				// 						CompositeBatch, 
+				// 						EG::RGBA16_White()
+				// 					);
+
+				// EG::Fonts::PrintText(	
+				// 						(float)(-SCREENWIDTH) / 2.0f + EG::Fonts::GetStringAdvance(DrawCallLabel.c_str(), F), 
+				// 						(float)SCREENHEIGHT / 2.0f - 80.0f, 
+				// 						1.0f, 
+				// 						std::to_string(PointLights.size()), 
+				// 						EG::FontManager::GetFont("Reduction_14"), 
+				// 						CompositeBatch, 
+				// 						EG::RGBA16_ZombieGreen()
+				// 					);
 			}
 			CompositeBatch.End();
 			CompositeBatch.RenderBatch();
@@ -6458,7 +6773,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 		}
     }
 
-    static float speed = 15.0f;
+    static float speed = 30.0f;
     static float dt = 0.01f;
 
 
@@ -6472,7 +6787,30 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 		Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
 
 	    EM::Vec3 VelDir(0, 0, 0);
-	
+
+	    // Make a light and a light sphere
+	    if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
+	    {
+	    	// Position for light
+	    	EM::Vec3 LightPosition = Camera->Transform.Position + Camera->Forward() * 5.0f;
+
+	    	EG::PointLight L;
+	    	L.Position = LightPosition;
+	    	L.Parameters = EG::PointLightParameters(1.0f, 0.0f, 0.01f);
+	    	float R = (float)ER::Roll(0, 255) / 255.0f;
+	    	float G = (float)ER::Roll(0, 255) / 255.0f;
+	    	float B = (float)ER::Roll(0, 255) / 255.0f;
+	    	L.Color = EG::RGBA16(R, G, B, 1.0f);
+	    	L.Intensity = 1.0f;
+	    	PointLights.push_back(L);
+
+			EG::ModelInstance LS;
+			LS.Asset = &Sphere;
+			LS.Transform.Position 	= LightPosition;
+			LS.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.05f;
+			LightSpheres.push_back(LS);
+	    }	
+
 		if (Input->IsKeyDown(SDLK_w))
 		{
 			EM::Vec3 F = Camera->Forward();
@@ -6515,10 +6853,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	}
 	else if (Camera->ProjType == EG::ProjectionType::Orthographic)
 	{
-		const float PlayerSpeed = 6.0f;
-
-		Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
-
+		const float PlayerSpeed = 12.0f;
 
 		if (Input->IsKeyDown(SDLK_q))
 		{
@@ -6680,11 +7015,19 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	{
 		if (Input->IsKeyDown(SDLK_DOWN))
 		{
-			if (Spot.Parameters.InnerCutoff > 0.0f) Spot.Parameters.InnerCutoff -= 0.01f;
+			for (auto& S : SpotLights)
+			{
+				if (S.Parameters.InnerCutoff > 0.0f) S.Parameters.InnerCutoff -= 0.01f;
+				printf("inner: %f\n", S.Parameters.InnerCutoff);
+			}
 		}
 		else if (Input->IsKeyDown(SDLK_UP))
 		{
-			Spot.Parameters.InnerCutoff += 0.01f;
+			for (auto& S : SpotLights)
+			{
+				S.Parameters.InnerCutoff += 0.01f;
+				printf("inner: %f\n", S.Parameters.InnerCutoff);
+			}
 		}
 	}
 
@@ -6692,11 +7035,19 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	{
 		if (Input->IsKeyDown(SDLK_DOWN))
 		{
-			if (Spot.Parameters.OuterCutoff > 0.0f) Spot.Parameters.OuterCutoff -= 0.01f;
+			for (auto& S : SpotLights)
+			{
+				if (S.Parameters.OuterCutoff > 0.0f) S.Parameters.OuterCutoff -= 0.01f;
+				printf("outer: %f\n", S.Parameters.OuterCutoff);
+			}
 		}
 		else if (Input->IsKeyDown(SDLK_UP))
 		{
-			Spot.Parameters.OuterCutoff += 0.01f;
+			for (auto& S : SpotLights)
+			{
+				S.Parameters.OuterCutoff += 0.01f;
+				printf("outer: %f\n", S.Parameters.OuterCutoff);
+			}
 		}
 	}
 
@@ -6704,11 +7055,19 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	{
 		if (Input->IsKeyDown(SDLK_DOWN))
 		{
-			if (Spot.Intensity > 0.0f) Spot.Intensity -= 0.01f;
+			for (auto& S : SpotLights)
+			{
+				if (S.Intensity > 0.0f) S.Intensity -= 0.01f;
+				printf("intensity: %f\n", S.Intensity);
+			}
 		}
 		else if (Input->IsKeyDown(SDLK_UP))
 		{
-			Spot.Intensity += 0.01f;
+			for (auto& S : SpotLights)
+			{
+				S.Intensity += 0.01f;
+				printf("intensity: %f\n", S.Intensity);
+			}
 		}
 	}
 
@@ -6760,32 +7119,6 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	if (Input->IsKeyPressed(SDLK_l))
 	{
 		BlurArrayType = BlurType::LARGE;
-	}
-
-	// Move sun 
-	float SunSpeed = 0.01f;
-	if (Input->IsKeyDown(SDLK_f))
-	{
-		auto& Transform = Animations.at(0).Transform;
-
-		if (Input->IsKeyDown(SDLK_UP))
-		{
-			Transform.Position.y += SunSpeed;
-			printf("%f\n", Transform.Position.y);
-		}
-		if (Input->IsKeyDown(SDLK_DOWN))
-		{
-			Transform.Position.y -= SunSpeed;
-			printf("%f\n", Transform.Position.y);
-		}
-		if (Input->IsKeyDown(SDLK_RIGHT))
-		{
-			Transform.Position.z += SunSpeed;
-		}
-		if (Input->IsKeyDown(SDLK_LEFT))
-		{
-			Transform.Position.z -= SunSpeed;
-		}
 	}
 
 	return true;

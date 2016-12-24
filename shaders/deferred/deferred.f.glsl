@@ -21,7 +21,7 @@ uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
 uniform sampler2D emissiveMap;
 
-const float emissiveIntensity = 4.0;
+const float emissiveIntensity = 5.0;
 
 void main()
 {

@@ -36,7 +36,6 @@ float ShadowCalculation(vec4 FragPosLightSpace, float bias)
     ProjCoords = ProjCoords * 0.5 + 0.5;
 
     // Get depth values
-    // float ClosestDepth = texture2D(ShadowMap, ProjCoords.xy).r;
     float CurrentDepth = ProjCoords.z;
 
     // PCF
@@ -50,7 +49,6 @@ float ShadowCalculation(vec4 FragPosLightSpace, float bias)
             Shadow += CurrentDepth - bias > PCFDepth ? 1.0 : 0.0;
         }
     }
-    // float Shadow = CurrentDepth - bias > ClosestDepth ? 1.0 : 0.0;
     Shadow /= 9.0;
 
     if (ProjCoords.z > 1.0) Shadow = 0.0;
