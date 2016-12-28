@@ -10,10 +10,11 @@ namespace Enjon { namespace Graphics {
 
 	enum class GBufferTextureType
 	{
-		DIFFUSE,
+		ALBEDO,
 		NORMAL,
 		POSITION,
 		EMISSIVE,
+		MAT_PROPS,
 		GBUFFER_TEXTURE_COUNT
 	};
 

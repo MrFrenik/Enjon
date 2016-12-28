@@ -41,6 +41,8 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("Bright", "../shaders/deferred/bright.v.glsl", "../shaders/deferred/bright.f.glsl");
 		ShaderManager::AddShader("SimpleDepth", "../shaders/deferred/simple_depth.v.glsl", "../shaders/deferred/simple_depth.f.glsl");
 		ShaderManager::AddShader("SimpleDepthAnimation", "../shaders/deferred/simple_depth_animation.v.glsl", "../shaders/deferred/simple_depth_animation.f.glsl");
+		ShaderManager::AddShader("PBRPointLight", "../shaders/pbr/point_light.v.glsl", "../shaders/pbr/point_light.f.glsl");
+		ShaderManager::AddShader("PBRDirectionalLight", "../shaders/pbr/directional_light.v.glsl", "../shaders/pbr/directional_light.f.glsl");
 	}
 
 	void AddShader(const char* shadername, const char* vertpath, const char* fragpath)

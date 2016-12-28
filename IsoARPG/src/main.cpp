@@ -4554,7 +4554,7 @@ int main(int argc, char** argv)
 
 #if 1
 
-#define FULLSCREENMODE   1
+#define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
 
 #if FULLSCREENMODE
@@ -4599,8 +4599,15 @@ int main(int argc, char** argv)
 
 using u32 = uint32_t;
 
+struct MaterialProps
+{
+	float Metallic;
+	float Roughness;
+};
+
 EG::ModelAsset GlobalModel;
 EG::ModelAsset EmissiveBunny;
+EG::ModelAsset PBRBunny;
 EG::ModelAsset Floor;
 EG::ModelAsset NormalFloor;
 EG::ModelAsset Wall;
@@ -4622,8 +4629,10 @@ std::vector<EG::ModelInstance> Animations;
 std::vector<EG::ModelInstance> UVAnimations;
 std::vector<EG::ModelInstance> Backdrops;
 std::vector<EG::ModelInstance> LightSpheres;
+std::vector<EG::ModelInstance> PBRInstances;
 std::vector<EG::SpotLight> SpotLights;
 std::vector<EG::PointLight> PointLights;
+std::vector<MaterialProps> MaterialProperties;
 
 EG::Camera FPSCamera;
 EG::Camera2D HUDCamera;
@@ -4638,13 +4647,14 @@ float Tick = 0.0f;
 enum class DrawFrameType
 {
 	FINAL, 
-	DIFFUSE,
+	ALBEDO,
 	EMISSIVE, 
 	NORMAL, 
 	POSITION, 
 	BLUR,
 	SHADOWDEPTH,
-	LIGHTS
+	LIGHTS,
+	MAT_PROPS
 };
 
 DrawFrameType DrawFrame = DrawFrameType::FINAL;
@@ -4670,7 +4680,7 @@ EM::Vec2 UVScalar = EM::Vec2(0.02f, 3.0f);
 EM::Vec2 UVAdditive = EM::Vec2(0, 0);
 float LineWidth = 50.0f;
 bool DirectionalLightEnabled = true;
-float SunlightIntensity = 1.0f;
+float SunlightIntensity = 0.0f;
 float TempCamScale = 25.0f;
 float ShadowBiasMin = 0.006f;
 float ShadowBiasMax = 0.007f;
@@ -4680,9 +4690,11 @@ Enjon::u32 PointLightAmount = 10;
 float PointLightRadius = 10.0f;
 float DistanceRadius = 10000.0f;
 float TickEnabled = true;
+float Metallic = 1.0f;
+float Roughness = 0.0f;
 
 EM::Vec3 AmbientColor(0.2f, 0.2f, 0.2f);
-float AmbientIntensity = 2.0f;
+float AmbientIntensity = 0.0f;
 
 struct ToneMapSettings
 {
@@ -4711,9 +4723,9 @@ struct BloomSettings
 	EM::Vec3 Radius;
 };
 
-struct FXAASettings FXAASettings{8.0f, 0.09f, 1.0f};
+struct FXAASettings FXAASettings{8.0f, 0.09f, 0.0f};
 struct ToneMapSettings ToneMapSettings{0.5f, 1.5f, 1.0f, 2.0f, 2.0f};
-struct BloomSettings BloomSettings(EM::Vec3(0.4f, 0.5f, 0.0f), EM::Vec3(5, 4, 1), EM::Vec3(0.004f, 0.009f, 0.009f));
+struct BloomSettings BloomSettings(EM::Vec3(0.4f, 0.35f, 0.0f), EM::Vec3(5, 4, 1), EM::Vec3(0.001f, 0.009f, 0.009f));
 
 void LoadBackdropAsset()
 {
@@ -4731,7 +4743,7 @@ void LoadBackdropAsset()
     // Set shader
     BackdropAsset.Shader = Shader;
     // Textures
-	BackdropAsset.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Concrete_Tiles_D.png");
+	BackdropAsset.Material.Textures[EG::TextureSlotType::ALBEDO] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Concrete_Tiles_D.png");
 	BackdropAsset.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Concrete_Tiles_N.png");
 	BackdropAsset.Material.Textures[EG::TextureSlotType::EMISSIVE]= EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	BackdropAsset.Material.Shininess = 100.0f;
@@ -4753,7 +4765,7 @@ void LoadUVAnimatedAsset()
     // Set shader
     UVAnimatedAsset.Shader = Shader;
     // Textures
-	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_MacroVariation.png");
+	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::ALBEDO] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_MacroVariation.png");
 	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png");
 	UVAnimatedAsset.Material.Textures[EG::TextureSlotType::EMISSIVE]= EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	UVAnimatedAsset.Material.Shininess = 100.0f;
@@ -4775,7 +4787,7 @@ void LoadUVAnimatedAsset2()
     // Set shader
     UVAnimatedAsset2.Shader = Shader;
     // Textures
-	UVAnimatedAsset2.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png");
+	UVAnimatedAsset2.Material.Textures[EG::TextureSlotType::ALBEDO] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png");
 	UVAnimatedAsset2.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png");
 	UVAnimatedAsset2.Material.Textures[EG::TextureSlotType::EMISSIVE]= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png");
 	UVAnimatedAsset2.Material.Shininess = 100.0f;
@@ -4798,7 +4810,7 @@ void LoadMonkeyHeadAsset()
     // Set shader
     MonkeyHead.Shader = Shader;
     // Textures
-	MonkeyHead.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_MacroVariation.png");
+	MonkeyHead.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_MacroVariation.png");
 	MonkeyHead.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png");
 	MonkeyHead.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	MonkeyHead.Material.Shininess = 100.0f; 
@@ -4821,7 +4833,7 @@ void LoadEmissiveCube()
     // Set shader
     EmissiveCube.Shader = Shader;
     // Textures
-	EmissiveCube.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/cube_diffuse.png");
+	EmissiveCube.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/cube_diffuse.png");
 	EmissiveCube.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png");
 	EmissiveCube.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive_outline.png");
 	EmissiveCube.Material.Shininess = 100.0f;
@@ -4844,7 +4856,7 @@ void LoadBunnyAsset()
     // Set shader
     BunnyAsset.Shader = Shader;
     // Textures
-	BunnyAsset.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptileblue.png");
+	BunnyAsset.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptileblue.png");
 	BunnyAsset.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
 	BunnyAsset.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	BunnyAsset.Material.Shininess = 100.0f; 
@@ -4860,12 +4872,13 @@ void LoadOtherCubeAsset()
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
     Shader->Unuse();
 
     // Set shader
     OtherCube.Shader = Shader;
     // Textures
-	OtherCube.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
+	OtherCube.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
 	OtherCube.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
 	OtherCube.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	OtherCube.Material.Shininess = 20.0f;
@@ -4886,7 +4899,7 @@ void LoadCubeAsset()
     // Set shader
     Cube.Shader = Shader;
     // Set texture
-    Cube.Material.Textures[EG::TextureSlotType::DIFFUSE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptileblue.png");
+    Cube.Material.Textures[EG::TextureSlotType::ALBEDO] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptileblue.png");
     Cube.Material.Textures[EG::TextureSlotType::NORMAL] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png");
     Cube.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive.png");
     Cube.Material.Shininess = 20.0f;
@@ -4902,12 +4915,13 @@ void LoadNormalFloorAsset()
     Shader->Use();
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
     Shader->Unuse();
 
     // Set shader
     NormalFloor.Shader = Shader;
     // Textures
-	NormalFloor.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
+	NormalFloor.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png");
 	NormalFloor.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png");
 	NormalFloor.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	NormalFloor.Material.Shininess = 20.0f;
@@ -4928,7 +4942,7 @@ void LoadNormalMappedAnimatedSpriteAsset()
     // Set shader
     SpriteWithNormal.Shader = Shader;
     // Textures
-	SpriteWithNormal.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png", GL_NEAREST, GL_NEAREST);
+	SpriteWithNormal.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png", GL_NEAREST, GL_NEAREST);
 	SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test_normal.png", GL_NEAREST, GL_NEAREST);
 	SpriteWithNormal.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST, false);
 	SpriteWithNormal.Material.Shininess = 20.0f;
@@ -4950,7 +4964,7 @@ void LoadNormalMappedSpriteAsset()
     // Set shader
     SpriteWithNormal.Shader = Shader;
     // Textures
-	SpriteWithNormal.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png", GL_NEAREST, GL_NEAREST);
+	SpriteWithNormal.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png", GL_NEAREST, GL_NEAREST);
 	SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png", GL_NEAREST, GL_NEAREST);
 	SpriteWithNormal.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST, false);
 	SpriteWithNormal.Material.Shininess = 20.0f;
@@ -4972,7 +4986,7 @@ void LoadIsometricWall()
     // Set shader
     TopWall.Shader = TopShader;
     // Textures
-	TopWall.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_MacroVariation.png", GL_NEAREST, GL_NEAREST);
+	TopWall.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_MacroVariation.png", GL_NEAREST, GL_NEAREST);
 	TopWall.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png", GL_NEAREST, GL_NEAREST);
 	TopWall.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST, false);
 	TopWall.Material.Shininess = 20.0f;
@@ -4991,7 +5005,7 @@ void LoadIsometricWall()
     // Set shader
     FrontWall.Shader = Shader;
     // Textures
-	FrontWall.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_MacroVariation.png", GL_NEAREST, GL_NEAREST);
+	FrontWall.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_MacroVariation.png", GL_NEAREST, GL_NEAREST);
 	FrontWall.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png", GL_NEAREST, GL_NEAREST);
 	FrontWall.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST, false);
 	FrontWall.Material.Shininess = 20.0f;
@@ -5012,7 +5026,7 @@ void LoadCubeSprite()
     // Set shader
     CubeSprite.Shader = Shader;
     // Textures
-	CubeSprite.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png", GL_NEAREST, GL_NEAREST);
+	CubeSprite.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png", GL_NEAREST, GL_NEAREST);
 	CubeSprite.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png", GL_NEAREST, GL_NEAREST);
 	CubeSprite.Material.Textures[EG::TextureSlotType::EMISSIVE] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png", GL_NEAREST, GL_NEAREST, false);
 	CubeSprite.Material.Shininess = 20.0f;
@@ -5034,7 +5048,7 @@ void LoadSphere()
     // Set shader
     Sphere.Shader = Shader;
     // Textures
-	Sphere.Material.Textures[EG::TextureSlotType::DIFFUSE] 		= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png", GL_NEAREST, GL_NEAREST);
+	Sphere.Material.Textures[EG::TextureSlotType::ALBEDO] 		= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png", GL_NEAREST, GL_NEAREST);
 	Sphere.Material.Textures[EG::TextureSlotType::NORMAL] 		= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png", GL_NEAREST, GL_NEAREST);
 	Sphere.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png", GL_NEAREST, GL_NEAREST, false);
 	Sphere.Material.Shininess = 20.0f;
@@ -5056,10 +5070,39 @@ void LoadEmissiveBunny()
     // Set shader
     EmissiveBunny.Shader = Shader;
     // Textures
-	EmissiveBunny.Material.Textures[EG::TextureSlotType::DIFFUSE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptilered.png", GL_NEAREST, GL_NEAREST);
+	EmissiveBunny.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptilered.png", GL_NEAREST, GL_NEAREST);
 	EmissiveBunny.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/T_Concrete_Poured_N.png", GL_NEAREST, GL_NEAREST);
 	EmissiveBunny.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptilered.png", GL_NEAREST, GL_NEAREST, false);
 	EmissiveBunny.Material.Shininess = 20.0f;
+}
+
+void LoadPBRBunny()
+{
+	// Get mesh
+	PBRBunny.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/shaderball.obj");
+
+    // Get shader and set texture
+    auto Shader = EG::ShaderManager::GetShader("GBuffer");
+    Shader->Use();
+    	Shader->SetUniform("diffuseMap", 0);
+    	Shader->SetUniform("normalMap", 1);
+    	Shader->SetUniform("emissiveMap", 2);
+    	Shader->SetUniform("metallicMap", 3);
+    	Shader->SetUniform("roughnessMap", 4);
+    Shader->Unuse();
+
+    // Set shader
+    PBRBunny.Shader = Shader;
+    // Textures
+	// PBRBunny.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/BaseColor.png");
+	PBRBunny.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptilered.png");
+	PBRBunny.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Normal.png");
+	PBRBunny.Material.Textures[EG::TextureSlotType::METALLIC] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png");
+	// PBRBunny.Material.Textures[EG::TextureSlotType::METALLIC] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png");
+	// PBRBunny.Material.Textures[EG::TextureSlotType::METALLIC] 	= EI::ResourceManager::GetTexture("../Assets/Textures/white.png");
+	PBRBunny.Material.Textures[EG::TextureSlotType::ROUGHNESS] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png");
+	PBRBunny.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST, false);
+	PBRBunny.Material.Shininess = 20.0f;
 }
 
 void LoadInstances()
@@ -5074,7 +5117,7 @@ void LoadInstances()
 		Instances.push_back(U);
 	}
 
-	for (auto i = 0; i < 6; i++)
+	for (auto i = 0; i < 7; i++)
 	{
 		EG::ModelInstance B;
 		B.Asset = &BackdropAsset;
@@ -5089,13 +5132,6 @@ void LoadInstances()
 	A.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 1.5f;
 	Instances.push_back(A);
 
-	EG::ModelInstance D;
-	D.Asset = &SpriteWithNormal;
-	D.Transform.Position 	= Instances.at(2).Transform.Position;
-	D.Transform.Position.y 	= 0.91f;
-    D.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
-    D.Transform.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f) * 2.0f;
-	Animations.push_back(D);
 
 	EG::ModelInstance B;
 	B.Asset = &UVAnimatedAsset;
@@ -5103,6 +5139,7 @@ void LoadInstances()
 	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 2.75f;
 	Instances.push_back(B);
 
+	/*
 	for (auto i = 0; i < PointLightAmount; ++i)
 	{
 		EG::ModelInstance S;
@@ -5111,6 +5148,7 @@ void LoadInstances()
 		S.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.05f;
 		LightSpheres.push_back(S);
 	}
+	*/
 
 	EG::ModelInstance C;
 	C.Asset = &Cube;
@@ -5141,6 +5179,31 @@ void LoadInstances()
 	Y.Transform.Position 	= EM::Vec3(5 * 30 + 40, 1.0f, 19.22f);
 	Y.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 1.75f;
 	UVAnimations.push_back(Y);
+
+	auto size = 5;
+	for (auto i = 0; i < size; i++)
+	{
+		for (auto j = 0; j < size; j++)
+		{
+			EG::ModelInstance P;
+			P.Asset = &PBRBunny;
+			P.Transform.Position 	= EM::Vec3(6 * 30 + 30, 1.0f, 19.22f) + EM::Vec3(j, 0, i) * 8.0f;
+			P.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.02f;
+			PBRInstances.push_back(P);
+
+			float Metallic = (float)i / (float)size;
+			float Roughenss = (float)j / (float)size + 0.1f;
+			MaterialProperties.push_back({Metallic, Roughenss});
+		}
+	}
+
+	EG::ModelInstance D;
+	D.Asset = &SpriteWithNormal;
+	D.Transform.Position 	= PBRInstances.at(0).Transform.Position;
+	D.Transform.Position.y 	= 0.91f;
+    D.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
+    D.Transform.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f) * 2.0f;
+	Animations.push_back(D);
 }
 
 void RenderInstanceForShadow(const EG::ModelInstance& Instance)
@@ -5158,7 +5221,7 @@ void RenderInstanceForShadow(const EG::ModelInstance& Instance)
 		Model *= EM::QuaternionToMat4(Transform.Orientation);
 		Model *= EM::Mat4::Scale(Transform.Scale);
 
-		Shader->BindTexture("DiffuseMap", Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id, 0);
+		Shader->BindTexture("DiffuseMap", Asset->Material.Textures[EG::TextureSlotType::ALBEDO].id, 0);
 		Shader->SetUniform("Model", Model);
 		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
 	}
@@ -5176,7 +5239,7 @@ void RenderInstance(const EG::ModelInstance& Instance)
 	{
         // Bind instance texture
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::ALBEDO].id);
 
 		// Bind normal
 		glActiveTexture(GL_TEXTURE1);
@@ -5184,6 +5247,59 @@ void RenderInstance(const EG::ModelInstance& Instance)
 
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::EMISSIVE].id);
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::METALLIC].id);
+
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::ROUGHNESS].id);
+
+		EM::Mat4 Model;
+		// L = T*R*S
+		Model *= EM::Mat4::Translate(Transform.Position);
+		Model *= EM::QuaternionToMat4(Transform.Orientation);
+		Model *= EM::Mat4::Scale(Transform.Scale);
+
+		static float t = 0.0f;
+		t += 0.001f;
+
+		auto& Position = Instances.at(0).Transform.Position;
+
+		Asset->Shader->SetUniform("u_metallic", Metallic);
+		Asset->Shader->SetUniform("u_roughness", Roughness);
+		Asset->Shader->SetUniform("model", Model);
+		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
+	}
+
+	glActiveTexture(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindVertexArray(0);
+}
+
+void PBRRenderInstance(const EG::ModelInstance& Instance)
+{
+	// Get reference to asset pointer
+	auto Asset = Instance.Asset;
+	auto& Transform = Instance.Transform;
+
+	glBindVertexArray(Asset->Mesh->VAO);
+	{
+        // Bind instance texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::ALBEDO].id);
+
+		// Bind normal
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::NORMAL].id);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::EMISSIVE].id);
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::METALLIC].id);
+
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::ROUGHNESS].id);
 
 		EM::Mat4 Model;
 		// L = T*R*S
@@ -5231,7 +5347,7 @@ void RenderAnimation(EG::ModelInstance& Instance)
 	{
         // Bind instance texture
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::ALBEDO].id);
 
 		// Bind normal
 		glActiveTexture(GL_TEXTURE1);
@@ -5291,7 +5407,7 @@ void RenderAnimationForShadow(EG::ModelInstance& Instance)
 
 		auto& Position = Instances.at(0).Transform.Position;
 
-		Shader->BindTexture("DiffuseMap", Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id, 0);
+		Shader->BindTexture("DiffuseMap", Asset->Material.Textures[EG::TextureSlotType::ALBEDO].id, 0);
 		Shader->SetUniform("Model", Model);
 		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
 	}
@@ -5313,7 +5429,7 @@ void RenderBackdrops(EG::ModelInstance& Instance)
 	{
         // Bind instance texture
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::ALBEDO].id);
 
 		// Bind normal
 		glActiveTexture(GL_TEXTURE1);
@@ -5351,7 +5467,7 @@ void RenderUVAnimation(EG::ModelInstance& Instance)
 	{
         // Bind instance texture
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::DIFFUSE].id);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::ALBEDO].id);
 
 		// Bind normal
 		glActiveTexture(GL_TEXTURE1);
@@ -5546,8 +5662,8 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* VerticalBlurProgram 		= EG::ShaderManager::GetShader("VerticalBlur");
 	EG::GLSLProgram* GBufferProgram 			= EG::ShaderManager::GetShader("GBuffer");
 	EG::GLSLProgram* AmbientLightProgram 		= EG::ShaderManager::GetShader("AmbientLight");
-	EG::GLSLProgram* DirectionalLightProgram 	= EG::ShaderManager::GetShader("DirectionalLight");
-	EG::GLSLProgram* PointLightProgram 			= EG::ShaderManager::GetShader("PointLight");
+	EG::GLSLProgram* DirectionalLightProgram 	= EG::ShaderManager::GetShader("PBRDirectionalLight");
+	EG::GLSLProgram* PointLightProgram 			= EG::ShaderManager::GetShader("PBRPointLight");
 	EG::GLSLProgram* SpotLightProgram 			= EG::ShaderManager::GetShader("SpotLight");
 	EG::GLSLProgram* UIProgram					= EG::ShaderManager::GetShader("Text");
 	EG::GLSLProgram* FXAAProgram 				= EG::ShaderManager::GetShader("FXAA");
@@ -5580,6 +5696,7 @@ int main(int argc, char** argv)
 	LoadEmissiveBunny();
 	LoadUVAnimatedAsset2();
 	LoadEmissiveCube();
+	LoadPBRBunny();
 	LoadInstances();
 
 	LoadFrames();
@@ -5645,6 +5762,7 @@ int main(int argc, char** argv)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
     glBindVertexArray(0);
 
+    /*
     for (u32 i = 0; i < PointLightAmount; i++)
     {
     	EG::PointLight L;
@@ -5661,6 +5779,7 @@ int main(int argc, char** argv)
 
     	PointLights.push_back(L);
     }
+    */
 
 	Spot = EG::SpotLight(
 						Instances.at(0).Transform.Position, 
@@ -5802,6 +5921,8 @@ int main(int argc, char** argv)
 	Enjon::CVarsSystem::Register("pointlights_radius", &PointLightRadius, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("distance_radius", &DistanceRadius, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("tick_enabled", &TickEnabled, Enjon::CVarType::TYPE_BOOL);
+	Enjon::CVarsSystem::Register("metallic", &Metallic, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("roughness", &Roughness, Enjon::CVarType::TYPE_FLOAT);
 
     // Game loop
     bool running = true;
@@ -5850,6 +5971,7 @@ int main(int argc, char** argv)
     	EM::Vec3& CamPos = FPSCamera.Transform.Position;
 
     	// Attach light to "player" position
+    	/*
     	float speed = 2.6f;
     	{
 	    	auto& Position = Instances.at(1).Transform.Position;
@@ -5861,6 +5983,7 @@ int main(int argc, char** argv)
 	    		LightSpheres.at(i).Transform.Position 	= Position + NewPosition + EM::Vec3(0.0f, 2.0f, 0.0f); 
 	    	}
     	}
+    	*/
 
     	// Set up spot light
     	SpotLights.at(0).Position = Instances.at(2).Transform.Position + EM::Vec3(-2.0f, 8.0f, 3.0f);
@@ -5886,8 +6009,8 @@ int main(int argc, char** argv)
         //////////////////////////////////////////////////////////////////////////
 
 		// Rotate one of the instances over time
-		// auto& InstanceTransform = Instances.at(0).Transform;
-		// InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * RotationSpeed), EM::Vec3(0, 1, 0));
+		auto& InstanceTransform = PBRInstances.at(0).Transform;
+		InstanceTransform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * RotationSpeed), EM::Vec3(0, 1, 0));
 
 		// // Rotate one of the instances over time
 		auto& InstanceTransform2 = Instances.at(5).Transform;
@@ -5912,6 +6035,20 @@ int main(int argc, char** argv)
 			        RenderInstance(c);
 		        Shader->Unuse();
 	        } 
+
+	        for (auto i = 0; i < PBRInstances.size(); i++)
+	        {
+	        	auto& c = PBRInstances.at(i);
+	        	auto& p = MaterialProperties.at(i);
+	        	auto Shader = c.Asset->Shader;
+	        	Shader->Use();
+	        		Shader->SetUniform("u_metallic", p.Metallic);
+	        		Shader->SetUniform("u_roughness", p.Roughness);
+		        	Shader->SetUniform("diffuseColor", EM::Vec3(1.0, 1.0, 1.0));
+		        	Shader->SetUniform("camera", CameraMatrix);
+			        PBRRenderInstance(c);
+		        Shader->Unuse();
+	        }
 
 	        for (auto& c : Animations)
 	        {
@@ -6158,6 +6295,11 @@ int main(int argc, char** argv)
 				        RenderInstanceForShadow(c);
 			        }
 
+		    		 for (auto& c : PBRInstances)
+			        {
+				        RenderInstanceForShadow(c);
+			        }
+
 			        for (auto& c : UVAnimations)
 			        {
 		        		RenderInstanceForShadow(c);
@@ -6200,7 +6342,7 @@ int main(int argc, char** argv)
 			// Ambient light
 			AmbientLightProgram->Use();
 			{
-				AmbientLightProgram->BindTexture("DiffuseMap", GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
+				AmbientLightProgram->BindTexture("DiffuseMap", GBuffer.GetTexture(EG::GBufferTextureType::ALBEDO), 0);
 				AmbientLightProgram->BindTexture("EmissiveMap", GBuffer.GetTexture(EG::GBufferTextureType::EMISSIVE), 1);
 				AmbientLightProgram->SetUniform("AmbientColor", AmbientColor);
 				AmbientLightProgram->SetUniform("AmbientIntensity", AmbientIntensity);
@@ -6218,20 +6360,21 @@ int main(int argc, char** argv)
 			{
 				DirectionalLightProgram->Use();
 				{
-					DirectionalLightProgram->BindTexture("DiffuseMap", GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
+					DirectionalLightProgram->BindTexture("AlbedoMap", GBuffer.GetTexture(EG::GBufferTextureType::ALBEDO), 0);
 					DirectionalLightProgram->BindTexture("NormalMap", GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
 					DirectionalLightProgram->BindTexture("PositionMap", GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
-					DirectionalLightProgram->BindTexture("ShadowMap", ShadowDepth.GetDepth(), 3);
+					DirectionalLightProgram->BindTexture("MaterialProperties", GBuffer.GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
+					DirectionalLightProgram->BindTexture("ShadowMap", ShadowDepth.GetDepth(), 4);
 					DirectionalLightProgram->SetUniform("Resolution", GBuffer.GetResolution());
 					DirectionalLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
-					DirectionalLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
+					// DirectionalLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
 					DirectionalLightProgram->SetUniform("LightSpaceMatrix", ShadowCamera.GetViewProjectionMatrix());
 					DirectionalLightProgram->SetUniform("ShadowBias", EM::Vec2(ShadowBiasMin, ShadowBiasMax));
 
 
 					// Direcitonal light
 					// NOTE: Will be faster to cache uniforms rather than find them every frame
-					DirectionalLightProgram->SetUniform("LightDirection", Sun.Position);															
+					DirectionalLightProgram->SetUniform("LightPosition", Sun.Position);															
 					DirectionalLightProgram->SetUniform("LightColor", EM::Vec3(Sun.Color.r, Sun.Color.g, Sun.Color.b));
 					DirectionalLightProgram->SetUniform("LightIntensity", Sun.Intensity);
 
@@ -6249,20 +6392,20 @@ int main(int argc, char** argv)
 			{
 				PointLightProgram->Use();
 				{
-					PointLightProgram->BindTexture("DiffuseMap", GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
+					PointLightProgram->BindTexture("AlbedoMap", GBuffer.GetTexture(EG::GBufferTextureType::ALBEDO), 0);
 					PointLightProgram->BindTexture("NormalMap", GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
 					PointLightProgram->BindTexture("PositionMap", GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
+					PointLightProgram->BindTexture("MaterialProperties", GBuffer.GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
 					PointLightProgram->SetUniform("Resolution", GBuffer.GetResolution());
 					PointLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
-					PointLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
+					// PointLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
 
 					for (Enjon::u32 i = 0; i < PointLights.size(); ++i)
 					{
 						PointLightProgram->SetUniform("LightPos", PointLights.at(i).Position);
 						PointLightProgram->SetUniform("LightColor", EM::Vec3(PointLights.at(i).Color.r, PointLights.at(i).Color.g, PointLights.at(i).Color.b));
 						PointLightProgram->SetUniform("Falloff", PointLights.at(i).Parameters.Falloff);
-						// PointLightProgram->SetUniform("Radius", PointLights.at(i).Parameters.Radius);
-						PointLightProgram->SetUniform("LightIntensity", PointLights.at(i).Intensity);
+						// PointLightProgram->SetUniform("LightIntensity", PointLights.at(i).Intensity);
 
 						// Render Light to screen
 						{
@@ -6279,7 +6422,7 @@ int main(int argc, char** argv)
 			{
 				for (auto& S : SpotLights)
 				{
-					SpotLightProgram->BindTexture("DiffuseMap", 	GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE), 0);
+					SpotLightProgram->BindTexture("DiffuseMap", 	GBuffer.GetTexture(EG::GBufferTextureType::ALBEDO), 0);
 					SpotLightProgram->BindTexture("NormalMap", 		GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
 					SpotLightProgram->BindTexture("PositionMap", 	GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
 					SpotLightProgram->SetUniform("Resolution", 		GBuffer.GetResolution());
@@ -6498,7 +6641,7 @@ int main(int argc, char** argv)
 				CompositeProgram->Unuse();
 			} break;
 
-			case DrawFrameType::DIFFUSE:
+			case DrawFrameType::ALBEDO:
 			{
 				NoCameraProgram->Use();
 				{
@@ -6508,7 +6651,7 @@ int main(int argc, char** argv)
 							CompositeBatch.Add(
 												EM::Vec4(-1, -1, 2, 2),
 												EM::Vec4(0, 0, 1, 1),
-												GBuffer.GetTexture(EG::GBufferTextureType::DIFFUSE)
+												GBuffer.GetTexture(EG::GBufferTextureType::ALBEDO)
 											);
 						}
 						CompositeBatch.End();
@@ -6589,6 +6732,25 @@ int main(int argc, char** argv)
 												EM::Vec4(-1, -1, 2, 2),
 												EM::Vec4(0, 0, 1, 1),
 												ShadowDepth.GetTexture()
+											);
+						}
+						CompositeBatch.End();
+						CompositeBatch.RenderBatch();
+				}
+				NoCameraProgram->Unuse();
+			} break;
+
+			case DrawFrameType::MAT_PROPS:
+			{
+				NoCameraProgram->Use();
+				{
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+						CompositeBatch.Begin();
+						{
+							CompositeBatch.Add(
+												EM::Vec4(-1, -1, 2, 2),
+												EM::Vec4(0, 0, 1, 1),
+												GBuffer.GetTexture(EG::GBufferTextureType::MAT_PROPS)
 											);
 						}
 						CompositeBatch.End();
@@ -6942,7 +7104,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 
 		if (VelDir.Length()) VelDir = EM::Vec3::Normalize(VelDir);
 
-		Camera->Transform.Position = Player.Transform.Position + EM::Vec3(2.5, 2, 3);
+		Camera->Transform.Position = Player.Transform.Position + EM::Vec3(40, 30, 40);
 		Camera->Transform.Orientation = EM::Quaternion(-0.17f, 0.38f, 0.07f, 0.9f);
 
 		// Camera->Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(Rotations.x), EM::Vec3(1, 0, 0)) * 
@@ -6988,7 +7150,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 
 	if (Input->IsKeyPressed(SDLK_2))
 	{
-		DrawFrame = DrawFrameType::DIFFUSE;	
+		DrawFrame = DrawFrameType::ALBEDO;	
 	}
 
 	if (Input->IsKeyPressed(SDLK_3))
@@ -7009,6 +7171,11 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	if (Input->IsKeyPressed(SDLK_6))
 	{
 		DrawFrame = DrawFrameType::SHADOWDEPTH;	
+	}
+
+	if (Input->IsKeyPressed(SDLK_7))
+	{
+		DrawFrame = DrawFrameType::MAT_PROPS;	
 	}
 
 	if (Input->IsKeyDown(SDLK_i))

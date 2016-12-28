@@ -66,7 +66,5 @@ void main()
         Specular = vec3(0.2) * Spec * LightColor;
     }
 
-
     ColorOut = (DiffuseColor + vec4(Specular, 1.0)) * Attenuation;
-
 }

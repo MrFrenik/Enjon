@@ -6,18 +6,19 @@
 
 namespace Enjon { namespace Graphics {
 
-	const static int TextureSlotCount = 3;
-
 	enum TextureSlotType
 	{
-		DIFFUSE,
+		ALBEDO,
 		NORMAL,
-		EMISSIVE
+		EMISSIVE,
+		METALLIC,
+		ROUGHNESS,
+		TEXTURE_SLOT_COUNT
 	};
 
 	struct MaterialInstance
 	{
-		GLTexture Textures[TextureSlotCount];
+		GLTexture Textures[TEXTURE_SLOT_COUNT];
 		float Shininess;
 	};
 	
