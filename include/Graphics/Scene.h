@@ -32,6 +32,9 @@ namespace Enjon { namespace Graphics {
 			void RemoveRenderable(EG::Renderable* renderable);
 
 			std::vector<EG::Renderable*> GetRenderables(RenderableSortType type = RenderableSortType::MATERIAL);
+			std::set<EG::DirectionalLight*>* GetDirectionalLights() { return &mDirectionalLights; }
+			std::set<EG::PointLight*>* GetPointLights() { return &mPointLights; }
+			std::set<EG::SpotLight*>* GetSpotLights() { return &mSpotLights; }
 
 		private:
 			std::set<EG::Renderable*> 		mRenderables;

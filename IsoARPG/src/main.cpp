@@ -8466,7 +8466,6 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-
 #endif
 
 // Refactor
@@ -8478,6 +8477,7 @@ int main(int argc, char** argv)
 #include <Defines.h>
 #include <Math/Maths.h>
 #include <Enjon.h>
+#include <vector>
 
 EG::DeferredRenderer mGraphicsEngine;
 EI::InputManager mInputManager;
@@ -8492,9 +8492,37 @@ int main(int argc, char** argv)
 	Enjon::Init();
 	mGraphicsEngine.Init();
 
+	EG::Scene* scene = mGraphicsEngine.GetScene();
+
+	EG::Renderable renderable;
+	EG::Material* mat = new EG::Material();
+	EG::Mesh* mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
+	mat->SetTexture(
+					EG::TextureSlotType::ALBEDO, 
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bb8_diffuse.png")
+					);
+	mat->SetTexture(
+					EG::TextureSlotType::NORMAL, 
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png")
+					);
+	renderable.SetMesh(mesh);
+	renderable.SetMaterial(mat);
+	renderable.SetPosition(EM::Vec3(0, 0, 0));
+	renderable.SetScale(EM::Vec3(1, 1, 1) * 1.0f);
+	scene->AddRenderable(&renderable);
+
+	float dt = 0.0f;
+
 	while(ProcessInput(&mInputManager))
 	{
-		mGraphicsEngine.Update(0.01f);
+		dt += 0.01f;
+		mGraphicsEngine.Update(dt);
+		renderable.SetOrientation(
+							EM::Quaternion::AngleAxis(
+														EM::ToRadians(dt),
+														EM::Vec3(0, 1, 0)
+													)
+								);
 	}
 
 	printf("Exit Successful!\n");	

@@ -28,27 +28,30 @@ namespace Enjon { namespace Graphics {
 			void SetViewport(EM::iVec2& dimensions);
 			EM::iVec2 GetViewport();
 
+			EG::Scene* GetScene() { return &mScene; }
+
 		private:
 
 			void InitializeFrameBuffers();
 			void GBufferPass();
+			void LightingPass();
 
 			void SubmitRenderable(EG::Renderable* renderable);
 
 			// Frame buffers
-			EG::GBuffer 			mGbuffer;
-			EG::RenderTarget 		mDebugTarget;
-			EG::RenderTarget 		mSmallBlurHorizontal;
-			EG::RenderTarget 		mSmallBlurVertical;
-			EG::RenderTarget 		mMediumBlurHorizontal;
-			EG::RenderTarget 		mMediumBlurVertical;
-			EG::RenderTarget 		mLargeBlurHorizontal;
-			EG::RenderTarget 		mLargeBlurVertical;
-			EG::RenderTarget 		mComposite;
-			EG::RenderTarget 		mLightingBuffer;
-			EG::RenderTarget 		mLuminanceBuffer;
-			EG::RenderTarget		mFXAATarget;
-			EG::RenderTarget		mShadowDepth;
+			EG::GBuffer* mGbuffer 					= nullptr;
+			EG::RenderTarget* mDebugTarget 			= nullptr;
+			EG::RenderTarget* mSmallBlurHorizontal  = nullptr;
+			EG::RenderTarget* mSmallBlurVertical 	= nullptr;
+			EG::RenderTarget* mMediumBlurHorizontal = nullptr;
+			EG::RenderTarget* mMediumBlurVertical 	= nullptr;
+			EG::RenderTarget* mLargeBlurHorizontal 	= nullptr;
+			EG::RenderTarget* mLargeBlurVertical 	= nullptr;
+			EG::RenderTarget* mComposite 			= nullptr;
+			EG::RenderTarget* mLightingBuffer		= nullptr;
+			EG::RenderTarget* mLuminanceBuffer		= nullptr;
+			EG::RenderTarget* mFXAATarget			= nullptr;
+			EG::RenderTarget* mShadowDepth			= nullptr;
 
 			// Graphics scene
 			EG::Scene 				mScene;

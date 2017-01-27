@@ -13,7 +13,7 @@ namespace Enjon { namespace Graphics {
 		NearPlane(0.1f),
 		FarPlane(1000.0f),
 		ViewPortAspectRatio(4.0f / 3.0f), 
-		ProjType(ProjectionType::Perspective),
+		ProjType(ProjectionType::PERSPECTIVE),
 		OrthographicScale(1.0f),
 		ScreenDimensions(EM::Vec2(800, 600))
 	{
@@ -26,7 +26,7 @@ namespace Enjon { namespace Graphics {
 		NearPlane(0.1f),
 		FarPlane(256.0f),
 		ViewPortAspectRatio((Enjon::f32)Width / (Enjon::f32)Height), 
-		ProjType(ProjectionType::Perspective),
+		ProjType(ProjectionType::PERSPECTIVE),
 		OrthographicScale(1.0f),
 		ScreenDimensions(EM::Vec2(Width, Height))
 	{
@@ -35,14 +35,19 @@ namespace Enjon { namespace Graphics {
 	Camera::Camera(EM::iVec2& dimensions)
 		: 
 		Transform(),
-		FieldOfView(50),
+		FieldOfView(60),
 		NearPlane(0.1f),
 		FarPlane(1000.0f),
 		ViewPortAspectRatio((Enjon::f32)dimensions.x / (Enjon::f32)dimensions.y), 
-		ProjType(ProjectionType::Perspective),
+		ProjType(ProjectionType::PERSPECTIVE),
 		OrthographicScale(1.0f),
 		ScreenDimensions(EM::Vec2(dimensions.x, dimensions.y))
 	{
+	}
+
+	void Camera::SetPosition(EM::Vec3& position)
+	{
+		Transform.Position = position;
 	}
 
 	void Camera::LookAt(EM::Vec3& Position, EM::Vec3& Up)
@@ -108,18 +113,23 @@ namespace Enjon { namespace Graphics {
 		return GetProjection() * GetView();
 	}
 
+	EM::Mat4 Camera::GetViewProjection() const 
+	{
+		return GetProjection() * GetView();
+	}
+
 	EM::Mat4 Camera::GetProjection() const
 	{
 		EM::Mat4 Projection;
 
 		switch(ProjType)
 		{
-			case ProjectionType::Perspective:
+			case ProjectionType::PERSPECTIVE:
 			{
 				Projection = EM::Mat4::Perspective(FieldOfView, ViewPortAspectRatio, NearPlane, FarPlane);
 			} break;
 
-			case ProjectionType::Orthographic:
+			case ProjectionType::ORTHOGRAPHIC:
 			{
 				Enjon::f32 Distance = 0.5f * (FarPlane - NearPlane);
 				Projection = EM::Mat4::Orthographic(

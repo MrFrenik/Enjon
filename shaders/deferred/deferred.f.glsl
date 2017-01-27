@@ -27,6 +27,8 @@ uniform sampler2D u_aoMap;
 
 const float u_emissiveIntensity = 5.0;
 
+out vec4 ColorOut;
+
 void main()
 {
     // Translate normal to world space
@@ -47,4 +49,6 @@ void main()
     PositionOut = vec4(fs_in.FragPos, 1.0);
     EmissiveOut = texture2D(u_emissiveMap, fs_in.TexCoords) * vec4(u_emissiveIntensity, u_emissiveIntensity, u_emissiveIntensity, 1.0);
     MatPropsOut = vec4(Metallic, Roughness, AO, 1.0);
+
+    ColorOut = color * vec4(u_albedoColor, 1.0);
 }

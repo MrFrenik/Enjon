@@ -17,6 +17,8 @@ namespace Enjon { namespace Graphics {
 
 	void Mesh::Unbind()
 	{
+		glActiveTexture(0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindVertexArray(0);
 	}
 

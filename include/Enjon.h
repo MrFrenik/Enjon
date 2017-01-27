@@ -40,6 +40,10 @@
 #include "Graphics/FrameBufferObject.h"
 #include "Graphics/DeferredRenderer.h"
 #include "Graphics/GBuffer.h"
+#include "Graphics/Material.h"
+#include "Graphics/Mesh.h"
+#include "Graphics/Scene.h"
+#include "Graphics/Renderable.h"
 #include "Graphics/Animations.h"
 #include "Graphics/Shapes.h"
 #include "Graphics/DeferredRenderer.h"
@@ -89,8 +93,8 @@ namespace Enjon {
 		SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE,    8);
 		SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE,    8);
 		 
-		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS,  1);
-		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,  16);
+		// SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS,  1);
+		// SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,  16);
 
 		return 0;
 	}

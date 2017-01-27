@@ -16,8 +16,8 @@ namespace Enjon { namespace Graphics {
 
 	enum class ProjectionType
 	{
-		Perspective,
-		Orthographic
+		PERSPECTIVE,
+		ORTHOGRAPHIC
 	};
 
 	struct Camera
@@ -39,6 +39,7 @@ namespace Enjon { namespace Graphics {
 		EM::Vec3 Down() const;
 
 		EM::Mat4 GetViewProjectionMatrix() const;
+		EM::Mat4 GetViewProjection() const;
 		EM::Mat4 GetProjection() const;
 		EM::Mat4 GetView() const;
 		inline EM::Vec2 GetNearFar() const { return EM::Vec2(NearPlane, FarPlane); }
@@ -48,6 +49,8 @@ namespace Enjon { namespace Graphics {
 		inline void SetNearFar(float Near, float Far) { NearPlane = Near; FarPlane = Far; }
 		inline void SetProjection(ProjectionType Type) { ProjType = Type; }
 		inline void SetOrthographicScale(const float Scale) { OrthographicScale = Scale; }
+
+		void SetPosition(EM::Vec3& position);
 
 		// Member variables
 		EM::Transform Transform;
