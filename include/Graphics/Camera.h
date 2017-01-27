@@ -8,6 +8,10 @@
 #include <Math/Vec2.h>
 #include <Math/Mat4.h>
 
+namespace Enjon { namespace Math {
+	class iVec2;
+}}
+
 namespace Enjon { namespace Graphics { 
 
 	enum class ProjectionType
@@ -20,6 +24,7 @@ namespace Enjon { namespace Graphics {
 	{
 		Camera();
 		Camera(Enjon::uint32 Width, Enjon::uint32 Height);
+		Camera(EM::iVec2& dimenstions);
 		Camera(const Camera& Other) = default;
 
 		void LookAt(EM::Vec3& Position, EM::Vec3& Up = EM::Vec3(0, 1, 0));

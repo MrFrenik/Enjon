@@ -22,6 +22,7 @@ namespace Enjon { namespace Math {
 namespace Enjon { namespace Graphics {
 
 	class ColorRGBA16;
+	class GLTexture;
 
 	class GLSLProgram
 	{
@@ -36,6 +37,7 @@ namespace Enjon { namespace Graphics {
 		void Unuse();
 
 		void BindTexture(const std::string& name, const GLuint& TextureID, const GLuint Index);
+		void BindTexture(const std::string& name, const GLTexture& texture, const GLuint index);
 
 		// template <typename T>
 		// void SetUniform(const std::string& Name, const T& Val);
@@ -50,7 +52,7 @@ namespace Enjon { namespace Graphics {
 		void SetUniform(const std::string& name, const EM::Vec4& vector);
 		void SetUniform(const std::string& name, const EM::Mat4& matrix); 
 		void SetUniform(const std::string& name, const EM::Transform& T);
-		void SetUniform(const std::string& name, const EG::ColorRGBA16& C);
+		void SetUniform(const std::string& name, EG::ColorRGBA16& C);
 		
 		GLuint inline GetProgramID() const { return m_programID; } 
 	
@@ -66,6 +68,33 @@ namespace Enjon { namespace Graphics {
 	private: 
 		void CompileShader(const char* filePath, GLuint id);
 		void LinkShaders();
+	};
+
+	struct UniformBase
+	{
+		virtual void Set() = 0;
+		GLSLProgram* mShader;
+	};
+
+	template <typename T>
+	struct Uniform
+	{
+		Uniform()
+			: mName("UNSET_UNIFORM"), mShader(nullptr)
+		{}
+
+		Uniform(const char* name, T value, GLSLProgram* shader)
+			: mName(name), mValue(value), mShader(shader)
+		{}
+
+		void Set()
+		{
+			assert(mShader != nullptr);
+			mShader->SetUniform(name, value);
+		}
+
+		const char* name;
+		T value;
 	};
 }}
 

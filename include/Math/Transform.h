@@ -13,19 +13,9 @@ namespace Enjon { namespace Math {
 	struct Transform
 	{
 		// Default constructor
-		Transform()
-			: 
-				Position(EM::Vec3(0.0f, 0.0f, 0.0f)),
-				Orientation(EM::Quaternion(0, 0, 0, 1)),
-				Scale(EM::Vec3(1, 1, 1))
-			{}
-			
-		Transform(EM::Vec3& _Position, EM::Quaternion& _Orientation, EM::Vec3& _Scale)
-			: 
-				Position(_Position),
-				Orientation(_Orientation),
-				Scale(_Scale)
-			{}
+		Transform();
+		Transform(EM::Vec3& _Position, EM::Quaternion& _Orientation, EM::Vec3& _Scale);
+		~Transform();
 
 		// Multiplication of this transform with another
 		Transform operator*(Transform& Parent) const;	
@@ -35,6 +25,14 @@ namespace Enjon { namespace Math {
 
 		// Gets inverse of this transform
 		Transform Inverse();
+
+		EM::Vec3 GetPosition() { return Position; }
+		EM::Vec3 GetScale() { return Scale; }
+		EM::Quaternion GetOrientation() { return Orientation; }
+
+		void SetPosition(EM::Vec3& position);
+		void SetScale(EM::Vec3& scale);
+		void SetOrientation(EM::Quaternion& orientation);
 
 		// Member variables
 		EM::Vec3 Position;

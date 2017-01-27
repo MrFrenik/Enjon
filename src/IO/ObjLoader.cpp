@@ -12,9 +12,9 @@
 
 namespace Enjon { namespace Input {
 
-	EG::MeshInstance LoadMeshFromFile(const char* FilePath)
+	EG::Mesh LoadMeshFromFile(const char* FilePath)
 	{
-		EG::MeshInstance Mesh;
+		EG::Mesh Mesh;
 
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
@@ -152,9 +152,9 @@ namespace Enjon { namespace Input {
 	}
 
 	/*
-	EG::MeshInstance LoadMeshFromFile(const char* FilePath)
+	EG::Mesh LoadMeshFromFile(const char* FilePath)
 	{
-		EG::MeshInstance Mesh;
+		EG::Mesh Mesh;
 
 		std::vector<EM::Vec3> TempVertexPositions;
 		std::vector<EM::Vec3> TempVertexNormals;

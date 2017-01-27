@@ -1,38 +1,62 @@
 #ifndef ENJON_DEFERRED_RENDERER_H
 #define ENJON_DEFERRED_RENDERER_H
 
-#include "System/Types.h"
 #include "Defines.h"
-#include "Graphics/FrameBufferObject.h"
-#include "Graphics/GLSLProgram.h"
+#include "System/Types.h"
+#include "Graphics/RenderTarget.h"
+#include "Graphics/GBuffer.h"
+#include "Graphics/Window.h"
+#include "Graphics/Scene.h"
+#include "Graphics/Camera.h"
+#include "Graphics/SpriteBatch.h"
 
-#include "GLEW/glew.h"
+namespace Enjon { namespace Math { 
+	class iVec2;
+}}
 
 namespace Enjon { namespace Graphics {
 
-	/**
-	*	This object is used to render a big screen sized quad with the deferred rendering shader applied on it.
-	*/
 	class DeferredRenderer
 	{
-	public:
-		DeferredRenderer(uint32 Width, uint32 Height, FrameBufferObject* FBO, EG::GLSLProgram* Shader);
-		~DeferredRenderer();
+		public:
+			DeferredRenderer();
+			~DeferredRenderer();
 
-		void	Render();
+			void Init();
+			void Update(float dt);
 
-	private:
-		EG::GLSLProgram* 		m_shader; 				// Deferred rendering shader
-		EG::FrameBufferObject*	m_fbo; 					// A pointer to the FBO render texture that contains diffuse, normals and positions
+			void SetViewport(EM::iVec2& dimensions);
+			EM::iVec2 GetViewport();
 
-		Enjon::uint32			m_width; 				// width
-		Enjon::uint32			m_height; 				// height
+		private:
 
-		GLuint					m_diffuseID; 			// Diffuse texture handle for the shader
-		GLuint					m_positionID; 			// Position texture handle for the shader
-		GLuint					m_normalsID; 			// Normals texture handle for the shader
+			void InitializeFrameBuffers();
+			void GBufferPass();
+
+			void SubmitRenderable(EG::Renderable* renderable);
+
+			// Frame buffers
+			EG::GBuffer 			mGbuffer;
+			EG::RenderTarget 		mDebugTarget;
+			EG::RenderTarget 		mSmallBlurHorizontal;
+			EG::RenderTarget 		mSmallBlurVertical;
+			EG::RenderTarget 		mMediumBlurHorizontal;
+			EG::RenderTarget 		mMediumBlurVertical;
+			EG::RenderTarget 		mLargeBlurHorizontal;
+			EG::RenderTarget 		mLargeBlurVertical;
+			EG::RenderTarget 		mComposite;
+			EG::RenderTarget 		mLightingBuffer;
+			EG::RenderTarget 		mLuminanceBuffer;
+			EG::RenderTarget		mFXAATarget;
+			EG::RenderTarget		mShadowDepth;
+
+			// Graphics scene
+			EG::Scene 				mScene;
+			EG::Window 				mWindow;
+			EG::Camera 				mSceneCamera;   // Probably part of scene instead
+
+			EG::SpriteBatch 		mBatch;
 	};
-
 
 }}
 

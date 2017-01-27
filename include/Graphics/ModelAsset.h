@@ -13,15 +13,15 @@ namespace Enjon { namespace Graphics {
 
 	struct ModelAsset
 	{
-		EG::GLSLProgram* Shader;
-		EG::MaterialInstance Material;
-		EG::MeshInstance* Mesh;
+		EG::GLSLProgram* mShader;
+		EG::Material mMaterial;
+		EG::MeshInstance* mMesh;
 	};
 
 	struct ModelInstance
 	{
-		ModelAsset* Asset;
-		EM::Transform Transform;
+		ModelAsset* mAsset;
+		EM::Transform mTransform;
 	};
 
 }}

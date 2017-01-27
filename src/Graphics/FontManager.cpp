@@ -67,7 +67,7 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 		else 
 		{
 			std::cout << FontName << " not found." << std::endl;
-			return Fonts["WeblySleek"];
+			return Fonts["WeblySleek_14"];
 		}
 	}
 

@@ -2,6 +2,25 @@
 
 namespace Enjon { namespace Math {
 
+	Transform::Transform()
+		: 
+			Position(EM::Vec3(0.0f, 0.0f, 0.0f)), 
+			Orientation(EM::Quaternion(0, 0, 0, 1)), 
+			Scale(EM::Vec3(1, 1, 1))
+	{
+	}
+		
+	Transform::Transform(EM::Vec3& _Position, EM::Quaternion& _Orientation, EM::Vec3& _Scale)
+		: 
+			Position(_Position), 
+			Orientation(_Orientation), 
+			Scale(_Scale)
+	{
+	}
+
+	Transform::~Transform()
+	{
+	}
 
 	Transform Transform::operator*(Transform& Parent) const
 	{
@@ -32,6 +51,21 @@ namespace Enjon { namespace Math {
 		Transform I;
 
 		return I / *this;
+	}
+
+	void Transform::SetPosition(EM::Vec3& position)
+	{
+		Position = position;
+	}
+
+	void Transform::SetScale(EM::Vec3& scale)
+	{
+		Scale = scale;
+	}
+
+	void Transform::SetOrientation(EM::Quaternion& orientation)
+	{
+		Orientation = orientation;
 	}
 
 }}

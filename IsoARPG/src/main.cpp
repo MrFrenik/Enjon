@@ -414,7 +414,7 @@ int main(int argc, char** argv)
 
 	static Math::Vec2 enemydims(222.0f, 200.0f);
 
-	static uint32 AmountDrawn = 40000;
+	static uint32 AmountDrawn = 10;
 	for (int e = 0; e < AmountDrawn; e++)
 	{
 		float height = -50.0f;
@@ -1411,8 +1411,7 @@ int main(int argc, char** argv)
 			// Draw player shadow
 			EntityBatch.Add(Math::Vec4(GroundPosition->x - 20.0f, GroundPosition->y - 20.0f, 200.0f, 300.0f), EM::Vec4(0, 0, 1, 1), 
 										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/mainDudeSmall.png").id,
-										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.3f), 1000000.0f, Enjon::Math::ToRadians(120.0f));
-
+										Graphics::SetOpacity(Graphics::RGBA16_Black(), EM::Clamp(sin(EntitySystem::WorldTime()), 0.0f, 1.0f)), 1000000.0f, Enjon::Math::ToRadians(120.0f));
 		
 			///////////////////////////////
 			// BEAMS //////////////////////	
@@ -4552,7 +4551,7 @@ int main(int argc, char** argv)
 
 // NEWBEGIN
 
-#if 1
+#if 0
 
 #define FULLSCREENMODE   0
 #define SECOND_DISPLAY   0
@@ -4634,6 +4633,8 @@ std::vector<EG::SpotLight> SpotLights;
 std::vector<EG::PointLight> PointLights;
 std::vector<MaterialProps> MaterialProperties;
 
+EM::Quaternion ShadowRotation;
+
 EG::Camera FPSCamera;
 EG::Camera2D HUDCamera;
 
@@ -4654,6 +4655,7 @@ enum class DrawFrameType
 	BLUR,
 	SHADOWDEPTH,
 	LIGHTS,
+	HEIGHT,
 	MAT_PROPS
 };
 
@@ -4692,6 +4694,19 @@ float DistanceRadius = 10000.0f;
 float TickEnabled = true;
 float Metallic = 1.0f;
 float Roughness = 0.0f;
+EM::Vec3 CameraAdjustment 	= EM::Vec3(87.5f, 50.0f, 87.5f);
+EM::Vec3 CameraAxis 		= EM::Vec3(1.0f, 1.0f, 1.0f);
+EM::Vec2 NearFar(0.1, 1000.0f);
+float LightIntensityAdjustment = 1.0f;
+EM::Vec3 ShadowMove(1.0f, 0.0f, 1.0f);
+EM::Vec3 ShadowScale(1.0f, 1.0f, 1.0f);
+EM::Vec3 TLP(1.0f, 0.0f, 1.0f);
+EM::Vec3 TRP(1.0f, 0.0f, 1.0f);
+EM::Vec3 BLP(1.0f, 0.0f, 1.0f);
+EM::Vec3 BRP(1.0f, 0.0f, 1.0f);
+EM::Vec3 SunPosition(0, 0, 0);
+bool SpecularEnabled = true;
+float NumCelShadedLevels = 4;
 
 EM::Vec3 AmbientColor(0.2f, 0.2f, 0.2f);
 float AmbientIntensity = 0.0f;
@@ -4703,6 +4718,7 @@ struct ToneMapSettings
 	float BloomScalar;
 	float Scale;
 	float Threshold;
+	float Saturation;
 };
 
 struct FXAASettings
@@ -4723,8 +4739,8 @@ struct BloomSettings
 	EM::Vec3 Radius;
 };
 
-struct FXAASettings FXAASettings{8.0f, 0.09f, 0.0f};
-struct ToneMapSettings ToneMapSettings{0.5f, 1.5f, 1.0f, 2.0f, 2.0f};
+struct FXAASettings FXAASettings{0.0f, 0.09f, 0.0f};
+struct ToneMapSettings ToneMapSettings{0.5f, 1.5f, 1.0f, 2.0f, 2.0f, 1.0f};
 struct BloomSettings BloomSettings(EM::Vec3(0.4f, 0.35f, 0.0f), EM::Vec3(5, 4, 1), EM::Vec3(0.001f, 0.009f, 0.009f));
 
 void LoadBackdropAsset()
@@ -4817,6 +4833,7 @@ void LoadMonkeyHeadAsset()
 }
 
 void LoadEmissiveCube()
+
 {
 	// Get mesh
 	EmissiveCube.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cube.obj");
@@ -4959,14 +4976,20 @@ void LoadNormalMappedSpriteAsset()
     	Shader->SetUniform("diffuseMap", 0);
     	Shader->SetUniform("normalMap", 1);
     	Shader->SetUniform("emissiveMap", 2);
+    	Shader->SetUniform("metallicMap", 3);
+    	Shader->SetUniform("roughnessMap", 4);
+    	Shader->SetUniform("aoMap", 5);
     Shader->Unuse();
 
     // Set shader
     SpriteWithNormal.Shader = Shader;
     // Textures
-	SpriteWithNormal.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png", GL_NEAREST, GL_NEAREST);
-	SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png", GL_NEAREST, GL_NEAREST);
+	SpriteWithNormal.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/smoker.png", GL_NEAREST, GL_NEAREST);
+	SpriteWithNormal.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/up_normal.png", GL_NEAREST, GL_NEAREST);
+	SpriteWithNormal.Material.Textures[EG::TextureSlotType::METALLIC] 	= EI::ResourceManager::GetTexture("../Assets/Textures/grey.png", GL_NEAREST, GL_NEAREST, false);
+	SpriteWithNormal.Material.Textures[EG::TextureSlotType::ROUGHNESS] 	= EI::ResourceManager::GetTexture("../Assets/Textures/white.png", GL_NEAREST, GL_NEAREST, false);
 	SpriteWithNormal.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST, false);
+	SpriteWithNormal.Material.Textures[EG::TextureSlotType::AO] 		= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST);
 	SpriteWithNormal.Material.Shininess = 20.0f;
 }
 
@@ -5079,7 +5102,7 @@ void LoadEmissiveBunny()
 void LoadPBRBunny()
 {
 	// Get mesh
-	PBRBunny.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/shaderball.obj");
+	PBRBunny.Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/sphere.obj");
 
     // Get shader and set texture
     auto Shader = EG::ShaderManager::GetShader("GBuffer");
@@ -5089,19 +5112,18 @@ void LoadPBRBunny()
     	Shader->SetUniform("emissiveMap", 2);
     	Shader->SetUniform("metallicMap", 3);
     	Shader->SetUniform("roughnessMap", 4);
+    	Shader->SetUniform("aoMap", 5);
     Shader->Unuse();
 
     // Set shader
     PBRBunny.Shader = Shader;
     // Textures
-	// PBRBunny.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/BaseColor.png");
-	PBRBunny.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptilered.png");
+	PBRBunny.Material.Textures[EG::TextureSlotType::ALBEDO] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/BaseColor.png");
 	PBRBunny.Material.Textures[EG::TextureSlotType::NORMAL] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Normal.png");
 	PBRBunny.Material.Textures[EG::TextureSlotType::METALLIC] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png");
-	// PBRBunny.Material.Textures[EG::TextureSlotType::METALLIC] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_Diffuse.png");
-	// PBRBunny.Material.Textures[EG::TextureSlotType::METALLIC] 	= EI::ResourceManager::GetTexture("../Assets/Textures/white.png");
-	PBRBunny.Material.Textures[EG::TextureSlotType::ROUGHNESS] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png");
-	PBRBunny.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png", GL_NEAREST, GL_NEAREST, false);
+	PBRBunny.Material.Textures[EG::TextureSlotType::ROUGHNESS] 	= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png");
+	PBRBunny.Material.Textures[EG::TextureSlotType::AO] 		= EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/AO.png");
+	PBRBunny.Material.Textures[EG::TextureSlotType::EMISSIVE] 	= EI::ResourceManager::GetTexture("../Assets/Textures/black.png");
 	PBRBunny.Material.Shininess = 20.0f;
 }
 
@@ -5139,16 +5161,11 @@ void LoadInstances()
 	B.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 2.75f;
 	Instances.push_back(B);
 
-	/*
-	for (auto i = 0; i < PointLightAmount; ++i)
-	{
-		EG::ModelInstance S;
-		S.Asset = &Sphere;
-		S.Transform.Position 	= EM::Vec3(0, 0, 0);
-		S.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.05f;
-		LightSpheres.push_back(S);
-	}
-	*/
+	// EG::ModelInstance S;
+	// S.Asset = &Sphere;
+	// S.Transform.Position 	= PointLights.at(0).Position;
+	// S.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.05f;
+	// LightSpheres.push_back(S);
 
 	EG::ModelInstance C;
 	C.Asset = &Cube;
@@ -5180,29 +5197,19 @@ void LoadInstances()
 	Y.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 1.75f;
 	UVAnimations.push_back(Y);
 
-	auto size = 5;
-	for (auto i = 0; i < size; i++)
-	{
-		for (auto j = 0; j < size; j++)
-		{
-			EG::ModelInstance P;
-			P.Asset = &PBRBunny;
-			P.Transform.Position 	= EM::Vec3(6 * 30 + 30, 1.0f, 19.22f) + EM::Vec3(j, 0, i) * 8.0f;
-			P.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.02f;
-			PBRInstances.push_back(P);
-
-			float Metallic = (float)i / (float)size;
-			float Roughenss = (float)j / (float)size + 0.1f;
-			MaterialProperties.push_back({Metallic, Roughenss});
-		}
-	}
+	EG::ModelInstance P;
+	P.Asset = &PBRBunny;
+	P.Transform.Position 	= EM::Vec3(6 * 30 + 30, 1.0f, 19.22f);
+	P.Transform.Scale 		= EM::Vec3(1.0f, 1.0f, 1.0f) * 0.5f;
+	PBRInstances.push_back(P);
 
 	EG::ModelInstance D;
 	D.Asset = &SpriteWithNormal;
 	D.Transform.Position 	= PBRInstances.at(0).Transform.Position;
-	D.Transform.Position.y 	= 0.91f;
+	D.Transform.Position.y 	= 2.0f;
     D.Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(-45), EM::Vec3(0, 1, 0)); 
-    D.Transform.Scale 		= EM::Vec3(1.395f, 1.0f, 1.0f) * 2.0f;
+    ShadowRotation = D.Transform.Orientation;
+    D.Transform.Scale 		= EM::Vec3(0.628f, 1.0f, 1.0f) * 7.0f;
 	Animations.push_back(D);
 }
 
@@ -5228,12 +5235,45 @@ void RenderInstanceForShadow(const EG::ModelInstance& Instance)
 	glBindVertexArray(0);
 }
 
-void RenderInstance(const EG::ModelInstance& Instance)
+void RenderForwardInstance(const EG::ModelInstance& Instance)
 {
 	// Get reference to asset pointer
 	auto Asset = Instance.Asset;
 	auto& Transform = Instance.Transform;
 
+	glBindVertexArray(Asset->Mesh->VAO);
+	{
+		Asset->Shader->BindTexture("diffuseMap", Asset->Material.Textures[EG::TextureSlotType::ALBEDO].id, 0);
+
+        // Bind instance texture
+		// glActiveTexture(GL_TEXTURE0);
+		// glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::ALBEDO].id);
+
+		EM::Mat4 Model;
+		// L = T*R*S
+		Model *= EM::Mat4::Translate(Transform.Position);
+		Model *= EM::QuaternionToMat4(Transform.Orientation);
+		Model *= EM::Mat4::Scale(Transform.Scale);
+
+		static float t = 0.0f;
+		t += 0.001f;
+
+		auto& Position = Instances.at(0).Transform.Position;
+
+		Asset->Shader->SetUniform("model", Model);
+		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
+	}
+
+	glActiveTexture(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindVertexArray(0);
+}
+
+void RenderInstance(const EG::ModelInstance& Instance)
+{
+	// Get reference to asset pointer
+	auto Asset = Instance.Asset;
+	auto& Transform = Instance.Transform;
 
 	glBindVertexArray(Asset->Mesh->VAO);
 	{
@@ -5265,8 +5305,6 @@ void RenderInstance(const EG::ModelInstance& Instance)
 
 		auto& Position = Instances.at(0).Transform.Position;
 
-		Asset->Shader->SetUniform("u_metallic", Metallic);
-		Asset->Shader->SetUniform("u_roughness", Roughness);
 		Asset->Shader->SetUniform("model", Model);
 		glDrawArrays(Asset->Mesh->DrawType, 0, Asset->Mesh->DrawCount);
 	}
@@ -5300,6 +5338,9 @@ void PBRRenderInstance(const EG::ModelInstance& Instance)
 
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::ROUGHNESS].id);
+
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, Asset->Material.Textures[EG::TextureSlotType::AO].id);
 
 		EM::Mat4 Model;
 		// L = T*R*S
@@ -5619,20 +5660,19 @@ int main(int argc, char** argv)
 	// Init Console
 	Enjon::Console::Init(SCREENWIDTH, SCREENHEIGHT);
 
-	EG::FrameBufferObject 	FBO((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
 	EG::RenderTarget 		DebugTarget((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
-	EG::RenderTarget 		SmallBlurHorizontal((Enjon::u32)SCREENWIDTH / 4, (Enjon::u32)SCREENHEIGHT / 4);
-	EG::RenderTarget 		SmallBlurVertical((Enjon::u32)SCREENWIDTH / 4, (Enjon::u32)SCREENHEIGHT / 4);
-	EG::RenderTarget 		MediumBlurHorizontal((Enjon::u32)SCREENWIDTH  / 16, (Enjon::u32)SCREENHEIGHT  / 16);
-	EG::RenderTarget 		MediumBlurVertical((Enjon::u32)SCREENWIDTH  / 16, (Enjon::u32)SCREENHEIGHT  / 16);
+	EG::RenderTarget 		SmallBlurHorizontal((Enjon::u32)SCREENWIDTH / 2, (Enjon::u32)SCREENHEIGHT / 2);
+	EG::RenderTarget 		SmallBlurVertical((Enjon::u32)SCREENWIDTH / 2, (Enjon::u32)SCREENHEIGHT / 2);
+	EG::RenderTarget 		MediumBlurHorizontal((Enjon::u32)SCREENWIDTH  / 4, (Enjon::u32)SCREENHEIGHT  / 4);
+	EG::RenderTarget 		MediumBlurVertical((Enjon::u32)SCREENWIDTH  / 4, (Enjon::u32)SCREENHEIGHT  / 4);
 	EG::RenderTarget 		LargeBlurHorizontal((Enjon::u32)SCREENWIDTH / 64, (Enjon::u32)SCREENHEIGHT / 64);
 	EG::RenderTarget 		LargeBlurVertical((Enjon::u32)SCREENWIDTH / 64, (Enjon::u32)SCREENHEIGHT / 64);
-	EG::RenderTarget 		Composite((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::RenderTarget 		Composite((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT, GL_NEAREST);
 	EG::GBuffer 	 		GBuffer((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
-	EG::RenderTarget 		DeferredLight((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
-	EG::RenderTarget 		BrightTarget((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
+	EG::RenderTarget 		DeferredLight((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT, GL_NEAREST);
+	EG::RenderTarget 		BrightTarget((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT, GL_NEAREST);
 	EG::RenderTarget		FXAATarget((Enjon::u32)SCREENWIDTH, (Enjon::u32)SCREENHEIGHT);
-	EG::RenderTarget		ShadowDepth(512, 512);
+	EG::RenderTarget		ShadowDepth(2048, 2048);
 
 	EG::SpriteBatch CompositeBatch;
 	CompositeBatch.Init();
@@ -5647,7 +5687,7 @@ int main(int argc, char** argv)
 	EG::Camera ShadowCamera(SCREENWIDTH, SCREENHEIGHT);
 	ShadowCamera.SetProjection(EG::ProjectionType::Orthographic);
 	ShadowCamera.SetOrthographicScale(TempCamScale);
-	ShadowCamera.SetNearFar(0.1f, 100.0f);
+	ShadowCamera.SetNearFar(0.1f, 250.0f);
 	ShadowCamera.Transform.Position = EM::Vec3(10.0f, 10.0f, 3.0f);
 	ShadowCamera.Transform.Orientation = EM::Mat4ToQuaternion(EM::Mat4::LookAt(
 																		ShadowCamera.Transform.Position, 
@@ -5662,8 +5702,8 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* VerticalBlurProgram 		= EG::ShaderManager::GetShader("VerticalBlur");
 	EG::GLSLProgram* GBufferProgram 			= EG::ShaderManager::GetShader("GBuffer");
 	EG::GLSLProgram* AmbientLightProgram 		= EG::ShaderManager::GetShader("AmbientLight");
-	EG::GLSLProgram* DirectionalLightProgram 	= EG::ShaderManager::GetShader("PBRDirectionalLight");
-	EG::GLSLProgram* PointLightProgram 			= EG::ShaderManager::GetShader("PBRPointLight");
+	EG::GLSLProgram* DirectionalLightProgram 	= EG::ShaderManager::GetShader("DirectionalLight");
+	EG::GLSLProgram* PointLightProgram 			= EG::ShaderManager::GetShader("PointLight");
 	EG::GLSLProgram* SpotLightProgram 			= EG::ShaderManager::GetShader("SpotLight");
 	EG::GLSLProgram* UIProgram					= EG::ShaderManager::GetShader("Text");
 	EG::GLSLProgram* FXAAProgram 				= EG::ShaderManager::GetShader("FXAA");
@@ -5674,6 +5714,7 @@ int main(int argc, char** argv)
 	EG::GLSLProgram* NoCameraProgram 			= EG::ShaderManager::GetShader("NoCameraProjection");
 	EG::GLSLProgram* DepthProgram 				= EG::ShaderManager::GetShader("Depth");
 	EG::GLSLProgram* SimpleDepthAnimationProgram = EG::ShaderManager::GetShader("SimpleDepthAnimation");
+	EG::GLSLProgram* TransparentProgram 		= EG::ShaderManager::GetShader("Transparent");
 
 	SimpleDepthAnimationProgram->Use();
 	{
@@ -5723,6 +5764,15 @@ int main(int argc, char** argv)
 	FPSCamera.FieldOfView = 60.0f;
 	FPSCamera.ViewPortAspectRatio = (Enjon::f32)SCREENWIDTH / (Enjon::f32)SCREENHEIGHT;
 	FPSCamera.OrthographicScale = 12.172f;
+	FPSCamera.SetNearFar(NearFar.x, NearFar.y);
+	FPSCamera.Transform.Orientation = EM::Quaternion(-0.17f, 0.38f, 0.07f, 0.9f);
+
+	CameraAxis = FPSCamera.Transform.Orientation.QuaternionToEulerAngles();
+	CameraAxis.x = EM::ToDegrees(CameraAxis.x);
+	CameraAxis.y = EM::ToDegrees(CameraAxis.y);
+	CameraAxis.z = EM::ToDegrees(CameraAxis.z);
+
+	printf("%f %f %f\n", CameraAxis.x, CameraAxis.y, CameraAxis.z);
 
 	// Initialize entity manager
 	EManager = new EntityManager;
@@ -5762,8 +5812,7 @@ int main(int argc, char** argv)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
     glBindVertexArray(0);
 
-    /*
-    for (u32 i = 0; i < PointLightAmount; i++)
+    for (u32 i = 0; i < 1; i++)
     {
     	EG::PointLight L;
     	L.Position = EM::Vec3(ER::Roll(-50, 50), ER::Roll(0, 10), ER::Roll(-50, 50));
@@ -5779,7 +5828,6 @@ int main(int argc, char** argv)
 
     	PointLights.push_back(L);
     }
-    */
 
 	Spot = EG::SpotLight(
 						Instances.at(0).Transform.Position, 
@@ -5865,7 +5913,8 @@ int main(int argc, char** argv)
 				FloorBatch.Add(
 								T, 
 								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Concrete_Tiles_D.png").id
+								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								EG::RGBA16_DarkGrey()
 							);
 			}
 		}
@@ -5889,6 +5938,7 @@ int main(int argc, char** argv)
 	Enjon::CVarsSystem::Register("exposure", &ToneMapSettings.Exposure, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("gamma", &ToneMapSettings.Gamma, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("bloom_scalar", &ToneMapSettings.BloomScalar, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("saturation", &ToneMapSettings.Saturation, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("blur_weight_small", &BloomSettings.Weights.x, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("blur_weight_medium", &BloomSettings.Weights.y, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("blur_weight_large", &BloomSettings.Weights.z, Enjon::CVarType::TYPE_FLOAT);
@@ -5923,6 +5973,21 @@ int main(int argc, char** argv)
 	Enjon::CVarsSystem::Register("tick_enabled", &TickEnabled, Enjon::CVarType::TYPE_BOOL);
 	Enjon::CVarsSystem::Register("metallic", &Metallic, Enjon::CVarType::TYPE_FLOAT);
 	Enjon::CVarsSystem::Register("roughness", &Roughness, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("near", &NearFar.x, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("far", &NearFar.y, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("light_adjust", &LightIntensityAdjustment, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("ss_x", &ShadowScale.x, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("ss_y", &ShadowScale.y, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("ss_z", &ShadowScale.z, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("sm_x", &ShadowMove.x, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("sm_y", &ShadowMove.y, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("sm_z", &ShadowMove.z, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("sp_x", &SunPosition.x, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("sp_y", &SunPosition.y, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("sp_z", &SunPosition.z, Enjon::CVarType::TYPE_FLOAT);
+	Enjon::CVarsSystem::Register("spec_on", &SpecularEnabled, Enjon::CVarType::TYPE_BOOL);
+	Enjon::CVarsSystem::Register("cel_levels", &NumCelShadedLevels, Enjon::CVarType::TYPE_FLOAT);
+
 
     // Game loop
     bool running = true;
@@ -5970,6 +6035,8 @@ int main(int argc, char** argv)
     	// Update the FPS camera
     	EM::Vec3& CamPos = FPSCamera.Transform.Position;
 
+		FPSCamera.SetNearFar(NearFar.x, NearFar.y);
+
     	// Attach light to "player" position
     	/*
     	float speed = 2.6f;
@@ -5984,6 +6051,15 @@ int main(int argc, char** argv)
 	    	}
     	}
     	*/
+
+    	{
+	    	float speed = 2.6f;
+	    	auto& P = Animations.at(0).Transform.Position;
+			EM::Vec3 NewPosition = EM::Vec3(cos(timer * speed), 0.0f, sin(timer * speed));
+			NewPosition = NewPosition * (PointLightRadius + sin(timer) * 2.0f);
+			PointLights.at(0).Position 				= P + NewPosition + EM::Vec3(0.0f, 2.0f, 0.0f); 
+			// LightSpheres.at(0).Transform.Position 	= P + NewPosition + EM::Vec3(0.0f, 2.0f, 0.0f);
+    	}
 
     	// Set up spot light
     	SpotLights.at(0).Position = Instances.at(2).Transform.Position + EM::Vec3(-2.0f, 8.0f, 3.0f);
@@ -6032,6 +6108,7 @@ int main(int argc, char** argv)
 	        	Shader->Use();
 		        	Shader->SetUniform("diffuseColor", EM::Vec3(1.0, 1.0, 1.0));
 		        	Shader->SetUniform("camera", CameraMatrix);
+		        	Shader->SetUniform("maxHeight", 50.0f);
 			        RenderInstance(c);
 		        Shader->Unuse();
 	        } 
@@ -6039,13 +6116,11 @@ int main(int argc, char** argv)
 	        for (auto i = 0; i < PBRInstances.size(); i++)
 	        {
 	        	auto& c = PBRInstances.at(i);
-	        	auto& p = MaterialProperties.at(i);
 	        	auto Shader = c.Asset->Shader;
 	        	Shader->Use();
-	        		Shader->SetUniform("u_metallic", p.Metallic);
-	        		Shader->SetUniform("u_roughness", p.Roughness);
 		        	Shader->SetUniform("diffuseColor", EM::Vec3(1.0, 1.0, 1.0));
 		        	Shader->SetUniform("camera", CameraMatrix);
+		        	Shader->SetUniform("maxHeight", 50.0f);
 			        PBRRenderInstance(c);
 		        Shader->Unuse();
 	        }
@@ -6055,6 +6130,7 @@ int main(int argc, char** argv)
 	        	auto Shader = c.Asset->Shader;
 	        	Shader->Use();
 	        		Shader->SetUniform("camera", CameraMatrix);
+		        	Shader->SetUniform("maxHeight", 50.0f);
 	        		RenderInstance(c);
 	        	Shader->Unuse();
 	        }
@@ -6065,6 +6141,7 @@ int main(int argc, char** argv)
 	        	Shader->Use();
 	        		Shader->SetUniform("camera", CameraMatrix);
 	        		Shader->SetUniform("Tick", TickEnabled ? Tick : 0.0f);
+		        	Shader->SetUniform("maxHeight", 50.0f);
 	        		RenderUVAnimation(c);
 	        	Shader->Unuse();
 	        }
@@ -6075,6 +6152,7 @@ int main(int argc, char** argv)
 	        	Shader->Use();
 	        		Shader->SetUniform("camera", CameraMatrix);
 	        		Shader->SetUniform("Tick", 0.0f);
+		        	Shader->SetUniform("maxHeight", 50.0f);
 	        		RenderBackdrops(c);
 	        	Shader->Unuse();
 	        }
@@ -6082,11 +6160,9 @@ int main(int argc, char** argv)
 	        uint32_t i = 0;
 	        for (auto& c : LightSpheres)
 	        {
-	        	auto Shader = c.Asset->Shader;
-	        	Shader->Use();
-	        		auto& Color = PointLights.at(i++).Color;
-	        		Shader->SetUniform("diffuseColor", EM::Vec3(Color.r, Color.g, Color.b));
+	        	auto Shader = c.Asset->Shader; Shader->Use(); auto& Color = PointLights.at(i++).Color; Shader->SetUniform("diffuseColor", EM::Vec3(Color.r, Color.g, Color.b));
 	        		Shader->SetUniform("camera", CameraMatrix);
+		        	Shader->SetUniform("maxHeight", 50.0f);
 	        		RenderInstance(c);
 	        	Shader->Unuse();
 	        }
@@ -6098,6 +6174,10 @@ int main(int argc, char** argv)
 				// Render floor
 				QuadBatchProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Concrete_Tiles_N.png").id, 2);
 				QuadBatchProgram->BindTexture("emissiveMap", EI::ResourceManager::GetTexture("../Assets/Textures/black.png").id, 3);
+				QuadBatchProgram->BindTexture("metallicMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png").id, 4);
+				QuadBatchProgram->BindTexture("roughnessMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png").id, 5);
+				QuadBatchProgram->BindTexture("aoMap", EI::ResourceManager::GetTexture("../Assets/Textures/white.png").id, 6);
+	
 				FloorBatch.RenderBatch();
 
 				QBatch.Begin(EG::QuadGlyphSortType::FRONT_TO_BACK);
@@ -6123,40 +6203,34 @@ int main(int argc, char** argv)
 				QBatch.End();
 				QBatch.RenderBatch();
 
-				QBatch.Begin();
-				{
-					static float uv_add = 0.0f;
-					uv_add += 0.001f;
-					// QBatch.Add(
-					// 			EM::Transform(
-					// 							EM::Vec3(0, 2, 13),
-					// 							EM::Quaternion::AngleAxis(EM::ToRadians(-90), EM::Vec3(0, 1, 0)),
-					// 							EM::Vec3(10, 1, 1)
-					// 						),
-					// 			EM::Vec4(0.0f + uv_add * UVScalar.x, 0.0f, 1.0f + uv_add * UVScalar.y, 1.0f),
-					// 			EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png", GL_LINEAR).id
-					// 	);
+				// QBatch.Begin();
+				// {
+				// 	auto& PP = Animations.at(0).Transform.Position;
+				// 	QBatch.Add(
+				// 				EM::Vec3(PP.x, 0.1f, PP.z) + ShadowMove,
+				// 				EM::Vec3(PP.x + 20.0f, 0.1f, PP.z) + ShadowMove,
+				// 				EM::Vec3(PP.x + 20.0f, 0.1f, PP.z - 20.0f) + ShadowMove,
+				// 				EM::Vec3(PP.x, 0.1f, PP.z - 20.0f) + ShadowMove,
+				// 				EM::Vec4(0, 0, 1, 1),
+				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/pixelanimtest.png").id,
+				// 				EG::SetOpacity(EG::RGBA16_Black(), 0.5f)
+				// 			);
 
-					// Line rendering?
-					QBatch.Add(
-								EM::Transform(
-												EM::Vec3(10, -0.9, 25),
-												EM::Quaternion::AngleAxis(EM::ToRadians(-90), EM::Vec3(0, 1, 0)) * 
-												EM::Quaternion::AngleAxis(EM::ToRadians(90), EM::Vec3(0, 0, 1)),
-												EM::Vec3(5, 0.1 * LineWidth, 1.0)
-											),
-								EM::Vec4(0.0f + uv_add * UVScalar.x, 0.0f, 1.0f, 1.0f),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/side_arrow.png", GL_LINEAR).id,
-								EG::RGBA16_ZombieGreen()
-						);
-				}
-				QuadBatchProgram->BindTexture("emissiveMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptileblue.png").id, 2);
-				QBatch.End();
-
-				glEnable(GL_CULL_FACE);
-				glCullFace(GL_BACK);
+				// 	QBatch.Add(
+				// 				EM::Transform(
+				// 								PP,
+				// 								EM::Quaternion(0, 0, 0, 1),
+				// 								EM::Vec3(1, 1, 1)
+				// 							),
+				// 				EM::Vec4(0, 0, 1, 1),
+				// 				EI::ResourceManager::GetTexture("../Assets/Textures/white.png").id,
+				// 				EG::SetOpacity(EG::RGBA16_Black(), 0.5f)
+				// 			);
+				// }
+				// QBatch.End();
+				// QuadBatchProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../Assets/Textures/black.png").id, 2);
+				// QuadBatchProgram->BindTexture("emissiveMap", EI::ResourceManager::GetTexture("../Assets/Textures/white.png").id, 3);
 				QBatch.RenderBatch();
-				glDisable(GL_CULL_FACE);
 			}
 
 			QuadBatchProgram->Unuse();
@@ -6175,7 +6249,7 @@ int main(int argc, char** argv)
 												"model loading",
 												EG::FontManager::GetFont("8Bit_32"),
 												QBatch,
-												EG::RGBA16_White(),
+												EG::SetOpacity(EG::RGBA16_White(), 0.0f),
 												TextSpacing
 										);
 
@@ -6234,7 +6308,7 @@ int main(int argc, char** argv)
 
 				}
 				QBatch.End();
-				WorldTextProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png").id, 1);
+				WorldTextProgram->BindTexture("normalMap", EI::ResourceManager::GetTexture("../Assets/Textures/black.png").id, 1);
 				WorldTextProgram->BindTexture("emissiveMap", EI::ResourceManager::GetTexture("../Assets/Textures/black.png").id, 2);
 				QBatch.End();
 				QBatch.RenderBatch();
@@ -6266,6 +6340,9 @@ int main(int argc, char** argv)
 
     	EM::Mat4 LightSpaceMatrix;
 
+    	// Just set this shit for now to something like whoa
+    	Sun.Position = SunPosition;
+
     	// Shadow pass
     	ShadowDepth.Bind();
     	{
@@ -6274,7 +6351,7 @@ int main(int argc, char** argv)
 			if (ShadowsEnabled)
 			{
 				ShadowCamera.SetOrthographicScale(TempCamScale);
-				Sun.Position = Animations.at(0).Transform.Position + EM::Vec3(10, 10, 0);
+				Sun.Position = Animations.at(0).Transform.Position + EM::Vec3(10, 10, 0) + SunPosition;
 				ShadowCamera.Transform.Position = Sun.Position;
 				auto Orient = &ShadowCamera.Transform.Orientation;
 				ShadowCamera.Transform.Orientation = EM::Mat4ToQuaternion(EM::Mat4::LookAt(
@@ -6315,7 +6392,16 @@ int main(int argc, char** argv)
 
 					for (auto& c : Animations)
 					{
+						// auto Scale = c.Transform.Scale;
+						// auto Position = c.Transform.Position;
+						// c.Transform.Scale = ShadowScale;
+						// c.Transform.Position += ShadowMove;
+						// auto Orientation = c.Transform.Orientation;
+						// c.Transform.Orientation = ShadowRotation;
 						RenderInstanceForShadow(c);
+						// c.Transform.Orientation = Orientation;
+						// c.Transform.Scale = Scale;
+						// c.Transform.Position = Position;
 					}
 
 			        // Render floor
@@ -6344,6 +6430,7 @@ int main(int argc, char** argv)
 			{
 				AmbientLightProgram->BindTexture("DiffuseMap", GBuffer.GetTexture(EG::GBufferTextureType::ALBEDO), 0);
 				AmbientLightProgram->BindTexture("EmissiveMap", GBuffer.GetTexture(EG::GBufferTextureType::EMISSIVE), 1);
+				// AmbientLightProgram->BindTexture("MaterialProperties", GBuffer.GetTexture(EG::GBufferTextureType::MAT_PROPS), 2);
 				AmbientLightProgram->SetUniform("AmbientColor", AmbientColor);
 				AmbientLightProgram->SetUniform("AmbientIntensity", AmbientIntensity);
 				AmbientLightProgram->SetUniform("Resolution", GBuffer.GetResolution());
@@ -6363,13 +6450,14 @@ int main(int argc, char** argv)
 					DirectionalLightProgram->BindTexture("AlbedoMap", GBuffer.GetTexture(EG::GBufferTextureType::ALBEDO), 0);
 					DirectionalLightProgram->BindTexture("NormalMap", GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
 					DirectionalLightProgram->BindTexture("PositionMap", GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
-					DirectionalLightProgram->BindTexture("MaterialProperties", GBuffer.GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
+					// DirectionalLightProgram->BindTexture("MaterialProperties", GBuffer.GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
 					DirectionalLightProgram->BindTexture("ShadowMap", ShadowDepth.GetDepth(), 4);
 					DirectionalLightProgram->SetUniform("Resolution", GBuffer.GetResolution());
-					DirectionalLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
-					// DirectionalLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
+					// DirectionalLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
 					DirectionalLightProgram->SetUniform("LightSpaceMatrix", ShadowCamera.GetViewProjectionMatrix());
 					DirectionalLightProgram->SetUniform("ShadowBias", EM::Vec2(ShadowBiasMin, ShadowBiasMax));
+					// DirectionalLightProgram->SetUniform("SpecularEnabled", SpecularEnabled);
+					DirectionalLightProgram->SetUniform("num_levels", NumCelShadedLevels);
 
 
 					// Direcitonal light
@@ -6395,17 +6483,17 @@ int main(int argc, char** argv)
 					PointLightProgram->BindTexture("AlbedoMap", GBuffer.GetTexture(EG::GBufferTextureType::ALBEDO), 0);
 					PointLightProgram->BindTexture("NormalMap", GBuffer.GetTexture(EG::GBufferTextureType::NORMAL), 1);
 					PointLightProgram->BindTexture("PositionMap", GBuffer.GetTexture(EG::GBufferTextureType::POSITION), 2);
-					PointLightProgram->BindTexture("MaterialProperties", GBuffer.GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
+					// PointLightProgram->BindTexture("MaterialProperties", GBuffer.GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
 					PointLightProgram->SetUniform("Resolution", GBuffer.GetResolution());
-					PointLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
-					// PointLightProgram->SetUniform("CameraForward", FPSCamera.Forward());
+					PointLightProgram->SetUniform("num_levels", NumCelShadedLevels);
+					// PointLightProgram->SetUniform("CamPos", FPSCamera.Transform.Position);			
 
 					for (Enjon::u32 i = 0; i < PointLights.size(); ++i)
 					{
 						PointLightProgram->SetUniform("LightPos", PointLights.at(i).Position);
 						PointLightProgram->SetUniform("LightColor", EM::Vec3(PointLights.at(i).Color.r, PointLights.at(i).Color.g, PointLights.at(i).Color.b));
 						PointLightProgram->SetUniform("Falloff", PointLights.at(i).Parameters.Falloff);
-						// PointLightProgram->SetUniform("LightIntensity", PointLights.at(i).Intensity);
+						PointLightProgram->SetUniform("LightIntensity", PointLights.at(i).Intensity * LightIntensityAdjustment);
 
 						// Render Light to screen
 						{
@@ -6614,31 +6702,56 @@ int main(int argc, char** argv)
 		{
 			case DrawFrameType::FINAL:
 			{
-		    	CompositeProgram->Use();
-		    	{
-			    	CompositeBatch.Begin();
+				Composite.Bind();
+				{
+			    	CompositeProgram->Use();
 			    	{
-						CompositeProgram->BindTexture("blurTexSmall", SmallBlurVertical.GetTexture(), 1);
-						CompositeProgram->BindTexture("blurTexMedium", MediumBlurVertical.GetTexture(), 2);
-						CompositeProgram->BindTexture("blurTexLarge", LargeBlurVertical.GetTexture(), 3);
-						CompositeProgram->SetUniform("exposure", ToneMapSettings.Exposure);
-						CompositeProgram->SetUniform("gamma", ToneMapSettings.Gamma);
-						CompositeProgram->SetUniform("bloomScalar", ToneMapSettings.BloomScalar);
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+				    	CompositeBatch.Begin();
+				    	{
+							CompositeProgram->BindTexture("blurTexSmall", SmallBlurVertical.GetTexture(), 1);
+							CompositeProgram->BindTexture("blurTexMedium", MediumBlurVertical.GetTexture(), 2);
+							CompositeProgram->BindTexture("blurTexLarge", LargeBlurVertical.GetTexture(), 3);
+							CompositeProgram->SetUniform("exposure", ToneMapSettings.Exposure);
+							CompositeProgram->SetUniform("gamma", ToneMapSettings.Gamma);
+							CompositeProgram->SetUniform("bloomScalar", ToneMapSettings.BloomScalar);
+							CompositeProgram->SetUniform("Saturation", ToneMapSettings.Saturation);
+							CompositeBatch.Begin();
+							{
+								CompositeBatch.Add(
+													EM::Vec4(-1, -1, 2, 2),
+													EM::Vec4(0, 0, 1, 1),
+													FXAATarget.GetTexture()
+												);
+							}
+							CompositeBatch.End();
+							CompositeBatch.RenderBatch();
+				    	}
+					   	CompositeBatch.End();
+					   	CompositeBatch.RenderBatch();
+					}   	
+					CompositeProgram->Unuse();
+				}
+				Composite.Unbind();
+
+				NoCameraProgram->Use();
+				{
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
 						CompositeBatch.Begin();
 						{
 							CompositeBatch.Add(
 												EM::Vec4(-1, -1, 2, 2),
 												EM::Vec4(0, 0, 1, 1),
-												FXAATarget.GetTexture()
+												Composite.GetTexture()
 											);
 						}
 						CompositeBatch.End();
 						CompositeBatch.RenderBatch();
-			    	}
-				   	CompositeBatch.End();
-				   	CompositeBatch.RenderBatch();
-				}   	
-				CompositeProgram->Unuse();
+
+				}
+				NoCameraProgram->Unuse();
+
+
 			} break;
 
 			case DrawFrameType::ALBEDO:
@@ -6758,7 +6871,56 @@ int main(int argc, char** argv)
 				}
 				NoCameraProgram->Unuse();
 			} break;
+
+			case DrawFrameType::HEIGHT:
+			{
+				NoCameraProgram->Use();
+				{
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+						CompositeBatch.Begin();
+						{
+							CompositeBatch.Add(
+												EM::Vec4(-1, -1, 2, 2),
+												EM::Vec4(0, 0, 1, 1),
+												GBuffer.GetTexture(EG::GBufferTextureType::HEIGHT)
+											);
+						}
+						CompositeBatch.End();
+						CompositeBatch.RenderBatch();
+				}
+				NoCameraProgram->Unuse();
+			} break;
 		}
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+
+		Window.Clear(1.0f, GL_DEPTH_BUFFER_BIT);
+
+		/*
+		// Forward pass
+		TransparentProgram->Use();
+		{
+			EG::ModelInstance TransparentCube;
+			EG::ModelAsset A;
+			TransparentCube.Asset = &A;
+			TransparentCube.Asset->Mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cube.obj");
+			TransparentCube.Asset->Shader = TransparentProgram;
+			TransparentCube.Transform.Position = Animations.at(0).Transform.Position;
+			TransparentCube.Transform.Scale = EM::Vec3(1.0f, 1.0f, 1.0f) * 1.0f;
+			TransparentCube.Asset->Material.Textures[EG::TextureSlotType::ALBEDO] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/up_gradient_N.png");
+			TransparentCube.Asset->Material.DiffuseColor = EG::SetOpacity(EG::RGBA16_ZombieGreen(), 0.3f);
+
+			TransparentProgram->BindTexture("diffuseMap", TransparentCube.Asset->Material.Textures[EG::TextureSlotType::ALBEDO].id, 0);
+			TransparentProgram->SetUniform("camera", FPSCamera.GetViewProjectionMatrix());
+			TransparentProgram->SetUniform("diffuseColor", TransparentCube.Asset->Material.DiffuseColor);
+
+			RenderForwardInstance(TransparentCube);
+		}
+		TransparentProgram->Unuse();
+		*/
+
+		glDisable(GL_CULL_FACE);
 
 		/*
 		UIProgram->Use();
@@ -6885,7 +7047,7 @@ int main(int argc, char** argv)
         // Swap the screen buffers
         Window.SwapBuffer();
 
-        FPS = Limiter.End();
+        // FPS = Limiter.End();
 
         // Reset draw call count
         EG::QuadBatch::DrawCallCount = 0;
@@ -7104,19 +7266,12 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 
 		if (VelDir.Length()) VelDir = EM::Vec3::Normalize(VelDir);
 
-		Camera->Transform.Position = Player.Transform.Position + EM::Vec3(40, 30, 40);
+		Camera->Transform.Position = Player.Transform.Position + CameraAdjustment;
 		Camera->Transform.Orientation = EM::Quaternion(-0.17f, 0.38f, 0.07f, 0.9f);
-
-		// Camera->Transform.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(Rotations.x), EM::Vec3(1, 0, 0)) * 
-		// 								EM::Quaternion::AngleAxis(EM::ToRadians(Rotations.y), EM::Vec3(0, 1, 0)) * 
-		// 								EM::Quaternion::AngleAxis(EM::ToRadians(Rotations.z), EM::Vec3(0, 0, 1)); 
 
 		Player.Transform.Position += PlayerSpeed * dt * VelDir;
 		Camera->Transform.Position += PlayerSpeed * dt * VelDir;
-
-		// std::cout << Rotations << '\n';
 	}
-	
 
 	// Switch between perspective and orthographic camera projections
 	if (Input->IsKeyDown(SDLK_LSHIFT) && Input->IsKeyPressed(SDLK_o))
@@ -7176,6 +7331,11 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	if (Input->IsKeyPressed(SDLK_7))
 	{
 		DrawFrame = DrawFrameType::MAT_PROPS;	
+	}
+
+	if (Input->IsKeyPressed(SDLK_8))
+	{
+		DrawFrame = DrawFrameType::HEIGHT;	
 	}
 
 	if (Input->IsKeyDown(SDLK_i))
@@ -7286,6 +7446,120 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	if (Input->IsKeyPressed(SDLK_l))
 	{
 		BlurArrayType = BlurType::LARGE;
+	}
+
+	if (Input->IsKeyDown(SDLK_f))
+	{
+		if (Input->IsKeyDown(SDLK_UP))
+		{
+			auto& position = Animations.at(0).Transform.Position;
+			position.y += 0.01f;
+			printf("%f\n", position.y);
+		}
+		if (Input->IsKeyDown(SDLK_DOWN))
+		{
+			auto& position = Animations.at(0).Transform.Position;
+			position.y -= 0.01f;
+
+			printf("%f\n", position.y);
+		}
+		if (Input->IsKeyDown(SDLK_LEFT))
+		{
+			auto& Orientation = Animations.at(0).Transform.Orientation;
+			Orientation = Orientation * EM::Quaternion::AngleAxis(EM::ToRadians(-0.1f), EM::Vec3(0, 1, 0));
+			printf("%f\n", Orientation.y);
+		}
+		if (Input->IsKeyDown(SDLK_RIGHT))
+		{
+			auto& Orientation = Animations.at(0).Transform.Orientation;
+			Orientation = Orientation * EM::Quaternion::AngleAxis(EM::ToRadians(0.1f), EM::Vec3(0, 1, 0));
+			printf("%f\n", Orientation.y);
+		}
+	}
+	if (Input->IsKeyDown(SDLK_z))
+	{
+		if (Input->IsKeyDown(SDLK_UP))
+		{
+			auto& scale = Animations.at(0).Transform.Scale;
+			scale.y += 0.01f;
+			printf("%f\n", scale.y);
+		}
+		if (Input->IsKeyDown(SDLK_DOWN))
+		{
+			auto& scale = Animations.at(0).Transform.Scale;
+			scale.y -= 0.01f;
+			printf("%f\n", scale.y);
+		}
+		if (Input->IsKeyDown(SDLK_LEFT))
+		{
+			auto& scale = Animations.at(0).Transform.Scale;
+			scale.x -= 0.01f;
+			printf("%f\n", scale.x);
+		}
+		if (Input->IsKeyDown(SDLK_RIGHT))
+		{
+			auto& scale = Animations.at(0).Transform.Scale;
+			scale.x += 0.01f;
+			printf("%f\n", scale.x);
+		}
+	}
+
+	if (Input->IsKeyDown(SDLK_b))
+	{
+		if (Input->IsKeyDown(SDLK_UP))
+		{
+			ShadowMove.x += 0.1f;
+		}
+		if (Input->IsKeyDown(SDLK_DOWN))
+		{
+			ShadowMove.x -= 0.1f;
+		}
+		if (Input->IsKeyDown(SDLK_LEFT))
+		{
+			ShadowMove.z -= 0.1f;
+		}
+		if (Input->IsKeyDown(SDLK_RIGHT))
+		{
+			ShadowMove.z += 0.1f;
+		}
+	}
+
+	if (Input->IsKeyDown(SDLK_t))
+	{
+		if (Input->IsKeyDown(SDLK_UP))
+		{
+			CameraAxis.x += 0.01f;	
+			printf("%f %f %f\n", CameraAxis.x, CameraAxis.y, CameraAxis.z);
+		}	
+		if (Input->IsKeyDown(SDLK_DOWN))
+		{
+			CameraAxis.x -= 0.01f;
+			printf("%f %f %f\n", CameraAxis.x, CameraAxis.y, CameraAxis.z);
+		}
+		if (Input->IsKeyDown(SDLK_LEFT))
+		{
+			CameraAxis.z -= 0.01f;
+			printf("%f %f %f\n", CameraAxis.x, CameraAxis.y, CameraAxis.z);
+		}
+		if (Input->IsKeyDown(SDLK_RIGHT))
+		{
+			CameraAxis.z += 0.01f;
+			printf("%f %f %f\n", CameraAxis.x, CameraAxis.y, CameraAxis.z);
+		}
+	}
+
+	if (Input->IsKeyDown(SDLK_r))
+	{
+		if (Input->IsKeyDown(SDLK_UP))
+		{
+			CameraAxis.y += 0.01f;	
+			printf("%f %f %f\n", CameraAxis.x, CameraAxis.y, CameraAxis.z);
+		}	
+		if (Input->IsKeyDown(SDLK_DOWN))
+		{
+			CameraAxis.y -= 0.01f;
+			printf("%f %f %f\n", CameraAxis.x, CameraAxis.y, CameraAxis.z);
+		}
 	}
 
 	return true;
@@ -8194,6 +8468,97 @@ int main(int argc, char** argv)
 
 
 #endif
+
+// Refactor
+
+#if 1
+
+#include <iostream>
+
+#include <Defines.h>
+#include <Math/Maths.h>
+#include <Enjon.h>
+
+EG::DeferredRenderer mGraphicsEngine;
+EI::InputManager mInputManager;
+
+bool ProcessInput(EI::InputManager* input);
+
+#ifdef main
+	#undef main
+#endif
+int main(int argc, char** argv)
+{
+	Enjon::Init();
+	mGraphicsEngine.Init();
+
+	while(ProcessInput(&mInputManager))
+	{
+		mGraphicsEngine.Update(0.01f);
+	}
+
+	printf("Exit Successful!\n");	
+
+	return 0;
+}
+
+bool ProcessInput(EI::InputManager* input)
+{
+	input->Update();
+
+    SDL_Event event;
+   //Will keep looping until there are no more events to process
+    while (SDL_PollEvent(&event)) 
+    {
+        switch (event.type) 
+        {
+            case SDL_QUIT:
+                return false;
+                break;
+			case SDL_KEYUP:
+				input->ReleaseKey(event.key.keysym.sym); 
+				break;
+			case SDL_KEYDOWN:
+				input->PressKey(event.key.keysym.sym);
+				break;
+			default:
+				break;
+		}
+    }
+
+    if (input->IsKeyPressed(SDLK_ESCAPE))
+    {
+    	return false;
+    }
+
+    return true;
+}
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

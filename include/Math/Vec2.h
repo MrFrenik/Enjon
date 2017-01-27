@@ -50,6 +50,7 @@ namespace Enjon { namespace Math {
 		float Length() const;
 		
 		static Vec2 inline Normalize(const Vec2& vec) { return vec / vec.Length(); }
+		static float inline Dot(Vec2& a, Vec2& b) { return a.DotProduct(b); }
 
 	}; 
 

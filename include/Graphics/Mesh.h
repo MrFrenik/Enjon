@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENJON_MESH_H
 #define ENJON_MESH_H
 
@@ -17,16 +18,24 @@ namespace Enjon { namespace Graphics {
 		float UV[2];	
 	};
 
-	struct MeshInstance
+	class Mesh
 	{
-		std::vector<Vert> Verticies;
-		std::vector<u32> Indicies;	
-		GLenum DrawType;
-		GLint DrawStart;
-		GLint DrawCount;
-		GLuint VAO;
-		GLuint VBO;
-		GLuint IBO;
+		public:
+			Mesh();
+			~Mesh();
+
+			void Bind();
+			void Unbind();
+			void Submit();
+
+			std::vector<Vert> Verticies;
+			std::vector<u32> Indicies;	
+			GLenum DrawType;
+			GLint DrawStart;
+			GLint DrawCount;
+			GLuint VAO;
+			GLuint VBO;
+			GLuint IBO;
 	};
 
 }}

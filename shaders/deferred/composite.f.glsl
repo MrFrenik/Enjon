@@ -16,6 +16,7 @@ uniform sampler2D blurTexLarge;
 uniform float exposure;
 uniform float gamma;
 uniform float bloomScalar;
+uniform float Saturation;
 
 float A = 0.15;
 float B = 0.50;
@@ -24,6 +25,7 @@ float D = 0.20;
 float E = 0.02;
 float F = 0.30;
 float W = 11.2;
+
 
 vec3 Uncharted2Tonemap(vec3 x)
 {
@@ -42,10 +44,14 @@ void main()
 
 	// Tone mapping
 	vec3 result = vec3(1.0) - exp(-hdrColor * exposure);
-	// vec3 result = hdrColor / (1 + hdrColor);
 	result = pow(result, vec3(1.0 / gamma));
 
+	// Saturation
+	float lum = result.r * 0.2 + result.g * 0.7 + result.b * 0.1;
+	vec3 diff = result.rgb - vec3(lum);
+
 	// Final
-	color = vec4(result, 1.0);
+	color = vec4(vec3(diff) * Saturation + lum, 1.0);
+	// color = vec4(hdrColor, 1.0);
 }
 

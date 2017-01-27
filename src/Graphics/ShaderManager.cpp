@@ -43,6 +43,7 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 		ShaderManager::AddShader("SimpleDepthAnimation", "../shaders/deferred/simple_depth_animation.v.glsl", "../shaders/deferred/simple_depth_animation.f.glsl");
 		ShaderManager::AddShader("PBRPointLight", "../shaders/pbr/point_light.v.glsl", "../shaders/pbr/point_light.f.glsl");
 		ShaderManager::AddShader("PBRDirectionalLight", "../shaders/pbr/directional_light.v.glsl", "../shaders/pbr/directional_light.f.glsl");
+		ShaderManager::AddShader("Transparent", "../shaders/deferred/transparent_material.v.glsl", "../shaders/deferred/transparent_material.f.glsl");
 	}
 
 	void AddShader(const char* shadername, const char* vertpath, const char* fragpath)
@@ -62,7 +63,23 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 
 		else
 		{
-			std::cout << "Nope!\n";
+			// Otherwise not found
+			std::string errorstr = shadername;
+			Utils::FatalError("SHADERMANAGER::GETSHADER::SHADER_NOT_FOUND::" + errorstr);
+			return NULL;
+		}	
+	} 
+
+	GLSLProgram* Get(const char* shadername)
+	{
+		auto it = Shaders.find(shadername);
+		if (it != Shaders.end())
+		{
+			return it->second;
+		}
+
+		else
+		{
 			// Otherwise not found
 			std::string errorstr = shadername;
 			Utils::FatalError("SHADERMANAGER::GETSHADER::SHADER_NOT_FOUND::" + errorstr);

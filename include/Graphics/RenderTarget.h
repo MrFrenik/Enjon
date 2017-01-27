@@ -20,7 +20,7 @@ namespace Enjon { namespace Graphics {
 			};
 
 			RenderTarget();
-			RenderTarget(uint32 _Width, uint32 _Height);
+			RenderTarget(uint32 _Width, uint32 _Height, GLuint TexParam = GL_LINEAR);
 			~RenderTarget();
 
 			void Bind(BindType Type = BindType::WRITE);

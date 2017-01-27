@@ -19,6 +19,7 @@ uniform vec2 Resolution;
 uniform vec3 CameraForward;
 uniform mat4 LightSpaceMatrix;
 uniform vec2 ShadowBias;
+uniform float num_levels;
 
 // Vertex information
 in DATA
@@ -77,9 +78,10 @@ void main()
     // Get material properties
     vec4 MaterialProps = texture2D(MaterialProperties, TexCoords);
 
-    // Roughness and Metallic
-    float Metallic = MaterialProps.r;
+    // Roughness, Metallic, and AO
+    float Metallic  = MaterialProps.r;
     float Roughness = MaterialProps.g;
+
 
     // Obtain normal from normal map in range (world coords)
     vec3 N = normalize(texture(NormalMap, TexCoords).xyz);
@@ -113,7 +115,14 @@ void main()
 
     // Add to outgoing radiance Lo
     float NdotL = max(dot(N, L), 0.0);
+    // float NDotL = dot(N, L);
+    // float Brightness = max(NDotL, 0.0);
+    // float Level = floor(Brightness * num_levels);
+    // Brightness = Level / num_levels;
+
+    // Final light
     Lo += (kD * Albedo / kPi + BRDF) * Radiance * NdotL;
+    // Lo += (kD * Albedo / kPi + BRDF) * Radiance * Brightness;
 
     float bias = max(ShadowBias.y * (1.0 - dot(N, L)), ShadowBias.x);
 
@@ -121,10 +130,8 @@ void main()
 
     float Shadow = ShadowCalculation(FragPosLightSpace, bias);
 
-    vec3 ambient = vec3(0.06) * Albedo;
-
     float val = 1.0 - Shadow;
-    ColorOut = (vec4(Lo, 1.0) + vec4(ambient, 1.0)) * vec4(val, val, val, 1.0);
+    ColorOut = vec4(Lo, 1.0) * vec4(val, val, val, 1.0);
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)

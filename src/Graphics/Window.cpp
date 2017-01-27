@@ -1,6 +1,7 @@
 #include <Graphics/Window.h>
 #include <Utils/Errors.h>
 #include <iostream>
+#include <Math/Maths.h>
 
 namespace Enjon { namespace Graphics {
 
@@ -85,6 +86,24 @@ namespace Enjon { namespace Graphics {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		return 0;
+	}
+
+	void Window::SetViewport(int width, int height)
+	{
+		m_screenWidth = width;
+		m_screenHeight = height;	
+	}
+
+	void Window::SetViewport(EM::iVec2& dimensions)
+	{
+		// TODO(John): Need to refresh screen here...
+		m_screenWidth = dimensions.x;
+		m_screenHeight = dimensions.y;
+	}
+
+	EM::iVec2 Window::GetViewport() 
+	{
+		return EM::iVec2(m_screenWidth, m_screenHeight);
 	}
 
 	void Window::SwapBuffer()

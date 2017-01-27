@@ -12,7 +12,7 @@
 namespace Enjon { namespace Input { namespace ResourceManager { 
 
 		Enjon::Graphics::GLTexture GetTexture(const std::string& texturePath, GLint magParam = GL_LINEAR, GLint minParam = GL_LINEAR_MIPMAP_LINEAR, bool genmips = true);
-		Enjon::Graphics::MeshInstance* GetMesh(const char* MeshPath);
+		Enjon::Graphics::Mesh* GetMesh(const char* MeshPath);
 
 }}}
 

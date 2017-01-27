@@ -1,6 +1,7 @@
 #include <Graphics/Camera.h>
 #include <Math/Quaternion.h>
 #include <Math/Constants.h>
+#include <Math/Vec2.h>
 
 
 namespace Enjon { namespace Graphics {
@@ -28,6 +29,19 @@ namespace Enjon { namespace Graphics {
 		ProjType(ProjectionType::Perspective),
 		OrthographicScale(1.0f),
 		ScreenDimensions(EM::Vec2(Width, Height))
+	{
+	}
+
+	Camera::Camera(EM::iVec2& dimensions)
+		: 
+		Transform(),
+		FieldOfView(50),
+		NearPlane(0.1f),
+		FarPlane(1000.0f),
+		ViewPortAspectRatio((Enjon::f32)dimensions.x / (Enjon::f32)dimensions.y), 
+		ProjType(ProjectionType::Perspective),
+		OrthographicScale(1.0f),
+		ScreenDimensions(EM::Vec2(dimensions.x, dimensions.y))
 	{
 	}
 

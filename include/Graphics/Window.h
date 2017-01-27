@@ -13,8 +13,11 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace Enjon { namespace Graphics {
+namespace Enjon { namespace Math {
+	class iVec2;	
+}}
 
+namespace Enjon { namespace Graphics {
 
 	enum WindowFlags : u32
 	{ 
@@ -45,8 +48,14 @@ namespace Enjon { namespace Graphics {
 		inline int ShowMouseCursor(int val) const { return SDL_ShowCursor(val); } 
 		inline int GetScreenWidth() const { return m_screenWidth; }
 		inline int GetScreenHeight() const { return m_screenHeight; }
+
+		void SetViewport(int width, int height);
+		void SetViewport(EM::iVec2& dimensions);
+		EM::iVec2 GetViewport();
 	
-		void Clear(float val, GLbitfield mask, const ColorRGBA16& color = RGBA16_DarkGrey());
+		void Clear(float val = 1.0f, 
+					GLbitfield mask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, 
+					const ColorRGBA16& color = RGBA16_Black());
 		void SwapBuffer(); 
 
 		SDL_Window* GetWindowContext() { return m_sdlWindow; }
@@ -57,7 +66,6 @@ namespace Enjon { namespace Graphics {
 		int m_screenHeight;
 		bool m_isfullscreen;
 	};
-
 }}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

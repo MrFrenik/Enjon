@@ -6,6 +6,7 @@
 #include "Math/Maths.h"
 #include "Utils/FileUtils.h"
 #include "Utils/Errors.h"
+#include "Graphics/GLTexture.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -321,13 +322,12 @@ namespace Enjon { namespace Graphics {
 		glUniform3f(GetUniformLocation(name + ".scale"), T.Scale.x, T.Scale.y, T.Scale.z);
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const EG::ColorRGBA16& C)
+	void GLSLProgram::SetUniform(const std::string& name, EG::ColorRGBA16& C)
 	{
-		// glUniform3f(GetUniformLocation(name), C.r, C.g, C.b);	
 		auto Search = UniformMap.find(name);
 		if (Search != UniformMap.end())
 		{
-			glUniform3f(Search->second, C.r, C.g, C.b);
+			glUniform4f(Search->second, C.r, C.g, C.b, C.a);
 		}
 		else
 		{
@@ -339,7 +339,6 @@ namespace Enjon { namespace Graphics {
 	{
 		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0 + Index);
-		// GLuint UniformID = glGetUniformLocationARB(GetProgramID(), Name.c_str());
 
 		auto Search = UniformMap.find(Name);
 		if (Search != UniformMap.end())
@@ -351,8 +350,26 @@ namespace Enjon { namespace Graphics {
 			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + Name);
 		}
 
-		// glUniform1i(UniformID, Index);
 		glBindTexture(GL_TEXTURE_2D, TextureID);
+	}
+
+	void GLSLProgram::BindTexture(const std::string& name, const GLTexture& texture, const GLuint index)
+	{
+		glEnable(GL_TEXTURE_2D);
+		glActiveTexture(GL_TEXTURE0 + index);
+
+		auto Search = UniformMap.find(name);
+		if (Search != UniformMap.end())
+		{
+			glUniform1i(Search->second, index);
+		}
+		else
+		{
+			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		}
+
+		glBindTexture(GL_TEXTURE_2D, texture.id);
+
 	}
 }}
 

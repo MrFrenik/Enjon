@@ -27,6 +27,7 @@ namespace Enjon { namespace Graphics {
 	class GBuffer
 	{
 	public:
+		GBuffer(){}
 		GBuffer(uint32 _Width, uint32 _Height);
 		~GBuffer();
 

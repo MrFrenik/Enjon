@@ -42,6 +42,7 @@
 #include "Graphics/GBuffer.h"
 #include "Graphics/Animations.h"
 #include "Graphics/Shapes.h"
+#include "Graphics/DeferredRenderer.h"
 
 #include "GUI/Signal.h"
 #include "GUI/Property.h"

@@ -30,7 +30,7 @@ void main()
     // Get diffuse color
 	vec4 sampled = vec4(1.0,1.0, 1.0, texture(diffuseMap, fs_in.TexCoords).r);
 	if (sampled.a < 0.5) discard;
-	vec4 color = fs_in.FragColor * sampled;
+	vec4 color = vec4(1, 0, 0, 0.0);
     
     DiffuseOut  = color;
     NormalsOut  = vec4(normal, 1.0);

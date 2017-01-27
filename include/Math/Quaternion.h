@@ -9,14 +9,7 @@
 #include <Math/Common.h>
 #include <Math/Mat4.h>
 
-namespace Enjon { namespace Math { 
-
-	struct EulerAngles
-	{
-		f32 Pitch;
-		f32 Yaw;
-		f32 Roll;
-	};
+namespace Enjon { namespace Math {
 
 	struct Quaternion
 	{
@@ -112,7 +105,7 @@ namespace Enjon { namespace Math {
 		f32 Yaw();
 
 		// Get Euler Angles from quaternion
-		EulerAngles QuaternionToEulerAngles();
+		EM::Vec3 QuaternionToEulerAngles();
 
 		static inline Quaternion AngleAxis(const f32& Angle, const Vec3& Axis)
 		{

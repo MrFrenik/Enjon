@@ -15,37 +15,36 @@ in VS_OUT
     mat3 TBN;
 } fs_in;
 
-uniform vec3 diffuseColor = vec3(1, 1, 1);
+uniform vec3 u_albedoColor = vec3(1, 1, 1);
 
 // uniforms
-uniform sampler2D diffuseMap;
-uniform sampler2D normalMap;
-uniform sampler2D emissiveMap;
-uniform sampler2D metallicMap;
-uniform sampler2D roughnessMap;
+uniform sampler2D u_albedoMap;
+uniform sampler2D u_normalMap;
+uniform sampler2D u_emissiveMap;
+uniform sampler2D u_metallicMap;
+uniform sampler2D u_roughnessMap;
+uniform sampler2D u_aoMap;
 
-uniform float u_metallic;
-uniform float u_roughness;
-
-const float emissiveIntensity = 5.0;
+const float u_emissiveIntensity = 5.0;
 
 void main()
 {
     // Translate normal to world space
-    vec3 normal = texture(normalMap, fs_in.TexCoords).rgb;
+    vec3 normal = texture(u_normalMap, fs_in.TexCoords).rgb;
     normal = normalize(normal * 2.0 - 1.0);
     normal = normalize(fs_in.TBN * normal);
 
-    // Get diffuse color
-    vec4 color = texture(diffuseMap, fs_in.TexCoords);
+    // Get albedo color
+    vec4 color = texture(u_albedoMap, fs_in.TexCoords);
     if (color.a < 0.5) discard;
 
-    float Metallic = texture2D(metallicMap, fs_in.TexCoords).r;
-    float Roughness = texture2D(roughnessMap, fs_in.TexCoords).r;
+    float Metallic  = texture2D(u_metallicMap, fs_in.TexCoords).r;
+    float Roughness = texture2D(u_roughnessMap, fs_in.TexCoords).r;
+    float AO        = texture2D(u_aoMap, fs_in.TexCoords).r;
     
-    DiffuseOut  = color * vec4(diffuseColor, 1.0);
+    DiffuseOut  = color * vec4(u_albedoColor, 1.0);
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
-    EmissiveOut = DiffuseOut * texture2D(emissiveMap, fs_in.TexCoords) * vec4(emissiveIntensity, emissiveIntensity, emissiveIntensity, 1.0);
-    MatPropsOut = vec4(Metallic + u_metallic * 0.0001, Roughness + u_roughness * 0.0001, 0.0, 1.0);
+    EmissiveOut = texture2D(u_emissiveMap, fs_in.TexCoords) * vec4(u_emissiveIntensity, u_emissiveIntensity, u_emissiveIntensity, 1.0);
+    MatPropsOut = vec4(Metallic, Roughness, AO, 1.0);
 }

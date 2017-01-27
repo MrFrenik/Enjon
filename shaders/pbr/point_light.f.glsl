@@ -18,6 +18,7 @@ uniform vec3 LightPos;
 uniform float LightIntensity;
 uniform vec2 Resolution;
 uniform vec3 CameraForward;
+uniform float num_levels;
 
 // Vertex information
 in DATA
@@ -49,8 +50,8 @@ void main()
     // Get material properties
     vec4 MaterialProps = texture2D(MaterialProperties, TexCoords);
 
-    // Roughness and Metallic
-    float Metallic = MaterialProps.r;
+    // Roughness, Metallic, and AO
+    float Metallic  = MaterialProps.r;
     float Roughness = MaterialProps.g;
 
     // Obtain normal from normal map in range (world coords)
@@ -79,7 +80,7 @@ void main()
     float Attenuation = 1.0 / (Falloff.x + Falloff.y * Distance + Falloff.z * Distance * Distance);
 
     // Radiance
-    vec3 Radiance = LightColor * Attenuation;
+    vec3 Radiance = LightColor * Attenuation * LightIntensity;
 
     // Cook-Torrance BRDF
     float NDF   = DistributionGGX(N, H, Roughness);
@@ -90,11 +91,19 @@ void main()
     vec3 BRDF = Nominator / Denominator;
 
     // Add to outgoing radiance Lo
-    vec3 ambient = vec3(0.06) * Albedo;
-    float NdotL = max(dot(N, L), 0.0);
-    Lo += (kD * Albedo / kPi + BRDF) * Radiance * NdotL;
+    // float NdotL = max(dot(N, L), 0.0);
+    vec3 LightDir = normalize(LightPos - WorldPos);
+    float NDotL = dot(LightDir, N);
+    float Brightness = max(NDotL, 0.0);
 
-    ColorOut = vec4(Lo, 1.0) + vec4(ambient, 1.0);
+    float Level = floor(Brightness * num_levels);
+    Brightness = Level / num_levels;
+
+    // Final color
+    // Lo += (kD * Albedo / kPi + BRDF) * Radiance * NdotL;
+    Lo += (kD * Albedo / kPi + BRDF) * Radiance * Brightness;
+
+    ColorOut = vec4(Lo, 1.0);
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
