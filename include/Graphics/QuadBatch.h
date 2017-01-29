@@ -18,6 +18,9 @@
 
 namespace Enjon { namespace Graphics {
 
+	class Material;
+	class Scene;
+
 	struct QuadVert
 	{
 		float Position[3];
@@ -74,6 +77,15 @@ namespace Enjon { namespace Graphics {
 			void Begin(QuadGlyphSortType SortType = QuadGlyphSortType::TEXTURE);
 			void End();
 
+			void SetScene(EG::Scene* scene);
+			EG::Scene* GetScene() { return mScene; }
+
+			// Sets material of quadbatch
+			void SetMaterial(EG::Material* mat);
+
+			// Gets material of quadbatch
+			EG::Material* GetMaterial() { return mMaterial; }
+
 			// Adds quadglyph to quadbatch to be rendered
 			void Add(EM::Transform& Transform, EM::Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
 
@@ -104,6 +116,8 @@ namespace Enjon { namespace Graphics {
 			std::vector<QuadGlyph> QuadGlyphs;
 			std::vector<QuadGlyph*> QuadGlyphPointers;
 			std::vector<QuadRenderBatch> RenderBatches;
+			EG::Material* mMaterial = nullptr;
+			EG::Scene* mScene 		= nullptr;
 	};
 
 }}

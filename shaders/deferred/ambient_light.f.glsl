@@ -8,16 +8,15 @@ in DATA
 } fs_in;
 
 // uniforms
-uniform sampler2D DiffuseMap;
-uniform sampler2D EmissiveMap;
-// uniform sampler2D MaterialProperties;
-uniform vec2 Resolution;
-uniform vec3 AmbientColor;
-uniform float AmbientIntensity;
+uniform sampler2D u_albedoMap;
+uniform sampler2D u_emissiveMap;
+uniform vec2 u_resolution;
+uniform vec3 u_ambientColor;
+uniform float u_ambientIntensity;
 
 vec2 CalculateTexCoord()
 {
-    return gl_FragCoord.xy / Resolution;
+    return gl_FragCoord.xy / u_resolution;
 }
 
 void main()
@@ -25,18 +24,13 @@ void main()
     vec2 TexCoords = CalculateTexCoord();
 
     // Get diffuse color
-    vec4 Diffuse = texture(DiffuseMap, TexCoords);
+    vec4 Diffuse = texture(u_albedoMap, TexCoords);
 
-    vec4 Emissive = texture2D(EmissiveMap, TexCoords);
-
-    // float AO = texture2D(MaterialProperties, TexCoords).b;
+    vec4 Emissive = texture2D(u_emissiveMap, TexCoords);
 
     // Diffuse
-    // vec4 DiffuseColor = Diffuse * vec4(AmbientColor * AmbientIntensity, 1.0) * AO;
-    vec4 DiffuseColor = Diffuse * vec4(AmbientColor * AmbientIntensity, 1.0);
-
-    // Brightness
-	float lum = DiffuseColor.r * 0.2 + DiffuseColor.g * 0.7 + DiffuseColor.b * 0.1;
+    vec4 DiffuseColor = Diffuse * vec4(u_ambientColor * u_ambientIntensity, 1.0);
 
    ColorOut = DiffuseColor + Emissive;
+   // ColorOut = vec4(u_ambientColor, 1.0) + (ColorOut) * 0.0001;
 }

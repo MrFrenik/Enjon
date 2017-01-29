@@ -3,18 +3,20 @@
 
 #include "Defines.h"
 #include "System/Types.h"
-#include "Graphics/RenderTarget.h"
-#include "Graphics/GBuffer.h"
 #include "Graphics/Window.h"
 #include "Graphics/Scene.h"
 #include "Graphics/Camera.h"
-#include "Graphics/SpriteBatch.h"
 
 namespace Enjon { namespace Math { 
 	class iVec2;
 }}
 
 namespace Enjon { namespace Graphics {
+
+	class RenderTarget;
+	class GBuffer;
+	class FullScreenQuad;
+	class SpriteBatch;
 
 	class DeferredRenderer
 	{
@@ -30,13 +32,14 @@ namespace Enjon { namespace Graphics {
 
 			EG::Scene* GetScene() { return &mScene; }
 
+			EG::Camera* GetSceneCamera() { return &mSceneCamera; }
+			EG::Window* GetWindow() { return &mWindow; }
+
 		private:
 
 			void InitializeFrameBuffers();
 			void GBufferPass();
 			void LightingPass();
-
-			void SubmitRenderable(EG::Renderable* renderable);
 
 			// Frame buffers
 			EG::GBuffer* mGbuffer 					= nullptr;
@@ -53,12 +56,17 @@ namespace Enjon { namespace Graphics {
 			EG::RenderTarget* mFXAATarget			= nullptr;
 			EG::RenderTarget* mShadowDepth			= nullptr;
 
+			// Full screen quad
+			EG::FullScreenQuad* mFullScreenQuad 	= nullptr;
+
 			// Graphics scene
 			EG::Scene 				mScene;
 			EG::Window 				mWindow;
 			EG::Camera 				mSceneCamera;   // Probably part of scene instead
+			EG::Camera 				mShadowCamera;	// Probably part of light or scene?
 
-			EG::SpriteBatch 		mBatch;
+			EG::SpriteBatch* 		mBatch 			= nullptr;
+
 	};
 
 }}

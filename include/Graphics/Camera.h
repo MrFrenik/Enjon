@@ -51,6 +51,7 @@ namespace Enjon { namespace Graphics {
 		inline void SetOrthographicScale(const float Scale) { OrthographicScale = Scale; }
 
 		void SetPosition(EM::Vec3& position);
+		EM::Vec3 GetPosition() { return Transform.GetPosition(); }
 
 		// Member variables
 		EM::Transform Transform;

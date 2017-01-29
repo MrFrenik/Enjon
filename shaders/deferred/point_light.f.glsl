@@ -7,19 +7,17 @@ const float kPi = 3.13159265;
 
 out vec4 color;
 
-uniform sampler2D AlbedoMap;
-uniform sampler2D NormalMap;
-uniform sampler2D PositionMap;
+uniform sampler2D u_albedoMap;
+uniform sampler2D u_normalMap;
+uniform sampler2D u_positionMap;
 
-uniform vec3 CamPos;
-uniform vec3 Falloff;
-uniform float Radius;
-uniform vec3 LightColor;
-uniform vec3 LightPos;
-uniform float LightIntensity;
-uniform vec2 Resolution;
-uniform vec3 CameraForward;
-uniform float num_levels;
+uniform vec3 u_camPos;
+uniform vec3 u_falloff;
+uniform float u_radius;
+uniform vec3 u_lightColor;
+uniform vec3 u_lightPos;
+uniform float u_lightIntensity;
+uniform vec2 u_resolution;
 
 // Vertex information
 in DATA
@@ -29,7 +27,7 @@ in DATA
 
 vec2 CalculateTexCoord()
 {
-    return gl_FragCoord.xy / Resolution;
+    return gl_FragCoord.xy / u_resolution;
 }
 
 void main()
@@ -37,45 +35,38 @@ void main()
     vec2 TexCoords = CalculateTexCoord();
 
     // Obtain normal from normal map in range (world coords)
-    vec3 Normal = texture(NormalMap, TexCoords).xyz;
+    vec3 Normal = texture(u_normalMap, TexCoords).xyz;
 
     // Get diffuse color
-    vec4 Diffuse = texture(AlbedoMap, TexCoords);
+    vec4 Diffuse = texture(u_albedoMap, TexCoords);
 
     // Get world position
-    vec3 WorldPos = texture(PositionMap, TexCoords).xyz;
+    vec3 WorldPos = texture(u_positionMap, TexCoords).xyz;
 
     // Diffuse
-    float Distance = length(LightPos - WorldPos);
+    float Distance = length(u_lightPos - WorldPos);
 
     // Attenuation of light
-    float Attenuation = 1.0 / (Falloff.x + Falloff.y * Distance + Falloff.z * Distance * Distance);
+    float Attenuation = 1.0 / (u_falloff.x + u_falloff.y * Distance + u_falloff.z * Distance * Distance);
 
-    vec3 LightDir = normalize(LightPos - WorldPos);
+    vec3 LightDir = normalize(u_lightPos - WorldPos);
     float NDotL = dot(LightDir, Normal);
     float Brightness = max(NDotL, 0.0);
 
-    float Level = floor(Brightness * num_levels);
-    Brightness = Level / num_levels;
+    vec4 DiffuseColor = Brightness * Diffuse * vec4(u_lightColor, 1.0) * u_lightIntensity;
 
-    vec4 DiffuseColor = Brightness * Diffuse * vec4(LightColor, 1.0) * LightIntensity;
     // Specular
-    /*
     float specularLightWeighting = 0.0;
     vec3 Specular = vec3(0.0);
-    if (DiffuseTerm > 0)
+    if (Brightness > 0)
     {
-        float Shininess = 10.0;
+        float Shininess = 25.0;
         float kEnergyConservation = (8.0 + Shininess) / (8.0 * kPi);
-        vec3 ViewDir = normalize(CamPos - WorldPos + CameraForward);
+        vec3 ViewDir = normalize(u_camPos - WorldPos);
         vec3 ReflectDir = reflect(-LightDir, Normal);
         float Spec = kEnergyConservation * pow(max(dot(ViewDir, ReflectDir), 0.0), Shininess); 
-        Specular = vec3(0.2) * Spec * LightColor;
+        Specular = vec3(0.2) * Spec * u_lightColor;
     }
-    */
 
-    ColorOut = DiffuseColor * Attenuation;
-
-
-    // ColorOut = (DiffuseColor + vec4(Specular, 1.0)) * Attenuation;
+    ColorOut = (DiffuseColor + vec4(Specular, 1.0)) * Attenuation;
 }

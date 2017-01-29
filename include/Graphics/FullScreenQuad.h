@@ -6,19 +6,19 @@
 
 namespace Enjon { namespace Graphics { 
 
-	struct FullScreenQuad
+	class FullScreenQuad
 	{
-			FullScreenQuad(uint32 _Width, uint32 _Height);
+		public:
+			FullScreenQuad();
 			~FullScreenQuad();
 
 			void Bind();
 			void Unbind();
+			void Submit();
 
-			GLuint		FrameBufferID; 	// The FBO ID
-			GLuint		TargetID; 		// The texture id
-			u32			Texture; 		// The OpenGL texture for the diffuse render target
-			u32			Width; 			// FBO width
-			u32			Height; 		// FBO height
+		private:
+			GLuint		mVAO; 		// VAO ID
+			GLuint		mVBO; 		// VBO id
 	};
 
 }}

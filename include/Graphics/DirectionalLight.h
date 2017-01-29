@@ -9,29 +9,31 @@
 
 namespace Enjon { namespace Graphics {
 
+	class Scene;
+
 	class DirectionalLight
 	{
 		public:
 				DirectionalLight();
-				DirectionalLight(EM::Vec3& Direction, EG::ColorRGBA16& Color, float Intensity = 1.0f);
+				DirectionalLight(EM::Vec3& direction, 
+								EG::ColorRGBA16& color, 
+								float intensity = 1.0f);
 				~DirectionalLight();
-				void BindDepth();
-				void UnbindDepth();
-				void InitDepthMap();
 
-				inline GLint GetDepthBuffer() { return DepthTarget.GetTexture(); }
+				EM::Vec3* GetDirection() { return &mDirection; }
+				EG::ColorRGBA16* GetColor() { return &mColor; }
+				float GetIntensity() { return mIntensity; }
 
-				EM::Vec3 			Position;
-				EG::ColorRGBA16 	Color;
-				float 				Intensity;
-				GLuint 				DepthFBO;
-				GLuint				DepthBuffer;
+				void SetDirection(EM::Vec3& direction);
+				void SetColor(EG::ColorRGBA16& color);
+				void SetIntensity(float intensity);
+				void SetScene(EG::Scene* scene);
 
-				RenderTarget 		DepthTarget;
-
-				static const int DirectionalLightShadowResolution;
-				static const float DirectionalLightNear;
-				static const float DirectionalLightFar;
+		private:
+				EM::Vec3 			mDirection;
+				EG::ColorRGBA16 	mColor;
+				EG::Scene* 			mScene 			= nullptr;
+				float 				mIntensity;
 	};
 }}
 

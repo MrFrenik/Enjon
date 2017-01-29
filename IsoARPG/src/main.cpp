@@ -8481,8 +8481,14 @@ int main(int argc, char** argv)
 
 EG::DeferredRenderer mGraphicsEngine;
 EI::InputManager mInputManager;
+EU::FPSLimiter mLimiter;
+EG::DirectionalLight mSun;
+EG::PointLight mPointLight;
+EG::PointLight mPointLight2;
+EG::SpotLight mSpotLight;
+EG::QuadBatch mBatch;
 
-bool ProcessInput(EI::InputManager* input);
+bool ProcessInput(EI::InputManager* input, float dt);
 
 #ifdef main
 	#undef main
@@ -8491,7 +8497,14 @@ int main(int argc, char** argv)
 {
 	Enjon::Init();
 	mGraphicsEngine.Init();
+	mLimiter.Init(60.0f);
 
+	mSun = EG::DirectionalLight(EM::Vec3(0.5, 0.5, 0), EG::RGBA16_ZombieGreen(), 1.0f);
+	mPointLight = EG::PointLight(EM::Vec3(-3, 1, 0), EG::PLParams(1.0f, 0.2f, 0.01f), EG::RGBA16_Red(), 2.0f);
+	mPointLight2 = EG::PointLight(EM::Vec3(2, 1, 0), EG::PLParams(1.0f, 0.2f, 0.01f), EG::RGBA16_Blue(), 3.0f);
+
+	EG::SLParams slParams(1.0f, 0.1f, 0.02f, EM::Vec3(0, 0, 0), 0.5f, 1.0f);
+	mSpotLight = EG::SpotLight(EM::Vec3(0, 0, 0), slParams, EG::RGBA16_White()); 
 	EG::Scene* scene = mGraphicsEngine.GetScene();
 
 	EG::Renderable renderable;
@@ -8503,26 +8516,68 @@ int main(int argc, char** argv)
 					);
 	mat->SetTexture(
 					EG::TextureSlotType::NORMAL, 
-					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png")
+					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png")
 					);
 	renderable.SetMesh(mesh);
 	renderable.SetMaterial(mat);
 	renderable.SetPosition(EM::Vec3(0, 0, 0));
 	renderable.SetScale(EM::Vec3(1, 1, 1) * 1.0f);
+
+	// Set up floor batch
+	mBatch.Init();
+	EG::Material floorMat;
+	floorMat.SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png"));
+	floorMat.SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png"));
+	mBatch.SetMaterial(&floorMat);
+	mBatch.Begin();
+	{
+		for (auto i = -10; i < 10; i++)
+		{
+			for (auto j = -10; j < 10; j++)
+			{
+				EM::Transform t(EM::Vec3(j * 2, 0, i * 2), EM::Quaternion::AngleAxis(EM::ToRadians(90), EM::Vec3(1, 0, 0)), EM::Vec3(1, 1, 1));
+				mBatch.Add(
+							t, 
+							EM::Vec4(0, 0, 1, 1),
+							0
+						);
+			}
+		}
+	}
+	mBatch.End();
+
+	// Add elements scene
 	scene->AddRenderable(&renderable);
+	scene->AddDirectionalLight(&mSun);
+	scene->AddPointLight(&mPointLight);
+	scene->AddPointLight(&mPointLight2);
+	scene->AddSpotLight(&mSpotLight);
+	scene->AddQuadBatch(&mBatch);
+	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_Orange(), 0.2f));
 
 	float dt = 0.0f;
 
-	while(ProcessInput(&mInputManager))
+	while(ProcessInput(&mInputManager, 0.01f))
 	{
-		dt += 0.01f;
-		mGraphicsEngine.Update(dt);
+		dt += 0.1f;
+		mLimiter.Begin();
 		renderable.SetOrientation(
 							EM::Quaternion::AngleAxis(
 														EM::ToRadians(dt),
 														EM::Vec3(0, 1, 0)
 													)
 								);
+		mSun.SetDirection(EM::Vec3(cos(dt), 0.5f, sin(dt)));
+
+		// Set spot light direction and position
+		EG::Camera* sceneCam = mGraphicsEngine.GetSceneCamera();
+		mSpotLight.SetPosition(sceneCam->GetPosition());
+		mSpotLight.SetDirection(sceneCam->Forward());
+
+		// Render
+		mGraphicsEngine.Update(dt);
+
+		mLimiter.End();
 	}
 
 	printf("Exit Successful!\n");	
@@ -8530,7 +8585,7 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-bool ProcessInput(EI::InputManager* input)
+bool ProcessInput(EI::InputManager* input, float dt)
 {
 	input->Update();
 
@@ -8549,6 +8604,14 @@ bool ProcessInput(EI::InputManager* input)
 			case SDL_KEYDOWN:
 				input->PressKey(event.key.keysym.sym);
 				break;
+			case SDL_MOUSEBUTTONDOWN:
+				input->PressKey(event.button.button);
+				break;
+			case SDL_MOUSEBUTTONUP:
+				input->ReleaseKey(event.button.button);
+				break;
+			case SDL_MOUSEMOTION:
+				input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 			default:
 				break;
 		}
@@ -8558,6 +8621,50 @@ bool ProcessInput(EI::InputManager* input)
     {
     	return false;
     }
+
+    EG::Camera* camera = mGraphicsEngine.GetSceneCamera();
+   	EM::Vec3 velDir(0, 0, 0); 
+   	static float speed = 3.0f;
+
+	if (input->IsKeyDown(SDLK_w))
+	{
+		EM::Vec3 F = camera->Forward();
+		velDir += F;
+	}
+	if (input->IsKeyDown(SDLK_s))
+	{
+		EM::Vec3 B = camera->Backward();
+		velDir += B;
+	}
+	if (input->IsKeyDown(SDLK_a))
+	{
+		velDir += camera->Left();
+	}
+	if (input->IsKeyDown(SDLK_d))
+	{
+		velDir += camera->Right();
+	}
+
+	if (velDir.Length()) velDir = EM::Vec3::Normalize(velDir);
+
+	camera->Transform.Position += speed * dt * velDir;
+
+	auto MouseSensitivity = 7.5f;
+
+	// Get mouse input and change orientation of camera
+	auto MouseCoords = input->GetMouseCoords();
+
+	auto viewPort = mGraphicsEngine.GetViewport();
+
+	EG::Window* window = mGraphicsEngine.GetWindow();
+
+	// Reset the mouse coords after having gotten the mouse coordinates
+	SDL_WarpMouseInWindow(window->GetWindowContext(), (float)viewPort.x / 2.0f, (float)viewPort.y / 2.0f);
+
+	camera->OffsetOrientation(
+								(EM::ToRadians(((float)viewPort.x / 2.0f - MouseCoords.x) * dt) * MouseSensitivity), 
+								(EM::ToRadians(((float)viewPort.y / 2.0f - MouseCoords.y) * dt) * MouseSensitivity)
+							);
 
     return true;
 }

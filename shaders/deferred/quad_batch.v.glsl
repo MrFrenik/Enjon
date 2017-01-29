@@ -15,12 +15,12 @@ out VS_OUT
     vec4 FragColor;
 } vs_out;
 
-uniform mat4 camera = mat4(1.0f);
+uniform mat4 u_camera = mat4(1.0f);
 
 void main()
 {
 	// Calculate vertex position in camera space
-	gl_Position = camera * vec4(vertexPosition, 1.0);
+	gl_Position = u_camera * vec4(vertexPosition, 1.0);
 
 	// TBN matrix
 	mat3 TBN = mat3(vertexTangent, vertexBitangent, vertexNormal);

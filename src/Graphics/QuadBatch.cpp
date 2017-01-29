@@ -1,4 +1,6 @@
 #include "Graphics/QuadBatch.h"
+#include "Graphics/Scene.h"
+#include "Graphics/Material.h"
 #include "IO/ResourceManager.h"
 #include <stdio.h>
 
@@ -438,14 +440,14 @@ namespace Enjon { namespace Graphics {
 		glBindVertexArray(VAO);
 
 		// Activate texture
-		glActiveTexture(GL_TEXTURE0);
+		// glActiveTexture(GL_TEXTURE0);
 
 		for (uint32_t i = 0; i < RenderBatches.size(); i++)
 		{
 			DrawCallCount++;
 
 			// Bind texture for rendering
-			glBindTexture(GL_TEXTURE_2D, RenderBatches[i].Texture);
+			// glBindTexture(GL_TEXTURE_2D, RenderBatches[i].Texture);
 
 			// Draw quad
 			glDrawArrays(GL_TRIANGLES, RenderBatches[i].Offset, RenderBatches[i].NumVerticies);
@@ -562,6 +564,16 @@ namespace Enjon { namespace Graphics {
 				std::stable_sort(QuadGlyphPointers.begin(), QuadGlyphPointers.end(), CompareBackToFront);
 			} break;
 		}
+	}
+
+	void QuadBatch::SetMaterial(EG::Material* mat)
+	{
+		mMaterial = mat;	
+	}
+
+	void QuadBatch::SetScene(EG::Scene* scene)
+	{
+		mScene = scene;
 	}
 
 	bool QuadBatch::CompareFrontToBack(QuadGlyph* A, QuadGlyph* B)

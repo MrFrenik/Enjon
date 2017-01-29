@@ -8,47 +8,64 @@
 
 namespace Enjon { namespace Graphics { 
 
+	class Scene;
+
 	struct SpotLightParameters
 	{
 		SpotLightParameters(){}
-		SpotLightParameters(float _Constant, float _Linear, float _Quadratic, EM::Vec3 _Dir, float _Inner, float _Outer)
+		SpotLightParameters(float constant, float linear, float quadratic, EM::Vec3 dir, float inner, float outer)
 		{
-			Constant 	= _Constant;
-			Linear 		= _Linear;
-			Quadratic 	= _Quadratic;
-			Direction 	= _Dir;
-			InnerCutoff = _Inner;
-			OuterCutoff = _Outer;
+			mConstant 		= constant;
+			mLinear 		= linear;
+			mQuadratic 		= quadratic;
+			mDirection 		= dir;
+			mInnerCutoff 	= inner;
+			mOuterCutoff 	= outer;
 		}
 
 		union
 		{
-			EM::Vec3 Falloff;
+			EM::Vec3 mFalloff;
 			struct
 			{
-				float Constant; 
-				float Linear; 
-				float Quadratic;
+				float mConstant; 
+				float mLinear; 
+				float mQuadratic;
 			};
 		};
 
-		EM::Vec3 Direction;
-		float InnerCutoff;
-		float OuterCutoff;
+		EM::Vec3 mDirection;
+		float mInnerCutoff;
+		float mOuterCutoff;
 	};
 
 	typedef struct SpotLightParameters SLParams;
 
-	struct SpotLight
+	class SpotLight
 	{
+		public:
 			SpotLight();
-			SpotLight(EM::Vec3& Position, SLParams& Params, EG::ColorRGBA16& Color, float Intensity = 1.0f);
+			SpotLight(EM::Vec3& position, SLParams& params, EG::ColorRGBA16& color, float intensity = 1.0f);
 			~SpotLight();
 
-			EM::Vec3 			Position;
-			SLParams 			Parameters;	
-			EG::ColorRGBA16 	Color;
-			float 				Intensity;
+			EM::Vec3& GetPosition() { return mPosition; }
+			EG::ColorRGBA16& GetColor() { return mColor; }
+			SLParams& GetParams() { return mParams; }
+			float GetIntensity() { return mIntensity; }
+
+			void SetPosition(EM::Vec3& position);
+			void SetDirection(EM::Vec3& direction);
+			void SetColor(EG::ColorRGBA16& color);
+			void SetIntensity(float intensity);
+			void SetScene(EG::Scene* scene);
+			void SetParams(EG::SLParams& params);
+
+		private:
+			EM::Vec3 			mPosition;
+			SLParams 			mParams;	
+			EG::ColorRGBA16 	mColor;
+			EG::Scene* 			mScene 			= nullptr;
+			float 				mIntensity;
 	};
 
 }}

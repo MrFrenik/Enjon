@@ -8,43 +8,57 @@
 
 namespace Enjon { namespace Graphics { 
 
+	class Scene;
+
 	struct PointLightParameters
 	{
 		PointLightParameters(){}
-		PointLightParameters(float _Constant, float _Linear, float _Quadratic)
+		PointLightParameters(float constant, float linear, float quadratic)
 		{
-			Constant 	= _Constant;
-			Linear 		= _Linear;
-			Quadratic 	= _Quadratic;
-			Radius 		= 1.0f;
+			mConstant 	= constant;
+			mLinear 	= linear;
+			mQuadratic 	= quadratic;
+			mRadius 	= 1.0f;
 		}
 
 		union
 		{
-			EM::Vec3 Falloff;
+			EM::Vec3 mFalloff;
 			struct
 			{
-				float Constant; 
-				float Linear; 
-				float Quadratic;
+				float mConstant; 
+				float mLinear; 
+				float mQuadratic;
 			};
 		};
 
-		float Radius;	
+		float mRadius;	
 	};
 
 	typedef struct PointLightParameters PLParams;
 
-	struct PointLight
+	class PointLight
 	{
+		public:
 			PointLight();
 			PointLight(EM::Vec3& Position, PLParams& Params, EG::ColorRGBA16& Color, float Intensity = 1.0f);
 			~PointLight();
 
-			EM::Vec3 			Position;
-			PLParams 			Parameters;	
-			EG::ColorRGBA16 	Color;
-			float 				Intensity;
+			EM::Vec3& GetPosition() { return mPosition; }
+			EG::ColorRGBA16& GetColor() { return mColor; }
+			PLParams& GetParams() { return mParams; }
+			float GetIntensity() { return mIntensity; }
+
+			void SetColor(EG::ColorRGBA16& color);
+			void SetIntensity(float intensity);
+			void SetScene(EG::Scene* scene);
+
+		private:
+			EM::Vec3 			mPosition;
+			PLParams 			mParams;	
+			EG::ColorRGBA16 	mColor;
+			EG::Scene* 			mScene 			= nullptr;
+			float 				mIntensity;
 	};
 
 }}

@@ -47,6 +47,10 @@
 #include "Graphics/Animations.h"
 #include "Graphics/Shapes.h"
 #include "Graphics/DeferredRenderer.h"
+#include "Graphics/DirectionalLight.h"
+#include "Graphics/SpotLight.h"
+#include "Graphics/PointLight.h"
+#include "Graphics/QuadBatch.h"
 
 #include "GUI/Signal.h"
 #include "GUI/Property.h"

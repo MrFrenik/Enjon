@@ -34,7 +34,6 @@ namespace Enjon { namespace Utils {
 
 	private:
 		void CalculateFPS();
-		
 	};
 
 
