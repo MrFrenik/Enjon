@@ -5,21 +5,19 @@ layout (location = 0) out vec4 ColorOut;
 
 const float kPi = 3.13159265;
 
-uniform sampler2D AlbedoMap;
-uniform sampler2D NormalMap;
-uniform sampler2D PositionMap;
-uniform sampler2D MaterialProperties;
-uniform sampler2D ShadowMap;
+uniform sampler2D u_albedoMap;
+uniform sampler2D u_normalMap;
+uniform sampler2D u_positionMap;
+uniform sampler2D u_matProps;
+// uniform sampler2D u_shadowMap;
 
-uniform vec3 CamPos;
-uniform vec3 LightColor;
-uniform vec3 LightPosition;
-uniform float LightIntensity;
-uniform vec2 Resolution;
-uniform vec3 CameraForward;
-uniform mat4 LightSpaceMatrix;
-uniform vec2 ShadowBias;
-uniform float num_levels;
+uniform vec3 u_camPos;
+uniform vec3 u_lightColor;
+uniform vec3 u_lightDirection;
+uniform float u_lightIntensity;
+uniform vec2 u_resolution;
+// uniform mat4 u_lightSpaceMatrix;
+// uniform vec2 u_shadowBias;
 
 // Vertex information
 in DATA
@@ -29,9 +27,10 @@ in DATA
 
 vec2 CalculateTexCoord()
 {
-    return gl_FragCoord.xy / Resolution;
+    return gl_FragCoord.xy / u_resolution;
 }
 
+/*
 float ShadowCalculation(vec4 FragPosLightSpace, float bias)
 {
     // Perspective divide
@@ -58,6 +57,7 @@ float ShadowCalculation(vec4 FragPosLightSpace, float bias)
 
     return Shadow;
 }
+*/
 
 float DistributionGGX(vec3 N, vec3 H, float Roughness);
 float GeometrySchlickGGX(float NdotV, float Roughness);
@@ -69,41 +69,42 @@ void main()
     vec2 TexCoords = CalculateTexCoord();
 
     // Get diffuse color
-    vec3 Albedo = texture(AlbedoMap, TexCoords).rgb;
+    vec3 Albedo = texture(u_albedoMap, TexCoords).rgb;
     Albedo = vec3(pow(Albedo.r, 2.2), pow(Albedo.g, 2.2), pow(Albedo.b, 2.2));
 
     // Get world position
-    vec3 WorldPos = texture(PositionMap, TexCoords).xyz;
+    vec3 WorldPos = texture(u_positionMap, TexCoords).xyz;
 
     // Get material properties
-    vec4 MaterialProps = texture2D(MaterialProperties, TexCoords);
+    vec4 MaterialProps = texture2D(u_matProps, TexCoords);
+    // MaterialProps = vec4(pow(MaterialProps.r, 2.2), pow(MaterialProps.g, 2.2), pow(MaterialProps.b, 2.2), 1.0);
 
     // Roughness, Metallic, and AO
     float Metallic  = MaterialProps.r;
     float Roughness = MaterialProps.g;
 
-
     // Obtain normal from normal map in range (world coords)
-    vec3 N = normalize(texture(NormalMap, TexCoords).xyz);
-    vec3 V = normalize(CamPos - WorldPos);
+    vec3 N = normalize(texture(u_normalMap, TexCoords).xyz);
+    vec3 V = normalize(u_camPos - WorldPos);
 
     // Calculate radiance
-    vec3 L = normalize(LightPosition - WorldPos);
+    vec3 L = normalize(u_lightDirection);
     vec3 H = normalize(V + L);
 
     vec3 F0 = vec3(0.04);
     F0      = mix(F0, Albedo, Metallic);
-    vec3 F  = FresnelSchlickRoughness(max(dot(H, V), 0.0), F0, Roughness);
+    vec3 F  = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, Roughness);
 
     vec3 kS = F;
     vec3 kD = vec3(1.0) - kS;
+    // vec3 kD = kS;
     kD *= (1.0 - Metallic);
 
     // Reflectance Equation
     vec3 Lo = vec3(0.0);
 
     // Radiance
-    vec3 Radiance = LightColor * LightIntensity;
+    vec3 Radiance = u_lightColor * u_lightIntensity;
 
     // Cook-Torrance BRDF
     float NDF   = DistributionGGX(N, H, Roughness);
@@ -115,23 +116,19 @@ void main()
 
     // Add to outgoing radiance Lo
     float NdotL = max(dot(N, L), 0.0);
-    // float NDotL = dot(N, L);
-    // float Brightness = max(NDotL, 0.0);
-    // float Level = floor(Brightness * num_levels);
-    // Brightness = Level / num_levels;
 
     // Final light
     Lo += (kD * Albedo / kPi + BRDF) * Radiance * NdotL;
-    // Lo += (kD * Albedo / kPi + BRDF) * Radiance * Brightness;
 
-    float bias = max(ShadowBias.y * (1.0 - dot(N, L)), ShadowBias.x);
+    // Shadow
+    // float bias = max(ShadowBias.y * (1.0 - dot(N, L)), ShadowBias.x);
+    // vec4 FragPosLightSpace = LightSpaceMatrix * vec4(WorldPos, 1.0);
+    // float Shadow = ShadowCalculation(FragPosLightSpace, bias);
 
-    vec4 FragPosLightSpace = LightSpaceMatrix * vec4(WorldPos, 1.0);
+    ColorOut = vec4(Lo, 1.0);
 
-    float Shadow = ShadowCalculation(FragPosLightSpace, bias);
-
-    float val = 1.0 - Shadow;
-    ColorOut = vec4(Lo, 1.0) * vec4(val, val, val, 1.0);
+    // float val = 1.0 - Shadow;
+    // ColorOut = vec4(Lo, 1.0) * vec4(val, val, val, 1.0);
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)

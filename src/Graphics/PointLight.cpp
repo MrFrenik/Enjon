@@ -41,6 +41,11 @@ namespace Enjon { namespace Graphics {
 		mScene = scene;
 	}
 
+	void PointLight::SetPosition(EM::Vec3& position)
+	{
+		mPosition = position;
+	}
+
 	PointLight::~PointLight()
 	{
 	}

@@ -43,7 +43,7 @@ namespace Enjon { namespace Graphics {
 	{
 		// TODO(John): Need to have a way to have an ini that's read or grab these values from a static
 		// engine config file
-		mWindow.Init("Game", 1440, 900); 
+		mWindow.Init("Game", 800, 600); 
 
 		// Initialize shader manager
 		EG::ShaderManager::Init();
@@ -78,6 +78,8 @@ namespace Enjon { namespace Graphics {
 		GBufferPass();
 		// Lighting pass
 		LightingPass();
+		// FXAA pass
+		FXAAPass(mLightingBuffer);
 
 		// Draw diffuse texture just for testing
 		GLSLProgram* shader = EG::ShaderManager::Get("NoCameraProjection");		
@@ -90,8 +92,9 @@ namespace Enjon { namespace Graphics {
 				mBatch->Add(
 							EM::Vec4(-1, -1, 2, 2),
 							EM::Vec4(0, 0, 1, 1),
-							mLightingBuffer->GetTexture()
-							// mGbuffer->GetTexture(EG::GBufferTextureType::NORMAL)
+							// mLightingBuffer->GetTexture()
+							// mGbuffer->GetTexture(EG::GBufferTextureType::MAT_PROPS)
+							mFXAATarget->GetTexture()
 						);
 			}
 			mBatch->End();
@@ -209,8 +212,8 @@ namespace Enjon { namespace Graphics {
 		mFullScreenQuad->Bind();
 		
 		EG::GLSLProgram* ambientShader 		= EG::ShaderManager::Get("AmbientLight");
-		EG::GLSLProgram* directionalShader 	= EG::ShaderManager::Get("DirectionalLight");	
-		EG::GLSLProgram* pointShader 		= EG::ShaderManager::Get("PointLight");	
+		EG::GLSLProgram* directionalShader 	= EG::ShaderManager::Get("PBRDirectionalLight");	
+		EG::GLSLProgram* pointShader 		= EG::ShaderManager::Get("PBRPointLight");	
 		EG::GLSLProgram* spotShader 		= EG::ShaderManager::Get("SpotLight");	
 
 		std::set<EG::DirectionalLight*>* directionalLights 	= mScene.GetDirectionalLights();	
@@ -249,6 +252,7 @@ namespace Enjon { namespace Graphics {
 
 		directionalShader->Use();
 		{
+			directionalShader->SetUniform("u_camPos", mSceneCamera.GetPosition());
 			for (auto& l : *directionalLights)
 			{
 				EG::ColorRGBA16* color = l->GetColor();
@@ -256,6 +260,7 @@ namespace Enjon { namespace Graphics {
 				directionalShader->BindTexture("u_albedoMap", 		mGbuffer->GetTexture(EG::GBufferTextureType::ALBEDO), 0);
 				directionalShader->BindTexture("u_normalMap", 		mGbuffer->GetTexture(EG::GBufferTextureType::NORMAL), 1);
 				directionalShader->BindTexture("u_positionMap", 	mGbuffer->GetTexture(EG::GBufferTextureType::POSITION), 2);
+				directionalShader->BindTexture("u_matProps", 		mGbuffer->GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
 				// directionalShader->BindTexture("u_shadowMap", 		mShadowDepth->GetDepth(), 4);
 				directionalShader->SetUniform("u_resolution", 		mGbuffer->GetResolution());
 				// directionalShader->SetUniform("u_lightSpaceMatrix", mShadowCamera->GetViewProjectionMatrix());
@@ -284,7 +289,7 @@ namespace Enjon { namespace Graphics {
 			pointShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(EG::GBufferTextureType::ALBEDO), 0);
 			pointShader->BindTexture("u_normalMap", mGbuffer->GetTexture(EG::GBufferTextureType::NORMAL), 1);
 			pointShader->BindTexture("u_positionMap", mGbuffer->GetTexture(EG::GBufferTextureType::POSITION), 2);
-			// pointShader->BindTexture("MaterialProperties", mGbuffer->GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
+			pointShader->BindTexture("u_matProps", mGbuffer->GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
 			pointShader->SetUniform("u_resolution", mGbuffer->GetResolution());
 			pointShader->SetUniform("u_camPos", mSceneCamera.GetPosition());			
 
@@ -319,7 +324,7 @@ namespace Enjon { namespace Graphics {
 				spotShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(EG::GBufferTextureType::ALBEDO), 0);
 				spotShader->BindTexture("u_normalMap", mGbuffer->GetTexture(EG::GBufferTextureType::NORMAL), 1);
 				spotShader->BindTexture("u_positionMap", mGbuffer->GetTexture(EG::GBufferTextureType::POSITION), 2);
-				// spotShader->BindTexture("MaterialProperties", mGbuffer->GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
+				// spotShader->BindTexture("u_matProps", mGbuffer->GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
 				spotShader->SetUniform("u_resolution", mGbuffer->GetResolution());
 				spotShader->SetUniform("u_camPos", mSceneCamera.GetPosition());			
 
@@ -357,6 +362,33 @@ namespace Enjon { namespace Graphics {
 		glEnable(GL_DEPTH_TEST);
 		glBlendFunc(GL_ONE, GL_ONE);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	}
+
+	void DeferredRenderer::FXAAPass(EG::RenderTarget* input)
+	{
+		GLSLProgram* fxaaProgram = EG::ShaderManager::Get("FXAA");
+		mFXAATarget->Bind();
+		{
+			mWindow.Clear();
+			fxaaProgram->Use();
+			{
+				auto viewPort = GetViewport();
+				fxaaProgram->SetUniform("u_resolution", EM::Vec2(viewPort.x, viewPort.y));
+				fxaaProgram->SetUniform("u_FXAASettings", EM::Vec3(mFXAASettings.mSpanMax, mFXAASettings.mReduceMul, mFXAASettings.mReduceMin));
+				mBatch->Begin();
+				{
+					mBatch->Add(
+										EM::Vec4(-1, -1, 2, 2),
+										EM::Vec4(0, 0, 1, 1),
+										input->GetTexture()
+									);
+				}
+				mBatch->End();
+				mBatch->RenderBatch();
+			}
+			fxaaProgram->Unuse();
+		}
+		mFXAATarget->Unbind();
 	}
 
 	void DeferredRenderer::SetViewport(EM::iVec2& dimensions)

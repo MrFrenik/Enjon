@@ -1,11 +1,11 @@
 #version 330 core 
 uniform sampler2D tex;
-uniform vec2 resolution;
-uniform vec3 FXAASettings;
+uniform vec2 u_resolution;
+uniform vec3 u_FXAASettings;
 
-#define FXAA_SPAN_MAX   FXAASettings.x
-#define FXAA_REDUCE_MUL FXAASettings.y
-#define FXAA_REDUCE_MIN FXAASettings.z
+#define FXAA_SPAN_MAX   u_FXAASettings.x
+#define FXAA_REDUCE_MUL u_FXAASettings.y
+#define FXAA_REDUCE_MIN u_FXAASettings.z
 
 in DATA
 {
@@ -18,10 +18,10 @@ out vec4 Color;
  
 void main( void ) {
 
-    vec3 rgbNW=texture2D(tex,fs_in.TexCoords+(vec2(-1.0,-1.0)/resolution)).xyz;
-    vec3 rgbNE=texture2D(tex,fs_in.TexCoords+(vec2(1.0,-1.0)/resolution)).xyz;
-    vec3 rgbSW=texture2D(tex,fs_in.TexCoords+(vec2(-1.0,1.0)/resolution)).xyz;
-    vec3 rgbSE=texture2D(tex,fs_in.TexCoords+(vec2(1.0,1.0)/resolution)).xyz;
+    vec3 rgbNW=texture2D(tex,fs_in.TexCoords+(vec2(-1.0,-1.0)/u_resolution)).xyz;
+    vec3 rgbNE=texture2D(tex,fs_in.TexCoords+(vec2(1.0,-1.0)/u_resolution)).xyz;
+    vec3 rgbSW=texture2D(tex,fs_in.TexCoords+(vec2(-1.0,1.0)/u_resolution)).xyz;
+    vec3 rgbSE=texture2D(tex,fs_in.TexCoords+(vec2(1.0,1.0)/u_resolution)).xyz;
     vec3 rgbM=texture2D(tex,fs_in.TexCoords).xyz;
 
     vec3 luma=vec3(0.299, 0.587, 0.114);
@@ -43,7 +43,7 @@ void main( void ) {
 
     dir = min(vec2( FXAA_SPAN_MAX,  FXAA_SPAN_MAX),
           max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
-          dir * rcpDirMin)) / resolution;
+          dir * rcpDirMin)) / u_resolution;
 
     vec3 rgbA = 0.5 * (
         texture2D(tex, fs_in.TexCoords.xy + dir * (1.0/3.0 - 0.5)).xyz +

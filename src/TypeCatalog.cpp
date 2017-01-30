@@ -2,8 +2,6 @@
 #include <Entity/EntityManager.h>
 #include <Entity/Component.h>
 
-
-
 // Generated code
 namespace TypeCatalog 
 {
@@ -33,25 +31,4 @@ namespace TypeCatalog
 
 	template <>
 	ComponentType GetType<MovementComponent&>() { return ComponentType::COMPONENTTYPE_MOVEMENT; }
-
-	template<>
-	ComponentType GetType<A>() { return ComponentType::a; }
-
-	template<>
-	ComponentType GetType<A&>() { return ComponentType::a; }
-
-	template<>
-	ComponentType GetType<B>() { return ComponentType::b; }
-
-	template<>
-	ComponentType GetType<B&>() { return ComponentType::b; }
-
-	template<>
-	ComponentType GetType<J>() { return ComponentType::j; }
-
-	template<>
-	ComponentType GetType<J&>() { return ComponentType::j; }
-
-
-	RegisteredTypes rt;
 };

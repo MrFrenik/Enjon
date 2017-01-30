@@ -72,7 +72,5 @@ void main()
         Specular = vec3(0.2) * Spec * u_lightColor;
     }
 
-
     ColorOut = (DiffuseColor + vec4(Specular, 1.0)) * Attenuation * Intensity;
-
 }

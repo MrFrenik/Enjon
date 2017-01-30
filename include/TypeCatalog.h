@@ -6,9 +6,6 @@ struct PositionComponent;
 struct VelocityComponent;
 struct TestComponent;
 struct MovementComponent;
-struct A; 
-struct B; 
-struct J;
 
 #include <bitset>
 
@@ -22,9 +19,7 @@ namespace TypeCatalog
 		VelocityComponent,
 		TestComponent,
 		MovementComponent,
-		a, 
-		b, 
-		j,
+		PointLightComponent,
 		COUNT
 	};
 
@@ -36,9 +31,7 @@ namespace TypeCatalog
 		COMPONENTTYPE_VELOCITY,
 		COMPONENTTYPE_TEST,
 		COMPONENTTYPE_MOVEMENT,
-		a, 
-		b,
-		j, 
+		COMPONENTTYPE_POINTLIGHT,
 		COUNT
 	};
 
@@ -54,37 +47,6 @@ namespace TypeCatalog
 		BitSet.set(static_cast<size_t>(GetType<T>()));
 		return BitSet;
 	}
-
-	struct TypeBase
-	{
-		virtual void Base() = 0;
-		ObjectMetaType MetaType;
-	};
-
-	template <typename T>
-	struct Type : public TypeBase
-	{
-		void Base() override {}
-		T ConcreteType;
-	};
-
-	struct NoneType
-	{
-	};
-
-	struct RegisteredTypes
-	{
-		NoneType* r0;
-		PositionComponent* r1;
-		VelocityComponent* r2;
-		TestComponent* r3;
-		MovementComponent* r4;
-		A* r5; 
-		B* r6; 
-		J* r7;
-	};
-
-
 };
 
 #endif

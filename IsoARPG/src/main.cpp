@@ -8482,11 +8482,19 @@ int main(int argc, char** argv)
 EG::DeferredRenderer mGraphicsEngine;
 EI::InputManager mInputManager;
 EU::FPSLimiter mLimiter;
+EG::Renderable mRenderable;
+EG::Renderable mRenderable2;
 EG::DirectionalLight mSun;
+EG::DirectionalLight mSun2;
+EG::DirectionalLight mSun3;
 EG::PointLight mPointLight;
 EG::PointLight mPointLight2;
+EG::PointLight mPointLight3;
+EG::PointLight mPointLight4;
 EG::SpotLight mSpotLight;
 EG::QuadBatch mBatch;
+
+bool mMovementOn = true;
 
 bool ProcessInput(EI::InputManager* input, float dt);
 
@@ -8499,35 +8507,48 @@ int main(int argc, char** argv)
 	mGraphicsEngine.Init();
 	mLimiter.Init(60.0f);
 
-	mSun = EG::DirectionalLight(EM::Vec3(0.5, 0.5, 0), EG::RGBA16_ZombieGreen(), 1.0f);
-	mPointLight = EG::PointLight(EM::Vec3(-3, 1, 0), EG::PLParams(1.0f, 0.2f, 0.01f), EG::RGBA16_Red(), 2.0f);
-	mPointLight2 = EG::PointLight(EM::Vec3(2, 1, 0), EG::PLParams(1.0f, 0.2f, 0.01f), EG::RGBA16_Blue(), 3.0f);
+	mSun = EG::DirectionalLight(EM::Vec3(0.5, 0.5, 0), EG::RGBA16_Orange(), 2.0f);
+	mSun2 = EG::DirectionalLight(EM::Vec3(-0.5, 0.5, -0.5), EG::RGBA16_SkyBlue(), 2.0f);
+	mSun3 = EG::DirectionalLight(EM::Vec3(0.0, 0.3, 0.5), EG::RGBA16_ZombieGreen(), 3.0f);
+	mPointLight = EG::PointLight(EM::Vec3(-3, 1, 0), EG::PLParams(1.0f, 0.2f, 0.01f), EG::RGBA16_Red(), 6.0f);
+	mPointLight2 = EG::PointLight(EM::Vec3(2, 1, 0), EG::PLParams(1.0f, 0.2f, 0.01f), EG::RGBA16_SkyBlue(), 10.0f);
+	mPointLight3 = EG::PointLight(EM::Vec3(-2, 1, -2), EG::PLParams(1.0f, 0.2f, 0.01f), EG::RGBA16_Orange(), 10.0f);
+	mPointLight4 = EG::PointLight(EM::Vec3(3, 2, -2), EG::PLParams(1.0f, 0.2f, 0.01f), EG::RGBA16_ZombieGreen(), 10.0f);
 
 	EG::SLParams slParams(1.0f, 0.1f, 0.02f, EM::Vec3(0, 0, 0), 0.5f, 1.0f);
 	mSpotLight = EG::SpotLight(EM::Vec3(0, 0, 0), slParams, EG::RGBA16_White()); 
 	EG::Scene* scene = mGraphicsEngine.GetScene();
 
-	EG::Renderable renderable;
 	EG::Material* mat = new EG::Material();
-	EG::Mesh* mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
-	mat->SetTexture(
-					EG::TextureSlotType::ALBEDO, 
-					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bb8_diffuse.png")
-					);
-	mat->SetTexture(
-					EG::TextureSlotType::NORMAL, 
-					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png")
-					);
-	renderable.SetMesh(mesh);
-	renderable.SetMaterial(mat);
-	renderable.SetPosition(EM::Vec3(0, 0, 0));
-	renderable.SetScale(EM::Vec3(1, 1, 1) * 1.0f);
+	EG::Mesh* mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cerebus.obj");
+	mat->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/BaseColor.png"));
+	mat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png") );
+	mat->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Metallic.png") );
+	mat->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Roughness.png") );
+	mRenderable.SetMesh(mesh);
+	mRenderable.SetMaterial(mat);
+	mRenderable.SetPosition(EM::Vec3(0, 2, 0));
+	mRenderable.SetScale(EM::Vec3(1, 1, 1));
+	mRenderable.SetOrientation(mGraphicsEngine.GetSceneCamera()->GetOrientation());
+
+	EG::Material* mat2 = new EG::Material();
+	EG::Mesh* mesh2 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/shaderball.obj");
+	mat2->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/BaseColor.png"));
+	mat2->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Normal.png") );
+	mat2->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Metallic.png") );
+	mat2->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Roughness.png") );
+	mRenderable2.SetMesh(mesh2);
+	mRenderable2.SetMaterial(mat2);
+	mRenderable2.SetPosition(EM::Vec3(3, 0.2f, 0));
+	mRenderable2.SetScale(EM::Vec3(1, 1, 1) * 0.007f);
 
 	// Set up floor batch
 	mBatch.Init();
 	EG::Material floorMat;
 	floorMat.SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png"));
-	floorMat.SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png"));
+	floorMat.SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png") );
+	floorMat.SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Metallic.png") );
+	floorMat.SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Roughness.png") );
 	mBatch.SetMaterial(&floorMat);
 	mBatch.Begin();
 	{
@@ -8547,13 +8568,18 @@ int main(int argc, char** argv)
 	mBatch.End();
 
 	// Add elements scene
-	scene->AddRenderable(&renderable);
+	scene->AddRenderable(&mRenderable);
+	scene->AddRenderable(&mRenderable2);
 	scene->AddDirectionalLight(&mSun);
+	scene->AddDirectionalLight(&mSun2);
+	scene->AddDirectionalLight(&mSun3);
 	scene->AddPointLight(&mPointLight);
 	scene->AddPointLight(&mPointLight2);
+	scene->AddPointLight(&mPointLight3);
+	scene->AddPointLight(&mPointLight4);
 	scene->AddSpotLight(&mSpotLight);
 	scene->AddQuadBatch(&mBatch);
-	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_Orange(), 0.2f));
+	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_White(), 0.1f));
 
 	float dt = 0.0f;
 
@@ -8561,13 +8587,13 @@ int main(int argc, char** argv)
 	{
 		dt += 0.1f;
 		mLimiter.Begin();
-		renderable.SetOrientation(
+		mRenderable.SetOrientation(
 							EM::Quaternion::AngleAxis(
 														EM::ToRadians(dt),
 														EM::Vec3(0, 1, 0)
 													)
 								);
-		mSun.SetDirection(EM::Vec3(cos(dt), 0.5f, sin(dt)));
+		mPointLight.SetPosition(EM::Vec3(cos(dt) * 10.0f, 0.5f, sin(dt) * 10.0f));
 
 		// Set spot light direction and position
 		EG::Camera* sceneCam = mGraphicsEngine.GetSceneCamera();
@@ -8622,49 +8648,61 @@ bool ProcessInput(EI::InputManager* input, float dt)
     	return false;
     }
 
-    EG::Camera* camera = mGraphicsEngine.GetSceneCamera();
-   	EM::Vec3 velDir(0, 0, 0); 
-   	static float speed = 3.0f;
+    if (input->IsKeyPressed(SDLK_t))
+    {
+    	mMovementOn = !mMovementOn;
+		EG::Window* window = mGraphicsEngine.GetWindow();
+		window->ShowMouseCursor(true);
+    }
 
-	if (input->IsKeyDown(SDLK_w))
-	{
-		EM::Vec3 F = camera->Forward();
-		velDir += F;
-	}
-	if (input->IsKeyDown(SDLK_s))
-	{
-		EM::Vec3 B = camera->Backward();
-		velDir += B;
-	}
-	if (input->IsKeyDown(SDLK_a))
-	{
-		velDir += camera->Left();
-	}
-	if (input->IsKeyDown(SDLK_d))
-	{
-		velDir += camera->Right();
-	}
+    if (mMovementOn)
+    {
+	    EG::Camera* camera = mGraphicsEngine.GetSceneCamera();
+	   	EM::Vec3 velDir(0, 0, 0); 
+	   	static float speed = 3.0f;
 
-	if (velDir.Length()) velDir = EM::Vec3::Normalize(velDir);
+		if (input->IsKeyDown(SDLK_w))
+		{
+			EM::Vec3 F = camera->Forward();
+			velDir += F;
+		}
+		if (input->IsKeyDown(SDLK_s))
+		{
+			EM::Vec3 B = camera->Backward();
+			velDir += B;
+		}
+		if (input->IsKeyDown(SDLK_a))
+		{
+			velDir += camera->Left();
+		}
+		if (input->IsKeyDown(SDLK_d))
+		{
+			velDir += camera->Right();
+		}
 
-	camera->Transform.Position += speed * dt * velDir;
+		if (velDir.Length()) velDir = EM::Vec3::Normalize(velDir);
 
-	auto MouseSensitivity = 7.5f;
+		camera->Transform.Position += speed * dt * velDir;
 
-	// Get mouse input and change orientation of camera
-	auto MouseCoords = input->GetMouseCoords();
+		auto MouseSensitivity = 7.5f;
 
-	auto viewPort = mGraphicsEngine.GetViewport();
+		// Get mouse input and change orientation of camera
+		auto MouseCoords = input->GetMouseCoords();
 
-	EG::Window* window = mGraphicsEngine.GetWindow();
+		auto viewPort = mGraphicsEngine.GetViewport();
 
-	// Reset the mouse coords after having gotten the mouse coordinates
-	SDL_WarpMouseInWindow(window->GetWindowContext(), (float)viewPort.x / 2.0f, (float)viewPort.y / 2.0f);
+		EG::Window* window = mGraphicsEngine.GetWindow();
 
-	camera->OffsetOrientation(
-								(EM::ToRadians(((float)viewPort.x / 2.0f - MouseCoords.x) * dt) * MouseSensitivity), 
-								(EM::ToRadians(((float)viewPort.y / 2.0f - MouseCoords.y) * dt) * MouseSensitivity)
-							);
+		window->ShowMouseCursor(false);
+
+		// Reset the mouse coords after having gotten the mouse coordinates
+		SDL_WarpMouseInWindow(window->GetWindowContext(), (float)viewPort.x / 2.0f, (float)viewPort.y / 2.0f);
+
+		camera->OffsetOrientation(
+									(EM::ToRadians(((float)viewPort.x / 2.0f - MouseCoords.x) * dt) * MouseSensitivity), 
+									(EM::ToRadians(((float)viewPort.y / 2.0f - MouseCoords.y) * dt) * MouseSensitivity)
+								);
+    }
 
     return true;
 }

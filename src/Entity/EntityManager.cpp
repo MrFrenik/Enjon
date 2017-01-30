@@ -17,9 +17,6 @@ void EntityManager::DetachAll(EntityHandle* Entity)
 	if (Entity->HasComponent<VelocityComponent>()) 		Entity->Detach<VelocityComponent>();
 	if (Entity->HasComponent<TestComponent>()) 			Entity->Detach<TestComponent>();
 	if (Entity->HasComponent<MovementComponent>()) 		Entity->Detach<TestComponent>();
-	if (Entity->HasComponent<A>())						Entity->Detach<A>();
-	if (Entity->HasComponent<B>()) 						Entity->Detach<B>();
-	if (Entity->HasComponent<J>()) 						Entity->Detach<J>();
 }
 
 	// void EntityManager::DetachAll(EntityHandle* Entity)

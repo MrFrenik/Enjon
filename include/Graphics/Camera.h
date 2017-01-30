@@ -42,6 +42,7 @@ namespace Enjon { namespace Graphics {
 		EM::Mat4 GetViewProjection() const;
 		EM::Mat4 GetProjection() const;
 		EM::Mat4 GetView() const;
+		EM::Quaternion& GetOrientation() { return Transform.Orientation; }
 		inline EM::Vec2 GetNearFar() const { return EM::Vec2(NearPlane, FarPlane); }
 		inline f32 GetNear() { return NearPlane; }
 		inline f32 GetFar() { return FarPlane; }

@@ -10,7 +10,7 @@ namespace Enjon { namespace Graphics {
 		: 
 		Transform(),
 		FieldOfView(50),
-		NearPlane(0.1f),
+		NearPlane(0.001f),
 		FarPlane(1000.0f),
 		ViewPortAspectRatio(4.0f / 3.0f), 
 		ProjType(ProjectionType::PERSPECTIVE),
@@ -23,8 +23,8 @@ namespace Enjon { namespace Graphics {
 		: 
 		Transform(),
 		FieldOfView(50),
-		NearPlane(0.1f),
-		FarPlane(256.0f),
+		NearPlane(0.001f),
+		FarPlane(500.0f),
 		ViewPortAspectRatio((Enjon::f32)Width / (Enjon::f32)Height), 
 		ProjType(ProjectionType::PERSPECTIVE),
 		OrthographicScale(1.0f),
@@ -36,7 +36,7 @@ namespace Enjon { namespace Graphics {
 		: 
 		Transform(),
 		FieldOfView(60),
-		NearPlane(0.1f),
+		NearPlane(0.001f),
 		FarPlane(1000.0f),
 		ViewPortAspectRatio((Enjon::f32)dimensions.x / (Enjon::f32)dimensions.y), 
 		ProjType(ProjectionType::PERSPECTIVE),

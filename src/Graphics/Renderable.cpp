@@ -29,6 +29,14 @@ namespace Enjon { namespace Graphics {
 		mTransform.SetOrientation(orientation);
 	}
 
+	void Renderable::OffsetOrientation(const f32& Yaw, const f32& Pitch)
+	{
+		EM::Quaternion X = EM::Quaternion::AngleAxis(Yaw, 	EM::Vec3(0, 1, 0)); 	// Absolute Up
+		EM::Quaternion Y = EM::Quaternion::AngleAxis(Pitch, mTransform.Orientation * EM::Vec3(1, 0, 0));	// Relative Right
+
+		mTransform.Orientation = X * Y * mTransform.Orientation;
+	}
+
 	void Renderable::SetMaterial(EG::Material* material)
 	{
 		mMaterial = material;

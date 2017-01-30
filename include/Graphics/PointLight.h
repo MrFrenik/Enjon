@@ -52,6 +52,7 @@ namespace Enjon { namespace Graphics {
 			void SetColor(EG::ColorRGBA16& color);
 			void SetIntensity(float intensity);
 			void SetScene(EG::Scene* scene);
+			void SetPosition(EM::Vec3& position);
 
 		private:
 			EM::Vec3 			mPosition;

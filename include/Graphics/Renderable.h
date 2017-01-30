@@ -27,6 +27,9 @@ namespace Enjon { namespace Graphics {
 			/* Get orientation of transform */
 			EM::Quaternion GetOrientation() { return mTransform.GetOrientation(); }
 
+			/* Offset orientation of transform */
+			void Renderable::OffsetOrientation(const f32& Yaw, const f32& Pitch);
+
 			/* Get material of renderable */
 			EG::Material* GetMaterial() { return mMaterial; }
 
