@@ -12,7 +12,7 @@
 
 struct PlayerControllerSystem
 {
-	ECS::Systems::EntityManager* Manager;
+	ECS::Systems::EntityManagerDeprecated* Manager;
 	ECS::Component::PlayerController PlayerControllers[MAX_ENTITIES];
 	std::vector<Enjon::uint32> Targets;  // Totally testing this for now...
 
@@ -26,7 +26,7 @@ namespace ECS { namespace Systems { namespace PlayerController {
 
 	// Constructs and returns new PlayerControllerSystem
 	// TODO(John): Write custom allocator for this
-	struct PlayerControllerSystem* NewPlayerControllerSystem(Systems::EntityManager* Manager);
+	struct PlayerControllerSystem* NewPlayerControllerSystem(Systems::EntityManagerDeprecated* Manager);
 	
 	// Updates Controller of player it is attached to
 	void Update(struct PlayerControllerSystem* System);	

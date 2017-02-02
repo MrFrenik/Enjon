@@ -1,92 +1,92 @@
-#ifndef LOOT_H
-#define LOOT_H
+// #ifndef LOOT_H
+// #define LOOT_H
 
-#include <System/Types.h>
-#include <Math/Maths.h>
+// #include <System/Types.h>
+// #include <Math/Maths.h>
 
-#include "ECS/ComponentSystems.h"
+// #include "ECS/ComponentSystems.h"
 
-#include <unordered_map>
+// #include <unordered_map>
 
-namespace Loot {
+// namespace Loot {
 
-	enum Uniqueness 				{ COMMON, UNCOMMON, RARE, MAGIC, UNIQUE, LEGEND };
+// 	enum Uniqueness 				{ COMMON, UNCOMMON, RARE, MAGIC, UNIQUE, LEGEND };
 
-	typedef struct 
-	{
-		Enjon::uint32 Min;
-		Enjon::uint32 Max;	
-	} Range;
+// 	typedef struct 
+// 	{
+// 		Enjon::uint32 Min;
+// 		Enjon::uint32 Max;	
+// 	} Range;
 
 
-	typedef struct
-	{
-		Enjon::uint32 NumOfDrops;
-		float ChanceToDrop;
-		float LegendRate;
-		float RareRate;
-		float MagicRate;
-		float UncommonRate;
-		float CommoneRate;
-	} LootProfile;
+// 	typedef struct
+// 	{
+// 		Enjon::uint32 NumOfDrops;
+// 		float ChanceToDrop;
+// 		float LegendRate;
+// 		float RareRate;
+// 		float MagicRate;
+// 		float UncommonRate;
+// 		float CommoneRate;
+// 	} LootProfile;
 
-	/*-- Function Declarations --*/
+// 	/*-- Function Declarations --*/
 
-	/* Creates drop profiles for entities */	
-	void Init();		
+// 	/* Creates drop profiles for entities */	
+// 	void Init();		
 
-	/* Gets specific profile based on entity type */	
-	const LootProfile* GetProfile(std::string& N);
+// 	/* Gets specific profile based on entity type */	
+// 	const LootProfile* GetProfile(std::string& N);
 
-	/* Drops loot based on specified profile */
-	void DropLootBasedOnProfile(ECS::Systems::EntityManager* Manager, ECS::eid32 E);
+// 	/* Drops loot based on specified profile */
+// 	void DropLootBasedOnProfile(ECS::Systems::EntityManagerDeprecated* Manager, ECS::eid32 E);
 
-	void PrintCounts();
+// 	void PrintCounts();
 
-	/* Sub-namespaces */
+// 	/* Sub-namespaces */
 
-	namespace Weapon {
+// 	namespace Weapon {
 	
-		enum BaseType 	{ DAGGER, BOW, ARROW };
-		enum ReachType 	{ UNIDIRECTION, OMNIDIRECTION };
+// 		enum BaseType 	{ DAGGER, BOW, ARROW };
+// 		enum ReachType 	{ UNIDIRECTION, OMNIDIRECTION };
 	
-		typedef struct 
-		{
-			Range Damage;
-			float Reach;
-			BaseType Base;
-			ReachType Spread;  // I don't like this name... but oh well 
-		} WeaponProfile;
+// 		typedef struct 
+// 		{
+// 			Range Damage;
+// 			float Reach;
+// 			BaseType Base;
+// 			ReachType Spread;  // I don't like this name... but oh well 
+// 		} WeaponProfile;
 
-		/* Gets specific weapon profile given */
-		const WeaponProfile* GetProfile(std::string& N);
+// 		/* Gets specific weapon profile given */
+// 		const WeaponProfile* GetProfile(std::string& N);
 
-		/* Creates weapon profiles for entities */	
-		void Init();
-	}
+// 		/* Creates weapon profiles for entities */	
+// 		void Init();
+// 	}
 
-	namespace Item {
+// 	namespace Item {
 	
-		typedef struct 
-		{
-		} ItemProfile;
+// 		typedef struct 
+// 		{
+// 		} ItemProfile;
 
-	}
+// 	}
 
-	namespace Armor {
+// 	namespace Armor {
 
-		enum BaseType {};
+// 		enum BaseType {};
 	
-		typedef struct 
-		{
-			Range Defense;
-		} ArmorProfile;
+// 		typedef struct 
+// 		{
+// 			Range Defense;
+// 		} ArmorProfile;
 
-	}
-
-
-}
+// 	}
 
 
+// }
 
-#endif
+
+
+// #endif

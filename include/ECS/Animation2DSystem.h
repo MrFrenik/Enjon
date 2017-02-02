@@ -7,7 +7,7 @@
 
 struct Animation2DSystem
 {
-	ECS::Systems::EntityManager* Manager;
+	ECS::Systems::EntityManagerDeprecated* Manager;
 	ECS::Component::Animation2D Animations[MAX_ENTITIES];
 	ECS::Component::AnimComponent AnimComponents[MAX_ENTITIES];
 };
@@ -22,10 +22,10 @@ namespace ECS { namespace Systems { namespace Animation2D {
 	void SetCurrentWeapon(Weapons CurrentWeapon);
 
 	// Updates Transforms of EntityManager
-	void Update(struct EntityManager* Manager);	
+	void Update(struct EntityManagerDeprecated* Manager);	
 	
 	// Creates new Transform3DSystem
-	Animation2DSystem* NewAnimation2DSystem(struct EntityManager* Manager);
+	Animation2DSystem* NewAnimation2DSystem(struct EntityManagerDeprecated* Manager);
 }}}
 
 

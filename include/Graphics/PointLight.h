@@ -12,7 +12,9 @@ namespace Enjon { namespace Graphics {
 
 	struct PointLightParameters
 	{
-		PointLightParameters(){}
+		PointLightParameters()
+			: mConstant(1.0f), mLinear(0.1f), mQuadratic(0.01f)
+		{}
 		PointLightParameters(float constant, float linear, float quadratic)
 		{
 			mConstant 	= constant;
@@ -53,6 +55,7 @@ namespace Enjon { namespace Graphics {
 			void SetIntensity(float intensity);
 			void SetScene(EG::Scene* scene);
 			void SetPosition(EM::Vec3& position);
+			void SetParams(PLParams& params);
 
 		private:
 			EM::Vec3 			mPosition;

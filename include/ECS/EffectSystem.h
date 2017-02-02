@@ -14,14 +14,14 @@ typedef struct
 	EffectType Type;
 
 	// Some function pointer here to actually do something...
-	void (*Apply)(ECS::eid32 Entity, ECS::Systems::EntityManager* Manager);
+	void (*Apply)(ECS::eid32 Entity, ECS::Systems::EntityManagerDeprecated* Manager);
 	ECS::Component::TimerComponent Timer;
 	ECS::eid32 Entity;
 } EffectComponent;
 
 struct EffectSystem
 {
-	ECS::Systems::EntityManager* Manager;
+	ECS::Systems::EntityManagerDeprecated* Manager;
 
 	/* Note(John): This takes too much memory; Might need to change this or roll a more light-weight implementation */
 	std::unordered_map<std::string, EffectComponent> TransferredEffects[MAX_ENTITIES];
@@ -32,10 +32,10 @@ struct EffectSystem
 namespace ECS{ namespace Systems { namespace Effect {
 
 	// Constructs and returns new EffectSystem
-	struct EffectSystem* NewEffectSystem(Systems::EntityManager* Manager);
+	struct EffectSystem* NewEffectSystem(Systems::EntityManagerDeprecated* Manager);
 	
 	// Updates any Attributes Components of entity it is attached to
-	void Update(Systems::EntityManager* Manager);
+	void Update(Systems::EntityManagerDeprecated* Manager);
 
 }}}
 

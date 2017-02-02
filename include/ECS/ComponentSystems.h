@@ -33,83 +33,83 @@ struct Renderer2DSystem;
 struct AIControllerSystem;
 struct EffectSystem;
 
-// EntityManagers hold pointers to their system, which hold the arrays of data
+// EntityManagerDeprecateds hold pointers to their system, which hold the arrays of data
 // ComponentSystems don't need to know of mangers...or do they? Yes, they'll hold pointers to the managers of which they belong
-namespace ECS { namespace Systems {
+// namespace ECS { namespace Systems {
 
-	const float TILE_SIZE = 32.0f;
+// 	const float TILE_SIZE = 32.0f;
 	
-	struct EntityManager
-	{
-		eid32 NextAvailableID;
-		eid32 MinID;
-		eid32 MaxAvailableID;
-		eid32 Length;
+// 	struct EntityManagerDeprecated
+// 	{
+// 		eid32 NextAvailableID;
+// 		eid32 MinID;
+// 		eid32 MaxAvailableID;
+// 		eid32 Length;
 
-		struct Transform3DSystem* TransformSystem;
-		struct AIControllerSystem* AIControllerSystem;
-		struct PlayerControllerSystem* PlayerControllerSystem;
-		struct Animation2DSystem* Animation2DSystem;
-		struct LabelSystem* LabelSystem;
-		struct CollisionSystem* CollisionSystem;
-		struct AttributeSystem* AttributeSystem;
-		struct Renderer2DSystem* Renderer2DSystem;
-		struct InventorySystem* InventorySystem;
-		struct EffectSystem* EffectSystem;
-		EG::Particle2D::ParticleEngine2D* ParticleEngine;
+// 		struct Transform3DSystem* TransformSystem;
+// 		struct AIControllerSystem* AIControllerSystem;
+// 		struct PlayerControllerSystem* PlayerControllerSystem;
+// 		struct Animation2DSystem* Animation2DSystem;
+// 		struct LabelSystem* LabelSystem;
+// 		struct CollisionSystem* CollisionSystem;
+// 		struct AttributeSystem* AttributeSystem;
+// 		struct Renderer2DSystem* Renderer2DSystem;
+// 		struct InventorySystem* InventorySystem;
+// 		struct EffectSystem* EffectSystem;
+// 		EG::Particle2D::ParticleEngine2D* ParticleEngine;
 
-		bitmask32 Masks[MAX_ENTITIES];
-		Component::EntityType Types[MAX_ENTITIES];
+// 		bitmask32 Masks[MAX_ENTITIES];
+// 		Component::EntityType Types[MAX_ENTITIES];
 
-		eid32 Player;
+// 		eid32 Player;
 
-		int Width; 
-		int Height;
+// 		int Width; 
+// 		int Height;
 
-		SpatialHash::Grid* Grid;
-		Enjon::Graphics::Camera2D* Camera;
+// 		SpatialHash::Grid* Grid;
+// 		Enjon::Graphics::Camera2D* Camera;
 
-		Level* Lvl;
+// 		Level* Lvl;
 
-		std::vector<eid32> Entities;
+// 		std::vector<eid32> Entities;
 
-		Enjon::f32 Time;
-	};
+// 		Enjon::f32 Time;
+// 	};
 
-	////////////////////
-	// Entity Manager //
-	////////////////////
+// 	////////////////////
+// 	// Entity Manager //
+// 	////////////////////
 	
-	namespace EntitySystem 
-	{ 
-		// Creates and returns instance of an Entity Manager
-		// TODO(John): Write custom allocators instead of using malloc/delete
-		struct EntityManager* NewEntityManager(int Width, int Height, Enjon::Graphics::Camera2D* Camera, Level* Lvl);
+// 	namespace EntitySystem 
+// 	{ 
+// 		// Creates and returns instance of an Entity Manager
+// 		// TODO(John): Write custom allocators instead of using malloc/delete
+// 		struct EntityManagerDeprecated* NewEntityManagerDeprecated(int Width, int Height, Enjon::Graphics::Camera2D* Camera, Level* Lvl);
 
-		// Get global world object
-		struct EntityManager* World();
+// 		// Get global world object
+// 		struct EntityManagerDeprecated* World();
 
-		// Creates a blank entity, returns the eid and places in manager
-		eid32 CreateEntity(struct EntityManager* Manager, bitmask32 Components);
+// 		// Creates a blank entity, returns the eid and places in manager
+// 		eid32 CreateEntity(struct EntityManagerDeprecated* Manager, bitmask32 Components);
 
-		// Removes entity from manager by setting its bitfield to COMPONENT_NONE
-		void RemoveEntity(struct EntityManager* Manager, eid32 Entity); 
+// 		// Removes entity from manager by setting its bitfield to COMPONENT_NONE
+// 		void RemoveEntity(struct EntityManagerDeprecated* Manager, eid32 Entity); 
 
-		// Returns whether or not entity's bitfield is set to COMPONENT_NONE or not
-		bool IsAlive(struct EntityManager* Manager, eid32 Entity);
+// 		// Returns whether or not entity's bitfield is set to COMPONENT_NONE or not
+// 		bool IsAlive(struct EntityManagerDeprecated* Manager, eid32 Entity);
 
 		/* Turns off component from entity by bitwise ^= */
-		void RemoveComponents(struct EntityManager* Manager, eid32 Entity, bitmask32 Components);
+		// void RemoveComponents(struct EntityManagerDeprecated* Manager, eid32 Entity, bitmask32 Components);
 
-		/* Adds components to entity by bitwise | */
-		void AddComponents(bitmask32 Components);
+// 		/* Adds components to entity by bitwise | */
+// 		void AddComponents(bitmask32 Components);
 
-		/* Returns world time in ticks */
-		Enjon::f32 WorldTime();
+// 		/* Returns world time in ticks */
+// 		Enjon::f32 WorldTime();
 
-		void Update();
-	}
-}}
+// 		void Update();
+// 	}
+// }}
 
 
 

@@ -1,70 +1,617 @@
-***    OpenGL Version:  4.5.0 NVIDIA 364.72    ***
-XString: -1.000000
-YString: 0.000000
-ZString: 1.000000
-XString: 1.000000
-YString: 0.000000
-ZString: 1.000000
-XString: 1.000000
-YString: 0.000000
-ZString: -1.000000
-XString: -1.000000
-YString: 0.000000
-ZString: -1.000000
-v: -1.00 0.00 1.00
-v: 1.00 0.00 1.00
-v: 1.00 0.00 -1.00
-v: -1.00 0.00 -1.00
-vt: 1.00 0.00
-vt: 0.00 1.00
-vt: 0.00 0.00
-vt: 1.00 1.00
-vn: 0.00 1.00 0.00
-1: 2 1 1
-1.00 0.00 1.00
-1.00 0.00 
-0.00 1.00 0.00
-
-
-1: 4 2 1
--1.00 0.00 -1.00
-0.00 1.00 
-0.00 1.00 0.00
-
-
-1: 1 3 1
--1.00 0.00 1.00
-0.00 0.00 
-0.00 1.00 0.00
-
-
-v: -1.00 0.00 1.00
-v: 1.00 0.00 1.00
-v: 1.00 0.00 -1.00
-v: -1.00 0.00 -1.00
-vt: 1.00 0.00
-vt: 0.00 1.00
-vt: 0.00 0.00
-vt: 1.00 1.00
-vn: 0.00 1.00 0.00
-2: 2 1 1
-1.00 0.00 1.00
-1.00 0.00 
-0.00 1.00 0.00
-
-
-2: 3 4 1
-1.00 0.00 -1.00
-1.00 1.00 
-0.00 1.00 0.00
-
-
-2: 4 2 1
--1.00 0.00 -1.00
-0.00 1.00 
-0.00 1.00 0.00
-
-
-Positions: 4
-Normals: 1
-UVs: 4
+BehaviorTree.cpp
+Console.cpp
+CVarsSystem.cpp
+Game.cpp
+TypeCatalog.cpp
+Animations.cpp
+Camera.cpp
+Camera2D.cpp
+Camera3D.cpp
+CursorManager.cpp
+DeferredRenderer.cpp
+DirectionalLight.cpp
+Font.cpp
+FontManager.cpp
+FrameBufferObject.cpp
+..\include\Graphics/DeferredRenderer.h(23): error C2065: 'saturation': undeclared identifier (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/DeferredRenderer.h(25): error C2614: 'Enjon::Graphics::ToneMapSettings': illegal member initialization: 'mTreshold' is not a base or member (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/DeferredRenderer.h(39): error C2969: syntax error: ';': expected member function definition to end with '}' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/DeferredRenderer.h(39): error C2612: trailing 'type' illegal in base/member initializer list (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/RenderTarget.h(31): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/RenderTarget.h(31): error C2039: 'Vec2': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/RenderTarget.h(10): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/RenderTarget.h(31): error C2144: syntax error: 'int' should be preceded by ';' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/RenderTarget.h(31): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/RenderTarget.h(31): error C3861: 'Vec2': identifier not found (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(39): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(39): error C2039: 'Vec2': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(39): error C2144: syntax error: 'int' should be preceded by ';' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(39): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(40): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(40): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(40): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(40): error C2143: syntax error: missing ',' before '&' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(51): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(51): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(51): error C3646: 'Viewport': unknown override specifier (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(51): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+..\include\Graphics/GBuffer.h(39): error C3861: 'Vec2': identifier not found (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(89): error C2988: unrecognizable template declaration/definition (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(89): error C2143: syntax error: missing ';' before '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(89): error C2433: 'iterator_traits': 'inline' not permitted on data declarations (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(89): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(89): error C2059: syntax error: '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(104): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(104): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): error C2988: unrecognizable template declaration/definition (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): error C2143: syntax error: missing ';' before '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): error C2433: 'pair': 'inline' not permitted on data declarations (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): error C2059: syntax error: '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(132): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(132): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(204): error C2988: unrecognizable template declaration/definition (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(204): error C2143: syntax error: missing ';' before '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(204): error C2433: 'pair': 'inline' not permitted on data declarations (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(204): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(204): error C2374: 'Enjon::std::pair': redefinition; multiple initialization (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): note: see declaration of 'Enjon::std::pair' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(204): error C2059: syntax error: '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(232): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(232): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(245): error C2988: unrecognizable template declaration/definition (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(245): error C2143: syntax error: missing ';' before '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(245): error C2433: 'pair': 'inline' not permitted on data declarations (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(245): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(245): error C2374: 'Enjon::std::pair': redefinition; multiple initialization (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): note: see declaration of 'Enjon::std::pair' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(245): error C2059: syntax error: '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(266): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(266): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(428): error C2988: unrecognizable template declaration/definition (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(428): error C2143: syntax error: missing ';' before '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(428): error C2433: 'pair': 'inline' not permitted on data declarations (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(428): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(428): error C2374: 'Enjon::std::pair': redefinition; multiple initialization (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): note: see declaration of 'Enjon::std::pair' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(428): error C2059: syntax error: '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(454): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(454): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(659): error C2061: syntax error: identifier 'forward_iterator_tag' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(681): error C2061: syntax error: identifier 'random_access_iterator_tag' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(696): error C2995: '_FwdIt1 Enjon::std::_Search(_FwdIt1,_FwdIt1,_FwdIt2,_FwdIt2,_Pr,_Diff1 *,_Diff2 *)': function template has already been defined (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(657): note: see declaration of 'Enjon::std::_Search' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(730): error C2061: syntax error: identifier 'forward_iterator_tag' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(760): error C2061: syntax error: identifier 'random_access_iterator_tag' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(798): error C2995: '_FwdIt Enjon::std::_Search_n(_FwdIt,_FwdIt,_Diff,const _Ty &,_Pr)': function template has already been defined (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(729): note: see declaration of 'Enjon::std::_Search_n' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(1887): error C2061: syntax error: identifier 'input_iterator_tag' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(1897): error C2061: syntax error: identifier 'forward_iterator_tag' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(1908): error C2995: '_OutIt Enjon::std::_Unique_copy(_InIt,_InIt,_OutIt,_Pr)': function template has already been defined (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(1886): note: see declaration of 'Enjon::std::_Unique_copy' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2184): error C2061: syntax error: identifier 'forward_iterator_tag' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2202): error C2061: syntax error: identifier 'bidirectional_iterator_tag' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2219): error C2995: '_FwdIt Enjon::std::_Partition(_FwdIt,_FwdIt,_Pr)': function template has already been defined (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2183): note: see declaration of 'Enjon::std::_Partition' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2236): error C2061: syntax error: identifier '_Temp_iterator' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2267): error C2061: syntax error: identifier '_Temp_iterator' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2644): error C2988: unrecognizable template declaration/definition (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2644): error C2143: syntax error: missing ';' before '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2644): error C2433: 'pair': 'inline' not permitted on data declarations (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2644): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2644): error C2374: 'Enjon::std::pair': redefinition; multiple initialization (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): note: see declaration of 'Enjon::std::pair' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2644): error C2059: syntax error: '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2682): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2682): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2694): error C2988: unrecognizable template declaration/definition (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2694): error C2143: syntax error: missing ';' before '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2694): error C2433: 'pair': 'inline' not permitted on data declarations (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2694): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2694): error C2374: 'Enjon::std::pair': redefinition; multiple initialization (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): note: see declaration of 'Enjon::std::pair' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2694): error C2059: syntax error: '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2707): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2707): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(2956): error C2061: syntax error: identifier '_Temp_iterator' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(3108): error C2988: unrecognizable template declaration/definition (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(3108): error C2143: syntax error: missing ';' before '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(3108): error C2433: 'pair': 'inline' not permitted on data declarations (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(3108): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(3108): error C2374: 'Enjon::std::pair': redefinition; multiple initialization (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): note: see declaration of 'Enjon::std::pair' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(3108): error C2059: syntax error: '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(3169): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(3169): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(3249): error C2061: syntax error: identifier '_Temp_iterator' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(3276): error C2061: syntax error: identifier '_Temp_iterator' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4075): error C2988: unrecognizable template declaration/definition (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4075): error C2143: syntax error: missing ';' before '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4075): error C2433: 'pair': 'inline' not permitted on data declarations (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4075): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4075): error C2374: 'Enjon::std::pair': redefinition; multiple initialization (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): note: see declaration of 'Enjon::std::pair' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4075): error C2059: syntax error: '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4117): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4117): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4129): error C2988: unrecognizable template declaration/definition (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4129): error C2143: syntax error: missing ';' before '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4129): error C2433: 'pair': 'inline' not permitted on data declarations (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4129): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4129): error C2374: 'Enjon::std::pair': redefinition; multiple initialization (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(113): note: see declaration of 'Enjon::std::pair' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4129): error C2059: syntax error: '<' (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+E:\Programs\MicrosoftVisualStudio14.0\VC\INCLUDE\algorithm(4129): fatal error C1003: error count exceeds 100; stopping compilation (compiling source file ..\src\Graphics\DeferredRenderer.cpp)
+FullScreenQuad.cpp
+GBuffer.cpp
+GLSLProgram.cpp
+GUIAnimationElement.cpp
+Material.cpp
+Mesh.cpp
+MeshOG.cpp
+ParticleEngine2D.cpp
+picoPNG.cpp
+PointLight.cpp
+QuadBatch.cpp
+Renderable.cpp
+RenderTarget.cpp
+Scene.cpp
+ShaderManager.cpp
+SpotLight.cpp
+Sprite.cpp
+SpriteBatch.cpp
+SpriteSheetManager.cpp
+Window.cpp
+ImageLoader.cpp
+InputManager.cpp
+IOManager.cpp
+ObjLoader.cpp
+ResourceManager.cpp
+TextureCache.cpp
+Constants.cpp
+Mat4.cpp
+Quaternion.cpp
+Transform.cpp
+Vec2.cpp
+Vec3.cpp
+Vec4.cpp
+AABB.cpp
+Errors.cpp
+Timing.cpp
+AnimationEditor.cpp
+BehaviorTreeEditor.cpp
+PathFinding.cpp
+SpatialHash.cpp
+AIControllerSystem.cpp
+Animation2DSystem.cpp
+AttributeSystem.cpp
+e:\development\enjon\include\Graphics/DeferredRenderer.h(23): error C2065: 'saturation': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/DeferredRenderer.h(25): error C2614: 'Enjon::Graphics::ToneMapSettings': illegal member initialization: 'mTreshold' is not a base or member (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/DeferredRenderer.h(39): error C2969: syntax error: ';': expected member function definition to end with '}' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/DeferredRenderer.h(39): error C2612: trailing 'type' illegal in base/member initializer list (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C2039: 'Vec2': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C2144: syntax error: 'int' should be preceded by ';' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(40): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(40): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(40): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(40): error C2143: syntax error: missing ',' before '&' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(51): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(51): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(51): error C3646: 'Viewport': unknown override specifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(51): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C3861: 'Vec2': identifier not found (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(32): error C2061: syntax error: identifier 'GLTexture' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(33): error C3646: 'GetTexture': unknown override specifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(33): error C2059: syntax error: '(' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(33): error C2238: unexpected token(s) preceding ';' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2039: 'GLTexture': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(11): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C3646: 'mTextures': unknown override specifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2143: syntax error: missing ',' before '[' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2039: 'u32': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(11): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2143: syntax error: missing ')' before ';' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2238: unexpected token(s) preceding ';' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2039: 'ColorRGBA16': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(11): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C3646: 'mColors': unknown override specifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2143: syntax error: missing ',' before '[' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2039: 'u32': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(11): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2143: syntax error: missing ')' before ';' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2238: unexpected token(s) preceding ';' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C2039: 'Vec3': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C3646: 'GetPosition': unknown override specifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C2059: syntax error: '(' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C2334: unexpected token(s) preceding '{'; skipping apparent function body (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C2039: 'Vec3': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C3646: 'GetScale': unknown override specifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C2059: syntax error: '(' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C2334: unexpected token(s) preceding '{'; skipping apparent function body (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C2039: 'Quaternion': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C3646: 'GetOrientation': unknown override specifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C2059: syntax error: '(' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C2334: unexpected token(s) preceding '{'; skipping apparent function body (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C2039: 'Transform': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C2143: syntax error: missing ';' before '*' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C2334: unexpected token(s) preceding '{'; skipping apparent function body (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(46): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(46): error C2039: 'Vec3': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(46): error C2061: syntax error: identifier 'Vec3' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(49): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(49): error C2039: 'Vec3': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(49): error C2061: syntax error: identifier 'Vec3' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(52): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(52): error C2039: 'Quaternion': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(52): error C2061: syntax error: identifier 'Quaternion' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(64): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(64): error C2039: 'Transform': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(64): error C3646: 'mTransform': unknown override specifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(64): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'SpriteBatch': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'SpriteBatch': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'Batch': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'Vec4': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'StartAndEndPoints': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'ControlPoints': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2062: type 'float' unexpected (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'uint32': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'ColorRGBA16': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'RGBA16_White': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(12): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(12): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2039: 'SpriteBatch': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2065: 'SpriteBatch': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2065: 'Batch': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2065: 'Vec4': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2065: 'StartAndEndPoints': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2062: type 'float' unexpected (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2039: 'ColorRGBA16': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2039: 'RGBA16_White': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(70): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(70): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'SpriteBatch': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'SpriteBatch': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'Batch': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'Vec2': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'Vec2': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'Point': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'StartAndEndAngles': undeclared identifier (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2062: type 'float' unexpected (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'uint32': is not a member of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'ColorRGBA16': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'RGBA16_White': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(92): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(92): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(92): fatal error C1003: error count exceeds 100; stopping compilation (compiling source file ..\src\Editor\BehaviorTreeEditor.cpp)
+CollisionSystem.cpp
+ComponentSystems.cpp
+EffectSystem.cpp
+Entity.cpp
+EntityFactory.cpp
+InventorySystem.cpp
+LabelSystem.cpp
+PlayerControllerSystem.cpp
+Renderer2DSystem.cpp
+Transform3DSystem.cpp
+BehaviorTreeManager.cpp
+Task.cpp
+EntityManager.cpp
+AnimationManager.cpp
+AnimManager.cpp
+EnjonAnimation.cpp
+e:\development\enjon\include\Graphics/DeferredRenderer.h(23): error C2065: 'saturation': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/DeferredRenderer.h(25): error C2614: 'Enjon::Graphics::ToneMapSettings': illegal member initialization: 'mTreshold' is not a base or member (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/DeferredRenderer.h(39): error C2969: syntax error: ';': expected member function definition to end with '}' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/DeferredRenderer.h(39): error C2612: trailing 'type' illegal in base/member initializer list (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C2039: 'Vec2': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C2144: syntax error: 'int' should be preceded by ';' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(40): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(40): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(40): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(40): error C2143: syntax error: missing ',' before '&' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(51): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(51): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(51): error C3646: 'Viewport': unknown override specifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(51): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C3861: 'Vec2': identifier not found (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(32): error C2061: syntax error: identifier 'GLTexture' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(33): error C3646: 'GetTexture': unknown override specifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(33): error C2059: syntax error: '(' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(33): error C2238: unexpected token(s) preceding ';' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2039: 'GLTexture': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(11): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C3646: 'mTextures': unknown override specifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2143: syntax error: missing ',' before '[' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2039: 'u32': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(11): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2143: syntax error: missing ')' before ';' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2238: unexpected token(s) preceding ';' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2039: 'ColorRGBA16': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(11): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C3646: 'mColors': unknown override specifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2143: syntax error: missing ',' before '[' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2039: 'u32': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(11): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2143: syntax error: missing ')' before ';' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2238: unexpected token(s) preceding ';' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C2039: 'Vec3': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C3646: 'GetPosition': unknown override specifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C2059: syntax error: '(' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C2334: unexpected token(s) preceding '{'; skipping apparent function body (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C2039: 'Vec3': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C3646: 'GetScale': unknown override specifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C2059: syntax error: '(' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C2334: unexpected token(s) preceding '{'; skipping apparent function body (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C2039: 'Quaternion': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C3646: 'GetOrientation': unknown override specifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C2059: syntax error: '(' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C2334: unexpected token(s) preceding '{'; skipping apparent function body (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C2039: 'Transform': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C2143: syntax error: missing ';' before '*' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C2334: unexpected token(s) preceding '{'; skipping apparent function body (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(46): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(46): error C2039: 'Vec3': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(46): error C2061: syntax error: identifier 'Vec3' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(49): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(49): error C2039: 'Vec3': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(49): error C2061: syntax error: identifier 'Vec3' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(52): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(52): error C2039: 'Quaternion': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(52): error C2061: syntax error: identifier 'Quaternion' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(64): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(64): error C2039: 'Transform': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(64): error C3646: 'mTransform': unknown override specifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(64): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'SpriteBatch': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'SpriteBatch': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'Batch': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'Vec4': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'StartAndEndPoints': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'ControlPoints': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2062: type 'float' unexpected (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'uint32': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'ColorRGBA16': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'RGBA16_White': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(12): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(12): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2039: 'SpriteBatch': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2065: 'SpriteBatch': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2065: 'Batch': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2065: 'Vec4': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2065: 'StartAndEndPoints': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2062: type 'float' unexpected (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2039: 'ColorRGBA16': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2039: 'RGBA16_White': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(70): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(70): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'SpriteBatch': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'SpriteBatch': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'Batch': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'Vec2': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'Vec2': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'Point': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'StartAndEndAngles': undeclared identifier (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2062: type 'float' unexpected (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'uint32': is not a member of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'ColorRGBA16': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'RGBA16_White': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(92): error C2143: syntax error: missing ';' before '{' (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(92): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(92): fatal error C1003: error count exceeds 100; stopping compilation (compiling source file ..\src\BehaviorTree\BehaviorTreeManager.cpp)
+Level.cpp
+Loot.cpp
+main.cpp
+e:\development\enjon\include\Graphics/DeferredRenderer.h(23): error C2065: 'saturation': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/DeferredRenderer.h(25): error C2614: 'Enjon::Graphics::ToneMapSettings': illegal member initialization: 'mTreshold' is not a base or member (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/DeferredRenderer.h(39): error C2969: syntax error: ';': expected member function definition to end with '}' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/DeferredRenderer.h(39): error C2612: trailing 'type' illegal in base/member initializer list (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C2039: 'Vec2': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C2144: syntax error: 'int' should be preceded by ';' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(40): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(40): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(40): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(40): error C2143: syntax error: missing ',' before '&' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(51): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(51): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(51): error C3646: 'Viewport': unknown override specifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(51): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/GBuffer.h(39): error C3861: 'Vec2': identifier not found (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(32): error C2061: syntax error: identifier 'GLTexture' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(33): error C3646: 'GetTexture': unknown override specifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(33): error C2059: syntax error: '(' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(33): error C2238: unexpected token(s) preceding ';' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2039: 'GLTexture': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(11): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C3646: 'mTextures': unknown override specifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2143: syntax error: missing ',' before '[' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2039: 'u32': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(11): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2143: syntax error: missing ')' before ';' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(39): error C2238: unexpected token(s) preceding ';' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2039: 'ColorRGBA16': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(11): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C3646: 'mColors': unknown override specifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2143: syntax error: missing ',' before '[' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2039: 'u32': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(11): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2143: syntax error: missing ')' before ';' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Material.h(40): error C2238: unexpected token(s) preceding ';' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C2039: 'Vec3': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C3646: 'GetPosition': unknown override specifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C2059: syntax error: '(' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(22): error C2334: unexpected token(s) preceding '{'; skipping apparent function body (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C2039: 'Vec3': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C3646: 'GetScale': unknown override specifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C2059: syntax error: '(' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(25): error C2334: unexpected token(s) preceding '{'; skipping apparent function body (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C2039: 'Quaternion': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C3646: 'GetOrientation': unknown override specifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C2059: syntax error: '(' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(28): error C2334: unexpected token(s) preceding '{'; skipping apparent function body (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C2039: 'Transform': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C2143: syntax error: missing ';' before '*' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(43): error C2334: unexpected token(s) preceding '{'; skipping apparent function body (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(46): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(46): error C2039: 'Vec3': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(46): error C2061: syntax error: identifier 'Vec3' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(49): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(49): error C2039: 'Vec3': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(49): error C2061: syntax error: identifier 'Vec3' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(52): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(52): error C2039: 'Quaternion': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(52): error C2061: syntax error: identifier 'Quaternion' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(64): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(64): error C2039: 'Transform': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(9): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(64): error C3646: 'mTransform': unknown override specifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Renderable.h(64): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'SpriteBatch': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'SpriteBatch': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'Batch': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'Vec4': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'StartAndEndPoints': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2065: 'ControlPoints': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2062: type 'float' unexpected (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'uint32': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'ColorRGBA16': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(11): error C2039: 'RGBA16_White': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(12): error C2143: syntax error: missing ';' before '{' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(12): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2039: 'SpriteBatch': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2065: 'SpriteBatch': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2065: 'Batch': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2039: 'Vec4': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2065: 'Vec4': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2065: 'StartAndEndPoints': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2062: type 'float' unexpected (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2039: 'ColorRGBA16': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(69): error C2039: 'RGBA16_White': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(70): error C2143: syntax error: missing ';' before '{' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(70): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'SpriteBatch': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'SpriteBatch': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'Batch': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C3083: 'Math': the symbol to the left of a '::' must be a type (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'Vec2': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'Vec2': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'Point': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2065: 'StartAndEndAngles': undeclared identifier (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2062: type 'float' unexpected (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'uint32': is not a member of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'ColorRGBA16': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(91): error C2039: 'RGBA16_White': is not a member of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(8): note: see declaration of 'Enjon::Enjon::Graphics' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(92): error C2143: syntax error: missing ';' before '{' (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(92): error C2447: '{': missing function header (old-style formal list?) (compiling source file ..\IsoARPG\src\main.cpp)
+e:\development\enjon\include\Graphics/Shapes.h(92): fatal error C1003: error count exceeds 100; stopping compilation (compiling source file ..\IsoARPG\src\main.cpp)

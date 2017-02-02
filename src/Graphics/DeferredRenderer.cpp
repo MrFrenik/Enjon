@@ -43,7 +43,7 @@ namespace Enjon { namespace Graphics {
 	{
 		// TODO(John): Need to have a way to have an ini that's read or grab these values from a static
 		// engine config file
-		mWindow.Init("Game", 800, 600); 
+		mWindow.Init("Game", 1440, 900); 
 
 		// Initialize shader manager
 		EG::ShaderManager::Init();

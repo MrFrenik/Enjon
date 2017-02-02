@@ -7,17 +7,17 @@
 
 struct InventorySystem
 {
-	ECS::Systems::EntityManager* Manager;
+	ECS::Systems::EntityManagerDeprecated* Manager;
 	ECS::Component::InventoryComponent Inventories[MAX_ENTITIES];
 }; 
 
 namespace ECS { namespace Systems { namespace Inventory {
 
-	// Updates Transforms of EntityManager
+	// Updates Transforms of EntityManagerDeprecated
 	void Update(InventorySystem* System);
 
 	// Creates new Transform3DSystem
-	InventorySystem* NewInventorySystem(struct EntityManager* Manager);		
+	InventorySystem* NewInventorySystem(struct EntityManagerDeprecated* Manager);		
 }}}
 
 

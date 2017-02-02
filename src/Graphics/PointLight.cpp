@@ -46,6 +46,11 @@ namespace Enjon { namespace Graphics {
 		mPosition = position;
 	}
 
+	void PointLight::SetParams(PLParams& params)
+	{
+		mParams = params;	
+	}
+
 	PointLight::~PointLight()
 	{
 	}

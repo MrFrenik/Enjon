@@ -7,7 +7,7 @@
 
 struct CollisionSystem
 {
-	ECS::Systems::EntityManager* Manager;
+	ECS::Systems::EntityManagerDeprecated* Manager;
 	ECS::Component::CollisionComponent CollisionComponents[MAX_ENTITIES];	
 	std::vector<Enjon::uint32> Entities;
 };
@@ -15,32 +15,32 @@ struct CollisionSystem
 namespace ECS { namespace Systems { namespace Collision {
 
 	// Updates all possible collisions
-	void Update(struct EntityManager* Manager);
+	void Update(struct EntityManagerDeprecated* Manager);
 
 	// Creates new CollisionSystem
-	struct CollisionSystem* NewCollisionSystem(Systems::EntityManager* Manager);		
+	struct CollisionSystem* NewCollisionSystem(Systems::EntityManagerDeprecated* Manager);		
 
 	// Check collision type  
-	Enjon::uint32 GetCollisionType(Systems::EntityManager* Manager, ECS::eid32 A, ECS::eid32 B);
+	Enjon::uint32 GetCollisionType(Systems::EntityManagerDeprecated* Manager, ECS::eid32 A, ECS::eid32 B);
 
 	// Collide Player with Item
-	void CollideWithItem(Systems::EntityManager* Manager, ECS::eid32 A, ECS::eid32 B);
+	void CollideWithItem(Systems::EntityManagerDeprecated* Manager, ECS::eid32 A, ECS::eid32 B);
 
 	// Collide Player with Enemy
-	void CollideWithEnemy(Systems::EntityManager* Manager, ECS::eid32 A, ECS::eid32 B);
+	void CollideWithEnemy(Systems::EntityManagerDeprecated* Manager, ECS::eid32 A, ECS::eid32 B);
 
 	// Collide Projectile with Enemy
-	void CollideWithProjectile(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
+	void CollideWithProjectile(Systems::EntityManagerDeprecated* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
 
 	// Collide Explosive with Enemy
-	void CollideWithExplosive(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
+	void CollideWithExplosive(Systems::EntityManagerDeprecated* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
 
-	void CollideWithDebris(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
+	void CollideWithDebris(Systems::EntityManagerDeprecated* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
 
-	void CollideWithVortex(Systems::EntityManager* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
+	void CollideWithVortex(Systems::EntityManagerDeprecated* Manager, ECS::eid32 A_ID, ECS::eid32 B_ID);
 
 	// Totally for testing purposes...
-	void DropRandomLoot(Systems::EntityManager* Manager, Enjon::uint32 count, const Enjon::Math::Vec2* Position);
+	void DropRandomLoot(Systems::EntityManagerDeprecated* Manager, Enjon::uint32 count, const Enjon::Math::Vec2* Position);
 }}}
 
 

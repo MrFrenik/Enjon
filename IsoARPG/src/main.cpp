@@ -8478,6 +8478,7 @@ int main(int argc, char** argv)
 #include <Math/Maths.h>
 #include <Enjon.h>
 #include <vector>
+#include <Entity/Component.h>
 
 EG::DeferredRenderer mGraphicsEngine;
 EI::InputManager mInputManager;
@@ -8493,6 +8494,8 @@ EG::PointLight mPointLight3;
 EG::PointLight mPointLight4;
 EG::SpotLight mSpotLight;
 EG::QuadBatch mBatch;
+
+Enjon::EntityManager* mEntities;
 
 bool mMovementOn = true;
 
@@ -8567,17 +8570,24 @@ int main(int argc, char** argv)
 	}
 	mBatch.End();
 
+	mEntities = new Enjon::EntityManager();
+	mEntities->RegisterComponent<Enjon::PointLightComponent>();
+
+	Enjon::EntityHandle* handle = mEntities->Allocate();
+	auto plc = mEntities->Attach<Enjon::PointLightComponent>(handle);
+	auto light = plc->GetLight();
+	light->SetColor(EG::RGBA16_Orange());
+	light->SetParams(EG::PLParams(1.0f, 0.1f, 0.01f));
+	light->SetIntensity(20.0f);
+
 	// Add elements scene
 	scene->AddRenderable(&mRenderable);
 	scene->AddRenderable(&mRenderable2);
 	scene->AddDirectionalLight(&mSun);
 	scene->AddDirectionalLight(&mSun2);
 	scene->AddDirectionalLight(&mSun3);
-	scene->AddPointLight(&mPointLight);
-	scene->AddPointLight(&mPointLight2);
-	scene->AddPointLight(&mPointLight3);
-	scene->AddPointLight(&mPointLight4);
-	scene->AddSpotLight(&mSpotLight);
+	// scene->AddSpotLight(&mSpotLight);
+	scene->AddPointLight(light);
 	scene->AddQuadBatch(&mBatch);
 	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_White(), 0.1f));
 
@@ -8593,12 +8603,13 @@ int main(int argc, char** argv)
 														EM::Vec3(0, 1, 0)
 													)
 								);
-		mPointLight.SetPosition(EM::Vec3(cos(dt) * 10.0f, 0.5f, sin(dt) * 10.0f));
 
 		// Set spot light direction and position
 		EG::Camera* sceneCam = mGraphicsEngine.GetSceneCamera();
-		mSpotLight.SetPosition(sceneCam->GetPosition());
-		mSpotLight.SetDirection(sceneCam->Forward());
+		// mSpotLight.SetPosition(sceneCam->GetPosition());
+		// mSpotLight.SetDirection(sceneCam->Forward());
+
+		light->SetPosition(sceneCam->GetPosition() + EM::Vec3(cos(dt), 0.0f, sin(dt)) * 3.0f);
 
 		// Render
 		mGraphicsEngine.Update(dt);

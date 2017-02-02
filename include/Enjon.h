@@ -65,9 +65,12 @@
 #include "IO/TextureCache.h"
 #include "IO/ObjLoader.h"
 
+#include "Entity/EntityManager.h"
+#include "Entity/Entity.h"
+#include "Entity/Component.h"
+
 #include "Physics/AABB.h"
 
-#include "BehaviorTree/BT.h"
 
 #include "Defines.h"
 

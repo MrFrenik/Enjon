@@ -1,7 +1,8 @@
-#include <TypeCatalog.h>
-#include <Entity/EntityManager.h>
-#include <Entity/Component.h>
+// #include <TypeCatalog.h>
+// #include <Entity/EntityManager.h>
+// #include <Entity/Component.h>
 
+/*
 // Generated code
 namespace TypeCatalog 
 {
@@ -31,4 +32,15 @@ namespace TypeCatalog
 
 	template <>
 	ComponentType GetType<MovementComponent&>() { return ComponentType::COMPONENTTYPE_MOVEMENT; }
+
+	template <>
+	ComponentType GetType<PointLightComponent>() { return ComponentType::COMPONENTTYPE_POINTLIGHT; }
+
+	template <>
+	ComponentType GetType<PointLightComponent*>() { return ComponentType::COMPONENTTYPE_POINTLIGHT; }
+
+	template <>
+	ComponentType GetType<PointLightComponent&>() { return ComponentType::COMPONENTTYPE_POINTLIGHT; }
 };
+
+*/

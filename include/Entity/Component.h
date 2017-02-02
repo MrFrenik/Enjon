@@ -1,99 +1,89 @@
+#pragma once
 #ifndef ENJON_COMPONENT_H
 #define ENJON_COMPONENT_H
-#pragma once
 
 #define ENJON_COMPONENT(tags)
 #define ENJON_OBJECT(tags)
 
-struct vec3
-{
-	vec3(){}
-	vec3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+#include "Entity/EntityDefines.h"
+#include "Graphics/PointLight.h"
 
-	float x;
-	float y;
-	float z;
-};
+#include <array>
+#include <vector>
+#include <bitset>
 
-struct ComponentBase
-{
-	virtual void Base() = 0;
-	struct EntityHandle* Entity;
-};
+namespace Enjon {
 
-template <typename T>
-struct Component : public ComponentBase
-{
-	void Base()
+	enum class CoreComponentType
 	{
-		static_cast<T*>(this)->Base();
+		COMPONENTTYPE_NONE,
+		COMPONENTTYPE_POSITION,
+		COMPONENTTYPE_VELOCITY,
+		COMPONENTTYPE_TEST,
+		COMPONENTTYPE_MOVEMENT,
+		COMPONENTTYPE_POINTLIGHT,
+		COUNT
+	};
+
+	typedef std::bitset<static_cast<size_t>(CoreComponentType::COUNT)> ComponentBitset;
+
+	template <typename T>
+	CoreComponentType GetComponentType();
+
+	template <typename T>
+	ComponentBitset GetComponentBitMask() 
+	{ 
+		ComponentBitset BitSet;
+		BitSet.set(static_cast<size_t>(GetComponentType<T>()));
+		return BitSet;
 	}
-};
 
-ENJON_OBJECT("Component")
-struct PositionComponent : Component<PositionComponent>
-{
-	void Base() {}
-	PositionComponent(){}
-	PositionComponent(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+	// Forward declaration
+	class EntityHandle;
 
-	float x;
-	float y;
-	float z;
-};
+	class Component
+	{
+		public:
+			Component(){}
+			virtual void Update(float dt) = 0;
 
-ENJON_OBJECT("Component")
-struct VelocityComponent : Component<VelocityComponent>
-{
-	void Base() {}
+			Enjon::EntityHandle* GetEntity();
+			void SetEntity(EntityHandle* entity);
 
-	VelocityComponent(){}
-	VelocityComponent(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+		private:
+			Enjon::EntityHandle* mEntity;
+	};
 
-	float x;
-	float y;
-	float z;
-};
+	class ComponentWrapperBase
+	{
+		public:
+			virtual void Base() = 0;
+	};
 
-ENJON_OBJECT("Component")
-struct TestComponent : Component<TestComponent>
-{
-	void Base(){}
+	template <typename T>
+	class ComponentWrapper : public ComponentWrapperBase
+	{
+		public:
+			void Base() override {}
 
-	vec3 a;
-};
+			std::vector<T> Components;
+			std::array<uint32_t, MAX_ENTITIES> ComponentIndexMap;
+	};
 
-ENJON_OBJECT("Component")
-struct MovementComponent : Component<MovementComponent>
-{
-	void Base(){}
+	class PointLightComponent : public Component
+	{
+		public:
+			PointLightComponent(){}
+			~PointLightComponent(){}
 
-	vec3 Position;
-	vec3 Velocity;
-};
+			virtual void Update(float dt) {}
+			Enjon::Graphics::PointLight* GetLight() { return &mLight; }
 
-ENJON_OBJECT("Component")
-struct J : Component<J>
-{
-	void Base(){}
+		private:
+			Enjon::Graphics::PointLight mLight;	
+	};
+}
 
-	vec3 MemberVarible;
-};
 
-ENJON_OBJECT("Component")
-struct A : Component<A>
-{
-	void Base(){}
-
-	vec3 MemberVarible;
-};
-
-ENJON_OBJECT("Component")
-struct B : Component<B>
-{
-	void Base(){}
-
-	vec3 MemberVarible;
-};
 
 #endif

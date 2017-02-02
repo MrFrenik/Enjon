@@ -9,18 +9,18 @@
 
 struct Renderer2DSystem
 {
-	ECS::Systems::EntityManager* Manager;
+	ECS::Systems::EntityManagerDeprecated* Manager;
 	ECS::Component::Renderer2DComponent Renderers[MAX_ENTITIES];
 	std::vector<Enjon::uint32> Entities;
 };
 
 namespace ECS { namespace Systems { namespace Renderer2D {
 
-	// Updates Renderers of EntityManager
-	void Update(struct EntityManager* Manager);
+	// Updates Renderers of EntityManagerDeprecated
+	void Update(struct EntityManagerDeprecated* Manager);
 
 	// Create new Render2DSystem
-	Renderer2DSystem* NewRenderer2DSystem(struct EntityManager* Manager);	
+	Renderer2DSystem* NewRenderer2DSystem(struct EntityManagerDeprecated* Manager);	
 }}}
 
 

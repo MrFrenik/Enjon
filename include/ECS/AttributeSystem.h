@@ -10,7 +10,7 @@
 
 struct AttributeSystem
 {
-	ECS::Systems::EntityManager* Manager;
+	ECS::Systems::EntityManagerDeprecated* Manager;
 	ECS::Component::HealthComponent HealthComponents[MAX_ENTITIES];
 	ECS::Component::BitmaskComponent BitMasks[MAX_ENTITIES];
 	ECS::Masks::EntityMask Masks[MAX_ENTITIES];
@@ -28,12 +28,12 @@ namespace ECS{ namespace Systems { namespace Attributes {
 
 	// Constructs and returns new AttributeSystem
 	// TODO(John): Write custom allocator for this
-	struct AttributeSystem* NewAttributeSystem(Systems::EntityManager* Manager);
+	struct AttributeSystem* NewAttributeSystem(Systems::EntityManagerDeprecated* Manager);
 	
 	// Updates any Attributes Components of entity it is attached to
 	void Update(struct AttributeSystem* System);
 
-	void Reset(Systems::EntityManager* Manager, eid32 Entity);
+	void Reset(Systems::EntityManagerDeprecated* Manager, eid32 Entity);
 
 }}}
 

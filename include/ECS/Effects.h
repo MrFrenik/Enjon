@@ -18,18 +18,18 @@
 
 namespace ECS { namespace Effects {
 
-	inline void Stop(ECS::eid32 E, ECS::Systems::EntityManager* Manager)
+	inline void Stop(ECS::eid32 E, ECS::Systems::EntityManagerDeprecated* Manager)
 	{
 		Manager->TransformSystem->Transforms[E].Velocity = Enjon::Math::Vec3(0.0f, 0.0f, 0.0f);
 	}
 
 	// Purely for testing this out to see if it will even transfer
-	inline void ChangeColor(ECS::eid32 E, ECS::Systems::EntityManager* Manager, Enjon::Graphics::ColorRGBA16 C)
+	inline void ChangeColor(ECS::eid32 E, ECS::Systems::EntityManagerDeprecated* Manager, Enjon::Graphics::ColorRGBA16 C)
 	{
 		Manager->Renderer2DSystem->Renderers[E].Color = C; 
 	}
 
-	inline void Damage(ECS::eid32 E, ECS::Systems::EntityManager* Manager)
+	inline void Damage(ECS::eid32 E, ECS::Systems::EntityManagerDeprecated* Manager)
 	{
 		// Apply damage
 		auto A = Enjon::Random::Roll(0, 3);
@@ -38,7 +38,7 @@ namespace ECS { namespace Effects {
 	}
 
 	/* Applies poison damage to entity over time */
-	inline void Poison(ECS::eid32 E, ECS::Systems::EntityManager* Manager)
+	inline void Poison(ECS::eid32 E, ECS::Systems::EntityManagerDeprecated* Manager)
 	{
 		// Change to green color
 		// ChangeColor(E, Manager, Enjon::Graphics::RGBA16_Green());
@@ -50,7 +50,7 @@ namespace ECS { namespace Effects {
 
 
 	/* Slows down velocity of entity to given amount */
-	inline void Cold(ECS::eid32 E, ECS::Systems::EntityManager* Manager)
+	inline void Cold(ECS::eid32 E, ECS::Systems::EntityManagerDeprecated* Manager)
 	{
 		// Change color to blue
 		ChangeColor(E, Manager, Enjon::Graphics::RGBA16_Blue());;

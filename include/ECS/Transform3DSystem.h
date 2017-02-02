@@ -7,24 +7,24 @@
 #include <Graphics/ParticleEngine2D.h>
 
 // Forward Declaration
-struct EntityManager;
+struct EntityManagerDeprecated;
 
 struct Transform3DSystem
 {
-	ECS::Systems::EntityManager* Manager;
+	ECS::Systems::EntityManagerDeprecated* Manager;
 	ECS::Component::Transform3D Transforms[MAX_ENTITIES];
 }; 
 
 namespace ECS{ namespace Systems { namespace Transform {
 
-		// Updates Transforms of EntityManager
+		// Updates Transforms of EntityManagerDeprecated
 		void Update(Transform3DSystem* System, Enjon::Graphics::Particle2D::ParticleBatch2D* Batch);
 
 		// Creates new Transform3DSystem
-		Transform3DSystem* NewTransform3DSystem(struct EntityManager* Manager);	
+		Transform3DSystem* NewTransform3DSystem(struct EntityManagerDeprecated* Manager);	
 
 		// Resets transform component of entity
-		void Reset(struct EntityManager* Manager, eid32 Entity);	
+		void Reset(struct EntityManagerDeprecated* Manager, eid32 Entity);	
 }}}
 
 

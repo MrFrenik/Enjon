@@ -2,13 +2,15 @@
 #define ENJON_TYPE_CATALOG_H
 #pragma once
 
-struct PositionComponent;
-struct VelocityComponent;
-struct TestComponent;
-struct MovementComponent;
+// struct PositionComponent;
+// struct VelocityComponent;
+// struct TestComponent;
+// struct MovementComponent;
+// struct PointLightComponent;
 
-#include <bitset>
+// #include <bitset>
 
+/*
 // Generated code
 namespace TypeCatalog 
 {
@@ -48,5 +50,6 @@ namespace TypeCatalog
 		return BitSet;
 	}
 };
+*/
 
 #endif

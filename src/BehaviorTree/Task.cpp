@@ -1,10 +1,10 @@
 #ifndef ENJON_TASK_H
 #define ENJON_TASK_H
 
-#include "BehaviorTree/Task.h"
-#include "ECS/ComponentSystems.h"
-#include "ECS/Transform3DSystem.h"
-#include "ECS/AttributeSystem.h"
+// #include "BehaviorTree/Task.h"
+// #include "ECS/ComponentSystems.h"
+// #include "ECS/Transform3DSystem.h"
+// #include "ECS/AttributeSystem.h"
 
 namespace BT
 {

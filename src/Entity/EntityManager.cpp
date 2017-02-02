@@ -1,5 +1,5 @@
-#include <Entity/EntityManager.h>
-#include <Entity/Component.h>
+#include "Entity/EntityManager.h"
+#include "Entity/Component.h"
 
 #include <array>
 #include <vector>
@@ -7,29 +7,29 @@
 
 #include <stdio.h>
 
-// Generated? Possibly, that way we can do the stupid shit I'm about to do...
-// Would really like a cleaner way that doesn't expose all of this to the entity manager
-// Whatever... for now, this is just how it is until I get smarter about it
-// But I'm tired of trying to figure out how to do this correctly
-void EntityManager::DetachAll(EntityHandle* Entity)
-{
-	if (Entity->HasComponent<PositionComponent>()) 		Entity->Detach<PositionComponent>();
-	if (Entity->HasComponent<VelocityComponent>()) 		Entity->Detach<VelocityComponent>();
-	if (Entity->HasComponent<TestComponent>()) 			Entity->Detach<TestComponent>();
-	if (Entity->HasComponent<MovementComponent>()) 		Entity->Detach<TestComponent>();
+namespace Enjon { 
+
+	EntityManager::EntityManager()
+	{
+		for (auto i = 0; i < Components.size(); i++)
+		{
+			Components.at(i) = nullptr;
+		}
+
+		NextAvailableID = 0;
+		mEntities = new EntityHandle[MAX_ENTITIES];
+	}
+
+	EntityManager::~EntityManager()
+	{
+	}
+
+	EntityHandle* EntityManager::Allocate()
+	{
+		assert(NextAvailableID < MAX_ENTITIES);
+		EntityHandle Entity(this);
+		auto id = Entity.GetID();
+		mEntities[id] = Entity;
+		return &mEntities[id];
+	}
 }
-
-	// void EntityManager::DetachAll(EntityHandle* Entity)
-	// {
-	// 	// Grab id
-	// 	auto ID = Entity->ID;
-
-	// 	TypeCatalog::RegisteredTypes rt;
-
-	// 	for (auto i = 0; i < static_cast<size_t>(TypeCatalog::ComponentType::COUNT); i++)
-	// 	{
-	// 		// Get component wrapper
-	// 		// auto CWrapper = static_cast<ComponentWrapper<decltype(member)>*>(Components.at(static_cast<size_t>(TypeCatalog::GetType<decltype(member)>())));
-	// 	}
-
-	// }

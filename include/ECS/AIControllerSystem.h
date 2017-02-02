@@ -24,7 +24,7 @@ namespace ECS { namespace Component {
 
 struct AIControllerSystem
 {
-	ECS::Systems::EntityManager* Manager;
+	ECS::Systems::EntityManagerDeprecated* Manager;
 	ECS::Component::AIController AIControllers[MAX_ENTITIES];
 	ECS::Component::PathFindingComponent PathFindingComponents[MAX_ENTITIES];
 };
@@ -38,7 +38,7 @@ namespace ECS { namespace Systems { namespace AIController {
 	// Updates Controller of AI it is attached to
 	void Update(struct AIControllerSystem* System, eid32 Player);
 
-	void Reset(struct EntityManager* Manager, eid32 Entity);	
+	void Reset(struct EntityManagerDeprecated* Manager, eid32 Entity);	
 
 	std::deque<PathFinding::Node>* GetPath();
 }}}
