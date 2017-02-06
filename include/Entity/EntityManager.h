@@ -5,6 +5,7 @@
 #include "Entity/Component.h"
 #include "Entity/Entity.h"
 #include "Entity/EntityDefines.h"
+#include "Math/Transform.h"
 
 #include "System/Types.h"
 
@@ -19,6 +20,7 @@ namespace Enjon {
 
 	class EntityHandle
 	{
+		friend EntityManager; 
 		public:
 			EntityHandle()
 			{
@@ -49,7 +51,6 @@ namespace Enjon {
 				return ((mComponentMask & Enjon::GetComponentBitMask<T>()) != 0);
 			}
 
-			/*
 			template <typename T>
 			T* GetComponent()
 			{
@@ -116,13 +117,22 @@ namespace Enjon {
 				// Set bitmask field for component
 				this->ComponentMask ^= TypeCatalog::GetBitMask<T>();
 			}
-			*/
 
+			void SetPosition(EM::Vec3& position);
+			void SetScale(EM::Vec3& scale);
+			void SetOrientation(EM::Quaternion& orientation);
+
+			EM::Vec3& GetPosition() { return mTransform.GetPosition(); }
+			EM::Vec3& GetScale() { return mTransform.GetScale(); }
+			EM::Quaternion& GetOrientation() { return mTransform.GetOrientation(); }
+
+		private:
 			u32 mID;	
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
+			Enjon::Math::Transform mTransform;
+			std::vector<Component*> mComponents;
 	};
-
 
 	class EntityManager
 	{
@@ -184,7 +194,7 @@ namespace Enjon {
 			void Detach(EntityHandle* Entity)
 			{
 				// Check to make sure isn't already attached to this entity
-				// assert(Entity->HasComponent<T>());
+				assert(Entity->HasComponent<T>());
 
 				// Remove component from entity manager components
 				RemoveComponent<T>(Entity);
@@ -225,7 +235,6 @@ namespace Enjon {
 					// Now to fix the newly moved component in the ComponentIndexMap
 					ComponentIndexMap->at(ComponentList->at(ComponentIndex).Entity->ID) = ComponentIndex;
 				}
-
 			}
 
 			template <typename T>

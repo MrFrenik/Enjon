@@ -8519,17 +8519,32 @@ int main(int argc, char** argv)
 	mSpotLight = EG::SpotLight(EM::Vec3(0, 0, 0), slParams, EG::RGBA16_White()); 
 	EG::Scene* scene = mGraphicsEngine.GetScene();
 
+	// Create entity
+	mEntities = new Enjon::EntityManager();
+	mEntities->RegisterComponent<Enjon::PointLightComponent>();
+	mEntities->RegisterComponent<Enjon::GraphicsComponent>();
+
+	Enjon::EntityHandle* handle = mEntities->Allocate();
+	handle->SetPosition(EM::Vec3(0, 2, 0));
+	Enjon::PointLightComponent* plc = mEntities->Attach<Enjon::PointLightComponent>(handle);
+	plc->SetColor(EG::RGBA16_Orange());
+	plc->SetParams(EG::PLParams(1.0f, 0.1f, 0.01f));
+	plc->SetIntensity(30.0f);
+	plc->SetPosition(handle->GetPosition());
+	Enjon::GraphicsComponent* gc = mEntities->Attach<Enjon::GraphicsComponent>(handle);
+
 	EG::Material* mat = new EG::Material();
 	EG::Mesh* mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cerebus.obj");
 	mat->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/BaseColor.png"));
 	mat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png") );
 	mat->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Metallic.png") );
 	mat->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Roughness.png") );
-	mRenderable.SetMesh(mesh);
-	mRenderable.SetMaterial(mat);
-	mRenderable.SetPosition(EM::Vec3(0, 2, 0));
-	mRenderable.SetScale(EM::Vec3(1, 1, 1));
-	mRenderable.SetOrientation(mGraphicsEngine.GetSceneCamera()->GetOrientation());
+	EG::Renderable* gunRenderable = gc->GetRenderable();
+	gunRenderable->SetMesh(mesh);
+	gunRenderable->SetMaterial(mat);
+	gunRenderable->SetPosition(handle->GetPosition());
+	gunRenderable->SetScale(handle->GetScale());
+	gunRenderable->SetOrientation(mGraphicsEngine.GetSceneCamera()->GetOrientation());
 
 	EG::Material* mat2 = new EG::Material();
 	EG::Mesh* mesh2 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/shaderball.obj");
@@ -8567,17 +8582,9 @@ int main(int argc, char** argv)
 	}
 	mBatch.End();
 
-	mEntities = new Enjon::EntityManager();
-	mEntities->RegisterComponent<Enjon::PointLightComponent>();
-
-	Enjon::EntityHandle* handle = mEntities->Allocate();
-	auto plc = mEntities->Attach<Enjon::PointLightComponent>(handle);
-	plc->SetColor(EG::RGBA16_Orange());
-	plc->SetParams(EG::PLParams(1.0f, 0.1f, 0.01f));
-	plc->SetIntensity(30.0f);
 
 	// Add elements scene
-	scene->AddRenderable(&mRenderable);
+	scene->AddRenderable(gunRenderable);
 	scene->AddRenderable(&mRenderable2);
 	scene->AddDirectionalLight(&mSun);
 	scene->AddDirectionalLight(&mSun2);
@@ -8593,7 +8600,10 @@ int main(int argc, char** argv)
 	{
 		dt += 0.1f;
 		mLimiter.Begin();
-		mRenderable.SetOrientation(
+
+		// This will simply be a call to set the entity's orientation which will propogate down
+		// to all of its owned components
+		gc->SetOrientation(
 							EM::Quaternion::AngleAxis(
 														EM::ToRadians(dt),
 														EM::Vec3(0, 1, 0)
@@ -8604,7 +8614,7 @@ int main(int argc, char** argv)
 		EG::Camera* sceneCam = mGraphicsEngine.GetSceneCamera();
 
 		// Don't think that I like this interface...
-		plc->SetPosition(sceneCam->GetPosition() + EM::Vec3(cos(dt), 0.0f, sin(dt)) * 3.0f);
+		plc->SetPosition(handle->GetPosition() + EM::Vec3(cos(dt), 0.0f, sin(dt)) * 3.0f);
 
 		// Render
 		mGraphicsEngine.Update(dt);

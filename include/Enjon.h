@@ -70,6 +70,7 @@
 #include "Entity/Component.h"
 
 #include "Entity/Components/PointLightComponent.h"
+#include "Entity/Components/GraphicsComponent.h"
 
 #include "Physics/AABB.h"
 

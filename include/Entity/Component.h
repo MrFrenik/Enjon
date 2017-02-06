@@ -6,14 +6,12 @@
 #define ENJON_OBJECT(tags)
 
 #include "Entity/EntityDefines.h"
-#include "Graphics/PointLight.h"
+#include "Math/Transform.h"
 
 #include <array>
 #include <vector>
 #include <bitset>
 #include <type_traits>
-
-#define MAX_COMPONENTS 64
 
 namespace Enjon {
 

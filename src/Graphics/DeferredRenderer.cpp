@@ -251,7 +251,6 @@ namespace Enjon { namespace Graphics {
 
 		directionalShader->Use();
 		{
-			std::cout << mSceneCamera.Backward() << "\n";
 			directionalShader->SetUniform("u_camPos", mSceneCamera.GetPosition() + mSceneCamera.Backward());
 			for (auto& l : *directionalLights)
 			{
