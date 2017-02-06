@@ -135,6 +135,8 @@ namespace Enjon {
 			template <typename T>
 			void RegisterComponent()
 			{
+				static_assert(std::is_base_of<Component, T>::value, 
+					"EntityManager::RegisterComponent:: T must inherit from Component.");
 				auto index = static_cast<size_t>(Enjon::GetComponentType<T>());
 				assert(Components.at(index) == nullptr);
 				auto C = new ComponentWrapper<T>;	
@@ -247,7 +249,7 @@ namespace Enjon {
 
 		private:
 			EntityHandle* mEntities;
-			std::array<ComponentWrapperBase*, static_cast<size_t>(Enjon::CoreComponentType::COUNT)> Components;	
+			std::array<ComponentWrapperBase*, static_cast<size_t>(MAX_COMPONENTS)> Components;	
 			u32 NextAvailableID;
 	};
 

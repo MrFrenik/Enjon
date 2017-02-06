@@ -11,32 +11,11 @@
 #include <array>
 #include <vector>
 #include <bitset>
+#include <type_traits>
+
+#define MAX_COMPONENTS 64
 
 namespace Enjon {
-
-	enum class CoreComponentType
-	{
-		COMPONENTTYPE_NONE,
-		COMPONENTTYPE_POSITION,
-		COMPONENTTYPE_VELOCITY,
-		COMPONENTTYPE_TEST,
-		COMPONENTTYPE_MOVEMENT,
-		COMPONENTTYPE_POINTLIGHT,
-		COUNT
-	};
-
-	typedef std::bitset<static_cast<size_t>(CoreComponentType::COUNT)> ComponentBitset;
-
-	template <typename T>
-	CoreComponentType GetComponentType();
-
-	template <typename T>
-	ComponentBitset GetComponentBitMask() 
-	{ 
-		ComponentBitset BitSet;
-		BitSet.set(static_cast<size_t>(GetComponentType<T>()));
-		return BitSet;
-	}
 
 	// Forward declaration
 	class EntityHandle;
@@ -70,20 +49,36 @@ namespace Enjon {
 			std::array<uint32_t, MAX_ENTITIES> ComponentIndexMap;
 	};
 
-	class PointLightComponent : public Component
+	using ComponentID = std::size_t;
+
+	namespace Internal
 	{
-		public:
-			PointLightComponent(){}
-			~PointLightComponent(){}
+		inline ComponentID GetUniqueComponentID() noexcept
+		{
+			static ComponentID lastID{0u};
+			return lastID++;
+		}
+	}
 
-			virtual void Update(float dt) {}
-			Enjon::Graphics::PointLight* GetLight() { return &mLight; }
+	template <typename T>
+	inline ComponentID GetComponentType() noexcept
+	{
+		static_assert(std::is_base_of<Component, T>::value, 
+			"Component:: T must inherit from Component.");	
 
-		private:
-			Enjon::Graphics::PointLight mLight;	
-	};
+		static ComponentID typeID{Internal::GetUniqueComponentID()};
+		return typeID;
+	}
+
+	typedef std::bitset<static_cast<size_t>(MAX_COMPONENTS)> ComponentBitset;
+
+	template <typename T>
+	ComponentBitset GetComponentBitMask() 
+	{ 
+		ComponentBitset BitSet;
+		BitSet.set(static_cast<size_t>(GetComponentType<T>()));
+		return BitSet;
+	}
 }
-
-
 
 #endif

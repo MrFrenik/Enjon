@@ -7,6 +7,7 @@ layout (location = 1) out vec4 NormalsOut;
 layout (location = 2) out vec4 PositionOut;
 layout (location = 3) out vec4 EmissiveOut;
 layout (location = 4) out vec4 MatPropsOut;
+layout (location = 5) out vec4 UVOut;
 
 in VS_OUT
 {
@@ -49,6 +50,7 @@ void main()
     PositionOut = vec4(fs_in.FragPos, 1.0);
     EmissiveOut = texture2D(u_emissiveMap, fs_in.TexCoords) * vec4(u_emissiveIntensity, u_emissiveIntensity, u_emissiveIntensity, 1.0);
     MatPropsOut = vec4(Metallic, Roughness, AO, 1.0);
+    UVOut = vec4(fs_in.TexCoords.x, fs_in.TexCoords.y, 0.0, 1.0);
 
     ColorOut = color * vec4(u_albedoColor, 1.0);
 }

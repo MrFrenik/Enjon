@@ -15,6 +15,7 @@ namespace Enjon { namespace Graphics {
 		POSITION,
 		EMISSIVE,
 		MAT_PROPS,
+		UV,
 		GBUFFER_TEXTURE_COUNT
 	};
 

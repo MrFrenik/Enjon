@@ -69,6 +69,8 @@
 #include "Entity/Entity.h"
 #include "Entity/Component.h"
 
+#include "Entity/Components/PointLightComponent.h"
+
 #include "Physics/AABB.h"
 
 

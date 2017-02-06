@@ -92,8 +92,7 @@ namespace Enjon { namespace Graphics {
 				mBatch->Add(
 							EM::Vec4(-1, -1, 2, 2),
 							EM::Vec4(0, 0, 1, 1),
-							// mLightingBuffer->GetTexture()
-							// mGbuffer->GetTexture(EG::GBufferTextureType::MAT_PROPS)
+							// mGbuffer->GetTexture(EG::GBufferTextureType::UV)
 							mFXAATarget->GetTexture()
 						);
 			}
@@ -252,7 +251,8 @@ namespace Enjon { namespace Graphics {
 
 		directionalShader->Use();
 		{
-			directionalShader->SetUniform("u_camPos", mSceneCamera.GetPosition());
+			std::cout << mSceneCamera.Backward() << "\n";
+			directionalShader->SetUniform("u_camPos", mSceneCamera.GetPosition() + mSceneCamera.Backward());
 			for (auto& l : *directionalLights)
 			{
 				EG::ColorRGBA16* color = l->GetColor();
@@ -291,7 +291,7 @@ namespace Enjon { namespace Graphics {
 			pointShader->BindTexture("u_positionMap", mGbuffer->GetTexture(EG::GBufferTextureType::POSITION), 2);
 			pointShader->BindTexture("u_matProps", mGbuffer->GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
 			pointShader->SetUniform("u_resolution", mGbuffer->GetResolution());
-			pointShader->SetUniform("u_camPos", mSceneCamera.GetPosition());			
+			pointShader->SetUniform("u_camPos", mSceneCamera.GetPosition() + mSceneCamera.Backward());			
 
 			for (auto& l : *pointLights)
 			{

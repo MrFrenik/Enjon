@@ -8276,9 +8276,6 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 
 
 
-
-
-
 #if 0
 
 #include <stdio.h>
@@ -8575,10 +8572,9 @@ int main(int argc, char** argv)
 
 	Enjon::EntityHandle* handle = mEntities->Allocate();
 	auto plc = mEntities->Attach<Enjon::PointLightComponent>(handle);
-	auto light = plc->GetLight();
-	light->SetColor(EG::RGBA16_Orange());
-	light->SetParams(EG::PLParams(1.0f, 0.1f, 0.01f));
-	light->SetIntensity(20.0f);
+	plc->SetColor(EG::RGBA16_Orange());
+	plc->SetParams(EG::PLParams(1.0f, 0.1f, 0.01f));
+	plc->SetIntensity(30.0f);
 
 	// Add elements scene
 	scene->AddRenderable(&mRenderable);
@@ -8587,7 +8583,7 @@ int main(int argc, char** argv)
 	scene->AddDirectionalLight(&mSun2);
 	scene->AddDirectionalLight(&mSun3);
 	// scene->AddSpotLight(&mSpotLight);
-	scene->AddPointLight(light);
+	scene->AddPointLight(&plc->GetLight());
 	scene->AddQuadBatch(&mBatch);
 	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_White(), 0.1f));
 
@@ -8606,10 +8602,9 @@ int main(int argc, char** argv)
 
 		// Set spot light direction and position
 		EG::Camera* sceneCam = mGraphicsEngine.GetSceneCamera();
-		// mSpotLight.SetPosition(sceneCam->GetPosition());
-		// mSpotLight.SetDirection(sceneCam->Forward());
 
-		light->SetPosition(sceneCam->GetPosition() + EM::Vec3(cos(dt), 0.0f, sin(dt)) * 3.0f);
+		// Don't think that I like this interface...
+		plc->SetPosition(sceneCam->GetPosition() + EM::Vec3(cos(dt), 0.0f, sin(dt)) * 3.0f);
 
 		// Render
 		mGraphicsEngine.Update(dt);
@@ -8718,17 +8713,8 @@ bool ProcessInput(EI::InputManager* input, float dt)
     return true;
 }
 
+
 #endif
-
-
-
-
-
-
-
-
-
-
 
 
 

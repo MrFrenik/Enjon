@@ -35,7 +35,7 @@ namespace Enjon { namespace Graphics {
 	Camera::Camera(EM::iVec2& dimensions)
 		: 
 		Transform(),
-		FieldOfView(40),
+		FieldOfView(50),
 		NearPlane(0.01f),
 		FarPlane(100.0f),
 		ViewPortAspectRatio((Enjon::f32)dimensions.x / (Enjon::f32)dimensions.y), 

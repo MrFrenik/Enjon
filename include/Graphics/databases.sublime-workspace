@@ -1,0 +1,1360 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"Refere",
+				"REFERENCES"
+			],
+			[
+				"RGBA",
+				"RGBA16_ZombieGreen"
+			],
+			[
+				"Color",
+				"ColorRGBA16"
+			],
+			[
+				"GLCULLF",
+				"GL_CULL_FACE"
+			],
+			[
+				"pxe",
+				"pixelanimtest"
+			],
+			[
+				"UVanimati",
+				"UVAnimation"
+			],
+			[
+				"Shadowenabl",
+				"ShadowsEnabled"
+			],
+			[
+				"GLTriangles",
+				"GL_TRIANGLES"
+			],
+			[
+				"RG",
+				"RGBA16_Orange"
+			],
+			[
+				"GLON",
+				"GL_ONE_MINUS_SRC_ALPHA"
+			],
+			[
+				"bitangent1",
+				"bitangent1"
+			],
+			[
+				"Value",
+				"_Value"
+			],
+			[
+				"Playerattackohls",
+				"Player_Attack_OH_L_SE"
+			],
+			[
+				"Components",
+				"Components	(main.cpp)"
+			],
+			[
+				"Playercon",
+				"PlayerControllers	(PlayerControllerSystem.h)"
+			],
+			[
+				"Renderers",
+				"Renderers	(ComponentSystems.cpp)"
+			],
+			[
+				"salarypara",
+				"salaryParameter"
+			],
+			[
+				"salaryp",
+				"salaryParameter"
+			],
+			[
+				"bullets",
+				"bullets_"
+			],
+			[
+				"glClearColor",
+				"glClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha)	void"
+			],
+			[
+				"Upadte",
+				"Update(const std::vector<std::string> &levelData, std::vector<Human *> &humans, std::vector<Zombie *> &zombies)	void"
+			],
+			[
+				"cam",
+				"camera_"
+			],
+			[
+				"spee",
+				"speed_"
+			],
+			[
+				"bulletsp",
+				"bulletSpeed"
+			],
+			[
+				"bulletda",
+				"bulletDamage"
+			],
+			[
+				"speed",
+				"speed"
+			],
+			[
+				"buletd",
+				"bulletDamage"
+			],
+			[
+				"sprea",
+				"spread_"
+			],
+			[
+				"bulletspers",
+				"bulletsPerShot_"
+			],
+			[
+				"positio",
+				"position_"
+			],
+			[
+				"Level",
+				"Level(const std::string &fileName)	constructor"
+			],
+			[
+				"colorp",
+				"colorProgram_	int"
+			],
+			[
+				"Spark",
+				"Spark	namespace"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "/E/Documents/School/Databases/Scripts/jrj7634_c.sql",
+			"settings":
+			{
+				"buffer_size": 3440,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Documents/School/Databases/Scripts/jrj7634_i.sql",
+			"settings":
+			{
+				"buffer_size": 6352,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Documents/School/Databases/Scripts/jrj7634_u.sql",
+			"settings":
+			{
+				"buffer_size": 441,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Documents/School/Databases/Scripts/jrj7634_d.sql",
+			"settings":
+			{
+				"buffer_size": 585,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Documents/School/Databases/Scripts/test.sql",
+			"settings":
+			{
+				"buffer_size": 2623,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Documents/School/Databases/Scripts/run.sql",
+			"settings":
+			{
+				"buffer_size": 241,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/User/SDL_Build.sublime-build",
+					""
+				],
+				[
+					"Packages/User/SDL_Build.sublime-build",
+					"all"
+				],
+				[
+					"Packages/User/SDL_Build.sublime-build",
+					"run"
+				]
+			],
+			[
+				"Packages/User/SDL_Build.sublime-build",
+				"all"
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 182.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"package control: insta",
+				"Package Control: Install Package"
+			],
+			[
+				"packagein",
+				"Package Control: Disable Package"
+			],
+			[
+				"pack",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: ",
+				"Package Control: List Packages"
+			],
+			[
+				"sub",
+				"Preferences: SublimeClang Settings – User"
+			],
+			[
+				"Subl",
+				"Preferences: SublimeClang Settings – Default"
+			],
+			[
+				"packi",
+				"Package Control: Install Package"
+			],
+			[
+				"pac",
+				"Preferences: Browse Packages"
+			]
+		],
+		"width": 382.0
+	},
+	"console":
+	{
+		"height": 113.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = '2915d1851351e5ee549c20394736b442' + '8bc59f460fa1548d1514676163dafc88'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)",
+			"sublime.log_input(True)",
+			"import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404' + 'e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by) "
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/E/Documents/School/Databases/Scripts"
+	],
+	"file_history":
+	[
+		"/E/Documents/School/Databases/NETID.sql",
+		"/E/Documents/School/Databases/Scripts/insert.sql",
+		"/E/Documents/School/Databases/Scripts/books.sql",
+		"/E/Development/enjon/include/Graphics/SpotLight.h",
+		"/E/Development/enjon/include/Graphics/PointLight.h",
+		"/E/Development/enjon/include/Math/Vec2.h",
+		"/E/Development/enjon/src/Graphics/Camera.cpp",
+		"/E/Development/Enjon/src/Graphics/Material.cpp",
+		"/E/Development/enjon/include/Graphics/ModelAsset.h",
+		"/E/Development/enjon/include/Defines.h",
+		"/E/Development/enjon/src/Graphics/Window.cpp",
+		"/E/Development/enjon/src/Graphics/GLSLProgram.cpp",
+		"/E/Development/Enjon/src/Graphics/Mesh.cpp",
+		"/E/Development/enjon/include/Graphics/Mesh.h",
+		"/E/Development/enjon/src/IO/ObjLoader.cpp",
+		"/E/Development/enjon/include/IO/ObjLoader.h",
+		"/E/Development/enjon/src/IO/ResourceManager.cpp",
+		"/E/Development/enjon/include/IO/ResourceManager.h",
+		"/E/Development/enjon/include/Graphics/Material.h",
+		"/E/Development/enjon/include/Graphics/GLSLProgram.h",
+		"/E/Development/Enjon/shaders/pbr/point_light.f.glsl",
+		"/E/Development/Enjon/shaders/deferred/point_light.v.glsl",
+		"/E/Development/Enjon/shaders/pbr/spot_light.f.glsl",
+		"/E/Development/Enjon/shaders/pbr/spot_light.v.glsl",
+		"/E/Development/enjon/include/ECS/AIControllerSystem.h",
+		"/E/Development/Enjon/proc/clean.bat",
+		"/E/Development/Enjon/proc/rel.bat",
+		"/E/Development/enjon/IsoARPG/src/Loot.cpp",
+		"/E/Development/enjon/src/ECS/EntityFactory.cpp",
+		"/E/Development/enjon/src/BehaviorTree/Task.cpp",
+		"/E/Development/enjon/include/BehaviorTree/Task.h",
+		"/E/Development/enjon/include/ECS/EntityFactory.h",
+		"/E/Development/enjon/IsoARPG/include/Loot.h",
+		"/E/Development/enjon/include/ECS/Transform3DSystem.h",
+		"/E/Development/enjon/include/ECS/Renderer2DSystem.h",
+		"/E/Development/enjon/include/ECS/PlayerControllerSystem.h",
+		"/E/Development/enjon/include/ECS/LabelSystem.h",
+		"/E/Development/enjon/include/ECS/InventorySystem.h",
+		"/E/Development/Enjon/src/Entity/Entity.cpp",
+		"/E/Development/enjon/include/ECS/Entity.h",
+		"/E/Development/enjon/src/ECS/Entity.cpp",
+		"/E/Development/Enjon/include/Entity/Entity.h",
+		"/E/Development/enjon/include/ECS/ComponentSystems.h",
+		"/E/Development/enjon/src/ECS/ComponentSystems.cpp",
+		"/E/Development/enjon/IsoARPG/include/TestTree.h",
+		"/E/Development/enjon/src/BehaviorTree/BehaviorTreeManager.cpp",
+		"/E/Development/enjon/include/BehaviorTree/BehaviorTreeManager.h",
+		"/E/Development/enjon/IsoARPG/src/main.cpp",
+		"/E/Development/enjon/src/Math/Transform.cpp",
+		"/E/Development/enjon/include/Graphics/Renderable.h",
+		"/E/Development/enjon/src/Graphics/GBuffer.cpp",
+		"/E/Development/enjon/include/Graphics/GBuffer.h",
+		"/E/Development/Enjon/shaders/deferred/deferred.v.glsl",
+		"/E/Development/Enjon/shaders/deferred/deferred.f.glsl",
+		"/E/Development/enjon/include/Math/Transform.h",
+		"/E/Development/enjon/include/Graphics/Window.h",
+		"/E/Development/enjon/include/Graphics/SpriteBatch.h",
+		"/E/Development/enjon/src/Graphics/ShaderManager.cpp",
+		"/E/Development/enjon/include/Graphics/ShaderManager.h",
+		"/E/Development/enjon/src/Graphics/SpriteBatch.cpp",
+		"/E/Development/enjon/src/IO/ImageLoader.cpp",
+		"/E/Development/enjon/include/Math/Quaternion.h",
+		"/E/Development/enjon/include/IO/ImageLoader.h",
+		"/E/Development/enjon/src/Graphics/RenderTarget.cpp",
+		"/E/Development/enjon/include/Enjon.h",
+		"/E/Development/Enjon/shaders/deferred/ambient_light.f.glsl",
+		"/E/Development/enjon/src/Graphics/FullScreenQuad.cpp",
+		"/E/Development/enjon/include/Graphics/FullScreenQuad.h",
+		"/E/Development/Enjon/shaders/deferred/directional_light.f.glsl",
+		"/E/Development/enjon/include/Graphics/RenderTarget.h",
+		"/E/Development/enjon/src/Graphics/DirectionalLight.cpp",
+		"/E/Development/enjon/include/Graphics/DirectionalLight.h",
+		"/E/Development/Enjon/shaders/deferred/point_light.f.glsl",
+		"/E/Development/enjon/src/Graphics/PointLight.cpp",
+		"/E/Development/Enjon/shaders/deferred/quad_batch.v.glsl",
+		"/E/Development/Enjon/shaders/deferred/quad_batch.f.glsl",
+		"/E/Development/enjon/src/Graphics/SpotLight.cpp",
+		"/E/Development/Enjon/shaders/deferred/spot_light.f.glsl",
+		"/E/Development/Enjon/shaders/pbr/directional_light.f.glsl",
+		"/E/Development/Enjon/shaders/pbr/directional_light.v.glsl",
+		"/E/Development/Enjon/shaders/deferred/fxaa.f.glsl",
+		"/E/Development/Enjon/proc/dump.txt",
+		"/E/Development/Enjon/src/Entity/Component.cpp",
+		"/E/Development/enjon/src/TypeCatalog.cpp",
+		"/E/Development/enjon/include/Entity/EntityManager.h",
+		"/E/Development/enjon/src/Entity/EntityManager.cpp",
+		"/E/Development/enjon/include/TypeCatalog.h",
+		"/E/Development/Enjon/include/Entity/EntityDefines.h",
+		"/E/Development/enjon/include/ECS/Components.h",
+		"/E/Development/enjon/include/Entity/Component.h",
+		"/E/Development/enjon/src/Graphics/DeferredRenderer.cpp",
+		"/E/Development/enjon/include/System/Types.h",
+		"/E/Development/enjon/include/Graphics/QuadBatch.h",
+		"/E/Development/enjon/src/Graphics/QuadBatch.cpp",
+		"/E/Development/enjon/src/Graphics/Renderable.cpp",
+		"/E/Development/enjon/src/Graphics/Scene.cpp",
+		"/E/Development/enjon/include/Graphics/Scene.h",
+		"/E/Development/enjon/include/Graphics/Camera.h",
+		"/E/Development/enjon/include/Graphics/DeferredRenderer.h",
+		"/E/Development/enjon/include/ECS/EffectSystem.h",
+		"/E/Development/enjon/include/ECS/Effects.h",
+		"/E/Development/enjon/include/ECS/CollisionSystem.h",
+		"/E/Development/enjon/include/ECS/Animation2DSystem.h",
+		"/E/Development/enjon/include/ECS/AttributeSystem.h",
+		"/E/Development/enjon/include/Utils/Timing.h",
+		"/E/Development/enjon/src/Graphics/MeshOG.cpp",
+		"/E/Development/enjon/include/Graphics/MeshOG.h",
+		"/E/Development/enjon/include/freetype/ftrender.h",
+		"/E/Development/Enjon/shaders/no_camera.f.glsl",
+		"/E/Development/Enjon/shaders/no_camera.v.glsl",
+		"/E/Development/enjon/include/IO/InputManager.h",
+		"/E/Development/Enjon/src/Graphics/Renderable.cpp",
+		"/E/Development/Enjon/include/Graphics/Renderable.h",
+		"/E/Development/Enjon/include/Graphics/Scene.h",
+		"/E/Development/Enjon/src/Graphics/Scene.cpp",
+		"/E/Development/Enjon/shaders/deferred/world_text.f.glsl",
+		"/E/Development/Enjon/shaders/deferred/world_text.v.glsl",
+		"/E/Development/Enjon/shaders/text.f.glsl",
+		"/E/Development/Enjon/shaders/basic.f.glsl",
+		"/E/Development/Enjon/shaders/basic.v.glsl",
+		"/E/Development/Enjon/shaders/deferred/ambient_light.v.glsl",
+		"/E/Development/Enjon/shaders/deferred/depth.f.glsl",
+		"/E/Development/Enjon/shaders/deferred/depth.v.glsl",
+		"/E/Development/enjon/src/Graphics/FontManager.cpp",
+		"/E/Development/enjon/src/CVarsSystem.cpp",
+		"/E/Development/enjon/include/CVarsSystem.h",
+		"/E/Development/Enjon/shaders/deferred/composite.v.glsl",
+		"/E/Development/Enjon/shaders/deferred/composite.f.glsl"
+	],
+	"find":
+	{
+		"height": 70.0
+	},
+	"find_in_files":
+	{
+		"height": 127.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"null",
+			"`",
+			"\n--",
+			"9",
+			"E",
+			"\"",
+			"10/6/2002",
+			"&",
+			"FlightLegInstance",
+			", ",
+			"&",
+			"\"",
+			"&",
+			"PlaneSeats",
+			"NOT NULL",
+			"&",
+			"FlightLeg",
+			"PlaneSeats",
+			"PilotSeat",
+			"Pilot",
+			"Passenger",
+			"`",
+			"mediumint",
+			"NOT NULL",
+			" 	",
+			"NOT NULL",
+			"100",
+			"gettype",
+			"TypeCatalog",
+			"entity->compon",
+			"void",
+			"ComponentType::",
+			"ComponentType",
+			"COMPONENTTYPE",
+			"ComponentType",
+			"uint32_t",
+			"eid32",
+			"EntityManager",
+			"entitymanager",
+			"Entity.GetID()",
+			"Entities",
+			"entities",
+			"componenttype",
+			"typecatalog",
+			"GetBitMask",
+			"TypeCatalog::",
+			"GetType<T>",
+			"TypeCatalog::",
+			"TypeCatalog",
+			"8573",
+			"EntityManager",
+			"create",
+			"point_light",
+			"Cerebus",
+			"mat->",
+			"mat",
+			"Mat",
+			"mat",
+			"Mat",
+			"mat",
+			"Mat",
+			"mat",
+			"mRenderable",
+			"resolution",
+			"h.",
+			"CompositeBatch",
+			"FXAAProgram",
+			"FXAATarget.",
+			"fxaa",
+			"lightingpass",
+			"struct ",
+			"processinput",
+			"renderable",
+			"CopperRock",
+			"Resolution",
+			"LightIntensity",
+			"LightPos",
+			"LightColor",
+			"Radius",
+			"Falloff",
+			"CamPos",
+			"MaterialProperties",
+			"PositionMap",
+			"NormalMap",
+			"AlbedoMap",
+			"mat->",
+			"RustedIron",
+			"lightingp",
+			"u_materialProperties",
+			"RusetdIron",
+			"RustedIron",
+			"BaseColor",
+			"lightpass",
+			"Resolution",
+			"LightIntensity",
+			"LightPosition",
+			"LightColor",
+			"CamPos",
+			"MaterialProperties",
+			"PositionMap",
+			"NormalMap",
+			"AlbedoMap",
+			"uniform float   ",
+			"uniform vec3    ",
+			"uniform sampler2D ",
+			"OuterCutoff",
+			"InnerCutoff",
+			"CameraForward",
+			"Resolution",
+			"LightDirection",
+			"LightIntensity",
+			"LightPos",
+			"LightColor",
+			"Falloff",
+			"CamPos",
+			"PositionMap",
+			"NormalMap",
+			"DiffuseMap",
+			"pointShader",
+			"light",
+			"mPointLights",
+			"PointLight",
+			"Constant",
+			"_Intensity",
+			"_Color",
+			"_Inner",
+			"_Dir",
+			"_Quadratic"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"class",
+			"5",
+			"CameraManager"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "/E/Documents/School/Databases/Scripts/jrj7634_c.sql",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3440,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								307,
+								307
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SQL/SQL.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 126.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/E/Documents/School/Databases/Scripts/jrj7634_i.sql",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6352,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2691,
+								2691
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SQL/SQL.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 1014.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/E/Documents/School/Databases/Scripts/jrj7634_u.sql",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 441,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								441,
+								441
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SQL/SQL.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/E/Documents/School/Databases/Scripts/jrj7634_d.sql",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 585,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								334,
+								334
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SQL/SQL.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/E/Documents/School/Databases/Scripts/test.sql",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2623,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1148,
+								1148
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SQL/SQL.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 153.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/E/Documents/School/Databases/Scripts/run.sql",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 241,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								233,
+								233
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SQL/SQL.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 70.0
+	},
+	"input":
+	{
+		"height": 46.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.clang":
+	{
+		"height": 138.0
+	},
+	"output.exec":
+	{
+		"height": 260.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/C++/C++ Single File.sublime-build",
+	"project": "databases.sublime-project",
+	"replace":
+	{
+		"height": 44.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"run",
+				"run.sql"
+			],
+			[
+				"defer.",
+				"src\\Graphics\\DeferredRenderer.cpp"
+			],
+			[
+				"camear",
+				"src\\Graphics\\Camera.cpp"
+			],
+			[
+				"componet.c",
+				"src\\Entity\\Component.cpp"
+			],
+			[
+				"component.c",
+				"src\\Entity\\Component.cpp"
+			],
+			[
+				"pointli.c",
+				"src\\Graphics\\PointLight.cpp"
+			],
+			[
+				"pointli",
+				"include\\Graphics\\PointLight.h"
+			],
+			[
+				"pointli.h",
+				"include\\Graphics\\PointLight.h"
+			],
+			[
+				"compon.h",
+				"include\\Entity\\Component.h"
+			],
+			[
+				"main.c",
+				"IsoARPG\\src\\main.cpp"
+			],
+			[
+				"componen.h",
+				"include\\Entity\\Component.h"
+			],
+			[
+				"entitym.c",
+				"src\\Entity\\EntityManager.cpp"
+			],
+			[
+				"entity.c",
+				"src\\Entity\\Entity.cpp"
+			],
+			[
+				"entity.h",
+				"include\\Entity\\Entity.h"
+			],
+			[
+				"entitymanaer.h",
+				"include\\Entity\\EntityManager.h"
+			],
+			[
+				"componetn.h",
+				"include\\Entity\\Component.h"
+			],
+			[
+				"entityman.h",
+				"include\\Entity\\EntityManager.h"
+			],
+			[
+				"enon.h",
+				"include\\Enjon.h"
+			],
+			[
+				"componetn.c",
+				"src\\Entity\\Component.cpp"
+			],
+			[
+				"main.cp",
+				"IsoARPG\\src\\main.cpp"
+			],
+			[
+				"entity.cp",
+				"src\\Entity\\Entity.cpp"
+			],
+			[
+				"entitymanager",
+				"src\\Entity\\EntityManager.cpp"
+			],
+			[
+				"enjon.h",
+				"include\\Enjon.h"
+			],
+			[
+				"rel.bat",
+				"E:\\Development\\Enjon\\proc\\rel.bat"
+			],
+			[
+				"task.c",
+				"src\\BehaviorTree\\Task.cpp"
+			],
+			[
+				"transform3",
+				"include\\ECS\\Transform3DSystem.h"
+			],
+			[
+				"task.h",
+				"include\\BehaviorTree\\Task.h"
+			],
+			[
+				"behaviortreem.h",
+				"include\\BehaviorTree\\BehaviorTreeManager.h"
+			],
+			[
+				"behavtrem.",
+				"src\\BehaviorTree\\BehaviorTreeManager.cpp"
+			],
+			[
+				"testt",
+				"IsoARPG\\include\\TestTree.h"
+			],
+			[
+				"behaviortrem",
+				"src\\BehaviorTree\\BehaviorTreeManager.cpp"
+			],
+			[
+				"factor.c",
+				"src\\ECS\\EntityFactory.cpp"
+			],
+			[
+				"factory.h",
+				"include\\ECS\\EntityFactory.h"
+			],
+			[
+				"loot.h",
+				"IsoARPG\\include\\Loot.h"
+			],
+			[
+				"loot",
+				"IsoARPG\\src\\Loot.cpp"
+			],
+			[
+				"compoenntsys.h",
+				"include\\ECS\\ComponentSystems.h"
+			],
+			[
+				"compoentsyste.c",
+				"src\\ECS\\ComponentSystems.cpp"
+			],
+			[
+				"behaviortreemang.c",
+				"src\\BehaviorTree\\BehaviorTreeManager.cpp"
+			],
+			[
+				"behaviortreeman",
+				"include\\BehaviorTree\\BehaviorTreeManager.h"
+			],
+			[
+				"entityh",
+				"include\\ECS\\Entity.h"
+			],
+			[
+				"entitydefin",
+				"include\\Entity\\EntityDefines.h"
+			],
+			[
+				"entitymanager.c",
+				"src\\Entity\\EntityManager.cpp"
+			],
+			[
+				"entitymanager.h",
+				"include\\Entity\\EntityManager.h"
+			],
+			[
+				"entityma",
+				"include\\Entity\\EntityManager.h"
+			],
+			[
+				"component.h",
+				"include\\Entity\\Component.h"
+			],
+			[
+				"typecatalog.cp",
+				"src\\TypeCatalog.cpp"
+			],
+			[
+				"typecatlog.h",
+				"include\\TypeCatalog.h"
+			],
+			[
+				"component.cp",
+				"src\\Entity\\Component.cpp"
+			],
+			[
+				"entitym",
+				"include\\Entity\\EntityManager.h"
+			],
+			[
+				"typec.c",
+				"src\\TypeCatalog.cpp"
+			],
+			[
+				"type",
+				"include\\TypeCatalog.h"
+			],
+			[
+				"com.cp",
+				"src\\Entity\\Component.cpp"
+			],
+			[
+				"comp.h",
+				"include\\Entity\\Component.h"
+			],
+			[
+				"typca.cp",
+				"src\\TypeCatalog.cpp"
+			],
+			[
+				"typec.cp",
+				"src\\TypeCatalog.cpp"
+			],
+			[
+				"entitym.h",
+				"include\\Entity\\EntityManager.h"
+			],
+			[
+				"compone.h",
+				"include\\Entity\\Component.h"
+			],
+			[
+				"typec",
+				"include\\TypeCatalog.h"
+			],
+			[
+				"entitymang",
+				"include\\Entity\\EntityManager.h"
+			],
+			[
+				"main",
+				"IsoARPG\\src\\main.cpp"
+			],
+			[
+				"loot.c",
+				"IsoARPG\\src\\Loot.cpp"
+			],
+			[
+				"entitymana.c",
+				"src\\Entity\\EntityManager.cpp"
+			],
+			[
+				"entiym.c",
+				"src\\Entity\\EntityManager.cpp"
+			],
+			[
+				"main.",
+				"IsoARPG\\src\\main.cpp"
+			],
+			[
+				"compoe",
+				"include\\Entity\\Component.h"
+			],
+			[
+				"com",
+				"include\\Entity\\Component.h"
+			],
+			[
+				"enjon",
+				"include\\Enjon.h"
+			],
+			[
+				"comp",
+				"include\\Entity\\Component.h"
+			],
+			[
+				"eneitym",
+				"include\\Entity\\EntityManager.h"
+			],
+			[
+				"defines.h",
+				"include\\Defines.h"
+			],
+			[
+				"enj.h",
+				"include\\Enjon.h"
+			],
+			[
+				"component",
+				"include\\Entity\\Component.h"
+			],
+			[
+				"camear.c",
+				"src\\Graphics\\Camera.cpp"
+			],
+			[
+				"typeca",
+				"include\\TypeCatalog.h"
+			],
+			[
+				"compon",
+				"include\\Entity\\Component.h"
+			],
+			[
+				"windo.h",
+				"include\\Graphics\\Window.h"
+			],
+			[
+				"windo",
+				"src\\Graphics\\Window.cpp"
+			],
+			[
+				"defer.cp",
+				"src\\Graphics\\DeferredRenderer.cpp"
+			],
+			[
+				"spotli.f",
+				"shaders\\deferred\\spot_light.f.glsl"
+			],
+			[
+				"pointli.f",
+				"shaders\\pbr\\point_light.f.glsl"
+			],
+			[
+				"spotlig.f",
+				"shaders\\pbr\\spot_light.f.glsl"
+			],
+			[
+				"defer.c",
+				"src\\Graphics\\DeferredRenderer.cpp"
+			],
+			[
+				"shadem",
+				"src\\Graphics\\ShaderManager.cpp"
+			],
+			[
+				"spotli.v",
+				"shaders\\pbr\\spot_light.v.glsl"
+			],
+			[
+				"pointlig.v",
+				"shaders\\deferred\\point_light.v.glsl"
+			],
+			[
+				"spotli.h",
+				"include\\Graphics\\SpotLight.h"
+			],
+			[
+				"point",
+				"src\\Graphics\\PointLight.cpp"
+			],
+			[
+				"deferr.h",
+				"include\\Graphics\\DeferredRenderer.h"
+			],
+			[
+				"fxa.f",
+				"shaders\\deferred\\fxaa.f.glsl"
+			],
+			[
+				"dump",
+				"E:\\Development\\Enjon\\proc\\dump.txt"
+			],
+			[
+				"defer.h",
+				"include\\Graphics\\DeferredRenderer.h"
+			],
+			[
+				"fxaa",
+				"shaders\\deferred\\fxaa.f.glsl"
+			],
+			[
+				"shad",
+				"src\\Graphics\\ShaderManager.cpp"
+			],
+			[
+				"def",
+				"src\\Graphics\\DeferredRenderer.cpp"
+			],
+			[
+				"cam.c",
+				"src\\Graphics\\Camera.cpp"
+			],
+			[
+				"rend.c",
+				"src\\Graphics\\Renderable.cpp"
+			],
+			[
+				"rend.h",
+				"include\\Graphics\\Renderable.h"
+			],
+			[
+				"cam.h",
+				"include\\Graphics\\Camera.h"
+			],
+			[
+				"tra.h",
+				"include\\Math\\Transform.h"
+			],
+			[
+				"ren.h",
+				"include\\Graphics\\Renderable.h"
+			],
+			[
+				"ren.c",
+				"src\\Graphics\\Renderable.cpp"
+			],
+			[
+				"rende.c",
+				"src\\Graphics\\Renderable.cpp"
+			],
+			[
+				"rende.h",
+				"include\\Graphics\\Renderable.h"
+			],
+			[
+				"camer.c",
+				"src\\Graphics\\Camera.cpp"
+			],
+			[
+				"camera.h",
+				"include\\Graphics\\Camera.h"
+			],
+			[
+				"directionl.f",
+				"shaders\\pbr\\directional_light.f.glsl"
+			],
+			[
+				"mainc",
+				"IsoARPG\\src\\main.cpp"
+			],
+			[
+				"dire",
+				"shaders\\pbr\\directional_light.f.glsl"
+			],
+			[
+				"direction.f",
+				"shaders\\pbr\\directional_light.f.glsl"
+			],
+			[
+				"shadm",
+				"src\\Graphics\\ShaderManager.cpp"
+			],
+			[
+				"defer",
+				"src\\Graphics\\DeferredRenderer.cpp"
+			],
+			[
+				"dire.",
+				"shaders\\pbr\\directional_light.f.glsl"
+			],
+			[
+				"deferred.c",
+				"src\\Graphics\\DeferredRenderer.cpp"
+			],
+			[
+				"pbrdirection",
+				"shaders\\pbr\\directional_light.v.glsl"
+			],
+			[
+				"spotli",
+				"include\\Graphics\\SpotLight.h"
+			],
+			[
+				"spotli.c",
+				"src\\Graphics\\SpotLight.cpp"
+			],
+			[
+				"spotl",
+				"include\\Graphics\\SpotLight.h"
+			],
+			[
+				"spotlic",
+				"src\\Graphics\\SpotLight.cpp"
+			],
+			[
+				"spot.h",
+				"include\\Graphics\\SpotLight.h"
+			],
+			[
+				"spotlig.h",
+				"include\\Graphics\\SpotLight.h"
+			],
+			[
+				"spo",
+				"include\\Graphics\\SpotLight.h"
+			],
+			[
+				"scne.c",
+				"src\\Graphics\\Scene.cpp"
+			],
+			[
+				"scnee.h",
+				"include\\Graphics\\Scene.h"
+			],
+			[
+				"spotlight.",
+				"src\\Graphics\\SpotLight.cpp"
+			],
+			[
+				"pointligh.h",
+				"include\\Graphics\\PointLight.h"
+			],
+			[
+				"spotlig",
+				"include\\Graphics\\SpotLight.h"
+			],
+			[
+				"deferredre.h",
+				"include\\Graphics\\DeferredRenderer.h"
+			],
+			[
+				"diretion.f",
+				"shaders\\deferred\\directional_light.f.glsl"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 625.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 475.0
+	},
+	"select_symbol":
+	{
+		"height": 354.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"main",
+				"main"
+			],
+			[
+				"BBwr",
+				"BBWrite"
+			]
+		],
+		"width": 374.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 123.0,
+	"status_bar_visible": false,
+	"template_settings":
+	{
+	}
+}

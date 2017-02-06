@@ -13,13 +13,4 @@ namespace Enjon
 	{
 		mEntity = entity;
 	}
-
-	template <>
-	CoreComponentType GetComponentType<PointLightComponent>() { return CoreComponentType::COMPONENTTYPE_POINTLIGHT; }
-
-	template <>
-	CoreComponentType GetComponentType<PointLightComponent*>() { return CoreComponentType::COMPONENTTYPE_POINTLIGHT; }
-
-	template <>
-	CoreComponentType GetComponentType<PointLightComponent&>() { return CoreComponentType::COMPONENTTYPE_POINTLIGHT; }
 }
