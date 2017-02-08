@@ -7,7 +7,12 @@
 
 #include <stdio.h>
 
-namespace Enjon { 
+namespace Enjon {
+
+	void EntityHandle::SetID(u32 id)
+	{
+		mID = id;
+	}
 
 	void EntityHandle::SetPosition(EM::Vec3& position)
 	{
@@ -32,7 +37,7 @@ namespace Enjon {
 		}
 
 		NextAvailableID = 0;
-		mEntities = new EntityHandle[MAX_ENTITIES];
+		mEntities = new std::array<EntityHandle, MAX_ENTITIES>;
 	}
 
 	EntityManager::~EntityManager()
@@ -42,9 +47,9 @@ namespace Enjon {
 	EntityHandle* EntityManager::Allocate()
 	{
 		assert(NextAvailableID < MAX_ENTITIES);
-		EntityHandle Entity(this);
-		auto id = Entity.GetID();
-		mEntities[id] = Entity;
-		return &mEntities[id];
+		u32 id = NextAvailableID++;
+		EntityHandle* entity = &mEntities->at(id);
+		entity->SetID(id);							// TODO(): Fix this!
+		return entity;
 	}
 }

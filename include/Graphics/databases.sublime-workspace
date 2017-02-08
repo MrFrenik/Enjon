@@ -143,7 +143,7 @@
 			"file": "/E/Documents/School/Databases/Scripts/jrj7634_c.sql",
 			"settings":
 			{
-				"buffer_size": 3440,
+				"buffer_size": 3673,
 				"line_ending": "Windows"
 			}
 		},
@@ -159,7 +159,7 @@
 			"file": "/E/Documents/School/Databases/Scripts/jrj7634_u.sql",
 			"settings":
 			{
-				"buffer_size": 441,
+				"buffer_size": 681,
 				"line_ending": "Windows"
 			}
 		},
@@ -425,6 +425,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"ID",
 			"null",
 			"`",
 			"\n--",
@@ -551,8 +552,7 @@
 			"_Intensity",
 			"_Color",
 			"_Inner",
-			"_Dir",
-			"_Quadratic"
+			"_Dir"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -582,26 +582,27 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3440,
+						"buffer_size": 3673,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								307,
-								307
+								3194,
+								3194
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/SQL/SQL.sublime-syntax"
+							"syntax": "Packages/SQL/SQL.sublime-syntax",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 126.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -617,16 +618,17 @@
 						"selection":
 						[
 							[
-								2691,
-								2691
+								134,
+								134
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/SQL/SQL.sublime-syntax"
+							"syntax": "Packages/SQL/SQL.sublime-syntax",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1014.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
@@ -638,15 +640,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 441,
+						"buffer_size": 681,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								441,
-								441
+								134,
+								134
 							]
 						],
 						"settings":
@@ -673,8 +675,8 @@
 						"selection":
 						[
 							[
-								334,
-								334
+								135,
+								135
 							]
 						],
 						"settings":
@@ -685,7 +687,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -707,7 +709,8 @@
 						],
 						"settings":
 						{
-							"syntax": "Packages/SQL/SQL.sublime-syntax"
+							"syntax": "Packages/SQL/SQL.sublime-syntax",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
 						"translation.y": 153.0,
@@ -741,7 +744,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 5,
 					"type": "text"
 				}
 			]

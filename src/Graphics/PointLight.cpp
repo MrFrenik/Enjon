@@ -7,23 +7,22 @@ namespace Enjon { namespace Graphics {
 	{
 		mPosition 	= EM::Vec3(0.0f, 0.0f, 0.0f);
 		mColor 		= EG::RGBA16_White(); 
-		mParams 	= PointLightParameters(0.0f, 0.0f, 0.0f);
+		mAttenuationRate = 1.0f;
+		mIntensity = 10.0f;
+		mRadius = 100.0f;
 	}
 
-	PointLight::PointLight(EM::Vec3& position, PLParams& params, EG::ColorRGBA16& color, float intensity)
+	PointLight::PointLight(EM::Vec3& position, float attenuationRate, EG::ColorRGBA16& color, float intensity, float radius)
 	{
-		mPosition 	= position;
-		mParams 	= params;
-		mColor 		= color;
-		mIntensity 	= intensity;
+		mPosition = position;
+		mAttenuationRate = attenuationRate;
+		mColor = color;
+		mIntensity = intensity;	
+		mRadius = radius;
+	}
 
-		const float constant 	= params.mConstant;
-		const float linear 		= params.mLinear;
-		const float quadratic 	= params.mQuadratic;
-
-		// Calculate radius
-	    float maxBrightness = std::fmaxf(std::fmaxf(color.r, color.g), color.b);
-	    params.mRadius = (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2 * quadratic);
+	PointLight::~PointLight()
+	{
 	}
 
 	void PointLight::SetColor(EG::ColorRGBA16& color)
@@ -46,13 +45,13 @@ namespace Enjon { namespace Graphics {
 		mPosition = position;
 	}
 
-	void PointLight::SetParams(PLParams& params)
+	void PointLight::SetAttenuationRate(float rate)
 	{
-		mParams = params;	
+		mAttenuationRate = rate;
 	}
 
-	PointLight::~PointLight()
+	void PointLight::SetRadius(float radius)
 	{
+		mRadius = radius;
 	}
-
 }}

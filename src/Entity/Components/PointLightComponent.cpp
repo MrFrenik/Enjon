@@ -29,8 +29,14 @@ namespace Enjon
 		mLight.SetPosition(position);
 	}
 
-	void PointLightComponent::SetParams(EG::PLParams& params)
+	void PointLightComponent::SetRadius(float radius)
 	{
-		mLight.SetParams(params);
+		mLight.SetRadius(radius);
 	}
+
+	void PointLightComponent::SetAttenuationRate(float rate)
+	{
+		mLight.SetAttenuationRate(rate);
+	}
+
 }

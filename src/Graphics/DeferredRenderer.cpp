@@ -295,13 +295,13 @@ namespace Enjon { namespace Graphics {
 			for (auto& l : *pointLights)
 			{
 				EG::ColorRGBA16& color = l->GetColor();
-				EG::PLParams& params = l->GetParams();
 				EM::Vec3& position = l->GetPosition();
 
 				pointShader->SetUniform("u_lightPos", position);
 				pointShader->SetUniform("u_lightColor", EM::Vec3(color.r, color.g, color.b));
-				pointShader->SetUniform("u_falloff", params.mFalloff);
 				pointShader->SetUniform("u_lightIntensity", l->GetIntensity());
+				pointShader->SetUniform("u_attenuationRate", l->GetAttenuationRate());
+				pointShader->SetUniform("u_radius", l->GetRadius());
 
 				// Render Light to screen
 				mBatch->Begin();

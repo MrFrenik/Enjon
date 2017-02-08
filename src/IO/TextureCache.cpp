@@ -17,7 +17,7 @@ namespace Enjon { namespace Graphics {
 	{
 	}
 
-	GLTexture TextureCache::GetTexture(std::string texturePath, GLint magParams, GLint minParams, bool genmips)
+	GLTexture& TextureCache::GetTexture(std::string texturePath, GLint magParams, GLint minParams, bool genmips)
 	{
 		//Set mit to map iterator; lookup texture to see if it's in map
 		auto mit = m_textureMap.find(texturePath);

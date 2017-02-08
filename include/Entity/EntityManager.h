@@ -25,7 +25,7 @@ namespace Enjon {
 			EntityHandle()
 			{
 				// This needs to be set to some null variable
-				mID = 0;
+				mID = MAX_ENTITIES;
 				mComponentMask = Enjon::ComponentBitset(0);
 				mManager = nullptr;	
 			}
@@ -33,7 +33,7 @@ namespace Enjon {
 			EntityHandle(EntityManager* _Manager)
 			{
 				// This needs to be set to some null variable
-				mID = 0;
+				mID = MAX_ENTITIES;
 				mComponentMask = Enjon::ComponentBitset(0);
 				mManager = _Manager;	
 			}
@@ -58,18 +58,19 @@ namespace Enjon {
 				assert(HasComponent<T>());
 
 				// Assert entity manager exists
-				assert(Manager != nullptr);
+				assert(mManager != nullptr);
 
 				// Get component wrapper
-				auto CWrapper = static_cast<ComponentWrapper<T>*>(mManager->Components.at(static_cast<size_t>(TypeCatalog::GetType<T>())));
+				auto CWrapper = static_cast<ComponentWrapper<T>*>(mManager->Components.at(static_cast<size_t>(Enjon::GetComponentType<T>())));
 
 				// Get component index
-				auto ComponentIndex = CWrapper->ComponentIndexMap.at(this->ID);
+				auto ComponentIndex = CWrapper->ComponentIndexMap.at(this->mID);
 
 				// Return component
 				return &(CWrapper->Components.at(ComponentIndex));
 			}
 
+			/*
 			template <typename T>
 			T* Attach()
 			{
@@ -117,6 +118,7 @@ namespace Enjon {
 				// Set bitmask field for component
 				this->ComponentMask ^= TypeCatalog::GetBitMask<T>();
 			}
+			*/
 
 			void SetPosition(EM::Vec3& position);
 			void SetScale(EM::Vec3& scale);
@@ -127,6 +129,8 @@ namespace Enjon {
 			EM::Quaternion& GetOrientation() { return mTransform.GetOrientation(); }
 
 		private:
+			void SetID(u32 id);
+
 			u32 mID;	
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
@@ -136,6 +140,7 @@ namespace Enjon {
 
 	class EntityManager
 	{
+		friend EntityHandle;
 		public:
 			EntityManager();
 			~EntityManager();
@@ -257,7 +262,8 @@ namespace Enjon {
 			}
 
 		private:
-			EntityHandle* mEntities;
+			// EntityHandle* mEntities;
+			std::array<EntityHandle, MAX_ENTITIES>* mEntities;
 			std::array<ComponentWrapperBase*, static_cast<size_t>(MAX_COMPONENTS)> Components;	
 			u32 NextAvailableID;
 	};

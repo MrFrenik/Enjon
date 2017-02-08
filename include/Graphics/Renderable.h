@@ -15,7 +15,7 @@ namespace Enjon { namespace Graphics {
 	class Renderable
 	{
 		public:
-			Renderable(EG::Mesh* mesh = nullptr, EG::Material* material = nullptr);
+			Renderable();
 			~Renderable();
 
 			/* Get position of transform */

@@ -28,7 +28,7 @@ namespace Enjon { namespace Input {
 
 	*/
 
-	EG::Mesh LoadMeshFromFile(const char* FilePath);
+	EG::Mesh LoadMeshFromFile(const std::string& FilePath);
 }} 
 
 

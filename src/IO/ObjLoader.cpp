@@ -12,7 +12,7 @@
 
 namespace Enjon { namespace Input {
 
-	EG::Mesh LoadMeshFromFile(const char* FilePath)
+	EG::Mesh LoadMeshFromFile(const std::string& FilePath)
 	{
 		EG::Mesh Mesh;
 
@@ -21,7 +21,7 @@ namespace Enjon { namespace Input {
 		std::vector<tinyobj::material_t> materials;
 
 		std::string err;
-		bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, FilePath);
+		bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, FilePath.c_str());
 
 		if (!err.empty()) { // `err` may contain warning message.
 		  std::cerr << err << std::endl;

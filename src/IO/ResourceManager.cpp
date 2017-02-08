@@ -5,14 +5,14 @@
 namespace Enjon { namespace Input { namespace ResourceManager { 
 
 	Enjon::Graphics::TextureCache m_textureCache;
-	std::unordered_map<const char*, EG::Mesh> MeshCache;
+	std::unordered_map<std::string, EG::Mesh> MeshCache;
 
-	Enjon::Graphics::GLTexture GetTexture(const std::string& texturePath, GLint magParams, GLint minParams, bool genmips) 
+	Enjon::Graphics::GLTexture& GetTexture(const std::string& texturePath, GLint magParams, GLint minParams, bool genmips) 
 	{ 
 		return m_textureCache.GetTexture(texturePath, magParams, minParams, genmips); 
 	} 
 
-	EG::Mesh* GetMesh(const char* MeshPath)
+	EG::Mesh* GetMesh(const std::string& MeshPath)
 	{
 		auto Search = MeshCache.find(MeshPath);
 		if (Search != MeshCache.end())
@@ -23,7 +23,7 @@ namespace Enjon { namespace Input { namespace ResourceManager {
 		// Otherwise create the mesh
 		else
 		{
-			MeshCache[MeshPath] = LoadMeshFromFile(MeshPath);
+			MeshCache[MeshPath] = LoadMeshFromFile(MeshPath.c_str());
 			return &MeshCache[MeshPath];
 		}
 	}

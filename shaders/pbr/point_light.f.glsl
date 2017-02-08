@@ -11,12 +11,12 @@ uniform sampler2D u_positionMap;
 uniform sampler2D u_matProps;
 
 uniform vec3 u_camPos;
-uniform vec3 u_falloff;
 uniform float u_radius;
 uniform vec3 u_lightColor;
 uniform vec3 u_lightPos;
 uniform float u_lightIntensity;
 uniform vec2 u_resolution;
+uniform float u_attenuationRate;
 
 // Vertex information
 in DATA
@@ -75,7 +75,8 @@ void main()
     float Distance = length(u_lightPos - WorldPos);
 
     // Attenuation
-    float Attenuation = 1.0 / (u_falloff.x + u_falloff.y * Distance + u_falloff.z * Distance * Distance);
+    float Attenuation = clamp((1.0 - (Distance / u_radius)) / (Distance * Distance), 0.0, 1.0);
+    Attenuation = pow(Attenuation, u_attenuationRate);
 
     // Radiance
     vec3 Radiance = u_lightColor * Attenuation * u_lightIntensity;

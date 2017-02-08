@@ -5,8 +5,8 @@
 
 namespace Enjon { namespace Graphics {
 
-	Renderable::Renderable(EG::Mesh* mesh, EG::Material* material)
-		: mMesh(mesh), mMaterial(material)
+	Renderable::Renderable()
+		: mMesh(nullptr), mMaterial(nullptr)
 	{
 	}
 

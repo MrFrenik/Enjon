@@ -11,34 +11,34 @@ namespace Enjon
 	{
 		public:
 			GraphicsComponent();
-			GraphicsComponent(EG::Renderable& renderable);
+			GraphicsComponent(EG::Renderable* renderable);
 			~GraphicsComponent();
 
 			virtual void Update(float dt) override;	
 
 			/* Get position of transform */
-			EM::Vec3& GetPosition() { return mRenderable.GetPosition(); }
+			EM::Vec3& GetPosition() { return mRenderable->GetPosition(); }
 
 			/* Get scale of transform */
-			EM::Vec3& GetScale() { return mRenderable.GetScale(); }
+			EM::Vec3& GetScale() { return mRenderable->GetScale(); }
 
 			/* Get orientation of transform */
-			EM::Quaternion& GetOrientation() { return mRenderable.GetOrientation(); }
+			EM::Quaternion& GetOrientation() { return mRenderable->GetOrientation(); }
 
 			/* Get material of renderable */
-			EG::Material* GetMaterial() { return mRenderable.GetMaterial(); }
+			EG::Material* GetMaterial() { return mRenderable->GetMaterial(); }
 
 			/* Get mesh of renderable */
-			EG::Mesh* GetMesh() { return mRenderable.GetMesh(); }
+			EG::Mesh* GetMesh() { return mRenderable->GetMesh(); }
 
 			/* Get scene of renderable */
-			EG::Scene* GetScene() { return mRenderable.GetScene(); }
+			EG::Scene* GetScene() { return mRenderable->GetScene(); }
 
 			/* Get transform */
-			EM::Transform GetTransform() { return mRenderable.GetTransform(); }
+			EM::Transform GetTransform() { return mRenderable->GetTransform(); }
 
 			/* Get renderable */
-			EG::Renderable* GetRenderable() { return &mRenderable; }
+			EG::Renderable* GetRenderable() { return mRenderable; }
 
 			/* Set position of transform */
 			void SetPosition(EM::Vec3& position);
@@ -58,8 +58,10 @@ namespace Enjon
 			/* Set scene of renderable */
 			void SetScene(EG::Scene* scene);
 
+			void SetRenderable(EG::Renderable* renderable);
+
 		private:
-			EG::Renderable mRenderable;
+			EG::Renderable* mRenderable = nullptr;
 	};
 }
 
