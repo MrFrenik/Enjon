@@ -69,6 +69,12 @@ namespace Enjon { namespace Graphics {
 	class QuadBatch
 	{
 		public:
+	
+			enum class QuadBatchStatus
+			{
+				READY, 
+				NOT_READY
+			};
 
 			QuadBatch();
 			~QuadBatch();
@@ -110,6 +116,7 @@ namespace Enjon { namespace Graphics {
 			static bool CompareBackToFront(QuadGlyph* A, QuadGlyph* B);
 			static bool CompareTexture(QuadGlyph* A, QuadGlyph* B);
 
+			QuadBatchStatus mStatus = QuadBatchStatus::NOT_READY;
 			GLuint VBO;
 			GLuint VAO;
 			QuadGlyphSortType SortType;

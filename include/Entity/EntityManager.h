@@ -150,35 +150,60 @@ namespace Enjon {
 			template <typename T>
 			void RegisterComponent()
 			{
-				static_assert(std::is_base_of<Component, T>::value, 
-					"EntityManager::RegisterComponent:: T must inherit from Component.");
-				auto index = static_cast<size_t>(Enjon::GetComponentType<T>());
-				assert(Components.at(index) == nullptr);
-				auto C = new ComponentWrapper<T>;	
-				Components.at(index) = C;
+				static_assert(std::is_base_of<Component, T>::value, "EntityManager::RegisterComponent:: T must inherit from Component.");
+				u32 index = static_cast<u32>(Enjon::GetComponentType<T>());
+				assert(mComponents.at(index) == nullptr);
+				ComponentWrapper<T>* C = new ComponentWrapper<T>;	
+				mComponents.at(index) = C;
 			}
 
 			template <typename T>
 			std::vector<T>* GetComponentList()
 			{
-				auto index = static_cast<size_t>(Enjon::GetComponentType<T>());
+				u32 index = static_cast<u32>(Enjon::GetComponentType<T>());
 				assert(Components.at(index) != nullptr);
-				return &(static_cast<ComponentWrapper<T>*>(Components.at(index))->Components);	
+				return &(static_cast<ComponentWrapper<T>*>(Components.at(index))->mComponentPtrs);	
 			}
 
 			template <typename T>
-			T* Attach(Enjon::EntityHandle* Entity)
+			T* Attach(Enjon::EntityHandle* entity)
 			{
+				// Assert entity is valid
+				assert(entity != nullptr);
 				// Check to make sure isn't already attached to this entity
-				assert(!Entity->HasComponent<T>());
+				assert(!entity->HasComponent<T>());
+
+				// Entity id
+				u32 eid = entity->GetID();
 
 				// Get index into vector and assert that entity manager has this component
-				auto index = static_cast<size_t>(Enjon::GetComponentType<T>());
-				assert(Components.at(index) != nullptr);
+				u32 index = static_cast<u32>(Enjon::GetComponentType<T>());
+				assert(mComponents.at(index) != nullptr);
 
-				auto CWrapper = static_cast<ComponentWrapper<T>*>(Components.at(index));
-				auto ComponentList = &(CWrapper->Components);
+				ComponentWrapper<T>* cWrapper = static_cast<ComponentWrapper<T>*>(mComponents.at(index));
+				auto cMap = &(cWrapper->mComponentMap);
+				auto componentList = &(cWrapper->mComponentPtrs);
 
+				// Create new component and place into map
+				auto query = cMap->find(eid);
+				if (query == cMap->end())
+				{
+					T component;
+					component.SetEntity(entity);
+					cWrapper->mComponentMap[eid] = component;
+					componentList->push_back(&cWrapper->mComponentMap[eid]);
+
+					// Set bitmask field for component
+					entity->mComponentMask |= Enjon::GetComponentBitMask<T>();
+
+					return &cWrapper->mComponentMap[eid];
+				}
+
+				// Otherwise the entity already has the component
+				assert(false);
+
+
+				/*
 				// Create new component and push back into components list
 				// and set entity as its owner
 				T NewComponent;
@@ -193,32 +218,34 @@ namespace Enjon {
 
 				// Return newly created component to allow for chaining
 				return &(CWrapper->Components.back());	
+				*/
 			}
 
 			template <typename T>
-			void Detach(EntityHandle* Entity)
+			void Detach(EntityHandle* entity)
 			{
 				// Check to make sure isn't already attached to this entity
-				assert(Entity->HasComponent<T>());
+				assert(entity->HasComponent<T>());
 
 				// Remove component from entity manager components
-				RemoveComponent<T>(Entity);
+				RemoveComponent<T>(entity);
 
 				// Set bitmask field for component
-				Entity->mComponentMask ^= Enjon::GetComponentBitMask<T>();
+				entity->mComponentMask ^= Enjon::GetComponentBitMask<T>();
 			}
 
 			// NOTE(John): Should only ever be called in context of detaching a component from an entity!
+			/*
 			template <typename T>
-			void RemoveComponent(EntityHandle* Entity)
+			void RemoveComponent(EntityHandle* entity)
 			{
 				// Get index into vector and assert that entity manager has this component
 				auto index = static_cast<size_t>(Enjon::GetComponentType<T>());
-				assert(Components.at(index) != nullptr);
+				assert(mComponents.at(index) != nullptr);
 
-				auto CWrapper = static_cast<ComponentWrapper<T>*>(Components.at(index));
+				auto CWrapper = static_cast<ComponentWrapper<T>*>(mComponents.at(index));
 				auto ComponentList = &(CWrapper->Components);
-				auto ComponentIndex = CWrapper->ComponentIndexMap.at(Entity->ID);
+				auto ComponentIndex = CWrapper->ComponentIndexMap.at(entity->ID);
 				auto ComponentIndexMap = &CWrapper->ComponentIndexMap;
 
 				// If an the last element
@@ -241,31 +268,36 @@ namespace Enjon {
 					ComponentIndexMap->at(ComponentList->at(ComponentIndex).Entity->ID) = ComponentIndex;
 				}
 			}
+			*/
 
 			template <typename T>
-			T* GetComponent(EntityHandle* Entity)
+			T* GetComponent(EntityHandle* entity)
 			{
 				// Assert that it has component
-				assert(Entity->HasComponent<T>());
+				assert(entity->HasComponent<T>());
 
 				// Assert entity manager exists
-				assert(Entity != nullptr);
+				assert(entity != nullptr);
+
+				u32 eid = entity->GetID();
 
 				// Get component wrapper
-				auto CWrapper = static_cast<ComponentWrapper<T>*>(Components.at(Enjon::GetComponentType<T>()));
-
-				// Get component index
-				auto ComponentIndex = CWrapper->ComponentIndexMap.at(Entity->ID);
+				auto cWrapper = static_cast<ComponentWrapper<T>*>(mComponents.at(Enjon::GetComponentType<T>()));
 
 				// Return component
-				return &(CWrapper->Components.at(ComponentIndex));
+				auto* cMap = &cWrapper->mComponentMap;
+				auto query = cMap->find(eid);
+				if (query != cMap->end())
+				{
+					return &query->second;
+				}
 			}
 
 		private:
 			// EntityHandle* mEntities;
 			std::array<EntityHandle, MAX_ENTITIES>* mEntities;
-			std::array<ComponentWrapperBase*, static_cast<size_t>(MAX_COMPONENTS)> Components;	
-			u32 NextAvailableID;
+			std::array<ComponentWrapperBase*, static_cast<size_t>(MAX_COMPONENTS)> mComponents;	
+			u32 mNextAvailableID;
 	};
 
 }

@@ -8498,6 +8498,8 @@ bool mMovementOn = true;
 
 bool ProcessInput(EI::InputManager* input, float dt);
 
+std::vector<Enjon::EntityHandle*> mHandles;
+
 #ifdef main
 	#undef main
 #endif
@@ -8507,49 +8509,116 @@ int main(int argc, char** argv)
 	mGraphicsEngine.Init();
 	mLimiter.Init(60.0f);
 
+	// Create entity manager
+	mEntities = new Enjon::EntityManager();
+
+	// Register components
+	mEntities->RegisterComponent<Enjon::GraphicsComponent>();
+	mEntities->RegisterComponent<Enjon::PointLightComponent>();
+
+
+	Enjon::EntityHandle* handle1 = mEntities->Allocate();
+	Enjon::EntityHandle* handle2 = mEntities->Allocate();
+	Enjon::EntityHandle* handle3 = mEntities->Allocate();
+
+	auto gc = mEntities->Attach<Enjon::GraphicsComponent>(handle1);
+	auto gc2 = mEntities->Attach<Enjon::GraphicsComponent>(handle2);
+
+	EG::Renderable* renderable = gc->GetRenderable();
+	EG::Renderable* renderable2 = gc2->GetRenderable();
+
 	mSun = EG::DirectionalLight(EM::Vec3(0.5, 0.5, 0), EG::RGBA16_Orange(), 5.0f);
 	EG::Scene* scene = mGraphicsEngine.GetScene();
 
-	EG::Mesh* mesh1 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cerebus.obj");
-	EG::Mesh* mesh2 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/shaderball.obj");
+	EG::Mesh* mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/sphere.obj");
+	EG::Mesh* mesh2 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cerebus.obj");
+	EG::Material* mat = new EG::Material();
+	EG::Material* mat2 = new EG::Material();
+	EG::Material* mat3 = new EG::Material();
 
-	assert(mesh1 != nullptr);
-	assert(mesh2 != nullptr);
+	mat->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/BaseColor.png"));
+	mat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png"));
+	mat->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Metallic.png"));
+	mat->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Roughness.png"));
 
-	// Create entity
-	mEntities = new Enjon::EntityManager();
-	mEntities->RegisterComponent<Enjon::PointLightComponent>();
-	mEntities->RegisterComponent<Enjon::GraphicsComponent>();
+	mat2->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/BaseColor.png"));
+	mat2->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Normal.png"));
+	mat2->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Metallic.png"));
+	mat2->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Roughness.png"));
 
-	Enjon::EntityHandle* handle = mEntities->Allocate();
-	handle->SetPosition(EM::Vec3(0, 2, 0));
-	Enjon::GraphicsComponent* gc = mEntities->Attach<Enjon::GraphicsComponent>(handle);
-	gc->SetRenderable(new EG::Renderable());
-	gc->SetMesh(EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cerebus.obj"));
-	gc->SetMaterial(new EG::Material());
-	gc->GetMaterial()->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/BaseColor.png"));
-	gc->GetMaterial()->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png"));
-	gc->GetMaterial()->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Metallic.png"));
-	gc->GetMaterial()->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Roughness.png"));
+	mat3->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/BaseColor.png"));
+	mat3->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Normal.png"));
+	mat3->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png"));
+	mat3->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png"));
 
-	Enjon::EntityHandle* handle2 = mEntities->Allocate();
-	assert(handle2 != nullptr);
-	Enjon::GraphicsComponent* gc2 = mEntities->Attach<Enjon::GraphicsComponent>(handle2);
-	gc2->SetRenderable(new EG::Renderable());
-	gc2->SetMesh(EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/shaderball.obj"));
-	gc2->SetMaterial(new EG::Material());
-	gc2->GetMaterial()->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/BaseColor.png"));
-	gc2->GetMaterial()->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png"));
-	gc2->GetMaterial()->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Metallic.png"));
-	gc2->GetMaterial()->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Roughness.png"));
-	gc2->GetRenderable()->SetScale(EM::Vec3(1, 1, 1) * 0.0075f);
-	gc2->GetRenderable()->SetPosition(EM::Vec3(4, 0.2f, 0));
+	renderable->SetMesh(mesh);
+	renderable->SetMaterial(mat);
+	renderable2->SetMesh(mesh2);
+	renderable2->SetMaterial(mat);
+
+	renderable2->SetPosition(EM::Vec3(5, 2, 0));
+
+	
+	for (Enjon::u32 i = 0; i < 10; ++i)
+	{
+		Enjon::EntityHandle* handle = mEntities->Allocate();
+		auto gcomp = mEntities->Attach<Enjon::GraphicsComponent>(handle);
+		auto plcomp = mEntities->Attach<Enjon::PointLightComponent>(handle);
+
+		// Set up graphics component
+		auto rend = gcomp->GetRenderable();
+		rend->SetMesh(mesh);
+		if (i % 2 == 0) rend->SetMaterial(mat);
+		else if (i % 3 == 0) rend->SetMaterial(mat2);
+		else rend->SetMaterial(mat3);
+		// rend->SetMaterial(mat2);
+		rend->SetPosition(EM::Vec3(i * 4, i, i));
+		rend->SetScale(EM::Vec3(1, 1, 1) * (0.01f * i));
+		scene->AddRenderable(rend);
+
+		// Set up point light component
+		plcomp->SetRadius(300.0f);
+		plcomp->SetIntensity(100.0f);
+		plcomp->SetAttenuationRate(1.0f);
+		plcomp->SetColor(EG::RGBA16_ZombieGreen());
+		scene->AddPointLight(plcomp->GetLight());
+
+		mHandles.push_back(handle);
+	}
+
+	mBatch.Init();
+	EG::Material* floorMat = new EG::Material();
+  	floorMat->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png"));
+ 	floorMat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png"));
+ 	floorMat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png") );
+ 	floorMat->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Metallic.png") );
+ 	floorMat->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Roughness.png") );
+  	mBatch.SetMaterial(floorMat);
+
+	mBatch.Begin();
+  	{
+ 		for (auto i = -2; i < 10; i++)
+ 		{
+ 			for (auto j = -2; j < 10; j++)
+ 			{
+ 				EM::Transform t(EM::Vec3(j * 2, 0, i * 2), EM::Quaternion::AngleAxis(EM::ToRadians(90), EM::Vec3(1, 0, 0)), EM::Vec3(1, 1, 1));
+ 				mBatch.Add(
+ 							t, 
+ 							EM::Vec4(0, 0, 1, 1),
+ 							0
+ 						);
+ 			}
+ 		}
+ 	}
+  	mBatch.End();
+
 
 	// Add elements scene
 	scene->AddDirectionalLight(&mSun);
 	scene->AddRenderable(gc->GetRenderable());
 	scene->AddRenderable(gc2->GetRenderable());
 	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_White(), 0.1f));
+	scene->AddQuadBatch(&mBatch);
 
 	float dt = 0.0f;
 
@@ -8560,6 +8629,17 @@ int main(int argc, char** argv)
 
 		// Render
 		mGraphicsEngine.Update(dt);
+
+		gc->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
+		gc2->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
+
+		for (auto& ent : mHandles)
+		{
+			auto gcomp = mEntities->GetComponent<Enjon::GraphicsComponent>(ent);
+			auto plc = mEntities->GetComponent<Enjon::PointLightComponent>(ent);
+			gcomp->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
+			plc->SetPosition(gcomp->GetPosition() + EM::Vec3(cos(dt), 0, sin(dt)) * 4.0f);
+		}
 
 		mLimiter.End();
 	}

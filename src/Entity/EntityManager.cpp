@@ -31,12 +31,12 @@ namespace Enjon {
 
 	EntityManager::EntityManager()
 	{
-		for (auto i = 0; i < Components.size(); i++)
+		for (auto i = 0; i < mComponents.size(); i++)
 		{
-			Components.at(i) = nullptr;
+			mComponents.at(i) = nullptr;
 		}
 
-		NextAvailableID = 0;
+		mNextAvailableID = 0;
 		mEntities = new std::array<EntityHandle, MAX_ENTITIES>;
 	}
 
@@ -46,8 +46,8 @@ namespace Enjon {
 
 	EntityHandle* EntityManager::Allocate()
 	{
-		assert(NextAvailableID < MAX_ENTITIES);
-		u32 id = NextAvailableID++;
+		assert(mNextAvailableID < MAX_ENTITIES);
+		u32 id = mNextAvailableID++;
 		EntityHandle* entity = &mEntities->at(id);
 		entity->SetID(id);							// TODO(): Fix this!
 		return entity;

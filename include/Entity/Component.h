@@ -7,11 +7,13 @@
 
 #include "Entity/EntityDefines.h"
 #include "Math/Transform.h"
+#include "System/Types.h"
 
 #include <array>
 #include <vector>
 #include <bitset>
 #include <type_traits>
+#include <unordered_map>
 
 namespace Enjon {
 
@@ -43,11 +45,14 @@ namespace Enjon {
 		public:
 			void Base() override {}
 
-			std::vector<T> Components;
-			std::array<uint32_t, MAX_ENTITIES> ComponentIndexMap;
+			typedef std::vector<T*> ComponentPtrs;
+			typedef std::unordered_map<u32, T> ComponentMap;
+
+			ComponentPtrs mComponentPtrs;
+			ComponentMap mComponentMap;
 	};
 
-	using ComponentID = std::size_t;
+	using ComponentID = u32;
 
 	namespace Internal
 	{
@@ -68,13 +73,13 @@ namespace Enjon {
 		return typeID;
 	}
 
-	typedef std::bitset<static_cast<size_t>(MAX_COMPONENTS)> ComponentBitset;
+	typedef std::bitset<static_cast<u32>(MAX_COMPONENTS)> ComponentBitset;
 
 	template <typename T>
 	ComponentBitset GetComponentBitMask() 
 	{ 
 		ComponentBitset BitSet;
-		BitSet.set(static_cast<size_t>(GetComponentType<T>()));
+		BitSet.set(static_cast<u32>(GetComponentType<T>()));
 		return BitSet;
 	}
 }

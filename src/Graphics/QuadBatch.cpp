@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include <algorithm>
+#include <assert.h>
 
 namespace Enjon { namespace Graphics {
 
@@ -371,10 +372,13 @@ namespace Enjon { namespace Graphics {
 	void QuadBatch::Init()
 	{
 		CreateVertexArray();
+		mStatus = QuadBatchStatus::READY;
 	}
 
 	void QuadBatch::Begin(QuadGlyphSortType _SortType)
 	{
+		assert(mStatus != QuadBatchStatus::NOT_READY);
+
 		// Set sort type
 		SortType = _SortType;
 
