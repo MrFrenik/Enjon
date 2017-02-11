@@ -8494,6 +8494,10 @@ EG::QuadBatch mBatch;
 
 Enjon::EntityManager* mEntities;
 
+Enjon::EntityHandle* handle1;
+Enjon::EntityHandle* handle2;
+Enjon::EntityHandle* handle3;
+
 bool mMovementOn = true;
 
 bool ProcessInput(EI::InputManager* input, float dt);
@@ -8516,22 +8520,25 @@ int main(int argc, char** argv)
 	mEntities->RegisterComponent<Enjon::GraphicsComponent>();
 	mEntities->RegisterComponent<Enjon::PointLightComponent>();
 
+	handle1 = mEntities->Allocate();
+	handle2 = mEntities->Allocate();
+	handle3 = mEntities->Allocate();
 
-	Enjon::EntityHandle* handle1 = mEntities->Allocate();
-	Enjon::EntityHandle* handle2 = mEntities->Allocate();
-	Enjon::EntityHandle* handle3 = mEntities->Allocate();
-
-	auto gc = mEntities->Attach<Enjon::GraphicsComponent>(handle1);
+	auto gc = handle1->Attach<Enjon::GraphicsComponent>();
 	auto gc2 = mEntities->Attach<Enjon::GraphicsComponent>(handle2);
 
 	EG::Renderable* renderable = gc->GetRenderable();
 	EG::Renderable* renderable2 = gc2->GetRenderable();
 
-	mSun = EG::DirectionalLight(EM::Vec3(0.5, 0.5, 0), EG::RGBA16_Orange(), 5.0f);
+	mSun = EG::DirectionalLight(EM::Vec3(0.5f, 0.5f, 0.0f), EG::RGBA16_Orange(), 5.0f);
+	mSun2 = EG::DirectionalLight(EM::Vec3(0.0f, 0.5f, -0.75f), EG::RGBA16_SkyBlue(), 5.0f);
+	mSun3 = EG::DirectionalLight(EM::Vec3(0.75f, 0.6f, 0.75f), EG::RGBA16_Yellow(), 5.0f);
+
 	EG::Scene* scene = mGraphicsEngine.GetScene();
 
 	EG::Mesh* mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/sphere.obj");
 	EG::Mesh* mesh2 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cerebus.obj");
+	EG::Mesh* mesh3 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
 	EG::Material* mat = new EG::Material();
 	EG::Material* mat2 = new EG::Material();
 	EG::Material* mat3 = new EG::Material();
@@ -8551,55 +8558,42 @@ int main(int argc, char** argv)
 	mat3->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png"));
 	mat3->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png"));
 
-	renderable->SetMesh(mesh);
+	renderable->SetMesh(mesh3);
 	renderable->SetMaterial(mat);
 	renderable2->SetMesh(mesh2);
 	renderable2->SetMaterial(mat);
 
+	handle2->SetPosition(EM::Vec3(5, 2, 0));
 	renderable2->SetPosition(EM::Vec3(5, 2, 0));
 
-	
-	for (Enjon::u32 i = 0; i < 10; ++i)
-	{
-		Enjon::EntityHandle* handle = mEntities->Allocate();
-		auto gcomp = mEntities->Attach<Enjon::GraphicsComponent>(handle);
-		auto plcomp = mEntities->Attach<Enjon::PointLightComponent>(handle);
+	auto plc = mEntities->Attach<Enjon::PointLightComponent>(handle2);
+	plc->SetIntensity(100.0f);
+	plc->SetRadius(300.0f);
+	plc->SetAttenuationRate(1.0f);
+	plc->SetColor(EG::RGBA16_LightPurple());
 
-		// Set up graphics component
-		auto rend = gcomp->GetRenderable();
-		rend->SetMesh(mesh);
-		if (i % 2 == 0) rend->SetMaterial(mat);
-		else if (i % 3 == 0) rend->SetMaterial(mat2);
-		else rend->SetMaterial(mat3);
-		// rend->SetMaterial(mat2);
-		rend->SetPosition(EM::Vec3(i * 4, i, i));
-		rend->SetScale(EM::Vec3(1, 1, 1) * (0.01f * i));
-		scene->AddRenderable(rend);
+	auto plc2 = mEntities->Attach<Enjon::PointLightComponent>(handle1);
+	plc->SetIntensity(100.0f);
+	plc->SetRadius(300.0f);
+	plc->SetAttenuationRate(1.0f);
+	plc->SetColor(EG::RGBA16_Red());
 
-		// Set up point light component
-		plcomp->SetRadius(300.0f);
-		plcomp->SetIntensity(100.0f);
-		plcomp->SetAttenuationRate(1.0f);
-		plcomp->SetColor(EG::RGBA16_ZombieGreen());
-		scene->AddPointLight(plcomp->GetLight());
-
-		mHandles.push_back(handle);
-	}
+	printf("%d\n", mHandles.size());
 
 	mBatch.Init();
 	EG::Material* floorMat = new EG::Material();
   	floorMat->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png"));
  	floorMat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png"));
  	floorMat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png") );
- 	floorMat->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Metallic.png") );
- 	floorMat->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Roughness.png") );
+ 	floorMat->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png") );
+ 	floorMat->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png") );
   	mBatch.SetMaterial(floorMat);
 
 	mBatch.Begin();
   	{
- 		for (auto i = -2; i < 10; i++)
+ 		for (auto i = -100; i < 100; i++)
  		{
- 			for (auto j = -2; j < 10; j++)
+ 			for (auto j = -100; j < 100; j++)
  			{
  				EM::Transform t(EM::Vec3(j * 2, 0, i * 2), EM::Quaternion::AngleAxis(EM::ToRadians(90), EM::Vec3(1, 0, 0)), EM::Vec3(1, 1, 1));
  				mBatch.Add(
@@ -8615,6 +8609,10 @@ int main(int argc, char** argv)
 
 	// Add elements scene
 	scene->AddDirectionalLight(&mSun);
+	scene->AddDirectionalLight(&mSun2);
+	scene->AddDirectionalLight(&mSun3);
+	scene->AddPointLight(plc->GetLight());
+	scene->AddPointLight(plc2->GetLight());
 	scene->AddRenderable(gc->GetRenderable());
 	scene->AddRenderable(gc2->GetRenderable());
 	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_White(), 0.1f));
@@ -8633,12 +8631,10 @@ int main(int argc, char** argv)
 		gc->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
 		gc2->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
 
-		for (auto& ent : mHandles)
+		if (handle1->HasComponent<Enjon::PointLightComponent>())
 		{
-			auto gcomp = mEntities->GetComponent<Enjon::GraphicsComponent>(ent);
-			auto plc = mEntities->GetComponent<Enjon::PointLightComponent>(ent);
-			gcomp->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
-			plc->SetPosition(gcomp->GetPosition() + EM::Vec3(cos(dt), 0, sin(dt)) * 4.0f);
+			auto pl = handle1->GetComponent<Enjon::PointLightComponent>();
+			pl->SetPosition(handle1->GetPosition() + EM::Vec3(cos(dt) * 5.0f, 2.0f, sin(dt) * 5.0f));
 		}
 
 		mLimiter.End();
@@ -8693,11 +8689,32 @@ bool ProcessInput(EI::InputManager* input, float dt)
 		window->ShowMouseCursor(true);
     }
 
+    if (input->IsKeyPressed(SDLK_r))
+    {
+    	if (!(handle1->HasComponent<Enjon::PointLightComponent>()))
+    	{
+    		auto plc = handle1->Attach<Enjon::PointLightComponent>();
+    		plc->SetIntensity(100.0f);
+    		plc->SetAttenuationRate(1.0f);
+    		plc->SetColor(EG::RGBA16_ZombieGreen());
+    		plc->SetRadius(200.0f);
+    		mGraphicsEngine.GetScene()->AddPointLight(plc->GetLight());
+    	}
+    }
+
+    if (input->IsKeyPressed(SDLK_e))
+    {
+    	if (handle1->HasComponent<Enjon::PointLightComponent>())
+    	{
+	    	mEntities->Detach<Enjon::PointLightComponent>(handle1);
+    	}
+    }
+
     if (mMovementOn)
     {
 	    EG::Camera* camera = mGraphicsEngine.GetSceneCamera();
 	   	EM::Vec3 velDir(0, 0, 0); 
-	   	static float speed = 3.0f;
+	   	static float speed = 8.0f;
 
 		if (input->IsKeyDown(SDLK_w))
 		{

@@ -32,7 +32,7 @@ namespace Enjon { namespace Graphics {
 		delete(mMediumBlurVertical);
 		delete(mLargeBlurHorizontal);
 		delete(mLargeBlurVertical);
-		delete(mComposite);
+		delete(mCompositeTarget);
 		delete(mLightingBuffer);
 		delete(mLuminanceBuffer);
 		delete(mFXAATarget);
@@ -80,6 +80,8 @@ namespace Enjon { namespace Graphics {
 		LightingPass();
 		// FXAA pass
 		FXAAPass(mLightingBuffer);
+		// Composite Pass
+		CompositePass(mFXAATarget);
 
 		// Draw diffuse texture just for testing
 		GLSLProgram* shader = EG::ShaderManager::Get("NoCameraProjection");		
@@ -93,7 +95,7 @@ namespace Enjon { namespace Graphics {
 							EM::Vec4(-1, -1, 2, 2),
 							EM::Vec4(0, 0, 1, 1),
 							// mGbuffer->GetTexture(EG::GBufferTextureType::UV)
-							mFXAATarget->GetTexture()
+							mCompositeTarget->GetTexture()
 						);
 			}
 			mBatch->End();
@@ -390,6 +392,33 @@ namespace Enjon { namespace Graphics {
 		mFXAATarget->Unbind();
 	}
 
+	void DeferredRenderer::CompositePass(EG::RenderTarget* inputTarget)
+	{
+		GLSLProgram* compositeProgram = EG::ShaderManager::Get("Composite");
+		mCompositeTarget->Bind();
+		{
+			mWindow.Clear();
+			compositeProgram->Use();
+			{
+				compositeProgram->SetUniform("u_exposure", mToneMapSettings.mExposure);
+				compositeProgram->SetUniform("u_gamma", mToneMapSettings.mGamma);
+				compositeProgram->SetUniform("u_saturation", mToneMapSettings.mSaturation);
+				mBatch->Begin();
+				{
+					mBatch->Add(
+										EM::Vec4(-1, -1, 2, 2),
+										EM::Vec4(0, 0, 1, 1),
+										inputTarget->GetTexture()
+									);
+				}
+				mBatch->End();
+				mBatch->RenderBatch();
+			}
+			compositeProgram->Unuse();
+		}
+		mCompositeTarget->Unbind();
+	}
+
 	void DeferredRenderer::SetViewport(EM::iVec2& dimensions)
 	{
 		mWindow.SetViewport(dimensions);
@@ -414,7 +443,7 @@ namespace Enjon { namespace Graphics {
 		mMediumBlurVertical 		= new EG::RenderTarget(width  / 4, height  / 4);
 		mLargeBlurHorizontal 		= new EG::RenderTarget(width / 64, height / 64);
 		mLargeBlurVertical 			= new EG::RenderTarget(width / 64, height / 64);
-		mComposite 					= new EG::RenderTarget(width, height);
+		mCompositeTarget 			= new EG::RenderTarget(width, height);
 		mLightingBuffer 			= new EG::RenderTarget(width, height);
 		mLuminanceBuffer 			= new EG::RenderTarget(width, height);
 		mFXAATarget 				= new EG::RenderTarget(width, height);

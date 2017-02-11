@@ -23,6 +23,10 @@ namespace Enjon { namespace Graphics {
 
 	PointLight::~PointLight()
 	{
+		if (mScene != nullptr)
+		{
+			mScene->RemovePointLight(this);
+		}
 	}
 
 	void PointLight::SetColor(EG::ColorRGBA16& color)

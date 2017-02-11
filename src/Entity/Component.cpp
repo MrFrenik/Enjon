@@ -13,4 +13,9 @@ namespace Enjon
 	{
 		mEntity = entity;
 	}
+
+	void Component::SetID(u32 id)
+	{
+		mID = id;
+	}
 }

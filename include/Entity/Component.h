@@ -19,18 +19,27 @@ namespace Enjon {
 
 	// Forward declaration
 	class EntityHandle;
+	class EntityManager;
 
 	class Component
 	{
+		friend EntityHandle;
+		friend EntityManager;
+
 		public:
 			Component(){}
 			virtual void Update(float dt) = 0;
 
 			Enjon::EntityHandle* GetEntity();
+			u32 GetID() const { return mID; }
+
+		private:
 			void SetEntity(EntityHandle* entity);
+			void SetID(u32 id);
 
 		private:
 			Enjon::EntityHandle* mEntity;
+			u32 mID;
 	};
 
 	class ComponentWrapperBase

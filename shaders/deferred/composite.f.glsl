@@ -10,13 +10,13 @@ in DATA
 out vec4 color;
 
 uniform sampler2D tex;
-uniform sampler2D blurTexSmall;
-uniform sampler2D blurTexMedium;
-uniform sampler2D blurTexLarge;
-uniform float exposure;
-uniform float gamma;
-uniform float bloomScalar;
-uniform float Saturation;
+// uniform sampler2D blurTexSmall;
+// uniform sampler2D blurTexMedium;
+// uniform sampler2D blurTexLarge;
+uniform float u_exposure;
+uniform float u_gamma;
+// uniform float bloomScalar;
+uniform float u_saturation;
 
 float A = 0.15;
 float B = 0.50;
@@ -36,22 +36,22 @@ void main()
 {
 	// Mix bloom
 	vec3 hdrColor = texture2D(tex, fs_in.TexCoords).rgb;
-	vec3 bloomColor = texture2D(blurTexSmall, fs_in.TexCoords).rgb + 
-						texture2D(blurTexMedium, fs_in.TexCoords).rgb + 
-						texture2D(blurTexLarge, fs_in.TexCoords).rgb;
-	bloomColor = bloomColor / 3.0;
-	hdrColor += bloomColor * bloomScalar;
+	// vec3 bloomColor = texture2D(blurTexSmall, fs_in.TexCoords).rgb + 
+	// 					texture2D(blurTexMedium, fs_in.TexCoords).rgb + 
+	// 					texture2D(blurTexLarge, fs_in.TexCoords).rgb;
+	// bloomColor = bloomColor / 3.0;
+	// hdrColor += bloomColor * bloomScalar;
 
 	// Tone mapping
-	vec3 result = vec3(1.0) - exp(-hdrColor * exposure);
-	result = pow(result, vec3(1.0 / gamma));
+	vec3 result = vec3(1.0) - exp(-hdrColor * u_exposure);
+	result = pow(result, vec3(1.0 / u_gamma));
 
 	// Saturation
 	float lum = result.r * 0.2 + result.g * 0.7 + result.b * 0.1;
 	vec3 diff = result.rgb - vec3(lum);
 
 	// Final
-	color = vec4(vec3(diff) * Saturation + lum, 1.0);
+	color = vec4(vec3(diff) * u_saturation + lum, 1.0);
 	// color = vec4(hdrColor, 1.0);
 }
 

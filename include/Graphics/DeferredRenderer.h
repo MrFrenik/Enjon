@@ -77,7 +77,8 @@ namespace Enjon { namespace Graphics {
 			void InitializeFrameBuffers();
 			void GBufferPass();
 			void LightingPass();
-			void FXAAPass(EG::RenderTarget* input);
+			void FXAAPass(EG::RenderTarget* inputTarget);
+			void CompositePass(EG::RenderTarget* inputTarget);
 
 			// Frame buffers
 			EG::GBuffer* mGbuffer 					= nullptr;
@@ -88,7 +89,7 @@ namespace Enjon { namespace Graphics {
 			EG::RenderTarget* mMediumBlurVertical 	= nullptr;
 			EG::RenderTarget* mLargeBlurHorizontal 	= nullptr;
 			EG::RenderTarget* mLargeBlurVertical 	= nullptr;
-			EG::RenderTarget* mComposite 			= nullptr;
+			EG::RenderTarget* mCompositeTarget 		= nullptr;
 			EG::RenderTarget* mLightingBuffer		= nullptr;
 			EG::RenderTarget* mLuminanceBuffer		= nullptr;
 			EG::RenderTarget* mFXAATarget			= nullptr;

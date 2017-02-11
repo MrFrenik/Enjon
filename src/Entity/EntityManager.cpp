@@ -42,6 +42,9 @@ namespace Enjon {
 
 	EntityManager::~EntityManager()
 	{
+		// Detach all components from entities
+		// Deallocate all components
+		// Deallocate all entities
 	}
 
 	EntityHandle* EntityManager::Allocate()
@@ -49,7 +52,8 @@ namespace Enjon {
 		assert(mNextAvailableID < MAX_ENTITIES);
 		u32 id = mNextAvailableID++;
 		EntityHandle* entity = &mEntities->at(id);
-		entity->SetID(id);							// TODO(): Fix this!
+		entity->SetID(id);				
+		entity->mManager = this;
 		return entity;
 	}
 }
