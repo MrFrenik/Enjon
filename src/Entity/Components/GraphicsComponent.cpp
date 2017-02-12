@@ -1,4 +1,6 @@
 #include "Entity/Components/GraphicsComponent.h"
+#include "Entity/EntityManager.h"
+#include "Graphics/Scene.h"
 
 namespace Enjon
 {
@@ -14,6 +16,15 @@ namespace Enjon
 
 	GraphicsComponent::~GraphicsComponent()
 	{
+		if (mRenderable.GetScene() != nullptr)
+		{
+			mRenderable.GetScene()->RemoveRenderable(&mRenderable);
+		}
+	}
+
+	void GraphicsComponent::Destroy()
+	{
+		DestroyBase<GraphicsComponent>(mEntity->GetID());
 	}
 
 	void GraphicsComponent::Update(float dt)

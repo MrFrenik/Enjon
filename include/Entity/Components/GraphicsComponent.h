@@ -14,7 +14,9 @@ namespace Enjon
 			GraphicsComponent(EG::Renderable& renderable);
 			~GraphicsComponent();
 
-			virtual void Update(float dt) override;	
+			virtual void Update(float dt) override;
+
+			virtual void Destroy() override;
 
 			/* Get position of transform */
 			EM::Vec3& GetPosition() { return mRenderable.GetPosition(); }

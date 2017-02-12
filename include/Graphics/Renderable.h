@@ -62,9 +62,9 @@ namespace Enjon { namespace Graphics {
 
 		private:
 			EM::Transform 	mTransform;
-			EG::Mesh* 		mMesh;
-			EG::Material* 	mMaterial;
-			EG::Scene* 		mScene;
+			EG::Mesh* 		mMesh 		= nullptr;
+			EG::Material* 	mMaterial 	= nullptr;
+			EG::Scene* 		mScene 		= nullptr;
 	};
 }}
 

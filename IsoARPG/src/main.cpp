@@ -8470,6 +8470,7 @@ int main(int argc, char** argv)
 #if 1
 
 #include <iostream>
+#include <stdio.h>
 
 #include <Defines.h>
 #include <Math/Maths.h>
@@ -8606,7 +8607,6 @@ int main(int argc, char** argv)
  	}
   	mBatch.End();
 
-
 	// Add elements scene
 	scene->AddDirectionalLight(&mSun);
 	scene->AddDirectionalLight(&mSun2);
@@ -8628,13 +8628,22 @@ int main(int argc, char** argv)
 		// Render
 		mGraphicsEngine.Update(dt);
 
-		gc->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
-		gc2->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
+		if (handle2)
+		{
+			gc2 = handle2->GetComponent<Enjon::GraphicsComponent>();	
+			gc2->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
+		}
 
 		if (handle1->HasComponent<Enjon::PointLightComponent>())
 		{
 			auto pl = handle1->GetComponent<Enjon::PointLightComponent>();
 			pl->SetPosition(handle1->GetPosition() + EM::Vec3(cos(dt) * 5.0f, 2.0f, sin(dt) * 5.0f));
+		}
+
+		if (handle1->HasComponent<Enjon::GraphicsComponent>())
+		{
+			auto gComp = handle1->GetComponent<Enjon::GraphicsComponent>();
+			gComp->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
 		}
 
 		mLimiter.End();
@@ -8707,6 +8716,14 @@ bool ProcessInput(EI::InputManager* input, float dt)
     	if (handle1->HasComponent<Enjon::PointLightComponent>())
     	{
 	    	mEntities->Detach<Enjon::PointLightComponent>(handle1);
+    	}
+    }
+
+    if (input->IsKeyPressed(SDLK_y))
+    {
+    	if (handle1 != nullptr)
+    	{
+	    	mEntities->Destroy(handle1);
     	}
     }
 

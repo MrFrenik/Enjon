@@ -18,4 +18,16 @@ namespace Enjon
 	{
 		mID = id;
 	}
+
+	void Component::SetBase(ComponentWrapperBase* base)
+	{
+		mBase = base;
+	}
+
+	ComponentBitset GetComponentBitMask(u32 type)
+	{
+		ComponentBitset BitSet;
+		BitSet.set(type);
+		return BitSet;
+	}
 }

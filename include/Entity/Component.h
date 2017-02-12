@@ -9,6 +9,7 @@
 #include "Math/Transform.h"
 #include "System/Types.h"
 
+#include <assert.h>
 #include <array>
 #include <vector>
 #include <bitset>
@@ -20,27 +21,7 @@ namespace Enjon {
 	// Forward declaration
 	class EntityHandle;
 	class EntityManager;
-
-	class Component
-	{
-		friend EntityHandle;
-		friend EntityManager;
-
-		public:
-			Component(){}
-			virtual void Update(float dt) = 0;
-
-			Enjon::EntityHandle* GetEntity();
-			u32 GetID() const { return mID; }
-
-		private:
-			void SetEntity(EntityHandle* entity);
-			void SetID(u32 id);
-
-		private:
-			Enjon::EntityHandle* mEntity;
-			u32 mID;
-	};
+	class Component;
 
 	class ComponentWrapperBase
 	{
@@ -51,15 +32,73 @@ namespace Enjon {
 	template <typename T>
 	class ComponentWrapper : public ComponentWrapperBase
 	{
+		friend EntityHandle; 
+		friend EntityManager;
+		friend Component;
+
 		public:
 			void Base() override {}
 
 			typedef std::vector<T*> ComponentPtrs;
 			typedef std::unordered_map<u32, T> ComponentMap;
 
+		private:
 			ComponentPtrs mComponentPtrs;
 			ComponentMap mComponentMap;
 	};
+
+	class Component
+	{
+		friend EntityHandle;
+		friend EntityManager;
+
+		public:
+			Component(){}
+			virtual void Update(float dt) = 0;
+
+			EntityHandle* GetEntity();
+			u32 GetID() const { return mID; }
+
+			EntityManager* GetEntityManager();
+
+		protected:
+
+			template <typename T>
+			void DestroyBase(u32 eid)
+			{
+				assert(mBase != nullptr);
+
+				auto cWrapper = static_cast<ComponentWrapper<T>*>(mBase);
+				auto cPtrList = &cWrapper->mComponentPtrs;
+				auto cMap = &cWrapper->mComponentMap;
+
+				// Get component
+				auto compPtr = &cWrapper->mComponentMap[eid];
+
+				// Remove ptr from point list map
+				cPtrList->erase(std::remove(cPtrList->begin(), cPtrList->end(), compPtr), cPtrList->end());	
+
+				// Finally remove from map
+				cMap->erase(eid);
+			}
+
+			virtual void Destroy() = 0;
+
+		private:
+			void SetEntityManager(EntityManager* manager);
+			void SetEntity(EntityHandle* entity);
+			void SetID(u32 id);
+			void SetBase(ComponentWrapperBase* base);
+
+		protected:
+			Enjon::EntityHandle* mEntity = nullptr;
+			Enjon::EntityManager* mManager = nullptr;
+			u32 mID;
+
+		private:
+			Enjon::ComponentWrapperBase* mBase = nullptr;
+	};
+
 
 	using ComponentID = u32;
 
@@ -68,7 +107,7 @@ namespace Enjon {
 		inline ComponentID GetUniqueComponentID() noexcept
 		{
 			static ComponentID lastID{0u};
-			return lastID++;
+			return ++lastID;
 		}
 	}
 
@@ -88,9 +127,11 @@ namespace Enjon {
 	ComponentBitset GetComponentBitMask() 
 	{ 
 		ComponentBitset BitSet;
-		BitSet.set(static_cast<u32>(GetComponentType<T>()));
+		BitSet.set(GetComponentType<T>());
 		return BitSet;
 	}
+
+	ComponentBitset GetComponentBitMask(u32 type);
 }
 
 #endif

@@ -18,30 +18,19 @@ namespace Enjon {
 
 	class EntityManager;
 
+	enum class EntityState
+	{
+		INACTIVE,
+		ACTIVE
+	};
+
 	class EntityHandle
 	{
 		friend EntityManager; 
 		public:
-			EntityHandle()
-			{
-				// This needs to be set to some null variable
-				mID = MAX_ENTITIES;
-				mComponentMask = Enjon::ComponentBitset(0);
-				mManager = nullptr;	
-			}
-
-			EntityHandle(EntityManager* _Manager)
-			{
-				// This needs to be set to some null variable
-				mID = MAX_ENTITIES;
-				mComponentMask = Enjon::ComponentBitset(0);
-				mManager = _Manager;	
-			}
-
-			// TODO(John): Take care of removing all attached components here
-			~EntityHandle()
-			{
-			}
+			EntityHandle();
+			EntityHandle(EntityManager* _Manager);
+			~EntityHandle();
 
 			u32 GetID() { return mID; }
 
@@ -60,16 +49,7 @@ namespace Enjon {
 				// Assert entity manager exists
 				assert(mManager != nullptr);
 
-				// Get component wrapper
-				auto cWrapper = static_cast<ComponentWrapper<T>*>(mManager->mComponents.at(Enjon::GetComponentType<T>()));
-
-				// Return component
-				auto* cMap = &cWrapper->mComponentMap;
-				auto query = cMap->find(mID);
-				if (query != cMap->end())
-				{
-					return &query->second;
-				}
+				return mManager->GetComponent<T>(this);
 			}
 
 			template <typename T>
@@ -81,36 +61,7 @@ namespace Enjon {
 				// Make sure that entity manager isn't null
 				assert(mManager != nullptr);
 
-				// Get index into vector and assert that entity manager has this component
-				u32 index = Enjon::GetComponentType<T>();
-				assert(mManager->mComponents.at(index) != nullptr);
-
-				ComponentWrapper<T>* cWrapper = static_cast<ComponentWrapper<T>*>(mManager->mComponents.at(index));
-				auto cMap = &(cWrapper->mComponentMap);
-				auto componentList = &(cWrapper->mComponentPtrs);
-
-				// Create new component and place into map
-				auto query = cMap->find(mID);
-				if (query == cMap->end())
-				{
-					T component;
-					component.SetEntity(this);
-					cWrapper->mComponentMap[mID] = component;
-					componentList->push_back(&cWrapper->mComponentMap[mID]);
-
-					// Set bitmask field for component
-					mComponentMask |= Enjon::GetComponentBitMask<T>();
-
-					// Add this component to component vector 
-					auto compPtr = &cWrapper->mComponentMap[mID];
-					mComponents.push_back(compPtr);
-
-					// Return component
-					return compPtr;
-				}
-
-				// Otherwise the entity already has the component
-				assert(false);
+				return mManager->Attach<T>(this);
 			}
 
 			template <typename T>
@@ -122,11 +73,8 @@ namespace Enjon {
 				// Make sure entity manager isn't null
 				assert(mManager != nullptr);
 
-				// Remove component from entity manager components
-				mManager->RemoveComponent<T>(this);
-
-				// Set bitmask field for component
-				this->ComponentMask ^= TypeCatalog::GetBitMask<T>();
+				// Detach component
+				mManager->Detach<T>(this);
 			}
 
 			void SetPosition(EM::Vec3& position);
@@ -139,12 +87,14 @@ namespace Enjon {
 
 		private:
 			void SetID(u32 id);
+			void Reset();
 
 			u32 mID;	
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
 			Enjon::Math::Transform mTransform;
 			std::vector<Component*> mComponents;
+			Enjon::EntityState mState;
 	};
 
 	class EntityManager
@@ -200,6 +150,7 @@ namespace Enjon {
 					T component;
 					component.SetEntity(entity);
 					component.SetID(index);
+					component.SetBase(cWrapper); 
 					cWrapper->mComponentMap[eid] = component;
 					componentList->push_back(&cWrapper->mComponentMap[eid]);
 
@@ -230,7 +181,6 @@ namespace Enjon {
 				entity->mComponentMask ^= Enjon::GetComponentBitMask<T>();
 			}
 
-
 			template <typename T>
 			T* GetComponent(EntityHandle* entity)
 			{
@@ -253,6 +203,8 @@ namespace Enjon {
 					return &query->second;
 				}
 			}
+
+			void Destroy(EntityHandle* entity);
 
 		private:
 
@@ -279,10 +231,12 @@ namespace Enjon {
 				cMap->erase(entity->mID);
 			}
 
+			u32 FindNextAvailableID();
+
 			// EntityHandle* mEntities;
 			std::array<EntityHandle, MAX_ENTITIES>* mEntities;
-			std::array<ComponentWrapperBase*, static_cast<size_t>(MAX_COMPONENTS)> mComponents;	
-			u32 mNextAvailableID;
+			std::array<ComponentWrapperBase*, static_cast<u32>(MAX_COMPONENTS)> mComponents;	
+			u32 mNextAvailableID = 0;
 	};
 
 }

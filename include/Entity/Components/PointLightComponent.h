@@ -14,6 +14,8 @@ namespace Enjon
 			~PointLightComponent();
 
 			virtual void Update(float dt) override;
+			virtual void Destroy() override;
+
 			Enjon::Graphics::PointLight* GetLight() { return &mLight; }
 
 			EM::Vec3& GetPosition() { return mLight.GetPosition(); }

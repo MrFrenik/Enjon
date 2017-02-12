@@ -1,4 +1,5 @@
 #include "Entity/Components/PointLightComponent.h"
+#include "Entity/EntityManager.h"
 
 namespace Enjon
 {
@@ -12,6 +13,11 @@ namespace Enjon
 
 	void PointLightComponent::Update(float dt)
 	{
+	}
+
+	void PointLightComponent::Destroy()
+	{
+		DestroyBase<PointLightComponent>(mEntity->GetID());
 	}
 
 	void PointLightComponent::SetColor(EG::ColorRGBA16& color)
