@@ -8608,8 +8608,12 @@ int main(int argc, char** argv)
 	renderable->SetMaterial(mat);
 	renderable2->SetMesh(mesh2);
 	renderable2->SetMaterial(mat);
+
+	// Sphere
 	renderable3->SetMesh(mesh5);
 	renderable3->SetMaterial(mat4);
+
+	// Sphere
 	renderable4->SetMesh(mesh6);
 	renderable4->SetMaterial(mat5);
 
@@ -8617,10 +8621,10 @@ int main(int argc, char** argv)
 	renderable2->SetPosition(EM::Vec3(5, 2, 0));
 
 	renderable3->SetPosition(EM::Vec3(5, 0.5f, 3));
-	renderable3->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
+	renderable3->SetScale(EM::Vec3(1, 1, 1) * 1.0f);
 
 	renderable4->SetPosition(EM::Vec3(5, 1.0f, -5.0f));
-	renderable4->SetScale(0.2f);
+	renderable4->SetScale(0.5f * 0.8f);
 
 	auto plc = mEntities->Attach<Enjon::PointLightComponent>(handle2);
 	plc->SetIntensity(100.0f);
@@ -8677,13 +8681,13 @@ int main(int argc, char** argv)
 	btAlignedObjectArray<btCollisionShape*> collisionShapes;
 
 	{
-		btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(50.), btScalar(1), btScalar(50.)));
+		btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(50.), btScalar(0.8), btScalar(50.)));
 
 		collisionShapes.push_back(groundShape);
 
 		btTransform groundTransform;
 		groundTransform.setIdentity();
-		groundTransform.setOrigin(btVector3(0, -2, 0));
+		groundTransform.setOrigin(btVector3(0, -0.8, 0));
 
 		btScalar mass(0.);
 
@@ -8697,7 +8701,8 @@ int main(int argc, char** argv)
 		btDefaultMotionState* myMotionState = new btDefaultMotionState(groundTransform);
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, groundShape, localInertia);
 		btRigidBody* body = new btRigidBody(rbInfo);
-		body->setRestitution(1.0);
+		body->setRestitution(0.1);
+		body->setFriction(2.0);
 
 		// Add body to dynamics world
 		mDynamicsWorld->addRigidBody(body);
@@ -8708,14 +8713,14 @@ int main(int argc, char** argv)
 
 	{
 		// Create dynamic rigid body
-		btCollisionShape* colShape = new btSphereShape(btScalar(1.));
+		btCollisionShape* colShape = new btBoxShape(btVector3(1, 1, 1) * 0.8);
 		collisionShapes.push_back(colShape);
 
 		// Create dynamic objects
 		btTransform startTransform;
 		startTransform.setIdentity();
 
-		btScalar mass(1.);
+		btScalar mass(10.);
 
 		// Rigid body is dynamic iff mass is non zero, otherwise static
 		bool isDynamic = (mass != 0.f);
@@ -8730,6 +8735,36 @@ int main(int argc, char** argv)
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
 		btRigidBody* body = new btRigidBody(rbInfo);
 		body->setRestitution(0.8);
+		body->setFriction(0.8);
+
+		mDynamicsWorld->addRigidBody(body);
+	}
+
+	{
+		// Create dynamic rigid body
+		btCollisionShape* colShape = new btSphereShape(btScalar(0.5));
+		collisionShapes.push_back(colShape);
+
+		// Create dynamic objects
+		btTransform startTransform;
+		startTransform.setIdentity();
+
+		btScalar mass(3.);
+
+		// Rigid body is dynamic iff mass is non zero, otherwise static
+		bool isDynamic = (mass != 0.f);
+
+		btVector3 localInertia(0, 0, 0);
+		if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
+
+		startTransform.setOrigin(btVector3(2, 30, 0));
+
+		// Using motionstate is recommended
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+		btRigidBody* body = new btRigidBody(rbInfo);
+		body->setRestitution(0.8);
+		body->setFriction(0.8);
 
 		mDynamicsWorld->addRigidBody(body);
 	}
@@ -8789,6 +8824,28 @@ int main(int argc, char** argv)
 
     	// Physics simulation
     	mDynamicsWorld->stepSimulation(1.f/60.f, 10);
+
+    	if (handle3->HasComponent<Enjon::GraphicsComponent>())
+    	{
+    		btCollisionObject* obj = mDynamicsWorld->getCollisionObjectArray()[1];
+    		btRigidBody* body = btRigidBody::upcast(obj);
+    		btTransform trans;
+    		body->getMotionState()->getWorldTransform(trans);
+
+    		auto gComp = handle3->GetComponent<Enjon::GraphicsComponent>();
+    		gComp->SetPosition(EM::Vec3((float)trans.getOrigin().getX(), (float)trans.getOrigin().getY(), (float)trans.getOrigin().getZ()));
+    	}
+
+    	if (handle4->HasComponent<Enjon::GraphicsComponent>())
+    	{
+    		btCollisionObject* obj = mDynamicsWorld->getCollisionObjectArray()[2];
+    		btRigidBody* body = btRigidBody::upcast(obj);
+    		btTransform trans;
+    		body->getMotionState()->getWorldTransform(trans);
+
+    		auto gComp = handle4->GetComponent<Enjon::GraphicsComponent>();
+    		gComp->SetPosition(EM::Vec3((float)trans.getOrigin().getX(), (float)trans.getOrigin().getY(), (float)trans.getOrigin().getZ()));
+    	}
 
     	for (Enjon::u32 i = 0; i < mDynamicsWorld->getNumCollisionObjects(); ++i)
     	{
@@ -8942,6 +8999,8 @@ bool ProcessInput(EI::InputManager* input, float dt)
 		body->setWorldTransform(trans);
 		body->getMotionState()->setWorldTransform(trans);
 		body->clearForces();
+		body->setLinearVelocity(btVector3(0, 0, 0));
+		body->setAngularVelocity(btVector3(0, 0, 0));
 
 		// Set graphics component
 		if (handle4->HasComponent<Enjon::GraphicsComponent>())
