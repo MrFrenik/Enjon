@@ -17,10 +17,12 @@ uniform vec3 u_lightPos;
 uniform float u_lightIntensity;
 uniform vec2 u_resolution;
 uniform float u_attenuationRate;
+uniform mat4 camMatrix;
 
 // Vertex information
 in DATA
 {
+    vec3 FragPos;
     vec2 TexCoords;
 }fs_in;
 
@@ -60,8 +62,7 @@ void main()
     vec3 L = normalize(u_lightPos - WorldPos);
     vec3 H = normalize(V + L);
 
-    vec3 F0 = vec3(0.04);
-    F0      = mix(F0, Albedo, Metallic);
+    vec3 F0 = mix(vec3(0.04), Albedo, Metallic);
     vec3 F  = FresnelSchlickRoughness(max(dot(H, V), 0.0), F0, Roughness);
 
     vec3 kS = F;
@@ -75,7 +76,9 @@ void main()
     float Distance = length(u_lightPos - WorldPos);
 
     // Attenuation
-    float Attenuation = clamp((1.0 - (Distance / u_radius)) / (Distance * Distance), 0.0, 1.0);
+    float ddr = Distance / (u_radius + 0.001);
+    float dsqrd = (Distance * Distance) + 0.001;
+    float Attenuation = clamp((1.0 - ddr) / dsqrd, 0.0, 1.0);
     Attenuation = pow(Attenuation, u_attenuationRate);
 
     // Radiance
@@ -84,13 +87,12 @@ void main()
     // Cook-Torrance BRDF
     float NDF   = DistributionGGX(N, H, Roughness);
     float G     = GeometrySmith(N, V, L, Roughness);
+    float NdotL = max(dot(N, L), 0.0);
+    float NdotV = max(dot(N, V), 0.0);
 
     vec3 Nominator = NDF * G * F; 
-    float Denominator = 4 * max(dot(V, N), 0.0) * max(dot(L, N), 0.0) + 0.001;
+    float Denominator = 4 * NdotV * NdotL + 0.001;
     vec3 BRDF = Nominator / Denominator;
-
-    // Add to outgoing radiance Lo
-    float NdotL = max(dot(N, L), 0.0);
 
     // Final color
     Lo += (kD * Albedo / kPi + BRDF) * Radiance * NdotL;

@@ -81,7 +81,14 @@ namespace Enjon { namespace Graphics {
 	// Strict POD struct ColoRGBA16
 	struct ColorRGBA16
 	{ 
-		ColorRGBA16() : r(0), g(0), b(0), a(0) {}
+		ColorRGBA16() 
+			: r(1), g(1), b(1), a(1) 
+		{}
+
+		ColorRGBA16(float _r, float _g, float _b, float _a)
+			: r(_r), g(_g), b(_b), a(_a)
+		{}
+
 		ColorRGBA16(const EM::Vec4& V) : r(V.x), g(V.y), b(V.z), a(V.w) {}
 
 		float r;
@@ -151,11 +158,7 @@ namespace Enjon { namespace Graphics {
 	{ 
 		return RGBA16(color.r, color.g, color.b, a); 
 	}
-
 }}
-
-
-
 
 
 

@@ -64,7 +64,7 @@ namespace Enjon {
 		protected:
 
 			template <typename T>
-			void DestroyBase(u32 eid)
+			void DestroyBase()
 			{
 				assert(mBase != nullptr);
 
@@ -73,13 +73,13 @@ namespace Enjon {
 				auto cMap = &cWrapper->mComponentMap;
 
 				// Get component
-				auto compPtr = &cWrapper->mComponentMap[eid];
+				auto compPtr = &cWrapper->mComponentMap[mEntityID];
 
 				// Remove ptr from point list map
 				cPtrList->erase(std::remove(cPtrList->begin(), cPtrList->end(), compPtr), cPtrList->end());	
 
 				// Finally remove from map
-				cMap->erase(eid);
+				cMap->erase(mEntityID);
 			}
 
 			virtual void Destroy() = 0;
@@ -93,6 +93,8 @@ namespace Enjon {
 		protected:
 			Enjon::EntityHandle* mEntity = nullptr;
 			Enjon::EntityManager* mManager = nullptr;
+			Enjon::Math::Transform mTransform;
+			u32 mEntityID;
 			u32 mID;
 
 		private:

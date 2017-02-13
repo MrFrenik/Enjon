@@ -12,15 +12,15 @@ in vec2 v_blurTexCoords[16];
 out vec4 color;
 
 uniform sampler2D tex;
-uniform float weight;
-uniform float blurWeights[16];
+uniform float u_weight;
+uniform float u_blurWeights[16];
 
 void main() 
 {
 	color = vec4(0.0, 0.0, 0.0, 1.0);
 	for (int i = 0; i < 16; i++)
 	{
-		color += texture2D(tex, v_blurTexCoords[i]) * blurWeights[i] * weight;
+		color += texture2D(tex, v_blurTexCoords[i]) * u_blurWeights[i] * u_weight;
 	}
 }
 

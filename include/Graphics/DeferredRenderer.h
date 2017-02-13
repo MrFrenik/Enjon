@@ -17,17 +17,17 @@ namespace Enjon { namespace Graphics {
 	class GBuffer;
 	class FullScreenQuad;
 	class SpriteBatch;
+	class Mesh;
 
 	struct ToneMapSettings
 	{
-		ToneMapSettings(float exposure, float gamma, float bloomscalar, float scale, float threshold, float saturation)
-			: mExposure(exposure), mGamma(gamma), mBloomScalar(bloomscalar), mScale(scale), mThreshold(threshold), mSaturation(saturation)
+		ToneMapSettings(float exposure, float gamma, float bloomscalar, float threshold, float saturation)
+			: mExposure(exposure), mGamma(gamma), mBloomScalar(bloomscalar), mThreshold(threshold), mSaturation(saturation)
 		{}
 
 		float mExposure;
 		float mGamma;
 		float mBloomScalar;
-		float mScale;
 		float mThreshold;
 		float mSaturation;
 	};
@@ -52,6 +52,10 @@ namespace Enjon { namespace Graphics {
 		EM::Vec3 mWeights;
 		EM::Vec3 mIterations;
 		EM::Vec3 mRadius;
+
+		double mSmallGaussianCurve[16];
+		double mMediumGaussianCurve[16];
+		double mLargeGaussianCurve[16];
 	};
 
 
@@ -75,8 +79,12 @@ namespace Enjon { namespace Graphics {
 		private:
 
 			void InitializeFrameBuffers();
+			void CalculateBlurWeights();
+			void RegisterCVars();
 			void GBufferPass();
 			void LightingPass();
+			void LuminancePass();
+			void BloomPass();
 			void FXAAPass(EG::RenderTarget* inputTarget);
 			void CompositePass(EG::RenderTarget* inputTarget);
 
@@ -91,7 +99,7 @@ namespace Enjon { namespace Graphics {
 			EG::RenderTarget* mLargeBlurVertical 	= nullptr;
 			EG::RenderTarget* mCompositeTarget 		= nullptr;
 			EG::RenderTarget* mLightingBuffer		= nullptr;
-			EG::RenderTarget* mLuminanceBuffer		= nullptr;
+			EG::RenderTarget* mLuminanceTarget		= nullptr;
 			EG::RenderTarget* mFXAATarget			= nullptr;
 			EG::RenderTarget* mShadowDepth			= nullptr;
 
@@ -108,11 +116,9 @@ namespace Enjon { namespace Graphics {
 
 			// Post processing settings
 			FXAASettings mFXAASettings = FXAASettings(8.0f, 1.0f/8.0f, 1.0f/128.0f);
-			ToneMapSettings mToneMapSettings = ToneMapSettings(0.5f, 1.5f, 1.0f, 2.0f, 2.0f, 1.0f);
-			BloomSettings mBloomSettings = BloomSettings(EM::Vec3(0.4f, 0.35f, 0.0f), EM::Vec3(5, 4, 1), EM::Vec3(0.001f, 0.009f, 0.009f));
-
+			ToneMapSettings mToneMapSettings = ToneMapSettings(0.5f, 1.5f, 2.0f, 1.0f, 1.2f);
+			BloomSettings mBloomSettings = BloomSettings(EM::Vec3(0.39f, 0.4f, 0.4f), EM::Vec3(5, 5, 5), EM::Vec3(0.001f, 0.002f, 0.008f));
 	};
-
 }}
 
 

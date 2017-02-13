@@ -18,18 +18,19 @@ namespace Enjon { namespace Math {
 		float z;
 
 		Vec3() = default;
-		Vec3(const float& x, const float& y, const float& z)
+		Vec3(const float& _x, const float& _y, const float& _z)
+			: x(_x), y(_y), z(_z) 
 		{
-			this->x = x;
-			this->y = y;
-			this->z = z;
-			
 		}
+		
 		Vec3(const Vec2& a, const float& val)
+			: x(a.x), y(a.y), z(val)
 		{
-			this->x = a.x;
-			this->y = a.y;
-			this->z = val;
+		}
+
+		Vec3(const float& val)
+			: x(val), y(val), z(val)
+		{
 		}
 
 		Vec2 inline XY() const { return Vec2(this->x, this->y); }

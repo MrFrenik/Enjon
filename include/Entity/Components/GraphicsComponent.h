@@ -4,6 +4,7 @@
 
 #include "Entity/Component.h"
 #include "Graphics/Renderable.h"
+#include "Graphics/Material.h"
 
 namespace Enjon
 {
@@ -60,9 +61,14 @@ namespace Enjon
 			/* Set scene of renderable */
 			void SetScene(EG::Scene* scene);
 
+			/* Set Renderable */
 			void SetRenderable(EG::Renderable& renderable);
 
+			/* Set material color */
+			void SetColor(EG::TextureSlotType type, EG::ColorRGBA16& color);	
+
 		private:
+
 			EG::Renderable mRenderable;
 	};
 }

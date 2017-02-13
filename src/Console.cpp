@@ -26,6 +26,7 @@ namespace Enjon {
 		EG::ColorRGBA16 TextColor;
 	};
 
+	bool Console::mIsVisible = false;
 	GUI::GUITextBox Console::InputTextBox;
 	std::vector<OutputMessage> Output;
 	EG::SpriteBatch Batch;
@@ -73,12 +74,23 @@ namespace Enjon {
 
 		if (Input->IsKeyPressed(SDLK_BACKQUOTE) || Input->IsKeyPressed(SDLK_ESCAPE))
 		{
+			mIsVisible = false;
 			return false;	
 		}
 
 		InputTextBox.ProcessInput(Input, nullptr);
 
 		return true;
+	}
+
+	bool Console::Visible()
+	{
+		return mIsVisible;
+	}
+
+	void Console::Visible(bool visible)
+	{
+		mIsVisible = visible;
 	}
 
 	void Console::Draw()
@@ -92,7 +104,7 @@ namespace Enjon {
 			Batch.Begin();
 			{
 				Batch.Add(
-								EM::Vec4(-ScreenWidth * 0.5f, -ScreenHeight * 0.5f, ScreenWidth, ScreenHeight),
+								EM::Vec4(-ScreenWidth * 0.5f, -ScreenHeight * 0.5f, ScreenWidth / 3, ScreenHeight / 4),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
 								EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.8f)
@@ -137,7 +149,7 @@ namespace Enjon {
 
 		// Console text box initialization
 		InputTextBox.Position = EM::Vec2(-ScreenWidth * 0.5f + 5.0f, -ScreenHeight * 0.5f + 20.0f);
-		InputTextBox.Dimensions = EM::Vec2(ScreenWidth - 10.0f, InputTextBox.Dimensions.y);
+		InputTextBox.Dimensions = EM::Vec2((ScreenWidth / 3) - 10.0f, InputTextBox.Dimensions.y);
 		InputTextBox.MaxStringLength = 100;
 		InputTextBox.KeyboardInFocus = true;
 

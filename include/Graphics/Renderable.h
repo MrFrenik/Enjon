@@ -5,11 +5,11 @@
 #include "Defines.h"
 #include "Math/Transform.h"
 #include "Math/Quaternion.h"
+#include "Graphics/Material.h"
 
 namespace Enjon { namespace Graphics { 
 
 	class Mesh; 			
-	class Material;
 	class Scene;
 
 	class Renderable
@@ -48,6 +48,9 @@ namespace Enjon { namespace Graphics {
 			/* Set scale of transform */
 			void SetScale(EM::Vec3& scale);
 
+			/* Set uniform scale of transform */
+			void SetScale(float scale);
+
 			/* Set orientation of transform */
 			void SetOrientation(EM::Quaternion& orientation);
 
@@ -59,6 +62,9 @@ namespace Enjon { namespace Graphics {
 
 			/* Set scene of renderable */
 			void SetScene(EG::Scene* scene);
+
+			/* Set material color */
+			void SetColor(EG::TextureSlotType type, EG::ColorRGBA16& color);	
 
 		private:
 			EM::Transform 	mTransform;

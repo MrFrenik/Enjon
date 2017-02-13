@@ -8478,6 +8478,8 @@ int main(int argc, char** argv)
 #include <vector>
 #include <Entity/Component.h>
 
+#include <Bullet/btBulletDynamicsCommon.h>
+
 EG::DeferredRenderer mGraphicsEngine;
 EI::InputManager mInputManager;
 EU::FPSLimiter mLimiter;
@@ -8498,12 +8500,27 @@ Enjon::EntityManager* mEntities;
 Enjon::EntityHandle* handle1;
 Enjon::EntityHandle* handle2;
 Enjon::EntityHandle* handle3;
+Enjon::EntityHandle* handle4;
+
+EG::Mesh* mesh;
+EG::Mesh* mesh2;
+EG::Mesh* mesh3;
+EG::Mesh* mesh4;
+EG::Mesh* mesh5;
+EG::Mesh* mesh6;
+EG::Material* mat;
+EG::Material* mat2;
+EG::Material* mat3;
+EG::Material* mat4;
+EG::Material* mat5;
 
 bool mMovementOn = true;
 
 bool ProcessInput(EI::InputManager* input, float dt);
 
 std::vector<Enjon::EntityHandle*> mHandles;
+
+btDiscreteDynamicsWorld* mDynamicsWorld;
 
 #ifdef main
 	#undef main
@@ -8512,7 +8529,12 @@ int main(int argc, char** argv)
 {
 	Enjon::Init();
 	mGraphicsEngine.Init();
+	Enjon::Console::Init(mGraphicsEngine.GetViewport().x, mGraphicsEngine.GetViewport().y);
 	mLimiter.Init(60.0f);
+
+
+	// Seed random 
+	srand(time(NULL));
 
 	// Create entity manager
 	mEntities = new Enjon::EntityManager();
@@ -8524,48 +8546,81 @@ int main(int argc, char** argv)
 	handle1 = mEntities->Allocate();
 	handle2 = mEntities->Allocate();
 	handle3 = mEntities->Allocate();
+	handle4 = mEntities->Allocate();
 
 	auto gc = handle1->Attach<Enjon::GraphicsComponent>();
-	auto gc2 = mEntities->Attach<Enjon::GraphicsComponent>(handle2);
+	auto gc2 = handle2->Attach<Enjon::GraphicsComponent>();
+	auto gc3 = handle3->Attach<Enjon::GraphicsComponent>();
+	auto gc4 = handle4->Attach<Enjon::GraphicsComponent>();
 
 	EG::Renderable* renderable = gc->GetRenderable();
 	EG::Renderable* renderable2 = gc2->GetRenderable();
+	EG::Renderable* renderable3 = gc3->GetRenderable();
+	EG::Renderable* renderable4 = gc4->GetRenderable();
 
-	mSun = EG::DirectionalLight(EM::Vec3(0.5f, 0.5f, 0.0f), EG::RGBA16_Orange(), 5.0f);
-	mSun2 = EG::DirectionalLight(EM::Vec3(0.0f, 0.5f, -0.75f), EG::RGBA16_SkyBlue(), 5.0f);
+	mSun = EG::DirectionalLight(EM::Vec3(-0.5f, 0.5f, 0.75f), EG::RGBA16_Orange(), 10.0f);
+	mSun2 = EG::DirectionalLight(EM::Vec3(0.5f, 0.5f, -0.75f), EG::RGBA16_SkyBlue(), 10.0f);
 	mSun3 = EG::DirectionalLight(EM::Vec3(0.75f, 0.6f, 0.75f), EG::RGBA16_Yellow(), 5.0f);
 
 	EG::Scene* scene = mGraphicsEngine.GetScene();
 
-	EG::Mesh* mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/sphere.obj");
-	EG::Mesh* mesh2 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cerebus.obj");
-	EG::Mesh* mesh3 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
-	EG::Material* mat = new EG::Material();
-	EG::Material* mat2 = new EG::Material();
-	EG::Material* mat3 = new EG::Material();
+	mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/sphere.obj");
+	mesh2 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cerebus.obj");
+	mesh3 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
+	mesh4 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/shaderball.obj");
+	mesh5 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cube.obj");
+	mesh6 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/sphere.obj");
+	mat = new EG::Material();
+	mat2 = new EG::Material();
+	mat3 = new EG::Material();
+	mat4 = new EG::Material();
+	mat5 = new EG::Material();
 
-	mat->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/BaseColor.png"));
+	mat->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Albedo.png"));
 	mat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png"));
 	mat->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Metallic.png"));
 	mat->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Roughness.png"));
 
-	mat2->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/BaseColor.png"));
+	mat2->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Albedo.png"));
 	mat2->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Normal.png"));
 	mat2->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Metallic.png"));
 	mat2->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/CopperRock/Roughness.png"));
 
-	mat3->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/BaseColor.png"));
+	mat3->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Albedo.png"));
 	mat3->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Normal.png"));
 	mat3->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png"));
 	mat3->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png"));
+	mat3->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png"));
+
+	mat4->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Albedo.png"));
+	mat4->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Normal.png"));
+	mat4->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Metallic.png"));
+	mat4->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Roughness.png"));
+	mat4->SetTexture(EG::TextureSlotType::AO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/AO.png"));
+
+	mat5->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/HarshBricks/Albedo.png"));
+	mat5->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/HarshBricks/Normal.png"));
+	mat5->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/HarshBricks/Metallic.png"));
+	mat5->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/HarshBricks/Roughness.png"));
+	mat5->SetTexture(EG::TextureSlotType::AO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/HarshBricks/AO.png"));
 
 	renderable->SetMesh(mesh3);
 	renderable->SetMaterial(mat);
 	renderable2->SetMesh(mesh2);
 	renderable2->SetMaterial(mat);
+	renderable3->SetMesh(mesh5);
+	renderable3->SetMaterial(mat4);
+	renderable4->SetMesh(mesh6);
+	renderable4->SetMaterial(mat5);
 
 	handle2->SetPosition(EM::Vec3(5, 2, 0));
 	renderable2->SetPosition(EM::Vec3(5, 2, 0));
+
+	renderable3->SetPosition(EM::Vec3(5, 0.5f, 3));
+	renderable3->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
+
+	renderable4->SetPosition(EM::Vec3(5, 1.0f, -5.0f));
+	renderable4->SetScale(0.2f);
 
 	auto plc = mEntities->Attach<Enjon::PointLightComponent>(handle2);
 	plc->SetIntensity(100.0f);
@@ -8581,20 +8636,119 @@ int main(int argc, char** argv)
 
 	printf("%d\n", mHandles.size());
 
+
+	// Add elements scene
+	scene->AddDirectionalLight(&mSun);
+	scene->AddDirectionalLight(&mSun2);
+	// scene->AddDirectionalLight(&mSun3);
+	scene->AddPointLight(plc->GetLight());
+	scene->AddPointLight(plc2->GetLight());
+	scene->AddRenderable(gc->GetRenderable());
+	scene->AddRenderable(gc2->GetRenderable());
+	scene->AddRenderable(gc3->GetRenderable());
+	scene->AddRenderable(gc4->GetRenderable());
+	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_White(), 0.1f));
+	scene->AddQuadBatch(&mBatch);
+
+	//------------------------------------------------------
+	// Physics	
+	//------------------------------------------------------
+
+	// Set up collision configuration
+	btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
+
+	// Collsiion dispatcher
+	btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
+
+	// Broad phase interface
+	btBroadphaseInterface* overlappingPairCache = new btDbvtBroadphase();
+
+	// Default constraint solver
+	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
+
+	// Set up dynamics world
+	mDynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+
+	// Set gravity
+	mDynamicsWorld->setGravity(btVector3(0, -10, 0));	
+
+	// Keep track of all bullet shapes
+	// Make sure to reuse shapes amongst rigid bodies whenever possible
+	btAlignedObjectArray<btCollisionShape*> collisionShapes;
+
+	{
+		btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(50.), btScalar(1), btScalar(50.)));
+
+		collisionShapes.push_back(groundShape);
+
+		btTransform groundTransform;
+		groundTransform.setIdentity();
+		groundTransform.setOrigin(btVector3(0, -2, 0));
+
+		btScalar mass(0.);
+
+		// Rigid body is dynamic iff mass is non zero, otherwise static
+		bool isDynamic = (mass != 0.f);
+
+		btVector3 localInertia(0, 0, 0);
+		if (isDynamic) groundShape->calculateLocalInertia(mass, localInertia);
+
+		// Using motionstate is optional, it provides interpolation capabilities and only synches active objects
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(groundTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, groundShape, localInertia);
+		btRigidBody* body = new btRigidBody(rbInfo);
+		body->setRestitution(1.0);
+
+		// Add body to dynamics world
+		mDynamicsWorld->addRigidBody(body);
+
+		// Set up ground to take ground physics shape
+
+	}
+
+	{
+		// Create dynamic rigid body
+		btCollisionShape* colShape = new btSphereShape(btScalar(1.));
+		collisionShapes.push_back(colShape);
+
+		// Create dynamic objects
+		btTransform startTransform;
+		startTransform.setIdentity();
+
+		btScalar mass(1.);
+
+		// Rigid body is dynamic iff mass is non zero, otherwise static
+		bool isDynamic = (mass != 0.f);
+
+		btVector3 localInertia(0, 0, 0);
+		if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
+
+		startTransform.setOrigin(btVector3(2, 20, 0));
+
+		// Using motionstate is recommended
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+		btRigidBody* body = new btRigidBody(rbInfo);
+		body->setRestitution(0.8);
+
+		mDynamicsWorld->addRigidBody(body);
+	}
+
+	// Ground
 	mBatch.Init();
 	EG::Material* floorMat = new EG::Material();
-  	floorMat->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall.png"));
- 	floorMat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png"));
- 	floorMat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/brickwall_normal.png") );
- 	floorMat->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png") );
- 	floorMat->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png") );
+ 	floorMat->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/Albedo.png"));
+ 	floorMat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/Normal.png"));
+ 	floorMat->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/Roughness.png"));
+ 	floorMat->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/Roughness.png"));
+ 	floorMat->SetTexture(EG::TextureSlotType::AO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/AO.png"));
   	mBatch.SetMaterial(floorMat);
 
 	mBatch.Begin();
   	{
- 		for (auto i = -100; i < 100; i++)
+ 		for (auto i = -200; i < 200; i++)
  		{
- 			for (auto j = -100; j < 100; j++)
+ 			for (auto j = -200; j < 200; j++)
  			{
  				EM::Transform t(EM::Vec3(j * 2, 0, i * 2), EM::Quaternion::AngleAxis(EM::ToRadians(90), EM::Vec3(1, 0, 0)), EM::Vec3(1, 1, 1));
  				mBatch.Add(
@@ -8607,31 +8761,69 @@ int main(int argc, char** argv)
  	}
   	mBatch.End();
 
-	// Add elements scene
-	scene->AddDirectionalLight(&mSun);
-	scene->AddDirectionalLight(&mSun2);
-	scene->AddDirectionalLight(&mSun3);
-	scene->AddPointLight(plc->GetLight());
-	scene->AddPointLight(plc2->GetLight());
-	scene->AddRenderable(gc->GetRenderable());
-	scene->AddRenderable(gc2->GetRenderable());
-	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_White(), 0.1f));
-	scene->AddQuadBatch(&mBatch);
-
 	float dt = 0.0f;
 
-	while(ProcessInput(&mInputManager, 0.01f))
+	bool isRunning = true;
+	while(isRunning)
 	{
 		dt += 0.1f;
 		mLimiter.Begin();
 
+		// Update input manager
+		mInputManager.Update();
+
+		// Console update
+    	Enjon::Console::Update(dt);
+
+    	// Processing input
+    	bool consoleVisible = Enjon::Console::Visible();
+    	if (consoleVisible) 
+    	{
+    		Enjon::Console::ProcessInput(&mInputManager);
+    	}
+
+    	else
+    	{
+	    	isRunning = ProcessInput(&mInputManager, 0.01f);
+    	}
+
+    	// Physics simulation
+    	mDynamicsWorld->stepSimulation(1.f/60.f, 10);
+
+    	for (Enjon::u32 i = 0; i < mDynamicsWorld->getNumCollisionObjects(); ++i)
+    	{
+    		btCollisionObject* obj = mDynamicsWorld->getCollisionObjectArray()[i];
+    		btRigidBody* body = btRigidBody::upcast(obj);
+    		btTransform trans;
+    		if (body && body->getMotionState())
+    		{
+    			body->getMotionState()->getWorldTransform(trans);
+
+    			if (handle4->HasComponent<Enjon::GraphicsComponent>())
+    			{
+    				auto gComp = handle4->GetComponent<Enjon::GraphicsComponent>();
+    				gComp->SetPosition(EM::Vec3((float)trans.getOrigin().getX(), (float)trans.getOrigin().getY(), (float)trans.getOrigin().getZ()));
+    			}
+    		}
+    		else
+    		{
+    			trans = obj->getWorldTransform();
+    		}
+    	}
+
 		// Render
 		mGraphicsEngine.Update(dt);
 
-		if (handle2)
+		if (handle2->HasComponent<Enjon::GraphicsComponent>())
 		{
 			gc2 = handle2->GetComponent<Enjon::GraphicsComponent>();	
 			gc2->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
+		}
+
+		if (handle2->HasComponent<Enjon::PointLightComponent>())
+		{
+			auto pl = handle2->GetComponent<Enjon::PointLightComponent>();
+			pl->SetPosition(handle2->GetPosition() + EM::Vec3(cos(dt) * 5.0f, 0.0f, sin(dt) * 5.0f));	
 		}
 
 		if (handle1->HasComponent<Enjon::PointLightComponent>())
@@ -8656,8 +8848,6 @@ int main(int argc, char** argv)
 
 bool ProcessInput(EI::InputManager* input, float dt)
 {
-	input->Update();
-
     SDL_Event event;
    //Will keep looping until there are no more events to process
     while (SDL_PollEvent(&event)) 
@@ -8691,32 +8881,16 @@ bool ProcessInput(EI::InputManager* input, float dt)
     	return false;
     }
 
+    if (input->IsKeyPressed(SDLK_BACKQUOTE))
+    {
+    	Enjon::Console::Visible(true);
+    }
+
     if (input->IsKeyPressed(SDLK_t))
     {
     	mMovementOn = !mMovementOn;
 		EG::Window* window = mGraphicsEngine.GetWindow();
 		window->ShowMouseCursor(true);
-    }
-
-    if (input->IsKeyPressed(SDLK_r))
-    {
-    	if (!(handle1->HasComponent<Enjon::PointLightComponent>()))
-    	{
-    		auto plc = handle1->Attach<Enjon::PointLightComponent>();
-    		plc->SetIntensity(100.0f);
-    		plc->SetAttenuationRate(1.0f);
-    		plc->SetColor(EG::RGBA16_ZombieGreen());
-    		plc->SetRadius(200.0f);
-    		mGraphicsEngine.GetScene()->AddPointLight(plc->GetLight());
-    	}
-    }
-
-    if (input->IsKeyPressed(SDLK_e))
-    {
-    	if (handle1->HasComponent<Enjon::PointLightComponent>())
-    	{
-	    	mEntities->Detach<Enjon::PointLightComponent>(handle1);
-    	}
     }
 
     if (input->IsKeyPressed(SDLK_y))
@@ -8725,13 +8899,63 @@ bool ProcessInput(EI::InputManager* input, float dt)
     	{
 	    	mEntities->Destroy(handle1);
     	}
+
+    	if (handle2 != nullptr)
+    	{
+    		mEntities->Destroy(handle2);
+    	}
+
+    	for (auto& c : mHandles)
+    	{
+    		mEntities->Destroy(c);
+    	}
+
+    	mHandles.clear();
+    }
+
+    if (input->IsKeyPressed(SDL_BUTTON_LEFT))
+    {
+    	auto cam = mGraphicsEngine.GetSceneCamera();
+    	auto scene = mGraphicsEngine.GetScene();
+    	auto ent = mEntities->Allocate();
+    	auto gc = ent->Attach<Enjon::GraphicsComponent>();	
+    	gc->SetMesh(mesh);
+    	gc->SetMaterial(mat3);
+    	gc->SetPosition(cam->GetPosition() + cam->Forward() * 1.5f);
+    	gc->SetScale(EM::Vec3(1, 1, 1) * 0.05f);
+    	gc->SetColor(EG::TextureSlotType::ALBEDO, EG::ColorRGBA16(1.0f, 0.0f, 0.0f, 1.0f));
+
+    	scene->AddRenderable(gc->GetRenderable());
+
+    	mHandles.push_back(ent);
+
+    	printf("handles: %d\n", (Enjon::u32)mHandles.size());
+    }
+
+    if (input->IsKeyPressed(SDLK_u))
+    {
+    	// Get ball
+		btCollisionObject* obj = mDynamicsWorld->getCollisionObjectArray()[1];
+		btRigidBody* body = btRigidBody::upcast(obj);
+		btTransform trans;
+		trans.setOrigin(btVector3(2, 30, 0));
+		body->setWorldTransform(trans);
+		body->getMotionState()->setWorldTransform(trans);
+		body->clearForces();
+
+		// Set graphics component
+		if (handle4->HasComponent<Enjon::GraphicsComponent>())
+		{
+			auto gComp = handle4->GetComponent<Enjon::GraphicsComponent>();
+			gComp->SetPosition(EM::Vec3((float)trans.getOrigin().getX(), (float)trans.getOrigin().getY(), (float)trans.getOrigin().getZ()));
+		}
     }
 
     if (mMovementOn)
     {
 	    EG::Camera* camera = mGraphicsEngine.GetSceneCamera();
 	   	EM::Vec3 velDir(0, 0, 0); 
-	   	static float speed = 8.0f;
+	   	static float speed = 10.0f;
 
 		if (input->IsKeyDown(SDLK_w))
 		{

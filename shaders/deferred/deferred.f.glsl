@@ -16,7 +16,7 @@ in VS_OUT
     mat3 TBN;
 } fs_in;
 
-uniform vec3 u_albedoColor = vec3(1, 1, 1);
+uniform vec4 u_albedoColor = vec4(1, 1, 1, 1);
 
 // uniforms
 uniform sampler2D u_albedoMap;
@@ -27,8 +27,6 @@ uniform sampler2D u_roughnessMap;
 uniform sampler2D u_aoMap;
 
 const float u_emissiveIntensity = 5.0;
-
-out vec4 ColorOut;
 
 void main()
 {
@@ -45,12 +43,10 @@ void main()
     float Roughness = texture2D(u_roughnessMap, fs_in.TexCoords).r;
     float AO        = texture2D(u_aoMap, fs_in.TexCoords).r;
     
-    DiffuseOut  = color * vec4(u_albedoColor, 1.0);
+    DiffuseOut  = color * vec4(u_albedoColor.xyz, 1.0);
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
     EmissiveOut = texture2D(u_emissiveMap, fs_in.TexCoords) * vec4(u_emissiveIntensity, u_emissiveIntensity, u_emissiveIntensity, 1.0);
     MatPropsOut = vec4(Metallic, Roughness, AO, 1.0);
     UVOut = vec4(fs_in.TexCoords.x, fs_in.TexCoords.y, 0.0, 1.0);
-
-    ColorOut = color * vec4(u_albedoColor, 1.0);
 }

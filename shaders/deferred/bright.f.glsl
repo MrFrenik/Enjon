@@ -9,19 +9,18 @@ in DATA
 
 out vec4 color;
 
-uniform sampler2D light_tex;
-uniform float threshold;
-uniform float scale;
+uniform sampler2D tex;
+uniform float u_threshold;
 
 void main() 
 {
 	color = vec4(0.0, 0.0, 0.0, 1.0);
-	vec3 FragColor = texture2D(light_tex, fs_in.TexCoords).rgb;
+	vec3 FragColor = texture2D(tex, fs_in.TexCoords).rgb;
 	float brightness = dot(FragColor, vec3(0.2126, 0.7152, 0.0722));
 
-	if (brightness > 1.0)
+	if (brightness > u_threshold)
 	{
-		vec3 output = max(vec3(0), FragColor - vec3(threshold)) * scale;
+		vec3 output = clamp(FragColor, vec3(0), vec3(1));
 		color = vec4(output, 1.0);
 	}
 }

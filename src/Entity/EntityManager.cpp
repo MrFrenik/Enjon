@@ -31,8 +31,10 @@ namespace Enjon {
 	//---------------------------------------------------------------
 	EntityHandle::~EntityHandle()
 	{
+		mManager->Destroy(this);		
 	}
 
+	//---------------------------------------------------------------
 	void EntityHandle::Reset()
 	{
 		mID = MAX_ENTITIES;
@@ -51,7 +53,7 @@ namespace Enjon {
 	//---------------------------------------------------------------
 	void EntityHandle::SetPosition(EM::Vec3& position)
 	{
-		mTransform.SetPosition(position);	
+		mTransform.SetPosition(position);
 	}
 
 	//---------------------------------------------------------------
@@ -64,6 +66,12 @@ namespace Enjon {
 	void EntityHandle::SetOrientation(EM::Quaternion& orientation)
 	{
 		mTransform.SetOrientation(orientation);
+	}
+
+	//---------------------------------------------------------------
+	void EntityHandle::SetParent(EntityHandle* parent)
+	{
+		mParent = parent;
 	}
 
 	//---------------------------------------------------------------
@@ -84,6 +92,18 @@ namespace Enjon {
 		// Detach all components from entities
 		// Deallocate all components
 		// Deallocate all entities
+
+		for (u32 i = 0; i < MAX_ENTITIES; ++i)
+		{
+			Destroy(&mEntities->at(i));	
+		}
+		delete[] mEntities;
+
+		for (u32 i = 0; i < mComponents.size(); ++i)
+		{
+			delete mComponents.at(i);
+			mComponents.at(i) = nullptr;
+		}
 	}
 
 	//---------------------------------------------------------------
@@ -129,6 +149,7 @@ namespace Enjon {
 		// Detach all components from entity
 		// Set handle to nullptr
 		// Set state to inactive
+		assert(entity != nullptr);
 
 		// Iterate through entity component list and detach
 		for (auto& c : entity->mComponents)

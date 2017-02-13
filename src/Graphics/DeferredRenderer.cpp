@@ -13,6 +13,8 @@
 #include "Graphics/PointLight.h"
 #include "Graphics/SpotLight.h"
 #include "IO/ResourceManager.h"
+#include "Console.h"
+#include "CVarsSystem.h"
 
 #include <cassert>
 
@@ -34,7 +36,7 @@ namespace Enjon { namespace Graphics {
 		delete(mLargeBlurVertical);
 		delete(mCompositeTarget);
 		delete(mLightingBuffer);
-		delete(mLuminanceBuffer);
+		delete(mLuminanceTarget);
 		delete(mFXAATarget);
 		delete(mShadowDepth);
 	}
@@ -59,6 +61,10 @@ namespace Enjon { namespace Graphics {
 
 		// Initialize frame buffers
 		InitializeFrameBuffers();
+		// Calcualte blur weights
+		CalculateBlurWeights();
+		// Register cvars
+		RegisterCVars();
 
 		EG::GLSLProgram* shader = EG::ShaderManager::Get("GBuffer");
 		shader->Use();
@@ -78,6 +84,10 @@ namespace Enjon { namespace Graphics {
 		GBufferPass();
 		// Lighting pass
 		LightingPass();
+		// Luminance Pass
+		LuminancePass();
+		// Bloom pass
+		BloomPass();
 		// FXAA pass
 		FXAAPass(mLightingBuffer);
 		// Composite Pass
@@ -94,7 +104,6 @@ namespace Enjon { namespace Graphics {
 				mBatch->Add(
 							EM::Vec4(-1, -1, 2, 2),
 							EM::Vec4(0, 0, 1, 1),
-							// mGbuffer->GetTexture(EG::GBufferTextureType::UV)
 							mCompositeTarget->GetTexture()
 						);
 			}
@@ -102,6 +111,12 @@ namespace Enjon { namespace Graphics {
 			mBatch->RenderBatch();
 		}
 		shader->Unuse();
+
+		// Draw console if visible
+		if (Enjon::Console::Visible())
+		{
+			Enjon::Console::Draw();
+		}
 
 		mWindow.SwapBuffer();
 	}
@@ -146,6 +161,7 @@ namespace Enjon { namespace Graphics {
 					shader->BindTexture("u_metallicMap", material->GetTexture(EG::TextureSlotType::METALLIC), 3);
 					shader->BindTexture("u_roughnessMap", material->GetTexture(EG::TextureSlotType::ROUGHNESS), 4);
 					shader->BindTexture("u_aoMap", material->GetTexture(EG::TextureSlotType::AO), 5);
+					shader->SetUniform("u_albedoColor", material->GetColor(EG::TextureSlotType::ALBEDO));
 				}
 
 				// Now need to render
@@ -187,7 +203,6 @@ namespace Enjon { namespace Graphics {
 
 					// Set material tetxures
 					shader->BindTexture("u_albedoMap", material->GetTexture(EG::TextureSlotType::ALBEDO), 0);
-					shader->BindTexture("u_albedoMap", material->GetTexture(EG::TextureSlotType::ALBEDO), 0);
 					shader->BindTexture("u_normalMap", material->GetTexture(EG::TextureSlotType::NORMAL), 1);
 					shader->BindTexture("u_emissiveMap", material->GetTexture(EG::TextureSlotType::EMISSIVE), 2);
 					shader->BindTexture("u_metallicMap", material->GetTexture(EG::TextureSlotType::METALLIC), 3);
@@ -210,7 +225,7 @@ namespace Enjon { namespace Graphics {
 	void DeferredRenderer::LightingPass()
 	{
 		mLightingBuffer->Bind();
-		mFullScreenQuad->Bind();
+		// mFullScreenQuad->Bind();
 		
 		EG::GLSLProgram* ambientShader 		= EG::ShaderManager::Get("AmbientLight");
 		EG::GLSLProgram* directionalShader 	= EG::ShaderManager::Get("PBRDirectionalLight");	
@@ -357,11 +372,156 @@ namespace Enjon { namespace Graphics {
 		}
 		spotShader->Unuse();
 
-		mFullScreenQuad->Unbind();
+		// mFullScreenQuad->Unbind();
 		mLightingBuffer->Unbind();	
 
 		glEnable(GL_DEPTH_TEST);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	}
+
+	void DeferredRenderer::LuminancePass()
+	{
+		GLSLProgram* luminanceProgram = EG::ShaderManager::Get("Bright");
+		mLuminanceTarget->Bind();
+		{
+			mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+			luminanceProgram->Use();
+			{
+				luminanceProgram->SetUniform("u_threshold", mToneMapSettings.mThreshold);
+				mBatch->Begin();
+				{
+					mBatch->Add(
+										EM::Vec4(-1, -1, 2, 2),
+										EM::Vec4(0, 0, 1, 1),
+										mLightingBuffer->GetTexture()
+									);
+				}
+				mBatch->End();
+				mBatch->RenderBatch();
+			}
+			luminanceProgram->Unuse();
+		}
+		mLuminanceTarget->Unbind();
+	}
+
+	void DeferredRenderer::BloomPass()
+	{
+		GLSLProgram* horizontalBlurProgram = EG::ShaderManager::Get("HorizontalBlur");
+		GLSLProgram* verticalBlurProgram = EG::ShaderManager::Get("VerticalBlur");
+
+		glEnable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
 		glBlendFunc(GL_ONE, GL_ONE);
+
+		// Small blur
+    	for (u32 i = 0; i < (u32)mBloomSettings.mIterations.x * 2; ++i)
+    	{
+    		bool isEven = (i % 2 == 0);
+    		EG::RenderTarget* target = isEven ? mSmallBlurHorizontal : mSmallBlurVertical;
+    		EG::GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
+
+			target->Bind();
+			{
+				program->Use();
+				{
+					for (uint32_t j = 0; j < 16; j++)
+					{
+						std::string uniform = "u_blurWeights[" + std::to_string(j) + "]";
+						program->SetUniform(uniform, mBloomSettings.mSmallGaussianCurve[j]);
+					}
+
+					program->SetUniform("u_weight", mBloomSettings.mWeights.x);
+					program->SetUniform("u_blurRadius", mBloomSettings.mRadius.x);
+					GLuint texID = i == 0 ? mLuminanceTarget->GetTexture() : isEven ? mSmallBlurVertical->GetTexture() : mSmallBlurHorizontal->GetTexture();
+					mBatch->Begin();
+					{
+			    		mBatch->Add(
+									EM::Vec4(-1, -1, 2, 2),
+									EM::Vec4(0, 0, 1, 1), 
+									texID
+								);
+					}
+					mBatch->End();
+					mBatch->RenderBatch();
+				}
+				program->Unuse();
+			}	
+			target->Unbind();
+    	}
+
+		// Medium blur
+    	for (u32 i = 0; i < (u32)mBloomSettings.mIterations.y * 2; ++i)
+    	{
+    		bool isEven = (i % 2 == 0);
+    		EG::RenderTarget* target = isEven ? mMediumBlurHorizontal : mMediumBlurVertical;
+    		EG::GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
+
+			target->Bind();
+			{
+				program->Use();
+				{
+					for (uint32_t j = 0; j < 16; j++)
+					{
+						std::string uniform = "u_blurWeights[" + std::to_string(j) + "]";
+						program->SetUniform(uniform, mBloomSettings.mMediumGaussianCurve[j]);
+					}
+
+					program->SetUniform("u_weight", mBloomSettings.mWeights.y);
+					program->SetUniform("u_blurRadius", mBloomSettings.mRadius.y);
+					GLuint texID = i == 0 ? mLuminanceTarget->GetTexture() : isEven ? mMediumBlurVertical->GetTexture() : mMediumBlurHorizontal->GetTexture();
+					mBatch->Begin();
+					{
+			    		mBatch->Add(
+									EM::Vec4(-1, -1, 2, 2),
+									EM::Vec4(0, 0, 1, 1), 
+									texID
+								);
+					}
+					mBatch->End();
+					mBatch->RenderBatch();
+				}
+				program->Unuse();
+			}	
+			target->Unbind();
+    	}
+
+		// Large blur
+    	for (u32 i = 0; i < (u32)mBloomSettings.mIterations.z * 2; ++i)
+    	{
+    		bool isEven = (i % 2 == 0);
+    		EG::RenderTarget* target = isEven ? mLargeBlurHorizontal : mLargeBlurVertical;
+    		EG::GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
+
+			target->Bind();
+			{
+				program->Use();
+				{
+					for (uint32_t j = 0; j < 16; j++)
+					{
+						std::string uniform = "u_blurWeights[" + std::to_string(j) + "]";
+						program->SetUniform(uniform, mBloomSettings.mLargeGaussianCurve[j]);
+					}
+
+					program->SetUniform("u_weight", mBloomSettings.mWeights.z);
+					program->SetUniform("u_blurRadius", mBloomSettings.mRadius.z);
+					GLuint texID = i == 0 ? mLuminanceTarget->GetTexture() : isEven ? mLargeBlurVertical->GetTexture() : mLargeBlurHorizontal->GetTexture();
+					mBatch->Begin();
+					{
+			    		mBatch->Add(
+									EM::Vec4(-1, -1, 2, 2),
+									EM::Vec4(0, 0, 1, 1), 
+									texID
+								);
+					}
+					mBatch->End();
+					mBatch->RenderBatch();
+				}
+				program->Unuse();
+			}	
+			target->Unbind();
+    	}
+
+		glEnable(GL_DEPTH_TEST);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
@@ -392,7 +552,7 @@ namespace Enjon { namespace Graphics {
 		mFXAATarget->Unbind();
 	}
 
-	void DeferredRenderer::CompositePass(EG::RenderTarget* inputTarget)
+	void DeferredRenderer::CompositePass(EG::RenderTarget* input)
 	{
 		GLSLProgram* compositeProgram = EG::ShaderManager::Get("Composite");
 		mCompositeTarget->Bind();
@@ -400,15 +560,19 @@ namespace Enjon { namespace Graphics {
 			mWindow.Clear();
 			compositeProgram->Use();
 			{
+				compositeProgram->BindTexture("u_blurTexSmall", mSmallBlurVertical->GetTexture(), 1);
+				compositeProgram->BindTexture("u_blurTexMedium", mMediumBlurVertical->GetTexture(), 2);
+				compositeProgram->BindTexture("u_blurTexLarge", mLargeBlurVertical->GetTexture(), 3);
 				compositeProgram->SetUniform("u_exposure", mToneMapSettings.mExposure);
 				compositeProgram->SetUniform("u_gamma", mToneMapSettings.mGamma);
+				compositeProgram->SetUniform("u_bloomScalar", mToneMapSettings.mBloomScalar);
 				compositeProgram->SetUniform("u_saturation", mToneMapSettings.mSaturation);
 				mBatch->Begin();
 				{
 					mBatch->Add(
 										EM::Vec4(-1, -1, 2, 2),
 										EM::Vec4(0, 0, 1, 1),
-										inputTarget->GetTexture()
+										input->GetTexture()
 									);
 				}
 				mBatch->End();
@@ -429,6 +593,14 @@ namespace Enjon { namespace Graphics {
 		return mWindow.GetViewport();
 	}
 
+	double NormalPDF(double x, double s, double m = 0.0)
+	{
+		static const double inv_sqrt_2pi = 0.3989422804014327;
+		double a = (x - m) / s;
+
+		return inv_sqrt_2pi / s * std::exp(-0.5 * a * a);
+	}
+
 	void DeferredRenderer::InitializeFrameBuffers()
 	{
 		auto viewport = mWindow.GetViewport();
@@ -445,7 +617,7 @@ namespace Enjon { namespace Graphics {
 		mLargeBlurVertical 			= new EG::RenderTarget(width / 64, height / 64);
 		mCompositeTarget 			= new EG::RenderTarget(width, height);
 		mLightingBuffer 			= new EG::RenderTarget(width, height);
-		mLuminanceBuffer 			= new EG::RenderTarget(width, height);
+		mLuminanceTarget 			= new EG::RenderTarget(width / 4, height / 4);
 		mFXAATarget 				= new EG::RenderTarget(width, height);
 		mShadowDepth 				= new EG::RenderTarget(2048, 2048);
 
@@ -453,6 +625,59 @@ namespace Enjon { namespace Graphics {
 		mBatch->Init();
 
 		mFullScreenQuad 			= new EG::FullScreenQuad();
+	}
+
+	void DeferredRenderer::CalculateBlurWeights()
+	{
+		double weight;
+		double start = -3.0;
+		double end = 3.0;
+		double denom = 2.0 * end + 1.0;
+		double num_samples = 15.0;
+		double range = end * 2.0;
+		double step = range / num_samples;
+		u32 i = 0;
+
+		weight = 1.74;
+		for (double x = start; x <= end; x += step)
+		{
+			double pdf = NormalPDF(x, 0.23);
+			mBloomSettings.mSmallGaussianCurve[i++] = pdf;
+		}
+
+		i = 0;
+		weight = 3.9f;
+		for (double x = start; x <= end; x += step)
+		{
+			double pdf = NormalPDF(x, 0.775);
+			mBloomSettings.mMediumGaussianCurve[i++]= pdf;
+		}
+
+		i = 0;
+		weight = 2.53f;
+		for (double x = start; x <= end; x += step)
+		{
+			double pdf = NormalPDF(x, 1.0);
+			mBloomSettings.mLargeGaussianCurve[i++] = pdf;
+		}
+	}
+
+	void DeferredRenderer::RegisterCVars()
+	{
+		Enjon::CVarsSystem::Register("exposure", &mToneMapSettings.mExposure, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("gamma", &mToneMapSettings.mGamma, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("bloomScale", &mToneMapSettings.mBloomScalar, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("saturation", &mToneMapSettings.mSaturation, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("blur_weight_small", &mBloomSettings.mWeights.x, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("blur_weight_medium", &mBloomSettings.mWeights.y, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("blur_weight_large", &mBloomSettings.mWeights.z, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("blur_iter_small", &mBloomSettings.mIterations.x, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("blur_iter_medium", &mBloomSettings.mIterations.y, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("blur_iter_large", &mBloomSettings.mIterations.z, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("threshold", &mToneMapSettings.mThreshold, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("blur_radius_small", &mBloomSettings.mRadius.x, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("blur_radius_medium", &mBloomSettings.mRadius.y, Enjon::CVarType::TYPE_FLOAT);
+		Enjon::CVarsSystem::Register("blur_radius_large", &mBloomSettings.mRadius.z, Enjon::CVarType::TYPE_FLOAT);
 	}
 }}
 

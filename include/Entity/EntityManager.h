@@ -80,6 +80,9 @@ namespace Enjon {
 			void SetPosition(EM::Vec3& position);
 			void SetScale(EM::Vec3& scale);
 			void SetOrientation(EM::Quaternion& orientation);
+			void SetParent(EntityHandle* parent);
+
+			EntityHandle* GetParent() const { return mParent; }
 
 			EM::Vec3& GetPosition() { return mTransform.GetPosition(); }
 			EM::Vec3& GetScale() { return mTransform.GetScale(); }
@@ -89,7 +92,10 @@ namespace Enjon {
 			void SetID(u32 id);
 			void Reset();
 
+			void UpdateComponentTransforms();
+
 			u32 mID;	
+			EntityHandle* mParent;
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
 			Enjon::Math::Transform mTransform;
@@ -151,6 +157,7 @@ namespace Enjon {
 					component.SetEntity(entity);
 					component.SetID(index);
 					component.SetBase(cWrapper); 
+					component.mEntityID = entity->mID;
 					cWrapper->mComponentMap[eid] = component;
 					componentList->push_back(&cWrapper->mComponentMap[eid]);
 

@@ -32,6 +32,7 @@ namespace Enjon { namespace Math {
 
 		void SetPosition(EM::Vec3& position);
 		void SetScale(EM::Vec3& scale);
+		void SetScale(float scale);
 		void SetOrientation(EM::Quaternion& orientation);
 
 		// Member variables

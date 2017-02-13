@@ -17,7 +17,7 @@ namespace Enjon
 
 	void PointLightComponent::Destroy()
 	{
-		DestroyBase<PointLightComponent>(mEntity->GetID());
+		DestroyBase<PointLightComponent>();
 	}
 
 	void PointLightComponent::SetColor(EG::ColorRGBA16& color)

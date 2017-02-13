@@ -24,9 +24,12 @@ namespace Enjon {
 			static bool ProcessInput(Input::InputManager* Input);
 			static void Update(float DT);
 			static void Draw();
+			static bool Visible();
+			static void Visible(bool visible);
 
 		public:
 			static GUI::GUITextBox InputTextBox;
+			static bool mIsVisible;
 	};
 }
 
