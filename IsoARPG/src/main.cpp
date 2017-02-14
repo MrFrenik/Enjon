@@ -8888,8 +8888,16 @@ int main(int argc, char** argv)
 			auto gComp = handle1->GetComponent<Enjon::GraphicsComponent>();
 			gComp->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 0, 1)));
 		}
+		/*
+		// float fps = mLimiter.End();
 
-		mLimiter.End();
+		static float f = 0.0f;
+		f += 0.1f;
+		if (f > 2.0f)
+		{
+			printf("fps: %f\n", fps);
+		}
+		*/
 	}
 
 	printf("Exit Successful!\n");	
@@ -8964,11 +8972,11 @@ bool ProcessInput(EI::InputManager* input, float dt)
     	mHandles.clear();
     }
 
-    if (input->IsKeyPressed(SDL_BUTTON_LEFT))
+    if (input->IsKeyDown(SDL_BUTTON_LEFT))
     {
     	auto cam = mGraphicsEngine.GetSceneCamera();
     	auto scene = mGraphicsEngine.GetScene();
-    	auto pos = cam->GetPosition();
+    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
     	auto vel = cam->Forward() * 20.0f;
 
 		btCollisionShape* colShape = new btSphereShape(btScalar(0.5));
@@ -9008,13 +9016,15 @@ bool ProcessInput(EI::InputManager* input, float dt)
 		mBalls.push_back(ent);
 
 		mDynamicsWorld->addRigidBody(body);
+
+		printf("bodies: %d\n", mBodies.size());
     }
 
-    if (input->IsKeyPressed(SDL_BUTTON_RIGHT))
+    if (input->IsKeyDown(SDL_BUTTON_RIGHT))
     {
     	auto cam = mGraphicsEngine.GetSceneCamera();
     	auto scene = mGraphicsEngine.GetScene();
-    	auto pos = cam->GetPosition();
+    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
     	auto vel = cam->Forward() * 20.0f;
 
 		btCollisionShape* colShape = new btBoxShape(btVector3(btScalar(0.5), btScalar(0.5), btScalar(0.5)));
