@@ -8520,7 +8520,14 @@ bool ProcessInput(EI::InputManager* input, float dt);
 
 std::vector<Enjon::EntityHandle*> mHandles;
 
+std::vector<Enjon::EntityHandle*> mBalls;
+std::vector<btRigidBody*> mBodies;
+
 btDiscreteDynamicsWorld* mDynamicsWorld;
+
+// Keep track of all bullet shapes
+// Make sure to reuse shapes amongst rigid bodies whenever possible
+btAlignedObjectArray<btCollisionShape*> collisionShapes;
 
 #ifdef main
 	#undef main
@@ -8564,12 +8571,12 @@ int main(int argc, char** argv)
 
 	EG::Scene* scene = mGraphicsEngine.GetScene();
 
-	mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/sphere.obj");
+	mesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_sphere.obj");
 	mesh2 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cerebus.obj");
 	mesh3 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
 	mesh4 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/shaderball.obj");
-	mesh5 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cube.obj");
-	mesh6 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/sphere.obj");
+	mesh5 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_cube.obj");
+	mesh6 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_sphere.obj");
 	mat = new EG::Material();
 	mat2 = new EG::Material();
 	mat3 = new EG::Material();
@@ -8606,7 +8613,8 @@ int main(int argc, char** argv)
 
 	renderable->SetMesh(mesh3);
 	renderable->SetMaterial(mat);
-	renderable2->SetMesh(mesh2);
+
+	renderable2->SetMesh(mesh);
 	renderable2->SetMaterial(mat);
 
 	// Sphere
@@ -8624,7 +8632,7 @@ int main(int argc, char** argv)
 	renderable3->SetScale(EM::Vec3(1, 1, 1) * 1.0f);
 
 	renderable4->SetPosition(EM::Vec3(5, 1.0f, -5.0f));
-	renderable4->SetScale(0.5f * 0.8f);
+	renderable4->SetScale(0.5f);
 
 	auto plc = mEntities->Attach<Enjon::PointLightComponent>(handle2);
 	plc->SetIntensity(100.0f);
@@ -8674,14 +8682,10 @@ int main(int argc, char** argv)
 	mDynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
 
 	// Set gravity
-	mDynamicsWorld->setGravity(btVector3(0, -10, 0));	
-
-	// Keep track of all bullet shapes
-	// Make sure to reuse shapes amongst rigid bodies whenever possible
-	btAlignedObjectArray<btCollisionShape*> collisionShapes;
+	mDynamicsWorld->setGravity(btVector3(0, -10, 0));
 
 	{
-		btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(50.), btScalar(0.8), btScalar(50.)));
+		btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(500.), btScalar(1.0), btScalar(500.)));
 
 		collisionShapes.push_back(groundShape);
 
@@ -8701,19 +8705,22 @@ int main(int argc, char** argv)
 		btDefaultMotionState* myMotionState = new btDefaultMotionState(groundTransform);
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, groundShape, localInertia);
 		btRigidBody* body = new btRigidBody(rbInfo);
-		body->setRestitution(0.1);
-		body->setFriction(2.0);
+		body->setRestitution(0.0);
+		body->setFriction(10.0);
+		body->setDamping(10.0, 10.0);
 
 		// Add body to dynamics world
 		mDynamicsWorld->addRigidBody(body);
 
-		// Set up ground to take ground physics shape
+		mBodies.push_back(body);
 
+		auto h = mEntities->Allocate();
+		mBalls.push_back(h);
 	}
 
 	{
 		// Create dynamic rigid body
-		btCollisionShape* colShape = new btBoxShape(btVector3(1, 1, 1) * 0.8);
+		btCollisionShape* colShape = new btBoxShape(btVector3(1, 1, 1));
 		collisionShapes.push_back(colShape);
 
 		// Create dynamic objects
@@ -8736,8 +8743,12 @@ int main(int argc, char** argv)
 		btRigidBody* body = new btRigidBody(rbInfo);
 		body->setRestitution(0.8);
 		body->setFriction(0.8);
+		body->setDamping(0.2f, 0.4f);
+
 
 		mDynamicsWorld->addRigidBody(body);
+		mBodies.push_back(body);
+		mBalls.push_back(handle3);
 	}
 
 	{
@@ -8765,8 +8776,11 @@ int main(int argc, char** argv)
 		btRigidBody* body = new btRigidBody(rbInfo);
 		body->setRestitution(0.8);
 		body->setFriction(0.8);
+		body->setDamping(0.7f, 0.7f);
 
 		mDynamicsWorld->addRigidBody(body);
+		mBodies.push_back(body);
+		mBalls.push_back(handle4);
 	}
 
 	// Ground
@@ -8825,46 +8839,25 @@ int main(int argc, char** argv)
     	// Physics simulation
     	mDynamicsWorld->stepSimulation(1.f/60.f, 10);
 
-    	if (handle3->HasComponent<Enjon::GraphicsComponent>())
+
+    	// Step through physics bodies and change graphics position/orientation based on those
+    	for (Enjon::u32 i = 0; i < mBodies.size(); ++i)
     	{
-    		btCollisionObject* obj = mDynamicsWorld->getCollisionObjectArray()[1];
-    		btRigidBody* body = btRigidBody::upcast(obj);
+    		btRigidBody* body = mBodies.at(i);
+    		Enjon::EntityHandle* handle = mBalls.at(i);
     		btTransform trans;
-    		body->getMotionState()->getWorldTransform(trans);
 
-    		auto gComp = handle3->GetComponent<Enjon::GraphicsComponent>();
-    		gComp->SetPosition(EM::Vec3((float)trans.getOrigin().getX(), (float)trans.getOrigin().getY(), (float)trans.getOrigin().getZ()));
-    	}
-
-    	if (handle4->HasComponent<Enjon::GraphicsComponent>())
-    	{
-    		btCollisionObject* obj = mDynamicsWorld->getCollisionObjectArray()[2];
-    		btRigidBody* body = btRigidBody::upcast(obj);
-    		btTransform trans;
-    		body->getMotionState()->getWorldTransform(trans);
-
-    		auto gComp = handle4->GetComponent<Enjon::GraphicsComponent>();
-    		gComp->SetPosition(EM::Vec3((float)trans.getOrigin().getX(), (float)trans.getOrigin().getY(), (float)trans.getOrigin().getZ()));
-    	}
-
-    	for (Enjon::u32 i = 0; i < mDynamicsWorld->getNumCollisionObjects(); ++i)
-    	{
-    		btCollisionObject* obj = mDynamicsWorld->getCollisionObjectArray()[i];
-    		btRigidBody* body = btRigidBody::upcast(obj);
-    		btTransform trans;
     		if (body && body->getMotionState())
     		{
     			body->getMotionState()->getWorldTransform(trans);
-
-    			if (handle4->HasComponent<Enjon::GraphicsComponent>())
+    			if (handle->HasComponent<Enjon::GraphicsComponent>())
     			{
-    				auto gComp = handle4->GetComponent<Enjon::GraphicsComponent>();
-    				gComp->SetPosition(EM::Vec3((float)trans.getOrigin().getX(), (float)trans.getOrigin().getY(), (float)trans.getOrigin().getZ()));
+    				auto gComp = handle->GetComponent<Enjon::GraphicsComponent>();
+    				auto pos = EM::Vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+    				auto rot = EM::Quaternion(-trans.getRotation().x(), -trans.getRotation().y(), -trans.getRotation().z(), trans.getRotation().w());
+    				gComp->SetPosition(EM::Vec3(pos));
+    				gComp->SetOrientation(rot);
     			}
-    		}
-    		else
-    		{
-    			trans = obj->getWorldTransform();
     		}
     	}
 
@@ -8874,7 +8867,8 @@ int main(int argc, char** argv)
 		if (handle2->HasComponent<Enjon::GraphicsComponent>())
 		{
 			gc2 = handle2->GetComponent<Enjon::GraphicsComponent>();	
-			gc2->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
+			gc2->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)) * 
+								EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 0, 1)));
 		}
 
 		if (handle2->HasComponent<Enjon::PointLightComponent>())
@@ -8892,7 +8886,7 @@ int main(int argc, char** argv)
 		if (handle1->HasComponent<Enjon::GraphicsComponent>())
 		{
 			auto gComp = handle1->GetComponent<Enjon::GraphicsComponent>();
-			gComp->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
+			gComp->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 0, 1)));
 		}
 
 		mLimiter.End();
@@ -8974,19 +8968,92 @@ bool ProcessInput(EI::InputManager* input, float dt)
     {
     	auto cam = mGraphicsEngine.GetSceneCamera();
     	auto scene = mGraphicsEngine.GetScene();
-    	auto ent = mEntities->Allocate();
-    	auto gc = ent->Attach<Enjon::GraphicsComponent>();	
-    	gc->SetMesh(mesh);
-    	gc->SetMaterial(mat3);
-    	gc->SetPosition(cam->GetPosition() + cam->Forward() * 1.5f);
-    	gc->SetScale(EM::Vec3(1, 1, 1) * 0.05f);
-    	gc->SetColor(EG::TextureSlotType::ALBEDO, EG::ColorRGBA16(1.0f, 0.0f, 0.0f, 1.0f));
+    	auto pos = cam->GetPosition();
+    	auto vel = cam->Forward() * 20.0f;
 
-    	scene->AddRenderable(gc->GetRenderable());
+		btCollisionShape* colShape = new btSphereShape(btScalar(0.5));
+		collisionShapes.push_back(colShape);
 
-    	mHandles.push_back(ent);
+		// Create dynamic objects
+		btTransform startTransform;
+		startTransform.setIdentity();
 
-    	printf("handles: %d\n", (Enjon::u32)mHandles.size());
+		btScalar mass(3.);
+
+		// Rigid body is dynamic iff mass is non zero, otherwise static
+		bool isDynamic = (mass != 0.f);
+
+		btVector3 localInertia(0, 0, 0);
+		if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
+
+		startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
+
+		// Using motionstate is recommended
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+		btRigidBody* body = new btRigidBody(rbInfo);
+		body->setRestitution(0.2f);
+		body->setFriction(10.0f);
+		body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
+		body->setDamping(0.2f, 0.4f);
+
+		auto ent = mEntities->Allocate();
+		auto gc = ent->Attach<Enjon::GraphicsComponent>();
+		gc->SetMesh(mesh);
+		gc->SetMaterial(mat5);
+		gc->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
+		scene->AddRenderable(gc->GetRenderable());
+
+		mBodies.push_back(body);
+		mBalls.push_back(ent);
+
+		mDynamicsWorld->addRigidBody(body);
+    }
+
+    if (input->IsKeyPressed(SDL_BUTTON_RIGHT))
+    {
+    	auto cam = mGraphicsEngine.GetSceneCamera();
+    	auto scene = mGraphicsEngine.GetScene();
+    	auto pos = cam->GetPosition();
+    	auto vel = cam->Forward() * 20.0f;
+
+		btCollisionShape* colShape = new btBoxShape(btVector3(btScalar(0.5), btScalar(0.5), btScalar(0.5)));
+		collisionShapes.push_back(colShape);
+
+		// Create dynamic objects
+		btTransform startTransform;
+		startTransform.setIdentity();
+
+		btScalar mass(10.);
+
+		// Rigid body is dynamic iff mass is non zero, otherwise static
+		bool isDynamic = (mass != 0.f);
+
+		btVector3 localInertia(0, 0, 0);
+		if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
+
+		startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
+
+		// Using motionstate is recommended
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+		btRigidBody* body = new btRigidBody(rbInfo);
+		body->setRestitution(0.2f);
+		body->setFriction(10.0f);
+		body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
+		body->setDamping(0.2f, 0.4f);
+
+		auto ent = mEntities->Allocate();
+		auto gc = ent->Attach<Enjon::GraphicsComponent>();
+		gc->SetMesh(mesh5);
+		gc->SetMaterial(mat4);
+		gc->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
+		scene->AddRenderable(gc->GetRenderable());
+
+		mBodies.push_back(body);
+		mBalls.push_back(ent);
+
+		mDynamicsWorld->addRigidBody(body);
     }
 
     if (input->IsKeyPressed(SDLK_u))
