@@ -8565,7 +8565,7 @@ int main(int argc, char** argv)
 	EG::Renderable* renderable3 = gc3->GetRenderable();
 	EG::Renderable* renderable4 = gc4->GetRenderable();
 
-	mSun = EG::DirectionalLight(EM::Vec3(-0.5f, 0.5f, 0.75f), EG::RGBA16_Orange(), 10.0f);
+	mSun = EG::DirectionalLight(EM::Vec3(-0.5f, 0.5f, 0.75f), EG::RGBA16_Orange(), 20.0f);
 	mSun2 = EG::DirectionalLight(EM::Vec3(0.5f, 0.5f, -0.75f), EG::RGBA16_SkyBlue(), 10.0f);
 	mSun3 = EG::DirectionalLight(EM::Vec3(0.75f, 0.6f, 0.75f), EG::RGBA16_Yellow(), 5.0f);
 
@@ -8905,6 +8905,26 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+btRigidBody* CreateSphere()
+{
+	return nullptr;
+}
+
+btRigidBody* CreateBox()
+{
+	return nullptr;
+}
+
+btRigidBody* CreateCone()
+{
+	return nullptr;
+}
+
+btRigidBody* CreateCylinder()
+{
+	return nullptr;
+}
+
 bool ProcessInput(EI::InputManager* input, float dt)
 {
     SDL_Event event;
@@ -9065,6 +9085,99 @@ bool ProcessInput(EI::InputManager* input, float dt)
 
 		mDynamicsWorld->addRigidBody(body);
     }
+
+    if (input->IsKeyDown(SDLK_f))
+    {
+    	auto cam = mGraphicsEngine.GetSceneCamera();
+    	auto scene = mGraphicsEngine.GetScene();
+    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
+    	auto vel = cam->Forward() * 20.0f;
+
+		btCollisionShape* colShape = new btCylinderShape(btVector3(btScalar(0.5), btScalar(0.5), btScalar(0.5)));
+		collisionShapes.push_back(colShape);
+
+		// Create dynamic objects
+		btTransform startTransform;
+		startTransform.setIdentity();
+
+		btScalar mass(10.);
+
+		// Rigid body is dynamic iff mass is non zero, otherwise static
+		bool isDynamic = (mass != 0.f);
+
+		btVector3 localInertia(0, 0, 0);
+		if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
+
+		startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
+
+		// Using motionstate is recommended
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+		btRigidBody* body = new btRigidBody(rbInfo);
+		body->setRestitution(0.2f);
+		body->setFriction(10.0f);
+		body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
+		body->setDamping(0.2f, 0.4f);
+
+		auto ent = mEntities->Allocate();
+		auto gc = ent->Attach<Enjon::GraphicsComponent>();
+		gc->SetMesh(EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_cylinder.obj"));
+		gc->SetMaterial(mat4);
+		gc->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
+		scene->AddRenderable(gc->GetRenderable());
+
+		mBodies.push_back(body);
+		mBalls.push_back(ent);
+
+		mDynamicsWorld->addRigidBody(body);
+    }
+
+    if (input->IsKeyDown(SDL_BUTTON_MIDDLE))
+    {
+    	auto cam = mGraphicsEngine.GetSceneCamera();
+    	auto scene = mGraphicsEngine.GetScene();
+    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
+    	auto vel = cam->Forward() * 20.0f;
+
+		btCollisionShape* colShape = new btConeShape(btScalar(0.5f), btScalar(1.0f));
+		collisionShapes.push_back(colShape);
+
+		// Create dynamic objects
+		btTransform startTransform;
+		startTransform.setIdentity();
+
+		btScalar mass(10.);
+
+		// Rigid body is dynamic iff mass is non zero, otherwise static
+		bool isDynamic = (mass != 0.f);
+
+		btVector3 localInertia(0, 0, 0);
+		if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
+
+		startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
+
+		// Using motionstate is recommended
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+		btRigidBody* body = new btRigidBody(rbInfo);
+		body->setRestitution(0.7f);
+		body->setFriction(10.0f);
+		body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
+		body->setDamping(0.2f, 0.4f);
+
+		auto ent = mEntities->Allocate();
+		auto gc = ent->Attach<Enjon::GraphicsComponent>();
+		gc->SetMesh(EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_cone.obj"));
+		gc->SetMaterial(mat);
+		gc->SetScale(EM::Vec3(1, 1, 1));
+		scene->AddRenderable(gc->GetRenderable());
+
+		mBodies.push_back(body);
+		mBalls.push_back(ent);
+
+		mDynamicsWorld->addRigidBody(body);
+    }
+
 
     if (input->IsKeyPressed(SDLK_u))
     {
