@@ -87,6 +87,8 @@ namespace Enjon { namespace Graphics {
 			void BloomPass();
 			void FXAAPass(EG::RenderTarget* inputTarget);
 			void CompositePass(EG::RenderTarget* inputTarget);
+			void GuiPass();
+			void ImGuiStyles();
 
 			// Frame buffers
 			EG::GBuffer* mGbuffer 					= nullptr;

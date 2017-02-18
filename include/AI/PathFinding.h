@@ -42,7 +42,7 @@ namespace PathFinding {
 	{
 		if (A->PriorityValue == B->PriorityValue)  	return 0;
 		if (A->PriorityValue >  B->PriorityValue) 	return 1;
-		if (A->PriorityValue <  B->PriorityValue) 	return -1;
+		return -1;
 	}
 
 	struct CompareNode

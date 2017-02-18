@@ -8478,6 +8478,8 @@ int main(int argc, char** argv)
 #include <vector>
 #include <Entity/Component.h>
 
+#include <ImGui/imgui_impl_sdl_gl3.h>
+
 #include <Bullet/btBulletDynamicsCommon.h>
 
 EG::DeferredRenderer mGraphicsEngine;
@@ -8517,6 +8519,7 @@ EG::Material* mat5;
 bool mMovementOn = true;
 
 bool ProcessInput(EI::InputManager* input, float dt);
+bool ProcessGuiInput(EI::InputManager* input, float dt);
 
 std::vector<Enjon::EntityHandle*> mHandles;
 
@@ -8524,6 +8527,8 @@ std::vector<Enjon::EntityHandle*> mBalls;
 std::vector<btRigidBody*> mBodies;
 
 btDiscreteDynamicsWorld* mDynamicsWorld;
+
+bool mGuiControl = false;
 
 // Keep track of all bullet shapes
 // Make sure to reuse shapes amongst rigid bodies whenever possible
@@ -8610,6 +8615,7 @@ int main(int argc, char** argv)
 	mat5->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/HarshBricks/Metallic.png"));
 	mat5->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/HarshBricks/Roughness.png"));
 	mat5->SetTexture(EG::TextureSlotType::AO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/HarshBricks/AO.png"));
+	mat5->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png"));
 
 	renderable->SetMesh(mesh3);
 	renderable->SetMaterial(mat);
@@ -8825,10 +8831,9 @@ int main(int argc, char** argv)
     	Enjon::Console::Update(dt);
 
     	// Processing input
-    	bool consoleVisible = Enjon::Console::Visible();
-    	if (consoleVisible) 
+    	if (Enjon::Console::Visible()) 
     	{
-    		Enjon::Console::ProcessInput(&mInputManager);
+    		Enjon::Console::Visible(ProcessGuiInput(&mInputManager, 0.01f));
     	}
 
     	else
@@ -8931,6 +8936,8 @@ bool ProcessInput(EI::InputManager* input, float dt)
    //Will keep looping until there are no more events to process
     while (SDL_PollEvent(&event)) 
     {
+    	ImGui_ImplSdlGL3_ProcessEvent(&event);
+
         switch (event.type) 
         {
             case SDL_QUIT:
@@ -9247,6 +9254,51 @@ bool ProcessInput(EI::InputManager* input, float dt)
 									(EM::ToRadians(((float)viewPort.x / 2.0f - MouseCoords.x) * dt) * MouseSensitivity), 
 									(EM::ToRadians(((float)viewPort.y / 2.0f - MouseCoords.y) * dt) * MouseSensitivity)
 								);
+    }
+
+    return true;
+}
+
+bool ProcessGuiInput(EI::InputManager* input, float dt)
+{
+	SDL_Event event;
+   //Will keep looping until there are no more events to process
+    while (SDL_PollEvent(&event)) 
+    {
+    	ImGui_ImplSdlGL3_ProcessEvent(&event);
+
+    	switch (event.type) 
+        {
+            case SDL_QUIT:
+                return false;
+                break;
+			case SDL_KEYUP:
+				input->ReleaseKey(event.key.keysym.sym); 
+				break;
+			case SDL_KEYDOWN:
+				input->PressKey(event.key.keysym.sym);
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				input->PressKey(event.button.button);
+				break;
+			case SDL_MOUSEBUTTONUP:
+				input->ReleaseKey(event.button.button);
+				break;
+			case SDL_MOUSEMOTION:
+				input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+			default:
+				break;
+		}
+    }
+
+    if (input->IsKeyPressed(SDLK_ESCAPE))
+    {
+    	return false;
+    }
+
+    if (input->IsKeyPressed(SDLK_BACKQUOTE))
+    {
+    	return false;
     }
 
     return true;

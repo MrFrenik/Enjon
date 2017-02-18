@@ -35,5 +35,4 @@ namespace Enjon { namespace Graphics {
 		
 		return mit->second; 
 	}
-
 }}

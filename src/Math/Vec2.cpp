@@ -146,27 +146,27 @@ namespace Enjon { namespace Math {
 		return *this;
 	}
 
-	iVec2& operator+(iVec2 left, const iVec2& right)
+	iVec2 operator+(iVec2 left, const iVec2& right)
 	{
 		return left.Add(right);
 	}
 	
-	iVec2& operator-(iVec2 left, const iVec2& right)
+	iVec2 operator-(iVec2 left, const iVec2& right)
 	{
 		return left.Subtract(right);
 	}
 	
-	iVec2& operator*(iVec2 left, const iVec2& right)
+	iVec2 operator*(iVec2 left, const iVec2& right)
 	{
 		return left.Multiply(right);
 	}
 	
-	iVec2& operator/(iVec2 left, const iVec2& right)
+	iVec2 operator/(iVec2 left, const iVec2& right)
 	{
 		return left.Divide(right);
 	}
 
-	iVec2& operator*(iVec2 left, const int& scalar)
+	iVec2 operator*(iVec2 left, const int& scalar)
 	{
 		return left.Scale(scalar);
 	}
@@ -194,6 +194,16 @@ namespace Enjon { namespace Math {
 	iVec2& iVec2::operator*=(const int& scalar)
 	{
 		return Scale(scalar);
+	}
+
+	bool operator==(iVec2 left, const iVec2& other)
+	{
+		return ((left.x == other.x) && (left.y == other.y));
+	}
+
+	bool operator!=(iVec2 left, const iVec2& other)
+	{
+		return ((left.x != other.x) || (left.y != other.y));
 	}
 
 	float Vec2::DotProduct(const Vec2& other)

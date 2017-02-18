@@ -59,6 +59,7 @@ namespace Enjon { namespace Graphics {
 		void SwapBuffer(); 
 
 		SDL_Window* GetWindowContext() { return m_sdlWindow; }
+		SDL_Window* GetSDLWindow() { return m_sdlWindow; }
 
 	private:
 		SDL_Window* m_sdlWindow;

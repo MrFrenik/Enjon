@@ -1,4 +1,5 @@
 #include "CVarsSystem.h"
+#include "System/Types.h"
 
 #include <iostream>
 
@@ -40,7 +41,7 @@ namespace Enjon
 					return true;
 					break;
 				case TYPE_UINT: 
-					if (val < 0) break;
+					if ((s32)val < 0) break;
 					*(static_cast<CVar<unsigned int>*>(base)->value) = val;
 					return true;
 					break;

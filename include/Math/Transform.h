@@ -26,9 +26,9 @@ namespace Enjon { namespace Math {
 		// Gets inverse of this transform
 		Transform Inverse();
 
-		EM::Vec3 GetPosition()& { return Position; }
-		EM::Vec3 GetScale()& { return Scale; }
-		EM::Quaternion GetOrientation()& { return Orientation; }
+		EM::Vec3 GetPosition() { return Position; }
+		EM::Vec3 GetScale() { return Scale; }
+		EM::Quaternion GetOrientation() { return Orientation; }
 
 		void SetPosition(EM::Vec3& position);
 		void SetScale(EM::Vec3& scale);

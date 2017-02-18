@@ -4,9 +4,9 @@ pushd bin
 set libs=Opengl32.lib SDL2.lib SDL2main.lib glew32.lib glew32s.lib freetype.lib Bullet3Collision.lib Bullet3Dynamics.lib
 set libs2=Bullet3Common.lib LinearMath.lib BulletDynamics.lib BulletCollision.lib
 set src1=..\src\*.cpp ..\src\Graphics\*.cpp ..\src\IO\*.cpp ..\src\Math\*.cpp ..\src\Physics\*.cpp ..\src\Utils\*.cpp 
-set src2=..\src\AI\*.cpp ..\src\Entity\*.cpp ..\src\Entity\Components\*.cpp 
+set src2=..\src\AI\*.cpp ..\src\Entity\*.cpp ..\src\Entity\Components\*.cpp ..\src\IMGui\*.cpp
 
-cl /MP /FS /Ox /w /Femain.exe ^
+cl /MP /FS /Ox /W1 /Femain.exe ^
 %src1% %src2% ^
 ..\IsoARPG\src\*.cpp ^
 /I ..\include /I ..\deps\include /I ..\IsoARPG\include ^

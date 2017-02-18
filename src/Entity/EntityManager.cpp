@@ -90,15 +90,13 @@ namespace Enjon {
 	EntityManager::~EntityManager()
 	{
 		// Detach all components from entities
-		// Deallocate all components
-		// Deallocate all entities
-
 		for (u32 i = 0; i < MAX_ENTITIES; ++i)
 		{
 			Destroy(&mEntities->at(i));	
 		}
 		delete[] mEntities;
 
+		// Deallocate all components
 		for (u32 i = 0; i < mComponents.size(); ++i)
 		{
 			delete mComponents.at(i);
@@ -129,6 +127,8 @@ namespace Enjon {
 			}
 		}
 
+		// Other wise return MAX_ENTITIES, since there are no entity slots left
+		return MAX_ENTITIES;
 	}
 
 	//---------------------------------------------------------------
@@ -146,9 +146,7 @@ namespace Enjon {
 	//---------------------------------------------------------------
 	void EntityManager::Destroy(EntityHandle* entity)
 	{
-		// Detach all components from entity
-		// Set handle to nullptr
-		// Set state to inactive
+		// Assert that entity isn't already null
 		assert(entity != nullptr);
 
 		// Iterate through entity component list and detach

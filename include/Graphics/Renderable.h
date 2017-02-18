@@ -19,13 +19,13 @@ namespace Enjon { namespace Graphics {
 			~Renderable();
 
 			/* Get position of transform */
-			EM::Vec3& GetPosition() { return mTransform.GetPosition(); }
+			EM::Vec3 GetPosition() { return mTransform.GetPosition(); }
 
 			/* Get scale of transform */
-			EM::Vec3& GetScale() { return mTransform.GetScale(); }
+			EM::Vec3 GetScale() { return mTransform.GetScale(); }
 
 			/* Get orientation of transform */
-			EM::Quaternion& GetOrientation() { return mTransform.GetOrientation(); }
+			EM::Quaternion GetOrientation() { return mTransform.GetOrientation(); }
 
 			/* Offset orientation of transform */
 			void Renderable::OffsetOrientation(const f32& Yaw, const f32& Pitch);

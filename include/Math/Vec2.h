@@ -79,10 +79,12 @@ namespace Enjon { namespace Math {
 		iVec2& Divide(const iVec2& other); 
 		iVec2& Scale(const int& scalar);
 
-		friend iVec2& operator+(iVec2 left, const iVec2& other);
-		friend iVec2& operator-(iVec2 left, const iVec2& other); 
-		friend iVec2& operator*(iVec2 left, const iVec2& other);
-		friend iVec2& operator/(iVec2 left, const iVec2& other);
+		friend iVec2 operator+(iVec2 left, const iVec2& other);
+		friend iVec2 operator-(iVec2 left, const iVec2& other); 
+		friend iVec2 operator*(iVec2 left, const iVec2& other);
+		friend iVec2 operator/(iVec2 left, const iVec2& other);
+		friend bool operator==(iVec2 left, const iVec2& other);
+		friend bool operator!=(iVec2 left, const iVec2& other);
 		
 		iVec2& operator+=(const iVec2& other);
 		iVec2& operator-=(const iVec2& other);

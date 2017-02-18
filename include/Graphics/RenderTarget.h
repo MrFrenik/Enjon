@@ -13,7 +13,7 @@ namespace Enjon { namespace Graphics {
 	class RenderTarget
 	{
 	 public:
-			static enum class BindType
+			enum class BindType
 			{
 				READ, 
 				WRITE	

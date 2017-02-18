@@ -39,6 +39,7 @@ namespace Enjon {
 	// We do not need to include stdint.h/cstdint because it is not always available
 
 	using int8 = signed char;
+	using s8 = signed char;
 	using uint8 = unsigned char;
 	using u8 = uint8;
 
@@ -48,6 +49,7 @@ namespace Enjon {
 	using int32 = signed int;
 	using uint32 = unsigned int;
 	using u32 = uint32;
+	using s32 = int32;
 	using i32 = int32;
 
 	// Older versions of MSVC do not define long long as 64 bits

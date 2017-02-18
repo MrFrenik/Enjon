@@ -1,7 +1,7 @@
 #ifndef ENJON_TEXTURECACHE_H
 #define ENJON_TEXTURECACHE_H
 
-#include <map>
+#include <unordered_map>
 #include <string>
 
 #include "Graphics/GLTexture.h"
@@ -20,7 +20,7 @@ namespace Enjon { namespace Graphics {
 		GLTexture& GetTexture(std::string texturePath, GLint magParams = GL_LINEAR, GLint minParams = GL_LINEAR_MIPMAP_LINEAR, bool genmips = true);
 
 	private:
-		std::map<std::string, GLTexture> m_textureMap;
+		std::unordered_map<std::string, GLTexture> m_textureMap;
 	}; 
 }}
 

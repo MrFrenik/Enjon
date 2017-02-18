@@ -43,8 +43,11 @@ namespace AnimationManager {
 		{
 			auto it = PlayerAnimations.find(AnimationName);
 			if (it != PlayerAnimations.end()) return &it->second;
-			else printf("Not found!");
-			// else return &PlayerAnimations["walk"];
+			else 
+			{
+				printf("Not found!");
+				return &PlayerAnimations["walk"];
+			}
 		}
 		
 		else return &PlayerAnimations["walk"];
