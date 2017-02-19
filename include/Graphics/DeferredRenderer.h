@@ -89,6 +89,10 @@ namespace Enjon { namespace Graphics {
 			void CompositePass(EG::RenderTarget* inputTarget);
 			void GuiPass();
 			void ImGuiStyles();
+			void ImGuiStyles2();
+
+			void ShowGraphicsWindow(bool* p_open);
+			void ShowGameViewport(bool* open, bool fullscreen);
 
 			// Frame buffers
 			EG::GBuffer* mGbuffer 					= nullptr;
@@ -104,6 +108,7 @@ namespace Enjon { namespace Graphics {
 			EG::RenderTarget* mLuminanceTarget		= nullptr;
 			EG::RenderTarget* mFXAATarget			= nullptr;
 			EG::RenderTarget* mShadowDepth			= nullptr;
+			EG::RenderTarget* mFinalTarget			= nullptr;
 
 			// Full screen quad
 			EG::FullScreenQuad* mFullScreenQuad 	= nullptr;

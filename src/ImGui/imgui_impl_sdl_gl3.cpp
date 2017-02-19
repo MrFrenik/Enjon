@@ -218,7 +218,7 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects()
         "{\n"
         "	Frag_UV = UV;\n"
         "	Frag_Color = Color;\n"
-        "	gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
+        "	gl_Position = ProjMtx * vec4(Position.x, Position.y, 0,1);\n"
         "}\n";
 
     const GLchar* fragment_shader =
@@ -384,9 +384,6 @@ void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window)
 
     io.MouseWheel = g_MouseWheel;
     g_MouseWheel = 0.0f;
-
-    // Hide OS mouse cursor if ImGui is drawing it
-    SDL_ShowCursor(io.MouseDrawCursor ? 0 : 1);
 
     // Start the frame
     ImGui::NewFrame();

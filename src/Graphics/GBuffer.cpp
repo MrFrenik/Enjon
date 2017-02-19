@@ -108,5 +108,19 @@ namespace Enjon { namespace Graphics {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glPopAttrib();
 	}
+
+	const char* GBuffer::FrameBufferToString(u32 i)
+	{
+		switch (i)
+		{
+			case 0: return "Albedo";
+			case 1: return "Normal";
+			case 2: return "Position";
+			case 3: return "Emissive";
+			case 4: return "Materials";
+			case 5: return "UV";
+			default: return "Unknown";
+		}	
+	}
 }}
 

@@ -134,12 +134,20 @@ namespace Enjon {
 	//---------------------------------------------------------------
 	EntityHandle* EntityManager::Allocate()
 	{
+		// Grab next available id and assert that it's valid
 		u32 id = FindNextAvailableID();
 		assert(id < MAX_ENTITIES);
+
+		// Find entity in array and set values
 		EntityHandle* entity = &mEntities->at(id);
 		entity->mID = id;				
 		entity->mState = EntityState::ACTIVE; 
 		entity->mManager = this;
+
+		// Push back live entity into active entity vector
+		mActiveEntities.push_back(entity);
+
+		// Return entity handle
 		return entity;
 	}
 
@@ -148,6 +156,9 @@ namespace Enjon {
 	{
 		// Assert that entity isn't already null
 		assert(entity != nullptr);
+
+		// Push for deferred removal from active entities
+		mMarkedForDestruction.push_back(entity);
 
 		// Iterate through entity component list and detach
 		for (auto& c : entity->mComponents)
@@ -162,6 +173,26 @@ namespace Enjon {
 		// Set bitmask to 0
 		entity->Reset();
 	}
+
+	//--------------------------------------------------------------
+	void EntityManager::Cleanup()
+	{
+		// Move through dirty list and remove from active entities
+		for (auto& c : mMarkedForDestruction)
+		{
+			// Remove from active entities
+			mActiveEntities.erase(std::remove(mActiveEntities.begin(), mActiveEntities.end(), c), mActiveEntities.end());
+		}
+
+		mMarkedForDestruction.clear();
+	}
+
+	//--------------------------------------------------------------
+	void EntityManager::Update(f32 dt)
+	{
+		// Clean any entities that were marked for destruction
+		Cleanup();
+	} 
 }
 
 

@@ -81,6 +81,8 @@ namespace Enjon {
 
 			EntityHandle* Allocate();
 
+			void Update(f32 dt);
+
 			template <typename T>
 			void RegisterComponent();
 
@@ -98,7 +100,10 @@ namespace Enjon {
 
 			void Destroy(EntityHandle* entity);
 
+			const std::vector<EntityHandle*>& GetActiveEntities() { return mActiveEntities; }
+
 		private:
+			void EntityManager::Cleanup();
 
 			template <typename T>
 			void RemoveComponent(EntityHandle* entity);
@@ -107,6 +112,8 @@ namespace Enjon {
 
 			std::array<EntityHandle, MAX_ENTITIES>* mEntities;
 			std::array<ComponentWrapperBase*, static_cast<u32>(MAX_COMPONENTS)> mComponents;	
+			std::vector<EntityHandle*> mActiveEntities;
+			std::vector<EntityHandle*> mMarkedForDestruction;
 			u32 mNextAvailableID = 0;
 	};
 

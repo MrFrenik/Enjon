@@ -8479,6 +8479,7 @@ int main(int argc, char** argv)
 #include <Entity/Component.h>
 
 #include <ImGui/imgui_impl_sdl_gl3.h>
+#include <ImGui/ImGuiManager.h>
 
 #include <Bullet/btBulletDynamicsCommon.h>
 
@@ -8519,7 +8520,6 @@ EG::Material* mat5;
 bool mMovementOn = true;
 
 bool ProcessInput(EI::InputManager* input, float dt);
-bool ProcessGuiInput(EI::InputManager* input, float dt);
 
 std::vector<Enjon::EntityHandle*> mHandles;
 
@@ -8543,7 +8543,6 @@ int main(int argc, char** argv)
 	mGraphicsEngine.Init();
 	Enjon::Console::Init(mGraphicsEngine.GetViewport().x, mGraphicsEngine.GetViewport().y);
 	mLimiter.Init(60.0f);
-
 
 	// Seed random 
 	srand(time(NULL));
@@ -8816,7 +8815,66 @@ int main(int argc, char** argv)
  	}
   	mBatch.End();
 
+  	// Set console to true
+  	Enjon::Console::Visible(true);
+
+  	// Disable mouse cursor
+    ImGuiIO& io = ImGui::GetIO();
+    io.MouseDrawCursor = 0;
+
 	float dt = 0.0f;
+
+	// Register function with ImGuiManager
+	auto func = [&]()
+	{
+		static bool show_entities = false;
+        if (ImGui::BeginMenu("Entities"))
+        {
+        	ImGui::MenuItem("Entities##ents", NULL, &show_entities);
+            ImGui::EndMenu();
+        }
+
+        if (show_entities)
+        {
+			static bool no_titlebar = false;
+		    static bool no_border = false;
+		    static bool no_resize = false;
+		    static bool no_move = false;
+		    static bool no_scrollbar = false;
+		    static bool no_collapse = true;
+		    static bool no_menu = true;
+
+		    // Demonstrate the various window flags. Typically you would just use the default.
+		    ImGuiWindowFlags window_flags = 0;
+		    if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
+		    if (!no_border)   window_flags |= ImGuiWindowFlags_ShowBorders;
+		    if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
+		    if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
+		    if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
+		    if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
+		    if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
+
+		    ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiSetCond_FirstUseEver);
+		    ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiSetCond_FirstUseEver);
+		    if (!ImGui::Begin("Entities##viewport", nullptr, window_flags))
+		    {
+		        // Early out if the window is collapsed, as an optimization.
+		        ImGui::End();
+		        return;
+		    }
+
+			auto entities = mEntities->GetActiveEntities();
+			ImGui::Text("Entities Amount: %d", entities.size());
+			for (auto& e : entities)
+			{
+				ImGui::Text("%d", e->GetID());
+			}
+
+			ImGui::End();
+        }
+	};
+
+	Enjon::ImGuiManager::Register(func);
 
 	bool isRunning = true;
 	while(isRunning)
@@ -8824,26 +8882,20 @@ int main(int argc, char** argv)
 		dt += 0.1f;
 		mLimiter.Begin();
 
+		// Update entity manager
+		mEntities->Update(dt);
+
 		// Update input manager
 		mInputManager.Update();
 
 		// Console update
     	Enjon::Console::Update(dt);
 
-    	// Processing input
-    	if (Enjon::Console::Visible()) 
-    	{
-    		Enjon::Console::Visible(ProcessGuiInput(&mInputManager, 0.01f));
-    	}
-
-    	else
-    	{
-	    	isRunning = ProcessInput(&mInputManager, 0.01f);
-    	}
+    	// Process input
+    	isRunning = ProcessInput(&mInputManager, 0.01f);
 
     	// Physics simulation
     	mDynamicsWorld->stepSimulation(1.f/60.f, 10);
-
 
     	// Step through physics bodies and change graphics position/orientation based on those
     	for (Enjon::u32 i = 0; i < mBodies.size(); ++i)
@@ -8855,7 +8907,7 @@ int main(int argc, char** argv)
     		if (body && body->getMotionState())
     		{
     			body->getMotionState()->getWorldTransform(trans);
-    			if (handle->HasComponent<Enjon::GraphicsComponent>())
+    			if (handle1 && handle->HasComponent<Enjon::GraphicsComponent>())
     			{
     				auto gComp = handle->GetComponent<Enjon::GraphicsComponent>();
     				auto pos = EM::Vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
@@ -8866,43 +8918,39 @@ int main(int argc, char** argv)
     		}
     	}
 
-		// Render
-		mGraphicsEngine.Update(dt);
-
-		if (handle2->HasComponent<Enjon::GraphicsComponent>())
+		if (handle2 && handle2->HasComponent<Enjon::GraphicsComponent>())
 		{
 			gc2 = handle2->GetComponent<Enjon::GraphicsComponent>();	
 			gc2->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)) * 
 								EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 0, 1)));
 		}
 
-		if (handle2->HasComponent<Enjon::PointLightComponent>())
+		if (handle2 && handle2->HasComponent<Enjon::PointLightComponent>())
 		{
 			auto pl = handle2->GetComponent<Enjon::PointLightComponent>();
 			pl->SetPosition(handle2->GetPosition() + EM::Vec3(cos(dt) * 5.0f, 0.0f, sin(dt) * 5.0f));	
 		}
 
-		if (handle1->HasComponent<Enjon::PointLightComponent>())
+		if (handle1 && handle1->HasComponent<Enjon::PointLightComponent>())
 		{
 			auto pl = handle1->GetComponent<Enjon::PointLightComponent>();
 			pl->SetPosition(handle1->GetPosition() + EM::Vec3(cos(dt) * 5.0f, 2.0f, sin(dt) * 5.0f));
 		}
 
-		if (handle1->HasComponent<Enjon::GraphicsComponent>())
+		if (handle1 && handle1->HasComponent<Enjon::GraphicsComponent>())
 		{
 			auto gComp = handle1->GetComponent<Enjon::GraphicsComponent>();
 			gComp->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 0, 1)));
 		}
-		/*
-		// float fps = mLimiter.End();
 
-		static float f = 0.0f;
-		f += 0.1f;
-		if (f > 2.0f)
-		{
-			printf("fps: %f\n", fps);
-		}
-		*/
+		// Get active entities
+		const std::vector<Enjon::EntityHandle*> activeEntities = mEntities->GetActiveEntities();
+
+		// Render
+		mGraphicsEngine.Update(dt);
+
+		// TODO(): Fix this busted-ass limiter
+		// float fps = mLimiter.End();
 	}
 
 	printf("Exit Successful!\n");	
@@ -8967,248 +9015,264 @@ bool ProcessInput(EI::InputManager* input, float dt)
     	return false;
     }
 
-    if (input->IsKeyPressed(SDLK_BACKQUOTE))
-    {
-    	Enjon::Console::Visible(true);
-    }
-
     if (input->IsKeyPressed(SDLK_t))
     {
     	mMovementOn = !mMovementOn;
 		EG::Window* window = mGraphicsEngine.GetWindow();
-		window->ShowMouseCursor(true);
+
+	    ImGuiIO& io = ImGui::GetIO();
+
+		if (!mMovementOn)
+		{
+			window->ShowMouseCursor(true);
+		}
+		else
+		{
+			window->ShowMouseCursor(false);
+		}
     }
 
-    if (input->IsKeyPressed(SDLK_y))
+    if (input->IsKeyPressed(SDLK_p))
     {
-    	if (handle1 != nullptr)
-    	{
-	    	mEntities->Destroy(handle1);
-    	}
-
-    	if (handle2 != nullptr)
-    	{
-    		mEntities->Destroy(handle2);
-    	}
-
-    	for (auto& c : mHandles)
+    	for (auto& c : mEntities->GetActiveEntities())
     	{
     		mEntities->Destroy(c);
     	}
 
-    	mHandles.clear();
-    }
-
-    if (input->IsKeyDown(SDL_BUTTON_LEFT))
-    {
-    	auto cam = mGraphicsEngine.GetSceneCamera();
-    	auto scene = mGraphicsEngine.GetScene();
-    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
-    	auto vel = cam->Forward() * 20.0f;
-
-		btCollisionShape* colShape = new btSphereShape(btScalar(0.5));
-		collisionShapes.push_back(colShape);
-
-		// Create dynamic objects
-		btTransform startTransform;
-		startTransform.setIdentity();
-
-		btScalar mass(3.);
-
-		// Rigid body is dynamic iff mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
-
-		btVector3 localInertia(0, 0, 0);
-		if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
-
-		startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
-
-		// Using motionstate is recommended
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-		btRigidBody* body = new btRigidBody(rbInfo);
-		body->setRestitution(0.2f);
-		body->setFriction(10.0f);
-		body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
-		body->setDamping(0.2f, 0.4f);
-
-		auto ent = mEntities->Allocate();
-		auto gc = ent->Attach<Enjon::GraphicsComponent>();
-		gc->SetMesh(mesh);
-		gc->SetMaterial(mat5);
-		gc->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
-		scene->AddRenderable(gc->GetRenderable());
-
-		mBodies.push_back(body);
-		mBalls.push_back(ent);
-
-		mDynamicsWorld->addRigidBody(body);
-
-		printf("bodies: %d\n", mBodies.size());
-    }
-
-    if (input->IsKeyDown(SDL_BUTTON_RIGHT))
-    {
-    	auto cam = mGraphicsEngine.GetSceneCamera();
-    	auto scene = mGraphicsEngine.GetScene();
-    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
-    	auto vel = cam->Forward() * 20.0f;
-
-		btCollisionShape* colShape = new btBoxShape(btVector3(btScalar(0.5), btScalar(0.5), btScalar(0.5)));
-		collisionShapes.push_back(colShape);
-
-		// Create dynamic objects
-		btTransform startTransform;
-		startTransform.setIdentity();
-
-		btScalar mass(10.);
-
-		// Rigid body is dynamic iff mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
-
-		btVector3 localInertia(0, 0, 0);
-		if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
-
-		startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
-
-		// Using motionstate is recommended
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-		btRigidBody* body = new btRigidBody(rbInfo);
-		body->setRestitution(0.2f);
-		body->setFriction(10.0f);
-		body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
-		body->setDamping(0.2f, 0.4f);
-
-		auto ent = mEntities->Allocate();
-		auto gc = ent->Attach<Enjon::GraphicsComponent>();
-		gc->SetMesh(mesh5);
-		gc->SetMaterial(mat4);
-		gc->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
-		scene->AddRenderable(gc->GetRenderable());
-
-		mBodies.push_back(body);
-		mBalls.push_back(ent);
-
-		mDynamicsWorld->addRigidBody(body);
-    }
-
-    if (input->IsKeyDown(SDLK_f))
-    {
-    	auto cam = mGraphicsEngine.GetSceneCamera();
-    	auto scene = mGraphicsEngine.GetScene();
-    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
-    	auto vel = cam->Forward() * 20.0f;
-
-		btCollisionShape* colShape = new btCylinderShape(btVector3(btScalar(0.5), btScalar(0.5), btScalar(0.5)));
-		collisionShapes.push_back(colShape);
-
-		// Create dynamic objects
-		btTransform startTransform;
-		startTransform.setIdentity();
-
-		btScalar mass(10.);
-
-		// Rigid body is dynamic iff mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
-
-		btVector3 localInertia(0, 0, 0);
-		if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
-
-		startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
-
-		// Using motionstate is recommended
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-		btRigidBody* body = new btRigidBody(rbInfo);
-		body->setRestitution(0.2f);
-		body->setFriction(10.0f);
-		body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
-		body->setDamping(0.2f, 0.4f);
-
-		auto ent = mEntities->Allocate();
-		auto gc = ent->Attach<Enjon::GraphicsComponent>();
-		gc->SetMesh(EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_cylinder.obj"));
-		gc->SetMaterial(mat4);
-		gc->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
-		scene->AddRenderable(gc->GetRenderable());
-
-		mBodies.push_back(body);
-		mBalls.push_back(ent);
-
-		mDynamicsWorld->addRigidBody(body);
-    }
-
-    if (input->IsKeyDown(SDL_BUTTON_MIDDLE))
-    {
-    	auto cam = mGraphicsEngine.GetSceneCamera();
-    	auto scene = mGraphicsEngine.GetScene();
-    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
-    	auto vel = cam->Forward() * 20.0f;
-
-		btCollisionShape* colShape = new btConeShape(btScalar(0.5f), btScalar(1.0f));
-		collisionShapes.push_back(colShape);
-
-		// Create dynamic objects
-		btTransform startTransform;
-		startTransform.setIdentity();
-
-		btScalar mass(10.);
-
-		// Rigid body is dynamic iff mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
-
-		btVector3 localInertia(0, 0, 0);
-		if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
-
-		startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
-
-		// Using motionstate is recommended
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-		btRigidBody* body = new btRigidBody(rbInfo);
-		body->setRestitution(0.7f);
-		body->setFriction(10.0f);
-		body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
-		body->setDamping(0.2f, 0.4f);
-
-		auto ent = mEntities->Allocate();
-		auto gc = ent->Attach<Enjon::GraphicsComponent>();
-		gc->SetMesh(EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_cone.obj"));
-		gc->SetMaterial(mat);
-		gc->SetScale(EM::Vec3(1, 1, 1));
-		scene->AddRenderable(gc->GetRenderable());
-
-		mBodies.push_back(body);
-		mBalls.push_back(ent);
-
-		mDynamicsWorld->addRigidBody(body);
-    }
-
-
-    if (input->IsKeyPressed(SDLK_u))
-    {
-    	// Get ball
-		btCollisionObject* obj = mDynamicsWorld->getCollisionObjectArray()[1];
-		btRigidBody* body = btRigidBody::upcast(obj);
-		btTransform trans;
-		trans.setOrigin(btVector3(2, 30, 0));
-		body->setWorldTransform(trans);
-		body->getMotionState()->setWorldTransform(trans);
-		body->clearForces();
-		body->setLinearVelocity(btVector3(0, 0, 0));
-		body->setAngularVelocity(btVector3(0, 0, 0));
-
-		// Set graphics component
-		if (handle4->HasComponent<Enjon::GraphicsComponent>())
-		{
-			auto gComp = handle4->GetComponent<Enjon::GraphicsComponent>();
-			gComp->SetPosition(EM::Vec3((float)trans.getOrigin().getX(), (float)trans.getOrigin().getY(), (float)trans.getOrigin().getZ()));
-		}
+    	// Need to delete physics bodies - leaking memory
+    	// But oh well, who gives a shit right now, amirite?
     }
 
     if (mMovementOn)
     {
+	    if (input->IsKeyPressed(SDLK_y))
+	    {
+	    	if (handle1 != nullptr)
+	    	{
+		    	mEntities->Destroy(handle1);
+	    	}
+
+	    	if (handle2 != nullptr)
+	    	{
+	    		mEntities->Destroy(handle2);
+	    	}
+
+	    	for (auto& c : mHandles)
+	    	{
+	    		mEntities->Destroy(c);
+	    	}
+
+	    	mHandles.clear();
+	    }
+
+	    if (input->IsKeyDown(SDL_BUTTON_LEFT))
+	    {
+	    	auto cam = mGraphicsEngine.GetSceneCamera();
+	    	auto scene = mGraphicsEngine.GetScene();
+	    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
+	    	auto vel = cam->Forward() * 20.0f;
+
+			btCollisionShape* colShape = new btSphereShape(btScalar(0.5));
+			collisionShapes.push_back(colShape);
+
+			// Create dynamic objects
+			btTransform startTransform;
+			startTransform.setIdentity();
+
+			btScalar mass(3.);
+
+			// Rigid body is dynamic iff mass is non zero, otherwise static
+			bool isDynamic = (mass != 0.f);
+
+			btVector3 localInertia(0, 0, 0);
+			if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
+
+			startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
+
+			// Using motionstate is recommended
+			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+			btRigidBody* body = new btRigidBody(rbInfo);
+			body->setRestitution(0.2f);
+			body->setFriction(10.0f);
+			body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
+			body->setDamping(0.2f, 0.4f);
+
+			auto ent = mEntities->Allocate();
+			auto gc = ent->Attach<Enjon::GraphicsComponent>();
+			gc->SetMesh(mesh);
+			gc->SetMaterial(mat5);
+			gc->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
+			scene->AddRenderable(gc->GetRenderable());
+
+			mBodies.push_back(body);
+			mBalls.push_back(ent);
+
+			mDynamicsWorld->addRigidBody(body);
+
+			printf("bodies: %d\n", mBodies.size());
+	    }
+
+	    if (input->IsKeyDown(SDL_BUTTON_RIGHT))
+	    {
+	    	auto cam = mGraphicsEngine.GetSceneCamera();
+	    	auto scene = mGraphicsEngine.GetScene();
+	    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
+	    	auto vel = cam->Forward() * 20.0f;
+
+			btCollisionShape* colShape = new btBoxShape(btVector3(btScalar(0.5), btScalar(0.5), btScalar(0.5)));
+			collisionShapes.push_back(colShape);
+
+			// Create dynamic objects
+			btTransform startTransform;
+			startTransform.setIdentity();
+
+			btScalar mass(10.);
+
+			// Rigid body is dynamic iff mass is non zero, otherwise static
+			bool isDynamic = (mass != 0.f);
+
+			btVector3 localInertia(0, 0, 0);
+			if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
+
+			startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
+
+			// Using motionstate is recommended
+			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+			btRigidBody* body = new btRigidBody(rbInfo);
+			body->setRestitution(0.2f);
+			body->setFriction(10.0f);
+			body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
+			body->setDamping(0.2f, 0.4f);
+
+			auto ent = mEntities->Allocate();
+			auto gc = ent->Attach<Enjon::GraphicsComponent>();
+			gc->SetMesh(mesh5);
+			gc->SetMaterial(mat4);
+			gc->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
+			scene->AddRenderable(gc->GetRenderable());
+
+			mBodies.push_back(body);
+			mBalls.push_back(ent);
+
+			mDynamicsWorld->addRigidBody(body);
+	    }
+
+	    if (input->IsKeyDown(SDLK_f))
+	    {
+	    	auto cam = mGraphicsEngine.GetSceneCamera();
+	    	auto scene = mGraphicsEngine.GetScene();
+	    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
+	    	auto vel = cam->Forward() * 20.0f;
+
+			btCollisionShape* colShape = new btCylinderShape(btVector3(btScalar(0.5), btScalar(0.5), btScalar(0.5)));
+			collisionShapes.push_back(colShape);
+
+			// Create dynamic objects
+			btTransform startTransform;
+			startTransform.setIdentity();
+
+			btScalar mass(10.);
+
+			// Rigid body is dynamic iff mass is non zero, otherwise static
+			bool isDynamic = (mass != 0.f);
+
+			btVector3 localInertia(0, 0, 0);
+			if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
+
+			startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
+
+			// Using motionstate is recommended
+			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+			btRigidBody* body = new btRigidBody(rbInfo);
+			body->setRestitution(0.2f);
+			body->setFriction(10.0f);
+			body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
+			body->setDamping(0.2f, 0.4f);
+
+			auto ent = mEntities->Allocate();
+			auto gc = ent->Attach<Enjon::GraphicsComponent>();
+			gc->SetMesh(EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_cylinder.obj"));
+			gc->SetMaterial(mat4);
+			gc->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
+			scene->AddRenderable(gc->GetRenderable());
+
+			mBodies.push_back(body);
+			mBalls.push_back(ent);
+
+			mDynamicsWorld->addRigidBody(body);
+	    }
+
+	    if (input->IsKeyDown(SDL_BUTTON_MIDDLE))
+	    {
+	    	auto cam = mGraphicsEngine.GetSceneCamera();
+	    	auto scene = mGraphicsEngine.GetScene();
+	    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
+	    	auto vel = cam->Forward() * 20.0f;
+
+			btCollisionShape* colShape = new btConeShape(btScalar(0.5f), btScalar(1.0f));
+			collisionShapes.push_back(colShape);
+
+			// Create dynamic objects
+			btTransform startTransform;
+			startTransform.setIdentity();
+
+			btScalar mass(10.);
+
+			// Rigid body is dynamic iff mass is non zero, otherwise static
+			bool isDynamic = (mass != 0.f);
+
+			btVector3 localInertia(0, 0, 0);
+			if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
+
+			startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
+
+			// Using motionstate is recommended
+			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+			btRigidBody* body = new btRigidBody(rbInfo);
+			body->setRestitution(0.7f);
+			body->setFriction(10.0f);
+			body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
+			body->setDamping(0.2f, 0.4f);
+
+			auto ent = mEntities->Allocate();
+			auto gc = ent->Attach<Enjon::GraphicsComponent>();
+			gc->SetMesh(EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_cone.obj"));
+			gc->SetMaterial(mat);
+			gc->SetScale(EM::Vec3(1, 1, 1));
+			scene->AddRenderable(gc->GetRenderable());
+
+			mBodies.push_back(body);
+			mBalls.push_back(ent);
+
+			mDynamicsWorld->addRigidBody(body);
+	    }
+
+
+	    if (input->IsKeyPressed(SDLK_u))
+	    {
+	    	// Get ball
+			btCollisionObject* obj = mDynamicsWorld->getCollisionObjectArray()[1];
+			btRigidBody* body = btRigidBody::upcast(obj);
+			btTransform trans;
+			trans.setOrigin(btVector3(2, 30, 0));
+			body->setWorldTransform(trans);
+			body->getMotionState()->setWorldTransform(trans);
+			body->clearForces();
+			body->setLinearVelocity(btVector3(0, 0, 0));
+			body->setAngularVelocity(btVector3(0, 0, 0));
+
+			// Set graphics component
+			if (handle4->HasComponent<Enjon::GraphicsComponent>())
+			{
+				auto gComp = handle4->GetComponent<Enjon::GraphicsComponent>();
+				gComp->SetPosition(EM::Vec3((float)trans.getOrigin().getX(), (float)trans.getOrigin().getY(), (float)trans.getOrigin().getZ()));
+			}
+	    }
+
 	    EG::Camera* camera = mGraphicsEngine.GetSceneCamera();
 	   	EM::Vec3 velDir(0, 0, 0); 
 	   	static float speed = 10.0f;
@@ -9254,51 +9318,7 @@ bool ProcessInput(EI::InputManager* input, float dt)
 									(EM::ToRadians(((float)viewPort.x / 2.0f - MouseCoords.x) * dt) * MouseSensitivity), 
 									(EM::ToRadians(((float)viewPort.y / 2.0f - MouseCoords.y) * dt) * MouseSensitivity)
 								);
-    }
 
-    return true;
-}
-
-bool ProcessGuiInput(EI::InputManager* input, float dt)
-{
-	SDL_Event event;
-   //Will keep looping until there are no more events to process
-    while (SDL_PollEvent(&event)) 
-    {
-    	ImGui_ImplSdlGL3_ProcessEvent(&event);
-
-    	switch (event.type) 
-        {
-            case SDL_QUIT:
-                return false;
-                break;
-			case SDL_KEYUP:
-				input->ReleaseKey(event.key.keysym.sym); 
-				break;
-			case SDL_KEYDOWN:
-				input->PressKey(event.key.keysym.sym);
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-				input->PressKey(event.button.button);
-				break;
-			case SDL_MOUSEBUTTONUP:
-				input->ReleaseKey(event.button.button);
-				break;
-			case SDL_MOUSEMOTION:
-				input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
-			default:
-				break;
-		}
-    }
-
-    if (input->IsKeyPressed(SDLK_ESCAPE))
-    {
-    	return false;
-    }
-
-    if (input->IsKeyPressed(SDLK_BACKQUOTE))
-    {
-    	return false;
     }
 
     return true;

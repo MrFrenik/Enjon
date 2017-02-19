@@ -16,10 +16,15 @@
 #include "Console.h"
 #include "CVarsSystem.h"
 #include "ImGui/imgui_impl_sdl_gl3.h"
+#include "ImGui/ImGuiManager.h"
+
+#include "ImGui/ImGuiDock.h"
 
 #include <cassert>
 
 namespace Enjon { namespace Graphics {
+
+static void ShowExampleAppLayout(bool* p_open);
 
 	//------------------------------------------------------------------------------
 	DeferredRenderer::DeferredRenderer()
@@ -106,24 +111,33 @@ namespace Enjon { namespace Graphics {
 		// Composite Pass
 		CompositePass(mFXAATarget);
 
-		// Draw diffuse texture just for testing
-		GLSLProgram* shader = EG::ShaderManager::Get("NoCameraProjection");		
-		shader->Use();
+		// Final target
+		mFinalTarget->Bind();
 		{
 			mWindow.Clear();
 
-			mBatch->Begin();
+			GLSLProgram* shader = EG::ShaderManager::Get("NoCameraProjection");		
+			shader->Use();
 			{
-				mBatch->Add(
-							EM::Vec4(-1, -1, 2, 2),
-							EM::Vec4(0, 0, 1, 1),
-							mCompositeTarget->GetTexture()
-						);
+				mWindow.Clear();
+
+				mBatch->Begin();
+				{
+					mBatch->Add(
+								EM::Vec4(-1, -1, 2, 2),
+								EM::Vec4(0, 0, 1, 1),
+								mCompositeTarget->GetTexture()
+							);
+				}
+				mBatch->End();
+				mBatch->RenderBatch();
 			}
-			mBatch->End();
-			mBatch->RenderBatch();
+			shader->Unuse();
 		}
-		shader->Unuse();
+		mFinalTarget->Unbind();
+
+		// Clear default buffer
+		mWindow.Clear();
 
 		// ImGui pass
 		if (Enjon::Console::Visible())
@@ -605,37 +619,92 @@ namespace Enjon { namespace Graphics {
 	//------------------------------------------------------------------------------
 	void DeferredRenderer::GuiPass()
 	{
-		static bool show_test_window = true;
-	    static bool show_another_window = false;
+		static bool show_test_window = false;
+		static bool show_frame_rate = false;
+		static bool show_graphics_window = true;
+		static bool show_app_layout = false;
+		static bool show_game_viewport = true;
 
 	    // Make a new window
 		ImGui_ImplSdlGL3_NewFrame(mWindow.GetSDLWindow());
 
-        // 1. Show a simple window
-        // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
+	    // Menu
+	    ImGui::BeginMainMenuBar();
+	    {
+	        if (ImGui::BeginMenu("File"))
+	        {
+	            ImGui::MenuItem("Frame Rate", NULL, &show_frame_rate);
+	            ImGui::EndMenu();
+	        }
+	        if (ImGui::BeginMenu("Edit"))
+	        {
+	            ImGui::EndMenu();
+	        }
+	        if (ImGui::BeginMenu("Scene"))
+	        {
+	            ImGui::EndMenu();
+	        }
+	        if (ImGui::BeginMenu("View"))
+	        {
+	        	ImGui::MenuItem("Graphics", NULL, &show_graphics_window);
+	        	ImGui::MenuItem("Viewport##game", NULL, &show_game_viewport);
+	            ImGui::EndMenu();
+	        }
+	        if (ImGui::BeginMenu("Help"))
+	        {
+	        	ImGui::MenuItem("TestWindow", NULL, &show_test_window);
+	        	ImGui::MenuItem("App Layout", NULL, &show_app_layout);
+	            ImGui::EndMenu();
+	        }
+
+        	ImGuiManager::Render();
+
+	       	// Frame time
+            ImGui::SameLine(ImGui::GetWindowWidth() - 90.0f);
+            ImGui::Text("FPS: ");
+
+            f32 fps = ImGui::GetIO().Framerate;
+            ImColor color;
+
+            if (fps >= 60.0f) color = ImColor(0.1f, 1.0f, 0.0f, 1.0f);
+            else if (fps > 30.0f) color = ImColor(1.00f, 0.41f, 0.00f, 1.00f);
+            else color = ImColor(1.0f, 0.0f, 0.0f, 1.0f);
+
+            ImGui::SameLine();
+	       	ImGui::PushStyleColor(ImGuiCol_Text, color);
+            ImGui::Text("%.1f", ImGui::GetIO().Framerate);
+            ImGui::PopStyleColor(1);
+
+	        ImGui::EndMainMenuBar();
+	    }
+
+	    // Frame rate
+        if (show_frame_rate)
         {
-            static float f = 0.0f;
-            ImGui::Text("Hello, world!");
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-            if (ImGui::Button("Test Window")) show_test_window ^= 1;
-            if (ImGui::Button("Another Window")) show_another_window ^= 1;
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         }
 
-        // 2. Show another simple window, this time using an explicit Begin/End pair
-        if (show_another_window)
+        // Render game
+        if (show_game_viewport)
         {
-            ImGui::SetNextWindowSize(ImVec2(200,100), ImGuiSetCond_FirstUseEver);
-            ImGui::Begin("Another Window", &show_another_window);
-            ImGui::Text("Hello");
-            ImGui::End();
+	        ShowGameViewport(&show_game_viewport, !show_graphics_window);
         }
 
-        // 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
         if (show_test_window)
         {
-            ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
+            ImGui::SetNextWindowPos(ImVec2(450, 20), ImGuiSetCond_FirstUseEver);
             ImGui::ShowTestWindow(&show_test_window);
+        }
+
+        // Show graphics options
+        if (show_graphics_window)
+        {
+            ShowGraphicsWindow(&show_graphics_window);
+        }
+
+        if (show_app_layout)
+        {
+        	ShowExampleAppLayout(&show_app_layout);
         }
 
         // Rendering
@@ -684,6 +753,7 @@ namespace Enjon { namespace Graphics {
 		mLuminanceTarget 			= new EG::RenderTarget(width / 4, height / 4);
 		mFXAATarget 				= new EG::RenderTarget(width, height);
 		mShadowDepth 				= new EG::RenderTarget(2048, 2048);
+		mFinalTarget 				= new EG::RenderTarget(width, height);
 
 		mBatch 						= new EG::SpriteBatch();
 		mBatch->Init();
@@ -749,72 +819,349 @@ namespace Enjon { namespace Graphics {
 	//------------------------------------------------------------------------------
 	void DeferredRenderer::ImGuiStyles()
 	{
+		ImGuiIO& io = ImGui::GetIO();
+
+		io.Fonts->Clear();
+		io.Fonts->AddFontFromFileTTF("../Assets/Fonts/WeblySleek/weblysleekuisb.ttf", 16);
+		io.Fonts->AddFontFromFileTTF("../Assets/Fonts/WeblySleek/weblysleekuisb.ttf", 14);
+		io.Fonts->Build();
+
 		// Grab reference to style
 		ImGuiStyle& style = ImGui::GetStyle();
 
+		style.WindowPadding            = ImVec2(3, 7);
+		style.WindowRounding           = 5.0f;
+		style.FramePadding             = ImVec2(2, 0);
+		style.FrameRounding            = 2.0f;
+		style.ItemSpacing              = ImVec2(8, 4);
+		style.ItemInnerSpacing         = ImVec2(2, 2);
+		style.IndentSpacing            = 21.0f;
+		style.ScrollbarSize            = 11.0f;
+		style.ScrollbarRounding        = 9.0f;
+		style.GrabMinSize              = 4.0f;
+		style.GrabRounding             = 3.0f;
+		style.WindowTitleAlign 		   = ImVec2(0.5f, 0.41f);
+		style.ButtonTextAlign 		   = ImVec2(0.5f, 0.5f);
 		style.Alpha = 1.0f;
         style.FrameRounding = 3.0f;
-        style.Colors[ImGuiCol_Text]                  = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-        style.Colors[ImGuiCol_TextDisabled]          = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-        style.Colors[ImGuiCol_WindowBg]              = ImVec4(0.94f, 0.94f, 0.94f, 0.94f);
-        style.Colors[ImGuiCol_ChildWindowBg]         = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-        style.Colors[ImGuiCol_PopupBg]               = ImVec4(1.00f, 1.00f, 1.00f, 0.94f);
-        style.Colors[ImGuiCol_Border]                = ImVec4(0.00f, 0.00f, 0.00f, 0.39f);
-        style.Colors[ImGuiCol_BorderShadow]          = ImVec4(1.00f, 1.00f, 1.00f, 0.10f);
-        style.Colors[ImGuiCol_FrameBg]               = ImVec4(1.00f, 1.00f, 1.00f, 0.94f);
-        style.Colors[ImGuiCol_FrameBgHovered]        = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
-        style.Colors[ImGuiCol_FrameBgActive]         = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
-        style.Colors[ImGuiCol_TitleBg]               = ImVec4(0.96f, 0.96f, 0.96f, 1.00f);
-        style.Colors[ImGuiCol_TitleBgCollapsed]      = ImVec4(1.00f, 1.00f, 1.00f, 0.51f);
-        style.Colors[ImGuiCol_TitleBgActive]         = ImVec4(0.82f, 0.82f, 0.82f, 1.00f);
-        style.Colors[ImGuiCol_MenuBarBg]             = ImVec4(0.86f, 0.86f, 0.86f, 1.00f);
-        style.Colors[ImGuiCol_ScrollbarBg]           = ImVec4(0.98f, 0.98f, 0.98f, 0.53f);
-        style.Colors[ImGuiCol_ScrollbarGrab]         = ImVec4(0.69f, 0.69f, 0.69f, 1.00f);
-        style.Colors[ImGuiCol_ScrollbarGrabHovered]  = ImVec4(0.59f, 0.59f, 0.59f, 1.00f);
-        style.Colors[ImGuiCol_ScrollbarGrabActive]   = ImVec4(0.49f, 0.49f, 0.49f, 1.00f);
-        style.Colors[ImGuiCol_ComboBg]               = ImVec4(0.86f, 0.86f, 0.86f, 0.99f);
-        style.Colors[ImGuiCol_CheckMark]             = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-        style.Colors[ImGuiCol_SliderGrab]            = ImVec4(0.24f, 0.52f, 0.88f, 1.00f);
-        style.Colors[ImGuiCol_SliderGrabActive]      = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-        style.Colors[ImGuiCol_Button]                = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
-        style.Colors[ImGuiCol_ButtonHovered]         = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-        style.Colors[ImGuiCol_ButtonActive]          = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
-        style.Colors[ImGuiCol_Header]                = ImVec4(0.26f, 0.59f, 0.98f, 0.31f);
-        style.Colors[ImGuiCol_HeaderHovered]         = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
-        style.Colors[ImGuiCol_HeaderActive]          = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-        style.Colors[ImGuiCol_Column]                = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
-        style.Colors[ImGuiCol_ColumnHovered]         = ImVec4(0.26f, 0.59f, 0.98f, 0.78f);
-        style.Colors[ImGuiCol_ColumnActive]          = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-        style.Colors[ImGuiCol_ResizeGrip]            = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
-        style.Colors[ImGuiCol_ResizeGripHovered]     = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
-        style.Colors[ImGuiCol_ResizeGripActive]      = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
-        style.Colors[ImGuiCol_CloseButton]           = ImVec4(0.59f, 0.59f, 0.59f, 0.50f);
-        style.Colors[ImGuiCol_CloseButtonHovered]    = ImVec4(0.98f, 0.39f, 0.36f, 1.00f);
-        style.Colors[ImGuiCol_CloseButtonActive]     = ImVec4(0.98f, 0.39f, 0.36f, 1.00f);
-        style.Colors[ImGuiCol_PlotLines]             = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
-        style.Colors[ImGuiCol_PlotLinesHovered]      = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
-        style.Colors[ImGuiCol_PlotHistogram]         = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-        style.Colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-        style.Colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
-        style.Colors[ImGuiCol_ModalWindowDarkening]  = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
 
-        // Dark style 
-        for (int i = 0; i <= ImGuiCol_COUNT; i++)
-        {
-            ImVec4& col = style.Colors[i];
-            float H, S, V;
-            ImGui::ColorConvertRGBtoHSV( col.x, col.y, col.z, H, S, V );
+       	style.Colors[ImGuiCol_Text]                  = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+		style.Colors[ImGuiCol_TextDisabled]          = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+		style.Colors[ImGuiCol_WindowBg]              = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+		style.Colors[ImGuiCol_ChildWindowBg]         = ImVec4(1.00f, 1.00f, 1.00f, 0.00f);
+		style.Colors[ImGuiCol_PopupBg]               = ImVec4(0.04f, 0.04f, 0.04f, 0.94f);
+		style.Colors[ImGuiCol_Border]                = ImVec4(1.00f, 1.00f, 1.00f, 0.18f);
+		style.Colors[ImGuiCol_BorderShadow]          = ImVec4(0.00f, 0.00f, 0.00f, 0.10f);
+		style.Colors[ImGuiCol_FrameBg]               = ImVec4(0.06f, 0.06f, 0.06f, 0.94f);
+		style.Colors[ImGuiCol_FrameBgHovered]        = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
+		style.Colors[ImGuiCol_FrameBgActive]         = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
+		style.Colors[ImGuiCol_TitleBg]               = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
+		style.Colors[ImGuiCol_TitleBgCollapsed]      = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
+		style.Colors[ImGuiCol_TitleBgActive]         = ImVec4(0.18f, 0.18f, 0.18f, 1.00f);
+		style.Colors[ImGuiCol_MenuBarBg]             = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+		style.Colors[ImGuiCol_ScrollbarBg]           = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
+		style.Colors[ImGuiCol_ScrollbarGrab]         = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
+		style.Colors[ImGuiCol_ScrollbarGrabHovered]  = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+		style.Colors[ImGuiCol_ScrollbarGrabActive]   = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
+		style.Colors[ImGuiCol_ComboBg]               = ImVec4(0.14f, 0.14f, 0.14f, 0.99f);
+		style.Colors[ImGuiCol_CheckMark]             = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		style.Colors[ImGuiCol_SliderGrab]            = ImVec4(0.24f, 0.52f, 0.88f, 1.00f);
+		style.Colors[ImGuiCol_SliderGrabActive]      = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		style.Colors[ImGuiCol_Button]                = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
+		style.Colors[ImGuiCol_ButtonHovered]         = ImVec4(0.26f, 0.59f, 0.98f, 0.85f);
+		style.Colors[ImGuiCol_ButtonActive]          = ImVec4(0.06f, 0.53f, 0.98f, 0.63f);
+		style.Colors[ImGuiCol_Header]                = ImVec4(0.26f, 0.59f, 0.98f, 0.32f);
+		style.Colors[ImGuiCol_HeaderHovered]         = ImVec4(0.02f, 0.02f, 0.02f, 1.00f);
+		style.Colors[ImGuiCol_HeaderActive]          = ImVec4(0.26f, 0.59f, 0.98f, 0.37f);
+		style.Colors[ImGuiCol_Column]                = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+		style.Colors[ImGuiCol_ColumnHovered]         = ImVec4(0.26f, 0.59f, 0.98f, 0.78f);
+		style.Colors[ImGuiCol_ColumnActive]          = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		style.Colors[ImGuiCol_ResizeGrip]            = ImVec4(0.00f, 0.00f, 0.00f, 0.50f);
+		style.Colors[ImGuiCol_ResizeGripHovered]     = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
+		style.Colors[ImGuiCol_ResizeGripActive]      = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
+		style.Colors[ImGuiCol_CloseButton]           = ImVec4(0.41f, 0.41f, 0.41f, 0.50f);
+		style.Colors[ImGuiCol_CloseButtonHovered]    = ImVec4(0.98f, 0.39f, 0.36f, 1.00f);
+		style.Colors[ImGuiCol_CloseButtonActive]     = ImVec4(0.98f, 0.39f, 0.36f, 1.00f);
+		style.Colors[ImGuiCol_PlotLines]             = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+		style.Colors[ImGuiCol_PlotLinesHovered]      = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+		style.Colors[ImGuiCol_PlotHistogram]         = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+		style.Colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+		style.Colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
+		style.Colors[ImGuiCol_ModalWindowDarkening]  = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+	}
 
-            if( S < 0.1f )
-            {
-               V = 1.0f - V;
-            }
-            ImGui::ColorConvertHSVtoRGB( H, S, V, col.x, col.y, col.z );
-            if( col.w < 1.00f )
-            {
-                col.w *= 1.0f;
-            }
-        }
+	void DeferredRenderer::ShowGraphicsWindow(bool* p_open)
+	{
+	    static bool no_titlebar = true;
+	    static bool no_border = false;
+	    static bool no_resize = true;
+	    static bool no_move = true;
+	    static bool no_scrollbar = false;
+	    static bool no_collapse = true;
+	    static bool no_menu = true;
+
+	    // Demonstrate the various window flags. Typically you would just use the default.
+	    ImGuiWindowFlags window_flags = 0;
+	    if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
+	    if (!no_border)   window_flags |= ImGuiWindowFlags_ShowBorders;
+	    if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
+	    if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
+	    if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
+	    if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
+	    if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
+
+	    ImGui::SetNextWindowSize(ImVec2(407, 886));
+	    ImGui::SetNextWindowPos(ImVec2(1032, 17));
+	    if (!ImGui::Begin("Graphics Options", p_open, window_flags))
+	    {
+	        // Early out if the window is collapsed, as an optimization.
+	        ImGui::End();
+	        return;
+	    }
+
+	    /*
+	    auto pos = ImGui::GetWindowPos();
+	    printf("W/H: %d %d\n", (u32)ImGui::GetWindowWidth(), (u32)ImGui::GetWindowHeight());
+	    printf("X/Y: %d %d\n", (u32)pos.x, (u32)pos.y);
+	    */
+
+	    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);                                 // Right align, keep 140 pixels for labels
+
+        ImGui::PushStyleColor(ImGuiCol_Text, ImColor(1.0, 0.6f, 0.0f, 1.0f));
+        ImGui::Text("Graphics Options");
+        ImGui::PopStyleColor(1);
+        ImGui::Separator();
+
+	    if (ImGui::TreeNode("ToneMapping"))
+	    {
+		    if (ImGui::TreeNode("Bloom"))
+		    {
+		    	if (ImGui::TreeNode("Blur"))
+		    	{
+				    if (ImGui::TreeNode("Small##bloom"))
+				    {
+				    	// Iterations
+				    	s32 smallIter = (s32)mBloomSettings.mIterations.x;
+					    ImGui::SliderInt("Iterations##small", &smallIter, 0, 30);
+					    mBloomSettings.mIterations.x = smallIter;
+
+					    // Radius
+					    f32 radius = (f32)mBloomSettings.mRadius.x;
+					    ImGui::SliderFloat("Radius##bloomsmall", &radius, 0.001f, 0.1f, "%.3f");
+					    mBloomSettings.mRadius.x = radius;
+
+					    // Weight
+					    f32 weight = (f32)mBloomSettings.mWeights.x;
+					    ImGui::SliderFloat("Weight##bloomsmall", &weight, 0.001, 0.5f, "%.3f");
+					    mBloomSettings.mWeights.x = weight;
+
+					    ImGui::TreePop();
+				    }
+
+				    if (ImGui::TreeNode("Medium##bloom"))
+				    {
+				    	// Iterations
+				    	s32 medIter = (s32)mBloomSettings.mIterations.y;
+					    ImGui::SliderInt("Iterations##medium", &medIter, 0, 30);
+					    mBloomSettings.mIterations.y = medIter;
+
+					    // Radius
+					    f32 radius = (f32)mBloomSettings.mRadius.y;
+					    ImGui::SliderFloat("Radius##bloomedium", &radius, 0.001f, 0.1f, "%.3f");
+					    mBloomSettings.mRadius.y = radius;
+
+					    // Weight
+					    f32 weight = (f32)mBloomSettings.mWeights.y;
+					    ImGui::SliderFloat("Weight##bloomedium", &weight, 0.001, 0.5f, "%.3f");
+					    mBloomSettings.mWeights.y = weight;
+
+					    ImGui::TreePop();
+				    }
+
+				    if (ImGui::TreeNode("Large##bloom"))
+				    {
+				    	// Iterations
+				    	s32 largeIter = (s32)mBloomSettings.mIterations.z;
+					    ImGui::SliderInt("Iterations##large", &largeIter, 0, 30);
+					    mBloomSettings.mIterations.z = largeIter;
+
+					    // Radius
+					    f32 radius = (f32)mBloomSettings.mRadius.z;
+					    ImGui::SliderFloat("Radius##bloomlarge", &radius, 0.001f, 0.1f, "%.3f");
+					    mBloomSettings.mRadius.z = radius;
+
+					    // Weight
+					    f32 weight = (f32)mBloomSettings.mWeights.z;
+					    ImGui::SliderFloat("Weight##bloomlarge", &weight, 0.001, 0.5f, "%.3f");
+					    mBloomSettings.mWeights.z = weight;
+
+					    ImGui::TreePop();
+				    }
+
+				    ImGui::TreePop();
+		    	}
+
+			    ImGui::SliderFloat("Scale##bloom", &mToneMapSettings.mBloomScalar, 0.01f, 100.0f, "%.2f");
+			    ImGui::SliderFloat("Threshold##bloom", &mToneMapSettings.mThreshold, 0.00f, 4.0f, "%.2f");
+
+			    ImGui::TreePop();
+		    }
+
+		    if (ImGui::TreeNode("Saturation"))
+		    {
+			    // Saturation
+			    ImGui::SliderFloat("Saturation##tonemap", &mToneMapSettings.mSaturation, 0.0, 2.0f, "%.1f");
+
+			    ImGui::TreePop();
+		    }
+
+		    if (ImGui::TreeNode("Gamma"))
+		    {
+			    // Gamma
+			    ImGui::SliderFloat("Gamma##tonemap", &mToneMapSettings.mGamma, 0.01, 2.5f, "%.2f");
+
+			    ImGui::TreePop();
+		    }
+
+		    if (ImGui::TreeNode("Exposure"))
+		    {
+			    // Exposure
+			    ImGui::SliderFloat("Exposure##tonemap", &mToneMapSettings.mExposure, 0.01, 1.0f, "%.2f");
+
+			    ImGui::TreePop();
+		    }
+
+		    ImGui::TreePop();
+	    }
+
+	    if (ImGui::TreeNode("FXAA"))
+	    {
+		    ImGui::SliderFloat("SpanMax##fxaa", &mFXAASettings.mSpanMax, 0.001, 10.0f, "%.3f");
+		    ImGui::SliderFloat("ReduceMul##fxaa", &mFXAASettings.mReduceMul, 0.001, 10.0f, "%.3f");
+		    ImGui::SliderFloat("ReduceMin##fxaa", &mFXAASettings.mReduceMin, 0.001, 10.0f, "%.3f");
+
+		    ImGui::TreePop();
+	    }
+
+	    if (ImGui::TreeNode("FrameBuffers"))
+	    {
+	    	ImFontAtlas* atlas = ImGui::GetIO().Fonts;
+	    	ImGui::PushFont(atlas->Fonts[1]);
+	        ImGui::PushStyleColor(ImGuiCol_Text, ImColor(0.2, 0.6f, 0.6f, 1.0f));
+	    	for (u32 i = 0; i < (u32)EG::GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
+	    	{
+	    		const char* string_name = mGbuffer->FrameBufferToString(i);
+	    		// if (ImGui::TreeNode(string_name))
+	    		// {
+				   //  ImTextureID img = (ImTextureID)mGbuffer->GetTexture(i);
+				   //  ImGui::Image(img, ImVec2(200, 200), ImVec2(0,1), ImVec2(1,0), ImColor(255,255,255,255), ImColor(255,255,255,128));
+				   //  ImGui::TreePop();
+	    		// }
+
+	    		ImGui::Text(string_name);
+			    ImTextureID img = (ImTextureID)mGbuffer->GetTexture(i);
+			    ImGui::Image(img, ImVec2(200, 200), ImVec2(0,1), ImVec2(1,0), ImColor(255,255,255,255), ImColor(255,255,255,128));
+	    	}
+	    	ImGui::PopStyleColor(1);
+	    	ImGui::PopFont();
+	    	ImGui::TreePop();
+	    }
+
+
+	    ImGui::End();
+	}
+
+	//-----------------------------------------------------------------------------------------------------
+	void DeferredRenderer::ShowGameViewport(bool* open, bool fullscreen)
+	{
+		static bool no_titlebar = true;
+	    static bool no_border = false;
+	    static bool no_resize = false;
+	    static bool no_move = true;
+	    static bool no_scrollbar = true;
+	    static bool no_collapse = true;
+	    static bool no_menu = true;
+
+	    // Demonstrate the various window flags. Typically you would just use the default.
+	    ImGuiWindowFlags window_flags = 0;
+	    if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
+	    if (!no_border)   window_flags |= ImGuiWindowFlags_ShowBorders;
+	    if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
+	    if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
+	    if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
+	    if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
+	    if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
+
+	    if (!fullscreen) ImGui::SetNextWindowSize(ImVec2(1028, 883));
+	    else ImGui::SetNextWindowSize(ImVec2(1440, 900));
+	    ImGui::SetNextWindowPos(ImVec2(1, 18));
+	    if (!ImGui::Begin("Viewport", open, window_flags))
+	    {
+	        // Early out if the window is collapsed, as an optimization.
+	        ImGui::End();
+	        return;
+	    }
+
+	    // Render game in window
+	    ImTextureID img = (ImTextureID)mFinalTarget->GetTexture();
+	    ImGui::Image(img, ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()), 
+	    				ImVec2(0,1), ImVec2(1,0), ImColor(255,255,255,255), ImColor(255,255,255,0));
+
+
+	    /*
+	    auto pos = ImGui::GetWindowPos();
+	    printf("W/H: %d %d\n", (u32)ImGui::GetWindowWidth(), (u32)ImGui::GetWindowHeight());
+	    printf("X/Y: %d %d\n", (u32)pos.x, (u32)pos.y);
+	    */
+
+	    // End the window
+	    ImGui::End();
+	}
+
+
+	static void ShowExampleAppLayout(bool* p_open)
+	{
+	    ImGui::SetNextWindowSize(ImVec2(500, 440), ImGuiSetCond_FirstUseEver);
+	    if (ImGui::Begin("Example: Layout", p_open, ImGuiWindowFlags_MenuBar))
+	    {
+	        if (ImGui::BeginMenuBar())
+	        {
+	            if (ImGui::BeginMenu("File"))
+	            {
+	                if (ImGui::MenuItem("Close")) *p_open = false;
+	                ImGui::EndMenu();
+	            }
+	            ImGui::EndMenuBar();
+	        }
+
+	        // left
+	        static int selected = 0;
+	        ImGui::BeginChild("left pane", ImVec2(150, 0), true);
+	        for (int i = 0; i < 100; i++)
+	        {
+	            char label[128];
+	            sprintf(label, "MyObject %d", i);
+	            if (ImGui::Selectable(label, selected == i))
+	                selected = i;
+	        }
+	        ImGui::EndChild();
+	        ImGui::SameLine();
+
+	        // right
+	        ImGui::BeginGroup();
+	            ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetItemsLineHeightWithSpacing())); // Leave room for 1 line below us
+	                ImGui::Text("MyObject: %d", selected);
+	                ImGui::Separator();
+	                ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ");
+	            ImGui::EndChild();
+	            ImGui::BeginChild("buttons");
+	                if (ImGui::Button("Revert")) {}
+	                ImGui::SameLine();
+	                if (ImGui::Button("Save")) {}
+	            ImGui::EndChild();
+	        ImGui::EndGroup();
+	    }
+	    ImGui::End();
 	}
 
 }}

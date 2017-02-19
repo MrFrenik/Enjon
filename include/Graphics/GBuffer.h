@@ -36,9 +36,12 @@ namespace Enjon { namespace Graphics {
 		void Unbind();
 
 		GLuint inline GetTexture(GBufferTextureType Type) { return Textures[(GLuint)Type]; }
+		GLuint inline GetTexture(u32 index) { return Textures[index]; }
 		GLuint inline GetDepth() { return DepthBuffer; }
 		EM::Vec2 inline GetResolution() { return EM::Vec2(Width, Height); }
 		void SetViewport(const EM::Vec4& Viewport);
+
+		const char* FrameBufferToString(u32 i);
 
 	private:
 		uint32 Width;
