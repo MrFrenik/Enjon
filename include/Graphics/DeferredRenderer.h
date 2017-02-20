@@ -35,12 +35,13 @@ namespace Enjon { namespace Graphics {
 	struct FXAASettings
 	{
 		FXAASettings(float span, float mul, float min)
-			: mSpanMax(span), mReduceMin(min), mReduceMul(mul)
+			: mSpanMax(span), mReduceMin(min), mReduceMul(mul), mEnabled(1)
 		{}
 
 		float mSpanMax;
 		float mReduceMin;
 		float mReduceMul;
+		u32 mEnabled;
 	};
 
 	struct BloomSettings
@@ -92,7 +93,7 @@ namespace Enjon { namespace Graphics {
 			void ImGuiStyles2();
 
 			void ShowGraphicsWindow(bool* p_open);
-			void ShowGameViewport(bool* open, bool fullscreen);
+			void ShowGameViewport(bool* open);
 
 			// Frame buffers
 			EG::GBuffer* mGbuffer 					= nullptr;
@@ -110,6 +111,8 @@ namespace Enjon { namespace Graphics {
 			EG::RenderTarget* mShadowDepth			= nullptr;
 			EG::RenderTarget* mFinalTarget			= nullptr;
 
+			GLuint mCurrentRenderTexture;
+
 			// Full screen quad
 			EG::FullScreenQuad* mFullScreenQuad 	= nullptr;
 
@@ -125,6 +128,9 @@ namespace Enjon { namespace Graphics {
 			FXAASettings mFXAASettings = FXAASettings(8.0f, 1.0f/8.0f, 1.0f/128.0f);
 			ToneMapSettings mToneMapSettings = ToneMapSettings(0.5f, 1.5f, 3.0f, 1.0f, 1.2f);
 			BloomSettings mBloomSettings = BloomSettings(EM::Vec3(0.39f, 0.4f, 0.3f), EM::Vec3(5, 5, 10), EM::Vec3(0.001f, 0.004f, 0.005f));
+
+			bool mShowGame = true;
+			bool mShowGraphicsOptionsWindow = true;
 	};
 }}
 

@@ -1,82 +1,74 @@
-BehaviorTree.cpp
-Console.cpp
-CVarsSystem.cpp
-Game.cpp
-TypeCatalog.cpp
-Animations.cpp
-Camera.cpp
-Camera2D.cpp
-Camera3D.cpp
-CursorManager.cpp
-..\src\CVarsSystem.cpp(43): warning C4804: '<': unsafe use of type 'bool' in operation
-..\src\CVarsSystem.cpp(78): note: see reference to function template instantiation 'bool Enjon::CVarsSystem::Set<bool>(std::string,bool)' being compiled
-DeferredRenderer.cpp
-DirectionalLight.cpp
-Font.cpp
-FontManager.cpp
-FrameBufferObject.cpp
-FullScreenQuad.cpp
-GBuffer.cpp
-GLSLProgram.cpp
-GUIAnimationElement.cpp
-Material.cpp
-Mesh.cpp
-MeshOG.cpp
-ParticleEngine2D.cpp
-picoPNG.cpp
-PointLight.cpp
-QuadBatch.cpp
-Renderable.cpp
-RenderTarget.cpp
-Scene.cpp
-ShaderManager.cpp
-SpotLight.cpp
-Sprite.cpp
-SpriteBatch.cpp
-SpriteSheetManager.cpp
-Window.cpp
-e:\development\enjon\include\graphics\renderable.h(22) : warning C4172: returning address of local variable or temporary
-e:\development\enjon\include\graphics\renderable.h(25) : warning C4172: returning address of local variable or temporary
-e:\development\enjon\include\graphics\renderable.h(28) : warning C4172: returning address of local variable or temporary
-ImageLoader.cpp
-InputManager.cpp
-IOManager.cpp
-ObjLoader.cpp
-ResourceManager.cpp
-TextureCache.cpp
-Constants.cpp
-Mat4.cpp
-Quaternion.cpp
-Transform.cpp
-Vec2.cpp
-Vec3.cpp
-Vec4.cpp
-e:\development\enjon\src\math\vec2.cpp(151) : warning C4172: returning address of local variable or temporary: left
-e:\development\enjon\src\math\vec2.cpp(156) : warning C4172: returning address of local variable or temporary: left
-e:\development\enjon\src\math\vec2.cpp(161) : warning C4172: returning address of local variable or temporary: left
-e:\development\enjon\src\math\vec2.cpp(166) : warning C4172: returning address of local variable or temporary: left
-e:\development\enjon\src\math\vec2.cpp(171) : warning C4172: returning address of local variable or temporary: left
-AABB.cpp
-Errors.cpp
-Timing.cpp
-PathFinding.cpp
-SpatialHash.cpp
-Component.cpp
-Entity.cpp
-EntityManager.cpp
-GraphicsComponent.cpp
-PointLightComponent.cpp
-AnimationManager.cpp
-AnimManager.cpp
-EnjonAnimation.cpp
-Level.cpp
-Loot.cpp
 main.cpp
-e:\development\enjon\isoarpg\src\animationmanager.cpp(51) : warning C4715: 'AnimationManager::GetAnimation': not all control paths return a value
-e:\development\enjon\include\ai\pathfinding.h(46) : warning C4715: 'PathFinding::CompareHeapNode': not all control paths return a value
+imgui_impl_sdl_gl3.cpp
+imgui.cpp
+ObjLoader.cpp
+Scene.cpp
+Material.cpp
+GUIAnimationElement.cpp
+GLSLProgram.cpp
+DeferredRenderer.cpp
+Animations.cpp
+Console.cpp
+Generating Code...
+Skipping... (no relevant changes detected)
+imgui_draw.cpp
+imgui_dock.cpp
+imgui_demo.cpp
+ImGuiManager.cpp
+PointLightComponent.cpp
+GraphicsComponent.cpp
+EntityManager.cpp
+Entity.cpp
+Component.cpp
+Timing.cpp
+Errors.cpp
+AABB.cpp
+Vec4.cpp
+Vec3.cpp
+Vec2.cpp
+Transform.cpp
+Quaternion.cpp
+Mat4.cpp
+Constants.cpp
+TextureCache.cpp
+ResourceManager.cpp
+IOManager.cpp
+InputManager.cpp
+ImageLoader.cpp
+Window.cpp
+Texture2D.cpp
+SpriteSheetManager.cpp
+SpriteBatch.cpp
+Sprite.cpp
+SpotLight.cpp
+ShaderManager.cpp
+RenderTarget.cpp
+Renderable.cpp
+QuadBatch.cpp
+PointLight.cpp
+picoPNG.cpp
+ParticleEngine2D.cpp
+MeshOG.cpp
+Mesh.cpp
+GBuffer.cpp
+FullScreenQuad.cpp
+FrameBufferObject.cpp
+FontManager.cpp
+Font.cpp
+DirectionalLight.cpp
+CursorManager.cpp
+Camera3D.cpp
+Camera2D.cpp
+Camera.cpp
+TypeCatalog.cpp
+Game.cpp
+Engine.cpp
+CVarsSystem.cpp
+BehaviorTree.cpp
 Microsoft (R) Incremental Linker Version 14.00.23918.0
 Copyright (C) Microsoft Corporation.  All rights reserved.
 
+/debug 
 /out:main.exe 
 /SUBSYSTEM:CONSOLE 
 /NODEFAULTLIB:msvcrt.lib 
@@ -84,6 +76,7 @@ Copyright (C) Microsoft Corporation.  All rights reserved.
 BehaviorTree.obj 
 Console.obj 
 CVarsSystem.obj 
+Engine.obj 
 Game.obj 
 TypeCatalog.obj 
 Animations.obj 
@@ -115,6 +108,7 @@ SpotLight.obj
 Sprite.obj 
 SpriteBatch.obj 
 SpriteSheetManager.obj 
+Texture2D.obj 
 Window.obj 
 ImageLoader.obj 
 InputManager.obj 
@@ -132,16 +126,15 @@ Vec4.obj
 AABB.obj 
 Errors.obj 
 Timing.obj 
-PathFinding.obj 
-SpatialHash.obj 
 Component.obj 
 Entity.obj 
 EntityManager.obj 
 GraphicsComponent.obj 
 PointLightComponent.obj 
-AnimationManager.obj 
-AnimManager.obj 
-EnjonAnimation.obj 
-Level.obj 
-Loot.obj 
+imgui.obj 
+ImGuiManager.obj 
+imgui_demo.obj 
+imgui_dock.obj 
+imgui_draw.obj 
+imgui_impl_sdl_gl3.obj 
 main.obj 

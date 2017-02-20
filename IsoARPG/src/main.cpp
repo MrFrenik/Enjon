@@ -8539,10 +8539,20 @@ btAlignedObjectArray<btCollisionShape*> collisionShapes;
 #endif
 int main(int argc, char** argv)
 {
+	// Initialize engine
 	Enjon::Init();
+
+	// Initialize graphics engine
 	mGraphicsEngine.Init();
+
+	// Initialize console
 	Enjon::Console::Init(mGraphicsEngine.GetViewport().x, mGraphicsEngine.GetViewport().y);
+
+	// Initialize limiter
 	mLimiter.Init(60.0f);
+
+	// Initialize ImGuiManager
+	Enjon::ImGuiManager::Init(mGraphicsEngine.GetWindow()->GetSDLWindow());
 
 	// Seed random 
 	srand(time(NULL));
@@ -8824,57 +8834,67 @@ int main(int argc, char** argv)
 
 	float dt = 0.0f;
 
+	static bool show_entities = false;
 	// Register function with ImGuiManager
-	auto func = [&]()
+	auto entityMenu = [&]()
 	{
-		static bool show_entities = false;
-        if (ImGui::BeginMenu("Entities"))
-        {
-        	ImGui::MenuItem("Entities##ents", NULL, &show_entities);
-            ImGui::EndMenu();
-        }
+    	ImGui::MenuItem("Entities##ents", NULL, &show_entities);
+	};
 
-        if (show_entities)
-        {
-			static bool no_titlebar = false;
-		    static bool no_border = false;
-		    static bool no_resize = false;
-		    static bool no_move = false;
-		    static bool no_scrollbar = false;
-		    static bool no_collapse = true;
-		    static bool no_menu = true;
+	auto entityDock = [&]()
+	{
+		static bool no_titlebar = true;
+	    static bool no_border = false;
+	    static bool no_resize = true;
+	    static bool no_move = true;
+	    static bool no_scrollbar = false;
+	    static bool no_collapse = true;
+	    static bool no_menu = true;
 
-		    // Demonstrate the various window flags. Typically you would just use the default.
-		    ImGuiWindowFlags window_flags = 0;
-		    if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
-		    if (!no_border)   window_flags |= ImGuiWindowFlags_ShowBorders;
-		    if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
-		    if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
-		    if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
-		    if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
-		    if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
+	    // Demonstrate the various window flags. Typically you would just use the default.
+	    ImGuiWindowFlags window_flags = 0;
+	    if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
+	    if (!no_border)   window_flags |= ImGuiWindowFlags_ShowBorders;
+	    if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
+	    if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
+	    if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
+	    if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
+	    if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
 
-		    ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiSetCond_FirstUseEver);
-		    ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiSetCond_FirstUseEver);
-		    if (!ImGui::Begin("Entities##viewport", nullptr, window_flags))
-		    {
-		        // Early out if the window is collapsed, as an optimization.
-		        ImGui::End();
-		        return;
-		    }
-
+		// Docking windows
+		if (ImGui::BeginDock("Entities##viewport", &show_entities))
+		{
 			auto entities = mEntities->GetActiveEntities();
 			ImGui::Text("Entities Amount: %d", entities.size());
 			for (auto& e : entities)
 			{
 				ImGui::Text("%d", e->GetID());
 			}
-
-			ImGui::End();
-        }
+		}
+		ImGui::EndDock();
 	};
 
-	Enjon::ImGuiManager::Register(func);
+	static bool showLog = true;
+	auto logMenu = [&]()
+	{
+		ImGui::MenuItem("Log##view", NULL, &showLog);
+	};
+
+	auto logDock = [&]()
+	{
+		// Log
+		if (ImGui::BeginDock("Log", &showLog))
+		{
+			// Print docking information
+			ImGui::Print();
+		}
+		ImGui::EndDock();
+	};
+
+	Enjon::ImGuiManager::RegisterMenuOption("View", entityMenu);
+	Enjon::ImGuiManager::RegisterMenuOption("View", logMenu);
+	Enjon::ImGuiManager::RegisterWindow(entityDock);
+	Enjon::ImGuiManager::RegisterWindow(logDock);
 
 	bool isRunning = true;
 	while(isRunning)
@@ -8952,6 +8972,9 @@ int main(int argc, char** argv)
 		// TODO(): Fix this busted-ass limiter
 		// float fps = mLimiter.End();
 	}
+
+	// Shut down systems
+	Enjon::ImGuiManager::ShutDown();
 
 	printf("Exit Successful!\n");	
 
