@@ -8611,7 +8611,7 @@ int main(int argc, char** argv)
 	mat3->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Normal.png"));
 	mat3->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png"));
 	mat3->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png"));
-	mat3->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png"));
+	mat3->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png"));
 
 	mat4->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Albedo.png"));
 	mat4->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Normal.png"));
@@ -8629,7 +8629,7 @@ int main(int argc, char** argv)
 	renderable->SetMesh(mesh3);
 	renderable->SetMaterial(mat);
 
-	renderable2->SetMesh(mesh);
+	renderable2->SetMesh(mesh2);
 	renderable2->SetMaterial(mat);
 
 	// Sphere
@@ -8874,7 +8874,7 @@ int main(int argc, char** argv)
 		ImGui::EndDock();
 	};
 
-	static bool showLog = true;
+	static bool showLog = false;
 	auto logMenu = [&]()
 	{
 		ImGui::MenuItem("Log##view", NULL, &showLog);
@@ -8891,10 +8891,29 @@ int main(int argc, char** argv)
 		ImGui::EndDock();
 	};
 
+	static bool showStyle = false;
+	auto styleMenu = [&]()
+	{
+		ImGui::MenuItem("Style Editor##Help", NULL, &showStyle);
+	};
+
+	auto styleDock = [&]()
+	{
+		// Log
+		if (ImGui::BeginDock("StyleEditor##dock", &showStyle))
+		{
+			// Print docking information
+			ImGui::ShowStyleEditor();
+		}
+		ImGui::EndDock();
+	};
+
 	Enjon::ImGuiManager::RegisterMenuOption("View", entityMenu);
 	Enjon::ImGuiManager::RegisterMenuOption("View", logMenu);
+	Enjon::ImGuiManager::RegisterMenuOption("Help", styleMenu);
 	Enjon::ImGuiManager::RegisterWindow(entityDock);
 	Enjon::ImGuiManager::RegisterWindow(logDock);
+	Enjon::ImGuiManager::RegisterWindow(styleDock);
 
 	bool isRunning = true;
 	while(isRunning)
@@ -8941,8 +8960,7 @@ int main(int argc, char** argv)
 		if (handle2 && handle2->HasComponent<Enjon::GraphicsComponent>())
 		{
 			gc2 = handle2->GetComponent<Enjon::GraphicsComponent>();	
-			gc2->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)) * 
-								EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 0, 1)));
+			gc2->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
 		}
 
 		if (handle2 && handle2->HasComponent<Enjon::PointLightComponent>())
@@ -8960,7 +8978,7 @@ int main(int argc, char** argv)
 		if (handle1 && handle1->HasComponent<Enjon::GraphicsComponent>())
 		{
 			auto gComp = handle1->GetComponent<Enjon::GraphicsComponent>();
-			gComp->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 0, 1)));
+			gComp->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
 		}
 
 		// Get active entities
@@ -9189,7 +9207,7 @@ bool ProcessInput(EI::InputManager* input, float dt)
 	    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
 	    	auto vel = cam->Forward() * 20.0f;
 
-			btCollisionShape* colShape = new btCylinderShape(btVector3(btScalar(0.5), btScalar(0.5), btScalar(0.5)));
+			btCollisionShape* colShape = new btCylinderShape(btVector3(btScalar(0.5), btScalar(2.0), btScalar(0.5)));
 			collisionShapes.push_back(colShape);
 
 			// Create dynamic objects
@@ -9218,8 +9236,8 @@ bool ProcessInput(EI::InputManager* input, float dt)
 			auto ent = mEntities->Allocate();
 			auto gc = ent->Attach<Enjon::GraphicsComponent>();
 			gc->SetMesh(EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_cylinder.obj"));
-			gc->SetMaterial(mat4);
-			gc->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
+			gc->SetMaterial(mat3);
+			gc->SetScale(EM::Vec3(1, 4, 1) * 0.5f);
 			scene->AddRenderable(gc->GetRenderable());
 
 			mBodies.push_back(body);

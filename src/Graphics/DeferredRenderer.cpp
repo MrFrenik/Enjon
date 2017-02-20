@@ -49,6 +49,7 @@ namespace Enjon { namespace Graphics {
 	{
 		// TODO(John): Need to have a way to have an ini that's read or grab these values from a static
 		// engine config file
+		// mWindow.Init("Game", 1920, 1080, WindowFlagsMask((u32)WindowFlags::FULLSCREEN)); 
 		mWindow.Init("Game", 1440, 900); 
 
 		// Initialize shader manager
@@ -76,7 +77,7 @@ namespace Enjon { namespace Graphics {
 			shader->SetUniform("u_normalMap", 1);
 		shader->Unuse();
 
-		mShowGraphicsOptionsWindow = true;
+		mShowGraphicsOptionsWindow = false;
 		auto graphicsMenuOption = [&]()
 		{
         	ImGui::MenuItem("Graphics##options", NULL, &mShowGraphicsOptionsWindow);
@@ -86,7 +87,7 @@ namespace Enjon { namespace Graphics {
 		auto showGameViewportFunc = [&]()
 		{
 			// Docking windows
-			if (ImGui::BeginDock("Game View", &mShowGame, ImGuiWindowFlags_NoScrollbar))
+			if (ImGui::BeginDock("Game View", &mShowGame, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
 			{
 				// Print docking information
 				ShowGameViewport(&mShowGame);
