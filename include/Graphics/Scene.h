@@ -65,6 +65,9 @@ namespace Enjon { namespace Graphics {
 			void SetAmbientSettings(AmbientSettings& settings);
 			void SetAmbientColor(EG::ColorRGBA16& color);
 
+			void SetSun(EG::DirectionalLight* light) { mSun = light; }
+			EG::DirectionalLight* GetSun() { return mSun; }
+
 			std::vector<EG::Renderable*> GetRenderables(RenderableSortType type = RenderableSortType::MATERIAL);
 			std::set<EG::QuadBatch*>* GetQuadBatches() { return &mQuadBatches; }
 			std::set<EG::DirectionalLight*>* GetDirectionalLights() { return &mDirectionalLights; }
@@ -79,6 +82,8 @@ namespace Enjon { namespace Graphics {
 			std::set<EG::SpotLight*> 		mSpotLights;
 
 			AmbientSettings 				mAmbientSettings;
+
+			EG::DirectionalLight* 			mSun = nullptr;
 
 			static bool CompareMaterial(EG::Renderable* a, EG::Renderable* b);
 	};

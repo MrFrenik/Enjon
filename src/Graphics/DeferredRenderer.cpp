@@ -325,7 +325,7 @@ namespace Enjon { namespace Graphics {
 			directionalShader->SetUniform("u_camPos", mSceneCamera.GetPosition() + mSceneCamera.Backward());
 			for (auto& l : *directionalLights)
 			{
-				EG::ColorRGBA16* color = l->GetColor();
+				EG::ColorRGBA16 color = l->GetColor();
 
 				directionalShader->BindTexture("u_albedoMap", 		mGbuffer->GetTexture(EG::GBufferTextureType::ALBEDO), 0);
 				directionalShader->BindTexture("u_normalMap", 		mGbuffer->GetTexture(EG::GBufferTextureType::NORMAL), 1);
@@ -335,8 +335,8 @@ namespace Enjon { namespace Graphics {
 				directionalShader->SetUniform("u_resolution", 		mGbuffer->GetResolution());
 				// directionalShader->SetUniform("u_lightSpaceMatrix", mShadowCamera->GetViewProjectionMatrix());
 				// directionalShader->SetUniform("u_shadowBias", 		EM::Vec2(0.005f, ShadowBiasMax));
-				directionalShader->SetUniform("u_lightDirection", 	*l->GetDirection());															
-				directionalShader->SetUniform("u_lightColor", 		EM::Vec3(color->r, color->g, color->b));
+				directionalShader->SetUniform("u_lightDirection", 	l->GetDirection());															
+				directionalShader->SetUniform("u_lightColor", 		EM::Vec3(color.r, color.g, color.b));
 				directionalShader->SetUniform("u_lightIntensity", 	l->GetIntensity());
 
 				// Render	
@@ -914,6 +914,17 @@ namespace Enjon { namespace Graphics {
 
 	    	ImGui::PopStyleColor(1);
 	    	ImGui::PopFont();
+	    	ImGui::TreePop();
+	    }
+
+	    if (ImGui::TreeNode("Sunlight"))
+	    {
+	    	static const char* labels[] = {"X", "Y", "Z"};
+            static float vec4f[4] = { 0.10f, 0.20f, 0.30f, 0.44f };
+	    	EM::Vec3 direction = mScene.GetSun()->GetDirection();
+	    	ImGui::Text("Direction");
+            ImGui::DragFloat3Labels("##sundir", labels, vec4f, 0.001f, -1.0f, 1.0f);
+	    	mScene.GetSun()->SetDirection(EM::Vec3(vec4f[0], vec4f[1], vec4f[2]));
 	    	ImGui::TreePop();
 	    }
 	}

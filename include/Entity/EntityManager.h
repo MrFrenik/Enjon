@@ -24,6 +24,12 @@ namespace Enjon {
 		ACTIVE
 	};
 
+	enum class EntityTransformSpace
+	{
+		LOCAL,
+		WORLD
+	};
+
 	class EntityHandle
 	{
 		friend EntityManager; 
@@ -46,16 +52,28 @@ namespace Enjon {
 			template <typename T>
 			void Detach();
 
-			void SetPosition(EM::Vec3& position);
-			void SetScale(EM::Vec3& scale);
-			void SetOrientation(EM::Quaternion& orientation);
+			void SetWorldPosition(EM::Vec3& position);
+			void SetWorldScale(EM::Vec3& scale);
+			void SetWorldOrientation(EM::Quaternion& orientation);
+
+			void SetLocalPosition(EM::Vec3& position);
+			void SetLocalScale(EM::Vec3& scale);
+			void SetLocalOrientation(EM::Quaternion& orientation);
+
+			EM::Vec3 GetLocalPosition();
+			EM::Vec3 GetLocalScale();
+			EM::Quaternion GetLocalOrientation();
+
+			EM::Vec3 GetWorldPosition();
+			EM::Vec3 GetWorldScale();
+			EM::Quaternion GetWorldOrientation();
+
 			void SetParent(EntityHandle* parent);
 
 			EntityHandle* GetParent() const { return mParent; }
 
-			EM::Vec3 GetPosition() { return mTransform.GetPosition(); }
-			EM::Vec3 GetScale() { return mTransform.GetScale(); }
-			EM::Quaternion GetOrientation() { return mTransform.GetOrientation(); }
+			Enjon::Math::Transform mLocalTransform;
+			Enjon::Math::Transform mWorldTransform;
 
 		private:
 			void SetID(u32 id);
@@ -67,7 +85,6 @@ namespace Enjon {
 			EntityHandle* mParent;
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
-			Enjon::Math::Transform mTransform;
 			std::vector<Component*> mComponents;
 			Enjon::EntityState mState;
 	};

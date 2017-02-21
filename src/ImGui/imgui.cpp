@@ -6023,7 +6023,9 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
         if (flags & ImGuiTreeNodeFlags_Bullet)
             RenderBullet(bb.Min + ImVec2(text_offset_x * 0.5f, g.FontSize*0.50f + text_base_offset_y));
         else if (!(flags & ImGuiTreeNodeFlags_Leaf))
+        {
             RenderCollapseTriangle(bb.Min + ImVec2(padding.x, g.FontSize*0.15f + text_base_offset_y), is_open, 0.70f);
+        }
         if (g.LogEnabled)
             LogRenderedText(text_pos, ">");
         RenderText(text_pos, label, label_end, false);
@@ -6974,6 +6976,40 @@ bool ImGui::DragFloatN(const char* label, float* v, int components, float v_spee
     EndGroup();
 
     return value_changed;
+}
+
+bool ImGui::DragFloatNLabels(const char* label, const char** labels, float* v, int components, float v_speed, float v_min, float v_max, const char* display_format, float power)
+{
+    ImGuiWindow* window = GetCurrentWindow();
+    if (window->SkipItems)
+        return false;
+
+    ImGuiContext& g = *GImGui;
+    bool value_changed = false;
+    BeginGroup();
+    PushID(label);
+    PushMultiItemsWidths(components);
+    for (int i = 0; i < components; i++)
+    {
+        PushID(i);
+        ImGui::Text(labels[i]); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
+        value_changed |= DragFloat("##v", &v[i], v_speed, v_min, v_max, display_format, power);
+        ImGui::SameLine(); ImGui::Text(" ");
+        SameLine(0, g.Style.ItemInnerSpacing.x);
+        PopID();
+        PopItemWidth();
+    }
+    PopID();
+
+    TextUnformatted(label, FindRenderedTextEnd(label));
+    EndGroup();
+
+    return value_changed;
+}
+
+bool ImGui::DragFloat3Labels(const char* label, const char* labels[3], float v[3], float v_speed, float v_min, float v_max, const char* display_format, float power)
+{
+  return DragFloatNLabels(label, labels, v, 3, v_speed, v_min, v_max, display_format, power);
 }
 
 bool ImGui::DragFloat2(const char* label, float v[2], float v_speed, float v_min, float v_max, const char* display_format, float power)

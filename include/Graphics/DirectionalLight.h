@@ -20,8 +20,8 @@ namespace Enjon { namespace Graphics {
 								float intensity = 1.0f);
 				~DirectionalLight();
 
-				EM::Vec3* GetDirection() { return &mDirection; }
-				EG::ColorRGBA16* GetColor() { return &mColor; }
+				EM::Vec3 GetDirection() { return mDirection; }
+				EG::ColorRGBA16 GetColor() { return mColor; }
 				float GetIntensity() { return mIntensity; }
 
 				void SetDirection(EM::Vec3& direction);

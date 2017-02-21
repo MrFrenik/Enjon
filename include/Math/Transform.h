@@ -10,6 +10,12 @@
 
 namespace Enjon { namespace Math {
 
+	enum class TransformSpace
+	{
+		LOCAL,
+		WORLD
+	};
+
 	struct Transform
 	{
 		// Default constructor

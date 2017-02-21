@@ -51,21 +51,75 @@ namespace Enjon {
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::SetPosition(EM::Vec3& position)
+	void EntityHandle::SetWorldPosition(EM::Vec3& position)
 	{
-		mTransform.SetPosition(position);
+		mWorldTransform.SetPosition(position);
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::SetScale(EM::Vec3& scale)
+	void EntityHandle::SetWorldScale(EM::Vec3& scale)
 	{
-		mTransform.SetScale(scale);
+		mWorldTransform.SetScale(scale);
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::SetOrientation(EM::Quaternion& orientation)
+	void EntityHandle::SetWorldOrientation(EM::Quaternion& orientation)
 	{
-		mTransform.SetOrientation(orientation);
+		mWorldTransform.SetOrientation(orientation);
+	}
+
+	//---------------------------------------------------------------
+	void EntityHandle::SetLocalPosition(EM::Vec3& position)
+	{
+		mLocalTransform.SetPosition(position);
+	}
+
+	//---------------------------------------------------------------
+	void EntityHandle::SetLocalScale(EM::Vec3& scale)
+	{
+		mLocalTransform.SetScale(scale);
+	}
+
+	//---------------------------------------------------------------
+	void EntityHandle::SetLocalOrientation(EM::Quaternion& orientation)
+	{
+		mLocalTransform.SetOrientation(orientation);
+	}
+
+	//---------------------------------------------------------------
+	EM::Vec3 EntityHandle::GetLocalPosition()
+	{
+		return mLocalTransform.GetPosition();
+	}
+
+	//---------------------------------------------------------------
+	EM::Vec3 EntityHandle::GetLocalScale()
+	{
+		return mLocalTransform.GetScale();
+	}
+
+	//---------------------------------------------------------------
+	EM::Quaternion EntityHandle::GetLocalOrientation()
+	{
+		return mLocalTransform.GetOrientation();
+	}
+
+	//---------------------------------------------------------------
+	EM::Vec3 EntityHandle::GetWorldPosition()
+	{
+		return mWorldTransform.GetPosition();
+	}
+
+	//---------------------------------------------------------------
+	EM::Vec3 EntityHandle::GetWorldScale()
+	{
+		return mWorldTransform.GetScale();
+	}
+
+	//---------------------------------------------------------------
+	EM::Quaternion EntityHandle::GetWorldOrientation()
+	{
+		return mWorldTransform.GetOrientation();
 	}
 
 	//---------------------------------------------------------------

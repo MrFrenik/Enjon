@@ -6,7 +6,7 @@ set libs2=Bullet3Common.lib LinearMath.lib BulletDynamics.lib BulletCollision.li
 set src1=..\src\*.cpp ..\src\Graphics\*.cpp ..\src\IO\*.cpp ..\src\Math\*.cpp ..\src\Physics\*.cpp ..\src\Utils\*.cpp 
 set src2=..\src\Entity\*.cpp ..\src\Entity\Components\*.cpp ..\src\IMGui\*.cpp
 
-cl /Gm /ZI /FS /Ox /W1 /Femain.exe ^
+cl /MP /FS /Ox /W1 /Femain.exe ^
 %src1% %src2% ^
 ..\IsoARPG\src\main.cpp ^
 /I ..\include /I ..\deps\include /I ..\IsoARPG\include ^

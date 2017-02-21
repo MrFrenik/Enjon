@@ -8640,7 +8640,7 @@ int main(int argc, char** argv)
 	renderable4->SetMesh(mesh6);
 	renderable4->SetMaterial(mat5);
 
-	handle2->SetPosition(EM::Vec3(5, 2, 0));
+	handle2->SetWorldPosition(EM::Vec3(5, 2, 0));
 	renderable2->SetPosition(EM::Vec3(5, 2, 0));
 
 	renderable3->SetPosition(EM::Vec3(5, 0.5f, 3));
@@ -8661,10 +8661,8 @@ int main(int argc, char** argv)
 	plc->SetAttenuationRate(1.0f);
 	plc->SetColor(EG::RGBA16_Red());
 
-	printf("%d\n", mHandles.size());
-
-
 	// Add elements scene
+	scene->SetSun(&mSun);
 	scene->AddDirectionalLight(&mSun);
 	scene->AddDirectionalLight(&mSun2);
 	// scene->AddDirectionalLight(&mSun3);
@@ -8676,6 +8674,18 @@ int main(int argc, char** argv)
 	scene->AddRenderable(gc4->GetRenderable());
 	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_White(), 0.1f));
 	scene->AddQuadBatch(&mBatch);
+
+	for (Enjon::u32 i = 0; i < 1000; ++i)
+	{
+		Enjon::EntityHandle* ent = mEntities->Allocate();
+		Enjon::GraphicsComponent* gfx = ent->Attach<Enjon::GraphicsComponent>();
+		ent->SetWorldPosition(EM::Vec3(0, i, 0));
+		gfx->SetMesh(mesh6);
+		gfx->SetMaterial(mat5);
+		gfx->SetScale(EM::Vec3(1, 1, 1) * 0.2f);
+		mHandles.push_back(ent);
+		scene->AddRenderable(gfx->GetRenderable());
+	}
 
 	//------------------------------------------------------
 	// Physics	
@@ -8966,13 +8976,13 @@ int main(int argc, char** argv)
 		if (handle2 && handle2->HasComponent<Enjon::PointLightComponent>())
 		{
 			auto pl = handle2->GetComponent<Enjon::PointLightComponent>();
-			pl->SetPosition(handle2->GetPosition() + EM::Vec3(cos(dt) * 5.0f, 0.0f, sin(dt) * 5.0f));	
+			pl->SetPosition(handle2->GetWorldPosition() + EM::Vec3(cos(dt) * 5.0f, 0.0f, sin(dt) * 5.0f));	
 		}
 
 		if (handle1 && handle1->HasComponent<Enjon::PointLightComponent>())
 		{
 			auto pl = handle1->GetComponent<Enjon::PointLightComponent>();
-			pl->SetPosition(handle1->GetPosition() + EM::Vec3(cos(dt) * 5.0f, 2.0f, sin(dt) * 5.0f));
+			pl->SetPosition(handle1->GetWorldPosition() + EM::Vec3(cos(dt) * 5.0f, 2.0f, sin(dt) * 5.0f));
 		}
 
 		if (handle1 && handle1->HasComponent<Enjon::GraphicsComponent>())
@@ -8983,6 +8993,17 @@ int main(int argc, char** argv)
 
 		// Get active entities
 		const std::vector<Enjon::EntityHandle*> activeEntities = mEntities->GetActiveEntities();
+
+		// Loop through handles and update
+		for (auto& h : mHandles)
+		{
+			h->SetWorldPosition(h->GetWorldPosition() + EM::Vec3(cos(dt), 0, sin(dt)));
+			if (h->HasComponent<Enjon::GraphicsComponent>())
+			{
+				auto gfx = h->GetComponent<Enjon::GraphicsComponent>();
+				gfx->SetPosition(h->GetWorldPosition() + EM::Vec3(cos(dt), 0, sin(dt)));
+			}
+		}
 
 		// Render
 		mGraphicsEngine.Update(dt);
@@ -9369,7 +9390,74 @@ bool ProcessInput(EI::InputManager* input, float dt)
 #endif
 
 
+#if 0
 
+#include <Enjon.h>
+
+#include <vector>
+
+std::vector<Enjon::EntityHandle*> mHandlesPrivate;
+std::vector<Enjon::EntityHandle*> mHandlesPublic;
+
+Enjon::EntityManager* mEntities;
+
+#include <stdio.h>
+
+#ifdef main
+	#undef main
+#endif
+int main(int argc, char** argv)
+{
+	using namespace Enjon;
+	Enjon::Init();
+
+	mEntities = new Enjon::EntityManager;
+
+	{
+	    u32 time = SDL_GetTicks();
+		// Allocate 100k entities
+		for (Enjon::u32 i = 0; i < 350000; ++i)
+		{
+			Enjon::EntityHandle* ent1 = mEntities->Allocate();
+			Enjon::EntityHandle* ent2 = mEntities->Allocate();
+			mHandlesPrivate.push_back(ent1);
+			mHandlesPublic.push_back(ent2);
+		}
+		u32 time2 = SDL_GetTicks() - time;
+		double time_elapsed = time2 / 1000.0f;
+		printf("Time to allocate: %f\n", time_elapsed);
+	}
+
+	// Public entities
+	{
+		u32 time = SDL_GetTicks();
+		for (auto& e : mHandlesPublic)
+		{
+			e->mWorldTransform.Position = EM::Vec3(3.0f, 2.0f, 1.0f);
+		}
+		u32 time2 = SDL_GetTicks() - time;
+		double time_elapsed = time2 / 1000.0f;
+		printf("Public: %d", time2);
+	}
+
+	// Private entities
+	{
+		u32 time = SDL_GetTicks();
+		for (auto& e : mHandlesPrivate)
+		{
+			e->SetLocalPosition(EM::Vec3(3.0f, 2.0f, 1.0f));
+		}
+		u32 time2 = SDL_GetTicks() - time;
+		// double time_elapsed = time2 / 1000.0f;
+		printf("Private: %d", time2);
+	}
+
+
+	return 0;
+}
+
+
+#endif
 
 
 
