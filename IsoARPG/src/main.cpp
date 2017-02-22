@@ -8827,9 +8827,9 @@ int main(int argc, char** argv)
 
 	mBatch.Begin();
   	{
- 		for (auto i = -50; i <-50; i++)
+ 		for (auto i = -10; i <10; i++)
  		{
- 			for (auto j = -50; j <-50; j++)
+ 			for (auto j = -10; j <10; j++)
  			{
  				EM::Transform t(EM::Vec3(j * 2, 0, i * 2), EM::Quaternion::AngleAxis(EM::ToRadians(90), EM::Vec3(1, 0, 0)), EM::Vec3(1, 1, 1));
  				mBatch.Add(

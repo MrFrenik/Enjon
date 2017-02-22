@@ -912,6 +912,11 @@ namespace Enjon { namespace Graphics {
 	    	ImGui::Text("Direction");
             ImGui::DragFloat3Labels("##sundir", labels, vec4f, 0.001f, -1.0f, 1.0f);
 	    	mScene.GetSun()->SetDirection(EM::Vec3(vec4f[0], vec4f[1], vec4f[2]));
+
+	    	float intensity = mScene.GetSun()->GetIntensity();
+	    	ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f);
+	    	mScene.GetSun()->SetIntensity(intensity);
+
 	    	ImGui::TreePop();
 	    }
 
