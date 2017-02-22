@@ -74,6 +74,12 @@ void main()
 
     // Get world position
     vec3 WorldPos = texture(u_positionMap, TexCoords).xyz;
+    
+    // Obtain normal from normal map in range (world coords)
+    vec3 N = normalize(texture(u_normalMap, TexCoords).xyz);
+
+    // View vector
+    vec3 V = normalize(u_camPos - WorldPos);
 
     // Get material properties
     vec4 MaterialProps = texture2D(u_matProps, TexCoords);
@@ -82,10 +88,6 @@ void main()
     // Roughness, Metallic, and AO
     float Metallic  = MaterialProps.r;
     float Roughness = MaterialProps.g;
-
-    // Obtain normal from normal map in range (world coords)
-    vec3 N = normalize(texture(u_normalMap, TexCoords).xyz);
-    vec3 V = normalize(u_camPos - WorldPos);
 
     // Calculate radiance
     vec3 L = normalize(u_lightDirection);

@@ -41,6 +41,9 @@ namespace Enjon { namespace Graphics {
 		EM::Vec2 inline GetResolution() { return EM::Vec2(Width, Height); }
 		void SetViewport(const EM::Vec4& Viewport);
 
+		u32 GetWidth() { return Width; }
+		u32 GetHeight() { return Height; }
+
 		const char* FrameBufferToString(u32 i);
 
 	private:

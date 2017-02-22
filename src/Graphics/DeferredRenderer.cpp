@@ -112,7 +112,7 @@ namespace Enjon { namespace Graphics {
 		ImGuiManager::RegisterWindow(showGraphicsViewportFunc);
 
 		// Set current render texture
-		mCurrentRenderTexture = mFinalTarget->GetTexture();
+		mCurrentRenderTexture = mCompositeTarget->GetTexture();
 
 		// TODO(): I don't like random raw gl calls just lying around...
 		glEnable(GL_DEPTH_TEST);
@@ -135,31 +135,6 @@ namespace Enjon { namespace Graphics {
 		if (mFXAASettings.mEnabled) FXAAPass(mLightingBuffer);
 		// Composite Pass
 		CompositePass(mFXAASettings.mEnabled ? mFXAATarget : mLightingBuffer);
-
-		// Final target
-		mFinalTarget->Bind();
-		{
-			mWindow.Clear();
-
-			GLSLProgram* shader = EG::ShaderManager::Get("NoCameraProjection");		
-			shader->Use();
-			{
-				mWindow.Clear();
-
-				mBatch->Begin();
-				{
-					mBatch->Add(
-								EM::Vec4(-1, -1, 2, 2),
-								EM::Vec4(0, 0, 1, 1),
-								mCompositeTarget->GetTexture()
-							);
-				}
-				mBatch->End();
-				mBatch->RenderBatch();
-			}
-			shader->Unuse();
-		}
-		mFinalTarget->Unbind();
 
 		// Clear default buffer
 		mWindow.Clear();
@@ -185,7 +160,19 @@ namespace Enjon { namespace Graphics {
 		shader->Use();
 
 		// Clear buffer (default)
-		mWindow.Clear();
+		glClearBufferfv(GL_COLOR, 0, mBGColor);
+
+		/*
+		GLfloat black[] = {0.0f, 0.0f, 0.0f, 1.0f};
+		for (u32 i = 1; i < (u32)EG::GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
+		{
+			glClearBufferfv(GL_COLOR, i, black);
+		}
+		*/
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		// mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16_LightGrey());
 
 		// Get sorted renderables by material
 		std::vector<EG::Renderable*> sortedRenderables = mScene.GetRenderables();
@@ -906,10 +893,10 @@ namespace Enjon { namespace Graphics {
 
     		const char* string_name = "Final";
     		ImGui::Text(string_name);
-		    ImTextureID img = (ImTextureID)mFinalTarget->GetTexture();
+		    ImTextureID img = (ImTextureID)mCompositeTarget->GetTexture();
             if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
             {
-		        mCurrentRenderTexture = mFinalTarget->GetTexture(); 
+		        mCurrentRenderTexture = mCompositeTarget->GetTexture(); 
             }
 
 	    	ImGui::PopStyleColor(1);
@@ -925,6 +912,14 @@ namespace Enjon { namespace Graphics {
 	    	ImGui::Text("Direction");
             ImGui::DragFloat3Labels("##sundir", labels, vec4f, 0.001f, -1.0f, 1.0f);
 	    	mScene.GetSun()->SetDirection(EM::Vec3(vec4f[0], vec4f[1], vec4f[2]));
+	    	ImGui::TreePop();
+	    }
+
+	    if (ImGui::TreeNode("Background"))
+	    {
+	    	static const char* labels[] = {"R", "G", "B"};
+	    	ImGui::Text("Color");
+            ImGui::DragFloat3Labels("##bgcolor", labels, mBGColor, 0.001f, 0.0f, 1.0f);
 	    	ImGui::TreePop();
 	    }
 	}

@@ -56,6 +56,8 @@ void main()
 
     // Obtain normal from normal map in range (world coords)
     vec3 N = texture(u_normalMap, TexCoords).xyz;
+
+    // View vector
     vec3 V = normalize(u_camPos - WorldPos);
 
     // Calculate radiance
@@ -98,6 +100,7 @@ void main()
     Lo += (kD * Albedo / kPi + BRDF) * Radiance * NdotL;
 
     ColorOut = vec4(Lo, 1.0);
+
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)

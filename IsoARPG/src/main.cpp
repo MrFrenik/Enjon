@@ -8516,6 +8516,7 @@ EG::Material* mat2;
 EG::Material* mat3;
 EG::Material* mat4;
 EG::Material* mat5;
+EG::Material* mat6;
 
 bool mMovementOn = true;
 
@@ -8596,6 +8597,7 @@ int main(int argc, char** argv)
 	mat3 = new EG::Material();
 	mat4 = new EG::Material();
 	mat5 = new EG::Material();
+	mat6 = new EG::Material();
 
 	mat->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Albedo.png"));
 	mat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png"));
@@ -8625,6 +8627,11 @@ int main(int argc, char** argv)
 	mat5->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/HarshBricks/Roughness.png"));
 	mat5->SetTexture(EG::TextureSlotType::AO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/HarshBricks/AO.png"));
 	mat5->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png"));
+
+	mat6->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Albedo.png"));
+	mat6->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Normal.png"));
+	mat6->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png"));
+	mat6->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png"));
 
 	renderable->SetMesh(mesh3);
 	renderable->SetMaterial(mat);
@@ -8675,17 +8682,17 @@ int main(int argc, char** argv)
 	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_White(), 0.1f));
 	scene->AddQuadBatch(&mBatch);
 
-	for (Enjon::u32 i = 0; i < 1000; ++i)
-	{
-		Enjon::EntityHandle* ent = mEntities->Allocate();
-		Enjon::GraphicsComponent* gfx = ent->Attach<Enjon::GraphicsComponent>();
-		ent->SetWorldPosition(EM::Vec3(0, i, 0));
-		gfx->SetMesh(mesh6);
-		gfx->SetMaterial(mat5);
-		gfx->SetScale(EM::Vec3(1, 1, 1) * 0.2f);
-		mHandles.push_back(ent);
-		scene->AddRenderable(gfx->GetRenderable());
-	}
+	// for (Enjon::u32 i = 0; i < 1000; ++i)
+	// {
+	// 	Enjon::EntityHandle* ent = mEntities->Allocate();
+	// 	Enjon::GraphicsComponent* gfx = ent->Attach<Enjon::GraphicsComponent>();
+	// 	ent->SetWorldPosition(EM::Vec3(0, i, 0));
+	// 	gfx->SetMesh(mesh6);
+	// 	gfx->SetMaterial(mat5);
+	// 	gfx->SetScale(EM::Vec3(1, 1, 1) * 0.2f);
+	// 	mHandles.push_back(ent);
+	// 	scene->AddRenderable(gfx->GetRenderable());
+	// }
 
 	//------------------------------------------------------
 	// Physics	
@@ -8820,9 +8827,9 @@ int main(int argc, char** argv)
 
 	mBatch.Begin();
   	{
- 		for (auto i = -200; i < 200; i++)
+ 		for (auto i = -50; i <-50; i++)
  		{
- 			for (auto j = -200; j < 200; j++)
+ 			for (auto j = -50; j <-50; j++)
  			{
  				EM::Transform t(EM::Vec3(j * 2, 0, i * 2), EM::Quaternion::AngleAxis(EM::ToRadians(90), EM::Vec3(1, 0, 0)), EM::Vec3(1, 1, 1));
  				mBatch.Add(
@@ -8969,8 +8976,11 @@ int main(int argc, char** argv)
 
 		if (handle2 && handle2->HasComponent<Enjon::GraphicsComponent>())
 		{
+			auto cam = mGraphicsEngine.GetSceneCamera();
 			gc2 = handle2->GetComponent<Enjon::GraphicsComponent>();	
-			gc2->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
+			gc2->SetPosition(cam->GetPosition() + cam->Forward() * 0.85f + cam->Right() * 0.85f + cam->Down() * 0.5f); 
+			auto rot = cam->GetOrientation();
+			gc2->SetOrientation(EM::Quaternion(rot.x, rot.y, rot.z, -rot.w));
 		}
 
 		if (handle2 && handle2->HasComponent<Enjon::PointLightComponent>())
@@ -8995,15 +9005,15 @@ int main(int argc, char** argv)
 		const std::vector<Enjon::EntityHandle*> activeEntities = mEntities->GetActiveEntities();
 
 		// Loop through handles and update
-		for (auto& h : mHandles)
-		{
-			h->SetWorldPosition(h->GetWorldPosition() + EM::Vec3(cos(dt), 0, sin(dt)));
-			if (h->HasComponent<Enjon::GraphicsComponent>())
-			{
-				auto gfx = h->GetComponent<Enjon::GraphicsComponent>();
-				gfx->SetPosition(h->GetWorldPosition() + EM::Vec3(cos(dt), 0, sin(dt)));
-			}
-		}
+		// for (auto& h : mHandles)
+		// {
+		// 	h->SetWorldPosition(h->GetWorldPosition() + EM::Vec3(cos(dt), 0, sin(dt)));
+		// 	if (h->HasComponent<Enjon::GraphicsComponent>())
+		// 	{
+		// 		auto gfx = h->GetComponent<Enjon::GraphicsComponent>();
+		// 		gfx->SetPosition(h->GetWorldPosition() + EM::Vec3(cos(dt), 0, sin(dt)));
+		// 	}
+		// }
 
 		// Render
 		mGraphicsEngine.Update(dt);
@@ -9131,17 +9141,17 @@ bool ProcessInput(EI::InputManager* input, float dt)
 	    {
 	    	auto cam = mGraphicsEngine.GetSceneCamera();
 	    	auto scene = mGraphicsEngine.GetScene();
-	    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
-	    	auto vel = cam->Forward() * 20.0f;
+	    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f + cam->Right() * 0.85f + cam->Down() * 0.5f;
+	    	auto vel = cam->Forward() * 30.0f;
 
-			btCollisionShape* colShape = new btSphereShape(btScalar(0.5));
+			btCollisionShape* colShape = new btSphereShape(btScalar(0.3f));
 			collisionShapes.push_back(colShape);
 
 			// Create dynamic objects
 			btTransform startTransform;
 			startTransform.setIdentity();
 
-			btScalar mass(3.);
+			btScalar mass(1.);
 
 			// Rigid body is dynamic iff mass is non zero, otherwise static
 			bool isDynamic = (mass != 0.f);
@@ -9155,7 +9165,7 @@ bool ProcessInput(EI::InputManager* input, float dt)
 			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
 			btRigidBody* body = new btRigidBody(rbInfo);
-			body->setRestitution(0.2f);
+			body->setRestitution(0.02f);
 			body->setFriction(10.0f);
 			body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
 			body->setDamping(0.2f, 0.4f);
@@ -9163,8 +9173,8 @@ bool ProcessInput(EI::InputManager* input, float dt)
 			auto ent = mEntities->Allocate();
 			auto gc = ent->Attach<Enjon::GraphicsComponent>();
 			gc->SetMesh(mesh);
-			gc->SetMaterial(mat5);
-			gc->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
+			gc->SetMaterial(mat6);
+			gc->SetScale(EM::Vec3(1, 1, 1) * 0.3f);
 			scene->AddRenderable(gc->GetRenderable());
 
 			mBodies.push_back(body);
