@@ -8517,6 +8517,7 @@ EG::Material* mat3;
 EG::Material* mat4;
 EG::Material* mat5;
 EG::Material* mat6;
+EG::Material* mat7;
 
 bool mMovementOn = true;
 
@@ -8580,7 +8581,7 @@ int main(int argc, char** argv)
 	EG::Renderable* renderable3 = gc3->GetRenderable();
 	EG::Renderable* renderable4 = gc4->GetRenderable();
 
-	mSun = EG::DirectionalLight(EM::Vec3(-0.5f, 0.5f, 0.75f), EG::RGBA16_Orange(), 20.0f);
+	mSun = EG::DirectionalLight(EM::Vec3(-0.523f, 1.0f, 0.286f), EG::RGBA16_Orange(), 20.0f);
 	mSun2 = EG::DirectionalLight(EM::Vec3(0.5f, 0.5f, -0.75f), EG::RGBA16_SkyBlue(), 10.0f);
 	mSun3 = EG::DirectionalLight(EM::Vec3(0.75f, 0.6f, 0.75f), EG::RGBA16_Yellow(), 5.0f);
 
@@ -8598,6 +8599,7 @@ int main(int argc, char** argv)
 	mat4 = new EG::Material();
 	mat5 = new EG::Material();
 	mat6 = new EG::Material();
+	mat7 = new EG::Material();
 
 	mat->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Albedo.png"));
 	mat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png"));
@@ -8633,8 +8635,14 @@ int main(int argc, char** argv)
 	mat6->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png"));
 	mat6->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png"));
 
+	mat7->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Albedo.png"));
+	mat7->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png"));
+	mat7->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Metallic.png"));
+	mat7->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Roughness.png"));
+	mat7->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png"));
+
 	renderable->SetMesh(mesh3);
-	renderable->SetMaterial(mat);
+	renderable->SetMaterial(mat7);
 
 	renderable2->SetMesh(mesh2);
 	renderable2->SetMaterial(mat);
@@ -9466,9 +9474,34 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-
 #endif
 
+
+#if 0
+
+#include <stdio.h>
+
+int main(int argc, char** argv)
+{
+	double R2 = 2.5;
+	double R3 = 1.5;
+	double e1 = 18.0;
+	double e2 = 45.0;
+	double r1 = 0.5;
+	double r2 = 0.5f;
+
+	double i2 = 0.99;
+
+	double i3 = (R2*i2 - e1 + r1*i2 + e2) / (R3 + r2);
+
+	printf("i3: %f\n", i3); 	
+
+
+
+	return 0;	
+}
+
+#endif
 
 
 

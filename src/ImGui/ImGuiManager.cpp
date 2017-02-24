@@ -1,5 +1,6 @@
 #include "ImGui/ImGuiManager.h"
 #include "ImGui/imgui_impl_sdl_gl3.h"
+#include "Graphics/Camera.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -52,6 +53,74 @@ namespace Enjon
 	void ImGuiManager::RegisterWindow(std::function<void()> func)
 	{
 		mWindows.push_back(func);
+	}
+
+	void ImGuiManager::RenderGameUI(SDL_Window* window, f32* view, f32* projection)
+	{
+	    // Make a new window
+		// ImGui_ImplSdlGL3_NewFrame(window);
+
+	    ImGuizmo::BeginFrame();
+		static auto model = EM::Mat4::Identity();
+
+	    // Imguizmo 
+	    static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
+	    static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
+	    if (ImGui::IsKeyPressed(90))
+		mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+		if (ImGui::IsKeyPressed(69))
+			mCurrentGizmoOperation = ImGuizmo::ROTATE;
+		if (ImGui::IsKeyPressed(82)) // r Key
+			mCurrentGizmoOperation = ImGuizmo::SCALE;
+		if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
+			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+		ImGui::SameLine();
+		if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
+			mCurrentGizmoOperation = ImGuizmo::ROTATE;
+		ImGui::SameLine();
+		if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
+			mCurrentGizmoOperation = ImGuizmo::SCALE;
+		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+		ImGuizmo::DecomposeMatrixToComponents(model.elements, matrixTranslation, matrixRotation, matrixScale);
+		ImGui::InputFloat3("Tr", matrixTranslation, 3);
+		ImGui::InputFloat3("Rt", matrixRotation, 3);
+		ImGui::InputFloat3("Sc", matrixScale, 3);
+		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, model.elements);
+
+		if (mCurrentGizmoOperation != ImGuizmo::SCALE)
+		{
+			if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+				mCurrentGizmoMode = ImGuizmo::LOCAL;
+			ImGui::SameLine();
+			if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+				mCurrentGizmoMode = ImGuizmo::WORLD;
+		}
+		static bool useSnap(false);
+		if (ImGui::IsKeyPressed(83))
+			useSnap = !useSnap;
+		ImGui::Checkbox("", &useSnap);
+		ImGui::SameLine();
+		EM::Vec2 snap;
+
+		/*
+		switch (mCurrentGizmoOperation)
+		{
+		case ImGuizmo::TRANSLATE:
+			snap = config.mSnapTranslation;
+			ImGui::InputFloat3("Snap", &snap.x);
+			break;
+		case ImGuizmo::ROTATE:
+			snap = config.mSnapRotation;
+			ImGui::InputFloat("Angle Snap", &snap.x);
+			break;
+		case ImGuizmo::SCALE:
+			snap = config.mSnapScale;
+			ImGui::InputFloat("Scale Snap", &snap.x);
+			break;
+		}
+		*/
+
+		ImGuizmo::Manipulate(view, projection, mCurrentGizmoOperation, mCurrentGizmoMode, model.elements, NULL, useSnap ? &snap.x : NULL);
 	}
 
 	//---------------------------------------------------

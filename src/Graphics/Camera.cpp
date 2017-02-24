@@ -9,7 +9,7 @@ namespace Enjon { namespace Graphics {
 	Camera::Camera()
 		: 
 		Transform(),
-		FieldOfView(60),
+		FOV(60),
 		NearPlane(0.01f),
 		FarPlane(100.0f),
 		ViewPortAspectRatio(4.0f / 3.0f), 
@@ -22,7 +22,7 @@ namespace Enjon { namespace Graphics {
 	Camera::Camera(Enjon::uint32 Width, Enjon::uint32 Height)
 		: 
 		Transform(),
-		FieldOfView(50),
+		FOV(50),
 		NearPlane(0.1f),
 		FarPlane(100.0f),
 		ViewPortAspectRatio((Enjon::f32)Width / (Enjon::f32)Height), 
@@ -35,7 +35,7 @@ namespace Enjon { namespace Graphics {
 	Camera::Camera(EM::iVec2& dimensions)
 		: 
 		Transform(),
-		FieldOfView(50),
+		FOV(50),
 		NearPlane(0.01f),
 		FarPlane(100.0f),
 		ViewPortAspectRatio((Enjon::f32)dimensions.x / (Enjon::f32)dimensions.y), 
@@ -126,7 +126,7 @@ namespace Enjon { namespace Graphics {
 		{
 			case ProjectionType::PERSPECTIVE:
 			{
-				Projection = EM::Mat4::Perspective(FieldOfView, ViewPortAspectRatio, NearPlane, FarPlane);
+				Projection = EM::Mat4::Perspective(FOV, ViewPortAspectRatio, NearPlane, FarPlane);
 			} break;
 
 			case ProjectionType::ORTHOGRAPHIC:

@@ -637,10 +637,11 @@ namespace Enjon { namespace Graphics {
 		static bool show_app_layout = false;
 		static bool show_game_viewport = true;
 
-        // Render gui
+        // Queue up gui
         ImGuiManager::Render(mWindow.GetSDLWindow());
+		ImGuiManager::RenderGameUI(mWindow.GetSDLWindow(), mSceneCamera.GetView().elements, mSceneCamera.GetProjection().elements);
 
-        // Rendering
+        // Flush
         glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
         ImGui::Render();
 	}
@@ -907,16 +908,22 @@ namespace Enjon { namespace Graphics {
 	    if (ImGui::TreeNode("Sunlight"))
 	    {
 	    	static const char* labels[] = {"X", "Y", "Z"};
-            static float vec4f[4] = { 0.10f, 0.20f, 0.30f, 0.44f };
 	    	EM::Vec3 direction = mScene.GetSun()->GetDirection();
+            float vec4f[4] = { direction.x, direction.y, direction.z, 1.0f };
 	    	ImGui::Text("Direction");
             ImGui::DragFloat3Labels("##sundir", labels, vec4f, 0.001f, -1.0f, 1.0f);
 	    	mScene.GetSun()->SetDirection(EM::Vec3(vec4f[0], vec4f[1], vec4f[2]));
 
 	    	float intensity = mScene.GetSun()->GetIntensity();
-	    	ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 50.0f);
+	    	ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 50.0f);
 	    	mScene.GetSun()->SetIntensity(intensity);
 
+	    	ImGui::TreePop();
+	    }
+
+	    if (ImGui::TreeNode("Camera"))
+	    {
+	    	ImGui::DragFloat("FOV", &mSceneCamera.FOV, 0.1f, 0.0f, 100.0f);
 	    	ImGui::TreePop();
 	    }
 
@@ -924,7 +931,7 @@ namespace Enjon { namespace Graphics {
 	    {
 	    	static const char* labels[] = {"R", "G", "B"};
 	    	ImGui::Text("Color");
-            ImGui::DragFloat3Labels("##bgcolor", labels, mBGColor, 0.001f, 0.0f, 1.0f);
+            ImGui::DragFloat3Labels("##bgcolor", labels, mBGColor, 0.1f, 0.0f, 30.0f);
 	    	ImGui::TreePop();
 	    }
 	}

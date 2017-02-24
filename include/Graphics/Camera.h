@@ -23,7 +23,7 @@ namespace Enjon { namespace Graphics {
 	struct Camera
 	{
 		Camera();
-		Camera(Enjon::uint32 Width, Enjon::uint32 Height);
+		Camera(u32 Width, u32 Height);
 		Camera(EM::iVec2& dimenstions);
 		Camera(const Camera& Other) = default;
 
@@ -56,11 +56,11 @@ namespace Enjon { namespace Graphics {
 
 		// Member variables
 		EM::Transform Transform;
-		Enjon::f32 FieldOfView;
-		Enjon::f32 NearPlane;
-		Enjon::f32 FarPlane;
-		Enjon::f32 ViewPortAspectRatio;
-		Enjon::f32 OrthographicScale;
+		f32 FOV;
+		f32 NearPlane;
+		f32 FarPlane;
+		f32 ViewPortAspectRatio;
+		f32 OrthographicScale;
 		ProjectionType ProjType;
 		EM::Vec2 ScreenDimensions;
 	};

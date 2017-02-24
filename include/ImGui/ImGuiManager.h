@@ -4,6 +4,7 @@
 
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_dock.h"
+#include "ImGui/ImGuizmo.h"
 #include "System/Types.h"
 
 #include <SDL2/sdl.h>
@@ -25,6 +26,7 @@ namespace Enjon
 			static void Register(std::function<void()> func);
 			static void RegisterMenuOption(std::string name, std::function<void()> func);
 			static void RegisterWindow(std::function<void()> func);
+			static void RenderGameUI(SDL_Window* window, f32* view, f32* projection);
 			static void Render(SDL_Window* window);
 			static void ShutDown();
 

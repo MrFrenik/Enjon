@@ -126,13 +126,13 @@ namespace Enjon { namespace Graphics {
 
 			// Post processing settings
 			FXAASettings mFXAASettings = FXAASettings(8.0f, 1.0f/8.0f, 1.0f/128.0f);
-			ToneMapSettings mToneMapSettings = ToneMapSettings(0.65f, 1.58f, 3.36f, 2.93f, 1.5f);
-			BloomSettings mBloomSettings = BloomSettings(EM::Vec3(0.352f, 0.4f, 0.001f), EM::Vec3(5, 7, 1), EM::Vec3(0.001f, 0.001f, 0.001f));
+			ToneMapSettings mToneMapSettings = ToneMapSettings(0.37f, 1.92f, 1.03f, 3.35f, 1.7f);
+			BloomSettings mBloomSettings = BloomSettings(EM::Vec3(0.307f, 0.444f, 0.001f), EM::Vec3(1, 4, 1), EM::Vec3(0.001f, 0.001f, 0.001f));
 
 			bool mShowGame = true;
 			bool mShowGraphicsOptionsWindow = true;
 
-			f32 mBGColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+			f32 mBGColor[4] = {10.0f, 10.0f, 10.0f, 1.0f};
 	};
 }}
 

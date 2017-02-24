@@ -26,7 +26,7 @@ uniform sampler2D u_metallicMap;
 uniform sampler2D u_roughnessMap;
 uniform sampler2D u_aoMap;
 
-const float u_emissiveIntensity = 5.0;
+const float u_emissiveIntensity = 10.0;
 
 void main()
 {
