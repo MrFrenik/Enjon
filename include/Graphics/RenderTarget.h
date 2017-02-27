@@ -23,7 +23,7 @@ namespace Enjon { namespace Graphics {
 			RenderTarget(uint32 _Width, uint32 _Height, GLuint TexParam = GL_LINEAR);
 			~RenderTarget();
 
-			void Bind(BindType Type = BindType::WRITE);
+			void Bind(BindType type = BindType::WRITE, bool clear = true);
 			void Unbind();
 
 			GLuint inline GetTexture() const 	{ return Texture; }

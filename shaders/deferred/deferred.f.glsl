@@ -42,11 +42,11 @@ void main()
     float Metallic  = texture2D(u_metallicMap, fs_in.TexCoords).r;
     float Roughness = texture2D(u_roughnessMap, fs_in.TexCoords).r;
     float AO        = texture2D(u_aoMap, fs_in.TexCoords).r;
-    
+
     DiffuseOut  = color * vec4(u_albedoColor.xyz, 1.0);
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
-    EmissiveOut = texture2D(u_emissiveMap, fs_in.TexCoords) * vec4(u_emissiveIntensity, u_emissiveIntensity, u_emissiveIntensity, 1.0);
+    EmissiveOut = vec4(texture2D(u_emissiveMap, fs_in.TexCoords).xyz * u_emissiveIntensity, 1.0);
     MatPropsOut = vec4(Metallic, Roughness, AO, 1.0);
     UVOut = vec4(fs_in.TexCoords.x, fs_in.TexCoords.y, 0.0, 1.0);
 }

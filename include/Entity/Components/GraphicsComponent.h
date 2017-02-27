@@ -5,6 +5,7 @@
 #include "Entity/Component.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Material.h"
+#include "System/Types.h"
 
 namespace Enjon
 {
@@ -20,13 +21,13 @@ namespace Enjon
 			virtual void Destroy() override;
 
 			/* Get position of transform */
-			EM::Vec3& GetPosition() { return mRenderable.GetPosition(); }
+			EM::Vec3 GetPosition() { return mRenderable.GetPosition(); }
 
 			/* Get scale of transform */
-			EM::Vec3& GetScale() { return mRenderable.GetScale(); }
+			EM::Vec3 GetScale() { return mRenderable.GetScale(); }
 
 			/* Get orientation of transform */
-			EM::Quaternion& GetOrientation() { return mRenderable.GetOrientation(); }
+			EM::Quaternion GetOrientation() { return mRenderable.GetOrientation(); }
 
 			/* Get material of renderable */
 			EG::Material* GetMaterial() { return mRenderable.GetMaterial(); }
@@ -48,6 +49,9 @@ namespace Enjon
 
 			/* Set scale of transform */
 			void SetScale(EM::Vec3& scale);
+
+			/* Set scale of transform */
+			void SetScale(f32& scale);
 
 			/* Set orientation of transform */
 			void SetOrientation(EM::Quaternion& orientation);

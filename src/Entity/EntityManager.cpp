@@ -51,6 +51,46 @@ namespace Enjon {
 	}
 
 	//---------------------------------------------------------------
+	void EntityHandle::SetLocalTransform(EM::Transform& transform)
+	{
+		mLocalTransform = transform;
+	}
+
+	//---------------------------------------------------------------
+	EM::Transform EntityHandle::GetLocalTransform()
+	{
+		return mLocalTransform;
+	}
+
+	//---------------------------------------------------------------
+	void EntityHandle::SetWorldTransform(EM::Transform& transform)
+	{
+		mWorldTransform = transform;
+	}
+
+	//---------------------------------------------------------------
+	EM::Transform EntityHandle::GetWorldTransform()
+	{
+		EM::Transform result = mLocalTransform;
+
+		// In order to get global transform, 
+		// iterate through all parent entities and calculate 
+		// global transform
+		// TOOD(): Make sure that world transform is dirty before 
+		// doing this calculation
+		for (EntityHandle* p = mParent; p != nullptr; p = p->GetParent())
+		{
+			result *= p->GetLocalTransform();
+		}
+
+		// Cache it off for now
+		mWorldTransform = result;
+
+		// Return world transform
+		return mWorldTransform;
+	}
+
+	//---------------------------------------------------------------
 	void EntityHandle::SetWorldPosition(EM::Vec3& position)
 	{
 		mWorldTransform.SetPosition(position);
@@ -122,10 +162,75 @@ namespace Enjon {
 		return mWorldTransform.GetOrientation();
 	}
 
-	//---------------------------------------------------------------
+	//-----------------------------------------
+	EntityHandle* EntityHandle::AddChild(EntityHandle* child)
+	{
+		// Set parent to this
+		child->SetParent(this);
+
+		// Make sure child doesn't exist in vector before pushing back
+		auto query = std::find(mChildren.begin(), mChildren.end(), child);
+		if (query == mChildren.end())
+		{
+			mChildren.push_back(child);
+		}
+		else
+		{
+			// Log a warning mesage here
+		}
+
+		return this;
+	}
+
+	//-----------------------------------------
+	void EntityHandle::DetachChild(EntityHandle* child)
+	{
+		// Make sure child exists
+		assert(child != nullptr);
+
+		// Find and erase
+		mChildren.erase(std::remove(mChildren.begin(), mChildren.end(), child), mChildren.end());
+
+		// Remove parent from child
+		child->RemoveParent();
+	}
+
+	//-----------------------------------------
 	void EntityHandle::SetParent(EntityHandle* parent)
 	{
+		// Make sure this child doesn't have a parent
+		assert(parent != nullptr);
+		assert(mParent == nullptr);
+
+		// Set parent
 		mParent = parent;
+	}
+
+	//-----------------------------------------
+	EntityHandle* EntityHandle::RemoveParent()
+	{
+		// Asset parent exists
+		assert(mParent != nullptr);
+
+		// Capture pointer
+		EntityHandle* retNode = mParent;
+
+		// Remove parent
+		mParent = nullptr;
+
+		return retNode;
+	}
+
+	//---------------------------------------------------------------
+	void EntityHandle::UpdateAllChildrenTransforms()
+	{
+
+	}
+
+	//---------------------------------------------------------------
+	void EntityHandle::UpdateComponentTransforms()
+	{
+
 	}
 
 	//---------------------------------------------------------------

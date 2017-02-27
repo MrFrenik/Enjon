@@ -37,6 +37,12 @@ namespace Enjon { namespace Math {
 		return WorldSpace;
 	}
 
+	Transform& Transform::operator*=(Transform& parent)
+	{
+		*this = *this * parent;
+		return *this;	
+	}	
+
 	//-----------------------------------------------------------------------
 	Transform operator/(Transform& World, Transform& Parent)
 	{

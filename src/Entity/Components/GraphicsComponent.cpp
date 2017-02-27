@@ -49,6 +49,12 @@ namespace Enjon
 	}
 
 	//--------------------------------------------------------------------
+	void GraphicsComponent::SetScale(f32& scale)
+	{
+		mRenderable.SetScale(scale);
+	}
+
+	//--------------------------------------------------------------------
 	void GraphicsComponent::SetOrientation(EM::Quaternion& orientation)
 	{
 		mRenderable.SetOrientation(orientation);

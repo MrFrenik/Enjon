@@ -40,7 +40,7 @@ namespace Enjon { namespace Graphics {
 			EG::Scene* GetScene() { return mScene; }
 
 			/* Get transform */
-			EM::Transform& GetTransform() { return mTransform; }
+			EM::Transform GetTransform() { return mTransform; }
 
 			/* Set position of transform */
 			void SetPosition(EM::Vec3& position);

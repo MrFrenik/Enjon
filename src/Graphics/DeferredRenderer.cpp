@@ -112,7 +112,7 @@ namespace Enjon { namespace Graphics {
 		ImGuiManager::RegisterWindow(showGraphicsViewportFunc);
 
 		// Set current render texture
-		mCurrentRenderTexture = mCompositeTarget->GetTexture();
+		mCurrentRenderTexture = mFXAATarget->GetTexture();
 
 		// TODO(): I don't like random raw gl calls just lying around...
 		glEnable(GL_DEPTH_TEST);
@@ -131,10 +131,10 @@ namespace Enjon { namespace Graphics {
 		LuminancePass();
 		// Bloom pass
 		BloomPass();
-		// FXAA pass
-		if (mFXAASettings.mEnabled) FXAAPass(mLightingBuffer);
 		// Composite Pass
-		CompositePass(mFXAASettings.mEnabled ? mFXAATarget : mLightingBuffer);
+		CompositePass(mLightingBuffer);
+		// FXAA pass
+		FXAAPass(mCompositeTarget);
 
 		// Clear default buffer
 		mWindow.Clear();
@@ -143,6 +143,25 @@ namespace Enjon { namespace Graphics {
 		if (Enjon::Console::Visible())
 		{
 			GuiPass();
+		}
+
+		else
+		{
+			auto program = EG::ShaderManager::Get("NoCameraProjection");	
+			program->Use();
+			{
+				mBatch->Begin();
+				{
+					mBatch->Add(
+									EM::Vec4(-1, -1, 2, 2),
+									EM::Vec4(0, 0, 1, 1),
+									mCompositeTarget->GetTexture()
+								);
+				}
+				mBatch->End();
+				mBatch->RenderBatch();
+			}
+			program->Unuse();
 		}
 
 		mWindow.SwapBuffer();
@@ -429,6 +448,7 @@ namespace Enjon { namespace Graphics {
 			mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
 			luminanceProgram->Use();
 			{
+				luminanceProgram->BindTexture("u_emissiveMap", mGbuffer->GetTexture(EG::GBufferTextureType::EMISSIVE), 1);
 				luminanceProgram->SetUniform("u_threshold", mToneMapSettings.mThreshold);
 				mBatch->Begin();
 				{
@@ -463,7 +483,7 @@ namespace Enjon { namespace Graphics {
     		EG::RenderTarget* target = isEven ? mSmallBlurHorizontal : mSmallBlurVertical;
     		EG::GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
 
-			target->Bind();
+			target->Bind(EG::RenderTarget::BindType::WRITE);
 			{
 				program->Use();
 				{
@@ -499,7 +519,7 @@ namespace Enjon { namespace Graphics {
     		EG::RenderTarget* target = isEven ? mMediumBlurHorizontal : mMediumBlurVertical;
     		EG::GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
 
-			target->Bind();
+			target->Bind(EG::RenderTarget::BindType::WRITE);
 			{
 				program->Use();
 				{
@@ -535,7 +555,7 @@ namespace Enjon { namespace Graphics {
     		EG::RenderTarget* target = isEven ? mLargeBlurHorizontal : mLargeBlurVertical;
     		EG::GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
 
-			target->Bind();
+			target->Bind(EG::RenderTarget::BindType::WRITE);
 			{
 				program->Use();
 				{
@@ -639,7 +659,7 @@ namespace Enjon { namespace Graphics {
 
         // Queue up gui
         ImGuiManager::Render(mWindow.GetSDLWindow());
-		ImGuiManager::RenderGameUI(mWindow.GetSDLWindow(), mSceneCamera.GetView().elements, mSceneCamera.GetProjection().elements);
+		// ImGuiManager::RenderGameUI(&mWindow, mSceneCamera.GetView().elements, mSceneCamera.GetProjection().elements);
 
         // Flush
         glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
@@ -676,15 +696,15 @@ namespace Enjon { namespace Graphics {
 
 		mGbuffer 					= new EG::GBuffer(width, height);
 		mDebugTarget 				= new EG::RenderTarget(width, height);
-		mSmallBlurHorizontal 		= new EG::RenderTarget(width / 2, height / 2);
-		mSmallBlurVertical 			= new EG::RenderTarget(width / 2, height / 2);
-		mMediumBlurHorizontal 		= new EG::RenderTarget(width  / 4, height  / 4);
-		mMediumBlurVertical 		= new EG::RenderTarget(width  / 4, height  / 4);
-		mLargeBlurHorizontal 		= new EG::RenderTarget(width / 64, height / 64);
-		mLargeBlurVertical 			= new EG::RenderTarget(width / 64, height / 64);
+		mSmallBlurHorizontal 		= new EG::RenderTarget(width / 4, height / 4);
+		mSmallBlurVertical 			= new EG::RenderTarget(width / 4, height / 4);
+		mMediumBlurHorizontal 		= new EG::RenderTarget(width  / 8, height  / 8);
+		mMediumBlurVertical 		= new EG::RenderTarget(width  / 8, height  / 8);
+		mLargeBlurHorizontal 		= new EG::RenderTarget(width / 16, height / 16);
+		mLargeBlurVertical 			= new EG::RenderTarget(width / 16, height / 16);
 		mCompositeTarget 			= new EG::RenderTarget(width, height);
 		mLightingBuffer 			= new EG::RenderTarget(width, height);
-		mLuminanceTarget 			= new EG::RenderTarget(width / 4, height / 4);
+		mLuminanceTarget 			= new EG::RenderTarget(width / 2, height / 2);
 		mFXAATarget 				= new EG::RenderTarget(width, height);
 		mShadowDepth 				= new EG::RenderTarget(2048, 2048);
 		mFinalTarget 				= new EG::RenderTarget(width, height);
@@ -830,7 +850,7 @@ namespace Enjon { namespace Graphics {
 		    	}
 
 			    ImGui::SliderFloat("Scale##bloom", &mToneMapSettings.mBloomScalar, 0.01f, 100.0f, "%.2f");
-			    ImGui::SliderFloat("Threshold##bloom", &mToneMapSettings.mThreshold, 0.00f, 4.0f, "%.2f");
+			    ImGui::SliderFloat("Threshold##bloom", &mToneMapSettings.mThreshold, 0.00f, 100.0f, "%.2f");
 
 			    ImGui::TreePop();
 		    }
@@ -892,13 +912,44 @@ namespace Enjon { namespace Graphics {
                 }
 	    	}
 
-    		const char* string_name = "Final";
-    		ImGui::Text(string_name);
-		    ImTextureID img = (ImTextureID)mCompositeTarget->GetTexture();
-            if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
-            {
-		        mCurrentRenderTexture = mCompositeTarget->GetTexture(); 
-            }
+	    	{
+	    		const char* string_name = "SmallBloom";
+	    		ImGui::Text(string_name);
+			    ImTextureID img = (ImTextureID)mSmallBlurVertical->GetTexture();
+	            if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
+	            {
+			        mCurrentRenderTexture = mSmallBlurVertical->GetTexture(); 
+	            }
+	    	}
+
+	    	{
+	    		const char* string_name = "MediumBloom";
+	    		ImGui::Text(string_name);
+			    ImTextureID img = (ImTextureID)mMediumBlurVertical->GetTexture();
+	            if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
+	            {
+			        mCurrentRenderTexture = mMediumBlurVertical->GetTexture(); 
+	            }
+	    	}
+	    	{
+	    		const char* string_name = "LargeBloom";
+	    		ImGui::Text(string_name);
+			    ImTextureID img = (ImTextureID)mLargeBlurVertical->GetTexture();
+	            if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
+	            {
+			        mCurrentRenderTexture = mLargeBlurVertical->GetTexture(); 
+	            }
+	    	}
+
+	    	{
+	    		const char* string_name = "Final";
+	    		ImGui::Text(string_name);
+			    ImTextureID img = (ImTextureID)mFXAATarget->GetTexture();
+	            if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
+	            {
+			        mCurrentRenderTexture = mFXAATarget->GetTexture(); 
+	            }
+	    	}
 
 	    	ImGui::PopStyleColor(1);
 	    	ImGui::PopFont();

@@ -852,7 +852,7 @@ namespace ImGuizmo
          }
          drawList->AddPolyline(circlePos, halfCircleSegmentCount, colors[3 - axis], false, 2, true);
       }
-      drawList->AddCircle(worldToPos(gContext.mModel.v.position, gContext.mViewProjection), 0.06f * io.DisplaySize.x, colors[0], 64);
+      drawList->AddCircle(worldToPos(gContext.mModel.v.position, gContext.mViewProjection), 0.06f * io.DisplaySize.x, colors[0], 64, 1.0f);
 
       if (gContext.mbUsing)
       {
@@ -979,7 +979,7 @@ namespace ImGuizmo
             ImVec2 baseSSpace = worldToPos(dirPlaneX * 0.1f * gContext.mScreenFactor, gContext.mMVP);
             ImVec2 worldDirSSpace = worldToPos(dirPlaneX * gContext.mScreenFactor, gContext.mMVP);
 
-            drawList->AddLine(baseSSpace, worldDirSSpace, colors[i + 1], 6.f);
+            drawList->AddLine(baseSSpace, worldDirSSpace, colors[i + 1], 10.f);
             
             if (gContext.mAxisFactor[i] < 0.f)
                DrawHatchedAxis(dirPlaneX);
@@ -1016,6 +1016,7 @@ namespace ImGuizmo
          drawList->AddText(ImVec2(destinationPosOnScreen.x + 15, destinationPosOnScreen.y + 15), 0xFF000000, tmps);
          drawList->AddText(ImVec2(destinationPosOnScreen.x + 14, destinationPosOnScreen.y + 14), 0xFFFFFFFF, tmps);
       }
+
    }
 
    static void HandleAndDrawLocalBounds(float *bounds, matrix_t *matrix, float *snapValues)

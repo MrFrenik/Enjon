@@ -1,6 +1,9 @@
 #include "ImGui/ImGuiManager.h"
 #include "ImGui/imgui_impl_sdl_gl3.h"
 #include "Graphics/Camera.h"
+#include "Graphics/Window.h"
+#include "System/Types.h"
+#include "Defines.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -55,13 +58,28 @@ namespace Enjon
 		mWindows.push_back(func);
 	}
 
-	void ImGuiManager::RenderGameUI(SDL_Window* window, f32* view, f32* projection)
+	void ImGuiManager::RenderGameUI(EG::Window* window, f32* view, f32* projection)
 	{
 	    // Make a new window
 		// ImGui_ImplSdlGL3_NewFrame(window);
 
+		// Original screen coords
+		auto dimensions = window->GetViewport();
+		EM::Vec2 center = EM::Vec2((f32)dimensions.x / 2.0f, (f32)dimensions.y / 2.0f);
+
 	    ImGuizmo::BeginFrame();
 		static auto model = EM::Mat4::Identity();
+		EM::Vec2 translate(0, 0);
+    	ImGui::SliderFloat("Translate X", &translate.x, 0.0f, 1.0f);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
+    	ImGui::SliderFloat("Translate Y", &translate.y, 0.0f, 1.0f);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
+
+    	EM::Vec3 scale(1, 1, 1);
+    	ImGui::SliderFloat("Scale X", &scale.x, 0.01f, 1.0);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
+    	ImGui::SliderFloat("Scale Y", &scale.y, 0.01f, 1.0);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
+    	ImGui::SliderFloat("Scale Z", &scale.z, 0.01f, 1.0);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
+
+    	model *= EM::Mat4::Translate(EM::Vec3(translate, 0.0f));
+    	model *= EM::Mat4::Scale(scale);
 
 	    // Imguizmo 
 	    static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);

@@ -8,6 +8,7 @@
 #include "Math/Transform.h"
 
 #include "System/Types.h"
+#include "Defines.h"
 
 #include <array>
 #include <vector>
@@ -52,6 +53,12 @@ namespace Enjon {
 			template <typename T>
 			void Detach();
 
+			void SetLocalTransform(EM::Transform& transform);
+			EM::Transform GetLocalTransform();
+
+			void SetWorldTransform(EM::Transform& transform);
+			EM::Transform GetWorldTransform();
+
 			void SetWorldPosition(EM::Vec3& position);
 			void SetWorldScale(EM::Vec3& scale);
 			void SetWorldOrientation(EM::Quaternion& orientation);
@@ -68,17 +75,23 @@ namespace Enjon {
 			EM::Vec3 GetWorldScale();
 			EM::Quaternion GetWorldOrientation();
 
+			EntityHandle* GetParent() { return mParent; }
+
+			EM::Transform mLocalTransform;
+			EM::Transform mWorldTransform;
+
+			EntityHandle* AddChild(EntityHandle* child);
+			void DetachChild(EntityHandle* child);	
+
+		protected:
 			void SetParent(EntityHandle* parent);
-
-			EntityHandle* GetParent() const { return mParent; }
-
-			Enjon::Math::Transform mLocalTransform;
-			Enjon::Math::Transform mWorldTransform;
+			EntityHandle* RemoveParent();
 
 		private:
 			void SetID(u32 id);
 			void Reset();
 
+			void UpdateAllChildrenTransforms();
 			void UpdateComponentTransforms();
 
 			u32 mID;	
@@ -86,6 +99,7 @@ namespace Enjon {
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
 			std::vector<Component*> mComponents;
+			std::vector<EntityHandle*> mChildren;
 			Enjon::EntityState mState;
 	};
 

@@ -25,6 +25,7 @@ namespace Enjon { namespace Math {
 
 		// Multiplication of this transform with another
 		Transform operator*(Transform& Parent) const;	
+		Transform& operator*=(Transform& parent);
 
 		// Friend operator for dividing two transforms
 		friend Transform operator/(Transform& World, Transform& Parent);

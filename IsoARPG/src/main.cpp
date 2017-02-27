@@ -8504,6 +8504,12 @@ Enjon::EntityHandle* handle1;
 Enjon::EntityHandle* handle2;
 Enjon::EntityHandle* handle3;
 Enjon::EntityHandle* handle4;
+Enjon::EntityHandle* handle5;
+Enjon::EntityHandle* handle6;
+Enjon::EntityHandle* handle7;
+Enjon::EntityHandle* handle8;
+Enjon::EntityHandle* handle9;
+Enjon::EntityHandle* handle10;
 
 EG::Mesh* mesh;
 EG::Mesh* mesh2;
@@ -8511,6 +8517,9 @@ EG::Mesh* mesh3;
 EG::Mesh* mesh4;
 EG::Mesh* mesh5;
 EG::Mesh* mesh6;
+EG::Mesh* mesh7;
+EG::Mesh* mesh8;
+EG::Mesh* mesh9;
 EG::Material* mat;
 EG::Material* mat2;
 EG::Material* mat3;
@@ -8518,6 +8527,12 @@ EG::Material* mat4;
 EG::Material* mat5;
 EG::Material* mat6;
 EG::Material* mat7;
+EG::Material* mat8;
+EG::Material* mat9;
+EG::Material* mat10;
+EG::Material* mat11;
+EG::Material* mat12;
+EG::Material* mat13;
 
 bool mMovementOn = true;
 
@@ -8570,16 +8585,34 @@ int main(int argc, char** argv)
 	handle2 = mEntities->Allocate();
 	handle3 = mEntities->Allocate();
 	handle4 = mEntities->Allocate();
+	handle5 = mEntities->Allocate();
+	handle6 = mEntities->Allocate();
+	handle7 = mEntities->Allocate();
+	handle8 = mEntities->Allocate();
+	handle9 = mEntities->Allocate();
+	handle10 = mEntities->Allocate();
 
 	auto gc = handle1->Attach<Enjon::GraphicsComponent>();
 	auto gc2 = handle2->Attach<Enjon::GraphicsComponent>();
 	auto gc3 = handle3->Attach<Enjon::GraphicsComponent>();
 	auto gc4 = handle4->Attach<Enjon::GraphicsComponent>();
+	auto gc5 = handle5->Attach<Enjon::GraphicsComponent>();
+	auto gc6 = handle6->Attach<Enjon::GraphicsComponent>();
+	auto gc7 = handle7->Attach<Enjon::GraphicsComponent>();
+	auto gc8 = handle8->Attach<Enjon::GraphicsComponent>();
+	auto gc9 = handle9->Attach<Enjon::GraphicsComponent>();
+	auto gc10 = handle10->Attach<Enjon::GraphicsComponent>();
 
 	EG::Renderable* renderable = gc->GetRenderable();
 	EG::Renderable* renderable2 = gc2->GetRenderable();
 	EG::Renderable* renderable3 = gc3->GetRenderable();
 	EG::Renderable* renderable4 = gc4->GetRenderable();
+	EG::Renderable* renderable5 = gc5->GetRenderable();
+	EG::Renderable* renderable6 = gc6->GetRenderable();
+	EG::Renderable* renderable7 = gc7->GetRenderable();
+	EG::Renderable* renderable8 = gc8->GetRenderable();
+	EG::Renderable* renderable9 = gc9->GetRenderable();
+	EG::Renderable* renderable10 = gc10->GetRenderable();
 
 	mSun = EG::DirectionalLight(EM::Vec3(-0.523f, 1.0f, 0.286f), EG::RGBA16_Orange(), 20.0f);
 	mSun2 = EG::DirectionalLight(EM::Vec3(0.5f, 0.5f, -0.75f), EG::RGBA16_SkyBlue(), 10.0f);
@@ -8593,6 +8626,9 @@ int main(int argc, char** argv)
 	mesh4 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/shaderball.obj");
 	mesh5 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_cube.obj");
 	mesh6 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_sphere.obj");
+	mesh7 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/bunny.obj");
+	mesh8 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/dragon.obj");
+	mesh9 = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/arrow.obj");
 	mat = new EG::Material();
 	mat2 = new EG::Material();
 	mat3 = new EG::Material();
@@ -8600,6 +8636,12 @@ int main(int argc, char** argv)
 	mat5 = new EG::Material();
 	mat6 = new EG::Material();
 	mat7 = new EG::Material();
+	mat8 = new EG::Material();
+	mat9 = new EG::Material();
+	mat10 = new EG::Material();
+	mat11 = new EG::Material();
+	mat12 = new EG::Material();
+	mat13 = new EG::Material();
 
 	mat->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Albedo.png"));
 	mat->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png"));
@@ -8615,7 +8657,7 @@ int main(int argc, char** argv)
 	mat3->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Normal.png"));
 	mat3->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png"));
 	mat3->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png"));
-	mat3->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png"));
+	mat3->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptileblue.png"));
 
 	mat4->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Albedo.png"));
 	mat4->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Normal.png"));
@@ -8639,10 +8681,47 @@ int main(int argc, char** argv)
 	mat7->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png"));
 	mat7->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Metallic.png"));
 	mat7->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Roughness.png"));
-	mat7->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/emissive2.png"));
+	mat7->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Emissive.png"));
 
-	renderable->SetMesh(mesh3);
+	mat8->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptilered.png"));
+	mat8->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png"));
+	mat8->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Metallic.png"));
+	mat8->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Roughness.png"));
+	mat8->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptilered.png"));
+
+	mat9->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/up_gradient_N.png"));
+	mat9->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png"));
+	mat9->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Metallic.png"));
+	mat9->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Roughness.png"));
+
+	mat10->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../Assets/Textures/green.png"));
+	mat10->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png"));
+	mat10->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../Assets/Textures/grey.png"));
+	mat10->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../Assets/Textures/white.png"));
+	mat10->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../Assets/Textures/green.png"));
+
+	mat11->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../Assets/Textures/red.png"));
+	mat11->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png"));
+	mat11->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../Assets/Textures/grey.png"));
+	mat11->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../Assets/Textures/white.png"));
+	mat11->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../Assets/Textures/red.png"));
+
+	mat12->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../Assets/Textures/blue.png"));
+	mat12->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png"));
+	mat12->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../Assets/Textures/grey.png"));
+	mat12->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../Assets/Textures/white.png"));
+	mat12->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../Assets/Textures/blue.png"));
+
+	mat13->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../Assets/Textures/white.png"));
+	mat13->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/front_normal.png"));
+	mat13->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../Assets/Textures/grey.png"));
+	mat13->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../Assets/Textures/white.png"));
+	mat13->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../Assets/Textures/white.png"));
+
+	renderable->SetMesh(mesh2);
 	renderable->SetMaterial(mat7);
+	renderable->SetScale(4.0f);
+	renderable->SetPosition(EM::Vec3(0, 2, 0));
 
 	renderable2->SetMesh(mesh2);
 	renderable2->SetMaterial(mat);
@@ -8663,6 +8742,35 @@ int main(int argc, char** argv)
 
 	renderable4->SetPosition(EM::Vec3(5, 1.0f, -5.0f));
 	renderable4->SetScale(0.5f);
+
+	renderable5->SetMesh(mesh7);
+	renderable5->SetMaterial(mat8);
+	renderable5->SetPosition(EM::Vec3(5, 1, -4));
+	renderable5->SetScale(1.0f);
+
+	renderable6->SetMesh(mesh8);
+	renderable6->SetMaterial(mat9);
+	renderable6->SetPosition(EM::Vec3(5, 1, 2));
+	renderable6->SetScale(1.0f);
+
+	renderable7->SetMesh(mesh9);
+	renderable7->SetMaterial(mat10);
+	renderable7->SetPosition(EM::Vec3(-5, 2, 5));
+
+	renderable8->SetMesh(mesh9);
+	renderable8->SetMaterial(mat11);
+	renderable8->SetPosition(EM::Vec3(-5, 2, 5));
+	renderable8->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(90.0f), EM::Vec3(1, 0, 0)));
+
+	renderable9->SetMesh(mesh9);
+	renderable9->SetMaterial(mat12);
+	renderable9->SetPosition(EM::Vec3(-5, 2, 5));
+	renderable9->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(90.0f), EM::Vec3(0, 0, 1)));
+
+	renderable10->SetMesh(mesh);
+	renderable10->SetMaterial(mat13);
+	renderable10->SetPosition(EM::Vec3(-5, 2, 5));
+
 
 	auto plc = mEntities->Attach<Enjon::PointLightComponent>(handle2);
 	plc->SetIntensity(100.0f);
@@ -8687,6 +8795,12 @@ int main(int argc, char** argv)
 	scene->AddRenderable(gc2->GetRenderable());
 	scene->AddRenderable(gc3->GetRenderable());
 	scene->AddRenderable(gc4->GetRenderable());
+	scene->AddRenderable(gc5->GetRenderable());
+	scene->AddRenderable(gc6->GetRenderable());
+	scene->AddRenderable(gc7->GetRenderable());
+	scene->AddRenderable(gc8->GetRenderable());
+	scene->AddRenderable(gc9->GetRenderable());
+	scene->AddRenderable(gc10->GetRenderable());
 	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_White(), 0.1f));
 	scene->AddQuadBatch(&mBatch);
 
@@ -8971,13 +9085,13 @@ int main(int argc, char** argv)
     		if (body && body->getMotionState())
     		{
     			body->getMotionState()->getWorldTransform(trans);
-    			if (handle1 && handle->HasComponent<Enjon::GraphicsComponent>())
+    			if (handle && handle->HasComponent<Enjon::GraphicsComponent>())
     			{
     				auto gComp = handle->GetComponent<Enjon::GraphicsComponent>();
     				auto pos = EM::Vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
     				auto rot = EM::Quaternion(-trans.getRotation().x(), -trans.getRotation().y(), -trans.getRotation().z(), trans.getRotation().w());
     				gComp->SetPosition(EM::Vec3(pos));
-    				gComp->SetOrientation(rot);
+    				gComp->SetOrientation(rot); 
     			}
     		}
     	}
@@ -9007,6 +9121,70 @@ int main(int argc, char** argv)
 		{
 			auto gComp = handle1->GetComponent<Enjon::GraphicsComponent>();
 			gComp->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
+		}
+
+		if (handle9 && handle9->HasComponent<Enjon::GraphicsComponent>())
+		{
+			auto gComp = handle9->GetComponent<Enjon::GraphicsComponent>();
+
+			// Get position
+			auto position = gComp->GetPosition();
+			// Camera position
+			auto camPosition = mGraphicsEngine.GetSceneCamera()->GetPosition();
+			// Distance
+			auto distance = (camPosition - position).Length() / 20.0f;
+			// Clamp distance 
+			distance = EM::MinClamp(distance, 0.05f);
+
+			gComp->SetScale(distance);
+		}
+
+		if (handle8 && handle8->HasComponent<Enjon::GraphicsComponent>())
+		{
+			auto gComp = handle8->GetComponent<Enjon::GraphicsComponent>();
+
+			// Get position
+			auto position = gComp->GetPosition();
+			// Camera position
+			auto camPosition = mGraphicsEngine.GetSceneCamera()->GetPosition();
+			// Distance
+			auto distance = (camPosition - position).Length() / 20.0f;
+			// Clamp distance 
+			distance = EM::MinClamp(distance, 0.05f);
+
+			gComp->SetScale(distance);
+		}
+
+		if (handle7 && handle7->HasComponent<Enjon::GraphicsComponent>())
+		{
+			auto gComp = handle7->GetComponent<Enjon::GraphicsComponent>();
+
+			// Get position
+			auto position = gComp->GetPosition();
+			// Camera position
+			auto camPosition = mGraphicsEngine.GetSceneCamera()->GetPosition();
+			// Distance
+			auto distance = (camPosition - position).Length() / 20.0f;
+			// Clamp distance 
+			distance = EM::MinClamp(distance, 0.05f);
+
+			gComp->SetScale(distance);
+		}
+
+		if (handle10 && handle10->HasComponent<Enjon::GraphicsComponent>())
+		{
+			auto gComp = handle10->GetComponent<Enjon::GraphicsComponent>();
+
+			// Get position
+			auto position = gComp->GetPosition();
+			// Camera position
+			auto camPosition = mGraphicsEngine.GetSceneCamera()->GetPosition();
+			// Distance
+			auto distance = (camPosition - position).Length() / 100.0f;
+			// Clamp distance 
+			distance = EM::MinClamp(distance, 0.005f);
+
+			gComp->SetScale(distance);
 		}
 
 		// Get active entities
