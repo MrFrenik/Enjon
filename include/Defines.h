@@ -26,4 +26,14 @@
 #define ECSS	ECS::Systems
 #define EScript	Enjon::Scripting
 
+namespace Enjon
+{
+	enum class Result
+	{
+		SUCCESS,
+		FAILURE,
+		UNKNOWN_ERROR
+	};
+}
+
 #endif

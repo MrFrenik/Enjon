@@ -8467,7 +8467,7 @@ int main(int argc, char** argv)
 
 // Refactor
 
-#if 1
+#if 0
 
 #include <iostream>
 #include <stdio.h>
@@ -8734,7 +8734,7 @@ int main(int argc, char** argv)
 	renderable4->SetMesh(mesh6);
 	renderable4->SetMaterial(mat5);
 
-	handle2->SetWorldPosition(EM::Vec3(5, 2, 0));
+	handle2->SetPosition(EM::Vec3(5, 2, 0));
 	renderable2->SetPosition(EM::Vec3(5, 2, 0));
 
 	renderable3->SetPosition(EM::Vec3(5, 0.5f, 3));
@@ -9655,26 +9655,31 @@ int main(int argc, char** argv)
 #endif
 
 
-#if 0
+#if 1
+
+#include <Enjon.h>
+
+#include "Game.h"
 
 #include <stdio.h>
 
+Enjon::Engine mEngine;
+Game mGame;
+
+#undef main
 int main(int argc, char** argv)
 {
-	double R2 = 2.5;
-	double R3 = 1.5;
-	double e1 = 18.0;
-	double e2 = 45.0;
-	double r1 = 0.5;
-	double r2 = 0.5f;
+	// Startup engine
+	mEngine.StartUp(&mGame);
 
-	double i2 = 0.99;
+	// Run engine loop
+	Enjon::Result res = mEngine.Run();
 
-	double i3 = (R2*i2 - e1 + r1*i2 + e2) / (R3 + r2);
-
-	printf("i3: %f\n", i3); 	
-
-
+	// Capture exit status and report
+	if (res == Enjon::Result::SUCCESS)
+		printf("Exit successful.\n");
+	else
+		printf("Exit failed.\n");
 
 	return 0;	
 }

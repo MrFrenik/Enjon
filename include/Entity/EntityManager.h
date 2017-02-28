@@ -59,13 +59,9 @@ namespace Enjon {
 			void SetWorldTransform(EM::Transform& transform);
 			EM::Transform GetWorldTransform();
 
-			void SetWorldPosition(EM::Vec3& position);
-			void SetWorldScale(EM::Vec3& scale);
-			void SetWorldOrientation(EM::Quaternion& orientation);
-
-			void SetLocalPosition(EM::Vec3& position);
-			void SetLocalScale(EM::Vec3& scale);
-			void SetLocalOrientation(EM::Quaternion& orientation);
+			void SetPosition(EM::Vec3& position);
+			void SetScale(EM::Vec3& scale);
+			void SetOrientation(EM::Quaternion& orientation);
 
 			EM::Vec3 GetLocalPosition();
 			EM::Vec3 GetLocalScale();
@@ -77,15 +73,13 @@ namespace Enjon {
 
 			EntityHandle* GetParent() { return mParent; }
 
-			EM::Transform mLocalTransform;
-			EM::Transform mWorldTransform;
-
 			EntityHandle* AddChild(EntityHandle* child);
 			void DetachChild(EntityHandle* child);	
 
 		protected:
 			void SetParent(EntityHandle* parent);
 			EntityHandle* RemoveParent();
+
 
 		private:
 			void SetID(u32 id);
@@ -96,6 +90,8 @@ namespace Enjon {
 
 			u32 mID;	
 			EntityHandle* mParent;
+			EM::Transform mLocalTransform;
+			EM::Transform mWorldTransform;
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
 			std::vector<Component*> mComponents;

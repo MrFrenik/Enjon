@@ -63,12 +63,6 @@ namespace Enjon {
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::SetWorldTransform(EM::Transform& transform)
-	{
-		mWorldTransform = transform;
-	}
-
-	//---------------------------------------------------------------
 	EM::Transform EntityHandle::GetWorldTransform()
 	{
 		EM::Transform result = mLocalTransform;
@@ -91,37 +85,19 @@ namespace Enjon {
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::SetWorldPosition(EM::Vec3& position)
-	{
-		mWorldTransform.SetPosition(position);
-	}
-
-	//---------------------------------------------------------------
-	void EntityHandle::SetWorldScale(EM::Vec3& scale)
-	{
-		mWorldTransform.SetScale(scale);
-	}
-
-	//---------------------------------------------------------------
-	void EntityHandle::SetWorldOrientation(EM::Quaternion& orientation)
-	{
-		mWorldTransform.SetOrientation(orientation);
-	}
-
-	//---------------------------------------------------------------
-	void EntityHandle::SetLocalPosition(EM::Vec3& position)
+	void EntityHandle::SetPosition(EM::Vec3& position)
 	{
 		mLocalTransform.SetPosition(position);
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::SetLocalScale(EM::Vec3& scale)
+	void EntityHandle::SetScale(EM::Vec3& scale)
 	{
 		mLocalTransform.SetScale(scale);
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::SetLocalOrientation(EM::Quaternion& orientation)
+	void EntityHandle::SetOrientation(EM::Quaternion& orientation)
 	{
 		mLocalTransform.SetOrientation(orientation);
 	}
