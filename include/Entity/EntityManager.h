@@ -25,12 +25,6 @@ namespace Enjon {
 		ACTIVE
 	};
 
-	enum class EntityTransformSpace
-	{
-		LOCAL,
-		WORLD
-	};
-
 	class EntityHandle
 	{
 		friend EntityManager; 
@@ -56,7 +50,6 @@ namespace Enjon {
 			void SetLocalTransform(EM::Transform& transform);
 			EM::Transform GetLocalTransform();
 
-			void SetWorldTransform(EM::Transform& transform);
 			EM::Transform GetWorldTransform();
 
 			void SetPosition(EM::Vec3& position);

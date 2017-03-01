@@ -140,7 +140,8 @@ namespace Enjon { namespace Graphics {
 		mWindow.Clear();
 
 		// ImGui pass
-		if (Enjon::Console::Visible())
+		// if (Enjon::Console::Visible())
+		if (true)
 		{
 			GuiPass();
 		}

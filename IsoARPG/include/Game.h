@@ -3,6 +3,17 @@
 
 #include "Application.h"
 
+namespace Enjon
+{
+	class EntityHandle;
+	class EntityManager;
+
+	namespace Graphics
+	{
+		class DirectionalLight;
+	}
+}
+
 class Game : public Enjon::Application
 {
 	public:
@@ -14,6 +25,9 @@ class Game : public Enjon::Application
 		virtual void Shutdown();
 
 	private:
+		Enjon::EntityManager* mEntities 		= nullptr;
+		Enjon::EntityHandle* mHandle 			= nullptr;
+		Enjon::Graphics::DirectionalLight* mSun = nullptr;
 };
 
 #endif

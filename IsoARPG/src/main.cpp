@@ -9681,6 +9681,8 @@ int main(int argc, char** argv)
 	else
 		printf("Exit failed.\n");
 
+	mEngine.ShutDown();
+
 	return 0;	
 }
 

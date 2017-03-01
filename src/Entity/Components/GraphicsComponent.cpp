@@ -49,7 +49,7 @@ namespace Enjon
 	}
 
 	//--------------------------------------------------------------------
-	void GraphicsComponent::SetScale(f32& scale)
+	void GraphicsComponent::SetScale(f32 scale)
 	{
 		mRenderable.SetScale(scale);
 	}

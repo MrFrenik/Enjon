@@ -51,7 +51,7 @@ namespace Enjon
 			void SetScale(EM::Vec3& scale);
 
 			/* Set scale of transform */
-			void SetScale(f32& scale);
+			void SetScale(f32 scale);
 
 			/* Set orientation of transform */
 			void SetOrientation(EM::Quaternion& orientation);

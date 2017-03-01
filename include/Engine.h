@@ -6,6 +6,16 @@
 
 namespace Enjon
 {
+	namespace Graphics
+	{
+		class DeferredRenderer;
+	}
+
+	namespace Input
+	{
+		class InputManager;
+	}
+
 	class Application;
 
 	class Engine
@@ -16,13 +26,27 @@ namespace Enjon
 			
 			Enjon::Result StartUp();
 			Enjon::Result StartUp(Application* app);
-			Engine* GetInstance();
 			Enjon::Result RegisterApplication(Application* app);
 			Enjon::Result Run();
+			Enjon::Result ShutDown();
+
+			// NOTE(): I don't like this and will use a type catalog to grab 
+			// registered subsystems "globally"
+			Graphics::DeferredRenderer* GetGraphics() { return mGraphics; }
+
+			static Engine* GetInstance();
+
+		private:
+			Enjon::Result InitSubsystems();
+			bool ProcessInput(Input::InputManager* input, float dt);
 
 		private:
 			static Engine* mInstance;
-			Application* mApp = nullptr;
+
+			Application* mApp 						= nullptr;
+			Graphics::DeferredRenderer* mGraphics 	= nullptr;
+			Input::InputManager* mInput 			= nullptr;
+
 	};
 }
 

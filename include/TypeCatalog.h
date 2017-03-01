@@ -1,55 +1,19 @@
-#ifndef ENJON_TYPE_CATALOG_H
-#define ENJON_TYPE_CATALOG_H
 #pragma once
+#ifndef ENJON_TYPECATALOG_H
+#define ENJON_TYPECATALOG_H
 
-// struct PositionComponent;
-// struct VelocityComponent;
-// struct TestComponent;
-// struct MovementComponent;
-// struct PointLightComponent;
+#include "System/Types.h"
 
-// #include <bitset>
+#include <unordered_map>
 
-/*
-// Generated code
-namespace TypeCatalog 
+namespace Enjon
 {
-	enum class ObjectMetaType
+	class TypeCatalog
 	{
-		None,
-		PositionComponent,
-		VelocityComponent,
-		TestComponent,
-		MovementComponent,
-		PointLightComponent,
-		COUNT
+		template <typename T>
+		void Register(T type);
 	};
+}
 
-
-	enum class ComponentType
-	{
-		COMPONENTTYPE_NONE,
-		COMPONENTTYPE_POSITION,
-		COMPONENTTYPE_VELOCITY,
-		COMPONENTTYPE_TEST,
-		COMPONENTTYPE_MOVEMENT,
-		COMPONENTTYPE_POINTLIGHT,
-		COUNT
-	};
-
-	typedef std::bitset<static_cast<size_t>(ComponentType::COUNT)> ComponentBitset;
-
-	template <typename T>
-	ComponentType GetType();
-
-	template <typename T>
-	ComponentBitset GetBitMask() 
-	{ 
-		ComponentBitset BitSet;
-		BitSet.set(static_cast<size_t>(GetType<T>()));
-		return BitSet;
-	}
-};
-*/
 
 #endif

@@ -2,6 +2,8 @@
 #ifndef ENJON_IM_GUI_MANAGER_H
 #define ENJON_IM_GUI_MANAGER_H
 
+
+#include "ImGui/imgui_impl_sdl_gl3.h"
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_dock.h"
 #include "ImGui/ImGuizmo.h"

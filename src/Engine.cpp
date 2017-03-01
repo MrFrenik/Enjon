@@ -1,5 +1,8 @@
 #include "Engine.h"
 #include "Application.h"
+#include "Graphics/DeferredRenderer.h"
+#include "IO/InputManager.h"
+#include "ImGui/ImGuiManager.h"
 
 #include "SDL2/sdl.h"
 
@@ -44,20 +47,62 @@ namespace Enjon
 		SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE,    8);
 		SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE,    8);
 
+		InitSubsystems();
+
 		return Enjon::Result::SUCCESS;
 	}
 
 	//-------------------------------------------------------
 	Enjon::Result Engine::StartUp(Application* app)
 	{
-		StartUp();
-		RegisterApplication(app);
+		// Register application 
+		Enjon::Result res = RegisterApplication(app);
+
+		if (res != Enjon::Result::SUCCESS)
+		{
+			// Error here
+			assert(false);
+			return res;
+		}
+
+		// Start up engine and subsystems
+		res = StartUp();
+		if (res != Enjon::Result::SUCCESS)
+		{
+			// Error here
+			assert(false);
+			return res;
+		}
+
+		// Return result
+		return res;
 	}
 
 	//-------------------------------------------------------
 	Engine* Engine::GetInstance()
 	{
 		return mInstance;
+	}
+
+	Enjon::Result Engine::InitSubsystems()
+	{
+		// Construct new graphics engine and initialize
+		mGraphics = new Enjon::Graphics::DeferredRenderer();	
+		mGraphics->Init();
+
+		// Construct new input manager
+		mInput = new Enjon::Input::InputManager();
+
+		// Initialize imgui manager
+		Enjon::ImGuiManager::Init(mGraphics->GetWindow()->GetSDLWindow());
+
+		// Initialize application if one is registered
+		if (mApp)
+		{
+			mApp->Initialize();
+		}
+
+		return Enjon::Result::SUCCESS;
 	}
 
 	//-------------------------------------------------------
@@ -80,16 +125,72 @@ namespace Enjon
 		bool mIsRunning = true;
 		while (mIsRunning)
 		{
+			mInput->Update();
+			
+			// Update input
+			mIsRunning = ProcessInput(mInput, dt);
+
 			// Update application
 			mApp->Update(dt);
 
+			// Update graphics
+			mGraphics->Update(dt);
+
 			// Increment dt
 			dt += 0.01f;
-
-			if (dt >= 1.0f) mIsRunning = false;
 		}
 
 		// Main engine loop here
 		return Enjon::Result::SUCCESS;
+	}
+
+	Enjon::Result Engine::ShutDown()
+	{
+		if (mApp)
+		{
+			mApp->Shutdown();
+		}
+
+		return Enjon::Result::SUCCESS;
+	}
+
+	bool Engine::ProcessInput(EI::InputManager* input, float dt) 
+	{
+	    SDL_Event event;
+	   //Will keep looping until there are no more events to process
+	    while (SDL_PollEvent(&event)) 
+	    {
+	    	ImGui_ImplSdlGL3_ProcessEvent(&event);
+
+	        switch (event.type) 
+	        {
+	            case SDL_QUIT:
+	                return false;
+	                break;
+				case SDL_KEYUP:
+					input->ReleaseKey(event.key.keysym.sym); 
+					break;
+				case SDL_KEYDOWN:
+					input->PressKey(event.key.keysym.sym);
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					input->PressKey(event.button.button);
+					break;
+				case SDL_MOUSEBUTTONUP:
+					input->ReleaseKey(event.button.button);
+					break;
+				case SDL_MOUSEMOTION:
+					input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+				default:
+					break;
+			}
+	    }
+
+	    if (input->IsKeyPressed(SDLK_ESCAPE))
+	    {
+	    	return false;
+	    }
+
+	    return true;
 	}
 }

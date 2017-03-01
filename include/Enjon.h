@@ -74,10 +74,9 @@
 
 #include "Physics/AABB.h"
 
+#include "TypeCatalog.h"
 #include "Engine.h"
-
 #include "Console.h"
-
 #include "Defines.h"
 
 
