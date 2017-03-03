@@ -3,10 +3,18 @@
 #include "Graphics/DeferredRenderer.h"
 #include "IO/InputManager.h"
 #include "ImGui/ImGuiManager.h"
+#include "Utils/Timing.h"
 
 #include "SDL2/sdl.h"
 
 #include <assert.h>
+#include <random>
+#include <time.h>
+
+// Totally temporary
+static bool mMovementOn = false;
+
+Enjon::Utils::FPSLimiter mLimiter;
 
 namespace Enjon
 {
@@ -102,6 +110,8 @@ namespace Enjon
 			mApp->Initialize();
 		}
 
+		mLimiter.Init(60.0f);
+
 		return Enjon::Result::SUCCESS;
 	}
 
@@ -121,14 +131,19 @@ namespace Enjon
 		// Assert that application is registered with engine
 		assert(mApp != nullptr);
 
+		// Seed random 
+		srand(time(NULL));
+
 		// Main application loop
 		bool mIsRunning = true;
 		while (mIsRunning)
 		{
+			mLimiter.Begin();
+
 			mInput->Update();
-			
+
 			// Update input
-			mIsRunning = ProcessInput(mInput, dt);
+			mIsRunning = ProcessInput(mInput, 0.1f);
 
 			// Update application
 			mApp->Update(dt);
@@ -136,8 +151,7 @@ namespace Enjon
 			// Update graphics
 			mGraphics->Update(dt);
 
-			// Increment dt
-			dt += 0.01f;
+			// mLimiter.End();
 		}
 
 		// Main engine loop here
@@ -154,7 +168,7 @@ namespace Enjon
 		return Enjon::Result::SUCCESS;
 	}
 
-	bool Engine::ProcessInput(EI::InputManager* input, float dt) 
+	bool Engine::ProcessInput(EI::InputManager* input, float dt)
 	{
 	    SDL_Event event;
 	   //Will keep looping until there are no more events to process
@@ -189,6 +203,71 @@ namespace Enjon
 	    if (input->IsKeyPressed(SDLK_ESCAPE))
 	    {
 	    	return false;
+	    }
+
+	    if (input->IsKeyPressed(SDLK_t))
+	    {
+	    	mMovementOn = !mMovementOn;
+			EG::Window* window = mGraphics->GetWindow();
+
+			if (!mMovementOn)
+			{
+				window->ShowMouseCursor(true);
+			}
+			else
+			{
+				window->ShowMouseCursor(false);
+			}
+	    }
+
+	    if (mMovementOn)
+	    {
+		    EG::Camera* camera = mGraphics->GetSceneCamera();
+		   	EM::Vec3 velDir(0, 0, 0); 
+		   	static float speed = 0.15f;
+
+			if (input->IsKeyDown(SDLK_w))
+			{
+				EM::Vec3 F = camera->Forward();
+				velDir += F;
+			}
+			if (input->IsKeyDown(SDLK_s))
+			{
+				EM::Vec3 B = camera->Backward();
+				velDir += B;
+			}
+			if (input->IsKeyDown(SDLK_a))
+			{
+				velDir += camera->Left();
+			}
+			if (input->IsKeyDown(SDLK_d))
+			{
+				velDir += camera->Right();
+			}
+
+			if (velDir.Length()) velDir = EM::Vec3::Normalize(velDir);
+
+			camera->Transform.Position += speed * dt * velDir;
+
+			auto MouseSensitivity = 2.0f;
+
+			// Get mouse input and change orientation of camera
+			auto MouseCoords = input->GetMouseCoords();
+
+			auto viewPort = mGraphics->GetViewport();
+
+			EG::Window* window = mGraphics->GetWindow();
+
+			window->ShowMouseCursor(false);
+
+			// Reset the mouse coords after having gotten the mouse coordinates
+			SDL_WarpMouseInWindow(window->GetWindowContext(), (float)viewPort.x / 2.0f, (float)viewPort.y / 2.0f);
+
+			camera->OffsetOrientation(
+										(EM::ToRadians(((float)viewPort.x / 2.0f - MouseCoords.x) * dt) * MouseSensitivity), 
+										(EM::ToRadians(((float)viewPort.y / 2.0f - MouseCoords.y) * dt) * MouseSensitivity)
+									);
+
 	    }
 
 	    return true;
