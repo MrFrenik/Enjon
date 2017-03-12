@@ -21,7 +21,7 @@ std::vector<T>* EntityManager::GetComponentList()
 
 //--------------------------------------------------------------------------
 template <typename T>
-T* EntityManager::Attach(Enjon::EntityHandle* entity)
+T* EntityManager::Attach(Enjon::Entity* entity)
 {
 	// Assert entity is valid
 	assert(entity != nullptr);
@@ -70,7 +70,7 @@ T* EntityManager::Attach(Enjon::EntityHandle* entity)
 
 //--------------------------------------------------------------------------
 template <typename T>
-void EntityManager::Detach(EntityHandle* entity)
+void EntityManager::Detach(Entity* entity)
 {
 	// Check to make sure isn't already attached to this entity
 	assert(entity->HasComponent<T>());
@@ -84,7 +84,7 @@ void EntityManager::Detach(EntityHandle* entity)
 
 //--------------------------------------------------------------------------
 template <typename T>
-T* EntityManager::GetComponent(EntityHandle* entity)
+T* EntityManager::GetComponent(Entity* entity)
 {
 	// Assert that it has component
 	assert(entity->HasComponent<T>());
@@ -114,7 +114,7 @@ T* EntityManager::GetComponent(EntityHandle* entity)
 
 //--------------------------------------------------------------------------
 template <typename T>
-void EntityManager::RemoveComponent(EntityHandle* entity)
+void EntityManager::RemoveComponent(Entity* entity)
 {
 	u32 idx = Enjon::GetComponentType<T>();
 	assert(mComponents.at(idx) != nullptr);

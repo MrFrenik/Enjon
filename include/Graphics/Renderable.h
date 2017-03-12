@@ -24,11 +24,11 @@ namespace Enjon { namespace Graphics {
 			/* Get scale of transform */
 			EM::Vec3 GetScale() { return mTransform.GetScale(); }
 
-			/* Get orientation of transform */
-			EM::Quaternion GetOrientation() { return mTransform.GetOrientation(); }
+			/* Get rotation of transform */
+			EM::Quaternion GetRotation() { return mTransform.GetRotation(); }
 
-			/* Offset orientation of transform */
-			void Renderable::OffsetOrientation(const f32& Yaw, const f32& Pitch);
+			/* Offset rotation of transform */
+			void Renderable::OffsetRotation(const f32& Yaw, const f32& Pitch);
 
 			/* Get material of renderable */
 			EG::Material* GetMaterial() { return mMaterial; }
@@ -39,8 +39,11 @@ namespace Enjon { namespace Graphics {
 			/* Get scene of renderable */
 			EG::Scene* GetScene() { return mScene; }
 
-			/* Get transform */
+			/* Gets world transform */
 			EM::Transform GetTransform() { return mTransform; }
+
+			/* Sets world transform */
+			void SetTransform(EM::Transform& transform) { mTransform = transform; }
 
 			/* Set position of transform */
 			void SetPosition(EM::Vec3& position);
@@ -51,8 +54,8 @@ namespace Enjon { namespace Graphics {
 			/* Set uniform scale of transform */
 			void SetScale(float scale);
 
-			/* Set orientation of transform */
-			void SetOrientation(EM::Quaternion& orientation);
+			/* Set rotation of transform */
+			void SetRotation(EM::Quaternion& rotation);
 
 			/* Set material of renderable */
 			void SetMaterial(EG::Material* material);

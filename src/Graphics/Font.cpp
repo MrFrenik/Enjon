@@ -202,7 +202,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	void PrintText(EM::Transform& Transform, std::string Text, Font* F, EG::QuadBatch& Batch, EG::ColorRGBA16 Color, float Spacing, TextStyle Style)
 	{
 		EM::Vec3& Position = Transform.Position;
-		EM::Quaternion& Rotation = Transform.Orientation;
+		EM::Quaternion& Rotation = Transform.Rotation;
 		EM::Vec3& Scale = Transform.Scale;
 
 		float x = Transform.Position.x;

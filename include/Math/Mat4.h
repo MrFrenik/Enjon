@@ -47,18 +47,9 @@ namespace Enjon { namespace Math {
 		friend std::ostream& operator<<(std::ostream& stream, const Mat4& Mat);
 
 	};
-
-
-
 }}
 
-
-
-
-
-
-
-
+typedef Enjon::Math::Mat4 mat4;
 
 
 #endif

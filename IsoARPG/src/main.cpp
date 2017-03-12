@@ -9688,7 +9688,35 @@ int main(int argc, char** argv)
 
 #endif
 
+#if 0
 
+#include <iostream>
+#include <cmath>
+
+#include <Math/Vec3.h>
+#include <System/Types.h>
+
+f64 pi = 3.14152965359;
+
+int main(int argc, char** argv)
+{
+	f64 N = 200.0;
+	f64 d = 0.18;
+	f64 r = d / 2.0;
+	f64 B = 0.55;
+	f64 f = 3300.0 * 0.0166;
+	f64 A = pi * r * r; 
+
+	f64 e = (N * B * A * 2.0 * pi * f);
+
+	std::cout << e << "\n";
+	
+
+	return 0;
+}
+
+
+#endif
 
 
 

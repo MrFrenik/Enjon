@@ -6,17 +6,17 @@ namespace Enjon { namespace Math {
 	Transform::Transform()
 		: 
 			Position(EM::Vec3(0.0f, 0.0f, 0.0f)), 
-			Orientation(EM::Quaternion(0, 0, 0, 1)), 
+			Rotation(EM::Quaternion(0, 0, 0, 1)), 
 			Scale(EM::Vec3(1, 1, 1))
 	{
 	}
 		
 	//-----------------------------------------------------------------------
-	Transform::Transform(EM::Vec3& _Position, EM::Quaternion& _Orientation, EM::Vec3& _Scale)
+	Transform::Transform(EM::Vec3& position, EM::Quaternion& rotation, EM::Vec3& scale)
 		: 
-			Position(_Position), 
-			Orientation(_Orientation), 
-			Scale(_Scale)
+			Position(position), 
+			Rotation(rotation), 
+			Scale(scale)
 	{
 	}
 
@@ -30,9 +30,9 @@ namespace Enjon { namespace Math {
 	{
 		Transform WorldSpace;
 
-		WorldSpace.Position 	= Parent.Position + Parent.Orientation * (Parent.Scale * Position); 	
-		WorldSpace.Orientation 	= Parent.Orientation * Orientation;
-		WorldSpace.Scale 		= Parent.Scale * (Parent.Orientation * Scale);
+		WorldSpace.Position 	= Parent.Position + Parent.Rotation * (Parent.Scale * Position); 	
+		WorldSpace.Rotation 	= Parent.Rotation * Rotation;
+		WorldSpace.Scale 		= Parent.Scale * Scale;
 
 		return WorldSpace;
 	}
@@ -48,10 +48,10 @@ namespace Enjon { namespace Math {
 	{
 		Transform Local;
 
-		auto ParentConjugate = Parent.Orientation.Conjugate();
+		auto ParentConjugate = Parent.Rotation.Conjugate();
 
 		Local.Position 		= (ParentConjugate * (World.Position - Parent.Position)) / Parent.Scale;
-		Local.Orientation 	= ParentConjugate * World.Orientation;
+		Local.Rotation 		= ParentConjugate * World.Rotation;
 		Local.Scale 		= ParentConjugate * (World.Scale / Parent.Scale);
 
 		return Local;
@@ -84,9 +84,9 @@ namespace Enjon { namespace Math {
 	}
 
 	//-----------------------------------------------------------------------
-	void Transform::SetOrientation(EM::Quaternion& orientation)
+	void Transform::SetRotation(EM::Quaternion& rotation)
 	{
-		Orientation = orientation;
+		Rotation = rotation;
 	}
 
 }}

@@ -19,7 +19,7 @@
 namespace Enjon {
 
 	// Forward declaration
-	class EntityHandle;
+	class Entity;
 	class EntityManager;
 	class Component;
 
@@ -32,7 +32,7 @@ namespace Enjon {
 	template <typename T>
 	class ComponentWrapper : public ComponentWrapperBase
 	{
-		friend EntityHandle; 
+		friend Entity; 
 		friend EntityManager;
 		friend Component;
 
@@ -49,14 +49,14 @@ namespace Enjon {
 
 	class Component
 	{
-		friend EntityHandle;
+		friend Entity;
 		friend EntityManager;
 
 		public:
 			Component(){}
 			virtual void Update(float dt) = 0;
 
-			EntityHandle* GetEntity();
+			Entity* GetEntity();
 			u32 GetID() const { return mID; }
 
 			EntityManager* GetEntityManager();
@@ -86,12 +86,12 @@ namespace Enjon {
 
 		private:
 			void SetEntityManager(EntityManager* manager);
-			void SetEntity(EntityHandle* entity);
+			void SetEntity(Entity* entity);
 			void SetID(u32 id);
 			void SetBase(ComponentWrapperBase* base);
 
 		protected:
-			Enjon::EntityHandle* mEntity = nullptr;
+			Enjon::Entity* mEntity = nullptr;
 			Enjon::EntityManager* mManager = nullptr;
 			Enjon::Math::Transform mTransform;
 			u32 mEntityID;

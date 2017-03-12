@@ -112,6 +112,9 @@ namespace Enjon
 
 		mLimiter.Init(60.0f);
 
+		// Late init for systems that need it
+		Enjon::ImGuiManager::LateInit(mGraphics->GetWindow()->GetSDLWindow());
+
 		return Enjon::Result::SUCCESS;
 	}
 
@@ -126,7 +129,7 @@ namespace Enjon
 
 	Enjon::Result Engine::Run()
 	{
-		static float dt = 0.0f;
+		static float dt = 0.1f;
 
 		// Assert that application is registered with engine
 		assert(mApp != nullptr);
@@ -143,7 +146,7 @@ namespace Enjon
 			mInput->Update();
 
 			// Update input
-			mIsRunning = ProcessInput(mInput, 0.1f);
+			mIsRunning = ProcessInput(mInput, dt);
 
 			// Update application
 			mApp->Update(dt);

@@ -93,8 +93,8 @@ namespace Enjon { namespace Math {
 		iVec2& operator*=(const int& scalar);
 
 	};
-		
-
 }}
+
+typedef Enjon::Math::Vec2 v2;
 
 #endif

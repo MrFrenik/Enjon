@@ -77,7 +77,7 @@ namespace Enjon { namespace Graphics {
 			shader->SetUniform("u_normalMap", 1);
 		shader->Unuse();
 
-		mShowGraphicsOptionsWindow = false;
+		mShowGraphicsOptionsWindow = true;
 		auto graphicsMenuOption = [&]()
 		{
         	ImGui::MenuItem("Graphics##options", NULL, &mShowGraphicsOptionsWindow);
@@ -98,7 +98,7 @@ namespace Enjon { namespace Graphics {
 		auto showGraphicsViewportFunc = [&]()
 		{
 			// Docking windows
-			if (ImGui::BeginDock("Graphics##viewport", &mShowGraphicsOptionsWindow))
+			if (ImGui::BeginDock("Graphics", &mShowGraphicsOptionsWindow))
 			{
 				// Print docking information
 				ShowGraphicsWindow(&mShowGraphicsOptionsWindow);
@@ -106,13 +106,30 @@ namespace Enjon { namespace Graphics {
 			ImGui::EndDock();
 		};
 
+	 	mShowStyles = true;
+	 	auto showStylesWindowFunc = [&]()
+	 	{
+			if (ImGui::BeginDock("Styles##options", &mShowStyles))
+			{
+				ImGui::ShowStyleEditor();	
+			}
+			ImGui::EndDock();
+	 	};
+
 		// ImGuiManager::Register(graphicsMenuOption);
+		// TODO(John): I HATE the way this looks
 		ImGuiManager::RegisterMenuOption("View", graphicsMenuOption);
 		ImGuiManager::RegisterWindow(showGameViewportFunc);
 		ImGuiManager::RegisterWindow(showGraphicsViewportFunc);
+		ImGuiManager::RegisterWindow(showStylesWindowFunc);
 
 		// Set current render texture
 		mCurrentRenderTexture = mFXAATarget->GetTexture();
+
+		// Register docking layouts
+	    ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Game View", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f));
+	    ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Graphics", nullptr, ImGui::DockSlotType::Slot_Right, 0.1f));
+	    ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Styles##options", nullptr, ImGui::DockSlotType::Slot_Bottom, 0.2f));
 
 		// TODO(): I don't like random raw gl calls just lying around...
 		glEnable(GL_DEPTH_TEST);
@@ -230,7 +247,7 @@ namespace Enjon { namespace Graphics {
 				{
 					EM::Mat4 Model;
 					Model *= EM::Mat4::Translate(renderable->GetPosition());
-					Model *= EM::QuaternionToMat4(renderable->GetOrientation());
+					Model *= EM::QuaternionToMat4(renderable->GetRotation());
 					Model *= EM::Mat4::Scale(renderable->GetScale());
 					shader->SetUniform("u_model", Model);
 					mesh->Submit();
@@ -995,6 +1012,7 @@ namespace Enjon { namespace Graphics {
 	    ImTextureID img = (ImTextureID)mCurrentRenderTexture;
 	    ImGui::Image(img, ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()), 
 	    				ImVec2(0,1), ImVec2(1,0), ImColor(255,255,255,255), ImColor(255,255,255,0));
+
 
 	}
 

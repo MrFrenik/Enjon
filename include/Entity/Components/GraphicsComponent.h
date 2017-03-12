@@ -27,7 +27,7 @@ namespace Enjon
 			EM::Vec3 GetScale() { return mRenderable.GetScale(); }
 
 			/* Get orientation of transform */
-			EM::Quaternion GetOrientation() { return mRenderable.GetOrientation(); }
+			EM::Quaternion GetRotation() { return mRenderable.GetRotation(); }
 
 			/* Get material of renderable */
 			EG::Material* GetMaterial() { return mRenderable.GetMaterial(); }
@@ -38,8 +38,11 @@ namespace Enjon
 			/* Get scene of renderable */
 			EG::Scene* GetScene() { return mRenderable.GetScene(); }
 
-			/* Get transform */
+			/* Get world transform */
 			EM::Transform GetTransform() { return mRenderable.GetTransform(); }
+
+			/* Sets world transform */
+			void SetTransform(EM::Transform& transform) { mRenderable.SetTransform(transform); }
 
 			/* Get renderable */
 			EG::Renderable* GetRenderable() { return &mRenderable; }
@@ -54,7 +57,7 @@ namespace Enjon
 			void SetScale(f32 scale);
 
 			/* Set orientation of transform */
-			void SetOrientation(EM::Quaternion& orientation);
+			void SetRotation(EM::Quaternion& rotation);
 
 			/* Set material of renderable */
 			void SetMaterial(EG::Material* material);

@@ -20,7 +20,7 @@ namespace Enjon { namespace Math {
 	{
 		// Default constructor
 		Transform();
-		Transform(EM::Vec3& _Position, EM::Quaternion& _Orientation, EM::Vec3& _Scale);
+		Transform(EM::Vec3& position, EM::Quaternion& rotation, EM::Vec3& scale);
 		~Transform();
 
 		// Multiplication of this transform with another
@@ -35,16 +35,16 @@ namespace Enjon { namespace Math {
 
 		EM::Vec3 GetPosition() { return Position; }
 		EM::Vec3 GetScale() { return Scale; }
-		EM::Quaternion GetOrientation() { return Orientation; }
+		EM::Quaternion GetRotation() { return Rotation; }
 
 		void SetPosition(EM::Vec3& position);
 		void SetScale(EM::Vec3& scale);
 		void SetScale(float scale);
-		void SetOrientation(EM::Quaternion& orientation);
+		void SetRotation(EM::Quaternion& rotation);
 
 		// Member variables
 		EM::Vec3 Position;
-		EM::Quaternion Orientation;
+		EM::Quaternion Rotation;
 		EM::Vec3 Scale;
 	};
 

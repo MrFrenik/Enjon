@@ -25,81 +25,132 @@ namespace Enjon {
 		ACTIVE
 	};
 
-	class EntityHandle
+	class Entity
 	{
 		friend EntityManager; 
 		public:
-			EntityHandle();
-			EntityHandle(EntityManager* manager);
-			~EntityHandle();
+			Entity();
+			Entity(EntityManager* manager);
+			~Entity();
 
+			/// @brief Get id of this entity
 			u32 GetID() { return mID; }
 
+			/// @brief Checks whether or not entity has given component
 			template <typename T>
 			bool HasComponent();
 
+			/// @brief Gets component from entity, if exists
 			template <typename T>
 			T* GetComponent();
 
+			/// @brief Attaches component to entity, if exists
 			template <typename T>
 			T* Attach();
 
+			/// @brief Detaches component from entity, if exists
 			template <typename T>
 			void Detach();
 
+			/// @brief Sets local transform of entity
 			void SetLocalTransform(EM::Transform& transform);
+
+			/// @brief Gets local transform of entity relative to parent entity, if exists
 			EM::Transform GetLocalTransform();
 
+			/// @brief Gets World transform of entity which calculates world transform if dirty flag is set
 			EM::Transform GetWorldTransform();
 
+			/// @brief Sets local position of entity relative to parent, if exists
 			void SetPosition(EM::Vec3& position);
+
+			/// @brief Sets local scale of entity relative to parent, if exists
 			void SetScale(EM::Vec3& scale);
-			void SetOrientation(EM::Quaternion& orientation);
 
+			/// @brief Sets local orientation of entity relative to parent, if exists
+			void SetRotation(EM::Quaternion& rotation);
+
+			/// @brief Gets local position of entity relative to parent, if exists
 			EM::Vec3 GetLocalPosition();
+
+			/// @brief Gets local scale of entity relative to parent, if exists
 			EM::Vec3 GetLocalScale();
-			EM::Quaternion GetLocalOrientation();
 
+			/// @brief Gets local rotation of entity relative to parent, if exists
+			EM::Quaternion GetLocalRotation();
+
+			/// @brief Gets World position of entity which calculates world transform if dirty flag is set
 			EM::Vec3 GetWorldPosition();
+
+			/// @brief Gets World scale of entity which calculates world transform if dirty flag is set
 			EM::Vec3 GetWorldScale();
-			EM::Quaternion GetWorldOrientation();
 
-			EntityHandle* GetParent() { return mParent; }
+			/// @brief Gets World rotation of entity which calculates world transform if dirty flag is set
+			EM::Quaternion GetWorldRotation();
 
-			EntityHandle* AddChild(EntityHandle* child);
-			void DetachChild(EntityHandle* child);	
+			/// @brief Gets parent of this entity, returns nullptr if doesn't exist
+			Entity* GetParent() { return mParent; }
+
+			/// @brief Registers a child with this entity
+			Entity* AddChild(Entity* child);
+
+			/// @brief Removes child from entity, if exists
+			void DetachChild(Entity* child);	
+
+			/// @brief Sets parent of entity, if one doesn't already exist
+			void SetParent(Entity* parent);
+
+			/// @brief Removes parent from entity, if one exists
+			Entity* RemoveParent();
+
+			/// @brief Returns whether or not has parent
+			b8 Entity::HasParent();
+
+			/// @brief Returns whether or not has children
+			b8 Entity::HasChildren();
 
 		protected:
-			void SetParent(EntityHandle* parent);
-			EntityHandle* RemoveParent();
+			/// @brief Calculates world transform with respect to parent heirarchy
+			void CalculateWorldTransform();
 
 
 		private:
+			/// @brief Sets id of entity - Entity Manager is responsible for this
 			void SetID(u32 id);
+
+			/// @brief Resets all appropriate fields and member variables for entity
 			void Reset();
 
-			void UpdateAllChildrenTransforms();
+			/// @brief Sets all child states to be updated
+			void SetAllChildWorldTransformsDirty();
+
+			/// @brief Propogates transform down through all children
+			void UpdateAllChildTransforms();
+
+			/// @brief Propogates transform down through all components
 			void UpdateComponentTransforms();
 
+		private:
 			u32 mID;	
-			EntityHandle* mParent;
+			b32 mWorldTransformDirty; 					// NOTE(): Necessary struct padding for alignment. Not too happy about it.
+			Entity* mParent;
 			EM::Transform mLocalTransform;
 			EM::Transform mWorldTransform;
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
 			std::vector<Component*> mComponents;
-			std::vector<EntityHandle*> mChildren;
+			std::vector<Entity*> mChildren;
 			Enjon::EntityState mState;
 	};
 
 	class EntityManager
 	{
-		friend EntityHandle;
+		friend Entity;
 		public:
 			EntityManager();
 			~EntityManager();
 
-			EntityHandle* Allocate();
+			Entity* Allocate();
 
 			void Update(f32 dt);
 
@@ -110,34 +161,34 @@ namespace Enjon {
 			std::vector<T>* GetComponentList();
 
 			template <typename T>
-			T* Attach(Enjon::EntityHandle* entity);
+			T* Attach(Enjon::Entity* entity);
 
 			template <typename T>
-			void Detach(EntityHandle* entity);
+			void Detach(Entity* entity);
 
 			template <typename T>
-			T* GetComponent(EntityHandle* entity);
+			T* GetComponent(Entity* entity);
 
-			void Destroy(EntityHandle* entity);
+			void Destroy(Entity* entity);
 
-			const std::vector<EntityHandle*>& GetActiveEntities() { return mActiveEntities; }
+			const std::vector<Entity*>& GetActiveEntities() { return mActiveEntities; }
 
 		private:
 			void EntityManager::Cleanup();
 
 			template <typename T>
-			void RemoveComponent(EntityHandle* entity);
+			void RemoveComponent(Entity* entity);
 
 			u32 FindNextAvailableID();
 
-			std::array<EntityHandle, MAX_ENTITIES>* mEntities;
+			std::array<Entity, MAX_ENTITIES>* mEntities;
 			std::array<ComponentWrapperBase*, static_cast<u32>(MAX_COMPONENTS)> mComponents;	
-			std::vector<EntityHandle*> mActiveEntities;
-			std::vector<EntityHandle*> mMarkedForDestruction;
+			std::vector<Entity*> mActiveEntities;
+			std::vector<Entity*> mMarkedForDestruction;
 			u32 mNextAvailableID = 0;
 	};
 
-	#include "Entity/EntityHandle.inl"
+	#include "Entity/Entity.inl"
 	#include "Entity/EntityManager.inl"
 }
 

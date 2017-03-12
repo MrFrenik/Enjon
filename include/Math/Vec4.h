@@ -85,9 +85,9 @@ namespace Enjon { namespace Math {
 		static Vec4 inline Normalize(const Vec4& vec) { return vec / vec.Length(); }
 		Vec3 XYZ();
 
-	}; 
-		
-
+	};
 }}
+
+typedef Enjon::Math::Vec4 v4;
 
 #endif

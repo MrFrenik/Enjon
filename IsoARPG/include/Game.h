@@ -5,11 +5,12 @@
 
 namespace Enjon
 {
-	class EntityHandle;
+	class Entity;
 	class EntityManager;
 
 	namespace Graphics
 	{
+		class QuadBatch;
 		class DirectionalLight;
 	}
 }
@@ -26,8 +27,13 @@ class Game : public Enjon::Application
 
 	private:
 		Enjon::EntityManager* mEntities 		= nullptr;
-		Enjon::EntityHandle* mHandle 			= nullptr;
+		Enjon::Entity* mGun 					= nullptr;
+		Enjon::Entity* mGreen 					= nullptr;
+		Enjon::Entity* mRed 					= nullptr;
 		Enjon::Graphics::DirectionalLight* mSun = nullptr;
+		Enjon::Graphics::QuadBatch* mBatch 		= nullptr;
+
+		bool mShowEntities = true;
 };
 
 #endif

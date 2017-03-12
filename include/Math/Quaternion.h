@@ -105,7 +105,7 @@ namespace Enjon { namespace Math {
 		f32 Yaw();
 
 		// Get Euler Angles from quaternion
-		EM::Vec3 QuaternionToEulerAngles();
+		EM::Vec3 EulerAngles();
 
 		static inline Quaternion AngleAxis(const f32& Angle, const Vec3& Axis)
 		{
@@ -250,10 +250,8 @@ namespace Enjon { namespace Math {
 		Vec3 T = 2.0f * Qxyz.Cross(V);
 		return (V + Q.w * T + Qxyz.Cross(T));
 	}
-
-
-
-
 }}
+
+typedef Enjon::Math::Quaternion quat;
 
 #endif

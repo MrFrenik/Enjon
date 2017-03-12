@@ -9,6 +9,7 @@
 #define YAXIS       Vec3(0.0f, 1.0f, 0.0f)
 #define ZAXIS       Vec3(0.0f, 0.0f, 1.0f)
 
+
 namespace Enjon { namespace Math { 
 
 	struct Vec3
@@ -82,5 +83,7 @@ namespace Enjon { namespace Math {
 		
 
 }}
+
+typedef Enjon::Math::Vec3 v3;
 
 #endif

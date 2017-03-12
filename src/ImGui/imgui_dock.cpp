@@ -1,6 +1,7 @@
 #include "ImGui/imgui.h"
 #define IMGUI_DEFINE_PLACEMENT_NEW
 #include "ImGui/imgui_internal.h"
+#include "ImGui/imgui_dock.h"
 
 ImVec2 operator+(ImVec2 lhs, ImVec2 rhs) {
     return ImVec2(lhs.x+rhs.x, lhs.y+rhs.y);
@@ -18,19 +19,6 @@ namespace ImGui
 {
 	struct DockContext
 	{
-		enum Slot_
-		{
-			Slot_Left,
-			Slot_Right,
-			Slot_Top,
-			Slot_Bottom,
-			Slot_Tab,
-
-			Slot_Float,
-			Slot_None
-		};
-
-
 		enum EndAction_
 		{
 			EndAction_None,
@@ -213,7 +201,6 @@ namespace ImGui
 
 		~DockContext() {}
 
-
 		Dock& getDock(const char* label, bool opened)
 		{
 			ImU32 id = ImHash(label, 0);
@@ -390,7 +377,7 @@ namespace ImGui
 		}
 
 
-		static ImRect getDockedRect(const ImRect& rect, Slot_ dock_slot)
+		static ImRect getDockedRect(const ImRect& rect, DockSlotType dock_slot)
 		{
 			ImVec2 half_size = rect.GetSize() * 0.5f;
 			switch (dock_slot)
@@ -404,7 +391,7 @@ namespace ImGui
 		}
 
 
-		static ImRect getSlotRect(ImRect parent_rect, Slot_ dock_slot)
+		static ImRect getSlotRect(ImRect parent_rect, DockSlotType dock_slot)
 		{
 			ImVec2 size = parent_rect.Max - parent_rect.Min;
 			ImVec2 center = parent_rect.Min + size * 0.5f;
@@ -419,7 +406,7 @@ namespace ImGui
 		}
 
 
-		static ImRect getSlotRectOnBorder(ImRect parent_rect, Slot_ dock_slot)
+		static ImRect getSlotRectOnBorder(ImRect parent_rect, DockSlotType dock_slot)
 		{
 			ImVec2 size = parent_rect.Max - parent_rect.Min;
 			ImVec2 center = parent_rect.Min + size * 0.5f;
@@ -467,7 +454,7 @@ namespace ImGui
 			for (int i = 0; i < (on_border ? 4 : 5); ++i)
 			{
 				ImRect r =
-					on_border ? getSlotRectOnBorder(rect, (Slot_)i) : getSlotRect(rect, (Slot_)i);
+					on_border ? getSlotRectOnBorder(rect, (DockSlotType)i) : getSlotRect(rect, (DockSlotType)i);
 				bool hovered = r.Contains(mouse_pos);
 				
 				canvas->AddRectFilled(r.Min, r.Max, hovered ? color_hovered : color);
@@ -475,10 +462,10 @@ namespace ImGui
 
 				if (!IsMouseDown(0))
 				{
-					doDock(dock, dest_dock ? dest_dock : getRootDock(), (Slot_)i);
+					doDock(dock, dest_dock ? dest_dock : getRootDock(), (DockSlotType)i);
 					return true;
 				}
-				ImRect docked_rect = getDockedRect(rect, (Slot_)i);
+				ImRect docked_rect = getDockedRect(rect, (DockSlotType)i);
 				canvas->AddRectFilled(docked_rect.Min, docked_rect.Max, GetColorU32(ImGuiCol_Button));
 			}
 			return false;
@@ -738,7 +725,7 @@ namespace ImGui
 		}
 
 
-		static void setDockPosSize(Dock& dest, Dock& dock, Slot_ dock_slot, Dock& container)
+		static void setDockPosSize(Dock& dest, Dock& dock, DockSlotType dock_slot, Dock& container, float weight = 0.5f)
 		{
 			IM_ASSERT(!dock.prev_tab && !dock.next_tab && !dock.children[0] && !dock.children[1]);
 
@@ -747,26 +734,32 @@ namespace ImGui
 			dock.pos = container.pos;
 			dock.size = container.size;
 
+			if (weight > 1.0f) weight = 1.0f;
+			if (weight < 0.0f) weight = 0.0f;
+
+			float dockWeight = weight;
+			float destWeight = 1.0f - weight;
+
 			switch (dock_slot)
 			{
 				case Slot_Bottom:
-					dest.size.y *= 0.5f;
-					dock.size.y *= 0.5f;
+					dest.size.y *= destWeight;
+					dock.size.y *= dockWeight;
 					dock.pos.y += dest.size.y;
 					break;
 				case Slot_Right:
-					dest.size.x *= 0.5f;
-					dock.size.x *= 0.5f;
+					dest.size.x *= destWeight;
+					dock.size.x *= dockWeight;
 					dock.pos.x += dest.size.x;
 					break;
 				case Slot_Left:
-					dest.size.x *= 0.5f;
-					dock.size.x *= 0.5f;
+					dest.size.x *= destWeight;
+					dock.size.x *= dockWeight;
 					dest.pos.x += dock.size.x;
 					break;
 				case Slot_Top:
-					dest.size.y *= 0.5f;
-					dock.size.y *= 0.5f;
+					dest.size.y *= destWeight;
+					dock.size.y *= dockWeight;
 					dest.pos.y += dock.size.y;
 					break;
 				default: IM_ASSERT(false); break;
@@ -783,7 +776,7 @@ namespace ImGui
 		}
 
 
-		void doDock(Dock& dock, Dock* dest, Slot_ dock_slot)
+		void doDock(Dock& dock, Dock* dest, DockSlotType dock_slot, float weight = 0.5f)
 		{
 			IM_ASSERT(!dock.parent);
 			if (!dest)
@@ -841,7 +834,7 @@ namespace ImGui
 				dock.parent = container;
 				dock.status = Status_Docked;
 
-				setDockPosSize(*dest, dock, dock_slot, *container);
+				setDockPosSize(*dest, dock, dock_slot, *container, weight);
 			}
 			dock.setActive();
 		}
@@ -865,7 +858,7 @@ namespace ImGui
 		}
 
 
-		static Slot_ getSlotFromLocationCode(char code)
+		static DockSlotType getSlotFromLocationCode(char code)
 		{
 			switch (code)
 			{
@@ -1072,7 +1065,6 @@ namespace ImGui
 
 		Dock* getDockByIndex(int idx) { return idx < 0 ? nullptr : m_docks[(int)idx]; }
 
-
 		void load()
 		{
 			for (int i = 0; i < m_docks.size(); ++i)
@@ -1137,11 +1129,22 @@ namespace ImGui
 			printf("done\n"); fflush(stdout);
 
 		}
+
+		void dockWith( const char* label, const char* containerLabel, DockSlotType slot, float weight )
+		{
+		    Dock& dock = getDock( label, true );
+		    Dock* container = ( containerLabel ) ? &getDock( containerLabel, true ) : getRootDock();
+
+		    if ( &dock == container )
+		        return;
+
+
+		    doUndock( dock );
+		    doDock( dock, container, slot, weight );
+		}
 	};
 
-
 	static DockContext g_dock;
-
 
 	void Print() {
 		for (int i = 0; i < g_dock.m_docks.size(); ++i)
@@ -1187,12 +1190,10 @@ namespace ImGui
 		g_dock.setDockActive();
 	}
 
-
 	bool BeginDock(const char* label, bool* opened, ImGuiWindowFlags extra_flags)
 	{
 		return g_dock.begin(label, opened, extra_flags);
 	}
-
 
 	void EndDock()
 	{
@@ -1207,6 +1208,13 @@ namespace ImGui
 	void LoadDock()
 	{
 		g_dock.load();
+	}
+
+
+
+	void DockWith( const char* dock, const char* container, DockSlotType slot, float weight)
+	{
+	    g_dock.dockWith( dock, container, slot, weight );
 	}
 
 } // namespace ImGui

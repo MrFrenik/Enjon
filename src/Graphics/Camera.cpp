@@ -67,7 +67,7 @@ namespace Enjon { namespace Graphics {
 		EM::Mat4 LA = EM::Mat4::LookAt(Pos, Position, Up);
 
 		// Set Transform
-		Transform.Orientation = EM::Mat4ToQuaternion(LA);
+		Transform.Rotation = EM::Mat4ToQuaternion(LA);
 	}
 
 	void Camera::OffsetOrientation(const f32& Yaw, const f32& Pitch)
@@ -75,37 +75,37 @@ namespace Enjon { namespace Graphics {
 		EM::Quaternion X = EM::Quaternion::AngleAxis(Yaw, 	EM::Vec3(0, 1, 0)); 	// Absolute Up
 		EM::Quaternion Y = EM::Quaternion::AngleAxis(Pitch, Right());				// Relative Right
 
-		Transform.Orientation = X * Y * Transform.Orientation;
+		Transform.Rotation = X * Y * Transform.Rotation;
 	}
 
 	EM::Vec3 Camera::Forward() const
 	{
-		return Transform.Orientation * EM::Vec3(0, 0, -1);
+		return Transform.Rotation * EM::Vec3(0, 0, -1);
 	}
 
 	EM::Vec3 Camera::Backward() const
 	{
-		return Transform.Orientation * EM::Vec3(0, 0, 1);
+		return Transform.Rotation * EM::Vec3(0, 0, 1);
 	}
 
 	EM::Vec3 Camera::Right() const
 	{
-		return Transform.Orientation * EM::Vec3(1, 0, 0);
+		return Transform.Rotation * EM::Vec3(1, 0, 0);
 	}
 
 	EM::Vec3 Camera::Left() const
 	{
-		return Transform.Orientation * EM::Vec3(-1, 0, 0);
+		return Transform.Rotation * EM::Vec3(-1, 0, 0);
 	}
 
 	EM::Vec3 Camera::Up() const
 	{
-		return Transform.Orientation * EM::Vec3(0, 1, 0);
+		return Transform.Rotation * EM::Vec3(0, 1, 0);
 	}
 
 	EM::Vec3 Camera::Down() const
 	{
-		return Transform.Orientation * EM::Vec3(0, -1, 0);
+		return Transform.Rotation * EM::Vec3(0, -1, 0);
 	}
 
 	EM::Mat4 Camera::GetViewProjectionMatrix() const
@@ -151,7 +151,7 @@ namespace Enjon { namespace Graphics {
 	{
 		EM::Mat4 View;
 
-		View =  EM::Mat4::Scale(EM::Vec3(1.0f, 1.0f, 1.0f) / Transform.Scale) * EM::QuaternionToMat4(Transform.Orientation) * EM::Mat4::Translate(Transform.Position * -1.0f);
+		View =  EM::Mat4::Scale(EM::Vec3(1.0f, 1.0f, 1.0f) / Transform.Scale) * EM::QuaternionToMat4(Transform.Rotation) * EM::Mat4::Translate(Transform.Position * -1.0f);
 
 		return View;
 	}

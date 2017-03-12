@@ -58,8 +58,11 @@ namespace Enjon {
 	using uint64 = unsigned __int64;
 #else
 	using int64 = signed long long;
-	using uint4 = unsigned long long;
+	using uint64 = unsigned long long;
 #endif
+
+	using u64 = uint64;
+	using s64 = int64;
 
 	// NOTE(John): (std::)size_t is not used because for this platform:
 	// sizeof(size_t) == sizeof(usize) == sizeof(ssize)
@@ -84,6 +87,9 @@ using intptr  = intptr_t;
 
 using bool8 = int8;
 using bool32 = int32;
+
+using b32 = bool32;
+using b8 = bool8;
 
 using f32 = float;
 using f64 = double;
@@ -183,16 +189,16 @@ using f64 = double;
 	{
 		return {static_cast<f32>(a) / static_cast<f32>(b)};
 	}
-	
-
 } 
 
-
-
-
-
-
-
+typedef Enjon::u32 u32;
+typedef Enjon::f32 f32;
+typedef Enjon::s32 s32;
+typedef Enjon::f64 f64;
+typedef Enjon::u64 u64;
+typedef Enjon::s64 s64;
+typedef Enjon::b32 b32;
+typedef Enjon::b8  b8;
 
 
 

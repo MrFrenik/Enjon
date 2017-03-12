@@ -318,7 +318,7 @@ namespace Enjon { namespace Graphics {
 	{
 		// TODO(John): Figure out a decent way to cache these
 		glUniform3f(GetUniformLocation(name + ".position"), T.Position.x, T.Position.y, T.Position.z);	
-		glUniform4f(GetUniformLocation(name + ".orientation"), T.Orientation.x, T.Orientation.y, T.Orientation.z, T.Orientation.w);	
+		glUniform4f(GetUniformLocation(name + ".rotation"), T.Rotation.x, T.Rotation.y, T.Rotation.z, T.Rotation.w);	
 		glUniform3f(GetUniformLocation(name + ".scale"), T.Scale.x, T.Scale.y, T.Scale.z);
 	}
 

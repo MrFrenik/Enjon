@@ -4,12 +4,12 @@
 
 namespace Enjon 
 {
-	Enjon::EntityHandle* Component::GetEntity()
+	Enjon::Entity* Component::GetEntity()
 	{
 		return mEntity;
 	}
 
-	void Component::SetEntity(EntityHandle* entity)
+	void Component::SetEntity(Entity* entity)
 	{
 		mEntity = entity;
 	}

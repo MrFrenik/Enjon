@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 template <typename T>
-bool EntityHandle::HasComponent()
+bool Entity::HasComponent()
 {
 	return ((mComponentMask & Enjon::GetComponentBitMask<T>()) != 0);
 }
 
 //------------------------------------------------------------------------------
 template <typename T>
-T* EntityHandle::GetComponent()
+T* Entity::GetComponent()
 {
 	// Assert that it has component
 	assert(HasComponent<T>());
@@ -20,7 +20,7 @@ T* EntityHandle::GetComponent()
 
 //------------------------------------------------------------------------------
 template <typename T>
-T* EntityHandle::Attach()
+T* Entity::Attach()
 {
 	// Check to make sure isn't already attached to this entity
 	assert(!HasComponent<T>());
@@ -33,7 +33,7 @@ T* EntityHandle::Attach()
 
 //------------------------------------------------------------------------------
 template <typename T>
-void EntityHandle::Detach()
+void Entity::Detach()
 {
 	// Check to make sure isn't already attached to this entity
 	assert(HasComponent<T>());

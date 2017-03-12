@@ -35,9 +35,11 @@ namespace Enjon
 	{
 		public:
 			static void Init(SDL_Window* window);
+			static void LateInit(SDL_Window* window);
 			static void Register(std::function<void()> func);
 			static void RegisterMenuOption(std::string name, std::function<void()> func);
 			static void RegisterWindow(std::function<void()> func);
+			static void RegisterDockingLayout(ImGui::DockingLayout& layout);
 			static void RenderGameUI(Enjon::Graphics::Window* window, f32* view, f32* projection);
 			static void Render(SDL_Window* window);
 			static void ShutDown();
@@ -51,6 +53,7 @@ namespace Enjon
 			static std::vector<std::function<void()>> mGuiFuncs;
 			static std::vector<std::function<void()>> mWindows;
 			static std::unordered_map<std::string, std::vector<std::function<void()>>> mMainMenuOptions;
+			static std::vector<ImGui::DockingLayout> mDockingLayouts;
 	};
 }
 

@@ -183,7 +183,7 @@ namespace Enjon { namespace Math {
 		return std::asin(-2.0f * (x*z - w*y));
 	}
 
-	EM::Vec3 Quaternion::QuaternionToEulerAngles()
+	EM::Vec3 Quaternion::EulerAngles()
 	{
 		return EM::Vec3(this->Pitch(), this->Yaw(), this->Roll());
 	}

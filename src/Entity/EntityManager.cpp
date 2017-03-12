@@ -10,69 +10,90 @@
 namespace Enjon {
 
 	//---------------------------------------------------------------
-	EntityHandle::EntityHandle()
+	Entity::Entity()
 	: mID(MAX_ENTITIES), 
 	  mState(EntityState::INACTIVE), 
 	  mComponentMask(Enjon::ComponentBitset(0)),
-	  mManager(nullptr)
+	  mManager(nullptr),
+	  mWorldTransformDirty(true)
 	{
 	}
 
 	//---------------------------------------------------------------
-	EntityHandle::EntityHandle(EntityManager* manager)
+	Entity::Entity(EntityManager* manager)
 	: mID(MAX_ENTITIES), 
 	  mState(EntityState::INACTIVE), 
 	  mComponentMask(Enjon::ComponentBitset(0)),
-	  mManager(manager)
+	  mManager(manager),
+	  mWorldTransformDirty(true)
 	{
 	}
 
 	// TODO(John): Take care of removing all attached components here
 	//---------------------------------------------------------------
-	EntityHandle::~EntityHandle()
+	Entity::~Entity()
 	{
 		mManager->Destroy(this);		
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::Reset()
+	void Entity::Reset()
 	{
 		mID = MAX_ENTITIES;
 		mState = EntityState::INACTIVE;
+		mWorldTransformDirty = true;
 		mComponentMask = Enjon::ComponentBitset(0);
 		mManager = nullptr;
 		mComponents.clear();
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::SetID(u32 id)
+	void Entity::SetID(u32 id)
 	{
 		mID = id;
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::SetLocalTransform(EM::Transform& transform)
+	void Entity::SetLocalTransform(EM::Transform& transform)
 	{
 		mLocalTransform = transform;
+		mWorldTransformDirty = true;
 	}
 
 	//---------------------------------------------------------------
-	EM::Transform EntityHandle::GetLocalTransform()
+	EM::Transform Entity::GetLocalTransform()
 	{
 		return mLocalTransform;
 	}
 
 	//---------------------------------------------------------------
-	EM::Transform EntityHandle::GetWorldTransform()
+	EM::Transform Entity::GetWorldTransform()
 	{
+		// If dirty, then calcualte world transform
+		if (mWorldTransformDirty)
+		{
+			CalculateWorldTransform();
+		}
+
+		// Return world transform
+		return mWorldTransform;
+	}
+
+	//---------------------------------------------------------------
+	void Entity::CalculateWorldTransform()
+	{
+		if (mParent == nullptr) 
+		{
+			mWorldTransform = mLocalTransform;
+			mWorldTransformDirty = false;
+			return;
+		}
+
+		// Start with local transform. If no parent exists, then we return this.
 		EM::Transform result = mLocalTransform;
 
-		// In order to get global transform, 
-		// iterate through all parent entities and calculate 
-		// global transform
-		// TOOD(): Make sure that world transform is dirty before 
-		// doing this calculation
-		for (EntityHandle* p = mParent; p != nullptr; p = p->GetParent())
+		// Iterate through all parents and multiply local transform with parents
+		for (Entity* p = mParent; p != nullptr; p = p->GetParent())
 		{
 			result *= p->GetLocalTransform();
 		}
@@ -80,66 +101,89 @@ namespace Enjon {
 		// Cache it off for now
 		mWorldTransform = result;
 
-		// Return world transform
-		return mWorldTransform;
+		mWorldTransformDirty = false;
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::SetPosition(EM::Vec3& position)
+	void Entity::SetPosition(EM::Vec3& position)
 	{
 		mLocalTransform.SetPosition(position);
+		mWorldTransformDirty = true;
+
+		// If has children, propogate transform
+		if (HasChildren())
+		{
+			SetAllChildWorldTransformsDirty();
+		}
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::SetScale(EM::Vec3& scale)
+	void Entity::SetScale(EM::Vec3& scale)
 	{
 		mLocalTransform.SetScale(scale);
+		mWorldTransformDirty = true;
+
+		// If has children, propogate transform
+		if (HasChildren())
+		{
+			SetAllChildWorldTransformsDirty();
+		}
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::SetOrientation(EM::Quaternion& orientation)
+	void Entity::SetRotation(EM::Quaternion& rotation)
 	{
-		mLocalTransform.SetOrientation(orientation);
+		mLocalTransform.SetRotation(rotation);
+		mWorldTransformDirty = true;
+
+		// If has children, propogate transform
+		if (HasChildren())
+		{
+			SetAllChildWorldTransformsDirty();
+		}
 	}
 
 	//---------------------------------------------------------------
-	EM::Vec3 EntityHandle::GetLocalPosition()
+	EM::Vec3 Entity::GetLocalPosition()
 	{
 		return mLocalTransform.GetPosition();
 	}
 
 	//---------------------------------------------------------------
-	EM::Vec3 EntityHandle::GetLocalScale()
+	EM::Vec3 Entity::GetLocalScale()
 	{
 		return mLocalTransform.GetScale();
 	}
 
 	//---------------------------------------------------------------
-	EM::Quaternion EntityHandle::GetLocalOrientation()
+	EM::Quaternion Entity::GetLocalRotation()
 	{
-		return mLocalTransform.GetOrientation();
+		return mLocalTransform.GetRotation();
 	}
 
 	//---------------------------------------------------------------
-	EM::Vec3 EntityHandle::GetWorldPosition()
+	EM::Vec3 Entity::GetWorldPosition()
 	{
+		if (mWorldTransformDirty) CalculateWorldTransform();
 		return mWorldTransform.GetPosition();
 	}
 
 	//---------------------------------------------------------------
-	EM::Vec3 EntityHandle::GetWorldScale()
+	EM::Vec3 Entity::GetWorldScale()
 	{
+		if (mWorldTransformDirty) CalculateWorldTransform();
 		return mWorldTransform.GetScale();
 	}
 
 	//---------------------------------------------------------------
-	EM::Quaternion EntityHandle::GetWorldOrientation()
+	EM::Quaternion Entity::GetWorldRotation()
 	{
-		return mWorldTransform.GetOrientation();
+		if (mWorldTransformDirty) CalculateWorldTransform();
+		return mWorldTransform.GetRotation();
 	}
 
 	//-----------------------------------------
-	EntityHandle* EntityHandle::AddChild(EntityHandle* child)
+	Entity* Entity::AddChild(Entity* child)
 	{
 		// Set parent to this
 		child->SetParent(this);
@@ -148,7 +192,11 @@ namespace Enjon {
 		auto query = std::find(mChildren.begin(), mChildren.end(), child);
 		if (query == mChildren.end())
 		{
+			// Add child to children list
 			mChildren.push_back(child);
+
+			// Calculate its world transform with respect to parent
+			child->CalculateWorldTransform();
 		}
 		else
 		{
@@ -159,7 +207,7 @@ namespace Enjon {
 	}
 
 	//-----------------------------------------
-	void EntityHandle::DetachChild(EntityHandle* child)
+	void Entity::DetachChild(Entity* child)
 	{
 		// Make sure child exists
 		assert(child != nullptr);
@@ -167,44 +215,83 @@ namespace Enjon {
 		// Find and erase
 		mChildren.erase(std::remove(mChildren.begin(), mChildren.end(), child), mChildren.end());
 
-		// Remove parent from child
-		child->RemoveParent();
+		// Recalculate world transform of child
+		child->CalculateWorldTransform();
+
+		// Set parent to nullptr
+		child->mParent = nullptr;
 	}
 
 	//-----------------------------------------
-	void EntityHandle::SetParent(EntityHandle* parent)
+	void Entity::SetParent(Entity* parent)
 	{
 		// Make sure this child doesn't have a parent
 		assert(parent != nullptr);
 		assert(mParent == nullptr);
 
-		// Set parent
+		// Set parent to this
 		mParent = parent;
+
+		// Calculate world transform
+		CalculateWorldTransform();
 	}
 
 	//-----------------------------------------
-	EntityHandle* EntityHandle::RemoveParent()
+	Entity* Entity::RemoveParent()
 	{
 		// Asset parent exists
 		assert(mParent != nullptr);
 
-		// Capture pointer
-		EntityHandle* retNode = mParent;
+		// Remove child from parent
+		mParent->DetachChild(this);
 
-		// Remove parent
+		// Capture pointer
+		Entity* retNode = mParent;
+
+		// Set parent to nullptr
 		mParent = nullptr;
 
 		return retNode;
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::UpdateAllChildrenTransforms()
+	b8 Entity::HasChildren()
 	{
-
+		return (mChildren.size() > 0);
 	}
 
 	//---------------------------------------------------------------
-	void EntityHandle::UpdateComponentTransforms()
+	b8 Entity::HasParent()
+	{
+		return (mParent != nullptr);
+	}
+
+	//---------------------------------------------------------------
+	void Entity::SetAllChildWorldTransformsDirty()
+	{
+		for (auto& c : mChildren)
+		{
+			// Set dirty to true
+			c->mWorldTransformDirty = true;
+
+			// Iterate through child's children to set their state dirty as well
+			c->SetAllChildWorldTransformsDirty();
+		}
+	}
+
+	//---------------------------------------------------------------
+	void Entity::UpdateAllChildTransforms()
+	{
+		// Maybe this should just be to set their flags to dirty?
+		for (auto& c : mChildren)
+		{
+			c->mWorldTransformDirty = true;
+			c->CalculateWorldTransform();
+		}
+	}
+
+	//---------------------------------------------------------------
+	void Entity::UpdateComponentTransforms()
 	{
 
 	}
@@ -218,7 +305,7 @@ namespace Enjon {
 		}
 
 		mNextAvailableID = 0;
-		mEntities = new std::array<EntityHandle, MAX_ENTITIES>;
+		mEntities = new std::array<Entity, MAX_ENTITIES>;
 	}
 
 	//---------------------------------------------------------------
@@ -267,14 +354,14 @@ namespace Enjon {
 	}
 
 	//---------------------------------------------------------------
-	EntityHandle* EntityManager::Allocate()
+	Entity* EntityManager::Allocate()
 	{
 		// Grab next available id and assert that it's valid
 		u32 id = FindNextAvailableID();
 		assert(id < MAX_ENTITIES);
 
 		// Find entity in array and set values
-		EntityHandle* entity = &mEntities->at(id);
+		Entity* entity = &mEntities->at(id);
 		entity->mID = id;				
 		entity->mState = EntityState::ACTIVE; 
 		entity->mManager = this;
@@ -287,7 +374,7 @@ namespace Enjon {
 	}
 
 	//---------------------------------------------------------------
-	void EntityManager::Destroy(EntityHandle* entity)
+	void EntityManager::Destroy(Entity* entity)
 	{
 		// Assert that entity isn't already null
 		assert(entity != nullptr);

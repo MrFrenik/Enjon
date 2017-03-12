@@ -55,9 +55,9 @@ namespace Enjon
 	}
 
 	//--------------------------------------------------------------------
-	void GraphicsComponent::SetOrientation(EM::Quaternion& orientation)
+	void GraphicsComponent::SetRotation(EM::Quaternion& rotation)
 	{
-		mRenderable.SetOrientation(orientation);
+		mRenderable.SetRotation(rotation);
 	}
 
 	//--------------------------------------------------------------------
