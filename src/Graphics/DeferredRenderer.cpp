@@ -173,7 +173,7 @@ namespace Enjon { namespace Graphics {
 					mBatch->Add(
 									EM::Vec4(-1, -1, 2, 2),
 									EM::Vec4(0, 0, 1, 1),
-									mCompositeTarget->GetTexture()
+									mFXAATarget->GetTexture()
 								);
 				}
 				mBatch->End();

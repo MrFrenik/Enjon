@@ -46,7 +46,7 @@ void Game::Initialize()
 
 	// Set up child heirarchy
 	mGun->AddChild(mGreen);
-	mGun->AddChild(mRed);
+	mGreen->AddChild(mRed);
 
 	auto gunMesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cerebus.obj");
 	auto sphereMesh = EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/sphere.obj");
@@ -85,16 +85,18 @@ void Game::Initialize()
 	gc->SetPosition(v3(0.0f, 3.0f, 0.0f));
 
 	mGreen->SetPosition(v3(1.0f, 3.0f, -1.0f));
+	mGreen->SetScale(v3(0.2f));
 	gc2->SetMesh(sphereMesh);
 	gc2->SetMaterial(greenMat);
 	gc2->SetPosition(mGreen->GetWorldPosition());
-	gc2->SetScale(0.2f);
+	gc2->SetScale(mGreen->GetWorldScale());
 
-	mRed->SetPosition(v3(1.0f, 3.0f, -1.0f));
+	mRed->SetPosition(v3(1.0f, 10.0f, -1.0f));
+	mRed->SetScale(v3(0.05f));
 	gc3->SetMesh(sphereMesh);
 	gc3->SetMaterial(redMat);
 	gc3->SetPosition(mRed->GetWorldPosition());
-	gc3->SetScale(0.2f);
+	gc3->SetScale(mRed->GetWorldScale());
 
 	mSun = new EG::DirectionalLight();
 	mSun->SetIntensity(10.0f);
@@ -112,6 +114,20 @@ void Game::Initialize()
  	floorMat->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/Roughness.png"));
  	floorMat->SetTexture(EG::TextureSlotType::AO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/AO.png"));
   	mBatch->SetMaterial(floorMat);
+
+  	mHandles.push_back(mRed);
+  	for (auto i = 1; i < 10000; ++i)
+  	{
+  		auto h = mEntities->Allocate();
+  		mHandles.push_back(h);
+  		mHandles.at(i - 1)->AddChild(h);
+  		h->SetPosition(v3(0.0f, 2.0f, 0.0f));
+  		auto gfx = h->Attach<Enjon::GraphicsComponent>();
+  		gfx->SetMesh(sphereMesh);
+  		gfx->SetMaterial(blueMat);
+  		gfx->SetPosition(h->GetWorldPosition());
+  		// Enjon::Engine::GetInstance()->GetGraphics()->GetScene()->AddRenderable(gfx->GetRenderable());
+  	}
 
 	mBatch->Begin();
   	{
@@ -186,22 +202,89 @@ void Game::Initialize()
 }
 
 //-------------------------------------------------------------
+void Game::ListEntityChildren(Enjon::Entity* entity, u32 indentAmount)
+{
+	for (auto& c : entity->GetChildren())
+	{
+		// Formatting
+		for (u32 i = 0; i < indentAmount; ++i)
+		{
+			ImGui::Text("\t");
+		}
+
+		ImGui::SameLine();
+		ImGui::Text("%d", c->GetID());
+
+		ImGui::SameLine();
+    	if (ImGui::Button("-"))
+    	{
+    		mEntities->Destroy(c);
+    	}
+
+		// List all children recursively
+		ListEntityChildren(c, indentAmount + 1);
+	}
+
+}
+
+//-------------------------------------------------------------
 void Game::Update(Enjon::f32 dt)
 {
-	auto gc = mGun->GetComponent<Enjon::GraphicsComponent>();
-	auto gc2 = mGreen->GetComponent<Enjon::GraphicsComponent>();
-	auto gc3 = mRed->GetComponent<Enjon::GraphicsComponent>();
+	// Update entity manager
+	mEntities->Update(dt);
 
 	static float t = 0.0f;
-	t += 0.1f * dt;
+	t += 0.01f * dt;
 
-	// Update local position of parent
-	// mGun->SetOrientation(quat::AngleAxis(t, v3(cos(t) * 3.0f, 3.0f, sin(t) * 3.0f)));
+	Enjon::GraphicsComponent* gc 	= nullptr;
+	Enjon::GraphicsComponent* gc2 	= nullptr;
+	Enjon::GraphicsComponent* gc3 	= nullptr;
+
+	if (mGun && mGun->HasComponent<Enjon::GraphicsComponent>())
+	{
+		gc = mGun->GetComponent<Enjon::GraphicsComponent>();
+	}
+
+	if (mGreen && mGreen->HasComponent<Enjon::GraphicsComponent>())
+	{
+		// Update local position of parent
+		mGreen->SetPosition(v3(cos(t) * 3.0f, 3.0f, sin(t) * 3.0f));
+		gc2 = mGreen->GetComponent<Enjon::GraphicsComponent>();
+	}
+
+	if (mRed && mRed->HasComponent<Enjon::GraphicsComponent>())
+	{
+		mRed->SetPosition(v3(cos(t) * 3.0f, 3.0f, sin(t) * 3.0f));
+		gc3 = mRed->GetComponent<Enjon::GraphicsComponent>();
+	}
+
+	// Don't delete these or this shit will fail
+	for (u32 i = 0; i < (u32)mHandles.size(); ++i)
+	{
+		auto h = mHandles.at(i);
+
+		if (h->IsValid())
+		{
+			h->SetPosition(v3(cos(t * i) * i, i, sin(t * i) * i));
+		}
+	}
+
+	// This is where transform propogation happens
+	mEntities->LateUpdate(dt);
 
 	// Update tranforms of graphics
-	gc->SetTransform(mGun->GetWorldTransform());
-	gc2->SetTransform(mGreen->GetWorldTransform());
-	gc3->SetTransform(mRed->GetWorldTransform());
+	if (gc) 	gc->SetTransform(mGun->GetWorldTransform());
+	if (gc2) 	gc2->SetTransform(mGreen->GetWorldTransform());
+	if (gc3)	gc3->SetTransform(mRed->GetWorldTransform());
+
+	for (auto& h : mHandles)
+	{
+		if (h->IsValid() && h->HasComponent<Enjon::GraphicsComponent>())
+		{
+			h->GetComponent<Enjon::GraphicsComponent>()->SetTransform(h->GetWorldTransform());
+		}
+	}
+
 }
 
 //-------------------------------------------------------------

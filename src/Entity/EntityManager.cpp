@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 #include <assert.h>
+#include <algorithm>
 
 #include <stdio.h>
 
@@ -39,12 +40,34 @@ namespace Enjon {
 	//---------------------------------------------------------------
 	void Entity::Reset()
 	{
+		assert(mManager != nullptr);
+
+		// Remove from parent heirarchy list if in it
+		if (!HasParent()) 
+		{
+			// Goes through and adds all children to heirarchy
+			mManager->RemoveFromParentHeirarchyList(this, true);
+
+		}
+		// Otherwise remove parent 
+		else
+		{
+			RemoveParent(true, false);
+		}
+
+		// Remove all children and add to parent heirarchy list
+		for (auto& c : mChildren)
+		{
+			c->RemoveParent(false, true);
+		}
+
 		mID = MAX_ENTITIES;
 		mState = EntityState::INACTIVE;
 		mWorldTransformDirty = true;
 		mComponentMask = Enjon::ComponentBitset(0);
 		mManager = nullptr;
 		mComponents.clear();
+		mChildren.clear();
 	}
 
 	//---------------------------------------------------------------
@@ -70,10 +93,10 @@ namespace Enjon {
 	EM::Transform Entity::GetWorldTransform()
 	{
 		// If dirty, then calcualte world transform
-		if (mWorldTransformDirty)
-		{
-			CalculateWorldTransform();
-		}
+		// if (mWorldTransformDirty)
+		// {
+		// 	CalculateWorldTransform();
+		// }
 
 		// Return world transform
 		return mWorldTransform;
@@ -111,10 +134,10 @@ namespace Enjon {
 		mWorldTransformDirty = true;
 
 		// If has children, propogate transform
-		if (HasChildren())
-		{
-			SetAllChildWorldTransformsDirty();
-		}
+		// if (HasChildren())
+		// {
+		// 	SetAllChildWorldTransformsDirty();
+		// }
 	}
 
 	//---------------------------------------------------------------
@@ -124,10 +147,10 @@ namespace Enjon {
 		mWorldTransformDirty = true;
 
 		// If has children, propogate transform
-		if (HasChildren())
-		{
-			SetAllChildWorldTransformsDirty();
-		}
+		// if (HasChildren())
+		// {
+		// 	SetAllChildWorldTransformsDirty();
+		// }
 	}
 
 	//---------------------------------------------------------------
@@ -137,10 +160,10 @@ namespace Enjon {
 		mWorldTransformDirty = true;
 
 		// If has children, propogate transform
-		if (HasChildren())
-		{
-			SetAllChildWorldTransformsDirty();
-		}
+		// if (HasChildren())
+		// {
+		// 	SetAllChildWorldTransformsDirty();
+		// }
 	}
 
 	//---------------------------------------------------------------
@@ -207,19 +230,31 @@ namespace Enjon {
 	}
 
 	//-----------------------------------------
-	void Entity::DetachChild(Entity* child)
+	void Entity::DetachChild(Entity* child, b8 removeFromList, b8 addToHeirarchy)
 	{
 		// Make sure child exists
 		assert(child != nullptr);
+		assert(mManager != nullptr);
 
 		// Find and erase
-		mChildren.erase(std::remove(mChildren.begin(), mChildren.end(), child), mChildren.end());
+		if (removeFromList) 
+		{
+			mChildren.erase(std::remove(mChildren.begin(), mChildren.end(), child), mChildren.end());
+
+		}
+
+		if (addToHeirarchy)
+		{
+			// Add to child to parent heirarchy list now that it's a free node
+			mManager->AddToParentHeirarchy(child);
+		}
 
 		// Recalculate world transform of child
 		child->CalculateWorldTransform();
 
 		// Set parent to nullptr
 		child->mParent = nullptr;
+
 	}
 
 	//-----------------------------------------
@@ -228,22 +263,26 @@ namespace Enjon {
 		// Make sure this child doesn't have a parent
 		assert(parent != nullptr);
 		assert(mParent == nullptr);
+		assert(mManager != nullptr);
 
 		// Set parent to this
 		mParent = parent;
 
 		// Calculate world transform
 		CalculateWorldTransform();
+
+		// Now that the parent is set, remove it from heirarchy list
+		mManager->RemoveFromParentHeirarchyList(this);
 	}
 
 	//-----------------------------------------
-	Entity* Entity::RemoveParent()
+	Entity* Entity::RemoveParent(b8 removeFromList, b8 addToHeirarchy)
 	{
 		// Asset parent exists
 		assert(mParent != nullptr);
 
 		// Remove child from parent
-		mParent->DetachChild(this);
+		mParent->DetachChild(this, removeFromList, addToHeirarchy);
 
 		// Capture pointer
 		Entity* retNode = mParent;
@@ -267,6 +306,12 @@ namespace Enjon {
 	}
 
 	//---------------------------------------------------------------
+	b8 Entity::IsValid()
+	{
+		return (mState != EntityState::INACTIVE);
+	}
+
+	//---------------------------------------------------------------
 	void Entity::SetAllChildWorldTransformsDirty()
 	{
 		for (auto& c : mChildren)
@@ -276,6 +321,19 @@ namespace Enjon {
 
 			// Iterate through child's children to set their state dirty as well
 			c->SetAllChildWorldTransformsDirty();
+		}
+	}
+
+	void Entity::PropogateTransform()
+	{
+		// Calculate world transform
+		mWorldTransform = mLocalTransform;
+		if (HasParent()) mWorldTransform *= mParent->mWorldTransform;
+
+		// Iterate through children and propogate down
+		for (auto& c : mChildren)
+		{
+			c->PropogateTransform();
 		}
 	}
 
@@ -369,6 +427,9 @@ namespace Enjon {
 		// Push back live entity into active entity vector
 		mActiveEntities.push_back(entity);
 
+		// Push back live entity into parent heirarchy list
+		AddToParentHeirarchy(entity);
+
 		// Return entity handle
 		return entity;
 	}
@@ -381,29 +442,25 @@ namespace Enjon {
 
 		// Push for deferred removal from active entities
 		mMarkedForDestruction.push_back(entity);
-
-		// Iterate through entity component list and detach
-		for (auto& c : entity->mComponents)
-		{
-			// Detach(c);
-			c->Destroy();
-		}	
-
-		// Set state to inactive
-		entity->mState = EntityState::INACTIVE;
-
-		// Set bitmask to 0
-		entity->Reset();
 	}
 
 	//--------------------------------------------------------------
 	void EntityManager::Cleanup()
 	{
 		// Move through dirty list and remove from active entities
-		for (auto& c : mMarkedForDestruction)
+		for (auto& e : mMarkedForDestruction)
 		{
+			// Destroy all components
+			for (auto& c : e->mComponents)
+			{
+				c->Destroy();
+			}
+
+			// Reset entity
+			e->Reset();
+
 			// Remove from active entities
-			mActiveEntities.erase(std::remove(mActiveEntities.begin(), mActiveEntities.end(), c), mActiveEntities.end());
+			mActiveEntities.erase(std::remove(mActiveEntities.begin(), mActiveEntities.end(), e), mActiveEntities.end());
 		}
 
 		mMarkedForDestruction.clear();
@@ -415,6 +472,72 @@ namespace Enjon {
 		// Clean any entities that were marked for destruction
 		Cleanup();
 	} 
+
+	//--------------------------------------------------------------
+	void EntityManager::LateUpdate(f32 dt)
+	{
+		// Clean any entities that were marked for destruction
+		UpdateAllActiveTransforms();
+	}
+
+	//--------------------------------------------------------------
+	b8 EntityManager::CompareEntityIDs(const Entity* a, const Entity* b)
+	{
+		return a->mID < b->mID;	
+	}
+
+	//--------------------------------------------------------------
+	void EntityManager::AddToParentHeirarchy(Entity* entity)
+	{
+		if (entity == nullptr) return;
+
+		// Add to parent heirarchy list
+		// Does this need to check if entity already exists?
+
+		if (std::find(mEntityParentHeirarchy.begin(), mEntityParentHeirarchy.end(), entity) == mEntityParentHeirarchy.end() && entity->mID < MAX_ENTITIES)
+		{
+			mEntityParentHeirarchy.push_back(entity);
+		}
+
+		// Sort list
+		std::stable_sort(mEntityParentHeirarchy.begin(), mEntityParentHeirarchy.end(), CompareEntityIDs);	
+	}
+
+	//--------------------------------------------------------------
+	void EntityManager::RemoveFromParentHeirarchyList(Entity* entity, b8 toBeDestroyed)
+	{
+		// Some checks need to be made here
+		if (entity == nullptr) return;
+
+		// Find and erase from heirarchy
+		// TODO(): Make sure this uses binary search for speed up
+		mEntityParentHeirarchy.erase(std::remove(mEntityParentHeirarchy.begin(), mEntityParentHeirarchy.end(), entity), mEntityParentHeirarchy.end());
+
+		// Check if entity is to be destroyed this frame or not
+		// If not to be destroyed, then this entity is being attached to another as a child
+		// and its children will come along with it
+		if (toBeDestroyed)
+		{
+			// If children, add them to parent heirarchy as free nodes
+			if (entity->HasChildren())
+			{
+				for (auto& c : entity->mChildren)
+				{
+					AddToParentHeirarchy(c);	
+				}
+			}
+		}
+	}
+
+	//--------------------------------------------------------------
+	void EntityManager::UpdateAllActiveTransforms()
+	{
+		// Iterate though parent heirarchy and calculate transforms
+		for (auto& p : mEntityParentHeirarchy)
+		{
+			p->PropogateTransform();
+		}
+	}
 }
 
 

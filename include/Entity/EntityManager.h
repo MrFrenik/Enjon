@@ -95,13 +95,13 @@ namespace Enjon {
 			Entity* AddChild(Entity* child);
 
 			/// @brief Removes child from entity, if exists
-			void DetachChild(Entity* child);	
+			void DetachChild(Entity* child, b8 removeFromList = true, b8 addToHeirarchy = true);	
 
 			/// @brief Sets parent of entity, if one doesn't already exist
 			void SetParent(Entity* parent);
 
 			/// @brief Removes parent from entity, if one exists
-			Entity* RemoveParent();
+			Entity* RemoveParent(b8 removeFromList = true, b8 addToHeirarchy = true);
 
 			/// @brief Returns whether or not has parent
 			b8 Entity::HasParent();
@@ -109,10 +109,14 @@ namespace Enjon {
 			/// @brief Returns whether or not has children
 			b8 Entity::HasChildren();
 
+			/// @brief Returns whether or not entity is valid
+			b8 Entity::IsValid();
+
+			const std::vector<Entity*>& GetChildren() const { return mChildren; }
+
 		protected:
 			/// @brief Calculates world transform with respect to parent heirarchy
 			void CalculateWorldTransform();
-
 
 		private:
 			/// @brief Sets id of entity - Entity Manager is responsible for this
@@ -130,6 +134,10 @@ namespace Enjon {
 			/// @brief Propogates transform down through all components
 			void UpdateComponentTransforms();
 
+			/// @brief Propogates transform down through all children
+			void PropogateTransform();
+
+
 		private:
 			u32 mID;	
 			b32 mWorldTransformDirty; 					// NOTE(): Necessary struct padding for alignment. Not too happy about it.
@@ -143,6 +151,12 @@ namespace Enjon {
 			Enjon::EntityState mState;
 	};
 
+	using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
+	using EntityParentHeirarchy 	= std::vector<Entity*>;
+	using MarkedForDestructionList	= std::vector<Entity*>;
+	using ActiveEntityList 			= std::vector<Entity*>;
+	using ComponentBaseArray 		= std::array<ComponentWrapperBase*, static_cast<u32>(MAX_COMPONENTS)>;
+
 	class EntityManager
 	{
 		friend Entity;
@@ -153,6 +167,8 @@ namespace Enjon {
 			Entity* Allocate();
 
 			void Update(f32 dt);
+
+			void LateUpdate(f32 dt);
 
 			template <typename T>
 			void RegisterComponent();
@@ -171,21 +187,33 @@ namespace Enjon {
 
 			void Destroy(Entity* entity);
 
+			void RemoveFromParentHeirarchyList(Entity* entity, b8 toBeDestroyed = false);
+
+			void AddToParentHeirarchy(Entity* entity);
+
 			const std::vector<Entity*>& GetActiveEntities() { return mActiveEntities; }
+
+			const std::vector<Entity*>& GetParentHeirarchyList() { return mEntityParentHeirarchy; }
 
 		private:
 			void EntityManager::Cleanup();
+
+			static b8 CompareEntityIDs(const Entity* a, const Entity* b);
 
 			template <typename T>
 			void RemoveComponent(Entity* entity);
 
 			u32 FindNextAvailableID();
 
-			std::array<Entity, MAX_ENTITIES>* mEntities;
-			std::array<ComponentWrapperBase*, static_cast<u32>(MAX_COMPONENTS)> mComponents;	
-			std::vector<Entity*> mActiveEntities;
-			std::vector<Entity*> mMarkedForDestruction;
-			u32 mNextAvailableID = 0;
+			/// @brief Runs through all transforms and propogates downwards
+			void UpdateAllActiveTransforms();
+
+			EntityStorage 				mEntities;
+			ComponentBaseArray 			mComponents;	
+			ActiveEntityList 			mActiveEntities;
+			MarkedForDestructionList 	mMarkedForDestruction;
+			EntityParentHeirarchy 		mEntityParentHeirarchy;
+			u32 						mNextAvailableID = 0;
 	};
 
 	#include "Entity/Entity.inl"
@@ -193,6 +221,5 @@ namespace Enjon {
 }
 
 #endif
-
 
 
