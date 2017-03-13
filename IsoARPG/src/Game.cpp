@@ -2,6 +2,7 @@
 
 #include <Entity/EntityManager.h>
 #include <Entity/Components/GraphicsComponent.h>
+#include <Entity/Components/PointLightComponent.h>
 #include <IO/ResourceManager.h>
 #include <Graphics/DeferredRenderer.h>
 #include <Graphics/DirectionalLight.h>
@@ -35,6 +36,7 @@ void Game::Initialize()
 	mEntities = new Enjon::EntityManager();
 
 	mEntities->RegisterComponent<Enjon::GraphicsComponent>();
+	mEntities->RegisterComponent<Enjon::PointLightComponent>();
 
 	// Allocate handle
 	mGun = mEntities->Allocate();
@@ -92,7 +94,7 @@ void Game::Initialize()
 	gc2->SetScale(mGreen->GetWorldScale());
 
 	mRed->SetPosition(v3(1.0f, 10.0f, -1.0f));
-	mRed->SetScale(v3(0.05f));
+	mRed->SetScale(v3(1.0f));
 	gc3->SetMesh(sphereMesh);
 	gc3->SetMaterial(redMat);
 	gc3->SetPosition(mRed->GetWorldPosition());
@@ -115,19 +117,30 @@ void Game::Initialize()
  	floorMat->SetTexture(EG::TextureSlotType::AO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/AO.png"));
   	mBatch->SetMaterial(floorMat);
 
-  	mHandles.push_back(mRed);
-  	for (auto i = 1; i < 10000; ++i)
-  	{
-  		auto h = mEntities->Allocate();
-  		mHandles.push_back(h);
-  		mHandles.at(i - 1)->AddChild(h);
-  		h->SetPosition(v3(0.0f, 2.0f, 0.0f));
-  		auto gfx = h->Attach<Enjon::GraphicsComponent>();
-  		gfx->SetMesh(sphereMesh);
-  		gfx->SetMaterial(blueMat);
-  		gfx->SetPosition(h->GetWorldPosition());
-  		// Enjon::Engine::GetInstance()->GetGraphics()->GetScene()->AddRenderable(gfx->GetRenderable());
-  	}
+  	auto plc = mRed->Attach<Enjon::PointLightComponent>();
+  	plc->SetAttenuationRate(0.2f);
+  	plc->SetColor(EG::RGBA16_Red());
+  	plc->SetRadius(300.0f);
+  	plc->SetIntensity(50.0f);
+
+  	auto plc2 = mGreen->Attach<Enjon::PointLightComponent>();
+  	plc2->SetAttenuationRate(0.2f);
+  	plc2->SetColor(EG::RGBA16_Green());
+  	plc2->SetRadius(300.0f);
+  	plc2->SetIntensity(50.0f);
+
+  	// for (auto i = 1; i < 100; ++i)
+  	// {
+  	// 	auto h = mEntities->Allocate();
+  	// 	mHandles.push_back(h);
+  	// 	mHandles.at(i - 1)->AddChild(h);
+  	// 	h->SetPosition(v3(0.0f, 2.0f, 0.0f));
+  	// 	auto gfx = h->Attach<Enjon::GraphicsComponent>();
+  	// 	gfx->SetMesh(sphereMesh);
+  	// 	gfx->SetMaterial(blueMat);
+  	// 	gfx->SetPosition(h->GetWorldPosition());
+  	// 	Enjon::Engine::GetInstance()->GetGraphics()->GetScene()->AddRenderable(gfx->GetRenderable());
+  	// }
 
 	mBatch->Begin();
   	{
@@ -158,6 +171,8 @@ void Game::Initialize()
 		scene->AddRenderable(gc->GetRenderable());
 		scene->AddRenderable(gc2->GetRenderable());
 		scene->AddRenderable(gc3->GetRenderable());
+		scene->AddPointLight(plc->GetLight());
+		scene->AddPointLight(plc2->GetLight());
 		scene->AddQuadBatch(mBatch);
 		scene->SetSun(mSun);
 		scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_White(), 0.1f));
@@ -242,6 +257,7 @@ void Game::Update(Enjon::f32 dt)
 
 	if (mGun && mGun->HasComponent<Enjon::GraphicsComponent>())
 	{
+		mGun->SetRotation(quat::AngleAxis(t * 5.0f, v3(0, 1, 0)));
 		gc = mGun->GetComponent<Enjon::GraphicsComponent>();
 	}
 
@@ -254,37 +270,23 @@ void Game::Update(Enjon::f32 dt)
 
 	if (mRed && mRed->HasComponent<Enjon::GraphicsComponent>())
 	{
-		mRed->SetPosition(v3(cos(t) * 3.0f, 3.0f, sin(t) * 3.0f));
+		mRed->SetPosition(v3(3.0f, -20.0f + sin(t * 30.0f) * 3.0f, 3.0f));
 		gc3 = mRed->GetComponent<Enjon::GraphicsComponent>();
 	}
 
 	// Don't delete these or this shit will fail
-	for (u32 i = 0; i < (u32)mHandles.size(); ++i)
-	{
-		auto h = mHandles.at(i);
+	// for (u32 i = 0; i < (u32)mHandles.size(); ++i)
+	// {
+	// 	auto h = mHandles.at(i);
 
-		if (h->IsValid())
-		{
-			h->SetPosition(v3(cos(t * i) * i, i, sin(t * i) * i));
-		}
-	}
+	// 	if (h->IsValid())
+	// 	{
+	// 		h->SetPosition(v3(cos(t * i) * i, i, sin(t * i) * i));
+	// 	}
+	// }
 
 	// This is where transform propogation happens
 	mEntities->LateUpdate(dt);
-
-	// Update tranforms of graphics
-	if (gc) 	gc->SetTransform(mGun->GetWorldTransform());
-	if (gc2) 	gc2->SetTransform(mGreen->GetWorldTransform());
-	if (gc3)	gc3->SetTransform(mRed->GetWorldTransform());
-
-	for (auto& h : mHandles)
-	{
-		if (h->IsValid() && h->HasComponent<Enjon::GraphicsComponent>())
-		{
-			h->GetComponent<Enjon::GraphicsComponent>()->SetTransform(h->GetWorldTransform());
-		}
-	}
-
 }
 
 //-------------------------------------------------------------

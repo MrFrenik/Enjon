@@ -24,6 +24,11 @@ namespace Enjon
 		mBase = base;
 	}
 
+	void Component::SetTransform(Enjon::Math::Transform& transform)
+	{
+		mTransform = transform;
+	}
+
 	ComponentBitset GetComponentBitMask(u32 type)
 	{
 		ComponentBitset BitSet;

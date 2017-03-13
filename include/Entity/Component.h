@@ -61,6 +61,8 @@ namespace Enjon {
 
 			EntityManager* GetEntityManager();
 
+			void SetTransform(Enjon::Math::Transform& transform);
+
 		protected:
 
 			template <typename T>

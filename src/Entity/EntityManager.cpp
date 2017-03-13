@@ -133,7 +133,7 @@ namespace Enjon {
 		mLocalTransform.SetPosition(position);
 		mWorldTransformDirty = true;
 
-		// If has children, propogate transform
+		// If has children, propagate transform
 		// if (HasChildren())
 		// {
 		// 	SetAllChildWorldTransformsDirty();
@@ -146,7 +146,7 @@ namespace Enjon {
 		mLocalTransform.SetScale(scale);
 		mWorldTransformDirty = true;
 
-		// If has children, propogate transform
+		// If has children, propagate transform
 		// if (HasChildren())
 		// {
 		// 	SetAllChildWorldTransformsDirty();
@@ -159,7 +159,7 @@ namespace Enjon {
 		mLocalTransform.SetRotation(rotation);
 		mWorldTransformDirty = true;
 
-		// If has children, propogate transform
+		// If has children, propagate transform
 		// if (HasChildren())
 		// {
 		// 	SetAllChildWorldTransformsDirty();
@@ -324,7 +324,7 @@ namespace Enjon {
 		}
 	}
 
-	void Entity::PropogateTransform()
+	void Entity::PropagateTransform(f32 dt)
 	{
 		// Calculate world transform
 		mWorldTransform = mLocalTransform;
@@ -333,8 +333,10 @@ namespace Enjon {
 		// Iterate through children and propogate down
 		for (auto& c : mChildren)
 		{
-			c->PropogateTransform();
+			c->PropagateTransform(dt);
 		}
+
+		UpdateComponentTransforms(dt);
 	}
 
 	//---------------------------------------------------------------
@@ -349,9 +351,13 @@ namespace Enjon {
 	}
 
 	//---------------------------------------------------------------
-	void Entity::UpdateComponentTransforms()
+	void Entity::UpdateComponentTransforms(f32 dt)
 	{
-
+		for (auto& c : mComponents)
+		{
+			c->SetTransform(mWorldTransform);
+			c->Update(dt);
+		}
 	}
 
 	//---------------------------------------------------------------
@@ -477,7 +483,7 @@ namespace Enjon {
 	void EntityManager::LateUpdate(f32 dt)
 	{
 		// Clean any entities that were marked for destruction
-		UpdateAllActiveTransforms();
+		UpdateAllActiveTransforms(dt);
 	}
 
 	//--------------------------------------------------------------
@@ -530,12 +536,12 @@ namespace Enjon {
 	}
 
 	//--------------------------------------------------------------
-	void EntityManager::UpdateAllActiveTransforms()
+	void EntityManager::UpdateAllActiveTransforms(f32 dt)
 	{
 		// Iterate though parent heirarchy and calculate transforms
 		for (auto& p : mEntityParentHeirarchy)
 		{
-			p->PropogateTransform();
+			p->PropagateTransform(dt);
 		}
 	}
 }

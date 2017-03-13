@@ -128,14 +128,14 @@ namespace Enjon {
 			/// @brief Sets all child states to be updated
 			void SetAllChildWorldTransformsDirty();
 
-			/// @brief Propogates transform down through all children
+			/// @brief Propagates transform down through all children
 			void UpdateAllChildTransforms();
 
-			/// @brief Propogates transform down through all components
-			void UpdateComponentTransforms();
+			/// @brief Propagates transform down through all components
+			void UpdateComponentTransforms(f32 dt);
 
-			/// @brief Propogates transform down through all children
-			void PropogateTransform();
+			/// @brief Propagates transform down through all children
+			void PropagateTransform(f32 dt);
 
 
 		private:
@@ -206,7 +206,7 @@ namespace Enjon {
 			u32 FindNextAvailableID();
 
 			/// @brief Runs through all transforms and propogates downwards
-			void UpdateAllActiveTransforms();
+			void UpdateAllActiveTransforms(f32 dt);
 
 			EntityStorage 				mEntities;
 			ComponentBaseArray 			mComponents;	
