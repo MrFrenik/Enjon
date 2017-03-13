@@ -67,6 +67,9 @@ namespace Enjon {
 			/// @brief Sets local scale of entity relative to parent, if exists
 			void SetScale(EM::Vec3& scale);
 
+			/// @brief Sets local scale of entity relative to parent, if exists
+			void SetScale(f32 scale);
+
 			/// @brief Sets local orientation of entity relative to parent, if exists
 			void SetRotation(EM::Quaternion& rotation);
 

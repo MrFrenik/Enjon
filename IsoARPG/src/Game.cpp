@@ -9,6 +9,7 @@
 #include <Graphics/QuadBatch.h>
 #include <Math/Vec3.h>
 #include <Math/Random.h>
+#include <Math/Common.h>
 #include <System/Types.h>
 #include <ImGui/ImGuiManager.h>
 
@@ -129,18 +130,18 @@ void Game::Initialize()
   	plc2->SetRadius(300.0f);
   	plc2->SetIntensity(50.0f);
 
-  	// for (auto i = 1; i < 100; ++i)
-  	// {
-  	// 	auto h = mEntities->Allocate();
-  	// 	mHandles.push_back(h);
-  	// 	mHandles.at(i - 1)->AddChild(h);
-  	// 	h->SetPosition(v3(0.0f, 2.0f, 0.0f));
-  	// 	auto gfx = h->Attach<Enjon::GraphicsComponent>();
-  	// 	gfx->SetMesh(sphereMesh);
-  	// 	gfx->SetMaterial(blueMat);
-  	// 	gfx->SetPosition(h->GetWorldPosition());
-  	// 	Enjon::Engine::GetInstance()->GetGraphics()->GetScene()->AddRenderable(gfx->GetRenderable());
-  	// }
+  	mHandles.push_back(mRed);
+  	for (auto i = 1; i < 100; ++i)
+  	{
+  		auto h = mEntities->Allocate();
+  		mHandles.push_back(h);
+  		mHandles.at(i - 1)->AddChild(h);
+  		h->SetPosition(v3(0.0f, 2.0f, 0.0f));
+  		auto gfx = h->Attach<Enjon::GraphicsComponent>();
+  		gfx->SetMesh(sphereMesh);
+  		gfx->SetMaterial(blueMat);
+  		Enjon::Engine::GetInstance()->GetGraphics()->GetScene()->AddRenderable(gfx->GetRenderable());
+  	}
 
 	mBatch->Begin();
   	{
@@ -271,19 +272,20 @@ void Game::Update(Enjon::f32 dt)
 	if (mRed && mRed->HasComponent<Enjon::GraphicsComponent>())
 	{
 		mRed->SetPosition(v3(3.0f, -20.0f + sin(t * 30.0f) * 3.0f, 3.0f));
+		mRed->SetScale(EM::Clamp(sin(t) * 3.0f, 0.4f, 3.0f));
 		gc3 = mRed->GetComponent<Enjon::GraphicsComponent>();
 	}
 
 	// Don't delete these or this shit will fail
-	// for (u32 i = 0; i < (u32)mHandles.size(); ++i)
-	// {
-	// 	auto h = mHandles.at(i);
+	for (u32 i = 1; i < (u32)mHandles.size(); ++i)
+	{
+		auto h = mHandles.at(i);
 
-	// 	if (h->IsValid())
-	// 	{
-	// 		h->SetPosition(v3(cos(t * i) * i, i, sin(t * i) * i));
-	// 	}
-	// }
+		if (h->IsValid())
+		{
+			h->SetPosition(v3(cos(t * i) * i, i, sin(t * i) * i));
+		}
+	}
 
 	// This is where transform propogation happens
 	mEntities->LateUpdate(dt);

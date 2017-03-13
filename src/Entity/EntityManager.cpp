@@ -132,12 +132,12 @@ namespace Enjon {
 	{
 		mLocalTransform.SetPosition(position);
 		mWorldTransformDirty = true;
+	}
 
-		// If has children, propagate transform
-		// if (HasChildren())
-		// {
-		// 	SetAllChildWorldTransformsDirty();
-		// }
+	/// @brief Sets local scale of entity relative to parent, if exists
+	void Entity::SetScale(f32 scale)
+	{
+		SetScale(v3(scale));
 	}
 
 	//---------------------------------------------------------------
@@ -145,12 +145,6 @@ namespace Enjon {
 	{
 		mLocalTransform.SetScale(scale);
 		mWorldTransformDirty = true;
-
-		// If has children, propagate transform
-		// if (HasChildren())
-		// {
-		// 	SetAllChildWorldTransformsDirty();
-		// }
 	}
 
 	//---------------------------------------------------------------
@@ -158,12 +152,6 @@ namespace Enjon {
 	{
 		mLocalTransform.SetRotation(rotation);
 		mWorldTransformDirty = true;
-
-		// If has children, propagate transform
-		// if (HasChildren())
-		// {
-		// 	SetAllChildWorldTransformsDirty();
-		// }
 	}
 
 	//---------------------------------------------------------------
