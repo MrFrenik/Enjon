@@ -1,6 +1,7 @@
 #ifndef ARPG_GAME_H
 #define ARPG_GAME_H
 
+/*
 #include "Application.h"
 
 #include <vector>
@@ -14,6 +15,8 @@ namespace Enjon
 	{
 		class QuadBatch;
 		class DirectionalLight;
+		class Material;
+		class Mesh;
 	}
 }
 
@@ -24,8 +27,10 @@ class Game : public Enjon::Application
 		~Game();
 
 		virtual void Initialize();  
-		virtual void Update(Enjon::f32 dt);
+		virtual void Update(f32 dt);
 		virtual void Shutdown();
+
+		void ProcessInput(f32 dt);
 
 	private:
 		void ListEntityChildren(Enjon::Entity* entity, u32 indentAmount);
@@ -38,9 +43,21 @@ class Game : public Enjon::Application
 		Enjon::Graphics::DirectionalLight* mSun = nullptr;
 		Enjon::Graphics::QuadBatch* mBatch 		= nullptr;
 
+		Enjon::Graphics::Material* mGunMat 		= nullptr;
+		Enjon::Graphics::Material* mRedMat 		= nullptr;
+		Enjon::Graphics::Material* mGreenMat 	= nullptr;
+		Enjon::Graphics::Material* mBlueMat 	= nullptr;
+		Enjon::Graphics::Mesh* mSphereMesh 		= nullptr;
+		Enjon::Graphics::Mesh* mGunMesh 		= nullptr;
+		Enjon::Graphics::Mesh* mBuddhaMesh 		= nullptr;
+
 		std::vector<Enjon::Entity*> mHandles;
 
 		bool mShowEntities = true;
+		bool mMovementOn = true;
+
+		f32 mCameraSpeed = 0.12f;
 };
+*/
 
 #endif

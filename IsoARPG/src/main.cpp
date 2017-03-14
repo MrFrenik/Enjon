@@ -8467,7 +8467,7 @@ int main(int argc, char** argv)
 
 // Refactor
 
-#if 0
+#if 1
 
 #include <iostream>
 #include <stdio.h>
@@ -8500,16 +8500,16 @@ EG::QuadBatch mBatch;
 
 Enjon::EntityManager* mEntities;
 
-Enjon::EntityHandle* handle1;
-Enjon::EntityHandle* handle2;
-Enjon::EntityHandle* handle3;
-Enjon::EntityHandle* handle4;
-Enjon::EntityHandle* handle5;
-Enjon::EntityHandle* handle6;
-Enjon::EntityHandle* handle7;
-Enjon::EntityHandle* handle8;
-Enjon::EntityHandle* handle9;
-Enjon::EntityHandle* handle10;
+Enjon::Entity* handle1;
+Enjon::Entity* handle2;
+Enjon::Entity* handle3;
+Enjon::Entity* handle4;
+Enjon::Entity* handle5;
+Enjon::Entity* handle6;
+Enjon::Entity* handle7;
+Enjon::Entity* handle8;
+Enjon::Entity* handle9;
+Enjon::Entity* handle10;
 
 EG::Mesh* mesh;
 EG::Mesh* mesh2;
@@ -8523,7 +8523,7 @@ EG::Mesh* mesh9;
 EG::Material* mat;
 EG::Material* mat2;
 EG::Material* mat3;
-EG::Material* mat4;
+EG::Material* material4;
 EG::Material* mat5;
 EG::Material* mat6;
 EG::Material* mat7;
@@ -8538,9 +8538,9 @@ bool mMovementOn = true;
 
 bool ProcessInput(EI::InputManager* input, float dt);
 
-std::vector<Enjon::EntityHandle*> mHandles;
+std::vector<Enjon::Entity*> mHandles;
 
-std::vector<Enjon::EntityHandle*> mBalls;
+std::vector<Enjon::Entity*> mBalls;
 std::vector<btRigidBody*> mBodies;
 
 btDiscreteDynamicsWorld* mDynamicsWorld;
@@ -8632,7 +8632,7 @@ int main(int argc, char** argv)
 	mat = new EG::Material();
 	mat2 = new EG::Material();
 	mat3 = new EG::Material();
-	mat4 = new EG::Material();
+	material4 = new EG::Material();
 	mat5 = new EG::Material();
 	mat6 = new EG::Material();
 	mat7 = new EG::Material();
@@ -8659,11 +8659,11 @@ int main(int argc, char** argv)
 	mat3->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png"));
 	mat3->SetTexture(EG::TextureSlotType::EMISSIVE, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptileblue.png"));
 
-	mat4->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Albedo.png"));
-	mat4->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Normal.png"));
-	mat4->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Metallic.png"));
-	mat4->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Roughness.png"));
-	mat4->SetTexture(EG::TextureSlotType::AO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/AO.png"));
+	material4->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Albedo.png"));
+	material4->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Normal.png"));
+	material4->SetTexture(EG::TextureSlotType::METALLIC, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Metallic.png"));
+	material4->SetTexture(EG::TextureSlotType::ROUGHNESS, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/Roughness.png"));
+	material4->SetTexture(EG::TextureSlotType::AO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/WoodFrame/AO.png"));
 
 	mat5->SetTexture(EG::TextureSlotType::ALBEDO, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/HarshBricks/Albedo.png"));
 	mat5->SetTexture(EG::TextureSlotType::NORMAL, EI::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/HarshBricks/Normal.png"));
@@ -8728,7 +8728,7 @@ int main(int argc, char** argv)
 
 	// Sphere
 	renderable3->SetMesh(mesh5);
-	renderable3->SetMaterial(mat4);
+	renderable3->SetMaterial(material4);
 
 	// Sphere
 	renderable4->SetMesh(mesh6);
@@ -8760,12 +8760,12 @@ int main(int argc, char** argv)
 	renderable8->SetMesh(mesh9);
 	renderable8->SetMaterial(mat11);
 	renderable8->SetPosition(EM::Vec3(-5, 2, 5));
-	renderable8->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(90.0f), EM::Vec3(1, 0, 0)));
+	renderable8->SetRotation(EM::Quaternion::AngleAxis(EM::ToRadians(90.0f), EM::Vec3(1, 0, 0)));
 
 	renderable9->SetMesh(mesh9);
 	renderable9->SetMaterial(mat12);
 	renderable9->SetPosition(EM::Vec3(-5, 2, 5));
-	renderable9->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(90.0f), EM::Vec3(0, 0, 1)));
+	renderable9->SetRotation(EM::Quaternion::AngleAxis(EM::ToRadians(90.0f), EM::Vec3(0, 0, 1)));
 
 	renderable10->SetMesh(mesh);
 	renderable10->SetMaterial(mat13);
@@ -8806,7 +8806,7 @@ int main(int argc, char** argv)
 
 	// for (Enjon::u32 i = 0; i < 1000; ++i)
 	// {
-	// 	Enjon::EntityHandle* ent = mEntities->Allocate();
+	// 	Enjon::Entity* ent = mEntities->Allocate();
 	// 	Enjon::GraphicsComponent* gfx = ent->Attach<Enjon::GraphicsComponent>();
 	// 	ent->SetWorldPosition(EM::Vec3(0, i, 0));
 	// 	gfx->SetMesh(mesh6);
@@ -9054,6 +9054,8 @@ int main(int argc, char** argv)
 	Enjon::ImGuiManager::RegisterWindow(logDock);
 	Enjon::ImGuiManager::RegisterWindow(styleDock);
 
+	Enjon::ImGuiManager::LateInit(mGraphicsEngine.GetWindow()->GetSDLWindow());
+
 	bool isRunning = true;
 	while(isRunning)
 	{
@@ -9079,7 +9081,7 @@ int main(int argc, char** argv)
     	for (Enjon::u32 i = 0; i < mBodies.size(); ++i)
     	{
     		btRigidBody* body = mBodies.at(i);
-    		Enjon::EntityHandle* handle = mBalls.at(i);
+    		Enjon::Entity* handle = mBalls.at(i);
     		btTransform trans;
 
     		if (body && body->getMotionState())
@@ -9091,7 +9093,9 @@ int main(int argc, char** argv)
     				auto pos = EM::Vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
     				auto rot = EM::Quaternion(-trans.getRotation().x(), -trans.getRotation().y(), -trans.getRotation().z(), trans.getRotation().w());
     				gComp->SetPosition(EM::Vec3(pos));
-    				gComp->SetOrientation(rot); 
+    				gComp->SetRotation(rot); 
+    				handle->SetPosition(pos);
+    				handle->SetRotation(rot);
     			}
     		}
     	}
@@ -9101,8 +9105,8 @@ int main(int argc, char** argv)
 			auto cam = mGraphicsEngine.GetSceneCamera();
 			gc2 = handle2->GetComponent<Enjon::GraphicsComponent>();	
 			gc2->SetPosition(cam->GetPosition() + cam->Forward() * 0.85f + cam->Right() * 0.85f + cam->Down() * 0.5f); 
-			auto rot = cam->GetOrientation();
-			gc2->SetOrientation(EM::Quaternion(rot.x, rot.y, rot.z, -rot.w));
+			auto rot = cam->GetRotation();
+			gc2->SetRotation(EM::Quaternion(rot.x, rot.y, rot.z, -rot.w));
 		}
 
 		if (handle2 && handle2->HasComponent<Enjon::PointLightComponent>())
@@ -9120,7 +9124,7 @@ int main(int argc, char** argv)
 		if (handle1 && handle1->HasComponent<Enjon::GraphicsComponent>())
 		{
 			auto gComp = handle1->GetComponent<Enjon::GraphicsComponent>();
-			gComp->SetOrientation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
+			gComp->SetRotation(EM::Quaternion::AngleAxis(EM::ToRadians(dt), EM::Vec3(0, 1, 0)));
 		}
 
 		if (handle9 && handle9->HasComponent<Enjon::GraphicsComponent>())
@@ -9188,7 +9192,12 @@ int main(int argc, char** argv)
 		}
 
 		// Get active entities
-		const std::vector<Enjon::EntityHandle*> activeEntities = mEntities->GetActiveEntities();
+		const std::vector<Enjon::Entity*> activeEntities = mEntities->GetActiveEntities();
+
+		for (auto& e : activeEntities)
+		{
+			e->UpdateComponentTransforms(dt);
+		}
 
 		// Loop through handles and update
 		// for (auto& h : mHandles)
@@ -9358,6 +9367,7 @@ bool ProcessInput(EI::InputManager* input, float dt)
 
 			auto ent = mEntities->Allocate();
 			auto gc = ent->Attach<Enjon::GraphicsComponent>();
+			ent->SetScale(0.3f);
 			gc->SetMesh(mesh);
 			gc->SetMaterial(mat6);
 			gc->SetScale(EM::Vec3(1, 1, 1) * 0.3f);
@@ -9406,8 +9416,9 @@ bool ProcessInput(EI::InputManager* input, float dt)
 
 			auto ent = mEntities->Allocate();
 			auto gc = ent->Attach<Enjon::GraphicsComponent>();
+			ent->SetScale(0.5f);
 			gc->SetMesh(mesh5);
-			gc->SetMaterial(mat4);
+			gc->SetMaterial(material4);
 			gc->SetScale(EM::Vec3(1, 1, 1) * 0.5f);
 			scene->AddRenderable(gc->GetRenderable());
 
@@ -9452,6 +9463,7 @@ bool ProcessInput(EI::InputManager* input, float dt)
 
 			auto ent = mEntities->Allocate();
 			auto gc = ent->Attach<Enjon::GraphicsComponent>();
+			ent->SetScale(EM::Vec3(1, 4, 1) * 0.5f);
 			gc->SetMesh(EI::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_cylinder.obj"));
 			gc->SetMaterial(mat3);
 			gc->SetScale(EM::Vec3(1, 4, 1) * 0.5f);
@@ -9592,7 +9604,7 @@ bool ProcessInput(EI::InputManager* input, float dt)
 
 #include <vector>
 
-std::vector<Enjon::EntityHandle*> mHandlesPrivate;
+std::vector<Enjon::Entity*> mHandlesPrivate;
 std::vector<Enjon::EntityHandle*> mHandlesPublic;
 
 Enjon::EntityManager* mEntities;
@@ -9655,7 +9667,7 @@ int main(int argc, char** argv)
 #endif
 
 
-#if 1
+#if 0
 
 #include <Enjon.h>
 

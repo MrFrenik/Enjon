@@ -2,12 +2,11 @@
 
 const float kPi = 3.13159265;
 
-layout (location = 0) out vec4 DiffuseOut;     // Diffuse
+layout (location = 0) out vec4 AlbedoOut;     // Diffuse
 layout (location = 1) out vec4 NormalsOut;
 layout (location = 2) out vec4 PositionOut;
 layout (location = 3) out vec4 EmissiveOut;
 layout (location = 4) out vec4 MatPropsOut;
-layout (location = 5) out vec4 UVOut;
 
 in VS_OUT
 {
@@ -43,10 +42,9 @@ void main()
     float Roughness = texture2D(u_roughnessMap, fs_in.TexCoords).r;
     float AO        = texture2D(u_aoMap, fs_in.TexCoords).r;
 
-    DiffuseOut  = color * vec4(u_albedoColor.xyz, 1.0);
+    AlbedoOut  = color * vec4(u_albedoColor.xyz, 1.0);
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
     EmissiveOut = vec4(texture2D(u_emissiveMap, fs_in.TexCoords).xyz * u_emissiveIntensity, 1.0);
     MatPropsOut = vec4(Metallic, Roughness, AO, 1.0);
-    UVOut = vec4(fs_in.TexCoords.x, fs_in.TexCoords.y, 0.0, 1.0);
 }

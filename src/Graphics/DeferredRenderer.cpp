@@ -157,7 +157,6 @@ namespace Enjon { namespace Graphics {
 		mWindow.Clear();
 
 		// ImGui pass
-		// if (Enjon::Console::Visible())
 		if (true)
 		{
 			GuiPass();
@@ -1012,8 +1011,6 @@ namespace Enjon { namespace Graphics {
 	    ImTextureID img = (ImTextureID)mCurrentRenderTexture;
 	    ImGui::Image(img, ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()), 
 	    				ImVec2(0,1), ImVec2(1,0), ImColor(255,255,255,255), ImColor(255,255,255,0));
-
-
 	}
 
 }}

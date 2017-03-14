@@ -117,6 +117,9 @@ namespace Enjon {
 
 			const std::vector<Entity*>& GetChildren() const { return mChildren; }
 
+			/// @brief Propagates transform down through all components
+			void UpdateComponentTransforms(f32 dt);
+
 		protected:
 			/// @brief Calculates world transform with respect to parent heirarchy
 			void CalculateWorldTransform();
@@ -133,9 +136,6 @@ namespace Enjon {
 
 			/// @brief Propagates transform down through all children
 			void UpdateAllChildTransforms();
-
-			/// @brief Propagates transform down through all components
-			void UpdateComponentTransforms(f32 dt);
 
 			/// @brief Propagates transform down through all children
 			void PropagateTransform(f32 dt);

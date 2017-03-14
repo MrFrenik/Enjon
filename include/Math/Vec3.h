@@ -68,7 +68,7 @@ namespace Enjon { namespace Math {
 		inline static Vec3 YAxis() { return Vec3(0.0f, 1.0f, 0.0f); }
 		inline static Vec3 ZAxis() { return Vec3(0.0f, 0.0f, 1.0f); } 
 	
-		float Vec3::Length() const; 
+		float Vec3::Length() const;
 
 		static Vec3 inline Normalize(const Vec3& vec) { return vec / vec.Length(); }
 		static float inline DistanceSquared(const Vec3& a, const Vec3& b)

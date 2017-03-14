@@ -6,6 +6,9 @@
 #include "Graphics/QuadBatch.h"
 #include "Graphics/GLTexture.h"
 #include "Graphics/Material.h"
+#include "Graphics/DeferredRenderer.h"
+
+#include "Engine.h"
 
 #include <algorithm>
 
@@ -29,6 +32,11 @@ namespace Enjon { namespace Graphics {
 			{
 				std::stable_sort(renderables.begin(), renderables.end(), CompareMaterial);
 			} 
+			break;
+			case RenderableSortType::DEPTH:
+			{
+				std::stable_sort(renderables.begin(), renderables.end(), CompareDepth);
+			}
 			break;
 
 			case RenderableSortType::NONE: break;
@@ -149,13 +157,30 @@ namespace Enjon { namespace Graphics {
 		mAmbientSettings.mIntensity = color.a;
 	}
 
+	bool Scene::CompareDepth(EG::Renderable* a, EG::Renderable* b)
+	{
+		// Get camera position
+		v3 camPos = Engine::GetInstance()->GetGraphics()->GetSceneCamera()->GetPosition();
+
+		// Get a pos
+		v3 aPos = a->GetPosition();
+		// Get b pos
+		v3 bPos = b->GetPosition();
+
+		f32 aDist = (camPos - aPos).Length();
+		f32 bDist = (camPos - bPos).Length();
+
+		return aDist < bDist;
+	}
+
 	bool Scene::CompareMaterial(EG::Renderable* a, EG::Renderable* b)
 	{
 		// TODO(): Set this up to where materials have a unique id and sort by that
 		GLTexture texA = a->GetMaterial()->GetTexture(EG::TextureSlotType::ALBEDO);
 		GLTexture texB = b->GetMaterial()->GetTexture(EG::TextureSlotType::ALBEDO);
 
-		return texA.id < texB.id;
+
+		return texA.id > texB.id;
 	}
 
 }}

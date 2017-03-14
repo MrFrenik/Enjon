@@ -33,6 +33,7 @@ namespace Enjon
 			// NOTE(): I don't like this and will use a type catalog to grab 
 			// registered subsystems "globally"
 			Graphics::DeferredRenderer* GetGraphics() { return mGraphics; }
+			Input::InputManager* GetInput() { return mInput; }
 
 			static Engine* GetInstance();
 

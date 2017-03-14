@@ -14,7 +14,7 @@
 // Totally temporary
 static bool mMovementOn = false;
 
-Enjon::Utils::FPSLimiter mLimiter;
+// Enjon::Utils::FPSLimiter mLimiter;
 
 namespace Enjon
 {
@@ -110,7 +110,7 @@ namespace Enjon
 			mApp->Initialize();
 		}
 
-		mLimiter.Init(60.0f);
+		// mLimiter.Init(60.0f);
 
 		// Late init for systems that need it
 		Enjon::ImGuiManager::LateInit(mGraphics->GetWindow()->GetSDLWindow());
@@ -141,7 +141,7 @@ namespace Enjon
 		bool mIsRunning = true;
 		while (mIsRunning)
 		{
-			mLimiter.Begin();
+			// mLimiter.Begin();
 
 			mInput->Update();
 
@@ -208,70 +208,7 @@ namespace Enjon
 	    	return false;
 	    }
 
-	    if (input->IsKeyPressed(SDLK_t))
-	    {
-	    	mMovementOn = !mMovementOn;
-			EG::Window* window = mGraphics->GetWindow();
-
-			if (!mMovementOn)
-			{
-				window->ShowMouseCursor(true);
-			}
-			else
-			{
-				window->ShowMouseCursor(false);
-			}
-	    }
-
-	    if (mMovementOn)
-	    {
-		    EG::Camera* camera = mGraphics->GetSceneCamera();
-		   	EM::Vec3 velDir(0, 0, 0); 
-		   	static float speed = 0.15f;
-
-			if (input->IsKeyDown(SDLK_w))
-			{
-				EM::Vec3 F = camera->Forward();
-				velDir += F;
-			}
-			if (input->IsKeyDown(SDLK_s))
-			{
-				EM::Vec3 B = camera->Backward();
-				velDir += B;
-			}
-			if (input->IsKeyDown(SDLK_a))
-			{
-				velDir += camera->Left();
-			}
-			if (input->IsKeyDown(SDLK_d))
-			{
-				velDir += camera->Right();
-			}
-
-			if (velDir.Length()) velDir = EM::Vec3::Normalize(velDir);
-
-			camera->Transform.Position += speed * dt * velDir;
-
-			auto MouseSensitivity = 2.0f;
-
-			// Get mouse input and change orientation of camera
-			auto MouseCoords = input->GetMouseCoords();
-
-			auto viewPort = mGraphics->GetViewport();
-
-			EG::Window* window = mGraphics->GetWindow();
-
-			window->ShowMouseCursor(false);
-
-			// Reset the mouse coords after having gotten the mouse coordinates
-			SDL_WarpMouseInWindow(window->GetWindowContext(), (float)viewPort.x / 2.0f, (float)viewPort.y / 2.0f);
-
-			camera->OffsetOrientation(
-										(EM::ToRadians(((float)viewPort.x / 2.0f - MouseCoords.x) * dt) * MouseSensitivity), 
-										(EM::ToRadians(((float)viewPort.y / 2.0f - MouseCoords.y) * dt) * MouseSensitivity)
-									);
-
-	    }
+	    
 
 	    return true;
 	}

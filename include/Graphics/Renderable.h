@@ -6,6 +6,7 @@
 #include "Math/Transform.h"
 #include "Math/Quaternion.h"
 #include "Graphics/Material.h"
+#include "System/Types.h"
 
 namespace Enjon { namespace Graphics { 
 
@@ -14,6 +15,8 @@ namespace Enjon { namespace Graphics {
 
 	class Renderable
 	{
+		friend Scene;
+
 		public:
 			Renderable();
 			~Renderable();

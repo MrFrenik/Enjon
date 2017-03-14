@@ -20,6 +20,7 @@ namespace Enjon { namespace Graphics {
 	enum class RenderableSortType
 	{
 		MATERIAL,
+		DEPTH,
 		NONE
 	};
 
@@ -39,6 +40,8 @@ namespace Enjon { namespace Graphics {
 		EG::ColorRGBA16 mColor;	
 		float mIntensity;
 	};
+
+	using RenderableID = u32;
 
 	class Scene
 	{
@@ -75,6 +78,9 @@ namespace Enjon { namespace Graphics {
 			std::set<EG::SpotLight*>* GetSpotLights() { return &mSpotLights; }
 
 		private:
+			void AssignRenderableID(EG::Renderable* renderable);
+
+		private:
 			std::set<EG::Renderable*> 		mRenderables;
 			std::set<EG::QuadBatch*> 		mQuadBatches;
 			std::set<EG::DirectionalLight*> mDirectionalLights;
@@ -86,6 +92,7 @@ namespace Enjon { namespace Graphics {
 			EG::DirectionalLight* 			mSun = nullptr;
 
 			static bool CompareMaterial(EG::Renderable* a, EG::Renderable* b);
+			static bool CompareDepth(EG::Renderable* a, EG::Renderable* b);
 	};
 }}
 

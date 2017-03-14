@@ -1,10 +1,11 @@
 #ifndef ENJON_COMMON_H
 #define ENJON_COMMON_H
 
-#include <Math/Vec2.h>
-#include <Math/Vec3.h>
-#include <Math/Constants.h>
-#include <Defines.h>
+#include "Math/Vec2.h"
+#include "Math/Vec3.h"
+#include "Math/Constants.h"
+#include "Defines.h"
+#include "System/Types.h"
 
 namespace Enjon { namespace Math {
 		

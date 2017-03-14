@@ -93,10 +93,10 @@ namespace Enjon {
 	EM::Transform Entity::GetWorldTransform()
 	{
 		// If dirty, then calcualte world transform
-		// if (mWorldTransformDirty)
-		// {
-		// 	CalculateWorldTransform();
-		// }
+		if (mWorldTransformDirty)
+		{
+			CalculateWorldTransform();
+		}
 
 		// Return world transform
 		return mWorldTransform;
@@ -115,11 +115,8 @@ namespace Enjon {
 		// Start with local transform. If no parent exists, then we return this.
 		EM::Transform result = mLocalTransform;
 
-		// Iterate through all parents and multiply local transform with parents
-		for (Entity* p = mParent; p != nullptr; p = p->GetParent())
-		{
-			result *= p->GetLocalTransform();
-		}
+		// This will stop once parent is not dirty
+		result *= mParent->GetWorldTransform();
 
 		// Cache it off for now
 		mWorldTransform = result;
@@ -134,7 +131,7 @@ namespace Enjon {
 		mWorldTransformDirty = true;
 	}
 
-	/// @brief Sets local scale of entity relative to parent, if exists
+	//---------------------------------------------------------------
 	void Entity::SetScale(f32 scale)
 	{
 		SetScale(v3(scale));
