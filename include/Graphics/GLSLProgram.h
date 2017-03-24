@@ -12,7 +12,6 @@
 
 namespace Enjon { namespace Math { 
 
-	struct Vec2;
 	struct Vec3;
 	struct Vec4;
 	struct Mat4;	
@@ -23,6 +22,7 @@ namespace Enjon {
 
 	class ColorRGBA16;
 	class GLTexture;
+	struct Vec2;
 
 	class GLSLProgram
 	{
@@ -47,11 +47,11 @@ namespace Enjon {
 		void SetUniform(const std::string& name, int* val, int count);
 		void SetUniform(const std::string& name, const double& val);
 		void SetUniform(const std::string& name, const float& val);
-		void SetUniform(const std::string& name, const EM::Vec2& vector);
-		void SetUniform(const std::string& name, const EM::Vec3& vector);
-		void SetUniform(const std::string& name, const EM::Vec4& vector);
-		void SetUniform(const std::string& name, const EM::Mat4& matrix); 
-		void SetUniform(const std::string& name, const EM::Transform& T);
+		void SetUniform(const std::string& name, Enjon::Vec2& vector);
+		void SetUniform(const std::string& name, EM::Vec3& vector);
+		void SetUniform(const std::string& name, EM::Vec4& vector);
+		void SetUniform(const std::string& name, EM::Mat4& matrix); 
+		void SetUniform(const std::string& name, EM::Transform& T);
 		void SetUniform(const std::string& name, ColorRGBA16& C);
 		
 		GLuint inline GetProgramID() const { return m_programID; } 

@@ -15,7 +15,7 @@ namespace Enjon { namespace GUI {
 			Init();
 		}
 
-		GUISceneGroup(EM::Vec2 P)
+		GUISceneGroup(Enjon::Vec2 P)
 		{
 			Position = P;
 
@@ -30,7 +30,7 @@ namespace Enjon { namespace GUI {
 
 			// Set up member variables
 			Name 			= std::string("GUISceneGroup");		// Default Name
-			Dimensions		= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
+			Dimensions		= Enjon::Vec2(250.0f, 300.0f);		// Default Dimensions
 			TextColor		= RGBA16_MidGrey();
 			Color 			= RGBA16(0.12, 0.12, 0.12, 1.0f);
 			HoveredElement	= nullptr;
@@ -69,7 +69,7 @@ namespace Enjon { namespace GUI {
 
 		bool ProcessInput(Input* Input, Camera2D* Camera)
 		{
-			static EM::Vec2 MouseFrameOffset(0.0f);
+			static Enjon::Vec2 MouseFrameOffset(0.0f);
 			static bool JustFocused = true;
 
 		    SDL_Event event;
@@ -125,7 +125,7 @@ namespace Enjon { namespace GUI {
 			Init();
 		}
 
-		GUIVerticleGroup(EM::Vec2 P)
+		GUIVerticleGroup(Enjon::Vec2 P)
 		{
 			Position = P;
 
@@ -145,7 +145,7 @@ namespace Enjon { namespace GUI {
 			YOffset 		= 25.0f;						// Not exact way but close estimate for now
 			TitlePadding 	= 15.0f;
 			Name 			= std::string("GUIVerticleGroup");		// Default Name
-			Dimensions		= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
+			Dimensions		= Enjon::Vec2(250.0f, 300.0f);		// Default Dimensions
 			TextColor		= RGBA16_MidGrey();
 			Color 			= RGBA16(0.12, 0.12, 0.12, 1.0f);
 			TextFont 		= nullptr;
@@ -153,7 +153,7 @@ namespace Enjon { namespace GUI {
 			Visibility 		= VisibleState::VISIBLE;
 
 			// Set up MinimizeButton button
-			MinimizeButton.Dimensions = EM::Vec2(12.0f, 12.0f);
+			MinimizeButton.Dimensions = Enjon::Vec2(12.0f, 12.0f);
 
 			// Get font
 			FontScale = 1.0f;
@@ -194,7 +194,7 @@ namespace Enjon { namespace GUI {
 			Element->Parent = this;
 
 			// Set up position of Element in relation to group
-			Element->Position = EM::Vec2(Position.x + Dimensions.x - X1Offset, Position.y + Dimensions.y - ElementIndex * YOffset - TitlePadding);
+			Element->Position = Enjon::Vec2(Position.x + Dimensions.x - X1Offset, Position.y + Dimensions.y - ElementIndex * YOffset - TitlePadding);
 			Element->Name = Name;
 
 			// Increment element index
@@ -204,11 +204,11 @@ namespace Enjon { namespace GUI {
 		void Update()
 		{
 			// Update AABB of group based on position
-			this->AABB.Min = this->Position + EM::Vec2(0.0f, this->Dimensions.y - YOffset);
-			this->AABB.Max = this->AABB.Min + EM::Vec2(this->Dimensions.x, YOffset);
+			this->AABB.Min = this->Position + Enjon::Vec2(0.0f, this->Dimensions.y - YOffset);
+			this->AABB.Max = this->AABB.Min + Enjon::Vec2(this->Dimensions.x, YOffset);
 
 			// Update AABB of MinimizeButton button
-			MinimizeButton.Position = this->Position + EM::Vec2(Dimensions.x - MinimizeButton.Dimensions.x - 10.0f, Dimensions.y - MinimizeButton.Dimensions.y - 5.0f);
+			MinimizeButton.Position = this->Position + Enjon::Vec2(Dimensions.x - MinimizeButton.Dimensions.x - 10.0f, Dimensions.y - MinimizeButton.Dimensions.y - 5.0f);
 			MinimizeButton.AABB.Min = MinimizeButton.Position;
 			MinimizeButton.AABB.Max = MinimizeButton.AABB.Min + MinimizeButton.Dimensions;
 
@@ -218,7 +218,7 @@ namespace Enjon { namespace GUI {
 			for(auto C : Children)
 			{
 				// Update position
-				C->Position = EM::Vec2(Position.x + Dimensions.x - X1Offset, Position.y + Dimensions.y - index * YOffset - TitlePadding);
+				C->Position = Enjon::Vec2(Position.x + Dimensions.x - X1Offset, Position.y + Dimensions.y - index * YOffset - TitlePadding);
 
 				// Update AABB
 				C->AABB.Min = C->Position;
@@ -232,7 +232,7 @@ namespace Enjon { namespace GUI {
 
 		bool ProcessInput(Enjon::Input* Input, Camera2D* Camera)
 		{
-			static EM::Vec2 MouseFrameOffset(0.0f);
+			static Enjon::Vec2 MouseFrameOffset(0.0f);
 			static bool JustFocused = true;
 
 		    SDL_Event event;
@@ -280,12 +280,12 @@ namespace Enjon { namespace GUI {
 
 	    		if (JustFocused) 
 	    		{
-	    			MouseFrameOffset = EM::Vec2(X - this->AABB.Min.x, Y - this->Position.y);
+	    			MouseFrameOffset = Enjon::Vec2(X - this->AABB.Min.x, Y - this->Position.y);
 	    			JustFocused = false;
 	    		}
 
 				// Update offsets
-				this->Position = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
+				this->Position = Enjon::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
 		    }
 
 	    	else 
@@ -314,7 +314,7 @@ namespace Enjon { namespace GUI {
 
 			// Draw Group inner border
 			Batch->Add(	
-						EM::Vec4(Position + EM::Vec2(5.0f, 5.0f), Dimensions - EM::Vec2(10.0f, 10.0f + YOffset)),
+						EM::Vec4(Position + Enjon::Vec2(5.0f, 5.0f), Dimensions - Enjon::Vec2(10.0f, 10.0f + YOffset)),
 						EM::Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						SetOpacity(RGBA16(0.14f, 0.14f, 0.14f, 1.0f), 0.3f),

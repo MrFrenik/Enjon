@@ -3,6 +3,13 @@ cmake_minimum_required(VERSION 2.6)
 # Declare project file
 project(Enjon)
 
+if(MSVC)
+    # Default to statically-linked runtime.
+    if("${MSVC_RUNTIME}" STREQUAL "")
+      set(MSVC_RUNTIME "static")
+    endif()
+endif()
+
 # set top level directory
 set (cur_dir ${CMAKE_CURRENT_SOURCE_DIR})
 

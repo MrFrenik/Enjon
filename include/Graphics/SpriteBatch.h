@@ -49,9 +49,9 @@ namespace Enjon {
 		using DrawOption = Enjon::uint32;
 
 
-		inline Enjon::Math::Vec2 RotatePoint(const Enjon::Math::Vec2* Pos, float angle)
+		inline Enjon::Vec2 RotatePoint(const Enjon::Vec2* Pos, float angle)
 		{
-			Enjon::Math::Vec2 NewVec;
+			Enjon::Vec2 NewVec;
 			NewVec.x = Pos->x * cos(angle) - Pos->y * sin(angle);
 			NewVec.y = Pos->x * sin(angle) + Pos->y * cos(angle);
 			return NewVec;
@@ -82,14 +82,14 @@ namespace Enjon {
 			return glyph;
 		}
 
-		inline Glyph NewPolygon(std::vector<Enjon::Math::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, CoordinateFormat format)
+		inline Glyph NewPolygon(std::vector<Enjon::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, CoordinateFormat format)
 		{
 			Glyph glyph;
 
-			Enjon::Math::Vec2* TL = &Points.at(0);
-			Enjon::Math::Vec2* TR = &Points.at(1);
-			Enjon::Math::Vec2* BR = &Points.at(2);
-			Enjon::Math::Vec2* BL = &Points.at(3);
+			Enjon::Vec2* TL = &Points.at(0);
+			Enjon::Vec2* TR = &Points.at(1);
+			Enjon::Vec2* BR = &Points.at(2);
+			Enjon::Vec2* BL = &Points.at(3);
 
 			if (format == CoordinateFormat::ISOMETRIC)
 			{
@@ -125,13 +125,13 @@ namespace Enjon {
 		{
 			Glyph glyph;
 
-			Enjon::Math::Vec2 halfDims(destRect.z / 2.0f, destRect.w / 2.0f);
+			Enjon::Vec2 halfDims(destRect.z / 2.0f, destRect.w / 2.0f);
 
 			// Get points centered at origin
-			Enjon::Math::Vec2 tl(-halfDims.x, halfDims.y);
-			Enjon::Math::Vec2 bl(-halfDims.x, -halfDims.y);
-			Enjon::Math::Vec2 br(halfDims.x, -halfDims.y);
-			Enjon::Math::Vec2 tr(halfDims.x, halfDims.y);
+			Enjon::Vec2 tl(-halfDims.x, halfDims.y);
+			Enjon::Vec2 bl(-halfDims.x, -halfDims.y);
+			Enjon::Vec2 br(halfDims.x, -halfDims.y);
+			Enjon::Vec2 tr(halfDims.x, halfDims.y);
 
 			// Rotate the points back to left corner as pivot point
 			// NOTE(John): Better way of doing this would be to rotate by a given point
@@ -217,13 +217,13 @@ namespace Enjon {
 
 			/* Adds glpyh to spritebatch to be rendered */
 			void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture = 0, const ColorRGBA16& color = RGBA16(1.0f), float depth = 0.0f, DrawOption Options = DrawOptions::DEFAULT_DRAW,
-				ColorRGBA16 BorderColor = RGBA16_White(), float BorderThickness = 1.0f, const EM::Vec2& ShadowOffset = EM::Vec2(5.0f, 5.0f), float BorderRadius = 1.0f);
+				ColorRGBA16 BorderColor = RGBA16_White(), float BorderThickness = 1.0f, const Enjon::Vec2& ShadowOffset = Enjon::Vec2(5.0f, 5.0f), float BorderRadius = 1.0f);
 
 			/* Adds glpyh to spritebatch to be rendered with specified rotation */
 			void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, CoordinateFormat Format = CoordinateFormat::CARTESIAN, DrawOption Options = DrawOptions::DEFAULT_DRAW);
 
 			/* Adds polygon glyph to spritebatch to be rendered */
-			void AddPolygon(std::vector<Enjon::Math::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color = RGBA16_White(), float depth = 0.0f, CoordinateFormat = CoordinateFormat::CARTESIAN);
+			void AddPolygon(std::vector<Enjon::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color = RGBA16_White(), float depth = 0.0f, CoordinateFormat = CoordinateFormat::CARTESIAN);
 
 			/* Renders entire batch to screen */
 			void RenderBatch();

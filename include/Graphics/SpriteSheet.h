@@ -11,7 +11,7 @@ namespace Enjon {
 		SpriteSheet()
 		{}
 
-		void Init(const GLTexture& Texture, const Math::iVec2 Dims)
+		void Init(const GLTexture& Texture, const Enjon::iVec2 Dims)
 		{
 			this->texture = Texture;
 			this->dims = Dims;
@@ -35,7 +35,7 @@ namespace Enjon {
 		}
 
 	GLTexture texture;
-	Math::iVec2 dims;
+	Enjon::iVec2 dims;
 	int init_status = 0;
 
 	}; 

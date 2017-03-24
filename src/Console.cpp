@@ -119,7 +119,7 @@ namespace Enjon {
 				InputTextBox.Draw(&Batch);
 
 				// Render the text in the console output
-				auto StartPosition = EM::Vec2(-ScreenWidth * 0.5f + 20.0f, -ScreenHeight * 0.5f + InputTextBox.Dimensions.y + 20.0f);
+				auto StartPosition = Vec2(-ScreenWidth * 0.5f + 20.0f, -ScreenHeight * 0.5f + InputTextBox.Dimensions.y + 20.0f);
 				auto YOffset = 30.0f;
 				for (auto C = Output.rbegin(); C != Output.rend(); C++)
 				{
@@ -148,8 +148,8 @@ namespace Enjon {
 		HUDCamera.SetScale(1.0f);
 
 		// Console text box initialization
-		InputTextBox.Position = EM::Vec2(-ScreenWidth * 0.5f + 5.0f, -ScreenHeight * 0.5f + 20.0f);
-		InputTextBox.Dimensions = EM::Vec2((ScreenWidth / 3) - 10.0f, InputTextBox.Dimensions.y);
+		InputTextBox.Position = Vec2(-ScreenWidth * 0.5f + 5.0f, -ScreenHeight * 0.5f + 20.0f);
+		InputTextBox.Dimensions = Vec2((ScreenWidth / 3) - 10.0f, InputTextBox.Dimensions.y);
 		InputTextBox.MaxStringLength = 100;
 		InputTextBox.KeyboardInFocus = true;
 

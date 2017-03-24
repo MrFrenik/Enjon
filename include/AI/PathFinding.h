@@ -11,7 +11,7 @@ namespace PathFinding {
 	
 	struct Node 
 	{
-		EM::Vec2 GridCoordinates;
+		Enjon::Vec2 GridCoordinates;
 		float GCost;
 		float HCost;
 		float WCost;
@@ -60,13 +60,13 @@ namespace PathFinding {
 		return A.Index != B.Index;	
 	}
 
-	std::deque<Node> FindPath(SpatialHash::Grid* G, EM::Vec2& Start, EM::Vec2& End);
+	std::deque<Node> FindPath(SpatialHash::Grid* G, Enjon::Vec2& Start, Enjon::Vec2& End);
 
 	Enjon::uint32 GetDistance(Node& A, Node& B);
 
-	Node CreateNodeFromPosition(SpatialHash::Grid* G, EM::Vec2& Position);
+	Node CreateNodeFromPosition(SpatialHash::Grid* G, Enjon::Vec2& Position);
 
-	Node CreateNodeFromGridCoordinates(SpatialHash::Grid* G, EM::Vec2& GridCoordinates);
+	Node CreateNodeFromGridCoordinates(SpatialHash::Grid* G, Enjon::Vec2& GridCoordinates);
 
 	std::vector<Node> GetNeighbors(SpatialHash::Grid* G, Node& CurrentNode);
 

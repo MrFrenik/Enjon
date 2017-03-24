@@ -28,7 +28,7 @@ namespace Enjon {
 	{
 	public:
 		GBuffer(){}
-		GBuffer(uint32 _Width, uint32 _Height);
+		GBuffer(u32 _Width, u32 _Height);
 		~GBuffer();
 
 		void Bind(BindType Type = BindType::WRITE);
@@ -37,7 +37,7 @@ namespace Enjon {
 		GLuint inline GetTexture(GBufferTextureType Type) { return Textures[(GLuint)Type]; }
 		GLuint inline GetTexture(u32 index) { return Textures[index]; }
 		GLuint inline GetDepth() { return DepthBuffer; }
-		EM::Vec2 inline GetResolution() { return EM::Vec2(Width, Height); }
+		Vec2 inline GetResolution() { return Vec2(Width, Height); }
 		void SetViewport(const EM::Vec4& Viewport);
 
 		u32 GetWidth() { return Width; }

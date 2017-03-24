@@ -85,9 +85,9 @@ namespace Enjon {
 			EM::Vec3 pos2 = EM::Vec3(Vert2.Position[0], Vert2.Position[1], Vert2.Position[2]);
 			EM::Vec3 pos3 = EM::Vec3(Vert3.Position[0], Vert3.Position[1], Vert3.Position[2]);
 
-			EM::Vec2 uv1 = EM::Vec2(Vert1.UV[0], Vert1.UV[1]);
-			EM::Vec2 uv2 = EM::Vec2(Vert2.UV[0], Vert2.UV[1]);
-			EM::Vec2 uv3 = EM::Vec2(Vert3.UV[0], Vert3.UV[1]);
+			Enjon::Vec2 uv1 = Enjon::Vec2(Vert1.UV[0], Vert1.UV[1]);
+			Enjon::Vec2 uv2 = Enjon::Vec2(Vert2.UV[0], Vert2.UV[1]);
+			Enjon::Vec2 uv3 = Enjon::Vec2(Vert3.UV[0], Vert3.UV[1]);
 
 			// calculate tangent vectors of both triangles
 		    EM::Vec3 tangent;
@@ -95,8 +95,8 @@ namespace Enjon {
 		    // - triangle 1
 		    EM::Vec3 edge1 = pos2 - pos1;
 		    EM::Vec3 edge2 = pos3 - pos1;
-		    EM::Vec2 deltaUV1 = uv2 - uv1;
-		    EM::Vec2 deltaUV2 = uv3 - uv1;
+		    Enjon::Vec2 deltaUV1 = uv2 - uv1;
+		    Enjon::Vec2 deltaUV2 = uv3 - uv1;
 
 		    float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
 
@@ -158,7 +158,7 @@ namespace Enjon {
 
 		std::vector<EM::Vec3> TempVertexPositions;
 		std::vector<EM::Vec3> TempVertexNormals;
-		std::vector<EM::Vec2> TempVertexUVs;
+		std::vector<Enjon::Vec2> TempVertexUVs;
 
 		char* FileContents = EU::ReadFileContentsIntoString(FilePath);
 
@@ -209,7 +209,7 @@ namespace Enjon {
 						float X = std::atof(XString); 
 						float Y = std::atof(YString); 
 
-						TempVertexUVs.push_back(EM::Vec2(X, Y));
+						TempVertexUVs.push_back(Enjon::Vec2(X, Y));
 
 						// Delete strings to free memory
 						free(XString);
@@ -383,7 +383,7 @@ namespace Enjon {
 							Vert Vertex = {};
 
 							EM::Vec3* Position 	= &TempVertexPositions.at(PositionIndex);
-							EM::Vec2* UV 		= &TempVertexUVs.at(UVIndex);
+							Enjon::Vec2* UV 		= &TempVertexUVs.at(UVIndex);
 							EM::Vec3* Normal 	= &TempVertexNormals.at(NormalIndex);
 
 							// printf("%d: %s %s %s\n", count, PositionString, UVString, NormalString);
@@ -452,9 +452,9 @@ namespace Enjon {
 			EM::Vec3 pos2 = EM::Vec3(Vert2.Position[0], Vert2.Position[1], Vert2.Position[2]);
 			EM::Vec3 pos3 = EM::Vec3(Vert3.Position[0], Vert3.Position[1], Vert3.Position[2]);
 
-			EM::Vec2 uv1 = EM::Vec2(Vert1.UV[0], Vert1.UV[1]);
-			EM::Vec2 uv2 = EM::Vec2(Vert2.UV[0], Vert2.UV[1]);
-			EM::Vec2 uv3 = EM::Vec2(Vert3.UV[0], Vert3.UV[1]);
+			Enjon::Vec2 uv1 = Enjon::Vec2(Vert1.UV[0], Vert1.UV[1]);
+			Enjon::Vec2 uv2 = Enjon::Vec2(Vert2.UV[0], Vert2.UV[1]);
+			Enjon::Vec2 uv3 = Enjon::Vec2(Vert3.UV[0], Vert3.UV[1]);
 
 			// calculate tangent vectors of both triangles
 		    EM::Vec3 tangent;
@@ -462,8 +462,8 @@ namespace Enjon {
 		    // - triangle 1
 		    EM::Vec3 edge1 = pos2 - pos1;
 		    EM::Vec3 edge2 = pos3 - pos1;
-		    EM::Vec2 deltaUV1 = uv2 - uv1;
-		    EM::Vec2 deltaUV2 = uv3 - uv1;
+		    Enjon::Vec2 deltaUV1 = uv2 - uv1;
+		    Enjon::Vec2 deltaUV2 = uv3 - uv1;
 
 		    float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
 

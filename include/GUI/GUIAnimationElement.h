@@ -47,7 +47,7 @@ namespace Enjon { namespace GUI {
 
 		bool ProcessInput(Input* Input, Camera2D* Camera)
 		{
-			static EM::Vec2 MouseFrameOffset(0.0f);
+			static Enjon::Vec2 MouseFrameOffset(0.0f);
 			static bool JustFocused = true;
 
 		    SDL_Event event;
@@ -85,7 +85,7 @@ namespace Enjon { namespace GUI {
 
 	    		if (JustFocused) 
 	    		{
-	    			MouseFrameOffset = EM::Vec2(MousePos.x - this->AABB.Min.x, MousePos.y - this->AABB.Min.y);
+	    			MouseFrameOffset = Enjon::Vec2(MousePos.x - this->AABB.Min.x, MousePos.y - this->AABB.Min.y);
 	    			JustFocused = false;
 
 	    			// Just clicked
@@ -93,7 +93,7 @@ namespace Enjon { namespace GUI {
 	    		}
 
 				// Update offsets
-				this->CurrentAnimation->Frames.at(this->CurrentIndex).Offsets = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
+				this->CurrentAnimation->Frames.at(this->CurrentIndex).Offsets = Enjon::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
 
 				// Emit that value has changed
 				this->on_value_change.emit();

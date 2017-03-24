@@ -78,8 +78,8 @@ namespace Enjon { namespace Fonts {
 	        // Now store character for later use
 	        Character character = {
 	            texture,
-	            Enjon::Math::iVec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-	            Enjon::Math::iVec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+	            Enjon::iVec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+	            Enjon::iVec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
 	            face->glyph->advance.x
 	        };
 
@@ -119,7 +119,7 @@ namespace Enjon { namespace Fonts {
 	}
 
 	/* Gets character stats from given font */
-	CharacterStats GetCharacterAttributes(Enjon::Math::Vec2 Pos, float scale, Font* F, char c, float* advance)
+	CharacterStats GetCharacterAttributes(Enjon::Vec2 Pos, float scale, Font* F, char c, float* advance)
 	{
 		Character ch = F->Characters[c];
 
@@ -229,7 +229,7 @@ namespace Enjon { namespace Fonts {
 
 	        // Add to batch
 	        Batch.Add(
-						EM::Vec2(w, h),
+						Enjon::Vec2(w, h),
 	        			EM::Transform(
 	        							EM::Vec3(xpos, ypos, Position.z),
 	        							Rotation,

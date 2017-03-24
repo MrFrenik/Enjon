@@ -24,7 +24,7 @@ namespace Enjon { namespace GUI {
 			this->Color 		= RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 			this->Name 			= std::string("GUIButton");
 			this->TextColor 	= RGBA16_LightGrey();
-			this->Dimensions 	= EM::Vec2(10.0f, 10.0f);
+			this->Dimensions 	= Enjon::Vec2(10.0f, 10.0f);
 			this->BorderColor 	= SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 
 			// Set up PlayButton's on_hover signal
@@ -86,10 +86,10 @@ namespace Enjon { namespace GUI {
 			// Set up text color
 			this->TextColor 	= RGBA16_MidGrey();
 			this->Name 			= std::string("GUITextButton");
-			this->TextPadding	= EM::Vec2(5.0f, 5.0f);
+			this->TextPadding	= Enjon::Vec2(5.0f, 5.0f);
 
 			// Dimensions
-			Dimensions 			= EM::Vec2(160.0f, 18.0f);
+			Dimensions 			= Enjon::Vec2(160.0f, 18.0f);
 
 			// Get font
 			this->TextFont 		= nullptr;
@@ -159,7 +159,7 @@ namespace Enjon { namespace GUI {
 								);
 		}
 
-		EM::Vec2 TextPadding;
+		Enjon::Vec2 TextPadding;
 		EGUI::Signal<GUIElementBase*> on_click;
 		EGUI::Signal<> on_hover;
 		EGUI::Signal<> off_hover;
@@ -184,7 +184,7 @@ namespace Enjon { namespace GUI {
 			this->Step = 1;
 			this->MaxValue = 10;
 			this->MinValue = 0;
-			this->Dimensions = EM::Vec2(145.0f, 18.0f);
+			this->Dimensions = Enjon::Vec2(145.0f, 18.0f);
 			this->Depth = 0.0f;
 			this->JustFocused = false;
 			this->LoopValues = false;
@@ -192,9 +192,9 @@ namespace Enjon { namespace GUI {
 			this->FontScale = 1.0f;
 			this->YOffset = 0.0f;
 
-			ValueUp.Dimensions 		= EM::Vec2(15.0f, 16.0f);
-			ValueDown.Dimensions 	= EM::Vec2(15.0f, 16.0f);
-			ValueText.Dimensions 	= EM::Vec2(92.0f, 18.0f);
+			ValueUp.Dimensions 		= Enjon::Vec2(15.0f, 16.0f);
+			ValueDown.Dimensions 	= Enjon::Vec2(15.0f, 16.0f);
+			ValueText.Dimensions 	= Enjon::Vec2(92.0f, 18.0f);
 
 			ValueUp.Text = "+";
 			ValueDown.Text = "-";
@@ -482,7 +482,7 @@ namespace Enjon { namespace GUI {
 			if (!this->HoverState)
 			{
 				Batch->Add(
-							EM::Vec4(AABB.Min, AABB.Max - AABB.Min - EM::Vec2(21, 0)),
+							EM::Vec4(AABB.Min, AABB.Max - AABB.Min - Enjon::Vec2(21, 0)),
 							EM::Vec4(0, 0, 1, 1),
 							Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 							ValueText.Color,
@@ -491,7 +491,7 @@ namespace Enjon { namespace GUI {
 			}
 
 			Batch->Add(
-						EM::Vec4(this->AABB.Min, this->AABB.Max - this->AABB.Min - EM::Vec2(21, 0)),
+						EM::Vec4(this->AABB.Min, this->AABB.Max - this->AABB.Min - Enjon::Vec2(21, 0)),
 						EM::Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						ValueText.Color,
@@ -555,11 +555,11 @@ namespace Enjon { namespace GUI {
 			ValueText.AABB.Min = ValueText.Position;
 			ValueText.AABB.Max = ValueText.AABB.Min + ValueText.Dimensions;
 
-			ValueDown.Position = EM::Vec2(Position.x + ValueText.Dimensions.x + 2.0f, Position.y + 1.0f);
+			ValueDown.Position = Enjon::Vec2(Position.x + ValueText.Dimensions.x + 2.0f, Position.y + 1.0f);
 			ValueDown.AABB.Min = ValueDown.Position;
 			ValueDown.AABB.Max = ValueDown.AABB.Min + ValueDown.Dimensions;	
 
-			ValueUp.Position = EM::Vec2(ValueDown.Position.x + ValueDown.Dimensions.x, Position.y + 1.0f);
+			ValueUp.Position = Enjon::Vec2(ValueDown.Position.x + ValueDown.Dimensions.x, Position.y + 1.0f);
 			ValueUp.AABB.Min = ValueUp.Position;
 			ValueUp.AABB.Max = ValueUp.AABB.Min + ValueUp.Dimensions;	
 
@@ -601,9 +601,9 @@ namespace Enjon { namespace GUI {
 			this->FontScale = 1.0f;
 			this->Name = std::string("GUIDropDownButton");
 			this->TextColor		= RGBA16_LightGrey();
-			this->TextPadding = EM::Vec2(5.0f, 6.0f);
+			this->TextPadding = Enjon::Vec2(5.0f, 6.0f);
 			this->BorderColor = SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
-			this->Dimensions = EM::Vec2(123.0f, 20.0f);
+			this->Dimensions = Enjon::Vec2(123.0f, 20.0f);
 			this->YOffset = 20.0f;
 			this->XPadding = 1.0f;
 			this->Visibility = VisibleState::VISIBLE;
@@ -660,7 +660,7 @@ namespace Enjon { namespace GUI {
 			for (auto C : List)
 			{
 				// Update AABB of child
-				C->Position = EM::Vec2(Position.x + XPadding, Position.y - YOffset * index);
+				C->Position = Enjon::Vec2(Position.x + XPadding, Position.y - YOffset * index);
 				C->AABB.Min = C->Position;
 				C->AABB.Max = C->AABB.Min + C->Dimensions;
 				index++;
@@ -862,12 +862,12 @@ namespace Enjon { namespace GUI {
 				index++;
 			}
 
-			// this->Dimensions = EM::Vec2(A + 20.0f, 20.0f);
+			// this->Dimensions = Enjon::Vec2(A + 20.0f, 20.0f);
 		}
 
 		std::vector<GUITextButton*> List;
 		Fonts::Font* TextFont;
-		EM::Vec2 TextPadding;
+		Enjon::Vec2 TextPadding;
 		float XPadding;
 		float FontScale;
 		float YOffset;
@@ -885,7 +885,7 @@ namespace Enjon { namespace GUI {
 			this->ActiveColor 	= RGBA16_LimeGreen();
 			this->InactiveColor = RGBA16_DarkGrey();
 			this->BorderColor = SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
-			this->Dimensions = EM::Vec2(10.0f, 10.0f);
+			this->Dimensions = Enjon::Vec2(10.0f, 10.0f);
 
 			// Set up initial color
 			this->Color = this->InactiveColor;
@@ -940,7 +940,7 @@ namespace Enjon { namespace GUI {
 						SpriteBatch::DrawOptions::BORDER | SpriteBatch::DrawOptions::SHADOW,
 						this->BorderColor, 
 						1.0f,
-						EM::Vec2(2.0f, 2.0f)	
+						Enjon::Vec2(2.0f, 2.0f)	
 					);
 			
 		}

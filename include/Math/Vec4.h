@@ -22,7 +22,7 @@ namespace Enjon { namespace Math {
 			this->z = z;
 			this->w = w;
 		}
-		Vec4(const float& val1, const float& val2, const Math::Vec2& a)
+		Vec4(const float& val1, const float& val2, const Vec2& a)
 		{
 			this->x = val1;
 			this->y = val2;
@@ -30,14 +30,14 @@ namespace Enjon { namespace Math {
 			this->w = a.y;
 		}
 
-		Vec4(const Math::Vec2& a, const float& val1, const float& val2)
+		Vec4(const Vec2& a, const float& val1, const float& val2)
 		{
 			this->x = a.x;
 			this->y = a.y;
 			this->z = val1;
 			this->w = val2;
 		}
-		Vec4(const Math::Vec2& a, const Math::Vec2& b)
+		Vec4(const Vec2& a, const Vec2& b)
 		{
 			this->x = a.x;
 			this->y = a.y;

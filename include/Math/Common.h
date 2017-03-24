@@ -37,14 +37,14 @@ namespace Enjon { namespace Math {
 		return radians * (180.0f / (float)PI); 
 	}
 	
-	inline Math::Vec2 IsoToCartesian(const Enjon::Math::Vec2& point)
+	inline Enjon::Vec2 IsoToCartesian(const Enjon::Vec2& point)
 	{
-		return Enjon::Math::Vec2((2 * point.y + point.x) / 2.0f, (2 * point.y - point.x) / 2.0f);
+		return Enjon::Vec2((2 * point.y + point.x) / 2.0f, (2 * point.y - point.x) / 2.0f);
 	}
 
-	inline Math::Vec2 CartesianToIso(const Enjon::Math::Vec2& point)
+	inline Enjon::Vec2 CartesianToIso(const Enjon::Vec2& point)
 	{
-		return Enjon::Math::Vec2(point.x - point.y, (point.x + point.y) / 2.0f); 
+		return Enjon::Vec2(point.x - point.y, (point.x + point.y) / 2.0f); 
 	}
 
 	inline float Lerp(float goal, float current, float dt)

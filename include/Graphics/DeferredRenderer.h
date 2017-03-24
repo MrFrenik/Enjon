@@ -5,11 +5,7 @@
 #include "System/Types.h"
 #include "Graphics/Window.h"
 #include "Graphics/Scene.h"
-#include "Graphics/Camera.h"
-
-namespace Enjon { namespace Math { 
-	class iVec2;
-}}
+#include "Graphics/Camera.h" 
 
 namespace Enjon { 
 
@@ -18,6 +14,7 @@ namespace Enjon {
 	class GBuffer;
 	class FullScreenQuad; 
 	class SpriteBatch;
+	class iVec2;
 
 	struct ToneMapSettings
 	{
@@ -69,8 +66,8 @@ namespace Enjon {
 			void Init();
 			void Update(float dt);
 
-			void SetViewport(EM::iVec2& dimensions);
-			EM::iVec2 GetViewport();
+			void SetViewport(iVec2& dimensions);
+			iVec2 GetViewport();
 
 			Scene* GetScene() { return &mScene; }
 

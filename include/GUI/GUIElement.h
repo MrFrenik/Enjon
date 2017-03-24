@@ -1,4 +1,3 @@
-#pragma once
 #ifndef ENJON_GUIELEMENT_H
 #define ENJON_GUIELEMENT_H
 
@@ -54,14 +53,14 @@ namespace Enjon { namespace GUI {
 		virtual void Init() = 0;
 		virtual void Update() = 0;
 		virtual void Draw(SpriteBatch* TextBatch) = 0;
-		virtual bool ProcessInput(Enjon::Input* input, Camera2D* Camera = nullptr) = 0; 
+		virtual bool ProcessInput(Input* input, Camera2D* Camera = nullptr) = 0;
 
 		GUIElementBase* Parent;
-		EM::Vec2 Position;
+		Enjon::Vec2 Position;
 		EP::AABB AABB;
 		GUIType Type;
 
-		EM::Vec2 Dimensions;
+		Enjon::Vec2 Dimensions;
 		std::string Text;
 		std::string Name;
 		ButtonState State;
@@ -127,7 +126,7 @@ namespace Enjon { namespace GUI {
 			caret_count 	= 0.0f;
 			TextFont 		= nullptr;
 			KeyboardInFocus = false;
-			Dimensions 		= EM::Vec2(100.0f, 20.0f);
+			Dimensions 		= Enjon::Vec2(100.0f, 20.0f);
 			MaxStringLength = 20;
 			HistoryIndex 	= 0;
 
@@ -291,7 +290,7 @@ namespace Enjon { namespace GUI {
 
 		void Draw(SpriteBatch* Batch)
 		{
-			auto Padding = EM::Vec2(5.0f, 5.0f);
+			auto Padding = Enjon::Vec2(5.0f, 5.0f);
 
 			// Make sure font isn't null
 			if (TextFont == nullptr) TextFont = FontManager::GetFont("Sofia_14");
@@ -322,7 +321,7 @@ namespace Enjon { namespace GUI {
 			{
 				auto CurrentFont = TextFont;
 				auto scale = FontScale;
-				auto Padding = EM::Vec2(5.0f, 7.0f);
+				auto Padding = Enjon::Vec2(5.0f, 7.0f);
 				auto XAdvance = Position.x + Padding.x;
 				auto ITextHeight = AABB.Max.y - AABB.Min.y; // InputTextHeight
 				auto TextHeight = ITextHeight - 22.0f;

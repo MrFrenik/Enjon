@@ -56,7 +56,7 @@ namespace Enjon {
 			void SetMouseCoords(float x, float y);
 			
 			//Getters
-			inline Enjon::Math::Vec2 GetMouseCoords() const { return m_mouseCoords; }
+			inline Enjon::Vec2 GetMouseCoords() const { return m_mouseCoords; }
 
 		public:
 			std::vector<SDL_GameController*> ControllerHandles;
@@ -67,7 +67,7 @@ namespace Enjon {
 			std::unordered_map<unsigned int, bool> m_previousKeyMap;
 			std::unordered_map<unsigned int, bool> m_buttonMap;
 			std::unordered_map<unsigned int, bool> m_previousButtonMap;
-			Enjon::Math::Vec2 m_mouseCoords;
+			Enjon::Vec2 m_mouseCoords;
 	}; 
 }
 

@@ -10,7 +10,7 @@
 #include <Utils/Errors.h>
 #include <Physics/AABB.h>
 
-typedef Enjon::Math::Vec2 V2; 
+typedef Enjon::Vec2 V2; 
 
 const int CELL_SIZE = 64;
 
@@ -28,7 +28,7 @@ namespace SpatialHash {
 		int rows;
 		int cols;
 		int CellSize;
-		EM::Vec2 Origin;
+		Enjon::Vec2 Origin;
 		std::vector<Cell> cells; 
 		std::vector<Enjon::uint32> dirtyCells;
 	} Grid; 
@@ -37,7 +37,7 @@ namespace SpatialHash {
 	void Init(Grid* grid, int width, int height, int cell_size = CELL_SIZE); 
 
 	/* Finds particular cell that a given entity belongs to based on its position */
-	EM::Vec2 FindGridCoordinates(Grid* grid, V2& position); 
+	Enjon::Vec2 FindGridCoordinates(Grid* grid, V2& position); 
 
 	/* Overloaded function that finds particular cell that a given entity belongs to based on its AABB (preferred method) */
 	std::vector<Enjon::uint32> FindCell(Grid* grid, Enjon::uint32 entity, const Enjon::Physics::AABB* AABB); 
@@ -48,19 +48,19 @@ namespace SpatialHash {
 	/* Finds all neighboring cells to a given entitiy's cell and stores those in a passed in entities vector */
 	void GetNeighborCells(Grid* grid, int index, std::vector<Enjon::uint32>* Entities);
 
-	void DrawGrid(Grid* G, Enjon::SpriteBatch* Batch, EM::Vec2& Position = EM::Vec2(0.0f));
+	void DrawGrid(Grid* G, Enjon::SpriteBatch* Batch, Enjon::Vec2& Position = Enjon::Vec2(0.0f));
 
-	void DrawActiveCell(Grid* G, Enjon::SpriteBatch* Batch, EM::Vec2& Position);
+	void DrawActiveCell(Grid* G, Enjon::SpriteBatch* Batch, Enjon::Vec2& Position);
 
-	EM::Vec4 GetCellDimensions(Grid* G, EM::Vec2& Cell);
+	EM::Vec4 GetCellDimensions(Grid* G, Enjon::Vec2& Cell);
 
-	EM::Vec2 FindGridCoordinatesFromIndex(Grid* G, Enjon::uint32 Index);
+	Enjon::Vec2 FindGridCoordinatesFromIndex(Grid* G, Enjon::uint32 Index);
 
 	void FindCells(Grid* G, Enjon::uint32 Entity, const EP::AABB* AABB, EM::Vec4* CellRange, float ObstructionValue);
 
 	std::vector<Enjon::uint32> GetEntitiesFromCells(Grid* G, EM::Vec4& Cells);
 
-	Enjon::uint32 GetGridIndexFromCoordinates(Grid* G, EM::Vec2& Coordinates);
+	Enjon::uint32 GetGridIndexFromCoordinates(Grid* G, Enjon::Vec2& Coordinates);
 }
 
 #endif

@@ -1,3 +1,6 @@
+// Copyright 2016-2017, John Jackson. All Rights Reserved.  
+// File: Engine.cpp
+
 #include "Engine.h"
 #include "Application.h"
 #include "Graphics/DeferredRenderer.h"

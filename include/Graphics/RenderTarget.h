@@ -27,7 +27,7 @@ namespace Enjon {
 
 			GLuint inline GetTexture() const 	{ return Texture; }
 			GLuint inline GetDepth() const 		{ return DepthBuffer; }
-			EM::Vec2 inline GetResolution() 	{ return EM::Vec2(Width, Height); }
+			Vec2 inline GetResolution() 		{ return Vec2(Width, Height); }
 
 		private:
 			GLuint		FrameBufferID; 	// The FBO ID

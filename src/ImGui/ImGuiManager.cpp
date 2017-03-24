@@ -66,11 +66,11 @@ namespace Enjon
 
 		// Original screen coords
 		auto dimensions = window->GetViewport();
-		EM::Vec2 center = EM::Vec2((f32)dimensions.x / 2.0f, (f32)dimensions.y / 2.0f);
+		Enjon::Vec2 center = Enjon::Vec2((f32)dimensions.x / 2.0f, (f32)dimensions.y / 2.0f);
 
 	    ImGuizmo::BeginFrame();
 		static auto model = EM::Mat4::Identity();
-		EM::Vec2 translate(0, 0);
+		Enjon::Vec2 translate(0, 0);
     	ImGui::SliderFloat("Translate X", &translate.x, 0.0f, 1.0f);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
     	ImGui::SliderFloat("Translate Y", &translate.y, 0.0f, 1.0f);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
 
@@ -119,7 +119,7 @@ namespace Enjon
 			useSnap = !useSnap;
 		ImGui::Checkbox("", &useSnap);
 		ImGui::SameLine();
-		EM::Vec2 snap;
+		Enjon::Vec2 snap;
 
 		/*
 		switch (mCurrentGizmoOperation)

@@ -58,19 +58,19 @@ namespace Enjon {
 			m_shake_counter -= 0.1f;
 			float XOffset = Enjon::Random::Roll(-m_shake_intensity, m_shake_intensity);
 			float YOffset = Enjon::Random::Roll(-m_shake_intensity, m_shake_intensity);
-			Enjon::Math::Vec2 Position = this->GetPosition();
-			this->SetPosition(Enjon::Math::Vec2(Position.x + XOffset, Position.y + YOffset)); 
+			Enjon::Vec2 Position = this->GetPosition();
+			this->SetPosition(Enjon::Vec2(Position.x + XOffset, Position.y + YOffset)); 
 		}
 
 	}
 
-	void Camera2D::ConvertScreenToWorld(Enjon::Math::Vec2& screenCoords){
+	void Camera2D::ConvertScreenToWorld(Enjon::Vec2& screenCoords){
 
 		//Invert y-direction
 		screenCoords.y = m_screenHeight - screenCoords.y;
 
 		//Convert screenCoords to where 0,0 is our center of screen	
-		screenCoords -= Enjon::Math::Vec2((float)m_screenWidth / 2.0f ,(float)m_screenHeight / 2.0f);
+		screenCoords -= Enjon::Vec2((float)m_screenWidth / 2.0f ,(float)m_screenHeight / 2.0f);
 
 		//Scale the coords
 		screenCoords /= m_scalar;
@@ -79,19 +79,19 @@ namespace Enjon {
 		screenCoords += m_position;
 	}
 	
-	bool Camera2D::IsBoundBoxInCamView(const Enjon::Math::Vec2& position, const Enjon::Math::Vec2& dimensions){
+	bool Camera2D::IsBoundBoxInCamView(const Enjon::Vec2& position, const Enjon::Vec2& dimensions){
 
-		Enjon::Math::Vec2 scaledScreenDimensions = Enjon::Math::Vec2((float)m_screenWidth, (float)m_screenHeight) / m_scalar;
+		Enjon::Vec2 scaledScreenDimensions = Enjon::Vec2((float)m_screenWidth, (float)m_screenHeight) / m_scalar;
 		// const float TILE_RADIUS = (float)TILE_WIDTH / 2;
 		const float MIN_DISTANCE_X = dimensions.x / 2.0f + scaledScreenDimensions.x / 2.0f;
 		const float MIN_DISTANCE_Y = dimensions.y / 2.0f + scaledScreenDimensions.y / 2.0f;
 
 		//Center position of parameters passed in
-		Enjon::Math::Vec2 centerPos = position + dimensions / 2.0f;	
+		Enjon::Vec2 centerPos = position + dimensions / 2.0f;	
 		//Center position of camera
-		Enjon::Math::Vec2 centerCameraPos = m_position;
+		Enjon::Vec2 centerCameraPos = m_position;
 		//Distance vector between two center positions
-		Enjon::Math::Vec2 distVec = centerPos - centerCameraPos;
+		Enjon::Vec2 distVec = centerPos - centerCameraPos;
 
 		float xDepth = MIN_DISTANCE_X - abs(distVec.x);
 		float yDepth = MIN_DISTANCE_Y - abs(distVec.y);
@@ -108,9 +108,9 @@ namespace Enjon {
 
 	}	
 	
-	Math::Vec2 Camera2D::GetAnchorPosition(Anchor anchor)
+	Enjon::Vec2 Camera2D::GetAnchorPosition(Anchor anchor)
 	{
-		Math::Vec2 pos(0, 0);
+		Enjon::Vec2 pos(0, 0);
 		switch(anchor)
 		{
 			case Anchor::TOPLEFT:

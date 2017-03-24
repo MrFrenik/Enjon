@@ -41,13 +41,13 @@ namespace Enjon {  namespace Shapes {
 			Y = Ay*a*a*a + By*3*a*a*b + Cy*3*a*b*b + Dy*b*b*b;
 
 			// Get direction vector from Next to previous
-			auto Difference = EM::Vec2(X, Y) - EM::Vec2(Px, Py);
+			auto Difference = Enjon::Vec2(X, Y) - Enjon::Vec2(Px, Py);
 			auto Length = Difference.Length();
-			auto Direction = EM::Vec2::Normalize(Difference);
+			auto Direction = Enjon::Vec2::Normalize(Difference);
 
 			// Get angle of direction vector
-			auto R = EM::Vec2(1, 0);
-			float Angle = acos(R.DotProduct(Direction)) * 180.0f / EM::PI;
+			auto R = Enjon::Vec2(1, 0);
+			float Angle = acos(R.Dot(Direction)) * 180.0f / EM::PI;
 			if (Direction.y < 0.0f) Angle *= -1; 
 
 			// Draw point
@@ -69,13 +69,13 @@ namespace Enjon {  namespace Shapes {
 	inline void DrawLine(SpriteBatch* Batch, EM::Vec4& StartAndEndPoints, float Thickness = 2.0f, ColorRGBA16& Color = RGBA16_White(), float Depth = 0.0f)
 	{
 		// Get direction vector from Next to previous
-		auto Difference = EM::Vec2(StartAndEndPoints.z, StartAndEndPoints.w) - EM::Vec2(StartAndEndPoints.x, StartAndEndPoints.y);
+		auto Difference = Enjon::Vec2(StartAndEndPoints.z, StartAndEndPoints.w) - Enjon::Vec2(StartAndEndPoints.x, StartAndEndPoints.y);
 		auto Length = Difference.Length();
-		auto Direction = EM::Vec2::Normalize(Difference);
+		auto Direction = Enjon::Vec2::Normalize(Difference);
 
 		// Get angle of direction vector
-		auto R = EM::Vec2(1, 0);
-		float Angle = acos(R.DotProduct(Direction)) * 180.0f / EM::PI;
+		auto R = Enjon::Vec2(1, 0);
+		float Angle = acos(R.Dot(Direction)) * 180.0f / EM::PI;
 		if (Direction.y < 0.0f) Angle *= -1; 
 
 		Batch->Add(
@@ -88,7 +88,7 @@ namespace Enjon {  namespace Shapes {
 				);
 	}
 
-	inline void DrawHollowCircle(SpriteBatch* Batch, EM::Vec2& Point, EM::Vec2& StartAndEndAngles, float Radius, float Thickness = 2.0f, Enjon::uint32 NumberOfPoints = 360, ColorRGBA16& Color = RGBA16_White(), float Depth = 0.0f)
+	inline void DrawHollowCircle(SpriteBatch* Batch, Enjon::Vec2& Point, Enjon::Vec2& StartAndEndAngles, float Radius, float Thickness = 2.0f, Enjon::uint32 NumberOfPoints = 360, ColorRGBA16& Color = RGBA16_White(), float Depth = 0.0f)
 	{
 		for (auto i = StartAndEndAngles.x; i <= StartAndEndAngles.y; i += 0.5)
 		{
@@ -99,18 +99,18 @@ namespace Enjon {  namespace Shapes {
 			auto NextY = Radius * sin(i + 0.5f) + Point.y;
 
 			// Get direction vector from Next to previous
-			// auto Difference = EM::Vec2(NextX, NextY) - EM::Vec2(X, X);
-			auto Difference = EM::Vec2(X, Y) - EM::Vec2(Point.x, Point.y);
+			// auto Difference = Enjon::Vec2(NextX, NextY) - Enjon::Vec2(X, X);
+			auto Difference = Enjon::Vec2(X, Y) - Enjon::Vec2(Point.x, Point.y);
 			auto Length = Difference.Length();
-			auto Direction = EM::Vec2::Normalize(Difference);
+			auto Direction = Enjon::Vec2::Normalize(Difference);
 
 			// Get angle of direction vector
-			auto R = EM::Vec2(1, 0);
-			float Angle = acos(R.DotProduct(Direction)) * 180.0f / EM::PI;
+			auto R = Enjon::Vec2(1, 0);
+			float Angle = acos(R.Dot(Direction)) * 180.0f / EM::PI;
 			if (Direction.y < 0.0f) Angle *= -1; 
 
 			Batch->Add(
-						EM::Vec4(Point.x, Point.y, EM::Vec2(Length, Thickness)),
+						EM::Vec4(Point.x, Point.y, Enjon::Vec2(Length, Thickness)),
 						EM::Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
 						Color,
@@ -121,13 +121,13 @@ namespace Enjon {  namespace Shapes {
 
 	}
 
-	inline void DrawArrow(SpriteBatch* Batch, EM::Vec2& Point, float Size, ColorRGBA16& Color, float Depth = 0.0f, float Angle = 0.0f)
+	inline void DrawArrow(SpriteBatch* Batch, Enjon::Vec2& Point, float Size, ColorRGBA16& Color, float Depth = 0.0f, float Angle = 0.0f)
 	{
-		std::vector<EM::Vec2> Points;
+		std::vector<Enjon::Vec2> Points;
 
-		EM::Vec2 LOC = Point - EM::Vec2(Size / 2.0f, 0.0f);
-		EM::Vec2 ROC = Point + EM::Vec2(Size / 2.0f, 0.0f);
-		EM::Vec2 TOC = Point + EM::Vec2(0.0f, Size / 2.0f);
+		Enjon::Vec2 LOC = Point - Enjon::Vec2(Size / 2.0f, 0.0f);
+		Enjon::Vec2 ROC = Point + Enjon::Vec2(Size / 2.0f, 0.0f);
+		Enjon::Vec2 TOC = Point + Enjon::Vec2(0.0f, Size / 2.0f);
 		Points.push_back(LOC);
 		Points.push_back(ROC);
 		Points.push_back(TOC);

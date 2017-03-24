@@ -33,7 +33,7 @@ namespace Enjon {
 		EM::Vec3 N(0, 1, 0);
 		EM::Vec3 T(0, 0, -1);
 		EM::Vec3 B(-1, 0, 0);
-		EM::Vec2 UV;
+		Enjon::Vec2 UV;
 
 		/* Set top left vertex */
 		TL.Position[0] 		= TLP.x;
@@ -48,7 +48,7 @@ namespace Enjon {
 		TL.Bitangent[0]		= B.x;
 		TL.Bitangent[1]		= B.y;
 		TL.Bitangent[2]		= B.z;
-		UV 					= EM::Vec2(UVRect.x, UVRect.y + UVRect.w);
+		UV 					= Enjon::Vec2(UVRect.x, UVRect.y + UVRect.w);
 		TL.UV[0] 			= UV.x; 
 		TL.UV[1] 			= UV.y; 
 		TL.Color[0] 		= Color.r;
@@ -69,7 +69,7 @@ namespace Enjon {
 		BL.Bitangent[0]		= B.x;
 		BL.Bitangent[1]		= B.y;
 		BL.Bitangent[2]		= B.z;
-		UV 					= EM::Vec2(UVRect.x, UVRect.y);
+		UV 					= Enjon::Vec2(UVRect.x, UVRect.y);
 		BL.UV[0] 			= UV.x; 
 		BL.UV[1] 			= UV.y; 
 		BL.Color[0] 		= Color.r;
@@ -90,7 +90,7 @@ namespace Enjon {
 		BR.Bitangent[0]		= B.x;
 		BR.Bitangent[1]		= B.y;
 		BR.Bitangent[2]		= B.z;
-		UV 					= EM::Vec2(UVRect.x + UVRect.z, UVRect.y);
+		UV 					= Enjon::Vec2(UVRect.x + UVRect.z, UVRect.y);
 		BR.UV[0] 			= UV.x; 
 		BR.UV[1] 			= UV.y; 
 		BR.Color[0] 		= Color.r;
@@ -111,7 +111,7 @@ namespace Enjon {
 		TR.Bitangent[0]		= B.x;
 		TR.Bitangent[1]		= B.y;
 		TR.Bitangent[2]		= B.z;
-		UV 					= EM::Vec2(UVRect.x + UVRect.z, UVRect.y + UVRect.w);
+		UV 					= Enjon::Vec2(UVRect.x + UVRect.z, UVRect.y + UVRect.w);
 		TR.UV[0] 			= UV.x; 
 		TR.UV[1] 			= UV.y; 
 		TR.Color[0] 		= Color.r;
@@ -120,7 +120,7 @@ namespace Enjon {
 		TR.Color[3] 		= Color.a;
 	}
 
-	QuadGlyph::QuadGlyph(EM::Vec2& Dimensions, EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
+	QuadGlyph::QuadGlyph(Enjon::Vec2& Dimensions, EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
 	:	Texture(_Texture), Depth(_Depth) 	
 	{
 		// Transform all verticies by model matrix
@@ -132,7 +132,7 @@ namespace Enjon {
 
 		EM::Vec4 Position, Normal, Tangent, Bitangent;
 		EM::Vec3 T, B, N, P;
-		EM::Vec2 UV;
+		Enjon::Vec2 UV;
 
 		// Normal for all verticies
 		Normal = Model * EM::Vec4(Static_Normal, 0.0);
@@ -169,7 +169,7 @@ namespace Enjon {
 		TL.Bitangent[0]		= B.x;
 		TL.Bitangent[1]		= B.y;
 		TL.Bitangent[2]		= B.z;
-		UV 					= EM::Vec2(UVRect.x, UVRect.y + UVRect.w);
+		UV 					= Enjon::Vec2(UVRect.x, UVRect.y + UVRect.w);
 		TL.UV[0] 			= UV.x; 
 		TL.UV[1] 			= UV.y; 
 		TL.Color[0] 		= Color.r;
@@ -192,7 +192,7 @@ namespace Enjon {
 		BL.Bitangent[0]		= B.x;
 		BL.Bitangent[1]		= B.y;
 		BL.Bitangent[2]		= B.z;
-		UV 					= EM::Vec2(UVRect.x, UVRect.y);
+		UV 					= Enjon::Vec2(UVRect.x, UVRect.y);
 		BL.UV[0] 			= UV.x; 
 		BL.UV[1] 			= UV.y; 
 		BL.Color[0] 		= Color.r;
@@ -215,7 +215,7 @@ namespace Enjon {
 		TR.Bitangent[0]		= B.x;
 		TR.Bitangent[1]		= B.y;
 		TR.Bitangent[2]		= B.z;
-		UV 					= EM::Vec2(UVRect.x + UVRect.z, UVRect.y + UVRect.w);
+		UV 					= Enjon::Vec2(UVRect.x + UVRect.z, UVRect.y + UVRect.w);
 		TR.UV[0] 			= UV.x; 
 		TR.UV[1] 			= UV.y; 
 		TR.Color[0] 		= Color.r;
@@ -238,7 +238,7 @@ namespace Enjon {
 		BR.Bitangent[0]		= B.x;
 		BR.Bitangent[1]		= B.y;
 		BR.Bitangent[2]		= B.z;
-		UV 					= EM::Vec2(UVRect.x + UVRect.z, UVRect.y);
+		UV 					= Enjon::Vec2(UVRect.x + UVRect.z, UVRect.y);
 		BR.UV[0] 			= UV.x; 
 		BR.UV[1] 			= UV.y; 
 		BR.Color[0] 		= Color.r;
@@ -259,7 +259,7 @@ namespace Enjon {
 
 		EM::Vec4 Position, Normal, Tangent, Bitangent;
 		EM::Vec3 T, B, N, P;
-		EM::Vec2 UV;
+		Enjon::Vec2 UV;
 
 		// Normal for all verticies
 		Normal = Model * EM::Vec4(Static_Normal, 0.0);
@@ -290,7 +290,7 @@ namespace Enjon {
 		TL.Bitangent[0]		= B.x;
 		TL.Bitangent[1]		= B.y;
 		TL.Bitangent[2]		= B.z;
-		UV 					= EM::Vec2(UVRect.x, UVRect.y + UVRect.w);
+		UV 					= Enjon::Vec2(UVRect.x, UVRect.y + UVRect.w);
 		TL.UV[0] 			= UV.x; 
 		TL.UV[1] 			= UV.y; 
 		TL.Color[0] 		= Color.r;
@@ -313,7 +313,7 @@ namespace Enjon {
 		BL.Bitangent[0]		= B.x;
 		BL.Bitangent[1]		= B.y;
 		BL.Bitangent[2]		= B.z;
-		UV 					= EM::Vec2(UVRect.x, UVRect.y);
+		UV 					= Enjon::Vec2(UVRect.x, UVRect.y);
 		BL.UV[0] 			= UV.x; 
 		BL.UV[1] 			= UV.y; 
 		BL.Color[0] 		= Color.r;
@@ -337,7 +337,7 @@ namespace Enjon {
 		TR.Bitangent[0]		= B.x;
 		TR.Bitangent[1]		= B.y;
 		TR.Bitangent[2]		= B.z;
-		UV 					= EM::Vec2(UVRect.x + UVRect.z, UVRect.y + UVRect.w);
+		UV 					= Enjon::Vec2(UVRect.x + UVRect.z, UVRect.y + UVRect.w);
 		TR.UV[0] 			= UV.x; 
 		TR.UV[1] 			= UV.y; 
 		TR.Color[0] 		= Color.r;
@@ -360,7 +360,7 @@ namespace Enjon {
 		BR.Bitangent[0]		= B.x;
 		BR.Bitangent[1]		= B.y;
 		BR.Bitangent[2]		= B.z;
-		UV 					= EM::Vec2(UVRect.x + UVRect.z, UVRect.y);
+		UV 					= Enjon::Vec2(UVRect.x + UVRect.z, UVRect.y);
 		BR.UV[0] 			= UV.x; 
 		BR.UV[1] 			= UV.y; 
 		BR.Color[0] 		= Color.r;
@@ -420,7 +420,7 @@ namespace Enjon {
 
 	// Adds quadglyph to quadbatch to be rendered with base quad defined
 	void QuadBatch::Add(
-					EM::Vec2& Dimensions, 
+					Enjon::Vec2& Dimensions, 
 					EM::Transform& Transform, 
 					EM::Vec4& UVRect, 
 					GLuint Texture, 

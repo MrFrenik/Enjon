@@ -13,11 +13,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace Enjon { namespace Math {
-	class iVec2;	
-}}
 
-namespace Enjon {
+namespace Enjon 
+{
+	class iVec2;
 
 	enum WindowFlags : u32
 	{ 
@@ -50,8 +49,8 @@ namespace Enjon {
 		inline int GetScreenHeight() const { return m_screenHeight; }
 
 		void SetViewport(int width, int height);
-		void SetViewport(EM::iVec2& dimensions);
-		EM::iVec2 GetViewport();
+		void SetViewport(Enjon::iVec2& dimensions);
+		iVec2 GetViewport();
 	
 		void Clear(float val = 1.0f, 
 					GLbitfield mask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, 

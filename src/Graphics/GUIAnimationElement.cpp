@@ -22,10 +22,10 @@ namespace Enjon { namespace GUI {
 				auto& SSize = Frame->SourceSize;
 				auto& Offsets = Frame->Offsets;
 
-				AABB->Min = EM::Vec2(Position.x + Offsets.x * ScalingFactor, 
+				AABB->Min = Enjon::Vec2(Position.x + Offsets.x * ScalingFactor, 
 									 Position.y + Offsets.y * ScalingFactor);
 
-				AABB->Max = AABB->Min + EM::Vec2(SSize.x, SSize.y) * ScalingFactor;
+				AABB->Max = AABB->Min + Enjon::Vec2(SSize.x, SSize.y) * ScalingFactor;
 			}
 
 			else

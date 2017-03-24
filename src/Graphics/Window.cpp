@@ -88,22 +88,22 @@ namespace Enjon {
 		return 0;
 	}
 
-	void Window::SetViewport(int width, int height)
+	void Window::SetViewport(s32 width, s32 height)
 	{
 		m_screenWidth = width;
 		m_screenHeight = height;	
 	}
 
-	void Window::SetViewport(EM::iVec2& dimensions)
+	void Window::SetViewport(iVec2& dimensions)
 	{
 		// TODO(John): Need to refresh screen here...
 		m_screenWidth = dimensions.x;
 		m_screenHeight = dimensions.y;
 	}
 
-	EM::iVec2 Window::GetViewport() 
+	iVec2 Window::GetViewport() 
 	{
-		return EM::iVec2(m_screenWidth, m_screenHeight);
+		return iVec2(m_screenWidth, m_screenHeight);
 	}
 
 	void Window::SwapBuffer()

@@ -43,7 +43,7 @@ namespace Enjon {
 	struct QuadGlyph
 	{
 		QuadGlyph(EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
-		QuadGlyph(EM::Vec2& Dimensions, EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
+		QuadGlyph(Vec2& Dimensions, EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
 		QuadGlyph(std::vector<EM::Vec3>& Points, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
 		QuadGlyph(EM::Vec3& TL, EM::Vec3& BL, EM::Vec3& BR, EM::Vec3& TR, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
 
@@ -96,7 +96,7 @@ namespace Enjon {
 			void Add(EM::Transform& Transform, EM::Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
 
 			// Adds quadglyph to quadbatch to be rendered with base quad defined
-			void Add(EM::Vec2& Dimensions, EM::Transform& Transform, EM::Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
+			void Add(Vec2& Dimensions, EM::Transform& Transform, EM::Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
 
 			// Adds quadglyph to quadbatch to be rendered with base quad defined
 			void Add(EM::Vec3& TLP, EM::Vec3& BLP, EM::Vec3& BRP, EM::Vec3& TRP, EM::Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);

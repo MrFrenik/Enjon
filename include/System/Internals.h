@@ -127,21 +127,21 @@ namespace Enjon { namespace Internals {
 	};
 
 	template <> 
-	struct Internal<EM::Vec2> 
+	struct Internal<Enjon::Vec2> 
 	{
 		Internal()
 		{
 			Type = InternalType::VEC2;
-			Value = EM::Vec2(1.0f);
+			Value = Enjon::Vec2(1.0f);
 		}
 
-		Internal(const EM::Vec2& _Value)
+		Internal(const Enjon::Vec2& _Value)
 		{
 			Type = InternalType::VEC2;
 			Value = _Value;
 		}
 
-		EM::Vec2 Value;
+		Enjon::Vec2 Value;
 		InternalType Type;
 	};
 
@@ -205,7 +205,7 @@ namespace Enjon { namespace Internals {
 	using EBool = Internal<Enjon::bool8>;
 
 	// Default vec2 constructor
-	using EVec2 = Internal<EM::Vec2>;
+	using EVec2 = Internal<Enjon::Vec2>;
 
 	// Default vec3 constructor
 	using EVec3 = Internal<EM::Vec3>;

@@ -182,7 +182,7 @@ namespace Enjon {
 		return location;
 	} 
 		
-	void GLSLProgram::SetUniform(const std::string& name, const Math::Mat4& matrix)
+	void GLSLProgram::SetUniform(const std::string& name, Math::Mat4& matrix)
 	{
 		// glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, matrix.elements);	
 		auto Search = UniformMap.find(name);
@@ -241,7 +241,7 @@ namespace Enjon {
 		}
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const Math::Vec2& vector)
+	void GLSLProgram::SetUniform(const std::string& name, Enjon::Vec2& vector)
 	{
 		// glUniform2f(GetUniformLocation(name), vector.x, vector.y);
 		auto Search = UniformMap.find(name);
@@ -255,7 +255,7 @@ namespace Enjon {
 		}
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const Math::Vec3& vector)
+	void GLSLProgram::SetUniform(const std::string& name, Math::Vec3& vector)
 	{
 		// glUniform3f(GetUniformLocation(name), vector.x, vector.y, vector.z);
 		auto Search = UniformMap.find(name);
@@ -269,7 +269,7 @@ namespace Enjon {
 		}
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const Math::Vec4& vector)
+	void GLSLProgram::SetUniform(const std::string& name, Math::Vec4& vector)
 	{
 		// glUniform4f(GetUniformLocation(name), vector.x, vector.y, vector.z, vector.w);
 		auto Search = UniformMap.find(name);
@@ -314,7 +314,7 @@ namespace Enjon {
 		}
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const EM::Transform& T)
+	void GLSLProgram::SetUniform(const std::string& name, EM::Transform& T)
 	{
 		// TODO(John): Figure out a decent way to cache these
 		glUniform3f(GetUniformLocation(name + ".position"), T.Position.x, T.Position.y, T.Position.z);	

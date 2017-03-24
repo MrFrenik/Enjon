@@ -1,10 +1,4 @@
-/* ===========================================================
-* @Author: 	       		John Jackson
-* @Title:	       		defines.h 
-* @Date:   	       		2015-11-08 11:31:34
-* @Last Modified time: 	2016-23-05 16:51:00
-=============================================================*/
-
+#pragma once
 #ifndef ENJON_DEFINES_H
 #define ENJON_DEFINES_H
 
@@ -17,12 +11,9 @@
 #define EM 		Enjon::Math
 #define ER 		Enjon::Random
 #define EU 		Enjon::Utils
-#define EGUI 	Enjon::GUI
-#define EP		Enjon::Physics
 #define EA		Enjon::Animation
-#define EN     	Enjon::Internals
-#define ECSS	ECS::Systems
-#define EScript	Enjon::Scripting
+#define EP		Enjon::Physics
+#define EGUI	Enjon::GUI
 
 namespace Enjon
 {

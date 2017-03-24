@@ -18,8 +18,8 @@ namespace Enjon { namespace GUI {
 			// Set up states
 			this->State = ButtonState::INACTIVE;
 			this->HoverState = HoveredState::OFF_HOVER;
-			this->Dimensions = EM::Vec2(100.0f);
-			this->Position = EM::Vec2(0.0f);
+			this->Dimensions = Enjon::Vec2(100.0f);
+			this->Position = Enjon::Vec2(0.0f);
 			this->AABB.Min = this->Position;
 			this->AABB.Max = this->AABB.Min + this->Dimensions;
 
@@ -48,7 +48,7 @@ namespace Enjon { namespace GUI {
 
 		bool ProcessInput(Enjon::Input* Input, Camera2D* Camera)
 		{
-			static EM::Vec2 MouseFrameOffset(0.0f);
+			static Enjon::Vec2 MouseFrameOffset(0.0f);
 			static bool JustFocused = true;
 
 		    SDL_Event event;
@@ -86,7 +86,7 @@ namespace Enjon { namespace GUI {
 
 	    		if (JustFocused) 
 	    		{
-	    			MouseFrameOffset = EM::Vec2(MousePos.x - this->AABB.Min.x, MousePos.y - this->AABB.Min.y);
+	    			MouseFrameOffset = Enjon::Vec2(MousePos.x - this->AABB.Min.x, MousePos.y - this->AABB.Min.y);
 	    			JustFocused = false;
 
 	    			// Just clicked
@@ -94,7 +94,7 @@ namespace Enjon { namespace GUI {
 	    		}
 
 				// Update Position
-				this->Position = EM::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
+				this->Position = Enjon::Vec2(X - MouseFrameOffset.x, Y - MouseFrameOffset.y);
 
 				// Emit that value has changed
 				this->on_value_change.emit();

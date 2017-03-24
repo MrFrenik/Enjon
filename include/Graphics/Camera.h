@@ -6,11 +6,7 @@
 #include <Math/Transform.h>
 #include <Math/Vec3.h>
 #include <Math/Vec2.h>
-#include <Math/Mat4.h>
-
-namespace Enjon { namespace Math {
-	class iVec2;
-}}
+#include <Math/Mat4.h> 
 
 namespace Enjon { 
 
@@ -24,7 +20,7 @@ namespace Enjon {
 	{
 		Camera();
 		Camera(u32 Width, u32 Height);
-		Camera(EM::iVec2& dimenstions);
+		Camera(iVec2& dimenstions);
 		Camera(const Camera& Other) = default;
 
 		void LookAt(EM::Vec3& Position, EM::Vec3& Up = EM::Vec3(0, 1, 0));
@@ -42,7 +38,7 @@ namespace Enjon {
 		EM::Mat4 GetViewProjection() const;
 		EM::Mat4 GetProjection() const;
 		EM::Mat4 GetView() const;
-		inline EM::Vec2 GetNearFar() const { return EM::Vec2(NearPlane, FarPlane); }
+		inline Vec2 GetNearFar() const { return Vec2(NearPlane, FarPlane); }
 		inline f32 GetNear() { return NearPlane; }
 		inline f32 GetFar() { return FarPlane; }
 
@@ -63,7 +59,7 @@ namespace Enjon {
 		f32 ViewPortAspectRatio;
 		f32 OrthographicScale;
 		ProjectionType ProjType;
-		EM::Vec2 ScreenDimensions;
+		Vec2 ScreenDimensions;
 	};
 
 }

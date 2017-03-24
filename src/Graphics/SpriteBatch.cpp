@@ -50,7 +50,7 @@ namespace Enjon {
 
 		void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture,
 			const ColorRGBA16& color /* = ColorRGBA16(255) */, float depth /* = 0.0f ) */, DrawOption Options,
-			ColorRGBA16 BorderColor, float BorderThickness, const EM::Vec2& ShadowOffset, float BorderRadius)
+			ColorRGBA16 BorderColor, float BorderThickness, const Enjon::Vec2& ShadowOffset, float BorderRadius)
 		{
 			if (Options & DrawOptions::SHADOW)
 			{
@@ -76,7 +76,7 @@ namespace Enjon {
 		}
 
 		/* Adds polygon glyph to spritebatch to be rendered */
-		void SpriteBatch::AddPolygon(std::vector<Enjon::Math::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, CoordinateFormat format)
+		void SpriteBatch::AddPolygon(std::vector<Enjon::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, CoordinateFormat format)
 		{
 			// Place back new glyph
 			m_glyphs.emplace_back(NewPolygon(Points, uvRect, texture, color, depth, format));
@@ -266,11 +266,11 @@ namespace Enjon {
 			Shapes::DrawLine(Batch, EM::Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
 			Shapes::DrawHollowCircle(
 				Batch,
-				EM::Vec2(
+				Enjon::Vec2(
 					EndX + 0.5f,
 					EndY - BorderRadius / 4.0f - 0.5f
 				),
-				EM::Vec2(0.0f, 90.0f),
+				Enjon::Vec2(0.0f, 90.0f),
 				Thickness,
 				BorderThickness,
 				AmountOfAngles,
@@ -290,11 +290,11 @@ namespace Enjon {
 			Shapes::DrawLine(Batch, EM::Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
 			Shapes::DrawHollowCircle(
 				Batch,
-				EM::Vec2(
+				Enjon::Vec2(
 					EndX - BorderRadius / 4.0f - 0.5f,
 					EndY - BorderRadius / 8.0f + 1.5f
 				),
-				EM::Vec2(270.0f, 360.0f),
+				Enjon::Vec2(270.0f, 360.0f),
 				Thickness,
 				BorderThickness,
 				AmountOfAngles,
@@ -314,11 +314,11 @@ namespace Enjon {
 			Enjon::Shapes::DrawLine(Batch, EM::Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
 			Enjon::Shapes::DrawHollowCircle(
 				Batch,
-				EM::Vec2(
+				Enjon::Vec2(
 					X - 0.5f,
 					Y + BorderRadius / 8.0f + 2.5f
 				),
-				EM::Vec2(270.0f, 360.0f),
+				Enjon::Vec2(270.0f, 360.0f),
 				Thickness,
 				BorderThickness,
 				AmountOfAngles,
@@ -344,11 +344,11 @@ namespace Enjon {
 
 			Enjon::Shapes::DrawHollowCircle(
 				Batch,
-				EM::Vec2(
+				Enjon::Vec2(
 					X - 0.5f,
 					EndY - BorderRadius / 4.0f - 0.5f
 				),
-				EM::Vec2(270.0f, 360.0f),
+				Enjon::Vec2(270.0f, 360.0f),
 				Thickness,
 				BorderThickness,
 				AmountOfAngles,

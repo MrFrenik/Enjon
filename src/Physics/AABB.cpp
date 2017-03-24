@@ -3,7 +3,7 @@
 namespace Enjon { namespace Physics {
 
 	// Test point vs AABB
-	bool AABBvsPoint(const AABB* A, const EM::Vec2& P)
+	bool AABBvsPoint(const AABB* A, const Enjon::Vec2& P)
 	{
 		if (A->Min.x > P.x || A->Max.x < P.x ||
 			A->Min.y > P.y || A->Max.y < P.y) 
@@ -35,9 +35,9 @@ namespace Enjon { namespace Physics {
 	}
 
 	// Calculates and returns Minimum Translation Distance of AABBvsAABB collision
-	Enjon::Math::Vec2 MinimumTranslation(const AABB* A, const AABB* B)
+	Enjon::Vec2 MinimumTranslation(const AABB* A, const AABB* B)
 	{
-		Enjon::Math::Vec2 MTD;
+		Enjon::Vec2 MTD;
 
 		float left		= B->Min.x - A->Max.x;
 		float right		= B->Max.x - A->Min.x;

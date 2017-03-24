@@ -24,13 +24,13 @@ namespace Enjon { namespace Animation {
 		// Size information
 		float s_w = SSS.at("w");
 		float s_h = SSS.at("h");
-		EM::Vec2 SourceSize(s_w, s_h);
+		Enjon::Vec2 SourceSize(s_w, s_h);
 
 		// Create ImageFrame
 		ImageFrame IF = 
 						{
 							EM::Vec4(x, y, w, h),
-							EM::Vec2(0.0f),
+							Enjon::Vec2(0.0f),
 							SourceSize,
 							{},
 							0.0f, 
@@ -112,7 +112,7 @@ namespace Enjon { namespace Animation {
 	}
 
 	// Draws a single animation frame	
-	void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, SpriteBatch* Batch, const ColorRGBA16& Color, float ScalingFactor, float Depth)
+	void DrawFrame(const ImageFrame& Image, Enjon::Vec2 Position, SpriteBatch* Batch, const ColorRGBA16& Color, float ScalingFactor, float Depth)
 	{
 		auto& Dims = Image.UVs;
 		auto& SSize = Image.SourceSize;
@@ -125,7 +125,7 @@ namespace Enjon { namespace Animation {
 		Batch->Add(
 					EM::Vec4(Position.x + Offsets.x * ScalingFactor, 
 							Position.y + Offsets.y * ScalingFactor, 
-							EM::Vec2(SSize.x, SSize.y) * ScalingFactor), 
+							Enjon::Vec2(SSize.x, SSize.y) * ScalingFactor), 
 					EM::Vec4(Dims.x / AWidth, 
 							(AHeight - Dims.y - Dims.w) / AHeight, 
 							 Dims.z / AWidth, 

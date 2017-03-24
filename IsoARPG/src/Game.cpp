@@ -271,9 +271,7 @@ void Game::Initialize()
 		body->setDamping(10.0, 10.0);
 
 		// Add body to dynamics world
-		mDynamicsWorld->addRigidBody(body);
-
-		// mBodies.push_back(body);
+		mDynamicsWorld->addRigidBody(body); 
 	}
 }
 
@@ -447,10 +445,10 @@ void Game::ProcessInput(f32 dt)
 				btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 				btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
 				btRigidBody* body = new btRigidBody(rbInfo);
-				body->setRestitution(0.02f);
-				body->setFriction(10.0f);
+				body->setRestitution(0.2f);
+				body->setFriction(2.0f);
 				body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
-				body->setDamping(0.8f, 0.8f);
+				body->setDamping(0.7f, 0.7f);
 
 				auto ent = mEntities->Allocate();
 				auto gc = ent->Attach<Enjon::GraphicsComponent>();
@@ -469,24 +467,27 @@ void Game::ProcessInput(f32 dt)
 
 			camera->Transform.Position += mCameraSpeed * dt * velDir;
 
-			auto MouseSensitivity = 2.0f;
+			// Set mouse sensitivity
+			f32 MouseSensitivity = 2.0f;
 
 			// Get mouse input and change orientation of camera
-			auto MouseCoords = input->GetMouseCoords();
+			Enjon::Vec2 MouseCoords = input->GetMouseCoords();
 
-			auto viewPort = gfx->GetViewport();
+			Enjon::iVec2 viewPort = gfx->GetViewport();
 
-			Enjon::Window* window = gfx->GetWindow();
+			// Grab window from graphics subsystem
+			Enjon::Window* window = gfx->GetWindow(); 
 
+			// Set cursor to not visible
 			window->ShowMouseCursor(false);
 
 			// Reset the mouse coords after having gotten the mouse coordinates
 			SDL_WarpMouseInWindow(window->GetWindowContext(), (float)viewPort.x / 2.0f, (float)viewPort.y / 2.0f);
 
-			camera->OffsetOrientation(
-										(EM::ToRadians(((float)viewPort.x / 2.0f - MouseCoords.x) * dt) * MouseSensitivity), 
-										(EM::ToRadians(((float)viewPort.y / 2.0f - MouseCoords.y) * dt) * MouseSensitivity)
-									);
+			// Offset camera orientation
+			f32 xOffset = EM::ToRadians((f32)viewPort.x / 2.0f - MouseCoords.x) * dt * MouseSensitivity;
+			f32 yOffset = EM::ToRadians((f32)viewPort.y / 2.0f - MouseCoords.y) * dt * MouseSensitivity;
+			camera->OffsetOrientation(xOffset, yOffset);
 
 	    }
 }
@@ -496,5 +497,8 @@ void Game::Shutdown()
 {
 	printf("%d\n", sizeof(Enjon::Entity));
 	printf("%d\n", sizeof(Enjon::Math::Transform));
+
+	fmt::print("{}", sizeof(Enjon::Entity));
+	
 	printf("Shutting down game...\n");
 }

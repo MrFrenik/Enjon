@@ -15,7 +15,7 @@ namespace Enjon {
 		ViewPortAspectRatio(4.0f / 3.0f), 
 		ProjType(ProjectionType::PERSPECTIVE),
 		OrthographicScale(1.0f),
-		ScreenDimensions(EM::Vec2(800, 600))
+		ScreenDimensions(Vec2(800, 600))
 	{
 	}
 
@@ -28,11 +28,11 @@ namespace Enjon {
 		ViewPortAspectRatio((Enjon::f32)Width / (Enjon::f32)Height), 
 		ProjType(ProjectionType::PERSPECTIVE),
 		OrthographicScale(1.0f),
-		ScreenDimensions(EM::Vec2(Width, Height))
+		ScreenDimensions(Vec2(Width, Height))
 	{
 	}
 
-	Camera::Camera(EM::iVec2& dimensions)
+	Camera::Camera(iVec2& dimensions)
 		: 
 		Transform(),
 		FOV(50),
@@ -41,7 +41,7 @@ namespace Enjon {
 		ViewPortAspectRatio((Enjon::f32)dimensions.x / (Enjon::f32)dimensions.y), 
 		ProjType(ProjectionType::PERSPECTIVE),
 		OrthographicScale(1.0f),
-		ScreenDimensions(EM::Vec2(dimensions.x, dimensions.y))
+		ScreenDimensions(Vec2(dimensions.x, dimensions.y))
 	{
 	}
 

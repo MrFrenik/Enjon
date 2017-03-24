@@ -615,7 +615,7 @@ namespace Enjon {
 			fxaaProgram->Use();
 			{
 				auto viewPort = GetViewport();
-				fxaaProgram->SetUniform("u_resolution", EM::Vec2(viewPort.x, viewPort.y));
+				fxaaProgram->SetUniform("u_resolution", Vec2(viewPort.x, viewPort.y));
 				fxaaProgram->SetUniform("u_FXAASettings", EM::Vec3(mFXAASettings.mSpanMax, mFXAASettings.mReduceMul, mFXAASettings.mReduceMin));
 				mBatch->Begin();
 				{
@@ -684,13 +684,13 @@ namespace Enjon {
 	}
 
 	//------------------------------------------------------------------------------
-	void DeferredRenderer::SetViewport(EM::iVec2& dimensions)
+	void DeferredRenderer::SetViewport(iVec2& dimensions)
 	{
 		mWindow.SetViewport(dimensions);
 	}
 
 	//------------------------------------------------------------------------------
-	EM::iVec2 DeferredRenderer::GetViewport()
+	iVec2 DeferredRenderer::GetViewport()
 	{
 		return mWindow.GetViewport();
 	}

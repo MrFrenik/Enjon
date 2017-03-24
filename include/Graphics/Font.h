@@ -21,8 +21,8 @@ namespace Enjon { namespace Fonts {
 	typedef struct 
 	{
 		GLuint TextureID;
-		Enjon::Math::iVec2 Size;
-		Enjon::Math::iVec2 Bearing;
+		Enjon::iVec2 Size;
+		Enjon::iVec2 Bearing;
 		FT_Pos Advance;
 	} Character;
 
@@ -46,7 +46,7 @@ namespace Enjon { namespace Fonts {
 	/* Gets character stats from given font */
 	// CharacterStats GetCharacterAttributes(Math::Vec2 Pos, float scale, Font* F, std::string::const_iterator c, float* advance);
 
-	CharacterStats GetCharacterAttributes(Enjon::Math::Vec2 Pos, float scale, Font* F, char c, float* advance);
+	CharacterStats GetCharacterAttributes(Enjon::Vec2 Pos, float scale, Font* F, char c, float* advance);
 
 	float GetAdvance(char c, Font* F, float scale = 1.0f);
 

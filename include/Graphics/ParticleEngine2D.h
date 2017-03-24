@@ -23,7 +23,7 @@ namespace Enjon { namespace Particle2D {
 		Math::Vec3 Position;
 		Math::Vec3 Velocity;
 		Math::Vec3 VelocityGoal;
-		Math::Vec2 Dimensions;
+		Enjon::Vec2 Dimensions;
 		float LifeTime;	
 		float DecayRate;	
 		ColorRGBA16 Color;	
@@ -65,7 +65,7 @@ namespace Enjon { namespace Particle2D {
 	uint32 AddParticleBatch(ParticleEngine2D* PE, ParticleBatch2D* PB);
 
 	/* Adds a particle to a batch */
-	uint32 AddParticle(Math::Vec3 P, Math::Vec3 V, Math::Vec2 D, ColorRGBA16 C, GLuint ID, float DR, ParticleBatch2D* PB, EM::Vec4 UV = EM::Vec4(0, 0, 1, 1));
+	uint32 AddParticle(Math::Vec3 P, Math::Vec3 V, Enjon::Vec2 D, ColorRGBA16 C, GLuint ID, float DR, ParticleBatch2D* PB, EM::Vec4 UV = EM::Vec4(0, 0, 1, 1));
 
 	/* Frees memory of given particle engine */
 	uint32 FreeEngine(ParticleEngine2D* PE);
