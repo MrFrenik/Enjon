@@ -10,9 +10,7 @@
 #include "IO/InputManager.h"
 #include "Graphics/Color.h"
 #include "Physics/AABB.h"
-#include "Defines.h"
-
-#include "EnjonAnimation.h"
+#include "Defines.h" 
 
 #include <unordered_map>
 #include <utility>
@@ -95,12 +93,11 @@ namespace ECS { namespace Component {
 	// Animation2D struct
 	typedef struct
 	{
-		Enjon::Graphics::SpriteSheet* Sheet; // TODO(John): Pull all spritesheets from some kind of cache, either the resource manager or a spritesheet manager
+		Enjon::SpriteSheet* Sheet; // TODO(John): Pull all spritesheets from some kind of cache, either the resource manager or a spritesheet manager
 		float AnimationTimer;
 		Enjon::uint32 CurrentFrame;
 		Enjon::uint32 SetStart;
 		Enjon::uint32 BeginningFrame; 
-		const Animate::Animation* CurrentAnimation;
 		eid32 Entity;
 	} Animation2D;	
 
@@ -125,7 +122,7 @@ namespace ECS { namespace Component {
 	// PlayerController struct
 	typedef struct
 	{
-		Enjon::Input::InputManager* Input; 
+		Enjon::Input* Input; 
 		eid32 Entity;
 	} PlayerController;
 
@@ -169,9 +166,9 @@ namespace ECS { namespace Component {
 	// Render Component
 	typedef struct 
 	{
-		Enjon::Graphics::ColorRGBA16 Color;
-		Enjon::Graphics::SpriteBatch* Batch;
-		EG::CoordinateFormat Format;
+		Enjon::ColorRGBA16 Color;
+		Enjon::SpriteBatch* Batch;
+		Enjon::CoordinateFormat Format;
 		eid32 Entity;
 		// NOTE(John): Should I add a spritebatch component here as well?
 	} Renderer2DComponent;
@@ -209,7 +206,7 @@ namespace ECS { namespace Component {
 	}
 
 	// Create new PlayerController Component
-	inline PlayerController NewPlayerController(Enjon::Input::InputManager* Input, eid32 Entity)
+	inline PlayerController NewPlayerController(Enjon::Input* Input, eid32 Entity)
 	{
 		PlayerController Component;
 		Component.Input = Input;

@@ -3,8 +3,7 @@
 
 #include <Graphics/Mesh.h>
 
-namespace Enjon { namespace Input {
-
+namespace Enjon { 
 	
 	/*
 		Parse the file
@@ -28,10 +27,8 @@ namespace Enjon { namespace Input {
 
 	*/
 
-	EG::Mesh LoadMeshFromFile(const std::string& FilePath);
-}} 
-
-
+	Mesh LoadMeshFromFile(const std::string& FilePath);
+} 
 
 
 

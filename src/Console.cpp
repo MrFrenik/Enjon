@@ -16,26 +16,26 @@ namespace Enjon {
 	struct OutputMessage
 	{
 		OutputMessage(){}
-		OutputMessage(std::string _Text, EG::ColorRGBA16 Color = EG::RGBA16_LightGrey())
+		OutputMessage(std::string _Text, ColorRGBA16 Color = RGBA16_LightGrey())
 		{
 			Text = _Text;
 			TextColor = Color;
 		}
 
 		std::string Text;
-		EG::ColorRGBA16 TextColor;
+		ColorRGBA16 TextColor;
 	};
 
 	bool Console::mIsVisible = false;
 	GUI::GUITextBox Console::InputTextBox;
 	std::vector<OutputMessage> Output;
-	EG::SpriteBatch Batch;
-	EG::Camera UICamera;
+	SpriteBatch Batch;
+	Camera UICamera;
 	float ScreenWidth, ScreenHeight;
-	EG::GLSLProgram* Shader;
+	GLSLProgram* Shader;
 
 	// Create HUDCamera
-	EG::Camera2D HUDCamera;
+	Camera2D HUDCamera;
 
 	void Console::Update(float DT)
 	{
@@ -43,7 +43,7 @@ namespace Enjon {
 		HUDCamera.Update();
 	}
 
-	bool Console::ProcessInput(Input::InputManager* Input)
+	bool Console::ProcessInput(Input* input)
 	{
 	    SDL_Event event;
 	   //Will keep looping until there are no more events to process
@@ -53,32 +53,32 @@ namespace Enjon {
 	                return false;
 	                break;
 				case SDL_KEYUP:
-					Input->ReleaseKey(event.key.keysym.sym); 
+					input->ReleaseKey(event.key.keysym.sym); 
 					break;
 				case SDL_KEYDOWN:
-					Input->PressKey(event.key.keysym.sym);
+					input->PressKey(event.key.keysym.sym);
 					break;
 				case SDL_MOUSEBUTTONDOWN:
-					Input->PressKey(event.button.button);
+					input->PressKey(event.button.button);
 					break;
 				case SDL_MOUSEBUTTONUP:
-					Input->ReleaseKey(event.button.button);
+					input->ReleaseKey(event.button.button);
 					break;
 				case SDL_MOUSEMOTION:
-					Input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+					input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
 					break;
 				default:
 					break;
 			}
 	    }
 
-		if (Input->IsKeyPressed(SDLK_BACKQUOTE) || Input->IsKeyPressed(SDLK_ESCAPE))
+		if (input->IsKeyPressed(SDLK_BACKQUOTE) || input->IsKeyPressed(SDLK_ESCAPE))
 		{
 			mIsVisible = false;
 			return false;	
 		}
 
-		InputTextBox.ProcessInput(Input, nullptr);
+		InputTextBox.ProcessInput(input, nullptr);
 
 		return true;
 	}
@@ -106,14 +106,14 @@ namespace Enjon {
 				Batch.Add(
 								EM::Vec4(-ScreenWidth * 0.5f, -ScreenHeight * 0.5f, ScreenWidth / 3, ScreenHeight / 4),
 								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
-								EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.8f)
+								Enjon::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
+								SetOpacity(RGBA16_DarkGrey(), 0.8f)
 							);
 			}
 			Batch.End();
 			Batch.RenderBatch();
 
-			Batch.Begin(EG::GlyphSortType::FRONT_TO_BACK);
+			Batch.Begin(GlyphSortType::FRONT_TO_BACK);
 			{
 				// Render the console input text box
 				InputTextBox.Draw(&Batch);
@@ -123,7 +123,7 @@ namespace Enjon {
 				auto YOffset = 30.0f;
 				for (auto C = Output.rbegin(); C != Output.rend(); C++)
 				{
-				 	EG::Fonts::PrintText(StartPosition.x, StartPosition.y + YOffset, 1.0f, (*C).Text, InputTextBox.TextFont, Batch, (*C).TextColor);
+				 	Fonts::PrintText(StartPosition.x, StartPosition.y + YOffset, 1.0f, (*C).Text, InputTextBox.TextFont, Batch, (*C).TextColor);
 				 	YOffset += 20.0f;
 				}
 			}
@@ -141,8 +141,8 @@ namespace Enjon {
 
 		ScreenWidth = _ScreenWidth;
 		ScreenHeight = _ScreenHeight;
-		UICamera = EG::Camera(ScreenWidth, ScreenHeight);
-		Shader = EG::ShaderManager::GetShader("Text");
+		UICamera = Camera(ScreenWidth, ScreenHeight);
+		Shader = ShaderManager::GetShader("Text");
 
 		HUDCamera.Init(ScreenWidth, ScreenHeight);
 		HUDCamera.SetScale(1.0f);
@@ -174,14 +174,14 @@ namespace Enjon {
 			if (Elements.at(0).compare("mul") == 0) 
 			{
 				// Error
-				if (Elements.size() < 3) Output.emplace_back("Error: mul requires 2 arguments", EG::RGBA16_Red());
+				if (Elements.size() < 3) Output.emplace_back("Error: mul requires 2 arguments", RGBA16_Red());
 
 				// Calculate the result
 				else
 				{
 					if (!EU::is_numeric(Elements.at(1)) || !EU::is_numeric(Elements.at(2))) 
 					{
-						Output.emplace_back("Error: cannot multiply non numeric terms: " + Elements.at(1) + ", " + Elements.at(2), EG::RGBA16_Red());
+						Output.emplace_back("Error: cannot multiply non numeric terms: " + Elements.at(1) + ", " + Elements.at(2), RGBA16_Red());
 					}
 
 					// Otherwise, multiply and push back result
@@ -199,18 +199,18 @@ namespace Enjon {
 			else if (Elements.at(0).compare("cvarlist") == 0)
 			{
 				auto registeredCommands = CVarsSystem::GetRegisteredCommands();
-				Output.emplace_back("Console Variables Available: ", EG::RGBA16_Yellow());
+				Output.emplace_back("Console Variables Available: ", RGBA16_Yellow());
 				for (auto& c : registeredCommands) Output.emplace_back(c);
 			}
 			else
 			{
 				// Register command with CVar System
-				if (Elements.size() < 2) Output.emplace_back("Error: need argument for cvar \"" + Elements.at(0) + "\"", EG::RGBA16_Red());
+				if (Elements.size() < 2) Output.emplace_back("Error: need argument for cvar \"" + Elements.at(0) + "\"", RGBA16_Red());
 				else
 				{
 					if (!CVarsSystem::Set(Elements.at(0), std::atof(Elements.at(1).c_str())))
 					{
-						Output.emplace_back("Error: cvar does not exist: " + Elements.at(0), EG::RGBA16_Red());
+						Output.emplace_back("Error: cvar does not exist: " + Elements.at(0), RGBA16_Red());
 					}
 					else
 					{

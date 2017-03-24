@@ -9,7 +9,7 @@
 #include <set>
 #include <vector>
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon { 
 
 	class Renderable;
 	class DirectionalLight;
@@ -28,16 +28,16 @@ namespace Enjon { namespace Graphics {
 	{
 		AmbientSettings()
 		{
-			mColor = EG::RGBA16_White();
+			mColor = RGBA16_White();
 			mIntensity = 1.0f;
 		}
 
-		AmbientSettings(EG::ColorRGBA16& color, float intensity)
+		AmbientSettings(ColorRGBA16& color, float intensity)
 			: mColor(color), mIntensity(intensity)
 		{
 		}
 
-		EG::ColorRGBA16 mColor;	
+		ColorRGBA16 mColor;	
 		float mIntensity;
 	};
 
@@ -49,51 +49,51 @@ namespace Enjon { namespace Graphics {
 			Scene();
 			~Scene();
 
-			void AddRenderable(EG::Renderable* renderable);
-			void RemoveRenderable(EG::Renderable* renderable);
+			void AddRenderable(Renderable* renderable);
+			void RemoveRenderable(Renderable* renderable);
 
-			void AddQuadBatch(EG::QuadBatch* batch);
-			void RemoveQuadBatch(EG::QuadBatch* batch);
+			void AddQuadBatch(QuadBatch* batch);
+			void RemoveQuadBatch(QuadBatch* batch);
 
-			void AddDirectionalLight(EG::DirectionalLight* light);
-			void RemoveDirectionLight(EG::DirectionalLight* light);
+			void AddDirectionalLight(DirectionalLight* light);
+			void RemoveDirectionLight(DirectionalLight* light);
 
-			void AddPointLight(EG::PointLight* light);
-			void RemovePointLight(EG::PointLight* light);
+			void AddPointLight(PointLight* light);
+			void RemovePointLight(PointLight* light);
 
-			void AddSpotLight(EG::SpotLight* light);
-			void RemoveSpotLight(EG::SpotLight* light);
+			void AddSpotLight(SpotLight* light);
+			void RemoveSpotLight(SpotLight* light);
 
 			AmbientSettings* GetAmbientSettings() { return &mAmbientSettings; }
 			void SetAmbientSettings(AmbientSettings& settings);
-			void SetAmbientColor(EG::ColorRGBA16& color);
+			void SetAmbientColor(ColorRGBA16& color);
 
-			void SetSun(EG::DirectionalLight* light) { mSun = light; }
-			EG::DirectionalLight* GetSun() { return mSun; }
+			void SetSun(DirectionalLight* light) { mSun = light; }
+			DirectionalLight* GetSun() { return mSun; }
 
-			std::vector<EG::Renderable*> GetRenderables(RenderableSortType type = RenderableSortType::MATERIAL);
-			std::set<EG::QuadBatch*>* GetQuadBatches() { return &mQuadBatches; }
-			std::set<EG::DirectionalLight*>* GetDirectionalLights() { return &mDirectionalLights; }
-			std::set<EG::PointLight*>* GetPointLights() { return &mPointLights; }
-			std::set<EG::SpotLight*>* GetSpotLights() { return &mSpotLights; }
-
-		private:
-			void AssignRenderableID(EG::Renderable* renderable);
+			std::vector<Renderable*> GetRenderables(RenderableSortType type = RenderableSortType::MATERIAL);
+			std::set<QuadBatch*>* GetQuadBatches() { return &mQuadBatches; }
+			std::set<DirectionalLight*>* GetDirectionalLights() { return &mDirectionalLights; }
+			std::set<PointLight*>* GetPointLights() { return &mPointLights; }
+			std::set<SpotLight*>* GetSpotLights() { return &mSpotLights; }
 
 		private:
-			std::set<EG::Renderable*> 		mRenderables;
-			std::set<EG::QuadBatch*> 		mQuadBatches;
-			std::set<EG::DirectionalLight*> mDirectionalLights;
-			std::set<EG::PointLight*> 		mPointLights;
-			std::set<EG::SpotLight*> 		mSpotLights;
+			void AssignRenderableID(Renderable* renderable);
+
+		private:
+			std::set<Renderable*> 		mRenderables;
+			std::set<QuadBatch*> 		mQuadBatches;
+			std::set<DirectionalLight*> mDirectionalLights;
+			std::set<PointLight*> 		mPointLights;
+			std::set<SpotLight*> 		mSpotLights;
 
 			AmbientSettings 				mAmbientSettings;
 
-			EG::DirectionalLight* 			mSun = nullptr;
+			DirectionalLight* 			mSun = nullptr;
 
-			static bool CompareMaterial(EG::Renderable* a, EG::Renderable* b);
-			static bool CompareDepth(EG::Renderable* a, EG::Renderable* b);
+			static bool CompareMaterial(Renderable* a, Renderable* b);
+			static bool CompareDepth(Renderable* a, Renderable* b);
 	};
-}}
+}
 
 #endif

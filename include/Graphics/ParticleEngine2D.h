@@ -15,7 +15,7 @@
 
 const int MAXPARTICLES = 8000;
 
-namespace Enjon { namespace Graphics { namespace Particle2D { 
+namespace Enjon { namespace Particle2D { 
 
 	/* 2D Particle struct */
 	typedef struct 
@@ -40,7 +40,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		std::vector<Particle> Particles;
 		// Particle Particles[MAXPARTICLES];
 		uint32 NextAvailableParticle;
-		Graphics::SpriteBatch* SB;
+		SpriteBatch* SB;
 	} ParticleBatch2D;
 
 	/* 2D Particle Engine struct which will hold all batches to be updated and drawn */
@@ -59,7 +59,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 	ParticleEngine2D* NewParticleEngine();
 
 	/* Creates a ParticleBatch2D* and returns it */
-	ParticleBatch2D* NewParticleBatch(SpriteBatch* SB);
+	ParticleBatch2D* NewParticleBatch(Enjon::SpriteBatch* SB);
 
 	/* Adds a particle batch to a particle engine */
 	uint32 AddParticleBatch(ParticleEngine2D* PE, ParticleBatch2D* PB);
@@ -74,9 +74,9 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 	uint32 FreeBatches(ParticleEngine2D* PE);
 
 	/* Adds all particles in each particle batch to be drawn */
-	void Draw(ParticleEngine2D* PE, Enjon::Graphics::Camera2D* Camera);
+	void Draw(ParticleEngine2D* PE, Enjon::Camera2D* Camera);
 
-	void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position);
-}}}
+	void DrawFire(Enjon::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position);
+}}
 
 #endif

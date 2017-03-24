@@ -4,7 +4,7 @@
 #include "Graphics/GLTexture.h"
 #include "Math/Maths.h"
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon { 
 
 	struct SpriteSheet
 	{
@@ -39,7 +39,7 @@ namespace Enjon { namespace Graphics {
 	int init_status = 0;
 
 	}; 
-}}
+}
 
 
 #endif

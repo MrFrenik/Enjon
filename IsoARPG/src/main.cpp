@@ -8467,7 +8467,7 @@ int main(int argc, char** argv)
 
 // Refactor
 
-#if 1
+#if 0
 
 #include <iostream>
 #include <stdio.h>
@@ -9667,7 +9667,8 @@ int main(int argc, char** argv)
 #endif
 
 
-#if 0
+// ACTUAL
+#if 1
 
 #include <Enjon.h>
 
@@ -9682,7 +9683,7 @@ Game mGame;
 int main(int argc, char** argv)
 {
 	// Startup engine
-	mEngine.StartUp(&mGame);
+	mEngine.StartUp(&mGame); 
 
 	// Run engine loop
 	Enjon::Result res = mEngine.Run();
@@ -9691,7 +9692,7 @@ int main(int argc, char** argv)
 	if (res == Enjon::Result::SUCCESS)
 		printf("Exit successful.\n");
 	else
-		printf("Exit failed.\n");
+		printf("Exit failed.\n"); 
 
 	mEngine.ShutDown();
 

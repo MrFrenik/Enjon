@@ -6,7 +6,7 @@
 
 #include <unordered_map>
 
-namespace Enjon { namespace Graphics { namespace FontManager {
+namespace Enjon { namespace FontManager {
 
 	/* Checks init status of manager */
 	bool IsInit();
@@ -22,7 +22,7 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 
 	// Delete all animations and clear any memory used
 	void DeletFonts();
-}}}
+}}
 
 #endif
 

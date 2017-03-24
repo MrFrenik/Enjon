@@ -11,7 +11,7 @@ namespace Enjon
 
 	class SceneNode
 	{
-		friend Enjon::Graphics::Scene;
+		friend Enjon::Scene;
 
 		public:
 			SceneNode();

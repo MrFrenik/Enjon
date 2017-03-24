@@ -21,7 +21,7 @@ namespace Enjon
 		DestroyBase<PointLightComponent>();
 	}
 
-	void PointLightComponent::SetColor(EG::ColorRGBA16& color)
+	void PointLightComponent::SetColor(ColorRGBA16& color)
 	{
 		mLight.SetColor(color);
 	}

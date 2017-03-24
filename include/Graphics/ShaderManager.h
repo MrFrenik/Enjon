@@ -6,7 +6,7 @@
 #include "Graphics/GLSLProgram.h"
 #include "Utils/Errors.h"
 
-namespace Enjon { namespace Graphics { namespace ShaderManager { 
+namespace Enjon { namespace ShaderManager { 
 
 	void Init();
 	void AddShader(const char* shadername, const char* vertpath, const char* fragpath);
@@ -17,7 +17,7 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 	void UnuseProgram(const char* shadername);
 	void DeleteShaders();
 
-}}}
+}}
 
 
 

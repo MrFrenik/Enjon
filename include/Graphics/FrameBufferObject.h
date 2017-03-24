@@ -4,7 +4,7 @@
 #include "System/Types.h"
 #include "GLEW/glew.h"
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon { 
 
 	/**
 	*	A Frame Buffer Object is used by OpenGL to render into a texture. Specifically this implementation assumes that the
@@ -42,6 +42,6 @@ namespace Enjon { namespace Graphics {
 			unsigned int	m_height; 				// FBO height
 	};
 
-}}
+}
 
 #endif

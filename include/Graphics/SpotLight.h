@@ -6,7 +6,7 @@
 #include "Graphics/Color.h"
 #include "Defines.h"
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon { 
 
 	class Scene;
 
@@ -45,29 +45,29 @@ namespace Enjon { namespace Graphics {
 	{
 		public:
 			SpotLight();
-			SpotLight(EM::Vec3& position, SLParams& params, EG::ColorRGBA16& color, float intensity = 1.0f);
+			SpotLight(EM::Vec3& position, SLParams& params, ColorRGBA16& color, float intensity = 1.0f);
 			~SpotLight();
 
 			EM::Vec3& GetPosition() { return mPosition; }
-			EG::ColorRGBA16& GetColor() { return mColor; }
+			ColorRGBA16& GetColor() { return mColor; }
 			SLParams& GetParams() { return mParams; }
 			float GetIntensity() { return mIntensity; }
 
 			void SetPosition(EM::Vec3& position);
 			void SetDirection(EM::Vec3& direction);
-			void SetColor(EG::ColorRGBA16& color);
+			void SetColor(ColorRGBA16& color);
 			void SetIntensity(float intensity);
-			void SetScene(EG::Scene* scene);
-			void SetParams(EG::SLParams& params);
+			void SetScene(Scene* scene);
+			void SetParams(SLParams& params);
 
 		private:
 			EM::Vec3 			mPosition;
 			SLParams 			mParams;	
-			EG::ColorRGBA16 	mColor;
-			EG::Scene* 			mScene 			= nullptr;
+			ColorRGBA16 	mColor;
+			Scene* 			mScene 			= nullptr;
 			float 				mIntensity;
 	};
 
-}}
+}
 
 #endif

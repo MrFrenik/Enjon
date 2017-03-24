@@ -2,16 +2,16 @@
 #include "Graphics/Scene.h"
 #include "Math/Mat4.h"
 
-namespace Enjon { namespace Graphics {
+namespace Enjon {
 
 	DirectionalLight::DirectionalLight()
 	{
 		mDirection = EM::Vec3(1, 1, 1);
-		mColor = EG::RGBA16_White();
+		mColor = RGBA16_White();
 		mIntensity = 1.0f;
 	}
 
-	DirectionalLight::DirectionalLight(EM::Vec3& direction, EG::ColorRGBA16& color, float intensity)
+	DirectionalLight::DirectionalLight(EM::Vec3& direction, ColorRGBA16& color, float intensity)
 		: mDirection(direction), mColor(color), mIntensity(intensity)
 	{
 	}
@@ -26,7 +26,7 @@ namespace Enjon { namespace Graphics {
 		mDirection = direction;
 	}
 
-	void DirectionalLight::SetColor(EG::ColorRGBA16& color)
+	void DirectionalLight::SetColor(ColorRGBA16& color)
 	{
 		mColor = color;
 	}
@@ -36,12 +36,12 @@ namespace Enjon { namespace Graphics {
 		mIntensity = intensity;
 	}
 
-	void DirectionalLight::SetScene(EG::Scene* scene)
+	void DirectionalLight::SetScene(Scene* scene)
 	{
 		mScene = scene;
 	}
 
-}}
+}
 
 
 

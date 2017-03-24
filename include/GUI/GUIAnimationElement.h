@@ -4,9 +4,7 @@
 #include "GUI/GUIElement.h"
 #include "Graphics/Animations.h"
 #include "Math/Vec2.h"
-#include "Defines.h"
-
-#include "AnimManager.h"
+#include "Defines.h" 
 
 namespace Enjon { namespace GUI {
 
@@ -47,7 +45,7 @@ namespace Enjon { namespace GUI {
 			
 		}
 
-		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		bool ProcessInput(Input* Input, Camera2D* Camera)
 		{
 			static EM::Vec2 MouseFrameOffset(0.0f);
 			static bool JustFocused = true;
@@ -111,7 +109,7 @@ namespace Enjon { namespace GUI {
 			return false;
 		}
 
-		void Draw(EG::SpriteBatch* TB)
+		void Draw(SpriteBatch* TB)
 		{
 
 		}

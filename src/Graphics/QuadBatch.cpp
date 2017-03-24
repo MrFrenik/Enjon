@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <assert.h>
 
-namespace Enjon { namespace Graphics {
+namespace Enjon { 
 
 	static EM::Vec3 Static_TL(-1.0f, 1.0f, 0.0f);
 	static EM::Vec3 Static_BL(-1.0f, -1.0f, 0.0f);
@@ -27,7 +27,7 @@ namespace Enjon { namespace Graphics {
 	{
 	}
 
-	QuadGlyph::QuadGlyph(EM::Vec3& TLP, EM::Vec3& BLP, EM::Vec3& BRP, EM::Vec3& TRP, EM::Vec4& UVRect, GLuint _Texture, EG::ColorRGBA16& Color, float _Depth)
+	QuadGlyph::QuadGlyph(EM::Vec3& TLP, EM::Vec3& BLP, EM::Vec3& BRP, EM::Vec3& TRP, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
 	: Texture(_Texture), Depth(_Depth)
 	{
 		EM::Vec3 N(0, 1, 0);
@@ -120,7 +120,7 @@ namespace Enjon { namespace Graphics {
 		TR.Color[3] 		= Color.a;
 	}
 
-	QuadGlyph::QuadGlyph(EM::Vec2& Dimensions, EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, EG::ColorRGBA16& Color, float _Depth)
+	QuadGlyph::QuadGlyph(EM::Vec2& Dimensions, EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
 	:	Texture(_Texture), Depth(_Depth) 	
 	{
 		// Transform all verticies by model matrix
@@ -247,7 +247,7 @@ namespace Enjon { namespace Graphics {
 		BR.Color[3] 		= Color.a;
 	}
 
-	QuadGlyph::QuadGlyph(EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, EG::ColorRGBA16& Color, float _Depth)
+	QuadGlyph::QuadGlyph(EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
 	:	Texture(_Texture), Depth(_Depth)
 	{
 		// Transform all verticies by model matrix
@@ -570,12 +570,12 @@ namespace Enjon { namespace Graphics {
 		}
 	}
 
-	void QuadBatch::SetMaterial(EG::Material* mat)
+	void QuadBatch::SetMaterial(Material* mat)
 	{
 		mMaterial = mat;	
 	}
 
-	void QuadBatch::SetScene(EG::Scene* scene)
+	void QuadBatch::SetScene(Scene* scene)
 	{
 		mScene = scene;
 	}
@@ -595,4 +595,4 @@ namespace Enjon { namespace Graphics {
 		return (A->Texture < B->Texture);
 	}
 
-}}
+}

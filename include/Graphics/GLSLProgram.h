@@ -19,7 +19,7 @@ namespace Enjon { namespace Math {
 	struct Transform;
 }}
 
-namespace Enjon { namespace Graphics {
+namespace Enjon { 
 
 	class ColorRGBA16;
 	class GLTexture;
@@ -52,7 +52,7 @@ namespace Enjon { namespace Graphics {
 		void SetUniform(const std::string& name, const EM::Vec4& vector);
 		void SetUniform(const std::string& name, const EM::Mat4& matrix); 
 		void SetUniform(const std::string& name, const EM::Transform& T);
-		void SetUniform(const std::string& name, EG::ColorRGBA16& C);
+		void SetUniform(const std::string& name, ColorRGBA16& C);
 		
 		GLuint inline GetProgramID() const { return m_programID; } 
 	
@@ -96,7 +96,7 @@ namespace Enjon { namespace Graphics {
 		const char* name;
 		T value;
 	};
-}}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

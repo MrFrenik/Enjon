@@ -4,7 +4,7 @@
 #include <Math/Vec2.h>
 
 
-namespace Enjon { namespace Graphics {
+namespace Enjon { 
 
 	Camera::Camera()
 		: 
@@ -155,7 +155,7 @@ namespace Enjon { namespace Graphics {
 
 		return View;
 	}
-}}
+}
 
 
 

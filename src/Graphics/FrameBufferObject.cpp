@@ -1,6 +1,6 @@
 #include "Graphics/FrameBufferObject.h"
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon { 
 
 	/* Constructor */
 	FrameBufferObject::FrameBufferObject(uint32 Width, uint32 Height)
@@ -124,5 +124,5 @@ namespace Enjon { namespace Graphics {
 		glPopAttrib();
 	}
 
-}}
+}
 

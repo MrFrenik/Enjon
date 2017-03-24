@@ -9,7 +9,7 @@
 #include <freetype/ftoutln.h>
 #include <freetype/fttrigon.h>
 
-namespace Enjon { namespace Graphics { namespace Fonts {
+namespace Enjon { namespace Fonts {
 
 	// This Function Gets The First Power Of 2 >= The
 	// Int That We Pass It.
@@ -167,11 +167,11 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	}
 
 	/* Adds a string of tex at (x,y) to given spritebatch */
-	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::Graphics::SpriteBatch& Batch, Enjon::Graphics::ColorRGBA16 Color, TextStyle Style, float Angle, float Depth)
+	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, SpriteBatch& Batch, ColorRGBA16 Color, TextStyle Style, float Angle, float Depth)
 	{
 	    if (Style == TextStyle::SHADOW) 
 	    {
-	    	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, EG::RGBA16_Black(), TextStyle::DEFAULT, Angle, Depth);
+	    	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, RGBA16_Black(), TextStyle::DEFAULT, Angle, Depth);
 	    }
 
 		// Iterate through all characters
@@ -199,7 +199,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 
 	}
 
-	void PrintText(EM::Transform& Transform, std::string Text, Font* F, EG::QuadBatch& Batch, EG::ColorRGBA16 Color, float Spacing, TextStyle Style)
+	void PrintText(EM::Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA16 Color, float Spacing, TextStyle Style)
 	{
 		EM::Vec3& Position = Transform.Position;
 		EM::Quaternion& Rotation = Transform.Rotation;
@@ -210,7 +210,7 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 
 	    // if (Style == TextStyle::SHADOW) 
 	    // {
-	    // 	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, EG::RGBA16_Black(), TextStyle::DEFAULT, Angle, Depth);
+	    // 	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, RGBA16_Black(), TextStyle::DEFAULT, Angle, Depth);
 	    // }
 
 		// Iterate through all characters
@@ -245,4 +245,4 @@ namespace Enjon { namespace Graphics { namespace Fonts {
 	    }
 	}
 
-}}}
+}}

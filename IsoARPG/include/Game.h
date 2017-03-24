@@ -1,7 +1,6 @@
 #ifndef ARPG_GAME_H
 #define ARPG_GAME_H
 
-/*
 #include "Application.h"
 
 #include <vector>
@@ -9,15 +8,11 @@
 namespace Enjon
 {
 	class Entity;
-	class EntityManager;
-
-	namespace Graphics
-	{
-		class QuadBatch;
-		class DirectionalLight;
-		class Material;
-		class Mesh;
-	}
+	class EntityManager; 
+	class QuadBatch;
+	class DirectionalLight;
+	class Material;
+	class Mesh;
 }
 
 class Game : public Enjon::Application
@@ -40,16 +35,16 @@ class Game : public Enjon::Application
 		Enjon::Entity* mGun 					= nullptr;
 		Enjon::Entity* mGreen 					= nullptr;
 		Enjon::Entity* mRed 					= nullptr;
-		Enjon::Graphics::DirectionalLight* mSun = nullptr;
-		Enjon::Graphics::QuadBatch* mBatch 		= nullptr;
+		Enjon::DirectionalLight* mSun = nullptr;
+		Enjon::QuadBatch* mBatch 		= nullptr;
 
-		Enjon::Graphics::Material* mGunMat 		= nullptr;
-		Enjon::Graphics::Material* mRedMat 		= nullptr;
-		Enjon::Graphics::Material* mGreenMat 	= nullptr;
-		Enjon::Graphics::Material* mBlueMat 	= nullptr;
-		Enjon::Graphics::Mesh* mSphereMesh 		= nullptr;
-		Enjon::Graphics::Mesh* mGunMesh 		= nullptr;
-		Enjon::Graphics::Mesh* mBuddhaMesh 		= nullptr;
+		Enjon::Material* mGunMat 	= nullptr;
+		Enjon::Material* mRedMat 	= nullptr;
+		Enjon::Material* mGreenMat 	= nullptr;
+		Enjon::Material* mBlueMat 	= nullptr;
+		Enjon::Mesh* mSphereMesh 	= nullptr;
+		Enjon::Mesh* mGunMesh 		= nullptr;
+		Enjon::Mesh* mBuddhaMesh 	= nullptr;
 
 		std::vector<Enjon::Entity*> mHandles;
 
@@ -58,6 +53,5 @@ class Game : public Enjon::Application
 
 		f32 mCameraSpeed = 0.12f;
 };
-*/
 
 #endif

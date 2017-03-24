@@ -1,18 +1,18 @@
 #include "Graphics/PointLight.h"
 #include "Graphics/Scene.h"
 
-namespace Enjon { namespace Graphics {
+namespace Enjon {
 
 	PointLight::PointLight()
 	{
 		mPosition 	= EM::Vec3(0.0f, 0.0f, 0.0f);
-		mColor 		= EG::RGBA16_White(); 
+		mColor 		= RGBA16_White(); 
 		mAttenuationRate = 1.0f;
 		mIntensity = 10.0f;
 		mRadius = 100.0f;
 	}
 
-	PointLight::PointLight(EM::Vec3& position, float attenuationRate, EG::ColorRGBA16& color, float intensity, float radius)
+	PointLight::PointLight(EM::Vec3& position, float attenuationRate, ColorRGBA16& color, float intensity, float radius)
 	{
 		mPosition = position;
 		mAttenuationRate = attenuationRate;
@@ -29,7 +29,7 @@ namespace Enjon { namespace Graphics {
 		}
 	}
 
-	void PointLight::SetColor(EG::ColorRGBA16& color)
+	void PointLight::SetColor(ColorRGBA16& color)
 	{
 		mColor = color;
 	}
@@ -39,7 +39,7 @@ namespace Enjon { namespace Graphics {
 		mIntensity = intensity;	
 	}
 
-	void PointLight::SetScene(EG::Scene* scene)
+	void PointLight::SetScene(Scene* scene)
 	{
 		mScene = scene;
 	}
@@ -58,4 +58,4 @@ namespace Enjon { namespace Graphics {
 	{
 		mRadius = radius;
 	}
-}}
+}

@@ -11,13 +11,13 @@ namespace Enjon { namespace Math {
 	class iVec2;
 }}
 
-namespace Enjon { namespace Graphics {
+namespace Enjon { 
 
 	class RenderTarget;
+	class Mesh; 
 	class GBuffer;
-	class FullScreenQuad;
+	class FullScreenQuad; 
 	class SpriteBatch;
-	class Mesh;
 
 	struct ToneMapSettings
 	{
@@ -72,10 +72,10 @@ namespace Enjon { namespace Graphics {
 			void SetViewport(EM::iVec2& dimensions);
 			EM::iVec2 GetViewport();
 
-			EG::Scene* GetScene() { return &mScene; }
+			Scene* GetScene() { return &mScene; }
 
-			EG::Camera* GetSceneCamera() { return &mSceneCamera; }
-			EG::Window* GetWindow() { return &mWindow; }
+			Camera* GetSceneCamera() { return &mSceneCamera; }
+			Window* GetWindow() { return &mWindow; }
 
 		private:
 
@@ -86,8 +86,8 @@ namespace Enjon { namespace Graphics {
 			void LightingPass();
 			void LuminancePass();
 			void BloomPass();
-			void FXAAPass(EG::RenderTarget* inputTarget);
-			void CompositePass(EG::RenderTarget* inputTarget);
+			void FXAAPass(RenderTarget* inputTarget);
+			void CompositePass(RenderTarget* inputTarget);
 			void GuiPass();
 			void ImGuiStyles();
 			void ImGuiStyles2();
@@ -96,33 +96,33 @@ namespace Enjon { namespace Graphics {
 			void ShowGameViewport(bool* open);
 
 			// Frame buffers
-			EG::GBuffer* mGbuffer 					= nullptr;
-			EG::RenderTarget* mDebugTarget 			= nullptr;
-			EG::RenderTarget* mSmallBlurHorizontal  = nullptr;
-			EG::RenderTarget* mSmallBlurVertical 	= nullptr;
-			EG::RenderTarget* mMediumBlurHorizontal = nullptr;
-			EG::RenderTarget* mMediumBlurVertical 	= nullptr;
-			EG::RenderTarget* mLargeBlurHorizontal 	= nullptr;
-			EG::RenderTarget* mLargeBlurVertical 	= nullptr;
-			EG::RenderTarget* mCompositeTarget 		= nullptr;
-			EG::RenderTarget* mLightingBuffer		= nullptr;
-			EG::RenderTarget* mLuminanceTarget		= nullptr;
-			EG::RenderTarget* mFXAATarget			= nullptr;
-			EG::RenderTarget* mShadowDepth			= nullptr;
-			EG::RenderTarget* mFinalTarget			= nullptr;
+			GBuffer* mGbuffer 					= nullptr;
+			RenderTarget* mDebugTarget 			= nullptr;
+			RenderTarget* mSmallBlurHorizontal  = nullptr;
+			RenderTarget* mSmallBlurVertical 	= nullptr;
+			RenderTarget* mMediumBlurHorizontal = nullptr;
+			RenderTarget* mMediumBlurVertical 	= nullptr;
+			RenderTarget* mLargeBlurHorizontal 	= nullptr;
+			RenderTarget* mLargeBlurVertical 	= nullptr;
+			RenderTarget* mCompositeTarget 		= nullptr;
+			RenderTarget* mLightingBuffer		= nullptr;
+			RenderTarget* mLuminanceTarget		= nullptr;
+			RenderTarget* mFXAATarget			= nullptr;
+			RenderTarget* mShadowDepth			= nullptr;
+			RenderTarget* mFinalTarget			= nullptr;
 
 			GLuint mCurrentRenderTexture;
 
 			// Full screen quad
-			EG::FullScreenQuad* mFullScreenQuad 	= nullptr;
+			FullScreenQuad* mFullScreenQuad 	= nullptr;
 
 			// Graphics scene
-			EG::Scene 				mScene;
-			EG::Window 				mWindow;
-			EG::Camera 				mSceneCamera;   // Probably part of scene instead
-			EG::Camera 				mShadowCamera;	// Probably part of light or scene?
+			Scene 				mScene;
+			Window 				mWindow;
+			Camera 				mSceneCamera;   // Probably part of scene instead
+			Camera 				mShadowCamera;	// Probably part of light or scene?
 
-			EG::SpriteBatch* 		mBatch 			= nullptr;
+			SpriteBatch* 	mBatch 			= nullptr;
 
 			// float mExposure;
 			// float mGamma;
@@ -141,7 +141,7 @@ namespace Enjon { namespace Graphics {
 
 			f32 mBGColor[4] = {0.8f, 0.8f, 0.8f, 1.0f};
 	};
-}}
+}
 
 
 #endif

@@ -1,7 +1,7 @@
 #include "Graphics/CursorManager.h"
 
 
-namespace Enjon { namespace Graphics { namespace CursorManager {
+namespace Enjon { namespace CursorManager {
 
 	std::unordered_map<std::string, SDL_Cursor*> Cursors;
 
@@ -29,5 +29,5 @@ namespace Enjon { namespace Graphics { namespace CursorManager {
 		// Free memory eventually and things...
 	}
 
-}}}
+}}
 

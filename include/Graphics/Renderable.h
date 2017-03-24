@@ -8,7 +8,7 @@
 #include "Graphics/Material.h"
 #include "System/Types.h"
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon {
 
 	class Mesh; 			
 	class Scene;
@@ -34,13 +34,13 @@ namespace Enjon { namespace Graphics {
 			void Renderable::OffsetRotation(const f32& Yaw, const f32& Pitch);
 
 			/* Get material of renderable */
-			EG::Material* GetMaterial() { return mMaterial; }
+			Material* GetMaterial() { return mMaterial; }
 
 			/* Get mesh of renderable */
-			EG::Mesh* GetMesh() { return mMesh; }
+			Mesh* GetMesh() { return mMesh; }
 
 			/* Get scene of renderable */
-			EG::Scene* GetScene() { return mScene; }
+			Scene* GetScene() { return mScene; }
 
 			/* Gets world transform */
 			EM::Transform GetTransform() { return mTransform; }
@@ -61,24 +61,24 @@ namespace Enjon { namespace Graphics {
 			void SetRotation(EM::Quaternion& rotation);
 
 			/* Set material of renderable */
-			void SetMaterial(EG::Material* material);
+			void SetMaterial(Material* material);
 
 			/* Set mesh of renderable */
-			void SetMesh(EG::Mesh* mesh);
+			void SetMesh(Mesh* mesh);
 
 			/* Set scene of renderable */
-			void SetScene(EG::Scene* scene);
+			void SetScene(Scene* scene);
 
 			/* Set material color */
-			void SetColor(EG::TextureSlotType type, EG::ColorRGBA16& color);	
+			void SetColor(TextureSlotType type, ColorRGBA16& color);	
 
 		private:
 			EM::Transform 	mTransform;
-			EG::Mesh* 		mMesh 		= nullptr;
-			EG::Material* 	mMaterial 	= nullptr;
-			EG::Scene* 		mScene 		= nullptr;
+			Mesh* 		mMesh 		= nullptr;
+			Material* 	mMaterial 	= nullptr;
+			Scene* 		mScene 		= nullptr;
 	};
-}}
+}
 
 
 #endif

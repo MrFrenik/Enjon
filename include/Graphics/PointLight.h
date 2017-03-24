@@ -6,7 +6,7 @@
 #include "Graphics/Color.h"
 #include "Defines.h"
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon { 
 
 	class Scene;
 
@@ -14,18 +14,18 @@ namespace Enjon { namespace Graphics {
 	{
 		public:
 			PointLight();
-			PointLight(EM::Vec3& position, float attenuationRate, EG::ColorRGBA16& color, float intensity = 1.0f, float radius = 1.0f);
+			PointLight(EM::Vec3& position, float attenuationRate, ColorRGBA16& color, float intensity = 1.0f, float radius = 1.0f);
 			~PointLight();
 
 			EM::Vec3& GetPosition() 	{ return mPosition; }
-			EG::ColorRGBA16& GetColor() { return mColor; }
+			ColorRGBA16& GetColor() { return mColor; }
 			float GetIntensity() 		{ return mIntensity; }
 			float GetAttenuationRate() 	{ return mAttenuationRate; }
 			float GetRadius() 			{ return mRadius; }
 
-			void SetColor(EG::ColorRGBA16& color);
+			void SetColor(ColorRGBA16& color);
 			void SetIntensity(float intensity);
-			void SetScene(EG::Scene* scene);
+			void SetScene(Scene* scene);
 			void SetPosition(EM::Vec3& position);
 			void SetAttenuationRate(float rate);
 			void SetRadius(float radius);
@@ -35,10 +35,10 @@ namespace Enjon { namespace Graphics {
 			float 				mAttenuationRate;
 			float 				mRadius;
 			float 				mIntensity;
-			EG::ColorRGBA16 	mColor;
-			EG::Scene* 			mScene 			= nullptr;
+			ColorRGBA16 	mColor;
+			Scene* 			mScene 			= nullptr;
 	};
 
-}}
+}
 
 #endif

@@ -20,7 +20,7 @@ namespace Enjon { namespace Animation {
 	typedef struct 
 	{
 		EM::Vec2 AtlasSize;
-		EG::GLTexture Texture;	
+		GLTexture Texture;	
 	} Atlas;
 
 	typedef struct
@@ -50,7 +50,7 @@ namespace Enjon { namespace Animation {
 	Anim* CreateAnimation(const std::string& AnimName, nlohmann::json& FramesDoc, EA::Atlas atlas, const std::string Path);
 	
 	// Draws a single animation frame	
-	void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White(), float ScalingFactor = 1.0f, float Depth = 0.0f);
+	void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, SpriteBatch* Batch, const ColorRGBA16& Color = RGBA16_White(), float ScalingFactor = 1.0f, float Depth = 0.0f);
 
 }}
 

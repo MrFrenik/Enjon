@@ -7,7 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace Enjon { namespace Graphics {
+namespace Enjon { 
 
 
 	Sprite::Sprite()
@@ -35,7 +35,7 @@ namespace Enjon { namespace Graphics {
 		m_height = height;
 
 		//Get texture from resource manager
-		m_texture = Enjon::Input::ResourceManager::GetTexture(texturePath); 
+		m_texture = Enjon::ResourceManager::GetTexture(texturePath); 
 
 
 		//Generate the buffer if it hasn't already been generated
@@ -108,4 +108,4 @@ namespace Enjon { namespace Graphics {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-}}
+}

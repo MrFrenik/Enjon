@@ -3,7 +3,7 @@
 
 #include <assert.h>
 
-namespace Enjon { namespace Graphics {
+namespace Enjon {
 
 	//------------------------------------------------------------------------
 	Material::Material()
@@ -17,28 +17,28 @@ namespace Enjon { namespace Graphics {
 	}
 
 	//------------------------------------------------------------------------
-	void Material::SetTexture(EG::TextureSlotType type, GLTexture& texture)
+	void Material::SetTexture(TextureSlotType type, GLTexture& texture)
 	{
 		assert((u32)type < (u32)TextureSlotType::TEXTURE_SLOT_COUNT);
 		mTextures[(u32)type] = texture;
 	}
 
 	//------------------------------------------------------------------------
-	GLTexture Material::GetTexture(EG::TextureSlotType type)
+	GLTexture Material::GetTexture(TextureSlotType type)
 	{
 		assert((u32)type < (u32)TextureSlotType::TEXTURE_SLOT_COUNT);
 		return mTextures[(u32)type];
 	}
 
 	//------------------------------------------------------------------------
-	void Material::SetColor(EG::TextureSlotType type, EG::ColorRGBA16& color)
+	void Material::SetColor(TextureSlotType type, ColorRGBA16& color)
 	{
 		assert((u32)type < (u32)TextureSlotType::TEXTURE_SLOT_COUNT);
 		mColors[(u32)type] = color;
 	}
 
 	//------------------------------------------------------------------------
-	EG::ColorRGBA16& Material::GetColor(EG::TextureSlotType type)
+	ColorRGBA16& Material::GetColor(TextureSlotType type)
 	{
 		assert((u32)type < (u32)TextureSlotType::TEXTURE_SLOT_COUNT);
 		return mColors[(u32)type];
@@ -51,9 +51,9 @@ namespace Enjon { namespace Graphics {
 	}
 
 	//------------------------------------------------------------------------
-	void Material::SetShader(EG::GLSLProgram* shader)
+	void Material::SetShader(GLSLProgram* shader)
 	{
 		mShader = shader;
 	}
 
-}}
+}

@@ -16,22 +16,22 @@ namespace Enjon
 			virtual void Update(float dt) override;
 			virtual void Destroy() override;
 
-			Enjon::Graphics::PointLight* GetLight() { return &mLight; }
+			PointLight* GetLight() { return &mLight; }
 
 			EM::Vec3& GetPosition() { return mLight.GetPosition(); }
-			EG::ColorRGBA16& GetColor() { return mLight.GetColor(); }
+			ColorRGBA16& GetColor() { return mLight.GetColor(); }
 			float GetIntensity() { return mLight.GetIntensity(); }
 			float GetRadius() { return mLight.GetRadius(); }
 			float GetAttenuationRate() { return mLight.GetAttenuationRate(); }
 
 			void SetAttenuationRate(float rate);
 			void SetPosition(EM::Vec3& position);
-			void SetColor(EG::ColorRGBA16& color);
+			void SetColor(ColorRGBA16& color);
 			void SetIntensity(float intensity);
 			void SetRadius(float radius);
 
 		private:
-			Enjon::Graphics::PointLight mLight;	
+			PointLight mLight;	
 	};
 }
 

@@ -48,9 +48,9 @@ namespace SpatialHash {
 	/* Finds all neighboring cells to a given entitiy's cell and stores those in a passed in entities vector */
 	void GetNeighborCells(Grid* grid, int index, std::vector<Enjon::uint32>* Entities);
 
-	void DrawGrid(Grid* G, EG::SpriteBatch* Batch, EM::Vec2& Position = EM::Vec2(0.0f));
+	void DrawGrid(Grid* G, Enjon::SpriteBatch* Batch, EM::Vec2& Position = EM::Vec2(0.0f));
 
-	void DrawActiveCell(Grid* G, EG::SpriteBatch* Batch, EM::Vec2& Position);
+	void DrawActiveCell(Grid* G, Enjon::SpriteBatch* Batch, EM::Vec2& Position);
 
 	EM::Vec4 GetCellDimensions(Grid* G, EM::Vec2& Cell);
 

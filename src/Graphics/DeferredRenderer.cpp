@@ -19,7 +19,7 @@
 
 #include <cassert>
 
-namespace Enjon { namespace Graphics {
+namespace Enjon { 
 
 	//------------------------------------------------------------------------------
 	DeferredRenderer::DeferredRenderer()
@@ -47,20 +47,20 @@ namespace Enjon { namespace Graphics {
 	//------------------------------------------------------------------------------
 	void DeferredRenderer::Init()
 	{
-		// TODO(John): Need to have a way to have an ini that's read or grab these values from a static
+		// TODO(John): Need to have a way to have an .ini that's read or grab these values from a static
 		// engine config file
 		// mWindow.Init("Game", 1920, 1080, WindowFlagsMask((u32)WindowFlags::FULLSCREEN)); 
 		mWindow.Init("Game", 1440, 900); 
 
 		// Initialize shader manager
-		EG::ShaderManager::Init();
+		Enjon::ShaderManager::Init();
 
 		// Initialize font manager
-		EG::FontManager::Init();
+		Enjon::FontManager::Init();
 
 		// Initialize scene camera
-		mSceneCamera = EG::Camera(mWindow.GetViewport());
-		mSceneCamera.SetProjection(EG::ProjectionType::PERSPECTIVE);
+		mSceneCamera = Enjon::Camera(mWindow.GetViewport());
+		mSceneCamera.SetProjection(ProjectionType::PERSPECTIVE);
 		mSceneCamera.SetPosition(EM::Vec3(0, 5, 10));
 		mSceneCamera.LookAt(EM::Vec3(0, 0, 0));
 
@@ -71,7 +71,7 @@ namespace Enjon { namespace Graphics {
 		// Register cvars
 		RegisterCVars();
 
-		EG::GLSLProgram* shader = EG::ShaderManager::Get("GBuffer");
+		GLSLProgram* shader = Enjon::ShaderManager::Get("GBuffer");
 		shader->Use();
 			shader->SetUniform("u_albedoMap", 0);
 			shader->SetUniform("u_normalMap", 1);
@@ -164,7 +164,7 @@ namespace Enjon { namespace Graphics {
 
 		else
 		{
-			auto program = EG::ShaderManager::Get("NoCameraProjection");	
+			auto program = Enjon::ShaderManager::Get("NoCameraProjection");	
 			program->Use();
 			{
 				mBatch->Begin();
@@ -190,7 +190,7 @@ namespace Enjon { namespace Graphics {
 		// Bind gbuffer
 		mGbuffer->Bind();
 
-		EG::GLSLProgram* shader = EG::ShaderManager::Get("GBuffer");
+		GLSLProgram* shader = Enjon::ShaderManager::Get("GBuffer");
 
 		// Use gbuffer shader
 		shader->Use();
@@ -200,7 +200,7 @@ namespace Enjon { namespace Graphics {
 
 		/*
 		GLfloat black[] = {0.0f, 0.0f, 0.0f, 1.0f};
-		for (u32 i = 1; i < (u32)EG::GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
+		for (u32 i = 1; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
 		{
 			glClearBufferfv(GL_COLOR, i, black);
 		}
@@ -208,22 +208,22 @@ namespace Enjon { namespace Graphics {
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		// mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16_LightGrey());
+		// mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA16_LightGrey());
 
 		// Get sorted renderables by material
-		std::vector<EG::Renderable*> sortedRenderables = mScene.GetRenderables();
-		std::set<EG::QuadBatch*>* sortedQuadBatches = mScene.GetQuadBatches();
+		std::vector<Renderable*> sortedRenderables = mScene.GetRenderables();
+		std::set<QuadBatch*>* sortedQuadBatches = mScene.GetQuadBatches();
 
 		if (!sortedRenderables.empty())
 		{
 			// Set set shared uniform
 			shader->SetUniform("u_camera", mSceneCamera.GetViewProjection());
 
-			EG::Material* material = nullptr;
+			Material* material = nullptr;
 			for (auto& renderable : sortedRenderables)
 			{
 				// Check for material switch
-				EG::Material* curMaterial = renderable->GetMaterial();
+				Material* curMaterial = renderable->GetMaterial();
 				assert(curMaterial != nullptr);
 				if (material != curMaterial)
 				{
@@ -231,17 +231,17 @@ namespace Enjon { namespace Graphics {
 					material = curMaterial;
 
 					// Set material textures
-					shader->BindTexture("u_albedoMap", material->GetTexture(EG::TextureSlotType::ALBEDO), 0);
-					shader->BindTexture("u_normalMap", material->GetTexture(EG::TextureSlotType::NORMAL), 1);
-					shader->BindTexture("u_emissiveMap", material->GetTexture(EG::TextureSlotType::EMISSIVE), 2);
-					shader->BindTexture("u_metallicMap", material->GetTexture(EG::TextureSlotType::METALLIC), 3);
-					shader->BindTexture("u_roughnessMap", material->GetTexture(EG::TextureSlotType::ROUGHNESS), 4);
-					shader->BindTexture("u_aoMap", material->GetTexture(EG::TextureSlotType::AO), 5);
-					shader->SetUniform("u_albedoColor", material->GetColor(EG::TextureSlotType::ALBEDO));
+					shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::ALBEDO), 0);
+					shader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::NORMAL), 1);
+					shader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::EMISSIVE), 2);
+					shader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::METALLIC), 3);
+					shader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::ROUGHNESS), 4);
+					shader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO), 5);
+					shader->SetUniform("u_albedoColor", material->GetColor(Enjon::TextureSlotType::ALBEDO));
 				}
 
 				// Now need to render
-				EG::Mesh* mesh = renderable->GetMesh();
+				Mesh* mesh = renderable->GetMesh();
 				mesh->Bind();
 				{
 					EM::Mat4 Model;
@@ -259,7 +259,7 @@ namespace Enjon { namespace Graphics {
 		shader->Unuse();
 
 		// Quadbatches
-		shader = EG::ShaderManager::Get("QuadBatch");
+		shader = Enjon::ShaderManager::Get("QuadBatch");
 		shader->Use();
 
 		if (!sortedQuadBatches->empty())
@@ -267,10 +267,10 @@ namespace Enjon { namespace Graphics {
 			// Set shared uniform
 			shader->SetUniform("u_camera", mSceneCamera.GetViewProjection());
 
-			EG::Material* material = nullptr;
+			Material* material = nullptr;
 			for (auto& quadBatch : *sortedQuadBatches)
 			{
-				EG::Material* curMaterial = quadBatch->GetMaterial();
+				Material* curMaterial = quadBatch->GetMaterial();
 				assert(curMaterial != nullptr);
 				if (material != curMaterial)
 				{
@@ -278,12 +278,12 @@ namespace Enjon { namespace Graphics {
 					material = curMaterial;
 
 					// Set material tetxures
-					shader->BindTexture("u_albedoMap", material->GetTexture(EG::TextureSlotType::ALBEDO), 0);
-					shader->BindTexture("u_normalMap", material->GetTexture(EG::TextureSlotType::NORMAL), 1);
-					shader->BindTexture("u_emissiveMap", material->GetTexture(EG::TextureSlotType::EMISSIVE), 2);
-					shader->BindTexture("u_metallicMap", material->GetTexture(EG::TextureSlotType::METALLIC), 3);
-					shader->BindTexture("u_roughnessMap", material->GetTexture(EG::TextureSlotType::ROUGHNESS), 4);
-					shader->BindTexture("u_aoMap", material->GetTexture(EG::TextureSlotType::AO), 5);
+					shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::ALBEDO), 0);
+					shader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::NORMAL), 1);
+					shader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::EMISSIVE), 2);
+					shader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::METALLIC), 3);
+					shader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::ROUGHNESS), 4);
+					shader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO), 5);
 				}
 
 				// Render batch
@@ -304,16 +304,16 @@ namespace Enjon { namespace Graphics {
 		mLightingBuffer->Bind();
 		// mFullScreenQuad->Bind();
 		
-		EG::GLSLProgram* ambientShader 		= EG::ShaderManager::Get("AmbientLight");
-		EG::GLSLProgram* directionalShader 	= EG::ShaderManager::Get("PBRDirectionalLight");	
-		EG::GLSLProgram* pointShader 		= EG::ShaderManager::Get("PBRPointLight");	
-		EG::GLSLProgram* spotShader 		= EG::ShaderManager::Get("SpotLight");	
+		GLSLProgram* ambientShader 		= Enjon::ShaderManager::Get("AmbientLight");
+		GLSLProgram* directionalShader 	= Enjon::ShaderManager::Get("PBRDirectionalLight");	
+		GLSLProgram* pointShader 		= Enjon::ShaderManager::Get("PBRPointLight");	
+		GLSLProgram* spotShader 		= Enjon::ShaderManager::Get("SpotLight");	
 
-		std::set<EG::DirectionalLight*>* directionalLights 	= mScene.GetDirectionalLights();	
-		std::set<EG::SpotLight*>* spotLights 				= mScene.GetSpotLights();	
-		std::set<EG::PointLight*>* pointLights 				= mScene.GetPointLights();
+		std::set<DirectionalLight*>* directionalLights 	= mScene.GetDirectionalLights();	
+		std::set<SpotLight*>* spotLights 				= mScene.GetSpotLights();	
+		std::set<PointLight*>* pointLights 				= mScene.GetPointLights();
 
-		EG::AmbientSettings* aS = mScene.GetAmbientSettings();
+		AmbientSettings* aS = mScene.GetAmbientSettings();
 
 		mWindow.Clear();
 
@@ -325,8 +325,8 @@ namespace Enjon { namespace Graphics {
 		// Ambient pass
 		ambientShader->Use();
 		{
-			ambientShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(EG::GBufferTextureType::ALBEDO), 0);
-			ambientShader->BindTexture("u_emissiveMap", mGbuffer->GetTexture(EG::GBufferTextureType::EMISSIVE), 1);
+			ambientShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
+			ambientShader->BindTexture("u_emissiveMap", mGbuffer->GetTexture(GBufferTextureType::EMISSIVE), 1);
 			ambientShader->SetUniform("u_ambientColor", EM::Vec3(aS->mColor.r, aS->mColor.g, aS->mColor.b));
 			ambientShader->SetUniform("u_ambientIntensity", aS->mIntensity);
 			ambientShader->SetUniform("u_resolution", mGbuffer->GetResolution());
@@ -336,7 +336,7 @@ namespace Enjon { namespace Graphics {
 					mBatch->Add(
 									EM::Vec4(-1, -1, 2, 2),
 									EM::Vec4(0, 0, 1, 1),
-									mGbuffer->GetTexture(EG::GBufferTextureType::ALBEDO)
+									mGbuffer->GetTexture(GBufferTextureType::ALBEDO)
 								);
 				mBatch->End();
 				mBatch->RenderBatch();
@@ -348,12 +348,12 @@ namespace Enjon { namespace Graphics {
 			directionalShader->SetUniform("u_camPos", mSceneCamera.GetPosition() + mSceneCamera.Backward());
 			for (auto& l : *directionalLights)
 			{
-				EG::ColorRGBA16 color = l->GetColor();
+				ColorRGBA16 color = l->GetColor();
 
-				directionalShader->BindTexture("u_albedoMap", 		mGbuffer->GetTexture(EG::GBufferTextureType::ALBEDO), 0);
-				directionalShader->BindTexture("u_normalMap", 		mGbuffer->GetTexture(EG::GBufferTextureType::NORMAL), 1);
-				directionalShader->BindTexture("u_positionMap", 	mGbuffer->GetTexture(EG::GBufferTextureType::POSITION), 2);
-				directionalShader->BindTexture("u_matProps", 		mGbuffer->GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
+				directionalShader->BindTexture("u_albedoMap", 		mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
+				directionalShader->BindTexture("u_normalMap", 		mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
+				directionalShader->BindTexture("u_positionMap", 	mGbuffer->GetTexture(GBufferTextureType::POSITION), 2);
+				directionalShader->BindTexture("u_matProps", 		mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
 				// directionalShader->BindTexture("u_shadowMap", 		mShadowDepth->GetDepth(), 4);
 				directionalShader->SetUniform("u_resolution", 		mGbuffer->GetResolution());
 				// directionalShader->SetUniform("u_lightSpaceMatrix", mShadowCamera->GetViewProjectionMatrix());
@@ -369,7 +369,7 @@ namespace Enjon { namespace Graphics {
 					mBatch->Add(
 									EM::Vec4(-1, -1, 2, 2),
 									EM::Vec4(0, 0, 1, 1),
-									mGbuffer->GetTexture(EG::GBufferTextureType::ALBEDO)
+									mGbuffer->GetTexture(GBufferTextureType::ALBEDO)
 								);
 				mBatch->End();
 				mBatch->RenderBatch();
@@ -379,16 +379,16 @@ namespace Enjon { namespace Graphics {
 
 		pointShader->Use();
 		{
-			pointShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(EG::GBufferTextureType::ALBEDO), 0);
-			pointShader->BindTexture("u_normalMap", mGbuffer->GetTexture(EG::GBufferTextureType::NORMAL), 1);
-			pointShader->BindTexture("u_positionMap", mGbuffer->GetTexture(EG::GBufferTextureType::POSITION), 2);
-			pointShader->BindTexture("u_matProps", mGbuffer->GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
+			pointShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
+			pointShader->BindTexture("u_normalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
+			pointShader->BindTexture("u_positionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 2);
+			pointShader->BindTexture("u_matProps", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
 			pointShader->SetUniform("u_resolution", mGbuffer->GetResolution());
 			pointShader->SetUniform("u_camPos", mSceneCamera.GetPosition() + mSceneCamera.Backward());			
 
 			for (auto& l : *pointLights)
 			{
-				EG::ColorRGBA16& color = l->GetColor();
+				ColorRGBA16& color = l->GetColor();
 				EM::Vec3& position = l->GetPosition();
 
 				pointShader->SetUniform("u_lightPos", position);
@@ -402,7 +402,7 @@ namespace Enjon { namespace Graphics {
 					mBatch->Add(
 									EM::Vec4(-1, -1, 2, 2),
 									EM::Vec4(0, 0, 1, 1),
-									mGbuffer->GetTexture(EG::GBufferTextureType::ALBEDO)
+									mGbuffer->GetTexture(GBufferTextureType::ALBEDO)
 								);
 				mBatch->End();
 				mBatch->RenderBatch();
@@ -414,17 +414,17 @@ namespace Enjon { namespace Graphics {
 		{
 			for (auto& l : *spotLights)
 			{
-				spotShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(EG::GBufferTextureType::ALBEDO), 0);
-				spotShader->BindTexture("u_normalMap", mGbuffer->GetTexture(EG::GBufferTextureType::NORMAL), 1);
-				spotShader->BindTexture("u_positionMap", mGbuffer->GetTexture(EG::GBufferTextureType::POSITION), 2);
-				// spotShader->BindTexture("u_matProps", mGbuffer->GetTexture(EG::GBufferTextureType::MAT_PROPS), 3);
+				spotShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
+				spotShader->BindTexture("u_normalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
+				spotShader->BindTexture("u_positionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 2);
+				// spotShader->BindTexture("u_matProps", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
 				spotShader->SetUniform("u_resolution", mGbuffer->GetResolution());
 				spotShader->SetUniform("u_camPos", mSceneCamera.GetPosition());			
 
 				for (auto& l : *spotLights)
 				{
-					EG::ColorRGBA16& color = l->GetColor();
-					EG::SLParams& params = l->GetParams();
+					ColorRGBA16& color = l->GetColor();
+					SLParams& params = l->GetParams();
 					EM::Vec3& position = l->GetPosition();
 
 					spotShader->SetUniform("u_lightPos", position);
@@ -440,7 +440,7 @@ namespace Enjon { namespace Graphics {
 						mBatch->Add(
 										EM::Vec4(-1, -1, 2, 2),
 										EM::Vec4(0, 0, 1, 1),
-										mGbuffer->GetTexture(EG::GBufferTextureType::ALBEDO)
+										mGbuffer->GetTexture(GBufferTextureType::ALBEDO)
 									);
 					mBatch->End();
 					mBatch->RenderBatch();
@@ -459,13 +459,13 @@ namespace Enjon { namespace Graphics {
 	//------------------------------------------------------------------------------
 	void DeferredRenderer::LuminancePass()
 	{
-		GLSLProgram* luminanceProgram = EG::ShaderManager::Get("Bright");
+		GLSLProgram* luminanceProgram = Enjon::ShaderManager::Get("Bright");
 		mLuminanceTarget->Bind();
 		{
-			mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+			mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT, RGBA16_Black());
 			luminanceProgram->Use();
 			{
-				luminanceProgram->BindTexture("u_emissiveMap", mGbuffer->GetTexture(EG::GBufferTextureType::EMISSIVE), 1);
+				luminanceProgram->BindTexture("u_emissiveMap", mGbuffer->GetTexture(GBufferTextureType::EMISSIVE), 1);
 				luminanceProgram->SetUniform("u_threshold", mToneMapSettings.mThreshold);
 				mBatch->Begin();
 				{
@@ -486,8 +486,8 @@ namespace Enjon { namespace Graphics {
 	//------------------------------------------------------------------------------
 	void DeferredRenderer::BloomPass()
 	{
-		GLSLProgram* horizontalBlurProgram = EG::ShaderManager::Get("HorizontalBlur");
-		GLSLProgram* verticalBlurProgram = EG::ShaderManager::Get("VerticalBlur");
+		GLSLProgram* horizontalBlurProgram = Enjon::ShaderManager::Get("HorizontalBlur");
+		GLSLProgram* verticalBlurProgram = Enjon::ShaderManager::Get("VerticalBlur");
 
 		glEnable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
@@ -497,10 +497,10 @@ namespace Enjon { namespace Graphics {
     	for (u32 i = 0; i < (u32)mBloomSettings.mIterations.x * 2; ++i)
     	{
     		bool isEven = (i % 2 == 0);
-    		EG::RenderTarget* target = isEven ? mSmallBlurHorizontal : mSmallBlurVertical;
-    		EG::GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
+    		RenderTarget* target = isEven ? mSmallBlurHorizontal : mSmallBlurVertical;
+    		GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
 
-			target->Bind(EG::RenderTarget::BindType::WRITE);
+			target->Bind(RenderTarget::BindType::WRITE);
 			{
 				program->Use();
 				{
@@ -533,10 +533,10 @@ namespace Enjon { namespace Graphics {
     	for (u32 i = 0; i < (u32)mBloomSettings.mIterations.y * 2; ++i)
     	{
     		bool isEven = (i % 2 == 0);
-    		EG::RenderTarget* target = isEven ? mMediumBlurHorizontal : mMediumBlurVertical;
-    		EG::GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
+    		RenderTarget* target = isEven ? mMediumBlurHorizontal : mMediumBlurVertical;
+    		GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
 
-			target->Bind(EG::RenderTarget::BindType::WRITE);
+			target->Bind(RenderTarget::BindType::WRITE);
 			{
 				program->Use();
 				{
@@ -569,10 +569,10 @@ namespace Enjon { namespace Graphics {
     	for (u32 i = 0; i < (u32)mBloomSettings.mIterations.z * 2; ++i)
     	{
     		bool isEven = (i % 2 == 0);
-    		EG::RenderTarget* target = isEven ? mLargeBlurHorizontal : mLargeBlurVertical;
-    		EG::GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
+    		RenderTarget* target = isEven ? mLargeBlurHorizontal : mLargeBlurVertical;
+    		GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
 
-			target->Bind(EG::RenderTarget::BindType::WRITE);
+			target->Bind(RenderTarget::BindType::WRITE);
 			{
 				program->Use();
 				{
@@ -606,9 +606,9 @@ namespace Enjon { namespace Graphics {
 	}
 
 	//------------------------------------------------------------------------------
-	void DeferredRenderer::FXAAPass(EG::RenderTarget* input)
+	void DeferredRenderer::FXAAPass(RenderTarget* input)
 	{
-		GLSLProgram* fxaaProgram = EG::ShaderManager::Get("FXAA");
+		GLSLProgram* fxaaProgram = Enjon::ShaderManager::Get("FXAA");
 		mFXAATarget->Bind();
 		{
 			mWindow.Clear();
@@ -634,9 +634,9 @@ namespace Enjon { namespace Graphics {
 	}
 
 	//------------------------------------------------------------------------------
-	void DeferredRenderer::CompositePass(EG::RenderTarget* input)
+	void DeferredRenderer::CompositePass(RenderTarget* input)
 	{
-		GLSLProgram* compositeProgram = EG::ShaderManager::Get("Composite");
+		GLSLProgram* compositeProgram = Enjon::ShaderManager::Get("Composite");
 		mCompositeTarget->Bind();
 		{
 			mWindow.Clear();
@@ -711,25 +711,25 @@ namespace Enjon { namespace Graphics {
 		Enjon::u32 width = (Enjon::u32)viewport.x;
 		Enjon::u32 height = (Enjon::u32)viewport.y;
 
-		mGbuffer 					= new EG::GBuffer(width, height);
-		mDebugTarget 				= new EG::RenderTarget(width, height);
-		mSmallBlurHorizontal 		= new EG::RenderTarget(width / 4, height / 4);
-		mSmallBlurVertical 			= new EG::RenderTarget(width / 4, height / 4);
-		mMediumBlurHorizontal 		= new EG::RenderTarget(width  / 8, height  / 8);
-		mMediumBlurVertical 		= new EG::RenderTarget(width  / 8, height  / 8);
-		mLargeBlurHorizontal 		= new EG::RenderTarget(width / 16, height / 16);
-		mLargeBlurVertical 			= new EG::RenderTarget(width / 16, height / 16);
-		mCompositeTarget 			= new EG::RenderTarget(width, height);
-		mLightingBuffer 			= new EG::RenderTarget(width, height);
-		mLuminanceTarget 			= new EG::RenderTarget(width / 2, height / 2);
-		mFXAATarget 				= new EG::RenderTarget(width, height);
-		mShadowDepth 				= new EG::RenderTarget(2048, 2048);
-		mFinalTarget 				= new EG::RenderTarget(width, height);
+		mGbuffer 					= new GBuffer(width, height);
+		mDebugTarget 				= new RenderTarget(width, height);
+		mSmallBlurHorizontal 		= new RenderTarget(width / 4, height / 4);
+		mSmallBlurVertical 			= new RenderTarget(width / 4, height / 4);
+		mMediumBlurHorizontal 		= new RenderTarget(width  / 8, height  / 8);
+		mMediumBlurVertical 		= new RenderTarget(width  / 8, height  / 8);
+		mLargeBlurHorizontal 		= new RenderTarget(width / 16, height / 16);
+		mLargeBlurVertical 			= new RenderTarget(width / 16, height / 16);
+		mCompositeTarget 			= new RenderTarget(width, height);
+		mLightingBuffer 			= new RenderTarget(width, height);
+		mLuminanceTarget 			= new RenderTarget(width / 2, height / 2);
+		mFXAATarget 				= new RenderTarget(width, height);
+		mShadowDepth 				= new RenderTarget(2048, 2048);
+		mFinalTarget 				= new RenderTarget(width, height);
 
-		mBatch 						= new EG::SpriteBatch();
+		mBatch 						= new SpriteBatch();
 		mBatch->Init();
 
-		mFullScreenQuad 			= new EG::FullScreenQuad();
+		mFullScreenQuad 			= new FullScreenQuad();
 	}
 
 	//------------------------------------------------------------------------------
@@ -917,7 +917,7 @@ namespace Enjon { namespace Graphics {
 	    	ImFontAtlas* atlas = ImGui::GetIO().Fonts;
 	    	ImGui::PushFont(atlas->Fonts[1]);
 	        ImGui::PushStyleColor(ImGuiCol_Text, ImColor(0.2, 0.6f, 0.6f, 1.0f));
-	    	for (u32 i = 0; i < (u32)EG::GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
+	    	for (u32 i = 0; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
 	    	{
 	    		const char* string_name = mGbuffer->FrameBufferToString(i);
 	    		ImGui::Text(string_name);
@@ -1013,7 +1013,7 @@ namespace Enjon { namespace Graphics {
 	    				ImVec2(0,1), ImVec2(1,0), ImColor(255,255,255,255), ImColor(255,255,255,0));
 	}
 
-}}
+}
 
 
 

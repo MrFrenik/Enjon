@@ -3,7 +3,7 @@
 #include <string.h>
 #include <unordered_map>
 
-namespace Enjon { namespace Graphics { namespace ShaderManager {
+namespace Enjon { namespace ShaderManager {
 
  	std::unordered_map<std::string, GLSLProgram*> Shaders;
 
@@ -108,4 +108,4 @@ namespace Enjon { namespace Graphics { namespace ShaderManager {
 
 	}
 
-}}}
+}}

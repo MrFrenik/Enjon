@@ -12,7 +12,7 @@
 
 #include <algorithm>
 
-namespace Enjon { namespace Graphics {
+namespace Enjon { 
 
 	Scene::Scene()
 	{
@@ -22,9 +22,9 @@ namespace Enjon { namespace Graphics {
 	{
 	}
 
-	std::vector<EG::Renderable*> Scene::GetRenderables(RenderableSortType type)
+	std::vector<Renderable*> Scene::GetRenderables(RenderableSortType type)
 	{
-		std::vector<EG::Renderable*> renderables(mRenderables.begin(), mRenderables.end());	
+		std::vector<Renderable*> renderables(mRenderables.begin(), mRenderables.end());	
 
 		switch(type)
 		{
@@ -46,7 +46,7 @@ namespace Enjon { namespace Graphics {
 		return renderables;
 	}
 
-	void Scene::AddRenderable(EG::Renderable* renderable)
+	void Scene::AddRenderable(Renderable* renderable)
 	{
 		auto query = mRenderables.find(renderable);
 		if (query == mRenderables.end())
@@ -56,7 +56,7 @@ namespace Enjon { namespace Graphics {
 		}
 	}
 
-	void Scene::RemoveRenderable(EG::Renderable* renderable)
+	void Scene::RemoveRenderable(Renderable* renderable)
 	{
 		auto query = mRenderables.find(renderable);
 		if (query != mRenderables.end())
@@ -66,7 +66,7 @@ namespace Enjon { namespace Graphics {
 		}
 	}
 
-	void Scene::AddQuadBatch(EG::QuadBatch* batch)
+	void Scene::AddQuadBatch(QuadBatch* batch)
 	{
 		auto query = mQuadBatches.find(batch);
 		if (query == mQuadBatches.end())
@@ -76,7 +76,7 @@ namespace Enjon { namespace Graphics {
 		}
 	}
 
-	void Scene::RemoveQuadBatch(EG::QuadBatch* batch)
+	void Scene::RemoveQuadBatch(QuadBatch* batch)
 	{
 		auto query = mQuadBatches.find(batch);
 		if (query != mQuadBatches.end())
@@ -86,7 +86,7 @@ namespace Enjon { namespace Graphics {
 		}
 	}
 
-	void Scene::AddDirectionalLight(EG::DirectionalLight* light)
+	void Scene::AddDirectionalLight(DirectionalLight* light)
 	{
 		auto query = mDirectionalLights.find(light);
 		if (query == mDirectionalLights.end())
@@ -96,7 +96,7 @@ namespace Enjon { namespace Graphics {
 		}
 	}
 
-	void Scene::RemoveDirectionLight(EG::DirectionalLight* light)
+	void Scene::RemoveDirectionLight(DirectionalLight* light)
 	{
 		auto query = mDirectionalLights.find(light);
 		if (query != mDirectionalLights.end())
@@ -106,7 +106,7 @@ namespace Enjon { namespace Graphics {
 		}
 	}
 
-	void Scene::AddPointLight(EG::PointLight* light)
+	void Scene::AddPointLight(PointLight* light)
 	{
 		auto query = mPointLights.find(light);
 		if (query == mPointLights.end())
@@ -116,7 +116,7 @@ namespace Enjon { namespace Graphics {
 		}
 	}
 
-	void Scene::RemovePointLight(EG::PointLight* light)
+	void Scene::RemovePointLight(PointLight* light)
 	{
 		auto query = mPointLights.find(light);
 		if (query != mPointLights.end())
@@ -126,7 +126,7 @@ namespace Enjon { namespace Graphics {
 		}
 	}
 
-	void Scene::AddSpotLight(EG::SpotLight* light)
+	void Scene::AddSpotLight(SpotLight* light)
 	{
 		auto query = mSpotLights.find(light);
 		if (query == mSpotLights.end())
@@ -136,7 +136,7 @@ namespace Enjon { namespace Graphics {
 		}
 	}
 
-	void Scene::RemoveSpotLight(EG::SpotLight* light)
+	void Scene::RemoveSpotLight(SpotLight* light)
 	{
 		auto query = mSpotLights.find(light);
 		if (query != mSpotLights.end())
@@ -151,13 +151,13 @@ namespace Enjon { namespace Graphics {
 		mAmbientSettings = settings;
 	}
 
-	void Scene::SetAmbientColor(EG::ColorRGBA16& color)
+	void Scene::SetAmbientColor(ColorRGBA16& color)
 	{
 		mAmbientSettings.mColor = color;
 		mAmbientSettings.mIntensity = color.a;
 	}
 
-	bool Scene::CompareDepth(EG::Renderable* a, EG::Renderable* b)
+	bool Scene::CompareDepth(Renderable* a, Renderable* b)
 	{
 		// Get camera position
 		v3 camPos = Engine::GetInstance()->GetGraphics()->GetSceneCamera()->GetPosition();
@@ -173,15 +173,15 @@ namespace Enjon { namespace Graphics {
 		return aDist < bDist;
 	}
 
-	bool Scene::CompareMaterial(EG::Renderable* a, EG::Renderable* b)
+	bool Scene::CompareMaterial(Renderable* a, Renderable* b)
 	{
 		// TODO(): Set this up to where materials have a unique id and sort by that
-		GLTexture texA = a->GetMaterial()->GetTexture(EG::TextureSlotType::ALBEDO);
-		GLTexture texB = b->GetMaterial()->GetTexture(EG::TextureSlotType::ALBEDO);
+		GLTexture texA = a->GetMaterial()->GetTexture(TextureSlotType::ALBEDO);
+		GLTexture texB = b->GetMaterial()->GetTexture(TextureSlotType::ALBEDO);
 
 
 		return texA.id > texB.id;
 	}
 
-}}
+}
 

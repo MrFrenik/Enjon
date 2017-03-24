@@ -9,19 +9,15 @@
 namespace Enjon {
 
 	// Forward declaration
-	namespace Input {
-		class InputManager;
-	}
+	class Input;
 
-	namespace Graphics {
-		class Camera;
-	}
+	class Camera;
 
 	class Console
 	{
 		public:
 			static void Init(float ScreenWidth, float ScreenHeight);
-			static bool ProcessInput(Input::InputManager* Input);
+			static bool ProcessInput(Input* sInput);
 			static void Update(float DT);
 			static void Draw();
 			static bool Visible();

@@ -9,13 +9,13 @@
 #include <IO/ResourceManager.h>
 #include <Math/Mat4.h>
 
-namespace Enjon { namespace Graphics {
+namespace Enjon {
 
 	struct ModelAsset
 	{
-		EG::GLSLProgram* mShader;
-		EG::Material mMaterial;
-		EG::MeshInstance* mMesh;
+		GLSLProgram* mShader;
+		Material mMaterial;
+		Mesh* mMesh;
 	};
 
 	struct ModelInstance
@@ -24,6 +24,6 @@ namespace Enjon { namespace Graphics {
 		EM::Transform mTransform;
 	};
 
-}}
+}
 
 #endif

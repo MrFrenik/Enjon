@@ -1,6 +1,6 @@
+#pragma once
 #ifndef ENJON_INPUTMANAGER_H
-#define ENJON_INPUTMANAGER_H
-
+#define ENJON_INPUTMANAGER_H 
 
 #define MAX_CONTROLLERS 4
 
@@ -12,7 +12,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
-namespace Enjon { namespace Input {
+namespace Enjon { 
 	
 	struct Controller
 	{
@@ -30,12 +30,11 @@ namespace Enjon { namespace Input {
 		bool IsButtonPressed(unsigned int buttonID);
 	};
 
-	class InputManager
+	class Input
 	{
 		public:
-			InputManager();
-			~InputManager();
-
+			Input();
+			~Input(); 
 
 			void Update();
 
@@ -69,9 +68,8 @@ namespace Enjon { namespace Input {
 			std::unordered_map<unsigned int, bool> m_buttonMap;
 			std::unordered_map<unsigned int, bool> m_previousButtonMap;
 			Enjon::Math::Vec2 m_mouseCoords;
-	};
-
-}}
+	}; 
+}
 
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////

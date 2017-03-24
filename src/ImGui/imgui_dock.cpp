@@ -275,14 +275,14 @@ namespace ImGui
 				ImVec2 min_size1 = dock.children[1]->getMinSize();
 				if (dock.isHorizontal())
 				{
-					InvisibleButton("split", ImVec2(3, dock.size.y));
+					InvisibleButton("split", ImVec2(5, dock.size.y));
 					if (dock.status == Status_Dragged) dsize.x = io.MouseDelta.x;
 					dsize.x = -ImMin(-dsize.x, dock.children[0]->size.x - min_size0.x);
 					dsize.x = ImMin(dsize.x, dock.children[1]->size.x - min_size1.x);
 				}
 				else
 				{
-					InvisibleButton("split", ImVec2(dock.size.x, 3));
+					InvisibleButton("split", ImVec2(dock.size.x, 5));
 					if (dock.status == Status_Dragged) dsize.y = io.MouseDelta.y;
 					dsize.y = -ImMin(-dsize.y, dock.children[0]->size.y - min_size0.y);
 					dsize.y = ImMin(dsize.y, dock.children[1]->size.y - min_size1.y);

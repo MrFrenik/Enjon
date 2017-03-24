@@ -6,7 +6,7 @@
 
 #include <unordered_map>
 
-namespace Enjon { namespace Graphics { namespace CursorManager {
+namespace Enjon {  namespace CursorManager {
 
 	/* Init the CursorManager */
 	void Init();
@@ -17,7 +17,7 @@ namespace Enjon { namespace Graphics { namespace CursorManager {
 	// Delete all cursors and clear any memory used
 	void DeleteCursors();
 
-}}}
+}}
 
 
 

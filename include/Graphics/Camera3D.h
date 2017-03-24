@@ -13,7 +13,7 @@
 #include "Math/Maths.h"
 
 
-namespace Enjon { namespace Graphics {
+namespace Enjon {
 
 	const float YAW 			= -90.0f;
 	const float PITCH 			= 0.0f;
@@ -64,6 +64,6 @@ namespace Enjon { namespace Graphics {
 			float Sensitivity;
 			float Zoom;
 	};
-}}
+}
 
 #endif

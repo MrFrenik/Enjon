@@ -13,7 +13,7 @@ namespace Enjon
 	{
 		public:
 			GraphicsComponent();
-			GraphicsComponent(EG::Renderable& renderable);
+			GraphicsComponent(Renderable& renderable);
 			~GraphicsComponent();
 
 			virtual void Update(float dt) override;
@@ -30,13 +30,13 @@ namespace Enjon
 			EM::Quaternion GetRotation() { return mRenderable.GetRotation(); }
 
 			/* Get material of renderable */
-			EG::Material* GetMaterial() { return mRenderable.GetMaterial(); }
+			Material* GetMaterial() { return mRenderable.GetMaterial(); }
 
 			/* Get mesh of renderable */
-			EG::Mesh* GetMesh() { return mRenderable.GetMesh(); }
+			Mesh* GetMesh() { return mRenderable.GetMesh(); }
 
 			/* Get scene of renderable */
-			EG::Scene* GetScene() { return mRenderable.GetScene(); }
+			Scene* GetScene() { return mRenderable.GetScene(); }
 
 			/* Get world transform */
 			EM::Transform GetTransform() { return mRenderable.GetTransform(); }
@@ -45,7 +45,7 @@ namespace Enjon
 			void SetTransform(EM::Transform& transform) { mRenderable.SetTransform(transform); }
 
 			/* Get renderable */
-			EG::Renderable* GetRenderable() { return &mRenderable; }
+			Renderable* GetRenderable() { return &mRenderable; }
 
 			/* Set position of transform */
 			void SetPosition(EM::Vec3& position);
@@ -60,23 +60,23 @@ namespace Enjon
 			void SetRotation(EM::Quaternion& rotation);
 
 			/* Set material of renderable */
-			void SetMaterial(EG::Material* material);
+			void SetMaterial(Material* material);
 
 			/* Set mesh of renderable */
-			void SetMesh(EG::Mesh* mesh);
+			void SetMesh(Mesh* mesh);
 
 			/* Set scene of renderable */
-			void SetScene(EG::Scene* scene);
+			void SetScene(Scene* scene);
 
 			/* Set Renderable */
-			void SetRenderable(EG::Renderable& renderable);
+			void SetRenderable(Renderable& renderable);
 
 			/* Set material color */
-			void SetColor(EG::TextureSlotType type, EG::ColorRGBA16& color);	
+			void SetColor(TextureSlotType type, ColorRGBA16& color);	
 
 		private:
 
-			EG::Renderable mRenderable;
+			Renderable mRenderable;
 	};
 }
 

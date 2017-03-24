@@ -31,8 +31,8 @@ namespace Enjon { namespace GUI {
 			// Set up member variables
 			Name 			= std::string("GUISceneGroup");		// Default Name
 			Dimensions		= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
-			TextColor		= EG::RGBA16_MidGrey();
-			Color 			= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
+			TextColor		= RGBA16_MidGrey();
+			Color 			= RGBA16(0.12, 0.12, 0.12, 1.0f);
 			HoveredElement	= nullptr;
 			Visibility 		= VisibleState::VISIBLE;
 
@@ -67,7 +67,7 @@ namespace Enjon { namespace GUI {
 			}
 		}
 
-		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		bool ProcessInput(Input* Input, Camera2D* Camera)
 		{
 			static EM::Vec2 MouseFrameOffset(0.0f);
 			static bool JustFocused = true;
@@ -100,7 +100,7 @@ namespace Enjon { namespace GUI {
 			return false;			
 		}
 
-		void Draw(EG::SpriteBatch* Batch)
+		void Draw(SpriteBatch* Batch)
 		{
 			// Try and draw this shiz
 			for(auto& E : Children)
@@ -146,8 +146,8 @@ namespace Enjon { namespace GUI {
 			TitlePadding 	= 15.0f;
 			Name 			= std::string("GUIVerticleGroup");		// Default Name
 			Dimensions		= EM::Vec2(250.0f, 300.0f);		// Default Dimensions
-			TextColor		= EG::RGBA16_MidGrey();
-			Color 			= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
+			TextColor		= RGBA16_MidGrey();
+			Color 			= RGBA16(0.12, 0.12, 0.12, 1.0f);
 			TextFont 		= nullptr;
 			HoveredElement	= nullptr;
 			Visibility 		= VisibleState::VISIBLE;
@@ -163,7 +163,7 @@ namespace Enjon { namespace GUI {
 			{
 				HoverState = HoveredState::ON_HOVER;
 
-				Color = EG::RGBA16(0.2f, 0.2f, 0.2f, 0.5f);
+				Color = RGBA16(0.2f, 0.2f, 0.2f, 0.5f);
 			});
 
 			// Set up GUIVerticleGroup's off_hover signal
@@ -171,7 +171,7 @@ namespace Enjon { namespace GUI {
 			{
 				HoverState = HoveredState::OFF_HOVER;
 
-				Color 			= EG::RGBA16(0.12, 0.12, 0.12, 1.0f);
+				Color 			= RGBA16(0.12, 0.12, 0.12, 1.0f);
 			});
 
 			MinimizeButton.on_hover.connect([&]()
@@ -230,7 +230,7 @@ namespace Enjon { namespace GUI {
 			}
 		}
 
-		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		bool ProcessInput(Enjon::Input* Input, Camera2D* Camera)
 		{
 			static EM::Vec2 MouseFrameOffset(0.0f);
 			static bool JustFocused = true;
@@ -298,17 +298,17 @@ namespace Enjon { namespace GUI {
 			return false;			
 		}
 
-		void Draw(EG::SpriteBatch* Batch)
+		void Draw(SpriteBatch* Batch)
 		{
 			// Draw Group border
 			Batch->Add(	
 						EM::Vec4(Position, Dimensions),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						EG::SetOpacity(EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f), 0.3f),
+						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						SetOpacity(RGBA16(0.12f, 0.12f, 0.12f, 1.0f), 0.3f),
 						0.0f,
-						EG::SpriteBatch::DrawOptions::BORDER | EG::SpriteBatch::DrawOptions::SHADOW,
-						EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.2f),
+						SpriteBatch::DrawOptions::BORDER | SpriteBatch::DrawOptions::SHADOW,
+						SetOpacity(RGBA16_DarkGrey(), 0.2f),
 						1.0f
 					);
 
@@ -316,26 +316,26 @@ namespace Enjon { namespace GUI {
 			Batch->Add(	
 						EM::Vec4(Position + EM::Vec2(5.0f, 5.0f), Dimensions - EM::Vec2(10.0f, 10.0f + YOffset)),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						EG::SetOpacity(EG::RGBA16(0.14f, 0.14f, 0.14f, 1.0f), 0.3f),
+						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						SetOpacity(RGBA16(0.14f, 0.14f, 0.14f, 1.0f), 0.3f),
 						0.0f,
-						EG::SpriteBatch::DrawOptions::BORDER,
-						EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.8f),
+						SpriteBatch::DrawOptions::BORDER,
+						SetOpacity(RGBA16_DarkGrey(), 0.8f),
 						1.0f
 					);
 
 
-			if (TextFont == nullptr) TextFont = EG::FontManager::GetFont("WeblySleek_12");
+			if (TextFont == nullptr) TextFont = FontManager::GetFont("WeblySleek_12");
 
 			// Draw Title border
 			Batch->Add(	
 						EM::Vec4(Position.x, Position.y + Dimensions.y - YOffset, Dimensions.x, YOffset),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						Color,
 						0.0f,
-						EG::SpriteBatch::DrawOptions::BORDER,
-						EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.8f),
+						SpriteBatch::DrawOptions::BORDER,
+						SetOpacity(RGBA16_DarkGrey(), 0.8f),
 						1.0f
 					);
 
@@ -343,54 +343,54 @@ namespace Enjon { namespace GUI {
 			Batch->Add(	
 						EM::Vec4(Position.x + 2.0f, Position.y + Dimensions.y - YOffset + 2.0f, Dimensions.x - 4.0f, YOffset - 4.0f),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						EG::SetOpacity(EG::RGBA16(0.14f, 0.14f, 0.14f, 1.0f), 0.3f),
+						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						SetOpacity(RGBA16(0.14f, 0.14f, 0.14f, 1.0f), 0.3f),
 						0.0f,
-						EG::SpriteBatch::DrawOptions::BORDER,
-						EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.8f),
+						SpriteBatch::DrawOptions::BORDER,
+						SetOpacity(RGBA16_DarkGrey(), 0.8f),
 						1.0f
 					);
 
 			// Draw title of widget
-			auto TitleFont = EG::FontManager::GetFont("WeblySleek");
+			auto TitleFont = FontManager::GetFont("WeblySleek");
 			// Calculate total width of title to find placement
 			float TitleAdvance = 0.0f;
 			for (auto& c : Name)
 			{
-				TitleAdvance += EG::Fonts::GetAdvance(c, TitleFont, 1.0f);
+				TitleAdvance += Fonts::GetAdvance(c, TitleFont, 1.0f);
 			}
 
-			EG::Fonts::PrintText(
+			Fonts::PrintText(
 									Position.x + Dimensions.x / 2.0f - TitleAdvance / 2.0f,
-									Position.y + Dimensions.y - YOffset + EG::Fonts::GetHeight(Name[0], TitleFont, 1.0f) / 2.0f,
+									Position.y + Dimensions.y - YOffset + Fonts::GetHeight(Name[0], TitleFont, 1.0f) / 2.0f,
 									1.0f,
 									Name,
 									TitleFont,
 									*Batch,
-									EG::SetOpacity(EG::RGBA16_MidGrey(), 0.6f)
+									SetOpacity(RGBA16_MidGrey(), 0.6f)
 								);
 
 			// Draw MinimizeButton button
 			Batch->Add(	
 						EM::Vec4(MinimizeButton.Position, MinimizeButton.Dimensions),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						MinimizeButton.Color,
 						0.0f,
-						EG::SpriteBatch::DrawOptions::BORDER,
-						EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.8f),
+						SpriteBatch::DrawOptions::BORDER,
+						SetOpacity(RGBA16_DarkGrey(), 0.8f),
 						1.0f
 					);
 
-			EG::Fonts::PrintText(
+			Fonts::PrintText(
 									MinimizeButton.Position.x + MinimizeButton.Dimensions.x / 2.0f,
 									MinimizeButton.Position.y + MinimizeButton.Dimensions.y / 2.0f,
 									1.0f,
 									"x",
-									EG::FontManager::GetFont("Arrows7"),
+									FontManager::GetFont("Arrows7"),
 									*Batch,
-									EG::SetOpacity(EG::RGBA16_MidGrey(), 0.6f), 
-									EG::Fonts::TextStyle::SHADOW,
+									SetOpacity(RGBA16_MidGrey(), 0.6f), 
+									Fonts::TextStyle::SHADOW,
 									EM::ToRadians(180.0f)
 								);
 
@@ -405,19 +405,19 @@ namespace Enjon { namespace GUI {
 					Batch->Add(	
 								EM::Vec4(Position.x, E->Position.y, Dimensions.x, E->Dimensions.y),
 								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16(0.2f, 0.2f, 0.2f, 1.0f), 0.1f),
+								Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								SetOpacity(RGBA16(0.2f, 0.2f, 0.2f, 1.0f), 0.1f),
 								0.0f,
-								EG::SpriteBatch::DrawOptions::BORDER,
-								EG::SetOpacity(EG::RGBA16_DarkGrey(), 0.2f),
+								SpriteBatch::DrawOptions::BORDER,
+								SetOpacity(RGBA16_DarkGrey(), 0.2f),
 								1.0f
 							);
 				}
 
 				// Print name of child
-				EG::Fonts::PrintText(
+				Fonts::PrintText(
 										Position.x + X0Offset, 																						// X Position
-										E->Position.y + E->Dimensions.y / 2.0f - EG::Fonts::GetHeight(E->Name[0], TextFont, FontScale) / 6.0f,		// Y Position
+										E->Position.y + E->Dimensions.y / 2.0f - Fonts::GetHeight(E->Name[0], TextFont, FontScale) / 6.0f,		// Y Position
 										FontScale,																									// Font Scale
 										E->Name + std::string(":"),																					// Child Name
 										TextFont,																									// Font
@@ -434,8 +434,8 @@ namespace Enjon { namespace GUI {
 		// Vector of children
 		std::vector<GUIElementBase*> Children;
 		GUIElementBase* HoveredElement;
-		EG::Fonts::Font* TextFont;
-		EG::ColorRGBA16 TextColor;
+		Fonts::Font* TextFont;
+		ColorRGBA16 TextColor;
 		float TitlePadding;
 		float FontScale;
 		float X0Offset;

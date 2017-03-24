@@ -1,6 +1,6 @@
 #include "Graphics/FontManager.h"
 
-namespace Enjon { namespace Graphics { namespace FontManager {
+namespace Enjon { namespace FontManager {
 
 	std::unordered_map<std::string, Fonts::Font*> Fonts;
 	bool Initialized = false;
@@ -76,7 +76,7 @@ namespace Enjon { namespace Graphics { namespace FontManager {
 	{
 
 	}
-}}}
+}}
 
 
 

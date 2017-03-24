@@ -12,7 +12,7 @@ namespace Enjon { namespace Math {
 	class iVec2;
 }}
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon { 
 
 	enum class ProjectionType
 	{
@@ -66,6 +66,6 @@ namespace Enjon { namespace Graphics {
 		EM::Vec2 ScreenDimensions;
 	};
 
-}}
+}
 
 #endif

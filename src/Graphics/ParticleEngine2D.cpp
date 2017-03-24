@@ -8,7 +8,7 @@
 #include "Utils/Errors.h"
 
 
-namespace Enjon { namespace Graphics { namespace Particle2D { 
+namespace Enjon { namespace Particle2D { 
 
 	/*-- Function Declarations --*/
 
@@ -67,7 +67,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 	}
 
 	/* Creates a ParticleBatch2D* and returns it */
-	ParticleBatch2D* NewParticleBatch(SpriteBatch* SB)
+	ParticleBatch2D* NewParticleBatch(Enjon::SpriteBatch* SB)
 	{
 		ParticleBatch2D* PB = new ParticleBatch2D();
 		// PB->Particles.reserve(MAXPARTICLES);
@@ -169,7 +169,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 	}
 
 	/* Adds all particles in each particle batch to be drawn */
-	void Draw(ParticleEngine2D* PE, Enjon::Graphics::Camera2D* Camera) 
+	void Draw(ParticleEngine2D* PE, Camera2D* Camera) 
 	{
 		if (Camera == nullptr) Utils::FatalError("PARTICLE_ENGINE::DRAW::Camera is null.");
 
@@ -195,17 +195,17 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		}
 	}
 
-	void DrawFire(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position)
+	void DrawFire(Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position)
 	{
 		// Totally testing for shiggles
 		static float PCounter = 0.0f;
 		// PCounter += 0.25f;
-		static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_1.png").id;
-		static GLuint PTex2 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_2.png").id;
-		static GLuint PTex3 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_3.png").id;
-		static GLuint PTex4 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/bg-light.png").id;
+		static GLuint PTex = Enjon::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_1.png").id;
+		static GLuint PTex2 = Enjon::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_2.png").id;
+		static GLuint PTex3 = Enjon::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_3.png").id;
+		static GLuint PTex4 = Enjon::ResourceManager::GetTexture("../IsoARPG/assets/textures/bg-light.png").id;
 
-		static EG::ColorRGBA16 Gray = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
+		static ColorRGBA16 Gray = RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
 
 		static float SmokeCounter = 0.0f;
 		SmokeCounter += 0.25f;
@@ -225,8 +225,8 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 				int Alpha = Random::Roll(995, 1000) / 1000.0f;
 
 
-				EG::Particle2D::AddParticle(Math::Vec3(Position.x - 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
-					Math::Vec2(XSize, YSize), EG::RGBA16(Gray.r, Gray.g, Gray.b + 0.1f, 0.185f), tex, 0.0025f, Batch);
+				Particle2D::AddParticle(Math::Vec3(Position.x - 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+					Math::Vec2(XSize, YSize), RGBA16(Gray.r, Gray.g, Gray.b + 0.1f, 0.185f), tex, 0.0025f, Batch);
 			}
 			SmokeCounter = 0.0f;
 		}
@@ -235,7 +235,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		FlameCounter += 0.25f;
 		if (FlameCounter >= 1.0f)
 		{
-			EG::ColorRGBA16 Fire = EG::RGBA16(3.0f, 0.3f, 0.1f, 0.5f);
+			ColorRGBA16 Fire = RGBA16(3.0f, 0.3f, 0.1f, 0.5f);
 			for (int i = 0; i < 1; i++)
 			{
 				float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
@@ -247,7 +247,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 				else if (Roll == 2) tex = PTex2;
 				else tex = PTex3; 
 
-				EG::Particle2D::AddParticle(Math::Vec3(Position.x, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Particle2D::AddParticle(Math::Vec3(Position.x, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
 					Math::Vec2(XSize, YSize), Fire, tex, 0.025f, Batch);
 			}
 			FlameCounter = 0.0f;
@@ -258,7 +258,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		InnerFlameCounter += 0.05f;
 		if (InnerFlameCounter >= 1.0f)
 		{
-			EG::ColorRGBA16 Fire = EG::RGBA16(5.0f, 0.8f, 0.1f, 2.0f);
+			ColorRGBA16 Fire = RGBA16(5.0f, 0.8f, 0.1f, 2.0f);
 			for (int i = 0; i < 1; i++)
 			{
 				float XPos = Random::Roll(-50, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(2, 4), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
@@ -270,7 +270,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 				else if (Roll == 2) tex = PTex2;
 				else tex = PTex3; 
 
-				EG::Particle2D::AddParticle(Math::Vec3(Position.x, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Particle2D::AddParticle(Math::Vec3(Position.x, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
 					Math::Vec2(XSize, YSize), Fire, tex, 0.05f, Batch);
 			}
 			InnerFlameCounter = 0.0f;
@@ -280,7 +280,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		LightFlameCounter += 0.025f;
 		if (LightFlameCounter >= 1.0f)
 		{
-			EG::ColorRGBA16 Fire = EG::RGBA16(8.0f, 1.6f, 0.0f, 0.005f);
+			ColorRGBA16 Fire = RGBA16(8.0f, 1.6f, 0.0f, 0.005f);
 			for (int i = 0; i < 4; i++)
 			{
 				float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(1, 2), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
@@ -292,7 +292,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 				else if (Roll == 2) tex = PTex2;
 				else tex = PTex3; 
 
-				EG::Particle2D::AddParticle(Math::Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Particle2D::AddParticle(Math::Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
 					Math::Vec2(XSize, YSize), Fire, tex, 0.025f, Batch);
 			}
 			LightFlameCounter = 0.0f;
@@ -302,14 +302,14 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		LightFlameCounter += 0.025f;
 		if (LightFlameCounter >= 1.0f)
 		{
-			EG::ColorRGBA16 Fire = EG::RGBA16(8.0f, 1.6f, 0.0f, 0.005f);
+			ColorRGBA16 Fire = RGBA16(8.0f, 1.6f, 0.0f, 0.005f);
 			for (int i = 0; i < 1; i++)
 			{
 				float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(1, 2), XVel = Random::Roll(-1, 1), YVel = Random::Roll(-1, 1),
 								YSize = Random::Roll(500, 500), XSize = Random::Roll(500, 500);
 				int Roll = Random::Roll(1, 3);
 
-				EG::Particle2D::AddParticle(Math::Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Particle2D::AddParticle(Math::Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
 					Math::Vec2(XSize, YSize), Fire, PTex4, 0.7f, Batch);
 			}
 			LightFlameCounter = 0.0f;
@@ -319,7 +319,7 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 		Ember += 0.05f;
 		if (Ember >= 1.0f)
 		{
-			EG::ColorRGBA16 Fire = EG::RGBA16(5.0f, 0.8f, 0.0f, 5.0f);
+			ColorRGBA16 Fire = RGBA16(5.0f, 0.8f, 0.0f, 5.0f);
 			for (int i = 0; i < 15; i++)
 			{
 				float XPos = Random::Roll(-100, 100), YPos = Random::Roll(-50, 100), ZVel = Random::Roll(5, 10), XVel = Random::Roll(-5, 5), YVel = Random::Roll(-5, 5),
@@ -331,14 +331,14 @@ namespace Enjon { namespace Graphics { namespace Particle2D {
 				else if (Roll == 2) tex = PTex2;
 				else tex = PTex3; 
 
-				EG::Particle2D::AddParticle(Math::Vec3(Position.x + 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Particle2D::AddParticle(Math::Vec3(Position.x + 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
 					Math::Vec2(XSize, YSize), Fire, PTex, 0.05f, Batch);
 			}
 			Ember = 0.0f;
 		}
 	}
 
-}}}
+}}
 
 
 

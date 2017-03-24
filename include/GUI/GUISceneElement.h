@@ -46,7 +46,7 @@ namespace Enjon { namespace GUI {
 			this->AABB.Max = this->AABB.Min + this->Dimensions;
 		}
 
-		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		bool ProcessInput(Enjon::Input* Input, Camera2D* Camera)
 		{
 			static EM::Vec2 MouseFrameOffset(0.0f);
 			static bool JustFocused = true;
@@ -110,12 +110,12 @@ namespace Enjon { namespace GUI {
 			return false;
 		}
 
-		void Draw(EG::SpriteBatch* Batch)
+		void Draw(SpriteBatch* Batch)
 		{
 			Batch->Add(
 							EM::Vec4(Position, Dimensions),
 							EM::Vec4(0, 0, 1, 1),
-							EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id
+							Enjon::ResourceManager::GetTexture("../Assets/Textures/Default.png").id
 						);
 
 		}

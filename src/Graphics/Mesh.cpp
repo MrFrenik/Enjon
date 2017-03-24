@@ -1,6 +1,6 @@
 #include "Graphics/Mesh.h"
 
-namespace Enjon { namespace Graphics {
+namespace Enjon {
 
 	Mesh::Mesh()
 	{
@@ -26,4 +26,4 @@ namespace Enjon { namespace Graphics {
 	{
 		glDrawArrays(DrawType, 0, DrawCount);	
 	}
-}}
+}

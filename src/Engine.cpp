@@ -18,7 +18,7 @@ static bool mMovementOn = false;
 
 namespace Enjon
 {
-	Engine* Engine::mInstance = nullptr;
+	Engine* Engine::mInstance = nullptr; 
 
 	//-------------------------------------------------------
 	Engine::Engine()
@@ -40,7 +40,7 @@ namespace Enjon
 		 //Initialize SDL
 		SDL_Init(SDL_INIT_EVERYTHING);
 		
-		//Tell SDL that we want a double buffered window so we dont get any flickering
+		//Tell SDL that we want a double buffered window so we don't get any flickering
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE,        8);
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,      8);
@@ -95,11 +95,11 @@ namespace Enjon
 	Enjon::Result Engine::InitSubsystems()
 	{
 		// Construct new graphics engine and initialize
-		mGraphics = new Enjon::Graphics::DeferredRenderer();	
+		mGraphics = new Enjon::DeferredRenderer();	
 		mGraphics->Init();
 
 		// Construct new input manager
-		mInput = new Enjon::Input::InputManager();
+		mInput = new Enjon::Input();
 
 		// Initialize imgui manager
 		Enjon::ImGuiManager::Init(mGraphics->GetWindow()->GetSDLWindow());
@@ -132,10 +132,10 @@ namespace Enjon
 		static float dt = 0.1f;
 
 		// Assert that application is registered with engine
-		assert(mApp != nullptr);
+		assert(mApp != nullptr); 
 
 		// Seed random 
-		srand(time(NULL));
+		srand(time(NULL)); 
 
 		// Main application loop
 		bool mIsRunning = true;
@@ -171,7 +171,7 @@ namespace Enjon
 		return Enjon::Result::SUCCESS;
 	}
 
-	bool Engine::ProcessInput(EI::InputManager* input, float dt)
+	b8 Engine::ProcessInput(Enjon::Input* input, float dt)
 	{
 	    SDL_Event event;
 	   //Will keep looping until there are no more events to process
@@ -206,9 +206,7 @@ namespace Enjon
 	    if (input->IsKeyPressed(SDLK_ESCAPE))
 	    {
 	    	return false;
-	    }
-
-	    
+	    } 
 
 	    return true;
 	}

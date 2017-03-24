@@ -59,7 +59,7 @@ namespace Enjon
 		mWindows.push_back(func);
 	}
 
-	void ImGuiManager::RenderGameUI(EG::Window* window, f32* view, f32* projection)
+	void ImGuiManager::RenderGameUI(Window* window, f32* view, f32* projection)
 	{
 	    // Make a new window
 		// ImGui_ImplSdlGL3_NewFrame(window);

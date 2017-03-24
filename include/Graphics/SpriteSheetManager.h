@@ -7,7 +7,7 @@
 
 #include <unordered_map>
 
-namespace Enjon { namespace Graphics { namespace SpriteSheetManager {
+namespace Enjon { namespace SpriteSheetManager {
 
 	void Init();
 
@@ -15,7 +15,7 @@ namespace Enjon { namespace Graphics { namespace SpriteSheetManager {
 	void AddSpriteSheet(std::unordered_map<std::string, SpriteSheet>& M, std::string N, GLTexture T, Math::iVec2 V);
 
 	SpriteSheet* GetSpriteSheet(std::string N);
-}}}
+}}
 
 
 

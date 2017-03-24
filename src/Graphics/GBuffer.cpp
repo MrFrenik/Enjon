@@ -3,7 +3,7 @@
 #include "Defines.h"
 #include <stdio.h>
 
-namespace Enjon { namespace Graphics {
+namespace Enjon {
 
 	GBuffer::GBuffer(uint32 _Width, uint32 _Height)
 	{
@@ -122,5 +122,5 @@ namespace Enjon { namespace Graphics {
 			default: return "Unknown";
 		}	
 	}
-}}
+}
 

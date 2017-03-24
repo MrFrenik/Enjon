@@ -2,16 +2,16 @@
 #include "Graphics/Scene.h"
 
 
-namespace Enjon { namespace Graphics {
+namespace Enjon {
 
 	SpotLight::SpotLight()
 	{
 		mPosition 	= EM::Vec3(0.0f, 0.0f, 0.0f);
-		mColor 		= EG::RGBA16_White(); 
+		mColor 		= RGBA16_White(); 
 		mParams 	= SpotLightParameters(0.0f, 0.0f, 0.0f, EM::Vec3(0, 0, 0), 0.0f, 0.0f);
 	}
 
-	SpotLight::SpotLight(EM::Vec3& position, SLParams& params, EG::ColorRGBA16& color, float intensity)
+	SpotLight::SpotLight(EM::Vec3& position, SLParams& params, ColorRGBA16& color, float intensity)
 	{
 		mPosition 	= position;
 		mParams 	= params;
@@ -29,7 +29,7 @@ namespace Enjon { namespace Graphics {
 	{
 	}
 
-	void SpotLight::SetColor(EG::ColorRGBA16& color)
+	void SpotLight::SetColor(ColorRGBA16& color)
 	{
 		mColor = color;
 	}
@@ -39,7 +39,7 @@ namespace Enjon { namespace Graphics {
 		mIntensity = intensity;
 	}
 
-	void SpotLight::SetScene(EG::Scene* scene)
+	void SpotLight::SetScene(Scene* scene)
 	{
 		mScene = scene;	
 	}
@@ -53,9 +53,9 @@ namespace Enjon { namespace Graphics {
 		mParams.mDirection = direction;
 	}
 
-	void SpotLight::SetParams(EG::SLParams& params)
+	void SpotLight::SetParams(SLParams& params)
 	{
 		mParams = params;
 	}
 
-}}
+}

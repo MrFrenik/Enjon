@@ -14,9 +14,7 @@
 #define ENJON_FUNCTION(...)
 #define ENJON_PROP(...)
 
-#define EG 		Enjon::Graphics
 #define EM 		Enjon::Math
-#define EI 		Enjon::Input
 #define ER 		Enjon::Random
 #define EU 		Enjon::Utils
 #define EGUI 	Enjon::GUI

@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include <Graphics/SpriteBatch.h>
+#include <Graphics/Color.h>
 #include <IO/ResourceManager.h>
 
 namespace SpatialHash {
@@ -390,10 +391,10 @@ namespace SpatialHash {
 			{
 				auto index = r * G->cols + c;
 				auto size = G->cells.at(index).entities.size();
-				auto OV = G->cells.at(index).ObstructionValue;
+				auto OV = G->cells.at(index).ObstructionValue; 
 
-				EG::ColorRGBA16 Color = EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.3f);
-				if (size || OV != 0.0f) Color = EG::SetOpacity(EG::RGBA16_Green(), OV);
+				Enjon::ColorRGBA16 Color = Enjon::SetOpacity(Enjon::RGBA16_SkyBlue(), 0.3f);
+				if (size || OV != 0.0f) Color = Enjon::SetOpacity(Enjon::RGBA16_Green(), OV);
 				Batch->Add(
 							EM::Vec4(CurrentX, CurrentY, Width - 5.0f, Height - 5.0f), 
 							EM::Vec4(0, 0, 1, 1), 
@@ -453,7 +454,7 @@ namespace SpatialHash {
 		auto CellDimensions = GetCellDimensions(G, StartCell);
 	
 		// Draw actived tile
-		EG::ColorRGBA16 Color = EG::SetOpacity(EG::RGBA16_Orange(), 1.0f);
+		Enjon::ColorRGBA16 Color = Enjon::SetOpacity(Enjon::RGBA16_Orange(), 1.0f);
 		auto index = StartCell.y * G->cols + StartCell.x;
 		Batch->Add(
 					EM::Vec4(CellDimensions.x, CellDimensions.y, CellDimensions.z - 5.0f, CellDimensions.w - 5.0f), 

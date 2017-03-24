@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENJON_GUIELEMENT_H
 #define ENJON_GUIELEMENT_H
 
@@ -52,8 +53,8 @@ namespace Enjon { namespace GUI {
 	{
 		virtual void Init() = 0;
 		virtual void Update() = 0;
-		virtual void Draw(EG::SpriteBatch* TextBatch) = 0;
-		virtual bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera = nullptr) = 0;
+		virtual void Draw(SpriteBatch* TextBatch) = 0;
+		virtual bool ProcessInput(Enjon::Input* input, Camera2D* Camera = nullptr) = 0; 
 
 		GUIElementBase* Parent;
 		EM::Vec2 Position;
@@ -71,10 +72,10 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<> on_hover;
 		EGUI::Signal<> off_hover;
 		EGUI::Signal<> lose_focus;
-		EGUI::Signal<EI::InputManager*, EG::Camera2D*> check_children;
-		EG::ColorRGBA16 Color;
-		EG::ColorRGBA16 BorderColor;
-		EG::ColorRGBA16 TextColor;
+		EGUI::Signal<Enjon::Input*, Camera2D*> check_children;
+		ColorRGBA16 Color;
+		ColorRGBA16 BorderColor;
+		ColorRGBA16 TextColor;
 		uint32_t JustFocused;
 		float Depth;
 	};
@@ -90,7 +91,7 @@ namespace Enjon { namespace GUI {
 			static_cast<T*>(this)->Clickability = ClickState::CLICKABLE;
 		}
 
-		void Draw(EG::SpriteBatch* Batch)
+		void Draw(SpriteBatch* Batch)
 		{
 			static_cast<T*>(this)->Draw(Batch);
 		}
@@ -100,9 +101,9 @@ namespace Enjon { namespace GUI {
 			static_cast<T*>(this)->Update();
 		}
 
-		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		bool ProcessInput(Input* input, Camera2D* Camera)
 		{
-			return static_cast<T*>(this)->ProcessInput(Input, Camera);
+			return static_cast<T*>(this)->ProcessInput(input, Camera);
 		}
 	};
 
@@ -119,8 +120,8 @@ namespace Enjon { namespace GUI {
 			Name 			= std::string("GUITextBox");
 			Text 			= std::string("");
 			CursorIndex 	= 0;
-			TextColor 		= EG::RGBA16_White();
-			Color 	 		= EG::RGBA16_DarkGrey();
+			TextColor 		= RGBA16_White();
+			Color 	 		= RGBA16_DarkGrey();
 			BorderColor 	= Color;
 			caret_on 		= false;
 			caret_count 	= 0.0f;
@@ -141,24 +142,24 @@ namespace Enjon { namespace GUI {
 			this->on_hover.connect([&]()
 			{
 				// Change the mouse cursor
-				SDL_SetCursor(EG::CursorManager::Get("IBeam"));
+				SDL_SetCursor(CursorManager::Get("IBeam"));
 
 				HoverState = HoveredState::ON_HOVER;
 
 				// Change color of Box
-				Color = EG::SetOpacity(EG::RGBA16(0.2f, 0.2f, 0.2f, 1.0f), 0.3f);
+				Color = SetOpacity(RGBA16(0.2f, 0.2f, 0.2f, 1.0f), 0.3f);
 			});
 
 			// Set up TextBox's off_hover signal
 			this->off_hover.connect([&]()
 			{
 				// Change mouse cursor back to defaul
-				SDL_SetCursor(EG::CursorManager::Get("Arrow"));
+				SDL_SetCursor(CursorManager::Get("Arrow"));
 
 				HoverState = HoveredState::OFF_HOVER;
 			
 				// Change color of Box
-				Color = EG::RGBA16_DarkGrey();
+				Color = RGBA16_DarkGrey();
 			});
 
 			// Set up TextBox's on_keyboard signal
@@ -233,12 +234,12 @@ namespace Enjon { namespace GUI {
 				uint32_t index = 0;
 
 				// Set border color to active
-				BorderColor 	= EG::SetOpacity(EG::RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
+				BorderColor 	= SetOpacity(RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
 
 				// Get advance
 				for (auto& c : Text)
 				{
-					float Advance = EG::Fonts::GetAdvance(c, TextFont, FontScale);
+					float Advance = Fonts::GetAdvance(c, TextFont, FontScale);
 					if (XAdvance + Advance < MouseX) 
 					{
 						XAdvance += Advance;
@@ -259,7 +260,7 @@ namespace Enjon { namespace GUI {
 			{
 				KeyboardInFocus = false;
 				caret_on 		= false;
-				BorderColor 	= EG::SetOpacity(Color, 0.5f);
+				BorderColor 	= SetOpacity(Color, 0.5f);
 			});
 
 			this->on_enter.connect([&]()
@@ -288,18 +289,18 @@ namespace Enjon { namespace GUI {
 			}
 		}
 
-		void Draw(EG::SpriteBatch* Batch)
+		void Draw(SpriteBatch* Batch)
 		{
 			auto Padding = EM::Vec2(5.0f, 5.0f);
 
 			// Make sure font isn't null
-			if (TextFont == nullptr) TextFont = EG::FontManager::GetFont("Sofia_14");
+			if (TextFont == nullptr) TextFont = FontManager::GetFont("Sofia_14");
 
 			// Draw box		
 			Batch->Add(
 						EM::Vec4(AABB.Min, AABB.Max - AABB.Min),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						Color, 
 						-1.0f
 					);
@@ -307,13 +308,13 @@ namespace Enjon { namespace GUI {
 			// Print text
 			auto ITextHeight = AABB.Max.y - AABB.Min.y; // InputTextHeight
 			auto TextHeight = ITextHeight - 20.0f;
-			EG::Fonts::PrintText(	
+			Fonts::PrintText(	
 									AABB.Min.x + Padding.x, 
 									AABB.Min.y + Padding.y, 1.0f, 
 									Text, 
 									TextFont, 
 									*Batch, 
-									EG::RGBA16_LightGrey()
+									RGBA16_LightGrey()
 								);
 			
 			// Draw Caret if on
@@ -329,13 +330,13 @@ namespace Enjon { namespace GUI {
 				// Get xadvance of all characters
 				for (auto i = 0; i < CursorIndex; ++i)
 				{
-					XAdvance += EG::Fonts::GetAdvance(Text[i], CurrentFont, scale);
+					XAdvance += Fonts::GetAdvance(Text[i], CurrentFont, scale);
 				}
 				Batch->Add(
 								EM::Vec4(XAdvance + 0.2f, Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
 								EM::Vec4(0, 0, 1, 1),
-								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::RGBA16_LightGrey(),
+								Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+								RGBA16_LightGrey(),
 								1.0f
 							);
 			}
@@ -354,7 +355,7 @@ namespace Enjon { namespace GUI {
 			else return false; 
 		}
 
-		std::string GetNumericString(EI::InputManager* Input)
+		std::string GetNumericString(Enjon::Input* Input)
 		{
 			std::string str = "";
 
@@ -406,7 +407,7 @@ namespace Enjon { namespace GUI {
 		void Init()
 		{}
 
-		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		bool ProcessInput(Enjon::Input* Input, Camera2D* Camera)
 		{ 
 			SDL_Event event;
 		    while (SDL_PollEvent(&event)) 
@@ -564,7 +565,7 @@ namespace Enjon { namespace GUI {
 		ButtonState State;
 		HoveredState HoverState;
 		std::string Text;
-		EG::Fonts::Font* TextFont;
+		Fonts::Font* TextFont;
 		float FontScale;
 		float caret_count;
 		int32_t CursorIndex;

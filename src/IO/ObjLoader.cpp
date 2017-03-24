@@ -10,11 +10,11 @@
 
 #include <stdio.h>
 
-namespace Enjon { namespace Input {
+namespace Enjon {
 
-	EG::Mesh LoadMeshFromFile(const std::string& FilePath)
+	Mesh LoadMeshFromFile(const std::string& FilePath)
 	{
-		EG::Mesh Mesh;
+		Mesh Mesh;
 
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
@@ -51,7 +51,7 @@ namespace Enjon { namespace Input {
 		      float tx = attrib.texcoords[2*idx.texcoord_index+0];
 		      float ty = attrib.texcoords[2*idx.texcoord_index+1];
 
-		      EG::Vert Vertex = {};
+		      Vert Vertex = {};
 		      Vertex.Position[0] = vx;
 		      Vertex.Position[1] = vy;
 		      Vertex.Position[2] = vz;
@@ -122,23 +122,23 @@ namespace Enjon { namespace Input {
 		// Create and upload mesh data
 	    glGenBuffers(1, &Mesh.VBO);
 	    glBindBuffer(GL_ARRAY_BUFFER, Mesh.VBO);
-	    glBufferData(GL_ARRAY_BUFFER, sizeof(EG::Vert) * Mesh.Verticies.size(), &Mesh.Verticies[0], GL_STATIC_DRAW);
+	    glBufferData(GL_ARRAY_BUFFER, sizeof(Vert) * Mesh.Verticies.size(), &Mesh.Verticies[0], GL_STATIC_DRAW);
 
 	    glGenVertexArrays(1, &Mesh.VAO);
 	    glBindVertexArray(Mesh.VAO);
 
 	    // Position
 	    glEnableVertexAttribArray(0);
-	    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Position));
+	    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)offsetof(Vert, Position));
 	    // Normal
 	    glEnableVertexAttribArray(1);
-	    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Normals));
+	    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)offsetof(Vert, Normals));
 	    // Tangent
 	    glEnableVertexAttribArray(2);
-	    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, Tangent));
+	    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)offsetof(Vert, Tangent));
 	    // UV
 	    glEnableVertexAttribArray(3);
-	    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(EG::Vert), (void*)offsetof(EG::Vert, UV));
+	    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)offsetof(Vert, UV));
 
 	    // Unbind VAO
 	    glBindVertexArray(0);
@@ -152,9 +152,9 @@ namespace Enjon { namespace Input {
 	}
 
 	/*
-	EG::Mesh LoadMeshFromFile(const char* FilePath)
+	Mesh LoadMeshFromFile(const char* FilePath)
 	{
-		EG::Mesh Mesh;
+		Mesh Mesh;
 
 		std::vector<EM::Vec3> TempVertexPositions;
 		std::vector<EM::Vec3> TempVertexNormals;
@@ -380,7 +380,7 @@ namespace Enjon { namespace Input {
 
 							// Now that we have the indicies, need to grab them from our previously stored temp 
 							// positions, normals, and uvs and store them in the mesh
-							EG::Vert Vertex = {};
+							Vert Vertex = {};
 
 							EM::Vec3* Position 	= &TempVertexPositions.at(PositionIndex);
 							EM::Vec2* UV 		= &TempVertexUVs.at(UVIndex);
@@ -490,4 +490,4 @@ namespace Enjon { namespace Input {
 		return Mesh;
 	}
 	*/
-}}
+}

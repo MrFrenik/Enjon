@@ -22,10 +22,7 @@ namespace Enjon
 		class Vec4;
 	}
 
-	namespace Graphics
-	{
-		class Window;
-	}
+	class Window;
 
 	/*
 		Static class meant to be a central hub for registering 
@@ -40,7 +37,7 @@ namespace Enjon
 			static void RegisterMenuOption(std::string name, std::function<void()> func);
 			static void RegisterWindow(std::function<void()> func);
 			static void RegisterDockingLayout(ImGui::DockingLayout& layout);
-			static void RenderGameUI(Enjon::Graphics::Window* window, f32* view, f32* projection);
+			static void RenderGameUI(Enjon::Window* window, f32* view, f32* projection);
 			static void Render(SDL_Window* window);
 			static void ShutDown();
 

@@ -39,7 +39,7 @@ namespace Enjon { namespace Animation {
 							0
 						};
 
-		IF.TextureID = EI::ResourceManager::GetTexture(Path).id;
+		IF.TextureID = Enjon::ResourceManager::GetTexture(Path).id;
 
 
 		// ImageFrame IF;
@@ -112,7 +112,7 @@ namespace Enjon { namespace Animation {
 	}
 
 	// Draws a single animation frame	
-	void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color, float ScalingFactor, float Depth)
+	void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, SpriteBatch* Batch, const ColorRGBA16& Color, float ScalingFactor, float Depth)
 	{
 		auto& Dims = Image.UVs;
 		auto& SSize = Image.SourceSize;

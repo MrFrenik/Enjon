@@ -42,11 +42,11 @@ namespace Enjon {
 	{
 		assert(mManager != nullptr);
 
-		// Remove from parent heirarchy list if in it
+		// Remove from parent hierarchy list if in it
 		if (!HasParent()) 
 		{
-			// Goes through and adds all children to heirarchy
-			mManager->RemoveFromParentHeirarchyList(this, true);
+			// Goes through and adds all children to hierarchy
+			mManager->RemoveFromParentHierarchyList(this, true);
 
 		}
 		// Otherwise remove parent 
@@ -55,7 +55,7 @@ namespace Enjon {
 			RemoveParent(true, false);
 		}
 
-		// Remove all children and add to parent heirarchy list
+		// Remove all children and add to parent hierarchy list
 		for (auto& c : mChildren)
 		{
 			c->RemoveParent(false, true);
@@ -92,7 +92,7 @@ namespace Enjon {
 	//---------------------------------------------------------------
 	EM::Transform Entity::GetWorldTransform()
 	{
-		// If dirty, then calcualte world transform
+		// If dirty, then calculate world transform
 		if (mWorldTransformDirty)
 		{
 			CalculateWorldTransform();
@@ -208,7 +208,7 @@ namespace Enjon {
 		}
 		else
 		{
-			// Log a warning mesage here
+			// Log a warning message here
 		}
 
 		return this;
@@ -230,8 +230,8 @@ namespace Enjon {
 
 		if (addToHeirarchy)
 		{
-			// Add to child to parent heirarchy list now that it's a free node
-			mManager->AddToParentHeirarchy(child);
+			// Add to child to parent hierarchy list now that it's a free node
+			mManager->AddToParentHierarchy(child);
 		}
 
 		// Recalculate world transform of child
@@ -256,18 +256,18 @@ namespace Enjon {
 		// Calculate world transform
 		CalculateWorldTransform();
 
-		// Now that the parent is set, remove it from heirarchy list
-		mManager->RemoveFromParentHeirarchyList(this);
+		// Now that the parent is set, remove it from hierarchy list
+		mManager->RemoveFromParentHierarchyList(this);
 	}
 
 	//-----------------------------------------
-	Entity* Entity::RemoveParent(b8 removeFromList, b8 addToHeirarchy)
+	Entity* Entity::RemoveParent(b8 removeFromList, b8 addToHierarchy)
 	{
 		// Asset parent exists
 		assert(mParent != nullptr);
 
 		// Remove child from parent
-		mParent->DetachChild(this, removeFromList, addToHeirarchy);
+		mParent->DetachChild(this, removeFromList, addToHierarchy);
 
 		// Capture pointer
 		Entity* retNode = mParent;
@@ -315,7 +315,7 @@ namespace Enjon {
 		mWorldTransform = mLocalTransform;
 		if (HasParent()) mWorldTransform *= mParent->mWorldTransform;
 
-		// Iterate through children and propogate down
+		// Iterate through children and propagate down
 		for (auto& c : mChildren)
 		{
 			c->PropagateTransform(dt);
@@ -418,8 +418,8 @@ namespace Enjon {
 		// Push back live entity into active entity vector
 		mActiveEntities.push_back(entity);
 
-		// Push back live entity into parent heirarchy list
-		AddToParentHeirarchy(entity);
+		// Push back live entity into parent hierarchy list
+		AddToParentHierarchy(entity);
 
 		// Return entity handle
 		return entity;
@@ -478,43 +478,43 @@ namespace Enjon {
 	}
 
 	//--------------------------------------------------------------
-	void EntityManager::AddToParentHeirarchy(Entity* entity)
+	void EntityManager::AddToParentHierarchy(Entity* entity)
 	{
 		if (entity == nullptr) return;
 
-		// Add to parent heirarchy list
+		// Add to parent hierarchy list
 		// Does this need to check if entity already exists?
 
-		if (std::find(mEntityParentHeirarchy.begin(), mEntityParentHeirarchy.end(), entity) == mEntityParentHeirarchy.end() && entity->mID < MAX_ENTITIES)
+		if (std::find(mEntityParentHierarchy.begin(), mEntityParentHierarchy.end(), entity) == mEntityParentHierarchy.end() && entity->mID < MAX_ENTITIES)
 		{
-			mEntityParentHeirarchy.push_back(entity);
+			mEntityParentHierarchy.push_back(entity);
 		}
 
 		// Sort list
-		std::stable_sort(mEntityParentHeirarchy.begin(), mEntityParentHeirarchy.end(), CompareEntityIDs);	
+		std::stable_sort(mEntityParentHierarchy.begin(), mEntityParentHierarchy.end(), CompareEntityIDs);	
 	}
 
 	//--------------------------------------------------------------
-	void EntityManager::RemoveFromParentHeirarchyList(Entity* entity, b8 toBeDestroyed)
+	void EntityManager::RemoveFromParentHierarchyList(Entity* entity, b8 toBeDestroyed)
 	{
 		// Some checks need to be made here
 		if (entity == nullptr) return;
 
-		// Find and erase from heirarchy
+		// Find and erase from hierarchy
 		// TODO(): Make sure this uses binary search for speed up
-		mEntityParentHeirarchy.erase(std::remove(mEntityParentHeirarchy.begin(), mEntityParentHeirarchy.end(), entity), mEntityParentHeirarchy.end());
+		mEntityParentHierarchy.erase(std::remove(mEntityParentHierarchy.begin(), mEntityParentHierarchy.end(), entity), mEntityParentHierarchy.end());
 
 		// Check if entity is to be destroyed this frame or not
 		// If not to be destroyed, then this entity is being attached to another as a child
 		// and its children will come along with it
 		if (toBeDestroyed)
 		{
-			// If children, add them to parent heirarchy as free nodes
+			// If children, add them to parent hierarchy as free nodes
 			if (entity->HasChildren())
 			{
 				for (auto& c : entity->mChildren)
 				{
-					AddToParentHeirarchy(c);	
+					AddToParentHierarchy(c);	
 				}
 			}
 		}
@@ -523,8 +523,8 @@ namespace Enjon {
 	//--------------------------------------------------------------
 	void EntityManager::UpdateAllActiveTransforms(f32 dt)
 	{
-		// Iterate though parent heirarchy and calculate transforms
-		for (auto& p : mEntityParentHeirarchy)
+		// Iterate though parent hierarchy and calculate transforms
+		for (auto& p : mEntityParentHierarchy)
 		{
 			p->PropagateTransform(dt);
 		}

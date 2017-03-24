@@ -5,10 +5,10 @@
 #include "Graphics/SpriteBatch.h"
 #include "Defines.h"
 
-namespace Enjon { namespace Graphics { namespace Shapes {
+namespace Enjon {  namespace Shapes {
 
 
-	inline void DrawSpline(EG::SpriteBatch* Batch, EM::Vec4& StartAndEndPoints, EM::Vec4& ControlPoints, float Thickness = 2.0f, Enjon::uint32 NumberOfPoints = 200, EG::ColorRGBA16& Color = EG::RGBA16_White())
+	inline void DrawSpline(Enjon::SpriteBatch* Batch, EM::Vec4& StartAndEndPoints, EM::Vec4& ControlPoints, float Thickness = 2.0f, u32 NumberOfPoints = 200, ColorRGBA16& Color = RGBA16_White())
 	{
 		auto Ax = StartAndEndPoints.x; 	auto Ay = StartAndEndPoints.y;
 		auto Bx = ControlPoints.x; 		auto By = ControlPoints.y;
@@ -54,7 +54,7 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 			Batch->Add(
 						EM::Vec4(X, Y, Length + 1, Thickness),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
+						Enjon::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
 						Color,
 						0.0f,
 						EM::ToRadians(Angle)
@@ -66,7 +66,7 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 		}
 	}
 
-	inline void DrawLine(EG::SpriteBatch* Batch, EM::Vec4& StartAndEndPoints, float Thickness = 2.0f, EG::ColorRGBA16& Color = EG::RGBA16_White(), float Depth = 0.0f)
+	inline void DrawLine(SpriteBatch* Batch, EM::Vec4& StartAndEndPoints, float Thickness = 2.0f, ColorRGBA16& Color = RGBA16_White(), float Depth = 0.0f)
 	{
 		// Get direction vector from Next to previous
 		auto Difference = EM::Vec2(StartAndEndPoints.z, StartAndEndPoints.w) - EM::Vec2(StartAndEndPoints.x, StartAndEndPoints.y);
@@ -81,14 +81,14 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 		Batch->Add(
 					EM::Vec4(StartAndEndPoints.x + Difference.x / 2.0f, StartAndEndPoints.y + Difference.y / 2.0f, Length + 1, Thickness),
 					EM::Vec4(0, 0, 1, 1),
-					EI::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
+					Enjon::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
 					Color,
 					Depth,
 					EM::ToRadians(Angle)
 				);
 	}
 
-	inline void DrawHollowCircle(EG::SpriteBatch* Batch, EM::Vec2& Point, EM::Vec2& StartAndEndAngles, float Radius, float Thickness = 2.0f, Enjon::uint32 NumberOfPoints = 360, EG::ColorRGBA16& Color = EG::RGBA16_White(), float Depth = 0.0f)
+	inline void DrawHollowCircle(SpriteBatch* Batch, EM::Vec2& Point, EM::Vec2& StartAndEndAngles, float Radius, float Thickness = 2.0f, Enjon::uint32 NumberOfPoints = 360, ColorRGBA16& Color = RGBA16_White(), float Depth = 0.0f)
 	{
 		for (auto i = StartAndEndAngles.x; i <= StartAndEndAngles.y; i += 0.5)
 		{
@@ -112,7 +112,7 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 			Batch->Add(
 						EM::Vec4(Point.x, Point.y, EM::Vec2(Length, Thickness)),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
+						Enjon::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
 						Color,
 						Depth,
 						EM::ToRadians(Angle)
@@ -121,7 +121,7 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 
 	}
 
-	inline void DrawArrow(EG::SpriteBatch* Batch, EM::Vec2& Point, float Size, EG::ColorRGBA16& Color, float Depth = 0.0f, float Angle = 0.0f)
+	inline void DrawArrow(SpriteBatch* Batch, EM::Vec2& Point, float Size, ColorRGBA16& Color, float Depth = 0.0f, float Angle = 0.0f)
 	{
 		std::vector<EM::Vec2> Points;
 
@@ -135,13 +135,13 @@ namespace Enjon { namespace Graphics { namespace Shapes {
 		Batch->AddPolygon(
 							Points, 
 							EM::Vec4(0, 0, 1, 1), 
-							EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
+							Enjon::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
 							Color,
 							Depth		
 						);	
 	}
 
-}}}
+}}
 
 
 #endif

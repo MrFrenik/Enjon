@@ -5,7 +5,7 @@
 
 #include <assert.h>
 
-namespace Enjon { namespace Graphics 
+namespace Enjon  
 {
 	//--------------------------------------------------------------------
 	Renderable::Renderable()
@@ -52,30 +52,30 @@ namespace Enjon { namespace Graphics
 	}
 
 	//--------------------------------------------------------------------
-	void Renderable::SetMaterial(EG::Material* material)
+	void Renderable::SetMaterial(Material* material)
 	{
 		mMaterial = material;
 	}
 
 	//--------------------------------------------------------------------
-	void Renderable::SetMesh(EG::Mesh* mesh)
+	void Renderable::SetMesh(Mesh* mesh)
 	{
 		mMesh = mesh;
 	}
 
 	//--------------------------------------------------------------------
-	void Renderable::SetScene(EG::Scene* scene)
+	void Renderable::SetScene(Scene* scene)
 	{
 		mScene = scene;
 	}
 
 	//--------------------------------------------------------------------
-	void Renderable::SetColor(EG::TextureSlotType type, EG::ColorRGBA16& color)
+	void Renderable::SetColor(TextureSlotType type, ColorRGBA16& color)
 	{
 		assert(mMaterial != nullptr);
 		mMaterial->SetColor(type, color);
 	}
-}}
+}
 
 
 

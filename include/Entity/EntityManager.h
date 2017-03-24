@@ -121,7 +121,7 @@ namespace Enjon {
 			void UpdateComponentTransforms(f32 dt);
 
 		protected:
-			/// @brief Calculates world transform with respect to parent heirarchy
+			/// @brief Calculates world transform with respect to parent hierarchy
 			void CalculateWorldTransform();
 
 		private:
@@ -155,7 +155,7 @@ namespace Enjon {
 	};
 
 	using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
-	using EntityParentHeirarchy 	= std::vector<Entity*>;
+	using EntityParentHierarchy 	= std::vector<Entity*>;
 	using MarkedForDestructionList	= std::vector<Entity*>;
 	using ActiveEntityList 			= std::vector<Entity*>;
 	using ComponentBaseArray 		= std::array<ComponentWrapperBase*, static_cast<u32>(MAX_COMPONENTS)>;
@@ -190,13 +190,13 @@ namespace Enjon {
 
 			void Destroy(Entity* entity);
 
-			void RemoveFromParentHeirarchyList(Entity* entity, b8 toBeDestroyed = false);
+			void RemoveFromParentHierarchyList(Entity* entity, b8 toBeDestroyed = false);
 
-			void AddToParentHeirarchy(Entity* entity);
+			void AddToParentHierarchy(Entity* entity);
 
 			const std::vector<Entity*>& GetActiveEntities() { return mActiveEntities; }
 
-			const std::vector<Entity*>& GetParentHeirarchyList() { return mEntityParentHeirarchy; }
+			const std::vector<Entity*>& GetParentHierarchyList() { return mEntityParentHierarchy; }
 
 		private:
 			void EntityManager::Cleanup();
@@ -208,14 +208,14 @@ namespace Enjon {
 
 			u32 FindNextAvailableID();
 
-			/// @brief Runs through all transforms and propogates downwards
+			/// @brief Runs through all transforms and propagates downwards
 			void UpdateAllActiveTransforms(f32 dt);
 
 			EntityStorage 				mEntities;
 			ComponentBaseArray 			mComponents;	
 			ActiveEntityList 			mActiveEntities;
 			MarkedForDestructionList 	mMarkedForDestruction;
-			EntityParentHeirarchy 		mEntityParentHeirarchy;
+			EntityParentHierarchy 		mEntityParentHierarchy;
 			u32 						mNextAvailableID = 0;
 	};
 

@@ -2,7 +2,7 @@
 #include "Utils/Errors.h"
 #include <stdio.h>
 
-namespace Enjon { namespace Graphics {
+namespace Enjon { 
 
 	RenderTarget::RenderTarget()
 	{
@@ -103,5 +103,5 @@ namespace Enjon { namespace Graphics {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glPopAttrib();
 	}
-}}
+}
 

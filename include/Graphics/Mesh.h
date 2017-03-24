@@ -8,7 +8,7 @@
 #include <Graphics/Vertex.h>
 #include <vector>
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon { 
 
 	struct Vert
 	{
@@ -38,7 +38,7 @@ namespace Enjon { namespace Graphics {
 			GLuint IBO;
 	};
 
-}}
+}
 
 
 #endif

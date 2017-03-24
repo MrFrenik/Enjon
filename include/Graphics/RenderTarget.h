@@ -7,8 +7,7 @@
 #include "GLEW/glew.h"
 #include "Defines.h"
 
-namespace Enjon { namespace Graphics { 
-
+namespace Enjon { 
 
 	class RenderTarget
 	{
@@ -39,7 +38,7 @@ namespace Enjon { namespace Graphics {
 			u32			Height; 		// FBO height
 	};
 
-}}
+}
 
 
 

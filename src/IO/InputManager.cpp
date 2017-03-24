@@ -3,9 +3,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace Enjon { namespace Input {
+namespace Enjon { 
 
-	InputManager::InputManager() : m_mouseCoords(0.0f) 
+	Input::Input() 
+		: m_mouseCoords(0.0f) 
 	{
 		// Set up GamePadController
 		GamePadController = {};
@@ -30,12 +31,12 @@ namespace Enjon { namespace Input {
 		}	
 	}
 
-	InputManager::~InputManager()
+	Input::~Input()
 	{
 		if (GamePadController.ControllerHandle) SDL_GameControllerClose(GamePadController.ControllerHandle);
 	}
 
-	void InputManager::Update()
+	void Input::Update()
 	{ 
 		// Update keyboard keys
 		for(auto& it : m_keyMap)
@@ -50,18 +51,18 @@ namespace Enjon { namespace Input {
 		}
 	}
 
-	void InputManager::PressKey(unsigned int keyID)
+	void Input::PressKey(unsigned int keyID)
 	{ 
 		m_keyMap[keyID] = true;
 	}
 	
-	void InputManager::ReleaseKey(unsigned int keyID)
+	void Input::ReleaseKey(unsigned int keyID)
 	{
 		m_keyMap[keyID] = false;
 	}
 
 	//Returns true if key held down	
-	bool InputManager::IsKeyDown(unsigned int keyID)
+	bool Input::IsKeyDown(unsigned int keyID)
 	{ 
 		auto it = m_keyMap.find(keyID);
 
@@ -72,7 +73,7 @@ namespace Enjon { namespace Input {
 		else return false;
 	}
 
-	bool InputManager::WasKeyDown(unsigned int keyID)
+	bool Input::WasKeyDown(unsigned int keyID)
 	{ 
 		auto it = m_previousKeyMap.find(keyID);
 	
@@ -84,7 +85,7 @@ namespace Enjon { namespace Input {
 	}
 
 	//Returns true if key is just pressed
-	bool InputManager::IsKeyPressed(unsigned int keyID)
+	bool Input::IsKeyPressed(unsigned int keyID)
 	{ 
 		if(IsKeyDown(keyID) == true && WasKeyDown(keyID) == false) 
 			return true; 
@@ -92,7 +93,7 @@ namespace Enjon { namespace Input {
 			return false; 
 	}
 	
-	void InputManager::SetMouseCoords(float x, float y)
+	void Input::SetMouseCoords(float x, float y)
 	{
 		m_mouseCoords.x = x;
 		m_mouseCoords.y = y;
@@ -140,7 +141,7 @@ namespace Enjon { namespace Input {
 		else 
 			return false;
 	}
-}}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

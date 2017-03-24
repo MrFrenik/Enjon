@@ -11,7 +11,7 @@ namespace Enjon
 	}
 
 	//--------------------------------------------------------------------
-	GraphicsComponent::GraphicsComponent(EG::Renderable& renderable)
+	GraphicsComponent::GraphicsComponent(Renderable& renderable)
 		: mRenderable(renderable)
 	{
 	}
@@ -62,31 +62,31 @@ namespace Enjon
 	}
 
 	//--------------------------------------------------------------------
-	void GraphicsComponent::SetMaterial(EG::Material* material)
+	void GraphicsComponent::SetMaterial(Material* material)
 	{
 		mRenderable.SetMaterial(material);
 	}
 
 	//--------------------------------------------------------------------
-	void GraphicsComponent::SetMesh(EG::Mesh* mesh)
+	void GraphicsComponent::SetMesh(Mesh* mesh)
 	{
 		mRenderable.SetMesh(mesh);
 	}
 
 	//--------------------------------------------------------------------
-	void GraphicsComponent::SetScene(EG::Scene* scene)
+	void GraphicsComponent::SetScene(Scene* scene)
 	{
 		mRenderable.SetScene(scene);
 	}
 
 	//--------------------------------------------------------------------
-	void GraphicsComponent::SetRenderable(EG::Renderable& renderable)
+	void GraphicsComponent::SetRenderable(Renderable& renderable)
 	{
 		mRenderable = renderable;
 	}
 
 	//--------------------------------------------------------------------
-	void GraphicsComponent::SetColor(EG::TextureSlotType type, EG::ColorRGBA16& color)
+	void GraphicsComponent::SetColor(TextureSlotType type, ColorRGBA16& color)
 	{
 		mRenderable.SetColor(type, color);	
 	}

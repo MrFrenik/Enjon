@@ -21,17 +21,17 @@ namespace Enjon { namespace GUI {
 			// Set up initial states	
 			this->State 		= ButtonState::INACTIVE;
 			this->HoverState 	= HoveredState::OFF_HOVER;
-			this->Color 		= EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+			this->Color 		= RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 			this->Name 			= std::string("GUIButton");
-			this->TextColor 	= EG::RGBA16_LightGrey();
+			this->TextColor 	= RGBA16_LightGrey();
 			this->Dimensions 	= EM::Vec2(10.0f, 10.0f);
-			this->BorderColor 	= EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			this->BorderColor 	= SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 
 			// Set up PlayButton's on_hover signal
 			this->on_hover.connect([&]()
 			{
 				// Change color
-				this->Color = EG::RGBA16(0.2f, 0.2f, 0.2f, 1.0f);
+				this->Color = RGBA16(0.2f, 0.2f, 0.2f, 1.0f);
 
 				// Set state to active
 				this->HoverState = HoveredState::ON_HOVER;
@@ -40,7 +40,7 @@ namespace Enjon { namespace GUI {
 			// Set up PlayButton's off_hover signal
 			this->off_hover.connect([&]()
 			{
-				this->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+				this->Color = RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 
 				// Set state to inactive
 				this->HoverState = HoveredState::OFF_HOVER;
@@ -55,18 +55,18 @@ namespace Enjon { namespace GUI {
 			
 		}
 
-		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		bool ProcessInput(Enjon::Input* Input, Camera2D* Camera)
 		{
 			return true;		
 		}
 
-		void Draw(EG::SpriteBatch* TB)
+		void Draw(SpriteBatch* TB)
 		{
 			
 		}
 
 		std::vector<EA::ImageFrame> Frames;   // Could totally put this in a resource manager of some sort
-		EG::Fonts::Font* TextFont;
+		Fonts::Font* TextFont;
 	};
 
 	// Button with Text
@@ -81,10 +81,10 @@ namespace Enjon { namespace GUI {
 			this->HoverState = HoveredState::OFF_HOVER;
 
 			// Set up color
-			this->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+			this->Color = RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 
 			// Set up text color
-			this->TextColor 	= EG::RGBA16_MidGrey();
+			this->TextColor 	= RGBA16_MidGrey();
 			this->Name 			= std::string("GUITextButton");
 			this->TextPadding	= EM::Vec2(5.0f, 5.0f);
 
@@ -99,16 +99,16 @@ namespace Enjon { namespace GUI {
 			this->on_hover.connect([&]()
 			{
 				this->HoverState = HoveredState::ON_HOVER;
-				this->Color = EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0f);
-				this->TextColor = EG::RGBA16_White();
+				this->Color = RGBA16(0.1f, 0.1f, 0.1f, 1.0f);
+				this->TextColor = RGBA16_White();
 			});
 
 			// Set up on_hover signal
 			this->off_hover.connect([&]()
 			{
 				this->HoverState = HoveredState::OFF_HOVER;
-				this->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
-				this->TextColor = EG::RGBA16_MidGrey();
+				this->Color = RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+				this->TextColor = RGBA16_MidGrey();
 			});
 		}
 
@@ -120,15 +120,15 @@ namespace Enjon { namespace GUI {
 			
 		}
 
-		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		bool ProcessInput(Enjon::Input* Input, Camera2D* Camera)
 		{
 			return true;	
 		}
 
-		void Draw(EG::SpriteBatch* Batch)
+		void Draw(SpriteBatch* Batch)
 		{
 			// If null
-			if (this->TextFont == nullptr) this->TextFont = EG::FontManager::GetFont("WeblySleek_10");
+			if (this->TextFont == nullptr) this->TextFont = FontManager::GetFont("WeblySleek_10");
 
 			// Draw box
 			Batch->Add(
@@ -137,15 +137,15 @@ namespace Enjon { namespace GUI {
 									this->AABB.Max - this->AABB.Min
 								),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
+						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
 						this->Color,
 						this->Depth,
-						EG::SpriteBatch::DrawOptions::BORDER,
-						EG::SetOpacity(EG::RGBA16(0.08f, 0.08f, 0.08f, 1.0f), 1.0f)
+						SpriteBatch::DrawOptions::BORDER,
+						SetOpacity(RGBA16(0.08f, 0.08f, 0.08f, 1.0f), 1.0f)
 					);
 
 			// Draw text
-			EG::Fonts::PrintText(	
+			Fonts::PrintText(	
 									Position.x + TextPadding.x, 
 									Position.y + TextPadding.y, 
 									this->FontScale, 
@@ -153,7 +153,7 @@ namespace Enjon { namespace GUI {
 									this->TextFont, 
 									*Batch, 
 									this->TextColor,
-									EG::Fonts::TextStyle::SHADOW,
+									Fonts::TextStyle::SHADOW,
 									0.0f, 
 									2.0f
 								);
@@ -163,7 +163,7 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<GUIElementBase*> on_click;
 		EGUI::Signal<> on_hover;
 		EGUI::Signal<> off_hover;
-		EG::Fonts::Font* TextFont;
+		Fonts::Font* TextFont;
 		float FontScale;
 	};
 
@@ -188,7 +188,7 @@ namespace Enjon { namespace GUI {
 			this->Depth = 0.0f;
 			this->JustFocused = false;
 			this->LoopValues = false;
-			this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			this->BorderColor = SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 			this->FontScale = 1.0f;
 			this->YOffset = 0.0f;
 
@@ -285,7 +285,7 @@ namespace Enjon { namespace GUI {
 
 				ValueText.on_enter.emit();
 
-				this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+				this->BorderColor = SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 
 				this->State = ButtonState::INACTIVE;
 			});
@@ -298,7 +298,7 @@ namespace Enjon { namespace GUI {
 				this->State = ButtonState::ACTIVE;
 			});
 
-			this->check_children.connect([&](EI::InputManager* Input, EG::Camera2D* Camera)
+			this->check_children.connect([&](Enjon::Input* Input, Camera2D* Camera)
 			{
 			    auto MousePos = Input->GetMouseCoords();
 			    Camera->ConvertScreenToWorld(MousePos);
@@ -344,7 +344,7 @@ namespace Enjon { namespace GUI {
 			ValueText.Text = std::to_string(Value.get());	
 		}
 
-		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		bool ProcessInput(Enjon::Input* Input, Camera2D* Camera)
 		{
 			unsigned int CurrentKey = 0;
 			char CurrentChar = 0;
@@ -414,7 +414,7 @@ namespace Enjon { namespace GUI {
 
 		    	if (MouseOverText)
 		    	{
-					this->BorderColor = EG::SetOpacity(EG::RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
+					this->BorderColor = SetOpacity(RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
 		    		ValueText.on_click.emit(MousePos.x);
 		    	}
 		    	else ValueText.lose_focus.emit();
@@ -477,14 +477,14 @@ namespace Enjon { namespace GUI {
 			return false;
 		}
 
-		void Draw(EG::SpriteBatch* Batch)
+		void Draw(SpriteBatch* Batch)
 		{
 			if (!this->HoverState)
 			{
 				Batch->Add(
 							EM::Vec4(AABB.Min, AABB.Max - AABB.Min - EM::Vec2(21, 0)),
 							EM::Vec4(0, 0, 1, 1),
-							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+							Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 							ValueText.Color,
 							0.0f 
 						);
@@ -493,10 +493,10 @@ namespace Enjon { namespace GUI {
 			Batch->Add(
 						EM::Vec4(this->AABB.Min, this->AABB.Max - this->AABB.Min - EM::Vec2(21, 0)),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						ValueText.Color,
 						0.0f, 
-						EG::SpriteBatch::DrawOptions::BORDER, 
+						SpriteBatch::DrawOptions::BORDER, 
 						this->BorderColor
 					);
 
@@ -509,19 +509,19 @@ namespace Enjon { namespace GUI {
 				Batch->Add(
 							EM::Vec4(ValueUp.AABB.Min, ValueUp.AABB.Max - ValueUp.AABB.Min),
 							EM::Vec4(0, 0, 1, 1),
-							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+							Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 							ValueUp.Color,
 							0.0f 
 						);
 
 
-				auto F = EG::FontManager::GetFont("WeblySleek");
-				EG::Fonts::PrintText(	
-										ValueUp.Position.x + ValueUp.Dimensions.x / 2.0f - EG::Fonts::GetAdvance(ValueUp.Text[0], F, FontScale) / 2.0f, 
-										ValueUp.Position.y + ValueUp.Dimensions.y / 2.0f - EG::Fonts::GetHeight(ValueDown.Text[0], F, FontScale) / 2.0f + YOffset, 
+				auto F = FontManager::GetFont("WeblySleek");
+				Fonts::PrintText(	
+										ValueUp.Position.x + ValueUp.Dimensions.x / 2.0f - Fonts::GetAdvance(ValueUp.Text[0], F, FontScale) / 2.0f, 
+										ValueUp.Position.y + ValueUp.Dimensions.y / 2.0f - Fonts::GetHeight(ValueDown.Text[0], F, FontScale) / 2.0f + YOffset, 
 										FontScale, 
 										ValueUp.Text, 
-										EG::FontManager::GetFont("WeblySleek"), 
+										FontManager::GetFont("WeblySleek"), 
 										*Batch, 
 										ValueText.TextColor	
 									);
@@ -530,17 +530,17 @@ namespace Enjon { namespace GUI {
 				Batch->Add(
 							EM::Vec4(ValueDown.AABB.Min, ValueDown.AABB.Max - ValueDown.AABB.Min),
 							EM::Vec4(0, 0, 1, 1),
-							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+							Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 							ValueDown.Color,
 							0.0f 
 						);
 
-				EG::Fonts::PrintText(	
-										ValueDown.Position.x + ValueDown.Dimensions.x / 2.0f - EG::Fonts::GetAdvance(ValueDown.Text[0], F, FontScale) / 2.0f, 
-										ValueDown.Position.y + ValueDown.Dimensions.y / 2.0f - EG::Fonts::GetHeight(ValueDown.Text[0], F, FontScale) / 2.0f + YOffset, 
+				Fonts::PrintText(	
+										ValueDown.Position.x + ValueDown.Dimensions.x / 2.0f - Fonts::GetAdvance(ValueDown.Text[0], F, FontScale) / 2.0f, 
+										ValueDown.Position.y + ValueDown.Dimensions.y / 2.0f - Fonts::GetHeight(ValueDown.Text[0], F, FontScale) / 2.0f + YOffset, 
 										FontScale, 
 										ValueDown.Text, 
-										EG::FontManager::GetFont("WeblySleek"), 
+										FontManager::GetFont("WeblySleek"), 
 										*Batch, 
 										ValueText.TextColor	
 									);
@@ -592,7 +592,7 @@ namespace Enjon { namespace GUI {
 			this->Type = GUIType::DROP_DOWN_BUTTON; 
 
 			// Member variables
-			this->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+			this->Color = RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 			this->State = ButtonState::INACTIVE;
 			this->HoverState = HoveredState::OFF_HOVER;
 
@@ -600,9 +600,9 @@ namespace Enjon { namespace GUI {
 			this->TextFont 		= nullptr;
 			this->FontScale = 1.0f;
 			this->Name = std::string("GUIDropDownButton");
-			this->TextColor		= EG::RGBA16_LightGrey();
+			this->TextColor		= RGBA16_LightGrey();
 			this->TextPadding = EM::Vec2(5.0f, 6.0f);
-			this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			this->BorderColor = SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 			this->Dimensions = EM::Vec2(123.0f, 20.0f);
 			this->YOffset = 20.0f;
 			this->XPadding = 1.0f;
@@ -612,14 +612,14 @@ namespace Enjon { namespace GUI {
 			this->on_hover.connect([&]()
 			{
 				this->HoverState = HoveredState::ON_HOVER;
-				this->Color = EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0f);
+				this->Color = RGBA16(0.1f, 0.1f, 0.1f, 1.0f);
 			});
 
 			// Set up Drop Down Menu Button's off_hover signal
 			this->off_hover.connect([&]()
 			{
 				this->HoverState = HoveredState::OFF_HOVER;
-				if (!this->State) this->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+				if (!this->State) this->Color = RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
 			});
 
 			// Set up Drop Down Menu Button's on_click signal
@@ -628,15 +628,15 @@ namespace Enjon { namespace GUI {
 				// Need a drop down box here with all the options to be selected
 				if (this->State == ButtonState::INACTIVE)
 				{
-					this->Color = EG::RGBA16(0.08f, 0.08f, 0.08f, 1.0f);
-					this->BorderColor = EG::SetOpacity(EG::RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
+					this->Color = RGBA16(0.08f, 0.08f, 0.08f, 1.0f);
+					this->BorderColor = SetOpacity(RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
 					this->State = ButtonState::ACTIVE;
 					this->Depth = 1.0f;
 				} 
 				else
 				{
-					this->Color = EG::RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
-					this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+					this->Color = RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+					this->BorderColor = SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 					this->State = ButtonState::INACTIVE;
 					this->Depth = 0.0f;
 				} 
@@ -667,7 +667,7 @@ namespace Enjon { namespace GUI {
 			}
 		}
 
-		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		bool ProcessInput(Enjon::Input* Input, Camera2D* Camera)
 		{
 		    SDL_Event event;
 		    while (SDL_PollEvent(&event)) 
@@ -759,21 +759,21 @@ namespace Enjon { namespace GUI {
 		    return false;
 		}
 
-		void Draw(EG::SpriteBatch* Batch)
+		void Draw(SpriteBatch* Batch)
 		{
-			if (this->TextFont == nullptr) this->TextFont = EG::FontManager::GetFont("WeblySleek_10");
+			if (this->TextFont == nullptr) this->TextFont = FontManager::GetFont("WeblySleek_10");
 
 			Batch->Add(
 							EM::Vec4(Position.x, Position.y, this->Dimensions),
 							EM::Vec4(0, 0, 1, 1),
-							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
+							Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 							Color, 
 							0.0f, 
-							(EG::SpriteBatch::DrawOptions::BORDER), 
+							(SpriteBatch::DrawOptions::BORDER), 
 							this->BorderColor	
 						);
 
-			EG::Fonts::PrintText(	
+			Fonts::PrintText(	
 									Position.x + TextPadding.x, 
 									Position.y + TextPadding.y, 
 									this->FontScale, 
@@ -783,15 +783,15 @@ namespace Enjon { namespace GUI {
 									this->TextColor	
 								);
 
-			EG::Fonts::PrintText(	
+			Fonts::PrintText(	
 									Position.x + TextPadding.x + 112.0f, 
 									Position.y + TextPadding.y + 4.0f, 
 									this->FontScale * 0.8f, 
 									"d", 
-									EG::FontManager::GetFont("Arrows7"), 
+									FontManager::GetFont("Arrows7"), 
 									*Batch, 
 									this->TextColor, 
-									EG::Fonts::TextStyle::SHADOW,
+									Fonts::TextStyle::SHADOW,
 									EM::ToRadians(180.0f)
 								);
 
@@ -811,11 +811,11 @@ namespace Enjon { namespace GUI {
 										20.0f * Amount
 									),
 							EM::Vec4(0, 0, 1, 1),
-							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
-							EG::RGBA16_DarkGrey(), 
+							Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
+							RGBA16_DarkGrey(), 
 							0.0f,
-							EG::SpriteBatch::DrawOptions::BORDER | EG::SpriteBatch::DrawOptions::SHADOW,
-							EG::RGBA16_DarkGrey(), 
+							SpriteBatch::DrawOptions::BORDER | SpriteBatch::DrawOptions::SHADOW,
+							RGBA16_DarkGrey(), 
 							1.0f
 						);
 
@@ -838,13 +838,13 @@ namespace Enjon { namespace GUI {
 
 			std::cout << T << std::endl;
 
-			if (this->TextFont == nullptr) this->TextFont = EG::FontManager::GetFont("WeblySleek_10");
+			if (this->TextFont == nullptr) this->TextFont = FontManager::GetFont("WeblySleek_10");
 
 			// Get advance
 			for (auto& c : T)
 			{
 				// Summation of all characters
-				A += EG::Fonts::GetAdvance(c, this->TextFont, this->FontScale);
+				A += Fonts::GetAdvance(c, this->TextFont, this->FontScale);
 
 				if (A > 90.0f) 
 				{
@@ -866,7 +866,7 @@ namespace Enjon { namespace GUI {
 		}
 
 		std::vector<GUITextButton*> List;
-		EG::Fonts::Font* TextFont;
+		Fonts::Font* TextFont;
 		EM::Vec2 TextPadding;
 		float XPadding;
 		float FontScale;
@@ -882,9 +882,9 @@ namespace Enjon { namespace GUI {
 			Type = GUIType::RADIAL_BUTTON; 
 
 			// Load in color themes from data
-			this->ActiveColor 	= EG::RGBA16_LimeGreen();
-			this->InactiveColor = EG::RGBA16_DarkGrey();
-			this->BorderColor = EG::SetOpacity(EG::RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			this->ActiveColor 	= RGBA16_LimeGreen();
+			this->InactiveColor = RGBA16_DarkGrey();
+			this->BorderColor = SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 			this->Dimensions = EM::Vec2(10.0f, 10.0f);
 
 			// Set up initial color
@@ -925,7 +925,7 @@ namespace Enjon { namespace GUI {
 
 		}
 
-		void Draw(EG::SpriteBatch* Batch)
+		void Draw(SpriteBatch* Batch)
 		{
 			Batch->Add(
 						EM::Vec4(
@@ -934,10 +934,10 @@ namespace Enjon { namespace GUI {
 									this->Dimensions
 								),
 						EM::Vec4(0, 0, 1, 1),
-						EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
+						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
 						this->Color, 
 						0.0f,
-						EG::SpriteBatch::DrawOptions::BORDER | EG::SpriteBatch::DrawOptions::SHADOW,
+						SpriteBatch::DrawOptions::BORDER | SpriteBatch::DrawOptions::SHADOW,
 						this->BorderColor, 
 						1.0f,
 						EM::Vec2(2.0f, 2.0f)	
@@ -945,13 +945,13 @@ namespace Enjon { namespace GUI {
 			
 		}
 
-		bool ProcessInput(EI::InputManager* Input, EG::Camera2D* Camera)
+		bool ProcessInput(Enjon::Input* Input, Camera2D* Camera)
 		{
 			return true;	
 		}
 
-		EG::ColorRGBA16 ActiveColor;
-		EG::ColorRGBA16 InactiveColor;
+		ColorRGBA16 ActiveColor;
+		ColorRGBA16 InactiveColor;
 	};
 
 }}

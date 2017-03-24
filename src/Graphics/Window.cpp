@@ -3,7 +3,7 @@
 #include <iostream>
 #include <Math/Maths.h>
 
-namespace Enjon { namespace Graphics {
+namespace Enjon {
 
 	Window::Window()
 		: m_isfullscreen(false)
@@ -128,4 +128,4 @@ namespace Enjon { namespace Graphics {
 		//Need to figure this one out...
 	}
 
-}}
+}

@@ -6,7 +6,7 @@
 #include "Defines.h"
 #include "Math/Vec4.h"
 
-namespace Enjon { namespace Graphics {
+namespace Enjon {
 
 	enum class GBufferTextureType
 	{
@@ -51,12 +51,11 @@ namespace Enjon { namespace Graphics {
 		GLuint FBO;
 		GLuint DepthBuffer;
 
-		GLuint TargetIDs[GBufferTextureType::GBUFFER_TEXTURE_COUNT];
-		GLuint Textures[GBufferTextureType::GBUFFER_TEXTURE_COUNT];
+		GLuint TargetIDs[(u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT];
+		GLuint Textures[(u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT];
 
 		EM::Vec4 Viewport;
-	};
-
-}}
+	}; 
+}
 
 #endif

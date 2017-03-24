@@ -1,6 +1,6 @@
 #include "Graphics/FullScreenQuad.h"
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon { 
 
 	FullScreenQuad::FullScreenQuad()
 	{
@@ -45,4 +45,4 @@ namespace Enjon { namespace Graphics {
 	{
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
-}}
+}

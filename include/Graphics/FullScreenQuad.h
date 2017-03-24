@@ -4,7 +4,7 @@
 #include "System/Types.h"
 #include "GLEW/glew.h"
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon {
 
 	class FullScreenQuad
 	{
@@ -21,6 +21,6 @@ namespace Enjon { namespace Graphics {
 			GLuint		mVBO; 		// VBO id
 	};
 
-}}
+}
 
 #endif

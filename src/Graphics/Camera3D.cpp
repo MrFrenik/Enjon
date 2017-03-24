@@ -9,7 +9,7 @@
 #include "Defines.h"
 #include "Graphics/Camera3D.h"
 
-namespace Enjon { namespace Graphics { 
+namespace Enjon { 
 
 
 	void Camera3D::Update()
@@ -98,7 +98,7 @@ namespace Enjon { namespace Graphics {
 		// Front.y = Result.y;
 		// Front.z = Result.z;
 	}
-}}
+}
 
 
 
