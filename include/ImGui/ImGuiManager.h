@@ -16,13 +16,9 @@
 #include <vector>
 
 namespace Enjon
-{
-	namespace Math
-	{
-		class Vec4;
-	}
-
+{ 
 	class Window;
+	class Vec4;
 
 	/*
 		Static class meant to be a central hub for registering 

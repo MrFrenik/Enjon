@@ -2,27 +2,25 @@
 #define ENJON_GLSLPROGRAM_H
 
 #include <GLEW/glew.h>
-#include <Defines.h>
 
 #include <unordered_map>
 #include <string>
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#include "System/Types.h"
+#include "Defines.h"
 
-namespace Enjon { namespace Math { 
-
-	struct Vec3;
-	struct Vec4;
-	struct Mat4;	
-	struct Transform;
-}}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 
 namespace Enjon { 
 
 	class ColorRGBA16;
 	class GLTexture;
-	struct Vec2;
+	class Vec2;
+	class Vec3;
+	class Vec4;
+	class Mat4;
+	class Transform;
 
 	class GLSLProgram
 	{
@@ -42,16 +40,16 @@ namespace Enjon {
 		// template <typename T>
 		// void SetUniform(const std::string& Name, const T& Val);
 
-		void SetUniform(const std::string& name, const int& val);
-		void SetUniform(const std::string& name, float* val, int count);
-		void SetUniform(const std::string& name, int* val, int count);
-		void SetUniform(const std::string& name, const double& val);
-		void SetUniform(const std::string& name, const float& val);
-		void SetUniform(const std::string& name, Enjon::Vec2& vector);
-		void SetUniform(const std::string& name, EM::Vec3& vector);
-		void SetUniform(const std::string& name, EM::Vec4& vector);
-		void SetUniform(const std::string& name, EM::Mat4& matrix); 
-		void SetUniform(const std::string& name, EM::Transform& T);
+		void SetUniform(const std::string& name, const s32& val);
+		void SetUniform(const std::string& name, f32* val, s32 count);
+		void SetUniform(const std::string& name, s32* val, s32 count);
+		void SetUniform(const std::string& name, const f64& val);
+		void SetUniform(const std::string& name, const f32& val);
+		void SetUniform(const std::string& name, const Vec2& vector);
+		void SetUniform(const std::string& name, const Vec3& vector);
+		void SetUniform(const std::string& name, const Vec4& vector);
+		void SetUniform(const std::string& name, const Mat4& matrix); 
+		void SetUniform(const std::string& name, const Transform& T);
 		void SetUniform(const std::string& name, ColorRGBA16& C);
 		
 		GLuint inline GetProgramID() const { return m_programID; } 

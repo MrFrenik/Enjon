@@ -5,14 +5,14 @@ namespace Enjon {
 
 	PointLight::PointLight()
 	{
-		mPosition 	= EM::Vec3(0.0f, 0.0f, 0.0f);
+		mPosition 	= Vec3(0.0f, 0.0f, 0.0f);
 		mColor 		= RGBA16_White(); 
 		mAttenuationRate = 1.0f;
 		mIntensity = 10.0f;
 		mRadius = 100.0f;
 	}
 
-	PointLight::PointLight(EM::Vec3& position, float attenuationRate, ColorRGBA16& color, float intensity, float radius)
+	PointLight::PointLight(Vec3& position, float attenuationRate, ColorRGBA16& color, float intensity, float radius)
 	{
 		mPosition = position;
 		mAttenuationRate = attenuationRate;
@@ -44,7 +44,7 @@ namespace Enjon {
 		mScene = scene;
 	}
 
-	void PointLight::SetPosition(EM::Vec3& position)
+	void PointLight::SetPosition(Vec3& position)
 	{
 		mPosition = position;
 	}

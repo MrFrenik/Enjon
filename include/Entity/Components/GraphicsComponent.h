@@ -13,51 +13,51 @@ namespace Enjon
 	{
 		public:
 			GraphicsComponent();
-			GraphicsComponent(Renderable& renderable);
+			GraphicsComponent(const Renderable& renderable);
 			~GraphicsComponent();
 
-			virtual void Update(float dt) override;
+			virtual void Update(f32 dT) override;
 
 			virtual void Destroy() override;
 
 			/* Get position of transform */
-			EM::Vec3 GetPosition() { return mRenderable.GetPosition(); }
+			Vec3 GetPosition() const;
 
 			/* Get scale of transform */
-			EM::Vec3 GetScale() { return mRenderable.GetScale(); }
+			Vec3 GetScale() const;
 
 			/* Get orientation of transform */
-			EM::Quaternion GetRotation() { return mRenderable.GetRotation(); }
+			Quaternion GetRotation() const;
 
 			/* Get material of renderable */
-			Material* GetMaterial() { return mRenderable.GetMaterial(); }
+			Material* GetMaterial();
 
 			/* Get mesh of renderable */
-			Mesh* GetMesh() { return mRenderable.GetMesh(); }
+			Mesh* GetMesh() const;
 
 			/* Get scene of renderable */
-			Scene* GetScene() { return mRenderable.GetScene(); }
+			Scene* GetScene() const;
 
 			/* Get world transform */
-			EM::Transform GetTransform() { return mRenderable.GetTransform(); }
+			Transform GetTransform() const;
+			
+			/* Get renderable */
+			Renderable* GetRenderable();
 
 			/* Sets world transform */
-			void SetTransform(EM::Transform& transform) { mRenderable.SetTransform(transform); }
-
-			/* Get renderable */
-			Renderable* GetRenderable() { return &mRenderable; }
+			void SetTransform(const Transform& transform); 
 
 			/* Set position of transform */
-			void SetPosition(EM::Vec3& position);
+			void SetPosition(const Vec3& position);
 
 			/* Set scale of transform */
-			void SetScale(EM::Vec3& scale);
+			void SetScale(const Vec3& scale);
 
 			/* Set scale of transform */
-			void SetScale(f32 scale);
+			void SetScale(const f32& scale);
 
 			/* Set orientation of transform */
-			void SetRotation(EM::Quaternion& rotation);
+			void SetRotation(const Quaternion& rotation);
 
 			/* Set material of renderable */
 			void SetMaterial(Material* material);
@@ -69,12 +69,12 @@ namespace Enjon
 			void SetScene(Scene* scene);
 
 			/* Set Renderable */
-			void SetRenderable(Renderable& renderable);
+			void SetRenderable(const Renderable& renderable);
 
 			/* Set material color */
-			void SetColor(TextureSlotType type, ColorRGBA16& color);	
+			void SetColor(TextureSlotType type, const ColorRGBA16& color);	
 
-		private:
+		private: 
 
 			Renderable mRenderable;
 	};

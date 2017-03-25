@@ -17,28 +17,28 @@ namespace Enjon {
 	}
 
 	//------------------------------------------------------------------------
-	void Material::SetTexture(TextureSlotType type, GLTexture& texture)
+	void Material::SetTexture(TextureSlotType type, const GLTexture& texture)
 	{
 		assert((u32)type < (u32)TextureSlotType::TEXTURE_SLOT_COUNT);
 		mTextures[(u32)type] = texture;
 	}
 
 	//------------------------------------------------------------------------
-	GLTexture Material::GetTexture(TextureSlotType type)
+	GLTexture Material::GetTexture(TextureSlotType type) const
 	{
 		assert((u32)type < (u32)TextureSlotType::TEXTURE_SLOT_COUNT);
 		return mTextures[(u32)type];
 	}
 
 	//------------------------------------------------------------------------
-	void Material::SetColor(TextureSlotType type, ColorRGBA16& color)
+	void Material::SetColor(TextureSlotType type, const ColorRGBA16& color)
 	{
 		assert((u32)type < (u32)TextureSlotType::TEXTURE_SLOT_COUNT);
 		mColors[(u32)type] = color;
 	}
 
 	//------------------------------------------------------------------------
-	ColorRGBA16& Material::GetColor(TextureSlotType type)
+	ColorRGBA16 Material::GetColor(TextureSlotType type) const
 	{
 		assert((u32)type < (u32)TextureSlotType::TEXTURE_SLOT_COUNT);
 		return mColors[(u32)type];

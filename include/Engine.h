@@ -6,19 +6,29 @@
 #define ENJON_ENGINE_H
 
 #include "Defines.h"
-#include "System/Types.h"
+#include "System/Types.h" 
 
 namespace Enjon
 {
+	using String = std::string; 
+
 	class DeferredRenderer; 
 	class Input;
 
 	class Application; 
 	
+	// What can engine config hold?
+	// A root path for the engine
 	class EngineConfig
 	{
-		public: 
-		private: 
+		public:
+			EngineConfig() = default; 
+			Result ParseArguments(s32 argc, char** argv); 
+
+			const String& GetRoot() const;
+			
+		private:
+			String mRootPath; 
 	};
 
 	class Engine
@@ -30,17 +40,19 @@ namespace Enjon
 			/**
 			* @brief Called when first initializing engine. Runs through all subsystems and 
 			*		initializes those as well
+			* @param config - Configuration for engine.
 			* @return Result - Returns Success or Failure.
 			*/
-			Enjon::Result StartUp();
+			Enjon::Result StartUp(const EngineConfig& config);
 
 			/**
 			* @brief Called when first initializing engine. Runs through all subsystems and 
 			*		initializes those as well
 			* @param app - Pointer to main application to be ran and to be registered with engine.
+			* @param config - Configuration for engine.
 			* @return Result - Returns Success or Failure.
 			*/
-			Enjon::Result StartUp(Application* app);
+			Enjon::Result StartUp(Application* app, const EngineConfig& config);
 
 
 			/**
@@ -68,6 +80,12 @@ namespace Enjon
 			* @return Input* - Pointer to the registered input subsystem.
 			*/
 			Input* GetInput() { return mInput; }
+			
+			/**
+			* @brief Returns const reference to engine config.
+			* @return const EngineConfig& - Const reference to the registered engine config.
+			*/
+			const EngineConfig& GetConfig() const;
 
 			/**
 			* @brief Returns pointer to static instance of engine.
@@ -103,6 +121,7 @@ namespace Enjon
 			Application* mApp 				= nullptr; 
 			DeferredRenderer* mGraphics 	= nullptr; 
 			Input* mInput 					= nullptr;
+			EngineConfig mConfig;
 
 	};
 }

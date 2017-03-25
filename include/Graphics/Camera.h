@@ -23,21 +23,21 @@ namespace Enjon {
 		Camera(iVec2& dimenstions);
 		Camera(const Camera& Other) = default;
 
-		void LookAt(EM::Vec3& Position, EM::Vec3& Up = EM::Vec3(0, 1, 0));
+		void LookAt(Vec3& Position, Vec3& Up = Vec3(0, 1, 0));
 		void OffsetOrientation(const f32& Yaw, const f32& Pitch);
-		EM::Vec3 GetWorldPosition();
+		Vec3 GetWorldPosition();
 
-		EM::Vec3 Forward() const;
-		EM::Vec3 Backward() const;
-		EM::Vec3 Right() const;
-		EM::Vec3 Left() const;
-		EM::Vec3 Up() const;
-		EM::Vec3 Down() const;
+		Vec3 Forward() const;
+		Vec3 Backward() const;
+		Vec3 Right() const;
+		Vec3 Left() const;
+		Vec3 Up() const;
+		Vec3 Down() const;
 
-		EM::Mat4 GetViewProjectionMatrix() const;
-		EM::Mat4 GetViewProjection() const;
-		EM::Mat4 GetProjection() const;
-		EM::Mat4 GetView() const;
+		Mat4 GetViewProjectionMatrix() const;
+		Mat4 GetViewProjection() const;
+		Mat4 GetProjection() const;
+		Mat4 GetView() const;
 		inline Vec2 GetNearFar() const { return Vec2(NearPlane, FarPlane); }
 		inline f32 GetNear() { return NearPlane; }
 		inline f32 GetFar() { return FarPlane; }
@@ -46,13 +46,13 @@ namespace Enjon {
 		inline void SetProjection(ProjectionType Type) { ProjType = Type; }
 		inline void SetOrthographicScale(const float Scale) { OrthographicScale = Scale; }
 
-		void SetPosition(EM::Vec3& position);
-		EM::Vec3 GetPosition() { return Transform.GetPosition(); }
+		void SetPosition(Vec3& position);
+		Vec3 GetPosition() { return Transform.GetPosition(); }
 		
-		EM::Quaternion& GetRotation() { return Transform.Rotation; }
+		Quaternion& GetRotation() { return Transform.Rotation; }
 
 		// Member variables
-		EM::Transform Transform;
+		Transform Transform;
 		f32 FOV;
 		f32 NearPlane;
 		f32 FarPlane;

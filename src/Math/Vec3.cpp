@@ -1,27 +1,47 @@
-#include "math/Vec3.h"
+// Copyright 2016-2017 John Jackson. All Rights Reserved.
+// File: Vec2.cpp
 
-namespace Enjon { namespace Math { 
+#include "Math/Vec3.h"
+
+namespace Enjon 
+{ 
+	//==================================================================
+
+	Vec2 Vec3::XY() const 
+	{ 
+		return Vec2(this->x, this->y); 
+	} 
 	
+	//================================================
+
 	Vec3 Vec3::operator-()
 	{
 		return *this * -1.0f;
 	}
+	
+	//================================================
 
-	bool operator==(const Vec3& left, const Vec3& right) 
+	b8 operator==(const Vec3& left, const Vec3& right) 
 	{
 		return (left.x == right.x && left.y == right.y && left.z == right.z);
 	}
+	
+	//================================================
 
-	bool operator!=(const Vec3& left, const Vec3& right) 
+	b8 operator!=(const Vec3& left, const Vec3& right) 
 	{
 		return !(left == right);
 	}
+	
+	//================================================
 
 	std::ostream& operator<<(std::ostream& stream, Vec3& vector)
 	{
 		stream << "Vector3f: (" << vector.x << ", " << vector.y << ", " << vector.z << ")";
 		return stream;
 	}
+	
+	//================================================
 
 	Vec3& Vec3::Add(const Vec3& other)
 	{
@@ -31,6 +51,8 @@ namespace Enjon { namespace Math {
 		return *this;
 	} 
 	
+	//================================================
+	
 	Vec3& Vec3::Subtract(const Vec3& other)
 	{
 		x -= other.x;
@@ -38,6 +60,8 @@ namespace Enjon { namespace Math {
 		z -= other.z;
 		return *this;
 	}
+	
+	//================================================
 	
 	Vec3& Vec3::Multiply(const Vec3& other)
 	{
@@ -47,6 +71,8 @@ namespace Enjon { namespace Math {
 		return *this;
 	}
 	
+	//================================================
+	
 	Vec3& Vec3::Divide(const Vec3& other)
 	{
 		x /= other.x;
@@ -54,83 +80,116 @@ namespace Enjon { namespace Math {
 		z /= other.z;
 		return *this;
 	}
+	
+	//================================================
 
 	Vec3 operator+(Vec3 left, const Vec3& right)
 	{
 		return left.Add(right);
 	}
 	
+	//================================================
+	
 	Vec3 operator-(Vec3 left, const Vec3& right)
 	{
 		return left.Subtract(right);
 	}
 	
+	//================================================
+	
 	Vec3 operator*(Vec3 left, const Vec3& right)
 	{
 		return left.Multiply(right);
 	}
+	
+	//================================================
 		
-	Vec3 operator*(Vec3 left, const float& scalar)
+	Vec3 operator*(Vec3 left, const f32& scalar)
 	{
 		return Vec3(left.x * scalar, left.y * scalar, left.z * scalar);
 	}
+	
+	//================================================
 
-	Vec3 operator*(const float& scalar, Vec3 right)
+	Vec3 operator*(const f32& scalar, Vec3 right)
 	{
 		return operator*(right, scalar);
 	}
+	
+	//================================================
 
-	void operator*=(Vec3& left, const float& scalar)
+	void operator*=(Vec3& left, const f32& scalar)
 	{
 		left.x *= scalar;
 		left.y *= scalar;
 		left.z *= scalar;
 	}
+	
+	//================================================
 
-	void operator*=(const float& scalar, Vec3 left)
+	void operator*=(const f32& scalar, Vec3 left)
 	{
 		operator*=(left, scalar);
 	}
+	
+	//================================================
 
 	Vec3 operator/(Vec3 left, const Vec3& right)
 	{
 		return left.Divide(right);
 	}
+	
+	//================================================
+		
+	Vec3 operator/(Vec3 left, const f32& value)
+	{
+		return Vec3(left.x / value, left.y / value, left.z / value);
+	}
+	
+	//================================================
 
 	Vec3& Vec3::operator+=(const Vec3& other)
 	{
 		return Add(other);
 	} 
 	
+	//================================================
+	
 	Vec3& Vec3::operator-=(const Vec3& other)
 	{
 		return Subtract(other);
 	} 
+	
+	//================================================
 	
 	Vec3& Vec3::operator*=(const Vec3& other)
 	{
 		return Multiply(other);
 	} 
 	
+	//================================================
+	
 	Vec3& Vec3::operator/=(const Vec3& other)
 	{
 		return Divide(other);
 	} 
 	
-	float Vec3::Length() const 
+	//================================================
+	
+	f32 Vec3::Length() const 
 	{
 		return sqrt((x * x) + (y * y) + (z * z));
 	}
-		
-	Vec3 operator/(Vec3 left, float value)
-	{
-		return Vec3(left.x / value, left.y / value, left.z / value);
-	}
+	
+	
+	//================================================
 
-	float Vec3::Dot(const Vec3& other)
+	f32 Vec3::Dot(const Vec3& other)
 	{
 		return x * other.x + y * other.y + z * other.z;
 	}
+	
+	//================================================
 
 	Vec3 Vec3::Cross(const Vec3& other)
 	{
@@ -139,6 +198,191 @@ namespace Enjon { namespace Math {
 					z * other.x - x * other.z, 
 					x * other.y - y * other.x
 					);	
+	} 
+	
+	//================================================
+			
+	Vec3 Vec3::Normalize(const Vec3& vec)
+	{ 
+		return vec / vec.Length(); 
 	}
+	
+	//==================================================================
 
-}}
+	f32 Vec3::Distance(const Vec3& other) const
+	{
+		return std::sqrtf(std::pow(other.x - x, 2) + std::pow(other.y - y, 2) + std::pow(other.z - z, 2));
+	}
+	
+	//================================================
+			
+	f32 Vec3::DistanceSquared(const Vec3& a, const Vec3& b)
+	{
+		f32 x = a.x - b.x;
+		f32 y = a.y - b.y;
+		f32 z = a.z - b.z;
+
+		return x*x + y*y + z*z;
+	}
+			
+	Vec3 Vec3::Cross(Vec3& left, const Vec3& right)
+	{
+		return left.Cross(right);
+	}
+	
+	//================================================
+			
+	Vec3 Vec3::XAxis()
+	{ 
+		return Vec3(1.0f, 0.0f, 0.0f); 
+	}
+	
+	//================================================
+			
+	Vec3 Vec3::YAxis() 
+	{ 
+		return Vec3(0.0f, 1.0f, 0.0f); 
+	}
+	
+	//================================================
+	
+	Vec3 Vec3::ZAxis() 
+	{ 
+		return Vec3(0.0f, 0.0f, 1.0f); 
+	} 
+	
+	//================================================
+			
+	std::ostream& operator<<(std::ostream& stream, iVec3& vector)
+	{
+		stream << "Vector3i: (" << vector.x << ", " << vector.y << ", " << vector.z << ")";
+		return stream; 
+	}
+	
+	//================================================
+
+	iVec3& iVec3::Add(const iVec3& other)
+	{
+		x += other.x;
+		y += other.y;
+		z += other.z;
+		return *this; 
+	}
+	
+	//================================================
+	
+	iVec3& iVec3::Subtract(const iVec3& other)
+	{
+		x -= other.x;
+		y -= other.y;
+		z -= other.z;
+		return *this; 
+	}
+	
+	//================================================
+	
+	iVec3& iVec3::Multiply(const iVec3& other)
+	{
+		x *= other.x;
+		y *= other.y;
+		z *= other.z;
+		return *this; 
+	}
+	
+	//================================================
+	
+	iVec3& iVec3::Divide(const iVec3& other)
+	{ 
+		x /= other.x;
+		y /= other.y;
+		z /= other.z;
+		return *this; 
+	}
+	
+	//================================================
+	
+	iVec3& iVec3::Scale(const s32& scalar)
+	{
+		x *= scalar;
+		y *= scalar;
+		z *= scalar;
+		return *this;
+	}
+	
+	//================================================
+
+	iVec3 operator+(iVec3 left, const iVec3& right)
+	{
+		return left.Add(right); 
+	}
+	
+	//================================================
+	
+	iVec3 operator-(iVec3 left, const iVec3& right)
+	{
+		return left.Subtract(right); 
+	}
+	
+	//================================================
+	
+	iVec3 operator*(iVec3 left, const iVec3& right)
+	{
+		return left.Multiply(right); 
+	}
+	
+	//================================================
+	
+	iVec3 operator/(iVec3 left, const iVec3& right)
+	{
+		return left.Divide(right);
+	}
+	
+	//================================================
+	
+	b8 operator==(iVec3 left, const iVec3& right)
+	{ 
+		return (left.x == right.x && left.y == right.y && left.z == right.z);
+	}
+	
+	//================================================
+	
+	b8 operator!=(iVec3 left, const iVec3& right)
+	{
+		return !(left == right);
+	}
+	
+	//================================================
+
+	iVec3& iVec3::operator+=(const iVec3& other)
+	{
+		return Add(other); 
+	}
+	
+	//================================================
+	
+	iVec3& iVec3::operator-=(const iVec3& other)
+	{ 
+		return Subtract(other); 
+	}
+	
+	//================================================
+	
+	iVec3& iVec3::operator*=(const iVec3& other)
+	{
+		return Multiply(other);
+	}
+	
+	//================================================
+	
+	iVec3& iVec3::operator/=(const iVec3& other)
+	{
+		return Divide(other); 
+	}
+	
+	//================================================
+	
+	iVec3& iVec3::operator*=(const s32& scalar)
+	{
+		return Multiply(iVec3(scalar));
+	}
+}

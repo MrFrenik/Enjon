@@ -20,15 +20,15 @@ namespace Enjon { namespace Particle2D {
 	/* 2D Particle struct */
 	typedef struct 
 	{
-		Math::Vec3 Position;
-		Math::Vec3 Velocity;
-		Math::Vec3 VelocityGoal;
+		Vec3 Position;
+		Vec3 Velocity;
+		Vec3 VelocityGoal;
 		Enjon::Vec2 Dimensions;
 		float LifeTime;	
 		float DecayRate;	
 		ColorRGBA16 Color;	
 		GLuint TexID; //< Not too sure about the cache coherency of this being here
-		EM::Vec4 UV;
+		Vec4 UV;
 	} Particle;
 
 	/* 2D Particle Batch struct which will be registered with particle engine and is used to draw particles */
@@ -65,7 +65,7 @@ namespace Enjon { namespace Particle2D {
 	uint32 AddParticleBatch(ParticleEngine2D* PE, ParticleBatch2D* PB);
 
 	/* Adds a particle to a batch */
-	uint32 AddParticle(Math::Vec3 P, Math::Vec3 V, Enjon::Vec2 D, ColorRGBA16 C, GLuint ID, float DR, ParticleBatch2D* PB, EM::Vec4 UV = EM::Vec4(0, 0, 1, 1));
+	uint32 AddParticle(Vec3 P, Vec3 V, Enjon::Vec2 D, ColorRGBA16 C, GLuint ID, float DR, ParticleBatch2D* PB, Vec4 UV = Vec4(0, 0, 1, 1));
 
 	/* Frees memory of given particle engine */
 	uint32 FreeEngine(ParticleEngine2D* PE);
@@ -76,7 +76,7 @@ namespace Enjon { namespace Particle2D {
 	/* Adds all particles in each particle batch to be drawn */
 	void Draw(ParticleEngine2D* PE, Enjon::Camera2D* Camera);
 
-	void DrawFire(Enjon::Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position);
+	void DrawFire(Enjon::Particle2D::ParticleBatch2D* Batch, Vec3 Position);
 }}
 
 #endif

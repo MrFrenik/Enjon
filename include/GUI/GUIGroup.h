@@ -302,8 +302,8 @@ namespace Enjon { namespace GUI {
 		{
 			// Draw Group border
 			Batch->Add(	
-						EM::Vec4(Position, Dimensions),
-						EM::Vec4(0, 0, 1, 1),
+						Vec4(Position, Dimensions),
+						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						SetOpacity(RGBA16(0.12f, 0.12f, 0.12f, 1.0f), 0.3f),
 						0.0f,
@@ -314,8 +314,8 @@ namespace Enjon { namespace GUI {
 
 			// Draw Group inner border
 			Batch->Add(	
-						EM::Vec4(Position + Enjon::Vec2(5.0f, 5.0f), Dimensions - Enjon::Vec2(10.0f, 10.0f + YOffset)),
-						EM::Vec4(0, 0, 1, 1),
+						Vec4(Position + Enjon::Vec2(5.0f, 5.0f), Dimensions - Enjon::Vec2(10.0f, 10.0f + YOffset)),
+						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						SetOpacity(RGBA16(0.14f, 0.14f, 0.14f, 1.0f), 0.3f),
 						0.0f,
@@ -329,8 +329,8 @@ namespace Enjon { namespace GUI {
 
 			// Draw Title border
 			Batch->Add(	
-						EM::Vec4(Position.x, Position.y + Dimensions.y - YOffset, Dimensions.x, YOffset),
-						EM::Vec4(0, 0, 1, 1),
+						Vec4(Position.x, Position.y + Dimensions.y - YOffset, Dimensions.x, YOffset),
+						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						Color,
 						0.0f,
@@ -341,8 +341,8 @@ namespace Enjon { namespace GUI {
 
 			// Draw Title inner border
 			Batch->Add(	
-						EM::Vec4(Position.x + 2.0f, Position.y + Dimensions.y - YOffset + 2.0f, Dimensions.x - 4.0f, YOffset - 4.0f),
-						EM::Vec4(0, 0, 1, 1),
+						Vec4(Position.x + 2.0f, Position.y + Dimensions.y - YOffset + 2.0f, Dimensions.x - 4.0f, YOffset - 4.0f),
+						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						SetOpacity(RGBA16(0.14f, 0.14f, 0.14f, 1.0f), 0.3f),
 						0.0f,
@@ -372,8 +372,8 @@ namespace Enjon { namespace GUI {
 
 			// Draw MinimizeButton button
 			Batch->Add(	
-						EM::Vec4(MinimizeButton.Position, MinimizeButton.Dimensions),
-						EM::Vec4(0, 0, 1, 1),
+						Vec4(MinimizeButton.Position, MinimizeButton.Dimensions),
+						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						MinimizeButton.Color,
 						0.0f,
@@ -391,7 +391,7 @@ namespace Enjon { namespace GUI {
 									*Batch,
 									SetOpacity(RGBA16_MidGrey(), 0.6f), 
 									Fonts::TextStyle::SHADOW,
-									EM::ToRadians(180.0f)
+									Enjon::ToRadians(180.0f)
 								);
 
 
@@ -403,8 +403,8 @@ namespace Enjon { namespace GUI {
 				if (HoveredElement == E)
 				{
 					Batch->Add(	
-								EM::Vec4(Position.x, E->Position.y, Dimensions.x, E->Dimensions.y),
-								EM::Vec4(0, 0, 1, 1),
+								Vec4(Position.x, E->Position.y, Dimensions.x, E->Dimensions.y),
+								Vec4(0, 0, 1, 1),
 								Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 								SetOpacity(RGBA16(0.2f, 0.2f, 0.2f, 1.0f), 0.1f),
 								0.0f,

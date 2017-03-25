@@ -43,13 +43,13 @@ namespace Enjon {
 
 	struct BloomSettings
 	{
-		BloomSettings(EM::Vec3& blurWeights, EM::Vec3& blurIterations, EM::Vec3& blurRadius)
+		BloomSettings(Vec3& blurWeights, Vec3& blurIterations, Vec3& blurRadius)
 			: mWeights(blurWeights), mIterations(blurIterations), mRadius(blurRadius)
 		{}
 
-		EM::Vec3 mWeights;
-		EM::Vec3 mIterations;
-		EM::Vec3 mRadius;
+		Vec3 mWeights;
+		Vec3 mIterations;
+		Vec3 mRadius;
 
 		double mSmallGaussianCurve[16];
 		double mMediumGaussianCurve[16];
@@ -130,7 +130,7 @@ namespace Enjon {
 			// Post processing settings
 			FXAASettings mFXAASettings = FXAASettings(8.0f, 1.0f/8.0f, 1.0f/128.0f);
 			ToneMapSettings mToneMapSettings = ToneMapSettings(0.53f, 1.55f, 0.61f, 7.74f, 1.7f);
-			BloomSettings mBloomSettings = BloomSettings(EM::Vec3(0.402f, 0.383f, 0.387f), EM::Vec3(9, 7, 12), EM::Vec3(0.004f, 0.008f, 0.019f));
+			BloomSettings mBloomSettings = BloomSettings(Vec3(0.402f, 0.383f, 0.387f), Vec3(9, 7, 12), Vec3(0.004f, 0.008f, 0.019f));
 
 			bool mShowGame = true;
 			bool mShowGraphicsOptionsWindow = true;

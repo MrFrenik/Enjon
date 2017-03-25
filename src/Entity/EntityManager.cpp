@@ -77,20 +77,20 @@ namespace Enjon {
 	}
 
 	//---------------------------------------------------------------
-	void Entity::SetLocalTransform(EM::Transform& transform)
+	void Entity::SetLocalTransform(Transform& transform)
 	{
 		mLocalTransform = transform;
 		mWorldTransformDirty = true;
 	}
 
 	//---------------------------------------------------------------
-	EM::Transform Entity::GetLocalTransform()
+	Transform Entity::GetLocalTransform()
 	{
 		return mLocalTransform;
 	}
 
 	//---------------------------------------------------------------
-	EM::Transform Entity::GetWorldTransform()
+	Transform Entity::GetWorldTransform()
 	{
 		// If dirty, then calculate world transform
 		if (mWorldTransformDirty)
@@ -113,7 +113,7 @@ namespace Enjon {
 		}
 
 		// Start with local transform. If no parent exists, then we return this.
-		EM::Transform result = mLocalTransform;
+		Transform result = mLocalTransform;
 
 		// This will stop once parent is not dirty
 		result *= mParent->GetWorldTransform();
@@ -125,7 +125,7 @@ namespace Enjon {
 	}
 
 	//---------------------------------------------------------------
-	void Entity::SetPosition(EM::Vec3& position)
+	void Entity::SetPosition(Vec3& position)
 	{
 		mLocalTransform.SetPosition(position);
 		mWorldTransformDirty = true;
@@ -138,53 +138,53 @@ namespace Enjon {
 	}
 
 	//---------------------------------------------------------------
-	void Entity::SetScale(EM::Vec3& scale)
+	void Entity::SetScale(Vec3& scale)
 	{
 		mLocalTransform.SetScale(scale);
 		mWorldTransformDirty = true;
 	}
 
 	//---------------------------------------------------------------
-	void Entity::SetRotation(EM::Quaternion& rotation)
+	void Entity::SetRotation(Quaternion& rotation)
 	{
 		mLocalTransform.SetRotation(rotation);
 		mWorldTransformDirty = true;
 	}
 
 	//---------------------------------------------------------------
-	EM::Vec3 Entity::GetLocalPosition()
+	Vec3 Entity::GetLocalPosition()
 	{
 		return mLocalTransform.GetPosition();
 	}
 
 	//---------------------------------------------------------------
-	EM::Vec3 Entity::GetLocalScale()
+	Vec3 Entity::GetLocalScale()
 	{
 		return mLocalTransform.GetScale();
 	}
 
 	//---------------------------------------------------------------
-	EM::Quaternion Entity::GetLocalRotation()
+	Quaternion Entity::GetLocalRotation()
 	{
 		return mLocalTransform.GetRotation();
 	}
 
 	//---------------------------------------------------------------
-	EM::Vec3 Entity::GetWorldPosition()
+	Vec3 Entity::GetWorldPosition()
 	{
 		if (mWorldTransformDirty) CalculateWorldTransform();
 		return mWorldTransform.GetPosition();
 	}
 
 	//---------------------------------------------------------------
-	EM::Vec3 Entity::GetWorldScale()
+	Vec3 Entity::GetWorldScale()
 	{
 		if (mWorldTransformDirty) CalculateWorldTransform();
 		return mWorldTransform.GetScale();
 	}
 
 	//---------------------------------------------------------------
-	EM::Quaternion Entity::GetWorldRotation()
+	Quaternion Entity::GetWorldRotation()
 	{
 		if (mWorldTransformDirty) CalculateWorldTransform();
 		return mWorldTransform.GetRotation();

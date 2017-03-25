@@ -35,8 +35,8 @@ namespace Enjon { namespace Fonts {
 
 	typedef struct 
 	{
-		Enjon::Math::Vec4 DestRect;
-		Enjon::Math::Vec4 UV;
+		Vec4 DestRect;
+		Vec4 UV;
 		GLuint TextureID;
 	} CharacterStats;
 
@@ -61,7 +61,7 @@ namespace Enjon { namespace Fonts {
 	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::SpriteBatch& Batch, 
 						ColorRGBA16 Color = Enjon::RGBA16_White(), TextStyle Style = TextStyle::SHADOW, float Angle = 0.0f, float Depth = 0.0f);
 
-	void PrintText(EM::Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA16 Color = RGBA16_White(), float Spacing = 1.0f, TextStyle Style = TextStyle::SHADOW);
+	void PrintText(Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA16 Color = RGBA16_White(), float Spacing = 1.0f, TextStyle Style = TextStyle::SHADOW);
 
 }}
 

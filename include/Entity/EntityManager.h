@@ -53,43 +53,43 @@ namespace Enjon {
 			void Detach();
 
 			/// @brief Sets local transform of entity
-			void SetLocalTransform(EM::Transform& transform);
+			void SetLocalTransform(Transform& transform);
 
 			/// @brief Gets local transform of entity relative to parent entity, if exists
-			EM::Transform GetLocalTransform();
+			Transform GetLocalTransform();
 
 			/// @brief Gets World transform of entity which calculates world transform if dirty flag is set
-			EM::Transform GetWorldTransform();
+			Transform GetWorldTransform();
 
 			/// @brief Sets local position of entity relative to parent, if exists
-			void SetPosition(EM::Vec3& position);
+			void SetPosition(Vec3& position);
 
 			/// @brief Sets local scale of entity relative to parent, if exists
-			void SetScale(EM::Vec3& scale);
+			void SetScale(Vec3& scale);
 
 			/// @brief Sets local scale of entity relative to parent, if exists
 			void SetScale(f32 scale);
 
 			/// @brief Sets local orientation of entity relative to parent, if exists
-			void SetRotation(EM::Quaternion& rotation);
+			void SetRotation(Quaternion& rotation);
 
 			/// @brief Gets local position of entity relative to parent, if exists
-			EM::Vec3 GetLocalPosition();
+			Vec3 GetLocalPosition();
 
 			/// @brief Gets local scale of entity relative to parent, if exists
-			EM::Vec3 GetLocalScale();
+			Vec3 GetLocalScale();
 
 			/// @brief Gets local rotation of entity relative to parent, if exists
-			EM::Quaternion GetLocalRotation();
+			Quaternion GetLocalRotation();
 
 			/// @brief Gets World position of entity which calculates world transform if dirty flag is set
-			EM::Vec3 GetWorldPosition();
+			Vec3 GetWorldPosition();
 
 			/// @brief Gets World scale of entity which calculates world transform if dirty flag is set
-			EM::Vec3 GetWorldScale();
+			Vec3 GetWorldScale();
 
 			/// @brief Gets World rotation of entity which calculates world transform if dirty flag is set
-			EM::Quaternion GetWorldRotation();
+			Quaternion GetWorldRotation();
 
 			/// @brief Gets parent of this entity, returns nullptr if doesn't exist
 			Entity* GetParent() { return mParent; }
@@ -145,8 +145,8 @@ namespace Enjon {
 			u32 mID;	
 			b32 mWorldTransformDirty; 					// NOTE(): Necessary struct padding for alignment. Not too happy about it.
 			Entity* mParent;
-			EM::Transform mLocalTransform;
-			EM::Transform mWorldTransform;
+			Transform mLocalTransform;
+			Transform mWorldTransform;
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
 			std::vector<Component*> mComponents;

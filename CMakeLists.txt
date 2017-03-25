@@ -140,6 +140,7 @@ set(
 	)
 
 add_executable(Enjon ${ALL_SRC})
+set_target_properties(Enjon PROPERTIES COMMAND_ARGUMENTS "--enjon_root_path ${cur_dir}")
 target_link_libraries(Enjon ${PROJECT_LINK_LIBRARIES})
 
 source_group("Entity"		FILES ${SRC_ENTITY})

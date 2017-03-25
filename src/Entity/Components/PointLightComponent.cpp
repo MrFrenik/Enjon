@@ -31,7 +31,7 @@ namespace Enjon
 		mLight.SetIntensity(intensity);
 	}
 
-	void PointLightComponent::SetPosition(EM::Vec3& position)
+	void PointLightComponent::SetPosition(Vec3& position)
 	{
 		mLight.SetPosition(position);
 	}

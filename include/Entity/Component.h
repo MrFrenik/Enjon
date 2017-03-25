@@ -61,7 +61,7 @@ namespace Enjon {
 
 			EntityManager* GetEntityManager();
 
-			void SetTransform(Enjon::Math::Transform& transform);
+			void SetTransform(Transform& transform);
 
 		protected:
 
@@ -93,14 +93,14 @@ namespace Enjon {
 			void SetBase(ComponentWrapperBase* base);
 
 		protected:
-			Enjon::Entity* mEntity = nullptr;
-			Enjon::EntityManager* mManager = nullptr;
-			Enjon::Math::Transform mTransform;
+			Entity* mEntity = nullptr;
+			EntityManager* mManager = nullptr;
+			Transform mTransform;
 			u32 mEntityID;
 			u32 mID;
 
 		private:
-			Enjon::ComponentWrapperBase* mBase = nullptr;
+			ComponentWrapperBase* mBase = nullptr;
 	};
 
 

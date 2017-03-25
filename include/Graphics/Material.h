@@ -29,11 +29,11 @@ namespace Enjon {
 			Material();
 			~Material();
 
-			void SetTexture(TextureSlotType type, GLTexture& texture);
-			GLTexture GetTexture(TextureSlotType type);
+			void SetTexture(TextureSlotType type, const GLTexture& texture);
+			GLTexture GetTexture(TextureSlotType type) const;
 
-			void SetColor(TextureSlotType type, ColorRGBA16& color);
-			ColorRGBA16& GetColor(TextureSlotType type);
+			void SetColor(TextureSlotType type, const ColorRGBA16& color);
+			ColorRGBA16 GetColor(TextureSlotType type) const;
 
 			GLSLProgram* GetShader();
 			void SetShader(GLSLProgram* shader);

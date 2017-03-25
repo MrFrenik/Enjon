@@ -45,14 +45,14 @@ namespace Enjon {
 	{
 	}
 
-	void Camera::SetPosition(EM::Vec3& position)
+	void Camera::SetPosition(Vec3& position)
 	{
 		Transform.Position = position;
 	}
 
-	void Camera::LookAt(EM::Vec3& Position, EM::Vec3& Up)
+	void Camera::LookAt(Vec3& Position, Vec3& Up)
 	{
-		EM::Vec3& Pos = Transform.Position;
+		Vec3& Pos = Transform.Position;
 
 		// Ignore, since you cannot look at yourself
 		if ((Pos - Position).Length() < 0.001f) return;
@@ -64,75 +64,75 @@ namespace Enjon {
 		}	
 
 		// Get look at 
-		EM::Mat4 LA = EM::Mat4::LookAt(Pos, Position, Up);
+		Mat4 LA = Mat4::LookAt(Pos, Position, Up);
 
 		// Set Transform
-		Transform.Rotation = EM::Mat4ToQuaternion(LA);
+		Transform.Rotation = Enjon::Mat4ToQuaternion(LA);
 	}
 
 	void Camera::OffsetOrientation(const f32& Yaw, const f32& Pitch)
 	{
-		EM::Quaternion X = EM::Quaternion::AngleAxis(Yaw, 	EM::Vec3(0, 1, 0)); 	// Absolute Up
-		EM::Quaternion Y = EM::Quaternion::AngleAxis(Pitch, Right());				// Relative Right
+		Quaternion X = Quaternion::AngleAxis(Yaw, 	Vec3(0, 1, 0)); 	// Absolute Up
+		Quaternion Y = Quaternion::AngleAxis(Pitch, Right());				// Relative Right
 
 		Transform.Rotation = X * Y * Transform.Rotation;
 	}
 
-	EM::Vec3 Camera::Forward() const
+	Vec3 Camera::Forward() const
 	{
-		return Transform.Rotation * EM::Vec3(0, 0, -1);
+		return Transform.Rotation * Vec3(0, 0, -1);
 	}
 
-	EM::Vec3 Camera::Backward() const
+	Vec3 Camera::Backward() const
 	{
-		return Transform.Rotation * EM::Vec3(0, 0, 1);
+		return Transform.Rotation * Vec3(0, 0, 1);
 	}
 
-	EM::Vec3 Camera::Right() const
+	Vec3 Camera::Right() const
 	{
-		return Transform.Rotation * EM::Vec3(1, 0, 0);
+		return Transform.Rotation * Vec3(1, 0, 0);
 	}
 
-	EM::Vec3 Camera::Left() const
+	Vec3 Camera::Left() const
 	{
-		return Transform.Rotation * EM::Vec3(-1, 0, 0);
+		return Transform.Rotation * Vec3(-1, 0, 0);
 	}
 
-	EM::Vec3 Camera::Up() const
+	Vec3 Camera::Up() const
 	{
-		return Transform.Rotation * EM::Vec3(0, 1, 0);
+		return Transform.Rotation * Vec3(0, 1, 0);
 	}
 
-	EM::Vec3 Camera::Down() const
+	Vec3 Camera::Down() const
 	{
-		return Transform.Rotation * EM::Vec3(0, -1, 0);
+		return Transform.Rotation * Vec3(0, -1, 0);
 	}
 
-	EM::Mat4 Camera::GetViewProjectionMatrix() const
+	Mat4 Camera::GetViewProjectionMatrix() const
 	{
 		return GetProjection() * GetView();
 	}
 
-	EM::Mat4 Camera::GetViewProjection() const 
+	Mat4 Camera::GetViewProjection() const 
 	{
 		return GetProjection() * GetView();
 	}
 
-	EM::Mat4 Camera::GetProjection() const
+	Mat4 Camera::GetProjection() const
 	{
-		EM::Mat4 Projection;
+		Mat4 Projection;
 
 		switch(ProjType)
 		{
 			case ProjectionType::PERSPECTIVE:
 			{
-				Projection = EM::Mat4::Perspective(FOV, ViewPortAspectRatio, NearPlane, FarPlane);
+				Projection = Mat4::Perspective(FOV, ViewPortAspectRatio, NearPlane, FarPlane);
 			} break;
 
 			case ProjectionType::ORTHOGRAPHIC:
 			{
-				Enjon::f32 Distance = 0.5f * (FarPlane - NearPlane);
-				Projection = EM::Mat4::Orthographic(
+				f32 Distance = 0.5f * (FarPlane - NearPlane);
+				Projection = Mat4::Orthographic(
 														-OrthographicScale * ViewPortAspectRatio, 
 														OrthographicScale * ViewPortAspectRatio, 
 														-OrthographicScale, 
@@ -147,13 +147,16 @@ namespace Enjon {
 		return Projection;
 	}
 
-	EM::Mat4 Camera::GetView() const
+	Mat4 Camera::GetView() const
 	{
-		EM::Mat4 View;
+		//Mat4 view;
 
-		View =  EM::Mat4::Scale(EM::Vec3(1.0f, 1.0f, 1.0f) / Transform.Scale) * EM::QuaternionToMat4(Transform.Rotation) * EM::Mat4::Translate(Transform.Position * -1.0f);
+		Mat4 scale = Mat4::Scale(Vec3(1.0f, 1.0f, 1.0f) / Transform.GetScale());
+		Mat4 rotation = QuaternionToMat4(Transform.Rotation);
+		Mat4 translate = Mat4::Translate(Transform.Position * -1.0f);
+		//view =  Mat4::Scale(Vec3(1.0f, 1.0f, 1.0f) / Transform.Scale) * QuaternionToMat4(Transform.Rotation) * Mat4::Translate(Transform.Position * -1.0f); 
 
-		return View;
+		return (scale * rotation * translate);
 	}
 }
 

@@ -22,43 +22,43 @@ namespace Enjon {
 			~Renderable();
 
 			/* Get position of transform */
-			EM::Vec3 GetPosition() { return mTransform.GetPosition(); }
+			Vec3 GetPosition() const;
 
 			/* Get scale of transform */
-			EM::Vec3 GetScale() { return mTransform.GetScale(); }
+			Vec3 GetScale() const;
 
 			/* Get rotation of transform */
-			EM::Quaternion GetRotation() { return mTransform.GetRotation(); }
+			Quaternion GetRotation() const;
 
 			/* Offset rotation of transform */
 			void Renderable::OffsetRotation(const f32& Yaw, const f32& Pitch);
 
 			/* Get material of renderable */
-			Material* GetMaterial() { return mMaterial; }
+			Material* GetMaterial();
 
 			/* Get mesh of renderable */
-			Mesh* GetMesh() { return mMesh; }
+			Mesh* GetMesh() const;
 
 			/* Get scene of renderable */
-			Scene* GetScene() { return mScene; }
+			Scene* GetScene() const;
 
 			/* Gets world transform */
-			EM::Transform GetTransform() { return mTransform; }
+			Transform GetTransform() const;
 
 			/* Sets world transform */
-			void SetTransform(EM::Transform& transform) { mTransform = transform; }
+			void SetTransform(const Transform& transform);
 
 			/* Set position of transform */
-			void SetPosition(EM::Vec3& position);
+			void SetPosition(const Vec3& position);
 
 			/* Set scale of transform */
-			void SetScale(EM::Vec3& scale);
+			void SetScale(const Vec3& scale);
 
 			/* Set uniform scale of transform */
-			void SetScale(float scale);
+			void SetScale(const f32& scale);
 
 			/* Set rotation of transform */
-			void SetRotation(EM::Quaternion& rotation);
+			void SetRotation(const Quaternion& rotation);
 
 			/* Set material of renderable */
 			void SetMaterial(Material* material);
@@ -70,10 +70,10 @@ namespace Enjon {
 			void SetScene(Scene* scene);
 
 			/* Set material color */
-			void SetColor(TextureSlotType type, ColorRGBA16& color);	
+			void SetColor(TextureSlotType type, const ColorRGBA16& color);	
 
 		private:
-			EM::Transform 	mTransform;
+			Transform 	mTransform;
 			Mesh* 		mMesh 		= nullptr;
 			Material* 	mMaterial 	= nullptr;
 			Scene* 		mScene 		= nullptr;

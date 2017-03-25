@@ -28,8 +28,8 @@ namespace Enjon { namespace Particle2D {
 			// Decay particle lifetime by rate
 			*LT -= *DR;
 
-			Math::Vec3* Position = &p.Position;
-			Math::Vec3* Velocity = &p.Velocity;
+			Vec3* Position = &p.Position;
+			Vec3* Velocity = &p.Velocity;
 
 			// Move position of particle by its velocity
 			Position->x += Velocity->x;
@@ -95,7 +95,7 @@ namespace Enjon { namespace Particle2D {
 	}
 
 	/* Adds a particle to a batch */
-	uint32 AddParticle(Math::Vec3 P, Math::Vec3 V, Enjon::Vec2 D, ColorRGBA16 C, GLuint ID, float DR, ParticleBatch2D* PB, EM::Vec4 UV)
+	uint32 AddParticle(Vec3 P, Vec3 V, Enjon::Vec2 D, ColorRGBA16 C, GLuint ID, float DR, ParticleBatch2D* PB, Vec4 UV)
 	{
 		// Get next available index in particles
 		uint32 i = FindNextAvailableParticle(PB);
@@ -188,14 +188,14 @@ namespace Enjon { namespace Particle2D {
 					if (P.LifeTime > 0.0f && P.Color.a > 0.0f)
 					{
 						// Add particle to sprite batch to be rendered
-						PB->SB->Add(Math::Vec4(P.Position.XY(), P.Dimensions), P.UV, P.TexID, P.Color, P.Position.y - P.Position.z);
+						PB->SB->Add(Vec4(P.Position.XY(), P.Dimensions), P.UV, P.TexID, P.Color, P.Position.y - P.Position.z);
 					}
 				}
 			}
 		}
 	}
 
-	void DrawFire(Particle2D::ParticleBatch2D* Batch, EM::Vec3 Position)
+	void DrawFire(Particle2D::ParticleBatch2D* Batch, Vec3 Position)
 	{
 		// Totally testing for shiggles
 		static float PCounter = 0.0f;
@@ -225,7 +225,7 @@ namespace Enjon { namespace Particle2D {
 				int Alpha = Random::Roll(995, 1000) / 1000.0f;
 
 
-				Particle2D::AddParticle(Math::Vec3(Position.x - 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Particle2D::AddParticle(Vec3(Position.x - 20.0f, Position.y + 20.0f, Position.z), Vec3(XVel, YVel, ZVel), 
 					Enjon::Vec2(XSize, YSize), RGBA16(Gray.r, Gray.g, Gray.b + 0.1f, 0.185f), tex, 0.0025f, Batch);
 			}
 			SmokeCounter = 0.0f;
@@ -247,7 +247,7 @@ namespace Enjon { namespace Particle2D {
 				else if (Roll == 2) tex = PTex2;
 				else tex = PTex3; 
 
-				Particle2D::AddParticle(Math::Vec3(Position.x, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Particle2D::AddParticle(Vec3(Position.x, Position.y, Position.z), Vec3(XVel, YVel, ZVel), 
 					Enjon::Vec2(XSize, YSize), Fire, tex, 0.025f, Batch);
 			}
 			FlameCounter = 0.0f;
@@ -270,7 +270,7 @@ namespace Enjon { namespace Particle2D {
 				else if (Roll == 2) tex = PTex2;
 				else tex = PTex3; 
 
-				Particle2D::AddParticle(Math::Vec3(Position.x, Position.y, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Particle2D::AddParticle(Vec3(Position.x, Position.y, Position.z), Vec3(XVel, YVel, ZVel), 
 					Enjon::Vec2(XSize, YSize), Fire, tex, 0.05f, Batch);
 			}
 			InnerFlameCounter = 0.0f;
@@ -292,7 +292,7 @@ namespace Enjon { namespace Particle2D {
 				else if (Roll == 2) tex = PTex2;
 				else tex = PTex3; 
 
-				Particle2D::AddParticle(Math::Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Particle2D::AddParticle(Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Vec3(XVel, YVel, ZVel), 
 					Enjon::Vec2(XSize, YSize), Fire, tex, 0.025f, Batch);
 			}
 			LightFlameCounter = 0.0f;
@@ -309,7 +309,7 @@ namespace Enjon { namespace Particle2D {
 								YSize = Random::Roll(500, 500), XSize = Random::Roll(500, 500);
 				int Roll = Random::Roll(1, 3);
 
-				Particle2D::AddParticle(Math::Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Particle2D::AddParticle(Vec3(Position.x - 90.0f, Position.y - 50.0f, Position.z), Vec3(XVel, YVel, ZVel), 
 					Enjon::Vec2(XSize, YSize), Fire, PTex4, 0.7f, Batch);
 			}
 			LightFlameCounter = 0.0f;
@@ -331,7 +331,7 @@ namespace Enjon { namespace Particle2D {
 				else if (Roll == 2) tex = PTex2;
 				else tex = PTex3; 
 
-				Particle2D::AddParticle(Math::Vec3(Position.x + 20.0f, Position.y + 20.0f, Position.z), Math::Vec3(XVel, YVel, ZVel), 
+				Particle2D::AddParticle(Vec3(Position.x + 20.0f, Position.y + 20.0f, Position.z), Vec3(XVel, YVel, ZVel), 
 					Enjon::Vec2(XSize, YSize), Fire, PTex, 0.05f, Batch);
 			}
 			Ember = 0.0f;

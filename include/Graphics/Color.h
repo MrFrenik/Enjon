@@ -89,7 +89,7 @@ namespace Enjon {
 			: r(_r), g(_g), b(_b), a(_a)
 		{}
 
-		ColorRGBA16(const EM::Vec4& V) : r(V.x), g(V.y), b(V.z), a(V.w) {}
+		ColorRGBA16(const Vec4& V) : r(V.x), g(V.y), b(V.z), a(V.w) {}
 
 		float r;
 		float g;

@@ -9670,20 +9670,26 @@ int main(int argc, char** argv)
 // ACTUAL
 #if 1
 
-#include <Enjon.h>
+#include <Enjon.h> 
+#include <System/Types.h>
 
 #include "Game.h"
 
-#include <stdio.h>
-
-Enjon::Engine mEngine;
-Game mGame;
+#include <fmt/printf.h> 
+#include <stdio.h> 
 
 #undef main
-int main(int argc, char** argv)
+Enjon::s32 main(Enjon::s32 argc, char** argv)
 {
+	Enjon::Engine mEngine;
+	Enjon::EngineConfig mConfig;
+	Game mGame; 
+
+	// Parse passed in command arguments
+	mConfig.ParseArguments(argc, argv); 
+
 	// Startup engine
-	mEngine.StartUp(&mGame); 
+	mEngine.StartUp(&mGame, mConfig); 
 
 	// Run engine loop
 	Enjon::Result res = mEngine.Run();

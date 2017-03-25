@@ -1,6 +1,6 @@
 #include "math/Vec4.h"
 
-namespace Enjon { namespace Math { 
+namespace Enjon {
  
 	std::ostream& operator<<(std::ostream& stream, Vec4& vector)
 	{
@@ -134,9 +134,14 @@ namespace Enjon { namespace Math {
 	{
 		return x * other.x + y * other.y + z * other.z + w * other.w;
 	}
+			
+	Vec4 Vec4::Normalize(const Vec4& vec) 
+	{ 
+		return vec / vec.Length(); 
+	}
 
 	Vec3 Vec4::XYZ()
 	{
 		return Vec3(this->x, this->y, this->z);
 	}
-}}
+}

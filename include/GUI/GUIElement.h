@@ -297,8 +297,8 @@ namespace Enjon { namespace GUI {
 
 			// Draw box		
 			Batch->Add(
-						EM::Vec4(AABB.Min, AABB.Max - AABB.Min),
-						EM::Vec4(0, 0, 1, 1),
+						Vec4(AABB.Min, AABB.Max - AABB.Min),
+						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 						Color, 
 						-1.0f
@@ -332,8 +332,8 @@ namespace Enjon { namespace GUI {
 					XAdvance += Fonts::GetAdvance(Text[i], CurrentFont, scale);
 				}
 				Batch->Add(
-								EM::Vec4(XAdvance + 0.2f, Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
-								EM::Vec4(0, 0, 1, 1),
+								Vec4(XAdvance + 0.2f, Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
+								Vec4(0, 0, 1, 1),
 								Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 								RGBA16_LightGrey(),
 								1.0f

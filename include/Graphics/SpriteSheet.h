@@ -20,12 +20,12 @@ namespace Enjon {
 
 		inline bool IsInit() { return this->init_status; }
 
-		Math::Vec4 GetUV(int index)
+		Vec4 GetUV(int index)
 		{
 			int xTile = index % dims.x;
 			int yTile = index / dims.x;
 			
-			Math::Vec4 uv;
+			Vec4 uv;
 			uv.x = xTile / (float)dims.x;
 			uv.y = yTile / (float)dims.y;
 			uv.z = 1.0f / dims.x;

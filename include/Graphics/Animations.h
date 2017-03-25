@@ -25,7 +25,7 @@ namespace Enjon { namespace Animation {
 
 	typedef struct
 	{
-		EM::Vec4 UVs;
+		Vec4 UVs;
 		Enjon::Vec2 Offsets;
 		Enjon::Vec2 SourceSize;
 		Atlas TextureAtlas;

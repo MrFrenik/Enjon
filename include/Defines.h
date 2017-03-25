@@ -8,12 +8,11 @@
 #define ENJON_FUNCTION(...)
 #define ENJON_PROP(...)
 
-#define EM 		Enjon::Math
 #define ER 		Enjon::Random
 #define EU 		Enjon::Utils
 #define EA		Enjon::Animation
 #define EP		Enjon::Physics
-#define EGUI	Enjon::GUI
+#define EGUI	Enjon::GUI 
 
 namespace Enjon
 {

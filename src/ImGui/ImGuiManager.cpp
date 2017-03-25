@@ -69,18 +69,18 @@ namespace Enjon
 		Enjon::Vec2 center = Enjon::Vec2((f32)dimensions.x / 2.0f, (f32)dimensions.y / 2.0f);
 
 	    ImGuizmo::BeginFrame();
-		static auto model = EM::Mat4::Identity();
+		static Mat4 model = Mat4::Identity();
 		Enjon::Vec2 translate(0, 0);
     	ImGui::SliderFloat("Translate X", &translate.x, 0.0f, 1.0f);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
     	ImGui::SliderFloat("Translate Y", &translate.y, 0.0f, 1.0f);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
 
-    	EM::Vec3 scale(1, 1, 1);
+    	Vec3 scale(1, 1, 1);
     	ImGui::SliderFloat("Scale X", &scale.x, 0.01f, 1.0);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
     	ImGui::SliderFloat("Scale Y", &scale.y, 0.01f, 1.0);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
     	ImGui::SliderFloat("Scale Z", &scale.z, 0.01f, 1.0);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
 
-    	model *= EM::Mat4::Translate(EM::Vec3(translate, 0.0f));
-    	model *= EM::Mat4::Scale(scale);
+    	model *= Mat4::Translate(Vec3(translate, 0.0f));
+    	model *= Mat4::Scale(scale);
 
 	    // Imguizmo 
 	    static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);

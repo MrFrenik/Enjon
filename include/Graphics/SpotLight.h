@@ -13,7 +13,7 @@ namespace Enjon {
 	struct SpotLightParameters
 	{
 		SpotLightParameters(){}
-		SpotLightParameters(float constant, float linear, float quadratic, EM::Vec3 dir, float inner, float outer)
+		SpotLightParameters(float constant, float linear, float quadratic, Vec3 dir, float inner, float outer)
 		{
 			mConstant 		= constant;
 			mLinear 		= linear;
@@ -25,7 +25,7 @@ namespace Enjon {
 
 		union
 		{
-			EM::Vec3 mFalloff;
+			Vec3 mFalloff;
 			struct
 			{
 				float mConstant; 
@@ -34,7 +34,7 @@ namespace Enjon {
 			};
 		};
 
-		EM::Vec3 mDirection;
+		Vec3 mDirection;
 		float mInnerCutoff;
 		float mOuterCutoff;
 	};
@@ -45,23 +45,23 @@ namespace Enjon {
 	{
 		public:
 			SpotLight();
-			SpotLight(EM::Vec3& position, SLParams& params, ColorRGBA16& color, float intensity = 1.0f);
+			SpotLight(Vec3& position, SLParams& params, ColorRGBA16& color, float intensity = 1.0f);
 			~SpotLight();
 
-			EM::Vec3& GetPosition() { return mPosition; }
+			Vec3& GetPosition() { return mPosition; }
 			ColorRGBA16& GetColor() { return mColor; }
 			SLParams& GetParams() { return mParams; }
 			float GetIntensity() { return mIntensity; }
 
-			void SetPosition(EM::Vec3& position);
-			void SetDirection(EM::Vec3& direction);
+			void SetPosition(Vec3& position);
+			void SetDirection(Vec3& direction);
 			void SetColor(ColorRGBA16& color);
 			void SetIntensity(float intensity);
 			void SetScene(Scene* scene);
 			void SetParams(SLParams& params);
 
 		private:
-			EM::Vec3 			mPosition;
+			Vec3 			mPosition;
 			SLParams 			mParams;	
 			ColorRGBA16 	mColor;
 			Scene* 			mScene 			= nullptr;

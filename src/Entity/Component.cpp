@@ -4,7 +4,7 @@
 
 namespace Enjon 
 {
-	Enjon::Entity* Component::GetEntity()
+	Entity* Component::GetEntity()
 	{
 		return mEntity;
 	}
@@ -24,7 +24,7 @@ namespace Enjon
 		mBase = base;
 	}
 
-	void Component::SetTransform(Enjon::Math::Transform& transform)
+	void Component::SetTransform(Transform& transform)
 	{
 		mTransform = transform;
 	}

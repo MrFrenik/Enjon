@@ -1,10 +1,13 @@
+// Copyright 2016-2017 John Jackson. All Rights Reserved.
+// File: Quaternion.cpp
+
 #include <Math/Quaternion.h>
 
-namespace Enjon { namespace Math {
-
+namespace Enjon 
+{ 
 	Vec3 Quaternion::XYZ()
 	{
-		return EM::Vec3(x, y, z);
+		return Vec3(x, y, z);
 	}
 
 	f32 Quaternion::Length()
@@ -77,7 +80,7 @@ namespace Enjon { namespace Math {
 		return Result;	
 	}
 
-	Quaternion Quaternion::operator*(f32 V) const
+	Quaternion Quaternion::operator*(const f32& V) const
 	{
 		Quaternion C = *this;
 
@@ -90,7 +93,7 @@ namespace Enjon { namespace Math {
 	}
 
 
-	Quaternion Quaternion::operator/(f32 V) const
+	Quaternion Quaternion::operator/(const f32& V) const
 	{
 		Quaternion C = *this;
 		
@@ -125,8 +128,8 @@ namespace Enjon { namespace Math {
 
 	f32 Quaternion::Dot(Quaternion& Q)
 	{
-		auto A = EM::Vec3(Q.x, Q.y, Q.z);
-		auto B = EM::Vec3(x, y, z);
+		auto A = Vec3(Q.x, Q.y, Q.z);
+		auto B = Vec3(x, y, z);
 
 		return A.Dot(B) + w * Q.w;	
 	}
@@ -165,7 +168,7 @@ namespace Enjon { namespace Math {
 
 		f32 InverseS2 = 1.0f / std::sqrt(S2);
 
-		return EM::Vec3(x, y, z) * InverseS2;
+		return Vec3(x, y, z) * InverseS2;
 	}
 
 	f32 Quaternion::Roll()
@@ -183,12 +186,18 @@ namespace Enjon { namespace Math {
 		return std::asin(-2.0f * (x*z - w*y));
 	}
 
-	EM::Vec3 Quaternion::EulerAngles()
+	Vec3 Quaternion::EulerAngles()
 	{
-		return EM::Vec3(this->Pitch(), this->Yaw(), this->Roll());
-	}
+		return Vec3(this->Pitch(), this->Yaw(), this->Roll());
+	} 
 
-}}
+	Vec3 Quaternion::operator*(const Vec3& V) const
+	{
+		auto Qxyz = Vec3(x, y, z);
+		Vec3 T = 2.0f * Qxyz.Cross(V);
+		return (V + w * T + Qxyz.Cross(T));
+	} 
+}
 
 
 

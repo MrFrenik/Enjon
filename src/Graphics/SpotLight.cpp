@@ -6,12 +6,12 @@ namespace Enjon {
 
 	SpotLight::SpotLight()
 	{
-		mPosition 	= EM::Vec3(0.0f, 0.0f, 0.0f);
+		mPosition 	= Vec3(0.0f, 0.0f, 0.0f);
 		mColor 		= RGBA16_White(); 
-		mParams 	= SpotLightParameters(0.0f, 0.0f, 0.0f, EM::Vec3(0, 0, 0), 0.0f, 0.0f);
+		mParams 	= SpotLightParameters(0.0f, 0.0f, 0.0f, Vec3(0, 0, 0), 0.0f, 0.0f);
 	}
 
-	SpotLight::SpotLight(EM::Vec3& position, SLParams& params, ColorRGBA16& color, float intensity)
+	SpotLight::SpotLight(Vec3& position, SLParams& params, ColorRGBA16& color, float intensity)
 	{
 		mPosition 	= position;
 		mParams 	= params;
@@ -43,12 +43,12 @@ namespace Enjon {
 	{
 		mScene = scene;	
 	}
-	void SpotLight::SetPosition(EM::Vec3& position)
+	void SpotLight::SetPosition(Vec3& position)
 	{
 		mPosition = position;
 	}
 
-	void SpotLight::SetDirection(EM::Vec3& direction)
+	void SpotLight::SetDirection(Vec3& direction)
 	{
 		mParams.mDirection = direction;
 	}

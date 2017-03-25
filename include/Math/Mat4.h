@@ -7,49 +7,59 @@
 #include <Math/Vec4.h>
 #include <Math/Common.h>
 
-namespace Enjon { namespace Math { 
+namespace Enjon {
 
-	struct Mat4
+	class Mat4
 	{
-		union
-		{
-			float elements[4 * 4];
-			float Elements[4][4];
-			Vec4 columns[4];
-		};
-	
-		Mat4();
-		Mat4(float value);
- 
-		Mat4& Multiply(const Mat4& other);
+		public:
 
-		friend Mat4 operator*(Mat4 left, const Mat4& right);
-		Mat4& operator*=(const Mat4& other);
-		
-		Vec3 Multiply(const Vec3& other) const;
-		friend Vec3 operator*(const Mat4& left, const Vec3& right);
-		
-		Vec4 Multiply(const Vec4& other) const;
-		friend Vec4 operator*(const Mat4& left, const Vec4& right);
+			union
+			{
+				f32 elements[4 * 4];
+				f32 Elements[4][4];
+				Vec4 columns[4];
+			};
 
-		Mat4& Invert();
-		
-		static Mat4 Orthographic(float left, float right, float bottom, float top, float near, float far);
-		static Mat4 Perspective(float FOV, float aspectRatio, float near, float far);
+			Mat4();
 
-		static Mat4 Identity();
-		static Mat4 Scale(const Vec3& vector);
-		static Mat4 Translate(const Vec3& vector);
-		static Mat4 Rotate(float angle, const Vec3& axis);
-		static Mat4 Inverse(const Mat4& M);
-		static Mat4 LookAt(Vec3& Position, Vec3& Target, Vec3& Up);
+			Mat4(const f32& value);
+			
+			Mat4(const Mat4& other);
 
-		friend std::ostream& operator<<(std::ostream& stream, const Mat4& Mat);
+			Mat4& Multiply(const Mat4& other);
 
+			friend Mat4 operator*(Mat4 left, const Mat4& right);
+			Mat4& operator*=(const Mat4& other);
+
+			Vec3 Multiply(const Vec3& other) const;
+			friend Vec3 operator*(const Mat4& left, const Vec3& right);
+
+			Vec4 Multiply(const Vec4& other) const;
+			friend Vec4 operator*(const Mat4& left, const Vec4& right);
+
+			Mat4& Invert();
+
+			static Mat4 Orthographic(const f32& left, 
+									const f32& right, 
+									const f32& bottom, 
+									const f32& top, 
+									const f32& near, 
+									const f32& far);
+
+			static Mat4 Perspective(const f32& FOV, const f32& aspectRatio, const f32& near, const f32& far);
+
+			static Mat4 Identity();
+			static Mat4 Scale(const Vec3& vector);
+			static Mat4 Translate(const Vec3& vector);
+			static Mat4 Rotate(const f32& angle, const Vec3& axis);
+			static Mat4 Inverse(const Mat4& M);
+			static Mat4 LookAt(const Vec3& Position, const Vec3& Target, Vec3& Up);
+
+			friend std::ostream& operator<<(std::ostream& stream, const Mat4& Mat);
 	};
-}}
 
-typedef Enjon::Math::Mat4 mat4;
+}
+typedef Enjon::Mat4 mat4;
 
 
 #endif

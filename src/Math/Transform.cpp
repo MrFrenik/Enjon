@@ -1,18 +1,32 @@
-#include <Math/Transform.h>
+// Copyright 2016-2017 John Jackson. All Rights Reserved.
+// File: Transform.cpp
 
-namespace Enjon { namespace Math {
+#include <Math/Transform.h> 
 
-	//-----------------------------------------------------------------------
+namespace Enjon 
+{ 
+	//==========================================================================
+
 	Transform::Transform()
 		: 
-			Position(EM::Vec3(0.0f, 0.0f, 0.0f)), 
-			Rotation(EM::Quaternion(0, 0, 0, 1)), 
-			Scale(EM::Vec3(1, 1, 1))
+			Position(Vec3(0.0f, 0.0f, 0.0f)), 
+			Rotation(Quaternion(0, 0, 0, 1)), 
+			Scale(Vec3(1, 1, 1))
 	{
 	}
 		
-	//-----------------------------------------------------------------------
-	Transform::Transform(EM::Vec3& position, EM::Quaternion& rotation, EM::Vec3& scale)
+	//==========================================================================
+
+	Transform::Transform(const Transform& t)
+		: 
+			Position(t.Position), 
+			Rotation(t.Rotation), 
+			Scale(t.Scale)
+	{
+	}
+	//==========================================================================
+	
+	Transform::Transform(const Vec3& position, const Quaternion& rotation, const Vec3& scale)
 		: 
 			Position(position), 
 			Rotation(rotation), 
@@ -20,12 +34,14 @@ namespace Enjon { namespace Math {
 	{
 	}
 
-	//-----------------------------------------------------------------------
+	//==========================================================================
+
 	Transform::~Transform()
 	{
 	}
 
-	//-----------------------------------------------------------------------
+	//==========================================================================
+	
 	Transform Transform::operator*(Transform& Parent) const
 	{
 		Transform WorldSpace;
@@ -37,13 +53,16 @@ namespace Enjon { namespace Math {
 		return WorldSpace;
 	}
 
+	//==========================================================================
+
 	Transform& Transform::operator*=(Transform& parent)
 	{
 		*this = *this * parent;
 		return *this;	
 	}	
 
-	//-----------------------------------------------------------------------
+	//==========================================================================
+
 	Transform operator/(Transform& World, Transform& Parent)
 	{
 		Transform Local;
@@ -57,7 +76,8 @@ namespace Enjon { namespace Math {
 		return Local;
 	}
 
-	//-----------------------------------------------------------------------
+	//==========================================================================
+
 	Transform Transform::Inverse()
 	{
 		Transform I;
@@ -65,28 +85,31 @@ namespace Enjon { namespace Math {
 		return I / *this;
 	}
 
-	//-----------------------------------------------------------------------
-	void Transform::SetPosition(EM::Vec3& position)
+	//==========================================================================
+
+	void Transform::SetPosition(const Vec3& position)
 	{
 		Position = position;
 	}
 
-	//-----------------------------------------------------------------------
-	void Transform::SetScale(EM::Vec3& scale)
+	//==========================================================================
+
+	void Transform::SetScale(const Vec3& scale)
 	{
-		Scale = EM::Vec3(scale);
+		Scale = Vec3(scale);
 	}
 
-	//-----------------------------------------------------------------------
-	void Transform::SetScale(float scale)
+	//==========================================================================
+
+	void Transform::SetScale(const f32& scale)
 	{
 		Scale = scale;
 	}
 
-	//-----------------------------------------------------------------------
-	void Transform::SetRotation(EM::Quaternion& rotation)
+	//==========================================================================
+	
+	void Transform::SetRotation(const Quaternion& rotation)
 	{
 		Rotation = rotation;
-	}
-
-}}
+	} 
+}

@@ -9,13 +9,13 @@
 
 namespace Enjon { 
 
-	static EM::Vec3 Static_TL(-1.0f, 1.0f, 0.0f);
-	static EM::Vec3 Static_BL(-1.0f, -1.0f, 0.0f);
-	static EM::Vec3 Static_TR(1.0f, 1.0f, 0.0f);
-	static EM::Vec3 Static_BR(1.0f, -1.0f, 0.0f);
-	static EM::Vec3 Static_Normal(0.0f, 0.0f, 1.0f);
-	static EM::Vec3 Static_Tangent(1.0f, 0.0f, 0.0f);
-	static EM::Vec3 Static_BiTangent(0.0f, 1.0f, 0.0f);
+	static Vec3 Static_TL(-1.0f, 1.0f, 0.0f);
+	static Vec3 Static_BL(-1.0f, -1.0f, 0.0f);
+	static Vec3 Static_TR(1.0f, 1.0f, 0.0f);
+	static Vec3 Static_BR(1.0f, -1.0f, 0.0f);
+	static Vec3 Static_Normal(0.0f, 0.0f, 1.0f);
+	static Vec3 Static_Tangent(1.0f, 0.0f, 0.0f);
+	static Vec3 Static_BiTangent(0.0f, 1.0f, 0.0f);
 
 	u32 QuadBatch::DrawCallCount = 0;
 
@@ -27,12 +27,12 @@ namespace Enjon {
 	{
 	}
 
-	QuadGlyph::QuadGlyph(EM::Vec3& TLP, EM::Vec3& BLP, EM::Vec3& BRP, EM::Vec3& TRP, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
+	QuadGlyph::QuadGlyph(Vec3& TLP, Vec3& BLP, Vec3& BRP, Vec3& TRP, Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
 	: Texture(_Texture), Depth(_Depth)
 	{
-		EM::Vec3 N(0, 1, 0);
-		EM::Vec3 T(0, 0, -1);
-		EM::Vec3 B(-1, 0, 0);
+		Vec3 N(0, 1, 0);
+		Vec3 T(0, 0, -1);
+		Vec3 B(-1, 0, 0);
 		Enjon::Vec2 UV;
 
 		/* Set top left vertex */
@@ -120,42 +120,42 @@ namespace Enjon {
 		TR.Color[3] 		= Color.a;
 	}
 
-	QuadGlyph::QuadGlyph(Enjon::Vec2& Dimensions, EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
+	QuadGlyph::QuadGlyph(Enjon::Vec2& Dimensions, Transform& Transform, Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
 	:	Texture(_Texture), Depth(_Depth) 	
 	{
 		// Transform all verticies by model matrix
-		EM::Mat4 Model;
+		Mat4 Model;
 		// L = T*R*S
-		Model *= EM::Mat4::Translate(Transform.Position);
-		Model *= EM::QuaternionToMat4(Transform.Rotation);
-		Model *= EM::Mat4::Scale(Transform.Scale);
+		Model *= Mat4::Translate(Transform.Position);
+		Model *= QuaternionToMat4(Transform.Rotation);
+		Model *= Mat4::Scale(Transform.Scale);
 
-		EM::Vec4 Position, Normal, Tangent, Bitangent;
-		EM::Vec3 T, B, N, P;
+		Vec4 Position, Normal, Tangent, Bitangent;
+		Vec3 T, B, N, P;
 		Enjon::Vec2 UV;
 
 		// Normal for all verticies
-		Normal = Model * EM::Vec4(Static_Normal, 0.0);
-		N = EM::Vec3::Normalize(Normal.XYZ());
+		Normal = Model * Vec4(Static_Normal, 0.0);
+		N = Vec3::Normalize(Normal.XYZ());
 
 		// Tangent for all verticies
-		Tangent = Model * EM::Vec4(Static_Tangent, 0.0);
-		T = EM::Vec3::Normalize(Tangent.XYZ());
+		Tangent = Model * Vec4(Static_Tangent, 0.0);
+		T = Vec3::Normalize(Tangent.XYZ());
 
 		// Reorthogonalize with respect to N
-		T = EM::Vec3::Normalize(T - T.Dot(N) * N);
+		T = Vec3::Normalize(T - T.Dot(N) * N);
 
 		// Calculate Bitangent
-		B = EM::Vec3::Normalize( ( Model * EM::Vec4( ( N.Cross(T) * 1.0), 0.0 )).XYZ());
+		B = Vec3::Normalize( ( Model * Vec4( ( N.Cross(T) * 1.0), 0.0 )).XYZ());
 
 		// Create basis verticies
-		EM::Vec3 Basis_TL(-1.0f, 1.0f + Dimensions.y, 0.0f);
-		EM::Vec3 Basis_BL(-1.0f, -1.0f, 0.0f);
-		EM::Vec3 Basis_TR(1.0f + Dimensions.x, 1.0f + Dimensions.y, 0.0f);
-		EM::Vec3 Basis_BR(1.0f + Dimensions.x, -1.0f, 0.0f);
+		Vec3 Basis_TL(-1.0f, 1.0f + Dimensions.y, 0.0f);
+		Vec3 Basis_BL(-1.0f, -1.0f, 0.0f);
+		Vec3 Basis_TR(1.0f + Dimensions.x, 1.0f + Dimensions.y, 0.0f);
+		Vec3 Basis_BR(1.0f + Dimensions.x, -1.0f, 0.0f);
 
 		/* Set top left vertex */
- 		Position 			= Model * EM::Vec4(Basis_TL, 1.0);
+ 		Position 			= Model * Vec4(Basis_TL, 1.0);
  		P 					= Position.XYZ() / Position.w;
 		TL.Position[0] 		= P.x;
 		TL.Position[1] 		= P.y;
@@ -178,7 +178,7 @@ namespace Enjon {
 		TL.Color[3] 		= Color.a;
 
 		/* Set bottom left vertex */
- 		Position 			= Model * EM::Vec4(Basis_BL, 1.0);
+ 		Position 			= Model * Vec4(Basis_BL, 1.0);
  		P 					= Position.XYZ() / Position.w;
 		BL.Position[0] 		= P.x;
 		BL.Position[1] 		= P.y;
@@ -201,7 +201,7 @@ namespace Enjon {
 		BL.Color[3] 		= Color.a;
 
 		/* Set top right vertex */
- 		Position 			= Model * EM::Vec4(Basis_TR, 1.0);
+ 		Position 			= Model * Vec4(Basis_TR, 1.0);
  		P 					= Position.XYZ() / Position.w;
 		TR.Position[0] 		= P.x;
 		TR.Position[1] 		= P.y;
@@ -224,7 +224,7 @@ namespace Enjon {
 		TR.Color[3] 		= Color.a;
 
 		/* Set bottom right vertex */
- 		Position 			= Model * EM::Vec4(Basis_BR, 1.0);
+ 		Position 			= Model * Vec4(Basis_BR, 1.0);
  		P 					= Position.XYZ() / Position.w;
 		BR.Position[0] 		= P.x;
 		BR.Position[1] 		= P.y;
@@ -247,36 +247,36 @@ namespace Enjon {
 		BR.Color[3] 		= Color.a;
 	}
 
-	QuadGlyph::QuadGlyph(EM::Transform& Transform, EM::Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
+	QuadGlyph::QuadGlyph(Transform& Transform, Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
 	:	Texture(_Texture), Depth(_Depth)
 	{
 		// Transform all verticies by model matrix
-		EM::Mat4 Model;
+		Mat4 Model;
 		// L = T*R*S
-		Model *= EM::Mat4::Translate(Transform.Position);
-		Model *= EM::QuaternionToMat4(Transform.Rotation);
-		Model *= EM::Mat4::Scale(Transform.Scale);
+		Model *= Mat4::Translate(Transform.Position);
+		Model *= Enjon::QuaternionToMat4(Transform.Rotation);
+		Model *= Mat4::Scale(Transform.Scale);
 
-		EM::Vec4 Position, Normal, Tangent, Bitangent;
-		EM::Vec3 T, B, N, P;
+		Vec4 Position, Normal, Tangent, Bitangent;
+		Vec3 T, B, N, P;
 		Enjon::Vec2 UV;
 
 		// Normal for all verticies
-		Normal = Model * EM::Vec4(Static_Normal, 0.0);
-		N = EM::Vec3::Normalize(Normal.XYZ());
+		Normal = Model * Vec4(Static_Normal, 0.0);
+		N = Vec3::Normalize(Normal.XYZ());
 
 		// Tangent for all verticies
-		Tangent = Model * EM::Vec4(Static_Tangent, 0.0);
-		T = EM::Vec3::Normalize(Tangent.XYZ());
+		Tangent = Model * Vec4(Static_Tangent, 0.0);
+		T = Vec3::Normalize(Tangent.XYZ());
 
 		// Reorthogonalize with respect to N
-		T = EM::Vec3::Normalize(T - T.Dot(N) * N);
+		T = Vec3::Normalize(T - T.Dot(N) * N);
 
 		// Calculate Bitangent
-		B = EM::Vec3::Normalize( ( Model * EM::Vec4( ( N.Cross(T) * 1.0), 0.0 )).XYZ());
+		B = Vec3::Normalize( ( Model * Vec4( ( N.Cross(T) * 1.0), 0.0 )).XYZ());
 
 		/* Set top left vertex */
- 		Position 			= Model * EM::Vec4(Static_TL, 1.0);
+ 		Position 			= Model * Vec4(Static_TL, 1.0);
  		P 					= Position.XYZ() / Position.w;
 		TL.Position[0] 		= P.x;
 		TL.Position[1] 		= P.y;
@@ -299,7 +299,7 @@ namespace Enjon {
 		TL.Color[3] 		= Color.a;
 
 		/* Set bottom left vertex */
- 		Position 			= Model * EM::Vec4(Static_BL, 1.0);
+ 		Position 			= Model * Vec4(Static_BL, 1.0);
  		P 					= Position.XYZ() / Position.w;
 		BL.Position[0] 		= P.x;
 		BL.Position[1] 		= P.y;
@@ -323,7 +323,7 @@ namespace Enjon {
 
 
 		/* Set top right vertex */
- 		Position 			= Model * EM::Vec4(Static_TR, 1.0);
+ 		Position 			= Model * Vec4(Static_TR, 1.0);
  		P 					= Position.XYZ() / Position.w;
 		TR.Position[0] 		= P.x;
 		TR.Position[1] 		= P.y;
@@ -346,7 +346,7 @@ namespace Enjon {
 		TR.Color[3] 		= Color.a;
 
 		/* Set bottom right vertex */
- 		Position 			= Model * EM::Vec4(Static_BR, 1.0);
+ 		Position 			= Model * Vec4(Static_BR, 1.0);
  		P 					= Position.XYZ() / Position.w;
 		BR.Position[0] 		= P.x;
 		BR.Position[1] 		= P.y;
@@ -408,8 +408,8 @@ namespace Enjon {
 	}
 
 	void QuadBatch::Add(
-						EM::Transform& Transform, 
-						EM::Vec4& UVRect, 
+						Transform& Transform, 
+						Vec4& UVRect, 
 						GLuint Texture, 
 						ColorRGBA16& Color, 
 						float Depth
@@ -421,8 +421,8 @@ namespace Enjon {
 	// Adds quadglyph to quadbatch to be rendered with base quad defined
 	void QuadBatch::Add(
 					Enjon::Vec2& Dimensions, 
-					EM::Transform& Transform, 
-					EM::Vec4& UVRect, 
+					Transform& Transform, 
+					Vec4& UVRect, 
 					GLuint Texture, 
 					ColorRGBA16& Color, 
 					float Depth
@@ -433,7 +433,7 @@ namespace Enjon {
 
 
 	// Adds quadglyph to quadbatch to be rendered with base quad defined
-	void QuadBatch::Add(EM::Vec3& TLP, EM::Vec3& BLP, EM::Vec3& BRP, EM::Vec3& TRP, EM::Vec4& UVRect, GLuint Texture, ColorRGBA16& Color, float Depth)
+	void QuadBatch::Add(Vec3& TLP, Vec3& BLP, Vec3& BRP, Vec3& TRP, Vec4& UVRect, GLuint Texture, ColorRGBA16& Color, float Depth)
 	{
 		QuadGlyphs.emplace_back(TLP, BLP, BRP, TRP, UVRect, Texture, Color, Depth);
 	}

@@ -1,3 +1,7 @@
+// Copyright 2016-2017 John Jackson. All Rights Reserved.
+// File: Quaternion.h
+
+#pragma once
 #ifndef ENJON_QUATERNION_H
 #define ENJON_QUATERNION_H
 
@@ -9,136 +13,124 @@
 #include <Math/Common.h>
 #include <Math/Mat4.h>
 
-namespace Enjon { namespace Math {
-
-	struct Quaternion
+namespace Enjon 
+{ 
+	class Quaternion
 	{
-		Quaternion() : x(0), y(0), z(0), w(1) {}
+		public: 
 
-		Quaternion(const f32& X, const f32& Y, const f32& Z, const f32& W) : x(X), y(Y), z(Z), w(W) {}
+			Quaternion() 
+				: x(0), y(0), z(0), w(1) 
+			{}
 
-		Quaternion(const EM::Vec3& N, f32 _w)
-			: 
-			x(N.x), 
-			y(N.y), 
-			z(N.z), 
-			w(_w)
-		{}
+			Quaternion(const f32& _x, const f32& _y, const f32& _z, const f32& _w) 
+				: x(_x), y(_y), z(_z), w(_w) 
+			{
+			}
 
-		Quaternion::Quaternion(Quaternion& Q)
-			: 
-			x(Q.x), 
-			y(Q.y), 
-			z(Q.z),
-			w(Q.w)
-		{}
+			Quaternion(const Vec3& vec, f32 _w)
+				: x(vec.x), y(vec.y), z(vec.z), w(_w)
+			{}
 
-		Quaternion::Quaternion(const Quaternion& Q)
-			: 
-			x(Q.x),
-			y(Q.y),
-			z(Q.z),
-			w(Q.w)
-		{}
+			Quaternion::Quaternion(const Quaternion& q)
+				: x(q.x), y(q.y), z(q.z), w(q.w) 
+			{} 
 
-		// Return vec3 of x,y,z components of quaternion
-		Vec3 XYZ();
+			// Return vec3 of x,y,z components of quaternion
+			Vec3 XYZ();
 
-		// Negative unary operator overload
-		Quaternion operator-() const;
+			// Negative unary operator overload
+			Quaternion operator-() const;
 
-		// Addition operator overload
-		Quaternion operator+(const Quaternion& Other) const;
+			// Addition operator overload
+			Quaternion operator+(const Quaternion& Other) const;
 
-		// Subtraction operator overload
-		Quaternion operator-(const Quaternion& Other) const;
+			// Subtraction operator overload
+			Quaternion operator-(const Quaternion& Other) const;
 
-		// Multiplication operator overload
-		Quaternion operator*(const Quaternion& Other) const;
+			// Multiplication operator overload
+			Quaternion operator*(const Quaternion& Other) const;
 
-		// Multiplication operator with scalar
-		Quaternion operator*(f32 V) const;
+			// Multiplication operator with scalar
+			Quaternion operator*(const f32& V) const;
 
-		// Division operator overload with f32
-		Quaternion operator/(f32 V) const;
+			// Division operator overload with f32
+			Quaternion operator/(const f32& V) const; 
+		
+			Vec3 operator*(const Vec3& V) const;
 
-		// Equality operator
-		bool operator==(const Quaternion& Other) const;
+			// Equality operator
+			bool operator==(const Quaternion& Other) const;
 
-		// Inequality operator
-		bool operator!=(const Quaternion& Other) const;
+			// Inequality operator
+			bool operator!=(const Quaternion& Other) const;
 
-		// Operator stream overload
-		friend std::ostream& operator<<(std::ostream& stream, const Quaternion& Q);
+			// Operator stream overload
+			friend std::ostream& operator<<(std::ostream& stream, const Quaternion& Q);
 
-		// Gets length of quaternion
-		f32 Length();
+			// Gets length of quaternion
+			f32 Length();
 
-		// Normalizes length of quaternion to 1
-		Quaternion Normalize();
+			// Normalizes length of quaternion to 1
+			Quaternion Normalize();
 
-		// Returns conjugate of quaternion
-		Quaternion Conjugate() const;
+			// Returns conjugate of quaternion
+			Quaternion Conjugate() const;
 
-		// Returns dot product with another quaternion
-		f32 Dot(Quaternion& Q);
+			// Returns dot product with another quaternion
+			f32 Dot(Quaternion& Q);
 
-		// Returns cross product with another quaternion
-		Quaternion Cross(const Quaternion& Q) const;
+			// Returns cross product with another quaternion
+			Quaternion Cross(const Quaternion& Q) const;
 
-		// Returns inverse of quaternion
-		Quaternion Inverse(Quaternion& Q);
+			// Returns inverse of quaternion
+			Quaternion Inverse(Quaternion& Q);
 
-		// Get angle from quaternion in radians
-		f32 Angle();
+			// Get angle from quaternion in radians
+			f32 Angle();
 
-		// Get axis from quaternion
-		Vec3 Axis();
+			// Get axis from quaternion
+			Vec3 Axis();
 
-		// Get Euler roll from quaternion
-		f32 Roll();
+			// Get Euler roll from quaternion
+			f32 Roll();
 
-		// Get Euler pitch from quaternion
-		f32 Pitch();
+			// Get Euler pitch from quaternion
+			f32 Pitch();
 
-		// Get Euler yaw from quaternion
-		f32 Yaw();
+			// Get Euler yaw from quaternion
+			f32 Yaw();
 
-		// Get Euler Angles from quaternion
-		EM::Vec3 EulerAngles();
+			// Get Euler Angles from quaternion
+			Vec3 EulerAngles(); 
+			
+			static inline Quaternion AngleAxis(const f32& Angle, const Vec3& Axis)
+			{
+				Quaternion Q;
 
-		static inline Quaternion AngleAxis(const f32& Angle, const Vec3& Axis)
-		{
-			Quaternion Q;
+				// Normalize axis first	
+				Vec3 A = Vec3::Normalize(Axis);
 
-			// Normalize axis first	
-			Vec3 A = EM::Vec3::Normalize(Axis);
+				// Get scalar
+				const f32 S = std::sin(0.5f * Angle); 
 
-			// Get scalar
-			const f32 S = std::sin(0.5f * Angle); 
+				// Set Q
+				Q.x = A.x * S;
+				Q.y = A.y * S;
+				Q.z = A.z * S;
+				Q.w = std::cos(0.5f * Angle);
 
-			// Set Q
-			Q.x = A.x * S;
-			Q.y = A.y * S;
-			Q.z = A.z * S;
-			Q.w = std::cos(0.5f * Angle);
+				return Q;
+			}
 
-			return Q;
-		}
+			// Member variables
+			f32 x, y, z, w;
+	}; 
 
-		// Member variables
-		f32 x, y, z, w;
-	};
-
-	inline Quaternion operator*(f32 V, const Quaternion& Q)
+	static inline Enjon::Mat4 QuaternionToMat4(Quaternion B)
 	{
-		return Q * V;	
-	}
-
-	inline Mat4 QuaternionToMat4(Quaternion B)
-	{
-		Mat4 Mat = EM::Mat4::Identity();
-		auto Q = B.Normalize();
+		Mat4 Mat = Mat4::Identity();
+		Quaternion Q = B.Normalize();
 
 		f32 xx = Q.x*Q.x;	
 		f32 yy = Q.y*Q.y;	
@@ -166,7 +158,7 @@ namespace Enjon { namespace Math {
 	}
 
 	// NOTE(John): Assumes matrix is only rotational matrix and has no skew applied
-	inline Quaternion Mat4ToQuaternion(const EM::Mat4& Mat)
+	static inline Quaternion Mat4ToQuaternion(const Mat4& Mat)
 	{
 		Quaternion Q;
 		auto& E = Mat.elements;
@@ -237,21 +229,13 @@ namespace Enjon { namespace Math {
 			{
 
 			}
-			break;
-
+			break; 
 		}
 
 		return Q;
-	}
+	} 
+}
 
-	inline Vec3 operator*(const Quaternion& Q, const Vec3& V)
-	{
-		auto Qxyz = EM::Vec3(Q.x, Q.y, Q.z);
-		Vec3 T = 2.0f * Qxyz.Cross(V);
-		return (V + Q.w * T + Qxyz.Cross(T));
-	}
-}}
-
-typedef Enjon::Math::Quaternion quat;
+typedef Enjon::Quaternion quat;
 
 #endif

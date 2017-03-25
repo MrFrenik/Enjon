@@ -113,8 +113,8 @@ namespace Enjon { namespace GUI {
 		void Draw(SpriteBatch* Batch)
 		{
 			Batch->Add(
-							EM::Vec4(Position, Dimensions),
-							EM::Vec4(0, 0, 1, 1),
+							Vec4(Position, Dimensions),
+							Vec4(0, 0, 1, 1),
 							Enjon::ResourceManager::GetTexture("../Assets/Textures/Default.png").id
 						);
 

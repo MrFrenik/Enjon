@@ -29,7 +29,7 @@ namespace Enjon { namespace Animation {
 		// Create ImageFrame
 		ImageFrame IF = 
 						{
-							EM::Vec4(x, y, w, h),
+							Vec4(x, y, w, h),
 							Enjon::Vec2(0.0f),
 							SourceSize,
 							{},
@@ -123,10 +123,10 @@ namespace Enjon { namespace Animation {
 		auto AHeight = A.AtlasSize.y;
 
 		Batch->Add(
-					EM::Vec4(Position.x + Offsets.x * ScalingFactor, 
+					Vec4(Position.x + Offsets.x * ScalingFactor, 
 							Position.y + Offsets.y * ScalingFactor, 
 							Enjon::Vec2(SSize.x, SSize.y) * ScalingFactor), 
-					EM::Vec4(Dims.x / AWidth, 
+					Vec4(Dims.x / AWidth, 
 							(AHeight - Dims.y - Dims.w) / AHeight, 
 							 Dims.z / AWidth, 
 							 Dims.w / AHeight), 

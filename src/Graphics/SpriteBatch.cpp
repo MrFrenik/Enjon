@@ -48,14 +48,14 @@ namespace Enjon {
 			CreateRenderBatches();
 		}
 
-		void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture,
+		void SpriteBatch::Add(const Vec4& destRect, const Vec4& uvRect, GLuint texture,
 			const ColorRGBA16& color /* = ColorRGBA16(255) */, float depth /* = 0.0f ) */, DrawOption Options,
 			ColorRGBA16 BorderColor, float BorderThickness, const Enjon::Vec2& ShadowOffset, float BorderRadius)
 		{
 			if (Options & DrawOptions::SHADOW)
 			{
 				// Make this a shadow texture
-				m_glyphs.emplace_back(NewGlyph(EM::Vec4(destRect.x + ShadowOffset.x, destRect.y - ShadowOffset.y, destRect.z, destRect.w), uvRect, texture, depth, SetOpacity(RGBA16_Black(), 0.3f)));
+				m_glyphs.emplace_back(NewGlyph(Vec4(destRect.x + ShadowOffset.x, destRect.y - ShadowOffset.y, destRect.z, destRect.w), uvRect, texture, depth, SetOpacity(RGBA16_Black(), 0.3f)));
 			}
 
 			if (Options & DrawOptions::BORDER)
@@ -69,14 +69,14 @@ namespace Enjon {
 		}
 
 		/* Adds glpyh to spritebatch to be rendered with specified rotation */
-		void SpriteBatch::Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, CoordinateFormat format, DrawOption Options)
+		void SpriteBatch::Add(const Vec4& destRect, const Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, CoordinateFormat format, DrawOption Options)
 		{
 			// Place back new glyph
 			m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color, angle, format));
 		}
 
 		/* Adds polygon glyph to spritebatch to be rendered */
-		void SpriteBatch::AddPolygon(std::vector<Enjon::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, CoordinateFormat format)
+		void SpriteBatch::AddPolygon(std::vector<Enjon::Vec2>& Points, const Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, CoordinateFormat format)
 		{
 			// Place back new glyph
 			m_glyphs.emplace_back(NewPolygon(Points, uvRect, texture, color, depth, format));
@@ -237,7 +237,7 @@ namespace Enjon {
 			return (a->texture < b->texture);
 		}
 
-		void DrawRectBorder(SpriteBatch* Batch, const EM::Vec4& Dims, float Thickness, ColorRGBA16& Color, float Depth, float BorderRadius)
+		void DrawRectBorder(SpriteBatch* Batch, const Vec4& Dims, float Thickness, ColorRGBA16& Color, float Depth, float BorderRadius)
 		{
 			/*
 				|-  z  -|
@@ -263,7 +263,7 @@ namespace Enjon {
 			EndX = Dims.x + Dims.z;
 			EndY = Y;
 
-			Shapes::DrawLine(Batch, EM::Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
+			Shapes::DrawLine(Batch, Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
 			Shapes::DrawHollowCircle(
 				Batch,
 				Enjon::Vec2(
@@ -287,7 +287,7 @@ namespace Enjon {
 			EndX = X;
 			EndY = Dims.y;
 
-			Shapes::DrawLine(Batch, EM::Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
+			Shapes::DrawLine(Batch, Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
 			Shapes::DrawHollowCircle(
 				Batch,
 				Enjon::Vec2(
@@ -311,7 +311,7 @@ namespace Enjon {
 			EndX = Dims.x + Dims.z;
 			EndY = Y;
 
-			Enjon::Shapes::DrawLine(Batch, EM::Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
+			Enjon::Shapes::DrawLine(Batch, Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
 			Enjon::Shapes::DrawHollowCircle(
 				Batch,
 				Enjon::Vec2(
@@ -335,7 +335,7 @@ namespace Enjon {
 			EndX = X;
 			EndY = Dims.y + Dims.w;
 
-			Enjon::Shapes::DrawLine(Batch, EM::Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
+			Enjon::Shapes::DrawLine(Batch, Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
 
 			X = Dims.x;
 			Y = Dims.y + Dims.w + Thickness / 2.0f;

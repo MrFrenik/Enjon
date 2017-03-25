@@ -4,19 +4,22 @@
 
 namespace Enjon
 {
-	//--------------------------------------------------------------------
+	//====================================================================
+
 	GraphicsComponent::GraphicsComponent()
 	{
 		
 	}
 
-	//--------------------------------------------------------------------
-	GraphicsComponent::GraphicsComponent(Renderable& renderable)
+	//====================================================================
+
+	GraphicsComponent::GraphicsComponent(const Renderable& renderable)
 		: mRenderable(renderable)
 	{
 	}
 
-	//--------------------------------------------------------------------
+	//====================================================================
+
 	GraphicsComponent::~GraphicsComponent()
 	{
 		if (mRenderable.GetScene() != nullptr)
@@ -25,68 +28,135 @@ namespace Enjon
 		}
 	}
 
-	//--------------------------------------------------------------------
+	//====================================================================
+
 	void GraphicsComponent::Destroy()
 	{
 		DestroyBase<GraphicsComponent>();
 	}
 
-	//--------------------------------------------------------------------
-	void GraphicsComponent::Update(float dt)
+	//====================================================================
+
+	void GraphicsComponent::Update(f32 dt)
 	{
 		mRenderable.SetTransform(mEntity->GetWorldTransform());
 	}
+	
+	//====================================================================
+		
+	Vec3 GraphicsComponent::GetPosition() const
+	{ 
+		return mRenderable.GetPosition(); 
+	}
+	
+	//====================================================================
 
-	//--------------------------------------------------------------------
-	void GraphicsComponent::SetPosition(EM::Vec3& position)
+	Vec3 GraphicsComponent::GetScale() const
+	{ 
+		return mRenderable.GetScale(); 
+	}
+
+	//====================================================================
+
+	Quaternion GraphicsComponent::GetRotation() const 
+	{ 
+		return mRenderable.GetRotation(); 
+	}
+
+	//====================================================================
+
+	Material* GraphicsComponent::GetMaterial()
+	{ 
+		return mRenderable.GetMaterial(); 
+	}
+
+	//====================================================================
+
+	Mesh* GraphicsComponent::GetMesh() const
+	{ 
+		return mRenderable.GetMesh(); 
+	}
+
+	//====================================================================
+
+	Scene* GraphicsComponent::GetScene() const
+	{ 
+		return mRenderable.GetScene(); 
+	}
+
+	//====================================================================
+
+	Transform GraphicsComponent::GetTransform() const 
+	{ 
+		return mRenderable.GetTransform(); 
+	} 
+
+	//====================================================================
+
+	Renderable* GraphicsComponent::GetRenderable()
+	{ 
+		return &mRenderable; 
+	}
+
+	//====================================================================
+
+	void GraphicsComponent::SetPosition(const Vec3& position)
 	{
 		mRenderable.SetPosition(position);
 	}
 
-	//--------------------------------------------------------------------
-	void GraphicsComponent::SetScale(EM::Vec3& scale)
+	//====================================================================
+
+	void GraphicsComponent::SetScale(const Vec3& scale)
 	{
 		mRenderable.SetScale(scale);
 	}
 
-	//--------------------------------------------------------------------
-	void GraphicsComponent::SetScale(f32 scale)
+	//====================================================================
+
+	void GraphicsComponent::SetScale(const f32& scale)
 	{
 		mRenderable.SetScale(scale);
 	}
 
-	//--------------------------------------------------------------------
-	void GraphicsComponent::SetRotation(EM::Quaternion& rotation)
+	//====================================================================
+
+	void GraphicsComponent::SetRotation(const Quaternion& rotation)
 	{
 		mRenderable.SetRotation(rotation);
 	}
 
-	//--------------------------------------------------------------------
+	//====================================================================
+
 	void GraphicsComponent::SetMaterial(Material* material)
 	{
 		mRenderable.SetMaterial(material);
 	}
 
-	//--------------------------------------------------------------------
+	//====================================================================
+
 	void GraphicsComponent::SetMesh(Mesh* mesh)
 	{
 		mRenderable.SetMesh(mesh);
 	}
 
-	//--------------------------------------------------------------------
+	//====================================================================
+
 	void GraphicsComponent::SetScene(Scene* scene)
 	{
 		mRenderable.SetScene(scene);
 	}
 
-	//--------------------------------------------------------------------
-	void GraphicsComponent::SetRenderable(Renderable& renderable)
+	//==================================================================== 
+
+	void GraphicsComponent::SetRenderable(const Renderable& renderable)
 	{
 		mRenderable = renderable;
 	}
 
-	//--------------------------------------------------------------------
-	void GraphicsComponent::SetColor(TextureSlotType type, ColorRGBA16& color)
+	//====================================================================
+
+	void GraphicsComponent::SetColor(TextureSlotType type, const ColorRGBA16& color)
 	{
 		mRenderable.SetColor(type, color);	
 	}

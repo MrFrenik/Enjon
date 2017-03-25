@@ -57,7 +57,7 @@ namespace Enjon {
 			return NewVec;
 		}
 
-		inline Glyph NewGlyph(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, float depth, const ColorRGBA16& color)
+		inline Glyph NewGlyph(const Vec4& destRect, const Vec4& uvRect, GLuint texture, float depth, const ColorRGBA16& color)
 		{
 			Glyph glyph;
 
@@ -82,7 +82,7 @@ namespace Enjon {
 			return glyph;
 		}
 
-		inline Glyph NewPolygon(std::vector<Enjon::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, CoordinateFormat format)
+		inline Glyph NewPolygon(std::vector<Enjon::Vec2>& Points, const Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, CoordinateFormat format)
 		{
 			Glyph glyph;
 
@@ -93,10 +93,10 @@ namespace Enjon {
 
 			if (format == CoordinateFormat::ISOMETRIC)
 			{
-				*TL = Enjon::Math::CartesianToIso(*TL);
-				*TR = Enjon::Math::CartesianToIso(*TR);
-				*BL = Enjon::Math::CartesianToIso(*BL);
-				*BR = Enjon::Math::CartesianToIso(*BR);
+				*TL = Enjon::CartesianToIso(*TL);
+				*TR = Enjon::CartesianToIso(*TR);
+				*BL = Enjon::CartesianToIso(*BL);
+				*BR = Enjon::CartesianToIso(*BR);
 			}
 
 			/* Set topLeft vertex */
@@ -121,7 +121,7 @@ namespace Enjon {
 
 		}
 
-		inline Glyph NewGlyph(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, float depth, const ColorRGBA16& color, float angle, CoordinateFormat Format)
+		inline Glyph NewGlyph(const Vec4& destRect, const Vec4& uvRect, GLuint texture, float depth, const ColorRGBA16& color, float angle, CoordinateFormat Format)
 		{
 			Glyph glyph;
 
@@ -142,10 +142,10 @@ namespace Enjon {
 
 			if (Format == CoordinateFormat::ISOMETRIC)
 			{
-				tl = Enjon::Math::CartesianToIso(tl);
-				bl = Enjon::Math::CartesianToIso(bl);
-				br = Enjon::Math::CartesianToIso(br);
-				tr = Enjon::Math::CartesianToIso(tr);
+				tl = Enjon::CartesianToIso(tl);
+				bl = Enjon::CartesianToIso(bl);
+				br = Enjon::CartesianToIso(br);
+				tr = Enjon::CartesianToIso(tr);
 			}
 
 
@@ -216,14 +216,14 @@ namespace Enjon {
 			void End();
 
 			/* Adds glpyh to spritebatch to be rendered */
-			void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture = 0, const ColorRGBA16& color = RGBA16(1.0f), float depth = 0.0f, DrawOption Options = DrawOptions::DEFAULT_DRAW,
+			void Add(const Vec4& destRect, const Vec4& uvRect, GLuint texture = 0, const ColorRGBA16& color = RGBA16(1.0f), float depth = 0.0f, DrawOption Options = DrawOptions::DEFAULT_DRAW,
 				ColorRGBA16 BorderColor = RGBA16_White(), float BorderThickness = 1.0f, const Enjon::Vec2& ShadowOffset = Enjon::Vec2(5.0f, 5.0f), float BorderRadius = 1.0f);
 
 			/* Adds glpyh to spritebatch to be rendered with specified rotation */
-			void Add(const Enjon::Math::Vec4& destRect, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, CoordinateFormat Format = CoordinateFormat::CARTESIAN, DrawOption Options = DrawOptions::DEFAULT_DRAW);
+			void Add(const Vec4& destRect, const Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, CoordinateFormat Format = CoordinateFormat::CARTESIAN, DrawOption Options = DrawOptions::DEFAULT_DRAW);
 
 			/* Adds polygon glyph to spritebatch to be rendered */
-			void AddPolygon(std::vector<Enjon::Vec2>& Points, const Enjon::Math::Vec4& uvRect, GLuint texture, const ColorRGBA16& color = RGBA16_White(), float depth = 0.0f, CoordinateFormat = CoordinateFormat::CARTESIAN);
+			void AddPolygon(std::vector<Enjon::Vec2>& Points, const Vec4& uvRect, GLuint texture, const ColorRGBA16& color = RGBA16_White(), float depth = 0.0f, CoordinateFormat = CoordinateFormat::CARTESIAN);
 
 			/* Renders entire batch to screen */
 			void RenderBatch();
@@ -257,7 +257,7 @@ namespace Enjon {
 			std::vector<Enjon::RenderBatch> m_renderBatches;
 		};
 
-		void DrawRectBorder(SpriteBatch* Batch, const EM::Vec4& Dims, float Thickness = 1.0f, ColorRGBA16& Color = RGBA16_White(), float Depth = 0.0f, float BorderRadius = 1.0f);
+		void DrawRectBorder(SpriteBatch* Batch, const Vec4& Dims, float Thickness = 1.0f, ColorRGBA16& Color = RGBA16_White(), float Depth = 0.0f, float BorderRadius = 1.0f);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

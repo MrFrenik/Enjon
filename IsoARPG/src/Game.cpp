@@ -35,6 +35,8 @@ btAlignedObjectArray<btCollisionShape*> collisionShapes;
 // Physics entities to align with rigid bodies
 std::vector<Enjon::Entity*> mPhysicsEntities;
 
+Enjon::String mAssetsPath;
+
 //-------------------------------------------------------------
 Game::Game()
 {
@@ -48,6 +50,9 @@ Game::~Game()
 //-------------------------------------------------------------
 void Game::Initialize()
 {
+	// Set up assets path
+	mAssetsPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("IsoARPG/Assets/");
+
 	// Create entity manager
 	mEntities = new Enjon::EntityManager();
 
@@ -66,15 +71,18 @@ void Game::Initialize()
 	mGun->AddChild(mGreen);
 	mGreen->AddChild(mRed);
 
-	mGunMesh 	= Enjon::ResourceManager::GetMesh("../IsoARPG/Assets/Models/cerebus.obj");
-	mSphereMesh = Enjon::ResourceManager::GetMesh("../IsoARPG/Assets/Models/unit_sphere.obj");
-	mBuddhaMesh = Enjon::ResourceManager::GetMesh("../IsoARPG/Assets/Models/buddha.obj");
+	fmt::print("root: {}\n", Enjon::Engine::GetInstance()->GetConfig().GetRoot());
+	fmt::print("{}\n", mAssetsPath);
+
+	mGunMesh 	= Enjon::ResourceManager::GetMesh(mAssetsPath + "Models/cerebus.obj");
+	mSphereMesh = Enjon::ResourceManager::GetMesh(mAssetsPath + "Models/unit_sphere.obj");
+	mBuddhaMesh = Enjon::ResourceManager::GetMesh(mAssetsPath + "Models/buddha.obj");
 
 	mRedMat 	= new Enjon::Material;
-	mRedMat->SetTexture(Enjon::TextureSlotType::ALBEDO, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Albedo.png"));
-	mRedMat->SetTexture(Enjon::TextureSlotType::NORMAL, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Normal.png"));
-	mRedMat->SetTexture(Enjon::TextureSlotType::METALLIC, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png"));
-	mRedMat->SetTexture(Enjon::TextureSlotType::ROUGHNESS, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png"));
+	mRedMat->SetTexture(Enjon::TextureSlotType::ALBEDO, Enjon::ResourceManager::GetTexture(mAssetsPath + "Materials/RustedIron/Albedo.png"));
+	mRedMat->SetTexture(Enjon::TextureSlotType::NORMAL, Enjon::ResourceManager::GetTexture(mAssetsPath + "Materials/RustedIron/Normal.png"));
+	mRedMat->SetTexture(Enjon::TextureSlotType::METALLIC, Enjon::ResourceManager::GetTexture(mAssetsPath + "Materials/RustedIron/Metallic.png"));
+	mRedMat->SetTexture(Enjon::TextureSlotType::ROUGHNESS, Enjon::ResourceManager::GetTexture(mAssetsPath + "Materials/RustedIron/Roughness.png"));
 	mRedMat->SetTexture(Enjon::TextureSlotType::EMISSIVE, Enjon::ResourceManager::GetTexture("../Assets/Textures/red.png"));
 
 	mBlueMat 	= new Enjon::Material;
@@ -121,7 +129,7 @@ void Game::Initialize()
 	mSun->SetIntensity(10.0f);
 	mSun->SetColor(Enjon::RGBA16_Orange());
 
-	auto mSun2 = new Enjon::DirectionalLight(EM::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA16_SkyBlue(), 10.0f);
+	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA16_SkyBlue(), 10.0f);
 
 	// Ground
 	mBatch = new Enjon::QuadBatch();
@@ -152,10 +160,10 @@ void Game::Initialize()
  		{
  			for (auto j = -10; j <10; j++)
  			{
- 				EM::Transform t(EM::Vec3(j * 2, 0, i * 2), quat::AngleAxis(EM::ToRadians(90), EM::Vec3(1, 0, 0)), EM::Vec3(1, 1, 1));
+ 				Enjon::Transform t(Enjon::Vec3(j * 2, 0, i * 2), quat::AngleAxis(Enjon::ToRadians(90), Enjon::Vec3(1, 0, 0)), Enjon::Vec3(1, 1, 1));
  				mBatch->Add(
  							t, 
- 							EM::Vec4(0, 0, 1, 1),
+ 							Enjon::Vec4(0, 0, 1, 1),
  							0
  						);
  			}
@@ -183,8 +191,8 @@ void Game::Initialize()
 
 		// Set graphics camera position
 		auto cam = graphics->GetSceneCamera();
-		cam->SetPosition(EM::Vec3(0, 0, -10));
-		cam->LookAt(EM::Vec3(0, 0, 0));
+		cam->SetPosition(Enjon::Vec3(0, 0, -10));
+		cam->LookAt(Enjon::Vec3(0, 0, 0));
 	}
 
 	// Set up ImGui window
@@ -273,6 +281,8 @@ void Game::Initialize()
 		// Add body to dynamics world
 		mDynamicsWorld->addRigidBody(body); 
 	}
+
+	// Set up assets path
 }
 
 //-------------------------------------------------------------
@@ -333,7 +343,7 @@ void Game::Update(Enjon::f32 dt)
 	if (mRed && mRed->HasComponent<Enjon::GraphicsComponent>())
 	{
 		mRed->SetPosition(v3(3.0f, -20.0f + sin(t * 30.0f) * 3.0f, 3.0f));
-		mRed->SetScale(EM::Clamp(sin(t) * 3.0f, 0.4f, 3.0f));
+		mRed->SetScale(Enjon::Clamp(sin(t) * 3.0f, 0.4f, 3.0f));
 		gc3 = mRed->GetComponent<Enjon::GraphicsComponent>();
 	}
 
@@ -353,8 +363,8 @@ void Game::Update(Enjon::f32 dt)
 			if (entity && entity->HasComponent<Enjon::GraphicsComponent>())
 			{
 				auto gComp = entity->GetComponent<Enjon::GraphicsComponent>();
-				EM::Vec3 pos = EM::Vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-				EM::Quaternion rot = EM::Quaternion(trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), -trans.getRotation().w());
+				Enjon::Vec3 pos = Enjon::Vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+				Enjon::Quaternion rot = Enjon::Quaternion(trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), -trans.getRotation().w());
 				entity->SetPosition(pos);
 				entity->SetRotation(rot);
 			}
@@ -394,16 +404,16 @@ void Game::ProcessInput(f32 dt)
 	    if (mMovementOn)
 	    {
 		    Enjon::Camera* camera = gfx->GetSceneCamera();
-		   	EM::Vec3 velDir(0, 0, 0); 
+		   	Enjon::Vec3 velDir(0, 0, 0); 
 
 			if (input->IsKeyDown(SDLK_w))
 			{
-				EM::Vec3 F = camera->Forward();
+				Enjon::Vec3 F = camera->Forward();
 				velDir += F;
 			}
 			if (input->IsKeyDown(SDLK_s))
 			{
-				EM::Vec3 B = camera->Backward();
+				Enjon::Vec3 B = camera->Backward();
 				velDir += B;
 			}
 			if (input->IsKeyDown(SDLK_a))
@@ -463,7 +473,7 @@ void Game::ProcessInput(f32 dt)
 				mDynamicsWorld->addRigidBody(body);
 		    }
 
-			if (velDir.Length()) velDir = EM::Vec3::Normalize(velDir);
+			if (velDir.Length()) velDir = Enjon::Vec3::Normalize(velDir);
 
 			camera->Transform.Position += mCameraSpeed * dt * velDir;
 
@@ -485,8 +495,8 @@ void Game::ProcessInput(f32 dt)
 			SDL_WarpMouseInWindow(window->GetWindowContext(), (float)viewPort.x / 2.0f, (float)viewPort.y / 2.0f);
 
 			// Offset camera orientation
-			f32 xOffset = EM::ToRadians((f32)viewPort.x / 2.0f - MouseCoords.x) * dt * MouseSensitivity;
-			f32 yOffset = EM::ToRadians((f32)viewPort.y / 2.0f - MouseCoords.y) * dt * MouseSensitivity;
+			f32 xOffset = Enjon::ToRadians((f32)viewPort.x / 2.0f - MouseCoords.x) * dt * MouseSensitivity;
+			f32 yOffset = Enjon::ToRadians((f32)viewPort.y / 2.0f - MouseCoords.y) * dt * MouseSensitivity;
 			camera->OffsetOrientation(xOffset, yOffset);
 
 	    }
@@ -496,7 +506,7 @@ void Game::ProcessInput(f32 dt)
 void Game::Shutdown()
 {
 	printf("%d\n", sizeof(Enjon::Entity));
-	printf("%d\n", sizeof(Enjon::Math::Transform));
+	printf("%d\n", sizeof(Enjon::Transform));
 
 	fmt::print("{}", sizeof(Enjon::Entity));
 	

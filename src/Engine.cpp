@@ -8,7 +8,8 @@
 #include "ImGui/ImGuiManager.h"
 #include "Utils/Timing.h"
 
-#include "SDL2/sdl.h"
+#include <fmt/printf.h> 
+#include <SDL2/sdl.h>
 
 #include <assert.h>
 #include <random>
@@ -37,7 +38,7 @@ namespace Enjon
 	}
 
 	//-------------------------------------------------------
-	Enjon::Result Engine::StartUp()
+	Enjon::Result Engine::StartUp(const EngineConfig& config)
 	{
 		// TODO(): Find out where this should be abstracted into
 		 //Initialize SDL
@@ -58,13 +59,16 @@ namespace Enjon
 		SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE,    8);
 		SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE,    8);
 
+		// Set configuration
+		mConfig = config;
+
 		InitSubsystems();
 
 		return Enjon::Result::SUCCESS;
 	}
 
 	//-------------------------------------------------------
-	Enjon::Result Engine::StartUp(Application* app)
+	Enjon::Result Engine::StartUp(Application* app, const EngineConfig& config)
 	{
 		// Register application 
 		Enjon::Result res = RegisterApplication(app);
@@ -77,7 +81,7 @@ namespace Enjon
 		}
 
 		// Start up engine and subsystems
-		res = StartUp();
+		res = StartUp(config);
 		if (res != Enjon::Result::SUCCESS)
 		{
 			// Error here
@@ -93,6 +97,11 @@ namespace Enjon
 	Engine* Engine::GetInstance()
 	{
 		return mInstance;
+	}
+			
+	const EngineConfig& Engine::GetConfig() const
+	{
+		return mConfig;
 	}
 
 	Enjon::Result Engine::InitSubsystems()
@@ -212,5 +221,35 @@ namespace Enjon
 	    } 
 
 	    return true;
+	}
+
+	Result EngineConfig::ParseArguments(s32 argc, char** argv)
+	{
+		fmt::print("argument count: {}\n", argc);
+
+		// Parse arguments and place into config
+		for (s32 i = 0; i < argc; ++i)
+		{
+			String arg = String(argv[i]); 
+
+			// Set root path
+			if (arg.compare("--enjon_root_path") == 0 && (i + 1) < argc)
+			{
+				mRootPath = String(argv[i + 1]);
+			}
+		}
+
+		fmt::print("here: {}\n", mRootPath);
+
+		// Make sure that root path is set for engine
+		assert((mRootPath.compare("") != 0));
+
+		return Result::SUCCESS;
+	}
+			
+	const String& EngineConfig::GetRoot() const
+	{
+		fmt::print("root before returning: {}\n", mRootPath);
+		return mRootPath;
 	}
 }

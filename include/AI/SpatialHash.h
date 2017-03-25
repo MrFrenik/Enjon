@@ -52,13 +52,13 @@ namespace SpatialHash {
 
 	void DrawActiveCell(Grid* G, Enjon::SpriteBatch* Batch, Enjon::Vec2& Position);
 
-	EM::Vec4 GetCellDimensions(Grid* G, Enjon::Vec2& Cell);
+	Enjon::Vec4 GetCellDimensions(Grid* G, Enjon::Vec2& Cell);
 
 	Enjon::Vec2 FindGridCoordinatesFromIndex(Grid* G, Enjon::uint32 Index);
 
-	void FindCells(Grid* G, Enjon::uint32 Entity, const EP::AABB* AABB, EM::Vec4* CellRange, float ObstructionValue);
+	void FindCells(Grid* G, Enjon::uint32 Entity, const EP::AABB* AABB, Enjon::Vec4* CellRange, float ObstructionValue);
 
-	std::vector<Enjon::uint32> GetEntitiesFromCells(Grid* G, EM::Vec4& Cells);
+	std::vector<Enjon::uint32> GetEntitiesFromCells(Grid* G, Enjon::Vec4& Cells);
 
 	Enjon::uint32 GetGridIndexFromCoordinates(Grid* G, Enjon::Vec2& Coordinates);
 }

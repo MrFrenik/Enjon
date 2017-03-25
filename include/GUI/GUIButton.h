@@ -132,11 +132,11 @@ namespace Enjon { namespace GUI {
 
 			// Draw box
 			Batch->Add(
-						EM::Vec4(
+						Vec4(
 									this->AABB.Min,
 									this->AABB.Max - this->AABB.Min
 								),
-						EM::Vec4(0, 0, 1, 1),
+						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
 						this->Color,
 						this->Depth,
@@ -764,8 +764,8 @@ namespace Enjon { namespace GUI {
 			if (this->TextFont == nullptr) this->TextFont = FontManager::GetFont("WeblySleek_10");
 
 			Batch->Add(
-							EM::Vec4(Position.x, Position.y, this->Dimensions),
-							EM::Vec4(0, 0, 1, 1),
+							Vec4(Position.x, Position.y, this->Dimensions),
+							Vec4(0, 0, 1, 1),
 							Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
 							Color, 
 							0.0f, 
@@ -792,7 +792,7 @@ namespace Enjon { namespace GUI {
 									*Batch, 
 									this->TextColor, 
 									Fonts::TextStyle::SHADOW,
-									EM::ToRadians(180.0f)
+									Enjon::ToRadians(180.0f)
 								);
 
 			// If activated
@@ -804,13 +804,13 @@ namespace Enjon { namespace GUI {
 
 				// Draw box for group
 				Batch->Add(
-							EM::Vec4(
+							Vec4(
 										this->Position.x,
 										this->Position.y - this->YOffset * Amount - 2.0f, 
 										GroupWidth, 
 										20.0f * Amount
 									),
-							EM::Vec4(0, 0, 1, 1),
+							Vec4(0, 0, 1, 1),
 							Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
 							RGBA16_DarkGrey(), 
 							0.0f,
@@ -928,12 +928,12 @@ namespace Enjon { namespace GUI {
 		void Draw(SpriteBatch* Batch)
 		{
 			Batch->Add(
-						EM::Vec4(
+						Vec4(
 									this->Position.x,
 									this->Position.y, 
 									this->Dimensions
 								),
-						EM::Vec4(0, 0, 1, 1),
+						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
 						this->Color, 
 						0.0f,

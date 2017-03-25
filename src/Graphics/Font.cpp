@@ -78,8 +78,8 @@ namespace Enjon { namespace Fonts {
 	        // Now store character for later use
 	        Character character = {
 	            texture,
-	            Enjon::iVec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-	            Enjon::iVec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+	            iVec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+	            iVec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
 	            face->glyph->advance.x
 	        };
 
@@ -132,8 +132,8 @@ namespace Enjon { namespace Fonts {
         GLfloat w = ch.Size.x * scale;
         GLfloat h = ch.Size.y * scale;
 
-        Enjon::Math::Vec4 DestRect(xpos, ypos, w, h);
-        Enjon::Math::Vec4 UV(0.00f, 1.0f, 1.0f, 0.98f);
+        Vec4 DestRect(xpos, ypos, w, h);
+        Vec4 UV(0.00f, 1.0f, 1.0f, 0.98f);
 
         *advance = x + (ch.Advance >> 6) * scale;
 
@@ -186,8 +186,8 @@ namespace Enjon { namespace Fonts {
 	        GLfloat w = ch.Size.x * scale;
 	        GLfloat h = ch.Size.y * scale;
 
-	        Enjon::Math::Vec4 DestRect(xpos, ypos, w, h);
-	        Enjon::Math::Vec4 UV(0.00f, 0.05f, 1.0f, 0.90f);
+	        Vec4 DestRect(xpos, ypos, w, h);
+	        Vec4 UV(0.00f, 0.05f, 1.0f, 0.90f);
 
 	        // Add to batch
 	        if (Angle) Batch.Add(DestRect, UV, ch.TextureID, Color, Depth, Angle);
@@ -199,11 +199,11 @@ namespace Enjon { namespace Fonts {
 
 	}
 
-	void PrintText(EM::Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA16 Color, float Spacing, TextStyle Style)
+	void PrintText(Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA16 Color, float Spacing, TextStyle Style)
 	{
-		EM::Vec3& Position = Transform.Position;
-		EM::Quaternion& Rotation = Transform.Rotation;
-		EM::Vec3& Scale = Transform.Scale;
+		Vec3& Position = Transform.Position;
+		Quaternion& Rotation = Transform.Rotation;
+		Vec3& Scale = Transform.Scale;
 
 		float x = Transform.Position.x;
 		float y = Transform.Position.y;
@@ -225,15 +225,15 @@ namespace Enjon { namespace Fonts {
 	        GLfloat w = ch.Size.x;
 	        GLfloat h = ch.Size.y;
 
-	        Enjon::Math::Vec4 UV(0.00f, 0.05f, 1.0f, 0.90f);
+	        Vec4 UV(0.00f, 0.05f, 1.0f, 0.90f); 
 
 	        // Add to batch
 	        Batch.Add(
-						Enjon::Vec2(w, h),
-	        			EM::Transform(
-	        							EM::Vec3(xpos, ypos, Position.z),
+						Vec2(w, h),
+	        			Enjon::Transform(
+	        							Vec3(xpos, ypos, Position.z),
 	        							Rotation,
-	        							EM::Vec3(Scale.x, Scale.y, 1.0f)
+	        							Vec3(Scale.x, Scale.y, 1.0f)
 	        						),
 	        			UV,
 	        			ch.TextureID, 

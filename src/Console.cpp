@@ -104,8 +104,8 @@ namespace Enjon {
 			Batch.Begin();
 			{
 				Batch.Add(
-								EM::Vec4(-ScreenWidth * 0.5f, -ScreenHeight * 0.5f, ScreenWidth / 3, ScreenHeight / 4),
-								EM::Vec4(0, 0, 1, 1),
+								Vec4(-ScreenWidth * 0.5f, -ScreenHeight * 0.5f, ScreenWidth / 3, ScreenHeight / 4),
+								Vec4(0, 0, 1, 1),
 								Enjon::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
 								SetOpacity(RGBA16_DarkGrey(), 0.8f)
 							);

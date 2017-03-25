@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-namespace Enjon { namespace Math { 
+namespace Enjon {
 
 	Mat4::Mat4()
 	{
@@ -11,7 +11,7 @@ namespace Enjon { namespace Math {
 		*this = Mat4::Identity();
 	}
 
-	Mat4::Mat4(float diagonal)
+	Mat4::Mat4(const f32& diagonal)
 	{
 		for (int i = 0; i < 4 * 4; i++)
 			elements[i] = 0.0f;
@@ -23,15 +23,23 @@ namespace Enjon { namespace Math {
 		elements[3 + 3 * 4] = diagonal;
 
 	}
+			
+	Mat4::Mat4(const Mat4& other)
+	{ 
+		for (u32 i = 0; i < 16; ++i)
+		{
+			elements[i] = other.elements[i];
+		}
+	}
 		
 	Mat4& Mat4::Multiply(const Mat4& other)
 	{ 
-		float data[16];
+		f32 data[16];
 		for (int y = 0; y < 4; y++)
 		{
 			for (int x = 0; x < 4; x++)
 			{
-				float sum = 0.0f;
+				f32 sum = 0.0f;
 				for (int e = 0; e < 4; e++)
 				{
 					sum += elements[x + e * 4] * other.elements[e + y * 4];
@@ -39,7 +47,7 @@ namespace Enjon { namespace Math {
 				data[x + y * 4] = sum;
 			}
 		}
-		memcpy(elements, data, 4 * 4 * sizeof(float));
+		memcpy(elements, data, 4 * 4 * sizeof(f32));
 
 		return *this;
 	}
@@ -84,7 +92,12 @@ namespace Enjon { namespace Math {
 		return left.Multiply(right);
 	}
 
-	Mat4 Mat4::Orthographic(float left, float right, float bottom, float top, float near, float far)
+	Mat4 Mat4::Orthographic(const f32& left, 
+							const f32& right, 
+							const f32& bottom, 
+							const f32& top, 
+							const f32& near, 
+							const f32& far)
 	{
 		//Create identiy matrix
 		Mat4 result(1.0f);
@@ -102,14 +115,17 @@ namespace Enjon { namespace Math {
 		return result; 
 	}
 
-	Mat4 Mat4::Perspective(float FOV, float aspectRatio, float near, float far)
+	Mat4 Mat4::Perspective(const f32& FOV, 
+							const f32& aspectRatio, 
+							const f32& near, 
+							const f32& far)
 	{
 		Mat4 result(1.0f);
 
-		float q = 1.0f / tan(Math::ToRadians(0.5f * FOV));
-		float a = q / aspectRatio;
-		float b = (near + far) / (near - far);
-		float c = (2.0f * near * far) / (near - far);
+		f32 q = 1.0f / tan(Enjon::ToRadians(0.5f * FOV));
+		f32 a = q / aspectRatio;
+		f32 b = (near + far) / (near - far);
+		f32 c = (2.0f * near * far) / (near - far);
 
 		result.elements[0 + 0 * 4] = a;		
 		result.elements[1 + 1 * 4] = q;		
@@ -150,18 +166,18 @@ namespace Enjon { namespace Math {
 		return result;
 	}
 
-	Mat4 Mat4::Rotate(float angle, const Vec3& axis)
+	Mat4 Mat4::Rotate(const f32& angle, const Vec3& axis)
 	{
 		//Identity
 		Mat4 result(1.0f);
 	
-		float a = Math::ToRadians(angle);
-		float c = cos(a);
-		float s = sin(a);
+		f32 a = Enjon::ToRadians(angle);
+		f32 c = cos(a);
+		f32 s = sin(a);
 
-		float x = axis.x;
-		float y = axis.y;
-		float z = axis.z;
+		f32 x = axis.x;
+		f32 y = axis.y;
+		f32 z = axis.z;
 
 		//First column
 		result.elements[0 + 0 * 4] = x * x * (1 - c) + c;	
@@ -181,12 +197,12 @@ namespace Enjon { namespace Math {
 		return result; 
 	}
 
-	Mat4 Mat4::LookAt(Vec3& Position, Vec3& Target, Vec3& Up)
+	Mat4 Mat4::LookAt(const Vec3& Position, const Vec3& Target, Vec3& Up)
 	{
 		// Get direction and right vectors
 		Vec3 ZAxis = Vec3::Normalize(Position - Target);
 		auto YAxis = Up;
-		Vec3 XAxis = Vec3::Normalize(Up.Cross(ZAxis));
+		Vec3 XAxis = Vec3::Normalize(Vec3::Cross(Up, ZAxis));
 		YAxis = ZAxis.Cross(XAxis);
 		XAxis = Vec3::Normalize(XAxis);
 		YAxis = Vec3::Normalize(YAxis);
@@ -358,4 +374,4 @@ namespace Enjon { namespace Math {
 
 		return stream;
 	}
-}}
+}

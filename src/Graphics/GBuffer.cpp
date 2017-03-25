@@ -10,7 +10,7 @@ namespace Enjon {
 		// Save extensions
 		Width  = _Width;
 		Height = _Height;
-		Viewport = EM::Vec4(0, 0, Width, Height);
+		Viewport = Vec4(0, 0, Width, Height);
 
 	    glGenFramebuffers(1, &FBO);
 	    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
@@ -49,7 +49,7 @@ namespace Enjon {
 	    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void GBuffer::SetViewport(const EM::Vec4& _Viewport)
+	void GBuffer::SetViewport(const Vec4& _Viewport)
 	{
 		Viewport = _Viewport;	
 	}

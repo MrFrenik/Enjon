@@ -8,7 +8,7 @@
 namespace Enjon {  namespace Shapes {
 
 
-	inline void DrawSpline(Enjon::SpriteBatch* Batch, EM::Vec4& StartAndEndPoints, EM::Vec4& ControlPoints, float Thickness = 2.0f, u32 NumberOfPoints = 200, ColorRGBA16& Color = RGBA16_White())
+	inline void DrawSpline(Enjon::SpriteBatch* Batch, Vec4& StartAndEndPoints, Vec4& ControlPoints, float Thickness = 2.0f, u32 NumberOfPoints = 200, ColorRGBA16& Color = RGBA16_White())
 	{
 		auto Ax = StartAndEndPoints.x; 	auto Ay = StartAndEndPoints.y;
 		auto Bx = ControlPoints.x; 		auto By = ControlPoints.y;
@@ -47,17 +47,17 @@ namespace Enjon {  namespace Shapes {
 
 			// Get angle of direction vector
 			auto R = Enjon::Vec2(1, 0);
-			float Angle = acos(R.Dot(Direction)) * 180.0f / EM::PI;
+			float Angle = acos(R.Dot(Direction)) * 180.0f / PI;
 			if (Direction.y < 0.0f) Angle *= -1; 
 
 			// Draw point
 			Batch->Add(
-						EM::Vec4(X, Y, Length + 1, Thickness),
-						EM::Vec4(0, 0, 1, 1),
+						Vec4(X, Y, Length + 1, Thickness),
+						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
 						Color,
 						0.0f,
-						EM::ToRadians(Angle)
+						Enjon::ToRadians(Angle)
 					);
 			a -= 1.0f / static_cast<float>(NumberOfPoints);
 			b = 1.0f - a;
@@ -66,7 +66,7 @@ namespace Enjon {  namespace Shapes {
 		}
 	}
 
-	inline void DrawLine(SpriteBatch* Batch, EM::Vec4& StartAndEndPoints, float Thickness = 2.0f, ColorRGBA16& Color = RGBA16_White(), float Depth = 0.0f)
+	inline void DrawLine(SpriteBatch* Batch, Vec4& StartAndEndPoints, float Thickness = 2.0f, ColorRGBA16& Color = RGBA16_White(), float Depth = 0.0f)
 	{
 		// Get direction vector from Next to previous
 		auto Difference = Enjon::Vec2(StartAndEndPoints.z, StartAndEndPoints.w) - Enjon::Vec2(StartAndEndPoints.x, StartAndEndPoints.y);
@@ -75,16 +75,16 @@ namespace Enjon {  namespace Shapes {
 
 		// Get angle of direction vector
 		auto R = Enjon::Vec2(1, 0);
-		float Angle = acos(R.Dot(Direction)) * 180.0f / EM::PI;
+		float Angle = acos(R.Dot(Direction)) * 180.0f / PI;
 		if (Direction.y < 0.0f) Angle *= -1; 
 
 		Batch->Add(
-					EM::Vec4(StartAndEndPoints.x + Difference.x / 2.0f, StartAndEndPoints.y + Difference.y / 2.0f, Length + 1, Thickness),
-					EM::Vec4(0, 0, 1, 1),
+					Vec4(StartAndEndPoints.x + Difference.x / 2.0f, StartAndEndPoints.y + Difference.y / 2.0f, Length + 1, Thickness),
+					Vec4(0, 0, 1, 1),
 					Enjon::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
 					Color,
 					Depth,
-					EM::ToRadians(Angle)
+					Enjon::ToRadians(Angle)
 				);
 	}
 
@@ -106,16 +106,16 @@ namespace Enjon {  namespace Shapes {
 
 			// Get angle of direction vector
 			auto R = Enjon::Vec2(1, 0);
-			float Angle = acos(R.Dot(Direction)) * 180.0f / EM::PI;
+			float Angle = acos(R.Dot(Direction)) * 180.0f / PI;
 			if (Direction.y < 0.0f) Angle *= -1; 
 
 			Batch->Add(
-						EM::Vec4(Point.x, Point.y, Enjon::Vec2(Length, Thickness)),
-						EM::Vec4(0, 0, 1, 1),
+						Vec4(Point.x, Point.y, Enjon::Vec2(Length, Thickness)),
+						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../Assets/Textures/DefaultNoText.png").id,
 						Color,
 						Depth,
-						EM::ToRadians(Angle)
+						Enjon::ToRadians(Angle)
 					);
 		}
 
@@ -134,7 +134,7 @@ namespace Enjon {  namespace Shapes {
 		Points.push_back(TOC);
 		Batch->AddPolygon(
 							Points, 
-							EM::Vec4(0, 0, 1, 1), 
+							Vec4(0, 0, 1, 1), 
 							Enjon::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
 							Color,
 							Depth		

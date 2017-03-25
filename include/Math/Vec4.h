@@ -5,89 +5,113 @@
 #include "Math/Vec2.h"
 #include "Math/Vec3.h"
 
-namespace Enjon { namespace Math { 
+namespace Enjon {
 
-	struct Vec4
+	class Vec4
 	{ 
-		float x; 
-		float y;
-		float z;
-		float w; 
+		public: 
 
-		Vec4() = default;
-		Vec4(const float& x, const float& y, const float& z, const float& w)
-		{
-			this->x = x;
-			this->y = y;
-			this->z = z;
-			this->w = w;
-		}
-		Vec4(const float& val1, const float& val2, const Vec2& a)
-		{
-			this->x = val1;
-			this->y = val2;
-			this->z = a.x;
-			this->w = a.y;
-		}
+			/**
+			* @brief Default constructor
+			*/
+			Vec4() = default;
 
-		Vec4(const Vec2& a, const float& val1, const float& val2)
-		{
-			this->x = a.x;
-			this->y = a.y;
-			this->z = val1;
-			this->w = val2;
-		}
-		Vec4(const Vec2& a, const Vec2& b)
-		{
-			this->x = a.x;
-			this->y = a.y;
-			this->z = b.x;
-			this->w = b.y;
-		}
-		Vec4(const Math::Vec3& a, const float& val)
-		{
-			this->x = a.x;
-			this->y = a.y;
-			this->z = a.z;
-			this->w = val;
-		}
+			/**
+			* @brief Constructor that takes f32's for x, y, z, w
+			* @param x - f32 value to be set for x component
+			* @param y - f32 value to be set for y component
+			* @param z - f32 value to be set for y component
+			* @param w - f32 value to be set for y component
+			*/
+			Vec4(const f32& _x, const f32& _y, const f32& _z, const f32& _w)
+				: x(_x), y(_y), z(_z), w(_w)
+			{
+			}
 
-		
-		friend std::ostream& operator<<(std::ostream& stream, Vec4& vector);	
+			/**
+			* @brief Constructor that takes f32's for x, y, and vec2 for z, w
+			* @param x - f32 value to be set for x component
+			* @param y - f32 value to be set for y component
+			* @param a - vec2 to be used to set z, w components
+			*/
+			Vec4(const f32& _x, const f32& _y, const Vec2& a)
+				: x(_x), y(_y), z(a.x), w(a.y)
+			{
+			}
 
-		Vec4& Add(const Vec4& other);
-		Vec4& Subtract(const Vec4& other);
-		Vec4& Multiply(const Vec4& other);
-		Vec4& Divide(const Vec4& other); 
+			/**
+			* @brief Constructor that takes f32's for z, w, and vec2 for x, y
+			* @param a - vec2 to be used to set x, y components
+			* @param x - f32 value to be set for z component
+			* @param y - f32 value to be set for w component
+			*/
+			Vec4(const Vec2& a, const f32& _z, const f32& _w)
+				: x(a.x), y(a.y), z(_z), w(_w)
+			{
+			}
 
-		friend Vec4 operator+(Vec4 left, const Vec4& other);
-		friend Vec4 operator-(Vec4 left, const Vec4& other); 
-		friend Vec4 operator*(Vec4 left, const Vec4& other);
-		friend Vec4 operator/(Vec4 left, const Vec4& other);
+			/**
+			* @brief Constructor that takes f32's for x, y, z, w
+			* @param a - vec2 to be used to set x, y components
+			* @param a - vec2 to be used to set z, w components
+			*/
+			Vec4(const Vec2& a, const Vec2& b)
+				: x(a.x), y(a.y), z(b.x), w(b.y)
+			{
+			}
 
-		friend Vec4 operator*(Vec4 left, const float& scalar);
-		friend Vec4 operator*(const float& scalar, Vec4 right);
-		friend void operator*=(Vec4& left, const float& scalar);
-		friend Vec4 operator*=(const float& scalar, Vec4& left);
-		friend Vec4 operator/(Vec4 left, const Vec4& other);
-		friend Vec4 operator/(Vec4 left, float value);
-		friend void operator/=(Vec4& left, float scalar);
-		friend bool operator==(const Vec4& left, const Vec4& right); 
-		friend bool operator!=(const Vec4& left, const Vec4& right);
-		
-		Vec4& operator+=(const Vec4& other);
-		Vec4& operator-=(const Vec4& other);
-		Vec4& operator*=(const Vec4& other);
-		Vec4& operator/=(const Vec4& other);
+			/**
+			* @brief Constructor that takes vec3 for x, y, z and f32 for w
+			* @param a - vec3 to be used to set x, y, z components
+			* @param a - f32 to be used to setw components
+			*/
+			Vec4(const Vec3& a, const f32& _w)
+				: x(a.x), y(a.y), z(a.z), w(_w)
+			{
+			} 
+			
+			friend std::ostream& operator<<(std::ostream& stream, Vec4& vector);	
 
-		float Vec4::Length() const;
-		float Vec4::Dot(const Vec4& other);
-		static Vec4 inline Normalize(const Vec4& vec) { return vec / vec.Length(); }
-		Vec3 XYZ();
+			Vec4& Add(const Vec4& other);
+			Vec4& Subtract(const Vec4& other);
+			Vec4& Multiply(const Vec4& other);
+			Vec4& Divide(const Vec4& other); 
 
+			friend Vec4 operator+(Vec4 left, const Vec4& other);
+			friend Vec4 operator-(Vec4 left, const Vec4& other); 
+			friend Vec4 operator*(Vec4 left, const Vec4& other);
+			friend Vec4 operator/(Vec4 left, const Vec4& other);
+
+			friend Vec4 operator*(Vec4 left, const f32& scalar);
+			friend Vec4 operator*(const f32& scalar, Vec4 right);
+			friend void operator*=(Vec4& left, const f32& scalar);
+			friend Vec4 operator*=(const f32& scalar, Vec4& left);
+			friend Vec4 operator/(Vec4 left, const Vec4& other);
+			friend Vec4 operator/(Vec4 left, f32 value);
+			friend void operator/=(Vec4& left, f32 scalar);
+			friend bool operator==(const Vec4& left, const Vec4& right); 
+			friend bool operator!=(const Vec4& left, const Vec4& right);
+			
+			Vec4& operator+=(const Vec4& other);
+			Vec4& operator-=(const Vec4& other);
+			Vec4& operator*=(const Vec4& other);
+			Vec4& operator/=(const Vec4& other);
+
+			f32 Vec4::Length() const;
+			f32 Vec4::Dot(const Vec4& other); 
+			Vec3 XYZ(); 
+			
+			static Vec4 Normalize(const Vec4& vec);
+			
+		public:
+
+			f32 x; 
+			f32 y;
+			f32 z;
+			f32 w; 
 	};
-}}
+}
 
-typedef Enjon::Math::Vec4 v4;
+typedef Enjon::Vec4 v4;
 
 #endif

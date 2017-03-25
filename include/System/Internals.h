@@ -146,15 +146,15 @@ namespace Enjon { namespace Internals {
 	};
 
 	template <>
-	struct Internal<EM::Vec3> 
+	struct Internal<Vec3> 
 	{
 		Internal()
 		{
 			Type = InternalType::VEC3;
-			Value = EM::Vec3(1.0f, 1.0f, 1.0f);
+			Value = Vec3(1.0f, 1.0f, 1.0f);
 		}
 
-		Internal(const EM::Vec3& _Value)
+		Internal(const Vec3& _Value)
 		{
 			Type = InternalType::VEC3;
 			Value = _Value;
@@ -163,29 +163,29 @@ namespace Enjon { namespace Internals {
 		Internal(const Enjon::f32& _x, const Enjon::f32& _y, const Enjon::f32& _z)
 		{
 			Type = InternalType::VEC3;
-			Value = EM::Vec3(_x, _y, _z);
+			Value = Vec3(_x, _y, _z);
 		}
 
-		EM::Vec3 Value;
+		Vec3 Value;
 		InternalType Type;
 	};
 
 	template <>
-	struct Internal<EM::Vec4> 
+	struct Internal<Vec4> 
 	{
 		Internal()
 		{
 			Type = InternalType::VEC4;
-			Value = EM::Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			Value = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 
-		Internal(const EM::Vec4& _Value)
+		Internal(const Vec4& _Value)
 		{
 			Type = InternalType::VEC4;
 			Value = _Value;
 		}
 
-		EM::Vec4 Value;
+		Vec4 Value;
 		InternalType Type;
 	};
 
@@ -205,13 +205,13 @@ namespace Enjon { namespace Internals {
 	using EBool = Internal<Enjon::bool8>;
 
 	// Default vec2 constructor
-	using EVec2 = Internal<Enjon::Vec2>;
+	using EVec2 = Internal<Vec2>;
 
 	// Default vec3 constructor
-	using EVec3 = Internal<EM::Vec3>;
+	using EVec3 = Internal<Vec3>;
 
 	// Default vec4 constructor
-	using EVec4 = Internal<EM::Vec4>;
+	using EVec4 = Internal<Vec4>;
 
 }}
 

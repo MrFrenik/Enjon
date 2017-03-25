@@ -61,8 +61,8 @@ namespace Enjon {
 		// Initialize scene camera
 		mSceneCamera = Enjon::Camera(mWindow.GetViewport());
 		mSceneCamera.SetProjection(ProjectionType::PERSPECTIVE);
-		mSceneCamera.SetPosition(EM::Vec3(0, 5, 10));
-		mSceneCamera.LookAt(EM::Vec3(0, 0, 0));
+		mSceneCamera.SetPosition(Vec3(0, 5, 10));
+		mSceneCamera.LookAt(Vec3(0, 0, 0));
 
 		// Initialize frame buffers
 		InitializeFrameBuffers();
@@ -170,8 +170,8 @@ namespace Enjon {
 				mBatch->Begin();
 				{
 					mBatch->Add(
-									EM::Vec4(-1, -1, 2, 2),
-									EM::Vec4(0, 0, 1, 1),
+									Vec4(-1, -1, 2, 2),
+									Vec4(0, 0, 1, 1),
 									mFXAATarget->GetTexture()
 								);
 				}
@@ -244,10 +244,10 @@ namespace Enjon {
 				Mesh* mesh = renderable->GetMesh();
 				mesh->Bind();
 				{
-					EM::Mat4 Model;
-					Model *= EM::Mat4::Translate(renderable->GetPosition());
-					Model *= EM::QuaternionToMat4(renderable->GetRotation());
-					Model *= EM::Mat4::Scale(renderable->GetScale());
+					Mat4 Model;
+					Model *= Mat4::Translate(renderable->GetPosition());
+					Model *= QuaternionToMat4(renderable->GetRotation());
+					Model *= Mat4::Scale(renderable->GetScale());
 					shader->SetUniform("u_model", Model);
 					mesh->Submit();
 				}
@@ -327,15 +327,15 @@ namespace Enjon {
 		{
 			ambientShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
 			ambientShader->BindTexture("u_emissiveMap", mGbuffer->GetTexture(GBufferTextureType::EMISSIVE), 1);
-			ambientShader->SetUniform("u_ambientColor", EM::Vec3(aS->mColor.r, aS->mColor.g, aS->mColor.b));
+			ambientShader->SetUniform("u_ambientColor", Vec3(aS->mColor.r, aS->mColor.g, aS->mColor.b));
 			ambientShader->SetUniform("u_ambientIntensity", aS->mIntensity);
 			ambientShader->SetUniform("u_resolution", mGbuffer->GetResolution());
 
 			// Render
 				mBatch->Begin();
 					mBatch->Add(
-									EM::Vec4(-1, -1, 2, 2),
-									EM::Vec4(0, 0, 1, 1),
+									Vec4(-1, -1, 2, 2),
+									Vec4(0, 0, 1, 1),
 									mGbuffer->GetTexture(GBufferTextureType::ALBEDO)
 								);
 				mBatch->End();
@@ -359,7 +359,7 @@ namespace Enjon {
 				// directionalShader->SetUniform("u_lightSpaceMatrix", mShadowCamera->GetViewProjectionMatrix());
 				// directionalShader->SetUniform("u_shadowBias", 		EM::Vec2(0.005f, ShadowBiasMax));
 				directionalShader->SetUniform("u_lightDirection", 	l->GetDirection());															
-				directionalShader->SetUniform("u_lightColor", 		EM::Vec3(color.r, color.g, color.b));
+				directionalShader->SetUniform("u_lightColor", 		Vec3(color.r, color.g, color.b));
 				directionalShader->SetUniform("u_lightIntensity", 	l->GetIntensity());
 
 				// Render	
@@ -367,8 +367,8 @@ namespace Enjon {
 				// mFullScreenQuad->Submit();
 				mBatch->Begin();
 					mBatch->Add(
-									EM::Vec4(-1, -1, 2, 2),
-									EM::Vec4(0, 0, 1, 1),
+									Vec4(-1, -1, 2, 2),
+									Vec4(0, 0, 1, 1),
 									mGbuffer->GetTexture(GBufferTextureType::ALBEDO)
 								);
 				mBatch->End();
@@ -389,10 +389,10 @@ namespace Enjon {
 			for (auto& l : *pointLights)
 			{
 				ColorRGBA16& color = l->GetColor();
-				EM::Vec3& position = l->GetPosition();
+				Vec3& position = l->GetPosition();
 
 				pointShader->SetUniform("u_lightPos", position);
-				pointShader->SetUniform("u_lightColor", EM::Vec3(color.r, color.g, color.b));
+				pointShader->SetUniform("u_lightColor", Vec3(color.r, color.g, color.b));
 				pointShader->SetUniform("u_lightIntensity", l->GetIntensity());
 				pointShader->SetUniform("u_attenuationRate", l->GetAttenuationRate());
 				pointShader->SetUniform("u_radius", l->GetRadius());
@@ -400,8 +400,8 @@ namespace Enjon {
 				// Render Light to screen
 				mBatch->Begin();
 					mBatch->Add(
-									EM::Vec4(-1, -1, 2, 2),
-									EM::Vec4(0, 0, 1, 1),
+									Vec4(-1, -1, 2, 2),
+									Vec4(0, 0, 1, 1),
 									mGbuffer->GetTexture(GBufferTextureType::ALBEDO)
 								);
 				mBatch->End();
@@ -425,10 +425,10 @@ namespace Enjon {
 				{
 					ColorRGBA16& color = l->GetColor();
 					SLParams& params = l->GetParams();
-					EM::Vec3& position = l->GetPosition();
+					Vec3& position = l->GetPosition();
 
 					spotShader->SetUniform("u_lightPos", position);
-					spotShader->SetUniform("u_lightColor", EM::Vec3(color.r, color.g, color.b));
+					spotShader->SetUniform("u_lightColor", Vec3(color.r, color.g, color.b));
 					spotShader->SetUniform("u_falloff", params.mFalloff);
 					spotShader->SetUniform("u_lightIntensity", l->GetIntensity());
 					spotShader->SetUniform("u_lightDirection", params.mDirection);
@@ -438,8 +438,8 @@ namespace Enjon {
 					// Render Light to screen
 					mBatch->Begin();
 						mBatch->Add(
-										EM::Vec4(-1, -1, 2, 2),
-										EM::Vec4(0, 0, 1, 1),
+										Vec4(-1, -1, 2, 2),
+										Vec4(0, 0, 1, 1),
 										mGbuffer->GetTexture(GBufferTextureType::ALBEDO)
 									);
 					mBatch->End();
@@ -470,8 +470,8 @@ namespace Enjon {
 				mBatch->Begin();
 				{
 					mBatch->Add(
-										EM::Vec4(-1, -1, 2, 2),
-										EM::Vec4(0, 0, 1, 1),
+										Vec4(-1, -1, 2, 2),
+										Vec4(0, 0, 1, 1),
 										mLightingBuffer->GetTexture()
 									);
 				}
@@ -516,8 +516,8 @@ namespace Enjon {
 					mBatch->Begin();
 					{
 			    		mBatch->Add(
-									EM::Vec4(-1, -1, 2, 2),
-									EM::Vec4(0, 0, 1, 1), 
+									Vec4(-1, -1, 2, 2),
+									Vec4(0, 0, 1, 1), 
 									texID
 								);
 					}
@@ -552,8 +552,8 @@ namespace Enjon {
 					mBatch->Begin();
 					{
 			    		mBatch->Add(
-									EM::Vec4(-1, -1, 2, 2),
-									EM::Vec4(0, 0, 1, 1), 
+									Vec4(-1, -1, 2, 2),
+									Vec4(0, 0, 1, 1), 
 									texID
 								);
 					}
@@ -588,8 +588,8 @@ namespace Enjon {
 					mBatch->Begin();
 					{
 			    		mBatch->Add(
-									EM::Vec4(-1, -1, 2, 2),
-									EM::Vec4(0, 0, 1, 1), 
+									Vec4(-1, -1, 2, 2),
+									Vec4(0, 0, 1, 1), 
 									texID
 								);
 					}
@@ -616,12 +616,12 @@ namespace Enjon {
 			{
 				auto viewPort = GetViewport();
 				fxaaProgram->SetUniform("u_resolution", Vec2(viewPort.x, viewPort.y));
-				fxaaProgram->SetUniform("u_FXAASettings", EM::Vec3(mFXAASettings.mSpanMax, mFXAASettings.mReduceMul, mFXAASettings.mReduceMin));
+				fxaaProgram->SetUniform("u_FXAASettings", Vec3(mFXAASettings.mSpanMax, mFXAASettings.mReduceMul, mFXAASettings.mReduceMin));
 				mBatch->Begin();
 				{
 					mBatch->Add(
-										EM::Vec4(-1, -1, 2, 2),
-										EM::Vec4(0, 0, 1, 1),
+										Vec4(-1, -1, 2, 2),
+										Vec4(0, 0, 1, 1),
 										input->GetTexture()
 									);
 				}
@@ -652,8 +652,8 @@ namespace Enjon {
 				mBatch->Begin();
 				{
 					mBatch->Add(
-										EM::Vec4(-1, -1, 2, 2),
-										EM::Vec4(0, 0, 1, 1),
+										Vec4(-1, -1, 2, 2),
+										Vec4(0, 0, 1, 1),
 										input->GetTexture()
 									);
 				}
@@ -976,11 +976,11 @@ namespace Enjon {
 	    if (ImGui::TreeNode("Sunlight"))
 	    {
 	    	static const char* labels[] = {"X", "Y", "Z"};
-	    	EM::Vec3 direction = mScene.GetSun()->GetDirection();
+	    	Vec3 direction = mScene.GetSun()->GetDirection();
             float vec4f[4] = { direction.x, direction.y, direction.z, 1.0f };
 	    	ImGui::Text("Direction");
             ImGui::DragFloat3Labels("##sundir", labels, vec4f, 0.001f, -1.0f, 1.0f);
-	    	mScene.GetSun()->SetDirection(EM::Vec3(vec4f[0], vec4f[1], vec4f[2]));
+	    	mScene.GetSun()->SetDirection(Vec3(vec4f[0], vec4f[1], vec4f[2]));
 
 	    	float intensity = mScene.GetSun()->GetIntensity();
 	    	ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 50.0f);

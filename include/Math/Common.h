@@ -7,7 +7,7 @@
 #include "Defines.h"
 #include "System/Types.h"
 
-namespace Enjon { namespace Math {
+namespace Enjon {
 		
 	//Cardinal directions
 	#define NORTH		Enjon::Math::Vec2(0, 1)
@@ -25,6 +25,10 @@ namespace Enjon { namespace Math {
 	#endif
 	#ifndef FALSE
 		#define FALSE	0
+	#endif
+
+	#ifndef PI
+		#define PI 3.14159265359
 	#endif
 		
 	inline float ToRadians(float degrees)
@@ -74,6 +78,6 @@ namespace Enjon { namespace Math {
 		return val;
 	}
 
-}}
+}
 
 #endif

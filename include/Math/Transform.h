@@ -1,3 +1,7 @@
+// Copyright 2016-2017 John Jackson. All Rights Reserved.
+// File: Transform.h
+
+#pragma once
 #ifndef ENJON_TRANSFORM_H
 #define ENJON_TRANSFORM_H
 
@@ -8,48 +12,127 @@
 #include <Math/Mat4.h>
 #include <Math/Vec3.h>
 
-namespace Enjon { namespace Math {
-
+namespace Enjon 
+{ 
 	enum class TransformSpace
 	{
 		LOCAL,
 		WORLD
 	};
 
-	struct Transform
+	class Transform
 	{
-		// Default constructor
-		Transform();
-		Transform(EM::Vec3& position, EM::Quaternion& rotation, EM::Vec3& scale);
-		~Transform();
+		public:
 
-		// Multiplication of this transform with another
-		Transform operator*(Transform& Parent) const;	
-		Transform& operator*=(Transform& parent);
+			/**
+			* @brief Default constructor
+			*/
+			Transform();
 
-		// Friend operator for dividing two transforms
-		friend Transform operator/(Transform& World, Transform& Parent);
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			Transform(const Vec3& position, const Quaternion& rotation, const Vec3& scale);
+			
+			/**
+			* @brief Copy constructor
+			* @param
+			* @return
+			*/
+			Transform(const Transform& t);
 
-		// Gets inverse of this transform
-		Transform Inverse();
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			~Transform();
 
-		EM::Vec3 GetPosition() { return Position; }
-		EM::Vec3 GetScale() { return Scale; }
-		EM::Quaternion GetRotation() { return Rotation; }
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			Transform operator*(Transform& Parent) const;	
 
-		void SetPosition(EM::Vec3& position);
-		void SetScale(EM::Vec3& scale);
-		void SetScale(float scale);
-		void SetRotation(EM::Quaternion& rotation);
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			Transform& operator*=(Transform& parent);
 
-		// Member variables
-		EM::Vec3 Position;
-		EM::Quaternion Rotation;
-		EM::Vec3 Scale;
-	};
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			friend Transform operator/(Transform& World, Transform& Parent);
 
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			Transform Inverse();
 
-}}
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			Vec3 GetPosition() const { return Position; }
+			
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			Vec3 GetScale() const { return Scale; }
+			
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			Quaternion GetRotation() const { return Rotation; }
+
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			void SetPosition(const Vec3& position);
+			
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			void SetScale(const Vec3& scale);
+
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			void SetScale(const f32& scale);
+			
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			void SetRotation(const Quaternion& rotation);
+
+		public:
+			Vec3 Position;
+			Quaternion Rotation;
+			Vec3 Scale;
+	}; 
+}
 
 
 #endif

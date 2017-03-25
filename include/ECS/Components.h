@@ -37,9 +37,9 @@ namespace ECS { namespace Component {
 		Transform3D(){}
 		// NOTE(John): This is getting a bit bloated...
 		// NOTE(John): Yep, make a physics component
-		Enjon::Math::Vec3 Position;
-		Enjon::Math::Vec3 Velocity;
-		Enjon::Math::Vec3 VelocityGoal;
+		Enjon::Vec3 Position;
+		Enjon::Vec3 Velocity;
+		Enjon::Vec3 VelocityGoal;
 		Enjon::Vec2 ViewVector;
 		Enjon::Vec2 AttackVector;
 		Enjon::Vec2 CartesianPosition;
@@ -59,8 +59,8 @@ namespace ECS { namespace Component {
 	// Position struct
 	typedef struct
 	{
-		Enjon::Math::Vec3 IsoPosition;
-		Enjon::Math::Vec3 CartesianPosition;
+		Enjon::Vec3 IsoPosition;
+		Enjon::Vec3 CartesianPosition;
 		eid32 Entity;
 	} PositionComponent;
 
@@ -68,8 +68,8 @@ namespace ECS { namespace Component {
 	// Velocity struct
 	typedef struct
 	{
-		Enjon::Math::Vec3 Velocity;
-		Enjon::Math::Vec3 VelocityGoal;
+		Enjon::Vec3 Velocity;
+		Enjon::Vec3 VelocityGoal;
 		float VelocityGoalScale;
 		eid32 Entity;
 	} VelocityComponent;
@@ -85,7 +85,7 @@ namespace ECS { namespace Component {
 	// Collision struct
 	typedef struct
 	{
-		EM::Vec4 Cells;
+		Enjon::Vec4 Cells;
 		float ObstructionValue;
 		eid32 Entity;
 	} CollisionComponent;
@@ -194,7 +194,7 @@ namespace ECS { namespace Component {
 	//////////////////
 
 	// Create new Transform2D Component
-	inline Transform3D NewTransform3D(Enjon::Math::Vec3 Position, Enjon::Math::Vec3 Velocity, eid32 Entity, float Scale)
+	inline Transform3D NewTransform3D(Enjon::Vec3 Position, Enjon::Vec3 Velocity, eid32 Entity, float Scale)
 	{
 		Transform3D Component;
 		Component.Position = Position;

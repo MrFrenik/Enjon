@@ -23,10 +23,10 @@ namespace Enjon {
 
 	}
 
-	void Camera2D::Init(int screenWidth, int screenHeight){
+	void Camera2D::Init(s32 screenWidth, s32 screenHeight){
 		m_screenWidth = screenWidth;
 		m_screenHeight = screenHeight;
-		m_orthoMatrix = Enjon::Math::Mat4::Orthographic(0.0f, (float)m_screenWidth, 0.0f, (float)m_screenHeight, -1, 1);
+		m_orthoMatrix = Mat4::Orthographic(0.0f, (f32)m_screenWidth, 0.0f, (f32)m_screenHeight, -1, 1);
 		m_shake_counter = 0.0f;
 		m_shake_intensity = 0.0f;
 
@@ -38,15 +38,15 @@ namespace Enjon {
 
 	void Camera2D::Update(){
 
-		if(m_needsMatrixUpdate){
-			
+		if (m_needsMatrixUpdate)
+		{ 
 			//Create translate matrix and pass to camera
-			Enjon::Math::Vec3 translate(-m_position.x + m_screenWidth/2, -m_position.y + m_screenHeight/2, 0.0f);
-			m_cameraMatrix = m_orthoMatrix * Enjon::Math::Mat4::Translate(translate); 
+			Vec3 translate(-m_position.x + m_screenWidth/2, -m_position.y + m_screenHeight/2, 0.0f);
+			m_cameraMatrix = m_orthoMatrix * Mat4::Translate(translate); 
 			
 			//Create scale matrix and pass to camera
-			Enjon::Math::Vec3 scale(m_scalar, m_scalar, 0.0f);
-			m_cameraMatrix = Enjon::Math::Mat4::Scale(scale) * m_cameraMatrix;
+			Vec3 scale(m_scalar, m_scalar, 0.0f);
+			m_cameraMatrix = Mat4::Scale(scale) * m_cameraMatrix;
 
 			//Reset matrix update bool to false
 			m_needsMatrixUpdate = false;
