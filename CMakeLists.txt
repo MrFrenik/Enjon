@@ -102,6 +102,11 @@ file(GLOB_RECURSE SRC_UTILS
 	"${ENJON_SRC}/Utils/*.cpp"
 	"${ENJON_INC}/Utils/*.inl")
 
+file(GLOB_RECURSE SRC_ASSET
+	"${ENJON_INC}/Asset/*.h"
+	"${ENJON_SRC}/Asset/*.cpp"
+	"${ENJON_INC}/Asset/*.inl")
+
 file(GLOB_RECURSE GAME_FILES
 	"${cur_dir}/IsoARPG/include/Game.h"
 	"${cur_dir}/IsoARPG/src/Game.cpp"
@@ -135,6 +140,7 @@ set(
 	${SRC_UI} 
 	${SRC_PHYSICS} 
 	${SRC_MATH} 
+	${SRC_ASSET} 
 	${GAME_FILES}
 	${GENERAL_SOURCES}
 	)
@@ -152,5 +158,6 @@ source_group("Graphics"		FILES ${SRC_GRAPHICS})
 source_group("UI"			FILES ${SRC_UI})
 source_group("System"		FILES ${SRC_SYSTEM})
 source_group("Utils"		FILES ${SRC_UTILS})
+source_group("Asset"		FILES ${SRC_ASSET})
 source_group("Game"			FILES ${GAME_FILES})
 

@@ -3,6 +3,7 @@
 #define ENJON_MATERIAL_H 
 
 #include "Graphics/GLTexture.h"
+#include "Graphics/Texture.h"
 #include "Graphics/Color.h"
 #include "System/Types.h"
 
@@ -14,13 +15,13 @@ namespace Enjon {
 
 	enum class TextureSlotType
 	{
-		ALBEDO,
-		NORMAL,
-		EMISSIVE,
-		METALLIC,
-		ROUGHNESS,
+		Albedo,
+		Normal,
+		Emissive,
+		Metallic,
+		Roughness,
 		AO,
-		TEXTURE_SLOT_COUNT
+		Count
 	};
 
 	class Material
@@ -30,7 +31,10 @@ namespace Enjon {
 			~Material();
 
 			void SetTexture(TextureSlotType type, const GLTexture& texture);
-			GLTexture GetTexture(TextureSlotType type) const;
+			//GLTexture GetTexture(TextureSlotType type) const;
+
+			void SetTexture(const TextureSlotType& type, const AssetHandle<Texture>& textureHandle);
+			AssetHandle<Texture> GetTexture(const TextureSlotType& type) const;
 
 			void SetColor(TextureSlotType type, const ColorRGBA16& color);
 			ColorRGBA16 GetColor(TextureSlotType type) const;
@@ -39,8 +43,10 @@ namespace Enjon {
 			void SetShader(GLSLProgram* shader);
 
 		private:
-			GLTexture mTextures[(u32)TextureSlotType::TEXTURE_SLOT_COUNT];
-			ColorRGBA16 mColors[(u32)TextureSlotType::TEXTURE_SLOT_COUNT];
+			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count];
+
+			GLTexture mTextures[(u32)TextureSlotType::Count];
+			ColorRGBA16 mColors[(u32)TextureSlotType::Count];
 			GLSLProgram* mShader;
 	};
 	

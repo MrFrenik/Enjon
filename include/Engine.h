@@ -9,9 +9,7 @@
 #include "System/Types.h" 
 
 namespace Enjon
-{
-	using String = std::string; 
-
+{ 
 	class DeferredRenderer; 
 	class Input;
 

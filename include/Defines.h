@@ -14,6 +14,8 @@
 #define EP		Enjon::Physics
 #define EGUI	Enjon::GUI 
 
+#include <string>
+
 namespace Enjon
 {
 	enum class Result
@@ -22,6 +24,8 @@ namespace Enjon
 		FAILURE,
 		UNKNOWN_ERROR
 	};
+	
+	using String = std::string; 
 }
 
 #endif

@@ -6,6 +6,8 @@
 #include <string>
 
 #include "Utils/json.h"
+#include "Defines.h"
+#include "System/Types.h"
 
 namespace Enjon { namespace Utils { 
 
@@ -61,6 +63,26 @@ namespace Enjon { namespace Utils {
 		delete[] data;
 
 		return result; 
+	}
+
+	static inline std::vector<String> SplitString(const String& str, const String& delimiter)
+	{
+		std::vector<String> splits;
+
+		usize pos = 0;
+		String token;
+		usize last = 0;
+		usize next = 0;
+		while ((next = str.find(delimiter, last)) != String::npos)
+		{
+			token = str.substr(last, next - last);
+			splits.push_back(token);
+			last = next + 1;
+		}
+
+		splits.push_back(str.substr(last));
+
+		return splits; 
 	}
 
 	static inline char* ReadFileContentsIntoString(char* FilePath)

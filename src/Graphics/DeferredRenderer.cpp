@@ -231,13 +231,13 @@ namespace Enjon {
 					material = curMaterial;
 
 					// Set material textures
-					shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::ALBEDO), 0);
-					shader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::NORMAL), 1);
-					shader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::EMISSIVE), 2);
-					shader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::METALLIC), 3);
-					shader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::ROUGHNESS), 4);
-					shader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO), 5);
-					shader->SetUniform("u_albedoColor", material->GetColor(Enjon::TextureSlotType::ALBEDO));
+					shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
+					shader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::Normal).Get()->GetTextureId(), 1);
+					shader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::Emissive).Get()->GetTextureId(), 2);
+					shader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::Metallic).Get()->GetTextureId(), 3);
+					shader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::Roughness).Get()->GetTextureId(), 4);
+					shader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO).Get()->GetTextureId(), 5);
+					shader->SetUniform("u_albedoColor", material->GetColor(Enjon::TextureSlotType::Albedo));
 				}
 
 				// Now need to render
@@ -278,12 +278,12 @@ namespace Enjon {
 					material = curMaterial;
 
 					// Set material tetxures
-					shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::ALBEDO), 0);
-					shader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::NORMAL), 1);
-					shader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::EMISSIVE), 2);
-					shader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::METALLIC), 3);
-					shader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::ROUGHNESS), 4);
-					shader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO), 5);
+					shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
+					shader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::Normal).Get()->GetTextureId(), 1);
+					shader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::Emissive).Get()->GetTextureId(), 2);
+					shader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::Metallic).Get()->GetTextureId(), 3);
+					shader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::Roughness).Get()->GetTextureId(), 4);
+					shader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO).Get()->GetTextureId(), 5);
 				}
 
 				// Render batch

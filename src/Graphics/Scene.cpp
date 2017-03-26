@@ -176,11 +176,11 @@ namespace Enjon {
 	bool Scene::CompareMaterial(Renderable* a, Renderable* b)
 	{
 		// TODO(): Set this up to where materials have a unique id and sort by that
-		GLTexture texA = a->GetMaterial()->GetTexture(TextureSlotType::ALBEDO);
-		GLTexture texB = b->GetMaterial()->GetTexture(TextureSlotType::ALBEDO);
+		AssetHandle<Texture> texA = a->GetMaterial()->GetTexture(TextureSlotType::Albedo);
+		AssetHandle<Texture> texB = b->GetMaterial()->GetTexture(TextureSlotType::Albedo);
 
 
-		return texA.id > texB.id;
+		return texA.Get()->GetTextureId() > texB.Get()->GetTextureId();
 	}
 
 }

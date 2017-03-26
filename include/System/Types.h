@@ -47,7 +47,8 @@ namespace Enjon {
 	using uint16 = unsigned short;
 
 	using int32 = signed int;
-	using uint32 = unsigned int;
+	using uint32 = unsigned int; 
+	using u32l = unsigned long;
 	using u32 = uint32;
 	using s32 = int32;
 	using i32 = int32;

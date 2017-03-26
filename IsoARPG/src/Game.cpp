@@ -13,6 +13,10 @@
 #include <System/Types.h>
 #include <ImGui/ImGuiManager.h>
 #include <IO/InputManager.h>
+#include <Asset/Asset.h>
+#include <Asset/AssetManager.h>
+#include <Asset/TextureAssetLoader.h>
+#include <Utils/FileUtils.h>
 
 #include <fmt/printf.h>
 
@@ -35,7 +39,10 @@ btAlignedObjectArray<btCollisionShape*> collisionShapes;
 // Physics entities to align with rigid bodies
 std::vector<Enjon::Entity*> mPhysicsEntities;
 
-Enjon::String mAssetsPath;
+Enjon::String mAssetsPath; 
+
+Enjon::TextureAssetLoader* texAssetLoader;
+Enjon::AssetManager* mAssetManager;
 
 //-------------------------------------------------------------
 Game::Game()
@@ -49,9 +56,26 @@ Game::~Game()
 
 //-------------------------------------------------------------
 void Game::Initialize()
-{
+{ 
 	// Set up assets path
-	mAssetsPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("IsoARPG/Assets/");
+	mAssetsPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("IsoARPG/Assets/"); 
+	
+	// Create asset manager
+	mAssetManager = new Enjon::AssetManager(mAssetsPath); 
+
+	// Paths to resources
+	Enjon::String cerebusAlbedoPath = Enjon::String("Materials/Cerebus/Albedo.png"); 
+	Enjon::String cerebusNormalPath = Enjon::String("Materials/Cerebus/Normal.png"); 
+	Enjon::String cerebusMetallicPath = Enjon::String("Materials/Cerebus/Metallic.png"); 
+	Enjon::String cerebusRoughnessPath = Enjon::String("Materials/Cerebus/Roughness.png"); 
+	Enjon::String cerebusEmissivePath = Enjon::String("Materials/Cerebus/Emissive.png"); 
+
+	// Add to asset database
+	mAssetManager->AddToDatabase(cerebusAlbedoPath); 
+	mAssetManager->AddToDatabase(cerebusNormalPath); 
+	mAssetManager->AddToDatabase(cerebusMetallicPath); 
+	mAssetManager->AddToDatabase(cerebusRoughnessPath); 
+	mAssetManager->AddToDatabase(cerebusEmissivePath); 
 
 	// Create entity manager
 	mEntities = new Enjon::EntityManager();
@@ -61,115 +85,27 @@ void Game::Initialize()
 
 	// Allocate handle
 	mGun = mEntities->Allocate();
-	mGreen = mEntities->Allocate();
-	mRed = mEntities->Allocate();
-	auto gc = mGun->Attach<Enjon::GraphicsComponent>();
-	auto gc2 = mGreen->Attach<Enjon::GraphicsComponent>();
-	auto gc3 = mRed->Attach<Enjon::GraphicsComponent>();
+	auto gc = mGun->Attach<Enjon::GraphicsComponent>(); 
 
-	// Set up child hierarchy
-	mGun->AddChild(mGreen);
-	mGreen->AddChild(mRed);
-
-	fmt::print("root: {}\n", Enjon::Engine::GetInstance()->GetConfig().GetRoot());
-	fmt::print("{}\n", mAssetsPath);
-
-	mGunMesh 	= Enjon::ResourceManager::GetMesh(mAssetsPath + "Models/cerebus.obj");
-	mSphereMesh = Enjon::ResourceManager::GetMesh(mAssetsPath + "Models/unit_sphere.obj");
-	mBuddhaMesh = Enjon::ResourceManager::GetMesh(mAssetsPath + "Models/buddha.obj");
-
-	mRedMat 	= new Enjon::Material;
-	mRedMat->SetTexture(Enjon::TextureSlotType::ALBEDO, Enjon::ResourceManager::GetTexture(mAssetsPath + "Materials/RustedIron/Albedo.png"));
-	mRedMat->SetTexture(Enjon::TextureSlotType::NORMAL, Enjon::ResourceManager::GetTexture(mAssetsPath + "Materials/RustedIron/Normal.png"));
-	mRedMat->SetTexture(Enjon::TextureSlotType::METALLIC, Enjon::ResourceManager::GetTexture(mAssetsPath + "Materials/RustedIron/Metallic.png"));
-	mRedMat->SetTexture(Enjon::TextureSlotType::ROUGHNESS, Enjon::ResourceManager::GetTexture(mAssetsPath + "Materials/RustedIron/Roughness.png"));
-	mRedMat->SetTexture(Enjon::TextureSlotType::EMISSIVE, Enjon::ResourceManager::GetTexture("../Assets/Textures/red.png"));
-
-	mBlueMat 	= new Enjon::Material;
-	mBlueMat->SetTexture(Enjon::TextureSlotType::ALBEDO, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Albedo.png"));
-	mBlueMat->SetTexture(Enjon::TextureSlotType::NORMAL, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Normal.png"));
-	mBlueMat->SetTexture(Enjon::TextureSlotType::METALLIC, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png"));
-	mBlueMat->SetTexture(Enjon::TextureSlotType::ROUGHNESS, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png"));
-	mBlueMat->SetTexture(Enjon::TextureSlotType::EMISSIVE, Enjon::ResourceManager::GetTexture("../Assets/Textures/blue.png"));
-
-	mGreenMat 	= new Enjon::Material;
-	mGreenMat->SetTexture(Enjon::TextureSlotType::ALBEDO, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Albedo.png"));
-	mGreenMat->SetTexture(Enjon::TextureSlotType::NORMAL, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Normal.png"));
-	mGreenMat->SetTexture(Enjon::TextureSlotType::METALLIC, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Metallic.png"));
-	mGreenMat->SetTexture(Enjon::TextureSlotType::ROUGHNESS, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/RustedIron/Roughness.png"));
-	mGreenMat->SetTexture(Enjon::TextureSlotType::EMISSIVE, Enjon::ResourceManager::GetTexture("../Assets/Textures/green.png"));
-
-	mGunMat 	= new Enjon::Material;
-	mGunMat->SetTexture(Enjon::TextureSlotType::ALBEDO, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Albedo.png"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::NORMAL, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Normal.png"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::METALLIC, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Metallic.png"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::ROUGHNESS, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Roughness.png"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::EMISSIVE, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/Cerebus/Emissive.png"));
+	mGunMesh 	= Enjon::ResourceManager::GetMesh(mAssetsPath + "Models/cerebus.obj"); 
+	mGunMat 	= new Enjon::Material; 
+	mGunMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>(cerebusAlbedoPath));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>(cerebusNormalPath));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>(cerebusMetallicPath));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>(cerebusRoughnessPath));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>(cerebusEmissivePath));
+	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>(cerebusEmissivePath));
 
 	mGun->SetPosition(v3(0.0f, 3.0f, 0.0f));
 	gc->SetMesh(mGunMesh);
 	gc->SetMaterial(mGunMat);
-	gc->SetPosition(v3(0.0f, 3.0f, 0.0f));
-
-	mGreen->SetPosition(v3(1.0f, 3.0f, -1.0f));
-	mGreen->SetScale(v3(0.2f));
-	gc2->SetMesh(mSphereMesh);
-	gc2->SetMaterial(mGreenMat);
-	gc2->SetPosition(mGreen->GetWorldPosition());
-	gc2->SetScale(mGreen->GetWorldScale());
-
-	mRed->SetPosition(v3(1.0f, 10.0f, -1.0f));
-	mRed->SetScale(v3(0.7f));
-	gc3->SetMesh(mBuddhaMesh);
-	gc3->SetMaterial(mRedMat);
-	gc3->SetPosition(mRed->GetWorldPosition());
-	gc3->SetScale(mRed->GetWorldScale());
+	gc->SetPosition(v3(0.0f, 3.0f, 0.0f)); 
 
 	mSun = new Enjon::DirectionalLight();
 	mSun->SetIntensity(10.0f);
 	mSun->SetColor(Enjon::RGBA16_Orange());
 
-	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA16_SkyBlue(), 10.0f);
-
-	// Ground
-	mBatch = new Enjon::QuadBatch();
-	mBatch->Init();
-	Enjon::Material* floorMat = new Enjon::Material();
- 	floorMat->SetTexture(Enjon::TextureSlotType::ALBEDO, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/Albedo.png"));
- 	floorMat->SetTexture(Enjon::TextureSlotType::NORMAL, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/Normal.png"));
- 	floorMat->SetTexture(Enjon::TextureSlotType::METALLIC, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/Roughness.png"));
- 	floorMat->SetTexture(Enjon::TextureSlotType::ROUGHNESS, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/Roughness.png"));
- 	floorMat->SetTexture(Enjon::TextureSlotType::AO, Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Materials/OakFloor/AO.png"));
-  	mBatch->SetMaterial(floorMat);
-
-  	auto plc = mRed->Attach<Enjon::PointLightComponent>();
-  	plc->SetAttenuationRate(0.2f);
-  	plc->SetColor(Enjon::RGBA16_Red());
-  	plc->SetRadius(300.0f);
-  	plc->SetIntensity(50.0f);
-
-  	auto plc2 = mGreen->Attach<Enjon::PointLightComponent>();
-  	plc2->SetAttenuationRate(0.2f);
-  	plc2->SetColor(Enjon::RGBA16_Green());
-  	plc2->SetRadius(300.0f);
-  	plc2->SetIntensity(50.0f);
-
-	mBatch->Begin();
-  	{
- 		for (auto i = -10; i <10; i++)
- 		{
- 			for (auto j = -10; j <10; j++)
- 			{
- 				Enjon::Transform t(Enjon::Vec3(j * 2, 0, i * 2), quat::AngleAxis(Enjon::ToRadians(90), Enjon::Vec3(1, 0, 0)), Enjon::Vec3(1, 1, 1));
- 				mBatch->Add(
- 							t, 
- 							Enjon::Vec4(0, 0, 1, 1),
- 							0
- 						);
- 			}
- 		}
- 	}
-  	mBatch->End();
+	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA16_SkyBlue(), 10.0f); 
 
 	// Get graphics from engine
 	auto engine = Enjon::Engine::GetInstance();
@@ -181,11 +117,6 @@ void Game::Initialize()
 		scene->AddDirectionalLight(mSun);
 		scene->AddDirectionalLight(mSun2);
 		scene->AddRenderable(gc->GetRenderable());
-		scene->AddRenderable(gc2->GetRenderable());
-		scene->AddRenderable(gc3->GetRenderable());
-		scene->AddPointLight(plc->GetLight());
-		scene->AddPointLight(plc2->GetLight());
-		scene->AddQuadBatch(mBatch);
 		scene->SetSun(mSun);
 		scene->SetAmbientColor(Enjon::SetOpacity(Enjon::RGBA16_White(), 0.1f));
 
@@ -331,21 +262,7 @@ void Game::Update(Enjon::f32 dt)
 	{
 		mGun->SetRotation(quat::AngleAxis(t * 5.0f, v3(0, 1, 0)));
 		gc = mGun->GetComponent<Enjon::GraphicsComponent>();
-	}
-
-	if (mGreen && mGreen->HasComponent<Enjon::GraphicsComponent>())
-	{
-		// Update local position of parent
-		mGreen->SetPosition(v3(cos(t) * 3.0f, 3.0f, sin(t) * 3.0f));
-		gc2 = mGreen->GetComponent<Enjon::GraphicsComponent>();
 	} 
-
-	if (mRed && mRed->HasComponent<Enjon::GraphicsComponent>())
-	{
-		mRed->SetPosition(v3(3.0f, -20.0f + sin(t * 30.0f) * 3.0f, 3.0f));
-		mRed->SetScale(Enjon::Clamp(sin(t) * 3.0f, 0.4f, 3.0f));
-		gc3 = mRed->GetComponent<Enjon::GraphicsComponent>();
-	}
 
 	// Physics simulation
 	mDynamicsWorld->stepSimulation(1.f/60.f, 10);
@@ -425,6 +342,7 @@ void Game::ProcessInput(f32 dt)
 				velDir += camera->Right();
 			}
 
+			/*
 		    if (input->IsKeyDown(SDL_BUTTON_LEFT))
 		    {
 		    	auto cam = camera;
@@ -472,6 +390,7 @@ void Game::ProcessInput(f32 dt)
 
 				mDynamicsWorld->addRigidBody(body);
 		    }
+			*/
 
 			if (velDir.Length()) velDir = Enjon::Vec3::Normalize(velDir);
 
