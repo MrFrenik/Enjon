@@ -3,8 +3,7 @@
 
 #pragma  once
 #ifndef ENJON_TEXTURE_ASSET_LOADER_H
-#define ENJON_TEXTURE_ASSET_LOADER_H
-
+#define ENJON_TEXTURE_ASSET_LOADER_H 
 
 #include "Asset/AssetLoader.h"
 #include "Graphics/Texture.h"
@@ -28,7 +27,7 @@ namespace Enjon
 		protected:
 
 		private: 
-			Texture* LoadAssetFromFile(const std::string& name);
+			Texture* LoadAssetFromFile(const String& filePath, const String& name);
 	}; 
 }
 

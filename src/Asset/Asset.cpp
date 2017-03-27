@@ -2,3 +2,8 @@
 // File: Asset.cpp
 
 #include "Asset/Asset.h" 
+#include "Utils/FileUtils.h"
+			
+namespace Enjon
+{
+}

@@ -9700,8 +9700,6 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 	else
 		printf("Exit failed.\n"); 
 
-	mEngine.ShutDown();
-
 	return 0;	
 }
 

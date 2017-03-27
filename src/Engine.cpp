@@ -18,26 +18,29 @@
 // Totally temporary
 static bool mMovementOn = false;
 
-// Enjon::Utils::FPSLimiter mLimiter;
+ Enjon::Utils::FPSLimiter mLimiter;
 
 namespace Enjon
 {
 	Engine* Engine::mInstance = nullptr; 
 
-	//-------------------------------------------------------
+	//=======================================================
+
 	Engine::Engine()
 	{
 		assert(mInstance == nullptr);
 		mInstance = this;
 	}	
 
-	//-------------------------------------------------------
+	//=======================================================
+
 	Engine::~Engine()
 	{
 		// Shutdown all instances
 	}
 
-	//-------------------------------------------------------
+	//=======================================================
+
 	Enjon::Result Engine::StartUp(const EngineConfig& config)
 	{
 		// TODO(): Find out where this should be abstracted into
@@ -67,7 +70,8 @@ namespace Enjon
 		return Enjon::Result::SUCCESS;
 	}
 
-	//-------------------------------------------------------
+	//=======================================================
+
 	Enjon::Result Engine::StartUp(Application* app, const EngineConfig& config)
 	{
 		// Register application 
@@ -93,16 +97,21 @@ namespace Enjon
 		return res;
 	}
 
-	//-------------------------------------------------------
+	//=======================================================
+
 	Engine* Engine::GetInstance()
 	{
 		return mInstance;
 	}
+	
+	//=======================================================
 			
 	const EngineConfig& Engine::GetConfig() const
 	{
 		return mConfig;
 	}
+	
+	//=======================================================
 
 	Enjon::Result Engine::InitSubsystems()
 	{
@@ -122,7 +131,8 @@ namespace Enjon
 			mApp->Initialize();
 		}
 
-		// mLimiter.Init(60.0f);
+		// Initializessssstt limiter
+		 mLimiter.Init(60.0f);
 
 		// Late init for systems that need it
 		Enjon::ImGuiManager::LateInit(mGraphics->GetWindow()->GetSDLWindow());
@@ -130,7 +140,8 @@ namespace Enjon
 		return Enjon::Result::SUCCESS;
 	}
 
-	//-------------------------------------------------------
+	//=======================================================
+
 	Enjon::Result Engine::RegisterApplication(Application* app)
 	{
 		assert(mApp == nullptr);
@@ -138,6 +149,8 @@ namespace Enjon
 
 		return Enjon::Result::SUCCESS;
 	}
+	
+	//=======================================================
 
 	Enjon::Result Engine::Run()
 	{
@@ -150,28 +163,42 @@ namespace Enjon
 		srand(time(NULL)); 
 
 		// Main application loop
-		bool mIsRunning = true;
+		b8 mIsRunning = true;
 		while (mIsRunning)
 		{
-			// mLimiter.Begin();
+			 mLimiter.Begin();
 
 			mInput->Update();
 
 			// Update input
-			mIsRunning = ProcessInput(mInput, dt);
+			Enjon::Result res = ProcessInput(mInput, dt);
+			if (res != Result::PROCESS_RUNNING)
+			{
+				mIsRunning = false;
+				break;
+			}
 
 			// Update application
-			mApp->Update(dt);
+			res = mApp->Update(dt);
+			if (res != Result::PROCESS_RUNNING)
+			{
+				mIsRunning = false;
+				break;
+			}
 
 			// Update graphics
 			mGraphics->Update(dt);
 
-			// mLimiter.End();
+			 mLimiter.End();
 		}
 
+		Enjon::Result res = ShutDown();
+
 		// Main engine loop here
-		return Enjon::Result::SUCCESS;
+		return res;
 	}
+
+	//======================================================= 
 
 	Enjon::Result Engine::ShutDown()
 	{
@@ -183,7 +210,9 @@ namespace Enjon
 		return Enjon::Result::SUCCESS;
 	}
 
-	b8 Engine::ProcessInput(Enjon::Input* input, float dt)
+	//======================================================= 
+
+	Enjon::Result Engine::ProcessInput(Enjon::Input* input, float dt)
 	{
 	    SDL_Event event;
 	   //Will keep looping until there are no more events to process
@@ -194,7 +223,7 @@ namespace Enjon
 	        switch (event.type) 
 	        {
 	            case SDL_QUIT:
-	                return false;
+	                return Result::FAILURE;
 	                break;
 				case SDL_KEYUP:
 					input->ReleaseKey(event.key.keysym.sym); 
@@ -213,15 +242,12 @@ namespace Enjon
 				default:
 					break;
 			}
-	    }
-
-	    if (input->IsKeyPressed(SDLK_ESCAPE))
-	    {
-	    	return false;
 	    } 
 
-	    return true;
+	    return Result::PROCESS_RUNNING;
 	}
+
+	//======================================================= 
 
 	Result EngineConfig::ParseArguments(s32 argc, char** argv)
 	{
@@ -246,6 +272,8 @@ namespace Enjon
 
 		return Result::SUCCESS;
 	}
+
+	//======================================================= 
 			
 	const String& EngineConfig::GetRoot() const
 	{

@@ -72,7 +72,7 @@ namespace Enjon
 
 	//====================================================================
 
-	Mesh* GraphicsComponent::GetMesh() const
+	AssetHandle<Mesh> GraphicsComponent::GetMesh() const
 	{ 
 		return mRenderable.GetMesh(); 
 	}
@@ -135,7 +135,7 @@ namespace Enjon
 
 	//====================================================================
 
-	void GraphicsComponent::SetMesh(Mesh* mesh)
+	void GraphicsComponent::SetMesh(const AssetHandle<Mesh>& mesh)
 	{
 		mRenderable.SetMesh(mesh);
 	}

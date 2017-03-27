@@ -43,19 +43,19 @@ namespace Enjon
 			/**
 			*@brief Adds asset to project form given file path
 			*/
-			Result AddToDatabase(const String& filePath);
+			Result AddToDatabase(const String& filePath, b8 isRelativePath = true);
 
 			/**
 			*@brief Gets loaded asset in database from name
 			*/
 			template <typename T>
-			AssetHandle<T> GetAsset(const std::string& filePath)
+			AssetHandle<T> GetAsset(const String& name)
 			{ 
 				// Get appropriate loader based on asset type
 				u32 loaderId = GetAssetTypeId<T>(); 
 
 				// Get handle from loader
-				AssetHandle<T> handle = mLoaders[loaderId]->GetAsset<T>(mAssetsPath + filePath); 
+				AssetHandle<T> handle = mLoaders[loaderId]->GetAsset<T>(name); 
 
 				// Return asset handle
 				return handle;
@@ -67,7 +67,7 @@ namespace Enjon
 
 		private: 
 	
-			LoaderType GetTypeByFileExtension(const String& filePath);
+			s32 GetLoaderIdxByFileExtension(const String& filePath);
 
 			u32 GetUniqueAssetTypeId() noexcept
 			{

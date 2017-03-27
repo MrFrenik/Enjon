@@ -93,7 +93,7 @@ namespace Enjon {
 			Material* GetMaterial() { return mMaterial; }
 
 			// Adds quadglyph to quadbatch to be rendered
-			void Add(Transform& Transform, Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
+			void Add(Transform& Transform, Vec4& UVRect = Vec4(0, 0, 1, 1), GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
 
 			// Adds quadglyph to quadbatch to be rendered with base quad defined
 			void Add(Vec2& Dimensions, Transform& Transform, Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);

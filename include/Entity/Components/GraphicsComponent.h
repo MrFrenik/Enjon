@@ -33,7 +33,7 @@ namespace Enjon
 			Material* GetMaterial();
 
 			/* Get mesh of renderable */
-			Mesh* GetMesh() const;
+			AssetHandle<Mesh> GetMesh() const;
 
 			/* Get scene of renderable */
 			Scene* GetScene() const;
@@ -63,7 +63,7 @@ namespace Enjon
 			void SetMaterial(Material* material);
 
 			/* Set mesh of renderable */
-			void SetMesh(Mesh* mesh);
+			void SetMesh(const AssetHandle<Mesh>& mesh);
 
 			/* Set scene of renderable */
 			void SetScene(Scene* scene);

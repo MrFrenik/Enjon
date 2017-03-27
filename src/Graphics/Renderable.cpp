@@ -9,7 +9,7 @@ namespace Enjon
 {
 	//--------------------------------------------------------------------
 	Renderable::Renderable()
-		: mMesh(nullptr), mMaterial(nullptr)
+		: mMaterial(nullptr)
 	{
 	}
 
@@ -48,7 +48,7 @@ namespace Enjon
 
 	//==============================================================
 
-	Mesh* Renderable::GetMesh() const 
+	AssetHandle<Mesh> Renderable::GetMesh() const 
 	{ 
 		return mMesh; 
 	}
@@ -116,7 +116,7 @@ namespace Enjon
 	}
 
 	//--------------------------------------------------------------------
-	void Renderable::SetMesh(Mesh* mesh)
+	void Renderable::SetMesh(const AssetHandle<Mesh>& mesh)
 	{
 		mMesh = mesh;
 	}

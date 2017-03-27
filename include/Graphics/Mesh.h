@@ -2,10 +2,12 @@
 #ifndef ENJON_MESH_H
 #define ENJON_MESH_H
 
-#include <System/Types.h>
-#include <Defines.h>
-#include <Math/Maths.h>
-#include <Graphics/Vertex.h>
+#include "System/Types.h"
+#include "Defines.h"
+#include "Math/Maths.h"
+#include "Graphics/Vertex.h"
+#include "Asset/Asset.h"
+
 #include <vector>
 
 namespace Enjon { 
@@ -18,7 +20,7 @@ namespace Enjon {
 		float UV[2];	
 	};
 
-	class Mesh
+	class Mesh : public Asset
 	{
 		public:
 			Mesh();

@@ -14,21 +14,7 @@ namespace Enjon {
 	//------------------------------------------------------------------------
 	Material::~Material()
 	{
-	}
-
-	//------------------------------------------------------------------------
-	void Material::SetTexture(TextureSlotType type, const GLTexture& texture)
-	{
-		assert((u32)type < (u32)TextureSlotType::Count);
-		mTextures[(u32)type] = texture;
 	} 
-
-	//------------------------------------------------------------------------
-	//GLTexture Material::GetTexture(TextureSlotType type) const
-	//{
-	//	assert((u32)type < (u32)TextureSlotType::Count);
-	//	return mTextures[(u32)type];
-	//}
 	
 	//------------------------------------------------------------------------
 	

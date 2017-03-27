@@ -4,6 +4,7 @@
 #include "Asset/AssetManager.h"
 #include "Asset/AssetLoader.h"
 #include "Asset/TextureAssetLoader.h" 
+#include "Asset/MeshAssetLoader.h" 
 #include "Utils/FileUtils.h"
 
 #include <fmt/printf.h>
@@ -19,6 +20,7 @@ namespace Enjon
 
 		// Register the loaders with manager 
 		RegisterAssetLoader<Enjon::Texture, TextureAssetLoader>(); 
+		RegisterAssetLoader<Enjon::Mesh, MeshAssetLoader>(); 
 	}
 	
 	//=================================================
@@ -41,35 +43,59 @@ namespace Enjon
 		return Result::SUCCESS;
 	}
 
-	AssetManager::LoaderType AssetManager::GetTypeByFileExtension(const String& filePath)
+	s32 AssetManager::GetLoaderIdxByFileExtension(const String& filePath)
 	{ 
-		LoaderType type;
+		// If not found, will return -1
+		s32 idx = -1;
 
-		String fileExtension = Utils::SplitString(filePath, ".").back();
-			
-		fmt::print("fileExtension: {}\n", fileExtension);
+		String fileExtension = Utils::SplitString(filePath, ".").back(); 
 
+		// Graphics texture asset
 		if (fileExtension.compare("png") == 0 )
 		{ 
-			type = LoaderType::Texture;
+			idx = GetAssetTypeId<Enjon::Texture>();
 		}
 
-		return type;
+		// Graphics mesh asset
+		else if (fileExtension.compare("obj") == 0)
+		{
+			idx = GetAssetTypeId<Enjon::Mesh>();
+		}
+
+		return idx;
 	}
 	
 	//================================================= 
 			
-	Result AssetManager::AddToDatabase(const String& filePath)
+	Result AssetManager::AddToDatabase(const String& filePath, b8 isRelativePath)
 	{
 		// Have to do a switch based on extension of file
-		LoaderType fType = GetTypeByFileExtension(filePath);
+		s32 idx = GetLoaderIdxByFileExtension(filePath); 
 
-		// Find loader by type
-		auto query = mLoaders.find((u32)fType);
+		// If out of bounds, return failure since file extension was unknown
+		if (idx < 0) 
+		{
+			// TODO(): Log that extension was unknown
+			return Result::FAILURE;
+		}
+		
+		// Get qualified name of asset
+		String qualifiedName = AssetLoader::GetQualifiedName(filePath); 
+
+		// Find loader by idx
+		auto query = mLoaders.find((u32)idx);
 		if (query != mLoaders.end())
 		{
-			// Load asset and place into database
-			auto res = query->second->LoadAssetFromFile(mAssetsPath + filePath); 
+			// Make sure it doesn't exist already before trying to load it
+			if (query->second->Exists(qualifiedName))
+			{
+				return Result::FAILURE;
+			}
+			else
+			{
+				// Load asset and place into database
+				auto res = query->second->LoadAssetFromFile(mAssetsPath + filePath, qualifiedName); 
+			}
 		}
 
 		return Result::SUCCESS;

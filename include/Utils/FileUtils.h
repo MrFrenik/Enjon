@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <algorithm>
 
 #include "Utils/json.h"
 #include "Defines.h"
@@ -83,6 +84,28 @@ namespace Enjon { namespace Utils {
 		splits.push_back(str.substr(last));
 
 		return splits; 
+	}
+		
+	static inline String Replace(const String& str, const char& find, const char& with)
+	{
+		String res = str;
+
+		for (auto& c : res)
+		{
+			if (c == find)
+			{
+				c = with;
+			}
+		}
+
+		return res;
+	}
+	
+	static inline String ToLower(const String& str)
+	{
+		String res = str;
+		std::transform(res.begin(), res.end(), res.begin(), ::tolower);
+		return res;
 	}
 
 	static inline char* ReadFileContentsIntoString(char* FilePath)

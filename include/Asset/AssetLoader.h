@@ -25,13 +25,22 @@ namespace Enjon
 			/**
 			* @brief Constructor - Base class for all loaders
 			*/
-			AssetLoader() {}
+			AssetLoader();
 
 			/**
-			* @brief Virtual destructor
+			* @brief Destructor
 			*/
-			~AssetLoader() {}
+			~AssetLoader();
 
+			/**
+			* @brief 
+			*/ 
+			static String GetQualifiedName(const String& filePath);
+
+			/**
+			* @brief
+			*/
+			b8 Exists(const String& name);
 
 		protected:
 
@@ -53,13 +62,13 @@ namespace Enjon
 				return handle; 
 			} 
 			
-	protected:
-			
-			Asset* AddToAssets(const String& filePath, Asset* asset)
+			Asset* AddToAssets(const String& name, Asset* asset)
 			{
-				mAssets[filePath] = asset;
-				return mAssets[filePath];
+				mAssets[name] = asset;
+				return mAssets[name];
 			}
+
+	protected:
 			
 			std::unordered_map<String, Asset*> mAssets;
 
@@ -67,7 +76,7 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
-			virtual Asset* LoadAssetFromFile(const String& name) = 0; 
+			virtual Asset* LoadAssetFromFile(const String& filePath, const String& name) = 0; 
 
 	};
 } 

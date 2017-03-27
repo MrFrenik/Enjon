@@ -40,8 +40,6 @@ btAlignedObjectArray<btCollisionShape*> collisionShapes;
 std::vector<Enjon::Entity*> mPhysicsEntities;
 
 Enjon::String mAssetsPath; 
-
-Enjon::TextureAssetLoader* texAssetLoader;
 Enjon::AssetManager* mAssetManager;
 
 //-------------------------------------------------------------
@@ -55,7 +53,7 @@ Game::~Game()
 }
 
 //-------------------------------------------------------------
-void Game::Initialize()
+Enjon::Result Game::Initialize()
 { 
 	// Set up assets path
 	mAssetsPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("IsoARPG/Assets/"); 
@@ -64,11 +62,26 @@ void Game::Initialize()
 	mAssetManager = new Enjon::AssetManager(mAssetsPath); 
 
 	// Paths to resources
-	Enjon::String cerebusAlbedoPath = Enjon::String("Materials/Cerebus/Albedo.png"); 
-	Enjon::String cerebusNormalPath = Enjon::String("Materials/Cerebus/Normal.png"); 
-	Enjon::String cerebusMetallicPath = Enjon::String("Materials/Cerebus/Metallic.png"); 
-	Enjon::String cerebusRoughnessPath = Enjon::String("Materials/Cerebus/Roughness.png"); 
-	Enjon::String cerebusEmissivePath = Enjon::String("Materials/Cerebus/Emissive.png"); 
+	Enjon::String cerebusMeshPath		= Enjon::String("Models/cerebus.obj");
+	Enjon::String buddhaMeshPath		= Enjon::String("Models/buddha.obj");
+	Enjon::String bunnyMeshPath			= Enjon::String("Models/bunny.obj");
+	Enjon::String dragonMeshPath		= Enjon::String("Models/dragon.obj");
+	Enjon::String monkeyMeshPath		= Enjon::String("Models/monkey.obj");
+	Enjon::String sphereMeshPath		= Enjon::String("Models/unit_sphere.obj");
+	Enjon::String catMeshPath			= Enjon::String("Models/cat.obj");
+	Enjon::String dudeMeshPath			= Enjon::String("Models/dude.obj");
+	Enjon::String shaderBallMeshPath	= Enjon::String("Models/shaderball.obj");
+	Enjon::String cerebusAlbedoPath		= Enjon::String("Materials/Cerebus/Albedo.png"); 
+	Enjon::String cerebusNormalPath		= Enjon::String("Materials/Cerebus/Normal.png"); 
+	Enjon::String cerebusMetallicPath	= Enjon::String("Materials/Cerebus/Metallic.png"); 
+	Enjon::String cerebusRoughnessPath	= Enjon::String("Materials/Cerebus/Roughness.png"); 
+	Enjon::String cerebusEmissivePath	= Enjon::String("Materials/Cerebus/Emissive.png"); 
+	Enjon::String mahogAlbedoPath		= Enjon::String("Materials/MahogFloor/Albedo.png"); 
+	Enjon::String mahogNormalPath		= Enjon::String("Materials/MahogFloor/Normal.png"); 
+	Enjon::String mahogMetallicPath		= Enjon::String("Materials/MahogFloor/Metallic.png"); 
+	Enjon::String mahogRoughnessPath	= Enjon::String("Materials/MahogFloor/Roughness.png"); 
+	Enjon::String mahogEmissivePath		= Enjon::String("Materials/MahogFloor/Emissive.png"); 
+	Enjon::String mahogAOPath			= Enjon::String("Materials/MahogFloor/AO.png"); 
 
 	// Add to asset database
 	mAssetManager->AddToDatabase(cerebusAlbedoPath); 
@@ -76,6 +89,21 @@ void Game::Initialize()
 	mAssetManager->AddToDatabase(cerebusMetallicPath); 
 	mAssetManager->AddToDatabase(cerebusRoughnessPath); 
 	mAssetManager->AddToDatabase(cerebusEmissivePath); 
+	mAssetManager->AddToDatabase(mahogAlbedoPath); 
+	mAssetManager->AddToDatabase(mahogNormalPath); 
+	mAssetManager->AddToDatabase(mahogMetallicPath); 
+	mAssetManager->AddToDatabase(mahogRoughnessPath); 
+	mAssetManager->AddToDatabase(mahogEmissivePath); 
+	mAssetManager->AddToDatabase(mahogAOPath); 
+	mAssetManager->AddToDatabase(cerebusMeshPath);
+	mAssetManager->AddToDatabase(buddhaMeshPath);
+	mAssetManager->AddToDatabase(bunnyMeshPath);
+	mAssetManager->AddToDatabase(dragonMeshPath);
+	mAssetManager->AddToDatabase(monkeyMeshPath);
+	mAssetManager->AddToDatabase(sphereMeshPath);
+	mAssetManager->AddToDatabase(catMeshPath); 
+	mAssetManager->AddToDatabase(dudeMeshPath); 
+	mAssetManager->AddToDatabase(shaderBallMeshPath); 
 
 	// Create entity manager
 	mEntities = new Enjon::EntityManager();
@@ -87,25 +115,51 @@ void Game::Initialize()
 	mGun = mEntities->Allocate();
 	auto gc = mGun->Attach<Enjon::GraphicsComponent>(); 
 
-	mGunMesh 	= Enjon::ResourceManager::GetMesh(mAssetsPath + "Models/cerebus.obj"); 
 	mGunMat 	= new Enjon::Material; 
-	mGunMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>(cerebusAlbedoPath));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>(cerebusNormalPath));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>(cerebusMetallicPath));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>(cerebusRoughnessPath));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>(cerebusEmissivePath));
-	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>(cerebusEmissivePath));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.albedo"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.normal"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.metallic"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.roughness"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.emissive"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.emissive"));
 
-	mGun->SetPosition(v3(0.0f, 3.0f, 0.0f));
-	gc->SetMesh(mGunMesh);
+	mGun->SetPosition(Enjon::Vec3(0.0f, 0.0f, 0.0f));
+	mGun->SetScale(0.01f);
+	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("models.shaderball"));
 	gc->SetMaterial(mGunMat);
-	gc->SetPosition(v3(0.0f, 3.0f, 0.0f)); 
 
 	mSun = new Enjon::DirectionalLight();
 	mSun->SetIntensity(10.0f);
 	mSun->SetColor(Enjon::RGBA16_Orange());
 
 	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA16_SkyBlue(), 10.0f); 
+
+	mFloorMat = new Enjon::Material();
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.albedo"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.normal"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.metallic"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.roughness"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.emissive"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.ao"));
+	mBatch = new Enjon::QuadBatch();
+	mBatch->Init();
+	mBatch->Begin();
+	{
+		const Enjon::s32 dimSize = 25;
+		for (Enjon::s32 i = -dimSize; i < dimSize; ++i)
+		{
+			for (Enjon::s32 j = -dimSize; j < dimSize; ++j)
+			{
+				Enjon::Vec3 pos(j * 2.0f, 0.0f, i * 2.0f);
+				Enjon::Quaternion rot = Enjon::Quaternion::AngleAxis(Enjon::ToRadians(90.0f), Enjon::Vec3::XAxis());
+				Enjon::Vec3 scale(1.0f);
+				Enjon::Transform t(pos, rot, scale);
+				mBatch->Add(t);
+				mBatch->SetMaterial(mFloorMat);
+			}
+		} 
+	}
+	mBatch->End();
 
 	// Get graphics from engine
 	auto engine = Enjon::Engine::GetInstance();
@@ -117,6 +171,7 @@ void Game::Initialize()
 		scene->AddDirectionalLight(mSun);
 		scene->AddDirectionalLight(mSun2);
 		scene->AddRenderable(gc->GetRenderable());
+		scene->AddQuadBatch(mBatch);
 		scene->SetSun(mSun);
 		scene->SetAmbientColor(Enjon::SetOpacity(Enjon::RGBA16_White(), 0.1f));
 
@@ -213,7 +268,7 @@ void Game::Initialize()
 		mDynamicsWorld->addRigidBody(body); 
 	}
 
-	// Set up assets path
+	return Enjon::Result::SUCCESS; 
 }
 
 //-------------------------------------------------------------
@@ -243,25 +298,29 @@ void Game::ListEntityChildren(Enjon::Entity* entity, u32 indentAmount)
 }
 
 //-------------------------------------------------------------
-void Game::Update(Enjon::f32 dt)
+Enjon::Result Game::Update(Enjon::f32 dt)
 {
-	// Update movement
-	ProcessInput(dt);
+	// Update movement and check for success/failure of update
+	Enjon::Result res = ProcessInput(dt);
+	if (res != Enjon::Result::PROCESS_RUNNING)
+	{
+		return res;
+	}
 
 	// Update entity manager
 	mEntities->Update(dt);
 
-	static float t = 0.0f;
+	static Enjon::f32 t = 0.0f;
 	t += 0.01f * dt;
 
 	Enjon::GraphicsComponent* gc 	= nullptr;
 	Enjon::GraphicsComponent* gc2 	= nullptr;
-	Enjon::GraphicsComponent* gc3 	= nullptr;
+	Enjon::GraphicsComponent* gc3 	= nullptr; 
 
 	if (mGun && mGun->HasComponent<Enjon::GraphicsComponent>())
 	{
 		mGun->SetRotation(quat::AngleAxis(t * 5.0f, v3(0, 1, 0)));
-		gc = mGun->GetComponent<Enjon::GraphicsComponent>();
+		gc = mGun->GetComponent<Enjon::GraphicsComponent>(); 
 	} 
 
 	// Physics simulation
@@ -294,14 +353,21 @@ void Game::Update(Enjon::f32 dt)
 	{
 		e->UpdateComponentTransforms(dt);
 	}
+
+	return Enjon::Result::PROCESS_RUNNING;
 }
 
 //
-void Game::ProcessInput(f32 dt)
+Enjon::Result Game::ProcessInput(f32 dt)
 {
 	Enjon::Engine* engine = Enjon::Engine::GetInstance();
 	Enjon::Input* input = engine->GetInput();
 	Enjon::DeferredRenderer* gfx = engine->GetGraphics();
+
+	if (input->IsKeyPressed(SDLK_ESCAPE))
+	{
+		return Enjon::Result::SUCCESS;
+	}
 
 	if (input->IsKeyPressed(SDLK_t))
 	    {
@@ -416,13 +482,14 @@ void Game::ProcessInput(f32 dt)
 			// Offset camera orientation
 			f32 xOffset = Enjon::ToRadians((f32)viewPort.x / 2.0f - MouseCoords.x) * dt * MouseSensitivity;
 			f32 yOffset = Enjon::ToRadians((f32)viewPort.y / 2.0f - MouseCoords.y) * dt * MouseSensitivity;
-			camera->OffsetOrientation(xOffset, yOffset);
-
+			camera->OffsetOrientation(xOffset, yOffset); 
 	    }
+
+		return Enjon::Result::PROCESS_RUNNING;
 }
 
 //-------------------------------------------------------------
-void Game::Shutdown()
+Enjon::Result Game::Shutdown()
 {
 	printf("%d\n", sizeof(Enjon::Entity));
 	printf("%d\n", sizeof(Enjon::Transform));
@@ -430,4 +497,6 @@ void Game::Shutdown()
 	fmt::print("{}", sizeof(Enjon::Entity));
 	
 	printf("Shutting down game...\n");
+
+	return Enjon::Result::SUCCESS;
 }

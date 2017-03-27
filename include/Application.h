@@ -3,6 +3,7 @@
 #define ENJON_APPLICATION_H
 
 #include "System/Types.h"
+#include "Defines.h"
 
 namespace Enjon
 {
@@ -16,21 +17,27 @@ namespace Enjon
 			/**
 			* @brief Called when first initializing application. Runs through all startup code 
 			*		that is necessary for the application to begin properly.
-			* @return void
+			* @return Enjon::Result
 			*/
-			virtual void Initialize() = 0;  
+			virtual Enjon::Result Initialize() = 0;  
 
 			/**
 			* @brief Main update tick for application.
-			* @return void
+			* @return Enjon::Result
 			*/
-			virtual void Update(f32 dt) = 0;
+			virtual Enjon::Result Update(f32 dt) = 0;
+
+			/**
+			* @brief Processes input from input class 
+			* @return Enjon::Result
+			*/
+			virtual Enjon::Result ProcessInput(f32 dt) = 0;
 
 			/**
 			* @brief Shuts down application and cleans up any memory that was allocated.
-			* @return void
+			* @return Enjon::Result
 			*/
-			virtual void Shutdown() = 0; 
+			virtual Enjon::Result Shutdown() = 0; 
 	};
 }
 

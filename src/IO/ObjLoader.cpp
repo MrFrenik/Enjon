@@ -5,7 +5,7 @@
 #include <Math/Vec3.h>
 #include <Math/Vec2.h>
 
-#define TINYOBJLOADER_IMPLEMENTATION // define this in only *one* .cc
+//#define TINYOBJLOADER_IMPLEMENTATION // define this in only *one* .cc
 #include <IO/TinyLoader.h>
 
 #include <stdio.h>

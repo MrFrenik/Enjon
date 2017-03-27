@@ -1,7 +1,8 @@
 #ifndef ARPG_GAME_H
 #define ARPG_GAME_H
 
-#include "Application.h"
+#include "Application.h" 
+#include "Asset/Asset.h"
 
 #include <vector>
 
@@ -21,30 +22,36 @@ class Game : public Enjon::Application
 		Game();
 		~Game();
 
-		virtual void Initialize();  
-		virtual void Update(f32 dt);
-		virtual void Shutdown();
+		virtual Enjon::Result Initialize();  
+		virtual Enjon::Result Update(f32 dt);
+		virtual Enjon::Result Shutdown();
 
-		void ProcessInput(f32 dt);
+		virtual Enjon::Result ProcessInput(f32 dt);
 
 	private:
 		void ListEntityChildren(Enjon::Entity* entity, u32 indentAmount);
 
 	private:
-		Enjon::EntityManager* mEntities 		= nullptr;
-		Enjon::Entity* mGun 					= nullptr;
-		Enjon::Entity* mGreen 					= nullptr;
-		Enjon::Entity* mRed 					= nullptr;
-		Enjon::DirectionalLight* mSun = nullptr;
+		Enjon::EntityManager* mEntities = nullptr;
+		Enjon::Entity* mGun 			= nullptr;
+		Enjon::Entity* mGreen 			= nullptr;
+		Enjon::Entity* mRed 			= nullptr; 
+
+		Enjon::DirectionalLight* mSun	= nullptr;
 		Enjon::QuadBatch* mBatch 		= nullptr;
 
 		Enjon::Material* mGunMat 	= nullptr;
 		Enjon::Material* mRedMat 	= nullptr;
 		Enjon::Material* mGreenMat 	= nullptr;
 		Enjon::Material* mBlueMat 	= nullptr;
-		Enjon::Mesh* mSphereMesh 	= nullptr;
-		Enjon::Mesh* mGunMesh 		= nullptr;
-		Enjon::Mesh* mBuddhaMesh 	= nullptr;
+		Enjon::Material* mFloorMat	= nullptr;
+
+		Enjon::AssetHandle<Enjon::Mesh> mSphereMesh;
+		Enjon::AssetHandle<Enjon::Mesh> mGunMesh;
+		Enjon::AssetHandle<Enjon::Mesh> mBuddhaMesh;
+		Enjon::AssetHandle<Enjon::Mesh> mMonkeyMesh;
+
+		std::vector<Enjon::AssetHandle<Enjon::Mesh>*> mMeshSwitches;
 
 		std::vector<Enjon::Entity*> mHandles;
 

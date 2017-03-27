@@ -241,7 +241,7 @@ namespace Enjon {
 				}
 
 				// Now need to render
-				Mesh* mesh = renderable->GetMesh();
+				Mesh* mesh = renderable->GetMesh().Get();
 				mesh->Bind();
 				{
 					Mat4 Model;

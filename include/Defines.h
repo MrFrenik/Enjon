@@ -22,6 +22,7 @@ namespace Enjon
 	{
 		SUCCESS,
 		FAILURE,
+		PROCESS_RUNNING,
 		UNKNOWN_ERROR
 	};
 	

@@ -16,11 +16,11 @@ namespace Enjon
 			
 	TextureAssetLoader::~TextureAssetLoader()
 	{ 
-	}
+	} 
 
-	Texture* TextureAssetLoader::LoadAssetFromFile(const std::string& filePath)
-	{
-		// Make sure that asset is not already loaded 
+	Texture* TextureAssetLoader::LoadAssetFromFile(const String& filePath, const String& name)
+	{ 
+		// Create new texture
 		Enjon::Texture* tex = new Enjon::Texture;
 		
 		std::vector<u8> in;
@@ -79,8 +79,8 @@ namespace Enjon
 		tex->mWidth = width;
 		tex->mHeight = height; 
 
-		// Push back into assets
-		AddToAssets(filePath, tex);
+		// Add to assets with qualified name
+		AddToAssets(name, tex);
 
 		return tex;
 	} 

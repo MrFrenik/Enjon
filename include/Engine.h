@@ -110,7 +110,7 @@ namespace Enjon
 			* @brief Processes and updates input system.
 			* @return b8 - Returns true if success and false if failure.
 			*/
-			b8 ProcessInput(Input* input, float dt);
+			Enjon::Result ProcessInput(Input* input, float dt);
 
 		private:
 

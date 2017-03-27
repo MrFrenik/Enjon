@@ -6,6 +6,7 @@
 #include "Graphics/Texture.h"
 #include "Graphics/Color.h"
 #include "System/Types.h"
+#include "Asset/Asset.h"
 
 #include <unordered_map>
 
@@ -24,14 +25,11 @@ namespace Enjon {
 		Count
 	};
 
-	class Material
+	class Material : public Asset
 	{
 		public:
 			Material();
-			~Material();
-
-			void SetTexture(TextureSlotType type, const GLTexture& texture);
-			//GLTexture GetTexture(TextureSlotType type) const;
+			~Material(); 
 
 			void SetTexture(const TextureSlotType& type, const AssetHandle<Texture>& textureHandle);
 			AssetHandle<Texture> GetTexture(const TextureSlotType& type) const;
@@ -43,9 +41,7 @@ namespace Enjon {
 			void SetShader(GLSLProgram* shader);
 
 		private:
-			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count];
-
-			GLTexture mTextures[(u32)TextureSlotType::Count];
+			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count]; 
 			ColorRGBA16 mColors[(u32)TextureSlotType::Count];
 			GLSLProgram* mShader;
 	};
