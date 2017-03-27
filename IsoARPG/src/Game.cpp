@@ -78,7 +78,7 @@ Enjon::Result Game::Initialize()
 	Enjon::String cerebusEmissivePath	= Enjon::String("Materials/Cerebus/Emissive.png"); 
 	Enjon::String mahogAlbedoPath		= Enjon::String("Materials/MahogFloor/Albedo.png"); 
 	Enjon::String mahogNormalPath		= Enjon::String("Materials/MahogFloor/Normal.png"); 
-	Enjon::String mahogMetallicPath		= Enjon::String("Materials/MahogFloor/Metallic.png"); 
+	Enjon::String mahogMetallicPath		= Enjon::String("Materials/MahogFloor/Roughness.png"); 
 	Enjon::String mahogRoughnessPath	= Enjon::String("Materials/MahogFloor/Roughness.png"); 
 	Enjon::String mahogEmissivePath		= Enjon::String("Materials/MahogFloor/Emissive.png"); 
 	Enjon::String mahogAOPath			= Enjon::String("Materials/MahogFloor/AO.png"); 
@@ -96,13 +96,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase(mahogEmissivePath); 
 	mAssetManager->AddToDatabase(mahogAOPath); 
 	mAssetManager->AddToDatabase(cerebusMeshPath);
-	mAssetManager->AddToDatabase(buddhaMeshPath);
-	mAssetManager->AddToDatabase(bunnyMeshPath);
-	mAssetManager->AddToDatabase(dragonMeshPath);
-	mAssetManager->AddToDatabase(monkeyMeshPath);
 	mAssetManager->AddToDatabase(sphereMeshPath);
-	mAssetManager->AddToDatabase(catMeshPath); 
-	mAssetManager->AddToDatabase(dudeMeshPath); 
 	mAssetManager->AddToDatabase(shaderBallMeshPath); 
 
 	// Create entity manager
@@ -123,9 +117,9 @@ Enjon::Result Game::Initialize()
 	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.emissive"));
 	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.emissive"));
 
-	mGun->SetPosition(Enjon::Vec3(0.0f, 0.0f, 0.0f));
-	mGun->SetScale(0.01f);
-	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("models.shaderball"));
+	mGun->SetPosition(Enjon::Vec3(0.0f, 6.0f, 0.0f));
+	mGun->SetScale(3.0f);
+	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("models.cerebus"));
 	gc->SetMaterial(mGunMat);
 
 	mSun = new Enjon::DirectionalLight();
@@ -137,7 +131,7 @@ Enjon::Result Game::Initialize()
 	mFloorMat = new Enjon::Material();
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.albedo"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.normal"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.metallic"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.roughness"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.roughness"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.emissive"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.ao"));
