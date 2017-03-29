@@ -7,16 +7,15 @@
 
 #include "Defines.h"
 #include "System/Types.h" 
+#include "SubsystemCatalog.h"
 
 namespace Enjon
 { 
 	class DeferredRenderer; 
 	class Input;
-
+	class AssetManager; 
 	class Application; 
 	
-	// What can engine config hold?
-	// A root path for the engine
 	class EngineConfig
 	{
 		public:
@@ -27,7 +26,7 @@ namespace Enjon
 			
 		private:
 			String mRootPath; 
-	};
+	}; 
 
 	class Engine
 	{
@@ -80,6 +79,12 @@ namespace Enjon
 			Input* GetInput() { return mInput; }
 			
 			/**
+			* @brief Returns pointer to registered Subsystem Catalog .
+			* @return SubsystemCatalog* - Pointer to the registered SubsystemCatalog.
+			*/
+			SubsystemCatalog* GetSubsystemCatalog() { return mSubsystemCatalog; }
+			
+			/**
 			* @brief Returns const reference to engine config.
 			* @return const EngineConfig& - Const reference to the registered engine config.
 			*/
@@ -114,11 +119,19 @@ namespace Enjon
 
 		private:
 
+			// Pointer to static instance of engine
 			static Engine* mInstance; 
 
-			Application* mApp 				= nullptr; 
-			DeferredRenderer* mGraphics 	= nullptr; 
-			Input* mInput 					= nullptr;
+			// Main application
+			Application*		mApp 				= nullptr; 
+
+			// Subsystems
+			DeferredRenderer*	mGraphics 			= nullptr; 
+			Input*				mInput 				= nullptr;
+			SubsystemCatalog*	mSubsystemCatalog	= nullptr;
+			AssetManager*		mAssetManager		= nullptr;
+
+			// Engine configuration settings
 			EngineConfig mConfig;
 
 	};

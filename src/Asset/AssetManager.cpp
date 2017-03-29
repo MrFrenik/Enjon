@@ -6,24 +6,43 @@
 #include "Asset/TextureAssetLoader.h" 
 #include "Asset/MeshAssetLoader.h" 
 #include "Utils/FileUtils.h"
+#include "Engine.h"
 
 #include <fmt/printf.h>
 
 namespace Enjon
 {
-	//=================================================
+	//============================================================================================ 
 
-	AssetManager::AssetManager(const String& assetsPath)
+	AssetManager::AssetManager() 
 	{
+		// Set to default
+		mName = "";
+
+		// Set to default
+		mAssetsPath = "";
+		
+		// Register the loaders with manager 
+		RegisterAssetLoader<Enjon::Texture, TextureAssetLoader>(); 
+		RegisterAssetLoader<Enjon::Mesh, MeshAssetLoader>(); 
+	}
+
+	//============================================================================================ 
+
+	AssetManager::AssetManager(const String& name, const String& assetsPath)
+	{
+		// Set name
+		mName = name;
+
 		// Set project asset path
-		mAssetsPath = assetsPath;
+		mAssetsPath = assetsPath; 
 
 		// Register the loaders with manager 
 		RegisterAssetLoader<Enjon::Texture, TextureAssetLoader>(); 
 		RegisterAssetLoader<Enjon::Mesh, MeshAssetLoader>(); 
 	}
 	
-	//=================================================
+	//============================================================================================ 
 			
 	AssetManager::~AssetManager()
 	{ 
@@ -36,12 +55,43 @@ namespace Enjon
 		// Clear map
 		mLoaders.clear();
 	}
+	
+	//============================================================================================ 
 			
 	Result AssetManager::Initialize()
-	{
+	{ 
+		return Result::SUCCESS;
+	} 
+	
+	//============================================================================================ 
 
+	void AssetManager::Update( const f32 dT )
+	{ 
+		// In here could check for file updates on hot loaded resources
+	}
+	
+	//============================================================================================ 
+
+	Result AssetManager::Shutdown()
+	{
 		return Result::SUCCESS;
 	}
+	
+	//============================================================================================ 
+			
+	void AssetManager::SetAssetsPath( const String& path )
+	{
+		mAssetsPath = path;
+	}
+	
+	//============================================================================================ 
+			
+	void AssetManager::SetDatabaseName( const String& name )
+	{
+		mName = name;
+	}
+	
+	//============================================================================================ 
 
 	s32 AssetManager::GetLoaderIdxByFileExtension(const String& filePath)
 	{ 
@@ -65,7 +115,7 @@ namespace Enjon
 		return idx;
 	}
 	
-	//================================================= 
+	//============================================================================================ 
 			
 	Result AssetManager::AddToDatabase(const String& filePath, b8 isRelativePath)
 	{

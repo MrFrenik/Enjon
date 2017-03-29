@@ -1,10 +1,10 @@
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
-// File: AssetManager.h
-
+// @file AssetManager.h
 #pragma once
 #ifndef ENJON_ASSET_MANAGER_H
 #define ENJON_ASSET_MANAGER_H 
 
+#include "Subsystem.h"
 #include "System/Types.h"
 #include "Asset/AssetLoader.h"
 #include "Graphics/Texture.h"
@@ -17,7 +17,7 @@ namespace Enjon
 	class AssetLoader;
 	class Asset; 
 
-	class AssetManager
+	class AssetManager : public Subsystem
 	{
 		enum class LoaderType
 		{
@@ -28,28 +28,58 @@ namespace Enjon
 			Count
 		}; 
 
-		public:
+		public: 
 			
 			/**
 			*@brief Constructor
 			*/
-			AssetManager(const String& assetsPath);
+			AssetManager();
+
+			/**
+			*@brief Constructor
+			*/
+			AssetManager(const String& name, const String& assetsPath);
 
 			/**
 			*@brief Virtual destructor
 			*/
 			~AssetManager();
+
+			/**
+			*@brief
+			*/
+			virtual Result Initialize();
+
+			/**
+			*@brief
+			*/
+			virtual void Update( const f32 dT ) override;
+
+			/**
+			*@brief
+			*/
+			virtual Result Shutdown();
 	
 			/**
 			*@brief Adds asset to project form given file path
 			*/
-			Result AddToDatabase(const String& filePath, b8 isRelativePath = true);
+			Result AddToDatabase( const String& filePath, b8 isRelativePath = true );
+			
+			/**
+			*@brief
+			*/
+			void SetAssetsPath( const String& filePath );
+			
+			/**
+			*@brief
+			*/
+			void SetDatabaseName( const String& name );
 
 			/**
 			*@brief Gets loaded asset in database from name
 			*/
 			template <typename T>
-			AssetHandle<T> GetAsset(const String& name)
+			AssetHandle<T> GetAsset( const String& name )
 			{ 
 				// Get appropriate loader based on asset type
 				u32 loaderId = GetAssetTypeId<T>(); 
@@ -59,22 +89,29 @@ namespace Enjon
 
 				// Return asset handle
 				return handle;
-			}
-
-			Result Initialize();
+			} 
 
 		protected:
 
 		private: 
-	
+
+			/**
+			*@brief
+			*/
 			s32 GetLoaderIdxByFileExtension(const String& filePath);
 
+			/**
+			*@brief
+			*/
 			u32 GetUniqueAssetTypeId() noexcept
 			{
 				static u32 lastId{ 0u };
 				return lastId++;
 			} 
 
+			/**
+			*@brief
+			*/
 			template <typename T>
 			u32 GetAssetTypeId() noexcept
 			{
@@ -85,6 +122,9 @@ namespace Enjon
 				return typeId;
 			}
 
+			/**
+			*@brief
+			*/
 			template <typename T, typename K>
 			Enjon::Result RegisterAssetLoader()
 			{
@@ -107,7 +147,7 @@ namespace Enjon
 
 			std::unordered_map<u32, AssetLoader*> mLoaders; 
 			String mAssetsPath;
-
+			String mName; 
 	};
 
 	#include "Asset/AssetManager.inl"

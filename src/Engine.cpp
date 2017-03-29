@@ -4,6 +4,7 @@
 #include "Engine.h"
 #include "Application.h"
 #include "Graphics/DeferredRenderer.h"
+#include "Asset/AssetManager.h"
 #include "IO/InputManager.h"
 #include "ImGui/ImGuiManager.h"
 #include "Utils/Timing.h"
@@ -115,36 +116,37 @@ namespace Enjon
 
 	Enjon::Result Engine::InitSubsystems()
 	{
-		// Construct new graphics engine and initialize
-		mGraphics = new Enjon::DeferredRenderer();	
-		mGraphics->Init();
+		// Create new subsystem catalog
+		mSubsystemCatalog = new SubsystemCatalog();
 
-		// Construct new input manager
-		mInput = new Enjon::Input();
+		// Register subsystems with catalog
+		mGraphics		= mSubsystemCatalog->Register<Enjon::DeferredRenderer>(); 
+		mInput			= mSubsystemCatalog->Register<Enjon::Input>(); 
+		mAssetManager	= mSubsystemCatalog->Register<Enjon::AssetManager>();
 
 		// Initialize imgui manager
-		Enjon::ImGuiManager::Init(mGraphics->GetWindow()->GetSDLWindow());
+		Enjon::ImGuiManager::Init( mGraphics->GetWindow()->GetSDLWindow() );
 
 		// Initialize application if one is registered
-		if (mApp)
+		if ( mApp )
 		{
 			mApp->Initialize();
 		}
 
 		// Initializessssstt limiter
-		 mLimiter.Init(60.0f);
+		 mLimiter.Init( 60.0f );
 
 		// Late init for systems that need it
-		Enjon::ImGuiManager::LateInit(mGraphics->GetWindow()->GetSDLWindow());
+		Enjon::ImGuiManager::LateInit( mGraphics->GetWindow()->GetSDLWindow() );
 
 		return Enjon::Result::SUCCESS;
 	}
 
 	//=======================================================
 
-	Enjon::Result Engine::RegisterApplication(Application* app)
+	Enjon::Result Engine::RegisterApplication( Application* app )
 	{
-		assert(mApp == nullptr);
+		assert( mApp == nullptr );
 		mApp = app;
 
 		return Enjon::Result::SUCCESS;
@@ -157,10 +159,10 @@ namespace Enjon
 		static float dt = 0.1f;
 
 		// Assert that application is registered with engine
-		assert(mApp != nullptr); 
+		assert( mApp != nullptr ); 
 
 		// Seed random 
-		srand(time(NULL)); 
+		srand( time( NULL ) ); 
 
 		// Main application loop
 		b8 mIsRunning = true;
@@ -168,28 +170,28 @@ namespace Enjon
 		{
 			 mLimiter.Begin();
 
-			mInput->Update();
+			 mInput->Update( dt );
 
 			// Update input
-			Enjon::Result res = ProcessInput(mInput, dt);
-			if (res != Result::PROCESS_RUNNING)
+			Enjon::Result res = ProcessInput( mInput, dt );
+			if ( res != Result::PROCESS_RUNNING )
 			{
 				mIsRunning = false;
 				break;
 			}
 
 			// Update application
-			res = mApp->Update(dt);
-			if (res != Result::PROCESS_RUNNING)
+			res = mApp->Update( dt );
+			if ( res != Result::PROCESS_RUNNING )
 			{
 				mIsRunning = false;
 				break;
 			}
 
 			// Update graphics
-			mGraphics->Update(dt);
+			mGraphics->Update(dt); 
 
-			 mLimiter.End();
+			mLimiter.End();
 		}
 
 		Enjon::Result res = ShutDown();
@@ -202,7 +204,7 @@ namespace Enjon
 
 	Enjon::Result Engine::ShutDown()
 	{
-		if (mApp)
+		if ( mApp )
 		{
 			mApp->Shutdown();
 		}
@@ -212,33 +214,33 @@ namespace Enjon
 
 	//======================================================= 
 
-	Enjon::Result Engine::ProcessInput(Enjon::Input* input, float dt)
+	Enjon::Result Engine::ProcessInput( Enjon::Input* input, const f32 dt )
 	{
 	    SDL_Event event;
 	   //Will keep looping until there are no more events to process
-	    while (SDL_PollEvent(&event)) 
+	    while ( SDL_PollEvent( &event ) ) 
 	    {
-	    	ImGui_ImplSdlGL3_ProcessEvent(&event);
+	    	ImGui_ImplSdlGL3_ProcessEvent( &event );
 
-	        switch (event.type) 
+	        switch ( event.type ) 
 	        {
 	            case SDL_QUIT:
 	                return Result::FAILURE;
 	                break;
 				case SDL_KEYUP:
-					input->ReleaseKey(event.key.keysym.sym); 
+					input->ReleaseKey( event.key.keysym.sym ); 
 					break;
 				case SDL_KEYDOWN:
-					input->PressKey(event.key.keysym.sym);
+					input->PressKey( event.key.keysym.sym );
 					break;
 				case SDL_MOUSEBUTTONDOWN:
-					input->PressKey(event.button.button);
+					input->PressKey( event.button.button );
 					break;
 				case SDL_MOUSEBUTTONUP:
-					input->ReleaseKey(event.button.button);
+					input->ReleaseKey( event.button.button );
 					break;
 				case SDL_MOUSEMOTION:
-					input->SetMouseCoords((float)event.motion.x, (float)event.motion.y);
+					input->SetMouseCoords( (f32)event.motion.x, (f32)event.motion.y );
 				default:
 					break;
 			}
@@ -249,26 +251,22 @@ namespace Enjon
 
 	//======================================================= 
 
-	Result EngineConfig::ParseArguments(s32 argc, char** argv)
-	{
-		fmt::print("argument count: {}\n", argc);
-
+	Result EngineConfig::ParseArguments( s32 argc, char** argv )
+	{ 
 		// Parse arguments and place into config
-		for (s32 i = 0; i < argc; ++i)
+		for ( s32 i = 0; i < argc; ++i )
 		{
-			String arg = String(argv[i]); 
+			String arg = String( argv[i] ); 
 
 			// Set root path
-			if (arg.compare("--enjon_root_path") == 0 && (i + 1) < argc)
+			if ( arg.compare( "--enjon-path" ) == 0 && (i + 1) < argc )
 			{
-				mRootPath = String(argv[i + 1]);
+				mRootPath = String( argv[i + 1] );
 			}
-		}
-
-		fmt::print("here: {}\n", mRootPath);
+		} 
 
 		// Make sure that root path is set for engine
-		assert((mRootPath.compare("") != 0));
+		assert( ( mRootPath.compare( "" ) != 0 ) );
 
 		return Result::SUCCESS;
 	}
@@ -277,7 +275,6 @@ namespace Enjon
 			
 	const String& EngineConfig::GetRoot() const
 	{
-		fmt::print("root before returning: {}\n", mRootPath);
 		return mRootPath;
 	}
 }

@@ -19,15 +19,23 @@
 
 #include <cassert>
 
-namespace Enjon { 
+namespace Enjon 
+{ 
+	//======================================================================================================
 
-	//------------------------------------------------------------------------------
 	DeferredRenderer::DeferredRenderer()
 	{
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	DeferredRenderer::~DeferredRenderer()
+	{
+	}
+
+	//======================================================================================================
+
+	Enjon::Result DeferredRenderer::Shutdown()
 	{
 		delete(mGbuffer);
 		delete(mDebugTarget);
@@ -42,10 +50,13 @@ namespace Enjon {
 		delete(mLuminanceTarget);
 		delete(mFXAATarget);
 		delete(mShadowDepth);
+
+		return Result::SUCCESS; 
 	}
 
-	//------------------------------------------------------------------------------
-	void DeferredRenderer::Init()
+	//======================================================================================================
+
+	Enjon::Result DeferredRenderer::Initialize()
 	{
 		// TODO(John): Need to have a way to have an .ini that's read or grab these values from a static
 		// engine config file
@@ -135,10 +146,13 @@ namespace Enjon {
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
+
+		return Result::SUCCESS;
 	}
 
-	//------------------------------------------------------------------------------
-	void DeferredRenderer::Update(float dt)
+	//======================================================================================================
+
+	void DeferredRenderer::Update(const f32 dT)
 	{
 		// Gbuffer pass
 		GBufferPass();
@@ -184,7 +198,8 @@ namespace Enjon {
 		mWindow.SwapBuffer();
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	void DeferredRenderer::GBufferPass()
 	{
 		// Bind gbuffer
@@ -298,7 +313,8 @@ namespace Enjon {
 		mGbuffer->Unbind();
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	void DeferredRenderer::LightingPass()
 	{
 		mLightingBuffer->Bind();
@@ -456,7 +472,8 @@ namespace Enjon {
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	void DeferredRenderer::LuminancePass()
 	{
 		GLSLProgram* luminanceProgram = Enjon::ShaderManager::Get("Bright");
@@ -483,7 +500,8 @@ namespace Enjon {
 		mLuminanceTarget->Unbind();
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	void DeferredRenderer::BloomPass()
 	{
 		GLSLProgram* horizontalBlurProgram = Enjon::ShaderManager::Get("HorizontalBlur");
@@ -605,7 +623,8 @@ namespace Enjon {
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	void DeferredRenderer::FXAAPass(RenderTarget* input)
 	{
 		GLSLProgram* fxaaProgram = Enjon::ShaderManager::Get("FXAA");
@@ -633,7 +652,8 @@ namespace Enjon {
 		mFXAATarget->Unbind();
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	void DeferredRenderer::CompositePass(RenderTarget* input)
 	{
 		GLSLProgram* compositeProgram = Enjon::ShaderManager::Get("Composite");
@@ -665,7 +685,8 @@ namespace Enjon {
 		mCompositeTarget->Unbind();
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	void DeferredRenderer::GuiPass()
 	{
 		static bool show_test_window = false;
@@ -683,28 +704,32 @@ namespace Enjon {
         ImGui::Render();
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	void DeferredRenderer::SetViewport(iVec2& dimensions)
 	{
 		mWindow.SetViewport(dimensions);
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	iVec2 DeferredRenderer::GetViewport()
 	{
 		return mWindow.GetViewport();
 	}
 
-	//------------------------------------------------------------------------------
-	double NormalPDF(double x, double s, double m = 0.0)
+	//======================================================================================================
+
+	f64 NormalPDF(const f64 x, const f64 s, f64 m = 0.0)
 	{
-		static const double inv_sqrt_2pi = 0.3989422804014327;
-		double a = (x - m) / s;
+		static const f64 inv_sqrt_2pi = 0.3989422804014327;
+		f64 a = (x - m) / s;
 
 		return inv_sqrt_2pi / s * std::exp(-0.5 * a * a);
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	void DeferredRenderer::InitializeFrameBuffers()
 	{
 		auto viewport = mWindow.GetViewport();
@@ -732,43 +757,45 @@ namespace Enjon {
 		mFullScreenQuad 			= new FullScreenQuad();
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	void DeferredRenderer::CalculateBlurWeights()
 	{
-		double weight;
-		double start = -3.0;
-		double end = 3.0;
-		double denom = 2.0 * end + 1.0;
-		double num_samples = 15.0;
-		double range = end * 2.0;
-		double step = range / num_samples;
+		f64 weight;
+		f64 start = -3.0;
+		f64 end = 3.0;
+		f64 denom = 2.0 * end + 1.0;
+		f64 num_samples = 15.0;
+		f64 range = end * 2.0;
+		f64 step = range / num_samples;
 		u32 i = 0;
 
 		weight = 1.74;
-		for (double x = start; x <= end; x += step)
+		for (f64 x = start; x <= end; x += step)
 		{
-			double pdf = NormalPDF(x, 0.23);
+			f64 pdf = NormalPDF(x, 0.23);
 			mBloomSettings.mSmallGaussianCurve[i++] = pdf;
 		}
 
 		i = 0;
 		weight = 3.9f;
-		for (double x = start; x <= end; x += step)
+		for (f64 x = start; x <= end; x += step)
 		{
-			double pdf = NormalPDF(x, 0.775);
+			f64 pdf = NormalPDF(x, 0.775);
 			mBloomSettings.mMediumGaussianCurve[i++]= pdf;
 		}
 
 		i = 0;
 		weight = 2.53f;
-		for (double x = start; x <= end; x += step)
+		for (f64 x = start; x <= end; x += step)
 		{
-			double pdf = NormalPDF(x, 1.0);
+			f64 pdf = NormalPDF(x, 1.0);
 			mBloomSettings.mLargeGaussianCurve[i++] = pdf;
 		}
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	void DeferredRenderer::RegisterCVars()
 	{
 		Enjon::CVarsSystem::Register("exposure", &mToneMapSettings.mExposure, Enjon::CVarType::TYPE_FLOAT);
@@ -787,7 +814,8 @@ namespace Enjon {
 		Enjon::CVarsSystem::Register("blur_radius_large", &mBloomSettings.mRadius.z, Enjon::CVarType::TYPE_FLOAT);
 	}
 
-	//------------------------------------------------------------------------------
+	//======================================================================================================
+
 	void DeferredRenderer::ShowGraphicsWindow(bool* p_open)
 	{
 	    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);                                 // Right align, keep 140 pixels for labels
@@ -1004,7 +1032,8 @@ namespace Enjon {
 	    }
 	}
 
-	//-----------------------------------------------------------------------------------------------------
+	//=======================================================================================================
+
 	void DeferredRenderer::ShowGameViewport(bool* open)
 	{
 	    // Render game in window

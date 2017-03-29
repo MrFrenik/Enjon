@@ -91,6 +91,7 @@ using bool32 = int32;
 
 using b32 = bool32;
 using b8 = bool8;
+using b1 = bool;
 
 using f32 = float;
 using f64 = double;

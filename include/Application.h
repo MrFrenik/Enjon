@@ -10,8 +10,14 @@ namespace Enjon
 	class Application
 	{
 		public:
-			// Pure interface
-			Application(){};
+			/**
+			* @brief Constructor
+			*/
+			Application(){}; 
+
+			/**
+			* @brief Destructor
+			*/
 			~Application(){};
 
 			/**

@@ -3,33 +3,31 @@ cmake_minimum_required(VERSION 2.6)
 # Declare project file
 project(Enjon)
 
-if(MSVC)
-    # Default to statically-linked runtime.
-    if("${MSVC_RUNTIME}" STREQUAL "")
-      set(MSVC_RUNTIME "static")
-    endif()
-endif()
-
 # set top level directory
-set (cur_dir ${CMAKE_CURRENT_SOURCE_DIR})
+set (ENJON_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set (ENJON_BUILD_DIR "${ENJON_DIR}/Build")
+set (ENJON_RELEASE_DIR "${ENJON_BUILD_DIR}/Release")
+set (ENJON_RELDEBUGINFO_DIR "${ENJON_BUILD_DIR}/RelWithDebInfo")
+set (ENJON_DEBUG_DIR "${ENJON_BUILD_DIR}/Debug")
 
 # Set build directory for solution
-set (build_dir ${cur_dir}/Build)
-set (EXECUTABLE_OUTPUT_PATH ${build_dir})
+set (EXECUTABLE_OUTPUT_PATH ${ENJON_BUILD_DIR})
 
 # Turn on ability to create folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Set compiler flags and build options
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W1")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /W1")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /W1")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MT /W1")
 
 message("cxx FLgs:" ${CMAKE_CXX_FLAGS})
 
 
 # Add include directories
-include_directories(${cur_dir}/include
-					${cur_dir}/ThirdParty/Build/Include
-					${cur_dir}/IsoARPG/include)
+include_directories(${ENJON_DIR}/include
+					${ENJON_DIR}/ThirdParty/Build/Include
+					${ENJON_DIR}/IsoARPG/include)
 
 # Add libraries to be linked against
 set(
@@ -50,12 +48,12 @@ set(
 )
 
 # Add lib directories
-link_directories(${cur_dir}/ThirdParty/Build/Libraries/Release)
+link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Release)
 
-set(ENJON_SRC "${cur_dir}/src")
-set(ENJON_INC "${cur_dir}/include")
-set(GAME_INC "${cur_dir}/IsoARPG/include}")
-set(GAME_SRC "${cur_dir}/IsoARPG/src}")
+set(ENJON_SRC "${ENJON_DIR}/src")
+set(ENJON_INC "${ENJON_DIR}/include")
+set(GAME_INC "${ENJON_DIR}/IsoARPG/include}")
+set(GAME_SRC "${ENJON_DIR}/IsoARPG/src}")
 
 file(GLOB_RECURSE SRC_ENTITY
 	"${ENJON_INC}/Entity/*.h"
@@ -108,9 +106,9 @@ file(GLOB_RECURSE SRC_ASSET
 	"${ENJON_INC}/Asset/*.inl")
 
 file(GLOB_RECURSE GAME_FILES
-	"${cur_dir}/IsoARPG/include/Game.h"
-	"${cur_dir}/IsoARPG/src/Game.cpp"
-	"${cur_dir}/IsoARPG/src/main.cpp") 
+	"${ENJON_DIR}/IsoARPG/include/Game.h"
+	"${ENJON_DIR}/IsoARPG/src/Game.cpp"
+	"${ENJON_DIR}/IsoARPG/src/main.cpp") 
 
 # Add all engine source files
 set(
@@ -122,11 +120,14 @@ set(
 	include/Engine.h
 	include/Enjon.h
 	include/TypeCatalog.h
+	include/Subsystem.h
+	include/SubsystemCatalog.h
 
 	src/Console.cpp
 	src/CVarsSystem.cpp
 	src/Engine.cpp
 	src/TypeCatalog.cpp
+	src/SubsystemCatalog.cpp
 	)
 
 set(
@@ -146,7 +147,6 @@ set(
 	)
 
 add_executable(Enjon ${ALL_SRC})
-set_target_properties(Enjon PROPERTIES COMMAND_ARGUMENTS "--enjon_root_path ${cur_dir}")
 target_link_libraries(Enjon ${PROJECT_LINK_LIBRARIES})
 
 source_group("Entity"		FILES ${SRC_ENTITY})
@@ -160,4 +160,67 @@ source_group("System"		FILES ${SRC_SYSTEM})
 source_group("Utils"		FILES ${SRC_UTILS})
 source_group("Asset"		FILES ${SRC_ASSET})
 source_group("Game"			FILES ${GAME_FILES})
+
+# Write to .user file for command arguments
+if (MSVC)
+	file(WRITE ${ENJON_DIR}/Build/Enjon.vcxproj.user
+		"<?xml version=\"1.0\" encoding=\"utf-8\"?>
+		<Project ToolsVersion=\"14.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">
+		  <PropertyGroup>
+		    <LocalDebuggerCommandArguments>--enjon-path ${ENJON_DIR}</LocalDebuggerCommandArguments>
+		     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+		  </PropertyGroup>
+		</Project>" 
+	)
+endif()
+
+# List of necessary DLLs 
+set(
+		DLL_LIST
+
+		SDL2.dll
+		freetype6.dll
+		glew32.dll
+		glut32.dll
+	)
+
+# List of build directories
+set(
+		BUILD_DIRECTORIES
+
+		${ENJON_RELDEBUGINFO_DIR}
+		${ENJON_RELEASE_DIR}
+		${ENJON_DEBUG_DIR}
+	)
+
+
+# Install directories
+foreach(dir ${BUILD_DIRECTORIES})
+	if (NOT IS_DIRECTORY ${dir})
+		file(MAKE_DIRECTORY ${dir})
+		execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory {directory})
+	endif()
+
+endforeach(dir)
+
+
+# Add DLLs to builds
+foreach(dll ${DLL_LIST})
+
+	add_custom_command(TARGET Enjon POST_BUILD        		
+	    COMMAND ${CMAKE_COMMAND} -E copy_if_different  		
+	        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
+	        ${ENJON_BUILD_DIR}/RelWithDebInfo/)
+
+	add_custom_command(TARGET Enjon POST_BUILD        		
+	    COMMAND ${CMAKE_COMMAND} -E copy_if_different  		
+	        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
+	        ${ENJON_BUILD_DIR}/Release/)
+
+	add_custom_command(TARGET Enjon POST_BUILD        		
+	    COMMAND ${CMAKE_COMMAND} -E copy_if_different  		
+	        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
+	        ${ENJON_BUILD_DIR}/Debug/)
+
+endforeach(dll)
 

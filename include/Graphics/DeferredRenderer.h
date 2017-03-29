@@ -6,9 +6,10 @@
 #include "Graphics/Window.h"
 #include "Graphics/Scene.h"
 #include "Graphics/Camera.h" 
+#include "Subsystem.h"
 
-namespace Enjon { 
-
+namespace Enjon 
+{ 
 	class RenderTarget;
 	class Mesh; 
 	class GBuffer;
@@ -57,41 +58,133 @@ namespace Enjon {
 	};
 
 
-	class DeferredRenderer
+	class DeferredRenderer : public Subsystem
 	{
 		public:
+
+			/**
+			*@brief Constructor
+			*/
 			DeferredRenderer();
+			
+			/**
+			*@brief Destructor
+			*/
 			~DeferredRenderer();
 
-			void Init();
-			void Update(float dt);
+			/**
+			*@brief
+			*/
+			virtual Enjon::Result Initialize() override;
 
+			/**
+			*@brief
+			*/
+			virtual void Update(const f32 dT) override;
+			
+			/**
+			*@brief
+			*/
+			virtual Enjon::Result Shutdown() override;
+
+			/**
+			*@brief
+			*/
 			void SetViewport(iVec2& dimensions);
+			
+			/**
+			*@brief
+			*/
 			iVec2 GetViewport();
 
+			/**
+			*@brief
+			*/
 			Scene* GetScene() { return &mScene; }
 
+			/**
+			*@brief
+			*/
 			Camera* GetSceneCamera() { return &mSceneCamera; }
+			
+			/**
+			*@brief
+			*/
 			Window* GetWindow() { return &mWindow; }
 
 		private:
 
+			/**
+			*@brief
+			*/
 			void InitializeFrameBuffers();
+			
+			/**
+			*@brief
+			*/
 			void CalculateBlurWeights();
+			
+			/**
+			*@brief
+			*/
 			void RegisterCVars();
+
+			/**
+			*@brief
+			*/
 			void GBufferPass();
+			
+			/**
+			*@brief
+			*/
 			void LightingPass();
+			
+			/**
+			*@brief
+			*/
 			void LuminancePass();
+			
+			/**
+			*@brief
+			*/
 			void BloomPass();
+			
+			/**
+			*@brief
+			*/
 			void FXAAPass(RenderTarget* inputTarget);
+			
+			/**
+			*@brief
+			*/
 			void CompositePass(RenderTarget* inputTarget);
+			
+			/**
+			*@brief
+			*/
 			void GuiPass();
+			
+			/**
+			*@brief
+			*/
 			void ImGuiStyles();
+			
+			/**
+			*@brief
+			*/
 			void ImGuiStyles2();
 
+			/**
+			*@brief
+			*/
 			void ShowGraphicsWindow(bool* p_open);
+			
+			/**
+			*@brief
+			*/
 			void ShowGameViewport(bool* open);
 
+		private:
 			// Frame buffers
 			GBuffer* mGbuffer 					= nullptr;
 			RenderTarget* mDebugTarget 			= nullptr;
@@ -119,13 +212,7 @@ namespace Enjon {
 			Camera 				mSceneCamera;   // Probably part of scene instead
 			Camera 				mShadowCamera;	// Probably part of light or scene?
 
-			SpriteBatch* 	mBatch 			= nullptr;
-
-			// float mExposure;
-			// float mGamma;
-			// float mBloomScalar;
-			// float mThreshold;
-			// float mSaturation;
+			SpriteBatch* 	mBatch 			= nullptr; 
 
 			// Post processing settings
 			FXAASettings mFXAASettings = FXAASettings(8.0f, 1.0f/8.0f, 1.0f/128.0f);

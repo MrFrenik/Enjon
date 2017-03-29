@@ -56,32 +56,36 @@ Game::~Game()
 Enjon::Result Game::Initialize()
 { 
 	// Set up assets path
-	mAssetsPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("IsoARPG/Assets/"); 
+	// This needs to be done in a project settings config file or in the cmake, not in source
+	mAssetsPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Assets/"); 
 	
 	// Create asset manager
-	mAssetManager = new Enjon::AssetManager(mAssetsPath); 
+	mAssetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog()->Get<Enjon::AssetManager>(); 
+	// This also needs to be done through a config file or cmake
+	mAssetManager->SetAssetsPath( mAssetsPath );
+	mAssetManager->SetDatabaseName( "IsoARPG" );
 
 	// Paths to resources
-	Enjon::String cerebusMeshPath		= Enjon::String("Models/cerebus.obj");
-	Enjon::String buddhaMeshPath		= Enjon::String("Models/buddha.obj");
-	Enjon::String bunnyMeshPath			= Enjon::String("Models/bunny.obj");
-	Enjon::String dragonMeshPath		= Enjon::String("Models/dragon.obj");
-	Enjon::String monkeyMeshPath		= Enjon::String("Models/monkey.obj");
-	Enjon::String sphereMeshPath		= Enjon::String("Models/unit_sphere.obj");
-	Enjon::String catMeshPath			= Enjon::String("Models/cat.obj");
-	Enjon::String dudeMeshPath			= Enjon::String("Models/dude.obj");
-	Enjon::String shaderBallMeshPath	= Enjon::String("Models/shaderball.obj");
-	Enjon::String cerebusAlbedoPath		= Enjon::String("Materials/Cerebus/Albedo.png"); 
-	Enjon::String cerebusNormalPath		= Enjon::String("Materials/Cerebus/Normal.png"); 
-	Enjon::String cerebusMetallicPath	= Enjon::String("Materials/Cerebus/Metallic.png"); 
-	Enjon::String cerebusRoughnessPath	= Enjon::String("Materials/Cerebus/Roughness.png"); 
-	Enjon::String cerebusEmissivePath	= Enjon::String("Materials/Cerebus/Emissive.png"); 
-	Enjon::String mahogAlbedoPath		= Enjon::String("Materials/MahogFloor/Albedo.png"); 
-	Enjon::String mahogNormalPath		= Enjon::String("Materials/MahogFloor/Normal.png"); 
-	Enjon::String mahogMetallicPath		= Enjon::String("Materials/MahogFloor/Roughness.png"); 
-	Enjon::String mahogRoughnessPath	= Enjon::String("Materials/MahogFloor/Roughness.png"); 
-	Enjon::String mahogEmissivePath		= Enjon::String("Materials/MahogFloor/Emissive.png"); 
-	Enjon::String mahogAOPath			= Enjon::String("Materials/MahogFloor/AO.png"); 
+	Enjon::String cerebusMeshPath		= Enjon::String("/Models/cerebus.obj");
+	Enjon::String buddhaMeshPath		= Enjon::String("/Models/buddha.obj");
+	Enjon::String bunnyMeshPath			= Enjon::String("/Models/bunny.obj");
+	Enjon::String dragonMeshPath		= Enjon::String("/Models/dragon.obj");
+	Enjon::String monkeyMeshPath		= Enjon::String("/Models/monkey.obj");
+	Enjon::String sphereMeshPath		= Enjon::String("/Models/unit_sphere.obj");
+	Enjon::String catMeshPath			= Enjon::String("/Models/cat.obj");
+	Enjon::String dudeMeshPath			= Enjon::String("/Models/dude.obj");
+	Enjon::String shaderBallMeshPath	= Enjon::String("/Models/shaderball.obj");
+	Enjon::String cerebusAlbedoPath		= Enjon::String("/Materials/Cerebus/Albedo.png"); 
+	Enjon::String cerebusNormalPath		= Enjon::String("/Materials/Cerebus/Normal.png"); 
+	Enjon::String cerebusMetallicPath	= Enjon::String("/Materials/Cerebus/Metallic.png"); 
+	Enjon::String cerebusRoughnessPath	= Enjon::String("/Materials/Cerebus/Roughness.png"); 
+	Enjon::String cerebusEmissivePath	= Enjon::String("/Materials/Cerebus/Emissive.png"); 
+	Enjon::String mahogAlbedoPath		= Enjon::String("/Materials/MahogFloor/Albedo.png"); 
+	Enjon::String mahogNormalPath		= Enjon::String("/Materials/MahogFloor/Normal.png"); 
+	Enjon::String mahogMetallicPath		= Enjon::String("/Materials/MahogFloor/Roughness.png"); 
+	Enjon::String mahogRoughnessPath	= Enjon::String("/Materials/MahogFloor/Roughness.png"); 
+	Enjon::String mahogEmissivePath		= Enjon::String("/Materials/MahogFloor/Emissive.png"); 
+	Enjon::String mahogAOPath			= Enjon::String("/Materials/MahogFloor/AO.png"); 
 
 	// Add to asset database
 	mAssetManager->AddToDatabase(cerebusAlbedoPath); 
@@ -110,16 +114,16 @@ Enjon::Result Game::Initialize()
 	auto gc = mGun->Attach<Enjon::GraphicsComponent>(); 
 
 	mGunMat 	= new Enjon::Material; 
-	mGunMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.albedo"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.normal"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.metallic"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.roughness"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.emissive"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.emissive"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>(".materials.cerebus.albedo"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>(".materials.cerebus.normal"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>(".materials.cerebus.metallic"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>(".materials.cerebus.roughness"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>(".materials.cerebus.emissive"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>(".materials.cerebus.emissive"));
 
 	mGun->SetPosition(Enjon::Vec3(0.0f, 6.0f, 0.0f));
 	mGun->SetScale(3.0f);
-	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("models.cerebus"));
+	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>(".models.cerebus"));
 	gc->SetMaterial(mGunMat);
 
 	mSun = new Enjon::DirectionalLight();
@@ -129,12 +133,12 @@ Enjon::Result Game::Initialize()
 	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA16_SkyBlue(), 10.0f); 
 
 	mFloorMat = new Enjon::Material();
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.albedo"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.normal"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.roughness"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.roughness"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.emissive"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.ao"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>(".materials.mahogfloor.albedo"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>(".materials.mahogfloor.normal"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>(".materials.mahogfloor.roughness"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>(".materials.mahogfloor.roughness"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>(".materials.mahogfloor.emissive"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>(".materials.mahogfloor.ao"));
 	mBatch = new Enjon::QuadBatch();
 	mBatch->Init();
 	mBatch->Begin();
@@ -156,8 +160,9 @@ Enjon::Result Game::Initialize()
 	mBatch->End();
 
 	// Get graphics from engine
-	auto engine = Enjon::Engine::GetInstance();
-	auto graphics = engine->GetGraphics();
+	Enjon::Engine* engine = Enjon::Engine::GetInstance();
+	Enjon::SubsystemCatalog* subSysCatalog = engine->GetSubsystemCatalog();
+	Enjon::DeferredRenderer* graphics = subSysCatalog->Get<Enjon::DeferredRenderer>();
 
 	if (graphics)
 	{

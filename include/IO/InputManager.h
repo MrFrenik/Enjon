@@ -5,6 +5,9 @@
 #define MAX_CONTROLLERS 4
 
 #include "Math/Maths.h"
+#include "Subsystem.h"
+#include "System/Types.h"
+#include "Defines.h"
 
 #include <unordered_map> 
 #include <SDL2/SDL.h>
@@ -12,61 +15,122 @@
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
-namespace Enjon { 
-	
+namespace Enjon 
+{ 
 	struct Controller
 	{
-		std::unordered_map<unsigned int, bool> m_buttonMap;
-		std::unordered_map<unsigned int, bool> m_previousButtonMap;
+		std::unordered_map< u32, bool > m_buttonMap;
+		std::unordered_map< u32, bool > m_previousButtonMap;
 		float Axis0Value;
 		float Axis1Value;
 		SDL_GameController* ControllerHandle;
 
 		// GamePad
-		void PressButton(unsigned int buttonID);
-		void ReleaseButton(unsigned int buttonID);
-		bool IsButtonDown(unsigned int buttonID);
-		bool WasButtonDown(unsigned int buttonID);
-		bool IsButtonPressed(unsigned int buttonID);
+		void PressButton( u32 buttonID );
+		void ReleaseButton( u32 buttonID );
+		bool IsButtonDown( u32 buttonID );
+		bool WasButtonDown( u32 buttonID );
+		bool IsButtonPressed( u32 buttonID );
 	};
 
-	class Input
+	class Input : public Subsystem
 	{
-		public:
+		public: 
+
+			/**
+			* @brief Constructor
+			*/
 			Input();
+
+			/**
+			* @brief Destructor
+			*/
 			~Input(); 
 
-			void Update();
+			/**
+			* @brief
+			*/
+			virtual Result Initialize() override;
 
-			// Keyboard
-			void PressKey(unsigned int keyID);
-			void ReleaseKey(unsigned int keyID);
-			bool IsKeyDown(unsigned int keyID);
-			bool IsKeyPressed(unsigned int keyID);
-			bool WasKeyDown(unsigned int keyID);
+			/**
+			* @brief
+			*/
+			virtual void Update( const f32 dT ) override;
 
-			// GamePad
-			void PressButton(unsigned int buttonID);
-			void ReleaseButton(unsigned int buttonID);
-			bool IsButtonDown(unsigned int buttonID);
-			bool IsButtonPressed(unsigned int buttonID);
-			bool WasButtonDown(unsigned int buttonID);
+			/**
+			* @brief
+			*/
+			virtual Result Shutdown() override;
 
-			//Setters
-			void SetMouseCoords(float x, float y);
+			/**
+			* @brief
+			*/
+			void PressKey( u32 keyID );
 			
-			//Getters
-			inline Enjon::Vec2 GetMouseCoords() const { return m_mouseCoords; }
+			/**
+			* @brief
+			*/
+			void ReleaseKey( u32 keyID );
+			
+			/**
+			* @brief
+			*/
+			bool IsKeyDown( u32 keyID );
+			
+			/**
+			* @brief
+			*/
+			bool IsKeyPressed( u32 keyID );
+			
+			/**
+			* @brief
+			*/
+			bool WasKeyDown( u32 keyID );
+
+			/**
+			* @brief
+			*/
+			void PressButton( u32 buttonID );
+			
+			/**
+			* @brief
+			*/
+			void ReleaseButton( u32 buttonID );
+			
+			/**
+			* @brief
+			*/
+			bool IsButtonDown( u32 buttonID );
+			
+			/**
+			* @brief
+			*/
+			bool IsButtonPressed( u32 buttonID );
+			
+			/**
+			* @brief
+			*/
+			bool WasButtonDown( u32 buttonID );
+
+			/**
+			* @brief
+			*/
+			void SetMouseCoords( f32 x, f32 y );
+			
+			/**
+			* @brief
+			*/
+			Vec2 GetMouseCoords() const { return m_mouseCoords; }
 
 		public:
 			std::vector<SDL_GameController*> ControllerHandles;
 			Controller GamePadController;
 		
 		private:
-			std::unordered_map<unsigned int, bool> m_keyMap;
-			std::unordered_map<unsigned int, bool> m_previousKeyMap;
-			std::unordered_map<unsigned int, bool> m_buttonMap;
-			std::unordered_map<unsigned int, bool> m_previousButtonMap;
+			std::unordered_map<u32, bool> m_keyMap;
+			std::unordered_map<u32, bool> m_previousKeyMap;
+			std::unordered_map<u32, bool> m_buttonMap;
+			std::unordered_map<u32, bool> m_previousButtonMap;
 			Enjon::Vec2 m_mouseCoords;
 	}; 
 }
