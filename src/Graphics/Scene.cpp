@@ -160,7 +160,8 @@ namespace Enjon {
 	bool Scene::CompareDepth(Renderable* a, Renderable* b)
 	{
 		// Get camera position
-		v3 camPos = Engine::GetInstance()->GetGraphics()->GetSceneCamera()->GetPosition();
+		DeferredRenderer* gfx = Engine::GetInstance()->GetSubsystemCatalog()->Get<DeferredRenderer>();
+		v3 camPos = gfx->GetSceneCamera()->GetPosition();
 
 		// Get a pos
 		v3 aPos = a->GetPosition();

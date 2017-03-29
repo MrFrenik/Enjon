@@ -4,32 +4,32 @@
 
 namespace Enjon 
 {
-	Entity* Component::GetEntity()
+	Entity* Component::GetEntity() const
 	{
 		return mEntity;
 	}
 
-	void Component::SetEntity(Entity* entity)
+	void Component::SetEntity( Entity* entity )
 	{
 		mEntity = entity;
 	}
 
-	void Component::SetID(u32 id)
+	void Component::SetID( u32 id )
 	{
 		mID = id;
 	}
 
-	void Component::SetBase(ComponentWrapperBase* base)
+	void Component::SetBase( ComponentWrapperBase* base )
 	{
 		mBase = base;
 	}
 
-	void Component::SetTransform(Transform& transform)
+	void Component::SetTransform( Transform& transform )
 	{
 		mTransform = transform;
 	}
 
-	ComponentBitset GetComponentBitMask(u32 type)
+	ComponentBitset GetComponentBitMask( u32 type )
 	{
 		ComponentBitset BitSet;
 		BitSet.set(type);

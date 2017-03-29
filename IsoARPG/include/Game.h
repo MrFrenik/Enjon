@@ -14,6 +14,8 @@ namespace Enjon
 	class DirectionalLight;
 	class Material;
 	class Mesh;
+	class DeferredRenderer;
+	class Input;
 }
 
 class Game : public Enjon::Application
@@ -32,7 +34,10 @@ class Game : public Enjon::Application
 		void ListEntityChildren(Enjon::Entity* entity, u32 indentAmount);
 
 	private:
-		Enjon::EntityManager* mEntities = nullptr;
+		Enjon::DeferredRenderer* mGfx		= nullptr;
+		Enjon::Input* mInput				= nullptr;
+		Enjon::EntityManager* mEntities		= nullptr;
+
 		Enjon::Entity* mGun 			= nullptr;
 		Enjon::Entity* mGreen 			= nullptr;
 		Enjon::Entity* mRed 			= nullptr; 

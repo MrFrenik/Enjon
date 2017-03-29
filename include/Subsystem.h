@@ -32,7 +32,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			virtual void Update(const f32 dT) = 0;
+			virtual void Update( const f32 dT ) = 0;
 			
 			/**
 			*@brief

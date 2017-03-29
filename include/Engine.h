@@ -62,21 +62,7 @@ namespace Enjon
 			* @brief Shuts down engine and all of its subsystems.
 			* @return Result - Returns Success or Failure.
 			*/
-			Enjon::Result ShutDown();
-
-			// NOTE(): I don't like this and will use a type catalog to grab 
-			// registered subsystems "globally"
-			/**
-			* @brief Returns pointer to registered Graphics Subsystem.
-			* @return DeferredRenderer* - Pointer to the registered graphics subsystem.
-			*/
-			DeferredRenderer* GetGraphics() { return mGraphics; }
-			
-			/**
-			* @brief Returns pointer to registered Input Subsystem.
-			* @return Input* - Pointer to the registered input subsystem.
-			*/
-			Input* GetInput() { return mInput; }
+			Enjon::Result ShutDown(); 
 			
 			/**
 			* @brief Returns pointer to registered Subsystem Catalog .

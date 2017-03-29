@@ -63,7 +63,13 @@ Enjon::Result Game::Initialize()
 	mAssetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog()->Get<Enjon::AssetManager>(); 
 	// This also needs to be done through a config file or cmake
 	mAssetManager->SetAssetsPath( mAssetsPath );
-	mAssetManager->SetDatabaseName( "IsoARPG" );
+	mAssetManager->SetDatabaseName( "IsoARPG" ); 
+
+	// Get Subsystems from engine
+	Enjon::Engine* engine = Enjon::Engine::GetInstance();
+	Enjon::SubsystemCatalog* subSysCatalog = engine->GetSubsystemCatalog();
+	mGfx = subSysCatalog->Get<Enjon::DeferredRenderer>();
+	mInput = subSysCatalog->Get<Enjon::Input>();
 
 	// Paths to resources
 	Enjon::String cerebusMeshPath		= Enjon::String("/Models/cerebus.obj");
@@ -159,14 +165,10 @@ Enjon::Result Game::Initialize()
 	}
 	mBatch->End();
 
-	// Get graphics from engine
-	Enjon::Engine* engine = Enjon::Engine::GetInstance();
-	Enjon::SubsystemCatalog* subSysCatalog = engine->GetSubsystemCatalog();
-	Enjon::DeferredRenderer* graphics = subSysCatalog->Get<Enjon::DeferredRenderer>();
 
-	if (graphics)
+	if (mGfx)
 	{
-		auto scene = graphics->GetScene();
+		auto scene = mGfx->GetScene();
 		scene->AddDirectionalLight(mSun);
 		scene->AddDirectionalLight(mSun2);
 		scene->AddRenderable(gc->GetRenderable());
@@ -175,7 +177,7 @@ Enjon::Result Game::Initialize()
 		scene->SetAmbientColor(Enjon::SetOpacity(Enjon::RGBA16_White(), 0.1f));
 
 		// Set graphics camera position
-		auto cam = graphics->GetSceneCamera();
+		auto cam = mGfx->GetSceneCamera();
 		cam->SetPosition(Enjon::Vec3(0, 0, -10));
 		cam->LookAt(Enjon::Vec3(0, 0, 0));
 	}
@@ -358,20 +360,17 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 
 //
 Enjon::Result Game::ProcessInput(f32 dt)
-{
-	Enjon::Engine* engine = Enjon::Engine::GetInstance();
-	Enjon::Input* input = engine->GetInput();
-	Enjon::DeferredRenderer* gfx = engine->GetGraphics();
+{ 
 
-	if (input->IsKeyPressed(SDLK_ESCAPE))
+	if (mInput->IsKeyPressed(SDLK_ESCAPE))
 	{
 		return Enjon::Result::SUCCESS;
 	}
 
-	if (input->IsKeyPressed(SDLK_t))
+	if (mInput->IsKeyPressed(SDLK_t))
 	    {
 	    	mMovementOn = !mMovementOn;
-			Enjon::Window* window = gfx->GetWindow();
+			Enjon::Window* window = mGfx->GetWindow();
 
 			if (!mMovementOn)
 			{
@@ -385,24 +384,24 @@ Enjon::Result Game::ProcessInput(f32 dt)
 
 	    if (mMovementOn)
 	    {
-		    Enjon::Camera* camera = gfx->GetSceneCamera();
+		    Enjon::Camera* camera = mGfx->GetSceneCamera();
 		   	Enjon::Vec3 velDir(0, 0, 0); 
 
-			if (input->IsKeyDown(SDLK_w))
+			if (mInput->IsKeyDown(SDLK_w))
 			{
 				Enjon::Vec3 F = camera->Forward();
 				velDir += F;
 			}
-			if (input->IsKeyDown(SDLK_s))
+			if (mInput->IsKeyDown(SDLK_s))
 			{
 				Enjon::Vec3 B = camera->Backward();
 				velDir += B;
 			}
-			if (input->IsKeyDown(SDLK_a))
+			if (mInput->IsKeyDown(SDLK_a))
 			{
 				velDir += camera->Left();
 			}
-			if (input->IsKeyDown(SDLK_d))
+			if (mInput->IsKeyDown(SDLK_d))
 			{
 				velDir += camera->Right();
 			}
@@ -465,12 +464,12 @@ Enjon::Result Game::ProcessInput(f32 dt)
 			f32 MouseSensitivity = 2.0f;
 
 			// Get mouse input and change orientation of camera
-			Enjon::Vec2 MouseCoords = input->GetMouseCoords();
+			Enjon::Vec2 MouseCoords = mInput->GetMouseCoords();
 
-			Enjon::iVec2 viewPort = gfx->GetViewport();
+			Enjon::iVec2 viewPort = mGfx->GetViewport();
 
 			// Grab window from graphics subsystem
-			Enjon::Window* window = gfx->GetWindow(); 
+			Enjon::Window* window = mGfx->GetWindow(); 
 
 			// Set cursor to not visible
 			window->ShowMouseCursor(false);
