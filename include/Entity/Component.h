@@ -1,13 +1,11 @@
 #pragma once
 #ifndef ENJON_COMPONENT_H
-#define ENJON_COMPONENT_H
-
-#define ENJON_COMPONENT(tags)
-#define ENJON_OBJECT(tags)
+#define ENJON_COMPONENT_H 
 
 #include "Entity/EntityDefines.h"
 #include "Math/Transform.h"
 #include "System/Types.h"
+#include "Base/Object.h"
 
 #include <assert.h>
 #include <array>
@@ -16,8 +14,8 @@
 #include <type_traits>
 #include <unordered_map>
 
-namespace Enjon {
-
+namespace Enjon 
+{ 
 	// Forward declaration
 	class Entity;
 	class EntityManager;
@@ -47,10 +45,12 @@ namespace Enjon {
 			ComponentMap mComponentMap;
 	};
 
-	class Component
+	class Component : public Enjon::Object
 	{
 		friend Entity;
 		friend EntityManager;
+		
+		ENJON_OBJECT( Component )
 
 		public:
 

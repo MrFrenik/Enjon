@@ -27,6 +27,8 @@ namespace Enjon {
 
 	class Material : public Asset
 	{
+		ENJON_OBJECT( Material )
+
 		public:
 			Material();
 			~Material(); 
@@ -44,8 +46,7 @@ namespace Enjon {
 			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count]; 
 			ColorRGBA16 mColors[(u32)TextureSlotType::Count];
 			GLSLProgram* mShader;
-	};
-	
+	}; 
 }
 
 

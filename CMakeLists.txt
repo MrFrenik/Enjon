@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.6) 
 
 # Declare project file
 project(Enjon)
@@ -22,6 +22,9 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /W1")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MT /W1")
 
 message("cxx FLgs:" ${CMAKE_CXX_FLAGS})
+
+# Add additional sub-directories
+add_subdirectory( Generator )
 
 
 # Add include directories
@@ -54,6 +57,10 @@ set(ENJON_SRC "${ENJON_DIR}/src")
 set(ENJON_INC "${ENJON_DIR}/include")
 set(GAME_INC "${ENJON_DIR}/IsoARPG/include}")
 set(GAME_SRC "${ENJON_DIR}/IsoARPG/src}")
+
+file(GLOB_RECURSE SRC_BASE
+	"${ENJON_INC}/Base/*.h"
+	"${ENJON_INC}/Base/*.inl")
 
 file(GLOB_RECURSE SRC_ENTITY
 	"${ENJON_INC}/Entity/*.h"
@@ -132,6 +139,7 @@ set(
 
 set(
 	ALL_SRC 
+	${SRC_BASE}
 	${SRC_ENTITY} 
 	${SRC_UTILS} 
 	${SRC_GRAPHICS} 
@@ -149,6 +157,7 @@ set(
 add_executable(Enjon ${ALL_SRC})
 target_link_libraries(Enjon ${PROJECT_LINK_LIBRARIES})
 
+source_group("Base"			FILES ${SRC_BASE})
 source_group("Entity"		FILES ${SRC_ENTITY})
 source_group("Math"			FILES ${SRC_MATH})
 source_group("Physics"		FILES ${SRC_PHYSICS})
@@ -159,7 +168,7 @@ source_group("UI"			FILES ${SRC_UI})
 source_group("System"		FILES ${SRC_SYSTEM})
 source_group("Utils"		FILES ${SRC_UTILS})
 source_group("Asset"		FILES ${SRC_ASSET})
-source_group("Game"			FILES ${GAME_FILES})
+source_group("Game"			FILES ${GAME_FILES}) 
 
 # Write to .user file for command arguments
 if (MSVC)
@@ -198,7 +207,7 @@ set(
 foreach(dir ${BUILD_DIRECTORIES})
 	if (NOT IS_DIRECTORY ${dir})
 		file(MAKE_DIRECTORY ${dir})
-		execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory {directory})
+		execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${dir})
 	endif()
 
 endforeach(dir)
@@ -222,5 +231,4 @@ foreach(dll ${DLL_LIST})
 	        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
 	        ${ENJON_BUILD_DIR}/Debug/)
 
-endforeach(dll)
-
+endforeach(dll) 

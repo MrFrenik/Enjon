@@ -1,5 +1,5 @@
+// @file Vec2.h
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
-// File: Vec2.h
 
 #pragma once
 #ifndef ENJON_VEC2_H

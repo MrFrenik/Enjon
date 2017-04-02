@@ -7,6 +7,7 @@
 
 #include "Defines.h"
 #include "System/Types.h"
+#include "Base/Object.h"
 
 #include <assert.h>
 #include <memory>
@@ -14,37 +15,27 @@
 namespace Enjon
 { 
 	class AssetLoader;
-	class AssetManager;
+	class AssetManager; 
 
-	class Asset
+	class Asset : public Enjon::Object
 	{
-	public:
+		ENJON_OBJECT( Asset )
 
-		friend AssetLoader;
-		friend AssetManager;
+		public: 
+			friend AssetLoader;
+			friend AssetManager;
 
-		/**
-		*@brief Constructor
-		*/
-		Asset() {}
+			/**
+			*@brief Constructor
+			*/
+			Asset() {}
 
-		/**
-		*@brief Virtual destructor
-		*/
-		~Asset() {}
+			/**
+			*@brief Virtual destructor
+			*/
+			~Asset() {} 
 
-		template <typename T>
-		T* SafeCast()
-		{
-			static_assert(std::is_base_of<Asset, T>::value, 
-				"SafeCast:: T must inherit from Asset.");	
-
-			return static_cast<T*>(this);
-		}
-
-		protected:
-
-			
+		protected: 
 
 		private:
 	};
@@ -67,7 +58,7 @@ namespace Enjon
 				mAsset = asset;
 			}
 
-			T* Get() { return mAsset->SafeCast<T>(); }
+			T* Get() { return mAsset->Cast<T>(); }
 
 			b8 IsValid()
 			{

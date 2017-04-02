@@ -144,7 +144,7 @@ namespace Enjon
 			else
 			{
 				// Load asset and place into database
-				auto res = query->second->LoadAssetFromFile(mAssetsPath + filePath, qualifiedName); 
+				auto res = query->second->LoadAssetFromFile(mAssetsPath + filePath, Utils::ToLower( mName ) + qualifiedName); 
 			}
 		}
 

@@ -11,6 +11,8 @@ namespace Enjon
 {
 	class GraphicsComponent : public Component
 	{
+		ENJON_OBJECT( GraphicsComponent )
+
 		public:
 			GraphicsComponent();
 			GraphicsComponent(const Renderable& renderable);

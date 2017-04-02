@@ -22,6 +22,8 @@ namespace Enjon {
 
 	class Mesh : public Asset
 	{
+		ENJON_OBJECT( Mesh )
+
 		public:
 			Mesh();
 			~Mesh();
@@ -38,8 +40,7 @@ namespace Enjon {
 			GLuint VAO;
 			GLuint VBO;
 			GLuint IBO;
-	};
-
+	}; 
 }
 
 

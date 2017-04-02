@@ -16,6 +16,8 @@ namespace Enjon
 	{
 		friend TextureAssetLoader;
 
+		ENJON_OBJECT( Texture )
+
 		public:	
 
 			/**

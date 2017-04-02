@@ -29,6 +29,40 @@
 
 #include <Bullet/btBulletDynamicsCommon.h>
 
+class OtherComponent : public Enjon::Component
+{
+	ENJON_OBJECT( OtherComponent )
+
+	public:
+		OtherComponent( ) {}
+		~OtherComponent( ) {}
+
+		void Update( f32 dT ) override {}
+
+		void Destroy( ) {}
+
+	private:
+
+	protected:
+};
+
+class OneMoreComponent : public Enjon::Component 
+{
+	ENJON_OBJECT( OneMoreComponent )
+
+	public:
+		OneMoreComponent( ) {}
+		~OneMoreComponent( ) {}
+		
+		void Update( f32 dT ) override {}
+
+		void Destroy( ) {}
+
+	private:
+
+	protected:
+};
+
 std::vector<btRigidBody*> mBodies;
 btDiscreteDynamicsWorld* mDynamicsWorld;
 
@@ -57,7 +91,7 @@ Enjon::Result Game::Initialize()
 { 
 	// Set up assets path
 	// This needs to be done in a project settings config file or in the cmake, not in source
-	mAssetsPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Assets/"); 
+	mAssetsPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Assets"); 
 	
 	// Create asset manager
 	mAssetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog()->Get<Enjon::AssetManager>(); 
@@ -114,22 +148,29 @@ Enjon::Result Game::Initialize()
 
 	mEntities->RegisterComponent<Enjon::GraphicsComponent>();
 	mEntities->RegisterComponent<Enjon::PointLightComponent>();
+	mEntities->RegisterComponent<OtherComponent>();
+	mEntities->RegisterComponent<OneMoreComponent>();
 
 	// Allocate handle
 	mGun = mEntities->Allocate();
 	auto gc = mGun->Attach<Enjon::GraphicsComponent>(); 
+	auto pc = mGun->Attach<Enjon::PointLightComponent>(); 
+	auto oc = mGun->Attach<OtherComponent>(); 
+	auto omc = mGun->Attach<OneMoreComponent>(); 
+	
+	pc->GetLight( )->SetPosition( Enjon::Vec3( 10.0f, 2.0f, 4.0f ) );
 
 	mGunMat 	= new Enjon::Material; 
-	mGunMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>(".materials.cerebus.albedo"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>(".materials.cerebus.normal"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>(".materials.cerebus.metallic"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>(".materials.cerebus.roughness"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>(".materials.cerebus.emissive"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>(".materials.cerebus.emissive"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.albedo"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.normal"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.metallic"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.roughness"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.emissive"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.emissive"));
 
 	mGun->SetPosition(Enjon::Vec3(0.0f, 6.0f, 0.0f));
 	mGun->SetScale(3.0f);
-	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>(".models.cerebus"));
+	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("isoarpg.models.cerebus"));
 	gc->SetMaterial(mGunMat);
 
 	mSun = new Enjon::DirectionalLight();
@@ -139,12 +180,12 @@ Enjon::Result Game::Initialize()
 	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA16_SkyBlue(), 10.0f); 
 
 	mFloorMat = new Enjon::Material();
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>(".materials.mahogfloor.albedo"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>(".materials.mahogfloor.normal"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>(".materials.mahogfloor.roughness"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>(".materials.mahogfloor.roughness"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>(".materials.mahogfloor.emissive"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>(".materials.mahogfloor.ao"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.albedo"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.normal"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.roughness"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.roughness"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.emissive"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.ao"));
 	mBatch = new Enjon::QuadBatch();
 	mBatch->Init();
 	mBatch->Begin();
@@ -269,6 +310,40 @@ Enjon::Result Game::Initialize()
 		mDynamicsWorld->addRigidBody(body); 
 	}
 
+	fmt::print( "Entity Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Entity >() ); 
+	fmt::print( "Instance of Entity ID: {}\n", mGun->GetTypeId() ); 
+
+	fmt::print( "GraphicsComponent Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::GraphicsComponent >() ); 
+	fmt::print( "Instance of GraphicsComponent ID: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>()->GetTypeId() ); 
+	
+	fmt::print( "PointlightComponent Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::PointLightComponent >() ); 
+	fmt::print( "Instance of PointlightComponent ID: {}\n", mGun->GetComponent<Enjon::PointLightComponent>()->GetTypeId() ); 
+	
+	fmt::print( "Material Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Material >() ); 
+	fmt::print( "Instance of Material ID: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTypeId() ); 
+	
+	fmt::print( "Mesh Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Mesh >() ); 
+	fmt::print( "Instance of Mesh ID: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>()->GetMesh().Get()->GetTypeId() ); 
+	
+	fmt::print( "Texture Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >() ); 
+	fmt::print( "Instance of Texture ID: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTexture( Enjon::TextureSlotType::Albedo ).Get()->GetTypeId() ); 
+	
+	fmt::print( "Texture Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >() ); 
+	fmt::print( "Instance of Texture ID: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTexture( Enjon::TextureSlotType::Normal ).Get()->GetTypeId() ); 
+
+	fmt::print( "Same: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >( ) == mGun->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTypeId( ) );
+ 
+	fmt::print( "Name: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTypeName( ) );
+	fmt::print( "Name: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>()->GetTypeName() ); 
+	
+	for ( auto& c : mGun->GetComponents( ) )
+	{
+		fmt::print( "{} is instance of graphics component: {}\n", c->GetTypeName( ), c->InstanceOf< Enjon::GraphicsComponent >( ) );
+	}
+
+	
+
+	
 	return Enjon::Result::SUCCESS; 
 }
 

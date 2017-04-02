@@ -5,8 +5,8 @@
 #include "Entity/Component.h"
 #include "Entity/Entity.h"
 #include "Entity/EntityDefines.h"
-#include "Math/Transform.h"
-
+#include "Math/Transform.h" 
+#include "Base/Object.h"
 #include "System/Types.h"
 #include "Defines.h"
 
@@ -15,8 +15,8 @@
 #include <cstdint>
 #include <assert.h>
 
-namespace Enjon {
-
+namespace Enjon 
+{ 
 	class EntityManager;
 
 	enum class EntityState
@@ -25,8 +25,10 @@ namespace Enjon {
 		ACTIVE
 	};
 
-	class Entity
+	class Entity : public Enjon::Object
 	{
+		ENJON_OBJECT( Entity )
+
 		friend EntityManager; 
 		public:
 			Entity();
@@ -116,6 +118,8 @@ namespace Enjon {
 			b8 Entity::IsValid();
 
 			const std::vector<Entity*>& GetChildren() const { return mChildren; }
+
+			const std::vector<Component*>& GetComponents( ) const { return mComponents; }
 
 			/// @brief Propagates transform down through all components
 			void UpdateComponentTransforms(f32 dt);
