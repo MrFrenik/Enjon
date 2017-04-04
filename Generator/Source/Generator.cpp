@@ -1,4 +1,3 @@
-
 #include "Token.h"
 #include "Utils.h" 
 #include "Lexer.h"
@@ -15,6 +14,8 @@ struct catalog
 };
 
 struct catalog TypeCatalog; 
+
+std::vector<std::string> output;
 
 #define DEBUG_TOKEN_PRINT(Token) \
 	printf("%.*s\n", Token.TextLength, Token.Text);
@@ -48,8 +49,7 @@ struct token
 struct tokenizer
 {
 	char *At;
-};
-
+}; 
 
 inline void AddToCatalog(char* Type, catalog* Catalog)
 {
@@ -350,12 +350,12 @@ static token ParseFunctionPrepends(tokenizer *Tokenizer)
 	{
 		fprintf(stderr, "ERROR: Right now does not support functions having prepends after function name.");
 	}
+
 	else
 	{
 		// Print name of function, since it will be the last thing before paren...probably
 		// printf("\n\tName: %.*s", NameToken.TextLength, NameToken.Text);
-	}
-
+	} 
 
 	bool Parsing = true;
 	token Token;
@@ -625,9 +625,39 @@ int main(int ArgCount, char** Args)
 }
  
 #endif 
+
+static void ParseProperty( Lexer* lexer )
+{
+	if ( lexer->RequireToken( TokenType::Token_OpenParen ) )
+	{
+		output.push_back( "Property: " );
+
+		// Gets params and closes the paren 
+		Token typeToken = lexer->GetToken( );
+
+		bool parsing = true;
+		while (parsing)
+		{
+			Token token = lexer->GetToken( );
+			if ( token.mType == TokenType::Token_CloseParen || token.mType == TokenType::Token_EndOfStream )
+			{
+				parsing = false;
+			}
+			else
+			{
+				output.push_back( token.ToString( )  + "\n" );
+			}
+		}
+	}
+	else
+	{
+		fprintf( stderr, "ERROR: Missing parantheses.\n" );
+	}
+}
  
 std::string mFilePath;
 std::string mOutputDirectory;
+
 
 int main( int argc, char** argv )
 { 
@@ -649,7 +679,7 @@ int main( int argc, char** argv )
 	} 
 
 	char* fileContents = ReadFileContentsIntoString( mFilePath.c_str() ); 
-	Lexer lexer( fileContents ); 
+	Lexer* lexer = new Lexer( fileContents ); 
 
 	std::vector<std::string> split = SplitString( mFilePath, "/" );
 	std::vector<std::string> fileNameSplit = SplitString( split.back( ), ".h" );
@@ -663,14 +693,13 @@ int main( int argc, char** argv )
 	while (Parsing)
 	{
 		// Grab token from lexer
-		Token token = lexer.GetToken( );
+		Token token = lexer->GetToken( );
 
 		// Switch on token type given
 		switch (token.mType)
 		{ 
 			case TokenType::Token_Unknown:
-			{
-
+			{ 
 			} 
 			break;
 
@@ -678,11 +707,15 @@ int main( int argc, char** argv )
 			{
 				if ( token.Equals( "ENJON_STRUCT" ) || ( token.Equals( "ENJON_CLASS" ) ) || ( token.Equals( "ENJON_OBJECT" ) ) )
 				{
-					std::string tokenName = token.GetAsString(); 
+					std::string tokenName = token.ToString( );
 
 					ss << "From file: " << mFilePath.c_str( ) << "\n";
-					ss << "Token equals struct or class: " << tokenName.c_str() << "\n";
+					ss << "Token equals struct or class: " << tokenName.c_str( ) << "\n";
 				} 
+				else if ( token.Equals( "ENJON_PROPERTY" ) )
+				{
+					ParseProperty( lexer );
+				}
 			} 
 			break;
 
@@ -694,6 +727,11 @@ int main( int argc, char** argv )
 
 		}
 	} 
+
+	for ( auto& s : output )
+	{
+		ss << s;
+	}
  
 	ss.seekg( 0, std::ios::end );
 	usize size = ss.tellg( ); 
@@ -705,6 +743,8 @@ int main( int argc, char** argv )
 		outFile << ss.rdbuf(); 
 		outFile.close( ); 
 	} 
+
+	delete( lexer );
 }
 
 

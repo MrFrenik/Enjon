@@ -31,7 +31,7 @@ class Token
 
 		bool Equals( char* Match );
 
-		std::string GetAsString( );
+		std::string ToString( );
 
 		TokenType mType			= TokenType::Token_Unknown;
 		size_t mTextLength		= 0;

@@ -27,7 +27,7 @@ bool Token::Equals( char* match )
 	return res;
 }
 		
-std::string Token::GetAsString( )
+std::string Token::ToString( )
 {
 	std::string tokenName = "";
 	for ( u32 i = 0; i < mTextLength; ++i )
