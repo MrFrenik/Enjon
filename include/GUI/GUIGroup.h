@@ -266,13 +266,16 @@ namespace Enjon { namespace GUI {
 		    auto MouseOverMinimizeButton = EP::AABBvsPoint(&MinimizeButton.AABB, MousePos);
 		    if (MouseOverMinimizeButton)
 		    {
+				/*
 		    	if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
 		    	{
 		    		std::cout << "Hoo ah!" << std::endl;	
 		    		return true;
 		    	}	
+				*/
 		    }
 
+			/*
 		    if (Input->IsKeyDown(SDL_BUTTON_LEFT))
 		    {
 				auto X = MousePos.x;
@@ -294,6 +297,7 @@ namespace Enjon { namespace GUI {
 	    		JustFocused = true;
 	    		return true;
 	    	}
+			*/
 
 			return false;			
 		}

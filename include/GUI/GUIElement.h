@@ -357,7 +357,8 @@ namespace Enjon { namespace GUI {
 		std::string GetNumericString(Enjon::Input* Input)
 		{
 			std::string str = "";
-
+ 
+			/*
 			// Quick and dirty way so far...
 			if (Input->IsKeyPressed(SDLK_0))
 			{
@@ -548,7 +549,9 @@ namespace Enjon { namespace GUI {
 			// Exit input box
 			if (Input->IsKeyPressed(SDLK_ESCAPE)) return false;
 
-			return true;
+			*/
+			
+			return str; 
 		}
 
 		// Clears the text and resets the cursor position

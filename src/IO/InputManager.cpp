@@ -1,12 +1,12 @@
-#include "IO/InputManager.h"
+// @file Input.cpp
+// Copyright 2016-2017 John Jackson. All Rights Reserved.
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#include "IO/InputManager.h" 
 
-namespace Enjon { 
-
+namespace Enjon 
+{ 
 	Input::Input() 
-		: m_mouseCoords(0.0f) 
+		: mMouseCoords(0.0f) 
 	{
 		Initialize();
 	}
@@ -49,15 +49,15 @@ namespace Enjon {
 	void Input::Update( const f32 dT )
 	{ 
 		// Update keyboard keys
-		for ( auto& it : m_keyMap )
+		for ( auto& key : mKeyMap )
 		{
-			m_previousKeyMap[it.first] = it.second;
+			mPreviousKeyMap[key.first] = key.second;
 		}
 
 		// Update Game Controller button keys
-		for ( auto& it : GamePadController.m_buttonMap )
+		for ( auto& button : GamePadController.m_buttonMap )
 		{
-			GamePadController.m_previousButtonMap[it.first] = it.second;
+			GamePadController.m_previousButtonMap[button.first] = button.second;
 		}
 	}
 
@@ -68,24 +68,24 @@ namespace Enjon {
 		return Result::SUCCESS;
 	}
 
-	void Input::PressKey( u32 keyID )
+	void Input::PressKey( u32 code )
 	{ 
-		m_keyMap[keyID] = true;
+		mKeyMap[(KeyCode)code] = true;
 	}
 	
-	void Input::ReleaseKey( u32 keyID )
+	void Input::ReleaseKey( u32 code )
 	{
-		m_keyMap[keyID] = false;
+		mKeyMap[(KeyCode)code] = false;
 	}
 
 	//Returns true if key held down	
-	bool Input::IsKeyDown( u32 keyID )
+	bool Input::IsKeyDown( KeyCode code )
 	{ 
-		auto it = m_keyMap.find( keyID );
+		auto query = mKeyMap.find( code );
 
-		if ( it != m_keyMap.end() )
+		if ( query != mKeyMap.end() )
 		{
-			return it->second;
+			return query->second;
 		}
 
 		else
@@ -94,35 +94,33 @@ namespace Enjon {
 		}
 	}
 
-	bool Input::WasKeyDown( u32 keyID )
+	bool Input::WasKeyDown( KeyCode code )
 	{ 
-		auto it = m_previousKeyMap.find( keyID );
+		auto query = mPreviousKeyMap.find( code );
 	
-		if( it != m_previousKeyMap.end() )
+		if( query != mPreviousKeyMap.end() )
 		{
-			return it->second;
+			return query->second;
 		}
 	
 		else return false; 
 	}
 
 	//Returns true if key is just pressed
-	bool Input::IsKeyPressed( u32 keyID )
+	bool Input::IsKeyPressed( KeyCode code )
 	{ 
-		if ( IsKeyDown( keyID ) == true && WasKeyDown( keyID ) == false )
+		if ( IsKeyDown( code ) && !WasKeyDown( code ) )
 		{
 			return true; 
 		}
-		else
-		{
-			return false; 
-		}
+
+		return false; 
 	}
 	
 	void Input::SetMouseCoords( f32 x, f32 y )
 	{
-		m_mouseCoords.x = x;
-		m_mouseCoords.y = y;
+		mMouseCoords.x = x;
+		mMouseCoords.y = y;
 	}
 
 	void Controller::PressButton( u32 buttonID )
@@ -137,11 +135,11 @@ namespace Enjon {
 
 	bool Controller::IsButtonDown( u32 buttonID )
 	{
-		auto it = m_buttonMap.find( buttonID );
+		auto query = m_buttonMap.find( buttonID );
 
-		if ( it != m_buttonMap.end() ) 
+		if ( query != m_buttonMap.end() ) 
 		{
-			return it->second;
+			return query->second;
 		}
 
 		else
@@ -152,16 +150,15 @@ namespace Enjon {
 
 	bool Controller::WasButtonDown( u32 buttonID )
 	{
-		auto it = m_previousButtonMap.find( buttonID );
+		auto query = m_previousButtonMap.find( buttonID );
 	
-		if( it != m_previousButtonMap.end() )
+		if( query != m_previousButtonMap.end() )
 		{
-			return it->second;
+			return query->second;
 		}
 	
 		else
 		{
-			return false;
 			return false;
 		}
 	}

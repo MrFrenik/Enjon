@@ -26,7 +26,17 @@ namespace Enjon
 		BORDERLESS 	= 0x04,
 		RESIZABLE 	= 0x08,
 		COUNT 
-	};
+	}; 
+
+	inline WindowFlags operator|( WindowFlags a, WindowFlags b )
+	{
+		return static_cast<WindowFlags>( static_cast<u32>( a ) | static_cast<u32>( b ) );
+	}
+
+	inline void operator|=( WindowFlags& a, WindowFlags b )
+	{
+		a = a | b;
+	}
 
 	enum MouseCursorFlags{ GET_STATUS = -1, HIDE = 0, SHOW = 1 };
 
@@ -38,7 +48,7 @@ namespace Enjon
 		Window();
 		~Window();
 
-		int Init(std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask((u32)WindowFlags::DEFAULT)); 
+		int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( (u32)WindowFlags::DEFAULT ) ); 
 		void SetWindowTitle(const char* title);
 		void SetWindowFullScreen(int screenWidth, int screenHeight);
 

@@ -17,6 +17,8 @@
 #include <Asset/AssetManager.h>
 #include <Asset/TextureAssetLoader.h>
 #include <Utils/FileUtils.h>
+#include <Utils/Signal.h>
+#include <Utils/Property.h>
 
 #include <fmt/printf.h>
 
@@ -75,6 +77,11 @@ std::vector<Enjon::Entity*> mPhysicsEntities;
 
 Enjon::String mAssetsPath; 
 Enjon::AssetManager* mAssetManager;
+
+f32 ballSpeed = 10.0f;
+
+Enjon::Signal<f32> testSignal;
+Enjon::Property<f32> testProperty;
 
 //-------------------------------------------------------------
 Game::Game()
@@ -143,6 +150,26 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase(sphereMeshPath);
 	mAssetManager->AddToDatabase(shaderBallMeshPath); 
 
+	testProperty = mCameraSpeed; 
+
+	testProperty.OnChange( ).Connect( [&] ( f32 val ) 
+	{
+		fmt::print( "Property change: {}\n", testProperty.Get() );
+	} );
+
+	testSignal.Connect( [&] ( f32 val ) 
+	{
+		fmt::print( "Emitted value: {}\n", val );
+	} );
+	
+	testSignal.Connect( [&] ( f32 val ) 
+	{
+		fmt::print( "Another connection!\n" );
+	} );
+
+	// Set sphere mesh
+	mSphereMesh = mAssetManager->GetAsset<Enjon::Mesh>( "isoarpg.models.unit_sphere" );
+
 	// Create entity manager
 	mEntities = new Enjon::EntityManager();
 
@@ -204,8 +231,7 @@ Enjon::Result Game::Initialize()
 			}
 		} 
 	}
-	mBatch->End();
-
+	mBatch->End(); 
 
 	if (mGfx)
 	{
@@ -246,7 +272,20 @@ Enjon::Result Game::Initialize()
 			mGun->SetScale(v3(scl[0], scl[1], scl[2]));
 			mGun->SetRotation(quat(rot[0], rot[1], rot[2], rotation.w));
 
-			ImGui::SliderFloat("Camera Speed", &mCameraSpeed, 0.1f, 20.0f);
+			if ( ImGui::SliderFloat( "Camera Speed", &mCameraSpeed, 0.1f, 20.0f ) )
+			{
+				testProperty = mCameraSpeed;
+			}
+
+			ImGui::SliderFloat("Ball Speed", &ballSpeed, 0.1f, 100.0f);
+
+			if ( ImGui::Button( "Emit signal" ) )
+			{
+				testSignal.Emit( mCameraSpeed );
+			}
+			
+			ImGui::Text( "32 bit prop size: %d", sizeof( Enjon::Property<f32> ) );
+			ImGui::Text( "32 bit signal size: %d", sizeof( Enjon::Signal<f32> ) );
 
 			ImGui::Text("%d", mEntities->GetActiveEntities().size());
 		}
@@ -436,129 +475,182 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 //
 Enjon::Result Game::ProcessInput(f32 dt)
 { 
+	Enjon::Camera* cam = mGfx->GetSceneCamera( );
 
-	if (mInput->IsKeyPressed(SDLK_ESCAPE))
+	if ( mInput->IsKeyPressed( Enjon::KeyCode::Escape ) )
 	{
 		return Enjon::Result::SUCCESS;
 	}
 
-	if (mInput->IsKeyPressed(SDLK_t))
-	    {
-	    	mMovementOn = !mMovementOn;
-			Enjon::Window* window = mGfx->GetWindow();
-
-			if (!mMovementOn)
+	if ( mInput->IsKeyPressed( Enjon::KeyCode::O ) )
+	{ 
+		switch ( cam->GetProjectionType( ) )
+		{
+			case Enjon::ProjectionType::Orthographic :
 			{
-				window->ShowMouseCursor(true);
+				cam->SetProjectionType( Enjon::ProjectionType::Perspective );
 			}
-			else
-			{
-				window->ShowMouseCursor(false);
+			break;
+			case Enjon::ProjectionType::Perspective :
+			{ 
+				cam->SetProjectionType( Enjon::ProjectionType::Orthographic );
+				cam->Transform.Rotation = Enjon::Quaternion( -0.17f, 0.38f, 0.07f, 0.9f ); 
 			}
-	    }
+			break;
+		}
 
-	    if (mMovementOn)
-	    {
-		    Enjon::Camera* camera = mGfx->GetSceneCamera();
-		   	Enjon::Vec3 velDir(0, 0, 0); 
+	}
 
-			if (mInput->IsKeyDown(SDLK_w))
-			{
-				Enjon::Vec3 F = camera->Forward();
-				velDir += F;
-			}
-			if (mInput->IsKeyDown(SDLK_s))
-			{
-				Enjon::Vec3 B = camera->Backward();
-				velDir += B;
-			}
-			if (mInput->IsKeyDown(SDLK_a))
-			{
-				velDir += camera->Left();
-			}
-			if (mInput->IsKeyDown(SDLK_d))
-			{
-				velDir += camera->Right();
-			}
+	if ( mInput->IsKeyDown( Enjon::KeyCode::Q ) )
+	{ 
+		Enjon::Camera* cam = mGfx->GetSceneCamera( );
+		cam->SetOrthographicScale( cam->GetOrthographicScale( ) - 0.1f * dt );
+	}
 
-			/*
-		    if (input->IsKeyDown(SDL_BUTTON_LEFT))
-		    {
-		    	auto cam = camera;
-		    	auto scene = Enjon::Engine::GetInstance()->GetGraphics()->GetScene();
-		    	auto pos = cam->GetPosition() + cam->Forward() * 2.0f;
-		    	auto vel = cam->Forward() * 30.0f;
+	if ( mInput->IsKeyDown( Enjon::KeyCode::E ) )
+	{
+		Enjon::Camera* cam = mGfx->GetSceneCamera( ); 
+		cam->SetOrthographicScale( cam->GetOrthographicScale( ) + 0.1f * dt );
+	}
 
-		    	f32 scalar = 0.3f; 
+	if ( mInput->IsKeyPressed( Enjon::KeyCode::T ) )
+	{
+		mMovementOn = !mMovementOn;
+		Enjon::Window* window = mGfx->GetWindow();
 
-				btCollisionShape* colShape = new btSphereShape(btScalar(scalar));
-				collisionShapes.push_back(colShape);
+		if (!mMovementOn)
+		{
+			window->ShowMouseCursor( true );
+		}
+		else
+		{
+			window->ShowMouseCursor( false );
+		}
+	}
 
-				// Create dynamic objects
-				btTransform startTransform;
-				startTransform.setIdentity();
+	if ( mMovementOn && cam->GetProjectionType() == Enjon::ProjectionType::Perspective )
+	{
+		Enjon::Camera* camera = mGfx->GetSceneCamera();
+		Enjon::Vec3 velDir(0, 0, 0); 
 
-				btScalar mass(1.);
+		if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
+		{
+			Enjon::Vec3 F = camera->Forward();
+			velDir += F;
+		}
+		if ( mInput->IsKeyDown( Enjon::KeyCode::S ) )
+		{
+			Enjon::Vec3 B = camera->Backward();
+			velDir += B;
+		}
+		if ( mInput->IsKeyDown( Enjon::KeyCode::A ) )
+		{
+			velDir += camera->Left();
+		}
+		if ( mInput->IsKeyDown( Enjon::KeyCode::D ) )
+		{
+			velDir += camera->Right();
+		} 
 
-				// Rigid body is dynamic iff mass is non zero, otherwise static
-				bool isDynamic = (mass != 0.f);
+		if ( mInput->IsKeyPressed( Enjon::KeyCode::LeftMouseButton ) )
+		{
+			Enjon::Scene* scene = mGfx->GetScene();
+			Enjon::Vec3 pos = cam->GetPosition() + cam->Forward() * 2.0f;
+			Enjon::Vec3 vel = cam->Forward() * ballSpeed;
 
-				btVector3 localInertia(0, 0, 0);
-				if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
+			f32 scalar = 0.3f; 
 
-				startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
+			btCollisionShape* colShape = new btSphereShape(btScalar(scalar));
+			collisionShapes.push_back(colShape);
 
-				// Using motionstate is recommended
-				btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-				btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-				btRigidBody* body = new btRigidBody(rbInfo);
-				body->setRestitution(0.2f);
-				body->setFriction(2.0f);
-				body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
-				body->setDamping(0.7f, 0.7f);
+			// Create dynamic objects
+			btTransform startTransform;
+			startTransform.setIdentity();
 
-				auto ent = mEntities->Allocate();
-				auto gc = ent->Attach<Enjon::GraphicsComponent>();
-				ent->SetScale(v3(scalar));
-				gc->SetMesh(mSphereMesh);
-				gc->SetMaterial(mGunMat);
-				scene->AddRenderable(gc->GetRenderable());
+			btScalar mass(1.);
 
-				mBodies.push_back(body);
-				mPhysicsEntities.push_back(ent);
+			// Rigid body is dynamic iff mass is non zero, otherwise static
+			bool isDynamic = (mass != 0.f);
 
-				mDynamicsWorld->addRigidBody(body);
-		    }
-			*/
+			btVector3 localInertia(0, 0, 0);
+			if (isDynamic) colShape->calculateLocalInertia(mass, localInertia);
 
-			if (velDir.Length()) velDir = Enjon::Vec3::Normalize(velDir);
+			startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
 
-			camera->Transform.Position += mCameraSpeed * dt * velDir;
+			// Using motionstate is recommended
+			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+			btRigidBody* body = new btRigidBody(rbInfo);
+			body->setRestitution(0.2f);
+			body->setFriction(2.0f);
+			body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
+			body->setDamping(0.7f, 0.7f);
 
-			// Set mouse sensitivity
-			f32 MouseSensitivity = 2.0f;
+			Enjon::Entity* ent = mEntities->Allocate();
+			Enjon::GraphicsComponent* gc = ent->Attach<Enjon::GraphicsComponent>();
+			ent->SetScale(v3(scalar));
+			gc->SetMesh(mSphereMesh);
+			gc->SetMaterial(mGunMat);
+			scene->AddRenderable(gc->GetRenderable());
 
-			// Get mouse input and change orientation of camera
-			Enjon::Vec2 MouseCoords = mInput->GetMouseCoords();
+			mBodies.push_back(body);
+			mPhysicsEntities.push_back(ent);
 
-			Enjon::iVec2 viewPort = mGfx->GetViewport();
+			mDynamicsWorld->addRigidBody(body);
+		}
 
-			// Grab window from graphics subsystem
-			Enjon::Window* window = mGfx->GetWindow(); 
+		if (velDir.Length()) velDir = Enjon::Vec3::Normalize(velDir);
 
-			// Set cursor to not visible
-			window->ShowMouseCursor(false);
+		camera->Transform.Position += mCameraSpeed * dt * velDir;
 
-			// Reset the mouse coords after having gotten the mouse coordinates
-			SDL_WarpMouseInWindow(window->GetWindowContext(), (float)viewPort.x / 2.0f, (float)viewPort.y / 2.0f);
+		// Set mouse sensitivity
+		f32 MouseSensitivity = 2.0f;
 
-			// Offset camera orientation
-			f32 xOffset = Enjon::ToRadians((f32)viewPort.x / 2.0f - MouseCoords.x) * dt * MouseSensitivity;
-			f32 yOffset = Enjon::ToRadians((f32)viewPort.y / 2.0f - MouseCoords.y) * dt * MouseSensitivity;
-			camera->OffsetOrientation(xOffset, yOffset); 
-	    }
+		// Get mouse input and change orientation of camera
+		Enjon::Vec2 MouseCoords = mInput->GetMouseCoords();
 
-		return Enjon::Result::PROCESS_RUNNING;
+		Enjon::iVec2 viewPort = mGfx->GetViewport();
+
+		// Grab window from graphics subsystem
+		Enjon::Window* window = mGfx->GetWindow(); 
+
+		// Set cursor to not visible
+		window->ShowMouseCursor(false);
+
+		// Reset the mouse coords after having gotten the mouse coordinates
+		SDL_WarpMouseInWindow(window->GetWindowContext(), (float)viewPort.x / 2.0f, (float)viewPort.y / 2.0f);
+
+		// Offset camera orientation
+		f32 xOffset = Enjon::ToRadians((f32)viewPort.x / 2.0f - MouseCoords.x) * dt * MouseSensitivity;
+		f32 yOffset = Enjon::ToRadians((f32)viewPort.y / 2.0f - MouseCoords.y) * dt * MouseSensitivity;
+		camera->OffsetOrientation(xOffset, yOffset); 
+	}
+
+	else if ( mMovementOn && cam->GetProjectionType( ) == Enjon::ProjectionType::Orthographic )
+	{ 
+		Enjon::Vec3 VelDir( 0, 0, 0 );
+
+		if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
+		{
+			VelDir += Enjon::Vec3( -1, 0, -1 );
+		}
+		if ( mInput->IsKeyDown( Enjon::KeyCode::S ) )
+		{
+			VelDir += Enjon::Vec3( 1, 0, 1 );
+		}
+		if ( mInput->IsKeyDown( Enjon::KeyCode::A ) )
+		{
+			VelDir += Enjon::Vec3( -1.0f, 0, 1 );
+		}
+		if ( mInput->IsKeyDown( Enjon::KeyCode::D ) )
+		{
+			VelDir += Enjon::Vec3( 1, 0, -1 );
+		}
+		
+		cam->Transform.Position += VelDir * dt;
+	}
+
+	return Enjon::Result::PROCESS_RUNNING;
 }
 
 //-------------------------------------------------------------

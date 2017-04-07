@@ -744,6 +744,7 @@ namespace Enjon { namespace GUI {
 				ListElement = nullptr;
 			}
 
+			/*
 			if (Input->IsKeyPressed(SDL_BUTTON_LEFT))
 		    {
 		    	// Do AABB test with AnimationSelection List Element
@@ -755,6 +756,7 @@ namespace Enjon { namespace GUI {
 		    		return true;
 		    	}
 		    }
+			*/
 
 		    return false;
 		}

@@ -72,11 +72,13 @@ namespace Enjon {
 			}
 	    }
 
+		/*
 		if (input->IsKeyPressed(SDLK_BACKQUOTE) || input->IsKeyPressed(SDLK_ESCAPE))
 		{
 			mIsVisible = false;
 			return false;	
 		}
+		*/
 
 		InputTextBox.ProcessInput(input, nullptr);
 

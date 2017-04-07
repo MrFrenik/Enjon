@@ -214,6 +214,7 @@ namespace Enjon
 
 	//======================================================= 
 
+	// TODO(): This belongs in window class
 	Enjon::Result Engine::ProcessInput( Enjon::Input* input, const f32 dt )
 	{
 	    SDL_Event event;
@@ -225,24 +226,89 @@ namespace Enjon
 	        switch ( event.type ) 
 	        {
 	            case SDL_QUIT:
+				{
 	                return Result::FAILURE;
-	                break;
+				} break; 
+
 				case SDL_KEYUP:
+				{ 
 					input->ReleaseKey( event.key.keysym.sym ); 
-					break;
+				} break;
+
 				case SDL_KEYDOWN:
+				{
 					input->PressKey( event.key.keysym.sym );
-					break;
+				} break; 
+
 				case SDL_MOUSEBUTTONDOWN:
+				{
 					input->PressKey( event.button.button );
-					break;
+				} break; 
+
 				case SDL_MOUSEBUTTONUP:
+				{
 					input->ReleaseKey( event.button.button );
-					break;
+				} break; 
+
 				case SDL_MOUSEMOTION:
-					input->SetMouseCoords( (f32)event.motion.x, (f32)event.motion.y );
+				{
+					input->SetMouseCoords( (f32)event.motion.x, (f32)event.motion.y ); 
+				} break;
+
+				case SDL_WINDOWEVENT: 
+				{
+					switch ( event.window.event )
+					{
+						case SDL_WINDOWEVENT_RESIZED: 
+						{
+							mGraphics->GetWindow( )->SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
+						}
+						break; 
+
+						case SDL_WINDOWEVENT_ENTER: 
+						{
+
+						}
+						break;
+						
+						case SDL_WINDOWEVENT_LEAVE: 
+						{
+
+						}
+						break;
+
+						case SDL_WINDOWEVENT_MOVED:
+						{
+
+						}
+						break;
+
+						case SDL_WINDOWEVENT_RESTORED:
+						{
+
+						} break;
+
+						case SDL_WINDOWEVENT_FOCUS_GAINED: 
+						{
+
+						} break;
+
+						case SDL_WINDOWEVENT_FOCUS_LOST: 
+						{
+
+						} break;
+						
+						case SDL_WINDOWEVENT_CLOSE: 
+						{
+
+						} break; 
+					}
+				} break; 
+
 				default:
-					break;
+				{
+
+				} break;
 			}
 	    } 
 

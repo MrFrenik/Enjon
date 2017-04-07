@@ -17,6 +17,10 @@
 #include "CVarsSystem.h"
 #include "ImGui/ImGuiManager.h"
 
+#include <string>
+#include <fmt/format.h> 
+#include <fmt/string.h>
+#include <fmt/printf.h>
 #include <cassert>
 
 namespace Enjon 
@@ -61,7 +65,7 @@ namespace Enjon
 		// TODO(John): Need to have a way to have an .ini that's read or grab these values from a static
 		// engine config file
 		// mWindow.Init("Game", 1920, 1080, WindowFlagsMask((u32)WindowFlags::FULLSCREEN)); 
-		mWindow.Init("Game", 1440, 900); 
+		mWindow.Init( "Game", 1440, 900, WindowFlags::RESIZABLE ); 
 
 		// Initialize shader manager
 		Enjon::ShaderManager::Init();
@@ -1037,9 +1041,20 @@ namespace Enjon
 	void DeferredRenderer::ShowGameViewport(bool* open)
 	{
 	    // Render game in window
+		ImVec2 cursorPos = ImGui::GetCursorScreenPos( );
+
 	    ImTextureID img = (ImTextureID)mCurrentRenderTexture;
 	    ImGui::Image(img, ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()), 
 	    				ImVec2(0,1), ImVec2(1,0), ImColor(255,255,255,255), ImColor(255,255,255,0));
+		
+		ImVec2 min = ImVec2 ( cursorPos.x + ImGui::GetContentRegionAvailWidth() - 100.0f, cursorPos.y + 10.0f );
+		ImVec2 max = ImVec2( min.x + 50.0f, min.y + 10.0f );
+
+		ImGui::SetCursorScreenPos( min );
+		auto drawlist = ImGui::GetWindowDrawList( ); 
+		//drawlist->AddRect( min, max, ImColor( 255, 255, 255, 255 ) );
+		f32 fps = ImGui::GetIO( ).Framerate;
+		drawlist->AddText( min, ImColor( 255, 255, 255, 255 ), fmt::sprintf( "Frame: %.3f", fps ).c_str() );
 	}
 
 }

@@ -78,6 +78,7 @@ namespace Enjon { namespace GUI {
 		    auto MousePos = Input->GetMouseCoords();
 		    Camera->ConvertScreenToWorld(MousePos);
 
+			/*
 		    if (Input->IsKeyDown(SDL_BUTTON_LEFT))
 		    {
 				auto X = MousePos.x;
@@ -105,6 +106,7 @@ namespace Enjon { namespace GUI {
 	    		JustFocused = true;
 	    		return true;
 	    	}
+			*/
 
 			return false;
 		}

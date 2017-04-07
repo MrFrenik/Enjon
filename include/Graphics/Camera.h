@@ -12,8 +12,8 @@ namespace Enjon {
 
 	enum class ProjectionType
 	{
-		PERSPECTIVE,
-		ORTHOGRAPHIC
+		Perspective,
+		Orthographic
 	};
 
 	struct Camera
@@ -41,10 +41,13 @@ namespace Enjon {
 		inline Vec2 GetNearFar() const { return Vec2(NearPlane, FarPlane); }
 		inline f32 GetNear() { return NearPlane; }
 		inline f32 GetFar() { return FarPlane; }
+		const ProjectionType GetProjectionType( ) const { return ProjType;  }
+		f32 GetOrthographicScale( ) const { return OrthographicScale; }
 
 		inline void SetNearFar(float Near, float Far) { NearPlane = Near; FarPlane = Far; }
 		inline void SetProjection(ProjectionType Type) { ProjType = Type; }
 		inline void SetOrthographicScale(const float Scale) { OrthographicScale = Scale; }
+		void SetProjectionType( ProjectionType type ) { ProjType = type; }
 
 		void SetPosition(Vec3& position);
 		Vec3 GetPosition() { return Transform.GetPosition(); }
@@ -53,12 +56,12 @@ namespace Enjon {
 
 		// Member variables
 		Transform Transform;
-		f32 FOV;
-		f32 NearPlane;
-		f32 FarPlane;
+		f32 FOV								= 60.0f;
+		f32 NearPlane						= 0.1f;
+		f32 FarPlane						= 100.0f;
 		f32 ViewPortAspectRatio;
-		f32 OrthographicScale;
-		ProjectionType ProjType;
+		f32 OrthographicScale				= 1.0f;
+		ProjectionType ProjType				= ProjectionType::Perspective;
 		Vec2 ScreenDimensions;
 	};
 
