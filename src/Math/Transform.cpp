@@ -42,20 +42,20 @@ namespace Enjon
 
 	//==========================================================================
 	
-	Transform Transform::operator*(Transform& Parent) const
+	Transform Transform::operator*(const Transform& rhs) const
 	{
 		Transform WorldSpace;
 
-		WorldSpace.Position 	= Parent.Position + Parent.Rotation * (Parent.Scale * Position); 	
-		WorldSpace.Rotation 	= Parent.Rotation * Rotation;
-		WorldSpace.Scale 		= Parent.Scale * Scale;
+		WorldSpace.Position		= Rotation.Rotate( rhs.Position ) + Position;
+		WorldSpace.Rotation 	= Rotation * rhs.Rotation;
+		WorldSpace.Scale 		= Scale * rhs.Scale;
 
 		return WorldSpace;
 	}
 
 	//==========================================================================
 
-	Transform& Transform::operator*=(Transform& parent)
+	Transform& Transform::operator*=(const Transform& parent)
 	{
 		*this = *this * parent;
 		return *this;	
@@ -63,15 +63,17 @@ namespace Enjon
 
 	//==========================================================================
 
-	Transform operator/(Transform& World, Transform& Parent)
+	Transform Transform::operator/(Transform& rhs)
 	{
 		Transform Local;
 
-		auto ParentConjugate = Parent.Rotation.Conjugate();
+		Vec3 inverseScale = 1.0f / rhs.Scale;
+		Quaternion inverseRotation = rhs.Rotation.Inverse( );
+		auto ParentConjugate = rhs.Rotation.Conjugate();
 
-		Local.Position 		= (ParentConjugate * (World.Position - Parent.Position)) / Parent.Scale;
-		Local.Rotation 		= ParentConjugate * World.Rotation;
-		Local.Scale 		= ParentConjugate * (World.Scale / Parent.Scale);
+		Local.Position 		= (ParentConjugate * (Position - rhs.Position)) / rhs.Scale;
+		Local.Rotation 		= ParentConjugate * Rotation;
+		Local.Scale 		= (Scale / rhs.Scale);
 
 		return Local;
 	}

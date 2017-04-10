@@ -124,7 +124,10 @@ namespace Enjon
 			/// @brief Propagates transform down through all components
 			void UpdateComponentTransforms(f32 dt);
 
-		protected:
+		protected: 
+
+			void CalculateLocalTransform( );
+
 			/// @brief Calculates world transform with respect to parent hierarchy
 			void CalculateWorldTransform();
 

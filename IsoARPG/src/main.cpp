@@ -9668,7 +9668,7 @@ int main(int argc, char** argv)
 
 
 // ACTUAL
-#if 1
+#if 0
 
 #include <Enjon.h> 
 #include <System/Types.h>
@@ -9709,25 +9709,115 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 
 #include <iostream>
 #include <cmath>
+#include <fmt/printf.h>
 
+#include <Math/Transform.h>
 #include <Math/Vec3.h>
-#include <System/Types.h>
-
-f64 pi = 3.14152965359;
+#include <Math/Quaternion.h>
+#include <System/Types.h> 
 
 int main(int argc, char** argv)
-{
-	f64 N = 200.0;
-	f64 d = 0.18;
-	f64 r = d / 2.0;
-	f64 B = 0.55;
-	f64 f = 3300.0 * 0.0166;
-	f64 A = pi * r * r; 
+{ 
+	// World To Local 
+	Enjon::Transform e1( Enjon::Vec3( 0, 10, 0 ), Enjon::Quaternion::AngleAxis( 0.0f, Enjon::Vec3::YAxis() ), Enjon::Vec3( 0.5f ) );
+	Enjon::Transform e2( Enjon::Vec3( 0, 0, 0 ), Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ), Enjon::Vec3( 1.5f ) );
 
-	f64 e = (N * B * A * 2.0 * pi * f);
-
-	std::cout << e << "\n";
+	Enjon::Vec3 localPos = e1.Position;
+	Enjon::Quaternion localRot = e1.Rotation;
+	Enjon::Vec3 localScl = e1.Scale; 
+	Enjon::Vec3 localEul = e1.Rotation.EulerAngles( );
 	
+	fmt::print( "Local Pos: {} {} {}\n", localPos.x, localPos.y, localPos.z );
+	fmt::print( "Local Rot: {} {} {} {}\n", localRot.x, localRot.y, localRot.z, localRot.w );
+	fmt::print( "Local Rot ( degrees ): {} {} {}\n", localEul.x, localEul.y, localEul.z );
+	fmt::print( "Local Scale: {} {} {}\n", localScl.x, localScl.y, localScl.z );
+	fmt::print( "\n" );
+	
+	Enjon::Transform Local;
+
+	auto ParentConjugate = e2.Rotation.Conjugate(); 
+
+	//Enjon::Vec3 relScale		= e2.Rotation.Conjugate( ) * ( e1.Scale / e2.Scale );
+	Enjon::Vec3 relScale		= ( e1.Scale / e2.Scale );
+	Enjon::Quaternion relRot	= e2.Rotation.Conjugate( ) * e1.Rotation;
+	//Enjon::Quaternion relRot	= Enjon::Quaternion::AngleAxis( -45.0f, Enjon::Vec3::ZAxis( ) );
+	Enjon::Vec3 relPos			= ( ParentConjugate * ( e1.Position - e2.Position ) ) / e2.Scale; 
+
+	Enjon::Quaternion diff = relRot - ( e2.Rotation.Conjugate( ) * e1.Rotation );
+
+	Enjon::Vec3 relEuler = relRot.EulerAngles( );
+
+	fmt::print( "diff: {} {} {} {}\n", diff.x, diff.y, diff.z, diff.w );
+	fmt::print( "Rel Pos: {} {} {}\n", relPos.x, relPos.y, relPos.z );
+	fmt::print( "Rel Rot (euler): {} {} {}\n", Enjon::ToDegrees( relEuler.x ), Enjon::ToDegrees( relEuler.y ), Enjon::ToDegrees( relEuler.z ) );
+	fmt::print( "Rel Scale: {} {} {}\n", relScale.x, relScale.y, relScale.z );
+	fmt::print( "\n" );
+
+	Enjon::Transform localTrans( relPos, relRot, relScale );
+
+	// Local To World
+	Enjon::Transform parent = e2;
+
+	Enjon::Mat4 localMat( 1.0f );
+	localMat *= Enjon::Mat4::Translate( localTrans.Position );
+	localMat *= Enjon::QuaternionToMat4( localTrans.Rotation );
+	localMat *= Enjon::Mat4::Scale( localTrans.Scale );
+
+	Enjon::Mat4 parentMat( 1.0f );
+	parentMat *= Enjon::Mat4::Translate( parent.Position );
+	parentMat *= Enjon::QuaternionToMat4( parent.Rotation );
+	parentMat *= Enjon::Mat4::Scale( parent.Scale );
+
+	Enjon::Vec3 s = parent.Scale;
+	Enjon::Quaternion q = parent.Rotation.Normalize( );
+	Enjon::Vec3 p = parent.Position;
+	Enjon::Vec3 t = localTrans.Position;
+
+	f32 a = q.y * q.y + q.z * q.z;
+	f32 b = q.x * q.y - q.w * q.z;
+	f32 c = q.x * q.z + q.w * q.y;
+	f32 d = q.x * q.y + q.w * q.z;
+	f32 e = q.x * q.x + q.z * q.z;
+	f32 f = q.y * q.z - q.w * q.x;
+	f32 g = q.x * q.z - q.w * q.y;
+	f32 h = q.y * q.y + q.w * q.x;
+	f32 i = q.x * q.x + q.y * q.y;
+
+	f32 x = s.x * ( 1.0f - 2 * a )	* t.x +
+		s.y * ( 2.0f * b )		* t.y +
+		s.z * ( 2.0f * c )		* t.z +
+		p.x;
+
+	f32 y = s.x * ( 2.0f * d )			* t.x +
+		s.y * ( 1.0f - 2.0f * e )	* t.y +
+		s.z * ( 2.0f * f )			* t.z +
+		p.y;
+
+	f32 z = s.x * ( 2.0f * g )			* t.x +
+		s.y * ( 2.0f * h )			* t.y +
+		s.z * ( 1.0f - 2.0f * i )	* t.z +
+		p.z; 
+
+	Enjon::Mat4 worldMat = parentMat * localMat; 
+
+	std::cout << "World mat: " << "\n";
+	std::cout << worldMat << "\n";
+
+	//Enjon::Vec3 worldPos = Enjon::Vec3( worldMat.columns[3].x, worldMat.columns[3].y, worldMat.columns[3].z );
+	//Enjon::Vec3 worldPos	= ( parent.Rotation * ( localTrans.Position + parent.Position ) );
+	//Enjon::Vec3 worldPos = parent.Rotation.Rotate( localTrans.Position ) + parent.Position;
+	//Enjon::Vec3 worldPos = Enjon::Vec3( x, y, z );
+
+	//Enjon::Vec3 worldPos = parent.Position + parent.Rotation * ( parent.Scale * localTrans.Position );
+	Enjon::Vec3 worldPos = parent.Position + parent.Rotation.Rotate( parent.Scale * localTrans.Position );
+	//Enjon::Vec3 worldScale = parent.Scale * ( parent.Rotation * localTrans.Scale );
+	Enjon::Vec3 worldScale = parent.Scale * localTrans.Scale;
+	Enjon::Quaternion worldRot = parent.Rotation * localTrans.Rotation;
+
+	fmt::print( "World Pos: {} {} {}\n", worldPos.x, worldPos.y, worldPos.z );
+	fmt::print( "World Rot: {} {} {} {}\n", worldRot.x, worldRot.y, worldRot.z, worldRot.w );
+	fmt::print( "World Scl: {} {} {}\n", worldScale.x, worldScale.y, worldScale.z );
+
 
 	return 0;
 }
@@ -9735,6 +9825,37 @@ int main(int argc, char** argv)
 
 #endif
 
+#if 1
+
+#include <Entity/EntityManager.h>
+#include <System/Types.h>
+#include <Math/Transform.h>
+
+int main( int argc, char** argv )
+{
+	Enjon::EntityManager* entities = new Enjon::EntityManager( );
+	Enjon::Entity* e1 = entities->Allocate( );
+	Enjon::Entity* e2 = entities->Allocate( );
+
+	e1->SetLocalTransform( Enjon::Transform ( Enjon::Vec3( 0, 0, 0 ), Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ), Enjon::Vec3( 1.5f ) ) );
+	e2->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 0, 10, 0), Enjon::Quaternion::AngleAxis( 0.0f, Enjon::Vec3::ZAxis( ) ), Enjon::Vec3( 0.5f ) ) ); 
+
+	e1->AddChild( e2 );
+
+	auto lt = e2->GetLocalTransform( );
+	auto wt = e2->GetWorldTransform( );
+
+	for ( auto i = 0; i < 10; ++i )
+	{
+		auto lt = e2->GetLocalTransform( );
+		auto wt = e2->GetWorldTransform( );
+		std::cout << wt.Rotation << "\n";
+	}
+
+}
+
+
+#endif
 
 
 

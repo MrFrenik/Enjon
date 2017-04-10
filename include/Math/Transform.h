@@ -55,21 +55,21 @@ namespace Enjon
 			* @param
 			* @return
 			*/
-			Transform operator*(Transform& Parent) const;	
+			Transform operator*(const Transform& rhs) const;	
 
 			/**
 			* @brief 
 			* @param
 			* @return
 			*/
-			Transform& operator*=(Transform& parent);
+			Transform& operator*=(const Transform& rhs);
 
 			/**
 			* @brief 
 			* @param
 			* @return
 			*/
-			friend Transform operator/(Transform& World, Transform& Parent);
+			Transform operator/(Transform& rhs);
 
 			/**
 			* @brief 

@@ -97,6 +97,12 @@ namespace Enjon
 	{ 
 		return &mRenderable; 
 	}
+	
+	/* Sets world transform */
+	void GraphicsComponent::SetTransform( const Transform& transform )
+	{
+		mRenderable.SetTransform( transform );
+	}
 
 	//====================================================================
 
@@ -160,4 +166,5 @@ namespace Enjon
 	{
 		mRenderable.SetColor(type, color);	
 	}
+	
 }

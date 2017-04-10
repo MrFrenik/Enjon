@@ -30,12 +30,7 @@ namespace Enjon
 
 	Quaternion Quaternion::Conjugate() const
 	{
-		Quaternion Q = *this;
-		// Quaternion Q;
-		Q.x *= -1;
-		Q.y *= -1;
-		Q.z *= -1;
-		return Q;
+		return Quaternion( -x, -y, -z, w );
 	}
 
 	// Negative unary operator overload
@@ -70,12 +65,12 @@ namespace Enjon
 
 	Quaternion Quaternion::operator*(const Quaternion& Other) const 
 	{
-		Quaternion Result;
-		
-		Result.x = w*Other.x + x*Other.w + y*Other.z - z*Other.y;
-		Result.y = w*Other.y - x*Other.z + y*Other.w + z*Other.x;
-		Result.z = w*Other.z + x*Other.y - y*Other.x + z*Other.w;
-		Result.w = w*Other.w - x*Other.x - y*Other.y - z*Other.z;
+		Quaternion Result; 
+
+		Result.x = w * Other.x + Other.w * x + y * Other.z - Other.y * z;
+		Result.y = w * Other.y + Other.w * y + z * Other.x - Other.z * x;
+		Result.z = w * Other.z + Other.w * z + x * Other.y - Other.x * y;
+		Result.w = w * Other.w - x * Other.x - y * Other.y - z * Other.z;
 
 		return Result;	
 	}
@@ -126,12 +121,24 @@ namespace Enjon
 		return stream;	
 	}
 
-	f32 Quaternion::Dot(Quaternion& Q)
+	Vec3 Quaternion::Rotate( const Vec3& v ) const
 	{
-		auto A = Vec3(Q.x, Q.y, Q.z);
-		auto B = Vec3(x, y, z);
+		// nVidia SDK implementation
 
-		return A.Dot(B) + w * Q.w;	
+		Vec3 uv;
+		Vec3 uuv;
+		Vec3 qVec( this->x, this->y, this->z );
+		uv = qVec.Cross( v );
+		uuv = qVec.Cross( uv );
+		uv *= ( 2.0f * w );
+		uuv *= 2.0f;
+
+		return v + uv + uuv;
+	}
+
+	f32 Quaternion::Dot(Quaternion& Q)
+	{ 
+		return x*Q.x + y*Q.y + z*Q.z + w*Q.w;
 	}
 
 	// Returns cross product with another quaternion
@@ -145,6 +152,12 @@ namespace Enjon
 		C.w = w*Other.w - x*Other.x - y*Other.y - z*Other.z; 		
 
 		return C;	
+	}
+			
+	// Returns inverse of quaternion
+	Quaternion Quaternion::Inverse( )
+	{ 
+		return Conjugate( ) / Dot( *this );
 	}
 
 	Quaternion Quaternion::Inverse(Quaternion& Q)
@@ -188,14 +201,38 @@ namespace Enjon
 
 	Vec3 Quaternion::EulerAngles()
 	{
-		return Vec3(this->Pitch(), this->Yaw(), this->Roll());
+		//return Vec3(this->Pitch(), this->Yaw(), this->Roll());
+		double ysqr = y * y;
+
+		// roll (x-axis rotation)
+		double t0 = +2.0 * ( w * x + y * z );
+		double t1 = +1.0 - 2.0 * ( x * x + ysqr );
+		double roll = std::atan2( t0, t1 );
+
+		// pitch (y-axis rotation)
+		double t2 = +2.0 * ( w * y - z * x );
+		t2 = t2 > 1.0 ? 1.0 : t2;
+		t2 = t2 < -1.0 ? -1.0 : t2;
+		double pitch = std::asin( t2 );
+
+		// yaw (z-axis rotation)
+		double t3 = +2.0 * ( w * z + x * y );
+		double t4 = +1.0 - 2.0 * ( ysqr + z * z );
+		double yaw = std::atan2( t3, t4 );
+
+		return Vec3( roll, pitch, yaw );
 	} 
 
 	Vec3 Quaternion::operator*(const Vec3& V) const
 	{
+		//return this->Rotate( V );
 		auto Qxyz = Vec3(x, y, z);
-		Vec3 T = 2.0f * Qxyz.Cross(V);
-		return (V + w * T + Qxyz.Cross(T));
+		//Vec3 T = 2.0f * Qxyz.Cross(V);
+		//return (V + w * T + Qxyz.Cross(T)); 
+		const Vec3 t = 2.0f * Qxyz.Cross( V );
+		return ( V + w * t + Qxyz.Cross( t ) );
+		//Quaternion q = *this * Quaternion( V, 0 ) * this->Conjugate( );
+		//return Vec3( q.x, q.y, q.z );
 	} 
 }
 

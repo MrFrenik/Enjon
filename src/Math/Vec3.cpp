@@ -2,6 +2,7 @@
 // File: Vec2.cpp
 
 #include "Math/Vec3.h"
+#include "Math/Quaternion.h"
 
 namespace Enjon 
 { 
@@ -40,6 +41,15 @@ namespace Enjon
 		stream << "Vector3f: (" << vector.x << ", " << vector.y << ", " << vector.z << ")";
 		return stream;
 	}
+			
+	Vec3 Vec3::operator*(const Quaternion& quat) const
+	{
+		//return quat.Rotate( *this );
+		Vec3 t = *this;
+		auto Qxyz = Vec3(quat.x, quat.y, quat.z);
+		Vec3 T = 2.0f * t.Cross(Qxyz);
+		return (t + quat.w * T + Qxyz.Cross(T));
+	} 
 	
 	//================================================
 

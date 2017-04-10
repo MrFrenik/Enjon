@@ -71,6 +71,8 @@ namespace Enjon
 			// Gets length of quaternion
 			f32 Length();
 
+			Vec3 Rotate( const Vec3& v ) const;
+
 			// Normalizes length of quaternion to 1
 			Quaternion Normalize();
 
@@ -85,6 +87,9 @@ namespace Enjon
 
 			// Returns inverse of quaternion
 			Quaternion Inverse(Quaternion& Q);
+			
+			// Returns inverse of quaternion
+			Quaternion Inverse();
 
 			// Get angle from quaternion in radians
 			f32 Angle();
@@ -103,6 +108,11 @@ namespace Enjon
 
 			// Get Euler Angles from quaternion
 			Vec3 EulerAngles(); 
+
+			static inline Quaternion FromEulerAngles( const f32& roll, const f32& pitch, const f32& yaw )
+			{
+				return AngleAxis( roll, Vec3::XAxis( ) ) * AngleAxis( pitch, Vec3::YAxis( ) ) * AngleAxis( yaw, Vec3::ZAxis( ) );
+			}
 			
 			static inline Quaternion AngleAxis(const f32& Angle, const Vec3& Axis)
 			{
@@ -112,13 +122,14 @@ namespace Enjon
 				Vec3 A = Vec3::Normalize(Axis);
 
 				// Get scalar
-				const f32 S = std::sin(0.5f * Angle); 
+				const f32 halfAngle = 0.5f * Angle;
+				const f32 S = std::sinf(halfAngle); 
 
 				// Set Q
 				Q.x = A.x * S;
 				Q.y = A.y * S;
 				Q.z = A.z * S;
-				Q.w = std::cos(0.5f * Angle);
+				Q.w = std::cosf(halfAngle);
 
 				return Q;
 			}

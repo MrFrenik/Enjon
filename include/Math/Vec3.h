@@ -11,6 +11,8 @@
 
 namespace Enjon {  
 
+	class Quaternion;
+
 	class Vec3
 	{ 
 		public:
@@ -214,8 +216,15 @@ namespace Enjon {
 			/**
 			* @brief Negates vector components
 			* @return New negated vector
-			*/
+			*/ 
 			Vec3 operator-();
+	
+			/**
+			* @brief
+			* @param
+			* @return
+			*/
+			Vec3 operator*( const Quaternion& V ) const;
 
 			/**
 			* @brief Performs dot product with other vector and returns the calculated value

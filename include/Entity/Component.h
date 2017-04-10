@@ -77,12 +77,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			EntityManager* GetEntityManager() const;
-
-			/**
-			* @brief
-			*/
-			void SetTransform( Transform& transform );
+			EntityManager* GetEntityManager() const; 
 
 		protected:
 
@@ -116,7 +111,6 @@ namespace Enjon
 		protected:
 			Entity* mEntity = nullptr;
 			EntityManager* mManager = nullptr;
-			Transform mTransform;
 			u32 mEntityID;
 			u32 mID;
 

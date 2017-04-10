@@ -13,7 +13,7 @@ namespace Enjon
 
 	void PointLightComponent::Update(float dt)
 	{
-		mLight.SetPosition(mTransform.GetPosition());	
+		mLight.SetPosition(mEntity->GetWorldPosition());	
 	}
 
 	void PointLightComponent::Destroy()

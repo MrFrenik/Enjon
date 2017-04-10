@@ -22,12 +22,7 @@ namespace Enjon
 	void Component::SetBase( ComponentWrapperBase* base )
 	{
 		mBase = base;
-	}
-
-	void Component::SetTransform( Transform& transform )
-	{
-		mTransform = transform;
-	}
+	} 
 
 	ComponentBitset GetComponentBitMask( u32 type )
 	{

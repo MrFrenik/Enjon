@@ -119,6 +119,7 @@ Enjon::Result Game::Initialize()
 	Enjon::String dragonMeshPath		= Enjon::String("/Models/dragon.obj");
 	Enjon::String monkeyMeshPath		= Enjon::String("/Models/monkey.obj");
 	Enjon::String sphereMeshPath		= Enjon::String("/Models/unit_sphere.obj");
+	Enjon::String cubeMeshPath			= Enjon::String("/Models/unit_cube.obj");
 	Enjon::String catMeshPath			= Enjon::String("/Models/cat.obj");
 	Enjon::String dudeMeshPath			= Enjon::String("/Models/dude.obj");
 	Enjon::String shaderBallMeshPath	= Enjon::String("/Models/shaderball.obj");
@@ -133,6 +134,9 @@ Enjon::Result Game::Initialize()
 	Enjon::String mahogRoughnessPath	= Enjon::String("/Materials/MahogFloor/Roughness.png"); 
 	Enjon::String mahogEmissivePath		= Enjon::String("/Materials/MahogFloor/Emissive.png"); 
 	Enjon::String mahogAOPath			= Enjon::String("/Materials/MahogFloor/AO.png"); 
+	Enjon::String greenPath				= Enjon::String("/Textures/green.png"); 
+	Enjon::String redPath				= Enjon::String("/Textures/red.png"); 
+	Enjon::String bluePath				= Enjon::String("/Textures/blue.png"); 
 
 	// Add to asset database
 	mAssetManager->AddToDatabase(cerebusAlbedoPath); 
@@ -148,7 +152,11 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase(mahogAOPath); 
 	mAssetManager->AddToDatabase(cerebusMeshPath);
 	mAssetManager->AddToDatabase(sphereMeshPath);
+	mAssetManager->AddToDatabase(cubeMeshPath);
 	mAssetManager->AddToDatabase(shaderBallMeshPath); 
+	mAssetManager->AddToDatabase(greenPath); 
+	mAssetManager->AddToDatabase(redPath); 
+	mAssetManager->AddToDatabase(bluePath); 
 
 	testProperty = mCameraSpeed; 
 
@@ -179,12 +187,19 @@ Enjon::Result Game::Initialize()
 	mEntities->RegisterComponent<OneMoreComponent>();
 
 	// Allocate handle
-	mGun = mEntities->Allocate();
+	mGreen = mEntities->Allocate( );
+	mRed = mEntities->Allocate( );
+	mBlue = mEntities->Allocate( );
+	mGun = mEntities->Allocate( );
 	auto gc = mGun->Attach<Enjon::GraphicsComponent>(); 
 	auto pc = mGun->Attach<Enjon::PointLightComponent>(); 
 	auto oc = mGun->Attach<OtherComponent>(); 
 	auto omc = mGun->Attach<OneMoreComponent>(); 
-	
+
+	mRed->Attach< Enjon::GraphicsComponent >( );
+	mGreen->Attach< Enjon::GraphicsComponent >( );
+	mBlue->Attach< Enjon::GraphicsComponent >( );
+
 	pc->GetLight( )->SetPosition( Enjon::Vec3( 10.0f, 2.0f, 4.0f ) );
 
 	mGunMat 	= new Enjon::Material; 
@@ -195,9 +210,9 @@ Enjon::Result Game::Initialize()
 	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.emissive"));
 	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.emissive"));
 
-	mGun->SetPosition(Enjon::Vec3(0.0f, 6.0f, 0.0f));
-	mGun->SetScale(3.0f);
-	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("isoarpg.models.cerebus"));
+	mGun->SetPosition(Enjon::Vec3(0.0f, 0.0f, 0.0f));
+	mGun->SetRotation( Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ) );
+	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("isoarpg.models.unit_cube"));
 	gc->SetMaterial(mGunMat);
 
 	mSun = new Enjon::DirectionalLight();
@@ -213,6 +228,44 @@ Enjon::Result Game::Initialize()
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.roughness"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.emissive"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.ao"));
+
+	mBlueMat = new Enjon::Material( );
+	mBlueMat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.blue") );
+	mBlueMat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.normal") );
+	mBlueMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.metallic") );
+	mBlueMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.roughness") );
+	mBlueMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.emissive") );
+	mBlueMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.emissive") );
+	
+	mRedMat = new Enjon::Material( );
+	mRedMat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.red") );
+	mRedMat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.normal") );
+	mRedMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.metallic") );
+	mRedMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.roughness") );
+	mRedMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.emissive") );
+	mRedMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.emissive") );
+	
+	mGreenMat = new Enjon::Material( );
+	mGreenMat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
+	mGreenMat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.normal") );
+	mGreenMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.metallic") );
+	mGreenMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.roughness") );
+	mGreenMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.emissive") );
+	mGreenMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.emissive") );
+
+	mGreen->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mGreenMat );
+	mGreen->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("isoarpg.models.unit_cube" ) );
+	mRed->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mRedMat );
+	mRed->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mSphereMesh );
+	mBlue->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mBlueMat );
+	mBlue->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mSphereMesh );
+
+	mGreen->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 0, 10, 0 ), Enjon::Quaternion::AngleAxis( 0.0f, Enjon::Vec3::YAxis() ), Enjon::Vec3( 1, 1, 1 ) ) );
+
+	mGreen->SetScale( 0.5f ); 
+	mGun->SetScale( 1.5f );
+	mGun->AddChild( mGreen ); 
+
 	mBatch = new Enjon::QuadBatch();
 	mBatch->Init();
 	mBatch->Begin();
@@ -222,7 +275,7 @@ Enjon::Result Game::Initialize()
 		{
 			for (Enjon::s32 j = -dimSize; j < dimSize; ++j)
 			{
-				Enjon::Vec3 pos(j * 2.0f, 0.0f, i * 2.0f);
+				Enjon::Vec3 pos(j * 2.0f, -3.0f, i * 2.0f);
 				Enjon::Quaternion rot = Enjon::Quaternion::AngleAxis(Enjon::ToRadians(90.0f), Enjon::Vec3::XAxis());
 				Enjon::Vec3 scale(1.0f);
 				Enjon::Transform t(pos, rot, scale);
@@ -239,6 +292,8 @@ Enjon::Result Game::Initialize()
 		scene->AddDirectionalLight(mSun);
 		scene->AddDirectionalLight(mSun2);
 		scene->AddRenderable(gc->GetRenderable());
+		scene->AddRenderable( mGreen->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+	
 		scene->AddQuadBatch(mBatch);
 		scene->SetSun(mSun);
 		scene->SetAmbientColor(Enjon::SetOpacity(Enjon::RGBA16_White(), 0.1f));
@@ -256,6 +311,7 @@ Enjon::Result Game::Initialize()
 		// Docking windows
 		if (ImGui::BeginDock("Entities", &mShowEntities))
 		{
+			ImGui::Text( "Gun:" );
 			auto position 	= mGun->GetLocalPosition();
 			auto scale 		= mGun->GetLocalScale();
 			auto rotation 	= mGun->GetLocalRotation();
@@ -272,6 +328,25 @@ Enjon::Result Game::Initialize()
 			mGun->SetScale(v3(scl[0], scl[1], scl[2]));
 			mGun->SetRotation(quat(rot[0], rot[1], rot[2], rotation.w));
 
+			for ( auto c : mGun->GetChildren( ) )
+			{
+				ImGui::Text( "Child:" );
+				Enjon::Transform trans = c->GetWorldTransform( );
+				auto position 	= trans.Position;
+				auto scale 		= trans.Scale;
+				auto rotation 	= trans.Rotation;
+
+				f32 pos[] = {position.x, position.y, position.z}; 
+				f32 scl[] = {scale.x, scale.y, scale.z}; 
+				f32 rot[] = {rotation.x, rotation.y, rotation.z}; 
+
+				ImGui::PushID( c->GetID( ) );
+				ImGui::InputFloat3("Position", pos);
+				ImGui::InputFloat3("Scale", scl);
+				ImGui::InputFloat3("Rotation", rot);
+				ImGui::PopID( ); 
+			}
+
 			if ( ImGui::SliderFloat( "Camera Speed", &mCameraSpeed, 0.1f, 20.0f ) )
 			{
 				testProperty = mCameraSpeed;
@@ -285,10 +360,9 @@ Enjon::Result Game::Initialize()
 			}
 			
 			ImGui::Text( "32 bit prop size: %d", sizeof( Enjon::Property<f32> ) );
-			ImGui::Text( "32 bit signal size: %d", sizeof( Enjon::Signal<f32> ) );
-
-			ImGui::Text("%d", mEntities->GetActiveEntities().size());
+			ImGui::Text( "32 bit signal size: %d", sizeof( Enjon::Signal<f32> ) ); 
 		}
+
 		ImGui::EndDock();
 	};
 
@@ -415,6 +489,8 @@ void Game::ListEntityChildren(Enjon::Entity* entity, u32 indentAmount)
 //-------------------------------------------------------------
 Enjon::Result Game::Update(Enjon::f32 dt)
 {
+	mGreen->SetRotation( Enjon::Quaternion( 0, 0, 0, 1 ) );
+
 	// Update movement and check for success/failure of update
 	Enjon::Result res = ProcessInput(dt);
 	if (res != Enjon::Result::PROCESS_RUNNING)
@@ -432,11 +508,13 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 	Enjon::GraphicsComponent* gc2 	= nullptr;
 	Enjon::GraphicsComponent* gc3 	= nullptr; 
 
-	if (mGun && mGun->HasComponent<Enjon::GraphicsComponent>())
-	{
-		mGun->SetRotation(quat::AngleAxis(t * 5.0f, v3(0, 1, 0)));
-		gc = mGun->GetComponent<Enjon::GraphicsComponent>(); 
-	} 
+	//if (mGun && mGun->HasComponent<Enjon::GraphicsComponent>())
+	//{
+	//	mGun->SetRotation(quat::AngleAxis(t * 5.0f, Enjon::Vec3::YAxis() ));
+	//	gc = mGun->GetComponent<Enjon::GraphicsComponent>(); 
+	//} 
+
+	//mGreen->SetRotation( quat::AngleAxis( t * 10.0f, v3( 0, 0, 1 ) ) );
 
 	// Physics simulation
 	mDynamicsWorld->stepSimulation(1.f/60.f, 10);
@@ -466,7 +544,12 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 	// mEntities->LateUpdate(dt);
 	for (auto& e : mEntities->GetActiveEntities())
 	{
-		e->UpdateComponentTransforms(dt);
+		if ( e->HasComponent< Enjon::GraphicsComponent >( ) )
+		{
+			auto gfx = e->GetComponent< Enjon::GraphicsComponent >( );
+			gfx->SetTransform( e->GetWorldTransform( ) );
+		}
+		//e->UpdateComponentTransforms(dt);
 	}
 
 	return Enjon::Result::PROCESS_RUNNING;

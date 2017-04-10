@@ -75,7 +75,7 @@ namespace Enjon
 
 		// Initialize scene camera
 		mSceneCamera = Enjon::Camera(mWindow.GetViewport());
-		mSceneCamera.SetProjection(ProjectionType::PERSPECTIVE);
+		mSceneCamera.SetProjection(ProjectionType::Perspective);
 		mSceneCamera.SetPosition(Vec3(0, 5, 10));
 		mSceneCamera.LookAt(Vec3(0, 0, 0));
 
@@ -263,6 +263,7 @@ namespace Enjon
 				Mesh* mesh = renderable->GetMesh().Get();
 				mesh->Bind();
 				{
+					std::cout << renderable->GetRotation() << "\n";
 					Mat4 Model;
 					Model *= Mat4::Translate(renderable->GetPosition());
 					Model *= QuaternionToMat4(renderable->GetRotation());
