@@ -111,11 +111,11 @@ namespace Enjon {
 		if ( HasParent( ) )
 		{ 
 			Transform parentTransform = mParent->GetWorldTransform( );
-			Enjon::Quaternion parentConjugate = parentTransform.Rotation.Conjugate( ); 
+			Enjon::Quaternion parentInverse = parentTransform.Rotation.Inverse( ); 
 
-			Vec3 relativeScale		= parentConjugate * ( mLocalTransform.Scale / parentTransform.Scale );
-			Quaternion relativeRot	= parentConjugate * mLocalTransform.Rotation;
-			Vec3 relativePos		= ( parentConjugate * ( mLocalTransform.Position - parentTransform.Position ) ) / parentTransform.Scale;
+			Vec3 relativeScale		=  mWorldTransform.Scale / parentTransform.Scale;
+			Quaternion relativeRot	=  mWorldTransform.Rotation * parentInverse;
+			Vec3 relativePos		= parentInverse * ( ( mWorldTransform.Position - parentTransform.Position ) / parentTransform.Scale );
 
 			mLocalTransform = Transform( relativePos, relativeRot, relativeScale );
 		}
@@ -133,64 +133,9 @@ namespace Enjon {
 		// Get parent transform recursively
 		Transform parent = mParent->GetWorldTransform( ); 
 
-		/*
-		Mat4 world(1.0f);
-		world *= Mat4::Translate(mLocalTransform.Position);
-		world *= QuaternionToMat4(mLocalTransform.Rotation);
-		world *= Mat4::Scale(mLocalTransform.Scale);
-		
-		Mat4 parentMat(1.0f);
-		parentMat *= Mat4::Translate(parent.Position);
-		parentMat *= QuaternionToMat4(parent.Rotation);
-		parentMat *= Mat4::Scale(parent.Scale);
-
-		Vec3 s = parent.Scale;
-		Quaternion q = parent.Rotation.Normalize();
-		Vec3 p = parent.Position;
-		Vec3 t = mLocalTransform.Position; 
-
-		f32 a = q.y * q.y + q.z * q.z;
-		f32 b = q.x * q.y - q.w * q.z;
-		f32 c = q.x * q.z + q.w * q.y;
-		f32 d = q.x * q.y + q.w * q.z;
-		f32 e = q.x * q.x + q.z * q.z;
-		f32 f = q.y * q.z - q.w * q.x;0
-		f32 g = q.x * q.z - q.w * q.y;
-		f32 h = q.y * q.y + q.w * q.x;
-		f32 i = q.x * q.x + q.y * q.y;
-
-		f32 x = s.x * ( 1.0f - 2 * a )	* t.x +
-				s.y * ( 2.0f * b )		* t.y +
-				s.z * ( 2.0f * c )		* t.z +
-				p.x;
-
-		f32 y = s.x * ( 2.0f * d )			* t.x + 
-				s.y * ( 1.0f - 2.0f * e )	* t.y + 
-				s.z * ( 2.0f * f )			* t.z + 
-				p.y;
-
-		f32 z = s.x * ( 2.0f * g )			* t.x + 
-				s.y * ( 2.0f * h )			* t.y + 
-				s.z * ( 1.0f - 2.0f * i )	* t.z + 
-				p.z; 
-
-
-		//Mat4 worldMat = parentMat * world; 
-		
-
-		//Vec3 worldPos = Vec3( worldMat.columns[3].x, worldMat.columns[3].y, worldMat.columns[3].z );
-		Vec3 worldPos = Vec3( x, y, z );
-		Vec3 worldScale = parent.Scale * mLocalTransform.Scale; 
-		Quaternion worldRot = parent.Rotation * mLocalTransform.Rotation; 
-
-		// Not correct...
-		//Vec3 worldPos			= ( parent.Rotation.Rotate( mLocalTransform.Position ) + parent.Position ) * parent.Scale;
-		*/
-
-		Enjon::Vec3 worldPos = parent.Position + parent.Rotation.Rotate( parent.Scale * mLocalTransform.Position );
-		//Enjon::Vec3 worldPos = parent.Position + parent.Rotation * ( parent.Scale * mLocalTransform.Position );
-		Enjon::Vec3 worldScale = parent.Scale * ( parent.Rotation * mLocalTransform.Scale );
-		Enjon::Quaternion worldRot = parent.Rotation * mLocalTransform.Rotation; 
+		Enjon::Vec3 worldPos = parent.Position + ( parent.Rotation.Inverse() * ( parent.Scale * mLocalTransform.Position ) );
+		Enjon::Vec3 worldScale = parent.Scale * mLocalTransform.Scale;
+		Enjon::Quaternion worldRot = ( mLocalTransform.Rotation * parent.Rotation ).Normalize(); 
 
 		mWorldTransform = Transform( worldPos, worldRot, worldScale );
 			
@@ -323,16 +268,16 @@ namespace Enjon {
 		// Make sure this child doesn't have a parent
 		assert(parent != nullptr);
 		assert(mParent == nullptr);
-		assert(mManager != nullptr);
-
+		assert(mManager != nullptr); 
+		
+		// Calculate world transform ( No parent yet, so set world to local )
+		CalculateWorldTransform( ); 
+		
 		// Set parent to this
 		mParent = parent; 
 		
-		// Calculate local transform
-		CalculateLocalTransform( );
-
-		// Calculate world transform
-		CalculateWorldTransform( ); 
+		// Calculate local transform relative to parent
+		CalculateLocalTransform( ); 
 
 		// Now that the parent is set, remove it from hierarchy list
 		mManager->RemoveFromParentHierarchyList(this);

@@ -263,7 +263,6 @@ namespace Enjon
 				Mesh* mesh = renderable->GetMesh().Get();
 				mesh->Bind();
 				{
-					std::cout << renderable->GetRotation() << "\n";
 					Mat4 Model;
 					Model *= Mat4::Translate(renderable->GetPosition());
 					Model *= QuaternionToMat4(renderable->GetRotation());

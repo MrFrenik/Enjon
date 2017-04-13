@@ -133,7 +133,7 @@ namespace Enjon
 			mApp->Initialize();
 		}
 
-		// Initializessssstt limiter
+		// Initializes limiter
 		 mLimiter.Init( 60.0f );
 
 		// Late init for systems that need it
@@ -191,7 +191,7 @@ namespace Enjon
 			// Update graphics
 			mGraphics->Update(dt); 
 
-			mLimiter.End();
+			//mLimiter.End();
 		}
 
 		Enjon::Result res = ShutDown();

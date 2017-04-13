@@ -70,7 +70,7 @@ namespace Enjon
 		Result.x = w * Other.x + Other.w * x + y * Other.z - Other.y * z;
 		Result.y = w * Other.y + Other.w * y + z * Other.x - Other.z * x;
 		Result.z = w * Other.z + Other.w * z + x * Other.y - Other.x * y;
-		Result.w = w * Other.w - x * Other.x - y * Other.y - z * Other.z;
+		Result.w = w * Other.w - x * Other.x - y * Other.y - z * Other.z; 
 
 		return Result;	
 	}
@@ -201,7 +201,7 @@ namespace Enjon
 
 	Vec3 Quaternion::EulerAngles()
 	{
-		//return Vec3(this->Pitch(), this->Yaw(), this->Roll());
+		return Vec3(this->Pitch(), this->Yaw(), this->Roll());
 		double ysqr = y * y;
 
 		// roll (x-axis rotation)
@@ -225,14 +225,9 @@ namespace Enjon
 
 	Vec3 Quaternion::operator*(const Vec3& V) const
 	{
-		//return this->Rotate( V );
-		auto Qxyz = Vec3(x, y, z);
-		//Vec3 T = 2.0f * Qxyz.Cross(V);
-		//return (V + w * T + Qxyz.Cross(T)); 
+		auto Qxyz = Vec3(x, y, z); 
 		const Vec3 t = 2.0f * Qxyz.Cross( V );
-		return ( V + w * t + Qxyz.Cross( t ) );
-		//Quaternion q = *this * Quaternion( V, 0 ) * this->Conjugate( );
-		//return Vec3( q.x, q.y, q.z );
+		return ( V + w * t + Qxyz.Cross( t ) ); 
 	} 
 }
 

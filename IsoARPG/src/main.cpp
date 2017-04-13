@@ -9668,7 +9668,7 @@ int main(int argc, char** argv)
 
 
 // ACTUAL
-#if 0
+#if 1
 
 #include <Enjon.h> 
 #include <System/Types.h>
@@ -9825,7 +9825,9 @@ int main(int argc, char** argv)
 
 #endif
 
-#if 1
+#if 0
+
+#include <iostream>
 
 #include <Entity/EntityManager.h>
 #include <System/Types.h>
@@ -9833,25 +9835,28 @@ int main(int argc, char** argv)
 
 int main( int argc, char** argv )
 {
-	Enjon::EntityManager* entities = new Enjon::EntityManager( );
-	Enjon::Entity* e1 = entities->Allocate( );
-	Enjon::Entity* e2 = entities->Allocate( );
+	Enjon::Quaternion q = Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::YAxis( ) ) * 
+							Enjon::Quaternion( 0.45f, .3454f, -0.234, 0.543f );
+	Enjon::Vec3 v( 7, 5, 2 );
 
-	e1->SetLocalTransform( Enjon::Transform ( Enjon::Vec3( 0, 0, 0 ), Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ), Enjon::Vec3( 1.5f ) ) );
-	e2->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 0, 10, 0), Enjon::Quaternion::AngleAxis( 0.0f, Enjon::Vec3::ZAxis( ) ), Enjon::Vec3( 0.5f ) ) ); 
+	auto res = q.Rotate( v );
+	
+	//Enjon::Quaternion q( 0.7071f, 0, 0, 0.7071f );
 
-	e1->AddChild( e2 );
+	Enjon::Vec3 ea = q.EulerAngles( );
+	Enjon::Vec3 axis = q.Axis( );
+	f32 angle = Enjon::ToDegrees( q.Angle( ) );
+	//ea.x = Enjon::ToDegrees( ea.x );
+	//ea.y = Enjon::ToDegrees( ea.y );
+	//ea.z = Enjon::ToDegrees( ea.z );
 
-	auto lt = e2->GetLocalTransform( );
-	auto wt = e2->GetWorldTransform( );
-
-	for ( auto i = 0; i < 10; ++i )
-	{
-		auto lt = e2->GetLocalTransform( );
-		auto wt = e2->GetWorldTransform( );
-		std::cout << wt.Rotation << "\n";
-	}
-
+	std::cout << q.Conjugate( ) << "\n";
+	std::cout << q.Inverse( ) << "\n";
+	std::cout << q << "\n"; 
+	std::cout << ea << "\n"; 
+	std::cout << axis << "\n";
+	std::cout << angle << "\n";
+	std::cout << res << "\n";
 }
 
 
