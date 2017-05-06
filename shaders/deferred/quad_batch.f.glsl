@@ -37,7 +37,7 @@ void main()
     float Roughness = texture2D(u_roughnessMap, fs_in.TexCoords).r;
     float AO        = texture2D(u_aoMap, fs_in.TexCoords).r;
     
-    DiffuseOut  = color * fs_in.FragColor;
+    DiffuseOut  = vec4((color * fs_in.FragColor ).rgb, 1.0);
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
     EmissiveOut = texture2D(u_emissiveMap, fs_in.TexCoords);

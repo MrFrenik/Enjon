@@ -238,7 +238,7 @@ namespace Enjon { namespace GUI {
 				// Get advance
 				for (auto& c : Text)
 				{
-					float Advance = Fonts::GetAdvance(c, TextFont, FontScale);
+					float Advance = GetAdvance(c, TextFont, FontScale);
 					if (XAdvance + Advance < MouseX) 
 					{
 						XAdvance += Advance;
@@ -307,7 +307,7 @@ namespace Enjon { namespace GUI {
 			// Print text
 			auto ITextHeight = AABB.Max.y - AABB.Min.y; // InputTextHeight
 			auto TextHeight = ITextHeight - 20.0f;
-			Fonts::PrintText(	
+			PrintText(	
 									AABB.Min.x + Padding.x, 
 									AABB.Min.y + Padding.y, 1.0f, 
 									Text, 
@@ -329,7 +329,7 @@ namespace Enjon { namespace GUI {
 				// Get xadvance of all characters
 				for (auto i = 0; i < CursorIndex; ++i)
 				{
-					XAdvance += Fonts::GetAdvance(Text[i], CurrentFont, scale);
+					XAdvance += GetAdvance(Text[i], CurrentFont, scale);
 				}
 				Batch->Add(
 								Vec4(XAdvance + 0.2f, Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
@@ -567,7 +567,7 @@ namespace Enjon { namespace GUI {
 		ButtonState State;
 		HoveredState HoverState;
 		std::string Text;
-		Fonts::Font* TextFont;
+		Font* TextFont;
 		float FontScale;
 		float caret_count;
 		int32_t CursorIndex;

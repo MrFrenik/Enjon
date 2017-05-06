@@ -125,7 +125,7 @@ namespace Enjon {
 				auto YOffset = 30.0f;
 				for (auto C = Output.rbegin(); C != Output.rend(); C++)
 				{
-				 	Fonts::PrintText(StartPosition.x, StartPosition.y + YOffset, 1.0f, (*C).Text, InputTextBox.TextFont, Batch, (*C).TextColor);
+				 	PrintText(StartPosition.x, StartPosition.y + YOffset, 1.0f, (*C).Text, InputTextBox.TextFont, Batch, (*C).TextColor);
 				 	YOffset += 20.0f;
 				}
 			}

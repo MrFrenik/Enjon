@@ -24,6 +24,11 @@ namespace Enjon
 			* @brief Constructor
 			*/
 			Texture();
+			
+			/**
+			* @brief Constructor
+			*/
+			Texture( u32 width, u32 height, u32 textureID );
 
 			/**
 			* @brief Destructor

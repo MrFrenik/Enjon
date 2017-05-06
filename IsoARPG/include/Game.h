@@ -16,6 +16,7 @@ namespace Enjon
 	class Mesh;
 	class DeferredRenderer;
 	class Input;
+	class UIFont;
 }
 
 class Game : public Enjon::Application
@@ -45,17 +46,21 @@ class Game : public Enjon::Application
 
 		Enjon::DirectionalLight* mSun	= nullptr;
 		Enjon::QuadBatch* mBatch 		= nullptr;
+		Enjon::QuadBatch* mTextBatch 	= nullptr;
 
 		Enjon::Material* mGunMat 	= nullptr;
 		Enjon::Material* mRedMat 	= nullptr;
 		Enjon::Material* mGreenMat 	= nullptr;
 		Enjon::Material* mBlueMat 	= nullptr;
 		Enjon::Material* mFloorMat	= nullptr;
+		Enjon::Material* mFontMat	= nullptr;
 
 		Enjon::AssetHandle<Enjon::Mesh> mSphereMesh;
 		Enjon::AssetHandle<Enjon::Mesh> mGunMesh;
 		Enjon::AssetHandle<Enjon::Mesh> mBuddhaMesh;
 		Enjon::AssetHandle<Enjon::Mesh> mMonkeyMesh;
+
+		Enjon::UIFont* mFont = nullptr;
 
 		std::vector<Enjon::AssetHandle<Enjon::Mesh>*> mMeshSwitches;
 

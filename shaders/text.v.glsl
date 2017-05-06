@@ -11,13 +11,11 @@ out DATA
 	vec2 uv; 
 }fs_out;
 
-uniform mat4 model = mat4(1.0f);
-uniform mat4 view = mat4(1.0f);
-uniform mat4 projection = mat4(1.0f);
+uniform mat4 projection;
 
 void main() {
  
-    gl_Position = projection * view * model * vec4(vertexPosition, 0.0, 1.0);
+    gl_Position = projection * vec4(vertexPosition, 0.0, 1.0);
 
 	fs_out.position = vertexPosition; 
 	fs_out.color = vec4(vertexColor.x, vertexColor.y, vertexColor.z, vertexColor.w); 

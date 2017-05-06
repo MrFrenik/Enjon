@@ -15,10 +15,10 @@ namespace Enjon { namespace FontManager {
 	void Init();
 
 	/* Add font to FontManager */
-	void AddFont(std::unordered_map<std::string, Fonts::Font*>& M, std::string N, Fonts::Font* F);
+	void AddFont(std::unordered_map<std::string, Font*>& M, std::string N, Font* F);
 
 	// Get specificed animation with given name
-	Fonts::Font* GetFont(std::string FontName);
+	Font* GetFont(std::string FontName);
 
 	// Delete all animations and clear any memory used
 	void DeletFonts();

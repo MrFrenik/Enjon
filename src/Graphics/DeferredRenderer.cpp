@@ -8,6 +8,8 @@
 #include "Graphics/Material.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Renderable.h"
+#include "Graphics/Font.h"
+#include "Graphics/FontManager.h"
 #include "Graphics/Color.h"
 #include "Graphics/DirectionalLight.h"
 #include "Graphics/PointLight.h"
@@ -629,6 +631,18 @@ namespace Enjon
 
 	//======================================================================================================
 
+	void DeferredRenderer::BloomPass2( )
+	{
+		GLSLProgram* horizontalBlurProgram = Enjon::ShaderManager::Get( "HorizontalBlur" );
+		GLSLProgram* verticalBlurProgram = Enjon::ShaderManager::Get( "VerticalBlur" );
+
+		glEnable( GL_BLEND );
+		glDisable( GL_DEPTH_TEST );
+		glBlendFunc( GL_ONE, GL_ONE ); 
+	}
+
+	//======================================================================================================
+
 	void DeferredRenderer::FXAAPass(RenderTarget* input)
 	{
 		GLSLProgram* fxaaProgram = Enjon::ShaderManager::Get("FXAA");
@@ -701,11 +715,34 @@ namespace Enjon
 
         // Queue up gui
         ImGuiManager::Render(mWindow.GetSDLWindow());
-		// ImGuiManager::RenderGameUI(&mWindow, mSceneCamera.GetView().elements, mSceneCamera.GetProjection().elements);
+		 //ImGuiManager::RenderGameUI(&mWindow, mSceneCamera.GetView().elements, mSceneCamera.GetProjection().elements);
 
         // Flush
         glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
         ImGui::Render();
+
+		// Do some other random gui shit here to see if it still works
+		/*
+		GLSLProgram* textProgram = ShaderManager::Get( "Text" );
+ 
+		iVec2 viewport = GetViewport( ); 
+		Mat4 ortho = Mat4::Orthographic(0.0f, (f32)viewport.x, 0.0f, (f32)viewport.y, -1, 1);
+
+		textProgram->Use( );
+		{
+			textProgram->SetUniform( "projection", ortho );
+			mBatch->Begin( GlyphSortType::FRONT_TO_BACK );
+			{
+				Font* f = FontManager::GetFont( "WeblySleek_64" ); 
+				mBatch->Add( Vec4( 0, 0, f->Atlas.size.x, f->Atlas.size.y ), Vec4( 0, 0, 1, 1 ), f->Atlas.textureID );
+				//f32 advance = GetStringAdvance( "This is testing shit", f );
+				//PrintText( (f32) viewport.x / 2.0f - advance / 2.0f, (f32) viewport.y / 2.0f, 1.0f, "This is testing shit", f, *mBatch );
+			}
+			mBatch->End( ); 
+			mBatch->RenderBatch( );
+		}
+		textProgram->Unuse( );
+		*/
 	}
 
 	//======================================================================================================
@@ -754,6 +791,31 @@ namespace Enjon
 		mFXAATarget 				= new RenderTarget(width, height);
 		mShadowDepth 				= new RenderTarget(2048, 2048);
 		mFinalTarget 				= new RenderTarget(width, height);
+
+		mBloomDownSampleHalfVertical			= new RenderTarget( width / 2, height / 2 );
+		mBloomDownSampleHalfHorizontal			= new RenderTarget( width / 2, height / 2 );
+		mBloomDownSampleQuarterVertical			= new RenderTarget( width / 4, height / 4 );
+		mBloomDownSampleQuarterHorizontal		= new RenderTarget( width / 4, height / 4 );
+		mBloomDownSampleEighthVertical			= new RenderTarget( width / 8, height / 8 );
+		mBloomDownSampleEighthHorizontal		= new RenderTarget( width / 8, height / 8 );
+		mBloomDownSampleSixteenthVertical		= new RenderTarget( width / 16, height / 16 );
+		mBloomDownSampleSixteenthHorizontal		= new RenderTarget( width / 16, height / 16 );
+		mBloomDownSampleThirtySecondVertical	= new RenderTarget( width / 32, height / 32 );
+		mBloomDownSampleThirtySecondHorizontal	= new RenderTarget( width / 32, height / 32 );
+		mBloomDownSampleSixtyFourthVertical		= new RenderTarget( width / 64, height / 64 );
+		mBloomDownSampleSixtyFourthHorizontal	= new RenderTarget( width / 64, height / 64 );
+		mBloomUpSampleHalfVertical				= new RenderTarget( width / 2, height / 2 );
+		mBloomUpSampleHalfHorizontal			= new RenderTarget( width / 2, height / 2 );
+		mBloomUpSampleQuarterVertical			= new RenderTarget( width / 4, height / 4 );
+		mBloomUpSampleQuarterHorizontal			= new RenderTarget( width / 4, height / 4 );
+		mBloomUpSampleEighthVertical			= new RenderTarget( width / 8, height / 8 );
+		mBloomUpSampleEighthHorizontal			= new RenderTarget( width / 8, height / 8 );
+		mBloomUpSampleSixteenthVertical			= new RenderTarget( width / 16, height / 16 );
+		mBloomUpSampleSixteenthHorizontal		= new RenderTarget( width / 16, height / 16 );
+		mBloomUpSampleThirtySecondVertical		= new RenderTarget( width / 32, height / 32 );
+		mBloomUpSampleThirtySecondHorizontal	= new RenderTarget( width / 32, height / 32 );
+		mBloomUpSampleSixtyFourthVertical		= new RenderTarget( width / 64, height / 64 );
+		mBloomUpSampleSixtyFourthHorizontal		= new RenderTarget( width / 64, height / 64 );
 
 		mBatch 						= new SpriteBatch();
 		mBatch->Init();

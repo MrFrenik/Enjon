@@ -114,8 +114,8 @@ namespace Enjon {
 			Enjon::Quaternion parentInverse = parentTransform.Rotation.Inverse( ); 
 
 			Vec3 relativeScale		=  mWorldTransform.Scale / parentTransform.Scale;
-			Quaternion relativeRot	=  mWorldTransform.Rotation * parentInverse;
-			Vec3 relativePos		= parentInverse * ( ( mWorldTransform.Position - parentTransform.Position ) / parentTransform.Scale );
+			Quaternion relativeRot	=  parentInverse * mWorldTransform.Rotation;
+			Vec3 relativePos		= ( parentInverse * ( mWorldTransform.Position - parentTransform.Position ) ) / parentTransform.Scale;
 
 			mLocalTransform = Transform( relativePos, relativeRot, relativeScale );
 		}
@@ -139,7 +139,7 @@ namespace Enjon {
 
 		mWorldTransform = Transform( worldPos, worldRot, worldScale );
 			
-		mWorldTransformDirty = false;
+		mWorldTransformDirty = false; 
 	}
 
 	//---------------------------------------------------------------

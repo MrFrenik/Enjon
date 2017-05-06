@@ -19,6 +19,8 @@
 #include <Utils/FileUtils.h>
 #include <Utils/Signal.h>
 #include <Utils/Property.h>
+#include <Graphics/Font.h>
+#include <Engine.h>
 
 #include <fmt/printf.h>
 
@@ -138,6 +140,14 @@ Enjon::Result Game::Initialize()
 	Enjon::String redPath				= Enjon::String("/Textures/red.png"); 
 	Enjon::String bluePath				= Enjon::String("/Textures/blue.png"); 
 
+	// Try loading font
+	Enjon::String rootPath = engine->GetConfig( ).GetRoot( );
+	Enjon::String fontPath = rootPath + "/Assets/Fonts/WeblySleek/weblysleekuisb.ttf";
+	fmt::print( "font path: {}\n", fontPath );
+
+	mFont = new Enjon::UIFont( fontPath );
+	mFont->AddAtlas( 14 );
+
 	// Add to asset database
 	mAssetManager->AddToDatabase(cerebusAlbedoPath); 
 	mAssetManager->AddToDatabase(cerebusNormalPath); 
@@ -253,6 +263,14 @@ Enjon::Result Game::Initialize()
 	mGreenMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
 	mGreenMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
 
+	mFontMat = new Enjon::Material( );
+	mFontMat->SetTexture( Enjon::TextureSlotType::Albedo, mFont->GetAtlas( 14 )->GetAtlasTexture( ) );
+	mFontMat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.normal") );
+	mFontMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.metallic") );
+	mFontMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.roughness") );
+	mFontMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
+	mFontMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
+
 	mGreen->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mGreenMat );
 	mGreen->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("isoarpg.models.unit_cube" ) );
 	mRed->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mRedMat );
@@ -289,6 +307,17 @@ Enjon::Result Game::Initialize()
 	}
 	mBatch->End(); 
 
+	// Set up text batch
+	mTextBatch = new Enjon::QuadBatch( );
+	mTextBatch->Init( );
+	mTextBatch->Begin( );
+	{
+		Enjon::Transform tform( Enjon::Vec3( 0.f, 10.f, -10.f ), Enjon::Quaternion( ), Enjon::Vec3( 1 ) );
+		Enjon::PrintText( tform, "T", mFont, *mTextBatch, Enjon::RGBA16_White( ), 14 ); 
+	}
+	mTextBatch->End( );
+	mTextBatch->SetMaterial( mFontMat );
+
 	if (mGfx)
 	{
 		auto scene = mGfx->GetScene();
@@ -297,9 +326,9 @@ Enjon::Result Game::Initialize()
 		scene->AddRenderable(gc->GetRenderable());
 		scene->AddRenderable( mGreen->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 		scene->AddRenderable( mRed->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
-		scene->AddRenderable( mBlue->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
-	
+		scene->AddRenderable( mBlue->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
 		scene->AddQuadBatch(mBatch);
+		scene->AddQuadBatch(mTextBatch);
 		scene->SetSun(mSun);
 		scene->SetAmbientColor(Enjon::SetOpacity(Enjon::RGBA16_White(), 0.1f));
 
@@ -307,7 +336,7 @@ Enjon::Result Game::Initialize()
 		auto cam = mGfx->GetSceneCamera();
 		cam->SetPosition(Enjon::Vec3(0, 0, -10));
 		cam->LookAt(Enjon::Vec3(0, 0, 0));
-	}
+	} 
 
 	// Set up ImGui window
 	mShowEntities = true;
@@ -329,9 +358,9 @@ Enjon::Result Game::Initialize()
 			ImGui::InputFloat3("Scale", scl);
 			ImGui::InputFloat3("Rotation", rot);
 
-			//mGun->SetPosition(v3(pos[0], pos[1], pos[2]));
-			//mGun->SetScale(v3(scl[0], scl[1], scl[2]));
-			//mGun->SetRotation(quat(rot[0], rot[1], rot[2], rotation.w));
+			mGun->SetPosition(v3(pos[0], pos[1], pos[2]));
+			mGun->SetScale(v3(scl[0], scl[1], scl[2]));
+			mGun->SetRotation(quat(rot[0], rot[1], rot[2], rotation.w));
 
 			for ( auto c : mGun->GetChildren( ) )
 			{
@@ -385,6 +414,9 @@ Enjon::Result Game::Initialize()
 			
 			ImGui::Text( "32 bit prop size: %d", sizeof( Enjon::Property<f32> ) );
 			ImGui::Text( "32 bit signal size: %d", sizeof( Enjon::Signal<f32> ) ); 
+
+			// Font texture
+			ImGui::Image( ( ImTextureID )mFont->GetAtlas( 14 )->GetTextureID( ), ImVec2( 256, 256 ), ImVec2( 0, 0 ), ImVec2( 1, 1 ) );
 		}
 
 		ImGui::EndDock();
@@ -479,7 +511,6 @@ Enjon::Result Game::Initialize()
 	}
 
 	
-
 	
 	return Enjon::Result::SUCCESS; 
 }

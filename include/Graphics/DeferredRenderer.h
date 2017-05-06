@@ -148,6 +148,11 @@ namespace Enjon
 			*@brief
 			*/
 			void BloomPass();
+
+			/**
+			*@brief
+			*/
+			void BloomPass2( );
 			
 			/**
 			*@brief
@@ -186,20 +191,45 @@ namespace Enjon
 
 		private:
 			// Frame buffers
-			GBuffer* mGbuffer 					= nullptr;
-			RenderTarget* mDebugTarget 			= nullptr;
-			RenderTarget* mSmallBlurHorizontal  = nullptr;
-			RenderTarget* mSmallBlurVertical 	= nullptr;
-			RenderTarget* mMediumBlurHorizontal = nullptr;
-			RenderTarget* mMediumBlurVertical 	= nullptr;
-			RenderTarget* mLargeBlurHorizontal 	= nullptr;
-			RenderTarget* mLargeBlurVertical 	= nullptr;
-			RenderTarget* mCompositeTarget 		= nullptr;
-			RenderTarget* mLightingBuffer		= nullptr;
-			RenderTarget* mLuminanceTarget		= nullptr;
-			RenderTarget* mFXAATarget			= nullptr;
-			RenderTarget* mShadowDepth			= nullptr;
-			RenderTarget* mFinalTarget			= nullptr;
+			GBuffer* mGbuffer 										= nullptr;
+			RenderTarget* mDebugTarget 								= nullptr;
+			RenderTarget* mSmallBlurHorizontal						= nullptr;
+			RenderTarget* mSmallBlurVertical 						= nullptr;
+			RenderTarget* mMediumBlurHorizontal						= nullptr;
+			RenderTarget* mMediumBlurVertical 						= nullptr;
+			RenderTarget* mLargeBlurHorizontal 						= nullptr;
+			RenderTarget* mLargeBlurVertical 						= nullptr;
+			RenderTarget* mCompositeTarget 							= nullptr;
+			RenderTarget* mLightingBuffer							= nullptr;
+			RenderTarget* mLuminanceTarget							= nullptr;
+			RenderTarget* mFXAATarget								= nullptr;
+			RenderTarget* mShadowDepth								= nullptr;
+			RenderTarget* mFinalTarget								= nullptr;
+			RenderTarget* mBloomDownSampleHalfVertical				= nullptr;
+			RenderTarget* mBloomDownSampleHalfHorizontal			= nullptr;
+			RenderTarget* mBloomDownSampleQuarterVertical			= nullptr;
+			RenderTarget* mBloomDownSampleQuarterHorizontal			= nullptr;
+			RenderTarget* mBloomDownSampleEighthVertical			= nullptr;
+			RenderTarget* mBloomDownSampleEighthHorizontal			= nullptr;
+			RenderTarget* mBloomDownSampleSixteenthVertical			= nullptr;
+			RenderTarget* mBloomDownSampleSixteenthHorizontal		= nullptr;
+			RenderTarget* mBloomDownSampleThirtySecondVertical		= nullptr;
+			RenderTarget* mBloomDownSampleThirtySecondHorizontal	= nullptr;
+			RenderTarget* mBloomDownSampleSixtyFourthVertical		= nullptr;
+			RenderTarget* mBloomDownSampleSixtyFourthHorizontal		= nullptr;
+			RenderTarget* mBloomUpSampleHalfVertical				= nullptr;
+			RenderTarget* mBloomUpSampleHalfHorizontal				= nullptr;
+			RenderTarget* mBloomUpSampleQuarterVertical				= nullptr;
+			RenderTarget* mBloomUpSampleQuarterHorizontal			= nullptr;
+			RenderTarget* mBloomUpSampleEighthVertical				= nullptr;
+			RenderTarget* mBloomUpSampleEighthHorizontal			= nullptr;
+			RenderTarget* mBloomUpSampleSixteenthVertical			= nullptr;
+			RenderTarget* mBloomUpSampleSixteenthHorizontal			= nullptr;
+			RenderTarget* mBloomUpSampleThirtySecondVertical		= nullptr;
+			RenderTarget* mBloomUpSampleThirtySecondHorizontal		= nullptr;
+			RenderTarget* mBloomUpSampleSixtyFourthVertical			= nullptr;
+			RenderTarget* mBloomUpSampleSixtyFourthHorizontal		= nullptr;
+		
 
 			GLuint mCurrentRenderTexture;
 

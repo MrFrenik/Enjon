@@ -11,12 +11,21 @@ namespace Enjon
 	Texture::Texture()
 		: mId(0), mWidth(0), mHeight(0)
 	{ 
+
+	}
+
+	//=================================================
+			
+	Texture::Texture( u32 width, u32 height, u32 textureID )
+		: mWidth( width ), mHeight( height ), mId( textureID )
+	{ 
 	}
 
 	//=================================================
 
 	Texture::~Texture()
 	{ 
+
 	}
 
 	//=================================================

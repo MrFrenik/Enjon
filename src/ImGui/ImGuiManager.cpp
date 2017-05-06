@@ -246,7 +246,7 @@ namespace Enjon
 		io.Fonts->Clear();
 		io.Fonts->AddFontFromFileTTF("../Assets/Fonts/WeblySleek/weblysleekuisb.ttf", 16);
 		io.Fonts->AddFontFromFileTTF("../Assets/Fonts/WeblySleek/weblysleekuisb.ttf", 14);
-		io.Fonts->Build();
+		io.Fonts->Build(); 
 
 		// Grab reference to style
 		ImGuiStyle& style = ImGui::GetStyle(); 

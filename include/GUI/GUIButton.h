@@ -66,7 +66,7 @@ namespace Enjon { namespace GUI {
 		}
 
 		std::vector<EA::ImageFrame> Frames;   // Could totally put this in a resource manager of some sort
-		Fonts::Font* TextFont;
+		Font* TextFont;
 	};
 
 	// Button with Text
@@ -145,7 +145,7 @@ namespace Enjon { namespace GUI {
 					);
 
 			// Draw text
-			Fonts::PrintText(	
+			PrintText(	
 									Position.x + TextPadding.x, 
 									Position.y + TextPadding.y, 
 									this->FontScale, 
@@ -153,7 +153,7 @@ namespace Enjon { namespace GUI {
 									this->TextFont, 
 									*Batch, 
 									this->TextColor,
-									Fonts::TextStyle::SHADOW,
+									TextStyle::SHADOW,
 									0.0f, 
 									2.0f
 								);
@@ -163,7 +163,7 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<GUIElementBase*> on_click;
 		EGUI::Signal<> on_hover;
 		EGUI::Signal<> off_hover;
-		Fonts::Font* TextFont;
+		Font* TextFont;
 		float FontScale;
 	};
 
@@ -516,9 +516,9 @@ namespace Enjon { namespace GUI {
 
 
 				auto F = FontManager::GetFont("WeblySleek");
-				Fonts::PrintText(	
-										ValueUp.Position.x + ValueUp.Dimensions.x / 2.0f - Fonts::GetAdvance(ValueUp.Text[0], F, FontScale) / 2.0f, 
-										ValueUp.Position.y + ValueUp.Dimensions.y / 2.0f - Fonts::GetHeight(ValueDown.Text[0], F, FontScale) / 2.0f + YOffset, 
+				PrintText(	
+										ValueUp.Position.x + ValueUp.Dimensions.x / 2.0f - GetAdvance(ValueUp.Text[0], F, FontScale) / 2.0f, 
+										ValueUp.Position.y + ValueUp.Dimensions.y / 2.0f - GetHeight(ValueDown.Text[0], F, FontScale) / 2.0f + YOffset, 
 										FontScale, 
 										ValueUp.Text, 
 										FontManager::GetFont("WeblySleek"), 
@@ -535,9 +535,9 @@ namespace Enjon { namespace GUI {
 							0.0f 
 						);
 
-				Fonts::PrintText(	
-										ValueDown.Position.x + ValueDown.Dimensions.x / 2.0f - Fonts::GetAdvance(ValueDown.Text[0], F, FontScale) / 2.0f, 
-										ValueDown.Position.y + ValueDown.Dimensions.y / 2.0f - Fonts::GetHeight(ValueDown.Text[0], F, FontScale) / 2.0f + YOffset, 
+				PrintText(	
+										ValueDown.Position.x + ValueDown.Dimensions.x / 2.0f - GetAdvance(ValueDown.Text[0], F, FontScale) / 2.0f, 
+										ValueDown.Position.y + ValueDown.Dimensions.y / 2.0f - GetHeight(ValueDown.Text[0], F, FontScale) / 2.0f + YOffset, 
 										FontScale, 
 										ValueDown.Text, 
 										FontManager::GetFont("WeblySleek"), 
@@ -775,7 +775,7 @@ namespace Enjon { namespace GUI {
 							this->BorderColor	
 						);
 
-			Fonts::PrintText(	
+			PrintText(	
 									Position.x + TextPadding.x, 
 									Position.y + TextPadding.y, 
 									this->FontScale, 
@@ -785,7 +785,7 @@ namespace Enjon { namespace GUI {
 									this->TextColor	
 								);
 
-			Fonts::PrintText(	
+			PrintText(	
 									Position.x + TextPadding.x + 112.0f, 
 									Position.y + TextPadding.y + 4.0f, 
 									this->FontScale * 0.8f, 
@@ -793,7 +793,7 @@ namespace Enjon { namespace GUI {
 									FontManager::GetFont("Arrows7"), 
 									*Batch, 
 									this->TextColor, 
-									Fonts::TextStyle::SHADOW,
+									TextStyle::SHADOW,
 									Enjon::ToRadians(180.0f)
 								);
 
@@ -846,7 +846,7 @@ namespace Enjon { namespace GUI {
 			for (auto& c : T)
 			{
 				// Summation of all characters
-				A += Fonts::GetAdvance(c, this->TextFont, this->FontScale);
+				A += GetAdvance(c, this->TextFont, this->FontScale);
 
 				if (A > 90.0f) 
 				{
@@ -868,7 +868,7 @@ namespace Enjon { namespace GUI {
 		}
 
 		std::vector<GUITextButton*> List;
-		Fonts::Font* TextFont;
+		Font* TextFont;
 		Enjon::Vec2 TextPadding;
 		float XPadding;
 		float FontScale;

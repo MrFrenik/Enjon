@@ -361,12 +361,12 @@ namespace Enjon { namespace GUI {
 			float TitleAdvance = 0.0f;
 			for (auto& c : Name)
 			{
-				TitleAdvance += Fonts::GetAdvance(c, TitleFont, 1.0f);
+				TitleAdvance += GetAdvance(c, TitleFont, 1.0f);
 			}
 
-			Fonts::PrintText(
+			PrintText(
 									Position.x + Dimensions.x / 2.0f - TitleAdvance / 2.0f,
-									Position.y + Dimensions.y - YOffset + Fonts::GetHeight(Name[0], TitleFont, 1.0f) / 2.0f,
+									Position.y + Dimensions.y - YOffset + GetHeight(Name[0], TitleFont, 1.0f) / 2.0f,
 									1.0f,
 									Name,
 									TitleFont,
@@ -386,7 +386,7 @@ namespace Enjon { namespace GUI {
 						1.0f
 					);
 
-			Fonts::PrintText(
+			PrintText(
 									MinimizeButton.Position.x + MinimizeButton.Dimensions.x / 2.0f,
 									MinimizeButton.Position.y + MinimizeButton.Dimensions.y / 2.0f,
 									1.0f,
@@ -394,7 +394,7 @@ namespace Enjon { namespace GUI {
 									FontManager::GetFont("Arrows7"),
 									*Batch,
 									SetOpacity(RGBA16_MidGrey(), 0.6f), 
-									Fonts::TextStyle::SHADOW,
+									TextStyle::SHADOW,
 									Enjon::ToRadians(180.0f)
 								);
 
@@ -419,9 +419,9 @@ namespace Enjon { namespace GUI {
 				}
 
 				// Print name of child
-				Fonts::PrintText(
+				PrintText(
 										Position.x + X0Offset, 																						// X Position
-										E->Position.y + E->Dimensions.y / 2.0f - Fonts::GetHeight(E->Name[0], TextFont, FontScale) / 6.0f,		// Y Position
+										E->Position.y + E->Dimensions.y / 2.0f - GetHeight(E->Name[0], TextFont, FontScale) / 6.0f,		// Y Position
 										FontScale,																									// Font Scale
 										E->Name + std::string(":"),																					// Child Name
 										TextFont,																									// Font
@@ -438,7 +438,7 @@ namespace Enjon { namespace GUI {
 		// Vector of children
 		std::vector<GUIElementBase*> Children;
 		GUIElementBase* HoveredElement;
-		Fonts::Font* TextFont;
+		Font* TextFont;
 		ColorRGBA16 TextColor;
 		float TitlePadding;
 		float FontScale;
