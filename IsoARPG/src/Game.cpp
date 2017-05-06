@@ -211,6 +211,9 @@ Enjon::Result Game::Initialize()
 	mBlue->Attach< Enjon::GraphicsComponent >( );
 
 	pc->GetLight( )->SetPosition( Enjon::Vec3( 10.0f, 2.0f, 4.0f ) );
+	pc->GetLight( )->SetIntensity( 200.0f );
+	pc->GetLight( )->SetAttenuationRate( 0.1f );
+	pc->GetLight( )->SetRadius( 200.0f );
 
 	mGunMat 	= new Enjon::Material; 
 	mGunMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.albedo"));
@@ -324,6 +327,7 @@ Enjon::Result Game::Initialize()
 		scene->AddDirectionalLight(mSun);
 		scene->AddDirectionalLight(mSun2);
 		scene->AddRenderable(gc->GetRenderable());
+		scene->AddPointLight( pc->GetLight( ) );
 		scene->AddRenderable( mGreen->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 		scene->AddRenderable( mRed->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 		scene->AddRenderable( mBlue->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
