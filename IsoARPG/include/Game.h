@@ -70,6 +70,10 @@ class Game : public Enjon::Application
 		bool mMovementOn = true;
 
 		f32 mCameraSpeed = 0.12f;
+
+		f32 mFontSize = 1.0f;
+
+		Enjon::String mWorldString = "";
 };
 
 #endif

@@ -31,7 +31,7 @@ void main()
 
     // Get diffuse color
     vec4 color = texture(u_albedoMap, fs_in.TexCoords);
-    if (color.a < 0.5) discard;
+    if (color.a < 0.4) discard;
 
     float Metallic  = texture2D(u_metallicMap, fs_in.TexCoords).r;
     float Roughness = texture2D(u_roughnessMap, fs_in.TexCoords).r;

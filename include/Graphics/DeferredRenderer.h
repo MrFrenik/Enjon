@@ -254,6 +254,8 @@ namespace Enjon
 			bool mShowStyles = true;
 
 			f32 mBGColor[4] = {0.8f, 0.8f, 0.8f, 1.0f};
+
+			Vec4 uvs = Vec4( 0.f, 0.f, 1.f, 1.f );
 	};
 }
 

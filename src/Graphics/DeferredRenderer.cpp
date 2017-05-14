@@ -18,6 +18,7 @@
 #include "Console.h"
 #include "CVarsSystem.h"
 #include "ImGui/ImGuiManager.h"
+#include "Engine.h"
 
 #include <string>
 #include <fmt/format.h> 
@@ -174,7 +175,7 @@ namespace Enjon
 		FXAAPass(mCompositeTarget);
 
 		// Clear default buffer
-		mWindow.Clear();
+		mWindow.Clear( );
 
 		// ImGui pass
 		if (true)
@@ -294,9 +295,20 @@ namespace Enjon
 				Material* curMaterial = quadBatch->GetMaterial();
 				assert(curMaterial != nullptr);
 				if (material != curMaterial)
-				{
+				{ 
 					// Set material
 					material = curMaterial;
+					
+					// Check whether or not to be rendered two sided
+					if ( material->TwoSided( ) )
+					{
+						glDisable( GL_CULL_FACE );
+					}
+					else
+					{
+						glEnable( GL_CULL_FACE );
+						glCullFace( GL_BACK );
+					}
 
 					// Set material tetxures
 					shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
@@ -572,7 +584,8 @@ namespace Enjon
 
 					program->SetUniform("u_weight", mBloomSettings.mWeights.y);
 					program->SetUniform("u_blurRadius", mBloomSettings.mRadius.y);
-					GLuint texID = i == 0 ? mLuminanceTarget->GetTexture() : isEven ? mMediumBlurVertical->GetTexture() : mMediumBlurHorizontal->GetTexture();
+					GLuint texID = i == 0 ? mSmallBlurVertical->GetTexture() : isEven ? mMediumBlurVertical->GetTexture() : mMediumBlurHorizontal->GetTexture();
+					//GLuint texID = i == 0 ? mLuminanceTarget->GetTexture() : isEven ? mMediumBlurVertical->GetTexture() : mMediumBlurHorizontal->GetTexture();
 					mBatch->Begin();
 					{
 			    		mBatch->Add(
@@ -608,7 +621,8 @@ namespace Enjon
 
 					program->SetUniform("u_weight", mBloomSettings.mWeights.z);
 					program->SetUniform("u_blurRadius", mBloomSettings.mRadius.z);
-					GLuint texID = i == 0 ? mLuminanceTarget->GetTexture() : isEven ? mLargeBlurVertical->GetTexture() : mLargeBlurHorizontal->GetTexture();
+					GLuint texID = i == 0 ? mMediumBlurVertical->GetTexture() : isEven ? mLargeBlurVertical->GetTexture() : mLargeBlurHorizontal->GetTexture();
+					//GLuint texID = i == 0 ? mLuminanceTarget->GetTexture() : isEven ? mLargeBlurVertical->GetTexture() : mLargeBlurHorizontal->GetTexture();
 					mBatch->Begin();
 					{
 			    		mBatch->Add(
@@ -722,27 +736,67 @@ namespace Enjon
         ImGui::Render();
 
 		// Do some other random gui shit here to see if it still works
-		/*
 		GLSLProgram* textProgram = ShaderManager::Get( "Text" );
  
 		iVec2 viewport = GetViewport( ); 
 		Mat4 ortho = Mat4::Orthographic(0.0f, (f32)viewport.x, 0.0f, (f32)viewport.y, -1, 1);
 
+		static UIFont* font = nullptr;
+		static bool hasMadeFont = false;
+		if ( !hasMadeFont )
+		{
+			Enjon::String rootPath = Enjon::Engine::GetInstance()->GetConfig( ).GetRoot( );
+			Enjon::String fontPath = rootPath + "/Assets/Fonts/Hack3d/Hack3d.ttf";
+			font = new UIFont( fontPath );
+			hasMadeFont = true;
+		}
+
 		textProgram->Use( );
 		{
 			textProgram->SetUniform( "projection", ortho );
 			mBatch->Begin( GlyphSortType::FRONT_TO_BACK );
-			{
-				Font* f = FontManager::GetFont( "WeblySleek_64" ); 
-				mBatch->Add( Vec4( 0, 0, f->Atlas.size.x, f->Atlas.size.y ), Vec4( 0, 0, 1, 1 ), f->Atlas.textureID );
-				//f32 advance = GetStringAdvance( "This is testing shit", f );
-				//PrintText( (f32) viewport.x / 2.0f - advance / 2.0f, (f32) viewport.y / 2.0f, 1.0f, "This is testing shit", f, *mBatch );
+			{ 
+				Enjon::String str = "HELLO, BITCHES"; 
+
+				f32 x = (f32) viewport.x / 2.0f;
+				f32 y = (f32) viewport.y / 2.0f;
+				Enjon::FontAtlas* atlas = font->GetAtlas( 64 ); 
+				f32 textureWidth = atlas->GetAtlasTexture( ).Get( )->GetWidth( );
+				f32 textureHeight = atlas->GetAtlasTexture( ).Get( )->GetHeight( );
+
+				std::string::const_iterator c;
+				for ( c = str.begin( ); c != str.end( ); c++ )
+				{ 
+					Enjon::FontGlyph glyph = atlas->GetGlyph( *c );
+					f32 width = glyph.GetWidth( );
+					f32 height = glyph.GetHeight( ); 
+
+					f32 u1 = glyph.GetUVOffsetX( );
+					f32 v1 = 1.0f - glyph.GetUVOffsetY( );
+					f32 u2 = u1 + ( width / textureWidth );
+					f32 v2 = v1 -( height / textureHeight );
+
+					f32 w = width;
+					f32 h = height; 
+					
+					Vec2 bearing = glyph.GetBearing( );
+					GLfloat xpos = x + bearing.x;
+					GLfloat ypos = y - (height - bearing.y); 
+
+					Vec4 uv( u1, v2, u2, v1 );
+
+					Enjon::AssetHandle< Enjon::Texture > atlasTexture = atlas->GetAtlasTexture( );
+					mBatch->Add( Vec4( xpos, ypos, w, h ), uv, atlasTexture.Get( )->GetTextureId( ), Enjon::RGBA16_BurntOrange( ) ); 
+	        
+					s32 advance = glyph.GetAdvance( );
+					x += (f32)advance;
+				} 
+
 			}
 			mBatch->End( ); 
 			mBatch->RenderBatch( );
 		}
 		textProgram->Unuse( );
-		*/
 	}
 
 	//======================================================================================================
@@ -890,6 +944,11 @@ namespace Enjon
         ImGui::Text("Graphics Options");
         ImGui::PopStyleColor(1);
         ImGui::Separator();
+
+		ImGui::SliderFloat( "X", &uvs.x, 0.0f, 1.0f );
+		ImGui::SliderFloat( "Y", &uvs.y, 0.0f, 1.0f );
+		ImGui::SliderFloat( "Z", &uvs.z, 0.0f, 1.0f );
+		ImGui::SliderFloat( "W", &uvs.w, 0.0f, 1.0f );
 
 	    if (ImGui::TreeNode("ToneMapping"))
 	    {
@@ -1096,6 +1155,8 @@ namespace Enjon
             ImGui::DragFloat3Labels("##bgcolor", labels, mBGColor, 0.1f, 0.0f, 30.0f);
 	    	ImGui::TreePop();
 	    }
+
+		
 	}
 
 	//=======================================================================================================

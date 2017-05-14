@@ -42,10 +42,14 @@ namespace Enjon {
 			GLSLProgram* GetShader();
 			void SetShader(GLSLProgram* shader);
 
+			bool TwoSided( ) const { return mTwoSided; }
+			void TwoSided( bool enable ) { mTwoSided = enable; }
+
 		private:
 			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count]; 
 			ColorRGBA16 mColors[(u32)TextureSlotType::Count];
 			GLSLProgram* mShader;
+			bool mTwoSided = false;
 	}; 
 }
 

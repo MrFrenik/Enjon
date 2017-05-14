@@ -14,7 +14,7 @@ out DATA
 uniform mat4 projection;
 
 void main() {
- 
+
     gl_Position = projection * vec4(vertexPosition, 0.0, 1.0);
 
 	fs_out.position = vertexPosition; 

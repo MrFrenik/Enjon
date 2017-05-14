@@ -355,59 +355,48 @@ namespace Enjon
 	}
 
 	void PrintText( Transform& Transform, const Enjon::String& Text, UIFont* F, QuadBatch& Batch, ColorRGBA16 Color, u32 fontSize )
-	{
-		// Get atlas
-		FontAtlas* atlas = F->GetAtlas( fontSize );
+	{ 
+		Enjon::FontAtlas* atlas = F->GetAtlas( (s32)fontSize );
+		f32 textureWidth = atlas->GetAtlasTexture( ).Get( )->GetWidth( );
+		f32 textureHeight = atlas->GetAtlasTexture( ).Get( )->GetHeight( ); 
 
-		u32 texWidth = atlas->GetAtlasTexture( ).Get( )->GetWidth( );
-		u32 texHeight = atlas->GetAtlasTexture( ).Get( )->GetHeight( );
+		Vec3 scale = Transform.GetScale( );
+		Vec3 position = Transform.GetPosition( );
+		f32 x = position.x;
+		f32 y = position.y;
 
-		Vec3& Position = Transform.Position;
-		Quaternion& Rotation = Transform.Rotation;
-		Vec3& Scale = Transform.Scale;
-
-		float x = Transform.Position.x;
-		float y = Transform.Position.y; 
-
-		// Iterate through all characters
 		std::string::const_iterator c;
-		for ( c = Text.begin( ); c != Text.end( ); c++ )
+		for ( c = Text.begin( ); c != Text.end( ); ++c )
 		{
-			// Try this for now
-			FontGlyph glyph = atlas->GetGlyph( *c );
-			Vec4 texCoords = glyph.GetTextureCoords( );
-			f32 u0 = (f32)texCoords.x / (f32)texWidth;
-			f32 u1 = (f32)texCoords.z / (f32)texWidth;
-			f32 v0 = (f32)texCoords.y / (f32)texHeight;
-			f32 v1 = (f32)texCoords.w / (f32)texHeight;
+			Enjon::FontGlyph glyph = atlas->GetGlyph( *c );
+			f32 width = glyph.GetWidth( );
+			f32 height = glyph.GetHeight( );
+
+			f32 u1 = glyph.GetUVOffsetX( );
+			f32 v1 = 1.0f - glyph.GetUVOffsetY( );
+			f32 u2 = u1 + ( width / textureWidth );
+			f32 v2 = v1 - ( height / textureHeight );
+
+			f32 w = width;
+			f32 h = height;
 
 			Vec2 bearing = glyph.GetBearing( );
+			GLfloat xpos = x + ( bearing.x * scale.x );
+			GLfloat ypos = y - ( height - bearing.y ) * scale.y;
+
+			Vec4 uv( u1, v2, u2, v1 );
+			//Vec4 uv( 0, 0, 1, 1 );
+
+			Enjon::Transform tform;
+			tform.SetPosition( Vec3( x, y, position.z ) );
+			tform.SetRotation( Transform.GetRotation( ) );
+			tform.SetScale( Vec3( scale.x, scale.y, 1.0f ) );
+
+			Enjon::AssetHandle< Enjon::Texture > atlasTexture = atlas->GetAtlasTexture( );
+			Batch.Add( Vec2( w, h ), tform, uv, atlasTexture.Get( )->GetTextureId( ) );
+
 			s32 advance = glyph.GetAdvance( );
-
-			f32 xpos = ( x + bearing.x ) * Scale.x;
-			//f32 ypos = ( y - bearing.y ) * Scale.y; 
-			f32 ypos = y;
-
-			//Vec4 UV( u0, u1, v0, v1 );
-			Vec4 UV( 0, 0, 1, 1 );
-
-			Vec2 size = glyph.GetSize( );
-
-			// Add to batch
-			Batch.Add(
-				Vec2( size.x, size.y ),
-				Enjon::Transform(
-					Vec3( xpos, ypos, Position.z ),
-					Rotation,
-					Vec3( Scale.x, Scale.y, 1.0f )
-				),
-				UV,
-				atlas->GetTextureID( ),
-				Color
-			);
-
-			// Advance to next character
-			x += ( advance >> 6 ) * Scale.x; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+			x += (f32) advance * scale.x;
 		}
 	}
 
@@ -534,18 +523,28 @@ namespace Enjon
 			}
 
 			// Add glyph data
+			FontGlyph gl;
+			mGlyphs[ i ] = gl;
 			FontGlyph* glyph = &mGlyphs[ i ];
-			glyph->mTextureCoordinates.x	= penX;
-			glyph->mTextureCoordinates.y	= penY;
+			glyph->mTextureCoordinates.x	= penX / (f32)texWidth;
+			glyph->mTextureCoordinates.y	= penY /(f32)texHeight;
 			glyph->mTextureCoordinates.z	= penX + bmp->width;
 			glyph->mTextureCoordinates.w	= penY + bmp->rows;
 			glyph->mBearing.x				= face->glyph->bitmap_left;
 			glyph->mBearing.y				= face->glyph->bitmap_top; 
-			glyph->mXAdvance				= face->glyph->advance.x >> 6; 
+			glyph->mXAdvance				= (f32)(face->glyph->advance.x >> 6); 
 			glyph->mAtlas					= this;
 
-			penX += bmp->width + 1;
+			glyph->mWidth = face->glyph->bitmap.width;
+			glyph->mHeight = face->glyph->bitmap.rows;
 
+			glyph->mLeft = face->glyph->bitmap_left;
+			glyph->mTop = face->glyph->bitmap_top;
+
+			glyph->mUVOffsetX = penX / (f32) texWidth;
+			glyph->mUVOffsetY = penY / (f32) texHeight;
+
+			penX += bmp->width + 1;
 		} 
 
 		char* textureData = ( char* ) calloc( texWidth * texHeight * 4, 1 );
@@ -554,7 +553,7 @@ namespace Enjon
 			textureData[ i * 4 + 0 ] |= pixels[ i ];
 			textureData[ i * 4 + 1 ] |= pixels[ i ];
 			textureData[ i * 4 + 2 ] |= pixels[ i ];
-			textureData[ i * 4 + 3 ] |= 0xff;
+			textureData[ i * 4 + 3 ] |= pixels[ i ];
 		}
 		
 		// Disable byte-alignment restriction
@@ -580,7 +579,7 @@ namespace Enjon
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 
 		// Generate mipmaps
 		glGenerateMipmap( GL_TEXTURE_2D );
@@ -597,6 +596,154 @@ namespace Enjon
 		free( pixels );
 	}
 			
+	/*
+	FontAtlas::FontAtlas( const Enjon::String& filePath, s32 fontSize )
+	{
+		// FreeType library
+		FT_Library ft;
+
+		// All functions return a value different than 0 whenever an error occurred
+		if ( FT_Init_FreeType( &ft ) )
+		{
+			std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+		}
+
+		// Load font as face
+		FT_Face face;
+		if ( FT_New_Face( ft, filePath.c_str( ), 0, &face ) )
+		{
+			std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+		}
+
+		const u32 MAX_WIDTH = 512;
+
+		// Set face for later use
+		mFontFace = face;
+
+		FT_Set_Pixel_Sizes( mFontFace, 0, fontSize );
+		FT_GlyphSlot glyphSlot = face->glyph;
+
+		int roww = 0;
+		int rowh = 0;
+		int width = 0;
+		int height = 0;
+
+		for ( int i = 0; i < MAX_NUMBER_GLYPHS; i++ )
+		{
+			if ( FT_Load_Char( face, i, FT_LOAD_RENDER ) )
+			{
+				std::cout << "Loading character %c failed\n", i;
+				continue;
+			}
+
+			if ( roww + glyphSlot->bitmap.width + 1 >= MAX_WIDTH )
+			{
+				width = std::fmax( width, roww );
+				height += rowh;
+				roww = 0;
+				rowh = 0;
+			}
+
+			roww += glyphSlot->bitmap.width + 1;
+			rowh = std::fmax( rowh, glyphSlot->bitmap.rows );
+		}
+
+		width = std::fmax( width, roww );
+		height += rowh;
+
+		glGenTextures( 1, &mAtlasTextureID );
+
+		if ( glGetError( ) != GL_NO_ERROR )
+		{
+			std::cout << "glGenTextures failed\n";
+		}
+
+		glActiveTexture( GL_TEXTURE0 );
+
+		//if ( glGetError( ) != GL_NO_ERROR )
+		//{
+		//	std::cout << "glActiveTexture failed\n";
+		//}
+
+		glBindTexture( GL_TEXTURE_2D, mAtlasTextureID );
+
+
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, 0 );
+
+		
+
+		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+
+		//if ( glGetError( ) != GL_NO_ERROR )
+		//{
+		//	std::cout << "glPixelStorei failed\n";
+		//}
+
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+		
+
+		int ox = 0;
+		int oy = 0;
+
+		rowh = 0;
+
+		for ( int i = 0; i < MAX_NUMBER_GLYPHS; i++ )
+		{
+			if ( FT_Load_Char( face, i, FT_LOAD_RENDER ) )
+			{
+				std::cout << "Loading character %c failed\n", i;
+				continue;
+			}
+
+			if ( ox + glyphSlot->bitmap.width + 1 >= MAX_WIDTH )
+			{
+				oy += rowh;
+				rowh = 0;
+				ox = 0;
+			}
+
+			glTexSubImage2D( GL_TEXTURE_2D, 0, ox, oy, glyphSlot->bitmap.width, glyphSlot->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, glyphSlot->bitmap.buffer );
+
+			if ( glGetError( ) != GL_NO_ERROR )
+			{
+				std::cout << "BORKED AGAIN\n";
+			}
+
+			mGlyphs[ i ].mXAdvance = glyphSlot->advance.x >> 6;
+			mGlyphs[ i ].mYAdvance = glyphSlot->advance.y >> 6;
+
+			mGlyphs[ i ].mWidth = glyphSlot->bitmap.width;
+			mGlyphs[ i ].mHeight = glyphSlot->bitmap.rows;
+
+			mGlyphs[ i ].mLeft = glyphSlot->bitmap_left;
+			mGlyphs[ i ].mTop = glyphSlot->bitmap_top;
+
+			mGlyphs[ i ].mUVOffsetX = ox / (f32) width;
+			mGlyphs[ i ].mUVOffsetY = oy / (f32) height;
+
+			mGlyphs[ i ].mAtlas = this;
+
+			rowh = std::fmax( rowh, glyphSlot->bitmap.rows );
+			ox += glyphSlot->bitmap.width + 1;
+		}
+
+		// Generate mipmaps
+		glGenerateMipmap( GL_TEXTURE_2D );
+
+		// Unbind texture 
+		glBindTexture( GL_TEXTURE_2D, 0 );
+
+		// Create texture and assign it
+		Enjon::AssetHandle< Enjon::Texture > texture; 
+		texture.Set( new Texture( width, height, mAtlasTextureID ) );
+		mAtlasTexture = texture;
+	}
+	*/
+
 	//========================================================================================================================
 
 	FontAtlas::~FontAtlas( )
@@ -608,14 +755,26 @@ namespace Enjon
 
 	FontGlyph FontAtlas::GetGlyph( u8 character )
 	{
-		// Grab character index
-		u32 index = FT_Get_Char_Index( mFontFace, character );
-		
-		// Make sure is in range
-		assert( index < MAX_NUMBER_GLYPHS );
+		//// Grab character index
+		//u32 index = FT_Get_Char_Index( mFontFace, character );
+		//
+		//// Make sure is in range
+		assert( character < MAX_NUMBER_GLYPHS ); 
 
-		// Return glyph
-		return mGlyphs[ index ]; 
+		auto query = mGlyphs.find( character );
+		if ( query != mGlyphs.end( ) )
+		{
+			return query->second;
+		}
+
+		// Shouldn't ever hit here
+		assert( false );
+
+		FontGlyph gl;
+		return gl;
+
+		//// Return glyph
+		//return mGlyphs[ index ]; 
 	}
 			
 	//========================================================================================================================

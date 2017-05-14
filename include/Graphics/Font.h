@@ -99,12 +99,25 @@ namespace Enjon
 			Vec2 GetSize( );
 			Vec4 GetTextureCoords( ) const;
 			s32 GetAdvance( ) const; 
+			f32 GetWidth( ) const { return mWidth; }
+			f32 GetHeight( ) const { return mHeight; }
+			f32 GetLeft( ) const { return mLeft; }
+			f32 GetTop( ) const { return mTop; }
+			f32 GetUVOffsetX( ) const { return mUVOffsetX; }
+			f32 GetUVOffsetY( ) const { return mUVOffsetY; }
 
 		protected:
 			FontAtlas*	mAtlas = nullptr;
 			Vec4		mTextureCoordinates;
 			Vec2		mBearing;
-			s32			mXAdvance;
+			f32			mXAdvance;
+			f32			mYAdvance;
+			f32			mWidth;
+			f32			mHeight;
+			f32			mLeft;
+			f32			mTop;
+			f32			mUVOffsetX;
+			f32			mUVOffsetY;
 	};
 
 	class FontAtlas
@@ -122,7 +135,7 @@ namespace Enjon
 		protected: 
 			Enjon::AssetHandle< Enjon::Texture > mAtlasTexture;
 			u32 mAtlasTextureID;
-			FontGlyph mGlyphs[ MAX_NUMBER_GLYPHS ];
+			std::unordered_map< u8, FontGlyph > mGlyphs;
 			FT_Face mFontFace;
 	};
 

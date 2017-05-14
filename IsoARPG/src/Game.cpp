@@ -142,11 +142,11 @@ Enjon::Result Game::Initialize()
 
 	// Try loading font
 	Enjon::String rootPath = engine->GetConfig( ).GetRoot( );
-	Enjon::String fontPath = rootPath + "/Assets/Fonts/WeblySleek/weblysleekuisb.ttf";
+	Enjon::String fontPath = rootPath + "/Assets/Fonts/CurseOfTheZombie/CurseOfTheZombie.ttf";
 	fmt::print( "font path: {}\n", fontPath );
 
+	// Make new font
 	mFont = new Enjon::UIFont( fontPath );
-	mFont->AddAtlas( 14 );
 
 	// Add to asset database
 	mAssetManager->AddToDatabase(cerebusAlbedoPath); 
@@ -273,6 +273,7 @@ Enjon::Result Game::Initialize()
 	mFontMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.roughness") );
 	mFontMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
 	mFontMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
+	mFontMat->TwoSided( true );
 
 	mGreen->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mGreenMat );
 	mGreen->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("isoarpg.models.unit_cube" ) );
@@ -313,12 +314,6 @@ Enjon::Result Game::Initialize()
 	// Set up text batch
 	mTextBatch = new Enjon::QuadBatch( );
 	mTextBatch->Init( );
-	mTextBatch->Begin( );
-	{
-		Enjon::Transform tform( Enjon::Vec3( 0.f, 10.f, -10.f ), Enjon::Quaternion( ), Enjon::Vec3( 1 ) );
-		Enjon::PrintText( tform, "T", mFont, *mTextBatch, Enjon::RGBA16_White( ), 14 ); 
-	}
-	mTextBatch->End( );
 	mTextBatch->SetMaterial( mFontMat );
 
 	if (mGfx)
@@ -419,8 +414,27 @@ Enjon::Result Game::Initialize()
 			ImGui::Text( "32 bit prop size: %d", sizeof( Enjon::Property<f32> ) );
 			ImGui::Text( "32 bit signal size: %d", sizeof( Enjon::Signal<f32> ) ); 
 
-			// Font texture
-			ImGui::Image( ( ImTextureID )mFont->GetAtlas( 14 )->GetTextureID( ), ImVec2( 256, 256 ), ImVec2( 0, 0 ), ImVec2( 1, 1 ) );
+			static f32 x = 0;
+			static f32 y = 0;
+			static f32 z = 1;
+			static f32 w = 1; 
+ 
+			static Enjon::u8 chr = 'A';
+
+			static Enjon::s32 add = 0;
+			ImGui::InputInt( "Text", &add, 0, 100 );
+
+			ImGui::SliderFloat( "x##x", &x, 0, 1 );
+			ImGui::SliderFloat( "y##y", &y, 0, 1 );
+			ImGui::SliderFloat( "z##z", &z, 0, 1 );
+			ImGui::SliderFloat( "w##w", &w, 0, 1 ); 
+
+			ImGui::SliderFloat( "FontScale", &mFontSize, 0.05f, 5.0f );
+
+			char buf[ 256 ];
+			std::strncpy( buf, mWorldString.c_str( ), 256 );
+			ImGui::InputText( "World String", buf, 256 );
+			mWorldString = Enjon::String( buf );
 		}
 
 		ImGui::EndDock();
@@ -597,7 +611,14 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 				entity->SetRotation(rot);
 			}
 		}
+	} 
+
+	mTextBatch->Begin( );
+	{
+		Enjon::Transform tform( Enjon::Vec3( 0.f, 10.f, -10.f ), Enjon::Quaternion( ), Enjon::Vec3( mFontSize ) );
+		Enjon::PrintText( tform, mWorldString, mFont, *mTextBatch, Enjon::RGBA16_White( ), 14 );
 	}
+	mTextBatch->End( );
 
 	// This is where transform propagation happens
 	// mEntities->LateUpdate(dt);
@@ -622,38 +643,7 @@ Enjon::Result Game::ProcessInput(f32 dt)
 	if ( mInput->IsKeyPressed( Enjon::KeyCode::Escape ) )
 	{
 		return Enjon::Result::SUCCESS;
-	}
-
-	if ( mInput->IsKeyPressed( Enjon::KeyCode::O ) )
-	{ 
-		switch ( cam->GetProjectionType( ) )
-		{
-			case Enjon::ProjectionType::Orthographic :
-			{
-				cam->SetProjectionType( Enjon::ProjectionType::Perspective );
-			}
-			break;
-			case Enjon::ProjectionType::Perspective :
-			{ 
-				cam->SetProjectionType( Enjon::ProjectionType::Orthographic );
-				cam->Transform.Rotation = Enjon::Quaternion( -0.17f, 0.38f, 0.07f, 0.9f ); 
-			}
-			break;
-		}
-
-	}
-
-	if ( mInput->IsKeyDown( Enjon::KeyCode::Q ) )
-	{ 
-		Enjon::Camera* cam = mGfx->GetSceneCamera( );
-		cam->SetOrthographicScale( cam->GetOrthographicScale( ) - 0.1f * dt );
-	}
-
-	if ( mInput->IsKeyDown( Enjon::KeyCode::E ) )
-	{
-		Enjon::Camera* cam = mGfx->GetSceneCamera( ); 
-		cam->SetOrthographicScale( cam->GetOrthographicScale( ) + 0.1f * dt );
-	}
+	} 
 
 	if ( mInput->IsKeyPressed( Enjon::KeyCode::T ) )
 	{
@@ -766,30 +756,6 @@ Enjon::Result Game::ProcessInput(f32 dt)
 		f32 xOffset = Enjon::ToRadians((f32)viewPort.x / 2.0f - MouseCoords.x) * dt * MouseSensitivity;
 		f32 yOffset = Enjon::ToRadians((f32)viewPort.y / 2.0f - MouseCoords.y) * dt * MouseSensitivity;
 		camera->OffsetOrientation(xOffset, yOffset); 
-	}
-
-	else if ( mMovementOn && cam->GetProjectionType( ) == Enjon::ProjectionType::Orthographic )
-	{ 
-		Enjon::Vec3 VelDir( 0, 0, 0 );
-
-		if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
-		{
-			VelDir += Enjon::Vec3( -1, 0, -1 );
-		}
-		if ( mInput->IsKeyDown( Enjon::KeyCode::S ) )
-		{
-			VelDir += Enjon::Vec3( 1, 0, 1 );
-		}
-		if ( mInput->IsKeyDown( Enjon::KeyCode::A ) )
-		{
-			VelDir += Enjon::Vec3( -1.0f, 0, 1 );
-		}
-		if ( mInput->IsKeyDown( Enjon::KeyCode::D ) )
-		{
-			VelDir += Enjon::Vec3( 1, 0, -1 );
-		}
-		
-		cam->Transform.Position += VelDir * dt;
 	}
 
 	return Enjon::Result::PROCESS_RUNNING;

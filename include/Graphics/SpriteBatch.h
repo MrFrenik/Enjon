@@ -60,18 +60,30 @@ namespace Enjon {
 		inline Glyph NewGlyph(const Vec4& destRect, const Vec4& uvRect, GLuint texture, float depth, const ColorRGBA16& color)
 		{
 			Glyph glyph;
-
+			
 			/* Set topLeft vertex */
-			glyph.topLeft = NewVertex(destRect.x, destRect.y + destRect.w, uvRect.x, uvRect.y + uvRect.w, color.r, color.g, color.b, color.a);
+			glyph.topLeft = NewVertex(destRect.x, destRect.y + destRect.w, uvRect.x, uvRect.w, color.r, color.g, color.b, color.a);
 
 			/* Set bottomLeft vertex */
 			glyph.bottomLeft = NewVertex(destRect.x, destRect.y, uvRect.x, uvRect.y, color.r, color.g, color.b, color.a);
 
 			/* Set bottomRight vertex */
-			glyph.bottomRight = NewVertex(destRect.x + destRect.z, destRect.y, uvRect.x + uvRect.z, uvRect.y, color.r, color.g, color.b, color.a);
+			glyph.bottomRight = NewVertex(destRect.x + destRect.z, destRect.y, uvRect.z, uvRect.y, color.r, color.g, color.b, color.a);
 
 			/* Set topRight vertex */
-			glyph.topRight = NewVertex(destRect.x + destRect.z, destRect.y + destRect.w, uvRect.x + uvRect.z, uvRect.y + uvRect.w, color.r, color.g, color.b, color.a);
+			glyph.topRight = NewVertex(destRect.x + destRect.z, destRect.y + destRect.w, uvRect.z, uvRect.w, color.r, color.g, color.b, color.a);
+			
+			///* Set topLeft vertex */
+			//glyph.topLeft = NewVertex(destRect.x, destRect.y + destRect.w, uvRect.x, uvRect.y, color.r, color.g, color.b, color.a);
+
+			///* Set bottomLeft vertex */
+			//glyph.bottomLeft = NewVertex(destRect.x, destRect.y, uvRect.x, uvRect.w, color.r, color.g, color.b, color.a);
+
+			///* Set bottomRight vertex */
+			//glyph.bottomRight = NewVertex(destRect.x + destRect.z, destRect.y, uvRect.z, uvRect.w, color.r, color.g, color.b, color.a);
+
+			///* Set topRight vertex */
+			//glyph.topRight = NewVertex(destRect.x + destRect.z, destRect.y + destRect.w, uvRect.z, uvRect.y, color.r, color.g, color.b, color.a);
 
 			/* Set texture */
 			glyph.texture = texture;

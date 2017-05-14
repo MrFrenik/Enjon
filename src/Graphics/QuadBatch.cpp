@@ -48,7 +48,7 @@ namespace Enjon {
 		TL.Bitangent[0]		= B.x;
 		TL.Bitangent[1]		= B.y;
 		TL.Bitangent[2]		= B.z;
-		UV 					= Enjon::Vec2(UVRect.x, UVRect.y + UVRect.w);
+		UV 					= Enjon::Vec2(UVRect.x, UVRect.w);
 		TL.UV[0] 			= UV.x; 
 		TL.UV[1] 			= UV.y; 
 		TL.Color[0] 		= Color.r;
@@ -90,7 +90,7 @@ namespace Enjon {
 		BR.Bitangent[0]		= B.x;
 		BR.Bitangent[1]		= B.y;
 		BR.Bitangent[2]		= B.z;
-		UV 					= Enjon::Vec2(UVRect.x + UVRect.z, UVRect.y);
+		UV 					= Enjon::Vec2(UVRect.z, UVRect.y);
 		BR.UV[0] 			= UV.x; 
 		BR.UV[1] 			= UV.y; 
 		BR.Color[0] 		= Color.r;
@@ -111,7 +111,7 @@ namespace Enjon {
 		TR.Bitangent[0]		= B.x;
 		TR.Bitangent[1]		= B.y;
 		TR.Bitangent[2]		= B.z;
-		UV 					= Enjon::Vec2(UVRect.x + UVRect.z, UVRect.y + UVRect.w);
+		UV 					= Enjon::Vec2(UVRect.z, UVRect.w);
 		TR.UV[0] 			= UV.x; 
 		TR.UV[1] 			= UV.y; 
 		TR.Color[0] 		= Color.r;
@@ -148,11 +148,15 @@ namespace Enjon {
 		// Calculate Bitangent
 		B = Vec3::Normalize( ( Model * Vec4( ( N.Cross(T) * 1.0), 0.0 )).XYZ());
 
-		// Create basis verticies
-		Vec3 Basis_TL(-1.0f, 1.0f + Dimensions.y, 0.0f);
-		Vec3 Basis_BL(-1.0f, -1.0f, 0.0f);
-		Vec3 Basis_TR(1.0f + Dimensions.x, 1.0f + Dimensions.y, 0.0f);
-		Vec3 Basis_BR(1.0f + Dimensions.x, -1.0f, 0.0f);
+		// Create basis verticies 
+		f32 x = 0.0f;
+		f32 y = 0.0f;
+		f32 w = Dimensions.x;
+		f32 h = Dimensions.y;
+		Vec3 Basis_BL(x, y, 0.0f);
+		Vec3 Basis_BR(x + w, y, 0.0f);
+		Vec3 Basis_TL(x, y + h, 0.0f);
+		Vec3 Basis_TR(x + w, y + h, 0.0f);
 
 		/* Set top left vertex */
  		Position 			= Model * Vec4(Basis_TL, 1.0);
@@ -169,7 +173,7 @@ namespace Enjon {
 		TL.Bitangent[0]		= B.x;
 		TL.Bitangent[1]		= B.y;
 		TL.Bitangent[2]		= B.z;
-		UV 					= Enjon::Vec2(UVRect.x, UVRect.y + UVRect.w);
+		UV 					= Enjon::Vec2(UVRect.x, UVRect.w);
 		TL.UV[0] 			= UV.x; 
 		TL.UV[1] 			= UV.y; 
 		TL.Color[0] 		= Color.r;
@@ -215,7 +219,7 @@ namespace Enjon {
 		TR.Bitangent[0]		= B.x;
 		TR.Bitangent[1]		= B.y;
 		TR.Bitangent[2]		= B.z;
-		UV 					= Enjon::Vec2(UVRect.x + UVRect.z, UVRect.y + UVRect.w);
+		UV 					= Enjon::Vec2(UVRect.z, UVRect.w);
 		TR.UV[0] 			= UV.x; 
 		TR.UV[1] 			= UV.y; 
 		TR.Color[0] 		= Color.r;
@@ -238,7 +242,7 @@ namespace Enjon {
 		BR.Bitangent[0]		= B.x;
 		BR.Bitangent[1]		= B.y;
 		BR.Bitangent[2]		= B.z;
-		UV 					= Enjon::Vec2(UVRect.x + UVRect.z, UVRect.y);
+		UV 					= Enjon::Vec2(UVRect.z, UVRect.y);
 		BR.UV[0] 			= UV.x; 
 		BR.UV[1] 			= UV.y; 
 		BR.Color[0] 		= Color.r;
@@ -290,7 +294,7 @@ namespace Enjon {
 		TL.Bitangent[0]		= B.x;
 		TL.Bitangent[1]		= B.y;
 		TL.Bitangent[2]		= B.z;
-		UV 					= Enjon::Vec2(UVRect.x, UVRect.y + UVRect.w);
+		UV 					= Enjon::Vec2(UVRect.x, UVRect.w);
 		TL.UV[0] 			= UV.x; 
 		TL.UV[1] 			= UV.y; 
 		TL.Color[0] 		= Color.r;
@@ -337,7 +341,7 @@ namespace Enjon {
 		TR.Bitangent[0]		= B.x;
 		TR.Bitangent[1]		= B.y;
 		TR.Bitangent[2]		= B.z;
-		UV 					= Enjon::Vec2(UVRect.x + UVRect.z, UVRect.y + UVRect.w);
+		UV 					= Enjon::Vec2(UVRect.z, UVRect.w);
 		TR.UV[0] 			= UV.x; 
 		TR.UV[1] 			= UV.y; 
 		TR.Color[0] 		= Color.r;
@@ -360,7 +364,7 @@ namespace Enjon {
 		BR.Bitangent[0]		= B.x;
 		BR.Bitangent[1]		= B.y;
 		BR.Bitangent[2]		= B.z;
-		UV 					= Enjon::Vec2(UVRect.x + UVRect.z, UVRect.y);
+		UV 					= Enjon::Vec2( UVRect.z, UVRect.y );
 		BR.UV[0] 			= UV.x; 
 		BR.UV[1] 			= UV.y; 
 		BR.Color[0] 		= Color.r;
