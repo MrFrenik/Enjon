@@ -127,7 +127,7 @@ namespace Enjon
 
 		public:
 			FontAtlas( );
-			FontAtlas( const Enjon::String& path, s32 fontSize );
+			FontAtlas( const Enjon::String& path, s32 fontSize, const UIFont* font );
 			Enjon::AssetHandle< Enjon::Texture > GetAtlasTexture( ) const;
 			u32 GetTextureID( ) const;
 			FontGlyph GetGlyph( u8 character );
@@ -137,11 +137,12 @@ namespace Enjon
 			Enjon::AssetHandle< Enjon::Texture > mAtlasTexture;
 			u32 mAtlasTextureID;
 			std::unordered_map< u8, FontGlyph > mGlyphs;
-			FT_Face mFontFace;
 	};
 
 	class UIFont : public Asset
 	{
+		friend FontAtlas;
+
 		public:
 			/**
 			* @brief Constructor
@@ -169,9 +170,12 @@ namespace Enjon
 			*/
 			void AddAtlas( s32 fontSize );
 
+			FT_Face GetFace( ) const { return mFontFace;  }
+
 		private:
 			Enjon::String mFontPath;
 			std::unordered_map< u32, FontAtlas > mAtlases;
+			FT_Face mFontFace;
 	};
 }
 

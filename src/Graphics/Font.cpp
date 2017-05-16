@@ -461,29 +461,18 @@ namespace Enjon
 
 	//========================================================================================================================
 
-	FontAtlas::FontAtlas( const Enjon::String& filePath, s32 fontSize )
-	{
-		// FreeType library
-		FT_Library ft;
-
-		// All functions return a value different than 0 whenever an error occurred
-		if ( FT_Init_FreeType( &ft ) )
+	FontAtlas::FontAtlas( const Enjon::String& filePath, s32 fontSize, const UIFont* font )
+	{ 
+		if ( font == nullptr )
 		{
-			std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl; 
+			return;
 		}
 
-		// Load font as face
-		FT_Face face;
-		if ( FT_New_Face( ft, filePath.c_str( ), 0, &face ) )
-		{
-			std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl; 
-		} 
-
-		// Set face for later use
-		mFontFace = face;
+		// Get font face
+		FT_Face face = font->GetFace( );
 
 		// Set size to load glyphs as
-		FT_Set_Pixel_Sizes( face, 0, fontSize ); 
+		FT_Set_Pixel_Sizes( font->GetFace( ), 0, fontSize ); 
 
 		// Get dimentions
 		s32 maxDim = ( 1 + ( face->size->metrics.height >> 6 ) ) * std::ceilf( std::sqrtf( MAX_NUMBER_GLYPHS ) );
@@ -796,6 +785,20 @@ namespace Enjon
 	UIFont::UIFont( const Enjon::String& fontPath )
 		: mFontPath( fontPath )
 	{ 
+		// FreeType library
+		FT_Library ft;
+
+		// All functions return a value different than 0 whenever an error occurred
+		if ( FT_Init_FreeType( &ft ) )
+		{
+			std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl; 
+		}
+
+		// Load font as face
+		if ( FT_New_Face( ft, fontPath.c_str( ), 0, &mFontFace ) )
+		{
+			std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl; 
+		} 
 	}
 
 	//========================================================================================================================
@@ -833,7 +836,7 @@ namespace Enjon
 		// If doesn't exist, then place in map
 		if ( !AtlasExists( fontSize ) )
 		{
-			FontAtlas atlas( mFontPath, fontSize );
+			FontAtlas atlas( mFontPath, fontSize, this );
 			mAtlases[ fontSize ] = atlas;
 		}
 	}

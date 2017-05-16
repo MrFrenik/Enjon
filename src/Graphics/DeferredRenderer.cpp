@@ -15,6 +15,7 @@
 #include "Graphics/PointLight.h"
 #include "Graphics/SpotLight.h"
 #include "IO/ResourceManager.h"
+#include "Asset/AssetManager.h"
 #include "Console.h"
 #include "CVarsSystem.h"
 #include "ImGui/ImGuiManager.h"
@@ -741,16 +742,21 @@ namespace Enjon
 		iVec2 viewport = GetViewport( ); 
 		Mat4 ortho = Mat4::Orthographic(0.0f, (f32)viewport.x, 0.0f, (f32)viewport.y, -1, 1);
 
-		static UIFont* font = nullptr;
 		static bool hasMadeFont = false;
+		static UIFont* font = nullptr;
 		if ( !hasMadeFont )
 		{
+			// Add font to database
+			Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( ); 
 			Enjon::String rootPath = Enjon::Engine::GetInstance()->GetConfig( ).GetRoot( );
 			Enjon::String fontPath = rootPath + "/Assets/Fonts/Hack3d/Hack3d.ttf";
-			font = new UIFont( fontPath );
+			am->AddToDatabase( fontPath , false );
+			font = am->GetAsset< Enjon::UIFont >( "e.development.enjon.assets.fonts.hack3d.hack3d" ).Get( );
+
 			hasMadeFont = true;
 		}
 
+		/*
 		textProgram->Use( );
 		{
 			textProgram->SetUniform( "projection", ortho );
@@ -797,6 +803,7 @@ namespace Enjon
 			mBatch->RenderBatch( );
 		}
 		textProgram->Unuse( );
+		*/
 	}
 
 	//======================================================================================================

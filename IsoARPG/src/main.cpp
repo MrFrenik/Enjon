@@ -9671,7 +9671,8 @@ int main(int argc, char** argv)
 #if 1
 
 #include <Enjon.h> 
-#include <System/Types.h>
+#include <System/Types.h> 
+#include <Graphics/Shader.h>
 
 #include "Game.h"
 
@@ -9684,13 +9685,68 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 	Enjon::Engine mEngine;
 	Enjon::EngineConfig mConfig;
 	Game mGame; 
-
+ 
 	// Parse passed in command arguments
 	mConfig.ParseArguments(argc, argv); 
 
 	// Startup engine
 	mEngine.StartUp(&mGame, mConfig); 
 
+	// Make a shader graph
+	Enjon::UniformFloatNode uf1( 1.0f );
+	Enjon::UniformFloatNode uf2( 2.0f );
+	Enjon::UniformFloatNode uf3( 3.0f );
+	Enjon::MultiplyNode mult1;
+	Enjon::MultiplyNode mult2;
+	Enjon::MultiplyNode mult3;
+	Enjon::Texture2DNode tex1( "uAlbedoMap" );
+
+	mult1.AddInput( &uf1 );
+	mult1.AddInput( &uf2 );
+
+	mult2.AddInput( &mult1 ); 
+	mult2.AddInput( &tex1 );
+
+	mult3.AddInput( &mult2 );
+	mult3.AddInput( &uf3 );
+
+	Enjon::String glsl = mult3.EvaluateToGLSL( );
+
+	// ShaderGraph holds all nodes for a relavant graph
+	// In check stage, run through all nodes to find leaf nodes
+	// All nodes will hold reference to shader graph
+	// When evaulating to glsl, need to check shader graph to see if previous variable was defined already for this leaf node
+	// ex. Don't want to sample a texture twice
+	// Shader graph holds all memory for nodes, responsible for cleaning up when done
+
+	/*
+		Enjon::ShaderGraph graph;
+		graph.Begin( );		// Not sure what done in this step...
+		{
+			auto mult1	= graph.AddNode( new Enjon::MultiplyNode );
+			auto mult2	= graph.AddNode( new Enjon::MultiplyNode );
+			auto tex1	= graph.AddNode( new Enjon::Texture2DNode( "uAlbedo" ) );
+			auto tex2	= graph.AddNode( new Enjon::Texture2DNode( "uNormal" ) );
+			auto uf1	= graph.AddNode( new Enjon::UniformFloatNode( 1.0f ) );
+			auto uf2	= graph.AddNode( new Enjon::UniformFloatNode( 2.5f ) );
+
+			// Set up inputs for nodes
+			mult1.AddInput( tex1 );
+			mult1.AddInput( uf1 );
+			mult2.AddInput( mult1 );
+			mult2.AddInput( uf2 );
+
+			graph.SetInput( Enjon::ShaderInput::Albedo, mult1 );
+			graph.SetInput( Enjon::ShaderInput::Normal, tex2 );
+			graph.SetInput( Enjon::ShaderInput::Metallic, uf2 );
+		}
+		graph.End( );		// Not sure what's done here either...
+		graph.Build( );		// Parses graph and outputs appropriate glsl 
+	*/ 
+
+	std::cout << glsl << "\n"; 
+
+	/*
 	// Run engine loop
 	Enjon::Result res = mEngine.Run();
 
@@ -9699,6 +9755,7 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 		printf("Exit successful.\n");
 	else
 		printf("Exit failed.\n"); 
+	*/
 
 	return 0;	
 }

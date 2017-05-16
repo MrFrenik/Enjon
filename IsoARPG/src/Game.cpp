@@ -139,6 +139,7 @@ Enjon::Result Game::Initialize()
 	Enjon::String greenPath				= Enjon::String("/Textures/green.png"); 
 	Enjon::String redPath				= Enjon::String("/Textures/red.png"); 
 	Enjon::String bluePath				= Enjon::String("/Textures/blue.png"); 
+	Enjon::String teapotPath			= Enjon::String( "/Models/teapot.obj" );
 
 	// Try loading font
 	Enjon::String rootPath = engine->GetConfig( ).GetRoot( );
@@ -166,6 +167,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( greenPath );
 	mAssetManager->AddToDatabase( redPath );
 	mAssetManager->AddToDatabase( bluePath );
+	mAssetManager->AddToDatabase( teapotPath );
 	mAssetManager->AddToDatabase( fontPath, false );
 
 	// Assign font
@@ -228,7 +230,7 @@ Enjon::Result Game::Initialize()
 
 	mGun->SetPosition(Enjon::Vec3(0.0f, 0.0f, 0.0f));
 	mGun->SetRotation( Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ) );
-	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("isoarpg.models.unit_cube"));
+	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("isoarpg.models.teapot"));
 	gc->SetMaterial(mGunMat);
 
 	mSun = new Enjon::DirectionalLight();
