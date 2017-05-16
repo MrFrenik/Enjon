@@ -55,14 +55,13 @@ class Game : public Enjon::Application
 		Enjon::Material* mFloorMat	= nullptr;
 		Enjon::Material* mFontMat	= nullptr;
 
-		Enjon::AssetHandle<Enjon::Mesh> mSphereMesh;
-		Enjon::AssetHandle<Enjon::Mesh> mGunMesh;
-		Enjon::AssetHandle<Enjon::Mesh> mBuddhaMesh;
-		Enjon::AssetHandle<Enjon::Mesh> mMonkeyMesh;
-
-		Enjon::UIFont* mFont = nullptr;
-
-		std::vector<Enjon::AssetHandle<Enjon::Mesh>*> mMeshSwitches;
+		Enjon::AssetHandle< Enjon::Mesh > mSphereMesh;
+		Enjon::AssetHandle< Enjon::Mesh > mGunMesh;
+		Enjon::AssetHandle< Enjon::Mesh > mBuddhaMesh;
+		Enjon::AssetHandle< Enjon::Mesh > mMonkeyMesh; 
+		Enjon::AssetHandle< Enjon::UIFont > mFont;
+		
+		std::vector<Enjon::AssetHandle<Enjon::Mesh>*> mMeshSwitches; 
 
 		std::vector<Enjon::Entity*> mHandles;
 

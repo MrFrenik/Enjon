@@ -5,6 +5,7 @@
 #include "Asset/AssetLoader.h"
 #include "Asset/TextureAssetLoader.h" 
 #include "Asset/MeshAssetLoader.h" 
+#include "Asset/FontAssetLoader.h"
 #include "Utils/FileUtils.h"
 #include "Engine.h"
 
@@ -23,8 +24,7 @@ namespace Enjon
 		mAssetsPath = "";
 		
 		// Register the loaders with manager 
-		RegisterAssetLoader<Enjon::Texture, TextureAssetLoader>(); 
-		RegisterAssetLoader<Enjon::Mesh, MeshAssetLoader>(); 
+		RegisterLoaders( );
 	}
 
 	//============================================================================================ 
@@ -38,8 +38,7 @@ namespace Enjon
 		mAssetsPath = assetsPath; 
 
 		// Register the loaders with manager 
-		RegisterAssetLoader<Enjon::Texture, TextureAssetLoader>(); 
-		RegisterAssetLoader<Enjon::Mesh, MeshAssetLoader>(); 
+		RegisterLoaders( );
 	}
 	
 	//============================================================================================ 
@@ -54,6 +53,16 @@ namespace Enjon
 
 		// Clear map
 		mLoaders.clear();
+	}
+	
+	//============================================================================================ 
+			
+	void AssetManager::RegisterLoaders( )
+	{
+		// Register the loaders with manager 
+		RegisterAssetLoader< Enjon::Texture, TextureAssetLoader >( );
+		RegisterAssetLoader< Enjon::Mesh, MeshAssetLoader >( );
+		RegisterAssetLoader< Enjon::UIFont, FontAssetLoader >( );
 	}
 	
 	//============================================================================================ 
@@ -93,23 +102,30 @@ namespace Enjon
 	
 	//============================================================================================ 
 
-	s32 AssetManager::GetLoaderIdxByFileExtension(const String& filePath)
+	s32 AssetManager::GetLoaderIdxByFileExtension( const String& filePath )
 	{ 
 		// If not found, will return -1
 		s32 idx = -1;
 
-		String fileExtension = Utils::SplitString(filePath, ".").back(); 
+		// Get file extension of file
+		String fileExtension = Utils::SplitString( filePath, "." ).back( ); 
 
 		// Graphics texture asset
 		if (fileExtension.compare("png") == 0 )
 		{ 
-			idx = GetAssetTypeId<Enjon::Texture>();
+			idx = GetAssetTypeId< Enjon::Texture >( );
 		}
 
 		// Graphics mesh asset
 		else if (fileExtension.compare("obj") == 0)
 		{
-			idx = GetAssetTypeId<Enjon::Mesh>();
+			idx = GetAssetTypeId< Enjon::Mesh >( );
+		}
+
+		// Font asset
+		else if ( fileExtension.compare( "ttf" ) == 0 || fileExtension.compare( "otf" ) == 0 )
+		{
+			idx = GetAssetTypeId< Enjon::UIFont >( );
 		}
 
 		return idx;
@@ -144,7 +160,15 @@ namespace Enjon
 			else
 			{
 				// Load asset and place into database
-				auto res = query->second->LoadAssetFromFile(mAssetsPath + filePath, Utils::ToLower( mName ) + qualifiedName); 
+				if ( isRelativePath )
+				{
+					auto res = query->second->LoadAssetFromFile(mAssetsPath + filePath, Utils::ToLower( mName ) + qualifiedName); 
+				}
+				// If absolute path on disk
+				else
+				{
+					auto res = query->second->LoadAssetFromFile( filePath, qualifiedName );
+				}
 			}
 		}
 

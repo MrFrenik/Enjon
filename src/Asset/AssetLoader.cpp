@@ -30,7 +30,7 @@ namespace Enjon
 	String AssetLoader::GetQualifiedName(const String& filePath)
 	{
 		std::vector<String> splits = Enjon::Utils::SplitString(filePath, "."); 
-		String res = Enjon::Utils::Replace(splits.at(0), '/', '.');
+		String res = Enjon::Utils::Remove( Enjon::Utils::Replace(splits.at(0), '/', '.'), ':' ); 
 		return Enjon::Utils::ToLower(res);
 	} 
 	

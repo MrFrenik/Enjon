@@ -25,6 +25,7 @@ namespace Enjon
 			Material,
 			Mesh,
 			Shader,
+			Font,
 			Count
 		}; 
 
@@ -142,6 +143,9 @@ namespace Enjon
 
 				return Result::SUCCESS;
 			}
+
+		private:
+			void RegisterLoaders( );
 
 		private:
 

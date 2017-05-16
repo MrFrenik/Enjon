@@ -15,6 +15,7 @@
 #include "Math/Vec4.h"
 #include "Defines.h" 
 #include "Graphics/Texture.h"
+#include "Asset/Asset.h"
 
 #include "ft2build.h"
 #include FT_FREETYPE_H
@@ -139,15 +140,34 @@ namespace Enjon
 			FT_Face mFontFace;
 	};
 
-	class UIFont
+	class UIFont : public Asset
 	{
 		public:
+			/**
+			* @brief Constructor
+			*/
 			UIFont( const Enjon::String& fontPath );
+
+			/**
+			* @brief Constructor
+			*/
 			~UIFont( );
 
-			void AddAtlas( s32 fontSize );
+			/**
+			* @brief
+			*/
 			bool AtlasExists( s32 fontSize );
+
+			/**
+			* @brief
+			*/
 			FontAtlas* GetAtlas( s32 fontSize );
+
+		private:
+			/**
+			* @brief
+			*/
+			void AddAtlas( s32 fontSize );
 
 		private:
 			Enjon::String mFontPath;

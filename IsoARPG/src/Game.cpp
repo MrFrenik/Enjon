@@ -142,31 +142,34 @@ Enjon::Result Game::Initialize()
 
 	// Try loading font
 	Enjon::String rootPath = engine->GetConfig( ).GetRoot( );
-	Enjon::String fontPath = rootPath + "/Assets/Fonts/CurseOfTheZombie/CurseOfTheZombie.ttf";
-	fmt::print( "font path: {}\n", fontPath );
+	Enjon::String fontPath = rootPath + "/Assets/Fonts/CutOut/CutOut.ttf";
 
 	// Make new font
 	mFont = new Enjon::UIFont( fontPath );
 
 	// Add to asset database
-	mAssetManager->AddToDatabase(cerebusAlbedoPath); 
-	mAssetManager->AddToDatabase(cerebusNormalPath); 
-	mAssetManager->AddToDatabase(cerebusMetallicPath); 
-	mAssetManager->AddToDatabase(cerebusRoughnessPath); 
-	mAssetManager->AddToDatabase(cerebusEmissivePath); 
-	mAssetManager->AddToDatabase(mahogAlbedoPath); 
-	mAssetManager->AddToDatabase(mahogNormalPath); 
-	mAssetManager->AddToDatabase(mahogMetallicPath); 
-	mAssetManager->AddToDatabase(mahogRoughnessPath); 
-	mAssetManager->AddToDatabase(mahogEmissivePath); 
-	mAssetManager->AddToDatabase(mahogAOPath); 
-	mAssetManager->AddToDatabase(cerebusMeshPath);
-	mAssetManager->AddToDatabase(sphereMeshPath);
-	mAssetManager->AddToDatabase(cubeMeshPath);
-	mAssetManager->AddToDatabase(shaderBallMeshPath); 
-	mAssetManager->AddToDatabase(greenPath); 
-	mAssetManager->AddToDatabase(redPath); 
-	mAssetManager->AddToDatabase(bluePath); 
+	mAssetManager->AddToDatabase( cerebusAlbedoPath );
+	mAssetManager->AddToDatabase( cerebusNormalPath );
+	mAssetManager->AddToDatabase( cerebusMetallicPath );
+	mAssetManager->AddToDatabase( cerebusRoughnessPath );
+	mAssetManager->AddToDatabase( cerebusEmissivePath );
+	mAssetManager->AddToDatabase( mahogAlbedoPath );
+	mAssetManager->AddToDatabase( mahogNormalPath );
+	mAssetManager->AddToDatabase( mahogMetallicPath );
+	mAssetManager->AddToDatabase( mahogRoughnessPath );
+	mAssetManager->AddToDatabase( mahogEmissivePath );
+	mAssetManager->AddToDatabase( mahogAOPath );
+	mAssetManager->AddToDatabase( cerebusMeshPath );
+	mAssetManager->AddToDatabase( sphereMeshPath );
+	mAssetManager->AddToDatabase( cubeMeshPath );
+	mAssetManager->AddToDatabase( shaderBallMeshPath );
+	mAssetManager->AddToDatabase( greenPath );
+	mAssetManager->AddToDatabase( redPath );
+	mAssetManager->AddToDatabase( bluePath );
+	mAssetManager->AddToDatabase( fontPath, false );
+
+	// Assign font
+	mFont = mAssetManager->GetAsset< Enjon::UIFont >( "e.development.enjon.assets.fonts.cutout.cutout" );
 
 	testProperty = mCameraSpeed; 
 
@@ -267,7 +270,7 @@ Enjon::Result Game::Initialize()
 	mGreenMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
 
 	mFontMat = new Enjon::Material( );
-	mFontMat->SetTexture( Enjon::TextureSlotType::Albedo, mFont->GetAtlas( 14 )->GetAtlasTexture( ) );
+	mFontMat->SetTexture( Enjon::TextureSlotType::Albedo, mFont.Get( )->GetAtlas( 14 )->GetAtlasTexture( ) );
 	mFontMat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.normal") );
 	mFontMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.metallic") );
 	mFontMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.roughness") );
@@ -616,7 +619,7 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 	mTextBatch->Begin( );
 	{
 		Enjon::Transform tform( Enjon::Vec3( 0.f, 10.f, -10.f ), Enjon::Quaternion( ), Enjon::Vec3( mFontSize ) );
-		Enjon::PrintText( tform, mWorldString, mFont, *mTextBatch, Enjon::RGBA16_White( ), 14 );
+		Enjon::PrintText( tform, mWorldString, mFont.Get( ), *mTextBatch, Enjon::RGBA16_White( ), 14 );
 	}
 	mTextBatch->End( );
 
@@ -773,3 +776,4 @@ Enjon::Result Game::Shutdown()
 
 	return Enjon::Result::SUCCESS;
 }
+

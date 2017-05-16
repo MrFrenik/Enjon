@@ -85,6 +85,21 @@ namespace Enjon { namespace Utils {
 
 		return splits; 
 	}
+
+	static inline String Remove( const String& str, const char& find )
+	{
+		String res = "";
+
+		for ( auto& c : str )
+		{
+			if ( c != find )
+			{
+				res.push_back( c );
+			}
+		}
+
+		return res;
+	}
 		
 	static inline String Replace(const String& str, const char& find, const char& with)
 	{
