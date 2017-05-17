@@ -9672,7 +9672,7 @@ int main(int argc, char** argv)
 
 #include <Enjon.h> 
 #include <System/Types.h> 
-#include <Graphics/Shader.h>
+#include <Graphics/ShaderGraph.h>
 
 #include "Game.h"
 
@@ -9693,24 +9693,35 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 	mEngine.StartUp(&mGame, mConfig); 
 
 	// Make a shader graph
-	Enjon::UniformFloatNode uf1( 1.0f );
-	Enjon::UniformFloatNode uf2( 2.0f );
-	Enjon::UniformFloatNode uf3( 3.0f );
-	Enjon::MultiplyNode mult1;
-	Enjon::MultiplyNode mult2;
-	Enjon::MultiplyNode mult3;
-	Enjon::Texture2DNode tex1( "uAlbedoMap" );
+	Enjon::ShaderGraph graph;
+	Enjon::ShaderFloatNode* uf1 = graph.AddNode( new Enjon::ShaderFloatNode( "uf1", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
+	Enjon::ShaderFloatNode* uf2 = graph.AddNode( new Enjon::ShaderFloatNode( "uf2", 2.0f ) )->Cast< Enjon::ShaderFloatNode >( );
+	Enjon::ShaderFloatNode* uf3 = graph.AddNode( new Enjon::ShaderFloatNode( "uf3", 3.0f ) )->Cast< Enjon::ShaderFloatNode >( );
+	Enjon::ShaderMultiplyNode* mult1 = graph.AddNode( new Enjon::ShaderMultiplyNode( "mult1" ) )->Cast< Enjon::ShaderMultiplyNode >( );
+	Enjon::ShaderMultiplyNode* mult2 = graph.AddNode( new Enjon::ShaderMultiplyNode( "mult2" ) )->Cast< Enjon::ShaderMultiplyNode >( );
+	Enjon::ShaderMultiplyNode* mult3 = graph.AddNode( new Enjon::ShaderMultiplyNode( "mult3" ) )->Cast< Enjon::ShaderMultiplyNode >( );
+	Enjon::ShaderMultiplyNode* mult4 = graph.AddNode( new Enjon::ShaderMultiplyNode( "mult4" ) )->Cast< Enjon::ShaderMultiplyNode >( );
+	Enjon::ShaderTexture2DNode* tex1 = graph.AddNode( new Enjon::ShaderTexture2DNode( "uAlbedoMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
+	Enjon::ShaderVec4Node* vec41 = graph.AddNode( new Enjon::ShaderVec4Node( "vec41", Enjon::Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) ) )->Cast< Enjon::ShaderVec4Node >( );
 
-	mult1.AddInput( &uf1 );
-	mult1.AddInput( &uf2 );
+	// Set up inputs to nodes
+	mult1->AddInput( vec41 );
+	mult1->AddInput( tex1 ); 
+	
+	mult2->AddInput( tex1 );
+	mult2->AddInput( uf1 );
+	
+	mult4->AddInput( mult1 );
+	mult4->AddInput( mult2 );
 
-	mult2.AddInput( &mult1 ); 
-	mult2.AddInput( &tex1 );
+	mult3->AddInput( mult1 );
+	mult3->AddInput( mult4 ); 
 
-	mult3.AddInput( &mult2 );
-	mult3.AddInput( &uf3 );
+	// Compile graph
+	graph.Compile( );
 
-	Enjon::String glsl = mult3.EvaluateToGLSL( );
+	// Output glsl of mult3
+	Enjon::String glsl = mult3->EvaluateToGLSL( );
 
 	// ShaderGraph holds all nodes for a relavant graph
 	// In check stage, run through all nodes to find leaf nodes
@@ -9721,7 +9732,7 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 
 	/*
 		Enjon::ShaderGraph graph;
-		graph.Begin( );		// Not sure what done in this step...
+		graph.Begin( );		// Not sure what is done in this step...
 		{
 			auto mult1	= graph.AddNode( new Enjon::MultiplyNode );
 			auto mult2	= graph.AddNode( new Enjon::MultiplyNode );
