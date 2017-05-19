@@ -1,8 +1,9 @@
 #ifndef ARPG_GAME_H
 #define ARPG_GAME_H
 
-#include "Application.h" 
-#include "Asset/Asset.h"
+#include <Application.h> 
+#include <Asset/Asset.h>
+#include <Entity/EntityManager.h>
 
 #include <vector>
 
@@ -39,10 +40,10 @@ class Game : public Enjon::Application
 		Enjon::Input* mInput				= nullptr;
 		Enjon::EntityManager* mEntities		= nullptr;
 
-		Enjon::Entity* mGun 			= nullptr;
-		Enjon::Entity* mGreen 			= nullptr;
-		Enjon::Entity* mRed 			= nullptr; 
-		Enjon::Entity* mBlue 			= nullptr; 
+		Enjon::EntityHandle mGun;
+		Enjon::EntityHandle mGreen;
+		Enjon::EntityHandle mRed;
+		Enjon::EntityHandle mBlue;
 
 		Enjon::DirectionalLight* mSun	= nullptr;
 		Enjon::QuadBatch* mBatch 		= nullptr;

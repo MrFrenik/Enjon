@@ -25,11 +25,52 @@ namespace Enjon
 		ACTIVE
 	};
 
+	// Forward declaration
+	class Entity;
+	class EntityManager;
+
+	class EntityHandle
+	{
+		friend EntityManager;
+
+	public:
+		/*
+		* @brief Constructor
+		*/
+		EntityHandle( );
+
+		/*
+		* @brief Destructor
+		*/
+		~EntityHandle( );
+
+		/*
+		* @brief
+		*/
+		u32 GetID( ) const;
+			
+		/*
+		* @brief
+		*/
+		friend bool operator==( EntityHandle left, const EntityHandle& other);
+
+		/*
+		* @brief
+		*/
+		Enjon::Entity* Get( ) const;
+
+	private:
+		Enjon::Entity* mEntity = nullptr;
+		u32 mID;
+	};
+
 	class Entity : public Enjon::Object
 	{
 		ENJON_OBJECT( Entity )
 
+		friend EntityHandle;
 		friend EntityManager; 
+
 		public:
 			Entity();
 			Entity(EntityManager* manager);
@@ -97,16 +138,19 @@ namespace Enjon
 			Entity* GetParent() { return mParent; }
 
 			/// @brief Registers a child with this entity
-			Entity* AddChild(Entity* child);
+			void AddChild(const EntityHandle& child);
 
 			/// @brief Removes child from entity, if exists
-			void DetachChild(Entity* child, b8 removeFromList = true, b8 addToHeirarchy = true);	
+			void DetachChild(const EntityHandle& child );	
 
 			/// @brief Sets parent of entity, if one doesn't already exist
-			void SetParent(Entity* parent);
+			void SetParent(const EntityHandle& parent);
 
 			/// @brief Removes parent from entity, if one exists
-			Entity* RemoveParent(b8 removeFromList = true, b8 addToHeirarchy = true);
+			void RemoveParent( );
+			
+			/// @brief Removes parent from entity, if one exists
+			EntityHandle GetHandle( ) const { return mHandle; }
 
 			/// @brief Returns whether or not has parent
 			b8 Entity::HasParent();
@@ -117,7 +161,7 @@ namespace Enjon
 			/// @brief Returns whether or not entity is valid
 			b8 Entity::IsValid();
 
-			const std::vector<Entity*>& GetChildren() const { return mChildren; }
+			const std::vector< EntityHandle >& GetChildren() const { return mChildren; }
 
 			const std::vector<Component*>& GetComponents( ) const { return mComponents; }
 
@@ -145,8 +189,7 @@ namespace Enjon
 			void UpdateAllChildTransforms();
 
 			/// @brief Propagates transform down through all children
-			void PropagateTransform(f32 dt);
-
+			void PropagateTransform(f32 dt); 
 
 		private:
 			u32 mID;	
@@ -157,15 +200,15 @@ namespace Enjon
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
 			std::vector<Component*> mComponents;
-			std::vector<Entity*> mChildren;
+			std::vector< EntityHandle > mChildren;
 			Enjon::EntityState mState;
+			EntityHandle mHandle;
 	};
 
 	using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
-	using EntityParentHierarchy 	= std::vector<Entity*>;
-	using MarkedForDestructionList	= std::vector<Entity*>;
+	using MarkedForDestructionList	= std::vector< EntityHandle >;
 	using ActiveEntityList 			= std::vector<Entity*>;
-	using ComponentBaseArray 		= std::array<ComponentWrapperBase*, static_cast<u32>(MAX_COMPONENTS)>;
+	using ComponentBaseArray 		= std::array<ComponentWrapperBase*, static_cast<u32>(MAX_COMPONENTS)>; 
 
 	class EntityManager
 	{
@@ -173,8 +216,8 @@ namespace Enjon
 		public:
 			EntityManager();
 			~EntityManager();
-
-			Entity* Allocate();
+			
+			Enjon::EntityHandle Allocate( );
 
 			void Update(f32 dt);
 
@@ -195,15 +238,9 @@ namespace Enjon
 			template <typename T>
 			T* GetComponent(Entity* entity);
 
-			void Destroy(Entity* entity);
-
-			void RemoveFromParentHierarchyList(Entity* entity, b8 toBeDestroyed = false);
-
-			void AddToParentHierarchy(Entity* entity);
+			void Destroy(const EntityHandle& entity);
 
 			const std::vector<Entity*>& GetActiveEntities() { return mActiveEntities; }
-
-			const std::vector<Entity*>& GetParentHierarchyList() { return mEntityParentHierarchy; }
 
 		private:
 			void EntityManager::Cleanup();
@@ -222,7 +259,6 @@ namespace Enjon
 			ComponentBaseArray 			mComponents;	
 			ActiveEntityList 			mActiveEntities;
 			MarkedForDestructionList 	mMarkedForDestruction;
-			EntityParentHierarchy 		mEntityParentHierarchy;
 			u32 						mNextAvailableID = 0;
 	};
 

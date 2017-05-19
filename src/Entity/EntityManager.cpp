@@ -11,9 +11,44 @@
 #include <fmt/printf.h> 
 #include <stdio.h>
 
-namespace Enjon {
+namespace Enjon 
+{ 
+	//================================================================================================
 
-	//---------------------------------------------------------------
+	EntityHandle::EntityHandle( )
+	{ 
+	}
+ 
+	//================================================================================================
+
+	EntityHandle::~EntityHandle( )
+	{ 
+	}
+ 
+	//================================================================================================
+
+	u32 EntityHandle::GetID( ) const
+	{
+		return mID;
+	}
+
+	//================================================================================================
+
+	Enjon::Entity* EntityHandle::Get( ) const
+	{
+		return mEntity;
+	}
+		
+	//================================================================================================
+
+	bool operator==( EntityHandle left, const EntityHandle& other )
+	{
+		// Compare raw entity pointers and ids for match
+		return ( left.Get( ) == other.Get( ) ) && ( left.mID == other.mID );
+	} 
+
+	//================================================================================================
+
 	Entity::Entity()
 	: mID(MAX_ENTITIES), 
 	  mState(EntityState::INACTIVE), 
@@ -23,7 +58,8 @@ namespace Enjon {
 	{
 	}
 
-	//---------------------------------------------------------------
+	//================================================================================================
+
 	Entity::Entity(EntityManager* manager)
 	: mID(MAX_ENTITIES), 
 	  mState(EntityState::INACTIVE), 
@@ -37,7 +73,7 @@ namespace Enjon {
 	//---------------------------------------------------------------
 	Entity::~Entity()
 	{
-		mManager->Destroy(this);		
+		mManager->Destroy( GetHandle( ) );		
 	}
 
 	//---------------------------------------------------------------
@@ -45,23 +81,16 @@ namespace Enjon {
 	{
 		assert(mManager != nullptr);
 
-		// Remove from parent hierarchy list if in it
-		if (!HasParent()) 
-		{
-			// Goes through and adds all children to hierarchy
-			mManager->RemoveFromParentHierarchyList(this, true);
-
-		}
-		// Otherwise remove parent 
-		else
-		{
-			RemoveParent(true, false);
-		}
+		RemoveParent( );
 
 		// Remove all children and add to parent hierarchy list
 		for (auto& c : mChildren)
 		{
-			c->RemoveParent(false, true);
+			Enjon::Entity* e = c.Get( );
+			if ( e )
+			{
+				e ->RemoveParent( ); 
+			}
 		}
 
 		mID = MAX_ENTITIES;
@@ -209,10 +238,17 @@ namespace Enjon {
 	}
 
 	//-----------------------------------------
-	Entity* Entity::AddChild(Entity* child)
+	void Entity::AddChild(const EntityHandle& child)
 	{
+		Enjon::Entity* ent = child.Get( );
+
+		if ( ent == nullptr )
+		{
+			return;
+		}
+
 		// Set parent to this
-		child->SetParent(this);
+		ent->SetParent( GetHandle( ) );
 
 		// Make sure child doesn't exist in vector before pushing back
 		auto query = std::find(mChildren.begin(), mChildren.end(), child);
@@ -222,83 +258,61 @@ namespace Enjon {
 			mChildren.push_back(child);
 
 			// Calculate its world transform with respect to parent
-			child->CalculateWorldTransform();
+			ent->CalculateWorldTransform();
 		}
 		else
 		{
 			// Log a warning message here
-		}
-
-		return this;
+		} 
 	}
 
 	//-----------------------------------------
-	void Entity::DetachChild(Entity* child, b8 removeFromList, b8 addToHeirarchy)
+	void Entity::DetachChild( const EntityHandle& child )
 	{
 		// Make sure child exists
-		assert(child != nullptr);
-		assert(mManager != nullptr);
+		assert( mManager != nullptr );
 
 		// Find and erase
-		if (removeFromList) 
-		{
-			mChildren.erase(std::remove(mChildren.begin(), mChildren.end(), child), mChildren.end());
-
-		}
-
-		if (addToHeirarchy)
-		{
-			// Add to child to parent hierarchy list now that it's a free node
-			mManager->AddToParentHierarchy(child);
-		}
+		mChildren.erase( std::remove( mChildren.begin(), mChildren.end(), child ), mChildren.end() ); 
 
 		// Recalculate world transform of child
-		child->CalculateWorldTransform();
+		child.Get( )->CalculateWorldTransform();
 
 		// Set parent to nullptr
-		child->mParent = nullptr;
+		child.Get( )->mParent = nullptr;
 
-	}
-
-	
+	} 
 
 	//-----------------------------------------
-	void Entity::SetParent(Entity* parent)
+	void Entity::SetParent( const EntityHandle& parent )
 	{
 		// Make sure this child doesn't have a parent
-		assert(parent != nullptr);
-		assert(mParent == nullptr);
 		assert(mManager != nullptr); 
 		
 		// Calculate world transform ( No parent yet, so set world to local )
 		CalculateWorldTransform( ); 
 		
 		// Set parent to this
-		mParent = parent; 
+		mParent = parent.Get( ); 
 		
 		// Calculate local transform relative to parent
 		CalculateLocalTransform( ); 
-
-		// Now that the parent is set, remove it from hierarchy list
-		mManager->RemoveFromParentHierarchyList(this);
 	}
 
 	//-----------------------------------------
-	Entity* Entity::RemoveParent(b8 removeFromList, b8 addToHierarchy)
-	{
-		// Asset parent exists
-		assert(mParent != nullptr);
+	void Entity::RemoveParent( )
+	{ 
+		// No need to remove if nullptr
+		if ( mParent == nullptr )
+		{
+			return;
+		}
 
 		// Remove child from parent
-		mParent->DetachChild(this, removeFromList, addToHierarchy);
-
-		// Capture pointer
-		Entity* retNode = mParent;
+		mParent->DetachChild( GetHandle( ) ); 
 
 		// Set parent to nullptr
-		mParent = nullptr;
-
-		return retNode;
+		mParent = nullptr; 
 	}
 
 	//---------------------------------------------------------------
@@ -324,11 +338,15 @@ namespace Enjon {
 	{
 		for (auto& c : mChildren)
 		{
-			// Set dirty to true
-			c->mWorldTransformDirty = true;
+			Enjon::Entity* ent = c.Get( );
+			if ( ent )
+			{
+				// Set dirty to true
+				ent->mWorldTransformDirty = true;
 
-			// Iterate through child's children to set their state dirty as well
-			c->SetAllChildWorldTransformsDirty();
+				// Iterate through child's children to set their state dirty as well
+				ent->SetAllChildWorldTransformsDirty(); 
+			}
 		}
 	}
 
@@ -336,25 +354,36 @@ namespace Enjon {
 	{
 		// Calculate world transform
 		mWorldTransform = mLocalTransform;
-		if (HasParent()) mWorldTransform *= mParent->mWorldTransform;
+		if ( HasParent( ) )
+		{
+			mWorldTransform *= mParent->mWorldTransform;
+		}
 
 		// Iterate through children and propagate down
 		for (auto& c : mChildren)
 		{
-			c->PropagateTransform(dt);
+			Enjon::Entity* ent = c.Get( );
+			if ( ent )
+			{
+				ent->PropagateTransform( dt );
+			}
 		}
 
-		UpdateComponentTransforms(dt);
+		UpdateComponentTransforms( dt );
 	}
 
 	//---------------------------------------------------------------
 	void Entity::UpdateAllChildTransforms()
 	{
 		// Maybe this should just be to set their flags to dirty?
-		for (auto& c : mChildren)
+		for ( auto& c : mChildren )
 		{
-			c->mWorldTransformDirty = true;
-			c->CalculateWorldTransform();
+			Enjon::Entity* ent = c.Get( );
+			if ( ent )
+			{
+				ent->mWorldTransformDirty = true;
+				ent->CalculateWorldTransform( );
+			}
 		}
 	}
 
@@ -390,8 +419,9 @@ namespace Enjon {
 		// Detach all components from entities
 		for (u32 i = 0; i < MAX_ENTITIES; ++i)
 		{
-			Destroy(&mEntities->at(i));	
+			Destroy( mEntities->at( i ).GetHandle( ) );	
 		}
+
 		delete[] mEntities;
 
 		// Deallocate all components
@@ -430,34 +460,36 @@ namespace Enjon {
 	}
 
 	//---------------------------------------------------------------
-	Entity* EntityManager::Allocate()
+	Enjon::EntityHandle EntityManager::Allocate( )
 	{
 		// Grab next available id and assert that it's valid
 		u32 id = FindNextAvailableID();
+
+		// Make sure if valid id ( not out of room )
 		assert(id < MAX_ENTITIES);
+
+		// Handle to return
+		Enjon::EntityHandle handle;
 
 		// Find entity in array and set values
 		Entity* entity = &mEntities->at(id);
+		handle.mEntity = entity;
+		handle.mID = id;
 		entity->mID = id;				
+		entity->mHandle = handle;
 		entity->mState = EntityState::ACTIVE; 
 		entity->mManager = this;
 
 		// Push back live entity into active entity vector
-		mActiveEntities.push_back(entity);
-
-		// Push back live entity into parent hierarchy list
-		AddToParentHierarchy(entity);
+		mActiveEntities.push_back(entity); 
 
 		// Return entity handle
-		return entity;
+		return handle;
 	}
 
 	//---------------------------------------------------------------
-	void EntityManager::Destroy(Entity* entity)
-	{
-		// Assert that entity isn't already null
-		assert(entity != nullptr);
-
+	void EntityManager::Destroy( const EntityHandle& entity )
+	{ 
 		// Push for deferred removal from active entities
 		mMarkedForDestruction.push_back(entity);
 	}
@@ -468,17 +500,22 @@ namespace Enjon {
 		// Move through dirty list and remove from active entities
 		for (auto& e : mMarkedForDestruction)
 		{
-			// Destroy all components
-			for (auto& c : e->mComponents)
+			Entity* ent = e.Get( );
+			if ( ent )
 			{
-				c->Destroy();
+				// Destroy all components
+				for (auto& c : ent->mComponents)
+				{
+					c->Destroy();
+				}
+
+				// Reset entity
+				ent->Reset();
+
+				// Remove from active entities
+				mActiveEntities.erase(std::remove(mActiveEntities.begin(), mActiveEntities.end(), ent), mActiveEntities.end()); 
 			}
 
-			// Reset entity
-			e->Reset();
-
-			// Remove from active entities
-			mActiveEntities.erase(std::remove(mActiveEntities.begin(), mActiveEntities.end(), e), mActiveEntities.end());
 		}
 
 		mMarkedForDestruction.clear();
@@ -499,62 +536,9 @@ namespace Enjon {
 	}
 
 	//--------------------------------------------------------------
-	b8 EntityManager::CompareEntityIDs(const Entity* a, const Entity* b)
-	{
-		return a->mID < b->mID;	
-	}
-
-	//--------------------------------------------------------------
-	void EntityManager::AddToParentHierarchy(Entity* entity)
-	{
-		if (entity == nullptr) return;
-
-		// Add to parent hierarchy list
-		// Does this need to check if entity already exists?
-
-		if (std::find(mEntityParentHierarchy.begin(), mEntityParentHierarchy.end(), entity) == mEntityParentHierarchy.end() && entity->mID < MAX_ENTITIES)
-		{
-			mEntityParentHierarchy.push_back(entity);
-		}
-
-		// Sort list
-		std::stable_sort(mEntityParentHierarchy.begin(), mEntityParentHierarchy.end(), CompareEntityIDs);	
-	}
-
-	//--------------------------------------------------------------
-	void EntityManager::RemoveFromParentHierarchyList(Entity* entity, b8 toBeDestroyed)
-	{
-		// Some checks need to be made here
-		if (entity == nullptr) return;
-
-		// Find and erase from hierarchy
-		// TODO(): Make sure this uses binary search for speed up
-		mEntityParentHierarchy.erase(std::remove(mEntityParentHierarchy.begin(), mEntityParentHierarchy.end(), entity), mEntityParentHierarchy.end());
-
-		// Check if entity is to be destroyed this frame or not
-		// If not to be destroyed, then this entity is being attached to another as a child
-		// and its children will come along with it
-		if (toBeDestroyed)
-		{
-			// If children, add them to parent hierarchy as free nodes
-			if (entity->HasChildren())
-			{
-				for (auto& c : entity->mChildren)
-				{
-					AddToParentHierarchy(c);	
-				}
-			}
-		}
-	}
-
-	//--------------------------------------------------------------
 	void EntityManager::UpdateAllActiveTransforms(f32 dt)
-	{
-		// Iterate though parent hierarchy and calculate transforms
-		for (auto& p : mEntityParentHierarchy)
-		{
-			p->PropagateTransform(dt);
-		}
+	{ 
+		// Does nothing for now
 	}
 }
 

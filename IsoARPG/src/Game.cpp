@@ -206,14 +206,14 @@ Enjon::Result Game::Initialize()
 	mRed = mEntities->Allocate( );
 	mBlue = mEntities->Allocate( );
 	mGun = mEntities->Allocate( );
-	auto gc = mGun->Attach<Enjon::GraphicsComponent>(); 
-	auto pc = mGun->Attach<Enjon::PointLightComponent>(); 
-	auto oc = mGun->Attach<OtherComponent>(); 
-	auto omc = mGun->Attach<OneMoreComponent>(); 
+	auto gc = mGun.Get()->Attach<Enjon::GraphicsComponent>(); 
+	auto pc = mGun.Get()->Attach<Enjon::PointLightComponent>(); 
+	auto oc = mGun.Get()->Attach<OtherComponent>(); 
+	auto omc = mGun.Get()->Attach<OneMoreComponent>(); 
 
-	mRed->Attach< Enjon::GraphicsComponent >( );
-	mGreen->Attach< Enjon::GraphicsComponent >( );
-	mBlue->Attach< Enjon::GraphicsComponent >( );
+	mRed.Get()->Attach< Enjon::GraphicsComponent >( );
+	mGreen.Get()->Attach< Enjon::GraphicsComponent >( );
+	mBlue.Get()->Attach< Enjon::GraphicsComponent >( );
 
 	pc->GetLight( )->SetPosition( Enjon::Vec3( 10.0f, 2.0f, 4.0f ) );
 	pc->GetLight( )->SetIntensity( 200.0f );
@@ -228,8 +228,8 @@ Enjon::Result Game::Initialize()
 	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.emissive"));
 	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.emissive"));
 
-	mGun->SetPosition(Enjon::Vec3(0.0f, 0.0f, 0.0f));
-	mGun->SetRotation( Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ) );
+	mGun.Get()->SetPosition(Enjon::Vec3(0.0f, 0.0f, 0.0f));
+	mGun.Get()->SetRotation( Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ) );
 	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("isoarpg.models.teapot"));
 	gc->SetMaterial(mGunMat);
 
@@ -280,21 +280,21 @@ Enjon::Result Game::Initialize()
 	mFontMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
 	mFontMat->TwoSided( true );
 
-	mGreen->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mGreenMat );
-	mGreen->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("isoarpg.models.unit_cube" ) );
-	mRed->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mRedMat );
-	mRed->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("isoarpg.models.unit_cube" ) );
-	mBlue->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mBlueMat );
-	mBlue->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("isoarpg.models.unit_cube" ) );
+	mGreen.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mGreenMat );
+	mGreen.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("isoarpg.models.unit_cube" ) );
+	mRed.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mRedMat );
+	mRed.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("isoarpg.models.unit_cube" ) );
+	mBlue.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mBlueMat );
+	mBlue.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("isoarpg.models.unit_cube" ) );
 
-	mGun->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 0, 5, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 1.5f ) ) );
-	mGreen->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 0, 7, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.5f ) ) );
-	mRed->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 5, 7, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.25f ) ) );
-	mBlue->SetLocalTransform( Enjon::Transform( Enjon::Vec3( -5, 7, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.25f ) ) );
+	mGun.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 0, 5, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 1.5f ) ) );
+	mGreen.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 0, 7, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.5f ) ) );
+	mRed.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 5, 7, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.25f ) ) );
+	mBlue.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( -5, 7, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.25f ) ) );
 
-	mGun->AddChild( mGreen ); 
-	mGreen->AddChild( mRed );
-	mGreen->AddChild( mBlue ); 
+	mGun.Get()->AddChild( mGreen ); 
+	mGreen.Get()->AddChild( mRed );
+	mGreen.Get()->AddChild( mBlue ); 
 
 	mBatch = new Enjon::QuadBatch();
 	mBatch->Init();
@@ -328,9 +328,9 @@ Enjon::Result Game::Initialize()
 		scene->AddDirectionalLight(mSun2);
 		scene->AddRenderable(gc->GetRenderable());
 		scene->AddPointLight( pc->GetLight( ) );
-		scene->AddRenderable( mGreen->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
-		scene->AddRenderable( mRed->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
-		scene->AddRenderable( mBlue->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
+		scene->AddRenderable( mGreen.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+		scene->AddRenderable( mRed.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+		scene->AddRenderable( mBlue.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
 		scene->AddQuadBatch(mBatch);
 		scene->AddQuadBatch(mTextBatch);
 		scene->SetSun(mSun);
@@ -350,9 +350,9 @@ Enjon::Result Game::Initialize()
 		if (ImGui::BeginDock("Entities", &mShowEntities))
 		{
 			ImGui::Text( "Gun:" );
-			auto position 	= mGun->GetLocalPosition();
-			auto scale 		= mGun->GetLocalScale();
-			auto rotation 	= mGun->GetLocalRotation();
+			auto position 	= mGun.Get( )->GetLocalPosition();
+			auto scale 		= mGun.Get( )->GetLocalScale();
+			auto rotation 	= mGun.Get( )->GetLocalRotation();
 
 			f32 pos[] = {position.x, position.y, position.z}; 
 			f32 scl[] = {scale.x, scale.y, scale.z}; 
@@ -362,14 +362,14 @@ Enjon::Result Game::Initialize()
 			ImGui::InputFloat3("Scale", scl);
 			ImGui::InputFloat3("Rotation", rot);
 
-			mGun->SetPosition(v3(pos[0], pos[1], pos[2]));
-			mGun->SetScale(v3(scl[0], scl[1], scl[2]));
-			mGun->SetRotation(quat(rot[0], rot[1], rot[2], rotation.w));
+			mGun.Get( )->SetPosition(v3(pos[0], pos[1], pos[2]));
+			mGun.Get( )->SetScale(v3(scl[0], scl[1], scl[2]));
+			mGun.Get( )->SetRotation(quat(rot[0], rot[1], rot[2], rotation.w));
 
-			for ( auto c : mGun->GetChildren( ) )
+			for ( auto c : mGun.Get( )->GetChildren( ) )
 			{
 				ImGui::Text( "Child Local:" );
-				Enjon::Transform trans = c->GetLocalTransform( );
+				Enjon::Transform trans = c.Get( )->GetLocalTransform( );
 				auto position 	= trans.Position;
 				auto scale 		= trans.Scale;
 				auto rotation 	= trans.Rotation;
@@ -378,17 +378,17 @@ Enjon::Result Game::Initialize()
 				f32 scl[] = {scale.x, scale.y, scale.z}; 
 				f32 rot[] = {rotation.x, rotation.y, rotation.z}; 
 
-				ImGui::PushID( c->GetID( ) );
+				ImGui::PushID( c.GetID( ) );
 				ImGui::InputFloat3("Position", pos);
 				ImGui::InputFloat3("Scale", scl);
 				ImGui::InputFloat3("Rotation", rot);
 				ImGui::PopID( ); 
 			}
 			
-			for ( auto c : mGun->GetChildren( ) )
+			for ( auto c : mGun.Get( )->GetChildren( ) )
 			{
 				ImGui::Text( "Child World:" );
-				Enjon::Transform trans = c->GetWorldTransform( );
+				Enjon::Transform trans = c.Get( )->GetWorldTransform( );
 				auto position 	= trans.Position;
 				auto scale 		= trans.Scale;
 				auto rotation 	= trans.Rotation;
@@ -397,7 +397,7 @@ Enjon::Result Game::Initialize()
 				f32 scl[] = {scale.x, scale.y, scale.z}; 
 				f32 rot[] = {rotation.x, rotation.y, rotation.z}; 
 
-				ImGui::PushID( c->GetID( ) );
+				ImGui::PushID( c.GetID( ) );
 				ImGui::InputFloat3("Position", pos);
 				ImGui::InputFloat3("Scale", scl);
 				ImGui::InputFloat3("Rotation", rot);
@@ -436,10 +436,10 @@ Enjon::Result Game::Initialize()
 
 			ImGui::SliderFloat( "FontScale", &mFontSize, 0.05f, 5.0f );
 
-			char buf[ 256 ];
-			std::strncpy( buf, mWorldString.c_str( ), 256 );
-			ImGui::InputText( "World String", buf, 256 );
-			mWorldString = Enjon::String( buf );
+			//char buf[ 256 ];
+			//std::strncpy( buf, mWorldString.c_str( ), 256 );
+			//ImGui::InputText( "World String", buf, 256 );
+			//mWorldString = Enjon::String( buf );
 		}
 
 		ImGui::EndDock();
@@ -503,32 +503,32 @@ Enjon::Result Game::Initialize()
 	}
 
 	fmt::print( "Entity Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Entity >() ); 
-	fmt::print( "Instance of Entity ID: {}\n", mGun->GetTypeId() ); 
+	fmt::print( "Instance of Entity ID: {}\n", mGun.Get( )->GetTypeId() ); 
 
 	fmt::print( "GraphicsComponent Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::GraphicsComponent >() ); 
-	fmt::print( "Instance of GraphicsComponent ID: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>()->GetTypeId() ); 
+	fmt::print( "Instance of GraphicsComponent ID: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetTypeId() ); 
 	
 	fmt::print( "PointlightComponent Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::PointLightComponent >() ); 
-	fmt::print( "Instance of PointlightComponent ID: {}\n", mGun->GetComponent<Enjon::PointLightComponent>()->GetTypeId() ); 
+	fmt::print( "Instance of PointlightComponent ID: {}\n", mGun.Get( )->GetComponent<Enjon::PointLightComponent>()->GetTypeId() ); 
 	
 	fmt::print( "Material Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Material >() ); 
-	fmt::print( "Instance of Material ID: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTypeId() ); 
+	fmt::print( "Instance of Material ID: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTypeId() ); 
 	
 	fmt::print( "Mesh Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Mesh >() ); 
-	fmt::print( "Instance of Mesh ID: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>()->GetMesh().Get()->GetTypeId() ); 
+	fmt::print( "Instance of Mesh ID: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetMesh().Get()->GetTypeId() ); 
 	
 	fmt::print( "Texture Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >() ); 
-	fmt::print( "Instance of Texture ID: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTexture( Enjon::TextureSlotType::Albedo ).Get()->GetTypeId() ); 
+	fmt::print( "Instance of Texture ID: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTexture( Enjon::TextureSlotType::Albedo ).Get()->GetTypeId() ); 
 	
 	fmt::print( "Texture Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >() ); 
-	fmt::print( "Instance of Texture ID: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTexture( Enjon::TextureSlotType::Normal ).Get()->GetTypeId() ); 
+	fmt::print( "Instance of Texture ID: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTexture( Enjon::TextureSlotType::Normal ).Get()->GetTypeId() ); 
 
-	fmt::print( "Same: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >( ) == mGun->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTypeId( ) );
+	fmt::print( "Same: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >( ) == mGun.Get( )->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTypeId( ) );
  
-	fmt::print( "Name: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTypeName( ) );
-	fmt::print( "Name: {}\n", mGun->GetComponent<Enjon::GraphicsComponent>()->GetTypeName() ); 
+	fmt::print( "Name: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTypeName( ) );
+	fmt::print( "Name: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetTypeName() ); 
 	
-	for ( auto& c : mGun->GetComponents( ) )
+	for ( auto& c : mGun.Get( )->GetComponents( ) )
 	{
 		fmt::print( "{} is instance of graphics component: {}\n", c->GetTypeName( ), c->InstanceOf< Enjon::GraphicsComponent >( ) );
 	}
@@ -536,32 +536,6 @@ Enjon::Result Game::Initialize()
 	
 	
 	return Enjon::Result::SUCCESS; 
-}
-
-//-------------------------------------------------------------
-void Game::ListEntityChildren(Enjon::Entity* entity, u32 indentAmount)
-{
-	for (auto& c : entity->GetChildren())
-	{
-		// Formatting
-		for (u32 i = 0; i < indentAmount; ++i)
-		{
-			ImGui::Text("\t");
-		}
-
-		ImGui::SameLine();
-		ImGui::Text("%d", c->GetID());
-
-		ImGui::SameLine();
-    	if (ImGui::Button("-"))
-    	{
-    		mEntities->Destroy(c);
-    	}
-
-		// List all children recursively
-		ListEntityChildren(c, indentAmount + 1);
-	}
-
 }
 
 //-------------------------------------------------------------
@@ -584,15 +558,15 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 	Enjon::GraphicsComponent* gc2 	= nullptr;
 	Enjon::GraphicsComponent* gc3 	= nullptr; 
 
-	if ( mGun ) 
+	if ( mGun.Get( ) ) 
 	{
-		mGun->SetRotation( Enjon::Quaternion::AngleAxis( t * 5.0f, Enjon::Vec3::ZAxis( ) ) 
+		mGun.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 5.0f, Enjon::Vec3::ZAxis( ) ) 
 							* Enjon::Quaternion::AngleAxis( t * 5.0f, Enjon::Vec3::YAxis() ) );
 	} 
 
-	mGreen->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::YAxis( ) ) );
-	mRed->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
-	mBlue->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
+	mGreen.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::YAxis( ) ) );
+	mRed.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
+	mBlue.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
 
 	// Physics simulation
 	mDynamicsWorld->stepSimulation(1.f/60.f, 10);
@@ -634,7 +608,6 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 			auto gfx = e->GetComponent< Enjon::GraphicsComponent >( );
 			gfx->SetTransform( e->GetWorldTransform( ) );
 		}
-		//e->UpdateComponentTransforms(dt);
 	}
 
 	return Enjon::Result::PROCESS_RUNNING;
@@ -723,7 +696,8 @@ Enjon::Result Game::ProcessInput(f32 dt)
 			body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
 			body->setDamping(0.7f, 0.7f);
 
-			Enjon::Entity* ent = mEntities->Allocate();
+			Enjon::EntityHandle handle = mEntities->Allocate( );
+			Enjon::Entity* ent = handle.Get( );
 			Enjon::GraphicsComponent* gc = ent->Attach<Enjon::GraphicsComponent>();
 			ent->SetScale(v3(scalar));
 			gc->SetMesh(mSphereMesh);

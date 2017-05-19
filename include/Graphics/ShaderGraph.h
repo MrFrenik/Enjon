@@ -41,6 +41,104 @@ namespace Enjon
 
 	class ShaderGraphNode
 	{
+		class Connection
+		{
+			public: 
+			/**
+			* @brief Constructor
+			*/
+			Connection( );
+			
+			/**
+			* @brief Constructor
+			*/
+			Connection( const Enjon::String& name );
+
+			/**
+			* @brief Destructor
+			*/
+			~Connection( );
+
+			/**
+			* @brief
+			*/
+			Enjon::String EvaluateToGLSL( );
+
+			/*
+			* @brief
+			*/
+			void ConnectWith( const Connection* connection );
+
+			/*
+				ShaderMutiplyNode
+				{
+					ShaderMutiplyNode( const Enjon::String& id )
+						: mID( id )
+					{
+						mOutput = Connection( "Output" );
+						mInputA = Connection( "Input A" );
+						mInputB = Connection( "Input B" );
+					}
+
+					private:
+
+						// Output
+						Connection mOutput;
+
+						// Inputs
+						Connection mInputA;
+						Connection mInputB; 
+				};
+
+				ShaderFloatNode
+				{
+					ShaderFloatNode( const Enjon::String& id )
+						: mID( id )
+					{
+						mOutput = Connection( "Value" );
+					}
+
+					private:
+					Connection mOutput;
+				}
+				
+				ShaderTexture2DNode
+				{
+					ShaderTexture2DNode( const Enjon::String& id )
+						: mID( id )
+					{
+						mRGBOutput = Connection( "RGB" ); 
+						mROutput = Connection( "R" );
+						mGOutput = Connection( "G" );
+						mBOutput = Connection( "B" );
+						mAOutput = Connection( "A" );
+						mUVInput = Connection( "UV" );
+					}
+
+					private:
+					Connection mRGBOutput;
+					Connection mROutput;
+					Connection mGOutput;
+					Connection mBOutput;
+					Connection mAOutput;
+
+					Connection mUVInput;
+				};
+
+
+				ShaderMultiplyNode mult1( "mult1 );
+				ShaderTexture2DNode tex1( "tex2" );
+				ShaderFloatNOde fl1( "fl1" );
+
+				mult1.mInputA.ConnectWith( &tex1.mROutput );
+				mult1.mInputB.ConnectWith( &fl1.mOutput ); 
+			*/
+
+			private:
+				Enjon::String mConnectionID;
+				const Connection* mConnection;
+		};
+
 		public:
 			/**
 			* @brief Constructor

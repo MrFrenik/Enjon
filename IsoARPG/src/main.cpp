@@ -9682,6 +9682,7 @@ int main(int argc, char** argv)
 #undef main
 Enjon::s32 main(Enjon::s32 argc, char** argv)
 {
+	/*
 	Enjon::Engine mEngine;
 	Enjon::EngineConfig mConfig;
 	Game mGame; 
@@ -9691,6 +9692,7 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 
 	// Startup engine
 	mEngine.StartUp(&mGame, mConfig); 
+	*/
 
 	// Make a shader graph
 	Enjon::ShaderGraph graph;
