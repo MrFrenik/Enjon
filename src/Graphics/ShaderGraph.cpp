@@ -5,15 +5,18 @@
 
 namespace Enjon
 {
-	ShaderGraph::ShaderGraph( ) 
+	ShaderGraph::ShaderGraph( )
 	{
 		// Add main node by default
 		AddNode( &mMainNode );
+
+		// Set shader graph output to empty string
+		mShaderCodeOutput = "";
 	}
 
 	//===============================================================================================
 
-	ShaderGraph::~ShaderGraph( ) 
+	ShaderGraph::~ShaderGraph( )
 	{
 	}
 
@@ -28,7 +31,7 @@ namespace Enjon
 		}
 
 		return node;
-	} 
+	}
 
 	//===============================================================================================
 
@@ -44,7 +47,7 @@ namespace Enjon
 	}
 
 	//===============================================================================================
-			
+
 	bool ShaderGraph::VariableExists( const Enjon::String& var )
 	{
 		auto query = mRegisteredVariables.find( var );
@@ -62,34 +65,70 @@ namespace Enjon
 			RecurseThroughChildrenAndBuildVariables( n );
 		}
 
-		// Formatting
-		std::cout << "\n";
+		// Begin declarations
+		mShaderCodeOutput += "// Declarations and Uniforms \n";
 
-		// Defines on start
-		for ( auto& n : mDefinesOnStart )
+		// Output declarations
+		for ( auto& var : mDeclarations )
 		{
-			Enjon::String def = n->GetDefinition( );
-			std::cout << def << "\n";
+			 // Outputting variables
+			mShaderCodeOutput +=  var + "\n";
 		}
-	} 
+
+		// Output fragment main
+		BeginFragmentMain( ); 
+		{ 
+			// Defines on start
+			for ( auto& n : mDefinesOnStart )
+			{
+				mShaderCodeOutput += const_cast< ShaderGraphNode* >( n )->GetDefinition( ) + "\n";
+			} 
+
+			// Albedo
+			mShaderCodeOutput += mMainNode.Evaluate( );
+		} 
+		EndFragmentMain( );
+	}
 
 	//===============================================================================================
-			
+
+	void ShaderGraph::BeginFragmentMain( )
+	{
+		mShaderCodeOutput += "\n// Fragment Main\n";
+		mShaderCodeOutput += "void main() \n{\n";
+	}
+
+	//===============================================================================================
+
+	void ShaderGraph::EndFragmentMain( )
+	{
+		mShaderCodeOutput += "\n}\n";
+	}
+
+	//===============================================================================================
+
 	void ShaderGraph::RegisterVariable( const Enjon::String& var )
 	{
 		mRegisteredVariables.insert( var );
-	} 
+	}
 
 	//===============================================================================================
-			
+		
+	void ShaderGraph::RegisterDeclaration( const Enjon::String& decl )
+	{
+		mDeclarations.insert( decl );
+	}
+
+	//===============================================================================================
+
 	void ShaderGraph::UnregisterVariable( const Enjon::String& var )
 	{
 		mRegisteredVariables.erase( var );
 	}
 
 	//===============================================================================================
-			
-	void ShaderGraph::RegisterRequiredDefinitions( ShaderGraphNode* node )
+
+	void ShaderGraph::RegisterRequiredDefinitions( const ShaderGraphNode* node )
 	{
 		auto query = mDefinesOnStart.find( node );
 		if ( query == mDefinesOnStart.end( ) )
@@ -100,7 +139,14 @@ namespace Enjon
 
 	//===============================================================================================
 
-	void ShaderGraph::RecurseThroughChildrenAndBuildVariables( ShaderGraphNode* node )
+	void ShaderGraph::Connect( const ShaderGraphNode::Connection& connection )
+	{
+		mMainNode.AddInput( connection );
+	}
+
+	//===============================================================================================
+
+	void ShaderGraph::RecurseThroughChildrenAndBuildVariables( const ShaderGraphNode* node )
 	{
 		// Make sure node is valid
 		if ( node == nullptr )
@@ -111,24 +157,24 @@ namespace Enjon
 		// Recurse through children
 		for ( auto& n : *node->GetInputs( ) )
 		{
-			RecurseThroughChildrenAndBuildVariables( n );
+			RecurseThroughChildrenAndBuildVariables( n.mOwner );
 		}
 
 		// Register variable name if not already used 
 		if ( !VariableExists( node->GetID( ) ) )
-		{ 
+		{
 			RegisterVariable( node->GetID( ) );
-			std::cout << node->GetDeclaration( ) << "\n"; 
+
+			RegisterDeclaration( const_cast< ShaderGraphNode* >( node )->GetDeclaration( ) ); 
 
 			// If is of appropriate type, then push into defines on main begin
 			if ( node->GetPrimitiveType( ) == ShaderPrimitiveType::Texture2D )
 			{
 				RegisterRequiredDefinitions( node );
 			}
-		} 
-	} 
+		}
+	}
 }
-
 
 
 

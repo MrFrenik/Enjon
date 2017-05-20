@@ -9707,56 +9707,21 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 	Enjon::ShaderVec4Node* vec41 = graph.AddNode( new Enjon::ShaderVec4Node( "vec41", Enjon::Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) ) )->Cast< Enjon::ShaderVec4Node >( );
 
 	// Set up inputs to nodes
-	mult1->AddInput( vec41 );
-	mult1->AddInput( tex1 ); 
-	
-	mult2->AddInput( tex1 );
-	mult2->AddInput( uf1 );
-	
-	mult4->AddInput( mult1 );
-	mult4->AddInput( mult2 );
+	mult1->AddInput( Enjon::ShaderGraphNode::Connection( uf1 ) );
+	mult1->AddInput( Enjon::ShaderGraphNode::Connection( tex1, 0, (u32)Enjon::ShaderTexture2DNode::TexturePortType::G ) ); 
 
-	mult3->AddInput( mult1 );
-	mult3->AddInput( mult4 ); 
+	mult2->AddInput( Enjon::ShaderGraphNode::Connection( uf3 ) );
+	mult2->AddInput( Enjon::ShaderGraphNode::Connection( tex1, (u32)Enjon::ShaderTexture2DNode::TexturePortType::B ) );
+
+	// Add inputs to main node
+	graph.Connect( Enjon::ShaderGraphNode::Connection( mult1, (u32)Enjon::ShaderGraphMainNodeInputType::Albedo ) ); 
 
 	// Compile graph
 	graph.Compile( );
 
 	// Output glsl of mult3
-	Enjon::String glsl = mult3->EvaluateToGLSL( );
-
-	// ShaderGraph holds all nodes for a relavant graph
-	// In check stage, run through all nodes to find leaf nodes
-	// All nodes will hold reference to shader graph
-	// When evaulating to glsl, need to check shader graph to see if previous variable was defined already for this leaf node
-	// ex. Don't want to sample a texture twice
-	// Shader graph holds all memory for nodes, responsible for cleaning up when done
-
-	/*
-		Enjon::ShaderGraph graph;
-		graph.Begin( );		// Not sure what is done in this step...
-		{
-			auto mult1	= graph.AddNode( new Enjon::MultiplyNode );
-			auto mult2	= graph.AddNode( new Enjon::MultiplyNode );
-			auto tex1	= graph.AddNode( new Enjon::Texture2DNode( "uAlbedo" ) );
-			auto tex2	= graph.AddNode( new Enjon::Texture2DNode( "uNormal" ) );
-			auto uf1	= graph.AddNode( new Enjon::UniformFloatNode( 1.0f ) );
-			auto uf2	= graph.AddNode( new Enjon::UniformFloatNode( 2.5f ) );
-
-			// Set up inputs for nodes
-			mult1.AddInput( tex1 );
-			mult1.AddInput( uf1 );
-			mult2.AddInput( mult1 );
-			mult2.AddInput( uf2 );
-
-			graph.SetInput( Enjon::ShaderInput::Albedo, mult1 );
-			graph.SetInput( Enjon::ShaderInput::Normal, tex2 );
-			graph.SetInput( Enjon::ShaderInput::Metallic, uf2 );
-		}
-		graph.End( );		// Not sure what's done here either...
-		graph.Build( );		// Parses graph and outputs appropriate glsl 
-	*/ 
-
+	Enjon::String glsl = graph.GetShaderOutput( );
+ 
 	std::cout << glsl << "\n"; 
 
 	/*

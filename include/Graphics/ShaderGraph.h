@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace Enjon
-{ 
+{
 	// These do not necessary need to evaluate to executable code, 
 	// they just need to evaluate to glsl
 
@@ -41,222 +41,155 @@ namespace Enjon
 
 	class ShaderGraphNode
 	{
-		class Connection
-		{
-			public: 
-			/**
-			* @brief Constructor
-			*/
-			Connection( );
-			
-			/**
-			* @brief Constructor
-			*/
-			Connection( const Enjon::String& name );
+		public:
+			class Connection
+			{
+				public:
+					Connection( ) {}
 
-			/**
-			* @brief Destructor
-			*/
-			~Connection( );
-
-			/**
-			* @brief
-			*/
-			Enjon::String EvaluateToGLSL( );
-
-			/*
-			* @brief
-			*/
-			void ConnectWith( const Connection* connection );
-
-			/*
-				ShaderMutiplyNode
-				{
-					ShaderMutiplyNode( const Enjon::String& id )
-						: mID( id )
+					Connection( const ShaderGraphNode* owner, u32 inputPortID = 0, u32 outputPortID = 0 ) 
+						: mOwner( owner ), mInputPortID( inputPortID ), mOutputPortID( outputPortID )
 					{
-						mOutput = Connection( "Output" );
-						mInputA = Connection( "Input A" );
-						mInputB = Connection( "Input B" );
 					}
+					~Connection( ) {}
 
-					private:
+					u32 mInputPortID = 0;
+					u32 mOutputPortID = 0;
+					const ShaderGraphNode* mOwner = nullptr;
 
-						// Output
-						Connection mOutput;
-
-						// Inputs
-						Connection mInputA;
-						Connection mInputB; 
-				};
-
-				ShaderFloatNode
-				{
-					ShaderFloatNode( const Enjon::String& id )
-						: mID( id )
-					{
-						mOutput = Connection( "Value" );
-					}
-
-					private:
-					Connection mOutput;
-				}
-				
-				ShaderTexture2DNode
-				{
-					ShaderTexture2DNode( const Enjon::String& id )
-						: mID( id )
-					{
-						mRGBOutput = Connection( "RGB" ); 
-						mROutput = Connection( "R" );
-						mGOutput = Connection( "G" );
-						mBOutput = Connection( "B" );
-						mAOutput = Connection( "A" );
-						mUVInput = Connection( "UV" );
-					}
-
-					private:
-					Connection mRGBOutput;
-					Connection mROutput;
-					Connection mGOutput;
-					Connection mBOutput;
-					Connection mAOutput;
-
-					Connection mUVInput;
-				};
-
-
-				ShaderMultiplyNode mult1( "mult1 );
-				ShaderTexture2DNode tex1( "tex2" );
-				ShaderFloatNOde fl1( "fl1" );
-
-				mult1.mInputA.ConnectWith( &tex1.mROutput );
-				mult1.mInputB.ConnectWith( &fl1.mOutput ); 
-			*/
-
-			private:
-				Enjon::String mConnectionID;
-				const Connection* mConnection;
-		};
+				private:
+			};
 
 		public:
-			/**
-			* @brief Constructor
-			*/
-			ShaderGraphNode( const Enjon::String& id )
-				: mID( id )
+		/**
+		* @brief Constructor
+		*/
+		ShaderGraphNode( const Enjon::String& id )
+			: mID( id )
+		{
+		}
+
+		/**
+		* @brief Destructor
+		*/
+		~ShaderGraphNode( ) {}
+
+		/**
+		* @brief Destructor
+		*/
+		void Execute( )
+		{
+		}
+
+		template <typename T>
+		T* Cast( )
+		{
+			return static_cast<T*>( this );
+		}
+
+
+		/**
+		* @brief
+		*/
+		Enjon::String Evaluate( )
+		{
+			if ( mState == ShaderNodeState::Ready )
 			{
+				mState = ShaderNodeState::Evaulated;
+				return EvaluateToGLSL( );
 			}
 
-			/**
-			* @brief Destructor
-			*/
-			~ShaderGraphNode( ) {}
+			return "";
+		}
 
-			/**
-			* @brief Destructor
-			*/
-			void Execute( )
-			{ 
-			}
-			
-			template <typename T>
-			T* Cast( )
-			{
-				return static_cast<T*>( this );
-			} 
+		// Must be evaluated first
+		virtual Enjon::String EvaluateAtPort( u32 portID )
+		{
+			return "";
+		}
 
-			/**
-			* @brief
-			*/
-			Enjon::String Evaulate( )
+		/**
+		* @brief
+		*/
+		virtual Enjon::String EvaluateToGLSL( )
+		{
+			return "";
+		}
+
+		/**
+		* @brief
+		*/
+		virtual Enjon::String GetDeclaration( )
+		{
+			return "";
+		}
+
+		/**
+		* @brief
+		*/
+		Enjon::String GetID( ) const { return mID; }
+
+		/**
+		* @brief
+		*/
+		virtual Enjon::String GetQualifiedID( ) { return mID; }
+
+		/**
+		* @brief
+		*/
+		const std::vector< Connection >* GetInputs( ) const { return &mInputs; }
+
+		/**
+		* @brief
+		*/
+		ShaderPrimitiveType GetPrimitiveType( ) const { return mPrimitiveType; }
+
+		/**
+		* @brief
+		*/
+		ShaderNodeState GetState( ) const { return mState; }
+
+		/**
+		* @brief
+		*/
+		virtual Enjon::String GetDefinition( )
+		{
+			return "";
+		}
+
+		/**
+		* @brief
+		*/
+		void AddInput( Connection connection )
+		{
+			for ( auto& c : mInputs )
 			{
-				if ( mState == ShaderNodeState::Ready )
+				if ( connection.mOwner == c.mOwner )
 				{
-					mState = ShaderNodeState::Evaulated;
-					return EvaluateToGLSL( ); 
-				}
-
-				return "";
-			}
-
-			/**
-			* @brief
-			*/
-			virtual Enjon::String EvaluateToGLSL( )
-			{
-				return "";
-			}
-
-			/**
-			* @brief
-			*/
-			virtual Enjon::String GetDeclaration( )
-			{
-				return "";
-			}
-
-			/**
-			* @brief
-			*/
-			Enjon::String GetID( ) const { return mID; }
-			
-			/**
-			* @brief
-			*/
-			virtual Enjon::String GetQualifiedID( ) { return mID; }
-
-			/**
-			* @brief
-			*/
-			const std::vector< ShaderGraphNode* >* GetInputs( ) const { return &mInputs; }
-
-			/**
-			* @brief
-			*/
-			ShaderPrimitiveType GetPrimitiveType( ) const { return mPrimitiveType; }
-			
-			/**
-			* @brief
-			*/
-			ShaderNodeState GetState( ) const { return mState; }
-			
-			/**
-			* @brief
-			*/
-			virtual Enjon::String GetDefinition( )
-			{
-				return "";
-			}
-
-			/**
-			* @brief
-			*/
-			void AddInput( ShaderGraphNode* node )
-			{
-				auto query = std::find( mInputs.begin( ), mInputs.end( ), node );
-				if ( query == mInputs.end( ) && mInputs.size( ) < mMaxNumberInputs )
-				{
-					mInputs.push_back( node );
+					return;
 				}
 			}
 
-			/**
-			* @brief
-			*/
-			void RemoveInput( ShaderGraphNode* node );
+			mInputs.push_back( connection );
+		}
 
-		protected:
-			ShaderGraphNodeVariableType mVariableType = ShaderGraphNodeVariableType::LocalVariable;
-			ShaderPrimitiveType mPrimitiveType;
-			ShaderNodeState mState = ShaderNodeState::Ready;
-			u32 mMaxNumberInputs = 1;
-			std::vector< ShaderGraphNode* > mInputs;
-			Enjon::String mID;
+		/**
+		* @brief
+		*/
+		void RemoveInput( ShaderGraphNode* node );
+
+	protected:
+		ShaderGraphNodeVariableType mVariableType = ShaderGraphNodeVariableType::LocalVariable;
+		ShaderPrimitiveType mPrimitiveType;
+		ShaderNodeState mState = ShaderNodeState::Ready;
+		u32 mMaxNumberInputs = 1;
+		u32 mMaxNumberOutputs = 1;
+		std::vector< Connection > mInputs;
+		Enjon::String mID;
 	};
 
 	enum class ShaderGraphMainNodeInputType
-	{ 
+	{
 		Albedo,
 		Normal,
 		Metallic,
@@ -277,88 +210,198 @@ namespace Enjon
 			*/
 			ShaderGraphMainNode( )
 				: ShaderGraphNode( "MainNode" )
-			{ 
+			{
 				// Max number of inputs allowed for main node 
 				mMaxNumberInputs = u32( ShaderGraphMainNodeInputType::Count );
 
 				// Resize inputs to fit max
-				mInputs.resize( mMaxNumberInputs );
+				//mInputs.resize( mMaxNumberInputs );
 			}
-			
+
 			/**
 			* @brief
 			*/
 			~ShaderGraphMainNode( )
+			{
+			} 
+
+			/*
+			* @brief
+			*/
+			Enjon::String EvaluateToGLSL( ) override
 			{ 
+				// Evaluate basic for now
+				Enjon::String albedo = EvaluateAtPort( (u32)ShaderGraphMainNodeInputType::Albedo ) + "\n";
+
+				return albedo;
 			}
 
 		private:
+			/**
+			* @brief
+			*/
+			Enjon::String EvaluateAtPort( u32 idx )
+			{
+				switch ( ShaderGraphMainNodeInputType( idx ) )
+				{
+					case ShaderGraphMainNodeInputType::Albedo: 
+					{
+						// Evaluate connection at this port
+						for ( auto& c : mInputs )
+						{
+							// Find input to this
+							if ( c.mInputPortID == (u32) ShaderGraphMainNodeInputType::Albedo )
+							{
+								// String to return
+								Enjon::String albedoOutput = "";
+
+								// Get input node and evaluate
+								ShaderGraphNode* input = const_cast< ShaderGraphNode* >( c.mOwner ); 
+								albedoOutput += input->Evaluate( ) + "\n";
+
+								// Final output string
+								Enjon::String finalOutput = "AlbedoColorOut = ";
+								Enjon::String qid = input->GetQualifiedID( );
+
+								// Based on output type, need to format final output
+								switch ( input->GetPrimitiveType( ) )
+								{
+									case ShaderPrimitiveType::Float:
+									{
+										finalOutput += "vec4( " + qid + ", " + qid + ", " + qid + ", 1.0 );\n";
+									} break;
+
+									case ShaderPrimitiveType::Vec2:
+									{
+										finalOutput += "vec4( " + qid + ", " + "1.0, " + "1.0 );\n";
+									} break;
+									
+									case ShaderPrimitiveType::Vec3:
+									{
+										finalOutput += "vec4( " + qid + + ", 1.0 );\n";
+									} break;
+									
+									case ShaderPrimitiveType::Vec4:
+									{
+										finalOutput += qid + ";\n";
+									} break; 
+								}
+
+								// Final output
+								albedoOutput += finalOutput;
+
+								// return
+								return albedoOutput;
+							}
+						}
+
+					} break;
+
+					default:
+					{
+					} break;
+				}
+
+				return "Nothing valid found!"; 
+			}
+			
+
 	};
 
 	class ShaderGraph
 	{
-		public:
-			/**
-			* @brief Constructor
-			*/
-			ShaderGraph( );
+	public:
+		/**
+		* @brief Constructor
+		*/
+		ShaderGraph( );
 
-			/**
-			* @brief Destructor
-			*/
-			~ShaderGraph( ); 
+		/**
+		* @brief Destructor
+		*/
+		~ShaderGraph( );
 
-			/**
-			* @brief
-			*/
-			ShaderGraphNode* AddNode( ShaderGraphNode* node );
+		/**
+		* @brief
+		*/
+		ShaderGraphNode* AddNode( ShaderGraphNode* node );
 
-			/**
-			* @brief Removes node from graph and frees memory of node
-			*/
-			void RemoveNode( ShaderGraphNode* node );
+		/**
+		* @brief Removes node from graph and frees memory of node
+		*/
+		void RemoveNode( ShaderGraphNode* node );
 
-			/**
-			* @brief 
-			*/
-			void Reset( );
+		/**
+		* @brief
+		*/
+		void Reset( );
 
-			/**
-			* @brief
-			*/
-			void Compile( );
-			
-			/**
-			* @brief
-			*/
-			bool VariableExists( const Enjon::String& var );
-			
-			/**
-			* @brief
-			*/
-			void RegisterVariable( const Enjon::String& var );
+		/**
+		* @brief
+		*/
+		void Compile( );
 
-			/**
-			* @brief
-			*/
-			void RegisterRequiredDefinitions( ShaderGraphNode* node );
-	
-			/**
-			* @brief
-			*/
-			void UnregisterVariable( const Enjon::String& var );
+		/**
+		* @brief
+		*/
+		bool VariableExists( const Enjon::String& var );
 
-		private:
-			/**
-			* @brief
-			*/
-			void RecurseThroughChildrenAndBuildVariables( ShaderGraphNode* node );
+		/**
+		* @brief
+		*/
+		void RegisterVariable( const Enjon::String& var );
+		
+		/**
+		* @brief
+		*/
+		void RegisterDeclaration( const Enjon::String& var );
 
-		private:
-			ShaderGraphMainNode mMainNode;
-			std::set< ShaderGraphNode* > mNodes;
-			std::set< Enjon::String > mRegisteredVariables;
-			std::set< ShaderGraphNode* > mDefinesOnStart;
+		/**
+		* @brief
+		*/
+		void RegisterRequiredDefinitions( const ShaderGraphNode* node );
+
+		/**
+		* @brief
+		*/
+		void UnregisterVariable( const Enjon::String& var );
+		
+		/**
+		* @briefConnectionType
+		*/
+		Enjon::String GetShaderOutput( ) const 
+		{
+			return mShaderCodeOutput;
+		} 
+		
+		/**
+		* @brief
+		*/
+		void Connect( const ShaderGraphNode::Connection& connection );
+
+	private:
+		/**
+		* @brief
+		*/
+		void RecurseThroughChildrenAndBuildVariables( const ShaderGraphNode* node ); 
+
+		/*
+		* @Brief
+		*/
+		void BeginFragmentMain( );
+
+		/*
+		* @Brief
+		*/
+		void EndFragmentMain( );
+
+	private:
+		ShaderGraphMainNode mMainNode;
+		std::set< const ShaderGraphNode* > mNodes;
+		std::set< Enjon::String > mRegisteredVariables;
+		std::set< Enjon::String > mDeclarations;
+		std::set< const ShaderGraphNode* > mDefinesOnStart;
+		Enjon::String mShaderCodeOutput;
 	};
 
 	class ShaderGraphFunctionNode : public ShaderGraphNode
@@ -367,7 +410,7 @@ namespace Enjon
 		/**
 		* @brief Constructor
 		*/
-		ShaderGraphFunctionNode( const Enjon::String& id ) 
+		ShaderGraphFunctionNode( const Enjon::String& id )
 			: ShaderGraphNode( id )
 		{
 			mPrimitiveType = ShaderPrimitiveType::Float;
@@ -389,6 +432,9 @@ namespace Enjon
 			: ShaderGraphFunctionNode( id )
 		{
 			mMaxNumberInputs = 2;
+			mMaxNumberOutputs = 1;
+
+			//mInputs.resize( mMaxNumberInputs );
 		}
 
 		~BinaryFunctionNode( )
@@ -459,178 +505,253 @@ namespace Enjon
 		{
 			switch ( mVariableType )
 			{
-				case ShaderGraphNodeVariableType::LocalVariable: 
-				{
-					return GetQualifiedID( ) + " = " + std::to_string( mData ) + ";";
-				}
-				break;
+			case ShaderGraphNodeVariableType::LocalVariable:
+			{
+				return GetQualifiedID( ) + " = " + std::to_string( mData ) + ";";
+			}
+			break;
 
-				case ShaderGraphNodeVariableType::UniformVariable: 
-				{
-					return "";
-				}
-				break;
+			case ShaderGraphNodeVariableType::UniformVariable:
+			{
+				return "";
+			}
+			break;
 
-				default:
-				{ 
-					return "";
-				}
-				break;
+			default:
+			{
+				return "";
+			}
+			break;
 			}
 		}
-			
+
+		virtual Enjon::String EvaluateAtPort( u32 portID ) override
+		{
+			// Only one port, so return qualified id
+			return GetQualifiedID( );
+		}
+
 		virtual Enjon::String GetDeclaration( ) override
 		{
 			return ( "uniform float " + mID + ";" );
 		}
 
-		protected:
+	protected:
 	};
 
 	class ShaderVec4Node : public ShaderPrimitiveNode< Vec4 >
 	{
-		public:
-			ShaderVec4Node( const Enjon::String& id )
-				: ShaderPrimitiveNode( id )
+	public:
+		ShaderVec4Node( const Enjon::String& id )
+			: ShaderPrimitiveNode( id )
+		{
+			mPrimitiveType = ShaderPrimitiveType::Vec4;
+			mMaxNumberInputs = 4;
+		}
+
+		ShaderVec4Node( const Enjon::String& id, const Vec4& vec )
+			: ShaderPrimitiveNode( id )
+		{
+			mData = vec;
+			mMaxNumberInputs = 4;
+		}
+
+		~ShaderVec4Node( ) { }
+
+		Enjon::String EvaluateToGLSL( ) override
+		{
+			Enjon::String x = std::to_string( mData.x );
+			Enjon::String y = std::to_string( mData.y );
+			Enjon::String z = std::to_string( mData.z );
+			Enjon::String w = std::to_string( mData.w );
+
+			Enjon::String def = "vec4 " + GetQualifiedID( ) + " = vec4(" + x + ", " + y + ", " + z + ", " + w + ");";
+
+			switch ( mVariableType )
 			{
-				mPrimitiveType = ShaderPrimitiveType::Vec4;
-				mMaxNumberInputs = 4;
-			}
-
-			ShaderVec4Node( const Enjon::String& id, const Vec4& vec )
-				: ShaderPrimitiveNode( id )
+			case ShaderGraphNodeVariableType::LocalVariable:
 			{
-				mData = vec;
-				mMaxNumberInputs = 4;
+				return def;
 			}
+			break;
 
-			~ShaderVec4Node( ) { }
-
-			Enjon::String EvaluateToGLSL( ) override
+			case ShaderGraphNodeVariableType::UniformVariable:
 			{
-				Enjon::String x = std::to_string( mData.x );
-				Enjon::String y = std::to_string( mData.y );
-				Enjon::String z = std::to_string( mData.z );
-				Enjon::String w = std::to_string( mData.w );
-
-				Enjon::String def = "vec4 " + GetQualifiedID( ) + " = vec4(" + x + ", " + y + ", " + z + ", " + w + ");";
-
-				switch ( mVariableType )
-				{
-				case ShaderGraphNodeVariableType::LocalVariable:
-				{
-					return def;
-				}
-				break;
-
-				case ShaderGraphNodeVariableType::UniformVariable:
-				{
-					return "";
-				}
-				break;
-
-				default:
-				{
-					return "";
-				}
-				break;
-				}
+				return "";
 			}
-			
-			virtual Enjon::String GetDeclaration( ) override
+			break;
+
+			default:
 			{
-				return ( "vec4 " + mID + ";" ); 
+				return "";
 			}
+			break;
+			}
+		}
+
+		virtual Enjon::String GetDeclaration( ) override
+		{
+			return ( "vec4 " + mID + ";" );
+		}
 	};
 
 	class ShaderMultiplyNode : public BinaryFunctionNode
 	{
-		public:
-			ShaderMultiplyNode( const Enjon::String& id )
-				: BinaryFunctionNode( id )
-			{ 
-			}
+	public:
+		ShaderMultiplyNode( const Enjon::String& id )
+			: BinaryFunctionNode( id )
+		{
+		}
 
-			~ShaderMultiplyNode( )
-			{ 
-			}
+		~ShaderMultiplyNode( )
+		{
+		}
 
-			virtual Enjon::String EvaluateToGLSL( ) override
+		virtual Enjon::String EvaluateToGLSL( ) override
+		{
+			Enjon::String finalEvaluation = "";
+
+			// Evaluate inputs
+			for ( auto& c : mInputs )
 			{
-				Enjon::String inputA = mInputs.at( 0 )->Evaulate( );
-				Enjon::String inputB = mInputs.at( 1 )->Evaulate( ); 
-				return ( inputA + "\n"  + inputB + "\n" + GetQualifiedID( ) + " = " + mInputs.at( 0 )->GetQualifiedID( ) + " * " + mInputs.at( 1 )->GetQualifiedID( ) + ";" );
+				ShaderGraphNode* owner = const_cast<ShaderGraphNode*>( c.mOwner );
+				finalEvaluation += owner->Evaluate( ) + "\n"; 
 			}
 
-			virtual Enjon::String GetDeclaration( ) override
-			{
-				return ( "float " + mID + ";" ); 
-			}
+			// Get connections
+			Connection a_conn = mInputs.at( 0 );
+			Connection b_conn = mInputs.at( 1 );
 
-		protected:
+			// Get shader graph nodes
+			ShaderGraphNode* a = const_cast<ShaderGraphNode*>( a_conn.mOwner );
+			ShaderGraphNode* b = const_cast<ShaderGraphNode*>( b_conn.mOwner );
+
+			// Evaluate final line of code
+			finalEvaluation += GetQualifiedID( ) + " = " + a->EvaluateAtPort( a_conn.mOutputPortID ) + " * " + b->EvaluateAtPort( b_conn.mOutputPortID ) + ";";
+
+			// Return
+			return finalEvaluation;
+		}
+
+		virtual Enjon::String EvaluateAtPort( u32 portID ) override
+		{
+			// Multiply node only has one output, so just return its qualified id
+			return GetQualifiedID( );
+		}
+
+		virtual Enjon::String GetDeclaration( ) override
+		{
+			return ( "float " + mID + ";" );
+		}
+
+	protected:
 
 	};
- 
+
 	class ShaderTexture2DNode : public ShaderGraphNode
-	{ 
-		public:
-			/**
-			* @brief Constructor
-			*/
-			ShaderTexture2DNode( const Enjon::String& id )
-				: ShaderGraphNode( id )
-			{
-				mVariableType = ShaderGraphNodeVariableType::UniformVariable;
-				mPrimitiveType = ShaderPrimitiveType::Texture2D;
-				mMaxNumberInputs = 1;
-			}
+	{
+	public:
+		enum class TexturePortType
+		{
+			RGB,
+			R,
+			G,
+			B,
+			A
+		};
+		/**
+		* @brief Constructor
+		*/
+		ShaderTexture2DNode( const Enjon::String& id )
+			: ShaderGraphNode( id )
+		{
+			mVariableType = ShaderGraphNodeVariableType::UniformVariable;
+			mPrimitiveType = ShaderPrimitiveType::Texture2D;
+			mMaxNumberInputs = 1;
+			mMaxNumberOutputs = 5; 
+		}
 
-			/**
-			* @brief Destructor
-			*/
-			~ShaderTexture2DNode( )
-			{ 
-			}
+		/**
+		* @brief Destructor
+		*/
+		~ShaderTexture2DNode( )
+		{
+		}
 
-			/**
-			* @brief
-			*/
-			Enjon::String EvaluateToGLSL( ) override
-			{
-				// Already defined previously
-				return "";
-			}
-			
-			/**
-			* @brief
-			*/
-			virtual Enjon::String GetDeclaration( ) override
-			{
-				return ( "uniform sampler2D " + mID + ";" ); 
-			} 
+		/**
+		* @brief
+		*/
+		Enjon::String EvaluateToGLSL( ) override
+		{
+			// Already defined previously
+			return "";
+		}
 
-			/**
-			* @brief
-			*/
-			virtual Enjon::String GetDefinition( ) override
+		virtual Enjon::String EvaluateAtPort( u32 portID ) override
+		{
+			switch ( TexturePortType( portID ) )
 			{
-				return ( "vec4 " + mID + "_sample = texture(" + mID + ", texCoords);" );
-			}	
-			
-			/**
-			* @brief
-			*/
-			virtual Enjon::String GetQualifiedID( ) 
-			{ 
-				return mID + "_sample"; 
-			}
+				case TexturePortType::RGB: 
+				{
+					return GetQualifiedID( ) + ".rgb";
+				} break;
 
-		private:
-	}; 
+				case TexturePortType::R: 
+				{
+					return GetQualifiedID( ) + ".r";
+				} break;
+				
+				case TexturePortType::G: 
+				{
+					return GetQualifiedID( ) + ".g"; 
+				} break;
+				
+				case TexturePortType::B: 
+				{ 
+					return GetQualifiedID( ) + ".b"; 
+				} break;
+				
+				case TexturePortType::A: 
+				{
+					return GetQualifiedID( ) + ".a"; 
+				} break;
+
+				default:
+				{
+					return GetQualifiedID( );
+				} break;
+			}
+		}
+
+		/**
+		* @brief
+		*/
+		virtual Enjon::String GetDeclaration( ) override
+		{
+			return ( "uniform sampler2D " + mID + ";" );
+		}
+
+		/**
+		* @brief
+		*/
+		virtual Enjon::String GetDefinition( ) override
+		{
+			return ( "vec4 " + mID + "_sample = texture(" + mID + ", texCoords);" );
+		}
+
+		/**
+		* @brief
+		*/
+		virtual Enjon::String GetQualifiedID( )
+		{
+			return mID + "_sample";
+		}
+
+	private:
+	};
 }
 
 #endif
-
 
 
 
