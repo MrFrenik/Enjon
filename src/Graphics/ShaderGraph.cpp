@@ -162,9 +162,11 @@ namespace Enjon
 
 		// Register variable name if not already used 
 		if ( !VariableExists( node->GetID( ) ) )
-		{
-			RegisterVariable( node->GetID( ) );
+		{ 
+			// Register variable with graph
+			RegisterVariable( node->GetID( ) ); 
 
+			// Register variable declaration
 			RegisterDeclaration( const_cast< ShaderGraphNode* >( node )->GetDeclaration( ) ); 
 
 			// If is of appropriate type, then push into defines on main begin

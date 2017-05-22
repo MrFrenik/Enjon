@@ -9704,17 +9704,17 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 	Enjon::ShaderMultiplyNode* mult3 = graph.AddNode( new Enjon::ShaderMultiplyNode( "mult3" ) )->Cast< Enjon::ShaderMultiplyNode >( );
 	Enjon::ShaderMultiplyNode* mult4 = graph.AddNode( new Enjon::ShaderMultiplyNode( "mult4" ) )->Cast< Enjon::ShaderMultiplyNode >( );
 	Enjon::ShaderTexture2DNode* tex1 = graph.AddNode( new Enjon::ShaderTexture2DNode( "uAlbedoMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-	Enjon::ShaderVec4Node* vec41 = graph.AddNode( new Enjon::ShaderVec4Node( "vec41", Enjon::Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) ) )->Cast< Enjon::ShaderVec4Node >( );
+	Enjon::ShaderVec4Node* vec41 = graph.AddNode( new Enjon::ShaderVec4Node( "vec41", Enjon::Vec4( 0.23f, 0.0f, 1.0f, 1.0f ) ) )->Cast< Enjon::ShaderVec4Node >( );
 
 	// Set up inputs to nodes
-	mult1->AddInput( Enjon::ShaderGraphNode::Connection( uf1 ) );
-	mult1->AddInput( Enjon::ShaderGraphNode::Connection( tex1, 0, (u32)Enjon::ShaderTexture2DNode::TexturePortType::G ) ); 
-
-	mult2->AddInput( Enjon::ShaderGraphNode::Connection( uf3 ) );
-	mult2->AddInput( Enjon::ShaderGraphNode::Connection( tex1, (u32)Enjon::ShaderTexture2DNode::TexturePortType::B ) );
+	mult1->AddInput( Enjon::ShaderGraphNode::Connection( tex1, 0, (u32)Enjon::ShaderTexture2DNode::TexturePortType::G ) );
+	//mult1->AddInput( Enjon::ShaderGraphNode::Connection( tex1, 0, (u32)Enjon::ShaderTexture2DNode::TexturePortType::B ) ); 
+	mult1->AddInput( Enjon::ShaderGraphNode::Connection( vec41 ) ); 
 
 	// Add inputs to main node
 	graph.Connect( Enjon::ShaderGraphNode::Connection( mult1, (u32)Enjon::ShaderGraphMainNodeInputType::Albedo ) ); 
+
+	mult1->EvaluateOutputType( );
 
 	// Compile graph
 	graph.Compile( );

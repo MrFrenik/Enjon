@@ -33,6 +33,16 @@ namespace Enjon
 		Integer
 	};
 
+	enum class ShaderOutputType
+	{
+		Float,
+		Vec3,
+		Vec2,
+		Vec4,
+		Mat4,
+		Integer
+	};
+
 	enum class ShaderNodeState
 	{
 		Ready,
@@ -102,10 +112,15 @@ namespace Enjon
 			return "";
 		}
 
+		virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 )
+		{ 
+			return mOutputType;
+		}
+
 		// Must be evaluated first
 		virtual Enjon::String EvaluateAtPort( u32 portID )
 		{
-			return "";
+			return mID;
 		}
 
 		/**
@@ -161,15 +176,7 @@ namespace Enjon
 		* @brief
 		*/
 		void AddInput( Connection connection )
-		{
-			for ( auto& c : mInputs )
-			{
-				if ( connection.mOwner == c.mOwner )
-				{
-					return;
-				}
-			}
-
+		{ 
 			mInputs.push_back( connection );
 		}
 
@@ -181,6 +188,7 @@ namespace Enjon
 	protected:
 		ShaderGraphNodeVariableType mVariableType = ShaderGraphNodeVariableType::LocalVariable;
 		ShaderPrimitiveType mPrimitiveType;
+		ShaderOutputType mOutputType;
 		ShaderNodeState mState = ShaderNodeState::Ready;
 		u32 mMaxNumberInputs = 1;
 		u32 mMaxNumberOutputs = 1;
@@ -264,24 +272,24 @@ namespace Enjon
 								Enjon::String qid = input->GetQualifiedID( );
 
 								// Based on output type, need to format final output
-								switch ( input->GetPrimitiveType( ) )
+								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
 								{
-									case ShaderPrimitiveType::Float:
+									case ShaderOutputType::Float:
 									{
 										finalOutput += "vec4( " + qid + ", " + qid + ", " + qid + ", 1.0 );\n";
 									} break;
 
-									case ShaderPrimitiveType::Vec2:
+									case ShaderOutputType::Vec2:
 									{
 										finalOutput += "vec4( " + qid + ", " + "1.0, " + "1.0 );\n";
 									} break;
 									
-									case ShaderPrimitiveType::Vec3:
+									case ShaderOutputType::Vec3:
 									{
 										finalOutput += "vec4( " + qid + + ", 1.0 );\n";
 									} break;
 									
-									case ShaderPrimitiveType::Vec4:
+									case ShaderOutputType::Vec4:
 									{
 										finalOutput += qid + ";\n";
 									} break; 
@@ -414,6 +422,7 @@ namespace Enjon
 			: ShaderGraphNode( id )
 		{
 			mPrimitiveType = ShaderPrimitiveType::Float;
+			mOutputType = ShaderOutputType::Float;
 		}
 
 		/**
@@ -489,6 +498,7 @@ namespace Enjon
 			: ShaderPrimitiveNode( id )
 		{
 			mPrimitiveType = ShaderPrimitiveType::Float;
+			mOutputType = ShaderOutputType::Float;
 			mMaxNumberInputs = 1;
 		}
 
@@ -546,6 +556,7 @@ namespace Enjon
 			: ShaderPrimitiveNode( id )
 		{
 			mPrimitiveType = ShaderPrimitiveType::Vec4;
+			mOutputType = ShaderOutputType::Vec4;
 			mMaxNumberInputs = 4;
 		}
 
@@ -553,6 +564,8 @@ namespace Enjon
 			: ShaderPrimitiveNode( id )
 		{
 			mData = vec;
+			mPrimitiveType = ShaderPrimitiveType::Vec4;
+			mOutputType = ShaderOutputType::Vec4;
 			mMaxNumberInputs = 4;
 		}
 
@@ -587,7 +600,7 @@ namespace Enjon
 			}
 			break;
 			}
-		}
+		} 
 
 		virtual Enjon::String GetDeclaration( ) override
 		{
@@ -605,6 +618,79 @@ namespace Enjon
 
 		~ShaderMultiplyNode( )
 		{
+		}
+
+		virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override
+		{
+			if ( mInputs.size( ) < 2 )
+			{
+				return ShaderOutputType::Float;
+			}
+
+			Connection a_conn = mInputs.at( 0 );
+			Connection b_conn = mInputs.at( 1 );
+
+			// Look at inputs to determine output type of this node
+			ShaderGraphNode* a = const_cast<ShaderGraphNode*>( mInputs.at( 0 ).mOwner );
+			ShaderGraphNode* b = const_cast<ShaderGraphNode*>( mInputs.at( 1 ).mOwner );
+
+			// Evaluate output type
+			ShaderOutputType aType = a->EvaluateOutputType( a_conn.mOutputPortID );
+			ShaderOutputType bType = b->EvaluateOutputType( b_conn.mOutputPortID ); 
+
+			switch ( aType )
+			{
+				case ShaderOutputType::Float:
+				{
+					switch ( bType )
+					{
+						case ShaderOutputType::Float: mOutputType = ShaderOutputType::Float; break;
+						case ShaderOutputType::Vec2: mOutputType = ShaderOutputType::Vec2; break;
+						case ShaderOutputType::Vec3: mOutputType = ShaderOutputType::Vec3; break;
+						case ShaderOutputType::Vec4: mOutputType = ShaderOutputType::Vec4; break;
+					}
+
+				} break;
+
+				case ShaderOutputType::Vec2:
+				{
+					if ( bType == ShaderOutputType::Vec2 )
+					{
+						mOutputType = ShaderOutputType::Vec2;
+					}
+					else
+					{
+						// Throw error here!
+					}
+
+				} break;
+
+				case ShaderOutputType::Vec3:
+				{
+					if ( bType == ShaderOutputType::Vec3 )
+					{
+						mOutputType = ShaderOutputType::Vec3;
+					}
+					else
+					{
+						// Throw error
+					}
+				} break;
+
+				case ShaderOutputType::Vec4:
+				{
+					if ( bType == ShaderOutputType::Vec4 )
+					{
+						mOutputType = ShaderOutputType::Vec4; 
+					}
+					else
+					{
+						// Throw error
+					}
+				} break; 
+			}
+
+			return mOutputType;
 		}
 
 		virtual Enjon::String EvaluateToGLSL( ) override
@@ -641,7 +727,14 @@ namespace Enjon
 
 		virtual Enjon::String GetDeclaration( ) override
 		{
-			return ( "float " + mID + ";" );
+			switch ( EvaluateOutputType( ) )
+			{
+				case ShaderOutputType::Float: return "float " + mID + ";"; break;
+				case ShaderOutputType::Vec2: return "vec2 " + mID + ";"; break;
+				case ShaderOutputType::Vec3: return "vec3 " + mID + ";"; break;
+				case ShaderOutputType::Vec4: return "vec4 " + mID + ";"; break;
+				default: return "";
+			}
 		}
 
 	protected:
@@ -685,6 +778,31 @@ namespace Enjon
 		{
 			// Already defined previously
 			return "";
+		}
+
+		virtual ShaderOutputType EvaluateOutputType( u32 portID )
+		{
+			TexturePortType type = TexturePortType( portID );
+
+			switch ( type )
+			{
+				case TexturePortType::RGB: 
+				{
+					return ShaderOutputType::Vec3;
+				} break;
+
+				case TexturePortType::R:
+				case TexturePortType::G:
+				case TexturePortType::B:
+				case TexturePortType::A:
+				{
+					return ShaderOutputType::Float; 
+				} break;
+				default:
+				{
+					return ShaderOutputType::Float; 
+				} break;
+			}
 		}
 
 		virtual Enjon::String EvaluateAtPort( u32 portID ) override
