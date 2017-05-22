@@ -543,7 +543,26 @@ namespace Enjon
 
 		virtual Enjon::String GetDeclaration( ) override
 		{
-			return ( "uniform float " + mID + ";" );
+			switch ( mVariableType )
+			{ 
+				case ShaderGraphNodeVariableType::LocalVariable:
+				{
+					return "float " + mID + ";";
+				}
+				break;
+
+				case ShaderGraphNodeVariableType::UniformVariable:
+				{
+					return "uniform float " + mID + ";";
+				}
+				break;
+
+				default:
+				{
+					return "float " + mID + ";";
+				}
+				break;
+			}
 		}
 
 	protected:
