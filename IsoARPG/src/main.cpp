@@ -9707,14 +9707,14 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 	Enjon::ShaderVec4Node* vec41 = graph.AddNode( new Enjon::ShaderVec4Node( "vec41", Enjon::Vec4( 0.23f, 0.0f, 1.0f, 1.0f ) ) )->Cast< Enjon::ShaderVec4Node >( );
 
 	// Set up inputs to nodes
-	mult1->AddInput( Enjon::ShaderGraphNode::Connection( tex1, 0, (u32)Enjon::ShaderTexture2DNode::TexturePortType::G ) );
-	//mult1->AddInput( Enjon::ShaderGraphNode::Connection( tex1, 0, (u32)Enjon::ShaderTexture2DNode::TexturePortType::B ) ); 
-	mult1->AddInput( Enjon::ShaderGraphNode::Connection( vec41 ) ); 
+	mult1->AddInput( Enjon::ShaderGraphNode::Connection( tex1, 0, (u32)Enjon::ShaderTexture2DNode::TexturePortType::RGB ) );
+	mult1->AddInput( Enjon::ShaderGraphNode::Connection( mult2 ) ); 
+
+	mult2->AddInput( Enjon::ShaderGraphNode::Connection( tex1, 0, ( u32 )Enjon::ShaderTexture2DNode::TexturePortType::R ) );
+	mult2->AddInput( Enjon::ShaderGraphNode::Connection( uf1 ) );
 
 	// Add inputs to main node
 	graph.Connect( Enjon::ShaderGraphNode::Connection( mult1, (u32)Enjon::ShaderGraphMainNodeInputType::Albedo ) ); 
-
-	mult1->EvaluateOutputType( );
 
 	// Compile graph
 	graph.Compile( );

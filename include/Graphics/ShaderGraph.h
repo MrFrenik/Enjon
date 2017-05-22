@@ -654,7 +654,7 @@ namespace Enjon
 
 				case ShaderOutputType::Vec2:
 				{
-					if ( bType == ShaderOutputType::Vec2 )
+					if ( bType == ShaderOutputType::Vec2 || bType == ShaderOutputType::Float )
 					{
 						mOutputType = ShaderOutputType::Vec2;
 					}
@@ -667,7 +667,7 @@ namespace Enjon
 
 				case ShaderOutputType::Vec3:
 				{
-					if ( bType == ShaderOutputType::Vec3 )
+					if ( bType == ShaderOutputType::Vec3 || bType == ShaderOutputType::Float )
 					{
 						mOutputType = ShaderOutputType::Vec3;
 					}
@@ -679,7 +679,7 @@ namespace Enjon
 
 				case ShaderOutputType::Vec4:
 				{
-					if ( bType == ShaderOutputType::Vec4 )
+					if ( bType == ShaderOutputType::Vec4 || bType == ShaderOutputType::Float )
 					{
 						mOutputType = ShaderOutputType::Vec4; 
 					}
