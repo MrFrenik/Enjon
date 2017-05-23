@@ -102,6 +102,11 @@ file(GLOB_RECURSE SRC_RESOURCE
 	"${ENJON_SRC}/Resource/*.cpp"
 	"${ENJON_INC}/Resource/*.inl")
 
+file(GLOB_RECURSE SRC_SHADER_GRAPH
+	"${ENJON_INC}/Graphics/ShaderGraph/*.h"
+	"${ENJON_SRC}/Graphics/ShaderGraph/*.cpp"
+	"${ENJON_INC}/Graphics/ShaderGraph/*.inl")
+
 file(GLOB_RECURSE SRC_UTILS
 	"${ENJON_INC}/Utils/*.h"
 	"${ENJON_SRC}/Utils/*.cpp"
@@ -150,8 +155,9 @@ set(
 	${SRC_PHYSICS} 
 	${SRC_MATH} 
 	${SRC_ASSET} 
+	${SRC_SHADER_GRAPH}
 	${GAME_FILES}
-	${GENERAL_SOURCES}
+	${GENERAL_SOURCES} 
 	)
 
 add_executable(Enjon ${ALL_SRC})
@@ -169,6 +175,7 @@ source_group("System"		FILES ${SRC_SYSTEM})
 source_group("Utils"		FILES ${SRC_UTILS})
 source_group("Asset"		FILES ${SRC_ASSET})
 source_group("Game"			FILES ${GAME_FILES}) 
+source_group("ShaderGraph"	FILES ${SRC_SHADER_GRAPH}) 
 
 # Write to .user file for command arguments
 if (MSVC)

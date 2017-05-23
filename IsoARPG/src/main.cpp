@@ -9673,6 +9673,8 @@ int main(int argc, char** argv)
 #include <Enjon.h> 
 #include <System/Types.h> 
 #include <Graphics/ShaderGraph.h>
+#include <Graphics/ShaderGraph/ShaderVectorNode.h>
+#include <Graphics/ShaderGraph/ShaderMathNode.h>
 
 #include "Game.h"
 
@@ -9705,13 +9707,23 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 	Enjon::ShaderMultiplyNode* mult4 = graph.AddNode( new Enjon::ShaderMultiplyNode( "mult4" ) )->Cast< Enjon::ShaderMultiplyNode >( );
 	Enjon::ShaderTexture2DNode* tex1 = graph.AddNode( new Enjon::ShaderTexture2DNode( "uAlbedoMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
 	Enjon::ShaderVec4Node* vec41 = graph.AddNode( new Enjon::ShaderVec4Node( "vec41", Enjon::Vec4( 0.23f, 0.0f, 1.0f, 1.0f ) ) )->Cast< Enjon::ShaderVec4Node >( );
+	Enjon::ShaderVec2Node* vec21 = graph.AddNode( new Enjon::ShaderVec2Node( "vec21", Enjon::Vec2( 1.0f, 0.0f ) ) )->Cast< Enjon::ShaderVec2Node >( );
+	Enjon::ShaderVec3Node* vec31 = graph.AddNode( new Enjon::ShaderVec3Node( "vec31", Enjon::Vec3( 1.0f, 0.0f, 2.0f ) ) )->Cast< Enjon::ShaderVec3Node >( );
+	Enjon::ShaderVec3Node* vec32 = graph.AddNode( new Enjon::ShaderVec3Node( "vec32", Enjon::Vec3( 2.0f, 0.1f, 0.0f ) ) )->Cast< Enjon::ShaderVec3Node >( );
+	Enjon::ShaderDotProductNode* dot1 = graph.AddNode( new Enjon::ShaderDotProductNode( "dot1" ) )->Cast< Enjon::ShaderDotProductNode >( );
+	Enjon::ShaderNormalizeNode* norm1 = graph.AddNode( new Enjon::ShaderNormalizeNode( "norm1" ) )->Cast< Enjon::ShaderNormalizeNode >( );
 
 	// Set up inputs to nodes
 	mult1->AddInput( Enjon::ShaderGraphNode::Connection( tex1, 0, (u32)Enjon::ShaderTexture2DNode::TexturePortType::RGB ) );
-	mult1->AddInput( Enjon::ShaderGraphNode::Connection( mult2 ) ); 
+	mult1->AddInput( Enjon::ShaderGraphNode::Connection( dot1 ) ); 
 
-	mult2->AddInput( Enjon::ShaderGraphNode::Connection( tex1, 0, ( u32 )Enjon::ShaderTexture2DNode::TexturePortType::R ) );
-	mult2->AddInput( Enjon::ShaderGraphNode::Connection( uf1 ) );
+	norm1->AddInput( vec31 );
+
+	dot1->AddInput( Enjon::ShaderGraphNode::Connection( norm1 ) );
+	dot1->AddInput( Enjon::ShaderGraphNode::Connection( vec32 ) );
+
+	//mult2->AddInput( Enjon::ShaderGraphNode::Connection( tex1, 0, ( u32 )Enjon::ShaderTexture2DNode::TexturePortType::R ) );
+	//mult2->AddInput( Enjon::ShaderGraphNode::Connection( uf1 ) );
 
 	// Add inputs to main node
 	graph.Connect( Enjon::ShaderGraphNode::Connection( mult1, (u32)Enjon::ShaderGraphMainNodeInputType::Albedo ) ); 
@@ -9734,6 +9746,10 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 	else
 		printf("Exit failed.\n"); 
 	*/
+
+	//graph.RemoveNode( mult1 );
+
+	graph.DeleteGraph( );
 
 	return 0;	
 }

@@ -91,6 +91,23 @@ namespace Enjon
 	}
 
 	//===============================================================================================
+		
+	void ShaderGraph::DeleteGraph( )
+	{ 
+		std::set< ShaderGraphNode* > nodes = mNodes;
+		for ( auto& n : nodes )
+		{
+			// Skip main node
+			if ( n == &mMainNode )
+			{
+				continue;
+			}
+
+			RemoveNode( n );
+		} 
+	}
+
+	//===============================================================================================
 
 	void ShaderGraph::BeginFragmentMain( )
 	{
