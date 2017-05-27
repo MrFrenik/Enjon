@@ -238,10 +238,23 @@ namespace Enjon
 			*/
 			Enjon::String EvaluateToGLSL( ) override
 			{ 
-				// Evaluate basic for now
-				Enjon::String albedo = EvaluateAtPort( (u32)ShaderGraphMainNodeInputType::Albedo ) + "\n";
+				// Evaluate Metallic, Roughness, AO
+				Enjon::String metallic = EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Metallic );
+				Enjon::String roughness = EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Roughness );
+				Enjon::String ao = EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::AmbientOcculsion ) + "\n";
 
-				return albedo;
+				// Evaluate Albedo
+				Enjon::String albedo = EvaluateAtPort( (u32)ShaderGraphMainNodeInputType::Albedo ) + "\n";
+				// Evaluate Emissive
+				Enjon::String emissive = EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Emissive ) + "\n";
+
+				// Output material properties
+				Enjon::String matProps = "MatPropsOut = vec4(metallic, roughness, AO, 1.0 )\n";
+
+				// Final output
+				Enjon::String finalOutput = metallic + roughness + ao + albedo + emissive + matProps;
+
+				return finalOutput;
 			}
 
 		private:
@@ -254,12 +267,21 @@ namespace Enjon
 				{
 					case ShaderGraphMainNodeInputType::Albedo: 
 					{
+						bool inputExists = false;
+
 						// Evaluate connection at this port
 						for ( auto& c : mInputs )
 						{
+							if ( inputExists )
+							{
+								break;
+							}
+
 							// Find input to this
 							if ( c.mInputPortID == (u32) ShaderGraphMainNodeInputType::Albedo )
 							{
+								inputExists = true;
+
 								// String to return
 								Enjon::String albedoOutput = "";
 
@@ -268,7 +290,7 @@ namespace Enjon
 								albedoOutput += input->Evaluate( ) + "\n";
 
 								// Final output string
-								Enjon::String finalOutput = "AlbedoColorOut = ";
+								Enjon::String finalOutput = "AlbedoOut = ";
 								Enjon::String qid = input->GetQualifiedID( );
 
 								// Based on output type, need to format final output
@@ -305,12 +327,270 @@ namespace Enjon
 
 					} break;
 
+					case ShaderGraphMainNodeInputType::Normal:
+					{
+
+					} break;
+
+					case ShaderGraphMainNodeInputType::Emissive:
+					{
+						bool inputExists = false;
+
+						// Evaluate connection at this port
+						for ( auto& c : mInputs )
+						{
+							// Break out of loop if input already found
+							if ( inputExists )
+							{
+								break;
+							}
+
+							// Find input to this
+							if ( c.mInputPortID == ( u32 )ShaderGraphMainNodeInputType::Emissive )
+							{
+								// Input does exist, so mark it true
+								inputExists = true;
+
+								// String to return
+								Enjon::String emissiveOut = "";
+
+								// Get input node and evaluate
+								ShaderGraphNode* input = const_cast< ShaderGraphNode* >( c.mOwner );
+								emissiveOut += input->Evaluate( ) + "\n";
+
+								// Final output string
+								Enjon::String finalOutput = "EmissiveOut = ";
+								Enjon::String qid = input->GetQualifiedID( );
+
+								// Based on output type, need to format final output
+								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
+								{
+									case ShaderOutputType::Float:
+									{
+										finalOutput += "vec4( " + qid + ", " + qid + ", " + qid + ", 1.0 );\n";
+									} break;
+
+									case ShaderOutputType::Vec2:
+									{
+										finalOutput += "vec4( " + qid + ", " + "1.0, " + "1.0 );\n";
+									} break;
+
+									case ShaderOutputType::Vec3:
+									{
+										finalOutput += "vec4( " + qid + +", 1.0 );\n";
+									} break;
+
+									case ShaderOutputType::Vec4:
+									{
+										finalOutput += qid + ";\n";
+									} break;
+								}
+
+								// Final output
+								emissiveOut += finalOutput;
+
+								// return
+								return emissiveOut;
+							}
+						} 
+						
+					} break;
+
+					case ShaderGraphMainNodeInputType::Metallic:
+					{
+						bool inputExists = false;
+
+						// Evaluate connection at this port
+						for ( auto& c : mInputs )
+						{
+							// Break out of loop if input already found
+							if ( inputExists )
+							{
+								break;
+							}
+
+							// Find input to this
+							if ( c.mInputPortID == ( u32 )ShaderGraphMainNodeInputType::Roughness )
+							{
+								// Input does exist, so mark it true
+								inputExists = true;
+
+								// String to return
+								Enjon::String metallicOut = "";
+
+								// Get input node and evaluate
+								ShaderGraphNode* input = const_cast< ShaderGraphNode* >( c.mOwner );
+								metallicOut += input->Evaluate( ) + "\n";
+
+								// Final output string
+								Enjon::String finalOutput = "metallic = ";
+								Enjon::String qid = input->GetQualifiedID( );
+
+								// Based on output type, need to format final output
+								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
+								{
+								case ShaderOutputType::Float:
+								{
+									finalOutput += qid + ";\n";
+								} break;
+
+								case ShaderOutputType::Vec2:
+								{
+									finalOutput += qid + ".r" + ";\n";
+								} break;
+
+								case ShaderOutputType::Vec3:
+								{
+									finalOutput += qid + ".r" + ";\n";
+								} break;
+
+								case ShaderOutputType::Vec4:
+								{
+									finalOutput += qid + ".r" + ";\n";
+								} break;
+								}
+
+								// Final output
+								metallicOut += finalOutput;
+
+								// return
+								return metallicOut;
+							}
+						}
+					} break;
+
+					case ShaderGraphMainNodeInputType::Roughness:
+					{
+						bool inputExists = false;
+
+						// Evaluate connection at this port
+						for ( auto& c : mInputs )
+						{
+							// Break out of loop if input already found
+							if ( inputExists )
+							{
+								break;
+							}
+
+							// Find input to this
+							if ( c.mInputPortID == ( u32 )ShaderGraphMainNodeInputType::Roughness )
+							{
+								// Input does exist, so mark it true
+								inputExists = true;
+
+								// String to return
+								Enjon::String roughnessOut = "";
+
+								// Get input node and evaluate
+								ShaderGraphNode* input = const_cast< ShaderGraphNode* >( c.mOwner );
+								roughnessOut += input->Evaluate( ) + "\n";
+
+								// Final output string
+								Enjon::String finalOutput = "roughness = ";
+								Enjon::String qid = input->GetQualifiedID( );
+
+								// Based on output type, need to format final output
+								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
+								{
+								case ShaderOutputType::Float:
+								{
+									finalOutput += qid + ";\n";
+								} break;
+
+								case ShaderOutputType::Vec2:
+								{
+									finalOutput += qid + ".r" + ";\n";
+								} break;
+
+								case ShaderOutputType::Vec3:
+								{
+									finalOutput += qid + ".r" + ";\n";
+								} break;
+
+								case ShaderOutputType::Vec4:
+								{
+									finalOutput += qid + ".r" + ";\n";
+								} break;
+								}
+
+								// Final output
+								roughnessOut += finalOutput;
+
+								// return
+								return roughnessOut;
+							}
+						}
+					} break;
+
+					case ShaderGraphMainNodeInputType::AmbientOcculsion:
+					{
+						bool inputExists = false;
+
+						// Evaluate connection at this port
+						for ( auto& c : mInputs )
+						{
+							// Break out of loop if input already found
+							if ( inputExists )
+							{
+								break;
+							}
+
+							// Find input to this
+							if ( c.mInputPortID == ( u32 )ShaderGraphMainNodeInputType::AmbientOcculsion )
+							{
+								// Input does exist, so mark it true
+								inputExists = true;
+
+								// String to return
+								Enjon::String ambientOut = "";
+
+								// Get input node and evaluate
+								ShaderGraphNode* input = const_cast< ShaderGraphNode* >( c.mOwner );
+								ambientOut += input->Evaluate( ) + "\n";
+
+								// Final output string
+								Enjon::String finalOutput = "ao = ";
+								Enjon::String qid = input->GetQualifiedID( );
+
+								// Based on output type, need to format final output
+								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
+								{
+								case ShaderOutputType::Float:
+								{
+									finalOutput += qid + ";\n";
+								} break;
+
+								case ShaderOutputType::Vec2:
+								{
+									finalOutput += qid + ".r" + ";\n";
+								} break;
+
+								case ShaderOutputType::Vec3:
+								{
+									finalOutput += qid + ".r" + ";\n";
+								} break;
+
+								case ShaderOutputType::Vec4:
+								{
+									finalOutput += qid + ".r" + ";\n";
+								} break;
+								}
+
+								// Final output
+								ambientOut += finalOutput;
+
+								// return
+								return ambientOut;
+							}
+						}
+					}
+
 					default:
 					{
 					} break;
 				}
 
-				return "Nothing valid found!"; 
+				return "//No valid input found!"; 
 			}
 			
 
@@ -397,14 +677,39 @@ namespace Enjon
 		* @brief
 		*/
 		void RecurseThroughChildrenAndBuildVariables( const ShaderGraphNode* node ); 
+		
+		/**
+		* @brief
+		*/
+		void OutputShaderGraphHeaderInfo( );
+		
+		/**
+		* @brief
+		*/
+		void OutputVertexHeader( );
+		
+		/**
+		* @brief
+		*/
+		void BeginVertexMain( );
+		
+		/**
+		* @brief
+		*/
+		void EndVertexMain( );
+
+		/**
+		* @brief
+		*/
+		void OutputFragmentHeader( );
 
 		/*
-		* @Brief
+		* @brief
 		*/
 		void BeginFragmentMain( );
 
 		/*
-		* @Brief
+		* @brief
 		*/
 		void EndFragmentMain( );
 

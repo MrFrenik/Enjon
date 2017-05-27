@@ -9727,6 +9727,10 @@ Enjon::s32 main(Enjon::s32 argc, char** argv)
 
 	// Add inputs to main node
 	graph.Connect( Enjon::ShaderGraphNode::Connection( mult1, (u32)Enjon::ShaderGraphMainNodeInputType::Albedo ) ); 
+	graph.Connect( Enjon::ShaderGraphNode::Connection( dot1, ( u32 )Enjon::ShaderGraphMainNodeInputType::Metallic ) );
+	graph.Connect( Enjon::ShaderGraphNode::Connection( vec41, ( u32 )Enjon::ShaderGraphMainNodeInputType::Roughness ) );
+	graph.Connect( Enjon::ShaderGraphNode::Connection( vec32, ( u32 )Enjon::ShaderGraphMainNodeInputType::Emissive ) );
+	graph.Connect( Enjon::ShaderGraphNode::Connection( vec41, ( u32 )Enjon::ShaderGraphMainNodeInputType::AmbientOcculsion ) );
 
 	// Compile graph
 	graph.Compile( );

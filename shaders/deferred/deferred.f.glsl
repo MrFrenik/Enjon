@@ -25,6 +25,10 @@ uniform sampler2D u_metallicMap;
 uniform sampler2D u_roughnessMap;
 uniform sampler2D u_aoMap;
 
+float Metallic = 0.0;
+float Roughness = 1.0;
+float AO = 0.0;
+
 const float u_emissiveIntensity = 10.0;
 
 void main()
@@ -38,9 +42,9 @@ void main()
     vec4 color = texture(u_albedoMap, fs_in.TexCoords);
     if (color.a < 0.5) discard;
 
-    float Metallic  = texture2D(u_metallicMap, fs_in.TexCoords).r;
-    float Roughness = texture2D(u_roughnessMap, fs_in.TexCoords).r;
-    float AO        = texture2D(u_aoMap, fs_in.TexCoords).r;
+    Metallic  = texture2D(u_metallicMap, fs_in.TexCoords).r;
+    Roughness = texture2D(u_roughnessMap, fs_in.TexCoords).r;
+    AO        = texture2D(u_aoMap, fs_in.TexCoords).r;
 
     AlbedoOut  = color * vec4(u_albedoColor.xyz, 1.0);
     NormalsOut  = vec4(normal, 1.0);
