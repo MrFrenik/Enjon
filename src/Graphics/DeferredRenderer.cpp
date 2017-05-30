@@ -14,6 +14,10 @@
 #include "Graphics/DirectionalLight.h"
 #include "Graphics/PointLight.h"
 #include "Graphics/SpotLight.h"
+#include "Graphics/Shader.h"
+#include "Graphics/ShaderGraph.h"
+#include "Graphics/ShaderGraph/ShaderMathNode.h"
+#include "Graphics/ShaderGraph/ShaderVectorNode.h"
 #include "IO/ResourceManager.h"
 #include "Asset/AssetManager.h"
 #include "Console.h"
@@ -26,6 +30,10 @@
 #include <fmt/string.h>
 #include <fmt/printf.h>
 #include <cassert>
+
+Enjon::Shader mShader;
+Enjon::ShaderGraph mShaderGraph;
+Enjon::Renderable mRenderable;
 
 namespace Enjon 
 { 
@@ -155,13 +163,40 @@ namespace Enjon
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
+		ShaderTest( );
+
 		return Result::SUCCESS;
 	}
 
 	//======================================================================================================
 
 	void DeferredRenderer::Update(const f32 dT)
-	{
+	{ 
+		static bool set = false;
+		if ( !set )
+		{
+			Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+			if ( am )
+			{
+				mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_sphere" ) ); 
+				mRenderable.SetScale( 3.0f );
+				mRenderable.SetPosition( Vec3( 0, 10, 0 ) );
+			}
+			set = true;
+		}
+
+		// Get input
+		Enjon::Input* input = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::Input >( );
+		if ( input )
+		{
+			// Recompile test shader
+			if ( input->IsKeyPressed( Enjon::KeyCode::R ) )
+			{
+				std::cout << "Recompiling...\n";
+				mShader.Recompile( );
+			}
+		}
+
 		// Gbuffer pass
 		GBufferPass();
 		// Lighting pass
@@ -327,6 +362,54 @@ namespace Enjon
 
 		// Unuse quadbatch shader
 		shader->Unuse();
+
+		// Now do the shader test
+		mShader.Use( );
+		{
+			static bool set = false;
+			Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+			static Enjon::AssetHandle< Enjon::Texture > albedo;
+			static Enjon::AssetHandle< Enjon::Texture > normals;
+			static Enjon::AssetHandle< Enjon::Texture > metallic;
+			static Enjon::AssetHandle< Enjon::Texture > roughness;
+			static Enjon::AssetHandle< Enjon::Texture > emissive; 
+			
+			if ( !set )
+			{
+				albedo = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.albedo" );
+				normals = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.normal" );
+				metallic = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.metallic" );
+				roughness = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.roughness" );
+				emissive = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.emissive" ); 
+				set = true;
+			}
+			// Set textures
+			mShader.BindTexture( "uAlbedoMap", albedo.Get( )->GetTextureId( ), 0 );
+			mShader.BindTexture( "uEmissiveMap", emissive.Get()->GetTextureId( ), 1 );
+			mShader.BindTexture( "uMetallicMap", metallic.Get()->GetTextureId( ), 2 );
+			mShader.BindTexture( "uNormalMap", normals.Get()->GetTextureId( ), 3 );
+			mShader.BindTexture( "uRoughnessMap", roughness.Get()->GetTextureId( ), 4 );
+
+			static f32 t = 0.0f;
+			t += 0.001f;
+
+			// Set uniforms
+			mShader.SetUniform( "uCamera", mSceneCamera.GetViewProjectionMatrix( ) );
+			mShader.SetUniform( "uWorldTime", t );
+
+			Mesh* mesh = mRenderable.GetMesh( ).Get( );
+			mesh->Bind( );
+			{
+				Mat4 Model;
+				Model *= Mat4::Translate( mRenderable.GetPosition( ) );
+				Model *= QuaternionToMat4( mRenderable.GetRotation( ) );
+				Model *= Mat4::Scale( mRenderable.GetScale( ) );
+				mShader.SetUniform( "uModel", Model );
+				mesh->Submit( );
+			}
+			mesh->Unbind( ); 
+		}
+		mShader.Unuse( );
 
 		// Unbind gbuffer
 		mGbuffer->Unbind();
@@ -1161,9 +1244,7 @@ namespace Enjon
 	    	ImGui::Text("Color");
             ImGui::DragFloat3Labels("##bgcolor", labels, mBGColor, 0.1f, 0.0f, 30.0f);
 	    	ImGui::TreePop();
-	    }
-
-		
+	    } 
 	}
 
 	//=======================================================================================================
@@ -1185,8 +1266,44 @@ namespace Enjon
 		//drawlist->AddRect( min, max, ImColor( 255, 255, 255, 255 ) );
 		f32 fps = ImGui::GetIO( ).Framerate;
 		drawlist->AddText( min, ImColor( 255, 255, 255, 255 ), fmt::sprintf( "Frame: %.3f", fps ).c_str() );
-	}
+	} 
 
+	void DeferredRenderer::ShaderTest( )
+	{ 
+		Enjon::ShaderTexture2DNode* uAlbedoMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uAlbedoMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
+		Enjon::ShaderTexture2DNode* uNormalMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uNormalMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
+		Enjon::ShaderTexture2DNode* uMetallicMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uMetallicMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
+		Enjon::ShaderTexture2DNode* uRoughnessMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uRoughnessMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
+		Enjon::ShaderTexture2DNode* uEmissiveMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uEmissiveMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
+		Enjon::ShaderFloatNode* emissiveIntensity = mShaderGraph.AddNode( new Enjon::ShaderFloatNode( "emissiveIntensity", 100.0f ) )->Cast< Enjon::ShaderFloatNode >( );
+		Enjon::ShaderMultiplyNode* mult1 = mShaderGraph.AddNode( new Enjon::ShaderMultiplyNode( "mult1" ) )->Cast< Enjon::ShaderMultiplyNode >( );
+		Enjon::ShaderMultiplyNode* mult2 = mShaderGraph.AddNode( new Enjon::ShaderMultiplyNode( "mult2" ) )->Cast< Enjon::ShaderMultiplyNode >( );
+		Enjon::ShaderVec3Node* colRed = mShaderGraph.AddNode( new Enjon::ShaderVec3Node( "colRed", Vec3( 1.0f, 0.0f, 0.0f ) ) )->Cast< Enjon::ShaderVec3Node >( );
+		Enjon::ShaderTimeNode* worldTime = mShaderGraph.AddNode( new Enjon::ShaderTimeNode( "worldTime" ) )->Cast< Enjon::ShaderTimeNode >( );
+		Enjon::ShaderSinNode* sinNode = mShaderGraph.AddNode( new Enjon::ShaderSinNode( "sinNode" ) )->Cast< Enjon::ShaderSinNode >( );
+
+		// Set up inputs to nodes 
+		mult1->AddInput( ShaderGraphNode::Connection( uEmissiveMap, 0, (u32)Enjon::ShaderTexture2DNode::TexturePortType::RGB ) );
+		mult1->AddInput( emissiveIntensity ); 
+
+		sinNode->AddInput( worldTime );
+
+		mult2->AddInput( mult1 );
+		mult2->AddInput( sinNode );
+
+		// Add inputs to main node
+		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uAlbedoMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Albedo ) );
+		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uMetallicMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Metallic ) );
+		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uRoughnessMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Roughness ) );
+		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( mult2, ( u32 )Enjon::ShaderGraphMainNodeInputType::Emissive ) );
+		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uNormalMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Normal ) );
+
+		// Compile graph
+		mShaderGraph.Compile( ); 
+
+		// Make shader from graph
+		mShader = Enjon::Shader( mShaderGraph ); 
+	}
 }
 
 

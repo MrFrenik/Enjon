@@ -66,6 +66,28 @@ namespace Enjon { namespace Utils {
 		return result; 
 	}
 
+	static inline Enjon::String ParseFromTo( const Enjon::String& begin, const Enjon::String& end, const Enjon::String& src )
+	{
+		Enjon::String returnStr = "";
+
+		// Search for line to match
+		std::size_t foundBegin = src.find( begin );
+		std::size_t foundEnd = src.find( end );
+		
+		// Found
+		if ( foundBegin != std::string::npos && foundEnd != std::string::npos )
+		{
+			// Substring length
+			std::size_t length = foundEnd - foundBegin;
+
+			// Return that substring
+			return src.substr( foundBegin, length ); 
+		} 
+
+		// Didn't find anything, so return empty string
+		return returnStr;
+	}
+
 	static inline std::vector<String> SplitString(const String& str, const String& delimiter)
 	{
 		std::vector<String> splits;

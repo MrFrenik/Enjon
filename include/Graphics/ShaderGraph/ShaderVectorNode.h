@@ -6,6 +6,9 @@
 #define ENJON_SHADER_VECTOR_NODE_H 
 
 #include "Graphics/ShaderGraph.h" 
+#include "Math/Vec2.h"
+#include "Math/Vec3.h"
+#include "Math/Vec4.h"
 
 namespace Enjon
 {

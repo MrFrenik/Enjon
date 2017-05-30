@@ -5,7 +5,8 @@
 #ifndef ENJON_SHADER_GRAPH_H
 #define ENJON_SHADER_GRAPH_H 
 
-#include "Graphics/Shader.h" 
+#include "System/Types.h"
+#include "Defines.h"
 
 #include <unordered_map>
 #include <set>
@@ -47,6 +48,12 @@ namespace Enjon
 	{
 		Ready,
 		Evaulated
+	};
+
+	enum class ShaderType
+	{
+		Vertex,
+		Fragment
 	};
 
 	class ShaderGraphNode
@@ -95,7 +102,7 @@ namespace Enjon
 		T* Cast( )
 		{
 			return static_cast<T*>( this );
-		}
+		} 
 
 
 		/**
@@ -238,21 +245,31 @@ namespace Enjon
 			*/
 			Enjon::String EvaluateToGLSL( ) override
 			{ 
+				Enjon::String finalOutput = "";
+
 				// Evaluate Metallic, Roughness, AO
-				Enjon::String metallic = EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Metallic );
-				Enjon::String roughness = EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Roughness );
-				Enjon::String ao = EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::AmbientOcculsion ) + "\n";
+				finalOutput += "// Metallic\n";
+				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Metallic ) + "\n";
+				finalOutput += "// Roughness\n";
+				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Roughness ) + "\n";
+				finalOutput += "// Ambient Occulsion\n";
+				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::AmbientOcculsion ) + "\n";
+				
+				// Output material properties
+				finalOutput += "// Material Properties\n";
+				finalOutput += "MatPropsOut = vec4(metallic, roughness, ao, 1.0 );\n";
 
 				// Evaluate Albedo
-				Enjon::String albedo = EvaluateAtPort( (u32)ShaderGraphMainNodeInputType::Albedo ) + "\n";
+				finalOutput += "// Albedo\n";
+				finalOutput += EvaluateAtPort( (u32)ShaderGraphMainNodeInputType::Albedo ) + "\n";
+
 				// Evaluate Emissive
-				Enjon::String emissive = EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Emissive ) + "\n";
-
-				// Output material properties
-				Enjon::String matProps = "MatPropsOut = vec4(metallic, roughness, AO, 1.0 )\n";
-
-				// Final output
-				Enjon::String finalOutput = metallic + roughness + ao + albedo + emissive + matProps;
+				finalOutput += "// Emissive\n";
+				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Emissive ) + "\n";
+				
+				// Evaluate Emissive
+				finalOutput += "// Normal\n";
+				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Normal ) + "\n"; 
 
 				return finalOutput;
 			}
@@ -291,7 +308,7 @@ namespace Enjon
 
 								// Final output string
 								Enjon::String finalOutput = "AlbedoOut = ";
-								Enjon::String qid = input->GetQualifiedID( );
+								Enjon::String qid = input->EvaluateAtPort( c.mOutputPortID );
 
 								// Based on output type, need to format final output
 								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
@@ -329,6 +346,69 @@ namespace Enjon
 
 					case ShaderGraphMainNodeInputType::Normal:
 					{
+						bool inputExists = false;
+
+						// Evaluate connection at this port
+						for ( auto& c : mInputs )
+						{
+							// Break out of loop if input already found
+							if ( inputExists )
+							{
+								break;
+							}
+
+							// Find input to this
+							if ( c.mInputPortID == ( u32 )ShaderGraphMainNodeInputType::Normal )
+							{
+								// Input does exist, so mark it true
+								inputExists = true;
+
+								// String to return
+								Enjon::String normalOut = "";
+
+								// Get input node and evaluate
+								ShaderGraphNode* input = const_cast< ShaderGraphNode* >( c.mOwner );
+								normalOut += input->Evaluate( ) + "\n";
+
+								// Final output string
+								Enjon::String finalOutput = "NormalsOut = ";
+								Enjon::String qid = input->EvaluateAtPort( c.mOutputPortID );
+
+								// Based on output type, need to format final output
+								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
+								{
+									case ShaderOutputType::Float:
+									{
+										finalOutput += "vec4( " + qid + ", " + qid + ", " + qid + ", 1.0 );\n";
+									} break;
+
+									case ShaderOutputType::Vec2:
+									{
+										finalOutput += "vec4( " + qid + ", " + "1.0, " + "1.0 );\n";
+									} break;
+
+									case ShaderOutputType::Vec3:
+									{
+										finalOutput += "vec4( " + qid + +", 1.0 );\n";
+									} break;
+
+									case ShaderOutputType::Vec4:
+									{
+										finalOutput += qid + ";\n";
+									} break;
+								}
+
+								// Final output
+								normalOut += finalOutput;
+
+								// Multiply by tbn
+								normalOut += "vec3 normal = normalize(NormalsOut.xyz * 2.0 - 1.0);\n";
+								normalOut += "NormalsOut = vec4(normalize(fs_in.tbn * normal), 1.0);\n";
+
+								// return
+								return normalOut;
+							}
+						}
 
 					} break;
 
@@ -410,7 +490,7 @@ namespace Enjon
 							}
 
 							// Find input to this
-							if ( c.mInputPortID == ( u32 )ShaderGraphMainNodeInputType::Roughness )
+							if ( c.mInputPortID == ( u32 )ShaderGraphMainNodeInputType::Metallic )
 							{
 								// Input does exist, so mark it true
 								inputExists = true;
@@ -592,8 +672,6 @@ namespace Enjon
 
 				return "//No valid input found!"; 
 			}
-			
-
 	};
 
 	class ShaderGraph
@@ -632,7 +710,12 @@ namespace Enjon
 		/**
 		* @brief
 		*/
-		void Compile( );
+		Enjon::Result Compile( );
+
+		/*
+		* @brief
+		*/
+		Enjon::String Parse( const ShaderType type );
 
 		/**
 		* @brief
@@ -692,6 +775,11 @@ namespace Enjon
 		* @brief
 		*/
 		void BeginVertexMain( );
+	
+		/**
+		* @brief
+		*/
+		void VertexMain( );
 		
 		/**
 		* @brief
@@ -767,7 +855,7 @@ namespace Enjon
 	class UnaryFunctionNode : public ShaderGraphFunctionNode
 	{
 	public:
-
+ 
 		UnaryFunctionNode( const Enjon::String& id )
 			: ShaderGraphFunctionNode( id )
 		{
@@ -782,6 +870,7 @@ namespace Enjon
 
 	protected:
 	};
+
 
 	template < typename T >
 	class ShaderPrimitiveNode : public ShaderGraphNode
@@ -994,7 +1083,7 @@ namespace Enjon
 		*/
 		virtual Enjon::String GetDefinition( ) override
 		{
-			return ( "vec4 " + mID + "_sample = texture(" + mID + ", texCoords);" );
+			return ( "vec4 " + mID + "_sample = texture(" + mID + ", fs_in.texCoords);" );
 		}
 
 		/**

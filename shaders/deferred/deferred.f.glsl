@@ -1,3 +1,5 @@
+// Fragment Begin
+
 #version 330 core
 
 const float kPi = 3.13159265;
@@ -35,7 +37,7 @@ void main()
 {
     // Translate normal to world space
     vec3 normal = texture(u_normalMap, fs_in.TexCoords).rgb;
-    normal = normalize(normal * 2.0 - 1.0);
+    normal = normalize(normal.xyz * 2.0 - 1.0);
     normal = normalize(fs_in.TBN * normal);
 
     // Get albedo color

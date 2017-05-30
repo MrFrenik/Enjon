@@ -4,6 +4,8 @@
 #include <Application.h> 
 #include <Asset/Asset.h>
 #include <Entity/EntityManager.h>
+#include <Graphics/ShaderGraph.h>
+#include <Graphics/Shader.h>
 
 #include <vector>
 
@@ -64,7 +66,7 @@ class Game : public Enjon::Application
 		
 		std::vector<Enjon::AssetHandle<Enjon::Mesh>*> mMeshSwitches; 
 
-		std::vector<Enjon::Entity*> mHandles;
+		std::vector<Enjon::Entity*> mHandles; 
 
 		bool mShowEntities = true;
 		bool mMovementOn = true;

@@ -67,14 +67,15 @@ namespace Enjon
 
 			case ShaderOutputType::Vec3:
 			{
-				if ( bType == ShaderOutputType::Vec3 || bType == ShaderOutputType::Float )
-				{
-					mOutputType = ShaderOutputType::Vec3;
-				}
-				else
-				{
-					// Throw error
-				}
+				mOutputType = ShaderOutputType::Vec3;
+				//if ( bType == ShaderOutputType::Vec3 || bType == ShaderOutputType::Float )
+				//{
+				//	mOutputType = ShaderOutputType::Vec3;
+				//}
+				//else
+				//{
+				//	// Throw error
+				//}
 			} break;
 
 			case ShaderOutputType::Vec4:
@@ -302,7 +303,7 @@ namespace Enjon
 	}
 
 	//================================================================================================================
-
+	
 	Enjon::String ShaderNormalizeNode::GetDeclaration( )
 	{
 		switch ( EvaluateOutputType( ) )
@@ -313,6 +314,116 @@ namespace Enjon
 			case ShaderOutputType::Vec4: return "vec4 " + mID + ";"; break;
 			default: return "";
 		}
+	}
+
+	//================================================================================================================
+
+	ShaderTimeNode::ShaderTimeNode( const Enjon::String& id ) 
+		: ShaderGraphNode( id )
+	{ 
+		mMaxNumberInputs = 0;
+		mMaxNumberOutputs = 1;
+		mPrimitiveType = ShaderPrimitiveType::Float;
+		mOutputType = ShaderOutputType::Float;
+	}
+
+	//================================================================================================================
+
+	ShaderTimeNode::~ShaderTimeNode( )
+	{ 
+	}
+
+	//================================================================================================================
+
+	ShaderOutputType ShaderTimeNode::EvaluateOutputType( u32 portID )
+	{
+		return ShaderOutputType::Float;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderTimeNode::EvaluateToGLSL( )
+	{
+		// Don't need to evaluate, as it has no inputs
+		return "";
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderTimeNode::EvaluateAtPort( u32 portID )
+	{
+		// Only one output, so just get qualified id
+		return "uWorldTime"; 
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderTimeNode::GetDeclaration( )
+	{
+		// Already declared as uniform, so no need
+		return "";
+	}
+
+	//================================================================================================================
+
+	ShaderSinNode::ShaderSinNode( const Enjon::String& id ) 
+		: UnaryFunctionNode( id )
+	{ 
+	}
+
+	//================================================================================================================
+
+	ShaderSinNode::~ShaderSinNode( )
+	{ 
+	}
+
+	//================================================================================================================
+
+	ShaderOutputType ShaderSinNode::EvaluateOutputType( u32 portID )
+	{ 
+		// Only one output type possible
+		return ShaderOutputType::Float;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderSinNode::EvaluateToGLSL( )
+	{
+		Enjon::String finalEvaluation = "";
+
+		// Evaluate inputs
+		for ( auto& c : mInputs )
+		{
+			ShaderGraphNode* owner = const_cast< ShaderGraphNode* >( c.mOwner );
+			finalEvaluation += owner->Evaluate( ) + "\n";
+		}
+
+		// Get connections
+		Connection a_conn = mInputs.at( 0 );
+
+		// Get shader graph nodes
+		ShaderGraphNode* a = const_cast< ShaderGraphNode* >( a_conn.mOwner );
+
+		// Evaluate final line of code
+		finalEvaluation += GetQualifiedID( ) + " = sin(" + a->EvaluateAtPort( a_conn.mOutputPortID ) + ");";
+
+		// Return
+		return finalEvaluation;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderSinNode::EvaluateAtPort( u32 portID )
+	{
+		// Only one output
+		return GetQualifiedID( );
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderSinNode::GetDeclaration( )
+	{
+		return "float " + GetQualifiedID( ) + ";";
 	}
 
 	//================================================================================================================

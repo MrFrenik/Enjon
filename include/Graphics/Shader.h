@@ -10,21 +10,34 @@
 #include "Math/Vec4.h"
 #include "Math/Mat4.h"
 #include "Defines.h"
+#include "Graphics/ShaderGraph.h"
 
 #include <vector>
 
 namespace Enjon
 { 
+	enum class UniformType
+	{
+		Float,
+		Vec2,
+		Vec3,
+		Vec4,
+		Mat4,
+		TextureSampler
+	};
+
 	template <typename T>
 	class ShaderUniform
 	{
+
 		public:
 			ShaderUniform( ) {}
 			~ShaderUniform( ) {}
 
-		private: 
+		protected: 
 			T mValue;
-	};
+			UniformType mType;
+	}; 
 
 	class Shader : public Asset
 	{
@@ -32,17 +45,77 @@ namespace Enjon
 			/**
 			* @brief Constructor
 			*/
-			Shader( ) {}
+			Shader( );
+			
+			/**
+			* @brief Constructor
+			*/
+			Shader( const Enjon::ShaderGraph& graph );
 
 			/**
 			* @brief Destructor
 			*/
-			~Shader( ) {}
+			~Shader( ); 
+
+			/*
+			* @brief
+			*/
+			Enjon::Result Compile( ); 
+			
+			/*
+			* @brief
+			*/
+			Enjon::Result Recompile( ); 
+
+			/*
+			* @brief
+			*/
+			void Use( );
+			
+			/*
+			* @brief
+			*/
+			void Unuse( );
+
+			s32 GetUniformLocation( const Enjon::String& uniformName );
+			void SetUniform(const std::string& name, const s32& val);
+			void SetUniform(const std::string& name, f32* val, s32 count);
+			void SetUniform(const std::string& name, s32* val, s32 count);
+			void SetUniform(const std::string& name, const f64& val);
+			void SetUniform(const std::string& name, const f32& val);
+			void SetUniform(const std::string& name, const Vec2& vector);
+			void SetUniform(const std::string& name, const Vec3& vector);
+			void SetUniform(const std::string& name, const Vec4& vector);
+			void SetUniform(const std::string& name, const Mat4& matrix); 
+			//void SetUniform(const std::string& name, const Transform& T);
+			//void SetUniform(const std::string& name, ColorRGBA16& C);
+
+			void BindTexture(const std::string& name, const u32& TextureID, const u32 Index);
+			//void BindTexture(const std::string& name, const GLTexture& texture, const GLuint index);
+
+		private:
+
+			/*
+			* @brief
+			*/
+			Enjon::Result CompileShader( const Enjon::String& shaderCode, u32 shaderID );
+			
+			/*
+			* @brief
+			*/
+			Enjon::Result LinkProgram( );
+			
+			/*
+			* @brief
+			*/
+			Enjon::Result DestroyProgram( );
 
 		private: 
-			u32 mProgramID; 
-			u32 mVertexShaderID;
-			u32 mFragmentShaderID;
+			u32 mProgramID			= 0; 
+			u32 mVertexShaderID		= 0;
+			u32 mFragmentShaderID	= 0;
+			std::unordered_map< Enjon::String, u32 > mUniformMap;
+			ShaderGraph mGraph;
 	}; 
 }
 

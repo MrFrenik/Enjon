@@ -113,7 +113,7 @@ namespace Enjon
 		glDeleteShader(m_vertexShaderID);
 		glDeleteShader(m_fragmentShaderID);
 	}
-
+	
 	//Adds an attribute to our shader. Should be called between compiling and linking.
 	void GLSLProgram::AddAttribute(const GLchar* attributeName) 
 	{

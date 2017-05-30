@@ -189,6 +189,8 @@ namespace Enjon
 			*/
 			void ShowGameViewport(bool* open);
 
+			void ShaderTest( );
+
 		private:
 			// Frame buffers
 			GBuffer* mGbuffer 										= nullptr;
@@ -228,10 +230,9 @@ namespace Enjon
 			RenderTarget* mBloomUpSampleThirtySecondVertical		= nullptr;
 			RenderTarget* mBloomUpSampleThirtySecondHorizontal		= nullptr;
 			RenderTarget* mBloomUpSampleSixtyFourthVertical			= nullptr;
-			RenderTarget* mBloomUpSampleSixtyFourthHorizontal		= nullptr;
-		
+			RenderTarget* mBloomUpSampleSixtyFourthHorizontal		= nullptr; 
 
-			GLuint mCurrentRenderTexture;
+			GLuint mCurrentRenderTexture; 
 
 			// Full screen quad
 			FullScreenQuad* mFullScreenQuad 	= nullptr;
@@ -255,7 +256,7 @@ namespace Enjon
 
 			f32 mBGColor[4] = {0.8f, 0.8f, 0.8f, 1.0f};
 
-			Vec4 uvs = Vec4( 0.f, 0.f, 1.f, 1.f );
+			Vec4 uvs = Vec4( 0.f, 0.f, 1.f, 1.f ); 
 	};
 }
 

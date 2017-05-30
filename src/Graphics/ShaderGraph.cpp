@@ -2,6 +2,7 @@
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
 
 #include "Graphics/ShaderGraph.h"
+#include "Utils/FileUtils.h"
 
 namespace Enjon
 {
@@ -66,7 +67,7 @@ namespace Enjon
 
 	//===============================================================================================
 
-	void ShaderGraph::Compile( )
+	Enjon::Result ShaderGraph::Compile( )
 	{
 		// Shader graph header info
 		OutputShaderGraphHeaderInfo( );
@@ -77,7 +78,7 @@ namespace Enjon
 		// Vertex main
 		BeginVertexMain( );
 		{
-
+			VertexMain( );
 		}
 		EndVertexMain( );
 
@@ -110,10 +111,54 @@ namespace Enjon
 				mShaderCodeOutput += const_cast< ShaderGraphNode* >( n )->GetDefinition( ) + "\n";
 			} 
 
+			// Default values for outputs on start
+			mShaderCodeOutput += "// Default Values\n\n";
+			mShaderCodeOutput += "AlbedoOut = vec4( 1.0, 1.0, 1.0, 1.0 );\n";
+			mShaderCodeOutput += "NormalsOut = vec4( fs_in.tbn[2], 1.0 );\n";
+			mShaderCodeOutput += "EmissiveOut = vec4( 0.0, 0.0, 0.0, 1.0 );\n";
+			mShaderCodeOutput += "float metallic = 0.0;\n";
+			mShaderCodeOutput += "float roughness = 1.0;\n";
+			mShaderCodeOutput += "float ao = 0.0;\n";
+			mShaderCodeOutput += "MatPropsOut = vec4( metallic, roughness, ao, 1.0 );\n";
+			mShaderCodeOutput += "PositionOut = vec4(fs_in.fragPos, 1.0 );\n\n";
+
+			// Formatting
+			mShaderCodeOutput += "\n";
+
 			// Albedo
 			mShaderCodeOutput += mMainNode.Evaluate( );
 		} 
 		EndFragmentMain( );
+
+		// Return success
+		return Enjon::Result::SUCCESS;
+	}
+
+	//===============================================================================================
+		
+	Enjon::String ShaderGraph::Parse( const ShaderType type )
+	{
+		switch ( type )
+		{
+			case ShaderType::Vertex:
+			{
+				// Need to grab all lines from VERTEX_BEGIN to VERTEX_END
+				return Utils::ParseFromTo( "// VERTEX_SHADER_BEGIN\n", "// VERTEX_SHADER_END\n", mShaderCodeOutput );
+			} break;
+
+			case ShaderType::Fragment:
+			{
+				// Need to grab all lines from VERTEX_BEGIN to VERTEX_END 
+				return Utils::ParseFromTo( "// FRAGMENT_SHADER_BEGIN\n", "// FRAGMENT_SHADER_END\n", mShaderCodeOutput );
+			} break;
+
+			default: 
+			{
+				// Shouldn't get here!
+				assert( false ); 
+				return "";
+			} break; 
+		}
 	}
 
 	//===============================================================================================
@@ -139,7 +184,7 @@ namespace Enjon
 	{
 		mShaderCodeOutput += "// FRAGMENT_SHADER_BEGIN\n\n";
 
-		mShaderCodeOutput += "#version 330 core\n";
+		mShaderCodeOutput += "#version 330 core\n\n";
 		mShaderCodeOutput += "layout (location = 0) out vec4 AlbedoOut;\n";
 		mShaderCodeOutput += "layout (location = 1) out vec4 NormalsOut;\n";
 		mShaderCodeOutput += "layout (location = 2) out vec4 PositionOut;\n";
@@ -153,15 +198,8 @@ namespace Enjon
 		mShaderCodeOutput += "\tmat3 tbn;\n";
 		mShaderCodeOutput += "} fs_in;\n\n"; 
 
-		// Default values for outputs
-		mShaderCodeOutput += "// Default Values\n\n";
-		mShaderCodeOutput += "AlbedoOut = vec4( 1.0, 1.0, 1.0, 1.0 );\n";
-		mShaderCodeOutput += "NormalsOut = vec4( 0.0, 1.0, 0.0, 1.0 );\n";
-		mShaderCodeOutput += "EmissiveOut = vec4( 0.0, 0.0, 0.0, 1.0 );\n";
-		mShaderCodeOutput += "float metallic = 0.0;\n";
-		mShaderCodeOutput += "float roughness = 1.0;\n";
-		mShaderCodeOutput += "float ao = 0.0;\n";
-		mShaderCodeOutput += "MatPropsOut = vec4( metallic, roughness, ao, 1.0 );\n\n";
+		// Fragment shader uniforms
+		mShaderCodeOutput += "uniform float uWorldTime = 1.0;\n\n"; 
 	}
 
 	//===============================================================================================
@@ -169,16 +207,52 @@ namespace Enjon
 	void ShaderGraph::OutputVertexHeader( )
 	{
 		mShaderCodeOutput += "// VERTEX_SHADER_BEGIN\n\n";
+
+		mShaderCodeOutput += "#version 330 core\n\n";
+		mShaderCodeOutput += "layout (location = 0) in vec3 vertexPosition;\n";
+		mShaderCodeOutput += "layout (location = 1) in vec3 vertexNormal;\n";
+		mShaderCodeOutput += "layout (location = 2) in vec3 vertexTangent;\n";
+		mShaderCodeOutput += "layout (location = 3) in vec2 vertexUV;\n\n";
+
+		mShaderCodeOutput += "out VS_OUT\n";
+		mShaderCodeOutput += "{\n";
+		mShaderCodeOutput += "\tvec3 fragPos;\n";
+		mShaderCodeOutput += "\tvec2 texCoords;\n";
+		mShaderCodeOutput += "\tmat3 tbn;\n";
+		mShaderCodeOutput += "} vs_out;\n\n"; 
+
+		mShaderCodeOutput += "uniform mat4 uCamera = mat4(1.0);\n";
+		mShaderCodeOutput += "uniform mat4 uModel = mat4(1.0);\n\n"; 
 	}
 
 	//===============================================================================================
+
+	void ShaderGraph::VertexMain( )
+	{
+		mShaderCodeOutput += "mat4 MVP = uCamera * uModel;\n\n";
+
+		mShaderCodeOutput += "vec3 pos = vec3(uModel * vec4(vertexPosition, 1.0));\n\n"; 
+
+		mShaderCodeOutput += "gl_Position = uCamera * uModel * vec4(vertexPosition, 1.0);\n\n";
+
+		mShaderCodeOutput += "vec3 N = normalize((uModel * vec4(vertexNormal, 0.0)).xyz);\n";
+		mShaderCodeOutput += "vec3 T = normalize((uModel * vec4(vertexTangent, 0.0)).xyz);\n\n";
+		mShaderCodeOutput += "T = normalize(T - dot(T, N) * N);\n\n";
+		mShaderCodeOutput += "vec3 B = normalize((uModel * vec4((cross(vertexNormal, vertexTangent.xyz) * 1.0), 0.0)).xyz);\n";
+		mShaderCodeOutput += "mat3 TBN = mat3(T, B, N);\n\n";
+
+		mShaderCodeOutput += "vs_out.fragPos = vec3(uModel * vec4(vertexPosition, 1.0));\n";
+		mShaderCodeOutput += "vs_out.texCoords = vec2(vertexUV.x, -vertexUV.y);\n";
+		mShaderCodeOutput += "vs_out.tbn = TBN;\n";
+
+	}
 	
 	void ShaderGraph::BeginVertexMain( )
 	{
 		// For now, just output default code 
 		mShaderCodeOutput += "\n// Vertex main\n";
 		mShaderCodeOutput += "void main()\n";
-		mShaderCodeOutput += "{\n";
+		mShaderCodeOutput += "{\n"; 
 	}
 
 	//===============================================================================================

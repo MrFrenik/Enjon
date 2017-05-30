@@ -136,6 +136,10 @@ Enjon::Result Game::Initialize()
 	Enjon::String mahogRoughnessPath	= Enjon::String("/Materials/MahogFloor/Roughness.png"); 
 	Enjon::String mahogEmissivePath		= Enjon::String("/Materials/MahogFloor/Emissive.png"); 
 	Enjon::String mahogAOPath			= Enjon::String("/Materials/MahogFloor/AO.png"); 
+	Enjon::String woodAlbedoPath		= Enjon::String("/Materials/WoodFrame/Albedo.png"); 
+	Enjon::String woodNormalPath		= Enjon::String("/Materials/WoodFrame/Normal.png"); 
+	Enjon::String woodRoughnessPath		= Enjon::String("/Materials/WoodFrame/Roughness.png"); 
+	Enjon::String woodMetallicPath		= Enjon::String("/Materials/WoodFrame/Metallic.png"); 
 	Enjon::String greenPath				= Enjon::String("/Textures/green.png"); 
 	Enjon::String redPath				= Enjon::String("/Textures/red.png"); 
 	Enjon::String bluePath				= Enjon::String("/Textures/blue.png"); 
@@ -160,6 +164,10 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( mahogRoughnessPath );
 	mAssetManager->AddToDatabase( mahogEmissivePath );
 	mAssetManager->AddToDatabase( mahogAOPath );
+	mAssetManager->AddToDatabase( woodAlbedoPath );
+	mAssetManager->AddToDatabase( woodNormalPath );
+	mAssetManager->AddToDatabase( woodMetallicPath );
+	mAssetManager->AddToDatabase( woodRoughnessPath );
 	mAssetManager->AddToDatabase( cerebusMeshPath );
 	mAssetManager->AddToDatabase( sphereMeshPath );
 	mAssetManager->AddToDatabase( cubeMeshPath );
@@ -738,9 +746,10 @@ Enjon::Result Game::ProcessInput(f32 dt)
 	}
 
 	return Enjon::Result::PROCESS_RUNNING;
-}
+} 
 
 //-------------------------------------------------------------
+
 Enjon::Result Game::Shutdown()
 {
 	printf("%d\n", sizeof(Enjon::Entity));

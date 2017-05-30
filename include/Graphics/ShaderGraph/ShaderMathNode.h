@@ -119,7 +119,82 @@ namespace Enjon
 	protected:
 
 	};
+
+	class ShaderTimeNode : public ShaderGraphNode 
+	{
+		public:
+			/*
+			* @brief
+			*/ 
+			ShaderTimeNode( const Enjon::String& id );
+
+			/*
+			* @brief
+			*/ 
+			~ShaderTimeNode( );
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+			
+		protected:
+	};
+	
+	class ShaderSinNode : public UnaryFunctionNode
+	{
+	public:
+		/*
+		* @brief Constructor
+		*/
+		ShaderSinNode( const Enjon::String& id );
+
+		/*
+		* @brief Destructor
+		*/
+		~ShaderSinNode( );
+
+		/*
+		* @brief
+		*/
+		virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+		/*
+		* @brief
+		*/
+		virtual Enjon::String EvaluateToGLSL( ) override;
+
+		/*
+		* @brief
+		*/
+		virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+		/*
+		* @brief
+		*/
+		virtual Enjon::String GetDeclaration( ) override;
+
+	protected:
+
+	};
+
 	
 }
+	
 
 #endif
