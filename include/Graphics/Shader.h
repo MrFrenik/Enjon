@@ -26,16 +26,13 @@ namespace Enjon
 		TextureSampler
 	};
 
-	template <typename T>
 	class ShaderUniform
-	{
-
+	{ 
 		public:
 			ShaderUniform( ) {}
 			~ShaderUniform( ) {}
 
 		protected: 
-			T mValue;
 			UniformType mType;
 	}; 
 
@@ -87,11 +84,8 @@ namespace Enjon
 			void SetUniform(const std::string& name, const Vec3& vector);
 			void SetUniform(const std::string& name, const Vec4& vector);
 			void SetUniform(const std::string& name, const Mat4& matrix); 
-			//void SetUniform(const std::string& name, const Transform& T);
-			//void SetUniform(const std::string& name, ColorRGBA16& C);
 
 			void BindTexture(const std::string& name, const u32& TextureID, const u32 Index);
-			//void BindTexture(const std::string& name, const GLTexture& texture, const GLuint index);
 
 		private:
 

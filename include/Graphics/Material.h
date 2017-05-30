@@ -5,6 +5,7 @@
 #include "Graphics/GLTexture.h"
 #include "Graphics/Texture.h"
 #include "Graphics/Color.h"
+#include "Graphics/Shader.h"
 #include "System/Types.h"
 #include "Asset/Asset.h"
 
