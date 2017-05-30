@@ -99,8 +99,7 @@ void main()
     // Final color
     Lo += (kD * Albedo / kPi + BRDF) * Radiance * NdotL;
 
-    ColorOut = vec4(Lo, 1.0);
-
+    ColorOut = vec4(max(Lo, vec3(0.0)), 1.0);
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)

@@ -45,6 +45,80 @@ namespace Enjon
 		protected:
 
 	};
+	
+	class ShaderAddNode : public BinaryFunctionNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderAddNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderAddNode( ); 
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+
+	};
+	
+	class ShaderSubtractNode : public BinaryFunctionNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderSubtractNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderSubtractNode( ); 
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+
+	};
 
 	class ShaderDotProductNode : public BinaryFunctionNode
 	{

@@ -127,7 +127,7 @@ void main()
     // vec4 FragPosLightSpace = LightSpaceMatrix * vec4(WorldPos, 1.0);
     // float Shadow = ShadowCalculation(FragPosLightSpace, bias);
 
-    ColorOut = vec4(Lo, 1.0);
+    ColorOut = vec4(max(Lo, vec3(0.0)), 1.0);
 
     // float val = 1.0 - Shadow;
     // ColorOut = vec4(Lo, 1.0) * vec4(val, val, val, 1.0);
