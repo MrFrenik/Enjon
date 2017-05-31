@@ -2,10 +2,13 @@
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
 
 #include "Graphics/Shader.h" 
+#include "Graphics/Texture.h"
+#include "Graphics/Material.h"
 #include "Utils/Errors.h"
 
 #include <GLEW/glew.h> 
 #include <vector>
+#include <iostream>
 
 namespace Enjon
 { 
@@ -59,6 +62,12 @@ namespace Enjon
 		// Link shaders 
 		LinkProgram( );
 
+		auto refs = mGraph.GetUniforms( );
+		for ( auto& r : refs )
+		{
+			std::cout << r.mName << '\n';
+		}
+
 		return Enjon::Result::SUCCESS;
 	}
 
@@ -104,6 +113,13 @@ namespace Enjon
 	void Shader::Unuse( )
 	{ 
 		 glUseProgram(0);
+	}
+
+	//======================================================================================================================= 
+			
+	const Enjon::ShaderGraph* Shader::GetGraph( )
+	{
+		return &mGraph;
 	}
 
 	//======================================================================================================================= 
@@ -166,7 +182,6 @@ namespace Enjon
 			std::vector<char> errorLog(maxLength);
 			glGetProgramInfoLog(mProgramID, maxLength, &maxLength, &errorLog[0]); 
 
-
 			//We don't need the program anymore.
 			glDeleteProgram(mProgramID);
 
@@ -211,6 +226,36 @@ namespace Enjon
 
 		// Return success
 		return Enjon::Result::SUCCESS;
+	}
+			
+	/*
+	* @brief
+	*/
+	Enjon::AssetHandle< Enjon::Material > Shader::CreateMaterial( )
+	{
+		// Create new material
+		Enjon::Material* material = new Enjon::Material;
+
+		const std::vector< UniformReference >& refs = mGraph.GetUniforms( );
+		for ( auto& r : refs )
+		{
+			// Build uniforms for material
+			switch ( r.mType )
+			{
+				case ShaderPrimitiveType::Texture2D:
+				{
+					// Need to have texture handle somehow...
+					//UniformTexture* tex = new UniformTexture( r.mName, this,  )
+				} break;
+
+				default:
+				{ 
+				} break;
+			}
+		}
+
+		return material;
+
 	}
 	
 	s32 Shader::GetUniformLocation(const Enjon::String& uniformName) 
@@ -373,6 +418,29 @@ namespace Enjon
 
 		glBindTexture(GL_TEXTURE_2D, TextureID);
 	} 
+
+	//======================================================================================================================= 
+			
+	UniformTexture::UniformTexture( const Enjon::String& name, const Enjon::Shader* shader, const Enjon::AssetHandle< Enjon::Texture >& texture, u32 location )
+	{
+		mShader = shader;
+		mTexture = texture;
+		mLocation = location;
+		mName = name;
+	}
+
+	//======================================================================================================================= 
+			
+	UniformTexture::~UniformTexture( )
+	{ 
+	}
+
+	//======================================================================================================================= 
+	
+	void UniformTexture::Set( )
+	{
+		const_cast< Enjon::Shader* >( mShader )->BindTexture( mName, mTexture.Get( )->GetTextureId( ), mLocation );
+	}
 
 	//======================================================================================================================= 
 }

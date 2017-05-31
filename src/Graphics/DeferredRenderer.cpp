@@ -373,6 +373,11 @@ namespace Enjon
 			static Enjon::AssetHandle< Enjon::Texture > metallic;
 			static Enjon::AssetHandle< Enjon::Texture > roughness;
 			static Enjon::AssetHandle< Enjon::Texture > emissive; 
+			static Enjon::UniformTexture* textureUniform = nullptr;
+			static Enjon::UniformPrimitive< f32 >* floatUniform = nullptr;
+			
+			static f32 t = 0.0f;
+			t += 0.001f;
 			
 			if ( !set )
 			{
@@ -381,21 +386,27 @@ namespace Enjon
 				metallic = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.metallic" );
 				roughness = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.roughness" );
 				emissive = am->GetAsset< Enjon::Texture >( "isoarpg.textures.green" ); 
+				textureUniform = new Enjon::UniformTexture( "uAlbedoMap", &mShader, am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.albedo" ), 0 );
+				floatUniform = new Enjon::UniformPrimitive< f32 >( "uWorldTime", &mShader, t, 0 );
 				set = true;
-			}
+			} 
+
+			// Update uniform value
+			floatUniform->UpdateValue( t );
+
 			// Set textures
-			mShader.BindTexture( "uAlbedoMap", albedo.Get( )->GetTextureId( ), 0 );
+			//mShader.BindTexture( "uAlbedoMap", albedo.Get( )->GetTextureId( ), 0 );
+
+			textureUniform->Set( );
+			floatUniform->Set( );
 			mShader.BindTexture( "uEmissiveMap", emissive.Get()->GetTextureId( ), 1 );
 			mShader.BindTexture( "uMetallicMap", metallic.Get()->GetTextureId( ), 2 );
 			mShader.BindTexture( "uNormalMap", normals.Get()->GetTextureId( ), 3 );
-			mShader.BindTexture( "uRoughnessMap", roughness.Get()->GetTextureId( ), 4 );
-
-			static f32 t = 0.0f;
-			t += 0.001f;
+			mShader.BindTexture( "uRoughnessMap", roughness.Get()->GetTextureId( ), 4 ); 
 
 			// Set uniforms
 			mShader.SetUniform( "uCamera", mSceneCamera.GetViewProjectionMatrix( ) );
-			mShader.SetUniform( "uWorldTime", t );
+			//mShader.SetUniform( "uWorldTime", t );
 
 			Mesh* mesh = mRenderable.GetMesh( ).Get( );
 			mesh->Bind( );
@@ -1305,6 +1316,10 @@ namespace Enjon
 		Enjon::ShaderTimeNode* worldTime = mShaderGraph.AddNode( new Enjon::ShaderTimeNode( "worldTime" ) )->Cast< Enjon::ShaderTimeNode >( );
 		Enjon::ShaderSinNode* sinNode = mShaderGraph.AddNode( new Enjon::ShaderSinNode( "sinNode" ) )->Cast< Enjon::ShaderSinNode >( );
 		Enjon::ShaderAddNode* addNode = mShaderGraph.AddNode( new Enjon::ShaderAddNode( "addNode" ) )->Cast< Enjon::ShaderAddNode >( );
+		Enjon::ShaderVec2Node* vec21 = mShaderGraph.AddNode( new Enjon::ShaderVec2Node( "vec21", Vec2( 0, 0 ) ) )->Cast< Enjon::ShaderVec2Node >( ); 
+
+		// Set to be uniform variable
+		vec21->IsUniform( true );
 
 		// Emissive = ( sin(time) * 0.5 + 0.5 ) * emissiveIntensity * emissiveMap;
 

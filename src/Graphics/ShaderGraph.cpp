@@ -312,6 +312,13 @@ namespace Enjon
 	}
 
 	//===============================================================================================
+		
+	const std::vector< UniformReference >& ShaderGraph::GetUniforms( ) const
+	{
+		return mUniforms;
+	}
+
+	//===============================================================================================
 
 	void ShaderGraph::Connect( const ShaderGraphNode::Connection& connection )
 	{
@@ -347,6 +354,13 @@ namespace Enjon
 			if ( node->GetPrimitiveType( ) == ShaderPrimitiveType::Texture2D )
 			{
 				RegisterRequiredDefinitions( node );
+			}
+
+			// Store uniforms and texture samples to send to shader
+			if ( node->GetVariableType( ) == ShaderGraphNodeVariableType::UniformVariable || node->GetPrimitiveType() == ShaderPrimitiveType::Texture2D )
+			{
+				UniformReference ref = { const_cast< ShaderGraphNode* >( node )->GetQualifiedID( ), node->GetPrimitiveType( ) };
+				mUniforms.push_back( ref );
 			}
 		}
 	}

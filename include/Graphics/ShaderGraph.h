@@ -56,6 +56,12 @@ namespace Enjon
 		Fragment
 	};
 
+	struct UniformReference
+	{ 
+		Enjon::String mName; 
+		ShaderPrimitiveType mType;
+	};
+
 	class ShaderGraphNode
 	{
 		public:
@@ -104,6 +110,30 @@ namespace Enjon
 			return static_cast<T*>( this );
 		} 
 
+
+		/**
+		* @brief
+		*/
+		ShaderGraphNodeVariableType GetVariableType( ) const 
+		{
+			return mVariableType;
+		} 
+		
+		/**
+		* @brief
+		*/
+		void IsUniform( bool enable )
+		{
+			mVariableType = enable ? ShaderGraphNodeVariableType::UniformVariable : ShaderGraphNodeVariableType::LocalVariable;
+		}
+		
+		/**
+		* @brief
+		*/
+		bool IsUniform( )
+		{
+			return ( mVariableType == ShaderGraphNodeVariableType::UniformVariable );
+		}
 
 		/**
 		* @brief
@@ -712,6 +742,11 @@ namespace Enjon
 		*/
 		Enjon::Result Compile( );
 
+		/**
+		* @brief
+		*/
+		const std::vector< UniformReference >& GetUniforms( ) const; 
+
 		/*
 		* @brief
 		*/
@@ -808,6 +843,7 @@ namespace Enjon
 		std::set< Enjon::String > mDeclarations;
 		std::set< const ShaderGraphNode* > mDefinesOnStart;
 		Enjon::String mShaderCodeOutput;
+		std::vector< UniformReference > mUniforms;
 	};
 
 	class ShaderGraphFunctionNode : public ShaderGraphNode

@@ -49,8 +49,9 @@ namespace Enjon {
 		private:
 			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count]; 
 			ColorRGBA16 mColors[(u32)TextureSlotType::Count];
-			GLSLProgram* mShader;
+			GLSLProgram* mShader = nullptr;
 			bool mTwoSided = false;
+			std::unordered_map< Enjon::String, ShaderUniform* > mUniforms;
 	}; 
 }
 

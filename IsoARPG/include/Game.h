@@ -69,7 +69,7 @@ class Game : public Enjon::Application
 		std::vector<Enjon::Entity*> mHandles; 
 
 		bool mShowEntities = true;
-		bool mMovementOn = true;
+		bool mMovementOn = false;
 
 		f32 mCameraSpeed = 0.12f;
 
