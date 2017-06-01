@@ -359,7 +359,14 @@ namespace Enjon
 			// Store uniforms and texture samples to send to shader
 			if ( node->GetVariableType( ) == ShaderGraphNodeVariableType::UniformVariable || node->GetPrimitiveType() == ShaderPrimitiveType::Texture2D )
 			{
-				UniformReference ref = { const_cast< ShaderGraphNode* >( node )->GetQualifiedID( ), node->GetPrimitiveType( ) };
+				// Store location
+				u32 location = 0;
+				if ( node->GetPrimitiveType( ) == ShaderPrimitiveType::Texture2D )
+				{
+					location = mLastTextureLocation++;
+				}
+
+				UniformReference ref = { const_cast< ShaderGraphNode* >( node )->GetID( ), node->GetPrimitiveType( ), location };
 				mUniforms.push_back( ref );
 			}
 		}

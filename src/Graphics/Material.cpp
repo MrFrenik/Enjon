@@ -45,15 +45,69 @@ namespace Enjon {
 	}
 
 	//------------------------------------------------------------------------
-	GLSLProgram* Material::GetShader()
-	{
-		return mShader;
-	}
+
+	//GLSLProgram* Material::GetShader() 
+	//{
+	//	return mShader;
+	//}
 
 	//------------------------------------------------------------------------
-	void Material::SetShader(GLSLProgram* shader)
+
+	//void Material::SetShader(GLSLProgram* shader)
+	//{
+	//	mShader = shader;
+
+	//}
+
+	//========================================================================
+
+	void Material::SetShader( const Enjon::Shader* shader )
 	{
-		mShader = shader;
+		mMaterialShader = shader;
+	}
+
+	//========================================================================
+
+	const Enjon::Shader* Material::GetShader( ) const
+	{
+		return mMaterialShader;
+	}
+
+	//========================================================================
+			
+	void Material::AddUniform( ShaderUniform* uniform )
+	{
+		auto query = mUniforms.find( uniform->GetName( ) );
+		if ( query == mUniforms.end( ) )
+		{
+			mUniforms[ uniform->GetName( ) ] = uniform;
+		}
+	} 
+
+	//========================================================================
+
+	void Material::SetUniforms( )
+	{
+		// Make sure that material shader is valid
+		assert( mMaterialShader != nullptr );
+
+		// Iterate through uniforms and set with shader
+		for ( auto& u : mUniforms )
+		{
+			switch ( u.second->GetType() )
+			{
+				case UniformType::TextureSampler:
+				{
+					UniformTexture* texUni = u.second->Cast< UniformTexture >( );
+					const_cast< Enjon::Shader* >( mMaterialShader )->BindTexture( texUni->GetName( ), texUni->GetTexture( ).Get( )->GetTextureId(), texUni->GetLocation( ) );
+				} break;
+
+				default:
+				{
+
+				} break;
+			}
+		}
 	}
 
 }

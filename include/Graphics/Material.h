@@ -30,6 +30,8 @@ namespace Enjon {
 	{
 		ENJON_OBJECT( Material )
 
+		friend Shader;
+
 		public:
 			Material();
 			~Material(); 
@@ -40,18 +42,60 @@ namespace Enjon {
 			void SetColor(TextureSlotType type, const ColorRGBA16& color);
 			ColorRGBA16 GetColor(TextureSlotType type) const;
 
-			GLSLProgram* GetShader();
-			void SetShader(GLSLProgram* shader);
+			//GLSLProgram* GetShader();
+			//void SetShader(GLSLProgram* shader);
+
+			void SetShader( const Enjon::Shader* shader );
+			const Enjon::Shader* GetShader( ) const;
 
 			bool TwoSided( ) const { return mTwoSided; }
 			void TwoSided( bool enable ) { mTwoSided = enable; }
 
-		private:
+			template < typename T >
+			void SetUniform( const Enjon::String& name, const T& value )
+			{
+				auto query = mUniforms.find( name );
+				if ( query != mUniforms.end( ) )
+				{
+					ShaderUniform* uniform = mUniforms[ name ];
+					switch ( uniform->GetType() )
+					{
+						case Enjon::UniformType::TextureSampler:
+						{
+							static_cast< UniformTexture* > ( uniform )->SetTexture( value );
+						} break;
+
+						//case Enjon::UniformType::Vec4:
+						//case Enjon::UniformType::Vec3:
+						//case Enjon::UniformType::Vec2:
+						//case Enjon::UniformType::Mat4:
+						//case Enjon::UniformType::Float:
+						//{
+						//	static_cast< UniformPrimitive< T >* > ( uniform )->SetValue( value );
+						//} break;
+
+						default:
+						{ 
+						} break;
+					}
+				}
+			}
+
+			/*
+			* @brief
+			*/
+			void SetUniforms( );
+
+		protected:
+			void AddUniform( ShaderUniform* uniform );
+
+		protected:
 			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count]; 
 			ColorRGBA16 mColors[(u32)TextureSlotType::Count];
 			GLSLProgram* mShader = nullptr;
 			bool mTwoSided = false;
 			std::unordered_map< Enjon::String, ShaderUniform* > mUniforms;
+			const Enjon::Shader* mMaterialShader = nullptr;
 	}; 
 }
 

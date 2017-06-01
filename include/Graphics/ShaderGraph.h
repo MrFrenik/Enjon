@@ -60,6 +60,7 @@ namespace Enjon
 	{ 
 		Enjon::String mName; 
 		ShaderPrimitiveType mType;
+		u32 mLocation;
 	};
 
 	class ShaderGraphNode
@@ -844,6 +845,7 @@ namespace Enjon
 		std::set< const ShaderGraphNode* > mDefinesOnStart;
 		Enjon::String mShaderCodeOutput;
 		std::vector< UniformReference > mUniforms;
+		u32 mLastTextureLocation = 0;
 	};
 
 	class ShaderGraphFunctionNode : public ShaderGraphNode

@@ -133,6 +133,28 @@ namespace Enjon
 			* @brief
 			*/
 			virtual void Set( ) = 0;
+			
+			template < typename T >
+			T* Cast( )
+			{
+				static_assert( std::is_base_of<ShaderUniform, T>::value, "ShaderUniform::Cast -  T must inherit from ShaderUniform." );	
+				return static_cast< T* >( this );
+			}
+
+			/*
+			* @brief
+			*/
+			const Enjon::String& GetName( ) const { return mName; }
+			
+			/*
+			* @brief
+			*/
+			u32 GetLocation( ) const { return mLocation; }
+			
+			/*
+			* @brief
+			*/
+			UniformType GetType( ) const { return mType; }
 
 		protected: 
 			const Enjon::Shader* mShader = nullptr;
@@ -153,11 +175,28 @@ namespace Enjon
 			* @brief
 			*/
 			~UniformTexture( );
+
 			
 			/*
 			* @brief
 			*/
 			virtual void Set( ) override;
+
+			/*
+			* @brief
+			*/
+			void SetTexture( const Enjon::AssetHandle< Enjon::Texture >& texture )
+			{
+				mTexture = texture;
+			}
+			
+			/*
+			* @brief
+			*/
+			Enjon::AssetHandle< Enjon::Texture > GetTexture( ) const
+			{
+				return mTexture;
+			}
  
 		private:
 			Enjon::AssetHandle< Enjon::Texture > mTexture;
@@ -191,7 +230,7 @@ namespace Enjon
 				const_cast< Enjon::Shader* >( mShader )->SetUniform( mName, mValue );
 			}
 
-			void UpdateValue( const T& value )
+			void SetValue( const T& value )
 			{
 				mValue = value;
 			}

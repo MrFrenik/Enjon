@@ -373,8 +373,7 @@ namespace Enjon
 			static Enjon::AssetHandle< Enjon::Texture > metallic;
 			static Enjon::AssetHandle< Enjon::Texture > roughness;
 			static Enjon::AssetHandle< Enjon::Texture > emissive; 
-			static Enjon::UniformTexture* textureUniform = nullptr;
-			static Enjon::UniformPrimitive< f32 >* floatUniform = nullptr;
+			static Enjon::AssetHandle< Enjon::Material > matHandle; 
 			
 			static f32 t = 0.0f;
 			t += 0.001f;
@@ -386,39 +385,47 @@ namespace Enjon
 				metallic = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.metallic" );
 				roughness = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.roughness" );
 				emissive = am->GetAsset< Enjon::Texture >( "isoarpg.textures.green" ); 
-				textureUniform = new Enjon::UniformTexture( "uAlbedoMap", &mShader, am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.albedo" ), 0 );
-				floatUniform = new Enjon::UniformPrimitive< f32 >( "uWorldTime", &mShader, t, 0 );
+
+				// Create material
+				matHandle = mShader.CreateMaterial( );
+
+				// Set uniforms for material
+				Enjon::Material* mat = matHandle.Get( );
+				mat->SetUniform( "uAlbedoMap", albedo );
+				mat->SetUniform( "uMetallicMap", metallic );
+				mat->SetUniform( "uRoughnessMap", roughness );
+				mat->SetUniform( "uEmissiveMap", emissive );
+				mat->SetUniform( "uNormalMap", normals );
+
 				set = true;
 			} 
 
-			// Update uniform value
-			floatUniform->UpdateValue( t );
-
-			// Set textures
-			//mShader.BindTexture( "uAlbedoMap", albedo.Get( )->GetTextureId( ), 0 );
-
-			textureUniform->Set( );
-			floatUniform->Set( );
-			mShader.BindTexture( "uEmissiveMap", emissive.Get()->GetTextureId( ), 1 );
-			mShader.BindTexture( "uMetallicMap", metallic.Get()->GetTextureId( ), 2 );
-			mShader.BindTexture( "uNormalMap", normals.Get()->GetTextureId( ), 3 );
-			mShader.BindTexture( "uRoughnessMap", roughness.Get()->GetTextureId( ), 4 ); 
-
-			// Set uniforms
-			mShader.SetUniform( "uCamera", mSceneCamera.GetViewProjectionMatrix( ) );
-			//mShader.SetUniform( "uWorldTime", t );
-
-			Mesh* mesh = mRenderable.GetMesh( ).Get( );
-			mesh->Bind( );
+			Enjon::Input* input = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::Input >( );
+			if ( input && input->IsKeyPressed( Enjon::KeyCode::M ) )
 			{
-				Mat4 Model;
-				Model *= Mat4::Translate( mRenderable.GetPosition( ) );
-				Model *= QuaternionToMat4( mRenderable.GetRotation( ) );
-				Model *= Mat4::Scale( mRenderable.GetScale( ) );
-				mShader.SetUniform( "uModel", Model );
-				mesh->Submit( );
-			}
-			mesh->Unbind( ); 
+				if ( input->IsKeyDown( Enjon::KeyCode::LeftShift ) )
+				{
+					matHandle.Get( )->SetUniform( "uEmissiveMap", am->GetAsset< Enjon::Texture >( "isoarpg.textures.blue" ) ); 
+				}
+				else if ( input->IsKeyDown( Enjon::KeyCode::LeftCtrl ) )
+				{
+					matHandle.Get( )->SetUniform( "uEmissiveMap", am->GetAsset< Enjon::Texture >( "isoarpg.textures.red" ) );
+				}
+				else
+				{
+					matHandle.Get( )->SetUniform( "uEmissiveMap", am->GetAsset< Enjon::Texture >( "isoarpg.textures.green" ) ); 
+				}
+			} 
+
+			// Set default shader uniforms
+			mShader.SetUniform( "uCamera", mSceneCamera.GetViewProjectionMatrix( ) );
+			mShader.SetUniform( "uWorldTime", t );
+
+			// Set material specific uniforms
+			matHandle.Get( )->SetUniforms( );
+
+			// Submit renderable ( The material can be bound and used in the renderable submit call as well )
+			mRenderable.Submit( &mShader ); 
 		}
 		mShader.Unuse( );
 
@@ -1316,10 +1323,10 @@ namespace Enjon
 		Enjon::ShaderTimeNode* worldTime = mShaderGraph.AddNode( new Enjon::ShaderTimeNode( "worldTime" ) )->Cast< Enjon::ShaderTimeNode >( );
 		Enjon::ShaderSinNode* sinNode = mShaderGraph.AddNode( new Enjon::ShaderSinNode( "sinNode" ) )->Cast< Enjon::ShaderSinNode >( );
 		Enjon::ShaderAddNode* addNode = mShaderGraph.AddNode( new Enjon::ShaderAddNode( "addNode" ) )->Cast< Enjon::ShaderAddNode >( );
-		Enjon::ShaderVec2Node* vec21 = mShaderGraph.AddNode( new Enjon::ShaderVec2Node( "vec21", Vec2( 0, 0 ) ) )->Cast< Enjon::ShaderVec2Node >( ); 
+		//Enjon::ShaderVec2Node* vec21 = mShaderGraph.AddNode( new Enjon::ShaderVec2Node( "vec21", Vec2( 0, 0 ) ) )->Cast< Enjon::ShaderVec2Node >( ); 
 
 		// Set to be uniform variable
-		vec21->IsUniform( true );
+		//vec21->IsUniform( true );
 
 		// Emissive = ( sin(time) * 0.5 + 0.5 ) * emissiveIntensity * emissiveMap;
 
@@ -1340,18 +1347,18 @@ namespace Enjon
 		mult3->AddInput( ShaderGraphNode::Connection( uEmissiveMap, 0, ( u32 )Enjon::ShaderTexture2DNode::TexturePortType::RGB ) );
 		mult3->AddInput( mult2 ); 
 
-		mult4->AddInput( addNode );
-		mult4->AddInput( colRed );
+		//mult4->AddInput( addNode );
+		//mult4->AddInput( colRed );
 
-		mult5->AddInput( mult3 );
-		mult5->AddInput( mult4 );
+		//mult5->AddInput( mult3 );
+		//mult5->AddInput( mult4 );
 
 		// Add inputs to main node
 		//mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( colRed, ( u32 )Enjon::ShaderGraphMainNodeInputType::Albedo ) );
 		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uAlbedoMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Albedo ) );
 		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uMetallicMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Metallic ) );
 		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uRoughnessMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Roughness ) );
-		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( mult5, ( u32 )Enjon::ShaderGraphMainNodeInputType::Emissive ) );
+		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( mult3, ( u32 )Enjon::ShaderGraphMainNodeInputType::Emissive ) );
 		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uNormalMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Normal ) );
 
 		// Compile graph

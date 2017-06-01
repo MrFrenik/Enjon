@@ -6,16 +6,19 @@
 #include "Math/Transform.h"
 #include "Math/Quaternion.h"
 #include "Graphics/Material.h"
+#include "Graphics/Shader.h"
 #include "System/Types.h"
 
-namespace Enjon {
-
+namespace Enjon 
+{ 
 	class Mesh; 			
 	class Scene;
+	class DeferredRenderer;
 
 	class Renderable
 	{
 		friend Scene;
+		friend DeferredRenderer;
 
 		public:
 			Renderable();
@@ -71,6 +74,12 @@ namespace Enjon {
 
 			/* Set material color */
 			void SetColor(TextureSlotType type, const ColorRGBA16& color);	
+
+		protected:
+			/*
+			* @brief
+			*/
+			void Submit( const Enjon::Shader* shader );
 
 		private:
 			Transform 			mTransform;

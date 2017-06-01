@@ -65,7 +65,7 @@ namespace Enjon
 		auto refs = mGraph.GetUniforms( );
 		for ( auto& r : refs )
 		{
-			std::cout << r.mName << '\n';
+			std::cout << r.mName << ", " << r.mLocation << '\n';
 		}
 
 		return Enjon::Result::SUCCESS;
@@ -234,7 +234,10 @@ namespace Enjon
 	Enjon::AssetHandle< Enjon::Material > Shader::CreateMaterial( )
 	{
 		// Create new material
-		Enjon::Material* material = new Enjon::Material;
+		Enjon::Material* material = new Enjon::Material; 
+
+		// Set shader
+		material->mMaterialShader = this;
 
 		const std::vector< UniformReference >& refs = mGraph.GetUniforms( );
 		for ( auto& r : refs )
@@ -245,7 +248,16 @@ namespace Enjon
 				case ShaderPrimitiveType::Texture2D:
 				{
 					// Need to have texture handle somehow...
-					//UniformTexture* tex = new UniformTexture( r.mName, this,  )
+					Enjon::AssetHandle< Enjon::Texture > texture;
+					UniformTexture* tex = new UniformTexture( r.mName, this, texture, r.mLocation );
+					material->AddUniform( tex );
+
+				} break;
+
+				case ShaderPrimitiveType::Vec2:
+				{
+					UniformPrimitive< Vec2 >* uniform = new UniformPrimitive<Vec2>( r.mName, this, Enjon::Vec2( 0.0f ), r.mLocation );
+					material->AddUniform( uniform );
 				} break;
 
 				default:
@@ -254,8 +266,7 @@ namespace Enjon
 			}
 		}
 
-		return material;
-
+		return material; 
 	}
 	
 	s32 Shader::GetUniformLocation(const Enjon::String& uniformName) 
@@ -423,6 +434,7 @@ namespace Enjon
 			
 	UniformTexture::UniformTexture( const Enjon::String& name, const Enjon::Shader* shader, const Enjon::AssetHandle< Enjon::Texture >& texture, u32 location )
 	{
+		mType = UniformType::TextureSampler;
 		mShader = shader;
 		mTexture = texture;
 		mLocation = location;
