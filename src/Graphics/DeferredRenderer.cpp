@@ -179,7 +179,7 @@ namespace Enjon
 			if ( am )
 			{
 				mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.buddha" ) ); 
-				mRenderable.SetScale( 3.0f );
+				mRenderable.SetScale( 2.0f );
 				mRenderable.SetPosition( Vec3( 0, 10, 0 ) );
 			}
 			set = true;
@@ -392,30 +392,67 @@ namespace Enjon
 				// Set uniforms for material
 				Enjon::Material* mat = matHandle.Get( );
 				mat->SetUniform( "uAlbedoMap", albedo );
-				mat->SetUniform( "uMetallicMap", metallic );
-				mat->SetUniform( "uRoughnessMap", roughness );
-				mat->SetUniform( "uEmissiveMap", emissive );
+				//mat->SetUniform( "uMetallicMap", metallic );
+				//mat->SetUniform( "uRoughnessMap", roughness );
+				//mat->SetUniform( "uEmissiveMap", emissive );
 				mat->SetUniform( "uNormalMap", normals );
+				mat->SetUniform( "uColor", Vec3( 1.0f, 0.0f, 0.0f ) );
+				mat->SetUniform( "uEmissiveIntensity", 0.0f );
 
 				set = true;
 			} 
 
+			static f32 metal = 0.0f;
+			static f32 emissiveIntensity = 0.0f;
+			static f32 rough = 0.0f;
+
 			Enjon::Input* input = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::Input >( );
-			if ( input && input->IsKeyPressed( Enjon::KeyCode::M ) )
+			if ( input && input->IsKeyDown( KeyCode::E ) )
 			{
-				if ( input->IsKeyDown( Enjon::KeyCode::LeftShift ) )
+				if ( input->IsKeyDown( Enjon::KeyCode::Up ) )
 				{
-					matHandle.Get( )->SetUniform( "uEmissiveMap", am->GetAsset< Enjon::Texture >( "isoarpg.textures.blue" ) ); 
+					emissiveIntensity += 0.2f;
+					matHandle.Get( )->SetUniform( "uEmissiveIntensity", emissiveIntensity );
 				}
-				else if ( input->IsKeyDown( Enjon::KeyCode::LeftCtrl ) )
+				if ( input->IsKeyDown( Enjon::KeyCode::Down ) )
 				{
-					matHandle.Get( )->SetUniform( "uEmissiveMap", am->GetAsset< Enjon::Texture >( "isoarpg.textures.red" ) );
+					emissiveIntensity -= 0.2f;
+					emissiveIntensity = Enjon::Max( emissiveIntensity, 0.0f );
+					matHandle.Get( )->SetUniform( "uEmissiveIntensity", emissiveIntensity );
 				}
-				else
+			}
+			
+			if ( input && input->IsKeyDown( KeyCode::M ) )
+			{
+				if ( input->IsKeyDown( Enjon::KeyCode::Up ) )
 				{
-					matHandle.Get( )->SetUniform( "uEmissiveMap", am->GetAsset< Enjon::Texture >( "isoarpg.textures.green" ) ); 
+					metal += 0.01f;
+					metal = Enjon::Clamp( metal, 0.0f, 1.0f );
+					matHandle.Get( )->SetUniform( "uMetallicness", metal );
 				}
-			} 
+				if ( input && input->IsKeyDown( Enjon::KeyCode::Down ) )
+				{
+					metal -= 0.01f;
+					metal = Enjon::Clamp( metal, 0.0f, 1.0f );
+					matHandle.Get( )->SetUniform( "uMetallicness", metal );
+				}
+			}
+			
+			if ( input && input->IsKeyDown( KeyCode::N ) )
+			{
+				if ( input->IsKeyDown( Enjon::KeyCode::Up ) )
+				{
+					rough += 0.01f;
+					rough = Enjon::Clamp( rough, 0.0f, 1.0f );
+					matHandle.Get( )->SetUniform( "uRoughness", rough );
+				}
+				if ( input && input->IsKeyDown( Enjon::KeyCode::Down ) )
+				{
+					rough -= 0.01f;
+					rough = Enjon::Clamp( rough, 0.0f, 1.0f );
+					matHandle.Get( )->SetUniform( "uRoughness", rough );
+				}
+			}
 
 			// Set default shader uniforms
 			mShader.SetUniform( "uCamera", mSceneCamera.GetViewProjectionMatrix( ) );
@@ -835,76 +872,7 @@ namespace Enjon
 
         // Flush
         glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
-        ImGui::Render();
-
-		// Do some other random gui shit here to see if it still works
-		GLSLProgram* textProgram = ShaderManager::Get( "Text" );
- 
-		iVec2 viewport = GetViewport( ); 
-		Mat4 ortho = Mat4::Orthographic(0.0f, (f32)viewport.x, 0.0f, (f32)viewport.y, -1, 1);
-
-		static bool hasMadeFont = false;
-		static UIFont* font = nullptr;
-		if ( !hasMadeFont )
-		{
-			// Add font to database
-			Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( ); 
-			Enjon::String rootPath = Enjon::Engine::GetInstance()->GetConfig( ).GetRoot( );
-			Enjon::String fontPath = rootPath + "/Assets/Fonts/Hack3d/Hack3d.ttf";
-			am->AddToDatabase( fontPath , false );
-			font = am->GetAsset< Enjon::UIFont >( "e.development.enjon.assets.fonts.hack3d.hack3d" ).Get( );
-
-			hasMadeFont = true;
-		}
-
-		/*
-		textProgram->Use( );
-		{
-			textProgram->SetUniform( "projection", ortho );
-			mBatch->Begin( GlyphSortType::FRONT_TO_BACK );
-			{ 
-				Enjon::String str = "HELLO, BITCHES"; 
-
-				f32 x = (f32) viewport.x / 2.0f;
-				f32 y = (f32) viewport.y / 2.0f;
-				Enjon::FontAtlas* atlas = font->GetAtlas( 64 ); 
-				f32 textureWidth = atlas->GetAtlasTexture( ).Get( )->GetWidth( );
-				f32 textureHeight = atlas->GetAtlasTexture( ).Get( )->GetHeight( );
-
-				std::string::const_iterator c;
-				for ( c = str.begin( ); c != str.end( ); c++ )
-				{ 
-					Enjon::FontGlyph glyph = atlas->GetGlyph( *c );
-					f32 width = glyph.GetWidth( );
-					f32 height = glyph.GetHeight( ); 
-
-					f32 u1 = glyph.GetUVOffsetX( );
-					f32 v1 = 1.0f - glyph.GetUVOffsetY( );
-					f32 u2 = u1 + ( width / textureWidth );
-					f32 v2 = v1 -( height / textureHeight );
-
-					f32 w = width;
-					f32 h = height; 
-					
-					Vec2 bearing = glyph.GetBearing( );
-					GLfloat xpos = x + bearing.x;
-					GLfloat ypos = y - (height - bearing.y); 
-
-					Vec4 uv( u1, v2, u2, v1 );
-
-					Enjon::AssetHandle< Enjon::Texture > atlasTexture = atlas->GetAtlasTexture( );
-					mBatch->Add( Vec4( xpos, ypos, w, h ), uv, atlasTexture.Get( )->GetTextureId( ), Enjon::RGBA16_BurntOrange( ) ); 
-	        
-					s32 advance = glyph.GetAdvance( );
-					x += (f32)advance;
-				} 
-
-			}
-			mBatch->End( ); 
-			mBatch->RenderBatch( );
-		}
-		textProgram->Unuse( );
-		*/
+        ImGui::Render(); 
 	}
 
 	//======================================================================================================
@@ -1308,57 +1276,66 @@ namespace Enjon
 	{ 
 		Enjon::ShaderTexture2DNode* uAlbedoMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uAlbedoMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
 		Enjon::ShaderTexture2DNode* uNormalMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uNormalMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		Enjon::ShaderTexture2DNode* uMetallicMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uMetallicMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		Enjon::ShaderTexture2DNode* uRoughnessMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uRoughnessMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		Enjon::ShaderTexture2DNode* uEmissiveMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uEmissiveMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		Enjon::ShaderFloatNode* emissiveIntensity = mShaderGraph.AddNode( new Enjon::ShaderFloatNode( "emissiveIntensity", 50.0f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderFloatNode* floatNode2 = mShaderGraph.AddNode( new Enjon::ShaderFloatNode( "floatNode2", 0.5f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderFloatNode* floatNodeHalf = mShaderGraph.AddNode( new Enjon::ShaderFloatNode( "floatNode1", 0.5f ) )->Cast< Enjon::ShaderFloatNode >( );
+		//Enjon::ShaderTexture2DNode* uMetallicMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uMetallicMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
+		//Enjon::ShaderTexture2DNode* uRoughnessMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uRoughnessMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
+		//Enjon::ShaderTexture2DNode* uEmissiveMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uEmissiveMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
+		Enjon::ShaderFloatNode* emissiveIntensity = mShaderGraph.AddNode( new Enjon::ShaderFloatNode( "uEmissiveIntensity", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
+		Enjon::ShaderFloatNode* metallicness = mShaderGraph.AddNode( new Enjon::ShaderFloatNode( "uMetallicness", 0.0f ) )->Cast< Enjon::ShaderFloatNode >( );
+		Enjon::ShaderFloatNode* roughness = mShaderGraph.AddNode( new Enjon::ShaderFloatNode( "uRoughness", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
 		Enjon::ShaderMultiplyNode* mult1 = mShaderGraph.AddNode( new Enjon::ShaderMultiplyNode( "mult1" ) )->Cast< Enjon::ShaderMultiplyNode >( );
 		Enjon::ShaderMultiplyNode* mult2 = mShaderGraph.AddNode( new Enjon::ShaderMultiplyNode( "mult2" ) )->Cast< Enjon::ShaderMultiplyNode >( );
 		Enjon::ShaderMultiplyNode* mult3 = mShaderGraph.AddNode( new Enjon::ShaderMultiplyNode( "mult3" ) )->Cast< Enjon::ShaderMultiplyNode >( );
 		Enjon::ShaderMultiplyNode* mult4 = mShaderGraph.AddNode( new Enjon::ShaderMultiplyNode( "mult4" ) )->Cast< Enjon::ShaderMultiplyNode >( );
 		Enjon::ShaderMultiplyNode* mult5 = mShaderGraph.AddNode( new Enjon::ShaderMultiplyNode( "mult5" ) )->Cast< Enjon::ShaderMultiplyNode >( );
-		Enjon::ShaderVec3Node* colRed = mShaderGraph.AddNode( new Enjon::ShaderVec3Node( "colRed", Vec3( 1.0f, 0.2f, 1.0f ) ) )->Cast< Enjon::ShaderVec3Node >( );
+		Enjon::ShaderVec3Node* colRed = mShaderGraph.AddNode( new Enjon::ShaderVec3Node( "uColor", Vec3( 1.0f, 0.2f, 1.0f ) ) )->Cast< Enjon::ShaderVec3Node >( );
 		Enjon::ShaderTimeNode* worldTime = mShaderGraph.AddNode( new Enjon::ShaderTimeNode( "worldTime" ) )->Cast< Enjon::ShaderTimeNode >( );
 		Enjon::ShaderSinNode* sinNode = mShaderGraph.AddNode( new Enjon::ShaderSinNode( "sinNode" ) )->Cast< Enjon::ShaderSinNode >( );
 		Enjon::ShaderAddNode* addNode = mShaderGraph.AddNode( new Enjon::ShaderAddNode( "addNode" ) )->Cast< Enjon::ShaderAddNode >( );
+		Enjon::ShaderPannerNode* pannerNode = mShaderGraph.AddNode( new Enjon::ShaderPannerNode( "pannerNode", Vec2( 0.2f, 1.0f ) ) )->Cast< Enjon::ShaderPannerNode >( );
 		//Enjon::ShaderVec2Node* vec21 = mShaderGraph.AddNode( new Enjon::ShaderVec2Node( "vec21", Vec2( 0, 0 ) ) )->Cast< Enjon::ShaderVec2Node >( ); 
 
 		// Set to be uniform variable
-		//vec21->IsUniform( true );
+		colRed->IsUniform( true );
+		emissiveIntensity->IsUniform( true );
+		metallicness->IsUniform( true );
+		roughness->IsUniform( true ); 
 
 		// Emissive = ( sin(time) * 0.5 + 0.5 ) * emissiveIntensity * emissiveMap;
 
 		// Sin of world time
-		sinNode->AddInput( worldTime );
+		//sinNode->AddInput( worldTime );
 
-		// Multiply by 2.0
-		mult1->AddInput( sinNode );
-		mult1->AddInput( floatNode2 );
+		//// Multiply by 2.0
+		//mult1->AddInput( sinNode );
+		//mult1->AddInput( floatNode2 );
 
-		// Subtract 1.0
-		addNode->AddInput( mult1 );
-		addNode->AddInput( floatNodeHalf ); 
+		//// Subtract 1.0
+		//addNode->AddInput( mult1 );
+		//addNode->AddInput( floatNodeHalf ); 
 
-		mult2->AddInput( addNode );
-		mult2->AddInput( emissiveIntensity );
+		//mult2->AddInput( addNode );
+		//mult2->AddInput( emissiveIntensity );
 
-		mult3->AddInput( ShaderGraphNode::Connection( uEmissiveMap, 0, ( u32 )Enjon::ShaderTexture2DNode::TexturePortType::RGB ) );
-		mult3->AddInput( mult2 ); 
+		//mult3->AddInput( ShaderGraphNode::Connection( uEmissiveMap, 0, ( u32 )Enjon::ShaderTexture2DNode::TexturePortType::RGB ) );
+		//mult3->AddInput( mult2 ); 
 
 		//mult4->AddInput( addNode );
 		//mult4->AddInput( colRed );
 
 		//mult5->AddInput( mult3 );
-		//mult5->AddInput( mult4 );
+		//mult5->AddInput( mult4 ); 
+
+		uAlbedoMap->AddInput( pannerNode );
+		uNormalMap->AddInput( pannerNode );
+
+		mult1->AddInput( colRed );
+		mult1->AddInput( emissiveIntensity );
 
 		// Add inputs to main node
-		//mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( colRed, ( u32 )Enjon::ShaderGraphMainNodeInputType::Albedo ) );
 		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uAlbedoMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Albedo ) );
-		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uMetallicMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Metallic ) );
-		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uRoughnessMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Roughness ) );
-		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( mult3, ( u32 )Enjon::ShaderGraphMainNodeInputType::Emissive ) );
+		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( metallicness, ( u32 )Enjon::ShaderGraphMainNodeInputType::Metallic ) );
+		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( roughness, ( u32 )Enjon::ShaderGraphMainNodeInputType::Roughness ) );
+		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( mult1, ( u32 )Enjon::ShaderGraphMainNodeInputType::Emissive ) );
 		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uNormalMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Normal ) );
 
 		// Compile graph

@@ -65,7 +65,19 @@ namespace Enjon
 
 	Enjon::String ShaderVec2Node::GetDeclaration( )
 	{
-		return ( "vec2 " + mID + ";" );
+		switch ( mVariableType )
+		{ 
+			case ShaderGraphNodeVariableType::UniformVariable:
+			{
+				return ( "uniform vec2 " + mID + ";" ); 
+			} break;
+			
+			default:
+			case ShaderGraphNodeVariableType::LocalVariable:
+			{
+				return ( "vec2 " + mID + ";" ); 
+			} break;
+		}
 	} 
 
 	//=============================================================================================================
@@ -131,7 +143,19 @@ namespace Enjon
 
 	Enjon::String ShaderVec3Node::GetDeclaration( )
 	{
-		return ( "vec3 " + mID + ";" );
+		switch ( mVariableType )
+		{
+			case ShaderGraphNodeVariableType::UniformVariable:
+			{
+				return ( "uniform vec3 " + mID + ";" ); 
+			} break;
+			
+			default:
+			case ShaderGraphNodeVariableType::LocalVariable:
+			{
+				return ( "vec3 " + mID + ";" ); 
+			} break; 
+		}
 	}
  
 	//=============================================================================================================
@@ -198,7 +222,19 @@ namespace Enjon
 
 	Enjon::String ShaderVec4Node::GetDeclaration( )
 	{
-		return ( "vec4 " + mID + ";" );
+		switch ( mVariableType )
+		{
+			case ShaderGraphNodeVariableType::UniformVariable:
+			{
+				return ( "uniform vec4 " + mID + ";" ); 
+			} break;
+			
+			default:
+			case ShaderGraphNodeVariableType::LocalVariable:
+			{
+				return ( "vec4 " + mID + ";" ); 
+			} break; 
+		}
 	}
 
 	//=============================================================================================================

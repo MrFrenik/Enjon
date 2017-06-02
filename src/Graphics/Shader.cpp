@@ -254,9 +254,33 @@ namespace Enjon
 
 				} break;
 
+				case ShaderPrimitiveType::Float: 
+				{
+					UniformPrimitive< f32 >* uniform = new UniformPrimitive< f32 >( r.mName, this, 0.0f, r.mLocation );
+					material->AddUniform( uniform );
+				} break;
+
 				case ShaderPrimitiveType::Vec2:
 				{
-					UniformPrimitive< Vec2 >* uniform = new UniformPrimitive<Vec2>( r.mName, this, Enjon::Vec2( 0.0f ), r.mLocation );
+					UniformPrimitive< Vec2 >* uniform = new UniformPrimitive< Vec2 >( r.mName, this, Enjon::Vec2( 0.0f ), r.mLocation );
+					material->AddUniform( uniform );
+				} break;
+				
+				case ShaderPrimitiveType::Vec3:
+				{
+					UniformPrimitive< Vec3 >* uniform = new UniformPrimitive< Vec3 >( r.mName, this, Enjon::Vec3( 0.0f ), r.mLocation );
+					material->AddUniform( uniform );
+				} break;
+				
+				case ShaderPrimitiveType::Vec4:
+				{
+					UniformPrimitive< Vec4 >* uniform = new UniformPrimitive< Vec4 >( r.mName, this, Enjon::Vec4( 0.0f ), r.mLocation );
+					material->AddUniform( uniform );
+				} break;
+				
+				case ShaderPrimitiveType::Mat4:
+				{
+					UniformPrimitive< Mat4 >* uniform = new UniformPrimitive< Mat4 >( r.mName, this, Enjon::Mat4( 1.0f ), r.mLocation );
 					material->AddUniform( uniform );
 				} break;
 
@@ -275,7 +299,7 @@ namespace Enjon
 
 		if( location == GL_INVALID_INDEX )
 		{
-			Utils::FatalError( "GLSLPROGRAM::GETUNIFORMLOCATION::" + uniformName + "_NOT_FOUND" );
+			Utils::FatalError( "Shader::GetUniformLocation::" + uniformName + "_NOT_FOUND" );
 		}
 		return location;
 	} 
@@ -290,7 +314,7 @@ namespace Enjon
 		}
 		else
 		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
 		}
 	}
 	
@@ -304,7 +328,7 @@ namespace Enjon
 		}
 		else
 		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
 		}
 	}
 	
@@ -318,7 +342,7 @@ namespace Enjon
 		}
 		else
 		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -349,7 +373,7 @@ namespace Enjon
 		}
 		else
 		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -363,7 +387,7 @@ namespace Enjon
 		}
 		else
 		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -377,7 +401,7 @@ namespace Enjon
 		}
 		else
 		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -391,7 +415,7 @@ namespace Enjon
 		}
 		else
 		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -424,7 +448,7 @@ namespace Enjon
 		}
 		else
 		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
 		}
 
 		glBindTexture(GL_TEXTURE_2D, TextureID);

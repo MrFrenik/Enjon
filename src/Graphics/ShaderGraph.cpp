@@ -371,6 +371,83 @@ namespace Enjon
 			}
 		}
 	}
+
+	//=================================================================
+
+	ShaderPannerNode::ShaderPannerNode( const Enjon::String& id, const Enjon::Vec2& speed )
+		: ShaderGraphNode( id )
+	{ 
+		mPrimitiveType = ShaderPrimitiveType::Vec2;
+		mOutputType = ShaderOutputType::Vec2; 
+		mSpeed = speed;
+	}
+
+	//=================================================================
+
+	ShaderPannerNode::~ShaderPannerNode( )
+	{ 
+	}
+
+	//=================================================================
+
+	ShaderOutputType ShaderPannerNode::EvaluateOutputType( u32 portID )
+	{
+		return ShaderOutputType::Vec2;
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderPannerNode::EvaluateToGLSL( )
+	{ 
+		Enjon::String finalEvaluation = "";
+
+		// Evaluate inputs
+		for ( auto& c : mInputs )
+		{
+			ShaderGraphNode* owner = const_cast<ShaderGraphNode*>( c.mOwner );
+			finalEvaluation += owner->Evaluate( ) + "\n"; 
+		} 
+
+		if ( !mInputs.empty( ) )
+		{
+			// Get connections
+			Connection a_conn = mInputs.at( 0 );
+
+			// Get shader graph nodes
+			ShaderGraphNode* a = const_cast<ShaderGraphNode*>( a_conn.mOwner );
+
+			// Evaluate final line of code
+			Enjon::String aEval = a->EvaluateAtPort( a_conn.mOutputPortID );
+			finalEvaluation += GetQualifiedID( ) + " = vec2( fs_in.texCoords.x + " + aEval + ".x * uWorldTime, " + " fs_in.texCoords.y + " + aEval + ".y * uWorldTime);"; 
+		}
+
+		else
+		{
+			// Evaluate final line of code
+			Enjon::String xSpeed = std::to_string( mSpeed.x );
+			Enjon::String ySpeed = std::to_string( mSpeed.y );
+			finalEvaluation += GetQualifiedID( ) + " = vec2( fs_in.texCoords.x + " + xSpeed + " * uWorldTime, " + " fs_in.texCoords.y + " + ySpeed + " * uWorldTime);"; 
+		}
+		
+		// Return
+		return finalEvaluation; 
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderPannerNode::EvaluateAtPort( u32 portID )
+	{
+		return GetQualifiedID( );
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderPannerNode::GetDeclaration( )
+	{
+		return "vec2 " + GetQualifiedID( ) + ";";
+	}
+
+	//=================================================================
 }
 
 

@@ -101,6 +101,36 @@ namespace Enjon {
 					UniformTexture* texUni = u.second->Cast< UniformTexture >( );
 					const_cast< Enjon::Shader* >( mMaterialShader )->BindTexture( texUni->GetName( ), texUni->GetTexture( ).Get( )->GetTextureId(), texUni->GetLocation( ) );
 				} break;
+				
+				case UniformType::Float:
+				{
+					UniformPrimitive< f32 >* uni = u.second->Cast< UniformPrimitive< f32 > >( );
+					const_cast< Enjon::Shader* >( mMaterialShader )->SetUniform( uni->GetName( ), uni->GetValue( ) );
+				}
+
+				case UniformType::Vec2:
+				{
+					UniformPrimitive< Vec2 >* uni = u.second->Cast< UniformPrimitive< Vec2 > >( );
+					const_cast< Enjon::Shader* >( mMaterialShader )->SetUniform( uni->GetName( ), uni->GetValue( ) );
+				}
+				
+				case UniformType::Vec3:
+				{
+					UniformPrimitive< Vec3 >* uni = u.second->Cast< UniformPrimitive< Vec3 > >( );
+					const_cast< Enjon::Shader* >( mMaterialShader )->SetUniform( uni->GetName( ), uni->GetValue( ) );
+				}
+				
+				case UniformType::Vec4:
+				{
+					UniformPrimitive< Vec4 >* uni = u.second->Cast< UniformPrimitive< Vec4 > >( );
+					const_cast< Enjon::Shader* >( mMaterialShader )->SetUniform( uni->GetName( ), uni->GetValue( ) );
+				}
+				
+				case UniformType::Mat4:
+				{
+					UniformPrimitive< Mat4 >* uni = u.second->Cast< UniformPrimitive< Mat4 > >( );
+					const_cast< Enjon::Shader* >( mMaterialShader )->SetUniform( uni->GetName( ), uni->GetValue( ) );
+				}
 
 				default:
 				{
@@ -109,5 +139,92 @@ namespace Enjon {
 			}
 		}
 	}
+			
+	void Material::SetUniform( const Enjon::String& name, const Enjon::AssetHandle< Enjon::Texture >& value )
+	{
+		auto query = mUniforms.find( name );
+		if ( query != mUniforms.end( ) )
+		{
+			ShaderUniform* uniform = mUniforms[ name ];
+			if ( uniform->GetType( ) == Enjon::UniformType::TextureSampler )
+			{
+				uniform->Cast< UniformTexture >( )->SetTexture( value );
+			}
+		}
+	}
 
+	void Material::SetUniform( const Enjon::String& name, const Enjon::Vec2& value )
+	{
+		auto query = mUniforms.find( name );
+		if ( query != mUniforms.end( ) )
+		{
+			ShaderUniform* uniform = mUniforms[ name ];
+			if ( uniform->GetType( ) == Enjon::UniformType::Vec2 )
+			{
+				uniform->Cast< UniformPrimitive< Vec2 > >( )->SetValue( value );
+			}
+		} 
+	} 
+
+	//=========================================================================================
+
+	void Material::SetUniform( const Enjon::String& name, const Enjon::Vec3& value )
+	{
+		auto query = mUniforms.find( name );
+		if ( query != mUniforms.end( ) )
+		{
+			ShaderUniform* uniform = mUniforms[ name ];
+			if ( uniform->GetType( ) == Enjon::UniformType::Vec3 )
+			{
+				uniform->Cast< UniformPrimitive< Vec3 > >( )->SetValue( value );
+			}
+		} 
+	}
+
+	//=========================================================================================
+
+	void Material::SetUniform( const Enjon::String& name, const Enjon::Vec4& value )
+	{ 
+		auto query = mUniforms.find( name );
+		if ( query != mUniforms.end( ) )
+		{
+			ShaderUniform* uniform = mUniforms[ name ];
+			if ( uniform->GetType( ) == Enjon::UniformType::Vec4 )
+			{
+				uniform->Cast< UniformPrimitive< Vec4 > >( )->SetValue( value );
+			}
+		} 
+	}
+
+	//=========================================================================================
+
+	void Material::SetUniform( const Enjon::String& name, const Enjon::Mat4& value )
+	{ 
+		auto query = mUniforms.find( name );
+		if ( query != mUniforms.end( ) )
+		{
+			ShaderUniform* uniform = mUniforms[ name ];
+			if ( uniform->GetType( ) == Enjon::UniformType::Mat4 )
+			{
+				uniform->Cast< UniformPrimitive< Mat4 > >( )->SetValue( value );
+			}
+		} 
+	}
+
+	//=========================================================================================
+
+	void Material::SetUniform( const Enjon::String& name, const f32& value )
+	{ 
+		auto query = mUniforms.find( name );
+		if ( query != mUniforms.end( ) )
+		{
+			ShaderUniform* uniform = mUniforms[ name ];
+			if ( uniform->GetType( ) == Enjon::UniformType::Float )
+			{
+				uniform->Cast< UniformPrimitive< f32 > >( )->SetValue( value );
+			}
+		} 
+	}
+
+	//=========================================================================================
 }

@@ -70,6 +70,16 @@ namespace Enjon {
 			{
 			} 
 			
+			/**
+			* @brief Constructor that takes f32's for x, y, z, w
+			* @param val - f32 value to be set for all components
+
+			*/
+			Vec4(const f32& val)
+				: x(val), y(val), z(val), w(val)
+			{
+			}
+			
 			friend std::ostream& operator<<(std::ostream& stream, Vec4& vector);	
 
 			Vec4& Add(const Vec4& other);

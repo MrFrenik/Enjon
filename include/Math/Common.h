@@ -78,6 +78,12 @@ namespace Enjon {
 		return val;
 	}
 
+	template <typename T>
+	inline T Max( T val, T max )
+	{
+		return val > max ? val : max;
+	}
+
 }
 
 #endif

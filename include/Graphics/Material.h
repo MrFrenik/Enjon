@@ -40,10 +40,7 @@ namespace Enjon {
 			AssetHandle<Texture> GetTexture(const TextureSlotType& type) const;
 
 			void SetColor(TextureSlotType type, const ColorRGBA16& color);
-			ColorRGBA16 GetColor(TextureSlotType type) const;
-
-			//GLSLProgram* GetShader();
-			//void SetShader(GLSLProgram* shader);
+			ColorRGBA16 GetColor(TextureSlotType type) const; 
 
 			void SetShader( const Enjon::Shader* shader );
 			const Enjon::Shader* GetShader( ) const;
@@ -51,35 +48,35 @@ namespace Enjon {
 			bool TwoSided( ) const { return mTwoSided; }
 			void TwoSided( bool enable ) { mTwoSided = enable; }
 
-			template < typename T >
-			void SetUniform( const Enjon::String& name, const T& value )
-			{
-				auto query = mUniforms.find( name );
-				if ( query != mUniforms.end( ) )
-				{
-					ShaderUniform* uniform = mUniforms[ name ];
-					switch ( uniform->GetType() )
-					{
-						case Enjon::UniformType::TextureSampler:
-						{
-							static_cast< UniformTexture* > ( uniform )->SetTexture( value );
-						} break;
+			/*
+			* @brief
+			*/
+			void SetUniform( const Enjon::String& name, const Enjon::AssetHandle< Enjon::Texture >& value ); 
 
-						//case Enjon::UniformType::Vec4:
-						//case Enjon::UniformType::Vec3:
-						//case Enjon::UniformType::Vec2:
-						//case Enjon::UniformType::Mat4:
-						//case Enjon::UniformType::Float:
-						//{
-						//	static_cast< UniformPrimitive< T >* > ( uniform )->SetValue( value );
-						//} break;
+			/*
+			* @brief
+			*/
+			void SetUniform( const Enjon::String& name, const Enjon::Vec2& value ); 
 
-						default:
-						{ 
-						} break;
-					}
-				}
-			}
+			/*
+			* @brief
+			*/
+			void SetUniform( const Enjon::String& name, const Enjon::Vec3& value ); 
+
+			/*
+			* @brief
+			*/
+			void SetUniform( const Enjon::String& name, const Enjon::Vec4& value );
+
+			/*
+			* @brief
+			*/
+			void SetUniform( const Enjon::String& name, const Enjon::Mat4& value );
+
+			/*
+			* @brief
+			*/
+			void SetUniform( const Enjon::String& name, const f32& value );
 
 			/*
 			* @brief

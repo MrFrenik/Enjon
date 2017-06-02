@@ -215,6 +215,27 @@ namespace Enjon
 				mShader = shader;
 				mLocation = location;
 				mValue = value;
+
+				if ( std::is_base_of<Vec2, T>::value )
+				{
+					mType = UniformType::Vec2;
+				} 
+				else if ( std::is_base_of< Vec3, T>::value )
+				{
+					mType = UniformType::Vec3;
+				}
+				else if ( std::is_base_of< Vec4, T>::value )
+				{
+					mType = UniformType::Vec4;
+				}
+				else if ( std::is_base_of< Mat4, T >::value )
+				{
+					mType = UniformType::Mat4;
+				}
+				else
+				{
+					mType = UniformType::Float;
+				} 
 			}
 			
 			/*
@@ -235,9 +256,11 @@ namespace Enjon
 				mValue = value;
 			}
 
+			const T& GetValue( ) const { return mValue; }
+
 		private:
 			T mValue;
-	};
+	}; 
 }
 
 #endif

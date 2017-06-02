@@ -7,6 +7,7 @@
 
 #include "System/Types.h"
 #include "Defines.h"
+#include "Math/Vec2.h"
 
 #include <unordered_map>
 #include <set>
@@ -945,6 +946,8 @@ namespace Enjon
 		{
 			mData = value;
 			mMaxNumberInputs = 1;
+			mPrimitiveType = ShaderPrimitiveType::Float;
+			mOutputType = ShaderOutputType::Float;
 		}
 
 		~ShaderFloatNode( ) { }
@@ -1120,8 +1123,33 @@ namespace Enjon
 		* @brief
 		*/
 		virtual Enjon::String GetDefinition( ) override
-		{
-			return ( "vec4 " + mID + "_sample = texture(" + mID + ", fs_in.texCoords);" );
+		{ 
+			// UV coords
+			Enjon::String uvCoords = "fs_in.texCoords";
+			Enjon::String finalEvaluation = "";
+
+			// Get UV coords if input available
+			if ( !mInputs.empty( ) )
+			{ 
+				// Evaluate inputs
+				for ( auto& c : mInputs )
+				{
+					ShaderGraphNode* owner = const_cast<ShaderGraphNode*>( c.mOwner );
+					finalEvaluation += owner->Evaluate( ) + "\n"; 
+				} 
+
+				// Get connection for uv
+				Connection a_conn = mInputs.at( 0 );
+
+				// Get shader graph nodes
+				ShaderGraphNode* a = const_cast<ShaderGraphNode*>( a_conn.mOwner );
+
+				// Set uv coords
+				
+				uvCoords =  a->EvaluateAtPort( a_conn.mOutputPortID ); 
+			}
+
+			return ( finalEvaluation + "vec4 " + GetQualifiedID() +  " = texture(" + mID + ", " + uvCoords + ");" );
 		}
 
 		/**
@@ -1133,6 +1161,43 @@ namespace Enjon
 		}
 
 	private:
+	};
+
+	class ShaderPannerNode : public ShaderGraphNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderPannerNode( const Enjon::String& id, const Enjon::Vec2& speed );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderPannerNode( ); 
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+			Enjon::Vec2 mSpeed = Enjon::Vec2( 0.0f ); 
 	};
 }
 
