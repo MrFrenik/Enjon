@@ -34,6 +34,9 @@
 Enjon::Shader mShader;
 Enjon::ShaderGraph mShaderGraph;
 Enjon::Renderable mRenderable;
+			
+f32 mFresnelSharpness = 1.0f;
+f32 mEmissiveStrength = 1.0f;
 
 namespace Enjon 
 { 
@@ -178,7 +181,7 @@ namespace Enjon
 			Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 			if ( am )
 			{
-				mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.buddha" ) ); 
+				mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_sphere" ) ); 
 				mRenderable.SetScale( 2.0f );
 				mRenderable.SetPosition( Vec3( 0, 10, 0 ) );
 			}
@@ -369,7 +372,9 @@ namespace Enjon
 			static bool set = false;
 			Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 			static Enjon::AssetHandle< Enjon::Texture > albedo;
+			static Enjon::AssetHandle< Enjon::Texture > albedo2;
 			static Enjon::AssetHandle< Enjon::Texture > normals;
+			static Enjon::AssetHandle< Enjon::Texture > normals2;
 			static Enjon::AssetHandle< Enjon::Texture > metallic;
 			static Enjon::AssetHandle< Enjon::Texture > roughness;
 			static Enjon::AssetHandle< Enjon::Texture > emissive; 
@@ -381,7 +386,9 @@ namespace Enjon
 			if ( !set )
 			{
 				albedo = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.albedo" );
+				albedo2 = am->GetAsset< Enjon::Texture >( "isoarpg.materials.woodframe.albedo" );
 				normals = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.normal" );
+				normals2 = am->GetAsset< Enjon::Texture >( "isoarpg.materials.woodframe.normal" );
 				metallic = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.metallic" );
 				roughness = am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.roughness" );
 				emissive = am->GetAsset< Enjon::Texture >( "isoarpg.textures.green" ); 
@@ -392,21 +399,35 @@ namespace Enjon
 				// Set uniforms for material
 				Enjon::Material* mat = matHandle.Get( );
 				mat->SetUniform( "uAlbedoMap", albedo );
-				//mat->SetUniform( "uMetallicMap", metallic );
-				//mat->SetUniform( "uRoughnessMap", roughness );
+				mat->SetUniform( "uMetallicMap", metallic );
+				mat->SetUniform( "uRoughnessMap", roughness );
 				//mat->SetUniform( "uEmissiveMap", emissive );
 				mat->SetUniform( "uNormalMap", normals );
-				mat->SetUniform( "uColor", Vec3( 1.0f, 0.0f, 0.0f ) );
 				mat->SetUniform( "uEmissiveIntensity", 0.0f );
+				mat->SetUniform( "uSharpness", 1.0f );
 
 				set = true;
 			} 
 
 			static f32 metal = 0.0f;
-			static f32 emissiveIntensity = 0.0f;
+			static f32 emissiveIntensity = 1.0f;
 			static f32 rough = 0.0f;
+			static f32 alpha = 3.0f;
 
 			Enjon::Input* input = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::Input >( );
+			if ( input && input->IsKeyDown( KeyCode::I ) )
+			{
+				if ( input->IsKeyDown( Enjon::KeyCode::Up ) )
+				{
+					alpha = Enjon::Min(  alpha + 0.1f, 5.0f );
+					matHandle.Get( )->SetUniform( "uSharpness", alpha );
+				}
+				if ( input->IsKeyDown( Enjon::KeyCode::Down ) )
+				{
+					alpha = Enjon::Max( alpha - 0.1f, 0.0f );
+					matHandle.Get( )->SetUniform( "uSharpness", alpha );
+				}
+			}
 			if ( input && input->IsKeyDown( KeyCode::E ) )
 			{
 				if ( input->IsKeyDown( Enjon::KeyCode::Up ) )
@@ -421,42 +442,14 @@ namespace Enjon
 					matHandle.Get( )->SetUniform( "uEmissiveIntensity", emissiveIntensity );
 				}
 			}
-			
-			if ( input && input->IsKeyDown( KeyCode::M ) )
-			{
-				if ( input->IsKeyDown( Enjon::KeyCode::Up ) )
-				{
-					metal += 0.01f;
-					metal = Enjon::Clamp( metal, 0.0f, 1.0f );
-					matHandle.Get( )->SetUniform( "uMetallicness", metal );
-				}
-				if ( input && input->IsKeyDown( Enjon::KeyCode::Down ) )
-				{
-					metal -= 0.01f;
-					metal = Enjon::Clamp( metal, 0.0f, 1.0f );
-					matHandle.Get( )->SetUniform( "uMetallicness", metal );
-				}
-			}
-			
-			if ( input && input->IsKeyDown( KeyCode::N ) )
-			{
-				if ( input->IsKeyDown( Enjon::KeyCode::Up ) )
-				{
-					rough += 0.01f;
-					rough = Enjon::Clamp( rough, 0.0f, 1.0f );
-					matHandle.Get( )->SetUniform( "uRoughness", rough );
-				}
-				if ( input && input->IsKeyDown( Enjon::KeyCode::Down ) )
-				{
-					rough -= 0.01f;
-					rough = Enjon::Clamp( rough, 0.0f, 1.0f );
-					matHandle.Get( )->SetUniform( "uRoughness", rough );
-				}
-			}
 
 			// Set default shader uniforms
+			matHandle.Get( )->SetUniform( "uSharpness", mFresnelSharpness );
+			matHandle.Get( )->SetUniform( "uEmissiveIntensity", mEmissiveStrength );
 			mShader.SetUniform( "uCamera", mSceneCamera.GetViewProjectionMatrix( ) );
-			mShader.SetUniform( "uWorldTime", t );
+			mShader.SetUniform( "uCameraWorldPosition", mSceneCamera.GetPosition( ) );
+			//mShader.SetUniform( "uCameraForwardDirection", mSceneCamera.Forward( ) );
+			//mShader.SetUniform( "uWorldTime", t );
 
 			// Set material specific uniforms
 			matHandle.Get( )->SetUniforms( );
@@ -922,31 +915,6 @@ namespace Enjon
 		mShadowDepth 				= new RenderTarget(2048, 2048);
 		mFinalTarget 				= new RenderTarget(width, height);
 
-		mBloomDownSampleHalfVertical			= new RenderTarget( width / 2, height / 2 );
-		mBloomDownSampleHalfHorizontal			= new RenderTarget( width / 2, height / 2 );
-		mBloomDownSampleQuarterVertical			= new RenderTarget( width / 4, height / 4 );
-		mBloomDownSampleQuarterHorizontal		= new RenderTarget( width / 4, height / 4 );
-		mBloomDownSampleEighthVertical			= new RenderTarget( width / 8, height / 8 );
-		mBloomDownSampleEighthHorizontal		= new RenderTarget( width / 8, height / 8 );
-		mBloomDownSampleSixteenthVertical		= new RenderTarget( width / 16, height / 16 );
-		mBloomDownSampleSixteenthHorizontal		= new RenderTarget( width / 16, height / 16 );
-		mBloomDownSampleThirtySecondVertical	= new RenderTarget( width / 32, height / 32 );
-		mBloomDownSampleThirtySecondHorizontal	= new RenderTarget( width / 32, height / 32 );
-		mBloomDownSampleSixtyFourthVertical		= new RenderTarget( width / 64, height / 64 );
-		mBloomDownSampleSixtyFourthHorizontal	= new RenderTarget( width / 64, height / 64 );
-		mBloomUpSampleHalfVertical				= new RenderTarget( width / 2, height / 2 );
-		mBloomUpSampleHalfHorizontal			= new RenderTarget( width / 2, height / 2 );
-		mBloomUpSampleQuarterVertical			= new RenderTarget( width / 4, height / 4 );
-		mBloomUpSampleQuarterHorizontal			= new RenderTarget( width / 4, height / 4 );
-		mBloomUpSampleEighthVertical			= new RenderTarget( width / 8, height / 8 );
-		mBloomUpSampleEighthHorizontal			= new RenderTarget( width / 8, height / 8 );
-		mBloomUpSampleSixteenthVertical			= new RenderTarget( width / 16, height / 16 );
-		mBloomUpSampleSixteenthHorizontal		= new RenderTarget( width / 16, height / 16 );
-		mBloomUpSampleThirtySecondVertical		= new RenderTarget( width / 32, height / 32 );
-		mBloomUpSampleThirtySecondHorizontal	= new RenderTarget( width / 32, height / 32 );
-		mBloomUpSampleSixtyFourthVertical		= new RenderTarget( width / 64, height / 64 );
-		mBloomUpSampleSixtyFourthHorizontal		= new RenderTarget( width / 64, height / 64 );
-
 		mBatch 						= new SpriteBatch();
 		mBatch->Init();
 
@@ -1249,6 +1217,9 @@ namespace Enjon
             ImGui::DragFloat3Labels("##bgcolor", labels, mBGColor, 0.1f, 0.0f, 30.0f);
 	    	ImGui::TreePop();
 	    } 
+
+		ImGui::SliderFloat( "EmissiveIntensity", &mEmissiveStrength, 0.0f, 10.0f );
+		ImGui::SliderFloat( "FresnelSharpness", &mFresnelSharpness, 0.0f, 5.0f );
 	}
 
 	//=======================================================================================================
@@ -1270,14 +1241,17 @@ namespace Enjon
 		//drawlist->AddRect( min, max, ImColor( 255, 255, 255, 255 ) );
 		f32 fps = ImGui::GetIO( ).Framerate;
 		drawlist->AddText( min, ImColor( 255, 255, 255, 255 ), fmt::sprintf( "Frame: %.3f", fps ).c_str() );
+
+		// Update camera aspect ratio
+		mSceneCamera.SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
 	} 
 
 	void DeferredRenderer::ShaderTest( )
 	{ 
 		Enjon::ShaderTexture2DNode* uAlbedoMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uAlbedoMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
 		Enjon::ShaderTexture2DNode* uNormalMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uNormalMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		//Enjon::ShaderTexture2DNode* uMetallicMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uMetallicMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		//Enjon::ShaderTexture2DNode* uRoughnessMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uRoughnessMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
+		Enjon::ShaderTexture2DNode* uMetallicMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uMetallicMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
+		Enjon::ShaderTexture2DNode* uRoughnessMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uRoughnessMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
 		//Enjon::ShaderTexture2DNode* uEmissiveMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uEmissiveMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
 		Enjon::ShaderFloatNode* emissiveIntensity = mShaderGraph.AddNode( new Enjon::ShaderFloatNode( "uEmissiveIntensity", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
 		Enjon::ShaderFloatNode* metallicness = mShaderGraph.AddNode( new Enjon::ShaderFloatNode( "uMetallicness", 0.0f ) )->Cast< Enjon::ShaderFloatNode >( );
@@ -1287,55 +1261,49 @@ namespace Enjon
 		Enjon::ShaderMultiplyNode* mult3 = mShaderGraph.AddNode( new Enjon::ShaderMultiplyNode( "mult3" ) )->Cast< Enjon::ShaderMultiplyNode >( );
 		Enjon::ShaderMultiplyNode* mult4 = mShaderGraph.AddNode( new Enjon::ShaderMultiplyNode( "mult4" ) )->Cast< Enjon::ShaderMultiplyNode >( );
 		Enjon::ShaderMultiplyNode* mult5 = mShaderGraph.AddNode( new Enjon::ShaderMultiplyNode( "mult5" ) )->Cast< Enjon::ShaderMultiplyNode >( );
-		Enjon::ShaderVec3Node* colRed = mShaderGraph.AddNode( new Enjon::ShaderVec3Node( "uColor", Vec3( 1.0f, 0.2f, 1.0f ) ) )->Cast< Enjon::ShaderVec3Node >( );
 		Enjon::ShaderTimeNode* worldTime = mShaderGraph.AddNode( new Enjon::ShaderTimeNode( "worldTime" ) )->Cast< Enjon::ShaderTimeNode >( );
+		Enjon::ShaderFloatNode* floatTwo = mShaderGraph.AddNode( new Enjon::ShaderFloatNode( "floatTwo", 2048.0f ) )->Cast< Enjon::ShaderFloatNode >( );
 		Enjon::ShaderSinNode* sinNode = mShaderGraph.AddNode( new Enjon::ShaderSinNode( "sinNode" ) )->Cast< Enjon::ShaderSinNode >( );
 		Enjon::ShaderAddNode* addNode = mShaderGraph.AddNode( new Enjon::ShaderAddNode( "addNode" ) )->Cast< Enjon::ShaderAddNode >( );
 		Enjon::ShaderPannerNode* pannerNode = mShaderGraph.AddNode( new Enjon::ShaderPannerNode( "pannerNode", Vec2( 0.2f, 1.0f ) ) )->Cast< Enjon::ShaderPannerNode >( );
-		//Enjon::ShaderVec2Node* vec21 = mShaderGraph.AddNode( new Enjon::ShaderVec2Node( "vec21", Vec2( 0, 0 ) ) )->Cast< Enjon::ShaderVec2Node >( ); 
+		Enjon::ShaderDivideNode* divideNode = mShaderGraph.AddNode( new Enjon::ShaderDivideNode( "divideNode" ) )->Cast< Enjon::ShaderDivideNode >( );
+		Enjon::ShaderLerpNode* lerpNode = mShaderGraph.AddNode( new Enjon::ShaderLerpNode( "lerpNode" ) )->Cast< Enjon::ShaderLerpNode >( ); 
+		Enjon::ShaderLerpNode* lerpNode2 = mShaderGraph.AddNode( new Enjon::ShaderLerpNode( "lerpNode2" ) )->Cast< Enjon::ShaderLerpNode >( ); 
+		Enjon::ShaderLerpNode* lerpNode3 = mShaderGraph.AddNode( new Enjon::ShaderLerpNode( "lerpNode3" ) )->Cast< Enjon::ShaderLerpNode >( ); 
+		Enjon::ShaderFloatNode* alphaNode = mShaderGraph.AddNode( new Enjon::ShaderFloatNode( "alphaNode", 0.0f ) )->Cast< Enjon::ShaderFloatNode >( );
+		Enjon::ShaderCameraWorldPositionNode* cameraWS = mShaderGraph.AddNode( new Enjon::ShaderCameraWorldPositionNode( "cameraWS" ) )->Cast< Enjon::ShaderCameraWorldPositionNode >( );
+		Enjon::ShaderCameraViewDirectionNode* viewDir = mShaderGraph.AddNode( new Enjon::ShaderCameraViewDirectionNode( "viewDir" ) )->Cast< Enjon::ShaderCameraViewDirectionNode >( );
+		Enjon::ShaderVertexNormalDirectionNode* normalDir = mShaderGraph.AddNode( new Enjon::ShaderVertexNormalDirectionNode( "normalDir" ) )->Cast < Enjon::ShaderVertexNormalDirectionNode >( );
+		Enjon::ShaderOneMinusNode* oneMinus = mShaderGraph.AddNode( new Enjon::ShaderOneMinusNode( "oneMinus" ) )->Cast< Enjon::ShaderOneMinusNode >( );
+		Enjon::ShaderDotProductNode* dotProduct = mShaderGraph.AddNode( new Enjon::ShaderDotProductNode( "dotProduct" ) )->Cast< Enjon::ShaderDotProductNode >( );
+		Enjon::ShaderFloatNode* sharpness = mShaderGraph.AddNode( new Enjon::ShaderFloatNode( "uSharpness", 3.0f ) )->Cast< Enjon::ShaderFloatNode >( );
+		Enjon::ShaderPowerNode* powerNode = mShaderGraph.AddNode( new Enjon::ShaderPowerNode( "power" ) )->Cast< Enjon::ShaderPowerNode >( );
+		Enjon::ShaderVec3Node* fresnelColor = mShaderGraph.AddNode( new Enjon::ShaderVec3Node( "fresnelColor", Vec3( 1.0f, 0.3f, 0.0f ) ) )->Cast< Enjon::ShaderVec3Node >( );
 
 		// Set to be uniform variable
-		colRed->IsUniform( true );
 		emissiveIntensity->IsUniform( true );
-		metallicness->IsUniform( true );
-		roughness->IsUniform( true ); 
+		sharpness->IsUniform( true ); 
 
-		// Emissive = ( sin(time) * 0.5 + 0.5 ) * emissiveIntensity * emissiveMap;
+		// Set up emissive
+		dotProduct->AddInput( normalDir );
+		dotProduct->AddInput( viewDir );
 
-		// Sin of world time
-		//sinNode->AddInput( worldTime );
+		oneMinus->AddInput( dotProduct );
 
-		//// Multiply by 2.0
-		//mult1->AddInput( sinNode );
-		//mult1->AddInput( floatNode2 );
+		powerNode->AddInput( oneMinus );
+		powerNode->AddInput( sharpness );
 
-		//// Subtract 1.0
-		//addNode->AddInput( mult1 );
-		//addNode->AddInput( floatNodeHalf ); 
+		mult1->AddInput( powerNode );
+		mult1->AddInput( emissiveIntensity ); 
 
-		//mult2->AddInput( addNode );
-		//mult2->AddInput( emissiveIntensity );
-
-		//mult3->AddInput( ShaderGraphNode::Connection( uEmissiveMap, 0, ( u32 )Enjon::ShaderTexture2DNode::TexturePortType::RGB ) );
-		//mult3->AddInput( mult2 ); 
-
-		//mult4->AddInput( addNode );
-		//mult4->AddInput( colRed );
-
-		//mult5->AddInput( mult3 );
-		//mult5->AddInput( mult4 ); 
-
-		uAlbedoMap->AddInput( pannerNode );
-		uNormalMap->AddInput( pannerNode );
-
-		mult1->AddInput( colRed );
-		mult1->AddInput( emissiveIntensity );
+		mult2->AddInput( mult1 );
+		mult2->AddInput( fresnelColor );
 
 		// Add inputs to main node
 		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uAlbedoMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Albedo ) );
-		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( metallicness, ( u32 )Enjon::ShaderGraphMainNodeInputType::Metallic ) );
-		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( roughness, ( u32 )Enjon::ShaderGraphMainNodeInputType::Roughness ) );
-		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( mult1, ( u32 )Enjon::ShaderGraphMainNodeInputType::Emissive ) );
+		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uMetallicMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Metallic ) );
+		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uRoughnessMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Roughness ) );
+		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( mult2, ( u32 )Enjon::ShaderGraphMainNodeInputType::Emissive ) );
 		mShaderGraph.Connect( Enjon::ShaderGraphNode::Connection( uNormalMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Normal ) );
 
 		// Compile graph

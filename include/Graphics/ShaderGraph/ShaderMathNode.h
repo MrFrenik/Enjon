@@ -9,6 +9,43 @@
 
 namespace Enjon
 {
+	class ShaderLerpNode : public BinaryFunctionNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderLerpNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderLerpNode( );
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+
+	};
+
 	class ShaderMultiplyNode : public BinaryFunctionNode
 	{
 		public:
@@ -21,6 +58,43 @@ namespace Enjon
 			* @brief Destructor
 			*/
 			~ShaderMultiplyNode( ); 
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+
+	};
+	
+	class ShaderDivideNode : public BinaryFunctionNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderDivideNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderDivideNode( ); 
 
 			/*
 			* @brief
@@ -267,6 +341,79 @@ namespace Enjon
 
 	};
 
+	class ShaderOneMinusNode : public UnaryFunctionNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderOneMinusNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderOneMinusNode( );
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+
+	};
+
+	class ShaderPowerNode : public BinaryFunctionNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderPowerNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderPowerNode( );
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+
+	};
 	
 }
 	

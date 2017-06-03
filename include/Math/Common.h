@@ -77,6 +77,12 @@ namespace Enjon {
 		if (val < min) return min;
 		return val;
 	}
+	
+	template <typename T>
+	inline T Min( T val, T max )
+	{
+		return val < max ? val : max;
+	}
 
 	template <typename T>
 	inline T Max( T val, T max )

@@ -196,10 +196,11 @@ namespace Enjon
 		mShaderCodeOutput += "\tvec3 fragPos;\n";
 		mShaderCodeOutput += "\tvec2 texCoords;\n";
 		mShaderCodeOutput += "\tmat3 tbn;\n";
+		mShaderCodeOutput += "\tvec3 camViewDir;\n";
 		mShaderCodeOutput += "} fs_in;\n\n"; 
 
 		// Fragment shader uniforms
-		mShaderCodeOutput += "uniform float uWorldTime = 1.0;\n\n"; 
+		mShaderCodeOutput += "uniform float uWorldTime = 1.0;\n"; 
 	}
 
 	//===============================================================================================
@@ -219,9 +220,12 @@ namespace Enjon
 		mShaderCodeOutput += "\tvec3 fragPos;\n";
 		mShaderCodeOutput += "\tvec2 texCoords;\n";
 		mShaderCodeOutput += "\tmat3 tbn;\n";
+		mShaderCodeOutput += "\tvec3 camViewDir;\n"; 
 		mShaderCodeOutput += "} vs_out;\n\n"; 
 
 		mShaderCodeOutput += "uniform mat4 uCamera = mat4(1.0);\n";
+		mShaderCodeOutput += "uniform vec3 uCameraWorldPosition = vec3( 0, 0, 0 );\n\n"; 
+		mShaderCodeOutput += "uniform vec3 uCameraForwardDirection = vec3( 0, 0, 0 );\n\n"; 
 		mShaderCodeOutput += "uniform mat4 uModel = mat4(1.0);\n\n"; 
 	}
 
@@ -241,9 +245,12 @@ namespace Enjon
 		mShaderCodeOutput += "vec3 B = normalize((uModel * vec4((cross(vertexNormal, vertexTangent.xyz) * 1.0), 0.0)).xyz);\n";
 		mShaderCodeOutput += "mat3 TBN = mat3(T, B, N);\n\n";
 
+		mShaderCodeOutput += "vec3 viewDir = normalize(uCameraWorldPosition - pos) ;\n\n";
+
 		mShaderCodeOutput += "vs_out.fragPos = vec3(uModel * vec4(vertexPosition, 1.0));\n";
 		mShaderCodeOutput += "vs_out.texCoords = vec2(vertexUV.x, -vertexUV.y);\n";
 		mShaderCodeOutput += "vs_out.tbn = TBN;\n";
+		mShaderCodeOutput += "vs_out.camViewDir = viewDir;\n";
 
 	}
 	
@@ -445,6 +452,180 @@ namespace Enjon
 	Enjon::String ShaderPannerNode::GetDeclaration( )
 	{
 		return "vec2 " + GetQualifiedID( ) + ";";
+	}
+ 
+	//=================================================================
+
+	ShaderVertexNormalWSNode::ShaderVertexNormalWSNode( const Enjon::String& id )
+		: ShaderGraphNode( id )
+	{
+		mPrimitiveType = ShaderPrimitiveType::Vec3;
+		mOutputType = ShaderOutputType::Vec3;
+	}
+
+	//=================================================================
+
+	ShaderVertexNormalWSNode::~ShaderVertexNormalWSNode( )
+	{
+	}
+
+	//=================================================================
+
+	ShaderOutputType ShaderVertexNormalWSNode::EvaluateOutputType( u32 portID )
+	{
+		return ShaderOutputType::Vec3;
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderVertexNormalWSNode::EvaluateToGLSL( )
+	{ 
+		return GetQualifiedID( ) + " = " + VERTEX_NORMAL_WORLD_POSITION_FRAG + ";"; 
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderVertexNormalWSNode::EvaluateAtPort( u32 portID )
+	{
+		return GetQualifiedID( );
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderVertexNormalWSNode::GetDeclaration( )
+	{
+		return "vec3 " + GetQualifiedID( ) + ";";
+	} 
+
+	//=================================================================
+
+	ShaderCameraWorldPositionNode::ShaderCameraWorldPositionNode( const Enjon::String& id )
+		: ShaderGraphNode( id )
+	{
+		mPrimitiveType = ShaderPrimitiveType::Vec3;
+		mOutputType = ShaderOutputType::Vec3;
+	}
+
+	//=================================================================
+
+	ShaderCameraWorldPositionNode::~ShaderCameraWorldPositionNode( )
+	{
+	}
+
+	//=================================================================
+
+	ShaderOutputType ShaderCameraWorldPositionNode::EvaluateOutputType( u32 portID )
+	{
+		return ShaderOutputType::Vec3;
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderCameraWorldPositionNode::EvaluateToGLSL( )
+	{
+		return GetQualifiedID( ) + " = " + CAMERA_WORLD_POSITION + ";";
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderCameraWorldPositionNode::EvaluateAtPort( u32 portID )
+	{
+		return GetQualifiedID( );
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderCameraWorldPositionNode::GetDeclaration( )
+	{
+		return "vec3 " + GetQualifiedID( ) + ";";
+	}
+
+	//=================================================================
+
+	//=================================================================
+
+	ShaderCameraViewDirectionNode::ShaderCameraViewDirectionNode( const Enjon::String& id )
+		: ShaderGraphNode( id )
+	{
+		mPrimitiveType = ShaderPrimitiveType::Vec3;
+		mOutputType = ShaderOutputType::Vec3;
+	}
+
+	//=================================================================
+
+	ShaderCameraViewDirectionNode::~ShaderCameraViewDirectionNode( )
+	{
+	}
+
+	//=================================================================
+
+	ShaderOutputType ShaderCameraViewDirectionNode::EvaluateOutputType( u32 portID )
+	{
+		return ShaderOutputType::Vec3;
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderCameraViewDirectionNode::EvaluateToGLSL( )
+	{
+		return GetQualifiedID( ) + " = " + CAMERA_VIEW_DIR_FRAG + ";";
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderCameraViewDirectionNode::EvaluateAtPort( u32 portID )
+	{
+		return GetQualifiedID( );
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderCameraViewDirectionNode::GetDeclaration( )
+	{
+		return "vec3 " + GetQualifiedID( ) + ";";
+	}
+
+	//=================================================================
+
+	ShaderVertexNormalDirectionNode::ShaderVertexNormalDirectionNode( const Enjon::String& id )
+		: ShaderGraphNode( id )
+	{
+		mPrimitiveType = ShaderPrimitiveType::Vec3;
+		mOutputType = ShaderOutputType::Vec3;
+	}
+
+	//=================================================================
+
+	ShaderVertexNormalDirectionNode::~ShaderVertexNormalDirectionNode( )
+	{
+	}
+
+	//=================================================================
+
+	ShaderOutputType ShaderVertexNormalDirectionNode::EvaluateOutputType( u32 portID )
+	{
+		return ShaderOutputType::Vec3;
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderVertexNormalDirectionNode::EvaluateToGLSL( )
+	{
+		return GetQualifiedID( ) + " = " + VERTEX_NORMAL_DIR_UNPERTURBED_FRAG + ";";
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderVertexNormalDirectionNode::EvaluateAtPort( u32 portID )
+	{
+		return GetQualifiedID( );
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderVertexNormalDirectionNode::GetDeclaration( )
+	{
+		return "vec3 " + GetQualifiedID( ) + ";";
 	}
 
 	//=================================================================

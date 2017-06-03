@@ -122,6 +122,7 @@ Enjon::Result Game::Initialize()
 	Enjon::String monkeyMeshPath		= Enjon::String("/Models/monkey.obj");
 	Enjon::String sphereMeshPath		= Enjon::String("/Models/unit_sphere.obj");
 	Enjon::String cubeMeshPath			= Enjon::String("/Models/unit_cube.obj");
+	Enjon::String shaderballPath			= Enjon::String("/Models/shaderball.obj");
 	Enjon::String catMeshPath			= Enjon::String("/Models/cat.obj");
 	Enjon::String dudeMeshPath			= Enjon::String("/Models/dude.obj");
 	Enjon::String shaderBallMeshPath	= Enjon::String("/Models/shaderball.obj");

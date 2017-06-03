@@ -7,6 +7,147 @@ namespace Enjon
 { 
 	//================================================================================================================
 
+	ShaderLerpNode::ShaderLerpNode( const Enjon::String& id )
+		: BinaryFunctionNode( id )
+	{
+	}
+
+	//================================================================================================================
+
+	ShaderLerpNode::~ShaderLerpNode( )
+	{
+	}
+
+	//================================================================================================================
+
+	ShaderOutputType ShaderLerpNode::EvaluateOutputType( u32 portID )
+	{
+		if ( mInputs.size( ) < 2 )
+		{
+			return ShaderOutputType::Float;
+		}
+
+		Connection a_conn = mInputs.at( 0 );
+		Connection b_conn = mInputs.at( 1 );
+
+		// Look at inputs to determine output type of this node
+		ShaderGraphNode* a = const_cast< ShaderGraphNode* >( mInputs.at( 0 ).mOwner );
+		ShaderGraphNode* b = const_cast< ShaderGraphNode* >( mInputs.at( 1 ).mOwner );
+
+		// Evaluate output type
+		ShaderOutputType aType = a->EvaluateOutputType( a_conn.mOutputPortID );
+		ShaderOutputType bType = b->EvaluateOutputType( b_conn.mOutputPortID );
+
+		switch ( aType )
+		{
+		case ShaderOutputType::Float:
+		{
+			switch ( bType )
+			{
+			case ShaderOutputType::Float: mOutputType = ShaderOutputType::Float; break;
+			case ShaderOutputType::Vec2: mOutputType = ShaderOutputType::Vec2; break;
+			case ShaderOutputType::Vec3: mOutputType = ShaderOutputType::Vec3; break;
+			case ShaderOutputType::Vec4: mOutputType = ShaderOutputType::Vec4; break;
+			}
+
+		} break;
+
+		case ShaderOutputType::Vec2:
+		{
+			if ( bType == ShaderOutputType::Vec2 || bType == ShaderOutputType::Float )
+			{
+				mOutputType = ShaderOutputType::Vec2;
+			}
+			else
+			{
+				// Throw error here!
+			}
+
+		} break;
+
+		case ShaderOutputType::Vec3:
+		{
+			mOutputType = ShaderOutputType::Vec3;
+			//if ( bType == ShaderOutputType::Vec3 || bType == ShaderOutputType::Float )
+			//{
+			//	mOutputType = ShaderOutputType::Vec3;
+			//}
+			//else
+			//{
+			//	// Throw error
+			//}
+		} break;
+
+		case ShaderOutputType::Vec4:
+		{
+			if ( bType == ShaderOutputType::Vec4 || bType == ShaderOutputType::Float )
+			{
+				mOutputType = ShaderOutputType::Vec4;
+			}
+			else
+			{
+				// Throw error
+			}
+		} break;
+		}
+
+		return mOutputType;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderLerpNode::EvaluateToGLSL( )
+	{
+		Enjon::String finalEvaluation = "";
+
+		// Evaluate inputs
+		for ( auto& c : mInputs )
+		{
+			ShaderGraphNode* owner = const_cast< ShaderGraphNode* >( c.mOwner );
+			finalEvaluation += owner->Evaluate( ) + "\n";
+		}
+
+		// Get connections
+		Connection a_conn = mInputs.at( 0 );
+		Connection b_conn = mInputs.at( 1 );
+		Connection c_conn = mInputs.at( 2 );
+
+		// Get shader graph nodes
+		ShaderGraphNode* a = const_cast< ShaderGraphNode* >( a_conn.mOwner );
+		ShaderGraphNode* b = const_cast< ShaderGraphNode* >( b_conn.mOwner );
+		ShaderGraphNode* c = const_cast< ShaderGraphNode* >( c_conn.mOwner );
+
+		// Evaluate final line of code
+		finalEvaluation += GetQualifiedID( ) + " = mix(" + a->EvaluateAtPort( a_conn.mOutputPortID ) + ", " + b->EvaluateAtPort( b_conn.mOutputPortID ) + ", " + c->EvaluateAtPort( c_conn.mOutputPortID ) + ");";
+
+		// Return
+		return finalEvaluation;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderLerpNode::EvaluateAtPort( u32 portID )
+	{
+		// Multiply node only has one output, so just return its qualified id
+		return GetQualifiedID( );
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderLerpNode::GetDeclaration( )
+	{
+		switch ( EvaluateOutputType( ) )
+		{
+		case ShaderOutputType::Float: return "float " + mID + ";"; break;
+		case ShaderOutputType::Vec2: return "vec2 " + mID + ";"; break;
+		case ShaderOutputType::Vec3: return "vec3 " + mID + ";"; break;
+		case ShaderOutputType::Vec4: return "vec4 " + mID + ";"; break;
+		default: return "";
+		}
+	}
+
+	//================================================================================================================
+
 	ShaderMultiplyNode::ShaderMultiplyNode( const Enjon::String& id )
 		: BinaryFunctionNode( id )
 	{
@@ -133,6 +274,145 @@ namespace Enjon
 	//================================================================================================================
 
 	Enjon::String ShaderMultiplyNode::GetDeclaration( )
+	{
+		switch ( EvaluateOutputType( ) )
+		{
+			case ShaderOutputType::Float: return "float " + mID + ";"; break;
+			case ShaderOutputType::Vec2: return "vec2 " + mID + ";"; break;
+			case ShaderOutputType::Vec3: return "vec3 " + mID + ";"; break;
+			case ShaderOutputType::Vec4: return "vec4 " + mID + ";"; break;
+			default: return "";
+		}
+	} 
+	
+	//================================================================================================================
+
+	ShaderDivideNode::ShaderDivideNode( const Enjon::String& id )
+		: BinaryFunctionNode( id )
+	{
+	}
+
+	//================================================================================================================
+
+	ShaderDivideNode::~ShaderDivideNode( )
+	{
+	}
+
+	//================================================================================================================
+
+	ShaderOutputType ShaderDivideNode::EvaluateOutputType( u32 portID )
+	{
+		if ( mInputs.size( ) < 2 )
+		{
+			return ShaderOutputType::Float;
+		}
+
+		Connection a_conn = mInputs.at( 0 );
+		Connection b_conn = mInputs.at( 1 );
+
+		// Look at inputs to determine output type of this node
+		ShaderGraphNode* a = const_cast<ShaderGraphNode*>( mInputs.at( 0 ).mOwner );
+		ShaderGraphNode* b = const_cast<ShaderGraphNode*>( mInputs.at( 1 ).mOwner );
+
+		// Evaluate output type
+		ShaderOutputType aType = a->EvaluateOutputType( a_conn.mOutputPortID );
+		ShaderOutputType bType = b->EvaluateOutputType( b_conn.mOutputPortID ); 
+
+		switch ( aType )
+		{
+			case ShaderOutputType::Float:
+			{
+				switch ( bType )
+				{
+					case ShaderOutputType::Float: mOutputType = ShaderOutputType::Float; break;
+					case ShaderOutputType::Vec2: mOutputType = ShaderOutputType::Vec2; break;
+					case ShaderOutputType::Vec3: mOutputType = ShaderOutputType::Vec3; break;
+					case ShaderOutputType::Vec4: mOutputType = ShaderOutputType::Vec4; break;
+				}
+
+			} break;
+
+			case ShaderOutputType::Vec2:
+			{
+				if ( bType == ShaderOutputType::Vec2 || bType == ShaderOutputType::Float )
+				{
+					mOutputType = ShaderOutputType::Vec2;
+				}
+				else
+				{
+					// Throw error here!
+				}
+
+			} break;
+
+			case ShaderOutputType::Vec3:
+			{
+				mOutputType = ShaderOutputType::Vec3;
+				//if ( bType == ShaderOutputType::Vec3 || bType == ShaderOutputType::Float )
+				//{
+				//	mOutputType = ShaderOutputType::Vec3;
+				//}
+				//else
+				//{
+				//	// Throw error
+				//}
+			} break;
+
+			case ShaderOutputType::Vec4:
+			{
+				if ( bType == ShaderOutputType::Vec4 || bType == ShaderOutputType::Float )
+				{
+					mOutputType = ShaderOutputType::Vec4; 
+				}
+				else
+				{
+					// Throw error
+				}
+			} break; 
+		}
+
+		return mOutputType;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderDivideNode::EvaluateToGLSL( )
+	{
+		Enjon::String finalEvaluation = "";
+
+		// Evaluate inputs
+		for ( auto& c : mInputs )
+		{
+			ShaderGraphNode* owner = const_cast<ShaderGraphNode*>( c.mOwner );
+			finalEvaluation += owner->Evaluate( ) + "\n"; 
+		}
+
+		// Get connections
+		Connection a_conn = mInputs.at( 0 );
+		Connection b_conn = mInputs.at( 1 );
+
+		// Get shader graph nodes
+		ShaderGraphNode* a = const_cast<ShaderGraphNode*>( a_conn.mOwner );
+		ShaderGraphNode* b = const_cast<ShaderGraphNode*>( b_conn.mOwner );
+
+		// Evaluate final line of code
+		finalEvaluation += GetQualifiedID( ) + " = " + a->EvaluateAtPort( a_conn.mOutputPortID ) + " / " + b->EvaluateAtPort( b_conn.mOutputPortID ) + ";";
+
+		// Return
+		return finalEvaluation;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderDivideNode::EvaluateAtPort( u32 portID )
+	{
+		// Multiply node only has one output, so just return its qualified id
+		return GetQualifiedID( );
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderDivideNode::GetDeclaration( )
 	{
 		switch ( EvaluateOutputType( ) )
 		{
@@ -705,4 +985,207 @@ namespace Enjon
 	}
 
 	//================================================================================================================
+
+	ShaderOneMinusNode::ShaderOneMinusNode( const Enjon::String& id )
+		: UnaryFunctionNode( id )
+	{ 
+	}
+
+	//================================================================================================================
+
+	ShaderOneMinusNode::~ShaderOneMinusNode( )
+	{
+	}
+
+	//================================================================================================================
+
+	ShaderOutputType ShaderOneMinusNode::EvaluateOutputType( u32 portID )
+	{
+		if ( mInputs.size( ) < 1 )
+		{
+			return ShaderOutputType::Float;
+		}
+
+		Connection a_conn = mInputs.at( 0 );
+
+		// Look at inputs to determine output type of this node
+		ShaderGraphNode* a = const_cast< ShaderGraphNode* >( mInputs.at( 0 ).mOwner );
+
+		// Evaluate output type
+		ShaderOutputType aType = a->EvaluateOutputType( a_conn.mOutputPortID );
+
+		switch ( aType )
+		{
+			case ShaderOutputType::Float:
+			{
+				mOutputType = ShaderOutputType::Float;
+
+			} break;
+
+			case ShaderOutputType::Vec2:
+			{
+				mOutputType = ShaderOutputType::Vec2;
+			} break;
+
+			case ShaderOutputType::Vec3:
+			{
+				mOutputType = ShaderOutputType::Vec3;
+			} break;
+
+			case ShaderOutputType::Vec4:
+			{
+				mOutputType = ShaderOutputType::Vec4;
+			} break;
+			default:
+			{
+				mOutputType = ShaderOutputType::Float;
+			} break;
+		}
+
+		return mOutputType;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderOneMinusNode::EvaluateToGLSL( )
+	{
+		Enjon::String finalEvaluation = "";
+
+		// Evaluate inputs
+		for ( auto& c : mInputs )
+		{
+			ShaderGraphNode* owner = const_cast< ShaderGraphNode* >( c.mOwner );
+			finalEvaluation += owner->Evaluate( ) + "\n";
+		}
+
+		// Get connections
+		Connection a_conn = mInputs.at( 0 );
+
+		// Get shader graph nodes
+		ShaderGraphNode* a = const_cast< ShaderGraphNode* >( a_conn.mOwner );
+
+		Enjon::String oneVector = "";
+
+		switch ( EvaluateOutputType( ) )
+		{
+			case ShaderOutputType::Float:
+			{
+				oneVector = "1.0";
+			} break;
+			
+			case ShaderOutputType::Vec2:
+			{
+				oneVector = "vec2( 1.0 )";
+			} break;
+			
+			case ShaderOutputType::Vec3:
+			{
+				oneVector = "vec3( 1.0 )"; 
+			} break;
+
+			case ShaderOutputType::Vec4:
+			{
+				oneVector = "vec4( 1.0 )"; 
+			} break;
+
+			default:
+			{ 
+			} break;
+		}
+
+		// Evaluate final line of code
+		finalEvaluation += GetQualifiedID( ) + " = " + oneVector + " - " + a->EvaluateAtPort( a_conn.mOutputPortID ) + ";";
+
+		// Return
+		return finalEvaluation;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderOneMinusNode::EvaluateAtPort( u32 portID )
+	{
+		// Only one output, so just get qualified id
+		return GetQualifiedID( );
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderOneMinusNode::GetDeclaration( )
+	{
+		switch ( EvaluateOutputType( ) )
+		{
+			case ShaderOutputType::Float: return "float " + mID + ";"; break;
+			case ShaderOutputType::Vec2: return "vec2 " + mID + ";"; break;
+			case ShaderOutputType::Vec3: return "vec3 " + mID + ";"; break;
+			case ShaderOutputType::Vec4: return "vec4 " + mID + ";"; break;
+			default: return "";
+		}
+	}
+
+	//================================================================================================================
+
+	ShaderPowerNode::ShaderPowerNode( const Enjon::String& id )
+		: BinaryFunctionNode( id )
+	{
+		mOutputType = ShaderOutputType::Float;
+		mPrimitiveType = ShaderPrimitiveType::Float;
+	}
+
+	//================================================================================================================
+
+	ShaderPowerNode::~ShaderPowerNode( )
+	{
+	}
+
+	//================================================================================================================
+
+	ShaderOutputType ShaderPowerNode::EvaluateOutputType( u32 portID )
+	{ 
+		// Returns float
+		return mOutputType;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderPowerNode::EvaluateToGLSL( )
+	{
+		Enjon::String finalEvaluation = "";
+
+		// Evaluate inputs
+		for ( auto& c : mInputs )
+		{
+			ShaderGraphNode* owner = const_cast< ShaderGraphNode* >( c.mOwner );
+			finalEvaluation += owner->Evaluate( ) + "\n";
+		}
+
+		// Get connections
+		Connection a_conn = mInputs.at( 0 );
+		Connection b_conn = mInputs.at( 1 );
+
+		// Get shader graph nodes
+		ShaderGraphNode* a = const_cast< ShaderGraphNode* >( a_conn.mOwner );
+		ShaderGraphNode* b = const_cast< ShaderGraphNode* >( b_conn.mOwner );
+
+		// Evaluate final line of code
+		finalEvaluation += GetQualifiedID( ) + " = pow(" + a->EvaluateAtPort( a_conn.mOutputPortID ) + ", " + b->EvaluateAtPort( b_conn.mOutputPortID ) + ");";
+
+		// Return
+		return finalEvaluation;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderPowerNode::EvaluateAtPort( u32 portID )
+	{
+		// Multiply node only has one output, so just return its qualified id
+		return GetQualifiedID( );
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderPowerNode::GetDeclaration( )
+	{
+		// Always returns float
+		return "float " + mID + ";";
+	}
 }

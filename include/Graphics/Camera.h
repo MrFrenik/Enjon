@@ -43,6 +43,9 @@ namespace Enjon {
 		inline f32 GetFar() { return FarPlane; }
 		const ProjectionType GetProjectionType( ) const { return ProjType;  }
 		f32 GetOrthographicScale( ) const { return OrthographicScale; }
+		f32 GetAspectRatio( ) const { return ViewPortAspectRatio; }
+
+		void SetAspectRatio( const f32& aspectRatio ) { ViewPortAspectRatio = aspectRatio; }
 
 		inline void SetNearFar(float Near, float Far) { NearPlane = Near; FarPlane = Far; }
 		inline void SetProjection(ProjectionType Type) { ProjType = Type; }

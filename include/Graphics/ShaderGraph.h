@@ -13,6 +13,15 @@
 #include <set>
 #include <vector>
 
+#define FRAGMENT_SHADER_IN "fs_in"
+#define VERTEX_SHADER_OUT "vs_out"
+
+#define VERTEX_NORMAL_WORLD_POSITION_FRAG Enjon::String( FRAGMENT_SHADER_IN ) + Enjon::String( ".tbn[2]" )
+#define CAMERA_WORLD_POSITION "uCameraWorldPosition"
+#define VERTEX_NORMAL_DIR_UNPERTURBED_FRAG Enjon::String( "normalize(" ) + Enjon::String( FRAGMENT_SHADER_IN ) + Enjon::String( ".tbn[2]" ) + Enjon::String( ")" )
+#define CAMERA_VIEW_DIR_FRAG Enjon::String( FRAGMENT_SHADER_IN ) + Enjon::String( ".camViewDir" ) 
+#define WORLD_TIME "uWorldTime"
+
 namespace Enjon
 {
 	// These do not necessary need to evaluate to executable code, 
@@ -1198,6 +1207,150 @@ namespace Enjon
 
 		protected:
 			Enjon::Vec2 mSpeed = Enjon::Vec2( 0.0f ); 
+	};
+	
+	class ShaderVertexNormalWSNode : public ShaderGraphNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderVertexNormalWSNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderVertexNormalWSNode( ); 
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+	};
+
+	class ShaderCameraWorldPositionNode : public ShaderGraphNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderCameraWorldPositionNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderCameraWorldPositionNode( );
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+	};
+	
+	class ShaderCameraViewDirectionNode : public ShaderGraphNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderCameraViewDirectionNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderCameraViewDirectionNode( );
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+	};
+
+	class ShaderVertexNormalDirectionNode : public ShaderGraphNode 
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderVertexNormalDirectionNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderVertexNormalDirectionNode( );
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
 	};
 }
 

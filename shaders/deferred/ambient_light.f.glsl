@@ -31,6 +31,6 @@ void main()
     // Diffuse
     vec4 DiffuseColor = Diffuse * vec4(u_ambientColor * u_ambientIntensity, 1.0);
 
-   ColorOut = DiffuseColor + Emissive;
-   // ColorOut = vec4(u_ambientColor, 1.0) + (ColorOut) * 0.0001;
+    // Final color out
+    ColorOut = DiffuseColor + vec4( max( vec3( 0.0 ), Emissive.rgb ), 1.0 );
 }
