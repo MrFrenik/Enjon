@@ -186,7 +186,6 @@ namespace Enjon
 			if ( am )
 			{
 				mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.bunny" ) ); 
-				mRenderable.SetScale( 1.0f );
 				mRenderable.SetPosition( Vec3( 0, 10, 0 ) );
 			}
 			set = true;
@@ -416,7 +415,7 @@ namespace Enjon
 			matHandle.Get( )->SetUniform( "uEmissiveIntensity", mEmissiveStrength );
 			matHandle.Get( )->SetUniform( "uTiling", mTiling );
 			mFresnelShader.SetUniform( "uCamera", mSceneCamera.GetViewProjectionMatrix( ) );
-			mFresnelShader.SetUniform( "uCameraWorldPosition", mSceneCamera.GetPosition( ) );
+			mFresnelShader.SetUniform( "uCameraWorldPosition", mSceneCamera.GetPosition( ) + mSceneCamera.Backward() * 2.0f );
 			//mShader.SetUniform( "uCameraForwardDirection", mSceneCamera.Forward( ) );
 			//mShader.SetUniform( "uWorldTime", t );
 
@@ -1276,7 +1275,7 @@ namespace Enjon
 		// Get shader graph
 		Enjon::ShaderGraph* shaderGraph = const_cast< ShaderGraph* > ( mFresnelShader.GetGraph( ) );
 
-		Enjon::ShaderTexture2DNode* uAlbedoMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uAlbedoMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
+		//Enjon::ShaderTexture2DNode* uAlbedoMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uAlbedoMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
 		Enjon::ShaderTexture2DNode* uNormalMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uNormalMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
 		Enjon::ShaderTexture2DNode* uMetallicMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uMetallicMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
 		Enjon::ShaderTexture2DNode* uRoughnessMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uRoughnessMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
@@ -1314,6 +1313,8 @@ namespace Enjon
 		Enjon::ShaderSubtractNode* distVec = shaderGraph->AddNode( new Enjon::ShaderSubtractNode( "distVec" ) )->Cast< Enjon::ShaderSubtractNode >( );
 		Enjon::ShaderTextureCoordinatesNode* texCoords = shaderGraph->AddNode( new Enjon::ShaderTextureCoordinatesNode( "texCoords", Vec2( 1.0f ) ) )->Cast< Enjon::ShaderTextureCoordinatesNode >( );
 		Enjon::ShaderVec2Node* tiling = shaderGraph->AddNode( new Enjon::ShaderVec2Node( "uTiling", Vec2( 1.0f ) ) )->Cast< Enjon::ShaderVec2Node >( );
+		Enjon::ShaderClampNode* clamp = shaderGraph->AddNode( new Enjon::ShaderClampNode( "clampNode" ) )->Cast< Enjon::ShaderClampNode >( );
+		Enjon::ShaderMaskNode* maskNode = shaderGraph->AddNode( new Enjon::ShaderMaskNode( "maskNode", Enjon::MaskFlags::RG ) )->Cast< Enjon::ShaderMaskNode >( );
 
 		// Set to be uniform variable
 		emissiveIntensity->IsUniform( true );
@@ -1324,7 +1325,9 @@ namespace Enjon
 		dotProduct->AddInput( normalDir );
 		dotProduct->AddInput( viewDir );
 
-		oneMinus->AddInput( dotProduct );
+		clamp->AddInput( dotProduct );
+
+		oneMinus->AddInput( clamp );
 
 		powerNode->AddInput( oneMinus );
 		powerNode->AddInput( sharpness );
@@ -1336,11 +1339,13 @@ namespace Enjon
 		mult2->AddInput( fresnelColor ); 
 
 		texCoords->AddInput( tiling );
-		uAlbedoMap->AddInput( texCoords ); 
+		//uAlbedoMap->AddInput( texCoords ); 
 		uNormalMap->AddInput( texCoords );
+		
+		maskNode->AddInput( fresnelColor );
 
 		// Add inputs to main node
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( uAlbedoMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Albedo ) );
+		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( maskNode, ( u32 )Enjon::ShaderGraphMainNodeInputType::Albedo ) );
 		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( uMetallicMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Metallic ) );
 		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( uRoughnessMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Roughness ) );
 		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( mult2, ( u32 )Enjon::ShaderGraphMainNodeInputType::Emissive ) );
