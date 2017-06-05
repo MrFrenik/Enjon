@@ -172,6 +172,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( cerebusMeshPath );
 	mAssetManager->AddToDatabase( sphereMeshPath );
 	mAssetManager->AddToDatabase( cubeMeshPath );
+	mAssetManager->AddToDatabase( bunnyMeshPath );
 	mAssetManager->AddToDatabase( buddhaMeshPath );
 	mAssetManager->AddToDatabase( shaderBallMeshPath );
 	mAssetManager->AddToDatabase( greenPath );

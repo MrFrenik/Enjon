@@ -35,7 +35,7 @@ vec3 Uncharted2Tonemap(vec3 x)
 void main() 
 {
 	// Mix bloom
-	vec3 hdrColor = texture2D(tex, fs_in.TexCoords).rgb;
+	vec3 hdrColor = max( vec3( 0.0 ), texture2D(tex, fs_in.TexCoords).rgb );
 	vec3 bloomColor = texture2D(u_blurTexSmall, fs_in.TexCoords).rgb + 
 						texture2D(u_blurTexMedium, fs_in.TexCoords).rgb + 
 						texture2D(u_blurTexLarge, fs_in.TexCoords).rgb;

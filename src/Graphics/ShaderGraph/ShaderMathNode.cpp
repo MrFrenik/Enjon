@@ -873,6 +873,115 @@ namespace Enjon
 			default: return "";
 		}
 	}
+	
+	//================================================================================================================
+		
+	ShaderAbsoluteValueNode::ShaderAbsoluteValueNode( const Enjon::String& id )
+		: UnaryFunctionNode( id )
+	{ 
+	}
+
+	//================================================================================================================
+
+	ShaderAbsoluteValueNode::~ShaderAbsoluteValueNode( )
+	{ 
+	}
+
+	//================================================================================================================
+
+	ShaderOutputType ShaderAbsoluteValueNode::EvaluateOutputType( u32 portID )
+	{
+		if ( mInputs.size( ) < 1 )
+		{
+			return ShaderOutputType::Float;
+		}
+
+		Connection a_conn = mInputs.at( 0 );
+
+		// Look at inputs to determine output type of this node
+		ShaderGraphNode* a = const_cast< ShaderGraphNode* >( mInputs.at( 0 ).mOwner );
+
+		// Evaluate output type
+		ShaderOutputType aType = a->EvaluateOutputType( a_conn.mOutputPortID );
+
+		switch ( aType )
+		{
+			case ShaderOutputType::Float:
+			{ 
+				mOutputType = ShaderOutputType::Float;
+
+			} break;
+
+			case ShaderOutputType::Vec2:
+			{
+				mOutputType = ShaderOutputType::Vec2; 
+			} break;
+
+			case ShaderOutputType::Vec3:
+			{
+				mOutputType = ShaderOutputType::Vec3;
+			} break;
+
+			case ShaderOutputType::Vec4:
+			{
+				mOutputType = ShaderOutputType::Vec4;
+			} break;
+			default:
+			{
+				mOutputType = ShaderOutputType::Float;
+			} break;
+		}
+
+		return mOutputType;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderAbsoluteValueNode::EvaluateToGLSL( )
+	{ 
+		Enjon::String finalEvaluation = "";
+
+		// Evaluate inputs
+		for ( auto& c : mInputs )
+		{
+			ShaderGraphNode* owner = const_cast< ShaderGraphNode* >( c.mOwner );
+			finalEvaluation += owner->Evaluate( ) + "\n";
+		}
+
+		// Get connections
+		Connection a_conn = mInputs.at( 0 );
+
+		// Get shader graph nodes
+		ShaderGraphNode* a = const_cast< ShaderGraphNode* >( a_conn.mOwner );
+
+		// Evaluate final line of code
+		finalEvaluation += GetQualifiedID( ) + " = abs(" + a->EvaluateAtPort( a_conn.mOutputPortID ) + ");";
+
+		// Return
+		return finalEvaluation;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderAbsoluteValueNode::EvaluateAtPort( u32 portID )
+	{
+		// Only one output, so just get qualified id
+		return GetQualifiedID( ); 
+	}
+
+	//================================================================================================================
+	
+	Enjon::String ShaderAbsoluteValueNode::GetDeclaration( )
+	{
+		switch ( EvaluateOutputType( ) )
+		{
+			case ShaderOutputType::Float: return "float " + mID + ";"; break;
+			case ShaderOutputType::Vec2: return "vec2 " + mID + ";"; break;
+			case ShaderOutputType::Vec3: return "vec3 " + mID + ";"; break;
+			case ShaderOutputType::Vec4: return "vec4 " + mID + ";"; break;
+			default: return "";
+		}
+	}
 
 	//================================================================================================================
 
@@ -1188,4 +1297,70 @@ namespace Enjon
 		// Always returns float
 		return "float " + mID + ";";
 	}
+
+
+	//================================================================================================================
+
+	ShaderLengthNode::ShaderLengthNode( const Enjon::String& id )
+		: UnaryFunctionNode( id )
+	{
+		mPrimitiveType = ShaderPrimitiveType::Float;
+		mOutputType = ShaderOutputType::Float;
+	}
+
+	//================================================================================================================
+
+	ShaderLengthNode::~ShaderLengthNode( )
+	{
+	}
+
+	//================================================================================================================
+
+	ShaderOutputType ShaderLengthNode::EvaluateOutputType( u32 portID )
+	{
+		return ShaderOutputType::Float; 
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderLengthNode::EvaluateToGLSL( )
+	{
+		Enjon::String finalEvaluation = "";
+
+		// Evaluate inputs
+		for ( auto& c : mInputs )
+		{
+			ShaderGraphNode* owner = const_cast< ShaderGraphNode* >( c.mOwner );
+			finalEvaluation += owner->Evaluate( ) + "\n";
+		}
+
+		// Get connections
+		Connection a_conn = mInputs.at( 0 );
+
+		// Get shader graph nodes
+		ShaderGraphNode* a = const_cast< ShaderGraphNode* >( a_conn.mOwner );
+
+		// Evaluate final line of code
+		finalEvaluation += GetQualifiedID( ) + " = length(" + a->EvaluateAtPort( a_conn.mOutputPortID ) + ");";
+
+		// Return
+		return finalEvaluation;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderLengthNode::EvaluateAtPort( u32 portID )
+	{
+		// Only one output, so just get qualified id
+		return GetQualifiedID( );
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderLengthNode::GetDeclaration( )
+	{
+		return "float " + mID + ";";
+	}
+
+	//================================================================================================================
 }

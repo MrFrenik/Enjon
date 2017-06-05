@@ -82,9 +82,9 @@ namespace Enjon
 	Enjon::Result Shader::Recompile( )
 	{
 		// Destroy the program
-		Enjon::Result destResult = DestroyProgram( );
+		Enjon::Result destResult = DestroyProgram( ); 
 
-		// Recompile the program
+		// Recompile the graph and shader program
 		Enjon::Result comResult = Compile( );
 		
 		return Enjon::Result::SUCCESS;

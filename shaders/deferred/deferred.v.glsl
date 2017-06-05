@@ -32,7 +32,8 @@ void main()
 	T = normalize(T - dot(T, N) * N);
 
 	// Calculate bitangent
-	vec3 B = normalize( ( u_model * vec4( ( cross( vertexNormal, vertexTangent.xyz ) * 1.0), 0.0 )).xyz);
+	// vec3 B = normalize( ( u_model * vec4( ( cross( vertexNormal, vertexTangent.xyz ) * 1.0), 0.0 )).xyz);
+	vec3 B = cross( N, T );
 	mat3 TBN = mat3(T, B, N);
 
 	// Output data

@@ -16,7 +16,9 @@
 #define FRAGMENT_SHADER_IN "fs_in"
 #define VERTEX_SHADER_OUT "vs_out"
 
-#define VERTEX_NORMAL_WORLD_POSITION_FRAG Enjon::String( FRAGMENT_SHADER_IN ) + Enjon::String( ".tbn[2]" )
+#define VERTEX_WORLD_POSITION_FRAG			FRAGMENT_SHADER_IN + Enjon::String( ".fragPos" )
+#define VERTEX_NORMAL_WORLD_SPACE_FRAG Enjon::String( FRAGMENT_SHADER_IN ) + Enjon::String( ".tbn[2]" )
+#define FRAGMENT_NORMAL_WORLD_SPACE_FRAG "normalize( NormalsOut.rgb )"
 #define CAMERA_WORLD_POSITION "uCameraWorldPosition"
 #define VERTEX_NORMAL_DIR_UNPERTURBED_FRAG Enjon::String( "normalize(" ) + Enjon::String( FRAGMENT_SHADER_IN ) + Enjon::String( ".tbn[2]" ) + Enjon::String( ")" )
 #define CAMERA_VIEW_DIR_FRAG Enjon::String( FRAGMENT_SHADER_IN ) + Enjon::String( ".camViewDir" ) 
@@ -287,6 +289,10 @@ namespace Enjon
 			Enjon::String EvaluateToGLSL( ) override
 			{ 
 				Enjon::String finalOutput = "";
+				
+				// Evaluate Normal
+				finalOutput += "// Normal\n";
+				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Normal ) + "\n"; 
 
 				// Evaluate Metallic, Roughness, AO
 				finalOutput += "// Metallic\n";
@@ -306,11 +312,7 @@ namespace Enjon
 
 				// Evaluate Emissive
 				finalOutput += "// Emissive\n";
-				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Emissive ) + "\n";
-				
-				// Evaluate Emissive
-				finalOutput += "// Normal\n";
-				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Normal ) + "\n"; 
+				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Emissive ) + "\n"; 
 
 				return finalOutput;
 			}
@@ -1209,6 +1211,43 @@ namespace Enjon
 			Enjon::Vec2 mSpeed = Enjon::Vec2( 0.0f ); 
 	};
 	
+	class ShaderTextureCoordinatesNode : public ShaderGraphNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderTextureCoordinatesNode( const Enjon::String& id, const Enjon::Vec2& tiling );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderTextureCoordinatesNode( ); 
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+			Enjon::Vec2 mTiling = Enjon::Vec2( 0.0f ); 
+	};
+	
 	class ShaderVertexNormalWSNode : public ShaderGraphNode
 	{
 		public:
@@ -1221,6 +1260,43 @@ namespace Enjon
 			* @brief Destructor
 			*/
 			~ShaderVertexNormalWSNode( ); 
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+	};
+
+
+	class ShaderPixelNormalWSNode : public ShaderGraphNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderPixelNormalWSNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderPixelNormalWSNode( );
 
 			/*
 			* @brief
@@ -1329,6 +1405,78 @@ namespace Enjon
 			* @brief Destructor
 			*/
 			~ShaderVertexNormalDirectionNode( );
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+	};
+	
+	class ShaderVertexWorldPositionNode : public ShaderGraphNode 
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderVertexWorldPositionNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderVertexWorldPositionNode( );
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+	};
+
+	class ShaderBranchIfElseNode : public ShaderGraphNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderBranchIfElseNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderBranchIfElseNode( );
 
 			/*
 			* @brief

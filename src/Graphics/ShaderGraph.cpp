@@ -201,6 +201,7 @@ namespace Enjon
 
 		// Fragment shader uniforms
 		mShaderCodeOutput += "uniform float uWorldTime = 1.0;\n"; 
+		mShaderCodeOutput += "uniform vec3 uCameraWorldPosition = vec3( 0.0, 0.0, 0.0 );\n"; 
 	}
 
 	//===============================================================================================
@@ -242,7 +243,8 @@ namespace Enjon
 		mShaderCodeOutput += "vec3 N = normalize((uModel * vec4(vertexNormal, 0.0)).xyz);\n";
 		mShaderCodeOutput += "vec3 T = normalize((uModel * vec4(vertexTangent, 0.0)).xyz);\n\n";
 		mShaderCodeOutput += "T = normalize(T - dot(T, N) * N);\n\n";
-		mShaderCodeOutput += "vec3 B = normalize((uModel * vec4((cross(vertexNormal, vertexTangent.xyz) * 1.0), 0.0)).xyz);\n";
+		//mShaderCodeOutput += "vec3 B = normalize((uModel * vec4((cross(vertexNormal, vertexTangent.xyz) * 1.0), 0.0)).xyz);\n";
+		mShaderCodeOutput += "vec3 B = cross(N, T);\n";
 		mShaderCodeOutput += "mat3 TBN = mat3(T, B, N);\n\n";
 
 		mShaderCodeOutput += "vec3 viewDir = normalize(uCameraWorldPosition - pos) ;\n\n";
@@ -250,8 +252,7 @@ namespace Enjon
 		mShaderCodeOutput += "vs_out.fragPos = vec3(uModel * vec4(vertexPosition, 1.0));\n";
 		mShaderCodeOutput += "vs_out.texCoords = vec2(vertexUV.x, -vertexUV.y);\n";
 		mShaderCodeOutput += "vs_out.tbn = TBN;\n";
-		mShaderCodeOutput += "vs_out.camViewDir = viewDir;\n";
-
+		mShaderCodeOutput += "vs_out.camViewDir = viewDir;\n"; 
 	}
 	
 	void ShaderGraph::BeginVertexMain( )
@@ -456,6 +457,83 @@ namespace Enjon
  
 	//=================================================================
 
+	//=================================================================
+
+	ShaderTextureCoordinatesNode::ShaderTextureCoordinatesNode( const Enjon::String& id, const Enjon::Vec2& tiling )
+		: ShaderGraphNode( id )
+	{
+		mPrimitiveType = ShaderPrimitiveType::Vec2;
+		mOutputType = ShaderOutputType::Vec2;
+		mTiling = tiling;
+	}
+
+	//=================================================================
+
+	ShaderTextureCoordinatesNode::~ShaderTextureCoordinatesNode( )
+	{
+	}
+
+	//=================================================================
+
+	ShaderOutputType ShaderTextureCoordinatesNode::EvaluateOutputType( u32 portID )
+	{
+		return ShaderOutputType::Vec2;
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderTextureCoordinatesNode::EvaluateToGLSL( )
+	{
+		Enjon::String finalEvaluation = "";
+
+		// Evaluate inputs
+		for ( auto& c : mInputs )
+		{
+			ShaderGraphNode* owner = const_cast< ShaderGraphNode* >( c.mOwner );
+			finalEvaluation += owner->Evaluate( ) + "\n";
+		}
+
+		if ( !mInputs.empty( ) )
+		{
+			// Get connections
+			Connection a_conn = mInputs.at( 0 );
+
+			// Get shader graph nodes
+			ShaderGraphNode* a = const_cast< ShaderGraphNode* >( a_conn.mOwner );
+
+			// Evaluate final line of code
+			Enjon::String aEval = a->EvaluateAtPort( a_conn.mOutputPortID );
+			finalEvaluation += GetQualifiedID( ) + " = vec2( fs_in.texCoords.x * " + aEval + ".x, " + " fs_in.texCoords.y * " + aEval + ".y);";
+		}
+
+		else
+		{
+			// Evaluate final line of code
+			Enjon::String xTiling = std::to_string( mTiling.x );
+			Enjon::String yTiling = std::to_string( mTiling.y );
+			finalEvaluation += GetQualifiedID( ) + " = vec2( fs_in.texCoords.x * " + xTiling + ", " + " fs_in.texCoords.y * " + yTiling + ");";
+		}
+
+		// Return
+		return finalEvaluation;
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderTextureCoordinatesNode::EvaluateAtPort( u32 portID )
+	{
+		return GetQualifiedID( );
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderTextureCoordinatesNode::GetDeclaration( )
+	{
+		return "vec2 " + GetQualifiedID( ) + ";";
+	}
+
+	//=================================================================
+
 	ShaderVertexNormalWSNode::ShaderVertexNormalWSNode( const Enjon::String& id )
 		: ShaderGraphNode( id )
 	{
@@ -480,7 +558,7 @@ namespace Enjon
 
 	Enjon::String ShaderVertexNormalWSNode::EvaluateToGLSL( )
 	{ 
-		return GetQualifiedID( ) + " = " + VERTEX_NORMAL_WORLD_POSITION_FRAG + ";"; 
+		return GetQualifiedID( ) + " = " + VERTEX_NORMAL_WORLD_SPACE_FRAG + ";"; 
 	}
 
 	//=================================================================
@@ -496,6 +574,49 @@ namespace Enjon
 	{
 		return "vec3 " + GetQualifiedID( ) + ";";
 	} 
+
+	//=================================================================
+
+	ShaderPixelNormalWSNode::ShaderPixelNormalWSNode( const Enjon::String& id )
+		: ShaderGraphNode( id )
+	{
+		mPrimitiveType = ShaderPrimitiveType::Vec3;
+		mOutputType = ShaderOutputType::Vec3;
+	}
+
+	//=================================================================
+
+	ShaderPixelNormalWSNode::~ShaderPixelNormalWSNode( )
+	{
+	}
+
+	//=================================================================
+
+	ShaderOutputType ShaderPixelNormalWSNode::EvaluateOutputType( u32 portID )
+	{
+		return ShaderOutputType::Vec3;
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderPixelNormalWSNode::EvaluateToGLSL( )
+	{
+		return GetQualifiedID( ) + " = " + FRAGMENT_NORMAL_WORLD_SPACE_FRAG + ";";
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderPixelNormalWSNode::EvaluateAtPort( u32 portID )
+	{
+		return GetQualifiedID( );
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderPixelNormalWSNode::GetDeclaration( )
+	{
+		return "vec3 " + GetQualifiedID( ) + ";";
+	}
 
 	//=================================================================
 
@@ -568,7 +689,7 @@ namespace Enjon
 
 	Enjon::String ShaderCameraViewDirectionNode::EvaluateToGLSL( )
 	{
-		return GetQualifiedID( ) + " = " + CAMERA_VIEW_DIR_FRAG + ";";
+		return GetQualifiedID( ) + " = normalize( uCameraWorldPosition - fs_in.fragPos );";
 	}
 
 	//=================================================================
@@ -626,9 +747,172 @@ namespace Enjon
 	Enjon::String ShaderVertexNormalDirectionNode::GetDeclaration( )
 	{
 		return "vec3 " + GetQualifiedID( ) + ";";
+	} 
+	
+	//=================================================================
+
+	ShaderVertexWorldPositionNode::ShaderVertexWorldPositionNode( const Enjon::String& id )
+		: ShaderGraphNode( id )
+	{
+		mPrimitiveType = ShaderPrimitiveType::Vec3;
+		mOutputType = ShaderOutputType::Vec3;
 	}
 
 	//=================================================================
+
+	ShaderVertexWorldPositionNode::~ShaderVertexWorldPositionNode( )
+	{
+	}
+
+	//=================================================================
+
+	ShaderOutputType ShaderVertexWorldPositionNode::EvaluateOutputType( u32 portID )
+	{
+		return ShaderOutputType::Vec3;
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderVertexWorldPositionNode::EvaluateToGLSL( )
+	{
+		return GetQualifiedID( ) + " = " + VERTEX_WORLD_POSITION_FRAG + ";";
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderVertexWorldPositionNode::EvaluateAtPort( u32 portID )
+	{
+		return GetQualifiedID( );
+	}
+
+	//=================================================================
+
+	Enjon::String ShaderVertexWorldPositionNode::GetDeclaration( )
+	{
+		return "vec3 " + GetQualifiedID( ) + ";";
+	}
+
+	//================================================================================================================
+
+	ShaderBranchIfElseNode::ShaderBranchIfElseNode( const Enjon::String& id )
+		: ShaderGraphNode( id )
+	{
+		mPrimitiveType = ShaderPrimitiveType::Float;
+		mOutputType = ShaderOutputType::Float;
+	}
+
+	//================================================================================================================
+
+	ShaderBranchIfElseNode::~ShaderBranchIfElseNode( )
+	{
+	}
+
+	//================================================================================================================
+
+	ShaderOutputType ShaderBranchIfElseNode::EvaluateOutputType( u32 portID )
+	{
+		// For now, return float 
+		return ShaderOutputType::Float; 
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderBranchIfElseNode::EvaluateToGLSL( )
+	{
+		Enjon::String finalEvaluation = "";
+
+		// Evaluate inputs
+		for ( auto& c : mInputs )
+		{
+			ShaderGraphNode* owner = const_cast<ShaderGraphNode*>( c.mOwner );
+			finalEvaluation += owner->Evaluate( ) + "\n"; 
+		}
+
+		// Get connections
+		Connection a_conn = mInputs.at( 0 );
+		Connection b_conn = mInputs.at( 1 );
+		Connection agteb_conn;
+		Connection aeb_conn;
+		Connection altb_conn;
+
+		// Get shader graph nodes
+		ShaderGraphNode* a = const_cast<ShaderGraphNode*>( a_conn.mOwner );
+		ShaderGraphNode* b = const_cast<ShaderGraphNode*>( b_conn.mOwner );
+		ShaderGraphNode* aGTEb = nullptr;
+		ShaderGraphNode* aEb = nullptr;
+		ShaderGraphNode* aLTb = nullptr;
+
+		// aGTEb
+		if ( mInputs.size( ) >= 2 )
+		{
+			agteb_conn = mInputs.at( 2 );
+			aGTEb = const_cast< ShaderGraphNode* >( agteb_conn.mOwner );
+		}
+		
+		// aLTb
+		if ( mInputs.size( ) >= 3 )
+		{
+			altb_conn = mInputs.at( 3 );
+			aLTb = const_cast< ShaderGraphNode* >( altb_conn.mOwner );
+		}
+		
+		// aEb
+		//if ( mInputs.size( ) >= 4 )
+		//{
+		//	aeb_conn = mInputs.at( 4 );
+		//	aEb = const_cast< ShaderGraphNode* >( aeb_conn.mOwner );
+		//} 
+		
+		Enjon::String aEval = a->EvaluateAtPort( a_conn.mOutputPortID );
+		Enjon::String bEval = b->EvaluateAtPort( b_conn.mOutputPortID ); 
+
+		//if ( aEb )
+		//{
+		//	Enjon::String aebeval = aEb->EvaluateAtPort( aeb_conn.mOutputPortID ); 
+		//	finalEvaluation += "if ( " + aEval + " == " + bEval + " )\n";
+		//	finalEvaluation += "{\n";
+		//	finalEvaluation += "\t" + GetQualifiedID( ) + " = " + aebeval + ";\n";
+		//	finalEvaluation += "}\n";
+		//}
+
+		if ( aGTEb )
+		{ 
+			Enjon::String agtebeval = aGTEb->EvaluateAtPort( agteb_conn.mOutputPortID ); 
+			finalEvaluation += "if ( " + aEval + " >= " + bEval + " )\n";
+			finalEvaluation += "{\n";
+			finalEvaluation += "\t" + GetQualifiedID( ) + " = " + agtebeval + ";\n";
+			finalEvaluation += "}\n"; 
+		}
+
+		if ( aLTb )
+		{
+			Enjon::String altbeval = aLTb->EvaluateAtPort( altb_conn.mOutputPortID ); 
+			finalEvaluation += "if ( " + aEval + " < " + bEval + " )\n";
+			finalEvaluation += "{\n";
+			finalEvaluation += "\t" + GetQualifiedID( ) + " = " + altbeval + ";\n";
+			finalEvaluation += "}\n"; 
+		} 
+
+		// Return
+		return finalEvaluation;
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderBranchIfElseNode::EvaluateAtPort( u32 portID )
+	{
+		// Multiply node only has one output, so just return its qualified id
+		return GetQualifiedID( );
+	}
+
+	//================================================================================================================
+
+	Enjon::String ShaderBranchIfElseNode::GetDeclaration( )
+	{
+		return "float " + mID + ";"; 
+	} 
+	
+	//================================================================================================================
 }
 
 

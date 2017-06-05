@@ -20,7 +20,7 @@ void main()
 	vec3 EmissiveColor = texture2D(u_emissiveMap, fs_in.TexCoords).rgb;
 
 	// Clamp to avoid exceeding max float
-	FragColor = min(vec3(256 * 10, 256 * 10, 256 * 10), FragColor.rgb);
+	FragColor = min(vec3(256 * 10, 256 * 10, 256 * 10), max( vec3( 0.0 ), FragColor.rgb) );
 
 	// Calculate luminance of scene
 	float brightness = dot(FragColor, vec3(0.2126, 0.7152, 0.0722));
