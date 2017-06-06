@@ -33,6 +33,7 @@
 
 Enjon::Shader mFresnelShader;
 Enjon::Shader mOutlineShader;
+Enjon::Shader mWaterShader;
 Enjon::ShaderGraph mShaderGraph;
 Enjon::Renderable mRenderable;
 			
@@ -40,6 +41,7 @@ f32 mFresnelSharpness = 1.0f;
 f32 mEmissiveStrength = 1.0f;
 f32 mOutlineThickness = 0.2f;
 Enjon::Vec2 mTiling = Enjon::Vec2( 1.0f );
+Enjon::Vec2 mFlowControl = Enjon::Vec2( 1.0f );
 
 namespace Enjon 
 { 
@@ -170,6 +172,7 @@ namespace Enjon
 		glCullFace(GL_BACK);
 
 		FresnelShader( );
+		WaterShader( );
 		//OutlineShader( );
 
 		return Result::SUCCESS;
@@ -185,7 +188,8 @@ namespace Enjon
 			Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 			if ( am )
 			{
-				mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.bunny" ) ); 
+				mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.shaderball" ) ); 
+				mRenderable.SetScale( Vec3( 0.007f ) );
 				mRenderable.SetPosition( Vec3( 0, 10, 0 ) );
 			}
 			set = true;
@@ -377,7 +381,7 @@ namespace Enjon
 			static Enjon::AssetHandle< Enjon::Texture > albedo;
 			static Enjon::AssetHandle< Enjon::Texture > albedo2;
 			static Enjon::AssetHandle< Enjon::Texture > normals;
-			static Enjon::AssetHandle< Enjon::Texture > normals2;
+			static Enjon::AssetHandle< Enjon::Texture > waterNormal;
 			static Enjon::AssetHandle< Enjon::Texture > metallic;
 			static Enjon::AssetHandle< Enjon::Texture > roughness;
 			static Enjon::AssetHandle< Enjon::Texture > emissive; 
@@ -393,6 +397,7 @@ namespace Enjon
 				metallic = am->GetAsset< Enjon::Texture >( "isoarpg.materials.mahogfloor.roughness" );
 				roughness = am->GetAsset< Enjon::Texture >( "isoarpg.materials.mahogfloor.roughness" );
 				emissive = am->GetAsset< Enjon::Texture >( "isoarpg.textures.green" ); 
+				waterNormal = am->GetAsset< Enjon::Texture >( "isoarpg.textures.water" );
 
 				// Create material
 				matHandle = mFresnelShader.CreateMaterial( );
@@ -427,6 +432,46 @@ namespace Enjon
 			mRenderable.Submit( &mFresnelShader ); 
 		}
 		mFresnelShader.Unuse( );
+
+		mWaterShader.Use( );
+		{
+			static bool set = false;
+			Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+			static Enjon::AssetHandle< Enjon::Texture > waterNormal;
+			static Enjon::AssetHandle< Enjon::Material > matHandle;
+
+			static f32 t = 0.0f;
+			t += 0.001f;
+
+			if ( !set )
+			{
+				waterNormal = am->GetAsset< Enjon::Texture >( "isoarpg.textures.water" );
+
+				// Create material
+				matHandle = mWaterShader.CreateMaterial( );
+
+				// Set uniforms for material
+				Enjon::Material* mat = matHandle.Get( );
+				mat->SetUniform( "uNormalMap", waterNormal ); 
+
+				set = true;
+			}
+
+			// Set default shader uniforms
+			matHandle.Get( )->SetUniform( "uUFlowControl", mFlowControl.x );
+			matHandle.Get( )->SetUniform( "uVFlowControl", mFlowControl.y );
+			matHandle.Get( )->SetUniform( "coord", mTiling );
+			mWaterShader.SetUniform( "uCamera", mSceneCamera.GetViewProjectionMatrix( ) );
+			mWaterShader.SetUniform( "uWorldTime", t );
+
+			// Set material specific uniforms
+			matHandle.Get( )->SetUniforms( );
+
+			// Submit renderable ( The material can be bound and used in the renderable submit call as well )
+			mRenderable.SetPosition( Vec3( 5.0f, 5.0f, 0.0f ) );
+			mRenderable.Submit( &mWaterShader );
+		}
+		mWaterShader.Unuse( );
 
 		/*
 		// Now do the outline shader test
@@ -1244,6 +1289,8 @@ namespace Enjon
 		ImGui::SliderFloat( "OutlineThickness", &mOutlineThickness, 0.0f, 1.0f );
 		ImGui::SliderFloat( "Tiling X", &mTiling.x, 0.0f, 5.0f );
 		ImGui::SliderFloat( "Tiling Y", &mTiling.y, 0.0f, 5.0f );
+		ImGui::SliderFloat( "Flow U", &mFlowControl.x, 0.0f, 5.0f );
+		ImGui::SliderFloat( "Flow V", &mFlowControl.y, 0.0f, 5.0f );
 	}
 
 	//=======================================================================================================
@@ -1269,6 +1316,64 @@ namespace Enjon
 		// Update camera aspect ratio
 		mSceneCamera.SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
 	} 
+
+	void DeferredRenderer::WaterShader( )
+	{
+		// Get shader graph
+		Enjon::ShaderGraph* shaderGraph = const_cast< ShaderGraph* > ( mWaterShader.GetGraph( ) ); 
+
+		// Define nodes
+		Enjon::ShaderTimeNode* time = shaderGraph->AddNode( new Enjon::ShaderTimeNode( "worldTime" ) )->Cast< Enjon::ShaderTimeNode >( );
+		Enjon::ShaderFloatNode* uUFlowControl = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "uUFlowControl", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
+		Enjon::ShaderFloatNode* uVFlowControl = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "uVFlowControl", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
+		Enjon::ShaderMultiplyNode* multU = shaderGraph->AddNode( new Enjon::ShaderMultiplyNode( "multU" ) )->Cast< Enjon::ShaderMultiplyNode >( );
+		Enjon::ShaderMultiplyNode* multV = shaderGraph->AddNode( new Enjon::ShaderMultiplyNode( "multV" ) )->Cast< Enjon::ShaderMultiplyNode >( );
+		Enjon::ShaderPannerNode* pannU = shaderGraph->AddNode( new Enjon::ShaderPannerNode( "pannU", Vec2( 1.0f, 0.0f ) ) )->Cast< Enjon::ShaderPannerNode >( );
+		Enjon::ShaderPannerNode* pannV = shaderGraph->AddNode( new Enjon::ShaderPannerNode( "pannV", Vec2( 0.0f, 1.0f ) ) )->Cast< Enjon::ShaderPannerNode >( );
+		Enjon::ShaderVec2Node* coord = shaderGraph->AddNode( new Enjon::ShaderVec2Node( "coord", Vec2( 1.0f ) ) )->Cast< Enjon::ShaderVec2Node >( );
+		Enjon::ShaderMaskNode* maskR = shaderGraph->AddNode( new Enjon::ShaderMaskNode( "maskR", MaskFlags::R ) )->Cast< Enjon::ShaderMaskNode >( );
+		Enjon::ShaderMaskNode* maskG = shaderGraph->AddNode( new Enjon::ShaderMaskNode( "maskG", MaskFlags::G ) )->Cast< Enjon::ShaderMaskNode >( );
+		Enjon::ShaderAppendNode* append = shaderGraph->AddNode( new Enjon::ShaderAppendNode( "append" ) )->Cast< Enjon::ShaderAppendNode >( );
+		Enjon::ShaderVec3Node* baseColor = shaderGraph->AddNode( new Enjon::ShaderVec3Node( "baseColor", Vec3( 0.199f, 0.437f, 0.65f ) ) )->Cast< Enjon::ShaderVec3Node >( );
+		Enjon::ShaderFloatNode* metallic = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "metallic_param", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
+		Enjon::ShaderFloatNode* roughness = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "roughness_param", 0.3f ) )->Cast< Enjon::ShaderFloatNode >( );
+		Enjon::ShaderTexture2DNode* normalMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uNormalMap" ) )->Cast< Enjon::ShaderTexture2DNode >( ); 
+
+		// Set up uniforms
+		uUFlowControl->IsUniform( true );
+		uVFlowControl->IsUniform( true );
+		coord->IsUniform( true );
+
+		// Set up inputs
+		multU->AddInput( time );
+		multU->AddInput( uUFlowControl );
+
+		pannU->AddInput( coord );
+		pannU->AddInput( multU );
+ 
+		multV->AddInput( time );
+		multV->AddInput( uVFlowControl );
+
+		pannV->AddInput( coord );
+		pannV->AddInput( multV );
+
+		maskR->AddInput( pannU );
+		maskG->AddInput( pannV );
+
+		append->AddInput( maskR );
+		append->AddInput( maskG );
+
+		normalMap->AddInput( append ); 
+
+		// Add inputs to main node
+		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( baseColor, ( u32 )Enjon::ShaderGraphMainNodeInputType::Albedo ) );
+		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( metallic, ( u32 )Enjon::ShaderGraphMainNodeInputType::Metallic ) );
+		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( roughness, ( u32 )Enjon::ShaderGraphMainNodeInputType::Roughness ) );
+		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( normalMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Normal ) ); 
+
+		// Remake shader using new graph
+		mWaterShader = Enjon::Shader( *shaderGraph ); 
+	}
 
 	void DeferredRenderer::FresnelShader( )
 	{ 

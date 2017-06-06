@@ -141,6 +141,7 @@ Enjon::Result Game::Initialize()
 	Enjon::String woodNormalPath		= Enjon::String("/Materials/WoodFrame/Normal.png"); 
 	Enjon::String woodRoughnessPath		= Enjon::String("/Materials/WoodFrame/Roughness.png"); 
 	Enjon::String woodMetallicPath		= Enjon::String("/Materials/WoodFrame/Metallic.png"); 
+	Enjon::String waterPath				= Enjon::String("/Textures/water.png"); 
 	Enjon::String greenPath				= Enjon::String("/Textures/green.png"); 
 	Enjon::String redPath				= Enjon::String("/Textures/red.png"); 
 	Enjon::String bluePath				= Enjon::String("/Textures/blue.png"); 
@@ -179,6 +180,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( redPath );
 	mAssetManager->AddToDatabase( bluePath );
 	mAssetManager->AddToDatabase( teapotPath );
+	mAssetManager->AddToDatabase( waterPath );
 	mAssetManager->AddToDatabase( fontPath, false );
 
 	// Assign font

@@ -424,17 +424,38 @@ namespace Enjon
 			// Get shader graph nodes
 			ShaderGraphNode* a = const_cast<ShaderGraphNode*>( a_conn.mOwner );
 
+			Enjon::String time;
+
+			// Has time input
+			if ( mInputs.size( ) > 1 )
+			{
+				// Get connections
+				Connection b_conn = mInputs.at( 1 );
+
+				// Get shader graph nodes
+				ShaderGraphNode* b = const_cast< ShaderGraphNode* >( b_conn.mOwner );
+
+				// Evaluate final line of code
+				time = b->EvaluateAtPort( b_conn.mOutputPortID );
+			}
+			else
+			{
+				time = "uWorldTime";
+			}
+
 			// Evaluate final line of code
 			Enjon::String aEval = a->EvaluateAtPort( a_conn.mOutputPortID );
-			finalEvaluation += GetQualifiedID( ) + " = vec2( fs_in.texCoords.x + " + aEval + ".x * uWorldTime, " + " fs_in.texCoords.y + " + aEval + ".y * uWorldTime);"; 
+			finalEvaluation += GetQualifiedID( ) + " = vec2( fs_in.texCoords.x + " + aEval + ".x * " + time + ", " + " fs_in.texCoords.y + " + aEval + ".y * " + time + ");"; 
 		}
 
 		else
 		{
+			Enjon::String time = "uWorldTime";
+
 			// Evaluate final line of code
 			Enjon::String xSpeed = std::to_string( mSpeed.x );
 			Enjon::String ySpeed = std::to_string( mSpeed.y );
-			finalEvaluation += GetQualifiedID( ) + " = vec2( fs_in.texCoords.x + " + xSpeed + " * uWorldTime, " + " fs_in.texCoords.y + " + ySpeed + " * uWorldTime);"; 
+			finalEvaluation += GetQualifiedID( ) + " = vec2( fs_in.texCoords.x + " + xSpeed + " * " + time + ", " + " fs_in.texCoords.y + " + ySpeed + " * " + time + ");"; 
 		}
 		
 		// Return

@@ -137,7 +137,7 @@ namespace Enjon
 		f32 mMax = 1.0f;
 	};
 
-	enum MaskFlags : u32
+	enum MaskFlags
 	{
 		R, 
 		G, 
@@ -193,6 +193,43 @@ namespace Enjon
 
 		private:
 			bool HasMask( MaskFlags mask );
+	};
+
+	class ShaderAppendNode : public BinaryFunctionNode
+	{
+		public:
+			/*
+			* @brief Constructor
+			*/
+			ShaderAppendNode( const Enjon::String& id );
+
+			/*
+			* @brief Destructor
+			*/
+			~ShaderAppendNode( );
+
+			/*
+			* @brief
+			*/
+			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateToGLSL( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Enjon::String GetDeclaration( ) override;
+
+		protected:
+
 	};
 }
 

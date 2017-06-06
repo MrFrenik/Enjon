@@ -191,6 +191,7 @@ namespace Enjon
 
 			void FresnelShader( );
 			void OutlineShader( );
+			void WaterShader( );
 
 		private:
 			// Frame buffers
