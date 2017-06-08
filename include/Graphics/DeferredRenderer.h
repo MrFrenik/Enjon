@@ -192,6 +192,7 @@ namespace Enjon
 			void FresnelShader( );
 			void OutlineShader( );
 			void WaterShader( );
+			void STBTest( );
 
 		private:
 			// Frame buffers
@@ -235,6 +236,8 @@ namespace Enjon
 			f32 mBGColor[4] = {0.8f, 0.8f, 0.8f, 1.0f};
 
 			Vec4 uvs = Vec4( 0.f, 0.f, 1.f, 1.f ); 
+			
+			u32 mHDRTextureID = 0;
 	};
 }
 

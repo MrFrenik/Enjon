@@ -8,6 +8,9 @@
 #include <GLEW/glew.h>
 #include <vector>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <STB/stb_image.h>
+
 namespace Enjon
 {
 	TextureAssetLoader::TextureAssetLoader()
@@ -21,25 +24,11 @@ namespace Enjon
 	Texture* TextureAssetLoader::LoadAssetFromFile(const String& filePath, const String& name)
 	{ 
 		// Create new texture
-		Enjon::Texture* tex = new Enjon::Texture;
-		
-		std::vector<u8> in;
-		std::vector<u8> out;
+		Enjon::Texture* tex = new Enjon::Texture; 
 
-		u32l width, height;
-
-		// Read in file into character buffer
-		if (Enjon::IOManager::ReadFileToBuffer(filePath, in) == false)
-		{
-			// Error check
-		}
-
-		// TODO(): Switch to using stbimage to load images
-		s32 errorCode = DecodePNG(out, width, height, &(in[0]), in.size());
-		if (errorCode != 0)
-		{
-			// Error check
-		}
+		s32 width, height, nComps;
+		stbi_set_flip_vertically_on_load( false );
+		u8* data = stbi_load( filePath.c_str( ), &width, &height, &nComps, STBI_rgb_alpha );
 
 		// Generate texture
 		// TODO(): Make this API generalized to work with DirectX as well as OpenGL
@@ -56,7 +45,7 @@ namespace Enjon
 			0,
 			GL_RGBA,
 			GL_UNSIGNED_BYTE,
-			&(out[0])
+			data
 		);
 		
 		s32 MAG_PARAM = GL_LINEAR;
@@ -82,6 +71,6 @@ namespace Enjon
 		// Add to assets with qualified name
 		AddToAssets(name, tex);
 
-		return tex;
+		return tex; 
 	} 
 }

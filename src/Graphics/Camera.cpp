@@ -55,7 +55,7 @@ namespace Enjon {
 	void Camera::OffsetOrientation(const f32& Yaw, const f32& Pitch)
 	{
 		Quaternion X = Quaternion::AngleAxis(Yaw, 	Vec3(0, 1, 0)); 	// Absolute Up
-		Quaternion Y = Quaternion::AngleAxis(Pitch, Right());				// Relative Right
+		Quaternion Y = Quaternion::AngleAxis(Pitch, Right());			// Relative Right
 
 		Transform.Rotation = X * Y * Transform.Rotation;
 	}

@@ -354,13 +354,13 @@ namespace Enjon
 		{
 			glUniform1f(Search->second, val);
 		}
-		else
-		{
-			GLuint Location = GetUniformLocation(name);
-			mUniformMap[name] = Location;
-			glUniform1f(Location, val);
-			// EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
-		}
+		//else
+		//{
+		//	GLuint Location = GetUniformLocation(name);
+		//	mUniformMap[name] = Location;
+		//	glUniform1f(Location, val);
+		//	// EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		//}
 	}
 
 	void Shader::SetUniform(const std::string& name, const Vec2& vector)
@@ -427,13 +427,13 @@ namespace Enjon
 		{
 			glUniform1f(Search->second, val);
 		}
-		else
-		{
-			GLuint Location = GetUniformLocation(name);
-			mUniformMap[name] = Location;
-			glUniform1f(Location, val);
-			// EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
-		}
+		//else
+		//{
+		//	GLuint Location = GetUniformLocation(name);
+		//	mUniformMap[name] = Location;
+		//	glUniform1f(Location, val);
+		//	// EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+		//}
 	} 
 
 	void Shader::BindTexture(const std::string& name, const u32& TextureID, const u32 Index)

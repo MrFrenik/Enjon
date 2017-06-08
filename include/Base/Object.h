@@ -17,7 +17,6 @@
 
 #define ENJON_PROPERTY(...)
 #define ENJON_FUNCTION(...)
-	
 
 namespace Enjon
 {

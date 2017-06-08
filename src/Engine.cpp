@@ -120,9 +120,9 @@ namespace Enjon
 		mSubsystemCatalog = new SubsystemCatalog();
 
 		// Register subsystems with catalog
+		mAssetManager	= mSubsystemCatalog->Register<Enjon::AssetManager>();
 		mGraphics		= mSubsystemCatalog->Register<Enjon::DeferredRenderer>(); 
 		mInput			= mSubsystemCatalog->Register<Enjon::Input>(); 
-		mAssetManager	= mSubsystemCatalog->Register<Enjon::AssetManager>();
 
 		// Initialize imgui manager
 		Enjon::ImGuiManager::Init( mGraphics->GetWindow()->GetSDLWindow() );

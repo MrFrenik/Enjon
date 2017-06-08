@@ -46,6 +46,7 @@ class Game : public Enjon::Application
 		Enjon::EntityHandle mGreen;
 		Enjon::EntityHandle mRed;
 		Enjon::EntityHandle mBlue;
+		Enjon::EntityHandle mRock;
 
 		Enjon::DirectionalLight* mSun	= nullptr;
 		Enjon::QuadBatch* mBatch 		= nullptr;
@@ -57,6 +58,7 @@ class Game : public Enjon::Application
 		Enjon::Material* mBlueMat 	= nullptr;
 		Enjon::Material* mFloorMat	= nullptr;
 		Enjon::Material* mFontMat	= nullptr;
+		Enjon::Material* mRockMat	= nullptr;
 
 		Enjon::AssetHandle< Enjon::Mesh > mSphereMesh;
 		Enjon::AssetHandle< Enjon::Mesh > mGunMesh;

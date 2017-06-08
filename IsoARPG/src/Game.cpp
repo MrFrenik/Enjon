@@ -31,6 +31,8 @@
 
 #include <iostream>
 
+#include <STB/stb_image.h>
+
 #include <Bullet/btBulletDynamicsCommon.h>
 
 class OtherComponent : public Enjon::Component
@@ -122,7 +124,8 @@ Enjon::Result Game::Initialize()
 	Enjon::String monkeyMeshPath		= Enjon::String("/Models/monkey.obj");
 	Enjon::String sphereMeshPath		= Enjon::String("/Models/unit_sphere.obj");
 	Enjon::String cubeMeshPath			= Enjon::String("/Models/unit_cube.obj");
-	Enjon::String shaderballPath			= Enjon::String("/Models/shaderball.obj");
+	Enjon::String shaderballPath		= Enjon::String("/Models/shaderball.obj");
+	Enjon::String unrealShaderBallPath	= Enjon::String("/Models/unreal_shaderball.obj");
 	Enjon::String catMeshPath			= Enjon::String("/Models/cat.obj");
 	Enjon::String dudeMeshPath			= Enjon::String("/Models/dude.obj");
 	Enjon::String shaderBallMeshPath	= Enjon::String("/Models/shaderball.obj");
@@ -141,10 +144,16 @@ Enjon::Result Game::Initialize()
 	Enjon::String woodNormalPath		= Enjon::String("/Materials/WoodFrame/Normal.png"); 
 	Enjon::String woodRoughnessPath		= Enjon::String("/Materials/WoodFrame/Roughness.png"); 
 	Enjon::String woodMetallicPath		= Enjon::String("/Materials/WoodFrame/Metallic.png"); 
+	Enjon::String wornRedAlbedoPath		= Enjon::String("/Materials/WornRedRock/Albedo.png"); 
+	Enjon::String wornRedNormalPath		= Enjon::String("/Materials/WornRedRock/Normal.png"); 
+	Enjon::String wornRedRoughnessPath	= Enjon::String("/Materials/WornRedRock/Roughness.png"); 
+	Enjon::String wornRedMetallicPath	= Enjon::String("/Materials/WornRedRock/Metallic.png"); 
 	Enjon::String waterPath				= Enjon::String("/Textures/water.png"); 
 	Enjon::String greenPath				= Enjon::String("/Textures/green.png"); 
 	Enjon::String redPath				= Enjon::String("/Textures/red.png"); 
 	Enjon::String bluePath				= Enjon::String("/Textures/blue.png"); 
+	Enjon::String blackPath				= Enjon::String("/Textures/black.png"); 
+	Enjon::String whitePath				= Enjon::String("/Textures/white.png"); 
 	Enjon::String teapotPath			= Enjon::String( "/Models/teapot.obj" );
 
 	// Try loading font
@@ -170,15 +179,22 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( woodNormalPath );
 	mAssetManager->AddToDatabase( woodMetallicPath );
 	mAssetManager->AddToDatabase( woodRoughnessPath );
+	mAssetManager->AddToDatabase( wornRedAlbedoPath );
+	mAssetManager->AddToDatabase( wornRedRoughnessPath );
+	mAssetManager->AddToDatabase( wornRedMetallicPath );
+	mAssetManager->AddToDatabase( wornRedNormalPath );
 	mAssetManager->AddToDatabase( cerebusMeshPath );
 	mAssetManager->AddToDatabase( sphereMeshPath );
 	mAssetManager->AddToDatabase( cubeMeshPath );
 	mAssetManager->AddToDatabase( bunnyMeshPath );
 	mAssetManager->AddToDatabase( buddhaMeshPath );
 	mAssetManager->AddToDatabase( shaderBallMeshPath );
+	mAssetManager->AddToDatabase( unrealShaderBallPath );
 	mAssetManager->AddToDatabase( greenPath );
 	mAssetManager->AddToDatabase( redPath );
 	mAssetManager->AddToDatabase( bluePath );
+	mAssetManager->AddToDatabase( blackPath );
+	mAssetManager->AddToDatabase( whitePath );
 	mAssetManager->AddToDatabase( teapotPath );
 	mAssetManager->AddToDatabase( waterPath );
 	mAssetManager->AddToDatabase( fontPath, false );
@@ -219,6 +235,8 @@ Enjon::Result Game::Initialize()
 	mRed = mEntities->Allocate( );
 	mBlue = mEntities->Allocate( );
 	mGun = mEntities->Allocate( );
+	mRock = mEntities->Allocate( );
+	auto rgc = mRock.Get( )->Attach< Enjon::GraphicsComponent >( );
 	auto gc = mGun.Get()->Attach<Enjon::GraphicsComponent>(); 
 	auto pc = mGun.Get()->Attach<Enjon::PointLightComponent>(); 
 	auto oc = mGun.Get()->Attach<OtherComponent>(); 
@@ -229,9 +247,18 @@ Enjon::Result Game::Initialize()
 	mBlue.Get()->Attach< Enjon::GraphicsComponent >( );
 
 	pc->GetLight( )->SetPosition( Enjon::Vec3( 10.0f, 2.0f, 4.0f ) );
-	pc->GetLight( )->SetIntensity( 200.0f );
+	pc->GetLight( )->SetIntensity( 100.0f );
 	pc->GetLight( )->SetAttenuationRate( 0.1f );
-	pc->GetLight( )->SetRadius( 200.0f );
+	pc->GetLight( )->SetRadius( 100.0f );
+	pc->GetLight( )->SetColor( Enjon::RGBA16_Orange( ) );
+	
+	mRockMat 	= new Enjon::Material; 
+	mRockMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.wornredrock.albedo"));
+	mRockMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.wornredrock.normal"));
+	mRockMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.wornredrock.metallic"));
+	mRockMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.wornredrock.roughness"));
+	mRockMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
+	mRockMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.white"));
 
 	mGunMat 	= new Enjon::Material; 
 	mGunMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.albedo"));
@@ -248,7 +275,7 @@ Enjon::Result Game::Initialize()
 
 	mSun = new Enjon::DirectionalLight();
 	mSun->SetIntensity(10.0f);
-	mSun->SetColor(Enjon::RGBA16_Orange());
+	mSun->SetColor(Enjon::RGBA16_White());
 
 	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA16_SkyBlue(), 10.0f); 
 
@@ -309,6 +336,10 @@ Enjon::Result Game::Initialize()
 	mGreen.Get()->AddChild( mRed );
 	mGreen.Get()->AddChild( mBlue ); 
 
+	rgc->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.unreal_shaderball" ) );
+	rgc->SetMaterial( mRockMat );
+	mRock.Get( )->SetPosition( Enjon::Vec3( 5.0f, 5.0f, 20.0f ) );
+
 	mBatch = new Enjon::QuadBatch();
 	mBatch->Init();
 	mBatch->Begin();
@@ -340,10 +371,11 @@ Enjon::Result Game::Initialize()
 		scene->AddDirectionalLight(mSun);
 		scene->AddDirectionalLight(mSun2);
 		scene->AddRenderable(gc->GetRenderable());
-		scene->AddPointLight( pc->GetLight( ) );
+		//scene->AddPointLight( pc->GetLight( ) );
 		scene->AddRenderable( mGreen.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 		scene->AddRenderable( mRed.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 		scene->AddRenderable( mBlue.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
+		scene->AddRenderable( mRock.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
 		scene->AddQuadBatch(mBatch);
 		scene->AddQuadBatch(mTextBatch);
 		scene->SetSun(mSun);
@@ -544,9 +576,7 @@ Enjon::Result Game::Initialize()
 	for ( auto& c : mGun.Get( )->GetComponents( ) )
 	{
 		fmt::print( "{} is instance of graphics component: {}\n", c->GetTypeName( ), c->InstanceOf< Enjon::GraphicsComponent >( ) );
-	}
-
-	
+	} 
 	
 	return Enjon::Result::SUCCESS; 
 }
