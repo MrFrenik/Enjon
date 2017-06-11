@@ -1,5 +1,6 @@
 #include "Entity/EntityManager.h"
 #include "Entity/Component.h"
+#include "Engine.h"
 
 #include <array>
 #include <vector>
@@ -20,6 +21,14 @@ namespace Enjon
 	}
  
 	//================================================================================================
+		
+	EntityHandle::EntityHandle( const Entity* entity )
+		: mEntity( entity )
+	{
+		mID = entity->mID;
+	}
+ 
+	//================================================================================================
 
 	EntityHandle::~EntityHandle( )
 	{ 
@@ -35,8 +44,8 @@ namespace Enjon
 	//================================================================================================
 
 	Enjon::Entity* EntityHandle::Get( ) const
-	{
-		return mEntity;
+	{ 
+		return const_cast< Entity* > ( mEntity );
 	}
 		
 	//================================================================================================
@@ -74,6 +83,14 @@ namespace Enjon
 	Entity::~Entity()
 	{
 		mManager->Destroy( GetHandle( ) );		
+	}
+
+	//---------------------------------------------------------------
+			
+	EntityHandle Entity::GetHandle( )
+	{
+		EntityHandle handle( this );
+		return handle;
 	}
 
 	//---------------------------------------------------------------
@@ -139,7 +156,9 @@ namespace Enjon
 		// Trans	= 1/ParentScale * [Conjugate(ParentRot) * (Position - ParentPosition)];
 		if ( HasParent( ) )
 		{ 
-			Transform parentTransform = mParent->GetWorldTransform( );
+			Enjon::Entity* parent = mParent.Get( );
+
+			Transform parentTransform = parent->GetWorldTransform( );
 			Enjon::Quaternion parentInverse = parentTransform.Rotation.Inverse( ); 
 
 			Vec3 relativeScale		=  mWorldTransform.Scale / parentTransform.Scale;
@@ -160,7 +179,8 @@ namespace Enjon
 		} 
 		
 		// Get parent transform recursively
-		Transform parent = mParent->GetWorldTransform( ); 
+		Enjon::Entity* p = mParent.Get( );
+		Transform parent = p->GetWorldTransform( ); 
 
 		Enjon::Vec3 worldPos = parent.Position + ( parent.Rotation.Inverse() * ( parent.Scale * mLocalTransform.Position ) );
 		Enjon::Vec3 worldScale = parent.Scale * mLocalTransform.Scale;
@@ -303,13 +323,13 @@ namespace Enjon
 	void Entity::RemoveParent( )
 	{ 
 		// No need to remove if nullptr
-		if ( mParent == nullptr )
+		if ( mParent.Get( ) == nullptr )
 		{
 			return;
 		}
 
 		// Remove child from parent
-		mParent->DetachChild( GetHandle( ) ); 
+		mParent.Get( )->DetachChild( GetHandle( ) ); 
 
 		// Set parent to nullptr
 		mParent = nullptr; 
@@ -324,7 +344,7 @@ namespace Enjon
 	//---------------------------------------------------------------
 	b8 Entity::HasParent()
 	{
-		return (mParent != nullptr);
+		return (mParent.Get( ) != nullptr);
 	}
 
 	//---------------------------------------------------------------
@@ -356,7 +376,7 @@ namespace Enjon
 		mWorldTransform = mLocalTransform;
 		if ( HasParent( ) )
 		{
-			mWorldTransform *= mParent->mWorldTransform;
+			mWorldTransform *= mParent.Get( )->mWorldTransform;
 		}
 
 		// Iterate through children and propagate down

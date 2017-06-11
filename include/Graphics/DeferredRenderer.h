@@ -237,7 +237,11 @@ namespace Enjon
 
 			Vec4 uvs = Vec4( 0.f, 0.f, 1.f, 1.f ); 
 			
+			RenderTarget* cubeMapTarget = nullptr;
 			u32 mHDRTextureID = 0;
+			u32 mEnvCubemapID = 0; 
+			u32 mCaptureFBO = 0;
+			u32 mCaptureRBO = 0;
 	};
 }
 

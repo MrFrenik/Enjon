@@ -34,7 +34,7 @@ include_directories(${ENJON_DIR}/include
 
 # Add libraries to be linked against
 set(
-	PROJECT_LINK_LIBRARIES
+	PROJECT_RELEASE_LIBRARIES
 	Opengl32.lib 
 	SDL2.lib 
 	SDL2main.lib 
@@ -48,10 +48,30 @@ set(
 	BulletDynamics.lib 
 	BulletCollision.lib
 	fmt.lib
+	CrossGuid.lib
+)
+
+set(
+	PROJECT_DEBUG_LIBRARIES
+	Opengl32.lib 
+	SDL2_d.lib 
+	SDL2main_d.lib 
+	glew32_d.lib 
+	glew32s_d.lib 
+	freetype_d.lib 
+	Bullet3Collision_d.lib 
+	Bullet3Dynamics_d.lib
+	Bullet3Common_d.lib 
+	LinearMath_d.lib 
+	BulletDynamics_d.lib 
+	BulletCollision_d.lib
+	fmt_d.lib
+	CrossGuid_d.lib
 )
 
 # Add lib directories
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Release)
+link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Debug)
 
 set(ENJON_SRC "${ENJON_DIR}/src")
 set(ENJON_INC "${ENJON_DIR}/include")
@@ -117,6 +137,11 @@ file(GLOB_RECURSE SRC_ASSET
 	"${ENJON_SRC}/Asset/*.cpp"
 	"${ENJON_INC}/Asset/*.inl")
 
+file(GLOB_RECURSE SRC_SERIALIZE
+	"${ENJON_INC}/Serialize/*.h"
+	"${ENJON_SRC}/Serialize/*.cpp"
+	"${ENJON_INC}/Serialize/*.inl")
+
 file(GLOB_RECURSE GAME_FILES
 	"${ENJON_DIR}/IsoARPG/include/Game.h"
 	"${ENJON_DIR}/IsoARPG/src/Game.cpp"
@@ -156,12 +181,16 @@ set(
 	${SRC_MATH} 
 	${SRC_ASSET} 
 	${SRC_SHADER_GRAPH}
+	${SRC_SERIALIZE}
 	${GAME_FILES}
 	${GENERAL_SOURCES} 
 	)
 
+SET( LINK_LIBRARY debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES} )
+
 add_executable(Enjon ${ALL_SRC})
-target_link_libraries(Enjon ${PROJECT_LINK_LIBRARIES})
+#target_link_libraries(Enjon debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES})
+target_link_libraries(Enjon ${PROJECT_DEBUG_LIBRARIES})
 
 source_group("Base"			FILES ${SRC_BASE})
 source_group("Entity"		FILES ${SRC_ENTITY})
@@ -174,8 +203,9 @@ source_group("UI"			FILES ${SRC_UI})
 source_group("System"		FILES ${SRC_SYSTEM})
 source_group("Utils"		FILES ${SRC_UTILS})
 source_group("Asset"		FILES ${SRC_ASSET})
-source_group("Game"			FILES ${GAME_FILES}) 
 source_group("ShaderGraph"	FILES ${SRC_SHADER_GRAPH}) 
+source_group("Serialize"	FILES ${SRC_SERIALIZE}) 
+source_group("Game"			FILES ${GAME_FILES}) 
 
 # Write to .user file for command arguments
 if (MSVC)

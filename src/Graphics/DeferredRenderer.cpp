@@ -171,16 +171,14 @@ namespace Enjon
 
 		// TODO(): I don't like random raw gl calls just lying around...
 		glEnable( GL_DEPTH_TEST );
-		glEnable( GL_CULL_FACE );
-		glCullFace( GL_BACK );
+		//glEnable( GL_CULL_FACE );
+		//glCullFace( GL_BACK );
 		glEnable( GL_DEPTH_CLAMP );
 
 		FresnelShader( );
 		WaterShader( );
 
 		mDefaultShader.Compile( );
-
-		STBTest( );
 
 		return Result::SUCCESS;
 	}
@@ -206,6 +204,66 @@ namespace Enjon
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
 			stbi_image_free( data );
+
+			// Generate cubemap FBO, RBO
+			glGenFramebuffers( 1, &mCaptureFBO );
+			glGenFramebuffers( 1, &mCaptureRBO );
+
+			glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO );
+			glBindRenderbuffer( GL_RENDERBUFFER, mCaptureRBO );
+			glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512 );
+			glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mCaptureRBO );
+
+			// Cube map
+			glGenTextures( 1, &mEnvCubemapID );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+			for ( u32 i = 0; i < 6; ++i )
+			{
+				glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr );
+			}
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+			cubeMapTarget = new RenderTarget( 512, 512 );
+ 
+			// Capture onto cubemap faces
+			Mat4 captureProj = Mat4::Perspective( Enjon::ToRadians( 90.0f ), 1.0f, 0.1f, 10.0f );
+			Mat4 captureViews[ ] =  
+			{
+				Mat4::LookAt( Vec3(0.0f), Vec3( 1.0f, 0.0f, 0.0f ), Vec3( 0.0f, -1.0f, 0.0f ) ),
+				Mat4::LookAt( Vec3(0.0f), Vec3( -1.0f, 0.0f, 0.0f ), Vec3( 0.0f, -1.0f, 0.0f ) ),
+				Mat4::LookAt( Vec3(0.0f), Vec3( 0.0f, 1.0f, 0.0f ), Vec3( 0.0f, 0.0f, 1.0f ) ),
+				Mat4::LookAt( Vec3(0.0f), Vec3( 0.0f, -1.0f, 0.0f ), Vec3( 0.0f, 0.0f, -1.0f ) ),
+				Mat4::LookAt( Vec3(0.0f), Vec3( 0.0f, 0.0f, 1.0f ), Vec3( 0.0f, -1.0f, 0.0f ) ),
+				Mat4::LookAt( Vec3(0.0f), Vec3( 0.0f, 0.0f, -1.0f ), Vec3( 0.0f, -1.0f, 0.0f ) )
+			};
+
+			GLSLProgram* equiShader = ShaderManager::Get( "EquiToCube" );
+			equiShader->Use( );
+			{
+				equiShader->BindTexture( "equiMap", mHDRTextureID, 0 );
+				equiShader->SetUniform( "projection", captureProj );
+				glViewport( 0, 0, 512, 512 );
+				glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO ); 
+				for ( u32 i = 0; i < 6; ++i )
+				{
+					equiShader->SetUniform( "view", captureViews[ i ] );
+					glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mEnvCubemapID, 0 );
+					glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+					Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+					Enjon::AssetHandle< Enjon::Mesh > mesh = am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" );
+					mesh.Get( )->Bind( );
+					mesh.Get( )->Submit( );
+					mesh.Get( )->Unbind( );
+				}
+				glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+			}
+			equiShader->Unuse( );
+
 		}
 		else
 		{
@@ -230,6 +288,8 @@ namespace Enjon
 				mRenderable.SetPosition( Vec3( 0, 10, 0 ) );
 			}
 			set = true;
+
+			STBTest( );
 		}
 
 		// Get input
@@ -292,6 +352,8 @@ namespace Enjon
 
 	void DeferredRenderer::GBufferPass()
 	{
+		glDepthFunc( GL_LESS );
+
 		// Bind gbuffer
 		mGbuffer->Bind();
 
@@ -387,11 +449,11 @@ namespace Enjon
 					{
 						glDisable( GL_CULL_FACE );
 					}
-					else
-					{
-						glEnable( GL_CULL_FACE );
-						glCullFace( GL_BACK );
-					}
+					//else
+					//{
+					//	glEnable( GL_CULL_FACE );
+					//	glCullFace( GL_BACK );
+					//}
 
 					// Set material tetxures
 					shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
@@ -523,11 +585,15 @@ namespace Enjon
 		mWaterShader.Unuse( );
 
 		// Cubemap
-		Enjon::GLSLProgram* cubeMapShader = Enjon::ShaderManager::Get( "EquiToCube" );
-		cubeMapShader->Use( );
+		glDepthFunc( GL_LEQUAL );
+		Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
+		skyBoxShader->Use( );
 		{
-			cubeMapShader->SetUniform( "camera", mSceneCamera.GetViewProjectionMatrix( ) );
-			cubeMapShader->BindTexture( "equiMap", mHDRTextureID, 0 );
+			skyBoxShader->SetUniform( "view", mSceneCamera.GetView( ) );
+			skyBoxShader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
+			//skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
+			glActiveTexture( GL_TEXTURE0 );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
 
 			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 
@@ -543,7 +609,7 @@ namespace Enjon
 				mesh->Unbind( ); 
 			} 
 		}
-		cubeMapShader->Unuse( );
+		skyBoxShader->Unuse( );
 
 		// Unbind gbuffer
 		mGbuffer->Unbind();
@@ -1313,6 +1379,7 @@ namespace Enjon
 		ImGui::SliderFloat( "Flow V", &mFlowControl.y, 0.0f, 5.0f );
 
 		ImGui::Image( ImTextureID( mHDRTextureID ), ImVec2( 128, 128 ) );
+		ImGui::Image( ImTextureID( mEnvCubemapID ), ImVec2( 256, 256 ) );
 	}
 
 	//=======================================================================================================

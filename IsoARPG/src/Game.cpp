@@ -20,6 +20,8 @@
 #include <Utils/Signal.h>
 #include <Utils/Property.h>
 #include <Graphics/Font.h>
+#include <Serialize/UUID.h>
+#include <Serialize/ByteBuffer.h>
 #include <Engine.h>
 
 #include <fmt/printf.h>
@@ -33,7 +35,8 @@
 
 #include <STB/stb_image.h>
 
-#include <Bullet/btBulletDynamicsCommon.h>
+#include <Bullet/btBulletDynamicsCommon.h> 
+
 
 class OtherComponent : public Enjon::Component
 {
@@ -577,6 +580,76 @@ Enjon::Result Game::Initialize()
 	{
 		fmt::print( "{} is instance of graphics component: {}\n", c->GetTypeName( ), c->InstanceOf< Enjon::GraphicsComponent >( ) );
 	} 
+
+	std::vector < Enjon::UUID > ids;
+
+	for ( u32 i = 0; i < 20; ++i )
+	{
+		Enjon::UUID uuid = Enjon::UUID::GenerateUUID( );
+		fmt::print( "{}\n", uuid.ToString( ) );
+	} 
+	
+	// Need to save and load buffer
+	/*
+	* buffer.WriteToFile( filePath ); 
+	* Enjon::ByteBuffer buffer.ReadFromFile( filePath );
+	*/
+
+	u32 a = 123;
+	s32 b = -512;
+	f32 c = 345.235f;
+	u64 d = 0;
+	s64 e = -1;
+	f64 f = 12123.2549;
+	s8 g = 0;
+	u8 h = 1; 
+	u16 i = 2567;
+	s16 j = 1205;
+	bool bl = false;
+
+	Enjon::ByteBuffer buffer;
+
+	buffer.Write( a );
+	buffer.Write( b );
+	buffer.Write( c );
+	buffer.Write( d );
+	buffer.Write( e );
+	buffer.Write( f );
+	buffer.Write( g );
+	buffer.Write( h );
+	buffer.Write( i );
+	buffer.Write( j );
+	buffer.Write( bl );
+
+
+	buffer.WriteToFile( rootPath + "/testFile" );
+	
+	Enjon::ByteBuffer bb;
+	bb.ReadFromFile( rootPath + "/testFile" );
+
+	a = bb.Read< u32 >( );
+	b = bb.Read< s32 >( );
+	c = bb.Read< f32 >( );
+	d = bb.Read< u64 >( );
+	e = bb.Read< s64 >( );
+	f = bb.Read< f64 >( );
+	g = bb.Read< s8 >( );
+	h = bb.Read< u8 >( );
+	i = bb.Read< u16 >( );
+	j = bb.Read< s16 >( );
+	bl = bb.Read< bool >( ); 
+
+	fmt::print( "{}\n", a );
+	fmt::print( "{}\n", b );
+	fmt::print( "{}\n", c );
+	fmt::print( "{}\n", d );
+	fmt::print( "{}\n", e );
+	fmt::print( "{}\n", f );
+	fmt::print( "{}\n", g );
+	fmt::print( "{}\n", h );
+	fmt::print( "{}\n", i );
+	fmt::print( "{}\n", j );
+	fmt::print( "{}\n", bl );
 	
 	return Enjon::Result::SUCCESS; 
 }

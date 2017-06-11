@@ -9,6 +9,7 @@
 #include "Base/Object.h"
 #include "System/Types.h"
 #include "Defines.h"
+#include "Subsystem.h"
 
 #include <array>
 #include <vector>
@@ -38,6 +39,11 @@ namespace Enjon
 		* @brief Constructor
 		*/
 		EntityHandle( );
+		
+		/*
+		* @brief Constructor
+		*/
+		EntityHandle( const Entity* entity );
 
 		/*
 		* @brief Destructor
@@ -60,8 +66,8 @@ namespace Enjon
 		Enjon::Entity* Get( ) const;
 
 	private:
-		Enjon::Entity* mEntity = nullptr;
-		u32 mID;
+		const Enjon::Entity* mEntity = nullptr;
+		u32 mID = MAX_ENTITIES;
 	};
 
 	class Entity : public Enjon::Object
@@ -135,7 +141,7 @@ namespace Enjon
 			Quaternion GetWorldRotation();
 
 			/// @brief Gets parent of this entity, returns nullptr if doesn't exist
-			Entity* GetParent() { return mParent; }
+			EntityHandle GetParent() { return mParent; }
 
 			/// @brief Registers a child with this entity
 			void AddChild(const EntityHandle& child);
@@ -150,7 +156,7 @@ namespace Enjon
 			void RemoveParent( );
 			
 			/// @brief Removes parent from entity, if one exists
-			EntityHandle GetHandle( ) const { return mHandle; }
+			EntityHandle GetHandle( );
 
 			/// @brief Returns whether or not has parent
 			b8 Entity::HasParent();
@@ -192,9 +198,9 @@ namespace Enjon
 			void PropagateTransform(f32 dt); 
 
 		private:
-			u32 mID;	
+			u32 mID = MAX_ENTITIES;	
 			b32 mWorldTransformDirty; 					// NOTE(): Necessary struct padding for alignment. Not too happy about it.
-			Entity* mParent;
+			EntityHandle mParent;
 			Transform mLocalTransform;
 			Transform mWorldTransform;
 			Enjon::ComponentBitset mComponentMask;

@@ -45,6 +45,8 @@ namespace Enjon {
 
 	using int16 = signed short;
 	using uint16 = unsigned short;
+	using u16 = uint16;
+	using s16 = int16;
 
 	using int32 = signed int;
 	using uint32 = unsigned int; 
@@ -200,8 +202,12 @@ typedef Enjon::f64 f64;
 typedef Enjon::u64 u64;
 typedef Enjon::s64 s64;
 typedef Enjon::b32 b32;
+typedef Enjon::u16 u16;
+typedef Enjon::s16 s16;
 typedef Enjon::b8  b8;
-
+typedef Enjon::u8  u8;
+typedef Enjon::s8  s8;
+typedef Enjon::b1  b1; 
 
 
 #endif
