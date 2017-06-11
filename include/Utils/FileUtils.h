@@ -10,8 +10,8 @@
 #include "Defines.h"
 #include "System/Types.h"
 
-namespace Enjon { namespace Utils { 
-
+namespace Enjon { namespace Utils 
+{ 
 	inline std::string read_file_sstream(const char* filePath)
 	{
 		// Get and open input file

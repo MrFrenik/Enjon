@@ -12,6 +12,15 @@ namespace Enjon
 {
 	class TextureAssetLoader;
 
+	enum class TextureFileExtension : u32
+	{
+		PNG,
+		TGA,
+		JPEG,
+		BMP,
+		UNKNOWN
+	};
+
 	class Texture : public Asset
 	{
 		friend TextureAssetLoader;
@@ -50,10 +59,23 @@ namespace Enjon
 			*/
 			u32 GetTextureId() const;
 
+		protected: 
+			/*
+			* @brief
+			*/
+			static TextureFileExtension GetFileExtensionType( const Enjon::String& fileExtension );
+
+		protected:
+			/*
+			* @brief
+			*/
+			virtual Enjon::Result CacheFile( Enjon::ByteBuffer& buffer ) override; 
+
 		private:
 			u32 mId;
 			u32 mWidth;
 			u32 mHeight;
+			TextureFileExtension mFileExtension;
 	}; 
 }
 

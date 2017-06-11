@@ -242,6 +242,8 @@ namespace Enjon
 			u32 mEnvCubemapID = 0; 
 			u32 mCaptureFBO = 0;
 			u32 mCaptureRBO = 0;
+
+			Enjon::Mesh* mMesh = nullptr;
 	};
 }
 

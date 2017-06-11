@@ -208,6 +208,7 @@ typedef Enjon::b8  b8;
 typedef Enjon::u8  u8;
 typedef Enjon::s8  s8;
 typedef Enjon::b1  b1; 
+typedef Enjon::usize usize;
 
 
 #endif

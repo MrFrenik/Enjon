@@ -25,9 +25,13 @@ namespace Enjon
 			~TextureAssetLoader(); 
 
 		protected:
+			/**
+			* @brief
+			*/
+			Result CacheTextureData( const u8* data, u32 length, Texture* texture );
 
 		private: 
-			Texture* LoadAssetFromFile(const String& filePath, const String& name);
+			Texture* LoadAssetFromFile( const String& filePath, const String& name );
 	}; 
 }
 

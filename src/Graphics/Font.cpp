@@ -3,6 +3,7 @@
 #include "Graphics/Font.h"
 #include "System/Types.h"
 #include "Utils/Errors.h" 
+#include "Asset/FontAssetLoader.h"
 
 #include <stdexcept>
 #include <stdlib.h>

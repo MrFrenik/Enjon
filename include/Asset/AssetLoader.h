@@ -35,12 +35,17 @@ namespace Enjon
 			/**
 			* @brief 
 			*/ 
-			static String GetQualifiedName(const String& filePath);
+			static String GetQualifiedName( const String& filePath );
 
 			/**
 			* @brief
 			*/
-			b8 Exists(const String& name);
+			bool Exists( const String& name );
+			
+			/**
+			* @brief
+			*/
+			bool Exists( UUID uuid );
 
 		protected:
 
@@ -48,36 +53,49 @@ namespace Enjon
 			* @brief Templated argument to get asset of specific type 
 			*/
 			template <typename T>
-			AssetHandle<T> GetAsset(const String& name)
+			AssetHandle<T> GetAsset( const String& name )
 			{ 
 				AssetHandle<T> handle;
 
 				// Search through assets for name
-				auto query = mAssets.find(name);
-				if (query != mAssets.end()) 
+				auto query = mAssetsByName.find( name );
+				if ( query != mAssetsByName.end() ) 
 				{
-					handle = AssetHandle<T>(query->second); 
+					handle = AssetHandle<T>( query->second ); 
 				}
 
 				return handle; 
 			} 
 			
-			Asset* AddToAssets(const String& name, Asset* asset)
+			/**
+			* @brief
+			*/
+			Asset* AddToAssets( const String& name, Asset* asset )
 			{
-				mAssets[name] = asset;
-				return mAssets[name];
+				mAssetsByName[name] = asset;
+				mAssetsByUUID[ asset->mUUID.ToString( ) ] = asset;
+
+				return mAssetsByName[name];
+			}
+
+			/**
+			* @brief
+			*/
+			virtual Result CacheFile( Enjon::ByteBuffer& buffer )
+			{
+				return Enjon::Result::SUCCESS;
 			}
 
 	protected:
 			
-			std::unordered_map<String, Asset*> mAssets;
+			std::unordered_map<String, Asset*> mAssetsByName;
+			std::unordered_map<String, Asset*> mAssetsByUUID;
 
 		private:
 			/**
 			* @brief 
 			*/
-			virtual Asset* LoadAssetFromFile(const String& filePath, const String& name) = 0; 
-
+			virtual Asset* LoadAssetFromFile( const String& filePath, const String& name ) = 0; 
 	};
 } 
 

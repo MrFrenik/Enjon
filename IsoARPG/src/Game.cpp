@@ -21,10 +21,11 @@
 #include <Utils/Property.h>
 #include <Graphics/Font.h>
 #include <Serialize/UUID.h>
-#include <Serialize/ByteBuffer.h>
+#include <Serialize/ByteBuffer.h> 
 #include <Engine.h>
 
 #include <fmt/printf.h>
+#include <lz4/lz4.h>
 
 #include <Defines.h>
 #include <Engine.h>
@@ -32,8 +33,12 @@
 #include <stdio.h>
 
 #include <iostream>
+#include <string.h>
+#include <filesystem>
 
 #include <STB/stb_image.h>
+
+#include <STB/stb_image_write.h> 
 
 #include <Bullet/btBulletDynamicsCommon.h> 
 
@@ -91,27 +96,40 @@ Enjon::Signal<f32> testSignal;
 Enjon::Property<f32> testProperty;
 
 //-------------------------------------------------------------
+
 Game::Game()
 {
+	mApplicationName = "IsoARPG";
 }
 
 //-------------------------------------------------------------
+
 Game::~Game()
 {
 }
 
 //-------------------------------------------------------------
+
 Enjon::Result Game::Initialize()
 { 
 	// Set up assets path
-	// This needs to be done in a project settings config file or in the cmake, not in source
+	// This needs to be done in a project settings config file or in the cmake, not in source 
 	mAssetsPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Assets"); 
+	Enjon::String cachePath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Cache/"); 
+
+	Enjon::String projectDirectory = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + "/IsoARPG/";
 	
 	// Create asset manager
 	mAssetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog()->Get<Enjon::AssetManager>(); 
 	// This also needs to be done through a config file or cmake
 	mAssetManager->SetAssetsPath( mAssetsPath );
-	mAssetManager->SetDatabaseName( "IsoARPG" ); 
+	mAssetManager->SetCachedAssetsPath( cachePath );
+	mAssetManager->SetDatabaseName( GetApplicationName( ) ); 
+
+	for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( projectDirectory ) )
+	{
+		std::cout << p << '\n';
+	}
 
 	// Get Subsystems from engine
 	Enjon::Engine* engine = Enjon::Engine::GetInstance();
@@ -482,7 +500,7 @@ Enjon::Result Game::Initialize()
 			ImGui::SliderFloat( "z##z", &z, 0, 1 );
 			ImGui::SliderFloat( "w##w", &w, 0, 1 ); 
 
-			ImGui::SliderFloat( "FontScale", &mFontSize, 0.05f, 5.0f );
+			ImGui::SliderFloat( "FontScale", &mFontSize, 0.05f, 5.0f ); 
 
 			//char buf[ 256 ];
 			//std::strncpy( buf, mWorldString.c_str( ), 256 );
@@ -588,68 +606,112 @@ Enjon::Result Game::Initialize()
 		Enjon::UUID uuid = Enjon::UUID::GenerateUUID( );
 		fmt::print( "{}\n", uuid.ToString( ) );
 	} 
-	
-	// Need to save and load buffer
+
 	/*
-	* buffer.WriteToFile( filePath ); 
-	* Enjon::ByteBuffer buffer.ReadFromFile( filePath );
+	Enjon::ByteBuffer writeBuffer;
+	u32 texID;
+	s32 width, height, nComps;
+	s32 widthtga, heighttga, nCompstga;
+	s32 len;
+	stbi_set_flip_vertically_on_load( false );
+	u8* data = stbi_load( ( rootPath + "/IsoARPG/Assets/" + "Materials/CopperRock/Albedo.png" ).c_str( ), &width, &height, &nComps, STBI_rgb_alpha ); 
+	u8* tgaData = stbi_load( ( rootPath + "/IsoARPG/Assets/Textures/cerebusAlbedo.tga" ).c_str( ), &widthtga, &heighttga, &nCompstga, STBI_rgb_alpha ); 
+
+	auto saveData = stbi_write_png_to_mem( data, 0, width, height, 4, &len );
+	stbi_write_tga( ( rootPath + "/testTGA" ).c_str( ), widthtga, heighttga, 4, tgaData );
+	Enjon::ByteBuffer readBuffer;
+	readBuffer.ReadFromFile( rootPath + "/testTGA" );
+	u32 size = readBuffer.GetSize( ); 
+	u8* loadBufferData = ( u8* )malloc( size );
+	s32 loadWidth, loadHeight, loadComps;
+	for ( usize i = 0; i < size; ++i )
+	{
+		loadBufferData[ i ] = readBuffer.Read< char >( );
+	}
+
+	u32 srcSize = size;
+	u32 maxSize = LZ4_compressBound( srcSize );
+	char* compressedData = (char*)malloc( maxSize );
+	s32 compressed_data_size = LZ4_compress_default( (char*)loadBufferData, compressedData, srcSize, maxSize );
+
+	// Write out
+	Enjon::ByteBuffer compressBuffer;
+	compressBuffer.Write( compressed_data_size );
+	for ( usize i = 0; i < compressed_data_size; ++i )
+	{
+		compressBuffer.Write( compressedData[ i ] );
+	}
+	compressBuffer.WriteToFile( rootPath + "/compressedTexture" ); 
+
+	writeBuffer.Write( width );
+	writeBuffer.Write( height );
+	writeBuffer.Write( 4 );
+	writeBuffer.Write( len );
+	for ( usize i = 0; i < len; ++i )
+	{
+		writeBuffer.Write( saveData[ i ] );
+	} 
+	stbi_image_free( data );
+	writeBuffer.WriteToFile( rootPath + "/testTexture" );
+
+	writeBuffer.ReadFromFile( rootPath + "/testTexture" );
+
+	width = writeBuffer.Read< s32 >( );
+	height = writeBuffer.Read< s32 >( ); 
+	nComps = writeBuffer.Read< s32 >( );
+	len = writeBuffer.Read< s32 >( );
+	unsigned char* loadData = ( unsigned char* )malloc( len );
+	for ( usize i = 0; i < len; ++i )
+	{
+		loadData[ i ] = writeBuffer.Read< char >( );
+	}
+
+	s32 comps;
+	unsigned char* loadedData = stbi_load_from_memory( loadData, len, &width, &height, &comps, 4 ); 
+	u8* tgaDataLoad = stbi_load_from_memory( loadBufferData, size, &loadWidth, &loadHeight, &loadComps, 4 );
+ 
+	// Generate texture
+	// TODO(): Make this API generalized to work with DirectX as well as OpenGL
+	glGenTextures( 1, &( texID ) );
+
+	glBindTexture( GL_TEXTURE_2D, texID );
+
+	glPixelStorei( GL_PACK_ALIGNMENT, 1 );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	glTexImage2D(
+		GL_TEXTURE_2D,
+		0,
+		GL_RGBA8,
+		loadWidth,
+		loadHeight,
+		0,
+		GL_RGBA,
+		GL_UNSIGNED_BYTE,
+		tgaDataLoad
+	);
+
+	// No longer need data, so free
+	stbi_image_free( loadedData );
+
+	s32 MAG_PARAM = GL_LINEAR;
+	s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
+	b8 genMips = true;
+
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MAG_PARAM );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIN_PARAM );
+
+	if ( genMips )
+	{
+		glGenerateMipmap( GL_TEXTURE_2D );
+	}
+
+	glBindTexture( GL_TEXTURE_2D, 0 ); 
+
+	mTex = new Enjon::Texture( width, height, texID );
 	*/
 
-	u32 a = 123;
-	s32 b = -512;
-	f32 c = 345.235f;
-	u64 d = 0;
-	s64 e = -1;
-	f64 f = 12123.2549;
-	s8 g = 0;
-	u8 h = 1; 
-	u16 i = 2567;
-	s16 j = 1205;
-	bool bl = false;
-
-	Enjon::ByteBuffer buffer;
-
-	buffer.Write( a );
-	buffer.Write( b );
-	buffer.Write( c );
-	buffer.Write( d );
-	buffer.Write( e );
-	buffer.Write( f );
-	buffer.Write( g );
-	buffer.Write( h );
-	buffer.Write( i );
-	buffer.Write( j );
-	buffer.Write( bl );
-
-
-	buffer.WriteToFile( rootPath + "/testFile" );
-	
-	Enjon::ByteBuffer bb;
-	bb.ReadFromFile( rootPath + "/testFile" );
-
-	a = bb.Read< u32 >( );
-	b = bb.Read< s32 >( );
-	c = bb.Read< f32 >( );
-	d = bb.Read< u64 >( );
-	e = bb.Read< s64 >( );
-	f = bb.Read< f64 >( );
-	g = bb.Read< s8 >( );
-	h = bb.Read< u8 >( );
-	i = bb.Read< u16 >( );
-	j = bb.Read< s16 >( );
-	bl = bb.Read< bool >( ); 
-
-	fmt::print( "{}\n", a );
-	fmt::print( "{}\n", b );
-	fmt::print( "{}\n", c );
-	fmt::print( "{}\n", d );
-	fmt::print( "{}\n", e );
-	fmt::print( "{}\n", f );
-	fmt::print( "{}\n", g );
-	fmt::print( "{}\n", h );
-	fmt::print( "{}\n", i );
-	fmt::print( "{}\n", j );
-	fmt::print( "{}\n", bl );
 	
 	return Enjon::Result::SUCCESS; 
 }
@@ -725,6 +787,9 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 			gfx->SetTransform( e->GetWorldTransform( ) );
 		}
 	}
+ 
+
+	
 
 	return Enjon::Result::PROCESS_RUNNING;
 }

@@ -26,6 +26,7 @@ namespace Enjon
 			
 		private:
 			String mRootPath; 
+			String mProjectPath;
 	}; 
 
 	class Engine
@@ -81,6 +82,12 @@ namespace Enjon
 			* @return Engine* - Pointer to engine instance.
 			*/
 			static Engine* GetInstance();
+			
+			/**
+			* @brief Returns pointer to application.
+			* @return Engine* - Pointer to engine instance.
+			*/
+			const Application* GetApplication( );
 
 		private:
 			

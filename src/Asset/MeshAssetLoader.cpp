@@ -156,6 +156,9 @@ namespace Enjon
 	    // Set draw count
 	    mesh->DrawCount = mesh->Verticies.size();
 
+		// Generate new UUID
+		mesh->mUUID = Enjon::UUID::GenerateUUID( ); 
+
 		// Add to assets
 		AddToAssets(name, mesh);
 

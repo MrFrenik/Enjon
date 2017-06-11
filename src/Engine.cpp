@@ -329,6 +329,12 @@ namespace Enjon
 			{
 				mRootPath = String( argv[i + 1] );
 			}
+			
+			// Set root path
+			if ( arg.compare( "--project-path" ) == 0 && (i + 1) < argc )
+			{
+				mProjectPath = String( argv[i + 1] );
+			}
 		} 
 
 		// Make sure that root path is set for engine

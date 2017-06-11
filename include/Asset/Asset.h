@@ -8,6 +8,8 @@
 #include "Defines.h"
 #include "System/Types.h"
 #include "Base/Object.h"
+#include "Serialize/UUID.h"
+#include "Serialize/ByteBuffer.h"
 
 #include <assert.h>
 #include <memory>
@@ -34,8 +36,20 @@ namespace Enjon
 			*@brief Virtual destructor
 			*/
 			~Asset() {} 
+			
+		protected:
+			/*
+			* @brief Caches file into cache directory relative to project directory 
+			*/
+			virtual Result CacheFile( Enjon::ByteBuffer& buffer )
+			{ 
+				return Result::SUCCESS;
+			}
 
 		protected: 
+			UUID mUUID;
+			Enjon::String mFilePath;
+			Enjon::String mName;
 
 		private:
 	};
@@ -44,12 +58,18 @@ namespace Enjon
 	class AssetHandle
 	{
 		public:
+			/*
+			* @brief Constructor
+			*/
 			AssetHandle() 
 			{
 				static_assert(std::is_base_of<Asset, T>::value, 
 					"AssetHandle:: T must inherit from Asset.");	
 			}
 
+			/*
+			* @brief Constructor
+			*/
 			AssetHandle(Asset* asset)
 			{
 				static_assert(std::is_base_of<Asset, T>::value, 
@@ -58,18 +78,35 @@ namespace Enjon
 				mAsset = asset;
 			}
 
-			T* Get() { return mAsset->Cast<T>(); }
+			~AssetHandle( )
+			{ 
+			}
 
-			b8 IsValid()
+			/*
+			* @brief
+			*/
+			T* Get() 
+			{ 
+				return mAsset->Cast<T>(); 
+			}
+
+			/*
+			* @brief 
+			*/
+			bool IsValid()
 			{
 				return (mAsset != nullptr);
 			}
 			
+			/*
+			* @brief 
+			*/
 			Result Set(Asset* asset)
 			{
 				// Set to new asset
 				mAsset = asset;
 
+				// Return success
 				return Result::SUCCESS;
 			}
 

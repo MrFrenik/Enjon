@@ -9,6 +9,7 @@ set (ENJON_BUILD_DIR "${ENJON_DIR}/Build")
 set (ENJON_RELEASE_DIR "${ENJON_BUILD_DIR}/Release")
 set (ENJON_RELDEBUGINFO_DIR "${ENJON_BUILD_DIR}/RelWithDebInfo")
 set (ENJON_DEBUG_DIR "${ENJON_BUILD_DIR}/Debug")
+set (PROJECT_DIR ${ENJON_DIR}/IsoARPG/)
 
 # Set build directory for solution
 set (EXECUTABLE_OUTPUT_PATH ${ENJON_BUILD_DIR})
@@ -49,6 +50,7 @@ set(
 	BulletCollision.lib
 	fmt.lib
 	CrossGuid.lib
+	liblz4.lib
 )
 
 set(
@@ -67,6 +69,7 @@ set(
 	BulletCollision_d.lib
 	fmt_d.lib
 	CrossGuid_d.lib
+	liblz4_d.lib
 )
 
 # Add lib directories
@@ -183,14 +186,16 @@ set(
 	${SRC_SHADER_GRAPH}
 	${SRC_SERIALIZE}
 	${GAME_FILES}
-	${GENERAL_SOURCES} 
+	${GENERAL_SOURCES}
 	)
+
 
 SET( LINK_LIBRARY debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES} )
 
 add_executable(Enjon ${ALL_SRC})
 #target_link_libraries(Enjon debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES})
-target_link_libraries(Enjon ${PROJECT_DEBUG_LIBRARIES})
+#target_link_libraries(Enjon ${PROJECT_DEBUG_LIBRARIES})
+target_link_libraries(Enjon ${PROJECT_RELEASE_LIBRARIES})
 
 source_group("Base"			FILES ${SRC_BASE})
 source_group("Entity"		FILES ${SRC_ENTITY})
@@ -213,7 +218,7 @@ if (MSVC)
 		"<?xml version=\"1.0\" encoding=\"utf-8\"?>
 		<Project ToolsVersion=\"14.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">
 		  <PropertyGroup>
-		    <LocalDebuggerCommandArguments>--enjon-path ${ENJON_DIR}</LocalDebuggerCommandArguments>
+		    <LocalDebuggerCommandArguments>--enjon-path ${ENJON_DIR} --project-path ${PROJECT_DIR}</LocalDebuggerCommandArguments>
 		     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
 		  </PropertyGroup>
 		</Project>" 

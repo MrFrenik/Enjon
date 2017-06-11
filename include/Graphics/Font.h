@@ -139,8 +139,10 @@ namespace Enjon
 			std::unordered_map< u8, FontGlyph > mGlyphs;
 	};
 
+	class FontAssetLoader;
 	class UIFont : public Asset
 	{
+		friend FontAssetLoader;
 		friend FontAtlas;
 
 		public:

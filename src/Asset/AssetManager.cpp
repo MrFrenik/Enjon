@@ -63,6 +63,16 @@ namespace Enjon
 		RegisterAssetLoader< Enjon::Texture, TextureAssetLoader >( );
 		RegisterAssetLoader< Enjon::Mesh, MeshAssetLoader >( );
 		RegisterAssetLoader< Enjon::UIFont, FontAssetLoader >( );
+
+		// Create file extension map
+		mFileExtensionMap[ "png" ]	= GetAssetTypeId< Enjon::Texture >( );
+		mFileExtensionMap[ "tga" ]	= GetAssetTypeId< Enjon::Texture >( );
+		mFileExtensionMap[ "jpeg" ] = GetAssetTypeId< Enjon::Texture >( );
+		mFileExtensionMap[ "bmp" ]	= GetAssetTypeId< Enjon::Texture >( );
+		mFileExtensionMap[ "fbx" ]	= GetAssetTypeId< Enjon::Mesh >( );
+		mFileExtensionMap[ "obj" ]	= GetAssetTypeId< Enjon::Mesh >( );
+		mFileExtensionMap[ "ttf" ]	= GetAssetTypeId< Enjon::UIFont >( );
+		mFileExtensionMap[ "otf" ]	= GetAssetTypeId< Enjon::UIFont >( );
 	}
 	
 	//============================================================================================ 
@@ -95,6 +105,20 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
+	void AssetManager::SetCachedAssetsPath( const String& filePath )
+	{
+		mCachedPath = filePath;
+	}
+	
+	//============================================================================================ 
+	
+	const Enjon::String& AssetManager::GetCachedAssetsPath( ) const
+	{
+		return mCachedPath;
+	}
+	
+	//============================================================================================ 
+			
 	void AssetManager::SetDatabaseName( const String& name )
 	{
 		mName = name;
@@ -110,50 +134,39 @@ namespace Enjon
 		// Get file extension of file
 		String fileExtension = Utils::SplitString( filePath, "." ).back( ); 
 
-		// Graphics texture asset
-		if (fileExtension.compare("png") == 0 )
-		{ 
-			idx = GetAssetTypeId< Enjon::Texture >( );
-		}
-
-		// Graphics mesh asset
-		else if (fileExtension.compare("obj") == 0)
+		// Search for file extension relation with loader
+		auto query = mFileExtensionMap.find( fileExtension );
+		if ( query != mFileExtensionMap.end( ) )
 		{
-			idx = GetAssetTypeId< Enjon::Mesh >( );
+			idx = mFileExtensionMap[ fileExtension ];
 		}
 
-		// Font asset
-		else if ( fileExtension.compare( "ttf" ) == 0 || fileExtension.compare( "otf" ) == 0 )
-		{
-			idx = GetAssetTypeId< Enjon::UIFont >( );
-		}
-
-		return idx;
+		return idx; 
 	}
 	
 	//============================================================================================ 
 			
-	Result AssetManager::AddToDatabase(const String& filePath, b8 isRelativePath)
+	Result AssetManager::AddToDatabase( const String& filePath, b8 isRelativePath )
 	{
 		// Have to do a switch based on extension of file
-		s32 idx = GetLoaderIdxByFileExtension(filePath); 
+		s32 idx = GetLoaderIdxByFileExtension( filePath );
 
 		// If out of bounds, return failure since file extension was unknown
-		if (idx < 0) 
+		if ( idx < 0 )
 		{
 			// TODO(): Log that extension was unknown
 			return Result::FAILURE;
 		}
-		
+
 		// Get qualified name of asset
-		String qualifiedName = AssetLoader::GetQualifiedName(filePath); 
+		String qualifiedName = AssetLoader::GetQualifiedName( filePath );
 
 		// Find loader by idx
-		auto query = mLoaders.find((u32)idx);
-		if (query != mLoaders.end())
+		auto query = mLoaders.find( ( u32 )idx );
+		if ( query != mLoaders.end( ) )
 		{
 			// Make sure it doesn't exist already before trying to load it
-			if (query->second->Exists(qualifiedName))
+			if ( query->second->Exists( qualifiedName ) )
 			{
 				return Result::FAILURE;
 			}
@@ -162,7 +175,7 @@ namespace Enjon
 				// Load asset and place into database
 				if ( isRelativePath )
 				{
-					auto res = query->second->LoadAssetFromFile(mAssetsPath + filePath, Utils::ToLower( mName ) + qualifiedName); 
+					auto res = query->second->LoadAssetFromFile( mAssetsPath + filePath, Utils::ToLower( mName ) + qualifiedName ); 
 				}
 				// If absolute path on disk
 				else

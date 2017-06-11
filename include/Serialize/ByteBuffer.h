@@ -36,16 +36,21 @@ namespace Enjon
 			void WriteToFile( const Enjon::String& filePath );
 
 			/*
-			* @brief Destructor
+			* @brief
 			*/
 			template <typename T>
 			T Read( ); 
 
 			/*
-			* @brief Destructor
+			* @brief
 			*/
 			template < typename T >
 			void Write( const T& val );
+
+			/*
+			* @brief
+			*/
+			const u32 GetSize( ) const;
 
 		private:
 			/*

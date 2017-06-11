@@ -74,6 +74,16 @@ namespace Enjon
 			/**
 			*@brief
 			*/
+			void SetCachedAssetsPath( const String& filePath );
+			
+			/**
+			*@brief
+			*/
+			const Enjon::String& GetCachedAssetsPath( ) const;
+			
+			/**
+			*@brief
+			*/
 			void SetDatabaseName( const String& name );
 
 			/**
@@ -150,7 +160,9 @@ namespace Enjon
 		private:
 
 			std::unordered_map<u32, AssetLoader*> mLoaders; 
+			std::unordered_map< Enjon::String, u32 > mFileExtensionMap;
 			String mAssetsPath;
+			String mCachedPath;
 			String mName; 
 	};
 

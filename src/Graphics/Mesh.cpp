@@ -1,4 +1,5 @@
 #include "Graphics/Mesh.h"
+#include "Asset/MeshAssetLoader.h"
 
 namespace Enjon {
 

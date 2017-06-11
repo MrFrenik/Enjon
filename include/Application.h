@@ -44,6 +44,18 @@ namespace Enjon
 			* @return Enjon::Result
 			*/
 			virtual Enjon::Result Shutdown() = 0; 
+			
+			/**
+			* @brief Returns name of application
+			* @return Enjon::String
+			*/
+			const Enjon::String& GetApplicationName( )
+			{
+				return mApplicationName;
+			}
+
+		protected:
+			Enjon::String mApplicationName = "";
 	};
 }
 

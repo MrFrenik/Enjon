@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <fstream>
-#include <sstream>
 
 #define BYTE_BUFFER_RW( type)\
 	template type ByteBuffer::Read< type >( );\
@@ -71,7 +70,8 @@ namespace Enjon
 		if ( mWritePosition + size >= mCapacity )
 		{
 			// Resize the buffer by twice the original capacity
-			Resize( mCapacity * 2 );
+			mCapacity *= 2;
+			Resize( mCapacity );
 		}
 
 		// Now write to the buffer
@@ -87,7 +87,7 @@ namespace Enjon
 	void ByteBuffer::ReadFromFile( const Enjon::String& filePath )
 	{ 
 		std::ifstream infile;
-		infile.open( filePath.c_str( ), std::ios::in | std::ios::binary | std::ios::ate );
+		infile.open( filePath.c_str( ), std::ios::in | std::ios::binary );
 
 		if ( infile )
 		{
@@ -127,10 +127,15 @@ namespace Enjon
 		// Only write if file is valid
 		if ( file )
 		{
-			std::stringstream ss;
-			ss << mBuffer;
-			file.write( (const char*)mBuffer, mSize );
+			file.write( (char*)mBuffer, mSize );
 		} 
+	}
+
+	//========================================================================
+
+	const u32 ByteBuffer::GetSize( ) const
+	{
+		return mSize;
 	}
 
 	//========================================================================
@@ -138,6 +143,7 @@ namespace Enjon
 	BYTE_BUFFER_RW( b1 )
 	BYTE_BUFFER_RW( s8 )
 	BYTE_BUFFER_RW( u8 )
+	BYTE_BUFFER_RW( char )
 	BYTE_BUFFER_RW( u16 )
 	BYTE_BUFFER_RW( s16 )
 	BYTE_BUFFER_RW( s32 )
@@ -146,5 +152,6 @@ namespace Enjon
 	BYTE_BUFFER_RW( s64 )
 	BYTE_BUFFER_RW( u64 )
 	BYTE_BUFFER_RW( f64 )
+	BYTE_BUFFER_RW( usize )
 }
 

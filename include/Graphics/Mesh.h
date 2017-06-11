@@ -20,8 +20,12 @@ namespace Enjon {
 		float UV[2];	
 	};
 
+	class MeshAssetLoader;
+
 	class Mesh : public Asset
 	{
+		friend MeshAssetLoader;
+
 		ENJON_OBJECT( Mesh )
 
 		public:
@@ -30,16 +34,17 @@ namespace Enjon {
 
 			void Bind();
 			void Unbind();
-			void Submit();
+			void Submit(); 
 
 			std::vector<Vert> Verticies;
 			std::vector<u32> Indicies;	
+
 			GLenum DrawType;
-			GLint DrawStart;
-			GLint DrawCount;
-			GLuint VAO;
-			GLuint VBO;
-			GLuint IBO;
+			GLint DrawStart = 0;
+			GLint DrawCount = 0;
+			GLuint VAO = 0;
+			GLuint VBO = 0;
+			GLuint IBO = 0;
 	}; 
 }
 

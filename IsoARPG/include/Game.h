@@ -77,7 +77,9 @@ class Game : public Enjon::Application
 
 		f32 mFontSize = 1.0f;
 
-		Enjon::String mWorldString = "";
+		Enjon::String mWorldString = ""; 
+
+		Enjon::Texture* mTex = nullptr;
 };
 
 #endif
