@@ -187,6 +187,13 @@ namespace Enjon
 
 		return Result::SUCCESS;
 	} 
+
+	//======================================================================================================
+			
+	bool AssetManager::HasFileExtension( const String& file, const String& extension )
+	{
+		return ( Enjon::Utils::SplitString( file, "." ).back( ).compare( extension ) == 0 );
+	}
 }
 
 

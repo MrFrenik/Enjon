@@ -128,7 +128,10 @@ Enjon::Result Game::Initialize()
 
 	for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( projectDirectory ) )
 	{
-		std::cout << p << '\n';
+		if ( Enjon::AssetManager::HasFileExtension( p.path().string(), "easset" ) )
+		{
+			std::cout << "Asset: " << p << "\n";
+		}
 	}
 
 	// Get Subsystems from engine
@@ -597,14 +600,6 @@ Enjon::Result Game::Initialize()
 	for ( auto& c : mGun.Get( )->GetComponents( ) )
 	{
 		fmt::print( "{} is instance of graphics component: {}\n", c->GetTypeName( ), c->InstanceOf< Enjon::GraphicsComponent >( ) );
-	} 
-
-	std::vector < Enjon::UUID > ids;
-
-	for ( u32 i = 0; i < 20; ++i )
-	{
-		Enjon::UUID uuid = Enjon::UUID::GenerateUUID( );
-		fmt::print( "{}\n", uuid.ToString( ) );
 	} 
 
 	/*
