@@ -16,8 +16,6 @@
 #include "Graphics/SpotLight.h"
 #include "Graphics/Shader.h"
 #include "Graphics/ShaderGraph.h"
-#include "Graphics/ShaderGraph/ShaderMathNode.h"
-#include "Graphics/ShaderGraph/ShaderVectorNode.h"
 #include "IO/ResourceManager.h"
 #include "Asset/AssetManager.h"
 #include "Console.h"
@@ -31,20 +29,9 @@
 #include <fmt/printf.h>
 #include <cassert>
 
-#include <STB/stb_image.h>
+#include <STB/stb_image.h> 
 
-Enjon::Shader mFresnelShader;
-Enjon::Shader mOutlineShader;
-Enjon::Shader mWaterShader;
-Enjon::Shader mDefaultShader;
-Enjon::ShaderGraph mShaderGraph;
-Enjon::Renderable mRenderable;
-			
-f32 mFresnelSharpness = 1.0f;
-f32 mEmissiveStrength = 1.0f;
-f32 mOutlineThickness = 0.2f;
-Enjon::Vec2 mTiling = Enjon::Vec2( 1.0f );
-Enjon::Vec2 mFlowControl = Enjon::Vec2( 1.0f );
+Enjon::Renderable mRenderable; 
 
 namespace Enjon 
 { 
@@ -175,11 +162,6 @@ namespace Enjon
 		//glCullFace( GL_BACK );
 		glEnable( GL_DEPTH_CLAMP );
 
-		FresnelShader( );
-		WaterShader( );
-
-		mDefaultShader.Compile( );
-
 		return Result::SUCCESS;
 	}
 
@@ -225,12 +207,10 @@ namespace Enjon
 			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
 			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-			cubeMapTarget = new RenderTarget( 512, 512 );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); 
  
 			// Capture onto cubemap faces
-			Mat4 captureProj = Mat4::Perspective( Enjon::ToRadians( 90.0f ), 1.0f, 0.1f, 10.0f );
+			Mat4 captureProj = Mat4::Perspective( 90.0f, 1.0f, 0.1f, 100.0f );
 			Mat4 captureViews[ ] =  
 			{
 				Mat4::LookAt( Vec3(0.0f), Vec3( 1.0f, 0.0f, 0.0f ), Vec3( 0.0f, -1.0f, 0.0f ) ),
@@ -254,11 +234,7 @@ namespace Enjon
 					glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mEnvCubemapID, 0 );
 					glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-					Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-					Enjon::AssetHandle< Enjon::Mesh > mesh = am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" );
-					mesh.Get( )->Bind( );
-					mesh.Get( )->Submit( );
-					mesh.Get( )->Unbind( );
+					RenderCube( ); 
 				}
 				glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 			}
@@ -300,7 +276,6 @@ namespace Enjon
 			if ( input->IsKeyPressed( Enjon::KeyCode::R ) )
 			{
 				std::cout << "Recompiling...\n";
-				mFresnelShader.Recompile( );
 			}
 		}
 
@@ -373,7 +348,7 @@ namespace Enjon
 		}
 		*/
 
-		glClear(GL_DEPTH_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 
 		// mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA16_LightGrey());
 
@@ -472,142 +447,19 @@ namespace Enjon
 		// Unuse quadbatch shader
 		shader->Unuse();
 
-		// Now do the fresnel shader test
-		mFresnelShader.Use( );
-		{
-			static bool set = false;
-			Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-			static Enjon::AssetHandle< Enjon::Texture > albedo;
-			static Enjon::AssetHandle< Enjon::Texture > albedo2;
-			static Enjon::AssetHandle< Enjon::Texture > normals;
-			static Enjon::AssetHandle< Enjon::Texture > waterNormal;
-			static Enjon::AssetHandle< Enjon::Texture > metallic;
-			static Enjon::AssetHandle< Enjon::Texture > roughness;
-			static Enjon::AssetHandle< Enjon::Texture > emissive; 
-			static Enjon::AssetHandle< Enjon::Material > matHandle; 
-			static Enjon::AssetHandle< Enjon::Material > defaultMatHandle; 
-			
-			static f32 t = 0.0f;
-			t += 0.001f;
-			
-			if ( !set )
-			{
-				albedo = am->GetAsset< Enjon::Texture >( "isoarpg.materials.wornredrock.albedo" );
-				normals = am->GetAsset< Enjon::Texture >( "isoarpg.materials.wornredrock.normal" );
-				metallic = am->GetAsset< Enjon::Texture >( "isoarpg.materials.wornredrock.metallic" );
-				roughness = am->GetAsset< Enjon::Texture >( "isoarpg.materials.wornredrock.roughness" );
-				emissive = am->GetAsset< Enjon::Texture >( "isoarpg.textures.green" ); 
-				waterNormal = am->GetAsset< Enjon::Texture >( "isoarpg.textures.water" );
-
-				// Create material
-				matHandle = mFresnelShader.CreateMaterial( );
-				defaultMatHandle = mDefaultShader.CreateMaterial( );
-
-				// Set uniforms for material
-				Enjon::Material* mat = matHandle.Get( );
-				mat->SetUniform( "uAlbedoMap", albedo );
-				mat->SetUniform( "uMetallicMap", metallic );
-				mat->SetUniform( "uRoughnessMap", roughness );
-				mat->SetUniform( "uEmissiveMap", emissive );
-				mat->SetUniform( "uNormalMap", normals );
-
-				set = true;
-			} 
-
-			// Set default shader uniforms
-			matHandle.Get( )->SetUniform( "uSharpness", mFresnelSharpness );
-			matHandle.Get( )->SetUniform( "uEmissiveIntensity", mEmissiveStrength );
-			matHandle.Get( )->SetUniform( "uTiling", mTiling );
-			mFresnelShader.SetUniform( "uCamera", mSceneCamera.GetViewProjectionMatrix( ) );
-			mFresnelShader.SetUniform( "uCameraWorldPosition", mSceneCamera.GetPosition( ) + mSceneCamera.Backward() );
-			mFresnelShader.SetUniform( "uWorldTime", t );
-
-			// Set material specific uniforms
-			matHandle.Get( )->SetUniforms( ); 
-			// Submit renderable ( The material can be bound and used in the renderable submit call as well )
-			mRenderable.SetPosition( Vec3( -20.0f, 0.0f, 0.0f ) );
-			//mRenderable.Submit( &mFresnelShader ); 
-			mRenderable.Submit( &mFresnelShader ); 
-		}
-		mFresnelShader.Unuse( );
-
-		mDefaultShader.Use( );
-		{
-			mDefaultShader.SetUniform( "uCamera", mSceneCamera.GetViewProjectionMatrix( ) );
-			//mDefaultShader.SetUniform( "uCameraWorldPosition", mSceneCamera.GetPosition( ) + mSceneCamera.Backward() );
-			//mDefaultShader.SetUniform( "uWorldTime", 0.0f ); 
-			
-			// Submit renderable ( The material can be bound and used in the renderable submit call as well )
-			mRenderable.SetPosition( Vec3( 5.0f, 0.0f, 10.0f ) );
-			//mRenderable.Submit( &mFresnelShader ); 
-			mRenderable.Submit( &mDefaultShader ); 
-		}
-		mDefaultShader.Unuse( );
-
-		mWaterShader.Use( );
-		{
-			static bool set = false;
-			Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-			static Enjon::AssetHandle< Enjon::Texture > waterNormal;
-			static Enjon::AssetHandle< Enjon::Material > matHandle;
-
-			static f32 t = 0.0f;
-			t += 0.001f;
-
-			if ( !set )
-			{
-				waterNormal = am->GetAsset< Enjon::Texture >( "isoarpg.textures.water" );
-
-				// Create material
-				matHandle = mWaterShader.CreateMaterial( );
-
-				// Set uniforms for material
-				Enjon::Material* mat = matHandle.Get( );
-				mat->SetUniform( "uNormalMap", waterNormal ); 
-
-				set = true;
-			}
-
-			// Set default shader uniforms
-			matHandle.Get( )->SetUniform( "uUFlowControl", mFlowControl.x );
-			matHandle.Get( )->SetUniform( "uVFlowControl", mFlowControl.y );
-			matHandle.Get( )->SetUniform( "coord", mTiling );
-			mWaterShader.SetUniform( "uCamera", mSceneCamera.GetViewProjectionMatrix( ) );
-			mWaterShader.SetUniform( "uWorldTime", t );
-
-			// Set material specific uniforms
-			matHandle.Get( )->SetUniforms( );
-
-			// Submit renderable ( The material can be bound and used in the renderable submit call as well )
-			mRenderable.SetPosition( Vec3( 5.0f, 5.0f, 0.0f ) );
-			mRenderable.Submit( &mWaterShader );
-		}
-		mWaterShader.Unuse( );
-
 		// Cubemap
+		glEnable( GL_DEPTH_TEST );
 		glDepthFunc( GL_LEQUAL );
 		Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
 		skyBoxShader->Use( );
 		{
 			skyBoxShader->SetUniform( "view", mSceneCamera.GetView( ) );
 			skyBoxShader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
-			//skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
+			skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
 			glActiveTexture( GL_TEXTURE0 );
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
 
-			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-
-			Enjon::Renderable renderable;
-			Enjon::AssetHandle< Enjon::Mesh > meshHandle = am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" );
-			Mesh* mesh = meshHandle.Get( );
-			if ( mesh != nullptr )
-			{
-				mesh->Bind( );
-				{
-					mesh->Submit( );
-				}
-				mesh->Unbind( ); 
-			} 
+			RenderCube( );
 		}
 		skyBoxShader->Unuse( );
 
@@ -1370,14 +1222,6 @@ namespace Enjon
 	    	ImGui::TreePop();
 	    } 
 
-		ImGui::SliderFloat( "EmissiveIntensity", &mEmissiveStrength, 0.0f, 10.0f );
-		ImGui::SliderFloat( "FresnelSharpness", &mFresnelSharpness, 0.0f, 5.0f );
-		ImGui::SliderFloat( "OutlineThickness", &mOutlineThickness, 0.0f, 1.0f );
-		ImGui::SliderFloat( "Tiling X", &mTiling.x, 0.0f, 5.0f );
-		ImGui::SliderFloat( "Tiling Y", &mTiling.y, 0.0f, 5.0f );
-		ImGui::SliderFloat( "Flow U", &mFlowControl.x, 0.0f, 5.0f );
-		ImGui::SliderFloat( "Flow V", &mFlowControl.y, 0.0f, 5.0f );
-
 		ImGui::Image( ImTextureID( mHDRTextureID ), ImVec2( 128, 128 ) );
 		ImGui::Image( ImTextureID( mEnvCubemapID ), ImVec2( 256, 256 ) );
 	}
@@ -1406,212 +1250,80 @@ namespace Enjon
 		mSceneCamera.SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
 	} 
 
-	void DeferredRenderer::WaterShader( )
+
+	unsigned int cubeVAO = 0;
+	unsigned int cubeVBO = 0;
+	void DeferredRenderer::RenderCube( )
 	{
-		// Get shader graph
-		Enjon::ShaderGraph* shaderGraph = const_cast< ShaderGraph* > ( mWaterShader.GetGraph( ) ); 
-
-		// Define nodes
-		Enjon::ShaderTimeNode* time = shaderGraph->AddNode( new Enjon::ShaderTimeNode( "worldTime" ) )->Cast< Enjon::ShaderTimeNode >( );
-		Enjon::ShaderFloatNode* uUFlowControl = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "uUFlowControl", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderFloatNode* uVFlowControl = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "uVFlowControl", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderMultiplyNode* multU = shaderGraph->AddNode( new Enjon::ShaderMultiplyNode( "multU" ) )->Cast< Enjon::ShaderMultiplyNode >( );
-		Enjon::ShaderMultiplyNode* multV = shaderGraph->AddNode( new Enjon::ShaderMultiplyNode( "multV" ) )->Cast< Enjon::ShaderMultiplyNode >( );
-		Enjon::ShaderPannerNode* pannU = shaderGraph->AddNode( new Enjon::ShaderPannerNode( "pannU", Vec2( 1.0f, 0.0f ) ) )->Cast< Enjon::ShaderPannerNode >( );
-		Enjon::ShaderPannerNode* pannV = shaderGraph->AddNode( new Enjon::ShaderPannerNode( "pannV", Vec2( 0.0f, 1.0f ) ) )->Cast< Enjon::ShaderPannerNode >( );
-		Enjon::ShaderVec2Node* coord = shaderGraph->AddNode( new Enjon::ShaderVec2Node( "coord", Vec2( 1.0f ) ) )->Cast< Enjon::ShaderVec2Node >( );
-		Enjon::ShaderMaskNode* maskR = shaderGraph->AddNode( new Enjon::ShaderMaskNode( "maskR", MaskFlags::R ) )->Cast< Enjon::ShaderMaskNode >( );
-		Enjon::ShaderMaskNode* maskG = shaderGraph->AddNode( new Enjon::ShaderMaskNode( "maskG", MaskFlags::G ) )->Cast< Enjon::ShaderMaskNode >( );
-		Enjon::ShaderAppendNode* append = shaderGraph->AddNode( new Enjon::ShaderAppendNode( "append" ) )->Cast< Enjon::ShaderAppendNode >( );
-		Enjon::ShaderVec3Node* baseColor = shaderGraph->AddNode( new Enjon::ShaderVec3Node( "baseColor", Vec3( 0.199f, 0.437f, 0.65f ) ) )->Cast< Enjon::ShaderVec3Node >( );
-		Enjon::ShaderFloatNode* metallic = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "metallic_param", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderFloatNode* roughness = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "roughness_param", 0.3f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderTexture2DNode* normalMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uNormalMap" ) )->Cast< Enjon::ShaderTexture2DNode >( ); 
-
-		// Set up uniforms
-		uUFlowControl->IsUniform( true );
-		uVFlowControl->IsUniform( true );
-		coord->IsUniform( true );
-
-		// Set up inputs
-		multU->AddInput( time );
-		multU->AddInput( uUFlowControl );
-
-		pannU->AddInput( coord );
-		pannU->AddInput( multU );
- 
-		multV->AddInput( time );
-		multV->AddInput( uVFlowControl );
-
-		pannV->AddInput( coord );
-		pannV->AddInput( multV );
-
-		maskR->AddInput( pannU );
-		maskG->AddInput( pannV );
-
-		append->AddInput( maskR );
-		append->AddInput( maskG );
-
-		normalMap->AddInput( append ); 
-
-		// Add inputs to main node
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( baseColor, ( u32 )Enjon::ShaderGraphMainNodeInputType::Albedo ) );
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( metallic, ( u32 )Enjon::ShaderGraphMainNodeInputType::Metallic ) );
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( roughness, ( u32 )Enjon::ShaderGraphMainNodeInputType::Roughness ) );
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( normalMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Normal ) ); 
-
-		// Remake shader using new graph
-		mWaterShader = Enjon::Shader( *shaderGraph ); 
+		// initialize (if necessary)
+		if ( cubeVAO == 0 )
+		{
+			float vertices[ ] = {
+				// back face
+				-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+				1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+				1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
+				1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+				-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+				-1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+			  // front face
+			  -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+			  1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
+			  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+			  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+			  -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
+			  -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+			// left face
+			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+			-1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+			-1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+		  // right face
+		  1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+		  1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+		  1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
+		  1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+		  1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+		  1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
+		   // bottom face
+		   -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+		   1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
+		   1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+		   1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+		   -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+		   -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+		 // top face
+		 -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+		 1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+		 1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
+		 1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+		 -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+		 -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
+			};
+			glGenVertexArrays( 1, &cubeVAO );
+			glGenBuffers( 1, &cubeVBO );
+			// fill buffer
+			glBindBuffer( GL_ARRAY_BUFFER, cubeVBO );
+			glBufferData( GL_ARRAY_BUFFER, sizeof( vertices ), vertices, GL_STATIC_DRAW );
+			// link vertex attributes
+			glBindVertexArray( cubeVAO );
+			glEnableVertexAttribArray( 0 );
+			glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof( float ), ( void* )0 );
+			glEnableVertexAttribArray( 1 );
+			glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof( float ), ( void* )( 3 * sizeof( float ) ) );
+			glEnableVertexAttribArray( 2 );
+			glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof( float ), ( void* )( 6 * sizeof( float ) ) );
+			glBindBuffer( GL_ARRAY_BUFFER, 0 );
+			glBindVertexArray( 0 );
+		}
+		// render Cube
+		glBindVertexArray( cubeVAO );
+		glDrawArrays( GL_TRIANGLES, 0, 36 );
+		glBindVertexArray( 0 );
 	}
 
-	void DeferredRenderer::FresnelShader( )
-	{ 
-		// Get shader graph
-		Enjon::ShaderGraph* shaderGraph = const_cast< ShaderGraph* > ( mFresnelShader.GetGraph( ) );
-
-		Enjon::ShaderTexture2DNode* uAlbedoMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uAlbedoMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		Enjon::ShaderTexture2DNode* uNormalMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uNormalMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		Enjon::ShaderTexture2DNode* uMetallicMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uMetallicMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		Enjon::ShaderTexture2DNode* uRoughnessMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uRoughnessMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		//Enjon::ShaderTexture2DNode* uEmissiveMap = mShaderGraph.AddNode( new Enjon::ShaderTexture2DNode( "uEmissiveMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		Enjon::ShaderFloatNode* emissiveIntensity = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "uEmissiveIntensity", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderFloatNode* metallicness = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "uMetallicness", 0.0f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderFloatNode* roughness = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "uRoughness", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderMultiplyNode* mult1 = shaderGraph->AddNode( new Enjon::ShaderMultiplyNode( "mult1" ) )->Cast< Enjon::ShaderMultiplyNode >( );
-		Enjon::ShaderMultiplyNode* mult2 = shaderGraph->AddNode( new Enjon::ShaderMultiplyNode( "mult2" ) )->Cast< Enjon::ShaderMultiplyNode >( );
-		Enjon::ShaderMultiplyNode* mult3 = shaderGraph->AddNode( new Enjon::ShaderMultiplyNode( "mult3" ) )->Cast< Enjon::ShaderMultiplyNode >( );
-		Enjon::ShaderMultiplyNode* mult4 = shaderGraph->AddNode( new Enjon::ShaderMultiplyNode( "mult4" ) )->Cast< Enjon::ShaderMultiplyNode >( );
-		Enjon::ShaderMultiplyNode* mult5 = shaderGraph->AddNode( new Enjon::ShaderMultiplyNode( "mult5" ) )->Cast< Enjon::ShaderMultiplyNode >( );
-		Enjon::ShaderTimeNode* worldTime = shaderGraph->AddNode( new Enjon::ShaderTimeNode( "worldTime" ) )->Cast< Enjon::ShaderTimeNode >( );
-		Enjon::ShaderFloatNode* float64 = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "float64", 64.0f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderFloatNode* constOne = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "constOne", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderSinNode* sinNode = shaderGraph->AddNode( new Enjon::ShaderSinNode( "sinNode" ) )->Cast< Enjon::ShaderSinNode >( );
-		Enjon::ShaderAddNode* addNode = shaderGraph->AddNode( new Enjon::ShaderAddNode( "addNode" ) )->Cast< Enjon::ShaderAddNode >( );
-		Enjon::ShaderPannerNode* pannerNode = shaderGraph->AddNode( new Enjon::ShaderPannerNode( "pannerNode", Vec2( 0.2f, 1.0f ) ) )->Cast< Enjon::ShaderPannerNode >( );
-		Enjon::ShaderDivideNode* divideNode = shaderGraph->AddNode( new Enjon::ShaderDivideNode( "divideNode" ) )->Cast< Enjon::ShaderDivideNode >( );
-		Enjon::ShaderLerpNode* lerpNode = shaderGraph->AddNode( new Enjon::ShaderLerpNode( "lerpNode" ) )->Cast< Enjon::ShaderLerpNode >( ); 
-		Enjon::ShaderLerpNode* lerpNode2 = shaderGraph->AddNode( new Enjon::ShaderLerpNode( "lerpNode2" ) )->Cast< Enjon::ShaderLerpNode >( ); 
-		Enjon::ShaderLerpNode* lerpNode3 = shaderGraph->AddNode( new Enjon::ShaderLerpNode( "lerpNode3" ) )->Cast< Enjon::ShaderLerpNode >( ); 
-		Enjon::ShaderFloatNode* alphaNode = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "alphaNode", 0.0f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderCameraWorldPositionNode* cameraWS = shaderGraph->AddNode( new Enjon::ShaderCameraWorldPositionNode( "cameraWS" ) )->Cast< Enjon::ShaderCameraWorldPositionNode >( );
-		Enjon::ShaderCameraViewDirectionNode* viewDir = shaderGraph->AddNode( new Enjon::ShaderCameraViewDirectionNode( "viewDir" ) )->Cast< Enjon::ShaderCameraViewDirectionNode >( );
-		Enjon::ShaderPixelNormalWSNode* normalDir = shaderGraph->AddNode( new Enjon::ShaderPixelNormalWSNode( "normalDir" ) )->Cast < Enjon::ShaderPixelNormalWSNode >( );
-		Enjon::ShaderOneMinusNode* oneMinus = shaderGraph->AddNode( new Enjon::ShaderOneMinusNode( "oneMinus" ) )->Cast< Enjon::ShaderOneMinusNode >( );
-		Enjon::ShaderDotProductNode* dotProduct = shaderGraph->AddNode( new Enjon::ShaderDotProductNode( "dotProduct" ) )->Cast< Enjon::ShaderDotProductNode >( );
-		Enjon::ShaderFloatNode* sharpness = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "uSharpness", 3.0f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderPowerNode* powerNode = shaderGraph->AddNode( new Enjon::ShaderPowerNode( "power" ) )->Cast< Enjon::ShaderPowerNode >( );
-		Enjon::ShaderVec3Node* fresnelColor = shaderGraph->AddNode( new Enjon::ShaderVec3Node( "fresnelColor", Vec3( 0.1f, 0.4f, 1.0f ) ) )->Cast< Enjon::ShaderVec3Node >( );
-		Enjon::ShaderVertexWorldPositionNode* vertexWorldPosition = shaderGraph->AddNode( new Enjon::ShaderVertexWorldPositionNode( "vertexWP" ) )->Cast< Enjon::ShaderVertexWorldPositionNode >( );
-		Enjon::ShaderAbsoluteValueNode* absNode = shaderGraph->AddNode( new Enjon::ShaderAbsoluteValueNode( "absNode" ) )->Cast< Enjon::ShaderAbsoluteValueNode >( );
-		Enjon::ShaderLengthNode* length = shaderGraph->AddNode( new Enjon::ShaderLengthNode( "lengthNode" ) )->Cast< Enjon::ShaderLengthNode >( );
-		Enjon::ShaderSubtractNode* distVec = shaderGraph->AddNode( new Enjon::ShaderSubtractNode( "distVec" ) )->Cast< Enjon::ShaderSubtractNode >( );
-		Enjon::ShaderTextureCoordinatesNode* texCoords = shaderGraph->AddNode( new Enjon::ShaderTextureCoordinatesNode( "texCoords", Vec2( 1.0f ) ) )->Cast< Enjon::ShaderTextureCoordinatesNode >( );
-		Enjon::ShaderVec2Node* tiling = shaderGraph->AddNode( new Enjon::ShaderVec2Node( "uTiling", Vec2( 1.0f ) ) )->Cast< Enjon::ShaderVec2Node >( );
-		Enjon::ShaderClampNode* clamp = shaderGraph->AddNode( new Enjon::ShaderClampNode( "clampNode" ) )->Cast< Enjon::ShaderClampNode >( );
-		Enjon::ShaderMaskNode* maskNode = shaderGraph->AddNode( new Enjon::ShaderMaskNode( "maskNode", Enjon::MaskFlags::RG ) )->Cast< Enjon::ShaderMaskNode >( );
-
-		// Set to be uniform variable
-		emissiveIntensity->IsUniform( true );
-		sharpness->IsUniform( true ); 
-		tiling->IsUniform( true );
-
-		// Set up emissive
-		dotProduct->AddInput( normalDir );
-		dotProduct->AddInput( viewDir );
-
-		clamp->AddInput( dotProduct );
-
-		oneMinus->AddInput( clamp );
-
-		powerNode->AddInput( oneMinus );
-		powerNode->AddInput( sharpness );
-
-		mult1->AddInput( powerNode );
-		mult1->AddInput( emissiveIntensity ); 
-
-		mult2->AddInput( mult1 );
-		mult2->AddInput( fresnelColor ); 
-
-		texCoords->AddInput( tiling );
-		uAlbedoMap->AddInput( texCoords ); 
-		uNormalMap->AddInput( texCoords );
-		
-		maskNode->AddInput( fresnelColor );
-
-		// Add inputs to main node
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( uAlbedoMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Albedo ) );
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( uMetallicMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Metallic ) );
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( uRoughnessMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Roughness ) );
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( mult2, ( u32 )Enjon::ShaderGraphMainNodeInputType::Emissive ) );
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( uNormalMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Normal ) ); 
-
-		// Remake shader using new graph
-		mFresnelShader = Enjon::Shader( *shaderGraph ); 
-	} 
-
-	void DeferredRenderer::OutlineShader( )
-	{
-		// Get shader graph
-
-		Enjon::ShaderGraph* shaderGraph = const_cast< ShaderGraph* > ( mOutlineShader.GetGraph( ) );
-
-		Enjon::ShaderTexture2DNode* uAlbedoMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uAlbedoMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		Enjon::ShaderTexture2DNode* uNormalMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uNormalMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		Enjon::ShaderTexture2DNode* uMetallicMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uMetallicMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		Enjon::ShaderTexture2DNode* uRoughnessMap = shaderGraph->AddNode( new Enjon::ShaderTexture2DNode( "uRoughnessMap" ) )->Cast< Enjon::ShaderTexture2DNode >( );
-		Enjon::ShaderVertexWorldPositionNode* vertexWP = shaderGraph->AddNode( new Enjon::ShaderVertexWorldPositionNode( "vertexWP" ) )->Cast< Enjon::ShaderVertexWorldPositionNode >( );
-		Enjon::ShaderCameraWorldPositionNode* camPos = shaderGraph->AddNode( new Enjon::ShaderCameraWorldPositionNode( "camPos" ) )->Cast< Enjon::ShaderCameraWorldPositionNode >( );
-		Enjon::ShaderSubtractNode* subtractNode = shaderGraph->AddNode( new Enjon::ShaderSubtractNode( "subtractNode" ) )->Cast< Enjon::ShaderSubtractNode >( );
-		Enjon::ShaderNormalizeNode* normalizeNode = shaderGraph->AddNode( new Enjon::ShaderNormalizeNode( "normalizeNode" ) )->Cast< Enjon::ShaderNormalizeNode >( );
-		Enjon::ShaderPixelNormalWSNode* pixelNormalWS = shaderGraph->AddNode( new Enjon::ShaderPixelNormalWSNode( "pixelNormalWS" ) )->Cast< Enjon::ShaderPixelNormalWSNode >( );
-		Enjon::ShaderDotProductNode* dotProduct = shaderGraph->AddNode( new Enjon::ShaderDotProductNode( "dotProduct" ) )->Cast< Enjon::ShaderDotProductNode >( );
-		Enjon::ShaderFloatNode* uOutlineThickness = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "uOutlineThickness", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( );
-		Enjon::ShaderFloatNode* constZero = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "constZero", 0.0f ) )->Cast< Enjon::ShaderFloatNode >( ); 
-		Enjon::ShaderFloatNode* constOne = shaderGraph->AddNode( new Enjon::ShaderFloatNode( "constOne", 1.0f ) )->Cast< Enjon::ShaderFloatNode >( ); 
-		Enjon::ShaderBranchIfElseNode* branchIfElse = shaderGraph->AddNode( new Enjon::ShaderBranchIfElseNode( "branchIfElse" ) )->Cast < Enjon::ShaderBranchIfElseNode >( ); 
-		Enjon::ShaderMultiplyNode* mult = shaderGraph->AddNode( new Enjon::ShaderMultiplyNode( "multNode" ) )->Cast< Enjon::ShaderMultiplyNode >( );
-		Enjon::ShaderVec3Node* uOutlineColor = shaderGraph->AddNode( new Enjon::ShaderVec3Node( "uOutlineColor", Vec3( 0.0f ) ) )->Cast< Enjon::ShaderVec3Node >( );
-		Enjon::ShaderAddNode* addNode = shaderGraph->AddNode( new Enjon::ShaderAddNode( "addNode" ) )->Cast< Enjon::ShaderAddNode >( );
-
-		// Set up uniforms
-		uOutlineThickness->IsUniform( true );
-		uOutlineColor->IsUniform( true );
-
-		// Set up inputs
-		subtractNode->AddInput( camPos );
-		subtractNode->AddInput( vertexWP );
-
-		// Normalize
-		normalizeNode->AddInput( subtractNode );
-
-		// Dot product
-		dotProduct->AddInput( pixelNormalWS );
-		dotProduct->AddInput( normalizeNode );
-
-		// Branch
-		branchIfElse->AddInput( dotProduct );
-		branchIfElse->AddInput( uOutlineThickness );
-		branchIfElse->AddInput( constZero );
-		branchIfElse->AddInput( constOne );
-
-		// Mult
-		mult->AddInput( uOutlineColor );
-		mult->AddInput( branchIfElse );
-
-		// Add
-		addNode->AddInput( uAlbedoMap );
-		addNode->AddInput( mult );
-
-		// Add inputs to main node
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( addNode, ( u32 )Enjon::ShaderGraphMainNodeInputType::Albedo ) );
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( uMetallicMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Metallic ) );
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( uRoughnessMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Roughness ) );
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( uNormalMap, ( u32 )Enjon::ShaderGraphMainNodeInputType::Normal ) );
-		shaderGraph->Connect( Enjon::ShaderGraphNode::Connection( mult, ( u32 )Enjon::ShaderGraphMainNodeInputType::Emissive ) );
-
-		// Remake shader using new graph 
-		mOutlineShader = Enjon::Shader( *shaderGraph );
-	}
 }
 
 

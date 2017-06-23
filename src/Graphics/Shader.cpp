@@ -30,18 +30,18 @@ namespace Enjon
 	Enjon::Result Shader::Compile( )
 	{
 		// Check graph validity here? Or does this need to be checked elsewhere
-		Enjon::Result valid = mGraph.Compile( );
+		s32 valid = mGraph.Compile( );
 
-		if ( valid != Enjon::Result::SUCCESS )
+		if ( valid < 0 )
 		{
 			// Failure
 		}
 
 		// Parse shader for vertex shader output
-		Enjon::String vertexShaderCode = mGraph.Parse( Enjon::ShaderType::Vertex );
+		Enjon::String vertexShaderCode = mGraph.GetCode( ShaderPassType::Surface_StaticGeom, Enjon::ShaderType::Vertex );
 
 		// Parse shader for fragment shader output
-		Enjon::String fragmentShaderCode = mGraph.Parse( Enjon::ShaderType::Fragment );
+		Enjon::String fragmentShaderCode = mGraph.GetCode( ShaderPassType::Surface_StaticGeom, Enjon::ShaderType::Fragment );
 
 		std::cout << vertexShaderCode << "\n\n";
 		std::cout << fragmentShaderCode << "\n";
@@ -60,13 +60,7 @@ namespace Enjon
 		Enjon::Result fragmentResult = CompileShader( fragmentShaderCode, mFragmentShaderID );
 
 		// Link shaders 
-		LinkProgram( );
-
-		auto refs = mGraph.GetUniforms( );
-		for ( auto& r : refs )
-		{
-			std::cout << r.mName << ", " << r.mLocation << '\n';
-		}
+		LinkProgram( ); 
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -226,71 +220,6 @@ namespace Enjon
 
 		// Return success
 		return Enjon::Result::SUCCESS;
-	}
-			
-	/*
-	* @brief
-	*/
-	Enjon::AssetHandle< Enjon::Material > Shader::CreateMaterial( )
-	{
-		// Create new material
-		Enjon::Material* material = new Enjon::Material; 
-
-		// Set shader
-		material->mMaterialShader = this;
-
-		const std::vector< UniformReference >& refs = mGraph.GetUniforms( );
-		for ( auto& r : refs )
-		{
-			// Build uniforms for material
-			switch ( r.mType )
-			{
-				case ShaderPrimitiveType::Texture2D:
-				{
-					// Need to have texture handle somehow...
-					Enjon::AssetHandle< Enjon::Texture > texture;
-					UniformTexture* tex = new UniformTexture( r.mName, this, texture, r.mLocation );
-					material->AddUniform( tex );
-
-				} break;
-
-				case ShaderPrimitiveType::Float: 
-				{
-					UniformPrimitive< f32 >* uniform = new UniformPrimitive< f32 >( r.mName, this, 0.0f, r.mLocation );
-					material->AddUniform( uniform );
-				} break;
-
-				case ShaderPrimitiveType::Vec2:
-				{
-					UniformPrimitive< Vec2 >* uniform = new UniformPrimitive< Vec2 >( r.mName, this, Enjon::Vec2( 0.0f ), r.mLocation );
-					material->AddUniform( uniform );
-				} break;
-				
-				case ShaderPrimitiveType::Vec3:
-				{
-					UniformPrimitive< Vec3 >* uniform = new UniformPrimitive< Vec3 >( r.mName, this, Enjon::Vec3( 0.0f ), r.mLocation );
-					material->AddUniform( uniform );
-				} break;
-				
-				case ShaderPrimitiveType::Vec4:
-				{
-					UniformPrimitive< Vec4 >* uniform = new UniformPrimitive< Vec4 >( r.mName, this, Enjon::Vec4( 0.0f ), r.mLocation );
-					material->AddUniform( uniform );
-				} break;
-				
-				case ShaderPrimitiveType::Mat4:
-				{
-					UniformPrimitive< Mat4 >* uniform = new UniformPrimitive< Mat4 >( r.mName, this, Enjon::Mat4( 1.0f ), r.mLocation );
-					material->AddUniform( uniform );
-				} break;
-
-				default:
-				{ 
-				} break;
-			}
-		}
-
-		return material; 
 	}
 	
 	s32 Shader::GetUniformLocation(const Enjon::String& uniformName) 
@@ -458,7 +387,7 @@ namespace Enjon
 			
 	UniformTexture::UniformTexture( const Enjon::String& name, const Enjon::Shader* shader, const Enjon::AssetHandle< Enjon::Texture >& texture, u32 location )
 	{
-		mType = UniformType::TextureSampler;
+		mType = UniformType::TextureSampler2D;
 		mShader = shader;
 		mTexture = texture;
 		mLocation = location;

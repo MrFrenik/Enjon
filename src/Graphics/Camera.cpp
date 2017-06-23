@@ -135,6 +135,8 @@ namespace Enjon {
 		Mat4 rotation = QuaternionToMat4(Transform.Rotation);
 		Mat4 translate = Mat4::Translate(Transform.Position * -1.0f); 
 
+		return Mat4::LookAt( Transform.Position, Transform.Position + Forward( ), Up( ) );
+
 		return (scale * rotation * translate);
 	}
 }

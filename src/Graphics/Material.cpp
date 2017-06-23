@@ -96,7 +96,7 @@ namespace Enjon {
 		{
 			switch ( u.second->GetType() )
 			{
-				case UniformType::TextureSampler:
+				case UniformType::TextureSampler2D:
 				{
 					UniformTexture* texUni = u.second->Cast< UniformTexture >( );
 					const_cast< Enjon::Shader* >( mMaterialShader )->BindTexture( texUni->GetName( ), texUni->GetTexture( ).Get( )->GetTextureId(), texUni->GetLocation( ) );
@@ -146,7 +146,7 @@ namespace Enjon {
 		if ( query != mUniforms.end( ) )
 		{
 			ShaderUniform* uniform = mUniforms[ name ];
-			if ( uniform->GetType( ) == Enjon::UniformType::TextureSampler )
+			if ( uniform->GetType( ) == Enjon::UniformType::TextureSampler2D )
 			{
 				uniform->Cast< UniformTexture >( )->SetTexture( value );
 			}

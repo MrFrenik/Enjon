@@ -46,6 +46,13 @@ namespace Enjon {
 									const f32& near, 
 									const f32& far);
 
+			/*
+			* @brief
+			* @param FOV - field of view given in degrees
+			* @param aspectRatio - aspectRatio of screen
+			* @param near - near plane
+			* @param far - far plane
+			*/
 			static Mat4 Perspective(const f32& FOV, const f32& aspectRatio, const f32& near, const f32& far);
 
 			static Mat4 Identity();

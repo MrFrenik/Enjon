@@ -189,10 +189,9 @@ namespace Enjon
 			*/
 			void ShowGameViewport(bool* open);
 
-			void FresnelShader( );
-			void OutlineShader( );
-			void WaterShader( );
 			void STBTest( );
+
+			void RenderCube( );
 
 		private:
 			// Frame buffers

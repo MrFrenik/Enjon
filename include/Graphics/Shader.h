@@ -16,19 +16,8 @@
 
 namespace Enjon
 { 
-	enum class UniformType
-	{
-		Float,
-		Vec2,
-		Vec3,
-		Vec4,
-		Mat4,
-		TextureSampler
-	};
-
 	class Material;
-	class Texture;
-
+	class Texture; 
 
 	class Shader : public Asset
 	{
@@ -174,8 +163,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			~UniformTexture( );
-
+			~UniformTexture( ); 
 			
 			/*
 			* @brief

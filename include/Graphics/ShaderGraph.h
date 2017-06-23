@@ -1,1508 +1,333 @@
-// @file ShaderGraph.h
-// Copyright 2016-2017 John Jackson. All Rights Reserved.
-
 #pragma once
 #ifndef ENJON_SHADER_GRAPH_H
 #define ENJON_SHADER_GRAPH_H 
 
 #include "System/Types.h"
 #include "Defines.h"
-#include "Math/Vec2.h"
 
 #include <unordered_map>
-#include <set>
-#include <vector>
 
-#define FRAGMENT_SHADER_IN "fs_in"
-#define VERTEX_SHADER_OUT "vs_out"
-
-#define VERTEX_WORLD_POSITION_FRAG			FRAGMENT_SHADER_IN + Enjon::String( ".fragPos" )
-#define VERTEX_NORMAL_WORLD_SPACE_FRAG Enjon::String( FRAGMENT_SHADER_IN ) + Enjon::String( ".tbn[2]" )
-#define FRAGMENT_NORMAL_WORLD_SPACE_FRAG "normalize( NormalsOut.rgb )"
-#define CAMERA_WORLD_POSITION "uCameraWorldPosition"
-#define VERTEX_NORMAL_DIR_UNPERTURBED_FRAG Enjon::String( "normalize(" ) + Enjon::String( FRAGMENT_SHADER_IN ) + Enjon::String( ".tbn[2]" ) + Enjon::String( ")" )
-#define CAMERA_VIEW_DIR_FRAG Enjon::String( FRAGMENT_SHADER_IN ) + Enjon::String( ".camViewDir" ) 
-#define WORLD_TIME "uWorldTime"
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/document.h> 
 
 namespace Enjon
-{
-	// These do not necessary need to evaluate to executable code, 
-	// they just need to evaluate to glsl
-
-	enum class ShaderGraphNodeVariableType
-	{
-		LocalVariable,
-		UniformVariable
-	};
-
-	enum class ShaderPrimitiveType
+{ 
+	class ShaderUniform;
+	typedef std::unordered_map< Enjon::String, Enjon::ShaderUniform* > UniformMap;
+	
+	enum class UniformType
 	{
 		Float,
-		Vec3,
 		Vec2,
-		Vec4,
-		Texture2D,
-		Mat4,
-		Integer
-	};
-
-	enum class ShaderOutputType
-	{
-		Float,
 		Vec3,
-		Vec2,
 		Vec4,
 		Mat4,
-		Integer
+		TextureSampler2D,
+		Invalid
 	};
-
-	enum class ShaderNodeState
-	{
-		Ready,
-		Evaulated
-	};
-
+	
 	enum class ShaderType
 	{
+		Fragment,
 		Vertex,
-		Fragment
+		Compute,
+		Unknown
+	}; 
+
+	enum class ShaderPrimitiveType : u32
+	{
+		Float,
+		Int,
+		Vec2,
+		Vec3,
+		Vec4,
+		Mat4,
+		TextureSampler2D
 	};
 
-	struct UniformReference
-	{ 
-		Enjon::String mName; 
-		ShaderPrimitiveType mType;
-		u32 mLocation;
+	enum class ShaderGraphNodeType
+	{
+		Function,
+		Component,
+		Variable
+	};
+
+	class InputConnection
+	{
+	public:
+		std::string mName;
+		std::string mPrimitiveType;
+		std::string mDefaultValue;
+	};
+
+	class OutputConnection
+	{
+	public:
+		std::string mName;
+		std::string mPrimitiveType;
+		std::string mCodeTemplate;
+	};
+
+	struct ParameterLayout
+	{
+		std::vector< std::string > mInputParameters;
+		std::string mOutputParameter;
+	};
+
+	class ShaderGraph;
+	class ShaderGraphNodeTemplate
+	{
+		friend ShaderGraph;
+
+	public:
+		ShaderGraphNodeTemplate( )
+		{
+		}
+
+		~ShaderGraphNodeTemplate( )
+		{
+		}
+
+		bool IsFunction( ) const;
+
+		const InputConnection* GetInput( const std::string& inputName )
+		{
+			auto query = mInputs.find( inputName );
+			if ( query != mInputs.end( ) )
+			{
+				return &mInputs[ inputName ];
+			}
+
+			return nullptr;
+		}
+
+		const OutputConnection* GetOutput( const std::string& outputName )
+		{
+			auto query = mOutputs.find( outputName );
+			if ( query != mOutputs.end( ) )
+			{
+				return &mOutputs[ outputName ];
+			}
+
+			return nullptr;
+		}
+
+		std::string GetName( ) { return mName; }
+
+		const std::unordered_map< std::string, InputConnection >& GetInputs( ) const { return mInputs; }
+
+		const ParameterLayout* GetLayout( const std::string& inputKey );
+
+		std::string GetVariableDeclarationTemplate( ) const { return mVariableDeclaration; }
+		std::string GetVariableDefinitionTemplate( ) const { return mVariableDefinition; }
+
+		UniformType GetUniformType( ) const { return mUniformType; }
+
+	protected:
+		void AddParameterLayout( const ParameterLayout& layout );
+
+	protected:
+		std::string mName;
+		std::string mVariableDeclaration;
+		std::string mVariableDefinition;
+		u32 mNumberInputs;
+		u32 mNumberOutputs;
+		UniformType mUniformType = UniformType::Invalid;
+		std::unordered_map< std::string, InputConnection > mInputs;
+		std::unordered_map< std::string, OutputConnection > mOutputs;
+		std::unordered_map< std::string, ParameterLayout > mParameterLayouts;
+		ShaderGraphNodeType mType;
+	};
+
+	class ShaderGraphNode;
+	struct NodeLink
+	{
+		const ShaderGraphNode* mConnectingNode = nullptr;
+		const InputConnection* mTo = nullptr;
+		const OutputConnection* mFrom = nullptr;
 	};
 
 	class ShaderGraphNode
 	{
-		public:
-			class Connection
-			{
-				public:
-					Connection( ) {}
+		friend ShaderGraph;
 
-					Connection( const ShaderGraphNode* owner, u32 inputPortID = 0, u32 outputPortID = 0 ) 
-						: mOwner( owner ), mInputPortID( inputPortID ), mOutputPortID( outputPortID )
-					{
-					}
-					~Connection( ) {}
+	public:
 
-					u32 mInputPortID = 0;
-					u32 mOutputPortID = 0;
-					const ShaderGraphNode* mOwner = nullptr;
-
-				private:
-			};
-
-		public:
-		/**
-		* @brief Constructor
-		*/
-		ShaderGraphNode( const Enjon::String& id )
-			: mID( id )
+		ShaderGraphNode( )
 		{
 		}
 
-		/**
-		* @brief Destructor
-		*/
-		~ShaderGraphNode( ) {}
-
-		/**
-		* @brief Destructor
-		*/
-		void Execute( )
+		ShaderGraphNode( const ShaderGraphNodeTemplate* templateNode, const std::string& name )
+			: mName( name ), mTemplate( templateNode )
 		{
 		}
 
-		template <typename T>
-		T* Cast( )
+		~ShaderGraphNode( )
 		{
-			return static_cast<T*>( this );
-		} 
-
-
-		/**
-		* @brief
-		*/
-		ShaderGraphNodeVariableType GetVariableType( ) const 
-		{
-			return mVariableType;
-		} 
-		
-		/**
-		* @brief
-		*/
-		void IsUniform( bool enable )
-		{
-			mVariableType = enable ? ShaderGraphNodeVariableType::UniformVariable : ShaderGraphNodeVariableType::LocalVariable;
-		}
-		
-		/**
-		* @brief
-		*/
-		bool IsUniform( )
-		{
-			return ( mVariableType == ShaderGraphNodeVariableType::UniformVariable );
 		}
 
-		/**
-		* @brief
-		*/
-		Enjon::String Evaluate( )
-		{
-			if ( mState == ShaderNodeState::Ready )
-			{
-				mState = ShaderNodeState::Evaulated;
-				return EvaluateToGLSL( );
-			}
 
-			return "";
-		}
+		void Serialize( rapidjson::PrettyWriter< rapidjson::StringBuffer >& writer );
 
-		virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 )
-		{ 
-			return mOutputType;
-		}
+		s32 Deserialize( rapidjson::PrettyWriter< rapidjson::StringBuffer >& reader );
 
-		// Must be evaluated first
-		virtual Enjon::String EvaluateAtPort( u32 portID )
-		{
-			return mID;
-		}
+		void AddLink( const NodeLink& link );
 
-		/**
-		* @brief
-		*/
-		virtual Enjon::String EvaluateToGLSL( )
-		{
-			return "";
-		}
+		const NodeLink* GetLink( const std::string inputName );
 
-		/**
-		* @brief
-		*/
-		virtual Enjon::String GetDeclaration( )
-		{
-			return "";
-		}
+		std::string EvaluateOutputType( );
 
-		/**
-		* @brief
-		*/
-		Enjon::String GetID( ) const { return mID; }
+		std::string EvaluateVariableDeclaration( );
+		std::string EvaluateVariableDefinition( );
 
-		/**
-		* @brief
-		*/
-		virtual Enjon::String GetQualifiedID( ) { return mID; }
+		bool IsUniform( ) const { return mIsUniform; }
 
-		/**
-		* @brief
-		*/
-		const std::vector< Connection >* GetInputs( ) const { return &mInputs; }
+		bool IsDeclared( ) const { return mIsVariableDeclared; }
 
-		/**
-		* @brief
-		*/
-		ShaderPrimitiveType GetPrimitiveType( ) const { return mPrimitiveType; }
+		bool IsDefined( ) const { return mIsVariableDefined; }
 
-		/**
-		* @brief
-		*/
-		ShaderNodeState GetState( ) const { return mState; }
+		void SetDeclared( bool declared ) { mIsVariableDeclared = declared; }
 
-		/**
-		* @brief
-		*/
-		virtual Enjon::String GetDefinition( )
-		{
-			return "";
-		}
+		void SetDefined( bool defined ) { mIsVariableDefined = defined; }
 
-		/**
-		* @brief
-		*/
-		void AddInput( Connection connection )
-		{ 
-			mInputs.push_back( connection );
-		}
+		bool HasOverride( const std::string& inputName );
 
-		/**
-		* @brief
-		*/
-		void RemoveInput( ShaderGraphNode* node );
+		void AddOverride( const InputConnection& connection );
 
-	protected:
-		ShaderGraphNodeVariableType mVariableType = ShaderGraphNodeVariableType::LocalVariable;
-		ShaderPrimitiveType mPrimitiveType;
-		ShaderOutputType mOutputType;
-		ShaderNodeState mState = ShaderNodeState::Ready;
-		u32 mMaxNumberInputs = 1;
-		u32 mMaxNumberOutputs = 1;
-		std::vector< Connection > mInputs;
-		Enjon::String mID;
+		const InputConnection* GetOverride( const std::string& inputName );
+
+		std::string BuildInputKeyFromLinks( );
+
+		std::string EvaluateOutputCodeAt( const std::string& name );
+
+		std::string EvaluateOutputTypeAt( const std::string& outputName );
+
+		std::string GetUniformName( ) { return mName + "_uniform"; }
+
+		void Clear( );
+
+		std::string mName = "INVALID";
+		bool mIsUniform = false;
+		bool mIsVariableDeclared = false;
+		bool mIsVariableDefined = false;
+		u32 mUniformLocation = 0;
+		std::unordered_map< std::string, InputConnection > mDefaultOverrides;
+		const ShaderGraphNodeTemplate* mTemplate = nullptr;
+		std::vector< NodeLink > mLinks;
 	};
 
-	enum class ShaderGraphMainNodeInputType
+	enum class ShaderPassType
 	{
-		Albedo,
-		Normal,
-		Metallic,
-		Roughness,
-		Emissive,
-		AmbientOcculsion,
-		VertexPositionOffset,
+		Surface_StaticGeom,
 		Count
-	};
-
-	// Main entry point for shader graph
-	class ShaderGraphMainNode : public ShaderGraphNode
-	{
-		public:
-
-			/**
-			* @brief
-			*/
-			ShaderGraphMainNode( )
-				: ShaderGraphNode( "MainNode" )
-			{
-				// Max number of inputs allowed for main node 
-				mMaxNumberInputs = u32( ShaderGraphMainNodeInputType::Count );
-
-				// Resize inputs to fit max
-				//mInputs.resize( mMaxNumberInputs );
-			}
-
-			/**
-			* @brief
-			*/
-			~ShaderGraphMainNode( )
-			{
-			} 
-
-			/*
-			* @brief
-			*/
-			Enjon::String EvaluateToGLSL( ) override
-			{ 
-				Enjon::String finalOutput = "";
-				
-				// Evaluate Normal
-				finalOutput += "// Normal\n";
-				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Normal ) + "\n"; 
-
-				// Evaluate Metallic, Roughness, AO
-				finalOutput += "// Metallic\n";
-				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Metallic ) + "\n";
-				finalOutput += "// Roughness\n";
-				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Roughness ) + "\n";
-				finalOutput += "// Ambient Occulsion\n";
-				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::AmbientOcculsion ) + "\n";
-				
-				// Output material properties
-				finalOutput += "// Material Properties\n";
-				finalOutput += "MatPropsOut = vec4(metallic, roughness, ao, 1.0 );\n";
-
-				// Evaluate Albedo
-				finalOutput += "// Albedo\n";
-				finalOutput += EvaluateAtPort( (u32)ShaderGraphMainNodeInputType::Albedo ) + "\n";
-
-				// Evaluate Emissive
-				finalOutput += "// Emissive\n";
-				finalOutput += EvaluateAtPort( ( u32 )ShaderGraphMainNodeInputType::Emissive ) + "\n"; 
-
-				return finalOutput;
-			}
-
-		private:
-			/**
-			* @brief
-			*/
-			Enjon::String EvaluateAtPort( u32 idx )
-			{
-				switch ( ShaderGraphMainNodeInputType( idx ) )
-				{
-					case ShaderGraphMainNodeInputType::Albedo: 
-					{
-						bool inputExists = false;
-
-						// Evaluate connection at this port
-						for ( auto& c : mInputs )
-						{
-							if ( inputExists )
-							{
-								break;
-							}
-
-							// Find input to this
-							if ( c.mInputPortID == (u32) ShaderGraphMainNodeInputType::Albedo )
-							{
-								inputExists = true;
-
-								// String to return
-								Enjon::String albedoOutput = "";
-
-								// Get input node and evaluate
-								ShaderGraphNode* input = const_cast< ShaderGraphNode* >( c.mOwner ); 
-								albedoOutput += input->Evaluate( ) + "\n";
-
-								// Final output string
-								Enjon::String finalOutput = "AlbedoOut = ";
-								Enjon::String qid = input->EvaluateAtPort( c.mOutputPortID );
-
-								// Based on output type, need to format final output
-								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
-								{
-									case ShaderOutputType::Float:
-									{
-										finalOutput += "vec4( " + qid + ", " + qid + ", " + qid + ", 1.0 );\n";
-									} break;
-
-									case ShaderOutputType::Vec2:
-									{
-										finalOutput += "vec4( " + qid + ", " + "1.0, " + "1.0 );\n";
-									} break;
-									
-									case ShaderOutputType::Vec3:
-									{
-										finalOutput += "vec4( " + qid + + ", 1.0 );\n";
-									} break;
-									
-									case ShaderOutputType::Vec4:
-									{
-										finalOutput += qid + ";\n";
-									} break; 
-								}
-
-								// Final output
-								albedoOutput += finalOutput;
-
-								// return
-								return albedoOutput;
-							}
-						}
-
-					} break;
-
-					case ShaderGraphMainNodeInputType::Normal:
-					{
-						bool inputExists = false;
-
-						// Evaluate connection at this port
-						for ( auto& c : mInputs )
-						{
-							// Break out of loop if input already found
-							if ( inputExists )
-							{
-								break;
-							}
-
-							// Find input to this
-							if ( c.mInputPortID == ( u32 )ShaderGraphMainNodeInputType::Normal )
-							{
-								// Input does exist, so mark it true
-								inputExists = true;
-
-								// String to return
-								Enjon::String normalOut = "";
-
-								// Get input node and evaluate
-								ShaderGraphNode* input = const_cast< ShaderGraphNode* >( c.mOwner );
-								normalOut += input->Evaluate( ) + "\n";
-
-								// Final output string
-								Enjon::String finalOutput = "NormalsOut = ";
-								Enjon::String qid = input->EvaluateAtPort( c.mOutputPortID );
-
-								// Based on output type, need to format final output
-								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
-								{
-									case ShaderOutputType::Float:
-									{
-										finalOutput += "vec4( " + qid + ", " + qid + ", " + qid + ", 1.0 );\n";
-									} break;
-
-									case ShaderOutputType::Vec2:
-									{
-										finalOutput += "vec4( " + qid + ", " + "1.0, " + "1.0 );\n";
-									} break;
-
-									case ShaderOutputType::Vec3:
-									{
-										finalOutput += "vec4( " + qid + +", 1.0 );\n";
-									} break;
-
-									case ShaderOutputType::Vec4:
-									{
-										finalOutput += qid + ";\n";
-									} break;
-								}
-
-								// Final output
-								normalOut += finalOutput;
-
-								// Multiply by tbn
-								normalOut += "vec3 normal = normalize(NormalsOut.xyz * 2.0 - 1.0);\n";
-								normalOut += "NormalsOut = vec4(normalize(fs_in.tbn * normal), 1.0);\n";
-
-								// return
-								return normalOut;
-							}
-						}
-
-					} break;
-
-					case ShaderGraphMainNodeInputType::Emissive:
-					{
-						bool inputExists = false;
-
-						// Evaluate connection at this port
-						for ( auto& c : mInputs )
-						{
-							// Break out of loop if input already found
-							if ( inputExists )
-							{
-								break;
-							}
-
-							// Find input to this
-							if ( c.mInputPortID == ( u32 )ShaderGraphMainNodeInputType::Emissive )
-							{
-								// Input does exist, so mark it true
-								inputExists = true;
-
-								// String to return
-								Enjon::String emissiveOut = "";
-
-								// Get input node and evaluate
-								ShaderGraphNode* input = const_cast< ShaderGraphNode* >( c.mOwner );
-								emissiveOut += input->Evaluate( ) + "\n";
-
-								// Final output string
-								Enjon::String finalOutput = "EmissiveOut = ";
-								Enjon::String qid = input->GetQualifiedID( );
-
-								// Based on output type, need to format final output
-								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
-								{
-									case ShaderOutputType::Float:
-									{
-										finalOutput += "vec4( " + qid + ", " + qid + ", " + qid + ", 1.0 );\n";
-									} break;
-
-									case ShaderOutputType::Vec2:
-									{
-										finalOutput += "vec4( " + qid + ", " + "1.0, " + "1.0 );\n";
-									} break;
-
-									case ShaderOutputType::Vec3:
-									{
-										finalOutput += "vec4( " + qid + +", 1.0 );\n";
-									} break;
-
-									case ShaderOutputType::Vec4:
-									{
-										finalOutput += qid + ";\n";
-									} break;
-								}
-
-								// Final output
-								emissiveOut += finalOutput;
-
-								// return
-								return emissiveOut;
-							}
-						} 
-						
-					} break;
-
-					case ShaderGraphMainNodeInputType::Metallic:
-					{
-						bool inputExists = false;
-
-						// Evaluate connection at this port
-						for ( auto& c : mInputs )
-						{
-							// Break out of loop if input already found
-							if ( inputExists )
-							{
-								break;
-							}
-
-							// Find input to this
-							if ( c.mInputPortID == ( u32 )ShaderGraphMainNodeInputType::Metallic )
-							{
-								// Input does exist, so mark it true
-								inputExists = true;
-
-								// String to return
-								Enjon::String metallicOut = "";
-
-								// Get input node and evaluate
-								ShaderGraphNode* input = const_cast< ShaderGraphNode* >( c.mOwner );
-								metallicOut += input->Evaluate( ) + "\n";
-
-								// Final output string
-								Enjon::String finalOutput = "metallic = ";
-								Enjon::String qid = input->GetQualifiedID( );
-
-								// Based on output type, need to format final output
-								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
-								{
-								case ShaderOutputType::Float:
-								{
-									finalOutput += qid + ";\n";
-								} break;
-
-								case ShaderOutputType::Vec2:
-								{
-									finalOutput += qid + ".r" + ";\n";
-								} break;
-
-								case ShaderOutputType::Vec3:
-								{
-									finalOutput += qid + ".r" + ";\n";
-								} break;
-
-								case ShaderOutputType::Vec4:
-								{
-									finalOutput += qid + ".r" + ";\n";
-								} break;
-								}
-
-								// Final output
-								metallicOut += finalOutput;
-
-								// return
-								return metallicOut;
-							}
-						}
-					} break;
-
-					case ShaderGraphMainNodeInputType::Roughness:
-					{
-						bool inputExists = false;
-
-						// Evaluate connection at this port
-						for ( auto& c : mInputs )
-						{
-							// Break out of loop if input already found
-							if ( inputExists )
-							{
-								break;
-							}
-
-							// Find input to this
-							if ( c.mInputPortID == ( u32 )ShaderGraphMainNodeInputType::Roughness )
-							{
-								// Input does exist, so mark it true
-								inputExists = true;
-
-								// String to return
-								Enjon::String roughnessOut = "";
-
-								// Get input node and evaluate
-								ShaderGraphNode* input = const_cast< ShaderGraphNode* >( c.mOwner );
-								roughnessOut += input->Evaluate( ) + "\n";
-
-								// Final output string
-								Enjon::String finalOutput = "roughness = ";
-								Enjon::String qid = input->GetQualifiedID( );
-
-								// Based on output type, need to format final output
-								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
-								{
-								case ShaderOutputType::Float:
-								{
-									finalOutput += qid + ";\n";
-								} break;
-
-								case ShaderOutputType::Vec2:
-								{
-									finalOutput += qid + ".r" + ";\n";
-								} break;
-
-								case ShaderOutputType::Vec3:
-								{
-									finalOutput += qid + ".r" + ";\n";
-								} break;
-
-								case ShaderOutputType::Vec4:
-								{
-									finalOutput += qid + ".r" + ";\n";
-								} break;
-								}
-
-								// Final output
-								roughnessOut += finalOutput;
-
-								// return
-								return roughnessOut;
-							}
-						}
-					} break;
-
-					case ShaderGraphMainNodeInputType::AmbientOcculsion:
-					{
-						bool inputExists = false;
-
-						// Evaluate connection at this port
-						for ( auto& c : mInputs )
-						{
-							// Break out of loop if input already found
-							if ( inputExists )
-							{
-								break;
-							}
-
-							// Find input to this
-							if ( c.mInputPortID == ( u32 )ShaderGraphMainNodeInputType::AmbientOcculsion )
-							{
-								// Input does exist, so mark it true
-								inputExists = true;
-
-								// String to return
-								Enjon::String ambientOut = "";
-
-								// Get input node and evaluate
-								ShaderGraphNode* input = const_cast< ShaderGraphNode* >( c.mOwner );
-								ambientOut += input->Evaluate( ) + "\n";
-
-								// Final output string
-								Enjon::String finalOutput = "ao = ";
-								Enjon::String qid = input->GetQualifiedID( );
-
-								// Based on output type, need to format final output
-								switch ( input->EvaluateOutputType( c.mOutputPortID ) )
-								{
-								case ShaderOutputType::Float:
-								{
-									finalOutput += qid + ";\n";
-								} break;
-
-								case ShaderOutputType::Vec2:
-								{
-									finalOutput += qid + ".r" + ";\n";
-								} break;
-
-								case ShaderOutputType::Vec3:
-								{
-									finalOutput += qid + ".r" + ";\n";
-								} break;
-
-								case ShaderOutputType::Vec4:
-								{
-									finalOutput += qid + ".r" + ";\n";
-								} break;
-								}
-
-								// Final output
-								ambientOut += finalOutput;
-
-								// return
-								return ambientOut;
-							}
-						}
-					}
-
-					default:
-					{
-					} break;
-				}
-
-				return "//No valid input found!"; 
-			}
 	};
 
 	class ShaderGraph
 	{
 	public:
-		/**
-		* @brief Constructor
-		*/
+
 		ShaderGraph( );
 
-		/**
-		* @brief Destructor
-		*/
 		~ShaderGraph( );
 
-		/**
-		* @brief
-		*/
-		ShaderGraphNode* AddNode( ShaderGraphNode* node );
+		void Validate( );
 
-		/**
-		* @brief Removes node from graph and frees memory of node
-		*/
-		void RemoveNode( ShaderGraphNode* node );
+		s32 Compile( );
 
-		/**
-		* @brief
-		*/
-		void Reset( );
-		
-		/**
-		* @brief
-		*/
-		void DeleteGraph( );
+		s32 Serialize( rapidjson::PrettyWriter< rapidjson::StringBuffer >& writer );
 
-		/**
-		* @brief
-		*/
-		Enjon::Result Compile( );
+		s32 Deserialize( const std::string& filePath );
 
-		/**
-		* @brief
-		*/
-		const std::vector< UniformReference >& GetUniforms( ) const; 
+		static s32 DeserializeTemplate( const std::string& filePath );
 
-		/*
-		* @brief
-		*/
-		Enjon::String Parse( const ShaderType type );
+		static const ShaderGraphNodeTemplate* GetTemplate( const std::string& name );
 
-		/**
-		* @brief
-		*/
-		bool VariableExists( const Enjon::String& var );
+		static const std::unordered_map< std::string, ShaderGraphNodeTemplate >* GetTemplates( ) { return &mTemplates; }
 
-		/**
-		* @brief
-		*/
-		void RegisterVariable( const Enjon::String& var );
-		
-		/**
-		* @brief
-		*/
-		void RegisterDeclaration( const Enjon::String& var );
+		static std::string FindReplaceMetaTag( const std::string& code, const std::string& toFind, const std::string& replaceWith );
 
-		/**
-		* @brief
-		*/
-		void RegisterRequiredDefinitions( const ShaderGraphNode* node );
+		static std::string ReplaceAllGlobalMetaTags( const std::string& code );
 
-		/**
-		* @brief
-		*/
-		void UnregisterVariable( const Enjon::String& var );
-		
-		/**
-		* @briefConnectionType
-		*/
-		Enjon::String GetShaderOutput( ) const 
-		{
-			return mShaderCodeOutput;
-		} 
-		
-		/**
-		* @brief
-		*/
-		void Connect( const ShaderGraphNode::Connection& connection );
+		static std::string ReplaceTypeWithAppropriateUniformType( const std::string& code );
+
+		static std::string FindReplaceAllMetaTag( const std::string& code, const std::string& toFind, const std::string& replaceWith );
+
+		static bool HasTag( const std::string& code, const std::string& tag );
+
+		static u32 TagCount( const std::string& code, const std::string& tag );
+
+		static std::string ShaderGraph::TransformOutputType( const std::string& code, const std::string& type, const std::string& requiredType );
+
+		const ShaderGraphNode* GetNode( const std::string& nodeName );
+
+		std::string GetCode( ShaderPassType type, ShaderType shaderType = ShaderType::Unknown );
+
+		static std::string ShaderPassToString( ShaderPassType type );
+
+		//Shader* ShaderGraph::CreateShader( ShaderPassType type );
+
+		//void AddUniformsToShader( const NodeLink& link, Shader* shader );
 
 	private:
-		/**
-		* @brief
-		*/
-		void RecurseThroughChildrenAndBuildVariables( const ShaderGraphNode* node ); 
-		
-		/**
-		* @brief
-		*/
-		void OutputShaderGraphHeaderInfo( );
-		
-		/**
-		* @brief
-		*/
-		void OutputVertexHeader( );
-		
-		/**
-		* @brief
-		*/
-		void BeginVertexMain( );
-	
-		/**
-		* @brief
-		*/
-		void VertexMain( );
-		
-		/**
-		* @brief
-		*/
-		void EndVertexMain( );
+		static rapidjson::Document GetJSONDocumentFromFilePath( const std::string& filePath, s32* status );
 
-		/**
-		* @brief
-		*/
-		void OutputFragmentHeader( );
-
-		/*
-		* @brief
-		*/
-		void BeginFragmentMain( );
-
-		/*
-		* @brief
-		*/
-		void EndFragmentMain( );
+		void ShaderGraph::ClearGraph( );
 
 	private:
-		ShaderGraphMainNode mMainNode;
-		std::set< ShaderGraphNode* > mNodes;
-		std::set< Enjon::String > mRegisteredVariables;
-		std::set< Enjon::String > mDeclarations;
-		std::set< const ShaderGraphNode* > mDefinesOnStart;
-		Enjon::String mShaderCodeOutput;
-		std::vector< UniformReference > mUniforms;
-		u32 mLastTextureLocation = 0;
-	};
-
-	class ShaderGraphFunctionNode : public ShaderGraphNode
-	{
-	public:
-		/**
-		* @brief Constructor
-		*/
-		ShaderGraphFunctionNode( const Enjon::String& id )
-			: ShaderGraphNode( id )
-		{
-			mPrimitiveType = ShaderPrimitiveType::Float;
-			mOutputType = ShaderOutputType::Float;
-		}
-
-		/**
-		* @brief Destructor
-		*/
-		~ShaderGraphFunctionNode( ) {}
-
-	protected:
-	};
-
-	class BinaryFunctionNode : public ShaderGraphFunctionNode
-	{
-	public:
-
-		BinaryFunctionNode( const Enjon::String& id )
-			: ShaderGraphFunctionNode( id )
-		{
-			mMaxNumberInputs = 2;
-			mMaxNumberOutputs = 1;
-
-			//mInputs.resize( mMaxNumberInputs );
-		}
-
-		~BinaryFunctionNode( )
-		{
-
-		}
-
-	protected:
-	};
-
-	class UnaryFunctionNode : public ShaderGraphFunctionNode
-	{
-	public:
- 
-		UnaryFunctionNode( const Enjon::String& id )
-			: ShaderGraphFunctionNode( id )
-		{
-			mMaxNumberInputs = 1;
-			mMaxNumberOutputs = 1;
-		}
-
-		~UnaryFunctionNode( )
-		{
-
-		}
-
-	protected:
-	};
-
-
-	template < typename T >
-	class ShaderPrimitiveNode : public ShaderGraphNode
-	{
-	public:
-		ShaderPrimitiveNode( const Enjon::String& id )
-			: ShaderGraphNode( id )
-		{
-			mVariableType = ShaderGraphNodeVariableType::LocalVariable;
-		}
-
-		~ShaderPrimitiveNode( )
-		{
-
-		}
-
-	protected:
-		T mData;
-	};
-
-	class ShaderFloatNode : public ShaderPrimitiveNode< f32 >
-	{
-	public:
-		ShaderFloatNode( const Enjon::String& id )
-			: ShaderPrimitiveNode( id )
-		{
-			mPrimitiveType = ShaderPrimitiveType::Float;
-			mOutputType = ShaderOutputType::Float;
-			mMaxNumberInputs = 1;
-		}
-
-		ShaderFloatNode( const Enjon::String& id, f32 value )
-			: ShaderPrimitiveNode( id )
-		{
-			mData = value;
-			mMaxNumberInputs = 1;
-			mPrimitiveType = ShaderPrimitiveType::Float;
-			mOutputType = ShaderOutputType::Float;
-		}
-
-		~ShaderFloatNode( ) { }
-
-		Enjon::String EvaluateToGLSL( ) override
-		{
-			switch ( mVariableType )
-			{
-			case ShaderGraphNodeVariableType::LocalVariable:
-			{
-				return GetQualifiedID( ) + " = " + std::to_string( mData ) + ";";
-			}
-			break;
-
-			case ShaderGraphNodeVariableType::UniformVariable:
-			{
-				return "";
-			}
-			break;
-
-			default:
-			{
-				return "";
-			}
-			break;
-			}
-		}
-
-		virtual Enjon::String EvaluateAtPort( u32 portID ) override
-		{
-			// Only one port, so return qualified id
-			return GetQualifiedID( );
-		}
-
-		virtual Enjon::String GetDeclaration( ) override
-		{
-			switch ( mVariableType )
-			{ 
-				case ShaderGraphNodeVariableType::LocalVariable:
-				{
-					return "float " + mID + ";";
-				}
-				break;
-
-				case ShaderGraphNodeVariableType::UniformVariable:
-				{
-					return "uniform float " + mID + ";";
-				}
-				break;
-
-				default:
-				{
-					return "float " + mID + ";";
-				}
-				break;
-			}
-		}
-
-	protected:
-	};
-
-
-
-	class ShaderTexture2DNode : public ShaderGraphNode
-	{
-	public:
-		enum class TexturePortType
-		{
-			RGB,
-			R,
-			G,
-			B,
-			A
-		};
-		/**
-		* @brief Constructor
-		*/
-		ShaderTexture2DNode( const Enjon::String& id )
-			: ShaderGraphNode( id )
-		{
-			mVariableType = ShaderGraphNodeVariableType::UniformVariable;
-			mPrimitiveType = ShaderPrimitiveType::Texture2D;
-			mMaxNumberInputs = 1;
-			mMaxNumberOutputs = 5; 
-		}
-
-		/**
-		* @brief Destructor
-		*/
-		~ShaderTexture2DNode( )
-		{
-		}
-
-		/**
-		* @brief
-		*/
-		Enjon::String EvaluateToGLSL( ) override
-		{
-			// Already defined previously
-			return "";
-		}
-
-		virtual ShaderOutputType EvaluateOutputType( u32 portID )
-		{
-			TexturePortType type = TexturePortType( portID );
-
-			switch ( type )
-			{
-				case TexturePortType::RGB: 
-				{
-					return ShaderOutputType::Vec3;
-				} break;
-
-				case TexturePortType::R:
-				case TexturePortType::G:
-				case TexturePortType::B:
-				case TexturePortType::A:
-				{
-					return ShaderOutputType::Float; 
-				} break;
-				default:
-				{
-					return ShaderOutputType::Float; 
-				} break;
-			}
-		}
-
-		virtual Enjon::String EvaluateAtPort( u32 portID ) override
-		{
-			switch ( TexturePortType( portID ) )
-			{
-				case TexturePortType::RGB: 
-				{
-					return GetQualifiedID( ) + ".rgb";
-				} break;
-
-				case TexturePortType::R: 
-				{
-					return GetQualifiedID( ) + ".r";
-				} break;
-				
-				case TexturePortType::G: 
-				{
-					return GetQualifiedID( ) + ".g"; 
-				} break;
-				
-				case TexturePortType::B: 
-				{ 
-					return GetQualifiedID( ) + ".b"; 
-				} break;
-				
-				case TexturePortType::A: 
-				{
-					return GetQualifiedID( ) + ".a"; 
-				} break;
-
-				default:
-				{
-					return GetQualifiedID( );
-				} break;
-			}
-		}
-
-		/**
-		* @brief
-		*/
-		virtual Enjon::String GetDeclaration( ) override
-		{
-			return ( "uniform sampler2D " + mID + ";" );
-		}
-
-		/**
-		* @brief
-		*/
-		virtual Enjon::String GetDefinition( ) override
-		{ 
-			// UV coords
-			Enjon::String uvCoords = "fs_in.texCoords";
-			Enjon::String finalEvaluation = "";
-
-			// Get UV coords if input available
-			if ( !mInputs.empty( ) )
-			{ 
-				// Evaluate inputs
-				for ( auto& c : mInputs )
-				{
-					ShaderGraphNode* owner = const_cast<ShaderGraphNode*>( c.mOwner );
-					finalEvaluation += owner->Evaluate( ) + "\n"; 
-				} 
-
-				// Get connection for uv
-				Connection a_conn = mInputs.at( 0 );
-
-				// Get shader graph nodes
-				ShaderGraphNode* a = const_cast<ShaderGraphNode*>( a_conn.mOwner );
-
-				// Set uv coords
-				
-				uvCoords =  a->EvaluateAtPort( a_conn.mOutputPortID ); 
-			}
-
-			return ( finalEvaluation + "vec4 " + GetQualifiedID() +  " = texture(" + mID + ", " + uvCoords + ");" );
-		}
-
-		/**
-		* @brief
-		*/
-		virtual Enjon::String GetQualifiedID( )
-		{
-			return mID + "_sample";
-		}
+		std::string OutputPassTypeMetaData( const ShaderPassType& pass, s32* status );
+		std::string OutputVertexHeaderBeginTag( );
+		std::string OutputVertexHeaderEndTag( );
+		std::string OutputVertexHeader( const ShaderPassType& pass, s32* status );
+		std::string OutputVertexIncludes( const ShaderPassType& pass, s32* status );
+		std::string BeginVertexMain( const ShaderPassType& pass, s32* status );
+		std::string OutputVertexMain( const ShaderPassType& pass, s32* status );
+		std::string EndVertexMain( const ShaderPassType& pass, s32* status );
+		std::string OutputFragmentHeaderBeginTag( );
+		std::string OutputFragmentHeaderEndTag( );
+		std::string OutputFragmentHeader( const ShaderPassType& pass, s32* status );
+		std::string OutputFragmentIncludes( const ShaderPassType& pass, s32* status );
+		std::string BeginFragmentMain( const ShaderPassType& pass, s32* status );
+		std::string OutputFragmentMain( const ShaderPassType& pass, s32* status );
+		std::string EndFragmentMain( const ShaderPassType& pass, s32* status );
 
 	private:
-	};
+		void AddNode( const ShaderGraphNode& node );
+		void AddConstant( const ShaderGraphNode& node );
+		void AddUniform( const ShaderGraphNode& node );
+		void AddFunction( const ShaderGraphNode& node );
 
-	class ShaderPannerNode : public ShaderGraphNode
-	{
-		public:
-			/*
-			* @brief Constructor
-			*/
-			ShaderPannerNode( const Enjon::String& id, const Enjon::Vec2& speed );
-
-			/*
-			* @brief Destructor
-			*/
-			~ShaderPannerNode( ); 
-
-			/*
-			* @brief
-			*/
-			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateToGLSL( ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String GetDeclaration( ) override;
-
-		protected:
-			Enjon::Vec2 mSpeed = Enjon::Vec2( 0.0f ); 
-	};
-	
-	class ShaderTextureCoordinatesNode : public ShaderGraphNode
-	{
-		public:
-			/*
-			* @brief Constructor
-			*/
-			ShaderTextureCoordinatesNode( const Enjon::String& id, const Enjon::Vec2& tiling );
-
-			/*
-			* @brief Destructor
-			*/
-			~ShaderTextureCoordinatesNode( ); 
-
-			/*
-			* @brief
-			*/
-			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateToGLSL( ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String GetDeclaration( ) override;
-
-		protected:
-			Enjon::Vec2 mTiling = Enjon::Vec2( 0.0f ); 
-	};
-	
-	class ShaderVertexNormalWSNode : public ShaderGraphNode
-	{
-		public:
-			/*
-			* @brief Constructor
-			*/
-			ShaderVertexNormalWSNode( const Enjon::String& id );
-
-			/*
-			* @brief Destructor
-			*/
-			~ShaderVertexNormalWSNode( ); 
-
-			/*
-			* @brief
-			*/
-			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateToGLSL( ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String GetDeclaration( ) override;
-
-		protected:
-	};
-
-
-	class ShaderPixelNormalWSNode : public ShaderGraphNode
-	{
-		public:
-			/*
-			* @brief Constructor
-			*/
-			ShaderPixelNormalWSNode( const Enjon::String& id );
-
-			/*
-			* @brief Destructor
-			*/
-			~ShaderPixelNormalWSNode( );
-
-			/*
-			* @brief
-			*/
-			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateToGLSL( ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String GetDeclaration( ) override;
-
-		protected:
-	};
-
-	class ShaderCameraWorldPositionNode : public ShaderGraphNode
-	{
-		public:
-			/*
-			* @brief Constructor
-			*/
-			ShaderCameraWorldPositionNode( const Enjon::String& id );
-
-			/*
-			* @brief Destructor
-			*/
-			~ShaderCameraWorldPositionNode( );
-
-			/*
-			* @brief
-			*/
-			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateToGLSL( ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String GetDeclaration( ) override;
-
-		protected:
-	};
-	
-	class ShaderCameraViewDirectionNode : public ShaderGraphNode
-	{
-		public:
-			/*
-			* @brief Constructor
-			*/
-			ShaderCameraViewDirectionNode( const Enjon::String& id );
-
-			/*
-			* @brief Destructor
-			*/
-			~ShaderCameraViewDirectionNode( );
-
-			/*
-			* @brief
-			*/
-			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateToGLSL( ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String GetDeclaration( ) override;
-
-		protected:
-	};
-
-	class ShaderVertexNormalDirectionNode : public ShaderGraphNode 
-	{
-		public:
-			/*
-			* @brief Constructor
-			*/
-			ShaderVertexNormalDirectionNode( const Enjon::String& id );
-
-			/*
-			* @brief Destructor
-			*/
-			~ShaderVertexNormalDirectionNode( );
-
-			/*
-			* @brief
-			*/
-			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateToGLSL( ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String GetDeclaration( ) override;
-
-		protected:
-	};
-	
-	class ShaderVertexWorldPositionNode : public ShaderGraphNode 
-	{
-		public:
-			/*
-			* @brief Constructor
-			*/
-			ShaderVertexWorldPositionNode( const Enjon::String& id );
-
-			/*
-			* @brief Destructor
-			*/
-			~ShaderVertexWorldPositionNode( );
-
-			/*
-			* @brief
-			*/
-			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateToGLSL( ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String GetDeclaration( ) override;
-
-		protected:
-	};
-
-	class ShaderBranchIfElseNode : public ShaderGraphNode
-	{
-		public:
-			/*
-			* @brief Constructor
-			*/
-			ShaderBranchIfElseNode( const Enjon::String& id );
-
-			/*
-			* @brief Destructor
-			*/
-			~ShaderBranchIfElseNode( );
-
-			/*
-			* @brief
-			*/
-			virtual ShaderOutputType EvaluateOutputType( u32 portID = 0 ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateToGLSL( ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String EvaluateAtPort( u32 portID ) override;
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::String GetDeclaration( ) override;
-
-		protected:
-	};
+	protected:
+		std::string mName;
+		std::unordered_map< std::string, ShaderGraphNode > mNodes;
+		static std::unordered_map< std::string, ShaderGraphNodeTemplate > mTemplates;
+		std::unordered_map< ShaderPassType, u32 > mShaderProgramHandles; 
+		std::unordered_map< ShaderPassType, std::string > mShaderPassCode;
+		std::unordered_map< ShaderPassType, UniformMap > mShaderUniforms;
+		ShaderGraphNode mMainSurfaceNode;
+		u32 mTextureSamplerLocation = 0;
+	}; 
 }
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

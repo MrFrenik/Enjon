@@ -114,7 +114,7 @@ namespace Enjon {
 
 		return result; 
 	}
-
+ 
 	Mat4 Mat4::Perspective(const f32& FOV, 
 							const f32& aspectRatio, 
 							const f32& near, 
