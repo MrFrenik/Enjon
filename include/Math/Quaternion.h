@@ -36,6 +36,10 @@ namespace Enjon
 				: x(q.x), y(q.y), z(q.z), w(q.w) 
 			{} 
 
+			~Quaternion( )
+			{ 
+			}
+
 			// Return vec3 of x,y,z components of quaternion
 			Vec3 XYZ();
 

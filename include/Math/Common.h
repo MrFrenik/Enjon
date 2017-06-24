@@ -33,7 +33,7 @@ namespace Enjon {
 		
 	inline float ToRadians(float degrees)
 	{
-		return degrees * (float)(PI / 180.0f);
+		return degrees * ( f32 )( ( f32 )PI / 180.0f );
 	} 
 
 	inline float ToDegrees(float radians)

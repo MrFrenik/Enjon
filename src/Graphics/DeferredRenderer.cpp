@@ -30,6 +30,10 @@
 #include <cassert>
 
 #include <STB/stb_image.h> 
+#include <glm/glm.hpp>
+#include <glm/matrix.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 Enjon::Renderable mRenderable; 
 
@@ -161,6 +165,8 @@ namespace Enjon
 		//glEnable( GL_CULL_FACE );
 		//glCullFace( GL_BACK );
 		glEnable( GL_DEPTH_CLAMP );
+		// enable seamless cubemap sampling for lower mip levels in the pre-filter map.
+		glEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 
 		return Result::SUCCESS;
 	}
@@ -170,7 +176,7 @@ namespace Enjon
 	void DeferredRenderer::STBTest( )
 	{
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
-		Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/Alexs_Apt_2k.hdr";
+		Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/Newport_Loft_Ref.hdr";
 
 		stbi_set_flip_vertically_on_load( true );
 		s32 width, height, nComps;
@@ -206,11 +212,11 @@ namespace Enjon
 			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
-			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); 
  
 			// Capture onto cubemap faces
-			Mat4 captureProj = Mat4::Perspective( 90.0f, 1.0f, 0.1f, 100.0f );
+			Mat4 captureProj = Mat4::Perspective( 90.0f, 1.0f, 0.1f, 10.0f );
 			Mat4 captureViews[ ] =  
 			{
 				Mat4::LookAt( Vec3(0.0f), Vec3( 1.0f, 0.0f, 0.0f ), Vec3( 0.0f, -1.0f, 0.0f ) ),
@@ -219,15 +225,26 @@ namespace Enjon
 				Mat4::LookAt( Vec3(0.0f), Vec3( 0.0f, -1.0f, 0.0f ), Vec3( 0.0f, 0.0f, -1.0f ) ),
 				Mat4::LookAt( Vec3(0.0f), Vec3( 0.0f, 0.0f, 1.0f ), Vec3( 0.0f, -1.0f, 0.0f ) ),
 				Mat4::LookAt( Vec3(0.0f), Vec3( 0.0f, 0.0f, -1.0f ), Vec3( 0.0f, -1.0f, 0.0f ) )
-			};
+			}; 
 
+			/*glm::mat4 captureProjection = glm::perspective( glm::radians( 90.0f ), 1.0f, 0.1f, 10.0f );
+			glm::mat4 captureVs[ ] =  
+			{
+				glm::lookAt( glm::vec3(0.0f), glm::vec3( 1.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, -1.0f, 0.0f ) ),
+				glm::lookAt( glm::vec3(0.0f), glm::vec3( -1.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, -1.0f, 0.0f ) ),
+				glm::lookAt( glm::vec3(0.0f), glm::vec3( 0.0f, 1.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ),
+				glm::lookAt( glm::vec3(0.0f), glm::vec3( 0.0f, -1.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, -1.0f ) ),
+				glm::lookAt( glm::vec3(0.0f), glm::vec3( 0.0f, 0.0f, 1.0f ), glm::vec3( 0.0f, -1.0f, 0.0f ) ),
+				glm::lookAt( glm::vec3(0.0f), glm::vec3( 0.0f, 0.0f, -1.0f ), glm::vec3( 0.0f, -1.0f, 0.0f ) )
+			}; */
+
+			glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO ); 
 			GLSLProgram* equiShader = ShaderManager::Get( "EquiToCube" );
 			equiShader->Use( );
 			{
 				equiShader->BindTexture( "equiMap", mHDRTextureID, 0 );
 				equiShader->SetUniform( "projection", captureProj );
 				glViewport( 0, 0, 512, 512 );
-				glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO ); 
 				for ( u32 i = 0; i < 6; ++i )
 				{
 					equiShader->SetUniform( "view", captureViews[ i ] );
@@ -236,9 +253,141 @@ namespace Enjon
 
 					RenderCube( ); 
 				}
-				glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+				glBindFramebuffer( GL_FRAMEBUFFER, 0 ); 
 			}
 			equiShader->Unuse( );
+
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+			glGenerateMipmap( GL_TEXTURE_CUBE_MAP );
+
+			// pbr: create an irradiance cubemap, and re-scale capture FBO to irradiance scale.
+			// --------------------------------------------------------------------------------
+			glGenTextures( 1, &mIrradianceMap );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mIrradianceMap );
+			for ( unsigned int i = 0; i < 6; ++i )
+			{
+				glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr );
+			}
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+			glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO );
+			glBindRenderbuffer( GL_RENDERBUFFER, mCaptureRBO );
+			glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32 );
+
+			// pbr: solve diffuse integral by convolution to create an irradiance (cube)map.
+			// -----------------------------------------------------------------------------
+			GLSLProgram* irradianceShader = ShaderManager::Get( "IrradianceCapture" );
+			irradianceShader->Use( );
+			{
+				irradianceShader->SetUniform( "projection", captureProj );
+				irradianceShader->SetUniform( "envMap", 0 );
+				glActiveTexture( GL_TEXTURE0 );
+				glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+
+				glViewport( 0, 0, 32, 32 ); // don't forget to configure the viewport to the capture dimensions.
+				glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO );
+				for ( unsigned int i = 0; i < 6; ++i )
+				{
+					irradianceShader->SetUniform( "view", captureViews[ i ] );
+					glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mIrradianceMap, 0 );
+					glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+					RenderCube( );
+				}
+				glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+			}
+			irradianceShader->Unuse( );
+
+			// pbr: create an prefiltered convolution cubemap.
+			// --------------------------------------------------------------------------------
+			glGenTextures( 1, &mPrefilteredMap );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mPrefilteredMap );
+			const u32 textureSize = 128;
+			for ( u32 i = 0; i < 6; ++i )
+			{
+				glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, textureSize, textureSize, 0, GL_RGB, GL_FLOAT, nullptr );
+			}
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+			glGenerateMipmap( GL_TEXTURE_CUBE_MAP );
+
+			// -----------------------------------------------------------------------------
+			GLSLProgram* prefilterShader = ShaderManager::Get( "PrefilterConvolution" );
+			prefilterShader->Use( );
+			{
+				prefilterShader->SetUniform( "projection", captureProj );
+				glActiveTexture( GL_TEXTURE0 );
+				glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+
+				glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO );
+
+				const u32 maxMipLevels = 5;
+				for ( u32 mip = 0; mip < maxMipLevels; ++mip )
+				{
+					u32 mipWidth = u32( ( f32 )textureSize * std::pow( 0.5, mip ) );
+					u32 mipHeight = u32( ( f32 )textureSize * std::pow( 0.5, mip ) );
+					f32 roughness = ( f32 )mip / ( f32 )( maxMipLevels - 1 );
+					prefilterShader->SetUniform( "roughness", roughness );
+
+					glViewport( 0, 0, mipWidth, mipHeight ); // don't forget to configure the viewport to the capture dimensions.
+					glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight );
+					for ( unsigned int i = 0; i < 6; ++i )
+					{
+						prefilterShader->SetUniform( "view", captureViews[ i ] );
+						glBindRenderbuffer( GL_RENDERBUFFER, mCaptureRBO );
+						glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mPrefilteredMap, mip );
+						glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+						RenderCube( );
+					} 
+				} 
+				glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+			}
+			prefilterShader->Unuse( );
+
+			//GLSLProgram* prefilterShader = ShaderManager::Get( "PrefilterConvolution" );
+			//prefilterShader->Use( );
+			//{
+			//	prefilterShader->SetUniform( "projection", captureProj ); 
+			//	glActiveTexture( GL_TEXTURE0 );
+			//	glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+
+			//	glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO );
+			//	u32 maxMipLevels = 5;
+			//	//for ( u32 mip = 0; mip < maxMipLevels; ++mip )
+			//	//{
+			//		// reisze framebuffer according to mip-level size.
+			//		//u32 mipWidth = u32( ( f32 )textureSize * std::pow( 0.5, mip ) );
+			//		//u32 mipHeight = u32( ( f32 )textureSize * std::pow( 0.5, mip ) );
+			//		glBindRenderbuffer( GL_RENDERBUFFER, mCaptureRBO );
+			//		//glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight );
+			//		glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, textureSize, textureSize );
+			//		//glViewport( 0, 0, mipWidth, mipHeight );
+			//		glViewport( 0, 0, textureSize, textureSize );
+
+			//		//f32 roughness = ( f32 )mip / ( f32 )( maxMipLevels - 1 );
+			//		//prefilterShader->SetUniform( "roughness", roughness );
+			//		for ( unsigned int i = 0; i < 6; ++i )
+			//		{
+			//			prefilterShader->SetUniform( "view", captureViews[ i ] );
+			//			glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mPrefilteredMap, 0 );
+
+			//			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+			//			RenderCube( ); 
+			//		}
+			//	//}
+			//	glBindFramebuffer( GL_FRAMEBUFFER, 0 ); 
+			//}
+			//prefilterShader->Unuse( );
 
 		}
 		else
@@ -455,9 +604,11 @@ namespace Enjon
 		{
 			skyBoxShader->SetUniform( "view", mSceneCamera.GetView( ) );
 			skyBoxShader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
-			skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
+			//skyBoxShader->BindTexture( "environmentMap", mIrradianceMap, 0 );
+
+			// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
 			glActiveTexture( GL_TEXTURE0 );
-			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mPrefilteredMap );
 
 			RenderCube( );
 		}
@@ -492,14 +643,25 @@ namespace Enjon
 		glDisable(GL_DEPTH_TEST);
 		glBlendFunc(GL_ONE, GL_ONE);
 
+		//uniform sampler2D uAlbedoMap;
+		//uniform sampler2D uNormalMap;
+		//uniform sampler2D uPositionMap;
+		//uniform sampler2D uEmissiveMap;
+		//uniform sampler2D uMaterialMap;
+		//uniform samplerCube irradianceMap;
+
 		// Ambient pass
 		ambientShader->Use();
-		{
-			ambientShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
-			ambientShader->BindTexture("u_emissiveMap", mGbuffer->GetTexture(GBufferTextureType::EMISSIVE), 1);
-			ambientShader->SetUniform("u_ambientColor", Vec3(aS->mColor.r, aS->mColor.g, aS->mColor.b));
-			ambientShader->SetUniform("u_ambientIntensity", aS->mIntensity);
-			ambientShader->SetUniform("u_resolution", mGbuffer->GetResolution());
+		{ 
+			glActiveTexture( GL_TEXTURE0 );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mIrradianceMap );
+			ambientShader->BindTexture("uAlbedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 1);
+			ambientShader->BindTexture("uNormalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 2);
+			ambientShader->BindTexture("uPositionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 3);
+			ambientShader->BindTexture("uEmissiveMap", mGbuffer->GetTexture(GBufferTextureType::EMISSIVE), 4);
+			ambientShader->BindTexture("uMaterialMap", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 5);
+			ambientShader->SetUniform("uResolution", mGbuffer->GetResolution());
+			ambientShader->SetUniform( "uCamPos", mSceneCamera.GetPosition() );
 
 			// Render
 				mBatch->Begin();

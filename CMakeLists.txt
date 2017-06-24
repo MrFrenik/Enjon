@@ -150,6 +150,8 @@ file(GLOB_RECURSE GAME_FILES
 	"${ENJON_DIR}/IsoARPG/src/Game.cpp"
 	"${ENJON_DIR}/IsoARPG/src/main.cpp") 
 
+file(GLOB_RECURSE SHADERS "${ENJON_DIR}/Shaders/*.glsl" ) 
+
 # Add all engine source files
 set(
 	GENERAL_SOURCES
@@ -187,6 +189,7 @@ set(
 	${SRC_SERIALIZE}
 	${GAME_FILES}
 	${GENERAL_SOURCES}
+	${SHADERS}
 	)
 
 
@@ -194,8 +197,8 @@ SET( LINK_LIBRARY debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_L
 
 add_executable(Enjon ${ALL_SRC})
 #target_link_libraries(Enjon debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES})
-#target_link_libraries(Enjon ${PROJECT_DEBUG_LIBRARIES})
-target_link_libraries(Enjon ${PROJECT_RELEASE_LIBRARIES})
+target_link_libraries(Enjon ${PROJECT_DEBUG_LIBRARIES})
+#target_link_libraries(Enjon ${PROJECT_RELEASE_LIBRARIES})
 
 source_group("Base"			FILES ${SRC_BASE})
 source_group("Entity"		FILES ${SRC_ENTITY})
@@ -211,6 +214,7 @@ source_group("Asset"		FILES ${SRC_ASSET})
 source_group("ShaderGraph"	FILES ${SRC_SHADER_GRAPH}) 
 source_group("Serialize"	FILES ${SRC_SERIALIZE}) 
 source_group("Game"			FILES ${GAME_FILES}) 
+source_group("Shaders"		FILES ${SHADERS}) 
 
 # Write to .user file for command arguments
 if (MSVC)

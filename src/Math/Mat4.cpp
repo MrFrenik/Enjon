@@ -1,5 +1,9 @@
 #include "math/Mat4.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/matrix.hpp>
+#include <glm/glm.hpp>
+
 #include <sstream>
 
 namespace Enjon {
@@ -114,13 +118,13 @@ namespace Enjon {
 
 		return result; 
 	}
- 
+
 	Mat4 Mat4::Perspective(const f32& FOV, 
 							const f32& aspectRatio, 
 							const f32& near, 
 							const f32& far)
 	{
-		Mat4 result(1.0f);
+		Mat4 result(0.0f);
 
 		f32 q = 1.0f / tan(Enjon::ToRadians(0.5f * FOV));
 		f32 a = q / aspectRatio;
@@ -199,37 +203,28 @@ namespace Enjon {
 
 	Mat4 Mat4::LookAt(const Vec3& Position, const Vec3& Target, Vec3& Up)
 	{
-		// Get direction and right vectors
-		Vec3 ZAxis = Vec3::Normalize(Position - Target);
-		auto YAxis = Up;
-		Vec3 XAxis = Vec3::Normalize(Vec3::Cross(Up, ZAxis));
-		YAxis = ZAxis.Cross(XAxis);
-		XAxis = Vec3::Normalize(XAxis);
-		YAxis = Vec3::Normalize(YAxis);
+		Vec3 f = Vec3::Normalize( Target - Position );
+		Vec3 s = Vec3::Normalize( Vec3::Cross( f, Up ) );
+		Vec3 u = Vec3::Cross( s, f );
+		
+		Mat4 lookAt = Mat4::Identity( ); 
+		lookAt[ 0 ][ 0 ] = s.x;
+		lookAt[ 1 ][ 0 ] = s.y;
+		lookAt[ 2 ][ 0 ] = s.z;
 
-		Mat4 LA(1.0f);
-		LA.elements[0] = XAxis.x;
-		LA.elements[1] = YAxis.x;
-		LA.elements[2] = ZAxis.x;
-		LA.elements[3] = 0.0f;
+		lookAt[ 0 ][ 1 ] = u.x;
+		lookAt[ 1 ][ 1 ] = u.y;
+		lookAt[ 2 ][ 1 ] = u.z;
 
-		LA.elements[4] = XAxis.y;
-		LA.elements[5] = YAxis.y;
-		LA.elements[6] = ZAxis.y;
-		LA.elements[7] = 0.0f;
+		lookAt[ 0 ][ 2 ] = -f.x;
+		lookAt[ 1 ][ 2 ] = -f.y;
+		lookAt[ 2 ][ 2 ] = -f.z;
 
-		LA.elements[8]  = XAxis.z;
-		LA.elements[9]  = YAxis.z;
-		LA.elements[10] = ZAxis.z;
-		LA.elements[11] = 0.0f;
+		lookAt[ 3 ][ 0 ] = -s.Dot( Position );
+		lookAt[ 3 ][ 1 ] = -u.Dot( Position );
+		lookAt[ 3 ][ 2 ] = f.Dot( Position ); 
 
-		// Mat4 Translation(1.0f);
-		LA.elements[12] = XAxis.Dot(Position * -1.0f);	
-		LA.elements[13] = YAxis.Dot(Position * -1.0f);	
-		LA.elements[14] = ZAxis.Dot(Position * -1.0f);
-		LA.elements[15] = 1.0f;
-
-		return LA;
+		return lookAt;
 	}
 
 	Mat4& Mat4::Invert()

@@ -17,6 +17,10 @@ namespace Enjon {
 			{
 				f32 elements[4 * 4];
 				f32 Elements[4][4];
+				struct  
+				{
+					Vec4 x, y, z, w;
+				};
 				Vec4 columns[4];
 			};
 
@@ -28,6 +32,10 @@ namespace Enjon {
 
 			Mat4& Multiply(const Mat4& other);
 
+			~Mat4( )
+			{ 
+			}
+
 			friend Mat4 operator*(Mat4 left, const Mat4& right);
 			Mat4& operator*=(const Mat4& other);
 
@@ -36,6 +44,9 @@ namespace Enjon {
 
 			Vec4 Multiply(const Vec4& other) const;
 			friend Vec4 operator*(const Mat4& left, const Vec4& right);
+
+			inline Vec4& operator[]( usize index ) { return columns[ index ]; }
+			inline const Vec4& operator[]( usize index ) const { return columns[ index ]; }
 
 			Mat4& Invert();
 
@@ -60,6 +71,10 @@ namespace Enjon {
 			static Mat4 Translate(const Vec3& vector);
 			static Mat4 Rotate(const f32& angle, const Vec3& axis);
 			static Mat4 Inverse(const Mat4& M);
+
+			/*
+			* @brief Look at RH
+			*/
 			static Mat4 LookAt(const Vec3& Position, const Vec3& Target, Vec3& Up);
 
 			friend std::ostream& operator<<(std::ostream& stream, const Mat4& Mat);

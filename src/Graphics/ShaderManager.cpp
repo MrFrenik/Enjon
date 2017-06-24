@@ -47,6 +47,8 @@ namespace Enjon { namespace ShaderManager {
 		ShaderManager::AddShader("Transparent", "../shaders/deferred/transparent_material.v.glsl", "../shaders/deferred/transparent_material.f.glsl");
 		ShaderManager::AddShader("EquiToCube", "../shaders/equiToCubemap.v.glsl", "../shaders/equiToCubemap.f.glsl");
 		ShaderManager::AddShader("SkyBox", "../shaders/skybox.v.glsl", "../shaders/skybox.f.glsl");
+		ShaderManager::AddShader("IrradianceCapture", "../shaders/pbr/Irradiance.v.glsl", "../shaders/pbr/Irradiance.f.glsl");
+		ShaderManager::AddShader("PrefilterConvolution", "../shaders/pbr/PrefilterConvolution.v.glsl", "../shaders/pbr/PrefilterConvolution.f.glsl");
 	}
 
 	void AddShader(const char* shadername, const char* vertpath, const char* fragpath)

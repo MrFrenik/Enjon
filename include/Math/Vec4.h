@@ -16,6 +16,10 @@ namespace Enjon {
 			*/
 			Vec4() = default;
 
+			~Vec4( )
+			{ 
+			}
+
 			/**
 			* @brief Constructor that takes f32's for x, y, z, w
 			* @param x - f32 value to be set for x component
@@ -101,6 +105,9 @@ namespace Enjon {
 			friend void operator/=(Vec4& left, f32 scalar);
 			friend bool operator==(const Vec4& left, const Vec4& right); 
 			friend bool operator!=(const Vec4& left, const Vec4& right);
+
+			inline f32& operator[]( usize index ) { return data[ index ]; }
+			inline const f32& operator[]( usize index ) const { return data[ index ]; }
 			
 			Vec4& operator+=(const Vec4& other);
 			Vec4& operator-=(const Vec4& other);
@@ -115,10 +122,25 @@ namespace Enjon {
 			
 		public:
 
-			f32 x; 
-			f32 y;
-			f32 z;
-			f32 w; 
+			union 
+			{
+				struct 
+				{
+					f32 x; 
+					f32 y;
+					f32 z;
+					f32 w; 
+				};
+				f32 data[ 4 ];
+
+				struct
+				{
+					Vec2 xy;
+					Vec2 zw;
+				}; 
+
+				Vec3 xyz;
+			};
 	};
 }
 

@@ -83,11 +83,10 @@ void main()
 
     // Get material properties
     vec4 MaterialProps = texture2D(u_matProps, TexCoords);
-    // MaterialProps = vec4(pow(MaterialProps.r, 2.2), pow(MaterialProps.g, 2.2), pow(MaterialProps.b, 2.2), 1.0);
 
     // Roughness, Metallic, and AO
     float Metallic  = MaterialProps.r;
-    float Roughness = MaterialProps.g * MaterialProps.g;
+    float Roughness = max( 0.08, MaterialProps.g * MaterialProps.g );
 
     // Calculate radiance
     vec3 L = normalize(u_lightDirection);
