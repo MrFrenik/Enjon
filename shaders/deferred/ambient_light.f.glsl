@@ -39,6 +39,7 @@ void main()
 
     // Get diffuse color
     vec3 albedo = texture2D(uAlbedoMap, TexCoords).rgb;
+    albedo = vec3(pow(albedo.r, 2.2), pow(albedo.g, 2.2), pow(albedo.b, 2.2));
 
     vec4 emissive = texture2D(uEmissiveMap, TexCoords);
     
@@ -57,7 +58,8 @@ void main()
 	// Material Properties
 	vec4 MaterialProps = texture2D( uMaterialMap, TexCoords );
 	float metallic = MaterialProps.r;
-	float roughness = max( 0.08, MaterialProps.g * MaterialProps.g );
+	float roughness = clamp( MaterialProps.g * MaterialProps.g, 0.08, 0.99 );
+	float a = roughness * roughness;
 	float ao = MaterialProps.b;
 	
 	// F0 mix
@@ -65,31 +67,32 @@ void main()
     F0 = mix(F0, albedo, metallic);
 	
 	// Get fresnel term
-	vec3 F = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);	
+	vec3 F = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, a);	
 
 	// Ambient Diffuse term
 	vec3 kS = F;
-	vec3 kD = 1.0 - kS;
+	vec3 kD = vec3(1.0) - kS;
 	kD *= ( 1.0 - metallic ); 
+	kD = max(kD, clamp(a, 0.0, 1.0 ));
 
 	// Irradiance
 	vec3 irradiance = texture( uIrradianceMap, N).rgb;
-	vec3 diffuse = irradiance * albedo;
+	vec3 diffuse = irradiance * albedo * kD;
 
 	// Ambient Specular
 	const float MAX_REFLECTION_LOD = 5.0;
-    vec3 prefilteredColor = textureLod(uPrefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;    
-    vec2 brdf  = texture(uBRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
-    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y); 
+    vec3 prefilteredColor = textureLod(uPrefilterMap, R,  a * MAX_REFLECTION_LOD).rgb;    
+    vec2 brdf  = texture(uBRDFLUT, vec2(max(dot(N, V), 0.0), a)).rg;
+	vec3 brdfVec = vec3( F * brdf.x + brdf.y );
+	vec3 specular = prefilteredColor * brdfVec;
 
 	// Final ambient
-	vec3 ambient = (kD * diffuse + specular);
+	vec3 ambient = max( vec3( 0.0, 0.0, 0.0 ), (diffuse + specular) );
 
     // Final color out
 	ColorOut = vec4( ambient, 1.0 ) + vec4( max( vec3( 0.0, 0.0, 0.0 ), emissive.rgb ), 1.0 ); 
-}
+} 
 
-// ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
     float a = roughness*roughness;
@@ -103,7 +106,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 
     return nom / denom;
 }
-// ----------------------------------------------------------------------------
+
 float GeometrySchlickGGX(float NdotV, float roughness)
 {
     float r = (roughness + 1.0);
@@ -113,9 +116,7 @@ float GeometrySchlickGGX(float NdotV, float roughness)
     float denom = NdotV * (1.0 - k) + k;
 
     return nom / denom;
-}
-
-// ----------------------------------------------------------------------------
+} 
 
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
@@ -125,16 +126,13 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     float ggx1 = GeometrySchlickGGX(NdotL, roughness);
 
     return ggx1 * ggx2; 
-}
-
-// ----------------------------------------------------------------------------
+} 
 
 vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 } 
 
-// ----------------------------------------------------------------------------
 vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);

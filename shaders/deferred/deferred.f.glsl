@@ -41,14 +41,15 @@ void main()
     normal = normalize(fs_in.TBN * normal);
 
     // Get albedo color
-    vec4 color = texture(u_albedoMap, fs_in.TexCoords);
-    if (color.a < 0.5) discard;
+    vec4 albedo = texture(u_albedoMap, fs_in.TexCoords);
+    if (albedo.a < 0.5) discard;
+    //albedo = vec4(vec3(pow(albedo.r, 2.2), pow(albedo.g, 2.2), pow(albedo.b, 2.2)), 1.0);
 
     Metallic  = texture2D(u_metallicMap, fs_in.TexCoords).r;
     Roughness = texture2D(u_roughnessMap, fs_in.TexCoords).r;
     AO        = texture2D(u_aoMap, fs_in.TexCoords).r;
 
-    AlbedoOut  = color * vec4(u_albedoColor.xyz, 1.0);
+    AlbedoOut  = albedo * vec4(u_albedoColor.xyz, 1.0);
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
     EmissiveOut = vec4(texture2D(u_emissiveMap, fs_in.TexCoords).xyz * u_emissiveIntensity, 1.0);

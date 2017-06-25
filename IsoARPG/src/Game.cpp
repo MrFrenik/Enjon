@@ -168,15 +168,24 @@ Enjon::Result Game::Initialize()
 	Enjon::String woodNormalPath		= Enjon::String("/Materials/WoodFrame/Normal.png"); 
 	Enjon::String woodRoughnessPath		= Enjon::String("/Materials/WoodFrame/Roughness.png"); 
 	Enjon::String woodMetallicPath		= Enjon::String("/Materials/WoodFrame/Metallic.png"); 
-	Enjon::String wornRedAlbedoPath		= Enjon::String("/Materials/WornRedRock/Albedo.png"); 
-	Enjon::String wornRedNormalPath		= Enjon::String("/Materials/WornRedRock/Normal.png"); 
-	Enjon::String wornRedRoughnessPath	= Enjon::String("/Materials/WornRedRock/Roughness.png"); 
-	Enjon::String wornRedMetallicPath	= Enjon::String("/Materials/WornRedRock/Metallic.png"); 
+	Enjon::String plasticAlbedoPath		= Enjon::String("/Materials/ScuffedPlastic/Albedo.png"); 
+	Enjon::String plasticNormalPath		= Enjon::String("/Materials/ScuffedPlastic/Normal.png"); 
+	Enjon::String plasticRoughnessPath	= Enjon::String("/Materials/ScuffedPlastic/Roughness.png"); 
+	Enjon::String plasticMetallicPath	= Enjon::String("/Materials/ScuffedPlastic/Metallic.png"); 
+	Enjon::String plasticAOPath			= Enjon::String("/Materials/ScuffedPlastic/AO.png"); 
+	Enjon::String wornRedAlbedoPath		= Enjon::String("/Materials/RustedIron/Albedo.png"); 
+	Enjon::String wornRedNormalPath		= Enjon::String("/Materials/RustedIron/Normal.png"); 
+	Enjon::String wornRedRoughnessPath	= Enjon::String("/Materials/RustedIron/Roughness.png"); 
+	Enjon::String wornRedMetallicPath	= Enjon::String("/Materials/RustedIron/Metallic.png"); 
+	Enjon::String frontNormalPath		= Enjon::String("/Textures/front_normal.png"); 
+	Enjon::String brdfPath				= Enjon::String("/Textures/brdf.png"); 
 	Enjon::String waterPath				= Enjon::String("/Textures/water.png"); 
 	Enjon::String greenPath				= Enjon::String("/Textures/green.png"); 
 	Enjon::String redPath				= Enjon::String("/Textures/red.png"); 
 	Enjon::String bluePath				= Enjon::String("/Textures/blue.png"); 
 	Enjon::String blackPath				= Enjon::String("/Textures/black.png"); 
+	Enjon::String midGreyPath			= Enjon::String("/Textures/grey.png"); 
+	Enjon::String lightGreyPath			= Enjon::String("/Textures/light_grey.png"); 
 	Enjon::String whitePath				= Enjon::String("/Textures/white.png"); 
 	Enjon::String teapotPath			= Enjon::String( "/Models/teapot.obj" );
 
@@ -207,6 +216,13 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( wornRedRoughnessPath );
 	mAssetManager->AddToDatabase( wornRedMetallicPath );
 	mAssetManager->AddToDatabase( wornRedNormalPath );
+	mAssetManager->AddToDatabase( plasticAlbedoPath );
+	mAssetManager->AddToDatabase( plasticNormalPath );
+	mAssetManager->AddToDatabase( plasticRoughnessPath );
+	mAssetManager->AddToDatabase( plasticMetallicPath );
+	mAssetManager->AddToDatabase( plasticAOPath );
+	mAssetManager->AddToDatabase( frontNormalPath );
+	mAssetManager->AddToDatabase( brdfPath );
 	mAssetManager->AddToDatabase( cerebusMeshPath );
 	mAssetManager->AddToDatabase( sphereMeshPath );
 	mAssetManager->AddToDatabase( cubeMeshPath );
@@ -216,6 +232,8 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( unrealShaderBallPath );
 	mAssetManager->AddToDatabase( greenPath );
 	mAssetManager->AddToDatabase( redPath );
+	mAssetManager->AddToDatabase( midGreyPath );
+	mAssetManager->AddToDatabase( lightGreyPath );
 	mAssetManager->AddToDatabase( bluePath );
 	mAssetManager->AddToDatabase( blackPath );
 	mAssetManager->AddToDatabase( whitePath );
@@ -277,12 +295,20 @@ Enjon::Result Game::Initialize()
 	pc->GetLight( )->SetAttenuationRate( 0.1f );
 	pc->GetLight( )->SetRadius( 100.0f );
 	pc->GetLight( )->SetColor( Enjon::RGBA16_Orange( ) );
+
+	mPlasticMat = new Enjon::Material;
+	mPlasticMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.albedo"));
+	mPlasticMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.normal"));
+	mPlasticMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.metallic"));
+	mPlasticMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.roughness"));
+	mPlasticMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
+	mPlasticMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.ao"));
 	
 	mRockMat 	= new Enjon::Material; 
-	mRockMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.wornredrock.albedo"));
-	mRockMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.wornredrock.normal"));
-	mRockMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.wornredrock.metallic"));
-	mRockMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.wornredrock.roughness"));
+	mRockMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.green"));
+	mRockMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.rustediron.normal"));
+	mRockMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.white"));
+	mRockMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
 	mRockMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
 	mRockMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.white"));
 
@@ -296,11 +322,11 @@ Enjon::Result Game::Initialize()
 
 	mGun.Get()->SetPosition(Enjon::Vec3(0.0f, 0.0f, 0.0f));
 	mGun.Get()->SetRotation( Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ) );
-	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("isoarpg.models.teapot"));
-	gc->SetMaterial(mGunMat);
+	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("isoarpg.models.bunny"));
+	gc->SetMaterial(mRockMat);
 
 	mSun = new Enjon::DirectionalLight();
-	mSun->SetIntensity(10.0f);
+	mSun->SetIntensity(1.5f);
 	mSun->SetColor(Enjon::RGBA16_White());
 
 	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA16_SkyBlue(), 10.0f); 
@@ -308,7 +334,7 @@ Enjon::Result Game::Initialize()
 	mFloorMat = new Enjon::Material();
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.albedo"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.normal"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.roughness"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.emissive"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.roughness"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.emissive"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.ao"));
@@ -362,14 +388,15 @@ Enjon::Result Game::Initialize()
 	mGreen.Get()->AddChild( mRed );
 	mGreen.Get()->AddChild( mBlue ); 
 
-	rgc2->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.unreal_shaderball" ) );
+	rgc2->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.buddha" ) );
 	rgc->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.cerebus" ) );
 	rgc->SetMaterial( mGunMat );
-	rgc2->SetMaterial( mRockMat );
+	rgc2->SetMaterial( mPlasticMat );
 	mRock.Get( )->SetPosition( Enjon::Vec3( 5.0f, 5.0f, 20.0f ) );
 	mRock.Get( )->SetScale( Enjon::Vec3( 5.0f ) );
 	
-	mRock2.Get( )->SetPosition( Enjon::Vec3( 5.0f, 0.0f, 20.0f ) );
+	mRock2.Get( )->SetPosition( Enjon::Vec3( 10.0f, 0.0f, 20.0f ) );
+	//mRock2.Get( )->SetScale( Enjon::Vec3( 0.01f ) );
 
 	mBatch = new Enjon::QuadBatch();
 	mBatch->Init();
@@ -396,11 +423,146 @@ Enjon::Result Game::Initialize()
 	mTextBatch->Init( );
 	mTextBatch->SetMaterial( mFontMat );
 
+	enum class GreyScale
+	{
+		Black,
+		Grey,
+		LightGrey,
+		White,
+		Count
+	};
+
+	// Set up shader ball scene
+	for ( u32 i = 0; i < (u32)GreyScale::Count; ++i )  // Metallic
+	{
+		for ( u32 j = 0; j < ( u32 )GreyScale::Count; ++j )  // Roughnes
+		{
+
+			// Make new entity
+			Enjon::EntityHandle eh = mEntities->Allocate( );
+			auto gfxcmp = eh.Get( )->Attach< Enjon::GraphicsComponent >( ); 
+			Enjon::Material* mat = new Enjon::Material( );
+			mat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.white" ) );
+			mat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.front_normal" ) );
+			mat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.black" ) );
+			mat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.white" ) );
+			gfxcmp->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.shaderball" ) ); 
+			gfxcmp->SetMaterial( mat );
+
+			eh.Get( )->SetScale( Enjon::Vec3( 0.009f ) );
+			eh.Get( )->SetPosition( Enjon::Vec3( j * 3.0f, 1.0f, i * 3.0f ) + Enjon::Vec3( 15, 0, 15 ) );
+
+			switch ( GreyScale( i ) )
+			{
+				case GreyScale::Black:
+				{
+					mat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.black" ) );
+
+					switch ( GreyScale( j ) )
+					{
+						case GreyScale::Black:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.black" ) );
+						} break;
+						case GreyScale::Grey:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.grey" ) );
+						} break;
+						case GreyScale::LightGrey:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.light_grey" ) );
+						} break;
+						case GreyScale::White:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.white" ) );
+						} break;
+					} 
+				} break;
+				case GreyScale::Grey:
+				{
+					mat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.grey" ) );
+
+					switch ( GreyScale( j ) )
+					{
+						case GreyScale::Black:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.black" ) );
+						} break;
+						case GreyScale::Grey:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.grey" ) );
+						} break;
+						case GreyScale::LightGrey:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.light_grey" ) );
+						} break;
+						case GreyScale::White:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.white" ) );
+						} break;
+					} 
+				} break;
+				case GreyScale::LightGrey:
+				{
+					mat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.light_grey" ) );
+
+					switch ( GreyScale( j ) )
+					{
+						case GreyScale::Black:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.black" ) );
+						} break;
+						case GreyScale::Grey:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.grey" ) );
+						} break;
+						case GreyScale::LightGrey:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.light_grey" ) );
+						} break;
+						case GreyScale::White:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.white" ) );
+						} break;
+					} 
+				} break;
+				case GreyScale::White:
+				{
+					mat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.white" ) );
+
+					switch ( GreyScale( j ) )
+					{
+						case GreyScale::Black:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.black" ) );
+						} break;
+						case GreyScale::Grey:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.grey" ) );
+						} break;
+						case GreyScale::LightGrey:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.light_grey" ) );
+						} break;
+						case GreyScale::White:
+						{
+							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.white" ) );
+						} break;
+					} 
+				} break;
+			}
+
+			// Add to scene
+			auto scene = mGfx->GetScene();
+			scene->AddRenderable( eh.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+		} 
+	}
+
 	if (mGfx)
 	{
 		auto scene = mGfx->GetScene();
-		scene->AddDirectionalLight(mSun);
-		scene->AddDirectionalLight(mSun2);
+		scene->AddDirectionalLight( mSun );
+		//scene->AddDirectionalLight( mSun2 );
 		scene->AddRenderable(gc->GetRenderable());
 		//scene->AddPointLight( pc->GetLight( ) );
 		scene->AddRenderable( mGreen.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );

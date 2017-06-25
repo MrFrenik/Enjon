@@ -60,6 +60,7 @@ class Game : public Enjon::Application
 		Enjon::Material* mFloorMat	= nullptr;
 		Enjon::Material* mFontMat	= nullptr;
 		Enjon::Material* mRockMat	= nullptr;
+		Enjon::Material* mPlasticMat	= nullptr;
 
 		Enjon::AssetHandle< Enjon::Mesh > mSphereMesh;
 		Enjon::AssetHandle< Enjon::Mesh > mGunMesh;

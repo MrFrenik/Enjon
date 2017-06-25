@@ -226,7 +226,7 @@ namespace Enjon
 
 			// Post processing settings
 			FXAASettings mFXAASettings = FXAASettings(8.0f, 1.0f/8.0f, 1.0f/128.0f);
-			ToneMapSettings mToneMapSettings = ToneMapSettings(0.53f, 1.55f, 0.61f, 7.74f, 1.7f);
+			ToneMapSettings mToneMapSettings = ToneMapSettings(1.53f, 1.55f, 0.61f, 7.74f, 2.1f);
 			BloomSettings mBloomSettings = BloomSettings(Vec3(0.402f, 0.383f, 0.387f), Vec3(9, 7, 12), Vec3(0.004f, 0.008f, 0.019f));
 
 			bool mShowGame = true;

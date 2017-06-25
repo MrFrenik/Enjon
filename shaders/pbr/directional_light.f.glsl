@@ -86,7 +86,7 @@ void main()
 
     // Roughness, Metallic, and AO
     float Metallic  = MaterialProps.r;
-    float Roughness = MaterialProps.g * MaterialProps.g;
+    float Roughness = MaterialProps.g;
 
     // Calculate radiance
     vec3 L = normalize(u_lightDirection);
@@ -96,10 +96,9 @@ void main()
     F0      = mix(F0, Albedo, Metallic);
     vec3 F  = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, Roughness);
 
-    vec3 kS = F;
-    vec3 kD = vec3(1.0) - kS;
-    // vec3 kD = kS;
-    kD *= (1.0 - Metallic);
+	vec3 kS = max( F, F0 );
+	vec3 kD = vec3(1.0) - kS;
+	kD *= ( 1.0 - Metallic ); 
 
     // Reflectance Equation
     vec3 Lo = vec3(0.0);

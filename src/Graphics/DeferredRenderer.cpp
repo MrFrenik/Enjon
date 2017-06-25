@@ -21,6 +21,7 @@
 #include "Console.h"
 #include "CVarsSystem.h"
 #include "ImGui/ImGuiManager.h"
+#include "Graphics/Texture.h"
 #include "Engine.h"
 
 #include <string>
@@ -36,6 +37,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 Enjon::Renderable mRenderable; 
+Enjon::AssetHandle< Enjon::Texture > mBRDFHandle;
+bool brdfset = false;
+
+bool useOther = false;
 
 namespace Enjon 
 { 
@@ -176,7 +181,8 @@ namespace Enjon
 	void DeferredRenderer::STBTest( )
 	{
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
-		Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/Mono_Lake_B_Ref.hdr";
+		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/GCanyon_C_YumaPoint_3k.hdr";
+		Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/03-Ueno-Shrine_3k.hdr";
 
 		stbi_set_flip_vertically_on_load( true );
 		s32 width, height, nComps;
@@ -375,8 +381,11 @@ namespace Enjon
 			brdfShader->Unuse( );
 
 			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-			
 
+			// Get brdf texture
+			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+			mBRDFHandle = am->GetAsset< Enjon::Texture >( "isoarpg.textures.brdf" ); 
+			brdfset = true;
 		}
 		else
 		{
@@ -650,8 +659,16 @@ namespace Enjon
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mIrradianceMap );
 			glActiveTexture( GL_TEXTURE1 );
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mPrefilteredMap );
-			glActiveTexture( GL_TEXTURE2 );
-			glBindTexture( GL_TEXTURE_2D, mBRDFLUT );
+
+			if ( useOther )
+			{
+				glActiveTexture( GL_TEXTURE2 );
+				glBindTexture( GL_TEXTURE_2D, mBRDFLUT ); 
+			}
+			else
+			{ 
+				ambientShader->BindTexture( "uBRDFLUT", mBRDFHandle.Get( )->GetTextureId( ), 2 );
+			}
 			ambientShader->BindTexture("uAlbedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 3);
 			ambientShader->BindTexture("uNormalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 4);
 			ambientShader->BindTexture("uPositionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 5);
@@ -1392,7 +1409,15 @@ namespace Enjon
 	    } 
 
 		ImGui::Image( ImTextureID( mHDRTextureID ), ImVec2( 128, 128 ) );
-		ImGui::Image( ImTextureID( mBRDFLUT ), ImVec2( 128, 128 ) );
+		if ( brdfset )
+		{
+			ImGui::Image( ImTextureID( mBRDFHandle.Get()->GetTextureId() ), ImVec2( 128, 128 ) ); 
+		}
+
+		if ( ImGui::Button( "UseOther" ) )
+		{
+			useOther ^= 1;
+		}
 	}
 
 	//=======================================================================================================
