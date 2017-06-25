@@ -260,7 +260,9 @@ Enjon::Result Game::Initialize()
 	mBlue = mEntities->Allocate( );
 	mGun = mEntities->Allocate( );
 	mRock = mEntities->Allocate( );
+	mRock2 = mEntities->Allocate( );
 	auto rgc = mRock.Get( )->Attach< Enjon::GraphicsComponent >( );
+	auto rgc2 = mRock2.Get( )->Attach< Enjon::GraphicsComponent >( );
 	auto gc = mGun.Get()->Attach<Enjon::GraphicsComponent>(); 
 	auto pc = mGun.Get()->Attach<Enjon::PointLightComponent>(); 
 	auto oc = mGun.Get()->Attach<OtherComponent>(); 
@@ -360,9 +362,14 @@ Enjon::Result Game::Initialize()
 	mGreen.Get()->AddChild( mRed );
 	mGreen.Get()->AddChild( mBlue ); 
 
-	rgc->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.unreal_shaderball" ) );
-	rgc->SetMaterial( mRockMat );
+	rgc2->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.unreal_shaderball" ) );
+	rgc->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.cerebus" ) );
+	rgc->SetMaterial( mGunMat );
+	rgc2->SetMaterial( mRockMat );
 	mRock.Get( )->SetPosition( Enjon::Vec3( 5.0f, 5.0f, 20.0f ) );
+	mRock.Get( )->SetScale( Enjon::Vec3( 5.0f ) );
+	
+	mRock2.Get( )->SetPosition( Enjon::Vec3( 5.0f, 0.0f, 20.0f ) );
 
 	mBatch = new Enjon::QuadBatch();
 	mBatch->Init();
@@ -400,6 +407,7 @@ Enjon::Result Game::Initialize()
 		scene->AddRenderable( mRed.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 		scene->AddRenderable( mBlue.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
 		scene->AddRenderable( mRock.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
+		scene->AddRenderable( mRock2.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
 		scene->AddQuadBatch(mBatch);
 		scene->AddQuadBatch(mTextBatch);
 		scene->SetSun(mSun);

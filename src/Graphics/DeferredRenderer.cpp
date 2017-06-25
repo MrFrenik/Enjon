@@ -176,7 +176,7 @@ namespace Enjon
 	void DeferredRenderer::STBTest( )
 	{
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
-		Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/Newport_Loft_Ref.hdr";
+		Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/Mono_Lake_B_Ref.hdr";
 
 		stbi_set_flip_vertically_on_load( true );
 		s32 width, height, nComps;
@@ -199,7 +199,8 @@ namespace Enjon
 
 			glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO );
 			glBindRenderbuffer( GL_RENDERBUFFER, mCaptureRBO );
-			glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512 );
+			const u32 envMapSize = 1024;
+			glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 1024, 1024 );
 			glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mCaptureRBO );
 
 			// Cube map
@@ -207,7 +208,7 @@ namespace Enjon
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
 			for ( u32 i = 0; i < 6; ++i )
 			{
-				glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr );
+				glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, envMapSize, envMapSize, 0, GL_RGB, GL_FLOAT, nullptr );
 			}
 			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
@@ -227,24 +228,13 @@ namespace Enjon
 				Mat4::LookAt( Vec3(0.0f), Vec3( 0.0f, 0.0f, -1.0f ), Vec3( 0.0f, -1.0f, 0.0f ) )
 			}; 
 
-			/*glm::mat4 captureProjection = glm::perspective( glm::radians( 90.0f ), 1.0f, 0.1f, 10.0f );
-			glm::mat4 captureVs[ ] =  
-			{
-				glm::lookAt( glm::vec3(0.0f), glm::vec3( 1.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, -1.0f, 0.0f ) ),
-				glm::lookAt( glm::vec3(0.0f), glm::vec3( -1.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, -1.0f, 0.0f ) ),
-				glm::lookAt( glm::vec3(0.0f), glm::vec3( 0.0f, 1.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) ),
-				glm::lookAt( glm::vec3(0.0f), glm::vec3( 0.0f, -1.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, -1.0f ) ),
-				glm::lookAt( glm::vec3(0.0f), glm::vec3( 0.0f, 0.0f, 1.0f ), glm::vec3( 0.0f, -1.0f, 0.0f ) ),
-				glm::lookAt( glm::vec3(0.0f), glm::vec3( 0.0f, 0.0f, -1.0f ), glm::vec3( 0.0f, -1.0f, 0.0f ) )
-			}; */
-
 			glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO ); 
 			GLSLProgram* equiShader = ShaderManager::Get( "EquiToCube" );
 			equiShader->Use( );
 			{
 				equiShader->BindTexture( "equiMap", mHDRTextureID, 0 );
 				equiShader->SetUniform( "projection", captureProj );
-				glViewport( 0, 0, 512, 512 );
+				glViewport( 0, 0, envMapSize, envMapSize );
 				for ( u32 i = 0; i < 6; ++i )
 				{
 					equiShader->SetUniform( "view", captureViews[ i ] );
@@ -302,6 +292,8 @@ namespace Enjon
 			}
 			irradianceShader->Unuse( );
 
+			glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );
+
 			// pbr: create an prefiltered convolution cubemap.
 			// --------------------------------------------------------------------------------
 			glGenTextures( 1, &mPrefilteredMap );
@@ -324,6 +316,7 @@ namespace Enjon
 			prefilterShader->Use( );
 			{
 				prefilterShader->SetUniform( "projection", captureProj );
+				prefilterShader->SetUniform( "envMap", 0 );
 				glActiveTexture( GL_TEXTURE0 );
 				glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
 
@@ -338,11 +331,11 @@ namespace Enjon
 					prefilterShader->SetUniform( "roughness", roughness );
 
 					glViewport( 0, 0, mipWidth, mipHeight ); // don't forget to configure the viewport to the capture dimensions.
+					glBindRenderbuffer( GL_RENDERBUFFER, mCaptureRBO );
 					glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight );
 					for ( unsigned int i = 0; i < 6; ++i )
 					{
 						prefilterShader->SetUniform( "view", captureViews[ i ] );
-						glBindRenderbuffer( GL_RENDERBUFFER, mCaptureRBO );
 						glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mPrefilteredMap, mip );
 						glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
@@ -353,41 +346,36 @@ namespace Enjon
 			}
 			prefilterShader->Unuse( );
 
-			//GLSLProgram* prefilterShader = ShaderManager::Get( "PrefilterConvolution" );
-			//prefilterShader->Use( );
-			//{
-			//	prefilterShader->SetUniform( "projection", captureProj ); 
-			//	glActiveTexture( GL_TEXTURE0 );
-			//	glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+			//=======================================================================================
+			// BRDF LUT generation
+			glGenTextures( 1, &mBRDFLUT );
 
-			//	glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO );
-			//	u32 maxMipLevels = 5;
-			//	//for ( u32 mip = 0; mip < maxMipLevels; ++mip )
-			//	//{
-			//		// reisze framebuffer according to mip-level size.
-			//		//u32 mipWidth = u32( ( f32 )textureSize * std::pow( 0.5, mip ) );
-			//		//u32 mipHeight = u32( ( f32 )textureSize * std::pow( 0.5, mip ) );
-			//		glBindRenderbuffer( GL_RENDERBUFFER, mCaptureRBO );
-			//		//glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight );
-			//		glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, textureSize, textureSize );
-			//		//glViewport( 0, 0, mipWidth, mipHeight );
-			//		glViewport( 0, 0, textureSize, textureSize );
+			// pre-allocate enough memory for the LUT texture.
+			glBindTexture( GL_TEXTURE_2D, mBRDFLUT );
+			glTexImage2D( GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RGB, GL_FLOAT, 0 );
+			// be sure to set wrapping mode to GL_CLAMP_TO_EDGE
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
-			//		//f32 roughness = ( f32 )mip / ( f32 )( maxMipLevels - 1 );
-			//		//prefilterShader->SetUniform( "roughness", roughness );
-			//		for ( unsigned int i = 0; i < 6; ++i )
-			//		{
-			//			prefilterShader->SetUniform( "view", captureViews[ i ] );
-			//			glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mPrefilteredMap, 0 );
+			// then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
+			glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO );
+			glBindRenderbuffer( GL_RENDERBUFFER, mCaptureRBO );
+			glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512 );
+			glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mBRDFLUT, 0 );
+ 
+			glViewport( 0, 0, 512, 512 );
+			GLSLProgram* brdfShader = ShaderManager::Get( "BRDFLUT" );
+			brdfShader->Use( );
+			{
+				glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+				RenderQuad( ); 
+			}
+			brdfShader->Unuse( );
 
-			//			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-			//			RenderCube( ); 
-			//		}
-			//	//}
-			//	glBindFramebuffer( GL_FRAMEBUFFER, 0 ); 
-			//}
-			//prefilterShader->Unuse( );
+			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+			
 
 		}
 		else
@@ -608,7 +596,7 @@ namespace Enjon
 
 			// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
 			glActiveTexture( GL_TEXTURE0 );
-			glBindTexture( GL_TEXTURE_CUBE_MAP, mPrefilteredMap );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
 
 			RenderCube( );
 		}
@@ -641,25 +629,34 @@ namespace Enjon
 		// TODO(): Abstract these away 
 		glEnable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
-		glBlendFunc(GL_ONE, GL_ONE);
+		glBlendFunc(GL_ONE, GL_ONE); 
 
+		//uniform samplerCube uIrradianceMap;
+		//uniform samplerCube uPrefilterMap;
+		//uniform sampler2D uBRDFLUT;
 		//uniform sampler2D uAlbedoMap;
 		//uniform sampler2D uNormalMap;
 		//uniform sampler2D uPositionMap;
 		//uniform sampler2D uEmissiveMap;
 		//uniform sampler2D uMaterialMap;
-		//uniform samplerCube irradianceMap;
 
 		// Ambient pass
 		ambientShader->Use();
 		{ 
+			ambientShader->SetUniform( "uIrradianceMap", 0 );
+			ambientShader->SetUniform( "uPrefilterMap", 1 );
+			ambientShader->SetUniform( "uBRDFLUT", 2 );
 			glActiveTexture( GL_TEXTURE0 );
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mIrradianceMap );
-			ambientShader->BindTexture("uAlbedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 1);
-			ambientShader->BindTexture("uNormalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 2);
-			ambientShader->BindTexture("uPositionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 3);
-			ambientShader->BindTexture("uEmissiveMap", mGbuffer->GetTexture(GBufferTextureType::EMISSIVE), 4);
-			ambientShader->BindTexture("uMaterialMap", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 5);
+			glActiveTexture( GL_TEXTURE1 );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mPrefilteredMap );
+			glActiveTexture( GL_TEXTURE2 );
+			glBindTexture( GL_TEXTURE_2D, mBRDFLUT );
+			ambientShader->BindTexture("uAlbedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 3);
+			ambientShader->BindTexture("uNormalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 4);
+			ambientShader->BindTexture("uPositionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 5);
+			ambientShader->BindTexture("uEmissiveMap", mGbuffer->GetTexture(GBufferTextureType::EMISSIVE), 6);
+			ambientShader->BindTexture("uMaterialMap", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 7);
 			ambientShader->SetUniform("uResolution", mGbuffer->GetResolution());
 			ambientShader->SetUniform( "uCamPos", mSceneCamera.GetPosition() );
 
@@ -1339,6 +1336,16 @@ namespace Enjon
 	            }
 	    	}
 
+			{
+				const char* string_name = "BRDFLUT";
+				ImGui::Text( string_name );
+				ImTextureID img = ( ImTextureID )mBRDFLUT;
+				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
+				{
+					mCurrentRenderTexture = mBRDFLUT;
+				}
+			}
+
 	    	{
 	    		const char* string_name = "Final";
 	    		ImGui::Text(string_name);
@@ -1385,7 +1392,7 @@ namespace Enjon
 	    } 
 
 		ImGui::Image( ImTextureID( mHDRTextureID ), ImVec2( 128, 128 ) );
-		ImGui::Image( ImTextureID( mEnvCubemapID ), ImVec2( 256, 256 ) );
+		ImGui::Image( ImTextureID( mBRDFLUT ), ImVec2( 128, 128 ) );
 	}
 
 	//=======================================================================================================
@@ -1412,6 +1419,36 @@ namespace Enjon
 		mSceneCamera.SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
 	} 
 
+	// renderQuad() renders a 1x1 XY quad in NDC
+	// -----------------------------------------
+	unsigned int quadVAO = 0;
+	unsigned int quadVBO = 0;
+	void DeferredRenderer::RenderQuad( )
+	{
+		if ( quadVAO == 0 )
+		{
+			float quadVertices[ ] = {
+				// positions        // texture Coords
+				-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+				1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+				1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+			};
+			// setup plane VAO
+			glGenVertexArrays( 1, &quadVAO );
+			glGenBuffers( 1, &quadVBO );
+			glBindVertexArray( quadVAO );
+			glBindBuffer( GL_ARRAY_BUFFER, quadVBO );
+			glBufferData( GL_ARRAY_BUFFER, sizeof( quadVertices ), &quadVertices, GL_STATIC_DRAW );
+			glEnableVertexAttribArray( 0 );
+			glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof( float ), ( void* )0 );
+			glEnableVertexAttribArray( 1 );
+			glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof( float ), ( void* )( 3 * sizeof( float ) ) );
+		}
+		glBindVertexArray( quadVAO );
+		glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
+		glBindVertexArray( 0 );
+	}
 
 	unsigned int cubeVAO = 0;
 	unsigned int cubeVBO = 0;

@@ -12,12 +12,12 @@ uniform samplerCube environmentMap;
   
 void main()
 {
-    //vec3 envColor = textureLod(environmentMap, localPos, 5.0).rgb; 
-    vec3 envColor = texture(environmentMap, localPos).rgb; 
+    vec3 envColor = textureLod(environmentMap, localPos, 1.2).rgb; 
+    //vec3 envColor = texture(environmentMap, localPos).rgb; 
   
     AlbedoOut = vec4(envColor, 1.0);
 	NormalsOut = vec4( 0.0, 0.0, 0.0, 1.0 );
 	PositionOut = vec4( 0.0, 0.0, 0.0, 1.0 );
-	EmissiveOut = vec4( envColor, 1.0 );
+	EmissiveOut = vec4( 0.0, 0.0, 0.0, 1.0 );
 	MatPropsOut = vec4( 0.0, 1.0, 0.0, 1.0 );
 }

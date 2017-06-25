@@ -47,6 +47,7 @@ class Game : public Enjon::Application
 		Enjon::EntityHandle mRed;
 		Enjon::EntityHandle mBlue;
 		Enjon::EntityHandle mRock;
+		Enjon::EntityHandle mRock2;
 
 		Enjon::DirectionalLight* mSun	= nullptr;
 		Enjon::QuadBatch* mBatch 		= nullptr;

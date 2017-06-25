@@ -86,7 +86,7 @@ void main()
 
     // Roughness, Metallic, and AO
     float Metallic  = MaterialProps.r;
-    float Roughness = max( 0.08, MaterialProps.g * MaterialProps.g );
+    float Roughness = MaterialProps.g * MaterialProps.g;
 
     // Calculate radiance
     vec3 L = normalize(u_lightDirection);

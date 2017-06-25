@@ -11,6 +11,8 @@ in DATA
 
 // uniforms
 uniform samplerCube uIrradianceMap;
+uniform samplerCube uPrefilterMap;
+uniform sampler2D uBRDFLUT;
 uniform sampler2D uAlbedoMap;
 uniform sampler2D uNormalMap;
 uniform sampler2D uPositionMap;
@@ -36,34 +38,52 @@ void main()
     vec2 TexCoords = CalculateTexCoord();
 
     // Get diffuse color
-    vec3 albedo = texture(uAlbedoMap, TexCoords).rgb;
+    vec3 albedo = texture2D(uAlbedoMap, TexCoords).rgb;
 
     vec4 emissive = texture2D(uEmissiveMap, TexCoords);
     
 	// Get world position
-    vec3 worldPos = texture(uPositionMap, TexCoords).xyz;
+    vec3 worldPos = texture2D(uPositionMap, TexCoords).xyz;
     
 	// Obtain normal from normal map in range (world coords)
-    vec3 N = normalize(texture(uNormalMap, TexCoords).xyz);
+    vec3 N = normalize(texture2D(uNormalMap, TexCoords).xyz);
 
 	// View vector
 	vec3 V = normalize( uCamPos - worldPos ); 
 
+	// Reflection vector
+	 vec3 R = reflect(-V, N); 
+
 	// Material Properties
-	vec4 MaterialProps = texture( uMaterialMap, TexCoords );
+	vec4 MaterialProps = texture2D( uMaterialMap, TexCoords );
 	float metallic = MaterialProps.r;
-	float roughness = MaterialProps.g;
+	float roughness = max( 0.08, MaterialProps.g * MaterialProps.g );
 	float ao = MaterialProps.b;
 	
-	// Ambient term
-	 vec3 F0 = vec3(0.04); 
+	// F0 mix
+	vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metallic);
-	vec3 kS = FresnelSchlick( max( dot( N, V ), 0.0 ), F0 );
+	
+	// Get fresnel term
+	vec3 F = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);	
+
+	// Ambient Diffuse term
+	vec3 kS = F;
 	vec3 kD = 1.0 - kS;
-	kD *= ( 1.0 - metallic );
+	kD *= ( 1.0 - metallic ); 
+
+	// Irradiance
 	vec3 irradiance = texture( uIrradianceMap, N).rgb;
 	vec3 diffuse = irradiance * albedo;
-	vec3 ambient = (kD * diffuse);
+
+	// Ambient Specular
+	const float MAX_REFLECTION_LOD = 5.0;
+    vec3 prefilteredColor = textureLod(uPrefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;    
+    vec2 brdf  = texture(uBRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y); 
+
+	// Final ambient
+	vec3 ambient = (kD * diffuse + specular);
 
     // Final color out
 	ColorOut = vec4( ambient, 1.0 ) + vec4( max( vec3( 0.0, 0.0, 0.0 ), emissive.rgb ), 1.0 ); 
@@ -94,7 +114,9 @@ float GeometrySchlickGGX(float NdotV, float roughness)
 
     return nom / denom;
 }
+
 // ----------------------------------------------------------------------------
+
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
     float NdotV = max(dot(N, V), 0.0);
@@ -102,11 +124,18 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     float ggx2 = GeometrySchlickGGX(NdotV, roughness);
     float ggx1 = GeometrySchlickGGX(NdotL, roughness);
 
-    return ggx1 * ggx2;
+    return ggx1 * ggx2; 
 }
+
 // ----------------------------------------------------------------------------
+
 vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-}
+} 
+
 // ----------------------------------------------------------------------------
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+} 

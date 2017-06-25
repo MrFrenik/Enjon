@@ -192,6 +192,7 @@ namespace Enjon
 			void STBTest( );
 
 			void RenderCube( );
+			void RenderQuad( );
 
 		private:
 			// Frame buffers
@@ -240,6 +241,7 @@ namespace Enjon
 			u32 mEnvCubemapID = 0; 
 			u32 mIrradianceMap = 0;
 			u32 mPrefilteredMap = 0;
+			u32 mBRDFLUT = 0;
 			u32 mCaptureFBO = 0;
 			u32 mCaptureRBO = 0; 
 

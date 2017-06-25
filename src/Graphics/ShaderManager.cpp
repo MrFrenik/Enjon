@@ -49,6 +49,7 @@ namespace Enjon { namespace ShaderManager {
 		ShaderManager::AddShader("SkyBox", "../shaders/skybox.v.glsl", "../shaders/skybox.f.glsl");
 		ShaderManager::AddShader("IrradianceCapture", "../shaders/pbr/Irradiance.v.glsl", "../shaders/pbr/Irradiance.f.glsl");
 		ShaderManager::AddShader("PrefilterConvolution", "../shaders/pbr/PrefilterConvolution.v.glsl", "../shaders/pbr/PrefilterConvolution.f.glsl");
+		ShaderManager::AddShader("BRDFLUT", "../shaders/pbr/BRDF.v.glsl", "../shaders/pbr/BRDF.f.glsl");
 	}
 
 	void AddShader(const char* shadername, const char* vertpath, const char* fragpath)

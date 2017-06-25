@@ -1,8 +1,8 @@
 #version 330 core
 out vec4 FragColor;
-in vec3 WorldPos;
+in vec3 worldPos;
 
-uniform samplerCube environmentMap;
+uniform samplerCube envMap;
 uniform float roughness;
 
 const float PI = 3.14159265359;
@@ -89,7 +89,8 @@ vec2 HammersleyNoBitOps(uint i, uint N)
 
 void main()
 {		
-    vec3 N = normalize(WorldPos);
+    vec3 N = normalize(worldPos);
+	//vec3 N = vec3( 0, 1, 0 );
     
     // make the simplyfying assumption that V equals R equals the normal 
     vec3 R = N;
@@ -121,12 +122,12 @@ void main()
 
             float mipLevel = roughness == 0.0 ? 0.0 : 0.5 * log2(saSample / saTexel); 
             
-            prefilteredColor += textureLod(environmentMap, L, mipLevel).rgb * NdotL;
+            prefilteredColor += textureLod(envMap, L, mipLevel).rgb * NdotL;
             totalWeight      += NdotL;
         }
     }
 
-    prefilteredColor = prefilteredColor / totalWeight;
+    prefilteredColor = prefilteredColor / max( totalWeight, 0.001 );
 
 	FragColor = vec4( prefilteredColor, 1.0 );
 }
