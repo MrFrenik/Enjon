@@ -177,6 +177,10 @@ Enjon::Result Game::Initialize()
 	Enjon::String wornRedNormalPath		= Enjon::String("/Materials/RustedIron/Normal.png"); 
 	Enjon::String wornRedRoughnessPath	= Enjon::String("/Materials/RustedIron/Roughness.png"); 
 	Enjon::String wornRedMetallicPath	= Enjon::String("/Materials/RustedIron/Metallic.png"); 
+	Enjon::String scuffedGoldAlbedoPath		= Enjon::String("/Materials/ScuffedGold/Albedo.png"); 
+	Enjon::String scuffedGoldNormalPath		= Enjon::String("/Materials/ScuffedGold/Normal.png"); 
+	Enjon::String scuffedGoldMetallicPath	= Enjon::String("/Materials/ScuffedGold/Metallic.png"); 
+	Enjon::String scuffedGoldRoughnessPath	= Enjon::String("/Materials/ScuffedGold/Roughness.png"); 
 	Enjon::String frontNormalPath		= Enjon::String("/Textures/front_normal.png"); 
 	Enjon::String brdfPath				= Enjon::String("/Textures/brdf.png"); 
 	Enjon::String waterPath				= Enjon::String("/Textures/water.png"); 
@@ -220,6 +224,10 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( plasticNormalPath );
 	mAssetManager->AddToDatabase( plasticRoughnessPath );
 	mAssetManager->AddToDatabase( plasticMetallicPath );
+	mAssetManager->AddToDatabase( scuffedGoldAlbedoPath );
+	mAssetManager->AddToDatabase( scuffedGoldNormalPath );
+	mAssetManager->AddToDatabase( scuffedGoldMetallicPath );
+	mAssetManager->AddToDatabase( scuffedGoldRoughnessPath );
 	mAssetManager->AddToDatabase( plasticAOPath );
 	mAssetManager->AddToDatabase( frontNormalPath );
 	mAssetManager->AddToDatabase( brdfPath );
@@ -297,12 +305,20 @@ Enjon::Result Game::Initialize()
 	pc->GetLight( )->SetColor( Enjon::RGBA16_Orange( ) );
 
 	mPlasticMat = new Enjon::Material;
-	mPlasticMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.albedo"));
+	mPlasticMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.roughness"));
 	mPlasticMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.normal"));
 	mPlasticMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.metallic"));
 	mPlasticMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.roughness"));
 	mPlasticMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
 	mPlasticMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.ao"));
+	
+	mGoldMat = new Enjon::Material;
+	mGoldMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedgold.albedo"));
+	mGoldMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedgold.normal"));
+	mGoldMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedgold.metallic"));
+	mGoldMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedgold.roughness"));
+	mGoldMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
+	mGoldMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.ao")); 
 	
 	mRockMat 	= new Enjon::Material; 
 	mRockMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.green"));
@@ -323,7 +339,7 @@ Enjon::Result Game::Initialize()
 	mGun.Get()->SetPosition(Enjon::Vec3(0.0f, 0.0f, 0.0f));
 	mGun.Get()->SetRotation( Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ) );
 	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("isoarpg.models.bunny"));
-	gc->SetMaterial(mRockMat);
+	gc->SetMaterial(mGoldMat);
 
 	mSun = new Enjon::DirectionalLight();
 	mSun->SetIntensity(1.5f);
@@ -407,7 +423,7 @@ Enjon::Result Game::Initialize()
 		{
 			for (Enjon::s32 j = -dimSize; j < dimSize; ++j)
 			{
-				Enjon::Vec3 pos(j * 2.0f, -3.0f, i * 2.0f);
+				Enjon::Vec3 pos(j * 2.0f, 0.0f, i * 2.0f);
 				Enjon::Quaternion rot = Enjon::Quaternion::AngleAxis(Enjon::ToRadians(90.0f), Enjon::Vec3::XAxis());
 				Enjon::Vec3 scale(1.0f);
 				Enjon::Transform t(pos, rot, scale);
@@ -436,21 +452,20 @@ Enjon::Result Game::Initialize()
 	for ( u32 i = 0; i < (u32)GreyScale::Count; ++i )  // Metallic
 	{
 		for ( u32 j = 0; j < ( u32 )GreyScale::Count; ++j )  // Roughnes
-		{
-
+		{ 
 			// Make new entity
 			Enjon::EntityHandle eh = mEntities->Allocate( );
 			auto gfxcmp = eh.Get( )->Attach< Enjon::GraphicsComponent >( ); 
 			Enjon::Material* mat = new Enjon::Material( );
-			mat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.white" ) );
-			mat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.front_normal" ) );
+			mat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.materials.scuffedplastic.albedo" ) );
+			mat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.materials.scuffedplastic.normal" ) );
 			mat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.black" ) );
 			mat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.white" ) );
 			gfxcmp->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.shaderball" ) ); 
 			gfxcmp->SetMaterial( mat );
 
 			eh.Get( )->SetScale( Enjon::Vec3( 0.009f ) );
-			eh.Get( )->SetPosition( Enjon::Vec3( j * 3.0f, 1.0f, i * 3.0f ) + Enjon::Vec3( 15, 0, 15 ) );
+			eh.Get( )->SetPosition( Enjon::Vec3( j * 3.0f, 0.1f, i * 3.0f ) + Enjon::Vec3( 15, 0, 15 ) );
 
 			switch ( GreyScale( i ) )
 			{
@@ -577,7 +592,7 @@ Enjon::Result Game::Initialize()
 
 		// Set graphics camera position
 		auto cam = mGfx->GetSceneCamera();
-		cam->SetPosition(Enjon::Vec3(0, 0, -10));
+		cam->SetPosition(Enjon::Vec3(0.0f, 5.0f, -10.0f));
 		cam->LookAt(Enjon::Vec3(0, 0, 0));
 	} 
 
@@ -906,6 +921,11 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 		mGun.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 5.0f, Enjon::Vec3::ZAxis( ) ) 
 							* Enjon::Quaternion::AngleAxis( t * 5.0f, Enjon::Vec3::YAxis() ) );
 	} 
+	
+	if ( mRock.Get( ) ) 
+	{
+		mRock.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 2.0f, Enjon::Vec3::YAxis() ) );
+	} 
 
 	mGreen.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::YAxis( ) ) );
 	mRed.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
@@ -951,10 +971,7 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 			auto gfx = e->GetComponent< Enjon::GraphicsComponent >( );
 			gfx->SetTransform( e->GetWorldTransform( ) );
 		}
-	}
- 
-
-	
+	} 
 
 	return Enjon::Result::PROCESS_RUNNING;
 }
@@ -1096,6 +1113,7 @@ Enjon::Result Game::Shutdown()
 	fmt::print("{}", sizeof(Enjon::Entity));
 	
 	printf("Shutting down game...\n");
+		
 
 	return Enjon::Result::SUCCESS;
 }

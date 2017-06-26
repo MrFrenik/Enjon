@@ -181,8 +181,13 @@ namespace Enjon
 	void DeferredRenderer::STBTest( )
 	{
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
-		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/GCanyon_C_YumaPoint_3k.hdr";
-		Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/03-Ueno-Shrine_3k.hdr";
+		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
+		Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/03-Ueno-Shrine_3k.hdr";
+		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Factory_Catwalk_2k.hdr";
+		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/WinterForest_Ref.hdr";
+		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Alexs_Apt_2k.hdr";
+		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Mono_Lake_B_Ref.hdr";
+		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Mans_Outside_2k.hdr";
 
 		stbi_set_flip_vertically_on_load( true );
 		s32 width, height, nComps;

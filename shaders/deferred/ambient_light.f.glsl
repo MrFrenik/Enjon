@@ -59,7 +59,8 @@ void main()
 	vec4 MaterialProps = texture2D( uMaterialMap, TexCoords );
 	float metallic = MaterialProps.r;
 	float roughness = clamp( MaterialProps.g * MaterialProps.g, 0.08, 0.99 );
-	float a = roughness * roughness;
+	float specPower = clamp( 2.0 - metallic, 0.0, 1.0);
+	float a = roughness * pow(roughness, specPower);
 	float ao = MaterialProps.b;
 	
 	// F0 mix
