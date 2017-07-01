@@ -530,7 +530,7 @@
 					"CodeTemplate": "#NODE_NAME_sampler.a"
 				}
 			},
-			"VariableDeclaration": "SAMPLER2D( #NODE_NAME, #UNIFORM_LOCATION );",
+			"VariableDeclaration": "sampler2D #NODE_NAME;",
 			"VariableDefinition": "vec4 #NODE_NAME_sampler = texture2D( #NODE_NAME, #INPUT(UV) );"
 		},
 
@@ -707,7 +707,7 @@
 				},
 				"AO": {
 					"PrimitiveType": "float",
-					"Default": "0.0"
+					"Default": "1.0"
 				},
 				"WorldPositionOffset": {
 					"PrimitiveType": "vec3",
@@ -771,7 +771,7 @@
 			},
 			"AO": {
 				"PrimitiveType": "float",
-				"Default": "0.0"
+				"Default": "1.0"
 			},
 			"WorldPositionOffset": {
 				"PrimitiveType": "vec3",

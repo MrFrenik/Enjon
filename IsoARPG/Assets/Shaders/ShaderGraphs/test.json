@@ -2,12 +2,101 @@
 	"ShaderGraphName": "TestGraph",
 
 	"Nodes": {
-		"mult": {
+		"uColor": {
+			"Template": "ConstantVec3Node",
+			"IsUniform": true
+		},
+		"roughFloat": {
+			"Template": "ConstantFloatNode",
+			"IsUniform": true
+		},
+		"metallicFloat": {
+			"Template": "ConstantFloatNode",
+			"IsUniform": true
+		},
+		"emissiveIntensity": {
+			"Template": "ConstantFloatNode", 
+			"IsUniform": true
+		},
+		"emissiveColor": {
+			"Template": "ConstantVec3Node",
+			"IsUniform": true
+		},
+		"emissiveMult": {
 			"Template": "MultiplyFunctionNode"
+		},
+		"sinNode": {
+			"Template": "SinNode"
+		},
+		"sinMultNode": {
+			"Template": "MultiplyFunctionNode"
+		},
+		"timeNode": {
+			"Template": "TimeNode"
+		},
+		"timeMultiplier": {
+			"Template": "ConstantFloatNode",
+			"IsUniform": true
+		},
+		"timeMultiplication": {
+			"Template": "MultiplyFunctionNode"
+		},
+		"normalMap": {
+			"Template": "Texture2DSamplerNode",
+			"IsUniform": true
 		}
 	},
 
 	"NodeLinks": {
+		"uColor": {
+			"DefaultOverrides": {
+				"X": "1.0",
+				"Y": "1.0",
+				"Z": "1.0"
+			}
+		},
+		"roughFloat": {
+			"DefaultOverrides": {
+				"Value": "0.0"
+			}
+		},
+		"emissiveMult": {
+			"Inputs": {
+				"Input_0": {
+					"emissiveColor": "Value"
+				},
+				"Input_1": {
+					"emissiveIntensity": "Value"
+				}
+			}
+		},
+		"sinMultNode": {
+			"Inputs": {
+				"Input_0": {
+					"emissiveMult": "Value"
+				},
+				"Input_1": {
+					"sinNode": "Value"
+				}
+			}
+		},
+		"timeMultiplication": {
+			"Inputs": {
+				"Input_0": {
+					"timeMultiplier": "Value"
+				},
+				"Input_1": {
+					"timeNode": "Value"
+				}
+			}
+		},
+		"sinNode": {
+			"Inputs": {
+				"Time": {
+					"timeMultiplication": "Value"
+				}
+			}
+		}
 	},
 
 	"MainNode": {
@@ -15,25 +104,30 @@
 		"Inputs": {
 
 			"BaseColor": {
-				"mult": "Value"
+				"uColor": "Value"
 			},
 
 			"Normal": {
+				"normalMap": "RGB"
 			},
 
 			"Metallic": {
+				"metallicFloat": "Value"
 			},
 
 			"Roughness": {
+				"roughFloat": "Value"
 			},
 
 			"Emissive": {
+				"sinMultNode": "Value"
 			},
 
 			"AO": {
 			},
 
 			"WorldPositionOffset": {
+				"sinMultNode": "Value"
 			}
 		},
 

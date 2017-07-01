@@ -96,6 +96,11 @@ namespace Enjon
 			{
 				return ( mAssetsByName.find( name ) != mAssetsByName.end( ) );
 			} 
+
+			const std::unordered_map< String, Asset* >* GetAssets( )
+			{
+				return &mAssetsByName;
+			}
 			
 			/**
 			* @brief

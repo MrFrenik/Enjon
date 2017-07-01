@@ -268,6 +268,14 @@ namespace Enjon
 			static Enjon::String ShaderPassToString( ShaderPassType type ); 
  
 			bool HasUniform( const Enjon::String& uniformName );
+
+			const ShaderUniform* GetUniform( const Enjon::String& uniformName );
+
+			const std::unordered_map< Enjon::String, ShaderUniform* >* GetUniforms( );
+
+			bool HasShader( ShaderPassType pass );
+
+			const Shader* GetShader( ShaderPassType pass );
 	
 			void WriteToFile( ShaderPassType pass );
 

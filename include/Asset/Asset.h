@@ -36,6 +36,17 @@ namespace Enjon
 			*@brief Virtual destructor
 			*/
 			~Asset() {} 
+
+			/**
+			*@brief
+			*/
+			Enjon::String GetName( ) const { return mName; }
+			
+			/**
+			*@brief
+			*/
+			Enjon::String GetFilePath( ) const { return mFilePath; }
+
 			
 		protected:
 			/*

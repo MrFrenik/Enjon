@@ -16,6 +16,7 @@ namespace Enjon
 	class FullScreenQuad; 
 	class SpriteBatch;
 	class iVec2;
+	class Shader;
 
 	struct ToneMapSettings
 	{
@@ -111,6 +112,11 @@ namespace Enjon
 			*@brief
 			*/
 			Window* GetWindow() { return &mWindow; }
+
+			/*
+			* @brief
+			*/
+			void BindShader( const Enjon::Shader* shader );
 
 		private:
 
@@ -223,6 +229,8 @@ namespace Enjon
 			Camera 				mShadowCamera;	// Probably part of light or scene?
 
 			SpriteBatch* 	mBatch 			= nullptr; 
+
+			Enjon::Shader* mActiveShader = nullptr;
 
 			// Post processing settings
 			FXAASettings mFXAASettings = FXAASettings(8.0f, 1.0f/8.0f, 1.0f/128.0f);

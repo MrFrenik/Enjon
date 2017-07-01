@@ -517,6 +517,15 @@ namespace Enjon
 		// Clear the main surface node
 		mMainSurfaceNode.Clear( );
 		mTextureSamplerLocation = 0;
+
+		// Delete shaders
+		for ( auto& s : mShaders )
+		{
+			delete s.second;
+			s.second = nullptr;
+		}
+
+		mShaders.clear( );
 	}
 
 	//=========================================================================================================================
@@ -931,9 +940,9 @@ namespace Enjon
 
 		// Global uniforms
 		code += OutputLine( "// Gloabl Uniforms" );
-		code += OutputLine( "uniform mat4 uView = mat4( 1.0f );" );
+		code += OutputLine( "uniform float uWorldTime = 1.0f;" );
+		code += OutputLine( "uniform mat4 uViewProjection;" );
 		code += OutputLine( "uniform mat4 uModel = mat4( 1.0f );" );
-		code += OutputLine( "uniform mat4 uProjection = mat4( 1.0f );" );
 
 		// Comment for declarations
 		code += OutputLine( "\n// Variable Declarations" );
@@ -956,6 +965,44 @@ namespace Enjon
 		}
 
 		return code;
+	} 
+
+	//==================================================================================================================
+			
+	const std::unordered_map< Enjon::String, ShaderUniform* >* ShaderGraph::GetUniforms( )
+	{
+		return &mUniforms;
+	}
+
+	//==================================================================================================================
+			
+	bool ShaderGraph::HasShader( ShaderPassType pass )
+	{
+		return ( mShaders.find( pass ) != mShaders.end( ) );
+	}
+
+	//==================================================================================================================
+
+	const Shader* ShaderGraph::GetShader( ShaderPassType pass )
+	{
+		if ( HasShader( pass ) )
+		{
+			return mShaders[ pass ];
+		}
+
+		return nullptr;
+	}
+
+	//==================================================================================================================
+
+	const ShaderUniform* ShaderGraph::GetUniform( const Enjon::String& uniformName )
+	{
+		if ( HasUniform( uniformName ) )
+		{
+			return mUniforms[ uniformName ];
+		}
+
+		return nullptr;
 	}
 
 	//==================================================================================================================
@@ -1005,7 +1052,8 @@ namespace Enjon
 			const ShaderGraphNodeTemplate* nodeTemplate = link.mConnectingNode->mTemplate;
 
 			// Get uniform name
-			Enjon::String uniformName = const_cast< ShaderGraphNode* > ( link.mConnectingNode )->GetUniformName( );
+			//Enjon::String uniformName = const_cast< ShaderGraphNode* > ( link.mConnectingNode )->GetUniformName( );
+			Enjon::String uniformName = const_cast< ShaderGraphNode* > ( link.mConnectingNode )->mName;
 
 			// Get asset manager
 			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
@@ -1020,7 +1068,7 @@ namespace Enjon
 						// Texture samplers just use node name instead of uniform name
 						Enjon::String name = const_cast<ShaderGraphNode*>( link.mConnectingNode )->mName;
 
-						UniformTexture* uniform = new UniformTexture( name, am->GetDefaultAsset< Enjon::Texture >( ), mTextureSamplerLocation );
+						UniformTexture* uniform = new UniformTexture( name, am->GetDefaultAsset< Enjon::Texture >( ), link.mConnectingNode->mUniformLocation );
 						if ( !AddUniform( uniform ) )
 						{
 							// Failed to add, so delete uniform
@@ -1167,7 +1215,7 @@ namespace Enjon
 				}
 
 				// Final position output 
-				code += OutputTabbedLine( "gl_Position = uProjection * uView * vec4( worldPosition, 1.0 );\n" );
+				code += OutputTabbedLine( "gl_Position = uViewProjection * vec4( worldPosition, 1.0 );\n" );
 				
 				code += OutputTabbedLine( "// Reorthogonalize with respect to N" );
 				code += OutputTabbedLine( "vec3 N = normalize( ( uModel * vec4( vertexNormal, 0.0 ) ).xyz );" );
@@ -1235,6 +1283,7 @@ namespace Enjon
 		
 		// Comment for declarations
 		code += OutputLine( "// Global Uniforms" );
+		code += OutputLine( "uniform float uWorldTime = 1.0f;" );
 
 		// Comment for declarations
 		code += OutputLine( "\n// Variable Declarations" );
@@ -1406,7 +1455,7 @@ namespace Enjon
 						// Transform this type to required type for output ( could make this more specific to get away from branches )
 						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec3" );
 
-						code += OutputTabbedLine( "vec3 normal = normalize( " + linkEval + " * 2.0 - 1.0;" );
+						code += OutputTabbedLine( "vec3 normal = normalize( " + linkEval + " * 2.0 - 1.0 );" );
 						code += OutputTabbedLine( "normal = normalize( fs_in.TBN * normal );" );
 						code += OutputTabbedLine( "NormalsOut = vec4( normal, 1.0 );\n" );
 					}
@@ -1451,7 +1500,7 @@ namespace Enjon
 						// Transform to float
 						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
 
-						metallic = linkEval;
+						metallic = "clamp( " + linkEval + ", 0.0, 1.0 )";
 					}
 					else
 					{
@@ -1462,6 +1511,7 @@ namespace Enjon
 				else
 				{
 					metallic = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Metallic" )->mDefaultValue;
+					metallic = "clamp( " + metallic + ", 0.0, 1.0 )";
 				}
 
 				// Roughness
@@ -1486,7 +1536,7 @@ namespace Enjon
 						// Transform to float
 						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
 
-						roughness = linkEval;
+						roughness = "clamp( " + linkEval + ", 0.0, 1.0 )";
 					}
 					else
 					{
@@ -1497,6 +1547,7 @@ namespace Enjon
 				else
 				{
 					roughness = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Roughness" )->mDefaultValue;
+					roughness = "clamp( " + roughness + ", 0.0, 1.0 )";
 				}
 
 				// AO
@@ -1521,7 +1572,7 @@ namespace Enjon
 						// Transform to float
 						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
 
-						ao = linkEval;
+						ao = "clamp( " + linkEval + ", 0.0, 1.0 )";
 					}
 					else
 					{
@@ -1532,6 +1583,7 @@ namespace Enjon
 				else
 				{
 					ao = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "AO" )->mDefaultValue;
+					ao = "clamp( " + ao + ", 0.0, 1.0 )";
 				}
 
 				// Output Material Properties
@@ -1679,44 +1731,26 @@ namespace Enjon
 		// Replace V_TEXCOORD0 with appropriate tag
 		for ( u32 i = 0; i < ShaderGraph::TagCount( returnCode, "#V_TEXCOORD0" ); ++i )
 		{
-			returnCode = ShaderGraph::FindReplaceMetaTag( returnCode, "#V_TEXCOORD0", "v_texcoord0" );
+			returnCode = ShaderGraph::FindReplaceMetaTag( returnCode, "#V_TEXCOORD0", "fs_in.TexCoords" );
 		}
 
 		// Replace G_WORLD_TIME with appropriate tag
 		for ( u32 i = 0; i < ShaderGraph::TagCount( returnCode, "#G_WORLD_TIME" ); ++i )
 		{
-			returnCode = ShaderGraph::FindReplaceMetaTag( returnCode, "#G_WORLD_TIME", "GLOBAL_WORLD_TIME" );
+			returnCode = ShaderGraph::FindReplaceMetaTag( returnCode, "#G_WORLD_TIME", "uWorldTime" );
 		}
 
 		// Replace V_NORMAL with appropriate tag
 		for ( u32 i = 0; i < ShaderGraph::TagCount( returnCode, "#V_NORMAL" ); ++i )
 		{
-			returnCode = ShaderGraph::FindReplaceMetaTag( returnCode, "#V_NORMAL", "v_normal" );
+			returnCode = ShaderGraph::FindReplaceMetaTag( returnCode, "#V_NORMAL", "vertexNormal" );
 		}
 
 		// Replace V_TANGENT with appropriate tag
 		for ( u32 i = 0; i < ShaderGraph::TagCount( returnCode, "#V_TANGENT" ); ++i )
 		{
-			returnCode = ShaderGraph::FindReplaceMetaTag( returnCode, "#V_TANGENT", "v_tangent" );
-		}
-
-		// Replace V_BITANGENT with appropriate tag
-		for ( u32 i = 0; i < ShaderGraph::TagCount( returnCode, "#V_BITANGENT" ); ++i )
-		{
-			returnCode = ShaderGraph::FindReplaceMetaTag( returnCode, "#V_BITANGENT", "v_bitangent" );
-		}
-
-		// Replace V_WPOS with appropriate tag
-		for ( u32 i = 0; i < ShaderGraph::TagCount( returnCode, "#V_WPOS" ); ++i )
-		{
-			returnCode = ShaderGraph::FindReplaceMetaTag( returnCode, "#V_WPOS", "v_wpos" );
-		}
-
-		// Replace V_VIEW with appropriate tag
-		for ( u32 i = 0; i < ShaderGraph::TagCount( returnCode, "#V_VIEW" ); ++i )
-		{
-			returnCode = ShaderGraph::FindReplaceMetaTag( returnCode, "#V_VIEW", "v_view" );
-		}
+			returnCode = ShaderGraph::FindReplaceMetaTag( returnCode, "#V_TANGENT", "vertexTangent" );
+		} 
 
 		return returnCode;
 	}
@@ -1892,7 +1926,7 @@ namespace Enjon
 		}
 
 		// If is a uniform, don't need to redefine the variable
-		if ( !IsUniform( ) )
+		if ( !IsUniform( ) || mTemplate->GetUniformType() == UniformType::TextureSampler2D )
 		{
 			// Get variable decl template code
 			Enjon::String variableDefTemplate = mTemplate->GetVariableDefinitionTemplate( );
@@ -1988,7 +2022,8 @@ namespace Enjon
 		Enjon::String variableDeclTemplate = OutputLine( IsUniform( ) ? "uniform " + mTemplate->GetVariableDeclarationTemplate( ) : mTemplate->GetVariableDeclarationTemplate( ) );
 
 		// Need to find and replace for certain things
-		variableDeclTemplate = ( ShaderGraph::FindReplaceMetaTag( variableDeclTemplate, "#NODE_NAME", IsUniform( ) ? GetUniformName( ) : mName ) );
+		//variableDeclTemplate = ( ShaderGraph::FindReplaceMetaTag( variableDeclTemplate, "#NODE_NAME", IsUniform( ) ? GetUniformName( ) : mName ) );
+		variableDeclTemplate = ( ShaderGraph::FindReplaceMetaTag( variableDeclTemplate, "#NODE_NAME", mName ) );
 
 		// Replace uniform location tag
 		variableDeclTemplate = ( ShaderGraph::FindReplaceMetaTag( variableDeclTemplate, "#UNIFORM_LOCATION", std::to_string( mUniformLocation ) ) );
@@ -2011,6 +2046,8 @@ namespace Enjon
 
 			variableDeclTemplate = ( ShaderGraph::FindReplaceMetaTag( variableDeclTemplate, "#OUTPUT_TYPE", outputTypeString ) );
 		}
+
+		/*
 		else if ( IsUniform( ) )
 		{
 			Enjon::String actualVariable = "";
@@ -2034,6 +2071,7 @@ namespace Enjon
 			// Add actual variable declaration
 			variableDeclTemplate += OutputLine( actualVariable );
 		}
+		*/
 
 		// Set variable to being declared
 		SetDeclared( true );

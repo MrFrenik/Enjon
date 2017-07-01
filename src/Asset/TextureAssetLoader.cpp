@@ -107,6 +107,7 @@ namespace Enjon
 	{ 
 		// Load texture
 		Enjon::Texture* tex = LoadTextureFromFile( filePath );
+		tex->mName = name;
 
 		// Add to assets with qualified name
 		AddToAssets(name, tex); 
@@ -121,7 +122,8 @@ namespace Enjon
 		Enjon::String assetDir = am->GetAssetsPath( );
 
 		// Get default texture
-		Enjon::Texture* tex = LoadTextureFromFile( assetDir + "/Textures/white.png" );
+		Enjon::Texture* tex = LoadTextureFromFile( assetDir + "/Textures/white.png" ); 
+		tex->mName = AssetLoader::GetQualifiedName( assetDir + "/Textures/white.png" );
 
 		// Set default texture
 		mDefaultAsset = tex;

@@ -87,7 +87,7 @@ void main()
 	vec3 specular = prefilteredColor * brdfVec;
 
 	// Final ambient
-	vec3 ambient = max( vec3( 0.0, 0.0, 0.0 ), (diffuse + specular) ) * ao;
+	vec3 ambient = max( vec3( 0.0, 0.0, 0.0 ), (diffuse + specular) );
 
     // Final color out
 	ColorOut = vec4( ambient, 1.0 ) + vec4( max( vec3( 0.0, 0.0, 0.0 ), emissive.rgb ), 1.0 ); 

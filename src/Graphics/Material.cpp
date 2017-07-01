@@ -7,8 +7,13 @@ namespace Enjon {
 
 	//------------------------------------------------------------------------
 	Material::Material()
-		: mShader(nullptr)
+		: mShader(nullptr), mShaderGraph( nullptr )
 	{
+	}
+	
+	Material::Material( const Enjon::ShaderGraph* shaderGraph )
+		: mShaderGraph( shaderGraph )
+	{ 
 	}
 
 	//------------------------------------------------------------------------
@@ -17,6 +22,7 @@ namespace Enjon {
 	} 
 	
 	//------------------------------------------------------------------------
+			
 	
 	void Material::SetTexture(const TextureSlotType& type, const AssetHandle<Texture>& textureHandle)
 	{
@@ -57,112 +63,110 @@ namespace Enjon {
 	//{
 	//	mShader = shader;
 
-	//}
+	//} 
 
 	//========================================================================
-
-	void Material::SetShader( const Enjon::Shader* shader )
+			
+	void Material::AddOverride( ShaderUniform* uniform )
 	{
-		mMaterialShader = shader;
+		auto query = mUniformOverrides.find( uniform->GetName( ) );
+		if ( query == mUniformOverrides.end( ) )
+		{
+			mUniformOverrides[ uniform->GetName( ) ] = uniform;
+		}
+	} 
+ 
+	//========================================================================
+			
+	bool Material::HasOverride( const Enjon::String& uniformName )
+	{
+		return ( mUniformOverrides.find( uniformName ) != mUniformOverrides.end( ) );
 	}
-
+ 
 	//========================================================================
 
-	const Enjon::Shader* Material::GetShader( ) const
+	const ShaderUniform* Material::GetOverride( const Enjon::String& uniformName )
 	{
-		return mMaterialShader;
+		if ( HasOverride( uniformName ) )
+		{
+			return mUniformOverrides[ uniformName ];
+		}
+
+		return nullptr;
 	}
 
 	//========================================================================
 			
-	void Material::AddUniform( ShaderUniform* uniform )
+	const Enjon::ShaderGraph* Material::GetShaderGraph( ) const
 	{
-		auto query = mUniforms.find( uniform->GetName( ) );
-		if ( query == mUniforms.end( ) )
+		return mShaderGraph;
+	}
+
+	//========================================================================
+			
+	void Material::Bind( const ShaderPassType& pass )
+	{
+		Enjon::ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+		Enjon::Shader* shader = const_cast< Shader* > ( sg->GetShader( pass ) );
+		if ( shader )
 		{
-			mUniforms[ uniform->GetName( ) ] = uniform;
-		}
+			for ( auto& u : *sg->GetUniforms( ) )
+			{
+				Enjon::String uniformName = u.second->GetName( );
+				
+				if ( HasOverride( uniformName ) )
+				{
+					mUniformOverrides[ uniformName ]->Bind( shader );
+				}
+				else
+				{
+					u.second->Bind( shader );
+				}
+			}
+		} 
 	} 
 
 	//========================================================================
-
-	void Material::SetUniforms( )
-	{
-		// Make sure that material shader is valid
-		assert( mMaterialShader != nullptr );
-
-		// Iterate through uniforms and set with shader
-		for ( auto& u : mUniforms )
-		{
-			switch ( u.second->GetType() )
-			{
-				case UniformType::TextureSampler2D:
-				{
-					UniformTexture* texUni = u.second->Cast< UniformTexture >( );
-					const_cast< Enjon::Shader* >( mMaterialShader )->BindTexture( texUni->GetName( ), texUni->GetTexture( ).Get( )->GetTextureId(), texUni->GetLocation( ) );
-				} break;
-				
-				case UniformType::Float:
-				{
-					UniformPrimitive< f32 >* uni = u.second->Cast< UniformPrimitive< f32 > >( );
-					const_cast< Enjon::Shader* >( mMaterialShader )->SetUniform( uni->GetName( ), uni->GetValue( ) );
-				}
-
-				case UniformType::Vec2:
-				{
-					UniformPrimitive< Vec2 >* uni = u.second->Cast< UniformPrimitive< Vec2 > >( );
-					const_cast< Enjon::Shader* >( mMaterialShader )->SetUniform( uni->GetName( ), uni->GetValue( ) );
-				}
-				
-				case UniformType::Vec3:
-				{
-					UniformPrimitive< Vec3 >* uni = u.second->Cast< UniformPrimitive< Vec3 > >( );
-					const_cast< Enjon::Shader* >( mMaterialShader )->SetUniform( uni->GetName( ), uni->GetValue( ) );
-				}
-				
-				case UniformType::Vec4:
-				{
-					UniformPrimitive< Vec4 >* uni = u.second->Cast< UniformPrimitive< Vec4 > >( );
-					const_cast< Enjon::Shader* >( mMaterialShader )->SetUniform( uni->GetName( ), uni->GetValue( ) );
-				}
-				
-				case UniformType::Mat4:
-				{
-					UniformPrimitive< Mat4 >* uni = u.second->Cast< UniformPrimitive< Mat4 > >( );
-					const_cast< Enjon::Shader* >( mMaterialShader )->SetUniform( uni->GetName( ), uni->GetValue( ) );
-				}
-
-				default:
-				{
-
-				} break;
-			}
-		}
-	}
 			
 	void Material::SetUniform( const Enjon::String& name, const Enjon::AssetHandle< Enjon::Texture >& value )
 	{
-		auto query = mUniforms.find( name );
-		if ( query != mUniforms.end( ) )
+		// If override doesn't exist
+		if ( !HasOverride( name ) )
 		{
-			ShaderUniform* uniform = mUniforms[ name ];
-			if ( uniform->GetType( ) == Enjon::UniformType::TextureSampler2D )
+			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+			if ( sg->HasUniform( name ) )
 			{
-				uniform->Cast< UniformTexture >( )->SetTexture( value );
+				UniformTexture* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformTexture >( );;
+				UniformTexture* uniOverride = new UniformTexture( *uniform );
+				uniOverride->SetTexture( value );
+				AddOverride( uniOverride );
 			}
 		}
+		// Otherwise set override
+		else
+		{
+			mUniformOverrides[ name ]->Cast< UniformTexture >( )->SetTexture( value );
+		} 
 	}
 
 	void Material::SetUniform( const Enjon::String& name, const Enjon::Vec2& value )
 	{
-		auto query = mUniforms.find( name );
-		if ( query != mUniforms.end( ) )
+		// If override doesn't exist
+		if ( !HasOverride( name ) )
 		{
-			ShaderUniform* uniform = mUniforms[ name ];
-			if ( uniform->GetType( ) == Enjon::UniformType::Vec2 )
+			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+			if ( sg->HasUniform( name ) )
 			{
-				uniform->Cast< UniformPrimitive< Vec2 > >( )->SetValue( value );
+				UniformPrimitive< Vec2 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Vec2 > >( );;
+				UniformPrimitive< Vec2 >* uniOverride = new UniformPrimitive<Vec2>( *uniform );
+				uniOverride->SetValue( value );
+				AddOverride( uniOverride );
 			}
+		}
+		// Otherwise set override
+		else
+		{
+			mUniformOverrides[ name ]->Cast< UniformPrimitive< Vec2 > >( )->SetValue( value );
 		} 
 	} 
 
@@ -170,14 +174,22 @@ namespace Enjon {
 
 	void Material::SetUniform( const Enjon::String& name, const Enjon::Vec3& value )
 	{
-		auto query = mUniforms.find( name );
-		if ( query != mUniforms.end( ) )
+		// If override doesn't exist
+		if ( !HasOverride( name ) )
 		{
-			ShaderUniform* uniform = mUniforms[ name ];
-			if ( uniform->GetType( ) == Enjon::UniformType::Vec3 )
+			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+			if ( sg->HasUniform( name ) )
 			{
-				uniform->Cast< UniformPrimitive< Vec3 > >( )->SetValue( value );
+				UniformPrimitive< Vec3 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Vec3 > >( );;
+				UniformPrimitive< Vec3 >* uniOverride = new UniformPrimitive<Vec3>( *uniform );
+				uniOverride->SetValue( value );
+				AddOverride( uniOverride );
 			}
+		}
+		// Otherwise set override
+		else
+		{
+			mUniformOverrides[ name ]->Cast< UniformPrimitive< Vec3 > >( )->SetValue( value );
 		} 
 	}
 
@@ -185,14 +197,22 @@ namespace Enjon {
 
 	void Material::SetUniform( const Enjon::String& name, const Enjon::Vec4& value )
 	{ 
-		auto query = mUniforms.find( name );
-		if ( query != mUniforms.end( ) )
+		// If override doesn't exist
+		if ( !HasOverride( name ) )
 		{
-			ShaderUniform* uniform = mUniforms[ name ];
-			if ( uniform->GetType( ) == Enjon::UniformType::Vec4 )
+			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+			if ( sg->HasUniform( name ) )
 			{
-				uniform->Cast< UniformPrimitive< Vec4 > >( )->SetValue( value );
+				UniformPrimitive< Vec4 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Vec4 > >( );;
+				UniformPrimitive< Vec4 >* uniOverride = new UniformPrimitive<Vec4>( *uniform );
+				uniOverride->SetValue( value );
+				AddOverride( uniOverride );
 			}
+		}
+		// Otherwise set override
+		else
+		{
+			mUniformOverrides[ name ]->Cast< UniformPrimitive< Vec4 > >( )->SetValue( value );
 		} 
 	}
 
@@ -200,14 +220,22 @@ namespace Enjon {
 
 	void Material::SetUniform( const Enjon::String& name, const Enjon::Mat4& value )
 	{ 
-		auto query = mUniforms.find( name );
-		if ( query != mUniforms.end( ) )
+		// If override doesn't exist
+		if ( !HasOverride( name ) )
 		{
-			ShaderUniform* uniform = mUniforms[ name ];
-			if ( uniform->GetType( ) == Enjon::UniformType::Mat4 )
+			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+			if ( sg->HasUniform( name ) )
 			{
-				uniform->Cast< UniformPrimitive< Mat4 > >( )->SetValue( value );
+				UniformPrimitive< Mat4 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Mat4 > >( );;
+				UniformPrimitive< Mat4 >* uniOverride = new UniformPrimitive<Mat4>( *uniform );
+				uniOverride->SetValue( value );
+				AddOverride( uniOverride );
 			}
+		}
+		// Otherwise set override
+		else
+		{
+			mUniformOverrides[ name ]->Cast< UniformPrimitive< Mat4 > >( )->SetValue( value );
 		} 
 	}
 
@@ -215,14 +243,22 @@ namespace Enjon {
 
 	void Material::SetUniform( const Enjon::String& name, const f32& value )
 	{ 
-		auto query = mUniforms.find( name );
-		if ( query != mUniforms.end( ) )
+		// If override doesn't exist
+		if ( !HasOverride( name ) )
 		{
-			ShaderUniform* uniform = mUniforms[ name ];
-			if ( uniform->GetType( ) == Enjon::UniformType::Float )
+			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+			if ( sg->HasUniform( name ) )
 			{
-				uniform->Cast< UniformPrimitive< f32 > >( )->SetValue( value );
+				UniformPrimitive< f32 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< f32 > >( );;
+				UniformPrimitive< f32 >* uniOverride = new UniformPrimitive<f32>( *uniform );
+				uniOverride->SetValue( value );
+				AddOverride( uniOverride );
 			}
+		}
+		// Otherwise set override
+		else
+		{
+			mUniformOverrides[ name ]->Cast< UniformPrimitive< f32 > >( )->SetValue( value );
 		} 
 	}
 

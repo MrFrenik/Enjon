@@ -356,6 +356,7 @@ Enjon::Result Game::Initialize()
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.roughness"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.emissive"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.ao"));
+	mFloorMat->TwoSided( true );
 
 	mBlueMat = new Enjon::Material( );
 	mBlueMat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.blue") );
@@ -1065,7 +1066,7 @@ Enjon::Result Game::ProcessInput(f32 dt)
 			Enjon::GraphicsComponent* gc = ent->Attach<Enjon::GraphicsComponent>();
 			ent->SetScale(v3(scalar));
 			gc->SetMesh(mSphereMesh);
-			gc->SetMaterial(mGunMat);
+			gc->SetMaterial(mFloorMat);
 			scene->AddRenderable(gc->GetRenderable());
 
 			mBodies.push_back(body);

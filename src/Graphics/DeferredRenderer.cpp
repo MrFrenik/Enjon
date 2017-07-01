@@ -26,19 +26,21 @@
 #include "Graphics/ShaderGraph.h"
 
 #include <string>
-#include <fmt/format.h> 
-#include <fmt/string.h>
-#include <fmt/printf.h>
 #include <cassert>
+#include <limits>
 
 #include <STB/stb_image.h> 
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <fmt/format.h> 
+#include <fmt/string.h>
+#include <fmt/printf.h>
 
 Enjon::Renderable mRenderable; 
 Enjon::AssetHandle< Enjon::Texture > mBRDFHandle;
+Enjon::Material* mMaterial = nullptr;
 bool brdfset = false;
 
 bool useOther = false;
@@ -173,8 +175,8 @@ namespace Enjon
 
 		// TODO(): I don't like random raw gl calls just lying around...
 		glEnable( GL_DEPTH_TEST );
-		//glEnable( GL_CULL_FACE );
-		//glCullFace( GL_BACK );
+		glEnable( GL_CULL_FACE );
+		glCullFace( GL_BACK );
 		glEnable( GL_DEPTH_CLAMP );
 		// enable seamless cubemap sampling for lower mip levels in the pre-filter map.
 		glEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
@@ -182,10 +184,21 @@ namespace Enjon
 		return Result::SUCCESS;
 	}
 
+	void DeferredRenderer::BindShader( const Enjon::Shader* shader )
+	{
+		if ( shader != mActiveShader )
+		{
+			mActiveShader = const_cast< Shader*> ( shader );
+			mActiveShader->Use( );
+		}
+	}
+
 	//======================================================================================================
 
-	void DeferredRenderer::STBTest( )
+	void DeferredRenderer::STBTest( ) 
 	{
+		glDisable( GL_CULL_FACE );
+
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
 		Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/03-Ueno-Shrine_3k.hdr";
@@ -406,8 +419,19 @@ namespace Enjon
 		}
 	
 		// Shader graph creation
-		Enjon::String shaderPath = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( )->GetAssetsPath( ) + "/Shaders"; 
-		mShaderGraph.Create( shaderPath + "/ShaderGraphs/test.json" ); 
+		{
+			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+			Enjon::String shaderPath = am->GetAssetsPath( ) + "/Shaders"; 
+			mShaderGraph.Create( shaderPath + "/ShaderGraphs/test.json" ); 
+
+			// Create material
+			mMaterial = new Enjon::Material( &mShaderGraph );
+
+			// Set renderable material
+			mRenderable.SetMaterial( mMaterial );
+			mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.bunny" ) );
+			mRenderable.SetPosition( Enjon::Vec3( 30.0f, 2.0f, 10.0f ) );
+		}
 	}
 
 	//======================================================================================================
@@ -489,6 +513,8 @@ namespace Enjon
 	void DeferredRenderer::GBufferPass()
 	{
 		glDepthFunc( GL_LESS );
+		//glEnable( GL_CULL_FACE );
+		//glCullFace( GL_BACK );
 
 		// Bind gbuffer
 		mGbuffer->Bind();
@@ -558,8 +584,29 @@ namespace Enjon
 		// SHADER GRAPH TEST ////////////////////////////
 		///////////////////////////////////////////////// 
 
-		// Do shader graph test here
+		//glBindTexture( GL_TEXTURE_2D, 0 );
 
+		// Do shader graph test here
+		static float wt = 0.0f;
+		wt += 0.001f;
+		if ( wt >= std::numeric_limits<f32>::max( ) )
+		{
+			wt = 0.0f;
+		}
+		
+		Enjon::ShaderGraph* sGraph = const_cast< ShaderGraph* >( mMaterial->GetShaderGraph( ) );
+		Enjon::Shader* sgShader = const_cast< Shader*> ( sGraph->GetShader( ShaderPassType::StaticGeom ) );
+		if ( sgShader )
+		{
+			sgShader->Use( );
+			{
+				sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
+				sgShader->SetUniform( "uWorldTime", wt );
+				mMaterial->Bind( Enjon::ShaderPassType::StaticGeom ); 
+				mRenderable.Submit( sgShader );
+			} 
+			sgShader->Unuse( ); 
+		}
 
 		// Quadbatches
 		shader = Enjon::ShaderManager::Get("QuadBatch");
@@ -581,15 +628,15 @@ namespace Enjon
 					material = curMaterial;
 					
 					// Check whether or not to be rendered two sided
-					if ( material->TwoSided( ) )
+					/*if ( material->TwoSided( ) )
 					{
 						glDisable( GL_CULL_FACE );
 					}
-					//else
-					//{
-					//	glEnable( GL_CULL_FACE );
-					//	glCullFace( GL_BACK );
-					//}
+					else
+					{
+						glEnable( GL_CULL_FACE );
+						glCullFace( GL_BACK );
+					}*/
 
 					// Set material tetxures
 					shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
@@ -611,6 +658,7 @@ namespace Enjon
 		// Cubemap
 		glEnable( GL_DEPTH_TEST );
 		glDepthFunc( GL_LEQUAL );
+		//glCullFace( GL_FRONT );
 		Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
 		skyBoxShader->Use( );
 		{
@@ -1422,6 +1470,104 @@ namespace Enjon
             ImGui::DragFloat3Labels("##bgcolor", labels, mBGColor, 0.1f, 0.0f, 30.0f);
 	    	ImGui::TreePop();
 	    } 
+
+		if ( ImGui::CollapsingHeader( "Uniforms" ) )
+		{
+			if ( mMaterial )
+			{
+				for ( auto& u : *mShaderGraph.GetUniforms( ) )
+				{
+					Enjon::String uniformName = u.second->GetName( );
+					Enjon::UniformType type = u.second->GetType( );
+					Enjon::ShaderUniform* uniform = u.second;
+
+					if ( mMaterial->HasOverride( uniformName ) )
+					{
+						uniform = const_cast< ShaderUniform* > ( mMaterial->GetOverride( uniformName ) );
+					}
+
+					switch ( type )
+					{
+						case UniformType::Float:
+						{
+							UniformPrimitive< f32 >* uf = uniform->Cast< UniformPrimitive< f32 > >( );
+							f32 val = uf->GetValue( );
+							if ( ImGui::SliderFloat( uniformName.c_str( ), &val, 0.0f, 3.0f ) )
+							{
+								mMaterial->SetUniform( uniformName, val );
+							}
+						} break;
+
+						case UniformType::Vec2:
+						{
+							UniformPrimitive< Vec2 >* uf = uniform->Cast< UniformPrimitive< Vec2 > >( );
+							Enjon::Vec2 val = uf->GetValue( );
+							f32 vals[ 2 ];
+							vals[ 0 ] = val.x;
+							vals[ 1 ] = val.y;
+							if ( ImGui::SliderFloat2( uniformName.c_str( ), (f32*)&vals, 0.0f, 3.0f ) )
+							{ 
+								mMaterial->SetUniform( uniformName, Enjon::Vec2( vals[ 0 ], vals[ 1 ] ) );
+							}
+						} break;
+
+						case UniformType::Vec3:
+						{
+							UniformPrimitive< Vec3 >* uf = uniform->Cast< UniformPrimitive< Vec3 > >( );
+							Enjon::Vec3 val = uf->GetValue( );
+							f32 vals[ 3 ];
+							vals[ 0 ] = val.x;
+							vals[ 1 ] = val.y;
+							vals[ 2 ] = val.z;
+							if ( ImGui::SliderFloat3( uniformName.c_str( ), (f32*)&vals, 0.0f, 3.0f ) )
+							{ 
+								mMaterial->SetUniform( uniformName, Enjon::Vec3( vals[ 0 ], vals[ 1 ], vals[ 2 ] ) );
+							}
+						} break;
+
+						case UniformType::Vec4:
+						{
+							UniformPrimitive< Vec4 >* uf = uniform->Cast< UniformPrimitive< Vec4 > >( );
+							Enjon::Vec4 val = uf->GetValue( );
+							f32 vals[ 4 ];
+							vals[ 0 ] = val.x;
+							vals[ 1 ] = val.y;
+							vals[ 2 ] = val.z;
+							vals[ 3 ] = val.w;
+							if ( ImGui::SliderFloat4( uniformName.c_str( ), (f32*)&vals, 0.0f, 3.0f ) )
+							{ 
+								mMaterial->SetUniform( uniformName, Enjon::Vec4( vals[ 0 ], vals[ 1 ], vals[ 2 ], vals[ 3 ] ) );
+							}
+						} break;
+
+						case UniformType::TextureSampler2D:
+						{
+							UniformTexture* uf = uniform->Cast< UniformTexture >( );
+							if ( ImGui::CollapsingHeader( uf->GetName( ).c_str( ) ) )
+							{
+								Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+								ImGui::ListBoxHeader( "##textures" );
+								{
+									for ( auto& a : *am->GetAssets< Enjon::Texture >( ) )
+									{
+										ImGui::Text( a.second->Cast< Enjon::Texture >( )->GetName( ).c_str( ) );
+									} 
+								}
+								ImGui::ListBoxFooter( );
+							}
+						} break;
+					}
+
+				} 
+			}
+		}
+
+		if ( ImGui::Button( "Recompile Shader" ) )
+		{
+			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+			Enjon::String shaderPath = am->GetAssetsPath( ) + "/Shaders"; 
+			mShaderGraph.Create( shaderPath + "/ShaderGraphs/test.json" ); 
+		}
 
 		ImGui::Image( ImTextureID( mHDRTextureID ), ImVec2( 128, 128 ) );
 		if ( brdfset )

@@ -106,6 +106,31 @@ namespace Enjon
 				// Return asset handle
 				return handle;
 			} 
+
+			/**
+			*@brief
+			*/
+			bool Exists( u32 id )
+			{
+				return ( mLoaders.find( id ) != mLoaders.end( ) );
+			}
+			
+			/**
+			*@brief Gets all assets of specific type
+			*/
+			template <typename T>
+			const std::unordered_map< Enjon::String, Asset* >* GetAssets( )
+			{ 
+				// Get appropriate loader based on asset type
+				u32 loaderId = GetAssetTypeId<T>(); 
+
+				if ( Exists( loaderId ) )
+				{
+					return mLoaders[ loaderId ]->GetAssets( );
+				}
+
+				return nullptr;
+			} 
 			
 			/**
 			*@brief Gets loaded asset in database from name
