@@ -1546,11 +1546,16 @@ namespace Enjon
 							if ( ImGui::CollapsingHeader( uf->GetName( ).c_str( ) ) )
 							{
 								Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-								ImGui::ListBoxHeader( "##textures" );
+								ImGui::ListBoxHeader( ( "##textures" + uniformName ).c_str( ) );
 								{
 									for ( auto& a : *am->GetAssets< Enjon::Texture >( ) )
 									{
-										ImGui::Text( a.second->Cast< Enjon::Texture >( )->GetName( ).c_str( ) );
+										Enjon::String texName = a.second->Cast< Enjon::Texture >( )->GetName( );
+										if ( ImGui::Button( texName.c_str( ) ) )
+										{
+											Enjon::AssetHandle< Enjon::Texture > newTex = am->GetAsset< Enjon::Texture >( texName );
+											mMaterial->SetUniform( uniformName, newTex );
+										} 
 									} 
 								}
 								ImGui::ListBoxFooter( );

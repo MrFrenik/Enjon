@@ -17,10 +17,15 @@ in VS_OUT
 uniform float uWorldTime = 1.0f;
 
 // Variable Declarations
-uniform vec3 uColor;
+uniform float texCoordMultiplier;
+
+vec2 uTexCoords;
+
+vec2 texMult;
+
+uniform sampler2D albedoMap;
 uniform sampler2D normalMap;
-uniform float metallicFloat;
-uniform float roughFloat;
+uniform sampler2D roughMap;
 uniform vec3 emissiveColor;
 
 uniform float emissiveIntensity;
@@ -42,18 +47,20 @@ void main()
 {
 	// Base Color
 
-	AlbedoOut = vec4(uColor, 1.0);
+uTexCoords = fs_in.TexCoords;
+texMult = texCoordMultiplier * fs_in.TexCoords;
+vec4 albedoMap_sampler = texture2D( albedoMap, texMult );
+	AlbedoOut = vec4(albedoMap_sampler.rgb, 1.0);
 
 	// Normal
-	vec4 normalMap_sampler = texture2D( normalMap, fs_in.TexCoords );
+	vec4 normalMap_sampler = texture2D( normalMap, texMult );
 	vec3 normal = normalize( normalMap_sampler.rgb * 2.0 - 1.0 );
 	normal = normalize( fs_in.TBN * normal );
 	NormalsOut = vec4( normal, 1.0 );
 
 	// Material Properties
-	
-	
-	MatPropsOut = vec4( clamp( metallicFloat, 0.0, 1.0 ), clamp( roughFloat, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
+	vec4 roughMap_sampler = texture2D( roughMap, texMult );
+	MatPropsOut = vec4( clamp( 0.0, 0.0, 1.0 ), clamp( roughMap_sampler.rgb.x, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
 
 	// Emissive
 	

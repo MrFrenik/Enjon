@@ -111,7 +111,7 @@ namespace Enjon {
 		if ( shader )
 		{
 			for ( auto& u : *sg->GetUniforms( ) )
-			{
+			{ 
 				Enjon::String uniformName = u.second->GetName( );
 				
 				if ( HasOverride( uniformName ) )

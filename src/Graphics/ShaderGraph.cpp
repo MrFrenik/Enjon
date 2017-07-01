@@ -518,6 +518,12 @@ namespace Enjon
 		mMainSurfaceNode.Clear( );
 		mTextureSamplerLocation = 0;
 
+		for ( auto& u : mUniforms )
+		{ 
+			delete u.second;
+			u.second = nullptr;
+		}
+
 		// Delete shaders
 		for ( auto& s : mShaders )
 		{
@@ -526,6 +532,7 @@ namespace Enjon
 		}
 
 		mShaders.clear( );
+		mUniforms.clear( );
 	}
 
 	//=========================================================================================================================

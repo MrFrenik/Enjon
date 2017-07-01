@@ -44,6 +44,28 @@
 		"normalMap": {
 			"Template": "Texture2DSamplerNode",
 			"IsUniform": true
+		},
+		"albedoMap": {
+			"Template": "Texture2DSamplerNode",
+			"IsUniform": true
+		},
+		"metallicMap": {
+			"Template": "Texture2DSamplerNode",
+			"IsUniform": true
+		},
+		"roughMap": {
+			"Template": "Texture2DSamplerNode",
+			"IsUniform": true
+		},
+		"uTexCoords": { 
+			"Template": "TextureCoordinateNode"
+		},
+		"texMult": {
+			"Template": "MultiplyFunctionNode"
+		},
+		"texCoordMultiplier": {
+			"Template": "ConstantFloatNode",
+			"IsUniform": true
 		}
 	},
 
@@ -96,6 +118,44 @@
 					"timeMultiplication": "Value"
 				}
 			}
+		},
+		"roughMap": {
+			"Inputs": {
+				"UV": {
+					"texMult": "Value"
+				}
+			}
+		},
+		"albedoMap": {
+			"Inputs": {
+				"UV": {
+					"texMult": "Value"
+				}
+			}
+		},
+		"normalMap": {
+			"Inputs": {
+				"UV": {
+					"texMult": "Value"
+				}
+			}
+		},
+		"metallicMap": {
+			"Inputs": {
+				"UV": {
+					"texMult": "Value"
+				}
+			}
+		},
+		"texMult": {
+			"Inputs": {
+				"Input_0": {
+					"texCoordMultiplier": "Value"
+				},
+				"Input_1": {
+					"uTexCoords": "Value"
+				}
+			}
 		}
 	},
 
@@ -104,7 +164,7 @@
 		"Inputs": {
 
 			"BaseColor": {
-				"uColor": "Value"
+				"albedoMap": "RGB"
 			},
 
 			"Normal": {
@@ -112,11 +172,10 @@
 			},
 
 			"Metallic": {
-				"metallicFloat": "Value"
 			},
 
 			"Roughness": {
-				"roughFloat": "Value"
+				"roughMap": "RGB"
 			},
 
 			"Emissive": {
