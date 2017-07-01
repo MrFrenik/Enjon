@@ -1,0 +1,788 @@
+{
+	"Templates": {
+
+		"MultiplyFunctionNode": {
+
+			"Type": "Function",
+			"NumberInputs": 2,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Input_0":{
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Input_1":{
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "#OUTPUT_TYPE",
+					"CodeTemplate": "#NODE_NAME"
+				}	
+			},
+			"ParameterLayouts": [
+				[ "float", "float", "float" ], 
+				[ "float", "vec2", "vec2" ], 
+				[ "float", "vec3", "vec3"], 
+				[ "float", "vec4", "vec4" ], 
+				[ "vec2", "float", "vec2" ], 
+				[ "vec3", "float", "vec3" ], 
+				[ "vec4", "float", "vec4" ], 
+				[ "vec2", "vec2", "vec2" ], 
+				[ "vec3", "vec3", "vec3" ], 
+				[ "vec4", "vec4", "vec4" ], 
+				[ "mat4", "float", "mat4" ], 
+				[ "float", "mat4", "mat4" ],
+				[ "mat4", "mat4", "mat4" ],
+				[ "", "", "float" ],
+				[ "", "float", "float" ],
+				[ "float", "", "float" ],
+				[ "vec2", "", "vec2" ],
+				[ "", "vec2", "vec2" ],
+				[ "vec3", "", "vec3" ],
+				[ "", "vec3", "vec3" ],
+				[ "vec4", "", "vec4" ],
+				[ "", "vec4", "vec4" ],
+				[ "mat4", "", "mat4" ],
+				[ "", "mat4", "mat4" ]
+			],
+			"VariableDeclaration": "#OUTPUT_TYPE #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Input_0) * #INPUT(Input_1);"
+		},
+
+		"DivideFunctionNode": {
+
+			"Type": "Function",
+			"NumberInputs": 2,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Input_0":{
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Input_1":{
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "#OUTPUT_TYPE",
+					"CodeTemplate": "#NODE_NAME"
+				}	
+			},
+			"ParameterLayouts": [
+				[ "float", "float", "float" ], 
+				[ "float", "vec2", "vec2" ], 
+				[ "float", "vec3", "vec3"], 
+				[ "float", "vec4", "vec4" ], 
+				[ "vec2", "float", "vec2" ], 
+				[ "vec3", "float", "vec3" ], 
+				[ "vec4", "float", "vec4" ], 
+				[ "vec2", "vec2", "vec2" ], 
+				[ "vec3", "vec3", "vec3" ], 
+				[ "vec4", "vec4", "vec4" ], 
+				[ "mat4", "float", "mat4" ], 
+				[ "float", "mat4", "mat4" ],
+				[ "mat4", "mat4", "mat4" ],
+				[ "", "", "float" ],
+				[ "", "float", "float" ],
+				[ "float", "", "float" ],
+				[ "vec2", "", "vec2" ],
+				[ "", "vec2", "vec2" ],
+				[ "vec3", "", "vec3" ],
+				[ "", "vec3", "vec3" ],
+				[ "vec4", "", "vec4" ],
+				[ "", "vec4", "vec4" ],
+				[ "mat4", "", "mat4" ],
+				[ "", "mat4", "mat4" ]
+			],
+			"VariableDeclaration": "#OUTPUT_TYPE #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Input_0) / #INPUT(Input_1);"
+		},
+
+
+		"AddFunctionNode": {
+
+			"Type": "Function",
+			"NumberInputs": 2,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Input_0":{
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Input_1":{
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "#OUTPUT_TYPE",
+					"CodeTemplate": "#NODE_NAME"
+				}	
+			},
+			"ParameterLayouts": [
+				[ "float", "float", "float" ], 
+				[ "float", "vec2", "vec2" ], 
+				[ "float", "vec3", "vec3"], 
+				[ "float", "vec4", "vec4" ], 
+				[ "vec2", "float", "vec2" ], 
+				[ "vec3", "float", "vec3" ], 
+				[ "vec4", "float", "vec4" ], 
+				[ "vec2", "vec2", "vec2" ], 
+				[ "vec3", "vec3", "vec3" ], 
+				[ "vec4", "vec4", "vec4" ], 
+				[ "mat4", "float", "mat4" ], 
+				[ "float", "mat4", "mat4" ],
+				[ "mat4", "mat4", "mat4" ],
+				[ "", "", "float" ],
+				[ "", "float", "float" ],
+				[ "float", "", "float" ],
+				[ "vec2", "", "vec2" ],
+				[ "", "vec2", "vec2" ],
+				[ "vec3", "", "vec3" ],
+				[ "", "vec3", "vec3" ],
+				[ "vec4", "", "vec4" ],
+				[ "", "vec4", "vec4" ],
+				[ "mat4", "", "mat4" ],
+				[ "", "mat4", "mat4" ]
+			],
+			"VariableDeclaration": "#OUTPUT_TYPE #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Input_0) + #INPUT(Input_1);"
+		},
+
+
+		"SubtractFunctionNode": {
+
+			"Type": "Function",
+			"NumberInputs": 2,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Input_0":{
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Input_1":{
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "#OUTPUT_TYPE",
+					"CodeTemplate": "#NODE_NAME"
+				}	
+			},
+			"ParameterLayouts": [
+				[ "float", "float", "float" ], 
+				[ "float", "vec2", "vec2" ], 
+				[ "float", "vec3", "vec3"], 
+				[ "float", "vec4", "vec4" ], 
+				[ "vec2", "float", "vec2" ], 
+				[ "vec3", "float", "vec3" ], 
+				[ "vec4", "float", "vec4" ], 
+				[ "vec2", "vec2", "vec2" ], 
+				[ "vec3", "vec3", "vec3" ], 
+				[ "vec4", "vec4", "vec4" ], 
+				[ "mat4", "float", "mat4" ], 
+				[ "float", "mat4", "mat4" ],
+				[ "mat4", "mat4", "mat4" ],
+				[ "", "", "float" ],
+				[ "", "float", "float" ],
+				[ "float", "", "float" ],
+				[ "vec2", "", "vec2" ],
+				[ "", "vec2", "vec2" ],
+				[ "vec3", "", "vec3" ],
+				[ "", "vec3", "vec3" ],
+				[ "vec4", "", "vec4" ],
+				[ "", "vec4", "vec4" ],
+				[ "mat4", "", "mat4" ],
+				[ "", "mat4", "mat4" ]
+			],
+			"VariableDeclaration": "#OUTPUT_TYPE #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Input_0) - #INPUT(Input_1);"
+		},		
+		"FloorFunctionNode": {
+
+			"Type": "Function",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Input_0": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"ParameterLayouts": [
+				[ "float", "float" ],	
+				[ "vec2", "vec2" ],	
+				[ "vec3", "vec3" ],	
+				[ "vec4", "vec4" ]	
+			],
+			"VariableDeclaration": "#OUTPUT_TYPE #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = floor(#INPUT(Input_0));"
+		},
+
+		"LerpFunctionNode": {
+
+			"Type": "Function",
+			"NumberInputs": 3,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Input_0":{
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Input_1":{
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Input_2":{
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME"
+				}	
+			},
+			"ParameterLayouts": [
+				[ "float", "float", "float", "float" ],
+				[ "vec2", "vec2", "float", "vec2" ],
+				[ "vec3", "vec3", "float", "vec3"],
+				[ "vec4", "vec4", "float", "vec4" ],
+				[ "float", "", "", "float" ],
+				[ "", "float", "", "float" ],
+				[ "", "vec2", "", "vec2"],
+				[ "vec2", "", "", "vec2"],
+				[ "", "vec3", "", "vec3"],
+				[ "vec3", "", "", "vec3"],
+				[ "", "vec4", "", "vec4"],
+				[ "vec4", "", "", "vec4"]
+			],
+			"VariableDeclaration": "#OUTPUT_TYPE #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = mix( #INPUT(Input_0), #INPUT(Input_1), #INPUT(Input_2) );"
+		},
+
+		"PannerNode": {
+
+			"Type": "Function",
+			"NumberInputs": 2,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Speed": {
+					"PrimitiveType": "vec2",
+					"Default": "vec2(0.0, 0.0)"
+				},
+				"Time": {
+					"PrimitiveType": "float",
+					"Default": "#G_WORLD_TIME"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec2",
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"ParameterLayouts": [
+				[ "vec2", "float", "vec2" ]
+			],
+			"VariableDeclaration": "vec2 #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #V_TEXCOORD0 + #INPUT(Speed) * #INPUT(Time);"
+		},
+
+
+		"SinNode": {
+
+			"Type": "Function",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Time": {
+					"PrimitiveType": "float",
+					"Default": "#G_WORLD_TIME"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"ParameterLayouts": [
+				[ "float", "float", "float" ]
+			],
+			"VariableDeclaration": "float #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = sin(#INPUT(Time));"
+		},
+
+		"ClampFunctionNode": {
+
+			"Type": "Function",
+			"NumberInputs": 3, 
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Input_0": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Min": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Max": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"ParameterLayouts": [
+				[ "float", "float", "float", "float" ],
+				[ "vec2", "vec2", "vec2", "vec2" ],
+				[ "vec3", "vec3", "vec3", "vec3" ],
+				[ "vec4", "vec4", "vec4", "vec4" ]
+			],
+			"VariableDeclaration": "#OUTPUT_TYPE #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = clamp(#INPUT(Input_0), #INPUT(Min), #INPUT(Max));"
+		},
+
+		"SwitchFunctionNode": {
+
+			"Type": "Function",
+			"NumberInputs": 3, 
+			"NumberOutputs": 1,
+			"Inputs": {
+				"True": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"False": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Value": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"ParameterLayouts": [
+				[ "float", "float", "float" ]
+			],
+			"VariableDeclaration": "float #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Value) ? #INPUT(True) : #INPUT(False);"
+		},
+
+		"FracFunctionNode": {
+
+			"Type": "Function",
+			"NumberInputs": 1, 
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Input_0": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"ParameterLayouts": [
+				[ "float", "float" ]
+			],
+			"VariableDeclaration": "float #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Input_0) - floor(#INPUT(Input_0));"
+		},
+
+		"AppendFunctionNode": {
+
+			"Type": "Function",
+			"NumberInputs": 2, 
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Input_0": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Input_1": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "#OUTPUT_TYPE",
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"ParameterLayouts": [
+				[ "float", "float", "vec2" ],
+				[ "float", "vec2", "vec3" ],
+				[ "vec2", "float", "vec3" ],
+				[ "float", "vec3", "vec4" ],
+				[ "vec3", "float", "vec4" ]
+			],
+			"VariableDeclaration": "#OUTPUT_TYPE #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #OUTPUT_TYPE(#INPUT(Input_0), #INPUT(Input_1));"
+		},
+
+		"TimeNode": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"UniformType": "Float",
+			"Inputs": {
+				"Value": {
+					"PrimitiveType": "float", 
+					"Default": "#G_WORLD_TIME"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "float", 
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "float #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Value);"
+		},
+
+		"TextureCoordinateNode": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"UniformType": "Vec2",
+			"Inputs": {
+				"Coords": {
+					"PrimitiveType": "vec2", 
+					"Default": "#V_TEXCOORD0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec2", 
+					"CodeTemplate": "#V_TEXCOORD0"
+				}
+			},
+			"VariableDeclaration": "vec2 #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Coords);"
+		},
+		
+		"Texture2DSamplerNode": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 5,
+			"UniformType": "TextureSampler2D",
+			"Inputs": {
+				"UV": {
+					"PrimitiveType": "vec2",
+					"Default": "#V_TEXCOORD0"
+				}
+			},
+			"Outputs": {
+				"RGB": {
+					"PrimitiveType": "vec3",
+					"CodeTemplate": "#NODE_NAME_sampler.rgb"
+				},
+				"R": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME_sampler.r"
+				},
+				"G": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME_sampler.g"
+				},
+				"B": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME_sampler.b"
+				},
+				"A": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME_sampler.a"
+				}
+			},
+			"VariableDeclaration": "SAMPLER2D( #NODE_NAME, #UNIFORM_LOCATION );",
+			"VariableDefinition": "vec4 #NODE_NAME_sampler = texture2D( #NODE_NAME, #INPUT(UV) );"
+		},
+
+		"ConstantFloatNode": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"UniformType": "Float",
+			"Inputs": {
+				"Value": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "float #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Value);"
+		},
+
+		"ConstantVec2Node": {
+
+			"Type": "Variable",
+			"NumberInputs": 2,
+			"NumberOutputs": 1,
+			"UniformType": "Vec2",
+			"Inputs": {
+				"X": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Y": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec2",
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "vec2 #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = vec2( #INPUT(X), #INPUT(Y) );"
+		},
+
+		"ConstantVec3Node": {
+
+			"Type": "Variable",
+			"NumberInputs": 3,
+			"NumberOutputs": 1,
+			"UniformType": "Vec3",
+			"Inputs": {
+				"X": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Y": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Z": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec3",
+					"CodeTemplate": "#NODE_NAME"
+				},
+				"X": {
+					"PrimitiveType": "float",
+					"Default": "#NODE_NAME.x"
+				},
+				"Y": {
+					"PrimitiveType": "float",
+					"Default": "#NODE_NAME.y"
+				},
+				"Z": {
+					"PrimitiveType": "float",
+					"Default": "#NODE_NAME.z"
+				}
+			},
+			"VariableDeclaration": "vec3 #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = vec3( #INPUT(X), #INPUT(Y), #INPUT(Z) );"
+		},
+
+		"ConstantVec4Node": {
+
+			"Type": "Variable",
+			"NumberInputs": 4,
+			"NumberOutputs": 1,
+			"UniformType": "Vec3",
+			"Inputs": {
+				"X": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Y": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Z": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"W": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec4",
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "vec4 #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = vec4( #INPUT(X), #INPUT(Y), #INPUT(Z), #INPUT(W) );"
+		},
+
+		"VertexNormalWS": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Input_0": {
+					"PrimitiveType": "vec3",
+					"Default": "#V_NORMAL"
+				}	
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec3", 
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "vec3 #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Input_0);"
+		},
+
+		"MainNodeTemplate": {
+
+			"Type": "Variable",
+			"NumberInputs": 6,
+			"NumberOutputs": 6,
+			"Inputs": {
+				"BaseColor": {
+					"PrimitiveType": "vec4",
+					"Default": "vec4( 1.0, 1.0, 1.0, 1.0 )"
+				},
+				"Normal": {
+					"PrimitiveType": "vec4",
+					"Default": "#V_NORMAL"
+				},
+				"Metallic": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Roughness": {
+					"PrimitiveType": "float",
+					"Default": "1.0"
+				},
+				"Emissive": {
+					"PrimitiveType": "vec4",
+					"Default": "vec4( 0.0, 0.0, 0.0, 1.0 )"
+				},
+				"AO": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"WorldPositionOffset": {
+					"PrimitiveType": "vec3",
+					"Default": "vec3( 0.0, 0.0, 0.0 )"
+				}
+			},
+			"Outputs": {
+				"BaseColor": {
+					"PrimitiveType": "vec4",
+					"Default": "vec4( 1.0, 1.0, 1.0, 1.0 )"
+				},
+				"Normal": {
+					"PrimitiveType": "vec4",
+					"Default": "vec4( #V_NORMAL, 1.0 )"
+				},
+				"Metallic": {
+					"PrimitiveType": "float",
+					"Default": "0.0"
+				},
+				"Roughness": {
+					"PrimitiveType": "float",
+					"Default": "1.0"
+				},
+				"Emissive": {
+					"PrimitiveType": "vec4",
+					"Default": "vec4( 0.0, 0.0, 0.0, 1.0 )"
+				},
+				"AO": {
+					"PrimitiveType": "vec4",
+					"Default": "vec4( 0.0, 0.0, 0.0, 1.0 )"
+				},
+				"WorldPositionOffset": {
+					"PrimitiveType": "vec3",
+					"Default": "vec3( 0.0, 0.0, 0.0 )"
+				}
+			}	
+		}
+	},
+
+	"MainNodeTemplate": {
+		"Inputs": {
+			"BaseColor": {
+				"PrimitiveType": "vec4",
+				"Default": "vec4( 1.0, 1.0, 1.0, 1.0 )"
+			},
+			"Normal": {
+				"PrimitiveType": "vec4",
+				"Default": "V_NORMAL"
+			},
+			"Metallic": {
+				"PrimitiveType": "float",
+				"Default": "0.0"
+			},
+			"Roughness": {
+				"PrimitiveType": "float",
+				"Default": "1.0"
+			},
+			"Emissive": {
+				"PrimitiveType": "vec4",
+				"Default": "vec4( 0.0, 0.0, 0.0, 1.0 )"
+			},
+			"AO": {
+				"PrimitiveType": "float",
+				"Default": "0.0"
+			},
+			"WorldPositionOffset": {
+				"PrimitiveType": "vec3",
+				"Default": "vec3( 0.0, 0.0, 0.0 )"
+			}
+		},
+		"Outputs": {
+
+		}
+	}
+}
+
+
+

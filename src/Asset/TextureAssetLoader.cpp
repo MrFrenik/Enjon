@@ -28,26 +28,24 @@ namespace Enjon
 	TextureAssetLoader::~TextureAssetLoader()
 	{ 
 	} 
-			
-	//============================================================================================== 
 
-	Texture* TextureAssetLoader::LoadAssetFromFile(const String& filePath, const String& name )
-	{ 
+	Texture* TextureAssetLoader::LoadTextureFromFile( const Enjon::String& filePath )
+	{
 		// Create new texture
-		Enjon::Texture* tex = new Enjon::Texture; 
+		Enjon::Texture* tex = new Enjon::Texture;
 
 		// Fields to load and store
 		s32 width, height, nComps, len;
 
 		// Load texture data
 		stbi_set_flip_vertically_on_load( false );
-		u8* data = stbi_load( filePath.c_str( ), &width, &height, &nComps, STBI_rgb_alpha ); 
+		u8* data = stbi_load( filePath.c_str( ), &width, &height, &nComps, STBI_rgb_alpha );
 
 		// Generate texture
-		glGenTextures(1, &(tex->mId));
+		glGenTextures( 1, &( tex->mId ) );
 
 		// Bind and create texture
-		glBindTexture(GL_TEXTURE_2D, tex->mId); 
+		glBindTexture( GL_TEXTURE_2D, tex->mId );
 		glTexImage2D(
 			GL_TEXTURE_2D,
 			0,
@@ -60,50 +58,73 @@ namespace Enjon
 			data
 		);
 
-		
+
 		s32 MAG_PARAM = GL_LINEAR;
 		s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
 		b8 genMips = true;
 
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MAG_PARAM);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIN_PARAM);
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MAG_PARAM );
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIN_PARAM );
 
-		if (genMips)
+		if ( genMips )
 		{
-			glGenerateMipmap(GL_TEXTURE_2D);
+			glGenerateMipmap( GL_TEXTURE_2D );
 		}
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture( GL_TEXTURE_2D, 0 );
 
 		// Set texture attributes
 		tex->mWidth = width;
-		tex->mHeight = height; 
-		
+		tex->mHeight = height;
+
 		// Generate new UUID
 		tex->mUUID = Enjon::UUID::GenerateUUID( );
 
 #if CACHING 
-		 //Cache image data to file
-		auto saveData = stbi_write_png_to_mem( data, 0, width, height, 4, &len ); 
-		CacheTextureData( saveData, len, tex ); 
+		//Cache image data to file
+		auto saveData = stbi_write_png_to_mem( data, 0, width, height, 4, &len );
+		CacheTextureData( saveData, len, tex );
 		stbi_image_free( saveData );
 #endif
-		
+
 		// Get file extension of texture to save off its extension type
 		Enjon::String fileExtension = Enjon::Utils::SplitString( filePath, "." ).back( );
 
 		// Store file extension type of texture
-		tex->mFileExtension = Texture::GetFileExtensionType( fileExtension );
+		tex->mFileExtension = Texture::GetFileExtensionType( fileExtension ); 
 
-		// Add to assets with qualified name
-		AddToAssets(name, tex); 
-		
 		// No longer need data, so free
 		stbi_image_free( data );
 
+		return tex;
+	}
+			
+	//============================================================================================== 
+
+	Texture* TextureAssetLoader::LoadAssetFromFile(const String& filePath, const String& name )
+	{ 
+		// Load texture
+		Enjon::Texture* tex = LoadTextureFromFile( filePath );
+
+		// Add to assets with qualified name
+		AddToAssets(name, tex); 
+
 		return tex; 
+	} 
+
+	void TextureAssetLoader::RegisterDefaultAsset( )
+	{ 
+		// Get assets directory
+		Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+		Enjon::String assetDir = am->GetAssetsPath( );
+
+		// Get default texture
+		Enjon::Texture* tex = LoadTextureFromFile( assetDir + "/Textures/white.png" );
+
+		// Set default texture
+		mDefaultAsset = tex;
 	} 
 	
 	Result TextureAssetLoader::CacheTextureData( const u8* data, u32 length, Texture* texture )

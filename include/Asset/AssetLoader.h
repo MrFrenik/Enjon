@@ -41,6 +41,13 @@ namespace Enjon
 			* @brief
 			*/
 			bool Exists( const String& name );
+
+			/**
+			* @brief
+			*/
+			virtual void RegisterDefaultAsset( )
+			{ 
+			}
 			
 			/**
 			* @brief
@@ -68,10 +75,39 @@ namespace Enjon
 			} 
 			
 			/**
+			* @brief Templated argument to get asset of specific type 
+			*/
+			Asset* GetDefault( )
+			{ 
+				if ( mDefaultAsset )
+				{
+					return mDefaultAsset;
+				}
+				
+				// If not registered, then register and return default
+				RegisterDefaultAsset( ); 
+				return mDefaultAsset;
+			} 
+
+			/**
+			* @brief
+			*/
+			bool HasAsset( const String& name )
+			{
+				return ( mAssetsByName.find( name ) != mAssetsByName.end( ) );
+			} 
+			
+			/**
 			* @brief
 			*/
 			Asset* AddToAssets( const String& name, Asset* asset )
 			{
+				if ( HasAsset( name ) )
+				{
+					return mAssetsByName[ name ];
+				} 
+
+				// Otherwise add asset
 				mAssetsByName[name] = asset;
 				mAssetsByUUID[ asset->mUUID.ToString( ) ] = asset;
 
@@ -90,6 +126,7 @@ namespace Enjon
 			
 			std::unordered_map<String, Asset*> mAssetsByName;
 			std::unordered_map<String, Asset*> mAssetsByUUID;
+			Asset* mDefaultAsset = nullptr;
 
 		private:
 			/**

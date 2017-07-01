@@ -74,7 +74,12 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void SetCachedAssetsPath( const String& filePath );
+			Enjon::String GetAssetsPath( );
+			
+			/**
+			*@brief
+			*/
+			void SetCachedAssetsPath( const String& filePath ); 
 			
 			/**
 			*@brief
@@ -97,6 +102,23 @@ namespace Enjon
 
 				// Get handle from loader
 				AssetHandle<T> handle = mLoaders[loaderId]->GetAsset<T>(name); 
+
+				// Return asset handle
+				return handle;
+			} 
+			
+			/**
+			*@brief Gets loaded asset in database from name
+			*/
+			template <typename T>
+			AssetHandle<T> GetDefaultAsset( )
+			{ 
+				// Get appropriate loader based on asset type
+				u32 loaderId = GetAssetTypeId<T>(); 
+
+				// Get handle from loader
+				Asset* defaultAsset = mLoaders[loaderId]->GetDefault( );
+				AssetHandle<T> handle = AssetHandle<T>( defaultAsset );
 
 				// Return asset handle
 				return handle;

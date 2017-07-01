@@ -23,6 +23,7 @@
 #include "ImGui/ImGuiManager.h"
 #include "Graphics/Texture.h"
 #include "Engine.h"
+#include "Graphics/ShaderGraph.h"
 
 #include <string>
 #include <fmt/format.h> 
@@ -41,6 +42,8 @@ Enjon::AssetHandle< Enjon::Texture > mBRDFHandle;
 bool brdfset = false;
 
 bool useOther = false;
+
+Enjon::ShaderGraph mShaderGraph;
 
 namespace Enjon 
 { 
@@ -164,6 +167,9 @@ namespace Enjon
 	    ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Game View", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f));
 	    ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Graphics", nullptr, ImGui::DockSlotType::Slot_Right, 0.1f));
 	    ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Styles##options", nullptr, ImGui::DockSlotType::Slot_Bottom, 0.2f));
+	
+		// Register shader graph templates
+		Enjon::ShaderGraph::DeserializeTemplate( Enjon::Engine::GetInstance( )->GetConfig( ).GetEngineResourcePath( ) + "/Shaders/ShaderGraphTemplates/ShaderTemplates.json" );
 
 		// TODO(): I don't like random raw gl calls just lying around...
 		glEnable( GL_DEPTH_TEST );
@@ -183,6 +189,7 @@ namespace Enjon
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
 		Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/03-Ueno-Shrine_3k.hdr";
+		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Newport_Loft_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Factory_Catwalk_2k.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/WinterForest_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Alexs_Apt_2k.hdr";
@@ -309,7 +316,7 @@ namespace Enjon
 			// --------------------------------------------------------------------------------
 			glGenTextures( 1, &mPrefilteredMap );
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mPrefilteredMap );
-			const u32 textureSize = 128;
+			const u32 textureSize = 256;
 			for ( u32 i = 0; i < 6; ++i )
 			{
 				glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, textureSize, textureSize, 0, GL_RGB, GL_FLOAT, nullptr );
@@ -397,7 +404,10 @@ namespace Enjon
 			// Error
 			std::cout << "You done fucked up now!\n";
 		}
-
+	
+		// Shader graph creation
+		Enjon::String shaderPath = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( )->GetAssetsPath( ) + "/Shaders"; 
+		mShaderGraph.Create( shaderPath + "/ShaderGraphs/test.json" ); 
 	}
 
 	//======================================================================================================
@@ -488,16 +498,8 @@ namespace Enjon
 		// Use gbuffer shader
 		shader->Use();
 
-		// Clear buffer (default)
-		glClearBufferfv(GL_COLOR, 0, mBGColor);
-
-		/*
-		GLfloat black[] = {0.0f, 0.0f, 0.0f, 1.0f};
-		for (u32 i = 1; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
-		{
-			glClearBufferfv(GL_COLOR, i, black);
-		}
-		*/
+		// Clear albedo render target buffer (default)
+		glClearBufferfv(GL_COLOR, 0, mBGColor); 
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 
@@ -550,6 +552,14 @@ namespace Enjon
 
 		// Unuse gbuffer shader
 		shader->Unuse();
+
+
+		/////////////////////////////////////////////////
+		// SHADER GRAPH TEST ////////////////////////////
+		///////////////////////////////////////////////// 
+
+		// Do shader graph test here
+
 
 		// Quadbatches
 		shader = Enjon::ShaderManager::Get("QuadBatch");

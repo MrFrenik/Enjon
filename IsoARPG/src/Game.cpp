@@ -23,6 +23,7 @@
 #include <Serialize/UUID.h>
 #include <Serialize/ByteBuffer.h> 
 #include <Engine.h>
+#include <Graphics/ShaderGraph.h>
 
 #include <fmt/printf.h>
 #include <lz4/lz4.h>
@@ -119,7 +120,7 @@ Enjon::Result Game::Initialize()
 
 	Enjon::String projectDirectory = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + "/IsoARPG/";
 	
-	// Create asset manager
+	// Get asset manager and set its properties ( I don't like this )
 	mAssetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog()->Get<Enjon::AssetManager>(); 
 	// This also needs to be done through a config file or cmake
 	mAssetManager->SetAssetsPath( mAssetsPath );
@@ -234,6 +235,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( cerebusMeshPath );
 	mAssetManager->AddToDatabase( sphereMeshPath );
 	mAssetManager->AddToDatabase( cubeMeshPath );
+	mAssetManager->AddToDatabase( catMeshPath );
 	mAssetManager->AddToDatabase( bunnyMeshPath );
 	mAssetManager->AddToDatabase( buddhaMeshPath );
 	mAssetManager->AddToDatabase( shaderBallMeshPath );
@@ -318,7 +320,7 @@ Enjon::Result Game::Initialize()
 	mGoldMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedgold.metallic"));
 	mGoldMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedgold.roughness"));
 	mGoldMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
-	mGoldMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.ao")); 
+	mGoldMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.white")); 
 	
 	mRockMat 	= new Enjon::Material; 
 	mRockMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.green"));
@@ -334,11 +336,11 @@ Enjon::Result Game::Initialize()
 	mGunMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.metallic"));
 	mGunMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.roughness"));
 	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.emissive"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.cerebus.emissive"));
+	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.white"));
 
 	mGun.Get()->SetPosition(Enjon::Vec3(0.0f, 0.0f, 0.0f));
 	mGun.Get()->SetRotation( Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ) );
-	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("isoarpg.models.bunny"));
+	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("isoarpg.models.cat"));
 	gc->SetMaterial(mGoldMat);
 
 	mSun = new Enjon::DirectionalLight();
@@ -350,7 +352,7 @@ Enjon::Result Game::Initialize()
 	mFloorMat = new Enjon::Material();
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.albedo"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.normal"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.emissive"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.roughness"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.emissive"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.ao"));
@@ -361,7 +363,7 @@ Enjon::Result Game::Initialize()
 	mBlueMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.metallic") );
 	mBlueMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.roughness") );
 	mBlueMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.blue") );
-	mBlueMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.blue") );
+	mBlueMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.white") );
 	
 	mRedMat = new Enjon::Material( );
 	mRedMat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.red") );
@@ -369,7 +371,7 @@ Enjon::Result Game::Initialize()
 	mRedMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.metallic") );
 	mRedMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.roughness") );
 	mRedMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.red") );
-	mRedMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.red") );
+	mRedMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.white") );
 	
 	mGreenMat = new Enjon::Material( );
 	mGreenMat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
@@ -377,7 +379,7 @@ Enjon::Result Game::Initialize()
 	mGreenMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.metallic") );
 	mGreenMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.roughness") );
 	mGreenMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
-	mGreenMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
+	mGreenMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.white") );
 
 	mFontMat = new Enjon::Material( );
 	mFontMat->SetTexture( Enjon::TextureSlotType::Albedo, mFont.Get( )->GetAtlas( 14 )->GetAtlasTexture( ) );
@@ -385,7 +387,7 @@ Enjon::Result Game::Initialize()
 	mFontMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.metallic") );
 	mFontMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.roughness") );
 	mFontMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
-	mFontMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.green") );
+	mFontMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.white") );
 	mFontMat->TwoSided( true );
 
 	mGreen.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mGreenMat );
@@ -457,10 +459,10 @@ Enjon::Result Game::Initialize()
 			Enjon::EntityHandle eh = mEntities->Allocate( );
 			auto gfxcmp = eh.Get( )->Attach< Enjon::GraphicsComponent >( ); 
 			Enjon::Material* mat = new Enjon::Material( );
-			mat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.materials.scuffedplastic.albedo" ) );
-			mat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.materials.scuffedplastic.normal" ) );
+			mat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetDefaultAsset< Enjon::Texture >( ) );
+			mat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.materials.scuffedgold.normal" ) );
 			mat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.black" ) );
-			mat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.textures.white" ) );
+			mat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >( "isoarpg.materials.mahogfloor.ao" ) );
 			gfxcmp->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.shaderball" ) ); 
 			gfxcmp->SetMaterial( mat );
 
@@ -890,8 +892,7 @@ Enjon::Result Game::Initialize()
 	glBindTexture( GL_TEXTURE_2D, 0 ); 
 
 	mTex = new Enjon::Texture( width, height, texID );
-	*/
-
+	*/ 
 	
 	return Enjon::Result::SUCCESS; 
 }
@@ -1025,7 +1026,7 @@ Enjon::Result Game::ProcessInput(f32 dt)
 			velDir += camera->Right();
 		} 
 
-		if ( mInput->IsKeyPressed( Enjon::KeyCode::LeftMouseButton ) )
+		if ( mInput->IsKeyDown( Enjon::KeyCode::LeftMouseButton ) )
 		{
 			Enjon::Scene* scene = mGfx->GetScene();
 			Enjon::Vec3 pos = cam->GetPosition() + cam->Forward() * 2.0f;

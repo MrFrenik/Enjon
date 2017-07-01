@@ -22,7 +22,8 @@ namespace Enjon
 			EngineConfig() = default; 
 			Result ParseArguments(s32 argc, char** argv); 
 
-			const String& GetRoot() const;
+			String GetRoot() const; 
+			String GetEngineResourcePath() const;
 			
 		private:
 			String mRootPath; 

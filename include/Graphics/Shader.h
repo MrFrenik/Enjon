@@ -30,7 +30,7 @@ namespace Enjon
 			/**
 			* @brief Constructor
 			*/
-			Shader( const Enjon::ShaderGraph& graph );
+			Shader( const Enjon::ShaderGraph& graph, ShaderPassType passType );
 
 			/**
 			* @brief Destructor
@@ -102,6 +102,7 @@ namespace Enjon
 			u32 mVertexShaderID		= 0;
 			u32 mFragmentShaderID	= 0;
 			std::unordered_map< Enjon::String, u32 > mUniformMap;
+			ShaderPassType mPassType;
 			ShaderGraph mGraph;
 	}; 
 	
@@ -121,7 +122,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void Set( ) = 0;
+			virtual void Bind( const Shader* shader ) = 0;
 			
 			template < typename T >
 			T* Cast( )
@@ -146,7 +147,6 @@ namespace Enjon
 			UniformType GetType( ) const { return mType; }
 
 		protected: 
-			const Enjon::Shader* mShader = nullptr;
 			UniformType mType;
 			u32 mLocation = 0;
 			Enjon::String mName;
@@ -158,7 +158,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			UniformTexture( const Enjon::String& name, const Enjon::Shader* shader, const Enjon::AssetHandle< Enjon::Texture >& texture, u32 location );
+			UniformTexture( const Enjon::String& name, const Enjon::AssetHandle< Enjon::Texture >& texture, u32 location );
 			
 			/*
 			* @brief
@@ -168,7 +168,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void Set( ) override;
+			virtual void Bind( const Shader* shader ) override;
 
 			/*
 			* @brief
@@ -197,10 +197,9 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			UniformPrimitive( const Enjon::String& name, const Enjon::Shader* shader, const T& value, u32 location )
+			UniformPrimitive( const Enjon::String& name, const T& value, u32 location = 0 )
 			{ 
 				mName = name;
-				mShader = shader;
 				mLocation = location;
 				mValue = value;
 
@@ -220,6 +219,10 @@ namespace Enjon
 				{
 					mType = UniformType::Mat4;
 				}
+				else if ( std::is_base_of< Enjon::AssetHandle< Enjon::Texture >, T >::value )
+				{
+					mType = UniformType::TextureSampler2D;
+				}
 				else
 				{
 					mType = UniformType::Float;
@@ -234,9 +237,9 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void Set( ) override
+			virtual void Bind( const Shader* shader ) override
 			{
-				const_cast< Enjon::Shader* >( mShader )->SetUniform( mName, mValue );
+				const_cast< Enjon::Shader* >( shader )->SetUniform( mName, mValue );
 			}
 
 			void SetValue( const T& value )

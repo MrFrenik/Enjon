@@ -23,6 +23,11 @@ namespace Enjon
 			* @brief Destructor
 			*/
 			~TextureAssetLoader(); 
+			
+			/**
+			* @brief
+			*/
+			virtual void RegisterDefaultAsset( ) override;
 
 		protected:
 			/**
@@ -32,6 +37,8 @@ namespace Enjon
 
 		private: 
 			Texture* LoadAssetFromFile( const String& filePath, const String& name );
+	
+			Texture* LoadTextureFromFile( const Enjon::String& filePath );
 	}; 
 }
 

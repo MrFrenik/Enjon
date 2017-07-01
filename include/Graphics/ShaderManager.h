@@ -4,12 +4,13 @@
 #include <map>
 
 #include "Graphics/GLSLProgram.h"
+#include "System/Types.h"
 #include "Utils/Errors.h"
 
 namespace Enjon { namespace ShaderManager { 
 
 	void Init();
-	void AddShader(const char* shadername, const char* vertpath, const char* fragpath);
+	void AddShader( const Enjon::String& shadername, const Enjon::String& vertpath, const Enjon::String& fragpath );
 	GLSLProgram* GetShader(const char* shadername); 
 	GLSLProgram* Get(const char* shadername);
 	GLuint GetUniformLocation(const char* shadername, const char* uniform);

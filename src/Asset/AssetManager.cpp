@@ -105,6 +105,13 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
+	Enjon::String AssetManager::GetAssetsPath( )
+	{
+		return mAssetsPath;
+	}
+	
+	//============================================================================================ 
+			
 	void AssetManager::SetCachedAssetsPath( const String& filePath )
 	{
 		mCachedPath = filePath;

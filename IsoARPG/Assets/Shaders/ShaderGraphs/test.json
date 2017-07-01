@@ -1,0 +1,43 @@
+{
+	"ShaderGraphName": "TestGraph",
+
+	"Nodes": {
+		"mult": {
+			"Template": "MultiplyFunctionNode"
+		}
+	},
+
+	"NodeLinks": {
+	},
+
+	"MainNode": {
+
+		"Inputs": {
+
+			"BaseColor": {
+				"mult": "Value"
+			},
+
+			"Normal": {
+			},
+
+			"Metallic": {
+			},
+
+			"Roughness": {
+			},
+
+			"Emissive": {
+			},
+
+			"AO": {
+			},
+
+			"WorldPositionOffset": {
+			}
+		},
+
+		"DefaultOverrides": {
+		}
+	} 
+}

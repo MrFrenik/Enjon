@@ -1,5 +1,7 @@
 #include "Graphics/ShaderGraph.h"
 #include "Graphics/Shader.h"
+#include "Asset/AssetManager.h"
+#include "Engine.h"
 
 #include "rapidjson/rapidjson.h"
 #include "rapidjson/document.h"
@@ -17,18 +19,18 @@ using namespace rapidjson;
 
 namespace Enjon
 { 
-	std::unordered_map< std::string, Enjon::ShaderGraphNodeTemplate > Enjon::ShaderGraph::mTemplates;
+	std::unordered_map< Enjon::String, Enjon::ShaderGraphNodeTemplate > Enjon::ShaderGraph::mTemplates;
 
-	std::string ParseFromTo( const std::string& begin, const std::string& end, const std::string& src )
+	Enjon::String ParseFromTo( const Enjon::String& begin, const Enjon::String& end, const Enjon::String& src )
 	{
-		std::string returnStr = "";
+		Enjon::String returnStr = "";
 
 		// Search for line to match
 		std::size_t foundBegin = src.find( begin );
 		std::size_t foundEnd = src.find( end );
 
 		// Found
-		if ( foundBegin != std::string::npos && foundEnd != std::string::npos )
+		if ( foundBegin != Enjon::String::npos && foundEnd != Enjon::String::npos )
 		{
 			// Substring length
 			std::size_t length = foundEnd - foundBegin;
@@ -43,21 +45,21 @@ namespace Enjon
 
 	//=========================================================================================================================
 
-	std::string OutputLine( const std::string& line )
+	Enjon::String OutputLine( const Enjon::String& line )
 	{
 		return line + "\n";
 	}
 
 	//=========================================================================================================================
 
-	std::string OutputTabbedLine( const std::string& line )
+	Enjon::String OutputTabbedLine( const Enjon::String& line )
 	{
 		return "\t" + line + "\n";
 	}
 
-	std::string OutputErrorBlock( const std::string& line )
+	Enjon::String OutputErrorBlock( const Enjon::String& line )
 	{
-		std::string code = "";
+		Enjon::String code = "";
 		code += OutputLine( "///////////////////////////////////////////////////////////" );
 		code += OutputLine( "// ERROR //////////////////////////////////////////////////" );
 		code += OutputLine( line );
@@ -77,14 +79,14 @@ namespace Enjon
 
 	//=========================================================================================================================
 
-	bool ShaderGraphNode::HasOverride( const std::string& inputName )
+	bool ShaderGraphNode::HasOverride( const Enjon::String& inputName )
 	{
 		return ( mDefaultOverrides.find( inputName ) != mDefaultOverrides.end( ) );
 	}
 
 	//=========================================================================================================================
 
-	const InputConnection* ShaderGraphNode::GetOverride( const std::string& inputName )
+	const InputConnection* ShaderGraphNode::GetOverride( const Enjon::String& inputName )
 	{
 		if ( HasOverride( inputName ) )
 		{
@@ -122,7 +124,7 @@ namespace Enjon
 	void ShaderGraphNodeTemplate::AddParameterLayout( const ParameterLayout& layout )
 	{
 		// Build key for layout based on inputs
-		std::string inputKey = "";
+		Enjon::String inputKey = "";
 		for ( u32 i = 0; i < layout.mInputParameters.size( ); ++i )
 		{
 			inputKey += layout.mInputParameters.at( i );
@@ -137,7 +139,7 @@ namespace Enjon
 
 	//=========================================================================================================================
 
-	const ParameterLayout* ShaderGraphNodeTemplate::GetLayout( const std::string& inputKey )
+	const ParameterLayout* ShaderGraphNodeTemplate::GetLayout( const Enjon::String& inputKey )
 	{
 		// Find and return parameter layout based on input key
 		auto query = mParameterLayouts.find( inputKey );
@@ -151,7 +153,7 @@ namespace Enjon
 
 	//=========================================================================================================================
 
-	const NodeLink* ShaderGraphNode::GetLink( const std::string inputName )
+	const NodeLink* ShaderGraphNode::GetLink( const Enjon::String inputName )
 	{
 		// Search for link based on input name
 		for ( auto& n : mLinks )
@@ -197,7 +199,7 @@ namespace Enjon
 
 	//=========================================================================================================================
 
-	const ShaderGraphNode* ShaderGraph::GetNode( const std::string& nodeName )
+	const ShaderGraphNode* ShaderGraph::GetNode( const Enjon::String& nodeName )
 	{
 		auto query = mNodes.find( nodeName );
 		if ( query != mNodes.end( ) )
@@ -207,7 +209,7 @@ namespace Enjon
 
 		return nullptr;
 	}
-	const ShaderGraphNodeTemplate* ShaderGraph::GetTemplate( const std::string& name )
+	const ShaderGraphNodeTemplate* ShaderGraph::GetTemplate( const Enjon::String& name )
 	{
 		auto query = mTemplates.find( name );
 		if ( query != mTemplates.end( ) )
@@ -220,24 +222,25 @@ namespace Enjon
 
 	//==========================================================================================
 
-	std::string ShaderGraph::ShaderPassToString( ShaderPassType type )
+	Enjon::String ShaderGraph::ShaderPassToString( ShaderPassType type )
 	{
 		switch ( type )
 		{
-		case ShaderPassType::Surface_StaticGeom:
-		{
-			return "Surface_StaticGeom";
-		}; break;
-		default:
-		{
-			return "";
-		} break;
+			case ShaderPassType::StaticGeom:
+			{
+				return "StaticGeom";
+			}; break;
+
+			default:
+			{
+				return "";
+			} break;
 		}
 	}
 
 	//==========================================================================================
 
-	Document ShaderGraph::GetJSONDocumentFromFilePath( const std::string& filePath, s32* status )
+	Document ShaderGraph::GetJSONDocumentFromFilePath( const Enjon::String& filePath, s32* status )
 	{
 		// Load file
 		std::ifstream f;
@@ -245,7 +248,7 @@ namespace Enjon
 		std::stringstream buffer;
 		buffer << f.rdbuf( );
 
-		std::string str = buffer.str( );
+		Enjon::String str = buffer.str( );
 
 		Document document;
 		if ( document.Parse( str.c_str( ), STRSIZE( str ) ).HasParseError( ) )
@@ -260,7 +263,7 @@ namespace Enjon
 
 	//=========================================================================================================================
 
-	s32 ShaderGraph::DeserializeTemplate( const std::string& filePath )
+	s32 ShaderGraph::DeserializeTemplate( const Enjon::String& filePath )
 	{
 		s32 status = 1;
 
@@ -290,7 +293,7 @@ namespace Enjon
 					ShaderGraphNodeTemplate newTemplate;
 
 					// Get template name
-					std::string templateName = itr->name.GetString( );
+					Enjon::String templateName = itr->name.GetString( );
 
 					// Set name
 					newTemplate.mName = templateName;
@@ -298,7 +301,7 @@ namespace Enjon
 					// Get node type
 					if ( itr->value.HasMember( "Type" ) )
 					{
-						std::string templateStr = itr->value.FindMember( "Type" )->value.GetString( );
+						Enjon::String templateStr = itr->value.FindMember( "Type" )->value.GetString( );
 
 						// If function
 						if ( templateStr.compare( "Function" ) == 0 )
@@ -324,7 +327,7 @@ namespace Enjon
 					// Get uniform type
 					if ( itr->value.HasMember( "UniformType" ) )
 					{
-						std::string uniformStr = itr->value.FindMember( "UniformType" )->value.GetString( );
+						Enjon::String uniformStr = itr->value.FindMember( "UniformType" )->value.GetString( );
 					std:transform( uniformStr.begin( ), uniformStr.end( ), uniformStr.begin( ), ::tolower );
 
 						// Find uniform type
@@ -392,7 +395,7 @@ namespace Enjon
 								ParameterLayout newLayout;
 
 								// Push back input parameters
-								std::string inputParameterKey = "";
+								Enjon::String inputParameterKey = "";
 								for ( u32 i = 0; i < numberInputs; ++i )
 								{
 									newLayout.mInputParameters.push_back( p_array[ i ].GetString( ) );
@@ -518,7 +521,7 @@ namespace Enjon
 
 	//=========================================================================================================================
 
-	s32 ShaderGraph::Deserialize( const std::string& filePath )
+	s32 ShaderGraph::Create( const Enjon::String& filePath )
 	{
 		// This will need to happen only AFTER validation has been checked - otherwise could end up with empty graph
 		ClearGraph( );
@@ -577,7 +580,7 @@ namespace Enjon
 					node.mName = nodeName;
 
 					// Get template name
-					std::string nodeTemplateName;
+					Enjon::String nodeTemplateName;
 					if ( itr->value.HasMember( "Template" ) )
 					{
 						// Get template name
@@ -830,93 +833,66 @@ namespace Enjon
 			}
 		}
 
-		return status;
+		// Compile after deserializing
+		return Compile( ); 
 	}
 
 	//========================================================================================================================= 
 
-	std::string ShaderGraph::OutputPassTypeMetaData( const ShaderPassType& pass, s32* status )
+	Enjon::String ShaderGraph::OutputPassTypeMetaData( const ShaderPassType& pass, s32* status )
 	{
-		std::string code = "";
+		Enjon::String code = "";
 		switch ( pass )
 		{
-		case ShaderPassType::Surface_StaticGeom:
-		{
-			code += OutputLine( "/*" );
-			code += OutputLine( "* @info: This file has been generated. All changes will be lost. Copyright NerdKingdom 2017." );
-			code += OutputLine( "* @file: " + mName );
-			code += OutputLine( "* @passType: " + ShaderPassToString( pass ) );
-			code += OutputLine( "*/\n" );
-		} break;
+			case ShaderPassType::StaticGeom:
+			{
+				code += OutputLine( "/*" );
+				code += OutputLine( "* @info: This file has been generated. All changes will be lost." );
+				code += OutputLine( "* @file: " + mName );
+				code += OutputLine( "* @passType: " + ShaderPassToString( pass ) );
+				code += OutputLine( "*/\n" );
+			} break;
 		}
 
 		return code;
-	}
+	} 
 
-	std::string ShaderGraph::OutputVertexIncludes( const ShaderPassType& pass, s32* status )
+	Enjon::String ShaderGraph::OutputVertexHeaderBeginTag( )
 	{
-		std::string code = "";
-
-		switch ( pass )
-		{
-		case ShaderPassType::Surface_StaticGeom:
-		{
-			code += OutputLine( "$input a_position, a_normal, a_tangent, a_texcoord0" );
-			code += OutputLine( "$output v_wpos, v_view, v_normal, v_tangent, v_bitangent, v_texcoord0\n" );
-			code += OutputLine( "#include \"../common/common.sh\"\n" );
-		} break;
-		}
-
-		return code;
-	}
-
-	std::string ShaderGraph::OutputVertexHeaderBeginTag( )
-	{
-		std::string code = "";
+		Enjon::String code = "";
 		code += OutputLine( "///////////////////////////////////////////////////" );
 		code += OutputLine( "// VERTEX_SHADER_BEGIN ////////////////////////////" );
 		return code;
 	}
 
-	std::string ShaderGraph::OutputVertexHeaderEndTag( )
+	Enjon::String ShaderGraph::OutputVertexHeaderEndTag( )
 	{
-		std::string code = "";
+		Enjon::String code = "";
 		code += OutputLine( "// VERTEX_SHADER_END //////////////////////////////" );
 		code += OutputLine( "///////////////////////////////////////////////////\n" );
 		return code;
 	}
 
-	std::string ShaderGraph::OutputFragmentHeaderBeginTag( )
+	Enjon::String ShaderGraph::OutputFragmentHeaderBeginTag( )
 	{
-		std::string code = "";
+		Enjon::String code = "";
 		code += OutputLine( "// FRAGMENT_SHADER_BEGIN ////////////////////////////" );
 		code += OutputLine( "///////////////////////////////////////////////////\n" );
 		return code;
 	}
 
-	std::string ShaderGraph::OutputFragmentHeaderEndTag( )
+	Enjon::String ShaderGraph::OutputFragmentHeaderEndTag( )
 	{
-		std::string code = "";
+		Enjon::String code = "";
 		code += OutputLine( "// FRAGMENT_SHADER_END //////////////////////////////" );
 		code += OutputLine( "///////////////////////////////////////////////////\n" );
 		return code;
 	}
 
-	std::string ShaderGraph::OutputVertexHeader( const ShaderPassType& pass, s32* status )
+	Enjon::String ShaderGraph::OutputVertexHeader( const ShaderPassType& pass, s32* status )
 	{
-		std::string code = "";
-
-		// Header tag
-		code += OutputVertexHeaderBeginTag( );
-
-		// VertexHeaderInputData
-		code += OutputVertexIncludes( pass, status );
-
-		code += "/*\n";
-		code += "* @info: This file has been generated. All changes will be lost. Copyright NerdKingdom 2017.\n";
-		code += "* @file: " + mName + "." + ShaderPassToString( pass ) + ".VertexShader.glsl\n";
-		code += "*/\n\n";
-
+		Enjon::String code = "";
+		
 		// Get main node template
 		ShaderGraphNodeTemplate* surfaceNodeTemplate = const_cast< ShaderGraphNodeTemplate* >( GetTemplate( "MainNodeTemplate" ) );
 
@@ -928,9 +904,36 @@ namespace Enjon
 			return code;
 		}
 
+		// Header tag
+		code += OutputVertexHeaderBeginTag( ); 
+
+		//code += OutputLine( "/*" );
+		//code += OutputLine( "* @info: This file has been generated. All changes will be lost." );
+		//code += OutputLine( "* @file: " + mName + "." + ShaderPassToString( pass ) + ".VertexShader.glsl" );
+		//code += OutputLine( "*/\n" );
+
+		// Version number
+		code += OutputLine( "#version 330 core\n" );
+
+		// Vertex Attribute Layouts
+		code += OutputLine( "layout (location = 0) in vec3 vertexPosition;" );
+		code += OutputLine( "layout (location = 1) in vec3 vertexNormal;" );
+		code += OutputLine( "layout (location = 2) in vec3 vertexTangent;" );
+		code += OutputLine( "layout (location = 3) in vec3 vertexUV;" );
+
+		// Vertex output struct
+		code += OutputLine( "\nout VS_OUT" );
+		code += OutputLine( "{" );
+		code += OutputTabbedLine( "vec3 FragPos;" );
+		code += OutputTabbedLine( "vec2 TexCoords;" );
+		code += OutputTabbedLine( "mat3 TBN;" );
+		code += OutputLine( "} vs_out;\n" );
+
+		// Global uniforms
 		code += OutputLine( "// Gloabl Uniforms" );
-		code += OutputLine( "uniform vec4 Global_Uniform_WORLD_TIME;" );
-		code += OutputLine( "#define GLOBAL_WORLD_TIME Global_Uniform_WORLD_TIME.x" );
+		code += OutputLine( "uniform mat4 uView = mat4( 1.0f );" );
+		code += OutputLine( "uniform mat4 uModel = mat4( 1.0f );" );
+		code += OutputLine( "uniform mat4 uProjection = mat4( 1.0f );" );
 
 		// Comment for declarations
 		code += OutputLine( "\n// Variable Declarations" );
@@ -938,7 +941,7 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
-			case ShaderPassType::Surface_StaticGeom:
+			case ShaderPassType::StaticGeom:
 			{
 				// Should only have one link
 				NodeLink* link = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
@@ -956,9 +959,33 @@ namespace Enjon
 	}
 
 	//==================================================================================================================
+			
+	bool ShaderGraph::HasUniform( const Enjon::String& uniformName )
+	{
+		return ( mUniforms.find( uniformName ) != mUniforms.end( ) );
+	}
 
-	/*
-	void ShaderGraph::AddUniformsToShader( const NodeLink& link, Shader* shader )
+	//==================================================================================================================
+
+	bool ShaderGraph::AddUniform( ShaderUniform* uniform )
+	{ 
+		if ( uniform == nullptr )
+		{
+			return false;
+		}
+
+		if ( HasUniform( uniform->GetName( ) ) )
+		{
+			return false;
+		}
+
+		mUniforms[ uniform->GetName( ) ] = uniform;
+		return true;
+	}
+
+	//==================================================================================================================
+
+	void ShaderGraph::ConstructUniforms( const NodeLink& link )
 	{
 		if ( link.mConnectingNode == nullptr )
 		{
@@ -968,7 +995,7 @@ namespace Enjon
 		// Iterate through all nodes in link and recursive add uniforms
 		for ( auto& l : link.mConnectingNode->mLinks )
 		{
-			AddUniformsToShader( l, shader );
+			ConstructUniforms( l );
 		}
 
 		// Create new uniform if node is uniform
@@ -978,171 +1005,92 @@ namespace Enjon
 			const ShaderGraphNodeTemplate* nodeTemplate = link.mConnectingNode->mTemplate;
 
 			// Get uniform name
-			std::string uniformName = const_cast< ShaderGraphNode* > ( link.mConnectingNode )->GetUniformName( );
+			Enjon::String uniformName = const_cast< ShaderGraphNode* > ( link.mConnectingNode )->GetUniformName( );
+
+			// Get asset manager
+			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 
 			if ( nodeTemplate )
 			{
-			UniformType type = nodeTemplate->GetUniformType( );
-			switch ( type )
-			{
-				case UniformType::TextureSampler2D:
+				UniformType type = nodeTemplate->GetUniformType( );
+				switch ( type )
 				{
-					// Texture samplers just use node name instead of uniform name
-					std::string name = const_cast<ShaderGraphNode*>( link.mConnectingNode )->mName;
+					case UniformType::TextureSampler2D:
+					{
+						// Texture samplers just use node name instead of uniform name
+						Enjon::String name = const_cast<ShaderGraphNode*>( link.mConnectingNode )->mName;
 
-					UniformTextureSampler* uniform = new UniformTextureSampler( name );
-					if ( !shader->AddUniform( uniform ) )
-					{
-						// Failed to add, so delete uniform
-						delete uniform;
-					}
-				} break;
+						UniformTexture* uniform = new UniformTexture( name, am->GetDefaultAsset< Enjon::Texture >( ), mTextureSamplerLocation );
+						if ( !AddUniform( uniform ) )
+						{
+							// Failed to add, so delete uniform
+							delete uniform;
+						}
+					} break;
 
-				case UniformType::Float:
-				{
-					UniformFloat* uniform = new UniformFloat( uniformName, 1.0f );
-					if ( !shader->AddUniform( uniform ) )
+					case UniformType::Float:
 					{
-						// Failed to add, so delete uniform
-						delete uniform;
+						UniformPrimitive< f32 >* uniform = new UniformPrimitive< f32 >( uniformName, 1.0f );
+						if ( !AddUniform( uniform ) )
+						{
+							// Failed to add, so delete uniform
+							delete uniform;
+						}
+
+					} break;
+
+					case UniformType::Vec2:
+					{
+						UniformPrimitive< Vec2 >* uniform = new UniformPrimitive< Vec2 >( uniformName, Vec2( 1.0f ) );
+						if ( !AddUniform( uniform ) )
+						{
+							// Failed to add, so delete uniform
+							delete uniform;
 					}
-				} break;
-				case UniformType::Vec2:
-				{
-					UniformVec2* uniform = new UniformVec2( uniformName, Vec2( 1.0f ) );
-					if ( !shader->AddUniform( uniform ) )
+
+					} break;
+
+					case UniformType::Vec3:
 					{
-						// Failed to add, so delete uniform
-						delete uniform;
+						UniformPrimitive< Vec3 >* uniform = new UniformPrimitive< Vec3 >( uniformName, Vec3( 1.0f ) );
+						if ( !AddUniform( uniform ) )
+						{
+							// Failed to add, so delete uniform
+							delete uniform;
+						}
+
+					} break;
+
+					case UniformType::Vec4:
+					{
+						UniformPrimitive< Vec4 >* uniform = new UniformPrimitive< Vec4 >( uniformName, Vec4( 1.0f ) );
+						if ( !AddUniform( uniform ) )
+						{
+							// Failed to add, so delete uniform
+							delete uniform;
+						}
+
+					} break;
+
+					case UniformType::Mat4: 
+					{
+						// Do nothing for now
+					} break;
+
+					default:
+					{
+					// Error
+					} break;
 				}
-
-				} break;
-
-				case UniformType::Vec3:
-				{
-					UniformVec3* uniform = new UniformVec3( uniformName, Vec3( 1.0f ) );
-					if ( !shader->AddUniform( uniform ) )
-					{
-						// Failed to add, so delete uniform
-						delete uniform;
-					}
-
-				} break;
-				case UniformType::Vec4:
-				{
-					UniformVec4* uniform = new UniformVec4( uniformName, Vec4( 1.0f ) );
-					if ( !shader->AddUniform( uniform ) )
-					{
-						// Failed to add, so delete uniform
-						delete uniform;
-					}
-
-				} break;
-
-				case UniformType::Mat4: 
-				{
-				// Do nothing for now
-				} break;
-				default:
-				{
-				// Error
-				} break;
-			}
 			}
 		}
-	}
-	*/
+	} 
 
 	//==================================================================================================================
 
-	/*
-	Shader* ShaderGraph::CreateShader( ShaderPassType pass )
+	Enjon::String ShaderGraph::BeginVertexMain( const ShaderPassType& pass, s32* status )
 	{
-	Shader* newShader = new Shader( );
-	ShaderParameters params;
-	params.shaderName = mName + "." + ShaderPassToString( pass ) + ".shader";
-
-	// Get main node template
-	ShaderGraphNodeTemplate* surfaceNodeTemplate = const_cast<ShaderGraphNodeTemplate*>( GetTemplate( "MainNodeTemplate" ) );
-
-	// If not valid template
-	if ( !surfaceNodeTemplate )
-	{
-	// Throw error
-	// Shader not valid
-	}
-
-	// Output all variables to be used for vertex shader pass
-	switch ( pass )
-	{
-	case ShaderPassType::Surface_StaticGeom:
-	{
-	// Evaluate world position offsets for world position offets
-	NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "BaseColor" ) );
-	if ( link )
-	{
-	// Need to build uniforms from this node
-	AddUniformsToShader( *link, newShader );
-	}
-
-	link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "Normal" ) );
-	if ( link )
-	{
-	// Need to build uniforms from this node
-	AddUniformsToShader( *link, newShader );
-	}
-
-	link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "Metallic" ) );
-	if ( link )
-	{
-	// Need to build uniforms from this node
-	AddUniformsToShader( *link, newShader );
-	}
-
-	link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "Roughness" ) );
-	if ( link )
-	{
-	// Need to build uniforms from this node
-	AddUniformsToShader( *link, newShader );
-	}
-
-	link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "Emissive" ) );
-	if ( link )
-	{
-	// Need to build uniforms from this node
-	AddUniformsToShader( *link, newShader );
-	}
-
-	link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "AO" ) );
-	if ( link )
-	{
-	// Need to build uniforms from this node
-	AddUniformsToShader( *link, newShader );
-	}
-
-	link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
-	if ( link )
-	{
-	// Need to build uniforms from this node
-	AddUniformsToShader( *link, newShader );
-	}
-	} break;
-	}
-
-	// Have to fill out shader parameters
-
-
-	// Then have to iterate through main node links and all uniforms for shader to use
-
-	//return newShader;
-	//}
-	*/
-
-	//==================================================================================================================
-
-	std::string ShaderGraph::BeginVertexMain( const ShaderPassType& pass, s32* status )
-	{
-		std::string code = "\n// Vertex Main\n";
+		Enjon::String code = "\n// Vertex Main\n";
 		code += "void main()\n";
 		code += "{\n";
 		return code;
@@ -1150,7 +1098,7 @@ namespace Enjon
 
 	//==================================================================================================================
 
-	std::string ShaderGraph::EndVertexMain( const ShaderPassType& pass, s32* status )
+	Enjon::String ShaderGraph::EndVertexMain( const ShaderPassType& pass, s32* status )
 	{
 		// Need to iterate through nodes and make sure all set back to not being declared or defined
 		for ( auto& n : mNodes )
@@ -1159,16 +1107,16 @@ namespace Enjon
 			n.second.SetDefined( false );
 		}
 
-		std::string code = "}\n";
+		Enjon::String code = "}\n";
 		code += OutputVertexHeaderEndTag( );
 		return code;
 	}
 
 	//==================================================================================================================
 
-	std::string ShaderGraph::OutputVertexMain( const ShaderPassType& pass, s32* status )
+	Enjon::String ShaderGraph::OutputVertexMain( const ShaderPassType& pass, s32* status )
 	{
-		std::string code = "";
+		Enjon::String code = "";
 
 		// Get main node template
 		ShaderGraphNodeTemplate* surfaceNodeTemplate = const_cast<ShaderGraphNodeTemplate*>( GetTemplate( "MainNodeTemplate" ) );
@@ -1184,105 +1132,69 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
-		case ShaderPassType::Surface_StaticGeom:
-		{
-			// Output base suface static geom code
+			case ShaderPassType::StaticGeom:
+			{ 
+				// Evaluate world position offsets for world position offets
+				NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) ); 
 
-			// Evaluate world position offsets for world position offets
-			NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
-
-			// Need this for possible texcoords
-			code += OutputTabbedLine( "v_texcoord0 = a_texcoord0;\n" );
-
-			// Other defaults ( Not sure what should go here just yet )
-			code += OutputTabbedLine( "vec4 normal = a_normal * 2.0 - 1.0;" );
-			code += OutputTabbedLine( "vec3 wnormal = mul( u_model[0], vec4( normal.xyz, 0.0 ) ).xyz;\n" );
-			code += OutputTabbedLine( "vec4 tangent = a_tangent * 2.0 - 1.0;" );
-			code += OutputTabbedLine( "vec3 wtangent = mul( u_model[0], vec4( tangent.xyz, 0.0 ) ).xyz;\n" );
-			code += OutputTabbedLine( "vec3 viewNormal = normalize( mul( u_view, vec4( wnormal, 0.0 ) ).xyz );" );
-			code += OutputTabbedLine( "vec3 viewTangent = normalize( mul( u_view, vec4( wtangent, 0.0 ) ).xyz );" );
-			code += OutputTabbedLine( "vec3 viewBitangent = cross( viewNormal, viewTangent ) * tangent.w;\n" );
-			code += OutputTabbedLine( "mat3 tbn = mat3( viewTangent, viewBitangent, viewNormal );\n" );
-			code += OutputTabbedLine( "v_normal = viewNormal;" );
-			code += OutputTabbedLine( "v_tangent = viewTangent;" );
-			code += OutputTabbedLine( "v_bitangent = viewBitangent;" );
-
-			// If link exists
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( l->mConnectingNode->IsDeclared( ) )
+				// If link exists
+				if ( link )
 				{
-					code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
-				}
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( l->mConnectingNode->IsDeclared( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
 
-				if ( l->mFrom )
-				{
-					// Get code evaluation at link output
-					std::string linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
-					std::string evalType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
-					code += OutputTabbedLine( "vec3 wpos = mul( u_model[0], vec4( a_position, 1.0 ) ).xyz;" );
-					code += OutputTabbedLine( "wpos += " + ShaderGraph::TransformOutputType( linkEval, evalType, +"vec3" ) + ";" );
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+						Enjon::String evalType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+						code += OutputTabbedLine( "vec3 worldPosition = ( uModel * vec4( vertexPosition, 1.0 ) ).xyz;" );
+						code += OutputTabbedLine( "worldPosition += " + ShaderGraph::TransformOutputType( linkEval, evalType, +"vec3" ) + ";" );
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: WorldPositionOffset: Link" + l->mConnectingNode->mName + ";" );
+					}
 				}
+				// Otherwise, vertex position doesn't get changed
 				else
 				{
-					code += OutputErrorBlock( "INVALID: WorldPositionOffset: Link" + l->mConnectingNode->mName + ";" );
+					code += OutputTabbedLine( "vec3 worldPosition = ( uModel * vec4( vertexPosition, 1.0 ) ).xyz;" );
 				}
-			}
-			// Otherwise, vertex position doesn't get changed
-			else
-			{
-				code += OutputTabbedLine( "vec3 wpos = mul( u_model[0], vec4( a_position, 1.0 ) ).xyz;" );
-			}
 
-			// Final position output 
-			code += OutputTabbedLine( "vec3 view = mul( u_view, vec4( wpos, 0.0 ) ).xyz;" );
-			code += OutputTabbedLine( "v_view = mul(view, tbn);\n" );
-			code += OutputTabbedLine( "v_wpos = wpos;\n" );
-			code += OutputTabbedLine( "gl_Position = mul( u_viewProj, vec4( wpos, 1.0 ) );\n" );
+				// Final position output 
+				code += OutputTabbedLine( "gl_Position = uProjection * uView * vec4( worldPosition, 1.0 );\n" );
+				
+				code += OutputTabbedLine( "// Reorthogonalize with respect to N" );
+				code += OutputTabbedLine( "vec3 N = normalize( ( uModel * vec4( vertexNormal, 0.0 ) ).xyz );" );
+				code += OutputTabbedLine( "vec3 T = normalize( ( uModel * vec4( vertexTangent, 0.0 ) ).xyz );\n" );
+				
+				code += OutputTabbedLine( "// Calculate Bitangent" );
+				code += OutputTabbedLine( "vec3 B = cross( N, T );\n" );
+				
+				code += OutputTabbedLine( "// TBN" );
+				code += OutputTabbedLine( "mat3 TBN = mat3( T, B, N );\n" );
+				
+				code += OutputTabbedLine( "// Output Vertex Data" );
+				code += OutputTabbedLine( "vs_out.FragPos = worldPosition;" );
+				code += OutputTabbedLine( "vs_out.TexCoords = vec2( vertexUV.x, -vertexUV.y );" );
+				code += OutputTabbedLine( "vs_out.TBN = TBN;" ); 
 
-
-		} break;
+			} break;
 		}
 
 		return code;
-	}
+	} 
 
 	//==================================================================================================================
 
-	std::string ShaderGraph::OutputFragmentIncludes( const ShaderPassType& pass, s32* status )
+	Enjon::String ShaderGraph::OutputFragmentHeader( const ShaderPassType& pass, s32* status )
 	{
-		std::string code = "";
-
-		switch ( pass )
-		{
-		case ShaderPassType::Surface_StaticGeom:
-		{
-			code += OutputLine( "$input v_wpos, v_view, v_normal, v_tangent, v_bitangent, v_texcoord0\n" );
-			code += OutputLine( "#include \"../common/common.sh\"\n" );
-		} break;
-		}
-
-		return code;
-	}
-
-	//==================================================================================================================
-
-	std::string ShaderGraph::OutputFragmentHeader( const ShaderPassType& pass, s32* status )
-	{
-		std::string code = "";
-
-		// Header tag
-		code += OutputFragmentHeaderBeginTag( );
-
-		// Fragment header includes
-		code += OutputFragmentIncludes( pass, status );
-
-		code += "/*\n";
-		code += "* @info: This file has been generated. All changes will be lost. Copyright NerdKingdom 2017.\n";
-		code += "* @file: " + mName + "." + ShaderPassToString( pass ) + ".FragmentShader.glsl\n";
-		code += "*/\n\n";
+		Enjon::String code = "";
 
 		// Get main node template
 		ShaderGraphNodeTemplate* surfaceNodeTemplate = const_cast< ShaderGraphNodeTemplate* >( GetTemplate( "MainNodeTemplate" ) );
@@ -1294,10 +1206,35 @@ namespace Enjon
 			// Return empty code
 			return code;
 		}
+
+		// Header tag
+		code += OutputFragmentHeaderBeginTag( ); 
+
+		//code += "/*\n";
+		//code += "* @info: This file has been generated. All changes will be lost.\n";
+		//code += "* @file: " + mName + "." + ShaderPassToString( pass ) + ".FragmentShader.glsl\n";
+		//code += "*/\n\n"; 
+
+		// Version number
+		code += OutputLine( "#version 330 core\n" );
+
+		// FragData Layout
+		code += OutputLine( "layout (location = 0) out vec4 AlbedoOut;" );
+		code += OutputLine( "layout (location = 1) out vec4 NormalsOut;" );
+		code += OutputLine( "layout (location = 2) out vec4 PositionOut;" );
+		code += OutputLine( "layout (location = 3) out vec4 EmissiveOut;" );
+		code += OutputLine( "layout (location = 4) out vec4 MatPropsOut;\n" );
+
+		// Fragment Data In
+		code += OutputLine( "in VS_OUT" );
+		code += OutputLine( "{" );
+		code += OutputTabbedLine( "vec3 FragPos;" );
+		code += OutputTabbedLine( "vec2 TexCoords;" );
+		code += OutputTabbedLine( "mat3 TBN;" );
+		code += OutputLine( "} fs_in;\n" );
+		
 		// Comment for declarations
-		code += OutputLine( "// Gloabl Uniforms" );
-		code += OutputLine( "uniform vec4 Global_Uniform_WORLD_TIME;" );
-		code += OutputLine( "#define GLOBAL_WORLD_TIME Global_Uniform_WORLD_TIME.x" );
+		code += OutputLine( "// Global Uniforms" );
 
 		// Comment for declarations
 		code += OutputLine( "\n// Variable Declarations" );
@@ -1305,63 +1242,63 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
-		case ShaderPassType::Surface_StaticGeom:
-		{
-			// BaseColor link
-			NodeLink* baseColorLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "BaseColor" ) );
-			if ( baseColorLink )
+			case ShaderPassType::StaticGeom:
 			{
-				// Evaluate definitions for this node
-				NodeLink* l = baseColorLink;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// BaseColor link
+				NodeLink* baseColorLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "BaseColor" ) );
+				if ( baseColorLink )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = baseColorLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-			// Normal link
-			NodeLink* normalLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Normal" ) );
-			if ( normalLink )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = normalLink;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// Normal link
+				NodeLink* normalLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Normal" ) );
+				if ( normalLink )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = normalLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-			// Metallic link
-			NodeLink* metallicLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Metallic" ) );
-			if ( metallicLink )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = metallicLink;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// Metallic link
+				NodeLink* metallicLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Metallic" ) );
+				if ( metallicLink )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = metallicLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-			// Roughness link
-			NodeLink* roughnessLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Roughness" ) );
-			if ( roughnessLink )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = roughnessLink;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// Roughness link
+				NodeLink* roughnessLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Roughness" ) );
+				if ( roughnessLink )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = roughnessLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-			// Emissive link
-			NodeLink* emissiveLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Emissive" ) );
-			if ( emissiveLink )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = emissiveLink;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// Emissive link
+				NodeLink* emissiveLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Emissive" ) );
+				if ( emissiveLink )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = emissiveLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-			// AO link
-			NodeLink* aoLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "AO" ) );
-			if ( aoLink )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = aoLink;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// AO link
+				NodeLink* aoLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "AO" ) );
+				if ( aoLink )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = aoLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-		} break;
+			} break;
 		}
 
 		return code;
@@ -1369,19 +1306,19 @@ namespace Enjon
 
 	//==================================================================================================================
 
-	std::string ShaderGraph::BeginFragmentMain( const ShaderPassType& pass, s32* status )
+	Enjon::String ShaderGraph::BeginFragmentMain( const ShaderPassType& pass, s32* status )
 	{
-		std::string code = "\n// Fragment Main\n";
-		code += "void main()\n";
-		code += "{\n";
+		Enjon::String code = OutputLine( "\n// Fragment Main" );
+		code += OutputLine( "void main()" );
+		code += OutputLine( "{" );
 		return code;
 	}
 
 	//==================================================================================================================
 
-	std::string ShaderGraph::OutputFragmentMain( const ShaderPassType& pass, s32* status )
+	Enjon::String ShaderGraph::OutputFragmentMain( const ShaderPassType& pass, s32* status )
 	{
-		std::string code = "";
+		Enjon::String code = "";
 
 		// Get main node template
 		ShaderGraphNodeTemplate* surfaceNodeTemplate = const_cast<ShaderGraphNodeTemplate*>( GetTemplate( "MainNodeTemplate" ) );
@@ -1402,250 +1339,245 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
-		case ShaderPassType::Surface_StaticGeom:
-		{
-			// Output base suface static geom code
-			code += OutputTabbedLine( "mat3 tbn = mat3( normalize( v_tangent ), normalize( v_bitangent ), normalize( v_normal ) );\n" );
-			code += OutputLine( "#if BGFX_SHADER_LANGUAGE_HLSL" );
-			code += OutputTabbedLine( "tbn = transpose( tbn );" );
-			code += OutputLine( "#endif\n" );
+			case ShaderPassType::StaticGeom:
+			{ 
+				// Evaluate world position offsets for world position offets
+				NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "BaseColor" ) );
 
-			// Evaluate world position offsets for world position offets
-			NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "BaseColor" ) );
-
-			code += OutputTabbedLine( "// Base Color" );
-			// If link exists
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( !l->mConnectingNode->IsDefined( ) )
+				code += OutputTabbedLine( "// Base Color" );
+				// If link exists
+				if ( link )
 				{
-					std::string appendedCode = OutputLine( const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDefinition( ) );
-					code += appendedCode;
-				}
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						Enjon::String appendedCode = OutputLine( const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+						code += appendedCode;
+					}
 
-				// Get code evaluation at link output
-
-				if ( l->mFrom )
-				{
-					std::string linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
-
-					// Get output type so we can transform correctly
-					std::string fromOutputType = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
-
-					// Transform this type to required type for output ( could make this more specific to get away from branches )
-					linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec4" );
-
-					code += OutputTabbedLine( "gl_FragData[0] = " + linkEval + ";\n" );
-				}
-				else
-				{
-					code += OutputErrorBlock( "INVALID: BaseColor: Link" + l->mConnectingNode->mName + ";" );
-				}
-
-			}
-			// Default base color
-			else
-			{
-				std::string baseColor = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "BaseColor" )->mDefaultValue;
-				code += OutputTabbedLine( "gl_FragData[0] = " + baseColor + ";\n" );
-			}
-
-			// Normals
-			code += OutputTabbedLine( "// Normal" );
-			link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Normal" ) );
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( !l->mConnectingNode->IsDefined( ) )
-				{
-					code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
-				}
-
-				if ( l->mFrom )
-				{
 					// Get code evaluation at link output
-					std::string linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
 
-					// Get output type so we can transform correctly
-					std::string fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+					if ( l->mFrom )
+					{
+						Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
 
-					// Transform this type to required type for output ( could make this more specific to get away from branches )
-					linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec3" );
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
 
-					code += OutputTabbedLine( "vec3 normal = vec3( 0, 0, 1 );" );
-					code += OutputTabbedLine( "normal.xyz = " + linkEval + " * 2.0 - 1.0;" );
-					code += OutputTabbedLine( "normal = normalize( mul( tbn, normal ) );" );
-					code += OutputTabbedLine( "vec3 wnormal = normalize( mul( u_invView, vec4( normal, 0.0 ) ).xyz );" );
-					code += OutputTabbedLine( "gl_FragData[1] = vec4( encodeNormalUint( wnormal ), 1.0 );\n" );
+						// Transform this type to required type for output ( could make this more specific to get away from branches )
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec4" );
+
+						code += OutputTabbedLine( "AlbedoOut = " + linkEval + ";\n" );
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: BaseColor: Link" + l->mConnectingNode->mName + ";" );
+					}
+
 				}
+				// Default base color
 				else
 				{
-					code += OutputErrorBlock( "INVALID: Normal: Link" + l->mConnectingNode->mName + ";" );
+					Enjon::String baseColor = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "BaseColor" )->mDefaultValue;
+					code += OutputTabbedLine( "AlbedoOut = " + baseColor + ";\n" );
 				}
-			}
-			// Default normals
-			else
-			{
-				std::string normal = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Normal" )->mDefaultValue;
-				normal = ShaderGraph::FindReplaceAllMetaTag( normal, "#V_NORMAL", "v_normal" );
-				code += OutputTabbedLine( "gl_FragData[1] = vec4( encodeNormalUint( " + normal + " ), 1.0 );\n" );
-			}
 
-			code += OutputTabbedLine( "// Material Properties" );
-			std::string metallic, roughness, ao;
-
-			// Metallic
-			link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Metallic" ) );
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( !l->mConnectingNode->IsDefined( ) )
+				// Normals
+				code += OutputTabbedLine( "// Normal" );
+				link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Normal" ) );
+				if ( link )
 				{
-					code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+
+						// Transform this type to required type for output ( could make this more specific to get away from branches )
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec3" );
+
+						code += OutputTabbedLine( "vec3 normal = normalize( " + linkEval + " * 2.0 - 1.0;" );
+						code += OutputTabbedLine( "normal = normalize( fs_in.TBN * normal );" );
+						code += OutputTabbedLine( "NormalsOut = vec4( normal, 1.0 );\n" );
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: Normal: Link" + l->mConnectingNode->mName + ";" );
+					}
 				}
-
-				if ( l->mFrom )
-				{
-					// Get code evaluation at link output
-					std::string linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
-
-					// Strip away global defines
-					linkEval = ShaderGraph::ReplaceAllGlobalMetaTags( linkEval );
-
-					// Get output type so we can transform correctly
-					std::string fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
-
-					// Transform to float
-					linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
-
-					metallic = linkEval;
-				}
+				// Default normals
 				else
 				{
-					code += OutputErrorBlock( "INVALID: Metallic: Link" + l->mConnectingNode->mName + ";" );
+					Enjon::String normal = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Normal" )->mDefaultValue;
+					normal = ShaderGraph::FindReplaceAllMetaTag( normal, "#V_NORMAL", "fs_in.TBN[2]" );
+					code += OutputTabbedLine( "NormalsOut = vec4( " + normal + ", 1.0 );\n" );
 				}
-			}
-			// Default metallic
-			else
-			{
-				metallic = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Metallic" )->mDefaultValue;
-			}
 
-			// Roughness
-			link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Roughness" ) );
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( !l->mConnectingNode->IsDefined( ) )
+				code += OutputTabbedLine( "// Material Properties" );
+				Enjon::String metallic, roughness, ao;
+
+				// Metallic
+				link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Metallic" ) );
+				if ( link )
 				{
-					code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+
+						// Strip away global defines
+						linkEval = ShaderGraph::ReplaceAllGlobalMetaTags( linkEval );
+
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+
+						// Transform to float
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
+
+						metallic = linkEval;
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: Metallic: Link" + l->mConnectingNode->mName + ";" );
+					}
 				}
-
-				if ( l->mFrom )
-				{
-					// Get code evaluation at link output
-					std::string linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
-
-					// Get output type so we can transform correctly
-					std::string fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
-
-					// Transform to float
-					linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
-
-					roughness = linkEval;
-				}
+				// Default metallic
 				else
 				{
-					code += OutputErrorBlock( "INVALID: Metallic: Link" + l->mConnectingNode->mName + ";" );
+					metallic = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Metallic" )->mDefaultValue;
 				}
-			}
-			// Default roughness
-			else
-			{
-				roughness = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Roughness" )->mDefaultValue;
-			}
 
-			// AO
-			link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "AO" ) );
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( !l->mConnectingNode->IsDefined( ) )
+				// Roughness
+				link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Roughness" ) );
+				if ( link )
 				{
-					code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+
+						// Transform to float
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
+
+						roughness = linkEval;
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: Metallic: Link" + l->mConnectingNode->mName + ";" );
+					}
 				}
-
-				if ( l->mFrom )
-				{
-					// Get code evaluation at link output
-					std::string linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
-
-					// Get output type so we can transform correctly
-					std::string fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
-
-					// Transform to float
-					linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
-
-					ao = linkEval;
-				}
+				// Default roughness
 				else
 				{
-					code += OutputErrorBlock( "INVALID: AO: Link" + l->mConnectingNode->mName + ";" );
+					roughness = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Roughness" )->mDefaultValue;
 				}
-			}
-			// Default ao
-			else
-			{
-				ao = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "AO" )->mDefaultValue;
-			}
 
-			// Output Material Properties
-			code += OutputTabbedLine( "gl_FragData[2] = vec4( " + metallic + ", " + roughness + ", " + ao + ", 1.0);\n" );
-
-			// Emissive
-			code += OutputTabbedLine( "// Emissive" );
-			link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Emissive" ) );
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( !l->mConnectingNode->IsDefined( ) )
+				// AO
+				link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "AO" ) );
+				if ( link )
 				{
-					code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+
+						// Transform to float
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
+
+						ao = linkEval;
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: AO: Link" + l->mConnectingNode->mName + ";" );
+					}
 				}
-
-				if ( l->mFrom )
-				{
-					// Get code evaluation at link output
-					std::string linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
-
-					// Get output type so we can transform correctly
-					std::string fromOutputType = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
-
-					// Transform this type to required type for output ( could make this more specific to get away from branches )
-					linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec4" );
-
-					code += OutputTabbedLine( "gl_FragData[3] = " + linkEval + ";\n" );
-				}
+				// Default ao
 				else
 				{
-					code += OutputErrorBlock( "INVALID: Emissive: Link" + l->mConnectingNode->mName + ";" );
+					ao = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "AO" )->mDefaultValue;
 				}
-			}
-			// Default emissive
-			else
-			{
-				std::string emissive = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Emissive" )->mDefaultValue;
-				code += OutputTabbedLine( "gl_FragData[3] = " + emissive + ";\n" );
-			}
 
-		} break;
+				// Output Material Properties
+				code += OutputTabbedLine( "MatPropsOut = vec4( " + metallic + ", " + roughness + ", " + ao + ", 1.0);\n" );
+
+				// Emissive
+				code += OutputTabbedLine( "// Emissive" );
+				link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Emissive" ) );
+				if ( link )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+
+						// Transform this type to required type for output ( could make this more specific to get away from branches )
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec4" );
+
+						code += OutputTabbedLine( "EmissiveOut = " + linkEval + ";\n" );
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: Emissive: Link" + l->mConnectingNode->mName + ";" );
+					}
+				}
+				// Default emissive
+				else
+				{
+					Enjon::String emissive = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Emissive" )->mDefaultValue;
+					code += OutputTabbedLine( "EmissiveOut = " + emissive + ";\n" );
+				}
+
+				// Other default code
+				code += OutputTabbedLine( "PositionOut = vec4( fs_in.FragPos, 1.0 );" );
+
+			} break;
 		}
 
 		return code;
@@ -1653,7 +1585,7 @@ namespace Enjon
 
 	//==================================================================================================================
 
-	std::string ShaderGraph::EndFragmentMain( const ShaderPassType& pass, s32* status )
+	Enjon::String ShaderGraph::EndFragmentMain( const ShaderPassType& pass, s32* status )
 	{
 		// Need to iterate through nodes and make sure all set back to not being declared or defined
 		for ( auto& n : mNodes )
@@ -1662,7 +1594,7 @@ namespace Enjon
 			n.second.SetDefined( false );
 		}
 
-		std::string code = "}\n";
+		Enjon::String code = "}\n";
 		code += OutputFragmentHeaderEndTag( );
 
 		return code;
@@ -1670,7 +1602,7 @@ namespace Enjon
 
 	//==================================================================================================================
 
-	std::string ShaderGraph::TransformOutputType( const std::string& code, const std::string& type, const std::string& requiredType )
+	Enjon::String ShaderGraph::TransformOutputType( const Enjon::String& code, const Enjon::String& type, const Enjon::String& requiredType )
 	{
 		// If the same, then return
 		if ( type.compare( requiredType ) == 0 )
@@ -1740,9 +1672,9 @@ namespace Enjon
 
 	//==================================================================================================================
 
-	std::string ShaderGraph::ReplaceAllGlobalMetaTags( const std::string& code )
+	Enjon::String ShaderGraph::ReplaceAllGlobalMetaTags( const Enjon::String& code )
 	{
-		std::string returnCode = code;
+		Enjon::String returnCode = code;
 
 		// Replace V_TEXCOORD0 with appropriate tag
 		for ( u32 i = 0; i < ShaderGraph::TagCount( returnCode, "#V_TEXCOORD0" ); ++i )
@@ -1791,13 +1723,13 @@ namespace Enjon
 
 	//==================================================================================================================
 
-	std::string ShaderGraph::FindReplaceAllMetaTag( const std::string& code, const std::string& toFind, const std::string& replaceWith )
+	Enjon::String ShaderGraph::FindReplaceAllMetaTag( const Enjon::String& code, const Enjon::String& toFind, const Enjon::String& replaceWith )
 	{
-		std::string retCode = code;
+		Enjon::String retCode = code;
 
 		// Search for begin
 		std::size_t pos = retCode.find( toFind );
-		while ( pos != std::string::npos )
+		while ( pos != Enjon::String::npos )
 		{
 			retCode = FindReplaceMetaTag( retCode, toFind, replaceWith );
 			pos = retCode.find( toFind, pos + 1 );
@@ -1808,9 +1740,9 @@ namespace Enjon
 
 	//==================================================================================================================
 
-	std::string ShaderGraph::FindReplaceMetaTag( const std::string& code, const std::string& toFind, const std::string& replaceWith )
+	Enjon::String ShaderGraph::FindReplaceMetaTag( const Enjon::String& code, const Enjon::String& toFind, const Enjon::String& replaceWith )
 	{
-		std::string returnStr = "";
+		Enjon::String returnStr = "";
 
 		// Search for begin
 		std::size_t foundBegin = code.find( toFind );
@@ -1828,11 +1760,11 @@ namespace Enjon
 		finalString = subStrBefore + subStrAfter;
 		*/
 
-		std::string subStrBefore = "";
-		std::string subStrAfter = "";
+		Enjon::String subStrBefore = "";
+		Enjon::String subStrAfter = "";
 
 		// If found, then replace and return
-		if ( foundBegin != std::string::npos )
+		if ( foundBegin != Enjon::String::npos )
 		{
 			subStrBefore = code.substr( 0, foundBegin );
 			subStrAfter = code.substr( foundBegin + findSize );
@@ -1845,14 +1777,14 @@ namespace Enjon
 		}
 	}
 
-	std::string ShaderGraphNode::BuildInputKeyFromLinks( )
+	Enjon::String ShaderGraphNode::BuildInputKeyFromLinks( )
 	{
-		std::string inputKey = "";
+		Enjon::String inputKey = "";
 		for ( auto& l : mLinks )
 		{
-			std::string fromName = l.mFrom->mName;
-			std::string outputType = const_cast<ShaderGraphNode*> ( l.mConnectingNode )->EvaluateOutputTypeAt( l.mFrom->mName );
-			std::string input = ShaderGraph::FindReplaceAllMetaTag( l.mFrom->mPrimitiveType, "#OUTPUT_TYPE", const_cast<ShaderGraphNode*>( l.mConnectingNode )->EvaluateOutputTypeAt( l.mFrom->mName ) );
+			Enjon::String fromName = l.mFrom->mName;
+			Enjon::String outputType = const_cast<ShaderGraphNode*> ( l.mConnectingNode )->EvaluateOutputTypeAt( l.mFrom->mName );
+			Enjon::String input = ShaderGraph::FindReplaceAllMetaTag( l.mFrom->mPrimitiveType, "#OUTPUT_TYPE", const_cast<ShaderGraphNode*>( l.mConnectingNode )->EvaluateOutputTypeAt( l.mFrom->mName ) );
 			inputKey += input;
 		}
 
@@ -1869,15 +1801,15 @@ namespace Enjon
 		return inputKey;
 	}
 
-	std::string ShaderGraphNode::EvaluateOutputTypeAt( const std::string& outputName )
+	Enjon::String ShaderGraphNode::EvaluateOutputTypeAt( const Enjon::String& outputName )
 	{
-		std::string returnOutputType = "";
+		Enjon::String returnOutputType = "";
 
 		// Handle differently, of course
 		if ( mTemplate->IsFunction( ) )
 		{
 			// Build input key from links ( could be empty )
-			std::string inputKey = BuildInputKeyFromLinks( );
+			Enjon::String inputKey = BuildInputKeyFromLinks( );
 
 			// Need to code replace to make sure that empties are handled correctly
 			inputKey = ShaderGraph::FindReplaceAllMetaTag( inputKey, "#TYPE(", "" );
@@ -1905,9 +1837,9 @@ namespace Enjon
 		return returnOutputType;
 	}
 
-	std::string ShaderGraphNode::EvaluateOutputCodeAt( const std::string& name )
+	Enjon::String ShaderGraphNode::EvaluateOutputCodeAt( const Enjon::String& name )
 	{
-		std::string code = "";
+		Enjon::String code = "";
 
 		// Get code template from template
 		if ( mTemplate == nullptr )
@@ -1930,9 +1862,9 @@ namespace Enjon
 
 	//===========================================================================================================================
 
-	std::string ShaderGraphNode::EvaluateVariableDefinition( )
+	Enjon::String ShaderGraphNode::EvaluateVariableDefinition( )
 	{
-		std::string finalOutput = "";
+		Enjon::String finalOutput = "";
 
 		// At this point, ALL necessary nodes should be evaluated for their variable declarations
 		// Have to evaluate for their actual definitions now
@@ -1963,17 +1895,17 @@ namespace Enjon
 		if ( !IsUniform( ) )
 		{
 			// Get variable decl template code
-			std::string variableDefTemplate = mTemplate->GetVariableDefinitionTemplate( );
+			Enjon::String variableDefTemplate = mTemplate->GetVariableDefinitionTemplate( );
 
 			// Replace with output from links if available, otherwise we'll resort to defaults
 			for ( auto& l : mLinks )
 			{
 				if ( l.mFrom && l.mTo )
 				{
-					std::string codeEval = const_cast< ShaderGraphNode* > ( l.mConnectingNode )->EvaluateOutputCodeAt( l.mFrom->mName );
+					Enjon::String codeEval = const_cast< ShaderGraphNode* > ( l.mConnectingNode )->EvaluateOutputCodeAt( l.mFrom->mName );
 
 					// Get input name from link
-					std::string inputName = "#INPUT(" + l.mTo->mName + ")";
+					Enjon::String inputName = "#INPUT(" + l.mTo->mName + ")";
 
 					// Replace this input name in definition code with code evaluation
 					variableDefTemplate = ShaderGraph::FindReplaceAllMetaTag( variableDefTemplate, inputName, codeEval );
@@ -1985,11 +1917,11 @@ namespace Enjon
 			}
 
 			// Get inputs from template and search for remaining areas to replace
-			const std::unordered_map< std::string, InputConnection >& inpts = mTemplate->GetInputs( );
+			const std::unordered_map< Enjon::String, InputConnection >& inpts = mTemplate->GetInputs( );
 			for ( auto& i : inpts )
 			{
-				std::string inputName = "#INPUT(" + i.second.mName + ")";
-				std::string defaultValue = i.second.mDefaultValue;
+				Enjon::String inputName = "#INPUT(" + i.second.mName + ")";
+				Enjon::String defaultValue = i.second.mDefaultValue;
 
 				// Need to get default value from either template inputs or from default overrides
 				if ( HasOverride( i.second.mName ) )
@@ -2026,10 +1958,10 @@ namespace Enjon
 
 	//===========================================================================================================================
 
-	std::string ShaderGraphNode::EvaluateVariableDeclaration( )
+	Enjon::String ShaderGraphNode::EvaluateVariableDeclaration( )
 	{
 		// Final output
-		std::string finalOutput = "";
+		Enjon::String finalOutput = "";
 
 		// Early out if already declared
 		if ( IsDeclared( ) )
@@ -2053,7 +1985,7 @@ namespace Enjon
 		}
 
 		// Get variable decl template code
-		std::string variableDeclTemplate = OutputLine( IsUniform( ) ? "uniform " + mTemplate->GetVariableDeclarationTemplate( ) : mTemplate->GetVariableDeclarationTemplate( ) );
+		Enjon::String variableDeclTemplate = OutputLine( IsUniform( ) ? "uniform " + mTemplate->GetVariableDeclarationTemplate( ) : mTemplate->GetVariableDeclarationTemplate( ) );
 
 		// Need to find and replace for certain things
 		variableDeclTemplate = ( ShaderGraph::FindReplaceMetaTag( variableDeclTemplate, "#NODE_NAME", IsUniform( ) ? GetUniformName( ) : mName ) );
@@ -2064,7 +1996,7 @@ namespace Enjon
 		// Evalute output type if uniform or function
 		if ( mTemplate->IsFunction( ) )
 		{
-			std::string outputTypeString = EvaluateOutputTypeAt( "Value" );
+			Enjon::String outputTypeString = EvaluateOutputTypeAt( "Value" );
 
 			// If empty string, then need backup...
 			if ( outputTypeString.empty( ) )
@@ -2081,7 +2013,7 @@ namespace Enjon
 		}
 		else if ( IsUniform( ) )
 		{
-			std::string actualVariable = "";
+			Enjon::String actualVariable = "";
 
 			if ( ShaderGraph::HasTag( variableDeclTemplate, "float" ) )
 			{
@@ -2111,13 +2043,13 @@ namespace Enjon
 	}
 	//========================================================================================================================= 
 
-	u32 ShaderGraph::TagCount( const std::string& code, const std::string& tag )
+	u32 ShaderGraph::TagCount( const Enjon::String& code, const Enjon::String& tag )
 	{
 		u32 count = 0;
 
 		// Search for begin
 		std::size_t pos = code.find( tag );
-		while ( pos != std::string::npos )
+		while ( pos != Enjon::String::npos )
 		{
 			count++;
 			pos = code.find( tag, pos + 1 );
@@ -2128,13 +2060,13 @@ namespace Enjon
 
 	//========================================================================================================================= 
 
-	bool ShaderGraph::HasTag( const std::string& code, const std::string& tag )
+	bool ShaderGraph::HasTag( const Enjon::String& code, const Enjon::String& tag )
 	{
 		// Search for begin
 		std::size_t foundBegin = code.find( tag );
 
 		// If found, then replace and return
-		if ( foundBegin != std::string::npos )
+		if ( foundBegin != Enjon::String::npos )
 		{
 			return true;
 		}
@@ -2144,9 +2076,9 @@ namespace Enjon
 
 	//========================================================================================================================= 
 
-	std::string ShaderGraph::ReplaceTypeWithAppropriateUniformType( const std::string& code )
+	Enjon::String ShaderGraph::ReplaceTypeWithAppropriateUniformType( const Enjon::String& code )
 	{
-		std::string returnCode = "";
+		Enjon::String returnCode = "";
 
 		// Replace float with vec4
 		if ( HasTag( code, "float" ) )
@@ -2171,53 +2103,56 @@ namespace Enjon
 
 	//========================================================================================================================= 
 
-	std::string ShaderGraph::GetCode( ShaderPassType type, ShaderType shaderType )
+	Enjon::String ShaderGraph::GetCode( ShaderPassType type, ShaderType shaderType )
 	{
 		auto query = mShaderPassCode.find( type );
 		if ( query != mShaderPassCode.end( ) )
 		{
 			switch ( shaderType )
 			{
-			case ShaderType::Vertex:
-			{
-				// Get pass code
-				std::string passCode = mShaderPassCode[ type ];
+				case ShaderType::Vertex:
+				{
+					// Get pass code
+					Enjon::String passCode = mShaderPassCode[ type ];
 
-				// Parse and return vertex shader code 
-				passCode = ParseFromTo( OutputVertexHeaderBeginTag( ), OutputVertexHeaderEndTag( ), passCode );
-				passCode = ShaderGraph::FindReplaceMetaTag( passCode, OutputVertexHeaderBeginTag( ), "" );
+					// Parse and return vertex shader code 
+					passCode = ParseFromTo( OutputVertexHeaderBeginTag( ), OutputVertexHeaderEndTag( ), passCode );
+					passCode = ShaderGraph::FindReplaceMetaTag( passCode, OutputVertexHeaderBeginTag( ), "" );
 
-				// Return
-				return passCode;
+					// Return
+					return passCode;
 
-			} break;
-			case ShaderType::Fragment:
-			{
-				// Get pass code
-				std::string passCode = mShaderPassCode[ type ];
+				} break;
 
-				// Parse and return fragment shader code 
-				passCode = ParseFromTo( OutputFragmentHeaderBeginTag( ), OutputFragmentHeaderEndTag( ), passCode );
-				passCode = ShaderGraph::FindReplaceMetaTag( passCode, OutputFragmentHeaderBeginTag( ), "" );
+				case ShaderType::Fragment:
+				{
+					// Get pass code
+					Enjon::String passCode = mShaderPassCode[ type ];
 
-				// Return
-				return passCode;
+					// Parse and return fragment shader code 
+					passCode = ParseFromTo( OutputFragmentHeaderBeginTag( ), OutputFragmentHeaderEndTag( ), passCode );
+					passCode = ShaderGraph::FindReplaceMetaTag( passCode, OutputFragmentHeaderBeginTag( ), "" );
 
-			} break;
-			case ShaderType::Compute:
-			{
-				// Get pass code
-				std::string passCode = mShaderPassCode[ type ];
+					// Return
+					return passCode;
 
-				// Return compute shader code
-				return passCode;
+				} break;
 
-			} break;
-			default:
-			{
-				// Just return all of it
-				return mShaderPassCode[ type ];
-			} break;
+				case ShaderType::Compute:
+				{
+					// Get pass code
+					Enjon::String passCode = mShaderPassCode[ type ];
+
+					// Return compute shader code
+					return passCode;
+
+				} break;
+
+				default:
+				{
+					// Just return all of it
+					return mShaderPassCode[ type ];
+				} break;
 			}
 		}
 
@@ -2226,8 +2161,33 @@ namespace Enjon
 	}
 
 	//========================================================================================================================= 
+			
+	void ShaderGraph::WriteToFile( ShaderPassType pass )
+	{ 
+		Enjon::String shaderPath = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( )->GetAssetsPath( ) + "/Shaders";
+		Enjon::String fragName = mName + "." + ShaderPassToString( pass ) + ".Fragment.glsl";
+		Enjon::String vertName = mName + "." + ShaderPassToString( pass ) + ".Vertex.glsl";
 
-	// Start here tomorrow...
+		std::ofstream file;
+		file.open( ( shaderPath + "/" + fragName ).c_str() );
+		if ( file )
+		{
+			Enjon::String code = GetCode( pass, ShaderType::Fragment );
+			file.write( code.c_str( ), code.length( ) ); 
+		}
+		file.close( );
+
+		file.open( ( shaderPath + "/" + vertName ).c_str( ) );
+		if ( file )
+		{
+			Enjon::String code = GetCode( pass, ShaderType::Vertex );
+			file.write( code.c_str( ), code.length( ) );
+		} 
+		file.close( );
+	}
+
+	//========================================================================================================================= 
+
 	s32 ShaderGraph::Compile( )
 	{
 		s32 status = 1;
@@ -2235,7 +2195,7 @@ namespace Enjon
 		// For each pass, output shader code based on graph
 		for ( u32 i = 0; i < ( u32 )ShaderPassType::Count; ++i )
 		{
-			std::string code = "";
+			Enjon::String code = "";
 
 			// Meta data for pass
 			code += OutputPassTypeMetaData( ShaderPassType( i ), &status );
@@ -2250,17 +2210,38 @@ namespace Enjon
 			code += OutputFragmentHeader( ShaderPassType( i ), &status );
 			code += BeginFragmentMain( ShaderPassType( i ), &status );
 			code += OutputFragmentMain( ShaderPassType( i ), &status );
-			code += EndFragmentMain( ShaderPassType( i ), &status );
-
-			// Geometry Shader Output 
-			// Compute Shader Output
-			// Tesselelation Shader Output
-			// Whatever Other Crazy Shit We Want To Output
+			code += EndFragmentMain( ShaderPassType( i ), &status ); 
 
 			if ( status > 0 )
 			{
-				mShaderPassCode[ ShaderPassType::Surface_StaticGeom ] = code;
+				mShaderPassCode[ ShaderPassType( i ) ] = code;
 			}
+
+			// Write shaders to file ( for now )
+			WriteToFile( ShaderPassType( i ) );
+
+			// Create shader TODO(): Need a way to detect that this created failed
+			Enjon::Shader* shader = new Shader( *this, ShaderPassType( i ) ); 
+
+			// Add shader
+			mShaders[ ShaderPassType( i ) ] = shader;
+		} 
+ 
+		// Get main node template
+		ShaderGraphNodeTemplate* surfaceNodeTemplate = const_cast<ShaderGraphNodeTemplate*>( GetTemplate( "MainNodeTemplate" ) );
+
+		// If not valid template
+		if ( !surfaceNodeTemplate )
+		{
+			// Throw error
+			// Shader not valid
+			status = 0;
+		}
+
+		// Loop through nodes and build uniforms
+		for ( auto& l : mMainSurfaceNode.mLinks )
+		{
+			ConstructUniforms( l );
 		}
 
 		return status;

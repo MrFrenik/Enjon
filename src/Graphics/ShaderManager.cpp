@@ -1,4 +1,6 @@
 #include "Graphics/ShaderManager.h"
+#include "Engine.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <unordered_map>
@@ -9,53 +11,59 @@ namespace Enjon { namespace ShaderManager {
 
 	void Init()
 	{
+		Enjon::String rp = Enjon::Engine::GetInstance( )->GetConfig( ).GetEngineResourcePath( );
+		Enjon::String sp = rp + "/Shaders";
+
 		// Add shaders
-		ShaderManager::AddShader("Basic", "../shaders/basic.v.glsl", "../shaders/basic.f.glsl");
-		ShaderManager::AddShader("Text","../shaders/text.v.glsl", "../shaders/text.f.glsl");
-		ShaderManager::AddShader("Default","../shaders/default.v.glsl", "../shaders/default.f.glsl");
-		ShaderManager::AddShader("DiffuseShader", "../shaders/diffuse.v.glsl", "../shaders/diffuse.f.glsl");
-		ShaderManager::AddShader("DeferredShader", "../shaders/deferred.v.glsl", "../shaders/deferred.f.glsl");
-		ShaderManager::AddShader("NormalsShader", "../shaders/normal.v.glsl", "../shaders/normal.f.glsl");
-		ShaderManager::AddShader("DepthShader", "../shaders/depth.v.glsl", "../shaders/depth.f.glsl");
-		ShaderManager::AddShader("NoCameraProjection", "../shaders/no_camera.v.glsl", "../shaders/no_camera.f.glsl");
-		ShaderManager::AddShader("BasicLighting", "../shaders/lighting_basic.v.glsl", "../shaders/lighting_basic.f.glsl");
-		ShaderManager::AddShader("Learn", "../shaders/learn.v.glsl", "../shaders/learn.f.glsl");
-		ShaderManager::AddShader("Lamp", "../shaders/learn.v.glsl", "../shaders/lamplight.f.glsl");
-		ShaderManager::AddShader("DefaultLighting", "../shaders/defaultLight.v.glsl", "../shaders/defaultLight.f.glsl");
-		ShaderManager::AddShader("VerticalBlur", "../shaders/vertical_blur.v.glsl", "../shaders/vertical_blur.f.glsl");
-		ShaderManager::AddShader("HorizontalBlur", "../shaders/horizontal_blur.v.glsl", "../shaders/horizontal_blur.f.glsl");
-		ShaderManager::AddShader("GBuffer", "../shaders/deferred/deferred.v.glsl", "../shaders/deferred/deferred.f.glsl");
-		ShaderManager::AddShader("DeferredLight", "../shaders/deferred/deferred_light.v.glsl", "../shaders/deferred/deferred_light.f.glsl");
-		ShaderManager::AddShader("AmbientLight", "../shaders/deferred/ambient_light.v.glsl", "../shaders/deferred/ambient_light.f.glsl");
-		ShaderManager::AddShader("DirectionalLight", "../shaders/deferred/directional_light.v.glsl", "../shaders/deferred/directional_light.f.glsl");
-		ShaderManager::AddShader("PointLight", "../shaders/deferred/point_light.v.glsl", "../shaders/deferred/point_light.f.glsl");
-		ShaderManager::AddShader("SpotLight", "../shaders/deferred/spot_light.v.glsl", "../shaders/deferred/spot_light.f.glsl");
-		ShaderManager::AddShader("Depth", "../shaders/deferred/depth.v.glsl", "../shaders/deferred/depth.f.glsl");
-		ShaderManager::AddShader("AnimatedMaterial", "../shaders/deferred/animated_material.v.glsl", "../shaders/deferred/animated_material.f.glsl");
-		ShaderManager::AddShader("UVAnimation", "../shaders/deferred/uv_animation.v.glsl", "../shaders/deferred/uv_animation.f.glsl");
-		ShaderManager::AddShader("ScreenUI", "../shaders/screen_ui.v.glsl", "../shaders/screen_ui.f.glsl");
-		ShaderManager::AddShader("FXAA", "../shaders/deferred/fxaa.v.glsl", "../shaders/deferred/fxaa.f.glsl");
-		ShaderManager::AddShader("QuadBatch", "../shaders/deferred/quad_batch.v.glsl", "../shaders/deferred/quad_batch.f.glsl");
-		ShaderManager::AddShader("WorldText", "../shaders/deferred/world_text.v.glsl", "../shaders/deferred/world_text.f.glsl");
-		ShaderManager::AddShader("Composite", "../shaders/deferred/composite.v.glsl", "../shaders/deferred/composite.f.glsl");
-		ShaderManager::AddShader("Bright", "../shaders/deferred/bright.v.glsl", "../shaders/deferred/bright.f.glsl");
-		ShaderManager::AddShader("SimpleDepth", "../shaders/deferred/simple_depth.v.glsl", "../shaders/deferred/simple_depth.f.glsl");
-		ShaderManager::AddShader("SimpleDepthAnimation", "../shaders/deferred/simple_depth_animation.v.glsl", "../shaders/deferred/simple_depth_animation.f.glsl");
-		ShaderManager::AddShader("PBRDirectionalLight", "../shaders/pbr/directional_light.v.glsl", "../shaders/pbr/directional_light.f.glsl");
-		ShaderManager::AddShader("PBRPointLight", "../shaders/pbr/point_light.v.glsl", "../shaders/pbr/point_light.f.glsl");
-		ShaderManager::AddShader("PBRSpotLight", "../shaders/pbr/spot_light.v.glsl", "../shaders/pbr/spot_light.f.glsl");
-		ShaderManager::AddShader("Transparent", "../shaders/deferred/transparent_material.v.glsl", "../shaders/deferred/transparent_material.f.glsl");
-		ShaderManager::AddShader("EquiToCube", "../shaders/equiToCubemap.v.glsl", "../shaders/equiToCubemap.f.glsl");
-		ShaderManager::AddShader("SkyBox", "../shaders/skybox.v.glsl", "../shaders/skybox.f.glsl");
-		ShaderManager::AddShader("IrradianceCapture", "../shaders/pbr/Irradiance.v.glsl", "../shaders/pbr/Irradiance.f.glsl");
-		ShaderManager::AddShader("PrefilterConvolution", "../shaders/pbr/PrefilterConvolution.v.glsl", "../shaders/pbr/PrefilterConvolution.f.glsl");
-		ShaderManager::AddShader("BRDFLUT", "../shaders/pbr/BRDF.v.glsl", "../shaders/pbr/BRDF.f.glsl");
+		ShaderManager::AddShader("Basic", sp + "/basic.v.glsl", sp + "/basic.f.glsl");
+		ShaderManager::AddShader("Text", sp + "/text.v.glsl", sp + "/text.f.glsl");
+		ShaderManager::AddShader("Default", sp + "/default.v.glsl", sp + "/default.f.glsl");
+		ShaderManager::AddShader("DiffuseShader", sp + "/diffuse.v.glsl", sp + "/diffuse.f.glsl");
+		ShaderManager::AddShader("DeferredShader", sp + "/deferred.v.glsl", sp + "/deferred.f.glsl");
+		ShaderManager::AddShader("NormalsShader", sp + "/normal.v.glsl", sp + "/normal.f.glsl");
+		ShaderManager::AddShader("DepthShader", sp + "/depth.v.glsl", sp + "/depth.f.glsl");
+		ShaderManager::AddShader("NoCameraProjection", sp + "/no_camera.v.glsl", sp + "/no_camera.f.glsl");
+		ShaderManager::AddShader("BasicLighting", sp + "/lighting_basic.v.glsl", sp + "/lighting_basic.f.glsl");
+		ShaderManager::AddShader("Learn", sp + "/learn.v.glsl", sp + "/learn.f.glsl");
+		ShaderManager::AddShader("Lamp", sp + "/learn.v.glsl", sp + "/lamplight.f.glsl");
+		ShaderManager::AddShader("DefaultLighting", sp + "/defaultLight.v.glsl", sp + "/defaultLight.f.glsl");
+		ShaderManager::AddShader("VerticalBlur", sp + "/vertical_blur.v.glsl", sp + "/vertical_blur.f.glsl");
+		ShaderManager::AddShader("HorizontalBlur", sp + "/horizontal_blur.v.glsl", sp + "/horizontal_blur.f.glsl");
+		ShaderManager::AddShader("GBuffer", sp + "/deferred/deferred.v.glsl", sp + "/deferred/deferred.f.glsl");
+		ShaderManager::AddShader("DeferredLight", sp + "/deferred/deferred_light.v.glsl", sp + "/deferred/deferred_light.f.glsl");
+		ShaderManager::AddShader("AmbientLight", sp + "/deferred/ambient_light.v.glsl", sp + "/deferred/ambient_light.f.glsl");
+		ShaderManager::AddShader("DirectionalLight", sp + "/deferred/directional_light.v.glsl", sp + "/deferred/directional_light.f.glsl");
+		ShaderManager::AddShader("PointLight", sp + "/deferred/point_light.v.glsl", sp + "/deferred/point_light.f.glsl");
+		ShaderManager::AddShader("SpotLight", sp + "/deferred/spot_light.v.glsl", sp + "/deferred/spot_light.f.glsl");
+		ShaderManager::AddShader("Depth", sp + "/deferred/depth.v.glsl", sp + "/deferred/depth.f.glsl");
+		ShaderManager::AddShader("AnimatedMaterial", sp + "/deferred/animated_material.v.glsl", sp + "/deferred/animated_material.f.glsl");
+		ShaderManager::AddShader("UVAnimation", sp + "/deferred/uv_animation.v.glsl", sp + "/deferred/uv_animation.f.glsl");
+		ShaderManager::AddShader("ScreenUI", sp + "/screen_ui.v.glsl", sp + "/screen_ui.f.glsl");
+		ShaderManager::AddShader("FXAA", sp + "/deferred/fxaa.v.glsl", sp + "/deferred/fxaa.f.glsl");
+		ShaderManager::AddShader("QuadBatch", sp + "/deferred/quad_batch.v.glsl", sp + "/deferred/quad_batch.f.glsl");
+		ShaderManager::AddShader("WorldText", sp + "/deferred/world_text.v.glsl", sp + "/deferred/world_text.f.glsl");
+		ShaderManager::AddShader("Composite", sp + "/deferred/composite.v.glsl", sp + "/deferred/composite.f.glsl");
+		ShaderManager::AddShader("Bright", sp + "/deferred/bright.v.glsl", sp + "/deferred/bright.f.glsl");
+		ShaderManager::AddShader("SimpleDepth", sp + "/deferred/simple_depth.v.glsl", sp + "/deferred/simple_depth.f.glsl");
+		ShaderManager::AddShader("SimpleDepthAnimation", sp + "/deferred/simple_depth_animation.v.glsl", sp + "/deferred/simple_depth_animation.f.glsl");
+		ShaderManager::AddShader("PBRDirectionalLight", sp + "/pbr/directional_light.v.glsl", sp + "/pbr/directional_light.f.glsl");
+		ShaderManager::AddShader("PBRPointLight", sp + "/pbr/point_light.v.glsl", sp + "/pbr/point_light.f.glsl");
+		ShaderManager::AddShader("PBRSpotLight", sp + "/pbr/spot_light.v.glsl", sp + "/pbr/spot_light.f.glsl");
+		ShaderManager::AddShader("Transparent", sp + "/deferred/transparent_material.v.glsl", sp + "/deferred/transparent_material.f.glsl");
+		ShaderManager::AddShader("EquiToCube", sp + "/equiToCubemap.v.glsl", sp + "/equiToCubemap.f.glsl");
+		ShaderManager::AddShader("SkyBox", sp + "/skybox.v.glsl", sp + "/skybox.f.glsl");
+		ShaderManager::AddShader("IrradianceCapture", sp + "/pbr/Irradiance.v.glsl", sp + "/pbr/Irradiance.f.glsl");
+		ShaderManager::AddShader("PrefilterConvolution", sp + "/pbr/PrefilterConvolution.v.glsl", sp + "/pbr/PrefilterConvolution.f.glsl");
+		ShaderManager::AddShader("BRDFLUT", sp + "/pbr/BRDF.v.glsl", sp + "/pbr/BRDF.f.glsl");
+	
+		Enjon::String ps = "E:/Development/Enjon/IsoARPG/Assets/Shaders";
+		ShaderManager::AddShader("TestShader", ps + "/vert.glsl", ps + "/frag.glsl");
 	}
 
-	void AddShader(const char* shadername, const char* vertpath, const char* fragpath)
+	void AddShader( const Enjon::String& shadername, const Enjon::String& vertpath, const Enjon::String& fragpath )
 	{
 		GLSLProgram* p = new GLSLProgram;
-		p->CreateShader(vertpath, fragpath);
+		p->CreateShader( vertpath.c_str( ), fragpath.c_str( ) );
 		Shaders[shadername] = p;
 	}
 

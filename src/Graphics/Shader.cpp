@@ -5,6 +5,9 @@
 #include "Graphics/Texture.h"
 #include "Graphics/Material.h"
 #include "Utils/Errors.h"
+#include "Utils/FileUtils.h"
+#include "Engine.h"
+#include "Asset/AssetManager.h"
 
 #include <GLEW/glew.h> 
 #include <vector>
@@ -21,30 +24,29 @@ namespace Enjon
 
 	//=======================================================================================================================
 
-	Shader::Shader( const ShaderGraph& graph )
-		: mGraph( graph )
+	Shader::Shader( const ShaderGraph& graph, ShaderPassType passType )
+		: mGraph( graph ), mPassType( passType )
 	{
 		Compile( );
 	}
 
 	Enjon::Result Shader::Compile( )
-	{
-		// Check graph validity here? Or does this need to be checked elsewhere
-		s32 valid = mGraph.Compile( );
+	{ 
+		// Get shader resource path
+		Enjon::String sp = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( )->GetAssetsPath( ) + "/Shaders";
+		// Get vertex file path 
+		Enjon::String vertName = mGraph.GetName( ) + "." + ShaderGraph::ShaderPassToString( mPassType ) + ".Vertex.glsl";
+		Enjon::String vertPath = sp + "/" + vertName;
+		
+		// Get fragment file path 
+		Enjon::String fragName = mGraph.GetName( ) + "." + ShaderGraph::ShaderPassToString( mPassType ) + ".Fragment.glsl";
+		Enjon::String fragPath = sp + "/" + fragName;
 
-		if ( valid < 0 )
-		{
-			// Failure
-		}
-
-		// Parse shader for vertex shader output
-		Enjon::String vertexShaderCode = mGraph.GetCode( ShaderPassType::Surface_StaticGeom, Enjon::ShaderType::Vertex );
+		// Parse shader for vertex shader output 
+		Enjon::String vertexShaderCode = Enjon::Utils::read_file( vertPath.c_str( ) );
 
 		// Parse shader for fragment shader output
-		Enjon::String fragmentShaderCode = mGraph.GetCode( ShaderPassType::Surface_StaticGeom, Enjon::ShaderType::Fragment );
-
-		std::cout << vertexShaderCode << "\n\n";
-		std::cout << fragmentShaderCode << "\n";
+		Enjon::String fragmentShaderCode = Enjon::Utils::read_file( fragPath.c_str( ) );
 
 		// Create GLSL Program
 		mProgramID = glCreateProgram( );
@@ -59,8 +61,17 @@ namespace Enjon
 		// Compile frament shader
 		Enjon::Result fragmentResult = CompileShader( fragmentShaderCode, mFragmentShaderID );
 
+		if ( vertexResult != Enjon::Result::SUCCESS || fragmentResult != Enjon::Result::SUCCESS )
+		{
+			// Error
+			return Enjon::Result::FAILURE;
+		}
+
 		// Link shaders 
 		LinkProgram( ); 
+
+		// Destroy previous program if active
+		//DestroyProgram( ); 
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -69,6 +80,7 @@ namespace Enjon
 
 	Shader::~Shader( )
 	{ 
+		DestroyProgram( );
 	}
 
 	//=======================================================================================================================
@@ -79,9 +91,7 @@ namespace Enjon
 		Enjon::Result destResult = DestroyProgram( ); 
 
 		// Recompile the graph and shader program
-		Enjon::Result comResult = Compile( );
-		
-		return Enjon::Result::SUCCESS;
+		return Compile( ); 
 	}
 
 	Enjon::Result Shader::DestroyProgram( )
@@ -90,6 +100,18 @@ namespace Enjon
 		if ( mProgramID )
 		{
 			glDeleteProgram( mProgramID );
+		}
+		
+		// Delete vertex shader
+		if ( mVertexShaderID )
+		{
+			glDeleteShader( mVertexShaderID );
+		}
+
+		// Delete fragment shader
+		if ( mFragmentShaderID )
+		{
+			glDeleteShader( mFragmentShaderID );
 		}
 
 		return Enjon::Result::SUCCESS;
@@ -212,9 +234,11 @@ namespace Enjon
 			mUniformMap[Name] = (u32)Location;
 		}
 
-		//Always detach shaders after a successful link.
+		//Always detach shaders after a successful link
 		glDetachShader(mProgramID, mVertexShaderID);
 		glDetachShader(mProgramID, mFragmentShaderID);
+
+		// Destroy shaders now that the program is made
 		glDeleteShader(mVertexShaderID);
 		glDeleteShader(mFragmentShaderID); 
 
@@ -241,10 +265,6 @@ namespace Enjon
 		{
 			glUniformMatrix4fv(Search->second, 1, GL_FALSE, matrix.elements);
 		}
-		else
-		{
-			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
-		}
 	}
 	
 	void Shader::SetUniform(const std::string& name, f32* val, s32 count)
@@ -254,10 +274,6 @@ namespace Enjon
 		if (Search != mUniformMap.end())
 		{
 			glUniform1fv(Search->second, count, val);
-		}
-		else
-		{
-			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
 		}
 	}
 	
@@ -269,10 +285,6 @@ namespace Enjon
 		{
 			glUniform1iv(Search->second, count, val);
 		}
-		else
-		{
-			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
-		}
 	}
 
 	void Shader::SetUniform(const std::string& name, const f32& val)
@@ -283,13 +295,6 @@ namespace Enjon
 		{
 			glUniform1f(Search->second, val);
 		}
-		//else
-		//{
-		//	GLuint Location = GetUniformLocation(name);
-		//	mUniformMap[name] = Location;
-		//	glUniform1f(Location, val);
-		//	// EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
-		//}
 	}
 
 	void Shader::SetUniform(const std::string& name, const Vec2& vector)
@@ -299,10 +304,6 @@ namespace Enjon
 		if (Search != mUniformMap.end())
 		{
 			glUniform2f(Search->second, vector.x, vector.y);
-		}
-		else
-		{
-			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -314,10 +315,6 @@ namespace Enjon
 		{
 			glUniform3f(Search->second, vector.x, vector.y, vector.z);
 		}
-		else
-		{
-			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
-		}
 	}
 
 	void Shader::SetUniform(const std::string& name, const Vec4& vector)
@@ -327,10 +324,6 @@ namespace Enjon
 		if (Search != mUniformMap.end())
 		{
 			glUniform4f(Search->second, vector.x, vector.y, vector.z, vector.w);
-		}
-		else
-		{
-			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -342,10 +335,6 @@ namespace Enjon
 		{
 			glUniform1i(Search->second, val);
 		}
-		else
-		{
-			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
-		}
 	}
 
 	void Shader::SetUniform(const std::string& name, const f64& val)
@@ -356,13 +345,6 @@ namespace Enjon
 		{
 			glUniform1f(Search->second, val);
 		}
-		//else
-		//{
-		//	GLuint Location = GetUniformLocation(name);
-		//	mUniformMap[name] = Location;
-		//	glUniform1f(Location, val);
-		//	// EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
-		//}
 	} 
 
 	void Shader::BindTexture(const std::string& name, const u32& TextureID, const u32 Index)
@@ -375,20 +357,15 @@ namespace Enjon
 		{
 			glUniform1i(Search->second, Index);
 		}
-		else
-		{
-			EU::FatalError("Error: Shader: SetUniform: Uniform not found: " + name);
-		}
 
 		glBindTexture(GL_TEXTURE_2D, TextureID);
 	} 
 
 	//======================================================================================================================= 
 			
-	UniformTexture::UniformTexture( const Enjon::String& name, const Enjon::Shader* shader, const Enjon::AssetHandle< Enjon::Texture >& texture, u32 location )
+	UniformTexture::UniformTexture( const Enjon::String& name, const Enjon::AssetHandle< Enjon::Texture >& texture, u32 location )
 	{
 		mType = UniformType::TextureSampler2D;
-		mShader = shader;
 		mTexture = texture;
 		mLocation = location;
 		mName = name;
@@ -402,9 +379,9 @@ namespace Enjon
 
 	//======================================================================================================================= 
 	
-	void UniformTexture::Set( )
+	void UniformTexture::Bind( const Shader* shader )
 	{
-		const_cast< Enjon::Shader* >( mShader )->BindTexture( mName, mTexture.Get( )->GetTextureId( ), mLocation );
+		const_cast< Enjon::Shader* >( shader )->BindTexture( mName, mTexture.Get( )->GetTextureId( ), mLocation );
 	}
 
 	//======================================================================================================================= 

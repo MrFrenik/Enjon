@@ -133,6 +133,12 @@ namespace Enjon
 			mApp->Initialize();
 		}
 
+		// Initialize asset manager to load defaults
+		if ( mAssetManager )
+		{
+			mAssetManager->Initialize( );
+		}
+
 		// Initializes limiter
 		 mLimiter.Init( 60.0f );
 
@@ -191,7 +197,7 @@ namespace Enjon
 			// Update graphics
 			mGraphics->Update(dt); 
 
-			//mLimiter.End();
+			mLimiter.End();
 		}
 
 		Enjon::Result res = ShutDown();
@@ -345,8 +351,15 @@ namespace Enjon
 
 	//======================================================= 
 			
-	const String& EngineConfig::GetRoot() const
+	String EngineConfig::GetRoot() const
 	{
 		return mRootPath;
+	}
+	
+	//======================================================= 
+			
+	String EngineConfig::GetEngineResourcePath() const
+	{
+		return mRootPath + "/Assets";
 	}
 }
