@@ -50,6 +50,10 @@ namespace Enjon
 		{
 			return TextureFileExtension::JPEG;
 		}
+		else if ( fileExtension.compare( "hdr" ) == 0 )
+		{
+			return TextureFileExtension::HDR;
+		}
 		else
 		{
 			return TextureFileExtension::UNKNOWN;

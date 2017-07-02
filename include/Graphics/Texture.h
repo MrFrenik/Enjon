@@ -18,6 +18,7 @@ namespace Enjon
 		TGA,
 		JPEG,
 		BMP,
+		HDR,
 		UNKNOWN
 	};
 
