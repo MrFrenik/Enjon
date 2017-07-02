@@ -69,6 +69,7 @@ namespace Enjon
 		mFileExtensionMap[ "tga" ]	= GetAssetTypeId< Enjon::Texture >( );
 		mFileExtensionMap[ "jpeg" ] = GetAssetTypeId< Enjon::Texture >( );
 		mFileExtensionMap[ "bmp" ]	= GetAssetTypeId< Enjon::Texture >( );
+		mFileExtensionMap[ "hdr" ]	= GetAssetTypeId< Enjon::Texture >( );
 		mFileExtensionMap[ "fbx" ]	= GetAssetTypeId< Enjon::Mesh >( );
 		mFileExtensionMap[ "obj" ]	= GetAssetTypeId< Enjon::Mesh >( );
 		mFileExtensionMap[ "ttf" ]	= GetAssetTypeId< Enjon::UIFont >( );

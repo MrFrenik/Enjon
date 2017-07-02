@@ -31,49 +31,80 @@ namespace Enjon
 
 	Texture* TextureAssetLoader::LoadTextureFromFile( const Enjon::String& filePath )
 	{
+		// Get file extension of file
+		Enjon::String fileExtension = Utils::SplitString( filePath, "." ).back( ); 
+		
 		// Create new texture
 		Enjon::Texture* tex = new Enjon::Texture;
-
+		
 		// Fields to load and store
-		s32 width, height, nComps, len;
+		s32 width, height, nComps, len; 
 
-		// Load texture data
-		stbi_set_flip_vertically_on_load( false );
-		u8* data = stbi_load( filePath.c_str( ), &width, &height, &nComps, STBI_rgb_alpha );
-
-		// Generate texture
-		glGenTextures( 1, &( tex->mId ) );
-
-		// Bind and create texture
-		glBindTexture( GL_TEXTURE_2D, tex->mId );
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_RGBA8,
-			width,
-			height,
-			0,
-			GL_RGBA,
-			GL_UNSIGNED_BYTE,
-			data
-		);
-
-
-		s32 MAG_PARAM = GL_LINEAR;
-		s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
-		b8 genMips = true;
-
-		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MAG_PARAM );
-		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIN_PARAM );
-
-		if ( genMips )
+		// Load HDR format
+		if ( fileExtension.compare( "hdr" ) == 0 )
 		{
-			glGenerateMipmap( GL_TEXTURE_2D );
+			stbi_set_flip_vertically_on_load( true );
+			s32 width, height, nComps;
+			f32* data = stbi_loadf( filePath.c_str( ), &width, &height, &nComps, 0 );
+
+			glGenTextures( 1, &tex->mId );
+			glBindTexture( GL_TEXTURE_2D, tex->mId );
+			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGB, GL_FLOAT, data );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+			s32 MAG_PARAM = GL_LINEAR;
+			s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
+			b8 genMips = true;
+
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MAG_PARAM );
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIN_PARAM );
+
+			if ( genMips )
+			{
+				glGenerateMipmap( GL_TEXTURE_2D );
+			}
+
+			stbi_image_free( data ); 
 		}
 
-		glBindTexture( GL_TEXTURE_2D, 0 );
+		// Otherwise load standard format
+		else
+		{
+			// Load texture data
+			stbi_set_flip_vertically_on_load( false );
+			u8* data = stbi_load( filePath.c_str( ), &width, &height, &nComps, STBI_rgb_alpha );
+
+			// Generate texture
+			glGenTextures( 1, &( tex->mId ) );
+
+			// Bind and create texture
+			glBindTexture( GL_TEXTURE_2D, tex->mId );
+			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
+
+			s32 MAG_PARAM = GL_LINEAR;
+			s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
+			b8 genMips = true;
+
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MAG_PARAM );
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIN_PARAM );
+
+			if ( genMips )
+			{
+				glGenerateMipmap( GL_TEXTURE_2D );
+			}
+
+			glBindTexture( GL_TEXTURE_2D, 0 ); 
+		
+			// No longer need data, so free
+			stbi_image_free( data );
+		} 
 
 		// Set texture attributes
 		tex->mWidth = width;
@@ -87,16 +118,10 @@ namespace Enjon
 		auto saveData = stbi_write_png_to_mem( data, 0, width, height, 4, &len );
 		CacheTextureData( saveData, len, tex );
 		stbi_image_free( saveData );
-#endif
-
-		// Get file extension of texture to save off its extension type
-		Enjon::String fileExtension = Enjon::Utils::SplitString( filePath, "." ).back( );
+#endif 
 
 		// Store file extension type of texture
 		tex->mFileExtension = Texture::GetFileExtensionType( fileExtension ); 
-
-		// No longer need data, so free
-		stbi_image_free( data );
 
 		return tex;
 	}

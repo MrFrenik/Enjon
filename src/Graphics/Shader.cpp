@@ -8,6 +8,7 @@
 #include "Utils/FileUtils.h"
 #include "Engine.h"
 #include "Asset/AssetManager.h"
+#include "Graphics/DeferredRenderer.h"
 
 #include <GLEW/glew.h> 
 #include <vector>
@@ -356,9 +357,9 @@ namespace Enjon
 		if (Search != mUniformMap.end())
 		{
 			glUniform1i(Search->second, Index);
-		}
+		} 
 
-		glBindTexture(GL_TEXTURE_2D, TextureID);
+		glBindTexture(GL_TEXTURE_2D, TextureID); 
 	} 
 
 	//======================================================================================================================= 

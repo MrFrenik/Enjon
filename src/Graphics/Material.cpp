@@ -104,11 +104,11 @@ namespace Enjon {
 
 	//========================================================================
 			
-	void Material::Bind( const ShaderPassType& pass )
+	void Material::Bind( const Shader* shader )
 	{
-		Enjon::ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
-		Enjon::Shader* shader = const_cast< Shader* > ( sg->GetShader( pass ) );
-		if ( shader )
+		Enjon::ShaderGraph* sg = const_cast< ShaderGraph* > ( mShaderGraph );
+		Enjon::Shader* sh = const_cast< Shader* > ( shader );
+		if ( sh )
 		{
 			for ( auto& u : *sg->GetUniforms( ) )
 			{ 
@@ -116,11 +116,12 @@ namespace Enjon {
 				
 				if ( HasOverride( uniformName ) )
 				{
-					mUniformOverrides[ uniformName ]->Bind( shader );
+					mUniformOverrides[ uniformName ]->Bind( sh );
+					continue;
 				}
 				else
 				{
-					u.second->Bind( shader );
+					u.second->Bind( sh );
 				}
 			}
 		} 
@@ -130,8 +131,12 @@ namespace Enjon {
 			
 	void Material::SetUniform( const Enjon::String& name, const Enjon::AssetHandle< Enjon::Texture >& value )
 	{
+		if ( HasOverride( name ) )
+		{ 
+			mUniformOverrides[ name ]->Cast< UniformTexture >( )->SetTexture( value );
+		}
 		// If override doesn't exist
-		if ( !HasOverride( name ) )
+		else
 		{
 			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
 			if ( sg->HasUniform( name ) )
@@ -142,11 +147,6 @@ namespace Enjon {
 				AddOverride( uniOverride );
 			}
 		}
-		// Otherwise set override
-		else
-		{
-			mUniformOverrides[ name ]->Cast< UniformTexture >( )->SetTexture( value );
-		} 
 	}
 
 	void Material::SetUniform( const Enjon::String& name, const Enjon::Vec2& value )

@@ -86,7 +86,7 @@ void main()
 
     // Roughness, Metallic, and AO
     float Metallic  = MaterialProps.r;
-    float Roughness = clamp( MaterialProps.g, 0.08, 0.99 );
+    float Roughness = clamp( MaterialProps.g * MaterialProps.g, 0.08, 0.99 );
 
     // Calculate radiance
     vec3 L = normalize(u_lightDirection);
@@ -111,7 +111,7 @@ void main()
     float G     = GeometrySmith(N, V, L, Roughness);
 
     vec3 Nominator = NDF * G * F; 
-    float Denominator = 4 * max(dot(V, N), 0.0) * max(dot(L, N), 0.0) + 0.001;
+    float Denominator = 4 * max(dot(V, N), 0.0) * max(dot(L, N), 0.0) + 0.0001;
     vec3 BRDF = Nominator / Denominator;
 
     // Add to outgoing radiance Lo

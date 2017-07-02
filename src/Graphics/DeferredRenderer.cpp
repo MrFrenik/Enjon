@@ -39,6 +39,7 @@
 #include <fmt/printf.h>
 
 Enjon::Renderable mRenderable; 
+std::vector < Enjon::Renderable > mRenderables;
 Enjon::AssetHandle< Enjon::Texture > mBRDFHandle;
 Enjon::Material* mMaterial = nullptr;
 bool brdfset = false;
@@ -201,7 +202,8 @@ namespace Enjon
 
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
-		Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/03-Ueno-Shrine_3k.hdr";
+		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/03-Ueno-Shrine_3k.hdr";
+		Enjon::String hdrFilePath = "/Textures/HDR/03-Ueno-Shrine_3k.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Newport_Loft_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Factory_Catwalk_2k.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/WinterForest_Ref.hdr";
@@ -209,21 +211,12 @@ namespace Enjon
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Mono_Lake_B_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Mans_Outside_2k.hdr";
 
-		stbi_set_flip_vertically_on_load( true );
-		s32 width, height, nComps;
-		f32* data = stbi_loadf( hdrFilePath.c_str( ), &width, &height, &nComps, 0 );
-		if ( data )
-		{
-			glGenTextures( 1, &mHDRTextureID );
-			glBindTexture( GL_TEXTURE_2D, mHDRTextureID );
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGB, GL_FLOAT, data );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+		am->AddToDatabase( hdrFilePath );
 
-			stbi_image_free( data );
+		Enjon::AssetHandle< Enjon::Texture > hdrEnv = am->GetAsset< Enjon::Texture >( "isoarpg.textures.hdr.03-ueno-shrine_3k" ); 
 
+		{ 
 			// Generate cubemap FBO, RBO
 			glGenFramebuffers( 1, &mCaptureFBO );
 			glGenFramebuffers( 1, &mCaptureRBO );
@@ -263,7 +256,7 @@ namespace Enjon
 			GLSLProgram* equiShader = ShaderManager::Get( "EquiToCube" );
 			equiShader->Use( );
 			{
-				equiShader->BindTexture( "equiMap", mHDRTextureID, 0 );
+				equiShader->BindTexture( "equiMap", hdrEnv.Get()->GetTextureId( ), 0 );
 				equiShader->SetUniform( "projection", captureProj );
 				glViewport( 0, 0, envMapSize, envMapSize );
 				for ( u32 i = 0; i < 6; ++i )
@@ -328,6 +321,9 @@ namespace Enjon
 			// pbr: create an prefiltered convolution cubemap.
 			// --------------------------------------------------------------------------------
 			glGenTextures( 1, &mPrefilteredMap );
+		//stbi_set_flip_vertically_on_load( true );
+		//s32 width, height, nComps;
+		//f32* data = stbi_loadf( hdrFilePath.c_str( ), &width, &height, &nComps, 0 );
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mPrefilteredMap );
 			const u32 textureSize = 256;
 			for ( u32 i = 0; i < 6; ++i )
@@ -412,11 +408,6 @@ namespace Enjon
 			mBRDFHandle = am->GetAsset< Enjon::Texture >( "isoarpg.textures.brdf" ); 
 			brdfset = true;
 		}
-		else
-		{
-			// Error
-			std::cout << "You done fucked up now!\n";
-		}
 	
 		// Shader graph creation
 		{
@@ -427,10 +418,21 @@ namespace Enjon
 			// Create material
 			mMaterial = new Enjon::Material( &mShaderGraph );
 
-			// Set renderable material
-			mRenderable.SetMaterial( mMaterial );
-			mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.bunny" ) );
-			mRenderable.SetPosition( Enjon::Vec3( 30.0f, 2.0f, 10.0f ) );
+			for ( u32 i = 0; i < 10; ++i ) 
+			{
+				for ( u32 j = 0; j < 10; ++j )
+				{
+					Enjon::Renderable renderable;
+					
+					// Set renderable material
+					renderable.SetMaterial( mMaterial );
+					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_sphere" ) );
+					renderable.SetPosition( Enjon::Vec3( j * 3, 2.0f, i * 3 ) + Enjon::Vec3( -40, 0, 10 ) );
+
+					mRenderables.push_back( renderable );
+
+				}
+			}
 		}
 	}
 
@@ -513,8 +515,8 @@ namespace Enjon
 	void DeferredRenderer::GBufferPass()
 	{
 		glDepthFunc( GL_LESS );
-		//glEnable( GL_CULL_FACE );
-		//glCullFace( GL_BACK );
+		glEnable( GL_CULL_FACE );
+		glCullFace( GL_BACK );
 
 		// Bind gbuffer
 		mGbuffer->Bind();
@@ -546,8 +548,8 @@ namespace Enjon
 				// Check for material switch
 				Material* curMaterial = renderable->GetMaterial();
 				assert(curMaterial != nullptr);
-				if (material != curMaterial)
-				{
+				//if (material != curMaterial)
+				//{
 					// Set material
 					material = curMaterial;
 
@@ -559,7 +561,7 @@ namespace Enjon
 					shader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::Roughness).Get()->GetTextureId(), 4);
 					shader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO).Get()->GetTextureId(), 5);
 					shader->SetUniform("u_albedoColor", material->GetColor(Enjon::TextureSlotType::Albedo));
-				}
+				//}
 
 				// Now need to render
 				Mesh* mesh = renderable->GetMesh().Get();
@@ -584,8 +586,6 @@ namespace Enjon
 		// SHADER GRAPH TEST ////////////////////////////
 		///////////////////////////////////////////////// 
 
-		//glBindTexture( GL_TEXTURE_2D, 0 );
-
 		// Do shader graph test here
 		static float wt = 0.0f;
 		wt += 0.001f;
@@ -593,20 +593,21 @@ namespace Enjon
 		{
 			wt = 0.0f;
 		}
-		
+
 		Enjon::ShaderGraph* sGraph = const_cast< ShaderGraph* >( mMaterial->GetShaderGraph( ) );
 		Enjon::Shader* sgShader = const_cast< Shader*> ( sGraph->GetShader( ShaderPassType::StaticGeom ) );
-		if ( sgShader )
+		sgShader->Use( );
 		{
-			sgShader->Use( );
-			{
-				sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
-				sgShader->SetUniform( "uWorldTime", wt );
-				mMaterial->Bind( Enjon::ShaderPassType::StaticGeom ); 
-				mRenderable.Submit( sgShader );
-			} 
-			sgShader->Unuse( ); 
-		}
+			sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
+			sgShader->SetUniform( "uWorldTime", wt ); 
+			for ( auto& r : mRenderables )
+			{ 
+				mMaterial->Bind( sgShader ); 
+				r.Submit( sgShader );
+			}
+		} 
+		sgShader->Unuse( ); 
+		
 
 		// Quadbatches
 		shader = Enjon::ShaderManager::Get("QuadBatch");
@@ -628,7 +629,7 @@ namespace Enjon
 					material = curMaterial;
 					
 					// Check whether or not to be rendered two sided
-					/*if ( material->TwoSided( ) )
+					if ( material->TwoSided( ) )
 					{
 						glDisable( GL_CULL_FACE );
 					}
@@ -636,7 +637,7 @@ namespace Enjon
 					{
 						glEnable( GL_CULL_FACE );
 						glCullFace( GL_BACK );
-					}*/
+					}
 
 					// Set material tetxures
 					shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
@@ -664,7 +665,7 @@ namespace Enjon
 		{
 			skyBoxShader->SetUniform( "view", mSceneCamera.GetView( ) );
 			skyBoxShader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
-			//skyBoxShader->BindTexture( "environmentMap", mIrradianceMap, 0 );
+			skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
 
 			// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
 			glActiveTexture( GL_TEXTURE0 );

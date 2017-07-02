@@ -66,6 +66,21 @@
 		"texCoordMultiplier": {
 			"Template": "ConstantFloatNode",
 			"IsUniform": true
+		},
+		"vertNormalWS": {
+			"Template": "VertexNormalWS"
+		},
+		"mult_vert_norm": {
+			"Template": "MultiplyFunctionNode"
+		},
+		"clamp_sin": {
+			"Template": "ClampFunctionNode"
+		},
+		"clampMin": {
+			"Template": "ConstantFloatNode"
+		},
+		"clampMax": {
+			"Template": "ConstantFloatNode"
 		}
 	},
 
@@ -98,7 +113,7 @@
 					"emissiveMult": "Value"
 				},
 				"Input_1": {
-					"sinNode": "Value"
+					"clamp_sin": "Value"
 				}
 			}
 		},
@@ -156,6 +171,34 @@
 					"uTexCoords": "Value"
 				}
 			}
+		},
+		"mult_vert_norm": {
+			"Inputs": {
+				"Input_0": {
+					"sinMultNode": "Value"
+				},
+				"Input_1": {
+					"vertNormalWS": "Value"
+				}
+			}
+		},
+		"clamp_sin": {
+			"Inputs": {
+				"Input_0": {
+					"sinNode": "Value"
+				},
+				"Min": {
+					"clampMin": "Value"	
+				},
+				"Max": {
+					"clampMax": "Value"
+				}
+			}
+		},
+		"clampMax": {
+			"DefaultOverrides": {
+				"Value": "1.0"
+			}
 		}
 	},
 
@@ -172,6 +215,7 @@
 			},
 
 			"Metallic": {
+				"metallicFloat": "Value"
 			},
 
 			"Roughness": {
@@ -186,7 +230,6 @@
 			},
 
 			"WorldPositionOffset": {
-				"sinMultNode": "Value"
 			}
 		},
 

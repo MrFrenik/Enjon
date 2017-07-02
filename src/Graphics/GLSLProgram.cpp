@@ -7,6 +7,8 @@
 #include "Utils/FileUtils.h"
 #include "Utils/Errors.h"
 #include "Graphics/GLTexture.h"
+#include "Graphics/DeferredRenderer.h"
+#include "Engine.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -348,18 +350,14 @@ namespace Enjon
 	{
 		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0 + Index);
-
-		auto Search = UniformMap.find(Name);
-		if (Search != UniformMap.end())
+		
+		auto Search = UniformMap.find( Name );
+		if ( Search != UniformMap.end( ) )
 		{
-			glUniform1i(Search->second, Index);
-		}
-		else
-		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + Name);
-		}
+			glUniform1i( Search->second, Index );
+		} 
 
-		glBindTexture(GL_TEXTURE_2D, TextureID);
+		glBindTexture( GL_TEXTURE_2D, TextureID );
 	}
 
 	void GLSLProgram::BindTexture(const std::string& name, const GLTexture& texture, const GLuint index)

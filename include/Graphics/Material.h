@@ -76,7 +76,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void Bind( const ShaderPassType& type );
+			void Bind( const Shader* shader );
 
 			/*
 			* @brief

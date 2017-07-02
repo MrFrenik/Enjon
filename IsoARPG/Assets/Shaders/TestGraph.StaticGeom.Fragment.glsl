@@ -25,6 +25,7 @@ vec2 texMult;
 
 uniform sampler2D albedoMap;
 uniform sampler2D normalMap;
+uniform float metallicFloat;
 uniform sampler2D roughMap;
 uniform vec3 emissiveColor;
 
@@ -39,6 +40,12 @@ float timeNode;
 float timeMultiplication;
 
 float sinNode;
+
+float clampMin;
+
+float clampMax;
+
+float clamp_sin;
 
 vec3 sinMultNode;
 
@@ -59,8 +66,9 @@ vec4 albedoMap_sampler = texture2D( albedoMap, texMult );
 	NormalsOut = vec4( normal, 1.0 );
 
 	// Material Properties
+	
 	vec4 roughMap_sampler = texture2D( roughMap, texMult );
-	MatPropsOut = vec4( clamp( 0.0, 0.0, 1.0 ), clamp( roughMap_sampler.rgb.x, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
+	MatPropsOut = vec4( clamp( metallicFloat, 0.0, 1.0 ), clamp( roughMap_sampler.rgb.x, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
 
 	// Emissive
 	
@@ -70,7 +78,10 @@ emissiveMult = emissiveColor * emissiveIntensity;
 timeNode = uWorldTime;
 timeMultiplication = timeMultiplier * timeNode;
 sinNode = sin(timeMultiplication);
-sinMultNode = emissiveMult * sinNode;
+clampMin = 0.0;
+clampMax = 1.0;
+clamp_sin = clamp(sinNode, clampMin, clampMax);
+sinMultNode = emissiveMult * clamp_sin;
 	EmissiveOut = vec4(sinMultNode, 1.0);
 
 	PositionOut = vec4( fs_in.FragPos, 1.0 );

@@ -594,6 +594,11 @@ namespace Enjon
 
 					// Set name
 					node.mName = nodeName;
+					
+					if ( itr->value.HasMember( "IsUniform" ) )
+					{
+						node.mIsUniform = itr->value.FindMember( "IsUniform" )->value.GetBool( );
+					}
 
 					// Get template name
 					Enjon::String nodeTemplateName;
@@ -624,10 +629,6 @@ namespace Enjon
 						}
 					}
 
-					if ( itr->value.HasMember( "IsUniform" ) )
-					{
-						node.mIsUniform = itr->value.FindMember( "IsUniform" )->value.GetBool( );
-					}
 
 					// Add new node if no error occured
 					if ( !bErrorOccured )

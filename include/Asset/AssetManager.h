@@ -153,6 +153,7 @@ namespace Enjon
 			*@brief 
 			*/
 			static bool HasFileExtension( const String& file, const String& extension );
+			
 
 		protected:
 

@@ -301,8 +301,8 @@ Enjon::Result Game::Initialize()
 	mBlue.Get()->Attach< Enjon::GraphicsComponent >( );
 
 	pc->GetLight( )->SetPosition( Enjon::Vec3( 10.0f, 2.0f, 4.0f ) );
-	pc->GetLight( )->SetIntensity( 100.0f );
-	pc->GetLight( )->SetAttenuationRate( 0.1f );
+	pc->GetLight( )->SetIntensity( 20.0f );
+	pc->GetLight( )->SetAttenuationRate( 0.2f );
 	pc->GetLight( )->SetRadius( 100.0f );
 	pc->GetLight( )->SetColor( Enjon::RGBA16_Orange( ) );
 
@@ -323,10 +323,10 @@ Enjon::Result Game::Initialize()
 	mGoldMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.white")); 
 	
 	mRockMat 	= new Enjon::Material; 
-	mRockMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.green"));
+	mRockMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.rustediron.albedo"));
 	mRockMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.rustediron.normal"));
-	mRockMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.white"));
-	mRockMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
+	mRockMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.rustediron.metallic"));
+	mRockMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.rustediron.roughness"));
 	mRockMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
 	mRockMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.white"));
 
@@ -1066,7 +1066,18 @@ Enjon::Result Game::ProcessInput(f32 dt)
 			Enjon::GraphicsComponent* gc = ent->Attach<Enjon::GraphicsComponent>();
 			ent->SetScale(v3(scalar));
 			gc->SetMesh(mSphereMesh);
-			gc->SetMaterial(mFloorMat);
+
+			u32 roll = Enjon::Random::Roll( 0, 5 );
+			switch ( roll )
+			{
+				case 0: gc->SetMaterial( mFloorMat ); break;
+				case 1: gc->SetMaterial( mGunMat ); break;
+				case 2: gc->SetMaterial( mRockMat ); break;
+				case 3: gc->SetMaterial( mRedMat ); break;
+				case 4: gc->SetMaterial( mPlasticMat ); break;
+				default: gc->SetMaterial( mGunMat ); break;
+			}
+
 			scene->AddRenderable(gc->GetRenderable());
 
 			mBodies.push_back(body);

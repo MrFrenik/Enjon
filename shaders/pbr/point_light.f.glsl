@@ -52,7 +52,7 @@ void main()
 
     // Roughness, Metallic, and AO
     float Metallic  = MaterialProps.r;
-    float Roughness = max( 0.08, MaterialProps.g * MaterialProps.g );
+    float Roughness = clamp( MaterialProps.g * MaterialProps.g, 0.08, 0.99 );
 
     // Obtain normal from normal map in range (world coords)
     vec3 N = texture(u_normalMap, TexCoords).xyz;
