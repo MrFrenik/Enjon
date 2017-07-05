@@ -18,6 +18,7 @@ uniform sampler2D uNormalMap;
 uniform sampler2D uPositionMap;
 uniform sampler2D uEmissiveMap;
 uniform sampler2D uMaterialMap;
+uniform sampler2D uSSAOMap;
 
 uniform vec2 uResolution;
 uniform vec3 uCamPos;
@@ -62,6 +63,8 @@ void main()
 	float specPower = 1.0 - metallic;
 	float a = clamp( roughness * pow(roughness, specPower), 0.08, 1.0 );
 	float ao = MaterialProps.b;
+
+	float ssao = texture2D( uSSAOMap, TexCoords ).r;
 	
 	// F0 mix
 	vec3 F0 = vec3(0.04); 
@@ -87,7 +90,7 @@ void main()
 	vec3 specular = prefilteredColor * brdfVec;
 
 	// Final ambient
-	vec3 ambient = max( vec3( 0.0, 0.0, 0.0 ), (diffuse + specular) ) * ao;
+	vec3 ambient = max( vec3( 0.0, 0.0, 0.0 ), (diffuse + specular) ) * ao * ssao;
 
     // Final color out
 	ColorOut = vec4( ambient, 1.0 ) + vec4( max( vec3( 0.0, 0.0, 0.0 ), emissive.rgb ), 1.0 ); 

@@ -4,7 +4,7 @@
 
 const float kPi = 3.13159265;
 
-layout (location = 0) out vec4 AlbedoOut;     // Diffuse
+layout (location = 0) out vec4 AlbedoOut;
 layout (location = 1) out vec4 NormalsOut;
 layout (location = 2) out vec4 PositionOut;
 layout (location = 3) out vec4 EmissiveOut;

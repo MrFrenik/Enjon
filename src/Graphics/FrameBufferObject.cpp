@@ -109,8 +109,8 @@ namespace Enjon {
 		// Clear the render targets
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-		glActiveTextureARB(GL_TEXTURE0_ARB);
-		glEnable(GL_TEXTURE_2D);
+		//glActiveTextureARB(GL_TEXTURE0_ARB);
+		//glEnable(GL_TEXTURE_2D);
 
 		// Specify what to render an start acquiring
 		GLenum buffers[] = { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT, GL_COLOR_ATTACHMENT2_EXT };

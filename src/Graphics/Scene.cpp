@@ -22,28 +22,34 @@ namespace Enjon {
 	{
 	}
 
-	std::vector<Renderable*> Scene::GetRenderables(RenderableSortType type)
-	{
-		std::vector<Renderable*> renderables(mRenderables.begin(), mRenderables.end());	
+	//====================================================================================================
 
-		switch(type)
+	void Scene::SortRenderables( RenderableSortType type )
+	{
+		switch( type )
 		{
 			case RenderableSortType::MATERIAL:
 			{
-				std::stable_sort(renderables.begin(), renderables.end(), CompareMaterial);
+				std::stable_sort(mSortedRenderables.begin(), mSortedRenderables.end(), CompareMaterial);
 			} 
 			break;
+
 			case RenderableSortType::DEPTH:
 			{
-				std::stable_sort(renderables.begin(), renderables.end(), CompareDepth);
+				std::stable_sort(mSortedRenderables.begin(), mSortedRenderables.end(), CompareDepth);
 			}
 			break;
 
+			default:
 			case RenderableSortType::NONE: break;
-			default: break;
-		}
+		} 
+	}
 
-		return renderables;
+	//====================================================================================================
+
+	std::vector<Renderable*> Scene::GetRenderables( )
+	{ 
+		return mSortedRenderables;
 	}
 
 	void Scene::AddRenderable(Renderable* renderable)
@@ -53,6 +59,12 @@ namespace Enjon {
 		{
 			mRenderables.insert(renderable);
 			renderable->SetScene(this);
+
+			// Add to sorted renderables
+			mSortedRenderables.push_back( renderable );
+
+			// Sort renderables
+			SortRenderables( );
 		}
 	}
 
@@ -63,6 +75,12 @@ namespace Enjon {
 		{
 			renderable->SetScene(nullptr);
 			mRenderables.erase(renderable);
+
+			// Remove renderable from sorted list
+			mSortedRenderables.erase( std::remove( mSortedRenderables.begin( ), mSortedRenderables.end( ), renderable ), mSortedRenderables.end( ) );
+
+			// Sort renderables
+			SortRenderables( );
 		}
 	}
 

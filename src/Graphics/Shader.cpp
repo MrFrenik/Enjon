@@ -59,9 +59,23 @@ namespace Enjon
 
 		// Compile vertex shader
 		Enjon::Result vertexResult = CompileShader( vertexShaderCode, mVertexShaderID );
+
+		// Report any errors
+		if ( vertexResult != Result::SUCCESS )
+		{
+			std::cout << "Error: Vertex shader failed to compile: " + vertName + "\n";
+		}
+
 		// Compile frament shader
 		Enjon::Result fragmentResult = CompileShader( fragmentShaderCode, mFragmentShaderID );
 
+		// Report any errors
+		if ( fragmentResult != Result::SUCCESS )
+		{
+			std::cout << "Error: Fragment shader failed to compile: " + fragName + "\n"; 
+		}
+
+		// If either fails, return error
 		if ( vertexResult != Enjon::Result::SUCCESS || fragmentResult != Enjon::Result::SUCCESS )
 		{
 			// Error
@@ -122,14 +136,14 @@ namespace Enjon
 			
 	void Shader::Use( )
 	{
-		 glUseProgram(mProgramID);
+		glUseProgram( mProgramID );
 	}
 
 	//=======================================================================================================================
 
 	void Shader::Unuse( )
 	{ 
-		 glUseProgram(0);
+		glUseProgram( 0 );
 	}
 
 	//======================================================================================================================= 
@@ -163,11 +177,10 @@ namespace Enjon
 			std::vector<char> errorLog( maxLength );
 			glGetShaderInfoLog( shaderID, maxLength, &maxLength, &errorLog[ 0 ] );
 
-			//Provide the infolog in whatever manor you deem best.
-			//Exit with failure.
-			glDeleteShader( shaderID ); //Don't leak the shader.
+			// Delete shader
+			glDeleteShader( shaderID );
 
-								  //Print error log and quit
+			//Print error log and quit
 			std::printf( "%s\n", &( errorLog[ 0 ] ) );
 
 			return Result::FAILURE;

@@ -184,11 +184,11 @@ namespace Enjon
 
 	GLint GLSLProgram::GetUniformLocation(const std::string& uniformName) 
 	{
-		GLint location =  glGetUniformLocation(m_programID, uniformName.c_str());
+		GLint location = glGetUniformLocation(m_programID, uniformName.c_str());
 
 		if( location == GL_INVALID_INDEX )
 		{
-			Utils::FatalError( "GLSLPROGRAM::GETUNIFORMLOCATION::" + uniformName + "_NOT_FOUND" );
+			return -1;
 		}
 		return location;
 	} 
@@ -201,10 +201,6 @@ namespace Enjon
 		{
 			glUniformMatrix4fv(Search->second, 1, GL_FALSE, matrix.elements);
 		}
-		else
-		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
-		}
 	}
 	
 	void GLSLProgram::SetUniform(const std::string& name, f32* val, s32 count)
@@ -215,10 +211,6 @@ namespace Enjon
 		{
 			glUniform1fv(Search->second, count, val);
 		}
-		else
-		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
-		}
 	}
 	
 	void GLSLProgram::SetUniform(const std::string& name, s32* val, s32 count)
@@ -228,10 +220,6 @@ namespace Enjon
 		if (Search != UniformMap.end())
 		{
 			glUniform1iv(Search->second, count, val);
-		}
-		else
-		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -248,7 +236,6 @@ namespace Enjon
 			GLuint Location = GetUniformLocation(name);
 			UniformMap[name] = Location;
 			glUniform1f(Location, val);
-			// EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -259,10 +246,6 @@ namespace Enjon
 		if (Search != UniformMap.end())
 		{
 			glUniform2f(Search->second, vector.x, vector.y);
-		}
-		else
-		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -276,7 +259,7 @@ namespace Enjon
 		}
 		else
 		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
+			std::cout << "Error: cannot find uniform: " + name + "\n";
 		}
 	}
 
@@ -288,10 +271,6 @@ namespace Enjon
 		{
 			glUniform4f(Search->second, vector.x, vector.y, vector.z, vector.w);
 		}
-		else
-		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
-		}
 	}
 
 	void GLSLProgram::SetUniform(const std::string& name, const s32& val)
@@ -301,10 +280,6 @@ namespace Enjon
 		if (Search != UniformMap.end())
 		{
 			glUniform1i(Search->second, val);
-		}
-		else
-		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -321,7 +296,6 @@ namespace Enjon
 			GLuint Location = GetUniformLocation(name);
 			UniformMap[name] = Location;
 			glUniform1f(Location, val);
-			// EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -339,10 +313,6 @@ namespace Enjon
 		if (Search != UniformMap.end())
 		{
 			glUniform4f(Search->second, C.r, C.g, C.b, C.a);
-		}
-		else
-		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
 		}
 	}
 
@@ -369,10 +339,6 @@ namespace Enjon
 		if (Search != UniformMap.end())
 		{
 			glUniform1i(Search->second, index);
-		}
-		else
-		{
-			EU::FatalError("Error: GLGLProgram: SetUniform: Uniform not found: " + name);
 		}
 
 		glBindTexture(GL_TEXTURE_2D, texture.id);

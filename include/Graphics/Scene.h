@@ -46,46 +46,135 @@ namespace Enjon {
 	class Scene
 	{
 		public:
+			/*
+			* @brief
+			*/
 			Scene();
+
+			/*
+			* @brief
+			*/
 			~Scene();
 
+			/*
+			* @brief
+			*/
 			void AddRenderable(Renderable* renderable);
+
+			/*
+			* @brief
+			*/
 			void RemoveRenderable(Renderable* renderable);
 
+			/*
+			* @brief
+			*/
 			void AddQuadBatch(QuadBatch* batch);
+
+			/*
+			* @brief
+			*/
 			void RemoveQuadBatch(QuadBatch* batch);
 
+			/*
+			* @brief
+			*/
 			void AddDirectionalLight(DirectionalLight* light);
+			
+			/*
+			* @brief
+			*/
 			void RemoveDirectionLight(DirectionalLight* light);
 
+			/*
+			* @brief
+			*/
 			void AddPointLight(PointLight* light);
+
+			/*
+			* @brief
+			*/
 			void RemovePointLight(PointLight* light);
 
+			/*
+			* @brief
+			*/
 			void AddSpotLight(SpotLight* light);
+
+			/*
+			* @brief
+			*/
 			void RemoveSpotLight(SpotLight* light);
 
+			/*
+			* @brief
+			*/
 			AmbientSettings* GetAmbientSettings() { return &mAmbientSettings; }
+
+			/*
+			* @brief
+			*/
 			void SetAmbientSettings(AmbientSettings& settings);
+
+			/*
+			* @brief
+			*/
 			void SetAmbientColor(ColorRGBA16& color);
 
+			/*
+			* @brief
+			*/
 			void SetSun(DirectionalLight* light) { mSun = light; }
+			
+			/*
+			* @brief
+			*/
 			DirectionalLight* GetSun() { return mSun; }
 
-			std::vector<Renderable*> GetRenderables(RenderableSortType type = RenderableSortType::MATERIAL);
+			/*
+			* @brief
+			*/
+			std::vector<Renderable*> GetRenderables();
+
+			/*
+			* @brief
+			*/
 			std::set<QuadBatch*>* GetQuadBatches() { return &mQuadBatches; }
+
+			/*
+			* @brief
+			*/
 			std::set<DirectionalLight*>* GetDirectionalLights() { return &mDirectionalLights; }
+
+			/*
+			* @brief
+			*/
 			std::set<PointLight*>* GetPointLights() { return &mPointLights; }
+
+			/*
+			* @brief
+			*/
 			std::set<SpotLight*>* GetSpotLights() { return &mSpotLights; }
 
 		private:
+			
+			/*
+			* @brief
+			*/
 			void AssignRenderableID(Renderable* renderable);
 
+			/*
+			* @brief
+			*/
+			void SortRenderables( RenderableSortType type = RenderableSortType::MATERIAL );
+
 		private:
+			std::vector< Renderable* >	mSortedRenderables;
 			std::set<Renderable*> 		mRenderables;
 			std::set<QuadBatch*> 		mQuadBatches;
 			std::set<DirectionalLight*> mDirectionalLights;
 			std::set<PointLight*> 		mPointLights;
-			std::set<SpotLight*> 		mSpotLights;
+			std::set<SpotLight*> 		mSpotLights; 
 
 			AmbientSettings 				mAmbientSettings;
 

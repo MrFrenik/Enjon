@@ -51,17 +51,10 @@ namespace Enjon {
 		return Enjon::Vec2(point.x - point.y, (point.x + point.y) / 2.0f); 
 	}
 
-	inline float Lerp(float goal, float current, float dt)
+	inline f32 Lerp( f32 a, f32 b, f32 t )
 	{
-		float difference = goal - current;
-
-		if (difference > dt)
-			return current + dt;
-		if (difference < -dt)
-			return current - dt;
-
-		return goal;
-	}
+		return a + t * ( b - a );
+	} 
 
 	template <typename T>
 	inline T Clamp(T val, T min, T max)

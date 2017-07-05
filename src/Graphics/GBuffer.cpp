@@ -36,13 +36,24 @@ namespace Enjon {
 	
 		    glBindTexture(GL_TEXTURE_2D, 0);
 	    }
-	 
-	    // - Create and attach depth buffer (renderbuffer)
-	    glGenRenderbuffers(1, &DepthBuffer);
-	    glBindRenderbuffer(GL_RENDERBUFFER, DepthBuffer);
-	    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, Width, Height);
-	    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBuffer);
 
+		// Bind depth render buffer
+		glBindRenderbufferEXT( GL_RENDERBUFFER, DepthBuffer );
+		glRenderbufferStorageEXT( GL_RENDERBUFFER, GL_RGBA, Width, Height );
+		glFramebufferRenderbufferEXT( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBuffer );
+
+		// - Depth buffer texture
+		glGenTextures( 1, &DepthTexture );
+		glBindTexture( GL_TEXTURE_2D, DepthTexture );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, Width, Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthTexture, 0 ); 
+
+		glBindTexture( GL_TEXTURE_2D, 0 );
+		
 	    // - Finally check if framebuffer is complete
 	    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) EU::FatalError("GBuffer::Constructor::Gbuffer could not be created.");
 

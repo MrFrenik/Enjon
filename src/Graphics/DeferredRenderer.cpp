@@ -28,6 +28,7 @@
 #include <string>
 #include <cassert>
 #include <limits>
+#include <random>
 
 #include <STB/stb_image.h> 
 #include <glm/glm.hpp>
@@ -398,6 +399,16 @@ namespace Enjon
 			{
 				glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 				RenderQuad( ); 
+				mBatch->Begin( );
+				{
+					mBatch->Add(
+						Vec4( -1, -1, 2, 2 ),
+						Vec4( 0, 0, 1, 1 ),
+						0
+					);
+				}
+				mBatch->End( );
+				mBatch->RenderBatch( );
 			}
 			brdfShader->Unuse( );
 
@@ -468,6 +479,8 @@ namespace Enjon
 
 		// Gbuffer pass
 		GBufferPass();
+		// SSAO pass
+		SSAOPass( );
 		// Lighting pass
 		LightingPass();
 		// Luminance Pass
@@ -548,8 +561,8 @@ namespace Enjon
 				// Check for material switch
 				Material* curMaterial = renderable->GetMaterial();
 				assert(curMaterial != nullptr);
-				//if (material != curMaterial)
-				//{
+				if (material != curMaterial)
+				{
 					// Set material
 					material = curMaterial;
 
@@ -560,27 +573,15 @@ namespace Enjon
 					shader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::Metallic).Get()->GetTextureId(), 3);
 					shader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::Roughness).Get()->GetTextureId(), 4);
 					shader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO).Get()->GetTextureId(), 5);
-					shader->SetUniform("u_albedoColor", material->GetColor(Enjon::TextureSlotType::Albedo));
-				//}
-
-				// Now need to render
-				Mesh* mesh = renderable->GetMesh().Get();
-				mesh->Bind();
-				{
-					Mat4 Model;
-					Model *= Mat4::Translate(renderable->GetPosition());
-					Model *= QuaternionToMat4(renderable->GetRotation());
-					Model *= Mat4::Scale(renderable->GetScale());
-					shader->SetUniform("u_model", Model);
-					mesh->Submit();
 				}
-				mesh->Unbind();
+
+				// Render mesh ( Could make this all within one call to renderable, which submits mesh and material information )
+				renderable->Submit( shader ); 
 			}
 		}
 
 		// Unuse gbuffer shader
 		shader->Unuse();
-
 
 		/////////////////////////////////////////////////
 		// SHADER GRAPH TEST ////////////////////////////
@@ -600,9 +601,10 @@ namespace Enjon
 		{
 			sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
 			sgShader->SetUniform( "uWorldTime", wt ); 
+			mMaterial->Bind( sgShader ); 
+
 			for ( auto& r : mRenderables )
 			{ 
-				mMaterial->Bind( sgShader ); 
 				r.Submit( sgShader );
 			}
 		} 
@@ -671,12 +673,78 @@ namespace Enjon
 			glActiveTexture( GL_TEXTURE0 );
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
 
-			RenderCube( );
+			//RenderCube( );
 		}
 		skyBoxShader->Unuse( );
 
 		// Unbind gbuffer
 		mGbuffer->Unbind();
+	}
+
+	//======================================================================================================
+
+	void DeferredRenderer::SSAOPass( )
+	{
+		Enjon::iVec2 screenRes = GetViewport( ); 
+
+		//uniform sampler2D gPosition;
+		//uniform sampler2D gNormal;
+		//uniform sampler2D texNoise; 
+		//uniform vec2 uScreenResolution; 
+		//uniform vec3 samples[64]; 
+		//int kernelSize = 64;
+		//float radius = 0.5;
+		//float bias = 0.025; 
+		//uniform mat4 view;
+		//uniform mat4 projection;
+
+		// SSAO pass
+		mSSAOTarget->Bind( );
+		{
+			glClear( GL_COLOR_BUFFER_BIT );
+
+			GLSLProgram* shader = ShaderManager::Get( "SSAO" );
+			shader->Use( );
+			{ 
+				// Upload kernel uniform
+				//for ( u32 i = 0; i < 64; ++i ) 
+				//{
+				//	std::string uniform = "samples[" + std::to_string( i ) + "]";
+				//	shader->SetUniform( uniform, mSSAOKernel[ i ] );
+				//} 
+				glUniform3fv( glGetUniformLocation( shader->GetProgramID( ), "samples" ), 64 * 3, ( f32* )&mSSAOKernel[ 0 ] );
+				shader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
+				shader->SetUniform( "view", mSceneCamera.GetView( ) );
+				shader->SetUniform( "uScreenResolution", Vec2( screenRes.x / 2, screenRes.y / 2 ) );
+				shader->SetUniform( "radius", mSSAORadius );
+				shader->SetUniform( "bias", mSSAOBias );
+				shader->SetUniform( "uIntensity", mSSAOIntensity );
+				shader->SetUniform( "near", mSceneCamera.GetNear() );
+				shader->SetUniform( "far", mSceneCamera.GetFar() );
+				shader->BindTexture( "gPosition", mGbuffer->GetTexture( GBufferTextureType::POSITION ), 0 );
+				shader->BindTexture( "gNormal", mGbuffer->GetTexture( GBufferTextureType::NORMAL ), 1 );
+				shader->BindTexture( "texNoise", mSSAONoiseTexture, 2 ); 
+				shader->BindTexture( "uDepthMap", mGbuffer->GetDepth( ), 2 ); 
+				RenderQuad( );
+			}
+			shader->Unuse( ); 
+		}
+		mSSAOTarget->Unbind( );
+
+		// Blur SSAO to remove noise
+		mSSAOBlurTarget->Bind( );
+		{
+			glClear( GL_COLOR_BUFFER_BIT );
+
+			GLSLProgram* shader = ShaderManager::Get( "SSAOBlur" );
+			shader->Use( );
+			{
+				shader->BindTexture( "ssaoInput", mSSAOTarget->GetTexture( ), 0 );
+				RenderQuad( ); 
+			}
+			shader->Unuse( ); 
+		}
+		mSSAOBlurTarget->Unbind( );
 	}
 
 	//======================================================================================================
@@ -704,15 +772,6 @@ namespace Enjon
 		glDisable(GL_DEPTH_TEST);
 		glBlendFunc(GL_ONE, GL_ONE); 
 
-		//uniform samplerCube uIrradianceMap;
-		//uniform samplerCube uPrefilterMap;
-		//uniform sampler2D uBRDFLUT;
-		//uniform sampler2D uAlbedoMap;
-		//uniform sampler2D uNormalMap;
-		//uniform sampler2D uPositionMap;
-		//uniform sampler2D uEmissiveMap;
-		//uniform sampler2D uMaterialMap;
-
 		// Ambient pass
 		ambientShader->Use();
 		{ 
@@ -738,6 +797,8 @@ namespace Enjon
 			ambientShader->BindTexture("uPositionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 5);
 			ambientShader->BindTexture("uEmissiveMap", mGbuffer->GetTexture(GBufferTextureType::EMISSIVE), 6);
 			ambientShader->BindTexture("uMaterialMap", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 7);
+			ambientShader->BindTexture("uSSAOMap", mSSAOBlurTarget->GetTexture(), 8);
+			ambientShader->BindTexture("uDepthMap", mSSAOBlurTarget->GetTexture(), 9);
 			ambientShader->SetUniform("uResolution", mGbuffer->GetResolution());
 			ambientShader->SetUniform( "uCamPos", mSceneCamera.GetPosition() );
 
@@ -1158,11 +1219,68 @@ namespace Enjon
 		mFXAATarget 				= new RenderTarget(width, height);
 		mShadowDepth 				= new RenderTarget(2048, 2048);
 		mFinalTarget 				= new RenderTarget(width, height);
+		mSSAOTarget					= new RenderTarget( width, height );
+		mSSAOBlurTarget				= new RenderTarget( width, height );
 
 		mBatch 						= new SpriteBatch();
 		mBatch->Init();
 
 		mFullScreenQuad 			= new FullScreenQuad();
+
+		// Initialize SSAO buffers
+		glGenFramebuffers( 1, &mSSAOFBO );
+		glGenFramebuffers( 1, &mSSAOBlurFBO );
+		
+		glGenTextures( 1, &mSSAOColorBuffer );
+		glBindTexture( GL_TEXTURE_2D, mSSAOColorBuffer );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RGB, GL_FLOAT, NULL );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mSSAOColorBuffer, 0 );
+		if ( glCheckFramebufferStatus( GL_FRAMEBUFFER ) != GL_FRAMEBUFFER_COMPLETE )
+			std::cout << "SSAO Framebuffer not complete!" << std::endl;
+		// and blur stage
+		glBindFramebuffer( GL_FRAMEBUFFER, mSSAOBlurFBO );
+		glGenTextures( 1, &mSSAOColorBufferBlur );
+		glBindTexture( GL_TEXTURE_2D, mSSAOColorBufferBlur );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RGB, GL_FLOAT, NULL );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mSSAOColorBufferBlur, 0 );
+		if ( glCheckFramebufferStatus( GL_FRAMEBUFFER ) != GL_FRAMEBUFFER_COMPLETE )
+			std::cout << "SSAO Blur Framebuffer not complete!" << std::endl;
+		glBindFramebuffer( GL_FRAMEBUFFER, 0 ); 
+
+		// Generate sample kernel
+		std::uniform_real_distribution< f32 > randomFloats( 0.0f, 1.0f );
+		std::default_random_engine generator;
+		for ( u32 i = 0; i < 64; ++i )
+		{
+			Enjon::Vec3 sample( randomFloats( generator ) * 2.0f - 1.0f, randomFloats( generator ) * 2.0f - 1.0f, randomFloats( generator ) );
+			sample *= randomFloats( generator );
+			f32 scale = f32( i ) / 64.0;
+
+			// scale samples s.t. they're more aligned to center of kernel
+			scale = Enjon::Lerp( 0.1f, 1.0f, scale * scale );
+			sample *= scale;
+			mSSAOKernel.push_back( sample );
+		}
+
+		// Generate noise texture
+		std::vector< Enjon::Vec3 > ssaoNoise;
+		for ( unsigned int i = 0; i < 16; i++ )
+		{
+			Enjon::Vec3 noise( randomFloats( generator ) * 2.0 - 1.0, randomFloats( generator ) * 2.0 - 1.0, 0.0f ); // rotate around z-axis (in tangent space)
+			ssaoNoise.push_back( noise );
+		}
+
+		glGenTextures( 1, &mSSAONoiseTexture );
+		glBindTexture( GL_TEXTURE_2D, mSSAONoiseTexture );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB32F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[ 0 ] );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT ); 
 	}
 
 	//======================================================================================================
@@ -1352,6 +1470,15 @@ namespace Enjon
 
 		    ImGui::TreePop();
 	    }
+	    
+		if (ImGui::TreeNode("SSAO"))
+	    {
+		    ImGui::SliderFloat("Radius##ssao", &mSSAORadius, 0.01, 1.0f, "%.3f");
+		    ImGui::SliderFloat("Bias##ssao", &mSSAOBias, 1.0, 0.01f, "%.3f"); 
+		    ImGui::SliderFloat("Intensity##ssao", &mSSAOIntensity, 0.0f, 5.0f, "%.2f"); 
+
+		    ImGui::TreePop();
+	    }
 
 	    if (ImGui::TreeNode("FrameBuffers"))
 	    {
@@ -1424,6 +1551,36 @@ namespace Enjon
 				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
 				{
 					mCurrentRenderTexture = mBRDFLUT;
+				}
+			}
+			
+			{
+				const char* string_name = "SSAO";
+				ImGui::Text( string_name );
+				ImTextureID img = ( ImTextureID )mSSAOTarget->GetTexture( );
+				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
+				{
+					mCurrentRenderTexture = mSSAOTarget->GetTexture( );
+				}
+			}
+			
+			{
+				const char* string_name = "SSAOBlur";
+				ImGui::Text( string_name );
+				ImTextureID img = ( ImTextureID )mSSAOBlurTarget->GetTexture();
+				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
+				{
+					mCurrentRenderTexture = mSSAOBlurTarget->GetTexture();
+				}
+			}
+			
+			{
+				const char* string_name = "SSAONoise";
+				ImGui::Text( string_name );
+				ImTextureID img = ( ImTextureID )mSSAONoiseTexture;
+				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
+				{
+					mCurrentRenderTexture = mSSAONoiseTexture;
 				}
 			}
 

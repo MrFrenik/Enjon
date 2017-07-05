@@ -1429,7 +1429,7 @@ namespace Enjon
 					}
 					else
 					{
-						code += OutputErrorBlock( "INVALID: BaseColor: Link" + l->mConnectingNode->mName + ";" );
+						code += OutputErrorBlock( "INVALID: BaseColor: Incorrect Link: " + l->mConnectingNode->mName + ";" );
 					}
 
 				}
@@ -1469,7 +1469,7 @@ namespace Enjon
 					}
 					else
 					{
-						code += OutputErrorBlock( "INVALID: Normal: Link" + l->mConnectingNode->mName + ";" );
+						code += OutputErrorBlock( "INVALID: Normal: Incorrect Link: " + l->mConnectingNode->mName + ";" );
 					}
 				}
 				// Default normals
@@ -1512,7 +1512,7 @@ namespace Enjon
 					}
 					else
 					{
-						code += OutputErrorBlock( "INVALID: Metallic: Link" + l->mConnectingNode->mName + ";" );
+						code += OutputErrorBlock( "INVALID: Metallic: Incorrect Link: " + l->mConnectingNode->mName + ";" );
 					}
 				}
 				// Default metallic
@@ -1548,7 +1548,7 @@ namespace Enjon
 					}
 					else
 					{
-						code += OutputErrorBlock( "INVALID: Metallic: Link" + l->mConnectingNode->mName + ";" );
+						code += OutputErrorBlock( "INVALID: Metallic: Incorrect Link: " + l->mConnectingNode->mName + ";" );
 					}
 				}
 				// Default roughness
@@ -1584,7 +1584,7 @@ namespace Enjon
 					}
 					else
 					{
-						code += OutputErrorBlock( "INVALID: AO: Link" + l->mConnectingNode->mName + ";" );
+						code += OutputErrorBlock( "INVALID: AO: Incorrect Link: " + l->mConnectingNode->mName + ";" );
 					}
 				}
 				// Default ao
@@ -1624,7 +1624,7 @@ namespace Enjon
 					}
 					else
 					{
-						code += OutputErrorBlock( "INVALID: Emissive: Link" + l->mConnectingNode->mName + ";" );
+						code += OutputErrorBlock( "INVALID: Emissive: Incorrect Link: " + l->mConnectingNode->mName + ";" );
 					}
 				}
 				// Default emissive

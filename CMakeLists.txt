@@ -150,7 +150,7 @@ file(GLOB_RECURSE GAME_FILES
 	"${ENJON_DIR}/IsoARPG/src/Game.cpp"
 	"${ENJON_DIR}/IsoARPG/src/main.cpp") 
 
-file(GLOB_RECURSE SHADERS "${ENJON_DIR}/Shaders/*.glsl" ) 
+file(GLOB_RECURSE SHADERS "${ENJON_DIR}/Assets/Shaders/*.glsl" ) 
 
 # Add all engine source files
 set(
@@ -191,8 +191,7 @@ set(
 	${GENERAL_SOURCES}
 	${SHADERS}
 	)
-
-
+ 
 SET( LINK_LIBRARY debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES} )
 
 add_executable(Enjon ${ALL_SRC})

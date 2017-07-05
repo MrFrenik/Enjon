@@ -207,7 +207,7 @@
 		"Inputs": {
 
 			"BaseColor": {
-				"albedoMap": "RGB"
+				"uColor": "Value"
 			},
 
 			"Normal": {
@@ -219,7 +219,7 @@
 			},
 
 			"Roughness": {
-				"roughMap": "RGB"
+				"roughFloat": "Value"
 			},
 
 			"Emissive": {
@@ -230,6 +230,7 @@
 			},
 
 			"WorldPositionOffset": {
+				"mult_vert_norm": "Value"
 			}
 		},
 

@@ -71,10 +71,7 @@ namespace Enjon
 			void SetScene(Scene* scene);
 
 			/* Set Renderable */
-			void SetRenderable(const Renderable& renderable);
-
-			/* Set material color */
-			void SetColor(TextureSlotType type, const ColorRGBA16& color);	
+			void SetRenderable(const Renderable& renderable); 
 
 		private: 
 

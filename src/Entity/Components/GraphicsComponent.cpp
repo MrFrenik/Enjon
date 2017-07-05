@@ -162,9 +162,9 @@ namespace Enjon
 
 	//====================================================================
 
-	void GraphicsComponent::SetColor(TextureSlotType type, const ColorRGBA16& color)
-	{
-		mRenderable.SetColor(type, color);	
-	}
+	//void GraphicsComponent::SetColor(TextureSlotType type, const ColorRGBA16& color)
+	//{
+	//	mRenderable.SetColor(type, color);	
+	//}
 	
 }

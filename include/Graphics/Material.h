@@ -4,7 +4,6 @@
 
 #include "Graphics/GLTexture.h"
 #include "Graphics/Texture.h"
-#include "Graphics/Color.h"
 #include "Graphics/Shader.h"
 #include "Graphics/ShaderGraph.h"
 #include "System/Types.h"
@@ -51,16 +50,24 @@ namespace Enjon {
 			*/
 			~Material(); 
 
+			/*
+			* @brief
+			*/
 			void SetTexture(const TextureSlotType& type, const AssetHandle<Texture>& textureHandle);
-			AssetHandle<Texture> GetTexture(const TextureSlotType& type) const;
 
-			void SetColor(TextureSlotType type, const ColorRGBA16& color);
-			ColorRGBA16 GetColor(TextureSlotType type) const; 
+			/*
+			* @brief
+			*/
+			AssetHandle<Texture> GetTexture(const TextureSlotType& type) const; 
 
-			void SetShader( const Enjon::Shader* shader );
-			const Enjon::Shader* GetShader( ) const;
-
+			/*
+			* @brief
+			*/
 			bool TwoSided( ) const { return mTwoSided; }
+
+			/*
+			* @brief
+			*/
 			void TwoSided( bool enable ) { mTwoSided = enable; }
 
 			/*
@@ -106,12 +113,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void SetUniform( const Enjon::String& name, const f32& value );
-
-			/*
-			* @brief
-			*/
-			void SetUniforms( );
+			void SetUniform( const Enjon::String& name, const f32& value ); 
 
 			/*
 			* @brief
@@ -120,14 +122,14 @@ namespace Enjon {
 
 
 		protected:
-			void AddUniform( ShaderUniform* uniform );
 
+			/*
+			* @brief
+			*/
 			void AddOverride( ShaderUniform* uniform );
 
 		protected:
 			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count]; 
-			ColorRGBA16 mColors[(u32)TextureSlotType::Count];
-			GLSLProgram* mShader = nullptr;
 			bool mTwoSided = false;
 			std::unordered_map< Enjon::String, ShaderUniform* > mUniforms;
 			std::unordered_map< Enjon::String, ShaderUniform* > mUniformOverrides;

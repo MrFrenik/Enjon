@@ -2,7 +2,10 @@
 #include "Graphics/Scene.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Material.h"
+#include "Graphics/Shader.h"
+#include "Graphics/GLSLProgram.h"
 #include "Graphics/DeferredRenderer.h" 
+#include "Graphics/Color.h"
 
 #include <assert.h>
 
@@ -49,7 +52,7 @@ namespace Enjon
 
 	//==============================================================
 
-	AssetHandle<Mesh> Renderable::GetMesh() const 
+	AssetHandle< Mesh > Renderable::GetMesh() const 
 	{ 
 		return mMesh; 
 	}
@@ -130,11 +133,11 @@ namespace Enjon
 
 	//==============================================================================
 
-	void Renderable::SetColor(TextureSlotType type, const ColorRGBA16& color)
-	{
-		assert(mMaterial != nullptr);
-		mMaterial->SetColor(type, color);
-	}
+	//void Renderable::SetColor(TextureSlotType type, const ColorRGBA16& color)
+	//{
+	//	assert(mMaterial != nullptr);
+	//	mMaterial->SetColor(type, color);
+	//}
 
 	//==============================================================================
 
@@ -157,6 +160,31 @@ namespace Enjon
 				Model *= QuaternionToMat4( GetRotation( ) );
 				Model *= Mat4::Scale( GetScale( ) );
 				const_cast< Enjon::Shader* > ( shader )->SetUniform( "uModel", Model );
+				mesh->Submit( );
+			}
+			mesh->Unbind( ); 
+		} 
+	}
+	
+	void Renderable::Submit( const Enjon::GLSLProgram* shader )
+	{
+		// Check for shader validity
+		if ( shader == nullptr )
+		{
+			return;
+		}
+
+		// Bind mesh and submit
+		Mesh* mesh = GetMesh( ).Get( );
+		if ( mesh != nullptr )
+		{
+			mesh->Bind( );
+			{
+				Mat4 Model;
+				Model *= Mat4::Translate( GetPosition( ) );
+				Model *= QuaternionToMat4( GetRotation( ) );
+				Model *= Mat4::Scale( GetScale( ) );
+				const_cast< Enjon::GLSLProgram* > ( shader )->SetUniform( "u_model", Model );
 				mesh->Submit( );
 			}
 			mesh->Unbind( ); 

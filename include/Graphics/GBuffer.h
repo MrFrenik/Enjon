@@ -36,7 +36,7 @@ namespace Enjon {
 
 		GLuint inline GetTexture(GBufferTextureType Type) { return Textures[(GLuint)Type]; }
 		GLuint inline GetTexture(u32 index) { return Textures[index]; }
-		GLuint inline GetDepth() { return DepthBuffer; }
+		GLuint inline GetDepth() { return DepthTexture; }
 		Vec2 inline GetResolution() { return Vec2(Width, Height); }
 		void SetViewport(const Vec4& Viewport);
 
@@ -50,6 +50,7 @@ namespace Enjon {
 		uint32 Height;
 		GLuint FBO;
 		GLuint DepthBuffer;
+		GLuint DepthTexture;
 
 		GLuint TargetIDs[(u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT];
 		GLuint Textures[(u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT];

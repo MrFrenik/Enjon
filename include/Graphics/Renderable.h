@@ -5,15 +5,18 @@
 #include "Defines.h"
 #include "Math/Transform.h"
 #include "Math/Quaternion.h"
-#include "Graphics/Material.h"
-#include "Graphics/Shader.h"
 #include "System/Types.h"
+#include "Asset/Asset.h"
 
 namespace Enjon 
 { 
 	class Mesh; 			
 	class Scene;
+	class Shader;
+	class Material;
 	class DeferredRenderer;
+	class GLSLProgram;
+	class ColorRGBA16;
 
 	class Renderable
 	{
@@ -40,7 +43,7 @@ namespace Enjon
 			Material* GetMaterial();
 
 			/* Get mesh of renderable */
-			AssetHandle<Mesh> GetMesh() const;
+			AssetHandle< Mesh > GetMesh() const;
 
 			/* Get scene of renderable */
 			Scene* GetScene() const;
@@ -73,13 +76,18 @@ namespace Enjon
 			void SetScene(Scene* scene);
 
 			/* Set material color */
-			void SetColor(TextureSlotType type, const ColorRGBA16& color);	
+			//void SetColor(TextureSlotType type, const ColorRGBA16& color);	
 
 		protected:
 			/*
 			* @brief
 			*/
 			void Submit( const Enjon::Shader* shader );
+	
+			/*
+			* @brief
+			*/
+			void Submit( const Enjon::GLSLProgram* shader );
 
 		private:
 			Transform 			mTransform;

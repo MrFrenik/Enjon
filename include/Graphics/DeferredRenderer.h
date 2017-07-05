@@ -143,6 +143,11 @@ namespace Enjon
 			/**
 			*@brief
 			*/
+			void SSAOPass();
+			
+			/**
+			*@brief
+			*/
 			void LightingPass();
 			
 			/**
@@ -216,6 +221,8 @@ namespace Enjon
 			RenderTarget* mFXAATarget								= nullptr;
 			RenderTarget* mShadowDepth								= nullptr;
 			RenderTarget* mFinalTarget								= nullptr;
+			RenderTarget* mSSAOTarget								= nullptr;
+			RenderTarget* mSSAOBlurTarget							= nullptr;
 
 			GLuint mCurrentRenderTexture; 
 
@@ -253,7 +260,19 @@ namespace Enjon
 			u32 mCaptureFBO = 0;
 			u32 mCaptureRBO = 0; 
 
+			// SSAO
+			u32 mSSAOColorBuffer = 0;
+			u32 mSSAOColorBufferBlur = 0;
+			u32 mSSAONoiseTexture = 0;
+			u32 mSSAOFBO = 0;
+			u32 mSSAOBlurFBO = 0;
+			std::vector< Enjon::Vec3 > mSSAOKernel; 
+
 			Enjon::Mesh* mMesh = nullptr;
+
+			f32 mSSAORadius = 0.5f;
+			f32 mSSAOBias = 0.025f;
+			f32 mSSAOIntensity = 1.45f;
 	};
 }
 

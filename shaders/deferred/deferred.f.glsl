@@ -15,9 +15,7 @@ in VS_OUT
 	vec3 FragPos;
 	vec2 TexCoords;
     mat3 TBN;
-} fs_in;
-
-uniform vec4 u_albedoColor = vec4(1, 1, 1, 1);
+} fs_in; 
 
 // uniforms
 uniform sampler2D u_albedoMap;
@@ -48,7 +46,7 @@ void main()
     Roughness = texture2D(u_roughnessMap, fs_in.TexCoords).r;
     AO        = texture2D(u_aoMap, fs_in.TexCoords).r;
 
-    AlbedoOut  = albedo * vec4(u_albedoColor.xyz, 1.0);
+    AlbedoOut  = albedo;
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
     EmissiveOut = vec4(texture2D(u_emissiveMap, fs_in.TexCoords).xyz * u_emissiveIntensity, 1.0);

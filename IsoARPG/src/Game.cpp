@@ -407,7 +407,7 @@ Enjon::Result Game::Initialize()
 	mGreen.Get()->AddChild( mRed );
 	mGreen.Get()->AddChild( mBlue ); 
 
-	rgc2->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.buddha" ) );
+	rgc2->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.bunny" ) );
 	rgc->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.cerebus" ) );
 	rgc->SetMaterial( mGunMat );
 	rgc2->SetMaterial( mPlasticMat );
@@ -468,7 +468,7 @@ Enjon::Result Game::Initialize()
 			gfxcmp->SetMaterial( mat );
 
 			eh.Get( )->SetScale( Enjon::Vec3( 0.009f ) );
-			eh.Get( )->SetPosition( Enjon::Vec3( j * 3.0f, 0.1f, i * 3.0f ) + Enjon::Vec3( 15, 0, 15 ) );
+			eh.Get( )->SetPosition( Enjon::Vec3( j * 3.0f, 0.0f, i * 3.0f ) + Enjon::Vec3( 15, 0, 15 ) );
 
 			switch ( GreyScale( i ) )
 			{
