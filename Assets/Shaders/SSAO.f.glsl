@@ -10,10 +10,10 @@ uniform sampler2D uDepthMap;
 
 uniform vec2 uScreenResolution;
 
-uniform vec3 samples[64];
+uniform vec3 samples[16];
 
 // parameters (you'd probably want to use them as uniforms to more easily tweak the effect)
-int kernelSize = 64;
+int kernelSize = 16;
 uniform float radius = 0.5;
 uniform float bias = 0.025; 
 uniform float uIntensity = 1.0;
@@ -33,17 +33,17 @@ float LinearizeDepth( float depth )
 void main()
 {
 	// tile noise texture over screen based on screen dimensions divided by noise size
-	vec2 noiseScale = vec2(uScreenResolution.x/4.0, uScreenResolution.y/4.0); 
+	vec2 noiseScale = vec2(uScreenResolution.x/256.0, uScreenResolution.y/256.0); 
 	
 	float depth = LinearizeDepth( texture( uDepthMap, TexCoords ).r ) / far; 
 
     // get input for SSAO algorithm
     vec4 fp = view * vec4( texture(gPosition, TexCoords).rgb, 1.0 );
-	vec3 fragPos = fp.xyz;
+	vec3 fragPos = fp.xyz / fp.w;
 	
-    //vec4 n = view * vec4( texture(gNormal, TexCoords).rgb, 1.0 );
+    //vec4 n = view * vec4( texture(gNormal, TexCoords).rgb * 2.0 - 1.0, 1.0 );
 	//vec3 normal = normalize( n.xyz / n.w ); 
-	vec3 normal = normalize( texture( gNormal, TexCoords ).rgb );
+	vec3 normal = normalize( texture( gNormal, TexCoords ).rgb * 2.0 - 1.0 );
 
 	vec3 randomVec = normalize(texture(texNoise, TexCoords * noiseScale).xyz);
 
@@ -57,7 +57,7 @@ void main()
 	for(int i = 0; i < kernelSize; ++i)
 	{
 		// get sample position
-		vec3 sample = TBN * samples[i]; // from tangent to view-space
+		vec3 sample = TBN * samples[i]; // from tangent to view-space 
 		sample = fragPos + sample * radius; 
 		
 		// project sample position (to sample texture) (to get position on screen/texture)
@@ -76,5 +76,5 @@ void main()
 	}
 	occlusion = 1.0 - (occlusion / kernelSize);
 
-	FragColor = depth >= 1.0 ? vec4( 1.0 ) : vec4( vec3( occlusion ), 1.0 );
+	FragColor = depth >= 0.96 ? vec4( 1.0 ) : vec4( vec3( occlusion ), 1.0 );
 }

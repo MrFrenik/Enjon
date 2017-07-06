@@ -197,7 +197,7 @@ namespace Enjon
 			// Update graphics
 			mGraphics->Update(dt); 
 
-			mLimiter.End();
+			//mLimiter.End();
 		}
 
 		Enjon::Result res = ShutDown();

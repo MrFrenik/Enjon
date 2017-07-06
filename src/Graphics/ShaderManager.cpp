@@ -56,10 +56,7 @@ namespace Enjon { namespace ShaderManager {
 		ShaderManager::AddShader("PrefilterConvolution", sp + "/pbr/PrefilterConvolution.v.glsl", sp + "/pbr/PrefilterConvolution.f.glsl");
 		ShaderManager::AddShader("BRDFLUT", sp + "/pbr/BRDF.v.glsl", sp + "/pbr/BRDF.f.glsl");
 		ShaderManager::AddShader("SSAO", sp + "/SSAO.v.glsl", sp + "/SSAO.f.glsl");
-		ShaderManager::AddShader("SSAOBlur", sp + "/SSAOBlur.v.glsl", sp + "/SSAOBlur.f.glsl");
-	
-		Enjon::String ps = "E:/Development/Enjon/IsoARPG/Assets/Shaders";
-		ShaderManager::AddShader("TestShader", ps + "/vert.glsl", ps + "/frag.glsl");
+		ShaderManager::AddShader("SSAOBlur", sp + "/SSAOBlur.v.glsl", sp + "/SSAOBlur.f.glsl"); 
 	}
 
 	void AddShader( const Enjon::String& shadername, const Enjon::String& vertpath, const Enjon::String& fragpath )

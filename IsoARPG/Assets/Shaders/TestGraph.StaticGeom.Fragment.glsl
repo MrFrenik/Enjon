@@ -17,72 +17,48 @@ in VS_OUT
 uniform float uWorldTime = 1.0f;
 
 // Variable Declarations
-uniform vec3 uColor;
 uniform float texCoordMultiplier;
 
 vec2 uTexCoords;
 
 vec2 texMult;
 
+uniform sampler2D albedoMap;
 uniform sampler2D normalMap;
 uniform float metallicFloat;
+uniform sampler2D roughMap;
+
 uniform float roughFloat;
-uniform vec3 emissiveColor;
 
-uniform float emissiveIntensity;
-
-vec3 emissiveMult;
-
-uniform float timeMultiplier;
-
-float timeNode;
-
-float timeMultiplication;
-
-float sinNode;
-
-float clampMin;
-
-float clampMax;
-
-float clamp_sin;
-
-vec3 sinMultNode;
+vec3 roughMult;
+uniform sampler2D aoMap;
 
 // Fragment Main
 void main()
 {
 	// Base Color
 
-	AlbedoOut = vec4(uColor, 1.0);
-
-	// Normal
-	
 uTexCoords = fs_in.TexCoords;
 texMult = texCoordMultiplier * fs_in.TexCoords;
-vec4 normalMap_sampler = texture2D( normalMap, texMult );
+vec4 albedoMap_sampler = texture2D( albedoMap, texMult );
+	AlbedoOut = vec4(albedoMap_sampler.rgb, 1.0);
+
+	// Normal
+	vec4 normalMap_sampler = texture2D( normalMap, texMult );
 	vec3 normal = normalize( normalMap_sampler.rgb * 2.0 - 1.0 );
 	normal = normalize( fs_in.TBN * normal );
 	NormalsOut = vec4( normal, 1.0 );
 
 	// Material Properties
 	
-	
-	MatPropsOut = vec4( clamp( metallicFloat, 0.0, 1.0 ), clamp( roughFloat, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
+	vec4 roughMap_sampler = texture2D( roughMap, texMult );
+
+roughMult = roughMap_sampler.rgb * roughFloat;
+	vec4 aoMap_sampler = texture2D( aoMap, texMult );
+	MatPropsOut = vec4( clamp( metallicFloat, 0.0, 1.0 ), clamp( roughMult.x, 0.0, 1.0 ), clamp( aoMap_sampler.rgb.x, 0.0, 1.0 ), 1.0);
 
 	// Emissive
-	
-
-emissiveMult = emissiveColor * emissiveIntensity;
-
-timeNode = uWorldTime;
-timeMultiplication = timeMultiplier * timeNode;
-sinNode = sin(timeMultiplication);
-clampMin = 0.0;
-clampMax = 1.0;
-clamp_sin = clamp(sinNode, clampMin, clampMax);
-sinMultNode = emissiveMult * clamp_sin;
-	EmissiveOut = vec4(sinMultNode, 1.0);
+	EmissiveOut = vec4( 0.0, 0.0, 0.0, 1.0 );
 
 	PositionOut = vec4( fs_in.FragPos, 1.0 );
 }

@@ -45,6 +45,10 @@
 			"Template": "Texture2DSamplerNode",
 			"IsUniform": true
 		},
+		"aoMap": {
+			"Template": "Texture2DSamplerNode",
+			"IsUniform": true
+		},
 		"albedoMap": {
 			"Template": "Texture2DSamplerNode",
 			"IsUniform": true
@@ -81,10 +85,23 @@
 		},
 		"clampMax": {
 			"Template": "ConstantFloatNode"
+		},
+		"roughMult": {
+			"Template": "MultiplyFunctionNode"
 		}
 	},
 
 	"NodeLinks": {
+		"roughMult": {
+			"Inputs": {
+				"Input_0": {
+					"roughMap": "RGB"
+				},
+				"Input_1": {
+					"roughFloat": "Value"
+				}
+			}
+		},
 		"uColor": {
 			"DefaultOverrides": {
 				"X": "1.0",
@@ -199,6 +216,13 @@
 			"DefaultOverrides": {
 				"Value": "1.0"
 			}
+		},
+		"aoMap": {
+			"Inputs": {
+				"UV": {
+					"texMult": "Value"
+				}
+			}
 		}
 	},
 
@@ -207,7 +231,7 @@
 		"Inputs": {
 
 			"BaseColor": {
-				"uColor": "Value"
+				"albedoMap": "RGB"
 			},
 
 			"Normal": {
@@ -219,18 +243,17 @@
 			},
 
 			"Roughness": {
-				"roughFloat": "Value"
+				"roughMult": "Value"
 			},
 
 			"Emissive": {
-				"sinMultNode": "Value"
 			},
 
 			"AO": {
+				"aoMap": "RGB"
 			},
 
 			"WorldPositionOffset": {
-				"mult_vert_norm": "Value"
 			}
 		},
 

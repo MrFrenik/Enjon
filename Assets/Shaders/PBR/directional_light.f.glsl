@@ -9,6 +9,7 @@ uniform sampler2D u_albedoMap;
 uniform sampler2D u_normalMap;
 uniform sampler2D u_positionMap;
 uniform sampler2D u_matProps;
+uniform sampler2D u_ssao;
 // uniform sampler2D u_shadowMap;
 
 uniform vec3 u_camPos;
@@ -88,6 +89,9 @@ void main()
     float Metallic  = MaterialProps.r;
     float Roughness = clamp( MaterialProps.g, 0.08, 0.99 );
 
+	// Get SSAO
+	float ssao = texture(u_ssao, TexCoords).r; 
+
     // Calculate radiance
     vec3 L = normalize(u_lightDirection);
     vec3 H = normalize(V + L);
@@ -118,7 +122,7 @@ void main()
     float NdotL = max(dot(N, L), 0.0);
 
     // Final light
-    Lo += (kD * Albedo / kPi + BRDF) * Radiance * NdotL;
+    Lo += (kD * Albedo / kPi + BRDF) * Radiance * NdotL * ( ssao * 0.25 + 0.5 );
 
     // Shadow
     // float bias = max(ShadowBias.y * (1.0 - dot(N, L)), ShadowBias.x);

@@ -18,50 +18,11 @@ uniform mat4 uViewProjection;
 uniform mat4 uModel = mat4( 1.0f );
 
 // Variable Declarations
-uniform vec3 emissiveColor;
-
-uniform float emissiveIntensity;
-
-vec3 emissiveMult;
-
-uniform float timeMultiplier;
-
-float timeNode;
-
-float timeMultiplication;
-
-float sinNode;
-
-float clampMin;
-
-float clampMax;
-
-float clamp_sin;
-
-vec3 sinMultNode;
-
-vec3 vertNormalWS;
-
-vec3 mult_vert_norm;
 
 // Vertex Main
 void main()
 {
-	
-
-emissiveMult = emissiveColor * emissiveIntensity;
-
-timeNode = uWorldTime;
-timeMultiplication = timeMultiplier * timeNode;
-sinNode = sin(timeMultiplication);
-clampMin = 0.0;
-clampMax = 1.0;
-clamp_sin = clamp(sinNode, clampMin, clampMax);
-sinMultNode = emissiveMult * clamp_sin;
-vertNormalWS = vertexNormal;
-mult_vert_norm = sinMultNode * vertNormalWS;
 	vec3 worldPosition = ( uModel * vec4( vertexPosition, 1.0 ) ).xyz;
-	worldPosition += mult_vert_norm;
 	gl_Position = uViewProjection * vec4( worldPosition, 1.0 );
 
 	// Reorthogonalize with respect to N

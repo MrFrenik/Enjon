@@ -9,6 +9,7 @@ uniform sampler2D u_albedoMap;
 uniform sampler2D u_normalMap;
 uniform sampler2D u_positionMap;
 uniform sampler2D u_matProps;
+uniform sampler2D u_ssao;
 
 uniform vec3 u_camPos;
 uniform float u_radius;
@@ -54,6 +55,9 @@ void main()
     float Metallic  = MaterialProps.r;
     float Roughness = max( 0.08, MaterialProps.g * MaterialProps.g );
 
+	// SSAO
+	float ssao = texture2D(u_ssao, TexCoords).r;
+
     // Obtain normal from normal map in range (world coords)
     vec3 N = texture(u_normalMap, TexCoords).xyz;
 
@@ -97,7 +101,7 @@ void main()
     vec3 BRDF = Nominator / Denominator;
 
     // Final color
-    Lo += (kD * Albedo / kPi + BRDF) * Radiance * NdotL;
+    Lo += (kD * Albedo / kPi + BRDF) * Radiance * NdotL * (ssao * 0.5 + 0.5);
 
     ColorOut = vec4(max(Lo, vec3(0.0)), 1.0);
 }

@@ -151,6 +151,7 @@ Enjon::Result Game::Initialize()
 	Enjon::String cubeMeshPath			= Enjon::String("/Models/unit_cube.obj");
 	Enjon::String shaderballPath		= Enjon::String("/Models/shaderball.obj");
 	Enjon::String unrealShaderBallPath	= Enjon::String("/Models/unreal_shaderball.obj");
+	Enjon::String unitShaderBallPath	= Enjon::String("/Models/unit_shaderball.obj");
 	Enjon::String catMeshPath			= Enjon::String("/Models/cat.obj");
 	Enjon::String dudeMeshPath			= Enjon::String("/Models/dude.obj");
 	Enjon::String shaderBallMeshPath	= Enjon::String("/Models/shaderball.obj");
@@ -239,6 +240,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( bunnyMeshPath );
 	mAssetManager->AddToDatabase( buddhaMeshPath );
 	mAssetManager->AddToDatabase( shaderBallMeshPath );
+	mAssetManager->AddToDatabase( unitShaderBallPath );
 	mAssetManager->AddToDatabase( unrealShaderBallPath );
 	mAssetManager->AddToDatabase( greenPath );
 	mAssetManager->AddToDatabase( redPath );
@@ -350,7 +352,7 @@ Enjon::Result Game::Initialize()
 	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA16_SkyBlue(), 10.0f); 
 
 	mFloorMat = new Enjon::Material();
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.albedo"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.white"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.normal"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.roughness"));
@@ -407,7 +409,7 @@ Enjon::Result Game::Initialize()
 	mGreen.Get()->AddChild( mRed );
 	mGreen.Get()->AddChild( mBlue ); 
 
-	rgc2->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.bunny" ) );
+	rgc2->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.dragon" ) );
 	rgc->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.cerebus" ) );
 	rgc->SetMaterial( mGunMat );
 	rgc2->SetMaterial( mPlasticMat );
@@ -569,7 +571,6 @@ Enjon::Result Game::Initialize()
 					} 
 				} break;
 			}
-
 			// Add to scene
 			auto scene = mGfx->GetScene();
 			scene->AddRenderable( eh.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );

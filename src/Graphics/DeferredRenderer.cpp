@@ -180,7 +180,6 @@ namespace Enjon
 		glEnable( GL_CULL_FACE );
 		glCullFace( GL_BACK );
 		glEnable( GL_DEPTH_CLAMP );
-		// enable seamless cubemap sampling for lower mip levels in the pre-filter map.
 		glEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 
 		return Result::SUCCESS;
@@ -437,8 +436,9 @@ namespace Enjon
 					
 					// Set renderable material
 					renderable.SetMaterial( mMaterial );
-					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_sphere" ) );
-					renderable.SetPosition( Enjon::Vec3( j * 3, 2.0f, i * 3 ) + Enjon::Vec3( -40, 0, 10 ) );
+					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.teapot" ) );
+					renderable.SetPosition( Enjon::Vec3( j, 0.0f, i ) + Enjon::Vec3( -40, 0, 10 ) );
+					renderable.SetRotation( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::YAxis( ) ) );
 
 					mRenderables.push_back( renderable );
 
@@ -503,6 +503,8 @@ namespace Enjon
 
 		else
 		{
+
+			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
 			auto program = Enjon::ShaderManager::Get("NoCameraProjection");	
 			program->Use();
 			{
@@ -673,7 +675,7 @@ namespace Enjon
 			glActiveTexture( GL_TEXTURE0 );
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
 
-			//RenderCube( );
+			RenderCube( );
 		}
 		skyBoxShader->Unuse( );
 
@@ -687,17 +689,6 @@ namespace Enjon
 	{
 		Enjon::iVec2 screenRes = GetViewport( ); 
 
-		//uniform sampler2D gPosition;
-		//uniform sampler2D gNormal;
-		//uniform sampler2D texNoise; 
-		//uniform vec2 uScreenResolution; 
-		//uniform vec3 samples[64]; 
-		//int kernelSize = 64;
-		//float radius = 0.5;
-		//float bias = 0.025; 
-		//uniform mat4 view;
-		//uniform mat4 projection;
-
 		// SSAO pass
 		mSSAOTarget->Bind( );
 		{
@@ -707,15 +698,10 @@ namespace Enjon
 			shader->Use( );
 			{ 
 				// Upload kernel uniform
-				//for ( u32 i = 0; i < 64; ++i ) 
-				//{
-				//	std::string uniform = "samples[" + std::to_string( i ) + "]";
-				//	shader->SetUniform( uniform, mSSAOKernel[ i ] );
-				//} 
-				glUniform3fv( glGetUniformLocation( shader->GetProgramID( ), "samples" ), 64 * 3, ( f32* )&mSSAOKernel[ 0 ] );
+				glUniform3fv( glGetUniformLocation( shader->GetProgramID( ), "samples" ), 16 * 3, ( f32* )&mSSAOKernel[ 0 ] );
 				shader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
 				shader->SetUniform( "view", mSceneCamera.GetView( ) );
-				shader->SetUniform( "uScreenResolution", Vec2( screenRes.x / 2, screenRes.y / 2 ) );
+				shader->SetUniform( "uScreenResolution", Vec2( screenRes.x, screenRes.y ) );
 				shader->SetUniform( "radius", mSSAORadius );
 				shader->SetUniform( "bias", mSSAOBias );
 				shader->SetUniform( "uIntensity", mSSAOIntensity );
@@ -724,7 +710,7 @@ namespace Enjon
 				shader->BindTexture( "gPosition", mGbuffer->GetTexture( GBufferTextureType::POSITION ), 0 );
 				shader->BindTexture( "gNormal", mGbuffer->GetTexture( GBufferTextureType::NORMAL ), 1 );
 				shader->BindTexture( "texNoise", mSSAONoiseTexture, 2 ); 
-				shader->BindTexture( "uDepthMap", mGbuffer->GetDepth( ), 2 ); 
+				shader->BindTexture( "uDepthMap", mGbuffer->GetDepth( ), 3 ); 
 				RenderQuad( );
 			}
 			shader->Unuse( ); 
@@ -821,10 +807,11 @@ namespace Enjon
 			{
 				ColorRGBA16 color = l->GetColor();
 
-				directionalShader->BindTexture("u_albedoMap", 		mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
-				directionalShader->BindTexture("u_normalMap", 		mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
-				directionalShader->BindTexture("u_positionMap", 	mGbuffer->GetTexture(GBufferTextureType::POSITION), 2);
-				directionalShader->BindTexture("u_matProps", 		mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
+				directionalShader->BindTexture("u_albedoMap", 	mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
+				directionalShader->BindTexture("u_normalMap", 	mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
+				directionalShader->BindTexture("u_positionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 2);
+				directionalShader->BindTexture("u_matProps", 	mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
+				directionalShader->BindTexture("u_ssao", 		mSSAOBlurTarget->GetTexture(), 4);
 				// directionalShader->BindTexture("u_shadowMap", 		mShadowDepth->GetDepth(), 4);
 				directionalShader->SetUniform("u_resolution", 		mGbuffer->GetResolution());
 				// directionalShader->SetUniform("u_lightSpaceMatrix", mShadowCamera->GetViewProjectionMatrix());
@@ -850,12 +837,13 @@ namespace Enjon
 
 		pointShader->Use();
 		{
-			pointShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
-			pointShader->BindTexture("u_normalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
-			pointShader->BindTexture("u_positionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 2);
-			pointShader->BindTexture("u_matProps", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
-			pointShader->SetUniform("u_resolution", mGbuffer->GetResolution());
-			pointShader->SetUniform("u_camPos", mSceneCamera.GetPosition() + mSceneCamera.Backward());			
+			pointShader->BindTexture( "u_albedoMap", mGbuffer->GetTexture( GBufferTextureType::ALBEDO ), 0 );
+			pointShader->BindTexture( "u_normalMap", mGbuffer->GetTexture( GBufferTextureType::NORMAL ), 1 );
+			pointShader->BindTexture( "u_positionMap", mGbuffer->GetTexture( GBufferTextureType::POSITION ), 2 );
+			pointShader->BindTexture( "u_matProps", mGbuffer->GetTexture( GBufferTextureType::MAT_PROPS ), 3 );
+			pointShader->BindTexture( "u_ssao", mSSAOBlurTarget->GetTexture( ), 4 );
+			pointShader->SetUniform( "u_resolution", mGbuffer->GetResolution( ) );
+			pointShader->SetUniform( "u_camPos", mSceneCamera.GetPosition( ) );
 
 			for (auto& l : *pointLights)
 			{
@@ -1220,41 +1208,17 @@ namespace Enjon
 		mShadowDepth 				= new RenderTarget(2048, 2048);
 		mFinalTarget 				= new RenderTarget(width, height);
 		mSSAOTarget					= new RenderTarget( width, height );
-		mSSAOBlurTarget				= new RenderTarget( width, height );
+		mSSAOBlurTarget				= new RenderTarget( width / 2, height / 2 );
 
 		mBatch 						= new SpriteBatch();
 		mBatch->Init();
 
 		mFullScreenQuad 			= new FullScreenQuad();
 
-		// Initialize SSAO buffers
-		glGenFramebuffers( 1, &mSSAOFBO );
-		glGenFramebuffers( 1, &mSSAOBlurFBO );
-		
-		glGenTextures( 1, &mSSAOColorBuffer );
-		glBindTexture( GL_TEXTURE_2D, mSSAOColorBuffer );
-		glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RGB, GL_FLOAT, NULL );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mSSAOColorBuffer, 0 );
-		if ( glCheckFramebufferStatus( GL_FRAMEBUFFER ) != GL_FRAMEBUFFER_COMPLETE )
-			std::cout << "SSAO Framebuffer not complete!" << std::endl;
-		// and blur stage
-		glBindFramebuffer( GL_FRAMEBUFFER, mSSAOBlurFBO );
-		glGenTextures( 1, &mSSAOColorBufferBlur );
-		glBindTexture( GL_TEXTURE_2D, mSSAOColorBufferBlur );
-		glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RGB, GL_FLOAT, NULL );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mSSAOColorBufferBlur, 0 );
-		if ( glCheckFramebufferStatus( GL_FRAMEBUFFER ) != GL_FRAMEBUFFER_COMPLETE )
-			std::cout << "SSAO Blur Framebuffer not complete!" << std::endl;
-		glBindFramebuffer( GL_FRAMEBUFFER, 0 ); 
-
 		// Generate sample kernel
 		std::uniform_real_distribution< f32 > randomFloats( 0.0f, 1.0f );
 		std::default_random_engine generator;
-		for ( u32 i = 0; i < 64; ++i )
+		for ( u32 i = 0; i < 16; ++i )
 		{
 			Enjon::Vec3 sample( randomFloats( generator ) * 2.0f - 1.0f, randomFloats( generator ) * 2.0f - 1.0f, randomFloats( generator ) );
 			sample *= randomFloats( generator );
@@ -1268,7 +1232,7 @@ namespace Enjon
 
 		// Generate noise texture
 		std::vector< Enjon::Vec3 > ssaoNoise;
-		for ( unsigned int i = 0; i < 16; i++ )
+		for ( unsigned int i = 0; i < 256 * 256; i++ )
 		{
 			Enjon::Vec3 noise( randomFloats( generator ) * 2.0 - 1.0, randomFloats( generator ) * 2.0 - 1.0, 0.0f ); // rotate around z-axis (in tangent space)
 			ssaoNoise.push_back( noise );
@@ -1276,7 +1240,7 @@ namespace Enjon
 
 		glGenTextures( 1, &mSSAONoiseTexture );
 		glBindTexture( GL_TEXTURE_2D, mSSAONoiseTexture );
-		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB32F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[ 0 ] );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB32F, 256, 256, 0, GL_RGB, GL_FLOAT, &ssaoNoise[ 0 ] );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );

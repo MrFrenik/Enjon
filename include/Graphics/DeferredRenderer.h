@@ -270,9 +270,9 @@ namespace Enjon
 
 			Enjon::Mesh* mMesh = nullptr;
 
-			f32 mSSAORadius = 0.5f;
-			f32 mSSAOBias = 0.025f;
-			f32 mSSAOIntensity = 1.45f;
+			f32 mSSAORadius = 0.353f;
+			f32 mSSAOBias = 0.041f;
+			f32 mSSAOIntensity = 1.24f;
 	};
 }
 
