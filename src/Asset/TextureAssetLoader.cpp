@@ -44,7 +44,6 @@ namespace Enjon
 		if ( fileExtension.compare( "hdr" ) == 0 )
 		{
 			stbi_set_flip_vertically_on_load( true );
-			s32 width, height, nComps;
 			f32* data = stbi_loadf( filePath.c_str( ), &width, &height, &nComps, 0 );
 
 			glGenTextures( 1, &tex->mId );

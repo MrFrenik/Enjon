@@ -254,7 +254,8 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( fontPath, false );
 
 	// Assign font
-	mFont = mAssetManager->GetAsset< Enjon::UIFont >( "e.development.enjon.assets.fonts.cutout.cutout" );
+	Enjon::String fontQualifiedName = Enjon::AssetLoader::GetQualifiedName( fontPath ); 
+	mFont = mAssetManager->GetAsset< Enjon::UIFont >( fontQualifiedName );
 
 	testProperty = mCameraSpeed; 
 
