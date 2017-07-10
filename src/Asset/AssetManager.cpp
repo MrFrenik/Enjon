@@ -154,6 +154,13 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
+	Enjon::String AssetManager::GetName( )
+	{
+		return mName;
+	}
+	
+	//============================================================================================ 
+			
 	Result AssetManager::AddToDatabase( const String& filePath, b8 isRelativePath )
 	{
 		// Have to do a switch based on extension of file

@@ -67,6 +67,11 @@ namespace Enjon
 			Result AddToDatabase( const String& filePath, b8 isRelativePath = true );
 			
 			/**
+			*@brief Gets asset manager name
+			*/
+			Enjon::String GetName( );
+			
+			/**
 			*@brief
 			*/
 			void SetAssetsPath( const String& filePath );

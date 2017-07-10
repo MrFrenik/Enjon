@@ -88,10 +88,41 @@
 		},
 		"roughMult": {
 			"Template": "MultiplyFunctionNode"
+		},
+		"panner": {
+			"Template": "PannerNode"
+		},
+		"pannerSpeed": {
+			"Template": "ConstantVec2Node",
+			"IsUniform": true
+		},
+		"pannerMult": {
+			"Template": "MultiplyFunctionNode"
+		},
+		"emissiveMap": {
+			"Template": "Texture2DSamplerNode",
+			"IsUniform": true
 		}
 	},
 
 	"NodeLinks": {
+		"pannerMult": {
+			"Inputs": {
+				"Input_0": {
+					"panner": "Value"
+				},
+				"Input_1": {
+					"texMult": "Value"
+				}
+			}
+		},
+		"panner": {
+			"Inputs": {
+				"Speed": {
+					"pannerSpeed": "Value"
+				}
+			}
+		},
 		"roughMult": {
 			"Inputs": {
 				"Input_0": {
@@ -154,28 +185,42 @@
 		"roughMap": {
 			"Inputs": {
 				"UV": {
-					"texMult": "Value"
+					"pannerMult": "Value"
 				}
 			}
 		},
 		"albedoMap": {
 			"Inputs": {
 				"UV": {
-					"texMult": "Value"
+					"pannerMult": "Value"
 				}
 			}
 		},
 		"normalMap": {
 			"Inputs": {
 				"UV": {
-					"texMult": "Value"
+					"pannerMult": "Value"
 				}
 			}
 		},
 		"metallicMap": {
 			"Inputs": {
 				"UV": {
-					"texMult": "Value"
+					"pannerMult": "Value"
+				}
+			}
+		},
+		"aoMap": {
+			"Inputs": {
+				"UV": {
+					"pannerMult": "Value"
+				}
+			}
+		},
+		"emissiveMap": {
+			"Inputs": {
+				"UV": {
+					"pannerMult": "Value"
 				}
 			}
 		},
@@ -216,13 +261,6 @@
 			"DefaultOverrides": {
 				"Value": "1.0"
 			}
-		},
-		"aoMap": {
-			"Inputs": {
-				"UV": {
-					"texMult": "Value"
-				}
-			}
 		}
 	},
 
@@ -250,7 +288,6 @@
 			},
 
 			"AO": {
-				"aoMap": "RGB"
 			},
 
 			"WorldPositionOffset": {

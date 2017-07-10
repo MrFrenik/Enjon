@@ -201,9 +201,9 @@ namespace Enjon
 		glDisable( GL_CULL_FACE );
 
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
-		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
+		Enjon::String hdrFilePath = "/Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/03-Ueno-Shrine_3k.hdr";
-		Enjon::String hdrFilePath = "/Textures/HDR/03-Ueno-Shrine_3k.hdr";
+		//Enjon::String hdrFilePath = "/Textures/HDR/03-Ueno-Shrine_3k.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Newport_Loft_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Factory_Catwalk_2k.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/WinterForest_Ref.hdr";
@@ -212,9 +212,10 @@ namespace Enjon
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Mans_Outside_2k.hdr";
 
 		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
-		am->AddToDatabase( hdrFilePath );
+		am->AddToDatabase( hdrFilePath ); 
+		Enjon::String qualifiedName = Enjon::Utils::ToLower( am->GetName() ) + AssetLoader::GetQualifiedName( hdrFilePath );
 
-		Enjon::AssetHandle< Enjon::Texture > hdrEnv = am->GetAsset< Enjon::Texture >( "isoarpg.textures.hdr.03-ueno-shrine_3k" ); 
+		Enjon::AssetHandle< Enjon::Texture > hdrEnv = am->GetAsset< Enjon::Texture >( qualifiedName ); 
 
 		{ 
 			// Generate cubemap FBO, RBO
@@ -802,7 +803,7 @@ namespace Enjon
 
 		directionalShader->Use();
 		{
-			directionalShader->SetUniform("u_camPos", mSceneCamera.GetPosition() + mSceneCamera.Backward());
+			directionalShader->SetUniform( "u_camPos", mSceneCamera.GetPosition( ) );
 			for (auto& l : *directionalLights)
 			{
 				ColorRGBA16 color = l->GetColor();

@@ -17,11 +17,17 @@ in VS_OUT
 uniform float uWorldTime = 1.0f;
 
 // Variable Declarations
+uniform vec2 pannerSpeed;
+
+vec2 panner;
+
 uniform float texCoordMultiplier;
 
 vec2 uTexCoords;
 
 vec2 texMult;
+
+vec2 pannerMult;
 
 uniform sampler2D albedoMap;
 uniform sampler2D normalMap;
@@ -31,31 +37,32 @@ uniform sampler2D roughMap;
 uniform float roughFloat;
 
 vec3 roughMult;
-uniform sampler2D aoMap;
 
 // Fragment Main
 void main()
 {
 	// Base Color
 
+panner = fs_in.TexCoords + pannerSpeed * uWorldTime;
+
 uTexCoords = fs_in.TexCoords;
 texMult = texCoordMultiplier * fs_in.TexCoords;
-vec4 albedoMap_sampler = texture2D( albedoMap, texMult );
+pannerMult = panner * texMult;
+vec4 albedoMap_sampler = texture2D( albedoMap, pannerMult );
 	AlbedoOut = vec4(albedoMap_sampler.rgb, 1.0);
 
 	// Normal
-	vec4 normalMap_sampler = texture2D( normalMap, texMult );
+	vec4 normalMap_sampler = texture2D( normalMap, pannerMult );
 	vec3 normal = normalize( normalMap_sampler.rgb * 2.0 - 1.0 );
 	normal = normalize( fs_in.TBN * normal );
 	NormalsOut = vec4( normal, 1.0 );
 
 	// Material Properties
 	
-	vec4 roughMap_sampler = texture2D( roughMap, texMult );
+	vec4 roughMap_sampler = texture2D( roughMap, pannerMult );
 
 roughMult = roughMap_sampler.rgb * roughFloat;
-	vec4 aoMap_sampler = texture2D( aoMap, texMult );
-	MatPropsOut = vec4( clamp( metallicFloat, 0.0, 1.0 ), clamp( roughMult.x, 0.0, 1.0 ), clamp( aoMap_sampler.rgb.x, 0.0, 1.0 ), 1.0);
+	MatPropsOut = vec4( clamp( metallicFloat, 0.0, 1.0 ), clamp( roughMult.x, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
 
 	// Emissive
 	EmissiveOut = vec4( 0.0, 0.0, 0.0, 1.0 );

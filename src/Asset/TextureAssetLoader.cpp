@@ -6,8 +6,10 @@
 #include "Graphics/picoPNG.h"
 #include "IO/IOManager.h"
 #include "Utils/FileUtils.h"
+#include "Math/Vec3.h"
 #include "Engine.h"
 
+#include <random>
 #include <GLEW/glew.h>
 #include <vector>
 
@@ -143,14 +145,34 @@ namespace Enjon
 	{ 
 		// Get assets directory
 		Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-		Enjon::String assetDir = am->GetAssetsPath( );
+		Enjon::String assetDir = am->GetAssetsPath( ); 
+		
+		u32 texID;
+		u32 width = 4;
+		u32 height = 4;
+		
+		// Generate noise texture
+		std::vector< Enjon::Vec3 > data;
+		for ( unsigned int i = 0; i < width * height; i++ )
+		{
+			Enjon::Vec3 white( 1.0f );
+			data.push_back( white );
+		}
 
-		// Get default texture
-		Enjon::Texture* tex = LoadTextureFromFile( assetDir + "/Textures/white.png" ); 
-		tex->mName = AssetLoader::GetQualifiedName( assetDir + "/Textures/white.png" );
+		//u32 texID = 0;
+		glGenTextures( 1, &texID );
+		glBindTexture( GL_TEXTURE_2D, texID );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_FLOAT, &data[ 0 ] );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT ); 
+		
+		Enjon::Texture* defaultTex = new Enjon::Texture( width, height, texID );
+		defaultTex->mName = "defaultTexture";
 
 		// Set default texture
-		mDefaultAsset = tex;
+		mDefaultAsset = defaultTex;
 	} 
 	
 	Result TextureAssetLoader::CacheTextureData( const u8* data, u32 length, Texture* texture )

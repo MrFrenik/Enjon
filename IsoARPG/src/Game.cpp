@@ -396,7 +396,7 @@ Enjon::Result Game::Initialize()
 
 	mGreen.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mGreenMat );
 	mGreen.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("isoarpg.models.unit_cube" ) );
-	mRed.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mRedMat );
+	mRed.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mRedMat ); 
 	mRed.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("isoarpg.models.unit_cube" ) );
 	mBlue.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mBlueMat );
 	mBlue.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("isoarpg.models.unit_cube" ) );
@@ -410,7 +410,7 @@ Enjon::Result Game::Initialize()
 	mGreen.Get()->AddChild( mRed );
 	mGreen.Get()->AddChild( mBlue ); 
 
-	rgc2->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.dragon" ) );
+	rgc2->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.bunny" ) );
 	rgc->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.cerebus" ) );
 	rgc->SetMaterial( mGunMat );
 	rgc2->SetMaterial( mPlasticMat );
@@ -739,7 +739,7 @@ Enjon::Result Game::Initialize()
 
 		btTransform groundTransform;
 		groundTransform.setIdentity();
-		groundTransform.setOrigin(btVector3(0, -0.8, 0));
+		groundTransform.setOrigin(btVector3(0, -1.f, 0));
 
 		btScalar mass(0.);
 
@@ -1069,7 +1069,7 @@ Enjon::Result Game::ProcessInput(f32 dt)
 			ent->SetScale(v3(scalar));
 			gc->SetMesh(mSphereMesh);
 
-			u32 roll = Enjon::Random::Roll( 0, 5 );
+			u32 roll = Enjon::Random::Roll( 0, 6 );
 			switch ( roll )
 			{
 				case 0: gc->SetMaterial( mFloorMat ); break;
@@ -1077,6 +1077,8 @@ Enjon::Result Game::ProcessInput(f32 dt)
 				case 2: gc->SetMaterial( mRockMat ); break;
 				case 3: gc->SetMaterial( mRedMat ); break;
 				case 4: gc->SetMaterial( mPlasticMat ); break;
+				case 5: gc->SetMaterial( mGreenMat ); break;
+				case 6: gc->SetMaterial( mBlueMat ); break;
 				default: gc->SetMaterial( mGunMat ); break;
 			}
 
