@@ -380,7 +380,7 @@ namespace Enjon
 
 			// pre-allocate enough memory for the LUT texture.
 			glBindTexture( GL_TEXTURE_2D, mBRDFLUT );
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RGB, GL_FLOAT, 0 );
+			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA16F, 512, 512, 0, GL_RGBA, GL_FLOAT, 0 );
 			// be sure to set wrapping mode to GL_CLAMP_TO_EDGE
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
@@ -398,26 +398,11 @@ namespace Enjon
 			brdfShader->Use( );
 			{
 				glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-				RenderQuad( ); 
-				mBatch->Begin( );
-				{
-					mBatch->Add(
-						Vec4( -1, -1, 2, 2 ),
-						Vec4( 0, 0, 1, 1 ),
-						0
-					);
-				}
-				mBatch->End( );
-				mBatch->RenderBatch( );
+				mFullScreenQuad->Submit( );
 			}
 			brdfShader->Unuse( );
 
-			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-
-			// Get brdf texture
-			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-			mBRDFHandle = am->GetAsset< Enjon::Texture >( "isoarpg.textures.brdf" ); 
-			brdfset = true;
+			glBindFramebuffer( GL_FRAMEBUFFER, 0 ); 
 		}
 	
 		// Shader graph creation
@@ -612,7 +597,6 @@ namespace Enjon
 			}
 		} 
 		sgShader->Unuse( ); 
-		
 
 		// Quadbatches
 		shader = Enjon::ShaderManager::Get("QuadBatch");
@@ -712,7 +696,7 @@ namespace Enjon
 				shader->BindTexture( "gNormal", mGbuffer->GetTexture( GBufferTextureType::NORMAL ), 1 );
 				shader->BindTexture( "texNoise", mSSAONoiseTexture, 2 ); 
 				shader->BindTexture( "uDepthMap", mGbuffer->GetDepth( ), 3 ); 
-				RenderQuad( );
+				mFullScreenQuad->Submit( );
 			}
 			shader->Unuse( ); 
 		}
@@ -727,7 +711,7 @@ namespace Enjon
 			shader->Use( );
 			{
 				shader->BindTexture( "ssaoInput", mSSAOTarget->GetTexture( ), 0 );
-				RenderQuad( ); 
+				mFullScreenQuad->Submit( );
 			}
 			shader->Unuse( ); 
 		}
@@ -768,17 +752,9 @@ namespace Enjon
 			glActiveTexture( GL_TEXTURE0 );
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mIrradianceMap );
 			glActiveTexture( GL_TEXTURE1 );
-			glBindTexture( GL_TEXTURE_CUBE_MAP, mPrefilteredMap );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mPrefilteredMap ); 
 
-			if ( useOther )
-			{
-				glActiveTexture( GL_TEXTURE2 );
-				glBindTexture( GL_TEXTURE_2D, mBRDFLUT ); 
-			}
-			else
-			{ 
-				ambientShader->BindTexture( "uBRDFLUT", mBRDFHandle.Get( )->GetTextureId( ), 2 );
-			}
+			ambientShader->BindTexture( "uBRDFLUT", mBRDFLUT, 2 );
 			ambientShader->BindTexture("uAlbedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 3);
 			ambientShader->BindTexture("uNormalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 4);
 			ambientShader->BindTexture("uPositionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 5);
@@ -790,14 +766,7 @@ namespace Enjon
 			ambientShader->SetUniform( "uCamPos", mSceneCamera.GetPosition() );
 
 			// Render
-				mBatch->Begin();
-					mBatch->Add(
-									Vec4(-1, -1, 2, 2),
-									Vec4(0, 0, 1, 1),
-									mGbuffer->GetTexture(GBufferTextureType::ALBEDO)
-								);
-				mBatch->End();
-				mBatch->RenderBatch();
+			mFullScreenQuad->Submit( );
 		}
 		ambientShader->Unuse();
 
@@ -822,16 +791,7 @@ namespace Enjon
 				directionalShader->SetUniform("u_lightIntensity", 	l->GetIntensity());
 
 				// Render	
-				// TODO(): Fix full screen quad - super janky
-				// mFullScreenQuad->Submit();
-				mBatch->Begin();
-					mBatch->Add(
-									Vec4(-1, -1, 2, 2),
-									Vec4(0, 0, 1, 1),
-									mGbuffer->GetTexture(GBufferTextureType::ALBEDO)
-								);
-				mBatch->End();
-				mBatch->RenderBatch();
+				 mFullScreenQuad->Submit();
 			}
 		}
 		directionalShader->Unuse();
@@ -858,14 +818,7 @@ namespace Enjon
 				pointShader->SetUniform("u_radius", l->GetRadius());
 
 				// Render Light to screen
-				mBatch->Begin();
-					mBatch->Add(
-									Vec4(-1, -1, 2, 2),
-									Vec4(0, 0, 1, 1),
-									mGbuffer->GetTexture(GBufferTextureType::ALBEDO)
-								);
-				mBatch->End();
-				mBatch->RenderBatch();
+				mFullScreenQuad->Submit( );
 			}
 		}
 		pointShader->Unuse();
@@ -896,14 +849,7 @@ namespace Enjon
 					spotShader->SetUniform("u_outerCutoff", params.mOuterCutoff);
 
 					// Render Light to screen
-					mBatch->Begin();
-						mBatch->Add(
-										Vec4(-1, -1, 2, 2),
-										Vec4(0, 0, 1, 1),
-										mGbuffer->GetTexture(GBufferTextureType::ALBEDO)
-									);
-					mBatch->End();
-					mBatch->RenderBatch();
+					mFullScreenQuad->Submit( );
 				}
 			}
 		}
@@ -926,18 +872,12 @@ namespace Enjon
 			mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT, RGBA16_Black());
 			luminanceProgram->Use();
 			{
+				luminanceProgram->BindTexture( "tex", mLightingBuffer->GetTexture( ), 0 );
 				luminanceProgram->BindTexture("u_emissiveMap", mGbuffer->GetTexture(GBufferTextureType::EMISSIVE), 1);
 				luminanceProgram->SetUniform("u_threshold", mToneMapSettings.mThreshold);
-				mBatch->Begin();
-				{
-					mBatch->Add(
-										Vec4(-1, -1, 2, 2),
-										Vec4(0, 0, 1, 1),
-										mLightingBuffer->GetTexture()
-									);
-				}
-				mBatch->End();
-				mBatch->RenderBatch();
+
+				// Render
+				mFullScreenQuad->Submit( ); 
 			}
 			luminanceProgram->Unuse();
 		}
@@ -974,17 +914,11 @@ namespace Enjon
 
 					program->SetUniform("u_weight", mBloomSettings.mWeights.x);
 					program->SetUniform("u_blurRadius", mBloomSettings.mRadius.x);
-					GLuint texID = i == 0 ? mLuminanceTarget->GetTexture() : isEven ? mSmallBlurVertical->GetTexture() : mSmallBlurHorizontal->GetTexture();
-					mBatch->Begin();
-					{
-			    		mBatch->Add(
-									Vec4(-1, -1, 2, 2),
-									Vec4(0, 0, 1, 1), 
-									texID
-								);
-					}
-					mBatch->End();
-					mBatch->RenderBatch();
+					GLuint texID = i == 0 ? mLuminanceTarget->GetTexture() : isEven ? mSmallBlurVertical->GetTexture() : mSmallBlurHorizontal->GetTexture(); 
+					program->BindTexture( "tex", texID, 0 );
+
+					// Render
+					mFullScreenQuad->Submit( );
 				}
 				program->Unuse();
 			}	
@@ -1010,18 +944,11 @@ namespace Enjon
 
 					program->SetUniform("u_weight", mBloomSettings.mWeights.y);
 					program->SetUniform("u_blurRadius", mBloomSettings.mRadius.y);
-					GLuint texID = i == 0 ? mSmallBlurVertical->GetTexture() : isEven ? mMediumBlurVertical->GetTexture() : mMediumBlurHorizontal->GetTexture();
-					//GLuint texID = i == 0 ? mLuminanceTarget->GetTexture() : isEven ? mMediumBlurVertical->GetTexture() : mMediumBlurHorizontal->GetTexture();
-					mBatch->Begin();
-					{
-			    		mBatch->Add(
-									Vec4(-1, -1, 2, 2),
-									Vec4(0, 0, 1, 1), 
-									texID
-								);
-					}
-					mBatch->End();
-					mBatch->RenderBatch();
+					GLuint texID = i == 0 ? mSmallBlurVertical->GetTexture() : isEven ? mMediumBlurVertical->GetTexture() : mMediumBlurHorizontal->GetTexture(); 
+					program->BindTexture( "tex", texID, 0 );
+
+					// Render
+					mFullScreenQuad->Submit( );
 				}
 				program->Unuse();
 			}	
@@ -1047,18 +974,11 @@ namespace Enjon
 
 					program->SetUniform("u_weight", mBloomSettings.mWeights.z);
 					program->SetUniform("u_blurRadius", mBloomSettings.mRadius.z);
-					GLuint texID = i == 0 ? mMediumBlurVertical->GetTexture() : isEven ? mLargeBlurVertical->GetTexture() : mLargeBlurHorizontal->GetTexture();
-					//GLuint texID = i == 0 ? mLuminanceTarget->GetTexture() : isEven ? mLargeBlurVertical->GetTexture() : mLargeBlurHorizontal->GetTexture();
-					mBatch->Begin();
-					{
-			    		mBatch->Add(
-									Vec4(-1, -1, 2, 2),
-									Vec4(0, 0, 1, 1), 
-									texID
-								);
-					}
-					mBatch->End();
-					mBatch->RenderBatch();
+					GLuint texID = i == 0 ? mMediumBlurVertical->GetTexture() : isEven ? mLargeBlurVertical->GetTexture() : mLargeBlurHorizontal->GetTexture(); 
+					program->BindTexture( "tex", texID, 0 );
+
+					// Render
+					mFullScreenQuad->Submit( ); 
 				}
 				program->Unuse();
 			}	
@@ -1092,18 +1012,12 @@ namespace Enjon
 			fxaaProgram->Use();
 			{
 				auto viewPort = GetViewport();
+				fxaaProgram->BindTexture( "tex", input->GetTexture( ), 0 );
 				fxaaProgram->SetUniform("u_resolution", Vec2(viewPort.x, viewPort.y));
 				fxaaProgram->SetUniform("u_FXAASettings", Vec3(mFXAASettings.mSpanMax, mFXAASettings.mReduceMul, mFXAASettings.mReduceMin));
-				mBatch->Begin();
-				{
-					mBatch->Add(
-										Vec4(-1, -1, 2, 2),
-										Vec4(0, 0, 1, 1),
-										input->GetTexture()
-									);
-				}
-				mBatch->End();
-				mBatch->RenderBatch();
+
+				// Render
+				mFullScreenQuad->Submit( );
 			}
 			fxaaProgram->Unuse();
 		}
@@ -1120,6 +1034,7 @@ namespace Enjon
 			mWindow.Clear();
 			compositeProgram->Use();
 			{
+				compositeProgram->BindTexture( "tex", input->GetTexture( ), 0 );
 				compositeProgram->BindTexture("u_blurTexSmall", mSmallBlurVertical->GetTexture(), 1);
 				compositeProgram->BindTexture("u_blurTexMedium", mMediumBlurVertical->GetTexture(), 2);
 				compositeProgram->BindTexture("u_blurTexLarge", mLargeBlurVertical->GetTexture(), 3);
@@ -1127,16 +1042,9 @@ namespace Enjon
 				compositeProgram->SetUniform("u_gamma", mToneMapSettings.mGamma);
 				compositeProgram->SetUniform("u_bloomScalar", mToneMapSettings.mBloomScalar);
 				compositeProgram->SetUniform("u_saturation", mToneMapSettings.mSaturation);
-				mBatch->Begin();
-				{
-					mBatch->Add(
-										Vec4(-1, -1, 2, 2),
-										Vec4(0, 0, 1, 1),
-										input->GetTexture()
-									);
-				}
-				mBatch->End();
-				mBatch->RenderBatch();
+
+				// Render
+				mFullScreenQuad->Submit( );
 			}
 			compositeProgram->Unuse();
 		}
@@ -1513,7 +1421,7 @@ namespace Enjon
 				const char* string_name = "BRDFLUT";
 				ImGui::Text( string_name );
 				ImTextureID img = ( ImTextureID )mBRDFLUT;
-				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
+				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 0 ), ImVec2( 1, 1 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
 				{
 					mCurrentRenderTexture = mBRDFLUT;
 				}
@@ -1685,7 +1593,6 @@ namespace Enjon
 							}
 						} break;
 					}
-
 				} 
 			}
 		}
@@ -1698,15 +1605,7 @@ namespace Enjon
 		}
 
 		ImGui::Image( ImTextureID( mHDRTextureID ), ImVec2( 128, 128 ) );
-		if ( brdfset )
-		{
-			ImGui::Image( ImTextureID( mBRDFHandle.Get()->GetTextureId() ), ImVec2( 128, 128 ) ); 
-		}
-
-		if ( ImGui::Button( "UseOther" ) )
-		{
-			useOther ^= 1;
-		}
+		ImGui::Image( ImTextureID( mBRDFLUT ), ImVec2( 128, 128 ) ); 
 	}
 
 	//=======================================================================================================
@@ -1743,10 +1642,10 @@ namespace Enjon
 		{
 			float quadVertices[ ] = {
 				// positions        // texture Coords
-				-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-				1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-				1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+				-1.0f,  1.0f, 0.0f, 1.0f,
+				-1.0f, -1.0f, 0.0f, 0.0f,
+				1.0f,  1.0f, 1.0f, 1.0f,
+				1.0f, -1.0f, 1.0f, 0.0f,
 			};
 			// setup plane VAO
 			glGenVertexArrays( 1, &quadVAO );
@@ -1755,9 +1654,9 @@ namespace Enjon
 			glBindBuffer( GL_ARRAY_BUFFER, quadVBO );
 			glBufferData( GL_ARRAY_BUFFER, sizeof( quadVertices ), &quadVertices, GL_STATIC_DRAW );
 			glEnableVertexAttribArray( 0 );
-			glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof( float ), ( void* )0 );
+			glVertexAttribPointer( 0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof( float ), ( void* )0 );
 			glEnableVertexAttribArray( 1 );
-			glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof( float ), ( void* )( 3 * sizeof( float ) ) );
+			glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof( float ), ( void* )( 2 * sizeof( float ) ) );
 		}
 		glBindVertexArray( quadVAO );
 		glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );

@@ -584,7 +584,7 @@ Enjon::Result Game::Initialize()
 		scene->AddDirectionalLight( mSun );
 		//scene->AddDirectionalLight( mSun2 );
 		scene->AddRenderable(gc->GetRenderable());
-		//scene->AddPointLight( pc->GetLight( ) );
+		scene->AddPointLight( pc->GetLight( ) );
 		scene->AddRenderable( mGreen.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 		scene->AddRenderable( mRed.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 		scene->AddRenderable( mBlue.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 

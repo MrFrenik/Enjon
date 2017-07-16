@@ -3,7 +3,6 @@
 in DATA
 {
 	vec2 Position;	
-	vec4 Color;
 	vec2 TexCoords;
 }fs_in;
 

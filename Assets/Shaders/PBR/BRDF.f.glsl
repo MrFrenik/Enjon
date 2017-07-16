@@ -1,5 +1,5 @@
 #version 330 core
-out vec3 FragColor;
+out vec4 FragColor;
 in vec2 TexCoords;
 
 const float PI = 3.14159265359;
@@ -108,6 +108,8 @@ vec2 IntegrateBRDF(float NdotV, float roughness)
 // ----------------------------------------------------------------------------
 void main() 
 {
-    vec2 integratedBRDF = IntegrateBRDF(TexCoords.x, TexCoords.y);
-    FragColor = vec3( integratedBRDF, 0.0 ); 
+	vec2 tc = TexCoords * 0.5 + 0.5;
+    vec2 integratedBRDF = IntegrateBRDF(tc.x, 1.0 - tc.y);
+    FragColor = vec4( integratedBRDF, 0.0, 1.0 ); 
+	//FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
 }
