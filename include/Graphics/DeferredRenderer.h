@@ -202,8 +202,9 @@ namespace Enjon
 
 			void STBTest( );
 
+			void InstancingTest( );
+
 			void RenderCube( );
-			void RenderQuad( );
 
 		private:
 			// Frame buffers
@@ -273,6 +274,11 @@ namespace Enjon
 			f32 mSSAORadius = 0.353f;
 			f32 mSSAOBias = 0.041f;
 			f32 mSSAOIntensity = 1.24f;
+
+			Enjon::Mat4* mModelMatricies = nullptr;
+			Enjon::Renderable* mInstancedRenderable = nullptr;
+			u32 mInstancedAmount = 1000000;
+			u32 mInstancedVBO;
 	};
 }
 

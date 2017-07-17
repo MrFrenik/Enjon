@@ -87,11 +87,22 @@ namespace Enjon
 					"AssetHandle:: T must inherit from Asset.");	
 
 				mAsset = asset;
-			}
+			} 
 
+			/*
+			* @brief Destructor
+			*/
 			~AssetHandle( )
 			{ 
 			}
+			
+			/*
+			* @brief
+			*/
+			explicit operator bool( ) 
+			{
+				return IsValid( );
+			} 
 
 			/*
 			* @brief

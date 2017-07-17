@@ -185,7 +185,6 @@ namespace Enjon
 			}
 		}
 
-		//u32 texID = 0;
 		glGenTextures( 1, &texID );
 		glBindTexture( GL_TEXTURE_2D, texID );
 		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_FLOAT, &data[ 0 ] );

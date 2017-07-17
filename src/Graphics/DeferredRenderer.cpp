@@ -101,6 +101,7 @@ namespace Enjon
 
 		// Initialize scene camera
 		mSceneCamera = Enjon::Camera(mWindow.GetViewport());
+		mSceneCamera.SetNearFar( 0.01f, 1000.0f );
 		mSceneCamera.SetProjection(ProjectionType::Perspective);
 		mSceneCamera.SetPosition(Vec3(0, 5, 10));
 		mSceneCamera.LookAt(Vec3(0, 0, 0));
@@ -201,14 +202,13 @@ namespace Enjon
 		glDisable( GL_CULL_FACE );
 
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
-		Enjon::String hdrFilePath = "/Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
-		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/03-Ueno-Shrine_3k.hdr";
+		//Enjon::String hdrFilePath = "/Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
 		//Enjon::String hdrFilePath = "/Textures/HDR/03-Ueno-Shrine_3k.hdr";
-		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Newport_Loft_Ref.hdr";
+		//Enjon::String hdrFilePath = "/Textures/HDR/Newport_Loft_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Factory_Catwalk_2k.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/WinterForest_Ref.hdr";
-		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Alexs_Apt_2k.hdr";
-		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Mono_Lake_B_Ref.hdr";
+		Enjon::String hdrFilePath = "/Textures/HDR/Alexs_Apt_2k.hdr";
+		//Enjon::String hdrFilePath = "/Textures/HDR/Mono_Lake_B_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Mans_Outside_2k.hdr";
 
 		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
@@ -431,6 +431,87 @@ namespace Enjon
 				}
 			}
 		}
+
+		InstancingTest( );
+	}
+
+	//======================================================================================================
+
+	void DeferredRenderer::InstancingTest( )
+	{
+		// generate a large list of semi-random model transformation matrices
+		// ------------------------------------------------------------------
+		mModelMatricies = new Enjon::Mat4[ mInstancedAmount ];
+		f32 radius = 120.0;
+		f32 offset = 40.0f;
+		for ( u32 i = 0; i < mInstancedAmount; i++ )
+		{
+			Enjon::Mat4 model;
+			 //1. translation: displace along circle with 'radius' in range [-offset, offset]
+			f32 angle = ( f32 )i / ( f32 )mInstancedAmount * 360.0f;
+			f32 displacement = ( rand( ) % ( s32 )( 2 * offset * 100 ) ) / 100.0f - offset;
+			f32 x = sin( angle ) * radius + displacement;
+			displacement = ( rand( ) % ( s32 )( 2 * offset * 100 ) ) / 100.0f - offset;
+			f32 y = displacement * 0.4f; // keep height of asteroid field smaller compared to width of x and z
+			displacement = ( rand( ) % ( s32 )( 2 * offset * 100 ) ) / 100.0f - offset;
+			f32 z = cos( angle ) * radius + displacement;
+			model *= Enjon::Mat4::Translate( Enjon::Vec3( x, y, z ) );
+
+			// 2. scale: Scale between 0.05 and 0.25f
+			f32 scale = ( rand( ) % 40 ) / 100.0f + 0.05;
+			model *= Enjon::Mat4::Scale( Enjon::Vec3( scale ) );
+
+			// 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
+			f32 rotAngle = ( rand( ) % 360 );
+			model *= Enjon::Mat4::Rotate( rotAngle, Enjon::Vec3( 0.4f, 0.6f, 0.8f ) ); 
+
+			// 4. now add to list of matrices
+			mModelMatricies[ i ] = model;
+		} 
+
+		// Get a mesh and make it instanced... or something
+		auto db = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "isoarpg.models.quad" );
+		if ( mesh )
+		{
+			// Set bunny mesh for later use
+			mInstancedRenderable = new Enjon::Renderable( );
+			mInstancedRenderable->SetMesh( mesh );
+			Enjon::Material* instancedMat = new Enjon::Material( );
+			instancedMat->SetTexture(Enjon::TextureSlotType::Albedo, db->GetAsset<Enjon::Texture>("isoarpg.materials.copperrock.albedo"));
+			instancedMat->SetTexture(Enjon::TextureSlotType::Normal, db->GetAsset<Enjon::Texture>("isoarpg.materials.copperrock.normal"));
+			instancedMat->SetTexture(Enjon::TextureSlotType::Metallic, db->GetAsset<Enjon::Texture>("isoarpg.materials.copperrock.roughness"));
+			instancedMat->SetTexture(Enjon::TextureSlotType::Roughness, db->GetAsset<Enjon::Texture>("isoarpg.materials.copperrock.metallic"));
+			instancedMat->SetTexture(Enjon::TextureSlotType::Emissive, db->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
+			instancedMat->SetTexture(Enjon::TextureSlotType::AO, db->GetAsset<Enjon::Texture>("isoarpg.materials.copperrock.ao"));
+			mInstancedRenderable->SetMaterial( instancedMat );
+
+			glGenBuffers( 1, &mInstancedVBO );
+			glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
+			glBufferData( GL_ARRAY_BUFFER, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ], GL_STATIC_DRAW );
+
+			// Vertex attributes for instanced model matrix
+			glBindVertexArray( mesh.Get( )->VAO );
+			// Set attrib pointers for matrix
+			glEnableVertexAttribArray( 4 );
+			glVertexAttribPointer( 4, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )0 );
+
+			glEnableVertexAttribArray( 5 );
+			glVertexAttribPointer( 5, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )sizeof(Enjon::Vec4) );
+
+			glEnableVertexAttribArray( 6 );
+			glVertexAttribPointer( 6, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )( 2 * sizeof(Enjon::Vec4) ) );
+
+			glEnableVertexAttribArray( 7 );
+			glVertexAttribPointer( 7, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )( 3 * sizeof(Enjon::Vec4) ) );
+
+			glVertexAttribDivisor( 4, 1 );
+			glVertexAttribDivisor( 5, 1 );
+			glVertexAttribDivisor( 6, 1 );
+			glVertexAttribDivisor( 7, 1 );
+
+			glBindVertexArray( 0 );
+		} 
 	}
 
 	//======================================================================================================
@@ -568,6 +649,15 @@ namespace Enjon
 			}
 		}
 
+		// Render the bunny
+		auto material = mInstancedRenderable->GetMaterial( );
+		shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
+		shader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::Normal).Get()->GetTextureId(), 1);
+		shader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::Emissive).Get()->GetTextureId(), 2);
+		shader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::Metallic).Get()->GetTextureId(), 3);
+		shader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::Roughness).Get()->GetTextureId(), 4);
+		shader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO).Get()->GetTextureId(), 5);
+
 		// Unuse gbuffer shader
 		shader->Unuse();
 
@@ -641,9 +731,44 @@ namespace Enjon
 				quadBatch->RenderBatch();
 			}
 		}
-
-		// Unuse quadbatch shader
 		shader->Unuse();
+ 
+		static f32 rotT = 0.0f;
+		rotT += 0.01f; 
+
+		// Instancing test
+		shader = Enjon::ShaderManager::Get( "Instanced" ); 
+		shader->Use( );
+		{
+			// Set set shared uniform
+			shader->SetUniform( "uProjection", mSceneCamera.GetProjection( ) );
+			shader->SetUniform( "uView", mSceneCamera.GetView( ) );
+
+			// Get material
+			Material* material = mInstancedRenderable->GetMaterial( );
+
+			// Set material textures
+			shader->BindTexture( "uAlbedoMap", material->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTextureId( ), 0 );
+			shader->BindTexture( "uNormalMap", material->GetTexture( Enjon::TextureSlotType::Normal ).Get( )->GetTextureId( ), 1 );
+			shader->BindTexture( "uEmissiveMap", material->GetTexture( Enjon::TextureSlotType::Emissive ).Get( )->GetTextureId( ), 2 );
+			shader->BindTexture( "uMetallicMap", material->GetTexture( Enjon::TextureSlotType::Metallic ).Get( )->GetTextureId( ), 3 );
+			shader->BindTexture( "uRoughnessMap", material->GetTexture( Enjon::TextureSlotType::Roughness ).Get( )->GetTextureId( ), 4 );
+			shader->BindTexture( "uAoMap", material->GetTexture( Enjon::TextureSlotType::AO ).Get( )->GetTextureId( ), 5 );
+
+			// Render instanced mesh
+			mInstancedRenderable->GetMesh( ).Get( )->Bind( );
+		
+			//glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
+			//for ( u32 i = 0; i < mInstancedAmount; ++i )
+			//{
+			//	mModelMatricies[ i ] *= Enjon::Mat4::Rotate( rotT, Enjon::Vec3( 0, 1, 0 ) );
+			//}
+			//glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ] );
+
+			glDrawArraysInstanced( GL_TRIANGLES, 0, mInstancedRenderable->GetMesh( ).Get( )->DrawCount, mInstancedAmount );
+			mInstancedRenderable->GetMesh( ).Get( )->Unbind( ); 
+		} 
+		shader->Unuse( ); 
 
 		// Cubemap
 		glEnable( GL_DEPTH_TEST );
@@ -1035,13 +1160,13 @@ namespace Enjon
 			compositeProgram->Use();
 			{
 				compositeProgram->BindTexture( "tex", input->GetTexture( ), 0 );
-				compositeProgram->BindTexture("u_blurTexSmall", mSmallBlurVertical->GetTexture(), 1);
-				compositeProgram->BindTexture("u_blurTexMedium", mMediumBlurVertical->GetTexture(), 2);
-				compositeProgram->BindTexture("u_blurTexLarge", mLargeBlurVertical->GetTexture(), 3);
-				compositeProgram->SetUniform("u_exposure", mToneMapSettings.mExposure);
-				compositeProgram->SetUniform("u_gamma", mToneMapSettings.mGamma);
-				compositeProgram->SetUniform("u_bloomScalar", mToneMapSettings.mBloomScalar);
-				compositeProgram->SetUniform("u_saturation", mToneMapSettings.mSaturation);
+				compositeProgram->BindTexture( "u_blurTexSmall", mSmallBlurVertical->GetTexture( ), 1 );
+				compositeProgram->BindTexture( "u_blurTexMedium", mMediumBlurVertical->GetTexture( ), 2 );
+				compositeProgram->BindTexture( "u_blurTexLarge", mLargeBlurVertical->GetTexture( ), 3 );
+				compositeProgram->SetUniform( "u_exposure", mToneMapSettings.mExposure );
+				compositeProgram->SetUniform( "u_gamma", mToneMapSettings.mGamma );
+				compositeProgram->SetUniform( "u_bloomScalar", mToneMapSettings.mBloomScalar );
+				compositeProgram->SetUniform( "u_saturation", mToneMapSettings.mSaturation );
 
 				// Render
 				mFullScreenQuad->Submit( );
@@ -1631,37 +1756,6 @@ namespace Enjon
 		// Update camera aspect ratio
 		mSceneCamera.SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
 	} 
-
-	// renderQuad() renders a 1x1 XY quad in NDC
-	// -----------------------------------------
-	unsigned int quadVAO = 0;
-	unsigned int quadVBO = 0;
-	void DeferredRenderer::RenderQuad( )
-	{
-		if ( quadVAO == 0 )
-		{
-			float quadVertices[ ] = {
-				// positions        // texture Coords
-				-1.0f,  1.0f, 0.0f, 1.0f,
-				-1.0f, -1.0f, 0.0f, 0.0f,
-				1.0f,  1.0f, 1.0f, 1.0f,
-				1.0f, -1.0f, 1.0f, 0.0f,
-			};
-			// setup plane VAO
-			glGenVertexArrays( 1, &quadVAO );
-			glGenBuffers( 1, &quadVBO );
-			glBindVertexArray( quadVAO );
-			glBindBuffer( GL_ARRAY_BUFFER, quadVBO );
-			glBufferData( GL_ARRAY_BUFFER, sizeof( quadVertices ), &quadVertices, GL_STATIC_DRAW );
-			glEnableVertexAttribArray( 0 );
-			glVertexAttribPointer( 0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof( float ), ( void* )0 );
-			glEnableVertexAttribArray( 1 );
-			glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof( float ), ( void* )( 2 * sizeof( float ) ) );
-		}
-		glBindVertexArray( quadVAO );
-		glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
-		glBindVertexArray( 0 );
-	}
 
 	unsigned int cubeVAO = 0;
 	unsigned int cubeVBO = 0;

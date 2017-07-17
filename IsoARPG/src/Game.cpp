@@ -142,6 +142,9 @@ Enjon::Result Game::Initialize()
 	mInput = subSysCatalog->Get<Enjon::Input>();
 
 	// Paths to resources
+	Enjon::String grassTexturePath		= Enjon::String("/Textures/grass.png");
+	Enjon::String quadPath				= Enjon::String("/Models/quad.obj");
+	Enjon::String rockPath				= Enjon::String("/Models/rock.obj");
 	Enjon::String cerebusMeshPath		= Enjon::String("/Models/cerebus.obj");
 	Enjon::String buddhaMeshPath		= Enjon::String("/Models/buddha.obj");
 	Enjon::String bunnyMeshPath			= Enjon::String("/Models/bunny.obj");
@@ -183,6 +186,12 @@ Enjon::Result Game::Initialize()
 	Enjon::String scuffedGoldNormalPath		= Enjon::String("/Materials/ScuffedGold/Normal.png"); 
 	Enjon::String scuffedGoldMetallicPath	= Enjon::String("/Materials/ScuffedGold/Metallic.png"); 
 	Enjon::String scuffedGoldRoughnessPath	= Enjon::String("/Materials/ScuffedGold/Roughness.png"); 
+	Enjon::String rockAlbedoPath		= Enjon::String("/Materials/CopperRock/Albedo.png"); 
+	Enjon::String rockNormalPath		= Enjon::String("/Materials/CopperRock/Normal.png"); 
+	Enjon::String rockRoughnessPath		= Enjon::String("/Materials/CopperRock/Roughness.png"); 
+	Enjon::String rockMetallicPath		= Enjon::String("/Materials/CopperRock/Metallic.png"); 
+	Enjon::String rockEmissivePath		= Enjon::String("/Materials/CopperRock/Emissive.png"); 
+	Enjon::String rockAOPath			= Enjon::String("/Materials/CopperRock/AO.png"); 
 	Enjon::String frontNormalPath		= Enjon::String("/Textures/front_normal.png"); 
 	Enjon::String brdfPath				= Enjon::String("/Textures/brdf.png"); 
 	Enjon::String waterPath				= Enjon::String("/Textures/water.png"); 
@@ -203,6 +212,9 @@ Enjon::Result Game::Initialize()
 	mFont = new Enjon::UIFont( fontPath );
 
 	// Add to asset database
+	mAssetManager->AddToDatabase( grassTexturePath );
+	mAssetManager->AddToDatabase( quadPath );
+	mAssetManager->AddToDatabase( rockPath );
 	mAssetManager->AddToDatabase( cerebusAlbedoPath );
 	mAssetManager->AddToDatabase( cerebusNormalPath );
 	mAssetManager->AddToDatabase( cerebusMetallicPath );
@@ -226,6 +238,12 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( plasticNormalPath );
 	mAssetManager->AddToDatabase( plasticRoughnessPath );
 	mAssetManager->AddToDatabase( plasticMetallicPath );
+	mAssetManager->AddToDatabase( rockAlbedoPath );
+	mAssetManager->AddToDatabase( rockNormalPath );
+	mAssetManager->AddToDatabase( rockMetallicPath );
+	mAssetManager->AddToDatabase( rockRoughnessPath );
+	mAssetManager->AddToDatabase( rockEmissivePath );
+	mAssetManager->AddToDatabase( rockAOPath );
 	mAssetManager->AddToDatabase( scuffedGoldAlbedoPath );
 	mAssetManager->AddToDatabase( scuffedGoldNormalPath );
 	mAssetManager->AddToDatabase( scuffedGoldMetallicPath );
@@ -310,7 +328,7 @@ Enjon::Result Game::Initialize()
 	pc->GetLight( )->SetColor( Enjon::RGBA16_Orange( ) );
 
 	mPlasticMat = new Enjon::Material;
-	mPlasticMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.roughness"));
+	mPlasticMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.albedo"));
 	mPlasticMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.normal"));
 	mPlasticMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.metallic"));
 	mPlasticMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.roughness"));
@@ -410,7 +428,7 @@ Enjon::Result Game::Initialize()
 	mGreen.Get()->AddChild( mRed );
 	mGreen.Get()->AddChild( mBlue ); 
 
-	rgc2->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.bunny" ) );
+	rgc2->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.buddha" ) );
 	rgc->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "isoarpg.models.cerebus" ) );
 	rgc->SetMaterial( mGunMat );
 	rgc2->SetMaterial( mPlasticMat );
