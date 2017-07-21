@@ -4,6 +4,7 @@ layout (location = 0) in vec3 aVertexPosition;
 layout (location = 1) in vec3 aVertexNormal;
 layout (location = 2) in vec3 aVertexTangent;
 layout (location = 3) in vec3 aVertexUV;
+layout (location = 4) in mat4 aInstanceMatrix;
 
 out VS_OUT
 {
@@ -25,12 +26,12 @@ uniform mat4 uModel = mat4( 1.0f );
 // Vertex Main
 void main()
 {
-	vec3 worldPosition = ( uModel * vec4( aVertexPosition, 1.0 ) ).xyz;
+	vec3 worldPosition = ( aInstanceMatrix * vec4( aVertexPosition, 1.0 ) ).xyz;
 	gl_Position = uViewProjection * vec4( worldPosition, 1.0 );
 
 	// Reorthogonalize with respect to N
-	vec3 N = normalize( ( uModel * vec4( aVertexNormal, 0.0 ) ).xyz );
-	vec3 T = normalize( ( uModel * vec4( aVertexTangent, 0.0 ) ).xyz );
+	vec3 N = normalize( ( aInstanceMatrix * vec4( aVertexNormal, 0.0 ) ).xyz );
+	vec3 T = normalize( ( aInstanceMatrix * vec4( aVertexTangent, 0.0 ) ).xyz );
 
 	// Calculate Bitangent
 	vec3 B = cross( N, T );
@@ -38,10 +39,9 @@ void main()
 	// TBN
 	mat3 TBN = mat3( T, B, N );
 
-
 	// TS_TBN
-	vec3 TS_T = normalize(mat3(uModel) * aVertexTangent);
-	vec3 TS_N = normalize(mat3(uModel) * aVertexNormal);
+	vec3 TS_T = normalize(mat3(aInstanceMatrix) * aVertexTangent);
+	vec3 TS_N = normalize(mat3(aInstanceMatrix) * aVertexNormal);
 	vec3 TS_B = normalize(cross(TS_N, TS_T));
 	mat3 TS_TBN = transpose(mat3( TS_T, TS_B, TS_N ));
 

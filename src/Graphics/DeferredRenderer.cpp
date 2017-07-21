@@ -758,12 +758,12 @@ namespace Enjon
 			// Render instanced mesh
 			mInstancedRenderable->GetMesh( ).Get( )->Bind( );
 		
-			//glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
-			//for ( u32 i = 0; i < mInstancedAmount; ++i )
-			//{
-			//	mModelMatricies[ i ] *= Enjon::Mat4::Rotate( rotT, Enjon::Vec3( 0, 1, 0 ) );
-			//}
-			//glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ] );
+			glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
+			for ( u32 i = 0; i < mInstancedAmount; ++i )
+			{
+				mModelMatricies[ i ] *= Enjon::Mat4::Rotate( rotT, Enjon::Vec3( 0, 1, 0 ) );
+			}
+			glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ] );
 
 			glDrawArraysInstanced( GL_TRIANGLES, 0, mInstancedRenderable->GetMesh( ).Get( )->DrawCount, mInstancedAmount );
 			mInstancedRenderable->GetMesh( ).Get( )->Unbind( ); 
@@ -1241,7 +1241,7 @@ namespace Enjon
 		mFXAATarget 				= new RenderTarget(width, height);
 		mShadowDepth 				= new RenderTarget(2048, 2048);
 		mFinalTarget 				= new RenderTarget(width, height);
-		mSSAOTarget					= new RenderTarget( width, height );
+		mSSAOTarget					= new RenderTarget( width / 2, height / 2 );
 		mSSAOBlurTarget				= new RenderTarget( width / 2, height / 2 );
 
 		mBatch 						= new SpriteBatch();
