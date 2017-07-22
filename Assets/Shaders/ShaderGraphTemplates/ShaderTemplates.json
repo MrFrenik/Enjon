@@ -155,7 +155,6 @@
 			"VariableDefinition": "#NODE_NAME = #INPUT(Input_0) + #INPUT(Input_1);"
 		},
 
-
 		"SubtractFunctionNode": {
 
 			"Type": "Function",
@@ -301,7 +300,7 @@
 				[ "vec2", "float", "vec2" ]
 			],
 			"VariableDeclaration": "vec2 #NODE_NAME;",
-			"VariableDefinition": "#NODE_NAME = #V_TEXCOORD0 + #INPUT(Speed) * #INPUT(Time);"
+			"VariableDefinition": "#NODE_NAME = #TEXCOORDS + #INPUT(Speed) * #INPUT(Time);"
 		},
 
 
@@ -483,17 +482,39 @@
 			"Inputs": {
 				"Coords": {
 					"PrimitiveType": "vec2", 
-					"Default": "#V_TEXCOORD0"
+					"Default": "#TEXCOORDS"
 				}
 			},
 			"Outputs": {
 				"Value": {
 					"PrimitiveType": "vec2", 
-					"CodeTemplate": "#V_TEXCOORD0"
+					"CodeTemplate": "#TEXCOORDS"
 				}
 			},
 			"VariableDeclaration": "vec2 #NODE_NAME;",
 			"VariableDefinition": "#NODE_NAME = #INPUT(Coords);"
+		},
+
+		"Texture2DObject": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"UniformType": "TextureSampler2D",
+			"Inputs": {
+				"UV": {
+					"PrimitiveType": "vec2",
+					"Default": "#TEXCOORDS"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "textureSampler2D",
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "sampler2D #NODE_NAME;",
+			"VariableDefinition": ""
 		},
 		
 		"Texture2DSamplerNode": {
@@ -505,7 +526,7 @@
 			"Inputs": {
 				"UV": {
 					"PrimitiveType": "vec2",
-					"Default": "#V_TEXCOORD0"
+					"Default": "#TEXCOORDS"
 				}
 			},
 			"Outputs": {
@@ -532,6 +553,28 @@
 			},
 			"VariableDeclaration": "sampler2D #NODE_NAME;",
 			"VariableDefinition": "vec4 #NODE_NAME_sampler = texture2D( #NODE_NAME, #INPUT(UV) );"
+		},
+
+		"TextureObjectTest": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"UniformType": "Vec4",
+			"Inputs": {
+				"TextureObject": {
+					"PrimitiveType": "TextureSampler2D",
+					"Default": "#DEFAULT_TEXTURE"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec3",
+					"CodeTemplate": "#NODE_NAME.rgb"
+				}
+			},
+			"VariableDeclaration": "vec4 #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = texture2D( #INPUT(TextureObject), #TEXCOORDS );"
 		},
 
 		"ConstantFloatNode": {
@@ -658,6 +701,101 @@
 			"VariableDefinition": "#NODE_NAME = vec4( #INPUT(X), #INPUT(Y), #INPUT(Z), #INPUT(W) );"
 		},
 
+		"ParallaxOcclusionMapping": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"MinSteps": {
+					"PrimitiveType": "float",
+					"Default": "8.0"
+				},
+				"MaxSteps": {
+					"PrimitiveType": "float",
+					"Default": "32.0"
+				},
+				"HeightRatio": {
+					"PrimitiveType": "float",
+					"Default": "0.08"
+				},
+				"HeightMap": {
+					"PrimitiveType": "textureObject",
+					"Default": "#DEFAULT"	
+				},
+				"UV": {
+					"PrimitiveType": "vec2",
+					"Default": "#TEXCOORDS"
+				},
+				"AlphaCutoff": {
+					"PrimitiveType": "vec2",
+					"Default": "vec2(0.0, 1.0)"
+				}
+
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec2", 
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "vec2 #NODE_NAME;",
+			"VariableDefinition": [
+				"\t// Parallax Occlusion Mapping\n",
+				"{\n",
+					"\tvec3 viewDir = normalize(#TANGENT_SPACE_VIEW_POS - #TANGENT_SPACE_FRAG_POS);\n",
+					"\tfloat numSteps = mix(#INPUT(MaxSteps), #INPUT(MinSteps), abs(dot(vec3(0.0, 0.0, 1.0), viewDir) ) );\n",
+					"\tnumSteps = min(numSteps, 512.0);\n\n",
+
+					"\tfloat layerDepth = 1.0 / numSteps;\n",
+					"\tfloat currentLayerDepth = 0.0;\n",
+					"\tvec2 P = (viewDir.xy / viewDir.z) * #INPUT(HeightRatio);\n",
+					"\tvec2 deltaTexCoords = P / numSteps;\n\n",
+
+					"\tvec2 currentTexCoords = #INPUT(UV);\n",
+					"\tfloat currentDepthMapValue = texture2D(#INPUT(HeightMap), currentTexCoords).r;\n\n",
+
+					"\twhile( currentLayerDepth < currentDepthMapValue )\n",
+					"\t{\n",
+						"\t\tcurrentTexCoords -= deltaTexCoords;\n",
+						"\t\tcurrentDepthMapValue = texture(#INPUT(HeightMap), currentTexCoords).r;\n",
+						"\t\tcurrentLayerDepth += layerDepth;\n",
+					"\t}\n\n",
+
+					"\tvec2 prevTexCoords = currentTexCoords + deltaTexCoords;\n\n",
+
+					"\tfloat afterDepth = currentDepthMapValue - currentLayerDepth;\n",
+					"\tfloat beforeDepth = texture(#INPUT(HeightMap), prevTexCoords).r - currentLayerDepth + layerDepth;\n\n",
+
+					"\tfloat weight = afterDepth / (afterDepth - beforeDepth);\n",
+					"\tvec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);\n\n",
+
+					"\t#NODE_NAME = finalTexCoords;\n",
+				"}\n"
+			]
+		},
+
+		"ViewDirectionTS": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Direction": {
+					"PrimitiveType": "vec3",
+					"Default": "vec3(0.0, 0.0, 0.0)"
+				}	
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec3", 
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "vec3 #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #TANGENT_SPACE_VIEW_DIR;"
+		},
+
 		"VertexNormalWS": {
 
 			"Type": "Variable",
@@ -677,6 +815,90 @@
 			},
 			"VariableDeclaration": "vec3 #NODE_NAME;",
 			"VariableDefinition": "#NODE_NAME = #INPUT(Input_0);"
+		},
+
+		"ViewPositionWS": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Position": {
+					"PrimitiveType": "vec3",
+					"Default": "#WORLD_SPACE_VIEW_POS"
+				}	
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec3", 
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "vec3 #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Position);"
+		},
+
+		"ViewPositionTS": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Position": {
+					"PrimitiveType": "vec3",
+					"Default": "#TANGENT_SPACE_VIEW_POS"
+				}	
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec3", 
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "vec3 #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Position);"
+		},
+
+		"FragPositionWS": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Position": {
+					"PrimitiveType": "vec3",
+					"Default": "#WORLD_SPACE_FRAG_POS"
+				}	
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec3", 
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "vec3 #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Position);"
+		},
+
+		"FragPositionTS": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Position": {
+					"PrimitiveType": "vec3",
+					"Default": "#TANGENT_SPACE_FRAG_POS"
+				}	
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec3", 
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "vec3 #NODE_NAME;",
+			"VariableDefinition": "#NODE_NAME = #INPUT(Position);"
 		},
 
 		"MainNodeTemplate": {
@@ -744,42 +966,6 @@
 					"Default": "vec3( 0.0, 0.0, 0.0 )"
 				}
 			}	
-		}
-	},
-
-	"MainNodeTemplate": {
-		"Inputs": {
-			"BaseColor": {
-				"PrimitiveType": "vec4",
-				"Default": "vec4( 1.0, 1.0, 1.0, 1.0 )"
-			},
-			"Normal": {
-				"PrimitiveType": "vec4",
-				"Default": "V_NORMAL"
-			},
-			"Metallic": {
-				"PrimitiveType": "float",
-				"Default": "0.0"
-			},
-			"Roughness": {
-				"PrimitiveType": "float",
-				"Default": "1.0"
-			},
-			"Emissive": {
-				"PrimitiveType": "vec4",
-				"Default": "vec4( 0.0, 0.0, 0.0, 1.0 )"
-			},
-			"AO": {
-				"PrimitiveType": "float",
-				"Default": "1.0"
-			},
-			"WorldPositionOffset": {
-				"PrimitiveType": "vec3",
-				"Default": "vec3( 0.0, 0.0, 0.0 )"
-			}
-		},
-		"Outputs": {
-
 		}
 	}
 }

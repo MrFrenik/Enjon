@@ -414,20 +414,19 @@ namespace Enjon
 			// Create material
 			mMaterial = new Enjon::Material( &mShaderGraph );
 
-			for ( u32 i = 0; i < 10; ++i ) 
+			for ( u32 i = 0; i < 1; ++i ) 
 			{
-				for ( u32 j = 0; j < 10; ++j )
+				for ( u32 j = 0; j < 1; ++j )
 				{
 					Enjon::Renderable renderable;
 					
 					// Set renderable material
 					renderable.SetMaterial( mMaterial );
-					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.teapot" ) );
-					renderable.SetPosition( Enjon::Vec3( j, 0.0f, i ) + Enjon::Vec3( -40, 0, 10 ) );
-					renderable.SetRotation( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::YAxis( ) ) );
+					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.sword" ) );
+					//renderable.SetScale( 0.025f );
+					renderable.SetPosition( Enjon::Vec3( j, 1.0f, i ) + Enjon::Vec3( -25, 0, 5 ) );
 
-					mRenderables.push_back( renderable );
-
+					mRenderables.push_back( renderable ); 
 				}
 			}
 		}
@@ -471,7 +470,7 @@ namespace Enjon
 
 		// Get a mesh and make it instanced... or something
 		auto db = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "isoarpg.models.quad" );
+		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" );
 		if ( mesh )
 		{
 			// Set bunny mesh for later use
@@ -679,6 +678,7 @@ namespace Enjon
 		{
 			sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
 			sgShader->SetUniform( "uWorldTime", wt ); 
+			sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) ); 
 			mMaterial->Bind( sgShader ); 
 
 			for ( auto& r : mRenderables )
@@ -758,14 +758,15 @@ namespace Enjon
 			// Render instanced mesh
 			mInstancedRenderable->GetMesh( ).Get( )->Bind( );
 		
-			glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
-			for ( u32 i = 0; i < mInstancedAmount; ++i )
-			{
-				mModelMatricies[ i ] *= Enjon::Mat4::Rotate( rotT, Enjon::Vec3( 0, 1, 0 ) );
-			}
-			glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ] );
+			//glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
+			//for ( u32 i = 0; i < mInstancedAmount; ++i )
+			//{
+			//	mModelMatricies[ i ] *= Enjon::Mat4::Rotate( rotT, Enjon::Vec3( 0, 1, 0 ) );
+			//}
+			//glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ] );
 
 			glDrawArraysInstanced( GL_TRIANGLES, 0, mInstancedRenderable->GetMesh( ).Get( )->DrawCount, mInstancedAmount );
+
 			mInstancedRenderable->GetMesh( ).Get( )->Unbind( ); 
 		} 
 		shader->Unuse( ); 

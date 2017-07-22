@@ -142,6 +142,7 @@ Enjon::Result Game::Initialize()
 	mInput = subSysCatalog->Get<Enjon::Input>();
 
 	// Paths to resources
+	Enjon::String noisePath				= Enjon::String("/Textures/worleyNoise.png");
 	Enjon::String grassTexturePath		= Enjon::String("/Textures/grass.png");
 	Enjon::String quadPath				= Enjon::String("/Models/quad.obj");
 	Enjon::String rockPath				= Enjon::String("/Models/rock.obj");
@@ -203,6 +204,7 @@ Enjon::Result Game::Initialize()
 	Enjon::String lightGreyPath			= Enjon::String("/Textures/light_grey.png"); 
 	Enjon::String whitePath				= Enjon::String("/Textures/white.png"); 
 	Enjon::String teapotPath			= Enjon::String( "/Models/teapot.obj" );
+	Enjon::String swordPath				= Enjon::String( "/Models/sword.obj" );
 
 	// Try loading font
 	Enjon::String rootPath = engine->GetConfig( ).GetRoot( );
@@ -212,6 +214,9 @@ Enjon::Result Game::Initialize()
 	mFont = new Enjon::UIFont( fontPath );
 
 	// Add to asset database
+	mAssetManager->AddToDatabase( dragonMeshPath );
+	mAssetManager->AddToDatabase( swordPath );
+	mAssetManager->AddToDatabase( noisePath );
 	mAssetManager->AddToDatabase( grassTexturePath );
 	mAssetManager->AddToDatabase( quadPath );
 	mAssetManager->AddToDatabase( rockPath );
@@ -270,6 +275,8 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( teapotPath );
 	mAssetManager->AddToDatabase( waterPath );
 	mAssetManager->AddToDatabase( fontPath, false );
+
+	Enjon::AssetHandle<Enjon::Mesh> test = mAssetManager->GetAsset< Enjon::Mesh >( "doesntExist" );
 
 	// Assign font
 	Enjon::String fontQualifiedName = Enjon::AssetLoader::GetQualifiedName( fontPath ); 

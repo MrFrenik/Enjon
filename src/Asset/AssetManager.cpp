@@ -73,7 +73,7 @@ namespace Enjon
 		mFileExtensionMap[ "fbx" ]	= GetAssetTypeId< Enjon::Mesh >( );
 		mFileExtensionMap[ "obj" ]	= GetAssetTypeId< Enjon::Mesh >( );
 		mFileExtensionMap[ "ttf" ]	= GetAssetTypeId< Enjon::UIFont >( );
-		mFileExtensionMap[ "otf" ]	= GetAssetTypeId< Enjon::UIFont >( );
+		mFileExtensionMap[ "otf" ]	= GetAssetTypeId< Enjon::UIFont >( ); 
 	}
 	
 	//============================================================================================ 

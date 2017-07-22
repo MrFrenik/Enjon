@@ -66,9 +66,16 @@ namespace Enjon
 
 				// Search through assets for name
 				auto query = mAssetsByName.find( name );
+
+				// If found, then return asset
 				if ( query != mAssetsByName.end() ) 
 				{
 					handle = AssetHandle<T>( query->second ); 
+				}
+				// Else return default asset
+				else
+				{
+					handle = AssetHandle<T>( GetDefault( ) );
 				}
 
 				return handle; 

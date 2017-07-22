@@ -24,20 +24,28 @@ namespace Enjon
 			*/
 			~TextureAssetLoader(); 
 			
-			/**
-			* @brief
-			*/
-			virtual void RegisterDefaultAsset( ) override;
 
 		protected:
 			/**
 			* @brief
 			*/
 			Result CacheTextureData( const u8* data, u32 length, Texture* texture );
+			
+			/**
+			* @brief
+			*/
+			virtual void RegisterDefaultAsset( ) override;
+			
 
 		private: 
+			/**
+			* @brief
+			*/
 			Texture* LoadAssetFromFile( const String& filePath, const String& name );
 	
+			/**
+			* @brief
+			*/
 			Texture* LoadTextureFromFile( const Enjon::String& filePath );
 	}; 
 }

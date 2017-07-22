@@ -55,7 +55,7 @@ namespace Enjon
 			virtual Result CacheFile( Enjon::ByteBuffer& buffer )
 			{ 
 				return Result::SUCCESS;
-			}
+			} 
 
 		protected: 
 			UUID mUUID;

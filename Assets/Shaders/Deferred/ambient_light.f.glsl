@@ -62,7 +62,7 @@ void main()
 	float roughness = clamp( MaterialProps.g * MaterialProps.g, 0.08, 0.9 );
 	float specPower = 1.0 - metallic;
 	//float a = clamp( roughness * pow(roughness, specPower), 0.08, 1.0 );
-	float a = roughness;
+	float a = pow(roughness, 2.0);
 	float ao = MaterialProps.b;
 
 	float ssao = texture2D( uSSAOMap, TexCoords ).r;

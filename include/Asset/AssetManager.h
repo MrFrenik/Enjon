@@ -209,6 +209,10 @@ namespace Enjon
 				// Set into map
 				mLoaders[idx] = new K();
 
+				// TODO(): This crashes for now. I want to set this here, so figure it out.
+				// Register default asset from loader
+				//mLoaders[ idx ]->RegisterDefaultAsset( );
+
 				return Result::SUCCESS;
 			}
 

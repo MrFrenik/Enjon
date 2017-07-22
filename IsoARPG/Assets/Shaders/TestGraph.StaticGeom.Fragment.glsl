@@ -21,21 +21,33 @@ uniform float uWorldTime = 1.0f;
 uniform vec3 uViewPositionWorldSpace;
 
 // Variable Declarations
+uniform sampler2D albedoMap2;
+uniform sampler2D normalMap2;
+uniform float metallic;
+uniform float roughness;
+uniform sampler2D emissiveMap;
 
 // Fragment Main
 void main()
 {
 	// Base Color
-	AlbedoOut = vec4( 1.0, 1.0, 1.0, 1.0 );
+vec4 albedoMap2_sampler = texture2D( albedoMap2, fs_in.TexCoords );
+	AlbedoOut = vec4(albedoMap2_sampler.rgb, 1.0);
 
 	// Normal
-	NormalsOut = vec4( fs_in.TBN[2], 1.0 );
+	vec4 normalMap2_sampler = texture2D( normalMap2, fs_in.TexCoords );
+	vec3 normal = normalize( normalMap2_sampler.rgb * 2.0 - 1.0 );
+	normal = normalize( fs_in.TBN * normal );
+	NormalsOut = vec4( normal, 1.0 );
 
 	// Material Properties
-	MatPropsOut = vec4( clamp( 0.0, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
+	
+	
+	MatPropsOut = vec4( clamp( metallic, 0.0, 1.0 ), clamp( roughness, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
 
 	// Emissive
-	EmissiveOut = vec4( 0.0, 0.0, 0.0, 1.0 );
+	vec4 emissiveMap_sampler = texture2D( emissiveMap, fs_in.TexCoords );
+	EmissiveOut = vec4(emissiveMap_sampler.rgb, 1.0);
 
 	PositionOut = vec4( fs_in.FragPositionWorldSpace, 1.0 );
 }

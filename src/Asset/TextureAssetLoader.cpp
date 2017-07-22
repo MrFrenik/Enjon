@@ -143,10 +143,6 @@ namespace Enjon
 
 	void TextureAssetLoader::RegisterDefaultAsset( )
 	{ 
-		// Get assets directory
-		Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-		Enjon::String assetDir = am->GetAssetsPath( ); 
-		
 		u32 texID;
 		u32 width = 16;
 		u32 height = 16;

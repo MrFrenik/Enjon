@@ -5,6 +5,28 @@
 
 namespace Enjon {
 
+#define CREATE_RENDER_TARGET(InternalFormat, Format, GBufferAttachment)\
+	{\
+		u32 index = (u32)GBufferAttachment;\
+		glBindRenderbufferEXT(GL_RENDERBUFFER, TargetIDs[index]);\
+		glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, Width, Height);\
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, TargetIDs[index]);\
+		\
+		glGenTextures(1, &Textures[index]);\
+		glBindTexture(GL_TEXTURE_2D, Textures[index]);\
+		\
+		glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, Width, Height, 0, Format, GL_FLOAT, NULL);\
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);\
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );\
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );\
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );\
+		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, Textures[ index ], 0 );\
+		\
+		glGenerateMipmap( GL_TEXTURE_2D );\
+		\
+		glBindTexture( GL_TEXTURE_2D, 0 );\
+	}
+
 	GBuffer::GBuffer(uint32 _Width, uint32 _Height)
 	{
 		// Save extensions
@@ -14,28 +36,12 @@ namespace Enjon {
 
 	    glGenFramebuffers(1, &FBO);
 	    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
-	    for (u32 i = 0; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; i++)
-	    {
-		    // Bind the diffuse render target
-			glBindRenderbufferEXT(GL_RENDERBUFFER, TargetIDs[i]);
-			glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, Width, Height);
-			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_RENDERBUFFER, TargetIDs[i]);
-
-		    // - Diffuse buffer
-		    glGenTextures(1, &Textures[i]);
-		    glBindTexture(GL_TEXTURE_2D, Textures[i]);
-		    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, Width, Height, 0, GL_RGBA, GL_FLOAT, NULL);
-		    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, Textures[i], 0);
-
-			glGenerateMipmap(GL_TEXTURE_2D);
-	
-		    glBindTexture(GL_TEXTURE_2D, 0);
-	    }
+		
+		CREATE_RENDER_TARGET( GL_RGBA8, GL_RGBA, GBufferTextureType::ALBEDO )
+		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GBufferTextureType::NORMAL )
+		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GBufferTextureType::POSITION )
+		CREATE_RENDER_TARGET( GL_RGBA16F, GL_RGBA, GBufferTextureType::EMISSIVE )
+		CREATE_RENDER_TARGET( GL_RGBA16F, GL_RGBA, GBufferTextureType::MAT_PROPS )
 
 		// Bind depth render buffer
 		glBindRenderbufferEXT( GL_RENDERBUFFER, DepthBuffer );
@@ -45,7 +51,7 @@ namespace Enjon {
 		// - Depth buffer texture
 		glGenTextures( 1, &DepthTexture );
 		glBindTexture( GL_TEXTURE_2D, DepthTexture );
-		glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, Width, Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, Width, Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );

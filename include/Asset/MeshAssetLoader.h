@@ -26,7 +26,15 @@ namespace Enjon
 
 		protected:
 
+			/**
+			* @brief
+			*/
+			virtual void RegisterDefaultAsset( ) override;
+			
 		private: 
+			/**
+			* @brief Destructor
+			*/
 			Mesh* LoadAssetFromFile(const String& filePath, const String& name);
 	}; 
 }

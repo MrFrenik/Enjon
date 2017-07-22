@@ -427,8 +427,25 @@ namespace Enjon
 
 					// Variable Definition
 					if ( itr->value.HasMember( "VariableDefinition" ) )
-					{
-						newTemplate.mVariableDefinition = itr->value.FindMember( "VariableDefinition" )->value.GetString( );
+					{ 
+						Enjon::String definitionCode = "";
+
+						auto variableDef = itr->value.FindMember( "VariableDefinition" ); 
+
+						if ( variableDef->value.IsArray( ) )
+						{
+							auto arr = variableDef->value.GetArray( );
+							for ( auto& s : arr )
+							{
+								definitionCode += s.GetString( );
+							}
+						}
+						else
+						{
+							definitionCode = variableDef->value.GetString( );
+						}
+
+						newTemplate.mVariableDefinition = definitionCode;
 					}
 
 					// Inputs
@@ -616,14 +633,19 @@ namespace Enjon
 						// Get the template
 						const ShaderGraphNodeTemplate* nodeTemplate = ShaderGraph::GetTemplate( nodeTemplateName );
 
-						// If texture, then need to set uniform location and incrememnt
-						if ( nodeTemplate && nodeTemplateName.compare( "Texture2DSamplerNode" ) == 0 || nodeTemplate->mUniformType == UniformType::TextureSampler2D )
+						if ( nodeTemplate != nullptr )
 						{
-							node.mUniformLocation = mTextureSamplerLocation++;
+							// If texture, then need to set uniform location and incrememnt
+							if ( nodeTemplateName.compare( "Texture2DSamplerNode" ) == 0 || nodeTemplate->mUniformType == UniformType::TextureSampler2D )
+							{
+								node.mUniformLocation = mTextureSamplerLocation++;
 
-							// If is texture, then is uniform by default
-							node.mIsUniform = true;
+								// If is texture, then is uniform by default
+								node.mIsUniform = true;
+							}
+
 						}
+
 
 						// Set template
 						if ( nodeTemplate )
@@ -1265,12 +1287,16 @@ namespace Enjon
 			code += OutputTabbedLine( "// TS_TBN" );
 			code += OutputTabbedLine( "vec3 TS_T = normalize(mat3(uModel) * aVertexTangent);" );
 			code += OutputTabbedLine( "vec3 TS_N = normalize(mat3(uModel) * aVertexNormal);" );
+			//code += OutputTabbedLine( "vec3 TS_T = normalize(aVertexTangent * mat3(uModel));" );
+			//code += OutputTabbedLine( "vec3 TS_N = normalize(aVertexNormal * mat3(uModel));" );
 			code += OutputTabbedLine( "vec3 TS_B = normalize(cross(TS_N, TS_T));" );
 			code += OutputTabbedLine( "mat3 TS_TBN = transpose(mat3( TS_T, TS_B, TS_N ));\n" );
 
 			code += OutputTabbedLine( "// Output Vertex Data" );
 			code += OutputTabbedLine( "vs_out.FragPositionWorldSpace = worldPosition;" );
 			code += OutputTabbedLine( "vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );" );
+			//code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = uViewPositionWorldSpace * TS_TBN;" );
+			//code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = vs_out.FragPositionWorldSpace * TS_TBN;" );
 			code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = TS_TBN * uViewPositionWorldSpace;" );
 			code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = TS_TBN * vs_out.FragPositionWorldSpace;" );
 
@@ -1334,8 +1360,8 @@ namespace Enjon
 			code += OutputTabbedLine( "// Output Vertex Data" );
 			code += OutputTabbedLine( "vs_out.FragPositionWorldSpace = worldPosition;" );
 			code += OutputTabbedLine( "vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );" );
-			code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = TS_TBN * uViewPositionWorldSpace;" );
-			code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = TS_TBN * vs_out.FragPositionWorldSpace;" );
+			code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = uViewPositionWorldSpace * TS_TBN;" );
+			code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = vs_out.FragPositionWorldSpace * TS_TBN;" );
 			code += OutputTabbedLine( "vs_out.TBN = TBN;" );
 
 		} break;
