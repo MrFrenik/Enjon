@@ -1,5 +1,5 @@
-#ifndef ENJON_DEFERRED_RENDERER_H
-#define ENJON_DEFERRED_RENDERER_H
+#ifndef ENJON_GRAPHICS_SUBSYSTEM_H
+#define ENJON_GRAPHICS_SUBSYSTEM_H
 
 #include "Defines.h"
 #include "System/Types.h"
@@ -59,19 +59,19 @@ namespace Enjon
 	};
 
 
-	class DeferredRenderer : public Subsystem
+	class GraphicsSubsystem : public Subsystem
 	{
 		public:
 
 			/**
 			*@brief Constructor
 			*/
-			DeferredRenderer();
+			GraphicsSubsystem();
 			
 			/**
 			*@brief Destructor
 			*/
-			~DeferredRenderer();
+			~GraphicsSubsystem();
 
 			/**
 			*@brief
@@ -278,7 +278,7 @@ namespace Enjon
 			Enjon::Mat4* mModelMatricies = nullptr;
 			Enjon::Renderable* mInstancedRenderable = nullptr;
 			u32 mInstancedAmount = 1;
-			u32 mInstancedVBO;
+			u32 mInstancedVBO; 
 	};
 }
 

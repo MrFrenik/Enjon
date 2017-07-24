@@ -144,7 +144,7 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
-			virtual Asset* LoadAssetFromFile( const String& filePath, const String& name ) = 0; 
+			virtual Asset* LoadResourceFromFile( const String& filePath, const String& name ) = 0; 
 	};
 } 
 

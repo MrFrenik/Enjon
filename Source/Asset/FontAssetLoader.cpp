@@ -13,7 +13,7 @@ namespace Enjon
 	{
 	}
 
-	UIFont* FontAssetLoader::LoadAssetFromFile( const String& filePath, const String& name )
+	UIFont* FontAssetLoader::LoadResourceFromFile( const String& filePath, const String& name )
 	{
 		// Create new font
 		Enjon::UIFont* font = new Enjon::UIFont( filePath ); 

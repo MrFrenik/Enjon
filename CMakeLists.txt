@@ -29,7 +29,7 @@ add_subdirectory( Generator )
 
 
 # Add include directories
-include_directories(${ENJON_DIR}/include
+include_directories(${ENJON_DIR}/Include
 					${ENJON_DIR}/ThirdParty/Build/Include
 					${ENJON_DIR}/IsoARPG/include)
 
@@ -76,8 +76,8 @@ set(
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Release)
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Debug)
 
-set(ENJON_SRC "${ENJON_DIR}/src")
-set(ENJON_INC "${ENJON_DIR}/include")
+set(ENJON_SRC "${ENJON_DIR}/Source")
+set(ENJON_INC "${ENJON_DIR}/Include")
 set(GAME_INC "${ENJON_DIR}/IsoARPG/include}")
 set(GAME_SRC "${ENJON_DIR}/IsoARPG/src}")
 
@@ -155,21 +155,21 @@ file(GLOB_RECURSE SHADERS "${ENJON_DIR}/Assets/Shaders/*.glsl" )
 # Add all engine source files
 set(
 	GENERAL_SOURCES
-	include/Application.h
-	include/Console.h
-	include/CVarsSystem.h
-	include/Defines.h
-	include/Engine.h
-	include/Enjon.h
-	include/TypeCatalog.h
-	include/Subsystem.h
-	include/SubsystemCatalog.h
+	${ENJON_INC}/Application.h
+	${ENJON_INC}/Console.h
+	${ENJON_INC}/CVarsSystem.h
+	${ENJON_INC}/Defines.h
+	${ENJON_INC}/Engine.h
+	${ENJON_INC}/Enjon.h
+	${ENJON_INC}/TypeCatalog.h
+	${ENJON_INC}/Subsystem.h
+	${ENJON_INC}/SubsystemCatalog.h
 
-	src/Console.cpp
-	src/CVarsSystem.cpp
-	src/Engine.cpp
-	src/TypeCatalog.cpp
-	src/SubsystemCatalog.cpp
+	${ENJON_SRC}/Console.cpp
+	${ENJON_SRC}/CVarsSystem.cpp
+	${ENJON_SRC}/Engine.cpp
+	${ENJON_SRC}/TypeCatalog.cpp
+	${ENJON_SRC}/SubsystemCatalog.cpp
 	)
 
 set(

@@ -3,6 +3,7 @@
 #define ENJON_SHADER_GRAPH_H 
 
 #include "System/Types.h"
+#include "Asset/Asset.h"
 #include "Defines.h"
 
 #include <unordered_map>
@@ -170,7 +171,7 @@ namespace Enjon
 
 		void Serialize( rapidjson::PrettyWriter< rapidjson::StringBuffer >& writer );
 
-		s32 Deserialize( rapidjson::PrettyWriter< rapidjson::StringBuffer >& reader );
+		s32 Deserialize( rapidjson::PrettyWriter< rapidjson::StringBuffer >& reader ); 
 
 		void AddLink( const NodeLink& link );
 
@@ -207,6 +208,7 @@ namespace Enjon
 
 		void Clear( );
 
+
 		Enjon::String mName = "INVALID";
 		bool mIsUniform = false;
 		bool mIsVariableDeclared = false;
@@ -224,9 +226,12 @@ namespace Enjon
 		Count
 	};
 
-	class ShaderGraph
+	class ShaderGraphAssetLoader;
+	class ShaderGraph : public Enjon::Asset
 	{
 	public:
+
+		friend ShaderGraphAssetLoader;
 
 		ShaderGraph( );
 
@@ -234,9 +239,7 @@ namespace Enjon
 
 		void Validate( );
 
-		s32 Compile( );
-
-		s32 Serialize( rapidjson::PrettyWriter< rapidjson::StringBuffer >& writer );
+		s32 Compile( ); 
 
 		s32 Create( const Enjon::String& filePath );
 
@@ -279,6 +282,19 @@ namespace Enjon
 		const Shader* GetShader( ShaderPassType pass );
 
 		void WriteToFile( ShaderPassType pass );
+
+	public:
+
+		/*
+		* @brief
+		*/
+		virtual Result Reload( ) override;
+
+	protected: 
+
+		virtual Result Serialize( Enjon::ByteBuffer& buffer ) override;
+
+		virtual Result Deserialize( Enjon::ByteBuffer& buffer ) override;
 
 	private:
 		static rapidjson::Document GetJSONDocumentFromFilePath( const Enjon::String& filePath, s32* status );

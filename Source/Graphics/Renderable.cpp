@@ -4,7 +4,7 @@
 #include "Graphics/Material.h"
 #include "Graphics/Shader.h"
 #include "Graphics/GLSLProgram.h"
-#include "Graphics/DeferredRenderer.h" 
+#include "Graphics/GraphicsSubsystem.h" 
 #include "Graphics/Color.h"
 
 #include <assert.h>

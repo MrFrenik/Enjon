@@ -8,7 +8,7 @@
 #include "Utils/FileUtils.h"
 #include "Engine.h"
 #include "Asset/AssetManager.h"
-#include "Graphics/DeferredRenderer.h"
+#include "Graphics/GraphicsSubsystem.h"
 
 #include <GLEW/glew.h> 
 #include <vector>

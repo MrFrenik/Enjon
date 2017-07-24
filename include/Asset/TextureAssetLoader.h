@@ -41,7 +41,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			Texture* LoadAssetFromFile( const String& filePath, const String& name );
+			Texture* LoadResourceFromFile( const String& filePath, const String& name );
 	
 			/**
 			* @brief

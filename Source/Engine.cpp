@@ -3,7 +3,7 @@
 
 #include "Engine.h"
 #include "Application.h"
-#include "Graphics/DeferredRenderer.h"
+#include "Graphics/GraphicsSubsystem.h"
 #include "Asset/AssetManager.h"
 #include "IO/InputManager.h"
 #include "ImGui/ImGuiManager.h"
@@ -121,7 +121,7 @@ namespace Enjon
 
 		// Register subsystems with catalog
 		mAssetManager	= mSubsystemCatalog->Register<Enjon::AssetManager>();
-		mGraphics		= mSubsystemCatalog->Register<Enjon::DeferredRenderer>(); 
+		mGraphics		= mSubsystemCatalog->Register<Enjon::GraphicsSubsystem>(); 
 		mInput			= mSubsystemCatalog->Register<Enjon::Input>(); 
 
 		// Initialize imgui manager

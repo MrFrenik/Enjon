@@ -7,7 +7,7 @@
 #include "Utils/FileUtils.h"
 #include "Utils/Errors.h"
 #include "Graphics/GLTexture.h"
-#include "Graphics/DeferredRenderer.h"
+#include "Graphics/GraphicsSubsystem.h"
 #include "Engine.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

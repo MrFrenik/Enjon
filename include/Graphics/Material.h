@@ -44,6 +44,11 @@ namespace Enjon {
 			* @brief
 			*/
 			Material( const Enjon::ShaderGraph* shaderGraph );
+			
+			/*
+			* @brief
+			*/
+			Material( const Enjon::AssetHandle< Enjon::ShaderGraph >& shaderGraph );
 
 			/*
 			* @brief
@@ -118,7 +123,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			const Enjon::ShaderGraph* GetShaderGraph( ) const;
+			Enjon::AssetHandle< Enjon::ShaderGraph > GetShaderGraph( ) const;
 
 
 		protected:
@@ -133,7 +138,8 @@ namespace Enjon {
 			bool mTwoSided = false;
 			std::unordered_map< Enjon::String, ShaderUniform* > mUniforms;
 			std::unordered_map< Enjon::String, ShaderUniform* > mUniformOverrides;
-			const Enjon::ShaderGraph* mShaderGraph = nullptr;
+			//const Enjon::ShaderGraph* mShaderGraph = nullptr;
+			Enjon::AssetHandle< Enjon::ShaderGraph > mShaderGraph;
 	}; 
 }
 

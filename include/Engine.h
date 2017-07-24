@@ -11,7 +11,7 @@
 
 namespace Enjon
 { 
-	class DeferredRenderer; 
+	class GraphicsSubsystem; 
 	class Input;
 	class AssetManager; 
 	class Application; 
@@ -120,7 +120,7 @@ namespace Enjon
 			Application*		mApp 				= nullptr; 
 
 			// Subsystems
-			DeferredRenderer*	mGraphics 			= nullptr; 
+			GraphicsSubsystem*	mGraphics 			= nullptr; 
 			Input*				mInput 				= nullptr;
 			SubsystemCatalog*	mSubsystemCatalog	= nullptr;
 			AssetManager*		mAssetManager		= nullptr;

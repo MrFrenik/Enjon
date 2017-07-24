@@ -8,13 +8,12 @@ namespace Enjon {
 	//======================================================================== 
 
 	Material::Material()
-		: mShaderGraph( nullptr )
 	{
 	}
 	
 	//======================================================================== 
-	
-	Material::Material( const Enjon::ShaderGraph* shaderGraph )
+			
+	Material::Material( const Enjon::AssetHandle< Enjon::ShaderGraph >& shaderGraph )
 		: mShaderGraph( shaderGraph )
 	{ 
 	}
@@ -73,7 +72,7 @@ namespace Enjon {
 
 	//========================================================================
 			
-	const Enjon::ShaderGraph* Material::GetShaderGraph( ) const
+	Enjon::AssetHandle< Enjon::ShaderGraph > Material::GetShaderGraph( ) const
 	{
 		return mShaderGraph;
 	}
@@ -82,7 +81,7 @@ namespace Enjon {
 			
 	void Material::Bind( const Shader* shader )
 	{
-		Enjon::ShaderGraph* sg = const_cast< ShaderGraph* > ( mShaderGraph );
+		Enjon::ShaderGraph* sg = const_cast< ShaderGraph* > ( mShaderGraph.Get( ) );
 		Enjon::Shader* sh = const_cast< Shader* > ( shader );
 		if ( sh )
 		{
@@ -114,7 +113,7 @@ namespace Enjon {
 		// If override doesn't exist
 		else
 		{
-			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph.Get( ) );
 			if ( sg->HasUniform( name ) )
 			{
 				UniformTexture* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformTexture >( );;
@@ -130,7 +129,7 @@ namespace Enjon {
 		// If override doesn't exist
 		if ( !HasOverride( name ) )
 		{
-			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph.Get( ) );
 			if ( sg->HasUniform( name ) )
 			{
 				UniformPrimitive< Vec2 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Vec2 > >( );;
@@ -153,7 +152,7 @@ namespace Enjon {
 		// If override doesn't exist
 		if ( !HasOverride( name ) )
 		{
-			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph.Get( ) );
 			if ( sg->HasUniform( name ) )
 			{
 				UniformPrimitive< Vec3 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Vec3 > >( );;
@@ -176,7 +175,7 @@ namespace Enjon {
 		// If override doesn't exist
 		if ( !HasOverride( name ) )
 		{
-			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph.Get( ) );
 			if ( sg->HasUniform( name ) )
 			{
 				UniformPrimitive< Vec4 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Vec4 > >( );;
@@ -199,7 +198,7 @@ namespace Enjon {
 		// If override doesn't exist
 		if ( !HasOverride( name ) )
 		{
-			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph.Get( ) );
 			if ( sg->HasUniform( name ) )
 			{
 				UniformPrimitive< Mat4 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Mat4 > >( );;
@@ -222,7 +221,7 @@ namespace Enjon {
 		// If override doesn't exist
 		if ( !HasOverride( name ) )
 		{
-			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph );
+			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph.Get( ) );
 			if ( sg->HasUniform( name ) )
 			{
 				UniformPrimitive< f32 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< f32 > >( );;

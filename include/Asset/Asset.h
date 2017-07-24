@@ -49,6 +49,7 @@ namespace Enjon
 
 			
 		protected:
+
 			/*
 			* @brief Caches file into cache directory relative to project directory 
 			*/
@@ -56,6 +57,31 @@ namespace Enjon
 			{ 
 				return Result::SUCCESS;
 			} 
+
+			/*
+			* @brief Caches file into cache directory relative to project directory 
+			*/
+			virtual Result Serialize( Enjon::ByteBuffer& buffer )
+			{
+				return Result::SUCCESS;
+			}
+
+			/*
+			* @brief Caches file into cache directory relative to project directory 
+			*/
+			virtual Result Deserialize( Enjon::ByteBuffer& buffer )
+			{
+				return Result::SUCCESS;
+			}
+
+		public:
+			/*
+			* @brief
+			*/
+			virtual Result Reload( )
+			{ 
+				return Result::SUCCESS;
+			}
 
 		protected: 
 			UUID mUUID;

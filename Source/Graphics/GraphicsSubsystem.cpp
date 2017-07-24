@@ -1,4 +1,4 @@
-#include "Graphics/DeferredRenderer.h"
+#include "Graphics/GraphicsSubsystem.h"
 #include "Graphics/RenderTarget.h"
 #include "Graphics/GBuffer.h"
 #include "Graphics/FullScreenQuad.h"
@@ -42,6 +42,7 @@
 Enjon::Renderable mRenderable; 
 std::vector < Enjon::Renderable > mRenderables;
 Enjon::AssetHandle< Enjon::Texture > mBRDFHandle;
+Enjon::AssetHandle< Enjon::ShaderGraph > mTestShaderGraph;
 Enjon::Material* mMaterial = nullptr;
 bool brdfset = false;
 
@@ -53,19 +54,19 @@ namespace Enjon
 { 
 	//======================================================================================================
 
-	DeferredRenderer::DeferredRenderer()
+	GraphicsSubsystem::GraphicsSubsystem()
 	{
 	}
 
 	//======================================================================================================
 
-	DeferredRenderer::~DeferredRenderer()
+	GraphicsSubsystem::~GraphicsSubsystem()
 	{
 	}
 
 	//======================================================================================================
 
-	Enjon::Result DeferredRenderer::Shutdown()
+	Enjon::Result GraphicsSubsystem::Shutdown()
 	{
 		delete(mGbuffer);
 		delete(mDebugTarget);
@@ -86,7 +87,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	Enjon::Result DeferredRenderer::Initialize()
+	Enjon::Result GraphicsSubsystem::Initialize()
 	{
 		// TODO(John): Need to have a way to have an .ini that's read or grab these values from a static
 		// engine config file
@@ -186,7 +187,7 @@ namespace Enjon
 		return Result::SUCCESS;
 	}
 
-	void DeferredRenderer::BindShader( const Enjon::Shader* shader )
+	void GraphicsSubsystem::BindShader( const Enjon::Shader* shader )
 	{
 		if ( shader != mActiveShader )
 		{
@@ -197,7 +198,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::STBTest( ) 
+	void GraphicsSubsystem::STBTest( ) 
 	{
 		glDisable( GL_CULL_FACE );
 
@@ -411,8 +412,10 @@ namespace Enjon
 			Enjon::String shaderPath = am->GetAssetsPath( ) + "/Shaders"; 
 			mShaderGraph.Create( shaderPath + "/ShaderGraphs/test.json" ); 
 
+			mTestShaderGraph = am->GetAsset< Enjon::ShaderGraph >( "isoarpg.shaders.shadergraphs.testgraph" );
+
 			// Create material
-			mMaterial = new Enjon::Material( &mShaderGraph );
+			mMaterial = new Enjon::Material( mTestShaderGraph );
 
 			for ( u32 i = 0; i < 1; ++i ) 
 			{
@@ -422,7 +425,7 @@ namespace Enjon
 					
 					// Set renderable material
 					renderable.SetMaterial( mMaterial );
-					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.sword" ) );
+					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.eye" ) );
 					//renderable.SetScale( 0.025f );
 					renderable.SetPosition( Enjon::Vec3( j, 1.0f, i ) + Enjon::Vec3( -25, 0, 5 ) );
 
@@ -436,7 +439,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::InstancingTest( )
+	void GraphicsSubsystem::InstancingTest( )
 	{
 		// generate a large list of semi-random model transformation matrices
 		// ------------------------------------------------------------------
@@ -515,7 +518,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::Update(const f32 dT)
+	void GraphicsSubsystem::Update(const f32 dT)
 	{ 
 		static bool set = false;
 		if ( !set )
@@ -593,7 +596,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::GBufferPass()
+	void GraphicsSubsystem::GBufferPass()
 	{
 		glDepthFunc( GL_LESS );
 		glEnable( GL_CULL_FACE );
@@ -672,8 +675,9 @@ namespace Enjon
 			wt = 0.0f;
 		}
 
-		Enjon::ShaderGraph* sGraph = const_cast< ShaderGraph* >( mMaterial->GetShaderGraph( ) );
-		Enjon::Shader* sgShader = const_cast< Shader*> ( sGraph->GetShader( ShaderPassType::StaticGeom ) );
+		Enjon::ShaderGraph* sGraph = const_cast< ShaderGraph* >( mMaterial->GetShaderGraph( ).Get( ) );
+		Enjon::Shader* sgShader = const_cast< Shader*> ( sGraph->GetShader( ShaderPassType::StaticGeom ) ); 
+
 		sgShader->Use( );
 		{
 			sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
@@ -796,7 +800,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::SSAOPass( )
+	void GraphicsSubsystem::SSAOPass( )
 	{
 		Enjon::iVec2 screenRes = GetViewport( ); 
 
@@ -846,7 +850,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::LightingPass()
+	void GraphicsSubsystem::LightingPass()
 	{
 		mLightingBuffer->Bind();
 		// mFullScreenQuad->Bind();
@@ -990,7 +994,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::LuminancePass()
+	void GraphicsSubsystem::LuminancePass()
 	{
 		GLSLProgram* luminanceProgram = Enjon::ShaderManager::Get("Bright");
 		mLuminanceTarget->Bind();
@@ -1012,7 +1016,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::BloomPass()
+	void GraphicsSubsystem::BloomPass()
 	{
 		GLSLProgram* horizontalBlurProgram = Enjon::ShaderManager::Get("HorizontalBlur");
 		GLSLProgram* verticalBlurProgram = Enjon::ShaderManager::Get("VerticalBlur");
@@ -1117,7 +1121,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::BloomPass2( )
+	void GraphicsSubsystem::BloomPass2( )
 	{
 		GLSLProgram* horizontalBlurProgram = Enjon::ShaderManager::Get( "HorizontalBlur" );
 		GLSLProgram* verticalBlurProgram = Enjon::ShaderManager::Get( "VerticalBlur" );
@@ -1129,7 +1133,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::FXAAPass(RenderTarget* input)
+	void GraphicsSubsystem::FXAAPass(RenderTarget* input)
 	{
 		GLSLProgram* fxaaProgram = Enjon::ShaderManager::Get("FXAA");
 		mFXAATarget->Bind();
@@ -1152,7 +1156,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::CompositePass(RenderTarget* input)
+	void GraphicsSubsystem::CompositePass(RenderTarget* input)
 	{
 		GLSLProgram* compositeProgram = Enjon::ShaderManager::Get("Composite");
 		mCompositeTarget->Bind();
@@ -1179,7 +1183,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::GuiPass()
+	void GraphicsSubsystem::GuiPass()
 	{
 		static bool show_test_window = false;
 		static bool show_frame_rate = false;
@@ -1198,14 +1202,14 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::SetViewport(iVec2& dimensions)
+	void GraphicsSubsystem::SetViewport(iVec2& dimensions)
 	{
 		mWindow.SetViewport(dimensions);
 	}
 
 	//======================================================================================================
 
-	iVec2 DeferredRenderer::GetViewport()
+	iVec2 GraphicsSubsystem::GetViewport()
 	{
 		return mWindow.GetViewport();
 	}
@@ -1222,7 +1226,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::InitializeFrameBuffers()
+	void GraphicsSubsystem::InitializeFrameBuffers()
 	{
 		auto viewport = mWindow.GetViewport();
 		Enjon::u32 width = (Enjon::u32)viewport.x;
@@ -1284,7 +1288,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::CalculateBlurWeights()
+	void GraphicsSubsystem::CalculateBlurWeights()
 	{
 		f64 weight;
 		f64 start = -3.0;
@@ -1321,7 +1325,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::RegisterCVars()
+	void GraphicsSubsystem::RegisterCVars()
 	{
 		Enjon::CVarsSystem::Register("exposure", &mToneMapSettings.mExposure, Enjon::CVarType::TYPE_FLOAT);
 		Enjon::CVarsSystem::Register("gamma", &mToneMapSettings.mGamma, Enjon::CVarType::TYPE_FLOAT);
@@ -1341,7 +1345,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void DeferredRenderer::ShowGraphicsWindow(bool* p_open)
+	void GraphicsSubsystem::ShowGraphicsWindow(bool* p_open)
 	{
 	    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);                                 // Right align, keep 140 pixels for labels
 
@@ -1630,9 +1634,10 @@ namespace Enjon
 
 		if ( ImGui::CollapsingHeader( "Uniforms" ) )
 		{
-			if ( mMaterial )
+			if ( mMaterial && mMaterial->GetShaderGraph() )
 			{
-				for ( auto& u : *mShaderGraph.GetUniforms( ) )
+				Enjon::AssetHandle< Enjon::ShaderGraph > sg = mMaterial->GetShaderGraph( ); 
+				for ( auto& u : *sg.Get( )->GetUniforms( ) )
 				{
 					Enjon::String uniformName = u.second->GetName( );
 					Enjon::UniformType type = u.second->GetType( );
@@ -1724,10 +1729,8 @@ namespace Enjon
 		}
 
 		if ( ImGui::Button( "Recompile Shader" ) )
-		{
-			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-			Enjon::String shaderPath = am->GetAssetsPath( ) + "/Shaders"; 
-			mShaderGraph.Create( shaderPath + "/ShaderGraphs/test.json" ); 
+		{ 
+			mTestShaderGraph.Get( )->Reload( ); 
 		}
 
 		ImGui::Image( ImTextureID( mHDRTextureID ), ImVec2( 128, 128 ) );
@@ -1736,7 +1739,7 @@ namespace Enjon
 
 	//=======================================================================================================
 
-	void DeferredRenderer::ShowGameViewport(bool* open)
+	void GraphicsSubsystem::ShowGameViewport(bool* open)
 	{
 	    // Render game in window
 		ImVec2 cursorPos = ImGui::GetCursorScreenPos( );
@@ -1760,7 +1763,7 @@ namespace Enjon
 
 	unsigned int cubeVAO = 0;
 	unsigned int cubeVBO = 0;
-	void DeferredRenderer::RenderCube( )
+	void GraphicsSubsystem::RenderCube( )
 	{
 		// initialize (if necessary)
 		if ( cubeVAO == 0 )

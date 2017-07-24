@@ -29,13 +29,50 @@ namespace Enjon {
 		ENJON_OBJECT( Mesh )
 
 		public:
+			/*
+			* @brief Constructor
+			*/
 			Mesh();
+
+			/*
+			* @brief Destructor
+			*/
 			~Mesh();
 
+			/*
+			* @brief
+			*/
 			void Bind();
-			void Unbind();
-			void Submit(); 
 
+			/*
+			* @brief
+			*/
+			void Unbind();
+
+			/* 
+			* @brief 
+			*/
+			void Submit(); 
+			
+			/*
+			* @brief Protected Constructor
+			*/
+			Mesh( const Enjon::String& filePath );
+
+		protected:
+
+			/*
+			* @brief
+			*/
+			virtual Result Serialize( Enjon::ByteBuffer& buffer ) override;
+
+			/*
+			* @brief
+			*/
+			virtual Result Deserialize( Enjon::ByteBuffer& buffer ) override;
+
+
+		public:
 			std::vector<Vert> Verticies;
 			std::vector<u32> Indicies;	
 

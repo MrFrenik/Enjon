@@ -6,7 +6,7 @@
 #include "Graphics/QuadBatch.h"
 #include "Graphics/GLTexture.h"
 #include "Graphics/Material.h"
-#include "Graphics/DeferredRenderer.h"
+#include "Graphics/GraphicsSubsystem.h"
 
 #include "Engine.h"
 
@@ -178,7 +178,7 @@ namespace Enjon {
 	bool Scene::CompareDepth(Renderable* a, Renderable* b)
 	{
 		// Get camera position
-		DeferredRenderer* gfx = Engine::GetInstance()->GetSubsystemCatalog()->Get<DeferredRenderer>();
+		GraphicsSubsystem* gfx = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<GraphicsSubsystem>( );
 		v3 camPos = gfx->GetSceneCamera()->GetPosition();
 
 		// Get a pos
@@ -197,7 +197,6 @@ namespace Enjon {
 		// TODO(): Set this up to where materials have a unique id and sort by that
 		AssetHandle<Texture> texA = a->GetMaterial()->GetTexture(TextureSlotType::Albedo);
 		AssetHandle<Texture> texB = b->GetMaterial()->GetTexture(TextureSlotType::Albedo);
-
 
 		return texA.Get()->GetTextureId() > texB.Get()->GetTextureId();
 	}

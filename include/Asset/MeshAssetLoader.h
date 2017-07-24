@@ -35,7 +35,7 @@ namespace Enjon
 			/**
 			* @brief Destructor
 			*/
-			Mesh* LoadAssetFromFile(const String& filePath, const String& name);
+			Mesh* LoadResourceFromFile(const String& filePath, const String& name);
 	}; 
 }
 

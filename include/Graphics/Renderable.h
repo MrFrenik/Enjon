@@ -14,14 +14,14 @@ namespace Enjon
 	class Scene;
 	class Shader;
 	class Material;
-	class DeferredRenderer;
+	class GraphicsSubsystem;
 	class GLSLProgram;
 	class ColorRGBA16;
 
 	class Renderable
 	{
 		friend Scene;
-		friend DeferredRenderer;
+		friend GraphicsSubsystem;
 
 		public:
 			Renderable();

@@ -20,9 +20,12 @@ std::vector<T>* EntityManager::GetComponentList()
 }
 
 //--------------------------------------------------------------------------
+
 template <typename T>
-T* EntityManager::Attach(Enjon::Entity* entity)
+T* EntityManager::Attach(const Enjon::EntityHandle& handle)
 {
+	Enjon::Entity* entity = handle.Get( );
+
 	// Assert entity is valid
 	assert(entity != nullptr);
 	// Check to make sure isn't already attached to this entity

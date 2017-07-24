@@ -1,6 +1,7 @@
 #include "Graphics/ShaderGraph.h"
 #include "Graphics/Shader.h"
 #include "Asset/AssetManager.h"
+#include "Asset/ShaderGraphAssetLoader.h"
 #include "Engine.h"
 
 #include "rapidjson/rapidjson.h"
@@ -267,6 +268,20 @@ namespace Enjon
 	}
 
 	//=========================================================================================================================
+		
+	Result ShaderGraph::Serialize( Enjon::ByteBuffer& buffer )
+	{
+		return Result::SUCCESS;
+	}
+
+	//=========================================================================================================================
+
+	Result ShaderGraph::Deserialize( Enjon::ByteBuffer& buffer )
+	{
+		return Result::SUCCESS;
+	}
+
+	//=========================================================================================================================
 
 	s32 ShaderGraph::DeserializeTemplate( const Enjon::String& filePath )
 	{
@@ -509,7 +524,7 @@ namespace Enjon
 			}
 		}
 
-		return 1;
+		return status;
 	}
 
 	//=========================================================================================================================
@@ -560,10 +575,7 @@ namespace Enjon
 	//=========================================================================================================================
 
 	s32 ShaderGraph::Create( const Enjon::String& filePath )
-	{
-		// This will need to happen only AFTER validation has been checked - otherwise could end up with empty graph
-		ClearGraph( );
-
+	{ 
 		s32 status = 1;
 
 		// Get JSON doc
@@ -577,6 +589,8 @@ namespace Enjon
 			// Return status
 			return status;
 		}
+		
+		ClearGraph( );
 
 		// Parse shader name
 		if ( document.HasMember( "ShaderGraphName" ) )
@@ -881,7 +895,30 @@ namespace Enjon
 		}
 
 		// Compile after deserializing
-		return Compile( );
+		if ( status == 1 )
+		{
+			return Compile( );
+		} 
+
+		// If error, then clear graph and return fail status
+		ClearGraph( ); 
+		return status;
+	}
+
+	//========================================================================================================================= 
+		
+	Result ShaderGraph::Reload( )
+	{
+		// Call create with file path
+		s32 status = Create( mFilePath ); 
+
+		// Return failure if failed to create
+		if ( status != 1 )
+		{
+			return Result::FAILURE;
+		}
+
+		return Result::SUCCESS;
 	}
 
 	//========================================================================================================================= 
@@ -1509,7 +1546,7 @@ namespace Enjon
 			// Throw error 
 			// Return empty code
 			return code;
-		}
+		} 
 
 		if ( !mMainSurfaceNode.mTemplate )
 		{
@@ -2340,6 +2377,11 @@ for ( u32 i = 0; i < ShaderGraph::TagCount( code, find ); ++i )\
 	s32 ShaderGraph::Compile( )
 	{
 		s32 status = 1;
+
+		if ( !mMainSurfaceNode.mTemplate )
+		{
+			mMainSurfaceNode.mTemplate = const_cast<ShaderGraphNodeTemplate*>( GetTemplate( "MainNodeTemplate" ) );
+		}
 
 		// For each pass, output shader code based on graph
 		for ( u32 i = 0; i < ( u32 )ShaderPassType::Count; ++i )

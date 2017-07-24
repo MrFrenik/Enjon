@@ -236,7 +236,7 @@ namespace Enjon
 			std::vector<T>* GetComponentList();
 
 			template <typename T>
-			T* Attach(Enjon::Entity* entity);
+			T* Attach(const Enjon::EntityHandle& entity);
 
 			template <typename T>
 			void Detach(Entity* entity);

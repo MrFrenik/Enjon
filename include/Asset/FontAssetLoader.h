@@ -27,7 +27,7 @@ namespace Enjon
 	protected:
 
 	private:
-		UIFont* LoadAssetFromFile( const String& filePath, const String& name );
+		UIFont* LoadResourceFromFile( const String& filePath, const String& name );
 	};
 }
 

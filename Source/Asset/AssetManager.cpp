@@ -6,6 +6,7 @@
 #include "Asset/TextureAssetLoader.h" 
 #include "Asset/MeshAssetLoader.h" 
 #include "Asset/FontAssetLoader.h"
+#include "Asset/ShaderGraphAssetLoader.h"
 #include "Utils/FileUtils.h"
 #include "Engine.h"
 
@@ -63,6 +64,7 @@ namespace Enjon
 		RegisterAssetLoader< Enjon::Texture, TextureAssetLoader >( );
 		RegisterAssetLoader< Enjon::Mesh, MeshAssetLoader >( );
 		RegisterAssetLoader< Enjon::UIFont, FontAssetLoader >( );
+		RegisterAssetLoader< Enjon::ShaderGraph, ShaderGraphAssetLoader >( );
 
 		// Create file extension map
 		mFileExtensionMap[ "png" ]	= GetAssetTypeId< Enjon::Texture >( );
@@ -74,6 +76,7 @@ namespace Enjon
 		mFileExtensionMap[ "obj" ]	= GetAssetTypeId< Enjon::Mesh >( );
 		mFileExtensionMap[ "ttf" ]	= GetAssetTypeId< Enjon::UIFont >( );
 		mFileExtensionMap[ "otf" ]	= GetAssetTypeId< Enjon::UIFont >( ); 
+		mFileExtensionMap[ "sg" ]	= GetAssetTypeId< Enjon::ShaderGraph >( );
 	}
 	
 	//============================================================================================ 
@@ -162,7 +165,7 @@ namespace Enjon
 	//============================================================================================ 
 			
 	Result AssetManager::AddToDatabase( const String& filePath, b8 isRelativePath )
-	{
+	{ 
 		// Have to do a switch based on extension of file
 		s32 idx = GetLoaderIdxByFileExtension( filePath );
 
@@ -190,12 +193,30 @@ namespace Enjon
 				// Load asset and place into database
 				if ( isRelativePath )
 				{
-					auto res = query->second->LoadAssetFromFile( mAssetsPath + filePath, Utils::ToLower( mName ) + qualifiedName ); 
+					// Return failure if path doesn't exist
+					if ( !Utils::FileExists( mAssetsPath + filePath ) )
+					{
+						return Result::FAILURE;
+					}
+
+					auto res = query->second->LoadResourceFromFile( mAssetsPath + filePath, Utils::ToLower( mName ) + qualifiedName ); 
+					
+					// Set file path and name
+					if ( res )
+					{
+						res->mFilePath = mAssetsPath + filePath;
+					}
 				}
 				// If absolute path on disk
 				else
 				{
-					auto res = query->second->LoadAssetFromFile( filePath, qualifiedName );
+					// Return failure if path doesn't exist
+					if ( !Utils::FileExists( filePath ) )
+					{
+						return Result::FAILURE;
+					}
+
+					auto res = query->second->LoadResourceFromFile( filePath, qualifiedName );
 				}
 			}
 		}

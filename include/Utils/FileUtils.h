@@ -137,6 +137,12 @@ namespace Enjon { namespace Utils
 
 		return res;
 	}
+
+	static inline bool FileExists( const String& filePath )
+	{
+		std::ifstream f( filePath.c_str( ) );
+		return f.good( );
+	}
 	
 	static inline String ToLower(const String& str)
 	{
