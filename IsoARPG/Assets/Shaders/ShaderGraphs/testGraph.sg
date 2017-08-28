@@ -2,17 +2,8 @@
 	"ShaderGraphName": "TestGraph",
 
 	"Nodes": {
-		"colorMap": {
-			"Template": "Texture2DSamplerNode"
-		},
-		"normalMap": {
-			"Template": "Texture2DSamplerNode"
-		},
-		"metallicMap": {
-			"Template": "Texture2DSamplerNode"
-		},
-		"roughnessMap": {
-			"Template": "Texture2DSamplerNode"
+		"polarCoords" : {
+			"Template": "VectorToPolarCoordinates"
 		}
 	},
 
@@ -24,19 +15,16 @@
 		"Inputs": {
 
 			"BaseColor": {
-				"colorMap": "RGB"
+				"polarCoords": "Value"
 			},
 
 			"Normal": {
-				"normalMap": "RGB"
 			},
 
 			"Metallic": {
-				"metallicMap": "RGB"
 			},
 
 			"Roughness": {
-				"roughnessMap": "RGB"
 			},
 
 			"Emissive": {

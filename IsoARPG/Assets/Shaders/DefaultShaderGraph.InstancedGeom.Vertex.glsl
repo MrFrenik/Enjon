@@ -11,6 +11,7 @@ out VS_OUT
 	vec3 FragPositionWorldSpace;
 	vec2 TexCoords;
 	mat3 TBN;
+	mat3 TS_TBN;
 	vec3 ViewPositionTangentSpace;
 	vec3 FragPositionTangentSpace;
 } vs_out;

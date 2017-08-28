@@ -227,20 +227,25 @@ namespace Enjon
 	{
 		switch ( type )
 		{
-		case ShaderPassType::StaticGeom:
-		{
-			return "StaticGeom";
-		}; break;
+			case ShaderPassType::StaticGeom:
+			{
+				return "StaticGeom";
+			}; break;
 
-		case ShaderPassType::InstancedGeom:
-		{
-			return "InstancedGeom";
-		}; break;
+			case ShaderPassType::InstancedGeom:
+			{
+				return "InstancedGeom";
+			}; break;
+			
+			case ShaderPassType::Forward_StaticGeom:
+			{
+				return "Forward_StaticGeom";
+			}; break;
 
-		default:
-		{
-			return "";
-		} break;
+			default:
+			{
+				return "";
+			} break;
 		}
 	}
 
@@ -973,24 +978,25 @@ namespace Enjon
 
 		switch ( pass )
 		{
-		case ShaderPassType::StaticGeom:
-		{
-			// Vertex Attribute Layouts
-			code += OutputLine( "layout (location = 0) in vec3 aVertexPosition;" );
-			code += OutputLine( "layout (location = 1) in vec3 aVertexNormal;" );
-			code += OutputLine( "layout (location = 2) in vec3 aVertexTangent;" );
-			code += OutputLine( "layout (location = 3) in vec3 aVertexUV;" );
-		} break;
+			case ShaderPassType::Forward_StaticGeom:
+			case ShaderPassType::StaticGeom:
+			{
+				// Vertex Attribute Layouts
+				code += OutputLine( "layout (location = 0) in vec3 aVertexPosition;" );
+				code += OutputLine( "layout (location = 1) in vec3 aVertexNormal;" );
+				code += OutputLine( "layout (location = 2) in vec3 aVertexTangent;" );
+				code += OutputLine( "layout (location = 3) in vec3 aVertexUV;" );
+			} break;
 
-		case ShaderPassType::InstancedGeom:
-		{
-			// Vertex Attribute Layouts
-			code += OutputLine( "layout (location = 0) in vec3 aVertexPosition;" );
-			code += OutputLine( "layout (location = 1) in vec3 aVertexNormal;" );
-			code += OutputLine( "layout (location = 2) in vec3 aVertexTangent;" );
-			code += OutputLine( "layout (location = 3) in vec3 aVertexUV;" );
-			code += OutputLine( "layout (location = 4) in mat4 aInstanceMatrix;" );
-		} break;
+			case ShaderPassType::InstancedGeom:
+			{
+				// Vertex Attribute Layouts
+				code += OutputLine( "layout (location = 0) in vec3 aVertexPosition;" );
+				code += OutputLine( "layout (location = 1) in vec3 aVertexNormal;" );
+				code += OutputLine( "layout (location = 2) in vec3 aVertexTangent;" );
+				code += OutputLine( "layout (location = 3) in vec3 aVertexUV;" );
+				code += OutputLine( "layout (location = 4) in mat4 aInstanceMatrix;" );
+			} break; 
 		}
 
 		return code;
@@ -1026,6 +1032,7 @@ namespace Enjon
 		code += OutputTabbedLine( "vec3 FragPositionWorldSpace;" );
 		code += OutputTabbedLine( "vec2 TexCoords;" );
 		code += OutputTabbedLine( "mat3 TBN;" );
+		code += OutputTabbedLine( "mat3 TS_TBN;" );
 		code += OutputTabbedLine( "vec3 ViewPositionTangentSpace;" );
 		code += OutputTabbedLine( "vec3 FragPositionTangentSpace;" );
 		code += OutputLine( "} vs_out;\n" );
@@ -1043,19 +1050,20 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
-		case ShaderPassType::InstancedGeom:
-		case ShaderPassType::StaticGeom:
-		{
-			// Should only have one link
-			NodeLink* link = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
-			if ( link )
+			case ShaderPassType::Forward_StaticGeom:
+			case ShaderPassType::InstancedGeom:
+			case ShaderPassType::StaticGeom:
 			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// Should only have one link
+				NodeLink* link = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
+				if ( link )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-		} break;
+			} break;
 		}
 
 		return code;
@@ -1274,134 +1282,142 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
-		case ShaderPassType::StaticGeom:
-		{
-			// Evaluate world position offsets for world position offets
-			NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
-
-			// If link exists
-			if ( link )
+			case ShaderPassType::Forward_StaticGeom:
+			case ShaderPassType::StaticGeom:
 			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( l->mConnectingNode->IsDeclared( ) )
-				{
-					code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
-				}
+				// Evaluate world position offsets for world position offets
+				NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
 
-				if ( l->mFrom )
+				// If link exists
+				if ( link )
 				{
-					// Get code evaluation at link output
-					Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
-					Enjon::String evalType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( l->mConnectingNode->IsDeclared( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+						Enjon::String evalType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+						code += OutputTabbedLine( "vec3 worldPosition = ( uModel * vec4( aVertexPosition, 1.0 ) ).xyz;" );
+						code += OutputTabbedLine( "worldPosition += " + ShaderGraph::TransformOutputType( linkEval, evalType, +"vec3" ) + ";" );
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: WorldPositionOffset: Link" + l->mConnectingNode->mName + ";" );
+					}
+				}
+				// Otherwise, vertex position doesn't get changed
+				else
+				{
 					code += OutputTabbedLine( "vec3 worldPosition = ( uModel * vec4( aVertexPosition, 1.0 ) ).xyz;" );
-					code += OutputTabbedLine( "worldPosition += " + ShaderGraph::TransformOutputType( linkEval, evalType, +"vec3" ) + ";" );
 				}
+
+				// Final position output 
+				code += OutputTabbedLine( "gl_Position = uViewProjection * vec4( worldPosition, 1.0 );\n" );
+ 
+				//code += OutputTabbedLine( "vec3 N = normalize( ( uModel * vec4( aVertexNormal, 0.0 ) ).xyz );" );
+				//code += OutputTabbedLine( "vec3 T = normalize( ( uModel * vec4( aVertexTangent, 0.0 ) ).xyz );\n\n" );
+				
+				code += OutputTabbedLine( "vec3 N = normalize( mat3(uModel) * aVertexNormal );" );
+				code += OutputTabbedLine( "vec3 T = normalize( mat3(uModel) * aVertexTangent );" );
+				
+				code += OutputTabbedLine( "// Reorthogonalize with respect to N" );
+				code += OutputTabbedLine( "T = normalize( T - dot(T, N) * N );\n\n" );
+
+				code += OutputTabbedLine( "// Calculate Bitangent" );
+				code += OutputTabbedLine( "vec3 B = cross( N, T );\n" );
+
+				code += OutputTabbedLine( "// TBN" );
+				code += OutputTabbedLine( "mat3 TBN = mat3( T, B, N );\n\n" );
+
+				code += OutputTabbedLine( "// TS_TBN" );
+				//code += OutputTabbedLine( "vec3 TS_T = normalize(mat3(uModel) * aVertexTangent);" );
+				//code += OutputTabbedLine( "vec3 TS_N = normalize(mat3(uModel) * aVertexNormal);" );
+				//code += OutputTabbedLine( "vec3 TS_T = normalize(aVertexTangent * mat3(uModel));" );
+				//code += OutputTabbedLine( "vec3 TS_N = normalize(aVertexNormal * mat3(uModel));" );
+				//code += OutputTabbedLine( "vec3 TS_B = normalize(cross(TS_N, TS_T));" );
+				//code += OutputTabbedLine( "mat3 TS_TBN = transpose(mat3( TS_T, TS_B, TS_N ));\n" );
+				code += OutputTabbedLine( "mat3 TS_TBN = transpose( TBN );\n" );
+
+				code += OutputTabbedLine( "// Output Vertex Data" );
+				code += OutputTabbedLine( "vs_out.FragPositionWorldSpace = worldPosition;" );
+				code += OutputTabbedLine( "vs_out.TexCoords = vec2( aVertexUV.x, aVertexUV.y );" );
+				//code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = uViewPositionWorldSpace * TS_TBN;" );
+				//code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = vs_out.FragPositionWorldSpace * TS_TBN;" );
+				code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = TS_TBN * uViewPositionWorldSpace;" );
+				code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = TS_TBN * vs_out.FragPositionWorldSpace;" );
+
+				code += OutputTabbedLine( "vs_out.TBN = TBN;" );
+				code += OutputTabbedLine( "vs_out.TS_TBN = TS_TBN;" );
+
+			} break;
+
+			case ShaderPassType::InstancedGeom:
+			{
+				// Evaluate world position offsets for world position offets
+				NodeLink* link = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
+
+				// If link exists
+				if ( link )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( l->mConnectingNode->IsDeclared( ) )
+					{
+						code += OutputTabbedLine( const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+						Enjon::String evalType = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+						code += OutputTabbedLine( "vec3 worldPosition = ( aInstanceMatrix * vec4( aVertexPosition, 1.0 ) ).xyz;" );
+						code += OutputTabbedLine( "worldPosition += " + ShaderGraph::TransformOutputType( linkEval, evalType, +"vec3" ) + ";" );
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: WorldPositionOffset: Link" + l->mConnectingNode->mName + ";" );
+					}
+				}
+				// Otherwise, vertex position doesn't get changed
 				else
 				{
-					code += OutputErrorBlock( "INVALID: WorldPositionOffset: Link" + l->mConnectingNode->mName + ";" );
-				}
-			}
-			// Otherwise, vertex position doesn't get changed
-			else
-			{
-				code += OutputTabbedLine( "vec3 worldPosition = ( uModel * vec4( aVertexPosition, 1.0 ) ).xyz;" );
-			}
-
-			// Final position output 
-			code += OutputTabbedLine( "gl_Position = uViewProjection * vec4( worldPosition, 1.0 );\n" );
-
-			code += OutputTabbedLine( "// Reorthogonalize with respect to N" );
-			code += OutputTabbedLine( "vec3 N = normalize( ( uModel * vec4( aVertexNormal, 0.0 ) ).xyz );" );
-			code += OutputTabbedLine( "vec3 T = normalize( ( uModel * vec4( aVertexTangent, 0.0 ) ).xyz );\n" );
-
-			code += OutputTabbedLine( "// Calculate Bitangent" );
-			code += OutputTabbedLine( "vec3 B = cross( N, T );\n" );
-
-			code += OutputTabbedLine( "// TBN" );
-			code += OutputTabbedLine( "mat3 TBN = mat3( T, B, N );\n\n" );
-
-			code += OutputTabbedLine( "// TS_TBN" );
-			code += OutputTabbedLine( "vec3 TS_T = normalize(mat3(uModel) * aVertexTangent);" );
-			code += OutputTabbedLine( "vec3 TS_N = normalize(mat3(uModel) * aVertexNormal);" );
-			//code += OutputTabbedLine( "vec3 TS_T = normalize(aVertexTangent * mat3(uModel));" );
-			//code += OutputTabbedLine( "vec3 TS_N = normalize(aVertexNormal * mat3(uModel));" );
-			code += OutputTabbedLine( "vec3 TS_B = normalize(cross(TS_N, TS_T));" );
-			code += OutputTabbedLine( "mat3 TS_TBN = transpose(mat3( TS_T, TS_B, TS_N ));\n" );
-
-			code += OutputTabbedLine( "// Output Vertex Data" );
-			code += OutputTabbedLine( "vs_out.FragPositionWorldSpace = worldPosition;" );
-			code += OutputTabbedLine( "vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );" );
-			//code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = uViewPositionWorldSpace * TS_TBN;" );
-			//code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = vs_out.FragPositionWorldSpace * TS_TBN;" );
-			code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = TS_TBN * uViewPositionWorldSpace;" );
-			code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = TS_TBN * vs_out.FragPositionWorldSpace;" );
-
-			code += OutputTabbedLine( "vs_out.TBN = TBN;" );
-
-		} break;
-
-		case ShaderPassType::InstancedGeom:
-		{
-			// Evaluate world position offsets for world position offets
-			NodeLink* link = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
-
-			// If link exists
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( l->mConnectingNode->IsDeclared( ) )
-				{
-					code += OutputTabbedLine( const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDefinition( ) );
-				}
-
-				if ( l->mFrom )
-				{
-					// Get code evaluation at link output
-					Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
-					Enjon::String evalType = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
 					code += OutputTabbedLine( "vec3 worldPosition = ( aInstanceMatrix * vec4( aVertexPosition, 1.0 ) ).xyz;" );
-					code += OutputTabbedLine( "worldPosition += " + ShaderGraph::TransformOutputType( linkEval, evalType, +"vec3" ) + ";" );
 				}
-				else
-				{
-					code += OutputErrorBlock( "INVALID: WorldPositionOffset: Link" + l->mConnectingNode->mName + ";" );
-				}
-			}
-			// Otherwise, vertex position doesn't get changed
-			else
-			{
-				code += OutputTabbedLine( "vec3 worldPosition = ( aInstanceMatrix * vec4( aVertexPosition, 1.0 ) ).xyz;" );
-			}
 
-			// Final position output 
-			code += OutputTabbedLine( "gl_Position = uViewProjection * vec4( worldPosition, 1.0 );\n" );
+				// Final position output 
+				code += OutputTabbedLine( "gl_Position = uViewProjection * vec4( worldPosition, 1.0 );\n" );
 
-			code += OutputTabbedLine( "// Reorthogonalize with respect to N" );
-			code += OutputTabbedLine( "vec3 N = normalize( ( aInstanceMatrix * vec4( aVertexNormal, 0.0 ) ).xyz );" );
-			code += OutputTabbedLine( "vec3 T = normalize( ( aInstanceMatrix * vec4( aVertexTangent, 0.0 ) ).xyz );\n" );
+				code += OutputTabbedLine( "// Reorthogonalize with respect to N" );
+				code += OutputTabbedLine( "vec3 N = normalize( ( aInstanceMatrix * vec4( aVertexNormal, 0.0 ) ).xyz );" );
+				code += OutputTabbedLine( "vec3 T = normalize( ( aInstanceMatrix * vec4( aVertexTangent, 0.0 ) ).xyz );\n" );
 
-			code += OutputTabbedLine( "// Calculate Bitangent" );
-			code += OutputTabbedLine( "vec3 B = cross( N, T );\n" );
+				code += OutputTabbedLine( "// Calculate Bitangent" );
+				code += OutputTabbedLine( "vec3 B = cross( N, T );\n" );
 
-			code += OutputTabbedLine( "// TBN" );
-			code += OutputTabbedLine( "mat3 TBN = mat3( T, B, N );\n" );
+				code += OutputTabbedLine( "// TBN" );
+				code += OutputTabbedLine( "mat3 TBN = mat3( T, B, N );\n" );
 
-			code += OutputTabbedLine( "// TS_TBN" );
-			code += OutputTabbedLine( "vec3 TS_T = normalize(mat3(aInstanceMatrix) * aVertexTangent);" );
-			code += OutputTabbedLine( "vec3 TS_N = normalize(mat3(aInstanceMatrix) * aVertexNormal);" );
-			code += OutputTabbedLine( "vec3 TS_B = normalize(cross(TS_N, TS_T));" );
-			code += OutputTabbedLine( "mat3 TS_TBN = transpose(mat3( TS_T, TS_B, TS_N ));\n" );
+				code += OutputTabbedLine( "// TS_TBN" );
+				code += OutputTabbedLine( "vec3 TS_T = normalize(mat3(aInstanceMatrix) * aVertexTangent);" );
+				code += OutputTabbedLine( "vec3 TS_N = normalize(mat3(aInstanceMatrix) * aVertexNormal);" );
+				code += OutputTabbedLine( "vec3 TS_B = normalize(cross(TS_N, TS_T));" );
+				code += OutputTabbedLine( "mat3 TS_TBN = transpose(mat3( TS_T, TS_B, TS_N ));\n" );
 
-			code += OutputTabbedLine( "// Output Vertex Data" );
-			code += OutputTabbedLine( "vs_out.FragPositionWorldSpace = worldPosition;" );
-			code += OutputTabbedLine( "vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );" );
-			code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = uViewPositionWorldSpace * TS_TBN;" );
-			code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = vs_out.FragPositionWorldSpace * TS_TBN;" );
-			code += OutputTabbedLine( "vs_out.TBN = TBN;" );
+				code += OutputTabbedLine( "// Output Vertex Data" );
+				code += OutputTabbedLine( "vs_out.FragPositionWorldSpace = worldPosition;" );
+				code += OutputTabbedLine( "vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );" );
+				code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = uViewPositionWorldSpace * TS_TBN;" );
+				code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = vs_out.FragPositionWorldSpace * TS_TBN;" );
+				code += OutputTabbedLine( "vs_out.TBN = TBN;" );
 
-		} break;
+			} break;
 		}
 
 		return code;
@@ -1443,6 +1459,7 @@ namespace Enjon
 		code += OutputTabbedLine( "vec3 FragPositionWorldSpace;" );
 		code += OutputTabbedLine( "vec2 TexCoords;" );
 		code += OutputTabbedLine( "mat3 TBN;" );
+		code += OutputTabbedLine( "mat3 TS_TBN;" );
 		code += OutputTabbedLine( "vec3 ViewPositionTangentSpace;" );
 		code += OutputTabbedLine( "vec3 FragPositionTangentSpace;" );
 		code += OutputLine( "} fs_in;\n" );
@@ -1458,64 +1475,65 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
-		case ShaderPassType::InstancedGeom:
-		case ShaderPassType::StaticGeom:
-		{
-			// BaseColor link
-			NodeLink* baseColorLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "BaseColor" ) );
-			if ( baseColorLink )
+			case ShaderPassType::Forward_StaticGeom:
+			case ShaderPassType::InstancedGeom:
+			case ShaderPassType::StaticGeom:
 			{
-				// Evaluate definitions for this node
-				NodeLink* l = baseColorLink;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// BaseColor link
+				NodeLink* baseColorLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "BaseColor" ) );
+				if ( baseColorLink )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = baseColorLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-			// Normal link
-			NodeLink* normalLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Normal" ) );
-			if ( normalLink )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = normalLink;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// Normal link
+				NodeLink* normalLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Normal" ) );
+				if ( normalLink )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = normalLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-			// Metallic link
-			NodeLink* metallicLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Metallic" ) );
-			if ( metallicLink )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = metallicLink;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// Metallic link
+				NodeLink* metallicLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Metallic" ) );
+				if ( metallicLink )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = metallicLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-			// Roughness link
-			NodeLink* roughnessLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Roughness" ) );
-			if ( roughnessLink )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = roughnessLink;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// Roughness link
+				NodeLink* roughnessLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Roughness" ) );
+				if ( roughnessLink )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = roughnessLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-			// Emissive link
-			NodeLink* emissiveLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Emissive" ) );
-			if ( emissiveLink )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = emissiveLink;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// Emissive link
+				NodeLink* emissiveLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Emissive" ) );
+				if ( emissiveLink )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = emissiveLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-			// AO link
-			NodeLink* aoLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "AO" ) );
-			if ( aoLink )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = aoLink;
-				code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
-			}
+				// AO link
+				NodeLink* aoLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "AO" ) );
+				if ( aoLink )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = aoLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
 
-		} break;
+			} break;
 		}
 
 		return code;
@@ -1556,249 +1574,294 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
-		case ShaderPassType::InstancedGeom:
-		case ShaderPassType::StaticGeom:
-		{
-			// Evaluate world position offsets for world position offets
-			NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "BaseColor" ) );
-
-			code += OutputTabbedLine( "// Base Color" );
-			// If link exists
-			if ( link )
+			case ShaderPassType::InstancedGeom:
+			case ShaderPassType::StaticGeom:
 			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( !l->mConnectingNode->IsDefined( ) )
+				// Evaluate world position offsets for world position offets
+				NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "BaseColor" ) );
+
+				code += OutputTabbedLine( "// Base Color" );
+				// If link exists
+				if ( link )
 				{
-					Enjon::String appendedCode = OutputLine( const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDefinition( ) );
-					code += appendedCode;
-				}
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						Enjon::String appendedCode = OutputLine( const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+						code += appendedCode;
+					}
 
-				// Get code evaluation at link output
-
-				if ( l->mFrom )
-				{
-					Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
-
-					// Get output type so we can transform correctly
-					Enjon::String fromOutputType = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
-
-					// Transform this type to required type for output ( could make this more specific to get away from branches )
-					linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec4" );
-
-					code += OutputTabbedLine( "AlbedoOut = " + linkEval + ";\n" );
-				}
-				else
-				{
-					code += OutputErrorBlock( "INVALID: BaseColor: Incorrect Link: " + l->mConnectingNode->mName + ";" );
-				}
-
-			}
-			// Default base color
-			else
-			{
-				Enjon::String baseColor = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "BaseColor" )->mDefaultValue;
-				code += OutputTabbedLine( "AlbedoOut = " + baseColor + ";\n" );
-			}
-
-			// Normals
-			code += OutputTabbedLine( "// Normal" );
-			link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Normal" ) );
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( !l->mConnectingNode->IsDefined( ) )
-				{
-					code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
-				}
-
-				if ( l->mFrom )
-				{
 					// Get code evaluation at link output
-					Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
 
-					// Get output type so we can transform correctly
-					Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+					if ( l->mFrom )
+					{
+						Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
 
-					// Transform this type to required type for output ( could make this more specific to get away from branches )
-					linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec3" );
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
 
-					code += OutputTabbedLine( "vec3 normal = normalize( " + linkEval + " * 2.0 - 1.0 );" );
-					code += OutputTabbedLine( "normal = normalize( fs_in.TBN * normal );" );
-					code += OutputTabbedLine( "NormalsOut = vec4( normal, 1.0 );\n" );
+						// Transform this type to required type for output ( could make this more specific to get away from branches )
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec4" );
+
+						code += OutputTabbedLine( "AlbedoOut = " + linkEval + ";\n" );
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: BaseColor: Incorrect Link: " + l->mConnectingNode->mName + ";" );
+					}
+
 				}
+				// Default base color
 				else
 				{
-					code += OutputErrorBlock( "INVALID: Normal: Incorrect Link: " + l->mConnectingNode->mName + ";" );
-				}
-			}
-			// Default normals
-			else
-			{
-				Enjon::String normal = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Normal" )->mDefaultValue;
-				normal = ShaderGraph::FindReplaceAllMetaTag( normal, "#V_NORMAL", "fs_in.TBN[2]" );
-				code += OutputTabbedLine( "NormalsOut = vec4( " + normal + ", 1.0 );\n" );
-			}
-
-			code += OutputTabbedLine( "// Material Properties" );
-			Enjon::String metallic, roughness, ao;
-
-			// Metallic
-			link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Metallic" ) );
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( !l->mConnectingNode->IsDefined( ) )
-				{
-					code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					Enjon::String baseColor = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "BaseColor" )->mDefaultValue;
+					code += OutputTabbedLine( "AlbedoOut = " + baseColor + ";\n" );
 				}
 
-				if ( l->mFrom )
+				// Normals
+				code += OutputTabbedLine( "// Normal" );
+				link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Normal" ) );
+				if ( link )
 				{
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+
+						// Transform this type to required type for output ( could make this more specific to get away from branches )
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec3" );
+
+						code += OutputTabbedLine( "vec3 normal = normalize( " + linkEval + " * 2.0 - 1.0 );" );
+						code += OutputTabbedLine( "normal = normalize( fs_in.TBN * normal );" );
+						code += OutputTabbedLine( "NormalsOut = vec4( normal, 1.0 );\n" );
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: Normal: Incorrect Link: " + l->mConnectingNode->mName + ";" );
+					}
+				}
+				// Default normals
+				else
+				{
+					Enjon::String normal = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Normal" )->mDefaultValue;
+					normal = ShaderGraph::FindReplaceAllMetaTag( normal, "#V_NORMAL", "fs_in.TBN[2]" );
+					code += OutputTabbedLine( "NormalsOut = vec4( " + normal + ", 1.0 );\n" );
+				}
+
+				code += OutputTabbedLine( "// Material Properties" );
+				Enjon::String metallic, roughness, ao;
+
+				// Metallic
+				link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Metallic" ) );
+				if ( link )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+
+						// Strip away global defines
+						linkEval = ShaderGraph::ReplaceAllGlobalMetaTags( linkEval );
+
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+
+						// Transform to float
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
+
+						metallic = "clamp( " + linkEval + ", 0.0, 1.0 )";
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: Metallic: Incorrect Link: " + l->mConnectingNode->mName + ";" );
+					}
+				}
+				// Default metallic
+				else
+				{
+					metallic = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Metallic" )->mDefaultValue;
+					metallic = "clamp( " + metallic + ", 0.0, 1.0 )";
+				}
+
+				// Roughness
+				link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Roughness" ) );
+				if ( link )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+
+						// Transform to float
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
+
+						roughness = "clamp( " + linkEval + ", 0.0, 1.0 )";
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: Metallic: Incorrect Link: " + l->mConnectingNode->mName + ";" );
+					}
+				}
+				// Default roughness
+				else
+				{
+					roughness = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Roughness" )->mDefaultValue;
+					roughness = "clamp( " + roughness + ", 0.0, 1.0 )";
+				}
+
+				// AO
+				link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "AO" ) );
+				if ( link )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+
+						// Transform to float
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
+
+						ao = "clamp( " + linkEval + ", 0.0, 1.0 )";
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: AO: Incorrect Link: " + l->mConnectingNode->mName + ";" );
+					}
+				}
+				// Default ao
+				else
+				{
+					ao = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "AO" )->mDefaultValue;
+					ao = "clamp( " + ao + ", 0.0, 1.0 )";
+				}
+
+				// Output Material Properties
+				code += OutputTabbedLine( "MatPropsOut = vec4( " + metallic + ", " + roughness + ", " + ao + ", 1.0);\n" );
+
+				// Emissive
+				code += OutputTabbedLine( "// Emissive" );
+				link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Emissive" ) );
+				if ( link )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+
+						// Transform this type to required type for output ( could make this more specific to get away from branches )
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec4" );
+
+						code += OutputTabbedLine( "EmissiveOut = " + linkEval + ";\n" );
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: Emissive: Incorrect Link: " + l->mConnectingNode->mName + ";" );
+					}
+				}
+				// Default emissive
+				else
+				{
+					Enjon::String emissive = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Emissive" )->mDefaultValue;
+					code += OutputTabbedLine( "EmissiveOut = " + emissive + ";\n" );
+				}
+
+				// Other default code
+				code += OutputTabbedLine( "PositionOut = vec4( fs_in.FragPositionWorldSpace, 1.0 );" );
+
+			} break;
+
+			case ShaderPassType::Forward_StaticGeom:
+			{
+				// Evaluate world position offsets for world position offets
+				NodeLink* link = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "BaseColor" ) );
+
+				code += OutputTabbedLine( "// Base Color" );
+				// If link exists
+				if ( link )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						Enjon::String appendedCode = OutputLine( const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+						code += appendedCode;
+					}
+
 					// Get code evaluation at link output
-					Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
 
-					// Strip away global defines
-					linkEval = ShaderGraph::ReplaceAllGlobalMetaTags( linkEval );
+					if ( l->mFrom )
+					{
+						Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
 
-					// Get output type so we can transform correctly
-					Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
 
-					// Transform to float
-					linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
+						// Transform this type to required type for output ( could make this more specific to get away from branches )
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec4" );
 
-					metallic = "clamp( " + linkEval + ", 0.0, 1.0 )";
+						code += OutputTabbedLine( "AlbedoOut = " + linkEval + ";\n" );
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: BaseColor: Incorrect Link: " + l->mConnectingNode->mName + ";" );
+					}
+
 				}
+				// Default base color
 				else
 				{
-					code += OutputErrorBlock( "INVALID: Metallic: Incorrect Link: " + l->mConnectingNode->mName + ";" );
+					Enjon::String baseColor = const_cast< ShaderGraphNodeTemplate* > ( mMainSurfaceNode.mTemplate )->GetInput( "BaseColor" )->mDefaultValue;
+					code += OutputTabbedLine( "AlbedoOut = " + baseColor + ";\n" );
 				}
-			}
-			// Default metallic
-			else
-			{
-				metallic = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Metallic" )->mDefaultValue;
-				metallic = "clamp( " + metallic + ", 0.0, 1.0 )";
-			}
-
-			// Roughness
-			link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Roughness" ) );
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( !l->mConnectingNode->IsDefined( ) )
-				{
-					code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
-				}
-
-				if ( l->mFrom )
-				{
-					// Get code evaluation at link output
-					Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
-
-					// Get output type so we can transform correctly
-					Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
-
-					// Transform to float
-					linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
-
-					roughness = "clamp( " + linkEval + ", 0.0, 1.0 )";
-				}
-				else
-				{
-					code += OutputErrorBlock( "INVALID: Metallic: Incorrect Link: " + l->mConnectingNode->mName + ";" );
-				}
-			}
-			// Default roughness
-			else
-			{
-				roughness = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Roughness" )->mDefaultValue;
-				roughness = "clamp( " + roughness + ", 0.0, 1.0 )";
-			}
-
-			// AO
-			link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "AO" ) );
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( !l->mConnectingNode->IsDefined( ) )
-				{
-					code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
-				}
-
-				if ( l->mFrom )
-				{
-					// Get code evaluation at link output
-					Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
-
-					// Get output type so we can transform correctly
-					Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
-
-					// Transform to float
-					linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" );
-
-					ao = "clamp( " + linkEval + ", 0.0, 1.0 )";
-				}
-				else
-				{
-					code += OutputErrorBlock( "INVALID: AO: Incorrect Link: " + l->mConnectingNode->mName + ";" );
-				}
-			}
-			// Default ao
-			else
-			{
-				ao = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "AO" )->mDefaultValue;
-				ao = "clamp( " + ao + ", 0.0, 1.0 )";
-			}
-
-			// Output Material Properties
-			code += OutputTabbedLine( "MatPropsOut = vec4( " + metallic + ", " + roughness + ", " + ao + ", 1.0);\n" );
-
-			// Emissive
-			code += OutputTabbedLine( "// Emissive" );
-			link = const_cast<NodeLink*> ( mMainSurfaceNode.GetLink( "Emissive" ) );
-			if ( link )
-			{
-				// Evaluate definitions for this node
-				NodeLink* l = link;
-				if ( !l->mConnectingNode->IsDefined( ) )
-				{
-					code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
-				}
-
-				if ( l->mFrom )
-				{
-					// Get code evaluation at link output
-					Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
-
-					// Get output type so we can transform correctly
-					Enjon::String fromOutputType = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
-
-					// Transform this type to required type for output ( could make this more specific to get away from branches )
-					linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "vec4" );
-
-					code += OutputTabbedLine( "EmissiveOut = " + linkEval + ";\n" );
-				}
-				else
-				{
-					code += OutputErrorBlock( "INVALID: Emissive: Incorrect Link: " + l->mConnectingNode->mName + ";" );
-				}
-			}
-			// Default emissive
-			else
-			{
-				Enjon::String emissive = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "Emissive" )->mDefaultValue;
-				code += OutputTabbedLine( "EmissiveOut = " + emissive + ";\n" );
-			}
-
-			// Other default code
-			code += OutputTabbedLine( "PositionOut = vec4( fs_in.FragPositionWorldSpace, 1.0 );" );
-
-		} break;
+			} break;
 		}
 
 		return code;
@@ -1905,15 +1968,16 @@ for ( u32 i = 0; i < ShaderGraph::TagCount( code, find ); ++i )\
 
 		// Replace V_TEXCOORD0 with appropriate tag
 		REPLACE_META_TAG( returnCode, "#TEXCOORDS", "fs_in.TexCoords" )
-			REPLACE_META_TAG( returnCode, "#G_WORLD_TIME", "uWorldTime" )
-			REPLACE_META_TAG( returnCode, "#V_NORMAL", "aVertexNormal" )
-			REPLACE_META_TAG( returnCode, "#V_TANGENT", "aVertexTangent" )
-			REPLACE_META_TAG( returnCode, "#WORLD_SPACE_VIEW_POS", "uViewPositionWorldSpace" )
-			REPLACE_META_TAG( returnCode, "#WORLD_SPACE_FRAG_POS", "fs_in.FragPositionWorldSpace" )
-			REPLACE_META_TAG( returnCode, "#TANGENT_SPACE_VIEW_POS", "fs_in.ViewPositionTangentSpace" )
-			REPLACE_META_TAG( returnCode, "#TANGENT_SPACE_FRAG_POS", "fs_in.FragPositionTangentSpace" )
+		REPLACE_META_TAG( returnCode, "#G_WORLD_TIME", "uWorldTime" )
+		REPLACE_META_TAG( returnCode, "#V_NORMAL", "aVertexNormal" )
+		REPLACE_META_TAG( returnCode, "#V_TANGENT", "aVertexTangent" )
+		REPLACE_META_TAG( returnCode, "#WORLD_SPACE_VIEW_POS", "uViewPositionWorldSpace" )
+		REPLACE_META_TAG( returnCode, "#WORLD_SPACE_FRAG_POS", "fs_in.FragPositionWorldSpace" )
+		REPLACE_META_TAG( returnCode, "#TANGENT_SPACE_VIEW_POS", "fs_in.ViewPositionTangentSpace" )
+		REPLACE_META_TAG( returnCode, "#TANGENT_SPACE_FRAG_POS", "fs_in.FragPositionTangentSpace" )
+		REPLACE_META_TAG( returnCode, "#WORLD_SPACE_NORMALS", "NormalsOut.xyz" )
 
-			return returnCode;
+		return returnCode;
 	}
 
 	//==================================================================================================================
@@ -2194,32 +2258,6 @@ for ( u32 i = 0; i < ShaderGraph::TagCount( code, find ); ++i )\
 
 			variableDeclTemplate = ( ShaderGraph::FindReplaceMetaTag( variableDeclTemplate, "#OUTPUT_TYPE", outputTypeString ) );
 		}
-
-		/*
-		else if ( IsUniform( ) )
-		{
-		Enjon::String actualVariable = "";
-
-		if ( ShaderGraph::HasTag( variableDeclTemplate, "float" ) )
-		{
-		actualVariable = "#define " + mName + " " + GetUniformName( ) + ".x";
-		}
-		else if ( ShaderGraph::HasTag( variableDeclTemplate, "vec2" ) )
-		{
-		actualVariable = "#define " + mName + " " + GetUniformName( ) + ".xy";
-		}
-		else if ( ShaderGraph::HasTag( variableDeclTemplate, "vec3" ) )
-		{
-		actualVariable = "#define " + mName + " " + GetUniformName( ) + ".xyz";
-		}
-
-		// Need to replace the uniform with a vec3, so have to make account for that;
-		variableDeclTemplate = ShaderGraph::ReplaceTypeWithAppropriateUniformType( variableDeclTemplate );
-
-		// Add actual variable declaration
-		variableDeclTemplate += OutputLine( actualVariable );
-		}
-		*/
 
 		// Set variable to being declared
 		SetDeclared( true );

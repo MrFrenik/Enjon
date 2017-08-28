@@ -10,6 +10,8 @@ enum class TokenType
 	Token_Identifier,	
 	Token_OpenParen,	
 	Token_CloseParen,	
+	Token_LessThan,	
+	Token_GreaterThan,	
 	Token_String,	
 	Token_Colon,	
 	Token_SemiColon,	
@@ -17,7 +19,8 @@ enum class TokenType
 	Token_OpenBracket,	
 	Token_CloseBracket,	
 	Token_OpenBrace,	
-	Token_CloseBrace,	
+	Token_CloseBrace,
+	Token_Hash,
 	Token_EndOfStream,	
 };
 
@@ -29,13 +32,14 @@ class Token
 
 		~Token( );
 
-		bool Equals( char* Match );
+		bool Equals( const std::string& match );
 
 		std::string ToString( );
 
 		TokenType mType			= TokenType::Token_Unknown;
 		size_t mTextLength		= 0;
 		char* mText				= nullptr;	
+		std::string	mTextString = "";
 };
 
 #endif

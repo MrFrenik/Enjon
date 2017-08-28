@@ -84,8 +84,14 @@ namespace Enjon
 			}
 
 		protected: 
+
+			ENJON_PROPERTY( )
 			UUID mUUID;
+
+			ENJON_PROPERTY( )
 			Enjon::String mFilePath;
+
+			ENJON_PROPERTY( )
 			Enjon::String mName;
 
 		private:
@@ -137,6 +143,14 @@ namespace Enjon
 			{ 
 				return mAsset->Cast<T>(); 
 			}
+			
+			/*
+			* @brief
+			*/
+			T* operator->( )
+			{
+				return Get( );
+			} 
 
 			/*
 			* @brief 

@@ -1,14 +1,23 @@
 #include "Lexer.h"
 		
-Lexer::Lexer( char* contents )
+Lexer::Lexer( const std::string& contents )
 {
-	mContents = contents;
-	mAt = contents;
+	mContentsString = contents;
+	mContents = &mContentsString[0];
+	mAt = mContents;
+	mCurrentToken = Token( );
 }
 
 Lexer::~Lexer( )
 {
-	free( mContents );
+}
+		
+void Lexer::SetContents( const std::string& newContents )
+{
+	mContentsString = newContents;
+	mContents = &mContentsString[ 0 ];
+	mAt = mContents;
+	mCurrentToken = Token( );
 }
 
 void Lexer::EatAllWhiteSpace( )
@@ -49,7 +58,7 @@ void Lexer::EatAllWhiteSpace( )
 	}
 }
 
-Token Lexer::GetToken( )
+Token Lexer::GetNextToken( )
 {
 	EatAllWhiteSpace( );
 
@@ -61,79 +70,93 @@ Token Lexer::GetToken( )
 
 	switch (C)
 	{
-	case '(': {token.mType = TokenType::Token_OpenParen; }	break;
-	case ')': {token.mType = TokenType::Token_CloseParen; } 	break;
-	case ':': {token.mType = TokenType::Token_Colon; } 		break;
-	case ';': {token.mType = TokenType::Token_SemiColon; }	break;
-	case '*': {token.mType = TokenType::Token_Asterisk; }		break;
-	case '{': {token.mType = TokenType::Token_OpenBrace; }	break;
-	case '}': {token.mType = TokenType::Token_CloseBrace; }	break;
-	case '[': {token.mType = TokenType::Token_OpenBracket; }	break;
-	case ']': {token.mType = TokenType::Token_CloseBracket; }	break;
-	case '\0': {token.mType = TokenType::Token_EndOfStream; } 	break;
+		case '(': {token.mType = TokenType::Token_OpenParen; }		break;
+		case ')': {token.mType = TokenType::Token_CloseParen; } 	break;
+		case '<': {token.mType = TokenType::Token_LessThan; } 		break;
+		case '>': {token.mType = TokenType::Token_GreaterThan; } 	break;
+		case ':': {token.mType = TokenType::Token_Colon; } 			break;
+		case ';': {token.mType = TokenType::Token_SemiColon; }		break;
+		case '*': {token.mType = TokenType::Token_Asterisk; }		break;
+		case '{': {token.mType = TokenType::Token_OpenBrace; }		break;
+		case '}': {token.mType = TokenType::Token_CloseBrace; }		break;
+		case '[': {token.mType = TokenType::Token_OpenBracket; }	break;
+		case ']': {token.mType = TokenType::Token_CloseBracket; }	break;
+		case '\0':{token.mType = TokenType::Token_EndOfStream; } 	break;
+		case '#': {token.mType = TokenType::Token_Hash; } 			break;
 
-	case '/':
-	{
+		case '/':
+		{ 
+		} break;
 
-	} break;
-
-	case '"':
-	{
-		token.mText = mAt;
-
-		while (mAt[0] &&
-			mAt[0] != '"')
+		case '"':
 		{
-			if (mAt[0] == '\\' &&
-				mAt[1])
+			token.mText = mAt;
+
+			while (mAt[0] &&
+				mAt[0] != '"')
 			{
-				++mAt;
-			}
-			++mAt;
-		}
-
-		token.mTextLength = mAt - token.mText;
-		token.mType = TokenType::Token_String;
-
-		if (mAt[0] == '"')
-		{
-			++mAt;
-		}
-
-	} break;
-
-	default:
-	{
-		if (IsAlphabetical( C ))
-		{
-			while (IsAlphabetical( mAt[0] ) || ( IsNumeric( mAt[0] ) || mAt[0] == '_' ))
-			{
+				if (mAt[0] == '\\' &&
+					mAt[1])
+				{
+					++mAt;
+				}
 				++mAt;
 			}
 
 			token.mTextLength = mAt - token.mText;
-			token.mType = TokenType::Token_Identifier;
-		}
-		else if (IsNumeric( C ))
-		{
-			// ParseNumber();
-		}
-		else
-		{
-			token.mType = TokenType::Token_Unknown;
-		}
+			token.mType = TokenType::Token_String;
 
-	} break;
+			if (mAt[0] == '"')
+			{
+				++mAt;
+			}
+
+		} break;
+
+		default:
+		{
+			if (IsAlphabetical( C ))
+			{
+				while (IsAlphabetical( mAt[0] ) || ( IsNumeric( mAt[0] ) || mAt[0] == '_' ))
+				{
+					++mAt;
+				}
+
+				token.mTextLength = mAt - token.mText;
+				token.mType = TokenType::Token_Identifier;
+			}
+			else if (IsNumeric( C ))
+			{
+				// ParseNumber();
+			}
+			else
+			{
+				token.mType = TokenType::Token_Unknown;
+			}
+
+		} break;
 	}
 
-	return token;
+	// Get text string for debugging
+	token.mTextString = token.ToString( );
+
+	// Set current token
+	mCurrentToken = token; 
+
+	// Return current token
+	return mCurrentToken; 
+} 
+
+Token Lexer::GetCurrentToken( )
+{
+	return mCurrentToken;
 }
 		
-bool Lexer::RequireToken( TokenType type )
-{
-	Token token = GetToken( );
+bool Lexer::RequireToken( TokenType type, bool advance )
+{ 
+	Token token = advance ? GetNextToken( ) : GetCurrentToken( ); 
 	bool res = token.mType == type;
-	return res;
+	return res; 
 }
 
 

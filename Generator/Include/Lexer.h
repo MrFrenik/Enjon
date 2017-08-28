@@ -11,21 +11,27 @@ class Lexer
 
 		Lexer( );
 
-		Lexer( char* contents );
+		Lexer( const std::string& contents );
 
 		~Lexer( ); 
 
 		void EatAllWhiteSpace( ); 
 
-		Token GetToken( ); 
+		Token GetNextToken( ); 
 
-		bool RequireToken( TokenType type );
+		bool RequireToken( TokenType type, bool advance = false );
+
+		Token GetCurrentToken( );
+
+		void SetContents( const std::string& newContents );
 	
 	public: 
 		char* mAt = nullptr;
 
 	private:	
+		std::string mContentsString;
 		char* mContents = nullptr;
+		Token mCurrentToken;
 };
 
 #endif

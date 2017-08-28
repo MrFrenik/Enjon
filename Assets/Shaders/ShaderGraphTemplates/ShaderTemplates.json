@@ -488,7 +488,7 @@
 			"Outputs": {
 				"Value": {
 					"PrimitiveType": "vec2", 
-					"CodeTemplate": "#TEXCOORDS"
+					"CodeTemplate": "#NODE_NAME"
 				}
 			},
 			"VariableDeclaration": "vec2 #NODE_NAME;",
@@ -775,6 +775,37 @@
 			]
 		},
 
+		"Fresnel": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 1,
+			"Inputs": {
+				"Sharpness": {
+					"PrimitiveType": "float",
+					"Default": "1.0"
+				},
+				"Normal": {
+					"PrimitiveType": "vec2",
+					"Default": "#WORLD_SPACE_NORMALS"
+				}
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "float", 
+					"CodeTemplate": "#NODE_NAME"
+				}
+			},
+			"VariableDeclaration": "float #NODE_NAME;",
+			"VariableDefinition": [
+				"\t// Fresnel\n",
+				"{\n",
+					"\tvec3 viewDir = normalize(#WORLD_SPACE_VIEW_POS - #WORLD_SPACE_FRAG_POS);\n",
+					"\t#NODE_NAME = pow( 1.0 - dot( viewDir, #INPUT(Normal) ), #INPUT(Sharpness) );\n",
+				"}\n"
+			]
+		},
+
 		"ViewDirectionTS": {
 
 			"Type": "Variable",
@@ -899,6 +930,43 @@
 			},
 			"VariableDeclaration": "vec3 #NODE_NAME;",
 			"VariableDefinition": "#NODE_NAME = #INPUT(Position);"
+		},
+
+		"VectorToPolarCoordinates": {
+
+			"Type": "Variable",
+			"NumberInputs": 1,
+			"NumberOutputs": 3,
+			"Inputs": {
+				"Vector": {
+					"PrimitiveType": "vec2",
+					"Default": "#TEXCOORDS"
+				}	
+			},
+			"Outputs": {
+				"Value": {
+					"PrimitiveType": "vec2", 
+					"CodeTemplate": "#NODE_NAME"
+				},
+				"Length": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME.x"
+				},
+				"Angle": {
+					"PrimitiveType": "float",
+					"CodeTemplate": "#NODE_NAME.y"
+				}
+			},
+			"VariableDeclaration": "vec2 #NODE_NAME;",
+			"VariableDefinition": [
+				"{\n",
+					"\tvec2 coords = #INPUT(Vector);\n",
+					"\tfloat len = length( coords );\n",
+					"\tfloat angle = atan( coords.y, coords.x );\n",
+					"\t#NODE_NAME = vec2(len, angle);\n",
+					"\t#NODE_NAME = coords;\n",
+				"}"
+			]
 		},
 
 		"MainNodeTemplate": {

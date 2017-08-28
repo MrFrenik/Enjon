@@ -8,9 +8,15 @@ Token::~Token( )
 { 
 }
 
-bool Token::Equals( char* match )
+bool Token::Equals( const std::string& match )
 {
-	char* at = match;
+	// Early out
+	if ( match.length( ) != mTextLength )
+	{
+		return false;
+	}
+
+	const char* at = &match[0];
 
 	for (s32 i = 0; i < mTextLength; i++)
 	{

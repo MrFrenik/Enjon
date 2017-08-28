@@ -152,6 +152,11 @@ file(GLOB_RECURSE GAME_FILES
 
 file(GLOB_RECURSE SHADERS "${ENJON_DIR}/Assets/Shaders/*.glsl" ) 
 
+file(GLOB_RECURSE REFLECTION_INCLUDES
+	"${ENJON_INC}/*.h"
+	"${GAME_INC}/*.h"
+	)
+
 # Add all engine source files
 set(
 	GENERAL_SOURCES
@@ -247,7 +252,6 @@ set(
 		${ENJON_DEBUG_DIR}
 	)
 
-
 # Install directories
 foreach(dir ${BUILD_DIRECTORIES})
 	if (NOT IS_DIRECTORY ${dir})
@@ -256,7 +260,6 @@ foreach(dir ${BUILD_DIRECTORIES})
 	endif()
 
 endforeach(dir)
-
 
 # Add DLLs to builds
 foreach(dll ${DLL_LIST})
@@ -277,3 +280,14 @@ foreach(dll ${DLL_LIST})
 	        ${ENJON_BUILD_DIR}/Debug/)
 
 endforeach(dll) 
+
+# Create reflection list
+file(WRITE ${ENJON_DIR}/Generator/config.cfg "#enjon_dir \"${ENJON_DIR}\"\n") 
+file(APPEND ${ENJON_DIR}/Generator/config.cfg "#files\n") 
+
+# Add all reflection include files
+foreach( file ${REFLECTION_INCLUDES} )
+
+	file(APPEND ${ENJON_DIR}/Generator/config.cfg "\"${file}\"\n") 
+
+endforeach( file ) 

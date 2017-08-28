@@ -43,6 +43,21 @@
 
 #include <Bullet/btBulletDynamicsCommon.h> 
 
+class MapClass
+{
+	public:
+		MapClass( )
+		{ 
+		}
+
+		~MapClass( )
+		{ 
+		}
+
+	private:
+		std::unordered_map < Enjon::String, Enjon::AssetHandle< Enjon::Texture > > mMap;
+};
+
 
 class OtherComponent : public Enjon::Component
 {
@@ -76,7 +91,7 @@ class OneMoreComponent : public Enjon::Component
 	private:
 
 	protected:
-};
+}; 
 
 std::vector<btRigidBody*> mBodies;
 btDiscreteDynamicsWorld* mDynamicsWorld;
@@ -142,6 +157,8 @@ Enjon::Result Game::Initialize()
 	mInput = subSysCatalog->Get<Enjon::Input>();
 
 	// Paths to resources
+	Enjon::String toyBoxDispPath		= Enjon::String("/Textures/toy_box_disp.png");
+	Enjon::String toyBoxNormalPath		= Enjon::String("/Textures/toy_box_normal.png");
 	Enjon::String eyePath				= Enjon::String("/Models/eye.obj");
 	Enjon::String noisePath				= Enjon::String("/Textures/worleyNoise.png");
 	Enjon::String grassTexturePath		= Enjon::String("/Textures/grass.png");
@@ -155,6 +172,7 @@ Enjon::Result Game::Initialize()
 	Enjon::String sphereMeshPath		= Enjon::String("/Models/unit_sphere.obj");
 	Enjon::String cubeMeshPath			= Enjon::String("/Models/unit_cube.obj");
 	Enjon::String shaderballPath		= Enjon::String("/Models/shaderball.obj");
+	Enjon::String unitSpherePath		= Enjon::String("/Models/unit_sphere.obj");
 	Enjon::String unrealShaderBallPath	= Enjon::String("/Models/unreal_shaderball.obj");
 	Enjon::String unitShaderBallPath	= Enjon::String("/Models/unit_shaderball.obj");
 	Enjon::String catMeshPath			= Enjon::String("/Models/cat.obj");
@@ -218,6 +236,9 @@ Enjon::Result Game::Initialize()
 	mFont = new Enjon::UIFont( fontPath );
 
 	// Add to asset database
+	mAssetManager->AddToDatabase( toyBoxDispPath );
+	mAssetManager->AddToDatabase( toyBoxNormalPath );
+	mAssetManager->AddToDatabase( unitSpherePath );
 	mAssetManager->AddToDatabase( shaderGraphPath );
 	mAssetManager->AddToDatabase( eyePath );
 	mAssetManager->AddToDatabase( eyeAlbedo );
@@ -1013,7 +1034,8 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 	return Enjon::Result::PROCESS_RUNNING;
 }
 
-//
+//====================================================================================================================
+
 Enjon::Result Game::ProcessInput(f32 dt)
 { 
 	Enjon::Camera* cam = mGfx->GetSceneCamera( );
@@ -1068,7 +1090,7 @@ Enjon::Result Game::ProcessInput(f32 dt)
 			Enjon::Vec3 pos = cam->GetPosition() + cam->Forward() * 2.0f;
 			Enjon::Vec3 vel = cam->Forward() * ballSpeed;
 
-			f32 scalar = 0.3f; 
+			f32 scalar = 0.2f; 
 
 			btCollisionShape* colShape = new btSphereShape(btScalar(scalar));
 			collisionShapes.push_back(colShape);
@@ -1091,8 +1113,8 @@ Enjon::Result Game::ProcessInput(f32 dt)
 			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
 			btRigidBody* body = new btRigidBody(rbInfo);
-			body->setRestitution(0.2f);
-			body->setFriction(2.0f);
+			body->setRestitution(0.9f);
+			body->setFriction(0.8f);
 			body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
 			body->setDamping(0.7f, 0.7f);
 
@@ -1153,7 +1175,7 @@ Enjon::Result Game::ProcessInput(f32 dt)
 	return Enjon::Result::PROCESS_RUNNING;
 } 
 
-//-------------------------------------------------------------
+//==================================================================================================================
 
 Enjon::Result Game::Shutdown()
 {

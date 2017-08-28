@@ -217,15 +217,15 @@ namespace Enjon
 		std::unordered_map< Enjon::String, InputConnection > mDefaultOverrides;
 		const ShaderGraphNodeTemplate* mTemplate = nullptr;
 		std::vector< NodeLink > mLinks;
-	};
+	}; 
 
 	enum class ShaderPassType
 	{
 		StaticGeom,
 		InstancedGeom,
+		Forward_StaticGeom,
 		Count
-	};
-
+	}; 
 	class ShaderGraphAssetLoader;
 	class ShaderGraph : public Enjon::Asset
 	{

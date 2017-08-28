@@ -89,6 +89,7 @@ namespace Enjon
 
 		// Generate new UUID
 		mesh->mUUID = Enjon::UUID::GenerateUUID( ); 
+		mesh->mName = name;
 
 		// Add to assets
 		AddToAssets(name, mesh);

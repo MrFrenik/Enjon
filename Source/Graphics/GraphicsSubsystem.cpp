@@ -46,9 +46,7 @@ Enjon::AssetHandle< Enjon::ShaderGraph > mTestShaderGraph;
 Enjon::Material* mMaterial = nullptr;
 bool brdfset = false;
 
-bool useOther = false;
-
-Enjon::ShaderGraph mShaderGraph;
+bool useOther = false; 
 
 namespace Enjon 
 { 
@@ -157,7 +155,7 @@ namespace Enjon
 				ImGui::ShowStyleEditor();	
 			}
 			ImGui::EndDock();
-	 	};
+	 	}; 
 
 		// ImGuiManager::Register(graphicsMenuOption);
 		// TODO(John): I HATE the way this looks
@@ -204,11 +202,11 @@ namespace Enjon
 
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
 		//Enjon::String hdrFilePath = "/Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
-		//Enjon::String hdrFilePath = "/Textures/HDR/03-Ueno-Shrine_3k.hdr";
+		Enjon::String hdrFilePath = "/Textures/HDR/03-Ueno-Shrine_3k.hdr";
 		//Enjon::String hdrFilePath = "/Textures/HDR/Newport_Loft_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Factory_Catwalk_2k.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/WinterForest_Ref.hdr";
-		Enjon::String hdrFilePath = "/Textures/HDR/Alexs_Apt_2k.hdr";
+		//Enjon::String hdrFilePath = "/Textures/HDR/Alexs_Apt_2k.hdr";
 		//Enjon::String hdrFilePath = "/Textures/HDR/Mono_Lake_B_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Mans_Outside_2k.hdr";
 
@@ -407,11 +405,7 @@ namespace Enjon
 		}
 	
 		// Shader graph creation
-		{
-			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-			Enjon::String shaderPath = am->GetAssetsPath( ) + "/Shaders"; 
-			mShaderGraph.Create( shaderPath + "/ShaderGraphs/test.json" ); 
-
+		{ 
 			mTestShaderGraph = am->GetAsset< Enjon::ShaderGraph >( "isoarpg.shaders.shadergraphs.testgraph" );
 
 			// Create material
@@ -425,7 +419,7 @@ namespace Enjon
 					
 					// Set renderable material
 					renderable.SetMaterial( mMaterial );
-					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.eye" ) );
+					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.bunny" ) );
 					//renderable.SetScale( 0.025f );
 					renderable.SetPosition( Enjon::Vec3( j, 1.0f, i ) + Enjon::Vec3( -25, 0, 5 ) );
 
@@ -473,7 +467,7 @@ namespace Enjon
 
 		// Get a mesh and make it instanced... or something
 		auto db = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" );
+		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "isoarpg.models.quad" );
 		if ( mesh )
 		{
 			// Set bunny mesh for later use
@@ -1632,6 +1626,38 @@ namespace Enjon
 	    	ImGui::TreePop();
 	    } 
 
+		if ( ImGui::CollapsingHeader( "Mesh" ) )
+		{ 
+			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+			ImGui::ListBoxHeader( Enjon::String( "##meshes" ).c_str( ) );
+			{
+				for ( auto& a : *am->GetAssets< Enjon::Mesh >( ) )
+				{
+					Enjon::String meshName = a.second->Cast< Enjon::Mesh >( )->GetName( );
+					ImGui::Selectable( meshName.c_str( ) );
+					if ( ImGui::IsItemActive( ) )
+					{ 
+						for ( auto& r : mRenderables )
+						{
+								r.SetMesh( a.second );
+						}
+					} 
+				}
+
+				Enjon::AssetHandle< Enjon::Mesh > defaultMesh = am->GetDefaultAsset< Enjon::Mesh >( );
+				Enjon::String meshName = defaultMesh->GetName( );
+				ImGui::Selectable( meshName.c_str( ) );
+				if ( ImGui::IsItemActive( ) )
+				{ 
+					for ( auto& r : mRenderables )
+					{
+							r.SetMesh( defaultMesh );
+					}
+				}
+			}
+			ImGui::ListBoxFooter( ); 
+		}
+
 		if ( ImGui::CollapsingHeader( "Uniforms" ) )
 		{
 			if ( mMaterial && mMaterial->GetShaderGraph() )
@@ -1713,11 +1739,23 @@ namespace Enjon
 									for ( auto& a : *am->GetAssets< Enjon::Texture >( ) )
 									{
 										Enjon::String texName = a.second->Cast< Enjon::Texture >( )->GetName( );
-										if ( ImGui::Button( texName.c_str( ) ) )
+										ImGui::Selectable( texName.c_str( ) );
+										if ( ImGui::IsItemActive( ) )
 										{
 											Enjon::AssetHandle< Enjon::Texture > newTex = am->GetAsset< Enjon::Texture >( texName );
-											mMaterial->SetUniform( uniformName, newTex );
-										} 
+											mMaterial->SetUniform( uniformName, newTex ); 
+										}
+									} 
+
+									// Get default texture and list that as well
+									Enjon::AssetHandle< Enjon::Texture > defaultTex = am->GetDefaultAsset< Enjon::Texture >( );
+										
+									Enjon::String texName = defaultTex->GetName( );
+									ImGui::Selectable( texName.c_str( ) );
+									if ( ImGui::IsItemActive( ) )
+									{
+										Enjon::AssetHandle< Enjon::Texture > newTex = am->GetAsset< Enjon::Texture >( texName );
+										mMaterial->SetUniform( uniformName, newTex ); 
 									} 
 								}
 								ImGui::ListBoxFooter( );

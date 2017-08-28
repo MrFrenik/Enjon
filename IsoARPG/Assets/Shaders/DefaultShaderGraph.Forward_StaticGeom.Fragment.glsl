@@ -29,14 +29,4 @@ void main()
 	// Base Color
 	AlbedoOut = vec4( 1.0, 1.0, 1.0, 1.0 );
 
-	// Normal
-	NormalsOut = vec4( fs_in.TBN[2], 1.0 );
-
-	// Material Properties
-	MatPropsOut = vec4( clamp( 0.0, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
-
-	// Emissive
-	EmissiveOut = vec4( 0.0, 0.0, 0.0, 1.0 );
-
-	PositionOut = vec4( fs_in.FragPositionWorldSpace, 1.0 );
 }

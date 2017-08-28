@@ -4,6 +4,9 @@
 
 #include "Utils.h"
 
+// Forward Declarations 
+class Lexer;
+
 class Class
 {
 
@@ -88,9 +91,17 @@ class Function
 
 }; 
 
+
 class Introspection
 {
+	public:
+		Introspection( ); 
 
+		~Introspection( );
+
+		void Parse( Lexer* lexer );
+
+	private:
 };
 
 #endif

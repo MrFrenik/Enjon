@@ -14,23 +14,34 @@ using u32 = uint32_t;
 using s32 = int32_t;
 using String = std::string;
 using usize = size_t;
+	
+static inline std::string ReadFileIntoString( const char* filePath )
+{
+	std::ifstream f( filePath );
+	std::string str( ( std::istreambuf_iterator<char>( f ) ), std::istreambuf_iterator<char>( ) ); 
+	return str;
+}
+
 
 static inline char* ReadFileContentsIntoString(const char* FilePath)
 {
 	char* Result = 0;
 
-	FILE *File = fopen(FilePath, "r");
+	FILE *File = fopen( FilePath, "r" );
 	if (File)
 	{
-		fseek(File, 0, SEEK_END);
-		size_t FileSize = ftell(File);
-		fseek(File, 0, SEEK_SET);
+		fseek( File, 0, SEEK_END );
+		size_t FileSize = ftell( File );
+		fseek( File, 0, SEEK_SET );
 
-		Result = (char *)malloc(FileSize + 1);
-		fread(Result, FileSize, 1, File);
-		Result[FileSize] = '\0';
+		Result = ( char * )malloc( ( FileSize + 1 ) * sizeof( char ) );
+		if ( Result )
+		{
+			fread( Result, sizeof( char ), FileSize, File );
+			Result[FileSize] = '\0'; 
+		}
 
-		fclose(File);
+		fclose( File );
 	}	
 
 	return Result;
