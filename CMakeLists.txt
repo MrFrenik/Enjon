@@ -83,7 +83,8 @@ set(GAME_SRC "${ENJON_DIR}/IsoARPG/src}")
 
 file(GLOB_RECURSE SRC_BASE
 	"${ENJON_INC}/Base/*.h"
-	"${ENJON_INC}/Base/*.inl")
+	"${ENJON_INC}/Base/*.inl"
+	"${ENJON_SRC}/Base/*.cpp")
 
 file(GLOB_RECURSE SRC_ENTITY
 	"${ENJON_INC}/Entity/*.h"

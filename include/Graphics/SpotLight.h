@@ -6,6 +6,8 @@
 #include "Graphics/Color.h"
 #include "Defines.h"
 
+#include "Base/Object.h"
+
 namespace Enjon { 
 
 	class Scene;
@@ -41,8 +43,10 @@ namespace Enjon {
 
 	typedef struct SpotLightParameters SLParams;
 
-	class SpotLight
+	class SpotLight : public Enjon::Object
 	{
+		ENJON_OBJECT( SpotLight )
+
 		public:
 			SpotLight();
 			SpotLight(Vec3& position, SLParams& params, ColorRGBA16& color, float intensity = 1.0f);
@@ -61,11 +65,18 @@ namespace Enjon {
 			void SetParams(SLParams& params);
 
 		private:
-			Vec3 			mPosition;
-			SLParams 			mParams;	
-			ColorRGBA16 	mColor;
-			Scene* 			mScene 			= nullptr;
-			float 				mIntensity;
+			ENJON_PROPERTY( Editable )
+			Vec3 mPosition;
+
+			SLParams mParams;	
+			
+			ENJON_PROPERTY( Editable )
+			f32 mIntensity;
+
+			ENJON_PROPERTY( Editable )
+			ColorRGBA16 mColor;
+
+			Scene* mScene = nullptr;
 	};
 
 }

@@ -15,6 +15,7 @@ namespace Enjon
 	class Input;
 	class AssetManager; 
 	class Application; 
+	class MetaClassRegistry;
 	
 	class EngineConfig
 	{
@@ -89,6 +90,12 @@ namespace Enjon
 			* @return Engine* - Pointer to engine instance.
 			*/
 			const Application* GetApplication( );
+			
+			/**
+			* @brief Returns pointer to meta class registry.
+			* @return MetaClassRegistry* - Pointer to meta class registry instance.
+			*/
+			const MetaClassRegistry* GetMetaClassRegistry( );
 
 		private:
 			
@@ -124,6 +131,7 @@ namespace Enjon
 			Input*				mInput 				= nullptr;
 			SubsystemCatalog*	mSubsystemCatalog	= nullptr;
 			AssetManager*		mAssetManager		= nullptr;
+			MetaClassRegistry*	mMetaClassRegisty	= nullptr;
 
 			// Engine configuration settings
 			EngineConfig mConfig;

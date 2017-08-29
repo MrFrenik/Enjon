@@ -12,12 +12,22 @@ Lexer::~Lexer( )
 {
 }
 		
-void Lexer::SetContents( const std::string& newContents )
+void Lexer::SetContents( const std::string& newContents, const std::string& contentsPath )
 {
 	mContentsString = newContents;
 	mContents = &mContentsString[ 0 ];
 	mAt = mContents;
 	mCurrentToken = Token( );
+	mContentsPath = contentsPath;
+}
+
+void Lexer::ContinueTo( TokenType type )
+{
+	Token token = GetNextToken( );
+	while ( token.mType != type || token.mType == TokenType::Token_EndOfStream )
+	{
+		token = GetNextToken( );
+	}
 }
 
 void Lexer::EatAllWhiteSpace( )

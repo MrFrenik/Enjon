@@ -60,22 +60,22 @@ namespace Enjon {
 
 		private: 
 
-			ENJON_PROPERTY()
-			Vec3 				mPosition;
+			ENJON_PROPERTY( Editable )
+			Vec3 mPosition;
 
-			ENJON_PROPERTY()
-			float 				mAttenuationRate;
+			ENJON_PROPERTY( Editable )
+			f32 mAttenuationRate;
 
-			ENJON_PROPERTY()
-			float 				mRadius;
+			ENJON_PROPERTY( Editable )
+			f32 mRadius;
 
-			ENJON_PROPERTY()
-			float 				mIntensity;
+			ENJON_PROPERTY( Editable )
+			f32 mIntensity;
 
-			ENJON_PROPERTY()
-			ColorRGBA16 		mColor;
+			ENJON_PROPERTY( Editable )
+			ColorRGBA16 mColor;
 			
-			Scene* 				mScene 			= nullptr;
+			Scene* mScene = nullptr;
 	};
 
 }

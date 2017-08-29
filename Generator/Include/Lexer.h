@@ -23,13 +23,18 @@ class Lexer
 
 		Token GetCurrentToken( );
 
-		void SetContents( const std::string& newContents );
+		void SetContents( const std::string& newContents, const std::string& contentsPath = "" );
+
+		std::string GetContentsPath( ) const { return mContentsPath; }
+
+		void ContinueTo( TokenType type );
 	
 	public: 
 		char* mAt = nullptr;
 
 	private:	
 		std::string mContentsString;
+		std::string mContentsPath;
 		char* mContents = nullptr;
 		Token mCurrentToken;
 };

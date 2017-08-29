@@ -4,6 +4,7 @@
 #include "Engine.h"
 #include "Application.h"
 #include "Graphics/GraphicsSubsystem.h"
+#include "Base/MetaClassRegistry.h"
 #include "Asset/AssetManager.h"
 #include "IO/InputManager.h"
 #include "ImGui/ImGuiManager.h"
@@ -107,6 +108,13 @@ namespace Enjon
 	
 	//=======================================================
 			
+	const MetaClassRegistry* Engine::GetMetaClassRegistry( )
+	{
+		return mMetaClassRegisty;
+	}
+	
+	//=======================================================
+			
 	const EngineConfig& Engine::GetConfig() const
 	{
 		return mConfig;
@@ -126,6 +134,9 @@ namespace Enjon
 
 		// Initialize imgui manager
 		Enjon::ImGuiManager::Init( mGraphics->GetWindow()->GetSDLWindow() );
+
+		// Meta class registration
+		mMetaClassRegisty = new MetaClassRegistry( );
 
 		// Initialize application if one is registered
 		if ( mApp )

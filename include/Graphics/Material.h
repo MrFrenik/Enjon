@@ -135,7 +135,10 @@ namespace Enjon {
 
 		protected:
 			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count]; 
+
+			ENJON_PROPERTY( Editable ) 
 			bool mTwoSided = false;
+
 			std::unordered_map< Enjon::String, ShaderUniform* > mUniforms;
 			std::unordered_map< Enjon::String, ShaderUniform* > mUniformOverrides;
 			//const Enjon::ShaderGraph* mShaderGraph = nullptr;

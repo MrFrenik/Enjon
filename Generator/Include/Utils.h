@@ -9,11 +9,97 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <unordered_map>
 
 using u32 = uint32_t;
 using s32 = int32_t;
 using String = std::string;
 using usize = size_t;
+	
+static inline u32 TagCount( const std::string& code, const std::string& tag )
+{
+	u32 count = 0;
+
+	// Search for begin
+	std::size_t pos = code.find( tag );
+	while ( pos != std::string::npos )
+	{
+		count++;
+		pos = code.find( tag, pos + 1 );
+	}
+
+	return count;
+}
+
+#define REPLACE_META_TAG( code, find, replace )\
+for ( u32 i = 0; i < TagCount( code, find ); ++i )\
+{\
+	code = FindReplaceMetaTag( code, find, replace );\
+} 
+	
+static inline std::string FindReplaceMetaTag( const std::string& code, const std::string& toFind, const std::string& replaceWith )
+{
+	std::string returnStr = "";
+
+	// Search for begin
+	std::size_t foundBegin = code.find( toFind );
+	std::size_t findSize = toFind.length( );
+
+	std::string subStrBefore = "";
+	std::string subStrAfter = "";
+
+	// If found, then replace and return
+	if ( foundBegin != std::string::npos )
+	{
+		subStrBefore = code.substr( 0, foundBegin );
+		subStrAfter = code.substr( foundBegin + findSize );
+		return ( subStrBefore + replaceWith + subStrAfter );
+	}
+	// Else just return the original string
+	else
+	{
+		return code;
+	}
+}
+
+	//==================================================================================================================
+
+static inline std::string FindReplaceAll( const std::string& code, const std::string& toFind, const std::string& replaceWith )
+{
+	std::string retCode = code;
+
+	// Search for begin
+	std::size_t pos = retCode.find( toFind );
+	while ( pos != std::string::npos )
+	{
+		retCode = FindReplaceMetaTag( retCode, toFind, replaceWith );
+		pos = retCode.find( toFind, pos + 1 );
+	}
+
+	return retCode;
+}
+
+template <typename T>
+static inline T Clamp( const T& value, const T& min, const T& max )
+{
+	return value > max ? max : value < min : min : value;
+}
+
+template <typename T>
+static inline T Max( const T& a, const T& b )
+{
+	return a >= b ? a : b;
+}
+
+static inline std::string OutputLine( const std::string& code )
+{
+	return code + "\n";
+}
+
+static inline std::string OutputTabbedLine( const std::string& code )
+{
+	return OutputLine( "\t" + code );
+}
 	
 static inline std::string ReadFileIntoString( const char* filePath )
 {

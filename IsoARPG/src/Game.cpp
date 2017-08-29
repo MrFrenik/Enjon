@@ -59,40 +59,6 @@ class MapClass
 };
 
 
-class OtherComponent : public Enjon::Component
-{
-	ENJON_OBJECT( OtherComponent )
-
-	public:
-		OtherComponent( ) {}
-		~OtherComponent( ) {}
-
-		void Update( f32 dT ) override {}
-
-		void Destroy( ) {}
-
-	private:
-
-	protected:
-};
-
-class OneMoreComponent : public Enjon::Component 
-{
-	ENJON_OBJECT( OneMoreComponent )
-
-	public:
-		OneMoreComponent( ) {}
-		~OneMoreComponent( ) {}
-		
-		void Update( f32 dT ) override {}
-
-		void Destroy( ) {}
-
-	private:
-
-	protected:
-}; 
-
 std::vector<btRigidBody*> mBodies;
 btDiscreteDynamicsWorld* mDynamicsWorld;
 
@@ -336,8 +302,6 @@ Enjon::Result Game::Initialize()
 
 	mEntities->RegisterComponent<Enjon::GraphicsComponent>();
 	mEntities->RegisterComponent<Enjon::PointLightComponent>();
-	mEntities->RegisterComponent<OtherComponent>();
-	mEntities->RegisterComponent<OneMoreComponent>();
 
 	// Allocate handle
 	mGreen = mEntities->Allocate( );
@@ -350,8 +314,6 @@ Enjon::Result Game::Initialize()
 	auto rgc2 = mRock2.Get( )->Attach< Enjon::GraphicsComponent >( );
 	auto gc = mGun.Get()->Attach<Enjon::GraphicsComponent>(); 
 	auto pc = mGun.Get()->Attach<Enjon::PointLightComponent>(); 
-	auto oc = mGun.Get()->Attach<OtherComponent>(); 
-	auto omc = mGun.Get()->Attach<OneMoreComponent>(); 
 
 	mRed.Get()->Attach< Enjon::GraphicsComponent >( );
 	mGreen.Get()->Attach< Enjon::GraphicsComponent >( );
@@ -748,6 +710,63 @@ Enjon::Result Game::Initialize()
 			ImGui::SliderFloat( "w##w", &w, 0, 1 ); 
 
 			ImGui::SliderFloat( "FontScale", &mFontSize, 0.05f, 5.0f ); 
+
+			auto plc = mGun.Get( )->GetComponent< Enjon::PointLightComponent >( );
+			auto light = plc->GetLight( );
+			Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( plc->GetLight( )->Class( ) );
+			if ( cls )
+			{ 
+				ImGui::Text( light->GetTypeName( ) );
+
+				Enjon::PropertyTable* pt = cls->GetProperties( );
+				for ( auto& prop : *pt ) 
+				{
+					Enjon::String name = prop.second.GetName( );
+
+					switch ( prop.second.GetType( ) )
+					{
+						case Enjon::MetaPropertyType::Float_32:
+						{
+							float val = 0.0f;
+							cls->GetValue( light, name, &val );
+							if ( ImGui::SliderFloat( name.c_str(), &val, 0.0f, 10.0f ) )
+							{
+								cls->SetValue( light, cls->GetProperty( prop.second.GetName( ) ), val );
+							}
+						} break;
+						
+						case Enjon::MetaPropertyType::ColorRGBA16:
+						{
+							Enjon::ColorRGBA16 val;
+							cls->GetValue( light, name, &val ); 
+							f32 col[ 3 ] = { val.r, val.g, val.b };
+							if ( ImGui::SliderFloat3( name.c_str(), col, 0.0f, 1.0f ) )
+							{
+								val.r = col[ 0 ];
+								val.g = col[ 1 ];
+								val.b = col[ 2 ];
+
+								cls->SetValue( light, cls->GetProperty( prop.second.GetName( ) ), val );
+							}
+						} break;
+						
+						case Enjon::MetaPropertyType::Vec3:
+						{
+							Enjon::Vec3 val;
+							cls->GetValue( light, name, &val ); 
+							f32 col[ 3 ] = { val.x, val.y, val.z };
+							if ( ImGui::SliderFloat3( name.c_str(), col, 0.0f, 1.0f ) )
+							{
+								val.x = col[ 0 ];
+								val.y = col[ 1 ];
+								val.z = col[ 2 ];
+
+								cls->SetValue( light, cls->GetProperty( prop.second.GetName( ) ), val );
+							}
+						} break;
+					}
+				} 
+			}
 
 			//char buf[ 256 ];
 			//std::strncpy( buf, mWorldString.c_str( ), 256 );
