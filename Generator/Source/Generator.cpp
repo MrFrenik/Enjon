@@ -467,6 +467,7 @@ int main( int argc, char** argv )
 	// Grab the config file
 	mConfig.mConfigFilePath = mConfig.mEnjonRootPath + "/Generator/config.cfg"; 
 	mConfig.mOutputDirectory = mConfig.mEnjonRootPath + "/Build/Generator/Intermediate";
+	mConfig.mLinkedDirectory = mConfig.mEnjonRootPath + "/Build/Generator/Linked";
 
 	std::string configFileContents = ReadFileIntoString( mConfig.mConfigFilePath.c_str( ) );
 
@@ -478,7 +479,14 @@ int main( int argc, char** argv )
 
 	// Iterate over collected files and parse
 	for ( auto& f : mConfig.mFilesToParse )
-	{
+	{ 
+		std::vector< std::string > splits = SplitString( f, "/" );
+
+		if ( splits.back( ).compare( "Object.h" ) == 0 )
+		{
+			continue;
+		}
+
 		// Get file contents
 		std::string fileToParse = ReadFileIntoString( f.c_str( ) ); 
 
@@ -487,15 +495,15 @@ int main( int argc, char** argv )
 
 		// Parse file and collect information
 		mIntrospection.Parse( lexer ); 
+
+		std::cout << "Generating reflecton for " << splits.back() <<  "\n";
 	} 
 
 	// Write classes to file
 	mIntrospection.Compile( mConfig ); 
 
 	// Link all classes into one generated file
-	mIntrospection.Link( mConfig );
-
-	std::cout << "done parsing\n";
+	mIntrospection.Link( mConfig ); 
 }
  
 //====================================================================================

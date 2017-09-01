@@ -169,6 +169,7 @@ struct ReflectionConfig
 	std::string mProjectPath;
 	std::string mConfigFilePath;
 	std::string mOutputDirectory;
+	std::string mLinkedDirectory;
 	std::vector< std::string > mFilesToParse;
 }; 
 

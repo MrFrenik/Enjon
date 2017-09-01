@@ -5,11 +5,13 @@ project(Enjon)
 
 # set top level directory
 set (ENJON_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set (REFLECTION_DIR "${ENJON_DIR}/GENERATOR")
 set (ENJON_BUILD_DIR "${ENJON_DIR}/Build")
 set (ENJON_RELEASE_DIR "${ENJON_BUILD_DIR}/Release")
 set (ENJON_RELDEBUGINFO_DIR "${ENJON_BUILD_DIR}/RelWithDebInfo")
 set (ENJON_DEBUG_DIR "${ENJON_BUILD_DIR}/Debug")
-set (PROJECT_DIR ${ENJON_DIR}/IsoARPG/)
+set (ENJON_GENERATED_DIR "${ENJON_BUILD_DIR}/Generator/Linked")
+set (PROJECT_DIR "${ENJON_DIR}/IsoARPG/")
 
 # Set build directory for solution
 set (EXECUTABLE_OUTPUT_PATH ${ENJON_BUILD_DIR})
@@ -176,6 +178,7 @@ set(
 	${ENJON_SRC}/Engine.cpp
 	${ENJON_SRC}/TypeCatalog.cpp
 	${ENJON_SRC}/SubsystemCatalog.cpp
+	${ENJON_GENERATED_DIR}/Enjon_Generated.cpp
 	)
 
 set(
@@ -198,12 +201,19 @@ set(
 	${SHADERS}
 	)
  
-SET( LINK_LIBRARY debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES} )
+SET( LINK_LIBRARY debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES} ) 
+
+add_custom_target(
+	generate_files
+	DEPENDS ${ENJON_INC}/Defines.h
+) 
 
 add_executable(Enjon ${ALL_SRC})
 #target_link_libraries(Enjon debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES})
 #target_link_libraries(Enjon ${PROJECT_DEBUG_LIBRARIES})
 target_link_libraries(Enjon ${PROJECT_RELEASE_LIBRARIES}) 
+
+add_dependencies( Enjon generate_files )
 
 source_group("Base"			FILES ${SRC_BASE})
 source_group("Entity"		FILES ${SRC_ENTITY})
@@ -292,3 +302,24 @@ foreach( file ${REFLECTION_INCLUDES} )
 	file(APPEND ${ENJON_DIR}/Generator/config.cfg "\"${file}\"\n") 
 
 endforeach( file ) 
+
+if(WIN32)
+	execute_process( COMMAND ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe --enjon-path ${ENJON_DIR} )
+
+	add_custom_command(
+		OUTPUT generated.cpp
+		COMMAND  ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe --enjon-path ${ENJON_DIR}
+		DEPENDS generated_files
+	)
+	
+endif()
+
+
+
+
+
+
+
+
+
+

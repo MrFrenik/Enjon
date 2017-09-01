@@ -7,10 +7,16 @@ set( ENJON_DIR ${REFL_DIR}/.. )
 set( ENJON_INC ${ENJON_DIR}/include )
 set( BUILD_DIR ${ENJON_DIR}/Build)
 set( INTERMEDIATE_DIR ${BUILD_DIR}/Generator/Intermediate )
+set( LINK_DIR ${BUILD_DIR}/Generator/Linked )
 
 if (NOT IS_DIRECTORY ${INTERMEDIATE_DIR})
 		file(MAKE_DIRECTORY ${INTERMEDIATE_DIR})
 		execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${INTERMEDIATE_DIR})
+endif() 
+
+if (NOT IS_DIRECTORY ${LINK_DIR})
+		file(MAKE_DIRECTORY ${LINK_DIR})
+		execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${LINK_DIR})
 endif() 
 
 # Add include directory

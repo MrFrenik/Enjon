@@ -396,7 +396,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 void Introspection::Link( const ReflectionConfig& config )
 {
 	// Open link file to write to
-	std::string linkFilePath = config.mOutputDirectory + "/" + "Enjon_Generated.cpp"; 
+	std::string linkFilePath = config.mLinkedDirectory + "/" + "Enjon_Generated.cpp"; 
 	std::ofstream f( linkFilePath ); 
 
 	// Code to write to file

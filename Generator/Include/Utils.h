@@ -101,6 +101,26 @@ static inline std::string OutputTabbedLine( const std::string& code )
 	return OutputLine( "\t" + code );
 }
 	
+static inline std::vector<String> SplitString(const String& str, const String& delimiter)
+{
+	std::vector<String> splits;
+
+	usize pos = 0;
+	String token;
+	usize last = 0;
+	usize next = 0;
+	while ((next = str.find(delimiter, last)) != String::npos)
+	{
+		token = str.substr(last, next - last);
+		splits.push_back(token);
+		last = next + 1;
+	}
+
+	splits.push_back(str.substr(last));
+
+	return splits; 
+}
+	
 static inline std::string ReadFileIntoString( const char* filePath )
 {
 	std::ifstream f( filePath );
@@ -167,27 +187,6 @@ inline bool IsNumeric( char C )
 {
 	return ( C >= '0' && C <= '9' );
 } 
-
-static inline std::vector<String> SplitString( const String& str, const String& delimiter )
-{
-	std::vector<String> splits;
-
-	usize pos = 0;
-	String token;
-	usize last = 0;
-	usize next = 0;
-
-	while (( next = str.find( delimiter, last ) ) != String::npos)
-	{
-		token = str.substr( last, next - last );
-		splits.push_back( token );
-		last = next + 1;
-	}
-
-	splits.push_back( str.substr( last ) );
-
-	return splits;
-}
 
 static inline String Replace( const String& str, const char& find, const char& with )
 {
