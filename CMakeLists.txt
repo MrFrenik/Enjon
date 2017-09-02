@@ -272,6 +272,10 @@ foreach(dir ${BUILD_DIRECTORIES})
 
 endforeach(dir)
 
+add_custom_command(TARGET Enjon PRE_BUILD
+	COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe --enjon-path ${ENJON_DIR}
+	)
+
 # Add DLLs to builds
 foreach(dll ${DLL_LIST})
 
