@@ -21,19 +21,37 @@ enum class TokenType
 	Token_OpenBrace,	
 	Token_CloseBrace,
 	Token_Hash,
-	Token_EndOfStream,	
+	Token_EndOfStream,
+	Token_DoubleColon
 };
 
 class Token
 {
 	public:
 
+		/*
+		* @brief
+		*/
 		Token( );
 
+		/*
+		* @brief
+		*/
 		~Token( );
 
+		/*
+		* @brief
+		*/
 		bool Equals( const std::string& match );
 
+		/*
+		* @brief
+		*/
+		bool IsType( const TokenType& type );
+
+		/*
+		* @brief
+		*/
 		std::string ToString( );
 
 		TokenType mType			= TokenType::Token_Unknown;

@@ -5,12 +5,7 @@
 #define ENJON_META_PROPERTY_H 
 
 #include "System/Types.h"
-#include "Defines.h"
-
-namespace Enjon
-{
-	
-}
+#include "Defines.h" 
 
 
 #endif

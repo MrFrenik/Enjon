@@ -16,16 +16,16 @@ enum class PropertyType
 	Unknown,
 	Bool,
 	ColorRGBA16,
-	Float_32,
-	Float_64,
-	Uint_8,
-	Uint_16,
-	Uint_32,
-	Uint_64,
-	Int_8,
-	Int_16,
-	Int_32,
-	Int_64,
+	F32,
+	F64,
+	U8,
+	U16,
+	U32,
+	U64,
+	S8,
+	S16,
+	S32,
+	S64,
 	String,
 	Array,
 	Vec2,
@@ -91,10 +91,24 @@ class Property
 	protected:
 		static void InitPropertyMap( );
 
+		bool HasTrait( const std::string& trait )
+		{
+			return ( mPropertyTraits.find( trait ) != mPropertyTraits.end( ) );
+		}
+
+		void AddTrait( const std::string& trait )
+		{
+			if ( !HasTrait( trait ) )
+			{
+				mPropertyTraits.insert( trait );
+			}
+		}
+
 	public:
 		std::string mType;
 		std::string mName; 
 		PropertyFlags mFlags = PropertyFlags::None;
+		std::unordered_set< std::string > mPropertyTraits;
 
 		static PropertyTypeMap mPropertyTypeMap;
 		static PropertyTypeAsStringMap mPropertyTypeStringMap;
@@ -150,6 +164,7 @@ class Class
 		std::string mName; 
 		std::string mFilePath;
 		static u32 mScopeCount;
+		std::string mParent = "";
 };
 
 class Struct
@@ -184,6 +199,8 @@ class Introspection
  
 		void Parse( Lexer* lexer );
 
+		void ParseClassBody( Lexer* lexer, Class* cls );
+
 		void ParseClass( Lexer* lexer );
 		
 		void ParseClassMembers( Lexer* lexer, Class* cls );
@@ -194,6 +211,8 @@ class Introspection
 
 		bool ClassExists( const std::string& className );
 
+		void RemoveClass( const std::string& className );
+
 		const Class* AddClass( const std::string& className );
 
 		const Class* GetClass( const std::string& name );
@@ -201,6 +220,9 @@ class Introspection
 		void Compile( const ReflectionConfig& config );
 
 		void Link( const ReflectionConfig& config );
+
+	private:
+		std::string OutputLinkedHeader( );
 
 	private:
 		std::unordered_map< std::string, Class > mClasses;

@@ -5,23 +5,6 @@
 #define ENJON_META_FUNCTION_H 
 
 #include "System/Types.h"
-#include "Defines.h"
-
-namespace Enjon
-{
-	class MetaClass;
-	class MetaFunction
-	{
-		friend MetaClass;
-		public:
-			MetaFunction( );
-
-			~MetaFunction( );
-
-		private:
-
-	};
-}
-
+#include "Defines.h" 
 
 #endif

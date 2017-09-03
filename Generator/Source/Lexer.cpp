@@ -20,14 +20,41 @@ void Lexer::SetContents( const std::string& newContents, const std::string& cont
 	mCurrentToken = Token( );
 	mContentsPath = contentsPath;
 }
+		
+Token Lexer::PeekAtNextToken( )
+{ 
+	// Grab next token to return
+	Token nextToken = GetNextToken( false ); 
 
-void Lexer::ContinueTo( TokenType type )
+	return nextToken;
+}
+
+bool Lexer::ContinueTo( TokenType type )
 {
 	Token token = GetNextToken( );
-	while ( token.mType != type || token.mType == TokenType::Token_EndOfStream )
+
+	// Continue to search for type or hit end of stream
+	while ( !token.IsType( type ) && !token.IsType( TokenType::Token_EndOfStream ) )
 	{
 		token = GetNextToken( );
 	}
+
+	bool retVal = !token.IsType( TokenType::Token_EndOfStream );
+	return retVal;
+}
+		
+bool Lexer::ContinueToIdentifier( const std::string& identifier )
+{
+	Token token = GetNextToken( );
+
+	// Continue to search for identifier or hit end of stream
+	while ( !token.Equals( identifier ) && !token.IsType( TokenType::Token_EndOfStream ) )
+	{
+		token = GetNextToken( );
+	}
+
+	// If EOS hit, then didn't find identifier
+	return !token.IsType( TokenType::Token_EndOfStream ); 
 }
 
 void Lexer::EatAllWhiteSpace( )
@@ -68,15 +95,19 @@ void Lexer::EatAllWhiteSpace( )
 	}
 }
 
-Token Lexer::GetNextToken( )
+Token Lexer::GetNextToken( bool advance )
 {
 	EatAllWhiteSpace( );
 
 	Token token = { };
 	token.mTextLength = 1;
 	token.mText = mAt;
-	char C = mAt[0];
-	++mAt;
+	char C = mAt[ 0 ];
+
+	if ( advance )
+	{
+		++mAt; 
+	}
 
 	switch (C)
 	{
@@ -84,7 +115,6 @@ Token Lexer::GetNextToken( )
 		case ')': {token.mType = TokenType::Token_CloseParen; } 	break;
 		case '<': {token.mType = TokenType::Token_LessThan; } 		break;
 		case '>': {token.mType = TokenType::Token_GreaterThan; } 	break;
-		case ':': {token.mType = TokenType::Token_Colon; } 			break;
 		case ';': {token.mType = TokenType::Token_SemiColon; }		break;
 		case '*': {token.mType = TokenType::Token_Asterisk; }		break;
 		case '{': {token.mType = TokenType::Token_OpenBrace; }		break;
@@ -93,6 +123,32 @@ Token Lexer::GetNextToken( )
 		case ']': {token.mType = TokenType::Token_CloseBracket; }	break;
 		case '\0':{token.mType = TokenType::Token_EndOfStream; } 	break;
 		case '#': {token.mType = TokenType::Token_Hash; } 			break;
+		
+		case ':': 
+		{
+			// Search for double colon first
+			token.mType = TokenType::Token_Colon; 
+
+			if ( !advance )
+			{
+				if ( mAt[ 1 ] && mAt[ 1 ] == ':' )
+				{ 
+					token.mType = TokenType::Token_DoubleColon;
+					token.mTextLength = 2;
+				}
+			}
+			else
+			{
+				if ( mAt[ 0 ] && mAt[ 0 ] == ':' )
+				{
+					token.mType = TokenType::Token_DoubleColon;
+					token.mTextLength = 2;
+				}
+
+				++mAt; 
+			}
+		} 			
+		break;
 
 		case '/':
 		{ 
@@ -150,11 +206,18 @@ Token Lexer::GetNextToken( )
 	// Get text string for debugging
 	token.mTextString = token.ToString( );
 
-	// Set current token
-	mCurrentToken = token; 
+	if ( advance )
+	{
+		// Set current token
+		mCurrentToken = token; 
+	}
+	// Otherwise reset
+	else
+	{
+		mAt = token.mText;
+	}
 
-	// Return current token
-	return mCurrentToken; 
+	return token; 
 } 
 
 Token Lexer::GetCurrentToken( )
@@ -164,9 +227,11 @@ Token Lexer::GetCurrentToken( )
 		
 bool Lexer::RequireToken( TokenType type, bool advance )
 { 
+	// Get token
 	Token token = advance ? GetNextToken( ) : GetCurrentToken( ); 
-	bool res = token.mType == type;
-	return res; 
+
+	// Return whether or not the types match
+	return ( token.mType == type );
 }
 
 

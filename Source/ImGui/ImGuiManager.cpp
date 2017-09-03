@@ -4,6 +4,8 @@
 #include "Graphics/Window.h"
 #include "System/Types.h"
 #include "Defines.h"
+#include "Serialize/UUID.h" 
+#include "Base/Object.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -140,6 +142,114 @@ namespace Enjon
 		*/
 
 		ImGuizmo::Manipulate(view, projection, mCurrentGizmoOperation, mCurrentGizmoMode, model.elements, NULL, useSnap ? &snap.x : NULL);
+	}
+
+	//---------------------------------------------------
+			
+	void ImGuiManager::DebugDumpObject( Enjon::Object* object )
+	{
+		Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( object->Class( ) );
+
+		ImGui::Text( object->GetTypeName( ) );
+
+		Enjon::PropertyTable& pt = cls->GetProperties( );
+		for ( auto& prop : pt )
+		{
+			Enjon::String name = prop.GetName( );
+
+			switch ( prop.GetType( ) )
+			{
+				case Enjon::MetaPropertyType::U32:
+				{
+					u32 val = 0;
+					cls->GetValue( object, &prop, &val );
+					if ( ImGui::SliderInt( name.c_str( ), (s32*)&val, 0, 10 ) )
+					{
+						cls->SetValue( object, &prop, (u32)val );
+					}
+				} break; 
+				
+				case Enjon::MetaPropertyType::S32:
+				{
+					s32 val = 0;
+					cls->GetValue( object, &prop, &val );
+					if ( ImGui::SliderInt( name.c_str( ), (s32*)&val, 0, 10 ) )
+					{
+						cls->SetValue( object, &prop, (s32)val );
+					}
+				} break; 
+
+				case Enjon::MetaPropertyType::F32: 
+				{
+					float val = 0.0f;
+					cls->GetValue( object, &prop, &val );
+					if ( ImGui::SliderFloat( name.c_str( ), &val, 0.0f, 10.0f ) )
+					{
+						cls->SetValue( object, &prop, val );
+					}
+				} break; 
+				
+				case Enjon::MetaPropertyType::Vec2:
+				{
+					Enjon::Vec2 val;
+					cls->GetValue( object, &prop, &val );
+					f32 col[ 2 ] = { val.x, val.y };
+					if ( ImGui::SliderFloat2( name.c_str( ), col, 0.0f, 1.0f ) )
+					{
+						val.x = col[ 0 ];
+						val.y = col[ 1 ]; 
+						cls->SetValue( object, &prop, val );
+					}
+				} break;
+
+				case Enjon::MetaPropertyType::Vec3:
+				{
+					Enjon::Vec3 val;
+					cls->GetValue( object, &prop, &val );
+					f32 col[ 3 ] = { val.x, val.y, val.z };
+					if ( ImGui::SliderFloat3( name.c_str( ), col, 0.0f, 1.0f ) )
+					{
+						val.x = col[ 0 ];
+						val.y = col[ 1 ];
+						val.z = col[ 2 ];
+
+						cls->SetValue( object, &prop, val );
+					}
+				} break;
+				
+				case Enjon::MetaPropertyType::Vec4:
+				case Enjon::MetaPropertyType::ColorRGBA16:
+				{
+					Enjon::ColorRGBA16 val;
+					cls->GetValue( object, &prop, &val );
+					f32 col[ 4 ] = { val.r, val.g, val.b, val.a };
+					if ( ImGui::SliderFloat4( name.c_str( ), col, 0.0f, 1.0f ) )
+					{
+						val.r = col[ 0 ];
+						val.g = col[ 1 ];
+						val.b = col[ 2 ];
+						val.a = col[ 3 ]; 
+						cls->SetValue( object, &prop, val );
+					}
+				} break;
+
+				case Enjon::MetaPropertyType::String:
+				{
+					Enjon::String val;
+					cls->GetValue( object, &prop, &val );
+					ImGui::InputText( name.c_str( ), &val[ 0 ], val.size( ) );
+					cls->SetValue( object, &prop, val );
+				} break;
+
+				case Enjon::MetaPropertyType::UUID:
+				{
+					Enjon::UUID val;
+					cls->GetValue( object, &prop, &val );
+					Enjon::String str = val.ToString( );
+					ImGui::InputText( name.c_str( ), &str[ 0 ], str.size( ) );
+				} break;
+			}
+		} 
 	}
 
 	//---------------------------------------------------

@@ -33,6 +33,11 @@ bool Token::Equals( const std::string& match )
 	return res;
 }
 		
+bool Token::IsType( const TokenType& type )
+{
+	return ( mType == type );
+}
+		
 std::string Token::ToString( )
 {
 	std::string tokenName = "";

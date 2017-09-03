@@ -29,11 +29,20 @@ message("cxx FLgs:" ${CMAKE_CXX_FLAGS})
 # Add additional sub-directories
 add_subdirectory( Generator )
 
-
 # Add include directories
 include_directories(${ENJON_DIR}/Include
 					${ENJON_DIR}/ThirdParty/Build/Include
 					${ENJON_DIR}/IsoARPG/include)
+
+# Output generation file
+if (NOT IS_DIRECTORY ${ENJON_GENERATED_DIR})
+	file(MAKE_DIRECTORY ${dir})
+endif()
+
+if ( EXISTS ${ENJON_GENERATED_DIR}/Enjon_Generated.cpp )
+else()
+	file(WRITE ${ENJON_GENERATED_DIR}/Enjon_Generated.cpp "// Enjon_Generated.cpp\n") 
+endif()
 
 # Add libraries to be linked against
 set(
@@ -201,19 +210,14 @@ set(
 	${SHADERS}
 	)
  
-SET( LINK_LIBRARY debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES} ) 
-
-add_custom_target(
-	generate_files
-	DEPENDS ${ENJON_INC}/Defines.h
-) 
+SET( LINK_LIBRARY debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES} )
 
 add_executable(Enjon ${ALL_SRC})
 #target_link_libraries(Enjon debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES})
 #target_link_libraries(Enjon ${PROJECT_DEBUG_LIBRARIES})
-target_link_libraries(Enjon ${PROJECT_RELEASE_LIBRARIES}) 
+target_link_libraries(Enjon ${PROJECT_RELEASE_LIBRARIES})
 
-add_dependencies( Enjon generate_files )
+add_dependencies( Enjon Reflection )
 
 source_group("Base"			FILES ${SRC_BASE})
 source_group("Entity"		FILES ${SRC_ENTITY})
@@ -307,12 +311,13 @@ foreach( file ${REFLECTION_INCLUDES} )
 
 endforeach( file ) 
 
-if(WIN32)
-	execute_process( COMMAND ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe --enjon-path ${ENJON_DIR} )
+# Generate Files - Not sure the best way to handle this just yet...
+if(WIN32) 
+	execute_process( COMMAND ${ENJON_RELEASE_DIR}/Reflection.exe --enjon-path ${ENJON_DIR} )
 
 	add_custom_command(
 		OUTPUT generated.cpp
-		COMMAND  ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe --enjon-path ${ENJON_DIR}
+		COMMAND  ${ENJON_RELEASE_DIR}/Reflection.exe --enjon-path ${ENJON_DIR}
 		DEPENDS generated_files
 	)
 	

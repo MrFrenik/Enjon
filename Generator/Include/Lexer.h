@@ -17,7 +17,9 @@ class Lexer
 
 		void EatAllWhiteSpace( ); 
 
-		Token GetNextToken( ); 
+		Token GetNextToken( bool advance = true ); 
+
+		Token PeekAtNextToken( );
 
 		bool RequireToken( TokenType type, bool advance = false );
 
@@ -27,7 +29,9 @@ class Lexer
 
 		std::string GetContentsPath( ) const { return mContentsPath; }
 
-		void ContinueTo( TokenType type );
+		bool ContinueTo( TokenType type );
+
+		bool ContinueToIdentifier( const std::string& identifier );
 	
 	public: 
 		char* mAt = nullptr;

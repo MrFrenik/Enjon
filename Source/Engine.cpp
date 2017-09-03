@@ -208,6 +208,7 @@ namespace Enjon
 			// Update graphics
 			mGraphics->Update(dt); 
 
+			// Clamp frame rate
 			mLimiter.End();
 		}
 

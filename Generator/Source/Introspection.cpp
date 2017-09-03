@@ -43,40 +43,41 @@ mPropertyTypeStringMap[ PropertyType::prop ] = #prop;
 void Property::InitPropertyMap( )
 {
 	mPropertyTypeMap[ "bool" ]			= PropertyType::Bool;
-	mPropertyTypeMap[ "float" ]			= PropertyType::Float_32;
-	mPropertyTypeMap[ "f32" ]			= PropertyType::Float_32;
-	mPropertyTypeMap[ "f64" ]			= PropertyType::Float_64;
-	mPropertyTypeMap[ "double" ]		= PropertyType::Float_64;
-	mPropertyTypeMap[ "u8" ]			= PropertyType::Uint_8;
-	mPropertyTypeMap[ "uint8_t" ]		= PropertyType::Uint_8;
-	mPropertyTypeMap[ "u16" ]			= PropertyType::Uint_16;
-	mPropertyTypeMap[ "uint16_t" ]		= PropertyType::Uint_16;
-	mPropertyTypeMap[ "u32" ]			= PropertyType::Uint_32;
-	mPropertyTypeMap[ "uint32_t" ]		= PropertyType::Uint_32;
-	mPropertyTypeMap[ "u64" ]			= PropertyType::Uint_64;
-	mPropertyTypeMap[ "uint64_t" ]		= PropertyType::Uint_64;
-	mPropertyTypeMap[ "s32" ]			= PropertyType::Int_32;
-	mPropertyTypeMap[ "int32_t" ]		= PropertyType::Int_32;
-	mPropertyTypeMap[ "s64" ]			= PropertyType::Int_64;
-	mPropertyTypeMap[ "int64_t" ]		= PropertyType::Int_64;
+	mPropertyTypeMap[ "float" ]			= PropertyType::F32;
+	mPropertyTypeMap[ "f32" ]			= PropertyType::F32;
+	mPropertyTypeMap[ "f64" ]			= PropertyType::F64;
+	mPropertyTypeMap[ "double" ]		= PropertyType::F64;
+	mPropertyTypeMap[ "u8" ]			= PropertyType::S8;
+	mPropertyTypeMap[ "uint8_t" ]		= PropertyType::U8;
+	mPropertyTypeMap[ "u16" ]			= PropertyType::U16;
+	mPropertyTypeMap[ "uint16_t" ]		= PropertyType::U16;
+	mPropertyTypeMap[ "u32" ]			= PropertyType::U32;
+	mPropertyTypeMap[ "uint32_t" ]		= PropertyType::U32;
+	mPropertyTypeMap[ "u64" ]			= PropertyType::U64;
+	mPropertyTypeMap[ "uint64_t" ]		= PropertyType::U64;
+	mPropertyTypeMap[ "s32" ]			= PropertyType::S32;
+	mPropertyTypeMap[ "int32_t" ]		= PropertyType::S32;
+	mPropertyTypeMap[ "s64" ]			= PropertyType::S64;
+	mPropertyTypeMap[ "int64_t" ]		= PropertyType::S64;
 	mPropertyTypeMap[ "Vec2" ]			= PropertyType::Vec2;
 	mPropertyTypeMap[ "Vec3" ]			= PropertyType::Vec3;
 	mPropertyTypeMap[ "Vec4" ]			= PropertyType::Vec4;
 	mPropertyTypeMap[ "ColorRGBA16" ]	= PropertyType::ColorRGBA16;
 	mPropertyTypeMap[ "UUID" ]			= PropertyType::UUID;
+	mPropertyTypeMap[ "String" ]		= PropertyType::String;
 
 	// Init property type as string
-	PROP_TO_STRING( Float_32 )
-	PROP_TO_STRING( Float_64 )
+	PROP_TO_STRING( F32 )
+	PROP_TO_STRING( F64 )
 	PROP_TO_STRING( ColorRGBA16 )
-	PROP_TO_STRING( Uint_8 )
-	PROP_TO_STRING( Uint_16 )
-	PROP_TO_STRING( Uint_32 )
-	PROP_TO_STRING( Uint_64 )
-	PROP_TO_STRING( Int_8 )
-	PROP_TO_STRING( Int_16 )
-	PROP_TO_STRING( Int_32 ) 
-	PROP_TO_STRING( Int_64 )
+	PROP_TO_STRING( U8 )
+	PROP_TO_STRING( U16 )
+	PROP_TO_STRING( U32 )
+	PROP_TO_STRING( U64 )
+	PROP_TO_STRING( S8 )
+	PROP_TO_STRING( S16 )
+	PROP_TO_STRING( S32 ) 
+	PROP_TO_STRING( S64 )
 	PROP_TO_STRING( String )
 	PROP_TO_STRING( Array )
 	PROP_TO_STRING( Vec2 )
@@ -157,23 +158,29 @@ void Introspection::Parse( Lexer* lexer )
 			{
 			} break;
 
+			case TokenType::Token_OpenBrace:
+			{
+				Class::PushScope( );
+			}
+
+			case TokenType::Token_CloseBrace:
+			{
+				Class::PopScope( );
+			}
+
 			case TokenType::Token_Identifier:
 			{ 
 				// Parse class when object identifier is found
-				if ( token.Equals( "ENJON_OBJECT" ) )
+				if ( token.Equals( "ENJON_CLASS" ) )
 				{
-					// Begin class scope
-					Class::PushScope( );
-
-					// Parse the class
 					ParseClass( lexer );
-				}
+				} 
 			}
 			break;
 
 			case TokenType::Token_Unknown:
 			{
-				//Parsing = false;
+//Parsing = false;
 			}
 			break;
 
@@ -187,7 +194,7 @@ void Introspection::Parse( Lexer* lexer )
 }
 
 //=================================================================================================
-		
+
 const Class* Introspection::GetClass( const std::string& name )
 {
 	if ( ClassExists( name ) )
@@ -199,10 +206,17 @@ const Class* Introspection::GetClass( const std::string& name )
 }
 
 //=================================================================================================
-		
+
 bool Introspection::ClassExists( const std::string& className )
 {
 	return ( mClasses.find( className ) != mClasses.end( ) );
+}
+
+//=================================================================================================
+
+void Introspection::RemoveClass( const std::string& className )
+{
+	mClasses.erase( className );
 }
 
 //=================================================================================================
@@ -218,7 +232,7 @@ const Class* Introspection::AddClass( const std::string& className )
 }
 
 //=================================================================================================
-		
+
 void Introspection::ParseClass( Lexer* lexer )
 {
 	// Grab next token and make sure is parentheses
@@ -227,7 +241,26 @@ void Introspection::ParseClass( Lexer* lexer )
 		return;
 	}
 
-	// Get class name
+	// TODO(): Grab special class traits here
+
+	// Continue to close paren
+	if ( !lexer->ContinueTo( TokenType::Token_CloseParen ) )
+	{
+		return;
+	}
+
+	if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
+	{
+		return;
+	}
+
+	// Look for class keyword
+	if ( !lexer->GetCurrentToken( ).Equals( "class" ) )
+	{
+		return;
+	}
+
+	// Now need to grab class name
 	if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
 	{
 		return;
@@ -236,21 +269,88 @@ void Introspection::ParseClass( Lexer* lexer )
 	// Get class token
 	Token classToken = lexer->GetCurrentToken( );
 
-	// Get class name
+	// Get class name and store for class creation
 	std::string className = classToken.ToString( );
 
 	// Get new class created
-	Class* cls = const_cast< Class* >( AddClass( className ) ); 
+	Class* cls = const_cast< Class* >( AddClass( className ) );
 
 	// Set contents path of class ( include directory )
 	cls->mFilePath = lexer->GetContentsPath( );
 
-	// Continue to grab tokens until last paren is found
-	lexer->ContinueTo( TokenType::Token_CloseParen );
+	// Find super class
+	if ( lexer->PeekAtNextToken( ).IsType( TokenType::Token_Colon ) )
+	{
+		// Grab the colon
+		Token colToken = lexer->GetNextToken( );
+
+		// Peek at next token to see if is public keyword
+		if ( lexer->PeekAtNextToken( ).Equals( "public" ) || lexer->PeekAtNextToken().Equals( "private" ) )
+		{
+			// Grab public/private keyword
+			lexer->GetNextToken( );
+
+			if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
+			{
+				return;
+			}
+
+			// Should be on the super class now
+			Token superToken = lexer->GetCurrentToken( );
+
+			cls->mParent = superToken.ToString( );
+		}
+	} 
+
+	// Continue until open brace; if none hit, remove class
+	if ( !lexer->ContinueTo( TokenType::Token_OpenBrace ) )
+	{
+		RemoveClass( className );
+
+		return;
+	} 
+
+	// Need to push scope now, since open brace has been found
+	Class::PushScope( ); 
+
+	// Continue to class body tag, if not found then remove class and return
+	if ( !lexer->ContinueToIdentifier( "ENJON_CLASS_BODY" ) )
+	{
+		// Remove class
+		RemoveClass( className );
+
+		return;
+	}
+
+	// Parse remainder of class body
+	ParseClassBody( lexer, cls );
+
+	// Pop scope from class
+	Class::PopScope( );
+}
+
+//=================================================================================================
+		
+void Introspection::ParseClassBody( Lexer* lexer, Class* cls )
+{
+	// Grab next token and make sure is parentheses
+	if ( !lexer->RequireToken( TokenType::Token_OpenParen, true ) )
+	{
+		RemoveClass( cls->mName );
+
+		return;
+	} 
+
+	// Continue to last paren
+	if ( !lexer->ContinueTo( TokenType::Token_CloseParen ) ) 
+	{
+		RemoveClass( cls->mName );
+
+		return;
+	}
 
 	// Now need to parse all remaining members of class
-	ParseClassMembers( lexer, cls );
-
+	ParseClassMembers( lexer, cls ); 
 }
 
 //=================================================================================================
@@ -292,20 +392,55 @@ void Introspection::ParseClassMembers( Lexer* lexer, Class* cls )
 
 void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 {
+	// New property to be filled out
+	Property prop;
+
 	// Grab next token and make sure is parentheses
 	if ( !lexer->RequireToken( TokenType::Token_OpenParen, true ) )
 	{
 		return;
 	}
-	
-	// Continue to grab tokens until last paren is found
-	lexer->ContinueTo( TokenType::Token_CloseParen );
 
-	// Now need to create new property and add it to class 
-	Property prop;
+	// Grab all inner property traits until close paren is hit ( or end of stream in case of error )
+	{
+		Token curToken = lexer->GetCurrentToken( );
+		while ( !curToken.IsType( TokenType::Token_CloseParen ) && !curToken.IsType( TokenType::Token_EndOfStream ) )
+		{
+			// Get next token
+			curToken = lexer->GetNextToken( );
 
-	// Get property type
+			// If identifier, then push back intro property traits
+			if ( curToken.IsType( TokenType::Token_Identifier ) )
+			{
+				// Push back trait
+				prop.AddTrait( curToken.ToString( ) );
+			}
+		}
+	} 
+
+	// Need to strip away all namespaces from property
 	if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
+	{
+		return;
+	}
+
+	// Consume all namespace qualifiers 
+	{
+		Token curToken = lexer->GetCurrentToken( );
+		Token nextToken = lexer->PeekAtNextToken( );
+		while ( curToken.IsType( TokenType::Token_Identifier ) && nextToken.IsType( TokenType::Token_DoubleColon ) )
+		{
+			// Set to next token
+			curToken = lexer->GetNextToken( );
+			// This gets next token
+			curToken = lexer->GetNextToken( ); 
+			// Peek at next token
+			nextToken = lexer->PeekAtNextToken( );
+		}
+	}
+
+	// Get property type of current token
+	if ( !lexer->RequireToken( TokenType::Token_Identifier ) )
 	{
 		return; 
 	}
@@ -317,7 +452,7 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 	//prop.mType = Property::GetTypeFromString( curToken.ToString( ) );
 	prop.mType = curToken.ToString( );
 
-	// TODO(): Pointer types 
+	// TODO(): Pointer types / Const references
 		
 	// Get property name
 	if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
@@ -355,31 +490,78 @@ void Introspection::Compile( const ReflectionConfig& config )
 		if ( f )
 		{
 			// Build code
-			std::string code; 
+			std::string code;
+			
+			// Get parent
+			Class* parentCls = nullptr;
+			if ( ClassExists( c.second.mParent ) )
+			{
+				parentCls = const_cast< Class* >( GetClass( c.second.mParent ) );
+			}
+
+			// Copy over all properties into single map
+			PropertyTable properties = c.second.mProperties;
+			if ( parentCls )
+			{
+				for ( auto& p : parentCls->mProperties )
+				{
+					properties[ p.first ] = p.second;
+				}
+			}
 
 			// Construct meta class function
 			code += OutputLine( "// " + c.second.mName );
 			code += OutputLine( "template <>" );
 			code += OutputLine( "MetaClass* Object::ConstructMetaClass< " + c.second.mName + " >( )" );
 			code += OutputLine( "{" );
-			code += OutputTabbedLine( "MetaClass* cls = new MetaClass( );\n" );
-			code += OutputTabbedLine( "// Construct properties\n" );
+			code += OutputTabbedLine( "MetaClass* cls = new MetaClass( );\n" ); 
+
+			// Construct properties
+			code += OutputTabbedLine( "// Construct properties" );
+			code += OutputTabbedLine( "cls->mPropertyCount = " + std::to_string( properties.size( ) ) + ";" ); 
 
 			// Iterate through properties and output code
-			for ( auto& prop : c.second.mProperties )
+			u32 index = 0;
+			if ( !properties.empty( ) )
 			{
-				// Get property as string
-				auto metaProp = Property::GetTypeFromString( prop.second.mType );
-				std::string metaPropStr = Property::GetTypeAsString( metaProp ); 
+				code += OutputTabbedLine( "cls->mProperties.resize( cls->mPropertyCount );" );
+				code += OutputTabbedLine( "Enjon::MetaProperty props[] = " );
+				code += OutputTabbedLine( "{" );
 
-				// Get property name
-				std::string pn = prop.second.mName;
+				for ( auto& prop : properties )
+				{
+					// Get property as string
+					auto metaProp = Property::GetTypeFromString( prop.second.mType );
+					std::string metaPropStr = Property::GetTypeAsString( metaProp ); 
 
-				// Get class name
-				std::string cn = c.second.mName;
+					// Look for traits to fill out
+					std::string traits = "MetaPropertyTraits( "; 
+					traits += prop.second.HasTrait( "Editable" ) ? "true" : "false";
+					traits += " )"; 
 
-				// Output line
-				code += OutputTabbedLine( "cls->mProperties[ \"" + pn + "\" ] = Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" + pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + " );" ); }
+					// Get property name
+					std::string pn = prop.second.mName;
+
+					// Get class name
+					std::string cn = c.second.mName;
+
+					// Get property index
+					std::string pi = std::to_string( index++ );
+
+					// Get end character
+					std::string endChar = index <= properties.size( ) - 1 ? "," : "";
+
+					// Output line
+					code += OutputTabbedLine( "\tEnjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" + pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " )" + endChar ); 
+				} 
+
+				// End property table
+				code += OutputTabbedLine( "};\n" );
+	 
+				// Assign properties
+				code += OutputTabbedLine( "// Assign properties to class" ); 
+				code += OutputTabbedLine( "cls->mProperties = Enjon::PropertyTable( props, props + cls->mPropertyCount );" ); 
+			}
 
 			// Return statement
 			code += OutputLine( "\n\treturn cls;" );
@@ -390,17 +572,35 @@ void Introspection::Compile( const ReflectionConfig& config )
 		} 
 	} 
 }
+		
+std::string Introspection::OutputLinkedHeader( )
+{
+	std::string code = "";
+
+	code += OutputLine( "// @file Enjon_Generated.cpp" );
+	code += OutputLine( "// Copyright 2016-2017 John Jackson. All Rights Reserved." );
+	code += OutputLine( "// This file has been generated. All modifications will be lost." );
+	code += OutputLine( "" );
+
+	return code;
+}
 
 //=================================================================================================
 
 void Introspection::Link( const ReflectionConfig& config )
 {
 	// Open link file to write to
+	std::string enginePath = config.mEnjonRootPath + "/Include/Engine.h";
+	std::string typesPath = config.mEnjonRootPath + "/Include/System/Types.h";
+	std::string definesPath = config.mEnjonRootPath + "/Include/Defines.h";
 	std::string linkFilePath = config.mLinkedDirectory + "/" + "Enjon_Generated.cpp"; 
 	std::ofstream f( linkFilePath ); 
 
 	// Code to write to file
 	std::string code = "";
+
+	// Write header for Linked file
+	code += OutputLinkedHeader( );
 
 	// Output include diretories
 	for ( auto& c : mClasses )
@@ -408,6 +608,12 @@ void Introspection::Link( const ReflectionConfig& config )
 		code += OutputLine( "#include \"" + c.second.mFilePath + "\"" );
 	}
 
+	// Output engine/types path include
+	code += OutputLine( "#include \"" + enginePath + "\"" );
+	code += OutputLine( "#include \"" + typesPath + "\"" );
+	code += OutputLine( "#include \"" + definesPath + "\"" );
+
+	// Output namespace
 	code += OutputLine( "\nusing namespace Enjon;\n" ); 
 
 	// Iterate classes and grab compiled intermediate files

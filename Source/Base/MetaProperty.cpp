@@ -1,10 +1,9 @@
-#include "Base/MetaProperty.h"
-
+#include "Base/MetaProperty.h" 
 #include "Base/MetaClass.h"
 #include "Base/Object.h"
  
 namespace Enjon
-{
+{ 
 	std::string MetaProperty::GetName( )
 	{
 		return mName;
@@ -14,5 +13,10 @@ namespace Enjon
 	{
 		return mType;
 	} 
+			
+	bool MetaProperty::IsEditable( ) const
+	{
+		return mTraits.mIsEditable;
+	}
 }
 
