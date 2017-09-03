@@ -34,7 +34,8 @@ enum class PropertyType
 	Mat4,
 	Quat,
 	Enum,
-	UUID
+	UUID,
+	Transform
 };
 
 enum PropertyFlags : u32
@@ -82,8 +83,8 @@ class Property
 	friend Introspection;
 
 	public:
-		Property( ) {}
-		~Property( ) {} 
+		Property( ) = default;
+		~Property( ) = default;
  
 		static PropertyType GetTypeFromString( const std::string& str );
 		static std::string GetTypeAsString( PropertyType type );
@@ -114,8 +115,23 @@ class Property
 		static PropertyTypeAsStringMap mPropertyTypeStringMap;
 };
 
+struct FunctionSignature
+{
+	std::string mFunctionName;
+	std::string mRetType;
+	std::vector< std::string > mParameterList;
+};
+
 class Function
 { 
+	friend Introspection;
+
+	public:
+		Function( ) = default;
+		~Function( ) = default;
+
+	public:
+		FunctionSignature mSignature;
 }; 
 
 typedef std::unordered_map< std::string, Property > PropertyTable ;
@@ -144,6 +160,10 @@ class Class
 
 		Property* GetProperty( const std::string& name );
 
+		bool HasFunction( const std::string& name );
+		
+		Function* GetFunction( const std::string& name );
+
 	protected:
 
 		static void PushScope( )
@@ -157,6 +177,8 @@ class Class
 		} 
 
 		void AddProperty( const Property& prop );
+
+		void AddFunction( const Function& func );
 
 	public:
 		PropertyTable mProperties;

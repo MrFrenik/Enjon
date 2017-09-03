@@ -117,12 +117,14 @@ Token Lexer::GetNextToken( bool advance )
 		case '>': {token.mType = TokenType::Token_GreaterThan; } 	break;
 		case ';': {token.mType = TokenType::Token_SemiColon; }		break;
 		case '*': {token.mType = TokenType::Token_Asterisk; }		break;
+		case '&': {token.mType = TokenType::Token_Ampersand; }		break;
 		case '{': {token.mType = TokenType::Token_OpenBrace; }		break;
 		case '}': {token.mType = TokenType::Token_CloseBrace; }		break;
 		case '[': {token.mType = TokenType::Token_OpenBracket; }	break;
 		case ']': {token.mType = TokenType::Token_CloseBracket; }	break;
 		case '\0':{token.mType = TokenType::Token_EndOfStream; } 	break;
 		case '#': {token.mType = TokenType::Token_Hash; } 			break;
+		case ',': {token.mType = TokenType::Token_Comma; } 			break;
 		
 		case ':': 
 		{

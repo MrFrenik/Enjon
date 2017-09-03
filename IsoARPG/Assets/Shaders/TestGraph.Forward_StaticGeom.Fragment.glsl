@@ -22,19 +22,16 @@ uniform float uWorldTime = 1.0f;
 uniform vec3 uViewPositionWorldSpace;
 
 // Variable Declarations
-vec2 polarCoords;
+uniform vec3 albedoColor;
+uniform sampler2D normalMap;
+uniform float metallic;
+uniform float roughness;
 
 // Fragment Main
 void main()
 {
 	// Base Color
-{
-	vec2 coords = fs_in.TexCoords;
-	float len = length( coords );
-	float angle = atan( coords.y, coords.x );
-	polarCoords = vec2(len, angle);
-	polarCoords = coords;
-}
-	AlbedoOut = vec4(polarCoords, 0.0, 1.0);
+
+	AlbedoOut = vec4(albedoColor, 1.0);
 
 }

@@ -14,12 +14,7 @@ namespace Enjon
 	void PointLightComponent::Update(float dt)
 	{
 		mLight.SetPosition(mEntity->GetWorldPosition());	
-	}
-
-	void PointLightComponent::Destroy()
-	{
-		DestroyBase<PointLightComponent>();
-	}
+	} 
 
 	void PointLightComponent::SetColor(ColorRGBA16& color)
 	{

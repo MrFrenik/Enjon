@@ -5,12 +5,5 @@
 
 namespace Enjon
 {
-	MetaFunction::MetaFunction( )
-	{ 
-	}
-
-	MetaFunction::~MetaFunction( )
-	{ 
-	}
 }
 

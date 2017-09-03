@@ -150,7 +150,7 @@ namespace Enjon
 	{
 		Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( object->Class( ) );
 
-		ImGui::Text( object->GetTypeName( ) );
+		ImGui::Text( ( "Type: " + std::string(object->GetTypeName( ) ) ).c_str( ) );
 
 		Enjon::PropertyTable& pt = cls->GetProperties( );
 		for ( auto& prop : pt )
@@ -247,6 +247,54 @@ namespace Enjon
 					cls->GetValue( object, &prop, &val );
 					Enjon::String str = val.ToString( );
 					ImGui::InputText( name.c_str( ), &str[ 0 ], str.size( ) );
+				} break;
+				
+				case Enjon::MetaPropertyType::Transform:
+				{
+					Enjon::Transform val;
+					cls->GetValue( object, &prop, &val );
+					Enjon::Vec3 pos = val.GetPosition( );
+					Enjon::Quaternion rot = val.GetRotation( );
+					Enjon::Vec3 scl = val.GetScale( );
+
+					// Position
+					{
+						f32 col[ 3 ] = { pos.x, pos.y, pos.z };
+						if ( ImGui::SliderFloat3( name.c_str( ), col, 0.0f, 1.0f ) )
+						{
+							pos.x = col[ 0 ];
+							pos.y = col[ 1 ];
+							pos.z = col[ 2 ]; 
+							val.SetPosition( pos );
+							cls->SetValue( object, &prop, val );
+						} 
+					}
+					
+					// Rotation
+					{
+						f32 col[ 4 ] = { rot.x, rot.y, rot.z, rot.w };
+						if ( ImGui::SliderFloat4( name.c_str( ), col, 0.0f, 1.0f ) )
+						{
+							rot.x = col[ 0 ];
+							rot.y = col[ 1 ];
+							rot.z = col[ 2 ];
+							val.SetRotation( rot );
+							cls->SetValue( object, &prop, val );
+						} 
+					}
+					
+					// Scale
+					{
+						f32 col[ 3 ] = { scl.x, scl.y, scl.z };
+						if ( ImGui::SliderFloat3( name.c_str( ), col, 0.0f, 1.0f ) )
+						{
+							scl.x = col[ 0 ];
+							scl.y = col[ 1 ];
+							scl.z = col[ 2 ];
+							val.SetScale( scl );
+							cls->SetValue( object, &prop, val );
+						} 
+					} 
 				} break;
 			}
 		} 
@@ -363,11 +411,11 @@ namespace Enjon
 
 		style.WindowTitleAlign 		   = ImVec2(0.5f, 0.41f);
 		style.ButtonTextAlign 		   = ImVec2(0.5f, 0.5f); 
-		style.WindowPadding = ImVec2(6, 4);
+		style.WindowPadding = ImVec2(6, 3);
 		style.WindowRounding = 2.0f;
-		style.FramePadding = ImVec2(7, 5);
+		style.FramePadding = ImVec2(6, 2);
 		style.FrameRounding = 2.0f;
-		style.ItemSpacing = ImVec2(8, 4);
+		style.ItemSpacing = ImVec2(8, 3);
 		style.ItemInnerSpacing = ImVec2(2, 2);
 		style.IndentSpacing = 21.0f;
 		style.ScrollbarSize = 15.0f;

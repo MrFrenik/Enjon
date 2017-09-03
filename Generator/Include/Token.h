@@ -22,7 +22,9 @@ enum class TokenType
 	Token_CloseBrace,
 	Token_Hash,
 	Token_EndOfStream,
-	Token_DoubleColon
+	Token_DoubleColon,
+	Token_Ampersand,
+	Token_Comma
 };
 
 class Token

@@ -11,6 +11,7 @@
 
 #include <limits>
 #include <assert.h>
+#include <functional>
 
 #define ENJON_CLASS_BODY( type )																	\
 	friend Object;																					\
@@ -57,7 +58,8 @@ namespace Enjon
 		Mat4,
 		Quat,
 		Enum,
-		UUID
+		UUID,
+		Transform
 	};
 
 	enum MetaPropertyFlags : u32
@@ -170,24 +172,100 @@ namespace Enjon
 			u32 mOffset;
 			u32 mIndex;
 			MetaPropertyTraits mTraits;
-	}; 
+	};
+
+#define META_FUNCTION_IMPL( )\
+	friend MetaClass;\
+	friend Object;\
+	virtual void Base( ) override\
+	{\
+		\
+	} 
 
 	class MetaFunction
 	{
-		public:
-			/*
-			* @brief
-			*/
-			MetaFunction( );
+		friend MetaClass;
+		friend Object;
 
-			/*
-			* @brief
-			*/
-			~MetaFunction( ); 
+		public:
+			MetaFunction( )
+			{
+			}
+
+			~MetaFunction( )
+			{ 
+			}
+
+			template < typename RetVal, typename T, typename... Args >
+			RetVal Invoke( T* obj, Args&&... args )
+			{
+				static_assert( std::is_base_of<Object, T>::value, "Invoke() - T must inherit from Object." );
+				return static_cast< MetaFunctionImpl< T, RetVal, Args... >* >( this )->mFunc( obj, std::forward<Args>( args )... );
+			}
+
+			const Enjon::String& GetName( ) const
+			{
+				return mName;
+			}
+
+		protected:
+			virtual void Base( ) = 0;
+
+		protected:
+			Enjon::String mName = "";
+	};
+
+	template < typename T, typename RetVal, typename... Args >
+	struct MetaFunctionImpl : public MetaFunction
+	{ 
+		META_FUNCTION_IMPL( )
+
+		MetaFunctionImpl( std::function< RetVal( T*, Args&&... ) > function, const Enjon::String& name )
+			: mFunc( function )
+		{ 
+			mName = name;
+		}
+
+		~MetaFunctionImpl( )
+		{ 
+		}
+
+		std::function< RetVal( T*, Args&&... ) > mFunc;
+	};
+
+	template < typename T >
+	struct MetaFunctionImpl< T, void, void > : public MetaFunction
+	{ 
+		META_FUNCTION_IMPL( )
+		
+		MetaFunctionImpl( std::function< void( T* ) > function, const Enjon::String& name )
+			: mFunc( func )
+		{ 
+			mName = name;
+		}
+
+		~MetaFunctionImpl( )
+		{ 
+		}
+		std::function< void( T* ) > mFunc;
+	};
+
+	template < typename T, typename RetVal >
+	struct MetaFunctionImpl< T, RetVal, void > : public MetaFunction
+	{
+		META_FUNCTION_IMPL( )
+
+		MetaFunctionImpl( std::function< RetVal( T* ) > function, const Enjon::String& name )
+			: mFunc( func )
+		{ 
+			mName = name;
+		}
+
+		std::function< RetVal( T* ) > mFunc;
 	};
 
 	typedef std::vector< MetaProperty > PropertyTable;
-	typedef std::vector< MetaFunction > FunctionTable;
+	typedef std::unordered_map< Enjon::String, MetaFunction* > FunctionTable;
 
 	class MetaClass
 	{
@@ -214,12 +292,29 @@ namespace Enjon
 				return index < mPropertyCount;
 			}
 
+			bool FunctionExists( const Enjon::String& name )
+			{
+				return ( mFunctions.find( name ) != mFunctions.end( ) ); 
+			}
+
+			const MetaFunction* GetFunction( const Enjon::String& name )
+			{
+				if ( FunctionExists( name ) )
+				{
+					return mFunctions[ name ];
+				}
+
+				return nullptr;
+			}
+
 			const MetaProperty* GetProperty( const u32& index )
 			{
 				if ( PropertyExists( index ) )
 				{
 					return &mProperties.at( index );
 				}
+
+				return nullptr;
 			} 
 
 			bool HasProperty( const MetaProperty* prop )

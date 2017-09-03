@@ -12,12 +12,13 @@ namespace Enjon
 	{
 		ENJON_CLASS_BODY( PointLightComponent )
 
+		ENJON_COMPONENT( PointLightComponent )
+
 		public:
 			PointLightComponent();
 			~PointLightComponent();
 
 			virtual void Update(float dt) override;
-			virtual void Destroy() override;
 
 			PointLight* GetLight() { return &mLight; }
 

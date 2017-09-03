@@ -49,11 +49,13 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
-			u32 GetWidth() const;
+			ENJON_FUNCTION( )
+			Enjon::u32 GetWidth() const;
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			u32 GetHeight() const;
 
 			/**

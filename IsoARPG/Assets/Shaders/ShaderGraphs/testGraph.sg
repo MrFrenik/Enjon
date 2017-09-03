@@ -2,8 +2,20 @@
 	"ShaderGraphName": "TestGraph",
 
 	"Nodes": {
-		"polarCoords" : {
-			"Template": "VectorToPolarCoordinates"
+		"albedoColor": {
+			"Template": "ConstantVec3Node",
+			"IsUniform": true
+		},
+		"normalMap": {
+			"Template": "Texture2DSamplerNode"
+		},
+		"metallic": {
+			"Template": "ConstantFloatNode",
+			"IsUniform": true
+		},
+		"roughness": {
+			"Template": "ConstantFloatNode",
+			"IsUniform": true
 		}
 	},
 
@@ -15,16 +27,19 @@
 		"Inputs": {
 
 			"BaseColor": {
-				"polarCoords": "Value"
+				"albedoColor": "Value"
 			},
 
 			"Normal": {
+				"normalMap": "RGB"
 			},
 
 			"Metallic": {
+				"metallic": "Value"
 			},
 
 			"Roughness": {
+				"roughness": "Value"
 			},
 
 			"Emissive": {

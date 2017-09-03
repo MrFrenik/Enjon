@@ -694,39 +694,73 @@ Enjon::Result Game::Initialize()
 			ImGui::Text( "32 bit prop size: %d", sizeof( Enjon::Property<f32> ) );
 			ImGui::Text( "32 bit signal size: %d", sizeof( Enjon::Signal<f32> ) ); 
 
-			static f32 x = 0;
-			static f32 y = 0;
-			static f32 z = 1;
-			static f32 w = 1; 
- 
-			static Enjon::u8 chr = 'A';
-
-			static Enjon::s32 add = 0;
-			ImGui::InputInt( "Text", &add, 0, 100 );
-
-			ImGui::SliderFloat( "x##x", &x, 0, 1 );
-			ImGui::SliderFloat( "y##y", &y, 0, 1 );
-			ImGui::SliderFloat( "z##z", &z, 0, 1 );
-			ImGui::SliderFloat( "w##w", &w, 0, 1 ); 
-
-			ImGui::SliderFloat( "FontScale", &mFontSize, 0.05f, 5.0f ); 
+			// Testing meta functions
+			if ( ImGui::CollapsingHeader( "Entity" ) )
+			{ 
+				Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( mGun.Get( )->Class( ) );
+				Enjon::MetaFunction* getWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "GetWorldPosition" ) );
+				Enjon::MetaFunction* setWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "SetPosition" ) );
+				if ( getWPFunc )
+				{
+					Enjon::Vec3 wp = getWPFunc->Invoke< Enjon::Vec3 >( mGun.Get( ) );
+					if ( ImGui::SliderFloat3( "Entity WP", ( float* )&wp, 0.0f, 1.0f ) )
+					{
+						if ( setWPFunc )
+						{
+							setWPFunc->Invoke< void >( mGun.Get( ), wp );
+						}
+					}
+				}
+			} 
 
 			if ( ImGui::CollapsingHeader( "PointLight" ) )
 			{
 				auto plc = mGun.Get( )->GetComponent< Enjon::PointLightComponent >( );
 				auto light = plc->GetLight( );
 				Enjon::ImGuiManager::DebugDumpObject( light );
-				
+
+				Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* > ( light->Class( ) ); 
+				Enjon::MetaFunction* getWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "GetPosition" ) );
+				Enjon::MetaFunction* setWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "SetPosition" ) );
+				if ( getWPFunc )
+				{
+					Enjon::Vec3 wp = getWPFunc->Invoke< Enjon::Vec3 >( light );
+					Enjon::String label = "Func: " + getWPFunc->GetName( );
+					if ( ImGui::SliderFloat3( label.c_str( ), ( float* )&wp, 0.0f, 100.0f ) )
+					{
+						if ( setWPFunc )
+						{
+							setWPFunc->Invoke< void >( light, wp );
+						}
+					}
+				} 
 			}
-			if ( ImGui::CollapsingHeader( "Texture ") )
+			if ( ImGui::CollapsingHeader( "Textures" ) )
 			{
 				auto am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-				Enjon::AssetHandle< Enjon::Texture > texHandle = am->GetAsset< Enjon::Texture >( "isoarpg.textures.black" ); 
-				if ( texHandle )
+				auto textures = am->GetAssets< Enjon::Texture >( );
+				for ( auto& t : *textures ) 
 				{
-					Enjon::Texture* tex = texHandle.Get( );
-					Enjon::ImGuiManager::DebugDumpObject( tex );
-				} 
+					if ( t.second )
+					{
+						Enjon::Texture* tex = t.second->Cast< Enjon::Texture >( );
+						Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* > ( tex->Class( ) ); 
+
+						if ( ImGui::TreeNode( tex->GetName( ).c_str( ) ) )
+						{
+							Enjon::ImGuiManager::DebugDumpObject( tex ); 
+
+							Enjon::MetaFunction* func = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "GetWidth" ) );
+							if ( func )
+							{
+								Enjon::String funcRes = "Function Result: GetName: " + func->Invoke< Enjon::String >( tex );
+								ImGui::Text( funcRes.c_str( ) ); 
+							}
+
+							ImGui::TreePop( );
+						}
+					} 
+				}
 			}
 			if ( ImGui::CollapsingHeader( "Material" ) )
 			{
@@ -736,6 +770,11 @@ Enjon::Result Game::Initialize()
 				{
 					Enjon::ImGuiManager::DebugDumpObject( mat );
 				} 
+			}
+			if ( ImGui::CollapsingHeader( "GraphicsComponent" ) )
+			{
+				auto gc = mGun.Get( )->GetComponent< Enjon::GraphicsComponent >( );
+				Enjon::ImGuiManager::DebugDumpObject( gc ); 
 			}
 
 			//char buf[ 256 ];

@@ -127,9 +127,11 @@ namespace Enjon
 			*/
 			void SetRotation(const Quaternion& rotation);
 
-		public:
+		public: 
 			Vec3 Position;
+
 			Quaternion Rotation;
+
 			Vec3 Scale;
 	}; 
 }

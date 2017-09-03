@@ -27,10 +27,10 @@ namespace Enjon {
 			~PointLight();
 
 			ENJON_FUNCTION() 
-			Vec3& GetPosition() 	{ return mPosition; }
+			Vec3 GetPosition() 	{ return mPosition; }
 
 			ENJON_FUNCTION() 
-			ColorRGBA16& GetColor() { return mColor; }
+			ColorRGBA16 GetColor() { return mColor; }
 
 			ENJON_FUNCTION() 
 			float GetIntensity() 		{ return mIntensity; }
@@ -51,7 +51,7 @@ namespace Enjon {
 			void SetScene(Scene* scene);
 			
 			ENJON_FUNCTION() 
-			void SetPosition(Vec3& position);
+			void SetPosition(Enjon::Vec3& position);
 			
 			ENJON_FUNCTION() 
 			void SetAttenuationRate(float rate);

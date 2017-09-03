@@ -12,49 +12,8 @@
 #include <unordered_map>
 #include <functional> 
 
-struct Thing
-{
-	Thing( )
-	{ 
-	}
-
-	~Thing( )
-	{ 
-	}
-
-	void SetRadius( float radius )
-	{
-		mRadius = radius;
-	}
-
-	float GetRadius( ) const
-	{
-		return mRadius;
-	}
-
-	float mRadius; 
-}; 
-
-/*
-* Hold a heterogenuous group of functions
-std::vector< MetaFunction > mFunctions;
-*/
-
-class MetaFunction
-{
-	
-};
- 
 int main( int argc, char** argv )
 { 
-	Thing thing; 
-	thing.mRadius = 5.0f;
-
-	std::function <void( Thing*, float )> setRad = &Thing::SetRadius; 
-	std::function <float( Thing* )> getRad = &Thing::GetRadius; 
-
-	float rad = getRad( &thing );
-
 	ReflectionConfig mConfig; 
 	Introspection mIntrospection;
 	mIntrospection.Initialize( );

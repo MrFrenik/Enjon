@@ -14,6 +14,14 @@
 #include <type_traits>
 #include <unordered_map>
 
+#define ENJON_COMPONENT( type )\
+public:\
+	virtual void Destroy() override\
+	{\
+		DestroyBase<type>();\
+	}
+
+
 namespace Enjon 
 { 
 	// Forward declaration
@@ -112,13 +120,16 @@ namespace Enjon
 		protected:
 			Entity* mEntity = nullptr;
 			EntityManager* mManager = nullptr;
+
+			ENJON_PROPERTY( )
 			u32 mEntityID;
+
+			ENJON_PROPERTY( )
 			u32 mID;
 
 		private:
 			ComponentWrapperBase* mBase = nullptr;
-	};
-
+	}; 
 
 	using ComponentID = u32;
 

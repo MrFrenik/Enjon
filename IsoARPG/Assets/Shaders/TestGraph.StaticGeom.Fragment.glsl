@@ -22,26 +22,28 @@ uniform float uWorldTime = 1.0f;
 uniform vec3 uViewPositionWorldSpace;
 
 // Variable Declarations
-vec2 polarCoords;
+uniform vec3 albedoColor;
+uniform sampler2D normalMap;
+uniform float metallic;
+uniform float roughness;
 
 // Fragment Main
 void main()
 {
 	// Base Color
-{
-	vec2 coords = fs_in.TexCoords;
-	float len = length( coords );
-	float angle = atan( coords.y, coords.x );
-	polarCoords = vec2(len, angle);
-	polarCoords = coords;
-}
-	AlbedoOut = vec4(polarCoords, 0.0, 1.0);
+
+	AlbedoOut = vec4(albedoColor, 1.0);
 
 	// Normal
-	NormalsOut = vec4( fs_in.TBN[2], 1.0 );
+	vec4 normalMap_sampler = texture2D( normalMap, fs_in.TexCoords );
+	vec3 normal = normalize( normalMap_sampler.rgb * 2.0 - 1.0 );
+	normal = normalize( fs_in.TBN * normal );
+	NormalsOut = vec4( normal, 1.0 );
 
 	// Material Properties
-	MatPropsOut = vec4( clamp( 0.0, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
+	
+	
+	MatPropsOut = vec4( clamp( metallic, 0.0, 1.0 ), clamp( roughness, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
 
 	// Emissive
 	EmissiveOut = vec4( 0.0, 0.0, 0.0, 1.0 );

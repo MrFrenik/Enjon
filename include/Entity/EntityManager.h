@@ -112,6 +112,7 @@ namespace Enjon
 			Transform GetWorldTransform();
 
 			/// @brief Sets local position of entity relative to parent, if exists
+			ENJON_FUNCTION( )
 			void SetPosition(Vec3& position);
 
 			/// @brief Sets local scale of entity relative to parent, if exists
@@ -133,6 +134,7 @@ namespace Enjon
 			Quaternion GetLocalRotation();
 
 			/// @brief Gets World position of entity which calculates world transform if dirty flag is set
+			ENJON_FUNCTION( )
 			Vec3 GetWorldPosition();
 
 			/// @brief Gets World scale of entity which calculates world transform if dirty flag is set
@@ -199,11 +201,19 @@ namespace Enjon
 			void PropagateTransform(f32 dt); 
 
 		private:
+			ENJON_PROPERTY( )
 			u32 mID = MAX_ENTITIES;	
+
 			b32 mWorldTransformDirty; 					// NOTE(): Necessary struct padding for alignment. Not too happy about it.
+
 			EntityHandle mParent;
+
+			ENJON_PROPERTY( )
 			Transform mLocalTransform;
+
+			ENJON_PROPERTY( )
 			Transform mWorldTransform;
+
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
 			std::vector<Component*> mComponents;

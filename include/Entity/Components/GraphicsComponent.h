@@ -14,14 +14,14 @@ namespace Enjon
 	{
 		ENJON_CLASS_BODY( GraphicsComponent )
 
+		ENJON_COMPONENT( GraphicsComponent )
+
 		public:
 			GraphicsComponent();
 			GraphicsComponent(const Renderable& renderable);
 			~GraphicsComponent();
 
-			virtual void Update(f32 dT) override;
-
-			virtual void Destroy() override;
+			virtual void Update(f32 dT) override; 
 
 			/* Get position of transform */
 			Vec3 GetPosition() const;

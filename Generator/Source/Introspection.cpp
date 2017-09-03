@@ -35,59 +35,68 @@ PropertyType Property::GetTypeFromString( const std::string& str )
 	return PropertyType::Unknown;
 }
 
-//=================================================================================================
+//================================================================================================= 
 
-#define PROP_TO_STRING( prop )\
-mPropertyTypeStringMap[ PropertyType::prop ] = #prop; 
+#define STRING_TO_PROP( str, prop )\
+mPropertyTypeMap[ str ] = PropertyType::prop;\
+mPropertyTypeStringMap[ PropertyType::prop ] = #prop;
 
 void Property::InitPropertyMap( )
 {
-	mPropertyTypeMap[ "bool" ]			= PropertyType::Bool;
-	mPropertyTypeMap[ "float" ]			= PropertyType::F32;
-	mPropertyTypeMap[ "f32" ]			= PropertyType::F32;
-	mPropertyTypeMap[ "f64" ]			= PropertyType::F64;
-	mPropertyTypeMap[ "double" ]		= PropertyType::F64;
-	mPropertyTypeMap[ "u8" ]			= PropertyType::S8;
-	mPropertyTypeMap[ "uint8_t" ]		= PropertyType::U8;
-	mPropertyTypeMap[ "u16" ]			= PropertyType::U16;
-	mPropertyTypeMap[ "uint16_t" ]		= PropertyType::U16;
-	mPropertyTypeMap[ "u32" ]			= PropertyType::U32;
-	mPropertyTypeMap[ "uint32_t" ]		= PropertyType::U32;
-	mPropertyTypeMap[ "u64" ]			= PropertyType::U64;
-	mPropertyTypeMap[ "uint64_t" ]		= PropertyType::U64;
-	mPropertyTypeMap[ "s32" ]			= PropertyType::S32;
-	mPropertyTypeMap[ "int32_t" ]		= PropertyType::S32;
-	mPropertyTypeMap[ "s64" ]			= PropertyType::S64;
-	mPropertyTypeMap[ "int64_t" ]		= PropertyType::S64;
-	mPropertyTypeMap[ "Vec2" ]			= PropertyType::Vec2;
-	mPropertyTypeMap[ "Vec3" ]			= PropertyType::Vec3;
-	mPropertyTypeMap[ "Vec4" ]			= PropertyType::Vec4;
-	mPropertyTypeMap[ "ColorRGBA16" ]	= PropertyType::ColorRGBA16;
-	mPropertyTypeMap[ "UUID" ]			= PropertyType::UUID;
-	mPropertyTypeMap[ "String" ]		= PropertyType::String;
+	STRING_TO_PROP( "bool", Bool )
+	STRING_TO_PROP( "float", F32 )
+	STRING_TO_PROP( "f32", F32 )
+	STRING_TO_PROP( "f64", F64 )
+	STRING_TO_PROP( "double", F64 )
+	STRING_TO_PROP( "u8", U8 )
+	STRING_TO_PROP( "uint8_t", U8 )
+	STRING_TO_PROP( "u16", U16 )
+	STRING_TO_PROP( "uint16_t", U16 )
+	STRING_TO_PROP( "u32", U32 )
+	STRING_TO_PROP( "uint32_t", U32 )
+	STRING_TO_PROP( "u64", U64 )
+	STRING_TO_PROP( "uint64_t", U64 )
+	STRING_TO_PROP( "s32", S32 )
+	STRING_TO_PROP( "int32_t", S32 )
+	STRING_TO_PROP( "s64", S64 )
+	STRING_TO_PROP( "int64_t", S64 )
+	STRING_TO_PROP( "Vec2", Vec2 )
+	STRING_TO_PROP( "Vec3", Vec3 )
+	STRING_TO_PROP( "Vec4", Vec4 )
+	STRING_TO_PROP( "ColorRGBA16", ColorRGBA16 )
+	STRING_TO_PROP( "UUID", UUID )
+	STRING_TO_PROP( "String", String )
+	STRING_TO_PROP( "Transform", Transform )
+	STRING_TO_PROP( "Quaternion", Quat )
+}
 
-	// Init property type as string
-	PROP_TO_STRING( F32 )
-	PROP_TO_STRING( F64 )
-	PROP_TO_STRING( ColorRGBA16 )
-	PROP_TO_STRING( U8 )
-	PROP_TO_STRING( U16 )
-	PROP_TO_STRING( U32 )
-	PROP_TO_STRING( U64 )
-	PROP_TO_STRING( S8 )
-	PROP_TO_STRING( S16 )
-	PROP_TO_STRING( S32 ) 
-	PROP_TO_STRING( S64 )
-	PROP_TO_STRING( String )
-	PROP_TO_STRING( Array )
-	PROP_TO_STRING( Vec2 )
-	PROP_TO_STRING( Vec3 )
-	PROP_TO_STRING( Vec4 )
-	PROP_TO_STRING( Mat4 )
-	PROP_TO_STRING( Quat )
-	PROP_TO_STRING( Enum ) 
-	PROP_TO_STRING( UUID ) 
-	PROP_TO_STRING( Bool ) 
+//=================================================================================================
+		
+bool Class::HasFunction( const std::string& name )
+{
+	return ( mFunctions.find( name ) != mFunctions.end( ) );
+}
+
+//=================================================================================================
+
+Function* Class::GetFunction( const std::string& name )
+{
+	if ( HasFunction( name ) )
+	{
+		return &mFunctions[ name ];
+	}
+
+	return nullptr;
+}
+
+//=================================================================================================
+		
+void Class::AddFunction( const Function& func )
+{
+	if ( !HasFunction( func.mSignature.mFunctionName ) )
+	{
+		mFunctions[ func.mSignature.mFunctionName ] = func;
+	}
 }
 
 //=================================================================================================
@@ -180,7 +189,6 @@ void Introspection::Parse( Lexer* lexer )
 
 			case TokenType::Token_Unknown:
 			{
-//Parsing = false;
 			}
 			break;
 
@@ -474,6 +482,124 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 
 void Introspection::ParseFunction( Lexer* lexer, Class* cls )
 { 
+	// New function to inflate
+	Function func;
+
+	// Grab next token and make sure is parentheses
+	if ( !lexer->RequireToken( TokenType::Token_OpenParen, true ) )
+	{
+		return;
+	}
+
+	// Leave constructors for now
+	if ( lexer->PeekAtNextToken( ).Equals( "Constructor" ) || lexer->PeekAtNextToken().Equals( "Destructor" ) )
+	{
+		return;
+	}
+
+	// Just continue onto close paren token
+	if ( !lexer->ContinueTo( TokenType::Token_CloseParen ) )
+	{
+		return;
+	}
+
+	// Should be at ret type now, need take the entire token including any namespaces for return type
+	if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
+	{
+		return;
+	} 
+
+	// Grab return value
+	{
+		Token curToken = lexer->GetCurrentToken( );
+		Token nextToken = lexer->PeekAtNextToken( );
+		std::string retType = curToken.ToString( );
+
+		while ( curToken.IsType( TokenType::Token_Identifier ) && nextToken.IsType( TokenType::Token_DoubleColon ) )
+		{
+			curToken = lexer->GetNextToken( );
+			curToken = lexer->GetNextToken( );
+			nextToken = lexer->PeekAtNextToken( );
+
+			// Append to retType
+			retType += "::" + curToken.ToString( );
+		}
+
+		// Check for references and pointers
+		curToken = lexer->GetNextToken( );
+		while ( curToken.IsType( TokenType::Token_Asterisk ) ||
+			curToken.IsType( TokenType::Token_Ampersand ) )
+		{
+			retType += curToken.ToString( );
+
+			curToken = lexer->GetNextToken( );
+		}
+
+		// Add return type for function signature
+		func.mSignature.mRetType = retType;
+	}
+
+	// Grab function name
+	if ( !lexer->RequireToken( TokenType::Token_Identifier ) )
+	{
+		return;
+	}
+
+	// Add function name to signature
+	func.mSignature.mFunctionName = lexer->GetCurrentToken( ).ToString( ); 
+
+	// Need to parse parameter list now
+	if ( !lexer->ContinueTo( TokenType::Token_OpenParen ) )
+	{
+		return;
+	}
+
+	// Grab parameter list
+	{
+		Token curToken = lexer->GetNextToken( );
+		
+		// Continue until we reach the end of the function signature ( close paren )
+		while ( !curToken.IsType( TokenType::Token_CloseParen ) )
+		{
+			Token nextToken = lexer->PeekAtNextToken( );
+
+			std::string paramType = curToken.ToString( );
+
+			while ( curToken.IsType( TokenType::Token_Identifier ) && nextToken.IsType( TokenType::Token_DoubleColon ) )
+			{
+				curToken = lexer->GetNextToken( );
+				curToken = lexer->GetNextToken( );
+				nextToken = lexer->PeekAtNextToken( );
+
+				// Append to retType
+				paramType += "::" + curToken.ToString( );
+			}
+
+			// Check for references and pointers
+			curToken = lexer->GetNextToken( );
+			while ( curToken.IsType( TokenType::Token_Asterisk ) ||
+				curToken.IsType( TokenType::Token_Ampersand ) )
+			{
+				paramType += curToken.ToString( );
+
+				curToken = lexer->GetNextToken( );
+			}
+
+			// Add return type for function signature
+			func.mSignature.mParameterList.push_back( paramType ); 
+
+			// Now need to skip past param name as well as comma
+			curToken = lexer->GetNextToken( );
+
+			if ( curToken.IsType( TokenType::Token_Comma ) )
+			{ 
+				lexer->ContinueTo( TokenType::Token_Identifier );
+			} 
+		} 
+	} 
+
+	// All is well, so add the function to the class
+	cls->AddFunction( func );
 }
 
 //=================================================================================================
@@ -506,6 +632,16 @@ void Introspection::Compile( const ReflectionConfig& config )
 				for ( auto& p : parentCls->mProperties )
 				{
 					properties[ p.first ] = p.second;
+				}
+			}
+
+			// Copy over all functions into single map
+			FunctionTable functions = c.second.mFunctions;
+			if ( parentCls )
+			{
+				for ( auto& f : parentCls->mFunctions )
+				{
+					functions[ f.first ] = f.second;
 				}
 			}
 
@@ -561,6 +697,35 @@ void Introspection::Compile( const ReflectionConfig& config )
 				// Assign properties
 				code += OutputTabbedLine( "// Assign properties to class" ); 
 				code += OutputTabbedLine( "cls->mProperties = Enjon::PropertyTable( props, props + cls->mPropertyCount );" ); 
+			}
+
+			// Iterate through all functions and output code
+			if ( !functions.empty( ) )
+			{
+				code += OutputLine( "" );
+				code += OutputTabbedLine( "// Construct functions" );
+				code += OutputTabbedLine( "cls->mFunctionCount = " + std::to_string( functions.size( ) ) + ";" );
+				
+				// For each function
+				for ( auto& func : functions )
+				{
+					// Get function name
+					std::string fn = func.second.mSignature.mFunctionName;
+
+					// Get return type
+					std::string retType = func.second.mSignature.mRetType;
+
+					// Build template signature
+					std::string templateSignature = c.second.mName + ", " + retType ;
+
+					// Add parameter list to template signature
+					for ( auto& param : func.second.mSignature.mParameterList )
+					{
+						templateSignature += ", " + param;
+					}
+
+					code += OutputTabbedLine( "cls->mFunctions[ \"" + fn + "\" ] = new Enjon::MetaFunctionImpl< " + templateSignature + " >( &" + c.second.mName + "::" + fn + ", \"" + fn + "\" );" );
+				}
 			}
 
 			// Return statement

@@ -140,6 +140,7 @@ namespace Enjon
 
 	//========================================================================
 
+	// Template Specializations
 	BYTE_BUFFER_RW( b1 )
 	BYTE_BUFFER_RW( s8 )
 	BYTE_BUFFER_RW( u8 )

@@ -41,11 +41,13 @@ namespace Enjon
 			/**
 			*@brief
 			*/
+			ENJON_FUNCTION( )
 			Enjon::String GetName( ) const { return mName; }
 			
 			/**
 			*@brief
 			*/
+			ENJON_FUNCTION( )
 			Enjon::String GetFilePath( ) const { return mFilePath; }
 
 			

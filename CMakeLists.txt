@@ -214,8 +214,8 @@ SET( LINK_LIBRARY debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_L
 
 add_executable(Enjon ${ALL_SRC})
 #target_link_libraries(Enjon debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES})
-#target_link_libraries(Enjon ${PROJECT_DEBUG_LIBRARIES})
-target_link_libraries(Enjon ${PROJECT_RELEASE_LIBRARIES})
+target_link_libraries(Enjon ${PROJECT_DEBUG_LIBRARIES})
+#target_link_libraries(Enjon ${PROJECT_RELEASE_LIBRARIES})
 
 add_dependencies( Enjon Reflection )
 
