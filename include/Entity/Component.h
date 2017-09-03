@@ -45,12 +45,13 @@ namespace Enjon
 			ComponentMap mComponentMap;
 	};
 
+	ENJON_CLASS( )
 	class Component : public Enjon::Object
 	{
 		friend Entity;
 		friend EntityManager;
 		
-		ENJON_OBJECT( Component )
+		ENJON_CLASS_BODY( Component )
 
 		public:
 

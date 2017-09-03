@@ -43,9 +43,10 @@ namespace Enjon {
 
 	typedef struct SpotLightParameters SLParams;
 
+	ENJON_CLASS( )
 	class SpotLight : public Enjon::Object
 	{
-		ENJON_OBJECT( SpotLight )
+		ENJON_CLASS_BODY( SpotLight )
 
 		public:
 			SpotLight();

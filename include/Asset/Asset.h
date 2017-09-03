@@ -19,9 +19,10 @@ namespace Enjon
 	class AssetLoader;
 	class AssetManager; 
 
+	ENJON_CLASS( )
 	class Asset : public Enjon::Object
 	{
-		ENJON_OBJECT( Asset )
+		ENJON_CLASS_BODY( Asset )
 
 		public: 
 			friend AssetLoader;
@@ -106,8 +107,7 @@ namespace Enjon
 			*/
 			AssetHandle() 
 			{
-				static_assert(std::is_base_of<Asset, T>::value, 
-					"AssetHandle:: T must inherit from Asset.");	
+				static_assert(std::is_base_of<Asset, T>::value, "AssetHandle:: T must inherit from Asset.");	
 			}
 
 			/*
@@ -115,8 +115,7 @@ namespace Enjon
 			*/
 			AssetHandle(Asset* asset)
 			{
-				static_assert(std::is_base_of<Asset, T>::value, 
-					"AssetHandle:: T must inherit from Asset.");	
+				static_assert(std::is_base_of<Asset, T>::value, "AssetHandle:: T must inherit from Asset.");	
 
 				mAsset = asset;
 			} 

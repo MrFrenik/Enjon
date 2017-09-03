@@ -140,10 +140,14 @@ namespace Enjon
 	};
 
 	class FontAssetLoader;
+
+	ENJON_CLASS( )
 	class UIFont : public Asset
 	{
 		friend FontAssetLoader;
 		friend FontAtlas;
+
+		ENJON_CLASS_BODY( UIFont )
 
 		public:
 			/**
@@ -175,8 +179,11 @@ namespace Enjon
 			FT_Face GetFace( ) const { return mFontFace;  }
 
 		private:
+			ENJON_PROPERTY( )
 			Enjon::String mFontPath;
-			std::unordered_map< u32, FontAtlas > mAtlases;
+
+			std::unordered_map< u32, FontAtlas > mAtlases; 
+
 			FT_Face mFontFace;
 	};
 }

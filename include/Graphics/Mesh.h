@@ -22,11 +22,12 @@ namespace Enjon {
 
 	class MeshAssetLoader;
 
+	ENJON_CLASS( )
 	class Mesh : public Asset
 	{
 		friend MeshAssetLoader;
 
-		ENJON_OBJECT( Mesh )
+		ENJON_CLASS_BODY( Mesh )
 
 		public:
 			/*

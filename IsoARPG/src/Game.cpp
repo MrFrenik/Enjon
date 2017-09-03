@@ -711,60 +711,30 @@ Enjon::Result Game::Initialize()
 
 			ImGui::SliderFloat( "FontScale", &mFontSize, 0.05f, 5.0f ); 
 
-			auto plc = mGun.Get( )->GetComponent< Enjon::PointLightComponent >( );
-			auto light = plc->GetLight( );
-			Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( plc->GetLight( )->Class( ) );
-			if ( cls )
-			{ 
-				ImGui::Text( light->GetTypeName( ) );
-
-				Enjon::PropertyTable* pt = cls->GetProperties( );
-				for ( auto& prop : *pt ) 
+			if ( ImGui::CollapsingHeader( "PointLight" ) )
+			{
+				auto plc = mGun.Get( )->GetComponent< Enjon::PointLightComponent >( );
+				auto light = plc->GetLight( );
+				Enjon::ImGuiManager::DebugDumpObject( light );
+				
+			}
+			if ( ImGui::CollapsingHeader( "Texture ") )
+			{
+				auto am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+				Enjon::AssetHandle< Enjon::Texture > texHandle = am->GetAsset< Enjon::Texture >( "isoarpg.textures.black" ); 
+				if ( texHandle )
 				{
-					Enjon::String name = prop.second.GetName( );
-
-					switch ( prop.second.GetType( ) )
-					{
-						case Enjon::MetaPropertyType::Float_32:
-						{
-							float val = 0.0f;
-							cls->GetValue( light, name, &val );
-							if ( ImGui::SliderFloat( name.c_str(), &val, 0.0f, 10.0f ) )
-							{
-								cls->SetValue( light, cls->GetProperty( prop.second.GetName( ) ), val );
-							}
-						} break;
-						
-						case Enjon::MetaPropertyType::ColorRGBA16:
-						{
-							Enjon::ColorRGBA16 val;
-							cls->GetValue( light, name, &val ); 
-							f32 col[ 3 ] = { val.r, val.g, val.b };
-							if ( ImGui::SliderFloat3( name.c_str(), col, 0.0f, 1.0f ) )
-							{
-								val.r = col[ 0 ];
-								val.g = col[ 1 ];
-								val.b = col[ 2 ];
-
-								cls->SetValue( light, cls->GetProperty( prop.second.GetName( ) ), val );
-							}
-						} break;
-						
-						case Enjon::MetaPropertyType::Vec3:
-						{
-							Enjon::Vec3 val;
-							cls->GetValue( light, name, &val ); 
-							f32 col[ 3 ] = { val.x, val.y, val.z };
-							if ( ImGui::SliderFloat3( name.c_str(), col, 0.0f, 1.0f ) )
-							{
-								val.x = col[ 0 ];
-								val.y = col[ 1 ];
-								val.z = col[ 2 ];
-
-								cls->SetValue( light, cls->GetProperty( prop.second.GetName( ) ), val );
-							}
-						} break;
-					}
+					Enjon::Texture* tex = texHandle.Get( );
+					Enjon::ImGuiManager::DebugDumpObject( tex );
+				} 
+			}
+			if ( ImGui::CollapsingHeader( "Material" ) )
+			{
+				auto am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+				Enjon::Material* mat = mGunMat;
+				if ( mat )
+				{
+					Enjon::ImGuiManager::DebugDumpObject( mat );
 				} 
 			}
 

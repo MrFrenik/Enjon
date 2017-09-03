@@ -26,9 +26,10 @@ namespace Enjon {
 		Count
 	};
 
+	ENJON_CLASS( )
 	class Material : public Asset
 	{
-		ENJON_OBJECT( Material )
+		ENJON_CLASS_BODY( Material )
 
 		friend Shader;
 		friend ShaderGraph;

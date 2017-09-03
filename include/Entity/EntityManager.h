@@ -70,9 +70,10 @@ namespace Enjon
 		u32 mID = MAX_ENTITIES;
 	};
 
+	ENJON_CLASS( )
 	class Entity : public Enjon::Object
 	{
-		ENJON_OBJECT( Entity )
+		ENJON_CLASS_BODY( Entity )
 
 		friend EntityHandle;
 		friend EntityManager; 

@@ -22,11 +22,12 @@ namespace Enjon
 		UNKNOWN
 	};
 
+	ENJON_CLASS( )
 	class Texture : public Asset
 	{
 		friend TextureAssetLoader;
 
-		ENJON_OBJECT( Texture )
+		ENJON_CLASS_BODY( Texture )
 
 		public:	
 

@@ -9,9 +9,10 @@
 
 namespace Enjon
 {
+	ENJON_CLASS( )
 	class GraphicsComponent : public Component
 	{
-		ENJON_OBJECT( GraphicsComponent )
+		ENJON_CLASS_BODY( GraphicsComponent )
 
 		public:
 			GraphicsComponent();

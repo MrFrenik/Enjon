@@ -11,9 +11,10 @@ namespace Enjon {
 
 	class Scene;
 
+	ENJON_CLASS( )
 	class PointLight : public Enjon::Object
 	{
-		ENJON_OBJECT ( PointLight ) 
+		ENJON_CLASS_BODY ( PointLight ) 
 
 		public:
 			ENJON_FUNCTION( Constructor ) 

@@ -12,12 +12,12 @@
 #include <limits>
 #include <assert.h>
 
-#define ENJON_OBJECT( type )																		\
+#define ENJON_CLASS_BODY( type )																	\
 	friend Object;																					\
 	public:																							\
 		virtual u32 GetTypeId() const override { return Enjon::Object::GetTypeId< type >(); }		\
 		virtual const char* GetTypeName() const override { return #type; }							\
-		virtual const MetaClass* type::Class( ) override\
+		virtual const MetaClass* Class( ) override\
 		{\
 			MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance()->GetMetaClassRegistry( ) );\
 			const MetaClass* cls = mr->Get< type >( );\
@@ -26,10 +26,11 @@
 				cls = mr->RegisterMetaClass< type >( );\
 			}\
 			return cls;\
-		}
+		} 
 
 #define ENJON_PROPERTY(...)
 #define ENJON_FUNCTION(...)
+#define ENJON_CLASS(...)
 
 namespace Enjon
 {
@@ -38,16 +39,16 @@ namespace Enjon
 		Unknown,
 		Bool,
 		ColorRGBA16,
-		Float_32,
-		Float_64,
-		Uint_8,
-		Uint_16,
-		Uint_32,
-		Uint_64,
-		Int_8,
-		Int_16,
-		Int_32,
-		Int_64,
+		F32,
+		F64,
+		U8,
+		U16,
+		U32,
+		U64,
+		S8,
+		S16,
+		S32,
+		S64,
 		String,
 		Array,
 		Vec2,
@@ -59,118 +60,200 @@ namespace Enjon
 		UUID
 	};
 
+	enum MetaPropertyFlags : u32
+	{
+		None = 0x00,
+		IsPointer = 0x01,
+		IsDoublePointer = 0x02
+	};
+
+	inline MetaPropertyFlags operator|( MetaPropertyFlags a, MetaPropertyFlags b )
+	{
+		return static_cast< MetaPropertyFlags >( static_cast< u32 >( a ) | static_cast< u32 >( b ) );
+	}
+
+	inline MetaPropertyFlags operator&( MetaPropertyFlags a, MetaPropertyFlags b )
+	{
+		return static_cast< MetaPropertyFlags >( static_cast< u32 >( a ) & static_cast< u32 >( b ) );
+	}
+
+	inline MetaPropertyFlags operator^( MetaPropertyFlags a, MetaPropertyFlags b )
+	{
+		return static_cast< MetaPropertyFlags >( static_cast< u32 >( a ) ^ static_cast< u32 >( b ) );
+	}
+
+	inline void operator^=( MetaPropertyFlags& a, MetaPropertyFlags b )
+	{
+		a = a ^ b;
+	}
+
+	inline void operator|=( MetaPropertyFlags& a, MetaPropertyFlags b )
+	{
+		a = a | b;
+	}
+
+	inline void operator&=( MetaPropertyFlags& a, MetaPropertyFlags b )
+	{
+		a = a & b;
+	} 
+
+	// Forward Declarations
+	class MetaFunction;
+	class MetaProperty;
 	class MetaClass;
 	class Object;
+	
+	struct MetaPropertyTraits
+	{
+		MetaPropertyTraits( ) = default;
+		MetaPropertyTraits( bool isEditable )
+			: mIsEditable( isEditable )
+		{ 
+		}
+
+		~MetaPropertyTraits( )
+		{ 
+		}
+
+		bool mIsEditable = false;
+	};
 
 	class MetaProperty
 	{
 		friend MetaClass;
 		friend Object;
-	public:
-		MetaProperty( ) = default;
-		MetaProperty( MetaPropertyType type, const std::string& name, u32 offset )
-			: mType( type ), mName( name ), mOffset( offset )
-		{
-		}
 
-		~MetaProperty( )
-		{
-		}
+		public:
+			/*
+			* @brief
+			*/
+			MetaProperty( ) = default; 
 
-		std::string GetName( );
+			/*
+			* @brief
+			*/
+			MetaProperty( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits )
+				: mType( type ), mName( name ), mOffset( offset ), mIndex( propIndex ), mTraits( traits )
+			{
+			}
 
-		MetaPropertyType GetType( );
+			/*
+			* @brief
+			*/
+			~MetaProperty( )
+			{
+			}
+		
+			/*
+			* @brief
+			*/
+			bool HasFlags( MetaPropertyFlags flags );
+			
+			/*
+			* @brief
+			*/
+			bool IsEditable( ) const;
 
-	protected:
-		MetaPropertyType mType;
-		std::string mName;
-		u32 mOffset;
+			/*
+			* @brief
+			*/
+			std::string GetName( );
+
+			/*
+			* @brief
+			*/
+			MetaPropertyType GetType( );
+
+		protected:
+			MetaPropertyType mType;
+			std::string mName;
+			u32 mOffset;
+			u32 mIndex;
+			MetaPropertyTraits mTraits;
+	}; 
+
+	class MetaFunction
+	{
+		public:
+			/*
+			* @brief
+			*/
+			MetaFunction( );
+
+			/*
+			* @brief
+			*/
+			~MetaFunction( ); 
 	};
 
-	typedef std::unordered_map< std::string, MetaProperty > PropertyTable;
-	typedef std::unordered_map< std::string, MetaFunction > FunctionTable;
+	typedef std::vector< MetaProperty > PropertyTable;
+	typedef std::vector< MetaFunction > FunctionTable;
 
 	class MetaClass
 	{
 		friend Object;
 
-	public:
-		MetaClass( ) = default;
-		~MetaClass( )
-		{
-		}
-
-		u32 PropertyCount( ) const
-		{
-			return ( u32 )mProperties.size( );
-		}
-
-		u32 FunctionCount( )
-		{
-			return ( u32 )mFunctions.size( );
-		}
-
-		bool PropertyExists( const std::string& propertyName )
-		{
-			return ( mProperties.find( propertyName ) != mProperties.end( ) );
-		}
-
-		const MetaProperty* GetProperty( const std::string& propertyName )
-		{
-			if ( PropertyExists( propertyName ) )
+		public:
+			MetaClass( ) = default;
+			~MetaClass( )
 			{
-				return &mProperties[ propertyName ];
 			}
-			return nullptr;
-		}
 
-		template < typename T >
-		void GetValue( const Object* obj, const MetaProperty* property, T* value )
-		{
-			if ( PropertyExists( property->mName ) )
+			u32 PropertyCount( ) const
 			{
-				void* member_ptr = ( ( ( u8* )&( *obj ) + property->mOffset ) );
-				*value = *( T* )member_ptr;
+				return ( u32 )mProperties.size( );
 			}
-		}
 
-		template < typename T >
-		void GetValue( const Object* obj, const std::string& propertyName, T* value )
-		{
-			if ( PropertyExists( propertyName ) )
+			u32 FunctionCount( )
 			{
-				MetaProperty* prop = &mProperties[ propertyName ];
-				void* member_ptr = ( ( ( u8* )&( *obj ) + prop->mOffset ) );
-				*value = *( T* )member_ptr;
-			}
-		}
+				return ( u32 )mFunctions.size( );
+			} 
 
-		template < typename T >
-		void SetValue( const Object* obj, const std::string& propertyName, const T& value )
-		{
-			if ( PropertyExists( propertyName ) )
+			bool PropertyExists( const u32& index )
 			{
-				MetaProperty* prop = &mProperties[ propertyName ];
-				void* member_ptr = ( ( ( u8* )&( *obj ) + prop->mOffset ) );
-				*( T* )( member_ptr ) = value;
+				return index < mPropertyCount;
 			}
-		}
 
-		template < typename T >
-		void SetValue( const Object* obj, const MetaProperty* prop, const T& value )
-		{
-			if ( PropertyExists( prop->mName ) )
+			const MetaProperty* GetProperty( const u32& index )
 			{
-				void* member_ptr = ( ( ( u8* )&( *obj ) + prop->mOffset ) );
-				*( T* )( member_ptr ) = value;
+				if ( PropertyExists( index ) )
+				{
+					return &mProperties.at( index );
+				}
+			} 
+
+			bool HasProperty( const MetaProperty* prop )
+			{
+				return ( ( prop->mIndex < mPropertyCount ) && ( &mProperties.at( prop->mIndex ) == prop ) ); 
 			}
-		}
 
-		PropertyTable* GetProperties( ) { return &mProperties; }
+			template < typename T >
+			void GetValue( const Object* obj, const MetaProperty* prop, T* value )
+			{
+				if ( HasProperty( prop ) )
+				{
+					void* member_ptr = ( ( ( u8* )&( *obj ) + prop->mOffset ) );
+					*value = *( T* )member_ptr;
+				}
+			} 
 
-	protected:
-		PropertyTable mProperties;
-		FunctionTable mFunctions;
+			template < typename T >
+			void SetValue( const Object* obj, const MetaProperty* prop, const T& value )
+			{
+				if ( HasProperty( prop ) && prop->IsEditable( ) )
+				{
+					void* member_ptr = ( ( ( u8* )&( *obj ) + prop->mOffset ) );
+					*( T* )( member_ptr ) = value;
+				}
+			} 
+
+			PropertyTable& GetProperties( ) { return mProperties; }
+
+		protected:
+			PropertyTable mProperties;
+			FunctionTable mFunctions;
+			u32 mPropertyCount;
+			u32 mFunctionCount;
 	};
 
 	class Object;
@@ -189,7 +272,7 @@ namespace Enjon
 			MetaClass* RegisterMetaClass( )
 			{
 				// Must inherit from object to be able to registered
-				static_assert( std::is_base_of<Object, T>::value, "RegisterMetaClass:: T must inherit from Object." );
+				static_assert( std::is_base_of<Object, T>::value, "MetaClass::RegisterMetaClass() - T must inherit from Object." );
 
 				// Get id of object
 				u32 id = Object::GetTypeId<T>( );
@@ -264,7 +347,7 @@ namespace Enjon
 			template <typename T>
 			T* Cast( )
 			{
-				static_assert( std::is_base_of<Object, T>::value, "Cast:: T must inherit from Enjon Object." );
+				static_assert( std::is_base_of<Object, T>::value, "Object::Cast() - T must inherit from Enjon Object." );
 
 				return static_cast<T*>( this );
 			}
@@ -275,7 +358,7 @@ namespace Enjon
 			template <typename T>
 			static u32 GetTypeId( ) noexcept
 			{
-				static_assert( std::is_base_of<Object, T>::value, "GetTypeId:: T must inherit from Enjon Object." );
+				static_assert( std::is_base_of<Object, T>::value, "Object::GetTypeId() - T must inherit from Enjon Object." );
 
 				static u32 typeId { GetUniqueTypeId( ) };
 				return typeId;
@@ -291,6 +374,18 @@ namespace Enjon
 			*@brief
 			*/
 			bool TypeValid( ) const; 
+
+			template <typename T>
+			static const MetaClass* GetClass( )
+			{
+				MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance()->GetMetaClassRegistry( ) );
+				const MetaClass* cls = mr->Get< T >( );
+				if ( !cls )
+				{
+					cls = mr->RegisterMetaClass< T >( );
+				}
+				return cls;
+			}
 
 		protected:
 
