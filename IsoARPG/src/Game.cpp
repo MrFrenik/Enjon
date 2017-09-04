@@ -702,7 +702,8 @@ Enjon::Result Game::Initialize()
 				Enjon::MetaFunction* setWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "SetPosition" ) );
 				if ( getWPFunc )
 				{
-					Enjon::Vec3 wp = getWPFunc->Invoke< Enjon::Vec3 >( mGun.Get( ) );
+					// TODO(): Need to make this type safe - detect that this return type does not match the function signture
+					auto wp = getWPFunc->Invoke< Enjon::Vec3 >( mGun.Get( ) );
 					if ( ImGui::SliderFloat3( "Entity WP", ( float* )&wp, 0.0f, 1.0f ) )
 					{
 						if ( setWPFunc )

@@ -200,7 +200,7 @@ namespace Enjon
 			RetVal Invoke( T* obj, Args&&... args )
 			{
 				static_assert( std::is_base_of<Object, T>::value, "Invoke() - T must inherit from Object." );
-				return static_cast< MetaFunctionImpl< T, RetVal, Args... >* >( this )->mFunc( obj, std::forward<Args>( args )... );
+				return static_cast< MetaFunctionImpl< T, RetVal, Args&&... >* >( this )->mFunc( obj, std::forward<Args>( args )... );
 			}
 
 			const Enjon::String& GetName( ) const

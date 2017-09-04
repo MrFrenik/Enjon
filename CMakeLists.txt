@@ -44,45 +44,6 @@ else()
 	file(WRITE ${ENJON_GENERATED_DIR}/Enjon_Generated.cpp "// Enjon_Generated.cpp\n") 
 endif()
 
-# Add libraries to be linked against
-set(
-	PROJECT_RELEASE_LIBRARIES
-	Opengl32.lib 
-	SDL2.lib 
-	SDL2main.lib 
-	glew32.lib 
-	glew32s.lib 
-	freetype.lib 
-	Bullet3Collision.lib 
-	Bullet3Dynamics.lib
-	Bullet3Common.lib 
-	LinearMath.lib 
-	BulletDynamics.lib 
-	BulletCollision.lib
-	fmt.lib
-	CrossGuid.lib
-	liblz4.lib
-)
-
-set(
-	PROJECT_DEBUG_LIBRARIES
-	Opengl32.lib 
-	SDL2_d.lib 
-	SDL2main_d.lib 
-	glew32_d.lib 
-	glew32s_d.lib 
-	freetype_d.lib 
-	Bullet3Collision_d.lib 
-	Bullet3Dynamics_d.lib
-	Bullet3Common_d.lib 
-	LinearMath_d.lib 
-	BulletDynamics_d.lib 
-	BulletCollision_d.lib
-	fmt_d.lib
-	CrossGuid_d.lib
-	liblz4_d.lib
-)
-
 # Add lib directories
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Release)
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Debug)
@@ -208,14 +169,26 @@ set(
 	${GAME_FILES}
 	${GENERAL_SOURCES}
 	${SHADERS}
-	)
- 
-SET( LINK_LIBRARY debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES} )
+) 
 
 add_executable(Enjon ${ALL_SRC})
-#target_link_libraries(Enjon debug ${PROJECT_DEBUG_LIBRARIES} optimized ${PROJECT_RELEASE_LIBRARIES})
-target_link_libraries(Enjon ${PROJECT_DEBUG_LIBRARIES})
-#target_link_libraries(Enjon ${PROJECT_RELEASE_LIBRARIES})
+
+# Link libraries
+target_link_libraries( Enjon debug Opengl32.lib optimized Opengl32.lib ) 
+target_link_libraries( Enjon debug SDL2_d.lib optimized SDL2.lib )
+target_link_libraries( Enjon debug SDL2main_d.lib optimized SDL2main.lib )
+target_link_libraries( Enjon debug glew32_d.lib optimized glew32.lib )
+target_link_libraries( Enjon debug glew32s_d.lib optimized glew32s.lib )
+target_link_libraries( Enjon debug freetype_d.lib optimized freetype.lib )
+target_link_libraries( Enjon debug Bullet3Collision_d.lib optimized Bullet3Collision.lib )
+target_link_libraries( Enjon debug Bullet3Dynamics_d.lib optimized Bullet3Dynamics.lib )
+target_link_libraries( Enjon debug Bullet3Common_d.lib optimized Bullet3Common.lib )
+target_link_libraries( Enjon debug LinearMath_d.lib optimized LinearMath.lib )
+target_link_libraries( Enjon debug BulletDynamics_d.lib optimized BulletDynamics.lib )
+target_link_libraries( Enjon debug BulletCollision_d.lib optimized BulletCollision.lib )
+target_link_libraries( Enjon debug fmt_d.lib optimized fmt.lib )
+target_link_libraries( Enjon debug CrossGuid_d.lib optimized CrossGuid.lib )
+target_link_libraries( Enjon debug liblz4_d.lib optimized liblz4.lib ) 
 
 add_dependencies( Enjon Reflection )
 
@@ -309,7 +282,7 @@ foreach( file ${REFLECTION_INCLUDES} )
 
 	file(APPEND ${ENJON_DIR}/Generator/config.cfg "\"${file}\"\n") 
 
-endforeach( file ) 
+endforeach(file) 
 
 # Generate Files - Not sure the best way to handle this just yet...
 if(WIN32) 
