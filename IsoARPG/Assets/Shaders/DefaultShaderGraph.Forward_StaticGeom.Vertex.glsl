@@ -47,7 +47,7 @@ void main()
 
 	// Output Vertex Data
 	vs_out.FragPositionWorldSpace = worldPosition;
-	vs_out.TexCoords = vec2( aVertexUV.x, aVertexUV.y );
+	vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );
 	vs_out.ViewPositionTangentSpace = TS_TBN * uViewPositionWorldSpace;
 	vs_out.FragPositionTangentSpace = TS_TBN * vs_out.FragPositionWorldSpace;
 	vs_out.TBN = TBN;

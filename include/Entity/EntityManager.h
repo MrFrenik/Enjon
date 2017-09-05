@@ -206,6 +206,7 @@ namespace Enjon
 
 			b32 mWorldTransformDirty; 					// NOTE(): Necessary struct padding for alignment. Not too happy about it.
 
+			ENJON_PROPERTY( )
 			EntityHandle mParent;
 
 			ENJON_PROPERTY( )

@@ -124,8 +124,12 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			Enjon::AssetHandle< Enjon::ShaderGraph > GetShaderGraph( ) const;
+			void SetShaderGraph( const Enjon::AssetHandle< Enjon::ShaderGraph >& graph ); 
 
+			/*
+			* @brief
+			*/
+			Enjon::AssetHandle< Enjon::ShaderGraph > GetShaderGraph( ) const;
 
 		protected:
 
@@ -138,12 +142,13 @@ namespace Enjon {
 			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count]; 
 
 			ENJON_PROPERTY( Editable ) 
-			bool mTwoSided = false;
+			bool mTwoSided = false; 
 
+			ENJON_PROPERTY( Editable )
+			Enjon::AssetHandle< Enjon::ShaderGraph > mShaderGraph;
+			
 			std::unordered_map< Enjon::String, ShaderUniform* > mUniforms;
 			std::unordered_map< Enjon::String, ShaderUniform* > mUniformOverrides;
-			//const Enjon::ShaderGraph* mShaderGraph = nullptr;
-			Enjon::AssetHandle< Enjon::ShaderGraph > mShaderGraph;
 	}; 
 }
 

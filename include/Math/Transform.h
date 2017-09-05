@@ -10,7 +10,8 @@
 #include <Math/Common.h>
 #include <Math/Quaternion.h>
 #include <Math/Mat4.h>
-#include <Math/Vec3.h>
+#include <Math/Vec3.h> 
+#include <Base/Object.h>
 
 namespace Enjon 
 { 
@@ -21,7 +22,7 @@ namespace Enjon
 	};
 
 	class Transform
-	{
+	{ 
 		public:
 
 			/**

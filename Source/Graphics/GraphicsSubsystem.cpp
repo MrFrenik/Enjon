@@ -592,17 +592,19 @@ namespace Enjon
 
 	void GraphicsSubsystem::GBufferPass()
 	{
+		static float wt = 0.0f;
+		wt += 0.001f;
+		if ( wt >= std::numeric_limits<f32>::max( ) )
+		{
+			wt = 0.0f;
+		}
+
 		glDepthFunc( GL_LESS );
 		glEnable( GL_CULL_FACE );
 		glCullFace( GL_BACK );
 
 		// Bind gbuffer
-		mGbuffer->Bind();
-
-		GLSLProgram* shader = Enjon::ShaderManager::Get("GBuffer");
-
-		// Use gbuffer shader
-		shader->Use();
+		mGbuffer->Bind(); 
 
 		// Clear albedo render target buffer (default)
 		glClearBufferfv(GL_COLOR, 0, mBGColor); 
@@ -613,61 +615,89 @@ namespace Enjon
 
 		// Get sorted renderables by material
 		std::vector<Renderable*> sortedRenderables = mScene.GetRenderables();
-		std::set<QuadBatch*>* sortedQuadBatches = mScene.GetQuadBatches();
+		std::set<QuadBatch*>* sortedQuadBatches = mScene.GetQuadBatches(); 
+
+		// Shader graph to be used
+		Enjon::AssetHandle< Enjon::ShaderGraph > sg; 
+		GLSLProgram* gbufferShader = Enjon::ShaderManager::Get("GBuffer");
 
 		if (!sortedRenderables.empty())
-		{
-			// Set set shared uniform
-			shader->SetUniform("u_camera", mSceneCamera.GetViewProjection());
-
+		{ 
 			Material* material = nullptr;
 			for (auto& renderable : sortedRenderables)
 			{
 				// Check for material switch
 				Material* curMaterial = renderable->GetMaterial();
-				assert(curMaterial != nullptr);
+				sg = curMaterial->GetShaderGraph( );
+				assert(curMaterial != nullptr); 
+
 				if (material != curMaterial)
 				{
 					// Set material
 					material = curMaterial;
 
-					// Set material textures
-					shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
-					shader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::Normal).Get()->GetTextureId(), 1);
-					shader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::Emissive).Get()->GetTextureId(), 2);
-					shader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::Metallic).Get()->GetTextureId(), 3);
-					shader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::Roughness).Get()->GetTextureId(), 4);
-					shader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO).Get()->GetTextureId(), 5);
+					// Use shader graph shader
+					if ( sg )
+					{
+						Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
+						sgShader->Use( );
+						sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
+						sgShader->SetUniform( "uWorldTime", wt );
+						sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
+						material->Bind( sgShader );
+					}
+
+					if ( !sg )
+					{
+						// Use gbuffer shader 
+						gbufferShader->Use( );
+
+						// Set set shared uniform
+						gbufferShader->SetUniform("u_camera", mSceneCamera.GetViewProjection());
+
+						// Set material textures
+						gbufferShader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
+						gbufferShader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::Normal).Get()->GetTextureId(), 1);
+						gbufferShader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::Emissive).Get()->GetTextureId(), 2);
+						gbufferShader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::Metallic).Get()->GetTextureId(), 3);
+						gbufferShader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::Roughness).Get()->GetTextureId(), 4);
+						gbufferShader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO).Get()->GetTextureId(), 5); 
+					} 
 				}
 
-				// Render mesh ( Could make this all within one call to renderable, which submits mesh and material information )
-				renderable->Submit( shader ); 
+				// Render
+				if ( !sg )
+				{
+					// Render mesh ( Could make this all within one call to renderable, which submits mesh and material information )
+					renderable->Submit( gbufferShader ); 
+				}
+				else
+				{
+					renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
+				}
 			}
 		}
 
 		// Render the bunny
-		auto material = mInstancedRenderable->GetMaterial( );
-		shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
-		shader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::Normal).Get()->GetTextureId(), 1);
-		shader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::Emissive).Get()->GetTextureId(), 2);
-		shader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::Metallic).Get()->GetTextureId(), 3);
-		shader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::Roughness).Get()->GetTextureId(), 4);
-		shader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO).Get()->GetTextureId(), 5);
-
+		gbufferShader->Use( );
+		{
+			auto material = mInstancedRenderable->GetMaterial( );
+			gbufferShader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
+			gbufferShader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::Normal).Get()->GetTextureId(), 1);
+			gbufferShader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::Emissive).Get()->GetTextureId(), 2);
+			gbufferShader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::Metallic).Get()->GetTextureId(), 3);
+			gbufferShader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::Roughness).Get()->GetTextureId(), 4);
+			gbufferShader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO).Get()->GetTextureId(), 5); 
+		} 
 		// Unuse gbuffer shader
-		shader->Unuse();
+		gbufferShader->Unuse();
 
 		/////////////////////////////////////////////////
 		// SHADER GRAPH TEST ////////////////////////////
 		///////////////////////////////////////////////// 
 
 		// Do shader graph test here
-		static float wt = 0.0f;
-		wt += 0.001f;
-		if ( wt >= std::numeric_limits<f32>::max( ) )
-		{
-			wt = 0.0f;
-		}
+		
 
 		Enjon::ShaderGraph* sGraph = const_cast< ShaderGraph* >( mMaterial->GetShaderGraph( ).Get( ) );
 		Enjon::Shader* sgShader = const_cast< Shader*> ( sGraph->GetShader( ShaderPassType::StaticGeom ) ); 
@@ -687,7 +717,7 @@ namespace Enjon
 		sgShader->Unuse( ); 
 
 		// Quadbatches
-		shader = Enjon::ShaderManager::Get("QuadBatch");
+		Enjon::GLSLProgram* shader = Enjon::ShaderManager::Get("QuadBatch");
 		shader->Use();
 
 		if (!sortedQuadBatches->empty())

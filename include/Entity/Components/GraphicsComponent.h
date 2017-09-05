@@ -76,6 +76,7 @@ namespace Enjon
 
 		private: 
 
+			ENJON_PROPERTY( )
 			Renderable mRenderable;
 	};
 }

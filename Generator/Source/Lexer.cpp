@@ -125,6 +125,7 @@ Token Lexer::GetNextToken( bool advance )
 		case '\0':{token.mType = TokenType::Token_EndOfStream; } 	break;
 		case '#': {token.mType = TokenType::Token_Hash; } 			break;
 		case ',': {token.mType = TokenType::Token_Comma; } 			break;
+		case '=': {token.mType = TokenType::Token_Equal; } 			break;
 		
 		case ':': 
 		{
@@ -183,7 +184,7 @@ Token Lexer::GetNextToken( bool advance )
 
 		default:
 		{
-			if (IsAlphabetical( C ))
+			if (IsAlphabetical( C ) && C != '-' )
 			{
 				while (IsAlphabetical( mAt[0] ) || ( IsNumeric( mAt[0] ) || mAt[0] == '_' ))
 				{
@@ -193,9 +194,20 @@ Token Lexer::GetNextToken( bool advance )
 				token.mTextLength = mAt - token.mText;
 				token.mType = TokenType::Token_Identifier;
 			}
-			else if (IsNumeric( C ))
+			else if (IsNumeric( C ) || C == '-' )
 			{
-				// ParseNumber();
+				u32 numDecimals = 0;
+				while ( IsNumeric( mAt[ 0 ] ) || ( mAt[ 0 ] == '.' && numDecimals == 0 ) || mAt[0] == 'f' )
+				{
+					// Grab decimal
+					numDecimals = mAt[ 0 ] == '.' ? numDecimals++ : numDecimals;
+
+					// Increment
+					++mAt;
+				}
+
+				token.mTextLength = mAt - token.mText;
+				token.mType = TokenType::Token_Number;
 			}
 			else
 			{

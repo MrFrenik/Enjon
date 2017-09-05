@@ -60,8 +60,7 @@ namespace Enjon
 			template <typename T>
 			T* Get()
 			{
-				static_assert( std::is_base_of<Subsystem, T>::value, 
-					"SubsystemCatalog:: T must inherit from Subsystem." );	
+				static_assert( std::is_base_of<Subsystem, T>::value, "SubsystemCatalog:: T must inherit from Subsystem." );	
 
 				// Get idx of subsystem type
 				u32 idx = GetSubsystemTypeId<T>(); 

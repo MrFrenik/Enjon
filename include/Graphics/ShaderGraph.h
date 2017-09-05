@@ -227,113 +227,119 @@ namespace Enjon
 		Count
 	}; 
 	class ShaderGraphAssetLoader;
+
+	ENJON_CLASS( )
 	class ShaderGraph : public Enjon::Asset
-	{
-	public:
+	{ 
+		ENJON_CLASS_BODY( ShaderGraph )
 
-		friend ShaderGraphAssetLoader;
+		public: 
 
-		ShaderGraph( );
+			friend ShaderGraphAssetLoader;
 
-		~ShaderGraph( );
+			ShaderGraph( );
 
-		void Validate( );
+			~ShaderGraph( );
 
-		s32 Compile( ); 
+			void Validate( );
 
-		s32 Create( const Enjon::String& filePath );
+			s32 Compile( ); 
 
-		Enjon::String GetName( ) const { return mName; }
+			s32 Create( const Enjon::String& filePath );
 
-		static s32 DeserializeTemplate( const Enjon::String& filePath );
+			Enjon::String GetName( ) const { return mName; }
 
-		static const ShaderGraphNodeTemplate* GetTemplate( const Enjon::String& name );
+			static s32 DeserializeTemplate( const Enjon::String& filePath );
 
-		static const std::unordered_map< Enjon::String, ShaderGraphNodeTemplate >* GetTemplates( ) { return &mTemplates; }
+			static const ShaderGraphNodeTemplate* GetTemplate( const Enjon::String& name );
 
-		static Enjon::String FindReplaceMetaTag( const Enjon::String& code, const Enjon::String& toFind, const Enjon::String& replaceWith );
+			static const std::unordered_map< Enjon::String, ShaderGraphNodeTemplate >* GetTemplates( ) { return &mTemplates; }
 
-		static Enjon::String ReplaceAllGlobalMetaTags( const Enjon::String& code );
+			static Enjon::String FindReplaceMetaTag( const Enjon::String& code, const Enjon::String& toFind, const Enjon::String& replaceWith );
 
-		static Enjon::String ReplaceTypeWithAppropriateUniformType( const Enjon::String& code );
+			static Enjon::String ReplaceAllGlobalMetaTags( const Enjon::String& code );
 
-		static Enjon::String FindReplaceAllMetaTag( const Enjon::String& code, const Enjon::String& toFind, const Enjon::String& replaceWith );
+			static Enjon::String ReplaceTypeWithAppropriateUniformType( const Enjon::String& code );
 
-		static bool HasTag( const Enjon::String& code, const Enjon::String& tag );
+			static Enjon::String FindReplaceAllMetaTag( const Enjon::String& code, const Enjon::String& toFind, const Enjon::String& replaceWith );
 
-		static u32 TagCount( const Enjon::String& code, const Enjon::String& tag );
+			static bool HasTag( const Enjon::String& code, const Enjon::String& tag );
 
-		static Enjon::String ShaderGraph::TransformOutputType( const Enjon::String& code, const Enjon::String& type, const Enjon::String& requiredType );
+			static u32 TagCount( const Enjon::String& code, const Enjon::String& tag );
 
-		const ShaderGraphNode* GetNode( const Enjon::String& nodeName );
+			static Enjon::String ShaderGraph::TransformOutputType( const Enjon::String& code, const Enjon::String& type, const Enjon::String& requiredType );
 
-		Enjon::String GetCode( ShaderPassType type, ShaderType shaderType = ShaderType::Unknown );
+			const ShaderGraphNode* GetNode( const Enjon::String& nodeName );
 
-		static Enjon::String ShaderPassToString( ShaderPassType type );
+			Enjon::String GetCode( ShaderPassType type, ShaderType shaderType = ShaderType::Unknown );
 
-		bool HasUniform( const Enjon::String& uniformName );
+			static Enjon::String ShaderPassToString( ShaderPassType type );
 
-		const ShaderUniform* GetUniform( const Enjon::String& uniformName );
+			bool HasUniform( const Enjon::String& uniformName );
 
-		const std::unordered_map< Enjon::String, ShaderUniform* >* GetUniforms( );
+			const ShaderUniform* GetUniform( const Enjon::String& uniformName );
 
-		bool HasShader( ShaderPassType pass );
+			const std::unordered_map< Enjon::String, ShaderUniform* >* GetUniforms( );
 
-		const Shader* GetShader( ShaderPassType pass );
+			bool HasShader( ShaderPassType pass );
 
-		void WriteToFile( ShaderPassType pass );
+			const Shader* GetShader( ShaderPassType pass );
 
-	public:
+			void WriteToFile( ShaderPassType pass );
 
-		/*
-		* @brief
-		*/
-		virtual Result Reload( ) override;
+		public:
 
-	protected: 
+			/*
+			* @brief
+			*/
+			virtual Result Reload( ) override;
 
-		virtual Result Serialize( Enjon::ByteBuffer& buffer ) override;
+		protected: 
 
-		virtual Result Deserialize( Enjon::ByteBuffer& buffer ) override;
+			virtual Result Serialize( Enjon::ByteBuffer& buffer ) override;
 
-	private:
-		static rapidjson::Document GetJSONDocumentFromFilePath( const Enjon::String& filePath, s32* status );
+			virtual Result Deserialize( Enjon::ByteBuffer& buffer ) override;
 
-		void ShaderGraph::ClearGraph( );
+		private:
+			static rapidjson::Document GetJSONDocumentFromFilePath( const Enjon::String& filePath, s32* status );
 
-	private:
-		void ConstructUniforms( const NodeLink& link );
-		bool AddUniform( ShaderUniform* uniform );
+			void ShaderGraph::ClearGraph( );
 
-		Enjon::String OutputPassTypeMetaData( const ShaderPassType& pass, s32* status );
-		Enjon::String OutputVertexHeaderBeginTag( );
-		Enjon::String OutputVertexHeaderEndTag( );
-		Enjon::String OutputVertexHeader( const ShaderPassType& pass, s32* status );
-		Enjon::String OutputVertexAttributes( const ShaderPassType& pass, s32* status );
-		Enjon::String BeginVertexMain( const ShaderPassType& pass, s32* status );
-		Enjon::String OutputVertexMain( const ShaderPassType& pass, s32* status );
-		Enjon::String EndVertexMain( const ShaderPassType& pass, s32* status );
-		Enjon::String OutputFragmentHeaderBeginTag( );
-		Enjon::String OutputFragmentHeaderEndTag( );
-		Enjon::String OutputFragmentHeader( const ShaderPassType& pass, s32* status );
-		Enjon::String OutputFragmentIncludes( const ShaderPassType& pass, s32* status );
-		Enjon::String BeginFragmentMain( const ShaderPassType& pass, s32* status );
-		Enjon::String OutputFragmentMain( const ShaderPassType& pass, s32* status );
-		Enjon::String EndFragmentMain( const ShaderPassType& pass, s32* status );
+		private:
+			void ConstructUniforms( const NodeLink& link );
+			bool AddUniform( ShaderUniform* uniform );
 
-	private:
-		void AddNode( const ShaderGraphNode& node );
+			Enjon::String OutputPassTypeMetaData( const ShaderPassType& pass, s32* status );
+			Enjon::String OutputVertexHeaderBeginTag( );
+			Enjon::String OutputVertexHeaderEndTag( );
+			Enjon::String OutputVertexHeader( const ShaderPassType& pass, s32* status );
+			Enjon::String OutputVertexAttributes( const ShaderPassType& pass, s32* status );
+			Enjon::String BeginVertexMain( const ShaderPassType& pass, s32* status );
+			Enjon::String OutputVertexMain( const ShaderPassType& pass, s32* status );
+			Enjon::String EndVertexMain( const ShaderPassType& pass, s32* status );
+			Enjon::String OutputFragmentHeaderBeginTag( );
+			Enjon::String OutputFragmentHeaderEndTag( );
+			Enjon::String OutputFragmentHeader( const ShaderPassType& pass, s32* status );
+			Enjon::String OutputFragmentIncludes( const ShaderPassType& pass, s32* status );
+			Enjon::String BeginFragmentMain( const ShaderPassType& pass, s32* status );
+			Enjon::String OutputFragmentMain( const ShaderPassType& pass, s32* status );
+			Enjon::String EndFragmentMain( const ShaderPassType& pass, s32* status );
 
-	protected:
-		static std::unordered_map< Enjon::String, ShaderGraphNodeTemplate > mTemplates;
+		private:
+			void AddNode( const ShaderGraphNode& node );
 
-		Enjon::String mName;
-		std::unordered_map< Enjon::String, ShaderGraphNode > mNodes;
-		std::unordered_map< ShaderPassType, Shader* > mShaders;
-		std::unordered_map< Enjon::String, ShaderUniform* > mUniforms;
-		std::unordered_map< ShaderPassType, Enjon::String > mShaderPassCode;
-		ShaderGraphNode mMainSurfaceNode;
-		u32 mTextureSamplerLocation = 0;
+		protected:
+			static std::unordered_map< Enjon::String, ShaderGraphNodeTemplate > mTemplates;
+
+			Enjon::String mName;
+			std::unordered_map< Enjon::String, ShaderGraphNode > mNodes;
+			std::unordered_map< ShaderPassType, Shader* > mShaders;
+			std::unordered_map< Enjon::String, ShaderUniform* > mUniforms;
+			std::unordered_map< ShaderPassType, Enjon::String > mShaderPassCode;
+			ShaderGraphNode mMainSurfaceNode;
+
+			ENJON_PROPERTY( )
+			u32 mTextureSamplerLocation = 0;
 	};
 }
 

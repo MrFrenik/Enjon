@@ -61,16 +61,16 @@ namespace Enjon {
 
 		private: 
 
-			ENJON_PROPERTY( Editable )
+			ENJON_PROPERTY( Editable, UIMin = -100.0f, UIMax = 100.0f )
 			Vec3 mPosition;
 
 			ENJON_PROPERTY( Editable )
 			f32 mAttenuationRate;
 
-			ENJON_PROPERTY( Editable )
+			ENJON_PROPERTY( Editable, UIMin = 1.0f, UIMax = 250.0f )
 			f32 mRadius;
 
-			ENJON_PROPERTY( Editable )
+			ENJON_PROPERTY( Editable, UIMin = 0.0f, UIMax = 100.0f )
 			f32 mIntensity;
 
 			ENJON_PROPERTY( Editable )

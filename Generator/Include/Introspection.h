@@ -13,7 +13,7 @@ class Type;
 
 enum class PropertyType
 {
-	Unknown,
+	Object,
 	Bool,
 	ColorRGBA16,
 	F32,
@@ -35,7 +35,9 @@ enum class PropertyType
 	Quat,
 	Enum,
 	UUID,
-	Transform
+	Transform,
+	AssetHandle,
+	EntityHandle
 };
 
 enum PropertyFlags : u32
@@ -78,6 +80,13 @@ inline void operator&=( PropertyFlags& a, PropertyFlags b )
 typedef std::unordered_map< std::string, PropertyType > PropertyTypeMap;
 typedef std::unordered_map< PropertyType, std::string > PropertyTypeAsStringMap;
 
+struct PropertyTraits
+{
+	bool IsEditable = false;
+	float UIMin = 0.0f;
+	float UIMax = 0.0f;
+};
+
 class Property
 {
 	friend Introspection;
@@ -107,9 +116,11 @@ class Property
 
 	public:
 		std::string mType;
+		std::string mTypeAppend = "";
 		std::string mName; 
 		PropertyFlags mFlags = PropertyFlags::None;
 		std::unordered_set< std::string > mPropertyTraits;
+		PropertyTraits mTraits;
 
 		static PropertyTypeMap mPropertyTypeMap;
 		static PropertyTypeAsStringMap mPropertyTypeStringMap;

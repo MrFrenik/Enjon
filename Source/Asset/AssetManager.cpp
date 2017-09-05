@@ -164,6 +164,24 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
+	const std::unordered_map< Enjon::String, Asset* >* AssetManager::GetAssets( const Enjon::MetaClass* cls )
+	{
+		// Make sure class is valid
+		assert( cls != nullptr );
+
+		// Get type id of class
+		u32 idx = cls->GetTypeId( );
+
+		if ( Exists( idx ) )
+		{
+			return mLoaders[ idx ]->GetAssets( );
+		}
+
+		return nullptr;
+	}
+	
+	//============================================================================================ 
+			
 	Result AssetManager::AddToDatabase( const String& filePath, b8 isRelativePath )
 	{ 
 		// Have to do a switch based on extension of file
@@ -205,6 +223,7 @@ namespace Enjon
 					if ( res )
 					{
 						res->mFilePath = mAssetsPath + filePath;
+						res->mName = Utils::ToLower( mName ) + qualifiedName;
 					}
 				}
 				// If absolute path on disk

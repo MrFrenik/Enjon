@@ -24,7 +24,9 @@ enum class TokenType
 	Token_EndOfStream,
 	Token_DoubleColon,
 	Token_Ampersand,
-	Token_Comma
+	Token_Comma,
+	Token_Equal,
+	Token_Number
 };
 
 class Token

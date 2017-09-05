@@ -1346,7 +1346,7 @@ namespace Enjon
 
 				code += OutputTabbedLine( "// Output Vertex Data" );
 				code += OutputTabbedLine( "vs_out.FragPositionWorldSpace = worldPosition;" );
-				code += OutputTabbedLine( "vs_out.TexCoords = vec2( aVertexUV.x, aVertexUV.y );" );
+				code += OutputTabbedLine( "vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );" );
 				//code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = uViewPositionWorldSpace * TS_TBN;" );
 				//code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = vs_out.FragPositionWorldSpace * TS_TBN;" );
 				code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = TS_TBN * uViewPositionWorldSpace;" );

@@ -7,8 +7,10 @@
 #include "Subsystem.h"
 #include "System/Types.h"
 #include "Asset/AssetLoader.h"
-#include "Graphics/Texture.h"
 #include "Defines.h" 
+
+// TODO(): For some reason, need this here. I hate this. Fix it.
+#include "Graphics/Texture.h"
 
 #include <array>
 
@@ -112,6 +114,8 @@ namespace Enjon
 				return handle;
 			} 
 
+			const std::unordered_map< Enjon::String, Asset* >* GetAssets( const Enjon::MetaClass* cls );
+
 			/**
 			*@brief
 			*/
@@ -184,8 +188,10 @@ namespace Enjon
 			template <typename T>
 			u32 GetAssetTypeId() noexcept
 			{
-				static_assert(std::is_base_of<Asset, T>::value,
-					"GetAssetTypeId:: T must inherit from Asset.");
+				static_assert(std::is_base_of<Asset, T>::value, "GetAssetTypeId:: T must inherit from Asset.");
+
+				// Return id type from object
+				return Enjon::Object::GetTypeId< T >( );
 
 				static u32 typeId{ GetUniqueAssetTypeId() };
 				return typeId;

@@ -19,7 +19,7 @@ std::string Property::GetTypeAsString( PropertyType type )
 		return mPropertyTypeStringMap[ type ];
 	}
 
-	return "Unknown";
+	return "Object";
 }
 
 //================================================================================================= 
@@ -32,7 +32,7 @@ PropertyType Property::GetTypeFromString( const std::string& str )
 		return mPropertyTypeMap[ str ];
 	}
 
-	return PropertyType::Unknown;
+	return PropertyType::Object;
 }
 
 //================================================================================================= 
@@ -68,6 +68,8 @@ void Property::InitPropertyMap( )
 	STRING_TO_PROP( "String", String )
 	STRING_TO_PROP( "Transform", Transform )
 	STRING_TO_PROP( "Quaternion", Quat )
+	STRING_TO_PROP( "AssetHandle", AssetHandle )
+	STRING_TO_PROP( "EntityHandle", EntityHandle )
 }
 
 //=================================================================================================
@@ -302,11 +304,36 @@ void Introspection::ParseClass( Lexer* lexer )
 			{
 				return;
 			}
-
+			
 			// Should be on the super class now
 			Token superToken = lexer->GetCurrentToken( );
 
-			cls->mParent = superToken.ToString( );
+			// Cache off parent string
+			std::string parentString = superToken.ToString( );
+
+			// Consume all namespace qualifiers 
+			{
+				Token curToken = lexer->GetCurrentToken( );
+				Token nextToken = lexer->PeekAtNextToken( );
+				while ( curToken.IsType( TokenType::Token_Identifier ) && nextToken.IsType( TokenType::Token_DoubleColon ) )
+				{
+					// Set to next token
+					curToken = lexer->GetNextToken( );
+
+					// Append to parent string
+					parentString += curToken.ToString( );
+
+					// This gets next token
+					curToken = lexer->GetNextToken( );
+
+					// Peek at next token
+					nextToken = lexer->PeekAtNextToken( );
+				}
+			} 
+
+			superToken = lexer->GetCurrentToken( );
+
+			cls->mParent = parentString + superToken.ToString( );
 		}
 	} 
 
@@ -420,6 +447,44 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 			// If identifier, then push back intro property traits
 			if ( curToken.IsType( TokenType::Token_Identifier ) )
 			{
+				// Add editable trait
+				if ( curToken.Equals( "Editable" ) )
+				{
+					prop.mTraits.IsEditable = true;
+				}
+
+				if ( curToken.Equals( "UIMin" ) || curToken.Equals( "UIMax" ) )
+				{
+					// Store token
+					Token numToken = lexer->GetCurrentToken( );
+					
+					// Consume equal sign
+					if ( !lexer->RequireToken( TokenType::Token_Equal, true ) )
+					{
+						return;
+					} 
+
+					// Get value
+					if ( !lexer->RequireToken( TokenType::Token_Number, true ) )
+					{
+						return;
+					}
+
+					// Get value
+					float num = std::atof( lexer->GetCurrentToken( ).ToString( ).c_str( ) );
+
+					// Set value
+					if ( numToken.Equals( "UIMax" ) )
+					{
+						prop.mTraits.UIMax = num;
+					}
+
+					if ( numToken.Equals( "UIMin" ) )
+					{
+						prop.mTraits.UIMin = num; 
+					}
+				}
+
 				// Push back trait
 				prop.AddTrait( curToken.ToString( ) );
 			}
@@ -459,6 +524,69 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 	// Get property type from identifier token string
 	//prop.mType = Property::GetTypeFromString( curToken.ToString( ) );
 	prop.mType = curToken.ToString( );
+
+	// Get property type from enum and handle special cases differently
+	PropertyType type = Property::GetTypeFromString( prop.mType );
+
+	switch ( type )
+	{
+		case PropertyType::AssetHandle:
+		{
+			// Get opening template token
+			if ( !lexer->RequireToken( TokenType::Token_LessThan, true ) )
+			{
+				return;
+			}
+
+			// Append template token
+			prop.mTypeAppend += lexer->GetCurrentToken( ).ToString( );
+
+			// Get template type 
+			if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
+			{
+				return;
+			}
+
+			// Store template type
+			std::string mTemplateType = lexer->GetCurrentToken( ).ToString( );
+			{
+				Token curToken = lexer->GetCurrentToken( );
+				Token nextToken = lexer->PeekAtNextToken( );
+				while ( curToken.IsType( TokenType::Token_Identifier ) && nextToken.IsType( TokenType::Token_DoubleColon ) )
+				{
+					// Set to double color token
+					curToken = lexer->GetNextToken( );
+
+					// Store in templated type
+					mTemplateType += curToken.ToString( );
+
+					// Get next identifier token
+					curToken = lexer->GetNextToken( );
+
+					// Peek at next token
+					nextToken = lexer->PeekAtNextToken( );
+				}
+			}
+
+			// Get actual type
+			if ( !lexer->RequireToken( TokenType::Token_Identifier ) )
+			{
+				return;
+			} 
+
+			// Should have full templated name now, so append
+			prop.mTypeAppend += mTemplateType + lexer->GetCurrentToken( ).ToString( );
+
+			// Grab closing token
+			if ( !lexer->RequireToken( TokenType::Token_GreaterThan, true ) )
+			{
+				return;
+			}
+
+			// Append and close type
+			prop.mTypeAppend += lexer->GetCurrentToken( ).ToString( ); 
+		} break;
+	}
 
 	// TODO(): Pointer types / Const references
 		
@@ -669,10 +797,13 @@ void Introspection::Compile( const ReflectionConfig& config )
 					// Get property as string
 					auto metaProp = Property::GetTypeFromString( prop.second.mType );
 					std::string metaPropStr = Property::GetTypeAsString( metaProp ); 
-
-					// Look for traits to fill out
+					
+					// Fill out property traits
 					std::string traits = "MetaPropertyTraits( "; 
-					traits += prop.second.HasTrait( "Editable" ) ? "true" : "false";
+					traits += prop.second.mTraits.IsEditable ? "true" : "false";
+					traits += ", ";
+					traits += std::to_string(prop.second.mTraits.UIMin) + "f, ";
+					traits += std::to_string(prop.second.mTraits.UIMax) + "f";
 					traits += " )"; 
 
 					// Get property name
@@ -726,11 +857,18 @@ void Introspection::Compile( const ReflectionConfig& config )
 
 					code += OutputTabbedLine( "cls->mFunctions[ \"" + fn + "\" ] = new Enjon::MetaFunctionImpl< " + templateSignature + " >( &" + c.second.mName + "::" + fn + ", \"" + fn + "\" );" );
 				}
+
 			}
+
+			// Formatting
+			code += OutputLine( "" );
+
+			// Set up typeid field
+			code += OutputTabbedLine( "cls->mTypeId = Enjon::Object::GetTypeId< " + c.second.mName + " >( );\n" );
 
 			// Return statement
 			code += OutputLine( "\n\treturn cls;" );
-			code += OutputLine( "}" ); 
+			code += OutputLine( "}\n" ); 
 
 			// Write to file
 			f.write( code.c_str( ), code.length( ) );

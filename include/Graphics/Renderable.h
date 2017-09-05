@@ -7,6 +7,7 @@
 #include "Math/Quaternion.h"
 #include "System/Types.h"
 #include "Asset/Asset.h"
+#include "Base/Object.h"
 
 namespace Enjon 
 { 
@@ -18,10 +19,13 @@ namespace Enjon
 	class GLSLProgram;
 	class ColorRGBA16;
 
-	class Renderable
-	{
+	ENJON_CLASS( )
+	class Renderable : public Enjon::Object
+	{ 
 		friend Scene;
 		friend GraphicsSubsystem;
+
+		ENJON_CLASS_BODY( Renderable )
 
 		public:
 			Renderable();
@@ -89,11 +93,15 @@ namespace Enjon
 			*/
 			void Submit( const Enjon::GLSLProgram* shader );
 
-		private:
-			Transform 			mTransform;
-			AssetHandle<Mesh> 	mMesh;
-			Material* 	mMaterial 	= nullptr;
-			Scene* 		mScene 		= nullptr;
+		private: 
+			// Enjon Properties
+			ENJON_PROPERTY( Editable )
+			AssetHandle<Mesh> mMesh;
+
+		private: 
+			Transform mTransform; 
+			Material* mMaterial = nullptr;
+			Scene* mScene = nullptr;
 	};
 }
 

@@ -144,6 +144,14 @@ namespace Enjon
 			{ 
 				return mAsset->Cast<T>(); 
 			}
+
+			/*
+			* @brief
+			*/
+			const MetaClass* GetAssetClass( )
+			{
+				return mAsset->Class( );
+			}
 			
 			/*
 			* @brief

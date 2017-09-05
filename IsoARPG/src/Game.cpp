@@ -697,18 +697,21 @@ Enjon::Result Game::Initialize()
 			// Testing meta functions
 			if ( ImGui::CollapsingHeader( "Entity" ) )
 			{ 
-				Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( mGun.Get( )->Class( ) );
+				Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( mRed.Get( )->Class( ) );
+
+				// Debug dump object
+				Enjon::ImGuiManager::DebugDumpObject( mRed.Get( ) );
 				Enjon::MetaFunction* getWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "GetWorldPosition" ) );
 				Enjon::MetaFunction* setWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "SetPosition" ) );
 				if ( getWPFunc )
 				{
 					// TODO(): Need to make this type safe - detect that this return type does not match the function signture
-					auto wp = getWPFunc->Invoke< Enjon::Vec3 >( mGun.Get( ) );
+					auto wp = getWPFunc->Invoke< Enjon::Vec3 >( mRed.Get( ) );
 					if ( ImGui::SliderFloat3( "Entity WP", ( float* )&wp, 0.0f, 1.0f ) )
 					{
 						if ( setWPFunc )
 						{
-							setWPFunc->Invoke< void >( mGun.Get( ), wp );
+							setWPFunc->Invoke< void >( mRed.Get( ), wp );
 						}
 					}
 				}
@@ -754,8 +757,9 @@ Enjon::Result Game::Initialize()
 							Enjon::MetaFunction* func = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "GetWidth" ) );
 							if ( func )
 							{
-								Enjon::String funcRes = "Function Result: GetName: " + func->Invoke< Enjon::String >( tex );
-								ImGui::Text( funcRes.c_str( ) ); 
+								// TODO(): THIS NEEDS TO DO TYPECHECKING
+								Enjon::u32 funcRes = func->Invoke< Enjon::u32 >( tex );
+								ImGui::InputInt( "Width: ", (s32*)&funcRes );
 							}
 
 							ImGui::TreePop( );

@@ -119,6 +119,9 @@ namespace Enjon
 					return mAssetsByName[ name ];
 				} 
 
+				// Set name
+				asset->mName = name;
+
 				// Otherwise add asset
 				mAssetsByName[name] = asset;
 				mAssetsByUUID[ asset->mUUID.ToString( ) ] = asset;

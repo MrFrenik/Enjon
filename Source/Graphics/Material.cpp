@@ -78,6 +78,13 @@ namespace Enjon {
 	}
 
 	//========================================================================
+
+	void Material::SetShaderGraph( const Enjon::AssetHandle< Enjon::ShaderGraph >& graph )
+	{
+		mShaderGraph = graph;
+	}
+
+	//=========================================================================================
 			
 	void Material::Bind( const Shader* shader )
 	{
@@ -235,7 +242,26 @@ namespace Enjon {
 		{
 			mUniformOverrides[ name ]->Cast< UniformPrimitive< f32 > >( )->SetValue( value );
 		} 
-	}
+	} 
 
-	//=========================================================================================
+	//========================================================================================= 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

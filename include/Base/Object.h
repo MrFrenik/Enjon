@@ -29,6 +29,7 @@
 			return cls;\
 		} 
 
+#define ENJON_ARRAY(...)
 #define ENJON_PROPERTY(...)
 #define ENJON_FUNCTION(...)
 #define ENJON_CLASS(...)
@@ -37,7 +38,7 @@ namespace Enjon
 {
 	enum class MetaPropertyType
 	{
-		Unknown,
+		Object,
 		Bool,
 		ColorRGBA16,
 		F32,
@@ -59,7 +60,9 @@ namespace Enjon
 		Quat,
 		Enum,
 		UUID,
-		Transform
+		Transform,
+		AssetHandle,
+		EntityHandle
 	};
 
 	enum MetaPropertyFlags : u32
@@ -107,9 +110,8 @@ namespace Enjon
 	
 	struct MetaPropertyTraits
 	{
-		MetaPropertyTraits( ) = default;
-		MetaPropertyTraits( bool isEditable )
-			: mIsEditable( isEditable )
+		MetaPropertyTraits( bool isEditable = false, f32 uiMin = 0.0f, f32 uiMax = 0.0f )
+			: mIsEditable( isEditable ), mUIMin( uiMin ), mUIMax( uiMax )
 		{ 
 		}
 
@@ -117,7 +119,24 @@ namespace Enjon
 		{ 
 		}
 
+		/*
+		* @brief
+		*/
+		f32 GetUIMax( ) const;
+		
+		/*
+		* @brief
+		*/
+		f32 GetUIMin( ) const; 
+
+		/*
+		* @brief
+		*/
+		bool UseSlider( ) const;
+
 		bool mIsEditable = false;
+		f32 mUIMin = 0.0f;
+		f32 mUIMax = 0.0f;
 	};
 
 	class MetaProperty
@@ -165,6 +184,13 @@ namespace Enjon
 			* @brief
 			*/
 			MetaPropertyType GetType( );
+
+			/*
+			* @brief
+			*/
+			MetaPropertyTraits GetTraits( ) const;
+			
+
 
 		protected:
 			MetaPropertyType mType;
@@ -272,9 +298,26 @@ namespace Enjon
 		friend Object;
 
 		public:
+
+			/*
+			* @brief
+			*/
 			MetaClass( ) = default;
+
+			/*
+			* @brief
+			*/
 			~MetaClass( )
 			{
+				// Delete all functions
+				for ( auto& f : mFunctions )
+				{
+					delete f.second;
+				}
+
+				// Clear properties and functions
+				mProperties.clear( );
+				mFunctions.clear( );
 			}
 
 			u32 PropertyCount( ) const
@@ -332,6 +375,18 @@ namespace Enjon
 				}
 			} 
 
+			template < typename RetVal > 
+			RetVal* GetValueAs( const Object* obj, const MetaProperty* prop )
+			{
+				if ( HasProperty( prop ) )
+				{
+					void* member_ptr = ( ( ( u8* )&( *obj ) + prop->mOffset ) );
+					return ( RetVal* )member_ptr;
+				}
+
+				return nullptr;
+			} 
+
 			template < typename T >
 			void SetValue( const Object* obj, const MetaProperty* prop, const T& value )
 			{
@@ -342,6 +397,25 @@ namespace Enjon
 				}
 			} 
 
+			template < typename T >
+			bool InstanceOf( )
+			{
+				MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance( )->GetMetaClassRegistry( ) );
+				const MetaClass* cls = mr->Get< T >( );
+				if ( !cls )
+				{
+					cls = mr->RegisterMetaClass< T >( );
+				} 
+
+				return ( cls && cls == this ); 
+			} 
+
+			// Method for getting type id from MetaClass instead of Object
+			u32 GetTypeId( ) const 
+			{
+				return mTypeId;
+			}
+
 			PropertyTable& GetProperties( ) { return mProperties; }
 
 		protected:
@@ -349,6 +423,7 @@ namespace Enjon
 			FunctionTable mFunctions;
 			u32 mPropertyCount;
 			u32 mFunctionCount;
+			u32 mTypeId;
 	};
 
 	class Object;
@@ -359,8 +434,18 @@ namespace Enjon
 			{
 			}
 
+			/*
+			* @brief
+			*/
 			~MetaClassRegistry( )
 			{
+				// Delete all meta classes from registry
+				for ( auto& c : mRegistry )
+				{
+					delete c.second;
+				}
+
+				mRegistry.clear( );
 			}
 
 			template <typename T>
@@ -398,7 +483,7 @@ namespace Enjon
 			}
 
 		private:
-			std::unordered_map< u32, MetaClass* > mRegistry;
+			std::unordered_map< u32, MetaClass* > mRegistry; 
 	};
 
 	// Max allowed type id by engine
@@ -459,10 +544,11 @@ namespace Enjon
 				return typeId;
 			}
 
-			template < typename T >
+			template <typename T>
 			bool InstanceOf( )
 			{
-				return this->GetTypeId( ) == GetTypeId< T >( );
+				static_assert( std::is_base_of<Object, T>::value, "Object::GetTypeId() - T must inherit from Enjon Object." ); 
+				return ( mTypeId == Object::GetTypeId< T >( ) );
 			}
 
 			/**

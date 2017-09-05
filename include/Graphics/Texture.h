@@ -76,9 +76,16 @@ namespace Enjon
 			virtual Enjon::Result CacheFile( Enjon::ByteBuffer& buffer ) override; 
 
 		private:
+			
+			ENJON_PROPERTY( )
 			u32 mId;
+
+			ENJON_PROPERTY( )
 			u32 mWidth;
-			u32 mHeight;
+
+			ENJON_PROPERTY( )
+			u32 mHeight; 
+
 			TextureFileExtension mFileExtension;
 	}; 
 }
