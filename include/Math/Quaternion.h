@@ -157,17 +157,17 @@ namespace Enjon
 		f32 wy = Q.w*Q.y;
 		f32 wz = Q.w*Q.z;
 
-		Mat.elements[0 * 4 + 0] = 1.0f - 2.0f * (yy + zz);
-		Mat.elements[1 * 4 + 0] = 2.0f * (xy + wz);
-		Mat.elements[2 * 4 + 0] = 2.0f * (xz - wy);
+		Mat.Elements[0][0] = 1.0f - 2.0f * (yy + zz);
+		Mat.Elements[1][0] = 2.0f * (xy + wz);
+		Mat.Elements[2][0] = 2.0f * (xz - wy);
 
-		Mat.elements[0 * 4 + 1] = 2.0f * (xy - wz);
-		Mat.elements[1 * 4 + 1] = 1.0f - 2.0f * (xx + zz);
-		Mat.elements[2 * 4 + 1] = 2.0f * (yz + wx);
+		Mat.Elements[0][1] = 2.0f * (xy - wz);
+		Mat.Elements[1][1] = 1.0f - 2.0f * (xx + zz);
+		Mat.Elements[2][1] = 2.0f * (yz + wx);
 
-		Mat.elements[0 * 4 + 2] = 2.0f * (xz + wy);
-		Mat.elements[1 * 4 + 2] = 2.0f * (yz - wx);
-		Mat.elements[2 * 4 + 2] = 1.0f - 2.0f * (xx + yy);
+		Mat.Elements[0][2] = 2.0f * (xz + wy);
+		Mat.Elements[1][2] = 2.0f * (yz - wx);
+		Mat.Elements[2][2] = 1.0f - 2.0f * (xx + yy);
 
 		return Mat;
 	}

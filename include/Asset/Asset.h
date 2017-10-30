@@ -10,6 +10,7 @@
 #include "Base/Object.h"
 #include "Serialize/UUID.h"
 #include "Serialize/ByteBuffer.h"
+#include "Asset/AssetUtils.h"
 
 #include <assert.h>
 #include <memory>
@@ -50,6 +51,8 @@ namespace Enjon
 			ENJON_FUNCTION( )
 			Enjon::String GetFilePath( ) const { return mFilePath; }
 
+			ENJON_FUNCTION( )
+			UUID GetUUID( ) const { return mUUID; } 
 			
 		protected:
 
@@ -99,8 +102,30 @@ namespace Enjon
 
 		private:
 	};
+
+	class AssetHandleBase
+	{
+		public:
+			AssetHandleBase( )
+			{ 
+			}
+
+			~AssetHandleBase( )
+			{ 
+			}
+
+			virtual const MetaClass* GetAssetClass( )
+			{
+				return nullptr;
+			}
+
+			virtual Result Set( Asset* asset )
+			{ 
+				return Result::SUCCESS;
+			}
+	};
 	
-	template <typename T>
+	template <typename T> 
 	class AssetHandle
 	{
 		public:
@@ -140,6 +165,20 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			UUID GetUUID( )
+			{
+				// Return UUID if valid
+				if ( IsValid( ) )
+				{
+					return mAsset->GetUUID();
+				}
+
+				return UUID::Invalid( );
+			}
+
+			/*
+			* @brief
+			*/
 			T* Get() 
 			{ 
 				return mAsset->Cast<T>(); 
@@ -148,9 +187,14 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			const MetaClass* GetAssetClass( )
+			const MetaClass* GetAssetClass( ) 
 			{
-				return mAsset->Class( );
+				if ( mAsset )
+				{
+					return mAsset->Class( );
+				}
+
+				return Object::GetClass<T>( );
 			}
 			
 			/*
@@ -172,7 +216,7 @@ namespace Enjon
 			/*
 			* @brief 
 			*/
-			Result Set(Asset* asset)
+			Result Set(Asset* asset) 
 			{
 				// Set to new asset
 				mAsset = asset;

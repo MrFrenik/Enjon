@@ -33,6 +33,7 @@
 
 #include <stdio.h>
 
+#include <array>
 #include <iostream>
 #include <string.h>
 #include <filesystem>
@@ -42,6 +43,45 @@
 #include <STB/stb_image_write.h> 
 
 #include <Bullet/btBulletDynamicsCommon.h> 
+
+#include <Base/MetaClassRegistry.h>
+
+void TestObjectSerialize( )
+{
+	using namespace Enjon;
+
+	AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+	ByteBuffer writeBuffer;
+	ByteBuffer readBuffer;
+	AnotherObject writeTestObject;
+	AnotherObject readTestObject;
+	EnjonObjectSerializer objectSerializer;
+
+	//MetaClass* assetCls = const_cast< MetaClass*>( writeTestObject.mTexture.GetAssetClass( ) );
+
+	// Set value and texture
+	writeTestObject.mFloatValue = 1.0f;
+	writeTestObject.mUintValue = 3;
+	writeTestObject.mTexture = am->GetAsset< Texture >( "isoarpg.materials.scuffedplastic.albedo" );
+
+	// Serialize test object
+	objectSerializer.Serialize( writeBuffer, &writeTestObject );
+
+	String outputPath = am->GetAssetsPath( ) + "/Cache/testCache";
+
+	// Write to file
+	writeBuffer.WriteToFile( outputPath );
+
+	// Cool, now read back from file
+	readBuffer.ReadFromFile( outputPath );
+
+	//readTestObject.mTexture = AssetUtils::GetDefaultAsset( readTestObject.mTexture.GetAssetClass( ) );
+	
+	// Deserialize object
+	objectSerializer.Deserialize( readBuffer, &readTestObject ); 
+
+	std::cout << "here\n";
+}
 
 class MapClass
 {
@@ -56,7 +96,7 @@ class MapClass
 
 	private:
 		std::unordered_map < Enjon::String, Enjon::AssetHandle< Enjon::Texture > > mMap;
-};
+}; 
 
 
 std::vector<btRigidBody*> mBodies;
@@ -114,6 +154,23 @@ Enjon::Result Game::Initialize()
 		{
 			std::cout << "Asset: " << p << "\n";
 		}
+	}
+
+	{
+		// This works for flat arrays
+		Enjon::AssetHandle< Enjon::Texture > textures[ (u32)Enjon::TextureSlotType::Count ];
+		u32 size = *( &textures + 1 ) - textures;
+
+		std::array< Enjon::AssetHandle< Enjon::Texture >, ( u32 )Enjon::TextureSlotType::Count > texArray;
+		size = sizeof( texArray ) / sizeof( texArray[ 0 ] );
+
+		// What about for vectors( not so much )
+		std::vector< Enjon::AssetHandle< Enjon::Texture > > vecTextures;
+		vecTextures.push_back( Enjon::AssetHandle< Enjon::Texture >( ) );
+		vecTextures.push_back( Enjon::AssetHandle< Enjon::Texture >( ) );
+		vecTextures.push_back( Enjon::AssetHandle< Enjon::Texture >( ) );
+
+		size = sizeof( vecTextures ) / sizeof(vecTextures[ 0 ]);
 	}
 
 	// Get Subsystems from engine
@@ -270,7 +327,6 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( teapotPath );
 	mAssetManager->AddToDatabase( waterPath );
 	mAssetManager->AddToDatabase( fontPath, false );
- 
  
 
 	// Assign font
@@ -682,7 +738,7 @@ Enjon::Result Game::Initialize()
 			if ( ImGui::SliderFloat( "Camera Speed", &mCameraSpeed, 0.1f, 20.0f ) )
 			{
 				testProperty = mCameraSpeed;
-			}
+			} 
 
 			ImGui::SliderFloat("Ball Speed", &ballSpeed, 0.1f, 100.0f);
 
@@ -690,6 +746,16 @@ Enjon::Result Game::Initialize()
 			{
 				testSignal.Emit( mCameraSpeed );
 			}
+
+			auto cam = mGfx->GetSceneCamera( );
+			ImGui::InputFloat3( "Cam Position", ( float* )&cam->GetPosition( ) );
+			ImGui::InputFloat4( "Cam Rotation", ( float* )&cam->GetRotation( ) );
+
+			f32 ar = cam->GetAspectRatio( );
+			ImGui::InputFloat( "AspectRatio", &ar );
+
+			auto vp = mGfx->GetViewport( );
+			ImGui::InputInt2( "View Dimensions", ( s32* )&vp );
 			
 			ImGui::Text( "32 bit prop size: %d", sizeof( Enjon::Property<f32> ) );
 			ImGui::Text( "32 bit signal size: %d", sizeof( Enjon::Signal<f32> ) ); 
@@ -780,7 +846,7 @@ Enjon::Result Game::Initialize()
 			{
 				auto gc = mGun.Get( )->GetComponent< Enjon::GraphicsComponent >( );
 				Enjon::ImGuiManager::DebugDumpObject( gc ); 
-			}
+			} 
 
 			//char buf[ 256 ];
 			//std::strncpy( buf, mWorldString.c_str( ), 256 );
@@ -871,12 +937,12 @@ Enjon::Result Game::Initialize()
 
 	fmt::print( "Same: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >( ) == mGun.Get( )->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTypeId( ) );
  
-	fmt::print( "Name: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTypeName( ) );
-	fmt::print( "Name: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetTypeName() ); 
+	fmt::print( "Name: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetClassName( ) );
+	fmt::print( "Name: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetClassName() ); 
 	
 	for ( auto& c : mGun.Get( )->GetComponents( ) )
 	{
-		fmt::print( "{} is instance of graphics component: {}\n", c->GetTypeName( ), c->InstanceOf< Enjon::GraphicsComponent >( ) );
+		fmt::print( "{} is instance of graphics component: {}\n", c->GetClassName( ), c->InstanceOf< Enjon::GraphicsComponent >( ) );
 	} 
 
 	/*
@@ -886,14 +952,14 @@ Enjon::Result Game::Initialize()
 	s32 widthtga, heighttga, nCompstga;
 	s32 len;
 	stbi_set_flip_vertically_on_load( false );
-	u8* data = stbi_load( ( rootPath + "/IsoARPG/Assets/" + "Materials/CopperRock/Albedo.png" ).c_str( ), &width, &height, &nComps, STBI_rgb_alpha ); 
-	u8* tgaData = stbi_load( ( rootPath + "/IsoARPG/Assets/Textures/cerebusAlbedo.tga" ).c_str( ), &widthtga, &heighttga, &nCompstga, STBI_rgb_alpha ); 
+	u8* data = stbi_load( ( rootPath + "/IsoARPG/Assets/" + "Materials/CopperRock/Albedo.png" ).c_str( ), &width, &height, &nComps, STBI_rgb_alpha );
+	u8* tgaData = stbi_load( ( rootPath + "/IsoARPG/Assets/Textures/cerebusAlbedo.tga" ).c_str( ), &widthtga, &heighttga, &nCompstga, STBI_rgb_alpha );
 
 	auto saveData = stbi_write_png_to_mem( data, 0, width, height, 4, &len );
 	stbi_write_tga( ( rootPath + "/testTGA" ).c_str( ), widthtga, heighttga, 4, tgaData );
 	Enjon::ByteBuffer readBuffer;
 	readBuffer.ReadFromFile( rootPath + "/testTGA" );
-	u32 size = readBuffer.GetSize( ); 
+	u32 size = readBuffer.GetSize( );
 	u8* loadBufferData = ( u8* )malloc( size );
 	s32 loadWidth, loadHeight, loadComps;
 	for ( usize i = 0; i < size; ++i )
@@ -913,7 +979,7 @@ Enjon::Result Game::Initialize()
 	{
 		compressBuffer.Write( compressedData[ i ] );
 	}
-	compressBuffer.WriteToFile( rootPath + "/compressedTexture" ); 
+	compressBuffer.WriteToFile( rootPath + "/compressedTexture" );
 
 	writeBuffer.Write( width );
 	writeBuffer.Write( height );
@@ -922,14 +988,14 @@ Enjon::Result Game::Initialize()
 	for ( usize i = 0; i < len; ++i )
 	{
 		writeBuffer.Write( saveData[ i ] );
-	} 
+	}
 	stbi_image_free( data );
 	writeBuffer.WriteToFile( rootPath + "/testTexture" );
 
 	writeBuffer.ReadFromFile( rootPath + "/testTexture" );
 
 	width = writeBuffer.Read< s32 >( );
-	height = writeBuffer.Read< s32 >( ); 
+	height = writeBuffer.Read< s32 >( );
 	nComps = writeBuffer.Read< s32 >( );
 	len = writeBuffer.Read< s32 >( );
 	unsigned char* loadData = ( unsigned char* )malloc( len );
@@ -939,9 +1005,9 @@ Enjon::Result Game::Initialize()
 	}
 
 	s32 comps;
-	unsigned char* loadedData = stbi_load_from_memory( loadData, len, &width, &height, &comps, 4 ); 
+	unsigned char* loadedData = stbi_load_from_memory( loadData, len, &width, &height, &comps, 4 );
 	u8* tgaDataLoad = stbi_load_from_memory( loadBufferData, size, &loadWidth, &loadHeight, &loadComps, 4 );
- 
+
 	// Generate texture
 	// TODO(): Make this API generalized to work with DirectX as well as OpenGL
 	glGenTextures( 1, &( texID ) );
@@ -979,13 +1045,121 @@ Enjon::Result Game::Initialize()
 		glGenerateMipmap( GL_TEXTURE_2D );
 	}
 
-	glBindTexture( GL_TEXTURE_2D, 0 ); 
+	glBindTexture( GL_TEXTURE_2D, 0 );
 
 	mTex = new Enjon::Texture( width, height, texID );
-	*/ 
+	*/
+	Enjon::Vec3 Vertices[] = {
+		Enjon::Vec3( -0.5f, 0.5f, 0.5f ),
+		Enjon::Vec3( 0.5f, 0.5f, 0.5f ),
+		Enjon::Vec3( 0.5f, -0.5f, 0.5f ),
+		Enjon::Vec3( -0.5f, -0.5f, 0.5f ),
+		Enjon::Vec3( -0.5f, 0.5f, -0.5f ),
+		Enjon::Vec3( 0.5f, 0.5f, -0.5f ),
+		Enjon::Vec3( 0.5f, -0.5f, -0.5f ),
+		Enjon::Vec3( -0.5f, -0.5f, -0.5f ) 
+	};
+
+	// Define object transform
+	Enjon::Vec3 ObjectPosition = Enjon::Vec3( -25.0f, 1.0f, 5.0f );
+	Enjon::Quaternion ObjectRotation;
+									   
+	Enjon::Vec3 ObjectScale( 3.0f, 1.0f, 1.0f ); 
+
+	// Find View matrix
+	Enjon::Vec3 CamPosition = Enjon::Vec3( -27.466789f, 2.70275f, 8.79574f );
+	Enjon::Quaternion CamRotation = Enjon::Quaternion( -0.194232f, -0.243939f, -0.049514f, 0.948411f );
+	Enjon::Vec3 CamForward = CamRotation * Enjon::Vec3( 0.0f, 0.0f, -1.0f );
+	Enjon::Vec3 CamUp = CamRotation * Enjon::Vec3( 0.0f, 1.0f, 0.0f );
+	Enjon::Mat4 ViewMatrix = Enjon::Mat4::LookAt( CamPosition, CamPosition + CamForward, CamUp ); 
+
+	// Find perspective matrix
+	f32 FOV = 60.0f;
+	f32 Near = 0.01f;
+	f32 Far = 1000.0f;
+	f32 SW = 1400.0f;
+	f32 SH = 900.0f;
+	f32 AspectRatio = 1.837563f; 
+	Enjon::Mat4 ProjectionMatrix = Enjon::Mat4::Perspective( FOV, AspectRatio, Near, Far );
+
+
+	// Calculate model matrix
+	Enjon::Mat4 ModelMatrix = Enjon::Mat4::Identity( );
+	ModelMatrix *= Enjon::Mat4::Translate( ObjectPosition );
+	ModelMatrix *= Enjon::QuaternionToMat4( ObjectRotation );
+	ModelMatrix *= Enjon::Mat4::Scale( ObjectScale );
+
+	Enjon::String output = "";
+
+	// Calculate biased projected position
+	for ( usize i = 0; i < 8; ++i  )
+	{
+		Enjon::Vec4 ProjectedPositionBiased = ProjectionMatrix * ViewMatrix * ModelMatrix * Enjon::Vec4( Vertices[i], 1.0f ); 
+
+		// Divide out the bias to get corrected projected position
+		Enjon::Vec3 NDC = ( ProjectedPositionBiased / ProjectedPositionBiased.w ).XYZ( );
+
+		Enjon::Vec2 WindowCoords = Enjon::Vec2( ( NDC.x + 1.0f ) * ( SW / 2.0f ), ( NDC.y + 1.0f ) * ( SH / 2.0f ) );
+
+		std::stringstream ss;
+		Enjon::Vec2 coords = WindowCoords / Enjon::Vec2( SW, SH );
+		ss << "vert_ " << i << " = Math.Vec2(" << coords.x << ", " << 1.0 - coords.y << " )" << "\n";
+		output += ss.str( ); 
+	}
+
+	std::ofstream outFile( "E:/Documents/School/Graphics/Assignment_1/Jackson_01/output.txt" );
+	if ( outFile )
+	{
+		outFile.write( output.c_str( ), output.length( ) );
+		outFile.close( );
+	} 
+	Enjon::Quaternion q = Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::YAxis( ) ) *
+						  Enjon::Quaternion::AngleAxis( Enjon::ToRadians( -36.0f ), Enjon::Vec3::ZAxis( ) );
+	Enjon::Mat4 mat = Enjon::QuaternionToMat4( q );
+	std::cout << mat << "\n";
+
+
+	{
+		Enjon::Vec2 numbers[ ] = {
+			Enjon::Vec2( .4016187639621184, 0.4485978731822172 ),
+			Enjon::Vec2( 0.6818915804271153, 0.3622686499035348 ),
+			Enjon::Vec2( 0.6683032288439311, 0.5233702444624347 ),
+			Enjon::Vec2( 0.4113190311141083, 0.6554002622737832 ),
+			Enjon::Vec2( 0.3677100875763688, 0.3897306382940081 ),
+			Enjon::Vec2( 0.6162426043508087, 0.329379447817739 ),
+			Enjon::Vec2( 0.6086891976986508, 0.4712739931592119 ),
+			Enjon::Vec2( 0.3785668792045406, 0.5663520525797013 )
+		};
+
+		Enjon::Vec2 screenDims = Enjon::Vec2( 640, 480 );
+
+		for ( usize i = 0; i < 8; ++i ) 
+		{
+			auto res = numbers[ i ] * screenDims;
+			std::cout << res << "\n";
+		}
+	} 
+
+
+	{
+		auto q = Enjon::QuaternionToMat4( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 90.0f ), Enjon::Vec3::ZAxis( ) ) );
+		std::cout << q << '\n';
+		//Enjon::Mat4 model = Enjon::Mat4::Identity( );
+		//model *= Enjon::Mat4::Translate( Enjon::Vec3( 0.0f ) );
+		//model *= Enjon::QuaternionToMat4( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 90.0f ), Enjon::Vec3::ZAxis( ) ) );
+		//model *= Enjon::Mat4::Scale( Enjon::Vec3( 1.0f ) );
+		//std::cout << model << '\n';
+	} 
+
+	{
+		Enjon::Vec3 p( 5, 2, -3 );
+		std::cout << Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 90.0f ), Enjon::Vec3::ZAxis( ) ) * p << "\n";
+	}
+
+	TestObjectSerialize( );
 	
 	return Enjon::Result::SUCCESS; 
-}
+} 
 
 //-------------------------------------------------------------
 Enjon::Result Game::Update(Enjon::f32 dt)

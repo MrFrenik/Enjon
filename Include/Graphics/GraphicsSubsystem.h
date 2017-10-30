@@ -6,7 +6,7 @@
 #include "Graphics/Window.h"
 #include "Graphics/Scene.h"
 #include "Graphics/Camera.h" 
-#include "Subsystem.h"
+#include "Subsystem.h" 
 
 namespace Enjon 
 { 
@@ -277,7 +277,7 @@ namespace Enjon
 
 			Enjon::Mat4* mModelMatricies = nullptr;
 			Enjon::Renderable* mInstancedRenderable = nullptr;
-			u32 mInstancedAmount = 250000;
+			u32 mInstancedAmount = 100000;
 			u32 mInstancedVBO; 
 	};
 }

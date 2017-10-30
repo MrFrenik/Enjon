@@ -87,7 +87,6 @@ namespace Enjon
 		return C;
 	}
 
-
 	Quaternion Quaternion::operator/(const f32& V) const
 	{
 		Quaternion C = *this;

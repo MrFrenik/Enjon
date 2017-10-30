@@ -55,6 +55,7 @@ namespace Enjon {
 		void SetPosition(Vec3& position);
 		Vec3 GetPosition() { return Transform.GetPosition(); }
 		
+		void SetRotation( const Quaternion& q );
 		Quaternion& GetRotation() { return Transform.Rotation; }
 
 		// Member variables

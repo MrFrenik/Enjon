@@ -14,20 +14,20 @@
 #include <functional>
 
 #define ENJON_CLASS_BODY( type )																	\
-	friend Object;																					\
+	friend Enjon::Object;																			\
 	public:																							\
 		virtual u32 GetTypeId() const override { return Enjon::Object::GetTypeId< type >(); }		\
-		virtual const char* GetTypeName() const override { return #type; }							\
-		virtual const MetaClass* Class( ) override\
+		virtual const char* GetClassName() const override { return #type; }							\
+		virtual const Enjon::MetaClass* Class( ) override\
 		{\
-			MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance()->GetMetaClassRegistry( ) );\
-			const MetaClass* cls = mr->Get< type >( );\
+			Enjon::MetaClassRegistry* mr = const_cast< Enjon::MetaClassRegistry* >( Enjon::Engine::GetInstance()->GetMetaClassRegistry( ) );\
+			const Enjon::MetaClass* cls = mr->Get< type >( );\
 			if ( !cls )\
 			{\
 				cls = mr->RegisterMetaClass< type >( );\
 			}\
 			return cls;\
-		} 
+		}
 
 #define ENJON_ARRAY(...)
 #define ENJON_PROPERTY(...)
@@ -188,9 +188,23 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			MetaPropertyTraits GetTraits( ) const;
-			
+			MetaPropertyTraits GetTraits( ) const; 
 
+			/*
+			* @brief
+			*/
+			u32 GetOffset( )
+			{
+				return mOffset;
+			}
+
+			/*
+			* @brief
+			*/
+			u32 GetIndex( )
+			{
+				return mIndex;
+			}
 
 		protected:
 			MetaPropertyType mType;
@@ -200,12 +214,28 @@ namespace Enjon
 			MetaPropertyTraits mTraits;
 	};
 
+	template <typename T>
+	class MetaPropertyAssetHandle : public MetaProperty
+	{ 
+		public: 
+			MetaPropertyAssetHandle()
+			{
+				static_assert( std::is_base_of<Object, T>::value, "Invoke() - T must inherit from Object." );
+			}
+
+			MetaClass* GetClassOfTemplatedArgument()
+			{
+				return Object::GetClass<T>();	
+			}
+
+			T mClass;
+	};
+
 #define META_FUNCTION_IMPL( )\
 	friend MetaClass;\
 	friend Object;\
 	virtual void Base( ) override\
 	{\
-		\
 	} 
 
 	class MetaFunction
@@ -290,7 +320,7 @@ namespace Enjon
 		std::function< RetVal( T* ) > mFunc;
 	};
 
-	typedef std::vector< MetaProperty > PropertyTable;
+	typedef std::vector< MetaProperty* > PropertyTable;
 	typedef std::unordered_map< Enjon::String, MetaFunction* > FunctionTable;
 
 	class MetaClass
@@ -354,7 +384,7 @@ namespace Enjon
 			{
 				if ( PropertyExists( index ) )
 				{
-					return &mProperties.at( index );
+					return mProperties.at( index );
 				}
 
 				return nullptr;
@@ -362,7 +392,7 @@ namespace Enjon
 
 			bool HasProperty( const MetaProperty* prop )
 			{
-				return ( ( prop->mIndex < mPropertyCount ) && ( &mProperties.at( prop->mIndex ) == prop ) ); 
+				return ( ( prop->mIndex < mPropertyCount ) && ( mProperties.at( prop->mIndex ) == prop ) ); 
 			}
 
 			template < typename T >
@@ -484,6 +514,7 @@ namespace Enjon
 
 		private:
 			std::unordered_map< u32, MetaClass* > mRegistry; 
+			std::unordered_map< String, MetaClass* > mRegistryByClassName;
 	};
 
 	// Max allowed type id by engine
@@ -519,7 +550,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			virtual const char* GetTypeName( ) const = 0;
+			virtual const char* GetClassName( ) const = 0; 
 
 			/**
 			*@brief
@@ -540,7 +571,7 @@ namespace Enjon
 			{
 				static_assert( std::is_base_of<Object, T>::value, "Object::GetTypeId() - T must inherit from Enjon Object." );
 
-				static u32 typeId { GetUniqueTypeId( ) };
+				static u32 typeId { GetUniqueTypeId( ) }; 
 				return typeId;
 			}
 
@@ -558,7 +589,7 @@ namespace Enjon
 
 			template <typename T>
 			static const MetaClass* GetClass( )
-			{
+			{ 
 				MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance()->GetMetaClassRegistry( ) );
 				const MetaClass* cls = mr->Get< T >( );
 				if ( !cls )

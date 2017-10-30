@@ -81,7 +81,7 @@ namespace Enjon
 		return mId;
 	} 
 
-	//=================================================
+	//================================================= 
 			
 	Enjon::Result Texture::CacheFile( Enjon::ByteBuffer& buffer )
 	{

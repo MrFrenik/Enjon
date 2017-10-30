@@ -3,6 +3,7 @@
  
 #include "Serialize/ByteBuffer.h"
 #include "Utils/FileUtils.h"
+#include "Serialize/UUID.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -56,6 +57,47 @@ namespace Enjon
 		mReadPosition += size;
 
 		return val;
+	} 
+
+	//========================================================================
+
+	template <>
+	String ByteBuffer::Read< String >( )
+	{
+		// Get size of T from buffer
+		usize size = Read< usize >( );
+
+		// String to fill out
+		String val = "";
+
+		// Get characters for string
+		for ( usize i = 0; i < size; ++i ) 
+		{
+			// Get character
+			char c = *( char* )( mBuffer + mReadPosition );
+
+			// Append character to string
+			val.push_back( c );
+			
+			// Increment read position
+			mReadPosition += 1;
+		} 
+
+		return val;
+	}
+
+	//========================================================================
+
+	template <>
+	UUID ByteBuffer::Read< UUID >( )
+	{
+		// Get hash string for uuid
+		String uuidHash = Read< String >( );
+
+		// Construct new uuid
+		UUID uuid( uuidHash );
+
+		return uuid;
 	}
 
 	//========================================================================
@@ -80,6 +122,33 @@ namespace Enjon
 		// Increment position by size of val
 		mWritePosition += size;
 		mSize += size;
+	}
+
+	template<>
+	void ByteBuffer::Write< String >( const String& val )
+	{
+		// Get size of val
+		usize size = val.length( );
+
+		if ( mWritePosition + size + sizeof( usize ) >= mCapacity )
+		{
+			mCapacity *= 2;
+			Resize( mCapacity );
+		}
+
+		// Write length of string
+		Write( size );
+
+		// Write characters of string
+		for ( auto& c : val ) 
+		{ 
+			// Write to buffer
+			*( char* )( mBuffer + mWritePosition ) = c;
+
+			// Increment by 1
+			mWritePosition += 1;
+			mSize += 1;
+		} 
 	}
 
 	//========================================================================
@@ -154,5 +223,6 @@ namespace Enjon
 	BYTE_BUFFER_RW( u64 )
 	BYTE_BUFFER_RW( f64 )
 	BYTE_BUFFER_RW( usize )
+	BYTE_BUFFER_RW( UUID )
 }
 

@@ -8,10 +8,10 @@
 #include "System/Types.h"
 #include "Asset/Asset.h"
 #include "Base/Object.h"
+#include "Graphics/Mesh.h"
 
 namespace Enjon 
 { 
-	class Mesh; 			
 	class Scene;
 	class Shader;
 	class Material;

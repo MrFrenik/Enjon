@@ -41,6 +41,11 @@ namespace Enjon
 			*/
 			static UUID GenerateUUID( );
 
+			/*
+			* @brief
+			*/
+			static UUID Invalid( );
+
 		private: 
 			Guid mID;
 	}; 

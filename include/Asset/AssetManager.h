@@ -114,6 +114,14 @@ namespace Enjon
 				return handle;
 			} 
 
+			/**
+			*@brief
+			*/
+			Asset* GetAsset( const MetaClass* cls, const UUID& id );
+
+			/**
+			*@brief
+			*/
 			const std::unordered_map< Enjon::String, Asset* >* GetAssets( const Enjon::MetaClass* cls );
 
 			/**
@@ -140,6 +148,11 @@ namespace Enjon
 
 				return nullptr;
 			} 
+
+			/**
+			*@brief Gets loaded asset in database from name
+			*/
+			Asset* GetDefaultAsset( const Enjon::MetaClass* cls );
 			
 			/**
 			*@brief Gets loaded asset in database from name

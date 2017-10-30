@@ -53,6 +53,25 @@ namespace Enjon {
 		}
 		memcpy(elements, data, 4 * 4 * sizeof(f32));
 
+		//Vec4 bt_0 = Vec4( columns[ 0 ].x, columns[ 1 ].x, columns[ 2 ].x, columns[ 3 ].x );
+		//Vec4 bt_1 = Vec4( columns[ 0 ].y, columns[ 1 ].y, columns[ 2 ].y, columns[ 3 ].y );
+		//Vec4 bt_2 = Vec4( columns[ 0 ].z, columns[ 1 ].z, columns[ 2 ].z, columns[ 3 ].z );
+		//Vec4 bt_3 = Vec4( columns[ 0 ].w, columns[ 1 ].w, columns[ 2 ].w, columns[ 3 ].w ); 
+
+		//Mat4 ret( other );
+
+		//for ( usize i = 0; i < 4; ++i )
+		//{
+		//	ret.columns[ i ] = Vec4(
+		//		ret.columns[ i ].Dot( bt_0 ),
+		//		ret.columns[ i ].Dot( bt_1 ), 
+		//		ret.columns[ i ].Dot(bt_2 ),
+		//		ret.columns[i].Dot(bt_3 )
+		//	);
+		//}
+
+		//*this = Mat4( ret );
+
 		return *this;
 	}
 	

@@ -36,6 +36,21 @@ namespace Enjon
 	} 
 	
 	//=================================================================
+
+	/**
+	* @brief 
+	*/
+	Asset* AssetLoader::GetAsset( UUID id )
+	{
+		if ( Exists( id ) )
+		{
+			return mAssetsByUUID[ id.ToString() ];
+		}
+
+		return nullptr;
+	}
+	
+	//=================================================================
 			
 	bool AssetLoader::Exists( const String& name )
 	{

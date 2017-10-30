@@ -52,6 +52,11 @@ namespace Enjon {
 		Transform.Rotation = Enjon::Mat4ToQuaternion(LA);
 	}
 
+	void Camera::SetRotation( const Quaternion& q )
+	{
+		Transform.Rotation = q;
+	}
+
 	void Camera::OffsetOrientation(const f32& Yaw, const f32& Pitch)
 	{
 		Quaternion X = Quaternion::AngleAxis(Yaw, 	Vec3(0, 1, 0)); 	// Absolute Up
@@ -131,13 +136,13 @@ namespace Enjon {
 
 	Mat4 Camera::GetView() const
 	{ 
-		Mat4 scale = Mat4::Scale(Vec3(1.0f, 1.0f, 1.0f) / Transform.GetScale());
-		Mat4 rotation = QuaternionToMat4(Transform.Rotation);
-		Mat4 translate = Mat4::Translate(Transform.Position * -1.0f); 
+		//Mat4 scale = Mat4::Scale(Vec3(1.0f, 1.0f, 1.0f) / Transform.GetScale());
+		//Mat4 rotation = QuaternionToMat4(Transform.Rotation);
+		//Mat4 translate = Mat4::Translate(Transform.Position * -1.0f); 
 
-		//return Mat4::LookAt( Transform.Position, Transform.Position + Forward( ), Up( ) );
+		return Mat4::LookAt( Transform.Position, Transform.Position + Forward( ), Up( ) );
 
-		return (scale * rotation * translate);
+		//return (scale * rotation * translate);
 	}
 }
 

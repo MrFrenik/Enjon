@@ -44,6 +44,7 @@ mPropertyTypeStringMap[ PropertyType::prop ] = #prop;
 void Property::InitPropertyMap( )
 {
 	STRING_TO_PROP( "bool", Bool )
+	STRING_TO_PROP( "b8", Bool )
 	STRING_TO_PROP( "float", F32 )
 	STRING_TO_PROP( "f32", F32 )
 	STRING_TO_PROP( "f64", F64 )
@@ -789,7 +790,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 			if ( !properties.empty( ) )
 			{
 				code += OutputTabbedLine( "cls->mProperties.resize( cls->mPropertyCount );" );
-				code += OutputTabbedLine( "Enjon::MetaProperty props[] = " );
+				code += OutputTabbedLine( "Enjon::MetaProperty* props[] = " );
 				code += OutputTabbedLine( "{" );
 
 				for ( auto& prop : properties )
@@ -819,11 +820,12 @@ void Introspection::Compile( const ReflectionConfig& config )
 					std::string endChar = index <= properties.size( ) - 1 ? "," : "";
 
 					// Output line
-					code += OutputTabbedLine( "\tEnjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" + pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " )" + endChar ); 
+					code += OutputTabbedLine( "\tnew Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" + pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " )" + endChar );
 				} 
 
 				// End property table
 				code += OutputTabbedLine( "};\n" );
+				code += OutputLine( "\n" );
 	 
 				// Assign properties
 				code += OutputTabbedLine( "// Assign properties to class" ); 
@@ -869,6 +871,25 @@ void Introspection::Compile( const ReflectionConfig& config )
 			// Return statement
 			code += OutputLine( "\n\treturn cls;" );
 			code += OutputLine( "}\n" ); 
+
+			/*
+				// Fill out object
+				void Construct( MetaClass* cls, Object* object )
+				{
+					MetaClass* cls = const_cast< MetaClass* > ( object->Class( ) );
+					PropertyTable& pt = cls->GetProperties( ); 
+
+					// "Construct" object with default values
+					for ( auto& prop : pt ) 
+				}
+
+				Has to return an object of a specific type...
+
+			*/
+
+
+			// Construct function
+			code += OutputLine( "" );
 
 			// Write to file
 			f.write( code.c_str( ), code.length( ) );

@@ -204,7 +204,7 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			u32 mID = MAX_ENTITIES;	
 
-			b32 mWorldTransformDirty; 					// NOTE(): Necessary struct padding for alignment. Not too happy about it.
+			u32 mWorldTransformDirty : 1; 					
 
 			ENJON_PROPERTY( )
 			EntityHandle mParent;

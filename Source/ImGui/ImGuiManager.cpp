@@ -369,14 +369,14 @@ namespace Enjon
 
 		Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( object->Class( ) );
 
-		ImGui::Text( ( "Type: " + std::string(object->GetTypeName( ) ) ).c_str( ) );
+		ImGui::Text( ( "Type: " + std::string(object->GetClassName( ) ) ).c_str( ) );
 
 		Enjon::PropertyTable& pt = cls->GetProperties( );
 		for ( auto& prop : pt )
 		{
-			Enjon::String name = prop.GetName( );
+			Enjon::String name = prop->GetName( );
 
-			switch ( prop.GetType( ) )
+			switch ( prop->GetType( ) )
 			{
 				case Enjon::MetaPropertyType::U32: 
 				case Enjon::MetaPropertyType::S32: 
@@ -388,55 +388,55 @@ namespace Enjon
 				case Enjon::MetaPropertyType::String:
 				case Enjon::MetaPropertyType::UUID:
 				{
-					DebugDumpProperty( object, &prop );
+					DebugDumpProperty( object, prop );
 				} break; 
 				
 				case Enjon::MetaPropertyType::Transform:
 				{
 					Enjon::Transform val;
-					cls->GetValue( object, &prop, &val );
+					cls->GetValue( object, prop, &val );
 					Enjon::Vec3 pos = val.GetPosition( );
 					Enjon::Quaternion rot = val.GetRotation( );
 					Enjon::Vec3 scl = val.GetScale( );
 
-					if ( ImGui::TreeNode( Enjon::String( prop.GetName( ) + "##" + std::to_string( (u32)object ) ).c_str( ) ) )
+					if ( ImGui::TreeNode( Enjon::String( prop->GetName( ) + "##" + std::to_string( (u32)object ) ).c_str( ) ) )
 					{ 
 						// Position
 						{
 							f32 col[ 3 ] = { pos.x, pos.y, pos.z };
-							if ( ImGui::InputFloat3( Enjon::String( "Position##" + prop.GetName() ).c_str( ), col ) )
+							if ( ImGui::InputFloat3( Enjon::String( "Position##" + prop->GetName() ).c_str( ), col ) )
 							{
 								pos.x = col[ 0 ];
 								pos.y = col[ 1 ];
 								pos.z = col[ 2 ]; 
 								val.SetPosition( pos );
-								cls->SetValue( object, &prop, val );
+								cls->SetValue( object, prop, val );
 							} 
 						}
 						
 						// Rotation
 						{
 							f32 col[ 4 ] = { rot.x, rot.y, rot.z, rot.w };
-							if ( ImGui::InputFloat4( Enjon::String( "Rotation##" + prop.GetName() ).c_str( ), col ) )
+							if ( ImGui::InputFloat4( Enjon::String( "Rotation##" + prop->GetName() ).c_str( ), col ) )
 							{
 								rot.x = col[ 0 ];
 								rot.y = col[ 1 ];
 								rot.z = col[ 2 ];
 								val.SetRotation( rot );
-								cls->SetValue( object, &prop, val );
+								cls->SetValue( object, prop, val );
 							} 
 						}
 						
 						// Scale
 						{
 							f32 col[ 3 ] = { scl.x, scl.y, scl.z };
-							if ( ImGui::InputFloat3( Enjon::String( "Scale##" + prop.GetName() ).c_str( ), col ) )
+							if ( ImGui::InputFloat3( Enjon::String( "Scale##" + prop->GetName() ).c_str( ), col ) )
 							{
 								scl.x = col[ 0 ];
 								scl.y = col[ 1 ];
 								scl.z = col[ 2 ];
 								val.SetScale( scl );
-								cls->SetValue( object, &prop, val );
+								cls->SetValue( object, prop, val );
 							} 
 						} 
 
@@ -448,7 +448,7 @@ namespace Enjon
 				case Enjon::MetaPropertyType::AssetHandle:
 				{
 					Enjon::AssetHandle<Enjon::Asset> val;
-					cls->GetValue( object, &prop, &val ); 
+					cls->GetValue( object, prop, &val ); 
 					if ( val )
 					{
 						Enjon::MetaClass* assetCls = const_cast< Enjon::MetaClass* >( val.GetAssetClass( ) );
@@ -456,18 +456,18 @@ namespace Enjon
 						{ 
 							Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 							auto assets = am->GetAssets( assetCls ); 
-							if ( ImGui::TreeNode( prop.GetName( ).c_str( ) ) )
+							if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
 							{
 								if ( assets )
 								{
-									ImGui::ListBoxHeader( Enjon::String( "##" + prop.GetName( ) ).c_str( ) );
+									ImGui::ListBoxHeader( Enjon::String( "##" + prop->GetName( ) ).c_str( ) );
 									{
 										for ( auto& a : *assets )
 										{
 											if ( ImGui::Selectable( a.second->GetName( ).c_str( ) ) )
 											{ 
 												val.Set( a.second );
-												cls->SetValue( object, &prop, val );
+												cls->SetValue( object, prop, val );
 											}
 										}
 									} 
@@ -483,10 +483,10 @@ namespace Enjon
 
 				case Enjon::MetaPropertyType::Object:
 				{
-					Enjon::Object* obj = cls->GetValueAs< Enjon::Object >( object, &prop );
+					Enjon::Object* obj = cls->GetValueAs< Enjon::Object >( object, prop );
 					if ( obj )
 					{
-						if ( ImGui::TreeNode( prop.GetName( ).c_str( ) ) )
+						if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
 						{
 							ImGuiManager::DebugDumpObject( obj ); 
 							ImGui::TreePop( ); 
@@ -498,10 +498,10 @@ namespace Enjon
 				case Enjon::MetaPropertyType::EntityHandle:
 				{
 					Enjon::EntityHandle handle;
-					cls->GetValue( object, &prop, &handle );
+					cls->GetValue( object, prop, &handle );
 					if ( handle.Get( ) )
 					{
-						if ( ImGui::TreeNode( prop.GetName( ).c_str( ) ) )
+						if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
 						{
 							ImGuiManager::DebugDumpObject( handle.Get( ) );
 							ImGui::TreePop( ); 

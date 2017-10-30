@@ -80,6 +80,11 @@ namespace Enjon
 
 				return handle; 
 			} 
+
+			/**
+			* @brief 
+			*/
+			Asset* GetAsset( UUID id );
 			
 			/**
 			* @brief Templated argument to get asset of specific type 

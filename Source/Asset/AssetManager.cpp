@@ -76,7 +76,7 @@ namespace Enjon
 		mFileExtensionMap[ "obj" ]	= GetAssetTypeId< Enjon::Mesh >( );
 		mFileExtensionMap[ "ttf" ]	= GetAssetTypeId< Enjon::UIFont >( );
 		mFileExtensionMap[ "otf" ]	= GetAssetTypeId< Enjon::UIFont >( ); 
-		mFileExtensionMap[ "sg" ]	= GetAssetTypeId< Enjon::ShaderGraph >( );
+		mFileExtensionMap[ "sg" ]	= GetAssetTypeId< Enjon::ShaderGraph >( ); 
 	}
 	
 	//============================================================================================ 
@@ -160,6 +160,39 @@ namespace Enjon
 	Enjon::String AssetManager::GetName( )
 	{
 		return mName;
+	} 
+
+	//============================================================================================ 
+
+	Asset* AssetManager::GetDefaultAsset( const Enjon::MetaClass* cls )
+	{
+		// Make sure class is valid
+		assert( cls != nullptr );
+
+		// Get type id of class
+		u32 idx = cls->GetTypeId( ); 
+
+		if ( Exists( idx ) )
+		{
+			return mLoaders[ idx ]->GetDefault( );
+		}
+
+		return nullptr;
+	}
+	
+	//============================================================================================ 
+			
+	Asset* AssetManager::GetAsset( const MetaClass* cls, const UUID& id )
+	{
+		// Get type id of class
+		u32 idx = cls->GetTypeId( );
+
+		if ( Exists( idx ) )
+		{
+			return mLoaders[ idx ]->GetAsset( id );
+		}
+
+		return nullptr;
 	}
 	
 	//============================================================================================ 

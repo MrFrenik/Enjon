@@ -88,6 +88,7 @@ namespace Enjon
 
 			TextureFileExtension mFileExtension;
 	}; 
+
 }
 
 #endif

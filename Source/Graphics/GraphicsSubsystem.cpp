@@ -44,8 +44,7 @@ std::vector < Enjon::Renderable > mRenderables;
 Enjon::AssetHandle< Enjon::Texture > mBRDFHandle;
 Enjon::AssetHandle< Enjon::ShaderGraph > mTestShaderGraph;
 Enjon::Material* mMaterial = nullptr;
-bool brdfset = false;
-
+bool brdfset = false; 
 bool useOther = false; 
 
 namespace Enjon 
@@ -103,7 +102,9 @@ namespace Enjon
 		mSceneCamera.SetNearFar( 0.01f, 1000.0f );
 		mSceneCamera.SetProjection(ProjectionType::Perspective);
 		mSceneCamera.SetPosition(Vec3(0, 5, 10));
-		mSceneCamera.LookAt(Vec3(0, 0, 0));
+		//mSceneCamera.LookAt(Vec3(0, 0, 0));
+		mSceneCamera.SetRotation( Quaternion::AngleAxis( 30.0f, Vec3::XAxis( ) ) *
+								Quaternion::AngleAxis( 45.0f, Vec3::ZAxis( ) ) );
 
 		// Initialize frame buffers
 		InitializeFrameBuffers();
@@ -419,9 +420,10 @@ namespace Enjon
 					
 					// Set renderable material
 					renderable.SetMaterial( mMaterial );
-					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.bunny" ) );
-					//renderable.SetScale( 0.025f );
+					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" ) );
+					renderable.SetScale( Enjon::Vec3( 2.0f, 1.0f, 1.0f ) );
 					renderable.SetPosition( Enjon::Vec3( j, 1.0f, i ) + Enjon::Vec3( -25, 0, 5 ) );
+					//renderable.SetRotation( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::YAxis( ) ) );
 
 					mRenderables.push_back( renderable ); 
 				}
@@ -467,7 +469,7 @@ namespace Enjon
 
 		// Get a mesh and make it instanced... or something
 		auto db = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "isoarpg.models.quad" );
+		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" );
 		if ( mesh )
 		{
 			// Set bunny mesh for later use
@@ -520,9 +522,9 @@ namespace Enjon
 			Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 			if ( am )
 			{
-				mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.unreal_shaderball" ) ); 
-				mRenderable.SetScale( Vec3( 1.0f ) );
-				mRenderable.SetPosition( Vec3( 0, 10, 0 ) );
+				//mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.unreal_shaderball" ) ); 
+				//mRenderable.SetScale( Vec3( 1.0f ) );
+				//mRenderable.SetPosition( Vec3( 0, 10, 0 ) );
 			}
 			set = true;
 
