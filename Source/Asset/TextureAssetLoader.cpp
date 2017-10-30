@@ -42,11 +42,13 @@ namespace Enjon
 		// Fields to load and store
 		s32 width, height, nComps, len; 
 
+		void* textureData = nullptr;
+
 		// Load HDR format
 		if ( fileExtension.compare( "hdr" ) == 0 )
 		{
 			stbi_set_flip_vertically_on_load( true );
-			f32* data = stbi_loadf( filePath.c_str( ), &width, &height, &nComps, 0 );
+			f32* data = stbi_loadf( filePath.c_str( ), &width, &height, &nComps, 0 ); 
 
 			glGenTextures( 1, &tex->mId );
 			glBindTexture( GL_TEXTURE_2D, tex->mId );
@@ -68,9 +70,10 @@ namespace Enjon
 			if ( genMips )
 			{
 				glGenerateMipmap( GL_TEXTURE_2D );
-			}
+			} 
 
-			stbi_image_free( data ); 
+			// Free image data once done
+			stbi_image_free( data );
 		}
 
 		// Otherwise load standard format
@@ -79,6 +82,7 @@ namespace Enjon
 			// Load texture data
 			stbi_set_flip_vertically_on_load( false );
 			u8* data = stbi_load( filePath.c_str( ), &width, &height, &nComps, STBI_rgb_alpha );
+			textureData = (u8*)data;
 
 			// Generate texture
 			glGenTextures( 1, &( tex->mId ) );
@@ -102,9 +106,6 @@ namespace Enjon
 			}
 
 			glBindTexture( GL_TEXTURE_2D, 0 ); 
-		
-			// No longer need data, so free
-			stbi_image_free( data );
 		} 
 
 		// Set texture attributes
@@ -116,11 +117,19 @@ namespace Enjon
 
 #if CACHING 
 		//Cache image data to file
-		auto saveData = stbi_write_png_to_mem( data, 0, width, height, 4, &len );
-		CacheTextureData( saveData, len, tex );
-		stbi_image_free( saveData );
-#endif 
+		if ( textureData != nullptr )
+		{
+			auto saveData = stbi_write_png_to_mem( (u8*)textureData, 0, width, height, 4, &len );
+			TextureAssetLoader::CacheTextureData( saveData, len, tex );
+			stbi_image_free( saveData ); 
 
+			// Free image data
+			stbi_image_free( (u8*)textureData );
+		}
+#else
+		stbi_image_free( textureData );
+#endif 
+ 
 		// Store file extension type of texture
 		tex->mFileExtension = Texture::GetFileExtensionType( fileExtension ); 
 
@@ -203,10 +212,10 @@ namespace Enjon
 		Enjon::Engine* engine = Enjon::Engine::GetInstance( );
 
 		// Get asset manager from subsystem catalog
-		const Enjon::AssetManager* am = engine->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+		Enjon::AssetManager* am = engine->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 
 		// Get project directory
-		const Enjon::String& cachePath =  am->GetCachedAssetsPath( ); 
+		String outputPath = am->GetAssetsPath( ) + "/Cache/" + texture->mUUID.ToString() + ".easset";
 		
 		// Byte buffer to write to
 		Enjon::ByteBuffer writeBuffer;
@@ -222,7 +231,7 @@ namespace Enjon
 		} 
 
 		// Write out to file
-		writeBuffer.WriteToFile( cachePath + texture->mUUID.ToString( ) ); 
+		writeBuffer.WriteToFile( outputPath ); 
 
 		return Enjon::Result::SUCCESS;
 	}

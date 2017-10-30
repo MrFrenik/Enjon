@@ -86,6 +86,7 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			u32 mHeight; 
 
+			// Needs to be enum property
 			TextureFileExtension mFileExtension;
 	}; 
 

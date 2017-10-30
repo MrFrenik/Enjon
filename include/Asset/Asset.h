@@ -103,28 +103,6 @@ namespace Enjon
 		private:
 	};
 
-	class AssetHandleBase
-	{
-		public:
-			AssetHandleBase( )
-			{ 
-			}
-
-			~AssetHandleBase( )
-			{ 
-			}
-
-			virtual const MetaClass* GetAssetClass( )
-			{
-				return nullptr;
-			}
-
-			virtual Result Set( Asset* asset )
-			{ 
-				return Result::SUCCESS;
-			}
-	};
-	
 	template <typename T> 
 	class AssetHandle
 	{
@@ -188,12 +166,7 @@ namespace Enjon
 			* @brief
 			*/
 			const MetaClass* GetAssetClass( ) 
-			{
-				if ( mAsset )
-				{
-					return mAsset->Class( );
-				}
-
+			{ 
 				return Object::GetClass<T>( );
 			}
 			

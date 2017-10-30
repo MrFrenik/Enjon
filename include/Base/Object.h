@@ -108,6 +108,7 @@ namespace Enjon
 	class MetaClass;
 	class Object;
 	
+	// Don't really like this, but, ya know... wha ya gon' do?
 	struct MetaPropertyTraits
 	{
 		MetaPropertyTraits( bool isEditable = false, f32 uiMin = 0.0f, f32 uiMax = 0.0f )
@@ -214,16 +215,28 @@ namespace Enjon
 			MetaPropertyTraits mTraits;
 	};
 
+	class MetaPropertyTemplateBase : public MetaProperty
+	{
+		public:
+			virtual const MetaClass* GetClassOfTemplatedArgument( ) = 0;
+	};
+
 	template <typename T>
-	class MetaPropertyAssetHandle : public MetaProperty
+	class MetaPropertyAssetHandle : public MetaPropertyTemplateBase
 	{ 
 		public: 
-			MetaPropertyAssetHandle()
+			MetaPropertyAssetHandle( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits )
 			{
 				static_assert( std::is_base_of<Object, T>::value, "Invoke() - T must inherit from Object." );
+
+				mType = type;
+				mName = name;
+				mOffset = offset;
+				mIndex = propIndex;
+				mTraits = traits;
 			}
 
-			MetaClass* GetClassOfTemplatedArgument()
+			virtual const MetaClass* GetClassOfTemplatedArgument() override
 			{
 				return Object::GetClass<T>();	
 			}
@@ -380,6 +393,11 @@ namespace Enjon
 				return nullptr;
 			}
 
+			usize GetPropertyCount( )
+			{
+				return mPropertyCount;
+			}
+
 			const MetaProperty* GetProperty( const u32& index )
 			{
 				if ( PropertyExists( index ) )
@@ -420,7 +438,7 @@ namespace Enjon
 			template < typename T >
 			void SetValue( const Object* obj, const MetaProperty* prop, const T& value )
 			{
-				if ( HasProperty( prop ) && prop->IsEditable( ) )
+				if ( HasProperty( prop ) )
 				{
 					void* member_ptr = ( ( ( u8* )&( *obj ) + prop->mOffset ) );
 					*( T* )( member_ptr ) = value;
@@ -446,6 +464,11 @@ namespace Enjon
 				return mTypeId;
 			}
 
+			String GetName( )
+			{
+				return mName;
+			}
+
 			PropertyTable& GetProperties( ) { return mProperties; }
 
 		protected:
@@ -454,6 +477,7 @@ namespace Enjon
 			u32 mPropertyCount;
 			u32 mFunctionCount;
 			u32 mTypeId;
+			String mName;
 	};
 
 	class Object;
@@ -497,8 +521,13 @@ namespace Enjon
 				MetaClass* cls = Object::ConstructMetaClass< T >( );
 
 				mRegistry[ id ] = cls;
+				mRegistryByClassName[cls->GetName()] = cls;
 				return cls;
 			}
+
+			/*
+				MetaClass* cls = Object::ConstructMetaClassFromString(classString);
+			*/
 
 			template < typename T >
 			bool HasMetaClass( )
@@ -506,10 +535,25 @@ namespace Enjon
 				return ( mRegistry.find( Object::GetTypeId< T >( ) ) != mRegistry.end( ) );
 			}
 
+			bool HasMetaClass( const String& className )
+			{
+				return ( mRegistryByClassName.find( className ) != mRegistryByClassName.end( ) );
+			}
+
 			template < typename T >
 			const MetaClass* Get( )
 			{
 				return HasMetaClass< T >( ) ? mRegistry[ Object::GetTypeId< T >( ) ] : nullptr;
+			}
+
+			const MetaClass* GetClassByName( const String& className )
+			{
+				if ( HasMetaClass( className ) )
+				{
+					return mRegistryByClassName[className];
+				}
+
+				return nullptr;
 			}
 
 		private:
@@ -524,6 +568,7 @@ namespace Enjon
 	class Object
 	{
 		friend MetaClassRegistry;
+		friend Engine;
 
 		public:
 
@@ -599,6 +644,15 @@ namespace Enjon
 				return cls;
 			}
 
+			/**
+			*@brief Could return null!
+			*/
+			static const MetaClass* GetClass( const String& className )
+			{
+				MetaClassRegistry* mr = const_cast<MetaClassRegistry*> ( Engine::GetInstance( )->GetMetaClassRegistry( ) );
+				return mr->GetClassByName( className );
+			}
+
 		protected:
 
 			// Default to u32 max; If id set to this, then is not set by engine and invalid
@@ -607,6 +661,15 @@ namespace Enjon
 		protected:
 			template <typename T>
 			static MetaClass* ConstructMetaClass( );
+
+			static void BindMetaClasses( ); 
+
+			template <typename T>
+			static void RegisterMetaClass( )
+			{
+				MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance()->GetMetaClassRegistry( ) );
+				mr->RegisterMetaClass< T >( );
+			}
 
 		private:
 

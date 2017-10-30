@@ -244,6 +244,53 @@ const Class* Introspection::AddClass( const std::string& className )
 
 //=================================================================================================
 
+void Introspection::ParseClassTraits( Lexer* lexer, ClassMarkupTraits* traits )
+{
+	// ContinueToken curToken = lexer->GetCurrentToken( );
+	Token curToken = lexer->GetCurrentToken( );
+	while ( !curToken.IsType( TokenType::Token_CloseParen ) && !curToken.IsType( TokenType::Token_EndOfStream ) )
+	{ 
+		// If identifier then process trait
+		if ( curToken.IsType( TokenType::Token_Identifier ) )
+		{
+			// Namespace trait
+			if ( curToken.Equals( "Namespace" ) )
+			{
+				// Require an equal sign
+				if ( !lexer->RequireToken( TokenType::Token_Equal, true ) )
+				{
+					return;
+				}
+
+				// Require opening bracket for namespaces
+				if ( !lexer->RequireToken( TokenType::Token_OpenBracket, true ) )
+				{
+					return;
+				}
+
+				// Read all namespace identifiers until close bracket is hit	
+				Token token = lexer->GetNextToken( );
+				while ( !token.IsType( TokenType::Token_CloseBracket ) )
+				{
+					// If identifier, then place into namespaces
+					if ( token.IsType( TokenType::Token_Identifier ) )
+					{
+						traits->AddNamespaceQualifier( token.ToString( ) );
+					}
+
+					// Advance to next token
+					token = lexer->GetNextToken( );
+				}
+			} 
+		}
+
+		// Get next token after processing this one
+		curToken = lexer->GetNextToken( );
+	}
+}
+
+//=================================================================================================
+
 void Introspection::ParseClass( Lexer* lexer )
 {
 	// Grab next token and make sure is parentheses
@@ -253,12 +300,8 @@ void Introspection::ParseClass( Lexer* lexer )
 	}
 
 	// TODO(): Grab special class traits here
-
-	// Continue to close paren
-	if ( !lexer->ContinueTo( TokenType::Token_CloseParen ) )
-	{
-		return;
-	}
+	ClassMarkupTraits traits;
+	ParseClassTraits( lexer, &traits );
 
 	if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
 	{
@@ -288,6 +331,9 @@ void Introspection::ParseClass( Lexer* lexer )
 
 	// Set contents path of class ( include directory )
 	cls->mFilePath = lexer->GetContentsPath( );
+
+	// Add markup traits
+	cls->mTraits = traits;
 
 	// Find super class
 	if ( lexer->PeekAtNextToken( ).IsType( TokenType::Token_Colon ) )
@@ -549,6 +595,7 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 			}
 
 			// Store template type
+			bool consumedQualifiers = false;
 			std::string mTemplateType = lexer->GetCurrentToken( ).ToString( );
 			{
 				Token curToken = lexer->GetCurrentToken( );
@@ -566,6 +613,8 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 
 					// Peek at next token
 					nextToken = lexer->PeekAtNextToken( );
+
+					consumedQualifiers = true;
 				}
 			}
 
@@ -575,8 +624,15 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 				return;
 			} 
 
-			// Should have full templated name now, so append
-			prop.mTypeAppend += mTemplateType + lexer->GetCurrentToken( ).ToString( );
+			if ( consumedQualifiers )
+			{
+				// Should have full templated name now, so append
+				prop.mTypeAppend += mTemplateType + lexer->GetCurrentToken( ).ToString( ); 
+			}
+			else
+			{
+				prop.mTypeAppend += mTemplateType;
+			} 
 
 			// Grab closing token
 			if ( !lexer->RequireToken( TokenType::Token_GreaterThan, true ) )
@@ -773,11 +829,18 @@ void Introspection::Compile( const ReflectionConfig& config )
 					functions[ f.first ] = f.second;
 				}
 			}
+ 
+			std::string className = "";
+			for ( auto& ns : c.second.mTraits.mNamespaceQualifiers )
+			{
+				className += ns + "::";
+			}
+			className += c.second.mName;
 
 			// Construct meta class function
 			code += OutputLine( "// " + c.second.mName );
 			code += OutputLine( "template <>" );
-			code += OutputLine( "MetaClass* Object::ConstructMetaClass< " + c.second.mName + " >( )" );
+			code += OutputLine( "MetaClass* Object::ConstructMetaClass< " + className + " >( )" );
 			code += OutputLine( "{" );
 			code += OutputTabbedLine( "MetaClass* cls = new MetaClass( );\n" ); 
 
@@ -790,8 +853,10 @@ void Introspection::Compile( const ReflectionConfig& config )
 			if ( !properties.empty( ) )
 			{
 				code += OutputTabbedLine( "cls->mProperties.resize( cls->mPropertyCount );" );
-				code += OutputTabbedLine( "Enjon::MetaProperty* props[] = " );
-				code += OutputTabbedLine( "{" );
+				code += OutputTabbedLine( "std::vector<Enjon::MetaProperty*> props;" );
+				code += OutputTabbedLine( "props.resize(cls->mPropertyCount);" );
+				//code += OutputTabbedLine( "Enjon::MetaProperty* props = ( Enjon::MetaProperty* )malloc( sizeof( Enjon::MetaProperty ) * cls->mPropertyCount );" );
+				//code += OutputTabbedLine( "{" );
 
 				for ( auto& prop : properties )
 				{
@@ -811,7 +876,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 					std::string pn = prop.second.mName;
 
 					// Get class name
-					std::string cn = c.second.mName;
+					std::string cn = className;
 
 					// Get property index
 					std::string pi = std::to_string( index++ );
@@ -820,16 +885,30 @@ void Introspection::Compile( const ReflectionConfig& config )
 					std::string endChar = index <= properties.size( ) - 1 ? "," : "";
 
 					// Output line
-					code += OutputTabbedLine( "\tnew Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" + pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " )" + endChar );
+					//code += OutputTabbedLine( "\tnew Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" + pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " )" + endChar );
+
+					// If asset handle, need to convert property type
+					if ( metaProp == PropertyType::AssetHandle )
+					{ 
+						code += OutputTabbedLine( "props[ " + pi + " ] = new Enjon::MetaPropertyAssetHandle" + prop.second.mTypeAppend + "( MetaPropertyType::" + metaPropStr + ", \"" 
+														+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
+					}
+
+					else
+					{
+						code += OutputTabbedLine( "props[ " + pi + " ] = new Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" 
+														+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
+					}
 				} 
 
 				// End property table
-				code += OutputTabbedLine( "};\n" );
-				code += OutputLine( "\n" );
+				//code += OutputTabbedLine( "};\n" );
+				code += OutputLine( "" );
 	 
 				// Assign properties
 				code += OutputTabbedLine( "// Assign properties to class" ); 
-				code += OutputTabbedLine( "cls->mProperties = Enjon::PropertyTable( props, props + cls->mPropertyCount );" ); 
+				//code += OutputTabbedLine( "cls->mProperties = Enjon::PropertyTable( props, props + cls->mPropertyCount );" ); 
+				code += OutputTabbedLine( "cls->mProperties = props;" ); 
 			}
 
 			// Iterate through all functions and output code
@@ -849,7 +928,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 					std::string retType = func.second.mSignature.mRetType;
 
 					// Build template signature
-					std::string templateSignature = c.second.mName + ", " + retType ;
+					std::string templateSignature = className + ", " + retType ;
 
 					// Add parameter list to template signature
 					for ( auto& param : func.second.mSignature.mParameterList )
@@ -857,7 +936,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 						templateSignature += ", " + param;
 					}
 
-					code += OutputTabbedLine( "cls->mFunctions[ \"" + fn + "\" ] = new Enjon::MetaFunctionImpl< " + templateSignature + " >( &" + c.second.mName + "::" + fn + ", \"" + fn + "\" );" );
+					code += OutputTabbedLine( "cls->mFunctions[ \"" + fn + "\" ] = new Enjon::MetaFunctionImpl< " + templateSignature + " >( &" + className + "::" + fn + ", \"" + fn + "\" );" );
 				}
 
 			}
@@ -866,10 +945,13 @@ void Introspection::Compile( const ReflectionConfig& config )
 			code += OutputLine( "" );
 
 			// Set up typeid field
-			code += OutputTabbedLine( "cls->mTypeId = Enjon::Object::GetTypeId< " + c.second.mName + " >( );\n" );
+			code += OutputTabbedLine( "cls->mTypeId = Enjon::Object::GetTypeId< " + className +" >( );\n" );
+			
+			// Set up name field
+			code += OutputTabbedLine( "cls->mName = \"" + className + "\";\n" );
 
 			// Return statement
-			code += OutputLine( "\n\treturn cls;" );
+			code += OutputTabbedLine( "return cls;" );
 			code += OutputLine( "}\n" ); 
 
 			/*
@@ -952,6 +1034,17 @@ void Introspection::Link( const ReflectionConfig& config )
 		// Append contents
 		code += OutputLine( fileContents );
 	} 
+
+	// Output Binding Function
+	code += OutputLine( "// Binding function for Enjon::Object that is called at startup for reflection" );
+	code += OutputLine( "void Object::BindMetaClasses()" );
+	code += OutputLine( "{" );
+	for ( auto& c : mClasses )
+	{
+		std::string qualifiedName = c.second.GetQualifiedName( );
+		code += OutputTabbedLine( "Object::RegisterMetaClass< " + qualifiedName + " >();" ); 
+	}
+	code += OutputLine( "}" );
 
 	// Output linked code
 	if ( f )

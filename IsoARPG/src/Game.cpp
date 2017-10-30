@@ -53,21 +53,23 @@ void TestObjectSerialize( )
 	AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
 	ByteBuffer writeBuffer;
 	ByteBuffer readBuffer;
-	AnotherObject writeTestObject;
-	AnotherObject readTestObject;
-	EnjonObjectSerializer objectSerializer;
-
-	//MetaClass* assetCls = const_cast< MetaClass*>( writeTestObject.mTexture.GetAssetClass( ) );
+	TestNamespace::AnotherSpace::AnotherObject writeTestObject;
+	TestNamespace::AnotherSpace::AnotherObject readTestObject;
+	EnjonObjectSerializer objectSerializer; 
 
 	// Set value and texture
 	writeTestObject.mFloatValue = 1.0f;
 	writeTestObject.mUintValue = 3;
 	writeTestObject.mTexture = am->GetAsset< Texture >( "isoarpg.materials.scuffedplastic.albedo" );
+	writeTestObject.mName = "BobadeeboobopdeebopboodopbeeSquid";
+	writeTestObject.mIntValue = -23;
+
+	const MetaClass* textureCls = Enjon::Object::GetClass( "Texture" ); 
 
 	// Serialize test object
 	objectSerializer.Serialize( writeBuffer, &writeTestObject );
 
-	String outputPath = am->GetAssetsPath( ) + "/Cache/testCache";
+	String outputPath = am->GetAssetsPath( ) + "/Cache/testObject.easset";
 
 	// Write to file
 	writeBuffer.WriteToFile( outputPath );
@@ -75,10 +77,8 @@ void TestObjectSerialize( )
 	// Cool, now read back from file
 	readBuffer.ReadFromFile( outputPath );
 
-	//readTestObject.mTexture = AssetUtils::GetDefaultAsset( readTestObject.mTexture.GetAssetClass( ) );
-	
 	// Deserialize object
-	objectSerializer.Deserialize( readBuffer, &readTestObject ); 
+	objectSerializer.Deserialize( readBuffer, &readTestObject );
 
 	std::cout << "here\n";
 }
@@ -1139,7 +1139,6 @@ Enjon::Result Game::Initialize()
 			std::cout << res << "\n";
 		}
 	} 
-
 
 	{
 		auto q = Enjon::QuaternionToMat4( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 90.0f ), Enjon::Vec3::ZAxis( ) ) );

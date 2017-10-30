@@ -5,6 +5,7 @@
 #include "Application.h"
 #include "Graphics/GraphicsSubsystem.h"
 #include "Base/MetaClassRegistry.h"
+#include "Base/Object.h"
 #include "Asset/AssetManager.h"
 #include "IO/InputManager.h"
 #include "ImGui/ImGuiManager.h"
@@ -137,6 +138,9 @@ namespace Enjon
 
 		// Meta class registration
 		mMetaClassRegisty = new MetaClassRegistry( );
+
+		// Register all base object meta classes
+		Enjon::Object::BindMetaClasses( );
 
 		// Initialize application if one is registered
 		if ( mApp )

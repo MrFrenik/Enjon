@@ -371,9 +371,12 @@ namespace Enjon
 
 		ImGui::Text( ( "Type: " + std::string(object->GetClassName( ) ) ).c_str( ) );
 
-		Enjon::PropertyTable& pt = cls->GetProperties( );
-		for ( auto& prop : pt )
+		for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
 		{
+			// Grab property from class
+			MetaProperty* prop = const_cast< MetaProperty* >( cls ->GetProperty( i ) );
+
+			// Get property name
 			Enjon::String name = prop->GetName( );
 
 			switch ( prop->GetType( ) )
@@ -447,37 +450,40 @@ namespace Enjon
 
 				case Enjon::MetaPropertyType::AssetHandle:
 				{
-					Enjon::AssetHandle<Enjon::Asset> val;
-					cls->GetValue( object, prop, &val ); 
-					if ( val )
-					{
-						Enjon::MetaClass* assetCls = const_cast< Enjon::MetaClass* >( val.GetAssetClass( ) );
-						if ( assetCls )
-						{ 
-							Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-							auto assets = am->GetAssets( assetCls ); 
-							if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
+					// Property is of type MetaPropertyAssetHandle
+					MetaPropertyTemplateBase* base = static_cast<MetaPropertyTemplateBase*> ( prop );
+					const MetaClass* assetCls = const_cast<Enjon::MetaClass*>( base->GetClassOfTemplatedArgument( ) );
+
+					if ( assetCls )
+					{ 
+						Enjon::AssetHandle<Enjon::Asset> val; 
+						cls->GetValue( object, prop, &val );
+						Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+						auto assets = am->GetAssets( assetCls ); 
+						if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
+						{
+							if ( assets )
 							{
-								if ( assets )
+								ImGui::ListBoxHeader( Enjon::String( "##" + prop->GetName( ) ).c_str( ) );
 								{
-									ImGui::ListBoxHeader( Enjon::String( "##" + prop->GetName( ) ).c_str( ) );
+									for ( auto& a : *assets )
 									{
-										for ( auto& a : *assets )
-										{
-											if ( ImGui::Selectable( a.second->GetName( ).c_str( ) ) )
-											{ 
-												val.Set( a.second );
-												cls->SetValue( object, prop, val );
-											}
+										if ( ImGui::Selectable( a.second->GetName( ).c_str( ) ) )
+										{ 
+											val.Set( a.second );
+											cls->SetValue( object, prop, val );
 										}
-									} 
-									ImGui::ListBoxFooter( ); 
-								}
-								ImGuiManager::DebugDumpObject( val.Get( ) ); 
-								ImGui::TreePop( );
+									}
+								} 
+								ImGui::ListBoxFooter( ); 
 							}
-						} 
-					}
+							if ( val )
+							{
+								ImGuiManager::DebugDumpObject( val.Get( ) ); 
+							}
+							ImGui::TreePop( );
+						}
+					} 
 
 				} break;
 

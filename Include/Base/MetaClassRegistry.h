@@ -16,28 +16,43 @@
 
 namespace Enjon
 {
-	ENJON_CLASS()
-	class AnotherObject : public Enjon::Object
+	namespace TestNamespace
 	{
-		ENJON_CLASS_BODY( AnotherObject ) 
+		namespace AnotherSpace
+		{
+			ENJON_CLASS( Namespace = [ TestNamespace, AnotherSpace ] )
+			class AnotherObject : public Enjon::Object
+			{
+				ENJON_CLASS_BODY( AnotherObject )
 
-		public:
+			public:
 
-			ENJON_PROPERTY( )
-			f32 mFloatValue; 
+				ENJON_PROPERTY( Editable )
+				f32 mFloatValue;
 
-			ENJON_PROPERTY( )
-			u32 mUintValue;
-			
-			ENJON_PROPERTY( )
-			AssetHandle<Texture> mTexture;
-	}; 
+				ENJON_PROPERTY( Editable )
+				u32 mUintValue; 
+
+				ENJON_PROPERTY( )
+				s32 mIntValue;
+
+				ENJON_PROPERTY( Editable )
+				Enjon::AssetHandle<Enjon::Texture> mTexture;
+
+				ENJON_PROPERTY( )
+				String mName;
+			}; 
+		}
+	} 
 
 	class EnjonObjectSerializer
 	{
 		public:
 			EnjonObjectSerializer( ) = default;
 			~EnjonObjectSerializer( ) = default;
+
+#define WRITE_VAL( valType )\
+	writeBuffer.Write< valType >( *cls->GetValueAs< valType >( object, prop) );
 
 			void Serialize( ByteBuffer& writeBuffer, Object* object )
 			{
@@ -51,13 +66,23 @@ namespace Enjon
 					{
 						case MetaPropertyType::U32:
 						{ 
-							writeBuffer.Write( *cls->GetValueAs< u32 >( object, prop ) );
+							WRITE_VAL( u32 )
 						} break;
 
 						case MetaPropertyType::F32:
 						{ 
-							writeBuffer.Write( *cls->GetValueAs< f32 >( object, prop ) );
+							WRITE_VAL( f32 )
 						} break; 
+
+						case MetaPropertyType::S32:
+						{
+							WRITE_VAL( s32 )
+						} break;
+
+						case MetaPropertyType::String:
+						{
+							WRITE_VAL( String )
+						} break;
 
 						case MetaPropertyType::AssetHandle:
 						{
@@ -74,37 +99,55 @@ namespace Enjon
 				}
 			}
 
+# define READ_SET_VAL(valType)\
+	valType val = readBuffer.Read< valType >();\
+	cls->SetValue(object, prop, val);
+
 			void Deserialize( ByteBuffer& readBuffer, Object* object )
 			{
 				MetaClass* cls = const_cast< MetaClass* > ( object->Class( ) );
 				PropertyTable& pt = cls->GetProperties( ); 
 
 				// Iterate through properties and get from read buffer
-				for ( auto& prop : pt ) 
+				for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
 				{
+					// Grab property at index from metaclass
+					MetaProperty* prop = const_cast<MetaProperty*> ( cls->GetProperty( i ) );
+
 					switch ( prop->GetType( ) )
 					{
 						case MetaPropertyType::U32:
 						{
 							// Set value of object from read buffer
-							cls->SetValue( object, prop, readBuffer.Read<u32>( ) );
+							READ_SET_VAL( u32 )
 						} break;
 						
 						case MetaPropertyType::F32:
 						{
 							// Set value of object from read buffer
-							cls->SetValue( object, prop, readBuffer.Read<f32>( ) );
+							READ_SET_VAL( f32 )
+						} break;
+
+						case MetaPropertyType::String:
+						{
+							READ_SET_VAL( String )
+						} break;
+
+						case MetaPropertyType::S32:
+						{
+							READ_SET_VAL( s32 )
 						} break;
  
 						case MetaPropertyType::AssetHandle:
 						{
 							// Grab asset manager
-							AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( );
-							AssetHandle<Asset> val = nullptr;
+							MetaPropertyTemplateBase* base = static_cast< MetaPropertyTemplateBase* >( prop );
+							AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+							AssetHandle<Asset> val;
 							cls->GetValue( object, prop, &val ); 
 
 							// Get meta class of the asset
-							MetaClass* assetCls = const_cast< MetaClass* >( val.GetAssetClass( ) );
+							MetaClass* assetCls = const_cast< MetaClass* >( base->GetClassOfTemplatedArgument( ) );
 
 							// Get uuid from read buffer
 							UUID id = readBuffer.Read< UUID >( );
@@ -118,9 +161,15 @@ namespace Enjon
 								// Set asset handle to default asset
 								val.Set( asset ); 
 
-								// Set value of object
-								cls->SetValue( object, prop, &val );
 							} 
+							// Otherwise get default asset for this class type
+							else
+							{
+								val.Set( am->GetDefaultAsset( assetCls ) );
+							}
+
+							// Set value of object
+							cls->SetValue( object, prop, val );
 
 						} break;
 					}

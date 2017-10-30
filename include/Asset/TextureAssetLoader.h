@@ -23,19 +23,18 @@ namespace Enjon
 			* @brief Destructor
 			*/
 			~TextureAssetLoader(); 
-			
 
+		public:
+			/**
+			* @brief
+			*/
+			static Result CacheTextureData( const u8* data, u32 length, Texture* texture ); 
+			
 		protected:
 			/**
 			* @brief
 			*/
-			Result CacheTextureData( const u8* data, u32 length, Texture* texture );
-			
-			/**
-			* @brief
-			*/
 			virtual void RegisterDefaultAsset( ) override;
-			
 
 		private: 
 			/**

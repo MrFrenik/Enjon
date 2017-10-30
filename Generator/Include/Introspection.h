@@ -147,6 +147,17 @@ class Function
 
 typedef std::unordered_map< std::string, Property > PropertyTable ;
 typedef std::unordered_map< std::string, Function > FunctionTable ;
+typedef std::vector< std::string > NamespaceQualifiers;
+
+struct ClassMarkupTraits
+{
+	NamespaceQualifiers mNamespaceQualifiers; 
+
+	void AddNamespaceQualifier( const std::string& ns )
+	{
+		mNamespaceQualifiers.push_back( ns );
+	}
+};
 
 class Class
 {
@@ -175,6 +186,16 @@ class Class
 		
 		Function* GetFunction( const std::string& name );
 
+		std::string GetQualifiedName( )
+		{
+			std::string className = "";
+			for ( auto& ns : mTraits.mNamespaceQualifiers )
+			{
+				className += ns + "::";
+			}
+			return ( className + mName ); 
+		}
+
 	protected:
 
 		static void PushScope( )
@@ -194,6 +215,7 @@ class Class
 	public:
 		PropertyTable mProperties;
 		FunctionTable mFunctions;
+		ClassMarkupTraits mTraits;
 		std::string mName; 
 		std::string mFilePath;
 		static u32 mScopeCount;
@@ -221,6 +243,8 @@ struct ReflectionConfig
 	std::vector< std::string > mFilesToParse;
 }; 
 
+
+
 class Introspection
 {
 	public:
@@ -235,6 +259,8 @@ class Introspection
 		void ParseClassBody( Lexer* lexer, Class* cls );
 
 		void ParseClass( Lexer* lexer );
+
+		void ParseClassTraits( Lexer*, ClassMarkupTraits* traits );
 		
 		void ParseClassMembers( Lexer* lexer, Class* cls );
 
