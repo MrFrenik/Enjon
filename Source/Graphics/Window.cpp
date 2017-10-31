@@ -111,7 +111,7 @@ namespace Enjon {
 		SDL_GL_SwapWindow(m_sdlWindow);
 	}
 	
-	void Window::Clear(float val, GLbitfield mask, const ColorRGBA16& color)
+	void Window::Clear(float val, GLbitfield mask, const ColorRGBA32& color)
 	{
 		glClearColor(color.r, color.g, color.b, color.a);
 		glClearDepth(val);

@@ -4,12 +4,12 @@
  
 namespace Enjon
 { 
-	std::string MetaProperty::GetName( )
+	std::string MetaProperty::GetName( ) const
 	{
 		return mName;
 	}
 
-	MetaPropertyType MetaProperty::GetType( )
+	MetaPropertyType MetaProperty::GetType( ) const
 	{
 		return mType;
 	} 

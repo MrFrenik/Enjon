@@ -16,6 +16,9 @@
 #include <Asset/Asset.h>
 #include <Asset/AssetManager.h>
 #include <Asset/TextureAssetLoader.h>
+#include <Asset/MeshAssetLoader.h>
+#include <Asset/ShaderGraphAssetLoader.h>
+#include <Asset/FontAssetLoader.h>
 #include <Utils/FileUtils.h>
 #include <Utils/Signal.h>
 #include <Utils/Property.h>
@@ -24,6 +27,7 @@
 #include <Serialize/ByteBuffer.h> 
 #include <Engine.h>
 #include <Graphics/ShaderGraph.h>
+#include <Serialize/ObjectBinarySerializer.h>
 
 #include <fmt/printf.h>
 #include <lz4/lz4.h>
@@ -46,40 +50,52 @@
 
 #include <Base/MetaClassRegistry.h>
 
-
-void TestObjectSerialize( )
+void Game::TestObjectSerialize( )
 {
 	using namespace Enjon;
 
 	AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
-	ByteBuffer writeBuffer;
-	ByteBuffer readBuffer;
-	TestNamespace::AnotherSpace::PointLight writeTestObject;
-	TestNamespace::AnotherSpace::PointLight readTestObject;
-	EnjonObjectSerializer objectSerializer; 
+	TestNamespace::PointLight writeTestObject;
+
+	ObjectBinarySerializer objectSerializer;
+	ObjectBinaryDeserializer objectDeserializer;
+
+	FontAssetLoader assetLoader;
 
 	// Set value and texture
 	writeTestObject.mFloatValue = 1.0f;
 	writeTestObject.mUintValue = 3;
 	writeTestObject.mTexture = am->GetAsset< Texture >( "isoarpg.materials.scuffedplastic.albedo" );
-	writeTestObject.mName = "BobadeeboobopdeebopboodopbeeSquid";
-	writeTestObject.mIntValue = -23;
-
-	const MetaClass* textureCls = Enjon::Object::GetClass( "Texture" ); 
+	writeTestObject.mID = UUID::GenerateUUID( );
+	writeTestObject.mName = assetLoader.Class()->GetName();
+	writeTestObject.mIntValue = -23; 
 
 	// Serialize test object
-	objectSerializer.Serialize( writeBuffer, &writeTestObject );
+	objectSerializer.Serialize( &writeTestObject ); 
 
 	String outputPath = am->GetAssetsPath( ) + "/Cache/testObject.easset";
 
 	// Write to file
-	writeBuffer.WriteToFile( outputPath );
+	objectSerializer.WriteToFile( outputPath ); 
+ 
+	// Cool, now de-serialize all objects in file
+	Vector<Object*> objects;
+	objectDeserializer.Deserialize( outputPath, objects ); 
 
-	// Cool, now read back from file
-	readBuffer.ReadFromFile( outputPath );
+	// Test serializing/deserializing directional lights in a scene
+	Enjon::u32 i = 0;
+	for ( auto& dl : mGfx->GetScene()->GetDirectionalLights() )
+	{ 
+		String outputAssetPath = am->GetAssetsPath( ) + "/Cache/directionalLight" + std::to_string(i) +".easset";
+		ObjectBinarySerializer serializer;
+		serializer.Serialize( dl );
+		serializer.WriteToFile( outputAssetPath );
 
-	// Deserialize object
-	objectSerializer.Deserialize( readBuffer, &readTestObject );
+		ObjectBinaryDeserializer deserializer;
+		deserializer.Deserialize( outputAssetPath, objects );
+
+		i++;
+	} 
 
 	std::cout << "here\n";
 }
@@ -94,6 +110,15 @@ void TestObjectSerialize( )
 			"TextureFormat": 0, 
 			"Data": ...
 		}
+
+		// Write ObjectBinarySerializer class
+		// This class will get called by the asset manager to do a base cache and load of any asset 
+
+		// Get loader from meta data header for object
+		// Find loader from assetmanager based on meta class: (done)
+			// Extend assetmanager class to be able to get loader from meta class (done)
+		// Pass cached data to loader and load remaining data 
+		// Profit
 	}
 */
 
@@ -111,7 +136,6 @@ class MapClass
 	private:
 		std::unordered_map < Enjon::String, Enjon::AssetHandle< Enjon::Texture > > mMap;
 }; 
-
 
 std::vector<btRigidBody*> mBodies;
 btDiscreteDynamicsWorld* mDynamicsWorld;
@@ -393,7 +417,7 @@ Enjon::Result Game::Initialize()
 	pc->GetLight( )->SetIntensity( 20.0f );
 	pc->GetLight( )->SetAttenuationRate( 0.2f );
 	pc->GetLight( )->SetRadius( 100.0f );
-	pc->GetLight( )->SetColor( Enjon::RGBA16_Orange( ) );
+	pc->GetLight( )->SetColor( Enjon::RGBA32_Orange( ) );
 
 	mPlasticMat = new Enjon::Material;
 	mPlasticMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.albedo"));
@@ -434,9 +458,9 @@ Enjon::Result Game::Initialize()
 
 	mSun = new Enjon::DirectionalLight();
 	mSun->SetIntensity(1.5f);
-	mSun->SetColor(Enjon::RGBA16_White());
+	mSun->SetColor(Enjon::RGBA32_White());
 
-	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA16_SkyBlue(), 10.0f); 
+	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA32_SkyBlue(), 10.0f); 
 
 	mFloorMat = new Enjon::Material();
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.white"));
@@ -668,7 +692,7 @@ Enjon::Result Game::Initialize()
 	{
 		auto scene = mGfx->GetScene();
 		scene->AddDirectionalLight( mSun );
-		//scene->AddDirectionalLight( mSun2 );
+		scene->AddDirectionalLight( mSun2 );
 		scene->AddRenderable(gc->GetRenderable());
 		scene->AddPointLight( pc->GetLight( ) );
 		scene->AddRenderable( mGreen.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
@@ -679,7 +703,7 @@ Enjon::Result Game::Initialize()
 		scene->AddQuadBatch(mBatch);
 		scene->AddQuadBatch(mTextBatch);
 		scene->SetSun(mSun);
-		scene->SetAmbientColor(Enjon::SetOpacity(Enjon::RGBA16_White(), 0.1f));
+		scene->SetAmbientColor(Enjon::SetOpacity(Enjon::RGBA32_White(), 0.1f));
 
 		// Set graphics camera position
 		auto cam = mGfx->GetSceneCamera();
@@ -1233,7 +1257,7 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 	mTextBatch->Begin( );
 	{
 		Enjon::Transform tform( Enjon::Vec3( 0.f, 10.f, -10.f ), Enjon::Quaternion( ), Enjon::Vec3( mFontSize ) );
-		Enjon::PrintText( tform, mWorldString, mFont.Get( ), *mTextBatch, Enjon::RGBA16_White( ), 14 );
+		Enjon::PrintText( tform, mWorldString, mFont.Get( ), *mTextBatch, Enjon::RGBA32_White( ), 14 );
 	}
 	mTextBatch->End( );
 

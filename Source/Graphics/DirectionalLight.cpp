@@ -7,11 +7,11 @@ namespace Enjon {
 	DirectionalLight::DirectionalLight()
 	{
 		mDirection = Vec3(1, 1, 1);
-		mColor = RGBA16_White();
+		mColor = RGBA32_White();
 		mIntensity = 1.0f;
 	}
 
-	DirectionalLight::DirectionalLight(Vec3& direction, ColorRGBA16& color, float intensity)
+	DirectionalLight::DirectionalLight(Vec3& direction, ColorRGBA32& color, float intensity)
 		: mDirection(direction), mColor(color), mIntensity(intensity)
 	{
 	}
@@ -26,7 +26,7 @@ namespace Enjon {
 		mDirection = direction;
 	}
 
-	void DirectionalLight::SetColor(ColorRGBA16& color)
+	void DirectionalLight::SetColor(ColorRGBA32& color)
 	{
 		mColor = color;
 	}

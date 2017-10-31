@@ -38,6 +38,8 @@ class Game : public Enjon::Application
 	private:
 		void ListEntityChildren(Enjon::Entity* entity, u32 indentAmount);
 
+		void TestObjectSerialize( );
+
 	private:
 		Enjon::GraphicsSubsystem* mGfx		= nullptr;
 		Enjon::Input* mInput				= nullptr;

@@ -30,11 +30,11 @@ namespace Enjon
 
 	UUID::~UUID( )
 	{ 
-	}
+	} 
 
 	//====================================================================
 			
-	Enjon::String UUID::ToString( )
+	Enjon::String UUID::ToString( ) const
 	{ 
 		std::stringstream ss;
 		ss << mID; 

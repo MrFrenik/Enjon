@@ -11,8 +11,10 @@
 
 namespace Enjon
 {
+	ENJON_CLASS()
 	class TextureAssetLoader : public AssetLoader
 	{ 
+		ENJON_CLASS_BODY()
 
 		public:
 
@@ -37,6 +39,11 @@ namespace Enjon
 			* @brief
 			*/
 			virtual void RegisterDefaultAsset( ) override;
+
+			/**
+			* @brief
+			*/
+			virtual Result Cache( ByteBuffer& buffer, Asset* asset ) override;
 
 		private: 
 			/**

@@ -47,13 +47,13 @@ namespace Enjon
 	AssetManager::~AssetManager()
 	{ 
 		// Release all loaders from memory
-		for (auto& loader : mLoaders)
+		for (auto& loader : mLoadersByAssetId)
 		{
 			delete loader.second;
 		}
 
 		// Clear map
-		mLoaders.clear();
+		mLoadersByAssetId.clear();
 	}
 	
 	//============================================================================================ 
@@ -174,7 +174,7 @@ namespace Enjon
 
 		if ( Exists( idx ) )
 		{
-			return mLoaders[ idx ]->GetDefault( );
+			return mLoadersByAssetId[ idx ]->GetDefault( );
 		}
 
 		return nullptr;
@@ -189,7 +189,7 @@ namespace Enjon
 
 		if ( Exists( idx ) )
 		{
-			return mLoaders[ idx ]->GetAsset( id );
+			return mLoadersByAssetId[ idx ]->GetAsset( id );
 		}
 
 		return nullptr;
@@ -207,7 +207,7 @@ namespace Enjon
 
 		if ( Exists( idx ) )
 		{
-			return mLoaders[ idx ]->GetAssets( );
+			return mLoadersByAssetId[ idx ]->GetAssets( );
 		}
 
 		return nullptr;
@@ -231,8 +231,8 @@ namespace Enjon
 		String qualifiedName = AssetLoader::GetQualifiedName( filePath );
 
 		// Find loader by idx
-		auto query = mLoaders.find( ( u32 )idx );
-		if ( query != mLoaders.end( ) )
+		auto query = mLoadersByAssetId.find( ( u32 )idx );
+		if ( query != mLoadersByAssetId.end( ) )
 		{
 			// Make sure it doesn't exist already before trying to load it
 			if ( query->second->Exists( qualifiedName ) )
@@ -282,6 +282,61 @@ namespace Enjon
 	{
 		return ( Enjon::Utils::SplitString( file, "." ).back( ).compare( extension ) == 0 );
 	}
+
+	//======================================================================================================
+
+	Enjon::Result AssetManager::RegisterAssetLoaderInternal( AssetLoader* loader, u32 idx )
+	{
+		// Set into map
+		mLoadersByAssetId[idx] = loader;
+
+		// Get meta class of loader 
+		const MetaClass* cls = mLoadersByAssetId[idx]->Class();
+		// Register by meta class
+		mLoadersByMetaClass[cls] = mLoadersByAssetId[idx];
+
+		// TODO(): This crashes for now. I want to set this here, so figure it out.
+		// Register default asset from loader
+		//mLoadersByAssetId[ idx ]->RegisterDefaultAsset( ); 
+
+		return Result::SUCCESS;
+	}
+
+	//======================================================================================================
+
+	bool AssetManager::Exists( u32 id )
+	{
+		return ( mLoadersByAssetId.find( id ) != mLoadersByAssetId.end( ) );
+	}
+
+	//======================================================================================================
+
+	bool AssetManager::Exists( const MetaClass* cls )
+	{
+		return ( mLoadersByMetaClass.find( cls ) != mLoadersByMetaClass.end( ) );
+	}
+
+	//======================================================================================================
+
+	u32 AssetManager::GetUniqueAssetTypeId( ) noexcept
+	{
+		static u32 lastId{ 0u };
+		return lastId++;
+	}
+
+	//======================================================================================================
+
+	AssetLoader* AssetManager::GetLoader( const MetaClass* cls )
+	{
+		if ( Exists( cls ) )
+		{
+			return mLoadersByMetaClass[cls];
+		}
+
+		return nullptr;
+	}
+
+	//======================================================================================================
 }
 
 

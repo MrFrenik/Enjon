@@ -112,7 +112,7 @@ namespace Enjon { namespace Animation {
 	}
 
 	// Draws a single animation frame	
-	void DrawFrame(const ImageFrame& Image, Enjon::Vec2 Position, SpriteBatch* Batch, const ColorRGBA16& Color, float ScalingFactor, float Depth)
+	void DrawFrame(const ImageFrame& Image, Enjon::Vec2 Position, SpriteBatch* Batch, const ColorRGBA32& Color, float ScalingFactor, float Depth)
 	{
 		auto& Dims = Image.UVs;
 		auto& SSize = Image.SourceSize;

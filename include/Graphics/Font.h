@@ -77,13 +77,13 @@ namespace Enjon
 
 	/* Adds a string of tex at (x,y) to given spritebatch */
 	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::SpriteBatch& Batch, 
-						ColorRGBA16 Color = Enjon::RGBA16_White(), TextStyle Style = TextStyle::SHADOW, float Angle = 0.0f, float Depth = 0.0f);
+						ColorRGBA32 Color = Enjon::RGBA32_White(), TextStyle Style = TextStyle::SHADOW, float Angle = 0.0f, float Depth = 0.0f);
 
-	void PrintText(Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA16 Color = RGBA16_White(), float Spacing = 1.0f, TextStyle Style = TextStyle::SHADOW); 
+	void PrintText(Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA32 Color = RGBA32_White(), float Spacing = 1.0f, TextStyle Style = TextStyle::SHADOW); 
 
 	class UIFont;
 	
-	void PrintText( Transform& Transform, const Enjon::String& Text, UIFont* F, QuadBatch& Batch, ColorRGBA16 Color, u32 fontSize );
+	void PrintText( Transform& Transform, const Enjon::String& Text, UIFont* F, QuadBatch& Batch, ColorRGBA32 Color, u32 fontSize );
 
 	class UIFont;
 	class FontAtlas;

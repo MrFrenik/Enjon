@@ -21,17 +21,17 @@ namespace Enjon { namespace GUI {
 			// Set up initial states	
 			this->State 		= ButtonState::INACTIVE;
 			this->HoverState 	= HoveredState::OFF_HOVER;
-			this->Color 		= RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+			this->Color 		= RGBA32(0.12f, 0.12f, 0.12f, 1.0f);
 			this->Name 			= std::string("GUIButton");
-			this->TextColor 	= RGBA16_LightGrey();
+			this->TextColor 	= RGBA32_LightGrey();
 			this->Dimensions 	= Enjon::Vec2(10.0f, 10.0f);
-			this->BorderColor 	= SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			this->BorderColor 	= SetOpacity(RGBA32(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 
 			// Set up PlayButton's on_hover signal
 			this->on_hover.connect([&]()
 			{
 				// Change color
-				this->Color = RGBA16(0.2f, 0.2f, 0.2f, 1.0f);
+				this->Color = RGBA32(0.2f, 0.2f, 0.2f, 1.0f);
 
 				// Set state to active
 				this->HoverState = HoveredState::ON_HOVER;
@@ -40,7 +40,7 @@ namespace Enjon { namespace GUI {
 			// Set up PlayButton's off_hover signal
 			this->off_hover.connect([&]()
 			{
-				this->Color = RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+				this->Color = RGBA32(0.12f, 0.12f, 0.12f, 1.0f);
 
 				// Set state to inactive
 				this->HoverState = HoveredState::OFF_HOVER;
@@ -81,10 +81,10 @@ namespace Enjon { namespace GUI {
 			this->HoverState = HoveredState::OFF_HOVER;
 
 			// Set up color
-			this->Color = RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+			this->Color = RGBA32(0.12f, 0.12f, 0.12f, 1.0f);
 
 			// Set up text color
-			this->TextColor 	= RGBA16_MidGrey();
+			this->TextColor 	= RGBA32_MidGrey();
 			this->Name 			= std::string("GUITextButton");
 			this->TextPadding	= Enjon::Vec2(5.0f, 5.0f);
 
@@ -99,16 +99,16 @@ namespace Enjon { namespace GUI {
 			this->on_hover.connect([&]()
 			{
 				this->HoverState = HoveredState::ON_HOVER;
-				this->Color = RGBA16(0.1f, 0.1f, 0.1f, 1.0f);
-				this->TextColor = RGBA16_White();
+				this->Color = RGBA32(0.1f, 0.1f, 0.1f, 1.0f);
+				this->TextColor = RGBA32_White();
 			});
 
 			// Set up on_hover signal
 			this->off_hover.connect([&]()
 			{
 				this->HoverState = HoveredState::OFF_HOVER;
-				this->Color = RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
-				this->TextColor = RGBA16_MidGrey();
+				this->Color = RGBA32(0.12f, 0.12f, 0.12f, 1.0f);
+				this->TextColor = RGBA32_MidGrey();
 			});
 		}
 
@@ -141,7 +141,7 @@ namespace Enjon { namespace GUI {
 						this->Color,
 						this->Depth,
 						SpriteBatch::DrawOptions::BORDER,
-						SetOpacity(RGBA16(0.08f, 0.08f, 0.08f, 1.0f), 1.0f)
+						SetOpacity(RGBA32(0.08f, 0.08f, 0.08f, 1.0f), 1.0f)
 					);
 
 			// Draw text
@@ -188,7 +188,7 @@ namespace Enjon { namespace GUI {
 			this->Depth = 0.0f;
 			this->JustFocused = false;
 			this->LoopValues = false;
-			this->BorderColor = SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			this->BorderColor = SetOpacity(RGBA32(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 			this->FontScale = 1.0f;
 			this->YOffset = 0.0f;
 
@@ -285,7 +285,7 @@ namespace Enjon { namespace GUI {
 
 				ValueText.on_enter.emit();
 
-				this->BorderColor = SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+				this->BorderColor = SetOpacity(RGBA32(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 
 				this->State = ButtonState::INACTIVE;
 			});
@@ -414,7 +414,7 @@ namespace Enjon { namespace GUI {
 
 		    	if (MouseOverText)
 		    	{
-					this->BorderColor = SetOpacity(RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
+					this->BorderColor = SetOpacity(RGBA32(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
 		    		ValueText.on_click.emit(MousePos.x);
 		    	}
 		    	else ValueText.lose_focus.emit();
@@ -592,7 +592,7 @@ namespace Enjon { namespace GUI {
 			this->Type = GUIType::DROP_DOWN_BUTTON; 
 
 			// Member variables
-			this->Color = RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+			this->Color = RGBA32(0.12f, 0.12f, 0.12f, 1.0f);
 			this->State = ButtonState::INACTIVE;
 			this->HoverState = HoveredState::OFF_HOVER;
 
@@ -600,9 +600,9 @@ namespace Enjon { namespace GUI {
 			this->TextFont 		= nullptr;
 			this->FontScale = 1.0f;
 			this->Name = std::string("GUIDropDownButton");
-			this->TextColor		= RGBA16_LightGrey();
+			this->TextColor		= RGBA32_LightGrey();
 			this->TextPadding = Enjon::Vec2(5.0f, 6.0f);
-			this->BorderColor = SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			this->BorderColor = SetOpacity(RGBA32(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 			this->Dimensions = Enjon::Vec2(123.0f, 20.0f);
 			this->YOffset = 20.0f;
 			this->XPadding = 1.0f;
@@ -612,14 +612,14 @@ namespace Enjon { namespace GUI {
 			this->on_hover.connect([&]()
 			{
 				this->HoverState = HoveredState::ON_HOVER;
-				this->Color = RGBA16(0.1f, 0.1f, 0.1f, 1.0f);
+				this->Color = RGBA32(0.1f, 0.1f, 0.1f, 1.0f);
 			});
 
 			// Set up Drop Down Menu Button's off_hover signal
 			this->off_hover.connect([&]()
 			{
 				this->HoverState = HoveredState::OFF_HOVER;
-				if (!this->State) this->Color = RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
+				if (!this->State) this->Color = RGBA32(0.12f, 0.12f, 0.12f, 1.0f);
 			});
 
 			// Set up Drop Down Menu Button's on_click signal
@@ -628,15 +628,15 @@ namespace Enjon { namespace GUI {
 				// Need a drop down box here with all the options to be selected
 				if (this->State == ButtonState::INACTIVE)
 				{
-					this->Color = RGBA16(0.08f, 0.08f, 0.08f, 1.0f);
-					this->BorderColor = SetOpacity(RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
+					this->Color = RGBA32(0.08f, 0.08f, 0.08f, 1.0f);
+					this->BorderColor = SetOpacity(RGBA32(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
 					this->State = ButtonState::ACTIVE;
 					this->Depth = 1.0f;
 				} 
 				else
 				{
-					this->Color = RGBA16(0.12f, 0.12f, 0.12f, 1.0f);
-					this->BorderColor = SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+					this->Color = RGBA32(0.12f, 0.12f, 0.12f, 1.0f);
+					this->BorderColor = SetOpacity(RGBA32(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 					this->State = ButtonState::INACTIVE;
 					this->Depth = 0.0f;
 				} 
@@ -814,10 +814,10 @@ namespace Enjon { namespace GUI {
 									),
 							Vec4(0, 0, 1, 1),
 							Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id, 
-							RGBA16_DarkGrey(), 
+							RGBA32_DarkGrey(), 
 							0.0f,
 							SpriteBatch::DrawOptions::BORDER | SpriteBatch::DrawOptions::SHADOW,
-							RGBA16_DarkGrey(), 
+							RGBA32_DarkGrey(), 
 							1.0f
 						);
 
@@ -884,9 +884,9 @@ namespace Enjon { namespace GUI {
 			Type = GUIType::RADIAL_BUTTON; 
 
 			// Load in color themes from data
-			this->ActiveColor 	= RGBA16_LimeGreen();
-			this->InactiveColor = RGBA16_DarkGrey();
-			this->BorderColor = SetOpacity(RGBA16(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
+			this->ActiveColor 	= RGBA32_LimeGreen();
+			this->InactiveColor = RGBA32_DarkGrey();
+			this->BorderColor = SetOpacity(RGBA32(0.18f, 0.18f, 0.18f, 1.0f), 0.5f);
 			this->Dimensions = Enjon::Vec2(10.0f, 10.0f);
 
 			// Set up initial color
@@ -952,8 +952,8 @@ namespace Enjon { namespace GUI {
 			return true;	
 		}
 
-		ColorRGBA16 ActiveColor;
-		ColorRGBA16 InactiveColor;
+		ColorRGBA32 ActiveColor;
+		ColorRGBA32 InactiveColor;
 	};
 
 }}

@@ -52,7 +52,7 @@ namespace Enjon
 
 			glGenTextures( 1, &tex->mId );
 			glBindTexture( GL_TEXTURE_2D, tex->mId );
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGB, GL_FLOAT, data );
+			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGB, GL_FLOAT, data );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
@@ -132,6 +132,8 @@ namespace Enjon
  
 		// Store file extension type of texture
 		tex->mFileExtension = Texture::GetFileExtensionType( fileExtension ); 
+
+		Cache( ByteBuffer( ), tex );
 
 		return tex;
 	}
@@ -234,5 +236,16 @@ namespace Enjon
 		writeBuffer.WriteToFile( outputPath ); 
 
 		return Enjon::Result::SUCCESS;
+	}
+
+	Result TextureAssetLoader::Cache( ByteBuffer& buffer, Asset* asset )
+	{
+		// Call super
+		AssetLoader::Cache( buffer, asset );
+
+		std::cout << "textureassetloader\n";
+
+		// Return result
+		return Result::SUCCESS;
 	}
 }

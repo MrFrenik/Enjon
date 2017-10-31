@@ -15,7 +15,7 @@ enum class PropertyType
 {
 	Object,
 	Bool,
-	ColorRGBA16,
+	ColorRGBA32,
 	F32,
 	F64,
 	U8,
@@ -150,13 +150,19 @@ typedef std::unordered_map< std::string, Function > FunctionTable ;
 typedef std::vector< std::string > NamespaceQualifiers;
 
 struct ClassMarkupTraits
-{
-	NamespaceQualifiers mNamespaceQualifiers; 
-
+{ 
 	void AddNamespaceQualifier( const std::string& ns )
 	{
 		mNamespaceQualifiers.push_back( ns );
 	}
+
+	void Construct( bool enabled )
+	{
+		mConstruct = enabled;
+	}
+
+	NamespaceQualifiers mNamespaceQualifiers; 
+	bool mConstruct = false;
 };
 
 class Class

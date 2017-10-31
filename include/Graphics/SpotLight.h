@@ -50,17 +50,17 @@ namespace Enjon {
 
 		public:
 			SpotLight();
-			SpotLight(Vec3& position, SLParams& params, ColorRGBA16& color, float intensity = 1.0f);
+			SpotLight(Vec3& position, SLParams& params, ColorRGBA32& color, float intensity = 1.0f);
 			~SpotLight();
 
 			Vec3& GetPosition() { return mPosition; }
-			ColorRGBA16& GetColor() { return mColor; }
+			ColorRGBA32& GetColor() { return mColor; }
 			SLParams& GetParams() { return mParams; }
 			float GetIntensity() { return mIntensity; }
 
 			void SetPosition(Vec3& position);
 			void SetDirection(Vec3& direction);
-			void SetColor(ColorRGBA16& color);
+			void SetColor(ColorRGBA32& color);
 			void SetIntensity(float intensity);
 			void SetScene(Scene* scene);
 			void SetParams(SLParams& params);
@@ -75,7 +75,7 @@ namespace Enjon {
 			f32 mIntensity;
 
 			ENJON_PROPERTY( Editable )
-			ColorRGBA16 mColor;
+			ColorRGBA32 mColor;
 
 			Scene* mScene = nullptr;
 	};

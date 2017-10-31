@@ -16,14 +16,14 @@ namespace Enjon {
 	struct OutputMessage
 	{
 		OutputMessage(){}
-		OutputMessage(std::string _Text, ColorRGBA16 Color = RGBA16_LightGrey())
+		OutputMessage(std::string _Text, ColorRGBA32 Color = RGBA32_LightGrey())
 		{
 			Text = _Text;
 			TextColor = Color;
 		}
 
 		std::string Text;
-		ColorRGBA16 TextColor;
+		ColorRGBA32 TextColor;
 	};
 
 	bool Console::mIsVisible = false;
@@ -109,7 +109,7 @@ namespace Enjon {
 								Vec4(-ScreenWidth * 0.5f, -ScreenHeight * 0.5f, ScreenWidth / 3, ScreenHeight / 4),
 								Vec4(0, 0, 1, 1),
 								Enjon::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
-								SetOpacity(RGBA16_DarkGrey(), 0.8f)
+								SetOpacity(RGBA32_DarkGrey(), 0.8f)
 							);
 			}
 			Batch.End();
@@ -176,14 +176,14 @@ namespace Enjon {
 			if (Elements.at(0).compare("mul") == 0) 
 			{
 				// Error
-				if (Elements.size() < 3) Output.emplace_back("Error: mul requires 2 arguments", RGBA16_Red());
+				if (Elements.size() < 3) Output.emplace_back("Error: mul requires 2 arguments", RGBA32_Red());
 
 				// Calculate the result
 				else
 				{
 					if (!EU::is_numeric(Elements.at(1)) || !EU::is_numeric(Elements.at(2))) 
 					{
-						Output.emplace_back("Error: cannot multiply non numeric terms: " + Elements.at(1) + ", " + Elements.at(2), RGBA16_Red());
+						Output.emplace_back("Error: cannot multiply non numeric terms: " + Elements.at(1) + ", " + Elements.at(2), RGBA32_Red());
 					}
 
 					// Otherwise, multiply and push back result
@@ -201,18 +201,18 @@ namespace Enjon {
 			else if (Elements.at(0).compare("cvarlist") == 0)
 			{
 				auto registeredCommands = CVarsSystem::GetRegisteredCommands();
-				Output.emplace_back("Console Variables Available: ", RGBA16_Yellow());
+				Output.emplace_back("Console Variables Available: ", RGBA32_Yellow());
 				for (auto& c : registeredCommands) Output.emplace_back(c);
 			}
 			else
 			{
 				// Register command with CVar System
-				if (Elements.size() < 2) Output.emplace_back("Error: need argument for cvar \"" + Elements.at(0) + "\"", RGBA16_Red());
+				if (Elements.size() < 2) Output.emplace_back("Error: need argument for cvar \"" + Elements.at(0) + "\"", RGBA32_Red());
 				else
 				{
 					if (!CVarsSystem::Set(Elements.at(0), std::atof(Elements.at(1).c_str())))
 					{
-						Output.emplace_back("Error: cvar does not exist: " + Elements.at(0), RGBA16_Red());
+						Output.emplace_back("Error: cvar does not exist: " + Elements.at(0), RGBA32_Red());
 					}
 					else
 					{

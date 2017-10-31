@@ -37,7 +37,7 @@
 //	cls->mProperties[ "mAttenuationRate" ] = Enjon::MetaProperty( MetaPropertyType::Float_32, "mAttenuationRate", ( u32 )&( ( PointLight* )0 )->mAttenuationRate );
 //	cls->mProperties[ "mRadius" ] = Enjon::MetaProperty( MetaPropertyType::Float_32, "mRadius", ( u32 )&( ( PointLight* )0 )->mRadius );
 //	cls->mProperties[ "mIntensity" ] = Enjon::MetaProperty( MetaPropertyType::Float_32, "mIntensity", ( u32 )&( ( PointLight* )0 )->mIntensity );
-//	cls->mProperties[ "mColor" ] = Enjon::MetaProperty( MetaPropertyType::ColorRGBA16, "mColor", ( u32 )&( ( PointLight* )0 )->mColor );
+//	cls->mProperties[ "mColor" ] = Enjon::MetaProperty( MetaPropertyType::ColorRGBA32, "mColor", ( u32 )&( ( PointLight* )0 )->mColor );
 //
 //	return cls;
 //}
@@ -125,7 +125,7 @@
 //
 //	cls->mProperties[ "mPosition" ] = Enjon::MetaProperty( MetaPropertyType::Vec3, "mPosition", ( u32 )&( ( SpotLight* )0 )->mPosition );
 //	cls->mProperties[ "mIntensity" ] = Enjon::MetaProperty( MetaPropertyType::Float_32, "mIntensity", ( u32 )&( ( SpotLight* )0 )->mIntensity );
-//	cls->mProperties[ "mColor" ] = Enjon::MetaProperty( MetaPropertyType::ColorRGBA16, "mColor", ( u32 )&( ( SpotLight* )0 )->mColor );
+//	cls->mProperties[ "mColor" ] = Enjon::MetaProperty( MetaPropertyType::ColorRGBA32, "mColor", ( u32 )&( ( SpotLight* )0 )->mColor );
 //
 //	return cls;
 //}

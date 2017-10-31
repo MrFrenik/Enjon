@@ -28,9 +28,33 @@ namespace Enjon
 	
 	ByteBuffer::~ByteBuffer( )
 	{ 
+		ReleaseData( );
+	}
+
+	//========================================================================
+
+	void ByteBuffer::ReleaseData( )
+	{
 		// Delete all of its data
 		delete mBuffer;
-		mBuffer = nullptr;
+		mBuffer = nullptr; 
+	}
+
+	//========================================================================
+
+	void ByteBuffer::Reset( )
+	{
+		ReleaseData( );
+
+		// Reset to default values
+		mCapacity = 1024;
+		mSize = 0;
+		mReadPosition	= 0;
+		mWritePosition	= 0;
+
+		// Reallocate memory for buffer
+		mBuffer = ( u8* )malloc( sizeof( u8 ) * mCapacity );
+		assert( mBuffer != nullptr );
 	}
 
 	//========================================================================
@@ -137,7 +161,7 @@ namespace Enjon
 		}
 
 		// Write length of string
-		Write( size );
+		Write< usize >( size );
 
 		// Write characters of string
 		for ( auto& c : val ) 
@@ -149,6 +173,16 @@ namespace Enjon
 			mWritePosition += 1;
 			mSize += 1;
 		} 
+	}
+
+	template<>
+	void ByteBuffer::Write< UUID >( const UUID& val )
+	{
+		// Get hashed string of uuid
+		String uuidHash = val.ToString( );
+
+		// Write to buffer
+		Write< String >( uuidHash );
 	}
 
 	//========================================================================
@@ -223,6 +257,5 @@ namespace Enjon
 	BYTE_BUFFER_RW( u64 )
 	BYTE_BUFFER_RW( f64 )
 	BYTE_BUFFER_RW( usize )
-	BYTE_BUFFER_RW( UUID )
 }
 

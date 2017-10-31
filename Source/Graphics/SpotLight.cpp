@@ -7,11 +7,11 @@ namespace Enjon {
 	SpotLight::SpotLight()
 	{
 		mPosition 	= Vec3(0.0f, 0.0f, 0.0f);
-		mColor 		= RGBA16_White(); 
+		mColor 		= RGBA32_White(); 
 		mParams 	= SpotLightParameters(0.0f, 0.0f, 0.0f, Vec3(0, 0, 0), 0.0f, 0.0f);
 	}
 
-	SpotLight::SpotLight(Vec3& position, SLParams& params, ColorRGBA16& color, float intensity)
+	SpotLight::SpotLight(Vec3& position, SLParams& params, ColorRGBA32& color, float intensity)
 	{
 		mPosition 	= position;
 		mParams 	= params;
@@ -29,7 +29,7 @@ namespace Enjon {
 	{
 	}
 
-	void SpotLight::SetColor(ColorRGBA16& color)
+	void SpotLight::SetColor(ColorRGBA32& color)
 	{
 		mColor = color;
 	}

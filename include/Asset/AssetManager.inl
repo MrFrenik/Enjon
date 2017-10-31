@@ -1,5 +1,93 @@
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
 // File: AssetManager.inl
 
-
+//================================================================================================
 			
+template <typename T, typename K>
+Enjon::Result AssetManager::RegisterAssetLoader()
+{
+	static_assert(std::is_base_of<Asset, T>::value,
+		"RegisterAssetLoader: T must inherit from Asset.");
+	
+	static_assert(std::is_base_of<AssetLoader, K>::value,
+		"RegisterAssetLoader: K must inherit from AssetLoader.");
+
+	// Get idx of asset loader type
+	u32 idx = GetAssetTypeId<T>(); 
+
+	// Register internally with system
+	Enjon::Result res = RegisterAssetLoaderInternal( new K( ), idx ); 
+
+	return res;
+}
+
+//================================================================================================
+
+template <typename T>
+u32 AssetManager::GetAssetTypeId( ) noexcept
+{
+	static_assert( std::is_base_of<Asset, T>::value, "GetAssetTypeId:: T must inherit from Asset." );
+
+	// Return id type from object
+	return Enjon::Object::GetTypeId< T >( );
+
+	static u32 typeId{ GetUniqueAssetTypeId( ) };
+	return typeId;
+}
+
+//================================================================================================ 
+
+template <typename T>
+AssetHandle<T> AssetManager::GetDefaultAsset( )
+{
+	// Get appropriate loader based on asset type
+	u32 loaderId = GetAssetTypeId<T>( );
+
+	// Get handle from loader
+	Asset* defaultAsset = mLoadersByAssetId[loaderId]->GetDefault( );
+	AssetHandle<T> handle = AssetHandle<T>( defaultAsset );
+
+	// Return asset handle
+	return handle;
+}
+
+//================================================================================================ 
+
+template <typename T>
+const std::unordered_map< Enjon::String, Asset* >* AssetManager::GetAssets( )
+{
+	// Get appropriate loader based on asset type
+	u32 loaderId = GetAssetTypeId<T>( );
+
+	if ( Exists( loaderId ) )
+	{
+		return mLoadersByAssetId[loaderId]->GetAssets( );
+	}
+
+	return nullptr;
+} 
+
+//================================================================================================ 
+
+template <typename T>
+AssetHandle<T> AssetManager::GetAsset( const String& name )
+{
+	// Get appropriate loader based on asset type
+	u32 loaderId = GetAssetTypeId<T>( );
+
+	// Get handle from loader
+	AssetHandle<T> handle = mLoadersByAssetId[loaderId]->GetAsset<T>( name );
+
+	// Return asset handle
+	return handle;
+}
+
+
+
+
+
+
+
+
+
+

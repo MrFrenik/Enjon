@@ -26,7 +26,7 @@ namespace Enjon { namespace Particle2D {
 		Enjon::Vec2 Dimensions;
 		float LifeTime;	
 		float DecayRate;	
-		ColorRGBA16 Color;	
+		ColorRGBA32 Color;	
 		GLuint TexID; //< Not too sure about the cache coherency of this being here
 		Vec4 UV;
 	} Particle;
@@ -65,7 +65,7 @@ namespace Enjon { namespace Particle2D {
 	uint32 AddParticleBatch(ParticleEngine2D* PE, ParticleBatch2D* PB);
 
 	/* Adds a particle to a batch */
-	uint32 AddParticle(Vec3 P, Vec3 V, Enjon::Vec2 D, ColorRGBA16 C, GLuint ID, float DR, ParticleBatch2D* PB, Vec4 UV = Vec4(0, 0, 1, 1));
+	uint32 AddParticle(Vec3 P, Vec3 V, Enjon::Vec2 D, ColorRGBA32 C, GLuint ID, float DR, ParticleBatch2D* PB, Vec4 UV = Vec4(0, 0, 1, 1));
 
 	/* Frees memory of given particle engine */
 	uint32 FreeEngine(ParticleEngine2D* PE);

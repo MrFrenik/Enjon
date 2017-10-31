@@ -52,6 +52,16 @@ namespace Enjon
 			*/
 			const u32 GetSize( ) const;
 
+			/*
+			* @brief
+			*/
+			void ReleaseData( );
+
+			/*
+			* @brief
+			*/
+			void Reset( );
+
 		private:
 			/*
 			* @brief Destructor

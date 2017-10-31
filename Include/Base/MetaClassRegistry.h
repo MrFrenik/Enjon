@@ -18,31 +18,31 @@ namespace Enjon
 {
 	namespace TestNamespace
 	{
-		namespace AnotherSpace
+		ENJON_CLASS( Namespace = [ TestNamespace ], Construct )
+		class PointLight : public Enjon::Object
 		{
-			ENJON_CLASS( Namespace = [ TestNamespace, AnotherSpace ] )
-			class PointLight : public Enjon::Object
-			{
-				ENJON_CLASS_BODY( ) 
+			ENJON_CLASS_BODY( ) 
 
-			public:
+		public:
 
-				ENJON_PROPERTY( Editable )
-				f32 mFloatValue;
+			ENJON_PROPERTY( Editable )
+			f32 mFloatValue;
 
-				ENJON_PROPERTY( Editable )
-				u32 mUintValue; 
+			ENJON_PROPERTY( Editable )
+			u32 mUintValue; 
 
-				ENJON_PROPERTY( )
-				s32 mIntValue;
+			ENJON_PROPERTY( )
+			s32 mIntValue;
 
-				ENJON_PROPERTY( Editable )
-				Enjon::AssetHandle<Enjon::Texture> mTexture;
+			ENJON_PROPERTY( Editable )
+			AssetHandle< Texture > mTexture;
 
-				ENJON_PROPERTY( )
-				String mName;
-			}; 
-		}
+			ENJON_PROPERTY( )
+			UUID mID;
+
+			ENJON_PROPERTY( )
+			String mName;
+		}; 
 	} 
 
 	class EnjonObjectSerializer
@@ -57,7 +57,7 @@ namespace Enjon
 			void Serialize( ByteBuffer& writeBuffer, Object* object )
 			{
 				MetaClass* cls = const_cast< MetaClass* >( object->Class( ) );
-				PropertyTable& pt = cls->GetProperties( );
+				const PropertyTable& pt = cls->GetProperties( );
 
 				// Iterate through properties and write to buffer
 				for ( auto& prop : pt ) 
@@ -91,10 +91,15 @@ namespace Enjon
 							cls->GetValue( object, prop, &val );
 							if ( val )
 							{
-								writeBuffer.Write( val.GetUUID().ToString() );
+								writeBuffer.Write( val.GetUUID() );
 							} 
 
 						} break; 
+
+						case MetaPropertyType::UUID:
+						{
+							WRITE_VAL( UUID )
+						} break;
 					}
 				}
 			}
@@ -106,7 +111,7 @@ namespace Enjon
 			void Deserialize( ByteBuffer& readBuffer, Object* object )
 			{
 				MetaClass* cls = const_cast< MetaClass* > ( object->Class( ) );
-				PropertyTable& pt = cls->GetProperties( ); 
+				const PropertyTable& pt = cls->GetProperties( ); 
 
 				// Iterate through properties and get from read buffer
 				for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
@@ -136,6 +141,11 @@ namespace Enjon
 						case MetaPropertyType::S32:
 						{
 							READ_SET_VAL( s32 )
+						} break;
+
+						case MetaPropertyType::UUID:
+						{
+							READ_SET_VAL( UUID )
 						} break;
  
 						case MetaPropertyType::AssetHandle:

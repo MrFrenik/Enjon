@@ -64,7 +64,7 @@ namespace Enjon
 	
 		void Clear(float val = 1.0f, 
 					GLbitfield mask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, 
-					const ColorRGBA16& color = RGBA16_Black());
+					const ColorRGBA32& color = RGBA32_Black());
 		void SwapBuffer(); 
 
 		SDL_Window* GetWindowContext() { return m_sdlWindow; }

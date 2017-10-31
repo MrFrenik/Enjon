@@ -307,7 +307,7 @@ namespace Enjon
 		glUniform3f(GetUniformLocation(name + ".scale"), T.Scale.x, T.Scale.y, T.Scale.z);
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, ColorRGBA16& C)
+	void GLSLProgram::SetUniform(const std::string& name, ColorRGBA32& C)
 	{
 		auto Search = UniformMap.find(name);
 		if (Search != UniformMap.end())

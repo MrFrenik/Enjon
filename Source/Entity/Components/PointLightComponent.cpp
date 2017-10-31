@@ -16,7 +16,7 @@ namespace Enjon
 		mLight.SetPosition(mEntity->GetWorldPosition());	
 	} 
 
-	void PointLightComponent::SetColor(ColorRGBA16& color)
+	void PointLightComponent::SetColor(ColorRGBA32& color)
 	{
 		mLight.SetColor(color);
 	}

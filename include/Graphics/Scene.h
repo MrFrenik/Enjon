@@ -28,16 +28,16 @@ namespace Enjon {
 	{
 		AmbientSettings()
 		{
-			mColor = RGBA16_White();
+			mColor = RGBA32_White();
 			mIntensity = 1.0f;
 		}
 
-		AmbientSettings(ColorRGBA16& color, float intensity)
+		AmbientSettings(ColorRGBA32& color, float intensity)
 			: mColor(color), mIntensity(intensity)
 		{
 		}
 
-		ColorRGBA16 mColor;	
+		ColorRGBA32 mColor;	
 		float mIntensity;
 	};
 
@@ -119,7 +119,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void SetAmbientColor(ColorRGBA16& color);
+			void SetAmbientColor(ColorRGBA32& color);
 
 			/*
 			* @brief
@@ -129,32 +129,32 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			DirectionalLight* GetSun() { return mSun; }
+			DirectionalLight* GetSun() const { return mSun; }
 
 			/*
 			* @brief
 			*/
-			std::vector<Renderable*> GetRenderables();
+			const std::vector<Renderable*>& GetRenderables() const;
 
 			/*
 			* @brief
 			*/
-			std::set<QuadBatch*>* GetQuadBatches() { return &mQuadBatches; }
+			const std::set<QuadBatch*>& GetQuadBatches() const { return mQuadBatches; }
 
 			/*
 			* @brief
 			*/
-			std::set<DirectionalLight*>* GetDirectionalLights() { return &mDirectionalLights; }
+			const std::set<DirectionalLight*>& GetDirectionalLights() const { return mDirectionalLights; }
 
 			/*
 			* @brief
 			*/
-			std::set<PointLight*>* GetPointLights() { return &mPointLights; }
+			const std::set<PointLight*>& GetPointLights() const { return mPointLights; }
 
 			/*
 			* @brief
 			*/
-			std::set<SpotLight*>* GetSpotLights() { return &mSpotLights; }
+			const std::set<SpotLight*>& GetSpotLights() const { return mSpotLights; }
 
 		private:
 			

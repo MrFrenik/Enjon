@@ -10,8 +10,11 @@
 
 namespace Enjon
 {
+	ENJON_CLASS()
 	class MeshAssetLoader : public AssetLoader
 	{
+		ENJON_CLASS_BODY()
+
 		public:
 
 			/**

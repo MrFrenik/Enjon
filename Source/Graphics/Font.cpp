@@ -277,11 +277,11 @@ namespace Enjon
 	}
 
 	/* Adds a string of tex at (x,y) to given spritebatch */
-	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, SpriteBatch& Batch, ColorRGBA16 Color, TextStyle Style, float Angle, float Depth)
+	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, SpriteBatch& Batch, ColorRGBA32 Color, TextStyle Style, float Angle, float Depth)
 	{
 	    if (Style == TextStyle::SHADOW) 
 	    {
-	    	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, RGBA16_Black(), TextStyle::DEFAULT, Angle, Depth + 0.1f);
+	    	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, RGBA32_Black(), TextStyle::DEFAULT, Angle, Depth + 0.1f);
 	    }
 
 		// Iterate through all characters
@@ -309,7 +309,7 @@ namespace Enjon
 
 	}
 
-	void PrintText(Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA16 Color, float Spacing, TextStyle Style)
+	void PrintText(Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA32 Color, float Spacing, TextStyle Style)
 	{
 		Vec3& Position = Transform.Position;
 		Quaternion& Rotation = Transform.Rotation;
@@ -320,7 +320,7 @@ namespace Enjon
 
 	    // if (Style == TextStyle::SHADOW) 
 	    // {
-	    // 	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, RGBA16_Black(), TextStyle::DEFAULT, Angle, Depth);
+	    // 	PrintText(x + scale * 1.0f, y - 1.0f * scale, scale, text, F, Batch, RGBA32_Black(), TextStyle::DEFAULT, Angle, Depth);
 	    // }
 
 		// Iterate through all characters
@@ -355,7 +355,7 @@ namespace Enjon
 	    }
 	}
 
-	void PrintText( Transform& Transform, const Enjon::String& Text, UIFont* F, QuadBatch& Batch, ColorRGBA16 Color, u32 fontSize )
+	void PrintText( Transform& Transform, const Enjon::String& Text, UIFont* F, QuadBatch& Batch, ColorRGBA32 Color, u32 fontSize )
 	{ 
 		Enjon::FontAtlas* atlas = F->GetAtlas( (s32)fontSize );
 		f32 textureWidth = atlas->GetAtlasTexture( ).Get( )->GetWidth( );

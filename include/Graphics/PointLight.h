@@ -11,7 +11,7 @@ namespace Enjon {
 
 	class Scene;
 
-	ENJON_CLASS( )
+	ENJON_CLASS( Construct )
 	class PointLight : public Enjon::Object
 	{
 		ENJON_CLASS_BODY ( ) 
@@ -21,7 +21,7 @@ namespace Enjon {
 			PointLight();
 			
 			ENJON_FUNCTION( Constructor ) 
-			PointLight(Vec3& position, float attenuationRate, ColorRGBA16& color, float intensity = 1.0f, float radius = 1.0f);
+			PointLight(Vec3& position, float attenuationRate, ColorRGBA32& color, float intensity = 1.0f, float radius = 1.0f);
 
 			ENJON_FUNCTION( Destructor ) 
 			~PointLight();
@@ -30,7 +30,7 @@ namespace Enjon {
 			Vec3 GetPosition() 	{ return mPosition; }
 
 			ENJON_FUNCTION() 
-			ColorRGBA16 GetColor() { return mColor; }
+			ColorRGBA32 GetColor() { return mColor; }
 
 			ENJON_FUNCTION() 
 			float GetIntensity() 		{ return mIntensity; }
@@ -42,7 +42,7 @@ namespace Enjon {
 			float GetRadius() 			{ return mRadius; }
 
 			ENJON_FUNCTION() 
-			void SetColor(ColorRGBA16& color);
+			void SetColor(ColorRGBA32& color);
 
 			ENJON_FUNCTION() 
 			void SetIntensity(float intensity);
@@ -74,7 +74,7 @@ namespace Enjon {
 			f32 mIntensity;
 
 			ENJON_PROPERTY( Editable )
-			ColorRGBA16 mColor;
+			ColorRGBA32 mColor;
 			
 			Scene* mScene = nullptr;
 	};

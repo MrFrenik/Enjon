@@ -42,10 +42,10 @@ namespace Enjon {
 
 	struct QuadGlyph
 	{
-		QuadGlyph(Transform& Transform, Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
-		QuadGlyph(Vec2& Dimensions, Transform& Transform, Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
-		QuadGlyph(std::vector<Vec3>& Points, Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
-		QuadGlyph(Vec3& TL, Vec3& BL, Vec3& BR, Vec3& TR, Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
+		QuadGlyph(Transform& Transform, Vec4& UVRect, GLuint _Texture, ColorRGBA32& Color = RGBA32(1.0f), float Depth = 1.0f);
+		QuadGlyph(Vec2& Dimensions, Transform& Transform, Vec4& UVRect, GLuint _Texture, ColorRGBA32& Color = RGBA32(1.0f), float Depth = 1.0f);
+		QuadGlyph(std::vector<Vec3>& Points, Vec4& UVRect, GLuint _Texture, ColorRGBA32& Color = RGBA32(1.0f), float Depth = 1.0f);
+		QuadGlyph(Vec3& TL, Vec3& BL, Vec3& BR, Vec3& TR, Vec4& UVRect, GLuint _Texture, ColorRGBA32& Color = RGBA32(1.0f), float Depth = 1.0f);
 
 		GLuint Texture;
 		QuadVert TL;
@@ -93,13 +93,13 @@ namespace Enjon {
 			Material* GetMaterial() { return mMaterial; }
 
 			// Adds quadglyph to quadbatch to be rendered
-			void Add(Transform& Transform, Vec4& UVRect = Vec4(0, 0, 1, 1), GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
+			void Add(Transform& Transform, Vec4& UVRect = Vec4(0, 0, 1, 1), GLuint Texture = 0, ColorRGBA32& Color = RGBA32(1.0f), float Depth = 1.0f);
 
 			// Adds quadglyph to quadbatch to be rendered with base quad defined
-			void Add(Vec2& Dimensions, Transform& Transform, Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
+			void Add(Vec2& Dimensions, Transform& Transform, Vec4& UVRect, GLuint Texture = 0, ColorRGBA32& Color = RGBA32(1.0f), float Depth = 1.0f);
 
 			// Adds quadglyph to quadbatch to be rendered with base quad defined
-			void Add(Vec3& TLP, Vec3& BLP, Vec3& BRP, Vec3& TRP, Vec4& UVRect, GLuint Texture = 0, ColorRGBA16& Color = RGBA16(1.0f), float Depth = 1.0f);
+			void Add(Vec3& TLP, Vec3& BLP, Vec3& BRP, Vec3& TRP, Vec4& UVRect, GLuint Texture = 0, ColorRGBA32& Color = RGBA32(1.0f), float Depth = 1.0f);
 
 			// Renders entire batch to screen
 			void RenderBatch();

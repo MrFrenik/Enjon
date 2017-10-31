@@ -32,7 +32,7 @@ namespace Enjon
 
 	//================================================================================= 
  
-	ShaderGraph* ShaderGraphAssetLoader::LoadResourceFromFile( const String& filePath, const String& name )
+	Asset* ShaderGraphAssetLoader::LoadResourceFromFile( const String& filePath, const String& name )
 	{
 		ShaderGraph* graph = LoadShaderGraphFromFile( filePath );
 

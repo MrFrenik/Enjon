@@ -12,7 +12,7 @@ namespace Enjon {
 
 	class Scene;
 
-	ENJON_CLASS( )
+	ENJON_CLASS( Construct )
 	class DirectionalLight : public Enjon::Object
 	{
 		ENJON_CLASS_BODY( )
@@ -20,24 +20,24 @@ namespace Enjon {
 		public:
 				DirectionalLight();
 				DirectionalLight(Vec3& direction, 
-								ColorRGBA16& color, 
+								ColorRGBA32& color, 
 								float intensity = 1.0f);
 				~DirectionalLight();
 
 				ENJON_FUNCTION()
-				Vec3 GetDirection() { return mDirection; }
+				Vec3 GetDirection() const { return mDirection; }
 
 				ENJON_FUNCTION()
-				ColorRGBA16 GetColor() { return mColor; }
+				ColorRGBA32 GetColor() const { return mColor; }
 
 				ENJON_FUNCTION()
-				f32 GetIntensity() { return mIntensity; }
+				f32 GetIntensity() const { return mIntensity; }
 
 				ENJON_FUNCTION()
 				void SetDirection(Vec3& direction);
 
 				ENJON_FUNCTION()
-				void SetColor(ColorRGBA16& color);
+				void SetColor(ColorRGBA32& color);
 
 				ENJON_FUNCTION()
 				void SetIntensity(float intensity);
@@ -50,7 +50,7 @@ namespace Enjon {
 				Vec3 mDirection;
 
 				ENJON_PROPERTY( )
-				ColorRGBA16 mColor;
+				ColorRGBA32 mColor;
 
 				ENJON_PROPERTY( )
 				f32 mIntensity;

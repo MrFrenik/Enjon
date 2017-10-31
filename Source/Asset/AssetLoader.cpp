@@ -75,5 +75,20 @@ namespace Enjon
 
 		return false;
 	} 
+	
+	//=================================================================
+
+	Asset* AssetLoader::GetDefaultAsset( )
+	{
+		if ( mDefaultAsset )
+		{
+			return mDefaultAsset;
+		}
+
+		RegisterDefaultAsset( ); 
+		return mDefaultAsset;
+	} 
+	
+	//=================================================================
 }
 

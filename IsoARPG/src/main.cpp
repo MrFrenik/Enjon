@@ -87,7 +87,7 @@
 typedef struct
 {
 	EM::Vec3 Position;
-	EG::ColorRGBA16 Color;
+	EG::ColorRGBA32 Color;
 	float Radius;
 	EM::Vec3 Falloff;
 } Light;
@@ -461,7 +461,7 @@ int main(int argc, char** argv)
 										Enjon::Math::Vec2(ER::Roll(5, 10), ER::Roll(1, 5)), EG::SpriteSheetManager::GetSpriteSheet("VerticleBar"), Masks::Type::ITEM, Component::EntityType::ITEM);
 		World->TransformSystem->Transforms[id].Angle = ER::Roll(0, 360);
 		World->Renderer2DSystem->Renderers[id].Format = EG::CoordinateFormat::ISOMETRIC;
-		World->Renderer2DSystem->Renderers[id].Color = EG::RGBA16(0.5f, 0.2f, 0.1f, 1.0f);
+		World->Renderer2DSystem->Renderers[id].Color = EG::RGBA32(0.5f, 0.2f, 0.1f, 1.0f);
 		World->AttributeSystem->Masks[id] |= Masks::GeneralOptions::DEBRIS;
 	}
 
@@ -539,8 +539,8 @@ int main(int argc, char** argv)
    	float LevelHeight = level.GetHeight(); 
 	for (GLuint i = 0; i < NUM_LIGHTS; i++)
 	{
-		// EG::ColorRGBA16 Color = EG::RGBA16(ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, 2.5f);
-		EG::ColorRGBA16 Color = EG::RGBA16(0.6f, 0.7f, ER::Roll(0, 255) / 255.0f, 1.0f);
+		// EG::ColorRGBA32 Color = EG::RGBA32(ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, ER::Roll(0, 500) / 255.0f, 2.5f);
+		EG::ColorRGBA32 Color = EG::RGBA32(0.6f, 0.7f, ER::Roll(0, 255) / 255.0f, 1.0f);
 	    GLfloat maxBrightness = std::fmaxf(std::fmaxf(Color.r, Color.g), Color.b);  // max(max(lightcolor.r, lightcolor.g), lightcolor.b)
 	    // GLfloat maxBrightness = 100.0f;  // max(max(lightcolor.r, lightcolor.g), lightcolor.b)
 	    GLfloat Radius = (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2 * quadratic);
@@ -787,7 +787,7 @@ int main(int argc, char** argv)
 			const EM::Vec3* P = &World->TransformSystem->Transforms[Player].Position;
 			EM::Vec2 AddOn = EM::CartesianToIso(EM::Vec2(150 * cos(t), 150 * sin(t)));
 			L->Position = EM::Vec3(P->x + AddOn.x, P->y - P->z + AddOn.y, 0.0f);
-			L->Color = EG::RGBA16(0.3f, 0.2f, 1.0f, 1.0f);
+			L->Color = EG::RGBA32(0.3f, 0.2f, 1.0f, 1.0f);
 		}
 
 		// Clear lights
@@ -938,7 +938,7 @@ int main(int argc, char** argv)
 
 		if (AnimationEditorOn)
 		{
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.16f, 0.16f, 0.16f, 1.0));
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32(0.16f, 0.16f, 0.16f, 1.0));
 	
 			// Show mouse
 			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
@@ -949,7 +949,7 @@ int main(int argc, char** argv)
 
 		else if (BehaviorTreeEditorOn)
 		{
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.16f, 0.16f, 0.16f, 1.0));
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32(0.16f, 0.16f, 0.16f, 1.0));
 	
 			// Show mouse
 			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::SHOW);
@@ -961,7 +961,7 @@ int main(int argc, char** argv)
 		// Render game scene
 		else
 		{
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32(0.0, 0.0, 0.0, 0.0));
 
 			// Hide mouse
 			Window.ShowMouseCursor(Enjon::Graphics::MouseCursorFlags::HIDE);
@@ -1018,13 +1018,13 @@ int main(int argc, char** argv)
 				EG::SpriteSheet* ESpriteSheet = World->Animation2DSystem->Animations[e].Sheet;	
 				EntityPosition = &World->TransformSystem->Transforms[e].Position;
 				Ground = &World->TransformSystem->Transforms[e].GroundPosition;
-				const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[e].Color;
+				const Enjon::Graphics::ColorRGBA32* Color = &World->Renderer2DSystem->Renderers[e].Color;
 				auto EDims = &World->TransformSystem->Transforms[e].Dimensions;
 
 				Ground = &World->TransformSystem->Transforms[e].GroundPosition;
 				auto EAABB = &World->TransformSystem->Transforms[e].AABB;
 				// EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), EG::SpriteSheetManager::GetSpriteSheet("Orb2")->texture.id,
-				// 						Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);
+				// 						Graphics::SetOpacity(Graphics::RGBA32_Black(), 0.2f), 1.0f);
 
 				// If AI
 				if (Mask & COMPONENT_AICONTROLLER)
@@ -1042,7 +1042,7 @@ int main(int argc, char** argv)
 													std::string("ID: ") + std::to_string(e), 
 													CF, 
 													TextBatch, 
-													EG::SetOpacity(Graphics::RGBA16_White(), 0.8f)
+													EG::SetOpacity(Graphics::RGBA32_White(), 0.8f)
 												);
 						// Entity Type
 						std::string Type;
@@ -1060,13 +1060,13 @@ int main(int argc, char** argv)
 													EntityPosition->y - 40.0f, 
 													0.4f, std::string("<") + std::to_string(X) + std::string(", ") + std::to_string(Y) + (", ") + std::to_string(Z) + std::string(">"), 
 													CF, TextBatch, 
-																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+																	Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 						Graphics::Fonts::PrintText( EntityPosition->x + 20.0f, 
 													EntityPosition->y - 60.0f, 
 													0.4f, std::string("Type: ") + Type, 
 													CF, TextBatch, 
-																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+																	Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 						auto EntityHealth = World->AttributeSystem->HealthComponents[e].Health;
 
@@ -1074,7 +1074,7 @@ int main(int argc, char** argv)
 													EntityPosition->y - 80.0f, 
 													0.4f, std::string("Health: ") + std::to_string(EntityHealth), 
 													CF, TextBatch, 
-																	Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+																	Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 						auto Cells =  SpatialHash::FindGridCoordinates(World->Grid, World->TransformSystem->Transforms[e].CartesianPosition);
 
@@ -1082,7 +1082,7 @@ int main(int argc, char** argv)
 													EntityPosition->y - 100.0f, 
 													0.4f, std::string("Grid Cell: ") + "(" + std::to_string(Cells.x) + ", " + std::to_string(Cells.y) + ")", 
 													CF, TextBatch, 
-													Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+													Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 						auto Node = World->AIControllerSystem->AIControllers[e].BB.SO.CurrentNode;
 						if (Node != nullptr)
@@ -1091,7 +1091,7 @@ int main(int argc, char** argv)
 														EntityPosition->y - 120.0f, 
 														0.4f, std::string("RUNNING: ") + Node->String(), 
 														CF, TextBatch, 
-														Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+														Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 						}
 					}
 
@@ -1100,7 +1100,7 @@ int main(int argc, char** argv)
 					{
 						Math::Vec2 ReticleDims(94.0f, 47.0f);
 						Math::Vec2 Position = World->TransformSystem->Transforms[e].GroundPosition - Math::Vec2(15.0f, 5.0f);
-						EntityBatch.Add(Math::Vec4(Position.x, Position.y, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), TargetSheet.texture.id, Enjon::Graphics::RGBA16_Red(), 1000);
+						EntityBatch.Add(Math::Vec4(Position.x, Position.y, ReticleDims), Enjon::Math::Vec4(0, 0, 1, 1), TargetSheet.texture.id, Enjon::Graphics::RGBA32_Red(), 1000);
 					}
 
 					// EntityBatch.Add(Math::Vec4(EntityPosition->XY(), *EDims), uv, ESpriteSheet->texture.id, *Color, EntityPosition->y - World->TransformSystem->Transforms[e].Position.z);
@@ -1123,7 +1123,7 @@ int main(int argc, char** argv)
 					// 				EM::Vec4(Position, 300.0f, 300.0f * 0.87f),
 					// 				EM::Vec4(0, 0, 1, 1),
 					// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Enemy_NormalDepth.png").id,
-					// 				EG::RGBA16_White(),
+					// 				EG::RGBA32_White(),
 					// 				Position.y - World->TransformSystem->Transforms[e].Position.z
 					// 				);
 
@@ -1160,7 +1160,7 @@ int main(int argc, char** argv)
 				// if (World->Types[e] != ECS::Component::EntityType::ITEM)
 				// {
 				// 	EntityBatch.Add(Math::Vec4(Ground->x, Ground->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-				// 							Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 1.0f);
+				// 							Graphics::SetOpacity(Graphics::RGBA32_Black(), 0.2f), 1.0f);
 		
 				// 	float XDiff = World->TransformSystem->Transforms[e].AABBPadding.x;
 				// 	float YDiff = World->TransformSystem->Transforms[e].AABBPadding.y;
@@ -1170,10 +1170,10 @@ int main(int argc, char** argv)
 				// 	// float EAABBHeight = EAABB->Max.y - EAABB->Min.y, EAABBWidth = EAABB->Max.x - EAABB->Min.y;
 				// 	// EntityBatch.Add(Math::Vec4(EAABBIsoMin, Math::Vec2(abs(EAABB->Max.x - EAABB->Min.x), abs(EAABB->Max.y - EAABB->Min.y))), 
 				// 	// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
-				// 	// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
+				// 	// 					Graphics::SetOpacity(Graphics::RGBA32_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
 				// 	// EntityBatch.Add(Math::Vec4(EAABBIsoMin.x, EAABBIsoMin.y, Math::Vec2(XDiff, YDiff)), 
 				// 	// 					Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/2dmaptile.png").id, 
-				// 	// 					Graphics::SetOpacity(Graphics::RGBA16_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
+				// 	// 					Graphics::SetOpacity(Graphics::RGBA32_Red(), 0.2f), EAABBIsoMin.y, Math::ToRadians(0.0f), Graphics::CoordinateFormat::ISOMETRIC);
 				// }
 			}
 
@@ -1208,7 +1208,7 @@ int main(int argc, char** argv)
 				for (int i = 0; i < 5; i++)
 				{
 					Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
-					Enjon::Graphics::ColorRGBA16 DashColor = World->Renderer2DSystem->Renderers[Player].Color;
+					Enjon::Graphics::ColorRGBA32 DashColor = World->Renderer2DSystem->Renderers[Player].Color;
 					// DashColor.r += (i + i*2.9f);
 					DashColor.g += (i + i*20.75f);
 					DashColor.b += (i*5.25f);
@@ -1259,7 +1259,7 @@ int main(int argc, char** argv)
 			float boxRadius = 10.0f;
 			BoxCoords = BoxCoords - boxRadius * Math::CartesianToIso(Math::Vec2(cos(Math::ToRadians(AimAngle - 90)), sin(Math::ToRadians(AimAngle - 90))));
 			// EntityBatch.Add(Math::Vec4(BoxCoords, 100, 50), Math::Vec4(0, 0, 1, 1), Input::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/vector_reticle.png").id, 
-			// 					Graphics::SetOpacity(Graphics::RGBA16_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 45), Graphics::CoordinateFormat::ISOMETRIC);
+			// 					Graphics::SetOpacity(Graphics::RGBA32_White(), 0.7f), 1.0f, Math::ToRadians(AimAngle + 45), Graphics::CoordinateFormat::ISOMETRIC);
 
 
 			Enjon::Math::Vec2 AimCoords(World->TransformSystem->Transforms[Player].Position.XY() + Math::Vec2(100.0f, -100.0f));
@@ -1271,7 +1271,7 @@ int main(int argc, char** argv)
 			static float aim_count2 = 0.0f;
 			aim_count += 0.5f;
 			static Enjon::uint32 aim_index = 0;
-			static Graphics::ColorRGBA16 AimColor;
+			static Graphics::ColorRGBA32 AimColor;
 			if (aim_count >= 1.0f)
 			{
 				if (aim_index == 0)
@@ -1286,11 +1286,11 @@ int main(int argc, char** argv)
 				}
 				else if (aim_index == 7)
 				{
-					AimColor = Graphics::RGBA16_Red();
+					AimColor = Graphics::RGBA32_Red();
 					aim_count2 += 0.025f;
 					if (aim_count2 >= 1.0f)
 					{
-						AimColor = Graphics::RGBA16_White();
+						AimColor = Graphics::RGBA32_White();
 						aim_index = 0;
 						aim_count = 0.0f;
 						aim_count2 = 0.0f;
@@ -1299,7 +1299,7 @@ int main(int argc, char** argv)
 				}
 				else
 				{
-					AimColor = Graphics::RGBA16_White();
+					AimColor = Graphics::RGBA32_White();
 					aim_index++;
 					aim_count = 0.0f;
 				}
@@ -1309,7 +1309,7 @@ int main(int argc, char** argv)
 
 
 			Frame = World->Animation2DSystem->Animations[Player].CurrentFrame + World->Animation2DSystem->Animations[Player].BeginningFrame;
-			const Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[Player].Color;
+			const Enjon::Graphics::ColorRGBA32* Color = &World->Renderer2DSystem->Renderers[Player].Color;
 			Enjon::Math::Vec2* PlayerPosition = &World->TransformSystem->Transforms[Player].Position.XY();
 			if (World->Animation2DSystem->Animations[Player].Sheet == EG::SpriteSheetManager::GetSpriteSheet("PlayerSheet2"))
 			{
@@ -1322,7 +1322,7 @@ int main(int argc, char** argv)
 			//////////////////////////////////////////
 
 			{
-				// void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA16& Color = EG::RGBA16_White(), float ScalingFactor = 1.0f);
+				// void DrawFrame(const ImageFrame& Image, EM::Vec2 Position, EG::SpriteBatch* Batch, const EG::ColorRGBA32& Color = EG::RGBA32_White(), float ScalingFactor = 1.0f);
 				// Get handle to image frame
 				auto CurrentIndex = World->Animation2DSystem->AnimComponents[Player].CurrentIndex;
 				auto Image = &World->Animation2DSystem->AnimComponents[Player].CurrentAnimation->Frames.at(CurrentIndex);
@@ -1342,7 +1342,7 @@ int main(int argc, char** argv)
 												std::string("ID: ") + std::to_string(Player), 
 												CF, 
 												TextBatch, 
-												EG::SetOpacity(Graphics::RGBA16_White(), 0.8f)
+												EG::SetOpacity(Graphics::RGBA32_White(), 0.8f)
 											);
 					// Entity Type
 					std::string Type;
@@ -1360,13 +1360,13 @@ int main(int argc, char** argv)
 												PlayerPosition->y - 40.0f, 
 												0.4f, std::string("<") + std::to_string(X) + std::string(", ") + std::to_string(Y) + (", ") + std::to_string(Z) + std::string(">"), 
 												CF, TextBatch, 
-																Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+																Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 					Graphics::Fonts::PrintText( PlayerPosition->x + 20.0f, 
 												PlayerPosition->y - 60.0f, 
 												0.4f, std::string("Type: ") + Type, 
 												CF, TextBatch, 
-																Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+																Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 					auto EntityHealth = World->AttributeSystem->HealthComponents[Player].Health;
 
@@ -1374,7 +1374,7 @@ int main(int argc, char** argv)
 												PlayerPosition->y - 80.0f, 
 												0.4f, std::string("Health: ") + std::to_string(EntityHealth), 
 												CF, TextBatch, 
-																Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+																Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 					auto Cells =  SpatialHash::FindGridCoordinates(World->Grid, World->TransformSystem->Transforms[Player].CartesianPosition);
 
@@ -1382,7 +1382,7 @@ int main(int argc, char** argv)
 												PlayerPosition->y - 100.0f, 
 												0.4f, std::string("Grid Cell: ") + "(" + std::to_string(Cells.x) + ", " + std::to_string(Cells.y) + ")", 
 												CF, TextBatch, 
-												Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				}
 			}
@@ -1392,7 +1392,7 @@ int main(int argc, char** argv)
 										PlayerPosition->y + 170.0f, 
 										1.0f, "P1", 
 										EG::FontManager::GetFont("8Bit_32"), TextBatch, 
-										Graphics::SetOpacity(Graphics::RGBA16_Orange(), 0.8f));
+										Graphics::SetOpacity(Graphics::RGBA32_Orange(), 0.8f));
 
 			//////////////////////////////////////////
 
@@ -1407,18 +1407,18 @@ int main(int argc, char** argv)
 			// Draw player ground tile 
 			const Math::Vec2* GroundPosition = &World->TransformSystem->Transforms[Player].GroundPosition;
 			EntityBatch.Add(Math::Vec4(GroundPosition->x, GroundPosition->y, 64.0f, 32.0f), Math::Vec4(0, 0, 1, 1), groundtiletexture.id,
-										Graphics::SetOpacity(Graphics::RGBA16_Black(), 0.2f), 10000000.0f);
+										Graphics::SetOpacity(Graphics::RGBA32_Black(), 0.2f), 10000000.0f);
 			// Draw player shadow
 			EntityBatch.Add(Math::Vec4(GroundPosition->x - 20.0f, GroundPosition->y - 20.0f, 200.0f, 300.0f), EM::Vec4(0, 0, 1, 1), 
 										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/mainDudeSmall.png").id,
-										Graphics::SetOpacity(Graphics::RGBA16_Black(), EM::Clamp(sin(EntitySystem::WorldTime()), 0.0f, 1.0f)), 1000000.0f, Enjon::Math::ToRadians(120.0f));
+										Graphics::SetOpacity(Graphics::RGBA32_Black(), EM::Clamp(sin(EntitySystem::WorldTime()), 0.0f, 1.0f)), 1000000.0f, Enjon::Math::ToRadians(120.0f));
 		
 			///////////////////////////////
 			// BEAMS //////////////////////	
 			///////////////////////////////
 
 			/*
-			EG::ColorRGBA16 C = EG::RGBA16_ZombieGreen();
+			EG::ColorRGBA32 C = EG::RGBA32_ZombieGreen();
 			EM::Vec2 Norm;
 
 			// First segment
@@ -1500,7 +1500,7 @@ int main(int argc, char** argv)
 			// HUDBatch.Add(EM::Vec4(X, Y, 400.0f, 10.0f),
 			// 			 EM::Vec4(0, 0, 1, 1), 
 			// 			  HealthSheet.texture.id, 
-			// 			  EG::RGBA16_Red());
+			// 			  EG::RGBA32_Red());
 
 			auto F = EG::FontManager::GetFont("WeblySleek_32");
 
@@ -1523,101 +1523,101 @@ int main(int argc, char** argv)
 										), 
 								EM::Vec4(), 
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16_LightPurple(), 0.3f)
+								EG::SetOpacity(EG::RGBA32_LightPurple(), 0.3f)
 							);
 				// Profiling info
 				// Add FPS
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
-												0.4f, "FPS: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "FPS: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 60.0f, 
-												0.4f, FPSString, F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, FPSString, F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// Add CollisionTime
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 80.0f, 
-												0.4f, "Collisions: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "Collisions: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 80.0f, 
-												0.4f, CollisionTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, CollisionTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// Add RenderTime
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
-												0.4f, "Rendering: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "Rendering: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 100.0f, 
-												0.4f, RenderTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, RenderTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// Add EffectTime
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, 
-												0.4f, "Effects: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "Effects: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 120.0f, 
-												0.4f, EffectTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, EffectTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// Add TileOverlayTime
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
-												0.4f, "TileOverlay: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "TileOverlay: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 140.0f, 
-												0.4f, TileOverlayTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, TileOverlayTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// // Add LightsToDraw
 				Enjon::uint32 LightsSize = LightsToDraw.size(); 
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 160.0f, 
-												0.4f, "LightsToDraw: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "LightsToDraw: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 160.0f, 
-												0.4f, std::to_string(LightsSize), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, std::to_string(LightsSize), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// // LightZ
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 180.0f, 
-												0.4f, "LightZ: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "LightZ: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 180.0f, 
-												0.4f, std::to_string(LightZ), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, std::to_string(LightZ), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// Entities
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 200.0f, 
-												0.4f, "Entities: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "Entities: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 200.0f, 
-												0.4f, std::to_string(World->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, std::to_string(World->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// Renderer size
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 220.0f, 
-												0.4f, "Entities Drawn: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "Entities Drawn: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 220.0f, 
-												0.4f, std::to_string(World->Renderer2DSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, std::to_string(World->Renderer2DSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// Collisions size
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 240.0f, 
-												0.4f, "Collisions size: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "Collisions size: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 240.0f, 
-												0.4f, std::to_string(World->CollisionSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, std::to_string(World->CollisionSystem->Entities.size()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// Transform run time
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 260.0f, 
-												0.4f, "Transforms: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "Transforms: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 260.0f, 
-												0.4f, TransformTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, TransformTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// AI run time
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 280.0f, 
-												0.4f, "AI: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "AI: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 280.0f, 
-												0.4f, AITimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, AITimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// Player Controller run time
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 300.0f, 
-												0.4f, "PlayerController: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "PlayerController: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 300.0f, 
-												0.4f, PlayerControllerTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, PlayerControllerTimeString + " ms", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// Camera scale
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 320.0f, 
-												0.4f, "Camera Scale: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "Camera Scale: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 320.0f, 
-												0.4f, std::to_string(Camera.GetScale()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, std::to_string(Camera.GetScale()), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 				// Spatial Hash
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 30.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 340.0f, 
-												0.4f, "Spatial Grid: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.5f));
+												0.4f, "Spatial Grid: ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.5f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 200.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 340.0f, 
-												0.4f, "Rows: " + std::to_string(World->Grid->rows) + ", ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, "Rows: " + std::to_string(World->Grid->rows) + ", ", F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 				Graphics::Fonts::PrintText(HUDCamera.GetPosition().x - SCREENWIDTH / 2.0f + 270.0f, HUDCamera.GetPosition().y + SCREENHEIGHT / 2.0f - 340.0f, 
-												0.4f, "Cols: " + std::to_string(World->Grid->cols), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA16_White(), 0.8f));
+												0.4f, "Cols: " + std::to_string(World->Grid->cols), F, HUDBatch, Graphics::SetOpacity(Graphics::RGBA32_White(), 0.8f));
 
 			}
 
@@ -1626,7 +1626,7 @@ int main(int argc, char** argv)
 
 			// // Draw Isometric compass
 			// MapEntityBatch.Add(EM::Vec4(HUDCamera.GetPosition() - EM::Vec2(SCREENWIDTH / 2.0f - 30.0f, -SCREENHEIGHT / 2.0f + 250.0f), 150.0f, 75.0f), 
-			// 				EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Coordinates.png").id, EG::RGBA16_White());
+			// 				EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/Coordinates.png").id, EG::RGBA32_White());
 
 			// Add particles to entity batch
 			EG::Particle2D::Draw(World->ParticleEngine, &Camera);
@@ -1662,7 +1662,7 @@ int main(int argc, char** argv)
 				// 		auto T = IsoTiles[LEVELSIZE * i + j];
 
 				// 		// If front wall, then lower opacity
-				// 		EG::ColorRGBA16 Color = EG::RGBA16_White();
+				// 		EG::ColorRGBA32 Color = EG::RGBA32_White();
 				// 		if (i == 0 || i >= LEVELSIZE - 1 || j == 0 || j >= LEVELSIZE - 1) Color = EG::SetOpacity(Color, 0.5f);
 				// 		EntityBatch.Add(Enjon::Math::Vec4(T->pos, T->dims), T->Sheet->GetUV(T->index), T->Sheet->texture.id, Color, T->depth);
 				// 	}
@@ -1675,7 +1675,7 @@ int main(int argc, char** argv)
 				// Points.push_back(EM::Vec2(-800, -1400));	// BR
 				// Points.push_back(EM::Vec2(-850, -1200));	// TR
 				// Points.push_back(EM::Vec2(-900, -1200));	// TL
-				// EntityBatch.AddPolygon(Points, EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::RGBA16_Orange(), Points.at(0).y, EG::CoordinateFormat::ISOMETRIC);
+				// EntityBatch.AddPolygon(Points, EM::Vec4(0, 0, 1, 1), EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/verticlebar.png").id, EG::RGBA32_Orange(), Points.at(0).y, EG::CoordinateFormat::ISOMETRIC);
 
 				// Add a random cube 
 				// static EG::SpriteSheet* BoxSheet = EG::SpriteSheetManager::GetSpriteSheet("BoxSheet");
@@ -1684,13 +1684,13 @@ int main(int argc, char** argv)
 				// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
 				// 	BoxSheet->GetUV(0), 
 				// 	BoxSheet->texture.id
-				// 	EG::SetOpacity(EG::RGBA16_White(), 0.05f)
+				// 	EG::SetOpacity(EG::RGBA32_White(), 0.05f)
 				// 	);
 				// NormalsBatch.Add(
 				// 	EM::Vec4(BoxPos.x, BoxPos.y + 50.0f, 100, 100), 
 				// 	BoxSheet->GetUV(1),
 				// 	BoxSheet->texture.id,
-				// 	EG::SetOpacity(EG::RGBA16_White(), 0.5f)
+				// 	EG::SetOpacity(EG::RGBA32_White(), 0.5f)
 				// 	);
 			}
 			*/
@@ -1733,11 +1733,11 @@ int main(int argc, char** argv)
 
 					auto CellCoordinates = SpatialHash::FindGridCoordinatesFromIndex(World->Grid, index);
 					auto CellDimensions = SpatialHash::GetCellDimensions(World->Grid, CellCoordinates);
-					auto Color = EG::RGBA16_Yellow();
+					auto Color = EG::RGBA32_Yellow();
 
 					if (World->Grid->cells.at(index).entities.size())
 					{
-						Color = EG::RGBA16_Red();
+						Color = EG::RGBA32_Red();
 
 						for (auto& e : World->Grid->cells.at(index).entities)
 						{
@@ -1745,7 +1745,7 @@ int main(int argc, char** argv)
 
 							// Get health and color of entity
 							Component::HealthComponent* HealthComponent = &World->AttributeSystem->HealthComponents[e];
-							Enjon::Graphics::ColorRGBA16* Color = &World->Renderer2DSystem->Renderers[e].Color;
+							Enjon::Graphics::ColorRGBA32* Color = &World->Renderer2DSystem->Renderers[e].Color;
 
 							// Set option to damaged
 							World->AttributeSystem->Masks[e] |= Masks::GeneralOptions::DAMAGED;
@@ -1786,7 +1786,7 @@ int main(int argc, char** argv)
 														EM::Vec4(Dims.x, Dims.y, Dims.z - 5.0f, Dims.w - 5.0f), 
 														EM::Vec4(0, 0, 1, 1), 
 														EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
-														EG::SetOpacity(EG::RGBA16_Black(), i)
+														EG::SetOpacity(EG::RGBA32_Black(), i)
 													);
 								i += 0.1f;
 							}
@@ -1811,7 +1811,7 @@ int main(int argc, char** argv)
 					// 							EM::Vec4(Dims.x, Dims.y, Dims.z - 5.0f, Dims.w - 5.0f), 
 					// 							EM::Vec4(0, 0, 1, 1), 
 					// 							EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/tiletestfilledwhite.png").id,
-					// 							EG::RGBA16_Black()
+					// 							EG::RGBA32_Black()
 					// 						);
 					// }
 				}
@@ -1826,7 +1826,7 @@ int main(int argc, char** argv)
 				auto CurrentIndex = World->Animation2DSystem->AnimComponents[Player].CurrentIndex;
 				auto Image = &World->Animation2DSystem->AnimComponents[Player].CurrentAnimation->Frames.at(CurrentIndex);
 
-				// EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::SetOpacity(EG::RGBA16_White(), 0.1f), 1.5f, -10000.0f);
+				// EA::DrawFrame(*Image, *PlayerPosition, &EntityBatch, EG::SetOpacity(EG::RGBA32_White(), 0.1f), 1.5f, -10000.0f);
 			}
 
 			// Draw spline
@@ -1844,7 +1844,7 @@ int main(int argc, char** argv)
 										EM::Vec4(300.0f + 30 * CO, 600.0f + 30 * SO, 500.0f + 50 * CO, 100.0f + 20 * SO),
 										30.0f + 25 * SO,
 										200,
-										EG::RGBA16_LightPurple()
+										EG::RGBA32_LightPurple()
 									);
 			}
 
@@ -1993,7 +1993,7 @@ int main(int argc, char** argv)
 
 				// Do any post processing here, of course...
 				// Bind default buffer and render deferred render texture
-				Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.0, 0.0, 0.0, 0.0));
+				Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32(0.0, 0.0, 0.0, 0.0));
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 				ScreenShader->Use();
@@ -2105,7 +2105,7 @@ int main(int argc, char** argv)
 									EM::Vec4(-SCREENWIDTH * 0.5f, -SCREENHEIGHT * 0.5f, SCREENWIDTH, SCREENHEIGHT),
 									EM::Vec4(0, 0, 1, 1),
 									EI::ResourceManager::GetTexture("../Assets/Textures/Default.png").id,
-									EG::SetOpacity(EG::RGBA16_LightPurple(), 0.4f)
+									EG::SetOpacity(EG::RGBA32_LightPurple(), 0.4f)
 								);
 				}
 				HUDBatch.End();
@@ -2121,7 +2121,7 @@ int main(int argc, char** argv)
 					auto YOffset = 30.0f;
 					for (auto C = ConsoleOutput.rbegin(); C != ConsoleOutput.rend(); C++)
 					{
-						 EG::Fonts::PrintText(StartPosition.x, StartPosition.y + YOffset, 1.0f, *C, ConsoleInputTextBox.TextFont, TextBatch, EG::RGBA16_LightGrey());
+						 EG::Fonts::PrintText(StartPosition.x, StartPosition.y + YOffset, 1.0f, *C, ConsoleInputTextBox.TextFont, TextBatch, EG::RGBA32_LightGrey());
 						 YOffset += 20.0f;
 					}
 
@@ -2319,7 +2319,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 			World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
 			World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(0, 0);
 			World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-5.0f, -5.0f);
-			World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA16_White(), 0.3f);
+			World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA32_White(), 0.3f);
 
 		}
 
@@ -2354,7 +2354,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 			World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
 			World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(0, 0);
 			World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-5.0f, -5.0f);
-			World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA16_White(), 0.3f);
+			World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA32_White(), 0.3f);
 		}
 
 		else if (Input->IsKeyDown(SDLK_b))
@@ -2388,7 +2388,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 			World->TransformSystem->Transforms[id].Mass = (float)ER::Roll(2000, 2500) / 50.0f;
 			World->TransformSystem->Transforms[id].AABBPadding = EM::Vec2(0, 0);
 			World->TransformSystem->Transforms[id].GroundPositionOffset = EM::Vec2(-5.0f, -5.0f);
-			World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA16_White(), 0.3f);
+			World->Renderer2DSystem->Renderers[id].Color = EG::SetOpacity(EG::RGBA32_White(), 0.3f);
 		}
 
 		if (Input->IsKeyPressed(SDLK_x))
@@ -2453,7 +2453,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 																Width / Col,
 																Height / Row
 															), 
-													EG::RGBA16_White(),
+													EG::RGBA32_White(),
 													TextureID, 
 													0.0005f, 
 													World->ParticleEngine->ParticleBatches.at(0),
@@ -2475,7 +2475,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 			// 											Width / 2.0f,
 			// 											Height
 			// 										), 
-			// 								EG::RGBA16_Red(),
+			// 								EG::RGBA32_Red(),
 			// 								CS.TextureID, 
 			// 								0.0005f, 
 			// 								World->ParticleEngine->ParticleBatches.at(2),
@@ -2489,7 +2489,7 @@ void ProcessInput(Enjon::Input::InputManager* Input, Enjon::Graphics::Camera2D* 
 			// 											Width / 2.0f,
 			// 											Height
 			// 										), 
-			// 								EG::RGBA16_Red(),
+			// 								EG::RGBA32_Red(),
 			// 								CS.TextureID, 
 			// 								0.0005f, 
 			// 								World->ParticleEngine->ParticleBatches.at(2),
@@ -2668,7 +2668,7 @@ void DrawBox(Enjon::Graphics::SpriteBatch* Batch, Enjon::Graphics::SpriteBatch* 
 	float RY = sin(0.05f * t) * 1.0f;
 	static GLuint TexID = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/box.png").id;
 	static GLuint LightId = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg-light-small.png").id;
-	EG::ColorRGBA16 Color = EG::RGBA16_White();
+	EG::ColorRGBA32 Color = EG::RGBA32_White();
 	float Rad = 80.0f;
 	EM::Vec2 BoxPos = Pos + Rad * EM::CartesianToIso(Math::Vec2(cos(angle), sin(angle)));
 
@@ -2695,14 +2695,14 @@ void DrawBox(Enjon::Graphics::SpriteBatch* Batch, Enjon::Graphics::SpriteBatch* 
 
 	// Player Shadow
 	Batch->Add(EM::Vec4(BeamPos - Manager->TransformSystem->Transforms[Manager->Player].Position.z, BeamDims + EM::Vec2(Height / 2.0f, Height + PP->z)), 
-		PS->GetUV(CurrentFrame), PS->texture.id, EG::SetOpacity(EG::RGBA16_Black(), Color.r / 20.0f - Height / 750.0f),
+		PS->GetUV(CurrentFrame), PS->texture.id, EG::SetOpacity(EG::RGBA32_Black(), Color.r / 20.0f - Height / 750.0f),
 				BeamPos.y, EM::ToRadians(a + 90.0f), EG::CoordinateFormat::ISOMETRIC);
 
 	// Light box
-	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y + Height, Dims.x, Dims.y + RY), EM::Vec4(0, 0, 1, 1), TexID, EG::RGBA16(Color.r + 100.0f, Color.g + 100.0f, Color.b, Color.a), BoxPos.y, angle);
+	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y + Height, Dims.x, Dims.y + RY), EM::Vec4(0, 0, 1, 1), TexID, EG::RGBA32(Color.r + 100.0f, Color.g + 100.0f, Color.b, Color.a), BoxPos.y, angle);
 
 	// Shadow
-	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y, Dims.x / 100.0f - Height / 2.0f, Dims.y / 100.0f - Height / 2.0f), EM::Vec4(0, 0, 1, 1), TexID, EG::SetOpacity(EG::RGBA16_Black(), 0.2f + Color.r / 30.0f - Height / 450.0f), BoxPos.y, angle, EG::CoordinateFormat::ISOMETRIC);
+	Batch->Add(EM::Vec4(BoxPos.x, BoxPos.y, Dims.x / 100.0f - Height / 2.0f, Dims.y / 100.0f - Height / 2.0f), EM::Vec4(0, 0, 1, 1), TexID, EG::SetOpacity(EG::RGBA32_Black(), 0.2f + Color.r / 30.0f - Height / 450.0f), BoxPos.y, angle, EG::CoordinateFormat::ISOMETRIC);
 
 
 	// Light haze
@@ -2717,7 +2717,7 @@ void DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math:
 	static GLuint PTex = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_1.png").id;
 	static GLuint PTex2 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_2.png").id;
 	static GLuint PTex3 = EI::ResourceManager::GetTexture("../IsoARPG/assets/textures/smoke_3.png").id;
-	static EG::ColorRGBA16 Gray = EG::RGBA16(0.3f, 0.3f, 0.3f, 1.0f);
+	static EG::ColorRGBA32 Gray = EG::RGBA32(0.3f, 0.3f, 0.3f, 1.0f);
 
 	for (int i = 0; i < 100; i++)
 	{
@@ -2734,7 +2734,7 @@ void DrawSmoke(Enjon::Graphics::Particle2D::ParticleBatch2D* Batch, Enjon::Math:
 
 
 		EG::Particle2D::AddParticle(Pos + Math::Vec3(XPos, YPos, 0.0f), Math::Vec3(XVel, YVel, ZVel), 
-			Math::Vec2(XSize, YSize), EG::RGBA16(Gray.r, Gray.g, Gray.b + 0.1f, 0.185f), tex, 0.00075f, Batch);
+			Math::Vec2(XSize, YSize), EG::RGBA32(Gray.r, Gray.g, Gray.b + 0.1f, 0.185f), tex, 0.00075f, Batch);
 	}
 }
 void GetLights(EG::Camera2D* Camera, std::vector<Light>* Lights, std::vector<Light*>& LightsToDraw)
@@ -3078,8 +3078,8 @@ int main(int argc, char** argv) {
 	InputText.Text = std::string("");
 	InputText.CursorIndex = 0;
 
-	EG::ColorRGBA16 PlayButtonColor = EG::RGBA16_White();
-	EG::ColorRGBA16 InputTextColor = EG::RGBA16(0.05f, 0.05f, 0.05f, 0.4f);
+	EG::ColorRGBA32 PlayButtonColor = EG::RGBA32_White();
+	EG::ColorRGBA32 InputTextColor = EG::RGBA32(0.05f, 0.05f, 0.05f, 0.4f);
 
 	PlayButton.Type = GUIType::BUTTON;
 	InputText.Type = GUIType::TEXTBOX;
@@ -3261,7 +3261,7 @@ int main(int argc, char** argv) {
 		InputText.HoverState = HoveredState::ON_HOVER;
 
 		// Change color of Box
-		InputTextColor = EG::SetOpacity(EG::RGBA16_LightGrey(), 0.3f);
+		InputTextColor = EG::SetOpacity(EG::RGBA32_LightGrey(), 0.3f);
 
 	});
 
@@ -3274,14 +3274,14 @@ int main(int argc, char** argv) {
 		InputText.HoverState = HoveredState::OFF_HOVER;
 	
 		// Change color of Box
-		InputTextColor = EG::RGBA16(0.05f, 0.05f, 0.05f, 0.4f);
+		InputTextColor = EG::RGBA32(0.05f, 0.05f, 0.05f, 0.4f);
 	});
 
 	// Set up PlayButton's on_hover signal
 	PlayButton.on_hover.connect([&]()
 	{
 		// We'll just change a color for now
-		PlayButtonColor = EG::RGBA16_White();
+		PlayButtonColor = EG::RGBA32_White();
 
 		// Set state to active
 		PlayButton.HoverState = HoveredState::ON_HOVER;
@@ -3290,7 +3290,7 @@ int main(int argc, char** argv) {
 	// Set up PlayButton's off_hover signal
 	PlayButton.off_hover.connect([&]()
 	{
-		PlayButtonColor = EG::RGBA16_LightGrey();
+		PlayButtonColor = EG::RGBA32_LightGrey();
 
 		// Set state to inactive
 		PlayButton.HoverState = HoveredState::OFF_HOVER;
@@ -3507,19 +3507,19 @@ int main(int argc, char** argv) {
 					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
 					EM::Vec4(0, 0, 1, 1),
 					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png").id,
-					EG::SetOpacity(EG::RGBA16_SkyBlue(), 0.4f)
+					EG::SetOpacity(EG::RGBA32_SkyBlue(), 0.4f)
 				);
 	BGBatch->Add(
 					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
 					EM::Vec4(0, 0, 1, 1),
 					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg.png").id,
-					EG::SetOpacity(EG::RGBA16_White(), 0.3f)
+					EG::SetOpacity(EG::RGBA32_White(), 0.3f)
 				);
 	BGBatch->Add(
 					EM::Vec4(-SCREENWIDTH / 2.0f, -SCREENHEIGHT / 2.0f, SCREENWIDTH, SCREENHEIGHT),
 					EM::Vec4(0, 0, 1, 1),
 					EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/bg_cross.png").id,
-					EG::SetOpacity(EG::RGBA16_White(), 0.1f)
+					EG::SetOpacity(EG::RGBA32_White(), 0.1f)
 				);
 	BGBatch->End();
 
@@ -3564,8 +3564,8 @@ int main(int argc, char** argv) {
 		//Set blend function type
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0));
-		// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.02f, 0.0f, 0.05f, 1.0f));
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32(0.1f, 0.1f, 0.1f, 1.0));
+		// Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32(0.02f, 0.0f, 0.05f, 1.0f));
 
 		// Basic shader for UI
 		BasicShader->Use();
@@ -3586,7 +3586,7 @@ int main(int argc, char** argv) {
 								EM::Vec4(Parent->AABB.Min, Parent->AABB.Max - Parent->AABB.Min),
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::SetOpacity(EG::RGBA16_Blue(), 0.05f)
+								EG::SetOpacity(EG::RGBA32_Blue(), 0.05f)
 							);
 
 				// Draw Play button
@@ -3602,7 +3602,7 @@ int main(int argc, char** argv) {
 				// 				EM::Vec4(PlayButton.AABB.Min, PlayButton.AABB.Max - PlayButton.AABB.Min), 
 				// 				EM::Vec4(0, 0, 1, 1),
 				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-				// 				EG::SetOpacity(EG::RGBA16_Red(), 0.3f)
+				// 				EG::SetOpacity(EG::RGBA32_Red(), 0.3f)
 				// 			);
 
 				// CalculateAABBWithParent(&InputText.AABB, &InputText);
@@ -3635,7 +3635,7 @@ int main(int argc, char** argv) {
 								EM::Vec4(AABB_SA->Min, AABB_SA->Max - AABB_SA->Min), 
 								EM::Vec4(0,0,1,1), 
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/selection_box.png").id,
-								EG::RGBA16_Red()
+								EG::RGBA32_Red()
 							  );
 				}
 
@@ -3665,8 +3665,8 @@ int main(int argc, char** argv) {
 					auto NextFrame = &CurrentAnimation->Frames.at((SceneAnimation.CurrentIndex + 1) % TotalFrames);
 					auto PreviousFrame = &CurrentAnimation->Frames.at(PreviousIndex);
 
-					DrawFrame(*PreviousFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA16_Blue(), 0.3f));
-					DrawFrame(*NextFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA16_Red(), 0.3f));
+					DrawFrame(*PreviousFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA32_Blue(), 0.3f));
+					DrawFrame(*NextFrame, Position, SceneBatch, EG::SetOpacity(EG::RGBA32_Red(), 0.3f));
 				}
 
 				// Draw Scene animation
@@ -3696,9 +3696,9 @@ int main(int argc, char** argv) {
 				auto scale = 1.0f;
 
 				EG::Fonts::PrintText(HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 30.0f, scale, std::string("FPS: "), CurrentFont, *UIBatch, 
-												EG::SetOpacity(EG::RGBA16_White(), 0.8f));
+												EG::SetOpacity(EG::RGBA32_White(), 0.8f));
 				EG::Fonts::PrintText(HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 50.0f, HUDCamera->GetPosition().y + SCREENHEIGHT / 2.0f - 30.0f, scale, std::to_string((uint32_t)FPS), CurrentFont, *UIBatch, 
-												EG::SetOpacity(EG::RGBA16_White(), 0.8f));
+												EG::SetOpacity(EG::RGBA32_White(), 0.8f));
 
 				auto CurrentFrame = &SceneAnimation.CurrentAnimation->Frames.at(SceneAnimation.CurrentIndex);
 
@@ -3709,7 +3709,7 @@ int main(int argc, char** argv) {
 										std::string("Animation: "), 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 				// Display current frame information
 				EG::Fonts::PrintText(	
@@ -3718,7 +3718,7 @@ int main(int argc, char** argv) {
 										SceneAnimation.CurrentAnimation->Name, 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 				// Current Frame Name
 				EG::Fonts::PrintText(	
@@ -3727,7 +3727,7 @@ int main(int argc, char** argv) {
 										std::string("Frame: "), 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
@@ -3735,7 +3735,7 @@ int main(int argc, char** argv) {
 										std::to_string(SceneAnimation.CurrentIndex), 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 				// Current Frame Delay
 				EG::Fonts::PrintText(	
@@ -3744,7 +3744,7 @@ int main(int argc, char** argv) {
 										std::string("Delay: "), 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
@@ -3752,7 +3752,7 @@ int main(int argc, char** argv) {
 										std::to_string(CurrentFrame->Delay), 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 				// Current Frame Y offset
 				EG::Fonts::PrintText(	
@@ -3761,7 +3761,7 @@ int main(int argc, char** argv) {
 										std::string("Y Offset: "), 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
@@ -3769,7 +3769,7 @@ int main(int argc, char** argv) {
 										std::to_string(static_cast<int32_t>(CurrentFrame->Offsets.y)), 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 				// Current Frame X Offset
 				EG::Fonts::PrintText(	
@@ -3778,7 +3778,7 @@ int main(int argc, char** argv) {
 										std::string("X Offset: "), 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
@@ -3786,7 +3786,7 @@ int main(int argc, char** argv) {
 										std::to_string(static_cast<int32_t>(CurrentFrame->Offsets.x)), 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + 15.0f, 
@@ -3794,7 +3794,7 @@ int main(int argc, char** argv) {
 										std::string("Onion Skin: "), 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 				auto OnionString = ToggleOnionSkin.State == ButtonState::ACTIVE ? std::string("On") : std::string("Off");
 				EG::Fonts::PrintText(	
@@ -3803,7 +3803,7 @@ int main(int argc, char** argv) {
 										OnionString, 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 
 				EG::Fonts::PrintText(	
@@ -3812,7 +3812,7 @@ int main(int argc, char** argv) {
 										std::string("Time Scale: "), 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 				EG::Fonts::PrintText(	
 										HUDCamera->GetPosition().x - SCREENWIDTH / 2.0f + XOffset, 
@@ -3820,7 +3820,7 @@ int main(int argc, char** argv) {
 										std::to_string(TimeScale), 
 										CurrentFont, 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 
 				// Print out text box's text w/ shadow
@@ -3834,7 +3834,7 @@ int main(int argc, char** argv) {
 										InputText.Text, 
 										EG::FontManager::GetFont("WeblySleek"), 
 										*UIBatch, 
-										EG::RGBA16_LightGrey()
+										EG::RGBA32_LightGrey()
 									);
 
 				caret_count += 0.1f;
@@ -3861,7 +3861,7 @@ int main(int argc, char** argv) {
 									EM::Vec4(XAdvance + 0.2f, InputText.Position.y + InputText.Parent->Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
 									EM::Vec4(0, 0, 1, 1),
 									EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-									EG::RGBA16_LightGrey()
+									EG::RGBA32_LightGrey()
 								);
 				}
 
@@ -4410,7 +4410,7 @@ int main(int argc, char** argv) {
 		//Set blend function type
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16(0.1f, 0.1f, 0.1f, 1.0));
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32(0.1f, 0.1f, 0.1f, 1.0));
 
 		// Render scene
 		Enjon::AnimationEditor::Draw();
@@ -5822,7 +5822,7 @@ int main(int argc, char** argv)
     	float G = (float)ER::Roll(0, 255) / 255.0f;
     	float B = (float)ER::Roll(0, 255) / 255.0f;
 
-    	L.Color = EG::RGBA16(R, G, B, 1.0f);
+    	L.Color = EG::RGBA32(R, G, B, 1.0f);
 
     	L.Intensity = 1.0f;
 
@@ -5839,7 +5839,7 @@ int main(int argc, char** argv)
 													std::cos(0.8f),
 													std::cos(0.54f)
 												), 
-						EG::RGBA16(1, 0.3f, 0, 1),
+						EG::RGBA32(1, 0.3f, 0, 1),
 						7.06f
 					);
 
@@ -5853,7 +5853,7 @@ int main(int argc, char** argv)
 													std::cos(0.8f),
 													std::cos(0.54f)
 												), 
-						EG::RGBA16(0.2, 0.5f, 1.0, 1),
+						EG::RGBA32(0.2, 0.5f, 1.0, 1),
 						7.06f
 					);
 	SpotLights.push_back(Spot);
@@ -5861,7 +5861,7 @@ int main(int argc, char** argv)
 
 	Sun = EG::DirectionalLight(
 								EM::Vec3(1.0f, 1.0f, 1.0f),
-								EG::RGBA16_Orange(),
+								EG::RGBA32_Orange(),
 								4.0f
 							);
 
@@ -5914,7 +5914,7 @@ int main(int argc, char** argv)
 								T, 
 								EM::Vec4(0, 0, 1, 1),
 								EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								EG::RGBA16_DarkGrey()
+								EG::RGBA32_DarkGrey()
 							);
 			}
 		}
@@ -6092,7 +6092,7 @@ int main(int argc, char** argv)
 		auto& InstanceTransform2 = Instances.at(5).Transform;
 		InstanceTransform2.Orientation = EM::Quaternion::AngleAxis(EM::ToRadians(timer * RotationSpeed), EM::Vec3(0, 1, 0));
 
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16_Black());
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA32_Black());
 
     	// Bind FBO
     	GBuffer.Bind();
@@ -6194,7 +6194,7 @@ int main(int argc, char** argv)
 										Transforms.at(i) ,
 										EM::Vec4(0, 0, 1, 1), 
 										EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/TexturePackerTest/test.png").id, 
-										EG::RGBA16_White(), 
+										EG::RGBA32_White(), 
 										Depth
 									);
 						}
@@ -6213,7 +6213,7 @@ int main(int argc, char** argv)
 				// 				EM::Vec3(PP.x, 0.1f, PP.z - 20.0f) + ShadowMove,
 				// 				EM::Vec4(0, 0, 1, 1),
 				// 				EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/pixelanimtest.png").id,
-				// 				EG::SetOpacity(EG::RGBA16_Black(), 0.5f)
+				// 				EG::SetOpacity(EG::RGBA32_Black(), 0.5f)
 				// 			);
 
 				// 	QBatch.Add(
@@ -6224,7 +6224,7 @@ int main(int argc, char** argv)
 				// 							),
 				// 				EM::Vec4(0, 0, 1, 1),
 				// 				EI::ResourceManager::GetTexture("../Assets/Textures/white.png").id,
-				// 				EG::SetOpacity(EG::RGBA16_Black(), 0.5f)
+				// 				EG::SetOpacity(EG::RGBA32_Black(), 0.5f)
 				// 			);
 				// }
 				// QBatch.End();
@@ -6249,7 +6249,7 @@ int main(int argc, char** argv)
 												"model loading",
 												EG::FontManager::GetFont("8Bit_32"),
 												QBatch,
-												EG::SetOpacity(EG::RGBA16_White(), 0.0f),
+												EG::SetOpacity(EG::RGBA32_White(), 0.0f),
 												TextSpacing
 										);
 
@@ -6262,7 +6262,7 @@ int main(int argc, char** argv)
 												"point lights",
 												EG::FontManager::GetFont("8Bit_32"),
 												QBatch,
-												EG::RGBA16_White(),
+												EG::RGBA32_White(),
 												TextSpacing
 										);
 
@@ -6275,7 +6275,7 @@ int main(int argc, char** argv)
 												"spot Lights",
 												EG::FontManager::GetFont("8Bit_32"),
 												QBatch,
-												EG::RGBA16_White(),
+												EG::RGBA32_White(),
 												TextSpacing
 										);
 
@@ -6289,7 +6289,7 @@ int main(int argc, char** argv)
 												"batched quads",
 												EG::FontManager::GetFont("8Bit_32"),
 												QBatch,
-												EG::RGBA16_White(),
+												EG::RGBA32_White(),
 												TextSpacing
 										);
 
@@ -6302,7 +6302,7 @@ int main(int argc, char** argv)
 												"animated materials",
 												EG::FontManager::GetFont("8Bit_32"),
 												QBatch,
-												EG::RGBA16_White(),
+												EG::RGBA32_White(),
 												TextSpacing
 										);
 
@@ -6324,7 +6324,7 @@ int main(int argc, char** argv)
 											"emissive materials",
 											EG::FontManager::GetFont("8Bit_32"),
 											QBatch,
-											EG::RGBA16_White(),
+											EG::RGBA32_White(),
 											TextSpacing
 									);
 				}
@@ -6346,7 +6346,7 @@ int main(int argc, char** argv)
     	// Shadow pass
     	ShadowDepth.Bind();
     	{
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16_Black());
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA32_Black());
 
 			if (ShadowsEnabled)
 			{
@@ -6419,7 +6419,7 @@ int main(int argc, char** argv)
 			// Bind VAO
 			glBindVertexArray(quadVAO);
 
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 
 			glEnable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
@@ -6542,7 +6542,7 @@ int main(int argc, char** argv)
 		// Get bright target
 		BrightTarget.Bind();
 		{
-			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+			Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 
 			BrightProgram->Use();
 			{
@@ -6673,13 +6673,13 @@ int main(int argc, char** argv)
 			Target->Unbind();
     	}
 
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 
 		FXAATarget.Bind();
 		{
 			FXAAProgram->Use();
 			{
-				Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+				Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 				FXAAProgram->SetUniform("resolution", EM::Vec2(SCREENWIDTH, SCREENHEIGHT));
 				FXAAProgram->SetUniform("FXAASettings", EM::Vec3(FXAASettings.SpanMax, FXAASettings.ReduceMul, FXAASettings.ReduceMin));
 				CompositeBatch.Begin();
@@ -6706,7 +6706,7 @@ int main(int argc, char** argv)
 				{
 			    	CompositeProgram->Use();
 			    	{
-						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 				    	CompositeBatch.Begin();
 				    	{
 							CompositeProgram->BindTexture("blurTexSmall", SmallBlurVertical.GetTexture(), 1);
@@ -6736,7 +6736,7 @@ int main(int argc, char** argv)
 
 				NoCameraProgram->Use();
 				{
-						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 						CompositeBatch.Begin();
 						{
 							CompositeBatch.Add(
@@ -6758,7 +6758,7 @@ int main(int argc, char** argv)
 			{
 				NoCameraProgram->Use();
 				{
-						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 						CompositeBatch.Begin();
 						{
 							CompositeBatch.Add(
@@ -6778,7 +6778,7 @@ int main(int argc, char** argv)
 			{
 				NoCameraProgram->Use();
 				{
-						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 						CompositeBatch.Begin();
 						{
 							CompositeBatch.Add(
@@ -6798,7 +6798,7 @@ int main(int argc, char** argv)
 			{
 				NoCameraProgram->Use();
 				{
-						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 						CompositeBatch.Begin();
 						{
 							CompositeBatch.Add(
@@ -6818,7 +6818,7 @@ int main(int argc, char** argv)
 			{
 				NoCameraProgram->Use();
 				{
-						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 						CompositeBatch.Begin();
 						{
 							CompositeBatch.Add(
@@ -6838,7 +6838,7 @@ int main(int argc, char** argv)
 			{
 				NoCameraProgram->Use();
 				{
-						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 						CompositeBatch.Begin();
 						{
 							CompositeBatch.Add(
@@ -6857,7 +6857,7 @@ int main(int argc, char** argv)
 			{
 				NoCameraProgram->Use();
 				{
-						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 						CompositeBatch.Begin();
 						{
 							CompositeBatch.Add(
@@ -6876,7 +6876,7 @@ int main(int argc, char** argv)
 			{
 				NoCameraProgram->Use();
 				{
-						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA16_Black());
+						Window.Clear(1.0f, GL_COLOR_BUFFER_BIT, EG::RGBA32_Black());
 						CompositeBatch.Begin();
 						{
 							CompositeBatch.Add(
@@ -6909,7 +6909,7 @@ int main(int argc, char** argv)
 			TransparentCube.Transform.Position = Animations.at(0).Transform.Position;
 			TransparentCube.Transform.Scale = EM::Vec3(1.0f, 1.0f, 1.0f) * 1.0f;
 			TransparentCube.Asset->Material.Textures[EG::TextureSlotType::ALBEDO] = EI::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/up_gradient_N.png");
-			TransparentCube.Asset->Material.DiffuseColor = EG::SetOpacity(EG::RGBA16_ZombieGreen(), 0.3f);
+			TransparentCube.Asset->Material.DiffuseColor = EG::SetOpacity(EG::RGBA32_ZombieGreen(), 0.3f);
 
 			TransparentProgram->BindTexture("diffuseMap", TransparentCube.Asset->Material.Textures[EG::TextureSlotType::ALBEDO].id, 0);
 			TransparentProgram->SetUniform("camera", FPSCamera.GetViewProjectionMatrix());
@@ -6978,7 +6978,7 @@ int main(int argc, char** argv)
 										"FPS: ", 
 										F, 
 										CompositeBatch, 
-										EG::RGBA16_White()
+										EG::RGBA32_White()
 									);
 
 				EG::Fonts::PrintText(	
@@ -6988,7 +6988,7 @@ int main(int argc, char** argv)
 										std::to_string(FPS), 
 										EG::FontManager::GetFont("Reduction_14"), 
 										CompositeBatch, 
-										EG::RGBA16_ZombieGreen()
+										EG::RGBA32_ZombieGreen()
 									);
 
 				std::string DrawCallLabel("Draw Calls: ");
@@ -6999,7 +6999,7 @@ int main(int argc, char** argv)
 										DrawCallLabel, 
 										F, 
 										CompositeBatch, 
-										EG::RGBA16_White()
+										EG::RGBA32_White()
 									);
 
 				EG::Fonts::PrintText(	
@@ -7009,7 +7009,7 @@ int main(int argc, char** argv)
 										std::to_string(EG::QuadBatch::DrawCallCount), 
 										EG::FontManager::GetFont("Reduction_14"), 
 										CompositeBatch, 
-										EG::RGBA16_ZombieGreen()
+										EG::RGBA32_ZombieGreen()
 									);
 
 				// DrawCallLabel = std::string("Point Lights: ");
@@ -7020,7 +7020,7 @@ int main(int argc, char** argv)
 				// 						DrawCallLabel, 
 				// 						F, 
 				// 						CompositeBatch, 
-				// 						EG::RGBA16_White()
+				// 						EG::RGBA32_White()
 				// 					);
 
 				// EG::Fonts::PrintText(	
@@ -7030,7 +7030,7 @@ int main(int argc, char** argv)
 				// 						std::to_string(PointLights.size()), 
 				// 						EG::FontManager::GetFont("Reduction_14"), 
 				// 						CompositeBatch, 
-				// 						EG::RGBA16_ZombieGreen()
+				// 						EG::RGBA32_ZombieGreen()
 				// 					);
 			}
 			CompositeBatch.End();
@@ -7124,7 +7124,7 @@ bool ProcessInput(Enjon::Input::InputManager* Input, EG::Camera* Camera)
 	    	float R = (float)ER::Roll(0, 255) / 255.0f;
 	    	float G = (float)ER::Roll(0, 255) / 255.0f;
 	    	float B = (float)ER::Roll(0, 255) / 255.0f;
-	    	L.Color = EG::RGBA16(R, G, B, 1.0f);
+	    	L.Color = EG::RGBA32(R, G, B, 1.0f);
 	    	L.Intensity = 1.0f;
 	    	PointLights.push_back(L);
 
@@ -8128,7 +8128,7 @@ int main(int argc, char** argv)
     	EM::Vec3& CamPos = FPSCamera.Transform.Position;
 
     	// Rendering
-		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA16(0.05f, 0.05f, 0.05f, 1.0f));
+		Window.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, EG::RGBA32(0.05f, 0.05f, 0.05f, 1.0f));
 
         // Create transformations
         EM::Mat4 CameraMatrix;
@@ -8614,9 +8614,9 @@ int main(int argc, char** argv)
 	EG::Renderable* renderable9 = gc9->GetRenderable();
 	EG::Renderable* renderable10 = gc10->GetRenderable();
 
-	mSun = EG::DirectionalLight(EM::Vec3(-0.523f, 1.0f, 0.286f), EG::RGBA16_Orange(), 20.0f);
-	mSun2 = EG::DirectionalLight(EM::Vec3(0.5f, 0.5f, -0.75f), EG::RGBA16_SkyBlue(), 10.0f);
-	mSun3 = EG::DirectionalLight(EM::Vec3(0.75f, 0.6f, 0.75f), EG::RGBA16_Yellow(), 5.0f);
+	mSun = EG::DirectionalLight(EM::Vec3(-0.523f, 1.0f, 0.286f), EG::RGBA32_Orange(), 20.0f);
+	mSun2 = EG::DirectionalLight(EM::Vec3(0.5f, 0.5f, -0.75f), EG::RGBA32_SkyBlue(), 10.0f);
+	mSun3 = EG::DirectionalLight(EM::Vec3(0.75f, 0.6f, 0.75f), EG::RGBA32_Yellow(), 5.0f);
 
 	EG::Scene* scene = mGraphicsEngine.GetScene();
 
@@ -8776,13 +8776,13 @@ int main(int argc, char** argv)
 	plc->SetIntensity(100.0f);
 	plc->SetRadius(300.0f);
 	plc->SetAttenuationRate(1.0f);
-	plc->SetColor(EG::RGBA16_LightPurple());
+	plc->SetColor(EG::RGBA32_LightPurple());
 
 	auto plc2 = mEntities->Attach<Enjon::PointLightComponent>(handle1);
 	plc->SetIntensity(100.0f);
 	plc->SetRadius(300.0f);
 	plc->SetAttenuationRate(1.0f);
-	plc->SetColor(EG::RGBA16_Red());
+	plc->SetColor(EG::RGBA32_Red());
 
 	// Add elements scene
 	scene->SetSun(&mSun);
@@ -8801,7 +8801,7 @@ int main(int argc, char** argv)
 	scene->AddRenderable(gc8->GetRenderable());
 	scene->AddRenderable(gc9->GetRenderable());
 	scene->AddRenderable(gc10->GetRenderable());
-	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA16_White(), 0.1f));
+	scene->SetAmbientColor(EG::SetOpacity(EG::RGBA32_White(), 0.1f));
 	scene->AddQuadBatch(&mBatch);
 
 	// for (Enjon::u32 i = 0; i < 1000; ++i)

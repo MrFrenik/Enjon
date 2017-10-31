@@ -16,8 +16,11 @@ namespace Enjon
 	// Forward declaration
 	class AssetManager; 
  
-	class AssetLoader
+	ENJON_CLASS()
+	class AssetLoader : public Enjon::Object 
 	{ 
+		ENJON_CLASS_BODY()
+
 		friend AssetManager; 
 		
 		public:
@@ -48,6 +51,11 @@ namespace Enjon
 			virtual void RegisterDefaultAsset( )
 			{ 
 			}
+
+			/**
+			* @brief Returns default asset. Will register if not available yet.
+			*/
+			Asset* GetDefaultAsset( ); 
 			
 			/**
 			* @brief
@@ -137,9 +145,23 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual Result CacheFile( Enjon::ByteBuffer& buffer )
+			virtual Result Cache( ByteBuffer& buffer, Asset* asset )
 			{
-				return Enjon::Result::SUCCESS;
+				// Cache out certain base information regarding the asset here
+
+				std::cout << "assetloader\n";
+
+				// Return result
+				return Result::SUCCESS;
+			}
+
+			/**
+			* @brief
+			*/
+			virtual Result LoadFromCache( ByteBuffer& readBuffer )
+			{
+				// Return result
+				return Result::SUCCESS;
 			}
 
 	protected:
@@ -153,7 +175,7 @@ namespace Enjon
 			* @brief 
 			*/
 			virtual Asset* LoadResourceFromFile( const String& filePath, const String& name ) = 0;
-	};
+ };
 } 
 
 #endif

@@ -47,7 +47,7 @@ namespace Enjon {
 
 	//====================================================================================================
 
-	std::vector<Renderable*> Scene::GetRenderables( )
+	const std::vector<Renderable*>& Scene::GetRenderables( ) const
 	{ 
 		return mSortedRenderables;
 	}
@@ -169,7 +169,7 @@ namespace Enjon {
 		mAmbientSettings = settings;
 	}
 
-	void Scene::SetAmbientColor(ColorRGBA16& color)
+	void Scene::SetAmbientColor(ColorRGBA32& color)
 	{
 		mAmbientSettings.mColor = color;
 		mAmbientSettings.mIntensity = color.a;

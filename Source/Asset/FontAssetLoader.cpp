@@ -5,15 +5,35 @@
 
 namespace Enjon
 {
+	//======================================================================
+
 	FontAssetLoader::FontAssetLoader( )
 	{
 	}
+
+	//======================================================================
 
 	FontAssetLoader::~FontAssetLoader( )
 	{
 	}
 
-	UIFont* FontAssetLoader::LoadResourceFromFile( const String& filePath, const String& name )
+	//======================================================================
+
+	void FontAssetLoader::RegisterDefaultAsset( )
+	{
+		// Get file path to default font on disk
+		String filePath = Engine::GetInstance( )->GetConfig( ).GetEngineResourcePath( ) + "/Fonts/WeblySleek/weblysleekuisb.ttf"; 
+
+		// Load font
+		Enjon::UIFont* font = new Enjon::UIFont( filePath ); 
+
+		// Set default
+		mDefaultAsset = font;
+	}
+
+	//======================================================================
+
+	Asset* FontAssetLoader::LoadResourceFromFile( const String& filePath, const String& name )
 	{
 		// Create new font
 		Enjon::UIFont* font = new Enjon::UIFont( filePath ); 
@@ -27,4 +47,6 @@ namespace Enjon
 		// Return font
 		return font;
 	}
+
+	//======================================================================
 }

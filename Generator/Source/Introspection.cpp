@@ -64,7 +64,7 @@ void Property::InitPropertyMap( )
 	STRING_TO_PROP( "Vec2", Vec2 )
 	STRING_TO_PROP( "Vec3", Vec3 )
 	STRING_TO_PROP( "Vec4", Vec4 )
-	STRING_TO_PROP( "ColorRGBA16", ColorRGBA16 )
+	STRING_TO_PROP( "ColorRGBA32", ColorRGBA32 )
 	STRING_TO_PROP( "UUID", UUID )
 	STRING_TO_PROP( "String", String )
 	STRING_TO_PROP( "Transform", Transform )
@@ -282,6 +282,12 @@ void Introspection::ParseClassTraits( Lexer* lexer, ClassMarkupTraits* traits )
 					token = lexer->GetNextToken( );
 				}
 			} 
+
+			// Construct
+			if ( curToken.Equals( "Construct" ) )
+			{
+				traits->Construct( true );
+			}
 		}
 
 		// Get next token after processing this one
@@ -841,7 +847,6 @@ void Introspection::Compile( const ReflectionConfig& config )
 				}
 			} 
 
-
 			// Construct meta class function
 			code += OutputLine( "// " + qualifiedName );
 			code += OutputLine( "template <>" );
@@ -852,6 +857,16 @@ void Introspection::Compile( const ReflectionConfig& config )
 			// Construct properties
 			code += OutputTabbedLine( "// Construct properties" );
 			code += OutputTabbedLine( "cls->mPropertyCount = " + std::to_string( properties.size( ) ) + ";" ); 
+
+			// Construct function
+			if ( c.second.mTraits.mConstruct )
+			{
+				code += OutputLine( "" );
+				code += OutputTabbedLine( "cls->mConstructor = ([](){" );
+				code += OutputTabbedLine( "\treturn new " + qualifiedName + "();" );
+				code += OutputTabbedLine( "});" );
+				code += OutputLine( "" ); 
+			}
 
 			// Iterate through properties and output code
 			u32 index = 0;
@@ -959,23 +974,9 @@ void Introspection::Compile( const ReflectionConfig& config )
 			code += OutputTabbedLine( "return cls;" );
 			code += OutputLine( "}\n" ); 
 
-			// Function overrides from Object Base
-			/*
-				virtual u32 GetTypeId() const override { return Enjon::Object::GetTypeId< type >(); }		\
-				virtual const Enjon::MetaClass* Class( ) override\
-				{\
-					Enjon::MetaClassRegistry* mr = const_cast< Enjon::MetaClassRegistry* >( Enjon::Engine::GetInstance()->GetMetaClassRegistry( ) );\
-					const Enjon::MetaClass* cls = mr->Get< type >( );\
-					if ( !cls )\
-					{\
-						cls = mr->RegisterMetaClass< type >( );\
-					}\
-					return cls;\
-				}
-			*/
-
-			// Class()
-			code += OutputLine( "const MetaClass* " + qualifiedName + "::GetClassInternal()" );
+			// GetClassInternal()
+			code += OutputLine( "// GetClassInternal" );
+			code += OutputLine( "const MetaClass* " + qualifiedName + "::GetClassInternal() const" );
 			code += OutputLine( "{" );
 			code += OutputTabbedLine( "MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance()->GetMetaClassRegistry() );" );
 			code += OutputTabbedLine( "const MetaClass* cls = mr->Get< " + qualifiedName + " >( );" );
@@ -988,13 +989,13 @@ void Introspection::Compile( const ReflectionConfig& config )
 			
 			// GetTypeId()
 			code += OutputLine( "" );
+			code += OutputLine( "// GetTypeId" );
 			code += OutputLine( "Enjon::u32 " + qualifiedName + "::GetTypeId()" );
 			code += OutputLine( "{" );
 			code += OutputTabbedLine( "return Object::GetTypeId< " + qualifiedName + " >();" );
 			code += OutputLine( "}" ); 
 
-			// Construct function
-			code += OutputLine( "" );
+			
 
 			// Write to file
 			f.write( code.c_str( ), code.length( ) );

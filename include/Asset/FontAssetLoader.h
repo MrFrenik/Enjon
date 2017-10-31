@@ -10,24 +10,31 @@
 
 namespace Enjon
 {
+	ENJON_CLASS()
 	class FontAssetLoader : public AssetLoader
 	{
-	public:
+		ENJON_CLASS_BODY()
 
-		/**
-		* @brief Constructor
-		*/
-		FontAssetLoader( );
+		public:
 
-		/**
-		* @brief Destructor
-		*/
-		~FontAssetLoader( );
+			/**
+			* @brief Constructor
+			*/
+			FontAssetLoader( );
 
-	protected:
+			/**
+			* @brief Destructor
+			*/
+			~FontAssetLoader( );
 
-	private:
-		UIFont* LoadResourceFromFile( const String& filePath, const String& name );
+		protected:
+			/**
+			* @brief
+			*/
+			virtual void RegisterDefaultAsset( ) override; 
+
+		private:
+			Asset* LoadResourceFromFile( const String& filePath, const String& name ) override;
 	};
 }
 

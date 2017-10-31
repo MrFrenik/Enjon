@@ -27,7 +27,7 @@ namespace Enjon {
 	{
 	}
 
-	QuadGlyph::QuadGlyph(Vec3& TLP, Vec3& BLP, Vec3& BRP, Vec3& TRP, Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
+	QuadGlyph::QuadGlyph(Vec3& TLP, Vec3& BLP, Vec3& BRP, Vec3& TRP, Vec4& UVRect, GLuint _Texture, ColorRGBA32& Color, float _Depth)
 	: Texture(_Texture), Depth(_Depth)
 	{
 		Vec3 N(0, 1, 0);
@@ -120,7 +120,7 @@ namespace Enjon {
 		TR.Color[3] 		= Color.a;
 	}
 
-	QuadGlyph::QuadGlyph(Enjon::Vec2& Dimensions, Transform& Transform, Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
+	QuadGlyph::QuadGlyph(Enjon::Vec2& Dimensions, Transform& Transform, Vec4& UVRect, GLuint _Texture, ColorRGBA32& Color, float _Depth)
 	:	Texture(_Texture), Depth(_Depth) 	
 	{
 		// Transform all verticies by model matrix
@@ -251,7 +251,7 @@ namespace Enjon {
 		BR.Color[3] 		= Color.a;
 	}
 
-	QuadGlyph::QuadGlyph(Transform& Transform, Vec4& UVRect, GLuint _Texture, ColorRGBA16& Color, float _Depth)
+	QuadGlyph::QuadGlyph(Transform& Transform, Vec4& UVRect, GLuint _Texture, ColorRGBA32& Color, float _Depth)
 	:	Texture(_Texture), Depth(_Depth)
 	{
 		// Transform all verticies by model matrix
@@ -415,7 +415,7 @@ namespace Enjon {
 						Transform& Transform, 
 						Vec4& UVRect, 
 						GLuint Texture, 
-						ColorRGBA16& Color, 
+						ColorRGBA32& Color, 
 						float Depth
 						)
 	{
@@ -428,7 +428,7 @@ namespace Enjon {
 					Transform& Transform, 
 					Vec4& UVRect, 
 					GLuint Texture, 
-					ColorRGBA16& Color, 
+					ColorRGBA32& Color, 
 					float Depth
 				)
 	{
@@ -437,7 +437,7 @@ namespace Enjon {
 
 
 	// Adds quadglyph to quadbatch to be rendered with base quad defined
-	void QuadBatch::Add(Vec3& TLP, Vec3& BLP, Vec3& BRP, Vec3& TRP, Vec4& UVRect, GLuint Texture, ColorRGBA16& Color, float Depth)
+	void QuadBatch::Add(Vec3& TLP, Vec3& BLP, Vec3& BRP, Vec3& TRP, Vec4& UVRect, GLuint Texture, ColorRGBA32& Color, float Depth)
 	{
 		QuadGlyphs.emplace_back(TLP, BLP, BRP, TRP, UVRect, Texture, Color, Depth);
 	}

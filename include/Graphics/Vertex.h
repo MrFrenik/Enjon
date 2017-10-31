@@ -56,7 +56,7 @@ namespace Enjon {
 	struct Vertex 
 	{ 
 		Position2f position;
-		ColorRGBA16 color;
+		ColorRGBA32 color;
 		UV uv; 
 	};
 

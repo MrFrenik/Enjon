@@ -78,18 +78,18 @@ namespace Enjon {
 		return RGBA8(left.r, left.g, left.b, (int)(a * 255));
 	}
 
-	// Strict POD struct ColoRGBA16
-	struct ColorRGBA16
+	// Strict POD struct ColoRGBA32
+	struct ColorRGBA32
 	{ 
-		ColorRGBA16() 
+		ColorRGBA32() 
 			: r(1), g(1), b(1), a(1) 
 		{}
 
-		ColorRGBA16(float _r, float _g, float _b, float _a)
+		ColorRGBA32(float _r, float _g, float _b, float _a)
 			: r(_r), g(_g), b(_b), a(_a)
 		{}
 
-		ColorRGBA16(const Vec4& V) : r(V.x), g(V.y), b(V.z), a(V.w) {}
+		ColorRGBA32(const Vec4& V) : r(V.x), g(V.y), b(V.z), a(V.w) {}
 
 		float r;
 		float g;
@@ -98,9 +98,9 @@ namespace Enjon {
 	};
 
 	// Initializer
-	inline ColorRGBA16 RGBA16(float r, float g, float b, float a)
+	inline ColorRGBA32 RGBA32(float r, float g, float b, float a)
 	{
-		ColorRGBA16 color;
+		ColorRGBA32 color;
 		color.r = r;
 		color.g = g;
 		color.b = b;
@@ -110,9 +110,9 @@ namespace Enjon {
 	}
 
 	// Initializer
-	inline ColorRGBA16 RGBA16(float val)
+	inline ColorRGBA32 RGBA32(float val)
 	{
-		ColorRGBA16 color;
+		ColorRGBA32 color;
 		color.r = val;
 		color.b = val;
 		color.g = val;
@@ -122,9 +122,9 @@ namespace Enjon {
 	}
 	
 	// Initializer
-	inline ColorRGBA16 RGBA16(float val, float a)
+	inline ColorRGBA32 RGBA32(float val, float a)
 	{
-		ColorRGBA16 color;
+		ColorRGBA32 color;
 		color.r = val;
 		color.b = val;
 		color.g = val;
@@ -134,29 +134,29 @@ namespace Enjon {
 	}
 	
 	// Predefined Color Types
-	static ColorRGBA16 inline RGBA16_White()                { return RGBA16(1.0f); }
-	static ColorRGBA16 inline RGBA16_Black()                { return RGBA16(0.0f, 0.0f, 0.0f, 1.0f); }
-	static ColorRGBA16 inline RGBA16_LightGrey()		    { return RGBA16(0.8f, 0.8f, 0.8f, 1.0f); }
-	static ColorRGBA16 inline RGBA16_MidGrey()              { return RGBA16(0.5f, 0.5f, 0.5f, 1.0f); } 
-	static ColorRGBA16 inline RGBA16_DarkGrey()             { return RGBA16(0.1f, 0.1f, 0.1f, 1.0f); }
-	static ColorRGBA16 inline RGBA16_Red()			        { return RGBA16(1.0f, 0.0f, 0.0f, 1.0f); }
-	static ColorRGBA16 inline RGBA16_Green()				{ return RGBA16(0.0f, 1.0f, 0.0f, 1.0f); }
-	static ColorRGBA16 inline RGBA16_Blue()					{ return RGBA16(0.0f, 0.0f, 1.0f, 1.0f); }
-	static ColorRGBA16 inline RGBA16_Yellow()               { return RGBA16(1.0f, 0.8f, 0.0f, 1.0f); }
-	static ColorRGBA16 inline RGBA16_Magenta()              { return RGBA16(1.0f, 0.0f, 1.0f, 1.0f); } 
-	static ColorRGBA16 inline RGBA16_Orange()	     	    { return RGBA16(0.8f, 0.3f, 0.2f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_White()                { return RGBA32(1.0f); }
+	static ColorRGBA32 inline RGBA32_Black()                { return RGBA32(0.0f, 0.0f, 0.0f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_LightGrey()		    { return RGBA32(0.8f, 0.8f, 0.8f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_MidGrey()              { return RGBA32(0.5f, 0.5f, 0.5f, 1.0f); } 
+	static ColorRGBA32 inline RGBA32_DarkGrey()             { return RGBA32(0.1f, 0.1f, 0.1f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_Red()			        { return RGBA32(1.0f, 0.0f, 0.0f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_Green()				{ return RGBA32(0.0f, 1.0f, 0.0f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_Blue()					{ return RGBA32(0.0f, 0.0f, 1.0f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_Yellow()               { return RGBA32(1.0f, 0.8f, 0.0f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_Magenta()              { return RGBA32(1.0f, 0.0f, 1.0f, 1.0f); } 
+	static ColorRGBA32 inline RGBA32_Orange()	     	    { return RGBA32(0.8f, 0.3f, 0.2f, 1.0f); }
 
-	static ColorRGBA16 inline RGBA16_LightPurple() 			{ return RGBA16(0.24f, 0.22f, 0.35f, 1.0f); }
-	static ColorRGBA16 inline RGBA16_LimeGreen() 			{ return RGBA16(0.49f, 1.0f, 0.51f, 1.0f); }
-	static ColorRGBA16 inline RGBA16_BurntOrange()	     	{ return RGBA16(0.9f, 0.5f, 0.2f, 1.0f); }
-	static ColorRGBA16 inline RGBA16_SkyBlue()              { return RGBA16(0.2f, 0.3f, 0.8f, 1.0f); } 
-	static ColorRGBA16 inline RGBA16_ZombieGreen()          { return RGBA16(0.33f, 0.77f, 0.44f, 1.0f); }
-	static ColorRGBA16 inline RGBA16_DullMagenta()          { return RGBA16(0.77f, 0.33f, 0.66f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_LightPurple() 			{ return RGBA32(0.24f, 0.22f, 0.35f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_LimeGreen() 			{ return RGBA32(0.49f, 1.0f, 0.51f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_BurntOrange()	     	{ return RGBA32(0.9f, 0.5f, 0.2f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_SkyBlue()              { return RGBA32(0.2f, 0.3f, 0.8f, 1.0f); } 
+	static ColorRGBA32 inline RGBA32_ZombieGreen()          { return RGBA32(0.33f, 0.77f, 0.44f, 1.0f); }
+	static ColorRGBA32 inline RGBA32_DullMagenta()          { return RGBA32(0.77f, 0.33f, 0.66f, 1.0f); }
 
 	// Helper functions
-	inline ColorRGBA16 SetOpacity(const ColorRGBA16& color, float a)   
+	inline ColorRGBA32 SetOpacity(const ColorRGBA32& color, float a)   
 	{ 
-		return RGBA16(color.r, color.g, color.b, a); 
+		return RGBA32(color.r, color.g, color.b, a); 
 	}
 }
 

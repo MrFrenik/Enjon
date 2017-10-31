@@ -128,19 +128,19 @@ namespace Enjon
 		// Create new subsystem catalog
 		mSubsystemCatalog = new SubsystemCatalog();
 
+		// Meta class registration
+		mMetaClassRegisty = new MetaClassRegistry( );
+
+		// Register all base object meta classes
+		Enjon::Object::BindMetaClasses( );
+
 		// Register subsystems with catalog
 		mAssetManager	= mSubsystemCatalog->Register<Enjon::AssetManager>();
 		mGraphics		= mSubsystemCatalog->Register<Enjon::GraphicsSubsystem>(); 
 		mInput			= mSubsystemCatalog->Register<Enjon::Input>(); 
 
 		// Initialize imgui manager
-		Enjon::ImGuiManager::Init( mGraphics->GetWindow()->GetSDLWindow() );
-
-		// Meta class registration
-		mMetaClassRegisty = new MetaClassRegistry( );
-
-		// Register all base object meta classes
-		Enjon::Object::BindMetaClasses( );
+		Enjon::ImGuiManager::Init( mGraphics->GetWindow()->GetSDLWindow() ); 
 
 		// Initialize application if one is registered
 		if ( mApp )

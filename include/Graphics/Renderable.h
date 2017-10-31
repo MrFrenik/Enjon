@@ -17,7 +17,7 @@ namespace Enjon
 	class Material;
 	class GraphicsSubsystem;
 	class GLSLProgram;
-	class ColorRGBA16;
+	class ColorRGBA32;
 
 	ENJON_CLASS( )
 	class Renderable : public Enjon::Object
@@ -80,7 +80,7 @@ namespace Enjon
 			void SetScene(Scene* scene);
 
 			/* Set material color */
-			//void SetColor(TextureSlotType type, const ColorRGBA16& color);	
+			//void SetColor(TextureSlotType type, const ColorRGBA32& color);	
 
 		protected:
 			/*

@@ -102,17 +102,7 @@ namespace Enjon
 			*@brief Gets loaded asset in database from name
 			*/
 			template <typename T>
-			AssetHandle<T> GetAsset( const String& name )
-			{ 
-				// Get appropriate loader based on asset type
-				u32 loaderId = GetAssetTypeId<T>(); 
-
-				// Get handle from loader
-				AssetHandle<T> handle = mLoaders[loaderId]->GetAsset<T>(name); 
-
-				// Return asset handle
-				return handle;
-			} 
+			AssetHandle<T> GetAsset( const String& name ); 
 
 			/**
 			*@brief
@@ -125,57 +115,41 @@ namespace Enjon
 			const std::unordered_map< Enjon::String, Asset* >* GetAssets( const Enjon::MetaClass* cls );
 
 			/**
-			*@brief
+			*@brief Searches for specific loader based on class id. Returns true if found, false otherwise.
 			*/
-			bool Exists( u32 id )
-			{
-				return ( mLoaders.find( id ) != mLoaders.end( ) );
-			}
+			bool Exists( u32 id );
+
+			/**
+			*@brief Searches for specific loader based on meta class. Returns true if found, false otherwise.
+			*/
+			bool Exists( const MetaClass* cls );
 			
 			/**
 			*@brief Gets all assets of specific type
 			*/
 			template <typename T>
-			const std::unordered_map< Enjon::String, Asset* >* GetAssets( )
-			{ 
-				// Get appropriate loader based on asset type
-				u32 loaderId = GetAssetTypeId<T>(); 
-
-				if ( Exists( loaderId ) )
-				{
-					return mLoaders[ loaderId ]->GetAssets( );
-				}
-
-				return nullptr;
-			} 
+			const std::unordered_map< Enjon::String, Asset* >* GetAssets( ); 
 
 			/**
-			*@brief Gets loaded asset in database from name
+			*@brief Gets loaded default asset in database from name. Will load the asset if not currently available.
 			*/
 			Asset* GetDefaultAsset( const Enjon::MetaClass* cls );
 			
 			/**
-			*@brief Gets loaded asset in database from name
+			*@brief Gets loaded default asset in database by type id. Will load the asset if not currently available.
 			*/
 			template <typename T>
-			AssetHandle<T> GetDefaultAsset( )
-			{ 
-				// Get appropriate loader based on asset type
-				u32 loaderId = GetAssetTypeId<T>(); 
-
-				// Get handle from loader
-				Asset* defaultAsset = mLoaders[loaderId]->GetDefault( );
-				AssetHandle<T> handle = AssetHandle<T>( defaultAsset );
-
-				// Return asset handle
-				return handle;
-			} 
+			AssetHandle<T> GetDefaultAsset( );
+			
+			/**
+			*@brief Gets loader by meta class. If not found, returns nullptr.
+			*/
+			AssetLoader* GetLoader( const MetaClass* cls );
 
 			/**
 			*@brief 
 			*/
 			static bool HasFileExtension( const String& file, const String& extension );
-			
 
 		protected:
 
@@ -189,58 +163,33 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			u32 GetUniqueAssetTypeId() noexcept
-			{
-				static u32 lastId{ 0u };
-				return lastId++;
-			} 
+			u32 GetUniqueAssetTypeId( ) noexcept;
 
 			/**
 			*@brief
 			*/
 			template <typename T>
-			u32 GetAssetTypeId() noexcept
-			{
-				static_assert(std::is_base_of<Asset, T>::value, "GetAssetTypeId:: T must inherit from Asset.");
+			u32 GetAssetTypeId( ) noexcept;
 
-				// Return id type from object
-				return Enjon::Object::GetTypeId< T >( );
-
-				static u32 typeId{ GetUniqueAssetTypeId() };
-				return typeId;
-			}
+			/**
+			*@brief Used internally by AssetManager to place appropriate loaders into associative maps. 
+			*@note NOT TO BE DIRECTLY CALLED. 
+			*/
+			Enjon::Result RegisterAssetLoaderInternal( AssetLoader* loader, u32 idx );
 
 			/**
 			*@brief
 			*/
 			template <typename T, typename K>
-			Enjon::Result RegisterAssetLoader()
-			{
-				static_assert(std::is_base_of<Asset, T>::value,
-					"RegisterAssetLoader: T must inherit from Asset.");
-				
-				static_assert(std::is_base_of<AssetLoader, K>::value,
-					"RegisterAssetLoader: K must inherit from AssetLoader.");
-
-				// Get idx of asset loader type
-				u32 idx = GetAssetTypeId<T>(); 
-
-				// Set into map
-				mLoaders[idx] = new K();
-
-				// TODO(): This crashes for now. I want to set this here, so figure it out.
-				// Register default asset from loader
-				//mLoaders[ idx ]->RegisterDefaultAsset( );
-
-				return Result::SUCCESS;
-			}
+			Enjon::Result RegisterAssetLoader( );
 
 		private:
 			void RegisterLoaders( );
 
-		private:
+		private: 
 
-			std::unordered_map<u32, AssetLoader*> mLoaders; 
+			std::unordered_map< const MetaClass*, AssetLoader* > mLoadersByMetaClass;
+			std::unordered_map<u32, AssetLoader*> mLoadersByAssetId; 
 			std::unordered_map< Enjon::String, u32 > mFileExtensionMap;
 			String mAssetsPath;
 			String mCachedPath;

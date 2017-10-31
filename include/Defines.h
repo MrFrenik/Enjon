@@ -15,6 +15,8 @@
 #define EGUI	Enjon::GUI 
 
 #include <string>
+#include <vector>
+#include <unordered_map>
 
 namespace Enjon
 {
@@ -27,6 +29,12 @@ namespace Enjon
 	};
 	
 	using String = std::string; 
+
+	template <typename T>
+	using Vector = std::vector<T>;
+
+	template <typename T, typename K>
+	using HashMap = std::unordered_map<T, K>;
 }
 
 #endif

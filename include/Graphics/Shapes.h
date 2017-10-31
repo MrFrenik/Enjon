@@ -8,7 +8,7 @@
 namespace Enjon {  namespace Shapes {
 
 
-	inline void DrawSpline(Enjon::SpriteBatch* Batch, Vec4& StartAndEndPoints, Vec4& ControlPoints, float Thickness = 2.0f, u32 NumberOfPoints = 200, ColorRGBA16& Color = RGBA16_White())
+	inline void DrawSpline(Enjon::SpriteBatch* Batch, Vec4& StartAndEndPoints, Vec4& ControlPoints, float Thickness = 2.0f, u32 NumberOfPoints = 200, ColorRGBA32& Color = RGBA32_White())
 	{
 		auto Ax = StartAndEndPoints.x; 	auto Ay = StartAndEndPoints.y;
 		auto Bx = ControlPoints.x; 		auto By = ControlPoints.y;
@@ -66,7 +66,7 @@ namespace Enjon {  namespace Shapes {
 		}
 	}
 
-	inline void DrawLine(SpriteBatch* Batch, Vec4& StartAndEndPoints, float Thickness = 2.0f, ColorRGBA16& Color = RGBA16_White(), float Depth = 0.0f)
+	inline void DrawLine(SpriteBatch* Batch, Vec4& StartAndEndPoints, float Thickness = 2.0f, ColorRGBA32& Color = RGBA32_White(), float Depth = 0.0f)
 	{
 		// Get direction vector from Next to previous
 		auto Difference = Enjon::Vec2(StartAndEndPoints.z, StartAndEndPoints.w) - Enjon::Vec2(StartAndEndPoints.x, StartAndEndPoints.y);
@@ -88,7 +88,7 @@ namespace Enjon {  namespace Shapes {
 				);
 	}
 
-	inline void DrawHollowCircle(SpriteBatch* Batch, Enjon::Vec2& Point, Enjon::Vec2& StartAndEndAngles, float Radius, float Thickness = 2.0f, Enjon::uint32 NumberOfPoints = 360, ColorRGBA16& Color = RGBA16_White(), float Depth = 0.0f)
+	inline void DrawHollowCircle(SpriteBatch* Batch, Enjon::Vec2& Point, Enjon::Vec2& StartAndEndAngles, float Radius, float Thickness = 2.0f, Enjon::uint32 NumberOfPoints = 360, ColorRGBA32& Color = RGBA32_White(), float Depth = 0.0f)
 	{
 		for (auto i = StartAndEndAngles.x; i <= StartAndEndAngles.y; i += 0.5)
 		{
@@ -121,7 +121,7 @@ namespace Enjon {  namespace Shapes {
 
 	}
 
-	inline void DrawArrow(SpriteBatch* Batch, Enjon::Vec2& Point, float Size, ColorRGBA16& Color, float Depth = 0.0f, float Angle = 0.0f)
+	inline void DrawArrow(SpriteBatch* Batch, Enjon::Vec2& Point, float Size, ColorRGBA32& Color, float Depth = 0.0f, float Angle = 0.0f)
 	{
 		std::vector<Enjon::Vec2> Points;
 

@@ -380,7 +380,7 @@ namespace Enjon
 
 			// pre-allocate enough memory for the LUT texture.
 			glBindTexture( GL_TEXTURE_2D, mBRDFLUT );
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA16F, 512, 512, 0, GL_RGBA, GL_FLOAT, 0 );
+			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA32F, 512, 512, 0, GL_RGBA, GL_FLOAT, 0 );
 			// be sure to set wrapping mode to GL_CLAMP_TO_EDGE
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
@@ -613,11 +613,11 @@ namespace Enjon
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 
-		// mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA16_LightGrey());
+		// mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_LightGrey());
 
 		// Get sorted renderables by material
-		std::vector<Renderable*> sortedRenderables = mScene.GetRenderables();
-		std::set<QuadBatch*>* sortedQuadBatches = mScene.GetQuadBatches(); 
+		const std::vector<Renderable*>& sortedRenderables = mScene.GetRenderables();
+		const std::set<QuadBatch*>& sortedQuadBatches = mScene.GetQuadBatches(); 
 
 		// Shader graph to be used
 		Enjon::AssetHandle< Enjon::ShaderGraph > sg; 
@@ -722,13 +722,13 @@ namespace Enjon
 		Enjon::GLSLProgram* shader = Enjon::ShaderManager::Get("QuadBatch");
 		shader->Use();
 
-		if (!sortedQuadBatches->empty())
+		if (!sortedQuadBatches.empty())
 		{
 			// Set shared uniform
 			shader->SetUniform("u_camera", mSceneCamera.GetViewProjection());
 
 			Material* material = nullptr;
-			for (auto& quadBatch : *sortedQuadBatches)
+			for (auto& quadBatch : sortedQuadBatches)
 			{
 				Material* curMaterial = quadBatch->GetMaterial();
 				assert(curMaterial != nullptr);
@@ -886,9 +886,9 @@ namespace Enjon
 		GLSLProgram* pointShader 		= Enjon::ShaderManager::Get("PBRPointLight");	
 		GLSLProgram* spotShader 		= Enjon::ShaderManager::Get("SpotLight");	
 
-		std::set<DirectionalLight*>* directionalLights 	= mScene.GetDirectionalLights();	
-		std::set<SpotLight*>* spotLights 				= mScene.GetSpotLights();	
-		std::set<PointLight*>* pointLights 				= mScene.GetPointLights();
+		const std::set<DirectionalLight*>& directionalLights 	= mScene.GetDirectionalLights();	
+		const std::set<SpotLight*>& spotLights 					= mScene.GetSpotLights();	
+		const std::set<PointLight*>& pointLights 				= mScene.GetPointLights();
 
 		AmbientSettings* aS = mScene.GetAmbientSettings();
 
@@ -929,9 +929,9 @@ namespace Enjon
 		directionalShader->Use();
 		{
 			directionalShader->SetUniform( "u_camPos", mSceneCamera.GetPosition( ) );
-			for (auto& l : *directionalLights)
+			for (auto& l : directionalLights)
 			{
-				ColorRGBA16 color = l->GetColor();
+				ColorRGBA32 color = l->GetColor();
 
 				directionalShader->BindTexture("u_albedoMap", 	mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
 				directionalShader->BindTexture("u_normalMap", 	mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
@@ -962,9 +962,9 @@ namespace Enjon
 			pointShader->SetUniform( "u_resolution", mGbuffer->GetResolution( ) );
 			pointShader->SetUniform( "u_camPos", mSceneCamera.GetPosition( ) );
 
-			for (auto& l : *pointLights)
+			for (auto& l : pointLights)
 			{
-				ColorRGBA16& color = l->GetColor();
+				ColorRGBA32& color = l->GetColor();
 				Vec3& position = l->GetPosition();
 
 				pointShader->SetUniform("u_lightPos", position);
@@ -981,32 +981,29 @@ namespace Enjon
 
 		spotShader->Use();
 		{
-			for (auto& l : *spotLights)
+			spotShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
+			spotShader->BindTexture("u_normalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
+			spotShader->BindTexture("u_positionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 2);
+			// spotShader->BindTexture("u_matProps", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
+			spotShader->SetUniform("u_resolution", mGbuffer->GetResolution());
+			spotShader->SetUniform("u_camPos", mSceneCamera.GetPosition());			
+
+			for (auto& l : spotLights)
 			{
-				spotShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
-				spotShader->BindTexture("u_normalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
-				spotShader->BindTexture("u_positionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 2);
-				// spotShader->BindTexture("u_matProps", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
-				spotShader->SetUniform("u_resolution", mGbuffer->GetResolution());
-				spotShader->SetUniform("u_camPos", mSceneCamera.GetPosition());			
+				ColorRGBA32& color = l->GetColor();
+				SLParams& params = l->GetParams();
+				Vec3& position = l->GetPosition();
 
-				for (auto& l : *spotLights)
-				{
-					ColorRGBA16& color = l->GetColor();
-					SLParams& params = l->GetParams();
-					Vec3& position = l->GetPosition();
+				spotShader->SetUniform("u_lightPos", position);
+				spotShader->SetUniform("u_lightColor", Vec3(color.r, color.g, color.b));
+				spotShader->SetUniform("u_falloff", params.mFalloff);
+				spotShader->SetUniform("u_lightIntensity", l->GetIntensity());
+				spotShader->SetUniform("u_lightDirection", params.mDirection);
+				spotShader->SetUniform("u_innerCutoff", params.mInnerCutoff);
+				spotShader->SetUniform("u_outerCutoff", params.mOuterCutoff);
 
-					spotShader->SetUniform("u_lightPos", position);
-					spotShader->SetUniform("u_lightColor", Vec3(color.r, color.g, color.b));
-					spotShader->SetUniform("u_falloff", params.mFalloff);
-					spotShader->SetUniform("u_lightIntensity", l->GetIntensity());
-					spotShader->SetUniform("u_lightDirection", params.mDirection);
-					spotShader->SetUniform("u_innerCutoff", params.mInnerCutoff);
-					spotShader->SetUniform("u_outerCutoff", params.mOuterCutoff);
-
-					// Render Light to screen
-					mFullScreenQuad->Submit( );
-				}
+				// Render Light to screen
+				mFullScreenQuad->Submit( );
 			}
 		}
 		spotShader->Unuse();
@@ -1025,7 +1022,7 @@ namespace Enjon
 		GLSLProgram* luminanceProgram = Enjon::ShaderManager::Get("Bright");
 		mLuminanceTarget->Bind();
 		{
-			mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT, RGBA16_Black());
+			mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT, RGBA32_Black());
 			luminanceProgram->Use();
 			{
 				luminanceProgram->BindTexture( "tex", mLightingBuffer->GetTexture( ), 0 );

@@ -133,7 +133,7 @@ namespace Enjon
 
 	//==============================================================================
 
-	//void Renderable::SetColor(TextureSlotType type, const ColorRGBA16& color)
+	//void Renderable::SetColor(TextureSlotType type, const ColorRGBA32& color)
 	//{
 	//	assert(mMaterial != nullptr);
 	//	mMaterial->SetColor(type, color);

@@ -14,7 +14,7 @@
 
 namespace Enjon { 
 
-	class ColorRGBA16;
+	class ColorRGBA32;
 	class GLTexture;
 	class Vec2;
 	class Vec3;
@@ -50,7 +50,7 @@ namespace Enjon {
 		void SetUniform(const std::string& name, const Vec4& vector);
 		void SetUniform(const std::string& name, const Mat4& matrix); 
 		void SetUniform(const std::string& name, const Transform& T);
-		void SetUniform(const std::string& name, ColorRGBA16& C);
+		void SetUniform(const std::string& name, ColorRGBA32& C);
 		
 		GLuint inline GetProgramID() const { return m_programID; } 
 	

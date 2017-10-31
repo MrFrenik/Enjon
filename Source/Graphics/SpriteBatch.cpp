@@ -49,13 +49,13 @@ namespace Enjon {
 		}
 
 		void SpriteBatch::Add(const Vec4& destRect, const Vec4& uvRect, GLuint texture,
-			const ColorRGBA16& color /* = ColorRGBA16(255) */, float depth /* = 0.0f ) */, DrawOption Options,
-			ColorRGBA16 BorderColor, float BorderThickness, const Enjon::Vec2& ShadowOffset, float BorderRadius)
+			const ColorRGBA32& color /* = ColorRGBA32(255) */, float depth /* = 0.0f ) */, DrawOption Options,
+			ColorRGBA32 BorderColor, float BorderThickness, const Enjon::Vec2& ShadowOffset, float BorderRadius)
 		{
 			if (Options & DrawOptions::SHADOW)
 			{
 				// Make this a shadow texture
-				m_glyphs.emplace_back(NewGlyph(Vec4(destRect.x + ShadowOffset.x, destRect.y - ShadowOffset.y, destRect.z, destRect.w), uvRect, texture, depth, SetOpacity(RGBA16_Black(), 0.3f)));
+				m_glyphs.emplace_back(NewGlyph(Vec4(destRect.x + ShadowOffset.x, destRect.y - ShadowOffset.y, destRect.z, destRect.w), uvRect, texture, depth, SetOpacity(RGBA32_Black(), 0.3f)));
 			}
 
 			if (Options & DrawOptions::BORDER)
@@ -69,14 +69,14 @@ namespace Enjon {
 		}
 
 		/* Adds glpyh to spritebatch to be rendered with specified rotation */
-		void SpriteBatch::Add(const Vec4& destRect, const Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, float angle, CoordinateFormat format, DrawOption Options)
+		void SpriteBatch::Add(const Vec4& destRect, const Vec4& uvRect, GLuint texture, const ColorRGBA32& color, float depth, float angle, CoordinateFormat format, DrawOption Options)
 		{
 			// Place back new glyph
 			m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color, angle, format));
 		}
 
 		/* Adds polygon glyph to spritebatch to be rendered */
-		void SpriteBatch::AddPolygon(std::vector<Enjon::Vec2>& Points, const Vec4& uvRect, GLuint texture, const ColorRGBA16& color, float depth, CoordinateFormat format)
+		void SpriteBatch::AddPolygon(std::vector<Enjon::Vec2>& Points, const Vec4& uvRect, GLuint texture, const ColorRGBA32& color, float depth, CoordinateFormat format)
 		{
 			// Place back new glyph
 			m_glyphs.emplace_back(NewPolygon(Points, uvRect, texture, color, depth, format));
@@ -237,7 +237,7 @@ namespace Enjon {
 			return (a->texture < b->texture);
 		}
 
-		void DrawRectBorder(SpriteBatch* Batch, const Vec4& Dims, float Thickness, ColorRGBA16& Color, float Depth, float BorderRadius)
+		void DrawRectBorder(SpriteBatch* Batch, const Vec4& Dims, float Thickness, ColorRGBA32& Color, float Depth, float BorderRadius)
 		{
 			/*
 				|-  z  -|

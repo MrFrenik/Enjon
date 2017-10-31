@@ -10,39 +10,42 @@
 
 namespace Enjon
 {
+	ENJON_CLASS()
 	class ShaderGraphAssetLoader : public AssetLoader
 	{
-	public:
+		ENJON_CLASS_BODY()
 
-		/**
-		* @brief Constructor
-		*/
-		ShaderGraphAssetLoader( );
+		public:
 
-		/**
-		* @brief Destructor
-		*/
-		~ShaderGraphAssetLoader( );
+			/**
+			* @brief Constructor
+			*/
+			ShaderGraphAssetLoader( );
 
-
-	protected:
-
-		/**
-		* @brief
-		*/
-		virtual void RegisterDefaultAsset( ) override;
+			/**
+			* @brief Destructor
+			*/
+			~ShaderGraphAssetLoader( );
 
 
-	private:
-		/**
-		* @brief
-		*/
-		ShaderGraph* LoadResourceFromFile( const String& filePath, const String& name );
+		protected:
 
-		/**
-		* @brief
-		*/
-		ShaderGraph* LoadShaderGraphFromFile( const Enjon::String& filePath );
+			/**
+			* @brief
+			*/
+			virtual void RegisterDefaultAsset( ) override;
+
+
+		private:
+			/**
+			* @brief
+			*/
+			Asset* LoadResourceFromFile( const String& filePath, const String& name ) override;
+
+			/**
+			* @brief
+			*/
+			ShaderGraph* LoadShaderGraphFromFile( const Enjon::String& filePath );
 	};
 }
 

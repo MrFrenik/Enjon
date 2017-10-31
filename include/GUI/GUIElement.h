@@ -72,9 +72,9 @@ namespace Enjon { namespace GUI {
 		EGUI::Signal<> off_hover;
 		EGUI::Signal<> lose_focus;
 		EGUI::Signal<Enjon::Input*, Camera2D*> check_children;
-		ColorRGBA16 Color;
-		ColorRGBA16 BorderColor;
-		ColorRGBA16 TextColor;
+		ColorRGBA32 Color;
+		ColorRGBA32 BorderColor;
+		ColorRGBA32 TextColor;
 		uint32_t JustFocused;
 		float Depth;
 	};
@@ -119,8 +119,8 @@ namespace Enjon { namespace GUI {
 			Name 			= std::string("GUITextBox");
 			Text 			= std::string("");
 			CursorIndex 	= 0;
-			TextColor 		= RGBA16_White();
-			Color 	 		= RGBA16_DarkGrey();
+			TextColor 		= RGBA32_White();
+			Color 	 		= RGBA32_DarkGrey();
 			BorderColor 	= Color;
 			caret_on 		= false;
 			caret_count 	= 0.0f;
@@ -146,19 +146,19 @@ namespace Enjon { namespace GUI {
 				HoverState = HoveredState::ON_HOVER;
 
 				// Change color of Box
-				Color = SetOpacity(RGBA16(0.2f, 0.2f, 0.2f, 1.0f), 0.3f);
+				Color = SetOpacity(RGBA32(0.2f, 0.2f, 0.2f, 1.0f), 0.3f);
 			});
 
 			// Set up TextBox's off_hover signal
 			this->off_hover.connect([&]()
 			{
-				// Change mouse cursor back to defaul
+				// Change mouse cursor back to default
 				SDL_SetCursor(CursorManager::Get("Arrow"));
 
 				HoverState = HoveredState::OFF_HOVER;
 			
 				// Change color of Box
-				Color = RGBA16_DarkGrey();
+				Color = RGBA32_DarkGrey();
 			});
 
 			// Set up TextBox's on_keyboard signal
@@ -233,7 +233,7 @@ namespace Enjon { namespace GUI {
 				uint32_t index = 0;
 
 				// Set border color to active
-				BorderColor 	= SetOpacity(RGBA16(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
+				BorderColor 	= SetOpacity(RGBA32(0.20f, 0.635f, 1.0f, 1.0f), 0.5f);
 
 				// Get advance
 				for (auto& c : Text)
@@ -313,7 +313,7 @@ namespace Enjon { namespace GUI {
 									Text, 
 									TextFont, 
 									*Batch, 
-									RGBA16_LightGrey()
+									RGBA32_LightGrey()
 								);
 			
 			// Draw Caret if on
@@ -335,7 +335,7 @@ namespace Enjon { namespace GUI {
 								Vec4(XAdvance + 0.2f, Position.y + Padding.y + TextHeight, 1.0f, 10.0f),
 								Vec4(0, 0, 1, 1),
 								Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								RGBA16_LightGrey(),
+								RGBA32_LightGrey(),
 								1.0f
 							);
 			}

@@ -20,12 +20,12 @@
 	friend Enjon::Object;																			\
 	public:																							\
 		virtual u32 GetTypeId() override;		\
-		virtual const Enjon::MetaClass* Class( ) override\
+		virtual const Enjon::MetaClass* Class( ) const override\
 		{\
 			return GetClassInternal();\
 		}\
 	private:\
-		const Enjon::MetaClass* GetClassInternal(); 
+		const Enjon::MetaClass* GetClassInternal() const; 
 
 #define ENJON_COMPONENT( type )\
 public:\
@@ -45,7 +45,7 @@ namespace Enjon
 	{
 		Object,
 		Bool,
-		ColorRGBA16,
+		ColorRGBA32,
 		F32,
 		F64,
 		U8,
@@ -184,12 +184,12 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			std::string GetName( );
+			std::string GetName( ) const;
 
 			/*
 			* @brief
 			*/
-			MetaPropertyType GetType( );
+			MetaPropertyType GetType( ) const;
 
 			/*
 			* @brief
@@ -199,7 +199,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			u32 GetOffset( )
+			u32 GetOffset( ) const
 			{
 				return mOffset;
 			}
@@ -207,7 +207,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			u32 GetIndex( )
+			u32 GetIndex( ) const
 			{
 				return mIndex;
 			}
@@ -232,7 +232,7 @@ namespace Enjon
 		public: 
 			MetaPropertyAssetHandle( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits )
 			{
-				static_assert( std::is_base_of<Object, T>::value, "Invoke() - T must inherit from Object." );
+				Object::AssertIsObject<T>( );
 
 				mType = type;
 				mName = name;
@@ -273,7 +273,7 @@ namespace Enjon
 			template < typename RetVal, typename T, typename... Args >
 			RetVal Invoke( T* obj, Args&&... args )
 			{
-				static_assert( std::is_base_of<Object, T>::value, "Invoke() - T must inherit from Object." );
+				Object::AssertIsObject<T>( );
 				return static_cast< MetaFunctionImpl< T, RetVal, Args&&... >* >( this )->mFunc( obj, std::forward<Args>( args )... );
 			}
 
@@ -340,6 +340,7 @@ namespace Enjon
 
 	typedef std::vector< MetaProperty* > PropertyTable;
 	typedef std::unordered_map< Enjon::String, MetaFunction* > FunctionTable;
+	typedef std::function< Object*( void ) > ConstructFunction;
 
 	class MetaClass
 	{
@@ -373,17 +374,17 @@ namespace Enjon
 				return ( u32 )mProperties.size( );
 			}
 
-			u32 FunctionCount( )
+			u32 FunctionCount( ) const
 			{
 				return ( u32 )mFunctions.size( );
 			} 
 
-			bool PropertyExists( const u32& index )
+			bool PropertyExists( const u32& index ) const
 			{
 				return index < mPropertyCount;
 			}
 
-			bool FunctionExists( const Enjon::String& name )
+			bool FunctionExists( const Enjon::String& name ) const
 			{
 				return ( mFunctions.find( name ) != mFunctions.end( ) ); 
 			}
@@ -398,12 +399,12 @@ namespace Enjon
 				return nullptr;
 			}
 
-			usize GetPropertyCount( )
+			usize GetPropertyCount( ) const
 			{
 				return mPropertyCount;
 			}
 
-			const MetaProperty* GetProperty( const u32& index )
+			const MetaProperty* GetProperty( const u32& index ) const
 			{
 				if ( PropertyExists( index ) )
 				{
@@ -413,13 +414,13 @@ namespace Enjon
 				return nullptr;
 			} 
 
-			bool HasProperty( const MetaProperty* prop )
+			bool HasProperty( const MetaProperty* prop ) const
 			{
 				return ( ( prop->mIndex < mPropertyCount ) && ( mProperties.at( prop->mIndex ) == prop ) ); 
 			}
 
 			template < typename T >
-			void GetValue( const Object* obj, const MetaProperty* prop, T* value )
+			void GetValue( const Object* obj, const MetaProperty* prop, T* value ) const
 			{
 				if ( HasProperty( prop ) )
 				{
@@ -429,7 +430,7 @@ namespace Enjon
 			} 
 
 			template < typename RetVal > 
-			RetVal* GetValueAs( const Object* obj, const MetaProperty* prop )
+			RetVal* GetValueAs( const Object* obj, const MetaProperty* prop ) const
 			{
 				if ( HasProperty( prop ) )
 				{
@@ -441,7 +442,17 @@ namespace Enjon
 			} 
 
 			template < typename T >
-			void SetValue( const Object* obj, const MetaProperty* prop, const T& value )
+			void SetValue( const Object* obj, const MetaProperty* prop, const T& value ) const
+			{
+				if ( HasProperty( prop ) )
+				{
+					void* member_ptr = ( ( ( u8* )&( *obj ) + prop->mOffset ) );
+					*( T* )( member_ptr ) = value;
+				}
+			} 
+
+			template < typename T >
+			void SetValue( Object* obj, const MetaProperty* prop, const T& value )
 			{
 				if ( HasProperty( prop ) )
 				{
@@ -469,12 +480,24 @@ namespace Enjon
 				return mTypeId;
 			}
 
-			String GetName( )
+			String GetName( ) const
 			{
 				return mName;
 			}
 
-			PropertyTable& GetProperties( ) { return mProperties; }
+			const PropertyTable& GetProperties( ) const { return mProperties; }
+
+			/*
+			* @brief
+			*/
+			Object* Construct( ) const
+			{
+				if ( mConstructor )
+				{
+					return mConstructor( );
+				}
+				return nullptr;
+			}
 
 		protected:
 			PropertyTable mProperties;
@@ -483,6 +506,9 @@ namespace Enjon
 			u32 mFunctionCount;
 			u32 mTypeId;
 			String mName;
+
+			// Not sure if this is the best way to do this, but whatever...
+			ConstructFunction mConstructor = nullptr;
 	};
 
 	class Object;
@@ -590,7 +616,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			virtual const MetaClass* Class( )
+			virtual const MetaClass* Class( ) const
 			{
 				return nullptr;
 			}
@@ -607,9 +633,18 @@ namespace Enjon
 			*@brief
 			*/
 			template <typename T>
+			inline static void AssertIsObject( )
+			{
+				static_assert( std::is_base_of<Object, T>::value, "T must inherit from Object." ); 
+			} 
+
+			/**
+			*@brief
+			*/
+			template <typename T>
 			T* Cast( )
 			{
-				static_assert( std::is_base_of<Object, T>::value, "Object::Cast() - T must inherit from Enjon Object." );
+				Object::AssertIsObject<T>( );
 
 				return static_cast<T*>( this );
 			}
@@ -620,7 +655,7 @@ namespace Enjon
 			template <typename T>
 			static u32 GetTypeId( ) noexcept
 			{
-				static_assert( std::is_base_of<Object, T>::value, "Object::GetTypeId() - T must inherit from Enjon Object." );
+				Object::AssertIsObject<T>( ); 
 
 				static u32 typeId { GetUniqueTypeId( ) }; 
 				return typeId;
@@ -629,7 +664,8 @@ namespace Enjon
 			template <typename T>
 			bool InstanceOf( )
 			{
-				static_assert( std::is_base_of<Object, T>::value, "Object::GetTypeId() - T must inherit from Enjon Object." ); 
+				Object::AssertIsObject<T>( ); 
+
 				return ( mTypeId == Object::GetTypeId< T >( ) );
 			}
 

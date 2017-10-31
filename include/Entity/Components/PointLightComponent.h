@@ -23,14 +23,14 @@ namespace Enjon
 			PointLight* GetLight() { return &mLight; }
 
 			Vec3& GetPosition() { return mLight.GetPosition(); }
-			ColorRGBA16& GetColor() { return mLight.GetColor(); }
+			ColorRGBA32& GetColor() { return mLight.GetColor(); }
 			float GetIntensity() { return mLight.GetIntensity(); }
 			float GetRadius() { return mLight.GetRadius(); }
 			float GetAttenuationRate() { return mLight.GetAttenuationRate(); }
 
 			void SetAttenuationRate(float rate);
 			void SetPosition(Vec3& position);
-			void SetColor(ColorRGBA16& color);
+			void SetColor(ColorRGBA32& color);
 			void SetIntensity(float intensity);
 			void SetRadius(float radius);
 

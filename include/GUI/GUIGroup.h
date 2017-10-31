@@ -31,8 +31,8 @@ namespace Enjon { namespace GUI {
 			// Set up member variables
 			Name 			= std::string("GUISceneGroup");		// Default Name
 			Dimensions		= Enjon::Vec2(250.0f, 300.0f);		// Default Dimensions
-			TextColor		= RGBA16_MidGrey();
-			Color 			= RGBA16(0.12, 0.12, 0.12, 1.0f);
+			TextColor		= RGBA32_MidGrey();
+			Color 			= RGBA32(0.12, 0.12, 0.12, 1.0f);
 			HoveredElement	= nullptr;
 			Visibility 		= VisibleState::VISIBLE;
 
@@ -146,8 +146,8 @@ namespace Enjon { namespace GUI {
 			TitlePadding 	= 15.0f;
 			Name 			= std::string("GUIVerticleGroup");		// Default Name
 			Dimensions		= Enjon::Vec2(250.0f, 300.0f);		// Default Dimensions
-			TextColor		= RGBA16_MidGrey();
-			Color 			= RGBA16(0.12, 0.12, 0.12, 1.0f);
+			TextColor		= RGBA32_MidGrey();
+			Color 			= RGBA32(0.12, 0.12, 0.12, 1.0f);
 			TextFont 		= nullptr;
 			HoveredElement	= nullptr;
 			Visibility 		= VisibleState::VISIBLE;
@@ -163,7 +163,7 @@ namespace Enjon { namespace GUI {
 			{
 				HoverState = HoveredState::ON_HOVER;
 
-				Color = RGBA16(0.2f, 0.2f, 0.2f, 0.5f);
+				Color = RGBA32(0.2f, 0.2f, 0.2f, 0.5f);
 			});
 
 			// Set up GUIVerticleGroup's off_hover signal
@@ -171,7 +171,7 @@ namespace Enjon { namespace GUI {
 			{
 				HoverState = HoveredState::OFF_HOVER;
 
-				Color 			= RGBA16(0.12, 0.12, 0.12, 1.0f);
+				Color 			= RGBA32(0.12, 0.12, 0.12, 1.0f);
 			});
 
 			MinimizeButton.on_hover.connect([&]()
@@ -309,10 +309,10 @@ namespace Enjon { namespace GUI {
 						Vec4(Position, Dimensions),
 						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						SetOpacity(RGBA16(0.12f, 0.12f, 0.12f, 1.0f), 0.3f),
+						SetOpacity(RGBA32(0.12f, 0.12f, 0.12f, 1.0f), 0.3f),
 						0.0f,
 						SpriteBatch::DrawOptions::BORDER | SpriteBatch::DrawOptions::SHADOW,
-						SetOpacity(RGBA16_DarkGrey(), 0.2f),
+						SetOpacity(RGBA32_DarkGrey(), 0.2f),
 						1.0f
 					);
 
@@ -321,10 +321,10 @@ namespace Enjon { namespace GUI {
 						Vec4(Position + Enjon::Vec2(5.0f, 5.0f), Dimensions - Enjon::Vec2(10.0f, 10.0f + YOffset)),
 						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						SetOpacity(RGBA16(0.14f, 0.14f, 0.14f, 1.0f), 0.3f),
+						SetOpacity(RGBA32(0.14f, 0.14f, 0.14f, 1.0f), 0.3f),
 						0.0f,
 						SpriteBatch::DrawOptions::BORDER,
-						SetOpacity(RGBA16_DarkGrey(), 0.8f),
+						SetOpacity(RGBA32_DarkGrey(), 0.8f),
 						1.0f
 					);
 
@@ -339,7 +339,7 @@ namespace Enjon { namespace GUI {
 						Color,
 						0.0f,
 						SpriteBatch::DrawOptions::BORDER,
-						SetOpacity(RGBA16_DarkGrey(), 0.8f),
+						SetOpacity(RGBA32_DarkGrey(), 0.8f),
 						1.0f
 					);
 
@@ -348,10 +348,10 @@ namespace Enjon { namespace GUI {
 						Vec4(Position.x + 2.0f, Position.y + Dimensions.y - YOffset + 2.0f, Dimensions.x - 4.0f, YOffset - 4.0f),
 						Vec4(0, 0, 1, 1),
 						Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-						SetOpacity(RGBA16(0.14f, 0.14f, 0.14f, 1.0f), 0.3f),
+						SetOpacity(RGBA32(0.14f, 0.14f, 0.14f, 1.0f), 0.3f),
 						0.0f,
 						SpriteBatch::DrawOptions::BORDER,
-						SetOpacity(RGBA16_DarkGrey(), 0.8f),
+						SetOpacity(RGBA32_DarkGrey(), 0.8f),
 						1.0f
 					);
 
@@ -371,7 +371,7 @@ namespace Enjon { namespace GUI {
 									Name,
 									TitleFont,
 									*Batch,
-									SetOpacity(RGBA16_MidGrey(), 0.6f)
+									SetOpacity(RGBA32_MidGrey(), 0.6f)
 								);
 
 			// Draw MinimizeButton button
@@ -382,7 +382,7 @@ namespace Enjon { namespace GUI {
 						MinimizeButton.Color,
 						0.0f,
 						SpriteBatch::DrawOptions::BORDER,
-						SetOpacity(RGBA16_DarkGrey(), 0.8f),
+						SetOpacity(RGBA32_DarkGrey(), 0.8f),
 						1.0f
 					);
 
@@ -393,7 +393,7 @@ namespace Enjon { namespace GUI {
 									"x",
 									FontManager::GetFont("Arrows7"),
 									*Batch,
-									SetOpacity(RGBA16_MidGrey(), 0.6f), 
+									SetOpacity(RGBA32_MidGrey(), 0.6f), 
 									TextStyle::SHADOW,
 									Enjon::ToRadians(180.0f)
 								);
@@ -410,10 +410,10 @@ namespace Enjon { namespace GUI {
 								Vec4(Position.x, E->Position.y, Dimensions.x, E->Dimensions.y),
 								Vec4(0, 0, 1, 1),
 								Enjon::ResourceManager::GetTexture("../IsoARPG/Assets/Textures/HealthBarWhite.png").id,
-								SetOpacity(RGBA16(0.2f, 0.2f, 0.2f, 1.0f), 0.1f),
+								SetOpacity(RGBA32(0.2f, 0.2f, 0.2f, 1.0f), 0.1f),
 								0.0f,
 								SpriteBatch::DrawOptions::BORDER,
-								SetOpacity(RGBA16_DarkGrey(), 0.2f),
+								SetOpacity(RGBA32_DarkGrey(), 0.2f),
 								1.0f
 							);
 				}
@@ -439,7 +439,7 @@ namespace Enjon { namespace GUI {
 		std::vector<GUIElementBase*> Children;
 		GUIElementBase* HoveredElement;
 		Font* TextFont;
-		ColorRGBA16 TextColor;
+		ColorRGBA32 TextColor;
 		float TitlePadding;
 		float FontScale;
 		float X0Offset;

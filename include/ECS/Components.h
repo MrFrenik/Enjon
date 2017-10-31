@@ -166,7 +166,7 @@ namespace ECS { namespace Component {
 	// Render Component
 	typedef struct 
 	{
-		Enjon::ColorRGBA16 Color;
+		Enjon::ColorRGBA32 Color;
 		Enjon::SpriteBatch* Batch;
 		Enjon::CoordinateFormat Format;
 		eid32 Entity;

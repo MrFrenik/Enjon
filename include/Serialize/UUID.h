@@ -34,7 +34,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			Enjon::String ToString();
+			Enjon::String ToString() const; 
 
 			/*
 			* @brief

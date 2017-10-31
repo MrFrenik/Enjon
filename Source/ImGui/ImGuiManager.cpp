@@ -308,9 +308,9 @@ namespace Enjon
 				}
 			} break;
 
-			case Enjon::MetaPropertyType::ColorRGBA16:
+			case Enjon::MetaPropertyType::ColorRGBA32:
 			{
-				Enjon::ColorRGBA16 val;
+				Enjon::ColorRGBA32 val;
 				cls->GetValue( object, prop, &val );
 				f32 col[ 4 ] = { val.r, val.g, val.b, val.a };
 				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
@@ -387,7 +387,7 @@ namespace Enjon
 				case Enjon::MetaPropertyType::Vec2: 
 				case Enjon::MetaPropertyType::Vec3: 
 				case Enjon::MetaPropertyType::Vec4:
-				case Enjon::MetaPropertyType::ColorRGBA16:
+				case Enjon::MetaPropertyType::ColorRGBA32:
 				case Enjon::MetaPropertyType::String:
 				case Enjon::MetaPropertyType::UUID:
 				{
