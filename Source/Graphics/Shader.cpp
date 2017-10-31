@@ -25,7 +25,7 @@ namespace Enjon
 
 	//=======================================================================================================================
 
-	Shader::Shader( const ShaderGraph& graph, ShaderPassType passType )
+	Shader::Shader( const AssetHandle<ShaderGraph>& graph, ShaderPassType passType )
 		: mGraph( graph ), mPassType( passType )
 	{
 		Compile( );
@@ -36,11 +36,11 @@ namespace Enjon
 		// Get shader resource path
 		Enjon::String sp = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( )->GetAssetsPath( ) + "/Shaders";
 		// Get vertex file path 
-		Enjon::String vertName = mGraph.GetName( ) + "." + ShaderGraph::ShaderPassToString( mPassType ) + ".Vertex.glsl";
+		Enjon::String vertName = mGraph->GetName( ) + "." + ShaderGraph::ShaderPassToString( mPassType ) + ".Vertex.glsl";
 		Enjon::String vertPath = sp + "/" + vertName;
 		
 		// Get fragment file path 
-		Enjon::String fragName = mGraph.GetName( ) + "." + ShaderGraph::ShaderPassToString( mPassType ) + ".Fragment.glsl";
+		Enjon::String fragName = mGraph->GetName( ) + "." + ShaderGraph::ShaderPassToString( mPassType ) + ".Fragment.glsl";
 		Enjon::String fragPath = sp + "/" + fragName;
 
 		// Parse shader for vertex shader output 
@@ -150,7 +150,7 @@ namespace Enjon
 			
 	const Enjon::ShaderGraph* Shader::GetGraph( )
 	{
-		return &mGraph;
+		return mGraph.Get();
 	}
 
 	//======================================================================================================================= 

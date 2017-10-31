@@ -46,7 +46,7 @@ namespace Enjon {
 	ENJON_CLASS( )
 	class SpotLight : public Enjon::Object
 	{
-		ENJON_CLASS_BODY( SpotLight )
+		ENJON_CLASS_BODY( )
 
 		public:
 			SpotLight();

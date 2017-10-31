@@ -369,7 +369,7 @@ namespace Enjon
 
 		Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( object->Class( ) );
 
-		ImGui::Text( ( "Type: " + std::string(object->GetClassName( ) ) ).c_str( ) );
+		ImGui::Text( ( "Type: " + std::string(cls->GetName( ) ) ).c_str( ) );
 
 		for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
 		{

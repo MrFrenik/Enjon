@@ -19,8 +19,11 @@ namespace Enjon
 	class Material;
 	class Texture; 
 
+	ENJON_CLASS( )
 	class Shader : public Asset
 	{
+		ENJON_CLASS_BODY( )
+
 		public:
 			/**
 			* @brief Constructor
@@ -30,7 +33,7 @@ namespace Enjon
 			/**
 			* @brief Constructor
 			*/
-			Shader( const Enjon::ShaderGraph& graph, ShaderPassType passType );
+			Shader( const AssetHandle<ShaderGraph>& graph, ShaderPassType passType );
 
 			/**
 			* @brief Destructor
@@ -103,7 +106,7 @@ namespace Enjon
 			u32 mFragmentShaderID	= 0;
 			std::unordered_map< Enjon::String, u32 > mUniformMap;
 			ShaderPassType mPassType;
-			ShaderGraph mGraph;
+			AssetHandle<ShaderGraph> mGraph;
 	}; 
 	
 	class ShaderUniform

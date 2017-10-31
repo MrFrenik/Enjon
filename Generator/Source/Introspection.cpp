@@ -236,7 +236,7 @@ const Class* Introspection::AddClass( const std::string& className )
 {
 	if ( !ClassExists( className ) )
 	{
-		mClasses[ className ] = Class( className );
+		mClasses[ className ] = Class( );
 	}
 
 	return &mClasses[ className ];
@@ -321,19 +321,27 @@ void Introspection::ParseClass( Lexer* lexer )
 	}
 
 	// Get class token
-	Token classToken = lexer->GetCurrentToken( );
+	Token classToken = lexer->GetCurrentToken( ); 
 
-	// Get class name and store for class creation
-	std::string className = classToken.ToString( );
+	// Get the qualified name for the class
+	std::string qualifiedClassName = "";
+	for ( auto& ns : traits.mNamespaceQualifiers )
+	{
+		qualifiedClassName += ns + "::";
+	}
+	qualifiedClassName += classToken.ToString( );
 
 	// Get new class created
-	Class* cls = const_cast< Class* >( AddClass( className ) );
+	Class* cls = const_cast< Class* >( AddClass( qualifiedClassName ) );
 
 	// Set contents path of class ( include directory )
 	cls->mFilePath = lexer->GetContentsPath( );
 
 	// Add markup traits
 	cls->mTraits = traits;
+
+	// Set name of token
+	cls->mName = classToken.ToString( );
 
 	// Find super class
 	if ( lexer->PeekAtNextToken( ).IsType( TokenType::Token_Colon ) )
@@ -387,7 +395,7 @@ void Introspection::ParseClass( Lexer* lexer )
 	// Continue until open brace; if none hit, remove class
 	if ( !lexer->ContinueTo( TokenType::Token_OpenBrace ) )
 	{
-		RemoveClass( className );
+		RemoveClass( qualifiedClassName );
 
 		return;
 	} 
@@ -399,7 +407,7 @@ void Introspection::ParseClass( Lexer* lexer )
 	if ( !lexer->ContinueToIdentifier( "ENJON_CLASS_BODY" ) )
 	{
 		// Remove class
-		RemoveClass( className );
+		RemoveClass( qualifiedClassName );
 
 		return;
 	}
@@ -793,8 +801,11 @@ void Introspection::Compile( const ReflectionConfig& config )
 {
 	for ( auto& c : mClasses )
 	{
+		// Get qualified name of class
+		std::string qualifiedName = c.second.GetQualifiedName( ); 
+ 
 		// Grab output path
-		std::string outputPath = config.mOutputDirectory + "/" + c.second.mName + "_generated.gen"; 
+		std::string outputPath = config.mOutputDirectory + "/" + FindReplaceAll( qualifiedName, "::", "_" ) + "_generated.gen";
 
 		// Open file
 		std::ofstream f( outputPath );
@@ -828,19 +839,13 @@ void Introspection::Compile( const ReflectionConfig& config )
 				{
 					functions[ f.first ] = f.second;
 				}
-			}
- 
-			std::string className = "";
-			for ( auto& ns : c.second.mTraits.mNamespaceQualifiers )
-			{
-				className += ns + "::";
-			}
-			className += c.second.mName;
+			} 
+
 
 			// Construct meta class function
-			code += OutputLine( "// " + c.second.mName );
+			code += OutputLine( "// " + qualifiedName );
 			code += OutputLine( "template <>" );
-			code += OutputLine( "MetaClass* Object::ConstructMetaClass< " + className + " >( )" );
+			code += OutputLine( "MetaClass* Object::ConstructMetaClass< " + qualifiedName + " >( )" );
 			code += OutputLine( "{" );
 			code += OutputTabbedLine( "MetaClass* cls = new MetaClass( );\n" ); 
 
@@ -876,7 +881,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 					std::string pn = prop.second.mName;
 
 					// Get class name
-					std::string cn = className;
+					std::string cn = qualifiedName;
 
 					// Get property index
 					std::string pi = std::to_string( index++ );
@@ -928,7 +933,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 					std::string retType = func.second.mSignature.mRetType;
 
 					// Build template signature
-					std::string templateSignature = className + ", " + retType ;
+					std::string templateSignature = qualifiedName + ", " + retType ;
 
 					// Add parameter list to template signature
 					for ( auto& param : func.second.mSignature.mParameterList )
@@ -936,7 +941,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 						templateSignature += ", " + param;
 					}
 
-					code += OutputTabbedLine( "cls->mFunctions[ \"" + fn + "\" ] = new Enjon::MetaFunctionImpl< " + templateSignature + " >( &" + className + "::" + fn + ", \"" + fn + "\" );" );
+					code += OutputTabbedLine( "cls->mFunctions[ \"" + fn + "\" ] = new Enjon::MetaFunctionImpl< " + templateSignature + " >( &" + qualifiedName + "::" + fn + ", \"" + fn + "\" );" );
 				}
 
 			}
@@ -945,29 +950,48 @@ void Introspection::Compile( const ReflectionConfig& config )
 			code += OutputLine( "" );
 
 			// Set up typeid field
-			code += OutputTabbedLine( "cls->mTypeId = Enjon::Object::GetTypeId< " + className +" >( );\n" );
+			code += OutputTabbedLine( "cls->mTypeId = Enjon::Object::GetTypeId< " + qualifiedName +" >( );\n" );
 			
 			// Set up name field
-			code += OutputTabbedLine( "cls->mName = \"" + className + "\";\n" );
+			code += OutputTabbedLine( "cls->mName = \"" + qualifiedName + "\";\n" );
 
 			// Return statement
 			code += OutputTabbedLine( "return cls;" );
 			code += OutputLine( "}\n" ); 
 
+			// Function overrides from Object Base
 			/*
-				// Fill out object
-				void Construct( MetaClass* cls, Object* object )
-				{
-					MetaClass* cls = const_cast< MetaClass* > ( object->Class( ) );
-					PropertyTable& pt = cls->GetProperties( ); 
-
-					// "Construct" object with default values
-					for ( auto& prop : pt ) 
+				virtual u32 GetTypeId() const override { return Enjon::Object::GetTypeId< type >(); }		\
+				virtual const Enjon::MetaClass* Class( ) override\
+				{\
+					Enjon::MetaClassRegistry* mr = const_cast< Enjon::MetaClassRegistry* >( Enjon::Engine::GetInstance()->GetMetaClassRegistry( ) );\
+					const Enjon::MetaClass* cls = mr->Get< type >( );\
+					if ( !cls )\
+					{\
+						cls = mr->RegisterMetaClass< type >( );\
+					}\
+					return cls;\
 				}
-
-				Has to return an object of a specific type...
-
 			*/
+
+			// Class()
+			code += OutputLine( "const MetaClass* " + qualifiedName + "::GetClassInternal()" );
+			code += OutputLine( "{" );
+			code += OutputTabbedLine( "MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance()->GetMetaClassRegistry() );" );
+			code += OutputTabbedLine( "const MetaClass* cls = mr->Get< " + qualifiedName + " >( );" );
+			code += OutputTabbedLine( "if ( !cls )" );
+			code += OutputTabbedLine( "{" );
+			code += OutputTabbedLine( "\tcls = mr->RegisterMetaClass< " + qualifiedName + " >( );" );
+			code += OutputTabbedLine( "}" );
+			code += OutputTabbedLine( "return cls;" );
+			code += OutputLine( "}" );
+			
+			// GetTypeId()
+			code += OutputLine( "Enjon::u32 " + qualifiedName + "::GetTypeId()" );
+			code += OutputLine( "{" );
+			code += OutputTabbedLine( "return Object::GetTypeId< " + qualifiedName + " >();" );
+			code += OutputLine( "}" );
+
 
 
 			// Construct function
@@ -1025,8 +1049,11 @@ void Introspection::Link( const ReflectionConfig& config )
 	// Iterate classes and grab compiled intermediate files
 	for ( auto& c : mClasses )
 	{
+		// Get qualified name of class
+		std::string qualifiedName = c.second.GetQualifiedName( );
+
 		// Grab output path
-		std::string inputPath = config.mOutputDirectory + "/" + c.second.mName + "_generated.gen"; 
+		std::string inputPath = config.mOutputDirectory + "/" + FindReplaceAll( qualifiedName, "::", "_" ) + "_generated.gen";
 
 		// Open file
 		std::string fileContents = ReadFileIntoString( inputPath.c_str( ) ); 

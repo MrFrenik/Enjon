@@ -10,7 +10,7 @@ namespace Enjon
 	ENJON_CLASS( )
 	class PointLightComponent : public Component
 	{
-		ENJON_CLASS_BODY( PointLightComponent )
+		ENJON_CLASS_BODY( ) 
 
 		ENJON_COMPONENT( PointLightComponent )
 

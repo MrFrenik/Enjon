@@ -14,7 +14,7 @@ namespace Enjon {
 	ENJON_CLASS( )
 	class PointLight : public Enjon::Object
 	{
-		ENJON_CLASS_BODY ( PointLight ) 
+		ENJON_CLASS_BODY ( ) 
 
 		public:
 			ENJON_FUNCTION( Constructor ) 

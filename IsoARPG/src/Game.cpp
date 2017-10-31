@@ -46,6 +46,7 @@
 
 #include <Base/MetaClassRegistry.h>
 
+
 void TestObjectSerialize( )
 {
 	using namespace Enjon;
@@ -53,8 +54,8 @@ void TestObjectSerialize( )
 	AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
 	ByteBuffer writeBuffer;
 	ByteBuffer readBuffer;
-	TestNamespace::AnotherSpace::AnotherObject writeTestObject;
-	TestNamespace::AnotherSpace::AnotherObject readTestObject;
+	TestNamespace::AnotherSpace::PointLight writeTestObject;
+	TestNamespace::AnotherSpace::PointLight readTestObject;
 	EnjonObjectSerializer objectSerializer; 
 
 	// Set value and texture
@@ -760,6 +761,11 @@ Enjon::Result Game::Initialize()
 			ImGui::Text( "32 bit prop size: %d", sizeof( Enjon::Property<f32> ) );
 			ImGui::Text( "32 bit signal size: %d", sizeof( Enjon::Signal<f32> ) ); 
 
+			if ( ImGui::CollapsingHeader( "Sun" ) )
+			{
+				Enjon::ImGuiManager::DebugDumpObject( mSun ); 
+			}
+
 			// Testing meta functions
 			if ( ImGui::CollapsingHeader( "Entity" ) )
 			{ 
@@ -935,15 +941,7 @@ Enjon::Result Game::Initialize()
 	fmt::print( "Texture Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >() ); 
 	fmt::print( "Instance of Texture ID: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTexture( Enjon::TextureSlotType::Normal ).Get()->GetTypeId() ); 
 
-	fmt::print( "Same: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >( ) == mGun.Get( )->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTypeId( ) );
- 
-	fmt::print( "Name: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetClassName( ) );
-	fmt::print( "Name: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetClassName() ); 
-	
-	for ( auto& c : mGun.Get( )->GetComponents( ) )
-	{
-		fmt::print( "{} is instance of graphics component: {}\n", c->GetClassName( ), c->InstanceOf< Enjon::GraphicsComponent >( ) );
-	} 
+	fmt::print( "Same: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >( ) == mGun.Get( )->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTypeId( ) ); 
 
 	/*
 	Enjon::ByteBuffer writeBuffer;

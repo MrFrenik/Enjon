@@ -13,21 +13,26 @@
 #include <assert.h>
 #include <functional>
 
-#define ENJON_CLASS_BODY( type )																	\
+/*
+	Used as boilerplate for all classes participating in object/reflection model. 
+*/ 
+#define ENJON_CLASS_BODY( ... )																	\
 	friend Enjon::Object;																			\
 	public:																							\
-		virtual u32 GetTypeId() const override { return Enjon::Object::GetTypeId< type >(); }		\
-		virtual const char* GetClassName() const override { return #type; }							\
+		virtual u32 GetTypeId() override;		\
 		virtual const Enjon::MetaClass* Class( ) override\
 		{\
-			Enjon::MetaClassRegistry* mr = const_cast< Enjon::MetaClassRegistry* >( Enjon::Engine::GetInstance()->GetMetaClassRegistry( ) );\
-			const Enjon::MetaClass* cls = mr->Get< type >( );\
-			if ( !cls )\
-			{\
-				cls = mr->RegisterMetaClass< type >( );\
-			}\
-			return cls;\
-		}
+			return GetClassInternal();\
+		}\
+	private:\
+		const Enjon::MetaClass* GetClassInternal(); 
+
+#define ENJON_COMPONENT( type )\
+public:\
+	virtual void Destroy() override\
+	{\
+		DestroyBase<type>();\
+	} 
 
 #define ENJON_ARRAY(...)
 #define ENJON_PROPERTY(...)
@@ -590,12 +595,18 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			virtual u32 GetTypeId( ) const = 0;
+			virtual u32 GetTypeId( )
+			{
+				return EnjonMaxTypeId;
+			}
 
 			/**
 			*@brief
 			*/
-			virtual const char* GetClassName( ) const = 0; 
+			virtual const char* GetClassName( ) const
+			{
+				return "";
+			}
 
 			/**
 			*@brief

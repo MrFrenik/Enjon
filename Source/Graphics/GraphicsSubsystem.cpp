@@ -788,12 +788,12 @@ namespace Enjon
 			// Render instanced mesh
 			mInstancedRenderable->GetMesh( ).Get( )->Bind( );
 		
-			//glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
-			//for ( u32 i = 0; i < mInstancedAmount; ++i )
-			//{
-			//	mModelMatricies[ i ] *= Enjon::Mat4::Rotate( rotT, Enjon::Vec3( 0, 1, 0 ) );
-			//}
-			//glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ] );
+			glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
+			for ( u32 i = 0; i < mInstancedAmount; ++i )
+			{
+				mModelMatricies[ i ] *= Enjon::Mat4::Rotate( rotT, Enjon::Vec3( 0, 1, 0 ) );
+			}
+			glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ] );
 
 			glDrawArraysInstanced( GL_TRIANGLES, 0, mInstancedRenderable->GetMesh( ).Get( )->DrawCount, mInstancedAmount );
 

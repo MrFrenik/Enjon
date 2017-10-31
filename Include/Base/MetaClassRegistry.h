@@ -21,9 +21,9 @@ namespace Enjon
 		namespace AnotherSpace
 		{
 			ENJON_CLASS( Namespace = [ TestNamespace, AnotherSpace ] )
-			class AnotherObject : public Enjon::Object
+			class PointLight : public Enjon::Object
 			{
-				ENJON_CLASS_BODY( AnotherObject )
+				ENJON_CLASS_BODY( ) 
 
 			public:
 

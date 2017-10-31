@@ -277,7 +277,7 @@ namespace Enjon
 
 			Enjon::Mat4* mModelMatricies = nullptr;
 			Enjon::Renderable* mInstancedRenderable = nullptr;
-			u32 mInstancedAmount = 100000;
+			u32 mInstancedAmount = 10000;
 			u32 mInstancedVBO; 
 	};
 }

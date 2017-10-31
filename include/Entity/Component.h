@@ -12,15 +12,7 @@
 #include <vector>
 #include <bitset>
 #include <type_traits>
-#include <unordered_map>
-
-#define ENJON_COMPONENT( type )\
-public:\
-	virtual void Destroy() override\
-	{\
-		DestroyBase<type>();\
-	}
-
+#include <unordered_map> 
 
 namespace Enjon 
 { 
