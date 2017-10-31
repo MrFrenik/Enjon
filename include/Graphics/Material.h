@@ -29,7 +29,7 @@ namespace Enjon {
 	ENJON_CLASS( )
 	class Material : public Asset
 	{
-		ENJON_CLASS_BODY( Material )
+		ENJON_CLASS_BODY( )
 
 		friend Shader;
 		friend ShaderGraph;

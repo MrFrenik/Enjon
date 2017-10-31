@@ -590,7 +590,10 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			virtual const MetaClass* Class( ) = 0;
+			virtual const MetaClass* Class( )
+			{
+				return nullptr;
+			}
 
 			/**
 			*@brief
@@ -598,15 +601,7 @@ namespace Enjon
 			virtual u32 GetTypeId( )
 			{
 				return EnjonMaxTypeId;
-			}
-
-			/**
-			*@brief
-			*/
-			virtual const char* GetClassName( ) const
-			{
-				return "";
-			}
+			} 
 
 			/**
 			*@brief

@@ -147,7 +147,7 @@ namespace Enjon
 		friend FontAssetLoader;
 		friend FontAtlas;
 
-		ENJON_CLASS_BODY( UIFont )
+		ENJON_CLASS_BODY( )
 
 		public:
 			/**

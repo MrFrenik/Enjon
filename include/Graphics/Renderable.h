@@ -25,7 +25,7 @@ namespace Enjon
 		friend Scene;
 		friend GraphicsSubsystem;
 
-		ENJON_CLASS_BODY( Renderable )
+		ENJON_CLASS_BODY( )
 
 		public:
 			Renderable();

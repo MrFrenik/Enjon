@@ -12,7 +12,7 @@ namespace Enjon
 	ENJON_CLASS( )
 	class GraphicsComponent : public Component
 	{
-		ENJON_CLASS_BODY( GraphicsComponent )
+		ENJON_CLASS_BODY( )
 
 		ENJON_COMPONENT( GraphicsComponent )
 

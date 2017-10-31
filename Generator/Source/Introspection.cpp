@@ -987,12 +987,11 @@ void Introspection::Compile( const ReflectionConfig& config )
 			code += OutputLine( "}" );
 			
 			// GetTypeId()
+			code += OutputLine( "" );
 			code += OutputLine( "Enjon::u32 " + qualifiedName + "::GetTypeId()" );
 			code += OutputLine( "{" );
 			code += OutputTabbedLine( "return Object::GetTypeId< " + qualifiedName + " >();" );
-			code += OutputLine( "}" );
-
-
+			code += OutputLine( "}" ); 
 
 			// Construct function
 			code += OutputLine( "" );

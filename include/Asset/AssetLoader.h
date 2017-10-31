@@ -15,10 +15,10 @@ namespace Enjon
 {
 	// Forward declaration
 	class AssetManager; 
-
+ 
 	class AssetLoader
-	{
-		friend AssetManager;
+	{ 
+		friend AssetManager; 
 		
 		public:
 			
@@ -152,7 +152,7 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
-			virtual Asset* LoadResourceFromFile( const String& filePath, const String& name ) = 0; 
+			virtual Asset* LoadResourceFromFile( const String& filePath, const String& name ) = 0;
 	};
 } 
 

@@ -27,7 +27,7 @@ namespace Enjon {
 	{
 		friend MeshAssetLoader;
 
-		ENJON_CLASS_BODY( Mesh )
+		ENJON_CLASS_BODY( )
 
 		public:
 			/*

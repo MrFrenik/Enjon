@@ -5,13 +5,15 @@
 #ifndef ENJON_TEXTURE_ASSET_LOADER_H
 #define ENJON_TEXTURE_ASSET_LOADER_H 
 
+#include "Base/Object.h"
 #include "Asset/AssetLoader.h"
 #include "Graphics/Texture.h"
 
 namespace Enjon
 {
 	class TextureAssetLoader : public AssetLoader
-	{
+	{ 
+
 		public:
 
 			/**
@@ -40,7 +42,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			Texture* LoadResourceFromFile( const String& filePath, const String& name );
+			virtual Asset* LoadResourceFromFile( const String& filePath, const String& name ) override;
 	
 			/**
 			* @brief

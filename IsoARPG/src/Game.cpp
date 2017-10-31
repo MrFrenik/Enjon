@@ -84,6 +84,19 @@ void TestObjectSerialize( )
 	std::cout << "here\n";
 }
 
+/*
+	// Need to know an object's loader to be able to import it properly
+	{
+		"Object":{
+			"UUID": r33b-f....,
+			"Class": "Texture",
+			"Loader": "TextureAssetLoader",
+			"TextureFormat": 0, 
+			"Data": ...
+		}
+	}
+*/
+
 class MapClass
 {
 	public:

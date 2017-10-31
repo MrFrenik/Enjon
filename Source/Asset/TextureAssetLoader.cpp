@@ -138,7 +138,7 @@ namespace Enjon
 			
 	//============================================================================================== 
 
-	Texture* TextureAssetLoader::LoadResourceFromFile(const String& filePath, const String& name )
+	Asset* TextureAssetLoader::LoadResourceFromFile(const String& filePath, const String& name )
 	{ 
 		// Load texture
 		Enjon::Texture* tex = LoadTextureFromFile( filePath );

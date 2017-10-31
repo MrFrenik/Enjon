@@ -83,7 +83,7 @@ namespace Enjon
 		mDefaultAsset = mesh; 
 	}
 
-	Mesh* MeshAssetLoader::LoadResourceFromFile(const String& filePath, const String& name)
+	Asset* MeshAssetLoader::LoadResourceFromFile(const String& filePath, const String& name)
 	{
 		Mesh* mesh = new Enjon::Mesh( filePath );
 

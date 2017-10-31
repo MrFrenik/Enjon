@@ -51,7 +51,7 @@ namespace Enjon
 		friend Entity;
 		friend EntityManager;
 		
-		ENJON_CLASS_BODY( Component )
+		ENJON_CLASS_BODY( )
 
 		public:
 
