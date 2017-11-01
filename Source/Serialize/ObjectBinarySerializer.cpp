@@ -356,13 +356,13 @@ namespace Enjon
 						UUID id = mBuffer.Read< UUID >( );
 
 						// Get asset
-						Asset* asset = am->GetAsset( assetCls, id );
+						const Asset* asset = am->GetAsset( assetCls, id );
 
 						// If valid asset
 						if ( asset )
 						{
 							// Set asset handle to default asset
-							val.Set( asset );
+							val.Set( const_cast< Asset*> ( asset ) );
 
 						}
 						// Otherwise get default asset for this class type

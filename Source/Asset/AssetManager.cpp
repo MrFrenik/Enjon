@@ -182,7 +182,7 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
-	Asset* AssetManager::GetAsset( const MetaClass* cls, const UUID& id )
+	const Asset* AssetManager::GetAsset( const MetaClass* cls, const UUID& id )
 	{
 		// Get type id of class
 		u32 idx = cls->GetTypeId( );
@@ -244,20 +244,20 @@ namespace Enjon
 				// Load asset and place into database
 				if ( isRelativePath )
 				{
-					// Return failure if path doesn't exist
-					if ( !Utils::FileExists( mAssetsPath + filePath ) )
-					{
-						return Result::FAILURE;
-					}
+// Return failure if path doesn't exist
+if ( !Utils::FileExists( mAssetsPath + filePath ) )
+{
+	return Result::FAILURE;
+}
 
-					auto res = query->second->LoadResourceFromFile( mAssetsPath + filePath, Utils::ToLower( mName ) + qualifiedName ); 
-					
-					// Set file path and name
-					if ( res )
-					{
-						res->mFilePath = mAssetsPath + filePath;
-						res->mName = Utils::ToLower( mName ) + qualifiedName;
-					}
+auto res = query->second->LoadResourceFromFile( mAssetsPath + filePath, Utils::ToLower( mName ) + qualifiedName );
+
+// Set file path and name
+if ( res )
+{
+	res->mFilePath = mAssetsPath + filePath;
+	res->mName = Utils::ToLower( mName ) + qualifiedName;
+}
 				}
 				// If absolute path on disk
 				else
@@ -274,10 +274,10 @@ namespace Enjon
 		}
 
 		return Result::SUCCESS;
-	} 
+	}
 
 	//======================================================================================================
-			
+
 	bool AssetManager::HasFileExtension( const String& file, const String& extension )
 	{
 		return ( Enjon::Utils::SplitString( file, "." ).back( ).compare( extension ) == 0 );
@@ -288,12 +288,12 @@ namespace Enjon
 	Enjon::Result AssetManager::RegisterAssetLoaderInternal( AssetLoader* loader, u32 idx )
 	{
 		// Set into map
-		mLoadersByAssetId[idx] = loader;
+		mLoadersByAssetId[ idx ] = loader;
 
 		// Get meta class of loader 
-		const MetaClass* cls = mLoadersByAssetId[idx]->Class();
+		const MetaClass* cls = mLoadersByAssetId[ idx ]->Class( );
 		// Register by meta class
-		mLoadersByMetaClass[cls] = mLoadersByAssetId[idx];
+		mLoadersByMetaClass[ cls ] = mLoadersByAssetId[ idx ];
 
 		// TODO(): This crashes for now. I want to set this here, so figure it out.
 		// Register default asset from loader
@@ -304,14 +304,14 @@ namespace Enjon
 
 	//======================================================================================================
 
-	bool AssetManager::Exists( u32 id )
+	bool AssetManager::Exists( u32 id ) const
 	{
 		return ( mLoadersByAssetId.find( id ) != mLoadersByAssetId.end( ) );
 	}
 
 	//======================================================================================================
 
-	bool AssetManager::Exists( const MetaClass* cls )
+	bool AssetManager::Exists( const MetaClass* cls ) const
 	{
 		return ( mLoadersByMetaClass.find( cls ) != mLoadersByMetaClass.end( ) );
 	}
@@ -320,17 +320,32 @@ namespace Enjon
 
 	u32 AssetManager::GetUniqueAssetTypeId( ) noexcept
 	{
-		static u32 lastId{ 0u };
+		static u32 lastId { 0u };
 		return lastId++;
 	}
 
 	//======================================================================================================
 
-	AssetLoader* AssetManager::GetLoader( const MetaClass* cls )
+	const AssetLoader* AssetManager::GetLoader( const MetaClass* cls )
 	{
 		if ( Exists( cls ) )
 		{
-			return mLoadersByMetaClass[cls];
+			return mLoadersByMetaClass[ cls ];
+		}
+
+		return nullptr;
+	}
+
+	//======================================================================================================
+
+	const AssetLoader* AssetManager::GetLoaderByAssetClass( const MetaClass* cls )
+	{
+		// Get loader id from cls
+		u32 loaderId = cls->GetTypeId( );
+
+		if ( Exists( loaderId ) )
+		{
+			return mLoadersByAssetId[ loaderId ];
 		}
 
 		return nullptr;

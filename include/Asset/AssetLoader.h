@@ -135,6 +135,9 @@ namespace Enjon
 				// Set name
 				asset->mName = name;
 
+				// Set loader
+				asset->mLoader = this;
+
 				// Otherwise add asset
 				mAssetsByName[name] = asset;
 				mAssetsByUUID[ asset->mUUID.ToString( ) ] = asset;

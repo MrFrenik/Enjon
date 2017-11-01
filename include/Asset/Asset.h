@@ -51,8 +51,16 @@ namespace Enjon
 			ENJON_FUNCTION( )
 			Enjon::String GetFilePath( ) const { return mFilePath; }
 
+			/**
+			*@brief
+			*/
 			ENJON_FUNCTION( )
 			UUID GetUUID( ) const { return mUUID; } 
+
+			/**
+			*@brief
+			*/
+			const AssetLoader* GetLoader( ) const { return mLoader; }
 			
 		protected:
 
@@ -99,6 +107,8 @@ namespace Enjon
 
 			ENJON_PROPERTY( )
 			Enjon::String mName;
+
+			const AssetLoader* mLoader = nullptr;
 
 		private:
 	};
@@ -184,19 +194,24 @@ namespace Enjon
 			bool IsValid()
 			{
 				return (mAsset != nullptr);
-			}
+			} 
 			
 			/*
 			* @brief 
 			*/
-			Result Set(Asset* asset) 
+			Result Set( Asset* asset ) 
 			{
 				// Set to new asset
 				mAsset = asset;
 
 				// Return success
 				return Result::SUCCESS;
-			}
+			} 
+
+			/*
+			* @brief Gets loader based on asset loader type
+			*/
+			const AssetLoader* GetLoader( ) const;
 
 		protected:
 

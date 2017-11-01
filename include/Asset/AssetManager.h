@@ -107,7 +107,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			Asset* GetAsset( const MetaClass* cls, const UUID& id );
+			const Asset* GetAsset( const MetaClass* cls, const UUID& id );
 
 			/**
 			*@brief
@@ -117,12 +117,12 @@ namespace Enjon
 			/**
 			*@brief Searches for specific loader based on class id. Returns true if found, false otherwise.
 			*/
-			bool Exists( u32 id );
+			bool Exists( u32 id ) const;
 
 			/**
 			*@brief Searches for specific loader based on meta class. Returns true if found, false otherwise.
 			*/
-			bool Exists( const MetaClass* cls );
+			bool Exists( const MetaClass* cls ) const;
 			
 			/**
 			*@brief Gets all assets of specific type
@@ -144,7 +144,18 @@ namespace Enjon
 			/**
 			*@brief Gets loader by meta class. If not found, returns nullptr.
 			*/
-			AssetLoader* GetLoader( const MetaClass* cls );
+			const AssetLoader* GetLoader( const MetaClass* cls );
+
+			/**
+			*@brief Gets loader by meta class of asset type. If not found, returns nullptr.
+			*/
+			template <typename T>
+			const AssetLoader* GetLoaderByAssetType( );
+
+			/**
+			*@brief Gets loader by meta class of asset class. If not found, returns nullptr.
+			*/
+			const AssetLoader* GetLoaderByAssetClass( const MetaClass* cls );
 
 			/**
 			*@brief 

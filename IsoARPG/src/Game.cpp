@@ -111,6 +111,27 @@ void Game::TestObjectSerialize( )
 			"Data": ...
 		}
 
+		// Should UUID be the name of the object? 
+		{
+			"r33b-ff34...": {
+				"BaseHeader": {
+					"Loader": "TextureAssetLoader",
+					"UUID": "r33b-ff34..."
+				}
+			},
+			"abcd-efgh...": {
+				"BaseHeader": {
+					"Loader": "ObjectAssetLoader",
+					"UUID": "abcd-efgh..."
+				},
+				"AssetLoaderHeader": {
+					
+				},
+				"ObjectData": {
+				}
+			} 
+		}
+
 		// Write ObjectBinarySerializer class
 		// This class will get called by the asset manager to do a base cache and load of any asset 
 

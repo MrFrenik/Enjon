@@ -82,6 +82,22 @@ AssetHandle<T> AssetManager::GetAsset( const String& name )
 	return handle;
 }
 
+//================================================================================================ 
+
+template <typename T>
+const AssetLoader* AssetManager::GetLoaderByAssetType( )
+{
+	// Get appropriate loader based on asset type
+	u32 loaderId = GetAssetTypeId<T>( );
+
+	// If exists, return it
+	if ( Exists( loaderId ) )
+	{
+		return mLoadersByAssetId[ loaderId ];
+	}
+
+	return nullptr; 
+}
 
 
 
