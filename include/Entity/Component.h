@@ -45,13 +45,10 @@ namespace Enjon
 			ComponentMap mComponentMap;
 	};
 
-	ENJON_CLASS( )
 	class Component : public Enjon::Object
 	{
 		friend Entity;
-		friend EntityManager;
-		
-		ENJON_CLASS_BODY( )
+		friend EntityManager; 
 
 		public:
 
@@ -73,7 +70,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			u32 GetID() const { return mID; }
+			u32 GetID() const { return mComponentID; }
 
 			/**
 			* @brief
@@ -113,11 +110,8 @@ namespace Enjon
 			Entity* mEntity = nullptr;
 			EntityManager* mManager = nullptr;
 
-			ENJON_PROPERTY( )
-			u32 mEntityID;
-
-			ENJON_PROPERTY( )
-			u32 mID;
+			u32 mEntityID; 
+			u32 mComponentID;
 
 		private:
 			ComponentWrapperBase* mBase = nullptr;

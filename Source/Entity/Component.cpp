@@ -16,7 +16,7 @@ namespace Enjon
 
 	void Component::SetID( u32 id )
 	{
-		mID = id;
+		mComponentID = id;
 	}
 
 	void Component::SetBase( ComponentWrapperBase* base )
