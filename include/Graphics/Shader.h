@@ -11,19 +11,16 @@
 #include "Math/Mat4.h"
 #include "Defines.h"
 #include "Graphics/ShaderGraph.h"
+#include "Graphics/Texture.h"
 
 #include <vector>
 
 namespace Enjon
 { 
-	class Material;
-	class Texture; 
-
-	ENJON_CLASS( )
+	ENJON_CLASS()
 	class Shader : public Asset
 	{
-		ENJON_CLASS_BODY( )
-
+		ENJON_CLASS_BODY()
 		public:
 			/**
 			* @brief Constructor
@@ -49,11 +46,6 @@ namespace Enjon
 			* @brief
 			*/
 			Enjon::Result Recompile( ); 
-
-			/*
-			* @brief
-			*/
-			Enjon::AssetHandle< Enjon::Material > CreateMaterial( );
 
 			/*
 			* @brief

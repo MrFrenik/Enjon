@@ -187,4 +187,148 @@ namespace Enjon
 	};
 }
 
+/*
+ex. 
+
+ENJON_ENUM( )
+enum class TextureFileExtension : u32
+{
+	PNG,
+	TGA,
+	JPEG,
+	BMP,
+	HDR,
+	UNKNOWN
+};
+
+// Now imagine a class which has this enum as a property...
+
+ENJON_CLASS()
+class Texture : public Asset
+{
+	ENJON_CLASS_BODY()
+	...
+
+	ENJON_PROPERTY()
+	TextureFileExtension mExtesnsion;
+} 
+
+// When iterating through this object's properties, when a metapropertytype == Enum, need to evaluate the property in a special manner, just as 
+// the templated properties need to be evaluated 
+
+class MetaPropertyEnum : public MetaProperty
+{
+	// Need a way to iterate through elements of property
+}
+
+EvaluateProperties( const Object* object )
+{ 
+	const MetaClass* cls = object->Class();
+	for ( usize i = 0; i < cls->GetPropertyCount(); ++i )
+	{
+		const MetaProperty* property = cls->GetProperty( i );
+		switch ( property->GetType() )
+		{
+			...
+
+			case Enum: 
+			{
+				// Is an enum type, so needs to be cast to enum property
+				const MetaPropertyEnum* enumProp = static_cast<const MetaPropertyEnum*>( property );
+
+				// Could do it this way...
+				const MetaClassEnum* enumCls = enumProp->GetEnumClass();
+
+				// Should hold what the internal integral value is, which will be either u32, s32, or char
+
+				for ( auto& e : enumCls->GetElements() )
+				{
+					// Getting string value
+					String str = e->Name();  // A).
+					
+					// Getting u32 value ( this works because it MUST BE an integral value )
+					u32 val = e->ToUint();	// B).
+
+					// Getting s32 value
+					s32 val = e->ToInt();	// C).
+
+					// Getting char value  ( not sure I like this so much...)
+					char val = e->ToChar();	// D).
+
+					// If selected, then set value of enum on object
+					if ( ImGui::Selectable( str.c_str() ) )
+					{
+						cls->SetValue( object, prop, e->Value() );
+					}
+				}
+
+				TextureFileExtension val;
+				cls->GetValue( object, prop, &val );
+
+				template < typename T >
+				void GetValue( const Object* obj, const MetaProperty* prop, T* value ) const
+				{
+					if ( HasProperty( prop ) )
+					{
+						void* member_ptr = ( ( ( u8* )&( *obj ) + prop->mOffset ) );
+						*value = *( T* )member_ptr;
+					}
+				} 
+
+				// Example of enum element
+				class EnumElement
+				{
+					public: 
+						
+					private:
+						String mName; 
+				} 
+
+				// Need to have a way to be able to return the actual type of the enumeration? That way I can set its value on the object that holds it as a property
+				cls->SetValue( object, prop, value ); => value MUST be the enumeration, or else that won't work
+
+				// A).
+				String EnumElement::Name()
+				{ 
+					return mName;
+				}
+
+				u32 EnumElement::ToUint()
+				{
+					return (u32)mValue;  // => mValue must be the actual enumeration type, so how do I show this? Perhaps EnumElement will be templated? 
+				} 
+
+				// Can't really set the enumeration type, can I? If I don't know how to cast it to the enumeration type itself...
+
+				Show enum values in editor
+				Select from drop down of possible enum values
+				Set that value to object
+
+				for ( usize j = 0; j < enumCls->GetPropertyCount(); ++j )
+				{
+					
+				} 
+
+
+				// But how to actually assign the property? What am I even trying to solve?
+
+			} break;
+		}
+	} 
+} 
+
+// TextureFileExtension
+template <>
+MetaClass* Object::ConstructMetaClass< TextureFileExtension >( )
+{
+	MetaClass* cls = new MetaClass( ); 
+}
+	
+	// Need to be able to set the value of the enum 
+	// Need to be able to display the names of the enum as string values for editor display
+
+*/ 
+
+
+
 #endif

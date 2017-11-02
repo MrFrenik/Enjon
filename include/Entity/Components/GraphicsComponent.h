@@ -75,7 +75,7 @@ namespace Enjon
 			void SetRenderable(const Renderable& renderable); 
 
 		private: 
-
+			
 			ENJON_PROPERTY( )
 			Renderable mRenderable;
 	};

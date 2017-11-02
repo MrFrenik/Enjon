@@ -12,26 +12,33 @@ PropertyTypeAsStringMap Property::mPropertyTypeStringMap;
 
 //================================================================================================= 
 		
-std::string Property::GetTypeAsString( PropertyType type )
+std::string Introspection::GetTypeAsString( PropertyType type )
 {
 	if ( mPropertyTypeStringMap.find( type ) != mPropertyTypeStringMap.end( ) )
 	{
 		return mPropertyTypeStringMap[ type ];
-	}
+	} 
 
 	return "Object";
 }
 
 //================================================================================================= 
 		
-PropertyType Property::GetTypeFromString( const std::string& str )
+PropertyType Introspection::GetTypeFromString( const std::string& str )
 {
-	// If found, then return
+	// If base type found, then return
 	if ( mPropertyTypeMap.find( str ) != mPropertyTypeMap.end( ) )
 	{
 		return mPropertyTypeMap[ str ];
-	}
+	} 
 
+	// If enum found, then is type enum
+	if ( mEnums.find( str ) != mEnums.end( ) )
+	{
+		return PropertyType::Enum;
+	} 
+
+	// Default type object
 	return PropertyType::Object;
 }
 
@@ -41,7 +48,7 @@ PropertyType Property::GetTypeFromString( const std::string& str )
 mPropertyTypeMap[ str ] = PropertyType::prop;\
 mPropertyTypeStringMap[ PropertyType::prop ] = #prop;
 
-void Property::InitPropertyMap( )
+void Introspection::InitPropertyMap( )
 {
 	STRING_TO_PROP( "bool", Bool )
 	STRING_TO_PROP( "b8", Bool )
@@ -71,6 +78,7 @@ void Property::InitPropertyMap( )
 	STRING_TO_PROP( "Quaternion", Quat )
 	STRING_TO_PROP( "AssetHandle", AssetHandle )
 	STRING_TO_PROP( "EntityHandle", EntityHandle )
+	STRING_TO_PROP( "Enum", Enum )
 }
 
 //=================================================================================================
@@ -148,7 +156,7 @@ Introspection::~Introspection( )
 void Introspection::Initialize( )
 {
 	// Set up property table
-	Property::InitPropertyMap( );
+	InitPropertyMap( );
 }
 
 //=================================================================================================
@@ -187,6 +195,12 @@ void Introspection::Parse( Lexer* lexer )
 				{
 					ParseClass( lexer );
 				} 
+
+				// Parse enum
+				else if ( token.Equals( "ENJON_ENUM" ) )
+				{
+					ParseEnum( lexer );
+				}
 			}
 			break;
 
@@ -583,11 +597,16 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 	Token curToken = lexer->GetCurrentToken( );
 
 	// Get property type from identifier token string
-	//prop.mType = Property::GetTypeFromString( curToken.ToString( ) );
-	prop.mType = curToken.ToString( );
-
+	std::string propType = curToken.ToString( );
+ 
 	// Get property type from enum and handle special cases differently
-	PropertyType type = Property::GetTypeFromString( prop.mType );
+	PropertyType type = GetTypeFromString( propType );
+
+	// Set property type
+	prop.mType = type;
+
+	// Set raw property type string
+	prop.mTypeRaw = propType;
 
 	switch ( type )
 	{
@@ -803,6 +822,137 @@ void Introspection::ParseFunction( Lexer* lexer, Class* cls )
 
 //=================================================================================================
 
+void Introspection::ParseEnum( Lexer* lexer )
+{ 
+	// Value of previously visited element in enum
+	u32 previousEnumElementValue = 0;
+
+	// Grab next token and make sure is parentheses
+	if ( !lexer->RequireToken( TokenType::Token_OpenParen, true ) )
+	{
+		return;
+	}
+
+	// Continue on to closed paren for now
+	if ( !lexer->ContinueTo( TokenType::Token_CloseParen ) )
+	{ 
+		return;
+	} 
+
+	// Need to consume enum identifier declaration 
+	if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
+	{
+		return;
+	}
+
+	// If class, then consume
+	if ( lexer->PeekAtNextToken( ).Equals( "class" ) )
+	{
+		lexer->GetNextToken( );
+	}
+
+	// Should be on enum name now, so make sure we're at an identifier
+	if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
+	{
+		return;
+	}
+
+	// Get current token
+	Token curToken = lexer->GetCurrentToken( );
+
+	// Grab enum name from token
+	std::string enumName = curToken.ToString( );
+
+	// Add enum
+	Enum* enm = const_cast< Enum*> ( AddEnum( enumName ) );
+	enm->mName = enumName;
+
+	// Continue to open brace
+	if ( !lexer->ContinueTo( TokenType::Token_OpenBrace ) )
+	{
+		return;
+	}
+
+	// Now at elements for enum
+	curToken = lexer->GetCurrentToken( );
+	while ( curToken.mType != TokenType::Token_SemiColon )
+	{ 
+		// Element name
+		if ( curToken.mType == TokenType::Token_Identifier )
+		{ 
+			// Element to inflate
+			EnumElement element;
+			
+			// Set its name
+			element.mElementName = curToken.ToString( );
+
+			// Try and see if the value is set; if so, then need to set our previous value to this value
+			if ( lexer->PeekAtNextToken().mType == TokenType::Token_Equal )
+			{
+				// Consume Equal sign
+				lexer->GetNextToken( );
+
+				// Store value of next token
+				element.mValue = atoi( lexer->GetCurrentToken( ).ToString( ).c_str( ) );
+
+				// Increment previous value by 1
+				previousEnumElementValue++;
+			}
+			// Otherwise, need to set it to the previousEnumElement value and then increment it
+			else
+			{
+				element.mValue = previousEnumElementValue++;
+			} 
+
+			// Push element into enum declaration
+			enm->mElements.push_back( element );
+		} 
+
+		// Get next token
+		curToken = lexer->GetNextToken( );
+	} 
+}
+
+//=================================================================================================
+
+bool Introspection::EnumExists( const std::string& enumName )
+{
+	return ( mEnums.find( enumName ) != mEnums.end( ) );
+}
+
+//=================================================================================================
+
+void Introspection::RemoveEnum( const std::string& enumName )
+{
+	mEnums.erase( enumName ); 
+}
+
+//=================================================================================================
+
+const Enum* Introspection::AddEnum( const std::string& enumName )
+{
+	if ( !EnumExists( enumName ) )
+	{
+		mEnums[ enumName ] = Enum( );
+	}
+
+	return &mEnums[ enumName ]; 
+}
+
+//================================================================================================= 
+
+const Enum* Introspection::GetEnum( const std::string& name )
+{
+	if ( EnumExists( name ) )
+	{
+		return &mEnums[ name ];
+	}
+
+	return nullptr; 
+}
+
+//=================================================================================================
+
 void Introspection::Compile( const ReflectionConfig& config )
 {
 	for ( auto& c : mClasses )
@@ -881,8 +1031,8 @@ void Introspection::Compile( const ReflectionConfig& config )
 				for ( auto& prop : properties )
 				{
 					// Get property as string
-					auto metaProp = Property::GetTypeFromString( prop.second.mType );
-					std::string metaPropStr = Property::GetTypeAsString( metaProp ); 
+					auto metaProp = prop.second.mType;
+					std::string metaPropStr = GetTypeAsString( metaProp ); 
 					
 					// Fill out property traits
 					std::string traits = "MetaPropertyTraits( "; 
@@ -904,20 +1054,41 @@ void Introspection::Compile( const ReflectionConfig& config )
 					// Get end character
 					std::string endChar = index <= properties.size( ) - 1 ? "," : "";
 
-					// Output line
-					//code += OutputTabbedLine( "\tnew Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" + pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " )" + endChar );
-
-					// If asset handle, need to convert property type
-					if ( metaProp == PropertyType::AssetHandle )
-					{ 
-						code += OutputTabbedLine( "props[ " + pi + " ] = new Enjon::MetaPropertyAssetHandle" + prop.second.mTypeAppend + "( MetaPropertyType::" + metaPropStr + ", \"" 
-														+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
-					}
-
-					else
+					// Output line based on meta property type
+					switch ( metaProp )
 					{
-						code += OutputTabbedLine( "props[ " + pi + " ] = new Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" 
-														+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
+						case PropertyType::AssetHandle:
+						{
+							code += OutputTabbedLine( "props[ " + pi + " ] = new Enjon::MetaPropertyAssetHandle" + prop.second.mTypeAppend + "( MetaPropertyType::" + metaPropStr + ", \"" 
+															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
+						} break;
+
+						case PropertyType::Enum:
+						{
+							// Need to get the enum to which this property belongs based on its type
+							const Enum* enm = GetEnum( prop.second.mTypeRaw );
+							if ( enm )
+							{
+								// Vector declaration
+								code += OutputTabbedLine( "// Enum property" );
+								code += OutputTabbedLine( "{" );
+								code += OutputTabbedLine( "\tVector< MetaPropertyEnumElement > elements;" );
+								for ( auto& e : enm->mElements )
+								{
+									code += OutputTabbedLine( "\telements.push_back( MetaPropertyEnumElement( \"" + e.mElementName + "\", " + std::to_string(e.mValue) + " ) );" );
+								}
+								code += OutputTabbedLine( "\tprops[ " + pi + " ] = new Enjon::MetaPropertyEnum( MetaPropertyType::" + metaPropStr + ", \"" 
+																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", elements, \"" + prop.second.mTypeRaw + "\" );" ); 
+								code += OutputTabbedLine( "}" );
+							}
+							
+						} break;
+
+						default:
+						{
+							code += OutputTabbedLine( "props[ " + pi + " ] = new Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" 
+															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
+						} break;
 					}
 				} 
 

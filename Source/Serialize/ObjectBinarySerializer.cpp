@@ -344,13 +344,13 @@ namespace Enjon
 					case MetaPropertyType::AssetHandle:
 					{
 						// Grab asset manager
-						MetaPropertyTemplateBase* base = static_cast<MetaPropertyTemplateBase*>( prop );
+						const MetaPropertyTemplateBase* base = static_cast<MetaPropertyTemplateBase*>( prop );
 						AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
 						AssetHandle<Asset> val;
 						cls->GetValue( object, prop, &val );
 
 						// Get meta class of the asset
-						MetaClass* assetCls = const_cast<MetaClass*>( base->GetClassOfTemplatedArgument( ) );
+						const MetaClass* assetCls = const_cast<MetaClass*>( base->GetClassOfTemplatedArgument( ) );
 
 						// Get uuid from read buffer
 						UUID id = mBuffer.Read< UUID >( );

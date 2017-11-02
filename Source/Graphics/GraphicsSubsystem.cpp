@@ -486,7 +486,7 @@ namespace Enjon
 
 			glGenBuffers( 1, &mInstancedVBO );
 			glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
-			glBufferData( GL_ARRAY_BUFFER, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ], GL_STATIC_DRAW );
+			glBufferData( GL_ARRAY_BUFFER, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ], GL_DYNAMIC_DRAW );
 
 			// Vertex attributes for instanced model matrix
 			glBindVertexArray( mesh.Get( )->VAO );
@@ -1643,7 +1643,7 @@ namespace Enjon
 
 	    if (ImGui::TreeNode("Camera"))
 	    {
-	    	ImGui::DragFloat("FOV", &mSceneCamera.FOV, 0.1f, 0.0f, 100.0f);
+			ImGuiManager::DebugDumpObject( &mSceneCamera );
 	    	ImGui::TreePop();
 	    }
 

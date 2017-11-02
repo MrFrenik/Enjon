@@ -34,10 +34,11 @@ public:\
 		DestroyBase<type>();\
 	} 
 
-#define ENJON_ARRAY(...)
-#define ENJON_PROPERTY(...)
-#define ENJON_FUNCTION(...)
-#define ENJON_CLASS(...)
+#define ENJON_ENUM( ... )
+#define ENJON_PROPERTY( ... )
+#define ENJON_FUNCTION( ... )
+#define ENJON_CLASS( ... )
+#define ENJON_STRUCT( ... )
 
 namespace Enjon
 {
@@ -167,9 +168,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			~MetaProperty( )
-			{
-			}
+			~MetaProperty( ) = default;
 		
 			/*
 			* @brief
@@ -220,10 +219,86 @@ namespace Enjon
 			MetaPropertyTraits mTraits;
 	};
 
+	class MetaPropertyEnum;
+	class MetaPropertyEnumElement
+	{
+		friend MetaClass;
+		friend MetaPropertyEnum;
+		friend Object;
+		public:
+			MetaPropertyEnumElement( ) = default;
+			~MetaPropertyEnumElement( ) = default;
+
+			MetaPropertyEnumElement( const String& identifier, s32 value )
+				: mIdentifier( identifier ), mValue( value )
+			{ 
+			}
+
+			/*
+			* @brief
+			*/
+			String Identifier( ) const
+			{
+				return mIdentifier;
+			}
+
+			/*
+			* @brief
+			*/
+			s32 Value( ) const
+			{
+				return mValue;
+			}
+ 
+		protected:
+			String mIdentifier;
+			s32 mValue;
+	};
+
+	class MetaPropertyEnum : public MetaProperty 
+	{
+		public:
+
+			/*
+			* @brief
+			*/
+			MetaPropertyEnum( MetaPropertyType type, const String& name, u32 offset, u32 propIndex, MetaPropertyTraits traits, const Vector< MetaPropertyEnumElement >& elements, const String& enumName )
+				: mElements( elements ), mEnumTypeName( enumName )
+			{
+				mType = type;
+				mName = name;
+				mOffset = offset;
+				mIndex = propIndex;
+				mTraits = traits; 
+			}
+
+			/*
+			* @brief
+			*/
+			~MetaPropertyEnum( ) = default;
+
+			/*
+			* @brief
+			*/
+			const Vector< MetaPropertyEnumElement >& GetElements( ) const
+			{
+				return mElements;
+			}
+
+			String GetEnumName( ) const
+			{
+				return mEnumTypeName;
+			}
+
+		private:
+			Vector< MetaPropertyEnumElement > mElements; 
+			String mEnumTypeName;
+	};
+
 	class MetaPropertyTemplateBase : public MetaProperty
 	{
 		public:
-			virtual const MetaClass* GetClassOfTemplatedArgument( ) = 0;
+			virtual const MetaClass* GetClassOfTemplatedArgument( ) const = 0;
 	};
 
 	template <typename T>
@@ -241,7 +316,9 @@ namespace Enjon
 				mTraits = traits;
 			}
 
-			virtual const MetaClass* GetClassOfTemplatedArgument() override
+			~MetaPropertyAssetHandle( ) = default;
+
+			virtual const MetaClass* GetClassOfTemplatedArgument() const override
 			{
 				return Object::GetClass<T>();	
 			}

@@ -314,15 +314,7 @@ if ( res )
 	bool AssetManager::Exists( const MetaClass* cls ) const
 	{
 		return ( mLoadersByMetaClass.find( cls ) != mLoadersByMetaClass.end( ) );
-	}
-
-	//======================================================================================================
-
-	u32 AssetManager::GetUniqueAssetTypeId( ) noexcept
-	{
-		static u32 lastId { 0u };
-		return lastId++;
-	}
+	} 
 
 	//======================================================================================================
 

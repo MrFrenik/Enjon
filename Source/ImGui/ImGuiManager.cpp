@@ -389,10 +389,34 @@ namespace Enjon
 				case Enjon::MetaPropertyType::Vec4:
 				case Enjon::MetaPropertyType::ColorRGBA32:
 				case Enjon::MetaPropertyType::String:
-				case Enjon::MetaPropertyType::UUID:
+				case Enjon::MetaPropertyType::UUID: 
 				{
 					DebugDumpProperty( object, prop );
 				} break; 
+
+				case Enjon::MetaPropertyType::Enum:
+				{
+					// Property is enum prop, so need to convert it
+					const MetaPropertyEnum* enumProp = static_cast< const MetaPropertyEnum* > ( prop ); 
+
+					if ( ImGui::TreeNode( enumProp->GetEnumName( ).c_str( ) ) )
+					{
+						ImGui::ListBoxHeader( "##blah" );
+						{
+							// For each element in the enum
+							for ( auto& e : enumProp->GetElements( ) )
+							{
+								if ( ImGui::Selectable( e.Identifier( ).c_str( ) ) )
+								{
+									cls->SetValue( object, prop, e.Value( ) );
+								}
+							} 
+						}
+						ImGui::ListBoxFooter( ); 
+						ImGui::TreePop( );
+					}
+
+				} break;
 				
 				case Enjon::MetaPropertyType::Transform:
 				{

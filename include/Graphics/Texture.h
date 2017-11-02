@@ -12,6 +12,7 @@ namespace Enjon
 {
 	class TextureAssetLoader;
 
+	ENJON_ENUM( )
 	enum class TextureFileExtension : u32
 	{
 		PNG,
@@ -86,7 +87,7 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			u32 mHeight; 
 
-			// Needs to be enum property
+			ENJON_PROPERTY( )
 			TextureFileExtension mFileExtension;
 	}; 
 

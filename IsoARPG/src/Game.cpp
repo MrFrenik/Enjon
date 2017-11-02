@@ -97,8 +97,16 @@ void Game::TestObjectSerialize( )
 		i++;
 	} 
 
-	std::cout << "here\n";
+	std::cout << "here\n"; 
 }
+
+enum class TestEnum : char
+{
+	one = -1, 
+	two = 5, 
+	three = '.',
+	Count
+};
 
 /*
 	// Need to know an object's loader to be able to import it properly
@@ -206,6 +214,26 @@ Enjon::Result Game::Initialize()
 	mAssetManager->SetAssetsPath( mAssetsPath );
 	mAssetManager->SetCachedAssetsPath( cachePath );
 	mAssetManager->SetDatabaseName( GetApplicationName( ) ); 
+
+	char val = (s32)TestEnum::one;
+	char val2 = (s32)TestEnum::two;
+	char val3 = (s32)TestEnum::three;
+	char valcount = (s32)TestEnum::Count;
+
+	struct thing
+	{
+		TestEnum b = TestEnum::one;
+	} a; 
+
+	void* member_ptr = ( ( ( u8* )&( a ) + 0 ) );
+	*( s32* )member_ptr = 5;
+	*( s32* )member_ptr = 46;
+	*( s32* )member_ptr = 47;
+
+	TestEnum s = TestEnum( val );
+	TestEnum t = TestEnum( val2 );
+	TestEnum u = TestEnum( val3 );
+	TestEnum v = TestEnum( valcount );
 
 	for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( projectDirectory ) )
 	{
@@ -1450,5 +1478,5 @@ Enjon::Result Game::Shutdown()
 		
 
 	return Enjon::Result::SUCCESS;
-}
+};
 

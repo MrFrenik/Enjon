@@ -95,11 +95,8 @@ class Property
 		Property( ) = default;
 		~Property( ) = default;
  
-		static PropertyType GetTypeFromString( const std::string& str );
-		static std::string GetTypeAsString( PropertyType type );
 
 	protected:
-		static void InitPropertyMap( );
 
 		bool HasTrait( const std::string& trait )
 		{
@@ -115,7 +112,8 @@ class Property
 		}
 
 	public:
-		std::string mType;
+		PropertyType mType;
+		std::string mTypeRaw;
 		std::string mTypeAppend = "";
 		std::string mName; 
 		PropertyFlags mFlags = PropertyFlags::None;
@@ -237,6 +235,24 @@ class Type
 
 };
 
+struct EnumElement
+{
+	std::string mElementName;
+	s32 mValue;
+};
+
+class Enum
+{
+	friend Introspection;
+	public:
+		Enum( ) = default;
+		~Enum( ) = default; 
+ 
+	public:
+		std::string mName;
+		std::vector< EnumElement > mElements;
+};
+
 struct ReflectionConfig
 {
 	void CollectFiles( Lexer* lexer );
@@ -249,8 +265,6 @@ struct ReflectionConfig
 	std::vector< std::string > mFilesToParse;
 }; 
 
-
-
 class Introspection
 {
 	public:
@@ -259,6 +273,8 @@ class Introspection
 		~Introspection( );
 
 		void Initialize( );
+
+		void InitPropertyMap( );
  
 		void Parse( Lexer* lexer );
 
@@ -274,9 +290,19 @@ class Introspection
 
 		void ParseFunction( Lexer* lexer, Class* cls );
 
-		bool ClassExists( const std::string& className );
+		void ParseEnum( Lexer* lexer );
+
+		bool EnumExists( const std::string& enumName ); 
 
 		void RemoveClass( const std::string& className );
+
+		const Enum* AddEnum( const std::string& enumName );
+
+		void RemoveEnum( const std::string& enumName );
+
+		const Enum* GetEnum( const std::string& name );
+		
+		bool ClassExists( const std::string& className );
 
 		const Class* AddClass( const std::string& className );
 
@@ -286,11 +312,17 @@ class Introspection
 
 		void Link( const ReflectionConfig& config );
 
+		PropertyType GetTypeFromString( const std::string& str );
+		std::string GetTypeAsString( PropertyType type );
+
 	private:
 		std::string OutputLinkedHeader( );
 
 	private:
 		std::unordered_map< std::string, Class > mClasses;
+		std::unordered_map< std::string, Enum > mEnums;
+		PropertyTypeMap mPropertyTypeMap;
+		PropertyTypeAsStringMap mPropertyTypeStringMap;
 };
 
 #endif

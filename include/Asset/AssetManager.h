@@ -174,7 +174,11 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			u32 GetUniqueAssetTypeId( ) noexcept;
+			u32 GetUniqueAssetTypeId( )
+			{
+				static u32 lastId { 0u };
+				return lastId++; 
+			}
 
 			/**
 			*@brief
