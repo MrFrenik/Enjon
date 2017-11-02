@@ -100,57 +100,6 @@ void Game::TestObjectSerialize( )
 	std::cout << "here\n"; 
 }
 
-enum class TestEnum : char
-{
-	one = -1, 
-	two = 5, 
-	three = '.',
-	Count
-};
-
-/*
-	// Need to know an object's loader to be able to import it properly
-	{
-		"Object":{
-			"UUID": r33b-f....,
-			"Class": "Texture",
-			"Loader": "TextureAssetLoader",
-			"TextureFormat": 0, 
-			"Data": ...
-		}
-
-		// Should UUID be the name of the object? 
-		{
-			"r33b-ff34...": {
-				"BaseHeader": {
-					"Loader": "TextureAssetLoader",
-					"UUID": "r33b-ff34..."
-				}
-			},
-			"abcd-efgh...": {
-				"BaseHeader": {
-					"Loader": "ObjectAssetLoader",
-					"UUID": "abcd-efgh..."
-				},
-				"AssetLoaderHeader": {
-					
-				},
-				"ObjectData": {
-				}
-			} 
-		}
-
-		// Write ObjectBinarySerializer class
-		// This class will get called by the asset manager to do a base cache and load of any asset 
-
-		// Get loader from meta data header for object
-		// Find loader from assetmanager based on meta class: (done)
-			// Extend assetmanager class to be able to get loader from meta class (done)
-		// Pass cached data to loader and load remaining data 
-		// Profit
-	}
-*/
-
 class MapClass
 {
 	public:
@@ -214,26 +163,6 @@ Enjon::Result Game::Initialize()
 	mAssetManager->SetAssetsPath( mAssetsPath );
 	mAssetManager->SetCachedAssetsPath( cachePath );
 	mAssetManager->SetDatabaseName( GetApplicationName( ) ); 
-
-	char val = (s32)TestEnum::one;
-	char val2 = (s32)TestEnum::two;
-	char val3 = (s32)TestEnum::three;
-	char valcount = (s32)TestEnum::Count;
-
-	struct thing
-	{
-		TestEnum b = TestEnum::one;
-	} a; 
-
-	void* member_ptr = ( ( ( u8* )&( a ) + 0 ) );
-	*( s32* )member_ptr = 5;
-	*( s32* )member_ptr = 46;
-	*( s32* )member_ptr = 47;
-
-	TestEnum s = TestEnum( val );
-	TestEnum t = TestEnum( val2 );
-	TestEnum u = TestEnum( val3 );
-	TestEnum v = TestEnum( valcount );
 
 	for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( projectDirectory ) )
 	{
