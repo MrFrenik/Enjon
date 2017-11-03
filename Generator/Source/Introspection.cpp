@@ -500,6 +500,15 @@ void Introspection::ParseClassMembers( Lexer* lexer, Class* cls )
 
 //=================================================================================================
 
+bool IsPropertyArrayType( Lexer* lexer )
+{
+	bool isArray = false;
+
+	return isArray;
+}
+
+//=================================================================================================
+
 void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 {
 	// New property to be filled out
@@ -598,12 +607,15 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 
 	// Get property type from identifier token string
 	std::string propType = curToken.ToString( );
+
+	// Need to check if is an array type
+	bool isArrayType = IsPropertyArrayType( lexer );
  
-	// Get property type from enum and handle special cases differently
-	PropertyType type = GetTypeFromString( propType );
+	// Get property type 
+	PropertyType type = GetTypeFromString( propType ); 
 
 	// Set property type
-	prop.mType = type;
+	prop.mType = isArrayType ? PropertyType::Array : type;
 
 	// Set raw property type string
 	prop.mTypeRaw = propType;
@@ -676,6 +688,11 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 			// Append and close type
 			prop.mTypeAppend += lexer->GetCurrentToken( ).ToString( ); 
 		} break;
+
+		case PropertyType::Array:
+		{ 
+			// Do array shit here...
+		} 
 	}
 
 	// TODO(): Pointer types / Const references

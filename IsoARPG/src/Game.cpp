@@ -97,6 +97,121 @@ void Game::TestObjectSerialize( )
 		i++;
 	} 
 
+	{
+		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( );
+		AssetHandle<Texture> mFlatArray[(Enjon::u32)Enjon::TextureSlotType::Count];
+		for ( Enjon::usize i = 0; i < (Enjon::usize)Enjon::TextureSlotType::Count; ++i )
+		{
+			switch ( Enjon::TextureSlotType( i ) )
+			{
+				case Enjon::TextureSlotType::Albedo: 
+				{ 
+					mFlatArray[i] = am->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.albedo");
+				} break;
+				case Enjon::TextureSlotType::Normal: 
+				{ 
+					mFlatArray[i] = am->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.normal"); ;
+
+				} break;
+				case Enjon::TextureSlotType::Roughness: 
+				{ 
+					mFlatArray[i] = am->GetAsset<Enjon::Texture>( "isoarpg.materials.scuffedplastic.roughness" );
+				} break;
+				case Enjon::TextureSlotType::AO: 
+				{ 
+					mFlatArray[i] = am->GetAsset<Enjon::Texture>( "isoarpg.materials.mahogfloor.ao" ); 
+				} break;
+				case Enjon::TextureSlotType::Emissive: 
+				{
+					mFlatArray[i] = am->GetAsset<Enjon::Texture>( "isoarpg.materials.cerebus.emissive" ); 
+				} break;
+				case Enjon::TextureSlotType::Metallic: 
+				{ 
+					mFlatArray[i] = am->GetAsset<Enjon::Texture>( "isoarpg.materials.scuffedplastic.metallic" );
+				} break;
+			}
+		}
+
+		for ( Enjon::usize i = 0; i < (Enjon::usize)Enjon::TextureSlotType::Count; ++i )
+		{ 
+			void* member_ptr = (Enjon::u8*)( mFlatArray + i );
+			AssetHandle<Texture> val = *(AssetHandle<Texture>*)member_ptr;
+			std::cout << "blah" << '\n';
+		} 
+	}
+
+	struct TestArrayStruct
+	{
+		Enjon::u32 index;
+		Enjon::f32 val;
+		Enjon::f64 biggerval;
+		Enjon::AssetHandle< Enjon::Texture > textureHandle;
+		bool getFucked;
+	};
+
+	{
+		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( );
+		TestArrayStruct mFlatArray[( Enjon::u32 )Enjon::TextureSlotType::Count];
+		for ( Enjon::usize i = 0; i < ( Enjon::usize )Enjon::TextureSlotType::Count; ++i )
+		{
+			mFlatArray[i].index = i;
+		}
+
+		for ( Enjon::usize i = 0; i < ( Enjon::usize )Enjon::TextureSlotType::Count; ++i )
+		{
+			void* member_ptr = ( Enjon::u8* )( &mFlatArray[0] + i );
+			TestArrayStruct val = *( TestArrayStruct* )member_ptr;
+			std::cout << "blah" << '\n';
+		}
+	} 
+
+	{
+		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( );
+		Enjon::Vector<TestArrayStruct> testVector;
+		for ( Enjon::usize i = 0; i < ( Enjon::usize )Enjon::TextureSlotType::Count; ++i )
+		{
+			TestArrayStruct tas;
+			tas.index = i;
+
+			switch ( Enjon::TextureSlotType( i ) )
+			{
+				case Enjon::TextureSlotType::Albedo:
+				{
+					tas.textureHandle = am->GetAsset<Enjon::Texture>( "isoarpg.materials.scuffedplastic.albedo" );
+				} break;
+				case Enjon::TextureSlotType::Normal:
+				{
+					tas.textureHandle = am->GetAsset<Enjon::Texture>( "isoarpg.materials.scuffedplastic.normal" ); ;
+
+				} break;
+				case Enjon::TextureSlotType::Roughness:
+				{
+					tas.textureHandle = am->GetAsset<Enjon::Texture>( "isoarpg.materials.scuffedplastic.roughness" );
+				} break;
+				case Enjon::TextureSlotType::AO:
+				{
+					tas.textureHandle = am->GetAsset<Enjon::Texture>( "isoarpg.materials.mahogfloor.ao" );
+				} break;
+				case Enjon::TextureSlotType::Emissive:
+				{
+					tas.textureHandle = am->GetAsset<Enjon::Texture>( "isoarpg.materials.cerebus.emissive" );
+				} break;
+				case Enjon::TextureSlotType::Metallic:
+				{
+					tas.textureHandle = am->GetAsset<Enjon::Texture>( "isoarpg.materials.scuffedplastic.metallic" );
+				} break;
+			}
+			testVector.push_back( tas );
+		}
+
+		for ( Enjon::usize i = 0; i < ( Enjon::usize )Enjon::TextureSlotType::Count; ++i )
+		{
+			void* member_ptr = ( Enjon::u8* )( &testVector[0] + i );
+			TestArrayStruct val = *( TestArrayStruct* )member_ptr;
+			std::cout << "blah" << '\n';
+		} 
+	} 
+
 	std::cout << "here\n"; 
 }
 
@@ -169,7 +284,7 @@ Enjon::Result Game::Initialize()
 		if ( Enjon::AssetManager::HasFileExtension( p.path().string(), "easset" ) )
 		{
 			std::cout << "Asset: " << p << "\n";
-		}
+		} 
 	}
 
 	{
@@ -188,6 +303,8 @@ Enjon::Result Game::Initialize()
 
 		size = sizeof( vecTextures ) / sizeof(vecTextures[ 0 ]);
 	}
+
+	
 
 	// Get Subsystems from engine
 	Enjon::Engine* engine = Enjon::Engine::GetInstance();

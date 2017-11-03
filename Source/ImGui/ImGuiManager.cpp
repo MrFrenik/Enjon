@@ -401,7 +401,7 @@ namespace Enjon
 
 					if ( ImGui::TreeNode( enumProp->GetEnumName( ).c_str( ) ) )
 					{
-						ImGui::ListBoxHeader( "##blah" );
+						ImGui::ListBoxHeader( "##enumProps" );
 						{
 							// For each element in the enum
 							for ( auto& e : enumProp->GetElements( ) )

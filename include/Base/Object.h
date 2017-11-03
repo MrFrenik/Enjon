@@ -302,6 +302,159 @@ namespace Enjon
 	};
 
 	template <typename T>
+	class ArrayIterator : public std::iterator<std::random_access_iterator_tag, T, ptrdiff_t, T*, T&>
+	{ 
+	};
+
+	struct PropertyProxy : public MetaProperty
+	{
+		usize mOffset;
+		const Object* object = nullptr;
+	};
+
+	class MetaPropertyArrayBase;
+	struct ArrayPropertyProxy : public PropertyProxy
+	{
+		usize mOffset;
+		const MetaPropertyArrayBase* base = nullptr;
+		const Object* object = nullptr;
+	};
+
+	enum class ArraySizeType
+	{
+		Fixed,
+		Dynamic
+	};
+
+	class MetaPropertyArrayBase : public MetaProperty
+	{
+		public: 
+			virtual usize GetSize( const Object* object ) const = 0;
+			virtual ArraySizeType GetArraySizeType( ) const = 0;
+			virtual MetaPropertyType GetArrayType( ) const = 0;
+	}; 
+
+	template <typename T>
+	class MetaPropertyArray : public MetaPropertyArrayBase
+	{
+		public:
+
+			/*
+			* @brief
+			*/
+			MetaPropertyArray( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits, ArraySizeType arrayType, usize arraySize )
+				: mSize( arraySize ), mArrayType( arrayType )
+			{ 
+				mType = type;
+				mName = name;
+				mOffset = offset;
+				mIndex = propIndex;
+				mTraits = traits; 
+			}
+
+			/*
+			* @brief
+			*/
+			~MetaPropertyArray( ) = default; 
+
+			/*
+			* @brief
+			*/
+			usize GetSize( const Object* object ) const 
+			{
+				switch ( mArrayType )
+				{
+					case ArrayType::Fixed:
+					{
+						return mSize; 
+					} break;
+
+					case ArrayType::Dynamic:
+					{ 
+						void* memberPtr = (u8*)( &( *object ) + mOffset );
+						Vector<T>* arr = ( Vector<T>* )( memberPtr );
+						return arr->size( );
+					} break;
+				}
+			}
+
+			/*
+			* @brief
+			*/
+			void GetValueAt( const Object* object, usize index, T* out )
+			{
+				assert( index < mSize );
+
+				// Grab raw array
+				T* rawArr = GetRaw( object );
+				*out = T[index]; 
+			} 
+
+			T GetValueAs( const Object* object, usize index )
+			{
+				assert( index < mSize );
+
+				// Grab raw array
+				T* rawArr = GetRaw( object );
+				*out = T[index];
+			}
+
+			/*
+			* @brief
+			*/
+			void SetValueAt( const Object* object, usize index, const T& value )
+			{
+				assert( index < mSize );
+
+				// Grab raw array
+				T* rawArr = GetRaw( object );
+				rawArr[index] = value;
+			}
+ 
+			/*
+			* @brief
+			*/
+			ArraySizeType GetArraySizeType( ) const override
+			{
+				return mArrayType;
+			} 
+
+			/*
+			* @brief
+			*/
+			MetaPropertyType GetArrayType( ) const
+			{
+				return mArrayType;
+			}
+
+			/*
+			* @brief
+			*/
+			ArrayPropertyProxy GetArrayProperty( const Object* object, usize index )
+			{
+				return ArrayPropertyProxy{ index, this, object };
+			}
+
+		private:
+
+			/*
+			* @brief
+			*/
+			T* GetRaw( const Object* object ) override
+			{ 
+				void* memberPtr = (u8*)( &( *object ) + mOffset ); 
+				return ( T* )( memberPtr ); 
+			}
+
+		private:
+			T mClass; 
+			usize mSize;
+			ArraySizeType mArraySizeType;
+			MetaPropertyType mArrayType;
+	};
+
+
+	template <typename T>
 	class MetaPropertyAssetHandle : public MetaPropertyTemplateBase
 	{ 
 		public: 
@@ -497,12 +650,12 @@ namespace Enjon
 			}
 
 			template < typename T >
-			void GetValue( const Object* obj, const MetaProperty* prop, T* value ) const
+			void GetValue( const Object* obj, const MetaProperty* prop, T* out ) const
 			{
 				if ( HasProperty( prop ) )
 				{
 					void* member_ptr = ( ( ( u8* )&( *obj ) + prop->mOffset ) );
-					*value = *( T* )member_ptr;
+					*out = *( T* )member_ptr;
 				}
 			} 
 

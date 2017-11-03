@@ -16,6 +16,8 @@
 
 namespace Enjon
 {
+	const u32 kConstantValue = 5;
+
 	namespace TestNamespace
 	{
 		ENJON_CLASS( Namespace = [ TestNamespace ], Construct )
@@ -42,6 +44,18 @@ namespace Enjon
 
 			ENJON_PROPERTY( )
 			String mName;
+
+			ENJON_PROPERTY( )
+			Vector< u32 > mDynamicArray;
+
+			ENJON_PROPERTY( )
+			f32 mStaticArrayConstant[32];
+
+			ENJON_PROPERTY( )
+			f32 mStaticArrayEnumIntegral[(usize)TextureFileExtension::TGA]; 
+
+			ENJON_PROPERTY( )
+			f32 mStaticArrayConstVariable[kConstantValue];
 		}; 
 	} 
 
@@ -329,6 +343,143 @@ MetaClass* Object::ConstructMetaClass< TextureFileExtension >( )
 
 */ 
 
+//template < typename T >
+//void GetValue( const Object* obj, const MetaProperty* prop, T* value ) const
+//{
+//	if ( HasProperty( prop ) )
+//	{
+//		void* member_ptr = ( ( ( u8* )&( *obj ) + prop->mOffset ) );
+//		*value = *( T* )member_ptr;
+//	}
+//} 
 
+/*
+	// Need to be able to get the size of a dynamic array
+	// Need to be able to iterate through a static/dynamic array
+	// Storing size to static array should be easy enough - need to be able to have consistent way to iterate over the array type however
+	//	regardless of whether array is dynamic or static
+	// Maybe treat this the same as I do for elements of an enum? Be able to iterate over array elements? 
+
+	ArrayIterator iterator = arrayProp->GetBegin(object); 
+	for ( ArrayIterator it = arrayProp->GetBegin(object); it != arrayProp->GetEnd(object); ++it )
+	{
+		// Do thing with it...					
+	}
+
+	// What does the iterator look like?
+
+	template <typename T>
+	class MetaPropertyArray : public MetaPropertyTemplateBase
+	{
+		public:
+
+			ArrayIterator GetBegin( const Object* object )
+			{ 
+			}
+
+			ArrayIterator GetEnd( const Object* object )
+			{
+			}
+
+		private:
+			T mClass;
+			usize mSize;
+			ArrayType mType;
+	}
+
+	template <typename T>
+	class ArrayIterator : public std::iterator<std::random_access_iterator_tag, T, ptrdiff_t, T*, T&>
+	{
+				
+	}
+
+	// To iterate through flat array, very simply done: 
+
+	Ex. 
+	// Assume an array of some structure, defined as such: 
+	struct TestArrayStruct
+	{
+		u32 mUintVal;	
+		f32 mFloatVal;	
+		f64 mDoubleVal;	
+		s32 mIntVal;
+		AssetHandle<Texture> mTexture;
+		bool mBool;
+	}; // Not padded, arbitrarily large structure
+
+	// Now an array holding this structure
+	const usize arraySize = 6;
+	TestArrayStruct testArray[arraySize];
+	
+	// Great, now to iterate over this and to grab pointer to any member of the array will be as such:
+	// Use the base point ( will work for either dynamic or flat sized arrays )
+	for ( usize i = 0; i < arraySize; ++i )
+	{
+		void* memberPtr = (u8*)(&testArray[0] + i);
+		TestArrayStruct* val = (TestArrayStruct*)memberPtr;
+	}  
+
+	case Enjon::MetaPropertyType::Enum:
+	{
+		// Property is enum prop, so need to convert it
+		const MetaPropertyArrayBase* arrayProp = static_cast< const MetaPropertyArrayBase* > ( prop );
+		if ( typeCls )
+		{
+			if ( ImGui::TreeNode( arrayProp->GetName().c_str() )
+			{
+				for ( usize i = 0; i < arrayProp->GetSize(); ++i )
+				{
+					PropertyProxy proxy = base->GetArrayPropertyProxy( object, i );
+
+					// What does the proxy give me the ability to do?  
+					// Don't really like this, since it's just repetition of code...
+					ImGuiManager::DebugDumpArrayProperty( object, proxy );
+				}
+			}
+		}
+
+	} break; 
+
+
+	ImGuiManager::DebugDumpArrayProperty( const Object* object, const ArrayPropertyProxy& proxy )
+	{
+		MetaPropertyType propType = proxy.base->GetArrayType();
+
+		switch ( propType )
+		{
+			case MetaPropertyType::U32:
+			{
+				u32 val = proxy.base->GetValue				
+			} break;
+		}
+	}
+
+*/ 
+ 
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

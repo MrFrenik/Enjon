@@ -95,7 +95,7 @@ namespace Enjon
 			virtual Result Reload( )
 			{ 
 				return Result::SUCCESS;
-			}
+			} 
 
 		protected: 
 

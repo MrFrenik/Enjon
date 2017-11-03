@@ -145,6 +145,7 @@ class Function
 
 typedef std::unordered_map< std::string, Property > PropertyTable ;
 typedef std::unordered_map< std::string, Function > FunctionTable ;
+typedef std::unordered_map< std::string, Array > ArrayPropertyTable;
 typedef std::vector< std::string > NamespaceQualifiers;
 
 struct ClassMarkupTraits
@@ -195,8 +196,8 @@ class Class
 			std::string className = "";
 			for ( auto& ns : mTraits.mNamespaceQualifiers )
 			{
-				className += ns + "::";
-			}
+				className += ns + "::"; 
+			} 
 			return ( className + mName ); 
 		}
 
@@ -212,11 +213,14 @@ class Class
 			mScopeCount = Max( mScopeCount - 1, (u32)0 );
 		} 
 
+		void AddArray( const Array& arr );
+
 		void AddProperty( const Property& prop );
 
 		void AddFunction( const Function& func );
 
 	public:
+		ArrayPropertyTable mArrayProperties;
 		PropertyTable mProperties;
 		FunctionTable mFunctions;
 		ClassMarkupTraits mTraits;
@@ -224,15 +228,25 @@ class Class
 		std::string mFilePath;
 		static u32 mScopeCount;
 		std::string mParent = "";
-};
-
-class Struct
-{ 
 }; 
 
-class Type
+enum class ArraySizeType
 {
+	Fixed,
+	Dynamic
+};
 
+class Array
+{
+	friend Introspection;
+	public:		
+		Array( ) = default;
+		~Array( ) = default;
+
+	public:
+		std::string mSizeString;
+		ArraySizeType mArraySizeType;
+		PropertyType mArrayType; 
 };
 
 struct EnumElement
@@ -240,6 +254,7 @@ struct EnumElement
 	std::string mElementName;
 	s32 mValue;
 };
+ 
 
 class Enum
 {
@@ -289,6 +304,8 @@ class Introspection
 		void ParseProperty( Lexer* lexer, Class* cls );
 
 		void ParseFunction( Lexer* lexer, Class* cls );
+
+		bool IsPropertyArrayType( Lexer* lexer );
 
 		void ParseEnum( Lexer* lexer );
 
