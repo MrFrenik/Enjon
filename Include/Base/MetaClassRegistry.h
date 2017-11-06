@@ -18,6 +18,13 @@ namespace Enjon
 {
 	const u32 kConstantValue = 5;
 
+	ENJON_ENUM( )
+	enum TestEnum
+	{
+		Bob,
+		Bill
+	};
+
 	namespace TestNamespace
 	{
 		ENJON_CLASS( Namespace = [ TestNamespace ], Construct )
@@ -56,6 +63,9 @@ namespace Enjon
 
 			ENJON_PROPERTY( )
 			f32 mStaticArrayConstVariable[kConstantValue];
+
+			ENJON_PROPERTY( )
+			TestEnum mEnum;
 		}; 
 	} 
 

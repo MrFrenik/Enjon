@@ -143,6 +143,25 @@ class Function
 		FunctionSignature mSignature;
 }; 
 
+enum class ArraySizeType
+{
+	Fixed,
+	Dynamic
+};
+
+class Array
+{
+	friend Introspection;
+	public:		
+		Array( ) = default;
+		~Array( ) = default;
+
+	public:
+		std::string mSizeString;
+		ArraySizeType mArraySizeType;
+		PropertyType mArrayType; 
+};
+
 typedef std::unordered_map< std::string, Property > PropertyTable ;
 typedef std::unordered_map< std::string, Function > FunctionTable ;
 typedef std::unordered_map< std::string, Array > ArrayPropertyTable;
@@ -230,24 +249,6 @@ class Class
 		std::string mParent = "";
 }; 
 
-enum class ArraySizeType
-{
-	Fixed,
-	Dynamic
-};
-
-class Array
-{
-	friend Introspection;
-	public:		
-		Array( ) = default;
-		~Array( ) = default;
-
-	public:
-		std::string mSizeString;
-		ArraySizeType mArraySizeType;
-		PropertyType mArrayType; 
-};
 
 struct EnumElement
 {

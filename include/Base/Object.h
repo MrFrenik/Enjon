@@ -301,11 +301,6 @@ namespace Enjon
 			virtual const MetaClass* GetClassOfTemplatedArgument( ) const = 0;
 	};
 
-	template <typename T>
-	class ArrayIterator : public std::iterator<std::random_access_iterator_tag, T, ptrdiff_t, T*, T&>
-	{ 
-	};
-
 	struct PropertyProxy : public MetaProperty
 	{
 		usize mOffset;
@@ -955,7 +950,6 @@ namespace Enjon
 			} 
 	};
 }
-
 
 #endif
 

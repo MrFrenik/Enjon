@@ -500,7 +500,7 @@ void Introspection::ParseClassMembers( Lexer* lexer, Class* cls )
 
 //=================================================================================================
 
-bool IsPropertyArrayType( Lexer* lexer )
+bool Introspection::IsPropertyArrayType( Lexer* lexer )
 {
 	bool isArray = false;
 
