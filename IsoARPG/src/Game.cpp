@@ -55,11 +55,8 @@ void Game::TestObjectSerialize( )
 	using namespace Enjon;
 
 	AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
-	TestNamespace::PointLight writeTestObject;
-
-	ObjectBinarySerializer objectSerializer;
-	ObjectBinaryDeserializer objectDeserializer;
-
+	TestNamespace::PointLight writeTestObject; 
+	ObjectArchiver archiver; 
 	FontAssetLoader assetLoader;
 
 	// Set value and texture
@@ -71,164 +68,29 @@ void Game::TestObjectSerialize( )
 	writeTestObject.mIntValue = -23; 
 
 	// Serialize test object
-	objectSerializer.Serialize( &writeTestObject ); 
+	archiver.Serialize( &writeTestObject ); 
 
 	String outputPath = am->GetAssetsPath( ) + "/Cache/testObject.easset";
 
 	// Write to file
-	objectSerializer.WriteToFile( outputPath ); 
+	archiver.WriteToFile( outputPath ); 
  
 	// Cool, now de-serialize all objects in file
 	Vector<Object*> objects;
-	objectDeserializer.Deserialize( outputPath, objects ); 
+	archiver.Deserialize( outputPath, objects ); 
 
 	// Test serializing/deserializing directional lights in a scene
 	Enjon::u32 i = 0;
 	for ( auto& dl : mGfx->GetScene()->GetDirectionalLights() )
 	{ 
 		String outputAssetPath = am->GetAssetsPath( ) + "/Cache/directionalLight" + std::to_string(i) +".easset";
-		ObjectBinarySerializer serializer;
-		serializer.Serialize( dl );
-		serializer.WriteToFile( outputAssetPath );
-
-		ObjectBinaryDeserializer deserializer;
-		deserializer.Deserialize( outputAssetPath, objects );
-
+		ObjectArchiver oa;
+		oa.Serialize( dl );
+		oa.WriteToFile( outputAssetPath ); 
+		oa.Deserialize( outputAssetPath, objects ); 
 		i++;
 	} 
-
-	{
-		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( );
-		AssetHandle<Texture> mFlatArray[(Enjon::u32)Enjon::TextureSlotType::Count];
-		for ( Enjon::usize i = 0; i < (Enjon::usize)Enjon::TextureSlotType::Count; ++i )
-		{
-			switch ( Enjon::TextureSlotType( i ) )
-			{
-				case Enjon::TextureSlotType::Albedo: 
-				{ 
-					mFlatArray[i] = am->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.albedo");
-				} break;
-				case Enjon::TextureSlotType::Normal: 
-				{ 
-					mFlatArray[i] = am->GetAsset<Enjon::Texture>("isoarpg.materials.scuffedplastic.normal"); ;
-
-				} break;
-				case Enjon::TextureSlotType::Roughness: 
-				{ 
-					mFlatArray[i] = am->GetAsset<Enjon::Texture>( "isoarpg.materials.scuffedplastic.roughness" );
-				} break;
-				case Enjon::TextureSlotType::AO: 
-				{ 
-					mFlatArray[i] = am->GetAsset<Enjon::Texture>( "isoarpg.materials.mahogfloor.ao" ); 
-				} break;
-				case Enjon::TextureSlotType::Emissive: 
-				{
-					mFlatArray[i] = am->GetAsset<Enjon::Texture>( "isoarpg.materials.cerebus.emissive" ); 
-				} break;
-				case Enjon::TextureSlotType::Metallic: 
-				{ 
-					mFlatArray[i] = am->GetAsset<Enjon::Texture>( "isoarpg.materials.scuffedplastic.metallic" );
-				} break;
-			}
-		}
-
-		for ( Enjon::usize i = 0; i < (Enjon::usize)Enjon::TextureSlotType::Count; ++i )
-		{ 
-			void* member_ptr = (Enjon::u8*)( mFlatArray + i );
-			AssetHandle<Texture> val = *(AssetHandle<Texture>*)member_ptr;
-			std::cout << "blah" << '\n';
-		} 
-	}
-
-	struct TestArrayStruct
-	{
-		Enjon::u32 index;
-		Enjon::f32 val;
-		Enjon::f64 biggerval;
-		Enjon::AssetHandle< Enjon::Texture > textureHandle;
-		bool getFucked;
-	};
-
-	{
-		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( );
-		TestArrayStruct mFlatArray[( Enjon::u32 )Enjon::TextureSlotType::Count];
-		for ( Enjon::usize i = 0; i < ( Enjon::usize )Enjon::TextureSlotType::Count; ++i )
-		{
-			mFlatArray[i].index = i;
-		}
-
-		for ( Enjon::usize i = 0; i < ( Enjon::usize )Enjon::TextureSlotType::Count; ++i )
-		{
-			void* member_ptr = ( Enjon::u8* )( &mFlatArray[0] + i );
-			TestArrayStruct val = *( TestArrayStruct* )member_ptr;
-			std::cout << "blah" << '\n';
-		}
-	} 
-
-	{
-		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( );
-		Enjon::Vector<TestArrayStruct> testVector;
-		for ( Enjon::usize i = 0; i < ( Enjon::usize )Enjon::TextureSlotType::Count; ++i )
-		{
-			TestArrayStruct tas;
-			tas.index = i;
-
-			switch ( Enjon::TextureSlotType( i ) )
-			{
-				case Enjon::TextureSlotType::Albedo:
-				{
-					tas.textureHandle = am->GetAsset<Enjon::Texture>( "isoarpg.materials.scuffedplastic.albedo" );
-				} break;
-				case Enjon::TextureSlotType::Normal:
-				{
-					tas.textureHandle = am->GetAsset<Enjon::Texture>( "isoarpg.materials.scuffedplastic.normal" ); ;
-
-				} break;
-				case Enjon::TextureSlotType::Roughness:
-				{
-					tas.textureHandle = am->GetAsset<Enjon::Texture>( "isoarpg.materials.scuffedplastic.roughness" );
-				} break;
-				case Enjon::TextureSlotType::AO:
-				{
-					tas.textureHandle = am->GetAsset<Enjon::Texture>( "isoarpg.materials.mahogfloor.ao" );
-				} break;
-				case Enjon::TextureSlotType::Emissive:
-				{
-					tas.textureHandle = am->GetAsset<Enjon::Texture>( "isoarpg.materials.cerebus.emissive" );
-				} break;
-				case Enjon::TextureSlotType::Metallic:
-				{
-					tas.textureHandle = am->GetAsset<Enjon::Texture>( "isoarpg.materials.scuffedplastic.metallic" );
-				} break;
-			}
-			testVector.push_back( tas );
-		}
-
-		for ( Enjon::usize i = 0; i < ( Enjon::usize )Enjon::TextureSlotType::Count; ++i )
-		{
-			void* member_ptr = ( Enjon::u8* )( &testVector[0] + i );
-			TestArrayStruct val = *( TestArrayStruct* )member_ptr;
-			std::cout << "blah" << '\n';
-		} 
-	} 
-
-	std::cout << "here\n"; 
 }
-
-class MapClass
-{
-	public:
-		MapClass( )
-		{ 
-		}
-
-		~MapClass( )
-		{ 
-		}
-
-	private:
-		std::unordered_map < Enjon::String, Enjon::AssetHandle< Enjon::Texture > > mMap;
-}; 
 
 std::vector<btRigidBody*> mBodies;
 btDiscreteDynamicsWorld* mDynamicsWorld;

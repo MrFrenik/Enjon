@@ -13,6 +13,14 @@
 #include <assert.h>
 #include <functional>
 
+// Forward Declarations
+namespace Enjon
+{ 
+	class ByteBuffer;
+}
+
+// TODO(): Clean up this file!
+
 /*
 	Used as boilerplate for all classes participating in object/reflection model. 
 */ 
@@ -913,6 +921,16 @@ namespace Enjon
 				static_assert( std::is_base_of<Object, T>::value, "T must inherit from Object." ); 
 			} 
 
+			/*
+			* @brief Default method for object binary serialization
+			*/
+			Result Serialize( ByteBuffer* buffer ) const;
+			
+			/*
+			* @brief Default method for object binary deserialization
+			*/
+			Result Deserialize( ByteBuffer* buffer ) const;
+
 			/**
 			*@brief
 			*/
@@ -968,7 +986,7 @@ namespace Enjon
 			{
 				MetaClassRegistry* mr = const_cast<MetaClassRegistry*> ( Engine::GetInstance( )->GetMetaClassRegistry( ) );
 				return mr->GetClassByName( className );
-			}
+			} 
 
 		protected:
 
@@ -987,6 +1005,16 @@ namespace Enjon
 				MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance()->GetMetaClassRegistry( ) );
 				mr->RegisterMetaClass< T >( );
 			}
+
+			/*
+			* @brief
+			*/
+			virtual Result SerializeData( ByteBuffer* buffer ) const;
+
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeData( ByteBuffer* buffer ) const;
 
 		private:
 

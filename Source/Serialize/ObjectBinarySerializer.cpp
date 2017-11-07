@@ -10,16 +10,16 @@
 #include "Engine.h"
 
 namespace Enjon
-{
+{ 
 	//=====================================================================
 
-	ObjectBinarySerializer::ObjectBinarySerializer( )
+	ObjectArchiver::ObjectArchiver( )
 	{ 
 	}
 
 	//=====================================================================
 
-	ObjectBinarySerializer::~ObjectBinarySerializer( )
+	ObjectArchiver::~ObjectArchiver( )
 	{ 
 	}
 
@@ -28,7 +28,7 @@ namespace Enjon
 #define WRITE_PROP( buffer, cls, object, prop, valType )\
 	buffer.Write< valType >( *cls->GetValueAs< valType >( object, prop ) );
 
-	Result ObjectBinarySerializer::Serialize( const Object* object )
+	Result ObjectArchiver::Serialize( const Object* object )
 	{
 		// Get meta class from object
 		const MetaClass* cls = object->Class( ); 
@@ -187,73 +187,21 @@ namespace Enjon
 
 		// Shouldn't reach here
 		return Result::FAILURE;
+		
 	}
 
-	//===================================================================== 
-	
-	Result ObjectBinarySerializer::WriteToFile( const String& filePath )
-	{
-		mBuffer.WriteToFile( filePath );
-
-		return Result::SUCCESS;
-	}
-
-	//===================================================================== 
-
-	ObjectBinaryDeserializer::ObjectBinaryDeserializer( )
-	{ 
-	}
-
-	//===================================================================== 
-
-	void ObjectBinaryDeserializer::ReleaseData( )
-	{
-		// Release memory for all objects
-		for ( auto& v : mObjects )
-		{
-			for ( auto& o : v.second )
-			{
-				delete o;
-				o = nullptr; 
-			}
-
-			// Clear vector
-			v.second.clear( );
-		}
-
-		// Clear objects vector
-		mObjects.clear( ); 
-	}
-
-	//===================================================================== 
-
-	void ObjectBinaryDeserializer::Reset( )
-	{
-		// Release object data
-		ReleaseData( );
-
-		// Reset read buffer
-		mBuffer.Reset( );
-	}
-
-	//===================================================================== 
-
-	ObjectBinaryDeserializer::~ObjectBinaryDeserializer( )
-	{ 
-		ReleaseData( );
-	}
-
-	//===================================================================== 
+	//=====================================================================
 
 #define READ_PROP( buffer, cls, object, prop, valType )\
 	valType val = buffer.Read< valType >();\
 	cls->SetValue(object, prop, val);
 
-	Result ObjectBinaryDeserializer::Deserialize( const String& filePath, Vector< Object* >& objectsOut )
-	{ 
+	Result ObjectArchiver::Deserialize( const String& filePath, Vector< Object* >& out )
+	{
 		// Reset all data before de-serializing
 		Reset( );
 
+		// Read contents into buffer
 		mBuffer.ReadFromFile( filePath ); 
 
 		// Read class type
@@ -273,17 +221,17 @@ namespace Enjon
 			}
 
 			// Push back object into objects vector
-			objectsOut.push_back( object );
+			out.push_back( object );
 
 			// Fill out its properties ( // Perhaps, in order to be somewhat "backwards compatible", 
-			// instead of continuguously iterating over each property and assuming that it lines up with 
+			// instead of contiguously iterating over each property and assuming that it lines up with 
 			// the cached object file should instead search for the property by name using the meta class
 			// and then fill it out using that - will be trickier to implement of course
-			// need to know where to stop with deserializing data...
+			// need to know where to stop with de-serializing data...
 			// Should I serialize a json object then? That seems redundant as hell.  
 			
 			/*
-				... Started doing object data deserialization after header...
+				... Started doing object data de-serialization after header...
 
 				usize propertyCount = mBuffer.Read< usize > (); 
 				for ( usize i = 0; i < propertyCount; ++i )
@@ -498,5 +446,27 @@ namespace Enjon
 		return Result::SUCCESS;
 	}
 
-	//===================================================================== 
+	//=====================================================================
+
+	Result ObjectArchiver::Deserialize( const String& filePath, HashMap< const MetaClass*, Object* >& out )
+	{
+		return Result::SUCCESS;
+	}
+
+	//=====================================================================
+
+	Result ObjectArchiver::WriteToFile( const String& filePath )
+	{ 
+		mBuffer.WriteToFile( filePath ); 
+		return Result::SUCCESS;
+	}
+
+	//=====================================================================
+
+	void ObjectArchiver::Reset( )
+	{
+		mBuffer.Reset( );
+	} 
+
+	//=====================================================================
 }
