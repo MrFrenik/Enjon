@@ -62,6 +62,7 @@ class Token
 		size_t mTextLength		= 0;
 		char* mText				= nullptr;	
 		std::string	mTextString = "";
+		u32 mStartIndex = 0;
 };
 
 #endif

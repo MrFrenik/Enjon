@@ -23,7 +23,9 @@ class Lexer
 
 		bool RequireToken( TokenType type, bool advance = false );
 
-		Token GetCurrentToken( );
+		Token GetCurrentToken( ); 
+
+		void SetToken( Token token );
 
 		void SetContents( const std::string& newContents, const std::string& contentsPath = "" );
 

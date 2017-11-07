@@ -44,6 +44,11 @@ namespace Enjon
 				// Get property
 				const MetaProperty* prop = cls->GetProperty( i );
 
+				if ( !prop )
+				{
+					continue;
+				}
+
 				switch ( prop->GetType( ) )
 				{
 					case MetaPropertyType::U8:
@@ -275,6 +280,11 @@ namespace Enjon
 			{
 				// Grab property at index from metaclass
 				MetaProperty* prop = const_cast<MetaProperty*> ( cls->GetProperty( i ) );
+
+				if ( !prop )
+				{
+					continue;
+				}
 
 				switch ( prop->GetType( ) )
 				{

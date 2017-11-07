@@ -79,6 +79,8 @@ void Introspection::InitPropertyMap( )
 	STRING_TO_PROP( "AssetHandle", AssetHandle )
 	STRING_TO_PROP( "EntityHandle", EntityHandle )
 	STRING_TO_PROP( "Enum", Enum )
+	STRING_TO_PROP( "Array", Array )
+	STRING_TO_PROP( "Vector", Array )
 }
 
 //=================================================================================================
@@ -123,7 +125,7 @@ Property* Class::GetProperty( const std::string& name )
 {
 	if ( HasProperty( name ) )
 	{
-		return &mProperties[ name ];
+		return mProperties[ name ];
 	}
 
 	return nullptr;
@@ -131,11 +133,11 @@ Property* Class::GetProperty( const std::string& name )
 
 //=================================================================================================
 		
-void Class::AddProperty( const Property& prop )
+void Class::AddProperty( Property* prop )
 {
-	if ( !HasProperty( prop.mName ) )
+	if ( !HasProperty( prop->mName ) )
 	{
-		mProperties[ prop.mName ] = prop;
+		mProperties[ prop->mName ] = prop;
 	}
 }
 
@@ -496,6 +498,33 @@ void Introspection::ParseClassMembers( Lexer* lexer, Class* cls )
 			} break;
 		}
 	}
+} 
+
+//=================================================================================================
+
+PropertyType Introspection::GetPropertyType( Lexer* lexer )
+{
+	// Need to check if is an array type first
+	// Several ways to check for array type, unfortunately...
+	// Should I continue until I find open/close brackets? If found, then is a fixed sized array?
+
+	// Get property type from identifier token string
+	std::string propType = lexer->GetCurrentToken().ToString( );
+
+	// Need to check if is an array type
+	bool isArrayType = IsPropertyArrayType( lexer );
+
+	if ( !isArrayType )
+	{
+		// Get property type 
+		PropertyType type = GetTypeFromString( propType ); 
+
+		return type;
+	} 
+	else
+	{ 
+		return PropertyType::Array;
+	} 
 }
 
 //=================================================================================================
@@ -504,15 +533,55 @@ bool Introspection::IsPropertyArrayType( Lexer* lexer )
 {
 	bool isArray = false;
 
+	/*
+		ex. If the member variable looks like this: Enjon::f32 mStaticArrayEnumIntegralConstant[(usize)TextureFileExtension::TGA];
+		then this is considered an array of type f32 of size TextureFileExtension::TGA 
+	*/
+
+	// Dynamic array ( Vector ) is simple enough
+	if ( lexer->GetCurrentToken( ).Equals( "Vector" ) )
+	{
+		return true;
+	}
+
+	// Check for static array / need to be able to peek ahead far enough to get to end of property declaration (';')
+	Token cacheToken = lexer->GetCurrentToken( );
+	Token tokenPeek = lexer->GetNextToken( );
+	bool foundOpenBracket = false;
+	bool foundCloseBracket = false;
+	while ( tokenPeek.mType != TokenType::Token_SemiColon )
+	{
+		if ( tokenPeek.mType == TokenType::Token_OpenBracket )
+		{
+			foundOpenBracket = true;
+		}
+		if ( tokenPeek.mType == TokenType::Token_CloseBracket )
+		{
+			foundCloseBracket = true;
+		}
+
+		if ( foundOpenBracket && foundCloseBracket )
+		{
+			isArray = true;
+			break;
+		}
+
+		// Get next token
+		tokenPeek = lexer->GetNextToken( ); 
+	} 
+
+	// Reset to cached token
+	lexer->SetToken( cacheToken );
+
 	return isArray;
 }
 
 //=================================================================================================
 
 void Introspection::ParseProperty( Lexer* lexer, Class* cls )
-{
-	// New property to be filled out
-	Property prop;
+{ 
+	// Property traits to fill out
+	PropertyTraits traits;
 
 	// Grab next token and make sure is parentheses
 	if ( !lexer->RequireToken( TokenType::Token_OpenParen, true ) )
@@ -534,7 +603,7 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 				// Add editable trait
 				if ( curToken.Equals( "Editable" ) )
 				{
-					prop.mTraits.IsEditable = true;
+					traits.IsEditable = true;
 				}
 
 				if ( curToken.Equals( "UIMin" ) || curToken.Equals( "UIMax" ) )
@@ -560,17 +629,14 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 					// Set value
 					if ( numToken.Equals( "UIMax" ) )
 					{
-						prop.mTraits.UIMax = num;
+						traits.UIMax = num;
 					}
 
 					if ( numToken.Equals( "UIMin" ) )
 					{
-						prop.mTraits.UIMin = num; 
+						traits.UIMin = num; 
 					}
-				}
-
-				// Push back trait
-				prop.AddTrait( curToken.ToString( ) );
+				} 
 			}
 		}
 	} 
@@ -601,41 +667,59 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 	{
 		return; 
 	}
-		
-	// Grab current token
+ 
+	// Grab current token to cache type 
 	Token curToken = lexer->GetCurrentToken( );
 
-	// Get property type from identifier token string
-	std::string propType = curToken.ToString( );
+	// Get property type from lexer
+	PropertyType type = GetPropertyType( lexer ); 
 
-	// Need to check if is an array type
-	bool isArrayType = IsPropertyArrayType( lexer );
- 
-	// Get property type 
-	PropertyType type = GetTypeFromString( propType ); 
+	Property* prop = nullptr; 
 
-	// Set property type
-	prop.mType = isArrayType ? PropertyType::Array : type;
+	if ( type == PropertyType::Array )
+	{
+		prop = new ArrayProperty( );
+	}
+	else
+	{
+		prop = new Property( );
+	}
 
-	// Set raw property type string
-	prop.mTypeRaw = propType;
+	// Set property traits
+	prop->mTraits = traits;
 
+	// Get string of property type to store
+	prop->mTypeRaw = curToken.ToString( );
+
+	// Set property type 
+	prop->mType = type; 
+
+	// Specific parsing of non-primitive types  
 	switch ( type )
 	{
+		default:
+		{
+			// Consume type
+			Token consumeToken = lexer->GetNextToken( );
+		} break;
 		case PropertyType::AssetHandle:
 		{
+			Token consumeToken = lexer->GetNextToken( );
+
 			// Get opening template token
 			if ( !lexer->RequireToken( TokenType::Token_LessThan, true ) )
 			{
+				delete prop;
 				return;
 			}
 
 			// Append template token
-			prop.mTypeAppend += lexer->GetCurrentToken( ).ToString( );
+			prop->mTypeAppend += lexer->GetCurrentToken( ).ToString( );
 
 			// Get template type 
 			if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
 			{
+				delete prop;
 				return;
 			}
 
@@ -666,33 +750,165 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 			// Get actual type
 			if ( !lexer->RequireToken( TokenType::Token_Identifier ) )
 			{
+				delete prop;
 				return;
 			} 
 
 			if ( consumedQualifiers )
 			{
 				// Should have full templated name now, so append
-				prop.mTypeAppend += mTemplateType + lexer->GetCurrentToken( ).ToString( ); 
+				prop->mTypeAppend += mTemplateType + lexer->GetCurrentToken( ).ToString( ); 
 			}
 			else
 			{
-				prop.mTypeAppend += mTemplateType;
+				prop->mTypeAppend += mTemplateType;
 			} 
 
 			// Grab closing token
 			if ( !lexer->RequireToken( TokenType::Token_GreaterThan, true ) )
 			{
+				delete prop;
 				return;
 			}
 
 			// Append and close type
-			prop.mTypeAppend += lexer->GetCurrentToken( ).ToString( ); 
+			prop->mTypeAppend += lexer->GetCurrentToken( ).ToString( ); 
 		} break;
 
 		case PropertyType::Array:
 		{ 
-			// Do array shit here...
-		} 
+			// Will be the actual property type
+			Token token = lexer->GetCurrentToken( );
+
+			// Need to have a better recursive way of handling filling out the property information for this...
+
+			ArrayProperty* arrProp = static_cast<ArrayProperty*> ( prop );
+
+			// Dynamic array property
+			if ( token.Equals( "Vector" ) )
+			{
+				arrProp->mArraySizeType = ArraySizeType::Dynamic; 
+
+				// Need to the templated argument begin
+				if ( !lexer->RequireToken( TokenType::Token_LessThan, true ) )
+				{
+					delete arrProp;
+					return;
+				}
+
+				// Get the property string up to the closing bracket
+				std::string propertyString = "";
+				token = lexer->GetNextToken( );
+				while ( token.mType != TokenType::Token_GreaterThan )
+				{
+					propertyString += token.ToString( );
+					token = lexer->GetNextToken( );
+				}
+
+				// Set property type of array
+				arrProp->mPropertyTypeRaw = propertyString; 
+
+				// Need to store the property type as well
+				auto splitVector = SplitString( propertyString, "::" );
+				// The last element is the actual unqualified type
+				PropertyType pt = GetTypeFromString( splitVector.back( ) );
+
+				// Set property type of array
+				arrProp->mArrayPropertyType = pt; 
+			}
+			// Fixed array property
+			else
+			{
+				// Fixed size array type
+				arrProp->mArraySizeType = ArraySizeType::Fixed; 
+
+				// Need to grab type of array
+				std::string propertyString = "";
+				token = lexer->GetCurrentToken( );
+
+				// Getting the type of the property
+				// Hate this, but will generalize later to recursive property define calls...
+				bool consumeTypeToken = true;
+				if ( token.Equals( "AssetHandle" ) )
+				{ 
+					// NOTE(): Gross...
+					consumeTypeToken = false;
+
+					// Beginning of property string for this array
+					std::string propertyString = "Enjon::AssetHandle<";
+
+					// Need to consume the property type now
+					lexer->GetNextToken( ); 
+
+					// Need to the templated argument begin
+					if ( !lexer->RequireToken( TokenType::Token_LessThan, true ) )
+					{
+						delete arrProp;
+						return;
+					}
+
+					// Get the property string up to the closing bracket
+					token = lexer->GetNextToken( );
+					while ( token.mType != TokenType::Token_GreaterThan )
+					{
+						propertyString += token.ToString( );
+						token = lexer->GetNextToken( );
+					}
+					propertyString += ">";
+
+					// Set property type of array
+					arrProp->mPropertyTypeRaw = propertyString; 
+
+					// Need to store the property type as well
+					auto splitVector = SplitString( propertyString, "::" );
+					// The last element is the actual unqualified type
+					PropertyType pt = GetTypeFromString( splitVector.back( ) );
+
+					// Set property type of array
+					arrProp->mArrayPropertyType = PropertyType::AssetHandle; 
+				}
+				else
+				{
+					arrProp->mPropertyTypeRaw = arrProp->mTypeRaw;
+					arrProp->mArrayPropertyType = arrProp->mType; 
+				}
+
+				// Consume type token
+				if ( consumeTypeToken )
+				{
+					lexer->GetNextToken( );
+				}
+
+				// Now need to cache off identifier token for later
+				if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
+				{
+					delete arrProp;
+					return;
+				} 
+				Token nameToken = lexer->GetCurrentToken( );
+
+				// Now need to search for size string
+				if ( !lexer->RequireToken( TokenType::Token_OpenBracket, true ) )
+				{
+					delete arrProp;
+					return;
+				}
+
+				std::string sizeString = "";
+				Token ct = lexer->GetNextToken( );
+				while ( ct.mType != TokenType::Token_CloseBracket )
+				{
+					sizeString += ct.ToString( );
+					ct = lexer->GetNextToken( );
+				}
+
+				// Set size string of array property
+				arrProp->mSizeString = sizeString;
+
+				// Restore name token
+				lexer->SetToken( nameToken ); 
+			} 
+		} break;
 	}
 
 	// TODO(): Pointer types / Const references
@@ -707,7 +923,7 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 	curToken = lexer->GetCurrentToken( ); 
 
 	// Get name
-	prop.mName = curToken.ToString( ); 
+	prop->mName = curToken.ToString( ); 
 
 	// Add to class
 	cls->AddProperty( prop ); 
@@ -1039,28 +1255,28 @@ void Introspection::Compile( const ReflectionConfig& config )
 			u32 index = 0;
 			if ( !properties.empty( ) )
 			{
-				code += OutputTabbedLine( "cls->mProperties.resize( cls->mPropertyCount );" );
-				code += OutputTabbedLine( "std::vector<Enjon::MetaProperty*> props;" );
-				code += OutputTabbedLine( "props.resize(cls->mPropertyCount);" );
+				//code += OutputTabbedLine( "cls->mProperties.resize( cls->mPropertyCount );" );
+				//code += OutputTabbedLine( "std::vector<Enjon::MetaProperty*> props;" );
+				//code += OutputTabbedLine( "props.resize(cls->mPropertyCount);" );
 				//code += OutputTabbedLine( "Enjon::MetaProperty* props = ( Enjon::MetaProperty* )malloc( sizeof( Enjon::MetaProperty ) * cls->mPropertyCount );" );
 				//code += OutputTabbedLine( "{" );
 
 				for ( auto& prop : properties )
 				{
 					// Get property as string
-					auto metaProp = prop.second.mType;
+					auto metaProp = prop.second->mType;
 					std::string metaPropStr = GetTypeAsString( metaProp ); 
 					
 					// Fill out property traits
 					std::string traits = "MetaPropertyTraits( "; 
-					traits += prop.second.mTraits.IsEditable ? "true" : "false";
+					traits += prop.second->mTraits.IsEditable ? "true" : "false";
 					traits += ", ";
-					traits += std::to_string(prop.second.mTraits.UIMin) + "f, ";
-					traits += std::to_string(prop.second.mTraits.UIMax) + "f";
+					traits += std::to_string(prop.second->mTraits.UIMin) + "f, ";
+					traits += std::to_string(prop.second->mTraits.UIMax) + "f";
 					traits += " )"; 
 
 					// Get property name
-					std::string pn = prop.second.mName;
+					std::string pn = prop.second->mName;
 
 					// Get class name
 					std::string cn = qualifiedName;
@@ -1076,14 +1292,14 @@ void Introspection::Compile( const ReflectionConfig& config )
 					{
 						case PropertyType::AssetHandle:
 						{
-							code += OutputTabbedLine( "props[ " + pi + " ] = new Enjon::MetaPropertyAssetHandle" + prop.second.mTypeAppend + "( MetaPropertyType::" + metaPropStr + ", \"" 
-															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
+							code += OutputTabbedLine( "cls->mProperties.push_back( new Enjon::MetaPropertyAssetHandle" + prop.second->mTypeAppend + "( MetaPropertyType::" + metaPropStr + ", \"" 
+															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " ) );" ); 
 						} break;
 
 						case PropertyType::Enum:
 						{
 							// Need to get the enum to which this property belongs based on its type
-							const Enum* enm = GetEnum( prop.second.mTypeRaw );
+							const Enum* enm = GetEnum( prop.second->mTypeRaw );
 							if ( enm )
 							{
 								// Vector declaration
@@ -1094,17 +1310,61 @@ void Introspection::Compile( const ReflectionConfig& config )
 								{
 									code += OutputTabbedLine( "\telements.push_back( MetaPropertyEnumElement( \"" + e.mElementName + "\", " + std::to_string(e.mValue) + " ) );" );
 								}
-								code += OutputTabbedLine( "\tprops[ " + pi + " ] = new Enjon::MetaPropertyEnum( MetaPropertyType::" + metaPropStr + ", \"" 
-																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", elements, \"" + prop.second.mTypeRaw + "\" );" ); 
+								code += OutputTabbedLine( "\tcls->mProperties.push_back( new Enjon::MetaPropertyEnum( MetaPropertyType::" + metaPropStr + ", \"" 
+																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", elements, \"" + prop.second->mTypeRaw + "\" ) );" ); 
 								code += OutputTabbedLine( "}" );
 							}
 							
 						} break;
 
+						case PropertyType::Array:
+						{ 
+							ArrayProperty* ap = static_cast<ArrayProperty*>( prop.second );
+							std::string arraySizeType = ap->mArraySizeType == ArraySizeType::Dynamic ? "ArraySizeType::Dynamic" : "ArraySizeType::Fixed";
+							std::string arrayPropStr = GetTypeAsString( ap->mArrayPropertyType );
+
+							std::string propertyProxyString = "";
+
+							switch ( ap->mArrayPropertyType )
+							{
+								default:
+								{
+									propertyProxyString += "new Enjon::MetaProperty( MetaPropertyType::" + arrayPropStr + ", \"Proxy\", 0, 0, MetaPropertyTraits(false, 0, 0) )"; 
+								} break;
+
+								case PropertyType::AssetHandle:
+								{
+									// This is gon' be ugly...
+									// Original string = "AssetHandle< someType >
+									auto split = SplitString( ap->mPropertyTypeRaw, "<" ).at(1);
+									split = SplitString( split, ">" ).at( 0 );
+									propertyProxyString += "new Enjon::MetaPropertyAssetHandle< " + split + " >( MetaPropertyType::" + arrayPropStr + ", \"Proxy\", 0, 0, MetaPropertyTraits(false, 0, 0) )"; 
+								} break;
+							}
+
+							switch ( ap->mArraySizeType )
+							{
+								case ArraySizeType::Dynamic:
+								{
+									code += OutputTabbedLine( "cls->mProperties.push_back( new Enjon::MetaPropertyArray< " + ap->mPropertyTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
+																	+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", " + arraySizeType + ", MetaPropertyType::" 
+																	+ arrayPropStr + ", " + propertyProxyString + " ) );" ); 
+
+								} break;
+
+								case ArraySizeType::Fixed:
+								{
+									code += OutputTabbedLine( "cls->mProperties.push_back( new Enjon::MetaPropertyArray< " + ap->mPropertyTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
+																	+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", " + arraySizeType + ", MetaPropertyType::" 
+																	+ arrayPropStr + ", " + propertyProxyString + ", usize( " + ap->mSizeString + " ) ) );" ); 
+								} break;
+							}
+						} break;
+
 						default:
 						{
-							code += OutputTabbedLine( "props[ " + pi + " ] = new Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" 
-															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
+							code += OutputTabbedLine( "cls->mProperties.push_back( new Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" 
+															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " ) );" ); 
 						} break;
 					}
 				} 
@@ -1116,7 +1376,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 				// Assign properties
 				code += OutputTabbedLine( "// Assign properties to class" ); 
 				//code += OutputTabbedLine( "cls->mProperties = Enjon::PropertyTable( props, props + cls->mPropertyCount );" ); 
-				code += OutputTabbedLine( "cls->mProperties = props;" ); 
+				//code += OutputTabbedLine( "cls->mProperties = props;" ); 
 			}
 
 			// Iterate through all functions and output code

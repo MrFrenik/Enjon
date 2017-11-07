@@ -94,7 +94,6 @@ class Property
 	public:
 		Property( ) = default;
 		~Property( ) = default;
- 
 
 	protected:
 
@@ -149,22 +148,26 @@ enum class ArraySizeType
 	Dynamic
 };
 
-class Array
+class ArrayProperty : public Property
 {
 	friend Introspection;
 	public:		
-		Array( ) = default;
-		~Array( ) = default;
+		ArrayProperty( )
+		{
+			mType = PropertyType::Array;
+		}
+
+		~ArrayProperty( ) = default;
 
 	public:
 		std::string mSizeString;
 		ArraySizeType mArraySizeType;
-		PropertyType mArrayType; 
+		std::string mPropertyTypeRaw;
+		PropertyType mArrayPropertyType;
 };
 
-typedef std::unordered_map< std::string, Property > PropertyTable ;
+typedef std::unordered_map< std::string, Property* > PropertyTable ;
 typedef std::unordered_map< std::string, Function > FunctionTable ;
-typedef std::unordered_map< std::string, Array > ArrayPropertyTable;
 typedef std::vector< std::string > NamespaceQualifiers;
 
 struct ClassMarkupTraits
@@ -232,14 +235,13 @@ class Class
 			mScopeCount = Max( mScopeCount - 1, (u32)0 );
 		} 
 
-		void AddArray( const Array& arr );
+		void AddArray( const ArrayProperty& arr );
 
-		void AddProperty( const Property& prop );
+		void AddProperty( Property* prop );
 
 		void AddFunction( const Function& func );
 
 	public:
-		ArrayPropertyTable mArrayProperties;
 		PropertyTable mProperties;
 		FunctionTable mFunctions;
 		ClassMarkupTraits mTraits;
@@ -305,6 +307,8 @@ class Introspection
 		void ParseProperty( Lexer* lexer, Class* cls );
 
 		void ParseFunction( Lexer* lexer, Class* cls );
+
+		PropertyType GetPropertyType( Lexer* lexer );
 
 		bool IsPropertyArrayType( Lexer* lexer );
 

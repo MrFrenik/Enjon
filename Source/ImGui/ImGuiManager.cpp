@@ -151,6 +151,69 @@ namespace Enjon
 		ImGuizmo::Manipulate(view, projection, mCurrentGizmoOperation, mCurrentGizmoMode, model.elements, NULL, useSnap ? &snap.x : NULL);
 	}
 
+	void DebugDumpArrayProperty( const Enjon::Object* object, const Enjon::MetaPropertyArrayBase* prop )
+	{ 
+		const MetaClass* cls = object->Class( );
+		String propName = prop->GetName( );
+
+		switch ( prop->GetArrayType( ) )
+		{
+			case MetaPropertyType::U32:
+			{
+				const MetaPropertyArray< u32 >* arrayProp = static_cast<const MetaPropertyArray< u32 >*>( prop );
+				for ( usize i = 0; i < arrayProp->GetSize( object ); ++i )
+				{
+					Enjon::String label( "##" + propName + std::to_string(i) );
+					u32 val = arrayProp->GetValueAs( object, i );
+					if ( ImGui::SliderInt( label.c_str( ), (s32*)&val, 0, 100 ) )
+					{
+						arrayProp->SetValueAt( object, i, val );
+					}
+				} 
+			} break;
+
+			case MetaPropertyType::AssetHandle:
+			{
+				MetaArrayPropertyProxy proxy = prop->GetProxy( ); 
+				const MetaPropertyTemplateBase* base = static_cast<const MetaPropertyTemplateBase*> ( proxy.mArrayPropertyTypeBase );
+				const MetaClass* assetCls = const_cast<Enjon::MetaClass*>( base->GetClassOfTemplatedArgument( ) ); 
+				
+				// Property is of type MetaPropertyAssetHandle
+				const MetaPropertyArray< AssetHandle< Asset > >* arrayProp = static_cast<const MetaPropertyArray< AssetHandle< Asset > > * >( prop ); 
+				if ( assetCls )
+				{ 
+					for ( usize i = 0; i < arrayProp->GetSize( object ); ++i )
+					{
+						Enjon::AssetHandle<Enjon::Asset> val; 
+						arrayProp->GetValueAt( object, i, &val );
+						Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+						auto assets = am->GetAssets( assetCls ); 
+						if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
+						{
+							if ( assets )
+							{
+								ImGui::ListBoxHeader( Enjon::String( std::to_string(i) + "##" + prop->GetName( ) ).c_str( ) );
+								{
+									for ( auto& a : *assets )
+									{
+										if ( ImGui::Selectable( a.second->GetName( ).c_str( ) ) )
+										{ 
+											val.Set( a.second );
+											arrayProp->SetValueAt( object, i, val );
+										}
+									}
+								} 
+								ImGui::ListBoxFooter( ); 
+							}
+							ImGui::TreePop( );
+						}
+					} 
+				} 
+
+			} break;
+		}
+	}
+
 	void DebugDumpProperty( Enjon::Object* object, Enjon::MetaProperty* prop )
 	{
 		Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( object->Class( ) ); 
@@ -376,11 +439,17 @@ namespace Enjon
 			// Grab property from class
 			MetaProperty* prop = const_cast< MetaProperty* >( cls ->GetProperty( i ) );
 
+			if ( !prop )
+			{
+				continue;
+			}
+
 			// Get property name
 			Enjon::String name = prop->GetName( );
 
 			switch ( prop->GetType( ) )
 			{
+				// Primitive types
 				case Enjon::MetaPropertyType::U32: 
 				case Enjon::MetaPropertyType::S32: 
 				case Enjon::MetaPropertyType::F32: 
@@ -394,6 +463,18 @@ namespace Enjon
 					DebugDumpProperty( object, prop );
 				} break; 
 
+				// Array type
+				case Enjon::MetaPropertyType::Array:
+				{
+					if ( ImGui::TreeNode( Enjon::String( prop->GetName( ) + "##" + std::to_string( (u32)object ) ).c_str( ) ) )
+					{
+						const MetaPropertyArrayBase* arrayProp = static_cast<const MetaPropertyArrayBase*> ( prop );
+						DebugDumpArrayProperty( object, arrayProp );
+						ImGui::TreePop( );
+					}
+				} break;
+
+				// Enum type
 				case Enjon::MetaPropertyType::Enum:
 				{
 					// Property is enum prop, so need to convert it
@@ -418,6 +499,7 @@ namespace Enjon
 
 				} break;
 				
+				// Type is transform
 				case Enjon::MetaPropertyType::Transform:
 				{
 					Enjon::Transform val;
@@ -472,6 +554,7 @@ namespace Enjon
 
 				} break;
 
+				// AssetHandle type
 				case Enjon::MetaPropertyType::AssetHandle:
 				{
 					// Property is of type MetaPropertyAssetHandle
@@ -511,6 +594,7 @@ namespace Enjon
 
 				} break;
 
+				// Object type
 				case Enjon::MetaPropertyType::Object:
 				{
 					Enjon::Object* obj = cls->GetValueAs< Enjon::Object >( object, prop );
@@ -525,6 +609,7 @@ namespace Enjon
 
 				} break;
 
+				// Entity handle type
 				case Enjon::MetaPropertyType::EntityHandle:
 				{
 					Enjon::EntityHandle handle;
@@ -538,7 +623,7 @@ namespace Enjon
 						}
 					}
 
-				} break;
+				} break; 
 			}
 		} 
 	}

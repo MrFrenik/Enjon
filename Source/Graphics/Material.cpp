@@ -9,6 +9,10 @@ namespace Enjon {
 
 	Material::Material()
 	{
+		for ( u32 i = 0; i < 50; ++i )
+		{
+			mTestVector.push_back( i );
+		}
 	}
 	
 	//======================================================================== 
@@ -16,6 +20,10 @@ namespace Enjon {
 	Material::Material( const Enjon::AssetHandle< Enjon::ShaderGraph >& shaderGraph )
 		: mShaderGraph( shaderGraph )
 	{ 
+		for ( u32 i = 0; i < 50; ++i )
+		{
+			mTestVector.push_back( i );
+		}
 	}
 	
 	//======================================================================== 

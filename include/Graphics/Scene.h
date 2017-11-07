@@ -169,7 +169,7 @@ namespace Enjon {
 			void SortRenderables( RenderableSortType type = RenderableSortType::MATERIAL );
 
 		private:
-			std::vector< Renderable* >	mSortedRenderables;
+			Vector< Renderable* >	mSortedRenderables;
 			std::set<Renderable*> 		mRenderables;
 			std::set<QuadBatch*> 		mQuadBatches;
 			std::set<DirectionalLight*> mDirectionalLights;

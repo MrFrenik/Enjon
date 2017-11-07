@@ -139,6 +139,7 @@ namespace Enjon {
 			void AddOverride( ShaderUniform* uniform );
 
 		protected:
+			ENJON_PROPERTY( )
 			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count]; 
 
 			ENJON_PROPERTY( Editable ) 
@@ -146,6 +147,9 @@ namespace Enjon {
 
 			ENJON_PROPERTY( Editable )
 			Enjon::AssetHandle< Enjon::ShaderGraph > mShaderGraph;
+
+			ENJON_PROPERTY( )
+			Enjon::Vector< u32 > mTestVector;
 			
 			std::unordered_map< Enjon::String, ShaderUniform* > mUniforms;
 			std::unordered_map< Enjon::String, ShaderUniform* > mUniformOverrides;

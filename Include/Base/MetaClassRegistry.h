@@ -52,14 +52,14 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			String mName;
 
-			ENJON_PROPERTY( )
-			Vector< u32 > mDynamicArray;
+			ENJON_PROPERTY( Editable )
+			Enjon::Vector< u32 > mDynamicArray;
 
 			ENJON_PROPERTY( )
 			f32 mStaticArrayConstant[32];
 
 			ENJON_PROPERTY( )
-			f32 mStaticArrayEnumIntegral[(usize)TextureFileExtension::TGA]; 
+			Enjon::AssetHandle<Enjon::Texture> mStaticArrayEnumIntegral[(usize)TextureFileExtension::TGA]; 
 
 			ENJON_PROPERTY( )
 			f32 mStaticArrayConstVariable[kConstantValue];
@@ -429,11 +429,17 @@ MetaClass* Object::ConstructMetaClass< TextureFileExtension >( )
 		TestArrayStruct* val = (TestArrayStruct*)memberPtr;
 	}  
 
-	case Enjon::MetaPropertyType::Enum:
+	struct ArrayPropertyProxy
 	{
-		// Property is enum prop, so need to convert it
+		const MetaProperty* mArrayTypeProperty = nullptr;
+		u32 mIndex = 0;
+	}
+
+	case Enjon::MetaPropertyType::Array:
+	{
+		// Property is array prop, so need to convert it
 		const MetaPropertyArrayBase* arrayProp = static_cast< const MetaPropertyArrayBase* > ( prop );
-		if ( typeCls )
+		if ( arrayProp )
 		{
 			if ( ImGui::TreeNode( arrayProp->GetName().c_str() )
 			{
@@ -460,6 +466,11 @@ MetaClass* Object::ConstructMetaClass< TextureFileExtension >( )
 			case MetaPropertyType::U32:
 			{
 				u32 val = proxy.base->GetValue				
+			} break;
+
+			case MetaPropertyType::AssetHandle:
+			{
+				// The array property really needs to be able to hold a property for its type...
 			} break;
 		}
 	}

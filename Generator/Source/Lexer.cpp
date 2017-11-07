@@ -20,6 +20,12 @@ void Lexer::SetContents( const std::string& newContents, const std::string& cont
 	mCurrentToken = Token( );
 	mContentsPath = contentsPath;
 }
+
+void Lexer::SetToken( Token token )
+{
+	mCurrentToken = token; 
+	mAt = token.mText;
+}
 		
 Token Lexer::PeekAtNextToken( )
 { 
