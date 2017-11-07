@@ -36,7 +36,7 @@ namespace Enjon
 		{
 			ENJON_CLASS_BODY( ) 
 
-		public:
+		public: 
 
 			ENJON_PROPERTY( Editable )
 			f32 mFloatValue;
@@ -69,10 +69,10 @@ namespace Enjon
 			f32 mStaticArrayConstVariable[kConstantValue];
 
 			ENJON_PROPERTY( )
-			TestEnum mEnum;
+			TestEnum mEnum; 
 
 			ENJON_PROPERTY( )
-			TestEnum mAnotherEnumProp;
+			TestEnum mAnotherEnumProp; 
 		}; 
 	} 
 

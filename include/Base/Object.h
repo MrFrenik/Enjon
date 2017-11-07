@@ -653,6 +653,30 @@ namespace Enjon
 			usize GetPropertyCount( ) const
 			{
 				return mPropertyCount;
+			} 
+
+			s32 FindPropertyIndexByName( const String& propertyName ) const
+			{
+				for ( usize i = 0; i < mPropertyCount; ++i )
+				{
+					if ( mProperties.at( i )->mName.compare( propertyName ) == 0 )
+					{
+						return i;
+					}
+				}
+
+				return -1;
+			}
+
+			const MetaProperty* GetPropertyByName( const String& propertyName ) const
+			{
+				s32 index = FindPropertyIndexByName( propertyName );
+				if ( index >= 0 && index < mPropertyCount )
+				{
+					return mProperties[ index ];
+				}
+
+				return nullptr;
 			}
 
 			const MetaProperty* GetProperty( const u32& index ) const

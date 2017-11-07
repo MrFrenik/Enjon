@@ -275,7 +275,51 @@ namespace Enjon
 			// Push back object into objects vector
 			objectsOut.push_back( object );
 
-			// Fill out its properties
+			// Fill out its properties ( // Perhaps, in order to be somewhat "backwards compatible", 
+			// instead of continuguously iterating over each property and assuming that it lines up with 
+			// the cached object file should instead search for the property by name using the meta class
+			// and then fill it out using that - will be trickier to implement of course
+			// need to know where to stop with deserializing data...
+			// Should I serialize a json object then? That seems redundant as hell.  
+			
+			/*
+				... Started doing object data deserialization after header...
+
+				usize propertyCount = mBuffer.Read< usize > (); 
+				for ( usize i = 0; i < propertyCount; ++i )
+				{
+					// Read the property name from the buffer
+					String propName = mBuffer.Read< String >();
+
+					// Read the size of the property ( used for skipping data in buffer if property doesn't exist anymore )
+					usize propDataSize = mBuffer.Read< usize >();
+
+					// Get the property from the meta class
+					const MetaClass* prop = cls->GetPropertyByName( propName );
+
+					// If property exists
+					if ( prop )
+					{
+						// Find its type to set properly
+						switch ( prop->GetType() )
+						{ 
+							...
+							// Assume its a u32 and read into class
+							case MetaPropertyType::U32:
+							{
+								u32 val = mBuffer.Read< u32 >();\
+								cls->SetValue( object, prop, val );
+							} break;
+						}
+					} 
+					// If doesn't exist, we need to skip over some data to realign ourselves
+					else
+					{
+						mBuffer.SkipAhead( propDataSize );
+					}
+				}
+			*/
+
 			for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
 			{
 				// Grab property at index from metaclass
@@ -440,6 +484,15 @@ namespace Enjon
 			Header:
 				ClassType(String)
 				VerisonNumber(u32)
+			ObjData:
+				NumProperties() - could get this from the class itself, but it's safer to store this in the binary and use that 
+				For each property:
+					PropertyName() - used to search for property ( could use for migrating data versions as well )
+						- What if not found? Should the type also be stored so that the buffer can skip the upcoming data?
+						- What if the data is another Object type? Would be more useful to store the amount of bytes required
+						- Yeah, but now each binary file is being inflated with a String as well as a u32 for each property...
+						- Could have a separate binary file that's used to describe what this class is, but that's more file dependencies than I'd like
+					PropertyValue() - used to fill out property 
 		*/
 
 		return Result::SUCCESS;
