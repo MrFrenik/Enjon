@@ -21,6 +21,8 @@ namespace Enjon
 	class Vec4;
 	class Object;
 	class MetaClass;
+	class MetaPropertyArrayBase;
+	class MetaProperty;
 
 	/*
 		Static class meant to be a central hub for registering 
@@ -44,6 +46,9 @@ namespace Enjon
 			static s32 MainMenu();
 			static void ImGuiStyles();
 			static void InitializeDefaults();
+
+			static void DebugDumpArrayProperty( const Enjon::Object* object, const Enjon::MetaPropertyArrayBase* prop );
+			static void DebugDumpProperty( const Enjon::Object* object, const Enjon::MetaProperty* prop );
 
 		private:
 			static std::vector<std::function<void()>> mGuiFuncs;

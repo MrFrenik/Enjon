@@ -215,10 +215,14 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			Transform mWorldTransform;
 
+			ENJON_PROPERTY( )
+			Vector<Component*> mComponents;
+ 
+			ENJON_PROPERTY( )
+			std::vector< EntityHandle > mChildren; 
+
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
-			std::vector<Component*> mComponents;
-			std::vector< EntityHandle > mChildren;
 			Enjon::EntityState mState;
 			EntityHandle mHandle;
 	};

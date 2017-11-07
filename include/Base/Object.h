@@ -194,6 +194,16 @@ namespace Enjon
 			* @brief
 			*/
 			MetaPropertyTraits GetTraits( ) const; 
+ 
+			/*
+			* @brief
+			*/
+			template <typename T>
+			const T* Cast( ) const
+			{
+				static_assert( std::is_base_of< MetaProperty, T >::value, "Must inherit from MetaProperty." );
+				return static_cast< const T* >( this );
+			}
 
 			/*
 			* @brief
@@ -716,7 +726,7 @@ namespace Enjon
 			} 
 
 			// Method for getting type id from MetaClass instead of Object
-			u32 GetTypeId( ) const 
+			virtual u32 GetTypeId( ) const 
 			{
 				return mTypeId;
 			}

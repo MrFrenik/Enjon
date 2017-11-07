@@ -22,8 +22,12 @@ namespace Enjon
 	enum TestEnum
 	{
 		Bob,
-		Bill
-	};
+		Bill, 
+		Frank,
+		Jill,
+		John,
+		Mary
+	}; 
 
 	namespace TestNamespace
 	{
@@ -66,6 +70,9 @@ namespace Enjon
 
 			ENJON_PROPERTY( )
 			TestEnum mEnum;
+
+			ENJON_PROPERTY( )
+			TestEnum mAnotherEnumProp;
 		}; 
 	} 
 
@@ -475,6 +482,36 @@ MetaClass* Object::ConstructMetaClass< TextureFileExtension >( )
 		}
 	}
 
+*/ 
+
+// Define ALL shared enum property element structures up here
+// Enum property 
+/*
+
+struct Enjon_TestNamespace_TestEnum_Struct
+{
+	Enjon_TestNamespace_TestEnum_Struct()
+	{
+		mElements.push_back( MetaPropertyEnumElement( "Bob", 0 ) );
+		mElements.push_back( MetaPropertyEnumElement( "Bill", 1 ) );
+		mElements.push_back( MetaPropertyEnumElement( "Frank", 2 ) );
+		mElements.push_back( MetaPropertyEnumElement( "Jill", 3 ) );
+		mElements.push_back( MetaPropertyEnumElement( "John", 4 ) );
+		mElements.push_back( MetaPropertyEnumElement( "Mary", 5 ) ); 
+	}
+
+	const Vector< MetaPropertyEnumElement >& Elements() const 
+	{
+		return mElements;
+	}
+
+	Vector< MetaPropertyEnumElement > mElements; 
+};
+
+// Then to use...  
+// ex.
+struct Enjon_TestNamespace_TestEnum_Struct enumStruct();
+cls->mProperties[ 4 ] = new Enjon::MetaPropertyEnum( MetaPropertyType::Enum, "mAnotherEnumProp", ( u32 )&( ( TestNamespace::PointLight* )0 )->mAnotherEnumProp, 4, MetaPropertyTraits( false, 0.000000f, 0.000000f ), enumStruct.Elements(), "TestEnum" );
 */ 
  
 

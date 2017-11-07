@@ -329,17 +329,21 @@ namespace Enjon
 			void AddNode( const ShaderGraphNode& node );
 
 		protected:
-			static std::unordered_map< Enjon::String, ShaderGraphNodeTemplate > mTemplates;
+			static std::unordered_map< Enjon::String, ShaderGraphNodeTemplate > mTemplates; 
 
+		protected:
+
+			ENJON_PROPERTY( )
 			Enjon::String mName;
+
+			ENJON_PROPERTY( )
+			u32 mTextureSamplerLocation = 0;
+			
 			std::unordered_map< Enjon::String, ShaderGraphNode > mNodes;
 			std::unordered_map< ShaderPassType, Shader* > mShaders;
 			std::unordered_map< Enjon::String, ShaderUniform* > mUniforms;
 			std::unordered_map< ShaderPassType, Enjon::String > mShaderPassCode;
 			ShaderGraphNode mMainSurfaceNode;
-
-			ENJON_PROPERTY( )
-			u32 mTextureSamplerLocation = 0;
 	};
 }
 

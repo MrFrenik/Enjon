@@ -151,7 +151,7 @@ namespace Enjon
 		ImGuizmo::Manipulate(view, projection, mCurrentGizmoOperation, mCurrentGizmoMode, model.elements, NULL, useSnap ? &snap.x : NULL);
 	}
 
-	void DebugDumpArrayProperty( const Enjon::Object* object, const Enjon::MetaPropertyArrayBase* prop )
+	void ImGuiManager::DebugDumpArrayProperty( const Enjon::Object* object, const Enjon::MetaPropertyArrayBase* prop )
 	{ 
 		const MetaClass* cls = object->Class( );
 		String propName = prop->GetName( );
@@ -172,6 +172,25 @@ namespace Enjon
 				} 
 			} break;
 
+			case MetaPropertyType::Object:
+			{
+				const MetaPropertyArray< Object* >* arrayProp = static_cast< const MetaPropertyArray< Object* >* >( prop );
+				if ( arrayProp )
+				{
+					for ( usize i = 0; i < arrayProp->GetSize( object ); ++i )
+					{
+						const Object* arrObj = arrayProp->GetValueAs( object, i );
+						const MetaClass* arrPropCls = arrObj->Class( ); 
+
+						if ( ImGui::TreeNode( Enjon::String( arrPropCls->GetName() + "##" + std::to_string(u32(arrayProp->GetValueAs( object, i ) ) ) ).c_str( ) ) )
+						{
+							DebugDumpObject( arrayProp->GetValueAs( object, i ) );
+							ImGui::TreePop( );
+						}
+					}
+				}
+			} break;
+
 			case MetaPropertyType::AssetHandle:
 			{
 				MetaArrayPropertyProxy proxy = prop->GetProxy( ); 
@@ -188,11 +207,11 @@ namespace Enjon
 						arrayProp->GetValueAt( object, i, &val );
 						Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 						auto assets = am->GetAssets( assetCls ); 
-						if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
+						if ( ImGui::TreeNode( Enjon::String( std::to_string( i ) + "##" + prop->GetName( ) + std::to_string(u32(arrayProp) ) ).c_str( ) ) )
 						{
 							if ( assets )
 							{
-								ImGui::ListBoxHeader( Enjon::String( std::to_string(i) + "##" + prop->GetName( ) ).c_str( ) );
+								ImGui::ListBoxHeader( Enjon::String( "##" + std::to_string( i ) + prop->GetName( ) ).c_str( ) );
 								{
 									for ( auto& a : *assets )
 									{
@@ -205,6 +224,12 @@ namespace Enjon
 								} 
 								ImGui::ListBoxFooter( ); 
 							}
+
+							if ( val )
+							{
+								ImGuiManager::DebugDumpObject( val.Get( ) );
+							}
+
 							ImGui::TreePop( );
 						}
 					} 
@@ -214,9 +239,9 @@ namespace Enjon
 		}
 	}
 
-	void DebugDumpProperty( Enjon::Object* object, Enjon::MetaProperty* prop )
+	void ImGuiManager::DebugDumpProperty( const Enjon::Object* object, const Enjon::MetaProperty* prop )
 	{
-		Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( object->Class( ) ); 
+		const Enjon::MetaClass* cls = object->Class( ); 
 		Enjon::String name = prop->GetName( );
 
 		switch ( prop->GetType( ) )
@@ -405,9 +430,12 @@ namespace Enjon
 			{
 				Enjon::String val;
 				cls->GetValue( object, prop, &val );
-				if ( ImGui::InputText( name.c_str( ), &val[ 0 ], val.size( ) ) )
+				char buffer[ 256 ];
+				strncpy_s( buffer, &val[0], 256 );
+				if ( ImGui::InputText( name.c_str( ), buffer, 256 ) )
 				{
-					cls->SetValue( object, prop, val ); 
+					// Reset string
+					cls->SetValue( object, prop, String( buffer ) ); 
 				}
 			} break;
 				
@@ -430,14 +458,14 @@ namespace Enjon
 			return;
 		}
 
-		Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( object->Class( ) );
+		const Enjon::MetaClass* cls = object->Class( );
 
 		ImGui::Text( ( "Type: " + std::string(cls->GetName( ) ) ).c_str( ) );
 
 		for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
 		{
 			// Grab property from class
-			MetaProperty* prop = const_cast< MetaProperty* >( cls ->GetProperty( i ) );
+			const MetaProperty* prop = cls ->GetProperty( i );
 
 			if ( !prop )
 			{
@@ -468,7 +496,7 @@ namespace Enjon
 				{
 					if ( ImGui::TreeNode( Enjon::String( prop->GetName( ) + "##" + std::to_string( (u32)object ) ).c_str( ) ) )
 					{
-						const MetaPropertyArrayBase* arrayProp = static_cast<const MetaPropertyArrayBase*> ( prop );
+						const MetaPropertyArrayBase* arrayProp = prop->Cast< MetaPropertyArrayBase >( );
 						DebugDumpArrayProperty( object, arrayProp );
 						ImGui::TreePop( );
 					}
@@ -478,7 +506,7 @@ namespace Enjon
 				case Enjon::MetaPropertyType::Enum:
 				{
 					// Property is enum prop, so need to convert it
-					const MetaPropertyEnum* enumProp = static_cast< const MetaPropertyEnum* > ( prop ); 
+					const MetaPropertyEnum* enumProp = prop->Cast< MetaPropertyEnum >( ); 
 
 					if ( ImGui::TreeNode( enumProp->GetEnumName( ).c_str( ) ) )
 					{
@@ -558,8 +586,8 @@ namespace Enjon
 				case Enjon::MetaPropertyType::AssetHandle:
 				{
 					// Property is of type MetaPropertyAssetHandle
-					MetaPropertyTemplateBase* base = static_cast<MetaPropertyTemplateBase*> ( prop );
-					const MetaClass* assetCls = const_cast<Enjon::MetaClass*>( base->GetClassOfTemplatedArgument( ) );
+					const MetaPropertyTemplateBase* base = prop->Cast< MetaPropertyTemplateBase >( );
+					const MetaClass* assetCls = base->GetClassOfTemplatedArgument( );
 
 					if ( assetCls )
 					{ 

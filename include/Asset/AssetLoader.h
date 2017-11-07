@@ -16,14 +16,15 @@ namespace Enjon
 	// Forward declaration
 	class AssetManager; 
  
-	ENJON_CLASS()
+	ENJON_CLASS( )
 	class AssetLoader : public Enjon::Object 
 	{ 
-		ENJON_CLASS_BODY()
-
 		friend AssetManager; 
+
+		// Don't like this here, but apparently I need it or the linker freaks out...
+		ENJON_CLASS_BODY( )
 		
-		public:
+		public: 
 			
 			/**
 			* @brief Constructor - Base class for all loaders

@@ -146,13 +146,13 @@ namespace Enjon {
 			bool mTwoSided = false; 
 
 			ENJON_PROPERTY( Editable )
-			Enjon::AssetHandle< Enjon::ShaderGraph > mShaderGraph;
+			AssetHandle< ShaderGraph > mShaderGraph;
 
 			ENJON_PROPERTY( )
 			Enjon::Vector< u32 > mTestVector;
 			
-			std::unordered_map< Enjon::String, ShaderUniform* > mUniforms;
-			std::unordered_map< Enjon::String, ShaderUniform* > mUniformOverrides;
+			Enjon::HashMap< Enjon::String, ShaderUniform* > mUniforms;
+			Enjon::HashMap< Enjon::String, ShaderUniform* > mUniformOverrides;
 	}; 
 }
 

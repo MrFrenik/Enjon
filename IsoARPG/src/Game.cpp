@@ -893,6 +893,11 @@ Enjon::Result Game::Initialize()
 			ImGui::Text( "32 bit prop size: %d", sizeof( Enjon::Property<f32> ) );
 			ImGui::Text( "32 bit signal size: %d", sizeof( Enjon::Signal<f32> ) ); 
 
+			if ( ImGui::CollapsingHeader( "Scene" ) )
+			{
+				Enjon::ImGuiManager::DebugDumpObject( mGfx->GetScene( ) );
+			}
+
 			if ( ImGui::CollapsingHeader( "Sun" ) )
 			{
 				Enjon::ImGuiManager::DebugDumpObject( mSun ); 

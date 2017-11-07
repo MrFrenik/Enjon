@@ -5,6 +5,7 @@
 #include "Defines.h"
 #include "System/Types.h"
 #include "Graphics/Color.h"
+#include "Base/Object.h"
 
 #include <set>
 #include <vector>
@@ -43,8 +44,11 @@ namespace Enjon {
 
 	using RenderableID = u32;
 
-	class Scene
+	ENJON_CLASS( )
+	class Scene : public Enjon::Object
 	{
+		ENJON_CLASS_BODY( )
+
 		public:
 			/*
 			* @brief
@@ -169,7 +173,10 @@ namespace Enjon {
 			void SortRenderables( RenderableSortType type = RenderableSortType::MATERIAL );
 
 		private:
-			Vector< Renderable* >	mSortedRenderables;
+
+			ENJON_PROPERTY( )
+			Vector< Renderable* >	mSortedRenderables; 
+
 			std::set<Renderable*> 		mRenderables;
 			std::set<QuadBatch*> 		mQuadBatches;
 			std::set<DirectionalLight*> mDirectionalLights;

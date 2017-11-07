@@ -503,11 +503,7 @@ void Introspection::ParseClassMembers( Lexer* lexer, Class* cls )
 //=================================================================================================
 
 PropertyType Introspection::GetPropertyType( Lexer* lexer )
-{
-	// Need to check if is an array type first
-	// Several ways to check for array type, unfortunately...
-	// Should I continue until I find open/close brackets? If found, then is a fixed sized array?
-
+{ 
 	// Get property type from identifier token string
 	std::string propType = lexer->GetCurrentToken().ToString( );
 
@@ -531,12 +527,8 @@ PropertyType Introspection::GetPropertyType( Lexer* lexer )
 
 bool Introspection::IsPropertyArrayType( Lexer* lexer )
 {
-	bool isArray = false;
-
-	/*
-		ex. If the member variable looks like this: Enjon::f32 mStaticArrayEnumIntegralConstant[(usize)TextureFileExtension::TGA];
-		then this is considered an array of type f32 of size TextureFileExtension::TGA 
-	*/
+	// To be determined
+	bool isArray = false; 
 
 	// Dynamic array ( Vector ) is simple enough
 	if ( lexer->GetCurrentToken( ).Equals( "Vector" ) )
@@ -1188,6 +1180,56 @@ const Enum* Introspection::GetEnum( const std::string& name )
 
 void Introspection::Compile( const ReflectionConfig& config )
 {
+	///////////////////////////////////////////
+	// ENUMS //////////////////////////////////
+
+	{
+		// Grab output path
+		std::string enumOutputPath = config.mOutputDirectory + "/" + "Enjon_Enum_generated.gen";
+
+		// Open file
+		std::ofstream f( enumOutputPath );
+		if ( f )
+		{
+			// Build code
+			std::string code;
+
+			// Output generation file for enums
+			for ( auto& e : mEnums )
+			{
+				std::string qualifiedName = e.second.mName;
+				std::string structName = "Enum_" + qualifiedName + "_Structure";
+
+				// Constructor
+				code += OutputLine( "struct " + structName );
+				code += OutputLine( "{" );
+				code += OutputTabbedLine( structName + "()" );
+				code += OutputTabbedLine( "{" ); 
+				for ( auto& elem : e.second.mElements )
+				{
+					code += OutputTabbedLine( "\tmElements.push_back( MetaPropertyEnumElement( \"" + elem.mElementName + "\", " + std::to_string(elem.mValue) + " ) );" );
+				}
+				code += OutputTabbedLine( "}" );
+
+				// Get elements
+				code += OutputTabbedLine( "const Vector< MetaPropertyEnumElement >& Elements() const" );
+				code += OutputTabbedLine( "{" ); 
+				code += OutputTabbedLine( "\t return mElements;" );
+				code += OutputTabbedLine( "}" ); 
+
+				code += OutputTabbedLine( "" );
+				code += OutputTabbedLine( "Vector< MetaPropertyEnumElement > mElements;" ); 
+
+				code += OutputLine( "};" );
+				code += OutputLine( "" );
+			} 
+
+			// Write final to file
+			f.write( code.c_str( ), code.length( ) );
+		} 
+	}
+
+	// Classes
 	for ( auto& c : mClasses )
 	{
 		// Get qualified name of class
@@ -1255,12 +1297,8 @@ void Introspection::Compile( const ReflectionConfig& config )
 			u32 index = 0;
 			if ( !properties.empty( ) )
 			{
-				//code += OutputTabbedLine( "cls->mProperties.resize( cls->mPropertyCount );" );
-				//code += OutputTabbedLine( "std::vector<Enjon::MetaProperty*> props;" );
-				//code += OutputTabbedLine( "props.resize(cls->mPropertyCount);" );
-				//code += OutputTabbedLine( "Enjon::MetaProperty* props = ( Enjon::MetaProperty* )malloc( sizeof( Enjon::MetaProperty ) * cls->mPropertyCount );" );
-				//code += OutputTabbedLine( "{" );
-
+				// Properties
+				code += OutputTabbedLine( "cls->mProperties.resize( cls->mPropertyCount );" ); 
 				for ( auto& prop : properties )
 				{
 					// Get property as string
@@ -1292,8 +1330,8 @@ void Introspection::Compile( const ReflectionConfig& config )
 					{
 						case PropertyType::AssetHandle:
 						{
-							code += OutputTabbedLine( "cls->mProperties.push_back( new Enjon::MetaPropertyAssetHandle" + prop.second->mTypeAppend + "( MetaPropertyType::" + metaPropStr + ", \"" 
-															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " ) );" ); 
+							code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyAssetHandle" + prop.second->mTypeAppend + "( MetaPropertyType::" + metaPropStr + ", \"" 
+															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
 						} break;
 
 						case PropertyType::Enum:
@@ -1302,17 +1340,8 @@ void Introspection::Compile( const ReflectionConfig& config )
 							const Enum* enm = GetEnum( prop.second->mTypeRaw );
 							if ( enm )
 							{
-								// Vector declaration
-								code += OutputTabbedLine( "// Enum property" );
-								code += OutputTabbedLine( "{" );
-								code += OutputTabbedLine( "\tVector< MetaPropertyEnumElement > elements;" );
-								for ( auto& e : enm->mElements )
-								{
-									code += OutputTabbedLine( "\telements.push_back( MetaPropertyEnumElement( \"" + e.mElementName + "\", " + std::to_string(e.mValue) + " ) );" );
-								}
-								code += OutputTabbedLine( "\tcls->mProperties.push_back( new Enjon::MetaPropertyEnum( MetaPropertyType::" + metaPropStr + ", \"" 
-																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", elements, \"" + prop.second->mTypeRaw + "\" ) );" ); 
-								code += OutputTabbedLine( "}" );
+								code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyEnum( MetaPropertyType::" + metaPropStr + ", \"" 
+																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", Enum_" + enm->mName + "_Structure().Elements(), \"" + prop.second->mTypeRaw + "\" );" ); 
 							}
 							
 						} break;
@@ -1346,37 +1375,31 @@ void Introspection::Compile( const ReflectionConfig& config )
 							{
 								case ArraySizeType::Dynamic:
 								{
-									code += OutputTabbedLine( "cls->mProperties.push_back( new Enjon::MetaPropertyArray< " + ap->mPropertyTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
+									code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyArray< " + ap->mPropertyTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
 																	+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", " + arraySizeType + ", MetaPropertyType::" 
-																	+ arrayPropStr + ", " + propertyProxyString + " ) );" ); 
+																	+ arrayPropStr + ", " + propertyProxyString + " );" ); 
 
 								} break;
 
 								case ArraySizeType::Fixed:
 								{
-									code += OutputTabbedLine( "cls->mProperties.push_back( new Enjon::MetaPropertyArray< " + ap->mPropertyTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
+									code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyArray< " + ap->mPropertyTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
 																	+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", " + arraySizeType + ", MetaPropertyType::" 
-																	+ arrayPropStr + ", " + propertyProxyString + ", usize( " + ap->mSizeString + " ) ) );" ); 
+																	+ arrayPropStr + ", " + propertyProxyString + ", usize( " + ap->mSizeString + " ) );" ); 
 								} break;
 							}
 						} break;
 
 						default:
 						{
-							code += OutputTabbedLine( "cls->mProperties.push_back( new Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" 
-															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " ) );" ); 
+							code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" 
+															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
 						} break;
 					}
 				} 
 
-				// End property table
-				//code += OutputTabbedLine( "};\n" );
-				code += OutputLine( "" );
-	 
-				// Assign properties
-				code += OutputTabbedLine( "// Assign properties to class" ); 
-				//code += OutputTabbedLine( "cls->mProperties = Enjon::PropertyTable( props, props + cls->mPropertyCount );" ); 
-				//code += OutputTabbedLine( "cls->mProperties = props;" ); 
+				// Formatting
+				code += OutputLine( "" ); 
 			}
 
 			// Iterate through all functions and output code
@@ -1472,13 +1495,14 @@ void Introspection::Link( const ReflectionConfig& config )
 	std::string typesPath = config.mEnjonRootPath + "/Include/System/Types.h";
 	std::string definesPath = config.mEnjonRootPath + "/Include/Defines.h";
 	std::string linkFilePath = config.mLinkedDirectory + "/" + "Enjon_Generated.cpp"; 
+	std::string enumDefinesPath = config.mOutputDirectory + "/" + "Enjon_Enum_generated.gen";
 	std::ofstream f( linkFilePath ); 
 
 	// Code to write to file
 	std::string code = "";
 
 	// Write header for Linked file
-	code += OutputLinkedHeader( );
+	code += OutputLinkedHeader( ); 
 
 	// Output include diretories
 	for ( auto& c : mClasses )
@@ -1493,6 +1517,14 @@ void Introspection::Link( const ReflectionConfig& config )
 
 	// Output namespace
 	code += OutputLine( "\nusing namespace Enjon;\n" ); 
+
+	// Write enum structure definitions file
+	{
+		// Grab enum contents
+		std::string enumContents = ReadFileIntoString( enumDefinesPath.c_str( ) );
+		// Append
+		code += OutputLine( enumContents );
+	}
 
 	// Iterate classes and grab compiled intermediate files
 	for ( auto& c : mClasses )
