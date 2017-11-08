@@ -50,6 +50,8 @@
 
 #include <Base/MetaClassRegistry.h>
 
+Enjon::Texture* mNewTexture = nullptr;
+
 void Game::TestObjectSerialize( )
 {
 	using namespace Enjon;
@@ -89,6 +91,14 @@ void Game::TestObjectSerialize( )
 		oa.WriteToFile( outputAssetPath ); 
 		oa.Deserialize( outputAssetPath, objects ); 
 		i++;
+	} 
+
+	// Try deserializing one of the textures that have been cached
+	{
+		ObjectArchiver textureArchiver; 
+		Enjon::String texPath = am->GetCachedAssetsPath( ) + "isoarpg.materials.woodframe.normal.easset";
+		mNewTexture = static_cast< Enjon::Texture* > ( textureArchiver.Deserialize( texPath ) ); 
+		std::cout << "Done!\n";
 	} 
 }
 
@@ -130,8 +140,7 @@ Enjon::Result Game::Initialize()
 	// Set up assets path
 	// This needs to be done in a project settings config file or in the cmake, not in source 
 	mAssetsPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Assets"); 
-	Enjon::String cachePath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Cache/"); 
-
+	Enjon::String cachePath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Assets/Cache/"); 
 	Enjon::String projectDirectory = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + "/IsoARPG/";
 	
 	// Get asset manager and set its properties ( I don't like this )
@@ -854,6 +863,12 @@ Enjon::Result Game::Initialize()
 				auto gc = mGun.Get( )->GetComponent< Enjon::GraphicsComponent >( );
 				Enjon::ImGuiManager::DebugDumpObject( gc ); 
 			} 
+
+			// Show texture
+			if ( mNewTexture )
+			{
+				ImGui::Image( ImTextureID( mNewTexture->GetTextureId( ) ), ImVec2( 500, 500 ) );
+			}
 
 			//char buf[ 256 ];
 			//std::strncpy( buf, mWorldString.c_str( ), 256 );

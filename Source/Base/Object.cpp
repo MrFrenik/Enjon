@@ -14,7 +14,7 @@ namespace Enjon
 
 	//=========================================================================
 
-	Result Object::DeserializeData( ObjectArchiver* archive ) const
+	Result Object::DeserializeData( ObjectArchiver* archive )
 	{
 		return Result::INCOMPLETE; 
 	}

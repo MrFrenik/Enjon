@@ -1006,7 +1006,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual Result DeserializeData( ObjectArchiver* buffer ) const; 
+			virtual Result DeserializeData( ObjectArchiver* buffer ); 
 
 		private:
 

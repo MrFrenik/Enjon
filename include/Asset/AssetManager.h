@@ -9,9 +9,6 @@
 #include "Asset/AssetLoader.h"
 #include "Defines.h" 
 
-// TODO(): For some reason, need this here. I hate this. Fix it.
-#include "Graphics/Texture.h"
-
 #include <array>
 
 namespace Enjon
@@ -67,6 +64,11 @@ namespace Enjon
 			*@brief Adds asset to project form given file path
 			*/
 			Result AddToDatabase( const String& filePath, b8 isRelativePath = true );
+
+			/**
+			*@brief Adds asset to project form given file path
+			*/
+			Result SerializeAsset( const Asset* asset );
 			
 			/**
 			*@brief Gets asset manager name

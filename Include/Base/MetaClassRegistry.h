@@ -39,7 +39,7 @@ namespace Enjon
 		protected:
 			virtual Result SerializeData( ObjectArchiver* archiver ) const override
 			{
-				std::cout << "Yeah, buddy!";
+				std::cout << "Yeah, buddy\n!";
 				return Result::INCOMPLETE;
 			}
 

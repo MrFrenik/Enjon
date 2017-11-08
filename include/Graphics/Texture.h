@@ -10,7 +10,12 @@
 
 namespace Enjon
 {
+	// Forward declarations
+	template <typename T>
+	class TextureSourceData;
+	class TextureSourceDataBase;
 	class TextureAssetLoader;
+	class Texture;
 
 	ENJON_ENUM( )
 	enum class TextureFileExtension : u32
@@ -23,7 +28,83 @@ namespace Enjon
 		UNKNOWN
 	};
 
-	ENJON_CLASS( )
+	ENJON_ENUM( )
+	enum class TextureFormat : u32
+	{
+		LDR,
+		HDR
+	};
+
+	class TextureSourceDataBase
+	{
+		friend TextureAssetLoader;
+		friend Texture;
+		public:
+
+			/*
+			* @brief
+			*/
+			TextureSourceDataBase( ) = default;
+
+			/*
+			* @brief
+			*/
+			~TextureSourceDataBase( ) = default;
+
+			template <typename T>
+			const TextureSourceData<T>* Cast( )
+			{
+				return static_cast< TextureSourceData<T>* >( this );
+			}
+
+		protected: 
+			virtual void Base( ) = 0;
+
+		protected:
+			const Texture* mOwner = nullptr;
+	};
+
+	template <typename T>
+	class TextureSourceData : public TextureSourceDataBase
+	{
+		friend Texture;
+		friend TextureAssetLoader;
+		public:
+			TextureSourceData( ) = default;
+
+			TextureSourceData( T* data, const Texture* owner )
+				: mData( data )
+			{ 
+				mOwner = owner;
+			}
+
+			~TextureSourceData( )
+			{
+				ReleaseData( );
+			}
+		
+		protected:
+			virtual void Base( )
+			{ 
+			}
+
+			const T* GetData( ) const
+			{
+				return mData;
+			}
+
+		protected:
+			void ReleaseData( )
+			{
+				delete mData;
+				mData = nullptr;
+			}
+
+		private:
+			T* mData;
+	}; 
+
+	ENJON_CLASS( Construct )
 	class Texture : public Asset
 	{
 		friend TextureAssetLoader;
@@ -63,6 +144,12 @@ namespace Enjon
 			* @brief
 			*/
 			u32 GetTextureId() const;
+ 
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
+			TextureFormat GetFormat( ) const;
 
 		protected: 
 			/*
@@ -70,11 +157,28 @@ namespace Enjon
 			*/
 			static TextureFileExtension GetFileExtensionType( const Enjon::String& fileExtension );
 
+			/*
+			* @brief
+			*/
+			virtual Result SerializeData( ObjectArchiver* archiver ) const override;
+			
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeData( ObjectArchiver* archiver ) override;
+
 		protected:
+
 			/*
 			* @brief
 			*/
 			virtual Enjon::Result CacheFile( Enjon::ByteBuffer& buffer ) override; 
+
+			/*
+			* @brief
+			* @note Need to eventually move this into a factory class as a part of the graphics subsystem
+			*/
+			static Texture* Construct( const String& filePath );
 
 		private:
 			
@@ -88,7 +192,15 @@ namespace Enjon
 			u32 mHeight; 
 
 			ENJON_PROPERTY( )
+			u32 mNumberOfComponents;
+
+			ENJON_PROPERTY( )
 			TextureFileExtension mFileExtension;
+
+			ENJON_PROPERTY( )
+			TextureFormat mFormat;
+
+			TextureSourceDataBase* mSourceData = nullptr;
 	}; 
 
 }

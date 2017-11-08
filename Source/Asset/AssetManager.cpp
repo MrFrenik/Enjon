@@ -8,6 +8,7 @@
 #include "Asset/FontAssetLoader.h"
 #include "Asset/ShaderGraphAssetLoader.h"
 #include "Utils/FileUtils.h"
+#include "Serialize/ObjectArchiver.h"
 #include "Engine.h"
 
 #include <fmt/printf.h>
@@ -220,6 +221,9 @@ namespace Enjon
 		// Have to do a switch based on extension of file
 		s32 idx = GetLoaderIdxByFileExtension( filePath );
 
+		// Asset to be returned from loading if successful
+		Asset* asset = nullptr;
+
 		// If out of bounds, return failure since file extension was unknown
 		if ( idx < 0 )
 		{
@@ -258,15 +262,17 @@ namespace Enjon
 					String path = mAssetsPath + filePath;
 					String name = Utils::ToLower( mName ) + qualifiedName; 
 
-					auto res = query->second->LoadResourceFromFile( path, name );
+					asset = query->second->LoadResourceFromFile( path, name ); 
 
 					// Set file path and name
-					if ( res )
+					if ( asset )
 					{
-						res->mFilePath = mAssetsPath + filePath;
-						res->mName = Utils::ToLower( mName ) + qualifiedName;
+						asset->mFilePath = mAssetsPath + filePath;
+						asset->mName = name; 
+						asset->mUUID = UUID::GenerateUUID( );
 					}
 				}
+
 				// If absolute path on disk
 				else
 				{
@@ -276,12 +282,30 @@ namespace Enjon
 						return Result::FAILURE;
 					}
 
-					auto res = query->second->LoadResourceFromFile( filePath, qualifiedName );
+					asset = query->second->LoadResourceFromFile( filePath, qualifiedName );
 				}
 			}
 		}
 
+		// Handle serialization of asset file
+		SerializeAsset( asset );
+
 		return Result::SUCCESS;
+	}
+
+	//======================================================================================================
+
+	Result AssetManager::SerializeAsset( const Asset* asset )
+	{
+		// Serialize asset with archiver
+		ObjectArchiver archiver;
+		Result res = archiver.Serialize( asset ); 
+
+		// Write to file using archiver 
+		String path = mCachedPath + asset->mName + ".easset"; 
+		archiver.WriteToFile( path );
+
+		return res;
 	}
 
 	//======================================================================================================

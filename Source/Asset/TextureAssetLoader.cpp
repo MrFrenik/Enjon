@@ -3,7 +3,6 @@
 
 #include "Asset/AssetManager.h"
 #include "Asset/TextureAssetLoader.h" 
-#include "Graphics/picoPNG.h"
 #include "IO/IOManager.h"
 #include "Utils/FileUtils.h"
 #include "Math/Vec3.h"
@@ -11,15 +10,7 @@
 
 #include <random>
 #include <GLEW/glew.h>
-#include <vector>
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <STB/stb_image_write.h> 
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <STB/stb_image.h>
-
-#define CACHING 0
+#include <vector> 
 
 namespace Enjon
 {
@@ -31,120 +22,12 @@ namespace Enjon
 	{ 
 	} 
 
-	Texture* TextureAssetLoader::LoadTextureFromFile( const Enjon::String& filePath )
-	{
-		// Get file extension of file
-		Enjon::String fileExtension = Utils::SplitString( filePath, "." ).back( ); 
-		
-		// Create new texture
-		Enjon::Texture* tex = new Enjon::Texture;
-		
-		// Fields to load and store
-		s32 width, height, nComps, len; 
-
-		void* textureData = nullptr;
-
-		// Load HDR format
-		if ( fileExtension.compare( "hdr" ) == 0 )
-		{
-			stbi_set_flip_vertically_on_load( true );
-			f32* data = stbi_loadf( filePath.c_str( ), &width, &height, &nComps, 0 ); 
-
-			glGenTextures( 1, &tex->mId );
-			glBindTexture( GL_TEXTURE_2D, tex->mId );
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGB, GL_FLOAT, data );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-			s32 MAG_PARAM = GL_LINEAR;
-			s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
-			b8 genMips = true;
-
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MAG_PARAM );
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIN_PARAM );
-
-			if ( genMips )
-			{
-				glGenerateMipmap( GL_TEXTURE_2D );
-			} 
-
-			// Free image data once done
-			stbi_image_free( data );
-		}
-
-		// Otherwise load standard format
-		else
-		{
-			// Load texture data
-			stbi_set_flip_vertically_on_load( false );
-			u8* data = stbi_load( filePath.c_str( ), &width, &height, &nComps, STBI_rgb_alpha );
-			textureData = (u8*)data;
-
-			// Generate texture
-			glGenTextures( 1, &( tex->mId ) );
-
-			// Bind and create texture
-			glBindTexture( GL_TEXTURE_2D, tex->mId );
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
-
-			s32 MAG_PARAM = GL_LINEAR;
-			s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
-			b8 genMips = true;
-
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MAG_PARAM );
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIN_PARAM );
-
-			if ( genMips )
-			{
-				glGenerateMipmap( GL_TEXTURE_2D );
-			}
-
-			glBindTexture( GL_TEXTURE_2D, 0 ); 
-		} 
-
-		// Set texture attributes
-		tex->mWidth = width;
-		tex->mHeight = height;
-
-		// Generate new UUID
-		tex->mUUID = Enjon::UUID::GenerateUUID( );
-
-#if CACHING 
-		//Cache image data to file
-		if ( textureData != nullptr )
-		{
-			auto saveData = stbi_write_png_to_mem( (u8*)textureData, 0, width, height, 4, &len );
-			TextureAssetLoader::CacheTextureData( saveData, len, tex );
-			stbi_image_free( saveData ); 
-
-			// Free image data
-			stbi_image_free( (u8*)textureData );
-		}
-#else
-		stbi_image_free( textureData );
-#endif 
- 
-		// Store file extension type of texture
-		tex->mFileExtension = Texture::GetFileExtensionType( fileExtension ); 
-
-		Cache( ByteBuffer( ), tex );
-
-		return tex;
-	}
-			
 	//============================================================================================== 
 
 	Asset* TextureAssetLoader::LoadResourceFromFile(const String& filePath, const String& name )
 	{ 
-		// Load texture
-		Enjon::Texture* tex = LoadTextureFromFile( filePath );
-		tex->mName = name;
+		// Load and construct texture from file
+		Enjon::Texture* tex = Texture::Construct( filePath );
 
 		// Add to assets with qualified name
 		AddToAssets(name, tex); 
