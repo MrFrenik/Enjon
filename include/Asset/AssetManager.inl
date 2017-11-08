@@ -54,7 +54,7 @@ AssetHandle<T> AssetManager::GetDefaultAsset( )
 //================================================================================================ 
 
 template <typename T>
-const std::unordered_map< Enjon::String, Asset* >* AssetManager::GetAssets( )
+const HashMap< String, AssetRecordInfo >* AssetManager::GetAssets( )
 {
 	// Get appropriate loader based on asset type
 	u32 loaderId = GetAssetTypeId<T>( );

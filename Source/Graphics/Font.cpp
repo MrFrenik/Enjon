@@ -355,9 +355,9 @@ namespace Enjon
 	    }
 	}
 
-	void PrintText( Transform& Transform, const Enjon::String& Text, UIFont* F, QuadBatch& Batch, ColorRGBA32 Color, u32 fontSize )
+	void PrintText( Transform& Transform, const Enjon::String& Text, const UIFont* F, QuadBatch& Batch, ColorRGBA32 Color, u32 fontSize )
 	{ 
-		Enjon::FontAtlas* atlas = F->GetAtlas( (s32)fontSize );
+		const Enjon::FontAtlas* atlas = F->GetAtlas( (s32)fontSize );
 		f32 textureWidth = atlas->GetAtlasTexture( ).Get( )->GetWidth( );
 		f32 textureHeight = atlas->GetAtlasTexture( ).Get( )->GetHeight( ); 
 
@@ -743,7 +743,7 @@ namespace Enjon
 			
 	//========================================================================================================================
 
-	FontGlyph FontAtlas::GetGlyph( u8 character )
+	FontGlyph FontAtlas::GetGlyph( u8 character ) const
 	{
 		//// Grab character index
 		//u32 index = FT_Get_Char_Index( mFontFace, character );
@@ -811,7 +811,7 @@ namespace Enjon
 
 	//========================================================================================================================
 
-	bool UIFont::AtlasExists( s32 fontSize )
+	bool UIFont::AtlasExists( s32 fontSize ) const
 	{
 		// If not found, then will reach end of atlas map and return false
 		return ( ( mAtlases.find( fontSize ) ) != mAtlases.end( ) ); 
@@ -819,15 +819,17 @@ namespace Enjon
 
 	//========================================================================================================================
 			
-	FontAtlas* UIFont::GetAtlas( s32 fontSize )
+	const FontAtlas* UIFont::GetAtlas( s32 fontSize ) const
 	{
+		UIFont* f = const_cast< UIFont* > ( this );
+
 		// Build atlas if doesn't exist
 		if ( !AtlasExists( fontSize ) )
 		{
-			AddAtlas( fontSize );
+			f->AddAtlas( fontSize );
 		}
 
-		return &mAtlases[ fontSize ];
+		return &f->mAtlases[ fontSize ];
 	}
 
 	//========================================================================================================================

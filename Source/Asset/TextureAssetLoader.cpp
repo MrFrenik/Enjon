@@ -241,9 +241,7 @@ namespace Enjon
 	Result TextureAssetLoader::Cache( ByteBuffer& buffer, Asset* asset )
 	{
 		// Call super
-		AssetLoader::Cache( buffer, asset );
-
-		std::cout << "textureassetloader\n";
+		AssetLoader::Cache( buffer, asset ); 
 
 		// Return result
 		return Result::SUCCESS;

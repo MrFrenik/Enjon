@@ -275,15 +275,15 @@ namespace Enjon
 
 			static Enjon::String ShaderPassToString( ShaderPassType type );
 
-			bool HasUniform( const Enjon::String& uniformName );
+			bool HasUniform( const Enjon::String& uniformName ) const;
 
-			const ShaderUniform* GetUniform( const Enjon::String& uniformName );
+			const ShaderUniform* GetUniform( const Enjon::String& uniformName ) const;
 
-			const std::unordered_map< Enjon::String, ShaderUniform* >* GetUniforms( );
+			const HashMap< String, ShaderUniform* >* GetUniforms( ) const;
 
-			bool HasShader( ShaderPassType pass );
+			bool HasShader( ShaderPassType pass ) const;
 
-			const Shader* GetShader( ShaderPassType pass );
+			const Shader* GetShader( ShaderPassType pass ) const;
 
 			void WriteToFile( ShaderPassType pass );
 
@@ -329,7 +329,7 @@ namespace Enjon
 			void AddNode( const ShaderGraphNode& node );
 
 		protected:
-			static std::unordered_map< Enjon::String, ShaderGraphNodeTemplate > mTemplates; 
+			static HashMap< String, ShaderGraphNodeTemplate > mTemplates; 
 
 		protected:
 
@@ -339,10 +339,10 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			u32 mTextureSamplerLocation = 0;
 			
-			std::unordered_map< Enjon::String, ShaderGraphNode > mNodes;
-			std::unordered_map< ShaderPassType, Shader* > mShaders;
-			std::unordered_map< Enjon::String, ShaderUniform* > mUniforms;
-			std::unordered_map< ShaderPassType, Enjon::String > mShaderPassCode;
+			HashMap< String, ShaderGraphNode > mNodes;
+			HashMap< ShaderPassType, Shader* > mShaders;
+			HashMap< String, ShaderUniform* > mUniforms;
+			HashMap< ShaderPassType, String > mShaderPassCode;
 			ShaderGraphNode mMainSurfaceNode;
 	};
 }

@@ -1662,13 +1662,13 @@ namespace Enjon
 			{
 				for ( auto& a : *am->GetAssets< Enjon::Mesh >( ) )
 				{
-					Enjon::String meshName = a.second->Cast< Enjon::Mesh >( )->GetName( );
+					Enjon::String meshName = a.second.GetAssetName();
 					ImGui::Selectable( meshName.c_str( ) );
 					if ( ImGui::IsItemActive( ) )
 					{ 
 						for ( auto& r : mRenderables )
 						{
-								r.SetMesh( a.second );
+								r.SetMesh( a.second.GetAsset() );
 						}
 					} 
 				}
@@ -1767,7 +1767,7 @@ namespace Enjon
 								{
 									for ( auto& a : *am->GetAssets< Enjon::Texture >( ) )
 									{
-										Enjon::String texName = a.second->Cast< Enjon::Texture >( )->GetName( );
+										Enjon::String texName = a.second.GetAssetName();
 										ImGui::Selectable( texName.c_str( ) );
 										if ( ImGui::IsItemActive( ) )
 										{
@@ -1797,7 +1797,7 @@ namespace Enjon
 
 		if ( ImGui::Button( "Recompile Shader" ) )
 		{ 
-			mTestShaderGraph.Get( )->Reload( ); 
+			const_cast< ShaderGraph* > ( mTestShaderGraph.Get( ) )->Reload( ); 
 		}
 
 		ImGui::Image( ImTextureID( mHDRTextureID ), ImVec2( 128, 128 ) );

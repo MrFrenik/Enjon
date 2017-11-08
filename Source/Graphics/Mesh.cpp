@@ -161,21 +161,21 @@ namespace Enjon
 
 	//=========================================================================
 
-	void Mesh::Bind()
+	void Mesh::Bind() const
 	{
 		glBindVertexArray(VAO);
 	}
 
 	//=========================================================================
 
-	void Mesh::Unbind()
+	void Mesh::Unbind() const
 	{
 		glBindVertexArray(0);
 	}
 
 	//=========================================================================
 
-	void Mesh::Submit()
+	void Mesh::Submit() const
 	{
 		glDrawArrays(DrawType, 0, DrawCount);	
 	}

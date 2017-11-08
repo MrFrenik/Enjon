@@ -197,7 +197,7 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
-	const std::unordered_map< Enjon::String, Asset* >* AssetManager::GetAssets( const Enjon::MetaClass* cls )
+	const HashMap< Enjon::String, AssetRecordInfo >* AssetManager::GetAssets( const Enjon::MetaClass* cls )
 	{
 		// Make sure class is valid
 		assert( cls != nullptr );
@@ -208,7 +208,7 @@ namespace Enjon
 		if ( Exists( idx ) )
 		{
 			return mLoadersByAssetId[ idx ]->GetAssets( );
-		}
+		} 
 
 		return nullptr;
 	}

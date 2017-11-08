@@ -488,38 +488,54 @@ MetaClass* Object::ConstructMetaClass< TextureFileExtension >( )
 				// The array property really needs to be able to hold a property for its type...
 			} break;
 		}
-	}
+	} 
 
-*/ 
-
-// Define ALL shared enum property element structures up here
-// Enum property 
-/*
-
-struct Enjon_TestNamespace_TestEnum_Struct
+// Used for class parsing
+class MetaClassVersionInfo
 {
-	Enjon_TestNamespace_TestEnum_Struct()
-	{
-		mElements.push_back( MetaPropertyEnumElement( "Bob", 0 ) );
-		mElements.push_back( MetaPropertyEnumElement( "Bill", 1 ) );
-		mElements.push_back( MetaPropertyEnumElement( "Frank", 2 ) );
-		mElements.push_back( MetaPropertyEnumElement( "Jill", 3 ) );
-		mElements.push_back( MetaPropertyEnumElement( "John", 4 ) );
-		mElements.push_back( MetaPropertyEnumElement( "Mary", 5 ) ); 
-	}
+	public: 
+		MetaClassVersionInfo
+	private:
+}
 
-	const Vector< MetaPropertyEnumElement >& Elements() const 
-	{
-		return mElements;
-	}
+// How do I want this to work? umm... not sure, and it's not entirely necessary to think about just this second... but it's important to implement this fairly soon after basic serialization/deserialization is working 
 
-	Vector< MetaPropertyEnumElement > mElements; 
+// Basic serialization process
+
+I want to have a CacheRegistry.manifest file that contains all the cached assets by UUID and location on disk
+
+At startup of the assetmanager, this file is loaded in and parsed
+All the assets in the directory are then pre-loaded into a "shell state" and waiting to be fully loaded once called by the application
+
+Asset loaders then have a wrapper class around the asset that contain needed information for it to be processed
+
+ENJON_ENUM( )
+enum class AssetState
+{
+	Unloaded,				// When there is no record of the asset at all
+	Preloaded,				// Cache record is created
+	Loaded					// Fully loaded into memory and ready to use
 };
 
-// Then to use...  
-// ex.
-struct Enjon_TestNamespace_TestEnum_Struct enumStruct();
-cls->mProperties[ 4 ] = new Enjon::MetaPropertyEnum( MetaPropertyType::Enum, "mAnotherEnumProp", ( u32 )&( ( TestNamespace::PointLight* )0 )->mAnotherEnumProp, 4, MetaPropertyTraits( false, 0.000000f, 0.000000f ), enumStruct.Elements(), "TestEnum" );
+class AssetRecordInfo
+{
+	public:
+		AssetRecordInfo( const Asset* asset )
+			: mAsset( asset )
+		{
+		} 
+
+		~AssetRecordInfo() = default;
+
+	private:
+		const Asset* mAsset = nullptr; 
+		String mResourcePath = "";
+		Signal<> mResourceReloadSignal;
+		AssetState mAssetState = AssetState::Unloaded;
+}; 
+
+
+
 */ 
  
 

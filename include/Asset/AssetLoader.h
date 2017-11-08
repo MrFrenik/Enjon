@@ -13,6 +13,50 @@
 
 namespace Enjon
 {
+	ENJON_ENUM( )
+	enum class AssetState
+	{
+		Unloaded,				// When there is no record of the asset at all
+		Preloaded,				// Cache record is created
+		Loaded					// Fully loaded into memory and ready to use
+	};
+
+	class AssetLoader;
+	class AssetRecordInfo
+	{
+		friend AssetLoader;
+
+		public:
+
+			AssetRecordInfo( ) = default;
+
+			AssetRecordInfo( Asset* asset )
+				: mAsset( asset )
+			{
+			} 
+
+			~AssetRecordInfo( ) = default;
+
+			const Asset* GetAsset( ) const
+			{
+				return mAsset;
+			}
+
+			String GetAssetName( ) const
+			{
+				if ( mAsset )
+				{
+					return mAsset->GetName( ); 
+				}
+				return "UnloadedAsset";
+			}
+
+		private:
+			Asset* mAsset = nullptr; 
+			String mResourcePath = "";
+			AssetState mAssetState = AssetState::Unloaded;
+	}; 
+
 	// Forward declaration
 	class AssetManager; 
  
@@ -79,7 +123,7 @@ namespace Enjon
 				// If found, then return asset
 				if ( query != mAssetsByName.end() ) 
 				{
-					handle = AssetHandle<T>( query->second ); 
+					handle = AssetHandle<T>( query->second.mAsset ); 
 				}
 				// Else return default asset
 				else
@@ -113,12 +157,12 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			bool HasAsset( const String& name )
+			bool HasAsset( const String& name ) const
 			{
 				return ( mAssetsByName.find( name ) != mAssetsByName.end( ) );
 			} 
 
-			const std::unordered_map< String, Asset* >* GetAssets( )
+			const HashMap< String, AssetRecordInfo >* GetAssets( ) const
 			{
 				return &mAssetsByName;
 			}
@@ -126,11 +170,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			Asset* AddToAssets( const String& name, Asset* asset )
+			const Asset* AddToAssets( const String& name, Asset* asset )
 			{
 				if ( HasAsset( name ) )
 				{
-					return mAssetsByName[ name ];
+					return mAssetsByName[ name ].mAsset;
 				} 
 
 				// Set name
@@ -143,18 +187,14 @@ namespace Enjon
 				mAssetsByName[name] = asset;
 				mAssetsByUUID[ asset->mUUID.ToString( ) ] = asset;
 
-				return mAssetsByName[name];
+				return mAssetsByName[name].mAsset;
 			}
 
 			/**
 			* @brief
 			*/
 			virtual Result Cache( ByteBuffer& buffer, Asset* asset )
-			{
-				// Cache out certain base information regarding the asset here
-
-				std::cout << "assetloader\n";
-
+			{ 
 				// Return result
 				return Result::SUCCESS;
 			}
@@ -168,10 +208,10 @@ namespace Enjon
 				return Result::SUCCESS;
 			}
 
-	protected:
+		protected:
 			
-			std::unordered_map<String, Asset*> mAssetsByName;
-			std::unordered_map<String, Asset*> mAssetsByUUID;
+			HashMap< String, AssetRecordInfo > mAssetsByName;
+			HashMap< String, AssetRecordInfo > mAssetsByUUID;
 			Asset* mDefaultAsset = nullptr;
 
 		private:
@@ -179,7 +219,7 @@ namespace Enjon
 			* @brief 
 			*/
 			virtual Asset* LoadResourceFromFile( const String& filePath, const String& name ) = 0;
- };
+	};
 } 
 
 #endif

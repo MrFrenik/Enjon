@@ -19,7 +19,7 @@ namespace Enjon
 		// Delete all associated assets
 		for (auto& asset : mAssetsByName)
 		{
-			delete asset.second;
+			delete asset.second.mAsset;
 		}
 
 		mAssetsByName.clear();
@@ -44,7 +44,7 @@ namespace Enjon
 	{
 		if ( Exists( id ) )
 		{
-			return mAssetsByUUID[ id.ToString() ];
+			return mAssetsByUUID[ id.ToString() ].mAsset;
 		}
 
 		return nullptr;

@@ -213,11 +213,12 @@ namespace Enjon
 							{
 								ImGui::ListBoxHeader( Enjon::String( "##" + std::to_string( i ) + prop->GetName( ) ).c_str( ) );
 								{
+									// All asset record info structs
 									for ( auto& a : *assets )
 									{
-										if ( ImGui::Selectable( a.second->GetName( ).c_str( ) ) )
+										if ( ImGui::Selectable( a.second.GetAssetName().c_str( ) ) )
 										{ 
-											val.Set( a.second );
+											val.Set( const_cast< Asset* >( a.second.GetAsset() ) );
 											arrayProp->SetValueAt( object, i, val );
 										}
 									}
@@ -451,7 +452,7 @@ namespace Enjon
 
 	//---------------------------------------------------
 			
-	void ImGuiManager::DebugDumpObject( Enjon::Object* object )
+	void ImGuiManager::DebugDumpObject( const Enjon::Object* object )
 	{
 		if ( !object )
 		{
@@ -601,11 +602,12 @@ namespace Enjon
 							{
 								ImGui::ListBoxHeader( Enjon::String( "##" + prop->GetName( ) ).c_str( ) );
 								{
+									// For each record in assets
 									for ( auto& a : *assets )
 									{
-										if ( ImGui::Selectable( a.second->GetName( ).c_str( ) ) )
+										if ( ImGui::Selectable( a.second.GetAssetName().c_str( ) ) )
 										{ 
-											val.Set( a.second );
+											val.Set( const_cast< Asset* > ( a.second.GetAsset() ) );
 											cls->SetValue( object, prop, val );
 										}
 									}

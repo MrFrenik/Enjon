@@ -28,7 +28,7 @@ namespace Enjon
 #define ENJON_CLASS_BODY( ... )																	\
 	friend Enjon::Object;																			\
 	public:																							\
-		virtual u32 GetTypeId() override;		\
+		virtual u32 GetTypeId() const override;		\
 		virtual const Enjon::MetaClass* Class( ) const override\
 		{\
 			return GetClassInternal();\
@@ -909,7 +909,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			virtual u32 GetTypeId( )
+			virtual u32 GetTypeId( ) const
 			{
 				return EnjonMaxTypeId;
 			} 
@@ -923,25 +923,15 @@ namespace Enjon
 				static_assert( std::is_base_of<Object, T>::value, "T must inherit from Object." ); 
 			} 
 
-			/*
-			* @brief Default method for object binary serialization
-			*/
-			Result Serialize( ObjectArchiver* archive ) const;
-			
-			/*
-			* @brief Default method for object binary deserialization
-			*/
-			Result Deserialize( ObjectArchiver* archive ) const;
-
 			/**
 			*@brief
 			*/
 			template <typename T>
-			T* Cast( )
+			const T* Cast( ) const
 			{
 				Object::AssertIsObject<T>( );
 
-				return static_cast<T*>( this );
+				return static_cast<T*>( const_cast< Object* > ( this ) );
 			}
 
 			/**

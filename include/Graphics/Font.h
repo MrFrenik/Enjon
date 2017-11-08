@@ -83,7 +83,7 @@ namespace Enjon
 
 	class UIFont;
 	
-	void PrintText( Transform& Transform, const Enjon::String& Text, UIFont* F, QuadBatch& Batch, ColorRGBA32 Color, u32 fontSize );
+	void PrintText( Transform& Transform, const Enjon::String& Text, const UIFont* F, QuadBatch& Batch, ColorRGBA32 Color, u32 fontSize );
 
 	class UIFont;
 	class FontAtlas;
@@ -130,7 +130,7 @@ namespace Enjon
 			FontAtlas( const Enjon::String& path, s32 fontSize, const UIFont* font );
 			Enjon::AssetHandle< Enjon::Texture > GetAtlasTexture( ) const;
 			u32 GetTextureID( ) const;
-			FontGlyph GetGlyph( u8 character );
+			FontGlyph GetGlyph( u8 character ) const;
 			~FontAtlas( ); 
 
 		protected: 
@@ -163,12 +163,12 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			bool AtlasExists( s32 fontSize );
+			bool AtlasExists( s32 fontSize ) const;
 
 			/**
 			* @brief
 			*/
-			FontAtlas* GetAtlas( s32 fontSize );
+			const FontAtlas* GetAtlas( s32 fontSize ) const;
 
 		private:
 			/**
@@ -176,7 +176,10 @@ namespace Enjon
 			*/
 			void AddAtlas( s32 fontSize );
 
-			FT_Face GetFace( ) const { return mFontFace;  }
+			FT_Face GetFace( ) const 
+			{ 
+				return mFontFace;  
+			}
 
 		private:
 			ENJON_PROPERTY( )

@@ -150,7 +150,7 @@ namespace Enjon
 		}
 
 		// Bind mesh and submit
-		Mesh* mesh = GetMesh( ).Get( );
+		const Mesh* mesh = GetMesh( ).Get( );
 		if ( mesh != nullptr )
 		{
 			mesh->Bind( );
@@ -175,7 +175,7 @@ namespace Enjon
 		}
 
 		// Bind mesh and submit
-		Mesh* mesh = GetMesh( ).Get( );
+		const Mesh* mesh = GetMesh( ).Get( );
 		if ( mesh != nullptr )
 		{
 			mesh->Bind( );

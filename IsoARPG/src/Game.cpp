@@ -453,6 +453,8 @@ Enjon::Result Game::Initialize()
 	mGreenMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.textures.white") );
 
 	mFontMat = new Enjon::Material( );
+	auto f = mFont.Get( );
+	f->GetAtlas( 14 );
 	mFontMat->SetTexture( Enjon::TextureSlotType::Albedo, mFont.Get( )->GetAtlas( 14 )->GetAtlasTexture( ) );
 	mFontMat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.normal") );
 	mFontMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("isoarpg.materials.cerebus.metallic") );
@@ -816,9 +818,9 @@ Enjon::Result Game::Initialize()
 				auto textures = am->GetAssets< Enjon::Texture >( );
 				for ( auto& t : *textures ) 
 				{
-					if ( t.second )
+					if ( t.second.GetAsset() )
 					{
-						Enjon::Texture* tex = t.second->Cast< Enjon::Texture >( );
+						const Enjon::Texture* tex = t.second.GetAsset()->Cast< Enjon::Texture >( );
 						Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* > ( tex->Class( ) ); 
 
 						if ( ImGui::TreeNode( tex->GetName( ).c_str( ) ) )

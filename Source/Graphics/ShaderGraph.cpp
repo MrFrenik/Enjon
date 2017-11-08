@@ -1071,25 +1071,25 @@ namespace Enjon
 
 	//==================================================================================================================
 
-	const std::unordered_map< Enjon::String, ShaderUniform* >* ShaderGraph::GetUniforms( )
+	const HashMap< String, ShaderUniform* >* ShaderGraph::GetUniforms( ) const
 	{
 		return &mUniforms;
 	}
 
 	//==================================================================================================================
 
-	bool ShaderGraph::HasShader( ShaderPassType pass )
+	bool ShaderGraph::HasShader( ShaderPassType pass ) const
 	{
 		return ( mShaders.find( pass ) != mShaders.end( ) );
 	}
 
 	//==================================================================================================================
 
-	const Shader* ShaderGraph::GetShader( ShaderPassType pass )
+	const Shader* ShaderGraph::GetShader( ShaderPassType pass ) const
 	{
 		if ( HasShader( pass ) )
 		{
-			return mShaders[ pass ];
+			return const_cast< ShaderGraph*>( this )->mShaders[ pass ];
 		}
 
 		return nullptr;
@@ -1097,11 +1097,11 @@ namespace Enjon
 
 	//==================================================================================================================
 
-	const ShaderUniform* ShaderGraph::GetUniform( const Enjon::String& uniformName )
+	const ShaderUniform* ShaderGraph::GetUniform( const Enjon::String& uniformName ) const
 	{
 		if ( HasUniform( uniformName ) )
 		{
-			return mUniforms[ uniformName ];
+			return const_cast< ShaderGraph* >( this )->mUniforms[ uniformName ];
 		}
 
 		return nullptr;
@@ -1109,7 +1109,7 @@ namespace Enjon
 
 	//==================================================================================================================
 
-	bool ShaderGraph::HasUniform( const Enjon::String& uniformName )
+	bool ShaderGraph::HasUniform( const Enjon::String& uniformName ) const
 	{
 		return ( mUniforms.find( uniformName ) != mUniforms.end( ) );
 	}

@@ -43,17 +43,17 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void Bind();
+			void Bind() const;
 
 			/*
 			* @brief
 			*/
-			void Unbind();
+			void Unbind() const;
 
 			/* 
 			* @brief 
 			*/
-			void Submit(); 
+			void Submit() const; 
 			
 			/*
 			* @brief Protected Constructor

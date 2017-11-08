@@ -1,6 +1,6 @@
 #include "Introspection.h"
 #include "Token.h"
-#include "Lexer.h"
+#include "Lexer.h" 
 
 #include <iostream>
 #include <fstream>
@@ -1461,7 +1461,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 			// GetTypeId()
 			code += OutputLine( "" );
 			code += OutputLine( "// GetTypeId" );
-			code += OutputLine( "Enjon::u32 " + qualifiedName + "::GetTypeId()" );
+			code += OutputLine( "Enjon::u32 " + qualifiedName + "::GetTypeId() const" );
 			code += OutputLine( "{" );
 			code += OutputTabbedLine( "return Object::GetTypeId< " + qualifiedName + " >();" );
 			code += OutputLine( "}" ); 

@@ -40,7 +40,7 @@ namespace Enjon
 			static void RenderGameUI(Enjon::Window* window, f32* view, f32* projection);
 			static void Render(SDL_Window* window);
 			static void ShutDown();
-			static void DebugDumpObject( Enjon::Object* object );
+			static void DebugDumpObject( const Enjon::Object* object );
 
 		private:
 			static s32 MainMenu();

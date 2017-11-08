@@ -128,7 +128,7 @@ namespace Enjon
 			/*
 			* @brief Constructor
 			*/
-			AssetHandle(Asset* asset)
+			AssetHandle(const Asset* asset)
 			{
 				static_assert(std::is_base_of<Asset, T>::value, "AssetHandle:: T must inherit from Asset.");	
 
@@ -167,10 +167,10 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			T* Get() 
+			const T* Get() 
 			{ 
 				return mAsset->Cast<T>(); 
-			}
+			} 
 
 			/*
 			* @brief
@@ -183,7 +183,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			T* operator->( )
+			const T* operator->( )
 			{
 				return Get( );
 			} 
@@ -199,7 +199,7 @@ namespace Enjon
 			/*
 			* @brief 
 			*/
-			Result Set( Asset* asset ) 
+			Result Set( const Asset* asset ) 
 			{
 				// Set to new asset
 				mAsset = asset;
@@ -216,7 +216,7 @@ namespace Enjon
 		protected:
 
 		private: 
-			Asset* mAsset = nullptr;
+			const Asset* mAsset = nullptr;
 	};
 } 
 
