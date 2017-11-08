@@ -35,6 +35,13 @@ namespace Enjon
 		class PointLight : public Enjon::Object
 		{
 			ENJON_CLASS_BODY( ) 
+				
+		protected:
+			virtual Result SerializeData( ObjectArchiver* archiver ) const override
+			{
+				std::cout << "Yeah, buddy!";
+				return Result::INCOMPLETE;
+			}
 
 		public: 
 
@@ -74,6 +81,7 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			TestEnum mAnotherEnumProp; 
 		}; 
+
 	} 
 
 	class EnjonObjectSerializer

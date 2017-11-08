@@ -1,7 +1,7 @@
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
 // File: ObjectBinarySerializer.h
 
-#include "Serialize/ObjectBinarySerializer.h"
+#include "Serialize/ObjectArchiver.h"
 #include "Graphics/Color.h"													// Don't like this here, but I'll leave it for now
 #include "Serialize/UUID.h"
 #include "System/Types.h"
@@ -33,157 +33,174 @@ namespace Enjon
 		// Get meta class from object
 		const MetaClass* cls = object->Class( ); 
 
+		// TODO(): Get versioning structure from meta class this for object...  
+		/*
+			const MetaClassVersionArchive* archive = cls->GetVersionArchive();
+			buffer->Write( archive->GetClassName() );		
+			buffer->Write( archive->GetVersionNumber() );
+		*/
+
+		// Write out class header information using meta class
+		// Class name
 		if ( cls )
-		{
-			// Write class type as string
+		{ 
 			mBuffer.Write< String >( cls->GetName( ) );
+			// Make shift version number
+			mBuffer.Write( 0 );		
 
-			// Serialize all object properties
-			for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
-			{
-				// Get property
-				const MetaProperty* prop = cls->GetProperty( i );
+			// Serialize all object specific data ( classes can override at this point how they want to serialize data )
+			Result res = object->SerializeData( this );
 
-				if ( !prop )
+			// If incomplete, then continue with default serialization
+			if ( res == Result::INCOMPLETE )
+			{ 
+				// Serialize all object properties
+				for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
 				{
-					continue;
-				}
+					// Get property
+					const MetaProperty* prop = cls->GetProperty( i );
 
-				switch ( prop->GetType( ) )
-				{
-					case MetaPropertyType::U8:
-					{ 
-						WRITE_PROP( mBuffer, cls, object, prop, u8 )
-					} break;
-
-					case MetaPropertyType::U16:
-					{ 
-						WRITE_PROP( mBuffer, cls, object, prop, u16 )
-					} break;
-
-					case MetaPropertyType::U32:
-					{ 
-						WRITE_PROP( mBuffer, cls, object, prop, u32 )
-					} break;
-
-					case MetaPropertyType::U64:
-					{ 
-						WRITE_PROP( mBuffer, cls, object, prop, u64 )
-					} break;
-					
-					case MetaPropertyType::S8:
-					{ 
-						WRITE_PROP( mBuffer, cls, object, prop, s8 )
-					} break;
-
-					case MetaPropertyType::S16:
-					{ 
-						WRITE_PROP( mBuffer, cls, object, prop, s16 )
-					} break;
-
-					case MetaPropertyType::S32:
-					{ 
-						WRITE_PROP( mBuffer, cls, object, prop, s32 )
-					} break;
-
-					case MetaPropertyType::S64:
-					{ 
-						WRITE_PROP( mBuffer, cls, object, prop, s64 )
-					} break;
-
-					case MetaPropertyType::F32:
-					{ 
-						WRITE_PROP( mBuffer, cls, object, prop, f32 )
-					} break;
-
-					case MetaPropertyType::F64:
-					{ 
-						WRITE_PROP( mBuffer, cls, object, prop, f64 )
-					} break;
-
-					case MetaPropertyType::Bool:
-					{ 
-						WRITE_PROP( mBuffer, cls, object, prop, bool )
-					} break;
-
-					case MetaPropertyType::ColorRGBA32:
-					{ 
-						// Get color
-						ColorRGBA32 val = *cls->GetValueAs< ColorRGBA32 >( object, prop );
-
-						// Write all individual color channels
-						mBuffer.Write< f32 >( val.r );
-						mBuffer.Write< f32 >( val.g );
-						mBuffer.Write< f32 >( val.b );
-						mBuffer.Write< f32 >( val.a );
-
-					} break;
-
-					case MetaPropertyType::String:
+					if ( !prop )
 					{
-						WRITE_PROP( mBuffer, cls, object, prop, String )
-					} break;
+						continue;
+					}
 
-					case MetaPropertyType::Vec2:
+					switch ( prop->GetType( ) )
 					{
-						// Get vec2
-						Vec2 val = *cls->GetValueAs< Vec2 >( object, prop );
+						case MetaPropertyType::U8:
+						{ 
+							WRITE_PROP( mBuffer, cls, object, prop, u8 )
+						} break;
 
-						// Write individual elements of vec2
-						mBuffer.Write< f32 >( val.x );
-						mBuffer.Write< f32 >( val.y );
-					} break;
+						case MetaPropertyType::U16:
+						{ 
+							WRITE_PROP( mBuffer, cls, object, prop, u16 )
+						} break;
 
-					case MetaPropertyType::Vec3:
-					{
-						// Get vec3
-						Vec3 val = *cls->GetValueAs< Vec3 >( object, prop );
+						case MetaPropertyType::U32:
+						{ 
+							WRITE_PROP( mBuffer, cls, object, prop, u32 )
+						} break;
 
-						// Write individual elements of vec3
-						mBuffer.Write< f32 >( val.x );
-						mBuffer.Write< f32 >( val.y );
-						mBuffer.Write< f32 >( val.z );
-					} break;
+						case MetaPropertyType::U64:
+						{ 
+							WRITE_PROP( mBuffer, cls, object, prop, u64 )
+						} break;
+						
+						case MetaPropertyType::S8:
+						{ 
+							WRITE_PROP( mBuffer, cls, object, prop, s8 )
+						} break;
 
-					case MetaPropertyType::Vec4:
-					{
-						// Get vec3
-						Vec4 val = *cls->GetValueAs< Vec4 >( object, prop );
+						case MetaPropertyType::S16:
+						{ 
+							WRITE_PROP( mBuffer, cls, object, prop, s16 )
+						} break;
 
-						// Write individual elements of vec4
-						mBuffer.Write< f32 >( val.x );
-						mBuffer.Write< f32 >( val.y );
-						mBuffer.Write< f32 >( val.z );
-						mBuffer.Write< f32 >( val.w );
-					} break;
+						case MetaPropertyType::S32:
+						{ 
+							WRITE_PROP( mBuffer, cls, object, prop, s32 )
+						} break;
 
-					case MetaPropertyType::UUID:
-					{
-						WRITE_PROP( mBuffer, cls, object, prop, UUID )
-					} break;
+						case MetaPropertyType::S64:
+						{ 
+							WRITE_PROP( mBuffer, cls, object, prop, s64 )
+						} break;
 
-					case MetaPropertyType::AssetHandle:
-					{ 
-						// Get value of asset 
-						AssetHandle<Asset> val; 
-						cls->GetValue( object, prop, &val );
+						case MetaPropertyType::F32:
+						{ 
+							WRITE_PROP( mBuffer, cls, object, prop, f32 )
+						} break;
 
-						// If valid asset, write its UUID
-						if ( val )
+						case MetaPropertyType::F64:
+						{ 
+							WRITE_PROP( mBuffer, cls, object, prop, f64 )
+						} break;
+
+						case MetaPropertyType::Bool:
+						{ 
+							WRITE_PROP( mBuffer, cls, object, prop, bool )
+						} break;
+
+						case MetaPropertyType::ColorRGBA32:
+						{ 
+							// Get color
+							ColorRGBA32 val = *cls->GetValueAs< ColorRGBA32 >( object, prop );
+
+							// Write all individual color channels
+							mBuffer.Write< f32 >( val.r );
+							mBuffer.Write< f32 >( val.g );
+							mBuffer.Write< f32 >( val.b );
+							mBuffer.Write< f32 >( val.a );
+
+						} break;
+
+						case MetaPropertyType::String:
 						{
-							mBuffer.Write( val.GetUUID() );
-						} 
-						// Otherwise write out invalid UUID
-						else
+							WRITE_PROP( mBuffer, cls, object, prop, String )
+						} break;
+
+						case MetaPropertyType::Vec2:
 						{
-							mBuffer.Write( UUID::Invalid( ) );
-						} 
-					} break;
-				}
-			}
+							// Get vec2
+							Vec2 val = *cls->GetValueAs< Vec2 >( object, prop );
+
+							// Write individual elements of vec2
+							mBuffer.Write< f32 >( val.x );
+							mBuffer.Write< f32 >( val.y );
+						} break;
+
+						case MetaPropertyType::Vec3:
+						{
+							// Get vec3
+							Vec3 val = *cls->GetValueAs< Vec3 >( object, prop );
+
+							// Write individual elements of vec3
+							mBuffer.Write< f32 >( val.x );
+							mBuffer.Write< f32 >( val.y );
+							mBuffer.Write< f32 >( val.z );
+						} break;
+
+						case MetaPropertyType::Vec4:
+						{
+							// Get vec3
+							Vec4 val = *cls->GetValueAs< Vec4 >( object, prop );
+
+							// Write individual elements of vec4
+							mBuffer.Write< f32 >( val.x );
+							mBuffer.Write< f32 >( val.y );
+							mBuffer.Write< f32 >( val.z );
+							mBuffer.Write< f32 >( val.w );
+						} break;
+
+						case MetaPropertyType::UUID:
+						{
+							WRITE_PROP( mBuffer, cls, object, prop, UUID )
+						} break;
+
+						case MetaPropertyType::AssetHandle:
+						{ 
+							// Get value of asset 
+							AssetHandle<Asset> val; 
+							cls->GetValue( object, prop, &val );
+
+							// If valid asset, write its UUID
+							if ( val )
+							{
+								mBuffer.Write( val.GetUUID() );
+							} 
+							// Otherwise write out invalid UUID
+							else
+							{
+								mBuffer.Write( UUID::Invalid( ) );
+							} 
+						} break;
+					}
+				} 
+			} 
 
 			return Result::SUCCESS;
-		} 
+		}
 
 		// Shouldn't reach here
 		return Result::FAILURE;
@@ -204,8 +221,9 @@ namespace Enjon
 		// Read contents into buffer
 		mBuffer.ReadFromFile( filePath ); 
 
-		// Read class type
-		const MetaClass* cls = Object::GetClass( mBuffer.Read< String >( ) ); 
+		// Header information 
+		const MetaClass* cls = Object::GetClass( mBuffer.Read< String >( ) );	// Read class type
+		u32 versionNumber = mBuffer.Read< u32 >( );								// Read version number id
 
 		if ( cls )
 		{ 

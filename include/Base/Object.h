@@ -16,6 +16,7 @@
 // Forward Declarations
 namespace Enjon
 { 
+	class ObjectArchiver;
 	class ByteBuffer;
 }
 
@@ -881,6 +882,7 @@ namespace Enjon
 	// Base model for all Enjon classes that participate in reflection
 	class Object
 	{
+		friend ObjectArchiver;
 		friend MetaClassRegistry;
 		friend Engine;
 
@@ -924,12 +926,12 @@ namespace Enjon
 			/*
 			* @brief Default method for object binary serialization
 			*/
-			Result Serialize( ByteBuffer* buffer ) const;
+			Result Serialize( ObjectArchiver* archive ) const;
 			
 			/*
 			* @brief Default method for object binary deserialization
 			*/
-			Result Deserialize( ByteBuffer* buffer ) const;
+			Result Deserialize( ObjectArchiver* archive ) const;
 
 			/**
 			*@brief
@@ -1009,12 +1011,12 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual Result SerializeData( ByteBuffer* buffer ) const;
+			virtual Result SerializeData( ObjectArchiver* buffer ) const;
 
 			/*
 			* @brief
 			*/
-			virtual Result DeserializeData( ByteBuffer* buffer ) const;
+			virtual Result DeserializeData( ObjectArchiver* buffer ) const; 
 
 		private:
 

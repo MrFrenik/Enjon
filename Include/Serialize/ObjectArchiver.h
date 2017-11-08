@@ -1,9 +1,9 @@
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
-// File: ObjectBinarySerializer.h
+// File: ObjectArchiver.h
 
 #pragma once 
-#ifndef ENJON_OBJECT_BINARY_SERIALIZER_H
-#define ENJON_OBJECT_BINARY_SERIALIZER_H 
+#ifndef ENJON_OBJECT_ARCHIVER_H
+#define ENJON_OBJECT_ARCHIVER_H 
 
 #include "Base/Object.h"
 #include "Serialize/ByteBuffer.h"

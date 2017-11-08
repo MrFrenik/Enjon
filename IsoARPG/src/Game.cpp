@@ -27,7 +27,7 @@
 #include <Serialize/ByteBuffer.h> 
 #include <Engine.h>
 #include <Graphics/ShaderGraph.h>
-#include <Serialize/ObjectBinarySerializer.h>
+#include <Serialize/ObjectArchiver.h>
 
 #include <fmt/printf.h>
 #include <lz4/lz4.h>

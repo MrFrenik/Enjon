@@ -1,37 +1,23 @@
 
 #include "Base/Object.h"
 #include "Serialize/ByteBuffer.h"
-#include "Serialize/ObjectBinarySerializer.h"
+#include "Serialize/ObjectArchiver.h"
 
 namespace Enjon
 {
 	//=========================================================================
 
-	Result Object::Serialize( ByteBuffer* buffer ) const
+	Result Object::Serialize( ObjectArchiver* archiver ) const
 	{ 
-		// Get meta class
-		const MetaClass* cls = this->Class( );
-
-		// TODO(): Get versioning structure from meta class this for object...  
-		/*
-			const MetaClassVersionArchive* archive = cls->GetVersionArchive();
-			buffer->Write( archive->GetClassName() );		
-			buffer->Write( archive->GetVersionNumber() );
-		*/
-
-		// Write out class header information using meta class
-		buffer->Write( cls->GetName( ) );
-		buffer->Write( 0 );		// Make shift version number
-
-		// Serialize all object specific data ( classes can override at this point how they want to serialize data )
-		Result res = SerializeData( buffer );
+		// Just do this in the archiver...
+		Result res = archiver->Serialize( this ); 
 
 		return res;
 	}
 
 	//========================================================================= 
 
-	Result Object::Deserialize( ByteBuffer* buffer ) const
+	Result Object::Deserialize( ObjectArchiver* archiver ) const
 	{ 
 		// How exactly is this supposed to work? 
 		// I'm supposed to have the constructed class ready to be deserialized at this point, right?
@@ -40,30 +26,27 @@ namespace Enjon
 		const MetaClass* cls = this->Class( ); 
 
 		// Write out class header information using meta class
-		buffer->Write( cls->GetName( ) );
-		buffer->Write( 0 );		// Make shift version number
+		//archiver->WriteRaw( cls->GetName( ) );
+		//archiver->WriteRaw( 0 );		// Make shift version number
 
 		// Serialize all object specific data ( classes can override at this point how they want to serialize data )
-		Result res = DeserializeData( buffer );
+		Result res = DeserializeData( archiver );
 
 		return res;
 	}
 
 	//=========================================================================
 
-	Result Object::SerializeData( ByteBuffer* buffer ) const
+	Result Object::SerializeData( ObjectArchiver* archive ) const
 	{ 
-		ObjectArchiver arhiver;
-		arhiver.Serialize( this ); 
-
-		return Result::SUCCESS;
+		return Result::INCOMPLETE;
 	}
 
 	//=========================================================================
 
-	Result Object::DeserializeData( ByteBuffer* buffer ) const
+	Result Object::DeserializeData( ObjectArchiver* archive ) const
 	{
-		return Result::SUCCESS; 
+		return Result::INCOMPLETE; 
 	}
 
 	//=========================================================================
@@ -72,4 +55,35 @@ namespace Enjon
 /*
 	AssetHandle< Texture > mTexture;
 	mTexture.Serialize();
+
+	ObjectArchiver archive;
+	for ( auto& object : mObjects ) 
+	{
+		archive.Serialize(object);	
+	}
+
+	ObjectArchiver::Serialize( const Object* object )
+	{
+		// Need to get header data of object			
+		Result res = object->Serialize();
+
+		if ( res == Result::INCOMPLETE )
+		{
+			// Serialize data by default method...
+		}
+	}
 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+

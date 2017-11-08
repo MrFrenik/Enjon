@@ -234,6 +234,11 @@ namespace Enjon
 		auto query = mLoadersByAssetId.find( ( u32 )idx );
 		if ( query != mLoadersByAssetId.end( ) )
 		{
+			if ( !query->second )
+			{
+				return Result::FAILURE;
+			}
+
 			// Make sure it doesn't exist already before trying to load it
 			if ( query->second->Exists( qualifiedName ) )
 			{
@@ -244,20 +249,23 @@ namespace Enjon
 				// Load asset and place into database
 				if ( isRelativePath )
 				{
-// Return failure if path doesn't exist
-if ( !Utils::FileExists( mAssetsPath + filePath ) )
-{
-	return Result::FAILURE;
-}
+					// Return failure if path doesn't exist
+					if ( !Utils::FileExists( mAssetsPath + filePath ) )
+					{
+						return Result::FAILURE;
+					}
 
-auto res = query->second->LoadResourceFromFile( mAssetsPath + filePath, Utils::ToLower( mName ) + qualifiedName );
+					String path = mAssetsPath + filePath;
+					String name = Utils::ToLower( mName ) + qualifiedName; 
 
-// Set file path and name
-if ( res )
-{
-	res->mFilePath = mAssetsPath + filePath;
-	res->mName = Utils::ToLower( mName ) + qualifiedName;
-}
+					auto res = query->second->LoadResourceFromFile( path, name );
+
+					// Set file path and name
+					if ( res )
+					{
+						res->mFilePath = mAssetsPath + filePath;
+						res->mName = Utils::ToLower( mName ) + qualifiedName;
+					}
 				}
 				// If absolute path on disk
 				else

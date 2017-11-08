@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace Enjon
 {
@@ -25,6 +26,7 @@ namespace Enjon
 		SUCCESS,
 		FAILURE,
 		PROCESS_RUNNING,
+		INCOMPLETE,
 		UNKNOWN_ERROR
 	};
 	
@@ -35,6 +37,9 @@ namespace Enjon
 
 	template <typename T, typename K>
 	using HashMap = std::unordered_map<T, K>;
+
+	template <typename T>
+	using HashSet = std::unordered_set<T>;
 }
 
 #endif
