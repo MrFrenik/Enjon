@@ -38,9 +38,6 @@ namespace Enjon
 		// Create new font
 		Enjon::UIFont* font = new Enjon::UIFont( filePath ); 
 
-		// Generate new uuid 
-		font->mUUID = Enjon::UUID::GenerateUUID( );
-
 		// Add to assets with qualified name
 		AddToAssets( name, font );
 

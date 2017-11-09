@@ -489,7 +489,7 @@ namespace Enjon
 			glBufferData( GL_ARRAY_BUFFER, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ], GL_DYNAMIC_DRAW );
 
 			// Vertex attributes for instanced model matrix
-			glBindVertexArray( mesh.Get( )->VAO );
+			glBindVertexArray( mesh.Get( )->GetVAO() );
 			// Set attrib pointers for matrix
 			glEnableVertexAttribArray( 4 );
 			glVertexAttribPointer( 4, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )0 );
@@ -795,7 +795,7 @@ namespace Enjon
 			}
 			glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ] );
 
-			glDrawArraysInstanced( GL_TRIANGLES, 0, mInstancedRenderable->GetMesh( ).Get( )->DrawCount, mInstancedAmount );
+			glDrawArraysInstanced( GL_TRIANGLES, 0, mInstancedRenderable->GetMesh( ).Get( )->GetDrawCount(), mInstancedAmount );
 
 			mInstancedRenderable->GetMesh( ).Get( )->Unbind( ); 
 		} 

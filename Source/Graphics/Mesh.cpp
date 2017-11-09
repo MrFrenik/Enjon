@@ -1,5 +1,6 @@
 #include "Graphics/Mesh.h"
 #include "Asset/MeshAssetLoader.h"
+#include "Serialize/ObjectArchiver.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION // define this in only *one* .cc
 #include <IO/TinyLoader.h>
@@ -16,7 +17,28 @@ namespace Enjon
 
 	Mesh::~Mesh()
 	{
+		Release( );
 	}
+
+	//=========================================================================
+
+	Result Mesh::Release( )
+	{
+		if ( mVBO )
+		{
+			// TODO(): Get rid of all exposed OpenGL/ DX API calls
+			glDeleteBuffers( 1, &mVBO ); 
+		}
+
+		if ( mVAO )
+		{
+			glDeleteBuffers( 1, &mVBO ); 
+		}
+
+		return Result::SUCCESS;
+	}
+
+	//=========================================================================
 
 	Mesh::Mesh( const Enjon::String& filePath )
 	{ 
@@ -74,7 +96,7 @@ namespace Enjon
 					Vertex.Tangent[ 1 ] = 0.0f;
 					Vertex.Tangent[ 2 ] = 0.0f;
 
-					Verticies.push_back( Vertex );
+					mVerticies.push_back( Vertex );
 				}
 
 				index_offset += fv;
@@ -85,11 +107,11 @@ namespace Enjon
 		}
 
 		// Now calculate tangents for each vert in mesh
-		for ( int i = 0; i < Verticies.size( ); i += 3 )
+		for ( int i = 0; i < mVerticies.size( ); i += 3 )
 		{
-			auto& Vert1 = Verticies.at( i );
-			auto& Vert2 = Verticies.at( i + 1 );
-			auto& Vert3 = Verticies.at( i + 2 );
+			auto& Vert1 = mVerticies.at( i );
+			auto& Vert2 = mVerticies.at( i + 1 );
+			auto& Vert3 = mVerticies.at( i + 2 );
 
 			Vec3 pos1 = Vec3( Vert1.Position[ 0 ], Vert1.Position[ 1 ], Vert1.Position[ 2 ] );
 			Vec3 pos2 = Vec3( Vert2.Position[ 0 ], Vert2.Position[ 1 ], Vert2.Position[ 2 ] );
@@ -130,12 +152,12 @@ namespace Enjon
 		}
 
 		// Create and upload mesh data
-		glGenBuffers( 1, &VBO );
-		glBindBuffer( GL_ARRAY_BUFFER, VBO );
-		glBufferData( GL_ARRAY_BUFFER, sizeof( Vert ) * Verticies.size( ), &Verticies[ 0 ], GL_STATIC_DRAW );
+		glGenBuffers( 1, &mVBO );
+		glBindBuffer( GL_ARRAY_BUFFER, mVBO );
+		glBufferData( GL_ARRAY_BUFFER, sizeof( Vert ) * mVerticies.size( ), &mVerticies[ 0 ], GL_STATIC_DRAW );
 
-		glGenVertexArrays( 1, &VAO );
-		glBindVertexArray( VAO );
+		glGenVertexArrays( 1, &mVAO );
+		glBindVertexArray( mVAO );
 
 		// Position
 		glEnableVertexAttribArray( 0 );
@@ -150,20 +172,48 @@ namespace Enjon
 		glEnableVertexAttribArray( 3 );
 		glVertexAttribPointer( 3, 2, GL_FLOAT, GL_FALSE, sizeof( Vert ), ( void* )offsetof( Vert, UV ) );
 
-		// Unbind VAO
+		// Unbind mVAO
 		glBindVertexArray( 0 );
 
 		// Set draw type
-		DrawType = GL_TRIANGLES;
+		mDrawType = GL_TRIANGLES;
 		// Set draw count
-		DrawCount = Verticies.size( );
+		mDrawCount = mVerticies.size( );
+	}
+
+	//=========================================================================
+
+	u32 Mesh::GetDrawCount( ) const
+	{
+		return mDrawCount;
+	}
+
+	//=========================================================================
+
+	u32 Mesh::GetVAO( ) const
+	{
+		return mVAO;
+	}
+
+	//=========================================================================
+
+	u32 Mesh::GetVBO( ) const
+	{
+		return mVBO; 
+	}
+
+	//=========================================================================
+
+	u32 Mesh::GetIBO( ) const
+	{
+		return mIBO; 
 	}
 
 	//=========================================================================
 
 	void Mesh::Bind() const
 	{
-		glBindVertexArray(VAO);
+		glBindVertexArray(mVAO);
 	}
 
 	//=========================================================================
@@ -177,37 +227,37 @@ namespace Enjon
 
 	void Mesh::Submit() const
 	{
-		glDrawArrays(DrawType, 0, DrawCount);	
+		glDrawArrays(mDrawType, 0, mDrawCount);	
 	}
 
 	//=========================================================================
 			
-	Result Mesh::Serialize( Enjon::ByteBuffer& buffer )
+	Result Mesh::SerializeData( ObjectArchiver* archiver ) const
 	{ 
 		// Write out size of verticies
-		buffer.Write< usize >( Verticies.size( ) );
+		archiver->WriteToBuffer< usize >( mVerticies.size( ) );
 
 		// Write out verticies
-		for ( auto& v : Verticies )
+		for ( auto& v : mVerticies )
 		{
 			// Position
-			buffer.Write< f32 >( v.Position[ 0 ] );
-			buffer.Write< f32 >( v.Position[ 1 ] );
-			buffer.Write< f32 >( v.Position[ 2 ] );
+			archiver->WriteToBuffer< f32 >( v.Position[ 0 ] );
+			archiver->WriteToBuffer< f32 >( v.Position[ 1 ] );
+			archiver->WriteToBuffer< f32 >( v.Position[ 2 ] );
 
 			// Normal
-			buffer.Write< f32 >( v.Normals[ 0 ] );
-			buffer.Write< f32 >( v.Normals[ 1 ] );
-			buffer.Write< f32 >( v.Normals[ 2 ] );
+			archiver->WriteToBuffer< f32 >( v.Normals[ 0 ] );
+			archiver->WriteToBuffer< f32 >( v.Normals[ 1 ] );
+			archiver->WriteToBuffer< f32 >( v.Normals[ 2 ] );
 
 			// Tangent
-			buffer.Write< f32 >( v.Tangent[ 0 ] );
-			buffer.Write< f32 >( v.Tangent[ 1 ] );
-			buffer.Write< f32 >( v.Tangent[ 2 ] );
+			archiver->WriteToBuffer< f32 >( v.Tangent[ 0 ] );
+			archiver->WriteToBuffer< f32 >( v.Tangent[ 1 ] );
+			archiver->WriteToBuffer< f32 >( v.Tangent[ 2 ] );
 
 			// UV
-			buffer.Write< f32 >( v.UV[ 0 ] );
-			buffer.Write< f32 >( v.UV[ 1 ] );
+			archiver->WriteToBuffer< f32 >( v.UV[ 0 ] );
+			archiver->WriteToBuffer< f32 >( v.UV[ 1 ] );
 		} 
 
 		return Result::SUCCESS;
@@ -215,45 +265,49 @@ namespace Enjon
 
 	//=========================================================================
 
-	Result Mesh::Deserialize( Enjon::ByteBuffer& buffer )
+	Result Mesh::DeserializeData( ObjectArchiver* archiver )
 	{
-		// Get size of buffer
-		usize amount = buffer.Read< usize >( );
+		// Get size of verts from archiver
+		usize vertCount = archiver->ReadFromBuffer< usize >( );
 
-		for ( usize i = 0; i < amount; ++i )
+		// Read in verts from archiver
+		for ( usize i = 0; i < vertCount; ++i )
 		{
 			Vert v;
 
 			// Position
-			v.Position[ 0 ] = buffer.Read< f32 >( );
-			v.Position[ 1 ] = buffer.Read< f32 >( );
-			v.Position[ 2 ] = buffer.Read< f32 >( );
+			v.Position[ 0 ] = archiver->ReadFromBuffer< f32 >( );
+			v.Position[ 1 ] = archiver->ReadFromBuffer< f32 >( );
+			v.Position[ 2 ] = archiver->ReadFromBuffer< f32 >( );
 			
 			// Normal
-			v.Normals[ 0 ] = buffer.Read< f32 >( );
-			v.Normals[ 1 ] = buffer.Read< f32 >( );
-			v.Normals[ 2 ] = buffer.Read< f32 >( );
+			v.Normals[ 0 ] = archiver->ReadFromBuffer< f32 >( );
+			v.Normals[ 1 ] = archiver->ReadFromBuffer< f32 >( );
+			v.Normals[ 2 ] = archiver->ReadFromBuffer< f32 >( );
 			
 			// Tangent
-			v.Tangent[ 0 ] = buffer.Read< f32 >( );
-			v.Tangent[ 1 ] = buffer.Read< f32 >( );
-			v.Tangent[ 2 ] = buffer.Read< f32 >( );
+			v.Tangent[ 0 ] = archiver->ReadFromBuffer< f32 >( );
+			v.Tangent[ 1 ] = archiver->ReadFromBuffer< f32 >( );
+			v.Tangent[ 2 ] = archiver->ReadFromBuffer< f32 >( );
 			
 			// UV
-			v.UV[ 0 ] = buffer.Read< f32 >( );
-			v.UV[ 1 ] = buffer.Read< f32 >( );
+			v.UV[ 0 ] = archiver->ReadFromBuffer< f32 >( );
+			v.UV[ 1 ] = archiver->ReadFromBuffer< f32 >( );
 
 			// Push back vert
-			Verticies.push_back( v );
+			mVerticies.push_back( v );
 		}
 
-		// Create and upload mesh data
-		glGenBuffers( 1, &VBO );
-		glBindBuffer( GL_ARRAY_BUFFER, VBO );
-		glBufferData( GL_ARRAY_BUFFER, sizeof( Vert ) * Verticies.size( ), &Verticies[ 0 ], GL_STATIC_DRAW );
+		// Make sure that memory is cleared first before assigning
+		Release( );
 
-		glGenVertexArrays( 1, &VAO );
-		glBindVertexArray( VAO );
+		// Create and upload mesh data
+		glGenBuffers( 1, &mVBO );
+		glBindBuffer( GL_ARRAY_BUFFER, mVBO );
+		glBufferData( GL_ARRAY_BUFFER, sizeof( Vert ) * mVerticies.size( ), &mVerticies[ 0 ], GL_STATIC_DRAW );
+
+		glGenVertexArrays( 1, &mVAO );
+		glBindVertexArray( mVAO );
 
 		// Position
 		glEnableVertexAttribArray( 0 );
@@ -268,13 +322,13 @@ namespace Enjon
 		glEnableVertexAttribArray( 3 );
 		glVertexAttribPointer( 3, 2, GL_FLOAT, GL_FALSE, sizeof( Vert ), ( void* )offsetof( Vert, UV ) );
 
-		// Unbind VAO
+		// Unbind mVAO
 		glBindVertexArray( 0 );
 
 		// Set draw type
-		DrawType = GL_TRIANGLES;
+		mDrawType = GL_TRIANGLES;
 		// Set draw count
-		DrawCount = Verticies.size( );
+		mDrawCount = mVerticies.size( );
 
 		return Result::SUCCESS; 
 	}

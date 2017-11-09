@@ -288,9 +288,9 @@ namespace Enjon
 		}
 
 		// Handle serialization of asset file
-		SerializeAsset( asset );
+		Result res = SerializeAsset( asset );
 
-		return Result::SUCCESS;
+		return res;
 	}
 
 	//======================================================================================================
@@ -299,6 +299,10 @@ namespace Enjon
 	{
 		// Serialize asset with archiver
 		ObjectArchiver archiver;
+
+		// Should the UUID of the asset be written here? Should it be in the ObjectArchiver serialize path?
+		// Should there be a separate archiver that is in charge specifically of assets?
+
 		Result res = archiver.Serialize( asset ); 
 
 		// Write to file using archiver 

@@ -90,43 +90,4 @@ namespace Enjon
 		// Set default texture
 		mDefaultAsset = defaultTex;
 	} 
-	
-	Result TextureAssetLoader::CacheTextureData( const u8* data, u32 length, Texture* texture )
-	{
-		// Get engine
-		Enjon::Engine* engine = Enjon::Engine::GetInstance( );
-
-		// Get asset manager from subsystem catalog
-		Enjon::AssetManager* am = engine->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-
-		// Get project directory
-		String outputPath = am->GetAssetsPath( ) + "/Cache/" + texture->mUUID.ToString() + ".easset";
-		
-		// Byte buffer to write to
-		Enjon::ByteBuffer writeBuffer;
-		
-		// Add data to byte buffer
-		writeBuffer.Write( texture->mWidth );
-		writeBuffer.Write( texture->mHeight );
-		writeBuffer.Write( length );
-		writeBuffer.Write( ( u32 )texture->mFileExtension );
-		for ( usize i = 0; i < length; ++i )
-		{
-			writeBuffer.Write( data[ i ] );
-		} 
-
-		// Write out to file
-		writeBuffer.WriteToFile( outputPath ); 
-
-		return Enjon::Result::SUCCESS;
-	}
-
-	Result TextureAssetLoader::Cache( ByteBuffer& buffer, Asset* asset )
-	{
-		// Call super
-		AssetLoader::Cache( buffer, asset ); 
-
-		// Return result
-		return Result::SUCCESS;
-	}
 }

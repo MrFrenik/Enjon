@@ -714,11 +714,11 @@ namespace Enjon
 			} 
 
 			template < typename T > 
-			T* GetValueAs( const Object* object, const MetaProperty* prop ) const
+			const T* GetValueAs( const Object* object, const MetaProperty* prop ) const
 			{
 				if ( HasProperty( prop ) )
 				{
-					T* val = reinterpret_cast< T* >( usize( object ) +  prop->mOffset );
+					const T* val = reinterpret_cast< const T* >( usize( object ) +  prop->mOffset );
 					return val;
 				}
 

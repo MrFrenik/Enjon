@@ -188,25 +188,7 @@ namespace Enjon
 				mAssetsByUUID[ asset->mUUID.ToString( ) ] = asset;
 
 				return mAssetsByName[name].mAsset;
-			}
-
-			/**
-			* @brief
-			*/
-			virtual Result Cache( ByteBuffer& buffer, Asset* asset )
-			{ 
-				// Return result
-				return Result::SUCCESS;
-			}
-
-			/**
-			* @brief
-			*/
-			virtual Result LoadFromCache( ByteBuffer& readBuffer )
-			{
-				// Return result
-				return Result::SUCCESS;
-			}
+			} 
 
 		protected:
 			

@@ -627,7 +627,7 @@ namespace Enjon
 				// Object type
 				case Enjon::MetaPropertyType::Object:
 				{
-					Enjon::Object* obj = cls->GetValueAs< Enjon::Object >( object, prop );
+					const Enjon::Object* obj = cls->GetValueAs< Enjon::Object >( object, prop );
 					if ( obj )
 					{
 						if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )

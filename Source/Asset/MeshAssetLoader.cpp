@@ -40,20 +40,20 @@ namespace Enjon
 		CREATE_QUAD_VERTEX( BR, 1.0f, 1.0f, 1.0f, 1.0f )
 		CREATE_QUAD_VERTEX( BL, 0.0f, 1.0f, 0.0f, 1.0f )
 
-		mesh->Verticies.push_back( TL );
-		mesh->Verticies.push_back( TR );
-		mesh->Verticies.push_back( BR );
-		mesh->Verticies.push_back( BR );
-		mesh->Verticies.push_back( BL );
-		mesh->Verticies.push_back( TL );
+		mesh->mVerticies.push_back( TL );
+		mesh->mVerticies.push_back( TR );
+		mesh->mVerticies.push_back( BR );
+		mesh->mVerticies.push_back( BR );
+		mesh->mVerticies.push_back( BL );
+		mesh->mVerticies.push_back( TL );
 
 		// Create and upload mesh data
-		glGenBuffers( 1, &mesh->VBO );
-		glBindBuffer( GL_ARRAY_BUFFER, mesh->VBO );
-		glBufferData( GL_ARRAY_BUFFER, sizeof( Vert ) * mesh->Verticies.size( ), &mesh->Verticies[ 0 ], GL_STATIC_DRAW );
+		glGenBuffers( 1, &mesh->mVBO );
+		glBindBuffer( GL_ARRAY_BUFFER, mesh->mVBO );
+		glBufferData( GL_ARRAY_BUFFER, sizeof( Vert ) * mesh->mVerticies.size( ), &mesh->mVerticies[ 0 ], GL_STATIC_DRAW );
 
-		glGenVertexArrays( 1, &mesh->VAO );
-		glBindVertexArray( mesh->VAO );
+		glGenVertexArrays( 1, &mesh->mVAO );
+		glBindVertexArray( mesh->mVAO );
 
 		// Position
 		glEnableVertexAttribArray( 0 );
@@ -72,12 +72,9 @@ namespace Enjon
 		glBindVertexArray( 0 );
 
 		// Set draw type
-		mesh->DrawType = GL_TRIANGLES;
+		mesh->mDrawType = GL_TRIANGLES;
 		// Set draw count
-		mesh->DrawCount = mesh->Verticies.size( );
-
-		// Generate new UUID
-		mesh->mUUID = Enjon::UUID::GenerateUUID( );
+		mesh->mDrawCount = mesh->mVerticies.size( ); 
 
 		// Set default
 		mDefaultAsset = mesh; 
@@ -85,11 +82,8 @@ namespace Enjon
 
 	Asset* MeshAssetLoader::LoadResourceFromFile(const String& filePath, const String& name)
 	{
-		Mesh* mesh = new Enjon::Mesh( filePath );
-
-		// Generate new UUID
-		mesh->mUUID = Enjon::UUID::GenerateUUID( ); 
-		mesh->mName = name;
+		// Construct new mesh from filepath
+		Mesh* mesh = new Enjon::Mesh( filePath ); 
 
 		// Add to assets
 		AddToAssets(name, mesh);

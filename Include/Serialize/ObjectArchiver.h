@@ -40,9 +40,10 @@ namespace Enjon
 			Object* Deserialize( const String& filePath );
 
 			/*
-			* @brief
+			* @brief Takes in a HashMap< const MetaClass*, Vector< Object* > > and a file path to a .easset file to deserialize.
+			*			Fills the map out with vectors of objects indexed by class
 			*/
-			Result Deserialize( const String& filePath, HashMap< const MetaClass*, Object* >& out );
+			Result Deserialize( const String& filePath, HashMap< const MetaClass*, Vector< Object* > >& out );
 
 			/*
 			*@brief

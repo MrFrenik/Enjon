@@ -22,7 +22,7 @@ namespace Enjon {
 
 	class MeshAssetLoader;
 
-	ENJON_CLASS( )
+	ENJON_CLASS( Construct )
 	class Mesh : public Asset
 	{
 		friend MeshAssetLoader;
@@ -54,35 +54,60 @@ namespace Enjon {
 			* @brief 
 			*/
 			void Submit() const; 
-			
+
+			/*
+			* @brief
+			*/
+			u32 GetDrawCount( ) const; 
+
+			/*
+			* @brief
+			*/
+			u32 GetVAO( ) const;
+
+			/*
+			* @brief
+			*/
+			u32 GetVBO( ) const;
+
+			/*
+			* @brief
+			*/
+			u32 GetIBO( ) const;
+
+		protected:
+
 			/*
 			* @brief Protected Constructor
 			*/
 			Mesh( const Enjon::String& filePath );
 
-		protected:
+			/*
+			* @brief
+			*/
+			virtual Result SerializeData( ObjectArchiver* archiver ) const override;
 
 			/*
 			* @brief
 			*/
-			virtual Result Serialize( Enjon::ByteBuffer& buffer ) override;
+			virtual Result DeserializeData( ObjectArchiver* archiver ) override;
 
 			/*
 			* @brief
 			*/
-			virtual Result Deserialize( Enjon::ByteBuffer& buffer ) override;
+			Result Release( ); 
 
+		protected: 
+			Vector< Vert > mVerticies;
 
-		public:
-			std::vector<Vert> Verticies;
-			std::vector<u32> Indicies;	
+			Vector< u32 > mIndicies;	
 
-			GLenum DrawType;
-			GLint DrawStart = 0;
-			GLint DrawCount = 0;
-			GLuint VAO = 0;
-			GLuint VBO = 0;
-			GLuint IBO = 0;
+			GLenum mDrawType;
+			GLint mDrawStart = 0;
+			GLint mDrawCount = 0;
+			GLuint mVAO = 0;
+			GLuint mVBO = 0;
+			GLuint mIBO = 0;
 	}; 
 }
 

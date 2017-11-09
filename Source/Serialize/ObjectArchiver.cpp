@@ -140,13 +140,13 @@ namespace Enjon
 				case MetaPropertyType::ColorRGBA32:
 				{ 
 					// Get color
-					ColorRGBA32 val = *cls->GetValueAs< ColorRGBA32 >( object, prop );
+					const ColorRGBA32* val = cls->GetValueAs< ColorRGBA32 >( object, prop );
 
 					// Write all individual color channels
-					mBuffer.Write< f32 >( val.r );
-					mBuffer.Write< f32 >( val.g );
-					mBuffer.Write< f32 >( val.b );
-					mBuffer.Write< f32 >( val.a );
+					mBuffer.Write< f32 >( val->r );
+					mBuffer.Write< f32 >( val->g );
+					mBuffer.Write< f32 >( val->b );
+					mBuffer.Write< f32 >( val->a );
 
 				} break;
 
@@ -158,34 +158,34 @@ namespace Enjon
 				case MetaPropertyType::Vec2:
 				{
 					// Get vec2
-					Vec2 val = *cls->GetValueAs< Vec2 >( object, prop );
+					const Vec2* val = cls->GetValueAs< Vec2 >( object, prop );
 
 					// Write individual elements of vec2
-					mBuffer.Write< f32 >( val.x );
-					mBuffer.Write< f32 >( val.y );
+					mBuffer.Write< f32 >( val->x );
+					mBuffer.Write< f32 >( val->y );
 				} break;
 
 				case MetaPropertyType::Vec3:
 				{
 					// Get vec3
-					Vec3 val = *cls->GetValueAs< Vec3 >( object, prop );
+					const Vec3* val = cls->GetValueAs< Vec3 >( object, prop );
 
 					// Write individual elements of vec3
-					mBuffer.Write< f32 >( val.x );
-					mBuffer.Write< f32 >( val.y );
-					mBuffer.Write< f32 >( val.z );
+					mBuffer.Write< f32 >( val->x );
+					mBuffer.Write< f32 >( val->y );
+					mBuffer.Write< f32 >( val->z );
 				} break;
 
 				case MetaPropertyType::Vec4:
 				{
 					// Get vec3
-					Vec4 val = *cls->GetValueAs< Vec4 >( object, prop );
+					const Vec4* val = cls->GetValueAs< Vec4 >( object, prop );
 
 					// Write individual elements of vec4
-					mBuffer.Write< f32 >( val.x );
-					mBuffer.Write< f32 >( val.y );
-					mBuffer.Write< f32 >( val.z );
-					mBuffer.Write< f32 >( val.w );
+					mBuffer.Write< f32 >( val->x );
+					mBuffer.Write< f32 >( val->y );
+					mBuffer.Write< f32 >( val->z );
+					mBuffer.Write< f32 >( val->w );
 				} break;
 
 				case MetaPropertyType::UUID:
@@ -209,6 +209,16 @@ namespace Enjon
 					{
 						mBuffer.Write( UUID::Invalid( ) );
 					} 
+				} break;
+
+				case MetaPropertyType::Array:
+				{ 
+				} break;
+
+				case MetaPropertyType::Enum:
+				{ 
+					// Get integral value of enum
+					mBuffer.Write( *cls->GetValueAs< s32 >( object, prop ) ); 
 				} break;
 			}
 		} 
@@ -374,7 +384,7 @@ namespace Enjon
 
 	//=====================================================================
 
-	Result ObjectArchiver::Deserialize( const String& filePath, HashMap< const MetaClass*, Object* >& out )
+	Result ObjectArchiver::Deserialize( const String& filePath, HashMap< const MetaClass*, Vector< Object* > >& out )
 	{
 		return Result::SUCCESS;
 	}
@@ -540,6 +550,16 @@ namespace Enjon
 
 					// Set ColorRGBA32 property
 					cls->SetValue( object, prop, ColorRGBA32( r, g, b, a ) );
+				} break;
+
+				case MetaPropertyType::Enum:
+				{
+					// Read value from buffer
+					s32 val = mBuffer.Read< s32 >( );
+
+					// Set property on object
+					cls->SetValue( object, prop, val );
+
 				} break;
 			}
 		}

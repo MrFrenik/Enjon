@@ -51,6 +51,7 @@
 #include <Base/MetaClassRegistry.h>
 
 Enjon::Texture* mNewTexture = nullptr;
+Enjon::Mesh* mMesh = nullptr;
 
 void Game::TestObjectSerialize( )
 {
@@ -96,9 +97,17 @@ void Game::TestObjectSerialize( )
 	// Try deserializing one of the textures that have been cached
 	{
 		ObjectArchiver textureArchiver; 
-		Enjon::String texPath = am->GetCachedAssetsPath( ) + "isoarpg.materials.woodframe.normal.easset";
+		Enjon::String texPath = am->GetCachedAssetsPath( ) + "isoarpg.materials.woodframe.albedo.easset";
 		mNewTexture = static_cast< Enjon::Texture* > ( textureArchiver.Deserialize( texPath ) ); 
-		std::cout << "Done!\n";
+		mGunMat->SetTexture( Enjon::TextureSlotType::Albedo, Enjon::AssetHandle< Enjon::Texture >( mNewTexture ) );
+	} 
+
+	// Try deserializing one of the textures that have been cached
+	{
+		ObjectArchiver meshArchiver; 
+		Enjon::String meshPath = am->GetCachedAssetsPath( ) + "isoarpg.models.buddha.easset";
+		mMesh = static_cast< Enjon::Mesh* > ( meshArchiver.Deserialize( meshPath ) ); 
+		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMesh( AssetHandle< Mesh >( mMesh ) );
 	} 
 }
 
@@ -257,10 +266,7 @@ Enjon::Result Game::Initialize()
 
 	// Try loading font
 	Enjon::String rootPath = engine->GetConfig( ).GetRoot( );
-	Enjon::String fontPath = rootPath + "/Assets/Fonts/CutOut/CutOut.ttf";
-
-	// Make new font
-	mFont = new Enjon::UIFont( fontPath );
+	Enjon::String fontPath = rootPath + "/Assets/Fonts/WeblySleek/weblysleekuisb.ttf"; 
 
 	// Add to asset database
 	mAssetManager->AddToDatabase( toyBoxDispPath );
@@ -331,7 +337,6 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( teapotPath );
 	mAssetManager->AddToDatabase( waterPath );
 	mAssetManager->AddToDatabase( fontPath, false );
- 
 
 	// Assign font
 	Enjon::String fontQualifiedName = Enjon::AssetLoader::GetQualifiedName( fontPath ); 
@@ -867,13 +872,18 @@ Enjon::Result Game::Initialize()
 			// Show texture
 			if ( mNewTexture )
 			{
-				ImGui::Image( ImTextureID( mNewTexture->GetTextureId( ) ), ImVec2( 500, 500 ) );
+				ImGui::Image( ImTextureID( mNewTexture->GetTextureId( ) ), ImVec2( 100, 100 ) );
 			}
 
-			//char buf[ 256 ];
-			//std::strncpy( buf, mWorldString.c_str( ), 256 );
-			//ImGui::InputText( "World String", buf, 256 );
-			//mWorldString = Enjon::String( buf );
+			if ( mFont )
+			{
+				char buf[ 256 ];
+				std::strncpy( buf, mWorldString.c_str( ), 256 );
+				if ( ImGui::InputText( "World String", buf, 256 ) )
+				{
+					mWorldString = Enjon::String( buf );
+				}
+			}
 		}
 
 		ImGui::EndDock();
