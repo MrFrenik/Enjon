@@ -52,6 +52,7 @@
 
 Enjon::Texture* mNewTexture = nullptr;
 Enjon::Mesh* mMesh = nullptr;
+Enjon::PointLight* mPointLight = nullptr;
 
 void Game::TestObjectSerialize( )
 {
