@@ -231,20 +231,32 @@ namespace Enjon {
 			* @param other - vector to perform dot product with
 			* @return f32 - value of dot product
 			*/
-			f32 Dot(const Vec3& other);
+			f32 Dot(const Vec3& other) const;
 
 			/**
 			* @brief Performs cross product with other vector and returns the calculated value
 			* @param other - vector to perform cross product with
 			* @return Vec3 - vector result of cross product
 			*/
-			Vec3 Cross(const Vec3& other);
+			Vec3 Cross(const Vec3& other) const;
+			
+			/**
+			* @brief Performs normalization on this vector and returns it
+			* @return Vec3 - normalized vector
+			*/
+			Vec3 Normalize() const;
 			
 			/** 
 			* @brief Calculates magnitude of this vector
 			* @return f32 - magnitude of vector
 			*/	
 			f32 Vec3::Length() const;
+
+			/** 
+			* @brief Calculate squared magnitude of vector
+			* @return f32 - squared magnitude of vector
+			*/	
+			f32 Vec3::Length2() const;
 
 			/** 
 			* @brief Calculates distance between two vectors
@@ -293,14 +305,7 @@ namespace Enjon {
 			* @param b - RH vector used in distance calculation
 			* @return f32 - squared distance between two vectors
 			*/
-			static f32 DistanceSquared(const Vec3& a, const Vec3& b);
-			
-			/**
-			* @brief Performs cross product with other vector and returns the calculated value
-			* @param other - vector to perform cross product with
-			* @return Vec3 - vector result of cross product
-			*/
-			static Vec3 Cross(Vec3& left, const Vec3& right);
+			static f32 DistanceSquared(const Vec3& a, const Vec3& b); 
 		
 		public:
 			f32 x; 

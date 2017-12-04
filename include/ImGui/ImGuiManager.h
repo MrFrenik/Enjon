@@ -22,6 +22,7 @@ namespace Enjon
 	class Object;
 	class MetaClass;
 	class MetaPropertyArrayBase;
+	class MetaPropertyHashMapBase;
 	class MetaProperty;
 
 	/*
@@ -48,6 +49,7 @@ namespace Enjon
 			static void InitializeDefaults();
 
 			static void DebugDumpArrayProperty( const Enjon::Object* object, const Enjon::MetaPropertyArrayBase* prop );
+			static void DebugDumpHashMapProperty( const Enjon::Object* object, const Enjon::MetaPropertyHashMapBase* prop );
 			static void DebugDumpProperty( const Enjon::Object* object, const Enjon::MetaProperty* prop );
 
 		private:

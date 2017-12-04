@@ -113,6 +113,12 @@ namespace Enjon
 			// Get Euler Angles from quaternion
 			Vec3 EulerAngles(); 
 
+			/*
+			* @brief
+			* @note implementation from: https://github.com/opengl-tutorials/ogl/blob/master/common/quaternion_utils.cpp
+			*/
+			static Quaternion RotationBetweenVectors( const Vec3& start, const Vec3& destination );
+
 			static inline Quaternion FromEulerAngles( const f32& roll, const f32& pitch, const f32& yaw )
 			{
 				return AngleAxis( roll, Vec3::XAxis( ) ) * AngleAxis( pitch, Vec3::YAxis( ) ) * AngleAxis( yaw, Vec3::ZAxis( ) );

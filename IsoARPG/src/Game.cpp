@@ -685,6 +685,12 @@ Enjon::Result Game::Initialize()
 		cam->LookAt(Enjon::Vec3(0, 0, 0));
 	} 
 
+	// Set up test serializable object 
+	mTestObject.mHashMap[ "Bob" ] = 5.0f;
+	mTestObject.mHashMap[ "Joel" ] = 10.234f;
+	mTestObject.mHashMap[ "Billy" ] = -123.0234f;
+	mTestObject.mHashMap[ "Mark" ] = 0.045f; 
+
 	// Set up ImGui window
 	mShowEntities = true;
 	auto showEntities = [&]()
@@ -771,6 +777,11 @@ Enjon::Result Game::Initialize()
 			
 			ImGui::Text( "32 bit prop size: %d", sizeof( Enjon::Property<f32> ) );
 			ImGui::Text( "32 bit signal size: %d", sizeof( Enjon::Signal<f32> ) ); 
+
+			if ( ImGui::CollapsingHeader( "Test Object" ) )
+			{
+				Enjon::ImGuiManager::DebugDumpObject( &mTestObject );
+			}
 
 			if ( ImGui::CollapsingHeader( "Scene" ) )
 			{
@@ -1217,71 +1228,71 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 	} 
 
 	mGreen.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::YAxis( ) ) );
-	mRed.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
-	mBlue.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
+mRed.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
+mBlue.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
 
-	// Physics simulation
-	mDynamicsWorld->stepSimulation(1.f/60.f, 10);
+// Physics simulation
+mDynamicsWorld->stepSimulation( 1.f / 60.f, 10 );
 
-	// Step through physics bodies and update entity position
-	for (u32 i = 0; i < (u32)mBodies.size(); ++i)
+// Step through physics bodies and update entity position
+for ( u32 i = 0; i < ( u32 )mBodies.size( ); ++i )
+{
+	btRigidBody* body = mBodies.at( i );
+	Enjon::Entity* entity = mPhysicsEntities.at( i );
+	btTransform trans;
+
+	if ( body && body->getMotionState( ) )
 	{
-		btRigidBody* body = mBodies.at(i);
-		Enjon::Entity* entity = mPhysicsEntities.at(i);
-		btTransform trans;
-
-		if (body && body->getMotionState())
+		body->getMotionState( )->getWorldTransform( trans );
+		if ( entity && entity->HasComponent<Enjon::GraphicsComponent>( ) )
 		{
-			body->getMotionState()->getWorldTransform(trans);
-			if (entity && entity->HasComponent<Enjon::GraphicsComponent>())
-			{
-				auto gComp = entity->GetComponent<Enjon::GraphicsComponent>();
-				Enjon::Vec3 pos = Enjon::Vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-				Enjon::Quaternion rot = Enjon::Quaternion(trans.getRotation().x(), trans.getRotation().y(), trans.getRotation().z(), -trans.getRotation().w());
-				entity->SetPosition(pos);
-				entity->SetRotation(rot);
-			}
+			auto gComp = entity->GetComponent<Enjon::GraphicsComponent>( );
+			Enjon::Vec3 pos = Enjon::Vec3( trans.getOrigin( ).getX( ), trans.getOrigin( ).getY( ), trans.getOrigin( ).getZ( ) );
+			Enjon::Quaternion rot = Enjon::Quaternion( trans.getRotation( ).x( ), trans.getRotation( ).y( ), trans.getRotation( ).z( ), -trans.getRotation( ).w( ) );
+			entity->SetPosition( pos );
+			entity->SetRotation( rot );
 		}
-	} 
-
-	mTextBatch->Begin( );
-	{
-		Enjon::Transform tform( Enjon::Vec3( 0.f, 10.f, -10.f ), Enjon::Quaternion( ), Enjon::Vec3( mFontSize ) );
-		Enjon::PrintText( tform, mWorldString, mFont.Get( ), *mTextBatch, Enjon::RGBA32_White( ), 14 );
 	}
-	mTextBatch->End( );
+}
 
-	// This is where transform propagation happens
-	// mEntities->LateUpdate(dt);
-	for (auto& e : mEntities->GetActiveEntities())
+mTextBatch->Begin( );
+{
+	Enjon::Transform tform( Enjon::Vec3( 0.f, 10.f, -10.f ), Enjon::Quaternion( ), Enjon::Vec3( mFontSize ) );
+	Enjon::PrintText( tform, mWorldString, mFont.Get( ), *mTextBatch, Enjon::RGBA32_White( ), 14 );
+}
+mTextBatch->End( );
+
+// This is where transform propagation happens
+// mEntities->LateUpdate(dt);
+for ( auto& e : mEntities->GetActiveEntities( ) )
+{
+	if ( e->HasComponent< Enjon::GraphicsComponent >( ) )
 	{
-		if ( e->HasComponent< Enjon::GraphicsComponent >( ) )
-		{
-			auto gfx = e->GetComponent< Enjon::GraphicsComponent >( );
-			gfx->SetTransform( e->GetWorldTransform( ) );
-		}
-	} 
+		auto gfx = e->GetComponent< Enjon::GraphicsComponent >( );
+		gfx->SetTransform( e->GetWorldTransform( ) );
+	}
+}
 
-	return Enjon::Result::PROCESS_RUNNING;
+return Enjon::Result::PROCESS_RUNNING;
 }
 
 //====================================================================================================================
 
-Enjon::Result Game::ProcessInput(f32 dt)
-{ 
+Enjon::Result Game::ProcessInput( f32 dt )
+{
 	Enjon::Camera* cam = mGfx->GetSceneCamera( );
 
 	if ( mInput->IsKeyPressed( Enjon::KeyCode::Escape ) )
 	{
 		return Enjon::Result::SUCCESS;
-	} 
+	}
 
 	if ( mInput->IsKeyPressed( Enjon::KeyCode::T ) )
 	{
 		mMovementOn = !mMovementOn;
-		Enjon::Window* window = mGfx->GetWindow();
+		Enjon::Window* window = mGfx->GetWindow( );
 
-		if (!mMovementOn)
+		if ( !mMovementOn )
 		{
 			window->ShowMouseCursor( true );
 		}
@@ -1291,28 +1302,44 @@ Enjon::Result Game::ProcessInput(f32 dt)
 		}
 	}
 
-	if ( mMovementOn && cam->GetProjectionType() == Enjon::ProjectionType::Perspective )
+	if ( mInput->IsKeyPressed( Enjon::KeyCode::L ) )
 	{
-		Enjon::Camera* camera = mGfx->GetSceneCamera();
-		Enjon::Vec3 velDir(0, 0, 0); 
+		mLockCamera = !mLockCamera;
+	}
+
+	if ( mMovementOn && cam->GetProjectionType( ) == Enjon::ProjectionType::Perspective )
+	{
+		Enjon::Camera* camera = mGfx->GetSceneCamera( );
+		Enjon::Vec3 velDir( 0, 0, 0 );
 
 		if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
 		{
-			Enjon::Vec3 F = camera->Forward();
+			Enjon::Vec3 F = camera->Forward( );
 			velDir += F;
 		}
 		if ( mInput->IsKeyDown( Enjon::KeyCode::S ) )
 		{
-			Enjon::Vec3 B = camera->Backward();
+			Enjon::Vec3 B = camera->Backward( );
 			velDir += B;
 		}
 		if ( mInput->IsKeyDown( Enjon::KeyCode::A ) )
 		{
-			velDir += camera->Left();
+			velDir += camera->Left( );
 		}
 		if ( mInput->IsKeyDown( Enjon::KeyCode::D ) )
 		{
-			velDir += camera->Right();
+			velDir += camera->Right( );
+		}
+		if ( mInput->IsKeyDown( Enjon::KeyCode::Space ) )
+		{
+			if ( mInput->IsKeyDown( Enjon::KeyCode::LeftShift ) )
+			{
+				velDir -= Enjon::Vec3::YAxis( );
+			} 
+			else
+			{
+				velDir += Enjon::Vec3::YAxis( ); 
+			}
 		} 
 
 		if ( mInput->IsKeyDown( Enjon::KeyCode::LeftMouseButton ) )
@@ -1395,12 +1422,20 @@ Enjon::Result Game::ProcessInput(f32 dt)
 		window->ShowMouseCursor(false);
 
 		// Reset the mouse coords after having gotten the mouse coordinates
-		SDL_WarpMouseInWindow(window->GetWindowContext(), (float)viewPort.x / 2.0f, (float)viewPort.y / 2.0f);
+		SDL_WarpMouseInWindow(window->GetWindowContext(), (float)viewPort.x / 2.0f, (float)viewPort.y / 2.0f); 
 
-		// Offset camera orientation
-		f32 xOffset = Enjon::ToRadians((f32)viewPort.x / 2.0f - MouseCoords.x) * dt * MouseSensitivity;
-		f32 yOffset = Enjon::ToRadians((f32)viewPort.y / 2.0f - MouseCoords.y) * dt * MouseSensitivity;
-		camera->OffsetOrientation(xOffset, yOffset); 
+		if ( mLockCamera )
+		{ 
+			camera->LookAt( mGun.Get()->GetWorldPosition() );
+		}
+		else
+		{
+			// Offset camera orientation
+			f32 xOffset = Enjon::ToRadians((f32)viewPort.x / 2.0f - MouseCoords.x) * dt * MouseSensitivity;
+			f32 yOffset = Enjon::ToRadians((f32)viewPort.y / 2.0f - MouseCoords.y) * dt * MouseSensitivity;
+			camera->OffsetOrientation(xOffset, yOffset); 
+		}
+
 	}
 
 	return Enjon::Result::PROCESS_RUNNING;

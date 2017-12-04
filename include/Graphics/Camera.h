@@ -29,7 +29,7 @@ namespace Enjon
 			Camera(iVec2& dimenstions);
 			Camera(const Camera& Other) = default;
 
-			void LookAt(Vec3& Position, Vec3& Up = Vec3(0, 1, 0));
+			void LookAt(const Vec3& Position, const Vec3& Up = Vec3(0, 1, 0));
 			void OffsetOrientation(const f32& Yaw, const f32& Pitch);
 			Vec3 GetWorldPosition();
 

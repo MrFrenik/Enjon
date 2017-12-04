@@ -12,6 +12,7 @@
 #include <limits>
 #include <assert.h>
 #include <functional>
+#include <iterator>
 
 // Forward Declarations
 namespace Enjon
@@ -68,6 +69,7 @@ namespace Enjon
 		S64,
 		String,
 		Array,
+		HashMap,
 		Vec2,
 		Vec3,
 		Vec4,
@@ -126,7 +128,7 @@ namespace Enjon
 	// Don't really like this, but, ya know... wha ya gon' do?
 	struct MetaPropertyTraits
 	{
-		MetaPropertyTraits( bool isEditable = false, f32 uiMin = 0.0f, f32 uiMax = 0.0f )
+		MetaPropertyTraits( bool isEditable = false, f32 uiMin = 0.0f, f32 uiMax = 1.0f )
 			: mIsEditable( isEditable ), mUIMin( uiMin ), mUIMax( uiMax )
 		{ 
 		}
@@ -150,9 +152,9 @@ namespace Enjon
 		*/
 		bool UseSlider( ) const;
 
-		bool mIsEditable = false;
-		f32 mUIMin = 0.0f;
-		f32 mUIMax = 0.0f;
+		bool mIsEditable;
+		f32 mUIMin;
+		f32 mUIMax;
 	};
 
 	class MetaProperty
@@ -482,6 +484,156 @@ namespace Enjon
 			usize mSize;
 			ArraySizeType mArraySizeType;
 			MetaPropertyType mArrayType;
+	};
+
+	class MetaPropertyHashMapBase : public MetaProperty
+	{
+		public: 
+			virtual usize GetSize( const Object* object ) const = 0; 
+
+			MetaPropertyType GetKeyType( ) const
+			{
+				return mKeyType;
+			}
+
+			MetaPropertyType GetValueType( ) const 
+			{
+				return mValueType;
+			}
+			//virtual MetaArrayPropertyProxy GetProxy( ) const = 0;
+
+		protected:
+			MetaProperty* mKeyProperty = nullptr;
+			MetaProperty* mValueProperty = nullptr;
+			MetaPropertyType mKeyType;
+			MetaPropertyType mValueType;
+	}; 
+
+	template <typename K, typename V>
+	class MetaPropertyHashMap : public MetaPropertyHashMapBase
+	{
+		public:
+
+			/*
+			* @brief
+			*/
+			MetaPropertyHashMap( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits, MetaPropertyType keyType, MetaPropertyType valType, MetaProperty* keyProp, MetaProperty* valProp )
+			{ 
+				// Default meta property member variables
+				mType = type;
+				mName = name;
+				mOffset = offset;
+				mIndex = propIndex;
+				mTraits = traits; 
+				mKeyProperty = keyProp;
+				mValueProperty = valProp;
+				mKeyType = keyType;
+				mValueType = valType;
+			}
+
+			/*
+			* @brief
+			*/
+			~MetaPropertyHashMap( ) = default; 
+
+			/*
+			* @brief
+			*/
+			usize GetSize( const Object* object ) const 
+			{
+				return ( ( HashMap<K, V>* )( usize( object ) + mOffset ) )->size( ); 
+			}
+
+			/*
+				Have to be able to iterate over the map - have to be able to list the keys as well as the values that are being iterated over 
+			*/
+
+			/*
+			* @brief
+			*/
+			void GetValueAt( const Object* object, const K& key, V* out ) const
+			{ 
+				HashMap<K, V>* rawMap = GetRaw( object );
+				*out = rawMap[key];
+			} 
+
+			/*
+			* @brief
+			*/
+			V GetValueAs( const Object* object, const K& key ) const
+			{ 
+				HashMap<K, V>* rawMap = GetRaw( object );
+				return rawMap[key];
+			} 
+
+			/*
+			* @brief
+			*/
+			V GetValueAs( const Object* object, const typename HashMap< K, V >::iterator& iter ) const
+			{ 
+				return iter->second;
+			} 
+
+			/*
+			* @brief
+			*/
+			typename HashMap< K, V >::iterator Begin( const Object* object ) const
+			{
+				HashMap< K, V >* rawMap = GetRaw( object );
+				return rawMap->begin( );
+			}
+
+			/*
+			* @brief
+			*/
+			typename HashMap< K, V >::iterator End( const Object* object ) const
+			{
+				HashMap< K, V >* rawMap = GetRaw( object );
+				return rawMap->end( );
+			} 
+
+			/*
+			* @brief
+			*/
+			void SetValueAt( const Object* object, const typename HashMap< K, V >::iterator& iter, const V& value ) const
+			{ 
+				iter->second = value;
+			}
+
+			/*
+			* @brief
+			*/
+			void SetValueAt( const Object* object, const K& key, const V& value ) const
+			{ 
+				HashMap< K, V >* rawMap = GetRaw( object );
+				rawMap[ key ] = value;
+			}
+
+			/*
+			* @brief
+			*/
+			MetaPropertyType GetKeyType( ) const
+			{
+				return mKeyType;
+			}
+
+			/*
+			* @brief
+			*/
+			MetaPropertyType GetValueType( ) const
+			{
+				return mValueType;
+			} 
+
+		private: 
+
+			/*
+			* @brief
+			*/
+			HashMap<K, V>* GetRaw( const Object* object ) const
+			{ 
+				return ( HashMap<K, V>* )( usize( object ) + mOffset );
+			} 
 	};
 
 	template <typename T>

@@ -151,25 +151,119 @@ namespace Enjon
 		ImGuizmo::Manipulate(view, projection, mCurrentGizmoOperation, mCurrentGizmoMode, model.elements, NULL, useSnap ? &snap.x : NULL);
 	}
 
-	void ImGuiManager::DebugDumpArrayProperty( const Enjon::Object* object, const Enjon::MetaPropertyArrayBase* prop )
-	{ 
+#define MAP_KEY_PROP_PRIMITIVE( keyType, valType, ImGuiCastType, ImGuiFunc, object, prop )\
+	{\
+		const MetaPropertyHashMap< keyType, valType >* mapProp = prop->Cast< MetaPropertyHashMap< keyType, valType > >();\
+		for ( auto iter = mapProp->Begin( object ); iter != mapProp->End( object ); ++iter )\
+		{\
+			valType val = mapProp->GetValueAs( object, iter );\
+			Enjon::String label( "##" + propName + std::to_string( iter->first ) );\
+			ImGui::Text( ( "Key: " + std::to_string( iter->first ) ).c_str( ) );\
+			ImGui::SameLine( );\
+			if ( ImGuiFunc( label.c_str( ), ( ImGuiCastType* )&val, mapProp->GetTraits( ).GetUIMin( ), mapProp->GetTraits( ).GetUIMax( ) ) )\
+			{\
+				mapProp->SetValueAt( object, iter, val );\
+			}\
+		}\
+	}
+
+#define MAP_KEY_STRING_PROP( valType, ImGuiCastType, ImGuiFunc, object, prop )\
+	{\
+		const MetaPropertyHashMap< String, valType >* mapProp = prop->Cast< MetaPropertyHashMap< String, valType > >( );\
+		for ( auto iter = mapProp->Begin( object ); iter != mapProp->End( object ); ++iter )\
+		{\
+			valType val = mapProp->GetValueAs( object, iter );\
+			Enjon::String label( "##" + propName + iter->first );\
+			ImGui::Text( ( "Key: " + iter->first ).c_str( ) );\
+			ImGui::SameLine( );\
+			if ( ImGuiFunc( label.c_str( ), ( ImGuiCastType* )&val, mapProp->GetTraits( ).GetUIMin( ), mapProp->GetTraits( ).GetUIMax( ) ) )\
+			{\
+				mapProp->SetValueAt( object, iter, val );\
+			}\
+		}\
+	} 
+
+	void ImGuiManager::DebugDumpHashMapProperty( const Enjon::Object* object, const Enjon::MetaPropertyHashMapBase* prop )
+	{
 		const MetaClass* cls = object->Class( );
 		String propName = prop->GetName( );
 
+		switch ( prop->GetKeyType( ) )
+		{
+			case MetaPropertyType::F32:
+			{ 
+				switch ( prop->GetValueType() )
+				{
+					case MetaPropertyType::U32:		MAP_KEY_PROP_PRIMITIVE( f32, u32, s32, ImGui::InputInt, object, prop )		break;
+					case MetaPropertyType::S32:		MAP_KEY_PROP_PRIMITIVE( f32, s32, s32, ImGui::InputInt, object, prop )		break;
+					case MetaPropertyType::F32:		MAP_KEY_PROP_PRIMITIVE( f32, f32, f32, ImGui::InputFloat, object, prop )	break;
+				} 
+			} break;
+
+			case MetaPropertyType::S32:
+			{ 
+				switch ( prop->GetValueType() )
+				{
+					case MetaPropertyType::U32:		MAP_KEY_PROP_PRIMITIVE( s32, u32, s32, ImGui::InputInt, object, prop )		break;
+					case MetaPropertyType::S32:		MAP_KEY_PROP_PRIMITIVE( s32, s32, s32, ImGui::InputInt, object, prop )		break;
+					case MetaPropertyType::F32:		MAP_KEY_PROP_PRIMITIVE( s32, f32, f32, ImGui::InputFloat, object, prop )	break;
+				} 
+			} break;
+
+			case MetaPropertyType::U32:
+			{ 
+				switch ( prop->GetValueType() )
+				{
+					case MetaPropertyType::U32:		MAP_KEY_PROP_PRIMITIVE( u32, u32, s32, ImGui::InputInt, object, prop )		break;
+					case MetaPropertyType::S32:		MAP_KEY_PROP_PRIMITIVE( u32, s32, s32, ImGui::InputInt, object, prop )		break;
+					case MetaPropertyType::F32:		MAP_KEY_PROP_PRIMITIVE( u32, f32, f32, ImGui::InputFloat, object, prop )	break;
+				} 
+			} break;
+
+			case MetaPropertyType::String:
+			{
+				switch ( prop->GetValueType( ) )
+				{
+					case MetaPropertyType::U32:		MAP_KEY_STRING_PROP( u32, s32, ImGui::InputInt, object, prop ) break;
+					case MetaPropertyType::S32:		MAP_KEY_STRING_PROP( s32, s32, ImGui::InputInt, object, prop ) break;
+					case MetaPropertyType::F32:		MAP_KEY_STRING_PROP( f32, f32, ImGui::InputFloat, object, prop ) break;
+				}
+			} break;
+		}
+	}
+
+#define ARRAY_PROP( prop, propName, type, object, ImGuiCastType, ImGuiFunction, min, max )\
+	{\
+		const MetaPropertyArray< type >* arrayProp = prop->Cast< MetaPropertyArray< type > >();\
+		ImGui::Text( ("Size: " + std::to_string(arrayProp->GetSize( object )) ).c_str() );\
+		for ( usize i = 0; i < arrayProp->GetSize( object ); ++i )\
+		{\
+			Enjon::String label( "##" + propName + std::to_string(i) );\
+			type val = arrayProp->GetValueAs( object, i );\
+			if ( ImGuiFunction( label.c_str(), (ImGuiCastType*)&val, min, max ) )\
+			{\
+				arrayProp->SetValueAt( object, i, val );\
+			}\
+		}\
+	}
+
+	void ImGuiManager::DebugDumpArrayProperty( const Enjon::Object* object, const Enjon::MetaPropertyArrayBase* prop )
+	{ 
+		const MetaClass* cls = object->Class( );
+		String propName = prop->GetName( ); 
+
 		switch ( prop->GetArrayType( ) )
 		{
-			case MetaPropertyType::U32:
-			{
-				const MetaPropertyArray< u32 >* arrayProp = static_cast<const MetaPropertyArray< u32 >*>( prop );
-				for ( usize i = 0; i < arrayProp->GetSize( object ); ++i )
-				{
-					Enjon::String label( "##" + propName + std::to_string(i) );
-					u32 val = arrayProp->GetValueAs( object, i );
-					if ( ImGui::SliderInt( label.c_str( ), (s32*)&val, 0, 100 ) )
-					{
-						arrayProp->SetValueAt( object, i, val );
-					}
-				} 
+			case MetaPropertyType::U32:	ARRAY_PROP( prop, propName, u32, object, s32, ImGui::InputInt, prop->GetTraits().GetUIMin(), prop->GetTraits().GetUIMax() )		break; 
+			case MetaPropertyType::S32: ARRAY_PROP( prop, propName, s32, object, s32, ImGui::InputInt, prop->GetTraits().GetUIMin(), prop->GetTraits().GetUIMax() )		break; 
+			case MetaPropertyType::F32: ARRAY_PROP( prop, propName, f32, object, f32, ImGui::InputFloat, prop->GetTraits().GetUIMin(), prop->GetTraits().GetUIMax() )	break; 
+
+			case MetaPropertyType::String:
+			{ 
+			} break;
+
+			case MetaPropertyType::Bool:
+			{ 
 			} break;
 
 			case MetaPropertyType::Object:
@@ -503,13 +597,25 @@ namespace Enjon
 					}
 				} break;
 
+				case Enjon::MetaPropertyType::HashMap: 
+				{
+
+					if ( ImGui::TreeNode( Enjon::String( prop->GetName() + "##" + std::to_string( (u32)object ) ).c_str() ) )
+					{
+						const MetaPropertyHashMapBase* mapProp = prop->Cast< MetaPropertyHashMapBase >();
+						DebugDumpHashMapProperty( object, mapProp );
+						ImGui::TreePop( );
+					}
+
+				} break;
+
 				// Enum type
 				case Enjon::MetaPropertyType::Enum:
 				{
 					// Property is enum prop, so need to convert it
 					const MetaPropertyEnum* enumProp = prop->Cast< MetaPropertyEnum >( ); 
 
-					if ( ImGui::TreeNode( enumProp->GetEnumName( ).c_str( ) ) )
+					if ( ImGui::TreeNode( prop->GetName().c_str() ) )
 					{
 						ImGui::ListBoxHeader( "##enumProps" );
 						{

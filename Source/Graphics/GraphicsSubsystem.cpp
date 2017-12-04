@@ -103,8 +103,8 @@ namespace Enjon
 		mSceneCamera.SetProjection(ProjectionType::Perspective);
 		mSceneCamera.SetPosition(Vec3(0, 5, 10));
 		//mSceneCamera.LookAt(Vec3(0, 0, 0));
-		mSceneCamera.SetRotation( Quaternion::AngleAxis( 30.0f, Vec3::XAxis( ) ) *
-								Quaternion::AngleAxis( 45.0f, Vec3::ZAxis( ) ) );
+		//mSceneCamera.SetRotation( Quaternion::AngleAxis( 30.0f, Vec3::XAxis( ) ) *
+		//						Quaternion::AngleAxis( 45.0f, Vec3::ZAxis( ) ) );
 
 		// Initialize frame buffers
 		InitializeFrameBuffers();

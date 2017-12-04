@@ -80,6 +80,7 @@ void Introspection::InitPropertyMap( )
 	STRING_TO_PROP( "EntityHandle", EntityHandle )
 	STRING_TO_PROP( "Enum", Enum )
 	STRING_TO_PROP( "Array", Array )
+	STRING_TO_PROP( "HashMap", HashMap )
 	STRING_TO_PROP( "Vector", Array )
 }
 
@@ -508,19 +509,29 @@ PropertyType Introspection::GetPropertyType( Lexer* lexer )
 	std::string propType = lexer->GetCurrentToken().ToString( );
 
 	// Need to check if is an array type
-	bool isArrayType = IsPropertyArrayType( lexer );
-
-	if ( !isArrayType )
+	if ( IsPropertyArrayType( lexer ) )
 	{
+		return PropertyType::Array;
+	}
+	// Need to check if is an map type
+	else if ( IsPropertyHashMapType( lexer ) )
+	{
+		return PropertyType::HashMap;
+	} 
+	else
+	{ 
 		// Get property type 
 		PropertyType type = GetTypeFromString( propType ); 
 
 		return type;
-	} 
-	else
-	{ 
-		return PropertyType::Array;
-	} 
+	}
+}
+
+//====================================================================================================
+
+bool Introspection::IsPropertyHashMapType( Lexer* lexer )
+{ 
+	return lexer->GetCurrentToken( ).Equals( "HashMap" ); 
 }
 
 //=================================================================================================
@@ -671,6 +682,10 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 	if ( type == PropertyType::Array )
 	{
 		prop = new ArrayProperty( );
+	}
+	else if ( type == PropertyType::HashMap )
+	{
+		prop = new HashMapProperty( );
 	}
 	else
 	{
@@ -862,7 +877,7 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 				else
 				{
 					arrProp->mPropertyTypeRaw = arrProp->mTypeRaw;
-					arrProp->mArrayPropertyType = arrProp->mType; 
+					arrProp->mArrayPropertyType = GetTypeFromString( SplitString( arrProp->mPropertyTypeRaw, "::" ).back( ) );
 				}
 
 				// Consume type token
@@ -900,6 +915,66 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 				// Restore name token
 				lexer->SetToken( nameToken ); 
 			} 
+		} break;
+
+		case PropertyType::HashMap:
+			{
+				// Will be the actual property type
+			Token token = lexer->GetNextToken( );
+
+			// Need to have a better recursive way of handling filling out the property information for this...
+
+			HashMapProperty* mapProp = static_cast<HashMapProperty*> ( prop );
+
+			if ( token.Equals( "HashMap" ) )
+			{ 
+				// Need to the templated argument begin
+				if ( !lexer->RequireToken( TokenType::Token_LessThan, true ) )
+				{
+					delete mapProp;
+					return;
+				}
+
+				// Get the all tokens up to the closing bracket
+				std::string keyValueString = "";
+				token = lexer->GetNextToken( );
+				while ( token.mType != TokenType::Token_GreaterThan )
+				{
+					keyValueString += token.ToString( );
+					token = lexer->GetNextToken( );
+				}
+
+				// Split on comma for key and value
+				auto splitVector = SplitString( keyValueString, "," );
+
+				// If not a key and value, then delete and return
+				if ( splitVector.size( ) != 2 )
+				{
+					delete mapProp;
+					return;
+				}
+
+				// Get key and value strings separately
+				std::string keyString = splitVector.at( 0 );
+				std::string valueString = splitVector.at( 1 );
+
+				// Set raw types of map
+				mapProp->mKeyPropertyTypeRaw = keyString; 
+				mapProp->mValuePropertyTypeRaw = valueString; 
+
+				// Need to store the property type as well
+				auto keySplit = SplitString( keyString, "::" );
+				auto valueSplit = SplitString( valueString, "::" );
+
+				// The last element is the actual unqualified type
+				PropertyType kpt = GetTypeFromString( keySplit.back( ) );
+				PropertyType vpt = GetTypeFromString( valueSplit.back( ) );
+
+				// Set property type of array
+				mapProp->mKeyPropertyType = kpt;
+				mapProp->mValuePropertyType = vpt;
+			}
+
 		} break;
 	}
 
@@ -1344,6 +1419,26 @@ void Introspection::Compile( const ReflectionConfig& config )
 																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", Enum_" + enm->mName + "_Structure().Elements(), \"" + prop.second->mTypeRaw + "\" );" ); 
 							}
 							
+						} break;
+
+						case PropertyType::HashMap:
+						{
+
+							HashMapProperty* mp = static_cast< HashMapProperty* > ( prop.second );
+
+							std::string keyPropStr = GetTypeAsString( mp->mKeyPropertyType );
+							std::string valPropStr = GetTypeAsString( mp->mValuePropertyType );
+
+							std::string keyProxyString = "";
+							std::string valProxyString = "";
+
+							keyProxyString += "new Enjon::MetaProperty( MetaPropertyType::" + keyPropStr + ", \"KeyProxy\", 0, 0, MetaPropertyTraits(false, 0, 0) )"; 
+							valProxyString += "new Enjon::MetaProperty( MetaPropertyType::" + valPropStr + ", \"ValueProxy\", 0, 0, MetaPropertyTraits(false, 0, 0) )"; 
+
+							code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyHashMap< " + mp->mKeyPropertyTypeRaw + ", " + mp->mValuePropertyTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
+															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", MetaPropertyType::" + keyPropStr + ", MetaPropertyType::" + valPropStr + ", " + keyProxyString + ", "   
+															+ valProxyString + " );" ); 
+
 						} break;
 
 						case PropertyType::Array:

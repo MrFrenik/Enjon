@@ -28,6 +28,7 @@ enum class PropertyType
 	S64,
 	String,
 	Array,
+	HashMap,
 	Vec2,
 	Vec3,
 	Vec4,
@@ -164,6 +165,24 @@ class ArrayProperty : public Property
 		ArraySizeType mArraySizeType;
 		std::string mPropertyTypeRaw;
 		PropertyType mArrayPropertyType;
+};
+
+class HashMapProperty : public Property
+{
+	friend Introspection;
+	public:		
+		HashMapProperty( )
+		{
+			mType = PropertyType::HashMap;
+		}
+
+		~HashMapProperty( ) = default;
+
+	public:
+		std::string mKeyPropertyTypeRaw;
+		PropertyType mKeyPropertyType;
+		std::string mValuePropertyTypeRaw;
+		PropertyType mValuePropertyType; 
 };
 
 typedef std::unordered_map< std::string, Property* > PropertyTable ;
@@ -311,6 +330,8 @@ class Introspection
 		PropertyType GetPropertyType( Lexer* lexer );
 
 		bool IsPropertyArrayType( Lexer* lexer );
+
+		bool IsPropertyHashMapType( Lexer* lexer );
 
 		void ParseEnum( Lexer* lexer );
 

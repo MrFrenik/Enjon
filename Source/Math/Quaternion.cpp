@@ -228,6 +228,42 @@ namespace Enjon
 		const Vec3 t = 2.0f * Qxyz.Cross( V );
 		return ( V + w * t + Qxyz.Cross( t ) ); 
 	} 
+			
+	Quaternion Quaternion::RotationBetweenVectors( const Vec3& s, const Vec3& d )
+	{
+		Vec3 start = start.Normalize( );
+		Vec3 dest = d.Normalize( );
+
+		f32 cosTheta = start.Dot( dest );
+		Vec3 rotationAxis;
+
+		if ( cosTheta < -1 + 0.001f ) {
+			// special case when vectors in opposite directions :
+			// there is no "ideal" rotation axis
+			// So guess one; any will do as long as it's perpendicular to start
+			// This implementation favors a rotation around the Up axis,
+			// since it's often what you want to do.
+			rotationAxis = Vec3( 0.0f, 0.0f, 1.0f ).Cross( start );
+			if ( rotationAxis.Length2() < 0.01 ) // bad luck, they were parallel, try again!
+				rotationAxis = Vec3( 1.0f, 0.0f, 0.0f ).Cross( start );
+
+			rotationAxis = rotationAxis.Normalize();
+			return Quaternion::AngleAxis( ToRadians( 180.0f ), rotationAxis );
+		}
+
+		// Implementation from Stan Melax's Game Programming Gems 1 article
+		rotationAxis = start.Cross( dest );
+
+		f32 scalar = sqrt( ( 1 + cosTheta ) * 2 );
+		f32 invs = 1.0f / scalar;
+
+		return Quaternion(
+			rotationAxis.x * invs,
+			rotationAxis.y * invs,
+			rotationAxis.z * invs,
+			scalar * 0.5f
+		);
+	}
 }
 
 

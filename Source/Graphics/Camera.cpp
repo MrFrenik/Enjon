@@ -32,7 +32,35 @@ namespace Enjon {
 		Transform.Position = position;
 	}
 
-	void Camera::LookAt(Vec3& Position, Vec3& Up)
+	//void Camera::LookAt( const Vec3& target, const Vec3& up )
+	//{
+	//	// Get normalized direction towards target
+	//	//Vec3 direction = ( target - GetPosition( ) ).Normalize( );
+
+	//	//// Find rotation between camera forward and desired target
+	//	//Quaternion rot1 = Quaternion::RotationBetweenVectors( Forward( ), direction );
+
+	//	//// Recompute desired up 
+	//	//Vec3 right = direction.Cross( up );
+	//	//Vec3 desiredUp = right.Cross( direction );
+
+	//	//Vec3 newUp = rot1 * Vec3( 0.0f, 1.0f, 0.0f );
+	//	//Quaternion rot2 = Quaternion::RotationBetweenVectors( newUp, up );
+
+	//	//// Set orientation of camera
+	//	//SetRotation( rot2 * rot1 );
+
+	//	Vec3 forwardVector = ( target - Transform.Position ).Normalize( );
+	//	f32 dot = Vec3( 0.0f, 0.0f, -1.0f ).Dot( forwardVector );
+
+	//	f32 rotationAngle = ( f32 )std::acos( dot );
+	//	Vec3 rotationAxis = ( Vec3( 0.0f, 0.0f, 1.0f ).Cross( forwardVector ) ).Normalize( );
+	//	Quaternion rotation = Quaternion::AngleAxis( rotationAngle, rotationAxis ).Normalize( );
+
+	//	SetRotation( rotation );
+	//}
+
+	void Camera::LookAt(const Vec3& Position, const Vec3& Up)
 	{
 		Vec3& Pos = Transform.Position;
 

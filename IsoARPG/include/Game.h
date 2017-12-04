@@ -7,6 +7,8 @@
 #include <Graphics/ShaderGraph.h>
 #include <Graphics/Shader.h>
 
+#include <Base/MetaClassRegistry.h>
+
 #include <vector> 
 
 
@@ -78,6 +80,7 @@ class Game : public Enjon::Application
 
 		bool mShowEntities = true;
 		bool mMovementOn = false;
+		bool mLockCamera = false;
 
 		f32 mCameraSpeed = 0.12f;
 
@@ -86,6 +89,8 @@ class Game : public Enjon::Application
 		Enjon::String mWorldString = ""; 
 
 		Enjon::Texture* mTex = nullptr;
+
+		Enjon::TestNamespace::PointLight mTestObject;
 };
 
 #endif

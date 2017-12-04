@@ -75,7 +75,7 @@ namespace Enjon {
 			/*
 			* @brief Look at RH
 			*/
-			static Mat4 LookAt(const Vec3& Position, const Vec3& Target, Vec3& Up);
+			static Mat4 LookAt(const Vec3& Position, const Vec3& Target, const Vec3& Up);
 
 			friend std::ostream& operator<<(std::ostream& stream, const Mat4& Mat);
 	};

@@ -220,11 +220,11 @@ namespace Enjon {
 		return result; 
 	}
 
-	Mat4 Mat4::LookAt(const Vec3& Position, const Vec3& Target, Vec3& Up)
+	Mat4 Mat4::LookAt(const Vec3& Position, const Vec3& Target, const Vec3& Up)
 	{
 		Vec3 f = Vec3::Normalize( Target - Position );
-		Vec3 s = Vec3::Normalize( Vec3::Cross( f, Up ) );
-		Vec3 u = Vec3::Cross( s, f );
+		Vec3 s = Vec3::Normalize( f.Cross( Up ) );
+		Vec3 u = s.Cross( f );
 		
 		Mat4 lookAt = Mat4::Identity( ); 
 		lookAt[ 0 ][ 0 ] = s.x;

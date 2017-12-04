@@ -188,20 +188,26 @@ namespace Enjon
 	
 	f32 Vec3::Length() const 
 	{
-		return sqrt((x * x) + (y * y) + (z * z));
+		return sqrt( this->Length2() );
 	}
-	
 	
 	//================================================
 
-	f32 Vec3::Dot(const Vec3& other)
+	f32 Vec3::Length2( ) const
+	{
+		return this->Dot( *this );
+	}
+	
+	//================================================
+
+	f32 Vec3::Dot(const Vec3& other) const
 	{
 		return x * other.x + y * other.y + z * other.z;
 	}
 	
 	//================================================
 
-	Vec3 Vec3::Cross(const Vec3& other)
+	Vec3 Vec3::Cross(const Vec3& other) const
 	{
 		return Vec3(
 					y * other.z - z * other.y, 
@@ -215,6 +221,13 @@ namespace Enjon
 	Vec3 Vec3::Normalize(const Vec3& vec)
 	{ 
 		return vec / vec.Length(); 
+	}
+ 
+	//================================================
+			
+	Vec3 Vec3::Normalize( ) const
+	{
+		return *this / this->Length( );
 	}
 	
 	//==================================================================
@@ -233,14 +246,7 @@ namespace Enjon
 		f32 z = a.z - b.z;
 
 		return x*x + y*y + z*z;
-	}
-			
-	Vec3 Vec3::Cross(Vec3& left, const Vec3& right)
-	{
-		return left.Cross(right);
-	}
-	
-	//================================================
+	} 
 			
 	Vec3 Vec3::XAxis()
 	{ 
