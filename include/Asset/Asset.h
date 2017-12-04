@@ -22,7 +22,7 @@ namespace Enjon
 
 	ENJON_CLASS( )
 	class Asset : public Enjon::Object
-	{
+	{ 
 		ENJON_CLASS_BODY( )
 
 		public: 

@@ -390,7 +390,8 @@ void Introspection::ParseClass( Lexer* lexer )
 			std::string parentString = superToken.ToString( );
 
 			// Consume all namespace qualifiers 
-			{
+			bool consumed = false;
+			{ 
 				Token curToken = lexer->GetCurrentToken( );
 				Token nextToken = lexer->PeekAtNextToken( );
 				while ( curToken.IsType( TokenType::Token_Identifier ) && nextToken.IsType( TokenType::Token_DoubleColon ) )
@@ -406,12 +407,14 @@ void Introspection::ParseClass( Lexer* lexer )
 
 					// Peek at next token
 					nextToken = lexer->PeekAtNextToken( );
+
+					consumed = true;
 				}
 			} 
 
 			superToken = lexer->GetCurrentToken( );
 
-			cls->mParent = parentString + superToken.ToString( );
+			cls->mParent = parentString + ( consumed ? superToken.ToString( ) : "" );
 		}
 	} 
 
