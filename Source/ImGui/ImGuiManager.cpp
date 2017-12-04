@@ -151,7 +151,7 @@ namespace Enjon
 		ImGuizmo::Manipulate(view, projection, mCurrentGizmoOperation, mCurrentGizmoMode, model.elements, NULL, useSnap ? &snap.x : NULL);
 	}
 
-#define MAP_KEY_PROP_PRIMITIVE( keyType, valType, ImGuiCastType, ImGuiFunc, object, prop )\
+#define MAP_KEY_PRIMITIVE( keyType, valType, ImGuiCastType, ImGuiFunc, object, prop )\
 	{\
 		const MetaPropertyHashMap< keyType, valType >* mapProp = prop->Cast< MetaPropertyHashMap< keyType, valType > >();\
 		for ( auto iter = mapProp->Begin( object ); iter != mapProp->End( object ); ++iter )\
@@ -167,7 +167,7 @@ namespace Enjon
 		}\
 	}
 
-#define MAP_KEY_STRING_PROP( valType, ImGuiCastType, ImGuiFunc, object, prop )\
+#define MAP_KEY_STRING( valType, ImGuiCastType, ImGuiFunc, object, prop )\
 	{\
 		const MetaPropertyHashMap< String, valType >* mapProp = prop->Cast< MetaPropertyHashMap< String, valType > >( );\
 		for ( auto iter = mapProp->Begin( object ); iter != mapProp->End( object ); ++iter )\
@@ -194,9 +194,9 @@ namespace Enjon
 			{ 
 				switch ( prop->GetValueType() )
 				{
-					case MetaPropertyType::U32:		MAP_KEY_PROP_PRIMITIVE( f32, u32, s32, ImGui::InputInt, object, prop )		break;
-					case MetaPropertyType::S32:		MAP_KEY_PROP_PRIMITIVE( f32, s32, s32, ImGui::InputInt, object, prop )		break;
-					case MetaPropertyType::F32:		MAP_KEY_PROP_PRIMITIVE( f32, f32, f32, ImGui::InputFloat, object, prop )	break;
+					case MetaPropertyType::U32:		MAP_KEY_PRIMITIVE( f32, u32, s32, ImGui::InputInt, object, prop )	break;
+					case MetaPropertyType::S32:		MAP_KEY_PRIMITIVE( f32, s32, s32, ImGui::InputInt, object, prop )	break;
+					case MetaPropertyType::F32:		MAP_KEY_PRIMITIVE( f32, f32, f32, ImGui::InputFloat, object, prop )	break;
 				} 
 			} break;
 
@@ -204,9 +204,9 @@ namespace Enjon
 			{ 
 				switch ( prop->GetValueType() )
 				{
-					case MetaPropertyType::U32:		MAP_KEY_PROP_PRIMITIVE( s32, u32, s32, ImGui::InputInt, object, prop )		break;
-					case MetaPropertyType::S32:		MAP_KEY_PROP_PRIMITIVE( s32, s32, s32, ImGui::InputInt, object, prop )		break;
-					case MetaPropertyType::F32:		MAP_KEY_PROP_PRIMITIVE( s32, f32, f32, ImGui::InputFloat, object, prop )	break;
+					case MetaPropertyType::U32:		MAP_KEY_PRIMITIVE( s32, u32, s32, ImGui::InputInt, object, prop )	break;
+					case MetaPropertyType::S32:		MAP_KEY_PRIMITIVE( s32, s32, s32, ImGui::InputInt, object, prop )	break;
+					case MetaPropertyType::F32:		MAP_KEY_PRIMITIVE( s32, f32, f32, ImGui::InputFloat, object, prop )	break;
 				} 
 			} break;
 
@@ -214,9 +214,9 @@ namespace Enjon
 			{ 
 				switch ( prop->GetValueType() )
 				{
-					case MetaPropertyType::U32:		MAP_KEY_PROP_PRIMITIVE( u32, u32, s32, ImGui::InputInt, object, prop )		break;
-					case MetaPropertyType::S32:		MAP_KEY_PROP_PRIMITIVE( u32, s32, s32, ImGui::InputInt, object, prop )		break;
-					case MetaPropertyType::F32:		MAP_KEY_PROP_PRIMITIVE( u32, f32, f32, ImGui::InputFloat, object, prop )	break;
+					case MetaPropertyType::U32:		MAP_KEY_PRIMITIVE( u32, u32, s32, ImGui::InputInt, object, prop )	break;
+					case MetaPropertyType::S32:		MAP_KEY_PRIMITIVE( u32, s32, s32, ImGui::InputInt, object, prop )	break;
+					case MetaPropertyType::F32:		MAP_KEY_PRIMITIVE( u32, f32, f32, ImGui::InputFloat, object, prop )	break;
 				} 
 			} break;
 
@@ -224,9 +224,9 @@ namespace Enjon
 			{
 				switch ( prop->GetValueType( ) )
 				{
-					case MetaPropertyType::U32:		MAP_KEY_STRING_PROP( u32, s32, ImGui::InputInt, object, prop ) break;
-					case MetaPropertyType::S32:		MAP_KEY_STRING_PROP( s32, s32, ImGui::InputInt, object, prop ) break;
-					case MetaPropertyType::F32:		MAP_KEY_STRING_PROP( f32, f32, ImGui::InputFloat, object, prop ) break;
+					case MetaPropertyType::U32:		MAP_KEY_STRING( u32, s32, ImGui::InputInt, object, prop )	break;
+					case MetaPropertyType::S32:		MAP_KEY_STRING( s32, s32, ImGui::InputInt, object, prop )	break;
+					case MetaPropertyType::F32:		MAP_KEY_STRING( f32, f32, ImGui::InputFloat, object, prop ) break;
 				}
 			} break;
 		}
