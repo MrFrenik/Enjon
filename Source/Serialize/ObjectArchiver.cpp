@@ -1,3 +1,4 @@
+
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
 // File: ObjectArchiver.h
 
@@ -209,16 +210,48 @@ namespace Enjon
 					{
 						mBuffer.Write( UUID::Invalid( ) );
 					} 
+				} break; 
+
+				case MetaPropertyType::Enum:
+				{ 
+					// Get integral value of enum
+					mBuffer.Write( *cls->GetValueAs< s32 >( object, prop ) ); 
 				} break;
 
 				case MetaPropertyType::Array:
 				{ 
 				} break;
 
-				case MetaPropertyType::Enum:
+#define WRITE_MAP_KEY_PRIM_VAL_PRIM( object, prop, keyType, valType, buffer )\
+	{\
+		const MetaPropertyHashMap< keyType, valType >* mapProp = prop->Cast< MetaPropertyHashMap< keyType, valType > >();\
+		for ( auto iter = mapProp->Begin( object ); iter != mapProp->End( object ); ++iter )\
+		{\
+			buffer.Write< keyType >( iter->first );\
+			buffer.Write< valType >( iter->second );\
+		}\
+	} 
+				case MetaPropertyType::HashMap:
 				{ 
-					// Get integral value of enum
-					mBuffer.Write( *cls->GetValueAs< s32 >( object, prop ) ); 
+					// Get base
+					const MetaPropertyHashMapBase* base = prop->Cast< MetaPropertyHashMapBase >( );
+
+					// Write out size of map to buffer
+					mBuffer.Write< usize >( base->GetSize( object ) );
+
+					switch ( base->GetValueType( ) )
+					{
+						case MetaPropertyType::U32:
+						{
+							switch ( base->GetValueType( ) )
+							{
+								case MetaPropertyType::U32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, u32, mBuffer )	break;
+								case MetaPropertyType::S32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, s32, mBuffer )	break;
+								case MetaPropertyType::F32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, f32, mBuffer )	break; 
+							}
+						} break;
+					}
+					
 				} break;
 			}
 		} 
@@ -561,6 +594,42 @@ namespace Enjon
 					cls->SetValue( object, prop, val );
 
 				} break;
+
+#define READ_MAP_KEY_PRIM_VAL_PRIM( object, prop, keyType, valType, mapSize, buffer )\
+	{\
+		const MetaPropertyHashMap< keyType, valType >* mapProp = prop->Cast< MetaPropertyHashMap< keyType, valType > >();\
+		for ( usize j = 0; j < mapSize; ++j )\
+		{\
+			/*Read Key*/\
+			keyType key = buffer.Read< keyType >( );\
+			/*Read Value*/\
+			valType val = buffer.Read< valType >( );\
+			/*Set Value at key*/\
+			mapProp->SetValueAt( object, key, val );\
+		}\
+	} 
+				case MetaPropertyType::HashMap:
+				{ 
+					// Get base
+					const MetaPropertyHashMapBase* base = prop->Cast< MetaPropertyHashMapBase >( );
+
+					// Read size of map to buffer
+					usize mapSize = mBuffer.Read< usize >( );
+
+					switch ( base->GetValueType( ) )
+					{
+						case MetaPropertyType::U32:
+						{
+							switch ( base->GetValueType( ) )
+							{
+								case MetaPropertyType::U32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, u32, mapSize, mBuffer )	break;
+								case MetaPropertyType::S32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, s32, u32, mapSize, mBuffer )	break;
+								case MetaPropertyType::F32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, f32, u32, mapSize, mBuffer )	break;
+							}
+						} break;
+					} 
+					
+				} break; 
 			}
 		}
 

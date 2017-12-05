@@ -606,7 +606,7 @@ namespace Enjon
 			void SetValueAt( const Object* object, const K& key, const V& value ) const
 			{ 
 				HashMap< K, V >* rawMap = GetRaw( object );
-				rawMap[ key ] = value;
+				*rawMap[ key ] = value;
 			}
 
 			/*
