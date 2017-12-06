@@ -312,6 +312,123 @@ namespace Enjon
 		return res;
 	}
 
+	/*
+		What is the process for deserializing a cached asset?
+		On start of a project: 
+
+		Project::OnLoad()
+		{
+			// Need to initialize asset manager in here, which sets the relative project directory, the contents directory, etc.
+			InitiliazeAssetManager(); 
+
+			// Inside of a project file, it has a UUID of a scene asset it needs to load as its "Start Scene"
+			// If this scene cannot be found, as all other assets, will be load default scene asset
+
+			// Get asset manager
+			const AssetManager* am = Engine::GetInstance()->GetSubsystemCatalog()->Get< AssetManager >();
+			
+			// Load current scene from database
+			mProfile.mCurrentScene = am->Get< Scene >( mProfile.mDefaultSceneId );	// Something like this, although less ugly...  
+		}
+
+		Project::InitilizeAssetManager()
+		{
+			// Need to set up project directory in here
+			const AssetManager* am = Engine::GetInstance()->GetSubsystemCatalog()->Get< AssetManager >(); 
+
+			// Initialize AssetManager with project directory
+			// Only the project/engine should be able to initialize the asset manager!
+			am->Initialize(mProfile.mProjectDirectory + "/Assets/"); 
+		} 
+
+		AssetManager::Initialize( const String& assetsDirectory ) const
+		{
+			// NOTE(): Clear all previous assets here - burn it all down
+
+			// Set assets directory
+			mAssetsDirectory = assetsDirectory; 
+
+			// Load in cached asset manifest ( top level file )
+			mCacheManifest =  CacheManifest( mAssetDirectory + "Intermediate/CacheRegistry.manifest" );
+
+			// Collect all assets files from directory
+			for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( mAssetsDirectory ) )
+			{
+				// Grab asset path from p
+				String assetPath = p.path().string();
+
+				if ( HasFileExtension( p.path().string(), "easset" ) )
+				{
+					// Need to be able to determine which loader this asset uses to place appropriately
+					// Need to create the wrapper for this asset to be held by the loader
+
+					AssetRecordInfo record;
+					record.mAssetLoadStatus = AssetLoadStatus::Unloaded;
+					record.mAssetFilePath	= assetPath; 
+
+					// Need to store unloaded assets by UUID, since that's how they will be looked up when loaded into memory by some other referencing asset...
+					// However, the cached files are not cached with their UUID readily accessible - it's stored deep within the binary, which defeat the purpose of 
+					//	quickly pre-loaded these assets
+					// Perhaps this is where a cache registry comes into play? This is getting a bit out of hand, of course...
+
+					// Maybe all unloaded assets are held by the asset manager directly? It's not until they're loaded in that they're passed
+					//	directly to their respective loaders?
+				} 
+			} 
+		}
+
+		CacheManifest( const String& manifestPath )
+		{
+			// Store manifest path
+			mManifestFilePath = manifestPath;
+
+			// Read into buffer
+			ByteBuffer readBuffer;
+			readBuffer.ReadFromFile( mManifestFilePath );
+
+			// Grab record count
+			u32 recordCount = readBuffer.Read< u32 >(); 
+
+			// For each record, store into manifest 
+			for ( u32 i = 0; i < recordCount; ++i )
+			{
+				// Asset record to fill out
+				AssetRecordInfo ar; 
+				
+				// Load into record
+				ar.mUUID = readBuffer.Read< UUID >();
+				ar.mAssetFilePath = readBuffer.Read< String >();
+
+				// Get MetaClass for loader
+				const MetaClass* cls = Object::GetClass( readBuffer.Read< String >() ); 
+				ar.mLoaderClass = cls;
+
+				// Add record
+				mAssetRecords[ar.mUUID] = ar;
+			}
+		}
+
+		CacheRegistryFile:
+			u32 - Number of records stored
+			for each record:
+				UUID - UUID of asset
+				String - File path of asset binary file (.easset) 
+				MetaClass - MetaClass of loader this asset belongs to ( possibly )
+
+
+		// This loads the scene, which is deserialized through the asset manager
+		// This will look inside the loader to which this particular asset belongs... So how does THIS work exactly?
+
+
+		Scene is loaded - This 
+
+
+		Result AssetManager::DeserializeAsset( const String& filePath )
+		{
+			
+		}
+	*/
+
 	//======================================================================================================
 
 	bool AssetManager::HasFileExtension( const String& file, const String& extension )

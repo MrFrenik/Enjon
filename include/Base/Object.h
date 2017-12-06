@@ -513,8 +513,7 @@ namespace Enjon
 					default:
 					case ArraySizeType::Fixed:
 					{
-						T* val = reinterpret_cast<T*>( usize( object ) + mOffset );
-						return val; 
+						return ( reinterpret_cast< T* >( usize( object ) + mOffset ) );
 					} break;
 				}
 			}

@@ -14,10 +14,9 @@
 namespace Enjon
 {
 	ENJON_ENUM( )
-	enum class AssetState
+	enum class AssetLoadStatus
 	{
-		Unloaded,				// When there is no record of the asset at all
-		Preloaded,				// Cache record is created
+		Unloaded,				// Not loaded in to memory but record is created
 		Loaded					// Fully loaded into memory and ready to use
 	};
 
@@ -53,8 +52,8 @@ namespace Enjon
 
 		private:
 			Asset* mAsset = nullptr; 
-			String mResourcePath = "";
-			AssetState mAssetState = AssetState::Unloaded;
+			String mAssetFilePath = "";
+			AssetLoadStatus mAssetLoadStatus = AssetLoadStatus::Unloaded;
 	}; 
 
 	// Forward declaration
@@ -184,8 +183,8 @@ namespace Enjon
 				asset->mLoader = this;
 
 				// Otherwise add asset
-				mAssetsByName[name] = asset;
-				mAssetsByUUID[ asset->mUUID.ToString( ) ] = asset;
+				mAssetsByName[name] = AssetRecordInfo( asset );
+				mAssetsByUUID[ asset->mUUID.ToString( ) ] = AssetRecordInfo( asset );
 
 				return mAssetsByName[name].mAsset;
 			} 
