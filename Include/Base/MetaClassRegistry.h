@@ -64,13 +64,13 @@ namespace Enjon
 			String mName;
 
 			ENJON_PROPERTY( Editable )
-			Enjon::Vector< u32 > mDynamicArray;
+			Enjon::Vector< u32 > mDynamicArray; 
 
 			ENJON_PROPERTY( )
-			u32 mStaticArrayConstant[10];
+			Enjon::String mStaticArrayConstant[3];
 
-			ENJON_PROPERTY( )
-			Enjon::AssetHandle<Enjon::Texture> mStaticArrayEnumIntegral[(usize)TextureFileExtension::UNKNOWN]; 
+			//ENJON_PROPERTY( )
+			//Enjon::AssetHandle<Enjon::Texture> mStaticArrayEnumIntegral[(usize)TextureFileExtension::UNKNOWN]; 
 
 			ENJON_PROPERTY( )
 			f32 mStaticArrayConstVariable[kConstantValue];
@@ -82,7 +82,7 @@ namespace Enjon
 			TestEnum mAnotherEnumProp; 
 
 			ENJON_PROPERTY( )
-			Enjon::HashMap< String, f32 > mHashMap;
+			Enjon::HashMap< String, u32 > mHashMap;
 		}; 
 	} 
 }

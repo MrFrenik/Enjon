@@ -218,8 +218,36 @@ namespace Enjon
 					mBuffer.Write( *cls->GetValueAs< s32 >( object, prop ) ); 
 				} break;
 
+# define WRITE_ARRAY_PROP_PRIM( object, prop, valType, buffer )\
+	{\
+		const MetaPropertyArray< valType >* arrayProp = prop->Cast< MetaPropertyArray< valType > >();\
+		for ( usize j = 0; j < arrayProp->GetSize( object ); ++j )\
+		{\
+			buffer.Write< valType >( arrayProp->GetValueAs( object, j ) );\
+		}\
+	} 
 				case MetaPropertyType::Array:
 				{ 
+					// Get base
+					const MetaPropertyArrayBase* base = prop->Cast< MetaPropertyArrayBase >( );
+
+					// Write out size of array to buffer
+					mBuffer.Write< usize >( base->GetSize( object ) );
+
+					// Write out array elements
+					switch ( base->GetArrayType( ) )
+					{
+						case MetaPropertyType::Bool:	WRITE_ARRAY_PROP_PRIM( object, base, bool, mBuffer )	break;
+						case MetaPropertyType::U8:		WRITE_ARRAY_PROP_PRIM( object, base, u8, mBuffer )		break;
+						case MetaPropertyType::U32:		WRITE_ARRAY_PROP_PRIM( object, base, u32, mBuffer )		break;
+						case MetaPropertyType::S32:		WRITE_ARRAY_PROP_PRIM( object, base, s32, mBuffer )		break;
+						case MetaPropertyType::F32:		WRITE_ARRAY_PROP_PRIM( object, base, f32, mBuffer )		break;
+						case MetaPropertyType::F64:		WRITE_ARRAY_PROP_PRIM( object, base, f64, mBuffer )		break;
+						case MetaPropertyType::String:	WRITE_ARRAY_PROP_PRIM( object, base, String, mBuffer )	break;
+						case MetaPropertyType::UUID:	WRITE_ARRAY_PROP_PRIM( object, base, UUID, mBuffer )	break; 
+					}
+
+
 				} break;
 
 #define WRITE_MAP_KEY_PRIM_VAL_PRIM( object, prop, keyType, valType, buffer )\
@@ -239,7 +267,7 @@ namespace Enjon
 					// Write out size of map to buffer
 					mBuffer.Write< usize >( base->GetSize( object ) );
 
-					switch ( base->GetValueType( ) )
+					switch ( base->GetKeyType( ) )
 					{
 						case MetaPropertyType::U32:
 						{
@@ -248,6 +276,14 @@ namespace Enjon
 								case MetaPropertyType::U32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, u32, mBuffer )	break;
 								case MetaPropertyType::S32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, s32, mBuffer )	break;
 								case MetaPropertyType::F32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, f32, mBuffer )	break; 
+							}
+						} break;
+
+						case MetaPropertyType::String:
+						{
+							switch ( base->GetValueType( ) )
+							{
+								case MetaPropertyType::U32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, String, u32, mBuffer )	break;
 							}
 						} break;
 					}
@@ -595,6 +631,48 @@ namespace Enjon
 
 				} break;
 
+# define READ_ARRAY_PROP_PRIM( object, prop, valType, arraySize, buffer )\
+	{\
+		const MetaPropertyArray< valType >* arrayProp = prop->Cast< MetaPropertyArray< valType > >();\
+		for ( usize j = 0; j < arraySize; ++j )\
+		{\
+			/*Grab value from buffer and set at index in array*/\
+			arrayProp->SetValueAt( object, j, mBuffer.Read< valType >( ) );\
+		}\
+	} 
+				case MetaPropertyType::Array:
+				{ 
+					// Get base
+					const MetaPropertyArrayBase* base = prop->Cast< MetaPropertyArrayBase >( );
+
+					// Read size of array from buffer
+					usize arraySize = mBuffer.Read< usize >( );
+
+					// If a dynamic vector then need to resize vector to allow for placement
+					switch ( base->GetArraySizeType( ) )
+					{
+						case ArraySizeType::Dynamic:
+						{ 
+							base->Resize( object, arraySize );
+						} break;
+					}
+
+					// Read out array elements
+					switch ( base->GetArrayType( ) )
+					{
+						case MetaPropertyType::Bool:	READ_ARRAY_PROP_PRIM( object, base, bool, arraySize, mBuffer )		break;
+						case MetaPropertyType::U8:		READ_ARRAY_PROP_PRIM( object, base, u8, arraySize, mBuffer )		break;
+						case MetaPropertyType::U32:		READ_ARRAY_PROP_PRIM( object, base, u32, arraySize, mBuffer )		break;
+						case MetaPropertyType::S32:		READ_ARRAY_PROP_PRIM( object, base, s32, arraySize, mBuffer )		break;
+						case MetaPropertyType::F32:		READ_ARRAY_PROP_PRIM( object, base, f32, arraySize, mBuffer )		break;
+						case MetaPropertyType::F64:		READ_ARRAY_PROP_PRIM( object, base, f64, arraySize, mBuffer )		break;
+						case MetaPropertyType::String:	READ_ARRAY_PROP_PRIM( object, base, String, arraySize, mBuffer )	break;
+						case MetaPropertyType::UUID:	READ_ARRAY_PROP_PRIM( object, base, UUID, arraySize, mBuffer )		break;
+					}
+
+				} break;
+
+
 #define READ_MAP_KEY_PRIM_VAL_PRIM( object, prop, keyType, valType, mapSize, buffer )\
 	{\
 		const MetaPropertyHashMap< keyType, valType >* mapProp = prop->Cast< MetaPropertyHashMap< keyType, valType > >();\
@@ -616,7 +694,7 @@ namespace Enjon
 					// Read size of map to buffer
 					usize mapSize = mBuffer.Read< usize >( );
 
-					switch ( base->GetValueType( ) )
+					switch ( base->GetKeyType( ) )
 					{
 						case MetaPropertyType::U32:
 						{
@@ -625,6 +703,14 @@ namespace Enjon
 								case MetaPropertyType::U32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, u32, mapSize, mBuffer )	break;
 								case MetaPropertyType::S32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, s32, u32, mapSize, mBuffer )	break;
 								case MetaPropertyType::F32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, f32, u32, mapSize, mBuffer )	break;
+							}
+						} break;
+
+						case MetaPropertyType::String:
+						{
+							switch( base->GetValueType( ) )
+							{
+								case MetaPropertyType::U32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, String, u32, mapSize, mBuffer )	break; 
 							}
 						} break;
 					} 

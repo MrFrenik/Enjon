@@ -283,6 +283,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			MetaPropertyEnum( ) = default;
+
+			/*
+			* @brief
+			*/
 			MetaPropertyEnum( MetaPropertyType type, const String& name, u32 offset, u32 propIndex, MetaPropertyTraits traits, const Vector< MetaPropertyEnumElement >& elements, const String& enumName )
 				: mElements( elements ), mEnumTypeName( enumName )
 			{
@@ -291,7 +296,7 @@ namespace Enjon
 				mOffset = offset;
 				mIndex = propIndex;
 				mTraits = traits; 
-			}
+			} 
 
 			/*
 			* @brief
@@ -345,10 +350,11 @@ namespace Enjon
 	{
 		public: 
 			virtual usize GetSize( const Object* object ) const = 0;
+			virtual usize GetCapacity( const Object* object ) const = 0;
 			virtual ArraySizeType GetArraySizeType( ) const = 0;
 			virtual MetaPropertyType GetArrayType( ) const = 0; 
-
 			virtual MetaArrayPropertyProxy GetProxy( ) const = 0;
+			virtual void Resize( const Object* object, const usize& arraySize ) const = 0;
 
 		protected:
 			MetaProperty* mArrayProperty = nullptr;
@@ -382,7 +388,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			usize GetSize( const Object* object ) const 
+			virtual usize GetSize( const Object* object ) const override
 			{
 				switch ( mArraySizeType )
 				{
@@ -402,11 +408,45 @@ namespace Enjon
 			}
 
 			/*
+			* @brief 
+			*/
+			virtual usize GetCapacity( const Object* object ) const override
+			{
+				switch ( mArraySizeType )
+				{
+					case ArraySizeType::Fixed:
+					{
+						return mSize;
+					} break;
+
+					case ArraySizeType::Dynamic:
+					{
+						return ( ( Vector< T >* )( usize( object ) + mOffset ) )->capacity( );
+					} break;
+				}
+
+				// Shouldn't get here
+				return 0;
+			}
+
+			/*
+			* @brief 
+			* @note Can ONLY reserve/resize space for dynamic arrays
+			*/
+			void Resize( const Object* object, const usize& arraySize ) const override 
+			{
+				if ( mArraySizeType == ArraySizeType::Dynamic )
+				{
+					( ( Vector<T>* )( usize( object ) + mOffset ) )->resize( (usize)arraySize ); 
+				}
+			}
+
+			/*
 			* @brief
 			*/
 			void GetValueAt( const Object* object, usize index, T* out ) const
 			{
-				assert( index < GetSize( object ) ); 
+				assert( index < GetCapacity( object ) );
 
 				T* rawArr = GetRaw( object );
 				*out = rawArr[index];
@@ -414,7 +454,7 @@ namespace Enjon
 
 			T GetValueAs( const Object* object, usize index ) const
 			{
-				assert( index < GetSize( object ) ); 
+				assert( index < GetCapacity( object ) ); 
 
 				T* rawArr = GetRaw( object );
 				return rawArr[ index ]; 
@@ -425,7 +465,7 @@ namespace Enjon
 			*/
 			void SetValueAt( const Object* object, usize index, const T& value ) const
 			{
-				assert( index < GetSize( object ) );
+				assert( index < GetCapacity( object ) );
 
 				// Grab raw array
 				T* rawArr = GetRaw( object );
@@ -467,7 +507,7 @@ namespace Enjon
 				{
 					case ArraySizeType::Dynamic:
 					{ 
-						return ( T* )( ( ( Vector<T>* )( usize( object ) + mOffset ) ) )->data();
+						return ( T* )( ( Vector< T >* )( usize( object ) + mOffset ) );
 					} break;
 
 					default:

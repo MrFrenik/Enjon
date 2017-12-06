@@ -244,10 +244,10 @@ namespace Enjon
 	//========================================================================
 
 	// Template Specializations
+	BYTE_BUFFER_RW( bool )
 	BYTE_BUFFER_RW( b1 )
 	BYTE_BUFFER_RW( s8 )
 	BYTE_BUFFER_RW( u8 )
-	BYTE_BUFFER_RW( char )
 	BYTE_BUFFER_RW( u16 )
 	BYTE_BUFFER_RW( s16 )
 	BYTE_BUFFER_RW( s32 )

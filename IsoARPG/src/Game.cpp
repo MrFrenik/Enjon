@@ -70,6 +70,24 @@ void Game::TestObjectSerialize( )
 	writeTestObject.mID = UUID::GenerateUUID( );
 	writeTestObject.mName = assetLoader.Class()->GetName();
 	writeTestObject.mIntValue = -23; 
+	writeTestObject.mHashMap["Bob"] = 5;
+	writeTestObject.mHashMap["Billy"] = 1234;
+	writeTestObject.mHashMap["John"] = 354;
+	writeTestObject.mHashMap["Mark"] = 3;
+
+	writeTestObject.mStaticArrayConstant[0] = "Zero";
+	writeTestObject.mStaticArrayConstant[1] = "One";
+	writeTestObject.mStaticArrayConstant[2] = "Two";
+ 
+	for ( Enjon::u32 i = 0; i < Enjon::kConstantValue; ++i )
+	{
+		writeTestObject.mStaticArrayConstVariable[i] = i * 0.215f;
+	}
+
+	for ( Enjon::u32 i = 0; i < 5; ++i )
+	{
+		writeTestObject.mDynamicArray.push_back( i * 2 );
+	}
 
 	// Serialize test object
 	archiver.Serialize( &writeTestObject ); 
@@ -686,10 +704,9 @@ Enjon::Result Game::Initialize()
 	} 
 
 	// Set up test serializable object 
-	mTestObject.mHashMap[ "Bob" ] = 5.0f;
-	mTestObject.mHashMap[ "Joel" ] = 10.234f;
-	mTestObject.mHashMap[ "Billy" ] = -123.0234f;
-	mTestObject.mHashMap[ "Mark" ] = 0.045f; 
+	mTestObject.mHashMap["Bob"] = 2;
+	mTestObject.mHashMap["Billy"] = 234;
+	mTestObject.mHashMap["John"] = 10;
 
 	// Set up ImGui window
 	mShowEntities = true;
