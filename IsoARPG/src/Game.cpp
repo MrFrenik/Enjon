@@ -50,6 +50,8 @@
 
 #include <Base/MetaClassRegistry.h>
 
+#define ADD_ASSET_TO_PROJECT 0
+
 Enjon::Texture* mNewTexture = nullptr;
 Enjon::Mesh* mMesh = nullptr;
 Enjon::PointLight* mPointLight = nullptr;
@@ -128,6 +130,20 @@ void Game::TestObjectSerialize( )
 		mMesh = static_cast< Enjon::Mesh* > ( meshArchiver.Deserialize( meshPath ) ); 
 		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMesh( AssetHandle< Mesh >( mMesh ) );
 	} 
+
+#if ADD_ASSET_TO_PROJECT
+	{ 
+		Enjon::String assetPath( "/Textures/beast.png" );
+		am->AddToDatabase( assetPath, true, true );
+	}
+#else
+	Enjon::AssetHandle< Enjon::Texture > cachedTexture = am->GetAsset< Enjon::Texture >( "isoarpg.textures.beast" );
+	if ( cachedTexture )
+	{
+		mGun.Get( )->GetComponent< GraphicsComponent >( )->GetMaterial( )->SetTexture( Enjon::TextureSlotType::Albedo, cachedTexture );
+	}
+
+#endif
 }
 
 std::vector<btRigidBody*> mBodies;
@@ -177,6 +193,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->SetAssetsPath( mAssetsPath );
 	mAssetManager->SetCachedAssetsPath( cachePath );
 	mAssetManager->SetDatabaseName( GetApplicationName( ) ); 
+	mAssetManager->Initialize( );
 
 	for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( projectDirectory ) )
 	{

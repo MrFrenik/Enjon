@@ -7,6 +7,7 @@
 #include "Subsystem.h"
 #include "System/Types.h"
 #include "Asset/AssetLoader.h"
+#include "Serialize/CacheRegistryManifest.h"
 #include "Defines.h" 
 
 #include <array>
@@ -63,13 +64,8 @@ namespace Enjon
 			/**
 			*@brief Adds asset to project form given file path
 			*/
-			Result AddToDatabase( const String& filePath, b8 isRelativePath = true );
+			Result AddToDatabase( const String& filePath, b8 isRelativePath = true, bool updateCacheManifest = false );
 
-			/**
-			*@brief Adds asset to project form given file path
-			*/
-			Result SerializeAsset( const Asset* asset );
-			
 			/**
 			*@brief Gets asset manager name
 			*/
@@ -105,6 +101,12 @@ namespace Enjon
 			*/
 			template <typename T>
 			AssetHandle<T> GetAsset( const String& name ); 
+
+			/**
+			*@brief Gets loaded asset in database from uuid
+			*/
+			template <typename T>
+			AssetHandle<T> GetAsset( const UUID& uuid ); 
 
 			/**
 			*@brief
@@ -146,7 +148,7 @@ namespace Enjon
 			/**
 			*@brief Gets loader by meta class. If not found, returns nullptr.
 			*/
-			const AssetLoader* GetLoader( const MetaClass* cls );
+			const AssetLoader* GetLoader( const MetaClass* cls ) const;
 
 			/**
 			*@brief Gets loader by meta class of asset type. If not found, returns nullptr.
@@ -167,6 +169,11 @@ namespace Enjon
 		protected:
 
 		private: 
+
+			/**
+			*@brief Adds asset to project form given file path
+			*/
+			Result SerializeAsset( const Asset* asset, bool updateCacheManifest = false );
 
 			/**
 			*@brief
@@ -211,6 +218,7 @@ namespace Enjon
 			String mAssetsPath;
 			String mCachedPath;
 			String mName; 
+			CacheRegistryManifest mCacheManifest;
 	};
 
 	#include "Asset/AssetManager.inl"

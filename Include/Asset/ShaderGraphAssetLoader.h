@@ -40,7 +40,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			Asset* LoadResourceFromFile( const String& filePath, const String& name ) override;
+			Asset* LoadResourceFromFile( const String& filePath ) override;
 
 			/**
 			* @brief

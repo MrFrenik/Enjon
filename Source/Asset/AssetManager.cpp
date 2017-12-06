@@ -84,6 +84,9 @@ namespace Enjon
 			
 	Result AssetManager::Initialize()
 	{ 
+		// Initialize the manifest and read in records
+		mCacheManifest.Initialize( mAssetsPath + "/Intermediate/CacheManifest.bin", this ); 
+
 		return Result::SUCCESS;
 	} 
 	
@@ -216,7 +219,7 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
-	Result AssetManager::AddToDatabase( const String& filePath, b8 isRelativePath )
+	Result AssetManager::AddToDatabase( const String& filePath, b8 isRelativePath, bool updateCacheManifest )
 	{ 
 		// Have to do a switch based on extension of file
 		s32 idx = GetLoaderIdxByFileExtension( filePath );
@@ -257,20 +260,28 @@ namespace Enjon
 					if ( !Utils::FileExists( mAssetsPath + filePath ) )
 					{
 						return Result::FAILURE;
-					}
+					} 
 
-					String path = mAssetsPath + filePath;
-					String name = Utils::ToLower( mName ) + qualifiedName; 
-
-					asset = query->second->LoadResourceFromFile( path, name ); 
-
-					// Set file path and name
+					// Load the asset from file
+					asset = query->second->LoadResourceFromFile( mAssetsPath + filePath ); 
+ 
+					// If asset is valid
 					if ( asset )
 					{
+						// Add to loader assets with asset record info
+						AssetRecordInfo info;
+						asset->mName = Utils::ToLower( mName ) + qualifiedName;
 						asset->mFilePath = mAssetsPath + filePath;
-						asset->mName = name; 
 						asset->mUUID = UUID::GenerateUUID( );
-					}
+						info.mAsset = asset;
+						info.mAssetName = asset->mName;
+						info.mAssetUUID = asset->mUUID;
+						info.mAssetFilePath = asset->mFilePath;
+						info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+
+						// Add to loader
+						query->second->AddToAssets( info );
+					} 
 				}
 
 				// If absolute path on disk
@@ -282,20 +293,39 @@ namespace Enjon
 						return Result::FAILURE;
 					}
 
-					asset = query->second->LoadResourceFromFile( filePath, qualifiedName );
+					// Load asset from file
+					asset = query->second->LoadResourceFromFile( filePath ); 
+
+					// If asset is valid
+					if ( asset )
+					{
+						// Add to loader assets with asset record info
+						AssetRecordInfo info;
+						asset->mName = qualifiedName;
+						asset->mFilePath = filePath;
+						asset->mUUID = UUID::GenerateUUID( );
+						info.mAsset = asset;
+						info.mAssetName = asset->mName;
+						info.mAssetUUID = asset->mUUID;
+						info.mAssetFilePath = asset->mFilePath;
+						info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+
+						// Add to loader
+						query->second->AddToAssets( info );
+					} 
 				}
 			}
 		}
 
 		// Handle serialization of asset file
-		Result res = SerializeAsset( asset );
+		Result res = SerializeAsset( asset, updateCacheManifest );
 
 		return res;
 	}
 
 	//======================================================================================================
 
-	Result AssetManager::SerializeAsset( const Asset* asset )
+	Result AssetManager::SerializeAsset( const Asset* asset, bool updateCacheManifest )
 	{
 		// Serialize asset with archiver
 		ObjectArchiver archiver;
@@ -308,6 +338,20 @@ namespace Enjon
 		// Write to file using archiver 
 		String path = mCachedPath + asset->mName + ".easset"; 
 		archiver.WriteToFile( path );
+
+		if ( updateCacheManifest )
+		{
+			// Construct and add record to manifest
+			CacheManifestRecord record;
+			record.mAssetUUID = asset->mUUID;
+			record.mAssetFilePath = path;
+			record.mAssetLoaderClass = GetLoaderByAssetClass( asset->Class( ) )->Class( );
+			record.mAssetName = asset->mName;
+			mCacheManifest.AddRecord( record );
+
+			// Write out the manifest file
+			mCacheManifest.WriteOutManifest( mAssetsPath + "/Intermediate/CacheManifest.bin" ); 
+		} 
 
 		return res;
 	}
@@ -415,7 +459,6 @@ namespace Enjon
 				String - File path of asset binary file (.easset) 
 				MetaClass - MetaClass of loader this asset belongs to ( possibly )
 
-
 		// This loads the scene, which is deserialized through the asset manager
 		// This will look inside the loader to which this particular asset belongs... So how does THIS work exactly?
 
@@ -471,11 +514,11 @@ namespace Enjon
 
 	//======================================================================================================
 
-	const AssetLoader* AssetManager::GetLoader( const MetaClass* cls )
+	const AssetLoader* AssetManager::GetLoader( const MetaClass* cls ) const
 	{
 		if ( Exists( cls ) )
 		{
-			return mLoadersByMetaClass[ cls ];
+			return const_cast< AssetManager* > ( this )->mLoadersByMetaClass[ cls ];
 		}
 
 		return nullptr;

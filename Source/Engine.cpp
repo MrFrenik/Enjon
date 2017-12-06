@@ -135,7 +135,7 @@ namespace Enjon
 		Enjon::Object::BindMetaClasses( );
 
 		// Register subsystems with catalog
-		mAssetManager	= mSubsystemCatalog->Register<Enjon::AssetManager>();
+		mAssetManager	= mSubsystemCatalog->Register<Enjon::AssetManager>( false );		// Will do manual initialization of asset management system, since it's project dependent
 		mGraphics		= mSubsystemCatalog->Register<Enjon::GraphicsSubsystem>(); 
 		mInput			= mSubsystemCatalog->Register<Enjon::Input>(); 
 
@@ -146,13 +146,7 @@ namespace Enjon
 		if ( mApp )
 		{
 			mApp->Initialize();
-		}
-
-		// Initialize asset manager to load defaults
-		if ( mAssetManager )
-		{
-			mAssetManager->Initialize( );
-		}
+		} 
 
 		// Initializes limiter
 		 mLimiter.Init( 60.0f );

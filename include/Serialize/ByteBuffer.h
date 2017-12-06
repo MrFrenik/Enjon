@@ -12,6 +12,13 @@
 
 namespace Enjon
 {
+	enum class BufferStatus
+	{
+		Invalid,
+		ReadyToRead,
+		ReadyToWrite
+	};
+
 	class ByteBuffer
 	{
 		public:
@@ -19,6 +26,11 @@ namespace Enjon
 			* @brief Constructor
 			*/
 			ByteBuffer( );
+
+			/*
+			* @brief Constructor
+			*/
+			ByteBuffer( const String& filePath );
 			
 			/*
 			* @brief Destructor
@@ -34,6 +46,11 @@ namespace Enjon
 			* @brief
 			*/
 			void WriteToFile( const Enjon::String& filePath );
+
+			/*
+			* @brief
+			*/
+			BufferStatus GetStatus( ) const;
 
 			/*
 			* @brief
@@ -69,11 +86,12 @@ namespace Enjon
 			void Resize( usize size );
 
 		private:
-			u32 mReadPosition	= 0;
-			u32 mWritePosition	= 0;
-			u32 mSize			= 0;
-			u32 mCapacity		= ENJON_BYTE_BUFFER_DEFAULT_CAPACITY;
-			u8* mBuffer			= nullptr;
+			u32 mReadPosition		= 0;
+			u32 mWritePosition		= 0;
+			u32 mSize				= 0;
+			u32 mCapacity			= ENJON_BYTE_BUFFER_DEFAULT_CAPACITY;
+			u8* mBuffer				= nullptr;
+			BufferStatus mStatus	= BufferStatus::Invalid;
 	};
 }
 

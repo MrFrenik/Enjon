@@ -39,6 +39,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			explicit operator bool() const;
+
+			/*
+			* @brief
+			*/
 			static UUID GenerateUUID( );
 
 			/*

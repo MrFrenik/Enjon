@@ -24,13 +24,10 @@ namespace Enjon
 
 	//============================================================================================== 
 
-	Asset* TextureAssetLoader::LoadResourceFromFile(const String& filePath, const String& name )
+	Asset* TextureAssetLoader::LoadResourceFromFile(const String& filePath )
 	{ 
 		// Load and construct texture from file
-		Enjon::Texture* tex = Texture::Construct( filePath );
-
-		// Add to assets with qualified name
-		AddToAssets(name, tex); 
+		Enjon::Texture* tex = Texture::Construct( filePath ); 
 
 		return tex; 
 	} 

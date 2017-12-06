@@ -6,6 +6,7 @@
 #define ENJON_ASSET_LOADER_H 
 
  #include "Asset/Asset.h" 
+#include "Serialize/CacheRegistryManifest.h"
 #include "Defines.h"
 
 #include <string>
@@ -24,6 +25,7 @@ namespace Enjon
 	class AssetRecordInfo
 	{
 		friend AssetLoader;
+		friend AssetManager;
 
 		public:
 
@@ -50,10 +52,17 @@ namespace Enjon
 				return "UnloadedAsset";
 			}
 
+			AssetLoadStatus GetAssetLoadStatus( ) const
+			{
+				return mAssetLoadStatus;
+			} 
+
 		private:
-			Asset* mAsset = nullptr; 
-			String mAssetFilePath = "";
-			AssetLoadStatus mAssetLoadStatus = AssetLoadStatus::Unloaded;
+			Asset* mAsset						= nullptr; 
+			String mAssetFilePath				= "";
+			String mAssetName					= "";
+			UUID mAssetUUID						= UUID::Invalid( );
+			AssetLoadStatus mAssetLoadStatus	= AssetLoadStatus::Unloaded;
 	}; 
 
 	// Forward declaration
@@ -63,6 +72,7 @@ namespace Enjon
 	class AssetLoader : public Enjon::Object 
 	{ 
 		friend AssetManager; 
+		friend CacheRegistryManifest;
 
 		// Don't like this here, but apparently I need it or the linker freaks out...
 		ENJON_CLASS_BODY( )
@@ -109,7 +119,7 @@ namespace Enjon
 		protected:
 
 			/**
-			* @brief Templated argument to get asset of specific type 
+			* @brief Templated argument to get asset of specific type by name
 			*/
 			template <typename T>
 			AssetHandle<T> GetAsset( const String& name )
@@ -136,7 +146,17 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
-			Asset* GetAsset( UUID id );
+			const Asset* GetAsset( const String& name );
+
+			/**
+			* @brief 
+			*/
+			Result AddRecord( const CacheManifestRecord& record );
+
+			/**
+			* @brief 
+			*/
+			const Asset* GetAsset( const UUID& id );
 			
 			/**
 			* @brief Templated argument to get asset of specific type 
@@ -171,6 +191,7 @@ namespace Enjon
 			*/
 			const Asset* AddToAssets( const String& name, Asset* asset )
 			{
+				// Already exists
 				if ( HasAsset( name ) )
 				{
 					return mAssetsByName[ name ].mAsset;
@@ -189,17 +210,28 @@ namespace Enjon
 				return mAssetsByName[name].mAsset;
 			} 
 
+			/**
+			* @brief
+			*/
+			const Asset* AddToAssets( const AssetRecordInfo& info );
+
 		protected:
 			
 			HashMap< String, AssetRecordInfo > mAssetsByName;
 			HashMap< String, AssetRecordInfo > mAssetsByUUID;
 			Asset* mDefaultAsset = nullptr;
 
-		private:
+		private: 
+
+			/**
+			* @brief 
+			*/ 
+			bool FindRecordInfoByName( const String& name, AssetRecordInfo* info );
+
 			/**
 			* @brief 
 			*/
-			virtual Asset* LoadResourceFromFile( const String& filePath, const String& name ) = 0;
+			virtual Asset* LoadResourceFromFile( const String& filePath ) = 0;
 	};
 } 
 

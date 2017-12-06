@@ -33,13 +33,10 @@ namespace Enjon
 
 	//======================================================================
 
-	Asset* FontAssetLoader::LoadResourceFromFile( const String& filePath, const String& name )
+	Asset* FontAssetLoader::LoadResourceFromFile( const String& filePath )
 	{
 		// Create new font
 		Enjon::UIFont* font = new Enjon::UIFont( filePath ); 
-
-		// Add to assets with qualified name
-		AddToAssets( name, font );
 
 		// Return font
 		return font;

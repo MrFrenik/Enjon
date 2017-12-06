@@ -14,20 +14,34 @@
 	template void ByteBuffer::Write< type >( const type& val );
 
 namespace Enjon
-{ 
+{
 	//========================================================================
 
 	ByteBuffer::ByteBuffer( )
-	{ 
+	{
 		// Allocate memory for buffer
-		mBuffer = ( u8* )malloc( sizeof( u8 ) * mCapacity );
-		assert( mBuffer != nullptr );
+		mBuffer = (u8*)malloc( sizeof( u8 ) * mCapacity );
+		assert( mBuffer != nullptr ); 
+		mStatus = BufferStatus::ReadyToWrite;
 	}
 
 	//========================================================================
-	
+
+	ByteBuffer::ByteBuffer( const String& filePath )
+	{
+		// Allocate memory for buffer
+		mBuffer = (u8*)malloc( sizeof( u8 ) * mCapacity );
+		assert( mBuffer != nullptr );
+		mStatus = BufferStatus::ReadyToWrite;
+
+		// Read into buffer from file
+		ReadFromFile( filePath );
+	}
+
+	//========================================================================
+
 	ByteBuffer::~ByteBuffer( )
-	{ 
+	{
 		ReleaseData( );
 	}
 
@@ -37,7 +51,7 @@ namespace Enjon
 	{
 		// Delete all of its data
 		delete mBuffer;
-		mBuffer = nullptr; 
+		mBuffer = nullptr;
 	}
 
 	//========================================================================
@@ -49,19 +63,20 @@ namespace Enjon
 		// Reset to default values
 		mCapacity = 1024;
 		mSize = 0;
-		mReadPosition	= 0;
-		mWritePosition	= 0;
+		mReadPosition = 0;
+		mWritePosition = 0;
 
 		// Reallocate memory for buffer
-		mBuffer = ( u8* )malloc( sizeof( u8 ) * mCapacity );
+		mBuffer = (u8*)malloc( sizeof( u8 ) * mCapacity );
 		assert( mBuffer != nullptr );
+		mStatus = BufferStatus::ReadyToWrite;
 	}
 
 	//========================================================================
-			
+
 	void ByteBuffer::Resize( usize size )
 	{
-		mBuffer = ( u8* )realloc( mBuffer, sizeof( u8 ) * size );
+		mBuffer = (u8*)realloc( mBuffer, sizeof( u8 ) * size );
 		mReadPosition = 0;
 		assert( mBuffer != nullptr );
 	}
@@ -70,18 +85,18 @@ namespace Enjon
 
 	template <typename T>
 	T ByteBuffer::Read( )
-	{ 
+	{
 		// Get size of T
-		usize size = sizeof( T ); 
+		usize size = sizeof( T );
 
 		// Get value at position
-		T val = *( T* )( mBuffer + mReadPosition );
+		T val = *(T*)( mBuffer + mReadPosition );
 
 		// Increment read position
 		mReadPosition += size;
 
 		return val;
-	} 
+	}
 
 	//========================================================================
 
@@ -95,17 +110,17 @@ namespace Enjon
 		String val = "";
 
 		// Get characters for string
-		for ( usize i = 0; i < size; ++i ) 
+		for ( usize i = 0; i < size; ++i )
 		{
 			// Get character
-			char c = *( char* )( mBuffer + mReadPosition );
+			char c = *(char*)( mBuffer + mReadPosition );
 
 			// Append character to string
 			val.push_back( c );
-			
+
 			// Increment read position
 			mReadPosition += 1;
-		} 
+		}
 
 		return val;
 	}
@@ -128,9 +143,9 @@ namespace Enjon
 
 	template < typename T >
 	void ByteBuffer::Write( const T& val )
-	{ 
+	{
 		// Get size of val
-		usize size = sizeof( T ); 
+		usize size = sizeof( T );
 
 		// Make sure that enough bytes are present in buffer
 		if ( mWritePosition + size >= mCapacity )
@@ -141,7 +156,7 @@ namespace Enjon
 		}
 
 		// Now write to the buffer
-		*( T* )( mBuffer + mWritePosition ) = val;
+		*(T*)( mBuffer + mWritePosition ) = val;
 
 		// Increment position by size of val
 		mWritePosition += size;
@@ -164,15 +179,15 @@ namespace Enjon
 		Write< usize >( size );
 
 		// Write characters of string
-		for ( auto& c : val ) 
-		{ 
+		for ( auto& c : val )
+		{
 			// Write to buffer
-			*( char* )( mBuffer + mWritePosition ) = c;
+			*(char*)( mBuffer + mWritePosition ) = c;
 
 			// Increment by 1
 			mWritePosition += 1;
 			mSize += 1;
-		} 
+		}
 	}
 
 	template<>
@@ -186,9 +201,9 @@ namespace Enjon
 	}
 
 	//========================================================================
-			
+
 	void ByteBuffer::ReadFromFile( const Enjon::String& filePath )
-	{ 
+	{
 		std::ifstream infile;
 		infile.open( filePath.c_str( ), std::ios::in | std::ios::binary );
 
@@ -198,41 +213,55 @@ namespace Enjon
 
 			// Get file size
 			infile.seekg( 0, std::ios::end );
-			usize size = infile.tellg( ); 
+			usize size = infile.tellg( );
 			infile.seekg( 0, std::ios::beg );
 
 			// Create and read data
-			oData = new u8[ size + 1 ];
+			oData = new u8[size + 1];
 			infile.read( (char*)oData, size );
-			oData[ size ] = '\0';
+			oData[size] = '\0';
 
 			// Delete previous buffer that was allocated
 			if ( mBuffer )
 			{
 				delete mBuffer;
-			} 
+			}
 
 			// Set buffer to oData and reset fields
 			mBuffer = oData;
 			mSize = size;
 			mReadPosition = 0;
 			mWritePosition = 0;
-		} 
+
+			// Set status to being ready for reading
+			mStatus = BufferStatus::ReadyToRead;
+		}
+		else
+		{
+			mStatus = BufferStatus::Invalid;
+		}
 	}
 
 	//========================================================================
 
 	void ByteBuffer::WriteToFile( const Enjon::String& filePath )
-	{ 
+	{
 		// Open file 
-		std::ofstream file( filePath, std::ios::out | std::ios::binary ); 
+		std::ofstream file( filePath, std::ios::out | std::ios::binary );
 
 		// Only write if file is valid
 		if ( file )
 		{
 			file.write( (char*)mBuffer, mSize );
-		} 
+		}
 	}
+
+	//========================================================================
+
+	BufferStatus ByteBuffer::GetStatus( ) const
+	{
+		return mStatus;
+	} 
 
 	//========================================================================
 

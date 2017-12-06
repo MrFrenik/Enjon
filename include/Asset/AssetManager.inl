@@ -76,7 +76,22 @@ AssetHandle<T> AssetManager::GetAsset( const String& name )
 	u32 loaderId = GetAssetTypeId<T>( );
 
 	// Get handle from loader
-	AssetHandle<T> handle = mLoadersByAssetId[loaderId]->GetAsset<T>( name );
+	AssetHandle<T> handle = mLoadersByAssetId[loaderId]->GetAsset( name );
+
+	// Return asset handle
+	return handle;
+}
+
+//================================================================================================ 
+
+template <typename T>
+AssetHandle<T> AssetManager::GetAsset( const UUID& uuid )
+{
+	// Get appropriate loader based on asset type
+	u32 loaderId = GetAssetTypeId<T>( );
+
+	// Get handle from loader
+	AssetHandle<T> handle = mLoadersByAssetId[loaderId]->GetAsset( uuid );
 
 	// Return asset handle
 	return handle;

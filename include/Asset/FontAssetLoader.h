@@ -34,7 +34,7 @@ namespace Enjon
 			virtual void RegisterDefaultAsset( ) override; 
 
 		private:
-			Asset* LoadResourceFromFile( const String& filePath, const String& name ) override;
+			Asset* LoadResourceFromFile( const String& filePath ) override;
 	};
 }
 

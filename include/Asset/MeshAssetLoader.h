@@ -38,7 +38,7 @@ namespace Enjon
 			/**
 			* @brief Destructor
 			*/
-			virtual Asset* LoadResourceFromFile(const String& filePath, const String& name) override;
+			virtual Asset* LoadResourceFromFile(const String& filePath ) override;
 	}; 
 }
 
