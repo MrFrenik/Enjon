@@ -188,6 +188,18 @@ Enjon::Result Game::Initialize()
 	mAssetsPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Assets"); 
 	Enjon::String cachePath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Assets/Cache/"); 
 	Enjon::String projectDirectory = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + "/IsoARPG/";
+
+	// Check if directory exists - if not, create it
+	if ( !std::experimental::filesystem::exists( mAssetsPath + "/Cache" ) )
+	{
+		std::experimental::filesystem::create_directory( mAssetsPath + "/Cache" );
+	}
+
+	// Check if directory exists - if not, create it
+	if ( !std::experimental::filesystem::exists( mAssetsPath + "/Intermediate" ) )
+	{
+		std::experimental::filesystem::create_directory( mAssetsPath + "/Intermediate" );
+	}
 	
 	// Get asset manager and set its properties ( I don't like this )
 	mAssetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog()->Get<Enjon::AssetManager>(); 
@@ -204,6 +216,7 @@ Enjon::Result Game::Initialize()
 			std::cout << "Asset: " << p << "\n";
 		} 
 	}
+
 
 	{
 		// This works for flat arrays
