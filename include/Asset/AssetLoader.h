@@ -149,7 +149,9 @@ namespace Enjon
 			const Asset* GetAsset( const String& name );
 
 			/**
-			* @brief 
+			* @brief Adds an unloaded AssetRecordInfo struct with all the necessary information for loading the asset during runtime.
+			*			When the asset is to be loaded, this struct is searched for ( either by UUID or name ) and the asset is then deserialized off disk.
+			*			If during the deserialization process the asset is not found, the default asset for this particular asset type is returned.
 			*/
 			Result AddRecord( const CacheManifestRecord& record );
 

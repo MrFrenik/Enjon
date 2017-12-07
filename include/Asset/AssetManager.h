@@ -64,7 +64,7 @@ namespace Enjon
 			/**
 			*@brief Adds asset to project form given file path
 			*/
-			Result AddToDatabase( const String& filePath, b8 isRelativePath = true, bool updateCacheManifest = false );
+			Result AddToDatabase( const String& filePath, bool cache = true, bool isRelativePath = true );
 
 			/**
 			*@brief Gets asset manager name
@@ -173,7 +173,7 @@ namespace Enjon
 			/**
 			*@brief Adds asset to project form given file path
 			*/
-			Result SerializeAsset( const Asset* asset, bool updateCacheManifest = false );
+			Result SerializeAsset( const Asset* asset );
 
 			/**
 			*@brief

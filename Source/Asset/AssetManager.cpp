@@ -219,10 +219,13 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
-	Result AssetManager::AddToDatabase( const String& filePath, b8 isRelativePath, bool updateCacheManifest )
+	Result AssetManager::AddToDatabase( const String& resourceFilePath, bool cache, bool isRelativePath )
 	{ 
+		// To be determined, whether or not the asset will need to be cached
+		bool needToCache = false;
+
 		// Have to do a switch based on extension of file
-		s32 idx = GetLoaderIdxByFileExtension( filePath );
+		s32 idx = GetLoaderIdxByFileExtension( resourceFilePath );
 
 		// Asset to be returned from loading if successful
 		Asset* asset = nullptr;
@@ -235,7 +238,7 @@ namespace Enjon
 		}
 
 		// Get qualified name of asset
-		String qualifiedName = AssetLoader::GetQualifiedName( filePath );
+		String qualifiedName = AssetLoader::GetQualifiedName( resourceFilePath );
 
 		// Find loader by idx
 		auto query = mLoadersByAssetId.find( ( u32 )idx );
@@ -257,30 +260,42 @@ namespace Enjon
 				if ( isRelativePath )
 				{
 					// Return failure if path doesn't exist
-					if ( !Utils::FileExists( mAssetsPath + filePath ) )
+					if ( !Utils::FileExists( mAssetsPath + resourceFilePath ) )
 					{
 						return Result::FAILURE;
 					} 
 
-					// Load the asset from file
-					asset = query->second->LoadResourceFromFile( mAssetsPath + filePath ); 
- 
-					// If asset is valid
-					if ( asset )
+					// If file exists, grab that
+					if ( query->second->Exists( Utils::ToLower( mName ) + qualifiedName ) )
 					{
-						// Add to loader assets with asset record info
-						AssetRecordInfo info;
-						asset->mName = Utils::ToLower( mName ) + qualifiedName;
-						asset->mFilePath = mAssetsPath + filePath;
-						asset->mUUID = UUID::GenerateUUID( );
-						info.mAsset = asset;
-						info.mAssetName = asset->mName;
-						info.mAssetUUID = asset->mUUID;
-						info.mAssetFilePath = asset->mFilePath;
-						info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+						asset = const_cast< Asset* >( query->second->GetAsset( Utils::ToLower( mName ) + qualifiedName ) );
+					}
 
-						// Add to loader
-						query->second->AddToAssets( info );
+					else
+					{
+						// We need to cache the asset at the end of this operation
+						needToCache = true;
+
+						// Load the asset from file
+						asset = query->second->LoadResourceFromFile( mAssetsPath + resourceFilePath );
+	 
+						// If asset is valid
+						if ( asset )
+						{
+							// Add to loader assets with asset record info
+							AssetRecordInfo info;
+							asset->mName = Utils::ToLower( mName ) + qualifiedName;
+							asset->mFilePath = mAssetsPath + resourceFilePath;				// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
+							asset->mUUID = UUID::GenerateUUID( );
+							info.mAsset = asset;
+							info.mAssetName = asset->mName;
+							info.mAssetUUID = asset->mUUID;
+							info.mAssetFilePath = asset->mFilePath;							// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
+							info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+
+							// Add to loader
+							query->second->AddToAssets( info );
+						} 
 					} 
 				}
 
@@ -288,13 +303,13 @@ namespace Enjon
 				else
 				{
 					// Return failure if path doesn't exist
-					if ( !Utils::FileExists( filePath ) )
+					if ( !Utils::FileExists( resourceFilePath ) )
 					{
 						return Result::FAILURE;
 					}
 
 					// Load asset from file
-					asset = query->second->LoadResourceFromFile( filePath ); 
+					asset = query->second->LoadResourceFromFile( resourceFilePath );
 
 					// If asset is valid
 					if ( asset )
@@ -302,7 +317,7 @@ namespace Enjon
 						// Add to loader assets with asset record info
 						AssetRecordInfo info;
 						asset->mName = qualifiedName;
-						asset->mFilePath = filePath;
+						asset->mFilePath = resourceFilePath;
 						asset->mUUID = UUID::GenerateUUID( );
 						info.mAsset = asset;
 						info.mAssetName = asset->mName;
@@ -317,15 +332,22 @@ namespace Enjon
 			}
 		}
 
-		// Handle serialization of asset file
-		Result res = SerializeAsset( asset, updateCacheManifest );
+		// Result to return
+		Result res = Result::SUCCESS;
+
+		// If we need to cache the asset, then do that shit now
+		if ( needToCache && cache )
+		{
+			// Handle serialization of asset file
+			res = SerializeAsset( asset ); 
+		}
 
 		return res;
 	}
 
 	//======================================================================================================
 
-	Result AssetManager::SerializeAsset( const Asset* asset, bool updateCacheManifest )
+	Result AssetManager::SerializeAsset( const Asset* asset )
 	{
 		// Serialize asset with archiver
 		ObjectArchiver archiver;
@@ -339,19 +361,16 @@ namespace Enjon
 		String path = mCachedPath + asset->mName + ".easset"; 
 		archiver.WriteToFile( path );
 
-		if ( updateCacheManifest )
-		{
-			// Construct and add record to manifest
-			CacheManifestRecord record;
-			record.mAssetUUID = asset->mUUID;
-			record.mAssetFilePath = path;
-			record.mAssetLoaderClass = GetLoaderByAssetClass( asset->Class( ) )->Class( );
-			record.mAssetName = asset->mName;
-			mCacheManifest.AddRecord( record );
+		// Construct and add record to manifest
+		CacheManifestRecord record;
+		record.mAssetUUID = asset->mUUID;
+		record.mAssetFilePath = path;
+		record.mAssetLoaderClass = GetLoaderByAssetClass( asset->Class( ) )->Class( );
+		record.mAssetName = asset->mName;
+		mCacheManifest.AddRecord( record );
 
-			// Write out the manifest file
-			mCacheManifest.WriteOutManifest( mAssetsPath + "/Intermediate/CacheManifest.bin" ); 
-		} 
+		// Write out the manifest file
+		mCacheManifest.WriteOutManifest( mAssetsPath + "/Intermediate/CacheManifest.bin" ); 
 
 		return res;
 	}

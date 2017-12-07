@@ -147,8 +147,8 @@ namespace Enjon {
 			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph.Get( ) );
 			if ( sg->HasUniform( name ) )
 			{
-				UniformPrimitive< Vec2 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Vec2 > >( );;
-				UniformPrimitive< Vec2 >* uniOverride = new UniformPrimitive<Vec2>( *uniform );
+				UniformVec2* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformVec2 >( );;
+				UniformVec2* uniOverride = new UniformVec2( *uniform );
 				uniOverride->SetValue( value );
 				AddOverride( uniOverride );
 			}
@@ -156,7 +156,7 @@ namespace Enjon {
 		// Otherwise set override
 		else
 		{
-			mUniformOverrides[ name ]->Cast< UniformPrimitive< Vec2 > >( )->SetValue( value );
+			mUniformOverrides[ name ]->Cast< UniformVec2 >( )->SetValue( value );
 		} 
 	} 
 
@@ -170,8 +170,8 @@ namespace Enjon {
 			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph.Get( ) );
 			if ( sg->HasUniform( name ) )
 			{
-				UniformPrimitive< Vec3 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Vec3 > >( );;
-				UniformPrimitive< Vec3 >* uniOverride = new UniformPrimitive<Vec3>( *uniform );
+				UniformVec3* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformVec3 >( );;
+				UniformVec3* uniOverride = new UniformVec3( *uniform );
 				uniOverride->SetValue( value );
 				AddOverride( uniOverride );
 			}
@@ -179,7 +179,7 @@ namespace Enjon {
 		// Otherwise set override
 		else
 		{
-			mUniformOverrides[ name ]->Cast< UniformPrimitive< Vec3 > >( )->SetValue( value );
+			mUniformOverrides[ name ]->Cast< UniformVec3 >( )->SetValue( value );
 		} 
 	}
 
@@ -193,8 +193,8 @@ namespace Enjon {
 			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph.Get( ) );
 			if ( sg->HasUniform( name ) )
 			{
-				UniformPrimitive< Vec4 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Vec4 > >( );;
-				UniformPrimitive< Vec4 >* uniOverride = new UniformPrimitive<Vec4>( *uniform );
+				UniformVec4* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformVec4 >( );;
+				UniformVec4* uniOverride = new UniformVec4( *uniform );
 				uniOverride->SetValue( value );
 				AddOverride( uniOverride );
 			}
@@ -202,7 +202,7 @@ namespace Enjon {
 		// Otherwise set override
 		else
 		{
-			mUniformOverrides[ name ]->Cast< UniformPrimitive< Vec4 > >( )->SetValue( value );
+			mUniformOverrides[ name ]->Cast< UniformVec4 >( )->SetValue( value );
 		} 
 	}
 
@@ -210,13 +210,15 @@ namespace Enjon {
 
 	void Material::SetUniform( const Enjon::String& name, const Enjon::Mat4& value )
 	{ 
+		// Figure this one out later...
+		/*
 		// If override doesn't exist
 		if ( !HasOverride( name ) )
 		{
 			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph.Get( ) );
 			if ( sg->HasUniform( name ) )
 			{
-				UniformPrimitive< Mat4 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Mat4 > >( );;
+				UniformMat4* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< Mat4 > >( );;
 				UniformPrimitive< Mat4 >* uniOverride = new UniformPrimitive<Mat4>( *uniform );
 				uniOverride->SetValue( value );
 				AddOverride( uniOverride );
@@ -227,6 +229,7 @@ namespace Enjon {
 		{
 			mUniformOverrides[ name ]->Cast< UniformPrimitive< Mat4 > >( )->SetValue( value );
 		} 
+		*/
 	}
 
 	//=========================================================================================
@@ -239,8 +242,8 @@ namespace Enjon {
 			ShaderGraph* sg = const_cast< ShaderGraph* >( mShaderGraph.Get( ) );
 			if ( sg->HasUniform( name ) )
 			{
-				UniformPrimitive< f32 >* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformPrimitive< f32 > >( );;
-				UniformPrimitive< f32 >* uniOverride = new UniformPrimitive<f32>( *uniform );
+				UniformFloat* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformFloat >( );;
+				UniformFloat* uniOverride = new UniformFloat( *uniform );
 				uniOverride->SetValue( value );
 				AddOverride( uniOverride );
 			}
@@ -248,7 +251,7 @@ namespace Enjon {
 		// Otherwise set override
 		else
 		{
-			mUniformOverrides[ name ]->Cast< UniformPrimitive< f32 > >( )->SetValue( value );
+			mUniformOverrides[ name ]->Cast< UniformFloat >( )->SetValue( value );
 		} 
 	} 
 

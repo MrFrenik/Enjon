@@ -17,10 +17,8 @@
 
 namespace Enjon
 { 
-	ENJON_CLASS()
-	class Shader : public Asset
+	class Shader
 	{
-		ENJON_CLASS_BODY()
 		public:
 			/**
 			* @brief Constructor
@@ -101,8 +99,11 @@ namespace Enjon
 			AssetHandle<ShaderGraph> mGraph;
 	}; 
 	
-	class ShaderUniform
+	ENJON_CLASS( )
+	class ShaderUniform : public Enjon::Object
 	{ 
+		ENJON_CLASS_BODY( )
+
 		public:
 			/*
 			* @brief
@@ -142,14 +143,28 @@ namespace Enjon
 			UniformType GetType( ) const { return mType; }
 
 		protected: 
+			ENJON_PROPERTY( )
 			UniformType mType;
+
+			ENJON_PROPERTY( )
 			u32 mLocation = 0;
+
+			ENJON_PROPERTY( )
 			Enjon::String mName;
 	}; 
 
+	ENJON_CLASS( Construct )
 	class UniformTexture : public ShaderUniform
 	{
+		ENJON_CLASS_BODY( )
+
 		public:	
+
+			/*
+			* @brief
+			*/
+			UniformTexture( ) = default;
+
 			/*
 			* @brief
 			*/
@@ -182,53 +197,39 @@ namespace Enjon
 			}
  
 		private:
+
+			ENJON_PROPERTY( )
 			Enjon::AssetHandle< Enjon::Texture > mTexture;
 	};
 
-	template < typename T >
-	class UniformPrimitive : public ShaderUniform
+	ENJON_CLASS( Construct )
+	class UniformVec2 : public ShaderUniform
 	{
+		ENJON_CLASS_BODY( )
+
 		public:
+
 			/*
 			* @brief
 			*/
-			UniformPrimitive( const Enjon::String& name, const T& value, u32 location = 0 )
-			{ 
+			UniformVec2( ) = default;
+
+			/*
+			* @brief
+			*/
+			UniformVec2( const Enjon::String& name, const Vec2& value, u32 location = 0 )
+			{
 				mName = name;
 				mLocation = location;
 				mValue = value;
-
-				if ( std::is_base_of<Vec2, T>::value )
-				{
-					mType = UniformType::Vec2;
-				} 
-				else if ( std::is_base_of< Vec3, T>::value )
-				{
-					mType = UniformType::Vec3;
-				}
-				else if ( std::is_base_of< Vec4, T>::value )
-				{
-					mType = UniformType::Vec4;
-				}
-				else if ( std::is_base_of< Mat4, T >::value )
-				{
-					mType = UniformType::Mat4;
-				}
-				else if ( std::is_base_of< Enjon::AssetHandle< Enjon::Texture >, T >::value )
-				{
-					mType = UniformType::TextureSampler2D;
-				}
-				else
-				{
-					mType = UniformType::Float;
-				} 
+				mType = UniformType::Vec2; 
 			}
-			
+
 			/*
 			* @brief
 			*/
-			~UniformPrimitive( ) {}
-			
+			~UniformVec2( ) {}
+
 			/*
 			* @brief
 			*/
@@ -237,16 +238,177 @@ namespace Enjon
 				const_cast< Enjon::Shader* >( shader )->SetUniform( mName, mValue );
 			}
 
-			void SetValue( const T& value )
+			void SetValue( const Vec2& value )
 			{
 				mValue = value;
 			}
 
-			const T& GetValue( ) const { return mValue; }
+			const Vec2& GetValue( ) const 
+			{ 
+				return mValue; 
+			}
 
 		private:
-			T mValue;
-	}; 
+
+			ENJON_PROPERTY( )
+			Vec2 mValue;
+	};
+
+	ENJON_CLASS( Construct )
+	class UniformVec3 : public ShaderUniform
+	{
+		ENJON_CLASS_BODY( )
+
+	public:
+
+		/*
+		* @brief
+		*/
+		UniformVec3( ) = default;
+
+		/*
+		* @brief
+		*/
+		UniformVec3( const Enjon::String& name, const Vec3& value, u32 location = 0 )
+		{
+			mName = name;
+			mLocation = location;
+			mValue = value;
+			mType = UniformType::Vec3;
+		}
+
+		/*
+		* @brief
+		*/
+		~UniformVec3( ) = default;
+
+		/*
+		* @brief
+		*/
+		virtual void Bind( const Shader* shader ) override
+		{
+			const_cast< Enjon::Shader* >( shader )->SetUniform( mName, mValue );
+		}
+
+		void SetValue( const Vec3& value )
+		{
+			mValue = value;
+		}
+
+		const Vec3& GetValue( ) const
+		{
+			return mValue;
+		}
+
+	private:
+
+		ENJON_PROPERTY( )
+		Vec3 mValue;
+	};
+
+	ENJON_CLASS( Construct )
+	class UniformVec4 : public ShaderUniform
+	{
+		ENJON_CLASS_BODY( )
+
+	public:
+
+		/*
+		* @brief
+		*/
+		UniformVec4( ) = default;
+
+		/*
+		* @brief
+		*/
+		UniformVec4( const Enjon::String& name, const Vec4& value, u32 location = 0 )
+		{
+			mName = name;
+			mLocation = location;
+			mValue = value;
+			mType = UniformType::Vec4;
+		}
+
+		/*
+		* @brief
+		*/
+		~UniformVec4( ) = default;
+
+		/*
+		* @brief
+		*/
+		virtual void Bind( const Shader* shader ) override
+		{
+			const_cast< Enjon::Shader* >( shader )->SetUniform( mName, mValue );
+		}
+
+		void SetValue( const Vec4& value )
+		{
+			mValue = value;
+		}
+
+		const Vec4& GetValue( ) const
+		{
+			return mValue;
+		}
+
+	private:
+
+		ENJON_PROPERTY( )
+		Vec4 mValue;
+	};
+
+	ENJON_CLASS( Construct )
+	class UniformFloat : public ShaderUniform
+	{
+		ENJON_CLASS_BODY( )
+
+		public:
+
+			/*
+			* @brief
+			*/ 
+			UniformFloat( ) = default;
+
+			/*
+			* @brief
+			*/
+			UniformFloat( const Enjon::String& name, const f32& value, u32 location = 0 )
+			{
+				mName = name;
+				mLocation = location;
+				mValue = value;
+				mType = UniformType::Float;
+			}
+
+			/*
+			* @brief
+			*/
+			~UniformFloat( ) = default;
+
+			/*
+			* @brief
+			*/
+			virtual void Bind( const Shader* shader ) override
+			{
+				const_cast< Enjon::Shader* >( shader )->SetUniform( mName, mValue );
+			}
+
+			void SetValue( const f32& value )
+			{
+				mValue = value;
+			}
+
+			const f32& GetValue( ) const
+			{
+				return mValue;
+			}
+
+		private: 
+
+			ENJON_PROPERTY( )
+			f32 mValue;
+	};
 }
 
 #endif

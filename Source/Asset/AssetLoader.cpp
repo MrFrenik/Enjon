@@ -78,28 +78,31 @@ namespace Enjon
 		if ( Exists( name ) )
 		{
 			// Need to check for loaded status here
-			AssetRecordInfo info = mAssetsByName[name];
+			AssetRecordInfo* info = &mAssetsByName[name];
 
 			// If unloaded, load asset from disk
-			if ( info.GetAssetLoadStatus( ) == AssetLoadStatus::Unloaded )
+			if ( info->GetAssetLoadStatus( ) == AssetLoadStatus::Unloaded )
 			{
 				// Archiver to use to load asset from disk
 				ObjectArchiver archiver;
 
 				// Set the asset
-				info.mAsset = const_cast<Asset*>( archiver.Deserialize( info.mAssetFilePath )->Cast< Asset >( ) );
+				info->mAsset = const_cast<Asset*>( archiver.Deserialize( info->mAssetFilePath )->Cast< Asset >( ) );
 
 				// Set to loaded
-				info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+				info->mAssetLoadStatus = AssetLoadStatus::Loaded;
+
+				// Set up asset info
+				info->mAsset->mName = info->mAssetName; 
 			}
 
 			// Return asset from info record
-			if ( !info.mAsset )
+			if ( !info->mAsset )
 			{
 				return GetDefaultAsset( );
 			}
 
-			return info.mAsset;
+			return info->mAsset;
 		}
 
 		return GetDefaultAsset( ); 

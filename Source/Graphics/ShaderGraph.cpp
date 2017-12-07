@@ -1180,7 +1180,7 @@ namespace Enjon
 
 				case UniformType::Float:
 				{
-					UniformPrimitive< f32 >* uniform = new UniformPrimitive< f32 >( uniformName, 1.0f );
+					UniformFloat* uniform = new UniformFloat( uniformName, 1.0f );
 					if ( !AddUniform( uniform ) )
 					{
 						// Failed to add, so delete uniform
@@ -1191,7 +1191,7 @@ namespace Enjon
 
 				case UniformType::Vec2:
 				{
-					UniformPrimitive< Vec2 >* uniform = new UniformPrimitive< Vec2 >( uniformName, Vec2( 1.0f ) );
+					UniformVec2* uniform = new UniformVec2( uniformName, Vec2( 1.0f ) );
 					if ( !AddUniform( uniform ) )
 					{
 						// Failed to add, so delete uniform
@@ -1202,7 +1202,7 @@ namespace Enjon
 
 				case UniformType::Vec3:
 				{
-					UniformPrimitive< Vec3 >* uniform = new UniformPrimitive< Vec3 >( uniformName, Vec3( 1.0f ) );
+					UniformVec3* uniform = new UniformVec3( uniformName, Vec3( 1.0f ) );
 					if ( !AddUniform( uniform ) )
 					{
 						// Failed to add, so delete uniform
@@ -1213,7 +1213,7 @@ namespace Enjon
 
 				case UniformType::Vec4:
 				{
-					UniformPrimitive< Vec4 >* uniform = new UniformPrimitive< Vec4 >( uniformName, Vec4( 1.0f ) );
+					UniformVec4* uniform = new UniformVec4( uniformName, Vec4( 1.0f ) );
 					if ( !AddUniform( uniform ) )
 					{
 						// Failed to add, so delete uniform

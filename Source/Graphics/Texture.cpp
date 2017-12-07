@@ -1,4 +1,5 @@
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
+
 // File: Texture.cpp
 
 #include "Graphics/Texture.h"
@@ -62,6 +63,9 @@ namespace Enjon
 			stbi_set_flip_vertically_on_load( true );
 			f32* data = stbi_loadf( filePath.c_str( ), &width, &height, &nComps, 0 ); 
 
+			// Store texture data
+			textureData = (f32*)data;
+
 			glGenTextures( 1, &tex->mId );
 			glBindTexture( GL_TEXTURE_2D, tex->mId );
 			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGB, GL_FLOAT, data );
@@ -84,10 +88,7 @@ namespace Enjon
 				glGenerateMipmap( GL_TEXTURE_2D );
 			} 
 
-			tex->mFormat = TextureFormat::HDR;
-
-			// Free image data once done
-			//stbi_image_free( data );
+			tex->mFormat = TextureFormat::HDR; 
 		}
 
 		// Otherwise load standard format
@@ -99,6 +100,8 @@ namespace Enjon
 			// For now, this data will always have 4 components, since STBI_rgb_alpha is being passed in as required components param
 			// Could optimize this later
 			u8* data = stbi_load( filePath.c_str( ), &width, &height, &nComps, STBI_rgb_alpha );
+
+			// Store texture data
 			textureData = (u8*)data;
 
 			// TODO(): For some reason, required components is not working, so just default to 4 for now
@@ -249,9 +252,37 @@ namespace Enjon
 
 	//================================================= 
 
+	template void Texture::WriteTextureData< f32 >( ObjectArchiver* archiver ) const;
+	template void Texture::WriteTextureData< u8 >( ObjectArchiver* archiver ) const;
+
+	template <typename T>
+	void Texture::WriteTextureData( ObjectArchiver* archiver ) const
+	{
+		// Get raw data from source
+		const T* rawData = mSourceData->Cast< T >( )->GetData( );
+
+		// The pixel data consists of *y scanlines of *x pixels,
+		//	with each pixel consisting of N interleaved 8-bit components with no padding in between; the first
+		//	pixel pointed to is top-left-most in the image.  
+		u32 totalWidth = mWidth * mNumberOfComponents;
+
+		for ( u32 h = 0; h < mHeight; ++h )
+		{
+			for ( u32 w = 0; w < totalWidth; ++w )
+			{
+				// Get index of indvidual interleaved pixel
+				u32 pixelIndex = totalWidth * h + w; 
+				// Raw pixel 
+				T pixel = rawData[ pixelIndex ]; 
+				// Write individual pixel to archive
+				archiver->WriteToBuffer< T >( pixel );
+			}
+		} 
+	}
+
 	Result Texture::SerializeData( ObjectArchiver* archiver ) const 
 	{
-		std::cout << "Texture serializing!\n";
+		std::cout << "Serializing texture...\n";
 
 		// Keep around texture data resource object for serialization purposes
 		// Will be compiled out with release of application and only defined as being with editor data
@@ -267,35 +298,20 @@ namespace Enjon
 		{
 			case TextureFormat::HDR:
 			{
-				const f32* rawData = static_cast< TextureSourceData<f32>* >( mSourceData )->GetData( ); 
+				// Write texture data
+				WriteTextureData< f32 >( archiver );
+
+				// Release source data after serializing
+				const_cast< TextureSourceData< f32 >* >( mSourceData->Cast< f32 >( ) )->ReleaseData( );
 			} break;
 
 			case TextureFormat::LDR:
 			{
-				// Get raw data from source
-				const u8* rawData = mSourceData->Cast< u8 >()->GetData( ); 
-
-				// The pixel data consists of *y scanlines of *x pixels,
-				//	with each pixel consisting of N interleaved 8-bit components with no padding in between; the first
-				//	pixel pointed to is top-left-most in the image.  
-				u32 totalWidth = mWidth * mNumberOfComponents;
-
-				for ( u32 h = 0; h < mHeight; ++h )
-				{
-					for ( u32 w = 0; w < totalWidth; ++w )
-					{
-						// Get index of indvidual interleaved pixel
-						u32 pixelIndex = totalWidth * h + w; 
-						// Raw pixel 
-						u8 pixel = rawData[ pixelIndex ]; 
-						// Write individual pixel to archive
-						archiver->WriteToBuffer< u8 >( pixel );
-					}
-				}
+				// Write texture data
+				WriteTextureData< u8 >( archiver );
 
 				// Release source data after serializing
-				const_cast< TextureSourceData< u8 >* >( mSourceData->Cast< u8 >( ) )->ReleaseData( );
-
+				const_cast< TextureSourceData< u8 >* >( mSourceData->Cast< u8 >( ) )->ReleaseData( ); 
 			} break;
 		} 
 
@@ -304,7 +320,7 @@ namespace Enjon
 	
 	Result Texture::DeserializeData( ObjectArchiver* archiver )
 	{
-		std::cout << "Texture Deserializing!\n";
+		std::cout << "Deserializing texture...\n";
 
 		// Read properties from buffer - THIS SHOULD BE USED WITH A VERSIONING STRUCT!
 		mWidth = archiver->ReadFromBuffer< u32 >( );										// Texture width
@@ -317,6 +333,60 @@ namespace Enjon
 		{
 			case TextureFormat::HDR:
 			{ 
+				// Total width of pixel array
+				u32 totalWidth = mWidth * mNumberOfComponents;
+				// Buffer for pixel data
+				f32* pixelData = new f32[ mHeight * totalWidth]; 
+
+				// Fill out pixel data
+				for ( u32 h = 0; h < mHeight; ++h ) 
+				{
+					for ( u32 w = 0; w < totalWidth; ++w )
+					{
+						// Get index of indvidual interleaved pixel
+						u32 pixelIndex = totalWidth * h + w; 
+						// Read individual pixel from archive
+						pixelData[ pixelIndex ] = archiver->ReadFromBuffer< f32 >( );
+					}
+				} 
+
+				// Generate texture
+				glGenTextures( 1, &( mId ) ); 
+				// Bind texture to be created
+				glBindTexture( GL_TEXTURE_2D, mId );
+
+				switch ( mNumberOfComponents )
+				{
+					default:
+					case 3: 
+					{
+						glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB32F, mWidth, mHeight, 0, GL_RGB, GL_FLOAT, pixelData );
+					} break;
+
+					case 4: 
+					{
+						glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA32F, mWidth, mHeight, 0, GL_RGB, GL_FLOAT, pixelData );
+					} break;
+				}
+
+				s32 MAG_PARAM = GL_LINEAR;
+				s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
+				b8 genMips = true;
+
+				glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+				glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+				glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MAG_PARAM );
+				glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIN_PARAM );
+
+				if ( genMips )
+				{
+					glGenerateMipmap( GL_TEXTURE_2D );
+				} 
+
+				glBindTexture( GL_TEXTURE_2D, 0 );
+
+				// Clean up pixel data once done
+				delete pixelData;
 			} break;
 
 			case TextureFormat::LDR:

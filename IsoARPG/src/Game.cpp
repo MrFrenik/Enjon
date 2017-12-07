@@ -50,7 +50,7 @@
 
 #include <Base/MetaClassRegistry.h>
 
-#define ADD_ASSET_TO_PROJECT 0
+#define ADD_ASSET_TO_PROJECT 1
 
 Enjon::Texture* mNewTexture = nullptr;
 Enjon::Mesh* mMesh = nullptr;
@@ -131,19 +131,21 @@ void Game::TestObjectSerialize( )
 		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMesh( AssetHandle< Mesh >( mMesh ) );
 	} 
 
-#if ADD_ASSET_TO_PROJECT
 	{ 
+		// Will not serialize if not needed!
 		Enjon::String assetPath( "/Textures/beast.png" );
-		am->AddToDatabase( assetPath, true, true );
-	}
-#else
-	Enjon::AssetHandle< Enjon::Texture > cachedTexture = am->GetAsset< Enjon::Texture >( "isoarpg.textures.beast" );
-	if ( cachedTexture )
-	{
-		mGun.Get( )->GetComponent< GraphicsComponent >( )->GetMaterial( )->SetTexture( Enjon::TextureSlotType::Albedo, cachedTexture );
-	}
+		am->AddToDatabase( assetPath );
 
-#endif
+		// Will not serialize if not needed!
+		assetPath = Enjon::String( "/Models/bb8.obj" );
+		am->AddToDatabase( assetPath );
+
+		Enjon::AssetHandle< Enjon::Texture > cachedTexture = am->GetAsset< Enjon::Texture >( "isoarpg.textures.beast" );
+		mGun.Get( )->GetComponent< GraphicsComponent >( )->GetMaterial( )->SetTexture( Enjon::TextureSlotType::Albedo, cachedTexture );
+
+		Enjon::AssetHandle< Enjon::Mesh > cachedMesh = am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" );
+		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMesh( cachedMesh );
+	} 
 }
 
 std::vector<btRigidBody*> mBodies;
@@ -219,8 +221,6 @@ Enjon::Result Game::Initialize()
 
 		size = sizeof( vecTextures ) / sizeof(vecTextures[ 0 ]);
 	}
-
-	
 
 	// Get Subsystems from engine
 	Enjon::Engine* engine = Enjon::Engine::GetInstance();
@@ -308,7 +308,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( toyBoxDispPath );
 	mAssetManager->AddToDatabase( toyBoxNormalPath );
 	mAssetManager->AddToDatabase( unitSpherePath );
-	mAssetManager->AddToDatabase( shaderGraphPath );
+	mAssetManager->AddToDatabase( shaderGraphPath, false );
 	mAssetManager->AddToDatabase( eyePath );
 	mAssetManager->AddToDatabase( eyeAlbedo );
 	mAssetManager->AddToDatabase( eyeNormal );
@@ -372,7 +372,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( whitePath );
 	mAssetManager->AddToDatabase( teapotPath );
 	mAssetManager->AddToDatabase( waterPath );
-	mAssetManager->AddToDatabase( fontPath, false );
+	mAssetManager->AddToDatabase( fontPath, false, false );
 
 	// Assign font
 	Enjon::String fontQualifiedName = Enjon::AssetLoader::GetQualifiedName( fontPath ); 

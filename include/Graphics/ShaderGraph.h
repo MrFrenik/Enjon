@@ -17,6 +17,7 @@ namespace Enjon
 	class ShaderUniform;
 	typedef std::unordered_map< Enjon::String, Enjon::ShaderUniform* > UniformMap;
 
+	ENJON_ENUM( )
 	enum class UniformType
 	{
 		Float,

@@ -180,6 +180,12 @@ namespace Enjon
 			*/
 			static Texture* Construct( const String& filePath );
 
+			/*
+			* @brief
+			*/
+			template <typename T>
+			void WriteTextureData( ObjectArchiver* archiver ) const;
+
 		private:
 			
 			ENJON_PROPERTY( )

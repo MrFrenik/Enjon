@@ -480,6 +480,15 @@ void Introspection::ParseClassMembers( Lexer* lexer, Class* cls )
 
 		switch ( token.mType )
 		{
+			case TokenType::Token_CloseBrace:
+			{
+				// Done parsing class
+				if ( lexer->PeekAtNextToken( ).IsType( TokenType::Token_SemiColon ) )
+				{
+					isParsing = false;
+				}
+			};
+
 			case TokenType::Token_Identifier:
 			{
 				// Parse class property

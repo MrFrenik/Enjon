@@ -1707,7 +1707,7 @@ namespace Enjon
 					{
 						case UniformType::Float:
 						{
-							UniformPrimitive< f32 >* uf = uniform->Cast< UniformPrimitive< f32 > >( );
+							UniformFloat* uf = uniform->Cast< UniformFloat >( );
 							f32 val = uf->GetValue( );
 							if ( ImGui::SliderFloat( uniformName.c_str( ), &val, 0.0f, 3.0f ) )
 							{
@@ -1717,7 +1717,7 @@ namespace Enjon
 
 						case UniformType::Vec2:
 						{
-							UniformPrimitive< Vec2 >* uf = uniform->Cast< UniformPrimitive< Vec2 > >( );
+							UniformVec2* uf = uniform->Cast< UniformVec2 >( );
 							Enjon::Vec2 val = uf->GetValue( );
 							f32 vals[ 2 ];
 							vals[ 0 ] = val.x;
@@ -1730,7 +1730,7 @@ namespace Enjon
 
 						case UniformType::Vec3:
 						{
-							UniformPrimitive< Vec3 >* uf = uniform->Cast< UniformPrimitive< Vec3 > >( );
+							UniformVec3* uf = uniform->Cast< UniformVec3 >( );
 							Enjon::Vec3 val = uf->GetValue( );
 							f32 vals[ 3 ];
 							vals[ 0 ] = val.x;
@@ -1744,7 +1744,7 @@ namespace Enjon
 
 						case UniformType::Vec4:
 						{
-							UniformPrimitive< Vec4 >* uf = uniform->Cast< UniformPrimitive< Vec4 > >( );
+							UniformVec4* uf = uniform->Cast< UniformVec4 >( );
 							Enjon::Vec4 val = uf->GetValue( );
 							f32 vals[ 4 ];
 							vals[ 0 ] = val.x;
