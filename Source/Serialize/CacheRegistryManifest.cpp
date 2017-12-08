@@ -2,7 +2,10 @@
 // File: CacheRegistryManifest.cpp 
 
 #include "Serialize/CacheRegistryManifest.h"
+#include "Serialize/AssetArchiver.h"
 #include "Asset/AssetManager.h"
+
+#include <filesystem>
 
 namespace Enjon
 { 
@@ -67,29 +70,29 @@ namespace Enjon
 
 	Result CacheRegistryManifest::ReadInManifest( )
 	{
-		// Create read buffer from manifest path
-		ByteBuffer buffer( mManifestPath );
-
-		// If the buffer was created successfully, then parse
-		if ( buffer.GetStatus( ) == BufferStatus::ReadyToRead )
+		for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( mAssetManager->GetAssetsPath() + "/" ) )
 		{
-			// Grab record count
-			u32 recordCount = buffer.Read< u32 >();
-
-			// For each record, store into manifest 
-			for ( u32 i = 0; i < recordCount; ++i )
+			if ( Enjon::AssetManager::HasFileExtension( p.path( ).string( ), "easset" ) )
 			{
 				// Asset record to fill out
 				CacheManifestRecord record; 
-				
-				// Load into record
-				record.mAssetUUID = buffer.Read< UUID >();
-				record.mAssetFilePath = buffer.Read< String >();
-				record.mAssetName = buffer.Read< String >( );
 
-				// Get MetaClass for loader
-				const MetaClass* cls = Object::GetClass( buffer.Read< String >() );
-				record.mAssetLoaderClass = cls;
+				// Buffer to read from
+				ByteBuffer buffer( p.path( ).string( ) ); 
+
+				//==================================================
+				// Object Header 
+				//==================================================
+				const MetaClass* cls = Object::GetClass( buffer.Read< String >( ) );	// Read class type
+				u32 versionNumber = buffer.Read< u32 >( );								// Read version number id 
+
+				//==================================================
+				// Asset Header 
+				//================================================== 
+				record.mAssetUUID = buffer.Read< UUID >();									// UUID of asset
+				record.mAssetName = buffer.Read< String >();								// Asset name
+				record.mAssetLoaderClass = Object::GetClass( buffer.Read< String >( ) );	// Loader class
+				record.mAssetFilePath = p.path( ).string( );								// Asset file path 
 
 				// Add record
 				AddRecord( record );
@@ -97,21 +100,64 @@ namespace Enjon
 				if ( mAssetManager )
 				{
 					// At this point, should I pass on the record to the loader class? 
-					const AssetLoader* loader = mAssetManager->GetLoader( cls );
+					const AssetLoader* loader = mAssetManager->GetLoader( record.mAssetLoaderClass );
 
 					if ( loader )
 					{
 						// Add record to loader
-						const_cast< AssetLoader* >( loader )->AddRecord( record ); 
-					} 
-				}
+						const_cast<AssetLoader*>( loader )->AddRecord( record );
+					}
+				} 
 			} 
+		}
 
-			return Result::SUCCESS;
-		} 
+		return Result::SUCCESS;
 
-		return Result::FAILURE; 
-	} 
+		//// Create read buffer from manifest path
+		//ByteBuffer buffer( mManifestPath );
+
+		//// If the buffer was created successfully, then parse
+		//if ( buffer.GetStatus( ) == BufferStatus::ReadyToRead )
+		//{
+		//	// Grab record count
+		//	u32 recordCount = buffer.Read< u32 >();
+
+		//	// For each record, store into manifest 
+		//	for ( u32 i = 0; i < recordCount; ++i )
+		//	{
+		//		// Asset record to fill out
+		//		CacheManifestRecord record; 
+		//		
+		//		// Load into record
+		//		record.mAssetUUID = buffer.Read< UUID >();
+		//		record.mAssetFilePath = buffer.Read< String >();
+		//		record.mAssetName = buffer.Read< String >( );
+
+		//		// Get MetaClass for loader
+		//		const MetaClass* cls = Object::GetClass( buffer.Read< String >() );
+		//		record.mAssetLoaderClass = cls;
+
+		//		// Add record
+		//		AddRecord( record );
+
+		//		if ( mAssetManager )
+		//		{
+		//			// At this point, should I pass on the record to the loader class? 
+		//			const AssetLoader* loader = mAssetManager->GetLoader( cls );
+
+		//			if ( loader )
+		//			{
+		//				// Add record to loader
+		//				const_cast< AssetLoader* >( loader )->AddRecord( record ); 
+		//			} 
+		//		}
+		//	} 
+
+		//	return Result::SUCCESS;
+		//} 
+
+		//return Result::FAILURE; 
+	}
 
 	//=========================================================================================
 

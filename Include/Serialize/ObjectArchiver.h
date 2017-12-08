@@ -48,7 +48,7 @@ namespace Enjon
 			/*
 			*@brief
 			*/
-			Result WriteToFile( const String& filePath );
+			virtual Result WriteToFile( const String& filePath );
 
 			/*
 			* @brief
@@ -70,7 +70,7 @@ namespace Enjon
 				return mBuffer.Read< T >( ); 
 			} 
 
-		private:
+		protected:
 
 			/*
 			*@brief
@@ -87,7 +87,7 @@ namespace Enjon
 			*/ 
 			Result DeserializeObjectDataDefault( const Object* object, const MetaClass* cls );
 
-		private:
+		protected:
 			ByteBuffer mBuffer;
 	};
 	

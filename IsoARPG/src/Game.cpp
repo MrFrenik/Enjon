@@ -28,6 +28,7 @@
 #include <Engine.h>
 #include <Graphics/ShaderGraph.h>
 #include <Serialize/ObjectArchiver.h>
+#include <Serialize/AssetArchiver.h>
 
 #include <fmt/printf.h>
 #include <lz4/lz4.h>
@@ -94,7 +95,7 @@ void Game::TestObjectSerialize( )
 	// Serialize test object
 	archiver.Serialize( &writeTestObject ); 
 
-	String outputPath = am->GetAssetsPath( ) + "/Cache/testObject.easset";
+	String outputPath = am->GetAssetsPath( ) + "/Cache/testObject";
 
 	// Write to file
 	archiver.WriteToFile( outputPath ); 
@@ -107,28 +108,12 @@ void Game::TestObjectSerialize( )
 	Enjon::u32 i = 0;
 	for ( auto& dl : mGfx->GetScene()->GetDirectionalLights() )
 	{ 
-		String outputAssetPath = am->GetAssetsPath( ) + "/Cache/directionalLight" + std::to_string(i) +".easset";
+		String outputAssetPath = am->GetAssetsPath( ) + "/Cache/directionalLight" + std::to_string(i);
 		ObjectArchiver oa;
 		oa.Serialize( dl );
 		oa.WriteToFile( outputAssetPath ); 
 		oa.Deserialize( outputAssetPath, objects ); 
 		i++;
-	} 
-
-	// Try deserializing one of the textures that have been cached
-	{
-		ObjectArchiver textureArchiver; 
-		Enjon::String texPath = am->GetCachedAssetsPath( ) + "isoarpg.materials.woodframe.albedo.easset";
-		mNewTexture = static_cast< Enjon::Texture* > ( textureArchiver.Deserialize( texPath ) ); 
-		mGunMat->SetTexture( Enjon::TextureSlotType::Albedo, Enjon::AssetHandle< Enjon::Texture >( mNewTexture ) );
-	} 
-
-	// Try deserializing one of the textures that have been cached
-	{
-		ObjectArchiver meshArchiver; 
-		Enjon::String meshPath = am->GetCachedAssetsPath( ) + "isoarpg.models.buddha.easset";
-		mMesh = static_cast< Enjon::Mesh* > ( meshArchiver.Deserialize( meshPath ) ); 
-		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMesh( AssetHandle< Mesh >( mMesh ) );
 	} 
 
 	{ 
@@ -146,6 +131,11 @@ void Game::TestObjectSerialize( )
 		Enjon::AssetHandle< Enjon::Mesh > cachedMesh = am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" );
 		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMesh( cachedMesh );
 	} 
+
+	{
+		AssetArchiver assetArchiver; 
+		assetArchiver.Serialize( am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" ).Get( ) );
+	}
 }
 
 std::vector<btRigidBody*> mBodies;
@@ -209,13 +199,13 @@ Enjon::Result Game::Initialize()
 	mAssetManager->SetDatabaseName( GetApplicationName( ) ); 
 	mAssetManager->Initialize( );
 
-	for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( projectDirectory ) )
-	{
-		if ( Enjon::AssetManager::HasFileExtension( p.path().string(), "easset" ) )
-		{
-			std::cout << "Asset: " << p << "\n";
-		} 
-	}
+	//for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( projectDirectory ) )
+	//{
+	//	if ( Enjon::AssetManager::HasFileExtension( p.path().string(), "easset" ) )
+	//	{
+	//		std::cout << "Asset: " << p << "\n";
+	//	} 
+	//}
 
 
 	{

@@ -2,6 +2,7 @@
 #include "Base/Object.h"
 #include "Serialize/ByteBuffer.h"
 #include "Serialize/ObjectArchiver.h"
+#include "Serialize/AssetArchiver.h"
 
 namespace Enjon
 { 

@@ -25,7 +25,7 @@ namespace Enjon
 	}
 
 	//===================================================================== 
-
+ 
 	Result ObjectArchiver::Serialize( const Object* object )
 	{
 		// Get meta class from object

@@ -4,6 +4,7 @@
 #include "Asset/Asset.h" 
 #include "Asset/AssetManager.h"
 #include "Utils/FileUtils.h"
+#include "Serialize/AssetArchiver.h"
 #include "Engine.h"
 			
 namespace Enjon

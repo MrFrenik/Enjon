@@ -79,7 +79,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			Enjon::String GetAssetsPath( );
+			Enjon::String GetAssetsPath( ) const;
 			
 			/**
 			*@brief

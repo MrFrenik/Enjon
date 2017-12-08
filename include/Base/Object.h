@@ -17,6 +17,7 @@
 // Forward Declarations
 namespace Enjon
 { 
+	class AssetArchiver;
 	class ObjectArchiver;
 	class ByteBuffer;
 }
@@ -1075,6 +1076,7 @@ namespace Enjon
 	{
 		friend ObjectArchiver;
 		friend MetaClassRegistry;
+		friend AssetArchiver;
 		friend Engine;
 
 		public:

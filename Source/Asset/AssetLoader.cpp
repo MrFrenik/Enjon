@@ -4,6 +4,7 @@
 #include "Asset/AssetLoader.h"
 #include "Utils/FileUtils.h"
 #include "Serialize/ObjectArchiver.h"
+#include "Serialize/AssetArchiver.h"
 #include "Asset/AssetManager.h"
 
 namespace Enjon
@@ -44,28 +45,31 @@ namespace Enjon
 		if ( Exists( id ) )
 		{
 			// Need to check for loaded status here
-			AssetRecordInfo info = mAssetsByUUID[id.ToString( )];
+			AssetRecordInfo* info = &mAssetsByUUID[id.ToString( )];
 
 			// If unloaded, load asset from disk
-			if ( info.GetAssetLoadStatus( ) == AssetLoadStatus::Unloaded )
+			if ( info->GetAssetLoadStatus( ) == AssetLoadStatus::Unloaded )
 			{
 				// Archiver to use to load asset from disk
-				ObjectArchiver archiver; 
+				AssetArchiver archiver; 
 
 				// Set the asset
-				info.mAsset = const_cast<Asset*>( archiver.Deserialize( info.mAssetFilePath )->Cast< Asset >( ) ); 
+				info->mAsset = const_cast<Asset*>( archiver.Deserialize( info->mAssetFilePath )->Cast< Asset >( ) ); 
+
+				// Set loader of asset
+				info->mAsset->mLoader = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->GetLoaderByAssetClass( info->mAsset->Class( ) );
 
 				// Set to loaded
-				info.mAssetLoadStatus = AssetLoadStatus::Loaded; 
+				info->mAssetLoadStatus = AssetLoadStatus::Loaded; 
 			} 
 
 			// Return asset from info record
-			if ( !info.mAsset )
+			if ( !info->mAsset )
 			{
 				return GetDefaultAsset( );
 			}
 
-			return info.mAsset;
+			return info->mAsset;
 		}
 
 		return GetDefaultAsset( ); 
@@ -84,10 +88,13 @@ namespace Enjon
 			if ( info->GetAssetLoadStatus( ) == AssetLoadStatus::Unloaded )
 			{
 				// Archiver to use to load asset from disk
-				ObjectArchiver archiver;
+				AssetArchiver archiver; 
 
 				// Set the asset
 				info->mAsset = const_cast<Asset*>( archiver.Deserialize( info->mAssetFilePath )->Cast< Asset >( ) );
+
+				// Set loader of asset
+				info->mAsset->mLoader = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->GetLoaderByAssetClass( info->mAsset->Class( ) );
 
 				// Set to loaded
 				info->mAssetLoadStatus = AssetLoadStatus::Loaded;

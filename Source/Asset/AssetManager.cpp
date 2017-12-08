@@ -9,6 +9,7 @@
 #include "Asset/ShaderGraphAssetLoader.h"
 #include "Utils/FileUtils.h"
 #include "Serialize/ObjectArchiver.h"
+#include "Serialize/AssetArchiver.h"
 #include "Engine.h"
 
 #include <fmt/printf.h>
@@ -113,7 +114,7 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
-	Enjon::String AssetManager::GetAssetsPath( )
+	Enjon::String AssetManager::GetAssetsPath( ) const
 	{
 		return mAssetsPath;
 	}
@@ -287,6 +288,7 @@ namespace Enjon
 							asset->mName = Utils::ToLower( mName ) + qualifiedName;
 							asset->mFilePath = mAssetsPath + resourceFilePath;				// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
 							asset->mUUID = UUID::GenerateUUID( );
+							asset->mLoader = query->second;
 							info.mAsset = asset;
 							info.mAssetName = asset->mName;
 							info.mAssetUUID = asset->mUUID;
@@ -319,6 +321,7 @@ namespace Enjon
 						asset->mName = qualifiedName;
 						asset->mFilePath = resourceFilePath;
 						asset->mUUID = UUID::GenerateUUID( );
+						asset->mLoader = query->second;
 						info.mAsset = asset;
 						info.mAssetName = asset->mName;
 						info.mAssetUUID = asset->mUUID;
@@ -350,10 +353,10 @@ namespace Enjon
 	Result AssetManager::SerializeAsset( const Asset* asset )
 	{
 		// Serialize asset with archiver
-		ObjectArchiver archiver;
+		AssetArchiver archiver; 
 
 		// Should the UUID of the asset be written here? Should it be in the ObjectArchiver serialize path?
-		// Should there be a separate archiver that is in charge specifically of assets?
+		// Should there be a separate archiver that is in charge specifically of assets?  
 
 		Result res = archiver.Serialize( asset ); 
 
@@ -365,7 +368,7 @@ namespace Enjon
 		CacheManifestRecord record;
 		record.mAssetUUID = asset->mUUID;
 		record.mAssetFilePath = path;
-		record.mAssetLoaderClass = GetLoaderByAssetClass( asset->Class( ) )->Class( );
+		record.mAssetLoaderClass = asset->mLoader->Class( );
 		record.mAssetName = asset->mName;
 		mCacheManifest.AddRecord( record );
 

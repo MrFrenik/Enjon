@@ -19,6 +19,7 @@ namespace Enjon
 { 
 	class AssetLoader;
 	class AssetManager; 
+	class AssetArchiver;
 
 	ENJON_CLASS( )
 	class Asset : public Enjon::Object
@@ -28,6 +29,7 @@ namespace Enjon
 		public: 
 			friend AssetLoader;
 			friend AssetManager;
+			friend AssetArchiver;
 
 			/**
 			*@brief Constructor
