@@ -1201,6 +1201,11 @@ namespace Enjon
 			*/
 			virtual Result DeserializeData( ObjectArchiver* buffer ); 
 
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeLateInit( );
+
 		private:
 
 			/**

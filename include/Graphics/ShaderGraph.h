@@ -300,9 +300,10 @@ namespace Enjon
 
 		protected: 
 
-			virtual Result SerializeData( ObjectArchiver* archiver ) const override;
-
-			virtual Result DeserializeData( ObjectArchiver* archiver ) override;
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeLateInit( ) override;
 
 		private:
 			static rapidjson::Document GetJSONDocumentFromFilePath( const Enjon::String& filePath, s32* status );

@@ -1442,18 +1442,47 @@ void Introspection::Compile( const ReflectionConfig& config )
 						} break;
 
 						case PropertyType::HashMap:
-						{
-
-							HashMapProperty* mp = static_cast< HashMapProperty* > ( prop.second );
+						{ 
+							HashMapProperty* mp = static_cast< HashMapProperty* > ( prop.second ); 
 
 							std::string keyPropStr = GetTypeAsString( mp->mKeyPropertyType );
 							std::string valPropStr = GetTypeAsString( mp->mValuePropertyType );
+							
+							// Check for enum here
+							const Enum* keyEnm = GetEnum( mp->mKeyPropertyTypeRaw );
+							if ( keyEnm )
+							{
+								keyPropStr = "Enum";
+							}
+
+							const Enum* valEnm = GetEnum( mp->mValuePropertyTypeRaw );
+							if ( valEnm )
+							{
+								valPropStr = "Enum";
+							}
 
 							std::string keyProxyString = "";
-							std::string valProxyString = "";
+							std::string valProxyString = ""; 
 
-							keyProxyString += "new Enjon::MetaProperty( MetaPropertyType::" + keyPropStr + ", \"KeyProxy\", 0, 0, MetaPropertyTraits(false, 0, 0) )"; 
-							valProxyString += "new Enjon::MetaProperty( MetaPropertyType::" + valPropStr + ", \"ValueProxy\", 0, 0, MetaPropertyTraits(false, 0, 0) )"; 
+							if ( keyEnm )
+							{
+								keyProxyString += "new Enjon::MetaPropertyEnum( MetaPropertyType::" + keyPropStr + ", " 
+															+ "\"KeyProxy\", 0, 0, MetaPropertyTraits(false, 0, 0), " + "Enum_" + keyEnm->mName + "_Structure().Elements(), \"" + mp->mKeyPropertyTypeRaw + "\" )"; 
+							}
+							else
+							{
+								keyProxyString += "new Enjon::MetaProperty( MetaPropertyType::" + keyPropStr + ", \"KeyProxy\", 0, 0, MetaPropertyTraits(false, 0, 0) )"; 
+							}
+
+							if ( valEnm )
+							{
+								valProxyString += "new Enjon::MetaPropertyEnum( MetaPropertyType::" + valProxyString + ", " 
+															+ "\"ValueProxy\", 0, 0, MetaPropertyTraits(false, 0, 0), " + "Enum_" + valEnm->mName + "_Structure().Elements(), \"" + mp->mValuePropertyTypeRaw + "\" )"; 
+							}
+							else
+							{
+								valProxyString += "new Enjon::MetaProperty( MetaPropertyType::" + valPropStr + ", \"ValueProxy\", 0, 0, MetaPropertyTraits(false, 0, 0) )"; 
+							}
 
 							code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyHashMap< " + mp->mKeyPropertyTypeRaw + ", " + mp->mValuePropertyTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
 															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", MetaPropertyType::" + keyPropStr + ", MetaPropertyType::" + valPropStr + ", " + keyProxyString + ", "   

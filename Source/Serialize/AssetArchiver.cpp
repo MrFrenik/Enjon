@@ -117,11 +117,17 @@ namespace Enjon
 					res = DeserializeObjectDataDefault( asset, cls );
 				} 
 
+				// Delete object if not deserialized correctly
 				if ( res != Result::SUCCESS )
 				{
 					delete asset;
 					asset = nullptr;
-				} 
+				}
+				// Otherwise call late init after deserializing
+				else
+				{
+					asset->DeserializeLateInit( );
+				}
 			} 
 		}
 

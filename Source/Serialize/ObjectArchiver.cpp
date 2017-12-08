@@ -259,6 +259,18 @@ namespace Enjon
 			buffer.Write< valType >( iter->second );\
 		}\
 	} 
+
+#define WRITE_MAP_KEY_PRIM_VAL_OBJECT( object, prop, keyType, buffer )\
+	{\
+		const MetaPropertyHashMap< keyType, Object* >* mapProp = prop->Cast< MetaPropertyHashMap< keyType, Object* > >();\
+		for ( auto iter = mapProp->Begin( object ); iter != mapProp->End( object ); ++iter )\
+		{\
+			/*Write Key*/\
+			buffer.Write< keyType >( iter->first );\
+			/*Write Value*/\
+			Serialize( iter->second );\
+		}\
+	}
 				case MetaPropertyType::HashMap:
 				{ 
 					// Get base
@@ -283,7 +295,17 @@ namespace Enjon
 						{
 							switch ( base->GetValueType( ) )
 							{
-								case MetaPropertyType::U32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, String, u32, mBuffer )	break;
+								case MetaPropertyType::U32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, String, u32, mBuffer )	break; 
+								case MetaPropertyType::Object:	WRITE_MAP_KEY_PRIM_VAL_OBJECT( object, base, String, mBuffer )		break;
+							}
+						} break;
+
+						case MetaPropertyType::Enum:
+						{ 
+							switch ( base->GetValueType( ) )
+							{
+								case MetaPropertyType::String:	WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, s32, String, mBuffer )	break;
+								case MetaPropertyType::Object:	WRITE_MAP_KEY_PRIM_VAL_OBJECT( object, base, s32, mBuffer )			break;
 							}
 						} break;
 					}
@@ -326,51 +348,6 @@ namespace Enjon
 			// Push back object into objects vector
 			out.push_back( object );
 
-			// Fill out its properties ( // Perhaps, in order to be somewhat "backwards compatible", 
-			// instead of contiguously iterating over each property and assuming that it lines up with 
-			// the cached object file should instead search for the property by name using the meta class
-			// and then fill it out using that - will be trickier to implement of course
-			// need to know where to stop with de-serializing data...
-			// Should I serialize a json object then? That seems redundant as hell.  
-			
-			/*
-				... Started doing object data de-serialization after header...
-
-				usize propertyCount = mBuffer.Read< usize > (); 
-				for ( usize i = 0; i < propertyCount; ++i )
-				{
-					// Read the property name from the buffer
-					String propName = mBuffer.Read< String >();
-
-					// Read the size of the property ( used for skipping data in buffer if property doesn't exist anymore )
-					usize propDataSize = mBuffer.Read< usize >();
-
-					// Get the property from the meta class
-					const MetaClass* prop = cls->GetPropertyByName( propName );
-
-					// If property exists
-					if ( prop )
-					{
-						// Find its type to set properly
-						switch ( prop->GetType() )
-						{ 
-							...
-							// Assume its a u32 and read into class
-							case MetaPropertyType::U32:
-							{
-								u32 val = mBuffer.Read< u32 >();\
-								cls->SetValue( object, prop, val );
-							} break;
-						}
-					} 
-					// If doesn't exist, we need to skip over some data to realign ourselves
-					else
-					{
-						mBuffer.SkipAhead( propDataSize );
-					}
-				}
-			*/
-
 			Result res = object->DeserializeData( this );
 
 			if ( res == Result::INCOMPLETE )
@@ -378,23 +355,6 @@ namespace Enjon
 				DeserializeObjectDataDefault( object, cls );
 			} 
 		}
-
-		// How do I want binary files to be structured?
-		// Get class type at top of class?
-		/*
-			Header:
-				ClassType(String)
-				VerisonNumber(u32)
-			ObjData:
-				NumProperties() - could get this from the class itself, but it's safer to store this in the binary and use that 
-				For each property:
-					PropertyName() - used to search for property ( could use for migrating data versions as well )
-						- What if not found? Should the type also be stored so that the buffer can skip the upcoming data?
-						- What if the data is another Object type? Would be more useful to store the amount of bytes required
-						- Yeah, but now each binary file is being inflated with a String as well as a u32 for each property...
-						- Could have a separate binary file that's used to describe what this class is, but that's more file dependencies than I'd like
-					PropertyValue() - used to fill out property 
-		*/
 
 		return Result::SUCCESS;
 	} 
@@ -439,11 +399,17 @@ namespace Enjon
 					res = DeserializeObjectDataDefault( object, cls );
 				} 
 
+				// Delete object if not deserialized correctly
 				if ( res != Result::SUCCESS )
 				{
 					delete object;
 					object = nullptr;
 				} 
+				// Otherwise call late init after deserializing
+				else
+				{
+					object->DeserializeLateInit( );
+				}
 			} 
 		}
 
@@ -456,6 +422,58 @@ namespace Enjon
 	Result ObjectArchiver::Deserialize( const String& filePath, HashMap< const MetaClass*, Vector< Object* > >& out )
 	{
 		return Result::SUCCESS;
+	}
+
+	//=====================================================================
+
+	Object* ObjectArchiver::Deserialize( ByteBuffer* buffer ) 
+	{ 
+		// Object Header information 
+		const MetaClass* cls = Object::GetClass( buffer->Read< String >( ) );	// Read class type
+		u32 versionNumber = buffer->Read< u32 >( );								// Read version number id
+
+		// Object to construct and fill out
+		Object* object = nullptr;
+
+		if ( cls )
+		{
+			// Construct new object based on class
+			object = cls->Construct( );
+
+			// Couldn't construct object
+			if ( !object )
+			{
+				delete object;
+				object = nullptr;
+				return nullptr;
+			} 
+			// Successfully constructed, now deserialize data into it
+			else
+			{
+				Result res = object->DeserializeData( this );
+
+				// Default deserialization method if not object does not handle its own deserialization
+				if ( res == Result::INCOMPLETE )
+				{
+					res = DeserializeObjectDataDefault( object, cls );
+				} 
+
+				// Delete object if not deserialized correctly
+				if ( res != Result::SUCCESS )
+				{
+					delete object;
+					object = nullptr;
+				}
+				// Otherwise call late init after deserializing
+				else
+				{
+					object->DeserializeLateInit( );
+				}
+			} 
+		}
+
+		// Return object, either null or filled out
+		return object; 
 	}
 
 	//=====================================================================
@@ -685,6 +703,20 @@ namespace Enjon
 			mapProp->SetValueAt( object, key, val );\
 		}\
 	} 
+
+#define READ_MAP_KEY_PRIM_VAL_OBJ( object, prop, keyType, mapSize, buffer )\
+	{\
+		const MetaPropertyHashMap< keyType, Object* >* mapProp = prop->Cast< MetaPropertyHashMap< keyType, Object* > >();\
+		for ( usize j = 0; j < mapSize; ++j )\
+		{\
+			/* Read Key */\
+			keyType key = buffer.Read< keyType >();\
+			/* Read Value */\
+			Object* val = Deserialize( &buffer );\
+			/* Set Value */\
+			mapProp->SetValueAt( object, key, val );\
+		}\
+	}
 				case MetaPropertyType::HashMap:
 				{ 
 					// Get base
@@ -710,10 +742,20 @@ namespace Enjon
 							switch( base->GetValueType( ) )
 							{
 								case MetaPropertyType::U32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, String, u32, mapSize, mBuffer )	break; 
+								case MetaPropertyType::Object:	READ_MAP_KEY_PRIM_VAL_OBJ( object, base, String, mapSize, mBuffer )			break;
+							}
+
+						} break;
+
+						case MetaPropertyType::Enum:
+						{ 
+							switch ( base->GetValueType( ) )
+							{
+								case MetaPropertyType::String:	READ_MAP_KEY_PRIM_VAL_PRIM( object, base, s32, String, mapSize, mBuffer )	break;
+								case MetaPropertyType::Object:	READ_MAP_KEY_PRIM_VAL_OBJ( object, base, s32, mapSize, mBuffer )			break;
 							}
 						} break;
 					} 
-					
 				} break; 
 			}
 		}

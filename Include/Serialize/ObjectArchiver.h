@@ -77,6 +77,13 @@ namespace Enjon
 			*/ 
 			void Reset( );
 
+		protected:
+
+			/*
+			*@brief Takes an existing byte buffer and parses for an object - WILL NOT CALL RESET 
+			*/ 
+			Object* Deserialize( ByteBuffer* buffer );
+
 		public:
 			/*
 			*@brief
