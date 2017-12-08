@@ -2526,7 +2526,8 @@ for ( u32 i = 0; i < ShaderGraph::TagCount( code, find ); ++i )\
 			WriteToFile( ShaderPassType( i ) ); 
 
 			// Create shader TODO(): Need a way to detect that this created failed
-			Enjon::Shader* shader = new Shader( AssetHandle<ShaderGraph>(this), ShaderPassType( i ) );
+			ShaderPassType spt = ShaderPassType( i );
+			Enjon::Shader* shader = new Shader( AssetHandle< ShaderGraph >( this ), spt, GetCode( spt, ShaderType::Vertex ), GetCode( spt, ShaderType::Fragment ) );
 
 			// Add shader
 			mShaders[ ShaderPassType( i ) ] = shader;

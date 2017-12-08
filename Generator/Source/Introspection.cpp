@@ -1391,6 +1391,14 @@ void Introspection::Compile( const ReflectionConfig& config )
 					// Get property as string
 					auto metaProp = prop.second->mType;
 					std::string metaPropStr = GetTypeAsString( metaProp ); 
+
+					// Check for enum here
+					const Enum* enm = GetEnum( prop.second->mTypeRaw );
+					if ( enm )
+					{
+						metaProp = PropertyType::Enum;
+						metaPropStr = GetTypeAsString( metaProp );
+					}
 					
 					// Fill out property traits
 					std::string traits = "MetaPropertyTraits( "; 
