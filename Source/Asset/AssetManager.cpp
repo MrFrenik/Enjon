@@ -370,10 +370,7 @@ namespace Enjon
 		record.mAssetFilePath = path;
 		record.mAssetLoaderClass = asset->mLoader->Class( );
 		record.mAssetName = asset->mName;
-		mCacheManifest.AddRecord( record );
-
-		// Write out the manifest file
-		mCacheManifest.WriteOutManifest( mAssetsPath + "/Intermediate/CacheManifest.bin" ); 
+		mCacheManifest.AddRecord( record ); 
 
 		return res;
 	}

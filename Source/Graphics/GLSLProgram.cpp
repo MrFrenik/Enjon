@@ -318,7 +318,6 @@ namespace Enjon
 
 	void GLSLProgram::BindTexture(const std::string& Name, const GLuint& TextureID, const GLuint Index)
 	{
-		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0 + Index);
 		
 		auto Search = UniformMap.find( Name );
@@ -332,7 +331,6 @@ namespace Enjon
 
 	void GLSLProgram::BindTexture(const std::string& name, const GLTexture& texture, const GLuint index)
 	{
-		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0 + index);
 
 		auto Search = UniformMap.find(name);

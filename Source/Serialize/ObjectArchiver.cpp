@@ -547,7 +547,6 @@ namespace Enjon
 					const MetaPropertyTemplateBase* base = prop->Cast< MetaPropertyTemplateBase >();
 					AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
 					AssetHandle<Asset> val;
-					cls->GetValue( object, prop, &val );
 
 					// Get meta class of the asset
 					const MetaClass* assetCls = base->GetClassOfTemplatedArgument( );
@@ -562,7 +561,7 @@ namespace Enjon
 					if ( asset )
 					{
 						// Set asset handle to default asset
-						val.Set( const_cast< Asset*> ( asset ) );
+						val.Set( asset );
 
 					}
 					// Otherwise get default asset for this class type

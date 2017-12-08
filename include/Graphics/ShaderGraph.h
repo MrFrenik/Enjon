@@ -13,9 +13,11 @@
 
 namespace Enjon
 {
+	// Forward Declarations
+	class ShaderGraphNode;
+	class ShaderGraphAssetLoader;
 	class Shader;
-	class ShaderUniform;
-	typedef std::unordered_map< Enjon::String, Enjon::ShaderUniform* > UniformMap;
+	class ShaderUniform; 
 
 	ENJON_ENUM( )
 	enum class UniformType
@@ -34,6 +36,7 @@ namespace Enjon
 		Fragment,
 		Vertex,
 		Compute,
+		Tessellation,
 		Unknown
 	};
 
@@ -142,7 +145,6 @@ namespace Enjon
 		ShaderGraphNodeType mType;
 	};
 
-	class ShaderGraphNode;
 	struct NodeLink
 	{
 		const ShaderGraphNode* mConnectingNode = nullptr;
@@ -220,6 +222,7 @@ namespace Enjon
 		std::vector< NodeLink > mLinks;
 	}; 
 
+	ENJON_ENUM( )
 	enum class ShaderPassType
 	{
 		StaticGeom,
@@ -227,9 +230,9 @@ namespace Enjon
 		Forward_StaticGeom,
 		Count
 	}; 
-	class ShaderGraphAssetLoader;
 
-	ENJON_CLASS( )
+
+	ENJON_CLASS( Construct )
 	class ShaderGraph : public Enjon::Asset
 	{ 
 		ENJON_CLASS_BODY( ) 
@@ -297,9 +300,9 @@ namespace Enjon
 
 		protected: 
 
-			virtual Result Serialize( Enjon::ByteBuffer& buffer ) override;
+			virtual Result SerializeData( ObjectArchiver* archiver ) const override;
 
-			virtual Result Deserialize( Enjon::ByteBuffer& buffer ) override;
+			virtual Result DeserializeData( ObjectArchiver* archiver ) override;
 
 		private:
 			static rapidjson::Document GetJSONDocumentFromFilePath( const Enjon::String& filePath, s32* status );
@@ -339,11 +342,15 @@ namespace Enjon
 
 			ENJON_PROPERTY( )
 			u32 mTextureSamplerLocation = 0;
+
+			ENJON_PROPERTY( )
+			HashMap< ShaderPassType, String > mShaderPassCode;
+
+			ENJON_PROPERTY( )
+			HashMap< String, ShaderUniform* > mUniforms; 
 			
 			HashMap< String, ShaderGraphNode > mNodes;
 			HashMap< ShaderPassType, Shader* > mShaders;
-			HashMap< String, ShaderUniform* > mUniforms;
-			HashMap< ShaderPassType, String > mShaderPassCode;
 			ShaderGraphNode mMainSurfaceNode;
 	};
 }

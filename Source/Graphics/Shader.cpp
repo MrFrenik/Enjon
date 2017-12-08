@@ -31,23 +31,40 @@ namespace Enjon
 		Compile( );
 	}
 
-	Enjon::Result Shader::Compile( )
+	/**
+	* @brief Constructor
+	*/
+	Shader::Shader( const AssetHandle< ShaderGraph >& graph, ShaderPassType passType, const String& vertexShaderCode, const String& fragmentShaderCode )
+		: mGraph( graph ), mPassType( passType )
 	{ 
+		Compile( true, vertexShaderCode, fragmentShaderCode );
+	}
+
+	Enjon::Result Shader::Compile( bool passedCode, const String& vertexCode, const String& fragmentCode )
+	{ 
+		Enjon::String vertexShaderCode = vertexCode;
+		Enjon::String fragmentShaderCode = fragmentCode; 
+
 		// Get shader resource path
 		Enjon::String sp = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( )->GetAssetsPath( ) + "/Shaders";
+
 		// Get vertex file path 
 		Enjon::String vertName = mGraph->GetName( ) + "." + ShaderGraph::ShaderPassToString( mPassType ) + ".Vertex.glsl";
 		Enjon::String vertPath = sp + "/" + vertName;
 		
 		// Get fragment file path 
 		Enjon::String fragName = mGraph->GetName( ) + "." + ShaderGraph::ShaderPassToString( mPassType ) + ".Fragment.glsl";
-		Enjon::String fragPath = sp + "/" + fragName;
+		Enjon::String fragPath = sp + "/" + fragName; 
 
-		// Parse shader for vertex shader output 
-		Enjon::String vertexShaderCode = Enjon::Utils::read_file( vertPath.c_str( ) );
+		if ( !passedCode )
+		{
+			// Parse shader for vertex shader output 
+			Enjon::String vertexShaderCode = Enjon::Utils::read_file( vertPath.c_str( ) );
 
-		// Parse shader for fragment shader output
-		Enjon::String fragmentShaderCode = Enjon::Utils::read_file( fragPath.c_str( ) );
+			// Parse shader for fragment shader output
+			Enjon::String fragmentShaderCode = Enjon::Utils::read_file( fragPath.c_str( ) ); 
+
+		}
 
 		// Create GLSL Program
 		mProgramID = glCreateProgram( );

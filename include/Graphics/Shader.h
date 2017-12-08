@@ -24,6 +24,11 @@ namespace Enjon
 			* @brief Constructor
 			*/
 			Shader( );
+
+			/**
+			* @brief Constructor
+			*/
+			Shader( const AssetHandle< ShaderGraph >& graph, ShaderPassType passType, const String& vertexShaderCode, const String& fragmentShaderCode );
 			
 			/**
 			* @brief Constructor
@@ -38,7 +43,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			Enjon::Result Compile( ); 
+			Enjon::Result Compile( bool passedCode = false, const String& vertexShaderCode = "", const String& fragmentShaderCode = "" ); 
 			
 			/*
 			* @brief

@@ -77,6 +77,7 @@ namespace Enjon
 			*/ 
 			void Reset( );
 
+		public:
 			/*
 			*@brief
 			*/ 

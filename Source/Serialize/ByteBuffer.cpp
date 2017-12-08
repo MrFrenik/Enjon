@@ -167,11 +167,18 @@ namespace Enjon
 	void ByteBuffer::Write< String >( const String& val )
 	{
 		// Get size of val
-		usize size = val.length( );
+		usize size = val.length( ); 
 
-		if ( mWritePosition + size + sizeof( usize ) >= mCapacity )
+		// The total amount of storage needed to write this chunk of data
+		usize totalWriteSize = mWritePosition + size + sizeof( usize );
+
+		if ( totalWriteSize >= mCapacity )
 		{
-			mCapacity *= 2;
+			// Continue to grow until we grow past the total amount needed to write
+			while ( mCapacity < totalWriteSize )
+			{
+				mCapacity *= 2;
+			}
 			Resize( mCapacity );
 		}
 

@@ -2,6 +2,7 @@
 #include "Graphics/Shader.h"
 #include "Asset/AssetManager.h"
 #include "Asset/ShaderGraphAssetLoader.h"
+#include "Serialize/ObjectArchiver.h"
 #include "Engine.h"
 
 #include "rapidjson/rapidjson.h"
@@ -273,20 +274,95 @@ namespace Enjon
 	}
 
 	//=========================================================================================================================
-		
-	Result ShaderGraph::Serialize( Enjon::ByteBuffer& buffer )
+
+	Result ShaderGraph::SerializeData( ObjectArchiver* archiver ) const
 	{
-		return Result::SUCCESS;
+		archiver->WriteToBuffer< String >( mName );
+		archiver->WriteToBuffer< u32 >( mTextureSamplerLocation );
+		archiver->WriteToBuffer< u32 >( mShaderPassCode.size( ) );
+		for ( auto iter = mShaderPassCode.begin( ); iter != mShaderPassCode.end( ); ++iter )
+		{
+			archiver->WriteToBuffer< u32 >( (u32)iter->first );
+			archiver->WriteToBuffer< String >( iter->second );
+		}
+		archiver->WriteToBuffer< u32 >( mUniforms.size( ) );
+		for ( auto iter = mUniforms.begin( ); iter != mUniforms.end( ); ++iter )
+		{
+			archiver->WriteToBuffer< String >( iter->first );
+			archiver->Serialize( iter->second );
+		} 
+
+		return Result::INCOMPLETE;
 	}
 
 	//=========================================================================================================================
 
-	Result ShaderGraph::Deserialize( Enjon::ByteBuffer& buffer )
+	Result ShaderGraph::DeserializeData( ObjectArchiver* archiver )
 	{
-		return Result::SUCCESS;
+		mName = archiver->ReadFromBuffer< String >( );
+		mTextureSamplerLocation = archiver->ReadFromBuffer< u32 >( );
+		u32 shaderCodeSize = archiver->ReadFromBuffer< u32 >( );
+		for ( u32 i = 0; i < shaderCodeSize; ++i )
+		{
+			ShaderPassType key = ( ShaderPassType )archiver->ReadFromBuffer< u32 >( );
+			String value = archiver->ReadFromBuffer< String >( ); 
+			mShaderPassCode[ key ] = value;
+		}
+		u32 uniformSize = archiver->ReadFromBuffer< u32 >( );
+		for ( u32 i = 0; i < uniformSize; ++i )
+		{
+			String key = archiver->ReadFromBuffer< String >( ); 
+
+			// Read uniform object header information
+			const MetaClass* cls = Object::GetClass( archiver->ReadFromBuffer< String >( ) );	// Read class type
+			u32 versionNumber = archiver->ReadFromBuffer< u32 >( );								// Read version number id 
+
+			ShaderUniform* value = nullptr;
+			if ( cls )
+			{
+				// Construct new object based on class
+				value = (ShaderUniform*)cls->Construct( );
+
+				// Couldn't construct object
+				if ( !value )
+				{
+					delete value;
+					value = nullptr;
+				} 
+				// Successfully constructed, now deserialize data into it
+				else
+				{ 
+					// Default deserialization method if not object does not handle its own deserialization
+					Result res = archiver->DeserializeObjectDataDefault( value, cls );
+
+					if ( res != Result::SUCCESS )
+					{
+						delete value;
+						value = nullptr;
+					} 
+					else
+					{
+						mUniforms[ key ] = value;
+					}
+				} 
+			} 
+		}
+
+		// Need to create shaders now from shader code
+		for ( u32 i = 0; i < mShaderPassCode.size(); ++i ) 
+		{ 
+			ShaderPassType passType = ShaderPassType( i );
+			// Create shader TODO(): Need a way to detect that this created failed
+			Enjon::Shader* shader = new Shader( AssetHandle< ShaderGraph >( this ), passType, GetCode( passType, ShaderType::Vertex ), GetCode( passType, ShaderType::Fragment ) );
+
+			// Add shader
+			mShaders[ ShaderPassType( i ) ] = shader;
+		} 
+
+		return Result::SUCCESS; 
 	}
 
-	//=========================================================================================================================
+	//========================================================================================================================= 
 
 	s32 ShaderGraph::DeserializeTemplate( const Enjon::String& filePath )
 	{

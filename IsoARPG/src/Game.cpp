@@ -311,7 +311,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( toyBoxDispPath );
 	mAssetManager->AddToDatabase( toyBoxNormalPath );
 	mAssetManager->AddToDatabase( unitSpherePath );
-	mAssetManager->AddToDatabase( shaderGraphPath, false );
+	mAssetManager->AddToDatabase( shaderGraphPath );
 	mAssetManager->AddToDatabase( eyePath );
 	mAssetManager->AddToDatabase( eyeAlbedo );
 	mAssetManager->AddToDatabase( eyeNormal );
