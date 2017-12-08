@@ -307,6 +307,7 @@ Enjon::Result Game::Initialize()
 	Enjon::String rootPath = engine->GetConfig( ).GetRoot( );
 	Enjon::String fontPath = rootPath + "/Assets/Fonts/WeblySleek/weblysleekuisb.ttf"; 
 
+
 	// Add to asset database
 	mAssetManager->AddToDatabase( toyBoxDispPath );
 	mAssetManager->AddToDatabase( toyBoxNormalPath );

@@ -1,5 +1,3 @@
-@echo off
-
 git add Source
 
 git add include
