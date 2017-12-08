@@ -1,8 +1,15 @@
 @echo off
+
 git add Source
+
 git add include
+
 git add Include
+
 git add IsoARPG/Include
+
 git add IsoARPG/src
+
 git add Generator/Source
-git add Generator/Include 
+
+git add Generator/Include
