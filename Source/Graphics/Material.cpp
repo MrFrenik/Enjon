@@ -1,5 +1,6 @@
 #include "Graphics/Material.h"
 #include "Graphics/GLSLProgram.h"
+#include "Asset/MaterialAssetLoader.h"
 
 #include <assert.h>
 
@@ -9,21 +10,13 @@ namespace Enjon {
 
 	Material::Material()
 	{
-		for ( u32 i = 0; i < 50; ++i )
-		{
-			mTestVector.push_back( i );
-		}
 	}
 	
 	//======================================================================== 
 			
-	Material::Material( const Enjon::AssetHandle< Enjon::ShaderGraph >& shaderGraph )
+	Material::Material( const AssetHandle< ShaderGraph >& shaderGraph )
 		: mShaderGraph( shaderGraph )
 	{ 
-		for ( u32 i = 0; i < 50; ++i )
-		{
-			mTestVector.push_back( i );
-		}
 	}
 	
 	//======================================================================== 
@@ -61,14 +54,14 @@ namespace Enjon {
  
 	//========================================================================
 			
-	bool Material::HasOverride( const Enjon::String& uniformName )
+	bool Material::HasOverride( const String& uniformName )
 	{
 		return ( mUniformOverrides.find( uniformName ) != mUniformOverrides.end( ) );
 	}
  
 	//========================================================================
 
-	const ShaderUniform* Material::GetOverride( const Enjon::String& uniformName )
+	const ShaderUniform* Material::GetOverride( const String& uniformName )
 	{
 		if ( HasOverride( uniformName ) )
 		{
@@ -80,14 +73,14 @@ namespace Enjon {
 
 	//========================================================================
 			
-	Enjon::AssetHandle< Enjon::ShaderGraph > Material::GetShaderGraph( ) const
+	AssetHandle< ShaderGraph > Material::GetShaderGraph( ) const
 	{
 		return mShaderGraph;
 	}
 
 	//========================================================================
 
-	void Material::SetShaderGraph( const Enjon::AssetHandle< Enjon::ShaderGraph >& graph )
+	void Material::SetShaderGraph( const AssetHandle< ShaderGraph >& graph )
 	{
 		mShaderGraph = graph;
 	}
@@ -96,13 +89,13 @@ namespace Enjon {
 			
 	void Material::Bind( const Shader* shader )
 	{
-		Enjon::ShaderGraph* sg = const_cast< ShaderGraph* > ( mShaderGraph.Get( ) );
-		Enjon::Shader* sh = const_cast< Shader* > ( shader );
+		ShaderGraph* sg = const_cast< ShaderGraph* > ( mShaderGraph.Get( ) );
+		Shader* sh = const_cast< Shader* > ( shader );
 		if ( sh )
 		{
 			for ( auto& u : *sg->GetUniforms( ) )
 			{ 
-				Enjon::String uniformName = u.second->GetName( );
+				String uniformName = u.second->GetName( );
 				
 				if ( HasOverride( uniformName ) )
 				{
@@ -119,7 +112,7 @@ namespace Enjon {
 
 	//========================================================================
 			
-	void Material::SetUniform( const Enjon::String& name, const Enjon::AssetHandle< Enjon::Texture >& value )
+	void Material::SetUniform( const String& name, const AssetHandle< Texture >& value )
 	{
 		if ( HasOverride( name ) )
 		{ 
@@ -139,7 +132,7 @@ namespace Enjon {
 		}
 	}
 
-	void Material::SetUniform( const Enjon::String& name, const Enjon::Vec2& value )
+	void Material::SetUniform( const String& name, const Vec2& value )
 	{
 		// If override doesn't exist
 		if ( !HasOverride( name ) )
@@ -162,7 +155,7 @@ namespace Enjon {
 
 	//=========================================================================================
 
-	void Material::SetUniform( const Enjon::String& name, const Enjon::Vec3& value )
+	void Material::SetUniform( const String& name, const Vec3& value )
 	{
 		// If override doesn't exist
 		if ( !HasOverride( name ) )
@@ -185,7 +178,7 @@ namespace Enjon {
 
 	//=========================================================================================
 
-	void Material::SetUniform( const Enjon::String& name, const Enjon::Vec4& value )
+	void Material::SetUniform( const String& name, const Vec4& value )
 	{ 
 		// If override doesn't exist
 		if ( !HasOverride( name ) )
@@ -208,7 +201,7 @@ namespace Enjon {
 
 	//=========================================================================================
 
-	void Material::SetUniform( const Enjon::String& name, const Enjon::Mat4& value )
+	void Material::SetUniform( const String& name, const Mat4& value )
 	{ 
 		// Figure this one out later...
 		/*
@@ -234,7 +227,7 @@ namespace Enjon {
 
 	//=========================================================================================
 
-	void Material::SetUniform( const Enjon::String& name, const f32& value )
+	void Material::SetUniform( const String& name, const f32& value )
 	{ 
 		// If override doesn't exist
 		if ( !HasOverride( name ) )

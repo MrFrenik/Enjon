@@ -14,6 +14,7 @@
 namespace Enjon { 
 
 	class GLSLProgram;
+	class MaterialAssetLoader;
 
 	enum class TextureSlotType
 	{
@@ -26,13 +27,14 @@ namespace Enjon {
 		Count
 	};
 
-	ENJON_CLASS( )
+	ENJON_CLASS( Construct )
 	class Material : public Asset
 	{
 		ENJON_CLASS_BODY( )
 
 		friend Shader;
 		friend ShaderGraph;
+		friend MaterialAssetLoader;
 
 		public:
 
@@ -44,12 +46,12 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			Material( const Enjon::ShaderGraph* shaderGraph );
+			Material( const ShaderGraph* shaderGraph );
 			
 			/*
 			* @brief
 			*/
-			Material( const Enjon::AssetHandle< Enjon::ShaderGraph >& shaderGraph );
+			Material( const AssetHandle< ShaderGraph >& shaderGraph );
 
 			/*
 			* @brief
@@ -79,12 +81,12 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			bool HasOverride( const Enjon::String& uniformName );
+			bool HasOverride( const String& uniformName );
 
 			/*
 			* @brief
 			*/
-			const ShaderUniform* GetOverride( const Enjon::String& uniformName );
+			const ShaderUniform* GetOverride( const String& uniformName );
 
 			/*
 			* @brief
@@ -94,42 +96,42 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void SetUniform( const Enjon::String& name, const Enjon::AssetHandle< Enjon::Texture >& value ); 
+			void SetUniform( const String& name, const AssetHandle< Texture >& value ); 
 
 			/*
 			* @brief
 			*/
-			void SetUniform( const Enjon::String& name, const Enjon::Vec2& value ); 
+			void SetUniform( const String& name, const Vec2& value ); 
 
 			/*
 			* @brief
 			*/
-			void SetUniform( const Enjon::String& name, const Enjon::Vec3& value ); 
+			void SetUniform( const String& name, const Vec3& value ); 
 
 			/*
 			* @brief
 			*/
-			void SetUniform( const Enjon::String& name, const Enjon::Vec4& value );
+			void SetUniform( const String& name, const Vec4& value );
 
 			/*
 			* @brief
 			*/
-			void SetUniform( const Enjon::String& name, const Enjon::Mat4& value );
+			void SetUniform( const String& name, const Mat4& value );
 
 			/*
 			* @brief
 			*/
-			void SetUniform( const Enjon::String& name, const f32& value ); 
+			void SetUniform( const String& name, const f32& value ); 
 
 			/*
 			* @brief
 			*/
-			void SetShaderGraph( const Enjon::AssetHandle< Enjon::ShaderGraph >& graph ); 
+			void SetShaderGraph( const AssetHandle< ShaderGraph >& graph ); 
 
 			/*
 			* @brief
 			*/
-			Enjon::AssetHandle< Enjon::ShaderGraph > GetShaderGraph( ) const;
+			AssetHandle< ShaderGraph > GetShaderGraph( ) const;
 
 		protected:
 
@@ -138,21 +140,18 @@ namespace Enjon {
 			*/
 			void AddOverride( ShaderUniform* uniform );
 
-		protected:
+		protected: 
+			ENJON_PROPERTY( Editable )
+			AssetHandle< ShaderGraph > mShaderGraph; 
+			
 			ENJON_PROPERTY( )
-			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count]; 
+			HashMap< String, ShaderUniform* > mUniformOverrides;
 
 			ENJON_PROPERTY( Editable ) 
 			bool mTwoSided = false; 
 
-			ENJON_PROPERTY( Editable )
-			AssetHandle< ShaderGraph > mShaderGraph;
-
 			ENJON_PROPERTY( )
-			Enjon::Vector< u32 > mTestVector;
-			
-			Enjon::HashMap< Enjon::String, ShaderUniform* > mUniforms;
-			Enjon::HashMap< Enjon::String, ShaderUniform* > mUniformOverrides;
+			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count]; 
 	}; 
 }
 

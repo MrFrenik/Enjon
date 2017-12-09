@@ -11,6 +11,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <filesystem>
 
 namespace Enjon
 {
@@ -97,7 +98,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			bool Exists( const String& name );
+			bool Exists( const String& name ) const;
 
 			/**
 			* @brief
@@ -114,7 +115,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			bool Exists( UUID uuid );
+			bool Exists( UUID uuid ) const;
 
 		protected:
 
@@ -142,6 +143,54 @@ namespace Enjon
 
 				return handle; 
 			} 
+
+			template < typename T >
+			AssetHandle< T > ConstructAsset( )
+			{
+				// Construct new asset
+				T* asset = new T( ); 
+				// Copy values from default asset
+				*asset = *(T*)GetDefaultAsset( );
+
+				// Construct unique name for asset to be saved
+				String typeName = asset->Class( )->GetName( ); 
+				String originalAssetName = "New" + typeName;
+				String assetName = originalAssetName;
+
+				// TODO(): MAKE THIS GO THROUGH A CENTRALIZED GRAPHICS FACTORY
+				std::experimental::filesystem::path originalPath = mAssetsPath + "/Cache/New" + typeName;
+				std::experimental::filesystem::path p = originalPath.string() + ".easset";
+
+				// Look for cached asset based on name and continue until name is unique
+				u32 index = 0;
+				while ( std::experimental::filesystem::exists( p ) )
+				{
+					index++;
+					p = std::experimental::filesystem::path( originalPath.string() + std::to_string( index ) + ".easset" );
+					assetName = originalAssetName + std::to_string( index );
+				} 
+
+				//====================================================================================
+				// Asset header information
+				//====================================================================================
+				AssetRecordInfo info;
+				asset->mName = assetName;
+				asset->mLoader = this;
+				asset->mUUID = UUID::GenerateUUID( ); 
+				asset->mFilePath = p.string( );
+
+				info.mAsset = asset;
+				info.mAssetName = asset->mName;
+				info.mAssetUUID = asset->mUUID;
+				info.mAssetFilePath = p.string( );					
+				info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+
+				// Add to loader
+				const Asset* cnstAsset = AddToAssets( info ); 
+
+				// Return asset handle with asset
+				return AssetHandle< T >( cnstAsset ); 
+			}
 
 			/**
 			* @brief 

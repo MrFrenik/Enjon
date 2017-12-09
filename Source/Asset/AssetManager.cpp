@@ -6,6 +6,7 @@
 #include "Asset/TextureAssetLoader.h" 
 #include "Asset/MeshAssetLoader.h" 
 #include "Asset/FontAssetLoader.h"
+#include "Asset/MaterialAssetLoader.h"
 #include "Asset/ShaderGraphAssetLoader.h"
 #include "Utils/FileUtils.h"
 #include "Serialize/ObjectArchiver.h"
@@ -63,22 +64,23 @@ namespace Enjon
 	void AssetManager::RegisterLoaders( )
 	{
 		// Register the loaders with manager 
-		RegisterAssetLoader< Enjon::Texture, TextureAssetLoader >( );
-		RegisterAssetLoader< Enjon::Mesh, MeshAssetLoader >( );
-		RegisterAssetLoader< Enjon::UIFont, FontAssetLoader >( );
-		RegisterAssetLoader< Enjon::ShaderGraph, ShaderGraphAssetLoader >( );
+		RegisterAssetLoader< Texture,		TextureAssetLoader >( );
+		RegisterAssetLoader< Mesh,			MeshAssetLoader >( );
+		RegisterAssetLoader< UIFont,		FontAssetLoader >( );
+		RegisterAssetLoader< ShaderGraph,	ShaderGraphAssetLoader >( );
+		RegisterAssetLoader< Material,		MaterialAssetLoader >( );
 
 		// Create file extension map
-		mFileExtensionMap[ "png" ]	= GetAssetTypeId< Enjon::Texture >( );
-		mFileExtensionMap[ "tga" ]	= GetAssetTypeId< Enjon::Texture >( );
-		mFileExtensionMap[ "jpeg" ] = GetAssetTypeId< Enjon::Texture >( );
-		mFileExtensionMap[ "bmp" ]	= GetAssetTypeId< Enjon::Texture >( );
-		mFileExtensionMap[ "hdr" ]	= GetAssetTypeId< Enjon::Texture >( );
-		mFileExtensionMap[ "fbx" ]	= GetAssetTypeId< Enjon::Mesh >( );
-		mFileExtensionMap[ "obj" ]	= GetAssetTypeId< Enjon::Mesh >( );
-		mFileExtensionMap[ "ttf" ]	= GetAssetTypeId< Enjon::UIFont >( );
-		mFileExtensionMap[ "otf" ]	= GetAssetTypeId< Enjon::UIFont >( ); 
-		mFileExtensionMap[ "sg" ]	= GetAssetTypeId< Enjon::ShaderGraph >( ); 
+		mFileExtensionMap[ "png" ]	= GetAssetTypeId< Texture >( );
+		mFileExtensionMap[ "tga" ]	= GetAssetTypeId< Texture >( );
+		mFileExtensionMap[ "jpeg" ] = GetAssetTypeId< Texture >( );
+		mFileExtensionMap[ "bmp" ]	= GetAssetTypeId< Texture >( );
+		mFileExtensionMap[ "hdr" ]	= GetAssetTypeId< Texture >( );
+		mFileExtensionMap[ "fbx" ]	= GetAssetTypeId< Mesh >( );
+		mFileExtensionMap[ "obj" ]	= GetAssetTypeId< Mesh >( );
+		mFileExtensionMap[ "ttf" ]	= GetAssetTypeId< UIFont >( );
+		mFileExtensionMap[ "otf" ]	= GetAssetTypeId< UIFont >( ); 
+		mFileExtensionMap[ "sg" ]	= GetAssetTypeId< ShaderGraph >( ); 
 	}
 	
 	//============================================================================================ 
@@ -217,7 +219,19 @@ namespace Enjon
 
 		return nullptr;
 	}
-	
+
+	/*
+		How to create a new material asset and then serialize it?
+	 
+		// Needs a unique name:
+		//	- Save out default name as "New" + cls->GetName() + unique instance number // For instance, a new material will have name "NewMaterial1", if there was one other existing file named "NewMaterial"
+		AssetHandle<Asset> AssetManager::CreateAsset( const MetaClass* cls )
+		{
+					
+		}
+
+	*/ 
+ 
 	//============================================================================================ 
 			
 	Result AssetManager::AddToDatabase( const String& resourceFilePath, bool cache, bool isRelativePath )

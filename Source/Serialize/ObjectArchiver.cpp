@@ -245,9 +245,26 @@ namespace Enjon
 						case MetaPropertyType::F64:		WRITE_ARRAY_PROP_PRIM( object, base, f64, mBuffer )		break;
 						case MetaPropertyType::String:	WRITE_ARRAY_PROP_PRIM( object, base, String, mBuffer )	break;
 						case MetaPropertyType::UUID:	WRITE_ARRAY_PROP_PRIM( object, base, UUID, mBuffer )	break; 
-					}
 
-
+						case MetaPropertyType::AssetHandle:
+						{
+							// Write out asset uuids in array
+							const MetaPropertyArray< AssetHandle< Asset > >* arrProp = base->Cast< MetaPropertyArray< AssetHandle< Asset > > >( );
+							for ( usize j = 0; j < arrProp->GetSize( object ); ++j )
+							{
+								AssetHandle<Asset> asset;
+								arrProp->GetValueAt( object, j, &asset );
+								if ( asset )
+								{
+									mBuffer.Write< UUID >( asset->GetUUID() );
+								}
+								else
+								{
+									mBuffer.Write< UUID >( UUID::Invalid( ) );
+								}
+							} 
+						} break;
+					} 
 				} break;
 
 #define WRITE_MAP_KEY_PRIM_VAL_PRIM( object, prop, keyType, valType, buffer )\
@@ -684,7 +701,21 @@ namespace Enjon
 						case MetaPropertyType::F32:		READ_ARRAY_PROP_PRIM( object, base, f32, arraySize, mBuffer )		break;
 						case MetaPropertyType::F64:		READ_ARRAY_PROP_PRIM( object, base, f64, arraySize, mBuffer )		break;
 						case MetaPropertyType::String:	READ_ARRAY_PROP_PRIM( object, base, String, arraySize, mBuffer )	break;
-						case MetaPropertyType::UUID:	READ_ARRAY_PROP_PRIM( object, base, UUID, arraySize, mBuffer )		break;
+						case MetaPropertyType::UUID:	READ_ARRAY_PROP_PRIM( object, base, UUID, arraySize, mBuffer )		break; 
+						case MetaPropertyType::AssetHandle:
+						{ 
+							MetaArrayPropertyProxy proxy = base->GetProxy( ); 
+							const MetaPropertyTemplateBase* arrBase = static_cast<const MetaPropertyTemplateBase*> ( proxy.mArrayPropertyTypeBase );
+							const MetaClass* assetCls = const_cast<Enjon::MetaClass*>( arrBase->GetClassOfTemplatedArgument( ) ); 
+
+							// Write out asset uuids in array
+							const MetaPropertyArray< AssetHandle< Asset > >* arrProp = base->Cast< MetaPropertyArray< AssetHandle< Asset > > >( );
+							for ( usize j = 0; j < arraySize; ++j )
+							{
+								AssetHandle<Asset> newAsset = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->GetAsset( assetCls, mBuffer.Read< UUID >( ) );
+								arrProp->SetValueAt( object, j, newAsset );
+							} 
+						} break;
 					}
 
 				} break;

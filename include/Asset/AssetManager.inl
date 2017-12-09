@@ -114,6 +114,23 @@ const AssetLoader* AssetManager::GetLoaderByAssetType( )
 	return nullptr; 
 }
 
+//================================================================================================ 
+
+template <typename T>
+AssetHandle< T > AssetManager::ConstructAsset( )
+{ 
+	// Get the asset loader
+	const AssetLoader* loader = GetLoaderByAssetType< T >( );
+
+	// Construct new asset and get handle to it
+	AssetHandle< T > handle = const_cast< AssetLoader* >( loader )->ConstructAsset< T >( );
+
+	// Serialize the asset to file
+	SerializeAsset( handle.Get( ) );
+
+	return handle; 
+}
+
 
 
 

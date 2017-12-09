@@ -108,7 +108,7 @@ namespace Enjon
 			Enjon::String mFilePath;
 
 			ENJON_PROPERTY( )
-			Enjon::String mName;
+			Enjon::String mName; 
 
 			const AssetLoader* mLoader = nullptr;
 

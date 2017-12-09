@@ -133,7 +133,7 @@ namespace Enjon
 	
 	//=================================================================
 			
-	bool AssetLoader::Exists( const String& name )
+	bool AssetLoader::Exists( const String& name ) const
 	{
 		auto query = mAssetsByName.find( name );
 		if ( query != mAssetsByName.end() )
@@ -146,7 +146,7 @@ namespace Enjon
 	
 	//=================================================================
 			
-	bool AssetLoader::Exists( UUID uuid )
+	bool AssetLoader::Exists( UUID uuid ) const
 	{
 		auto query = mAssetsByUUID.find( uuid.ToString() );
 		if ( query != mAssetsByUUID.end( ) )
@@ -172,7 +172,7 @@ namespace Enjon
 	
 	//=================================================================
 
-	const Asset* AssetLoader::AddToAssets( const AssetRecordInfo& info ) 
+	const Asset* AssetLoader::AddToAssets( const AssetRecordInfo& info )
 	{ 
 		// If the UUID exists for whatever reason, return that asset
 		if ( info.mAsset->mUUID && Exists( info.mAsset->GetUUID() ) )

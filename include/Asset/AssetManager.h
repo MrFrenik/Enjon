@@ -66,6 +66,17 @@ namespace Enjon
 			*/
 			Result AddToDatabase( const String& filePath, bool cache = true, bool isRelativePath = true );
 
+			/*
+			* @brief Creates a new asset of given type, adds it into the database and returns a handle it
+			*/
+			//AssetHandle< Asset > ConstructAsset( const MetaClass* assetCls );
+
+			/*
+			* @brief Creates a new asset of given type, adds it into the database and returns a handle it
+			*/
+			template <typename T>
+			AssetHandle< T > ConstructAsset( );
+
 			/**
 			*@brief Gets asset manager name
 			*/

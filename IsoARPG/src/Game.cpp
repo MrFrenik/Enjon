@@ -306,7 +306,11 @@ Enjon::Result Game::Initialize()
 	// Try loading font
 	Enjon::String rootPath = engine->GetConfig( ).GetRoot( );
 	Enjon::String fontPath = rootPath + "/Assets/Fonts/WeblySleek/weblysleekuisb.ttf"; 
+	
+	// A way to construct new types of objects - Will be given all default parameters when constructed - NEEDS TO GO THROUGH FACTORY FOR THIS EVENTUALLY
+	Enjon::AssetHandle< Enjon::Material > newMat = mAssetManager->ConstructAsset< Enjon::Material >( );
 
+	Enjon::AssetHandle< Enjon::Material > deserializedMat = mAssetManager->GetAsset< Enjon::Material >( "NewMaterial" );
 
 	// Add to asset database
 	mAssetManager->AddToDatabase( toyBoxDispPath );
