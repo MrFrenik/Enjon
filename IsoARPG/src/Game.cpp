@@ -162,7 +162,7 @@ void Game::TestObjectSerialize( )
 
 	// Serialize / Deserialize entity information
 	{
-		if ( 1 )
+		if ( 0 )
 		{
 			// Parent
 			mSerializedEntity = mEntities->Allocate( ); 
@@ -170,6 +170,10 @@ void Game::TestObjectSerialize( )
 			mSerializedEntity.Get( )->SetRotation( Quaternion::AngleAxis( ToRadians( 20.0f ), Vec3::XAxis( ) ) );
 			mSerializedEntity.Get( )->SetScale( 0.5f );
 			auto gfxCmp = mSerializedEntity.Get( )->Attach< GraphicsComponent >( );
+			auto plCmp = mSerializedEntity.Get( )->Attach< PointLightComponent >( );
+			plCmp->SetColor( ColorRGBA32( 1.0f, 0.0f, 0.0f, 1.0f ) );
+			plCmp->SetIntensity( 100.0f );
+			plCmp->SetRadius( 50.0f );
 			gfxCmp->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
 			gfxCmp->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.unit_cube" ) ); 
 
@@ -206,6 +210,7 @@ void Game::TestObjectSerialize( )
 			mGfx->GetScene( )->AddRenderable( childGfx->GetRenderable( ) );
 			mGfx->GetScene( )->AddRenderable( child0Gfx->GetRenderable( ) );
 			mGfx->GetScene( )->AddRenderable( child1Gfx->GetRenderable( ) );
+			mGfx->GetScene( )->AddPointLight( plCmp->GetLight( ) );
 		}
 		else
 		{
@@ -218,6 +223,12 @@ void Game::TestObjectSerialize( )
 				if ( gfxCmp )
 				{
 					mGfx->GetScene( )->AddRenderable( gfxCmp->GetRenderable() );
+				}
+
+				auto pointLightComp = mSerializedEntity.Get( )->GetComponent< PointLightComponent >( );
+				if ( pointLightComp )
+				{
+					mGfx->GetScene( )->AddPointLight( pointLightComp->GetLight( ) );
 				}
 
 				auto addChildrenGfx = [ & ] ( const EntityHandle& handle )
@@ -293,13 +304,7 @@ Enjon::Result Game::Initialize()
 	if ( !std::experimental::filesystem::exists( mAssetsPath + "/Cache" ) )
 	{
 		std::experimental::filesystem::create_directory( mAssetsPath + "/Cache" );
-	}
-
-	// Check if directory exists - if not, create it
-	if ( !std::experimental::filesystem::exists( mAssetsPath + "/Intermediate" ) )
-	{
-		std::experimental::filesystem::create_directory( mAssetsPath + "/Intermediate" );
-	}
+	} 
 	
 	// Get asset manager and set its properties ( I don't like this )
 	mAssetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog()->Get<Enjon::AssetManager>()->ConstCast< Enjon::AssetManager >(); 
@@ -307,24 +312,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->SetAssetsPath( mAssetsPath );
 	mAssetManager->SetCachedAssetsPath( cachePath );
 	mAssetManager->SetDatabaseName( GetApplicationName( ) ); 
-	mAssetManager->Initialize( );
-
-	{
-		// This works for flat arrays
-		Enjon::AssetHandle< Enjon::Texture > textures[ (u32)Enjon::TextureSlotType::Count ];
-		u32 size = *( &textures + 1 ) - textures;
-
-		std::array< Enjon::AssetHandle< Enjon::Texture >, ( u32 )Enjon::TextureSlotType::Count > texArray;
-		size = sizeof( texArray ) / sizeof( texArray[ 0 ] );
-
-		// What about for vectors( not so much )
-		std::vector< Enjon::AssetHandle< Enjon::Texture > > vecTextures;
-		vecTextures.push_back( Enjon::AssetHandle< Enjon::Texture >( ) );
-		vecTextures.push_back( Enjon::AssetHandle< Enjon::Texture >( ) );
-		vecTextures.push_back( Enjon::AssetHandle< Enjon::Texture >( ) );
-
-		size = sizeof( vecTextures ) / sizeof(vecTextures[ 0 ]);
-	}
+	mAssetManager->Initialize( ); 
 
 	// Get Subsystems from engine
 	Enjon::Engine* engine = Enjon::Engine::GetInstance();
@@ -417,8 +405,7 @@ Enjon::Result Game::Initialize()
 	Enjon::String rootPath = engine->GetConfig( ).GetRoot( );
 	Enjon::String fontPath = rootPath + "/Assets/Fonts/WeblySleek/weblysleekuisb.ttf"; 
 	
-
-	// Add to asset database
+	// Add to asset database( will serialize the asset if not loaded from disk, otherwise will load the asset )
 	mAssetManager->AddToDatabase( toyBoxDispPath );
 	mAssetManager->AddToDatabase( toyBoxNormalPath );
 	mAssetManager->AddToDatabase( unitSpherePath );
@@ -522,11 +509,7 @@ Enjon::Result Game::Initialize()
 	mSphereMesh = mAssetManager->GetAsset<Enjon::Mesh>( "isoarpg.models.unit_sphere" );
 
 	// Get entity manager
-	mEntities = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->ConstCast< Enjon::EntityManager >();
-
-	// I don't really like having to do this... How would something like this work for script components?
-	//mEntities->RegisterComponent<Enjon::GraphicsComponent>();
-	//mEntities->RegisterComponent<Enjon::PointLightComponent>();
+	mEntities = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->ConstCast< Enjon::EntityManager >(); 
 
 	// Allocate handle
 	mGreen = mEntities->Allocate( );
@@ -662,7 +645,6 @@ Enjon::Result Game::Initialize()
 	mRock.Get( )->SetScale( Enjon::Vec3( 5.0f ) );
 	
 	mRock2.Get( )->SetPosition( Enjon::Vec3( 10.0f, 0.0f, 20.0f ) );
-	//mRock2.Get( )->SetScale( Enjon::Vec3( 0.01f ) );
 
 	mBatch = new Enjon::QuadBatch();
 	mBatch->Init();
@@ -1118,133 +1100,6 @@ Enjon::Result Game::Initialize()
 		mDynamicsWorld->addRigidBody(body); 
 	}
 
-	fmt::print( "Entity Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Entity >() ); 
-	fmt::print( "Instance of Entity ID: {}\n", mGun.Get( )->GetTypeId() ); 
-
-	fmt::print( "GraphicsComponent Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::GraphicsComponent >() ); 
-	fmt::print( "Instance of GraphicsComponent ID: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetTypeId() ); 
-	
-	fmt::print( "PointlightComponent Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::PointLightComponent >() ); 
-	fmt::print( "Instance of PointlightComponent ID: {}\n", mGun.Get( )->GetComponent<Enjon::PointLightComponent>()->GetTypeId() ); 
-	
-	fmt::print( "Material Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Material >() ); 
-	fmt::print( "Instance of Material ID: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTypeId() ); 
-	
-	fmt::print( "Mesh Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Mesh >() ); 
-	fmt::print( "Instance of Mesh ID: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetMesh().Get()->GetTypeId() ); 
-	
-	fmt::print( "Texture Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >() ); 
-	fmt::print( "Instance of Texture ID: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTexture( Enjon::TextureSlotType::Albedo ).Get()->GetTypeId() ); 
-	
-	fmt::print( "Texture Class Type ID: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >() ); 
-	fmt::print( "Instance of Texture ID: {}\n", mGun.Get( )->GetComponent<Enjon::GraphicsComponent>()->GetMaterial()->GetTexture( Enjon::TextureSlotType::Normal ).Get()->GetTypeId() ); 
-
-	fmt::print( "Same: {}\n", Enjon::Object::GetTypeId< Enjon::Texture >( ) == mGun.Get( )->GetComponent<Enjon::GraphicsComponent>( )->GetMaterial( )->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTypeId( ) ); 
-
-	/*
-	Enjon::ByteBuffer writeBuffer;
-	u32 texID;
-	s32 width, height, nComps;
-	s32 widthtga, heighttga, nCompstga;
-	s32 len;
-	stbi_set_flip_vertically_on_load( false );
-	u8* data = stbi_load( ( rootPath + "/IsoARPG/Assets/" + "Materials/CopperRock/Albedo.png" ).c_str( ), &width, &height, &nComps, STBI_rgb_alpha );
-	u8* tgaData = stbi_load( ( rootPath + "/IsoARPG/Assets/Textures/cerebusAlbedo.tga" ).c_str( ), &widthtga, &heighttga, &nCompstga, STBI_rgb_alpha );
-
-	auto saveData = stbi_write_png_to_mem( data, 0, width, height, 4, &len );
-	stbi_write_tga( ( rootPath + "/testTGA" ).c_str( ), widthtga, heighttga, 4, tgaData );
-	Enjon::ByteBuffer readBuffer;
-	readBuffer.ReadFromFile( rootPath + "/testTGA" );
-	u32 size = readBuffer.GetSize( );
-	u8* loadBufferData = ( u8* )malloc( size );
-	s32 loadWidth, loadHeight, loadComps;
-	for ( usize i = 0; i < size; ++i )
-	{
-		loadBufferData[ i ] = readBuffer.Read< char >( );
-	}
-
-	u32 srcSize = size;
-	u32 maxSize = LZ4_compressBound( srcSize );
-	char* compressedData = (char*)malloc( maxSize );
-	s32 compressed_data_size = LZ4_compress_default( (char*)loadBufferData, compressedData, srcSize, maxSize );
-
-	// Write out
-	Enjon::ByteBuffer compressBuffer;
-	compressBuffer.Write( compressed_data_size );
-	for ( usize i = 0; i < compressed_data_size; ++i )
-	{
-		compressBuffer.Write( compressedData[ i ] );
-	}
-	compressBuffer.WriteToFile( rootPath + "/compressedTexture" );
-
-	writeBuffer.Write( width );
-	writeBuffer.Write( height );
-	writeBuffer.Write( 4 );
-	writeBuffer.Write( len );
-	for ( usize i = 0; i < len; ++i )
-	{
-		writeBuffer.Write( saveData[ i ] );
-	}
-	stbi_image_free( data );
-	writeBuffer.WriteToFile( rootPath + "/testTexture" );
-
-	writeBuffer.ReadFromFile( rootPath + "/testTexture" );
-
-	width = writeBuffer.Read< s32 >( );
-	height = writeBuffer.Read< s32 >( );
-	nComps = writeBuffer.Read< s32 >( );
-	len = writeBuffer.Read< s32 >( );
-	unsigned char* loadData = ( unsigned char* )malloc( len );
-	for ( usize i = 0; i < len; ++i )
-	{
-		loadData[ i ] = writeBuffer.Read< char >( );
-	}
-
-	s32 comps;
-	unsigned char* loadedData = stbi_load_from_memory( loadData, len, &width, &height, &comps, 4 );
-	u8* tgaDataLoad = stbi_load_from_memory( loadBufferData, size, &loadWidth, &loadHeight, &loadComps, 4 );
-
-	// Generate texture
-	// TODO(): Make this API generalized to work with DirectX as well as OpenGL
-	glGenTextures( 1, &( texID ) );
-
-	glBindTexture( GL_TEXTURE_2D, texID );
-
-	glPixelStorei( GL_PACK_ALIGNMENT, 1 );
-	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	glTexImage2D(
-		GL_TEXTURE_2D,
-		0,
-		GL_RGBA8,
-		loadWidth,
-		loadHeight,
-		0,
-		GL_RGBA,
-		GL_UNSIGNED_BYTE,
-		tgaDataLoad
-	);
-
-	// No longer need data, so free
-	stbi_image_free( loadedData );
-
-	s32 MAG_PARAM = GL_LINEAR;
-	s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
-	b8 genMips = true;
-
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MAG_PARAM );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIN_PARAM );
-
-	if ( genMips )
-	{
-		glGenerateMipmap( GL_TEXTURE_2D );
-	}
-
-	glBindTexture( GL_TEXTURE_2D, 0 );
-
-	mTex = new Enjon::Texture( width, height, texID );
-	*/
 	Enjon::Vec3 Vertices[] = {
 		Enjon::Vec3( -0.5f, 0.5f, 0.5f ),
 		Enjon::Vec3( 0.5f, 0.5f, 0.5f ),
@@ -1312,44 +1167,7 @@ Enjon::Result Game::Initialize()
 	Enjon::Quaternion q = Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::YAxis( ) ) *
 						  Enjon::Quaternion::AngleAxis( Enjon::ToRadians( -36.0f ), Enjon::Vec3::ZAxis( ) );
 	Enjon::Mat4 mat = Enjon::QuaternionToMat4( q );
-	std::cout << mat << "\n";
 
-
-	{
-		Enjon::Vec2 numbers[ ] = {
-			Enjon::Vec2( .4016187639621184, 0.4485978731822172 ),
-			Enjon::Vec2( 0.6818915804271153, 0.3622686499035348 ),
-			Enjon::Vec2( 0.6683032288439311, 0.5233702444624347 ),
-			Enjon::Vec2( 0.4113190311141083, 0.6554002622737832 ),
-			Enjon::Vec2( 0.3677100875763688, 0.3897306382940081 ),
-			Enjon::Vec2( 0.6162426043508087, 0.329379447817739 ),
-			Enjon::Vec2( 0.6086891976986508, 0.4712739931592119 ),
-			Enjon::Vec2( 0.3785668792045406, 0.5663520525797013 )
-		};
-
-		Enjon::Vec2 screenDims = Enjon::Vec2( 640, 480 );
-
-		for ( usize i = 0; i < 8; ++i ) 
-		{
-			auto res = numbers[ i ] * screenDims;
-			std::cout << res << "\n";
-		}
-	} 
-
-	{
-		auto q = Enjon::QuaternionToMat4( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 90.0f ), Enjon::Vec3::ZAxis( ) ) );
-		std::cout << q << '\n';
-		//Enjon::Mat4 model = Enjon::Mat4::Identity( );
-		//model *= Enjon::Mat4::Translate( Enjon::Vec3( 0.0f ) );
-		//model *= Enjon::QuaternionToMat4( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 90.0f ), Enjon::Vec3::ZAxis( ) ) );
-		//model *= Enjon::Mat4::Scale( Enjon::Vec3( 1.0f ) );
-		//std::cout << model << '\n';
-	} 
-
-	{
-		Enjon::Vec3 p( 5, 2, -3 );
-		std::cout << Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 90.0f ), Enjon::Vec3::ZAxis( ) ) * p << "\n";
-	}
 
 	TestObjectSerialize( );
 	
@@ -1443,18 +1261,7 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 	}
 	mTextBatch->End( );
 
-	// This is where transform propagation happens
-	// mEntities->LateUpdate(dt);
-	for ( auto& e : mEntities->GetActiveEntities( ) )
-	{
-		if ( e->HasComponent< Enjon::GraphicsComponent >( ) )
-		{
-			auto gfx = e->GetComponent< Enjon::GraphicsComponent >( );
-			gfx->SetTransform( e->GetWorldTransform( ) );
-		}
-	}
-
-return Enjon::Result::PROCESS_RUNNING;
+	return Enjon::Result::PROCESS_RUNNING;
 }
 
 //====================================================================================================================
@@ -1639,11 +1446,8 @@ Enjon::Result Game::Shutdown()
 {
 	printf("%d\n", sizeof(Enjon::Entity));
 	printf("%d\n", sizeof(Enjon::Transform));
-
 	fmt::print("{}", sizeof(Enjon::Entity));
-	
 	printf("Shutting down game...\n");
-		
 
 	return Enjon::Result::SUCCESS;
 };

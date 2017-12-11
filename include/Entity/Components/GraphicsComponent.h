@@ -12,69 +12,121 @@ namespace Enjon
 	ENJON_CLASS( Construct )
 	class GraphicsComponent : public Component
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( ) 
 
+		// Don't really like that I have to do BOTH of these... Would rather this just be within one single macro or at least generated...
 		ENJON_COMPONENT( GraphicsComponent )
 
 		public:
+
+			/* 
+			* @brief
+			*/
 			GraphicsComponent();
+
+			/*
+			* @brief
+			*/
 			GraphicsComponent(const Renderable& renderable);
+
+			/*
+			* @brief
+			*/
 			~GraphicsComponent();
 
-			virtual void Update(f32 dT) override; 
+			/*
+			* @brief
+			*/
+			virtual void Update( const f32& dT) override; 
 
-			/* Get position of transform */
+			/* 
+			* @brief Get position of transform 
+			*/
 			Vec3 GetPosition() const;
 
-			/* Get scale of transform */
+			/* 
+			* @brief Get scale of transform 
+			*/
 			Vec3 GetScale() const;
 
-			/* Get orientation of transform */
+			/* 
+			* @brief Get orientation of transform 
+			*/
 			Quaternion GetRotation() const;
 
-			/* Get material of renderable */
+			/* 
+			* @brief Get material of renderable 
+			*/
 			const Material* GetMaterial() const;
 
-			/* Get mesh of renderable */
+			/* 
+			* @brief Get mesh of renderable 
+			*/
 			AssetHandle<Mesh> GetMesh() const;
 
-			/* Get scene of renderable */
+			/* 
+			* @brief Get scene of renderable 
+			*/
 			Scene* GetScene() const;
 
-			/* Get world transform */
+			/* 
+			* @brief Get world transform 
+			*/
 			Transform GetTransform() const;
 			
-			/* Get renderable */
+			/* 
+			* @brief Get renderable 
+			*/
 			Renderable* GetRenderable();
 
-			/* Sets world transform */
+			/* 
+			* @brief Sets world transform 
+			*/
 			void SetTransform(const Transform& transform); 
 
-			/* Set position of transform */
+			/* 
+			* @brief Set position of transform 
+			*/
 			void SetPosition(const Vec3& position);
 
-			/* Set scale of transform */
+			/* 
+			* @brief Set scale of transform 
+			*/
 			void SetScale(const Vec3& scale);
 
-			/* Set scale of transform */
+			/* 
+			* @brief Set scale of transform 
+			*/
 			void SetScale(const f32& scale);
 
-			/* Set orientation of transform */
+			/* 
+			* @brief Set orientation of transform 
+			*/
 			void SetRotation(const Quaternion& rotation);
 
-			/* Set material of renderable */
+			/* 
+			* @brief Set material of renderable 
+			*/
 			void SetMaterial(const Material* material);
 
-			/* Set material of renderable */
+			/* 
+			* @brief Set material of renderable 
+			*/
 			//void SetMaterial( const AssetHandle< Material >& material );
 
-			/* Set mesh of renderable */
+			/* 
+			* @brief Set mesh of renderable 
+			*/
 			void SetMesh(const AssetHandle<Mesh>& mesh);
 
-			/* Set scene of renderable */
+			/* 
+			* @brief Set scene of renderable 
+			*/
 			void SetScene(Scene* scene);
 
-			/* Set Renderable */
+			/* 
+			* @brief Set Renderable 
+			*/
 			void SetRenderable(const Renderable& renderable); 
 
 			/*

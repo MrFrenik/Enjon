@@ -186,25 +186,45 @@ namespace Enjon
 
 		protected: 
 
+			/*
+			* @brief
+			*/
+			void Update( const f32& dt );
+
+			/*
+			* @brief
+			*/
 			void CalculateLocalTransform( );
 
-			/// @brief Calculates world transform with respect to parent hierarchy
+			/*
+			* @brief
+			*/
 			void CalculateWorldTransform();
 
 		private:
-			/// @brief Sets id of entity - Entity Manager is responsible for this
+			/*
+			* @brief
+			*/
 			void SetID(u32 id);
 
-			/// @brief Resets all appropriate fields and member variables for entity
+			/*
+			* @brief
+			*/
 			void Reset();
 
-			/// @brief Sets all child states to be updated
+			/*
+			* @brief
+			*/
 			void SetAllChildWorldTransformsDirty();
 
-			/// @brief Propagates transform down through all children
+			/*
+			* @brief
+			*/
 			void UpdateAllChildTransforms();
 
-			/// @brief Propagates transform down through all children
+			/*
+			* @brief
+			*/
 			void PropagateTransform(f32 dt); 
 
 		private:

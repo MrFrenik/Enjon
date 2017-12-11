@@ -30,4 +30,11 @@ namespace Enjon
 		BitSet.set(type);
 		return BitSet;
 	}
+	
+	//=========================================================================
+
+	void Component::Update( const f32& dT )
+	{ 
+		// Nothing by default
+	}
 }

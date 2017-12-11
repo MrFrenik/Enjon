@@ -319,14 +319,16 @@ namespace Enjon
 							{
 								ImGui::ListBoxHeader( Enjon::String( "##" + std::to_string( i ) + prop->GetName( ) ).c_str( ) );
 								{
+									u32 assetIndex = 0;
 									// All asset record info structs
 									for ( auto& a : *assets )
 									{
-										if ( ImGui::Selectable( a.second.GetAssetName().c_str( ) ) )
+										if ( ImGui::Selectable( String( std::to_string( assetIndex ) + ": " +  a.second.GetAssetName() ).c_str( ) ) )
 										{ 
 											val.Set( const_cast< Asset* >( a.second.GetAsset() ) );
 											arrayProp->SetValueAt( object, i, val );
 										}
+										assetIndex++;
 									}
 								} 
 								ImGui::ListBoxFooter( ); 

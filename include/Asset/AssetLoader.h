@@ -30,45 +30,48 @@ namespace Enjon
 
 		public:
 
+			/*
+			* @brief Default Constructor
+			*/
 			AssetRecordInfo( ) = default;
 
-			AssetRecordInfo( Asset* asset )
-				: mAsset( asset )
-			{
-			} 
+			/*
+			* @brief Constructor
+			*/
+			AssetRecordInfo( Asset* asset );
 
+			/*
+			* @brief Default Destructor
+			*/
 			~AssetRecordInfo( ) = default;
 
-			const Asset* GetAsset( ) const
-			{
-				return mAsset;
-			}
+			/*
+			* @brief
+			*/
+			const Asset* GetAsset( ) const;
 
-			String GetAssetName( ) const
-			{
-				if ( mAsset )
-				{
-					return mAsset->GetName( ); 
-				}
-				return "UnloadedAsset";
-			}
+			/*
+			* @brief
+			*/
+			String GetAssetName( ) const;
 
-			AssetLoadStatus GetAssetLoadStatus( ) const
-			{
-				return mAssetLoadStatus;
-			} 
-
+			/*
+			* @brief
+			*/
+			AssetLoadStatus GetAssetLoadStatus( ) const; 
 			
-			String GetAssetFilePath( ) const 
-			{
-				return mAssetFilePath;
-			}
+			/*
+			* @brief
+			*/
+			String GetAssetFilePath( ) const;
+
 
 		private:
 			Asset* mAsset						= nullptr; 
-			String mAssetFilePath				= "";
-			String mAssetName					= "";
+			String mAssetFilePath				= "Invalid_Asset_Path";
+			String mAssetName					= "Invalid_Asset";
 			UUID mAssetUUID						= UUID::Invalid( );
+			const MetaClass* mAssetLoaderClass	= nullptr;
 			AssetLoadStatus mAssetLoadStatus	= AssetLoadStatus::Unloaded;
 	}; 
 
@@ -80,6 +83,7 @@ namespace Enjon
 	{ 
 		friend AssetManager; 
 		friend CacheRegistryManifest;
+		friend AssetRecordInfo;
 
 		// Don't like this here, but apparently I need it or the linker freaks out...
 		ENJON_CLASS_BODY( )
@@ -124,6 +128,11 @@ namespace Enjon
 			bool Exists( UUID uuid ) const;
 
 		protected:
+
+			/*
+			* @brief
+			*/
+			void LoadRecord( AssetRecordInfo* record );
 
 			/**
 			* @brief Templated argument to get asset of specific type by name

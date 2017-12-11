@@ -236,6 +236,9 @@ namespace Enjon
 			
 	Result AssetManager::AddToDatabase( const String& resourceFilePath, bool cache, bool isRelativePath )
 	{ 
+		// Result to be returned
+		Result res = Result::SUCCESS;
+
 		// To be determined, whether or not the asset will need to be cached
 		bool needToCache = false;
 
@@ -283,7 +286,7 @@ namespace Enjon
 					// If file exists, grab that
 					if ( query->second->Exists( Utils::ToLower( mName ) + qualifiedName ) )
 					{
-						asset = const_cast< Asset* >( query->second->GetAsset( Utils::ToLower( mName ) + qualifiedName ) );
+						return Result::SUCCESS;
 					}
 
 					else
@@ -324,33 +327,39 @@ namespace Enjon
 						return Result::FAILURE;
 					}
 
-					// Load asset from file
-					asset = query->second->LoadResourceFromFile( resourceFilePath );
-
-					// If asset is valid
-					if ( asset )
+					// If file exists, grab that
+					if ( query->second->Exists( qualifiedName ) )
 					{
-						// Add to loader assets with asset record info
-						AssetRecordInfo info;
-						asset->mName = qualifiedName;
-						asset->mFilePath = resourceFilePath;
-						asset->mUUID = UUID::GenerateUUID( );
-						asset->mLoader = query->second;
-						info.mAsset = asset;
-						info.mAssetName = asset->mName;
-						info.mAssetUUID = asset->mUUID;
-						info.mAssetFilePath = asset->mFilePath;
-						info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+						return Result::SUCCESS;
+					}
 
-						// Add to loader
-						query->second->AddToAssets( info );
+					else
+					{
+						// Load asset from file
+						asset = query->second->LoadResourceFromFile( resourceFilePath );
+
+						// If asset is valid
+						if ( asset )
+						{
+							// Add to loader assets with asset record info
+							AssetRecordInfo info;
+							asset->mName = qualifiedName;
+							asset->mFilePath = resourceFilePath;
+							asset->mUUID = UUID::GenerateUUID( );
+							asset->mLoader = query->second;
+							info.mAsset = asset;
+							info.mAssetName = asset->mName;
+							info.mAssetUUID = asset->mUUID;
+							info.mAssetFilePath = asset->mFilePath;
+							info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+
+							// Add to loader
+							query->second->AddToAssets( info );
+						} 
 					} 
 				}
 			}
-		}
-
-		// Result to return
-		Result res = Result::SUCCESS;
+		} 
 
 		// If we need to cache the asset, then do that shit now
 		if ( needToCache && cache )

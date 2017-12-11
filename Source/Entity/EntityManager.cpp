@@ -127,6 +127,17 @@ namespace Enjon
 
 	//====================================================================================================
 
+	void Entity::Update( const f32& dt )
+	{
+		// Update all core components
+		for ( auto& c : mComponents )
+		{
+			c->Update( dt );
+		}
+	}
+
+	//====================================================================================================
+
 	Component* Entity::Attach( const MetaClass* compCls )
 	{
 		return mManager->Attach( compCls, GetHandle() );
@@ -168,22 +179,20 @@ namespace Enjon
 		return mWorldTransform;
 	}
 
-	//---------------------------------------------------------------
+	//===========================================================================
+
 	void Entity::CalculateLocalTransform( ) 
 	{
-		// RelScale = Scale / ParentScale 
-		// RelRot	= Conjugate(ParentRot) * Rot
-		// Trans	= 1/ParentScale * [Conjugate(ParentRot) * (Position - ParentPosition)];
+		// RelScale = WorldScale / ParentScale 
+		// RelRot	= Inverse(ParentRot) * WorldRot
+		// Trans	= [Inverse(ParentRot) * (WorldPos - ParentPosition)] / ParentScale;
+
 		if ( HasParent( ) )
 		{
 			Enjon::Entity* parent = mParent.Get( );
 
 			Transform parentTransform = parent->GetWorldTransform( );
-			Enjon::Quaternion parentInverse = parentTransform.Rotation.Inverse( ).Normalize();
-
-			//Vec3 relativeScale = mWorldTransform.Scale / parentTransform.Scale;
-			//Quaternion relativeRot = parentInverse * mWorldTransform.Rotation;
-			//Vec3 relativePos = ( parentInverse * ( mWorldTransform.Position - parentTransform.Position ) * parentTransform.Rotation ) / parentTransform.Scale;
+			Enjon::Quaternion parentInverse = parentTransform.Rotation.Inverse( ).Normalize(); 
 
 			Vec3 relativeScale = mWorldTransform.Scale / parentTransform.Scale;
 			Quaternion relativeRot = ( parentInverse * mWorldTransform.Rotation ).Normalize();
@@ -193,10 +202,14 @@ namespace Enjon
 		}
 	}
 
-	//---------------------------------------------------------------
+	//===========================================================================
 
 	void Entity::CalculateWorldTransform()
 	{ 
+		// WorldScale = ParentScale * LocalScale
+		// WorldRot = LocalRot * ParentRot
+		// WorldPos = ParentPos + [ Inverse(ParentRot) * ( ParentScale * LocalPos ) ]
+
 		if ( !HasParent( ) )
 		{
 			mWorldTransform = mLocalTransform;
@@ -209,23 +222,23 @@ namespace Enjon
 
 		Enjon::Vec3 worldScale = parent.Scale * mLocalTransform.Scale;
 		Enjon::Quaternion worldRot = ( mLocalTransform.Rotation * parent.Rotation ).Normalize( );
-		//Enjon::Quaternion worldRot = ( parent.Rotation * mLocalTransform.Rotation.Inverse( ) );
 		Enjon::Vec3 worldPos = parent.Position + ( parent.Rotation.Inverse().Normalize() * ( parent.Scale * mLocalTransform.Position ) );
-		//Enjon::Vec3 worldPos = parent.Position - worldScale * ( worldRot * mLocalTransform.Position );
 
 		mWorldTransform = Transform( worldPos, worldRot, worldScale );
 
 		mWorldTransformDirty = false;
 	}
 
-	//---------------------------------------------------------------
+	//===========================================================================
+
 	void Entity::SetPosition(Vec3& position)
 	{
 		mLocalTransform.SetPosition(position);
 		mWorldTransformDirty = true;
 	}
 
-	//---------------------------------------------------------------
+	//===========================================================================
+
 	void Entity::SetScale(f32 scale)
 	{
 		SetScale(v3(scale));
@@ -582,10 +595,16 @@ namespace Enjon
 
 	//==================================================================================================
 
-	void EntityManager::Update( const f32 dT )
+	void EntityManager::Update( const f32 dt )
 	{
 		// Clean any entities that were marked for destruction
 		Cleanup( );
+
+		// Update all components on entities
+		for ( auto& e : mActiveEntities )
+		{
+			e->Update( dt );
+		}
 	}
 
 	//==================================================================================================

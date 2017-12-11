@@ -7,9 +7,59 @@
 #include "Serialize/AssetArchiver.h"
 #include "Asset/AssetManager.h"
 #include "SubsystemCatalog.h"
+#include "Engine.h"
 
 namespace Enjon
 { 
+	//=================================================================
+ 
+	AssetRecordInfo::AssetRecordInfo( Asset* asset )
+		: mAsset( asset )
+	{
+	} 
+
+	//=================================================================
+
+	const Asset* AssetRecordInfo::GetAsset( ) const
+	{
+		if ( !mAsset )
+		{
+			// Get the asset manager from engine
+			const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+
+			// Grab the loader
+			AssetLoader* al = am->GetLoader( mAssetLoaderClass )->ConstCast< AssetLoader >();
+
+			//Asset* asset = al->LoadAssetForRecord( mAssetUUID ); 
+			const Asset* asset = al->GetAsset( mAssetUUID ); 
+			
+			const_cast< AssetRecordInfo *> ( this )->mAsset = const_cast< Asset* >( asset );
+		}
+
+		return mAsset;
+	} 
+
+	//=================================================================
+
+	String AssetRecordInfo::GetAssetName( ) const
+	{
+		return mAssetName;
+	}
+
+	//=================================================================
+
+	AssetLoadStatus AssetRecordInfo::GetAssetLoadStatus( ) const
+	{
+		return mAssetLoadStatus;
+	} 
+
+	//================================================================= 
+	
+	String AssetRecordInfo::GetAssetFilePath( ) const 
+	{
+		return mAssetFilePath;
+	}
+
 	//=================================================================
 
 	AssetLoader::AssetLoader()
@@ -41,6 +91,14 @@ namespace Enjon
 	
 	//=================================================================
 
+	void AssetLoader::LoadRecord( AssetRecordInfo* info )
+	{
+		// Load asset from record and set
+		const Asset* asset = GetAsset( info->mAssetUUID ); 
+	}
+	
+	//=================================================================
+
 	const Asset* AssetLoader::GetAsset( const UUID& id )
 	{
 		if ( Exists( id ) )
@@ -67,10 +125,10 @@ namespace Enjon
 				info->mAsset->mRecordInfo = info;
 			} 
 
-			// Return asset from info record
+			// Set default asset if not valid asset
 			if ( !info->mAsset )
 			{
-				return GetDefaultAsset( );
+				info->mAsset = GetDefaultAsset( );
 			}
 
 			return info->mAsset;
@@ -113,7 +171,7 @@ namespace Enjon
 			// Return asset from info record
 			if ( !info->mAsset )
 			{
-				return GetDefaultAsset( );
+				info->mAsset = GetDefaultAsset( );
 			}
 
 			return info->mAsset;
@@ -204,6 +262,7 @@ namespace Enjon
 		info.mAssetFilePath = record.mAssetFilePath;
 		info.mAssetName = record.mAssetName;
 		info.mAssetUUID = record.mAssetUUID;
+		info.mAssetLoaderClass = record.mAssetLoaderClass;
 		info.mAsset = nullptr;
 
 		// Add to assets

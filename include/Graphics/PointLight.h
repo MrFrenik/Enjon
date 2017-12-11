@@ -27,19 +27,34 @@ namespace Enjon {
 			~PointLight();
 
 			ENJON_FUNCTION() 
-			Vec3 GetPosition() 	{ return mPosition; }
+			Vec3 GetPosition() const 	
+			{ 
+				return mPosition; 
+			}
 
 			ENJON_FUNCTION() 
-			ColorRGBA32 GetColor() { return mColor; }
+			ColorRGBA32 GetColor() const  
+			{ 
+				return mColor; 
+			}
 
 			ENJON_FUNCTION() 
-			float GetIntensity() 		{ return mIntensity; }
+			float GetIntensity() const
+			{ 
+				return mIntensity; 
+			}
 
 			ENJON_FUNCTION() 
-			float GetAttenuationRate() 	{ return mAttenuationRate; }
+			float GetAttenuationRate() const 
+			{ 
+				return mAttenuationRate; 
+			}
 			
 			ENJON_FUNCTION() 
-			float GetRadius() 			{ return mRadius; }
+			float GetRadius() const
+			{ 
+				return mRadius; 
+			}
 
 			ENJON_FUNCTION() 
 			void SetColor(ColorRGBA32& color);

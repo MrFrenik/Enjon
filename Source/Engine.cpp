@@ -206,11 +206,14 @@ namespace Enjon
 				break;
 			}
 
+			// Update entity manager
+			mEntities->Update( dt );
+
 			// Update graphics
-			mGraphics->Update(dt); 
+			mGraphics->Update( dt );
 
 			// Clamp frame rate
-			mLimiter.End();
+			//mLimiter.End();
 		}
 
 		Enjon::Result res = ShutDown();

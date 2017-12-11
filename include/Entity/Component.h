@@ -42,8 +42,8 @@ namespace Enjon
 		public:
 			void Base() override {}
 
-			using ComponentPtrs = std::vector<T*>; 
-			using ComponentMap = std::unordered_map<u32, T>;
+			using ComponentPtrs = Vector<T*>; 
+			using ComponentMap = HashMap<u32, T>;
 
 			Component* AddComponent( const u32& entityId, Component* component )
 			{
@@ -77,7 +77,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual void Update( f32 dT ) = 0;
+			virtual void Update( const f32& dT );
 
 			/**
 			* @brief
@@ -96,6 +96,9 @@ namespace Enjon
 
 		protected:
 
+			/**
+			* @brief
+			*/
 			template <typename T>
 			void DestroyBase()
 			{
@@ -115,12 +118,30 @@ namespace Enjon
 				cMap->erase( mEntityID );
 			}
 
+			/**
+			* @brief
+			*/
 			virtual void Destroy() = 0;
 
 		private:
+			/**
+			* @brief
+			*/
 			void SetEntityManager( EntityManager* manager );
+
+			/**
+			* @brief
+			*/
 			void SetEntity( Entity* entity );
+
+			/**
+			* @brief
+			*/
 			void SetID( u32 id );
+
+			/**
+			* @brief
+			*/
 			void SetBase( ComponentWrapperBase* base );
 
 		protected:
@@ -138,6 +159,9 @@ namespace Enjon
 
 	namespace Internal
 	{
+		/**
+		* @brief
+		*/
 		inline ComponentID GetUniqueComponentID() noexcept
 		{
 			static ComponentID lastID{ 0u };
@@ -145,6 +169,9 @@ namespace Enjon
 		}
 	}
 
+	/**
+	* @brief
+	*/
 	template <typename T>
 	inline ComponentID GetComponentType() noexcept
 	{
@@ -154,6 +181,9 @@ namespace Enjon
 
 	typedef std::bitset<static_cast<u32>( MAX_COMPONENTS )> ComponentBitset;
 
+	/**
+	* @brief
+	*/
 	template <typename T>
 	ComponentBitset GetComponentBitMask() 
 	{ 
@@ -162,6 +192,9 @@ namespace Enjon
 		return BitSet;
 	}
 
+	/**
+	* @brief
+	*/
 	ComponentBitset GetComponentBitMask( u32 type );
 }
 

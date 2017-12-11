@@ -470,7 +470,8 @@ namespace Enjon
 
 		// Get a mesh and make it instanced... or something
 		auto db = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" );
+		//Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_quad" );
+		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetDefaultAsset< Enjon::Mesh >( );
 		if ( mesh )
 		{
 			// Set bunny mesh for later use
@@ -789,12 +790,12 @@ namespace Enjon
 			// Render instanced mesh
 			mInstancedRenderable->GetMesh( ).Get( )->Bind( );
 		
-			glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
-			for ( u32 i = 0; i < mInstancedAmount; ++i )
-			{
-				mModelMatricies[ i ] *= Enjon::Mat4::Rotate( rotT, Enjon::Vec3( 0, 1, 0 ) );
-			}
-			glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ] );
+			//glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
+			//for ( u32 i = 0; i < mInstancedAmount; ++i )
+			//{
+			//	mModelMatricies[ i ] *= Enjon::Mat4::Rotate( rotT, Enjon::Vec3( 0, 1, 0 ) );
+			//}
+			//glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ] );
 
 			glDrawArraysInstanced( GL_TRIANGLES, 0, mInstancedRenderable->GetMesh( ).Get( )->GetDrawCount(), mInstancedAmount );
 
@@ -1270,8 +1271,8 @@ namespace Enjon
 		mFXAATarget 				= new RenderTarget(width, height);
 		mShadowDepth 				= new RenderTarget(2048, 2048);
 		mFinalTarget 				= new RenderTarget(width, height);
-		mSSAOTarget					= new RenderTarget( width, height );
-		mSSAOBlurTarget				= new RenderTarget( width, height );
+		mSSAOTarget					= new RenderTarget( width / 2, height / 2 );
+		mSSAOBlurTarget				= new RenderTarget( width / 2, height / 2 );
 
 		mBatch 						= new SpriteBatch();
 		mBatch->Init();
