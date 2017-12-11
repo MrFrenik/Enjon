@@ -2,20 +2,17 @@
 	"ShaderGraphName": "TestGraph",
 
 	"Nodes": {
-		"albedoColor": {
-			"Template": "ConstantVec3Node",
-			"IsUniform": true
+		"albedoMap": {
+			"Template": "Texture2DSamplerNode"
 		},
 		"normalMap": {
 			"Template": "Texture2DSamplerNode"
 		},
-		"metallic": {
-			"Template": "ConstantFloatNode",
-			"IsUniform": true
+		"metallicMap": {
+			"Template": "Texture2DSamplerNode"
 		},
-		"roughness": {
-			"Template": "ConstantFloatNode",
-			"IsUniform": true
+		"roughMap": {
+			"Template": "Texture2DSamplerNode"
 		}
 	},
 
@@ -27,7 +24,7 @@
 		"Inputs": {
 
 			"BaseColor": {
-				"albedoColor": "Value"
+				"albedoMap": "RGB"
 			},
 
 			"Normal": {
@@ -35,11 +32,11 @@
 			},
 
 			"Metallic": {
-				"metallic": "Value"
+				"metallicMap": "RGB"
 			},
 
 			"Roughness": {
-				"roughness": "Value"
+				"roughMap": "RGB"
 			},
 
 			"Emissive": {

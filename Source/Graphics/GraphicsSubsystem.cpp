@@ -411,7 +411,9 @@ namespace Enjon
 			mTestShaderGraph = am->GetAsset< Enjon::ShaderGraph >( "isoarpg.shaders.shadergraphs.testgraph" );
 
 			// Create material
-			mMaterial = new Enjon::Material( mTestShaderGraph );
+			//mMaterial = new Enjon::Material( mTestShaderGraph );
+
+			mMaterial = am->GetAsset< Material >( "NewMaterial" ).Get()->ConstCast< Material >();
 
 			for ( u32 i = 0; i < 1; ++i ) 
 			{
@@ -421,7 +423,7 @@ namespace Enjon
 					
 					// Set renderable material
 					renderable.SetMaterial( mMaterial );
-					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" ) );
+					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.dragon" ) );
 					renderable.SetPosition( Enjon::Vec3( j, 1.0f, i ) + Enjon::Vec3( -25, 0, 5 ) );
 
 					mRenderables.push_back( renderable ); 
@@ -1268,8 +1270,8 @@ namespace Enjon
 		mFXAATarget 				= new RenderTarget(width, height);
 		mShadowDepth 				= new RenderTarget(2048, 2048);
 		mFinalTarget 				= new RenderTarget(width, height);
-		mSSAOTarget					= new RenderTarget( width / 2, height / 2 );
-		mSSAOBlurTarget				= new RenderTarget( width / 2, height / 2 );
+		mSSAOTarget					= new RenderTarget( width, height );
+		mSSAOBlurTarget				= new RenderTarget( width, height );
 
 		mBatch 						= new SpriteBatch();
 		mBatch->Init();

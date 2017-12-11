@@ -146,12 +146,13 @@ void Game::TestObjectSerialize( )
 
 		// Get material of name "NewMaterial"
 		Enjon::AssetHandle< Enjon::Material > deserializedMat = am->GetAsset< Enjon::Material >( "NewMaterial" );
-		if ( 0 )
+		if ( 1 )
 		{
-			//deserializedMat.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "isoarpg.shaders.shadergraphs.testgraph" ) );
-			//const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.normal" ) );
-			const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "metallic", 1.0f );
-			const_cast< Material* >( deserializedMat.Get( ))->SetUniform( "roughness", 0.0f );
+			deserializedMat.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "isoarpg.shaders.shadergraphs.testgraph" ) );
+			const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "isoarpg.materials.paintpeeling.albedo" ) );
+			const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "isoarpg.materials.paintpeeling.normal" ) ); 
+			const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "isoarpg.materials.paintpeeling.metallic" ) );
+			const_cast< Material* >( deserializedMat.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "isoarpg.materials.paintpeeling.roughness" ) );
 			deserializedMat.Save( ); 
 		}
 
@@ -161,13 +162,13 @@ void Game::TestObjectSerialize( )
 
 	// Serialize / Deserialize entity information
 	{
-		if ( 0 )
+		if ( 1 )
 		{
 			// Parent
 			mSerializedEntity = mEntities->Allocate( ); 
 			mSerializedEntity.Get( )->SetPosition( Vec3( -8, 3, 0 ) );
 			mSerializedEntity.Get( )->SetRotation( Quaternion::AngleAxis( ToRadians( 20.0f ), Vec3::XAxis( ) ) );
-			mSerializedEntity.Get( )->SetScale( 0.8f );
+			mSerializedEntity.Get( )->SetScale( 0.5f );
 			auto gfxCmp = mSerializedEntity.Get( )->Attach< GraphicsComponent >( );
 			gfxCmp->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
 			gfxCmp->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.unit_cube" ) ); 
@@ -244,210 +245,6 @@ void Game::TestObjectSerialize( )
 				}
 			}
 		}
- 
-
-		// Entities should have game object id's - or at the very least, there should be scene wrappers for game objects that have unique game object ids associated with them
-		
-		// Need a generic way of serializing / deserializing entity information
-		// Write out all entity component data
-		//mGun.Get( )->GetComponents( );
-		//for ( auto& c : mGun.Get( )->GetComponents( ) )
-		//{
-		//	archiver.Serialize( c );
-		//}
-
-		// How do I deserialize an entity component and then attach it?
-		//mGun.Get( )->Attach< GraphicsComponent >( );
-
-		// Need to be able to construct components based on MetaClass information...
-		/*
-			Result EntityArchiver::Serialize( const EntityHandle& handle )
-			{
-				//==========================================================================
-				// Local Transform
-				//========================================================================== 
-
-				Transform local = handle.Get()->GetLocalTransform();
-
-				// Write out position
-				mBuffer.Write< f32 >( local.Position.x );
-				mBuffer.Write< f32 >( local.Position.y );
-				mBuffer.Write< f32 >( local.Position.z );
-
-				// Write out rotation
-				mBuffer.Write< f32 >( local.Rotation.x );
-				mBuffer.Write< f32 >( local.Rotation.y );
-				mBuffer.Write< f32 >( local.Rotation.z );
-				mBuffer.Write< f32 >( local.Rotation.w );
-
-				// Write out scale
-				mBuffer.Write< f32 >( local.Scale.x );
-				mBuffer.Write< f32 >( local.Scale.y );
-				mBuffer.Write< f32 >( local.Scale.z );
-
-				//==========================================================================
-				// World Transform
-				//========================================================================== 
-
-				Transform world = handle.Get()->GetWorldTransform(); 
-
-				// Write out position
-				mBuffer.Write< f32 >( world.Position.x );
-				mBuffer.Write< f32 >( world.Position.y );
-				mBuffer.Write< f32 >( world.Position.z );
-
-				// Write out rotation
-				mBuffer.Write< f32 >( world.Rotation.x );
-				mBuffer.Write< f32 >( world.Rotation.y );
-				mBuffer.Write< f32 >( world.Rotation.z );
-				mBuffer.Write< f32 >( world.Rotation.w );
-
-				// Write out scale
-				mBuffer.Write< f32 >( local.Scale.x );
-				mBuffer.Write< f32 >( local.Scale.y );
-				mBuffer.Write< f32 >( local.Scale.z );
-
-				//==========================================================================
-				// Components
-				//========================================================================== 
-
-				const Vector< Component* >& comps = handle.Get()->GetComponents();
-				
-				// Write out number of comps
-				mBuffer.Write< u32 >( (u32)comps.size() );
-
-				// Write out component data
-				for ( auto& c : comps )
-				{
-					// Get component's meta class
-					const MetaClass* compCls = c->Class();
-
-					// Write out component class
-					mBuffer.Write< String >( compCls->GetName() );
-
-					// Serialize component data
-					Result res = c->SerializeData( &mBuffer );
-					if ( res == Result::INCOMPLETE )
-					{
-						SerializeDataDefault( c, compCls );
-					}
-				}
-
-				//================================================================================
-				// Entity Children
-				//================================================================================
-
-				const Vector< EntityHandle >& children = handle.Get()->GetChildren();
-
-				// Write out number of children 
-				mBuffer.Write< u32 >( (u32)children.size() );
-
-				// Serialize all children into buffer
-				for ( auto& c : children )
-				{
-					Serialize( c ):
-				}
-
-				return Result::SUCCESS;
-			}
-
-			// Will be expecting this data to most likely come from a scene's deserialization process, so an existing byte buffer will be provided
-			Entity* EntityArchiver::Deserialize( ByteBuffer* buffer )
-			{
-				// Handle to fill out
-				EntityHandle handle = mEntities->Allocate();
-
-				//==========================================================================
-				// Local Transform
-				//========================================================================== 
-
-				Transform local;
-
-				// Read in position
-				local.Position.x = mBuffer.Read< f32 >();
-				local.Position.y = mBuffer.Read< f32 >();
-				local.Position.z = mBuffer.Read< f32 >();
-
-				// Read in rotation
-				local.Rotation.x = mBuffer.Read< f32 >();
-				local.Rotation.y = mBuffer.Read< f32 >();
-				local.Rotation.z = mBuffer.Read< f32 >();
-				local.Rotation.w = mBuffer.Read< f32 >();
-
-				// Read in scale
-				local.Scale.x = mBuffer.Read< f32 >();
-				local.Scale.y = mBuffer.Read< f32 >();
-				local.Scale.z = mBuffer.Read< f32 >();
-
-				//==========================================================================
-				// World Transform
-				//========================================================================== 
-
-				Transform world = handle.Get()->GetWorldTransform(); 
-
-				// Read in position
-				world.Position.x = mBuffer.Read< f32 >();
-				world.Position.y = mBuffer.Read< f32 >();
-				world.Position.z = mBuffer.Read< f32 >();
-
-				// Read in rotation
-				world.Rotation.x = mBuffer.Read< f32 >();
-				world.Rotation.y = mBuffer.Read< f32 >();
-				world.Rotation.z = mBuffer.Read< f32 >();
-				world.Rotation.w = mBuffer.Read< f32 >();
-
-				// Read in scale
-				world.Scale.x = mBuffer.Read< f32 >();
-				world.Scale.y = mBuffer.Read< f32 >();
-				world.Scale.z = mBuffer.Read< f32 >();
-
-				//=================================================================
-				// Components
-				//=================================================================
-				
-				u32 numComps = buffer->Read< u32 >();
-				
-				for ( u32 i = 0; i < numComps; ++i )
-				{
-					// Get component's meta class
-					const MetaClass* cmpCls = Object::GetClass( buffer->Read< String >() );
-
-					if ( cmpCls )
-					{
-						// Attach new component to entity using MetaClass
-						Component* cmp = handle.Get()->Attach( cmpCls );
-						if ( cmp )
-						{
-							Result res = cmp->DeserializeData( buffer );
-							if ( res == Result::INCOMPLETE )
-							{
-								res = DeserializeDataDefault( cmp, cmpCls );
-							}
-						} 
-					}
-				}
-
-				//=================================================================
-				// Entity Children
-				//=================================================================
-
-				u32 numChildren = buffer->Read< u32 >();
-
-				// Deserialize all children and add to handle
-				for ( u32 i = 0; i < numChildren; ++i )
-				{
-					Entity* child = Deserialize( buffer );
-					if ( child )
-					{
-						handle.Get()->AddChild( EntityHandle( child ) );	
-					}
-				}
-
-				return handle.Get(); 
-			}
-
-		*/
-
 	}
 }
 
@@ -585,6 +382,15 @@ Enjon::Result Game::Initialize()
 	Enjon::String scuffedGoldNormalPath		= Enjon::String("/Materials/ScuffedGold/Normal.png"); 
 	Enjon::String scuffedGoldMetallicPath	= Enjon::String("/Materials/ScuffedGold/Metallic.png"); 
 	Enjon::String scuffedGoldRoughnessPath	= Enjon::String("/Materials/ScuffedGold/Roughness.png"); 
+	Enjon::String paintPeelingAlbedoPath = Enjon::String( "/Materials/PaintPeeling/Albedo.png" );
+	Enjon::String paintPeelingNormalPath = Enjon::String( "/Materials/PaintPeeling/Normal.png" );
+	Enjon::String paintPeelingRoughnessPath = Enjon::String( "/Materials/PaintPeeling/Roughness.png" );
+	Enjon::String paintPeelingMetallicPath = Enjon::String( "/Materials/PaintPeeling/Metallic.png" );
+	Enjon::String mixedMossAlbedoPath	= Enjon::String( "/Materials/MixedMoss/Albedo.png" );
+	Enjon::String mixedMossNormalPath	= Enjon::String( "/Materials/MixedMoss/Normal.png" );
+	Enjon::String mixedMossMetallicPath	= Enjon::String( "/Materials/MixedMoss/Metallic.png" );
+	Enjon::String mixedMossRoughnessPath	= Enjon::String( "/Materials/MixedMoss/Roughness.png" );
+	Enjon::String mixedMossAOPath		= Enjon::String( "/Materials/MixedMoss/AO.png" );
 	Enjon::String rockAlbedoPath		= Enjon::String("/Materials/CopperRock/Albedo.png"); 
 	Enjon::String rockNormalPath		= Enjon::String("/Materials/CopperRock/Normal.png"); 
 	Enjon::String rockRoughnessPath		= Enjon::String("/Materials/CopperRock/Roughness.png"); 
@@ -659,6 +465,15 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( scuffedGoldNormalPath );
 	mAssetManager->AddToDatabase( scuffedGoldMetallicPath );
 	mAssetManager->AddToDatabase( scuffedGoldRoughnessPath );
+	mAssetManager->AddToDatabase( paintPeelingAlbedoPath );
+	mAssetManager->AddToDatabase( paintPeelingNormalPath );
+	mAssetManager->AddToDatabase( paintPeelingMetallicPath );
+	mAssetManager->AddToDatabase( paintPeelingRoughnessPath );
+	mAssetManager->AddToDatabase( mixedMossAlbedoPath );
+	mAssetManager->AddToDatabase( mixedMossNormalPath );
+	mAssetManager->AddToDatabase( mixedMossMetallicPath );
+	mAssetManager->AddToDatabase( mixedMossRoughnessPath );
+	mAssetManager->AddToDatabase( mixedMossAOPath );
 	mAssetManager->AddToDatabase( plasticAOPath );
 	mAssetManager->AddToDatabase( frontNormalPath );
 	mAssetManager->AddToDatabase( brdfPath );
@@ -780,7 +595,7 @@ Enjon::Result Game::Initialize()
 	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA32_SkyBlue(), 10.0f); 
 
 	mFloorMat = new Enjon::Material();
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.white"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.white"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.normal"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.roughness"));
@@ -1042,6 +857,7 @@ Enjon::Result Game::Initialize()
 		// Docking windows
 		if (ImGui::BeginDock("Entities", &mShowEntities))
 		{
+			ImGui::Text( Enjon::String( "Entities: " + std::to_string( Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->GetActiveEntities( ).size( ) ) ).c_str() );
 			ImGui::Text( "Gun:" );
 			auto position 	= mGun.Get( )->GetLocalPosition();
 			auto scale 		= mGun.Get( )->GetLocalScale();
@@ -1576,6 +1392,7 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 		f32 turnRate = std::sinf( t * 10.0f );
 		Enjon::Vec3 pos = mSerializedEntity.Get( )->GetWorldPosition( );
 		mSerializedEntity.Get( )->SetPosition( Enjon::Vec3( pos.x, turnRate * 2.0f + 3.0f, pos.z ) );
+		mSerializedEntity.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( turnRate * 1.5f, Enjon::Vec3::ZAxis( ) ) );
 
 		auto children = mSerializedEntity.Get( )->GetChildren( );
 		if ( children.size( ) > 0 ) 
