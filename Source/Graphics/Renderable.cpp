@@ -45,7 +45,7 @@ namespace Enjon
 
 	//==============================================================
 
-	Material* Renderable::GetMaterial() 
+	const Material* Renderable::GetMaterial() const
 	{ 
 		return mMaterial; 
 	}
@@ -114,10 +114,11 @@ namespace Enjon
 	}
 
 	//--------------------------------------------------------------------
-	void Renderable::SetMaterial(Material* material)
+
+	void Renderable::SetMaterial(const Material* material)
 	{
 		mMaterial = material;
-	}
+	} 
 
 	//--------------------------------------------------------------------
 	void Renderable::SetMesh(const AssetHandle<Mesh>& mesh)

@@ -6,6 +6,7 @@
 #include "Asset/AssetUtils.h"
 #include "Asset/AssetManager.h"
 #include "Engine.h"
+#include "SubsystemCatalog.h"
 
 namespace Enjon
 { 
@@ -16,7 +17,7 @@ namespace Enjon
 			return nullptr;
 		}
 
-		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( ); 
+		const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( ); 
 		return am->GetDefaultAsset( cls );
 	}
 } 

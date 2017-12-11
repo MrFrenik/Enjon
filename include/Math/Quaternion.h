@@ -119,9 +119,28 @@ namespace Enjon
 			*/
 			static Quaternion RotationBetweenVectors( const Vec3& start, const Vec3& destination );
 
+			//static inline Quaternion FromEulerAngles( const f32& roll, const f32& pitch, const f32& yaw )
+			//{
+			//	return AngleAxis( roll, Vec3::XAxis( ) ) * AngleAxis( pitch, Vec3::YAxis( ) ) * AngleAxis( yaw, Vec3::ZAxis( ) );
+			//}
+
 			static inline Quaternion FromEulerAngles( const f32& roll, const f32& pitch, const f32& yaw )
 			{
-				return AngleAxis( roll, Vec3::XAxis( ) ) * AngleAxis( pitch, Vec3::YAxis( ) ) * AngleAxis( yaw, Vec3::ZAxis( ) );
+				Quaternion Q; 
+
+				f64 cy = std::cosf( yaw * 0.5 );
+				f64 sy = std::sinf( yaw * 0.5 );
+				f64 cr = std::cosf( roll * 0.5 );
+				f64 sr = std::sinf( roll * 0.5 );
+				f64 cp = std::cosf( pitch * 0.5 );
+				f64 sp = std::sinf( pitch * 0.5 );
+
+				Q.w = cy * cr * cp + sy * sr * sp;
+				Q.x = cy * sr * cp - sy * cr * sp;
+				Q.y = cy * cr * sp + sy * sr * cp;
+				Q.z = sy * cr * cp - cy * sr * sp;
+
+				return Q;
 			}
 			
 			static inline Quaternion AngleAxis(const f32& Angle, const Vec3& Axis)

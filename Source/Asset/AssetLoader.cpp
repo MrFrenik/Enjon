@@ -6,6 +6,7 @@
 #include "Serialize/ObjectArchiver.h"
 #include "Serialize/AssetArchiver.h"
 #include "Asset/AssetManager.h"
+#include "SubsystemCatalog.h"
 
 namespace Enjon
 { 
@@ -61,6 +62,9 @@ namespace Enjon
 
 				// Set to loaded
 				info->mAssetLoadStatus = AssetLoadStatus::Loaded; 
+
+				// Set record info of asset
+				info->mAsset->mRecordInfo = info;
 			} 
 
 			// Return asset from info record
@@ -101,6 +105,9 @@ namespace Enjon
 
 				// Set up asset info
 				info->mAsset->mName = info->mAssetName; 
+
+				// Set record info for asset
+				info->mAsset->mRecordInfo = info;
 			}
 
 			// Return asset from info record

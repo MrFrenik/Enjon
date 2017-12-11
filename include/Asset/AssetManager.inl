@@ -24,7 +24,7 @@ Enjon::Result AssetManager::RegisterAssetLoader()
 //================================================================================================
 
 template <typename T>
-u32 AssetManager::GetAssetTypeId( ) noexcept
+u32 AssetManager::GetAssetTypeId( ) const noexcept
 {
 	static_assert( std::is_base_of<Asset, T>::value, "GetAssetTypeId:: T must inherit from Asset." );
 
@@ -38,13 +38,13 @@ u32 AssetManager::GetAssetTypeId( ) noexcept
 //================================================================================================ 
 
 template <typename T>
-AssetHandle<T> AssetManager::GetDefaultAsset( )
+AssetHandle<T> AssetManager::GetDefaultAsset( ) const
 {
 	// Get appropriate loader based on asset type
 	u32 loaderId = GetAssetTypeId<T>( );
 
 	// Get handle from loader
-	Asset* defaultAsset = mLoadersByAssetId[loaderId]->GetDefault( );
+	Asset* defaultAsset = ConstCast< AssetManager >()->mLoadersByAssetId[loaderId]->GetDefault( );
 	AssetHandle<T> handle = AssetHandle<T>( defaultAsset );
 
 	// Return asset handle
@@ -54,14 +54,14 @@ AssetHandle<T> AssetManager::GetDefaultAsset( )
 //================================================================================================ 
 
 template <typename T>
-const HashMap< String, AssetRecordInfo >* AssetManager::GetAssets( )
+const HashMap< String, AssetRecordInfo >* AssetManager::GetAssets( ) const
 {
 	// Get appropriate loader based on asset type
 	u32 loaderId = GetAssetTypeId<T>( );
 
 	if ( Exists( loaderId ) )
 	{
-		return mLoadersByAssetId[loaderId]->GetAssets( );
+		return ConstCast< AssetManager >()->mLoadersByAssetId[loaderId]->GetAssets( );
 	}
 
 	return nullptr;
@@ -70,13 +70,13 @@ const HashMap< String, AssetRecordInfo >* AssetManager::GetAssets( )
 //================================================================================================ 
 
 template <typename T>
-AssetHandle<T> AssetManager::GetAsset( const String& name )
+AssetHandle<T> AssetManager::GetAsset( const String& name ) const
 {
 	// Get appropriate loader based on asset type
 	u32 loaderId = GetAssetTypeId<T>( );
 
 	// Get handle from loader
-	AssetHandle<T> handle = mLoadersByAssetId[loaderId]->GetAsset( name );
+	AssetHandle<T> handle = ConstCast< AssetManager >()->mLoadersByAssetId[loaderId]->GetAsset( name );
 
 	// Return asset handle
 	return handle;
@@ -85,13 +85,13 @@ AssetHandle<T> AssetManager::GetAsset( const String& name )
 //================================================================================================ 
 
 template <typename T>
-AssetHandle<T> AssetManager::GetAsset( const UUID& uuid )
+AssetHandle<T> AssetManager::GetAsset( const UUID& uuid ) const
 {
 	// Get appropriate loader based on asset type
 	u32 loaderId = GetAssetTypeId<T>( );
 
 	// Get handle from loader
-	AssetHandle<T> handle = mLoadersByAssetId[loaderId]->GetAsset( uuid );
+	AssetHandle<T> handle = ConstCast< AssetManager >()->mLoadersByAssetId[loaderId]->GetAsset( uuid );
 
 	// Return asset handle
 	return handle;
@@ -100,7 +100,7 @@ AssetHandle<T> AssetManager::GetAsset( const UUID& uuid )
 //================================================================================================ 
 
 template <typename T>
-const AssetLoader* AssetManager::GetLoaderByAssetType( )
+const AssetLoader* AssetManager::GetLoaderByAssetType( ) const
 {
 	// Get appropriate loader based on asset type
 	u32 loaderId = GetAssetTypeId<T>( );
@@ -108,7 +108,7 @@ const AssetLoader* AssetManager::GetLoaderByAssetType( )
 	// If exists, return it
 	if ( Exists( loaderId ) )
 	{
-		return mLoadersByAssetId[ loaderId ];
+		return ConstCast< AssetManager >()->mLoadersByAssetId[ loaderId ];
 	}
 
 	return nullptr; 

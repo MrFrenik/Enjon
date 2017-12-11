@@ -5,16 +5,25 @@
 #include "Asset/AssetManager.h"
 #include "Utils/FileUtils.h"
 #include "Serialize/AssetArchiver.h"
+#include "Asset/AssetLoader.h"
 #include "Engine.h"
+#include "SubsystemCatalog.h"
 			
 namespace Enjon
 {
-	/*
-	* @brief Gets loader based on asset loader type
-	*/
 	template <typename T>
 	const AssetLoader* AssetHandle<T>::GetLoader( ) const
 	{
 		Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( )->GetLoaderByAssetType( Object::GetClass<T>( ) );
+	} 
+
+	const AssetRecordInfo* Asset::GetAssetRecordInfo( ) const
+	{
+		return mRecordInfo;
+	}
+
+	Result Asset::Save( ) const
+	{
+		return Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->SaveAsset( this );
 	}
 }

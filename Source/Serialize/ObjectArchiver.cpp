@@ -8,6 +8,7 @@
 #include "System/Types.h"
 #include "Defines.h"
 #include "Asset/AssetManager.h"
+#include "SubsystemCatalog.h"
 #include "Engine.h"
 
 namespace Enjon
@@ -47,7 +48,7 @@ namespace Enjon
 			mBuffer.Write( 0 );		
 
 			// Serialize all object specific data ( classes can override at this point how they want to serialize data )
-			Result res = object->SerializeData( this );
+			Result res = object->SerializeData( &mBuffer );
 
 			// Continue with default serialization if the object doesn't handle its own
 			if ( res == Result::INCOMPLETE )
@@ -365,7 +366,7 @@ namespace Enjon
 			// Push back object into objects vector
 			out.push_back( object );
 
-			Result res = object->DeserializeData( this );
+			Result res = object->DeserializeData( &mBuffer );
 
 			if ( res == Result::INCOMPLETE )
 			{
@@ -408,7 +409,7 @@ namespace Enjon
 			// Successfully constructed, now deserialize data into it
 			else
 			{
-				Result res = object->DeserializeData( this );
+				Result res = object->DeserializeData( &mBuffer );
 
 				// Default deserialization method if not object does not handle its own deserialization
 				if ( res == Result::INCOMPLETE )
@@ -467,7 +468,7 @@ namespace Enjon
 			// Successfully constructed, now deserialize data into it
 			else
 			{
-				Result res = object->DeserializeData( this );
+				Result res = object->DeserializeData( &mBuffer );
 
 				// Default deserialization method if not object does not handle its own deserialization
 				if ( res == Result::INCOMPLETE )
@@ -580,7 +581,7 @@ namespace Enjon
 				{
 					// Grab asset manager
 					const MetaPropertyTemplateBase* base = prop->Cast< MetaPropertyTemplateBase >();
-					AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+					const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
 					AssetHandle<Asset> val;
 
 					// Get meta class of the asset

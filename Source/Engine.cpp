@@ -4,12 +4,14 @@
 #include "Engine.h"
 #include "Application.h"
 #include "Graphics/GraphicsSubsystem.h"
+#include "Entity/EntityManager.h"
 #include "Base/MetaClassRegistry.h"
 #include "Base/Object.h"
 #include "Asset/AssetManager.h"
 #include "IO/InputManager.h"
 #include "ImGui/ImGuiManager.h"
 #include "Utils/Timing.h"
+#include "SubsystemCatalog.h"
 
 #include <fmt/printf.h> 
 #include <SDL2/sdl.h>
@@ -136,8 +138,9 @@ namespace Enjon
 
 		// Register subsystems with catalog
 		mAssetManager	= mSubsystemCatalog->Register<Enjon::AssetManager>( false );		// Will do manual initialization of asset management system, since it's project dependent
-		mGraphics		= mSubsystemCatalog->Register<Enjon::GraphicsSubsystem>(); 
-		mInput			= mSubsystemCatalog->Register<Enjon::Input>(); 
+		mGraphics		= mSubsystemCatalog->Register<Enjon::GraphicsSubsystem>( );
+		mInput			= mSubsystemCatalog->Register<Enjon::Input>( ); 
+		mEntities		= mSubsystemCatalog->Register<EntityManager>( );
 
 		// Initialize imgui manager
 		Enjon::ImGuiManager::Init( mGraphics->GetWindow()->GetSDLWindow() ); 

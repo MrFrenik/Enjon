@@ -20,6 +20,10 @@ namespace Enjon
 	class AssetLoader;
 	class AssetManager; 
 	class AssetArchiver;
+	class AssetRecordInfo;
+
+	template <typename T>
+	class AssetHandle;
 
 	ENJON_CLASS( )
 	class Asset : public Enjon::Object
@@ -45,24 +49,41 @@ namespace Enjon
 			*@brief
 			*/
 			ENJON_FUNCTION( )
-			Enjon::String GetName( ) const { return mName; }
+			Enjon::String GetName( ) const 
+			{ 
+				return mName; 
+			}
 			
 			/**
 			*@brief
 			*/
 			ENJON_FUNCTION( )
-			Enjon::String GetFilePath( ) const { return mFilePath; }
+			Enjon::String GetFilePath( ) const 
+			{ 
+				return mFilePath; 
+			}
 
 			/**
 			*@brief
 			*/
 			ENJON_FUNCTION( )
-			UUID GetUUID( ) const { return mUUID; } 
+			UUID GetUUID( ) const 
+			{ 
+				return mUUID; 
+			} 
 
 			/**
 			*@brief
 			*/
-			const AssetLoader* GetLoader( ) const { return mLoader; }
+			const AssetLoader* GetLoader( ) const 
+			{ 
+				return mLoader; 
+			}
+
+			/*
+			* @brief
+			*/
+			const AssetRecordInfo* GetAssetRecordInfo( ) const;
 			
 		protected:
 
@@ -99,6 +120,11 @@ namespace Enjon
 				return Result::SUCCESS;
 			} 
 
+			/**
+			*@brief
+			*/
+			Result Save( ) const;
+
 		protected: 
 
 			ENJON_PROPERTY( )
@@ -111,6 +137,8 @@ namespace Enjon
 			Enjon::String mName; 
 
 			const AssetLoader* mLoader = nullptr;
+
+			const AssetRecordInfo* mRecordInfo = nullptr;
 
 		private:
 	};
@@ -169,7 +197,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			const T* Get() 
+			const T* Get() const 
 			{ 
 				return mAsset->Cast<T>(); 
 			} 
@@ -209,6 +237,18 @@ namespace Enjon
 				// Return success
 				return Result::SUCCESS;
 			} 
+
+			/*
+			* @brief
+			*/
+			Result Save( )
+			{
+				if ( mAsset )
+				{
+					return mAsset->Save( );
+				} 
+				return Result::FAILURE;
+			}
 
 			/*
 			* @brief Gets loader based on asset loader type

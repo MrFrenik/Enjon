@@ -25,6 +25,11 @@ namespace Enjon
 	{
 		public:
 			virtual void Base() = 0;
+
+			virtual bool HasEntity( const u32& entityID ) = 0;
+
+			virtual Component* AddComponent( const u32& entityId, Component* component ) = 0;
+
 	};
 
 	template <typename T>
@@ -37,8 +42,20 @@ namespace Enjon
 		public:
 			void Base() override {}
 
-			using ComponentPtrs = std::vector<T*>;
+			using ComponentPtrs = std::vector<T*>; 
 			using ComponentMap = std::unordered_map<u32, T>;
+
+			Component* AddComponent( const u32& entityId, Component* component )
+			{
+				mComponentMap[ entityId ] = *(T*)component;
+				mComponentPtrs.push_back( &mComponentMap[ entityId ] );
+				return &mComponentMap[ entityId ];
+			} 
+
+			virtual bool HasEntity( const u32& entityID ) override
+			{
+				return ( mComponentMap.find( entityID ) != mComponentMap.end( ) );
+			}
 
 		private:
 			ComponentPtrs mComponentPtrs;
@@ -132,9 +149,7 @@ namespace Enjon
 	inline ComponentID GetComponentType() noexcept
 	{
 		static_assert( std::is_base_of<Component, T>::value, "Component:: T must inherit from Component." );	
-
-		static ComponentID typeID{ Internal::GetUniqueComponentID() };
-		return typeID;
+		return Object::GetTypeId< T >( ); 
 	}
 
 	typedef std::bitset<static_cast<u32>( MAX_COMPONENTS )> ComponentBitset;

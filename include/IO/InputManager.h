@@ -166,9 +166,9 @@ namespace Enjon
 		// GamePad
 		void PressButton( u32 buttonID );
 		void ReleaseButton( u32 buttonID );
-		bool IsButtonDown( u32 buttonID );
-		bool WasButtonDown( u32 buttonID );
-		bool IsButtonPressed( u32 buttonID ); 
+		bool IsButtonDown( u32 buttonID ) const;
+		bool WasButtonDown( u32 buttonID ) const;
+		bool IsButtonPressed( u32 buttonID ) const; 
 	};
 
 	class Input : public Subsystem
@@ -213,42 +213,42 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			bool IsKeyDown( KeyCode code );
+			bool IsKeyDown( KeyCode code ) const;
 			
 			/**
 			* @brief
 			*/
-			bool IsKeyPressed( KeyCode code );
+			bool IsKeyPressed( KeyCode code ) const;
 			
 			/**
 			* @brief
 			*/
-			bool WasKeyDown( KeyCode code );
+			bool WasKeyDown( KeyCode code ) const;
 			
 			/**
 			* @brief
 			*/
-			bool IsMouseClicked( MouseButtonCode code );
+			bool IsMouseClicked( MouseButtonCode code ) const;
 			
 			/**
 			* @brief
 			*/
-			bool IsMouseDoubleClicked( MouseButtonCode code );
+			bool IsMouseDoubleClicked( MouseButtonCode code ) const;
 			
 			/**
 			* @brief
 			*/
-			bool IsMouseDown( MouseButtonCode code );
+			bool IsMouseDown( MouseButtonCode code ) const;
 			
 			/**
 			* @brief
 			*/
-			bool IsMouseReleased( MouseButtonCode code );
+			bool IsMouseReleased( MouseButtonCode code ) const;
 			
 			/**
 			* @brief
 			*/
-			bool WasMouseDown( MouseButtonCode code );
+			bool WasMouseDown( MouseButtonCode code ) const;
 
 			/**
 			* @brief
@@ -263,17 +263,17 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			bool IsButtonDown( u32 buttonID );
+			bool IsButtonDown( u32 buttonID ) const;
 			
 			/**
 			* @brief
 			*/
-			bool IsButtonPressed( u32 buttonID );
+			bool IsButtonPressed( u32 buttonID ) const;
 			
 			/**
 			* @brief
 			*/
-			bool WasButtonDown( u32 buttonID );
+			bool WasButtonDown( u32 buttonID ) const;
 
 			/**
 			* @brief
@@ -283,7 +283,10 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			Vec2 GetMouseCoords() const { return mMouseCoords; }
+			Vec2 GetMouseCoords() const 
+			{ 
+				return mMouseCoords; 
+			}
 
 		public:
 			std::vector<SDL_GameController*> ControllerHandles;

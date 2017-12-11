@@ -232,32 +232,32 @@ namespace Enjon
 
 	//=========================================================================
 			
-	Result Mesh::SerializeData( ObjectArchiver* archiver ) const
+	Result Mesh::SerializeData( ByteBuffer* buffer ) const
 	{ 
 		// Write out size of verticies
-		archiver->WriteToBuffer< usize >( mVerticies.size( ) );
+		buffer->Write< usize >( mVerticies.size( ) );
 
 		// Write out verticies
 		for ( auto& v : mVerticies )
 		{
 			// Position
-			archiver->WriteToBuffer< f32 >( v.Position[ 0 ] );
-			archiver->WriteToBuffer< f32 >( v.Position[ 1 ] );
-			archiver->WriteToBuffer< f32 >( v.Position[ 2 ] );
+			buffer->Write< f32 >( v.Position[ 0 ] );
+			buffer->Write< f32 >( v.Position[ 1 ] );
+			buffer->Write< f32 >( v.Position[ 2 ] );
 
 			// Normal
-			archiver->WriteToBuffer< f32 >( v.Normals[ 0 ] );
-			archiver->WriteToBuffer< f32 >( v.Normals[ 1 ] );
-			archiver->WriteToBuffer< f32 >( v.Normals[ 2 ] );
+			buffer->Write< f32 >( v.Normals[ 0 ] );
+			buffer->Write< f32 >( v.Normals[ 1 ] );
+			buffer->Write< f32 >( v.Normals[ 2 ] );
 
 			// Tangent
-			archiver->WriteToBuffer< f32 >( v.Tangent[ 0 ] );
-			archiver->WriteToBuffer< f32 >( v.Tangent[ 1 ] );
-			archiver->WriteToBuffer< f32 >( v.Tangent[ 2 ] );
+			buffer->Write< f32 >( v.Tangent[ 0 ] );
+			buffer->Write< f32 >( v.Tangent[ 1 ] );
+			buffer->Write< f32 >( v.Tangent[ 2 ] );
 
 			// UV
-			archiver->WriteToBuffer< f32 >( v.UV[ 0 ] );
-			archiver->WriteToBuffer< f32 >( v.UV[ 1 ] );
+			buffer->Write< f32 >( v.UV[ 0 ] );
+			buffer->Write< f32 >( v.UV[ 1 ] );
 		} 
 
 		return Result::SUCCESS;
@@ -265,10 +265,10 @@ namespace Enjon
 
 	//=========================================================================
 
-	Result Mesh::DeserializeData( ObjectArchiver* archiver )
+	Result Mesh::DeserializeData( ByteBuffer* buffer )
 	{
 		// Get size of verts from archiver
-		usize vertCount = archiver->ReadFromBuffer< usize >( );
+		usize vertCount = buffer->Read< usize >( );
 
 		// Read in verts from archiver
 		for ( usize i = 0; i < vertCount; ++i )
@@ -276,23 +276,23 @@ namespace Enjon
 			Vert v;
 
 			// Position
-			v.Position[ 0 ] = archiver->ReadFromBuffer< f32 >( );
-			v.Position[ 1 ] = archiver->ReadFromBuffer< f32 >( );
-			v.Position[ 2 ] = archiver->ReadFromBuffer< f32 >( );
+			v.Position[ 0 ] = buffer->Read< f32 >( );
+			v.Position[ 1 ] = buffer->Read< f32 >( );
+			v.Position[ 2 ] = buffer->Read< f32 >( );
 			
 			// Normal
-			v.Normals[ 0 ] = archiver->ReadFromBuffer< f32 >( );
-			v.Normals[ 1 ] = archiver->ReadFromBuffer< f32 >( );
-			v.Normals[ 2 ] = archiver->ReadFromBuffer< f32 >( );
+			v.Normals[ 0 ] = buffer->Read< f32 >( );
+			v.Normals[ 1 ] = buffer->Read< f32 >( );
+			v.Normals[ 2 ] = buffer->Read< f32 >( );
 			
 			// Tangent
-			v.Tangent[ 0 ] = archiver->ReadFromBuffer< f32 >( );
-			v.Tangent[ 1 ] = archiver->ReadFromBuffer< f32 >( );
-			v.Tangent[ 2 ] = archiver->ReadFromBuffer< f32 >( );
+			v.Tangent[ 0 ] = buffer->Read< f32 >( );
+			v.Tangent[ 1 ] = buffer->Read< f32 >( );
+			v.Tangent[ 2 ] = buffer->Read< f32 >( );
 			
 			// UV
-			v.UV[ 0 ] = archiver->ReadFromBuffer< f32 >( );
-			v.UV[ 1 ] = archiver->ReadFromBuffer< f32 >( );
+			v.UV[ 0 ] = buffer->Read< f32 >( );
+			v.UV[ 1 ] = buffer->Read< f32 >( );
 
 			// Push back vert
 			mVerticies.push_back( v );

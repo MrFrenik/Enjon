@@ -3,6 +3,7 @@
 #include "Asset/AssetManager.h"
 #include "Asset/ShaderGraphAssetLoader.h"
 #include "Serialize/ObjectArchiver.h"
+#include "SubsystemCatalog.h"
 #include "Engine.h"
 
 #include "rapidjson/rapidjson.h"
@@ -1163,7 +1164,7 @@ namespace Enjon
 			Enjon::String uniformName = const_cast< ShaderGraphNode* > ( link.mConnectingNode )->mName;
 
 			// Get asset manager
-			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+			const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 
 			if ( nodeTemplate )
 			{

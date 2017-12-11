@@ -22,8 +22,9 @@
 #include "CVarsSystem.h"
 #include "ImGui/ImGuiManager.h"
 #include "Graphics/Texture.h"
-#include "Engine.h"
 #include "Graphics/ShaderGraph.h"
+#include "Engine.h"
+#include "SubsystemCatalog.h"
 
 #include <string>
 #include <cassert>
@@ -211,7 +212,7 @@ namespace Enjon
 		//Enjon::String hdrFilePath = "/Textures/HDR/Mono_Lake_B_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "/IsoARPG/Assets/Textures/HDR/Mans_Outside_2k.hdr";
 
-		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->ConstCast< AssetManager >();
 		am->AddToDatabase( hdrFilePath ); 
 		Enjon::String qualifiedName = Enjon::Utils::ToLower( am->GetName() ) + AssetLoader::GetQualifiedName( hdrFilePath );
 
@@ -421,9 +422,7 @@ namespace Enjon
 					// Set renderable material
 					renderable.SetMaterial( mMaterial );
 					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" ) );
-					renderable.SetScale( Enjon::Vec3( 2.0f, 1.0f, 1.0f ) );
 					renderable.SetPosition( Enjon::Vec3( j, 1.0f, i ) + Enjon::Vec3( -25, 0, 5 ) );
-					//renderable.SetRotation( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::YAxis( ) ) );
 
 					mRenderables.push_back( renderable ); 
 				}
@@ -519,7 +518,7 @@ namespace Enjon
 		static bool set = false;
 		if ( !set )
 		{
-			Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+			const Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 			if ( am )
 			{
 				//mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.unreal_shaderball" ) ); 
@@ -532,7 +531,7 @@ namespace Enjon
 		}
 
 		// Get input
-		Enjon::Input* input = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::Input >( );
+		const Enjon::Input* input = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Input >( );
 		if ( input )
 		{
 			// Recompile test shader
@@ -625,11 +624,11 @@ namespace Enjon
 
 		if (!sortedRenderables.empty())
 		{ 
-			Material* material = nullptr;
+			const Material* material = nullptr;
 			for (auto& renderable : sortedRenderables)
 			{
 				// Check for material switch
-				Material* curMaterial = renderable->GetMaterial();
+				const Material* curMaterial = renderable->GetMaterial();
 				sg = curMaterial->GetShaderGraph( );
 				assert(curMaterial != nullptr); 
 
@@ -775,7 +774,7 @@ namespace Enjon
 			shader->SetUniform( "uView", mSceneCamera.GetView( ) );
 
 			// Get material
-			Material* material = mInstancedRenderable->GetMaterial( );
+			const Material* material = mInstancedRenderable->GetMaterial( );
 
 			// Set material textures
 			shader->BindTexture( "uAlbedoMap", material->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTextureId( ), 0 );
@@ -1657,7 +1656,7 @@ namespace Enjon
 
 		if ( ImGui::CollapsingHeader( "Mesh" ) )
 		{ 
-			Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+			const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 			ImGui::ListBoxHeader( Enjon::String( "##meshes" ).c_str( ) );
 			{
 				for ( auto& a : *am->GetAssets< Enjon::Mesh >( ) )
@@ -1762,7 +1761,7 @@ namespace Enjon
 							UniformTexture* uf = uniform->Cast< UniformTexture >( );
 							if ( ImGui::CollapsingHeader( uf->GetName( ).c_str( ) ) )
 							{
-								Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+								const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 								ImGui::ListBoxHeader( ( "##textures" + uniformName ).c_str( ) );
 								{
 									for ( auto& a : *am->GetAssets< Enjon::Texture >( ) )

@@ -79,7 +79,7 @@ namespace Enjon
 	}
 
 	//Returns true if key held down	
-	bool Input::IsKeyDown( KeyCode code )
+	bool Input::IsKeyDown( KeyCode code ) const
 	{ 
 		auto query = mKeyMap.find( code );
 
@@ -94,7 +94,7 @@ namespace Enjon
 		}
 	}
 
-	bool Input::WasKeyDown( KeyCode code )
+	bool Input::WasKeyDown( KeyCode code ) const
 	{ 
 		auto query = mPreviousKeyMap.find( code );
 	
@@ -107,7 +107,7 @@ namespace Enjon
 	}
 
 	//Returns true if key is just pressed
-	bool Input::IsKeyPressed( KeyCode code )
+	bool Input::IsKeyPressed( KeyCode code ) const
 	{ 
 		if ( IsKeyDown( code ) && !WasKeyDown( code ) )
 		{
@@ -133,7 +133,7 @@ namespace Enjon
 		m_buttonMap[buttonID] = false;
 	}
 
-	bool Controller::IsButtonDown( u32 buttonID )
+	bool Controller::IsButtonDown( u32 buttonID ) const
 	{
 		auto query = m_buttonMap.find( buttonID );
 
@@ -148,7 +148,7 @@ namespace Enjon
 		}
 	}
 
-	bool Controller::WasButtonDown( u32 buttonID )
+	bool Controller::WasButtonDown( u32 buttonID ) const
 	{
 		auto query = m_previousButtonMap.find( buttonID );
 	
@@ -163,7 +163,7 @@ namespace Enjon
 		}
 	}
 
-	bool Controller::IsButtonPressed( u32 buttonID )
+	bool Controller::IsButtonPressed( u32 buttonID ) const
 	{
 		if ( IsButtonDown( buttonID ) == true && WasButtonDown( buttonID ) == false )
 		{

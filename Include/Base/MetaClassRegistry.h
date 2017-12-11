@@ -37,7 +37,7 @@ namespace Enjon
 			ENJON_CLASS_BODY( ) 
 				
 		protected:
-			virtual Result SerializeData( ObjectArchiver* archiver ) const override
+			virtual Result SerializeData( ByteBuffer* buffer ) const override
 			{
 				std::cout << "Yeah, buddy\n!";
 				return Result::INCOMPLETE;
@@ -69,8 +69,8 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			Enjon::String mStaticArrayConstant[3];
 
-			//ENJON_PROPERTY( )
-			//Enjon::AssetHandle<Enjon::Texture> mStaticArrayEnumIntegral[(usize)TextureFileExtension::UNKNOWN]; 
+			ENJON_PROPERTY( )
+			Enjon::AssetHandle<Enjon::Texture> mStaticArrayEnumIntegral[(usize)TextureFileExtension::UNKNOWN]; 
 
 			ENJON_PROPERTY( )
 			f32 mStaticArrayConstVariable[kConstantValue];

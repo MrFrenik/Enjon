@@ -29,6 +29,8 @@
 #include <Graphics/ShaderGraph.h>
 #include <Serialize/ObjectArchiver.h>
 #include <Serialize/AssetArchiver.h>
+#include <SubsystemCatalog.h>
+#include <Serialize/EntityArchiver.h>
 
 #include <fmt/printf.h>
 #include <lz4/lz4.h>
@@ -61,7 +63,7 @@ void Game::TestObjectSerialize( )
 {
 	using namespace Enjon;
 
-	AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+	AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->ConstCast< AssetManager >();
 	TestNamespace::PointLight writeTestObject; 
 	ObjectArchiver archiver; 
 	FontAssetLoader assetLoader;
@@ -126,7 +128,8 @@ void Game::TestObjectSerialize( )
 		am->AddToDatabase( assetPath );
 
 		Enjon::AssetHandle< Enjon::Texture > cachedTexture = am->GetAsset< Enjon::Texture >( "isoarpg.textures.beast" );
-		mGun.Get( )->GetComponent< GraphicsComponent >( )->GetMaterial( )->SetTexture( Enjon::TextureSlotType::Albedo, cachedTexture );
+		Enjon::Material* gunMat = const_cast< Enjon::Material* >( mGun.Get( )->GetComponent< GraphicsComponent >( )->GetMaterial( ) );
+		gunMat->SetTexture( Enjon::TextureSlotType::Albedo, cachedTexture );
 
 		Enjon::AssetHandle< Enjon::Mesh > cachedMesh = am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" );
 		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMesh( cachedMesh );
@@ -135,6 +138,316 @@ void Game::TestObjectSerialize( )
 	{
 		AssetArchiver assetArchiver; 
 		assetArchiver.Serialize( am->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" ).Get( ) );
+	}
+
+	{
+		// A way to construct new types of objects - Will be given all default parameters when constructed - NEEDS TO GO THROUGH FACTORY FOR THIS EVENTUALLY
+		Enjon::AssetHandle< Enjon::Material > newMat = am->ConstructAsset< Enjon::Material >( );
+
+		// Get material of name "NewMaterial"
+		Enjon::AssetHandle< Enjon::Material > deserializedMat = am->GetAsset< Enjon::Material >( "NewMaterial" );
+		if ( 0 )
+		{
+			//deserializedMat.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "isoarpg.shaders.shadergraphs.testgraph" ) );
+			//const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "isoarpg.materials.cerebus.normal" ) );
+			const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "metallic", 1.0f );
+			const_cast< Material* >( deserializedMat.Get( ))->SetUniform( "roughness", 0.0f );
+			deserializedMat.Save( ); 
+		}
+
+		// Set gun material
+		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMaterial( deserializedMat.Get( ) );
+	}
+
+	// Serialize / Deserialize entity information
+	{
+		if ( 0 )
+		{
+			// Parent
+			mSerializedEntity = mEntities->Allocate( ); 
+			mSerializedEntity.Get( )->SetPosition( Vec3( -8, 3, 0 ) );
+			mSerializedEntity.Get( )->SetRotation( Quaternion::AngleAxis( ToRadians( 20.0f ), Vec3::XAxis( ) ) );
+			mSerializedEntity.Get( )->SetScale( 0.8f );
+			auto gfxCmp = mSerializedEntity.Get( )->Attach< GraphicsComponent >( );
+			gfxCmp->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
+			gfxCmp->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.unit_cube" ) ); 
+
+			// Child
+			EntityHandle child = mEntities->Allocate( );
+			auto childGfx = child.Get( )->Attach< GraphicsComponent >( );
+			childGfx->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
+			childGfx->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.unit_sphere" ) );
+			mSerializedEntity.Get( )->AddChild( child );
+			child.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 0, 1.5f, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.5f ) ) );
+
+			// Other children
+			EntityHandle child0 = mEntities->Allocate( );
+			auto child0Gfx = child0.Get( )->Attach< GraphicsComponent >( );
+			child0Gfx->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
+			child0Gfx->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.unit_cube" ) );
+			child.Get( )->AddChild( child0 );
+			child0.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( -2, 2, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.75f ) ) ); 
+
+			EntityHandle child1 = mEntities->Allocate( );
+			auto child1Gfx = child1.Get( )->Attach< GraphicsComponent >( );
+			child1Gfx->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
+			child1Gfx->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.unit_cube" ) );
+			child.Get( )->AddChild( child1 );
+			child1.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 2, 2, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.75f ) ) ); 
+
+			// Test serializing entity data
+			EntityArchiver archiver; 
+			archiver.Serialize( mSerializedEntity ); 
+			String path = am->GetAssetsPath( ) + "/Cache/testEntity";
+			archiver.WriteToFile( path ); 
+
+			mGfx->GetScene( )->AddRenderable( gfxCmp->GetRenderable( ) );
+			mGfx->GetScene( )->AddRenderable( childGfx->GetRenderable( ) );
+			mGfx->GetScene( )->AddRenderable( child0Gfx->GetRenderable( ) );
+			mGfx->GetScene( )->AddRenderable( child1Gfx->GetRenderable( ) );
+		}
+		else
+		{
+			EntityArchiver archiver;
+			String path = am->GetAssetsPath( ) + "/Cache/testEntity";
+			mSerializedEntity = archiver.Deserialize( path );
+			if ( mSerializedEntity.Get( ) )
+			{
+				auto gfxCmp = mSerializedEntity.Get( )->GetComponent< GraphicsComponent >( );
+				if ( gfxCmp )
+				{
+					mGfx->GetScene( )->AddRenderable( gfxCmp->GetRenderable() );
+				}
+
+				auto addChildrenGfx = [ & ] ( const EntityHandle& handle )
+				{
+					for ( auto& c : handle.Get( )->GetChildren( ) )
+					{
+						auto cGfxCmp = c.Get( )->GetComponent< GraphicsComponent >( );
+						if ( cGfxCmp )
+						{
+							mGfx->GetScene( )->AddRenderable( cGfxCmp->GetRenderable( ) );
+						} 
+					}
+				};
+
+				// Need an automated way of doing this in the graphics component ( maybe in late update or something )
+				for ( auto& c : mSerializedEntity.Get( )->GetChildren( ) )
+				{
+					auto cGfxCmp = c.Get( )->GetComponent< GraphicsComponent >( );
+					if ( cGfxCmp )
+					{ 
+						mGfx->GetScene( )->AddRenderable( cGfxCmp->GetRenderable( ) );
+					}
+
+					addChildrenGfx( c );
+				}
+			}
+		}
+ 
+
+		// Entities should have game object id's - or at the very least, there should be scene wrappers for game objects that have unique game object ids associated with them
+		
+		// Need a generic way of serializing / deserializing entity information
+		// Write out all entity component data
+		//mGun.Get( )->GetComponents( );
+		//for ( auto& c : mGun.Get( )->GetComponents( ) )
+		//{
+		//	archiver.Serialize( c );
+		//}
+
+		// How do I deserialize an entity component and then attach it?
+		//mGun.Get( )->Attach< GraphicsComponent >( );
+
+		// Need to be able to construct components based on MetaClass information...
+		/*
+			Result EntityArchiver::Serialize( const EntityHandle& handle )
+			{
+				//==========================================================================
+				// Local Transform
+				//========================================================================== 
+
+				Transform local = handle.Get()->GetLocalTransform();
+
+				// Write out position
+				mBuffer.Write< f32 >( local.Position.x );
+				mBuffer.Write< f32 >( local.Position.y );
+				mBuffer.Write< f32 >( local.Position.z );
+
+				// Write out rotation
+				mBuffer.Write< f32 >( local.Rotation.x );
+				mBuffer.Write< f32 >( local.Rotation.y );
+				mBuffer.Write< f32 >( local.Rotation.z );
+				mBuffer.Write< f32 >( local.Rotation.w );
+
+				// Write out scale
+				mBuffer.Write< f32 >( local.Scale.x );
+				mBuffer.Write< f32 >( local.Scale.y );
+				mBuffer.Write< f32 >( local.Scale.z );
+
+				//==========================================================================
+				// World Transform
+				//========================================================================== 
+
+				Transform world = handle.Get()->GetWorldTransform(); 
+
+				// Write out position
+				mBuffer.Write< f32 >( world.Position.x );
+				mBuffer.Write< f32 >( world.Position.y );
+				mBuffer.Write< f32 >( world.Position.z );
+
+				// Write out rotation
+				mBuffer.Write< f32 >( world.Rotation.x );
+				mBuffer.Write< f32 >( world.Rotation.y );
+				mBuffer.Write< f32 >( world.Rotation.z );
+				mBuffer.Write< f32 >( world.Rotation.w );
+
+				// Write out scale
+				mBuffer.Write< f32 >( local.Scale.x );
+				mBuffer.Write< f32 >( local.Scale.y );
+				mBuffer.Write< f32 >( local.Scale.z );
+
+				//==========================================================================
+				// Components
+				//========================================================================== 
+
+				const Vector< Component* >& comps = handle.Get()->GetComponents();
+				
+				// Write out number of comps
+				mBuffer.Write< u32 >( (u32)comps.size() );
+
+				// Write out component data
+				for ( auto& c : comps )
+				{
+					// Get component's meta class
+					const MetaClass* compCls = c->Class();
+
+					// Write out component class
+					mBuffer.Write< String >( compCls->GetName() );
+
+					// Serialize component data
+					Result res = c->SerializeData( &mBuffer );
+					if ( res == Result::INCOMPLETE )
+					{
+						SerializeDataDefault( c, compCls );
+					}
+				}
+
+				//================================================================================
+				// Entity Children
+				//================================================================================
+
+				const Vector< EntityHandle >& children = handle.Get()->GetChildren();
+
+				// Write out number of children 
+				mBuffer.Write< u32 >( (u32)children.size() );
+
+				// Serialize all children into buffer
+				for ( auto& c : children )
+				{
+					Serialize( c ):
+				}
+
+				return Result::SUCCESS;
+			}
+
+			// Will be expecting this data to most likely come from a scene's deserialization process, so an existing byte buffer will be provided
+			Entity* EntityArchiver::Deserialize( ByteBuffer* buffer )
+			{
+				// Handle to fill out
+				EntityHandle handle = mEntities->Allocate();
+
+				//==========================================================================
+				// Local Transform
+				//========================================================================== 
+
+				Transform local;
+
+				// Read in position
+				local.Position.x = mBuffer.Read< f32 >();
+				local.Position.y = mBuffer.Read< f32 >();
+				local.Position.z = mBuffer.Read< f32 >();
+
+				// Read in rotation
+				local.Rotation.x = mBuffer.Read< f32 >();
+				local.Rotation.y = mBuffer.Read< f32 >();
+				local.Rotation.z = mBuffer.Read< f32 >();
+				local.Rotation.w = mBuffer.Read< f32 >();
+
+				// Read in scale
+				local.Scale.x = mBuffer.Read< f32 >();
+				local.Scale.y = mBuffer.Read< f32 >();
+				local.Scale.z = mBuffer.Read< f32 >();
+
+				//==========================================================================
+				// World Transform
+				//========================================================================== 
+
+				Transform world = handle.Get()->GetWorldTransform(); 
+
+				// Read in position
+				world.Position.x = mBuffer.Read< f32 >();
+				world.Position.y = mBuffer.Read< f32 >();
+				world.Position.z = mBuffer.Read< f32 >();
+
+				// Read in rotation
+				world.Rotation.x = mBuffer.Read< f32 >();
+				world.Rotation.y = mBuffer.Read< f32 >();
+				world.Rotation.z = mBuffer.Read< f32 >();
+				world.Rotation.w = mBuffer.Read< f32 >();
+
+				// Read in scale
+				world.Scale.x = mBuffer.Read< f32 >();
+				world.Scale.y = mBuffer.Read< f32 >();
+				world.Scale.z = mBuffer.Read< f32 >();
+
+				//=================================================================
+				// Components
+				//=================================================================
+				
+				u32 numComps = buffer->Read< u32 >();
+				
+				for ( u32 i = 0; i < numComps; ++i )
+				{
+					// Get component's meta class
+					const MetaClass* cmpCls = Object::GetClass( buffer->Read< String >() );
+
+					if ( cmpCls )
+					{
+						// Attach new component to entity using MetaClass
+						Component* cmp = handle.Get()->Attach( cmpCls );
+						if ( cmp )
+						{
+							Result res = cmp->DeserializeData( buffer );
+							if ( res == Result::INCOMPLETE )
+							{
+								res = DeserializeDataDefault( cmp, cmpCls );
+							}
+						} 
+					}
+				}
+
+				//=================================================================
+				// Entity Children
+				//=================================================================
+
+				u32 numChildren = buffer->Read< u32 >();
+
+				// Deserialize all children and add to handle
+				for ( u32 i = 0; i < numChildren; ++i )
+				{
+					Entity* child = Deserialize( buffer );
+					if ( child )
+					{
+						handle.Get()->AddChild( EntityHandle( child ) );	
+					}
+				}
+
+				return handle.Get(); 
+			}
+
+		*/
+
 	}
 }
 
@@ -192,21 +505,12 @@ Enjon::Result Game::Initialize()
 	}
 	
 	// Get asset manager and set its properties ( I don't like this )
-	mAssetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog()->Get<Enjon::AssetManager>(); 
+	mAssetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog()->Get<Enjon::AssetManager>()->ConstCast< Enjon::AssetManager >(); 
 	// This also needs to be done through a config file or cmake
 	mAssetManager->SetAssetsPath( mAssetsPath );
 	mAssetManager->SetCachedAssetsPath( cachePath );
 	mAssetManager->SetDatabaseName( GetApplicationName( ) ); 
 	mAssetManager->Initialize( );
-
-	//for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( projectDirectory ) )
-	//{
-	//	if ( Enjon::AssetManager::HasFileExtension( p.path().string(), "easset" ) )
-	//	{
-	//		std::cout << "Asset: " << p << "\n";
-	//	} 
-	//}
-
 
 	{
 		// This works for flat arrays
@@ -228,8 +532,8 @@ Enjon::Result Game::Initialize()
 	// Get Subsystems from engine
 	Enjon::Engine* engine = Enjon::Engine::GetInstance();
 	Enjon::SubsystemCatalog* subSysCatalog = engine->GetSubsystemCatalog();
-	mGfx = subSysCatalog->Get<Enjon::GraphicsSubsystem>();
-	mInput = subSysCatalog->Get<Enjon::Input>();
+	mGfx = subSysCatalog->Get<Enjon::GraphicsSubsystem>()->ConstCast< Enjon::GraphicsSubsystem >();
+	mInput = subSysCatalog->Get<Enjon::Input>()->ConstCast< Enjon::Input >();
 
 	// Paths to resources
 	Enjon::String toyBoxDispPath		= Enjon::String("/Textures/toy_box_disp.png");
@@ -307,10 +611,6 @@ Enjon::Result Game::Initialize()
 	Enjon::String rootPath = engine->GetConfig( ).GetRoot( );
 	Enjon::String fontPath = rootPath + "/Assets/Fonts/WeblySleek/weblysleekuisb.ttf"; 
 	
-	// A way to construct new types of objects - Will be given all default parameters when constructed - NEEDS TO GO THROUGH FACTORY FOR THIS EVENTUALLY
-	Enjon::AssetHandle< Enjon::Material > newMat = mAssetManager->ConstructAsset< Enjon::Material >( );
-
-	Enjon::AssetHandle< Enjon::Material > deserializedMat = mAssetManager->GetAsset< Enjon::Material >( "NewMaterial" );
 
 	// Add to asset database
 	mAssetManager->AddToDatabase( toyBoxDispPath );
@@ -406,11 +706,12 @@ Enjon::Result Game::Initialize()
 	// Set sphere mesh
 	mSphereMesh = mAssetManager->GetAsset<Enjon::Mesh>( "isoarpg.models.unit_sphere" );
 
-	// Create entity manager
-	mEntities = new Enjon::EntityManager();
+	// Get entity manager
+	mEntities = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->ConstCast< Enjon::EntityManager >();
 
-	mEntities->RegisterComponent<Enjon::GraphicsComponent>();
-	mEntities->RegisterComponent<Enjon::PointLightComponent>();
+	// I don't really like having to do this... How would something like this work for script components?
+	//mEntities->RegisterComponent<Enjon::GraphicsComponent>();
+	//mEntities->RegisterComponent<Enjon::PointLightComponent>();
 
 	// Allocate handle
 	mGreen = mEntities->Allocate( );
@@ -419,7 +720,8 @@ Enjon::Result Game::Initialize()
 	mGun = mEntities->Allocate( );
 	mRock = mEntities->Allocate( );
 	mRock2 = mEntities->Allocate( );
-	auto rgc = mRock.Get( )->Attach< Enjon::GraphicsComponent >( );
+	Enjon::GraphicsComponent* rgc = mRock.Get( )->Attach( Enjon::Object::GetClass< Enjon::GraphicsComponent >( ) )->ConstCast< Enjon::GraphicsComponent >( );
+	//auto rgc = mRock.Get( )->Attach< Enjon::GraphicsComponent >( );
 	auto rgc2 = mRock2.Get( )->Attach< Enjon::GraphicsComponent >( );
 	auto gc = mGun.Get()->Attach<Enjon::GraphicsComponent>(); 
 	auto pc = mGun.Get()->Attach<Enjon::PointLightComponent>(); 
@@ -723,7 +1025,7 @@ Enjon::Result Game::Initialize()
 		scene->SetAmbientColor(Enjon::SetOpacity(Enjon::RGBA32_White(), 0.1f));
 
 		// Set graphics camera position
-		auto cam = mGfx->GetSceneCamera();
+		Enjon::Camera* cam = mGfx->GetSceneCamera()->ConstCast< Enjon::Camera >();
 		cam->SetPosition(Enjon::Vec3(0.0f, 5.0f, -10.0f));
 		cam->LookAt(Enjon::Vec3(0, 0, 0));
 	} 
@@ -882,7 +1184,7 @@ Enjon::Result Game::Initialize()
 			}
 			if ( ImGui::CollapsingHeader( "Textures" ) )
 			{
-				auto am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+				auto am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( )->ConstCast< Enjon::AssetManager >();
 				auto textures = am->GetAssets< Enjon::Texture >( );
 				for ( auto& t : *textures ) 
 				{
@@ -1269,51 +1571,71 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 		mRock.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 2.0f, Enjon::Vec3::YAxis() ) );
 	} 
 
-	mGreen.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::YAxis( ) ) );
-mRed.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
-mBlue.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
-
-// Physics simulation
-mDynamicsWorld->stepSimulation( 1.f / 60.f, 10 );
-
-// Step through physics bodies and update entity position
-for ( u32 i = 0; i < ( u32 )mBodies.size( ); ++i )
-{
-	btRigidBody* body = mBodies.at( i );
-	Enjon::Entity* entity = mPhysicsEntities.at( i );
-	btTransform trans;
-
-	if ( body && body->getMotionState( ) )
+	if ( mSerializedEntity.Get( ) )
 	{
-		body->getMotionState( )->getWorldTransform( trans );
-		if ( entity && entity->HasComponent<Enjon::GraphicsComponent>( ) )
+		f32 turnRate = std::sinf( t * 10.0f );
+		Enjon::Vec3 pos = mSerializedEntity.Get( )->GetWorldPosition( );
+		mSerializedEntity.Get( )->SetPosition( Enjon::Vec3( pos.x, turnRate * 2.0f + 3.0f, pos.z ) );
+
+		auto children = mSerializedEntity.Get( )->GetChildren( );
+		if ( children.size( ) > 0 ) 
 		{
-			auto gComp = entity->GetComponent<Enjon::GraphicsComponent>( );
-			Enjon::Vec3 pos = Enjon::Vec3( trans.getOrigin( ).getX( ), trans.getOrigin( ).getY( ), trans.getOrigin( ).getZ( ) );
-			Enjon::Quaternion rot = Enjon::Quaternion( trans.getRotation( ).x( ), trans.getRotation( ).y( ), trans.getRotation( ).z( ), -trans.getRotation( ).w( ) );
-			entity->SetPosition( pos );
-			entity->SetRotation( rot );
+			Enjon::EntityHandle child = children.at( 0 );
+			child.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( turnRate * 10.0f, Enjon::Vec3::YAxis( ) ) );
+
+			auto cc = child.Get( )->GetChildren( );
+			for ( auto& c : cc )
+			{
+				c.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( turnRate * 2.0f, Enjon::Vec3::XAxis( ) ) );
+			}
 		}
 	}
-}
 
-mTextBatch->Begin( );
-{
-	Enjon::Transform tform( Enjon::Vec3( 0.f, 10.f, -10.f ), Enjon::Quaternion( ), Enjon::Vec3( mFontSize ) );
-	Enjon::PrintText( tform, mWorldString, mFont.Get( ), *mTextBatch, Enjon::RGBA32_White( ), 14 );
-}
-mTextBatch->End( );
+	mGreen.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::YAxis( ) ) );
+	mRed.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
+	mBlue.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
 
-// This is where transform propagation happens
-// mEntities->LateUpdate(dt);
-for ( auto& e : mEntities->GetActiveEntities( ) )
-{
-	if ( e->HasComponent< Enjon::GraphicsComponent >( ) )
+	// Physics simulation
+	mDynamicsWorld->stepSimulation( 1.f / 60.f, 10 );
+
+	// Step through physics bodies and update entity position
+	for ( u32 i = 0; i < ( u32 )mBodies.size( ); ++i )
 	{
-		auto gfx = e->GetComponent< Enjon::GraphicsComponent >( );
-		gfx->SetTransform( e->GetWorldTransform( ) );
+		btRigidBody* body = mBodies.at( i );
+		Enjon::Entity* entity = mPhysicsEntities.at( i );
+		btTransform trans;
+
+		if ( body && body->getMotionState( ) )
+		{
+			body->getMotionState( )->getWorldTransform( trans );
+			if ( entity && entity->HasComponent<Enjon::GraphicsComponent>( ) )
+			{
+				auto gComp = entity->GetComponent<Enjon::GraphicsComponent>( );
+				Enjon::Vec3 pos = Enjon::Vec3( trans.getOrigin( ).getX( ), trans.getOrigin( ).getY( ), trans.getOrigin( ).getZ( ) );
+				Enjon::Quaternion rot = Enjon::Quaternion( trans.getRotation( ).x( ), trans.getRotation( ).y( ), trans.getRotation( ).z( ), -trans.getRotation( ).w( ) );
+				entity->SetPosition( pos );
+				entity->SetRotation( rot );
+			}
+		}
 	}
-}
+
+	mTextBatch->Begin( );
+	{
+		Enjon::Transform tform( Enjon::Vec3( 0.f, 10.f, -10.f ), Enjon::Quaternion( ), Enjon::Vec3( mFontSize ) );
+		Enjon::PrintText( tform, mWorldString, mFont.Get( ), *mTextBatch, Enjon::RGBA32_White( ), 14 );
+	}
+	mTextBatch->End( );
+
+	// This is where transform propagation happens
+	// mEntities->LateUpdate(dt);
+	for ( auto& e : mEntities->GetActiveEntities( ) )
+	{
+		if ( e->HasComponent< Enjon::GraphicsComponent >( ) )
+		{
+			auto gfx = e->GetComponent< Enjon::GraphicsComponent >( );
+			gfx->SetTransform( e->GetWorldTransform( ) );
+		}
+	}
 
 return Enjon::Result::PROCESS_RUNNING;
 }
@@ -1322,7 +1644,7 @@ return Enjon::Result::PROCESS_RUNNING;
 
 Enjon::Result Game::ProcessInput( f32 dt )
 {
-	Enjon::Camera* cam = mGfx->GetSceneCamera( );
+	Enjon::Camera* cam = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >();
 
 	if ( mInput->IsKeyPressed( Enjon::KeyCode::Escape ) )
 	{
@@ -1349,9 +1671,16 @@ Enjon::Result Game::ProcessInput( f32 dt )
 		mLockCamera = !mLockCamera;
 	}
 
+	if ( mRotateCamera && mLockCamera )
+	{
+		Enjon::Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >();
+		camera->Transform.Position += camera->Right( ).Normalize( ) * mCameraSpeed;
+		camera->LookAt( mGun.Get()->GetWorldPosition() );
+	}
+
 	if ( mMovementOn && cam->GetProjectionType( ) == Enjon::ProjectionType::Perspective )
 	{
-		Enjon::Camera* camera = mGfx->GetSceneCamera( );
+		Enjon::Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >();
 		Enjon::Vec3 velDir( 0, 0, 0 );
 
 		if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
@@ -1383,6 +1712,10 @@ Enjon::Result Game::ProcessInput( f32 dt )
 				velDir += Enjon::Vec3::YAxis( ); 
 			}
 		} 
+		if ( mInput->IsKeyPressed( Enjon::KeyCode::K ) )
+		{
+			mRotateCamera = !mRotateCamera;
+		}
 
 		if ( mInput->IsKeyDown( Enjon::KeyCode::LeftMouseButton ) )
 		{

@@ -4,7 +4,8 @@
 #ifndef ENJON_SUBSYSTEM_CATALOG_H
 #define	ENJON_SUBSYSTEM_CATALOG_H
 
-#include "SYstem/Types.h"
+#include "Base/Object.h"
+#include "System/Types.h"
 #include "Defines.h"
 #include "Subsystem.h"
 
@@ -58,7 +59,7 @@ namespace Enjon
 			*@return The subsystem if registered, nullptr if not.
 			*/
 			template <typename T>
-			T* Get()
+			const T* Get()
 			{
 				static_assert( std::is_base_of<Subsystem, T>::value, "SubsystemCatalog:: T must inherit from Subsystem." );	
 

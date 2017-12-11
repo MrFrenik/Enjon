@@ -8,14 +8,14 @@ namespace Enjon
 { 
 	//=========================================================================
 
-	Result Object::SerializeData( ObjectArchiver* archive ) const
+	Result Object::SerializeData( ByteBuffer* buffer ) const
 	{ 
 		return Result::INCOMPLETE;
 	}
 
 	//=========================================================================
 
-	Result Object::DeserializeData( ObjectArchiver* archive )
+	Result Object::DeserializeData( ByteBuffer* buffer )
 	{
 		return Result::INCOMPLETE; 
 	}

@@ -1,11 +1,17 @@
 #include "Entity/EntityManager.h"
 #include "Entity/Component.h"
+#include "Entity/Components/GraphicsComponent.h"
+#include "Entity/Components/PointLightComponent.h"
+#include "SubsystemCatalog.h"
 #include "Engine.h"
 
 #include <array>
 #include <vector>
 #include <assert.h>
-#include <algorithm>
+#include <algorithm> 
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include "ImGui/ImGuizmo.h"
 
@@ -119,6 +125,20 @@ namespace Enjon
 		mChildren.clear();
 	}
 
+	//====================================================================================================
+
+	Component* Entity::Attach( const MetaClass* compCls )
+	{
+		return mManager->Attach( compCls, GetHandle() );
+	}
+
+	//====================================================================================================
+
+	bool Entity::HasComponent( const MetaClass* compCls )
+	{ 
+		return ( ( mComponentMask & Enjon::GetComponentBitMask( compCls->GetTypeId( ) ) ) != 0 );
+	}
+
 	//---------------------------------------------------------------
 	void Entity::SetID(u32 id)
 	{
@@ -155,40 +175,47 @@ namespace Enjon
 		// RelRot	= Conjugate(ParentRot) * Rot
 		// Trans	= 1/ParentScale * [Conjugate(ParentRot) * (Position - ParentPosition)];
 		if ( HasParent( ) )
-		{ 
+		{
 			Enjon::Entity* parent = mParent.Get( );
 
 			Transform parentTransform = parent->GetWorldTransform( );
-			Enjon::Quaternion parentInverse = parentTransform.Rotation.Inverse( ); 
+			Enjon::Quaternion parentInverse = parentTransform.Rotation.Inverse( ).Normalize();
 
-			Vec3 relativeScale		=  mWorldTransform.Scale / parentTransform.Scale;
-			Quaternion relativeRot	=  parentInverse * mWorldTransform.Rotation;
-			Vec3 relativePos		= ( parentInverse * ( mWorldTransform.Position - parentTransform.Position ) ) / parentTransform.Scale;
+			//Vec3 relativeScale = mWorldTransform.Scale / parentTransform.Scale;
+			//Quaternion relativeRot = parentInverse * mWorldTransform.Rotation;
+			//Vec3 relativePos = ( parentInverse * ( mWorldTransform.Position - parentTransform.Position ) * parentTransform.Rotation ) / parentTransform.Scale;
+
+			Vec3 relativeScale = mWorldTransform.Scale / parentTransform.Scale;
+			Quaternion relativeRot = ( parentInverse * mWorldTransform.Rotation ).Normalize();
+			Vec3 relativePos = ( parentInverse * ( mWorldTransform.Position - parentTransform.Position ) ) / parentTransform.Scale;
 
 			mLocalTransform = Transform( relativePos, relativeRot, relativeScale );
 		}
 	}
 
 	//---------------------------------------------------------------
+
 	void Entity::CalculateWorldTransform()
 	{ 
-		if ( !HasParent() ) 
+		if ( !HasParent( ) )
 		{
 			mWorldTransform = mLocalTransform;
 			return;
-		} 
-		
+		}
+
 		// Get parent transform recursively
 		Enjon::Entity* p = mParent.Get( );
-		Transform parent = p->GetWorldTransform( ); 
+		Transform parent = p->GetWorldTransform( );
 
-		Enjon::Vec3 worldPos = parent.Position + ( parent.Rotation.Inverse() * ( parent.Scale * mLocalTransform.Position ) );
 		Enjon::Vec3 worldScale = parent.Scale * mLocalTransform.Scale;
-		Enjon::Quaternion worldRot = ( mLocalTransform.Rotation * parent.Rotation ).Normalize(); 
+		Enjon::Quaternion worldRot = ( mLocalTransform.Rotation * parent.Rotation ).Normalize( );
+		//Enjon::Quaternion worldRot = ( parent.Rotation * mLocalTransform.Rotation.Inverse( ) );
+		Enjon::Vec3 worldPos = parent.Position + ( parent.Rotation.Inverse().Normalize() * ( parent.Scale * mLocalTransform.Position ) );
+		//Enjon::Vec3 worldPos = parent.Position - worldScale * ( worldRot * mLocalTransform.Position );
 
 		mWorldTransform = Transform( worldPos, worldRot, worldScale );
-			
-		mWorldTransformDirty = false; 
+
+		mWorldTransformDirty = false;
 	}
 
 	//---------------------------------------------------------------
@@ -202,6 +229,7 @@ namespace Enjon
 	void Entity::SetScale(f32 scale)
 	{
 		SetScale(v3(scale));
+		mWorldTransformDirty = true;
 	}
 
 	//---------------------------------------------------------------
@@ -541,24 +569,90 @@ namespace Enjon
 		mMarkedForDestruction.clear();
 	}
 
-	//--------------------------------------------------------------
-	void EntityManager::Update(f32 dt)
+	//==================================================================================================
+
+	Result EntityManager::Initialize( )
+	{ 
+		// Register engine components here
+		RegisterComponent< GraphicsComponent >( );
+		RegisterComponent< PointLightComponent >( );
+
+		return Result::SUCCESS;
+	}
+
+	//==================================================================================================
+
+	void EntityManager::Update( const f32 dT )
 	{
 		// Clean any entities that were marked for destruction
-		Cleanup();
-	} 
+		Cleanup( );
+	}
 
-	//--------------------------------------------------------------
-	void EntityManager::LateUpdate(f32 dt)
-	{
+	//==================================================================================================
+
+	void EntityManager::LateUpdate( f32 dt )
+	{ 
 		// Clean any entities that were marked for destruction
 		UpdateAllActiveTransforms(dt);
 	}
 
-	//--------------------------------------------------------------
+	//==================================================================================================
+
+	Result EntityManager::Shutdown( )
+	{ 
+		return Result::SUCCESS;
+	}
+
+	//================================================================================================== 
+
 	void EntityManager::UpdateAllActiveTransforms(f32 dt)
 	{ 
 		// Does nothing for now
+	}
+
+	//========================================================================================================================
+
+	Component* EntityManager::Attach( const MetaClass* compCls, const Enjon::EntityHandle& handle )
+	{
+		// Get type id from component class
+		u32 compIdx = compCls->GetTypeId( );
+
+		Enjon::Entity* entity = handle.Get( );
+
+		// Assert entity is valid
+		assert(entity != nullptr);
+		// Check to make sure isn't already attached to this entity
+		assert( !entity->HasComponent( compCls ) ); 
+		// Entity id
+		u32 eid = entity->GetID(); 
+
+		assert(mComponents.at(compIdx) != nullptr); 
+
+		ComponentWrapperBase* base = mComponents[ compIdx ];
+
+		// Create new component and place into map
+		Component* component = (Component*)compCls->Construct( );
+		component->SetEntity(entity);
+		component->SetID(compIdx);
+		component->SetBase( base );
+		component->mEntityID = entity->mID;
+		Component* cmpPtr = base->AddComponent( eid, component ); 
+		delete component;
+
+		// Set bitmask field for component
+		entity->mComponentMask |= Enjon::GetComponentBitMask( compIdx );
+
+		// Get component ptr and push back into entity components
+		entity->mComponents.push_back(cmpPtr);
+
+		return cmpPtr;
+
+		// Otherwise the entity already has the component
+		assert(false);
+
+		// Return null to remove warnings from compiler
+		return nullptr;
+
 	}
 }
 

@@ -6,8 +6,8 @@
 #include "Graphics/QuadBatch.h"
 #include "Graphics/GLTexture.h"
 #include "Graphics/Material.h"
-#include "Graphics/GraphicsSubsystem.h"
-
+#include "Graphics/GraphicsSubsystem.h" 
+#include "SubsystemCatalog.h"
 #include "Engine.h"
 
 #include <algorithm>
@@ -178,7 +178,7 @@ namespace Enjon {
 	bool Scene::CompareDepth(Renderable* a, Renderable* b)
 	{
 		// Get camera position
-		GraphicsSubsystem* gfx = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<GraphicsSubsystem>( );
+		const GraphicsSubsystem* gfx = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<GraphicsSubsystem>( );
 		v3 camPos = gfx->GetSceneCamera()->GetPosition();
 
 		// Get a pos

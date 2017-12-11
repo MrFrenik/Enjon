@@ -53,6 +53,7 @@ class Game : public Enjon::Application
 		Enjon::EntityHandle mBlue;
 		Enjon::EntityHandle mRock;
 		Enjon::EntityHandle mRock2;
+		Enjon::EntityHandle mSerializedEntity;
 
 		Enjon::DirectionalLight* mSun	= nullptr;
 		Enjon::QuadBatch* mBatch 		= nullptr;
@@ -81,6 +82,7 @@ class Game : public Enjon::Application
 		bool mShowEntities = true;
 		bool mMovementOn = false;
 		bool mLockCamera = false;
+		bool mRotateCamera = false;
 
 		f32 mCameraSpeed = 0.12f;
 

@@ -11,6 +11,7 @@
 #include "Serialize/UUID.h" 
 #include "Asset/AssetManager.h"
 #include "Base/Object.h"
+#include "SubsystemCatalog.h"
 #include "Engine.h"
 
 #include <algorithm>
@@ -235,7 +236,6 @@ namespace Enjon
 #define ARRAY_PROP( prop, propName, type, object, ImGuiCastType, ImGuiFunction, min, max )\
 	{\
 		const MetaPropertyArray< type >* arrayProp = prop->Cast< MetaPropertyArray< type > >();\
-		ImGui::Text( ("Size: " + std::to_string(arrayProp->GetSize( object )) ).c_str() );\
 		for ( usize i = 0; i < arrayProp->GetSize( object ); ++i )\
 		{\
 			Enjon::String label( "##" + propName + std::to_string(i) );\
@@ -260,6 +260,18 @@ namespace Enjon
 
 			case MetaPropertyType::String:
 			{ 
+				const MetaPropertyArray< String >* arrayProp = prop->Cast< MetaPropertyArray< String > >( );
+				for ( usize i = 0; i < arrayProp->GetSize( object ); ++i ) 
+				{
+					String val = arrayProp->GetValueAs( object, i );
+					char buffer[ 256 ];
+					std::strncpy( buffer, val.c_str( ), 256 );
+					String label( "##" + propName + std::to_string( i ) );
+					if ( ImGui::InputText( label.c_str(), buffer, 256 ) )
+					{
+						arrayProp->SetValueAt( object, i, String( buffer ) );
+					}
+				} 
 			} break;
 
 			case MetaPropertyType::Bool:
@@ -299,7 +311,7 @@ namespace Enjon
 					{
 						Enjon::AssetHandle<Enjon::Asset> val; 
 						arrayProp->GetValueAt( object, i, &val );
-						Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+						const Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 						auto assets = am->GetAssets( assetCls ); 
 						if ( ImGui::TreeNode( Enjon::String( std::to_string( i ) + "##" + prop->GetName( ) + std::to_string(u32(arrayProp) ) ).c_str( ) ) )
 						{
@@ -700,7 +712,7 @@ namespace Enjon
 					{ 
 						Enjon::AssetHandle<Enjon::Asset> val; 
 						cls->GetValue( object, prop, &val );
-						Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+						const Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 						auto assets = am->GetAssets( assetCls ); 
 						if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
 						{

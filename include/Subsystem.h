@@ -5,11 +5,12 @@
 #define ENJON_SUBSYSTEM_H
 
 #include "System/Types.h"
-#include "Defines.h"
+#include "Defines.h" 
+#include "Base/Object.h"
 
 namespace Enjon
 {
-	class Subsystem
+	class Subsystem : public Enjon::Object
 	{
 		public: 
 

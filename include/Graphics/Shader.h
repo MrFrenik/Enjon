@@ -123,7 +123,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void Bind( const Shader* shader ) = 0;
+			virtual void Bind( const Shader* shader ) const = 0;
 			
 			template < typename T >
 			T* Cast( )
@@ -183,7 +183,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void Bind( const Shader* shader ) override;
+			virtual void Bind( const Shader* shader ) const override;
 
 			/*
 			* @brief
@@ -238,7 +238,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void Bind( const Shader* shader ) override
+			virtual void Bind( const Shader* shader ) const override
 			{
 				const_cast< Enjon::Shader* >( shader )->SetUniform( mName, mValue );
 			}
@@ -290,7 +290,7 @@ namespace Enjon
 		/*
 		* @brief
 		*/
-		virtual void Bind( const Shader* shader ) override
+		virtual void Bind( const Shader* shader ) const override
 		{
 			const_cast< Enjon::Shader* >( shader )->SetUniform( mName, mValue );
 		}
@@ -342,7 +342,7 @@ namespace Enjon
 		/*
 		* @brief
 		*/
-		virtual void Bind( const Shader* shader ) override
+		virtual void Bind( const Shader* shader ) const override
 		{
 			const_cast< Enjon::Shader* >( shader )->SetUniform( mName, mValue );
 		}
@@ -394,7 +394,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void Bind( const Shader* shader ) override
+			virtual void Bind( const Shader* shader ) const override
 			{
 				const_cast< Enjon::Shader* >( shader )->SetUniform( mName, mValue );
 			}

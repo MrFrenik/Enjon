@@ -58,6 +58,12 @@ namespace Enjon
 				return mAssetLoadStatus;
 			} 
 
+			
+			String GetAssetFilePath( ) const 
+			{
+				return mAssetFilePath;
+			}
+
 		private:
 			Asset* mAsset						= nullptr; 
 			String mAssetFilePath				= "";

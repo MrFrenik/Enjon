@@ -44,7 +44,7 @@ namespace Enjon
 			void Renderable::OffsetRotation(const f32& Yaw, const f32& Pitch);
 
 			/* Get material of renderable */
-			Material* GetMaterial();
+			const Material* GetMaterial() const;
 
 			/* Get mesh of renderable */
 			AssetHandle< Mesh > GetMesh() const;
@@ -71,7 +71,10 @@ namespace Enjon
 			void SetRotation(const Quaternion& rotation);
 
 			/* Set material of renderable */
-			void SetMaterial(Material* material);
+			void SetMaterial(const Material* material);
+
+			/* Set material of renderable */
+			//void SetMaterial( const AssetHandle< Material >& material );
 
 			/* Set mesh of renderable */
 			void SetMesh(const AssetHandle<Mesh>& mesh);
@@ -100,7 +103,7 @@ namespace Enjon
 
 		private: 
 			Transform mTransform; 
-			Material* mMaterial = nullptr;
+			const Material* mMaterial = nullptr;
 			Scene* mScene = nullptr;
 	};
 }

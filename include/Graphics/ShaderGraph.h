@@ -233,7 +233,7 @@ namespace Enjon
 
 
 	ENJON_CLASS( Construct )
-	class ShaderGraph : public Enjon::Asset
+	class ShaderGraph : public Asset
 	{ 
 		ENJON_CLASS_BODY( ) 
 

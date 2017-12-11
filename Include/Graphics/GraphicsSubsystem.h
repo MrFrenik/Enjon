@@ -106,7 +106,10 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			Camera* GetSceneCamera() { return &mSceneCamera; }
+			const Camera* GetSceneCamera() const 
+			{ 
+				return &mSceneCamera; 
+			}
 			
 			/**
 			*@brief

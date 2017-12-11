@@ -171,7 +171,7 @@ namespace Enjon
 
 	//============================================================================================ 
 
-	Asset* AssetManager::GetDefaultAsset( const Enjon::MetaClass* cls )
+	Asset* AssetManager::GetDefaultAsset( const Enjon::MetaClass* cls ) const
 	{
 		// Make sure class is valid
 		assert( cls != nullptr );
@@ -181,7 +181,7 @@ namespace Enjon
 
 		if ( Exists( idx ) )
 		{
-			return mLoadersByAssetId[ idx ]->GetDefault( );
+			return ConstCast< AssetManager >()->mLoadersByAssetId[ idx ]->GetDefault( );
 		}
 
 		return nullptr;
@@ -189,14 +189,14 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
-	const Asset* AssetManager::GetAsset( const MetaClass* cls, const UUID& id )
+	const Asset* AssetManager::GetAsset( const MetaClass* cls, const UUID& id ) const
 	{
 		// Get type id of class
 		u32 idx = cls->GetTypeId( );
 
 		if ( Exists( idx ) )
 		{
-			return mLoadersByAssetId[ idx ]->GetAsset( id );
+			return const_cast< AssetManager* >( this )->mLoadersByAssetId[ idx ]->GetAsset( id );
 		}
 
 		return nullptr;
@@ -204,7 +204,7 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
-	const HashMap< Enjon::String, AssetRecordInfo >* AssetManager::GetAssets( const Enjon::MetaClass* cls )
+	const HashMap< Enjon::String, AssetRecordInfo >* AssetManager::GetAssets( const Enjon::MetaClass* cls ) const
 	{
 		// Make sure class is valid
 		assert( cls != nullptr );
@@ -214,7 +214,7 @@ namespace Enjon
 
 		if ( Exists( idx ) )
 		{
-			return mLoadersByAssetId[ idx ]->GetAssets( );
+			return ConstCast< AssetManager >()->mLoadersByAssetId[ idx ]->GetAssets( );
 		} 
 
 		return nullptr;
@@ -389,6 +389,32 @@ namespace Enjon
 		return res;
 	}
 
+	//======================================================================================================
+
+	Result AssetManager::SaveAsset( const Asset* asset ) const
+	{
+		if ( asset )
+		{
+			const AssetRecordInfo* info = asset->GetAssetRecordInfo( );
+			if ( info )
+			{
+				AssetArchiver archiver;
+				Result res = archiver.Serialize( asset );
+				archiver.WriteToFile( info->GetAssetFilePath( ) );
+
+				return Result::SUCCESS;
+			}
+			else
+			{
+				return Result::FAILURE;
+			}
+		}
+		else
+		{
+			return Result::FAILURE;
+		}
+	}
+
 	/*
 		What is the process for deserializing a cached asset?
 		On start of a project: 
@@ -559,14 +585,14 @@ namespace Enjon
 
 	//======================================================================================================
 
-	const AssetLoader* AssetManager::GetLoaderByAssetClass( const MetaClass* cls )
+	const AssetLoader* AssetManager::GetLoaderByAssetClass( const MetaClass* cls ) const
 	{
 		// Get loader id from cls
 		u32 loaderId = cls->GetTypeId( );
 
 		if ( Exists( loaderId ) )
 		{
-			return mLoadersByAssetId[ loaderId ];
+			return ConstCast< AssetManager >()->mLoadersByAssetId[ loaderId ];
 		}
 
 		return nullptr;

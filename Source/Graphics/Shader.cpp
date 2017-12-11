@@ -6,9 +6,10 @@
 #include "Graphics/Material.h"
 #include "Utils/Errors.h"
 #include "Utils/FileUtils.h"
-#include "Engine.h"
 #include "Asset/AssetManager.h"
 #include "Graphics/GraphicsSubsystem.h"
+#include "SubsystemCatalog.h"
+#include "Engine.h"
 
 #include <GLEW/glew.h> 
 #include <vector>
@@ -410,7 +411,7 @@ namespace Enjon
 
 	//======================================================================================================================= 
 	
-	void UniformTexture::Bind( const Shader* shader )
+	void UniformTexture::Bind( const Shader* shader ) const
 	{
 		const_cast< Enjon::Shader* >( shader )->BindTexture( mName, mTexture.Get( )->GetTextureId( ), mLocation );
 	}

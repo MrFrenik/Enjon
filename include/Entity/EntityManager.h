@@ -90,6 +90,8 @@ namespace Enjon
 			template <typename T>
 			bool HasComponent();
 
+			bool HasComponent( const MetaClass* compCls );
+
 			/// @brief Gets component from entity, if exists
 			template <typename T>
 			T* GetComponent();
@@ -97,6 +99,11 @@ namespace Enjon
 			/// @brief Attaches component to entity, if exists
 			template <typename T>
 			T* Attach();
+
+			/*
+			* @brief
+			*/
+			Component* Attach( const MetaClass* compCls );
 
 			/// @brief Detaches component from entity, if exists
 			template <typename T>
@@ -158,7 +165,7 @@ namespace Enjon
 			/// @brief Removes parent from entity, if one exists
 			void RemoveParent( );
 			
-			/// @brief Removes parent from entity, if one exists
+			/// @brief 
 			EntityHandle GetHandle( );
 
 			/// @brief Returns whether or not has parent
@@ -219,7 +226,7 @@ namespace Enjon
 			Vector<Component*> mComponents;
  
 			ENJON_PROPERTY( )
-			std::vector< EntityHandle > mChildren; 
+			Vector< EntityHandle > mChildren; 
 
 			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
@@ -228,55 +235,127 @@ namespace Enjon
 	};
 
 	using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
-	using MarkedForDestructionList	= std::vector< EntityHandle >;
-	using ActiveEntityList 			= std::vector<Entity*>;
-	using ComponentBaseArray 		= std::array<ComponentWrapperBase*, static_cast<u32>(MAX_COMPONENTS)>; 
+	using MarkedForDestructionList	= Vector< EntityHandle >;
+	using ActiveEntityList 			= Vector<Entity*>;
+	using ComponentBaseArray		= HashMap< u32, ComponentWrapperBase* >;
 
-	class EntityManager
+	class EntityManager : public Subsystem
 	{
 		friend Entity;
 		public:
+
+			/*
+			* @brief
+			*/
 			EntityManager();
+
+			/*
+			* @brief
+			*/
 			~EntityManager();
 			
+			/*
+			* @brief
+			*/
 			Enjon::EntityHandle Allocate( );
 
-			void Update(f32 dt);
+			/**
+			*@brief
+			*/
+			virtual Enjon::Result Initialize( ) override;
 
+			/**
+			*@brief
+			*/
+			virtual void Update( const f32 dT ) override;
+
+			/*
+			* @brief
+			*/
 			void LateUpdate(f32 dt);
 
+			/**
+			*@brief
+			*/
+			virtual Enjon::Result Shutdown( ) override; 
+
+
+			/**
+			*@brief
+			*/
 			template <typename T>
 			void RegisterComponent();
 
+			/**
+			*@brief
+			*/
 			template <typename T>
-			std::vector<T>* GetComponentList();
+			Vector<T>* GetComponentList();
 
+			/**
+			*@brief
+			*/
 			template <typename T>
 			T* Attach(const Enjon::EntityHandle& entity);
 
+			/**
+			*@brief
+			*/
+			Component* Attach( const MetaClass* compCls, const Enjon::EntityHandle& handle );
+
+			/**
+			*@brief
+			*/
 			template <typename T>
 			void Detach(Entity* entity);
 
+			/**
+			*@brief
+			*/
 			template <typename T>
 			T* GetComponent(Entity* entity);
 
+			/**
+			*@brief
+			*/
 			void Destroy(const EntityHandle& entity);
 
-			const std::vector<Entity*>& GetActiveEntities() { return mActiveEntities; }
+			/**
+			*@brief
+			*/
+			const Vector<Entity*>& GetActiveEntities() const
+			{ 
+				return mActiveEntities; 
+			}
 
 		private:
+			/**
+			*@brief
+			*/
 			void EntityManager::Cleanup();
 
+			/**
+			*@brief
+			*/
 			static b8 CompareEntityIDs(const Entity* a, const Entity* b);
 
+			/**
+			*@brief
+			*/
 			template <typename T>
 			void RemoveComponent(Entity* entity);
 
+			/**
+			*@brief
+			*/
 			u32 FindNextAvailableID();
 
-			/// @brief Runs through all transforms and propagates downwards
+			/**
+			*@brief
+			*/
 			void UpdateAllActiveTransforms(f32 dt);
 
+		private:
 			EntityStorage 				mEntities;
 			ComponentBaseArray 			mComponents;	
 			ActiveEntityList 			mActiveEntities;

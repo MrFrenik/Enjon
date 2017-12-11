@@ -7,6 +7,7 @@
 #include "Asset/AssetManager.h"
 #include "Serialize/ObjectArchiver.h"
 #include "Utils/FileUtils.h"
+#include "SubsystemCatalog.h"
 #include "Engine.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION 
@@ -252,11 +253,11 @@ namespace Enjon
 
 	//================================================= 
 
-	template void Texture::WriteTextureData< f32 >( ObjectArchiver* archiver ) const;
-	template void Texture::WriteTextureData< u8 >( ObjectArchiver* archiver ) const;
+	template void Texture::WriteTextureData< f32 >( ByteBuffer* buffer ) const;
+	template void Texture::WriteTextureData< u8 >( ByteBuffer* buffer ) const;
 
 	template <typename T>
-	void Texture::WriteTextureData( ObjectArchiver* archiver ) const
+	void Texture::WriteTextureData( ByteBuffer* buffer ) const
 	{
 		// Get raw data from source
 		const T* rawData = mSourceData->Cast< T >( )->GetData( );
@@ -275,12 +276,12 @@ namespace Enjon
 				// Raw pixel 
 				T pixel = rawData[ pixelIndex ]; 
 				// Write individual pixel to archive
-				archiver->WriteToBuffer< T >( pixel );
+				buffer->Write< T >( pixel );
 			}
 		} 
 	}
 
-	Result Texture::SerializeData( ObjectArchiver* archiver ) const 
+	Result Texture::SerializeData( ByteBuffer* buffer ) const 
 	{
 		std::cout << "Serializing texture...\n";
 
@@ -288,18 +289,18 @@ namespace Enjon
 		// Will be compiled out with release of application and only defined as being with editor data
 
 		// Write out basic header info for texture 
-		archiver->WriteToBuffer< u32 >( mWidth );					// Texture width
-		archiver->WriteToBuffer< u32 >( mHeight );					// Texture height
-		archiver->WriteToBuffer< u32 >( mNumberOfComponents );		// Texture components per pixel
-		archiver->WriteToBuffer< u32 >( ( u32 )mFormat );			// Texture format
-		archiver->WriteToBuffer< u32 >( ( u32 )mFileExtension );	// Texture file extension
+		buffer->Write< u32 >( mWidth );					// Texture width
+		buffer->Write< u32 >( mHeight );				// Texture height
+		buffer->Write< u32 >( mNumberOfComponents );	// Texture components per pixel
+		buffer->Write< u32 >( ( u32 )mFormat );			// Texture format
+		buffer->Write< u32 >( ( u32 )mFileExtension );	// Texture file extension
 
 		switch ( mFormat )
 		{
 			case TextureFormat::HDR:
 			{
 				// Write texture data
-				WriteTextureData< f32 >( archiver );
+				WriteTextureData< f32 >( buffer );
 
 				// Release source data after serializing
 				const_cast< TextureSourceData< f32 >* >( mSourceData->Cast< f32 >( ) )->ReleaseData( );
@@ -308,7 +309,7 @@ namespace Enjon
 			case TextureFormat::LDR:
 			{
 				// Write texture data
-				WriteTextureData< u8 >( archiver );
+				WriteTextureData< u8 >( buffer );
 
 				// Release source data after serializing
 				const_cast< TextureSourceData< u8 >* >( mSourceData->Cast< u8 >( ) )->ReleaseData( ); 
@@ -318,16 +319,16 @@ namespace Enjon
 		return Result::SUCCESS;
 	} 
 	
-	Result Texture::DeserializeData( ObjectArchiver* archiver )
+	Result Texture::DeserializeData( ByteBuffer* buffer )
 	{
 		std::cout << "Deserializing texture...\n";
 
 		// Read properties from buffer - THIS SHOULD BE USED WITH A VERSIONING STRUCT!
-		mWidth = archiver->ReadFromBuffer< u32 >( );										// Texture width
-		mHeight = archiver->ReadFromBuffer< u32 >( );										// Texture height
-		mNumberOfComponents = archiver->ReadFromBuffer< u32 >( );							// Texture components per pixel
-		mFormat = TextureFormat( archiver->ReadFromBuffer< u32 >( ) );						// Texture format
-		mFileExtension = TextureFileExtension( archiver->ReadFromBuffer< u32 >( ) );		// Texture format
+		mWidth = buffer->Read< u32 >( );										// Texture width
+		mHeight = buffer->Read< u32 >( );										// Texture height
+		mNumberOfComponents = buffer->Read< u32 >( );							// Texture components per pixel
+		mFormat = TextureFormat( buffer->Read< u32 >( ) );						// Texture format
+		mFileExtension = TextureFileExtension( buffer->Read< u32 >( ) );		// Texture format
 
 		switch ( mFormat )
 		{
@@ -346,7 +347,7 @@ namespace Enjon
 						// Get index of indvidual interleaved pixel
 						u32 pixelIndex = totalWidth * h + w; 
 						// Read individual pixel from archive
-						pixelData[ pixelIndex ] = archiver->ReadFromBuffer< f32 >( );
+						pixelData[ pixelIndex ] = buffer->Read< f32 >( );
 					}
 				} 
 
@@ -403,7 +404,7 @@ namespace Enjon
 						// Get index of indvidual interleaved pixel
 						u32 pixelIndex = totalWidth * h + w; 
 						// Read individual pixel from archive
-						pixelData[ pixelIndex ] = archiver->ReadFromBuffer< u8 >( );
+						pixelData[ pixelIndex ] = buffer->Read< u8 >( );
 					}
 				} 
 

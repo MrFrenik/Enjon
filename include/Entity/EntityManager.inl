@@ -5,9 +5,7 @@ void EntityManager::RegisterComponent()
 {
 	static_assert(std::is_base_of<Component, T>::value, "EntityManager::RegisterComponent:: T must inherit from Component.");
 	u32 index = static_cast<u32>(Enjon::GetComponentType<T>());
-	assert(mComponents.at(index) == nullptr);
-	ComponentWrapper<T>* C = new ComponentWrapper<T>;	
-	mComponents.at(index) = C;
+	mComponents[ index ] = new ComponentWrapper<T>;
 }
 
 //--------------------------------------------------------------------------

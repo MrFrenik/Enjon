@@ -32,7 +32,7 @@ namespace Enjon
 			void SetPosition(Vec3& position);
 			void SetColor(ColorRGBA32& color);
 			void SetIntensity(float intensity);
-			void SetRadius(float radius);
+			void SetRadius(float radius); 
 
 		private:
 			PointLight mLight;	

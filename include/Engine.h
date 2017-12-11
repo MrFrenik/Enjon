@@ -7,15 +7,16 @@
 
 #include "Defines.h"
 #include "System/Types.h" 
-#include "SubsystemCatalog.h"
 
 namespace Enjon
 { 
+	class SubsystemCatalog;
 	class GraphicsSubsystem; 
 	class Input;
 	class AssetManager; 
 	class Application; 
 	class MetaClassRegistry;
+	class EntityManager;
 	
 	class EngineConfig
 	{
@@ -132,6 +133,7 @@ namespace Enjon
 			SubsystemCatalog*	mSubsystemCatalog	= nullptr;
 			AssetManager*		mAssetManager		= nullptr;
 			MetaClassRegistry*	mMetaClassRegisty	= nullptr;
+			EntityManager*		mEntities			= nullptr;
 
 			// Engine configuration settings
 			EngineConfig mConfig;

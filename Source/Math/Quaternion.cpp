@@ -200,7 +200,8 @@ namespace Enjon
 
 	Vec3 Quaternion::EulerAngles()
 	{
-		return Vec3(this->Pitch(), this->Yaw(), this->Roll());
+		//return Vec3(this->Roll(), this->Pitch(), this->Yaw());
+
 		double ysqr = y * y;
 
 		// roll (x-axis rotation)

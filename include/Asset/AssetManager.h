@@ -67,6 +67,11 @@ namespace Enjon
 			Result AddToDatabase( const String& filePath, bool cache = true, bool isRelativePath = true );
 
 			/*
+			*@brief
+			*/
+			Result SaveAsset( const Asset* asset ) const;
+
+			/*
 			* @brief Creates a new asset of given type, adds it into the database and returns a handle it
 			*/
 			//AssetHandle< Asset > ConstructAsset( const MetaClass* assetCls );
@@ -111,23 +116,23 @@ namespace Enjon
 			*@brief Gets loaded asset in database from name
 			*/
 			template <typename T>
-			AssetHandle<T> GetAsset( const String& name ); 
+			AssetHandle<T> GetAsset( const String& name ) const; 
 
 			/**
 			*@brief Gets loaded asset in database from uuid
 			*/
 			template <typename T>
-			AssetHandle<T> GetAsset( const UUID& uuid ); 
+			AssetHandle<T> GetAsset( const UUID& uuid ) const; 
 
 			/**
 			*@brief
 			*/
-			const Asset* GetAsset( const MetaClass* cls, const UUID& id );
+			const Asset* GetAsset( const MetaClass* cls, const UUID& id ) const;
 
 			/**
 			*@brief
 			*/
-			const HashMap< Enjon::String, AssetRecordInfo >* AssetManager::GetAssets( const Enjon::MetaClass* cls );
+			const HashMap< Enjon::String, AssetRecordInfo >* AssetManager::GetAssets( const Enjon::MetaClass* cls ) const;
 
 			/**
 			*@brief Searches for specific loader based on class id. Returns true if found, false otherwise.
@@ -143,18 +148,18 @@ namespace Enjon
 			*@brief Gets all assets of specific type
 			*/
 			template <typename T>
-			const HashMap< String, AssetRecordInfo >* GetAssets( ); 
+			const HashMap< String, AssetRecordInfo >* GetAssets( ) const; 
 
 			/**
 			*@brief Gets loaded default asset in database from name. Will load the asset if not currently available.
 			*/
-			Asset* GetDefaultAsset( const Enjon::MetaClass* cls );
+			Asset* GetDefaultAsset( const Enjon::MetaClass* cls ) const;
 			
 			/**
 			*@brief Gets loaded default asset in database by type id. Will load the asset if not currently available.
 			*/
 			template <typename T>
-			AssetHandle<T> GetDefaultAsset( );
+			AssetHandle<T> GetDefaultAsset( ) const;
 			
 			/**
 			*@brief Gets loader by meta class. If not found, returns nullptr.
@@ -165,12 +170,12 @@ namespace Enjon
 			*@brief Gets loader by meta class of asset type. If not found, returns nullptr.
 			*/
 			template <typename T>
-			const AssetLoader* GetLoaderByAssetType( );
+			const AssetLoader* GetLoaderByAssetType( ) const;
 
 			/**
 			*@brief Gets loader by meta class of asset class. If not found, returns nullptr.
 			*/
-			const AssetLoader* GetLoaderByAssetClass( const MetaClass* cls );
+			const AssetLoader* GetLoaderByAssetClass( const MetaClass* cls ) const;
 
 			/**
 			*@brief 
@@ -194,7 +199,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			u32 GetUniqueAssetTypeId( )
+			u32 GetUniqueAssetTypeId( ) const
 			{
 				static u32 lastId { 0u };
 				return lastId++; 
@@ -204,7 +209,7 @@ namespace Enjon
 			*@brief
 			*/
 			template <typename T>
-			u32 GetAssetTypeId( ) noexcept;
+			u32 GetAssetTypeId( ) const noexcept;
 
 			/**
 			*@brief Used internally by AssetManager to place appropriate loaders into associative maps. 

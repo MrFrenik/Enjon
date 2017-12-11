@@ -17,6 +17,7 @@
 // Forward Declarations
 namespace Enjon
 { 
+	class EntityArchiver;
 	class AssetArchiver;
 	class ObjectArchiver;
 	class ByteBuffer;
@@ -1122,9 +1123,15 @@ namespace Enjon
 			template <typename T>
 			const T* Cast( ) const
 			{
-				Object::AssertIsObject<T>( );
+				Object::AssertIsObject< T >( ); 
+				return static_cast< T* >( const_cast< Object* > ( this ) );
+			}
 
-				return static_cast<T*>( const_cast< Object* > ( this ) );
+			template <typename T>
+			T* ConstCast( ) const
+			{
+				Object::AssertIsObject< T >( );
+				return static_cast< T* >( const_cast< Object* >( this ) );
 			}
 
 			/**
@@ -1191,15 +1198,16 @@ namespace Enjon
 				mr->RegisterMetaClass< T >( );
 			}
 
+		public:
 			/*
 			* @brief
 			*/
-			virtual Result SerializeData( ObjectArchiver* buffer ) const;
+			virtual Result SerializeData( ByteBuffer* buffer ) const;
 
 			/*
 			* @brief
 			*/
-			virtual Result DeserializeData( ObjectArchiver* buffer ); 
+			virtual Result DeserializeData( ByteBuffer* buffer ); 
 
 			/*
 			* @brief

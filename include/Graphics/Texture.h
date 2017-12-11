@@ -157,15 +157,16 @@ namespace Enjon
 			*/
 			static TextureFileExtension GetFileExtensionType( const Enjon::String& fileExtension );
 
+		public:
 			/*
 			* @brief
 			*/
-			virtual Result SerializeData( ObjectArchiver* archiver ) const override;
+			virtual Result SerializeData( ByteBuffer* archiver ) const override;
 			
 			/*
 			* @brief
 			*/
-			virtual Result DeserializeData( ObjectArchiver* archiver ) override;
+			virtual Result DeserializeData( ByteBuffer* archiver ) override;
 
 		protected:
 
@@ -184,7 +185,7 @@ namespace Enjon
 			* @brief
 			*/
 			template <typename T>
-			void WriteTextureData( ObjectArchiver* archiver ) const;
+			void WriteTextureData( ByteBuffer* archiver ) const;
 
 		private:
 			

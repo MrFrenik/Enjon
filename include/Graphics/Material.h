@@ -61,7 +61,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void SetTexture(const TextureSlotType& type, const AssetHandle<Texture>& textureHandle);
+			void SetTexture( const TextureSlotType& type, const AssetHandle<Texture>& textureHandle ) const;
 
 			/*
 			* @brief
@@ -81,17 +81,17 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			bool HasOverride( const String& uniformName );
+			bool HasOverride( const String& uniformName ) const;
 
 			/*
 			* @brief
 			*/
-			const ShaderUniform* GetOverride( const String& uniformName );
+			const ShaderUniform* GetOverride( const String& uniformName ) const;
 
 			/*
 			* @brief
 			*/
-			void Bind( const Shader* shader );
+			void Bind( const Shader* shader ) const;
 
 			/*
 			* @brief
@@ -126,7 +126,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void SetShaderGraph( const AssetHandle< ShaderGraph >& graph ); 
+			void SetShaderGraph( const AssetHandle< ShaderGraph >& graph ) const; 
 
 			/*
 			* @brief

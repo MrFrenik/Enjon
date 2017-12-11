@@ -6,6 +6,7 @@
 #include "Graphics/Material.h"
 #include "Asset/AssetManager.h"
 #include "Engine.h"
+#include "SubsystemCatalog.h"
 
 namespace Enjon
 {

@@ -85,17 +85,18 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			virtual Result SerializeData( ObjectArchiver* archiver ) const override;
-
-			/*
-			* @brief
-			*/
-			virtual Result DeserializeData( ObjectArchiver* archiver ) override;
-
-			/*
-			* @brief
-			*/
 			Result Release( ); 
+
+		public:
+			/*
+			* @brief
+			*/
+			virtual Result SerializeData( ByteBuffer* buffer ) const override;
+
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
 		protected: 
 			Vector< Vert > mVerticies;

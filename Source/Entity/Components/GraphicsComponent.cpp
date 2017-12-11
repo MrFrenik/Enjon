@@ -1,6 +1,9 @@
 #include "Entity/Components/GraphicsComponent.h"
 #include "Entity/EntityManager.h"
 #include "Graphics/Scene.h"
+#include "Serialize/AssetArchiver.h"
+#include "Asset/AssetManager.h"
+#include "SubsystemCatalog.h"
 
 namespace Enjon
 {
@@ -58,7 +61,7 @@ namespace Enjon
 
 	//====================================================================
 
-	Material* GraphicsComponent::GetMaterial()
+	const Material* GraphicsComponent::GetMaterial() const
 	{ 
 		return mRenderable.GetMaterial(); 
 	}
@@ -127,10 +130,16 @@ namespace Enjon
 
 	//====================================================================
 
-	void GraphicsComponent::SetMaterial(Material* material)
+	void GraphicsComponent::SetMaterial(const Material* material)
 	{
 		mRenderable.SetMaterial(material);
-	}
+	} 
+
+	//====================================================================
+
+	//void SetMaterial( const AssetHandle< Material >& material )
+	//{
+	//}
 
 	//====================================================================
 
@@ -151,13 +160,34 @@ namespace Enjon
 	void GraphicsComponent::SetRenderable(const Renderable& renderable)
 	{
 		mRenderable = renderable;
+	} 
+
+	//====================================================================
+
+	Result GraphicsComponent::SerializeData( ByteBuffer* buffer ) const
+	{
+		// Write uuid of mesh
+		mRenderable.GetMesh( ) ? buffer->Write< UUID >( mRenderable.GetMesh( )->GetUUID( ) ) : buffer->Write< UUID >( UUID::Invalid( ) );
+		// Write uuid of material
+		mRenderable.GetMaterial( ) ? buffer->Write< UUID >( mRenderable.GetMaterial( )->GetUUID( ) ) : buffer->Write< UUID >( UUID::Invalid( ) );
+
+		return Result::SUCCESS;
 	}
 
 	//====================================================================
 
-	//void GraphicsComponent::SetColor(TextureSlotType type, const ColorRGBA32& color)
-	//{
-	//	mRenderable.SetColor(type, color);	
-	//}
-	
+	Result GraphicsComponent::DeserializeData( ByteBuffer* buffer )
+	{
+		// Get asset manager
+		const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+
+		// Set mesh
+		mRenderable.SetMesh( am->GetAsset< Mesh >( buffer->Read< UUID >( ) ) );
+		// Set material 
+		mRenderable.SetMaterial( am->GetAsset< Material >( buffer->Read< UUID >( ) ).Get( ) );
+
+		return Result::SUCCESS;
+	}
+
+	//==================================================================== 
 }

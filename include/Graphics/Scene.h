@@ -175,17 +175,17 @@ namespace Enjon {
 		private:
 
 			ENJON_PROPERTY( )
-			Vector< Renderable* >	mSortedRenderables; 
+			Vector< Renderable* > mSortedRenderables; 
 
-			std::set<Renderable*> 		mRenderables;
-			std::set<QuadBatch*> 		mQuadBatches;
+			std::set<Renderable*> mRenderables;
+			std::set<QuadBatch*> mQuadBatches;
 			std::set<DirectionalLight*> mDirectionalLights;
-			std::set<PointLight*> 		mPointLights;
-			std::set<SpotLight*> 		mSpotLights; 
+			std::set<PointLight*> mPointLights;
+			std::set<SpotLight*> mSpotLights; 
 
-			AmbientSettings 				mAmbientSettings;
+			AmbientSettings mAmbientSettings;
 
-			DirectionalLight* 			mSun = nullptr;
+			DirectionalLight* mSun = nullptr;
 
 			static bool CompareMaterial(Renderable* a, Renderable* b);
 			static bool CompareDepth(Renderable* a, Renderable* b);

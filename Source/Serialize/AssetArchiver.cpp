@@ -5,6 +5,7 @@
 #include "Asset/AssetLoader.h"
 #include "Serialize/AssetArchiver.h"
 #include "Asset/AssetManager.h"
+#include "SubsystemCatalog.h"
 #include "Engine.h"
 
 namespace Enjon
@@ -41,7 +42,7 @@ namespace Enjon
 			mBuffer.Write< String >( asset->GetLoader( )->Class( )->GetName( ) );			// Asset name
 
 			// Serialize all object specific data ( classes can override at this point how they want to serialize data )
-			Result res = asset->SerializeData( this );
+			Result res = asset->SerializeData( &mBuffer );
 
 			// Continue with default serialization if the object doesn't handle its own
 			if ( res == Result::INCOMPLETE )
@@ -105,11 +106,12 @@ namespace Enjon
 			// Successfully constructed, now deserialize data into it
 			else
 			{
-				Result res = asset->DeserializeData( this ); 
+				Result res = asset->DeserializeData( &mBuffer ); 
 
 				// Set asset properties
 				asset->mLoader = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->GetLoaderByAssetClass( asset->Class( ) );
 				asset->mName = assetName;
+				asset->mUUID = uuid;
 
 				// Default deserialization method if not asset does not handle its own deserialization
 				if ( res == Result::INCOMPLETE )

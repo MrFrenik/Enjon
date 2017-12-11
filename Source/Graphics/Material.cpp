@@ -27,10 +27,10 @@ namespace Enjon {
 	
 	//======================================================================== 
 	
-	void Material::SetTexture(const TextureSlotType& type, const AssetHandle<Texture>& textureHandle)
+	void Material::SetTexture(const TextureSlotType& type, const AssetHandle<Texture>& textureHandle) const
 	{
 		assert((u32)type < (u32)TextureSlotType::Count);
-		mTextureHandles[(u32)type] = textureHandle;
+		const_cast< Material* >( this )->mTextureHandles[(u32)type] = textureHandle;
 	}
 
 	//========================================================================
@@ -54,18 +54,18 @@ namespace Enjon {
  
 	//========================================================================
 			
-	bool Material::HasOverride( const String& uniformName )
+	bool Material::HasOverride( const String& uniformName ) const
 	{
 		return ( mUniformOverrides.find( uniformName ) != mUniformOverrides.end( ) );
 	}
  
 	//========================================================================
 
-	const ShaderUniform* Material::GetOverride( const String& uniformName )
+	const ShaderUniform* Material::GetOverride( const String& uniformName ) const
 	{
 		if ( HasOverride( uniformName ) )
 		{
-			return mUniformOverrides[ uniformName ];
+			return const_cast< Material* >( this )->mUniformOverrides[ uniformName ];
 		}
 
 		return nullptr;
@@ -80,14 +80,14 @@ namespace Enjon {
 
 	//========================================================================
 
-	void Material::SetShaderGraph( const AssetHandle< ShaderGraph >& graph )
+	void Material::SetShaderGraph( const AssetHandle< ShaderGraph >& graph ) const
 	{
-		mShaderGraph = graph;
+		const_cast< Material* >( this )->mShaderGraph = graph;
 	}
 
 	//=========================================================================================
 			
-	void Material::Bind( const Shader* shader )
+	void Material::Bind( const Shader* shader ) const
 	{
 		ShaderGraph* sg = const_cast< ShaderGraph* > ( mShaderGraph.Get( ) );
 		Shader* sh = const_cast< Shader* > ( shader );
@@ -99,8 +99,7 @@ namespace Enjon {
 				
 				if ( HasOverride( uniformName ) )
 				{
-					mUniformOverrides[ uniformName ]->Bind( sh );
-					continue;
+					const_cast< Material* >( this )->mUniformOverrides[ uniformName ]->Bind( sh );
 				}
 				else
 				{

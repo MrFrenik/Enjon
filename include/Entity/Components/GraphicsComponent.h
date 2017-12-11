@@ -9,7 +9,7 @@
 
 namespace Enjon
 {
-	ENJON_CLASS( )
+	ENJON_CLASS( Construct )
 	class GraphicsComponent : public Component
 	{
 		ENJON_CLASS_BODY( )
@@ -33,7 +33,7 @@ namespace Enjon
 			Quaternion GetRotation() const;
 
 			/* Get material of renderable */
-			Material* GetMaterial();
+			const Material* GetMaterial() const;
 
 			/* Get mesh of renderable */
 			AssetHandle<Mesh> GetMesh() const;
@@ -63,7 +63,10 @@ namespace Enjon
 			void SetRotation(const Quaternion& rotation);
 
 			/* Set material of renderable */
-			void SetMaterial(Material* material);
+			void SetMaterial(const Material* material);
+
+			/* Set material of renderable */
+			//void SetMaterial( const AssetHandle< Material >& material );
 
 			/* Set mesh of renderable */
 			void SetMesh(const AssetHandle<Mesh>& mesh);
@@ -73,6 +76,16 @@ namespace Enjon
 
 			/* Set Renderable */
 			void SetRenderable(const Renderable& renderable); 
+
+			/*
+			* @brief
+			*/
+			virtual Result SerializeData( ByteBuffer* buffer ) const override;
+
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
 		private: 
 			

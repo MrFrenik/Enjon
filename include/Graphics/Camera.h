@@ -59,10 +59,17 @@ namespace Enjon
 			void SetProjectionType( ProjectionType type ) { ProjType = type; }
 
 			void SetPosition(Vec3& position);
-			Vec3 GetPosition() { return Transform.GetPosition(); }
+			Vec3 GetPosition() const 
+			{ 
+				return Transform.GetPosition(); 
+			}
 			
 			void SetRotation( const Quaternion& q );
-			Quaternion& GetRotation() { return Transform.Rotation; }
+
+			Quaternion GetRotation() const 
+			{ 
+				return Transform.Rotation; 
+			}
 
 			// Member variables
 			ENJON_PROPERTY()
