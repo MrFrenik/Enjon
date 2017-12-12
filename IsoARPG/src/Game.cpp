@@ -1209,7 +1209,7 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 	mEntities->Update(dt);
 
 	static Enjon::f32 t = 0.0f;
-	t += 0.01f * dt;
+	t += 0.1f * dt;
 
 	Enjon::GraphicsComponent* gc 	= nullptr;
 	Enjon::GraphicsComponent* gc2 	= nullptr;
@@ -1428,7 +1428,7 @@ Enjon::Result Game::ProcessInput( f32 dt )
 		camera->Transform.Position += mCameraSpeed * dt * velDir;
 
 		// Set mouse sensitivity
-		f32 MouseSensitivity = 2.0f;
+		f32 MouseSensitivity = 10.0f;
 
 		// Get mouse input and change orientation of camera
 		Enjon::Vec2 MouseCoords = mInput->GetMouseCoords();

@@ -37,6 +37,8 @@ namespace Enjon { namespace Utils {
 			//Calculate ticks
 			Uint32 frameTicks = SDL_GetTicks() - m_startTicks; 
 
+			mDT = (f32)frameTicks / 1000.0f;
+
 			//TODO:: Implement this using time-steps
 			// if (m_FPS > m_maxFPS + 2.0f) second = SECOND * 2.0f;
 			// else if (m_FPS < m_maxFPS - 2.0f) second = SECOND / 2.0f;

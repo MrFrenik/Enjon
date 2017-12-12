@@ -467,8 +467,7 @@ namespace Enjon
 
 		// Get a mesh and make it instanced... or something
 		auto db = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-		//Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_quad" );
-		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetDefaultAsset< Enjon::Mesh >( );
+		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "isoarpg.models.unit_cube" );
 		if ( mesh )
 		{
 			// Set bunny mesh for later use
@@ -612,7 +611,7 @@ namespace Enjon
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 
-		// mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_LightGrey());
+		 //mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_LightGrey());
 
 		// Get sorted renderables by material
 		const std::vector<Renderable*>& sortedRenderables = mScene.GetRenderables();

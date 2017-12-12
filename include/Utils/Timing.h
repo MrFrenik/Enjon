@@ -26,11 +26,17 @@ namespace Enjon { namespace Utils {
 		//Setters
 		void SetMaxFPS(float maxFPS) { m_maxFPS = maxFPS; }
 
+		float GetDT( ) const
+		{
+			return mDT;
+		}
+
 	private: 
 		float m_maxFPS;
 		Uint32 m_startTicks;
 		float m_FPS;
 		float m_frameTime;
+		float mDT = 0.1f;
 
 	private:
 		void CalculateFPS();

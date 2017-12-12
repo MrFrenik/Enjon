@@ -174,7 +174,7 @@ namespace Enjon
 
 	Enjon::Result Engine::Run()
 	{
-		static float dt = 0.1f;
+		static float dt = 0.01f;
 
 		// Assert that application is registered with engine
 		assert( mApp != nullptr ); 
@@ -183,7 +183,7 @@ namespace Enjon
 		srand( time( NULL ) ); 
 
 		// Main application loop
-		b8 mIsRunning = true;
+		bool mIsRunning = true;
 		while (mIsRunning)
 		{
 			 mLimiter.Begin();
@@ -213,7 +213,10 @@ namespace Enjon
 			mGraphics->Update( dt );
 
 			// Clamp frame rate
-			mLimiter.End();
+			mLimiter.End(); 
+
+			// Get dt from limiter
+			//dt = mLimiter.GetDT( );
 		}
 
 		Enjon::Result res = ShutDown();
