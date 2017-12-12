@@ -79,6 +79,11 @@ namespace Enjon
 			s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
 			b8 genMips = true;
 
+			// Anisotropic filtering
+			float aniso = 0.0f;
+			glGetFloatv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso );
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso );
+
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MAG_PARAM );
@@ -381,8 +386,9 @@ namespace Enjon
 				b8 genMips = true;
 
 				// Anisotropic filtering
-				float aniso = 0.0f; 
+				float aniso = 0.0f;
 				glGetFloatv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso );
+				aniso = std::min( aniso, 4.0f );
 				glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso );
 
 				glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
@@ -443,7 +449,7 @@ namespace Enjon
 				b8 genMips = true;
 
 				// Anisotropic filtering
-				float aniso = 0.0f; 
+				float aniso = 0.0f;
 				glGetFloatv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso );
 				glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso );
 
