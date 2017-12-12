@@ -244,7 +244,8 @@ namespace Enjon
 			Enjon::Shader* mActiveShader = nullptr;
 
 			// Post processing settings
-			FXAASettings mFXAASettings = FXAASettings(8.0f, 1.0f/8.0f, 1.0f/128.0f);
+			//FXAASettings mFXAASettings = FXAASettings(8.0f, 1.0f/8.0f, 1.0f/128.0f);	// Stock settings
+			FXAASettings mFXAASettings = FXAASettings(3.375, 0.00001f, 0.00001f);
 			ToneMapSettings mToneMapSettings = ToneMapSettings(0.9f, 2.f, 0.61f, 7.74f, 1.6f);
 			BloomSettings mBloomSettings = BloomSettings(Vec3(0.384f, 0.366f, 0.500f), Vec3(3, 3, 2), Vec3(0.001f, 0.006f, 0.015f)); 
 
@@ -274,9 +275,9 @@ namespace Enjon
 
 			Enjon::Mesh* mMesh = nullptr;
 
-			f32 mSSAORadius = 1.0f;
-			f32 mSSAOBias = 0.172f;
-			f32 mSSAOIntensity = 1.09f;
+			f32 mSSAORadius = 0.154;
+			f32 mSSAOBias = 0.013f;
+			f32 mSSAOIntensity = 1.13f;
 
 			Enjon::Mat4* mModelMatricies = nullptr;
 			Enjon::Renderable* mInstancedRenderable = nullptr;

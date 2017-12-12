@@ -175,7 +175,7 @@ void Game::TestObjectSerialize( )
 			auto gfxCmp = mSerializedEntity.Get( )->Attach< GraphicsComponent >( );
 			auto plCmp = mSerializedEntity.Get( )->Attach< PointLightComponent >( );
 			plCmp->SetColor( ColorRGBA32( 1.0f, 0.0f, 0.0f, 1.0f ) );
-			plCmp->SetIntensity( 100.0f );
+			plCmp->SetIntensity( 30.0f );
 			plCmp->SetRadius( 50.0f );
 			gfxCmp->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
 			gfxCmp->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.unit_cube" ) ); 
@@ -184,7 +184,7 @@ void Game::TestObjectSerialize( )
 			EntityHandle child = mEntities->Allocate( );
 			auto childGfx = child.Get( )->Attach< GraphicsComponent >( );
 			childGfx->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
-			childGfx->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.unit_sphere" ) );
+			childGfx->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.monkey" ) );
 			mSerializedEntity.Get( )->AddChild( child );
 			child.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 0, 1.5f, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.5f ) ) );
 
@@ -192,14 +192,14 @@ void Game::TestObjectSerialize( )
 			EntityHandle child0 = mEntities->Allocate( );
 			auto child0Gfx = child0.Get( )->Attach< GraphicsComponent >( );
 			child0Gfx->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
-			child0Gfx->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.unit_cube" ) );
+			child0Gfx->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.monkey" ) );
 			child.Get( )->AddChild( child0 );
 			child0.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( -2, 2, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.75f ) ) ); 
 
 			EntityHandle child1 = mEntities->Allocate( );
 			auto child1Gfx = child1.Get( )->Attach< GraphicsComponent >( );
 			child1Gfx->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
-			child1Gfx->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.unit_cube" ) );
+			child1Gfx->SetMesh( am->GetAsset< Mesh >( "isoarpg.models.monkey" ) );
 			child.Get( )->AddChild( child1 );
 			child1.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 2, 2, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.75f ) ) ); 
 
@@ -422,6 +422,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( grassTexturePath );
 	mAssetManager->AddToDatabase( quadPath );
 	mAssetManager->AddToDatabase( rockPath );
+	mAssetManager->AddToDatabase( monkeyMeshPath );
 	mAssetManager->AddToDatabase( cerebusAlbedoPath );
 	mAssetManager->AddToDatabase( cerebusNormalPath );
 	mAssetManager->AddToDatabase( cerebusMetallicPath );
@@ -581,7 +582,7 @@ Enjon::Result Game::Initialize()
 	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA32_SkyBlue(), 10.0f); 
 
 	mFloorMat = new Enjon::Material();
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.white"));
+	mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.white"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.normal"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.textures.black"));
 	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("isoarpg.materials.mahogfloor.roughness"));
@@ -811,7 +812,7 @@ Enjon::Result Game::Initialize()
 	{
 		auto scene = mGfx->GetScene();
 		scene->AddDirectionalLight( mSun );
-		scene->AddDirectionalLight( mSun2 );
+		//scene->AddDirectionalLight( mSun2 );
 		scene->AddRenderable(gc->GetRenderable());
 		scene->AddPointLight( pc->GetLight( ) );
 		scene->AddRenderable( mGreen.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
@@ -1319,7 +1320,7 @@ Enjon::Result Game::ProcessInput( f32 dt )
 	{
 		Enjon::Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >();
 		camera->Transform.Position += camera->Right( ).Normalize( ) * mCameraSpeed;
-		camera->LookAt( mGun.Get()->GetWorldPosition() );
+		camera->LookAt( mSerializedEntity.Get()->GetWorldPosition() );
 	}
 
 	if ( mMovementOn && cam->GetProjectionType( ) == Enjon::ProjectionType::Perspective )
@@ -1445,7 +1446,7 @@ Enjon::Result Game::ProcessInput( f32 dt )
 
 		if ( mLockCamera )
 		{ 
-			camera->LookAt( mGun.Get()->GetWorldPosition() );
+			camera->LookAt( mSerializedEntity.Get()->GetWorldPosition() );
 		}
 		else
 		{

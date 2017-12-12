@@ -509,7 +509,7 @@ namespace Enjon
 				{
 					case ArraySizeType::Dynamic:
 					{ 
-						return ( T* )( ( Vector< T >* )( usize( object ) + mOffset ) );
+						return ( T* )( &( ( ( Vector< T >* )( usize( object ) + mOffset ) )->at( 0 ) ) );
 					} break;
 
 					default:

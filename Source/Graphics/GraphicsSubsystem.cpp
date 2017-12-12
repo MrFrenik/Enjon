@@ -410,9 +410,6 @@ namespace Enjon
 		{ 
 			mTestShaderGraph = am->GetAsset< Enjon::ShaderGraph >( "isoarpg.shaders.shadergraphs.testgraph" );
 
-			// Create material
-			//mMaterial = new Enjon::Material( mTestShaderGraph );
-
 			mMaterial = am->GetAsset< Material >( "NewMaterial" ).Get()->ConstCast< Material >();
 
 			for ( u32 i = 0; i < 1; ++i ) 
@@ -423,7 +420,7 @@ namespace Enjon
 					
 					// Set renderable material
 					renderable.SetMaterial( mMaterial );
-					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.dragon" ) );
+					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "isoarpg.models.monkey" ) );
 					renderable.SetPosition( Enjon::Vec3( j, 1.0f, i ) + Enjon::Vec3( -25, 0, 5 ) );
 
 					mRenderables.push_back( renderable ); 
@@ -806,7 +803,7 @@ namespace Enjon
 		// Cubemap
 		glEnable( GL_DEPTH_TEST );
 		glDepthFunc( GL_LEQUAL );
-		//glCullFace( GL_FRONT );
+		glCullFace( GL_FRONT );
 		Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
 		skyBoxShader->Use( );
 		{
@@ -824,6 +821,8 @@ namespace Enjon
 
 		// Unbind gbuffer
 		mGbuffer->Unbind();
+
+		glCullFace( GL_BACK );
 	}
 
 	//======================================================================================================
