@@ -249,32 +249,8 @@ namespace Enjon
 
 			const HashMap< String, AssetRecordInfo >* GetAssets( ) const
 			{
-				return &mAssetsByName;
+				return &mAssetsByUUID;
 			}
-			
-			/**
-			* @brief
-			*/
-			const Asset* AddToAssets( const String& name, Asset* asset )
-			{
-				// Already exists
-				if ( HasAsset( name ) )
-				{
-					return mAssetsByName[ name ].mAsset;
-				} 
-
-				// Set name
-				asset->mName = name;
-
-				// Set loader
-				asset->mLoader = this;
-
-				// Otherwise add asset
-				mAssetsByName[name] = AssetRecordInfo( asset );
-				mAssetsByUUID[ asset->mUUID.ToString( ) ] = AssetRecordInfo( asset );
-
-				return mAssetsByName[name].mAsset;
-			} 
 
 			/**
 			* @brief
@@ -283,7 +259,7 @@ namespace Enjon
 
 		protected:
 			
-			HashMap< String, AssetRecordInfo > mAssetsByName;
+			HashMap< String, AssetRecordInfo* > mAssetsByName;
 			HashMap< String, AssetRecordInfo > mAssetsByUUID;
 			Asset* mDefaultAsset = nullptr;
 

@@ -75,6 +75,8 @@ namespace Enjon
 		mesh->mDrawType = GL_TRIANGLES;
 		// Set draw count
 		mesh->mDrawCount = mesh->mVerticies.size( ); 
+		// Set mesh name
+		mesh->mName = "DefaultMesh";
 
 		// Set default
 		mDefaultAsset = mesh; 

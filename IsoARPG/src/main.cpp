@@ -9682,6 +9682,7 @@ int main(int argc, char** argv)
 #include <fmt/printf.h> 
 #include <stdio.h> 
 
+#pragma optimize("", on)
 #undef main
 Enjon::s32 main(Enjon::s32 argc, char** argv)
 { 

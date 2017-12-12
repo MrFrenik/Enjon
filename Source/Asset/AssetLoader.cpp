@@ -71,7 +71,7 @@ namespace Enjon
 	AssetLoader::~AssetLoader()
 	{
 		// Delete all associated assets
-		for (auto& asset : mAssetsByName)
+		for (auto& asset : mAssetsByUUID)
 		{
 			delete asset.second.mAsset;
 		}
@@ -122,7 +122,7 @@ namespace Enjon
 				info->mAssetLoadStatus = AssetLoadStatus::Loaded; 
 
 				// Set record info of asset
-				info->mAsset->mRecordInfo = info;
+				info->mAsset->mRecordInfo = info; 
 			} 
 
 			// Set default asset if not valid asset
@@ -144,7 +144,7 @@ namespace Enjon
 		if ( Exists( name ) )
 		{
 			// Need to check for loaded status here
-			AssetRecordInfo* info = &mAssetsByName[name];
+			AssetRecordInfo* info = mAssetsByName[name];
 
 			// If unloaded, load asset from disk
 			if ( info->GetAssetLoadStatus( ) == AssetLoadStatus::Unloaded )
@@ -165,7 +165,7 @@ namespace Enjon
 				info->mAsset->mName = info->mAssetName; 
 
 				// Set record info for asset
-				info->mAsset->mRecordInfo = info;
+				info->mAsset->mRecordInfo = info; 
 			}
 
 			// Return asset from info record
@@ -246,8 +246,8 @@ namespace Enjon
 		} 
 
 		// Add asset
-		mAssetsByName[ info.mAsset->GetName() ] = info;
 		mAssetsByUUID[ info.mAsset->GetUUID( ).ToString( ) ] = info;
+		mAssetsByName[ info.mAsset->GetName() ] = &mAssetsByUUID[ info.mAsset->GetUUID().ToString() ];
 
 		return info.mAsset; 
 	}
@@ -268,10 +268,10 @@ namespace Enjon
 		// Add to assets
 		if ( !Exists( record.mAssetUUID ) )
 		{
-			mAssetsByUUID[ record.mAssetUUID.ToString( ) ] = info;
-
-			// Don't know if I like this or not...
-			mAssetsByName[ record.mAssetName ] = info;
+			// Store record by UUID
+			mAssetsByUUID[ record.mAssetUUID.ToString( ) ] = info; 
+			// Store pointer to record by asset name
+			mAssetsByName[record.mAssetName] = &mAssetsByUUID[record.mAssetUUID.ToString( )];
 
 			return Result::SUCCESS;
 		}

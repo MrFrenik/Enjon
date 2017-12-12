@@ -320,7 +320,7 @@ namespace Enjon
 								ImGui::ListBoxHeader( Enjon::String( "##" + std::to_string( i ) + prop->GetName( ) ).c_str( ) );
 								{
 									u32 assetIndex = 0;
-									// All asset record info structs
+									// All asset record info struct
 									for ( auto& a : *assets )
 									{
 										if ( ImGui::Selectable( String( std::to_string( assetIndex ) + ": " +  a.second.GetAssetName() ).c_str( ) ) )

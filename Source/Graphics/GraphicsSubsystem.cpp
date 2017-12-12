@@ -1271,8 +1271,8 @@ namespace Enjon
 		mFXAATarget 				= new RenderTarget(width, height);
 		mShadowDepth 				= new RenderTarget(2048, 2048);
 		mFinalTarget 				= new RenderTarget(width, height);
-		mSSAOTarget					= new RenderTarget( width / 2, height / 2 );
-		mSSAOBlurTarget				= new RenderTarget( width / 2, height / 2 );
+		mSSAOTarget					= new RenderTarget( width, height );
+		mSSAOBlurTarget				= new RenderTarget( width, height );
 
 		mBatch 						= new SpriteBatch();
 		mBatch->Init();

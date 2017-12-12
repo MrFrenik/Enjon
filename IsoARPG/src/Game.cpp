@@ -141,12 +141,15 @@ void Game::TestObjectSerialize( )
 	}
 
 	{
-		// A way to construct new types of objects - Will be given all default parameters when constructed - NEEDS TO GO THROUGH FACTORY FOR THIS EVENTUALLY
-		Enjon::AssetHandle< Enjon::Material > newMat = am->ConstructAsset< Enjon::Material >( );
+		if ( 0 )
+		{
+			// A way to construct new types of objects - Will be given all default parameters when constructed - NEEDS TO GO THROUGH FACTORY FOR THIS EVENTUALLY
+			Enjon::AssetHandle< Enjon::Material > newMat = am->ConstructAsset< Enjon::Material >( ); 
+		}
 
 		// Get material of name "NewMaterial"
 		Enjon::AssetHandle< Enjon::Material > deserializedMat = am->GetAsset< Enjon::Material >( "NewMaterial" );
-		if ( 1 )
+		if ( 0 )
 		{
 			deserializedMat.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "isoarpg.shaders.shadergraphs.testgraph" ) );
 			const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "isoarpg.materials.paintpeeling.albedo" ) );
@@ -839,6 +842,23 @@ Enjon::Result Game::Initialize()
 		// Docking windows
 		if (ImGui::BeginDock("Entities", &mShowEntities))
 		{
+			// Load file
+			if ( ImGui::CollapsingHeader( "Load Resource" ) )
+			{
+				static Enjon::String resourceFilePath = "";
+				char buffer[256];
+				std::strncpy( buffer, resourceFilePath.c_str( ), 256 );
+				if ( ImGui::InputText( "File Path", buffer, 256 ) )
+				{
+					resourceFilePath = Enjon::String( buffer );
+				} 
+
+				if ( ImGui::Button( "Load File" ) )
+				{
+					mAssetManager->AddToDatabase( resourceFilePath );
+				}
+			} 
+
 			ImGui::Text( Enjon::String( "Entities: " + std::to_string( Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->GetActiveEntities( ).size( ) ) ).c_str() );
 			ImGui::Text( "Gun:" );
 			auto position 	= mGun.Get( )->GetLocalPosition();

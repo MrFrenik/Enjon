@@ -213,7 +213,7 @@ namespace Enjon
 			mGraphics->Update( dt );
 
 			// Clamp frame rate
-			//mLimiter.End();
+			mLimiter.End();
 		}
 
 		Enjon::Result res = ShutDown();
