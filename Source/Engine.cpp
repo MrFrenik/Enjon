@@ -352,7 +352,7 @@ namespace Enjon
 			// Set root path
 			if ( arg.compare( "--enjon-path" ) == 0 && (i + 1) < argc )
 			{
-				mRootPath = String( argv[i + 1] );
+				mRootPath = String( argv[i + 1] ) + "/";
 			}
 			
 			// Set root path

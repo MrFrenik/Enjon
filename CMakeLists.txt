@@ -4,13 +4,13 @@ cmake_minimum_required(VERSION 2.6)
 project(Enjon)
 
 # set top level directory
-set (ENJON_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set (REFLECTION_DIR "${ENJON_DIR}/GENERATOR")
-set (ENJON_BUILD_DIR "${ENJON_DIR}/Build")
-set (ENJON_RELEASE_DIR "${ENJON_BUILD_DIR}/Release")
-set (ENJON_RELDEBUGINFO_DIR "${ENJON_BUILD_DIR}/RelWithDebInfo")
-set (ENJON_DEBUG_DIR "${ENJON_BUILD_DIR}/Debug")
-set (ENJON_GENERATED_DIR "${ENJON_BUILD_DIR}/Generator/Linked")
+set (ENJON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/)
+set (REFLECTION_DIR "${ENJON_DIR}/GENERATOR/")
+set (ENJON_BUILD_DIR "${ENJON_DIR}/Build/")
+set (ENJON_RELEASE_DIR "${ENJON_BUILD_DIR}/Release/")
+set (ENJON_RELDEBUGINFO_DIR "${ENJON_BUILD_DIR}/RelWithDebInfo/")
+set (ENJON_DEBUG_DIR "${ENJON_BUILD_DIR}/Debug/")
+set (ENJON_GENERATED_DIR "${ENJON_BUILD_DIR}/Generator/Linked/")
 set (PROJECT_DIR "${ENJON_DIR}/IsoARPG/")
 
 # Set build directory for solution

@@ -67,25 +67,22 @@ namespace Enjon
 			// Store texture data
 			textureData = (f32*)data;
 
-			glGenTextures( 1, &tex->mId );
-			glBindTexture( GL_TEXTURE_2D, tex->mId );
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGB, GL_FLOAT, data );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
 			s32 MAG_PARAM = GL_LINEAR;
 			s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
 			b8 genMips = true;
+
+			// Generate and bind texture for data storage
+			glGenTextures( 1, &tex->mId );
+			glBindTexture( GL_TEXTURE_2D, tex->mId );
+			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGB, GL_FLOAT, data ); 
 
 			// Anisotropic filtering
 			float aniso = 0.0f;
 			glGetFloatv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso );
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso );
 
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, MAG_PARAM );
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, MIN_PARAM );
 
@@ -242,27 +239,6 @@ namespace Enjon
 	} 
 
 	//================================================= 
-			
-	Enjon::Result Texture::CacheFile( Enjon::ByteBuffer& buffer )
-	{
-		// Get engine
-		Enjon::Engine* engine = Enjon::Engine::GetInstance( );
-
-		// Get asset manager from subsystem catalog
-		const Enjon::AssetManager* am = engine->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-
-		// Get project directory
-		const Enjon::String& cachePath =  am->GetCachedAssetsPath( );
-
-		// Write out to buffer
-		buffer.Write( mWidth );
-		buffer.Write( mHeight );
-		buffer.Write( (u32)mFileExtension );
-
-		return Enjon::Result::SUCCESS;
-	}
-
-	//================================================= 
 
 	template void Texture::WriteTextureData< f32 >( ByteBuffer* buffer ) const;
 	template void Texture::WriteTextureData< u8 >( ByteBuffer* buffer ) const;
@@ -335,11 +311,11 @@ namespace Enjon
 		std::cout << "Deserializing texture...\n";
 
 		// Read properties from buffer - THIS SHOULD BE USED WITH A VERSIONING STRUCT!
-		mWidth = buffer->Read< u32 >( );										// Texture width
-		mHeight = buffer->Read< u32 >( );										// Texture height
+		mWidth				= buffer->Read< u32 >( );							// Texture width
+		mHeight				= buffer->Read< u32 >( );							// Texture height
 		mNumberOfComponents = buffer->Read< u32 >( );							// Texture components per pixel
-		mFormat = TextureFormat( buffer->Read< u32 >( ) );						// Texture format
-		mFileExtension = TextureFileExtension( buffer->Read< u32 >( ) );		// Texture format
+		mFormat				= TextureFormat( buffer->Read< u32 >( ) );			// Texture format
+		mFileExtension		= TextureFileExtension( buffer->Read< u32 >( ) );	// Texture format
 
 		switch ( mFormat )
 		{

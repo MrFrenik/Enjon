@@ -1,6 +1,10 @@
 #include "Entity/Components/PointLightComponent.h"
 #include "Entity/EntityManager.h"
 #include "Serialize/ByteBuffer.h"
+#include "Graphics/Scene.h"
+#include "Graphics/GraphicsSubsystem.h"
+#include "SubsystemCatalog.h"
+#include "Engine.h"
 
 namespace Enjon
 {

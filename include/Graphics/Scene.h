@@ -189,6 +189,17 @@ namespace Enjon {
 
 			static bool CompareMaterial(Renderable* a, Renderable* b);
 			static bool CompareDepth(Renderable* a, Renderable* b);
+
+			// Scene should own all the data for renderables, lights, etc. and should hand those out on request from components
+			// Or could have a graphics subsystem which holds all of these objects?
+			/*
+				template <typename T, typename... Args>
+				const T* GraphicsFactory::Construct( Args&&... args )
+				{
+						
+				}
+			*/
+
 	};
 }
 

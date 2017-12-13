@@ -275,13 +275,13 @@ namespace Enjon
 
 			Enjon::Mesh* mMesh = nullptr;
 
-			f32 mSSAORadius = 0.154;
-			f32 mSSAOBias = 0.013f;
-			f32 mSSAOIntensity = 1.13f;
+			f32 mSSAORadius = 0.3f;
+			f32 mSSAOBias = 0.05f;
+			f32 mSSAOIntensity = 3.0f;
 
 			Enjon::Mat4* mModelMatricies = nullptr;
 			Enjon::Renderable* mInstancedRenderable = nullptr;
-			u32 mInstancedAmount = 15000;
+			u32 mInstancedAmount = 0;
 			u32 mInstancedVBO; 
 	};
 }

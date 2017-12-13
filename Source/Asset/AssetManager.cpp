@@ -25,7 +25,7 @@ namespace Enjon
 		mName = "";
 
 		// Set to default
-		mAssetsPath = "";
+		mAssetsDirectoryPath = "";
 		
 		// Register the loaders with manager 
 		RegisterLoaders( );
@@ -39,7 +39,7 @@ namespace Enjon
 		mName = name;
 
 		// Set project asset path
-		mAssetsPath = assetsPath; 
+		mAssetsDirectoryPath = assetsPath; 
 
 		// Register the loaders with manager 
 		RegisterLoaders( );
@@ -88,7 +88,7 @@ namespace Enjon
 	Result AssetManager::Initialize()
 	{ 
 		// Initialize the manifest and read in records
-		mCacheManifest.Initialize( mAssetsPath + "/Intermediate/CacheManifest.bin", this ); 
+		mCacheManifest.Initialize( mAssetsDirectoryPath + "/Intermediate/CacheManifest.bin", this ); 
 
 		return Result::SUCCESS;
 	} 
@@ -109,30 +109,30 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
-	void AssetManager::SetAssetsPath( const String& path )
+	void AssetManager::SetAssetsDirectoryPath( const String& path )
 	{
-		mAssetsPath = path;
+		mAssetsDirectoryPath = path;
 	}
 	
 	//============================================================================================ 
 			
-	Enjon::String AssetManager::GetAssetsPath( ) const
+	Enjon::String AssetManager::GetAssetsDirectoryPath( ) const
 	{
-		return mAssetsPath;
+		return mAssetsDirectoryPath;
 	}
 	
 	//============================================================================================ 
 			
-	void AssetManager::SetCachedAssetsPath( const String& filePath )
+	void AssetManager::SetCachedAssetsDirectoryPath( const String& filePath )
 	{
-		mCachedPath = filePath;
+		mCachedDirectoryPath = filePath;
 	}
 	
 	//============================================================================================ 
 	
-	const Enjon::String& AssetManager::GetCachedAssetsPath( ) const
+	const Enjon::String& AssetManager::GetCachedAssetsDirectoryPath( ) const
 	{
-		return mCachedPath;
+		return mCachedDirectoryPath;
 	}
 	
 	//============================================================================================ 
@@ -278,7 +278,7 @@ namespace Enjon
 				if ( isRelativePath )
 				{
 					// Return failure if path doesn't exist
-					if ( !Utils::FileExists( mAssetsPath + resourceFilePath ) )
+					if ( !Utils::FileExists( mAssetsDirectoryPath + resourceFilePath ) )
 					{
 						return Result::FAILURE;
 					} 
@@ -295,15 +295,15 @@ namespace Enjon
 						needToCache = true;
 
 						// Load the asset from file
-						asset = query->second->LoadResourceFromFile( mAssetsPath + resourceFilePath );
+						asset = query->second->LoadResourceFromFile( mAssetsDirectoryPath + resourceFilePath );
 	 
 						// If asset is valid
 						if ( asset )
 						{
 							// Add to loader assets with asset record info
 							AssetRecordInfo info;
-							asset->mName = Utils::ToLower( mName ) + qualifiedName;
-							asset->mFilePath = mAssetsPath + resourceFilePath;				// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
+							asset->mName =  qualifiedName;
+							asset->mFilePath = mAssetsDirectoryPath + resourceFilePath;				// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
 							asset->mUUID = UUID::GenerateUUID( );
 							asset->mLoader = query->second;
 							info.mAsset = asset;
@@ -384,7 +384,7 @@ namespace Enjon
 		Result res = archiver.Serialize( asset ); 
 
 		// Write to file using archiver 
-		String path = mCachedPath + asset->mName + ".easset"; 
+		String path = mCachedDirectoryPath + asset->mName + ".easset"; 
 		archiver.WriteToFile( path );
 
 		// Construct and add record to manifest

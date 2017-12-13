@@ -52,7 +52,7 @@ namespace Enjon
 			Enjon::String GetName( ) const 
 			{ 
 				return mName; 
-			}
+			} 
 			
 			/**
 			*@brief
@@ -83,33 +83,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			const AssetRecordInfo* GetAssetRecordInfo( ) const;
-			
-		protected:
-
-			/*
-			* @brief Caches file into cache directory relative to project directory 
-			*/
-			virtual Result CacheFile( Enjon::ByteBuffer& buffer )
-			{ 
-				return Result::SUCCESS;
-			} 
-
-			/*
-			* @brief Caches file into cache directory relative to project directory 
-			*/
-			virtual Result Serialize( Enjon::ByteBuffer& buffer )
-			{
-				return Result::SUCCESS;
-			}
-
-			/*
-			* @brief Caches file into cache directory relative to project directory 
-			*/
-			virtual Result Deserialize( Enjon::ByteBuffer& buffer )
-			{
-				return Result::SUCCESS;
-			}
+			const AssetRecordInfo* GetAssetRecordInfo( ) const; 
 
 		public:
 			/*

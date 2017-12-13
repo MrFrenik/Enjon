@@ -23,6 +23,12 @@ namespace Enjon
 
 	Result CacheRegistryManifest::Initialize( const String& manifestPath, const AssetManager* manager )
 	{
+		// Check if directory exists - if not, create it
+		if ( !std::experimental::filesystem::exists( manager->GetCachedAssetsDirectoryPath( ) ) )
+		{
+			std::experimental::filesystem::create_directory( manager->GetCachedAssetsDirectoryPath( ) );
+		} 
+
 		// Reset manifest records
 		Reset();
 
@@ -70,7 +76,7 @@ namespace Enjon
 
 	Result CacheRegistryManifest::ReadInManifest( )
 	{
-		for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( mAssetManager->GetAssetsPath() + "/" ) )
+		for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( mAssetManager->GetAssetsDirectoryPath( ) + "/" ) )
 		{
 			if ( Enjon::AssetManager::HasFileExtension( p.path( ).string( ), "easset" ) )
 			{

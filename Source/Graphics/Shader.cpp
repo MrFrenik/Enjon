@@ -47,7 +47,7 @@ namespace Enjon
 		Enjon::String fragmentShaderCode = fragmentCode; 
 
 		// Get shader resource path
-		Enjon::String sp = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( )->GetAssetsPath( ) + "/Shaders";
+		Enjon::String sp = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( )->GetAssetsDirectoryPath( ) + "/Shaders";
 
 		// Get vertex file path 
 		Enjon::String vertName = mGraph->GetName( ) + "." + ShaderGraph::ShaderPassToString( mPassType ) + ".Vertex.glsl";

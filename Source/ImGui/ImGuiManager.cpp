@@ -14,6 +14,8 @@
 #include "SubsystemCatalog.h"
 #include "Engine.h"
 
+#include <fmt/printf.h> 
+
 #include <algorithm>
 #include <assert.h>
 #include <iostream>
@@ -414,7 +416,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::InputFloat( name.c_str( ), &val ) )
+					if ( ImGui::DragFloat( name.c_str( ), &val ) )
 					{
 						cls->SetValue( object, prop, val );
 					}

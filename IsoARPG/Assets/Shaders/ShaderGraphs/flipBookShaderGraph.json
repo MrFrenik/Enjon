@@ -1,0 +1,307 @@
+{
+	"ShaderGraphName": "TestGraph",
+	"Nodes": {
+
+		"s_flipBookTexture": {
+			"Template": "Texture2DSamplerNode"
+		},
+		"numberRows": {
+			"Template": "ConstantFloatNode"
+		},
+		"numberCols": {
+			"Template": "ConstantFloatNode"
+		},
+		"s_texNormal": {
+			"Template": "Texture2DSamplerNode"
+		},
+
+
+		"multiply_rows_cols": {
+
+			"Template": "MultiplyFunctionNode"
+		},
+		"append_rows_cols": {
+			"Template": "AppendFunctionNode"
+		},
+		"append_mult_rows": {
+			"Template": "AppendFunctionNode"
+		},
+
+		"timeMultiplier": {
+			"Template": "ConstantFloatNode",
+			"IsUniform": true
+		},
+		"timeMult": {
+			"Template": "MultiplyFunctionNode"
+		},
+		"timeNode": {
+			"Template": "TimeNode"
+		},
+		"staticBool": {
+			"Template": "ConstantFloatNode"
+		},
+		"fracNode": {
+			"Template": "FracFunctionNode"
+		},
+		"switchTimeNode": {
+			"Template": "SwitchFunctionNode"
+		},
+		"appendFrac": {
+			"Template": "AppendFunctionNode"
+		},
+		"clampNode": {
+			"Template": "ClampFunctionNode"
+		},
+
+
+
+		"mult_append": {
+			"Template": "MultiplyFunctionNode"
+		},
+		"texCoordNode": {
+			"Template": "TextureCoordinateNode"
+		},
+		"divide_texcoord_append_row_col": {
+			"Template": "DivideFunctionNode"
+		},
+		"divide_floor": {
+			"Template": "DivideFunctionNode"
+		},
+		"add_divide1_divide2": {
+			"Template": "AddFunctionNode"
+		},
+		"floor_mult": {
+			"Template": "FloorFunctionNode"
+		},
+
+
+
+
+
+		"switchTextureNode": {
+			"Template": "SwitchFunctionNode"	
+		},
+
+
+
+
+		"float_1": {
+			"Template": "ConstantFloatNode"
+		},
+		"float_2": {
+			"Template": "ConstantFloatNode"
+		},
+		"appendFloatFloat": {
+			"Template": "AppendFunctionNode"
+		},
+		"vec21": {
+			"Template": "ConstantVec2Node"
+		},
+		"multiplyAppendToVec2": {
+			"Template": "MultiplyFunctionNode"
+		},
+		"floor1": {
+			"Template": "FloorFunctionNode"
+		}
+
+	},
+	"NodeLinks": {
+
+		"numberRows": {
+			"DefaultOverrides": {
+				"Value": "6.0"
+			}
+		},
+		"numberCols": {
+			"DefaultOverrides": {
+				"Value": "6.0"
+			}
+		},
+		"append_rows_cols": {
+			"Inputs": {
+				"Input_0": {
+					"numberCols": "Value"
+				},
+				"Input_1": {
+					"numberRows": "Value"
+				}
+			}
+		},
+		"multiply_rows_cols": {
+			"Inputs": {
+				"Input_0": {
+					"numberCols": "Value"
+				},
+				"Input_1": {
+					"numberRows": "Value"
+				}
+			}
+		},
+		"append_mult_rows": {
+			"Inputs": {
+				"Input_0": {
+					"multiply_rows_cols": "Value"
+				},
+				"Input_1": {
+					"numberRows": "Value"
+				}
+			}
+		},
+
+
+
+		"timeMult": {
+			"Inputs": {
+				"Input_0": {
+					"timeNode": "Value"
+				},
+				"Input_1": {
+					"timeMultiplier": "Value"
+				}
+			}
+		},
+
+
+		"clampNode": {
+			"Inputs": {
+				"Input_0": {
+					"timeMult": "Value"
+				}
+			},
+			"DefaultOverrides": {
+				"Min": "0.0",
+				"Max": "0.9999"
+			}
+		},
+		"switchTimeNode": {
+			"Inputs": {
+				"True": {
+					"clampNode": "Value"
+				},
+				"False": {
+					"timeMult": "Value"
+				},
+				"Value": {
+					"staticBool": "Value"
+				}
+			}
+		},
+		"fracNode": {
+			"Inputs": {
+				"Input_0": {
+					"timeMult": "Value"
+				}
+			}
+		},
+		"appendFrac": {
+			"Inputs": {
+				"Input_0": {
+					"fracNode": "Value"
+				},
+				"Input_1": {
+					"fracNode": "Value"
+				}
+			}
+		},
+
+
+		"mult_append": {
+			"Inputs": {
+				"Input_0": {
+					"append_mult_rows": "Value"
+				},
+				"Input_1":{
+					"appendFrac": "Value"
+				}
+			}
+		},
+		"floor_mult": {
+			"Inputs": {
+				"Input_0": {
+					"mult_append": "Value"
+				}
+			}
+		},
+		"divide_floor": {
+			"Inputs": {
+				"Input_0": {
+					"floor_mult": "Value"
+				},
+				"Input_1": {
+					"append_rows_cols": "Value"	
+				}
+			}
+		},
+		"divide_texcoord_append_row_col": {
+			"Inputs": {
+				"Input_0": {
+					"texCoordNode": "Value"
+				},
+				"Input_1": {
+					"append_rows_cols": "Value"
+				}
+			}
+		},
+		"add_divide1_divide2": {
+			"Inputs": {
+				"Input_0": {
+					"divide_texcoord_append_row_col": "Value"
+				},
+				"Input_1": {
+					"divide_floor": "Value" 
+				}
+			}
+		},
+
+
+		"s_flipBookTexture": {
+			"Inputs": {
+				"UV": {
+					"add_divide1_divide2": "Value"
+				}
+			}
+		},
+
+
+		"s_texNormal": {
+			"Inputs": {
+				"UV": {
+					"add_divide1_divide2": "Value"
+				}
+			}
+		}
+
+		
+	},
+
+	"MainNode": {
+
+		"Inputs": {
+
+			"BaseColor": {
+				"s_flipBookTexture": "RGB"
+			},
+
+			"Normal": {
+			},
+
+			"Metallic": {
+			},
+
+			"Roughness": {
+			},
+
+			"Emissive": {
+			},
+
+			"AO": {
+			},
+
+			"WorldPositionOffset": {
+			}
+		},
+
+		"DefaultOverrides": {
+		}
+	} 
+}

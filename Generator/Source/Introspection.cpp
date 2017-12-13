@@ -930,12 +930,11 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 		} break;
 
 		case PropertyType::HashMap:
-			{
-				// Will be the actual property type
+		{
+			// Will be the actual property type
 			Token token = lexer->GetNextToken( );
 
-			// Need to have a better recursive way of handling filling out the property information for this...
-
+			// Need to have a better recursive way of handling filling out the property information for this...  
 			HashMapProperty* mapProp = static_cast<HashMapProperty*> ( prop );
 
 			if ( token.Equals( "HashMap" ) )
@@ -985,6 +984,11 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 				// Set property type of array
 				mapProp->mKeyPropertyType = kpt;
 				mapProp->mValuePropertyType = vpt;
+			}
+			else
+			{
+				delete mapProp;
+				return;
 			}
 
 		} break;

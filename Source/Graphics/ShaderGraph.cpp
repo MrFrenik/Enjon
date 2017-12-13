@@ -2394,7 +2394,7 @@ for ( u32 i = 0; i < ShaderGraph::TagCount( code, find ); ++i )\
 
 	void ShaderGraph::WriteToFile( ShaderPassType pass )
 	{
-		Enjon::String shaderPath = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( )->GetAssetsPath( ) + "/Shaders";
+		Enjon::String shaderPath = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( )->GetAssetsDirectoryPath( ) + "/Shaders";
 		Enjon::String fragName = mName + "." + ShaderPassToString( pass ) + ".Fragment.glsl";
 		Enjon::String vertName = mName + "." + ShaderPassToString( pass ) + ".Vertex.glsl";
 

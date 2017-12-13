@@ -123,7 +123,7 @@ AssetHandle< T > AssetManager::ConstructAsset( )
 	const AssetLoader* loader = GetLoaderByAssetType< T >( );
 
 	// Construct new asset and get handle to it
-	AssetHandle< T > handle = const_cast< AssetLoader* >( loader )->ConstructAsset< T >( );
+	AssetHandle< T > handle = const_cast< AssetLoader* >( loader )->ConstructAsset< T >( this );
 
 	// Serialize the asset to file
 	SerializeAsset( handle.Get( ) );

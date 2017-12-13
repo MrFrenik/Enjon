@@ -160,7 +160,7 @@ namespace Enjon
 			} 
 
 			template < typename T >
-			AssetHandle< T > ConstructAsset( )
+			AssetHandle< T > ConstructAsset( const AssetManager* manager )
 			{
 				// Construct new asset
 				T* asset = new T( ); 
@@ -170,10 +170,10 @@ namespace Enjon
 				// Construct unique name for asset to be saved
 				String typeName = asset->Class( )->GetName( ); 
 				String originalAssetName = "New" + typeName;
-				String assetName = originalAssetName;
+				String assetName = originalAssetName; 
 
 				// TODO(): MAKE THIS GO THROUGH A CENTRALIZED GRAPHICS FACTORY
-				std::experimental::filesystem::path originalPath = mAssetsPath + "/Cache/New" + typeName;
+				std::experimental::filesystem::path originalPath = manager->GetAssetsDirectoryPath() + "Cache/New" + typeName;
 				std::experimental::filesystem::path p = originalPath.string() + ".easset";
 
 				// Look for cached asset based on name and continue until name is unique

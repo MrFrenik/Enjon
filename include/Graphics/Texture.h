@@ -35,6 +35,21 @@ namespace Enjon
 		HDR
 	};
 
+	ENJON_ENUM( )
+	enum class TextureMipMapFormat : u32
+	{
+		None,
+		Nearest,
+		Linear
+	}; 
+
+	ENJON_ENUM( )
+	enum class TextureWrapMode : u32
+	{
+		Repeat,
+		ClampToEdge
+	};
+
 	class TextureSourceDataBase
 	{
 		friend TextureAssetLoader;
@@ -168,12 +183,7 @@ namespace Enjon
 			*/
 			virtual Result DeserializeData( ByteBuffer* archiver ) override;
 
-		protected:
-
-			/*
-			* @brief
-			*/
-			virtual Enjon::Result CacheFile( Enjon::ByteBuffer& buffer ) override; 
+		protected: 
 
 			/*
 			* @brief

@@ -540,8 +540,7 @@ namespace Enjon
 			MetaPropertyType GetValueType( ) const 
 			{
 				return mValueType;
-			}
-			//virtual MetaArrayPropertyProxy GetProxy( ) const = 0;
+			} 
 
 		protected:
 			MetaProperty* mKeyProperty = nullptr;
@@ -648,7 +647,7 @@ namespace Enjon
 			{ 
 				HashMap< K, V >* rawMap = GetRaw( object );
 				rawMap->insert_or_assign( key, value );
-			}
+			} 
 
 			/*
 			* @brief
@@ -791,8 +790,8 @@ namespace Enjon
 		std::function< RetVal( T* ) > mFunc;
 	};
 
-	typedef std::vector< MetaProperty* > PropertyTable;
-	typedef std::unordered_map< Enjon::String, MetaFunction* > FunctionTable;
+	typedef Vector< MetaProperty* > PropertyTable;
+	typedef HashMap< Enjon::String, MetaFunction* > FunctionTable;
 	typedef std::function< Object*( void ) > ConstructFunction;
 
 	class MetaClass
@@ -1065,8 +1064,8 @@ namespace Enjon
 			}
 
 		private:
-			std::unordered_map< u32, MetaClass* > mRegistry; 
-			std::unordered_map< String, MetaClass* > mRegistryByClassName;
+			HashMap< u32, MetaClass* > mRegistry; 
+			HashMap< String, MetaClass* > mRegistryByClassName;
 	};
 
 	// Max allowed type id by engine

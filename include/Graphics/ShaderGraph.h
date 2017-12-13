@@ -170,12 +170,7 @@ namespace Enjon
 		~ShaderGraphNode( )
 		{
 		}
-
-
-		void Serialize( rapidjson::PrettyWriter< rapidjson::StringBuffer >& writer );
-
-		s32 Deserialize( rapidjson::PrettyWriter< rapidjson::StringBuffer >& reader ); 
-
+ 
 		void AddLink( const NodeLink& link );
 
 		const NodeLink* GetLink( const Enjon::String inputName );

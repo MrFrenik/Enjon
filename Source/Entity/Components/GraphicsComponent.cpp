@@ -1,16 +1,18 @@
 #include "Entity/Components/GraphicsComponent.h"
-#include "Entity/EntityManager.h"
+#include "Entity/EntityManager.h" 
 #include "Graphics/Scene.h"
 #include "Serialize/AssetArchiver.h"
 #include "Asset/AssetManager.h"
+#include "Graphics/GraphicsSubsystem.h"
 #include "SubsystemCatalog.h"
+#include "Engine.h"
 
 namespace Enjon
 {
 	//====================================================================
 
 	GraphicsComponent::GraphicsComponent()
-	{
+	{ 
 	}
 
 	//====================================================================
@@ -24,6 +26,7 @@ namespace Enjon
 
 	GraphicsComponent::~GraphicsComponent()
 	{
+		// Remove renderable from scene
 		if (mRenderable.GetScene() != nullptr)
 		{
 			mRenderable.GetScene()->RemoveRenderable(&mRenderable);

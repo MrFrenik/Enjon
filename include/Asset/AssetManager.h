@@ -90,22 +90,22 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void SetAssetsPath( const String& filePath );
+			void SetAssetsDirectoryPath( const String& filePath );
 			
 			/**
 			*@brief
 			*/
-			Enjon::String GetAssetsPath( ) const;
+			Enjon::String GetAssetsDirectoryPath( ) const;
 			
 			/**
 			*@brief
 			*/
-			void SetCachedAssetsPath( const String& filePath ); 
+			void SetCachedAssetsDirectoryPath( const String& filePath ); 
 			
 			/**
 			*@brief
 			*/
-			const Enjon::String& GetCachedAssetsPath( ) const;
+			const Enjon::String& GetCachedAssetsDirectoryPath( ) const;
 			
 			/**
 			*@brief
@@ -231,8 +231,8 @@ namespace Enjon
 			std::unordered_map< const MetaClass*, AssetLoader* > mLoadersByMetaClass;
 			std::unordered_map<u32, AssetLoader*> mLoadersByAssetId; 
 			std::unordered_map< Enjon::String, u32 > mFileExtensionMap;
-			String mAssetsPath;
-			String mCachedPath;
+			String mAssetsDirectoryPath;
+			String mCachedDirectoryPath;
 			String mName; 
 			CacheRegistryManifest mCacheManifest;
 	};
