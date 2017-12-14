@@ -299,7 +299,37 @@ Game::~Game()
 /*
 Enjon::Result Game::Initialize( )
 {
-	// Init the asset manager
+	//====================================
+	// Basic project initialization
+	//==================================== 
+	// Set up assets path
+	// This needs to be done in a project settings config file or in the cmake, not in source 
+	mAssetsDirectoryPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Assets/"); 
+	Enjon::String cacheDirectoryPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Assets/Cache/"); 
+	Enjon::String projectDirectory = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + "/IsoARPG/"; 
+	
+	// Get asset manager and set its properties ( I don't like this )
+	mAssetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog()->Get<Enjon::AssetManager>()->ConstCast< Enjon::AssetManager >(); 
+	// This also needs to be done through a config file or cmake
+	mAssetManager->SetAssetsDirectoryPath( mAssetsDirectoryPath );
+	mAssetManager->SetCachedAssetsDirectoryPath( cacheDirectoryPath );
+	mAssetManager->SetDatabaseName( GetApplicationName( ) ); 
+	mAssetManager->Initialize( ); 
+
+	// Get Subsystems from engine
+	Enjon::Engine* engine = Enjon::Engine::GetInstance();
+	Enjon::SubsystemCatalog* subSysCatalog = engine->GetSubsystemCatalog();
+	mGfx = subSysCatalog->Get<Enjon::GraphicsSubsystem>()->ConstCast< Enjon::GraphicsSubsystem >();
+	mInput = subSysCatalog->Get<Enjon::Input>()->ConstCast< Enjon::Input >();
+
+	//====================================
+
+	// Loading a basic scene
+	// How do?
+
+	// Grab a scene from the assets manager? Does the project hold a uuid of some default scene that's to be loaded? Most likely...
+	
+
 }
 */
 
@@ -307,9 +337,9 @@ Enjon::Result Game::Initialize()
 { 
 	// Set up assets path
 	// This needs to be done in a project settings config file or in the cmake, not in source 
-	mAssetsDirectoryPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Assets/"); 
-	Enjon::String cacheDirectoryPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("/IsoARPG/Assets/Cache/"); 
-	Enjon::String projectDirectory = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + "/IsoARPG/"; 
+	mAssetsDirectoryPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("IsoARPG/Assets/"); 
+	Enjon::String cacheDirectoryPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + Enjon::String("IsoARPG/Assets/Cache/"); 
+	Enjon::String projectDirectory = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + "IsoARPG/"; 
 	
 	// Get asset manager and set its properties ( I don't like this )
 	mAssetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog()->Get<Enjon::AssetManager>()->ConstCast< Enjon::AssetManager >(); 

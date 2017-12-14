@@ -234,6 +234,8 @@ namespace Enjon
 			
 	Result Mesh::SerializeData( ByteBuffer* buffer ) const
 	{ 
+		std::cout << "Serializing mesh...\n";
+
 		// Write out size of verticies
 		buffer->Write< usize >( mVerticies.size( ) );
 
@@ -267,6 +269,8 @@ namespace Enjon
 
 	Result Mesh::DeserializeData( ByteBuffer* buffer )
 	{
+		std::cout << "Deserializing mesh...\n";
+
 		// Get size of verts from archiver
 		usize vertCount = buffer->Read< usize >( );
 

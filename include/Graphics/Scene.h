@@ -174,6 +174,18 @@ namespace Enjon {
 
 		private:
 
+			/*
+			* @brief
+			*/
+			static bool CompareMaterial(Renderable* a, Renderable* b);
+
+			/*
+			* @brief
+			*/
+			static bool CompareDepth(Renderable* a, Renderable* b);
+
+		private:
+
 			ENJON_PROPERTY( )
 			Vector< Renderable* > mSortedRenderables; 
 
@@ -182,13 +194,9 @@ namespace Enjon {
 			std::set<DirectionalLight*> mDirectionalLights;
 			std::set<PointLight*> mPointLights;
 			std::set<SpotLight*> mSpotLights; 
-
-			AmbientSettings mAmbientSettings;
-
+			AmbientSettings mAmbientSettings; 
 			DirectionalLight* mSun = nullptr;
 
-			static bool CompareMaterial(Renderable* a, Renderable* b);
-			static bool CompareDepth(Renderable* a, Renderable* b);
 
 			// Scene should own all the data for renderables, lights, etc. and should hand those out on request from components
 			// Or could have a graphics subsystem which holds all of these objects?
@@ -198,6 +206,8 @@ namespace Enjon {
 				{
 						
 				}
+
+				// Should scene own its own camera? How will this work, exactly?
 			*/
 
 	};

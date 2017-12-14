@@ -12,3 +12,5 @@ git add IsoARPG/src
 git add Generator/Source
 
 git add Generator/Include
+
+git add Assets/Shaders
