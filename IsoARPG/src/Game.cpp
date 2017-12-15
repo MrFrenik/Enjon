@@ -159,7 +159,7 @@ void Game::TestObjectSerialize( )
 	}
 
 	{
-		if ( 0 )
+		if ( 1 )
 		{
 			// A way to construct new types of objects - Will be given all default parameters when constructed - NEEDS TO GO THROUGH FACTORY FOR THIS EVENTUALLY
 			Enjon::AssetHandle< Enjon::Material > newMat = am->ConstructAsset< Enjon::Material >( ); 
@@ -167,7 +167,7 @@ void Game::TestObjectSerialize( )
 
 		// Get material of name "NewMaterial"
 		Enjon::AssetHandle< Enjon::Material > deserializedMat = am->GetAsset< Enjon::Material >( "NewMaterial" );
-		if ( 0 )
+		if ( 1 )
 		{
 			deserializedMat.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
 			const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.paintpeeling.albedo" ) );
@@ -183,7 +183,7 @@ void Game::TestObjectSerialize( )
 
 	// Serialize / Deserialize entity information
 	{
-		if ( 0 )
+		if ( 1 )
 		{
 			// Parent
 			mSerializedEntity = mEntities->Allocate( ); 
