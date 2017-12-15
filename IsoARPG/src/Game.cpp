@@ -185,6 +185,20 @@ void Game::TestObjectSerialize( )
 	{
 		if ( 1 )
 		{
+			// Try serializing the camera Enjon::ObjectArchiver archiver;
+			archiver.Serialize( mGfx->GetSceneCamera( ) );
+			archiver.WriteToFile( am->GetCachedAssetsDirectoryPath() + "camera" ); 
+
+			Enjon::ObjectArchiver deserializeBuffer;
+			Enjon::Camera* cam = deserializeBuffer.Deserialize( am->GetCachedAssetsDirectoryPath( ) + "camera" )->ConstCast< Enjon::Camera >( );
+			if ( cam )
+			{
+				delete cam;
+				cam = nullptr;
+			}
+		}
+		if ( 0 )
+		{
 			// Parent
 			mSerializedEntity = mEntities->Allocate( ); 
 			mSerializedEntity.Get( )->SetPosition( Vec3( -8, 3, 0 ) );
@@ -876,6 +890,14 @@ Enjon::Result Game::Initialize()
 		// Docking windows
 		if (ImGui::BeginDock("Entities", &mShowEntities))
 		{
+			// Load camera
+			if ( ImGui::Button( "Load Camera" ) )
+			{ 
+				const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+				Enjon::ObjectArchiver deserializeBuffer;
+				deserializeBuffer.Deserialize( am->GetCachedAssetsDirectoryPath( ) + "camera", mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >( ) );
+			}
+
 			// Load file
 			if ( ImGui::CollapsingHeader( "Load Resource" ) )
 			{

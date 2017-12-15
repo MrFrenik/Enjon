@@ -41,12 +41,19 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			EntityHandle Deserialize( const String& filePath );
+			EntityHandle Deserialize( const String& filePath ); 
+
+		public:
 
 			/*
-			* @brief
+			* @brief Static method which serializes entity data using an existing ByteBuffer
 			*/
-			EntityHandle Deserialize( ByteBuffer* buffer );
+			static Result Serialize( const EntityHandle& entity, ByteBuffer* buffer );
+
+			/*
+			* @brief Static method which deserializes entity data using an existing ByteBuffer
+			*/
+			static EntityHandle Deserialize( ByteBuffer* buffer );
 
 		protected:
 

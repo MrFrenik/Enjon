@@ -15,6 +15,14 @@ namespace Enjon
 
 	Result EntityArchiver::Serialize( const EntityHandle& entity )
 	{
+		// Make call to static function and return result
+		return Serialize( entity, &mBuffer );
+	} 
+
+	//==========================================================================
+
+	Result EntityArchiver::Serialize( const EntityHandle& entity, ByteBuffer* buffer )
+	{ 
 		//==========================================================================
 		// Local Transform
 		//========================================================================== 
@@ -22,20 +30,20 @@ namespace Enjon
 		Transform local = entity.Get( )->GetLocalTransform( );
 
 		// Write out position
-		mBuffer.Write< f32 >( local.Position.x );
-		mBuffer.Write< f32 >( local.Position.y );
-		mBuffer.Write< f32 >( local.Position.z ); 
+		buffer->Write< f32 >( local.Position.x );
+		buffer->Write< f32 >( local.Position.y );
+		buffer->Write< f32 >( local.Position.z );
 
 		// Write out rotation
-		mBuffer.Write< f32 >( local.Rotation.x );
-		mBuffer.Write< f32 >( local.Rotation.y );
-		mBuffer.Write< f32 >( local.Rotation.z );
-		mBuffer.Write< f32 >( local.Rotation.w );
+		buffer->Write< f32 >( local.Rotation.x );
+		buffer->Write< f32 >( local.Rotation.y );
+		buffer->Write< f32 >( local.Rotation.z );
+		buffer->Write< f32 >( local.Rotation.w );
 
 		// Write out scale
-		mBuffer.Write< f32 >( local.Scale.x );
-		mBuffer.Write< f32 >( local.Scale.y );
-		mBuffer.Write< f32 >( local.Scale.z );
+		buffer->Write< f32 >( local.Scale.x );
+		buffer->Write< f32 >( local.Scale.y );
+		buffer->Write< f32 >( local.Scale.z );
 
 		//==========================================================================
 		// Components
@@ -44,7 +52,7 @@ namespace Enjon
 		const Vector< Component* >& comps = entity.Get( )->GetComponents( );
 
 		// Write out number of comps
-		mBuffer.Write< u32 >( ( u32 )comps.size( ) );
+		buffer->Write< u32 >( ( u32 )comps.size( ) );
 
 		// Write out component data
 		for ( auto& c : comps )
@@ -53,13 +61,13 @@ namespace Enjon
 			const MetaClass* compCls = c->Class( );
 
 			// Write out component class
-			mBuffer.Write< String >( compCls->GetName( ) );
+			buffer->Write< String >( compCls->GetName( ) );
 
 			// Serialize component data
-			Result res = c->SerializeData( &mBuffer );
+			Result res = c->SerializeData( buffer );
 			if ( res == Result::INCOMPLETE )
 			{
-				SerializeObjectDataDefault( c, compCls );
+				SerializeObjectDataDefault( c, compCls, buffer );
 			}
 		}
 
@@ -70,15 +78,15 @@ namespace Enjon
 		const Vector< EntityHandle >& children = entity.Get( )->GetChildren( );
 
 		// Write out number of children 
-		mBuffer.Write< u32 >( ( u32 )children.size( ) );
+		buffer->Write< u32 >( ( u32 )children.size( ) );
 
 		// Serialize all children into buffer
 		for ( auto& c : children )
 		{
-			Serialize( c );
+			Serialize( c, buffer );
 		}
 
-		return Result::SUCCESS; 
+		return Result::SUCCESS;
 	}
 
 	//=========================================================================================
@@ -109,6 +117,7 @@ namespace Enjon
 
 	EntityHandle EntityArchiver::Deserialize( ByteBuffer* buffer )
 	{
+		// Get entity manager from engine
 		EntityManager* entities = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< EntityManager >( )->ConstCast< EntityManager >( );
 
 		// Handle to fill out
@@ -159,7 +168,7 @@ namespace Enjon
 					Result res = cmp->DeserializeData( buffer );
 					if ( res == Result::INCOMPLETE )
 					{
-						res = DeserializeObjectDataDefault( cmp, cmpCls );
+						res = DeserializeObjectDataDefault( cmp, cmpCls, buffer );
 					}
 				}
 			}
@@ -191,5 +200,18 @@ namespace Enjon
 		return handle.Get( );
 	}
 
-	//=========================================================================================
+	//========================================================================================= 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
