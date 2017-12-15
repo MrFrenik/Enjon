@@ -55,6 +55,22 @@
 
 #define ADD_ASSET_TO_PROJECT 1
 
+struct ActiveSceneWrapper
+{
+	Enjon::Vector< Enjon::EntityHandle > mEntities;
+	Enjon::Camera mCamera;
+
+	void Unload( )
+	{
+		// Need to unload all of previous scene data ( entities )
+		for ( auto& e : mEntities )
+		{
+			e.Get( )->Destroy( );
+		} 
+		mEntities.clear( );
+	}
+};
+
 Enjon::Texture* mNewTexture = nullptr;
 Enjon::Mesh* mMesh = nullptr;
 Enjon::PointLight* mPointLight = nullptr;
@@ -76,6 +92,8 @@ f32 ballSpeed = 10.0f;
 
 Enjon::Signal<f32> testSignal;
 Enjon::Property<f32> testProperty;
+
+struct ActiveSceneWrapper mActiveScene;
 
 void Game::TestObjectSerialize( )
 {
@@ -188,14 +206,6 @@ void Game::TestObjectSerialize( )
 			// Try serializing the camera Enjon::ObjectArchiver archiver;
 			archiver.Serialize( mGfx->GetSceneCamera( ) );
 			archiver.WriteToFile( am->GetCachedAssetsDirectoryPath() + "camera" ); 
-
-			Enjon::ObjectArchiver deserializeBuffer;
-			Enjon::Camera* cam = deserializeBuffer.Deserialize( am->GetCachedAssetsDirectoryPath( ) + "camera" )->ConstCast< Enjon::Camera >( );
-			if ( cam )
-			{
-				delete cam;
-				cam = nullptr;
-			}
 		}
 		if ( 0 )
 		{
@@ -292,8 +302,95 @@ void Game::TestObjectSerialize( )
 			}
 		}
 	}
-}
 
+	// Serialize active scenes
+	{
+		String sceneToLoadPath = "scene_02";
+		bool serializeScene1 = false;
+		bool serializeScene2 = false;
+		// Scene 1
+		if ( serializeScene1 )
+		{
+			Enjon::EntityHandle handle = mEntities->Allocate( );
+			auto gfxCmp = handle.Get( )->Attach( Enjon::Object::GetClass< Enjon::GraphicsComponent >( ) )->ConstCast< Enjon::GraphicsComponent >();
+			if ( gfxCmp )
+			{
+				gfxCmp->SetMesh( am->GetAsset< Enjon::Mesh >( "models.unit_cube" ) );
+				gfxCmp->SetMaterial( am->GetAsset< Enjon::Material >( "NewMaterial" ).Get() );
+			}
+			handle.Get( )->SetPosition( Enjon::Vec3( 1.0, 3.0f, 20.0f ) );
+			handle.Get( )->SetScale( Enjon::Vec3( 2.0f ) );
+			handle.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::ZAxis( ) ) );
+
+			// Push back handle
+			mActiveScene.mEntities.push_back( handle );
+			
+			// Construct camera
+			mActiveScene.mCamera = *mGfx->GetSceneCamera( );
+			mActiveScene.mCamera.SetPosition( handle.Get()->GetWorldPosition() + Enjon::Vec3( 0.0f, 5.0f, 5.0f ) );
+			mActiveScene.mCamera.LookAt( handle.Get( )->GetWorldPosition( ) ); 
+
+			ByteBuffer buffer;
+
+			// Serialize camera
+			Enjon::ObjectArchiver::Serialize( &mActiveScene.mCamera, &buffer );
+			
+			// Serialize entity data
+			buffer.Write< Enjon::u32 >( mActiveScene.mEntities.size( ) );
+			for ( auto& e : mActiveScene.mEntities )
+			{
+				Enjon::EntityArchiver::Serialize( e, &buffer );
+			}
+	
+			// Write to file
+			buffer.WriteToFile( am->GetCachedAssetsDirectoryPath( ) + "scene_01" );
+		}
+
+		// Scene 2
+		else if ( serializeScene2 )
+		{
+			Enjon::EntityHandle handle = mEntities->Allocate( );
+			auto gfxCmp = handle.Get( )->Attach( Enjon::Object::GetClass< Enjon::GraphicsComponent >( ) )->ConstCast< Enjon::GraphicsComponent >( );
+			if ( gfxCmp )
+			{
+				gfxCmp->SetMesh( am->GetAsset< Enjon::Mesh >( "models.unit_sphere" ) );
+				gfxCmp->SetMaterial( am->GetAsset< Enjon::Material >( "NewMaterial" ).Get( ) );
+			}
+			auto plCmp = handle.Get( )->Attach( Enjon::Object::GetClass< Enjon::PointLightComponent >( ) )->ConstCast< Enjon::PointLightComponent >( );
+			if ( plCmp )
+			{
+				plCmp->SetColor( Enjon::ColorRGBA32( 0.0f, 1.0f, 0.0f, 1.0f ) );
+				plCmp->SetIntensity( 1000.0f );
+				plCmp->SetRadius( 100.0f );
+			}
+			handle.Get( )->SetPosition( Enjon::Vec3( 1.0, 2.0f, -10.0f ) );
+			handle.Get( )->SetScale( Enjon::Vec3( 3.0f ) );
+
+			// Push back handle
+			mActiveScene.mEntities.push_back( handle );
+
+			// Construct camera
+			mActiveScene.mCamera = *mGfx->GetSceneCamera( );
+			mActiveScene.mCamera.SetPosition( handle.Get( )->GetWorldPosition( ) + Enjon::Vec3( 0.0f, 10.0f, 5.0f ) );
+			mActiveScene.mCamera.LookAt( handle.Get( )->GetWorldPosition( ) );
+
+			ByteBuffer buffer;
+
+			// Serialize camera
+			Enjon::ObjectArchiver::Serialize( &mActiveScene.mCamera, &buffer );
+
+			// Serialize entity data
+			buffer.Write< Enjon::u32 >( mActiveScene.mEntities.size( ) );
+			for ( auto& e : mActiveScene.mEntities )
+			{
+				Enjon::EntityArchiver::Serialize( e, &buffer );
+			}
+
+			// Write to file
+			buffer.WriteToFile( am->GetCachedAssetsDirectoryPath( ) + "scene_02" );
+		}
+	}
+}
 
 //-------------------------------------------------------------
 
@@ -890,6 +987,47 @@ Enjon::Result Game::Initialize()
 		// Docking windows
 		if (ImGui::BeginDock("Entities", &mShowEntities))
 		{
+			if ( ImGui::CollapsingHeader( "Scene##header" ) )
+			{
+				static Enjon::String sceneFilePath = "";
+				char buffer[256];
+				std::strncpy( buffer, sceneFilePath.c_str( ), 256 );
+				if ( ImGui::InputText( "Scene Path", buffer, 256 ) )
+				{
+					sceneFilePath = Enjon::String( buffer );
+				}
+
+				if ( ImGui::Button( "Load Scene..." ) )
+				{
+					const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+					Enjon::ByteBuffer buffer( am->GetCachedAssetsDirectoryPath( ) + sceneFilePath );
+					if ( buffer.GetStatus( ) == Enjon::BufferStatus::ReadyToRead )
+					{
+						// Need to unload all of previous scene data
+						mActiveScene.Unload( );
+
+						// Deserialize camera data
+						Enjon::ObjectArchiver::Deserialize( &buffer, &mActiveScene.mCamera );
+
+						// Deserialize entities
+						Enjon::u32 entityCount = buffer.Read< Enjon::u32 >( );
+						for ( Enjon::u32 i = 0; i < entityCount; ++i )
+						{
+							Enjon::EntityHandle entityHandle = Enjon::EntityArchiver::Deserialize( &buffer );
+							mActiveScene.mEntities.push_back( entityHandle );
+
+							if ( entityHandle.Get( )->HasComponent< Enjon::GraphicsComponent >( ) )
+							{
+								mGfx->GetScene( )->AddRenderable( entityHandle.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+							}
+						}
+					}
+
+					// Set the scene camera to active scene's camera
+					*mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >( ) = mActiveScene.mCamera;
+				} 
+			}
+
 			// Load camera
 			if ( ImGui::Button( "Load Camera" ) )
 			{ 

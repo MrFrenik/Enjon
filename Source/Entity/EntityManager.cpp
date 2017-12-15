@@ -84,14 +84,14 @@ namespace Enjon
 	{
 	}
 
-	// TODO(John): Take care of removing all attached components here
-	//---------------------------------------------------------------
+	//=================================================================
+
 	Entity::~Entity()
 	{
 		mManager->Destroy( GetHandle( ) );		
 	}
 
-	//---------------------------------------------------------------
+	//=================================================================
 			
 	EntityHandle Entity::GetHandle( )
 	{
@@ -99,7 +99,13 @@ namespace Enjon
 		return handle;
 	}
 
-	//---------------------------------------------------------------
+	void Entity::Destroy( )
+	{
+		mManager->Destroy( GetHandle( ) );
+	} 
+
+	//=================================================================
+
 	void Entity::Reset()
 	{
 		assert(mManager != nullptr);

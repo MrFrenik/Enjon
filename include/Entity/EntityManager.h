@@ -184,6 +184,11 @@ namespace Enjon
 			/// @brief Propagates transform down through all components
 			void UpdateComponentTransforms(f32 dt);
 
+			/*
+			* @brief
+			*/
+			void Destroy( );
+
 		protected: 
 
 			/*
