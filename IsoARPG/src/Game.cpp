@@ -185,6 +185,20 @@ void Game::TestObjectSerialize( )
 	{
 		if ( 0 )
 		{
+			// Try serializing the camera Enjon::ObjectArchiver archiver;
+			archiver.Serialize( mGfx->GetSceneCamera( ) );
+			archiver.WriteToFile( am->GetCachedAssetsDirectoryPath() + "camera" ); 
+
+			Enjon::ObjectArchiver deserializeBuffer;
+			Enjon::Camera* cam = deserializeBuffer.Deserialize( am->GetCachedAssetsDirectoryPath( ) + "camera" )->ConstCast< Enjon::Camera >( );
+			if ( cam )
+			{
+				delete cam;
+				cam = nullptr;
+			}
+		}
+		if ( 0 )
+		{
 			// Parent
 			mSerializedEntity = mEntities->Allocate( ); 
 			mSerializedEntity.Get( )->SetPosition( Vec3( -8, 3, 0 ) );

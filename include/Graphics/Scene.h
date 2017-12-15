@@ -195,21 +195,46 @@ namespace Enjon {
 			std::set<PointLight*> mPointLights;
 			std::set<SpotLight*> mSpotLights; 
 			AmbientSettings mAmbientSettings; 
-			DirectionalLight* mSun = nullptr;
-
+			DirectionalLight* mSun = nullptr; 
 
 			// Scene should own all the data for renderables, lights, etc. and should hand those out on request from components
 			// Or could have a graphics subsystem which holds all of these objects?
 			/*
 				template <typename T, typename... Args>
 				const T* GraphicsFactory::Construct( Args&&... args )
-				{
-						
+				{ 
 				}
 
 				// Should scene own its own camera? How will this work, exactly?
-			*/
 
+				// Should scene actually be an asset in and of itself? So the graphics subsystem will actually hold an asset handle to a scene as opposed to a scene itself? Not sure that I really like that approach though, since it
+					seems fairly abstracted away...
+
+				Result Scene::SerializeData( ByteBuffer* buffer )
+				{ 
+					// Camera data
+					ObjectArchiver::Serialize( &mCamera, buffer );
+
+					// Get the entity manager
+					const EntityManager* em = Engine::GetInstance()->GetSubsystemCatalog()->Get< EntityManager >();	
+
+					// Write all entity data to buffer
+					for ( auto& e : em->GetActiveEntities() )
+					{
+						// Only write out top-level entities
+						if ( !e.HasParent() )
+						{
+							EntityArchiver::Serialize( e, buffer );
+						} 
+					}
+				}
+
+				Result DeserializeData( ByteBuffer* buffer )
+				{ 
+					// Deserialize camera and create
+					Camera* cam = (Camera*)ObjectArchiver::Deserialize( buffer );
+				}
+			*/ 
 	};
 }
 

@@ -32,6 +32,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			static Result Serialize( const Object* object, ByteBuffer* buffer ); 
+
+			/*
+			* @brief
+			*/
 			Result Deserialize( const String& filePath, Vector< Object* >& out );
 
 			/*
@@ -70,19 +75,17 @@ namespace Enjon
 				return mBuffer.Read< T >( ); 
 			} 
 
+			/*
+			*@brief Takes an existing byte buffer and parses for an object - WILL NOT CALL RESET 
+			*/ 
+			static Object* Deserialize( ByteBuffer* buffer );
+
 		protected:
 
 			/*
 			*@brief
 			*/ 
-			void Reset( );
-
-		protected:
-
-			/*
-			*@brief Takes an existing byte buffer and parses for an object - WILL NOT CALL RESET 
-			*/ 
-			Object* Deserialize( ByteBuffer* buffer );
+			void Reset( ); 
 
 		public:
 			/*
@@ -94,6 +97,16 @@ namespace Enjon
 			*@brief
 			*/ 
 			Result DeserializeObjectDataDefault( const Object* object, const MetaClass* cls );
+
+			/*
+			*@brief
+			*/ 
+			static Result SerializeObjectDataDefault( const Object* object, const MetaClass* cls, ByteBuffer* buffer );
+
+			/*
+			*@brief
+			*/ 
+			static Result DeserializeObjectDataDefault( const Object* object, const MetaClass* cls, ByteBuffer* buffer );
 
 		protected:
 			ByteBuffer mBuffer;

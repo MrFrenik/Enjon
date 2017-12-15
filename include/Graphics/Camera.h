@@ -11,6 +11,8 @@
 
 namespace Enjon 
 { 
+	// TODO(): Move as many functions from this file to the source file
+
 	ENJON_ENUM( )
 	enum class ProjectionType
 	{
@@ -24,52 +26,209 @@ namespace Enjon
 		ENJON_CLASS_BODY()
 
 		public:
-			Camera();
-			Camera(u32 Width, u32 Height);
-			Camera(iVec2& dimenstions);
-			Camera(const Camera& Other) = default;
+			/*
+			* @brief Constructor
+			*/
+			Camera( );
 
+			/*
+			* @brief Constructor
+			*/
+			Camera(const u32& width, const u32& height);
+
+			/*
+			* @brief Constructor
+			*/
+			Camera(const iVec2& dimensions);
+
+			/*
+			* @brief Copy Constructor
+			*/
+			Camera(const Camera& Other);
+
+			/*
+			* @brief Destructor
+			*/
+			~Camera( ) = default;
+
+			/*
+			* @brief
+			*/
 			void LookAt(const Vec3& Position, const Vec3& Up = Vec3(0, 1, 0));
+
+			/*
+			* @brief
+			*/
 			void OffsetOrientation(const f32& Yaw, const f32& Pitch);
+
+			/*
+			* @brief
+			*/
 			Vec3 GetWorldPosition();
 
+			/*
+			* @brief
+			*/
 			Vec3 Forward() const;
+
+			/*
+			* @brief
+			*/
 			Vec3 Backward() const;
+
+			/*
+			* @brief
+			*/
 			Vec3 Right() const;
+
+			/*
+			* @brief
+			*/
 			Vec3 Left() const;
+
+			/*
+			* @brief
+			*/
 			Vec3 Up() const;
+
+			/*
+			* @brief
+			*/
 			Vec3 Down() const;
 
+			/*
+			* @brief
+			*/
 			Mat4 GetViewProjectionMatrix() const;
+
+			/*
+			* @brief
+			*/
 			Mat4 GetViewProjection() const;
+
+			/*
+			* @brief
+			*/
 			Mat4 GetProjection() const;
+
+			/*
+			* @brief
+			*/
 			Mat4 GetView() const;
-			inline Vec2 GetNearFar() const { return Vec2(NearPlane, FarPlane); }
-			inline f32 GetNear() { return NearPlane; }
-			inline f32 GetFar() { return FarPlane; }
-			const ProjectionType GetProjectionType( ) const { return ProjType;  }
-			f32 GetOrthographicScale( ) const { return OrthographicScale; }
-			f32 GetAspectRatio( ) const { return ViewPortAspectRatio; }
 
-			void SetAspectRatio( const f32& aspectRatio ) { ViewPortAspectRatio = aspectRatio; }
+			/*
+			* @brief
+			*/
+			inline Vec2 GetNearFar() const 
+			{ 
+				return Vec2( NearPlane, FarPlane );
+			}
 
-			inline void SetNearFar(float Near, float Far) { NearPlane = Near; FarPlane = Far; }
-			inline void SetProjection(ProjectionType Type) { ProjType = Type; }
-			inline void SetOrthographicScale(const float Scale) { OrthographicScale = Scale; }
-			void SetProjectionType( ProjectionType type ) { ProjType = type; }
+			/*
+			* @brief
+			*/
+			inline f32 GetNear() const
+			{ 
+				return NearPlane; 
+			}
 
-			void SetPosition(Vec3& position);
+			/*
+			* @brief
+			*/
+			inline f32 GetFar() const
+			{ 
+				return FarPlane; 
+			}
+
+			/*
+			* @brief
+			*/
+			const ProjectionType GetProjectionType( ) const 
+			{ 
+				return ProjType;  
+			}
+
+			/*
+			* @brief
+			*/
+			f32 GetOrthographicScale( ) const 
+			{ 
+				return OrthographicScale; 
+			}
+
+			/*
+			* @brief
+			*/
+			f32 GetAspectRatio( ) const 
+			{ 
+				return ViewPortAspectRatio; 
+			}
+
+			/*
+			* @brief
+			*/
+			inline void SetAspectRatio( const f32& aspectRatio ) 
+			{ 
+				ViewPortAspectRatio = aspectRatio; 
+			}
+
+			/*
+			* @brief
+			*/
+			inline void SetNearFar(const f32& near, const f32& far) 
+			{ 
+				NearPlane = near; 
+				FarPlane = far; 
+			}
+
+			/*
+			* @brief
+			*/
+			inline void SetProjection(ProjectionType type) { ProjType = type; }
+
+			/*
+			* @brief
+			*/
+			inline void SetOrthographicScale(const f32& scale) 
+			{ 
+				OrthographicScale = scale; 
+			}
+
+			/*
+			* @brief
+			*/
+			void SetProjectionType( ProjectionType type ) 
+			{ 
+				ProjType = type; 
+			}
+
+			/*
+			* @brief
+			*/
+			void SetPosition(const Vec3& position);
+
+			/*
+			* @brief
+			*/
 			Vec3 GetPosition() const 
 			{ 
 				return Transform.GetPosition(); 
 			}
 			
+			/*
+			* @brief
+			*/
 			void SetRotation( const Quaternion& q );
 
+			/*
+			* @brief
+			*/
 			Quaternion GetRotation() const 
 			{ 
 				return Transform.Rotation; 
 			}
+
+		public:
 
 			// Member variables
 			ENJON_PROPERTY()
@@ -95,7 +254,6 @@ namespace Enjon
 
 			Vec2 ScreenDimensions;
 	};
-
 }
 
 #endif
