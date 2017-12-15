@@ -233,6 +233,15 @@ namespace Enjon {
 				{ 
 					// Deserialize camera and create
 					Camera* cam = (Camera*)ObjectArchiver::Deserialize( buffer );
+
+					// Really think that the scene should hold the camera itself, or at least a series of cameras? Not sure... But for now, it'll hold one camera per scene
+					mCam = *cam; 
+					delete cam;				// Hate hate hate hate hate this... want a cleaner way of moving the data around
+					cam = nullptr;
+
+					ObjectArchiver::Deserialize( buffer, &mCam );			// This could actually work to deserialize data into a preexisting object instead of having to construct one...
+
+
 				}
 			*/ 
 	};

@@ -474,10 +474,77 @@ namespace Enjon
 		return object; 
 	}
 
+	Result ObjectArchiver::Deserialize( const String& filePath, Object* object )
+	{
+		// Reset the byte buffer
+		Reset( );
+
+		// Read contents into buffer
+		mBuffer.ReadFromFile( filePath );
+
+		// Return result from static method
+		return Deserialize( &mBuffer, object );
+	}
+
 	//=====================================================================
 
 	Result ObjectArchiver::Deserialize( const String& filePath, HashMap< const MetaClass*, Vector< Object* > >& out )
 	{
+		return Result::SUCCESS;
+	}
+
+	//=====================================================================
+
+	/*
+	*@brief Takes an existing byte buffer, parses the buffer and then fills out the object passed in using that buffer
+	*/ 
+	Result ObjectArchiver::Deserialize( ByteBuffer* buffer, Object* object )
+	{
+		// Object Header information 
+		const MetaClass* cls = Object::GetClass( buffer->Read< String >( ) );	// Read class type
+		u32 versionNumber = buffer->Read< u32 >( );								// Read version number id 
+
+		if ( cls )
+		{
+			// If nullptr, then attempt to construct the object
+			if ( object == nullptr )
+			{
+				object = cls->Construct( ); 
+
+				// Couldn't construct object after attempting
+				if ( !object )
+				{
+					delete object;
+					object = nullptr;
+					return Result::FAILURE;
+				} 
+			} 
+			// Successfully constructed, now deserialize data into it
+			else
+			{
+				Result res = object->DeserializeData( buffer );
+
+				// Default deserialization method if not object does not handle its own deserialization
+				if ( res == Result::INCOMPLETE )
+				{
+					res = DeserializeObjectDataDefault( object, cls, buffer );
+				}
+
+				// Delete object if not deserialized correctly
+				if ( res != Result::SUCCESS )
+				{
+					delete object;
+					object = nullptr;
+				}
+				// Otherwise call late init after deserializing
+				else
+				{
+					object->DeserializeLateInit( );
+				}
+			}
+		}
+
+		// Return object, either null or filled out
 		return Result::SUCCESS;
 	}
 

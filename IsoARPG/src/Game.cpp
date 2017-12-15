@@ -890,6 +890,14 @@ Enjon::Result Game::Initialize()
 		// Docking windows
 		if (ImGui::BeginDock("Entities", &mShowEntities))
 		{
+			// Load camera
+			if ( ImGui::Button( "Load Camera" ) )
+			{ 
+				const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+				Enjon::ObjectArchiver deserializeBuffer;
+				deserializeBuffer.Deserialize( am->GetCachedAssetsDirectoryPath( ) + "camera", mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >( ) );
+			}
+
 			// Load file
 			if ( ImGui::CollapsingHeader( "Load Resource" ) )
 			{

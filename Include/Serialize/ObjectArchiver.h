@@ -45,6 +45,11 @@ namespace Enjon
 			Object* Deserialize( const String& filePath );
 
 			/*
+			* @brief
+			*/
+			Result Deserialize( const String& filePath, Object* object );
+
+			/*
 			* @brief Takes in a HashMap< const MetaClass*, Vector< Object* > > and a file path to a .easset file to deserialize.
 			*			Fills the map out with vectors of objects indexed by class
 			*/
@@ -79,6 +84,11 @@ namespace Enjon
 			*@brief Takes an existing byte buffer and parses for an object - WILL NOT CALL RESET 
 			*/ 
 			static Object* Deserialize( ByteBuffer* buffer );
+
+			/*
+			*@brief Takes an existing byte buffer, parses the buffer and then fills out the object passed in using that buffer
+			*/ 
+			static Result Deserialize( ByteBuffer* bufer, Object* object );
 
 		protected:
 

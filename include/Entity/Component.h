@@ -30,6 +30,8 @@ namespace Enjon
 
 			virtual Component* AddComponent( const u32& entityId, Component* component ) = 0;
 
+			virtual Component* AddComponent( const u32& entityId ) = 0;
+
 	};
 
 	template <typename T>
@@ -40,17 +42,29 @@ namespace Enjon
 		friend Component;
 
 		public:
-			void Base() override {}
+			virtual void Base() override {}
 
 			using ComponentPtrs = Vector<T*>; 
 			using ComponentMap = HashMap<u32, T>;
 
-			Component* AddComponent( const u32& entityId, Component* component )
+			virtual Component* AddComponent( const u32& entityId, Component* component ) override
 			{
 				mComponentMap[ entityId ] = *(T*)component;
 				mComponentPtrs.push_back( &mComponentMap[ entityId ] );
 				return &mComponentMap[ entityId ];
 			} 
+
+			virtual Component* AddComponent( const u32& entityId ) override
+			{
+				// If not available then add component - otherwise return component that's already allocated
+				if ( !HasEntity( entityId ) )
+				{
+					mComponentMap[ entityId ] = T( );
+					mComponentPtrs.push_back( &mComponentMap[ entityId ] );
+				}
+
+				return &mComponentMap[ entityId ];
+			}
 
 			virtual bool HasEntity( const u32& entityID ) override
 			{

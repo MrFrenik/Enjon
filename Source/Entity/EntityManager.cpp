@@ -650,21 +650,19 @@ namespace Enjon
 		ComponentWrapperBase* base = mComponents[ compIdx ];
 
 		// Create new component and place into map
-		Component* component = (Component*)compCls->Construct( );
+		Component* component = base->AddComponent( eid );
 		component->SetEntity(entity);
 		component->SetID(compIdx);
 		component->SetBase( base );
 		component->mEntityID = entity->mID;
-		Component* cmpPtr = base->AddComponent( eid, component ); 
-		delete component;
 
 		// Set bitmask field for component
 		entity->mComponentMask |= Enjon::GetComponentBitMask( compIdx );
 
 		// Get component ptr and push back into entity components
-		entity->mComponents.push_back(cmpPtr);
+		entity->mComponents.push_back(component);
 
-		return cmpPtr;
+		return component;
 
 		// Otherwise the entity already has the component
 		assert(false);
