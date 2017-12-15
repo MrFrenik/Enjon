@@ -482,8 +482,15 @@ namespace Enjon
 		// Read contents into buffer
 		mBuffer.ReadFromFile( filePath );
 
-		// Return result from static method
-		return Deserialize( &mBuffer, object );
+		if ( mBuffer.GetStatus( ) == BufferStatus::ReadyToRead )
+		{
+			// Return result from static method
+			return Deserialize( &mBuffer, object ); 
+		}
+		else
+		{
+			return Result::FAILURE;
+		}
 	}
 
 	//=====================================================================
