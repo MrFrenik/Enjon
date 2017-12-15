@@ -218,6 +218,8 @@ namespace Enjon {
 					// Get the entity manager
 					const EntityManager* em = Engine::GetInstance()->GetSubsystemCatalog()->Get< EntityManager >();	
 
+					buffer->Write< u32 >( em->GetActiveEntities().size() );
+
 					// Write all entity data to buffer
 					for ( auto& e : em->GetActiveEntities() )
 					{
@@ -231,17 +233,16 @@ namespace Enjon {
 
 				Result DeserializeData( ByteBuffer* buffer )
 				{ 
-					// Deserialize camera and create
-					Camera* cam = (Camera*)ObjectArchiver::Deserialize( buffer );
+					// Deserialize camera data
+					ObjectArchiver::Deserialize( buffer, &mCam );
 
-					// Really think that the scene should hold the camera itself, or at least a series of cameras? Not sure... But for now, it'll hold one camera per scene
-					mCam = *cam; 
-					delete cam;				// Hate hate hate hate hate this... want a cleaner way of moving the data around
-					cam = nullptr;
+					// Deserialize entity data 
+					u32 entityCount = buffer->Read< u32 >();
 
-					ObjectArchiver::Deserialize( buffer, &mCam );			// This could actually work to deserialize data into a preexisting object instead of having to construct one...
-
-
+					for ( u32 i = 0; i < entityCount; ++i )
+					{
+						EntityArchiver::Deserialize( buffer );
+					} 
 				}
 			*/ 
 	};
