@@ -32,6 +32,7 @@ namespace Enjon
 
 			virtual Component* AddComponent( const u32& entityId ) = 0;
 
+			virtual void RemoveComponent( const u32& entityId ) = 0; 
 	};
 
 	template <typename T>
@@ -64,6 +65,13 @@ namespace Enjon
 				}
 
 				return &mComponentMap[ entityId ];
+			} 
+
+			virtual void RemoveComponent( const u32& entityId ) override
+			{
+				if ( HasEntity( entityId ) )
+				{ 
+				}
 			}
 
 			virtual bool HasEntity( const u32& entityID ) override

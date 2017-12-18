@@ -98,16 +98,16 @@ namespace Enjon
 
 			/// @brief Attaches component to entity, if exists
 			template <typename T>
-			T* Attach();
+			T* AddComponent();
 
 			/*
 			* @brief
 			*/
-			Component* Attach( const MetaClass* compCls );
+			Component* AddComponent( const MetaClass* compCls );
 
 			/// @brief Detaches component from entity, if exists
 			template <typename T>
-			void Detach();
+			void RemoveComponent();
 
 			/// @brief Sets local transform of entity
 			void SetLocalTransform(Transform& transform);
@@ -157,13 +157,13 @@ namespace Enjon
 			void AddChild(const EntityHandle& child);
 
 			/// @brief Removes child from entity, if exists
-			void DetachChild(const EntityHandle& child );	
+			void DetachChild(const EntityHandle& child, bool deferRemovalFromList = false );	
 
 			/// @brief Sets parent of entity, if one doesn't already exist
 			void SetParent(const EntityHandle& parent);
 
 			/// @brief Removes parent from entity, if one exists
-			void RemoveParent( );
+			void RemoveParent( bool deferRemovalFromList = false );
 			
 			/// @brief 
 			EntityHandle GetHandle( );
@@ -321,18 +321,18 @@ namespace Enjon
 			*@brief
 			*/
 			template <typename T>
-			T* Attach(const Enjon::EntityHandle& entity);
+			T* AddComponent(const Enjon::EntityHandle& entity);
 
 			/**
 			*@brief
 			*/
-			Component* Attach( const MetaClass* compCls, const Enjon::EntityHandle& handle );
+			Component* AddComponent( const MetaClass* compCls, const Enjon::EntityHandle& handle );
 
 			/**
 			*@brief
 			*/
 			template <typename T>
-			void Detach(Entity* entity);
+			void RemoveComponent(Entity* entity);
 
 			/**
 			*@brief
@@ -368,7 +368,7 @@ namespace Enjon
 			*@brief
 			*/
 			template <typename T>
-			void RemoveComponent(Entity* entity);
+			void DetachComponentFromEntity(Entity* entity);
 
 			/**
 			*@brief

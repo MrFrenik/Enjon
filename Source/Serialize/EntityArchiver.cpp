@@ -162,7 +162,7 @@ namespace Enjon
 			if ( cmpCls )
 			{
 				// Attach new component to entity using MetaClass
-				Component* cmp = handle.Get( )->Attach( cmpCls );
+				Component* cmp = handle.Get( )->AddComponent( cmpCls );
 				if ( cmp )
 				{
 					Result res = cmp->DeserializeData( buffer );

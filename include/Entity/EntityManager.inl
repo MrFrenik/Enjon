@@ -20,7 +20,7 @@ std::vector<T>* EntityManager::GetComponentList()
 //--------------------------------------------------------------------------
 
 template <typename T>
-T* EntityManager::Attach(const Enjon::EntityHandle& handle)
+T* EntityManager::AddComponent(const Enjon::EntityHandle& handle)
 {
 	Enjon::Entity* entity = handle.Get( );
 
@@ -71,13 +71,13 @@ T* EntityManager::Attach(const Enjon::EntityHandle& handle)
 
 //--------------------------------------------------------------------------
 template <typename T>
-void EntityManager::Detach(Entity* entity)
+void EntityManager::RemoveComponent(Entity* entity)
 {
 	// Check to make sure isn't already attached to this entity
 	assert(entity->HasComponent<T>());
 
 	// Remove component from entity manager components
-	RemoveComponent<T>(entity);
+	DetachComponentFromEntity<T>(entity);
 
 	// Set bitmask field for component
 	entity->mComponentMask ^= Enjon::GetComponentBitMask<T>();
@@ -113,9 +113,10 @@ T* EntityManager::GetComponent(Entity* entity)
 	return nullptr;
 }
 
-//--------------------------------------------------------------------------
+//=======================================================================================
+
 template <typename T>
-void EntityManager::RemoveComponent(Entity* entity)
+void EntityManager::DetachComponentFromEntity(Entity* entity)
 {
 	u32 idx = Enjon::GetComponentType<T>();
 	assert(mComponents.at(idx) != nullptr);
@@ -136,3 +137,22 @@ void EntityManager::RemoveComponent(Entity* entity)
 	// Finally remove from map
 	cMap->erase(entity->mID);
 }
+
+//=======================================================================================
+
+template <typename T>
+T* Entity::AddComponent( )
+{
+	return mManager->AddComponent< T >( GetHandle( ) );
+}
+
+//=======================================================================================
+
+
+
+
+
+
+
+
+

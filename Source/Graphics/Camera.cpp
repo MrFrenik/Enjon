@@ -29,6 +29,13 @@ namespace Enjon
 
 	//=======================================================================================================
 
+	Camera::Camera( const Camera& Other )
+		: ViewPortAspectRatio( Other.ViewPortAspectRatio ), ScreenDimensions( Other.ScreenDimensions ), Transform( Other.Transform )
+	{ 
+	}
+
+	//=======================================================================================================
+
 	void Camera::SetPosition(const Vec3& position)
 	{
 		Transform.Position = position;

@@ -118,9 +118,11 @@ namespace Enjon
 			Enjon::Entity* e = c.Get( );
 			if ( e )
 			{
-				e ->RemoveParent( ); 
+				// Remove but don't remove from list just yet since we're iterating it
+				e ->RemoveParent( true ); 
+
 			}
-		}
+		} 
 
 		mID = MAX_ENTITIES;
 		mState = EntityState::INACTIVE;
@@ -144,9 +146,9 @@ namespace Enjon
 
 	//====================================================================================================
 
-	Component* Entity::Attach( const MetaClass* compCls )
+	Component* Entity::AddComponent( const MetaClass* compCls )
 	{
-		return mManager->Attach( compCls, GetHandle() );
+		return mManager->AddComponent( compCls, GetHandle() );
 	}
 
 	//====================================================================================================
@@ -334,20 +336,22 @@ namespace Enjon
 	}
 
 	//-----------------------------------------
-	void Entity::DetachChild( const EntityHandle& child )
+	void Entity::DetachChild( const EntityHandle& child, bool deferRemovalFromList )
 	{
 		// Make sure child exists
 		assert( mManager != nullptr );
 
 		// Find and erase
-		mChildren.erase( std::remove( mChildren.begin(), mChildren.end(), child ), mChildren.end() ); 
+		if ( !deferRemovalFromList )
+		{
+			mChildren.erase( std::remove( mChildren.begin(), mChildren.end(), child ), mChildren.end() ); 
+		}
 
 		// Recalculate world transform of child
 		child.Get( )->CalculateWorldTransform();
 
-		// Set parent to nullptr
-		child.Get( )->mParent = nullptr;
-
+		// Set parent to invalid entity handle
+		child.Get( )->mParent = EntityHandle( ); 
 	} 
 
 	//-----------------------------------------
@@ -367,7 +371,7 @@ namespace Enjon
 	}
 
 	//-----------------------------------------
-	void Entity::RemoveParent( )
+	void Entity::RemoveParent( bool deferRemovalFromList )
 	{ 
 		// No need to remove if nullptr
 		if ( mParent.Get( ) == nullptr )
@@ -376,10 +380,7 @@ namespace Enjon
 		}
 
 		// Remove child from parent
-		mParent.Get( )->DetachChild( GetHandle( ) ); 
-
-		// Set parent to nullptr
-		mParent = nullptr; 
+		mParent.Get( )->DetachChild( GetHandle( ), deferRemovalFromList ); 
 	}
 
 	//---------------------------------------------------------------
@@ -602,15 +603,15 @@ namespace Enjon
 	//==================================================================================================
 
 	void EntityManager::Update( const f32 dt )
-	{
-		// Clean any entities that were marked for destruction
-		Cleanup( );
-
+	{ 
 		// Update all components on entities
 		for ( auto& e : mActiveEntities )
 		{
 			e->Update( dt );
 		}
+
+		// Clean any entities that were marked for destruction
+		Cleanup( );
 	}
 
 	//==================================================================================================
@@ -637,7 +638,7 @@ namespace Enjon
 
 	//========================================================================================================================
 
-	Component* EntityManager::Attach( const MetaClass* compCls, const Enjon::EntityHandle& handle )
+	Component* EntityManager::AddComponent( const MetaClass* compCls, const Enjon::EntityHandle& handle )
 	{
 		// Get type id from component class
 		u32 compIdx = compCls->GetTypeId( );

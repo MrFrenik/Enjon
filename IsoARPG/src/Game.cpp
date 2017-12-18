@@ -61,12 +61,21 @@ struct ActiveSceneWrapper
 	Enjon::Camera mCamera;
 
 	void Unload( )
-	{
-		// Need to unload all of previous scene data ( entities )
+	{ 
+		// Deallocate entities after writing
 		for ( auto& e : mEntities )
 		{
-			e.Get( )->Destroy( );
+			// Have to destroy children first as well...
+			for ( auto& c : e.Get( )->GetChildren( ) )
+			{
+				c.Get( )->Destroy( ); 
+			}
+
+			// Destroy entity
+			e.Get( )->Destroy( ); 
 		} 
+
+		// Clear entities
 		mEntities.clear( );
 	}
 };
@@ -177,7 +186,7 @@ void Game::TestObjectSerialize( )
 	}
 
 	{
-		if ( 1 )
+		if ( 0 )
 		{
 			// A way to construct new types of objects - Will be given all default parameters when constructed - NEEDS TO GO THROUGH FACTORY FOR THIS EVENTUALLY
 			Enjon::AssetHandle< Enjon::Material > newMat = am->ConstructAsset< Enjon::Material >( ); 
@@ -193,6 +202,36 @@ void Game::TestObjectSerialize( )
 			const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.paintpeeling.metallic" ) );
 			const_cast< Material* >( deserializedMat.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.paintpeeling.roughness" ) );
 			deserializedMat.Save( ); 
+		}
+		Enjon::AssetHandle< Enjon::Material > newMat1 = am->GetAsset< Enjon::Material >( "NewMaterial1" );
+		if ( 1 )
+		{
+			newMat1.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
+			const_cast< Material* >( newMat1.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.mahogfloor.albedo" ) );
+			const_cast< Material* >( newMat1.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.mahogfloor.normal" ) ); 
+			const_cast< Material* >( newMat1.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.mixedmoss.metallic" ) );
+			const_cast< Material* >( newMat1.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.mahogfloor.roughness" ) );
+			newMat1.Save( ); 
+		}
+		Enjon::AssetHandle< Enjon::Material > newMat2 = am->GetAsset< Enjon::Material >( "NewMaterial2" );
+		if ( 1 )
+		{
+			newMat2.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
+			const_cast< Material* >( newMat2.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.scuffedgold.albedo" ) );
+			const_cast< Material* >( newMat2.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "textures.toy_box_normal" ) ); 
+			const_cast< Material* >( newMat2.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.scuffedgold.metallic" ) );
+			const_cast< Material* >( newMat2.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.scuffedgold.roughness" ) );
+			newMat2.Save( ); 
+		}
+		Enjon::AssetHandle< Enjon::Material > newMat3 = am->GetAsset< Enjon::Material >( "NewMaterial3" );
+		if ( 1 )
+		{
+			newMat3.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
+			const_cast< Material* >( newMat3.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.mixedmoss.albedo" ) );
+			const_cast< Material* >( newMat3.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.mixedmoss.normal" ) ); 
+			const_cast< Material* >( newMat3.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.mixedmoss.metallic" ) );
+			const_cast< Material* >( newMat3.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.mixedmoss.roughness" ) );
+			newMat3.Save( ); 
 		}
 
 		// Set gun material
@@ -214,8 +253,8 @@ void Game::TestObjectSerialize( )
 			mSerializedEntity.Get( )->SetPosition( Vec3( -8, 3, 0 ) );
 			mSerializedEntity.Get( )->SetRotation( Quaternion::AngleAxis( ToRadians( 20.0f ), Vec3::XAxis( ) ) );
 			mSerializedEntity.Get( )->SetScale( 0.5f );
-			auto gfxCmp = mSerializedEntity.Get( )->Attach< GraphicsComponent >( );
-			auto plCmp = mSerializedEntity.Get( )->Attach< PointLightComponent >( );
+			auto gfxCmp = mSerializedEntity.Get( )->AddComponent< GraphicsComponent >( );
+			auto plCmp = mSerializedEntity.Get( )->AddComponent< PointLightComponent >( );
 			plCmp->SetColor( ColorRGBA32( 1.0f, 0.0f, 0.0f, 1.0f ) );
 			plCmp->SetIntensity( 30.0f );
 			plCmp->SetRadius( 50.0f );
@@ -224,7 +263,7 @@ void Game::TestObjectSerialize( )
 
 			// Child
 			EntityHandle child = mEntities->Allocate( );
-			auto childGfx = child.Get( )->Attach< GraphicsComponent >( );
+			auto childGfx = child.Get( )->AddComponent< GraphicsComponent >( );
 			childGfx->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
 			childGfx->SetMesh( am->GetAsset< Mesh >( "models.monkey" ) );
 			mSerializedEntity.Get( )->AddChild( child );
@@ -232,14 +271,14 @@ void Game::TestObjectSerialize( )
 
 			// Other children
 			EntityHandle child0 = mEntities->Allocate( );
-			auto child0Gfx = child0.Get( )->Attach< GraphicsComponent >( );
+			auto child0Gfx = child0.Get( )->AddComponent< GraphicsComponent >( );
 			child0Gfx->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
 			child0Gfx->SetMesh( am->GetAsset< Mesh >( "models.monkey" ) );
 			child.Get( )->AddChild( child0 );
 			child0.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( -2, 2, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.75f ) ) ); 
 
 			EntityHandle child1 = mEntities->Allocate( );
-			auto child1Gfx = child1.Get( )->Attach< GraphicsComponent >( );
+			auto child1Gfx = child1.Get( )->AddComponent< GraphicsComponent >( );
 			child1Gfx->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
 			child1Gfx->SetMesh( am->GetAsset< Mesh >( "models.monkey" ) );
 			child.Get( )->AddChild( child1 );
@@ -305,58 +344,82 @@ void Game::TestObjectSerialize( )
 
 	// Serialize active scenes
 	{
-		String sceneToLoadPath = "scene_02";
-		bool serializeScene1 = false;
-		bool serializeScene2 = false;
+		bool serializeScene1 = true;
+		bool serializeScene2 = true;
+
 		// Scene 1
 		if ( serializeScene1 )
 		{
 			Enjon::EntityHandle handle = mEntities->Allocate( );
-			auto gfxCmp = handle.Get( )->Attach( Enjon::Object::GetClass< Enjon::GraphicsComponent >( ) )->ConstCast< Enjon::GraphicsComponent >();
+			auto gfxCmp = handle.Get( )->AddComponent( Enjon::Object::GetClass< Enjon::GraphicsComponent >( ) )->ConstCast< Enjon::GraphicsComponent >();
 			if ( gfxCmp )
 			{
 				gfxCmp->SetMesh( am->GetAsset< Enjon::Mesh >( "models.unit_cube" ) );
-				gfxCmp->SetMaterial( am->GetAsset< Enjon::Material >( "NewMaterial" ).Get() );
+				gfxCmp->SetMaterial( am->GetAsset< Enjon::Material >( "NewMaterial2" ).Get() );
 			}
-			handle.Get( )->SetPosition( Enjon::Vec3( 1.0, 3.0f, 20.0f ) );
+			handle.Get( )->SetPosition( Enjon::Vec3( 1.0, 3.0f, -10.0f ) );
 			handle.Get( )->SetScale( Enjon::Vec3( 2.0f ) );
 			handle.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::ZAxis( ) ) );
 
-			// Push back handle
-			mActiveScene.mEntities.push_back( handle );
+			Enjon::EntityHandle child = mEntities->Allocate( );
+			auto childGfxCmp = child.Get( )->AddComponent< Enjon::GraphicsComponent >( );
+			if ( childGfxCmp )
+			{
+				childGfxCmp->SetMesh( am->GetAsset< Enjon::Mesh >( "models.unit_sphere" ) );
+				childGfxCmp->SetMaterial( am->GetAsset< Enjon::Material >( "NewMaterial1" ).Get( ) );
+			}
+			handle.Get( )->AddChild( child );
+			child.Get( )->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 0.0f, 2.0f, 0.0f ), Enjon::Quaternion( ), Enjon::Vec3( 0.25f ) ) );
+
+			// Push back top-level entities
+			Enjon::Vector< Enjon::EntityHandle > entityHandles; 
+			entityHandles.push_back( handle );
 			
 			// Construct camera
-			mActiveScene.mCamera = *mGfx->GetSceneCamera( );
-			mActiveScene.mCamera.SetPosition( handle.Get()->GetWorldPosition() + Enjon::Vec3( 0.0f, 5.0f, 5.0f ) );
-			mActiveScene.mCamera.LookAt( handle.Get( )->GetWorldPosition( ) ); 
+			Enjon::Camera cam = *mGfx->GetSceneCamera( );
+			cam.SetPosition( Enjon::Vec3( 5.425f, 7.267f, -6.224f ) );
+			cam.LookAt( handle.Get( )->GetWorldPosition( ) ); 
 
 			ByteBuffer buffer;
 
 			// Serialize camera
-			Enjon::ObjectArchiver::Serialize( &mActiveScene.mCamera, &buffer );
+			Enjon::ObjectArchiver::Serialize( &cam, &buffer );
 			
 			// Serialize entity data
-			buffer.Write< Enjon::u32 >( mActiveScene.mEntities.size( ) );
-			for ( auto& e : mActiveScene.mEntities )
+			buffer.Write< Enjon::u32 >( entityHandles.size() );
+			for ( auto& e : entityHandles )
 			{
 				Enjon::EntityArchiver::Serialize( e, &buffer );
 			}
 	
 			// Write to file
 			buffer.WriteToFile( am->GetCachedAssetsDirectoryPath( ) + "scene_01" );
+
+			// Deallocate entities after writing
+			// Have to destroy children first as well...
+			for ( auto& e : entityHandles )
+			{
+				for ( auto& c : e.Get( )->GetChildren( ) )
+				{
+					c.Get( )->Destroy( ); 
+				}
+
+				// Destroy entity
+				e.Get( )->Destroy( ); 
+			}
 		}
 
 		// Scene 2
-		else if ( serializeScene2 )
+		if ( serializeScene2 )
 		{
 			Enjon::EntityHandle handle = mEntities->Allocate( );
-			auto gfxCmp = handle.Get( )->Attach( Enjon::Object::GetClass< Enjon::GraphicsComponent >( ) )->ConstCast< Enjon::GraphicsComponent >( );
+			auto gfxCmp = handle.Get( )->AddComponent( Enjon::Object::GetClass< Enjon::GraphicsComponent >( ) )->ConstCast< Enjon::GraphicsComponent >( );
 			if ( gfxCmp )
 			{
 				gfxCmp->SetMesh( am->GetAsset< Enjon::Mesh >( "models.unit_sphere" ) );
-				gfxCmp->SetMaterial( am->GetAsset< Enjon::Material >( "NewMaterial" ).Get( ) );
+				gfxCmp->SetMaterial( am->GetAsset< Enjon::Material >( "NewMaterial3" ).Get( ) );
 			}
-			auto plCmp = handle.Get( )->Attach( Enjon::Object::GetClass< Enjon::PointLightComponent >( ) )->ConstCast< Enjon::PointLightComponent >( );
+			auto plCmp = handle.Get( )->AddComponent( Enjon::Object::GetClass< Enjon::PointLightComponent >( ) )->ConstCast< Enjon::PointLightComponent >( );
 			if ( plCmp )
 			{
 				plCmp->SetColor( Enjon::ColorRGBA32( 0.0f, 1.0f, 0.0f, 1.0f ) );
@@ -366,28 +429,34 @@ void Game::TestObjectSerialize( )
 			handle.Get( )->SetPosition( Enjon::Vec3( 1.0, 2.0f, -10.0f ) );
 			handle.Get( )->SetScale( Enjon::Vec3( 3.0f ) );
 
-			// Push back handle
-			mActiveScene.mEntities.push_back( handle );
-
+			Enjon::Vector< Enjon::EntityHandle > entityHandles; 
+			entityHandles.push_back( handle );
+			
 			// Construct camera
-			mActiveScene.mCamera = *mGfx->GetSceneCamera( );
-			mActiveScene.mCamera.SetPosition( handle.Get( )->GetWorldPosition( ) + Enjon::Vec3( 0.0f, 10.0f, 5.0f ) );
-			mActiveScene.mCamera.LookAt( handle.Get( )->GetWorldPosition( ) );
+			Enjon::Camera cam = *mGfx->GetSceneCamera( );
+			cam.SetPosition( Enjon::Vec3( -3.9f, 6.2f, -4.6f ) );
+			cam.LookAt( handle.Get( )->GetWorldPosition( ) ); 
 
 			ByteBuffer buffer;
 
 			// Serialize camera
-			Enjon::ObjectArchiver::Serialize( &mActiveScene.mCamera, &buffer );
-
+			Enjon::ObjectArchiver::Serialize( &cam, &buffer );
+			
 			// Serialize entity data
-			buffer.Write< Enjon::u32 >( mActiveScene.mEntities.size( ) );
-			for ( auto& e : mActiveScene.mEntities )
+			buffer.Write< Enjon::u32 >( entityHandles.size() );
+			for ( auto& e : entityHandles )
 			{
 				Enjon::EntityArchiver::Serialize( e, &buffer );
 			}
-
+	
 			// Write to file
 			buffer.WriteToFile( am->GetCachedAssetsDirectoryPath( ) + "scene_02" );
+
+			// Deallocate entities after writing
+			for ( auto& e : entityHandles )
+			{
+				e.Get( )->Destroy( );
+			}
 		}
 	}
 }
@@ -665,15 +734,14 @@ Enjon::Result Game::Initialize()
 	mGun = mEntities->Allocate( );
 	mRock = mEntities->Allocate( );
 	mRock2 = mEntities->Allocate( );
-	Enjon::GraphicsComponent* rgc = mRock.Get( )->Attach( Enjon::Object::GetClass< Enjon::GraphicsComponent >( ) )->ConstCast< Enjon::GraphicsComponent >( );
-	//auto rgc = mRock.Get( )->Attach< Enjon::GraphicsComponent >( );
-	auto rgc2 = mRock2.Get( )->Attach< Enjon::GraphicsComponent >( );
-	auto gc = mGun.Get()->Attach<Enjon::GraphicsComponent>(); 
-	auto pc = mGun.Get()->Attach<Enjon::PointLightComponent>(); 
+	Enjon::GraphicsComponent* rgc = mRock.Get( )->AddComponent( Enjon::Object::GetClass< Enjon::GraphicsComponent >( ) )->ConstCast< Enjon::GraphicsComponent >( );
+	auto rgc2 = mRock2.Get( )->AddComponent< Enjon::GraphicsComponent >( );
+	auto gc = mGun.Get()->AddComponent<Enjon::GraphicsComponent>(); 
+	auto pc = mGun.Get()->AddComponent<Enjon::PointLightComponent>(); 
 
-	mRed.Get()->Attach< Enjon::GraphicsComponent >( );
-	mGreen.Get()->Attach< Enjon::GraphicsComponent >( );
-	mBlue.Get()->Attach< Enjon::GraphicsComponent >( );
+	mRed.Get()->AddComponent< Enjon::GraphicsComponent >( );
+	mGreen.Get()->AddComponent< Enjon::GraphicsComponent >( );
+	mBlue.Get()->AddComponent< Enjon::GraphicsComponent >( );
 
 	pc->GetLight( )->SetPosition( Enjon::Vec3( 10.0f, 2.0f, 4.0f ) );
 	pc->GetLight( )->SetIntensity( 20.0f );
@@ -835,7 +903,7 @@ Enjon::Result Game::Initialize()
 		{ 
 			// Make new entity
 			Enjon::EntityHandle eh = mEntities->Allocate( );
-			auto gfxcmp = eh.Get( )->Attach< Enjon::GraphicsComponent >( ); 
+			auto gfxcmp = eh.Get( )->AddComponent< Enjon::GraphicsComponent >( ); 
 			Enjon::Material* mat = new Enjon::Material( );
 			mat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetDefaultAsset< Enjon::Texture >( ) );
 			mat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >( "materials.scuffedgold.normal" ) );
@@ -1019,6 +1087,14 @@ Enjon::Result Game::Initialize()
 							if ( entityHandle.Get( )->HasComponent< Enjon::GraphicsComponent >( ) )
 							{
 								mGfx->GetScene( )->AddRenderable( entityHandle.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+
+								for ( auto& c : entityHandle.Get( )->GetChildren( ) )
+								{
+									if ( c.Get( )->HasComponent< Enjon::GraphicsComponent >( ) )
+									{
+										mGfx->GetScene( )->AddRenderable( c.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+									}
+								}
 							}
 						}
 					}
@@ -1591,7 +1667,7 @@ Enjon::Result Game::ProcessInput( f32 dt )
 
 			Enjon::EntityHandle handle = mEntities->Allocate( );
 			Enjon::Entity* ent = handle.Get( );
-			Enjon::GraphicsComponent* gc = ent->Attach<Enjon::GraphicsComponent>();
+			Enjon::GraphicsComponent* gc = ent->AddComponent<Enjon::GraphicsComponent>();
 			ent->SetScale(v3(scalar));
 			gc->SetMesh(mSphereMesh);
 
