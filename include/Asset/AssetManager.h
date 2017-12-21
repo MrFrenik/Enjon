@@ -80,7 +80,7 @@ namespace Enjon
 			* @brief Creates a new asset of given type, adds it into the database and returns a handle it
 			*/
 			template <typename T>
-			AssetHandle< T > ConstructAsset( );
+			AssetHandle< T > ConstructAsset( const String& assetName = "" );
 
 			/**
 			*@brief Gets asset manager name

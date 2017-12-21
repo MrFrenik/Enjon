@@ -186,10 +186,20 @@ void Game::TestObjectSerialize( )
 	}
 
 	{
-		if ( 0 )
+		// A way to construct new types of objects - Will be given all default parameters when constructed - NEEDS TO GO THROUGH FACTORY FOR THIS EVENTUALLY
+		// Will not construct if named asset already exists in loader - will return asset with that name
+		Enjon::AssetHandle< Enjon::Material > newMat = am->ConstructAsset< Enjon::Material >( "NewMaterial" ); 
+
+		// Construct cerebus material and save
+		Enjon::AssetHandle< Enjon::Material > cerebusMat = am->ConstructAsset< Enjon::Material >( "CerebusMaterial" ); 
+		if ( 1 )
 		{
-			// A way to construct new types of objects - Will be given all default parameters when constructed - NEEDS TO GO THROUGH FACTORY FOR THIS EVENTUALLY
-			Enjon::AssetHandle< Enjon::Material > newMat = am->ConstructAsset< Enjon::Material >( ); 
+			cerebusMat.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
+			const_cast< Material* >( cerebusMat.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.albedo" ) );
+			const_cast< Material* >( cerebusMat.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.normal" ) ); 
+			const_cast< Material* >( cerebusMat.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.metallic" ) );
+			const_cast< Material* >( cerebusMat.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.roughness" ) );
+			cerebusMat.Save( ); 
 		}
 
 		// Get material of name "NewMaterial"
@@ -227,15 +237,15 @@ void Game::TestObjectSerialize( )
 		if ( 1 )
 		{
 			newMat3.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
-			const_cast< Material* >( newMat3.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.mixedmoss.albedo" ) );
-			const_cast< Material* >( newMat3.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.mixedmoss.normal" ) ); 
-			const_cast< Material* >( newMat3.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.mixedmoss.metallic" ) );
-			const_cast< Material* >( newMat3.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.mixedmoss.roughness" ) );
+			const_cast< Material* >( newMat3.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.harshbricks.albedo" ) );
+			const_cast< Material* >( newMat3.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.harshbricks.normal" ) ); 
+			const_cast< Material* >( newMat3.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.harshbricks.metallic" ) );
+			const_cast< Material* >( newMat3.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.harshbricks.roughness" ) );
 			newMat3.Save( ); 
 		}
 
 		// Set gun material
-		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMaterial( deserializedMat.Get( ) );
+		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMaterial( cerebusMat.Get( ) );
 	}
 
 	// Serialize / Deserialize entity information
@@ -344,8 +354,8 @@ void Game::TestObjectSerialize( )
 
 	// Serialize active scenes
 	{
-		bool serializeScene1 = true;
-		bool serializeScene2 = true;
+		bool serializeScene1 = false;
+		bool serializeScene2 = false;
 
 		// Scene 1
 		if ( serializeScene1 )

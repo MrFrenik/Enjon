@@ -117,16 +117,21 @@ const AssetLoader* AssetManager::GetLoaderByAssetType( ) const
 //================================================================================================ 
 
 template <typename T>
-AssetHandle< T > AssetManager::ConstructAsset( )
+AssetHandle< T > AssetManager::ConstructAsset( const String& assetName )
 { 
 	// Get the asset loader
 	const AssetLoader* loader = GetLoaderByAssetType< T >( );
 
 	// Construct new asset and get handle to it
-	AssetHandle< T > handle = const_cast< AssetLoader* >( loader )->ConstructAsset< T >( this );
+	AssetHandle< T  > handle;
+	Result res = loader->ConstCast< AssetLoader >( )->ConstructAsset< T >( this, &handle, assetName );
 
-	// Serialize the asset to file
-	SerializeAsset( handle.Get( ) );
+	// If successfully constructed, then serialize newly constructed asset
+	if ( res == Result::INCOMPLETE )
+	{
+		// Serialize the asset to file
+		SerializeAsset( handle.Get( ) ); 
+	}
 
 	return handle; 
 }

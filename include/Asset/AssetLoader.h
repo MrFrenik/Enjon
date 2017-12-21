@@ -160,8 +160,15 @@ namespace Enjon
 			} 
 
 			template < typename T >
-			AssetHandle< T > ConstructAsset( const AssetManager* manager )
+			Result ConstructAsset( const AssetManager* manager, AssetHandle< T >* handle, const String& assetName = "" )
 			{
+				// Make sure that asset with that name doesn't exist already
+				if ( Exists( assetName ) )
+				{
+					handle->Set( GetAsset( assetName ) );
+					return Result::SUCCESS;
+				}
+
 				// Construct new asset
 				T* asset = new T( ); 
 				// Copy values from default asset
@@ -169,11 +176,11 @@ namespace Enjon
 
 				// Construct unique name for asset to be saved
 				String typeName = asset->Class( )->GetName( ); 
-				String originalAssetName = "New" + typeName;
-				String assetName = originalAssetName; 
+				String originalAssetName = assetName.compare("") == 0 ? assetName : "New" + typeName;
+				String usedAssetName = originalAssetName;
 
 				// TODO(): MAKE THIS GO THROUGH A CENTRALIZED GRAPHICS FACTORY
-				std::experimental::filesystem::path originalPath = manager->GetAssetsDirectoryPath() + "Cache/New" + typeName;
+				std::experimental::filesystem::path originalPath = manager->GetAssetsDirectoryPath() + "Cache/" + usedAssetName;
 				std::experimental::filesystem::path p = originalPath.string() + ".easset";
 
 				// Look for cached asset based on name and continue until name is unique
@@ -182,14 +189,14 @@ namespace Enjon
 				{
 					index++;
 					p = std::experimental::filesystem::path( originalPath.string() + std::to_string( index ) + ".easset" );
-					assetName = originalAssetName + std::to_string( index );
+					usedAssetName = originalAssetName + std::to_string( index );
 				} 
 
 				//====================================================================================
 				// Asset header information
 				//====================================================================================
 				AssetRecordInfo info;
-				asset->mName = assetName;
+				asset->mName = usedAssetName;
 				asset->mLoader = this;
 				asset->mUUID = UUID::GenerateUUID( ); 
 				asset->mFilePath = p.string( );
@@ -203,8 +210,11 @@ namespace Enjon
 				// Add to loader
 				const Asset* cnstAsset = AddToAssets( info ); 
 
-				// Return asset handle with asset
-				return AssetHandle< T >( cnstAsset ); 
+				// Set handle with new asset
+				handle->Set( cnstAsset );
+
+				// Return incomplete so that manager knows to serialize asset
+				return Result::INCOMPLETE;
 			}
 
 			/**
