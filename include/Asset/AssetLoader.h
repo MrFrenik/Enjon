@@ -176,7 +176,7 @@ namespace Enjon
 
 				// Construct unique name for asset to be saved
 				String typeName = asset->Class( )->GetName( ); 
-				String originalAssetName = assetName.compare("") == 0 ? assetName : "New" + typeName;
+				String originalAssetName = assetName.compare("") != 0 ? assetName : "New" + typeName;
 				String usedAssetName = originalAssetName;
 
 				// TODO(): MAKE THIS GO THROUGH A CENTRALIZED GRAPHICS FACTORY

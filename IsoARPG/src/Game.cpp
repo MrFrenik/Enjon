@@ -194,58 +194,54 @@ void Game::TestObjectSerialize( )
 		Enjon::AssetHandle< Enjon::Material > cerebusMat = am->ConstructAsset< Enjon::Material >( "CerebusMaterial" ); 
 		if ( 1 )
 		{
-			cerebusMat.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
-			const_cast< Material* >( cerebusMat.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.albedo" ) );
-			const_cast< Material* >( cerebusMat.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.normal" ) ); 
-			const_cast< Material* >( cerebusMat.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.metallic" ) );
-			const_cast< Material* >( cerebusMat.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.roughness" ) );
+			cerebusMat.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.defaultstaticgeom" ) );
+			cerebusMat.Get( )->ConstCast< Material >()->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.albedo" ) );
+			cerebusMat.Get( )->ConstCast< Material >()->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.normal" ) ); 
+			cerebusMat.Get( )->ConstCast< Material >()->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.metallic" ) );
+			cerebusMat.Get( )->ConstCast< Material >()->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.roughness" ) );
+			cerebusMat.Get( )->ConstCast< Material >()->SetUniform( "emissiveMap", am->GetAsset< Enjon::Texture >( "materials.cerebus.emissive" ) );
+			cerebusMat.Get( )->ConstCast< Material >()->SetUniform( "emissiveIntensity", 10.0f );
 			cerebusMat.Save( ); 
 		}
 
-		// Get material of name "NewMaterial"
-		Enjon::AssetHandle< Enjon::Material > deserializedMat = am->GetAsset< Enjon::Material >( "NewMaterial" );
+		Enjon::AssetHandle< Enjon::Material > mahogFloorMat = am->ConstructAsset< Enjon::Material >( "MahogFloorMaterial" );
 		if ( 1 )
-		{
-			deserializedMat.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
-			const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.paintpeeling.albedo" ) );
-			const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.paintpeeling.normal" ) ); 
-			const_cast< Material* >( deserializedMat.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.paintpeeling.metallic" ) );
-			const_cast< Material* >( deserializedMat.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.paintpeeling.roughness" ) );
-			deserializedMat.Save( ); 
+		{ 
+			mahogFloorMat.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.defaultstaticgeom" ) );
+			mahogFloorMat.Get( )->ConstCast< Material >()->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.mahogfloor.albedo" ) );
+			mahogFloorMat.Get( )->ConstCast< Material >()->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.mahogfloor.normal" ) ); 
+			mahogFloorMat.Get( )->ConstCast< Material >()->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "textures.black" ) );
+			mahogFloorMat.Get( )->ConstCast< Material >()->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.mahogfloor.roughness" ) );
+			mahogFloorMat.Get( )->ConstCast< Material >()->SetUniform( "emissiveMap", am->GetAsset< Enjon::Texture >( "textures.black" ) );
+			mahogFloorMat.Get( )->ConstCast< Material >()->SetUniform( "aoMap", am->GetAsset< Enjon::Texture >( "materials.mahogfloor.ao" ) );
+			mahogFloorMat.Get( )->ConstCast< Material >()->SetUniform( "emissiveIntensity", 0.0f );
+			mahogFloorMat.Save( ); 
 		}
-		Enjon::AssetHandle< Enjon::Material > newMat1 = am->GetAsset< Enjon::Material >( "NewMaterial1" );
+
+		Enjon::AssetHandle< Enjon::Material > paintPeelingMat = am->ConstructAsset< Enjon::Material >( "PaintPeeingMaterial" ); 
 		if ( 1 )
 		{
-			newMat1.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
-			const_cast< Material* >( newMat1.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.mahogfloor.albedo" ) );
-			const_cast< Material* >( newMat1.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.mahogfloor.normal" ) ); 
-			const_cast< Material* >( newMat1.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.mixedmoss.metallic" ) );
-			const_cast< Material* >( newMat1.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.mahogfloor.roughness" ) );
-			newMat1.Save( ); 
+			paintPeelingMat.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
+			paintPeelingMat.Get( )->ConstCast< Material >()->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.paintpeeling.albedo" ) );
+			paintPeelingMat.Get( )->ConstCast< Material >()->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.paintpeeling.normal" ) ); 
+			paintPeelingMat.Get( )->ConstCast< Material >()->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.paintpeeling.metallic" ) );
+			paintPeelingMat.Get( )->ConstCast< Material >()->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.paintpeeling.roughness" ) );
+			paintPeelingMat.Save( ); 
 		}
-		Enjon::AssetHandle< Enjon::Material > newMat2 = am->GetAsset< Enjon::Material >( "NewMaterial2" );
+
+		Enjon::AssetHandle< Enjon::Material > harshBricksMat = am->ConstructAsset< Enjon::Material >( "HarshBricksMaterial" );
 		if ( 1 )
 		{
-			newMat2.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
-			const_cast< Material* >( newMat2.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.scuffedgold.albedo" ) );
-			const_cast< Material* >( newMat2.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "textures.toy_box_normal" ) ); 
-			const_cast< Material* >( newMat2.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.scuffedgold.metallic" ) );
-			const_cast< Material* >( newMat2.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.scuffedgold.roughness" ) );
-			newMat2.Save( ); 
-		}
-		Enjon::AssetHandle< Enjon::Material > newMat3 = am->GetAsset< Enjon::Material >( "NewMaterial3" );
-		if ( 1 )
-		{
-			newMat3.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
-			const_cast< Material* >( newMat3.Get( ) )->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.harshbricks.albedo" ) );
-			const_cast< Material* >( newMat3.Get( ) )->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.harshbricks.normal" ) ); 
-			const_cast< Material* >( newMat3.Get( ) )->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.harshbricks.metallic" ) );
-			const_cast< Material* >( newMat3.Get( ))->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.harshbricks.roughness" ) );
-			newMat3.Save( ); 
+			harshBricksMat.Get( )->SetShaderGraph( am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" ) );
+			harshBricksMat.Get( )->ConstCast< Material >()->SetUniform( "albedoMap", am->GetAsset< Enjon::Texture >( "materials.harshbricks.albedo" ) );
+			harshBricksMat.Get( )->ConstCast< Material >()->SetUniform( "normalMap", am->GetAsset< Enjon::Texture >( "materials.harshbricks.normal" ) ); 
+			harshBricksMat.Get( )->ConstCast< Material >()->SetUniform( "metallicMap", am->GetAsset< Enjon::Texture >( "materials.harshbricks.metallic" ) );
+			harshBricksMat.Get( )->ConstCast< Material >()->SetUniform( "roughMap", am->GetAsset< Enjon::Texture >( "materials.harshbricks.roughness" ) );
+			harshBricksMat.Save( ); 
 		}
 
 		// Set gun material
-		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMaterial( cerebusMat.Get( ) );
+		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMaterial( mahogFloorMat.Get( ) );
 	}
 
 	// Serialize / Deserialize entity information
@@ -625,6 +621,7 @@ Enjon::Result Game::Initialize()
 	Enjon::String eyeNormal				= Enjon::String( "Textures/eye_NORMAL.png" );
 	Enjon::String eyeAlbedo				= Enjon::String( "Textures/eyeball_COLOR1.png" );
 	Enjon::String shaderGraphPath		= Enjon::String( "Shaders/ShaderGraphs/testGraph.sg" );
+	Enjon::String staticGeomGraphPath	= Enjon::String( "Shaders/ShaderGraphs/DefaultStaticGeom.sg" );
 
 	// Try loading font
 	Enjon::String rootPath = engine->GetConfig( ).GetRoot( );
@@ -635,6 +632,7 @@ Enjon::Result Game::Initialize()
 	mAssetManager->AddToDatabase( toyBoxNormalPath );
 	mAssetManager->AddToDatabase( unitSpherePath );
 	mAssetManager->AddToDatabase( shaderGraphPath );
+	mAssetManager->AddToDatabase( staticGeomGraphPath );
 	mAssetManager->AddToDatabase( eyePath );
 	mAssetManager->AddToDatabase( eyeAlbedo );
 	mAssetManager->AddToDatabase( eyeNormal );
@@ -1238,24 +1236,8 @@ Enjon::Result Game::Initialize()
 			// Testing meta functions
 			if ( ImGui::CollapsingHeader( "Entity" ) )
 			{ 
-				Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* >( mRed.Get( )->Class( ) );
-
-				// Debug dump object
-				Enjon::ImGuiManager::DebugDumpObject( mRed.Get( ) );
-				Enjon::MetaFunction* getWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "GetWorldPosition" ) );
-				Enjon::MetaFunction* setWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "SetPosition" ) );
-				if ( getWPFunc )
-				{
-					// TODO(): Need to make this type safe - detect that this return type does not match the function signture
-					auto wp = getWPFunc->Invoke< Enjon::Vec3 >( mRed.Get( ) );
-					if ( ImGui::SliderFloat3( "Entity WP", ( float* )&wp, 0.0f, 1.0f ) )
-					{
-						if ( setWPFunc )
-						{
-							setWPFunc->Invoke< void >( mRed.Get( ), wp );
-						}
-					}
-				}
+				const Enjon::Material* gfxMat = mGun.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetMaterial( );
+				Enjon::ImGuiManager::DebugDumpObject( gfxMat ); 
 			} 
 
 			if ( ImGui::CollapsingHeader( "PointLight" ) )

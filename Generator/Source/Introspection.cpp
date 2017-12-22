@@ -656,6 +656,12 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 		}
 	} 
 
+	// Get rid of const qualifier here
+	if ( lexer->PeekAtNextToken( ).Equals( "const" ) )
+	{
+		lexer->GetNextToken( );
+	}
+
 	// Need to strip away all namespaces from property
 	if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
 	{
@@ -995,6 +1001,10 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 	}
 
 	// TODO(): Pointer types / Const references
+	if ( lexer->PeekAtNextToken( ).IsType( TokenType::Token_Asterisk ) || lexer->PeekAtNextToken( ).IsType( TokenType::Token_Ampersand ) )
+	{
+		lexer->GetNextToken( );
+	}
 		
 	// Get property name
 	if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )

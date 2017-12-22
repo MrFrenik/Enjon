@@ -101,9 +101,11 @@ namespace Enjon
 			ENJON_PROPERTY( Editable )
 			AssetHandle<Mesh> mMesh;
 
+			ENJON_PROPERTY( )
+			const Material* mMaterial = nullptr;
+
 		private: 
 			Transform mTransform; 
-			const Material* mMaterial = nullptr;
 			Scene* mScene = nullptr;
 	};
 }

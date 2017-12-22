@@ -67,6 +67,9 @@ namespace Enjon
 		SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE,    8);
 		SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE,    8);
 
+		// Set on vsync by default
+		SDL_GL_SetSwapInterval( 1 );
+
 		// Set configuration
 		mConfig = config;
 

@@ -230,6 +230,21 @@ namespace Enjon
 					case MetaPropertyType::U32:		MAP_KEY_STRING( u32, s32, ImGui::InputInt, object, prop )	break;
 					case MetaPropertyType::S32:		MAP_KEY_STRING( s32, s32, ImGui::InputInt, object, prop )	break;
 					case MetaPropertyType::F32:		MAP_KEY_STRING( f32, f32, ImGui::InputFloat, object, prop ) break;
+					case MetaPropertyType::Object: 
+					{
+						const MetaPropertyHashMap< String, Object* >* mapProp = prop->Cast< MetaPropertyHashMap< String, Object* > >( );
+						for ( auto iter = mapProp->Begin( object ); iter != mapProp->End( object ); ++iter )
+						{
+							Object* val = mapProp->GetValueAs( object, iter );
+							Enjon::String label( "##" + propName + iter->first );
+							ImGui::Text( ( "Key: " + iter->first ).c_str( ) );
+							if ( ImGui::TreeNode( ( iter->first ).c_str( ) ) )
+							{
+								DebugDumpObject( iter->second );
+								ImGui::TreePop( );
+							}
+						}
+					} break;
 				}
 			} break;
 		}
@@ -748,7 +763,7 @@ namespace Enjon
 
 				// Object type
 				case Enjon::MetaPropertyType::Object:
-				{
+				{ 
 					const Enjon::Object* obj = cls->GetValueAs< Enjon::Object >( object, prop );
 					if ( obj )
 					{

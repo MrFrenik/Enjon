@@ -26,27 +26,18 @@ uniform sampler2D albedoMap;
 uniform sampler2D normalMap;
 uniform sampler2D metallicMap;
 uniform sampler2D roughMap;
+uniform float emissiveIntensity;
+
+uniform sampler2D emissiveMap;
+
+vec3 emissiveMult;
+uniform sampler2D aoMap;
 
 // Fragment Main
 void main()
 {
 	// Base Color
-	vec4 albedoMap_sampler = texture2D( albedoMap, fs_in.TexCoords );
+vec4 albedoMap_sampler = texture2D( albedoMap, fs_in.TexCoords );
 	AlbedoOut = vec4(albedoMap_sampler.rgb, 1.0);
 
-	// Normal
-	vec4 normalMap_sampler = texture2D( normalMap, fs_in.TexCoords );
-	vec3 normal = normalize( normalMap_sampler.rgb * 2.0 - 1.0 );
-	normal = normalize( fs_in.TBN * normal );
-	NormalsOut = vec4( normal, 1.0 );
-
-	// Material Properties
-	vec4 metallicMap_sampler = texture2D( metallicMap, fs_in.TexCoords );
-	vec4 roughMap_sampler = texture2D( roughMap, fs_in.TexCoords );
-	MatPropsOut = vec4( clamp( metallicMap_sampler.rgb.x, 0.0, 1.0 ), clamp( roughMap_sampler.rgb.x, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
-
-	// Emissive
-	EmissiveOut = vec4( 0.0, 0.0, 0.0, 1.0 );
-
-	PositionOut = vec4( fs_in.FragPositionWorldSpace, 1.0 );
 }
