@@ -101,7 +101,7 @@ namespace Enjon {
 		m_screenHeight = dimensions.y;
 	}
 
-	iVec2 Window::GetViewport() 
+	iVec2 Window::GetViewport() const 
 	{
 		return iVec2(m_screenWidth, m_screenHeight);
 	}

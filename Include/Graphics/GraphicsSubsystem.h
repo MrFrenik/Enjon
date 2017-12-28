@@ -96,7 +96,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			iVec2 GetViewport();
+			iVec2 GetViewport() const;
 
 			/**
 			*@brief
@@ -114,7 +114,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			Window* GetWindow() { return &mWindow; }
+			const Window* GetWindow() const { return &mWindow; }
 
 			/*
 			* @brief

@@ -1554,7 +1554,7 @@ Enjon::Result Game::ProcessInput( f32 dt )
 	if ( mInput->IsKeyPressed( Enjon::KeyCode::T ) )
 	{
 		mMovementOn = !mMovementOn;
-		Enjon::Window* window = mGfx->GetWindow( );
+		Enjon::Window* window = const_cast< Enjon::Window* >( mGfx->GetWindow( ) );
 
 		if ( !mMovementOn )
 		{
@@ -1691,7 +1691,7 @@ Enjon::Result Game::ProcessInput( f32 dt )
 		Enjon::iVec2 viewPort = mGfx->GetViewport();
 
 		// Grab window from graphics subsystem
-		Enjon::Window* window = mGfx->GetWindow(); 
+		Enjon::Window* window = const_cast< Enjon::Window* >( mGfx->GetWindow() ); 
 
 		// Set cursor to not visible
 		window->ShowMouseCursor(false);

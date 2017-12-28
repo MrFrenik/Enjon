@@ -220,14 +220,16 @@ namespace Enjon
 			
 	Vec3 Vec3::Normalize(const Vec3& vec)
 	{ 
-		return vec / vec.Length(); 
+		f32 length = vec.Length( );
+		return length != 0.0f ? vec / length : vec; 
 	}
  
 	//================================================
 			
 	Vec3 Vec3::Normalize( ) const
 	{
-		return *this / this->Length( );
+		f32 length = Length( );
+		return length != 0.0f ? *this / length : *this;
 	}
 	
 	//==================================================================

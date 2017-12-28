@@ -6,6 +6,7 @@
 #include <IO/InputManager.h>
 #include <ImGui/ImGuiManager.h>
 #include <Graphics/GraphicsSubsystem.h> 
+#include <Graphics/Window.h>
 
 void SceneView( bool* viewBool )
 {
@@ -124,11 +125,65 @@ Enjon::Result EnjonEditor::Update( f32 dt )
 
 Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 { 
-	const Enjon::Input* input = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::Input >( );
+	const Enjon::GraphicsSubsystem* mGfx = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem>( );
+	const Enjon::Input* mInput = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::Input >( );
+	Enjon::Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >();
 
-	if ( input->IsKeyPressed( Enjon::KeyCode::Escape ) )
+ 
+	if ( mInput->IsKeyPressed( Enjon::KeyCode::Escape ) )
 	{
 		return Enjon::Result::SUCCESS;
+	} 
+
+	{
+		Enjon::Vec3 velDir( 0, 0, 0 );
+
+		if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
+		{
+			Enjon::Vec3 F = camera->Forward( );
+			velDir += F;
+		}
+		if ( mInput->IsKeyDown( Enjon::KeyCode::S ) )
+		{
+			Enjon::Vec3 B = camera->Backward( );
+			velDir += B;
+		}
+		if ( mInput->IsKeyDown( Enjon::KeyCode::A ) )
+		{
+			velDir += camera->Left( );
+		}
+		if ( mInput->IsKeyDown( Enjon::KeyCode::D ) )
+		{
+			velDir += camera->Right( );
+		}
+
+		// Normalize velocity
+		velDir = Enjon::Vec3::Normalize( velDir ); 
+
+		// Set camera position
+		camera->Transform.Position += dt * 10.0f * velDir;
+
+		// Set camera rotation
+		// Get mouse input and change orientation of camera
+		Enjon::Vec2 mouseCoords = mInput->GetMouseCoords( );
+
+		Enjon::iVec2 viewPort = mGfx->GetViewport( );
+
+		const Enjon::f32 mouseSensitivity = 10.0f;
+
+		// Grab window from graphics subsystem
+		Enjon::Window* window = const_cast< Enjon::Window* >( mGfx->GetWindow( ) );
+
+		// Set cursor to not visible
+		window->ShowMouseCursor( false );
+
+		// Reset the mouse coords after having gotten the mouse coordinates
+		SDL_WarpMouseInWindow( window->GetWindowContext( ), ( float )viewPort.x / 2.0f, ( float )viewPort.y / 2.0f );
+
+		// Offset camera orientation
+		f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x ) * dt * mouseSensitivity;
+		f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y ) * dt * mouseSensitivity;
+		camera->OffsetOrientation( xOffset, yOffset ); 
 	}
 
 	return Enjon::Result::PROCESS_RUNNING;

@@ -146,7 +146,7 @@ namespace Enjon
 		mEntities		= mSubsystemCatalog->Register<EntityManager>( );
 
 		// Initialize imgui manager
-		Enjon::ImGuiManager::Init( mGraphics->GetWindow()->GetSDLWindow() ); 
+		Enjon::ImGuiManager::Init( mGraphics->GetWindow()->ConstCast< Window >()->GetSDLWindow() ); 
 
 		// Initialize application if one is registered
 		if ( mApp )
@@ -158,7 +158,7 @@ namespace Enjon
 		 mLimiter.Init( 60.0f );
 
 		// Late init for systems that need it
-		Enjon::ImGuiManager::LateInit( mGraphics->GetWindow()->GetSDLWindow() );
+		Enjon::ImGuiManager::LateInit( mGraphics->GetWindow()->ConstCast< Window >()->GetSDLWindow() );
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -295,7 +295,7 @@ namespace Enjon
 					{
 						case SDL_WINDOWEVENT_RESIZED: 
 						{
-							mGraphics->GetWindow( )->SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
+							mGraphics->GetWindow( )->ConstCast< Window >()->SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
 						}
 						break; 
 

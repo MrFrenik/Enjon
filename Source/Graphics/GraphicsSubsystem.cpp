@@ -516,17 +516,9 @@ namespace Enjon
 	{ 
 		static bool set = false;
 		if ( !set )
-		{
-			const Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-			if ( am )
-			{
-				//mRenderable.SetMesh( am->GetAsset< Enjon::Mesh >( "models.unreal_shaderball" ) ); 
-				//mRenderable.SetScale( Vec3( 1.0f ) );
-				//mRenderable.SetPosition( Vec3( 0, 10, 0 ) );
-			}
-			set = true;
-
+		{ 
 			STBTest( );
+			set = true;
 		}
 
 		// Get input
@@ -539,6 +531,9 @@ namespace Enjon
 				std::cout << "Recompiling...\n";
 			}
 		}
+
+		// Clear default buffer
+		mWindow.Clear( );
 
 		// Gbuffer pass
 		GBufferPass();
@@ -553,29 +548,21 @@ namespace Enjon
 		// Composite Pass
 		CompositePass(mLightingBuffer);
 		// FXAA pass
-		FXAAPass(mCompositeTarget);
+		FXAAPass(mCompositeTarget); 
 
-		// Clear default buffer
-		mWindow.Clear( );
-
-		// ImGui pass
+		// Editor gui pass (ImGUI)
 		if (true)
 		{
 			GuiPass();
-		}
-
+		} 
+		// Otherwise render back buffer (scene view) 
 		else
 		{ 
-			glViewport( 0, 0, (s32)mWindow.GetScreenWidth( ), (s32)mWindow.GetScreenHeight( ) );
+			glViewport( 0, 0, (s32)ImGui::GetIO().DisplaySize.x, (s32)ImGui::GetIO().DisplaySize.y );
 			auto program = Enjon::ShaderManager::Get("NoCameraProjection");	
 			program->Use();
-			{
-				const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( );
-				AssetHandle<Texture> tex = am->GetAsset<Texture>( "textures.beast" );
-				if ( tex )
-				{
-					program->BindTexture( "tex", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0 ); 
-				}
+			{ 
+				program->BindTexture( "tex", mCurrentRenderTexture, 0 ); 
 				mFullScreenQuad->Submit( );
 			}
 			program->Unuse();
@@ -1228,7 +1215,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	iVec2 GraphicsSubsystem::GetViewport()
+	iVec2 GraphicsSubsystem::GetViewport() const
 	{
 		return mWindow.GetViewport();
 	}
