@@ -389,7 +389,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::InputInt( label.c_str( ), ( s32* )&val, 0 ) )
+					if ( ImGui::DragInt( label.c_str( ), ( s32* )&val, 0 ) )
 					{
 						cls->SetValue( object, prop, ( u32 )val );
 					}
@@ -410,7 +410,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::InputInt( name.c_str( ), ( s32* )&val ) )
+					if ( ImGui::DragInt( name.c_str( ), ( s32* )&val ) )
 					{
 						cls->SetValue( object, prop, ( s32 )val );
 					}
@@ -455,7 +455,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::InputFloat2( name.c_str( ), col ) )
+					if ( ImGui::DragFloat2( name.c_str( ), col ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -482,7 +482,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::InputFloat3( name.c_str( ), col ) )
+					if ( ImGui::DragFloat3( name.c_str( ), col ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -511,7 +511,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::InputFloat4( name.c_str( ), col ) )
+					if ( ImGui::DragFloat4( name.c_str( ), col ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -541,7 +541,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::InputFloat4( name.c_str( ), col ) )
+					if ( ImGui::DragFloat4( name.c_str( ), col ) )
 					{
 						val.r = col[ 0 ];
 						val.g = col[ 1 ];
@@ -679,7 +679,7 @@ namespace Enjon
 						// Position
 						{
 							f32 col[ 3 ] = { pos.x, pos.y, pos.z };
-							if ( ImGui::InputFloat3( Enjon::String( "Position##" + prop->GetName() ).c_str( ), col ) )
+							if ( ImGui::DragFloat3( Enjon::String( "Position##" + prop->GetName() ).c_str( ), col ) )
 							{
 								pos.x = col[ 0 ];
 								pos.y = col[ 1 ];
@@ -692,7 +692,7 @@ namespace Enjon
 						// Rotation
 						{
 							f32 col[ 4 ] = { rot.x, rot.y, rot.z, rot.w };
-							if ( ImGui::InputFloat4( Enjon::String( "Rotation##" + prop->GetName() ).c_str( ), col ) )
+							if ( ImGui::DragFloat4( Enjon::String( "Rotation##" + prop->GetName() ).c_str( ), col ) )
 							{
 								rot.x = col[ 0 ];
 								rot.y = col[ 1 ];
@@ -705,7 +705,7 @@ namespace Enjon
 						// Scale
 						{
 							f32 col[ 3 ] = { scl.x, scl.y, scl.z };
-							if ( ImGui::InputFloat3( Enjon::String( "Scale##" + prop->GetName() ).c_str( ), col ) )
+							if ( ImGui::DragFloat3( Enjon::String( "Scale##" + prop->GetName() ).c_str( ), col ) )
 							{
 								scl.x = col[ 0 ];
 								scl.y = col[ 1 ];
@@ -894,11 +894,14 @@ namespace Enjon
 	//------------------------------------------------------------------------------
 	void ImGuiManager::ImGuiStyles()
 	{
+		String rootPath = Engine::GetInstance()->GetConfig( ).GetRoot( );
+		String fp = rootPath + "/Assets/Fonts/";
+
 		ImGuiIO& io = ImGui::GetIO();
 
 		io.Fonts->Clear();
-		io.Fonts->AddFontFromFileTTF("../Assets/Fonts/WeblySleek/weblysleekuisb.ttf", 16);
-		io.Fonts->AddFontFromFileTTF("../Assets/Fonts/WeblySleek/weblysleekuisb.ttf", 14);
+		io.Fonts->AddFontFromFileTTF((char*)( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16);
+		io.Fonts->AddFontFromFileTTF((char*)( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14);
 		io.Fonts->Build(); 
 
 		// Grab reference to style

@@ -62,7 +62,7 @@ int main( int argc, char** argv )
 		}
 		
 		// Output the file being generated
-		std::cout << "Generating reflecton for " << splits.back() <<  "\n";
+		std::cout << "Generating reflecton data for " << splits.back() <<  "\n";
 
 		// Get file contents
 		std::string fileToParse = ReadFileIntoString( f.c_str( ) ); 

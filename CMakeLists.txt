@@ -28,6 +28,7 @@ message("cxx FLgs:" ${CMAKE_CXX_FLAGS})
 
 # Add additional sub-directories
 add_subdirectory( Generator )
+add_subdirectory( Editor )
 
 # Add include directories
 include_directories(${ENJON_DIR}/Include
@@ -171,7 +172,8 @@ set(
 	${SHADERS}
 ) 
 
-add_executable(Enjon ${ALL_SRC})
+add_library( Enjon ${ALL_SRC})
+# add_executable(Enjon ${ALL_SRC})
 
 # Link libraries
 target_link_libraries( Enjon debug Opengl32.lib optimized Opengl32.lib ) 
@@ -191,6 +193,7 @@ target_link_libraries( Enjon debug CrossGuid_d.lib optimized CrossGuid.lib )
 target_link_libraries( Enjon debug liblz4_d.lib optimized liblz4.lib ) 
 
 add_dependencies( Enjon Reflection )
+add_dependencies( EnjonEditor Enjon )
 
 source_group("Base"			FILES ${SRC_BASE})
 source_group("Entity"		FILES ${SRC_ENTITY})
@@ -228,7 +231,6 @@ set(
 		SDL2.dll
 		freetype6.dll
 		glew32.dll
-		glut32.dll
 	)
 
 # List of build directories

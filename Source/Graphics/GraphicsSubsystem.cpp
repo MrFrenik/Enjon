@@ -161,18 +161,18 @@ namespace Enjon
 
 		// ImGuiManager::Register(graphicsMenuOption);
 		// TODO(John): I HATE the way this looks
-		ImGuiManager::RegisterMenuOption("View", graphicsMenuOption);
-		ImGuiManager::RegisterWindow(showGameViewportFunc);
-		ImGuiManager::RegisterWindow(showGraphicsViewportFunc);
-		ImGuiManager::RegisterWindow(showStylesWindowFunc);
+		//ImGuiManager::RegisterMenuOption("View", graphicsMenuOption);
+		//ImGuiManager::RegisterWindow(showGameViewportFunc);
+		//ImGuiManager::RegisterWindow(showGraphicsViewportFunc);
+		//ImGuiManager::RegisterWindow(showStylesWindowFunc);
 
 		// Set current render texture
 		mCurrentRenderTexture = mFXAATarget->GetTexture();
 
 		// Register docking layouts
-	    ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Game View", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f));
-	    ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Graphics", nullptr, ImGui::DockSlotType::Slot_Right, 0.1f));
-	    ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Styles##options", nullptr, ImGui::DockSlotType::Slot_Bottom, 0.2f));
+	    //ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Game View", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f));
+	    //ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Graphics", nullptr, ImGui::DockSlotType::Slot_Right, 0.1f));
+	    //ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Styles##options", nullptr, ImGui::DockSlotType::Slot_Bottom, 0.2f));
 	
 		// Register shader graph templates
 		Enjon::ShaderGraph::DeserializeTemplate( Enjon::Engine::GetInstance( )->GetConfig( ).GetEngineResourcePath( ) + "/Shaders/ShaderGraphTemplates/ShaderTemplates.json" );
@@ -565,22 +565,18 @@ namespace Enjon
 		}
 
 		else
-		{
-
-			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+		{ 
+			glViewport( 0, 0, (s32)mWindow.GetScreenWidth( ), (s32)mWindow.GetScreenHeight( ) );
 			auto program = Enjon::ShaderManager::Get("NoCameraProjection");	
 			program->Use();
 			{
-				mBatch->Begin();
+				const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( );
+				AssetHandle<Texture> tex = am->GetAsset<Texture>( "textures.beast" );
+				if ( tex )
 				{
-					mBatch->Add(
-									Vec4(-1, -1, 2, 2),
-									Vec4(0, 0, 1, 1),
-									mFXAATarget->GetTexture()
-								);
+					program->BindTexture( "tex", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0 ); 
 				}
-				mBatch->End();
-				mBatch->RenderBatch();
+				mFullScreenQuad->Submit( );
 			}
 			program->Unuse();
 		}
@@ -1348,6 +1344,11 @@ namespace Enjon
 
 	//======================================================================================================
 
+	u32 GraphicsSubsystem::GetCurrentRenderTextureId( ) const
+	{
+		return (u32)mCurrentRenderTexture;
+	}
+
 	void GraphicsSubsystem::RegisterCVars()
 	{
 		Enjon::CVarsSystem::Register("exposure", &mToneMapSettings.mExposure, Enjon::CVarType::TYPE_FLOAT);
@@ -1375,12 +1376,7 @@ namespace Enjon
         ImGui::PushStyleColor(ImGuiCol_Text, ImColor(1.0, 0.6f, 0.0f, 1.0f));
         ImGui::Text("Graphics Options");
         ImGui::PopStyleColor(1);
-        ImGui::Separator();
-
-		ImGui::SliderFloat( "X", &uvs.x, 0.0f, 1.0f );
-		ImGui::SliderFloat( "Y", &uvs.y, 0.0f, 1.0f );
-		ImGui::SliderFloat( "Z", &uvs.z, 0.0f, 1.0f );
-		ImGui::SliderFloat( "W", &uvs.w, 0.0f, 1.0f );
+        ImGui::Separator(); 
 
 	    if (ImGui::TreeNode("ToneMapping"))
 	    {
@@ -1808,14 +1804,6 @@ namespace Enjon
 				} 
 			}
 		}
-
-		if ( ImGui::Button( "Recompile Shader" ) )
-		{ 
-			const_cast< ShaderGraph* > ( mTestShaderGraph.Get( ) )->Reload( ); 
-		}
-
-		ImGui::Image( ImTextureID( mHDRTextureID ), ImVec2( 128, 128 ) );
-		ImGui::Image( ImTextureID( mBRDFLUT ), ImVec2( 128, 128 ) ); 
 	}
 
 	//=======================================================================================================

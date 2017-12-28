@@ -27,7 +27,7 @@ namespace Enjon
 	}
 
 	/* Inits a particular font with a particular size and stores in a returned map */
-	void Init(char* filePath, GLuint size, Font* font)
+	void Init(const String& filePath, GLuint size, Font* font)
 	{
 		// FreeType
 	    FT_Library ft;
@@ -37,7 +37,7 @@ namespace Enjon
 
 	    // Load font as face
 	    FT_Face face;
-	    if (FT_New_Face(ft, filePath, 0, &face))
+	    if (FT_New_Face(ft, filePath.c_str(), 0, &face))
 	        std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 		
 		// Used for atlas packing
@@ -210,7 +210,7 @@ namespace Enjon
 	}
 
 	/* Creates and returns new font */
-	Font* CreateFont(char* filePath, GLuint size)
+	Font* CreateFont(const String& filePath, GLuint size)
 	{
 		// Create new font
 		Font* F = new Font;

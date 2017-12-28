@@ -3,3 +3,6 @@ Build/
 Generator/Build/
 Generator/Config.cfg
 IsoARPG/Assets/Intermediate/
+Editor/Build/
+Editor/Binaries/
+Editor/Assets/Cache/

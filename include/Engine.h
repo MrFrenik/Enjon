@@ -26,6 +26,8 @@ namespace Enjon
 
 			String GetRoot() const; 
 			String GetEngineResourcePath() const;
+
+			void SetRootPath( const String& path ); 
 			
 		private:
 			String mRootPath; 

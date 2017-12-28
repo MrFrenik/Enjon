@@ -59,7 +59,7 @@ namespace Enjon
 	} PackedCharacterRect;
 
 	/* Inits a particular font with a particular size and stores in a returned map */
-	void Init(char* filePath, GLuint size, Font* font);
+	void Init(const String& filePath, GLuint size, Font* font);
 
 	/* Gets character stats from given font */
 	// CharacterStats GetCharacterAttributes(Math::Vec2 Pos, float scale, Font* F, std::string::const_iterator c, float* advance);
@@ -73,7 +73,7 @@ namespace Enjon
 	float GetHeight(char c, Font* F, float scale = 1.0f);
 
 	/* Creates and returns new font */
-	Font* CreateFont(char* filePath, GLuint size);
+	Font* CreateFont(const String& filePath, GLuint size);
 
 	/* Adds a string of tex at (x,y) to given spritebatch */
 	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::SpriteBatch& Batch, 

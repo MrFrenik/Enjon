@@ -121,6 +121,16 @@ namespace Enjon
 			*/
 			void BindShader( const Enjon::Shader* shader );
 
+			/*
+			* @brief
+			*/
+			u32 GetCurrentRenderTextureId( ) const;
+
+			/**
+			*@brief
+			*/
+			void ShowGraphicsWindow(bool* p_open);
+
 		private:
 
 			/**
@@ -193,10 +203,6 @@ namespace Enjon
 			*/
 			void ImGuiStyles2();
 
-			/**
-			*@brief
-			*/
-			void ShowGraphicsWindow(bool* p_open);
 			
 			/**
 			*@brief
@@ -208,6 +214,7 @@ namespace Enjon
 			void InstancingTest( );
 
 			void RenderCube( );
+
 
 		private:
 			// Frame buffers

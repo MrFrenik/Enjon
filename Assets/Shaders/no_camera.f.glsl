@@ -3,16 +3,15 @@
 in DATA
 {
 	vec2 Position;	
-	vec4 Color;
 	vec2 TexCoords;
 }fs_in;
 
-out vec4 color;
+layout (location = 0) out vec4 ColorOut;
 
 uniform sampler2D tex;
 
 void main() 
 {
-	color = texture2D(tex, fs_in.TexCoords);
+	ColorOut = texture2D(tex, fs_in.TexCoords);
 }
 

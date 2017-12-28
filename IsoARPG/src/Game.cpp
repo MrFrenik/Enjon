@@ -241,7 +241,7 @@ void Game::TestObjectSerialize( )
 		}
 
 		// Set gun material
-		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMaterial( mahogFloorMat.Get( ) );
+		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMaterial( paintPeelingMat.Get( ) );
 	}
 
 	// Serialize / Deserialize entity information
@@ -529,6 +529,7 @@ Enjon::Result Game::Initialize()
 	
 	// Get asset manager and set its properties ( I don't like this )
 	mAssetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog()->Get<Enjon::AssetManager>()->ConstCast< Enjon::AssetManager >(); 
+
 	// This also needs to be done through a config file or cmake
 	mAssetManager->SetAssetsDirectoryPath( mAssetsDirectoryPath );
 	mAssetManager->SetCachedAssetsDirectoryPath( cacheDirectoryPath );
@@ -1459,15 +1460,8 @@ Enjon::Result Game::Initialize()
 //-------------------------------------------------------------
 Enjon::Result Game::Update(Enjon::f32 dt)
 { 
-	// Update movement and check for success/failure of update
-	Enjon::Result res = ProcessInput(dt);
-	if (res != Enjon::Result::PROCESS_RUNNING)
-	{
-		return res;
-	}
-
-	// Update entity manager
-	mEntities->Update(dt);
+	//// Update entity manager
+	//mEntities->Update(dt);
 
 	static Enjon::f32 t = 0.0f;
 	t += 0.1f * dt;

@@ -395,6 +395,21 @@ class AssetRecordInfo
 		AssetState mAssetState = AssetState::Unloaded;
 }; 
 
+// Some concept of what a project will actually look like in the engine...
+
+// Use case:
+	1). Load up engine - default project? Or no project loaded at all? Not sure here...
+	2). Load up project
+	3). On project load:
+		a). Asset manager needs to be re/initialized to using this project directory
+		b). Application needs to be reinitialized - What does the application layer actually look like now?  
+		c). All projects could be associated with a .dll module that the engine must load to use?
+
+// Does this even need to exist? Could this not just be in the application layer itself?
+
+class Project
+{
+};
 
 
 */ 

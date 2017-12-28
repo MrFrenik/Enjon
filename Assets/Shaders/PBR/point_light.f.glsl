@@ -42,11 +42,11 @@ void main()
     vec2 TexCoords = CalculateTexCoord();
 
     // Get diffuse color
-    vec3 Albedo = texture(u_albedoMap, TexCoords).rgb;
+    vec3 Albedo = texture2D(u_albedoMap, TexCoords).rgb;
     Albedo = vec3(pow(Albedo.r, 2.2), pow(Albedo.g, 2.2), pow(Albedo.b, 2.2));
 
     // Get world position
-    vec3 WorldPos = texture(u_positionMap, TexCoords).xyz;
+    vec3 WorldPos = texture2D(u_positionMap, TexCoords).xyz;
 
     // Get material properties
     vec4 MaterialProps = texture2D(u_matProps, TexCoords);
@@ -59,7 +59,7 @@ void main()
 	float ssao = texture2D(u_ssao, TexCoords).r;
 
     // Obtain normal from normal map in range (world coords)
-    vec3 N = texture(u_normalMap, TexCoords).xyz;
+    vec3 N = texture2D(u_normalMap, TexCoords).xyz;
 
     // View vector
     vec3 V = normalize(u_camPos - WorldPos);

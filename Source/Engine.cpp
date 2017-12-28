@@ -191,6 +191,7 @@ namespace Enjon
 		{
 			 mLimiter.Begin();
 
+			 // Update input manager
 			 mInput->Update( dt );
 
 			// Update input
@@ -199,9 +200,17 @@ namespace Enjon
 			{
 				mIsRunning = false;
 				break;
+			} 
+			
+			// Process application input
+			res = mApp->ProcessInput( dt );
+			if ( res != Result::PROCESS_RUNNING )
+			{
+				mIsRunning = false;
+				break;
 			}
 
-			// Update application
+			// Update application 
 			res = mApp->Update( dt );
 			if ( res != Result::PROCESS_RUNNING )
 			{
@@ -217,9 +226,6 @@ namespace Enjon
 
 			// Clamp frame rate
 			mLimiter.End(); 
-
-			// Get dt from limiter
-			//dt = mLimiter.GetDT( );
 		}
 
 		Enjon::Result res = ShutDown();
@@ -369,6 +375,13 @@ namespace Enjon
 		assert( ( mRootPath.compare( "" ) != 0 ) );
 
 		return Result::SUCCESS;
+	}
+
+	//======================================================= 
+
+	void EngineConfig::SetRootPath( const String& path )
+	{
+		mRootPath = path;
 	}
 
 	//======================================================= 
