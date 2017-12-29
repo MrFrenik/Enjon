@@ -1,4 +1,5 @@
 #include <Application.h>
+#include <Entity/EntityManager.h>
 
 class EnjonEditor : public Enjon::Application
 {
@@ -32,4 +33,7 @@ class EnjonEditor : public Enjon::Application
 		bool mShowCameraOptions = true;
 		bool mShowLoadResourceOption = true;
 		Enjon::String mResourceFilePathToLoad = "";
+		bool mMoveCamera = false; 
+
+		Enjon::EntityHandle mEntity;
 };

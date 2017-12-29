@@ -268,6 +268,7 @@ class Class
 		std::string mFilePath;
 		static u32 mScopeCount;
 		std::string mParent = "";
+		u32 mObjectTypeId = 0;
 }; 
 
 
@@ -366,6 +367,7 @@ class Introspection
 		std::unordered_map< std::string, Enum > mEnums;
 		PropertyTypeMap mPropertyTypeMap;
 		PropertyTypeAsStringMap mPropertyTypeStringMap;
+		u32 mLastObjectTypeId = 0;
 };
 
 #endif

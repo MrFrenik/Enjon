@@ -7,6 +7,69 @@
 #include <ImGui/ImGuiManager.h>
 #include <Graphics/GraphicsSubsystem.h> 
 #include <Graphics/Window.h>
+#include <Entity/EntityManager.h>
+#include <Entity/Components/GraphicsComponent.h>
+
+#include <windows.h>
+
+typedef int( *funcAdd )( const int&, const int& );
+typedef int( *funcSubtract )( const int&, const int& );
+typedef void( *funcEntityRotate )( const Enjon::EntityHandle&, const Enjon::f32& );
+typedef void( *funcSetEngineInstance )( Enjon::Engine* instance );
+
+// TODO(): Make sure to abstract this for platform independence
+HINSTANCE dllHandle = nullptr;
+funcSubtract subFunc = nullptr;
+funcAdd addFunc = nullptr; 
+funcEntityRotate entityRotateFunc = nullptr;
+funcSetEngineInstance setEngineFunc = nullptr;
+
+namespace fs = std::experimental::filesystem; 
+
+Enjon::String copyDir = "E:/Development/C++DLLTest/Build/Debug/TestDLLIntermediate/";
+
+void CopyLibraryContents( )
+{
+	Enjon::String rootDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
+
+	fs::path dllPath = rootDir + "Build/Debug/TestDLL.dll";
+	if ( fs::exists( dllPath ) )
+	{
+		fs::remove( dllPath );
+	}
+
+	fs::path pdbPath = rootDir + "Build/Debug/TestDLL.pdb";
+	if ( fs::exists( pdbPath ) )
+	{
+		fs::remove( pdbPath );
+	}
+
+	// Now copy over contents from intermediate build to executable dir
+	dllPath = copyDir;
+	if ( fs::exists( dllPath ) )
+	{
+		fs::copy( dllPath, rootDir + "Build/Debug/", fs::copy_options::recursive );
+	}
+
+	fs::path expPath = rootDir + "Build/Debug/TestDLL.exp";
+	if ( fs::exists( expPath ) )
+	{
+		fs::remove( expPath );
+	}
+
+	fs::path libPath = rootDir + "Build/Debug/TestDLL.lib";
+	if ( fs::exists( libPath ) )
+	{
+		fs::remove( libPath );
+	}
+
+	fs::path ilkPath = rootDir + "Build/Debug/TestDLL.ilk";
+	if ( fs::exists( ilkPath ) )
+	{
+		fs::remove( ilkPath );
+	}
+}
+
 
 void SceneView( bool* viewBool )
 {
@@ -115,11 +178,30 @@ Enjon::Result EnjonEditor::Initialize( )
 	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Scene", ImGui::DockSlotType::Slot_Right, 0.2f ) );
 	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Camera", ImGui::DockSlotType::Slot_Bottom, 0.3f ) );
 
+	// Create an entity to manipulate 
+	Enjon::EntityManager* entities = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->ConstCast< Enjon::EntityManager >( );
+	mEntity = entities->Allocate( );
+
+	Enjon::GraphicsComponent* gfxCmp = mEntity.Get( )->AddComponent< Enjon::GraphicsComponent >( );
+	gfxCmp->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "models.unit_cube" ) );
+	gfxCmp->SetMaterial( mAssetManager->GetAsset< Enjon::Material >( "NewMaterial" ).Get( ) );
+
+	mGfx->GetScene( )->AddRenderable( gfxCmp->GetRenderable( ) );
+
 	return Enjon::Result::SUCCESS;
 }
 
 Enjon::Result EnjonEditor::Update( f32 dt )
 { 
+	static float t = 0.0f;
+	t += dt;
+
+	// Try to rotate entity if dll is loaded
+	if ( entityRotateFunc )
+	{ 
+		entityRotateFunc( mEntity, t );
+	}
+
 	return Enjon::Result::PROCESS_RUNNING;
 }
 
@@ -128,13 +210,18 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 	const Enjon::GraphicsSubsystem* mGfx = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem>( );
 	const Enjon::Input* mInput = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::Input >( );
 	Enjon::Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >();
-
  
 	if ( mInput->IsKeyPressed( Enjon::KeyCode::Escape ) )
 	{
 		return Enjon::Result::SUCCESS;
 	} 
 
+	if ( mInput->IsKeyPressed( Enjon::KeyCode::T ) )
+	{
+		mMoveCamera ^= 1;
+	}
+
+	if ( mMoveCamera )
 	{
 		Enjon::Vec3 velDir( 0, 0, 0 );
 
@@ -169,21 +256,80 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 
 		Enjon::iVec2 viewPort = mGfx->GetViewport( );
 
-		const Enjon::f32 mouseSensitivity = 10.0f;
+		f32 mouseSensitivity = 10.0f;
 
 		// Grab window from graphics subsystem
-		Enjon::Window* window = const_cast< Enjon::Window* >( mGfx->GetWindow( ) );
+		Enjon::Window* window = mGfx->GetWindow( )->ConstCast< Enjon::Window >( );
 
 		// Set cursor to not visible
 		window->ShowMouseCursor( false );
 
 		// Reset the mouse coords after having gotten the mouse coordinates
-		SDL_WarpMouseInWindow( window->GetWindowContext( ), ( float )viewPort.x / 2.0f, ( float )viewPort.y / 2.0f );
+		SDL_WarpMouseInWindow( window->GetWindowContext( ), ( f32 )viewPort.x / 2.0f, ( f32 )viewPort.y / 2.0f );
 
 		// Offset camera orientation
 		f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x ) * dt * mouseSensitivity;
 		f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y ) * dt * mouseSensitivity;
 		camera->OffsetOrientation( xOffset, yOffset ); 
+	}
+	else
+	{
+		mGfx->GetWindow( )->ConstCast< Enjon::Window >( )->ShowMouseCursor( true );
+	}
+
+	// DLL Loading/Unloading
+	{
+		if ( mInput->IsKeyPressed( Enjon::KeyCode::R ) )
+		{
+			if ( dllHandle )
+			{
+				// Free library if in use
+				FreeLibrary( dllHandle );
+				dllHandle = nullptr;
+			}
+
+			// Copy files to directory
+			CopyLibraryContents( );
+
+			// Try to load library
+			dllHandle = LoadLibrary( "TestDLL.dll" );
+
+			// If valid, then set address of procedures to be called
+			if ( dllHandle )
+			{
+				addFunc = ( funcAdd )GetProcAddress( dllHandle, "Add" );
+				subFunc = ( funcSubtract )GetProcAddress( dllHandle, "Subtract" );
+				entityRotateFunc = ( funcEntityRotate )GetProcAddress( dllHandle, "RotateEntity" ); 
+
+				// Try and set the engine instance
+				setEngineFunc = ( funcSetEngineInstance )GetProcAddress( dllHandle, "SetEngineInstance" );
+				if ( setEngineFunc )
+				{
+					setEngineFunc( Enjon::Engine::GetInstance( ) );
+				}
+				
+			}
+			else
+			{
+				std::cout << "Could not load library\n";
+			}
+		}
+
+		if ( mInput->IsKeyPressed( Enjon::KeyCode::One ) )
+		{
+			if ( addFunc )
+			{
+				std::cout << addFunc( 10, 10 ) << "\n";
+			}
+		}
+
+		if ( mInput->IsKeyPressed( Enjon::KeyCode::Two ) )
+		{
+			if ( subFunc )
+			{
+				std::cout << subFunc( 20, 5 ) << "\n";
+			}
+		}
 	}
 
 	return Enjon::Result::PROCESS_RUNNING;

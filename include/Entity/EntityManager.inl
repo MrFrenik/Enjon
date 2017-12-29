@@ -88,7 +88,7 @@ template <typename T>
 T* EntityManager::GetComponent(Entity* entity)
 {
 	// Assert that it has component
-	assert(entity->HasComponent<T>());
+	//assert(entity->HasComponent<T>());
 
 	// Assert entity manager exists
 	assert(entity != nullptr);
@@ -107,7 +107,7 @@ T* EntityManager::GetComponent(Entity* entity)
 	}
 
 	// We shoudln't hit this
-	assert(false);
+	//assert(false);
 
 	// Return nullptr to get rid of compiler warnings
 	return nullptr;

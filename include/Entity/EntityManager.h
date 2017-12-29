@@ -264,8 +264,11 @@ namespace Enjon
 	using ActiveEntityList 			= Vector<Entity*>;
 	using ComponentBaseArray		= HashMap< u32, ComponentWrapperBase* >;
 
+	ENJON_CLASS( )
 	class EntityManager : public Subsystem
 	{
+		ENJON_CLASS_BODY( )
+
 		friend Entity;
 		public:
 

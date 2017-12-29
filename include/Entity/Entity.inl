@@ -10,7 +10,7 @@ template <typename T>
 T* Entity::GetComponent()
 {
 	// Assert that it has component
-	assert(HasComponent<T>());
+	//assert(HasComponent<T>());
 
 	// Assert entity manager exists
 	assert(mManager != nullptr);

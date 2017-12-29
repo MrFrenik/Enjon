@@ -441,6 +441,9 @@ void Introspection::ParseClass( Lexer* lexer )
 	// Parse remainder of class body
 	ParseClassBody( lexer, cls );
 
+	// Class object identifier
+	cls->mObjectTypeId = mLastObjectTypeId++;
+
 	// Pop scope from class
 	Class::PopScope( );
 }
@@ -1594,7 +1597,8 @@ void Introspection::Compile( const ReflectionConfig& config )
 			code += OutputLine( "" );
 
 			// Set up typeid field
-			code += OutputTabbedLine( "cls->mTypeId = Enjon::Object::GetTypeId< " + qualifiedName +" >( );\n" );
+			//code += OutputTabbedLine( "cls->mTypeId = Enjon::Object::GetTypeId< " + qualifiedName +" >( );\n" );
+			code += OutputTabbedLine( "cls->mTypeId = " + std::to_string(c.second.mObjectTypeId) + ";\n" );
 			
 			// Set up name field
 			code += OutputTabbedLine( "cls->mName = \"" + qualifiedName + "\";\n" );
@@ -1617,11 +1621,20 @@ void Introspection::Compile( const ReflectionConfig& config )
 			code += OutputLine( "}" );
 			
 			// GetTypeId()
+			//code += OutputLine( "" );
+			//code += OutputLine( "// GetTypeId" );
+			//code += OutputLine( "Enjon::u32 " + qualifiedName + "::GetTypeId() const" );
+			//code += OutputLine( "{" );
+			//code += OutputTabbedLine( "return Object::GetTypeId< " + qualifiedName + " >();" );
+			//code += OutputLine( "}" ); 
+
+			// GetTypeId()
 			code += OutputLine( "" );
-			code += OutputLine( "// GetTypeId" );
-			code += OutputLine( "Enjon::u32 " + qualifiedName + "::GetTypeId() const" );
+			code += OutputLine( "// MetaClassRegistry::GetTypeId" );
+			code += OutputLine( "template <>" );
+			code += OutputLine( "Enjon::u32 MetaClassRegistry::GetTypeId< " + qualifiedName + " >() const" );
 			code += OutputLine( "{" );
-			code += OutputTabbedLine( "return Object::GetTypeId< " + qualifiedName + " >();" );
+			code += OutputTabbedLine( "return " + std::to_string(c.second.mObjectTypeId) + ";" );
 			code += OutputLine( "}" ); 
 
 			

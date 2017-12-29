@@ -31,7 +31,6 @@ namespace Enjon
 #define ENJON_CLASS_BODY( ... )																	\
 	friend Enjon::Object;																			\
 	public:																							\
-		virtual u32 GetTypeId() const override;		\
 		virtual const Enjon::MetaClass* Class( ) const override\
 		{\
 			return GetClassInternal();\
@@ -872,7 +871,7 @@ namespace Enjon
 			const MetaProperty* GetPropertyByName( const String& propertyName ) const
 			{
 				s32 index = FindPropertyIndexByName( propertyName );
-				if ( index >= 0 && index < mPropertyCount )
+				if ( index >= 0 && index < (s32)mPropertyCount )
 				{
 					return mProperties[ index ];
 				}
@@ -1016,7 +1015,8 @@ namespace Enjon
 				static_assert( std::is_base_of<Object, T>::value, "MetaClass::RegisterMetaClass() - T must inherit from Object." );
 
 				// Get id of object
-				u32 id = Object::GetTypeId<T>( );
+				u32 id = GetTypeId< T >( );
+				//u32 id = Object::GetTypeId<T>( );
 
 				// If available, then return
 				if ( HasMetaClass< T >( ) )
@@ -1032,6 +1032,9 @@ namespace Enjon
 				return cls;
 			}
 
+			template <typename T>
+			u32 GetTypeId( ) const;
+
 			/*
 				MetaClass* cls = Object::ConstructMetaClassFromString(classString);
 			*/
@@ -1039,7 +1042,7 @@ namespace Enjon
 			template < typename T >
 			bool HasMetaClass( )
 			{
-				return ( mRegistry.find( Object::GetTypeId< T >( ) ) != mRegistry.end( ) );
+				return ( mRegistry.find( GetTypeId< T >( ) ) != mRegistry.end( ) );
 			}
 
 			bool HasMetaClass( const String& className )
@@ -1050,7 +1053,8 @@ namespace Enjon
 			template < typename T >
 			const MetaClass* Get( )
 			{
-				return HasMetaClass< T >( ) ? mRegistry[ Object::GetTypeId< T >( ) ] : nullptr;
+				//return HasMetaClass< T >( ) ? mRegistry[ Object::GetTypeId< T >( ) ] : nullptr;
+				return HasMetaClass< T >( ) ? mRegistry[ GetTypeId< T >( ) ] : nullptr;
 			}
 
 			const MetaClass* GetClassByName( const String& className )
@@ -1102,10 +1106,10 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			virtual u32 GetTypeId( ) const
-			{
-				return EnjonMaxTypeId;
-			} 
+			//virtual u32 GetTypeId( ) const
+			//{
+			//	return EnjonMaxTypeId;
+			//} 
 
 			/**
 			*@brief
@@ -1136,22 +1140,22 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			template <typename T>
-			static u32 GetTypeId( ) noexcept
-			{
-				Object::AssertIsObject<T>( ); 
+			//template <typename T>
+			//static u32 GetTypeId( ) noexcept
+			//{
+			//	Object::AssertIsObject<T>( ); 
 
-				static u32 typeId { GetUniqueTypeId( ) }; 
-				return typeId;
-			}
+			//	static u32 typeId { GetUniqueTypeId( ) }; 
+			//	return typeId;
+			//} 
 
-			template <typename T>
-			bool InstanceOf( )
-			{
-				Object::AssertIsObject<T>( ); 
+			//template <typename T>
+			//bool InstanceOf( )
+			//{
+			//	Object::AssertIsObject<T>( ); 
 
-				return ( mTypeId == Object::GetTypeId< T >( ) );
-			}
+			//	return ( mTypeId == Object::GetTypeId< T >( ) );
+			//}
 
 			/**
 			*@brief

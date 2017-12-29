@@ -9,6 +9,7 @@
 #include "Asset/AssetLoader.h"
 #include "Serialize/CacheRegistryManifest.h"
 #include "Defines.h" 
+#include "Engine.h"
 
 #include <array>
 
@@ -17,8 +18,11 @@ namespace Enjon
 	class AssetLoader;
 	class Asset; 
 
+	ENJON_CLASS( )
 	class AssetManager : public Subsystem
 	{
+		ENJON_CLASS_BODY( )
+
 		enum class LoaderType
 		{
 			Texture,
@@ -127,7 +131,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			const Asset* GetAsset( const MetaClass* cls, const UUID& id ) const;
+			const Asset* GetAsset( const MetaClass* cls, const UUID& id ) const; 
 
 			/**
 			*@brief

@@ -141,7 +141,7 @@ using f64 = double;
 		operator f32() { return f16Tof32(m_value); }
 		operator f32() const { return f16Tof32(m_value); }
 
-		f16& operator=(const f16& f) { m_value = f; return *this; }
+		f16& operator=(const f16& f) { m_value = (int16)f; return *this; }
 		f16& operator+=(const f16& f)
 		{
 			*this = *this + f;

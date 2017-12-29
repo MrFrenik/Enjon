@@ -100,6 +100,17 @@ namespace Enjon
 			*/
 			const MetaClassRegistry* GetMetaClassRegistry( );
 
+			/**
+			* @brief
+			*/
+			static void SetInstance( Engine* instance )
+			{
+				if ( mInstance == nullptr )
+				{
+					mInstance = instance; 
+				}
+			}
+
 		private:
 			
 			/**

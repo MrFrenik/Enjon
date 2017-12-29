@@ -128,12 +128,12 @@ namespace Enjon
 			{
 				Quaternion Q; 
 
-				f64 cy = std::cosf( yaw * 0.5 );
-				f64 sy = std::sinf( yaw * 0.5 );
-				f64 cr = std::cosf( roll * 0.5 );
-				f64 sr = std::sinf( roll * 0.5 );
-				f64 cp = std::cosf( pitch * 0.5 );
-				f64 sp = std::sinf( pitch * 0.5 );
+				f32 cy = std::cosf( yaw * 0.5f );
+				f32 sy = std::sinf( yaw * 0.5f );
+				f32 cr = std::cosf( roll * 0.5f );
+				f32 sr = std::sinf( roll * 0.5f );
+				f32 cp = std::cosf( pitch * 0.5f );
+				f32 sp = std::sinf( pitch * 0.5f );
 
 				Q.w = cy * cr * cp + sy * sr * sp;
 				Q.x = cy * sr * cp - sy * cr * sp;

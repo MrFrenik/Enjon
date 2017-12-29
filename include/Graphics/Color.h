@@ -79,22 +79,23 @@ namespace Enjon {
 	}
 
 	// Strict POD struct ColoRGBA32
-	struct ColorRGBA32
+	class ColorRGBA32
 	{ 
-		ColorRGBA32() 
-			: r(1), g(1), b(1), a(1) 
-		{}
+		public:
+			ColorRGBA32() 
+				: r(1), g(1), b(1), a(1) 
+			{}
 
-		ColorRGBA32(float _r, float _g, float _b, float _a)
-			: r(_r), g(_g), b(_b), a(_a)
-		{}
+			ColorRGBA32(float _r, float _g, float _b, float _a)
+				: r(_r), g(_g), b(_b), a(_a)
+			{}
 
-		ColorRGBA32(const Vec4& V) : r(V.x), g(V.y), b(V.z), a(V.w) {}
+			ColorRGBA32(const Vec4& V) : r(V.x), g(V.y), b(V.z), a(V.w) {}
 
-		float r;
-		float g;
-		float b;
-		float a; 
+			float r;
+			float g;
+			float b;
+			float a; 
 	};
 
 	// Initializer

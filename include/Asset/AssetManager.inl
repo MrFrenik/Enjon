@@ -29,10 +29,7 @@ u32 AssetManager::GetAssetTypeId( ) const noexcept
 	static_assert( std::is_base_of<Asset, T>::value, "GetAssetTypeId:: T must inherit from Asset." );
 
 	// Return id type from object
-	return Enjon::Object::GetTypeId< T >( );
-
-	static u32 typeId{ GetUniqueAssetTypeId( ) };
-	return typeId;
+	return Enjon::Engine::GetInstance( )->GetMetaClassRegistry( )->GetTypeId< T >( );
 }
 
 //================================================================================================ 

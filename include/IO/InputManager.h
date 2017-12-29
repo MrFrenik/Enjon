@@ -171,8 +171,11 @@ namespace Enjon
 		bool IsButtonPressed( u32 buttonID ) const; 
 	};
 
+	ENJON_CLASS( )
 	class Input : public Subsystem
 	{
+		ENJON_CLASS_BODY( )
+
 		public: 
 
 			/**

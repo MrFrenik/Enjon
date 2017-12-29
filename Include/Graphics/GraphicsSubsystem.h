@@ -59,8 +59,11 @@ namespace Enjon
 	};
 
 
+	ENJON_CLASS( )
 	class GraphicsSubsystem : public Subsystem
 	{
+		ENJON_CLASS_BODY( )
+
 		public:
 
 			/**

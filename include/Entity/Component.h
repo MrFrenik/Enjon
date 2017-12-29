@@ -198,7 +198,7 @@ namespace Enjon
 	inline ComponentID GetComponentType() noexcept
 	{
 		static_assert( std::is_base_of<Component, T>::value, "Component:: T must inherit from Component." );	
-		return Object::GetTypeId< T >( ); 
+		return Engine::GetInstance( )->GetMetaClassRegistry( )->GetTypeId< T >( );
 	}
 
 	typedef std::bitset<static_cast<u32>( MAX_COMPONENTS )> ComponentBitset;

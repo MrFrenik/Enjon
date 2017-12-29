@@ -8,12 +8,13 @@
 #include "System/Types.h"
 #include "Defines.h"
 #include "Subsystem.h"
+#include "Engine.h"
 
 #include <unordered_map>
 
 namespace Enjon
 {
-	class SubsystemCatalog
+	class SubsystemCatalog : public Enjon::Object
 	{
 		public:
 
@@ -102,8 +103,7 @@ namespace Enjon
 				static_assert( std::is_base_of<Subsystem, T>::value,
 					"GetSubsystemTypeId:: T must inherit from Subsystem." );
 
-				static u32 typeId{ GetUniqueSubsystemTypeId() };
-				return typeId;
+				return Engine::GetInstance( )->GetMetaClassRegistry( )->GetTypeId< T >( ); 
 			} 
 
 		private: 
