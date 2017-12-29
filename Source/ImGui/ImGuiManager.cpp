@@ -314,6 +314,27 @@ namespace Enjon
 				}
 			} break;
 
+			case MetaPropertyType::EntityHandle:
+			{
+				const MetaPropertyArray< EntityHandle >* arrayProp = static_cast< const MetaPropertyArray< EntityHandle >* >( prop );
+				if ( arrayProp )
+				{
+					for ( usize i = 0; i < arrayProp->GetSize( object ); ++i )
+					{
+						EntityHandle arrObj = arrayProp->GetValueAs( object, i );
+						if ( arrObj.Get( ) )
+						{
+							const MetaClass* arrPropCls = arrObj.Get( )->Class( );
+							if ( ImGui::TreeNode( Enjon::String( arrPropCls->GetName( ) + "##" + std::to_string( u32( arrObj.GetID() ) ) ).c_str( ) ) )
+							{
+								DebugDumpObject( arrObj.Get( ) );
+								ImGui::TreePop( );
+							}
+						}
+					}
+				}
+			} break;
+
 			case MetaPropertyType::AssetHandle:
 			{
 				MetaArrayPropertyProxy proxy = prop->GetProxy( ); 

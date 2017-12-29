@@ -140,8 +140,12 @@ namespace Enjon
 		// Update all core components
 		for ( auto& c : mComponents )
 		{
-			c->Update( dt );
-		}
+			auto comp = mManager->GetComponent( GetHandle(), c );
+			if ( comp )
+			{
+				comp->Update( dt ); 
+			}
+		} 
 	}
 
 	//====================================================================================================
@@ -165,6 +169,24 @@ namespace Enjon
 	}
 
 	//---------------------------------------------------------------
+
+	Vector<Component*> Entity::GetComponents( )
+	{
+		Vector<Component*> compReturns;
+		for ( auto& c : mComponents )
+		{
+			auto comp = mManager->GetComponent( GetHandle( ), c );
+			if ( comp )
+			{
+				compReturns.push_back( comp );
+			}
+		}
+
+		return compReturns;
+	}
+
+	//---------------------------------------------------------------
+
 	void Entity::SetLocalTransform(Transform& transform)
 	{
 		mLocalTransform = transform;
@@ -454,8 +476,21 @@ namespace Enjon
 			}
 		}
 	}
-
+ 
 	//---------------------------------------------------------------
+
+	Component* EntityManager::GetComponent( const EntityHandle& entity, const u32& ComponentID )
+	{
+		if ( mComponents.find( ComponentID ) != mComponents.end( ) )
+		{
+			return mComponents[ ComponentID ]->GetComponent( entity.GetID( ) );
+		}
+
+		return nullptr;
+	}
+ 
+	//---------------------------------------------------------------
+
 	void Entity::UpdateComponentTransforms(f32 dt)
 	{
 		if ( mWorldTransformDirty )
@@ -465,7 +500,11 @@ namespace Enjon
 
 		for (auto& c : mComponents)
 		{
-			c->Update(dt);
+			auto comp = mManager->GetComponent( GetHandle( ), c );
+			if ( comp )
+			{
+				comp->Update( dt ); 
+			}
 		}
 	}
 
@@ -559,7 +598,7 @@ namespace Enjon
 	void EntityManager::Destroy( const EntityHandle& entity )
 	{ 
 		// Push for deferred removal from active entities
-		mMarkedForDestruction.push_back(entity);
+		mMarkedForDestruction.push_back(entity.GetID());
 	}
 
 	//--------------------------------------------------------------
@@ -568,22 +607,32 @@ namespace Enjon
 		// Move through dirty list and remove from active entities
 		for (auto& e : mMarkedForDestruction)
 		{
-			Entity* ent = e.Get( );
-			if ( ent )
+			if ( e < MAX_ENTITIES )
 			{
-				// Destroy all components
-				for (auto& c : ent->mComponents)
+				Entity* ent = &mEntities->at( e );
+
+				if ( ent && ent->mState == EntityState::ACTIVE )
 				{
-					c->Destroy();
-				}
+					// Destroy all components
+					for (auto& c : ent->mComponents)
+					{
+						auto comp = GetComponent( ent->GetHandle( ), c );
+						if ( comp )
+						{
+							comp->Destroy(); 
+						}
 
-				// Reset entity
-				ent->Reset();
+						delete comp;
+						comp = nullptr;
+					}
 
-				// Remove from active entities
-				mActiveEntities.erase(std::remove(mActiveEntities.begin(), mActiveEntities.end(), ent), mActiveEntities.end()); 
-			}
+					// Reset entity
+					ent->Reset();
 
+					// Remove from active entities
+					mActiveEntities.erase(std::remove(mActiveEntities.begin(), mActiveEntities.end(), ent), mActiveEntities.end()); 
+				} 
+			} 
 		}
 
 		mMarkedForDestruction.clear();
@@ -604,14 +653,14 @@ namespace Enjon
 
 	void EntityManager::Update( const f32 dt )
 	{ 
+		// Clean any entities that were marked for destruction
+		Cleanup( );
+
 		// Update all components on entities
 		for ( auto& e : mActiveEntities )
 		{
 			e->Update( dt );
-		}
-
-		// Clean any entities that were marked for destruction
-		Cleanup( );
+		} 
 	}
 
 	//==================================================================================================
@@ -667,7 +716,7 @@ namespace Enjon
 		entity->mComponentMask |= Enjon::GetComponentBitMask( compIdx );
 
 		// Get component ptr and push back into entity components
-		entity->mComponents.push_back(component);
+		entity->mComponents.push_back( compIdx );
 
 		return component;
 

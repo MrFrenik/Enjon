@@ -1,8 +1,14 @@
 #include "Graphics/Material.h"
 #include "Graphics/GLSLProgram.h"
 #include "Asset/MaterialAssetLoader.h"
+#include "System/Types.h"
+#include "Graphics/GraphicsSubsystem.h"
+#include "SubsystemCatalog.h"
+#include "Engine.h"
 
 #include <assert.h>
+
+#include <windows.h>
 
 namespace Enjon {
  
@@ -99,7 +105,11 @@ namespace Enjon {
 				
 				if ( HasOverride( uniformName ) )
 				{
-					const_cast< Material* >( this )->mUniformOverrides[ uniformName ]->Bind( sh );
+					ShaderUniform* uniform = const_cast< Material *> ( this )->mUniformOverrides[ uniformName ];
+					if ( uniform )
+					{
+						uniform->Bind( sh );
+					}
 				}
 				else
 				{
@@ -109,7 +119,7 @@ namespace Enjon {
 		} 
 	} 
 
-	//========================================================================
+	//======================================================================== 
 			
 	void Material::SetUniform( const String& name, const AssetHandle< Texture >& value )
 	{
@@ -124,9 +134,16 @@ namespace Enjon {
 			if ( sg->HasUniform( name ) )
 			{
 				UniformTexture* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformTexture >( );;
-				UniformTexture* uniOverride = new UniformTexture( *uniform );
-				uniOverride->SetTexture( value );
-				AddOverride( uniOverride );
+
+				// Construct new override from graphics subsystem
+				const GraphicsSubsystem* gfx = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem > ( );
+				UniformTexture* uniOverride = (UniformTexture*)gfx->NewShaderUniform( Object::GetClass< UniformTexture >() );
+				if ( uniOverride )
+				{
+					uniOverride->CopyFields( uniform );
+					uniOverride->SetTexture( value ); 
+					AddOverride( uniOverride );
+				} 
 			}
 		}
 	}
@@ -140,9 +157,16 @@ namespace Enjon {
 			if ( sg->HasUniform( name ) )
 			{
 				UniformVec2* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformVec2 >( );;
-				UniformVec2* uniOverride = new UniformVec2( *uniform );
-				uniOverride->SetValue( value );
-				AddOverride( uniOverride );
+
+				// Construct new override from graphics subsystem
+				const GraphicsSubsystem* gfx = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem > ( );
+				UniformVec2* uniOverride = (UniformVec2*)gfx->NewShaderUniform( Object::GetClass< UniformVec2 >() );
+				if ( uniOverride )
+				{
+					uniOverride->CopyFields( uniform );
+					uniOverride->SetValue( value ); 
+					AddOverride( uniOverride );
+				} 
 			}
 		}
 		// Otherwise set override
@@ -163,9 +187,16 @@ namespace Enjon {
 			if ( sg->HasUniform( name ) )
 			{
 				UniformVec3* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformVec3 >( );;
-				UniformVec3* uniOverride = new UniformVec3( *uniform );
-				uniOverride->SetValue( value );
-				AddOverride( uniOverride );
+
+				// Construct new override from graphics subsystem
+				const GraphicsSubsystem* gfx = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem > ( );
+				UniformVec3* uniOverride = (UniformVec3*)gfx->NewShaderUniform( Object::GetClass< UniformVec3 >() );
+				if ( uniOverride )
+				{
+					uniOverride->CopyFields( uniform );
+					uniOverride->SetValue( value ); 
+					AddOverride( uniOverride );
+				} 
 			}
 		}
 		// Otherwise set override
@@ -186,9 +217,16 @@ namespace Enjon {
 			if ( sg->HasUniform( name ) )
 			{
 				UniformVec4* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformVec4 >( );;
-				UniformVec4* uniOverride = new UniformVec4( *uniform );
-				uniOverride->SetValue( value );
-				AddOverride( uniOverride );
+
+				// Construct new override from graphics subsystem
+				const GraphicsSubsystem* gfx = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem > ( );
+				UniformVec4* uniOverride = (UniformVec4*)gfx->NewShaderUniform( Object::GetClass< UniformVec4 >() );
+				if ( uniOverride )
+				{
+					uniOverride->CopyFields( uniform );
+					uniOverride->SetValue( value ); 
+					AddOverride( uniOverride );
+				} 
 			}
 		}
 		// Otherwise set override
@@ -235,9 +273,16 @@ namespace Enjon {
 			if ( sg->HasUniform( name ) )
 			{
 				UniformFloat* uniform = const_cast< ShaderUniform* >( sg->GetUniform( name ) )->Cast< UniformFloat >( );;
-				UniformFloat* uniOverride = new UniformFloat( *uniform );
-				uniOverride->SetValue( value );
-				AddOverride( uniOverride );
+
+				// Construct new override from graphics subsystem
+				const GraphicsSubsystem* gfx = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem > ( );
+				UniformFloat* uniOverride = (UniformFloat*)gfx->NewShaderUniform( Object::GetClass< UniformFloat >() );
+				if ( uniOverride )
+				{
+					uniOverride->CopyFields( uniform );
+					uniOverride->SetValue( value ); 
+					AddOverride( uniOverride );
+				} 
 			}
 		}
 		// Otherwise set override

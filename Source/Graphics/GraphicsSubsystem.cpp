@@ -1890,6 +1890,22 @@ namespace Enjon
 		glBindVertexArray( 0 );
 	}
 
+
+	/**
+	*@brief
+	*/
+	ShaderUniform* GraphicsSubsystem::NewShaderUniform( const MetaClass* uniformClass ) const
+	{
+		if ( uniformClass )
+		{
+			ShaderUniform* newUniform = (ShaderUniform*)uniformClass->Construct( );
+
+			return newUniform;
+		}
+
+		return nullptr;
+	}
+
 }
 
 

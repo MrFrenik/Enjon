@@ -11,10 +11,11 @@
 #include <Entity/Components/GraphicsComponent.h>
 
 #include <windows.h>
+#include <fmt/format.h>
 
 typedef int( *funcAdd )( const int&, const int& );
 typedef int( *funcSubtract )( const int&, const int& );
-typedef void( *funcEntityRotate )( const Enjon::EntityHandle&, const Enjon::f32& );
+typedef void( *funcEntityRotate )( const Enjon::EntityHandle&, const Enjon::f32&, bool );
 typedef void( *funcSetEngineInstance )( Enjon::Engine* instance );
 
 // TODO(): Make sure to abstract this for platform independence
@@ -48,6 +49,7 @@ void CopyLibraryContents( )
 	dllPath = copyDir;
 	if ( fs::exists( dllPath ) )
 	{
+		//fs::copy( fs::path( dllPath.string( ) + "TestDLL.dll" ), rootDir + "Build/Debug/TestDLL.dll" );
 		fs::copy( dllPath, rootDir + "Build/Debug/", fs::copy_options::recursive );
 	}
 
@@ -103,6 +105,21 @@ void CameraOptions( bool* enable )
 	{
 		Enjon::ImGuiManager::DebugDumpObject( cam ); 
 		ImGui::TreePop( );
+	}
+}
+
+void EnjonEditor::WorldOutlinerView( )
+{
+	const Enjon::EntityManager* entities = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( );
+	ImGui::Text( fmt::format( "Entities: {}", entities->GetActiveEntities().size() ).c_str() ); 
+
+	for ( auto& e : entities->GetActiveEntities( ) )
+	{
+		if ( ImGui::TreeNode( fmt::format( "{}", e->GetID( ) ).c_str( ) ) )
+		{
+			Enjon::ImGuiManager::DebugDumpObject( e );
+			ImGui::TreePop( );
+		}
 	}
 }
 
@@ -173,10 +190,20 @@ Enjon::Result EnjonEditor::Initialize( )
 		ImGui::EndDock( );
 	});
 
+	Enjon::ImGuiManager::RegisterWindow( [ & ]
+	{
+		if ( ImGui::BeginDock( "World Outliner", nullptr ) )
+		{
+			WorldOutlinerView( );
+		}
+		ImGui::EndDock( );
+	});
+
 	// Register docking layouts
 	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
 	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Scene", ImGui::DockSlotType::Slot_Right, 0.2f ) );
 	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Camera", ImGui::DockSlotType::Slot_Bottom, 0.3f ) );
+	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) );
 
 	// Create an entity to manipulate 
 	Enjon::EntityManager* entities = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->ConstCast< Enjon::EntityManager >( );
@@ -199,7 +226,7 @@ Enjon::Result EnjonEditor::Update( f32 dt )
 	// Try to rotate entity if dll is loaded
 	if ( entityRotateFunc )
 	{ 
-		entityRotateFunc( mEntity, t );
+		entityRotateFunc( mEntity, t, mEntitySwitch );
 	}
 
 	return Enjon::Result::PROCESS_RUNNING;
@@ -209,12 +236,7 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 { 
 	const Enjon::GraphicsSubsystem* mGfx = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem>( );
 	const Enjon::Input* mInput = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::Input >( );
-	Enjon::Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >();
- 
-	if ( mInput->IsKeyPressed( Enjon::KeyCode::Escape ) )
-	{
-		return Enjon::Result::SUCCESS;
-	} 
+	Enjon::Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >(); 
 
 	if ( mInput->IsKeyPressed( Enjon::KeyCode::T ) )
 	{
@@ -237,7 +259,7 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 		}
 		if ( mInput->IsKeyDown( Enjon::KeyCode::A ) )
 		{
-			velDir += camera->Left( );
+velDir += camera->Left( );
 		}
 		if ( mInput->IsKeyDown( Enjon::KeyCode::D ) )
 		{
@@ -245,7 +267,7 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 		}
 
 		// Normalize velocity
-		velDir = Enjon::Vec3::Normalize( velDir ); 
+		velDir = Enjon::Vec3::Normalize( velDir );
 
 		// Set camera position
 		camera->Transform.Position += dt * 10.0f * velDir;
@@ -270,7 +292,7 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 		// Offset camera orientation
 		f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x ) * dt * mouseSensitivity;
 		f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y ) * dt * mouseSensitivity;
-		camera->OffsetOrientation( xOffset, yOffset ); 
+		camera->OffsetOrientation( xOffset, yOffset );
 	}
 	else
 	{
@@ -286,6 +308,9 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 				// Free library if in use
 				FreeLibrary( dllHandle );
 				dllHandle = nullptr;
+				addFunc = nullptr;
+				subFunc = nullptr;
+				entityRotateFunc = nullptr;
 			}
 
 			// Copy files to directory
@@ -299,7 +324,7 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 			{
 				addFunc = ( funcAdd )GetProcAddress( dllHandle, "Add" );
 				subFunc = ( funcSubtract )GetProcAddress( dllHandle, "Subtract" );
-				entityRotateFunc = ( funcEntityRotate )GetProcAddress( dllHandle, "RotateEntity" ); 
+				entityRotateFunc = ( funcEntityRotate )GetProcAddress( dllHandle, "RotateEntity" );
 
 				// Try and set the engine instance
 				setEngineFunc = ( funcSetEngineInstance )GetProcAddress( dllHandle, "SetEngineInstance" );
@@ -307,7 +332,7 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 				{
 					setEngineFunc( Enjon::Engine::GetInstance( ) );
 				}
-				
+
 			}
 			else
 			{
@@ -328,6 +353,48 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 			if ( subFunc )
 			{
 				std::cout << subFunc( 20, 5 ) << "\n";
+			}
+		}
+
+		if ( mInput->IsKeyPressed( Enjon::KeyCode::E ) )
+		{
+			mEntitySwitch ^= 1;
+		}
+
+		if ( mInput->IsKeyPressed( Enjon::KeyCode::O ) )
+		{
+			if ( !mEntity.Get( )->HasChildren( ) )
+			{ 
+				Enjon::EntityManager* entities = Enjon::Engine::GetInstance()->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->ConstCast< Enjon::EntityManager >( );
+				const Enjon::AssetManager* assetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+
+				for ( u32 i = 0; i < 5; ++i )
+				{
+					// Add entity as child, for shiggles
+					Enjon::EntityHandle child = entities->Allocate( );
+					mEntity.Get( )->AddChild( child );
+
+					Enjon::GraphicsComponent* childGfx = child.Get( )->AddComponent< Enjon::GraphicsComponent >( );
+					childGfx->SetMesh( assetManager->GetAsset< Enjon::Mesh >( "models.unit_sphere" ) );
+					childGfx->SetMaterial( assetManager->GetAsset< Enjon::Material >( "NewMaterial" ).Get( ) );
+
+					// Set local transform of child
+					child.Get( )->SetLocalTransform( Enjon::Transform( Enjon::Vec3( std::cos( ( f32 )i ), 2.0f, std::sin( ( f32 )i ) ), Enjon::Quaternion( ), Enjon::Vec3( 0.5f ) ) );
+
+					// Add renderable to scene
+					Enjon::Engine::GetInstance()->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetScene( )->AddRenderable( childGfx->GetRenderable( ) );
+				}
+			}
+		}
+
+		if ( mInput->IsKeyPressed( Enjon::KeyCode::P ) )
+		{
+			if ( mEntity.Get( )->HasChildren( ) )
+			{
+				for ( auto& child : mEntity.Get( )->GetChildren( ) )
+				{
+					child.Get( )->Destroy( );
+				}
 			}
 		}
 	}

@@ -177,9 +177,14 @@ namespace Enjon
 			/// @brief Returns whether or not entity is valid
 			b8 Entity::IsValid();
 
-			const std::vector< EntityHandle >& GetChildren() const { return mChildren; }
+			const Vector< EntityHandle >& GetChildren() const { return mChildren; }
 
-			const std::vector<Component*>& GetComponents( ) const { return mComponents; }
+			const Vector<u32>& GetComponentIndicies( ) const 
+			{ 
+				return mComponents; 
+			}
+
+			Vector<Component*> GetComponents( ); 
 
 			/// @brief Propagates transform down through all components
 			void UpdateComponentTransforms(f32 dt);
@@ -248,7 +253,7 @@ namespace Enjon
 			Transform mWorldTransform;
 
 			ENJON_PROPERTY( )
-			Vector<Component*> mComponents;
+			Vector<u32> mComponents;
  
 			ENJON_PROPERTY( )
 			Vector< EntityHandle > mChildren; 
@@ -260,7 +265,7 @@ namespace Enjon
 	};
 
 	using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
-	using MarkedForDestructionList	= Vector< EntityHandle >;
+	using MarkedForDestructionList	= Vector< u32 >;
 	using ActiveEntityList 			= Vector<Entity*>;
 	using ComponentBaseArray		= HashMap< u32, ComponentWrapperBase* >;
 
@@ -355,6 +360,13 @@ namespace Enjon
 			{ 
 				return mActiveEntities; 
 			}
+
+		protected:
+
+			/**
+			* @brief
+			*/
+			Component* GetComponent( const EntityHandle& entity, const u32& ComponentID );
 
 		private:
 			/**

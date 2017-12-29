@@ -17,6 +17,7 @@ namespace Enjon
 	class SpriteBatch;
 	class iVec2;
 	class Shader;
+	class ShaderUniform;
 
 	struct ToneMapSettings
 	{
@@ -133,6 +134,11 @@ namespace Enjon
 			*@brief
 			*/
 			void ShowGraphicsWindow(bool* p_open);
+
+			/**
+			*@brief
+			*/
+			ShaderUniform* NewShaderUniform( const MetaClass* uniformClass ) const;
 
 		private:
 

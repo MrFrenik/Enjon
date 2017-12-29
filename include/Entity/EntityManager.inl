@@ -33,39 +33,33 @@ T* EntityManager::AddComponent(const Enjon::EntityHandle& handle)
 	u32 eid = entity->GetID();
 
 	// Get index into vector and assert that entity manager has this component
-	u32 index = Enjon::GetComponentType<T>();
-	assert(mComponents.at(index) != nullptr);
+	u32 compIdx = Enjon::GetComponentType<T>();
+	assert(mComponents.at(compIdx) != nullptr); 
 
-	ComponentWrapper<T>* cWrapper = static_cast<ComponentWrapper<T>*>(mComponents.at(index));
-	auto cMap = &(cWrapper->mComponentMap);
-	auto componentList = &(cWrapper->mComponentPtrs);
+	ComponentWrapperBase* base = mComponents[ compIdx ];
 
-	// Create new component and place into map
-	auto query = cMap->find(eid);
-	if (query == cMap->end())
+	// If component already exists
+	if ( base->HasEntity( eid ) )
 	{
-		T component;
-		component.SetEntity(entity);
-		component.SetID(index);
-		component.SetBase(cWrapper); 
-		component.mEntityID = entity->mID;
-		cWrapper->mComponentMap[eid] = component;
-		componentList->push_back(&cWrapper->mComponentMap[eid]);
-
-		// Set bitmask field for component
-		entity->mComponentMask |= Enjon::GetComponentBitMask<T>();
-
-		// Get component ptr and push back into entity components
-		auto compPtr = &cWrapper->mComponentMap[eid];
-		entity->mComponents.push_back(compPtr);
-
-		return compPtr;
+		return (T*)base->GetComponent( eid );
 	}
 
-	// Otherwise the entity already has the component
-	assert(false);
+	// Otherwise new component and place into map
+	T* component = (T*)base->AddComponent( eid );
+	component->SetEntity(entity);
+	component->SetID(compIdx);
+	component->SetBase( base );
+	component->mEntityID = entity->mID;
 
-	// Return null to remove warnings from compiler
+	// Set bitmask field for component
+	entity->mComponentMask |= Enjon::GetComponentBitMask( compIdx );
+
+	// Get component ptr and push back into entity components
+	entity->mComponents.push_back( compIdx ); 
+
+	return component;
+ 
+	// Shouldn't get here
 	return nullptr;
 }
 
@@ -86,31 +80,18 @@ void EntityManager::RemoveComponent(Entity* entity)
 //--------------------------------------------------------------------------
 template <typename T>
 T* EntityManager::GetComponent(Entity* entity)
-{
-	// Assert that it has component
-	//assert(entity->HasComponent<T>());
-
+{ 
 	// Assert entity manager exists
 	assert(entity != nullptr);
 
 	u32 eid = entity->GetID();
 
-	// Get component wrapper
-	auto cWrapper = static_cast<ComponentWrapper<T>*>(mComponents.at(Enjon::GetComponentType<T>()));
+	// Get component idx
+	u32 compIdx = Enjon::GetComponentType<T>();
+	assert(mComponents.at(compIdx) != nullptr); 
 
-	// Return component
-	auto* cMap = &cWrapper->mComponentMap;
-	auto query = cMap->find(eid);
-	if (query != cMap->end())
-	{
-		return &query->second;
-	}
-
-	// We shoudln't hit this
-	//assert(false);
-
-	// Return nullptr to get rid of compiler warnings
-	return nullptr;
+	ComponentWrapperBase* base = mComponents.at( compIdx );
+	return (T*)base->GetComponent( eid ); 
 }
 
 //=======================================================================================
@@ -118,24 +99,27 @@ T* EntityManager::GetComponent(Entity* entity)
 template <typename T>
 void EntityManager::DetachComponentFromEntity(Entity* entity)
 {
-	u32 idx = Enjon::GetComponentType<T>();
-	assert(mComponents.at(idx) != nullptr);
+	u32 compIdx = Enjon::GetComponentType<T>();
+	assert(mComponents.at(compIdx) != nullptr);
 
-	auto cWrapper = static_cast<ComponentWrapper<T>*>(mComponents.at(idx));
+	auto cWrapper = static_cast<ComponentWrapper<T>*>(mComponents.at(compIdx));
 	auto cPtrList = &cWrapper->mComponentPtrs;
-	auto cMap = &cWrapper->mComponentMap;
-
+	auto cMap = &cWrapper->mComponentMap; 
 	auto compPtr = &cWrapper->mComponentMap[entity->mID];
 
 	// Search through entity component list and remove reference
 	auto entComps = &entity->mComponents;
-	entComps->erase(std::remove(entComps->begin(), entComps->end(), compPtr), entComps->end());
+	entComps->erase(std::remove(entComps->begin(), entComps->end(), compIdx), entComps->end());
 
 	// Remove ptr from point list map
 	cPtrList->erase(std::remove(cPtrList->begin(), cPtrList->end(), compPtr), cPtrList->end());	
 
 	// Finally remove from map
 	cMap->erase(entity->mID);
+
+	// Delete comp and set to nullptr
+	delete compPtr;
+	compPtr = nullptr;
 }
 
 //=======================================================================================

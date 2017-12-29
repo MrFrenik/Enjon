@@ -27,6 +27,7 @@ class EnjonEditor : public Enjon::Application
 
 	private:
 		void LoadResourceFromFile( );
+		void WorldOutlinerView( );
 
 	private:
 		bool mViewBool = true;
@@ -34,6 +35,8 @@ class EnjonEditor : public Enjon::Application
 		bool mShowLoadResourceOption = true;
 		Enjon::String mResourceFilePathToLoad = "";
 		bool mMoveCamera = false; 
+
+		bool mEntitySwitch = true;
 
 		Enjon::EntityHandle mEntity;
 };

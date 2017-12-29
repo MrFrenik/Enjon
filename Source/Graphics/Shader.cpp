@@ -404,6 +404,16 @@ namespace Enjon
 	}
 
 	//======================================================================================================================= 
+
+	void UniformTexture::CopyFields( const UniformTexture* other )
+	{
+		mLocation = other->mLocation;
+		mName = String(other->mName);
+		mType = other->mType;
+		mTexture = other->mTexture; 
+	}
+
+	//======================================================================================================================= 
 			
 	UniformTexture::~UniformTexture( )
 	{ 
@@ -417,5 +427,43 @@ namespace Enjon
 	}
 
 	//======================================================================================================================= 
+
+	void UniformFloat::CopyFields( const UniformFloat* other )
+	{
+		mLocation = other->mLocation;
+		mName = other->mName;
+		mType = other->mType;
+		mValue = other->mValue;
+	}
+ 
+	//======================================================================================================================= 
+
+	void UniformVec2::CopyFields( const UniformVec2* other )
+	{
+		mLocation = other->mLocation;
+		mName = other->mName;
+		mType = other->mType;
+		mValue = other->mValue;
+	}
+ 
+	//======================================================================================================================= 
+
+	void UniformVec3::CopyFields( const UniformVec3* other )
+	{
+		mLocation = other->mLocation;
+		mName = other->mName;
+		mType = other->mType;
+		mValue = other->mValue; 
+	}
+ 
+	//======================================================================================================================= 
+
+	void UniformVec4::CopyFields( const UniformVec4* other )
+	{
+		mLocation = other->mLocation;
+		mName = other->mName;
+		mType = other->mType;
+		mValue = other->mValue;
+	}
 }
 

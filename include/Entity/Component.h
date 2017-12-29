@@ -33,6 +33,8 @@ namespace Enjon
 			virtual Component* AddComponent( const u32& entityId ) = 0;
 
 			virtual void RemoveComponent( const u32& entityId ) = 0; 
+
+			virtual Component* GetComponent( const u32& entityId ) = 0;
 	};
 
 	template <typename T>
@@ -46,13 +48,13 @@ namespace Enjon
 			virtual void Base() override {}
 
 			using ComponentPtrs = Vector<T*>; 
-			using ComponentMap = HashMap<u32, T>;
+			using ComponentMap = HashMap<u32, T*>;
 
 			virtual Component* AddComponent( const u32& entityId, Component* component ) override
 			{
-				mComponentMap[ entityId ] = *(T*)component;
-				mComponentPtrs.push_back( &mComponentMap[ entityId ] );
-				return &mComponentMap[ entityId ];
+				mComponentMap[ entityId ] = (T*)component;
+				mComponentPtrs.push_back( mComponentMap[ entityId ] );
+				return mComponentMap[ entityId ];
 			} 
 
 			virtual Component* AddComponent( const u32& entityId ) override
@@ -60,11 +62,11 @@ namespace Enjon
 				// If not available then add component - otherwise return component that's already allocated
 				if ( !HasEntity( entityId ) )
 				{
-					mComponentMap[ entityId ] = T( );
-					mComponentPtrs.push_back( &mComponentMap[ entityId ] );
+					mComponentMap[ entityId ] = new T( );
+					mComponentPtrs.push_back( mComponentMap[ entityId ] );
 				}
 
-				return &mComponentMap[ entityId ];
+				return mComponentMap[ entityId ];
 			} 
 
 			virtual void RemoveComponent( const u32& entityId ) override
@@ -77,6 +79,16 @@ namespace Enjon
 			virtual bool HasEntity( const u32& entityID ) override
 			{
 				return ( mComponentMap.find( entityID ) != mComponentMap.end( ) );
+			}
+
+			virtual Component* GetComponent( const u32& entityID ) override
+			{
+				if ( HasEntity( entityID ) )
+				{
+					return mComponentMap[ entityID ]; 
+				}
+
+				return nullptr;
 			}
 
 		private:
@@ -95,6 +107,10 @@ namespace Enjon
 			* @brief Constructor
 			*/
 			Component(){}
+
+			virtual ~Component( )
+			{ 
+			}
 
 			/**
 			* @brief
@@ -131,7 +147,7 @@ namespace Enjon
 				auto cMap = &cWrapper->mComponentMap;
 
 				// Get component
-				auto compPtr = &cWrapper->mComponentMap[mEntityID];
+				auto compPtr = cWrapper->mComponentMap[mEntityID];
 
 				// Remove ptr from point list map
 				cPtrList->erase( std::remove( cPtrList->begin(), cPtrList->end(), compPtr ), cPtrList->end() );	
@@ -171,7 +187,7 @@ namespace Enjon
 			EntityManager* mManager = nullptr;
 
 			u32 mEntityID; 
-			u32 mComponentID;
+			u32 mComponentID = 0;
 
 		private:
 			ComponentWrapperBase* mBase = nullptr;

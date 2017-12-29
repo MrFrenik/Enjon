@@ -136,7 +136,7 @@ namespace Enjon
 			* @brief
 			*/
 			const Enjon::String& GetName( ) const { return mName; }
-			
+
 			/*
 			* @brief
 			*/
@@ -179,6 +179,11 @@ namespace Enjon
 			* @brief
 			*/
 			~UniformTexture( ); 
+
+			/*
+			* @brief
+			*/
+			void CopyFields( const UniformTexture* other );
 			
 			/*
 			* @brief
@@ -253,6 +258,11 @@ namespace Enjon
 				return mValue; 
 			}
 
+			/*
+			* @brief
+			*/
+			void CopyFields( const UniformVec2* other );
+
 		private:
 
 			ENJON_PROPERTY( )
@@ -304,6 +314,11 @@ namespace Enjon
 		{
 			return mValue;
 		}
+
+		/*
+		* @brief
+		*/
+		void CopyFields( const UniformVec3* other );
 
 	private:
 
@@ -357,6 +372,11 @@ namespace Enjon
 			return mValue;
 		}
 
+		/*
+		* @brief
+		*/
+		void CopyFields( const UniformVec4* other );
+
 	private:
 
 		ENJON_PROPERTY( )
@@ -408,6 +428,11 @@ namespace Enjon
 			{
 				return mValue;
 			}
+
+			/*
+			* @brief
+			*/
+			void CopyFields( const UniformFloat* other );
 
 		private: 
 

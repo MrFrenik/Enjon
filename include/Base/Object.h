@@ -1157,6 +1157,16 @@ namespace Enjon
 			//	return ( mTypeId == Object::GetTypeId< T >( ) );
 			//}
 
+			u32 GetTypeId( )
+			{
+				if ( Class( ) )
+				{
+					return Class( )->GetTypeId( );
+				}
+
+				return std::numeric_limits<u32>::max( );
+			}
+
 			/**
 			*@brief
 			*/
@@ -1186,7 +1196,7 @@ namespace Enjon
 		protected:
 
 			// Default to u32 max; If id set to this, then is not set by engine and invalid
-			u32 mTypeId = 0;
+			u32 mTypeId = std::numeric_limits<u32>::max();
 
 		protected:
 			template <typename T>

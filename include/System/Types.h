@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <initializer_list>
 #include <type_traits>
-#include <memory>
+#include <memory> 
 
 #include <cstddef>
 #include <cstring>
@@ -25,6 +25,16 @@
 #if !defined(alignof)
 	#define alignof(x) __alignof(x)
 #endif
+
+//#ifdef ENJON_SYSTEM_WINDOWS
+//#define Enjon_New(type)\
+//	(type*)GlobalAlloc(GMEM_FIXED, sizeof(type))
+//
+//#define Enjon_Delete(memory)\
+//	GlobalFree(memory) 
+
+//#endif
+
 
 namespace Enjon {
 
