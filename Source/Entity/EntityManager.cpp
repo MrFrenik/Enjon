@@ -51,7 +51,7 @@ namespace Enjon
 
 	Enjon::Entity* EntityHandle::Get( ) const
 	{ 
-		return const_cast< Entity* > ( mEntity );
+		return Engine::GetInstance( )->GetSubsystemCatalog( )->Get< EntityManager >( )->ConstCast< EntityManager >( )->GetRawEntity( mID );
 	}
 		
 	//================================================================================================
@@ -124,6 +124,9 @@ namespace Enjon
 			}
 		} 
 
+		// Reset all fields
+		mLocalTransform = Enjon::Transform( );
+		mWorldTransform = Enjon::Transform( ); 
 		mID = MAX_ENTITIES;
 		mState = EntityState::INACTIVE;
 		mWorldTransformDirty = true;
@@ -595,6 +598,19 @@ namespace Enjon
 	}
 
 	//---------------------------------------------------------------
+
+	Entity* EntityManager::GetRawEntity( const u32& id )
+	{
+		if ( id < MAX_ENTITIES )
+		{
+			return &mEntities->at( id );
+		}
+
+		return nullptr;
+	}
+
+	//---------------------------------------------------------------
+
 	void EntityManager::Destroy( const EntityHandle& entity )
 	{ 
 		// Push for deferred removal from active entities

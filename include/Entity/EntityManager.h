@@ -298,6 +298,11 @@ namespace Enjon
 			virtual Enjon::Result Initialize( ) override;
 
 			/**
+			* @brief
+			*/
+			Entity* GetRawEntity( const u32& id );
+
+			/**
 			*@brief
 			*/
 			virtual void Update( const f32 dT ) override;

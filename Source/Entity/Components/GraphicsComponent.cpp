@@ -63,7 +63,7 @@ namespace Enjon
 
 	//====================================================================
 
-	const Material* GraphicsComponent::GetMaterial() const
+	AssetHandle< Material > GraphicsComponent::GetMaterial() const
 	{ 
 		return mRenderable.GetMaterial(); 
 	}

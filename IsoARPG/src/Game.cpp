@@ -173,7 +173,7 @@ void Game::TestObjectSerialize( )
 		am->AddToDatabase( assetPath );
 
 		Enjon::AssetHandle< Enjon::Texture > cachedTexture = am->GetAsset< Enjon::Texture >( "textures.beast" );
-		Enjon::Material* gunMat = const_cast< Enjon::Material* >( mGun.Get( )->GetComponent< GraphicsComponent >( )->GetMaterial( ) );
+		Enjon::Material* gunMat = const_cast< Enjon::Material* >( mGun.Get( )->GetComponent< GraphicsComponent >( )->GetMaterial( ).Get() );
 		gunMat->SetTexture( Enjon::TextureSlotType::Albedo, cachedTexture );
 
 		Enjon::AssetHandle< Enjon::Mesh > cachedMesh = am->GetAsset< Enjon::Mesh >( "models.unit_cube" );
@@ -1237,7 +1237,7 @@ Enjon::Result Game::Initialize()
 			// Testing meta functions
 			if ( ImGui::CollapsingHeader( "Entity" ) )
 			{ 
-				const Enjon::Material* gfxMat = mGun.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetMaterial( );
+				const Enjon::Material* gfxMat = mGun.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetMaterial( ).Get();
 				Enjon::ImGuiManager::DebugDumpObject( gfxMat ); 
 			} 
 

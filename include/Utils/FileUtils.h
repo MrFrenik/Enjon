@@ -253,6 +253,54 @@ namespace Enjon { namespace Utils
 		return lod + rod; 
 	}
 
+	#define REPLACE_META_TAG( code, find, replace )\
+	for ( u32 i = 0; i < TagCount( code, find ); ++i )\
+	{\
+		code = FindReplaceMetaTag( code, find, replace );\
+	} 
+		
+	static inline std::string FindReplaceMetaTag( const std::string& code, const std::string& toFind, const std::string& replaceWith )
+	{
+		std::string returnStr = "";
+
+		// Search for begin
+		std::size_t foundBegin = code.find( toFind );
+		std::size_t findSize = toFind.length( );
+
+		std::string subStrBefore = "";
+		std::string subStrAfter = "";
+
+		// If found, then replace and return
+		if ( foundBegin != std::string::npos )
+		{
+			subStrBefore = code.substr( 0, foundBegin );
+			subStrAfter = code.substr( foundBegin + findSize );
+			return ( subStrBefore + replaceWith + subStrAfter );
+		}
+		// Else just return the original string
+		else
+		{
+			return code;
+		}
+	}
+
+	//==================================================================================================================
+
+	static inline std::string FindReplaceAll( const std::string& code, const std::string& toFind, const std::string& replaceWith )
+	{
+		std::string retCode = code;
+
+		// Search for begin
+		std::size_t pos = retCode.find( toFind );
+		while ( pos != std::string::npos )
+		{
+			retCode = FindReplaceMetaTag( retCode, toFind, replaceWith );
+			pos = retCode.find( toFind, pos + 1 );
+		}
+
+		return retCode;
+	}
+
 }} 
 
 #endif

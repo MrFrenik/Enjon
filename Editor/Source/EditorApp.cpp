@@ -9,25 +9,52 @@
 #include <Graphics/Window.h>
 #include <Entity/EntityManager.h>
 #include <Entity/Components/GraphicsComponent.h>
+#include <Utils/FileUtils.h>
 
 #include <windows.h>
 #include <fmt/format.h>
+#include <chrono>
+#include <ctime>
 
-typedef int( *funcAdd )( const int&, const int& );
-typedef int( *funcSubtract )( const int&, const int& );
-typedef void( *funcEntityRotate )( const Enjon::EntityHandle&, const Enjon::f32&, bool );
 typedef void( *funcSetEngineInstance )( Enjon::Engine* instance );
+typedef Enjon::Result( *funcStartUp )( const Enjon::f32& );
+typedef Enjon::Result( *funcUpdate )( const Enjon::f32& );
+typedef Enjon::Result( *funcShutDown )( const Enjon::f32& );
+typedef Enjon::Result( *funcSerializeData )( Enjon::ByteBuffer* );
+typedef Enjon::Result( *funcDeserializeData )( Enjon::ByteBuffer* );
 
 // TODO(): Make sure to abstract this for platform independence
+HINSTANCE dllHandleTemp = nullptr;
 HINSTANCE dllHandle = nullptr;
-funcSubtract subFunc = nullptr;
-funcAdd addFunc = nullptr; 
-funcEntityRotate entityRotateFunc = nullptr;
 funcSetEngineInstance setEngineFunc = nullptr;
+funcStartUp startUpFunc = nullptr;
+funcUpdate updateFunc = nullptr;
+funcShutDown shutDownFunc = nullptr;
+funcSerializeData serializeDataFunc = nullptr;
+funcDeserializeData deserializeDataFunc = nullptr;
 
 namespace fs = std::experimental::filesystem; 
 
 Enjon::String copyDir = "E:/Development/C++DLLTest/Build/Debug/TestDLLIntermediate/";
+
+void CopyTempDLL( )
+{
+	Enjon::String rootDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
+
+	fs::path dllPath = rootDir + "Build/Debug/TestDLLTemp.dll";
+	if ( fs::exists( dllPath ) )
+	{
+		fs::remove( dllPath );
+	}
+
+	// Now copy over contents from intermediate build to executable dir
+	dllPath = copyDir;
+	if ( fs::exists( dllPath ) )
+	{
+		fs::copy( fs::path( dllPath.string( ) + "TestDLL.dll" ), rootDir + "Build/Debug/TestDLLTemp.dll" );
+	}
+
+}
 
 void CopyLibraryContents( )
 {
@@ -39,39 +66,13 @@ void CopyLibraryContents( )
 		fs::remove( dllPath );
 	}
 
-	fs::path pdbPath = rootDir + "Build/Debug/TestDLL.pdb";
-	if ( fs::exists( pdbPath ) )
-	{
-		fs::remove( pdbPath );
-	}
-
 	// Now copy over contents from intermediate build to executable dir
 	dllPath = copyDir;
 	if ( fs::exists( dllPath ) )
 	{
-		//fs::copy( fs::path( dllPath.string( ) + "TestDLL.dll" ), rootDir + "Build/Debug/TestDLL.dll" );
-		fs::copy( dllPath, rootDir + "Build/Debug/", fs::copy_options::recursive );
-	}
-
-	fs::path expPath = rootDir + "Build/Debug/TestDLL.exp";
-	if ( fs::exists( expPath ) )
-	{
-		fs::remove( expPath );
-	}
-
-	fs::path libPath = rootDir + "Build/Debug/TestDLL.lib";
-	if ( fs::exists( libPath ) )
-	{
-		fs::remove( libPath );
-	}
-
-	fs::path ilkPath = rootDir + "Build/Debug/TestDLL.ilk";
-	if ( fs::exists( ilkPath ) )
-	{
-		fs::remove( ilkPath );
+		fs::copy( fs::path( dllPath.string( ) + "TestDLL.dll" ), rootDir + "Build/Debug/TestDLL.dll" );
 	}
 }
-
 
 void SceneView( bool* viewBool )
 {
@@ -96,7 +97,7 @@ void SceneView( bool* viewBool )
 	gfx->GetSceneCamera( )->ConstCast< Enjon::Camera >( )->SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
 }
 
-void CameraOptions( bool* enable )
+void EnjonEditor::CameraOptions( bool* enable )
 {
 	const Enjon::GraphicsSubsystem* gfx = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( ); 
 	const Enjon::Camera* cam = gfx->GetSceneCamera( );
@@ -106,6 +107,50 @@ void CameraOptions( bool* enable )
 		Enjon::ImGuiManager::DebugDumpObject( cam ); 
 		ImGui::TreePop( );
 	}
+
+	ImGui::DragFloat( "Camera Speed", &mCameraSpeed, 0.1f ); 
+}
+
+void EnjonEditor::PlayOptions( )
+{
+	if ( mPlaying )
+	{
+		if ( ImGui::Button( "Stop" ) )
+		{ 
+			mPlaying = false; 
+
+			// Call shut down function for game
+			if ( shutDownFunc )
+			{
+				shutDownFunc( 0.01f );
+			}
+
+			auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( )->ConstCast< Enjon::Camera >();
+			cam->SetPosition( mPreviousCameraTransform.Position );
+			cam->SetRotation( mPreviousCameraTransform.Rotation ); 
+		}
+	}
+	else
+	{
+		if ( ImGui::Button( "Play" ) )
+		{ 
+			mPlaying = true;
+
+			auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( ); 
+			mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) );
+
+			// Call start up function for game
+			if ( startUpFunc )
+			{
+				startUpFunc( 0.01f );
+			}
+			else
+			{ 
+				std::cout << "Cannot play without game loaded!\n";
+				mPlaying = false;
+			}
+		}
+	} 
 }
 
 void EnjonEditor::WorldOutlinerView( )
@@ -118,6 +163,16 @@ void EnjonEditor::WorldOutlinerView( )
 		if ( ImGui::TreeNode( fmt::format( "{}", e->GetID( ) ).c_str( ) ) )
 		{
 			Enjon::ImGuiManager::DebugDumpObject( e );
+
+			if ( ImGui::TreeNode( fmt::format( "Components##{}", e->GetID( ) ).c_str( ) ) )
+			{
+				for ( auto& c : e->GetComponents( ) )
+				{
+					Enjon::ImGuiManager::DebugDumpObject( c );
+				} 
+				ImGui::TreePop( );
+			}
+
 			ImGui::TreePop( );
 		}
 	}
@@ -199,21 +254,21 @@ Enjon::Result EnjonEditor::Initialize( )
 		ImGui::EndDock( );
 	});
 
+	Enjon::ImGuiManager::RegisterWindow( [ & ]
+	{
+		if ( ImGui::BeginDock( "Play Options", nullptr ) )
+		{
+			PlayOptions( );
+		}
+		ImGui::EndDock( );
+	} );
+
 	// Register docking layouts
 	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
 	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Scene", ImGui::DockSlotType::Slot_Right, 0.2f ) );
 	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Camera", ImGui::DockSlotType::Slot_Bottom, 0.3f ) );
-	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) );
-
-	// Create an entity to manipulate 
-	Enjon::EntityManager* entities = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->ConstCast< Enjon::EntityManager >( );
-	mEntity = entities->Allocate( );
-
-	Enjon::GraphicsComponent* gfxCmp = mEntity.Get( )->AddComponent< Enjon::GraphicsComponent >( );
-	gfxCmp->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "models.unit_cube" ) );
-	gfxCmp->SetMaterial( mAssetManager->GetAsset< Enjon::Material >( "NewMaterial" ).Get( ) );
-
-	mGfx->GetScene( )->AddRenderable( gfxCmp->GetRenderable( ) );
+	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) ); 
+	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene", ImGui::DockSlotType::Slot_Top, 0.07f ) );
 
 	return Enjon::Result::SUCCESS;
 }
@@ -221,12 +276,15 @@ Enjon::Result EnjonEditor::Initialize( )
 Enjon::Result EnjonEditor::Update( f32 dt )
 { 
 	static float t = 0.0f;
-	t += dt;
+	t += dt; 
 
-	// Try to rotate entity if dll is loaded
-	if ( entityRotateFunc )
+	// Simulate game tick scenario if playing
+	if ( mPlaying )
 	{ 
-		entityRotateFunc( mEntity, t, mEntitySwitch );
+		if ( updateFunc )
+		{
+			updateFunc( dt );
+		} 
 	}
 
 	return Enjon::Result::PROCESS_RUNNING;
@@ -259,7 +317,7 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 		}
 		if ( mInput->IsKeyDown( Enjon::KeyCode::A ) )
 		{
-velDir += camera->Left( );
+			velDir += camera->Left( );
 		}
 		if ( mInput->IsKeyDown( Enjon::KeyCode::D ) )
 		{
@@ -270,7 +328,7 @@ velDir += camera->Left( );
 		velDir = Enjon::Vec3::Normalize( velDir );
 
 		// Set camera position
-		camera->Transform.Position += dt * 10.0f * velDir;
+		camera->Transform.Position += dt * mCameraSpeed * velDir;
 
 		// Set camera rotation
 		// Get mouse input and change orientation of camera
@@ -303,14 +361,36 @@ velDir += camera->Left( );
 	{
 		if ( mInput->IsKeyPressed( Enjon::KeyCode::R ) )
 		{
+			Enjon::ByteBuffer buffer;
+			bool needsReload = false;
+
+			// Serialize state for reload and free library
 			if ( dllHandle )
-			{
+			{ 
+				if ( mPlaying )
+				{
+					if ( shutDownFunc )
+					{ 
+						// NOTE(): Will not work if the layout of the data has changed! Need versioning working first...
+						if ( serializeDataFunc )
+						{
+							serializeDataFunc( &buffer );
+							needsReload = true; 
+						} 
+
+						// Destroy the instance of the original handle
+						shutDownFunc( dt );
+					} 
+				}
+
 				// Free library if in use
 				FreeLibrary( dllHandle );
 				dllHandle = nullptr;
-				addFunc = nullptr;
-				subFunc = nullptr;
-				entityRotateFunc = nullptr;
+				startUpFunc = nullptr;
+				updateFunc = nullptr;
+				shutDownFunc = nullptr;
+				serializeDataFunc = nullptr;
+				deserializeDataFunc = nullptr;
 			}
 
 			// Copy files to directory
@@ -322,9 +402,12 @@ velDir += camera->Left( );
 			// If valid, then set address of procedures to be called
 			if ( dllHandle )
 			{
-				addFunc = ( funcAdd )GetProcAddress( dllHandle, "Add" );
-				subFunc = ( funcSubtract )GetProcAddress( dllHandle, "Subtract" );
-				entityRotateFunc = ( funcEntityRotate )GetProcAddress( dllHandle, "RotateEntity" );
+				// Set functions from handle
+				startUpFunc = ( funcStartUp )GetProcAddress( dllHandle, "StartUp" );
+				updateFunc = ( funcUpdate )GetProcAddress( dllHandle, "Update" );
+				shutDownFunc = ( funcShutDown )GetProcAddress( dllHandle, "ShutDown" );
+				serializeDataFunc = ( funcSerializeData )GetProcAddress( dllHandle, "SerializeData" );
+				deserializeDataFunc = ( funcDeserializeData )GetProcAddress( dllHandle, "DeserializeData" );
 
 				// Try and set the engine instance
 				setEngineFunc = ( funcSetEngineInstance )GetProcAddress( dllHandle, "SetEngineInstance" );
@@ -333,68 +416,61 @@ velDir += camera->Left( );
 					setEngineFunc( Enjon::Engine::GetInstance( ) );
 				}
 
+				if ( needsReload )
+				{
+					if ( deserializeDataFunc )
+					{
+						deserializeDataFunc( &buffer );
+					}
+				}
+
 			}
 			else
 			{
 				std::cout << "Could not load library\n";
 			}
 		}
+	}
 
-		if ( mInput->IsKeyPressed( Enjon::KeyCode::One ) )
-		{
-			if ( addFunc )
-			{
-				std::cout << addFunc( 10, 10 ) << "\n";
-			}
-		}
-
-		if ( mInput->IsKeyPressed( Enjon::KeyCode::Two ) )
-		{
-			if ( subFunc )
-			{
-				std::cout << subFunc( 20, 5 ) << "\n";
-			}
-		}
-
-		if ( mInput->IsKeyPressed( Enjon::KeyCode::E ) )
-		{
-			mEntitySwitch ^= 1;
-		}
-
-		if ( mInput->IsKeyPressed( Enjon::KeyCode::O ) )
-		{
-			if ( !mEntity.Get( )->HasChildren( ) )
-			{ 
-				Enjon::EntityManager* entities = Enjon::Engine::GetInstance()->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->ConstCast< Enjon::EntityManager >( );
-				const Enjon::AssetManager* assetManager = Enjon::Engine::GetInstance()->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-
-				for ( u32 i = 0; i < 5; ++i )
-				{
-					// Add entity as child, for shiggles
-					Enjon::EntityHandle child = entities->Allocate( );
-					mEntity.Get( )->AddChild( child );
-
-					Enjon::GraphicsComponent* childGfx = child.Get( )->AddComponent< Enjon::GraphicsComponent >( );
-					childGfx->SetMesh( assetManager->GetAsset< Enjon::Mesh >( "models.unit_sphere" ) );
-					childGfx->SetMaterial( assetManager->GetAsset< Enjon::Material >( "NewMaterial" ).Get( ) );
-
-					// Set local transform of child
-					child.Get( )->SetLocalTransform( Enjon::Transform( Enjon::Vec3( std::cos( ( f32 )i ), 2.0f, std::sin( ( f32 )i ) ), Enjon::Quaternion( ), Enjon::Vec3( 0.5f ) ) );
-
-					// Add renderable to scene
-					Enjon::Engine::GetInstance()->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetScene( )->AddRenderable( childGfx->GetRenderable( ) );
-				}
-			}
-		}
-
+	// Starting /Stopping game instance
+	{
 		if ( mInput->IsKeyPressed( Enjon::KeyCode::P ) )
 		{
-			if ( mEntity.Get( )->HasChildren( ) )
+			if ( !mPlaying )
 			{
-				for ( auto& child : mEntity.Get( )->GetChildren( ) )
+				mPlaying = true;
+
+				auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( );
+				mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) );
+
+				// Call start up function for game
+				if ( startUpFunc )
 				{
-					child.Get( )->Destroy( );
+					startUpFunc( dt );
 				}
+				else
+				{
+					std::cout << "Cannot play without game loaded!\n";
+					mPlaying = false;
+				}
+			}
+		}
+
+		if ( mInput->IsKeyPressed( Enjon::KeyCode::Escape ) )
+		{
+			if ( mPlaying )
+			{
+				mPlaying = false; 
+
+				// Call shut down function for game
+				if ( shutDownFunc )
+				{
+					shutDownFunc( dt );
+				}
+
+				auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( )->ConstCast< Enjon::Camera >( );
+				cam->SetPosition( mPreviousCameraTransform.Position );
+				cam->SetRotation( mPreviousCameraTransform.Rotation );
 			}
 		}
 	}

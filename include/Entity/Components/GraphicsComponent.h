@@ -57,12 +57,12 @@ namespace Enjon
 			/* 
 			* @brief Get material of renderable 
 			*/
-			const Material* GetMaterial() const;
+			AssetHandle< Material > GetMaterial() const;
 
 			/* 
 			* @brief Get mesh of renderable 
 			*/
-			AssetHandle<Mesh> GetMesh() const;
+			AssetHandle< Mesh > GetMesh() const;
 
 			/* 
 			* @brief Get scene of renderable 

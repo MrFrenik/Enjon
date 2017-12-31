@@ -161,9 +161,9 @@ namespace Enjon
 
 		// ImGuiManager::Register(graphicsMenuOption);
 		// TODO(John): I HATE the way this looks
-		//ImGuiManager::RegisterMenuOption("View", graphicsMenuOption);
+		ImGuiManager::RegisterMenuOption("View", graphicsMenuOption);
 		//ImGuiManager::RegisterWindow(showGameViewportFunc);
-		//ImGuiManager::RegisterWindow(showGraphicsViewportFunc);
+		ImGuiManager::RegisterWindow(showGraphicsViewportFunc);
 		//ImGuiManager::RegisterWindow(showStylesWindowFunc);
 
 		// Set current render texture
@@ -171,7 +171,7 @@ namespace Enjon
 
 		// Register docking layouts
 	    //ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Game View", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f));
-	    //ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Graphics", nullptr, ImGui::DockSlotType::Slot_Right, 0.1f));
+	    ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Graphics", nullptr, ImGui::DockSlotType::Slot_Right, 0.1f));
 	    //ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Styles##options", nullptr, ImGui::DockSlotType::Slot_Bottom, 0.2f));
 	
 		// Register shader graph templates
@@ -412,9 +412,9 @@ namespace Enjon
 
 			mMaterial = am->GetAsset< Material >( "NewMaterial" ).Get()->ConstCast< Material >();
 
-			for ( u32 i = 0; i < 1; ++i ) 
+			for ( u32 i = 0; i < 0; ++i ) 
 			{
-				for ( u32 j = 0; j < 1; ++j )
+				for ( u32 j = 0; j < 0; ++j )
 				{
 					Enjon::Renderable renderable;
 					
@@ -609,8 +609,8 @@ namespace Enjon
 			const Material* material = nullptr;
 			for (auto& renderable : sortedRenderables)
 			{
-				// Check for material switch
-				const Material* curMaterial = renderable->GetMaterial();
+				// Check for material switch 
+				const Material* curMaterial = renderable->GetMaterial().Get();
 				sg = curMaterial->GetShaderGraph( );
 				assert(curMaterial != nullptr); 
 
@@ -756,7 +756,7 @@ namespace Enjon
 			shader->SetUniform( "uView", mSceneCamera.GetView( ) );
 
 			// Get material
-			const Material* material = mInstancedRenderable->GetMaterial( );
+			const Material* material = mInstancedRenderable->GetMaterial( ).Get();
 
 			// Set material textures
 			shader->BindTexture( "uAlbedoMap", material->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTextureId( ), 0 );
@@ -1610,16 +1610,10 @@ namespace Enjon
 
 	    if (ImGui::TreeNode("Sunlight"))
 	    {
-	    	static const char* labels[] = {"X", "Y", "Z"};
-	    	Vec3 direction = mScene.GetSun()->GetDirection();
-            float vec4f[4] = { direction.x, direction.y, direction.z, 1.0f };
-	    	ImGui::Text("Direction");
-            ImGui::DragFloat3Labels("##sundir", labels, vec4f, 0.001f, -1.0f, 1.0f);
-	    	mScene.GetSun()->SetDirection(Vec3(vec4f[0], vec4f[1], vec4f[2]));
-
-	    	float intensity = mScene.GetSun()->GetIntensity();
-	    	ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 50.0f);
-	    	mScene.GetSun()->SetIntensity(intensity);
+			if ( mScene.GetSun( ) )
+			{
+				ImGuiManager::DebugDumpObject( mScene.GetSun( ) );
+			}
 
 	    	ImGui::TreePop();
 	    }
@@ -1638,159 +1632,159 @@ namespace Enjon
 	    	ImGui::TreePop();
 	    } 
 
-		if ( ImGui::CollapsingHeader( "Mesh" ) )
-		{ 
-			const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-			ImGui::ListBoxHeader( Enjon::String( "##meshes" ).c_str( ) );
-			{
-				for ( auto& a : *am->GetAssets< Enjon::Mesh >( ) )
-				{
-					Enjon::String meshName = a.second.GetAssetName();
-					ImGui::Selectable( meshName.c_str( ) );
-					if ( ImGui::IsItemActive( ) )
-					{ 
-						for ( auto& r : mRenderables )
-						{
-								r.SetMesh( a.second.GetAsset() );
-						}
-					} 
-				}
+		//if ( ImGui::CollapsingHeader( "Mesh" ) )
+		//{ 
+		//	const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+		//	ImGui::ListBoxHeader( Enjon::String( "##meshes" ).c_str( ) );
+		//	{
+		//		for ( auto& a : *am->GetAssets< Enjon::Mesh >( ) )
+		//		{
+		//			Enjon::String meshName = a.second.GetAssetName();
+		//			ImGui::Selectable( meshName.c_str( ) );
+		//			if ( ImGui::IsItemActive( ) )
+		//			{ 
+		//				for ( auto& r : mRenderables )
+		//				{
+		//						r.SetMesh( a.second.GetAsset() );
+		//				}
+		//			} 
+		//		}
 
-				Enjon::AssetHandle< Enjon::Mesh > defaultMesh = am->GetDefaultAsset< Enjon::Mesh >( );
-				Enjon::String meshName = defaultMesh->GetName( );
-				ImGui::Selectable( meshName.c_str( ) );
-				if ( ImGui::IsItemActive( ) )
-				{ 
-					for ( auto& r : mRenderables )
-					{
-							r.SetMesh( defaultMesh );
-					}
-				}
-			}
-			ImGui::ListBoxFooter( ); 
-		}
+		//		Enjon::AssetHandle< Enjon::Mesh > defaultMesh = am->GetDefaultAsset< Enjon::Mesh >( );
+		//		Enjon::String meshName = defaultMesh->GetName( );
+		//		ImGui::Selectable( meshName.c_str( ) );
+		//		if ( ImGui::IsItemActive( ) )
+		//		{ 
+		//			for ( auto& r : mRenderables )
+		//			{
+		//					r.SetMesh( defaultMesh );
+		//			}
+		//		}
+		//	}
+		//	ImGui::ListBoxFooter( ); 
+		//}
 
-		if ( ImGui::CollapsingHeader( "Uniforms" ) )
-		{
-			if ( mMaterial && mMaterial->GetShaderGraph() )
-			{
-				if ( ImGui::CollapsingHeader( "ShaderGraphs" ) )
-				{
-					const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
-					const HashMap< String, AssetRecordInfo >* shaderGraphs = am->GetAssets< ShaderGraph >( );
-					for ( auto& sg : *shaderGraphs )
-					{
-						if ( ImGui::Selectable( sg.second.GetAssetName( ).c_str() ) )
-						{
-							// Set shader graph if selected
-							mMaterial->SetShaderGraph( sg.second.GetAsset( ) );
-						}
-					}
-				}
+		//if ( ImGui::CollapsingHeader( "Uniforms" ) )
+		//{
+		//	if ( mMaterial && mMaterial->GetShaderGraph() )
+		//	{
+		//		if ( ImGui::CollapsingHeader( "ShaderGraphs" ) )
+		//		{
+		//			const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+		//			const HashMap< String, AssetRecordInfo >* shaderGraphs = am->GetAssets< ShaderGraph >( );
+		//			for ( auto& sg : *shaderGraphs )
+		//			{
+		//				if ( ImGui::Selectable( sg.second.GetAssetName( ).c_str() ) )
+		//				{
+		//					// Set shader graph if selected
+		//					mMaterial->SetShaderGraph( sg.second.GetAsset( ) );
+		//				}
+		//			}
+		//		}
 
-				Enjon::AssetHandle< Enjon::ShaderGraph > sg = mMaterial->GetShaderGraph( ); 
-				for ( auto& u : *sg.Get( )->GetUniforms( ) )
-				{
-					Enjon::String uniformName = u.second->GetName( );
-					Enjon::UniformType type = u.second->GetType( );
-					Enjon::ShaderUniform* uniform = u.second;
+		//		Enjon::AssetHandle< Enjon::ShaderGraph > sg = mMaterial->GetShaderGraph( ); 
+		//		for ( auto& u : *sg.Get( )->GetUniforms( ) )
+		//		{
+		//			Enjon::String uniformName = u.second->GetName( );
+		//			Enjon::UniformType type = u.second->GetType( );
+		//			Enjon::ShaderUniform* uniform = u.second;
 
-					if ( mMaterial->HasOverride( uniformName ) )
-					{
-						uniform = const_cast< ShaderUniform* > ( mMaterial->GetOverride( uniformName ) );
-					}
+		//			if ( mMaterial->HasOverride( uniformName ) )
+		//			{
+		//				uniform = const_cast< ShaderUniform* > ( mMaterial->GetOverride( uniformName ) );
+		//			}
 
-					switch ( type )
-					{
-						case UniformType::Float:
-						{
-							UniformFloat* uf = uniform->Cast< UniformFloat >( );
-							f32 val = uf->GetValue( );
-							if ( ImGui::SliderFloat( uniformName.c_str( ), &val, 0.0f, 3.0f ) )
-							{
-								mMaterial->SetUniform( uniformName, val );
-							}
-						} break;
+		//			switch ( type )
+		//			{
+		//				case UniformType::Float:
+		//				{
+		//					UniformFloat* uf = uniform->Cast< UniformFloat >( );
+		//					f32 val = uf->GetValue( );
+		//					if ( ImGui::SliderFloat( uniformName.c_str( ), &val, 0.0f, 3.0f ) )
+		//					{
+		//						mMaterial->SetUniform( uniformName, val );
+		//					}
+		//				} break;
 
-						case UniformType::Vec2:
-						{
-							UniformVec2* uf = uniform->Cast< UniformVec2 >( );
-							Enjon::Vec2 val = uf->GetValue( );
-							f32 vals[ 2 ];
-							vals[ 0 ] = val.x;
-							vals[ 1 ] = val.y;
-							if ( ImGui::SliderFloat2( uniformName.c_str( ), (f32*)&vals, 0.0f, 3.0f ) )
-							{ 
-								mMaterial->SetUniform( uniformName, Enjon::Vec2( vals[ 0 ], vals[ 1 ] ) );
-							}
-						} break;
+		//				case UniformType::Vec2:
+		//				{
+		//					UniformVec2* uf = uniform->Cast< UniformVec2 >( );
+		//					Enjon::Vec2 val = uf->GetValue( );
+		//					f32 vals[ 2 ];
+		//					vals[ 0 ] = val.x;
+		//					vals[ 1 ] = val.y;
+		//					if ( ImGui::SliderFloat2( uniformName.c_str( ), (f32*)&vals, 0.0f, 3.0f ) )
+		//					{ 
+		//						mMaterial->SetUniform( uniformName, Enjon::Vec2( vals[ 0 ], vals[ 1 ] ) );
+		//					}
+		//				} break;
 
-						case UniformType::Vec3:
-						{
-							UniformVec3* uf = uniform->Cast< UniformVec3 >( );
-							Enjon::Vec3 val = uf->GetValue( );
-							f32 vals[ 3 ];
-							vals[ 0 ] = val.x;
-							vals[ 1 ] = val.y;
-							vals[ 2 ] = val.z;
-							if ( ImGui::SliderFloat3( uniformName.c_str( ), (f32*)&vals, 0.0f, 3.0f ) )
-							{ 
-								mMaterial->SetUniform( uniformName, Enjon::Vec3( vals[ 0 ], vals[ 1 ], vals[ 2 ] ) );
-							}
-						} break;
+		//				case UniformType::Vec3:
+		//				{
+		//					UniformVec3* uf = uniform->Cast< UniformVec3 >( );
+		//					Enjon::Vec3 val = uf->GetValue( );
+		//					f32 vals[ 3 ];
+		//					vals[ 0 ] = val.x;
+		//					vals[ 1 ] = val.y;
+		//					vals[ 2 ] = val.z;
+		//					if ( ImGui::SliderFloat3( uniformName.c_str( ), (f32*)&vals, 0.0f, 3.0f ) )
+		//					{ 
+		//						mMaterial->SetUniform( uniformName, Enjon::Vec3( vals[ 0 ], vals[ 1 ], vals[ 2 ] ) );
+		//					}
+		//				} break;
 
-						case UniformType::Vec4:
-						{
-							UniformVec4* uf = uniform->Cast< UniformVec4 >( );
-							Enjon::Vec4 val = uf->GetValue( );
-							f32 vals[ 4 ];
-							vals[ 0 ] = val.x;
-							vals[ 1 ] = val.y;
-							vals[ 2 ] = val.z;
-							vals[ 3 ] = val.w;
-							if ( ImGui::SliderFloat4( uniformName.c_str( ), (f32*)&vals, 0.0f, 3.0f ) )
-							{ 
-								mMaterial->SetUniform( uniformName, Enjon::Vec4( vals[ 0 ], vals[ 1 ], vals[ 2 ], vals[ 3 ] ) );
-							}
-						} break;
+		//				case UniformType::Vec4:
+		//				{
+		//					UniformVec4* uf = uniform->Cast< UniformVec4 >( );
+		//					Enjon::Vec4 val = uf->GetValue( );
+		//					f32 vals[ 4 ];
+		//					vals[ 0 ] = val.x;
+		//					vals[ 1 ] = val.y;
+		//					vals[ 2 ] = val.z;
+		//					vals[ 3 ] = val.w;
+		//					if ( ImGui::SliderFloat4( uniformName.c_str( ), (f32*)&vals, 0.0f, 3.0f ) )
+		//					{ 
+		//						mMaterial->SetUniform( uniformName, Enjon::Vec4( vals[ 0 ], vals[ 1 ], vals[ 2 ], vals[ 3 ] ) );
+		//					}
+		//				} break;
 
-						case UniformType::TextureSampler2D:
-						{
-							UniformTexture* uf = uniform->Cast< UniformTexture >( );
-							if ( ImGui::CollapsingHeader( uf->GetName( ).c_str( ) ) )
-							{
-								const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-								ImGui::ListBoxHeader( ( "##textures" + uniformName ).c_str( ) );
-								{
-									for ( auto& a : *am->GetAssets< Enjon::Texture >( ) )
-									{
-										Enjon::String texName = a.second.GetAssetName();
-										ImGui::Selectable( texName.c_str( ) );
-										if ( ImGui::IsItemActive( ) )
-										{
-											Enjon::AssetHandle< Enjon::Texture > newTex = am->GetAsset< Enjon::Texture >( texName );
-											mMaterial->SetUniform( uniformName, newTex ); 
-										}
-									} 
+		//				case UniformType::TextureSampler2D:
+		//				{
+		//					UniformTexture* uf = uniform->Cast< UniformTexture >( );
+		//					if ( ImGui::CollapsingHeader( uf->GetName( ).c_str( ) ) )
+		//					{
+		//						const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+		//						ImGui::ListBoxHeader( ( "##textures" + uniformName ).c_str( ) );
+		//						{
+		//							for ( auto& a : *am->GetAssets< Enjon::Texture >( ) )
+		//							{
+		//								Enjon::String texName = a.second.GetAssetName();
+		//								ImGui::Selectable( texName.c_str( ) );
+		//								if ( ImGui::IsItemActive( ) )
+		//								{
+		//									Enjon::AssetHandle< Enjon::Texture > newTex = am->GetAsset< Enjon::Texture >( texName );
+		//									mMaterial->SetUniform( uniformName, newTex ); 
+		//								}
+		//							} 
 
-									// Get default texture and list that as well
-									Enjon::AssetHandle< Enjon::Texture > defaultTex = am->GetDefaultAsset< Enjon::Texture >( );
-										
-									Enjon::String texName = defaultTex->GetName( );
-									ImGui::Selectable( texName.c_str( ) );
-									if ( ImGui::IsItemActive( ) )
-									{
-										Enjon::AssetHandle< Enjon::Texture > newTex = am->GetAsset< Enjon::Texture >( texName );
-										mMaterial->SetUniform( uniformName, newTex ); 
-									} 
-								}
-								ImGui::ListBoxFooter( );
-							}
-						} break;
-					}
-				} 
-			}
-		}
+		//							// Get default texture and list that as well
+		//							Enjon::AssetHandle< Enjon::Texture > defaultTex = am->GetDefaultAsset< Enjon::Texture >( );
+		//								
+		//							Enjon::String texName = defaultTex->GetName( );
+		//							ImGui::Selectable( texName.c_str( ) );
+		//							if ( ImGui::IsItemActive( ) )
+		//							{
+		//								Enjon::AssetHandle< Enjon::Texture > newTex = am->GetAsset< Enjon::Texture >( texName );
+		//								mMaterial->SetUniform( uniformName, newTex ); 
+		//							} 
+		//						}
+		//						ImGui::ListBoxFooter( );
+		//					}
+		//				} break;
+		//			}
+		//		} 
+		//	}
+		//}
 	}
 
 	//=======================================================================================================

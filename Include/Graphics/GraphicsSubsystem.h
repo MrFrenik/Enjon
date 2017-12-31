@@ -291,9 +291,9 @@ namespace Enjon
 
 			Enjon::Mesh* mMesh = nullptr;
 
-			f32 mSSAORadius = 0.3f;
+			f32 mSSAORadius = 0.25f;
 			f32 mSSAOBias = 0.05f;
-			f32 mSSAOIntensity = 3.0f;
+			f32 mSSAOIntensity = 1.0f;
 
 			Enjon::Mat4* mModelMatricies = nullptr;
 			Enjon::Renderable* mInstancedRenderable = nullptr;

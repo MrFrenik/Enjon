@@ -412,6 +412,133 @@ class Project
 };
 
 
+// Class versioning ( deserializing example )
+
+Deserialize( ByteBuffer* buffer )
+{
+	//...
+
+	// Header information 
+	const MetaClass* cls = Object::GetClass( mBuffer.Read< String >( ) );	// Read class type
+	u32 versionNumber = mBuffer.Read< u32 >( );								// Read version number id 
+
+	// Get version from class
+	MetaClassVersion version = cls->GetVersion( versionNumber ); 
+
+	//...  
+	for ( usize i = 0; i < version.GetPropertyCount(); ++i )
+	{
+	}
+
+}
+
+// What does a MetaClassVersion hold? Differences in properties / functions / names?  
+
+class MetaClassVersion
+{
+	public:
+		MetaClassVersion( const u32& version, const MetaClass* cls, const Vector< MetaProperty* >* properties, const Vector< MetaFunction* >* functions )
+			: mVersionNumber( version ), mClass( cls ), mProperties( properties ), mFunctions( functions )
+		{
+		}
+
+	private:
+		u32 mVersionNumber;
+		
+		// Reference to the class being used
+		const MetaClass* mClass;	
+
+		// Reference to properties pertaining to the version requested
+		const PropertyList* mPropertyList;
+
+		// Reference to functions pertaining to the version requested
+		const FunctionList* mFunctionList;
+}; 
+
+class MetaPropertyArray
+
+// Example of how this could be constructed in reflection code...
+
+// Version 0 
+ENJON_CLASS( Construct )
+class Example
+{
+	ENJON_CLASS_BODY( )
+
+	public:	
+		Example( ) = default;
+		~Example( ) = default;
+
+	private:
+		
+		ENJON_PROPERTY( )
+		f32 mFloatProperty; 
+}; 
+
+// Version 1
+ENJON_CLASS( Construct )
+class Example
+{
+	ENJON_CLASS_BODY( )
+
+	public:	
+		Example( ) = default;
+		~Example( ) = default;
+
+	private:
+
+		ENJON_PROPERTY( )
+		s32 mIntProperty;
+		
+		ENJON_PROPERTY( )
+		f32 mFloatProperty; 
+}; 
+
+// On generation...
+
+template <>
+MetaClass* Object::ConstructMetaClass< Example >()
+{
+	MetaClass* cls = new MetaClass();
+
+	// Construct for class
+	cls->mConstruct = ([]()
+	{
+		return new Example();
+	});
+
+	// Properties should be a HashMap of version number to property array
+
+	// Version 0
+	PropertyList propVersion_0;
+	propVersion_0.mPropertyCount = 1; 
+	propVersion_0.mProperties.resize( propVersion_0.mPropertyCount );
+	propVersion_0.mProperties[ 0 ] = new Enjon::MetaProperty( MetaPropertyType::F32, "mFloatProperty", ( u32 )&( ( Example* )0 )->mFloatProperty, 0, MetaPropertyTraits( false, 0.000000f, 0.000000f ) );
+
+	// Version 1
+	PropertyList propVersion_1;
+	propVersion_1.mPropertyCount = 2; 
+	propVersion_1.mProperties.resize( propVersion_1.mPropertyCount );
+	propVersion_1.mProperties[ 0 ] = new Enjon::MetaProperty( MetaPropertyType::S32, "mIntProperty", ( u32 )&( ( Example* )0 )->mIntProperty, 0, MetaPropertyTraits( false, 0.000000f, 0.000000f ) );
+	propVersion_1.mProperties[ 1 ] = new Enjon::MetaProperty( MetaPropertyType::F32, "mFloatProperty", ( u32 )&( ( Example* )0 )->mFloatProperty, 0, MetaPropertyTraits( false, 0.000000f, 0.000000f ) );
+
+	cls->mProperties[ 0 ] = propVersion_0;
+	cls->mProperties[ 1 ] = propVersion_1; 
+
+	//... Same thing for functions...  
+
+	cls->mTypeId = 27;
+
+	cls->mName = "Example";
+
+	return cls;
+} 
+
+class PropertyArray
+{ 
+};
+
+
 */ 
  
 

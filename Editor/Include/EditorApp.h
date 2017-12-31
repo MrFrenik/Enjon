@@ -28,6 +28,8 @@ class EnjonEditor : public Enjon::Application
 	private:
 		void LoadResourceFromFile( );
 		void WorldOutlinerView( );
+		void PlayOptions( );
+		void CameraOptions( bool* enable );
 
 	private:
 		bool mViewBool = true;
@@ -36,7 +38,10 @@ class EnjonEditor : public Enjon::Application
 		Enjon::String mResourceFilePathToLoad = "";
 		bool mMoveCamera = false; 
 
-		bool mEntitySwitch = true;
+		bool mPlaying = false;
+		bool mNeedsStartup = true; 
+		bool mNeedsShutdown = false;
 
-		Enjon::EntityHandle mEntity;
+		Enjon::f32 mCameraSpeed = 10.0f;
+		Enjon::Transform mPreviousCameraTransform;
 };
