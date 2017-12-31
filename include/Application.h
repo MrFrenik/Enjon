@@ -3,11 +3,12 @@
 #define ENJON_APPLICATION_H
 
 #include "System/Types.h"
+#include "Base/Object.h"
 #include "Defines.h"
 
 namespace Enjon
 {
-	class Application
+	class Application : public Enjon::Object
 	{
 		public:
 			/**

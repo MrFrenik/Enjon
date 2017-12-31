@@ -634,181 +634,181 @@ namespace Enjon
 
 			switch ( prop->GetType( ) )
 			{
-			case MetaPropertyType::U8:
-			{
-				READ_PROP( buffer, cls, object, prop, u8 )
-			} break;
-
-			case MetaPropertyType::U16:
-			{
-				READ_PROP( buffer, cls, object, prop, u16 )
-			} break;
-
-			case MetaPropertyType::U32:
-			{
-				// Set value of object from read buffer
-				READ_PROP( buffer, cls, object, prop, u32 )
-			} break;
-
-			case MetaPropertyType::U64:
-			{
-				// Set value of object from read buffer
-				READ_PROP( buffer, cls, object, prop, u64 )
-			} break;
-
-			case MetaPropertyType::F32:
-			{
-				// Set value of object from read buffer
-				READ_PROP( buffer, cls, object, prop, f32 )
-			} break;
-
-			case MetaPropertyType::String:
-			{
-				READ_PROP( buffer, cls, object, prop, String )
-			} break;
-
-			case MetaPropertyType::S8:
-			{
-				READ_PROP( buffer, cls, object, prop, s8 )
-			} break;
-
-			case MetaPropertyType::S16:
-			{
-				READ_PROP( buffer, cls, object, prop, s16 )
-			} break;
-
-			case MetaPropertyType::S32:
-			{
-				READ_PROP( buffer, cls, object, prop, s32 )
-			} break;
-
-			case MetaPropertyType::S64:
-			{
-				READ_PROP( buffer, cls, object, prop, s64 )
-			} break;
-
-			case MetaPropertyType::UUID:
-			{
-				READ_PROP( buffer, cls, object, prop, UUID )
-			} break;
-
-			case MetaPropertyType::Bool:
-			{
-				READ_PROP( buffer, cls, object, prop, bool )
-			} break;
-
-			case MetaPropertyType::AssetHandle:
-			{
-				// Grab asset manager
-				const MetaPropertyTemplateBase* base = prop->Cast< MetaPropertyTemplateBase >( );
-				const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
-				AssetHandle<Asset> val;
-
-				// Get meta class of the asset
-				const MetaClass* assetCls = base->GetClassOfTemplatedArgument( );
-
-				// Get uuid from read buffer
-				UUID id = buffer->Read< UUID >( );
-
-				// Get asset
-				const Asset* asset = am->GetAsset( assetCls, id );
-
-				// If valid asset
-				if ( asset )
+				case MetaPropertyType::U8:
 				{
-					// Set asset handle to default asset
-					val.Set( asset );
+					READ_PROP( buffer, cls, object, prop, u8 )
+				} break;
 
-				}
-				// Otherwise get default asset for this class type
-				else
+				case MetaPropertyType::U16:
 				{
-					val.Set( am->GetDefaultAsset( assetCls ) );
-				}
+					READ_PROP( buffer, cls, object, prop, u16 )
+				} break;
 
-				// Set value of object
-				cls->SetValue( object, prop, val );
+				case MetaPropertyType::U32:
+				{
+					// Set value of object from read buffer
+					READ_PROP( buffer, cls, object, prop, u32 )
+				} break;
 
-			} break;
+				case MetaPropertyType::U64:
+				{
+					// Set value of object from read buffer
+					READ_PROP( buffer, cls, object, prop, u64 )
+				} break;
 
-			case MetaPropertyType::Vec2:
-			{
-				// Read individual elements of Vec2
-				f32 x = buffer->Read< f32 >( );
-				f32 y = buffer->Read< f32 >( );
+				case MetaPropertyType::F32:
+				{
+					// Set value of object from read buffer
+					READ_PROP( buffer, cls, object, prop, f32 )
+				} break;
 
-				// Set Vec2 property
-				cls->SetValue( object, prop, Vec2( x, y ) );
-			} break;
+				case MetaPropertyType::String:
+				{
+					READ_PROP( buffer, cls, object, prop, String )
+				} break;
 
-			case MetaPropertyType::Vec3:
-			{
-				// Read individual elements of Vec3
-				f32 x = buffer->Read< f32 >( );
-				f32 y = buffer->Read< f32 >( );
-				f32 z = buffer->Read< f32 >( );
+				case MetaPropertyType::S8:
+				{
+					READ_PROP( buffer, cls, object, prop, s8 )
+				} break;
 
-				// Set Vec3 property
-				cls->SetValue( object, prop, Vec3( x, y, z ) );
-			} break;
+				case MetaPropertyType::S16:
+				{
+					READ_PROP( buffer, cls, object, prop, s16 )
+				} break;
 
-			case MetaPropertyType::Vec4:
-			{
-				// Read individual elements of Vec4
-				f32 x = buffer->Read< f32 >( );
-				f32 y = buffer->Read< f32 >( );
-				f32 z = buffer->Read< f32 >( );
-				f32 w = buffer->Read< f32 >( );
+				case MetaPropertyType::S32:
+				{
+					READ_PROP( buffer, cls, object, prop, s32 )
+				} break;
 
-				// Set Vec4 property
-				cls->SetValue( object, prop, Vec4( x, y, z, w ) );
-			} break;
+				case MetaPropertyType::S64:
+				{
+					READ_PROP( buffer, cls, object, prop, s64 )
+				} break;
 
-			case MetaPropertyType::Transform:
-			{ 
-				Transform val;
- 
-				// Read in position
-				val.Position.x = buffer->Read< f32 >( );
-				val.Position.y = buffer->Read< f32 >( );
-				val.Position.z = buffer->Read< f32 >( );
+				case MetaPropertyType::UUID:
+				{
+					READ_PROP( buffer, cls, object, prop, UUID )
+				} break;
 
-				// Read in rotation
-				val.Rotation.x = buffer->Read< f32 >( );
-				val.Rotation.y = buffer->Read< f32 >( );
-				val.Rotation.z = buffer->Read< f32 >( );
-				val.Rotation.w = buffer->Read< f32 >( );
+				case MetaPropertyType::Bool:
+				{
+					READ_PROP( buffer, cls, object, prop, bool )
+				} break;
 
-				// Read in scale
-				val.Scale.x = buffer->Read< f32 >( );
-				val.Scale.y = buffer->Read< f32 >( );
-				val.Scale.z = buffer->Read< f32 >( );
+				case MetaPropertyType::AssetHandle:
+				{
+					// Grab asset manager
+					const MetaPropertyTemplateBase* base = prop->Cast< MetaPropertyTemplateBase >( );
+					const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+					AssetHandle<Asset> val;
 
-				// Set transform property
-				cls->SetValue( object, prop, val ); 
-			} break;
+					// Get meta class of the asset
+					const MetaClass* assetCls = base->GetClassOfTemplatedArgument( );
 
-			case MetaPropertyType::ColorRGBA32:
-			{
-				// Read all individual color channels
-				f32 r = buffer->Read< f32 >( );
-				f32 g = buffer->Read< f32 >( );
-				f32 b = buffer->Read< f32 >( );
-				f32 a = buffer->Read< f32 >( );
+					// Get uuid from read buffer
+					UUID id = buffer->Read< UUID >( );
 
-				// Set ColorRGBA32 property
-				cls->SetValue( object, prop, ColorRGBA32( r, g, b, a ) );
-			} break;
+					// Get asset
+					const Asset* asset = am->GetAsset( assetCls, id );
 
-			case MetaPropertyType::Enum:
-			{
-				// Read value from buffer
-				s32 val = buffer->Read< s32 >( );
+					// If valid asset
+					if ( asset )
+					{
+						// Set asset handle to default asset
+						val.Set( asset );
 
-				// Set property on object
-				cls->SetValue( object, prop, val );
+					}
+					// Otherwise get default asset for this class type
+					else
+					{
+						val.Set( am->GetDefaultAsset( assetCls ) );
+					}
 
-			} break;
+					// Set value of object
+					cls->SetValue( object, prop, val );
+
+				} break;
+
+				case MetaPropertyType::Vec2:
+				{
+					// Read individual elements of Vec2
+					f32 x = buffer->Read< f32 >( );
+					f32 y = buffer->Read< f32 >( );
+
+					// Set Vec2 property
+					cls->SetValue( object, prop, Vec2( x, y ) );
+				} break;
+
+				case MetaPropertyType::Vec3:
+				{
+					// Read individual elements of Vec3
+					f32 x = buffer->Read< f32 >( );
+					f32 y = buffer->Read< f32 >( );
+					f32 z = buffer->Read< f32 >( );
+
+					// Set Vec3 property
+					cls->SetValue( object, prop, Vec3( x, y, z ) );
+				} break;
+
+				case MetaPropertyType::Vec4:
+				{
+					// Read individual elements of Vec4
+					f32 x = buffer->Read< f32 >( );
+					f32 y = buffer->Read< f32 >( );
+					f32 z = buffer->Read< f32 >( );
+					f32 w = buffer->Read< f32 >( );
+
+					// Set Vec4 property
+					cls->SetValue( object, prop, Vec4( x, y, z, w ) );
+				} break;
+
+				case MetaPropertyType::Transform:
+				{ 
+					Transform val;
+	 
+					// Read in position
+					val.Position.x = buffer->Read< f32 >( );
+					val.Position.y = buffer->Read< f32 >( );
+					val.Position.z = buffer->Read< f32 >( );
+
+					// Read in rotation
+					val.Rotation.x = buffer->Read< f32 >( );
+					val.Rotation.y = buffer->Read< f32 >( );
+					val.Rotation.z = buffer->Read< f32 >( );
+					val.Rotation.w = buffer->Read< f32 >( );
+
+					// Read in scale
+					val.Scale.x = buffer->Read< f32 >( );
+					val.Scale.y = buffer->Read< f32 >( );
+					val.Scale.z = buffer->Read< f32 >( );
+
+					// Set transform property
+					cls->SetValue( object, prop, val ); 
+				} break;
+
+				case MetaPropertyType::ColorRGBA32:
+				{
+					// Read all individual color channels
+					f32 r = buffer->Read< f32 >( );
+					f32 g = buffer->Read< f32 >( );
+					f32 b = buffer->Read< f32 >( );
+					f32 a = buffer->Read< f32 >( );
+
+					// Set ColorRGBA32 property
+					cls->SetValue( object, prop, ColorRGBA32( r, g, b, a ) );
+				} break;
+
+				case MetaPropertyType::Enum:
+				{
+					// Read value from buffer
+					s32 val = buffer->Read< s32 >( );
+
+					// Set property on object
+					cls->SetValue( object, prop, val );
+
+				} break;
 
 # define READ_ARRAY_PROP_PRIM( object, prop, valType, arraySize, buffer )\
 	{\

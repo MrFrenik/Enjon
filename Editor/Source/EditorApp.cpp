@@ -22,6 +22,11 @@ typedef Enjon::Result( *funcUpdate )( const Enjon::f32& );
 typedef Enjon::Result( *funcShutDown )( const Enjon::f32& );
 typedef Enjon::Result( *funcSerializeData )( Enjon::ByteBuffer* );
 typedef Enjon::Result( *funcDeserializeData )( Enjon::ByteBuffer* );
+typedef Enjon::usize( *funcGetAppSize )( );
+typedef Enjon::Application*( *funcCreateApp )( Enjon::Engine* );
+typedef void( *funcDeleteApp )( Enjon::Application* );
+
+Enjon::Application* mApp = nullptr;
 
 // TODO(): Make sure to abstract this for platform independence
 HINSTANCE dllHandleTemp = nullptr;
@@ -32,6 +37,9 @@ funcUpdate updateFunc = nullptr;
 funcShutDown shutDownFunc = nullptr;
 funcSerializeData serializeDataFunc = nullptr;
 funcDeserializeData deserializeDataFunc = nullptr;
+funcGetAppSize getAppSizeFunc = nullptr;
+funcCreateApp createAppFunc = nullptr;
+funcDeleteApp deleteAppFunc = nullptr;
 
 namespace fs = std::experimental::filesystem; 
 
@@ -285,6 +293,15 @@ Enjon::Result EnjonEditor::Update( f32 dt )
 		{
 			updateFunc( dt );
 		} 
+
+		if ( mApp )
+		{
+			mApp->ProcessInput( dt );
+			mApp->Update( dt );
+
+			const Enjon::MetaClass* cls = mApp->Class( );
+			usize propCount = cls->GetPropertyCount( );
+		}
 	}
 
 	return Enjon::Result::PROCESS_RUNNING;
@@ -383,6 +400,13 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 					} 
 				}
 
+				// Free application memory
+				if ( deleteAppFunc )
+				{
+					deleteAppFunc( mApp );
+					mApp = nullptr;
+				}
+
 				// Free library if in use
 				FreeLibrary( dllHandle );
 				dllHandle = nullptr;
@@ -391,6 +415,9 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 				shutDownFunc = nullptr;
 				serializeDataFunc = nullptr;
 				deserializeDataFunc = nullptr;
+				createAppFunc = nullptr;
+				getAppSizeFunc = nullptr;
+				deleteAppFunc = nullptr;
 			}
 
 			// Copy files to directory
@@ -408,6 +435,15 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 				shutDownFunc = ( funcShutDown )GetProcAddress( dllHandle, "ShutDown" );
 				serializeDataFunc = ( funcSerializeData )GetProcAddress( dllHandle, "SerializeData" );
 				deserializeDataFunc = ( funcDeserializeData )GetProcAddress( dllHandle, "DeserializeData" );
+				createAppFunc = ( funcCreateApp )GetProcAddress( dllHandle, "CreateApplication" );
+				getAppSizeFunc = ( funcGetAppSize )GetProcAddress( dllHandle, "GetApplicationSizeInBytes" ); 
+				deleteAppFunc = ( funcDeleteApp )GetProcAddress( dllHandle, "DeleteApplication" );
+
+				// Create application
+				if ( createAppFunc )
+				{
+					mApp = createAppFunc( Enjon::Engine::GetInstance( ) );
+				}
 
 				// Try and set the engine instance
 				setEngineFunc = ( funcSetEngineInstance )GetProcAddress( dllHandle, "SetEngineInstance" );

@@ -1033,6 +1033,25 @@ namespace Enjon
 			}
 
 			template <typename T>
+			void UnregisterMetaClass( )
+			{
+				// Must inherit from object to be able to registered
+				static_assert( std::is_base_of<Object, T>::value, "MetaClass::RegisterMetaClass() - T must inherit from Object." );
+
+				// Get id of object
+				u32 id = GetTypeId< T >( );
+
+				// If available, then return
+				if ( HasMetaClass< T >( ) )
+				{
+					MetaClass* cls = mRegistry[ id ];
+					mRegistry.erase( id );
+					delete cls;
+					cls = nullptr;
+				} 
+			}
+
+			template <typename T>
 			u32 GetTypeId( ) const;
 
 			/*
