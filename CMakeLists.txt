@@ -174,7 +174,6 @@ set(
 ) 
 
 add_library( Enjon ${ALL_SRC})
-# add_executable(Enjon ${ALL_SRC})
 
 # Link libraries
 target_link_libraries( Enjon debug Opengl32.lib optimized Opengl32.lib ) 
@@ -253,10 +252,6 @@ foreach(dir ${BUILD_DIRECTORIES})
 
 endforeach(dir)
 
-add_custom_command(TARGET Enjon PRE_BUILD
-	COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe --enjon-path ${ENJON_DIR}
-	)
-
 # Add DLLs to builds
 foreach(dll ${DLL_LIST})
 
@@ -278,34 +273,20 @@ foreach(dll ${DLL_LIST})
 endforeach(dll) 
 
 # Create reflection list
-file(WRITE ${ENJON_DIR}/Generator/config.cfg "#enjon_dir \"${ENJON_DIR}\"\n") 
-file(APPEND ${ENJON_DIR}/Generator/config.cfg "#files\n") 
+file(WRITE ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#target_dir \"${ENJON_DIR}\"\n") 
+file(WRITE ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#engine_dir \"${ENJON_DIR}\"\n") 
+file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#project_name \"Enjon\"\n") 
+file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#files\n") 
 
 # Add all reflection include files
 foreach( file ${REFLECTION_INCLUDES} )
 
-	file(APPEND ${ENJON_DIR}/Generator/config.cfg "\"${file}\"\n") 
+	file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "\"${file}\"\n") 
 
 endforeach(file) 
 
-# Generate Files - Not sure the best way to handle this just yet...
-if(WIN32) 
-	execute_process( COMMAND ${ENJON_RELEASE_DIR}/Reflection.exe --enjon-path ${ENJON_DIR} )
-
-	add_custom_command(
-		OUTPUT generated.cpp
-		COMMAND  ${ENJON_RELEASE_DIR}/Reflection.exe --enjon-path ${ENJON_DIR}
-		DEPENDS generated_files
+add_custom_command(TARGET Enjon PRE_BUILD
+	COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe --target-path ${ENJON_DIR}/
 	)
-	
-endif()
-
-
-
-
-
-
-
-
 
 

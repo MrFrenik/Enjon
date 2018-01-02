@@ -36,4 +36,6 @@ git add TestProject/Source
 
 git add TestProject/CMakeLists.txt
 
+git add TestProject/Proc
+
 git add proc/gitadd.bat

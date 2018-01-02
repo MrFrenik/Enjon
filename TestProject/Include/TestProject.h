@@ -5,6 +5,8 @@
 #include <Application.h>
 #include <Entity/EntityManager.h>
 #include <Asset/AssetManager.h>
+#include <Graphics/Mesh.h>
+#include <Graphics/ShaderGraph.h>
 
 #define ENJON_EXPORT __declspec(dllexport) 
 
@@ -16,7 +18,7 @@ extern "C"
 	} 
 
 	namespace Enjon
-	{
+	{ 
 		ENJON_CLASS( )
 		class TestProject : public Enjon::Application 
 		{
@@ -60,6 +62,12 @@ extern "C"
 
 				ENJON_PROPERTY( )
 				Enjon::f32 mAnotherFloat = 1.0f; 
+
+				ENJON_PROPERTY( )
+				AssetHandle< Mesh > mMesh;
+
+				ENJON_PROPERTY( )
+				AssetHandle< ShaderGraph > mShaderGraph;
 
 				Vector< EntityHandle > mHandles;
 		};

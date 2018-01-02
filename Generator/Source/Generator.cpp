@@ -25,22 +25,17 @@ int main( int argc, char** argv )
 
 		// Set root path
 
-		if ( arg.compare( "--enjon-path" ) == 0 && (i + 1) < argc )
+		if ( arg.compare( "--target-path" ) == 0 && (i + 1) < argc )
 		{
-			mConfig.mEnjonRootPath = FindReplaceMetaTag( String( argv[i + 1] ), "/Generator/..", "" );
-		}
-		
-		// Set root path
-		if ( arg.compare( "--project-path" ) == 0 && (i + 1) < argc )
-		{
-			mConfig.mProjectPath = String( argv[i + 1] );
-		}
+			mConfig.mRootPath = String( argv[ i + 1 ] );
+			//mConfig.mRootPath = FindReplaceMetaTag( String( argv[i + 1] ), "/Generator/..", "" );
+		} 
 	} 
 
 	// Grab the config file
-	mConfig.mConfigFilePath = mConfig.mEnjonRootPath + "/Generator/config.cfg"; 
-	mConfig.mOutputDirectory = mConfig.mEnjonRootPath + "/Build/Generator/Intermediate";
-	mConfig.mLinkedDirectory = mConfig.mEnjonRootPath + "/Build/Generator/Linked";
+	mConfig.mConfigFilePath = mConfig.mRootPath + "Build/Generator/reflection.cfg"; 
+	mConfig.mOutputDirectory = mConfig.mRootPath + "Build/Generator/Intermediate";
+	mConfig.mLinkedDirectory = mConfig.mRootPath + "Build/Generator/Linked";
 
 	std::string configFileContents = ReadFileIntoString( mConfig.mConfigFilePath.c_str( ) );
 
@@ -49,6 +44,14 @@ int main( int argc, char** argv )
 
 	// Collect all necessary files for reflection
 	mConfig.CollectFiles( lexer );
+
+	std::cout << "Starting Reflection Generation on: " << mConfig.mConfigFilePath << "\n";
+
+	// If not an engine project, then set id to last used engine id (for now just a large number)
+	if ( mConfig.mProjectName.compare( "Enjon" ) != 0 )
+	{
+		mIntrospection.SetTypeID( 200 );
+	}
 
 	// Iterate over collected files and parse
 	for ( auto& f : mConfig.mFilesToParse )
@@ -103,8 +106,19 @@ void ReflectionConfig::CollectFiles( Lexer* lexer )
 
 				if ( nextToken.mType == TokenType::Token_Identifier )
 				{ 
-					if ( nextToken.Equals( "enjon_dir" ) )
+					if ( nextToken.Equals( "target_dir" ) )
 					{
+						if ( lexer->RequireToken( TokenType::Token_String, true ) )
+						{
+							mRootPath = lexer->GetCurrentToken( ).ToString( );
+						}
+					}
+					if ( nextToken.Equals( "engine_dir" ) )
+					{
+						if ( lexer->RequireToken( TokenType::Token_String, true ) )
+						{
+							mEnginePath = lexer->GetCurrentToken( ).ToString( );
+						}
 					}
 					if ( nextToken.Equals( "files" ) )
 					{
@@ -114,6 +128,21 @@ void ReflectionConfig::CollectFiles( Lexer* lexer )
 							mFilesToParse.push_back( lexer->GetCurrentToken( ).ToString( ) ); 
 						}
 					} 
+					if ( nextToken.Equals( "additional_includes" ) )
+					{
+						// Advance next token - if is string, then is file name
+						while ( lexer->RequireToken( TokenType::Token_String, true ) )
+						{
+							mAdditionalIncludes.push_back( lexer->GetCurrentToken( ).ToString( ) ); 
+						} 
+					}
+					if ( nextToken.Equals( "project_name" ) )
+					{
+						if ( lexer->RequireToken( TokenType::Token_String, true ) )
+						{
+							mProjectName = lexer->GetCurrentToken( ).ToString( );
+						}
+					}
 				}
 			} break;
 

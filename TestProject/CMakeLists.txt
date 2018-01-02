@@ -49,19 +49,28 @@ link_directories(${ENJON_BUILD_DIR}/RelWithDebInfo)
 
 set(TARGET_INC_DIR "${TARGET_DIR}/Include/")
 set(TARGET_DIR_DIR "${TARGET_DIR}/Source/")
+set(TARGET_GENERATED_DIR ${TARGET_BUILD_DIR}/Generator/Linked/)
 
-file(GLOB_RECURSE TARGET_SOURCES
-	"${TARGET_INC_DIR}/*.h"
-	"${TARGET_INC_DIR}/*.c"
-	"${TARGET_DIR_DIR}/*.cpp"
+file( 
+		GLOB_RECURSE TARGET_SOURCES
+
+		"${TARGET_INC_DIR}/*.h"
+		"${TARGET_INC_DIR}/*.c"
+		"${TARGET_DIR_DIR}/*.cpp"
 	)
 
 set(
-	ALL_SRC 
-	${TARGET_SOURCES}
-) 
+		ALL_SRC 
+		${TARGET_SOURCES}
+		${TARGET_GENERATED_DIR}/${TARGET_NAME}_Generated.cpp
+	)
 
-add_library(${TARGET_NAME} SHARED ${TARGET_SOURCES}) 
+file(
+		GLOB_RECURSE REFLECTION_INCLUDES
+		"${TARGET_INC_DIR}/*.h"
+	)
+
+add_library(${TARGET_NAME} SHARED ${ALL_SRC}) 
 
 
 # Link libraries to target
@@ -96,7 +105,7 @@ set_target_properties(
 						PDB_NAME "$(TargetName)-$([System.DateTime]::Now.ToString(\"HH_mm_ss_fff\"))"
 					)
 
-source_group("Source"		FILES ${TARGET_SOURCES})
+source_group("Source" FILES ${TARGET_SOURCES})
 
 # Write to .user file for command arguments
 if (MSVC)
@@ -135,13 +144,49 @@ foreach(dir ${BUILD_DIRECTORIES})
 		file(MAKE_DIRECTORY ${dir})
 		execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${dir})
 	endif()
-
 endforeach(dir)
 
+# Reflection information
+set( TARGET_REFLECTION_DIR ${TARGET_BUILD_DIR}/Generator/ )
+
+# Create directory if doesn't exist
+if (NOT IS_DIRECTORY ${TARGET_REFLECTION_DIR})
+	file(MAKE_DIRECTORY ${TARGET_REFLECTION_DIR})
+	file(MAKE_DIRECTORY ${TARGET_REFLECTION_DIR}/Intermediate/)
+	file(MAKE_DIRECTORY ${TARGET_REFLECTION_DIR}/Linked/)
+endif()
+
+# Create reflection list for project
+file(WRITE ${TARGET_REFLECTION_DIR}/reflection.cfg "#target_dir \"${TARGET_DIR}\"\n") 
+file(WRITE ${TARGET_REFLECTION_DIR}/reflection.cfg "#engine_dir \"${ENJON_DIR}\"\n") 
+file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#project_name \"${TARGET_NAME}\"\n") 
+file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#files\n") 
+
+# Add all reflection include files
+foreach( file ${REFLECTION_INCLUDES} )
+
+	file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "\"${file}\"\n") 
+
+endforeach(file)
+
+# Remove all previous .pdb files if possible
+file(
+	GLOB_RECURSE PDB_FILES
+	"${TARGET_BUILD_DIR}/Debug/*.pdb"
+) 
+
+add_custom_command(
+	TARGET ${TARGET_NAME} PRE_BUILD
+	COMMAND call ${TARGET_DIR}/Proc/delPDB.bat ${TARGET_DIR}
+) 
+
 # Need to get this working with projects
-# add_custom_command(TARGET Enjon PRE_BUILD
-	# COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe --enjon-path ${ENJON_DIR}
-	# )
+add_custom_command(
+	TARGET ${TARGET_NAME} PRE_BUILD
+	COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe ARGS --target-path ${TARGET_DIR}/
+)
+
+
 
 
 

@@ -84,6 +84,7 @@ void Introspection::InitPropertyMap( )
 	STRING_TO_PROP( "Vector", Array )
 }
 
+
 //=================================================================================================
 		
 bool Class::HasFunction( const std::string& name )
@@ -160,6 +161,13 @@ void Introspection::Initialize( )
 {
 	// Set up property table
 	InitPropertyMap( );
+}
+
+//=================================================================================================
+
+void Introspection::SetTypeID( const u32& id )
+{
+	mLastObjectTypeId = id;
 }
 
 //=================================================================================================
@@ -1289,7 +1297,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 
 	{
 		// Grab output path
-		std::string enumOutputPath = config.mOutputDirectory + "/" + "Enjon_Enum_generated.gen";
+		std::string enumOutputPath = config.mOutputDirectory + "/" + config.mProjectName + "_Enum_generated.gen";
 
 		// Open file
 		std::ofstream f( enumOutputPath );
@@ -1645,11 +1653,11 @@ void Introspection::Compile( const ReflectionConfig& config )
 	} 
 }
 		
-std::string Introspection::OutputLinkedHeader( )
+std::string Introspection::OutputLinkedHeader( const ReflectionConfig& config )
 {
 	std::string code = "";
 
-	code += OutputLine( "// @file Enjon_Generated.cpp" );
+	code += OutputLine( "// @file " + config.mProjectName + "_Generated.cpp" );
 	code += OutputLine( "// Copyright 2016-2017 John Jackson. All Rights Reserved." );
 	code += OutputLine( "// This file has been generated. All modifications will be lost." );
 	code += OutputLine( "" );
@@ -1662,18 +1670,18 @@ std::string Introspection::OutputLinkedHeader( )
 void Introspection::Link( const ReflectionConfig& config )
 {
 	// Open link file to write to
-	std::string enginePath = config.mEnjonRootPath + "/Include/Engine.h";
-	std::string typesPath = config.mEnjonRootPath + "/Include/System/Types.h";
-	std::string definesPath = config.mEnjonRootPath + "/Include/Defines.h";
-	std::string linkFilePath = config.mLinkedDirectory + "/" + "Enjon_Generated.cpp"; 
-	std::string enumDefinesPath = config.mOutputDirectory + "/" + "Enjon_Enum_generated.gen";
+	std::string enginePath = config.mEnginePath + "/Include/Engine.h";
+	std::string typesPath = config.mEnginePath + "/Include/System/Types.h";
+	std::string definesPath = config.mEnginePath + "/Include/Defines.h";
+	std::string linkFilePath = config.mLinkedDirectory + "/" + config.mProjectName + "_Generated.cpp"; 
+	std::string enumDefinesPath = config.mOutputDirectory + "/" + config.mProjectName + "_Enum_generated.gen";
 	std::ofstream f( linkFilePath ); 
 
 	// Code to write to file
 	std::string code = "";
 
 	// Write header for Linked file
-	code += OutputLinkedHeader( ); 
+	code += OutputLinkedHeader( config ); 
 
 	// Output include diretories
 	for ( auto& c : mClasses )
@@ -1713,16 +1721,21 @@ void Introspection::Link( const ReflectionConfig& config )
 		code += OutputLine( fileContents );
 	} 
 
-	// Output Binding Function
-	code += OutputLine( "// Binding function for Enjon::Object that is called at startup for reflection" );
-	code += OutputLine( "void Object::BindMetaClasses()" );
-	code += OutputLine( "{" );
-	for ( auto& c : mClasses )
+	// Only write static meta class binding call for enjon includes
+	if ( config.mProjectName.compare( "Enjon" ) == 0 )
 	{
-		std::string qualifiedName = c.second.GetQualifiedName( );
-		code += OutputTabbedLine( "Object::RegisterMetaClass< " + qualifiedName + " >();" ); 
+		// Output Binding Function
+		code += OutputLine( "// Binding function for Enjon::Object that is called at startup for reflection" );
+		code += OutputLine( "void Object::BindMetaClasses()" );
+		code += OutputLine( "{" );
+		for ( auto& c : mClasses )
+		{
+			std::string qualifiedName = c.second.GetQualifiedName( );
+			code += OutputTabbedLine( "Object::RegisterMetaClass< " + qualifiedName + " >();" ); 
+		}
+		code += OutputLine( "}" ); 
 	}
-	code += OutputLine( "}" );
+
 
 	// Output linked code
 	if ( f )

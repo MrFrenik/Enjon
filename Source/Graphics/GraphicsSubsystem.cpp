@@ -162,17 +162,13 @@ namespace Enjon
 		// ImGuiManager::Register(graphicsMenuOption);
 		// TODO(John): I HATE the way this looks
 		ImGuiManager::RegisterMenuOption("View", graphicsMenuOption);
-		//ImGuiManager::RegisterWindow(showGameViewportFunc);
 		ImGuiManager::RegisterWindow(showGraphicsViewportFunc);
-		//ImGuiManager::RegisterWindow(showStylesWindowFunc);
 
 		// Set current render texture
 		mCurrentRenderTexture = mFXAATarget->GetTexture();
 
 		// Register docking layouts
-	    //ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Game View", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f));
 	    ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Graphics", nullptr, ImGui::DockSlotType::Slot_Right, 0.2f));
-	    //ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Styles##options", nullptr, ImGui::DockSlotType::Slot_Bottom, 0.2f));
 	
 		// Register shader graph templates
 		Enjon::ShaderGraph::DeserializeTemplate( Enjon::Engine::GetInstance( )->GetConfig( ).GetEngineResourcePath( ) + "/Shaders/ShaderGraphTemplates/ShaderTemplates.json" );
@@ -1788,29 +1784,7 @@ namespace Enjon
 		//}
 	}
 
-	//=======================================================================================================
-
-	void GraphicsSubsystem::ShowGameViewport(bool* open)
-	{
-	    // Render game in window
-		ImVec2 cursorPos = ImGui::GetCursorScreenPos( );
-
-	    ImTextureID img = (ImTextureID)mCurrentRenderTexture;
-	    ImGui::Image(img, ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()), 
-	    				ImVec2(0,1), ImVec2(1,0), ImColor(255,255,255,255), ImColor(255,255,255,0));
-		
-		ImVec2 min = ImVec2 ( cursorPos.x + ImGui::GetContentRegionAvailWidth() - 100.0f, cursorPos.y + 10.0f );
-		ImVec2 max = ImVec2( min.x + 50.0f, min.y + 10.0f );
-
-		ImGui::SetCursorScreenPos( min );
-		auto drawlist = ImGui::GetWindowDrawList( ); 
-		//drawlist->AddRect( min, max, ImColor( 255, 255, 255, 255 ) );
-		f32 fps = ImGui::GetIO( ).Framerate;
-		drawlist->AddText( min, ImColor( 255, 255, 255, 255 ), fmt::sprintf( "Frame: %.3f", fps ).c_str() );
-
-		// Update camera aspect ratio
-		mSceneCamera.SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
-	} 
+	//======================================================================================================= 
 
 	unsigned int cubeVAO = 0;
 	unsigned int cubeVBO = 0;

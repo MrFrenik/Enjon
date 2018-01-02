@@ -295,12 +295,14 @@ struct ReflectionConfig
 {
 	void CollectFiles( Lexer* lexer );
 
-	std::string mEnjonRootPath;
-	std::string mProjectPath;
+	std::string mRootPath; 
+	std::string mEnginePath;
 	std::string mConfigFilePath;
 	std::string mOutputDirectory;
 	std::string mLinkedDirectory;
+	std::string mProjectName;
 	std::vector< std::string > mFilesToParse;
+	std::vector< std::string > mAdditionalIncludes;
 }; 
 
 class Introspection
@@ -359,8 +361,10 @@ class Introspection
 		PropertyType GetTypeFromString( const std::string& str );
 		std::string GetTypeAsString( PropertyType type );
 
+		void SetTypeID( const u32& typeId );
+
 	private:
-		std::string OutputLinkedHeader( );
+		std::string OutputLinkedHeader( const ReflectionConfig& config );
 
 	private:
 		std::unordered_map< std::string, Class > mClasses;

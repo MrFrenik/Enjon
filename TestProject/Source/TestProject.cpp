@@ -125,27 +125,16 @@ namespace Enjon
 
 		if ( mEntity.Get( ) )
 		{
+			if ( mMesh )
+			{
+				auto gfx = mEntity.Get( )->GetComponent< GraphicsComponent >( );
+				gfx->SetMesh( mMesh );
+			}
+
 			//mEntity.Get( )->Destroy( );
 			mEntity.Get( )->SetRotation( Quaternion::AngleAxis( ToRadians( mRotationTime ), mRotationAxis ) ); 
-			mEntity.Get( )->SetScale( std::sin( mRotationTime ) );
+			mEntity.Get( )->SetScale( std::sin( mRotationTime / 2.0f ) * 0.5f + 0.6f );
 		} 
-		else
-		{
-			Enjon::EntityManager* entities = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->ConstCast< Enjon::EntityManager >( );
-			const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-
-			mEntity = entities->Allocate( );
-			// Attach graphics component
-			auto gfx = mEntity.Get( )->AddComponent< Enjon::GraphicsComponent >( );
-			gfx->SetMesh( am->GetAsset< Enjon::Mesh >( "models.unit_sphere" ) );
-			gfx->SetMaterial( am->GetAsset< Enjon::Material >( "NewMaterial1" ).Get( ) );
-
-			Enjon::GraphicsSubsystem* gfxSub = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( );
-			gfxSub->GetScene( )->AddRenderable( gfx->GetRenderable( ) );
-
-			mEntity.Get( )->SetPosition( Enjon::Vec3( -73.0f, 5.0f, 0.0f ) );
-			mEntity.Get( )->SetScale( 2.0f );
-		}
 
 		if ( mFloor.Get( ) )
 		{
@@ -285,6 +274,24 @@ namespace Enjon
 					// Serialize entity data
 					EntityArchiver::Serialize( *cls->GetValueAs< EntityHandle >( this, prop ), buffer ); 
 				} break;
+
+				case MetaPropertyType::AssetHandle:
+				{
+					ByteBuffer temp;
+					temp.Write< UUID >( UUID::Invalid( ) );
+					buffer->Write< usize >( temp.GetSize( ) );
+
+					AssetHandle<Asset> val;
+					cls->GetValue( this, prop, &val );
+					if ( val )
+					{
+						buffer->Write( val.GetUUID( ) );
+					}
+					else
+					{
+						buffer->Write( UUID::Invalid( ) );
+					}
+				} break;
 			} 
 		}
 
@@ -327,6 +334,40 @@ namespace Enjon
 						EntityHandle handle = EntityArchiver::Deserialize( buffer );
 						cls->SetValue( this, prop, handle ); 
 					} break;
+
+					case MetaPropertyType::AssetHandle:
+					{
+						// Grab asset manager
+						const MetaPropertyTemplateBase* base = prop->Cast< MetaPropertyTemplateBase >( );
+						const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+						AssetHandle<Asset> val;
+
+						// Get meta class of the asset
+						const MetaClass* assetCls = base->GetClassOfTemplatedArgument( );
+
+						// Get uuid from read buffer
+						UUID id = buffer->Read< UUID >( );
+
+						// Get asset
+						const Asset* asset = am->GetAsset( assetCls, id );
+
+						// If valid asset
+						if ( asset )
+						{
+							// Set asset handle to default asset
+							val.Set( asset );
+
+						}
+						// Otherwise get default asset for this class type
+						else
+						{
+							val.Set( am->GetDefaultAsset( assetCls ) );
+						}
+
+						// Set value of object
+						cls->SetValue( this, prop, val );
+					} break;
+
 				} 
 			}
 			// Otherwise property doesn't exist, so yeah...
@@ -357,52 +398,5 @@ namespace Enjon
 
 		return Enjon::Result::SUCCESS; 
 	}
-
-	////////////////////////////////////////////////////
-	// Reflection //////////////////////////////////////
-
-	template <>
-	Enjon::MetaClass* Enjon::Object::ConstructMetaClass< Enjon::TestProject >( )
-	{
-		MetaClass* cls = new MetaClass( );
-
-		// Construct properties
-		cls->mPropertyCount = 5;
-		cls->mProperties.resize( cls->mPropertyCount );
-		cls->mProperties[ 0 ] = new Enjon::MetaProperty( MetaPropertyType::EntityHandle, "mFloor", ( u32 )&( ( TestProject* )0 )->mFloor, 0, MetaPropertyTraits( false, 0.000000f, 0.000000f ) );
-		cls->mProperties[ 1 ] = new Enjon::MetaProperty( MetaPropertyType::F32, "mRotationTime", ( u32 )&( ( TestProject* )0 )->mRotationTime, 1, MetaPropertyTraits( false, 0.000000f, 0.000000f ) );
-		cls->mProperties[ 2 ] = new Enjon::MetaProperty( MetaPropertyType::Vec3, "mRotationAxis", ( u32 )&( ( TestProject* )0 )->mRotationAxis, 2, MetaPropertyTraits( false, 0.000000f, 0.000000f ) );
-		cls->mProperties[ 3 ] = new Enjon::MetaProperty( MetaPropertyType::F32, "mRotationSpeed", ( u32 )&( ( TestProject* )0 )->mRotationSpeed, 3, MetaPropertyTraits( false, 0.000000f, 0.000000f ) ); 
-		cls->mProperties[ 4 ] = new Enjon::MetaProperty( MetaPropertyType::EntityHandle, "mEntity", ( u32 )&( ( TestProject* )0 )->mEntity, 4, MetaPropertyTraits( false, 0.000000f, 0.000000f ) );
- 
-		// Construct functions
-		cls->mFunctionCount = 0;
-
-		cls->mTypeId = 134;
-
-		cls->mName = "TestProject";
-
-		return cls;
-	}
-
-	// GetClassInternal
-	const Enjon::MetaClass* Enjon::TestProject::GetClassInternal( ) const
-	{
-		Enjon::MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance( )->GetMetaClassRegistry( ) );
-		const MetaClass* cls = mr->Get< TestProject >( );
-		if ( !cls )
-		{
-			cls = mr->RegisterMetaClass< TestProject >( );
-		}
-		return cls;
-	}
-
-	// MetaClassRegistry::GetTypeId
-	template <>
-	Enjon::u32 MetaClassRegistry::GetTypeId< TestProject >( ) const
-	{
-		return 134;
-	}
-
 }
 
