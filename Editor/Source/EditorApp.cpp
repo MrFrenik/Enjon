@@ -32,32 +32,16 @@ funcDeleteApp deleteAppFunc = nullptr;
 
 namespace fs = std::experimental::filesystem; 
 
-Enjon::String copyDir = "E:/Development/C++DLLTest/Build/Debug/TestDLLIntermediate/";
-
-void CopyTempDLL( )
-{
-	Enjon::String rootDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
-
-	fs::path dllPath = rootDir + "Build/Debug/TestDLLTemp.dll";
-	if ( fs::exists( dllPath ) )
-	{
-		fs::remove( dllPath );
-	}
-
-	// Now copy over contents from intermediate build to executable dir
-	dllPath = copyDir;
-	if ( fs::exists( dllPath ) )
-	{
-		fs::copy( fs::path( dllPath.string( ) + "TestDLL.dll" ), rootDir + "Build/Debug/TestDLLTemp.dll" );
-	}
-
-}
+Enjon::String projectName = "TestProject";
+Enjon::String projectDLLName = projectName + ".dll";
+Enjon::String copyDir = "E:/Development/C++DLLTest/Build/Debug/TestDLLIntermediate/"; 
 
 void CopyLibraryContents( )
 {
 	Enjon::String rootDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
+	Enjon::String dllName = projectName + ".dll";
 
-	fs::path dllPath = rootDir + "Build/Debug/TestDLL.dll";
+	fs::path dllPath = rootDir + "Build/Debug/" + dllName;
 	if ( fs::exists( dllPath ) )
 	{
 		fs::remove( dllPath );
@@ -67,7 +51,10 @@ void CopyLibraryContents( )
 	dllPath = copyDir;
 	if ( fs::exists( dllPath ) )
 	{
-		fs::copy( fs::path( dllPath.string( ) + "TestDLL.dll" ), rootDir + "Build/Debug/TestDLL.dll" );
+		if ( fs::exists( dllPath.string( ) + "Build/Debug/" + dllName ) )
+		{
+			fs::copy( fs::path( dllPath.string( ) + "Build/Debug/" + dllName ), rootDir + "Build/Debug/" + dllName );
+		}
 	}
 }
 
@@ -224,6 +211,9 @@ Enjon::Result EnjonEditor::Initialize( )
 	mAssetManager->SetDatabaseName( GetApplicationName( ) );
 	mAssetManager->Initialize( ); 
 
+	// Set up copy directory for project dll
+	copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";
+
 	// Register individual windows
 	Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
 	{
@@ -277,7 +267,7 @@ Enjon::Result EnjonEditor::Initialize( )
 	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Scene", ImGui::DockSlotType::Slot_Right, 0.2f ) );
 	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Camera", ImGui::DockSlotType::Slot_Bottom, 0.3f ) );
 	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) ); 
-	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene", ImGui::DockSlotType::Slot_Top, 0.07f ) );
+	Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene", ImGui::DockSlotType::Slot_Top, 0.1f ) );
 
 	return Enjon::Result::SUCCESS;
 }
@@ -408,7 +398,7 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 			CopyLibraryContents( );
 
 			// Try to load library
-			dllHandle = LoadLibrary( "TestDLL.dll" );
+			dllHandle = LoadLibrary( projectDLLName.c_str() );
 
 			// If valid, then set address of procedures to be called
 			if ( dllHandle )

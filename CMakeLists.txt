@@ -20,15 +20,16 @@ set (EXECUTABLE_OUTPUT_PATH ${ENJON_BUILD_DIR})
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Set compiler flags and build options
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /W1")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /W1")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MT /W1")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD /W1")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD /W1")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd /W1")
 
 message("cxx FLgs:" ${CMAKE_CXX_FLAGS})
 
 # Add additional sub-directories
 add_subdirectory( Generator )
 add_subdirectory( Editor )
+add_subdirectory( TestProject )
 
 # Add include directories
 include_directories(${ENJON_DIR}/Include
@@ -194,6 +195,7 @@ target_link_libraries( Enjon debug liblz4_d.lib optimized liblz4.lib )
 
 add_dependencies( Enjon Reflection )
 add_dependencies( EnjonEditor Enjon )
+add_dependencies( TestProject Enjon )
 
 source_group("Base"			FILES ${SRC_BASE})
 source_group("Entity"		FILES ${SRC_ENTITY})

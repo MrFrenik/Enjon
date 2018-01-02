@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6) 
 
-set (TARGET_NAME EnjonEditor)
+set (TARGET_NAME TestProject)
 
 # Declare project file
 project(${TARGET_NAME} C CXX)
@@ -15,12 +15,13 @@ set (ENJON_RELDEBUGINFO_DIR ${ENJON_BUILD_DIR}/RelWithDebInfo)
 set (ENJON_RELEASE_DIR ${ENJON_BUILD_DIR}/Release)
 set (ENJON_DEBUG_DIR ${ENJON_BUILD_DIR}/Debug)
 
-set (TARGET_RELEASE_DIR "${ENJON_RELEASE_DIR}")
-set (TARGET_RELEASEDEBUGINFO_DIR "${ENJON_RELDEBUGINFO_DIR}")
-set (TARGET_DEBUG_DIR "${ENJON_DEBUG_DIR}")
+set (TARGET_RELEASE_DIR "${TARGET_BUILD_DIR}/Release")
+set (TARGET_RELEASEDEBUGINFO_DIR "${TARGET_BUILD_DIR}/RelWithDebInfo")
+set (TARGET_DEBUG_DIR "${TARGET_BUILD_DIR}/Debug")
 
 # Set build directory for solution
-set (EXECUTABLE_OUTPUT_PATH ${ENJON_BUILD_DIR})
+set (EXECUTABLE_OUTPUT_PATH ${TARGET_BUILD_DIR})
+set (LIBRARY_OUTPUT_PATH ${TARGET_BUILD_DIR})
 
 # Turn on ability to create folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -33,7 +34,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd /W1")
 message("cxx FLgs:" ${CMAKE_CXX_FLAGS})
 
 # Add include directories
-include_directories(${TARGET_DIR}/Include
+include_directories(
+					${TARGET_DIR}/Include
 					${ENJON_DIR}/ThirdParty/Build/Include
 					${ENJON_INC}
 					)
@@ -59,7 +61,8 @@ set(
 	${TARGET_SOURCES}
 ) 
 
-add_executable(${TARGET_NAME} ${TARGET_SOURCES}) 
+add_library(${TARGET_NAME} SHARED ${TARGET_SOURCES}) 
+
 
 # Link libraries to target
 target_link_libraries( ${TARGET_NAME} debug Enjon.lib optimized Enjon.lib )
@@ -79,23 +82,35 @@ target_link_libraries( ${TARGET_NAME} debug fmt_d.lib optimized fmt.lib )
 target_link_libraries( ${TARGET_NAME} debug CrossGuid_d.lib optimized CrossGuid.lib )
 target_link_libraries( ${TARGET_NAME} debug liblz4_d.lib optimized liblz4.lib ) 
 
-set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${TARGET_BUILD_DIR})
 
-source_group("Source"		FILES ${TARGET_SOURCES}) 
+set_target_properties(
+						${TARGET_NAME} 
+						PROPERTIES 
+						LINKER_LANGUAGE CXX 
+					)
+
+set_target_properties(
+						${TARGET_NAME} 
+						PROPERTIES 
+						PDB_NAME "$(TargetName)-$([System.DateTime]::Now.ToString(\"HH_mm_ss_fff\"))"
+					)
+
+source_group("Source"		FILES ${TARGET_SOURCES})
 
 # Write to .user file for command arguments
 if (MSVC)
-	file(WRITE ${ENJON_BUILD_DIR}/${TARGET}/${TARGET}.vcxproj.user
+	file(WRITE ${TARGET_DIR}/Build/${TARGET_NAME}.vcxproj.user
 		"<?xml version=\"1.0\" encoding=\"utf-8\"?>
 		<Project ToolsVersion=\"14.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">
 		  <PropertyGroup>
-		    <LocalDebuggerCommandArguments>--enjon-path ${ENJON_DIR}</LocalDebuggerCommandArguments>
+		    <LocalDebuggerCommandArguments>--target-path ${TARGET_DIR}</LocalDebuggerCommandArguments>
 		     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
 		  </PropertyGroup>
 		</Project>" 
 	)
 endif()
- 
+
 # List of necessary DLLs 
 set(
 		DLL_LIST
@@ -109,12 +124,10 @@ set(
 set(
 		BUILD_DIRECTORIES
 
-		${ENJON_RELDEBUGINFO_DIR}
-		${ENJON_RELEASE_DIR}
-		${ENJON_DEBUG_DIR}
+		${TARGET_RELEASE_DIR}
+		${TARGET_RELEASEDEBUGINFO_DIR}
+		${TARGET_DEBUG_DIR}
 	)
-
-set(your_mother ${TARGET})
 
 # Install directories
 foreach(dir ${BUILD_DIRECTORIES})
@@ -125,27 +138,25 @@ foreach(dir ${BUILD_DIRECTORIES})
 
 endforeach(dir)
 
-add_custom_command(TARGET Enjon PRE_BUILD
-	COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe --enjon-path ${ENJON_DIR}
-	)
+# Need to get this working with projects
+# add_custom_command(TARGET Enjon PRE_BUILD
+	# COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe --enjon-path ${ENJON_DIR}
+	# )
 
-# Add DLLs to builds
-foreach(dll ${DLL_LIST})
 
-	add_custom_command(TARGET EnjonEditor POST_BUILD        		
-	    COMMAND ${CMAKE_COMMAND} -E copy_if_different  		
-	        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
-	        ${ENJON_BUILD_DIR}/RelWithDebInfo/)
 
-	add_custom_command(TARGET EnjonEditor POST_BUILD        		
-	    COMMAND ${CMAKE_COMMAND} -E copy_if_different  		
-	        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
-	        ${ENJON_BUILD_DIR}/Release/)
 
-	add_custom_command(TARGET EnjonEditor POST_BUILD        		
-	    COMMAND ${CMAKE_COMMAND} -E copy_if_different  		
-	        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
-	        ${ENJON_BUILD_DIR}/Debug/)
 
-endforeach(dll) 
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -29,3 +29,11 @@ git add IsoARPG/Include
 git add IsoARPG/include
 
 git add IsoARPG/src
+
+git add TestProject/Include
+
+git add TestProject/Source
+
+git add TestProject/CMakeLists.txt
+
+git add proc/gitadd.bat

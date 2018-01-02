@@ -15,6 +15,14 @@ mkdir Build
 cd Build
 cmake ../. -G"Visual Studio 14 2015"
 
+cd ..
+cd ..
+echo "Building Test Project..."
+cd TestProject
+mkdir Build
+cd Build
+cmake ../. -G"Visual Studio 14 2015"
+
 echo "Building Enjon..."
 cd ..
 cd ..
