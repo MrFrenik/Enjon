@@ -129,19 +129,13 @@ namespace Enjon
 	{
 		mRenderable.SetRotation(rotation);
 	}
-
+ 
 	//====================================================================
 
-	void GraphicsComponent::SetMaterial(const Material* material)
+	void GraphicsComponent::SetMaterial( const AssetHandle< Material >& material ) 
 	{
-		mRenderable.SetMaterial(material);
-	} 
-
-	//====================================================================
-
-	//void SetMaterial( const AssetHandle< Material >& material )
-	//{
-	//}
+		mRenderable.SetMaterial( material );
+	}
 
 	//====================================================================
 

@@ -10,7 +10,7 @@ namespace FS = std::experimental::filesystem;
 
 int main(int argc, char** argv)
 { 
-	EnjonEditor mEditor;
+	Enjon::EnjonEditor mEditor;
 	Enjon::Engine mEngine; 
 	Enjon::EngineConfig mConfig; 
 

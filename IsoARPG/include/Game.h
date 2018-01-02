@@ -32,13 +32,13 @@ class Game : public Enjon::Application
 		~Game();
 
 		virtual Enjon::Result Initialize();  
-		virtual Enjon::Result Update(f32 dt);
+		virtual Enjon::Result Update(Enjon::f32 dt);
 		virtual Enjon::Result Shutdown();
 
-		virtual Enjon::Result ProcessInput(f32 dt);
+		virtual Enjon::Result ProcessInput(Enjon::f32 dt);
 
 	private:
-		void ListEntityChildren(Enjon::Entity* entity, u32 indentAmount);
+		void ListEntityChildren(Enjon::Entity* entity, Enjon::u32 indentAmount);
 
 		void TestObjectSerialize( );
 
@@ -84,9 +84,9 @@ class Game : public Enjon::Application
 		bool mLockCamera = false;
 		bool mRotateCamera = false;
 
-		f32 mCameraSpeed = 0.12f;
+		Enjon::f32 mCameraSpeed = 0.12f;
 
-		f32 mFontSize = 1.0f;
+		Enjon::f32 mFontSize = 1.0f;
 
 		Enjon::String mWorldString = ""; 
 

@@ -53,6 +53,8 @@
 
 #include <Base/MetaClassRegistry.h>
 
+using namespace Enjon;
+
 #define ADD_ASSET_TO_PROJECT 1
 
 struct ActiveSceneWrapper

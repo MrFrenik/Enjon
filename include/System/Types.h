@@ -205,20 +205,4 @@ using f64 = double;
 	}
 } 
 
-typedef Enjon::u32 u32;
-typedef Enjon::f32 f32;
-typedef Enjon::s32 s32;
-typedef Enjon::f64 f64;
-typedef Enjon::u64 u64;
-typedef Enjon::s64 s64;
-typedef Enjon::b32 b32;
-typedef Enjon::u16 u16;
-typedef Enjon::s16 s16;
-typedef Enjon::b8  b8;
-typedef Enjon::u8  u8;
-typedef Enjon::s8  s8;
-typedef Enjon::b1  b1; 
-typedef Enjon::usize usize;
-
-
 #endif

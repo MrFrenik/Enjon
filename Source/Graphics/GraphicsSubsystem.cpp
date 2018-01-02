@@ -545,7 +545,7 @@ namespace Enjon
 
 		// Clear default buffer
 		//mWindow.Clear( );
-		mWindow.Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, ColorRGBA32( 0.005f, 0.005f, 0.005f, 1.0f ) );
+		mWindow.Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() );
 
 		// Editor gui pass (ImGUI)
 		if (true)
@@ -788,13 +788,13 @@ namespace Enjon
 		{
 			skyBoxShader->SetUniform( "view", mSceneCamera.GetView( ) );
 			skyBoxShader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
-			skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
+			skyBoxShader->BindTexture( "environmentMap", mIrradianceMap, 0 );
 
 			// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
 			glActiveTexture( GL_TEXTURE0 );
-			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mIrradianceMap );
 
-			//RenderCube( );
+			RenderCube( );
 		}
 		skyBoxShader->Unuse( );
 

@@ -26,8 +26,8 @@ namespace Enjon
 // TODO(): Clean up this file!
 
 /*
-	Used as boilerplate for all classes participating in object/reflection model. 
-*/ 
+	Used as boilerplate for all classes participating in object/reflection model.
+*/
 #define ENJON_CLASS_BODY( ... )																	\
 	friend Enjon::Object;																			\
 	public:																							\
@@ -50,6 +50,49 @@ public:\
 #define ENJON_FUNCTION( ... )
 #define ENJON_CLASS( ... )
 #define ENJON_STRUCT( ... )
+
+#ifdef ENJON_SYSTEM_WINDOWS
+#define ENJON_EXPORT __declspec(dllexport) 
+#endif
+
+#define ENJON_MODULE_DEFINE( ModuleName )\
+	extern "C"\
+	{\
+		ENJON_EXPORT void SetEngineInstance( Enjon::Engine* engine );\
+		ENJON_EXPORT Enjon::Application* CreateApplication( Enjon::Engine* engine );\
+		ENJON_EXPORT void DeleteApplication( Enjon::Application* app );\
+	}
+
+#define ENJON_MODULE_IMPL( ModuleName )\
+	extern "C"\
+	{\
+		ENJON_EXPORT void SetEngineInstance( Enjon::Engine* engine )\
+		{\
+			Enjon::Engine::SetInstance( engine );\
+		}\
+		\
+		ENJON_EXPORT Enjon::Application* CreateApplication( Enjon::Engine* engine )\
+		{\
+			ModuleName* app = new ModuleName();\
+			if ( app )\
+			{\
+				SetEngineInstance( engine );\
+				Enjon::Object::BindMetaClass< ModuleName >();\
+				return app;\
+			}\
+			return nullptr;\
+		}\
+		\
+		ENJON_EXPORT void DeleteApplication( Enjon::Application* app )\
+		{\
+			if ( app )\
+			{\
+				Enjon::Object::UnbindMetaClass( app->Class() );\
+				delete app;\
+				app = nullptr;\
+			}\
+		}\
+	}
 
 namespace Enjon
 {
@@ -1051,6 +1094,19 @@ namespace Enjon
 				} 
 			}
 
+			void UnregisterMetaClass( const MetaClass* cls )
+			{ 
+				// If available, then return
+				if ( HasMetaClass( cls->GetName() ) )
+				{
+					u32 id = cls->GetTypeId( );
+					MetaClass* cls = mRegistry[ id ];
+					mRegistry.erase( id );
+					delete cls;
+					cls = nullptr;
+				} 
+			}
+
 			template <typename T>
 			u32 GetTypeId( ) const;
 
@@ -1062,7 +1118,7 @@ namespace Enjon
 			bool HasMetaClass( )
 			{
 				return ( mRegistry.find( GetTypeId< T >( ) ) != mRegistry.end( ) );
-			}
+			} 
 
 			bool HasMetaClass( const String& className )
 			{
@@ -1175,6 +1231,27 @@ namespace Enjon
 
 			//	return ( mTypeId == Object::GetTypeId< T >( ) );
 			//}
+
+
+			template <typename T>
+			static void BindMetaClass( )
+			{
+				MetaClassRegistry* registry = const_cast< MetaClassRegistry* >( Engine::GetInstance( )->GetMetaClassRegistry( ) );
+				registry->RegisterMetaClass< T >( );
+			}
+
+			template <typename T>
+			static void UnbindMetaClass( )
+			{
+				MetaClassRegistry* registry = const_cast< MetaClassRegistry* >( Engine::GetInstance( )->GetMetaClassRegistry( ) ); 
+				registry->UnregisterMetaClass< T >( ); 
+			}
+
+			static void UnbindMetaClass( const MetaClass* cls )
+			{
+				MetaClassRegistry* registry = const_cast< MetaClassRegistry* >( Engine::GetInstance( )->GetMetaClassRegistry( ) ); 
+				registry->UnregisterMetaClass( cls ); 
+			}
 
 			u32 GetTypeId( )
 			{

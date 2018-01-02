@@ -102,17 +102,12 @@ namespace Enjon
 			/* 
 			* @brief Set orientation of transform 
 			*/
-			void SetRotation(const Quaternion& rotation);
+			void SetRotation(const Quaternion& rotation); 
 
 			/* 
 			* @brief Set material of renderable 
 			*/
-			void SetMaterial(const Material* material);
-
-			/* 
-			* @brief Set material of renderable 
-			*/
-			//void SetMaterial( const AssetHandle< Material >& material );
+			void SetMaterial( const AssetHandle< Material >& material );
 
 			/* 
 			* @brief Set mesh of renderable 
