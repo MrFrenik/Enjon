@@ -398,19 +398,16 @@ namespace Enjon
 				u32 val = 0;
 				cls->GetValue( object, prop, &val );
 				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
-				ImGui::Text( Enjon::String( name + ":" ).c_str( ) );
-				Enjon::String label( "##" + name );
-				ImGui::SameLine( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderInt( label.c_str(), ( s32* )&val, ( s32 )traits.GetUIMin( ), ( s32 )traits.GetUIMax( ) ) )
+					if ( ImGui::SliderInt( name.c_str(), ( s32* )&val, ( s32 )traits.GetUIMin( ), ( s32 )traits.GetUIMax( ) ) )
 					{
 						cls->SetValue( object, prop, ( u32 )val );
 					}
 				}
 				else
 				{
-					if ( ImGui::DragInt( label.c_str( ), ( s32* )&val, 0 ) )
+					if ( ImGui::DragInt( name.c_str( ), ( s32* )&val ) )
 					{
 						cls->SetValue( object, prop, ( u32 )val );
 					}

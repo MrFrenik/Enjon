@@ -2,6 +2,7 @@
 
 #include <Engine.h>
 #include <Asset/AssetManager.h>
+#include <Serialize/ObjectArchiver.h>
 #include <SubsystemCatalog.h>
 #include <IO/InputManager.h>
 #include <ImGui/ImGuiManager.h>
@@ -17,12 +18,6 @@
 #include <ctime>
 
 typedef void( *funcSetEngineInstance )( Enjon::Engine* instance );
-typedef Enjon::Result( *funcStartUp )( const Enjon::f32& );
-typedef Enjon::Result( *funcUpdate )( const Enjon::f32& );
-typedef Enjon::Result( *funcShutDown )( const Enjon::f32& );
-typedef Enjon::Result( *funcSerializeData )( Enjon::ByteBuffer* );
-typedef Enjon::Result( *funcDeserializeData )( Enjon::ByteBuffer* );
-typedef Enjon::usize( *funcGetAppSize )( );
 typedef Enjon::Application*( *funcCreateApp )( Enjon::Engine* );
 typedef void( *funcDeleteApp )( Enjon::Application* );
 
@@ -32,12 +27,6 @@ Enjon::Application* mApp = nullptr;
 HINSTANCE dllHandleTemp = nullptr;
 HINSTANCE dllHandle = nullptr;
 funcSetEngineInstance setEngineFunc = nullptr;
-funcStartUp startUpFunc = nullptr;
-funcUpdate updateFunc = nullptr;
-funcShutDown shutDownFunc = nullptr;
-funcSerializeData serializeDataFunc = nullptr;
-funcDeserializeData deserializeDataFunc = nullptr;
-funcGetAppSize getAppSizeFunc = nullptr;
 funcCreateApp createAppFunc = nullptr;
 funcDeleteApp deleteAppFunc = nullptr;
 
@@ -117,6 +106,15 @@ void EnjonEditor::CameraOptions( bool* enable )
 	}
 
 	ImGui::DragFloat( "Camera Speed", &mCameraSpeed, 0.1f ); 
+
+	if ( ImGui::TreeNode( "Application" ) )
+	{
+		if ( mApp )
+		{
+			Enjon::ImGuiManager::DebugDumpObject( mApp ); 
+		}
+		ImGui::TreePop( );
+	} 
 }
 
 void EnjonEditor::PlayOptions( )
@@ -126,11 +124,12 @@ void EnjonEditor::PlayOptions( )
 		if ( ImGui::Button( "Stop" ) )
 		{ 
 			mPlaying = false; 
+			mMoveCamera = false;
 
 			// Call shut down function for game
-			if ( shutDownFunc )
+			if ( mApp )
 			{
-				shutDownFunc( 0.01f );
+				mApp->Shutdown( );
 			}
 
 			auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( )->ConstCast< Enjon::Camera >();
@@ -143,19 +142,21 @@ void EnjonEditor::PlayOptions( )
 		if ( ImGui::Button( "Play" ) )
 		{ 
 			mPlaying = true;
+			mMoveCamera = true;
 
 			auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( ); 
 			mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) );
 
 			// Call start up function for game
-			if ( startUpFunc )
+			if ( mApp )
 			{
-				startUpFunc( 0.01f );
+				mApp->Initialize( );
 			}
 			else
 			{ 
 				std::cout << "Cannot play without game loaded!\n";
 				mPlaying = false;
+				mMoveCamera = false;
 			}
 		}
 	} 
@@ -289,18 +290,10 @@ Enjon::Result EnjonEditor::Update( f32 dt )
 	// Simulate game tick scenario if playing
 	if ( mPlaying )
 	{ 
-		if ( updateFunc )
-		{
-			updateFunc( dt );
-		} 
-
 		if ( mApp )
 		{
 			mApp->ProcessInput( dt );
-			mApp->Update( dt );
-
-			const Enjon::MetaClass* cls = mApp->Class( );
-			usize propCount = cls->GetPropertyCount( );
+			mApp->Update( dt ); 
 		}
 	}
 
@@ -386,17 +379,14 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 			{ 
 				if ( mPlaying )
 				{
-					if ( shutDownFunc )
+					if ( mApp )
 					{ 
 						// NOTE(): Will not work if the layout of the data has changed! Need versioning working first...
-						if ( serializeDataFunc )
-						{
-							serializeDataFunc( &buffer );
-							needsReload = true; 
-						} 
+						Enjon::ObjectArchiver::Serialize( mApp, &buffer );
+						needsReload = true; 
 
 						// Destroy the instance of the original handle
-						shutDownFunc( dt );
+						mApp->Shutdown( );
 					} 
 				}
 
@@ -410,13 +400,7 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 				// Free library if in use
 				FreeLibrary( dllHandle );
 				dllHandle = nullptr;
-				startUpFunc = nullptr;
-				updateFunc = nullptr;
-				shutDownFunc = nullptr;
-				serializeDataFunc = nullptr;
-				deserializeDataFunc = nullptr;
 				createAppFunc = nullptr;
-				getAppSizeFunc = nullptr;
 				deleteAppFunc = nullptr;
 			}
 
@@ -430,33 +414,20 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 			if ( dllHandle )
 			{
 				// Set functions from handle
-				startUpFunc = ( funcStartUp )GetProcAddress( dllHandle, "StartUp" );
-				updateFunc = ( funcUpdate )GetProcAddress( dllHandle, "Update" );
-				shutDownFunc = ( funcShutDown )GetProcAddress( dllHandle, "ShutDown" );
-				serializeDataFunc = ( funcSerializeData )GetProcAddress( dllHandle, "SerializeData" );
-				deserializeDataFunc = ( funcDeserializeData )GetProcAddress( dllHandle, "DeserializeData" );
 				createAppFunc = ( funcCreateApp )GetProcAddress( dllHandle, "CreateApplication" );
-				getAppSizeFunc = ( funcGetAppSize )GetProcAddress( dllHandle, "GetApplicationSizeInBytes" ); 
 				deleteAppFunc = ( funcDeleteApp )GetProcAddress( dllHandle, "DeleteApplication" );
 
 				// Create application
 				if ( createAppFunc )
 				{
 					mApp = createAppFunc( Enjon::Engine::GetInstance( ) );
-				}
-
-				// Try and set the engine instance
-				setEngineFunc = ( funcSetEngineInstance )GetProcAddress( dllHandle, "SetEngineInstance" );
-				if ( setEngineFunc )
-				{
-					setEngineFunc( Enjon::Engine::GetInstance( ) );
-				}
+				} 
 
 				if ( needsReload )
 				{
-					if ( deserializeDataFunc )
+					if ( mApp )
 					{
-						deserializeDataFunc( &buffer );
+						Enjon::ObjectArchiver::Deserialize( &buffer, mApp );
 					}
 				}
 
@@ -475,19 +446,21 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 			if ( !mPlaying )
 			{
 				mPlaying = true;
+				mMoveCamera = true;
 
 				auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( );
 				mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) );
 
 				// Call start up function for game
-				if ( startUpFunc )
+				if ( mApp )
 				{
-					startUpFunc( dt );
+					mApp->Initialize( );
 				}
 				else
 				{
 					std::cout << "Cannot play without game loaded!\n";
 					mPlaying = false;
+					mMoveCamera = false;
 				}
 			}
 		}
@@ -497,11 +470,12 @@ Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 			if ( mPlaying )
 			{
 				mPlaying = false; 
+				mMoveCamera = false;
 
 				// Call shut down function for game
-				if ( shutDownFunc )
+				if ( mApp )
 				{
-					shutDownFunc( dt );
+					mApp->Shutdown( );
 				}
 
 				auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( )->ConstCast< Enjon::Camera >( );

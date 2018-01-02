@@ -279,6 +279,19 @@ namespace Enjon
 
 	//========================================================================
 
+	void ByteBuffer::AdvanceReadPosition( const usize& amount )
+	{
+		// Cannot read past where we are
+		if ( mReadPosition + amount >= mSize )
+		{
+			return;
+		}
+
+		mReadPosition += amount; 
+	}
+
+	//========================================================================
+
 	// Template Specializations
 	BYTE_BUFFER_RW( bool )
 	BYTE_BUFFER_RW( b1 )

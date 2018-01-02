@@ -88,20 +88,22 @@ namespace Enjon
 
 	Entity::~Entity()
 	{
-		mManager->Destroy( GetHandle( ) );		
+		this->Destroy( );
 	}
 
 	//=================================================================
 			
 	EntityHandle Entity::GetHandle( )
 	{
-		EntityHandle handle( this );
-		return handle;
+		return EntityHandle( this );
 	}
 
 	void Entity::Destroy( )
 	{
-		mManager->Destroy( GetHandle( ) );
+		if ( mManager )
+		{
+			mManager->Destroy( GetHandle( ) ); 
+		}
 	} 
 
 	//=================================================================
@@ -601,7 +603,7 @@ namespace Enjon
 
 	Entity* EntityManager::GetRawEntity( const u32& id )
 	{
-		if ( id < MAX_ENTITIES )
+		if ( id < MAX_ENTITIES && mEntities->at( id ).mState == EntityState::ACTIVE )
 		{
 			return &mEntities->at( id );
 		}

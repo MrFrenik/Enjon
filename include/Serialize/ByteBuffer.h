@@ -79,6 +79,11 @@ namespace Enjon
 			*/
 			void Reset( );
 
+			/*
+			* @brief
+			*/
+			void AdvanceReadPosition( const usize& amount );
+
 		private:
 			/*
 			* @brief Destructor

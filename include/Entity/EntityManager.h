@@ -54,6 +54,7 @@ namespace Enjon
 		* @brief
 		*/
 		u32 GetID( ) const;
+
 			
 		/*
 		* @brief

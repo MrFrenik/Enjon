@@ -530,10 +530,7 @@ namespace Enjon
 			{
 				std::cout << "Recompiling...\n";
 			}
-		}
-
-		// Clear default buffer
-		mWindow.Clear( );
+		} 
 
 		// Gbuffer pass
 		GBufferPass();
@@ -549,6 +546,10 @@ namespace Enjon
 		CompositePass(mLightingBuffer);
 		// FXAA pass
 		FXAAPass(mCompositeTarget); 
+
+		// Clear default buffer
+		//mWindow.Clear( );
+		mWindow.Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, ColorRGBA32( 0.005f, 0.005f, 0.005f, 1.0f ) );
 
 		// Editor gui pass (ImGUI)
 		if (true)
@@ -594,7 +595,7 @@ namespace Enjon
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 
-		 //mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_LightGrey());
+		 //mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, mBGColor);
 
 		// Get sorted renderables by material
 		const std::vector<Renderable*>& sortedRenderables = mScene.GetRenderables();
@@ -797,7 +798,7 @@ namespace Enjon
 			glActiveTexture( GL_TEXTURE0 );
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
 
-			RenderCube( );
+			//RenderCube( );
 		}
 		skyBoxShader->Unuse( );
 

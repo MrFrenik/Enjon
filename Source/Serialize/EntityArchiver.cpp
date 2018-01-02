@@ -23,6 +23,21 @@ namespace Enjon
 
 	Result EntityArchiver::Serialize( const EntityHandle& entity, ByteBuffer* buffer )
 	{ 
+		if ( !buffer )
+		{
+			return Result::FAILURE;
+		}
+
+		// Write that entity was null for deserializing later on
+		if ( !entity.Get( ) )
+		{
+			buffer->Write< u32 >( 0 );
+			return Result::FAILURE;
+		}
+
+		// Write that entity was alive and serialized
+		buffer->Write< u32 >( 1 );
+
 		//==========================================================================
 		// Local Transform
 		//========================================================================== 
@@ -117,6 +132,16 @@ namespace Enjon
 
 	EntityHandle EntityArchiver::Deserialize( ByteBuffer* buffer )
 	{
+		// Read status of entity from buffer
+		u32 entityStatus = buffer->Read< u32 >( );
+
+		// If entity wasn't alive, then it wasn't serialized
+		if ( !entityStatus )
+		{
+			// Return empty entity handle
+			return EntityHandle();
+		}
+
 		// Get entity manager from engine
 		EntityManager* entities = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< EntityManager >( )->ConstCast< EntityManager >( );
 
@@ -198,7 +223,7 @@ namespace Enjon
 		}
 
 		return handle.Get( );
-	}
+	} 
 
 	//========================================================================================= 
 }
