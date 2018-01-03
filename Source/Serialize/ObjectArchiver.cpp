@@ -3,6 +3,7 @@
 // File: ObjectArchiver.h
 
 #include "Serialize/ObjectArchiver.h"
+#include "Serialize/EntityArchiver.h"
 #include "Graphics/Color.h"													// Don't like this here, but I'll leave it for now
 #include "Serialize/UUID.h"
 #include "System/Types.h"
@@ -83,11 +84,17 @@ namespace Enjon
 
 	//=====================================================================
 
+#define WRITE_PROP_SIZE_POD( buffer, valType )\
+	buffer->Write< usize >( sizeof( valType ) );
+
 #define WRITE_PROP( buffer, cls, object, prop, valType )\
 	buffer->Write< valType >( *cls->GetValueAs< valType >( object, prop ) );
 
 	Result ObjectArchiver::SerializeObjectDataDefault( const Object* object, const MetaClass* cls, ByteBuffer* buffer )
 	{ 
+		// Write out property count to buffer
+		buffer->Write< usize >( cls->GetPropertyCount( ) );
+
 		// Serialize all object properties
 		for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
 		{
@@ -99,65 +106,85 @@ namespace Enjon
 				continue;
 			}
 
+			// Write out property name
+			buffer->Write< String >( prop->GetName( ) );
+
+			// Write out property type
+			buffer->Write< s32 >( ( s32 )prop->GetType( ) );
+
 			switch ( prop->GetType( ) )
 			{
 				case MetaPropertyType::U8:
 				{
+					WRITE_PROP_SIZE_POD( buffer, u8 )
 					WRITE_PROP( buffer, cls, object, prop, u8 )
 				} break;
 
 				case MetaPropertyType::U16:
 				{
+					WRITE_PROP_SIZE_POD( buffer, u16 )
 					WRITE_PROP( buffer, cls, object, prop, u16 )
 				} break;
 
 				case MetaPropertyType::U32:
 				{
+					WRITE_PROP_SIZE_POD( buffer, u32 )
 					WRITE_PROP( buffer, cls, object, prop, u32 )
 				} break;
 
 				case MetaPropertyType::U64:
 				{
+					WRITE_PROP_SIZE_POD( buffer, u64 )
 					WRITE_PROP( buffer, cls, object, prop, u64 )
 				} break;
 
 				case MetaPropertyType::S8:
 				{
+					WRITE_PROP_SIZE_POD( buffer, s8 )
 					WRITE_PROP( buffer, cls, object, prop, s8 )
 				} break;
 
 				case MetaPropertyType::S16:
 				{
+					WRITE_PROP_SIZE_POD( buffer, s16 )
 					WRITE_PROP( buffer, cls, object, prop, s16 )
 				} break;
 
 				case MetaPropertyType::S32:
 				{
+					WRITE_PROP_SIZE_POD( buffer, s32 )
 					WRITE_PROP( buffer, cls, object, prop, s32 )
 				} break;
 
 				case MetaPropertyType::S64:
 				{
+					WRITE_PROP_SIZE_POD( buffer, s64 )
 					WRITE_PROP( buffer, cls, object, prop, s64 )
 				} break;
 
 				case MetaPropertyType::F32:
 				{
+					WRITE_PROP_SIZE_POD( buffer, f32 )
 					WRITE_PROP( buffer, cls, object, prop, f32 )
 				} break;
 
 				case MetaPropertyType::F64:
 				{
+					WRITE_PROP_SIZE_POD( buffer, f64 )
 					WRITE_PROP( buffer, cls, object, prop, f64 )
 				} break;
 
 				case MetaPropertyType::Bool:
 				{
+					WRITE_PROP_SIZE_POD( buffer, bool )
 					WRITE_PROP( buffer, cls, object, prop, bool )
 				} break;
 
 				case MetaPropertyType::ColorRGBA32:
 				{
+					// Write out size of ColorRGBA32
+					WRITE_PROP_SIZE_POD( buffer, ColorRGBA32 )
+					
 					// Get color
 					const ColorRGBA32* val = cls->GetValueAs< ColorRGBA32 >( object, prop );
 
@@ -171,11 +198,14 @@ namespace Enjon
 
 				case MetaPropertyType::String:
 				{
+					buffer->Write< usize >( cls->GetValueAs< String >( object, prop )->length( ) );
 					WRITE_PROP( buffer, cls, object, prop, String )
 				} break;
 
 				case MetaPropertyType::Vec2:
 				{
+					WRITE_PROP_SIZE_POD( buffer, Vec2 )
+
 					// Get vec2
 					const Vec2* val = cls->GetValueAs< Vec2 >( object, prop );
 
@@ -186,6 +216,8 @@ namespace Enjon
 
 				case MetaPropertyType::Vec3:
 				{
+					WRITE_PROP_SIZE_POD( buffer, Vec3 )
+
 					// Get vec3
 					const Vec3* val = cls->GetValueAs< Vec3 >( object, prop );
 
@@ -197,6 +229,8 @@ namespace Enjon
 
 				case MetaPropertyType::Vec4:
 				{
+					WRITE_PROP_SIZE_POD( buffer, Vec4 )
+
 					// Get vec3
 					const Vec4* val = cls->GetValueAs< Vec4 >( object, prop );
 
@@ -209,6 +243,8 @@ namespace Enjon
 
 				case MetaPropertyType::Transform:
 				{
+					WRITE_PROP_SIZE_POD( buffer, Transform )
+
 					// Get transform
 					const Transform* val = cls->GetValueAs< Transform >( object, prop );
 
@@ -231,11 +267,17 @@ namespace Enjon
 
 				case MetaPropertyType::UUID:
 				{
+					// Write size of uuid
+					buffer->Write< usize >( UUID::Invalid( ).ToString( ).length( ) ); 
+					// Write uuid to buffer
 					WRITE_PROP( buffer, cls, object, prop, UUID )
 				} break;
 
 				case MetaPropertyType::AssetHandle:
 				{
+					// Write size of uuid to buffer
+					buffer->Write< usize >( UUID::Invalid( ).ToString( ).length( ) );
+
 					// Get value of asset 
 					AssetHandle<Asset> val;
 					cls->GetValue( object, prop, &val );
@@ -254,8 +296,25 @@ namespace Enjon
 
 				case MetaPropertyType::Enum:
 				{
+					// Write size of enum integral value
+					WRITE_PROP_SIZE_POD( buffer, s32 )
+
 					// Get integral value of enum
 					buffer->Write( *cls->GetValueAs< s32 >( object, prop ) );
+				} break;
+
+				case MetaPropertyType::EntityHandle:
+				{
+					// Create temporary buffer to traverse entity to get size
+					ByteBuffer temp;
+					EntityHandle handle = *cls->GetValueAs< EntityHandle >( object, prop );
+					EntityArchiver::Serialize( handle, &temp );
+					buffer->Write< usize >( temp.GetSize( ) );
+
+					// Serialize entity data 
+					// TODO(): Just copy in the serialized entity data from the other buffer...
+					EntityArchiver::Serialize( handle, buffer ); 
+
 				} break;
 
 	# define WRITE_ARRAY_PROP_PRIM( object, prop, valType, buffer )\
@@ -269,7 +328,13 @@ namespace Enjon
 				case MetaPropertyType::Array:
 				{
 					// Get base
-					const MetaPropertyArrayBase* base = prop->Cast< MetaPropertyArrayBase >( );
+					const MetaPropertyArrayBase* base = prop->Cast< MetaPropertyArrayBase >( ); 
+
+					// Get total size to write for array + writing size of array element-wise
+					usize totalWriteSize = base->GetSizeInBytes( object ) + sizeof( usize );
+
+					// Write out total write size
+					buffer->Write< usize >( totalWriteSize );
 
 					// Write out size of array to buffer
 					buffer->Write< usize >( base->GetSize( object ) );
@@ -332,6 +397,12 @@ namespace Enjon
 				{
 					// Get base
 					const MetaPropertyHashMapBase* base = prop->Cast< MetaPropertyHashMapBase >( );
+
+					// Get total write size = numElements * ( size of key type + size of val type ) + size of usize
+					usize totalWriteSize = base->GetSizeInBytes( object ) + sizeof( usize ); 
+
+					// Write total write size out
+					buffer->Write< usize >( totalWriteSize );
 
 					// Write out size of map to buffer
 					buffer->Write< usize >( base->GetSize( object ) );
@@ -622,318 +693,337 @@ namespace Enjon
 
 	Result ObjectArchiver::DeserializeObjectDataDefault( const Object* object, const MetaClass* cls, ByteBuffer* buffer )
 	{ 
-		for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
+		// Read in property count
+		usize propCount = buffer->Read< usize >( );
+
+		for ( usize i = 0; i < propCount; ++i )
 		{
-			// Grab property at index from metaclass
-			MetaProperty* prop = const_cast< MetaProperty* > ( cls->GetProperty( i ) );
+			// Read in meta property
+			const MetaProperty* prop = cls->GetPropertyByName( buffer->Read< String >( ) );
+			// Read the type
+			MetaPropertyType propType = ( MetaPropertyType )buffer->Read< s32 >( );
+			// Read in the total size in bytes written for this property
+			usize propSize = buffer->Read< usize >( );
 
-			if ( !prop )
+			if ( prop && propType == prop->GetType( ) )
 			{
-				continue;
-			}
-
-			switch ( prop->GetType( ) )
-			{
-				case MetaPropertyType::U8:
+				switch ( prop->GetType( ) )
 				{
-					READ_PROP( buffer, cls, object, prop, u8 )
-				} break;
-
-				case MetaPropertyType::U16:
-				{
-					READ_PROP( buffer, cls, object, prop, u16 )
-				} break;
-
-				case MetaPropertyType::U32:
-				{
-					// Set value of object from read buffer
-					READ_PROP( buffer, cls, object, prop, u32 )
-				} break;
-
-				case MetaPropertyType::U64:
-				{
-					// Set value of object from read buffer
-					READ_PROP( buffer, cls, object, prop, u64 )
-				} break;
-
-				case MetaPropertyType::F32:
-				{
-					// Set value of object from read buffer
-					READ_PROP( buffer, cls, object, prop, f32 )
-				} break;
-
-				case MetaPropertyType::String:
-				{
-					READ_PROP( buffer, cls, object, prop, String )
-				} break;
-
-				case MetaPropertyType::S8:
-				{
-					READ_PROP( buffer, cls, object, prop, s8 )
-				} break;
-
-				case MetaPropertyType::S16:
-				{
-					READ_PROP( buffer, cls, object, prop, s16 )
-				} break;
-
-				case MetaPropertyType::S32:
-				{
-					READ_PROP( buffer, cls, object, prop, s32 )
-				} break;
-
-				case MetaPropertyType::S64:
-				{
-					READ_PROP( buffer, cls, object, prop, s64 )
-				} break;
-
-				case MetaPropertyType::UUID:
-				{
-					READ_PROP( buffer, cls, object, prop, UUID )
-				} break;
-
-				case MetaPropertyType::Bool:
-				{
-					READ_PROP( buffer, cls, object, prop, bool )
-				} break;
-
-				case MetaPropertyType::AssetHandle:
-				{
-					// Grab asset manager
-					const MetaPropertyTemplateBase* base = prop->Cast< MetaPropertyTemplateBase >( );
-					const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
-					AssetHandle<Asset> val;
-
-					// Get meta class of the asset
-					const MetaClass* assetCls = base->GetClassOfTemplatedArgument( );
-
-					// Get uuid from read buffer
-					UUID id = buffer->Read< UUID >( );
-
-					// Get asset
-					const Asset* asset = am->GetAsset( assetCls, id );
-
-					// If valid asset
-					if ( asset )
+					case MetaPropertyType::U8:
 					{
-						// Set asset handle to default asset
-						val.Set( asset );
-
-					}
-					// Otherwise get default asset for this class type
-					else
-					{
-						val.Set( am->GetDefaultAsset( assetCls ) );
-					}
-
-					// Set value of object
-					cls->SetValue( object, prop, val );
-
-				} break;
-
-				case MetaPropertyType::Vec2:
-				{
-					// Read individual elements of Vec2
-					f32 x = buffer->Read< f32 >( );
-					f32 y = buffer->Read< f32 >( );
-
-					// Set Vec2 property
-					cls->SetValue( object, prop, Vec2( x, y ) );
-				} break;
-
-				case MetaPropertyType::Vec3:
-				{
-					// Read individual elements of Vec3
-					f32 x = buffer->Read< f32 >( );
-					f32 y = buffer->Read< f32 >( );
-					f32 z = buffer->Read< f32 >( );
-
-					// Set Vec3 property
-					cls->SetValue( object, prop, Vec3( x, y, z ) );
-				} break;
-
-				case MetaPropertyType::Vec4:
-				{
-					// Read individual elements of Vec4
-					f32 x = buffer->Read< f32 >( );
-					f32 y = buffer->Read< f32 >( );
-					f32 z = buffer->Read< f32 >( );
-					f32 w = buffer->Read< f32 >( );
-
-					// Set Vec4 property
-					cls->SetValue( object, prop, Vec4( x, y, z, w ) );
-				} break;
-
-				case MetaPropertyType::Transform:
-				{ 
-					Transform val;
-	 
-					// Read in position
-					val.Position.x = buffer->Read< f32 >( );
-					val.Position.y = buffer->Read< f32 >( );
-					val.Position.z = buffer->Read< f32 >( );
-
-					// Read in rotation
-					val.Rotation.x = buffer->Read< f32 >( );
-					val.Rotation.y = buffer->Read< f32 >( );
-					val.Rotation.z = buffer->Read< f32 >( );
-					val.Rotation.w = buffer->Read< f32 >( );
-
-					// Read in scale
-					val.Scale.x = buffer->Read< f32 >( );
-					val.Scale.y = buffer->Read< f32 >( );
-					val.Scale.z = buffer->Read< f32 >( );
-
-					// Set transform property
-					cls->SetValue( object, prop, val ); 
-				} break;
-
-				case MetaPropertyType::ColorRGBA32:
-				{
-					// Read all individual color channels
-					f32 r = buffer->Read< f32 >( );
-					f32 g = buffer->Read< f32 >( );
-					f32 b = buffer->Read< f32 >( );
-					f32 a = buffer->Read< f32 >( );
-
-					// Set ColorRGBA32 property
-					cls->SetValue( object, prop, ColorRGBA32( r, g, b, a ) );
-				} break;
-
-				case MetaPropertyType::Enum:
-				{
-					// Read value from buffer
-					s32 val = buffer->Read< s32 >( );
-
-					// Set property on object
-					cls->SetValue( object, prop, val );
-
-				} break;
-
-# define READ_ARRAY_PROP_PRIM( object, prop, valType, arraySize, buffer )\
-	{\
-		const MetaPropertyArray< valType >* arrayProp = prop->Cast< MetaPropertyArray< valType > >();\
-		for ( usize j = 0; j < arraySize; ++j )\
-		{\
-			/*Grab value from buffer and set at index in array*/\
-			arrayProp->SetValueAt( object, j, buffer->Read< valType >( ) );\
-		}\
-	} 
-			case MetaPropertyType::Array:
-			{
-				// Get base
-				const MetaPropertyArrayBase* base = prop->Cast< MetaPropertyArrayBase >( );
-
-				// Read size of array from buffer
-				usize arraySize = buffer->Read< usize >( );
-
-				// If a dynamic vector then need to resize vector to allow for placement
-				switch ( base->GetArraySizeType( ) )
-				{
-					case ArraySizeType::Dynamic:
-					{
-						base->Resize( object, arraySize );
+						READ_PROP( buffer, cls, object, prop, u8 )
 					} break;
-					}
 
-					// Read out array elements
-					switch ( base->GetArrayType( ) )
+					case MetaPropertyType::U16:
 					{
-						case MetaPropertyType::Bool:	READ_ARRAY_PROP_PRIM( object, base, bool, arraySize, buffer )	break;
-						case MetaPropertyType::U8:		READ_ARRAY_PROP_PRIM( object, base, u8, arraySize, buffer )		break;
-						case MetaPropertyType::U32:		READ_ARRAY_PROP_PRIM( object, base, u32, arraySize, buffer )	break;
-						case MetaPropertyType::S32:		READ_ARRAY_PROP_PRIM( object, base, s32, arraySize, buffer )	break;
-						case MetaPropertyType::F32:		READ_ARRAY_PROP_PRIM( object, base, f32, arraySize, buffer )	break;
-						case MetaPropertyType::F64:		READ_ARRAY_PROP_PRIM( object, base, f64, arraySize, buffer )	break;
-						case MetaPropertyType::String:	READ_ARRAY_PROP_PRIM( object, base, String, arraySize, buffer )	break;
-						case MetaPropertyType::UUID:	READ_ARRAY_PROP_PRIM( object, base, UUID, arraySize, buffer )	break;
-						case MetaPropertyType::AssetHandle:
+						READ_PROP( buffer, cls, object, prop, u16 )
+					} break;
+
+					case MetaPropertyType::U32:
+					{
+						// Set value of object from read buffer
+						READ_PROP( buffer, cls, object, prop, u32 )
+					} break;
+
+					case MetaPropertyType::U64:
+					{
+						// Set value of object from read buffer
+						READ_PROP( buffer, cls, object, prop, u64 )
+					} break;
+
+					case MetaPropertyType::F32:
+					{
+						// Set value of object from read buffer
+						READ_PROP( buffer, cls, object, prop, f32 )
+					} break;
+
+					case MetaPropertyType::String:
+					{
+						READ_PROP( buffer, cls, object, prop, String )
+					} break;
+
+					case MetaPropertyType::S8:
+					{
+						READ_PROP( buffer, cls, object, prop, s8 )
+					} break;
+
+					case MetaPropertyType::S16:
+					{
+						READ_PROP( buffer, cls, object, prop, s16 )
+					} break;
+
+					case MetaPropertyType::S32:
+					{
+						READ_PROP( buffer, cls, object, prop, s32 )
+					} break;
+
+					case MetaPropertyType::S64:
+					{
+						READ_PROP( buffer, cls, object, prop, s64 )
+					} break;
+
+					case MetaPropertyType::UUID:
+					{
+						READ_PROP( buffer, cls, object, prop, UUID )
+					} break;
+
+					case MetaPropertyType::Bool:
+					{
+						READ_PROP( buffer, cls, object, prop, bool )
+					} break;
+
+					case MetaPropertyType::AssetHandle:
+					{
+						// Grab asset manager
+						const MetaPropertyTemplateBase* base = prop->Cast< MetaPropertyTemplateBase >( );
+						const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+						AssetHandle<Asset> val;
+
+						// Get meta class of the asset
+						const MetaClass* assetCls = base->GetClassOfTemplatedArgument( );
+
+						// Get uuid from read buffer
+						UUID id = buffer->Read< UUID >( );
+
+						// Get asset
+						const Asset* asset = am->GetAsset( assetCls, id );
+
+						// If valid asset
+						if ( asset )
 						{
-							MetaArrayPropertyProxy proxy = base->GetProxy( );
-							const MetaPropertyTemplateBase* arrBase = static_cast< const MetaPropertyTemplateBase* > ( proxy.mArrayPropertyTypeBase );
-							const MetaClass* assetCls = const_cast< Enjon::MetaClass* >( arrBase->GetClassOfTemplatedArgument( ) );
+							// Set asset handle to default asset
+							val.Set( asset );
 
-							// Write out asset uuids in array
-							const MetaPropertyArray< AssetHandle< Asset > >* arrProp = base->Cast< MetaPropertyArray< AssetHandle< Asset > > >( );
-							for ( usize j = 0; j < arraySize; ++j )
-							{
-								AssetHandle<Asset> newAsset = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->GetAsset( assetCls, buffer->Read< UUID >( ) );
-								arrProp->SetValueAt( object, j, newAsset );
-							}
-						} break;
-					}
+						}
+						// Otherwise get default asset for this class type
+						else
+						{
+							val.Set( am->GetDefaultAsset( assetCls ) );
+						}
 
-				} break;
+						// Set value of object
+						cls->SetValue( object, prop, val );
 
+					} break;
 
-	#define READ_MAP_KEY_PRIM_VAL_PRIM( object, prop, keyType, valType, mapSize, buffer )\
+					case MetaPropertyType::Vec2:
+					{
+						// Read individual elements of Vec2
+						f32 x = buffer->Read< f32 >( );
+						f32 y = buffer->Read< f32 >( );
+
+						// Set Vec2 property
+						cls->SetValue( object, prop, Vec2( x, y ) );
+					} break;
+
+					case MetaPropertyType::Vec3:
+					{
+						// Read individual elements of Vec3
+						f32 x = buffer->Read< f32 >( );
+						f32 y = buffer->Read< f32 >( );
+						f32 z = buffer->Read< f32 >( );
+
+						// Set Vec3 property
+						cls->SetValue( object, prop, Vec3( x, y, z ) );
+					} break;
+
+					case MetaPropertyType::Vec4:
+					{
+						// Read individual elements of Vec4
+						f32 x = buffer->Read< f32 >( );
+						f32 y = buffer->Read< f32 >( );
+						f32 z = buffer->Read< f32 >( );
+						f32 w = buffer->Read< f32 >( );
+
+						// Set Vec4 property
+						cls->SetValue( object, prop, Vec4( x, y, z, w ) );
+					} break;
+
+					case MetaPropertyType::Transform:
+					{ 
+						Transform val;
+		 
+						// Read in position
+						val.Position.x = buffer->Read< f32 >( );
+						val.Position.y = buffer->Read< f32 >( );
+						val.Position.z = buffer->Read< f32 >( );
+
+						// Read in rotation
+						val.Rotation.x = buffer->Read< f32 >( );
+						val.Rotation.y = buffer->Read< f32 >( );
+						val.Rotation.z = buffer->Read< f32 >( );
+						val.Rotation.w = buffer->Read< f32 >( );
+
+						// Read in scale
+						val.Scale.x = buffer->Read< f32 >( );
+						val.Scale.y = buffer->Read< f32 >( );
+						val.Scale.z = buffer->Read< f32 >( );
+
+						// Set transform property
+						cls->SetValue( object, prop, val ); 
+					} break;
+
+					case MetaPropertyType::ColorRGBA32:
+					{
+						// Read all individual color channels
+						f32 r = buffer->Read< f32 >( );
+						f32 g = buffer->Read< f32 >( );
+						f32 b = buffer->Read< f32 >( );
+						f32 a = buffer->Read< f32 >( );
+
+						// Set ColorRGBA32 property
+						cls->SetValue( object, prop, ColorRGBA32( r, g, b, a ) );
+					} break;
+
+					case MetaPropertyType::Enum:
+					{
+						// Read value from buffer
+						s32 val = buffer->Read< s32 >( );
+
+						// Set property on object
+						cls->SetValue( object, prop, val );
+
+					} break;
+
+					case MetaPropertyType::EntityHandle:
+					{
+						// Get the entity handle
+						EntityHandle handle = EntityArchiver::Deserialize( buffer );
+
+						// Set value on object
+						cls->SetValue( object, prop, handle );
+					} break;
+
+	# define READ_ARRAY_PROP_PRIM( object, prop, valType, arraySize, buffer )\
 		{\
-			const MetaPropertyHashMap< keyType, valType >* mapProp = prop->Cast< MetaPropertyHashMap< keyType, valType > >();\
-			for ( usize j = 0; j < mapSize; ++j )\
+			const MetaPropertyArray< valType >* arrayProp = prop->Cast< MetaPropertyArray< valType > >();\
+			for ( usize j = 0; j < arraySize; ++j )\
 			{\
-				/*Read Key*/\
-				keyType key = buffer->Read< keyType >( );\
-				/*Read Value*/\
-				valType val = buffer->Read< valType >( );\
-				/*Set Value at key*/\
-				mapProp->SetValueAt( object, key, val );\
+				/*Grab value from buffer and set at index in array*/\
+				arrayProp->SetValueAt( object, j, buffer->Read< valType >( ) );\
 			}\
 		} 
-
-	#define READ_MAP_KEY_PRIM_VAL_OBJ( object, prop, keyType, mapSize, buffer )\
-		{\
-			const MetaPropertyHashMap< keyType, Object* >* mapProp = prop->Cast< MetaPropertyHashMap< keyType, Object* > >();\
-			for ( usize j = 0; j < mapSize; ++j )\
-			{\
-				/* Read Key */\
-				keyType key = buffer->Read< keyType >();\
-				/* Read Value */\
-				Object* val = Deserialize( buffer );\
-				/* Set Value */\
-				mapProp->SetValueAt( object, key, val );\
-			}\
-		}
-				case MetaPropertyType::HashMap:
+				case MetaPropertyType::Array:
 				{
 					// Get base
-					const MetaPropertyHashMapBase* base = prop->Cast< MetaPropertyHashMapBase >( );
+					const MetaPropertyArrayBase* base = prop->Cast< MetaPropertyArrayBase >( );
 
-					// Read size of map to buffer
-					usize mapSize = buffer->Read< usize >( );
+					// Read size of array from buffer
+					usize arraySize = buffer->Read< usize >( );
 
-					switch ( base->GetKeyType( ) )
+					// If a dynamic vector then need to resize vector to allow for placement
+					switch ( base->GetArraySizeType( ) )
 					{
-						case MetaPropertyType::U32:
+						case ArraySizeType::Dynamic:
 						{
-							switch ( base->GetValueType( ) )
-							{
-								case MetaPropertyType::U32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, u32, mapSize, buffer )	break;
-								case MetaPropertyType::S32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, s32, u32, mapSize, buffer )	break;
-								case MetaPropertyType::F32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, f32, u32, mapSize, buffer )	break;
-							}
+							base->Resize( object, arraySize );
 						} break;
+						}
 
-						case MetaPropertyType::String:
+						// Read out array elements
+						switch ( base->GetArrayType( ) )
 						{
-							switch ( base->GetValueType( ) )
+							case MetaPropertyType::Bool:	READ_ARRAY_PROP_PRIM( object, base, bool, arraySize, buffer )	break;
+							case MetaPropertyType::U8:		READ_ARRAY_PROP_PRIM( object, base, u8, arraySize, buffer )		break;
+							case MetaPropertyType::U32:		READ_ARRAY_PROP_PRIM( object, base, u32, arraySize, buffer )	break;
+							case MetaPropertyType::S32:		READ_ARRAY_PROP_PRIM( object, base, s32, arraySize, buffer )	break;
+							case MetaPropertyType::F32:		READ_ARRAY_PROP_PRIM( object, base, f32, arraySize, buffer )	break;
+							case MetaPropertyType::F64:		READ_ARRAY_PROP_PRIM( object, base, f64, arraySize, buffer )	break;
+							case MetaPropertyType::String:	READ_ARRAY_PROP_PRIM( object, base, String, arraySize, buffer )	break;
+							case MetaPropertyType::UUID:	READ_ARRAY_PROP_PRIM( object, base, UUID, arraySize, buffer )	break;
+							case MetaPropertyType::AssetHandle:
 							{
-								case MetaPropertyType::U32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, String, u32, mapSize, buffer )	break;
-								case MetaPropertyType::Object:	READ_MAP_KEY_PRIM_VAL_OBJ( object, base, String, mapSize, buffer )			break;
-							}
+								MetaArrayPropertyProxy proxy = base->GetProxy( );
+								const MetaPropertyTemplateBase* arrBase = static_cast< const MetaPropertyTemplateBase* > ( proxy.mArrayPropertyTypeBase );
+								const MetaClass* assetCls = const_cast< Enjon::MetaClass* >( arrBase->GetClassOfTemplatedArgument( ) );
 
-						} break;
+								// Write out asset uuids in array
+								const MetaPropertyArray< AssetHandle< Asset > >* arrProp = base->Cast< MetaPropertyArray< AssetHandle< Asset > > >( );
+								for ( usize j = 0; j < arraySize; ++j )
+								{
+									AssetHandle<Asset> newAsset = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->GetAsset( assetCls, buffer->Read< UUID >( ) );
+									arrProp->SetValueAt( object, j, newAsset );
+								}
+							} break;
+						}
 
-						case MetaPropertyType::Enum:
-						{
-							switch ( base->GetValueType( ) )
-							{
-								case MetaPropertyType::String:	READ_MAP_KEY_PRIM_VAL_PRIM( object, base, s32, String, mapSize, buffer )	break;
-								case MetaPropertyType::Object:	READ_MAP_KEY_PRIM_VAL_OBJ( object, base, s32, mapSize, buffer )			break;
-							}
-						} break;
-					}
-				} break;
+					} break;
+
+
+		#define READ_MAP_KEY_PRIM_VAL_PRIM( object, prop, keyType, valType, mapSize, buffer )\
+			{\
+				const MetaPropertyHashMap< keyType, valType >* mapProp = prop->Cast< MetaPropertyHashMap< keyType, valType > >();\
+				for ( usize j = 0; j < mapSize; ++j )\
+				{\
+					/*Read Key*/\
+					keyType key = buffer->Read< keyType >( );\
+					/*Read Value*/\
+					valType val = buffer->Read< valType >( );\
+					/*Set Value at key*/\
+					mapProp->SetValueAt( object, key, val );\
+				}\
+			} 
+
+		#define READ_MAP_KEY_PRIM_VAL_OBJ( object, prop, keyType, mapSize, buffer )\
+			{\
+				const MetaPropertyHashMap< keyType, Object* >* mapProp = prop->Cast< MetaPropertyHashMap< keyType, Object* > >();\
+				for ( usize j = 0; j < mapSize; ++j )\
+				{\
+					/* Read Key */\
+					keyType key = buffer->Read< keyType >();\
+					/* Read Value */\
+					Object* val = Deserialize( buffer );\
+					/* Set Value */\
+					mapProp->SetValueAt( object, key, val );\
+				}\
 			}
+					case MetaPropertyType::HashMap:
+					{
+						// Get base
+						const MetaPropertyHashMapBase* base = prop->Cast< MetaPropertyHashMapBase >( );
+
+						// Read size of map to buffer
+						usize mapSize = buffer->Read< usize >( );
+
+						switch ( base->GetKeyType( ) )
+						{
+							case MetaPropertyType::U32:
+							{
+								switch ( base->GetValueType( ) )
+								{
+									case MetaPropertyType::U32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, u32, mapSize, buffer )	break;
+									case MetaPropertyType::S32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, s32, u32, mapSize, buffer )	break;
+									case MetaPropertyType::F32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, f32, u32, mapSize, buffer )	break;
+								}
+							} break;
+
+							case MetaPropertyType::String:
+							{
+								switch ( base->GetValueType( ) )
+								{
+									case MetaPropertyType::U32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, String, u32, mapSize, buffer )	break;
+									case MetaPropertyType::Object:	READ_MAP_KEY_PRIM_VAL_OBJ( object, base, String, mapSize, buffer )			break;
+								}
+
+							} break;
+
+							case MetaPropertyType::Enum:
+							{
+								switch ( base->GetValueType( ) )
+								{
+									case MetaPropertyType::String:	READ_MAP_KEY_PRIM_VAL_PRIM( object, base, s32, String, mapSize, buffer )	break;
+									case MetaPropertyType::Object:	READ_MAP_KEY_PRIM_VAL_OBJ( object, base, s32, mapSize, buffer )			break;
+								}
+							} break;
+						}
+					} break;
+				}
+			}
+			// Otherwise skip the property in the buffer
+			else
+			{
+				buffer->AdvanceReadPosition( propSize );
+			} 
 		}
 
 		return Result::SUCCESS;

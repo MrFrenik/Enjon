@@ -277,6 +277,16 @@ namespace Enjon
 		// Return success
 		return Enjon::Result::SUCCESS;
 	}
+
+	//==============================================================================================
+
+	u32 Shader::GetProgramID( ) const 
+	{
+		return mProgramID;
+	}
+
+	//==============================================================================================
+
 	
 	s32 Shader::GetUniformLocation(const Enjon::String& uniformName) 
 	{

@@ -22,19 +22,22 @@ uniform float uWorldTime = 1.0f;
 uniform vec3 uViewPositionWorldSpace;
 
 // Variable Declarations
-float uvMult;
-
 uniform sampler2D albedoMap;
 uniform sampler2D normalMap;
 uniform sampler2D metallicMap;
 uniform sampler2D roughMap;
+uniform float emissiveIntensity;
+
+uniform sampler2D emissiveMap;
+
+vec3 emissiveMult;
+uniform sampler2D aoMap;
 
 // Fragment Main
 void main()
 {
 	// Base Color
-uvMult = 0.0 * 0.0;
-vec4 albedoMap_sampler = texture2D( albedoMap, uvMult );
+vec4 albedoMap_sampler = texture2D( albedoMap, fs_in.TexCoords );
 	AlbedoOut = vec4(albedoMap_sampler.rgb, 1.0);
 
 }

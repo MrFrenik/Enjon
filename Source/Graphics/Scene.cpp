@@ -192,13 +192,24 @@ namespace Enjon {
 		return aDist < bDist;
 	}
 
+	// TODO(): Come up with better way to compare materials
 	bool Scene::CompareMaterial(Renderable* a, Renderable* b)
 	{
-		// TODO(): Set this up to where materials have a unique id and sort by that
-		AssetHandle<Texture> texA = a->GetMaterial()->GetTexture(TextureSlotType::Albedo);
-		AssetHandle<Texture> texB = b->GetMaterial()->GetTexture(TextureSlotType::Albedo);
+		// Need a good metric for comparing materials by shader program ids...
+		if ( a && b )
+		{
+			u32 pA = a->GetMaterial( )->GetShaderGraph( )->GetShader( Enjon::ShaderPassType::StaticGeom )->GetProgramID( );
+			u32 pB = a->GetMaterial( )->GetShaderGraph( )->GetShader( Enjon::ShaderPassType::StaticGeom )->GetProgramID( );
+			return pA > pB;
+		}
 
-		return texA.Get()->GetTextureId() > texB.Get()->GetTextureId();
+		return false;
+
+		// TODO(): Set this up to where materials have a unique id and sort by that
+		//AssetHandle<Texture> texA = a->GetMaterial()->GetTexture(TextureSlotType::Albedo);
+		//AssetHandle<Texture> texB = b->GetMaterial()->GetTexture(TextureSlotType::Albedo);
+
+		//return texA.Get()->GetTextureId() > texB.Get()->GetTextureId();
 	}
 
 }

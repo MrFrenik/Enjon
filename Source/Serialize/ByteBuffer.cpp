@@ -147,11 +147,17 @@ namespace Enjon
 		// Get size of val
 		usize size = sizeof( T );
 
+		// Total amount of capacity needed to write this chunk of data
+		usize totalWriteSize = mWritePosition + size;
+
 		// Make sure that enough bytes are present in buffer
-		if ( mWritePosition + size >= mCapacity )
+		if ( totalWriteSize >= mCapacity )
 		{
 			// Resize the buffer by twice the original capacity
-			mCapacity *= 2;
+			while ( mCapacity < totalWriteSize )
+			{
+				mCapacity *= 2; 
+			}
 			Resize( mCapacity );
 		}
 

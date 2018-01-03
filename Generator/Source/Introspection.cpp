@@ -845,7 +845,7 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 				arrProp->mPropertyTypeRaw = propertyString; 
 
 				// Need to store the property type as well
-				auto splitVector = SplitString( propertyString, "::" );
+				auto splitVector = SplitString( propertyString, ":" );
 				// The last element is the actual unqualified type
 				PropertyType pt = GetTypeFromString( splitVector.back( ) );
 

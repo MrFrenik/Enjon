@@ -47,6 +47,8 @@ namespace Enjon
 			void CollectAllProjectsOnDisk( );
 			void LoadProjectSolution( );
 
+			void CleanupScene( );
+
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;

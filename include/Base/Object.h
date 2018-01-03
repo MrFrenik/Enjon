@@ -399,6 +399,7 @@ namespace Enjon
 			virtual MetaPropertyType GetArrayType( ) const = 0; 
 			virtual MetaArrayPropertyProxy GetProxy( ) const = 0;
 			virtual void Resize( const Object* object, const usize& arraySize ) const = 0;
+			virtual usize GetSizeInBytes( const Object* object ) const = 0;
 
 		protected:
 			MetaProperty* mArrayProperty = nullptr;
@@ -449,6 +450,15 @@ namespace Enjon
 
 				// Shouldn't get here
 				return 0;
+			}
+
+			/*
+			* @brief
+			*/
+			virtual usize GetSizeInBytes( const Object* object ) const override
+			{
+				// Get number of elements in array * size of templated argument type
+				return GetSize( object ) * sizeof( T );
 			}
 
 			/*
@@ -584,6 +594,8 @@ namespace Enjon
 				return mValueType;
 			} 
 
+			virtual usize GetSizeInBytes( const Object* object ) const = 0;
+
 		protected:
 			MetaProperty* mKeyProperty = nullptr;
 			MetaProperty* mValueProperty = nullptr;
@@ -624,6 +636,14 @@ namespace Enjon
 			usize GetSize( const Object* object ) const 
 			{
 				return ( ( HashMap<K, V>* )( usize( object ) + mOffset ) )->size( ); 
+			}
+
+			/**
+			* @brief
+			*/
+			usize GetSizeInBytes( const Object* object ) const override 
+			{
+				return ( usize )( GetSize( object ) * ( sizeof( K ) + sizeof( V ) ) );
 			}
 
 			/*

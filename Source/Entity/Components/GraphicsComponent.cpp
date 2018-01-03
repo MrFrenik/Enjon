@@ -13,6 +13,9 @@ namespace Enjon
 
 	GraphicsComponent::GraphicsComponent()
 	{ 
+		// Add renderable to scene
+		GraphicsSubsystem* gs = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem >( )->ConstCast< GraphicsSubsystem >( );
+		gs->GetScene( )->AddRenderable( &mRenderable );
 	}
 
 	//====================================================================

@@ -276,6 +276,7 @@ namespace Enjon
 		ENJON_CLASS_BODY( )
 
 		friend Entity;
+		friend Application;
 		public:
 
 			/*
@@ -367,7 +368,12 @@ namespace Enjon
 				return mActiveEntities; 
 			}
 
-		protected:
+			/*
+			* @brief
+			*/
+			void ForceCleanup( );
+
+		protected: 
 
 			/**
 			* @brief

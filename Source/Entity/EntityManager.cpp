@@ -3,6 +3,7 @@
 #include "Entity/Components/GraphicsComponent.h"
 #include "Entity/Components/PointLightComponent.h"
 #include "SubsystemCatalog.h"
+#include "Application.h"
 #include "Engine.h"
 
 #include <array>
@@ -619,7 +620,15 @@ namespace Enjon
 		mMarkedForDestruction.push_back(entity.GetID());
 	}
 
-	//--------------------------------------------------------------
+	//==============================================================================
+
+	void EntityManager::ForceCleanup( )
+	{
+		Cleanup( );
+	}
+ 
+	//==============================================================================
+
 	void EntityManager::Cleanup()
 	{
 		// Move through dirty list and remove from active entities

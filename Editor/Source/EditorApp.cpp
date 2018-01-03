@@ -117,6 +117,9 @@ namespace Enjon
 				if ( mProject.GetApplication() )
 				{
 					mProject.GetApplication()->Shutdown( );
+
+					// Force the scene to clean up ahead of frame
+					CleanupScene( );
 				}
 
 				auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( )->ConstCast< Enjon::Camera >();
@@ -320,6 +323,15 @@ namespace Enjon
 
 	//================================================================================================================================
 
+	void EnjonEditor::CleanupScene( )
+	{ 
+		// Force the scene to clean up ahead of frame
+		auto entities = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< EntityManager >( )->ConstCast< EntityManager >( );
+		entities->ForceCleanup( );
+	}
+
+	//================================================================================================================================
+
 	bool EnjonEditor::UnloadDLL( ByteBuffer* buffer )
 	{
 		bool needsReload = false;
@@ -337,6 +349,9 @@ namespace Enjon
 
 					// Destroy the instance of the original handle
 					app->Shutdown( );
+
+					// Force the scene to clean up ahead of frame
+					CleanupScene( );
 				}
 			}
 
@@ -660,7 +675,10 @@ namespace Enjon
 					Application* app = mProject.GetApplication( );
 					if ( app )
 					{
-						app->Shutdown( );
+						app->Shutdown( ); 
+						
+						// Force the scene to clean up ahead of frame
+						CleanupScene( );
 					}
 
 					auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( )->ConstCast< Enjon::Camera >( );

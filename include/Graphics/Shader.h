@@ -65,6 +65,14 @@ namespace Enjon
 			*/
 			void Unuse( );
 
+			/*
+			* @brief
+			*/
+			u32 GetProgramID( ) const;
+
+			/*
+			* @brief
+			*/
 			s32 GetUniformLocation( const Enjon::String& uniformName );
 			void SetUniform(const std::string& name, const s32& val);
 			void SetUniform(const std::string& name, f32* val, s32 count);

@@ -170,7 +170,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void SortRenderables( RenderableSortType type = RenderableSortType::MATERIAL );
+			void SortRenderables( RenderableSortType type = RenderableSortType::DEPTH );
 
 		private:
 
