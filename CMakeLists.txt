@@ -145,6 +145,7 @@ set(
 	${ENJON_INC}/Subsystem.h
 	${ENJON_INC}/SubsystemCatalog.h
 
+	${ENJON_SRC}/Application.cpp
 	${ENJON_SRC}/Console.cpp
 	${ENJON_SRC}/CVarsSystem.cpp
 	${ENJON_SRC}/Engine.cpp
@@ -271,6 +272,7 @@ foreach(dll ${DLL_LIST})
 	        ${ENJON_BUILD_DIR}/Debug/)
 
 endforeach(dll) 
+
 
 # Create reflection list
 file(WRITE ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#target_dir \"${ENJON_DIR}\"\n") 

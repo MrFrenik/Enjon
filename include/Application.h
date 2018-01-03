@@ -1,4 +1,7 @@
-#pragma once
+// @file Application.h
+// Copyright 2016-2017 John Jackson. All Rights Reserved.
+
+#pragma once 
 #ifndef ENJON_APPLICATION_H
 #define ENJON_APPLICATION_H
 
@@ -14,12 +17,12 @@ namespace Enjon
 			/**
 			* @brief Constructor
 			*/
-			Application(){}; 
+			Application() = default; 
 
 			/**
 			* @brief Destructor
 			*/
-			~Application(){};
+			~Application() = default;
 
 			/**
 			* @brief Called when first initializing application. Runs through all startup code 
@@ -38,7 +41,7 @@ namespace Enjon
 			* @brief Processes input from input class 
 			* @return Enjon::Result
 			*/
-			virtual Enjon::Result ProcessInput(f32 dt) = 0;
+			virtual Enjon::Result ProcessInput(f32 dt);
 
 			/**
 			* @brief Shuts down application and cleans up any memory that was allocated.

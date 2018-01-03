@@ -66,19 +66,40 @@ namespace Enjon { namespace Utils
 		return result; 
 	}
 
-	static inline Enjon::String ParseFromTo( const Enjon::String& begin, const Enjon::String& end, const Enjon::String& src )
+	//=========================================================================================================================
+
+	static inline Enjon::String OutputLine( const Enjon::String& line )
+	{
+		return line + "\n";
+	}
+
+	//=========================================================================================================================
+
+	static inline Enjon::String OutputTabbedLine( const Enjon::String& line )
+	{
+		return "\t" + line + "\n";
+	}
+
+	//=========================================================================================================================
+
+	static inline Enjon::String ParseFromTo( const Enjon::String& begin, const Enjon::String& end, const Enjon::String& src, bool inclusive = true )
 	{
 		Enjon::String returnStr = "";
 
 		// Search for line to match
 		std::size_t foundBegin = src.find( begin );
 		std::size_t foundEnd = src.find( end );
+
+		if ( !inclusive )
+		{
+			foundBegin += begin.length( );
+		}
 		
 		// Found
 		if ( foundBegin != std::string::npos && foundEnd != std::string::npos )
 		{
 			// Substring length
-			std::size_t length = foundEnd - foundBegin;
+			std::size_t length = foundEnd - foundBegin; 
 
 			// Return that substring
 			return src.substr( foundBegin, length ); 
@@ -151,7 +172,7 @@ namespace Enjon { namespace Utils
 		return res;
 	}
 
-	static inline char* ReadFileContentsIntoString(char* FilePath)
+	static inline char* ReadFileContentsIntoString(const char* FilePath)
 	{
 		char* Result = 0;
 
@@ -300,6 +321,19 @@ namespace Enjon { namespace Utils
 
 		return retCode;
 	}
+
+	//==================================================================================================================
+
+	static inline void WriteToFile( const String& contents, const String& filePath )
+	{
+		std::ofstream out( filePath );
+		if ( out )
+		{
+			out.write( contents.c_str( ), contents.length( ) );
+		} 
+	}
+
+	//==================================================================================================================
 
 }} 
 

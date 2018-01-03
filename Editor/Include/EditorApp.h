@@ -37,13 +37,15 @@ namespace Enjon
 			void WorldOutlinerView( );
 			void PlayOptions( );
 			void CameraOptions( bool* enable );
+			void CreateProjectView( );
 
-			void CreateNewProject( );
+			void CreateNewProject( const String& projectName );
 
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;
 			bool mShowLoadResourceOption = true;
+			bool mShowCreateProjectView = true;
 			Enjon::String mResourceFilePathToLoad = "";
 			bool mMoveCamera = false; 
 
@@ -55,6 +57,14 @@ namespace Enjon
 			Enjon::Transform mPreviousCameraTransform;
 
 			Project mProject;
+
+			String mNewProjectName = "";
+ 
+			String mProjectsPath = "";
+			String mProjectSourceTemplate = "";
+			String mProjectCMakeTemplate = "";
+			String mProjectDelBatTemplate = "";
+			String mProjectBuildAndRunTemplate = "";
 	}; 
 }
 

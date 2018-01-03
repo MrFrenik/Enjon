@@ -32,7 +32,7 @@ namespace fs = std::experimental::filesystem;
 
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
-Enjon::String copyDir = "E:/Development/C++DLLTest/Build/Debug/TestDLLIntermediate/"; 
+Enjon::String copyDir = ""; 
 
 namespace Enjon
 {
@@ -193,11 +193,74 @@ namespace Enjon
 			}
 		}
 	}
+
+	//================================================================================================================================
 	 
-	void EnjonEditor::CreateNewProject( )
-	{
-		
+	void EnjonEditor::CreateNewProject( const String& projectName )
+	{ 
+		// Just output the source files for now... This is already going to get ugly, so need to split this all up pretty quickly
+		String projectDir = mProjectsPath + projectName + "/";
+		if ( !fs::exists( projectDir ) )
+		{
+			fs::create_directory( projectDir );
+			fs::create_directory( projectDir + "Source/" );
+			fs::create_directory( projectDir + "Assets/" );
+			fs::create_directory( projectDir + "Proc/" );
+			fs::create_directory( projectDir + "Build/" );
+			fs::create_directory( projectDir + "Build/Generator/" );
+			fs::create_directory( projectDir + "Build/Generator/Intermediate/" );
+			fs::create_directory( projectDir + "Build/Generator/Linked/" );
+		}
+
+		String includeFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::ParseFromTo( "#HEADERFILEBEGIN", "#HEADERFILEEND", mProjectSourceTemplate, false ), "#PROJECTNAME", projectName );
+		String sourceFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::ParseFromTo( "#SOURCEFILEBEGIN", "#SOURCEFILEEND", mProjectSourceTemplate, false ), "#PROJECTNAME", projectName ); 
+		String cmakeFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::FindReplaceAll( mProjectCMakeTemplate, "#PROJECTNAME", projectName ), "#ENJONDIRECTORY", Enjon::Utils::FindReplaceAll( Engine::GetInstance( )->GetConfig( ).GetRoot( ), "\\", "/" ) );
+		String delBatFile = mProjectDelBatTemplate;
+		String buildAndRunFIle = mProjectBuildAndRunTemplate;
+
+		// Write to file
+		Enjon::Utils::WriteToFile( includeFile, projectDir + "Source/" + projectName + ".h" );
+		Enjon::Utils::WriteToFile( sourceFile, projectDir + "Source/" + projectName + ".cpp" ); 
+		Enjon::Utils::WriteToFile( cmakeFile, projectDir + "CMakeLists.txt" ); 
+		Enjon::Utils::WriteToFile( delBatFile, projectDir + "Proc/" + "DelPDB.bat" ); 
+		Enjon::Utils::WriteToFile( buildAndRunFIle, projectDir + "Proc/" + "BuildAndRun.bat" ); 
+		Enjon::Utils::WriteToFile( "", projectDir + "Build/Generator/Linked/" + projectName + "_Generated.cpp" ); 
+
+		// Now call BuildAndRun.bat
+#ifdef ENJON_SYSTEM_WINDOWS 
+		system( String( projectDir + "Proc/" + "BuildAndRun.bat" + " " + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + " " + projectName ).c_str() );
+#endif
+
 	}
+
+	//================================================================================================================================
+
+	void EnjonEditor::CreateProjectView( )
+	{
+		char buffer[ 256 ];
+		strncpy( buffer, mNewProjectName.c_str( ), 256 );
+		if ( ImGui::InputText( "Project Name", buffer, 256 ) )
+		{
+			mNewProjectName = String( buffer );
+		}
+
+		if ( ImGui::Button( "Create New Project" ) && mNewProjectName.compare( "" ) != 0 )
+		{
+			// If project is able to be made, then make it
+			String projectPath = mProjectsPath + "/" + mNewProjectName + "/";
+			if ( !fs::exists( projectPath ) )
+			{
+				CreateNewProject( mNewProjectName );
+			}
+			else
+			{
+				std::cout << "Project already exists!\n";
+			}
+
+		}
+	}
+
+	//================================================================================================================================
 	 
 	Enjon::Result EnjonEditor::Initialize( )
 	{ 
@@ -216,6 +279,15 @@ namespace Enjon
 		mAssetManager->SetDatabaseName( GetApplicationName( ) );
 		mAssetManager->Initialize( ); 
 
+		// Register project template files
+		mProjectSourceTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectSourceTemplate.cpp" ).c_str() ); 
+		mProjectCMakeTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectCMakeTemplate.txt" ).c_str( ) );
+		mProjectDelBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/DelPDB.bat" ).c_str( ) );
+		mProjectBuildAndRunTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRun.bat" ).c_str( ) );
+
+		// Hard code projects path
+		mProjectsPath = "E:/Development/EnjonProjects/"; 
+
 		// Set up copy directory for project dll
 		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";
 
@@ -230,6 +302,18 @@ namespace Enjon
 			}
 			ImGui::EndDock( ); 
 		}); 
+
+		// Register individual windows
+		Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
+		{
+			// Docking windows
+			if ( ImGui::BeginDock( "Create Project", &mShowCreateProjectView, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
+			{
+				// Print docking information
+				CreateProjectView( );
+			}
+			ImGui::EndDock( );
+		} );
 
 		Enjon::ImGuiManager::RegisterWindow( [ & ]
 		{
@@ -273,6 +357,7 @@ namespace Enjon
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Camera", ImGui::DockSlotType::Slot_Bottom, 0.3f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) ); 
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene", ImGui::DockSlotType::Slot_Top, 0.1f ) );
+		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Scene", ImGui::DockSlotType::Slot_Tab, 0.1f ) );
 
 		return Enjon::Result::SUCCESS;
 	}
