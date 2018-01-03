@@ -259,7 +259,6 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			Vector< EntityHandle > mChildren; 
 
-			Enjon::ComponentBitset mComponentMask;
 			Enjon::EntityManager* mManager;
 			Enjon::EntityState mState;
 			EntityHandle mHandle;
@@ -406,6 +405,12 @@ namespace Enjon
 			*@brief
 			*/
 			void UpdateAllActiveTransforms(f32 dt);
+
+			/**
+			*@brief
+			*/
+			template <typename T >
+			bool ComponentBaseExists( );
 
 		private:
 			EntityStorage 				mEntities;

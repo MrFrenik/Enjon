@@ -49,6 +49,9 @@ namespace Enjon
 
 			void CleanupScene( );
 
+			void InitializeProjectApp( );
+			void ShutdownProjectApp( );
+
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;
@@ -75,6 +78,9 @@ namespace Enjon
 			String mProjectBuildAndRunTemplate = "";
 
 			Vector<Project> mProjectsOnDisk;
+			Vector<Entity*> mSceneEntities;
+
+			EntityHandle mSceneEntity;
 	}; 
 }
 

@@ -116,10 +116,7 @@ namespace Enjon
 				// Call shut down function for game
 				if ( mProject.GetApplication() )
 				{
-					mProject.GetApplication()->Shutdown( );
-
-					// Force the scene to clean up ahead of frame
-					CleanupScene( );
+					ShutdownProjectApp( );
 				}
 
 				auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( )->ConstCast< Enjon::Camera >();
@@ -140,7 +137,7 @@ namespace Enjon
 				// Call start up function for game
 				if ( mProject.GetApplication() )
 				{
-					mProject.GetApplication()->Initialize( );
+					InitializeProjectApp( );
 				}
 				else
 				{ 
@@ -347,11 +344,8 @@ namespace Enjon
 					Enjon::ObjectArchiver::Serialize( app, buffer );
 					needsReload = true;
 
-					// Destroy the instance of the original handle
-					app->Shutdown( );
-
-					// Force the scene to clean up ahead of frame
-					CleanupScene( );
+					// Shutdown project app
+					ShutdownProjectApp( );
 				}
 			}
 
@@ -439,6 +433,44 @@ namespace Enjon
 	}
 
 	//================================================================================================================================
+
+	void EnjonEditor::InitializeProjectApp( )
+	{
+		Application* app = mProject.GetApplication( );
+		if ( app )
+		{
+			// Cache off all entity handles in scene before app starts
+			mSceneEntities = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->GetActiveEntities( );
+
+			// Initialize the app
+			app->Initialize( );
+		}
+	}
+
+	//================================================================================================================================
+
+	void EnjonEditor::ShutdownProjectApp( )
+	{
+		Application* app = mProject.GetApplication( );
+		if ( app )
+		{
+			// Destroy any entities alive that aren't in the cached off entity list
+			for ( auto& e : Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->GetActiveEntities( ) )
+			{ 
+				// If either null or not in original cached entity list then destroy
+				if ( !e || std::find( mSceneEntities.begin( ), mSceneEntities.end( ), e ) == mSceneEntities.end( ) )
+				{
+					e->Destroy( );
+				}
+			} 
+
+			// Shutodwn the application
+			app->Shutdown( );
+
+			// Force the scene to clean up ahead of frame
+			CleanupScene( ); 
+		}
+	}
 	 
 	Enjon::Result EnjonEditor::Initialize( )
 	{ 
@@ -471,6 +503,21 @@ namespace Enjon
 
 		// Grab all .eproj files and store them for loading later
 		CollectAllProjectsOnDisk( );
+
+		// Initialize scene entity
+		EntityManager* entities = Engine::GetInstance( )->GetSubsystem( Object::GetClass<EntityManager >( ) )->ConstCast< EntityManager >( );
+		mSceneEntity = entities->Allocate( );
+		if ( mSceneEntity.Get() ) 
+		{ 
+			Entity* ent = mSceneEntity.Get( );
+			auto gfxComp = ent->AddComponent< GraphicsComponent >( );
+			if ( gfxComp )
+			{
+				gfxComp->SetMesh( mAssetManager->GetAsset< Mesh >( "models.monkey" ) );
+				gfxComp->SetMaterial( mAssetManager->GetDefaultAsset< Material >( ) );
+			}
+			ent->SetPosition( Vec3( 5.0f, 2.0f, 4.0f ) );
+		}
 
 		// Register individual windows
 		Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
@@ -538,7 +585,7 @@ namespace Enjon
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Camera", ImGui::DockSlotType::Slot_Bottom, 0.3f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) ); 
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene", ImGui::DockSlotType::Slot_Top, 0.1f ) );
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Scene", ImGui::DockSlotType::Slot_Tab, 0.1f ) );
+		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Play Options", ImGui::DockSlotType::Slot_Tab, 0.1f ) );
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -560,7 +607,7 @@ namespace Enjon
 		}
 
 		return Enjon::Result::PROCESS_RUNNING;
-	}
+	} 
 
 	Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 	{ 
@@ -653,7 +700,7 @@ namespace Enjon
 					Application* app = mProject.GetApplication( );
 					if ( app )
 					{
-						app->Initialize( );
+						InitializeProjectApp( );
 					}
 					else
 					{
@@ -675,10 +722,8 @@ namespace Enjon
 					Application* app = mProject.GetApplication( );
 					if ( app )
 					{
-						app->Shutdown( ); 
-						
-						// Force the scene to clean up ahead of frame
-						CleanupScene( );
+						// Shutown the application
+						ShutdownProjectApp( );
 					}
 
 					auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( )->ConstCast< Enjon::Camera >( );

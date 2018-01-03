@@ -2,16 +2,15 @@
 template <typename T>
 bool Entity::HasComponent()
 {
-	return ((mComponentMask & Enjon::GetComponentBitMask<T>()) != 0);
+	u32 compId = Component::GetComponentType< T >( );
+	auto query = std::find( mComponents.begin( ), mComponents.end( ), compId );
+	return ( query != mComponents.end( ) );
 }
 
 //------------------------------------------------------------------------------
 template <typename T>
 T* Entity::GetComponent()
-{
-	// Assert that it has component
-	//assert(HasComponent<T>());
-
+{ 
 	// Assert entity manager exists
 	assert(mManager != nullptr);
 
@@ -20,27 +19,27 @@ T* Entity::GetComponent()
 
 //------------------------------------------------------------------------------
 template <typename T>
-T* Entity::Attach()
+T* Entity::AddComponent()
 {
-	// Check to make sure isn't already attached to this entity
-	assert(!HasComponent<T>());
-
 	// Make sure that entity manager isn't null
 	assert(mManager != nullptr);
 
-	return mManager->Attach<T>(this);
+	// If component exists, return it
+	if ( HasComponent< T >( ) )
+	{
+		return GetComponent< T >( );
+	} 
+
+	return mManager->AddComponent<T>(this);
 }
 
 //------------------------------------------------------------------------------
 template <typename T>
-void Entity::Detach()
-{
-	// Check to make sure isn't already attached to this entity
-	assert(HasComponent<T>());
-
+void Entity::RemoveComponent()
+{ 
 	// Make sure entity manager isn't null
-	assert(mManager != nullptr);
+	assert(mManager != nullptr); 
 
 	// Detach component
-	mManager->Detach<T>(this);
+	mManager->RemoveComponent<T>(this);
 }

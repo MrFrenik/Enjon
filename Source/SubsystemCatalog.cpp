@@ -29,5 +29,28 @@ namespace Enjon
 	{
 		return mInstance;
 	}
-		
+	
+	//======================================================================================================
+
+	const Subsystem* SubsystemCatalog::Get( const MetaClass* cls ) const
+	{
+		// Get id of class
+		u32 id = cls->GetTypeId( ); 
+
+		if ( Exists( id ) )
+		{
+			return const_cast< SubsystemCatalog* >( this )->mSubsystems[ id ];
+		}
+
+		return nullptr;
+	}
+	
+	//======================================================================================================
+
+	bool SubsystemCatalog::Exists( u32& systemId ) const
+	{
+		return ( mSubsystems.find( systemId ) != mSubsystems.end( ) );
+	}
+	
+	//====================================================================================================== 
 }

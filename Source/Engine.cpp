@@ -165,6 +165,18 @@ namespace Enjon
 
 	//=======================================================
 
+	const Subsystem* Engine::GetSubsystem( const MetaClass* cls ) const
+	{
+		if ( cls && mInstance )
+		{
+			return mInstance->GetSubsystemCatalog( )->Get( cls );
+		}
+
+		return nullptr;
+	}
+
+	//=======================================================
+
 	Enjon::Result Engine::RegisterApplication( Application* app )
 	{
 		assert( mApp == nullptr );
@@ -397,4 +409,7 @@ namespace Enjon
 	{
 		return mRootPath + "/Assets";
 	}
+	
+	//======================================================= 
+
 }

@@ -96,6 +96,8 @@ namespace Enjon
 			ComponentMap mComponentMap;
 	};
 
+	using ComponentID = u32;
+
 	class Component : public Enjon::Object
 	{
 		friend Entity;
@@ -182,6 +184,16 @@ namespace Enjon
 			*/
 			void SetBase( ComponentWrapperBase* base );
 
+			/**
+			* @brief
+			*/
+			template <typename T>
+			static inline ComponentID GetComponentType() noexcept
+			{
+				static_assert( std::is_base_of<Component, T>::value, "Component:: T must inherit from Component." );	
+				return Engine::GetInstance( )->GetMetaClassRegistry( )->GetTypeId< T >( );
+			}
+
 		protected:
 			Entity* mEntity = nullptr;
 			EntityManager* mManager = nullptr;
@@ -193,47 +205,8 @@ namespace Enjon
 			ComponentWrapperBase* mBase = nullptr;
 	}; 
 
-	using ComponentID = u32;
 
-	namespace Internal
-	{
-		/**
-		* @brief
-		*/
-		inline ComponentID GetUniqueComponentID() noexcept
-		{
-			static ComponentID lastID{ 0u };
-			return ++lastID;
-		}
-	}
 
-	/**
-	* @brief
-	*/
-	template <typename T>
-	inline ComponentID GetComponentType() noexcept
-	{
-		static_assert( std::is_base_of<Component, T>::value, "Component:: T must inherit from Component." );	
-		return Engine::GetInstance( )->GetMetaClassRegistry( )->GetTypeId< T >( );
-	}
-
-	typedef std::bitset<static_cast<u32>( MAX_COMPONENTS )> ComponentBitset;
-
-	/**
-	* @brief
-	*/
-	template <typename T>
-	ComponentBitset GetComponentBitMask() 
-	{ 
-		ComponentBitset BitSet;
-		BitSet.set( GetComponentType<T>() );
-		return BitSet;
-	}
-
-	/**
-	* @brief
-	*/
-	ComponentBitset GetComponentBitMask( u32 type );
 }
 
 #endif

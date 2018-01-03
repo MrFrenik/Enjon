@@ -4,7 +4,7 @@ template <typename T>
 void EntityManager::RegisterComponent()
 {
 	static_assert(std::is_base_of<Component, T>::value, "EntityManager::RegisterComponent:: T must inherit from Component.");
-	u32 index = static_cast<u32>(Enjon::GetComponentType<T>());
+	u32 index = static_cast<u32>(Component::GetComponentType<T>());
 	mComponents[ index ] = new ComponentWrapper<T>;
 }
 
@@ -12,7 +12,7 @@ void EntityManager::RegisterComponent()
 template <typename T>
 std::vector<T>* EntityManager::GetComponentList()
 {
-	u32 index = Enjon::GetComponentType<T>();
+	u32 index = Component::GetComponentType<T>();
 	assert(Components.at(index) != nullptr);
 	return &(static_cast<ComponentWrapper<T>*>(Components.at(index))->mComponentPtrs);	
 }
@@ -27,13 +27,26 @@ T* EntityManager::AddComponent(const Enjon::EntityHandle& handle)
 	// Assert entity is valid
 	assert(entity != nullptr);
 	// Check to make sure isn't already attached to this entity
-	assert(!entity->HasComponent<T>());
+
+	// If component exists, return it
+	if ( entity->HasComponent< T >( ) )
+	{
+		return entity->GetComponent< T >( );
+	}
 
 	// Entity id
 	u32 eid = entity->GetID();
 
 	// Get index into vector and assert that entity manager has this component
-	u32 compIdx = Enjon::GetComponentType<T>();
+	u32 compIdx = Component::GetComponentType<T>();
+
+	// If the component doens't exist, need to register it
+	if ( !ComponentBaseExists< T >( ) )
+	{
+		RegisterComponent< T >( );
+	}
+
+	// Make sure that component isn't still null
 	assert(mComponents.at(compIdx) != nullptr); 
 
 	ComponentWrapperBase* base = mComponents[ compIdx ];
@@ -49,10 +62,7 @@ T* EntityManager::AddComponent(const Enjon::EntityHandle& handle)
 	component->SetEntity(entity);
 	component->SetID(compIdx);
 	component->SetBase( base );
-	component->mEntityID = entity->mID;
-
-	// Set bitmask field for component
-	entity->mComponentMask |= Enjon::GetComponentBitMask( compIdx );
+	component->mEntityID = entity->mID; 
 
 	// Get component ptr and push back into entity components
 	entity->mComponents.push_back( compIdx ); 
@@ -87,7 +97,7 @@ T* EntityManager::GetComponent(Entity* entity)
 	u32 eid = entity->GetID();
 
 	// Get component idx
-	u32 compIdx = Enjon::GetComponentType<T>();
+	u32 compIdx = Component::GetComponentType<T>();
 	assert(mComponents.at(compIdx) != nullptr); 
 
 	ComponentWrapperBase* base = mComponents.at( compIdx );
@@ -124,14 +134,17 @@ void EntityManager::DetachComponentFromEntity(Entity* entity)
 
 //=======================================================================================
 
-template <typename T>
-T* Entity::AddComponent( )
+/**
+*@brief
+*/
+template <typename T >
+bool EntityManager::ComponentBaseExists( )
 {
-	return mManager->AddComponent< T >( GetHandle( ) );
+	u32 idx = Component::GetComponentType< T >( );
+	return ( mComponents.find( idx ) != mComponents.end( ) );
 }
 
 //=======================================================================================
-
 
 
 

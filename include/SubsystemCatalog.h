@@ -78,21 +78,23 @@ namespace Enjon
 			}
 
 			/**
+			* @brief
+			*/
+			bool Exists( u32& systemId ) const;
+
+			/**
+			* @brief Returns pointer to registered requested subsystem by metaclass. Returns nullptr if not found.
+			* @return Subsystem* - Pointer to requested subsystem
+			*/
+			const Subsystem* Get( const MetaClass* cls ) const;
+
+			/**
 			*@brief Returns instance of this class
 			*@return SubsystemCatalog* - Pointer to instance of this class
 			*/
 			SubsystemCatalog* GetInstance() const;
 
-		private:
-
-			/**
-			*@brief
-			*/
-			u32 GetUniqueSubsystemTypeId() noexcept
-			{
-				static u32 lastId{ 0u };
-				return lastId++;
-			} 
+		private: 
 
 			/**
 			*@brief
@@ -107,7 +109,7 @@ namespace Enjon
 			} 
 
 		private: 
-			std::unordered_map<u32, Subsystem*> mSubsystems; 
+			HashMap<u32, Subsystem*> mSubsystems; 
 			static SubsystemCatalog* mInstance;
 	};
 }

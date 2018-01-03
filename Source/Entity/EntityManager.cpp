@@ -68,7 +68,6 @@ namespace Enjon
 	Entity::Entity()
 	: mID(MAX_ENTITIES), 
 	  mState(EntityState::INACTIVE), 
-	  mComponentMask(Enjon::ComponentBitset(0)),
 	  mManager(nullptr),
 	  mWorldTransformDirty(true)
 	{
@@ -79,7 +78,6 @@ namespace Enjon
 	Entity::Entity(EntityManager* manager)
 	: mID(MAX_ENTITIES), 
 	  mState(EntityState::INACTIVE), 
-	  mComponentMask(Enjon::ComponentBitset(0)),
 	  mManager(manager),
 	  mWorldTransformDirty(true)
 	{
@@ -133,7 +131,6 @@ namespace Enjon
 		mID = MAX_ENTITIES;
 		mState = EntityState::INACTIVE;
 		mWorldTransformDirty = true;
-		mComponentMask = Enjon::ComponentBitset(0);
 		mManager = nullptr;
 		mComponents.clear();
 		mChildren.clear();
@@ -165,7 +162,7 @@ namespace Enjon
 
 	bool Entity::HasComponent( const MetaClass* compCls )
 	{ 
-		return ( ( mComponentMask & Enjon::GetComponentBitMask( compCls->GetTypeId( ) ) ) != 0 );
+		return ( std::find( mComponents.begin( ), mComponents.end( ), compCls->GetTypeId( ) ) != mComponents.end( ) );
 	}
 
 	//---------------------------------------------------------------
@@ -723,12 +720,17 @@ namespace Enjon
 
 		// Assert entity is valid
 		assert(entity != nullptr);
-		// Check to make sure isn't already attached to this entity
-		assert( !entity->HasComponent( compCls ) ); 
+
+		assert(mComponents.at(compIdx) != nullptr); 
+
 		// Entity id
 		u32 eid = entity->GetID(); 
 
-		assert(mComponents.at(compIdx) != nullptr); 
+		// If component exists, return it
+		if ( entity->HasComponent( compCls ) )
+		{
+			return mComponents.at( compIdx )->GetComponent( entity->mID );
+		} 
 
 		ComponentWrapperBase* base = mComponents[ compIdx ];
 
@@ -739,16 +741,10 @@ namespace Enjon
 		component->SetBase( base );
 		component->mEntityID = entity->mID;
 
-		// Set bitmask field for component
-		entity->mComponentMask |= Enjon::GetComponentBitMask( compIdx );
-
 		// Get component ptr and push back into entity components
 		entity->mComponents.push_back( compIdx );
 
-		return component;
-
-		// Otherwise the entity already has the component
-		assert(false);
+		return component; 
 
 		// Return null to remove warnings from compiler
 		return nullptr;

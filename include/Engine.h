@@ -17,6 +17,8 @@ namespace Enjon
 	class Application; 
 	class MetaClassRegistry;
 	class EntityManager;
+	class MetaClass;
+	class Subsystem;
 	
 	class EngineConfig
 	{
@@ -111,6 +113,12 @@ namespace Enjon
 				}
 			}
 
+			/**
+			* @brief Returns pointer to registered requested subsystem by metaclass. Returns nullptr if not found.
+			* @return Subsystem* - Pointer to requested subsystem
+			*/
+			const Subsystem* GetSubsystem( const MetaClass* cls ) const;
+
 		private:
 			
 			/**
@@ -131,6 +139,7 @@ namespace Enjon
 			* @return b8 - Returns true if success and false if failure.
 			*/
 			Enjon::Result ProcessInput(Input* input, float dt);
+
 
 		private:
 
