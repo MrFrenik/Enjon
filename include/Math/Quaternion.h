@@ -20,7 +20,7 @@ namespace Enjon
 		public: 
 
 			Quaternion() 
-				: x(0), y(0), z(0), w(1) 
+				: x(0.0f), y(0.0f), z(0.0f), w(1.0f) 
 			{}
 
 			Quaternion(const f32& _x, const f32& _y, const f32& _z, const f32& _w) 

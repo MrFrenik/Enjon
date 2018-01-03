@@ -36,10 +36,10 @@ Enjon::String copyDir = "";
 
 namespace Enjon
 {
-	void CopyLibraryContents( )
+	void CopyLibraryContents( const String& projectName, const String& projectDir )
 	{
 		Enjon::String rootDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
-		Enjon::String dllName = projectName + ".dll";
+		Enjon::String dllName =  projectName + ".dll";
 
 		fs::path dllPath = rootDir + "Build/Debug/" + dllName;
 		if ( fs::exists( dllPath ) )
@@ -48,7 +48,7 @@ namespace Enjon
 		}
 
 		// Now copy over contents from intermediate build to executable dir
-		dllPath = copyDir;
+		dllPath = projectDir;
 		if ( fs::exists( dllPath ) )
 		{
 			if ( fs::exists( dllPath.string( ) + "Build/Debug/" + dllName ) )
@@ -225,12 +225,36 @@ namespace Enjon
 		Enjon::Utils::WriteToFile( delBatFile, projectDir + "Proc/" + "DelPDB.bat" ); 
 		Enjon::Utils::WriteToFile( buildAndRunFIle, projectDir + "Proc/" + "BuildAndRun.bat" ); 
 		Enjon::Utils::WriteToFile( "", projectDir + "Build/Generator/Linked/" + projectName + "_Generated.cpp" ); 
+		Enjon::Utils::WriteToFile( projectDir, projectDir + projectName + ".eproj" );
 
 		// Now call BuildAndRun.bat
 #ifdef ENJON_SYSTEM_WINDOWS 
-		system( String( projectDir + "Proc/" + "BuildAndRun.bat" + " " + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + " " + projectName ).c_str() );
+		// TODO(): Error check the fuck out of this call
+		// Is it possible to know whether or not this succeeded?
+		s32 code = system( String( projectDir + "Proc/" + "BuildAndRun.bat" + " " + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + " " + projectName ).c_str() ); 
+		if ( code == 0 )
+		{
+			// Can set the project path now
+			mProject.SetProjectPath( projectDir ); 
+			mProject.SetProjectName( projectName );
+
+			// Unload previous project
+			UnloadDLL( ); 
+		}
 #endif
 
+	}
+
+	//================================================================================================================================
+
+	void EnjonEditor::LoadProjectSolution( )
+	{
+		// Now call BuildAndRun.bat
+#ifdef ENJON_SYSTEM_WINDOWS 
+		// TODO(): Error check the fuck out of this call
+		// Is it possible to know whether or not this succeeded?
+		s32 code = system( String( "call " + mProject.GetProjectPath() + "Build/" + mProject.GetProjectName() + ".sln" ).c_str() ); 
+#endif
 	}
 
 	//================================================================================================================================
@@ -255,9 +279,148 @@ namespace Enjon
 			else
 			{
 				std::cout << "Project already exists!\n";
+			} 
+		}
+
+		if ( !mPlaying )
+		{
+			if ( ImGui::CollapsingHeader( "Existing Projects" ) )
+			{
+				ImGui::ListBoxHeader( "##projects" );
+				{
+					for ( auto& p : mProjectsOnDisk )
+					{
+						if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
+						{ 
+							// Unload previous dll
+							UnloadDLL( );
+
+							// Set project
+							mProject = p;
+
+							// Load project dll
+							LoadDLL( );
+						}
+					}
+				}
+				ImGui::ListBoxFooter( );
+			} 
+
+			// Load visual studio project 
+			if ( ImGui::Button( "Load Project Solution" ) )
+			{
+				if ( fs::exists( mProject.GetProjectPath( ) + "Build/" + mProject.GetProjectName( ) + ".sln" ) )
+				{ 
+					LoadProjectSolution( );
+				}
+			}
+		}
+
+	}
+
+	//================================================================================================================================
+
+	bool EnjonEditor::UnloadDLL( ByteBuffer* buffer )
+	{
+		bool needsReload = false;
+
+		if ( dllHandle )
+		{
+			if ( mPlaying && buffer )
+			{
+				Application* app = mProject.GetApplication( );
+				if ( app )
+				{
+					// NOTE(): Will not work if the layout of the data has changed! Need versioning working first...
+					Enjon::ObjectArchiver::Serialize( app, buffer );
+					needsReload = true;
+
+					// Destroy the instance of the original handle
+					app->Shutdown( );
+				}
+			}
+
+			// Free application memory
+			if ( deleteAppFunc )
+			{
+				deleteAppFunc( mProject.GetApplication( ) );
+				mProject.SetApplication( nullptr );
+			}
+
+			// Free library if in use
+			FreeLibrary( dllHandle );
+			dllHandle = nullptr;
+			createAppFunc = nullptr;
+			deleteAppFunc = nullptr;
+		}
+
+		return needsReload;
+	}
+
+	//================================================================================================================================
+
+	void EnjonEditor::LoadDLL( )
+	{
+		Enjon::ByteBuffer buffer;
+		bool needsReload = UnloadDLL( &buffer );
+
+		// Copy files to directory
+		CopyLibraryContents( mProject.GetProjectName(), mProject.GetProjectPath() );
+
+		// Try to load library
+		dllHandle = LoadLibrary( ( mProject.GetProjectName() + ".dll" ).c_str() );
+
+		// If valid, then set address of procedures to be called
+		if ( dllHandle )
+		{
+			// Set functions from handle
+			createAppFunc = ( funcCreateApp )GetProcAddress( dllHandle, "CreateApplication" );
+			deleteAppFunc = ( funcDeleteApp )GetProcAddress( dllHandle, "DeleteApplication" );
+
+			// Create application
+			if ( createAppFunc )
+			{
+				mProject.SetApplication( createAppFunc( Enjon::Engine::GetInstance( ) ) );
+			} 
+
+			if ( needsReload )
+			{
+				Application* app = mProject.GetApplication( );
+				if ( app )
+				{
+					Enjon::ObjectArchiver::Deserialize( &buffer, app );
+				}
 			}
 
 		}
+		else
+		{
+			std::cout << "Could not load library\n";
+		}
+	}
+
+	//================================================================================================================================
+
+	void EnjonEditor::CollectAllProjectsOnDisk( )
+	{
+		for ( auto& p : fs::recursive_directory_iterator( mProjectsPath ) )
+		{
+			if ( Enjon::Utils::HasFileExtension( p.path( ).string( ), "eproj" ) )
+			{ 
+				Project proj;
+				String path = "";
+				Vector<String> split = Utils::SplitString( Utils::FindReplaceAll( Utils::SplitString( p.path( ).string( ), "." ).front( ), "\\", "/" ), "/" );
+				split.pop_back( );
+				for ( auto& p : split )
+				{
+					path += p + "/";
+				}
+
+				proj.SetProjectPath( path );
+				proj.SetProjectName( Enjon::Utils::SplitString( Enjon::Utils::SplitString( p.path( ).string( ), "\\" ).back(), "." ).front() );
+				mProjectsOnDisk.push_back( proj );
+			}
+		} 
 	}
 
 	//================================================================================================================================
@@ -290,6 +453,9 @@ namespace Enjon
 
 		// Set up copy directory for project dll
 		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";
+
+		// Grab all .eproj files and store them for loading later
+		CollectAllProjectsOnDisk( );
 
 		// Register individual windows
 		Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
@@ -452,73 +618,7 @@ namespace Enjon
 		{
 			if ( mInput->IsKeyPressed( Enjon::KeyCode::R ) )
 			{
-				Enjon::ByteBuffer buffer;
-				bool needsReload = false;
-
-				// Serialize state for reload and free library
-				if ( dllHandle )
-				{ 
-					if ( mPlaying )
-					{
-						Application* app = mProject.GetApplication( );
-						if ( app )
-						{ 
-							// NOTE(): Will not work if the layout of the data has changed! Need versioning working first...
-							Enjon::ObjectArchiver::Serialize( app, &buffer );
-							needsReload = true; 
-
-							// Destroy the instance of the original handle
-							app->Shutdown( );
-						} 
-					}
-
-					// Free application memory
-					if ( deleteAppFunc )
-					{
-						deleteAppFunc( mProject.GetApplication() );
-						mProject.SetApplication( nullptr );
-					}
-
-					// Free library if in use
-					FreeLibrary( dllHandle );
-					dllHandle = nullptr;
-					createAppFunc = nullptr;
-					deleteAppFunc = nullptr;
-				}
-
-				// Copy files to directory
-				CopyLibraryContents( );
-
-				// Try to load library
-				dllHandle = LoadLibrary( projectDLLName.c_str() );
-
-				// If valid, then set address of procedures to be called
-				if ( dllHandle )
-				{
-					// Set functions from handle
-					createAppFunc = ( funcCreateApp )GetProcAddress( dllHandle, "CreateApplication" );
-					deleteAppFunc = ( funcDeleteApp )GetProcAddress( dllHandle, "DeleteApplication" );
-
-					// Create application
-					if ( createAppFunc )
-					{
-						mProject.SetApplication( createAppFunc( Enjon::Engine::GetInstance( ) ) );
-					} 
-
-					if ( needsReload )
-					{
-						Application* app = mProject.GetApplication( );
-						if ( app )
-						{
-							Enjon::ObjectArchiver::Deserialize( &buffer, app );
-						}
-					}
-
-				}
-				else
-				{
-					std::cout << "Could not load library\n";
-				}
+				LoadDLL( );
 			}
 		}
 

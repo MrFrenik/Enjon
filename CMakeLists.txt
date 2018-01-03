@@ -29,7 +29,6 @@ message("cxx FLgs:" ${CMAKE_CXX_FLAGS})
 # Add additional sub-directories
 add_subdirectory( Generator )
 add_subdirectory( Editor )
-add_subdirectory( TestProject )
 
 # Add include directories
 include_directories(${ENJON_DIR}/Include
@@ -195,7 +194,6 @@ target_link_libraries( Enjon debug liblz4_d.lib optimized liblz4.lib )
 
 add_dependencies( Enjon Reflection )
 add_dependencies( EnjonEditor Enjon )
-add_dependencies( TestProject Enjon )
 
 source_group("Base"			FILES ${SRC_BASE})
 source_group("Entity"		FILES ${SRC_ENTITY})

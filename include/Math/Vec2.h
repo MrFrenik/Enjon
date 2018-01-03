@@ -18,7 +18,10 @@ namespace Enjon
 			/**
 			* @brief Default constructor
 			*/
-			Vec2() = default; 
+			Vec2( )
+				: x( 0.0f ), y( 0.0f )
+			{ 
+			}
 
 			/**
 			* @brief Constructor that takes f32's for x and y 		

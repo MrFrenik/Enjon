@@ -41,6 +41,12 @@ namespace Enjon
 
 			void CreateNewProject( const String& projectName );
 
+			bool UnloadDLL( ByteBuffer* buffer = nullptr );
+			void LoadDLL( );
+
+			void CollectAllProjectsOnDisk( );
+			void LoadProjectSolution( );
+
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;
@@ -65,6 +71,8 @@ namespace Enjon
 			String mProjectCMakeTemplate = "";
 			String mProjectDelBatTemplate = "";
 			String mProjectBuildAndRunTemplate = "";
+
+			Vector<Project> mProjectsOnDisk;
 	}; 
 }
 

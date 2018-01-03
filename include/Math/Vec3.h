@@ -20,7 +20,10 @@ namespace Enjon {
 			/**
 			* @brief Default constructor
 			*/
-			Vec3() = default;
+			Vec3( )
+				: x( 0.0f ), y( 0.0f ), z( 0.0f )
+			{ 
+			}
  
 			/**
 			* @brief Constructor that takes f32's for x, y, and z

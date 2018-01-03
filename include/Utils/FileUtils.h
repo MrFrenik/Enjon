@@ -29,7 +29,7 @@ namespace Enjon { namespace Utils
 		return strStream.str();
 	}
 
-	inline std::string read_file(const char* filePath)
+		inline std::string read_file(const char* filePath)
 	{
 		//Create file pointer to filepath
 		//FILE* file = fopen(filePath, "rt"); 
@@ -158,6 +158,11 @@ namespace Enjon { namespace Utils
 
 		return res;
 	}
+
+	inline bool HasFileExtension( const String& file, const String& extension )
+	{
+		return ( SplitString( file, "." ).back( ).compare( extension ) == 0 );
+	} 
 
 	static inline bool FileExists( const String& filePath )
 	{

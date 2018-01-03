@@ -3,7 +3,8 @@
 #ifndef ENJON_#PROJECTNAME_H
 #define ENJON_#PROJECTNAME_H
 
-#include <Application.h>
+// Enjon includes
+#include <Enjon.h>
 
 ENJON_CLASS( Construct )
 class #PROJECTNAME : public Enjon::Application
@@ -50,9 +51,6 @@ ENJON_MODULE_DEFINE( #PROJECTNAME )
 
 // Module implementation for this project
 ENJON_MODULE_IMPL( #PROJECTNAME )
-
-// Enjon includes
-#include <Enjon.h>
 
 using namespace Enjon;
 

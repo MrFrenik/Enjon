@@ -14,8 +14,14 @@ namespace Enjon {
 			/**
 			* @brief Default constructor
 			*/
-			Vec4() = default;
+			Vec4( )
+				: x( 0.0f ), y( 0.0f ), z( 0.0f ), w( 0.0f )
+			{ 
+			}
 
+			/**
+			* @brief Default d
+			*/
 			~Vec4( )
 			{ 
 			}
