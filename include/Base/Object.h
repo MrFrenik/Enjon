@@ -229,7 +229,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			~MetaProperty( ) = default;
+			virtual ~MetaProperty( ) = default;
 		
 			/*
 			* @brief
@@ -407,6 +407,15 @@ namespace Enjon
 			virtual void Resize( const Object* object, const usize& arraySize ) const = 0;
 			virtual usize GetSizeInBytes( const Object* object ) const = 0;
 
+			/*
+			* @brief
+			*/
+			virtual ~MetaPropertyArrayBase( )
+			{
+				delete mArrayProperty;
+				mArrayProperty = nullptr;
+			}
+
 		protected:
 			MetaProperty* mArrayProperty = nullptr;
 	}; 
@@ -434,7 +443,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			~MetaPropertyArray( ) = default; 
+			virtual ~MetaPropertyArray( )
+			{
+				delete mArrayProperty;
+				mArrayProperty = nullptr;
+			}
 
 			/*
 			* @brief
@@ -567,7 +580,7 @@ namespace Enjon
 				{
 					case ArraySizeType::Dynamic:
 					{ 
-						return ( T* )( &( ( ( Vector< T >* )( usize( object ) + mOffset ) )->at( 0 ) ) );
+						return ( T* )( &( ( ( Vector< T >* )( usize( object ) + mOffset ) )[ 0 ] ) );
 					} break;
 
 					default:
@@ -601,6 +614,14 @@ namespace Enjon
 			} 
 
 			virtual usize GetSizeInBytes( const Object* object ) const = 0;
+
+			~MetaPropertyHashMapBase( )
+			{ 
+				delete mKeyProperty;
+				delete mValueProperty;
+				mKeyProperty = nullptr;
+				mValueProperty = nullptr;
+			} 
 
 		protected:
 			MetaProperty* mKeyProperty = nullptr;
@@ -889,6 +910,14 @@ namespace Enjon
 				for ( auto& f : mFunctions )
 				{
 					delete f.second;
+					f.second = nullptr;
+				}
+
+
+				for ( auto& p : mProperties )
+				{
+					delete p;
+					p = nullptr;
 				}
 
 				// Clear properties and functions

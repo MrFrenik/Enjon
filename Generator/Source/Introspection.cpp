@@ -1377,8 +1377,6 @@ void Introspection::Compile( const ReflectionConfig& config )
 		} 
 	} 
 
-	std::cout << "Is Application: " << config.mIsApplication << "\n";
-
 	// Classes
 	for ( auto& c : mClasses )
 	{
@@ -1393,9 +1391,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 		if ( f )
 		{
 			// Build code
-			std::string code;
-
-			std::cout << "Parent: " << c.second.mParent << "\n";
+			std::string code; 
 			
 			// Get parent
 			Class* parentCls = nullptr;

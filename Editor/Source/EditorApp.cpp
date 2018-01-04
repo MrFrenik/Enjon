@@ -35,7 +35,9 @@ Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
 
-Enjon::String configuration = "RelWithDebInfo";
+Enjon::String configuration = "Release";
+//Enjon::String configuration = "RelWithDebInfo";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -270,6 +272,11 @@ namespace Enjon
 		}
 #endif
 
+		// Add project to disk
+		Project proj; 
+		proj.SetProjectPath( projectDir );
+		proj.SetProjectName( projectName );
+		mProjectsOnDisk.push_back( proj ); 
 	}
 
 	//================================================================================================================================
@@ -472,7 +479,7 @@ namespace Enjon
 	//================================================================================================================================
 
 	void EnjonEditor::CollectAllProjectsOnDisk( )
-	{
+	{ 
 		for ( auto& p : fs::recursive_directory_iterator( mProjectsPath ) )
 		{
 			if ( Enjon::Utils::HasFileExtension( p.path( ).string( ), "eproj" ) )

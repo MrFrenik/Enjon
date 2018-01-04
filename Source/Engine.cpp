@@ -237,7 +237,7 @@ namespace Enjon
 			mGraphics->Update( dt );
 
 			// Clamp frame rate
-			//mLimiter.End(); 
+			mLimiter.End(); 
 
 			// Update world time
 			mWorldTime.mDT = dt;
