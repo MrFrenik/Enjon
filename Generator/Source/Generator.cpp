@@ -143,6 +143,16 @@ void ReflectionConfig::CollectFiles( Lexer* lexer )
 							mProjectName = lexer->GetCurrentToken( ).ToString( );
 						}
 					}
+					if ( nextToken.Equals( "generate_app_bindings" ) )
+					{
+						if ( lexer->RequireToken( TokenType::Token_Identifier, true ) )
+						{
+							if ( lexer->GetCurrentToken( ).Equals( "true" ) )
+							{
+								mIsApplication = true;
+							}
+						}
+					}
 				}
 			} break;
 

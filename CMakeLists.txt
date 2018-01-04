@@ -286,7 +286,7 @@ foreach( file ${REFLECTION_INCLUDES} )
 endforeach(file) 
 
 add_custom_command(TARGET Enjon PRE_BUILD
-	COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe --target-path ${ENJON_DIR}/
+	COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe ARGS --target-path ${ENJON_DIR}/
 	)
 
 

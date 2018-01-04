@@ -36,6 +36,21 @@ namespace Enjon
 			String mProjectPath;
 	}; 
 
+	class WorldTime
+	{
+		public:
+			WorldTime( )
+				: mTotalTime( 0.0f ), mDT( 0.01f )
+			{ 
+			} 
+			~WorldTime( )
+			{ 
+			}
+
+		f32 mTotalTime = 0.0f;;
+		f32 mDT = 0.0f;
+	};
+
 	class Engine
 	{
 		public:
@@ -114,6 +129,11 @@ namespace Enjon
 			}
 
 			/**
+			* @brief
+			*/
+			WorldTime GetWorldTime( ) const;
+
+			/**
 			* @brief Returns pointer to registered requested subsystem by metaclass. Returns nullptr if not found.
 			* @return Subsystem* - Pointer to requested subsystem
 			*/
@@ -160,6 +180,8 @@ namespace Enjon
 			// Engine configuration settings
 			EngineConfig mConfig;
 
+			// World time
+			WorldTime mWorldTime; 
 	};
 }
 

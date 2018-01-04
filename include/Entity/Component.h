@@ -30,51 +30,56 @@ namespace Enjon
 
 			virtual Component* AddComponent( const u32& entityId, Component* component ) = 0;
 
-			virtual Component* AddComponent( const u32& entityId ) = 0;
+			virtual Component* AddComponent( const MetaClass* cls, const u32& entityId ) = 0;
 
 			virtual void RemoveComponent( const u32& entityId ) = 0; 
 
 			virtual Component* GetComponent( const u32& entityId ) = 0;
+
+			virtual bool IsEmpty( ) const = 0;
+
+			virtual u32 GetSize( ) const = 0;
 	};
 
-	template <typename T>
-	class ComponentWrapper : public ComponentWrapperBase
+	class ComponentArray : public ComponentWrapperBase
 	{
-		friend Entity; 
+		friend Entity;
 		friend EntityManager;
 		friend Component;
 
 		public:
-			virtual void Base() override {}
+			virtual void Base( ) override {}
 
-			using ComponentPtrs = Vector<T*>; 
-			using ComponentMap = HashMap<u32, T*>;
+			ComponentArray( );
+
+			~ComponentArray( );
+
+			using ComponentPtrs = Vector<Component*>; 
+			using ComponentMap = HashMap<u32, Component*>;
 
 			virtual Component* AddComponent( const u32& entityId, Component* component ) override
 			{
-				mComponentMap[ entityId ] = (T*)component;
-				mComponentPtrs.push_back( mComponentMap[ entityId ] );
-				return mComponentMap[ entityId ];
-			} 
+				mComponentMap[entityId] = component;
+				mComponentPtrs.push_back( mComponentMap[entityId] );
+				return mComponentMap[entityId];
+			}
 
-			virtual Component* AddComponent( const u32& entityId ) override
+			virtual Component* AddComponent( const MetaClass* cls, const u32& entityId ) override
 			{
 				// If not available then add component - otherwise return component that's already allocated
 				if ( !HasEntity( entityId ) )
 				{
-					mComponentMap[ entityId ] = new T( );
-					mComponentPtrs.push_back( mComponentMap[ entityId ] );
+					mComponentMap[entityId] = (Component*)cls->Construct( );
+					mComponentPtrs.push_back( mComponentMap[entityId] );
 				}
 
-				return mComponentMap[ entityId ];
-			} 
-
-			virtual void RemoveComponent( const u32& entityId ) override
-			{
-				if ( HasEntity( entityId ) )
-				{ 
-				}
+				return mComponentMap[entityId];
 			}
+
+			/**
+			* @brief
+			*/
+			virtual void RemoveComponent( const u32& entityId ) override;
 
 			virtual bool HasEntity( const u32& entityID ) override
 			{
@@ -85,15 +90,25 @@ namespace Enjon
 			{
 				if ( HasEntity( entityID ) )
 				{
-					return mComponentMap[ entityID ]; 
+					return mComponentMap[entityID];
 				}
 
 				return nullptr;
 			}
 
+			virtual u32 GetSize( ) const override
+			{
+				return mComponentPtrs.size( );
+			}
+
+			virtual bool IsEmpty( ) const override
+			{
+				return ( GetSize( ) == 0 );
+			}
+
 		private:
 			ComponentPtrs mComponentPtrs;
-			ComponentMap mComponentMap;
+			ComponentMap mComponentMap; 
 	};
 
 	using ComponentID = u32;
@@ -102,6 +117,8 @@ namespace Enjon
 	{
 		friend Entity;
 		friend EntityManager; 
+		friend ComponentWrapperBase;
+		friend ComponentArray;
 
 		public:
 
@@ -142,20 +159,8 @@ namespace Enjon
 			template <typename T>
 			void DestroyBase()
 			{
-				assert( mBase != nullptr );
-
-				auto cWrapper = static_cast<ComponentWrapper<T>*>( mBase );
-				auto cPtrList = &cWrapper->mComponentPtrs;
-				auto cMap = &cWrapper->mComponentMap;
-
-				// Get component
-				auto compPtr = cWrapper->mComponentMap[mEntityID];
-
-				// Remove ptr from point list map
-				cPtrList->erase( std::remove( cPtrList->begin(), cPtrList->end(), compPtr ), cPtrList->end() );	
-
-				// Finally remove from map
-				cMap->erase( mEntityID );
+				assert( mBase != nullptr ); 
+				mBase->RemoveComponent( mEntityID );
 			}
 
 			/**

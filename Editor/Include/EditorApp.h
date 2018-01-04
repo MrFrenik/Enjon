@@ -50,7 +50,7 @@ namespace Enjon
 			void CleanupScene( );
 
 			void InitializeProjectApp( );
-			void ShutdownProjectApp( );
+			void ShutdownProjectApp( ByteBuffer* buffer );
 
 		private:
 			bool mViewBool = true;

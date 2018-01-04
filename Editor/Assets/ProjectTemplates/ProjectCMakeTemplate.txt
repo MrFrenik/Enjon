@@ -160,6 +160,7 @@ endif()
 file(WRITE ${TARGET_REFLECTION_DIR}/reflection.cfg "#target_dir \"${TARGET_DIR}\"\n") 
 file(WRITE ${TARGET_REFLECTION_DIR}/reflection.cfg "#engine_dir \"${ENJON_DIR}\"\n") 
 file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#project_name \"${TARGET_NAME}\"\n") 
+file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#generate_app_bindings true \n") 
 file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#files\n") 
 
 # Add all reflection include files

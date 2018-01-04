@@ -115,11 +115,6 @@ namespace Enjon
 
 	//--------------------------------------------------------------------
 
-	//void Renderable::SetMaterial(const Material* material)
-	//{
-	//	mMaterial = material;
-	//} 
-
 	void Renderable::SetMaterial( const AssetHandle< Material >& material )
 	{
 		mMaterial = material;
@@ -136,14 +131,6 @@ namespace Enjon
 	{
 		mScene = scene;
 	}
-
-	//==============================================================================
-
-	//void Renderable::SetColor(TextureSlotType type, const ColorRGBA32& color)
-	//{
-	//	assert(mMaterial != nullptr);
-	//	mMaterial->SetColor(type, color);
-	//}
 
 	//==============================================================================
 

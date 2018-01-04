@@ -55,6 +55,12 @@ public:\
 #define ENJON_EXPORT __declspec(dllexport) 
 #endif
 
+#define ENJON_MODULE_BODY( ModuleName )\
+	public:\
+		virtual Enjon::Result ModuleName::BindApplicationMetaClasses() override;\
+		virtual Enjon::Result ModuleName::UnbindApplicationMetaClasses() override;
+
+
 #define ENJON_MODULE_DEFINE( ModuleName )\
 	extern "C"\
 	{\
@@ -77,7 +83,7 @@ public:\
 			if ( app )\
 			{\
 				SetEngineInstance( engine );\
-				Enjon::Object::BindMetaClass< ModuleName >();\
+				app->BindApplicationMetaClasses();\
 				return app;\
 			}\
 			return nullptr;\
@@ -87,7 +93,7 @@ public:\
 		{\
 			if ( app )\
 			{\
-				Enjon::Object::UnbindMetaClass( app->Class() );\
+				app->UnbindApplicationMetaClasses();\
 				delete app;\
 				app = nullptr;\
 			}\
@@ -856,6 +862,13 @@ namespace Enjon
 	typedef HashMap< Enjon::String, MetaFunction* > FunctionTable;
 	typedef std::function< Object*( void ) > ConstructFunction;
 
+	enum class MetaClassType
+	{
+		Object,
+		Application,
+		Component
+	};
+
 	class MetaClass
 	{
 		friend Object;
@@ -881,6 +894,11 @@ namespace Enjon
 				// Clear properties and functions
 				mProperties.clear( );
 				mFunctions.clear( );
+			}
+
+			MetaClassType GetMetaClassType( ) const 
+			{
+				return mMetaClassType;
 			}
 
 			u32 PropertyCount( ) const
@@ -1043,6 +1061,7 @@ namespace Enjon
 			u32 mPropertyCount;
 			u32 mFunctionCount;
 			u32 mTypeId;
+			MetaClassType mMetaClassType = MetaClassType::Object;
 			String mName;
 
 			// Not sure if this is the best way to do this, but whatever...
@@ -1079,7 +1098,6 @@ namespace Enjon
 
 				// Get id of object
 				u32 id = GetTypeId< T >( );
-				//u32 id = Object::GetTypeId<T>( );
 
 				// If available, then return
 				if ( HasMetaClass< T >( ) )
@@ -1088,63 +1106,72 @@ namespace Enjon
 				}
 
 				// Otherwise construct it and return
-				MetaClass* cls = Object::ConstructMetaClass< T >( );
+				MetaClass* cls = Object::ConstructMetaClass< T >( ); 
 
 				mRegistry[ id ] = cls;
 				mRegistryByClassName[cls->GetName()] = cls;
+
+				// Further registration of metaclass
+				RegisterMetaClassLate( cls );
+
 				return cls;
 			}
+ 
+			/**
+			* @brief
+			*/
+			void RegisterMetaClassLate( const MetaClass* cls );
 
+			/**
+			* @brief
+			*/
 			template <typename T>
 			void UnregisterMetaClass( )
 			{
 				// Must inherit from object to be able to registered
-				static_assert( std::is_base_of<Object, T>::value, "MetaClass::RegisterMetaClass() - T must inherit from Object." );
-
-				// Get id of object
-				u32 id = GetTypeId< T >( );
-
-				// If available, then return
-				if ( HasMetaClass< T >( ) )
-				{
-					MetaClass* cls = mRegistry[ id ];
-					mRegistry.erase( id );
-					delete cls;
-					cls = nullptr;
-				} 
+				static_assert( std::is_base_of<Object, T>::value, "MetaClass::RegisterMetaClass() - T must inherit from Object." ); 
+				UnregisterMetaClass( Object::GetClass< T >( ) ); 
 			}
 
-			void UnregisterMetaClass( const MetaClass* cls )
-			{ 
-				// If available, then return
-				if ( HasMetaClass( cls->GetName() ) )
-				{
-					u32 id = cls->GetTypeId( );
-					MetaClass* cls = mRegistry[ id ];
-					mRegistry.erase( id );
-					delete cls;
-					cls = nullptr;
-				} 
-			}
-
-			template <typename T>
-			u32 GetTypeId( ) const;
-
-			/*
-				MetaClass* cls = Object::ConstructMetaClassFromString(classString);
+			/**
+			* @brief
 			*/
+			void UnregisterMetaClass( const MetaClass* cls );
 
+			/**
+			* @brief
+			*/
+			template <typename T>
+			u32 GetTypeId( ) const; 
+
+			/**
+			* @brief
+			*/
 			template < typename T >
 			bool HasMetaClass( )
 			{
 				return ( mRegistry.find( GetTypeId< T >( ) ) != mRegistry.end( ) );
 			} 
 
+			/**
+			* @brief
+			*/
 			bool HasMetaClass( const String& className )
 			{
 				return ( mRegistryByClassName.find( className ) != mRegistryByClassName.end( ) );
 			}
 
+			/**
+			* @brief
+			*/
+			bool HasMetaClass( const u32& typeId )
+			{
+				return ( mRegistry.find( typeId ) != mRegistry.end( ) );
+			}
+
+			/**
+			* @brief
+			*/
 			template < typename T >
 			const MetaClass* Get( )
 			{
@@ -1152,6 +1179,9 @@ namespace Enjon
 				return HasMetaClass< T >( ) ? mRegistry[ GetTypeId< T >( ) ] : nullptr;
 			}
 
+			/**
+			* @brief
+			*/
 			const MetaClass* GetClassByName( const String& className )
 			{
 				if ( HasMetaClass( className ) )
@@ -1161,6 +1191,11 @@ namespace Enjon
 
 				return nullptr;
 			}
+
+			/**
+			* @brief
+			*/
+			const MetaClass* GetClassById( const u32& typeId );
 
 		private:
 			HashMap< u32, MetaClass* > mRegistry; 
@@ -1225,34 +1260,19 @@ namespace Enjon
 				return static_cast< T* >( const_cast< Object* > ( this ) );
 			}
 
+			/**
+			*@brief
+			*/
 			template <typename T>
 			T* ConstCast( ) const
 			{
 				Object::AssertIsObject< T >( );
 				return static_cast< T* >( const_cast< Object* >( this ) );
-			}
+			} 
 
 			/**
 			*@brief
 			*/
-			//template <typename T>
-			//static u32 GetTypeId( ) noexcept
-			//{
-			//	Object::AssertIsObject<T>( ); 
-
-			//	static u32 typeId { GetUniqueTypeId( ) }; 
-			//	return typeId;
-			//} 
-
-			//template <typename T>
-			//bool InstanceOf( )
-			//{
-			//	Object::AssertIsObject<T>( ); 
-
-			//	return ( mTypeId == Object::GetTypeId< T >( ) );
-			//}
-
-
 			template <typename T>
 			static void BindMetaClass( )
 			{
@@ -1260,19 +1280,28 @@ namespace Enjon
 				registry->RegisterMetaClass< T >( );
 			}
 
+			/**
+			*@brief
+			*/
 			template <typename T>
 			static void UnbindMetaClass( )
 			{
 				MetaClassRegistry* registry = const_cast< MetaClassRegistry* >( Engine::GetInstance( )->GetMetaClassRegistry( ) ); 
-				registry->UnregisterMetaClass< T >( ); 
+				registry->UnregisterMetaClass( Object::GetClass< T >( ) );
 			}
 
+			/**
+			*@brief
+			*/
 			static void UnbindMetaClass( const MetaClass* cls )
 			{
 				MetaClassRegistry* registry = const_cast< MetaClassRegistry* >( Engine::GetInstance( )->GetMetaClassRegistry( ) ); 
 				registry->UnregisterMetaClass( cls ); 
 			}
 
+			/**
+			*@brief
+			*/
 			u32 GetTypeId( )
 			{
 				if ( Class( ) )
@@ -1299,6 +1328,11 @@ namespace Enjon
 				}
 				return cls;
 			}
+
+			/**
+			*@brief Could return null!
+			*/
+			static const MetaClass* GetClass( const u32& typeId );
 
 			/**
 			*@brief Could return null!

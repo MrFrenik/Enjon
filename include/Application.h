@@ -56,9 +56,25 @@ namespace Enjon
 			const Enjon::String& GetApplicationName( )
 			{
 				return mApplicationName;
+			} 
+			
+			/**
+			* @brief DON'T CALL DIRECTLY
+			*/
+			virtual Enjon::Result BindApplicationMetaClasses( )
+			{
+				return Enjon::Result::INCOMPLETE;
+			} 
+
+			/**
+			* @brief DON'T CALL DIRECTLY
+			*/
+			virtual Enjon::Result UnbindApplicationMetaClasses( )
+			{
+				return Enjon::Result::INCOMPLETE;
 			}
 
-		protected:
+		protected: 
 			Enjon::String mApplicationName = "";
 	};
 }

@@ -10,6 +10,7 @@ ENJON_CLASS( Construct )
 class #PROJECTNAME : public Enjon::Application
 {
 	ENJON_CLASS_BODY( )
+	ENJON_MODULE_BODY( #PROJECTNAME )
 
 	public:
 		/**

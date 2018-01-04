@@ -70,13 +70,22 @@ namespace Enjon
 		buffer->Write< u32 >( ( u32 )comps.size( ) );
 
 		// Write out component data
-		for ( auto& c : comps )
-		{
+		for ( auto& c : comps ) 
+		{ 
 			// Get component's meta class
-			const MetaClass* compCls = c->Class( );
+			const MetaClass* compCls = c->Class( ); 
 
 			// Write out component class
 			buffer->Write< String >( compCls->GetName( ) );
+
+			// Need to write out specific data regarding the component, namely how much size there is so that I can 
+			// skip the data in the buffer
+			ByteBuffer temp; 
+			if ( c->SerializeData( &temp ) == Result::INCOMPLETE )
+			{
+				SerializeObjectDataDefault( c, compCls, &temp );
+			}
+			buffer->Write< usize >( temp.GetSize( ) );
 
 			// Serialize component data
 			Result res = c->SerializeData( buffer );
@@ -184,6 +193,8 @@ namespace Enjon
 			// Get component's meta class
 			const MetaClass* cmpCls = Object::GetClass( buffer->Read< String >( ) );
 
+			usize compWriteSize = buffer->Read< usize >( );
+
 			if ( cmpCls )
 			{
 				// Attach new component to entity using MetaClass
@@ -196,6 +207,10 @@ namespace Enjon
 						res = DeserializeObjectDataDefault( cmp, cmpCls, buffer );
 					}
 				}
+			}
+			else
+			{
+				buffer->AdvanceReadPosition( compWriteSize );
 			}
 		}
 

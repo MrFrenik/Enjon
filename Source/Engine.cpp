@@ -237,7 +237,11 @@ namespace Enjon
 			mGraphics->Update( dt );
 
 			// Clamp frame rate
-			mLimiter.End(); 
+			//mLimiter.End(); 
+
+			// Update world time
+			mWorldTime.mDT = dt;
+			mWorldTime.mTotalTime += mWorldTime.mDT;
 		}
 
 		Enjon::Result res = ShutDown();
@@ -256,6 +260,13 @@ namespace Enjon
 		}
 
 		return Enjon::Result::SUCCESS;
+	}
+
+	//======================================================= 
+
+	WorldTime Engine::GetWorldTime( ) const
+	{
+		return mWorldTime;
 	}
 
 	//======================================================= 

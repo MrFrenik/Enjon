@@ -11,6 +11,13 @@ class Class;
 class Struct;
 class Type; 
 
+enum class MetaClassType
+{
+	Object, 
+	Application,
+	Component
+};
+
 enum class PropertyType
 {
 	Object,
@@ -269,6 +276,8 @@ class Class
 		static u32 mScopeCount;
 		std::string mParent = "";
 		u32 mObjectTypeId = 0;
+		bool mIsApplication = false;
+		MetaClassType mMetaClassType = MetaClassType::Object;
 }; 
 
 
@@ -300,9 +309,10 @@ struct ReflectionConfig
 	std::string mConfigFilePath;
 	std::string mOutputDirectory;
 	std::string mLinkedDirectory;
-	std::string mProjectName;
+	std::string mProjectName; 
 	std::vector< std::string > mFilesToParse;
 	std::vector< std::string > mAdditionalIncludes;
+	bool mIsApplication = false;
 }; 
 
 class Introspection
@@ -353,6 +363,8 @@ class Introspection
 		const Class* AddClass( const std::string& className );
 
 		const Class* GetClass( const std::string& name );
+
+		const Class* FindApplicationClass( );
 
 		void Compile( const ReflectionConfig& config );
 

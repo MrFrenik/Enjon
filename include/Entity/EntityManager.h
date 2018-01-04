@@ -110,6 +110,9 @@ namespace Enjon
 			template <typename T>
 			void RemoveComponent();
 
+			/// @brief Detaches component from entity, if exists
+			void RemoveComponent( const MetaClass* cls);
+
 			/// @brief Sets local transform of entity
 			void SetLocalTransform(Transform& transform);
 
@@ -328,8 +331,17 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			template <typename T>
-			Vector<T>* GetComponentList();
+			void RegisterComponent( const MetaClass* cls );
+
+			/**
+			*@brief
+			*/
+			void UnregisterComponent( const MetaClass* cls ); 
+
+			/**
+			*@brief
+			*/ 
+			Vector<const MetaClass*> GetComponentMetaClassList( );
 
 			/**
 			*@brief
@@ -347,6 +359,11 @@ namespace Enjon
 			*/
 			template <typename T>
 			void RemoveComponent(Entity* entity);
+
+			/**
+			*@brief
+			*/
+			void RemoveComponent(const MetaClass* compCls, const EntityHandle& entity);
 
 			/**
 			*@brief
@@ -371,6 +388,11 @@ namespace Enjon
 			* @brief
 			*/
 			void ForceCleanup( );
+
+			/**
+			* @brief
+			*/
+			bool ComponentBaseExists( const u32& compIdx );
 
 		protected: 
 
@@ -410,7 +432,7 @@ namespace Enjon
 			*@brief
 			*/
 			template <typename T >
-			bool ComponentBaseExists( );
+			bool ComponentBaseExists( ); 
 
 		private:
 			EntityStorage 				mEntities;

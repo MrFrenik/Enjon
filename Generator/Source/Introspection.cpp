@@ -423,6 +423,12 @@ void Introspection::ParseClass( Lexer* lexer )
 			superToken = lexer->GetCurrentToken( );
 
 			cls->mParent = parentString + ( consumed ? superToken.ToString( ) : "" );
+
+			// If is an application, then need to record that
+			if ( cls->mParent.compare( "Application" ) == 0 || cls->mParent.compare( "Enjon::Application" ) == 0 )
+			{
+				cls->mIsApplication = true;
+			}
 		}
 	} 
 
@@ -457,6 +463,22 @@ void Introspection::ParseClass( Lexer* lexer )
 }
 
 //=================================================================================================
+
+const Class* Introspection::FindApplicationClass( )
+{
+	// Return first instance of application
+	for ( auto& c : mClasses )
+	{
+		if ( c.second.mIsApplication )
+		{
+			return &c.second;
+		}
+	}
+
+	return nullptr;
+}
+
+//=================================================================================================
 		
 void Introspection::ParseClassBody( Lexer* lexer, Class* cls )
 {
@@ -474,6 +496,20 @@ void Introspection::ParseClassBody( Lexer* lexer, Class* cls )
 		RemoveClass( cls->mName );
 
 		return;
+	}
+
+	// Look for specific other body modifiers as well
+	if ( lexer->PeekAtNextToken( ).Equals( "ENJON_COMPONENT" ) )
+	{
+		cls->mMetaClassType = MetaClassType::Component;
+	}
+	else if ( lexer->PeekAtNextToken( ).Equals( "ENJON_MODULE_BODY" ) )
+	{
+		cls->mMetaClassType = MetaClassType::Application; 
+	}
+	else
+	{
+		cls->mMetaClassType = MetaClassType::Object;
 	}
 
 	// Now need to parse all remaining members of class
@@ -1339,7 +1375,9 @@ void Introspection::Compile( const ReflectionConfig& config )
 			// Write final to file
 			f.write( code.c_str( ), code.length( ) );
 		} 
-	}
+	} 
+
+	std::cout << "Is Application: " << config.mIsApplication << "\n";
 
 	// Classes
 	for ( auto& c : mClasses )
@@ -1356,6 +1394,8 @@ void Introspection::Compile( const ReflectionConfig& config )
 		{
 			// Build code
 			std::string code;
+
+			std::cout << "Parent: " << c.second.mParent << "\n";
 			
 			// Get parent
 			Class* parentCls = nullptr;
@@ -1605,9 +1645,25 @@ void Introspection::Compile( const ReflectionConfig& config )
 			code += OutputLine( "" );
 
 			// Set up typeid field
-			//code += OutputTabbedLine( "cls->mTypeId = Enjon::Object::GetTypeId< " + qualifiedName +" >( );\n" );
-			code += OutputTabbedLine( "cls->mTypeId = " + std::to_string(c.second.mObjectTypeId) + ";\n" );
-			
+			code += OutputTabbedLine( "cls->mTypeId = " + std::to_string( c.second.mObjectTypeId ) + ";\n" );
+
+			// Set up meta class type field
+			switch ( c.second.mMetaClassType )
+			{
+				case MetaClassType::Object:
+				{
+					code += OutputTabbedLine( "cls->mMetaClassType = Enjon::MetaClassType::Application;\n" ); 
+				} break; 
+				case MetaClassType::Component:
+				{
+					code += OutputTabbedLine( "cls->mMetaClassType = Enjon::MetaClassType::Component;\n" ); 
+				} break; 
+				case MetaClassType::Application:
+				{
+					code += OutputTabbedLine( "cls->mMetaClassType = Enjon::MetaClassType::Application;\n" ); 
+				} break; 
+			} 
+ 
 			// Set up name field
 			code += OutputTabbedLine( "cls->mName = \"" + qualifiedName + "\";\n" );
 
@@ -1627,14 +1683,6 @@ void Introspection::Compile( const ReflectionConfig& config )
 			code += OutputTabbedLine( "}" );
 			code += OutputTabbedLine( "return cls;" );
 			code += OutputLine( "}" );
-			
-			// GetTypeId()
-			//code += OutputLine( "" );
-			//code += OutputLine( "// GetTypeId" );
-			//code += OutputLine( "Enjon::u32 " + qualifiedName + "::GetTypeId() const" );
-			//code += OutputLine( "{" );
-			//code += OutputTabbedLine( "return Object::GetTypeId< " + qualifiedName + " >();" );
-			//code += OutputLine( "}" ); 
 
 			// GetTypeId()
 			code += OutputLine( "" );
@@ -1644,8 +1692,6 @@ void Introspection::Compile( const ReflectionConfig& config )
 			code += OutputLine( "{" );
 			code += OutputTabbedLine( "return " + std::to_string(c.second.mObjectTypeId) + ";" );
 			code += OutputLine( "}" ); 
-
-			
 
 			// Write to file
 			f.write( code.c_str( ), code.length( ) );
@@ -1721,6 +1767,9 @@ void Introspection::Link( const ReflectionConfig& config )
 		code += OutputLine( fileContents );
 	} 
 
+	// Get application if exists
+	const Class* applicationClass = FindApplicationClass( );
+
 	// Only write static meta class binding call for enjon includes
 	if ( config.mProjectName.compare( "Enjon" ) == 0 )
 	{
@@ -1734,8 +1783,38 @@ void Introspection::Link( const ReflectionConfig& config )
 			code += OutputTabbedLine( "Object::RegisterMetaClass< " + qualifiedName + " >();" ); 
 		}
 		code += OutputLine( "}" ); 
-	}
+	} 
 
+	// If application class exists, write binding/unbinding functions
+	if ( applicationClass )
+	{
+		// Output Binding function
+		code += OutputLine( "// Binding function for Application that is called at startup for reflection" );
+		code += OutputLine( "Enjon::Result " + applicationClass->mName + "::BindApplicationMetaClasses()" );
+		code += OutputLine( "{" );
+		for ( auto& c : mClasses )
+		{
+			std::string qualifiedName = c.second.GetQualifiedName( );
+			code += OutputTabbedLine( "Enjon::Object::BindMetaClass< " + qualifiedName + " >();" ); 
+		}
+		code += OutputTabbedLine( "return Enjon::Result::SUCCESS;" );
+		code += OutputLine( "}" ); 
+
+		// Formatting
+		code += OutputLine( "" );
+
+		// Output Unbinding function
+		code += OutputLine( "// Unbinding function for Application that is called when reloading for reflection" );
+		code += OutputLine( "Enjon::Result " + applicationClass->mName + "::UnbindApplicationMetaClasses()" );
+		code += OutputLine( "{" );
+		for ( auto& c : mClasses )
+		{
+			std::string qualifiedName = c.second.GetQualifiedName( );
+			code += OutputTabbedLine( "Enjon::Object::UnbindMetaClass< " + qualifiedName + " >();" ); 
+		}
+		code += OutputTabbedLine( "return Enjon::Result::SUCCESS;" );
+		code += OutputLine( "}" ); 
+	}
 
 	// Output linked code
 	if ( f )

@@ -3,6 +3,7 @@
 #include <Engine.h>
 #include <Asset/AssetManager.h>
 #include <Serialize/ObjectArchiver.h>
+#include <Serialize/EntityArchiver.h>
 #include <SubsystemCatalog.h>
 #include <IO/InputManager.h>
 #include <ImGui/ImGuiManager.h>
@@ -116,7 +117,8 @@ namespace Enjon
 				// Call shut down function for game
 				if ( mProject.GetApplication() )
 				{
-					ShutdownProjectApp( );
+					// Need to pass in previous scene to restore...
+					ShutdownProjectApp( nullptr );
 				}
 
 				auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( )->ConstCast< Enjon::Camera >();
@@ -167,6 +169,29 @@ namespace Enjon
 						Enjon::ImGuiManager::DebugDumpObject( c );
 					} 
 					ImGui::TreePop( );
+				}
+
+				if ( ImGui::CollapsingHeader( "ADD COMPONENT" ) )
+				{
+					// Get component list
+					auto entities = Engine::GetInstance( )->GetSubsystem( Object::GetClass< EntityManager >( ) )->ConstCast< EntityManager >( );
+					auto compMetaClsList = entities->GetComponentMetaClassList( );
+
+					ImGui::ListBoxHeader( "" );
+					{
+						for ( auto& cls : compMetaClsList )
+						{
+							if ( !mSceneEntity.Get( )->HasComponent( cls ) )
+							{
+								// Add component to mEntity
+								if ( ImGui::Selectable( cls->GetName( ).c_str( ) ) )
+								{
+									mSceneEntity.Get( )->AddComponent( cls );
+								} 
+							}
+						} 
+					}
+					ImGui::ListBoxFooter( );
 				}
 
 				ImGui::TreePop( );
@@ -345,7 +370,7 @@ namespace Enjon
 					needsReload = true;
 
 					// Shutdown project app
-					ShutdownProjectApp( );
+					ShutdownProjectApp( buffer );
 				}
 			}
 
@@ -371,6 +396,18 @@ namespace Enjon
 	void EnjonEditor::LoadDLL( )
 	{
 		Enjon::ByteBuffer buffer;
+
+		// NOTE(): VERY SPECIFIC IMPL THAT WILL BE GENERALIZED TO RELOADING SCENE
+		// Serialize mEntity ( this will be the scene, essentially... )
+		EntityArchiver::Serialize( mSceneEntity, &buffer );
+
+		// Destroy scene entity
+		mSceneEntity.Get()->Destroy( );
+
+		// Force the scene to clean up ahead of frame
+		CleanupScene( ); 
+
+		// Actual code starts here...
 		bool needsReload = UnloadDLL( &buffer );
 
 		// Copy files to directory
@@ -392,15 +429,22 @@ namespace Enjon
 				mProject.SetApplication( createAppFunc( Enjon::Engine::GetInstance( ) ) );
 			} 
 
+			// Reload the entity from the buffer
+			if ( buffer.GetSize( ) )
+			{
+				mSceneEntity = Enjon::EntityArchiver::Deserialize( &buffer ); 
+			}
+
 			if ( needsReload )
 			{
 				Application* app = mProject.GetApplication( );
 				if ( app )
 				{
-					Enjon::ObjectArchiver::Deserialize( &buffer, app );
+					Enjon::ObjectArchiver::Deserialize( &buffer, app ); 
 				}
 			}
 
+			
 		}
 		else
 		{
@@ -449,7 +493,7 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EnjonEditor::ShutdownProjectApp( )
+	void EnjonEditor::ShutdownProjectApp( ByteBuffer* buffer )
 	{
 		Application* app = mProject.GetApplication( );
 		if ( app )
@@ -463,6 +507,8 @@ namespace Enjon
 					e->Destroy( );
 				}
 			} 
+
+
 
 			// Shutodwn the application
 			app->Shutdown( );
@@ -496,7 +542,7 @@ namespace Enjon
 		mProjectBuildAndRunTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRun.bat" ).c_str( ) );
 
 		// Hard code projects path
-		mProjectsPath = "E:/Development/EnjonProjects/"; 
+		mProjectsPath = "W:/Projects/"; 
 
 		// Set up copy directory for project dll
 		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";
@@ -723,7 +769,7 @@ namespace Enjon
 					if ( app )
 					{
 						// Shutown the application
-						ShutdownProjectApp( );
+						ShutdownProjectApp( nullptr );
 					}
 
 					auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( )->ConstCast< Enjon::Camera >( );

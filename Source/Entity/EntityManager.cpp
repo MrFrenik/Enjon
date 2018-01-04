@@ -153,6 +153,13 @@ namespace Enjon
 
 	//====================================================================================================
 
+	void Entity::RemoveComponent( const MetaClass* cls )
+	{
+		mManager->RemoveComponent( cls, GetHandle( ) );
+	}
+
+	//====================================================================================================
+
 	Component* Entity::AddComponent( const MetaClass* compCls )
 	{
 		return mManager->AddComponent( compCls, GetHandle() );
@@ -711,6 +718,33 @@ namespace Enjon
 
 	//========================================================================================================================
 
+	void EntityManager::RegisterComponent( const MetaClass* cls )
+	{
+		u32 index = cls->GetTypeId( );
+		mComponents[index] = new ComponentArray( );
+	}
+
+	//========================================================================================================================
+
+	// TODO(): Need to have a destinction here on whether or not the component being 
+	// Asked to unregistered is an engine-level component or not - Most likely NEVER want to be able to 
+	// remove one of those
+	void EntityManager::UnregisterComponent( const MetaClass* cls )
+	{
+		u32 index = cls->GetTypeId( ); 
+	
+		// For now will only erase if there are no components attached to any entities
+		if ( ComponentBaseExists( index ) && mComponents[index]->IsEmpty() )
+		{
+			ComponentWrapperBase* base = mComponents[index];
+			mComponents.erase( index );
+			delete base;
+			base = nullptr;
+		}
+	}
+
+	//========================================================================================================================
+
 	Component* EntityManager::AddComponent( const MetaClass* compCls, const Enjon::EntityHandle& handle )
 	{
 		// Get type id from component class
@@ -720,6 +754,12 @@ namespace Enjon
 
 		// Assert entity is valid
 		assert(entity != nullptr);
+
+		// Doesn't have component
+		if ( !ComponentBaseExists( compIdx ) )
+		{
+			RegisterComponent( compCls );
+		}
 
 		assert(mComponents.at(compIdx) != nullptr); 
 
@@ -735,7 +775,7 @@ namespace Enjon
 		ComponentWrapperBase* base = mComponents[ compIdx ];
 
 		// Create new component and place into map
-		Component* component = base->AddComponent( eid );
+		Component* component = base->AddComponent( compCls, eid );
 		component->SetEntity(entity);
 		component->SetID(compIdx);
 		component->SetBase( base );
@@ -750,6 +790,46 @@ namespace Enjon
 		return nullptr;
 
 	}
+
+	//=========================================================================================
+
+	void EntityManager::RemoveComponent( const MetaClass* compCls, const EntityHandle& entity )
+	{
+		auto comp = GetComponent( entity, compCls->GetTypeId() );
+		if ( comp )
+		{
+			comp->Destroy( );
+		}
+		delete comp;
+		comp = nullptr;
+	}
+
+	//=========================================================================================
+
+	bool EntityManager::ComponentBaseExists( const u32& compIdx )
+	{
+		return ( mComponents.find( compIdx ) != mComponents.end( ) );
+	}
+
+	//=========================================================================================
+
+	Vector<const MetaClass*> EntityManager::GetComponentMetaClassList( )
+	{
+		Vector< const MetaClass* > metaClassList;
+		for ( auto& c : mComponents )
+		{
+			const MetaClass* cls = Object::GetClass( c.first );
+			if ( cls )
+			{
+				metaClassList.push_back( cls );
+			}
+		}
+
+		return metaClassList;
+	}
+
+	//=========================================================================================
+
 }
 
 

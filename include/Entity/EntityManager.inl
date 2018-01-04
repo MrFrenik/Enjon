@@ -5,17 +5,17 @@ void EntityManager::RegisterComponent()
 {
 	static_assert(std::is_base_of<Component, T>::value, "EntityManager::RegisterComponent:: T must inherit from Component.");
 	u32 index = static_cast<u32>(Component::GetComponentType<T>());
-	mComponents[ index ] = new ComponentWrapper<T>;
+	mComponents[ index ] = new ComponentArray( );
 }
 
 //--------------------------------------------------------------------------
-template <typename T>
-std::vector<T>* EntityManager::GetComponentList()
-{
-	u32 index = Component::GetComponentType<T>();
-	assert(Components.at(index) != nullptr);
-	return &(static_cast<ComponentWrapper<T>*>(Components.at(index))->mComponentPtrs);	
-}
+//template <typename T>
+//std::vector<T>* EntityManager::GetComponentList()
+//{
+//	u32 index = Component::GetComponentType<T>();
+//	assert(Components.at(index) != nullptr); 
+//	return &(static_cast<ComponentWrapper<T>*>(Components.at(index))->mComponentPtrs);	
+//}
 
 //--------------------------------------------------------------------------
 
@@ -58,7 +58,7 @@ T* EntityManager::AddComponent(const Enjon::EntityHandle& handle)
 	}
 
 	// Otherwise new component and place into map
-	T* component = (T*)base->AddComponent( eid );
+	T* component = (T*)base->AddComponent( Object::GetClass< T >(), eid );
 	component->SetEntity(entity);
 	component->SetID(compIdx);
 	component->SetBase( base );
