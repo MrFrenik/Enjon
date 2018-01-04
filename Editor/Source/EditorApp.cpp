@@ -35,6 +35,8 @@ Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
 
+Enjon::String configuration = "RelWithDebInfo";
+
 namespace Enjon
 {
 	void CopyLibraryContents( const String& projectName, const String& projectDir )
@@ -42,7 +44,7 @@ namespace Enjon
 		Enjon::String rootDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
 		Enjon::String dllName =  projectName + ".dll";
 
-		fs::path dllPath = rootDir + "Build/Debug/" + dllName;
+		fs::path dllPath = rootDir + "Build/" + configuration + "/" + dllName;
 		if ( fs::exists( dllPath ) )
 		{
 			fs::remove( dllPath );
@@ -52,9 +54,9 @@ namespace Enjon
 		dllPath = projectDir;
 		if ( fs::exists( dllPath ) )
 		{
-			if ( fs::exists( dllPath.string( ) + "Build/Debug/" + dllName ) )
+			if ( fs::exists( dllPath.string( ) + "Build/" + configuration + "/" + dllName ) )
 			{
-				fs::copy( fs::path( dllPath.string( ) + "Build/Debug/" + dllName ), rootDir + "Build/Debug/" + dllName );
+				fs::copy( fs::path( dllPath.string( ) + "Build/" + configuration + "/" + dllName ), rootDir + "Build/" + configuration + "/" + dllName );
 			}
 		}
 	}
@@ -404,6 +406,9 @@ namespace Enjon
 		// Destroy scene entity
 		mSceneEntity.Get()->Destroy( );
 
+		// Clean mSceneEntities
+		mSceneEntities.clear( );
+
 		// Force the scene to clean up ahead of frame
 		CleanupScene( ); 
 
@@ -432,7 +437,11 @@ namespace Enjon
 			// Reload the entity from the buffer
 			if ( buffer.GetSize( ) )
 			{
+				// Deserialize scene entity
 				mSceneEntity = Enjon::EntityArchiver::Deserialize( &buffer ); 
+
+				// Push back scene entity into mSceneEntities
+				mSceneEntities.push_back( mSceneEntity.Get( ) );
 			}
 
 			if ( needsReload )
@@ -443,11 +452,19 @@ namespace Enjon
 					Enjon::ObjectArchiver::Deserialize( &buffer, app ); 
 				}
 			}
-
-			
 		}
 		else
 		{
+			// Reload the entity from the buffer
+			if ( buffer.GetSize( ) )
+			{
+				// Deserialize scene entity
+				mSceneEntity = Enjon::EntityArchiver::Deserialize( &buffer );
+
+				// Push back scene entity into mSceneEntities
+				mSceneEntities.push_back( mSceneEntity.Get( ) );
+			}
+
 			std::cout << "Could not load library\n";
 		}
 	}
@@ -508,8 +525,6 @@ namespace Enjon
 				}
 			} 
 
-
-
 			// Shutodwn the application
 			app->Shutdown( );
 
@@ -542,7 +557,7 @@ namespace Enjon
 		mProjectBuildAndRunTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRun.bat" ).c_str( ) );
 
 		// Hard code projects path
-		mProjectsPath = "W:/Projects/"; 
+		mProjectsPath = "E:/Development/EnjonProjects/"; 
 
 		// Set up copy directory for project dll
 		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";
