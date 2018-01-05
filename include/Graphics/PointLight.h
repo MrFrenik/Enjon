@@ -74,6 +74,11 @@ namespace Enjon {
 			ENJON_FUNCTION() 
 			void SetRadius(float radius); 
 
+			/*
+			* @brief
+			*/
+			Scene* GetScene( ) const; 
+
 		private: 
 
 			ENJON_PROPERTY( Editable, UIMin = -100.0f, UIMax = 100.0f )
@@ -88,7 +93,7 @@ namespace Enjon {
 			ENJON_PROPERTY( Editable, UIMin = 0.0f, UIMax = 100.0f )
 			f32 mIntensity;
 
-			ENJON_PROPERTY( Editable )
+			ENJON_PROPERTY( Editable, UIMin = 0.0f, UIMax = 1.0f )
 			ColorRGBA32 mColor;
 			
 			Scene* mScene = nullptr;

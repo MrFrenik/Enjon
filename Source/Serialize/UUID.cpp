@@ -36,7 +36,6 @@ THE SOFTWARE.
 
 // If windows
 #ifdef ENJON_SYSTEM_WINDOWS 
-	#define GUID_WINDOWS
 	#include <objbase.h>
 #endif
 

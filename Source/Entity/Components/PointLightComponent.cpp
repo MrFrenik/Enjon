@@ -12,12 +12,20 @@ namespace Enjon
 
 	PointLightComponent::PointLightComponent()
 	{
+		// Add renderable to scene
+		GraphicsSubsystem* gs = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem >( )->ConstCast< GraphicsSubsystem >( );
+		gs->GetScene( )->AddPointLight( &mLight );
 	}
 
 	//==================================================================================
 
 	PointLightComponent::~PointLightComponent()
 	{
+		// Remove renderable from scene
+		if (mLight.GetScene() != nullptr)
+		{
+			mLight.GetScene()->RemovePointLight(&mLight);
+		}
 	}
 
 	//==================================================================================

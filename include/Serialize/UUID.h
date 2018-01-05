@@ -6,9 +6,7 @@
 #define ENJON_UUID_H
 
 #include "System/Types.h"
-#include "Defines.h"
-
-//#include <CrossGUID/guid.h>
+#include "Defines.h" 
 
 namespace Enjon
 {
@@ -81,12 +79,10 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			friend std::ostream &operator<<( std::ostream &s, const UUID &guid );
+			friend std::ostream &operator<<( std::ostream &s, const UUID &uuid );
  
 		private: 
-			Vector<u8> mBytes;
-
-			//Guid mID;
+			Vector<u8> mBytes; 
 	}; 
 }
 

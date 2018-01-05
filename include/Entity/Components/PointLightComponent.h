@@ -100,6 +100,7 @@ namespace Enjon
 			virtual Result DeserializeData( ByteBuffer* buffer ) override;
 
 		private:
+			ENJON_PROPERTY( )
 			PointLight mLight;	
 	};
 }

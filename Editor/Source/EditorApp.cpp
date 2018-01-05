@@ -34,7 +34,7 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 
 Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -457,7 +457,14 @@ namespace Enjon
 				Application* app = mProject.GetApplication( );
 				if ( app )
 				{
+					std::cout << "Buffer size: " << buffer.GetSize( ) << "\n";
 					Enjon::ObjectArchiver::Deserialize( &buffer, app ); 
+
+					for ( u32 i = 0; i < 30; ++i )
+					{
+						// Write this out to file for shiggles
+						buffer.WriteToFile( mProject.GetProjectPath( ) + "/testWriteBuffer" + fmt::format("{}", i ) ); 
+					}
 				}
 			}
 		}
@@ -667,6 +674,9 @@ namespace Enjon
 			Application* app = mProject.GetApplication( );
 			if ( app )
 			{
+				//static Enjon::ByteBuffer temp;
+				//Enjon::ObjectArchiver::Serialize( app, &temp );
+
 				app->ProcessInput( dt );
 				app->Update( dt ); 
 			}
