@@ -34,6 +34,7 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
+Enjon::String mProjectsDir = "W:/Projects/";
 
 Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -228,7 +229,7 @@ namespace Enjon
 	void EnjonEditor::CreateNewProject( const String& projectName )
 	{ 
 		// Just output the source files for now... This is already going to get ugly, so need to split this all up pretty quickly
-		String projectDir = mProjectsPath + projectName + "/";
+		String projectDir = mProjectsDir + projectName + "/";
 		if ( !fs::exists( projectDir ) )
 		{
 			fs::create_directory( projectDir );
@@ -305,7 +306,7 @@ namespace Enjon
 		if ( ImGui::Button( "Create New Project" ) && mNewProjectName.compare( "" ) != 0 )
 		{
 			// If project is able to be made, then make it
-			String projectPath = mProjectsPath + "/" + mNewProjectName + "/";
+			String projectPath = mProjectsDir + "/" + mNewProjectName + "/";
 			if ( !fs::exists( projectPath ) )
 			{
 				CreateNewProject( mNewProjectName );
@@ -480,7 +481,7 @@ namespace Enjon
 
 	void EnjonEditor::CollectAllProjectsOnDisk( )
 	{ 
-		for ( auto& p : fs::recursive_directory_iterator( mProjectsPath ) )
+		for ( auto& p : fs::recursive_directory_iterator( mProjectsDir ) )
 		{
 			if ( Enjon::Utils::HasFileExtension( p.path( ).string( ), "eproj" ) )
 			{ 
@@ -561,10 +562,7 @@ namespace Enjon
 		mProjectSourceTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectSourceTemplate.cpp" ).c_str() ); 
 		mProjectCMakeTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectCMakeTemplate.txt" ).c_str( ) );
 		mProjectDelBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/DelPDB.bat" ).c_str( ) );
-		mProjectBuildAndRunTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRun.bat" ).c_str( ) );
-
-		// Hard code projects path
-		mProjectsPath = "E:/Development/EnjonProjects/"; 
+		mProjectBuildAndRunTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRun.bat" ).c_str( ) ); 
 
 		// Set up copy directory for project dll
 		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";

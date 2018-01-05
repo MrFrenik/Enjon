@@ -76,7 +76,6 @@ target_link_libraries( ${TARGET_NAME} debug LinearMath_d.lib optimized LinearMat
 target_link_libraries( ${TARGET_NAME} debug BulletDynamics_d.lib optimized BulletDynamics.lib )
 target_link_libraries( ${TARGET_NAME} debug BulletCollision_d.lib optimized BulletCollision.lib )
 target_link_libraries( ${TARGET_NAME} debug fmt_d.lib optimized fmt.lib )
-target_link_libraries( ${TARGET_NAME} debug CrossGuid_d.lib optimized CrossGuid.lib )
 target_link_libraries( ${TARGET_NAME} debug liblz4_d.lib optimized liblz4.lib ) 
 
 set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE CXX)

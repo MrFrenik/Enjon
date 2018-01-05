@@ -8,7 +8,7 @@
 #include "System/Types.h"
 #include "Defines.h"
 
-#include <CrossGUID/guid.h>
+//#include <CrossGUID/guid.h>
 
 namespace Enjon
 {
@@ -25,6 +25,11 @@ namespace Enjon
 			* @brief Constructor
 			*/
 			UUID( const Enjon::String& string );
+
+			/*
+			* @brief Constructor
+			*/
+			UUID( const u8* bytes );
 
 			/*
 			* @brief Destructor
@@ -51,8 +56,37 @@ namespace Enjon
 			*/
 			static UUID Invalid( );
 
+			/*
+			* @brief
+			*/
+			UUID &operator=( const UUID &other );
+
+			/*
+			* @brief
+			*/
+			bool operator==( const UUID &other ) const;
+
+			/*
+			* @brief
+			*/
+			bool operator!=( const UUID &other ) const;
+
+		private:
+
+			/*
+			* @brief
+			*/
+			static UUID NewUUID( );
+ 
+			/*
+			* @brief
+			*/
+			friend std::ostream &operator<<( std::ostream &s, const UUID &guid );
+ 
 		private: 
-			Guid mID;
+			Vector<u8> mBytes;
+
+			//Guid mID;
 	}; 
 }
 

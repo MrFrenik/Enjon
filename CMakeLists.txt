@@ -189,7 +189,6 @@ target_link_libraries( Enjon debug LinearMath_d.lib optimized LinearMath.lib )
 target_link_libraries( Enjon debug BulletDynamics_d.lib optimized BulletDynamics.lib )
 target_link_libraries( Enjon debug BulletCollision_d.lib optimized BulletCollision.lib )
 target_link_libraries( Enjon debug fmt_d.lib optimized fmt.lib )
-target_link_libraries( Enjon debug CrossGuid_d.lib optimized CrossGuid.lib )
 target_link_libraries( Enjon debug liblz4_d.lib optimized liblz4.lib ) 
 
 add_dependencies( Enjon Reflection )
