@@ -173,6 +173,10 @@ set(
 	${SHADERS}
 ) 
 
+if(NOT CMAKE_DEBUG_POSTFIX)
+  set(CMAKE_DEBUG_POSTFIX d)
+endif()
+
 add_library( Enjon ${ALL_SRC})
 
 # Link libraries

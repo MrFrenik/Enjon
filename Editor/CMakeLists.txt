@@ -62,7 +62,7 @@ set(
 add_executable(${TARGET_NAME} ${TARGET_SOURCES}) 
 
 # Link libraries to target
-target_link_libraries( ${TARGET_NAME} debug Enjon.lib optimized Enjon.lib )
+target_link_libraries( ${TARGET_NAME} debug Enjond.lib optimized Enjon.lib )
 target_link_libraries( ${TARGET_NAME} debug Opengl32.lib optimized Opengl32.lib ) 
 target_link_libraries( ${TARGET_NAME} debug SDL2_d.lib optimized SDL2.lib )
 target_link_libraries( ${TARGET_NAME} debug SDL2main_d.lib optimized SDL2main.lib )

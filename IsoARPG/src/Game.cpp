@@ -258,9 +258,9 @@ void Game::TestObjectSerialize( )
 		{
 			// Parent
 			mSerializedEntity = mEntities->Allocate( ); 
-			mSerializedEntity.Get( )->SetPosition( Vec3( -8, 3, 0 ) );
-			mSerializedEntity.Get( )->SetRotation( Quaternion::AngleAxis( ToRadians( 20.0f ), Vec3::XAxis( ) ) );
-			mSerializedEntity.Get( )->SetScale( 0.5f );
+			mSerializedEntity.Get( )->SetLocalPosition( Vec3( -8, 3, 0 ) );
+			mSerializedEntity.Get( )->SetLocalRotation( Quaternion::AngleAxis( ToRadians( 20.0f ), Vec3::XAxis( ) ) );
+			mSerializedEntity.Get( )->SetLocalScale( 0.5f );
 			auto gfxCmp = mSerializedEntity.Get( )->AddComponent< GraphicsComponent >( );
 			auto plCmp = mSerializedEntity.Get( )->AddComponent< PointLightComponent >( );
 			plCmp->SetColor( ColorRGBA32( 1.0f, 0.0f, 0.0f, 1.0f ) );
@@ -365,9 +365,9 @@ void Game::TestObjectSerialize( )
 				gfxCmp->SetMesh( am->GetAsset< Enjon::Mesh >( "models.unit_cube" ) );
 				gfxCmp->SetMaterial( am->GetAsset< Enjon::Material >( "NewMaterial2" ).Get() );
 			}
-			handle.Get( )->SetPosition( Enjon::Vec3( 1.0, 3.0f, -10.0f ) );
-			handle.Get( )->SetScale( Enjon::Vec3( 2.0f ) );
-			handle.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::ZAxis( ) ) );
+			handle.Get( )->SetLocalPosition( Enjon::Vec3( 1.0, 3.0f, -10.0f ) );
+			handle.Get( )->SetLocalScale( Enjon::Vec3( 2.0f ) );
+			handle.Get( )->SetLocalRotation( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::ZAxis( ) ) );
 
 			Enjon::EntityHandle child = mEntities->Allocate( );
 			auto childGfxCmp = child.Get( )->AddComponent< Enjon::GraphicsComponent >( );
@@ -434,8 +434,8 @@ void Game::TestObjectSerialize( )
 				plCmp->SetIntensity( 1000.0f );
 				plCmp->SetRadius( 100.0f );
 			}
-			handle.Get( )->SetPosition( Enjon::Vec3( 1.0, 2.0f, -10.0f ) );
-			handle.Get( )->SetScale( Enjon::Vec3( 3.0f ) );
+			handle.Get( )->SetLocalPosition( Enjon::Vec3( 1.0, 2.0f, -10.0f ) );
+			handle.Get( )->SetLocalScale( Enjon::Vec3( 3.0f ) );
 
 			Enjon::Vector< Enjon::EntityHandle > entityHandles; 
 			entityHandles.push_back( handle );
@@ -792,8 +792,8 @@ Enjon::Result Game::Initialize()
 	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.emissive"));
 	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("textures.white"));
 
-	mGun.Get()->SetPosition(Enjon::Vec3(0.0f, 0.0f, 0.0f));
-	mGun.Get()->SetRotation( Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ) );
+	mGun.Get()->SetLocalPosition(Enjon::Vec3(0.0f, 0.0f, 0.0f));
+	mGun.Get()->SetLocalRotation( Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ) );
 	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("models.cat"));
 	gc->SetMaterial(mGoldMat);
 
@@ -868,10 +868,10 @@ Enjon::Result Game::Initialize()
 	rgc->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "models.cerebus" ) );
 	rgc->SetMaterial( mGunMat );
 	rgc2->SetMaterial( mPlasticMat );
-	mRock.Get( )->SetPosition( Enjon::Vec3( 5.0f, 5.0f, 20.0f ) );
-	mRock.Get( )->SetScale( Enjon::Vec3( 5.0f ) );
+	mRock.Get( )->SetLocalPosition( Enjon::Vec3( 5.0f, 5.0f, 20.0f ) );
+	mRock.Get( )->SetLocalScale( Enjon::Vec3( 5.0f ) );
 	
-	mRock2.Get( )->SetPosition( Enjon::Vec3( 10.0f, 0.0f, 20.0f ) );
+	mRock2.Get( )->SetLocalPosition( Enjon::Vec3( 10.0f, 0.0f, 20.0f ) );
 
 	mBatch = new Enjon::QuadBatch();
 	mBatch->Init();
@@ -923,8 +923,8 @@ Enjon::Result Game::Initialize()
 			gfxcmp->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "models.shaderball" ) ); 
 			gfxcmp->SetMaterial( mat );
 
-			eh.Get( )->SetScale( Enjon::Vec3( 0.009f ) );
-			eh.Get( )->SetPosition( Enjon::Vec3( j * 3.0f, 0.0f, i * 3.0f ) + Enjon::Vec3( 15, 0, 15 ) );
+			eh.Get( )->SetLocalScale( Enjon::Vec3( 0.009f ) );
+			eh.Get( )->SetLocalPosition( Enjon::Vec3( j * 3.0f, 0.0f, i * 3.0f ) + Enjon::Vec3( 15, 0, 15 ) );
 
 			switch ( GreyScale( i ) )
 			{
@@ -1154,9 +1154,9 @@ Enjon::Result Game::Initialize()
 			ImGui::InputFloat3("Scale", scl);
 			ImGui::InputFloat3("Rotation", rot);
 
-			mGun.Get( )->SetPosition(v3(pos[0], pos[1], pos[2]));
-			mGun.Get( )->SetScale(v3(scl[0], scl[1], scl[2]));
-			mGun.Get( )->SetRotation(quat(rot[0], rot[1], rot[2], rotation.w));
+			mGun.Get( )->SetLocalPosition(v3(pos[0], pos[1], pos[2]));
+			mGun.Get( )->SetLocalScale(v3(scl[0], scl[1], scl[2]));
+			mGun.Get( )->SetLocalRotation(quat(rot[0], rot[1], rot[2], rotation.w));
 
 			for ( auto c : mGun.Get( )->GetChildren( ) )
 			{
@@ -1251,7 +1251,7 @@ Enjon::Result Game::Initialize()
 
 				Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* > ( light->Class( ) ); 
 				Enjon::MetaFunction* getWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "GetPosition" ) );
-				Enjon::MetaFunction* setWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "SetPosition" ) );
+				Enjon::MetaFunction* setWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "SetLocalPosition" ) );
 				if ( getWPFunc )
 				{
 					Enjon::Vec3 wp = getWPFunc->Invoke< Enjon::Vec3 >( light );
@@ -1474,39 +1474,39 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 
 	if ( mGun.Get( ) ) 
 	{
-		mGun.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 5.0f, Enjon::Vec3::ZAxis( ) ) 
+		mGun.Get( )->SetLocalRotation( Enjon::Quaternion::AngleAxis( t * 5.0f, Enjon::Vec3::ZAxis( ) ) 
 							* Enjon::Quaternion::AngleAxis( t * 5.0f, Enjon::Vec3::YAxis() ) );
 	} 
 	
 	if ( mRock.Get( ) ) 
 	{
-		mRock.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 2.0f, Enjon::Vec3::YAxis() ) );
+		mRock.Get( )->SetLocalRotation( Enjon::Quaternion::AngleAxis( t * 2.0f, Enjon::Vec3::YAxis() ) );
 	} 
 
 	if ( mSerializedEntity.Get( ) )
 	{
 		f32 turnRate = std::sinf( t * 10.0f );
 		Enjon::Vec3 pos = mSerializedEntity.Get( )->GetWorldPosition( );
-		mSerializedEntity.Get( )->SetPosition( Enjon::Vec3( pos.x, turnRate * 2.0f + 3.0f, pos.z ) );
-		mSerializedEntity.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( turnRate * 1.5f, Enjon::Vec3::ZAxis( ) ) );
+		mSerializedEntity.Get( )->SetLocalPosition( Enjon::Vec3( pos.x, turnRate * 2.0f + 3.0f, pos.z ) );
+		mSerializedEntity.Get( )->SetLocalRotation( Enjon::Quaternion::AngleAxis( turnRate * 1.5f, Enjon::Vec3::ZAxis( ) ) );
 
 		auto children = mSerializedEntity.Get( )->GetChildren( );
 		if ( children.size( ) > 0 ) 
 		{
 			Enjon::EntityHandle child = children.at( 0 );
-			child.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( turnRate * 10.0f, Enjon::Vec3::YAxis( ) ) );
+			child.Get( )->SetLocalRotation( Enjon::Quaternion::AngleAxis( turnRate * 10.0f, Enjon::Vec3::YAxis( ) ) );
 
 			auto cc = child.Get( )->GetChildren( );
 			for ( auto& c : cc )
 			{
-				c.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( turnRate * 2.0f, Enjon::Vec3::XAxis( ) ) );
+				c.Get( )->SetLocalRotation( Enjon::Quaternion::AngleAxis( turnRate * 2.0f, Enjon::Vec3::XAxis( ) ) );
 			}
 		}
 	}
 
-	mGreen.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::YAxis( ) ) );
-	mRed.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
-	mBlue.Get( )->SetRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
+	mGreen.Get( )->SetLocalRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::YAxis( ) ) );
+	mRed.Get( )->SetLocalRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
+	mBlue.Get( )->SetLocalRotation( Enjon::Quaternion::AngleAxis( t * 10.0f, Enjon::Vec3::XAxis( ) ) );
 
 	// Physics simulation
 	mDynamicsWorld->stepSimulation( 1.f / 60.f, 10 );
@@ -1526,8 +1526,8 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 				auto gComp = entity->GetComponent<Enjon::GraphicsComponent>( );
 				Enjon::Vec3 pos = Enjon::Vec3( trans.getOrigin( ).getX( ), trans.getOrigin( ).getY( ), trans.getOrigin( ).getZ( ) );
 				Enjon::Quaternion rot = Enjon::Quaternion( trans.getRotation( ).x( ), trans.getRotation( ).y( ), trans.getRotation( ).z( ), -trans.getRotation( ).w( ) );
-				entity->SetPosition( pos );
-				entity->SetRotation( rot );
+				entity->SetLocalPosition( pos );
+				entity->SetLocalRotation( rot );
 			}
 		}
 	}
@@ -1656,7 +1656,7 @@ Enjon::Result Game::ProcessInput( f32 dt )
 			Enjon::EntityHandle handle = mEntities->Allocate( );
 			Enjon::Entity* ent = handle.Get( );
 			Enjon::GraphicsComponent* gc = ent->AddComponent<Enjon::GraphicsComponent>();
-			ent->SetScale(v3(scalar));
+			ent->SetLocalScale(v3(scalar));
 			gc->SetMesh(mSphereMesh);
 
 			u32 roll = Enjon::Random::Roll( 0, 6 );

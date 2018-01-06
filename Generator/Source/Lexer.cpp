@@ -61,7 +61,7 @@ bool Lexer::ContinueToIdentifier( const std::string& identifier )
 
 	// If EOS hit, then didn't find identifier
 	return !token.IsType( TokenType::Token_EndOfStream ); 
-}
+} 
 
 void Lexer::EatAllWhiteSpace( )
 {

@@ -8,6 +8,7 @@
 #include "Math/Transform.h" 
 #include "Base/Object.h"
 #include "System/Types.h"
+#include "Serialize/UUID.h"
 #include "Defines.h"
 #include "Subsystem.h"
 
@@ -124,16 +125,16 @@ namespace Enjon
 
 			/// @brief Sets local position of entity relative to parent, if exists
 			ENJON_FUNCTION( )
-			void SetPosition(Vec3& position);
+			void SetLocalPosition(Vec3& position);
 
 			/// @brief Sets local scale of entity relative to parent, if exists
-			void SetScale(Vec3& scale);
+			void SetLocalScale(Vec3& scale);
 
 			/// @brief Sets local scale of entity relative to parent, if exists
-			void SetScale(f32 scale);
+			void SetLocalScale(f32 scale);
 
 			/// @brief Sets local orientation of entity relative to parent, if exists
-			void SetRotation(Quaternion& rotation);
+			void SetLocalRotation(Quaternion& rotation);
 
 			/// @brief Gets local position of entity relative to parent, if exists
 			Vec3 GetLocalPosition();
@@ -261,6 +262,9 @@ namespace Enjon
  
 			ENJON_PROPERTY( )
 			Vector< EntityHandle > mChildren; 
+
+			ENJON_PROPERTY( )
+			UUID mUUID;
 
 			Enjon::EntityManager* mManager;
 			Enjon::EntityState mState;

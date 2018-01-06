@@ -271,7 +271,7 @@ namespace Enjon
 
 	//===========================================================================
 
-	void Entity::SetPosition(Vec3& position)
+	void Entity::SetLocalPosition(Vec3& position)
 	{
 		mLocalTransform.SetPosition(position);
 		mWorldTransformDirty = true;
@@ -279,21 +279,21 @@ namespace Enjon
 
 	//===========================================================================
 
-	void Entity::SetScale(f32 scale)
+	void Entity::SetLocalScale(f32 scale)
 	{
-		SetScale(v3(scale));
+		SetLocalScale(v3(scale));
 		mWorldTransformDirty = true;
 	}
 
 	//---------------------------------------------------------------
-	void Entity::SetScale(Vec3& scale)
+	void Entity::SetLocalScale(Vec3& scale)
 	{
 		mLocalTransform.SetScale(scale);
 		mWorldTransformDirty = true;
 	}
 
 	//---------------------------------------------------------------
-	void Entity::SetRotation(Quaternion& rotation)
+	void Entity::SetLocalRotation(Quaternion& rotation)
 	{
 		mLocalTransform.SetRotation(rotation);
 		mWorldTransformDirty = true;
@@ -596,6 +596,7 @@ namespace Enjon
 		entity->mHandle = handle;
 		entity->mState = EntityState::ACTIVE; 
 		entity->mManager = this;
+		entity->mUUID = UUID::GenerateUUID( );
 
 		// Push back live entity into active entity vector
 		mActiveEntities.push_back(entity); 
