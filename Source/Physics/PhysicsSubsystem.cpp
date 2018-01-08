@@ -44,7 +44,10 @@ namespace Enjon
 	void PhysicsSubsystem::Update( const f32 dt )
 	{
 		// Set physics simulation
-		mDynamicsWorld->stepSimulation( 1.f / 60.f, 10 );
+		if ( !mIsPaused )
+		{
+			mDynamicsWorld->stepSimulation( 1.f / 60.f, 10 ); 
+		}
 	}
 
 	//======================================================================
@@ -68,6 +71,23 @@ namespace Enjon
 	{
 		mRigidBodies.erase( body );
 		mDynamicsWorld->removeRigidBody( body );
+	}
+
+	//====================================================================== 
+
+	void PhysicsSubsystem::PauseSystem( bool enabled )
+	{
+		mIsPaused = ( u32 )enabled;
+	}
+
+	//====================================================================== 
+
+	void PhysicsSubsystem::ClearAllForces( )
+	{
+		for ( auto& b : mRigidBodies )
+		{
+			b->clearForces( );
+		}
 	}
 
 	//====================================================================== 

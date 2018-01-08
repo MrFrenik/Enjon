@@ -61,6 +61,16 @@ namespace Enjon
 			*/
 			void RemoveBody( RigidBody* body );
 
+			/**
+			*@brief
+			*/
+			void PauseSystem( bool enabled );
+
+			/**
+			*@brief
+			*/
+			void ClearAllForces( );
+
 		private:
 			btDiscreteDynamicsWorld* mDynamicsWorld						= nullptr;
 			btDefaultCollisionConfiguration* mCollisionConfiguration	= nullptr; 
@@ -69,6 +79,8 @@ namespace Enjon
 			btSequentialImpulseConstraintSolver* mSolver				= nullptr;
 
 			HashSet< RigidBody* > mRigidBodies;
+
+			u32 mIsPaused = false;
 	}; 
 }
 

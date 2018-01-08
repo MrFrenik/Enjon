@@ -39,9 +39,9 @@ Enjon::String copyDir = "";
 Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 //Enjon::String mProjectsDir = "W:/Projects/";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -523,6 +523,15 @@ namespace Enjon
 
 			// Initialize the app
 			app->Initialize( );
+
+			// Initialize all entity components ( should put this lower in the engine code...)
+			for ( auto& e : Engine::GetInstance( )->GetSubsystemCatalog( )->Get< EntityManager >( )->GetActiveEntities( ) )
+			{
+				for ( auto& c : e->GetComponents( ) )
+				{
+					c->Initialize( );
+				}
+			} 
 		}
 	}
 
@@ -545,6 +554,15 @@ namespace Enjon
 
 			// Shutodwn the application
 			app->Shutdown( );
+
+			// Shutdown all entity components ( should put this lower in the engine code...)
+			for ( auto& e : Engine::GetInstance( )->GetSubsystemCatalog( )->Get< EntityManager >( )->GetActiveEntities( ) )
+			{
+				for ( auto& c : e->GetComponents( ) )
+				{
+					c->Shutdown( );
+				}
+			} 
 
 			// Force the scene to clean up ahead of frame
 			CleanupScene( ); 

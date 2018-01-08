@@ -134,7 +134,17 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			virtual void Initialize( );
+
+			/**
+			* @brief
+			*/
 			virtual void Update( const f32& dT );
+
+			/**
+			* @brief
+			*/
+			virtual void Shutdown( );
 
 			/**
 			* @brief

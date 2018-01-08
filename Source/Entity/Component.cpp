@@ -65,6 +65,20 @@ namespace Enjon
 	
 	//=========================================================================
 
+	void Component::Initialize( )
+	{ 
+		// Nothing by default
+	} 
+	
+	//=========================================================================
+
+	void Component::Shutdown( )
+	{ 
+		// Nothing by default
+	}
+	
+	//=========================================================================
+
 	void ComponentArray::RemoveComponent( const u32& entityId )
 	{
 		if ( HasEntity( entityId ) )
