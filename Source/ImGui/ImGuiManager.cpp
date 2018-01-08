@@ -488,9 +488,10 @@ namespace Enjon
 				cls->GetValue( object, prop, &val );
 				f32 col[ 3 ] = { val.x, val.y, val.z };
 				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				ImGui::Text( name.c_str( ) ); ImGui::SameLine( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderFloat3( name.c_str( ), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
+					if ( ImGui::SliderFloat3( ( "##" + name ).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -499,8 +500,8 @@ namespace Enjon
 					}
 				}
 				else
-				{
-					if ( ImGui::DragFloat3( name.c_str( ), col ) )
+				{ 
+					if ( ImGui::DragFloat3( ( "##" + name ).c_str(), col ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];

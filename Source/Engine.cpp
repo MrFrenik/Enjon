@@ -10,6 +10,7 @@
 #include "Asset/AssetManager.h"
 #include "IO/InputManager.h"
 #include "ImGui/ImGuiManager.h"
+#include "Physics/PhysicsSubsystem.h"
 #include "Utils/Timing.h"
 #include "SubsystemCatalog.h"
 
@@ -144,6 +145,7 @@ namespace Enjon
 		mGraphics		= mSubsystemCatalog->Register<Enjon::GraphicsSubsystem>( );
 		mInput			= mSubsystemCatalog->Register<Enjon::Input>( ); 
 		mEntities		= mSubsystemCatalog->Register<EntityManager>( );
+		mPhysics		= mSubsystemCatalog->Register<PhysicsSubsystem>( );
 
 		// Initialize imgui manager
 		Enjon::ImGuiManager::Init( mGraphics->GetWindow()->ConstCast< Window >()->GetSDLWindow() ); 
@@ -232,6 +234,9 @@ namespace Enjon
 
 			// Update entity manager
 			mEntities->Update( dt );
+
+			// Update physics
+			mPhysics->Update( dt );
 
 			// Update graphics
 			mGraphics->Update( dt );

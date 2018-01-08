@@ -40,7 +40,7 @@ public:\
 		virtual Enjon::Result ModuleName::UnbindApplicationMetaClasses() override;\
 
 
-#define ENJON_MODULE_DEFINE( ModuleName )\
+#define ENJON_MODULE_DECLARE( ModuleName )\
 	class ModuleName;\
 	extern "C"\
 	{\
@@ -49,20 +49,15 @@ public:\
 		ENJON_EXPORT void DeleteApplication( Enjon::Application* app );\
 	}
 
-#define ENJON_MODULE_IMPL( ModuleName )\
+#define ENJON_MODULE_DEFINE( ModuleName )\
 	extern "C"\
 	{\
-		ENJON_EXPORT void SetEngineInstance( Enjon::Engine* engine )\
-		{\
-			Enjon::Engine::SetInstance( engine );\
-		}\
-		\
 		ENJON_EXPORT Enjon::Application* CreateApplication( Enjon::Engine* engine )\
 		{\
 			ModuleName* app = new ModuleName();\
 			if ( app )\
 			{\
-				SetEngineInstance( engine );\
+				Enjon::Engine::SetInstance( engine );\
 				app->BindApplicationMetaClasses();\
 				return app;\
 			}\

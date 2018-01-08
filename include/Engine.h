@@ -12,6 +12,7 @@ namespace Enjon
 { 
 	class SubsystemCatalog;
 	class GraphicsSubsystem; 
+	class PhysicsSubsystem;
 	class Input;
 	class AssetManager; 
 	class Application; 
@@ -176,6 +177,7 @@ namespace Enjon
 			AssetManager*		mAssetManager		= nullptr;
 			MetaClassRegistry*	mMetaClassRegisty	= nullptr;
 			EntityManager*		mEntities			= nullptr;
+			PhysicsSubsystem*	mPhysics = nullptr;
 
 			// Engine configuration settings
 			EngineConfig mConfig;

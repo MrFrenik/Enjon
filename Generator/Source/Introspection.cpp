@@ -1648,7 +1648,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 			{
 				case MetaClassType::Object:
 				{
-					code += OutputTabbedLine( "cls->mMetaClassType = Enjon::MetaClassType::Application;\n" ); 
+					code += OutputTabbedLine( "cls->mMetaClassType = Enjon::MetaClassType::Object;\n" ); 
 				} break; 
 				case MetaClassType::Component:
 				{
