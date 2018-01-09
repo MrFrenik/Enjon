@@ -72,6 +72,11 @@ namespace Enjon
 			*/
 			void ClearAllForces( );
 
+			btDynamicsWorld* GetWorld( )
+			{
+				return mDynamicsWorld;
+			}
+
 		private:
 			/**
 			*@brief
