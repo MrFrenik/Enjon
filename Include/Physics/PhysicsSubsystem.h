@@ -18,6 +18,7 @@ using RigidBodyMotionState	= btMotionState;
 
 namespace Enjon 
 { 
+	class Entity;
 
 	ENJON_CLASS( ) 
 	class PhysicsSubsystem : public Subsystem
@@ -72,13 +73,20 @@ namespace Enjon
 			void ClearAllForces( );
 
 		private:
+			/**
+			*@brief
+			*/
+			void PhysicsSubsystem::CheckCollisions( const f32& dt );
+
+		private:
 			btDiscreteDynamicsWorld* mDynamicsWorld						= nullptr;
 			btDefaultCollisionConfiguration* mCollisionConfiguration	= nullptr; 
 			btCollisionDispatcher* mDispatcher							= nullptr; 
 			btBroadphaseInterface* mOverlappingPairCache				= nullptr; 
 			btSequentialImpulseConstraintSolver* mSolver				= nullptr;
 
-			HashSet< RigidBody* > mRigidBodies;
+			std::unordered_multimap< u32, u32 > mContacts;
+			HashSet<RigidBody*> mRigidBodies;
 
 			u32 mIsPaused = false;
 	}; 
