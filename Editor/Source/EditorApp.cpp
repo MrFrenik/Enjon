@@ -40,8 +40,8 @@ Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 //Enjon::String mProjectsDir = "W:/Projects/";
 
 //Enjon::String configuration = "Release";
-//Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+Enjon::String configuration = "RelWithDebInfo";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {

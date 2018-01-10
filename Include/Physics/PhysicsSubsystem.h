@@ -19,13 +19,7 @@ using RigidBodyMotionState	= btMotionState;
 
 namespace Enjon 
 { 
-	class Entity;
-
-	struct PhysicsForceWrapper
-	{
-		Vec3 mForce;
-		Vec3 mRelativePosition;
-	};
+	class Entity; 
 
 	ENJON_CLASS( ) 
 	class PhysicsSubsystem : public Subsystem
@@ -97,8 +91,9 @@ namespace Enjon
 			btBroadphaseInterface* mOverlappingPairCache				= nullptr; 
 			btSequentialImpulseConstraintSolver* mSolver				= nullptr;
 
-			std::unordered_multimap< u32, u32 > mContacts;
 			HashSet<RigidBody*> mRigidBodies;
+			HashMap< u32, HashSet< u32 > > mContactEvents; 
+			HashMap< u32, HashSet< u32 > > mNewContactEvents; 
 
 			u32 mIsPaused = false;
 	}; 

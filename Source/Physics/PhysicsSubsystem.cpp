@@ -15,43 +15,8 @@
 //btAlignedObjectArray<btCollisionShape*> collisionShapes;
 
 namespace Enjon
-{
-	//======================================================================
-
-	bool customContactAddedCallback( btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1 )
-	{
-		Entity* obj1 = reinterpret_cast< Entity* > ( colObj0Wrap->getCollisionObject( )->getUserPointer( ) );
-		Entity* obj2 = reinterpret_cast< Entity* > ( colObj1Wrap->getCollisionObject( )->getUserPointer( ) );
-
-		if ( obj1 == 0 || obj2 == 0 )
-			return false;
-
-		std::cout << "Begin contact!\n";
-
-		return true;
-	}
-
-	bool customContactProcessedCallback( btManifoldPoint& cp, void* body0, void* body1 )
-	{
-		Entity* obj1 = reinterpret_cast< Entity* > ( static_cast< btCollisionObject* > ( body0 )->getUserPointer( ) );
-		Entity* obj2 = reinterpret_cast< Entity* > ( static_cast< btCollisionObject* > ( body1 )->getUserPointer( ) );
-
-		if ( obj1 == 0 || obj2 == 0 )
-			return false; 
-
-
-
-		std::cout << "Process contact!\n";
-
-		return true;
-	}
-
-	bool customContactDestroyedCallback( void* ptr )
-	{
-		std::cout << "End contact!\n";
-
-		return false;
-	}
+{ 
+	//=====================================================================
 
 	Result PhysicsSubsystem::Initialize( )
 	{
@@ -94,16 +59,11 @@ namespace Enjon
 	//======================================================================
 
 	void PhysicsSubsystem::CheckCollisions( const f32& dt )
-	{
-		std::unordered_multimap< u32, u32 > newContacts;
-		//static HashMap< Entity*, Entity* > newContacts;
-		//newContacts.clear( );
-		
+	{ 
 		// Browse all collision pairs.
 		s32 numManifolds = mDynamicsWorld->getDispatcher( )->getNumManifolds( );
 		for ( s32 i = 0; i < numManifolds; i++ )
 		{
-
 			btPersistentManifold* contactManifold = mDynamicsWorld->getDispatcher( )->getManifoldByIndexInternal( i );
 
 			Entity* objA = ( Entity* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody0( ) ) )->getUserPointer( ) );
@@ -117,6 +77,7 @@ namespace Enjon
 
 			// Check all contacts points.
 			int numContacts = contactManifold->getNumContacts( );
+			bool inContact = false;
 			for ( int j = 0; j < numContacts; j++ )
 			{
 				btManifoldPoint& pt = contactManifold->getContactPoint( j );
@@ -124,71 +85,92 @@ namespace Enjon
 				// Check collision state.
 				if ( pt.getDistance( ) < 0.f )
 				{
+					inContact = true;
+
 					// Order A < B, will make things easier with the contact hash.
-					Entity* objT;
+					u32 idT;
 					if ( objA > objB )
 					{
-						objT = objA;
-						objA = objB;
-						objB = objT;
+						idT = idA;
+						idA = idB;
+						idB = idT;
 					}
 
-					std::pair<u32, u32> pair( idA, idB );
-					newContacts.insert( pair );
-
-					// Call the collide() method on the bodies if they are not registered yet.
-					bool contains = false;
-					auto its = mContacts.equal_range( idA );
-					for ( auto& it = its.first; it != its.second; ++it )
+					// If set doesn't exist, then make it
+					if ( mNewContactEvents.find( idA ) == mNewContactEvents.end( ) )
 					{
-						if ( it->second == idB )
+						mNewContactEvents[ idA ] = HashSet< u32 >( ); 
+					}
+
+					// Insert new contact event into set for idA
+					mNewContactEvents[ idA ].insert( idB );
+
+					// Now need to check if this collision exist in current contacts. If not, then collision begin event has begun.  
+					bool contains = false;
+					if ( mContactEvents.find( idA ) != mContactEvents.end() )
+					{
+						if ( mContactEvents[ idA ].find( idB ) != mContactEvents[ idA ].end( ) )
 						{
 							contains = true;
-							break; 
 						}
 					}
 
+					// Was not there, so we have begun contact
 					if ( !contains )
 					{
 						//std::cout << "Begin contact!\n";
 					} 
 				}
-			}
-		}
 
-
-		// If the contact pair is in mContacts but NOT in newContacts, then that contact pair is longer valid and must be removed
-		bool found = false;
-		for ( auto& ContactIter = mContacts.begin( ); ContactIter != mContacts.end( ); ++ContactIter )
-		{
-			// Find all keys that match this iterator
-			auto NewContactKeyIter = newContacts.equal_range( ContactIter->first ); 
-
-			for ( auto NewContactValueIter = NewContactKeyIter.first; NewContactValueIter != NewContactKeyIter.second; ++NewContactValueIter )
-			{
-				if ( NewContactValueIter->second == ContactIter->second )
+				// No need to process the other contact points once found
+				if ( inContact )
 				{
-					found = true;
 					break;
 				}
 			}
-			if ( found )
+		} 
+
+		// Process all current contacts. If any of these pairs is not in new contacts, then end collision event is triggered.
+		for ( auto& curKey : mContactEvents )
+		{ 
+			// If key is not in new events
+			if ( mNewContactEvents.find( curKey.first ) == mNewContactEvents.end( ) )
 			{
-				break;
+				for ( auto& curVal : mContactEvents[ curKey.first ] )
+				{
+					 //std::cout << "End Contact!\n";
+				}
 			}
-		}
+			else
+			{
+				auto newSet = &mNewContactEvents[ curKey.first ];
 
-		if ( numManifolds && !found )
-		{
-			//std::cout << "End contact!\n";
-		}
-		if ( found )
-		{
-			//std::cout << "Process contact!\n";
-		}
+				// Else the key is found. Now need to make sure that the pairs are found as well
+				for ( auto& curVal : mContactEvents[ curKey.first ] )
+				{
+					// Not found in the newer set, so must process end contact event
+					if ( newSet->find( curVal ) == newSet->end( ) )
+					{ 
+						 //std::cout << "End Contact!\n";
+					}
+					// Otherwise was found, so processing current contact
+					else
+					{ 
+						//static float t = 0.0f;
+						//t += dt;
+						//if ( t >= 1.0f )
+						//{
+						//	t = 0.0f;
+						//	std::cout << "Processing Contact!\n"; 
+						//}
+					}
+				}
+			}
+		} 
 
-
-		mContacts = newContacts; 
+		// Set current contact events to the newly found/merged ones
+		mContactEvents = mNewContactEvents; 
+		mNewContactEvents.clear( );
 	}
 
 	//======================================================================
