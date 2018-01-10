@@ -73,12 +73,6 @@ namespace Enjon
 		// Set up physics world gravity
 		mDynamicsWorld->setGravity( btVector3( 0, -10, 0 ) );
 
-		//btCollisionShape* colShape = new btSphereShape(btScalar(1.0f)); 
-
-		//gContactAddedCallback = customContactAddedCallback;
-		//gContactProcessedCallback = customContactProcessedCallback;
-		//gContactDestroyedCallback = customContactDestroyedCallback;
-
 		return Result::SUCCESS;
 	}
 

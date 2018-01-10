@@ -7,6 +7,7 @@
 
 #include "System/Types.h"
 #include "Subsystem.h"
+#include "Math/Vec3.h"
 
 // TODO(): Abstract away Bullet Implementations
 #include <Bullet/btBulletCollisionCommon.h> 
@@ -19,6 +20,12 @@ using RigidBodyMotionState	= btMotionState;
 namespace Enjon 
 { 
 	class Entity;
+
+	struct PhysicsForceWrapper
+	{
+		Vec3 mForce;
+		Vec3 mRelativePosition;
+	};
 
 	ENJON_CLASS( ) 
 	class PhysicsSubsystem : public Subsystem
