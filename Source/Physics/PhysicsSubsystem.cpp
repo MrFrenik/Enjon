@@ -4,6 +4,8 @@
 #include "Physics/PhysicsSubsystem.h" 
 #include "Entity/EntityManager.h"
 #include "Entity/Components/PhysicsComponent.h"
+#include "SubsystemCatalog.h"
+#include "Engine.h"
  
 #include <Bullet/btBulletDynamicsCommon.h> 
 
@@ -36,7 +38,7 @@ namespace Enjon
 		mDynamicsWorld = new btDiscreteDynamicsWorld( mDispatcher, mOverlappingPairCache, mSolver, mCollisionConfiguration );
 
 		// Set up physics world gravity
-		mDynamicsWorld->setGravity( btVector3( 0, -10, 0 ) );
+		mDynamicsWorld->setGravity( btVector3( 0, -10, 0 ) ); 
 
 		return Result::SUCCESS;
 	}
@@ -67,8 +69,8 @@ namespace Enjon
 			btPersistentManifold* contactManifold = mDynamicsWorld->getDispatcher( )->getManifoldByIndexInternal( i );
 
 			// Get user pointers as components
-			Component* compA = ( Component* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody0( ) ) )->getUserPointer( ) );
-			Component* compB = ( Component* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody1( ) ) )->getUserPointer( ) ); 
+			PhysicsComponent* compA = ( PhysicsComponent* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody0( ) ) )->getUserPointer( ) );
+			PhysicsComponent* compB = ( PhysicsComponent* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody1( ) ) )->getUserPointer( ) ); 
 
 			if ( compA == nullptr || compB == nullptr )
 			{
@@ -100,28 +102,28 @@ namespace Enjon
 					inContact = true;
 
 					// Order A < B, will make things easier with the contact hash.
-					u32 idT;
+					PhysicsComponent* compT;
 					if ( idA > idB )
 					{
-						idT = idA;
-						idA = idB;
-						idB = idT;
+						compT = compA;
+						compA = compB;
+						compB = compT;
 					}
 
 					// If set doesn't exist, then make it
-					if ( mNewContactEvents.find( idA ) == mNewContactEvents.end( ) )
+					if ( mNewContactEvents.find( compA ) == mNewContactEvents.end( ) )
 					{
-						mNewContactEvents[ idA ] = HashSet< u32 >( ); 
+						mNewContactEvents[ compA ] = HashSet< PhysicsComponent* >( ); 
 					}
 
 					// Insert new contact event into set for idA
-					mNewContactEvents[ idA ].insert( idB );
+					mNewContactEvents[ compA ].insert( compB );
 
 					// Now need to check if this collision exist in current contacts. If not, then collision begin event has begun.  
 					bool contains = false;
-					if ( mContactEvents.find( idA ) != mContactEvents.end() )
+					if ( mContactEvents.find( compA ) != mContactEvents.end() )
 					{
-						if ( mContactEvents[ idA ].find( idB ) != mContactEvents[ idA ].end( ) )
+						if ( mContactEvents[ compA ].find( compB ) != mContactEvents[ compA ].end( ) )
 						{
 							contains = true;
 						}
@@ -130,7 +132,8 @@ namespace Enjon
 					// Was not there, so we have begun contact
 					if ( !contains )
 					{
-						//std::cout << "Begin contact!\n";
+						compA->OnCollisionEnter( CollisionReport( compB ) );
+						compB->OnCollisionEnter( CollisionReport( compA ) );
 					} 
 				}
 
@@ -142,6 +145,8 @@ namespace Enjon
 			}
 		} 
 
+		EntityManager* entities = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< EntityManager >( )->ConstCast< EntityManager >();
+
 		// Process all current contacts. If any of these pairs is not in new contacts, then end collision event is triggered.
 		for ( auto& curKey : mContactEvents )
 		{ 
@@ -149,8 +154,9 @@ namespace Enjon
 			if ( mNewContactEvents.find( curKey.first ) == mNewContactEvents.end( ) )
 			{
 				for ( auto& curVal : mContactEvents[ curKey.first ] )
-				{
-					 //std::cout << "End Contact!\n";
+				{ 
+					// End contact for values
+					curVal->OnCollisionExit( CollisionReport( curKey.first ) );
 				}
 			}
 			else
@@ -163,18 +169,12 @@ namespace Enjon
 					// Not found in the newer set, so must process end contact event
 					if ( newSet->find( curVal ) == newSet->end( ) )
 					{ 
-						 //std::cout << "End Contact!\n";
+						curVal->OnCollisionExit( CollisionReport( curKey.first ) );
 					}
 					// Otherwise was found, so processing current contact
 					else
 					{ 
-						//static float t = 0.0f;
-						//t += dt;
-						//if ( t >= 1.0f )
-						//{
-						//	t = 0.0f;
 						//	std::cout << "Processing Contact!\n"; 
-						//}
 					}
 				}
 			}
@@ -190,6 +190,14 @@ namespace Enjon
 	Result PhysicsSubsystem::Shutdown( )
 	{
 		return Result::SUCCESS;
+	}
+
+	//====================================================================== 
+
+	void PhysicsSubsystem::Reset( )
+	{
+		mContactEvents.clear( ); 
+		mNewContactEvents.clear( );
 	}
 
 	//====================================================================== 

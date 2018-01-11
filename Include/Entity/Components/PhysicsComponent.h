@@ -12,6 +12,8 @@
 
 namespace Enjon
 { 
+	using CollisionCallback = std::function< void( const CollisionReport& ) >;
+
 	ENJON_CLASS( )
 	class PhysicsComponent : public Component
 	{
@@ -100,6 +102,26 @@ namespace Enjon
 			*/
 			void ApplyImpulse( const Vec3& force, const Vec3& relativeImpulse ); 
 
+			/**
+			* @brief
+			*/
+			void OnCollisionEnter( const CollisionReport& collision );
+
+			/**
+			* @brief
+			*/
+			void OnCollisionExit( const CollisionReport& collision );
+
+			/**
+			* @brief
+			*/
+			void AddCollisionEnterCallback( const CollisionCallback& callback );
+
+			/**
+			* @brief
+			*/
+			void AddCollisionExitCallback( const CollisionCallback& callback );
+
 		protected:
 
 			/**
@@ -132,10 +154,13 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			Vec3 mGravity = Vec3( 0.0f, -10.0f, 10.0f ); 
 
+			Vector < CollisionCallback > mCollisionEnterCallbacks;
+			Vector < CollisionCallback > mCollisionExitCallbacks;
+
 			CollisionShape* mShape = nullptr;
 			RigidBody* mBody = nullptr;
 			RigidBodyMotionState* mMotionState = nullptr;
-			PhysicsWorld* mWorld = nullptr;
+			PhysicsWorld* mWorld = nullptr; 
 	};
 }
 

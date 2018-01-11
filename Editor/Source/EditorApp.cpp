@@ -10,6 +10,7 @@
 #include <Graphics/GraphicsSubsystem.h> 
 #include <Graphics/Window.h>
 #include <Entity/EntityManager.h>
+#include <Physics/PhysicsSubsystem.h>
 #include <Entity/Components/GraphicsComponent.h>
 #include <Utils/FileUtils.h>
 
@@ -557,6 +558,10 @@ namespace Enjon
 
 			// Force the scene to clean up ahead of frame
 			CleanupScene( ); 
+
+			// Clean up physics subsystem from contact events as well
+			auto phys = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::PhysicsSubsystem >( )->ConstCast< Enjon::PhysicsSubsystem >( );
+			phys->Reset( );
 		}
 	}
 	 

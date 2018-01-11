@@ -20,10 +20,21 @@ using PhysicsWorld			= btDynamicsWorld;
 
 namespace Enjon 
 { 
+	class PhysicsComponent;
 	class Entity; 
 
 	class RayCastResult
 	{ 
+	};
+
+	struct CollisionReport
+	{ 
+		CollisionReport( PhysicsComponent* comp )
+		{
+			mOther = comp;
+		}
+
+		PhysicsComponent* mOther; 
 	};
 
 	ENJON_CLASS( ) 
@@ -83,6 +94,11 @@ namespace Enjon
 			*/
 			PhysicsWorld* GetWorld( ) const;
 
+			/**
+			*@brief
+			*/
+			void Reset( );
+
 		private:
 			/**
 			*@brief
@@ -97,8 +113,8 @@ namespace Enjon
 			btSequentialImpulseConstraintSolver* mSolver				= nullptr;
 
 			HashSet<RigidBody*> mRigidBodies;
-			HashMap< u32, HashSet< u32 > > mContactEvents; 
-			HashMap< u32, HashSet< u32 > > mNewContactEvents; 
+			HashMap< PhysicsComponent*, HashSet< PhysicsComponent* > > mContactEvents; 
+			HashMap< PhysicsComponent*, HashSet< PhysicsComponent* > > mNewContactEvents; 
 
 			u32 mIsPaused = false;
 	}; 

@@ -239,4 +239,40 @@ namespace Enjon
 	}
 
 	//========================================================================
+
+	void PhysicsComponent::OnCollisionEnter( const CollisionReport& collision )
+	{
+		// Callbacks for enter collision
+		for ( auto& c : mCollisionEnterCallbacks )
+		{
+			c( collision );
+		}
+	}
+
+	//========================================================================
+
+	void PhysicsComponent::OnCollisionExit( const CollisionReport& collision )
+	{ 
+		// Callbacks for exit collision
+		for ( auto& c : mCollisionExitCallbacks )
+		{
+			c( collision );
+		}
+	}
+
+	//========================================================================
+
+	void PhysicsComponent::AddCollisionEnterCallback( const CollisionCallback& callback )
+	{ 
+		mCollisionEnterCallbacks.push_back( callback );
+	}
+
+	//========================================================================
+
+	void PhysicsComponent::AddCollisionExitCallback( const CollisionCallback& callback )
+	{ 
+		mCollisionExitCallbacks.push_back( callback );
+	}
+
+	//========================================================================
 }
