@@ -1,9 +1,9 @@
 // @file PhysicsSubsystem.cpp
 // Copyright 2016-2018 John Jackson. All Rights Reserved.
 
-#include "Physics/PhysicsSubsystem.h"
-
+#include "Physics/PhysicsSubsystem.h" 
 #include "Entity/EntityManager.h"
+#include "Entity/Components/PhysicsComponent.h"
  
 #include <Bullet/btBulletDynamicsCommon.h> 
 
@@ -66,14 +66,26 @@ namespace Enjon
 		{
 			btPersistentManifold* contactManifold = mDynamicsWorld->getDispatcher( )->getManifoldByIndexInternal( i );
 
-			Entity* objA = ( Entity* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody0( ) ) )->getUserPointer( ) );
-			Entity* objB = ( Entity* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody1( ) ) )->getUserPointer( ) ); 
+			// Get user pointers as components
+			Component* compA = ( Component* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody0( ) ) )->getUserPointer( ) );
+			Component* compB = ( Component* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody1( ) ) )->getUserPointer( ) ); 
 
-			if ( objA == nullptr || objB == nullptr )
+			if ( compA == nullptr || compB == nullptr )
+			{
+				return; 
+			}
+
+			Entity* entA = compA->GetEntity( );
+			Entity* entB = compB->GetEntity( );
+
+			if ( entA == nullptr || entB == nullptr )
+			{
 				return;
+			}
 
-			u32 idA = objA->GetID( );
-			u32 idB = objB->GetID( );
+			// Get entity ids
+			u32 idA = entA->GetID( );
+			u32 idB = entB->GetID( );
 
 			// Check all contacts points.
 			int numContacts = contactManifold->getNumContacts( );
@@ -89,7 +101,7 @@ namespace Enjon
 
 					// Order A < B, will make things easier with the contact hash.
 					u32 idT;
-					if ( objA > objB )
+					if ( idA > idB )
 					{
 						idT = idA;
 						idA = idB;
@@ -211,6 +223,13 @@ namespace Enjon
 		{
 			b->clearForces( );
 		}
+	}
+
+	//====================================================================== 
+
+	PhysicsWorld* PhysicsSubsystem::GetWorld( ) const
+	{
+		return mDynamicsWorld;
 	}
 
 	//====================================================================== 

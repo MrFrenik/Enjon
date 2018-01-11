@@ -115,7 +115,7 @@ namespace Enjon
 			void RemoveComponent( const MetaClass* cls);
 
 			/// @brief Sets local transform of entity
-			void SetLocalTransform(Transform& transform);
+			void SetLocalTransform( const Transform& transform, bool propagateToComponents = true );
 
 			/// @brief Gets local transform of entity relative to parent entity, if exists
 			Transform GetLocalTransform();
@@ -124,17 +124,16 @@ namespace Enjon
 			Transform GetWorldTransform();
 
 			/// @brief Sets local position of entity relative to parent, if exists
-			ENJON_FUNCTION( )
-			void SetLocalPosition(Vec3& position);
+			void SetLocalPosition( Vec3& position, bool propagateToComponents = true );
 
 			/// @brief Sets local scale of entity relative to parent, if exists
-			void SetLocalScale(Vec3& scale);
+			void SetLocalScale(Vec3& scale, bool propagateToComponents = true );
 
 			/// @brief Sets local scale of entity relative to parent, if exists
-			void SetLocalScale(f32 scale);
+			void SetLocalScale(f32 scale, bool propagateToComponents = true );
 
 			/// @brief Sets local orientation of entity relative to parent, if exists
-			void SetLocalRotation(Quaternion& rotation);
+			void SetLocalRotation(Quaternion& rotation, bool propagateToComponents = true );
 
 			/// @brief Gets local position of entity relative to parent, if exists
 			Vec3 GetLocalPosition();
@@ -192,7 +191,7 @@ namespace Enjon
 			Vector<Component*> GetComponents( ); 
 
 			/// @brief Propagates transform down through all components
-			void UpdateComponentTransforms(f32 dt);
+			void UpdateComponentTransforms();
 
 			/*
 			* @brief

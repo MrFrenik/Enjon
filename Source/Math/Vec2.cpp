@@ -1,5 +1,5 @@
-// Copyright 2016-2017 John Jackson. All Rights Reserved.
 // File: Vec2.cpp
+// Copyright 2016-2017 John Jackson. All Rights Reserved.
 
 #include "Math/Vec2.h"
 

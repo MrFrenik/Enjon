@@ -63,6 +63,7 @@ T* EntityManager::AddComponent(const Enjon::EntityHandle& handle)
 	component->SetID(compIdx);
 	component->SetBase( base );
 	component->mEntityID = entity->mID; 
+	component->Initialize( );
 
 	// Get component ptr and push back into entity components
 	entity->mComponents.push_back( compIdx ); 

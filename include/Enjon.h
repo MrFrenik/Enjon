@@ -47,7 +47,7 @@
 
 #include "Asset/AssetManager.h"
 
-#include "Physics/PhysicsSubsystem.h"
+#include "Physics/PhysicsSubsystem.h" 
 
 #include "Entity/EntityManager.h"
 #include "Entity/Entity.h"
@@ -55,6 +55,7 @@
 
 #include "Entity/Components/PointLightComponent.h"
 #include "Entity/Components/GraphicsComponent.h" 
+#include "Entity/Components/BoxComponent.h" 
 
 #include "Application.h"
 #include "TypeCatalog.h"

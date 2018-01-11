@@ -2,6 +2,7 @@
 #include "Entity/Component.h"
 #include "Entity/Components/GraphicsComponent.h"
 #include "Entity/Components/PointLightComponent.h"
+#include "Entity/Components/BoxComponent.h"
 #include "SubsystemCatalog.h"
 #include "Application.h"
 #include "Engine.h"
@@ -197,9 +198,16 @@ namespace Enjon
 
 	//---------------------------------------------------------------
 
-	void Entity::SetLocalTransform(Transform& transform)
+	void Entity::SetLocalTransform( const Transform& transform, bool propagateToComponents )
 	{
 		mLocalTransform = transform;
+
+		if ( propagateToComponents )
+		{ 
+			CalculateWorldTransform( );
+			UpdateComponentTransforms( );
+		}
+
 		mWorldTransformDirty = true;
 	}
 
@@ -271,31 +279,69 @@ namespace Enjon
 
 	//===========================================================================
 
-	void Entity::SetLocalPosition(Vec3& position)
+	void Entity::UpdateComponentTransforms( )
 	{
-		mLocalTransform.SetPosition(position);
+		for ( auto& c : GetComponents( ) )
+		{
+			c->UpdateTransform( mWorldTransform );
+		}
+	}
+
+	//===========================================================================
+
+	void Entity::SetLocalPosition( Vec3& position, bool propagateToComponents )
+	{
+		mLocalTransform.SetPosition(position); 
+
+		if ( propagateToComponents )
+		{
+			CalculateWorldTransform( ); 
+			UpdateComponentTransforms( ); 
+		}
+
 		mWorldTransformDirty = true;
 	}
 
 	//===========================================================================
 
-	void Entity::SetLocalScale(f32 scale)
+	void Entity::SetLocalScale( f32 scale, bool propagateToComponents )
 	{
-		SetLocalScale(v3(scale));
+		SetLocalScale(v3(scale)); 
+
+		if ( propagateToComponents )
+		{
+			CalculateWorldTransform( ); 
+			UpdateComponentTransforms( ); 
+		}
+
 		mWorldTransformDirty = true;
 	}
 
 	//---------------------------------------------------------------
-	void Entity::SetLocalScale(Vec3& scale)
+	void Entity::SetLocalScale( Vec3& scale, bool propagateToComponents )
 	{
 		mLocalTransform.SetScale(scale);
+
+		if ( propagateToComponents )
+		{
+			CalculateWorldTransform( ); 
+			UpdateComponentTransforms( ); 
+		}
+
 		mWorldTransformDirty = true;
 	}
 
 	//---------------------------------------------------------------
-	void Entity::SetLocalRotation(Quaternion& rotation)
+	void Entity::SetLocalRotation( Quaternion& rotation, bool propagateToComponents )
 	{
 		mLocalTransform.SetRotation(rotation);
+
+		if ( propagateToComponents )
+		{
+			CalculateWorldTransform( ); 
+			UpdateComponentTransforms( ); 
+		}
+
 		mWorldTransformDirty = true;
 	}
 
@@ -469,7 +515,7 @@ namespace Enjon
 			}
 		}
 
-		UpdateComponentTransforms( dt );
+		UpdateComponentTransforms( );
 	}
 
 	//---------------------------------------------------------------
@@ -499,25 +545,6 @@ namespace Enjon
 		return nullptr;
 	}
  
-	//---------------------------------------------------------------
-
-	void Entity::UpdateComponentTransforms(f32 dt)
-	{
-		if ( mWorldTransformDirty )
-		{
-			CalculateWorldTransform( );
-		}
-
-		for (auto& c : mComponents)
-		{
-			auto comp = mManager->GetComponent( GetHandle( ), c );
-			if ( comp )
-			{
-				comp->Update( dt ); 
-			}
-		}
-	}
-
 	//---------------------------------------------------------------
 	EntityManager::EntityManager()
 	{
@@ -677,6 +704,7 @@ namespace Enjon
 		// Register engine components here
 		RegisterComponent< GraphicsComponent >( );
 		RegisterComponent< PointLightComponent >( );
+		RegisterComponent< BoxComponent >( );
 
 		return Result::SUCCESS;
 	}
@@ -781,6 +809,7 @@ namespace Enjon
 		component->SetID(compIdx);
 		component->SetBase( base );
 		component->mEntityID = entity->mID;
+		component->Initialize( );
 
 		// Get component ptr and push back into entity components
 		entity->mComponents.push_back( compIdx );

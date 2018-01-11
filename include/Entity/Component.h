@@ -161,6 +161,7 @@ namespace Enjon
 			*/
 			EntityManager* GetEntityManager() const; 
 
+
 		protected:
 
 			/**
@@ -177,6 +178,11 @@ namespace Enjon
 			* @brief
 			*/
 			virtual void Destroy() = 0;
+
+			/*
+			* @brief
+			*/
+			virtual void UpdateTransform( const Transform& transform );
 
 		private:
 			/**

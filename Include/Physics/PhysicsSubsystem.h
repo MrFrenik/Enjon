@@ -16,10 +16,15 @@
 using RigidBody				= btRigidBody;
 using CollisionShape		= btCollisionShape;
 using RigidBodyMotionState	= btMotionState;
+using PhysicsWorld			= btDynamicsWorld;
 
 namespace Enjon 
 { 
 	class Entity; 
+
+	class RayCastResult
+	{ 
+	};
 
 	ENJON_CLASS( ) 
 	class PhysicsSubsystem : public Subsystem
@@ -73,10 +78,10 @@ namespace Enjon
 			*/
 			void ClearAllForces( );
 
-			btDynamicsWorld* GetWorld( )
-			{
-				return mDynamicsWorld;
-			}
+			/**
+			*@brief
+			*/
+			PhysicsWorld* GetWorld( ) const;
 
 		private:
 			/**

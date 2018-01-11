@@ -13,6 +13,11 @@ namespace Enjon
 
 	GraphicsComponent::GraphicsComponent()
 	{ 
+		// Add default mesh and material for renderable
+		const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+		mRenderable.SetMesh( am->GetDefaultAsset< Mesh >( ) );
+		mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ) ); 
+
 		// Add renderable to scene
 		GraphicsSubsystem* gs = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem >( )->ConstCast< GraphicsSubsystem >( );
 		gs->GetScene( )->AddRenderable( &mRenderable );
