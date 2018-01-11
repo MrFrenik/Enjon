@@ -57,6 +57,7 @@ namespace Enjon
 			bool mShowCameraOptions = true;
 			bool mShowLoadResourceOption = true;
 			bool mShowCreateProjectView = true;
+			bool mShowSceneView = true;
 			Enjon::String mResourceFilePathToLoad = "";
 			bool mMoveCamera = false; 
 

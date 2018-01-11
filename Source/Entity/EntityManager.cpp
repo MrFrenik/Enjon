@@ -2,7 +2,7 @@
 #include "Entity/Component.h"
 #include "Entity/Components/GraphicsComponent.h"
 #include "Entity/Components/PointLightComponent.h"
-#include "Entity/Components/BoxComponent.h"
+#include "Entity/Components/RigidBodyComponent.h"
 #include "SubsystemCatalog.h"
 #include "Application.h"
 #include "Engine.h"
@@ -704,7 +704,7 @@ namespace Enjon
 		// Register engine components here
 		RegisterComponent< GraphicsComponent >( );
 		RegisterComponent< PointLightComponent >( );
-		RegisterComponent< BoxComponent >( );
+		RegisterComponent< RigidBodyComponent >( );
 
 		return Result::SUCCESS;
 	}

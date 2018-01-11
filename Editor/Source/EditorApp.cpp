@@ -613,10 +613,10 @@ namespace Enjon
 		Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
 		{
 			// Docking windows
-			if ( ImGui::BeginDock( "Scene", &mViewBool, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
+			if ( ImGui::BeginDock( "Scene", &mShowSceneView, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
 			{
 				// Print docking information
-				SceneView( &mViewBool );
+				SceneView( &mShowSceneView );
 			}
 			ImGui::EndDock( ); 
 		}); 
@@ -669,7 +669,16 @@ namespace Enjon
 			ImGui::EndDock( );
 		} );
 
-		// Register docking layouts
+		mShowSceneView = true;
+		auto sceneViewOption = [&]()
+		{
+        	ImGui::MenuItem("Scene##options", NULL, &mShowSceneView);
+		};
+
+		// Register menu options
+		ImGuiManager::RegisterMenuOption("View", sceneViewOption);
+
+		// Register docking layouts 
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Scene", ImGui::DockSlotType::Slot_Right, 0.2f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Camera", ImGui::DockSlotType::Slot_Bottom, 0.3f ) );

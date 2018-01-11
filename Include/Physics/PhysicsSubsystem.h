@@ -7,20 +7,14 @@
 
 #include "System/Types.h"
 #include "Subsystem.h"
-#include "Math/Vec3.h"
-
-// TODO(): Abstract away Bullet Implementations
-#include <Bullet/btBulletCollisionCommon.h> 
-#include <Bullet/btBulletDynamicsCommon.h>
-
-using RigidBody				= btRigidBody;
-using CollisionShape		= btCollisionShape;
-using RigidBodyMotionState	= btMotionState;
-using PhysicsWorld			= btDynamicsWorld;
+#include "Math/Vec3.h" 
+#include "Physics/PhysicsDefines.h"
 
 namespace Enjon 
 { 
-	class PhysicsComponent;
+	class CollisionShape;
+	class RigidBody;
+	class RigidBodyComponent;
 	class Entity; 
 
 	class RayCastResult
@@ -29,12 +23,13 @@ namespace Enjon
 
 	struct CollisionReport
 	{ 
-		CollisionReport( PhysicsComponent* comp )
+		CollisionReport( RigidBodyComponent* cmpA, RigidBodyComponent* cmpB )
+			: mCompA( cmpA ), mCompB( cmpB )
 		{
-			mOther = comp;
 		}
 
-		PhysicsComponent* mOther; 
+		RigidBodyComponent* mCompA;
+		RigidBodyComponent* mCompB;
 	};
 
 	ENJON_CLASS( ) 
@@ -87,12 +82,17 @@ namespace Enjon
 			/**
 			*@brief
 			*/
+			void RemoveFromContactEvents( RigidBodyComponent* comp );
+
+			/**
+			*@brief
+			*/
 			void ClearAllForces( );
 
 			/**
 			*@brief
 			*/
-			PhysicsWorld* GetWorld( ) const;
+			BulletDynamicPhysicsWorld* GetWorld( ) const;
 
 			/**
 			*@brief
@@ -106,15 +106,15 @@ namespace Enjon
 			void PhysicsSubsystem::CheckCollisions( const f32& dt );
 
 		private:
-			btDiscreteDynamicsWorld* mDynamicsWorld						= nullptr;
-			btDefaultCollisionConfiguration* mCollisionConfiguration	= nullptr; 
-			btCollisionDispatcher* mDispatcher							= nullptr; 
-			btBroadphaseInterface* mOverlappingPairCache				= nullptr; 
-			btSequentialImpulseConstraintSolver* mSolver				= nullptr;
+			BulletDynamicPhysicsWorld* mDynamicsWorld						= nullptr;
+			BulletDefaultCollisionConfiguration* mCollisionConfiguration	= nullptr;
+			BulletCollisionDispatcher* mDispatcher							= nullptr;
+			BulletBroadphaseInterface* mOverlappingPairCache				= nullptr; 
+			BulletSequentialImpulseConstraintSolver* mSolver				= nullptr;
 
 			HashSet<RigidBody*> mRigidBodies;
-			HashMap< PhysicsComponent*, HashSet< PhysicsComponent* > > mContactEvents; 
-			HashMap< PhysicsComponent*, HashSet< PhysicsComponent* > > mNewContactEvents; 
+			HashMap< RigidBodyComponent*, HashSet< RigidBodyComponent* > > mContactEvents;
+			HashMap< RigidBodyComponent*, HashSet< RigidBodyComponent* > > mNewContactEvents;
 
 			u32 mIsPaused = false;
 	}; 

@@ -56,6 +56,7 @@
 #include "Entity/Components/PointLightComponent.h"
 #include "Entity/Components/GraphicsComponent.h" 
 #include "Entity/Components/BoxComponent.h" 
+#include "Entity/Components/RigidBodyComponent.h" 
 
 #include "Application.h"
 #include "TypeCatalog.h"
