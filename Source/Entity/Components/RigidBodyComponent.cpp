@@ -22,6 +22,22 @@ namespace Enjon
 	{
 		// Remove component from physics subsystem's contact events
 		Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->ConstCast< PhysicsSubsystem >( )->RemoveFromContactEvents( this );
+
+		// Delete all messages
+		for ( auto& m : mCollisionEnterCallbacks )
+		{
+			delete m;
+			m = nullptr;
+		}
+
+		for ( auto& m : mCollisionExitCallbacks )
+		{
+			delete m;
+			m = nullptr;
+		}
+
+		mCollisionExitCallbacks.clear( );
+		mCollisionExitCallbacks.clear( );
 	}
 
 	//========================================================================
