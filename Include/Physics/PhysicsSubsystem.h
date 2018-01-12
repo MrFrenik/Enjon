@@ -18,8 +18,49 @@ namespace Enjon
 	class Entity; 
 	class Component;
 
+	// What does a ray cast result give you?
+
 	class RayCastResult
-	{ 
+	{
+		public: 
+
+			/**
+			* @brief
+			*/
+			RayCastResult( const Vec3& start, const Vec3& end );
+
+			/**
+			* @brief
+			*/
+			~RayCastResult( ) = default; 
+
+			/**
+			* @brief
+			*/
+			void Cast( );
+
+			/**
+			* @brief
+			*/
+			bool HasHit( )
+			{
+				return mHitComponent != nullptr;
+			}
+
+			/**
+			* @brief
+			*/
+			void ClearResults( )
+			{
+				mHitComponent = nullptr;
+			}
+
+		public:
+			Vec3 mStart;
+			Vec3 mEnd;
+			Vec3 mHitPoint;
+			Vec3 mHitNormal;
+			RigidBodyComponent* mHitComponent = nullptr; 
 	};
 
 	struct CollisionReport

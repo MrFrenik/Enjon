@@ -16,5 +16,10 @@ namespace Enjon
 		{
 			return BV3( vec.x, vec.y, vec.z );
 		} 
+
+		Vec3 BV3ToVec3( const BV3& vec )
+		{
+			return Vec3( vec.getX( ), vec.getY( ), vec.getZ( ) );
+		}
 	}
 }

@@ -6,6 +6,7 @@
 #include "Physics/RigidBody.h"
 #include "Entity/EntityManager.h"
 #include "Entity/Components/RigidBodyComponent.h"
+#include "Physics/PhysicsUtils.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
  
@@ -273,6 +274,37 @@ namespace Enjon
 
 		Entity* retEnt = entA == entC ? entA : entB == entC ? entB : nullptr;
 		return retEnt;
+	}
+
+	//====================================================================== 
+			
+	RayCastResult::RayCastResult( const Vec3& start, const Vec3& end )
+		: mStart( start ), mEnd( end )
+	{
+	} 
+
+	//====================================================================== 
+
+	void RayCastResult::Cast( )
+	{
+		auto world = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->GetWorld( );
+
+		BV3 start = PhysicsUtils::Vec3ToBV3( mStart );
+		BV3 end = PhysicsUtils::Vec3ToBV3( mEnd );
+		BulletClosestRayResultCallback callback( start, end );
+		world->rayTest( PhysicsUtils::Vec3ToBV3( mStart ), PhysicsUtils::Vec3ToBV3( mEnd ), callback ); 
+
+		if ( HasHit( ) )
+		{
+			// Store user component pointer
+			mHitComponent = static_cast< RigidBodyComponent* >( callback.m_collisionObject->getUserPointer( ) );
+
+			// Store hit point
+			mHitPoint = PhysicsUtils::BV3ToVec3( callback.m_hitPointWorld );
+
+			// Store hit normal
+			mHitNormal = PhysicsUtils::BV3ToVec3( callback.m_hitNormalWorld ); 
+		}
 	}
 
 	//====================================================================== 

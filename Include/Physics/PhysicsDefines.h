@@ -22,10 +22,16 @@ namespace Enjon
 	using BulletEmptyShape							= btEmptyShape;
 	using BulletBoxShape							= btBoxShape;
 	using BulletSphereShape							= btSphereShape;
+	using BulletCylinderShape						= btCylinderShape;
+	using BulletConeShape							= btConeShape;
+	using BulletCapsuleShape						= btCapsuleShape;
 	using BV3										= btVector3;
 	using BQuat										= btQuaternion;
 	using BTransform								= btTransform;
 	using BulletRigidBodyConstructionInfo			= btRigidBody::btRigidBodyConstructionInfo;
+	using BulletClosestRayResultCallback			= btCollisionWorld::ClosestRayResultCallback;
+	using BulletClosestConvexResultCallback			= btCollisionWorld::ClosestConvexResultCallback;
+	using BulletAllHitsRayResultCallback			= btCollisionWorld::AllHitsRayResultCallback;
 }
 
 #endif

@@ -20,7 +20,10 @@ namespace Enjon
 	{
 		Empty,
 		Box,
-		Sphere
+		Sphere,
+		Cylinder,
+		Cone,
+		Capsule
 	};
 
 	ENJON_CLASS( )

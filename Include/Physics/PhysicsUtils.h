@@ -16,6 +16,11 @@ namespace Enjon
 		* @brief
 		*/
 		 BV3 Vec3ToBV3( const Vec3& vec ); 
+
+		/**
+		* @brief
+		*/
+		 Vec3 BV3ToVec3( const BV3& vec ); 
 	};
 }
 
