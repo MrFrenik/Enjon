@@ -40,7 +40,7 @@ namespace Enjon
 		mDynamicsWorld = new BulletDiscreteDynamicWorld( mDispatcher, mOverlappingPairCache, mSolver, mCollisionConfiguration );
 
 		// Set up physics world gravity
-		mDynamicsWorld->setGravity( btVector3( 0, -10, 0 ) ); 
+		mDynamicsWorld->setGravity( BV3( 0, -10, 0 ) ); 
 
 		return Result::SUCCESS;
 	}
@@ -256,6 +256,23 @@ namespace Enjon
 	BulletDynamicPhysicsWorld* PhysicsSubsystem::GetWorld( ) const
 	{
 		return mDynamicsWorld;
+	}
+
+	//====================================================================== 
+
+	Entity* CollisionReport::GetMatchingEntityFromReport( Component* comp ) const
+	{
+		if ( mCompA == nullptr || mCompB == nullptr || comp == nullptr )
+		{
+			return nullptr;
+		}
+
+		Entity* entA = mCompA->GetEntity( );
+		Entity* entB = mCompB->GetEntity( );
+		Entity* entC = comp->GetEntity( );
+
+		Entity* retEnt = entA == entC ? entA : entB == entC ? entB : nullptr;
+		return retEnt;
 	}
 
 	//====================================================================== 

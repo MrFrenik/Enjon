@@ -34,10 +34,10 @@ namespace Enjon {
 				f32 GetIntensity() const { return mIntensity; }
 
 				ENJON_FUNCTION()
-				void SetDirection(Vec3& direction);
+				void SetDirection(const Vec3& direction);
 
 				ENJON_FUNCTION()
-				void SetColor(ColorRGBA32& color);
+				void SetColor(const ColorRGBA32& color);
 
 				ENJON_FUNCTION()
 				void SetIntensity(float intensity);

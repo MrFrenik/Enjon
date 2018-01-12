@@ -1155,6 +1155,15 @@ void Introspection::ParseFunction( Lexer* lexer, Class* cls )
 			Token nextToken = lexer->PeekAtNextToken( );
 
 			std::string paramType = curToken.ToString( );
+ 
+			// Consume the const
+			bool hadConst = false;
+			if ( curToken.Equals( "const" ) )
+			{
+				paramType += " ";
+				curToken = lexer->GetNextToken( );
+				hadConst = true;
+			}
 
 			while ( curToken.IsType( TokenType::Token_Identifier ) && nextToken.IsType( TokenType::Token_DoubleColon ) )
 			{
@@ -1163,16 +1172,26 @@ void Introspection::ParseFunction( Lexer* lexer, Class* cls )
 				nextToken = lexer->PeekAtNextToken( );
 
 				// Append to retType
-				paramType += "::" + curToken.ToString( );
-			}
+				paramType += "::" + curToken.ToString( ); 
+			} 
+
+			if ( hadConst )
+			{
+				paramType += curToken.ToString( ); 
+			} 
 
 			// Check for references and pointers
 			curToken = lexer->GetNextToken( );
+
+			if ( curToken.IsType( TokenType::Token_Ampersand ) || curToken.IsType( TokenType::Token_Asterisk ) )
+			{
+				paramType += curToken.ToString( );
+				curToken = lexer->GetNextToken( );
+			}
+
 			while ( curToken.IsType( TokenType::Token_Asterisk ) ||
 				curToken.IsType( TokenType::Token_Ampersand ) )
 			{
-				paramType += curToken.ToString( );
-
 				curToken = lexer->GetNextToken( );
 			}
 

@@ -159,12 +159,19 @@ namespace Enjon
 
 	//========================================================================
 
+	void RigidBodyComponent::SetContinuousCollisionDetectionEnabled( bool enabled )
+	{
+		mBody.SetContinuousCollisionDetectionEnabled( enabled );
+	}
+
+	//========================================================================
+
 	void RigidBodyComponent::OnCollisionEnter( const CollisionReport& collision )
 	{
 		// Callbacks for enter collision
 		for ( auto& c : mCollisionEnterCallbacks )
-		{
-			c( collision );
+		{ 
+			c->Invoke( collision );
 		}
 	}
 
@@ -175,23 +182,23 @@ namespace Enjon
 		// Callbacks for exit collision
 		for ( auto& c : mCollisionExitCallbacks )
 		{
-			c( collision );
+			c->Invoke( collision );
 		}
 	}
 
 	//========================================================================
 
-	void RigidBodyComponent::AddCollisionEnterCallback( const CollisionCallback& callback )
-	{
-		mCollisionEnterCallbacks.push_back( callback );
-	}
+	//void RigidBodyComponent::AddCollisionEnterCallback( const CollisionCallbackSubscription& callback )
+	//{
+	//	mCollisionEnterCallbacks.push_back( callback );
+	//}
 
-	//========================================================================
+	////========================================================================
 
-	void RigidBodyComponent::AddCollisionExitCallback( const CollisionCallback& callback )
-	{
-		mCollisionExitCallbacks.push_back( callback );
-	}
+	//void RigidBodyComponent::AddCollisionExitCallback( const CollisionCallbackSubscription& callback )
+	//{
+	//	mCollisionExitCallbacks.push_back( callback );
+	//}
 
 	//======================================================================== 
 

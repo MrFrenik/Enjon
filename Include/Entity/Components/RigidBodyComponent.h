@@ -13,7 +13,45 @@
 
 namespace Enjon
 { 
-	using CollisionCallback = std::function< void( const CollisionReport& ) >;
+	using CollisionCallback = std::function< void( Component*, const CollisionReport& ) >; 
+ 
+	class CollisionCallbackSubscriptionBase
+	{ 
+		public:
+			CollisionCallbackSubscriptionBase( )
+			{ 
+			}
+
+			~CollisionCallbackSubscriptionBase( )
+			{
+			} 
+
+			virtual void Invoke( const CollisionReport& report ) = 0;
+	 };
+
+	template <typename T>
+	class CollisionCallbackSubscription : public CollisionCallbackSubscriptionBase
+	{
+		public:
+			CollisionCallbackSubscription( T* comp, const std::function< void(T*, const CollisionReport& )>& callback )
+				: mComponent( comp ), mCallback( callback )
+			{ 
+				static_assert( std::is_base_of<Component, T>::value, "CollisionCallbackSubscription::Constructor() - T must inherit from Component." ); 
+			}
+
+			~CollisionCallbackSubscription( )
+			{
+			} 
+
+			void Invoke( const CollisionReport& report )
+			{
+				mCallback( mComponent, report );
+			}
+
+			T* mComponent = nullptr;
+			std::function< void( T*, const CollisionReport& ) > mCallback; 
+	};
+
 
 	ENJON_CLASS( Construct )
 	class RigidBodyComponent : public Component
@@ -116,6 +154,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void SetContinuousCollisionDetectionEnabled( bool enabled ); 
+
+			/**
+			* @brief
+			*/
 			void OnCollisionEnter( const CollisionReport& collision );
 
 			/**
@@ -126,12 +169,20 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void AddCollisionEnterCallback( const CollisionCallback& callback );
+			template <typename T>
+			void AddCollisionEnterCallback( T* obj, const std::function<void(T*, const CollisionReport& ) >& func )
+			{
+				mCollisionEnterCallbacks.push_back( new CollisionCallbackSubscription<T>( obj, func ) );
+			}
 
 			/**
 			* @brief
 			*/
-			void AddCollisionExitCallback( const CollisionCallback& callback );
+			template <typename T>
+			void AddCollisionExitCallback( T* obj, const std::function<void(T*, const CollisionReport& ) >& func )
+			{
+				mCollisionExitCallbacks.push_back( new CollisionCallbackSubscription<T>( obj, func ) );
+			}
 
 		protected:
 
@@ -150,8 +201,8 @@ namespace Enjon
 			RigidBody mBody;
 
 		protected: 
-			Vector < CollisionCallback > mCollisionEnterCallbacks;
-			Vector < CollisionCallback > mCollisionExitCallbacks;
+			Vector < CollisionCallbackSubscriptionBase* > mCollisionEnterCallbacks;
+			Vector < CollisionCallbackSubscriptionBase* > mCollisionExitCallbacks;
 	};
 }
 

@@ -249,6 +249,17 @@ namespace Enjon
 
 	//========================================================================
 
+	void RigidBody::SetContinuousCollisionDetectionEnabled( bool enabled )
+	{
+		mBody->setCcdMotionThreshold( (f32)enabled );
+		if ( enabled )
+		{
+			mBody->setCcdSweptSphereRadius( 0.2f );
+		}
+	}
+
+	//========================================================================
+
 	void RigidBody::ApplyCentralForce( const Vec3& force )
 	{ 
 		if ( !mBody->isActive( ) )

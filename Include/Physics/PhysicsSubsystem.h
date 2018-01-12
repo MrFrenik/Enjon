@@ -16,6 +16,7 @@ namespace Enjon
 	class RigidBody;
 	class RigidBodyComponent;
 	class Entity; 
+	class Component;
 
 	class RayCastResult
 	{ 
@@ -28,9 +29,13 @@ namespace Enjon
 		{
 		}
 
+		Entity* GetMatchingEntityFromReport( Component* comp ) const;
+
 		RigidBodyComponent* mCompA;
 		RigidBodyComponent* mCompB;
 	};
+
+	
 
 	ENJON_CLASS( ) 
 	class PhysicsSubsystem : public Subsystem

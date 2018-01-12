@@ -28,7 +28,6 @@ int main( int argc, char** argv )
 		if ( arg.compare( "--target-path" ) == 0 && (i + 1) < argc )
 		{
 			mConfig.mRootPath = String( argv[ i + 1 ] );
-			//mConfig.mRootPath = FindReplaceMetaTag( String( argv[i + 1] ), "/Generator/..", "" );
 		} 
 	} 
 

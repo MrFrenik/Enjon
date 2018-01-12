@@ -876,11 +876,11 @@ namespace Enjon
 				return ( mFunctions.find( name ) != mFunctions.end( ) ); 
 			}
 
-			const MetaFunction* GetFunction( const Enjon::String& name )
+			const MetaFunction* GetFunction( const Enjon::String& name ) const
 			{
 				if ( FunctionExists( name ) )
 				{
-					return mFunctions[ name ];
+					return const_cast<MetaClass*>(this)->mFunctions[ name ];
 				}
 
 				return nullptr;

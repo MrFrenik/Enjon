@@ -153,6 +153,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void SetContinuousCollisionDetectionEnabled( bool enabled );
+
+			/**
+			* @brief
+			*/
 			void SetUserPointer( void* pointer );
 
 		// Serialized properties
@@ -175,6 +180,9 @@ namespace Enjon
 
 			ENJON_PROPERTY( )
 			Vec3 mGravity = Vec3( 0.0f, -10.0f, 10.0f );
+
+			ENJON_PROPERTY( )
+			u32 mCCDEnabled = false;
 
 			ENJON_PROPERTY( )
 			CollisionShape* mShape = nullptr;

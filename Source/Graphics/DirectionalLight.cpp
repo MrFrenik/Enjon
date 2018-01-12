@@ -21,12 +21,12 @@ namespace Enjon {
 
 	}
 
-	void DirectionalLight::SetDirection(Vec3& direction)
+	void DirectionalLight::SetDirection(const Vec3& direction)
 	{
 		mDirection = direction;
 	}
 
-	void DirectionalLight::SetColor(ColorRGBA32& color)
+	void DirectionalLight::SetColor(const ColorRGBA32& color)
 	{
 		mColor = color;
 	}
