@@ -188,6 +188,13 @@ namespace Enjon
 
 	//========================================================================
 
+	f32 RigidBody::GetMass( ) const
+	{
+		return mMass;
+	}
+
+	//========================================================================
+
 	void RigidBody::SetRestitution( const f32& restitution )
 	{ 
 		mRestitution = restitution;

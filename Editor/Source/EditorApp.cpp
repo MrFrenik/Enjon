@@ -12,6 +12,7 @@
 #include <Entity/EntityManager.h>
 #include <Physics/PhysicsSubsystem.h>
 #include <Entity/Components/GraphicsComponent.h>
+#include <Entity/Components/RigidBodyComponent.h>
 #include <Utils/FileUtils.h>
 
 #include <Bullet/btBulletDynamicsCommon.h> 
@@ -37,12 +38,12 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mProjectsDir = "W:/Projects/";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -174,8 +175,24 @@ namespace Enjon
 				if ( ImGui::TreeNode( fmt::format( "Components##{}", e->GetID( ) ).c_str( ) ) )
 				{
 					for ( auto& c : e->GetComponents( ) )
-					{
-						Enjon::ImGuiManager::DebugDumpObject( c );
+					{ 
+						if ( c->Class( ) == Object::GetClass<RigidBodyComponent >( ) )
+						{
+							RigidBodyComponent* rbc = c->ConstCast<RigidBodyComponent>( );
+							if ( rbc )
+							{
+								f32 mass = rbc->GetMass( );
+								if ( ImGui::DragFloat( "Mass", &mass, 1.0f, 0.0f, 100.0f ) )
+								{
+									rbc->SetMass( mass );
+								}
+							}
+						}
+
+						else
+						{
+							Enjon::ImGuiManager::DebugDumpObject( c ); 
+						}
 					} 
 					ImGui::TreePop( );
 				}
@@ -524,6 +541,9 @@ namespace Enjon
 
 			// Initialize the app
 			app->Initialize( );
+
+			// Turn on the physics simulation
+			Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->ConstCast< PhysicsSubsystem >( )->PauseSystem( false ); 
 		}
 	}
 
@@ -562,6 +582,9 @@ namespace Enjon
 			// Clean up physics subsystem from contact events as well
 			auto phys = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::PhysicsSubsystem >( )->ConstCast< Enjon::PhysicsSubsystem >( );
 			phys->Reset( );
+
+			// Pause the physics simulation
+			Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->ConstCast< PhysicsSubsystem >( )->PauseSystem( true ); 
 		}
 	}
 	 
@@ -575,6 +598,9 @@ namespace Enjon
 		// Get asset manager and set its properties ( I don't like this )
 		Enjon::AssetManager* mAssetManager = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get<Enjon::AssetManager>( )->ConstCast< Enjon::AssetManager >( );
 		Enjon::GraphicsSubsystem* mGfx = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( );
+
+		// Pause the physics simulation
+		Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->ConstCast< PhysicsSubsystem >( )->PauseSystem( true ); 
 
 		// This also needs to be done through a config file or cmake
 		mAssetManager->SetAssetsDirectoryPath( mAssetsDirectoryPath );

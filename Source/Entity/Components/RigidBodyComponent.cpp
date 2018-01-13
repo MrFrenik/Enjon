@@ -90,6 +90,13 @@ namespace Enjon
 
 	//========================================================================
 
+	f32 RigidBodyComponent::GetMass( ) const
+	{
+		return mBody.GetMass();
+	}
+
+	//========================================================================
+
 	void RigidBodyComponent::SetRestitution( const f32& restitution )
 	{
 		mBody.SetRestitution( restitution );

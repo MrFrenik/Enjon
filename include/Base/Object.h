@@ -959,6 +959,14 @@ namespace Enjon
 				{
 					T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
 					*dest = value;
+
+					// Call virtual setter on property here?
+					/*
+						for ( auto& callback : prop->GetCallbacks() )
+						{
+							callback(value);
+						}
+					*/
 				}
 			} 
 

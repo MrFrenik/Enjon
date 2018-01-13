@@ -133,7 +133,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void ClearAllForces( );
+			void ClearAllForces( ); 
 
 			/**
 			*@brief

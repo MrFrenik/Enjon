@@ -430,7 +430,7 @@ namespace Enjon
 				{
 					if ( ImGui::DragInt( name.c_str( ), ( s32* )&val ) )
 					{
-						cls->SetValue( object, prop, ( s32 )val );
+						cls->SetValue( object, prop, ( s32 )val ); 
 					}
 				}
 			} break;

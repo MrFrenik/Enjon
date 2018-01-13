@@ -89,6 +89,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			f32 GetMass( ) const;
+
+			/**
+			* @brief
+			*/
 			void SetRestitution( const f32& restitution );
 
 			/**
