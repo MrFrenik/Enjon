@@ -463,13 +463,14 @@ namespace Enjon
 
 		// Get a mesh and make it instanced... or something
 		auto db = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "models.unit_cube" );
+		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetDefaultAsset< Enjon::Mesh >( );
 		if ( mesh )
 		{
 			// Set bunny mesh for later use
 			mInstancedRenderable = new Enjon::Renderable( );
 			mInstancedRenderable->SetMesh( mesh );
 			Enjon::Material* instancedMat = new Enjon::Material( );
+			instancedMat->TwoSided( true );
 			instancedMat->SetTexture(Enjon::TextureSlotType::Albedo, db->GetAsset<Enjon::Texture>("materials.copperrock.albedo"));
 			instancedMat->SetTexture(Enjon::TextureSlotType::Normal, db->GetAsset<Enjon::Texture>("materials.copperrock.normal"));
 			instancedMat->SetTexture(Enjon::TextureSlotType::Metallic, db->GetAsset<Enjon::Texture>("materials.copperrock.roughness"));

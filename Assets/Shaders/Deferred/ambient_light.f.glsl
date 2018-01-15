@@ -48,7 +48,7 @@ void main()
     vec3 worldPos = texture2D(uPositionMap, TexCoords).xyz;
     
 	// Obtain normal from normal map in range (world coords)
-    vec3 N = normalize(texture2D(uNormalMap, TexCoords).xyz);
+    vec3 N = normalize(texture2D(uNormalMap, TexCoords).xyz); 
 
 	// View vector
 	vec3 V = normalize( uCamPos - worldPos ); 

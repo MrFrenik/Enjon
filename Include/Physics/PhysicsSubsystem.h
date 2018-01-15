@@ -145,6 +145,11 @@ namespace Enjon
 			*/
 			void Reset( );
 
+			/**
+			*@brief
+			*/
+			void CastRay( RayCastResult* ray );
+
 		private:
 			/**
 			*@brief

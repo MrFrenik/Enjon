@@ -38,8 +38,8 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mProjectsDir = "W:/Projects/";
 
 Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -157,6 +157,11 @@ namespace Enjon
 					mPlaying = false;
 					mMoveCamera = false;
 				}
+			}
+
+			if ( ImGui::Button( "Reload" ) )
+			{ 
+				LoadDLL( );
 			}
 		} 
 	}
@@ -802,43 +807,10 @@ namespace Enjon
 		else
 		{
 			mGfx->GetWindow( )->ConstCast< Enjon::Window >( )->ShowMouseCursor( true );
-		}
-
-		// DLL Loading/Unloading
-		{
-			if ( mInput->IsKeyPressed( Enjon::KeyCode::R ) )
-			{
-				LoadDLL( );
-			}
-		}
+		} 
 
 		// Starting /Stopping game instance
-		{
-			if ( mInput->IsKeyPressed( Enjon::KeyCode::P ) )
-			{
-				if ( !mPlaying )
-				{
-					mPlaying = true;
-					mMoveCamera = true;
-
-					auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( );
-					mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) );
-
-					// Call start up function for game
-					Application* app = mProject.GetApplication( );
-					if ( app )
-					{
-						InitializeProjectApp( );
-					}
-					else
-					{
-						std::cout << "Cannot play without game loaded!\n";
-						mPlaying = false;
-						mMoveCamera = false;
-					}
-				}
-			}
-
+		{ 
 			if ( mInput->IsKeyPressed( Enjon::KeyCode::Escape ) )
 			{
 				if ( mPlaying )

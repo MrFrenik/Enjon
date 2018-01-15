@@ -261,6 +261,33 @@ namespace Enjon
 
 	//====================================================================== 
 
+	void PhysicsSubsystem::CastRay( RayCastResult* ray )
+	{
+		if ( !ray )
+		{
+			return;
+		} 
+
+		BV3 start = PhysicsUtils::Vec3ToBV3( ray->mStart );
+		BV3 end = PhysicsUtils::Vec3ToBV3( ray->mEnd );
+		BulletClosestRayResultCallback callback( start, end );
+		mDynamicsWorld->rayTest( PhysicsUtils::Vec3ToBV3( ray->mStart ), PhysicsUtils::Vec3ToBV3( ray->mEnd ), callback ); 
+
+		if ( callback.hasHit( ) )
+		{ 
+			// Store user component pointer
+			ray->mHitComponent = static_cast< RigidBodyComponent* >( callback.m_collisionObject->getUserPointer( ) );
+
+			// Store hit point
+			ray->mHitPoint = PhysicsUtils::BV3ToVec3( callback.m_hitPointWorld );
+
+			// Store hit normal
+			ray->mHitNormal = PhysicsUtils::BV3ToVec3( callback.m_hitNormalWorld ); 
+		} 
+	}
+
+	//====================================================================== 
+
 	Entity* CollisionReport::GetMatchingEntityFromReport( Component* comp ) const
 	{
 		if ( mCompA == nullptr || mCompB == nullptr || comp == nullptr )
