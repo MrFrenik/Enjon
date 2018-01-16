@@ -81,6 +81,8 @@ namespace Enjon
 
 	void PrintText(Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA32 Color = RGBA32_White(), float Spacing = 1.0f, TextStyle Style = TextStyle::SHADOW); 
 
+	void PrintText(const Vec2& position, const Vec2& size, std::string Text, Font* F, SpriteBatch* Batch, ColorRGBA32 Color = RGBA32_White(), float Spacing = 1.0f, TextStyle Style = TextStyle::SHADOW); 
+
 	class UIFont;
 	
 	void PrintText( Transform& Transform, const Enjon::String& Text, const UIFont* F, QuadBatch& Batch, ColorRGBA32 Color, u32 fontSize );

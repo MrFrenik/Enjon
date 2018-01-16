@@ -173,6 +173,9 @@ namespace Enjon
 		// Register shader graph templates
 		Enjon::ShaderGraph::DeserializeTemplate( Enjon::Engine::GetInstance( )->GetConfig( ).GetEngineResourcePath( ) + "/Shaders/ShaderGraphTemplates/ShaderTemplates.json" );
 
+		// Init ui sprite batch
+		mUIBatch.Init( );
+
 		// TODO(): I don't like random raw gl calls just lying around...
 		glEnable( GL_DEPTH_TEST );
 		glEnable( GL_CULL_FACE );
@@ -516,17 +519,6 @@ namespace Enjon
 		{ 
 			STBTest( );
 			set = true;
-		}
-
-		// Get input
-		const Enjon::Input* input = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Input >( );
-		if ( input )
-		{
-			// Recompile test shader
-			if ( input->IsKeyPressed( Enjon::KeyCode::R ) )
-			{
-				std::cout << "Recompiling...\n";
-			}
 		} 
 
 		// Gbuffer pass
@@ -543,15 +535,16 @@ namespace Enjon
 		CompositePass(mLightingBuffer);
 		// FXAA pass
 		FXAAPass(mCompositeTarget); 
-
+		// Do UI pass
+		UIPass( mFXAATarget );
+ 
 		// Clear default buffer
-		//mWindow.Clear( );
-		mWindow.Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() );
+		mWindow.Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
 
 		// Editor gui pass (ImGUI)
 		if (true)
 		{
-			GuiPass();
+			ImGuiPass();
 		} 
 		// Otherwise render back buffer (scene view) 
 		else
@@ -570,7 +563,7 @@ namespace Enjon
 	}
 
 	//======================================================================================================
-
+	
 	void GraphicsSubsystem::GBufferPass()
 	{
 		static float wt = 0.0f;
@@ -583,6 +576,8 @@ namespace Enjon
 		glDepthFunc( GL_LESS );
 		glEnable( GL_CULL_FACE );
 		glCullFace( GL_BACK );
+		glEnable(GL_DEPTH_TEST);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Bind gbuffer
 		mGbuffer->Bind(); 
@@ -1187,7 +1182,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::GuiPass()
+	void GraphicsSubsystem::ImGuiPass()
 	{
 		static bool show_test_window = false;
 		static bool show_frame_rate = false;
@@ -1202,6 +1197,37 @@ namespace Enjon
         // Flush
         glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
         ImGui::Render(); 
+	}
+
+	//======================================================================================================
+
+	void GraphicsSubsystem::UIPass( RenderTarget* inputTarget )
+	{
+		// Just try and render some text to the screen, maybe?
+
+		inputTarget->Bind( RenderTarget::BindType::WRITE, false );
+		{
+			auto shader = ShaderManager::GetShader( "Text" ); 
+			shader->Use( );
+			{
+				auto dispX = ( s32 )ImGui::GetIO( ).DisplaySize.x; 
+				auto dispY = ( s32 )ImGui::GetIO( ).DisplaySize.y;
+				Mat4 ortho = Mat4::Orthographic(0.0f, (f32)dispX, 0.0f, (f32)dispY, -1, 1);
+				shader->SetUniform( "projection", ortho );
+				mUIBatch.Begin( );
+				{
+					auto wt = Engine::GetInstance( )->GetWorldTime( ).mTotalTime;
+					auto uiFont = FontManager::GetFont("WeblySleek_16"); 
+					f32 fps = ImGui::GetIO( ).Framerate;
+					f32 frameTime = ( 1.0f / fps ) * 1000.0f;
+					Enjon::PrintText( dispX / 2.0f, dispY / 2.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch );
+				}
+				mUIBatch.End( );
+				mUIBatch.RenderBatch( ); 
+			}
+			shader->Unuse( ); 
+		}
+		inputTarget->Unbind( ); 
 	}
 
 	//======================================================================================================

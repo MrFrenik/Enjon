@@ -13,9 +13,12 @@ uniform sampler2D tex;
 
 void main() 
 {
+
 	// Sample the texture
 	vec4 sampled = texture(tex, fs_in.uv);
-	sampled.a = sampled.r;
-	color = fs_in.color * sampled;
+	sampled.a = sampled.r; 
+
+	// Final color
+	color = vec4( fs_in.color.rgb * sampled.r, sampled.a );
 }
 

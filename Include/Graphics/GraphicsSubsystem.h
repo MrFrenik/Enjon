@@ -6,6 +6,7 @@
 #include "Graphics/Window.h"
 #include "Graphics/Scene.h"
 #include "Graphics/Camera.h" 
+#include "Graphics/SpriteBatch.h"
 #include "Subsystem.h" 
 
 namespace Enjon 
@@ -196,11 +197,16 @@ namespace Enjon
 			*@brief
 			*/
 			void CompositePass(RenderTarget* inputTarget);
+
+			/**
+			*@brief
+			*/
+			void UIPass( RenderTarget* inputTarget );
 			
 			/**
 			*@brief
 			*/
-			void GuiPass();
+			void ImGuiPass();
 			
 			/**
 			*@brief
@@ -210,8 +216,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void ImGuiStyles2();
-
+			void ImGuiStyles2(); 
 			
 			/**
 			*@brief
@@ -299,6 +304,8 @@ namespace Enjon
 			Enjon::Renderable* mInstancedRenderable = nullptr;
 			u32 mInstancedAmount = 0;
 			u32 mInstancedVBO; 
+
+			Enjon::SpriteBatch mUIBatch;
 	};
 }
 

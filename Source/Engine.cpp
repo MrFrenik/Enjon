@@ -242,7 +242,7 @@ namespace Enjon
 			mGraphics->Update( dt );
 
 			// Clamp frame rate
-			mLimiter.End(); 
+			//mLimiter.End(); 
 
 			// Update world time
 			mWorldTime.mDT = dt;
@@ -251,7 +251,6 @@ namespace Enjon
 
 		Enjon::Result res = ShutDown();
 
-		// Main engine loop here
 		return res;
 	}
 

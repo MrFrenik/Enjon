@@ -243,7 +243,7 @@ namespace Enjon
         GLfloat h = ch.Size.y * scale;
 
         Vec4 DestRect(xpos, ypos, w, h);
-        Vec4 UV(0.00f, 1.0f, 1.0f, 0.98f);
+        Vec4 UV(0.00f, 1.0f, 1.0f, 1.0f);
 
         *advance = x + (ch.Advance >> 6) * scale;
 
@@ -297,7 +297,7 @@ namespace Enjon
 	        GLfloat h = ch.Size.y * scale;
 
 	        Vec4 DestRect(xpos, ypos, w, h);
-	        Vec4 UV(0.00f, 0.05f, 1.0f, 0.90f);
+	        Vec4 UV(0.00f, 0.0f, 1.0f, 1.0f);
 
 	        // Add to batch
 	        if (Angle) Batch.Add(DestRect, UV, ch.TextureID, Color, Depth, Angle);
@@ -307,6 +307,33 @@ namespace Enjon
 	        x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
 	    }
 
+	}
+
+	void PrintText( const Vec2& position, const Vec2& size, std::string Text, Font* F, SpriteBatch* Batch, ColorRGBA32 Color, float Spacing, TextStyle Style )
+	{ 
+		float x = position.x;
+		float y = position.y; 
+
+		// Iterate through all characters
+	    std::string::const_iterator c;
+	    for (c = Text.begin(); c != Text.end(); c++) 
+	    {
+	        Character ch = F->Characters[*c];
+
+	        GLfloat xpos = x + ch.Bearing.x * size.x;
+	        GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * size.y;
+
+	        GLfloat w = ch.Size.x;
+	        GLfloat h = ch.Size.y;
+
+	        Vec4 UV(0.00f, 0.05f, 1.0f, 0.90f); 
+
+	        // Add to batch
+			Batch->Add( Vec4( xpos, ypos, size.x, size.y ), UV, ch.TextureID, Color ); 
+
+	        // Advance to next character
+	        x += (ch.Advance >> 6) * size.x; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+	    } 
 	}
 
 	void PrintText(Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA32 Color, float Spacing, TextStyle Style)
