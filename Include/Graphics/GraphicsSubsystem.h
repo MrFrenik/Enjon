@@ -202,6 +202,11 @@ namespace Enjon
 			*@brief
 			*/
 			void UIPass( RenderTarget* inputTarget );
+
+			/**
+			*@brief
+			*/
+			void ReadObjectIDTarget( );
 			
 			/**
 			*@brief

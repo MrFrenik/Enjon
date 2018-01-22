@@ -34,6 +34,8 @@ class Lexer
 		bool ContinueTo( TokenType type );
 
 		bool ContinueToIdentifier( const std::string& identifier );
+
+		void ConsumeAllNamespaceQualifiers( );
 	
 	public: 
 		char* mAt = nullptr;

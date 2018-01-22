@@ -254,4 +254,31 @@ bool Lexer::RequireToken( TokenType type, bool advance )
 	return ( token.mType == type );
 }
 
+void Lexer::ConsumeAllNamespaceQualifiers( )
+{
+	Token curToken = GetCurrentToken( );
+	Token nextToken = PeekAtNextToken( );
+	while ( curToken.IsType( TokenType::Token_Identifier ) && nextToken.IsType( TokenType::Token_DoubleColon ) )
+	{
+		// Set to next token
+		curToken = GetNextToken( );
+		// This gets next token
+		curToken = GetNextToken( ); 
+		// Peek at next token
+		nextToken = PeekAtNextToken( );
+	} 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 

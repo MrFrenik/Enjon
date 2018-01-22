@@ -5,7 +5,7 @@
 
 namespace Enjon {
 
-#define CREATE_RENDER_TARGET(InternalFormat, Format, GBufferAttachment)\
+#define CREATE_RENDER_TARGET(InternalFormat, Format, DataType, GBufferAttachment)\
 	{\
 		u32 index = (u32)GBufferAttachment;\
 		glBindRenderbufferEXT(GL_RENDERBUFFER, TargetIDs[index]);\
@@ -15,7 +15,7 @@ namespace Enjon {
 		glGenTextures(1, &Textures[index]);\
 		glBindTexture(GL_TEXTURE_2D, Textures[index]);\
 		\
-		glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, Width, Height, 0, Format, GL_FLOAT, NULL);\
+		glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, Width, Height, 0, Format, DataType, NULL);\
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);\
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );\
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );\
@@ -37,11 +37,12 @@ namespace Enjon {
 	    glGenFramebuffers(1, &FBO);
 	    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 		
-		CREATE_RENDER_TARGET( GL_RGBA8, GL_RGBA, GBufferTextureType::ALBEDO )
-		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GBufferTextureType::NORMAL )
-		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GBufferTextureType::POSITION )
-		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GBufferTextureType::EMISSIVE )
-		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GBufferTextureType::MAT_PROPS )
+		CREATE_RENDER_TARGET( GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GBufferTextureType::ALBEDO )
+		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GL_FLOAT, GBufferTextureType::NORMAL )
+		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GL_FLOAT, GBufferTextureType::POSITION )
+		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GL_FLOAT, GBufferTextureType::EMISSIVE )
+		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GL_FLOAT, GBufferTextureType::MAT_PROPS )
+		CREATE_RENDER_TARGET( GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GBufferTextureType::OBJECT_ID )
 
 		// Bind depth render buffer
 		glBindRenderbufferEXT( GL_RENDERBUFFER, DepthBuffer );
@@ -135,7 +136,7 @@ namespace Enjon {
 			case 2: return "Position";
 			case 3: return "Emissive";
 			case 4: return "Materials";
-			case 5: return "UV";
+			case 5: return "ObjectID";
 			default: return "Unknown";
 		}	
 	}

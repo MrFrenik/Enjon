@@ -805,20 +805,19 @@ namespace Enjon
 
 		// Create new component and place into map
 		Component* component = base->AddComponent( compCls, eid );
-		component->SetEntity(entity);
-		component->SetID(compIdx);
-		component->SetBase( base );
-		component->mEntityID = entity->mID;
-		component->Initialize( );
+		if ( component )
+		{
+			component->SetEntity(entity);
+			component->SetID(compIdx);
+			component->SetBase( base );
+			component->mEntityID = entity->mID;
+			component->Initialize( ); 
 
-		// Get component ptr and push back into entity components
-		entity->mComponents.push_back( compIdx );
+			// Get component ptr and push back into entity components
+			entity->mComponents.push_back( compIdx );
+		} 
 
 		return component; 
-
-		// Return null to remove warnings from compiler
-		return nullptr;
-
 	}
 
 	//=========================================================================================

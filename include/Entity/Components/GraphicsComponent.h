@@ -39,6 +39,11 @@ namespace Enjon
 			*/
 			virtual void Update( const f32& dT) override; 
 
+			/*
+			* @brief
+			*/
+			virtual void Initialize( ) override;
+
 			/* 
 			* @brief Get position of transform 
 			*/

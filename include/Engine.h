@@ -8,6 +8,9 @@
 #include "Defines.h"
 #include "System/Types.h" 
 
+#define EngineSubsystem(type)\
+	Engine::GetInstance()->GetSubsystemCatalog()->Get<type>()->ConstCast<type>();
+
 namespace Enjon
 { 
 	class SubsystemCatalog;
@@ -116,7 +119,7 @@ namespace Enjon
 			* @brief Returns pointer to meta class registry.
 			* @return MetaClassRegistry* - Pointer to meta class registry instance.
 			*/
-			const MetaClassRegistry* GetMetaClassRegistry( );
+			const MetaClassRegistry* GetMetaClassRegistry( ); 
 
 			/**
 			* @brief

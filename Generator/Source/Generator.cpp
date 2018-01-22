@@ -49,7 +49,7 @@ int main( int argc, char** argv )
 	// If not an engine project, then set id to last used engine id (for now just a large number)
 	if ( mConfig.mProjectName.compare( "Enjon" ) != 0 )
 	{
-		mIntrospection.SetTypeID( 200 );
+		mIntrospection.SetTypeID( 1000 );
 	}
 
 	// Iterate over collected files and parse

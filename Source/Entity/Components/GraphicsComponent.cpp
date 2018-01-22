@@ -43,6 +43,17 @@ namespace Enjon
 
 	//==================================================================== 
 
+	void GraphicsComponent::Initialize( )
+	{
+		// Set id of renderable to entity id
+		if ( mEntity ) 
+		{
+			mRenderable.SetRenderableID( mEntity->GetID( ) );
+		}
+	}
+
+	//==================================================================== 
+
 	void GraphicsComponent::Update( const f32& dt)
 	{
 		mRenderable.SetTransform(mEntity->GetWorldTransform());

@@ -8,6 +8,7 @@
 #include "System/Types.h"
 #include "Asset/Asset.h"
 #include "Base/Object.h"
+#include "Entity/EntityDefines.h"
 #include "Graphics/Mesh.h"
 
 namespace Enjon 
@@ -69,10 +70,7 @@ namespace Enjon
 			void SetScale(const f32& scale);
 
 			/* Set rotation of transform */
-			void SetRotation(const Quaternion& rotation);
-
-			/* Set material of renderable */
-			//void SetMaterial(const Material* material);
+			void SetRotation(const Quaternion& rotation); 
 
 			/* Set material of renderable */
 			void SetMaterial( const AssetHandle< Material >& material );
@@ -81,10 +79,29 @@ namespace Enjon
 			void SetMesh(const AssetHandle<Mesh>& mesh);
 
 			/* Set scene of renderable */
-			void SetScene(Scene* scene);
+			void SetScene(Scene* scene); 
+ 
+			/** 
+			* @brief
+			*/
+			void SetRenderableID( const u32& id );
 
-			/* Set material color */
-			//void SetColor(TextureSlotType type, const ColorRGBA32& color);	
+			/** 
+			* @brief
+			*/
+			u32 GetRenderableID( ) const; 
+
+		public:
+
+			/** 
+			* @brief
+			*/
+			static ColorRGBA32 IdToColor( const u32& id );
+
+			/** 
+			* @brief
+			*/
+			static u32 ColorToID( const ColorRGBA32& color );
 
 		protected:
 			/*
@@ -104,6 +121,8 @@ namespace Enjon
 
 			ENJON_PROPERTY( )
 			AssetHandle<Material> mMaterial;
+			
+			u32 mRenderableID = MAX_ENTITIES;
 
 		private: 
 			Transform mTransform; 

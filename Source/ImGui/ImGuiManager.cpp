@@ -669,13 +669,29 @@ namespace Enjon
 					{
 						ImGui::ListBoxHeader( "##enumProps" );
 						{
+							s32 enumInt = *cls->GetValueAs<s32>( object, prop ); 
+
 							// For each element in the enum
 							for ( auto& e : enumProp->GetElements( ) )
-							{
+							{ 
+								// Has this value, so need to display it differently
+								bool pushedColor = false;
+								if ( e.Value( ) == enumInt )
+								{
+									ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.8f, 0.3f, 0.1f, 1.0f ) );
+									pushedColor = true;
+								}
+
 								if ( ImGui::Selectable( e.Identifier( ).c_str( ) ) )
 								{
 									cls->SetValue( object, prop, e.Value( ) );
+								} 
+
+								if ( pushedColor )
+								{
+									ImGui::PopStyleColor( );
 								}
+
 							} 
 						}
 						ImGui::ListBoxFooter( ); 
@@ -918,10 +934,10 @@ namespace Enjon
 
 		ImGuiIO& io = ImGui::GetIO();
 
-		//io.Fonts->Clear();
-		//io.Fonts->AddFontFromFileTTF((char*)( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16);
-		//io.Fonts->AddFontFromFileTTF((char*)( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14);
-		//io.Fonts->Build(); 
+		io.Fonts->Clear();
+		io.Fonts->AddFontFromFileTTF((const char*)( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16);
+		io.Fonts->AddFontFromFileTTF((const char*)( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14);
+		io.Fonts->Build(); 
 
 		// Grab reference to style
 		ImGuiStyle& style = ImGui::GetStyle(); 

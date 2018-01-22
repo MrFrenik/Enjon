@@ -713,22 +713,10 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 	if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
 	{
 		return;
-	}
+	} 
 
-	// Consume all namespace qualifiers 
-	{
-		Token curToken = lexer->GetCurrentToken( );
-		Token nextToken = lexer->PeekAtNextToken( );
-		while ( curToken.IsType( TokenType::Token_Identifier ) && nextToken.IsType( TokenType::Token_DoubleColon ) )
-		{
-			// Set to next token
-			curToken = lexer->GetNextToken( );
-			// This gets next token
-			curToken = lexer->GetNextToken( ); 
-			// Peek at next token
-			nextToken = lexer->PeekAtNextToken( );
-		}
-	}
+	// Consume all namespace qualifiers
+	lexer->ConsumeAllNamespaceQualifiers( );
 
 	// Get property type of current token
 	if ( !lexer->RequireToken( TokenType::Token_Identifier ) )
@@ -850,10 +838,9 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 		case PropertyType::Array:
 		{ 
 			// Will be the actual property type
-			Token token = lexer->GetCurrentToken( );
+			Token token = lexer->GetCurrentToken( ); 
 
-			// Need to have a better recursive way of handling filling out the property information for this...
-
+			// Cast to array property
 			ArrayProperty* arrProp = static_cast<ArrayProperty*> ( prop );
 
 			// Dynamic array property
@@ -866,15 +853,41 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 				{
 					delete arrProp;
 					return;
-				}
+				} 
 
+
+				// This part is the problem... This needs to be recursive and stop until the LAST '>' is found of this templated type.
 				// Get the property string up to the closing bracket
 				std::string propertyString = "";
-				token = lexer->GetNextToken( );
+				token = lexer->GetNextToken();
+
+				// Consume namespace qualifiers
+				if ( token.Equals( "Enjon" ) )
+				{
+					lexer->ConsumeAllNamespaceQualifiers( );
+
+					// Get next token after initial namespace qualifier
+					token = lexer->GetCurrentToken( );
+				} 
+
+				// If an AssetHandle
+				bool isAssetHandle = false;
+				if ( token.Equals( "AssetHandle" ) )
+				{
+					isAssetHandle = true;
+				} 
+
 				while ( token.mType != TokenType::Token_GreaterThan )
 				{
 					propertyString += token.ToString( );
 					token = lexer->GetNextToken( );
+				}
+
+				// Now that the first greater than has been found, must continue until the LAST '>' is found
+				while ( lexer->PeekAtNextToken( ).IsType( TokenType::Token_GreaterThan ) || lexer->PeekAtNextToken().IsType( TokenType::Token_Asterisk ) )
+				{
+					token = lexer->GetNextToken( );
+					propertyString += token.ToString( );
 				}
 
 				// Set property type of array
@@ -887,6 +900,11 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 
 				// Set property type of array
 				arrProp->mArrayPropertyType = pt; 
+
+				if ( isAssetHandle )
+				{
+					arrProp->mArrayPropertyType = PropertyType::AssetHandle;
+				}
 			}
 			// Fixed array property
 			else
@@ -1586,7 +1604,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 								} break;
 
 								case PropertyType::AssetHandle:
-								{
+								{ 
 									// This is gon' be ugly...
 									// Original string = "AssetHandle< someType >
 									auto split = SplitString( ap->mPropertyTypeRaw, "<" ).at(1);

@@ -537,6 +537,9 @@ namespace Enjon
 		FXAAPass(mCompositeTarget); 
 		// Do UI pass
 		UIPass( mFXAATarget );
+
+		// Read pixel from target
+		ReadObjectIDTarget( );
  
 		// Clear default buffer
 		mWindow.Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
@@ -563,6 +566,31 @@ namespace Enjon
 	}
 
 	//======================================================================================================
+
+	void GraphicsSubsystem::ReadObjectIDTarget( )
+	{
+		// Set pixel alignment for unpacking
+		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 ); 
+		mGbuffer->Bind( BindType::READ );
+		glReadBuffer( GL_COLOR_ATTACHMENT0 + (u32)GBufferTextureType::OBJECT_ID );
+
+		// Read at center of screen
+		u8 data[ 4 ]; 
+		s32 x = ImGui::GetIO( ).DisplaySize.x;
+		s32 y = ImGui::GetIO( ).DisplaySize.y;
+		glReadPixels( s32( f32( x ) / 2.0f ), s32( f32( y ) / 2.0f ), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data ); 
+
+		ColorRGBA32 color( (f32)data[ 0 ] / 255.0f, (f32)data[ 1 ] / 255.0f, (f32)data[ 2 ] / 255.0f, (f32)data[ 3 ] / 255.0f );
+
+		u32 id = Renderable::ColorToID( color );
+
+		printf( "ID: %d\n", id );
+
+		// Unbind buffer
+		mGbuffer->Unbind( );
+	}
+
+	//======================================================================================================
 	
 	void GraphicsSubsystem::GBufferPass()
 	{
@@ -583,9 +611,12 @@ namespace Enjon
 		mGbuffer->Bind(); 
 
 		// Clear albedo render target buffer (default)
-		glClearBufferfv(GL_COLOR, 0, mBGColor); 
+		glClearBufferfv(GL_COLOR, (u32)GBufferTextureType::ALBEDO, mBGColor); 
+		// Clear object id render target buffer
+		GLfloat whiteColor[ ] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		glClearBufferfv(GL_COLOR, (u32)GBufferTextureType::OBJECT_ID, whiteColor); 
 
-		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
+		//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
 
 		 //mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, mBGColor);
 
@@ -607,19 +638,22 @@ namespace Enjon
 				sg = curMaterial->GetShaderGraph( );
 				assert(curMaterial != nullptr); 
 
+				// Grab shader from graph
+				Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
+
 				if (material != curMaterial)
 				{
 					// Set material
 					material = curMaterial;
 
-					// Use shader graph shader
 					if ( sg )
 					{
-						Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
 						sgShader->Use( );
 						sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
 						sgShader->SetUniform( "uWorldTime", wt );
 						sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
+						//sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
+						//sgShader->SetUniform( "uObjectID", ColorRGBA32( 1.0f, 0.0f, 0.0f, 1.0f ) );
 						material->Bind( sgShader );
 					}
 
@@ -649,6 +683,7 @@ namespace Enjon
 				}
 				else
 				{
+					sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
 					renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
 				}
 			}
@@ -1220,7 +1255,11 @@ namespace Enjon
 					auto uiFont = FontManager::GetFont("WeblySleek_16"); 
 					f32 fps = ImGui::GetIO( ).Framerate;
 					f32 frameTime = ( 1.0f / fps ) * 1000.0f;
-					Enjon::PrintText( dispX / 2.0f, dispY / 2.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch );
+					Enjon::PrintText( 10.0f, 10.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch );
+
+					// Print a small reticle in center of screen 
+					Enjon::PrintText( (f32)dispX / 2.0f, (f32)dispY / 2.0f, 1.0f, ".", uiFont, mUIBatch, RGBA32_White() );
+
 				}
 				mUIBatch.End( );
 				mUIBatch.RenderBatch( ); 

@@ -14,6 +14,7 @@ out VS_OUT
 	mat3 TS_TBN;
 	vec3 ViewPositionTangentSpace;
 	vec3 FragPositionTangentSpace;
+	vec4 ObjectID;
 } vs_out;
 
 // Gloabl Uniforms
@@ -21,6 +22,7 @@ uniform float uWorldTime = 1.0f;
 uniform mat4 uViewProjection;
 uniform vec3 uViewPositionWorldSpace;
 uniform mat4 uModel = mat4( 1.0f );
+uniform vec4 uObjectID;
 
 // Variable Declarations
 
@@ -52,4 +54,5 @@ void main()
 	vs_out.ViewPositionTangentSpace = uViewPositionWorldSpace * TS_TBN;
 	vs_out.FragPositionTangentSpace = vs_out.FragPositionWorldSpace * TS_TBN;
 	vs_out.TBN = TBN;
+	vs_out.ObjectID = uObjectID;
 }

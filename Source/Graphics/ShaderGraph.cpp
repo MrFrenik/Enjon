@@ -1041,6 +1041,7 @@ namespace Enjon
 		code += OutputTabbedLine( "mat3 TS_TBN;" );
 		code += OutputTabbedLine( "vec3 ViewPositionTangentSpace;" );
 		code += OutputTabbedLine( "vec3 FragPositionTangentSpace;" );
+		code += OutputTabbedLine( "vec4 ObjectID;" );
 		code += OutputLine( "} vs_out;\n" );
 
 		// Global uniforms
@@ -1049,6 +1050,7 @@ namespace Enjon
 		code += OutputLine( "uniform mat4 uViewProjection;" );
 		code += OutputLine( "uniform vec3 uViewPositionWorldSpace;" );
 		code += OutputLine( "uniform mat4 uModel = mat4( 1.0f );" );
+		code += OutputLine( "uniform vec4 uObjectID;" );
 
 		// Comment for declarations
 		code += OutputLine( "\n// Variable Declarations" );
@@ -1360,6 +1362,7 @@ namespace Enjon
 
 				code += OutputTabbedLine( "vs_out.TBN = TBN;" );
 				code += OutputTabbedLine( "vs_out.TS_TBN = TS_TBN;" );
+				code += OutputTabbedLine( "vs_out.ObjectID = uObjectID;" );
 
 			} break;
 
@@ -1422,6 +1425,7 @@ namespace Enjon
 				code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = uViewPositionWorldSpace * TS_TBN;" );
 				code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = vs_out.FragPositionWorldSpace * TS_TBN;" );
 				code += OutputTabbedLine( "vs_out.TBN = TBN;" );
+				code += OutputTabbedLine( "vs_out.ObjectID = uObjectID;" );
 
 			} break;
 		}
@@ -1458,6 +1462,7 @@ namespace Enjon
 		code += OutputLine( "layout (location = 2) out vec4 PositionOut;" );
 		code += OutputLine( "layout (location = 3) out vec4 EmissiveOut;" );
 		code += OutputLine( "layout (location = 4) out vec4 MatPropsOut;\n" );
+		code += OutputLine( "layout (location = 5) out vec4 ObjectIDOut;\n" );
 
 		// Fragment Data In 
 		code += OutputLine( "\nin VS_OUT" );
@@ -1468,6 +1473,7 @@ namespace Enjon
 		code += OutputTabbedLine( "mat3 TS_TBN;" );
 		code += OutputTabbedLine( "vec3 ViewPositionTangentSpace;" );
 		code += OutputTabbedLine( "vec3 FragPositionTangentSpace;" );
+		code += OutputTabbedLine( "vec4 ObjectID;" );
 		code += OutputLine( "} fs_in;\n" );
 
 		// Comment for declarations
@@ -1821,6 +1827,7 @@ namespace Enjon
 
 				// Other default code
 				code += OutputTabbedLine( "PositionOut = vec4( fs_in.FragPositionWorldSpace, 1.0 );" );
+				code += OutputTabbedLine( "ObjectIDOut = fs_in.ObjectID;" );
 
 			} break;
 

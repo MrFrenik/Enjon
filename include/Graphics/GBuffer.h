@@ -15,6 +15,7 @@ namespace Enjon {
 		POSITION,
 		EMISSIVE,
 		MAT_PROPS,
+		OBJECT_ID,
 		GBUFFER_TEXTURE_COUNT
 	};
 
