@@ -7,6 +7,7 @@
 #include "Graphics/Scene.h"
 #include "Graphics/Camera.h" 
 #include "Graphics/SpriteBatch.h"
+#include "Entity/EntityManager.h"
 #include "Subsystem.h" 
 
 namespace Enjon 
@@ -58,6 +59,11 @@ namespace Enjon
 		double mSmallGaussianCurve[16];
 		double mMediumGaussianCurve[16];
 		double mLargeGaussianCurve[16];
+	};
+
+	struct PickResult
+	{
+		EntityHandle mEntity;
 	};
 
 
@@ -140,6 +146,16 @@ namespace Enjon
 			*@brief
 			*/
 			ShaderUniform* NewShaderUniform( const MetaClass* uniformClass ) const;
+
+			/**
+			*@brief
+			*/
+			PickResult GetPickedObjectResult( const Vec2& screenPosition );
+
+			/**
+			*@brief
+			*/
+			iVec2 GetImGuiViewport( ) const;
 
 		private:
 

@@ -82,6 +82,7 @@ namespace Enjon
 			Vector<Entity*> mSceneEntities;
 
 			EntityHandle mSceneEntity;
+			EntityHandle mTransformWidgetEntity;
 	}; 
 }
 

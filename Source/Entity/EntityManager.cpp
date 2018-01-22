@@ -33,7 +33,10 @@ namespace Enjon
 	EntityHandle::EntityHandle( const Entity* entity )
 		: mEntity( entity )
 	{
-		mID = entity->mID;
+		if ( mEntity )
+		{
+			mID = mEntity->mID;
+		}
 	}
  
 	//================================================================================================

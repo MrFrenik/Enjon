@@ -41,9 +41,9 @@ Enjon::String copyDir = "";
 Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 //Enjon::String mProjectsDir = "W:/Projects/";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -71,7 +71,7 @@ namespace Enjon
 
 	void SceneView( bool* viewBool )
 	{
-		const Enjon::GraphicsSubsystem* gfx = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( );
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 		u32 currentTextureId = gfx->GetCurrentRenderTextureId( ); 
 
 		// Render game in window
@@ -94,7 +94,7 @@ namespace Enjon
 
 	void EnjonEditor::CameraOptions( bool* enable )
 	{
-		const Enjon::GraphicsSubsystem* gfx = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( ); 
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 		const Enjon::Camera* cam = gfx->GetSceneCamera( );
 
 		if ( ImGui::TreeNode( "Camera" ) )
@@ -131,7 +131,8 @@ namespace Enjon
 					ShutdownProjectApp( nullptr );
 				}
 
-				auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( )->ConstCast< Enjon::Camera >();
+				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+				auto cam = gfx->GetSceneCamera( )->ConstCast< Camera >();
 				cam->SetPosition( mPreviousCameraTransform.Position );
 				cam->SetRotation( mPreviousCameraTransform.Rotation ); 
 			}
@@ -143,7 +144,8 @@ namespace Enjon
 				mPlaying = true;
 				mMoveCamera = true;
 
-				auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( ); 
+				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+				auto cam = gfx->GetSceneCamera( );
 				mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) );
 
 				// Call start up function for game
@@ -168,7 +170,7 @@ namespace Enjon
 
 	void EnjonEditor::WorldOutlinerView( )
 	{
-		const Enjon::EntityManager* entities = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( );
+		EntityManager* entities = EngineSubsystem( EntityManager );
 		ImGui::Text( fmt::format( "Entities: {}", entities->GetActiveEntities().size() ).c_str() ); 
 
 		for ( auto& e : entities->GetActiveEntities( ) )
@@ -205,7 +207,7 @@ namespace Enjon
 				if ( ImGui::CollapsingHeader( "ADD COMPONENT" ) )
 				{
 					// Get component list
-					auto entities = Engine::GetInstance( )->GetSubsystem( Object::GetClass< EntityManager >( ) )->ConstCast< EntityManager >( );
+					EntityManager* entities = EngineSubsystem( EntityManager );
 					auto compMetaClsList = entities->GetComponentMetaClassList( );
 
 					ImGui::ListBoxHeader( "" );
@@ -244,7 +246,7 @@ namespace Enjon
 
 			if ( ImGui::Button( "Load File" ) )
 			{
-				Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( )->ConstCast< Enjon::AssetManager >( );
+				Enjon::AssetManager* am = EngineSubsystem( AssetManager );
 				am->AddToDatabase( mResourceFilePathToLoad );
 			}
 		}
@@ -384,7 +386,7 @@ namespace Enjon
 	void EnjonEditor::CleanupScene( )
 	{ 
 		// Force the scene to clean up ahead of frame
-		auto entities = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< EntityManager >( )->ConstCast< EntityManager >( );
+		EntityManager* entities = EngineSubsystem( EntityManager ) ;
 		entities->ForceCleanup( );
 	}
 
@@ -542,13 +544,15 @@ namespace Enjon
 		if ( app )
 		{
 			// Cache off all entity handles in scene before app starts
-			mSceneEntities = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->GetActiveEntities( );
+			EntityManager* em = EngineSubsystem( EntityManager );
+			mSceneEntities = em->GetActiveEntities( );
 
 			// Initialize the app
 			app->Initialize( );
 
 			// Turn on the physics simulation
-			Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->ConstCast< PhysicsSubsystem >( )->PauseSystem( false ); 
+			PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
+			physx->PauseSystem( false ); 
 		}
 	}
 
@@ -559,9 +563,17 @@ namespace Enjon
 		Application* app = mProject.GetApplication( );
 		if ( app )
 		{
+			EntityManager* em = EngineSubsystem( EntityManager );
+			Vector<Entity*> entities = em->GetActiveEntities( );
 			// Destroy any entities alive that aren't in the cached off entity list
-			for ( auto& e : Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::EntityManager >( )->GetActiveEntities( ) )
+			for ( auto& e : entities )
 			{ 
+				// Shutdown its components
+				for ( auto& c : e->GetComponents( ) )
+				{
+					c->Shutdown( );
+				}
+
 				// If either null or not in original cached entity list then destroy
 				if ( !e || std::find( mSceneEntities.begin( ), mSceneEntities.end( ), e ) == mSceneEntities.end( ) )
 				{
@@ -570,26 +582,17 @@ namespace Enjon
 			} 
 
 			// Shutodwn the application
-			app->Shutdown( );
-
-			// Shutdown all entity components ( should put this lower in the engine code...)
-			for ( auto& e : Engine::GetInstance( )->GetSubsystemCatalog( )->Get< EntityManager >( )->GetActiveEntities( ) )
-			{
-				for ( auto& c : e->GetComponents( ) )
-				{
-					c->Shutdown( );
-				}
-			} 
+			app->Shutdown( ); 
 
 			// Force the scene to clean up ahead of frame
 			CleanupScene( ); 
 
 			// Clean up physics subsystem from contact events as well
-			auto phys = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::PhysicsSubsystem >( )->ConstCast< Enjon::PhysicsSubsystem >( );
+			PhysicsSubsystem* phys = EngineSubsystem( PhysicsSubsystem );
 			phys->Reset( );
 
 			// Pause the physics simulation
-			Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->ConstCast< PhysicsSubsystem >( )->PauseSystem( true ); 
+			phys->PauseSystem( true ); 
 		}
 	}
 	 
@@ -601,11 +604,12 @@ namespace Enjon
 		Enjon::String cacheDirectoryPath = mAssetsDirectoryPath + "/Cache/";
 
 		// Get asset manager and set its properties ( I don't like this )
-		Enjon::AssetManager* mAssetManager = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get<Enjon::AssetManager>( )->ConstCast< Enjon::AssetManager >( );
-		Enjon::GraphicsSubsystem* mGfx = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( );
+		AssetManager* mAssetManager = EngineSubsystem( AssetManager );
+		GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
+		PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
 
 		// Pause the physics simulation
-		Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->ConstCast< PhysicsSubsystem >( )->PauseSystem( true ); 
+		physx->PauseSystem( true ); 
 
 		// This also needs to be done through a config file or cmake
 		mAssetManager->SetAssetsDirectoryPath( mAssetsDirectoryPath );
@@ -626,7 +630,7 @@ namespace Enjon
 		CollectAllProjectsOnDisk( );
 
 		// Initialize scene entity
-		EntityManager* entities = Engine::GetInstance( )->GetSubsystem( Object::GetClass<EntityManager >( ) )->ConstCast< EntityManager >( );
+		EntityManager* entities = EngineSubsystem( EntityManager );
 		mSceneEntity = entities->Allocate( );
 		if ( mSceneEntity.Get() ) 
 		{ 
@@ -638,7 +642,20 @@ namespace Enjon
 				gfxComp->SetMaterial( mAssetManager->GetDefaultAsset< Material >( ) );
 			}
 			ent->SetLocalPosition( Vec3( 5.0f, 2.0f, 4.0f ) );
-		}
+		} 
+
+		// Initialize transform widget entity
+		mTransformWidgetEntity = entities->Allocate( );
+		if ( mTransformWidgetEntity.Get( ) )
+		{
+			Entity* ent = mTransformWidgetEntity.Get( );
+			auto gfxComp = ent->AddComponent< GraphicsComponent >( );
+			if ( gfxComp )
+			{
+				gfxComp->SetMesh( mAssetManager->GetAsset< Mesh >( "models.unit_sphere" ) );
+				gfxComp->SetMaterial( mAssetManager->GetDefaultAsset< Material >( ) );
+			} 
+		} 
 
 		// Register individual windows
 		Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
@@ -744,9 +761,9 @@ namespace Enjon
 
 	Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 	{ 
-		const Enjon::GraphicsSubsystem* mGfx = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem>( );
-		const Enjon::Input* mInput = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::Input >( );
-		Enjon::Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >(); 
+		GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
+		Input* mInput = EngineSubsystem( Input );
+		Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >(); 
 
 		if ( mInput->IsKeyPressed( Enjon::KeyCode::T ) )
 		{
@@ -755,6 +772,20 @@ namespace Enjon
 
 		if ( mMoveCamera )
 		{
+			// Check for clicking to move transform widget for now
+			if ( mInput->IsKeyPressed( KeyCode::LeftMouseButton ) )
+			{
+				auto viewport = mGfx->GetViewport( );
+
+				// Get picked result from screen position
+				iVec2 dispSize = mGfx->GetImGuiViewport( );
+				PickResult pr = mGfx->GetPickedObjectResult( Vec2( dispSize.x, dispSize.y ) / 2.0f );
+				if ( pr.mEntity.Get( ) )
+				{
+					mTransformWidgetEntity.Get( )->SetLocalPosition( pr.mEntity.Get( )->GetWorldPosition( ) );
+				}
+			}
+
 			Enjon::Vec3 velDir( 0, 0, 0 );
 
 			if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
@@ -826,9 +857,8 @@ namespace Enjon
 						ShutdownProjectApp( nullptr );
 					}
 
-					auto cam = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::GraphicsSubsystem >( )->ConstCast< Enjon::GraphicsSubsystem >( )->GetSceneCamera( )->ConstCast< Enjon::Camera >( );
-					cam->SetPosition( mPreviousCameraTransform.Position );
-					cam->SetRotation( mPreviousCameraTransform.Rotation );
+					camera->SetPosition( mPreviousCameraTransform.Position );
+					camera->SetRotation( mPreviousCameraTransform.Rotation );
 				}
 			}
 		}

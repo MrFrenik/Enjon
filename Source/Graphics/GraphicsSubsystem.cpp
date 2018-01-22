@@ -569,25 +569,62 @@ namespace Enjon
 
 	void GraphicsSubsystem::ReadObjectIDTarget( )
 	{
+		//// Set pixel alignment for unpacking
+		//glPixelStorei( GL_UNPACK_ALIGNMENT, 1 ); 
+		//mGbuffer->Bind( BindType::READ );
+		//glReadBuffer( GL_COLOR_ATTACHMENT0 + (u32)GBufferTextureType::OBJECT_ID );
+
+		//// Read at center of screen
+		//u8 data[ 4 ]; 
+		//s32 x = ImGui::GetIO( ).DisplaySize.x;
+		//s32 y = ImGui::GetIO( ).DisplaySize.y;
+		//glReadPixels( s32( f32( x ) / 2.0f ), s32( f32( y ) / 2.0f ), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data ); 
+
+		//ColorRGBA32 color( (f32)data[ 0 ] / 255.0f, (f32)data[ 1 ] / 255.0f, (f32)data[ 2 ] / 255.0f, (f32)data[ 3 ] / 255.0f );
+
+		//u32 id = Renderable::ColorToID( color );
+
+		//printf( "ID: %d\n", id );
+
+		//// Unbind buffer
+		//mGbuffer->Unbind( );
+	}
+
+	//======================================================================================================
+
+	iVec2 GraphicsSubsystem::GetImGuiViewport( ) const
+	{
+		auto disp = ImGui::GetIO( ).DisplaySize;
+		return iVec2( disp.x, disp.y );
+	}
+
+	//======================================================================================================
+
+	PickResult GraphicsSubsystem::GetPickedObjectResult( const Vec2& screenPosition )
+	{
 		// Set pixel alignment for unpacking
-		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 ); 
+		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 		mGbuffer->Bind( BindType::READ );
-		glReadBuffer( GL_COLOR_ATTACHMENT0 + (u32)GBufferTextureType::OBJECT_ID );
+		glReadBuffer( GL_COLOR_ATTACHMENT0 + ( u32 )GBufferTextureType::OBJECT_ID );
 
-		// Read at center of screen
-		u8 data[ 4 ]; 
-		s32 x = ImGui::GetIO( ).DisplaySize.x;
-		s32 y = ImGui::GetIO( ).DisplaySize.y;
-		glReadPixels( s32( f32( x ) / 2.0f ), s32( f32( y ) / 2.0f ), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data ); 
+		// Read at center of screen and convert to color
+		u8 data[ 4 ];
+		s32 x = (s32)screenPosition.x;
+		s32 y = (s32)screenPosition.y;
+		glReadPixels( x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data );
+		ColorRGBA32 color( ( f32 )data[ 0 ] / 255.0f, ( f32 )data[ 1 ] / 255.0f, ( f32 )data[ 2 ] / 255.0f, ( f32 )data[ 3 ] / 255.0f );
 
-		ColorRGBA32 color( (f32)data[ 0 ] / 255.0f, (f32)data[ 1 ] / 255.0f, (f32)data[ 2 ] / 255.0f, (f32)data[ 3 ] / 255.0f );
-
+		// Get id from color
 		u32 id = Renderable::ColorToID( color );
 
-		printf( "ID: %d\n", id );
+		// Get the entity that this id corresponds to
+		EntityManager* em = EngineSubsystem( EntityManager );
+		EntityHandle handle = em->GetRawEntity( id );
 
 		// Unbind buffer
 		mGbuffer->Unbind( );
+
+		return PickResult { handle };
 	}
 
 	//======================================================================================================
