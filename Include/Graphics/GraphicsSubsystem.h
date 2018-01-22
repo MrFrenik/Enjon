@@ -150,7 +150,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			PickResult GetPickedObjectResult( const Vec2& screenPosition );
+			PickResult GetPickedObjectResult( const iVec2& screenPosition );
 
 			/**
 			*@brief

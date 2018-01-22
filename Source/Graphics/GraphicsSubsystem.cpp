@@ -600,7 +600,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	PickResult GraphicsSubsystem::GetPickedObjectResult( const Vec2& screenPosition )
+	PickResult GraphicsSubsystem::GetPickedObjectResult( const iVec2& screenPosition )
 	{
 		// Set pixel alignment for unpacking
 		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
@@ -609,9 +609,7 @@ namespace Enjon
 
 		// Read at center of screen and convert to color
 		u8 data[ 4 ];
-		s32 x = (s32)screenPosition.x;
-		s32 y = (s32)screenPosition.y;
-		glReadPixels( x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data );
+		glReadPixels( screenPosition.x, screenPosition.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data );
 		ColorRGBA32 color( ( f32 )data[ 0 ] / 255.0f, ( f32 )data[ 1 ] / 255.0f, ( f32 )data[ 2 ] / 255.0f, ( f32 )data[ 3 ] / 255.0f );
 
 		// Get id from color

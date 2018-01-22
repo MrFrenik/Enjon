@@ -778,8 +778,8 @@ namespace Enjon
 				auto viewport = mGfx->GetViewport( );
 
 				// Get picked result from screen position
-				iVec2 dispSize = mGfx->GetImGuiViewport( );
-				PickResult pr = mGfx->GetPickedObjectResult( Vec2( dispSize.x, dispSize.y ) / 2.0f );
+				iVec2 dispSize = mGfx->GetViewport( );
+				PickResult pr = mGfx->GetPickedObjectResult( iVec2( dispSize.x, dispSize.y ) / 2.0f );
 				if ( pr.mEntity.Get( ) )
 				{
 					mTransformWidgetEntity.Get( )->SetLocalPosition( pr.mEntity.Get( )->GetWorldPosition( ) );
