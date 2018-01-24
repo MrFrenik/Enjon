@@ -2,12 +2,14 @@
 // Copyright 2016-2018 John Jackson. All Rights Reserved.
 
 #include "Project.h"
+#include "EditorTransformWidget.h"
 
 #include <Application.h>
 #include <Entity/EntityManager.h>
+#include <Graphics/Renderable.h> 
 
 namespace Enjon
-{
+{ 
 	class EnjonEditor : public Enjon::Application
 	{
 		public:
@@ -81,8 +83,9 @@ namespace Enjon
 			Vector<Project> mProjectsOnDisk;
 			Vector<Entity*> mSceneEntities;
 
-			EntityHandle mSceneEntity;
-			EntityHandle mTransformWidgetEntity;
+			EntityHandle mSceneEntity; 
+
+			EditorTransformWidget mTransformWidget;
 	}; 
 }
 

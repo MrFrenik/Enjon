@@ -10,12 +10,11 @@
 #include "Base/Object.h"
 #include "Entity/EntityDefines.h"
 #include "Graphics/Mesh.h"
+#include "Graphics/Material.h"
 
 namespace Enjon 
 { 
 	class Scene;
-	class Shader;
-	class Material;
 	class GraphicsSubsystem;
 	class GLSLProgram;
 	class ColorRGBA32;

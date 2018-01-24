@@ -644,18 +644,8 @@ namespace Enjon
 			ent->SetLocalPosition( Vec3( 5.0f, 2.0f, 4.0f ) );
 		} 
 
-		// Initialize transform widget entity
-		mTransformWidgetEntity = entities->Allocate( );
-		if ( mTransformWidgetEntity.Get( ) )
-		{
-			Entity* ent = mTransformWidgetEntity.Get( );
-			auto gfxComp = ent->AddComponent< GraphicsComponent >( );
-			if ( gfxComp )
-			{
-				gfxComp->SetMesh( mAssetManager->GetAsset< Mesh >( "models.unit_sphere" ) );
-				gfxComp->SetMaterial( mAssetManager->GetDefaultAsset< Material >( ) );
-			} 
-		} 
+		// Initialize transform widget
+		mTransformWidget.Initialize( );
 
 		// Register individual windows
 		Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
@@ -742,6 +732,8 @@ namespace Enjon
 		static float t = 0.0f;
 		t += dt; 
 
+		mTransformWidget.Update( );
+
 		// Simulate game tick scenario if playing
 		if ( mPlaying )
 		{ 
@@ -782,7 +774,7 @@ namespace Enjon
 				PickResult pr = mGfx->GetPickedObjectResult( iVec2( dispSize.x, dispSize.y ) / 2.0f );
 				if ( pr.mEntity.Get( ) )
 				{
-					mTransformWidgetEntity.Get( )->SetLocalPosition( pr.mEntity.Get( )->GetWorldPosition( ) );
+					mTransformWidget.SetPosition( pr.mEntity.Get( )->GetWorldPosition( ) );
 				}
 			}
 

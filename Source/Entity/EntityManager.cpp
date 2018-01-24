@@ -388,6 +388,7 @@ namespace Enjon
 	}
 
 	//-----------------------------------------
+
 	void Entity::AddChild(const EntityHandle& child)
 	{
 		Enjon::Entity* ent = child.Get( );
