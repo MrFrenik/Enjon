@@ -241,6 +241,13 @@ namespace Enjon
 	}
 	
 	//================================================
+
+	f32 Vec3::Distance( const Vec3& a, const Vec3& b )
+	{
+		return a.Distance( b );
+	}
+	
+	//================================================
 			
 	f32 Vec3::DistanceSquared(const Vec3& a, const Vec3& b)
 	{

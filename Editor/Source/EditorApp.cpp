@@ -730,7 +730,15 @@ namespace Enjon
 	Enjon::Result EnjonEditor::Update( f32 dt )
 	{ 
 		static float t = 0.0f;
-		t += dt; 
+		t += dt; 		
+		
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		const Camera* cam = gfx->GetSceneCamera( );
+
+		// Set scale of root based on distance from camera
+		f32 distSqred = Vec3::DistanceSquared( cam->GetPosition( ), mTransformWidget.GetWorldTransform( ).GetPosition( ) );
+		f32 scale = Clamp( distSqred, 0.5f, 100.0f );
+		mTransformWidget.SetScale( scale );
 
 		mTransformWidget.Update( );
 

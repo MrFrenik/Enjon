@@ -25,11 +25,19 @@ namespace Enjon
 
 			// Sets root position
 			void SetPosition( const Vec3& position );
+			// Sets root scale
+			void SetScale( const f32& scale );
 			
-			TransformHeirarchy mRoot;
+			TransformRenderableHeirarchy mRoot;
 			TransformRenderableHeirarchy mUpAxis;
+			TransformRenderableHeirarchy mXYAxis;
+			TransformRenderableHeirarchy mXZAxis;
+			TransformRenderableHeirarchy mYZAxis;
+			TransformRenderableHeirarchy mUpAxisArrow;
 			TransformRenderableHeirarchy mForwardAxis;
+			TransformRenderableHeirarchy mForwardAxisArrow;
 			TransformRenderableHeirarchy mRightAxis;
+			TransformRenderableHeirarchy mRightAxisArrow;
 	}; 
 }
 

@@ -24,6 +24,7 @@ namespace Enjon
 			Transform GetWorldTransform( );
 
 			void SetPosition( const Vec3& position );
+			void SetScale( const f32& scale );
 
 		private:
 

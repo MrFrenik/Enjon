@@ -143,6 +143,11 @@ namespace Enjon
 			*/
 			const Subsystem* GetSubsystem( const MetaClass* cls ) const;
 
+			/**
+			* @brief
+			*/
+			GraphicsSubsystem* GetGraphicsSubsystem( ) const;
+
 		private:
 			
 			/**

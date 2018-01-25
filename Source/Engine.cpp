@@ -275,6 +275,13 @@ namespace Enjon
 
 	//======================================================= 
 
+	GraphicsSubsystem* Engine::GetGraphicsSubsystem( ) const
+	{
+		return mGraphics;
+	}
+
+	//======================================================= 
+
 	// TODO(): This belongs in window class
 	Enjon::Result Engine::ProcessInput( Enjon::Input* input, const f32 dt )
 	{

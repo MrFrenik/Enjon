@@ -9,6 +9,17 @@
 
 namespace Enjon
 {
+	enum class TransformWidgetRenderableType
+	{
+		TranslationRoot,
+		TranslationForwardAxis,
+		TranslationUpAxis,
+		TranslationRightAxis,
+		TranslationXYAxes,
+		TranslationXZAxes,
+		TranslationYZAxes
+	};
+
 	class TransformHeirarchy
 	{
 		public:
