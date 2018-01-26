@@ -113,6 +113,25 @@ namespace Enjon
 			}
 			ImGui::TreePop( );
 		} 
+
+		if ( ImGui::TreeNode( "XZAxis" ) )
+		{
+			ImGuiManager::DebugDumpObject( &mTransformWidget.mTranslationWidget.mXZAxis );
+
+			ImGui::TreePop( );
+		}
+		if ( ImGui::TreeNode( "XYAxis" ) )
+		{
+			ImGuiManager::DebugDumpObject( &mTransformWidget.mTranslationWidget.mXYAxis );
+
+			ImGui::TreePop( );
+		}
+		if ( ImGui::TreeNode( "YZAxis" ) )
+		{
+			ImGuiManager::DebugDumpObject( &mTransformWidget.mTranslationWidget.mYZAxis );
+
+			ImGui::TreePop( );
+		}
 	}
 
 	void EnjonEditor::PlayOptions( )
@@ -783,6 +802,57 @@ namespace Enjon
 				if ( pr.mEntity.Get( ) )
 				{
 					mTransformWidget.SetPosition( pr.mEntity.Get( )->GetWorldPosition( ) );
+				}
+				else
+				{
+					// Look for picked transform widget
+					switch ( pr.mId )
+					{
+						case ( MAX_ENTITIES + (u32)TransformWidgetRenderableType::TranslationRightAxis ):
+						{
+							std::cout << "Picked right axis!\n";
+
+							// Find dot between cam forward and right axis
+							Vec3 cF = camera->Forward( ).Normalize( );
+							Vec3 Tx = Vec3( 1.0f, 0.0f, 0.0f );
+							f32 cFDotTx = std::fabs( cF.Dot( Tx ) );
+
+							// Can't continue with movement if directly parallel to axis
+							if ( cFDotTx > 1.0f )
+							{
+								break;
+							} 
+
+							// Now determine appropriate axis to move along
+							Vec3 Ty = Vec3( 0.0f, 1.0f, 0.0f );
+							Vec3 Tz = Vec3( 0.0f, 0.0f, 1.0f );
+
+							f32 cFDotTy = std::fabs( cF.Dot( Ty ) );
+							f32 cFDotTz = std::fabs( cF.Dot( Tz ) );
+
+							std::cout << fmt::format( "cF: < {}, {}, {} >, cfDotTx: {}, cfDotTy: {}, cfDotTz: {}", cF.x, cF.y, cF.z, cFDotTx, cFDotTy, cFDotTz ) << "\n"; 
+
+							if ( cFDotTy < cFDotTz )
+							{
+								std::cout << "Chose XY-axis!\n";
+							}
+							else
+							{
+								std::cout << "Chose XZ-axis!\n";
+							} 
+
+						} break;
+
+						case ( MAX_ENTITIES + (u32)TransformWidgetRenderableType::TranslationUpAxis ):
+						{
+							std::cout << "Picked up axis!\n";
+						} break;
+
+						case ( MAX_ENTITIES + (u32)TransformWidgetRenderableType::TranslationForwardAxis ):
+						{
+							std::cout << "Picked forward axis!\n";
+						} break;
+					}
 				}
 			}
 

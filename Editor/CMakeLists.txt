@@ -47,19 +47,29 @@ link_directories(${ENJON_BUILD_DIR}/RelWithDebInfo)
 
 set(TARGET_INC_DIR "${TARGET_DIR}/Include/")
 set(TARGET_DIR_DIR "${TARGET_DIR}/Source/")
+set(TARGET_GENERATED_DIR ${TARGET_BUILD_DIR}/Generator/Linked/) 
 
-file(GLOB_RECURSE TARGET_SOURCES
-	"${TARGET_INC_DIR}/*.h"
-	"${TARGET_INC_DIR}/*.c"
-	"${TARGET_DIR_DIR}/*.cpp"
+file(
+		GLOB_RECURSE TARGET_SOURCES
+
+		"${TARGET_INC_DIR}/*.h"
+		"${TARGET_INC_DIR}/*.c"
+		"${TARGET_DIR_DIR}/*.cpp"
 	)
 
 set(
-	ALL_SRC 
-	${TARGET_SOURCES}
-) 
+		ALL_SRC 
+		${TARGET_SOURCES}
+		${TARGET_GENERATED_DIR}/${TARGET_NAME}_Generated.cpp
+	) 
 
-add_executable(${TARGET_NAME} ${TARGET_SOURCES}) 
+file(
+		GLOB_RECURSE REFLECTION_INCLUDES
+
+		"${TARGET_INC_DIR}/*.h"
+	)
+
+add_executable(${TARGET_NAME} ${ALL_SRC}) 
 
 # Link libraries to target
 target_link_libraries( ${TARGET_NAME} debug Enjond.lib optimized Enjon.lib )
@@ -94,3 +104,33 @@ if (MSVC)
 		</Project>" 
 	)
 endif()
+
+# Reflection information
+set( TARGET_REFLECTION_DIR ${TARGET_BUILD_DIR}/Generator/ )
+
+# Create directory if doesn't exist
+if (NOT IS_DIRECTORY ${TARGET_REFLECTION_DIR})
+	file(MAKE_DIRECTORY ${TARGET_REFLECTION_DIR})
+	file(MAKE_DIRECTORY ${TARGET_REFLECTION_DIR}/Intermediate/)
+	file(MAKE_DIRECTORY ${TARGET_REFLECTION_DIR}/Linked/)
+endif()
+
+# Create reflection list for project
+file(WRITE ${TARGET_REFLECTION_DIR}/reflection.cfg "#target_dir \"${TARGET_DIR}/\"\n") 
+file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#engine_dir \"${ENJON_DIR}\"\n") 
+file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#project_name \"${TARGET_NAME}\"\n") 
+file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#generate_app_bindings true \n") 
+file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#files\n") 
+
+# Add all reflection include files
+foreach( file ${REFLECTION_INCLUDES} )
+
+	file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "\"${file}\"\n") 
+
+endforeach(file)
+
+# Need to get this working with projects
+add_custom_command(
+	TARGET ${TARGET_NAME} PRE_BUILD
+	COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe ARGS --target-path ${TARGET_DIR}/
+)

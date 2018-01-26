@@ -64,6 +64,7 @@ namespace Enjon
 	struct PickResult
 	{
 		EntityHandle mEntity;
+		u32 mId;
 	};
 
 

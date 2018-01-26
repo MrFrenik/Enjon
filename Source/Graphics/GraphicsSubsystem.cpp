@@ -622,7 +622,7 @@ namespace Enjon
 		// Unbind buffer
 		mGbuffer->Unbind( );
 
-		return PickResult { handle };
+		return PickResult { handle, id };
 	}
 
 	//======================================================================================================

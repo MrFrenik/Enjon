@@ -57,7 +57,7 @@ namespace Enjon
 		f32 bias = 1.0f;
 		f32 coneYOffset = 1.2f;
 		Vec3 coneScale = Vec3( 2.0f, 0.3f, 2.0f );
-		Vec3 sharedAxisScale = Vec3( yScale * 1.5f, yScale / 10.0f * 1.5f, 0.1f );
+		Vec3 sharedAxisScale = Vec3( 5.0f, 0.4f, 0.2f );
 		mForwardAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( -90.0f ), Vec3::XAxis() ) );
 		mRightAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( 90.0f ), Vec3::ZAxis() ) );
 		mForwardAxis.mLocalTransform.SetScale( Vec3( xzScale, yScale, xzScale ) );
@@ -73,17 +73,17 @@ namespace Enjon
 		mUpAxisArrow.mLocalTransform.SetScale( coneScale );
 		mRightAxisArrow.mLocalTransform.SetScale( coneScale ); 
 
-		mYZAxis.mLocalTransform.SetScale( sharedAxisScale );
-		mYZAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( -90.0f ), Vec3::YAxis( ) ) );
-		mYZAxis.mLocalTransform.SetPosition( Vec3( 0.0f, -0.8f, 4.2f ) );
+		mXZAxis.mLocalTransform.SetScale( sharedAxisScale );
+		mXZAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( 90.0f ), Vec3::ZAxis( ) ) );
+		mXZAxis.mLocalTransform.SetPosition( Vec3( 4.5f, -0.9f, 0.0f ) );
 
 		mXYAxis.mLocalTransform.SetScale( sharedAxisScale );
 		mXYAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( 0.0f ), Vec3::YAxis( ) ) );
-		mXYAxis.mLocalTransform.SetPosition( Vec3( 4.2f, -0.8f, 0.0f ) );
+		mXYAxis.mLocalTransform.SetPosition( Vec3( 4.2f, -0.8f, 0.0f ) ); 
 
-		mXZAxis.mLocalTransform.SetScale( sharedAxisScale );
-		mXZAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( 90.0f ), Vec3::ZAxis( ) ) );
-		mXZAxis.mLocalTransform.SetPosition( Vec3( 4.5f, 0.8f, -4.5f ) );
+		mYZAxis.mLocalTransform.SetScale( sharedAxisScale );
+		mYZAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( -90.0f ), Vec3::YAxis( ) ) );
+		mYZAxis.mLocalTransform.SetPosition( Vec3( 0.0f, -0.8f, 4.2f ) );
 
 		// Add renderables to graphics scene
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
@@ -121,8 +121,8 @@ namespace Enjon
 
 		// Set scale of root based on distance from camera
 		f32 dist = Vec3::Distance( cam->GetPosition( ), mRoot.mLocalTransform.GetPosition() );
-		f32 scale = Clamp( dist / 40.0f, 0.01f, 100.0f );
-		mRoot.mLocalTransform.SetScale( scale ); 
+		f32 scale = Clamp( dist / 40.0f, 0.001f, 100.0f );
+		mRoot.mLocalTransform.SetScale( 1.0f ); 
 
 		// Calculate world transforms for all
 		mRoot.CalculateWorldTransform( ); 

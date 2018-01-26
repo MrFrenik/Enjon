@@ -26,8 +26,6 @@ namespace Enjon
 			void SetPosition( const Vec3& position );
 			void SetScale( const f32& scale );
 
-		private:
-
 			EditorTranslationWidget mTranslationWidget;
 
 		private:

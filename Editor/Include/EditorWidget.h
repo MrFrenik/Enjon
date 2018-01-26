@@ -20,8 +20,11 @@ namespace Enjon
 		TranslationYZAxes
 	};
 
-	class TransformHeirarchy
+	ENJON_CLASS( )
+	class TransformHeirarchy : public Object
 	{
+		ENJON_CLASS_BODY( )
+
 		public:
 			TransformHeirarchy( ) = default;
 			~TransformHeirarchy( ) = default;
@@ -110,14 +113,19 @@ namespace Enjon
 				CalculateLocalTransform( ); 
 			}
 
+			ENJON_PROPERTY( )
 			Transform mLocalTransform;
+
 			Transform mWorldTransform;
 			TransformHeirarchy* mParent = nullptr;
 			Vector<TransformHeirarchy*> mChildren;
 	};
 
+	ENJON_CLASS( )
 	class TransformRenderableHeirarchy : public TransformHeirarchy
 	{
+		ENJON_CLASS_BODY( )
+
 		public:
 			TransformRenderableHeirarchy( ) = default;
 			~TransformRenderableHeirarchy( ) = default;

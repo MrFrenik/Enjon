@@ -11,8 +11,11 @@
 
 namespace Enjon
 { 
-	class EditorTranslationWidget
+	ENJON_CLASS()
+	class EditorTranslationWidget : public Object
 	{
+		ENJON_CLASS_BODY( )
+
 		public:
 			EditorTranslationWidget( ) = default;
 			~EditorTranslationWidget( ) = default; 
@@ -30,9 +33,16 @@ namespace Enjon
 			
 			TransformRenderableHeirarchy mRoot;
 			TransformRenderableHeirarchy mUpAxis;
+
+			ENJON_PROPERTY( )
 			TransformRenderableHeirarchy mXYAxis;
+
+			ENJON_PROPERTY( )
 			TransformRenderableHeirarchy mXZAxis;
+
+			ENJON_PROPERTY( )
 			TransformRenderableHeirarchy mYZAxis;
+
 			TransformRenderableHeirarchy mUpAxisArrow;
 			TransformRenderableHeirarchy mForwardAxis;
 			TransformRenderableHeirarchy mForwardAxisArrow;
