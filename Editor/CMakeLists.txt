@@ -49,6 +49,16 @@ set(TARGET_INC_DIR "${TARGET_DIR}/Include/")
 set(TARGET_DIR_DIR "${TARGET_DIR}/Source/")
 set(TARGET_GENERATED_DIR ${TARGET_BUILD_DIR}/Generator/Linked/) 
 
+# Output generation file
+if (NOT IS_DIRECTORY ${TARGET_GENERATED_DIR})
+	file(MAKE_DIRECTORY ${TARGET_GENERATED_DIR})
+endif()
+
+if ( NOT EXISTS ${TARGET_GENERATED_DIR}/${TARGET_NAME}_Generated.cpp )
+else()
+	file(WRITE ${TARGET_GENERATED_DIR}/${TARGET_NAME}_Generated.cpp "// Target_Generated.cpp\n") 
+endif()
+
 file(
 		GLOB_RECURSE TARGET_SOURCES
 

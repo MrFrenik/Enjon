@@ -112,6 +112,8 @@ namespace Enjon
 
 		// Set up scale for root
 		mRoot.mLocalTransform.SetScale( 0.5f );
+
+		mRoot.mLocalTransform.SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
 	} 
 
 	void EditorTranslationWidget::Update( )
@@ -122,7 +124,7 @@ namespace Enjon
 		// Set scale of root based on distance from camera
 		f32 dist = Vec3::Distance( cam->GetPosition( ), mRoot.mLocalTransform.GetPosition() );
 		f32 scale = Clamp( dist / 40.0f, 0.001f, 100.0f );
-		mRoot.mLocalTransform.SetScale( 1.0f ); 
+		mRoot.mLocalTransform.SetScale( scale ); 
 
 		// Calculate world transforms for all
 		mRoot.CalculateWorldTransform( ); 

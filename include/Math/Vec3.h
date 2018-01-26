@@ -302,6 +302,11 @@ namespace Enjon {
 			*/	
 			static Vec3 Normalize(const Vec3& vec);
 
+			/** 
+			* @brief
+			*/	
+			static Vec3 Cross(const Vec3& a, const Vec3& b);
+
 			/**
 			* @brief Static function that calculates squared distance from one vector to another
 			* @param a - LH vector used in distance calculation

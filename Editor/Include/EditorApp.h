@@ -54,6 +54,8 @@ namespace Enjon
 			void InitializeProjectApp( );
 			void ShutdownProjectApp( ByteBuffer* buffer );
 
+			void LoadResources( );
+
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;

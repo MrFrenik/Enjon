@@ -218,6 +218,13 @@ namespace Enjon
 	} 
 	
 	//================================================
+
+	Vec3 Vec3::Cross( const Vec3& a, const Vec3& b )
+	{
+		return a.Cross( b );
+	}
+	
+	//================================================
 			
 	Vec3 Vec3::Normalize(const Vec3& vec)
 	{ 

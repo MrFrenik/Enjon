@@ -131,6 +131,12 @@ namespace Enjon
 			ImGuiManager::DebugDumpObject( &mTransformWidget.mTranslationWidget.mYZAxis );
 
 			ImGui::TreePop( );
+		} 
+		if ( ImGui::TreeNode( "TranslationRoot" ) )
+		{
+			ImGuiManager::DebugDumpObject( &mTransformWidget.mTranslationWidget.mRoot );
+
+			ImGui::TreePop( );
 		}
 	}
 
@@ -619,6 +625,9 @@ namespace Enjon
 	{ 
 		mApplicationName = "EnjonEditor";
 
+		std::cout << fmt::format( "Size of material: {}\n", sizeof( Enjon::Material ) );
+		std::cout << fmt::format( "Size of shader graph: {}\n", sizeof( Enjon::ShaderGraph ) );
+
 		Enjon::String mAssetsDirectoryPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + "Editor/Assets/";
 		Enjon::String cacheDirectoryPath = mAssetsDirectoryPath + "/Cache/";
 
@@ -635,6 +644,9 @@ namespace Enjon
 		mAssetManager->SetCachedAssetsDirectoryPath( cacheDirectoryPath );
 		mAssetManager->SetDatabaseName( GetApplicationName( ) );
 		mAssetManager->Initialize( ); 
+
+		// Load all resources and cache them
+		LoadResources( );
 
 		// Register project template files
 		mProjectSourceTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectSourceTemplate.cpp" ).c_str() ); 
@@ -832,13 +844,53 @@ namespace Enjon
 
 							std::cout << fmt::format( "cF: < {}, {}, {} >, cfDotTx: {}, cfDotTy: {}, cfDotTz: {}", cF.x, cF.y, cF.z, cFDotTx, cFDotTy, cFDotTz ) << "\n"; 
 
+							// Choose to use XY-plane
 							if ( cFDotTy < cFDotTz )
 							{
-								std::cout << "Chose XY-axis!\n";
-							}
+								std::cout << "Chose XY-plane!\n";
+
+								// Need to define z as normal to plane
+								Vec3 normal = Vec3::Normalize( mTransformWidget.mTranslationWidget.mRoot.mWorldTransform.GetRotation() * Vec3::ZAxis( ) );
+								std::cout << fmt::format( "normal: {}, {}, {}", normal.x, normal.y, normal.z ); 
+
+								// Define XZ plane
+								Plane XYPlane( normal, mTransformWidget.mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+								// Get intersection result of plane
+								LineIntersectionResult intersectionResult = XYPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition() + camera->Forward( ) ); 
+
+								if ( intersectionResult.mHit )
+								{
+									const Vec3* hp = &intersectionResult.mHitPosition;
+									std::cout << fmt::format( "Hit Position: < {}, {}, {} >\n", hp->x, hp->y, hp->z );
+
+									// Lock the movement to only the x position
+									mTransformWidget.mTranslationWidget.mRoot.mLocalTransform.Position.x = intersectionResult.mHitPosition.x;
+								} 
+							} 
+							// Choose to use XZ-plane
 							else
 							{
-								std::cout << "Chose XZ-axis!\n";
+								std::cout << "Chose XZ-plane!\n";
+
+								// Need to define z as normal to plane
+								Vec3 normal = Vec3::Normalize( mTransformWidget.mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) );
+								std::cout << fmt::format( "normal: {}, {}, {}", normal.x, normal.y, normal.z );
+
+								// Define XZ plane
+								Plane XZPlane( normal, mTransformWidget.mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+								// Get intersection result of plane
+								LineIntersectionResult intersectionResult = XZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+
+								if ( intersectionResult.mHit )
+								{
+									const Vec3* hp = &intersectionResult.mHitPosition;
+									std::cout << fmt::format( "Hit Position: < {}, {}, {} >\n", hp->x, hp->y, hp->z );
+
+									// Lock the movement to only the x position
+									mTransformWidget.mTranslationWidget.mRoot.mLocalTransform.Position.x = intersectionResult.mHitPosition.x;
+								}
 							} 
 
 						} break;
@@ -940,6 +992,177 @@ namespace Enjon
 	{ 
 		return Enjon::Result::SUCCESS;
 	} 
+
+	void EnjonEditor::LoadResources( )
+	{
+		// Paths to resources
+		Enjon::String toyBoxDispPath		= Enjon::String("Textures/toy_box_disp.png");
+		Enjon::String toyBoxNormalPath		= Enjon::String("Textures/toy_box_normal.png");
+		Enjon::String eyePath				= Enjon::String("Models/eye.obj");
+		Enjon::String noisePath				= Enjon::String("Textures/worleyNoise.png");
+		Enjon::String grassTexturePath		= Enjon::String("Textures/grass.png");
+		Enjon::String quadPath				= Enjon::String("Models/quad.obj");
+		Enjon::String rockPath				= Enjon::String("Models/rock.obj");
+		Enjon::String cerebusMeshPath		= Enjon::String("Models/cerebus.obj");
+		Enjon::String buddhaMeshPath		= Enjon::String("Models/buddha.obj");
+		Enjon::String bunnyMeshPath			= Enjon::String("Models/bunny.obj");
+		Enjon::String dragonMeshPath		= Enjon::String("Models/dragon.obj");
+		Enjon::String monkeyMeshPath		= Enjon::String("Models/monkey.obj");
+		Enjon::String sphereMeshPath		= Enjon::String("Models/unit_sphere.obj");
+		Enjon::String cylinderMeshPath		= Enjon::String("Models/unit_cylinder.obj");
+		Enjon::String coneMeshPath			= Enjon::String("Models/unit_cone.obj");
+		Enjon::String cubeMeshPath			= Enjon::String("Models/unit_cube.obj");
+		Enjon::String shaderballPath		= Enjon::String("Models/shaderball.obj");
+		Enjon::String unitSpherePath		= Enjon::String("Models/unit_sphere.obj");
+		Enjon::String unrealShaderBallPath	= Enjon::String("Models/unreal_shaderball.obj");
+		Enjon::String unitShaderBallPath	= Enjon::String("Models/unit_shaderball.obj");
+		Enjon::String catMeshPath			= Enjon::String("Models/cat.obj");
+		Enjon::String dudeMeshPath			= Enjon::String("Models/dude.obj");
+		Enjon::String shaderBallMeshPath	= Enjon::String("Models/shaderball.obj");
+		Enjon::String cerebusAlbedoPath		= Enjon::String("Materials/Cerebus/Albedo.png"); 
+		Enjon::String cerebusNormalPath		= Enjon::String("Materials/Cerebus/Normal.png"); 
+		Enjon::String cerebusMetallicPath	= Enjon::String("Materials/Cerebus/Metallic.png"); 
+		Enjon::String cerebusRoughnessPath	= Enjon::String("Materials/Cerebus/Roughness.png"); 
+		Enjon::String cerebusEmissivePath	= Enjon::String("Materials/Cerebus/Emissive.png"); 
+		Enjon::String mahogAlbedoPath		= Enjon::String("Materials/MahogFloor/Albedo.png"); 
+		Enjon::String mahogNormalPath		= Enjon::String("Materials/MahogFloor/Normal.png"); 
+		Enjon::String mahogMetallicPath		= Enjon::String("Materials/MahogFloor/Roughness.png"); 
+		Enjon::String mahogRoughnessPath	= Enjon::String("Materials/MahogFloor/Roughness.png"); 
+		Enjon::String mahogEmissivePath		= Enjon::String("Materials/MahogFloor/Emissive.png"); 
+		Enjon::String mahogAOPath			= Enjon::String("Materials/MahogFloor/AO.png"); 
+		Enjon::String woodAlbedoPath		= Enjon::String("Materials/WoodFrame/Albedo.png"); 
+		Enjon::String woodNormalPath		= Enjon::String("Materials/WoodFrame/Normal.png"); 
+		Enjon::String woodRoughnessPath		= Enjon::String("Materials/WoodFrame/Roughness.png"); 
+		Enjon::String woodMetallicPath		= Enjon::String("Materials/WoodFrame/Metallic.png"); 
+		Enjon::String plasticAlbedoPath		= Enjon::String("Materials/ScuffedPlastic/Albedo.png"); 
+		Enjon::String plasticNormalPath		= Enjon::String("Materials/ScuffedPlastic/Normal.png"); 
+		Enjon::String plasticRoughnessPath	= Enjon::String("Materials/ScuffedPlastic/Roughness.png"); 
+		Enjon::String plasticMetallicPath	= Enjon::String("Materials/ScuffedPlastic/Metallic.png"); 
+		Enjon::String plasticAOPath			= Enjon::String("Materials/ScuffedPlastic/AO.png"); 
+		Enjon::String wornRedAlbedoPath		= Enjon::String("Materials/RustedIron/Albedo.png"); 
+		Enjon::String wornRedNormalPath		= Enjon::String("Materials/RustedIron/Normal.png"); 
+		Enjon::String wornRedRoughnessPath	= Enjon::String("Materials/RustedIron/Roughness.png"); 
+		Enjon::String wornRedMetallicPath	= Enjon::String("Materials/RustedIron/Metallic.png"); 
+		Enjon::String scuffedGoldAlbedoPath		= Enjon::String("Materials/ScuffedGold/Albedo.png"); 
+		Enjon::String scuffedGoldNormalPath		= Enjon::String("Materials/ScuffedGold/Normal.png"); 
+		Enjon::String scuffedGoldMetallicPath	= Enjon::String("Materials/ScuffedGold/Metallic.png"); 
+		Enjon::String scuffedGoldRoughnessPath	= Enjon::String("Materials/ScuffedGold/Roughness.png"); 
+		Enjon::String paintPeelingAlbedoPath = Enjon::String( "Materials/PaintPeeling/Albedo.png" );
+		Enjon::String paintPeelingNormalPath = Enjon::String( "Materials/PaintPeeling/Normal.png" );
+		Enjon::String paintPeelingRoughnessPath = Enjon::String( "Materials/PaintPeeling/Roughness.png" );
+		Enjon::String paintPeelingMetallicPath = Enjon::String( "Materials/PaintPeeling/Metallic.png" );
+		Enjon::String mixedMossAlbedoPath	= Enjon::String( "Materials/MixedMoss/Albedo.png" );
+		Enjon::String mixedMossNormalPath	= Enjon::String( "Materials/MixedMoss/Normal.png" );
+		Enjon::String mixedMossMetallicPath	= Enjon::String( "Materials/MixedMoss/Metallic.png" );
+		Enjon::String mixedMossRoughnessPath	= Enjon::String( "Materials/MixedMoss/Roughness.png" );
+		Enjon::String mixedMossAOPath		= Enjon::String( "Materials/MixedMoss/AO.png" );
+		Enjon::String rockAlbedoPath		= Enjon::String("Materials/CopperRock/Albedo.png"); 
+		Enjon::String rockNormalPath		= Enjon::String("Materials/CopperRock/Normal.png"); 
+		Enjon::String rockRoughnessPath		= Enjon::String("Materials/CopperRock/Roughness.png"); 
+		Enjon::String rockMetallicPath		= Enjon::String("Materials/CopperRock/Metallic.png"); 
+		Enjon::String rockEmissivePath		= Enjon::String("Materials/CopperRock/Emissive.png"); 
+		Enjon::String rockAOPath			= Enjon::String("Materials/CopperRock/AO.png"); 
+		Enjon::String frontNormalPath		= Enjon::String("Textures/front_normal.png"); 
+		Enjon::String brdfPath				= Enjon::String("Textures/brdf.png"); 
+		Enjon::String waterPath				= Enjon::String("Textures/water.png"); 
+		Enjon::String greenPath				= Enjon::String("Textures/green.png"); 
+		Enjon::String redPath				= Enjon::String("Textures/red.png"); 
+		Enjon::String bluePath				= Enjon::String("Textures/blue.png"); 
+		Enjon::String blackPath				= Enjon::String("Textures/black.png"); 
+		Enjon::String midGreyPath			= Enjon::String("Textures/grey.png"); 
+		Enjon::String lightGreyPath			= Enjon::String("Textures/light_grey.png"); 
+		Enjon::String whitePath				= Enjon::String("Textures/white.png"); 
+		Enjon::String teapotPath			= Enjon::String( "Models/teapot.obj" );
+		Enjon::String swordPath				= Enjon::String( "Models/sword.obj" );
+		Enjon::String eyeNormal				= Enjon::String( "Textures/eye_NORMAL.png" );
+		Enjon::String eyeAlbedo				= Enjon::String( "Textures/eyeball_COLOR1.png" );
+		Enjon::String shaderGraphPath		= Enjon::String( "Shaders/ShaderGraphs/testGraph.sg" );
+		Enjon::String staticGeomGraphPath	= Enjon::String( "Shaders/ShaderGraphs/DefaultStaticGeom.sg" ); 
+
+		AssetManager* mAssetManager = EngineSubsystem( AssetManager );
+		
+		// Add to asset database( will serialize the asset if not loaded from disk, otherwise will load the asset )
+		mAssetManager->AddToDatabase( toyBoxDispPath );
+		mAssetManager->AddToDatabase( toyBoxNormalPath );
+		mAssetManager->AddToDatabase( unitSpherePath );
+		mAssetManager->AddToDatabase( shaderGraphPath );
+		mAssetManager->AddToDatabase( staticGeomGraphPath );
+		mAssetManager->AddToDatabase( eyePath );
+		mAssetManager->AddToDatabase( eyeAlbedo );
+		mAssetManager->AddToDatabase( eyeNormal );
+		mAssetManager->AddToDatabase( dragonMeshPath );
+		mAssetManager->AddToDatabase( swordPath );
+		mAssetManager->AddToDatabase( noisePath );
+		mAssetManager->AddToDatabase( grassTexturePath );
+		mAssetManager->AddToDatabase( quadPath );
+		mAssetManager->AddToDatabase( rockPath );
+		mAssetManager->AddToDatabase( monkeyMeshPath );
+		mAssetManager->AddToDatabase( cerebusAlbedoPath );
+		mAssetManager->AddToDatabase( cerebusNormalPath );
+		mAssetManager->AddToDatabase( cerebusMetallicPath );
+		mAssetManager->AddToDatabase( cerebusRoughnessPath );
+		mAssetManager->AddToDatabase( cerebusEmissivePath );
+		mAssetManager->AddToDatabase( mahogAlbedoPath );
+		mAssetManager->AddToDatabase( mahogNormalPath );
+		mAssetManager->AddToDatabase( mahogMetallicPath );
+		mAssetManager->AddToDatabase( mahogRoughnessPath );
+		mAssetManager->AddToDatabase( mahogEmissivePath );
+		mAssetManager->AddToDatabase( mahogAOPath );
+		mAssetManager->AddToDatabase( woodAlbedoPath );
+		mAssetManager->AddToDatabase( woodNormalPath );
+		mAssetManager->AddToDatabase( woodMetallicPath );
+		mAssetManager->AddToDatabase( woodRoughnessPath );
+		mAssetManager->AddToDatabase( wornRedAlbedoPath );
+		mAssetManager->AddToDatabase( wornRedRoughnessPath );
+		mAssetManager->AddToDatabase( wornRedMetallicPath );
+		mAssetManager->AddToDatabase( wornRedNormalPath );
+		mAssetManager->AddToDatabase( plasticAlbedoPath );
+		mAssetManager->AddToDatabase( plasticNormalPath );
+		mAssetManager->AddToDatabase( plasticRoughnessPath );
+		mAssetManager->AddToDatabase( plasticMetallicPath );
+		mAssetManager->AddToDatabase( rockAlbedoPath );
+		mAssetManager->AddToDatabase( rockNormalPath );
+		mAssetManager->AddToDatabase( rockMetallicPath );
+		mAssetManager->AddToDatabase( rockRoughnessPath );
+		mAssetManager->AddToDatabase( rockEmissivePath );
+		mAssetManager->AddToDatabase( rockAOPath );
+		mAssetManager->AddToDatabase( scuffedGoldAlbedoPath );
+		mAssetManager->AddToDatabase( scuffedGoldNormalPath );
+		mAssetManager->AddToDatabase( scuffedGoldMetallicPath );
+		mAssetManager->AddToDatabase( scuffedGoldRoughnessPath );
+		mAssetManager->AddToDatabase( paintPeelingAlbedoPath );
+		mAssetManager->AddToDatabase( paintPeelingNormalPath );
+		mAssetManager->AddToDatabase( paintPeelingMetallicPath );
+		mAssetManager->AddToDatabase( paintPeelingRoughnessPath );
+		mAssetManager->AddToDatabase( mixedMossAlbedoPath );
+		mAssetManager->AddToDatabase( mixedMossNormalPath );
+		mAssetManager->AddToDatabase( mixedMossMetallicPath );
+		mAssetManager->AddToDatabase( mixedMossRoughnessPath );
+		mAssetManager->AddToDatabase( mixedMossAOPath );
+		mAssetManager->AddToDatabase( plasticAOPath );
+		mAssetManager->AddToDatabase( frontNormalPath );
+		mAssetManager->AddToDatabase( brdfPath );
+		mAssetManager->AddToDatabase( cerebusMeshPath );
+		mAssetManager->AddToDatabase( sphereMeshPath );
+		mAssetManager->AddToDatabase( cylinderMeshPath );
+		mAssetManager->AddToDatabase( coneMeshPath );
+		mAssetManager->AddToDatabase( cubeMeshPath );
+		mAssetManager->AddToDatabase( catMeshPath );
+		mAssetManager->AddToDatabase( bunnyMeshPath );
+		mAssetManager->AddToDatabase( buddhaMeshPath );
+		mAssetManager->AddToDatabase( shaderBallMeshPath );
+		mAssetManager->AddToDatabase( unitShaderBallPath );
+		mAssetManager->AddToDatabase( unrealShaderBallPath );
+		mAssetManager->AddToDatabase( greenPath );
+		mAssetManager->AddToDatabase( redPath );
+		mAssetManager->AddToDatabase( midGreyPath );
+		mAssetManager->AddToDatabase( lightGreyPath );
+		mAssetManager->AddToDatabase( bluePath );
+		mAssetManager->AddToDatabase( blackPath );
+		mAssetManager->AddToDatabase( whitePath );
+		mAssetManager->AddToDatabase( teapotPath );
+		mAssetManager->AddToDatabase( waterPath );
+	}
 }
 
 

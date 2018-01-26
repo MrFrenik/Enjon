@@ -6,6 +6,8 @@ layout (location = 2) out vec4 PositionOut;
 layout (location = 3) out vec4 EmissiveOut;
 layout (location = 4) out vec4 MatPropsOut;
 
+layout (location = 5) out vec4 ObjectIDOut;
+
 
 in VS_OUT
 {
@@ -15,6 +17,7 @@ in VS_OUT
 	mat3 TS_TBN;
 	vec3 ViewPositionTangentSpace;
 	vec3 FragPositionTangentSpace;
+	vec4 ObjectID;
 } fs_in;
 
 // Global Uniforms
