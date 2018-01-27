@@ -11,10 +11,8 @@
 
 namespace Enjon
 { 
-	ENJON_CLASS()
-	class EditorTranslationWidget : public Object
+	class EditorTranslationWidget
 	{
-		ENJON_CLASS_BODY( )
 
 		public:
 			EditorTranslationWidget( ) = default;
@@ -30,19 +28,15 @@ namespace Enjon
 			void SetPosition( const Vec3& position );
 			// Sets root scale
 			void SetScale( const f32& scale );
+			void SetRotation( const Quaternion& rotation );
 			
 			TransformRenderableHeirarchy mRoot;
 			TransformRenderableHeirarchy mUpAxis;
-
-			ENJON_PROPERTY( )
 			TransformRenderableHeirarchy mXYAxis;
 
-			ENJON_PROPERTY( )
 			TransformRenderableHeirarchy mXZAxis;
 
-			ENJON_PROPERTY( )
 			TransformRenderableHeirarchy mYZAxis;
-
 			TransformRenderableHeirarchy mUpAxisArrow;
 			TransformRenderableHeirarchy mForwardAxis;
 			TransformRenderableHeirarchy mForwardAxisArrow;

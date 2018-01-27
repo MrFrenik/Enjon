@@ -656,7 +656,8 @@ namespace Enjon
 		 //mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, mBGColor);
 
 		// Get sorted renderables by material
-		const std::vector<Renderable*>& sortedRenderables = mScene.GetRenderables();
+		const Vector<Renderable*>& sortedRenderables = mScene.GetRenderables();
+		const Vector<Renderable*>& nonDepthTestedRenderables = mScene.GetNonDepthTestedRenderables( );
 		const std::set<QuadBatch*>& sortedQuadBatches = mScene.GetQuadBatches(); 
 
 		// Shader graph to be used
@@ -864,9 +865,49 @@ namespace Enjon
 		}
 		skyBoxShader->Unuse( );
 
+		glClear( GL_DEPTH_BUFFER_BIT );
+
+		 //None depth tested renderables
+		if (!nonDepthTestedRenderables.empty())
+		{ 
+			const Material* material = nullptr;
+			for (auto& renderable : nonDepthTestedRenderables)
+			{
+				// Check for material switch 
+				const Material* curMaterial = renderable->GetMaterial().Get();
+				sg = curMaterial->GetShaderGraph( );
+				assert(curMaterial != nullptr); 
+
+				// Grab shader from graph
+				Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
+
+				if (material != curMaterial)
+				{
+					// Set material
+					material = curMaterial;
+
+					if ( sg )
+					{
+						sgShader->Use( );
+						sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
+						sgShader->SetUniform( "uWorldTime", wt );
+						sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
+						material->Bind( sgShader );
+					} 
+				}
+
+				if ( sg )
+				{
+					sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
+					renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
+				}
+			}
+		} 
+
 		// Unbind gbuffer
 		mGbuffer->Unbind();
 
+		glEnable( GL_DEPTH_TEST );
 		glCullFace( GL_BACK );
 	}
 
@@ -1246,7 +1287,49 @@ namespace Enjon
 				mFullScreenQuad->Submit( );
 			}
 			compositeProgram->Unuse();
+			
 		}
+
+		glClear( GL_DEPTH_BUFFER_BIT );
+
+		const Vector<Renderable*>& nonDepthTestedRenderables = mScene.GetNonDepthTestedRenderables( );
+
+		// None depth tested renderables
+		if ( !nonDepthTestedRenderables.empty( ) )
+		{
+			const Material* material = nullptr;
+			for ( auto& renderable : nonDepthTestedRenderables )
+			{
+				// Check for material switch 
+				const Material* curMaterial = renderable->GetMaterial( ).Get( );
+				AssetHandle< ShaderGraph > sg = curMaterial->GetShaderGraph( );
+				assert( curMaterial != nullptr );
+
+				// Grab shader from graph
+				Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
+
+				if ( material != curMaterial )
+				{
+					// Set material
+					material = curMaterial;
+
+					if ( sg )
+					{
+						sgShader->Use( );
+						sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
+						sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
+						sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
+						material->Bind( sgShader );
+					}
+				} 
+				if ( sg )
+				{
+					sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
+					renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
+				}
+			}
+		}
+
 		mCompositeTarget->Unbind();
 	}
 

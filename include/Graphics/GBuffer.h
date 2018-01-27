@@ -32,7 +32,7 @@ namespace Enjon {
 		GBuffer(u32 _Width, u32 _Height);
 		~GBuffer();
 
-		void Bind(BindType Type = BindType::WRITE);
+		void Bind(BindType Type = BindType::WRITE, bool clear = true);
 		void Unbind();
 
 		GLuint inline GetTexture(GBufferTextureType Type) { return Textures[(GLuint)Type]; }

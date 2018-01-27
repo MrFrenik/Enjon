@@ -68,7 +68,17 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
+			void AddNonDepthTestedRenderable(Renderable* renderable);
+
+			/*
+			* @brief
+			*/
 			void RemoveRenderable(Renderable* renderable);
+
+			/*
+			* @brief
+			*/
+			void RemoveNonDepthTestedRenderable(Renderable* renderable);
 
 			/*
 			* @brief
@@ -143,6 +153,11 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
+			const std::vector<Renderable*>& GetNonDepthTestedRenderables();
+
+			/*
+			* @brief
+			*/
 			const std::set<QuadBatch*>& GetQuadBatches() const { return mQuadBatches; }
 
 			/*
@@ -188,6 +203,8 @@ namespace Enjon {
 
 			ENJON_PROPERTY( )
 			Vector< Renderable* > mSortedRenderables; 
+ 
+			Vector<Renderable*> mNonDepthTestedRenderables;
 
 			std::set<Renderable*> mRenderables;
 			std::set<QuadBatch*> mQuadBatches;

@@ -47,10 +47,18 @@ namespace Enjon {
 
 	//====================================================================================================
 
-	const std::vector<Renderable*>& Scene::GetRenderables( ) const
+	const Vector<Renderable*>& Scene::GetRenderables( ) const
 	{ 
 		return mSortedRenderables;
 	}
+
+	const Vector<Renderable*>& Scene::GetNonDepthTestedRenderables( )
+	{
+		// Sort by depth to camera
+		std::stable_sort( mNonDepthTestedRenderables.begin( ), mNonDepthTestedRenderables.end( ), CompareDepth );
+
+		return mNonDepthTestedRenderables;
+	} 
 
 	void Scene::AddRenderable(Renderable* renderable)
 	{
@@ -83,6 +91,21 @@ namespace Enjon {
 			SortRenderables( );
 		}
 	}
+
+	void Scene::AddNonDepthTestedRenderable( Renderable* renderable )
+	{
+		auto query = std::find( mNonDepthTestedRenderables.begin( ), mNonDepthTestedRenderables.end( ), renderable );
+		if ( query == mNonDepthTestedRenderables.end( ) )
+		{
+			mNonDepthTestedRenderables.push_back( renderable );
+			renderable->SetScene( this );
+		}
+	}
+
+	void Scene::RemoveNonDepthTestedRenderable( Renderable* renderable )
+	{
+		mNonDepthTestedRenderables.erase( std::remove( mNonDepthTestedRenderables.begin( ), mNonDepthTestedRenderables.end( ), renderable ), mNonDepthTestedRenderables.end( ) );
+	} 
 
 	void Scene::AddQuadBatch(QuadBatch* batch)
 	{

@@ -25,11 +25,27 @@ namespace Enjon
 
 			void SetPosition( const Vec3& position );
 			void SetScale( const f32& scale );
+			void SetRotation( const Quaternion& rotation );
 
 			EditorTranslationWidget mTranslationWidget;
 
+			void BeginWidgetInteraction( TransformWidgetRenderableType type );
+			void InteractWithWidget( );
+			void EndInteraction( );
+			TransformWidgetRenderableType GetInteractedWidgetType( );
+
+			bool IsInteractingWithWidget( ) const;
+			Vec3 GetDelta( ) const; 
+
 		private:
-			Transform mWorldTransform;
+			Transform mWorldTransform;					
+			// Store position and then store that we're moving
+
+			bool mInteractingWithTransformWidget = true; 
+			TransformWidgetRenderableType mType = TransformWidgetRenderableType::TranslationRightAxis;
+			Vec3 mIntersectionStartPosition;
+			Vec3 mRootStartPosition;
+			Vec3 mDelta;
 	}; 
 }
 

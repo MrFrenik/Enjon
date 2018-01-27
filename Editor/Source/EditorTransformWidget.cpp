@@ -35,4 +35,420 @@ namespace Enjon
 	{
 		mTranslationWidget.SetScale( scale );
 	}
+
+	void EditorTransformWidget::SetRotation( const Quaternion& rotation )
+	{
+		mTranslationWidget.SetRotation( rotation );
+	}
+
+	void EditorTransformWidget::InteractWithWidget( )
+	{
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		const Camera* camera = gfx->GetSceneCamera( );
+
+		if ( mInteractingWithTransformWidget )
+		{
+			switch ( mType )
+			{
+				case ( TransformWidgetRenderableType::TranslationRightAxis ) :
+				{
+					// Find dot between cam forward and right axis
+					Vec3 cF = camera->Forward( ).Normalize( );
+					Vec3 Tx = Vec3( 1.0f, 0.0f, 0.0f );
+					f32 cFDotTx = std::fabs( cF.Dot( Tx ) );
+
+					// Can't continue with movement if directly parallel to axis
+					if ( cFDotTx > 1.0f )
+					{
+						break;
+					}
+
+					// Now determine appropriate axis to move along
+					Vec3 Ty = Vec3( 0.0f, 1.0f, 0.0f );
+					Vec3 Tz = Vec3( 0.0f, 0.0f, 1.0f );
+
+					f32 cFDotTy = std::fabs( cF.Dot( Ty ) );
+					f32 cFDotTz = std::fabs( cF.Dot( Tz ) );
+
+					LineIntersectionResult intersectionResult;
+
+					// Choose to use XY-plane
+					if ( cFDotTy < cFDotTz )
+					{
+						// Need to define z as normal to plane
+						Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::ZAxis( ) );
+
+						// Define XZ plane
+						Plane XYPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+						// Get intersection result of plane
+						intersectionResult = XYPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+					}
+					// Choose to use XZ-plane
+					else
+					{ 
+						// Need to define z as normal to plane
+						Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) );
+
+						// Define XZ plane
+						Plane XZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+						// Get intersection result of plane
+						intersectionResult = XZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+					}
+
+					// Check for intersection hit result
+					if ( intersectionResult.mHit )
+					{
+						const Vec3* hp = &intersectionResult.mHitPosition;
+
+						// Calculate delta from starting position ( lock to x axis )
+						mDelta = Vec3( ( intersectionResult.mHitPosition - mIntersectionStartPosition ).x, 0.0f, 0.0f ); 
+
+						// Store previous position as new intersection position
+						mIntersectionStartPosition = intersectionResult.mHitPosition; 
+					}
+
+				} break;
+
+				case ( TransformWidgetRenderableType::TranslationForwardAxis ) :
+				{
+					// Find dot between cam forward and right axis
+					Vec3 cF = camera->Forward( ).Normalize( );
+					Vec3 Tz = Vec3( 0.0f, 0.0f, 1.0f );
+					f32 cFDotTz = std::fabs( cF.Dot( Tz ) );
+
+					// Can't continue with movement if directly parallel to axis
+					if ( cFDotTz > 1.0f )
+					{
+						break;
+					}
+
+					// Now determine appropriate axis to move along
+					Vec3 Ty = Vec3( 0.0f, 1.0f, 0.0f );
+					Vec3 Tx = Vec3( 1.0f, 0.0f, 0.0f );
+
+					f32 cFDotTy = std::fabs( cF.Dot( Ty ) );
+					f32 cFDotTx = std::fabs( cF.Dot( Tx ) );
+
+					LineIntersectionResult intersectionResult;
+
+					// Choose to use YZ-plane
+					if ( cFDotTy < cFDotTx )
+					{
+						std::cout << "Chose YZ-plane!\n";
+
+						// Need to define z as normal to plane
+						Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) );
+
+						// Define YZ plane
+						Plane YZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+						// Get intersection result of plane
+						intersectionResult = YZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+					}
+					// Choose to use XZ-plane
+					else
+					{
+						std::cout << "Chose XZ-plane!\n";
+
+						// Need to define z as normal to plane
+						Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) );
+
+						// Define XZ plane
+						Plane XZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+						// Get intersection result of plane
+						intersectionResult = XZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+					}
+
+					// Check for intersection hit result
+					if ( intersectionResult.mHit )
+					{
+						const Vec3* hp = &intersectionResult.mHitPosition; 
+
+						// Calculate delta from starting position ( lock to x axis )
+						mDelta = Vec3( 0.0f, 0.0f, ( intersectionResult.mHitPosition - mIntersectionStartPosition ).z ); 
+
+						// Store previous position as new intersection position
+						mIntersectionStartPosition = intersectionResult.mHitPosition; 
+					}
+				} break;
+
+				case ( TransformWidgetRenderableType::TranslationUpAxis ) :
+				{
+					// Find dot between cam forward and right axis
+					Vec3 cF = camera->Forward( ).Normalize( );
+					Vec3 Ty = Vec3( 0.0f, 1.0f, 0.0f );
+					f32 cFDotTy = std::fabs( cF.Dot( Ty ) );
+
+					// Can't continue with movement if directly parallel to axis
+					if ( cFDotTy > 1.0f )
+					{
+						break;
+					}
+
+					// Now determine appropriate axis to move along
+					Vec3 Tz = Vec3( 0.0f, 0.0f, 1.0f );
+					Vec3 Tx = Vec3( 1.0f, 0.0f, 0.0f );
+
+					f32 cFDotTz = std::fabs( cF.Dot( Tz ) );
+					f32 cFDotTx = std::fabs( cF.Dot( Tx ) );
+
+					LineIntersectionResult intersectionResult;
+
+					// Choose to use YZ-plane
+					if ( cFDotTz < cFDotTx )
+					{
+						std::cout << "Chose YZ-plane!\n";
+
+						// Need to define z as normal to plane
+						Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) );
+
+						// Define YZ plane
+						Plane YZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+						// Get intersection result of plane
+						intersectionResult = YZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+					}
+					// Choose to use XY-plane
+					else
+					{ 
+						// Need to define z as normal to plane
+						Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::ZAxis( ) );
+
+						// Define XY plane
+						Plane XYPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+						// Get intersection result of plane
+						intersectionResult = XYPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+					}
+
+					// Check for intersection hit result
+					if ( intersectionResult.mHit )
+					{
+						const Vec3* hp = &intersectionResult.mHitPosition;
+ 
+						// Calculate delta from starting position ( lock to x axis )
+						mDelta = Vec3( 0.0f, ( intersectionResult.mHitPosition - mIntersectionStartPosition ).y, 0.0f ); 
+
+						// Store previous position as new intersection position
+						mIntersectionStartPosition = intersectionResult.mHitPosition; 
+					}
+				} break;
+			} 
+		}
+	}
+
+	void EditorTransformWidget::EndInteraction( )
+	{
+		mInteractingWithTransformWidget = false;
+	}
+
+	void EditorTransformWidget::BeginWidgetInteraction( TransformWidgetRenderableType type )
+	{
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		const Camera* camera = gfx->GetSceneCamera( );
+
+		// Look for picked transform widget
+		switch ( type )
+		{ 
+			case ( TransformWidgetRenderableType::TranslationRightAxis ):
+			{ 
+				// Find dot between cam forward and right axis
+				Vec3 cF = camera->Forward( ).Normalize( );
+				Vec3 Tx = Vec3( 1.0f, 0.0f, 0.0f );
+				f32 cFDotTx = std::fabs( cF.Dot( Tx ) );
+
+				// Can't continue with movement if directly parallel to axis
+				if ( cFDotTx > 1.0f )
+				{
+					break;
+				} 
+
+				// Now determine appropriate axis to move along
+				Vec3 Ty = Vec3( 0.0f, 1.0f, 0.0f );
+				Vec3 Tz = Vec3( 0.0f, 0.0f, 1.0f );
+
+				f32 cFDotTy = std::fabs( cF.Dot( Ty ) );
+				f32 cFDotTz = std::fabs( cF.Dot( Tz ) ); 
+
+				LineIntersectionResult intersectionResult;
+
+				// Choose to use XY-plane
+				if ( cFDotTy < cFDotTz )
+				{
+					std::cout << "Chose XY-plane!\n";
+
+					// Need to define z as normal to plane
+					Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation() * Vec3::ZAxis( ) );
+
+					// Define XZ plane
+					Plane XYPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+					// Get intersection result of plane
+					intersectionResult = XYPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition() + camera->Forward( ) ); 
+				} 
+				// Choose to use XZ-plane
+				else
+				{
+					// Need to define z as normal to plane
+					Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) );
+
+					// Define XZ plane
+					Plane XZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+					// Get intersection result of plane
+					intersectionResult = XZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+				} 
+
+				if ( intersectionResult.mHit )
+				{
+					const Vec3* hp = &intersectionResult.mHitPosition; 
+
+					// Store position and then store that we're moving
+					mInteractingWithTransformWidget = true;
+					mType = TransformWidgetRenderableType::TranslationRightAxis;
+					mIntersectionStartPosition = intersectionResult.mHitPosition;
+					mRootStartPosition = mTranslationWidget.mRoot.mWorldTransform.GetPosition( ); 
+				}
+
+			} break;
+
+			case ( TransformWidgetRenderableType::TranslationUpAxis ):
+			{ 
+				// Find dot between cam forward and right axis
+				Vec3 cF = camera->Forward( ).Normalize( );
+				Vec3 Ty = Vec3( 0.0f, 1.0f, 0.0f );
+				f32 cFDotTy = std::fabs( cF.Dot( Ty ) );
+
+				// Can't continue with movement if directly parallel to axis
+				if ( cFDotTy > 1.0f )
+				{
+					break;
+				}
+
+				// Now determine appropriate axis to move along
+				Vec3 Tx = Vec3( 1.0f, 0.0f, 0.0f );
+				Vec3 Tz = Vec3( 0.0f, 0.0f, 1.0f );
+
+				f32 cFDotTx = std::fabs( cF.Dot( Tx ) );
+				f32 cFDotTz = std::fabs( cF.Dot( Tz ) );
+ 
+				LineIntersectionResult intersectionResult;
+
+				// Choose to use XY-plane
+				if ( cFDotTx < cFDotTz )
+				{
+					// Need to define z as normal to plane
+					Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::ZAxis( ) );
+
+					// Define XZ plane
+					Plane XYPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+					// Get intersection result of plane
+					intersectionResult = XYPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+				}
+				// Choose to use YZ-plane
+				else
+				{ 
+					// Need to define z as normal to plane
+					Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) );
+
+					// Define XZ plane
+					Plane YZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+					// Get intersection result of plane
+					intersectionResult = YZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+				}
+
+				if ( intersectionResult.mHit )
+				{
+					const Vec3* hp = &intersectionResult.mHitPosition;
+
+					// Store position and then store that we're moving
+					mInteractingWithTransformWidget = true;
+					mType = TransformWidgetRenderableType::TranslationUpAxis;
+					mIntersectionStartPosition = intersectionResult.mHitPosition;
+					mRootStartPosition = mTranslationWidget.mRoot.mWorldTransform.GetPosition( );
+				}
+
+			} break;
+
+			case ( TransformWidgetRenderableType::TranslationForwardAxis ):
+			{ 
+				// Find dot between cam forward and right axis
+				Vec3 cF = camera->Forward( ).Normalize( );
+				Vec3 Tz = Vec3( 0.0f, 0.0f, -1.0f );
+				f32 cFDotTz = std::fabs( cF.Dot( Tz ) );
+
+				// Can't continue with movement if directly parallel to axis
+				if ( cFDotTz > 1.0f )
+				{
+					break;
+				}
+
+				// Now determine appropriate axis to move along
+				Vec3 Tx = Vec3( 1.0f, 0.0f, 0.0f );
+				Vec3 Ty = Vec3( 0.0f, 1.0f, 0.0f );
+
+				f32 cFDotTx = std::fabs( cF.Dot( Tx ) );
+				f32 cFDotTy = std::fabs( cF.Dot( Ty ) );
+ 
+				LineIntersectionResult intersectionResult;
+
+				// Choose to use XZ-plane
+				if ( cFDotTx < cFDotTy )
+				{
+					// Need to define z as normal to plane
+					Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) );
+
+					// Define XZ plane
+					Plane XZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+					// Get intersection result of plane
+					intersectionResult = XZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+				}
+				// Choose to use YZ-plane
+				else
+				{ 
+					// Need to define z as normal to plane
+					Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) );
+
+					// Define XZ plane
+					Plane YZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
+
+					// Get intersection result of plane
+					intersectionResult = YZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+				}
+
+				if ( intersectionResult.mHit )
+				{
+					const Vec3* hp = &intersectionResult.mHitPosition;
+ 
+					// Store position and then store that we're moving
+					mInteractingWithTransformWidget = true;
+					mType = TransformWidgetRenderableType::TranslationForwardAxis;
+					mIntersectionStartPosition = intersectionResult.mHitPosition;
+					mRootStartPosition = mTranslationWidget.mRoot.mWorldTransform.GetPosition( );
+				}
+
+			} break;
+		}
+	}
+
+	bool EditorTransformWidget::IsInteractingWithWidget( ) const
+	{
+		return mInteractingWithTransformWidget;
+	}
+
+	Vec3 EditorTransformWidget::GetDelta( ) const
+	{
+		return mDelta;
+	}
+
+	TransformWidgetRenderableType EditorTransformWidget::GetInteractedWidgetType( )
+	{
+		return mType;
+	}
 }

@@ -20,11 +20,8 @@ namespace Enjon
 		TranslationYZAxes
 	};
 
-	ENJON_CLASS( )
 	class TransformHeirarchy : public Object
-	{
-		ENJON_CLASS_BODY( )
-
+	{ 
 		public:
 			TransformHeirarchy( ) = default;
 			~TransformHeirarchy( ) = default;
@@ -121,11 +118,8 @@ namespace Enjon
 			Vector<TransformHeirarchy*> mChildren;
 	};
 
-	ENJON_CLASS( )
 	class TransformRenderableHeirarchy : public TransformHeirarchy
 	{
-		ENJON_CLASS_BODY( )
-
 		public:
 			TransformRenderableHeirarchy( ) = default;
 			~TransformRenderableHeirarchy( ) = default;

@@ -85,7 +85,7 @@ namespace Enjon {
 		glDeleteRenderbuffers(1, &DepthBuffer);
 	}
 
-	void GBuffer::Bind(BindType Type)
+	void GBuffer::Bind(BindType Type, bool clear)
 	{
 		switch(Type)
 		{
@@ -97,7 +97,10 @@ namespace Enjon {
 				glViewport((u32)Viewport.x, (u32)Viewport.y, (u32)Viewport.z, (u32)Viewport.w);
 
 				// Clear the render targets
-				glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+				if ( clear )
+				{
+					glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); 
+				}
 
 				glActiveTextureARB(GL_TEXTURE0_ARB);
 				glEnable(GL_TEXTURE_2D);
