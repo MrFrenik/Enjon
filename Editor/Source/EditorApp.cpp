@@ -792,14 +792,22 @@ namespace Enjon
 		return Enjon::Result::PROCESS_RUNNING;
 	} 
 
+	enum class TransformMode
+	{
+		Translate,
+		Scale
+	};
+
 	Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 	{ 
 		static EntityHandle mSelectedEntity;
 		static bool mInteractingWithTransformWidget = false;
+		static TransformMode mMode = TransformMode::Translate;
 		static Vec3 mIntersectionStartPosition;
 		static Vec3 mRootStartPosition;
 		static Vec3 mRootStartScale;
 		static TransformWidgetRenderableType mType;
+		static 
 		GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
 		Input* mInput = EngineSubsystem( Input );
 		Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >(); 
@@ -807,6 +815,15 @@ namespace Enjon
 		if ( mInput->IsKeyPressed( Enjon::KeyCode::T ) )
 		{
 			mMoveCamera ^= 1;
+		}
+
+		if ( mInput->IsKeyPressed( KeyCode::One ) )
+		{
+			mMode = TransformMode::Translate;
+		}
+		if ( mInput->IsKeyPressed( KeyCode::Two ) )
+		{
+			mMode = TransformMode::Scale;
 		}
 
 		if ( mInput->IsKeyDown( KeyCode::LeftMouseButton ) )
@@ -818,20 +835,28 @@ namespace Enjon
 
 				switch ( mTransformWidget.GetInteractedWidgetType( ) )
 				{
-				case TransformWidgetRenderableType::TranslationUpAxis:
-				case TransformWidgetRenderableType::TranslationForwardAxis:
-				case TransformWidgetRenderableType::TranslationRightAxis:
-				{
-					Entity* ent = mSelectedEntity.Get( );
-					if ( ent )
+					case TransformWidgetRenderableType::TranslationUpAxis:
+					case TransformWidgetRenderableType::TranslationForwardAxis:
+					case TransformWidgetRenderableType::TranslationRightAxis:
 					{
-						//Vec3 lp = ent->GetLocalPosition( ) + delta;
-						//ent->SetLocalPosition( lp );
-
-						Vec3 ls = ent->GetLocalScale( ) + delta;
-						ent->SetLocalScale( ls );
-					}
-				} break;
+						Entity* ent = mSelectedEntity.Get( );
+						if ( ent )
+						{
+							switch ( mMode )
+							{
+								case TransformMode::Translate:
+								{
+									Vec3 lp = ent->GetLocalPosition( ) + delta;
+									ent->SetLocalPosition( lp ); 
+								} break;
+								case TransformMode::Scale:
+								{
+									Vec3 ls = ent->GetLocalScale( ) + delta;
+									ent->SetLocalScale( ls ); 
+								} break;
+							} 
+						}
+					} break;
 				}
 
 				if ( mSelectedEntity.Get( ) )
@@ -850,66 +875,6 @@ namespace Enjon
 
 		if ( mMoveCamera )
 		{ 
-			//if ( mInput->IsKeyDown( KeyCode::LeftMouseButton ) )
-			//{
-			//	if ( mTransformWidget.IsInteractingWithWidget( ) )
-			//	{
-			//		mTransformWidget.InteractWithWidget( );
-			//		Vec3 delta = mTransformWidget.GetDelta( ); 
-
-			//		switch ( mTransformWidget.GetInteractedWidgetType( ) )
-			//		{
-			//			case TransformWidgetRenderableType::TranslationUpAxis:
-			//			case TransformWidgetRenderableType::TranslationForwardAxis:
-			//			case TransformWidgetRenderableType::TranslationRightAxis:
-			//			{ 
-			//				Entity* ent = mSelectedEntity.Get( );
-			//				if ( ent )
-			//				{
-			//					Vec3 lp = ent->GetLocalPosition( ) + delta;
-			//					ent->SetLocalPosition( lp );
-
-			//					//Vec3 ls = ent->GetLocalScale( ) + delta;
-			//					//ent->SetLocalScale( ls );
-			//				}
-			//			} break; 
-			//		}
-
-			//		if ( mSelectedEntity.Get() )
-			//		{
-			//			Entity* ent = mSelectedEntity.Get( );
-			//			// Set position and rotation to that of entity
-			//			mTransformWidget.SetPosition( ent->GetWorldPosition( ) );
-			//			mTransformWidget.SetRotation( ent->GetWorldRotation( ) );
-			//		} 
-			//	}
-			//}
-			//else
-			//{
-			//	mTransformWidget.EndInteraction( );
-			//}
-
-			// Check for clicking to move transform widget for now
-			if ( mInput->IsKeyPressed( KeyCode::LeftMouseButton ) )
-			{
-				auto viewport = mGfx->GetViewport( );
-
-				// Get picked result from screen position
-				iVec2 dispSize = mGfx->GetViewport( );
-				PickResult pr = mGfx->GetPickedObjectResult( iVec2( dispSize.x, dispSize.y ) / 2.0f );
-				if ( pr.mEntity.Get( ) )
-				{
-					mTransformWidget.SetPosition( pr.mEntity.Get( )->GetWorldPosition( ) );
-					mSelectedEntity = pr.mEntity;
-				}
-				// Translation widget interaction
-				else
-				{
-					// Begin widget interaction
-					mTransformWidget.BeginWidgetInteraction( TransformWidgetRenderableType( pr.mId - MAX_ENTITIES ) );
-				}
-			}
-
 			Enjon::Vec3 velDir( 0, 0, 0 );
 
 			if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
@@ -959,16 +924,14 @@ namespace Enjon
 			f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y ) * dt * mouseSensitivity;
 			camera->OffsetOrientation( xOffset, yOffset );
 		}
+
+		// Mouse cursor on, interact with world
 		else
 		{
 			mGfx->GetWindow( )->ConstCast< Enjon::Window >( )->ShowMouseCursor( true );
 
 			if ( mInput->IsKeyPressed( KeyCode::LeftMouseButton ) )
 			{
-				// Get mouse position
-				//Ray ray = camera->ScreenToWorldRay( mInput->GetMouseCoords() );
-				//std::cout << fmt::format( "Ray: start: < {}, {}, {} >, dir: < {}, {}, {} >\n", ray.mPoint.x, ray.mPoint.y, ray.mPoint.z, ray.mDirection.x, ray.mDirection.y, ray.mDirection.z );
-
 				auto viewport = mGfx->GetViewport( );
 				std::cout << fmt::format( "Screen Position: < {}, {} >\n", mInput->GetMouseCoords( ).x, viewport.y - mInput->GetMouseCoords( ).y );
 
