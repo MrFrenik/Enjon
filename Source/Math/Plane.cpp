@@ -58,18 +58,18 @@ namespace Enjon
 		LineIntersectionResult result;
 
 		Vec3 dir = ( lineEnd - lineStart ).Normalize();
-		f32 denom = this->a * dir.x + this->b * dir.y + this->c * dir.z;
-		if ( denom == 0.0f )
+		f32 denom = Vec3( a, b, c ).Dot( dir );
+		if ( fabs( denom ) < 0.0001f )
 		{
 			result.mHit = false;
 		}
 		else
 		{
-			result.mHit = true;
-			f32 t = -( this->a * lineStart.x + this->b * lineStart.y + this->c * lineStart.z + d ) / denom;
+			f32 t = -( a * lineStart.x + b * lineStart.y + c * lineStart.z + d ) / denom;
+			result.mHit = t >= 0.0f ? true : false;
 
-			result.mHitPosition = ( lineStart + t * ( dir ) );
-		}
+			result.mHitPosition = ( lineStart + t * dir );
+		} 
 
 		return result;
 	}

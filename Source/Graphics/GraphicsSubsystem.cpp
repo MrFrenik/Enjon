@@ -545,7 +545,7 @@ namespace Enjon
 		mWindow.Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
 
 		// Editor gui pass (ImGUI)
-		if (true)
+		if (false)
 		{
 			ImGuiPass();
 		} 
@@ -600,6 +600,13 @@ namespace Enjon
 
 	//======================================================================================================
 
+	PickResult GraphicsSubsystem::GetPickedObjectResult( const Vec2& screenPosition )
+	{
+		return this->GetPickedObjectResult( iVec2( screenPosition.x, screenPosition.y ) );
+	}
+
+	//======================================================================================================
+
 	PickResult GraphicsSubsystem::GetPickedObjectResult( const iVec2& screenPosition )
 	{
 		// Set pixel alignment for unpacking
@@ -609,7 +616,7 @@ namespace Enjon
 
 		// Read at center of screen and convert to color
 		u8 data[ 4 ];
-		glReadPixels( screenPosition.x, screenPosition.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data );
+		glReadPixels( screenPosition.x, GetViewport().y - screenPosition.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data );
 		ColorRGBA32 color( ( f32 )data[ 0 ] / 255.0f, ( f32 )data[ 1 ] / 255.0f, ( f32 )data[ 2 ] / 255.0f, ( f32 )data[ 3 ] / 255.0f );
 
 		// Get id from color

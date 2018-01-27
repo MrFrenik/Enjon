@@ -1,7 +1,10 @@
-#include <Graphics/Camera.h>
-#include <Math/Quaternion.h>
-#include <Math/Constants.h>
-#include <Math/Vec2.h>
+#include "Graphics/Camera.h"
+#include "Math/Quaternion.h"
+#include "Math/Constants.h"
+#include "Math/Vec2.h"
+#include "Engine.h"
+#include "SubsystemCatalog.h"
+#include "Graphics/GraphicsSubsystem.h"
 
 
 namespace Enjon 
@@ -209,6 +212,81 @@ namespace Enjon
 
 		//return (scale * rotation * translate);
 	}
+
+	//=======================================================================================================
+
+	// Source Implementation: https://stackoverflow.com/questions/23644470/how-to-convert-mouse-coordinate-on-screen-to-3d-coordinate
+	Vec3 Camera::Unproject( const Vec3& screenCoords )
+	{
+		Vec3 worldCoordinates;
+
+		// Get inverse of view project matrix from camera
+		Mat4 inverseViewProjection = Mat4::Inverse( GetViewProjection( ) );
+
+		// Get viewport dimensions
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		iVec2 viewport = gfx->GetViewport( );
+
+		// Screen coordinates to be used
+		f32 winX = (f32)screenCoords.x;
+		f32 winY = (f32)screenCoords.y;
+		f32 winZ = (f32)screenCoords.z;
+
+		// Transform from ndc
+		Vec4 in;
+		//in.x = ( f32( winX - viewport.x ) ) / (f32)viewport.x * 2.0f - 1.0f;
+		//in.y = ( f32( winY - viewport.y ) ) / (f32)viewport.y * 2.0f - 1.0f;
+		//in.z = 2.0f * f32( winZ ) - 1.0f;
+		//in.w = 1.0f; 
+
+		in.x = ( winX / (f32)viewport.x ) * 2.0f - 1.0f;
+		in.y = 1.0f - ( winY / (f32)viewport.y ) * 2.0f;
+		in.z = 2.0f * winZ - 1.0f;
+		in.w = 1.0f; 
+
+		// To world coordinates
+		Vec4 out = inverseViewProjection * in;
+		// Avoid division by zero
+		if ( out.w == 0.0f )
+		{
+			return worldCoordinates; 
+		}
+
+		// W division to normalize
+		out.w = 1.0f / out.w;
+		worldCoordinates.x = out.x * out.w;
+		worldCoordinates.y = out.y * out.w;
+		worldCoordinates.z = out.z * out.w; 
+
+		return worldCoordinates;
+	}
+
+	//=======================================================================================================
+
+	Ray Camera::ScreenToWorldRay( const f32& x, const f32& y )
+	{
+		// Get start and end positions from near and far planes unprojected
+		Vec3 start = Unproject( Vec3( x, y, 0.0f ) );
+		Vec3 end = Unproject( Vec3( x, y, 1.0f ) );
+
+		// Calculate normalized direction for ray
+		Vec3 dir = Vec3::Normalize( end - start );
+
+		Ray ray;
+		ray.mPoint = start;
+		ray.mDirection = dir;
+
+		return ray; 
+	}
+
+	//=======================================================================================================
+
+	Ray Camera::ScreenToWorldRay( const Vec2& coords )
+	{
+		return this->ScreenToWorldRay( coords.x, coords.y );
+	}
+
+	//=======================================================================================================
 }
 
 

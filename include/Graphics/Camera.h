@@ -8,6 +8,7 @@
 #include <Math/Vec3.h>
 #include <Math/Vec2.h>
 #include <Math/Mat4.h> 
+#include <Math/Ray.h>
 
 namespace Enjon 
 { 
@@ -227,6 +228,23 @@ namespace Enjon
 			{ 
 				return Transform.Rotation; 
 			}
+
+			/*
+			* @brief
+			*/
+			Ray ScreenToWorldRay( const f32& x, const f32& y );
+
+			/*
+			* @brief
+			*/
+			Ray ScreenToWorldRay( const Vec2& coords );
+
+		private:
+
+			/*
+			* @brief
+			*/
+			Vec3 Unproject( const Vec3& screenCoords );
 
 		public:
 

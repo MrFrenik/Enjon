@@ -289,7 +289,7 @@ namespace Enjon
 	   //Will keep looping until there are no more events to process
 	    while ( SDL_PollEvent( &event ) ) 
 	    {
-	    	ImGui_ImplSdlGL3_ProcessEvent( &event );
+	    	ImGui_ImplSdlGL3_ProcessEvent( &event ); 
 
 	        switch ( event.type ) 
 	        {

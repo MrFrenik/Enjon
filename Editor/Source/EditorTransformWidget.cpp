@@ -6,6 +6,7 @@
 #include <Graphics/GraphicsSubsystem.h>
 #include <Engine.h>
 #include <SubsystemCatalog.h>
+#include <IO/InputManager.h>
 
 namespace Enjon
 {
@@ -44,7 +45,8 @@ namespace Enjon
 	void EditorTransformWidget::InteractWithWidget( )
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-		const Camera* camera = gfx->GetSceneCamera( );
+		Input* input = EngineSubsystem( Input );
+		Camera* camera = gfx->GetSceneCamera( )->ConstCast< Camera >( );
 
 		if ( mInteractingWithTransformWidget )
 		{
@@ -81,8 +83,11 @@ namespace Enjon
 						// Define XZ plane
 						Plane XYPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
 
-						// Get intersection result of plane
-						intersectionResult = XYPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+						// Define ray from mouse position on screen to world plane
+						Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+						// Get intersection result of plane 
+						intersectionResult = XYPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection ); 
 					}
 					// Choose to use XZ-plane
 					else
@@ -93,8 +98,11 @@ namespace Enjon
 						// Define XZ plane
 						Plane XZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
 
-						// Get intersection result of plane
-						intersectionResult = XZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+						// Define ray from mouse position on screen to world plane
+						Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+						// Get intersection result of plane 
+						intersectionResult = XZPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection ); 
 					}
 
 					// Check for intersection hit result
@@ -136,30 +144,32 @@ namespace Enjon
 					// Choose to use YZ-plane
 					if ( cFDotTy < cFDotTx )
 					{
-						std::cout << "Chose YZ-plane!\n";
-
 						// Need to define z as normal to plane
 						Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) );
 
 						// Define YZ plane
 						Plane YZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
 
-						// Get intersection result of plane
-						intersectionResult = YZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+						// Define ray from mouse position on screen to world plane
+						Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+						// Get intersection result of plane 
+						intersectionResult = YZPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection );
 					}
 					// Choose to use XZ-plane
 					else
 					{
-						std::cout << "Chose XZ-plane!\n";
-
 						// Need to define z as normal to plane
 						Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) );
 
 						// Define XZ plane
 						Plane XZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
 
-						// Get intersection result of plane
-						intersectionResult = XZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+						// Define ray from mouse position on screen to world plane
+						Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+						// Get intersection result of plane 
+						intersectionResult = XZPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection );
 					}
 
 					// Check for intersection hit result
@@ -200,16 +210,16 @@ namespace Enjon
 					// Choose to use YZ-plane
 					if ( cFDotTz < cFDotTx )
 					{
-						std::cout << "Chose YZ-plane!\n";
-
 						// Need to define z as normal to plane
 						Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) );
 
 						// Define YZ plane
 						Plane YZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
 
-						// Get intersection result of plane
-						intersectionResult = YZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+						Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+						// Get intersection result of plane 
+						intersectionResult = YZPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection );
 					}
 					// Choose to use XY-plane
 					else
@@ -220,8 +230,10 @@ namespace Enjon
 						// Define XY plane
 						Plane XYPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
 
-						// Get intersection result of plane
-						intersectionResult = XYPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+						Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+						// Get intersection result of plane 
+						intersectionResult = XYPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection );
 					}
 
 					// Check for intersection hit result
@@ -248,7 +260,8 @@ namespace Enjon
 	void EditorTransformWidget::BeginWidgetInteraction( TransformWidgetRenderableType type )
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-		const Camera* camera = gfx->GetSceneCamera( );
+		Input* input = EngineSubsystem( Input );
+		Camera* camera = gfx->GetSceneCamera( )->ConstCast< Camera >();
 
 		// Look for picked transform widget
 		switch ( type )
@@ -278,16 +291,17 @@ namespace Enjon
 				// Choose to use XY-plane
 				if ( cFDotTy < cFDotTz )
 				{
-					std::cout << "Chose XY-plane!\n";
-
 					// Need to define z as normal to plane
 					Vec3 normal = Vec3::Normalize( mTranslationWidget.mRoot.mWorldTransform.GetRotation() * Vec3::ZAxis( ) );
 
 					// Define XZ plane
 					Plane XYPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
 
-					// Get intersection result of plane
-					intersectionResult = XYPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition() + camera->Forward( ) ); 
+					// Define ray from mouse position on screen to world plane
+					Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+					// Get intersection result of plane 
+					intersectionResult = XYPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection ); 
 				} 
 				// Choose to use XZ-plane
 				else
@@ -298,8 +312,11 @@ namespace Enjon
 					// Define XZ plane
 					Plane XZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
 
-					// Get intersection result of plane
-					intersectionResult = XZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+					// Define ray from mouse position on screen to world plane
+					Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+					// Get intersection result of plane 
+					intersectionResult = XZPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection ); 
 				} 
 
 				if ( intersectionResult.mHit )
@@ -346,8 +363,10 @@ namespace Enjon
 					// Define XZ plane
 					Plane XYPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
 
-					// Get intersection result of plane
-					intersectionResult = XYPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+					Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+					// Get intersection result of plane 
+					intersectionResult = XYPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection );
 				}
 				// Choose to use YZ-plane
 				else
@@ -358,8 +377,10 @@ namespace Enjon
 					// Define XZ plane
 					Plane YZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
 
-					// Get intersection result of plane
-					intersectionResult = YZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+					Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+					// Get intersection result of plane 
+					intersectionResult = YZPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection );
 				}
 
 				if ( intersectionResult.mHit )
@@ -406,8 +427,10 @@ namespace Enjon
 					// Define XZ plane
 					Plane XZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
 
-					// Get intersection result of plane
-					intersectionResult = XZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+					Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+					// Get intersection result of plane 
+					intersectionResult = XZPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection );
 				}
 				// Choose to use YZ-plane
 				else
@@ -418,8 +441,10 @@ namespace Enjon
 					// Define XZ plane
 					Plane YZPlane( normal, mTranslationWidget.mRoot.mWorldTransform.GetPosition( ) );
 
-					// Get intersection result of plane
-					intersectionResult = YZPlane.GetLineIntersection( camera->GetPosition( ), camera->GetPosition( ) + camera->Forward( ) );
+					Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+					// Get intersection result of plane 
+					intersectionResult = YZPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection );
 				}
 
 				if ( intersectionResult.mHit )

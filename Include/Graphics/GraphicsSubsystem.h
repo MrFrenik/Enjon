@@ -156,6 +156,11 @@ namespace Enjon
 			/**
 			*@brief
 			*/
+			PickResult GetPickedObjectResult( const Vec2& screenPosition );
+
+			/**
+			*@brief
+			*/
 			iVec2 GetImGuiViewport( ) const;
 
 		private:
