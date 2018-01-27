@@ -21,6 +21,16 @@ namespace Enjon { namespace Utils {
 			SetMaxFPS(maxFPS);
 		}
 
+		float FPSLimiter::GetFPS( bool calculateFPS )
+		{
+			if ( calculateFPS )
+			{
+				CalculateFPS( );
+			}
+
+			return m_FPS;
+		} 
+
 		void FPSLimiter::Begin()
 		{
 			//Set starting ticks

@@ -179,4 +179,69 @@ namespace Enjon
 		mRoot.mLocalTransform.SetRotation( rotation );
 		Update( );
 	}
+
+	void EditorTranslationWidget::Activate( TransformWidgetRenderableType type )
+	{
+		AssetManager* am = EngineSubsystem( AssetManager );
+
+		// Change material 
+		switch ( type )
+		{
+			case TransformWidgetRenderableType::TranslationRoot:
+			{
+				mRoot.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+			} break; 
+
+			case TransformWidgetRenderableType::TranslationForwardAxis:
+			{
+				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+				mForwardAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+			} break;
+
+			case TransformWidgetRenderableType::TranslationRightAxis:
+			{
+				mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+				mRightAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) ); 
+			} break;
+
+			case TransformWidgetRenderableType::TranslationUpAxis:
+			{
+				mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+				mUpAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) ); 
+			} break; 
+		}
+	}
+
+	void EditorTranslationWidget::Deactivate( TransformWidgetRenderableType type )
+	{
+		AssetManager* am = EngineSubsystem( AssetManager );
+
+		// Change material 
+		switch ( type )
+		{
+			case TransformWidgetRenderableType::TranslationRoot:
+			{
+				mRoot.mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ) );
+			} break; 
+
+			case TransformWidgetRenderableType::TranslationForwardAxis:
+			{
+				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
+				mForwardAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
+			} break; 
+
+			case TransformWidgetRenderableType::TranslationRightAxis:
+			{
+				mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) );
+				mRightAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) ); 
+			} break;
+
+			case TransformWidgetRenderableType::TranslationUpAxis:
+			{
+				mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) );
+				mUpAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) ); 
+			} break; 
+		}
+
+	}
 }

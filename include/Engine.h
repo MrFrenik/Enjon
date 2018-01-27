@@ -53,6 +53,7 @@ namespace Enjon
 
 		f32 mTotalTime = 0.0f;;
 		f32 mDT = 0.0f;
+		f32 mFPS = 0.0f;
 	};
 
 	class Engine

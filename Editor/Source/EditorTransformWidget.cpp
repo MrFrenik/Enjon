@@ -48,10 +48,41 @@ namespace Enjon
 		Input* input = EngineSubsystem( Input );
 		Camera* camera = gfx->GetSceneCamera( )->ConstCast< Camera >( );
 
+		// Activate translation widget
+		mTranslationWidget.Activate( mType );
+
 		if ( mInteractingWithTransformWidget )
 		{
 			switch ( mType )
 			{
+				case ( TransformWidgetRenderableType::TranslationRoot ):
+				{
+					// Find dot between cam forward and right axis
+					Vec3 cF = camera->Forward( ).Normalize( ); 
+					Vec3 oP = mTranslationWidget.mRoot.mWorldTransform.GetPosition( );
+
+					// Define object plane
+					Plane objectPlane = Plane( cF, oP );
+
+					// Define ray from mouse position on screen to world plane
+					Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+					// Do intserection test
+					LineIntersectionResult intersectionResult = objectPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection ); 
+
+					// Check for intersection hit result
+					if ( intersectionResult.mHit )
+					{
+						const Vec3* hp = &intersectionResult.mHitPosition;
+
+						mDelta = intersectionResult.mHitPosition - mIntersectionStartPosition;
+
+						// Store previous position as new intersection position
+						mIntersectionStartPosition = intersectionResult.mHitPosition;
+					}
+
+				} break;
+
 				case ( TransformWidgetRenderableType::TranslationRightAxis ) :
 				{
 					// Find dot between cam forward and right axis
@@ -255,6 +286,7 @@ namespace Enjon
 	void EditorTransformWidget::EndInteraction( )
 	{
 		mInteractingWithTransformWidget = false;
+		mTranslationWidget.Deactivate( mType );
 	}
 
 	void EditorTransformWidget::BeginWidgetInteraction( TransformWidgetRenderableType type )
@@ -266,6 +298,33 @@ namespace Enjon
 		// Look for picked transform widget
 		switch ( type )
 		{ 
+			case ( TransformWidgetRenderableType::TranslationRoot ):
+			{
+				// Find dot between cam forward and right axis
+				Vec3 cF = camera->Forward( ).Normalize( ); 
+				Vec3 oP = mTranslationWidget.mRoot.mWorldTransform.GetPosition( ); 
+
+				// Define object plane
+				Plane objectPlane = Plane( cF, oP );
+
+				// Define ray from mouse position on screen to world plane
+				Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+
+				// Do intersection test
+				LineIntersectionResult intersectionResult = objectPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection ); 
+
+				if ( intersectionResult.mHit )
+				{
+					const Vec3* hp = &intersectionResult.mHitPosition;
+
+					// Store position and then store that we're moving
+					mInteractingWithTransformWidget = true;
+					mType = TransformWidgetRenderableType::TranslationRoot;
+					mIntersectionStartPosition = intersectionResult.mHitPosition;
+					mRootStartPosition = mTranslationWidget.mRoot.mWorldTransform.GetPosition( );
+				}
+
+			} break;
 			case ( TransformWidgetRenderableType::TranslationRightAxis ):
 			{ 
 				// Find dot between cam forward and right axis

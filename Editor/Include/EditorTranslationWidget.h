@@ -29,6 +29,9 @@ namespace Enjon
 			// Sets root scale
 			void SetScale( const f32& scale );
 			void SetRotation( const Quaternion& rotation );
+
+			void Activate( TransformWidgetRenderableType type );
+			void Deactivate( TransformWidgetRenderableType type );
 			
 			TransformRenderableHeirarchy mRoot;
 			TransformRenderableHeirarchy mUpAxis;

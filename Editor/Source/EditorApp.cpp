@@ -857,6 +857,19 @@ namespace Enjon
 							} 
 						}
 					} break;
+
+					case TransformWidgetRenderableType::TranslationRoot:
+					{
+						Entity* ent = mSelectedEntity.Get( );
+						switch ( mMode )
+						{
+							case TransformMode::Translate:
+							{
+								Vec3 lp = ent->GetLocalPosition( ) + delta;
+								ent->SetLocalPosition( lp ); 
+							} break;
+						} 
+					} break;
 				}
 
 				if ( mSelectedEntity.Get( ) )
@@ -1066,6 +1079,7 @@ namespace Enjon
 		Enjon::String midGreyPath			= Enjon::String("Textures/grey.png"); 
 		Enjon::String lightGreyPath			= Enjon::String("Textures/light_grey.png"); 
 		Enjon::String whitePath				= Enjon::String("Textures/white.png"); 
+		Enjon::String yellowPath			= Enjon::String("Textures/yellow.png"); 
 		Enjon::String teapotPath			= Enjon::String( "Models/teapot.obj" );
 		Enjon::String swordPath				= Enjon::String( "Models/sword.obj" );
 		Enjon::String eyeNormal				= Enjon::String( "Textures/eye_NORMAL.png" );
@@ -1154,6 +1168,7 @@ namespace Enjon
 		mAssetManager->AddToDatabase( bluePath );
 		mAssetManager->AddToDatabase( blackPath );
 		mAssetManager->AddToDatabase( whitePath );
+		mAssetManager->AddToDatabase( yellowPath );
 		mAssetManager->AddToDatabase( teapotPath );
 		mAssetManager->AddToDatabase( waterPath );
 
@@ -1161,6 +1176,7 @@ namespace Enjon
 		AssetHandle< Material > redMat = mAssetManager->ConstructAsset< Material >( "RedMaterial" );
 		AssetHandle< Material > greenMat = mAssetManager->ConstructAsset< Material >( "GreenMaterial" );
 		AssetHandle< Material > blueMat = mAssetManager->ConstructAsset< Material >( "BlueMaterial" );
+		AssetHandle< Material > yellowMat = mAssetManager->ConstructAsset< Material >( "YellowMaterial" );
 		AssetHandle< ShaderGraph > sg = mAssetManager->GetAsset< ShaderGraph >( "shaders.shadergraphs.defaultstaticgeom" );
 
 		redMat->SetShaderGraph( sg );
@@ -1187,9 +1203,18 @@ namespace Enjon
 		blueMat.Get()->ConstCast< Material >()->SetUniform( "aoMap", mAssetManager->GetAsset< Texture >( "textures.white" ) );
 		blueMat.Get()->ConstCast< Material >()->SetUniform( "emissiveMap", mAssetManager->GetAsset< Texture >( "textures.black" ) );
 
+		yellowMat->SetShaderGraph( sg );
+		yellowMat.Get()->ConstCast< Material >()->SetUniform( "albedoMap", mAssetManager->GetAsset< Texture >( "textures.yellow" ) );
+		yellowMat.Get()->ConstCast< Material >()->SetUniform( "normalMap", mAssetManager->GetAsset< Texture >( "textures.front_normal" ) );
+		yellowMat.Get()->ConstCast< Material >()->SetUniform( "metallicMap", mAssetManager->GetAsset< Texture >( "textures.black" ) );
+		yellowMat.Get()->ConstCast< Material >()->SetUniform( "roughMap", mAssetManager->GetAsset< Texture >( "textures.white" ) );
+		yellowMat.Get()->ConstCast< Material >()->SetUniform( "aoMap", mAssetManager->GetAsset< Texture >( "textures.white" ) );
+		yellowMat.Get()->ConstCast< Material >()->SetUniform( "emissiveMap", mAssetManager->GetAsset< Texture >( "textures.black" ) );
+
 		redMat->Save( );
 		greenMat->Save( );
 		blueMat->Save( );
+		yellowMat->Save( );
 	}
 }
 

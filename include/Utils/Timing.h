@@ -30,6 +30,8 @@ namespace Enjon { namespace Utils {
 		{
 			return mDT;
 		}
+ 
+		float GetFPS( bool calculateFPS = false );
 
 	private: 
 		float m_maxFPS;

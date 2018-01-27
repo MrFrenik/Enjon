@@ -1378,13 +1378,10 @@ namespace Enjon
 				{
 					auto wt = Engine::GetInstance( )->GetWorldTime( ).mTotalTime;
 					auto uiFont = FontManager::GetFont("WeblySleek_16"); 
-					f32 fps = ImGui::GetIO( ).Framerate;
+					//f32 fps = ImGui::GetIO( ).Framerate;
+					f32 fps = Engine::GetInstance( )->GetWorldTime( ).mFPS;
 					f32 frameTime = ( 1.0f / fps ) * 1000.0f;
-					Enjon::PrintText( 10.0f, 10.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch );
-
-					// Print a small reticle in center of screen 
-					Enjon::PrintText( (f32)dispX / 2.0f, (f32)dispY / 2.0f, 1.0f, ".", uiFont, mUIBatch, RGBA32_White() );
-
+					Enjon::PrintText( 10.0f, 10.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch ); 
 				}
 				mUIBatch.End( );
 				mUIBatch.RenderBatch( ); 

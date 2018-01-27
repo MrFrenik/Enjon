@@ -244,9 +244,12 @@ namespace Enjon
 			// Clamp frame rate
 			//mLimiter.End(); 
 
+			f32 fps = mLimiter.GetFPS( true );
+
 			// Update world time
 			mWorldTime.mDT = dt;
 			mWorldTime.mTotalTime += mWorldTime.mDT;
+			mWorldTime.mFPS = fps;
 		}
 
 		Enjon::Result res = ShutDown();
