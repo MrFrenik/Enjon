@@ -8,11 +8,11 @@
 
 #include <fmt/format.h>
 
-#include "EditorTranslationWidget.h"
+#include "EditorScaleWidget.h"
 
 namespace Enjon
 {
-	void EditorTranslationWidget::Initialize( EditorTransformWidget* owner )
+	void EditorScaleWidget::Initialize( EditorTransformWidget* owner )
 	{ 
 		// Set up renderables for each of the axes
 		AssetManager* am = EngineSubsystem( AssetManager );
@@ -20,11 +20,11 @@ namespace Enjon
 		// Set up renderables
 		mRoot.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
 		mForwardAxis.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cylinder" ) );
-		mForwardAxisArrow.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cone" ) );
 		mRightAxis.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cylinder" ) );
-		mRightAxisArrow.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cone" ) );
 		mUpAxis.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cylinder" ) );
-		mUpAxisArrow.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cone" ) );
+		mForwardAxisArrow.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
+		mRightAxisArrow.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
+		mUpAxisArrow.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
 		mXYAxis.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
 		mXZAxis.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
 		mYZAxis.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
@@ -88,16 +88,16 @@ namespace Enjon
 		mYZAxis.mLocalTransform.SetPosition( Vec3( 0.0f, 0.0f, 9.0f ) ); 
 
 		// Set renderable ids 
-		mRoot.mRenderable.SetRenderableID( MAX_ENTITIES + (u32)TransformWidgetRenderableType::TranslationRoot );
-		mForwardAxis.mRenderable.SetRenderableID( MAX_ENTITIES + (u32)TransformWidgetRenderableType::TranslationForwardAxis );
-		mUpAxis.mRenderable.SetRenderableID( MAX_ENTITIES + (u32)TransformWidgetRenderableType::TranslationUpAxis );
-		mRightAxis.mRenderable.SetRenderableID( MAX_ENTITIES + (u32)TransformWidgetRenderableType::TranslationRightAxis );
-		mForwardAxisArrow.mRenderable.SetRenderableID( MAX_ENTITIES + ( u32 )TransformWidgetRenderableType::TranslationForwardAxis );
-		mUpAxisArrow.mRenderable.SetRenderableID( MAX_ENTITIES + (u32)TransformWidgetRenderableType::TranslationUpAxis );
-		mRightAxisArrow.mRenderable.SetRenderableID( MAX_ENTITIES + (u32)TransformWidgetRenderableType::TranslationRightAxis );
-		mYZAxis.mRenderable.SetRenderableID( MAX_ENTITIES + ( u32 )TransformWidgetRenderableType::TranslationYZAxes );
-		mXYAxis.mRenderable.SetRenderableID( MAX_ENTITIES + ( u32 )TransformWidgetRenderableType::TranslationXYAxes );
-		mXZAxis.mRenderable.SetRenderableID( MAX_ENTITIES + ( u32 )TransformWidgetRenderableType::TranslationXZAxes );
+		mRoot.mRenderable.SetRenderableID( MAX_ENTITIES + (u32)TransformWidgetRenderableType::ScaleRoot );
+		mForwardAxis.mRenderable.SetRenderableID( MAX_ENTITIES + (u32)TransformWidgetRenderableType::ScaleForwardAxis );
+		mUpAxis.mRenderable.SetRenderableID( MAX_ENTITIES + (u32)TransformWidgetRenderableType::ScaleUpAxis );
+		mRightAxis.mRenderable.SetRenderableID( MAX_ENTITIES + (u32)TransformWidgetRenderableType::ScaleRightAxis );
+		mForwardAxisArrow.mRenderable.SetRenderableID( MAX_ENTITIES + ( u32 )TransformWidgetRenderableType::ScaleForwardAxis );
+		mUpAxisArrow.mRenderable.SetRenderableID( MAX_ENTITIES + (u32)TransformWidgetRenderableType::ScaleUpAxis );
+		mRightAxisArrow.mRenderable.SetRenderableID( MAX_ENTITIES + (u32)TransformWidgetRenderableType::ScaleRightAxis );
+		mYZAxis.mRenderable.SetRenderableID( MAX_ENTITIES + ( u32 )TransformWidgetRenderableType::ScaleYZAxes );
+		mXYAxis.mRenderable.SetRenderableID( MAX_ENTITIES + ( u32 )TransformWidgetRenderableType::ScaleXYAxes );
+		mXZAxis.mRenderable.SetRenderableID( MAX_ENTITIES + ( u32 )TransformWidgetRenderableType::ScaleXZAxes );
 
 		// Add transformation hierarchies
 		mTransformHeirarchies.push_back( &mRoot );
@@ -122,103 +122,104 @@ namespace Enjon
 		// Set root hierarchy
 		mRootHeirarchy = &mRoot;
 	} 
-
-	void EditorTranslationWidget::BeginInteraction( TransformWidgetRenderableType type )
+ 
+	void EditorScaleWidget::BeginInteraction( TransformWidgetRenderableType type )
 	{
 		AssetManager* am = EngineSubsystem( AssetManager );
 
 		// Change material 
 		switch ( type )
 		{
-			case TransformWidgetRenderableType::TranslationRoot:
+			case TransformWidgetRenderableType::ScaleRoot:
 			{
 				mRoot.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
 			} break; 
 
-			case TransformWidgetRenderableType::TranslationForwardAxis:
+			case TransformWidgetRenderableType::ScaleForwardAxis:
 			{
 				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
 				mForwardAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
 			} break;
 
-			case TransformWidgetRenderableType::TranslationRightAxis:
+			case TransformWidgetRenderableType::ScaleRightAxis:
 			{
 				mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
 				mRightAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) ); 
 			} break;
 
-			case TransformWidgetRenderableType::TranslationUpAxis:
+			case TransformWidgetRenderableType::ScaleUpAxis:
 			{
 				mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
 				mUpAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) ); 
 			} break; 
 
-			case TransformWidgetRenderableType::TranslationXYAxes:
+			case TransformWidgetRenderableType::ScaleXYAxes:
 			{
 				mXYAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
 			} break; 
 
-			case TransformWidgetRenderableType::TranslationXZAxes:
+			case TransformWidgetRenderableType::ScaleXZAxes:
 			{
 				mXZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
 			} break; 
 
-			case TransformWidgetRenderableType::TranslationYZAxes:
+			case TransformWidgetRenderableType::ScaleYZAxes:
 			{
 				mYZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
 			} break; 
 		}
 	}
 
-	void EditorTranslationWidget::Interact( )
+	void EditorScaleWidget::Interact( )
 	{
 
 	}
 
-	void EditorTranslationWidget::EndInteraction( TransformWidgetRenderableType type )
+	void EditorScaleWidget::EndInteraction( TransformWidgetRenderableType type )
 	{
 		AssetManager* am = EngineSubsystem( AssetManager );
 
 		// Change material 
 		switch ( type )
 		{
-			case TransformWidgetRenderableType::TranslationRoot:
+			case TransformWidgetRenderableType::ScaleRoot:
 			{
 				mRoot.mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ) );
 			} break; 
 
-			case TransformWidgetRenderableType::TranslationXYAxes:
+			case TransformWidgetRenderableType::ScaleXYAxes:
 			{
 				mXYAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
 			} break; 
 
-			case TransformWidgetRenderableType::TranslationXZAxes:
+			case TransformWidgetRenderableType::ScaleXZAxes:
 			{
 				mXZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) );
 			} break; 
 
-			case TransformWidgetRenderableType::TranslationYZAxes:
+			case TransformWidgetRenderableType::ScaleYZAxes:
 			{
 				mYZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) );
 			} break; 
 
-			case TransformWidgetRenderableType::TranslationForwardAxis:
+			case TransformWidgetRenderableType::ScaleForwardAxis:
 			{
 				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
 				mForwardAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
 			} break; 
 
-			case TransformWidgetRenderableType::TranslationRightAxis:
+			case TransformWidgetRenderableType::ScaleRightAxis:
 			{
 				mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) );
 				mRightAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) ); 
 			} break;
 
-			case TransformWidgetRenderableType::TranslationUpAxis:
+			case TransformWidgetRenderableType::ScaleUpAxis:
 			{
 				mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) );
 				mUpAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) ); 
 			} break; 
 		}
+
 	}
 }

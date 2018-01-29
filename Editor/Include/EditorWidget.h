@@ -9,6 +9,8 @@
 
 namespace Enjon
 {
+	class EditorTransformWidget;
+
 	enum class TransformWidgetRenderableType
 	{
 		TranslationRoot,
@@ -17,7 +19,14 @@ namespace Enjon
 		TranslationRightAxis,
 		TranslationXYAxes,
 		TranslationXZAxes,
-		TranslationYZAxes
+		TranslationYZAxes,
+		ScaleRoot,
+		ScaleForwardAxis,
+		ScaleUpAxis,
+		ScaleRightAxis,
+		ScaleXYAxes,
+		ScaleXZAxes,
+		ScaleYZAxes
 	};
 
 	class TransformHeirarchy : public Object
@@ -126,6 +135,33 @@ namespace Enjon
 
 			Renderable mRenderable;
 	}; 
+
+	class EditorWidget
+	{
+		public:
+			EditorWidget( ) = default;
+			~EditorWidget( ) = default;
+
+			virtual void Update( );
+			virtual void Initialize( EditorTransformWidget* owner ) = 0;
+			virtual void BeginInteraction( TransformWidgetRenderableType type ) = 0;
+			virtual void Interact( ) = 0;
+			virtual void EndInteraction( TransformWidgetRenderableType type ) = 0; 
+
+			virtual void Enable( );
+			virtual void Disable( ); 
+
+			Transform GetWorldTransform( );
+			void SetTransform( const Transform& transform ); 
+			void SetPosition( const Vec3& position ); 
+			void SetScale( const f32& scale ); 
+			void SetRotation( const Quaternion& rotation );
+
+		protected:
+			EditorTransformWidget* mOwner = nullptr;
+			TransformHeirarchy* mRootHeirarchy = nullptr; 
+			Vector<TransformRenderableHeirarchy*> mTransformHeirarchies;
+	};
 }
 
 #endif

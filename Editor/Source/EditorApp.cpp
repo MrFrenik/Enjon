@@ -677,6 +677,19 @@ namespace Enjon
 			ent->SetLocalPosition( Vec3( 5.0f, 2.0f, 4.0f ) );
 		} 
 
+		EntityHandle floorEnt = entities->Allocate( );
+		if ( floorEnt.Get() ) 
+		{ 
+			Entity* ent = floorEnt.Get( );
+			auto gfxComp = ent->AddComponent< GraphicsComponent >( );
+			if ( gfxComp )
+			{
+				gfxComp->SetMesh( mAssetManager->GetAsset< Mesh >( "models.unit_cube" ) );
+				gfxComp->SetMaterial( mAssetManager->GetAsset< Material >( "MahogFloorMaterial" ) );
+			}
+			ent->SetLocalScale( Vec3( 100.0f, 0.1f, 100.0f ) );
+		} 
+
 		// Initialize transform widget
 		mTransformWidget.Initialize( );
 
@@ -741,19 +754,19 @@ namespace Enjon
 		} );
 
 		mShowSceneView = true;
-		auto sceneViewOption = [&]()
+		auto sceneViewOption = [ & ] ( )
 		{
-        	ImGui::MenuItem("Scene##options", NULL, &mShowSceneView);
+			ImGui::MenuItem( "Scene##options", NULL, &mShowSceneView );
 		};
 
 		// Register menu options
-		ImGuiManager::RegisterMenuOption("View", sceneViewOption);
+		ImGuiManager::RegisterMenuOption( "View", sceneViewOption );
 
 		// Register docking layouts 
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Scene", ImGui::DockSlotType::Slot_Right, 0.2f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Camera", ImGui::DockSlotType::Slot_Bottom, 0.3f ) );
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) ); 
+		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene", ImGui::DockSlotType::Slot_Top, 0.1f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Play Options", ImGui::DockSlotType::Slot_Tab, 0.1f ) );
 
@@ -761,23 +774,24 @@ namespace Enjon
 	}
 
 	Enjon::Result EnjonEditor::Update( f32 dt )
-	{ 
+	{
 		static float t = 0.0f;
-		t += dt; 		
-		
-		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-		const Camera* cam = gfx->GetSceneCamera( );
+		t += dt;
 
-		// Set scale of root based on distance from camera
-		f32 distSqred = Vec3::DistanceSquared( cam->GetPosition( ), mTransformWidget.GetWorldTransform( ).GetPosition( ) );
-		f32 scale = Clamp( distSqred, 0.5f, 100.0f );
-		mTransformWidget.SetScale( scale );
+		//GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		//const Camera* cam = gfx->GetSceneCamera( );
 
+		//// Set scale of root based on distance from camera
+		//f32 distSqred = Vec3::DistanceSquared( cam->GetPosition( ), mTransformWidget.GetWorldTransform( ).GetPosition( ) );
+		//f32 scale = Clamp( distSqred, 0.5f, 100.0f );
+		//mTransformWidget.SetScale( scale );
+
+		// Update transform widget
 		mTransformWidget.Update( );
 
 		// Simulate game tick scenario if playing
 		if ( mPlaying )
-		{ 
+		{
 			Application* app = mProject.GetApplication( );
 			if ( app )
 			{
@@ -785,12 +799,12 @@ namespace Enjon
 				//Enjon::ObjectArchiver::Serialize( app, &temp );
 
 				app->ProcessInput( dt );
-				app->Update( dt ); 
+				app->Update( dt );
 			}
 		}
 
 		return Enjon::Result::PROCESS_RUNNING;
-	} 
+	}
 
 	enum class TransformMode
 	{
@@ -799,7 +813,7 @@ namespace Enjon
 	};
 
 	Enjon::Result EnjonEditor::ProcessInput( f32 dt )
-	{ 
+	{
 		static EntityHandle mSelectedEntity;
 		static bool mInteractingWithTransformWidget = false;
 		static TransformMode mMode = TransformMode::Translate;
@@ -807,10 +821,10 @@ namespace Enjon
 		static Vec3 mRootStartPosition;
 		static Vec3 mRootStartScale;
 		static TransformWidgetRenderableType mType;
-		static 
-		GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
+		static
+			GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
 		Input* mInput = EngineSubsystem( Input );
-		Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >(); 
+		Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >( );
 
 		if ( mInput->IsKeyPressed( Enjon::KeyCode::T ) )
 		{
@@ -819,12 +833,51 @@ namespace Enjon
 
 		if ( mInput->IsKeyPressed( KeyCode::One ) )
 		{
-			mMode = TransformMode::Translate;
+			mTransformWidget.SetTransformationMode( TransformationMode::Translation );
 		}
 		if ( mInput->IsKeyPressed( KeyCode::Two ) )
 		{
-			mMode = TransformMode::Scale;
+			mTransformWidget.SetTransformationMode( TransformationMode::Scale );
 		}
+
+		if ( mInput->IsKeyDown( KeyCode::N ) )
+		{
+			Entity* ent = mSelectedEntity.Get( );
+			if ( ent )
+			{
+				static f32 angle = 0.0f;
+				angle += 10.0f * 0.001f; 
+				Quaternion rotation = Quaternion::AngleAxis( ToRadians( angle ), Vec3::XAxis( ) );
+				ent->SetLocalRotation( ent->GetLocalRotation( ) * rotation );
+				mTransformWidget.SetRotation( ent->GetWorldRotation( ) );
+			}
+		} 
+
+		if ( mInput->IsKeyDown( KeyCode::M ) )
+		{
+			Entity* ent = mSelectedEntity.Get( );
+			if ( ent )
+			{
+				static f32 angle = 0.0f;
+				angle += 10.0f * 0.001f;
+				Quaternion rotation = Quaternion::AngleAxis( ToRadians( angle ), Vec3::YAxis( ) );
+				ent->SetLocalRotation( ent->GetLocalRotation( ) * rotation );
+				mTransformWidget.SetRotation( ent->GetWorldRotation( ) );
+			}
+		} 
+
+		if ( mInput->IsKeyDown( KeyCode::Comma ) )
+		{
+			Entity* ent = mSelectedEntity.Get( );
+			if ( ent )
+			{
+				static f32 angle = 0.0f;
+				angle += 10.0f * 0.001f;;
+				Quaternion rotation = Quaternion::AngleAxis( ToRadians( angle ), Vec3::ZAxis( ) );
+				ent->SetLocalRotation( ent->GetLocalRotation( ) * rotation );
+				mTransformWidget.SetRotation( ent->GetWorldRotation( ) );
+			}
+		} 
 
 		if ( mInput->IsKeyDown( KeyCode::LeftMouseButton ) )
 		{
@@ -833,42 +886,53 @@ namespace Enjon
 				mTransformWidget.InteractWithWidget( );
 				Vec3 delta = mTransformWidget.GetDelta( );
 
-				switch ( mTransformWidget.GetInteractedWidgetType( ) )
+				TransformationMode transformationMode = mTransformWidget.GetTransformationMode( );
+
+				switch ( transformationMode )
 				{
-					case TransformWidgetRenderableType::TranslationUpAxis:
-					case TransformWidgetRenderableType::TranslationForwardAxis:
-					case TransformWidgetRenderableType::TranslationRightAxis:
+					case TransformationMode::Translation:
 					{
-						Entity* ent = mSelectedEntity.Get( );
-						if ( ent )
+						switch ( mTransformWidget.GetInteractedWidgetType( ) )
 						{
-							switch ( mMode )
+							case TransformWidgetRenderableType::TranslationXYAxes:
+							case TransformWidgetRenderableType::TranslationXZAxes:
+							case TransformWidgetRenderableType::TranslationYZAxes:
+							case TransformWidgetRenderableType::TranslationRoot:
+							case TransformWidgetRenderableType::TranslationUpAxis:
+							case TransformWidgetRenderableType::TranslationForwardAxis:
+							case TransformWidgetRenderableType::TranslationRightAxis:
 							{
-								case TransformMode::Translate:
+								Entity* ent = mSelectedEntity.Get( );
+								if ( ent )
 								{
 									Vec3 lp = ent->GetLocalPosition( ) + delta;
-									ent->SetLocalPosition( lp ); 
-								} break;
-								case TransformMode::Scale:
-								{
-									Vec3 ls = ent->GetLocalScale( ) + delta;
-									ent->SetLocalScale( ls ); 
-								} break;
-							} 
+									ent->SetLocalPosition( lp );
+								}
+							} break;
 						}
+
 					} break;
 
-					case TransformWidgetRenderableType::TranslationRoot:
+					case TransformationMode::Scale:
 					{
-						Entity* ent = mSelectedEntity.Get( );
-						switch ( mMode )
+						switch ( mTransformWidget.GetInteractedWidgetType( ) )
 						{
-							case TransformMode::Translate:
+							case TransformWidgetRenderableType::ScaleYZAxes:
+							case TransformWidgetRenderableType::ScaleXZAxes:
+							case TransformWidgetRenderableType::ScaleXYAxes:
+							case TransformWidgetRenderableType::ScaleForwardAxis:
+							case TransformWidgetRenderableType::ScaleUpAxis:
+							case TransformWidgetRenderableType::ScaleRightAxis:
 							{
-								Vec3 lp = ent->GetLocalPosition( ) + delta;
-								ent->SetLocalPosition( lp ); 
+								Entity* ent = mSelectedEntity.Get( );
+								if ( ent )
+								{
+									Vec3 ls = ent->GetLocalScale( ) + delta;
+									ent->SetLocalScale( ls );
+								}
 							} break;
-						} 
+						}
+
 					} break;
 				}
 
@@ -952,6 +1016,7 @@ namespace Enjon
 				PickResult pr = mGfx->GetPickedObjectResult( mInput->GetMouseCoords() );
 				if ( pr.mEntity.Get( ) )
 				{
+					mTransformWidget.SetRotation( pr.mEntity.Get( )->GetWorldRotation( ) );
 					mTransformWidget.SetPosition( pr.mEntity.Get( )->GetWorldPosition( ) );
 					mSelectedEntity = pr.mEntity;
 				}
@@ -966,7 +1031,15 @@ namespace Enjon
 
 		if ( mInput->IsKeyPressed( KeyCode::Y ) )
 		{
+			Entity* ent = mSelectedEntity.Get( );
+			if ( ent )
+			{
+				ent->SetLocalPosition( Vec3( 0.0f ) );
+				ent->SetLocalRotation( Quaternion( ) );
+			}
+
 			mTransformWidget.SetPosition( Vec3( 0.0f ) );
+			mTransformWidget.SetRotation( Quaternion( ) );
 		}
 
 		// Starting /Stopping game instance

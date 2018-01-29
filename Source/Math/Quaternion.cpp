@@ -223,11 +223,19 @@ namespace Enjon
 		return Vec3( roll, pitch, yaw );
 	} 
 
+	Quaternion Quaternion::NegativeAngleAxis( )
+	{
+		return AngleAxis( -this->Angle( ), this->Axis( ) );
+	}
+
 	Vec3 Quaternion::operator*(const Vec3& V) const
 	{
-		auto Qxyz = Vec3(x, y, z); 
-		const Vec3 t = 2.0f * Qxyz.Cross( V );
-		return ( V + w * t + Qxyz.Cross( t ) ); 
+		Vec3 Qxyz = Vec3(x, y, z); 
+		f32 s = this->w; 
+		Vec3 vprime = 2.0f * Qxyz.Dot( V ) * Qxyz + ( s * s - Qxyz.Dot( Qxyz ) ) * V + 2.0f * s * Qxyz.Cross( V );
+		return vprime;
+		//const Vec3 t = 2.0f * Qxyz.Cross( V );
+		//return ( V + w * t + Qxyz.Cross( t ) ); 
 	} 
 			
 	Quaternion Quaternion::RotationBetweenVectors( const Vec3& s, const Vec3& d )

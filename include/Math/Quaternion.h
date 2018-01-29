@@ -113,6 +113,11 @@ namespace Enjon
 			// Get Euler Angles from quaternion
 			Vec3 EulerAngles(); 
 
+			/**
+			* @brief
+			*/
+			Quaternion NegativeAngleAxis( );
+
 			/*
 			* @brief
 			* @note implementation from: https://github.com/opengl-tutorials/ogl/blob/master/common/quaternion_utils.cpp

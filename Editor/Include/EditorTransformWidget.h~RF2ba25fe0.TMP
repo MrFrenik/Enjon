@@ -7,19 +7,11 @@
  
 #include "EditorWidget.h"
 #include "EditorTranslationWidget.h"
-#include "EditorScaleWidget.h"
 
 #include <Graphics/Renderable.h>
 
 namespace Enjon
 { 
-	enum class TransformationMode
-	{
-		Translation,
-		Scale,
-		Rotation
-	};
-
 	class EditorTransformWidget
 	{ 
 		public:
@@ -36,33 +28,27 @@ namespace Enjon
 			void SetRotation( const Quaternion& rotation );
 
 			EditorTranslationWidget mTranslationWidget;
-			EditorScaleWidget mScaleWidget;
 
 			void BeginWidgetInteraction( TransformWidgetRenderableType type );
 			void InteractWithWidget( );
 			void EndInteraction( );
 			TransformWidgetRenderableType GetInteractedWidgetType( );
-			TransformationMode GetTransformationMode( );
+
+			LineIntersectionResult GetLineIntersectionResult( const Vec3& axisA, const Vec3& axisB, const Vec3& axisC, bool comparedSupportingAxes = true, const Vec3& axisToUseAsPlaneNormal = Vec3(0.0f) );
+			void GetLineIntersectionResultSingleAxis( const Vec3& axis );
 
 			bool IsInteractingWithWidget( ) const;
 			Vec3 GetDelta( ) const; 
 
-			void SetTransformationMode( TransformationMode mode ); 
-
 		private:
-			LineIntersectionResult GetLineIntersectionResult( const Vec3& axisA, const Vec3& axisB, const Vec3& axisC, bool comparedSupportingAxes = true, const Vec3& axisToUseAsPlaneNormal = Vec3(0.0f) );
-			LineIntersectionResult GetLineIntersectionResultSingleAxis( const Vec3& axis );
-			void StoreIntersectionResultInformation( const LineIntersectionResult& result, TransformWidgetRenderableType type ); 
-
-		private:
-			EditorWidget* mActiveWidget = nullptr;
 			Transform mWorldTransform;					
-			TransformationMode mMode = TransformationMode::Translation;
+			// Store position and then store that we're moving
+
+			bool mInteractingWithTransformWidget = true; 
 			TransformWidgetRenderableType mType = TransformWidgetRenderableType::TranslationRightAxis;
 			Vec3 mIntersectionStartPosition;
 			Vec3 mRootStartPosition;
 			Vec3 mDelta;
-			bool mInteractingWithTransformWidget = true; 
 	}; 
 }
 
