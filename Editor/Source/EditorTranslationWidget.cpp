@@ -18,7 +18,7 @@ namespace Enjon
 		AssetManager* am = EngineSubsystem( AssetManager );
 
 		// Set up renderables
-		mRoot.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
+		mRoot.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_sphere" ) );
 		mForwardAxis.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cylinder" ) );
 		mForwardAxisArrow.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cone" ) );
 		mRightAxis.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cylinder" ) );
@@ -42,6 +42,8 @@ namespace Enjon
 		mXZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) );
 		mYZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) );
 
+		mRoot.mLocalTransform.SetScale( 0.2f );
+
 		// Child heirarchies
 		mRoot.AddChild( &mForwardAxis );
 		mRoot.AddChild( &mUpAxis );
@@ -55,7 +57,7 @@ namespace Enjon
 
 		// Set up local transforms for each
 		f32 yScale = 4.0f;
-		f32 xzScale = 0.5f;
+		f32 xzScale = 0.3f;
 		f32 bias = 1.0f;
 		f32 coneYOffset = 1.2f;
 		Vec3 coneScale = Vec3( 2.0f, 0.3f, 2.0f );
@@ -112,7 +114,7 @@ namespace Enjon
 		mTransformHeirarchies.push_back( &mYZAxis );
 
 		// Set up scale for root
-		mRoot.mLocalTransform.SetScale( 0.5f );
+		//mRoot.mLocalTransform.SetScale( 0.5f );
 
 		mRoot.mLocalTransform.SetPosition( Vec3( 0.0f, 0.0f, 0.0f ) );
 

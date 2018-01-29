@@ -55,7 +55,7 @@ namespace Enjon
 
 		// Set up local transforms for each
 		f32 yScale = 4.0f;
-		f32 xzScale = 0.5f;
+		f32 xzScale = 0.3f;
 		f32 bias = 1.0f;
 		f32 coneYOffset = 1.2f;
 		Vec3 coneScale = Vec3( 2.0f, 0.3f, 2.0f );
