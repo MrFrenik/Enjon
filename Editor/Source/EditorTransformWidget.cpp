@@ -138,10 +138,10 @@ namespace Enjon
 		Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
 
 		// Get intersection result of plane 
-		LineIntersectionResult intersectionResult = intersectionPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection );
+		LineIntersectionResult intersectionResult = intersectionPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection ); 
 
 		return intersectionResult; 
-	}
+	} 
 
 	LineIntersectionResult EditorTransformWidget::GetLineIntersectionResultSingleAxis( const Vec3& axis )
 	{
@@ -565,22 +565,27 @@ namespace Enjon
 						const Vec3* hp = &intersectionResult.mHitPosition; 
 
 						// Store delta
-						mDelta = Vec3( ( intersectionResult.mHitPosition - mIntersectionStartPosition ).Length( ) ); 
+						mDelta = intersectionResult.mHitPosition - mIntersectionStartPosition;
 
-						Vec3 delta = intersectionResult.mHitPosition - mIntersectionStartPosition;
-						f32 absx = fabs( delta.x );
-						f32 absy = fabs( delta.y );
-						f32 absz = fabs( delta.z );
-						f32 max = ( absx > absy ? ( absx > absy ? delta.x : ( absz > absy ? delta.z : delta.y ) ) : delta.z );
-
-						mDelta = Vec3( max );
+						// Get these positions in screen space coordinates to determine sign
+						Vec2 mc = input->GetMouseCoords( ); 
 
 						// Store previous position as new intersection position
-						mIntersectionStartPosition = intersectionResult.mHitPosition;
+						mIntersectionStartPosition = intersectionResult.mHitPosition; 
+
+						// Get dot product with camera forward and world x axis
+						f32 xDiff = mc.x - mPreviousMouseCoords.x;
+						f32 sign = xDiff > 0.0f ? 1.0f : -1.0f ; 
+
+						// Clamp to x axis
+						mDelta = Vec3( fabs( mDelta.x ) * sign );
 					}
 
 				} break;
 			} 
+
+			// Store previous mouse coordinates
+			mPreviousMouseCoords = input->GetMouseCoords( );
 		}
 	}
 
@@ -596,6 +601,8 @@ namespace Enjon
 
 	void EditorTransformWidget::StoreIntersectionResultInformation( const LineIntersectionResult& result, TransformWidgetRenderableType type )
 	{
+		Input* input = EngineSubsystem( Input );
+
 		if ( result.mHit )
 		{
 			const Vec3* hp = &result.mHitPosition; 
@@ -604,6 +611,7 @@ namespace Enjon
 			mType = type;
 			mIntersectionStartPosition = result.mHitPosition;
 			mRootStartPosition = mTranslationWidget.mRoot.mWorldTransform.GetPosition( );
+			mPreviousMouseCoords = input->GetMouseCoords( );
 		} 
 	} 
 

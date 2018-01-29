@@ -917,7 +917,6 @@ namespace Enjon
 					{
 						switch ( mTransformWidget.GetInteractedWidgetType( ) )
 						{
-							case TransformWidgetRenderableType::ScaleRoot:
 							case TransformWidgetRenderableType::ScaleYZAxes:
 							case TransformWidgetRenderableType::ScaleXZAxes:
 							case TransformWidgetRenderableType::ScaleXYAxes:
@@ -931,6 +930,16 @@ namespace Enjon
 									Vec3 ls = ent->GetLocalScale( ) + delta;
 									ent->SetLocalScale( ls );
 								}
+							} break;
+							case TransformWidgetRenderableType::ScaleRoot:
+							{
+								Entity* ent = mSelectedEntity.Get( );
+								if ( ent )
+								{
+									Vec3 ls = ent->GetLocalScale( ) + delta * ent->GetLocalScale( );
+									ent->SetLocalScale( ls );
+								}
+
 							} break;
 						}
 

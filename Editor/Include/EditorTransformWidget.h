@@ -62,6 +62,7 @@ namespace Enjon
 			Vec3 mIntersectionStartPosition;
 			Vec3 mRootStartPosition;
 			Vec3 mDelta;
+			Vec2 mPreviousMouseCoords;
 			bool mInteractingWithTransformWidget = true; 
 	}; 
 }
