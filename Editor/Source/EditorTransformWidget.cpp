@@ -8,6 +8,8 @@
 #include <SubsystemCatalog.h>
 #include <IO/InputManager.h>
 
+#include <fmt/format.h>
+
 namespace Enjon
 {
 	void EditorTransformWidget::Initialize( )
@@ -466,6 +468,10 @@ namespace Enjon
 						// Clamp to y axis check 
 						mDelta.x = 0.0f; 
 						mDelta.z = 0.0f;
+
+						mDelta.y = Clamp( mDelta.y, -5.0f, 5.0f );
+
+						std::cout << fmt::format( "dot: {}, delta: {}, {}, {}\n", TyDotYAxis, mDelta.x, mDelta.y, mDelta.z ); 
 					}
 				} break;
 
@@ -546,6 +552,34 @@ namespace Enjon
 					}
 
 				} break;
+
+				case ( TransformWidgetRenderableType::ScaleRoot ):
+				{
+					// Get intersection result
+					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( camera->Forward( ).Normalize( ) ); 
+
+					// Check for intersection hit result
+					if ( intersectionResult.mHit )
+					{
+						// Calculate delta
+						const Vec3* hp = &intersectionResult.mHitPosition; 
+
+						// Store delta
+						mDelta = Vec3( ( intersectionResult.mHitPosition - mIntersectionStartPosition ).Length( ) ); 
+
+						Vec3 delta = intersectionResult.mHitPosition - mIntersectionStartPosition;
+						f32 absx = fabs( delta.x );
+						f32 absy = fabs( delta.y );
+						f32 absz = fabs( delta.z );
+						f32 max = ( absx > absy ? ( absx > absy ? delta.x : ( absz > absy ? delta.z : delta.y ) ) : delta.z );
+
+						mDelta = Vec3( max );
+
+						// Store previous position as new intersection position
+						mIntersectionStartPosition = intersectionResult.mHitPosition;
+					}
+
+				} break;
 			} 
 		}
 	}
@@ -599,8 +633,6 @@ namespace Enjon
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::TranslationRoot ); 
 			} break;
-
-			
 
 			case ( TransformWidgetRenderableType::TranslationRightAxis ):
 			{ 
@@ -727,6 +759,19 @@ namespace Enjon
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::ScaleXZAxes ); 
 			} break;
+
+			case ( TransformWidgetRenderableType::ScaleRoot ):
+			{
+				// Axis of rotation
+				Vec3 cF = camera->Forward( ).Normalize( ); 
+
+				// Do intersection test
+				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( cF );
+
+				// Store information
+				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::ScaleRoot ); 
+			} break;
+
 		}
 	}
 

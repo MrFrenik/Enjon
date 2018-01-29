@@ -917,6 +917,7 @@ namespace Enjon
 					{
 						switch ( mTransformWidget.GetInteractedWidgetType( ) )
 						{
+							case TransformWidgetRenderableType::ScaleRoot:
 							case TransformWidgetRenderableType::ScaleYZAxes:
 							case TransformWidgetRenderableType::ScaleXZAxes:
 							case TransformWidgetRenderableType::ScaleXYAxes:
