@@ -362,37 +362,34 @@ namespace Enjon
 
 				case ( TransformWidgetRenderableType::ScaleRightAxis ):
 				{
-					// Right axis transformed by orientation
-					Vec3 Tx = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::XAxis( ) ).Normalize( ); 
-
+					Vec3 Tx = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::XAxis( ) ).Normalize( );
+ 
 					f32 TxDotXAxis = Tx.Dot( Vec3::XAxis( ) );
 
 					Vec3 axis = TxDotXAxis < 0.03f ? -Vec3::XAxis( ) : Vec3::XAxis( ); 
 					f32 negation = TxDotXAxis < 0.03f ? -1.0f : 1.0f;
 
 					// Get line intersection result 
-					LineIntersectionResult intersectionResult = GetLineIntersectionResult( axis, Vec3::XAxis( ), Vec3::ZAxis( ) ); 
+					LineIntersectionResult intersectionResult = GetLineIntersectionResult( axis, Vec3::YAxis( ), Vec3::ZAxis( ) ); 
 
 					// Check for intersection hit result
 					if ( intersectionResult.mHit )
 					{
-						const Vec3* hp = &intersectionResult.mHitPosition; 
-
-						// Calculate delta from starting position ( lock to x axis ) 
+						// Calculate delta from starting position ( lock to x axis )
 						Vec3 u = intersectionResult.mHitPosition - mIntersectionStartPosition; 
  
 						// Need to project u onto n
 						f32 uDotN = u.Dot( Tx );
 
 						// Store delta as final projection
-						mDelta = Tx * uDotN; 
+						mDelta = Tx * uDotN;
 
 						// Reset start position
 						mIntersectionStartPosition = mIntersectionStartPosition + mDelta; 
 
-						mDelta *= -negation;
+						mDelta *= negation;
 
-						// Clamp to x axis check
+						// Clamp to x axis check 
 						mDelta.y = 0.0f; 
 						mDelta.z = 0.0f;
 					}
@@ -410,7 +407,7 @@ namespace Enjon
 					f32 negation = TzDotZAxis < 0.03f ? -1.0f : 1.0f;
 
 					// Get line intersection result 
-					LineIntersectionResult intersectionResult = GetLineIntersectionResult( axis, Vec3::XAxis( ), Vec3::ZAxis( ) ); 
+					LineIntersectionResult intersectionResult = GetLineIntersectionResult( axis, Vec3::XAxis( ), Vec3::YAxis( ) ); 
 
 					// Check for intersection hit result
 					if ( intersectionResult.mHit )
