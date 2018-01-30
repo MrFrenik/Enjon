@@ -466,7 +466,7 @@ namespace Enjon
 
 		// Get a mesh and make it instanced... or something
 		auto db = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetDefaultAsset< Enjon::Mesh >( );
+		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "models.monkey" );
 		if ( mesh )
 		{
 			// Set bunny mesh for later use

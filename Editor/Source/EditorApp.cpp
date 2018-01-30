@@ -1241,6 +1241,7 @@ namespace Enjon
 		mAssetManager->AddToDatabase( catMeshPath );
 		mAssetManager->AddToDatabase( bunnyMeshPath );
 		mAssetManager->AddToDatabase( buddhaMeshPath );
+		mAssetManager->AddToDatabase( dudeMeshPath );
 		mAssetManager->AddToDatabase( shaderBallMeshPath );
 		mAssetManager->AddToDatabase( unitShaderBallPath );
 		mAssetManager->AddToDatabase( unrealShaderBallPath );
