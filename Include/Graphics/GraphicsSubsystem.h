@@ -163,6 +163,11 @@ namespace Enjon
 			*/
 			iVec2 GetImGuiViewport( ) const;
 
+			/**
+			*@brief
+			*/
+			void ReinitializeRenderTargets( );
+
 		private:
 
 			/**
@@ -223,12 +228,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void UIPass( RenderTarget* inputTarget );
-
-			/**
-			*@brief
-			*/
-			void ReadObjectIDTarget( );
+			void UIPass( RenderTarget* inputTarget ); 
 			
 			/**
 			*@brief
@@ -239,6 +239,11 @@ namespace Enjon
 			*@brief
 			*/
 			void ImGuiStyles();
+
+			/**
+			*@brief
+			*/
+			void InitializeNoiseTexture( ); 
 			
 			/**
 			*@brief

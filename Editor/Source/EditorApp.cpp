@@ -69,13 +69,17 @@ namespace Enjon
 		}
 	}
 
-	void SceneView( bool* viewBool )
+	void EnjonEditor::SceneView( bool* viewBool )
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 		u32 currentTextureId = gfx->GetCurrentRenderTextureId( ); 
 
 		// Render game in window
 		ImVec2 cursorPos = ImGui::GetCursorScreenPos( );
+
+		// Cache off cursor position for scene view
+		mSceneViewWindowPosition = Vec2( cursorPos.x, cursorPos.y );
+		mSceneViewWindowSize = Vec2( ImGui::GetWindowWidth( ), ImGui::GetWindowHeight( ) );
 
 		ImTextureID img = ( ImTextureID )currentTextureId;
 		ImGui::Image( img, ImVec2( ImGui::GetWindowWidth( ), ImGui::GetWindowHeight( ) ),
@@ -90,6 +94,21 @@ namespace Enjon
 
 		// Update camera aspect ratio
 		gfx->GetSceneCamera( )->ConstCast< Enjon::Camera >( )->SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
+	}
+
+	Vec2 EnjonEditor::GetSceneViewProjectedCursorPosition( )
+	{
+		// Need to get percentage of screen and things and stuff from mouse position
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem ); 
+		Input* input = EngineSubsystem( Input );
+		iVec2 viewport = gfx->GetViewport( );
+		Vec2 mp = input->GetMouseCoords( );
+		
+		// X screen percentage
+		f32 pX = f32( mp.x - mSceneViewWindowPosition.x ) / f32( mSceneViewWindowSize.x );
+		f32 pY = f32( mp.y - mSceneViewWindowPosition.y ) / f32( mSceneViewWindowSize.y ); 
+
+		return Vec2( (s32)( pX * viewport.x ), (s32)( pY * viewport.y ) );
 	}
 
 	void EnjonEditor::CameraOptions( bool* enable )
@@ -691,7 +710,7 @@ namespace Enjon
 		} 
 
 		// Initialize transform widget
-		mTransformWidget.Initialize( );
+		mTransformWidget.Initialize( this );
 
 		// Register individual windows
 		Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
@@ -991,14 +1010,16 @@ namespace Enjon
 
 			// Set camera rotation
 			// Get mouse input and change orientation of camera
-			Enjon::Vec2 mouseCoords = mInput->GetMouseCoords( );
+			//Enjon::Vec2 mouseCoords = mInput->GetMouseCoords( );
+
+			Vec2 mouseCoords = mInput->GetMouseCoords( );
 
 			Enjon::iVec2 viewPort = mGfx->GetViewport( );
 
 			f32 mouseSensitivity = 10.0f;
 
 			// Grab window from graphics subsystem
-			Enjon::Window* window = mGfx->GetWindow( )->ConstCast< Enjon::Window >( );
+		Enjon::Window* window = mGfx->GetWindow( )->ConstCast< Enjon::Window >( );
 
 			// Set cursor to not visible
 			window->ShowMouseCursor( false );
@@ -1020,10 +1041,10 @@ namespace Enjon
 			if ( mInput->IsKeyPressed( KeyCode::LeftMouseButton ) )
 			{
 				auto viewport = mGfx->GetViewport( );
-				std::cout << fmt::format( "Screen Position: < {}, {} >\n", mInput->GetMouseCoords( ).x, viewport.y - mInput->GetMouseCoords( ).y );
+				auto mp = GetSceneViewProjectedCursorPosition( );
 
 				iVec2 dispSize = mGfx->GetViewport( );
-				PickResult pr = mGfx->GetPickedObjectResult( mInput->GetMouseCoords() );
+				PickResult pr = mGfx->GetPickedObjectResult( GetSceneViewProjectedCursorPosition( ) );
 				if ( pr.mEntity.Get( ) )
 				{
 					mTransformWidget.SetRotation( pr.mEntity.Get( )->GetWorldRotation( ) );

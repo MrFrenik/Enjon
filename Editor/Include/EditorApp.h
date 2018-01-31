@@ -34,6 +34,11 @@ namespace Enjon
 			*/
 			virtual Enjon::Result Shutdown() override; 
 
+			/**
+			* @brief 
+			*/
+			Vec2 GetSceneViewProjectedCursorPosition( );
+
 		private:
 			void LoadResourceFromFile( );
 			void WorldOutlinerView( );
@@ -54,7 +59,9 @@ namespace Enjon
 			void InitializeProjectApp( );
 			void ShutdownProjectApp( ByteBuffer* buffer );
 
-			void LoadResources( );
+			void LoadResources( ); 
+
+			void SceneView( bool* viewBool );
 
 		private:
 			bool mViewBool = true;
@@ -88,6 +95,9 @@ namespace Enjon
 			EntityHandle mSceneEntity; 
 
 			EditorTransformWidget mTransformWidget;
+
+			Vec2 mSceneViewWindowPosition;
+			Vec2 mSceneViewWindowSize;
 	}; 
 }
 

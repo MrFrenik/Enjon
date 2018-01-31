@@ -33,7 +33,7 @@ float LinearizeDepth( float depth )
 void main()
 {
 	// tile noise texture over screen based on screen dimensions divided by noise size
-	vec2 noiseScale = vec2(uScreenResolution.x/256.0, uScreenResolution.y/256.0); 
+	vec2 noiseScale = vec2(uScreenResolution.x / 128.0, uScreenResolution.y / 128.0); 
 	
 	float depth = LinearizeDepth( texture( uDepthMap, TexCoords ).r ) / far; 
 

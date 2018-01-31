@@ -1,7 +1,8 @@
 // @file EditorTransformWidget.cpp
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
 
-#include "EditorTransformWidget.h"
+#include "EditorTransformWidget.h" 
+#include "EditorApp.h"
 
 #include <Graphics/GraphicsSubsystem.h>
 #include <Engine.h>
@@ -12,7 +13,7 @@
 
 namespace Enjon
 {
-	void EditorTransformWidget::Initialize( )
+	void EditorTransformWidget::Initialize( EnjonEditor* app )
 	{
 		// Initialize the translation widget
 		mTranslationWidget.Initialize( this );
@@ -22,6 +23,8 @@ namespace Enjon
 
 		// Set transformation mode to translation
 		SetTransformationMode( TransformationMode::Translation );
+
+		mEditorApp = app;
 	}
 
 	void EditorTransformWidget::SetTransformationMode( TransformationMode mode )
@@ -134,8 +137,11 @@ namespace Enjon
 			 intersectionPlane = Plane( axisToUseAsPlaneNormal, oP ); 
 		}
 
+		//mEditorApp->GetSceneViewProjectedCursorPosition( input->GetMouseCoords( ) );
+
 		// Get ray from camera
-		Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+		//Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
+		Ray ray = camera->ScreenToWorldRay( mEditorApp->GetSceneViewProjectedCursorPosition( ) );
 
 		// Get intersection result of plane 
 		LineIntersectionResult intersectionResult = intersectionPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection ); 
@@ -568,7 +574,9 @@ namespace Enjon
 						mDelta = intersectionResult.mHitPosition - mIntersectionStartPosition;
 
 						// Get these positions in screen space coordinates to determine sign
-						Vec2 mc = input->GetMouseCoords( ); 
+						//Vec2 mc = input->GetMouseCoords( ); 
+
+						Vec2 mc = mEditorApp->GetSceneViewProjectedCursorPosition( );
 
 						// Store previous position as new intersection position
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
@@ -585,7 +593,8 @@ namespace Enjon
 			} 
 
 			// Store previous mouse coordinates
-			mPreviousMouseCoords = input->GetMouseCoords( );
+			//mPreviousMouseCoords = input->GetMouseCoords( );
+			mPreviousMouseCoords = mEditorApp->GetSceneViewProjectedCursorPosition( );
 		}
 	}
 
@@ -611,7 +620,8 @@ namespace Enjon
 			mType = type;
 			mIntersectionStartPosition = result.mHitPosition;
 			mRootStartPosition = mTranslationWidget.mRoot.mWorldTransform.GetPosition( );
-			mPreviousMouseCoords = input->GetMouseCoords( );
+			mPreviousMouseCoords = mEditorApp->GetSceneViewProjectedCursorPosition( );
+			//mPreviousMouseCoords = input->GetMouseCoords( );
 		} 
 	} 
 

@@ -103,12 +103,18 @@ namespace Enjon
 		mSceneCamera.SetNearFar( 0.01f, 1000.0f );
 		mSceneCamera.SetProjection(ProjectionType::Perspective);
 		mSceneCamera.SetPosition(Vec3(0, 5, 10));
-		//mSceneCamera.LookAt(Vec3(0, 0, 0));
-		//mSceneCamera.SetRotation( Quaternion::AngleAxis( 30.0f, Vec3::XAxis( ) ) *
-		//						Quaternion::AngleAxis( 45.0f, Vec3::ZAxis( ) ) );
+
+		// Initialize sprite batch ( not really needed, I don't think...)
+		mBatch 						= new SpriteBatch();
+		mBatch->Init(); 
+
+		// Initialize full screen quad for rendering rendertargets
+		mFullScreenQuad 			= new FullScreenQuad();
 
 		// Initialize frame buffers
 		InitializeFrameBuffers();
+		// Initialize random noise texture
+		InitializeNoiseTexture( );
 		// Calcualte blur weights
 		CalculateBlurWeights();
 		// Register cvars
@@ -536,16 +542,13 @@ namespace Enjon
 		// FXAA pass
 		FXAAPass(mCompositeTarget); 
 		// Do UI pass
-		UIPass( mFXAATarget );
-
-		// Read pixel from target
-		ReadObjectIDTarget( );
+		UIPass( mFXAATarget ); 
  
 		// Clear default buffer
 		mWindow.Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
 
 		// Editor gui pass (ImGUI)
-		if (false)
+		if (true)
 		{
 			ImGuiPass();
 		} 
@@ -563,31 +566,6 @@ namespace Enjon
 		}
 
 		mWindow.SwapBuffer();
-	}
-
-	//======================================================================================================
-
-	void GraphicsSubsystem::ReadObjectIDTarget( )
-	{
-		//// Set pixel alignment for unpacking
-		//glPixelStorei( GL_UNPACK_ALIGNMENT, 1 ); 
-		//mGbuffer->Bind( BindType::READ );
-		//glReadBuffer( GL_COLOR_ATTACHMENT0 + (u32)GBufferTextureType::OBJECT_ID );
-
-		//// Read at center of screen
-		//u8 data[ 4 ]; 
-		//s32 x = ImGui::GetIO( ).DisplaySize.x;
-		//s32 y = ImGui::GetIO( ).DisplaySize.y;
-		//glReadPixels( s32( f32( x ) / 2.0f ), s32( f32( y ) / 2.0f ), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data ); 
-
-		//ColorRGBA32 color( (f32)data[ 0 ] / 255.0f, (f32)data[ 1 ] / 255.0f, (f32)data[ 2 ] / 255.0f, (f32)data[ 3 ] / 255.0f );
-
-		//u32 id = Renderable::ColorToID( color );
-
-		//printf( "ID: %d\n", id );
-
-		//// Unbind buffer
-		//mGbuffer->Unbind( );
 	}
 
 	//======================================================================================================
@@ -695,8 +673,6 @@ namespace Enjon
 						sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
 						sgShader->SetUniform( "uWorldTime", wt );
 						sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
-						//sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
-						//sgShader->SetUniform( "uObjectID", ColorRGBA32( 1.0f, 0.0f, 0.0f, 1.0f ) );
 						material->Bind( sgShader );
 					}
 
@@ -854,62 +830,23 @@ namespace Enjon
 		shader->Unuse( ); 
 
 		// Cubemap
-		glEnable( GL_DEPTH_TEST );
-		glDepthFunc( GL_LEQUAL );
-		glCullFace( GL_FRONT );
-		Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
-		skyBoxShader->Use( );
-		{
-			skyBoxShader->SetUniform( "view", mSceneCamera.GetView( ) );
-			skyBoxShader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
-			skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
+		//glEnable( GL_DEPTH_TEST );
+		//glDepthFunc( GL_LEQUAL );
+		//glCullFace( GL_FRONT );
+		//Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
+		//skyBoxShader->Use( );
+		//{
+		//	skyBoxShader->SetUniform( "view", mSceneCamera.GetView( ) );
+		//	skyBoxShader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
+		//	skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
 
-			// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
-			glActiveTexture( GL_TEXTURE0 );
-			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+		//	// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
+		//	glActiveTexture( GL_TEXTURE0 );
+		//	glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
 
-			RenderCube( );
-		}
-		skyBoxShader->Unuse( );
-
-		glClear( GL_DEPTH_BUFFER_BIT );
-
-		 //None depth tested renderables
-		if (!nonDepthTestedRenderables.empty())
-		{ 
-			const Material* material = nullptr;
-			for (auto& renderable : nonDepthTestedRenderables)
-			{
-				// Check for material switch 
-				const Material* curMaterial = renderable->GetMaterial().Get();
-				sg = curMaterial->GetShaderGraph( );
-				assert(curMaterial != nullptr); 
-
-				// Grab shader from graph
-				Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
-
-				if (material != curMaterial)
-				{
-					// Set material
-					material = curMaterial;
-
-					if ( sg )
-					{
-						sgShader->Use( );
-						sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
-						sgShader->SetUniform( "uWorldTime", wt );
-						sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
-						material->Bind( sgShader );
-					} 
-				}
-
-				if ( sg )
-				{
-					sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
-					renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
-				}
-			}
-		} 
+		//	RenderCube( );
+		//}
+		//skyBoxShader->Unuse( );
 
 		// Unbind gbuffer
 		mGbuffer->Unbind();
@@ -1294,50 +1231,117 @@ namespace Enjon
 				mFullScreenQuad->Submit( );
 			}
 			compositeProgram->Unuse();
-			
-		}
 
-		glClear( GL_DEPTH_BUFFER_BIT );
+			glClear( GL_DEPTH_BUFFER_BIT );
 
-		const Vector<Renderable*>& nonDepthTestedRenderables = mScene.GetNonDepthTestedRenderables( );
+			const Vector<Renderable*>& nonDepthTestedRenderables = mScene.GetNonDepthTestedRenderables( );
 
-		// None depth tested renderables
-		if ( !nonDepthTestedRenderables.empty( ) )
-		{
-			const Material* material = nullptr;
-			for ( auto& renderable : nonDepthTestedRenderables )
+			// None depth tested renderables
+			if ( !nonDepthTestedRenderables.empty( ) )
 			{
-				// Check for material switch 
-				const Material* curMaterial = renderable->GetMaterial( ).Get( );
-				AssetHandle< ShaderGraph > sg = curMaterial->GetShaderGraph( );
-				assert( curMaterial != nullptr );
-
-				// Grab shader from graph
-				Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
-
-				if ( material != curMaterial )
+				const Material* material = nullptr;
+				for ( auto& renderable : nonDepthTestedRenderables )
 				{
-					// Set material
-					material = curMaterial;
+					// Check for material switch 
+					const Material* curMaterial = renderable->GetMaterial( ).Get( );
+					AssetHandle< ShaderGraph > sg = curMaterial->GetShaderGraph( );
+					assert( curMaterial != nullptr );
 
+					// Grab shader from graph
+					Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
+
+					if ( material != curMaterial )
+					{
+						// Set material
+						material = curMaterial;
+
+						if ( sg )
+						{
+							sgShader->Use( );
+							sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
+							sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
+							sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
+							material->Bind( sgShader );
+						}
+					} 
 					if ( sg )
 					{
-						sgShader->Use( );
-						sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
-						sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
-						sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
-						material->Bind( sgShader );
+						sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
+						renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
 					}
-				} 
-				if ( sg )
+				}
+			} 
+
+			// Cubemap
+			//glEnable( GL_DEPTH_TEST );
+			//glDepthFunc( GL_LEQUAL );
+			//glCullFace( GL_FRONT );
+			//Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
+			//skyBoxShader->Use( );
+			//{
+			//	skyBoxShader->SetUniform( "view", mSceneCamera.GetView( ) );
+			//	skyBoxShader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
+			//	skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
+
+			//	// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
+			//	glActiveTexture( GL_TEXTURE0 );
+			//	glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+
+			//	RenderCube( );
+			//}
+			//skyBoxShader->Unuse( ); 
+
+			//glEnable( GL_DEPTH_TEST );
+			//glCullFace( GL_BACK );
+			
+		} 
+
+		mCompositeTarget->Unbind();
+
+		// Simply to write object ID
+		mGbuffer->Bind( BindType::WRITE, false );
+		{ 
+			glClear( GL_DEPTH_BUFFER_BIT );
+
+			const Vector<Renderable*>& nonDepthTestedRenderables = mScene.GetNonDepthTestedRenderables( );
+
+			// None depth tested renderables
+			if ( !nonDepthTestedRenderables.empty( ) )
+			{
+				const Material* material = nullptr;
+				for ( auto& renderable : nonDepthTestedRenderables )
 				{
-					sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
-					renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
+					// Check for material switch 
+					const Material* curMaterial = renderable->GetMaterial( ).Get( );
+					AssetHandle< ShaderGraph > sg = curMaterial->GetShaderGraph( );
+					assert( curMaterial != nullptr );
+
+					// Grab shader from graph
+					Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
+
+					if ( material != curMaterial )
+					{
+						// Set material
+						material = curMaterial;
+
+						if ( sg )
+						{
+							sgShader->Use( );
+							sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
+							sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
+							sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
+							material->Bind( sgShader );
+						}
+					} 
+					if ( sg )
+					{
+						sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
+						renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
+					}
 				}
 			}
 		}
-
-		mCompositeTarget->Unbind();
+		mGbuffer->Unbind( );
 	}
 
 	//======================================================================================================
@@ -1417,34 +1421,8 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::InitializeFrameBuffers()
+	void GraphicsSubsystem::InitializeNoiseTexture( )
 	{
-		auto viewport = mWindow.GetViewport();
-		Enjon::u32 width = (Enjon::u32)viewport.x;
-		Enjon::u32 height = (Enjon::u32)viewport.y;
-
-		mGbuffer 					= new GBuffer(width, height);
-		mDebugTarget 				= new RenderTarget(width, height);
-		mSmallBlurHorizontal 		= new RenderTarget(width / 4, height / 4);
-		mSmallBlurVertical 			= new RenderTarget(width / 4, height / 4);
-		mMediumBlurHorizontal 		= new RenderTarget(width  / 8, height  / 8);
-		mMediumBlurVertical 		= new RenderTarget(width  / 8, height  / 8);
-		mLargeBlurHorizontal 		= new RenderTarget(width / 16, height / 16);
-		mLargeBlurVertical 			= new RenderTarget(width / 16, height / 16);
-		mCompositeTarget 			= new RenderTarget(width, height);
-		mLightingBuffer 			= new RenderTarget(width, height);
-		mLuminanceTarget 			= new RenderTarget(width / 2, height / 2);
-		mFXAATarget 				= new RenderTarget(width, height);
-		mShadowDepth 				= new RenderTarget(2048, 2048);
-		mFinalTarget 				= new RenderTarget(width, height);
-		mSSAOTarget					= new RenderTarget( width, height );
-		mSSAOBlurTarget				= new RenderTarget( width, height );
-
-		mBatch 						= new SpriteBatch();
-		mBatch->Init();
-
-		mFullScreenQuad 			= new FullScreenQuad();
-
 		// Generate sample kernel
 		std::uniform_real_distribution< f32 > randomFloats( 0.0f, 1.0f );
 		std::default_random_engine generator;
@@ -1475,6 +1453,60 @@ namespace Enjon
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT ); 
+	}
+
+	//======================================================================================================
+
+	void GraphicsSubsystem::ReinitializeRenderTargets( )
+	{
+		// Free all framebuffers and rendertargets
+		delete( mGbuffer );
+		delete( mDebugTarget );
+		delete( mSmallBlurHorizontal );
+		delete( mSmallBlurVertical );
+		delete( mMediumBlurHorizontal );
+		delete( mMediumBlurVertical );
+		delete( mLargeBlurHorizontal );
+		delete( mLargeBlurVertical );
+		delete( mCompositeTarget );
+		delete( mLightingBuffer );
+		delete( mLuminanceTarget );
+		delete( mFXAATarget );
+		delete( mShadowDepth );
+		delete( mFinalTarget );
+		delete( mSSAOTarget );
+		delete( mSSAOBlurTarget );
+
+		InitializeFrameBuffers( );
+
+		// Reset current rendertarget 
+		mCurrentRenderTexture = mFXAATarget->GetTexture( );
+	}
+
+	//======================================================================================================
+
+	void GraphicsSubsystem::InitializeFrameBuffers()
+	{
+		auto viewport = mWindow.GetViewport();
+		Enjon::u32 width = (Enjon::u32)viewport.x;
+		Enjon::u32 height = (Enjon::u32)viewport.y;
+
+		mGbuffer 					= new GBuffer(width, height);
+		mDebugTarget 				= new RenderTarget(width, height);
+		mSmallBlurHorizontal 		= new RenderTarget(width / 4, height / 4);
+		mSmallBlurVertical 			= new RenderTarget(width / 4, height / 4);
+		mMediumBlurHorizontal 		= new RenderTarget(width  / 8, height  / 8);
+		mMediumBlurVertical 		= new RenderTarget(width  / 8, height  / 8);
+		mLargeBlurHorizontal 		= new RenderTarget(width / 16, height / 16);
+		mLargeBlurVertical 			= new RenderTarget(width / 16, height / 16);
+		mCompositeTarget 			= new RenderTarget(width, height);
+		mLightingBuffer 			= new RenderTarget(width, height);
+		mLuminanceTarget 			= new RenderTarget(width / 2, height / 2);
+		mFXAATarget 				= new RenderTarget(width, height);
+		mShadowDepth 				= new RenderTarget(2048, 2048);
+		mFinalTarget 				= new RenderTarget(width, height);
+		mSSAOTarget					= new RenderTarget( width, height );
+		mSSAOBlurTarget				= new RenderTarget( width, height ); 
 	}
 
 	//======================================================================================================
@@ -1816,160 +1848,6 @@ namespace Enjon
             ImGui::DragFloat3Labels("##bgcolor", labels, mBGColor, 0.1f, 0.0f, 30.0f);
 	    	ImGui::TreePop();
 	    } 
-
-		//if ( ImGui::CollapsingHeader( "Mesh" ) )
-		//{ 
-		//	const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-		//	ImGui::ListBoxHeader( Enjon::String( "##meshes" ).c_str( ) );
-		//	{
-		//		for ( auto& a : *am->GetAssets< Enjon::Mesh >( ) )
-		//		{
-		//			Enjon::String meshName = a.second.GetAssetName();
-		//			ImGui::Selectable( meshName.c_str( ) );
-		//			if ( ImGui::IsItemActive( ) )
-		//			{ 
-		//				for ( auto& r : mRenderables )
-		//				{
-		//						r.SetMesh( a.second.GetAsset() );
-		//				}
-		//			} 
-		//		}
-
-		//		Enjon::AssetHandle< Enjon::Mesh > defaultMesh = am->GetDefaultAsset< Enjon::Mesh >( );
-		//		Enjon::String meshName = defaultMesh->GetName( );
-		//		ImGui::Selectable( meshName.c_str( ) );
-		//		if ( ImGui::IsItemActive( ) )
-		//		{ 
-		//			for ( auto& r : mRenderables )
-		//			{
-		//					r.SetMesh( defaultMesh );
-		//			}
-		//		}
-		//	}
-		//	ImGui::ListBoxFooter( ); 
-		//}
-
-		//if ( ImGui::CollapsingHeader( "Uniforms" ) )
-		//{
-		//	if ( mMaterial && mMaterial->GetShaderGraph() )
-		//	{
-		//		if ( ImGui::CollapsingHeader( "ShaderGraphs" ) )
-		//		{
-		//			const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
-		//			const HashMap< String, AssetRecordInfo >* shaderGraphs = am->GetAssets< ShaderGraph >( );
-		//			for ( auto& sg : *shaderGraphs )
-		//			{
-		//				if ( ImGui::Selectable( sg.second.GetAssetName( ).c_str() ) )
-		//				{
-		//					// Set shader graph if selected
-		//					mMaterial->SetShaderGraph( sg.second.GetAsset( ) );
-		//				}
-		//			}
-		//		}
-
-		//		Enjon::AssetHandle< Enjon::ShaderGraph > sg = mMaterial->GetShaderGraph( ); 
-		//		for ( auto& u : *sg.Get( )->GetUniforms( ) )
-		//		{
-		//			Enjon::String uniformName = u.second->GetName( );
-		//			Enjon::UniformType type = u.second->GetType( );
-		//			Enjon::ShaderUniform* uniform = u.second;
-
-		//			if ( mMaterial->HasOverride( uniformName ) )
-		//			{
-		//				uniform = const_cast< ShaderUniform* > ( mMaterial->GetOverride( uniformName ) );
-		//			}
-
-		//			switch ( type )
-		//			{
-		//				case UniformType::Float:
-		//				{
-		//					UniformFloat* uf = uniform->Cast< UniformFloat >( );
-		//					f32 val = uf->GetValue( );
-		//					if ( ImGui::SliderFloat( uniformName.c_str( ), &val, 0.0f, 3.0f ) )
-		//					{
-		//						mMaterial->SetUniform( uniformName, val );
-		//					}
-		//				} break;
-
-		//				case UniformType::Vec2:
-		//				{
-		//					UniformVec2* uf = uniform->Cast< UniformVec2 >( );
-		//					Enjon::Vec2 val = uf->GetValue( );
-		//					f32 vals[ 2 ];
-		//					vals[ 0 ] = val.x;
-		//					vals[ 1 ] = val.y;
-		//					if ( ImGui::SliderFloat2( uniformName.c_str( ), (f32*)&vals, 0.0f, 3.0f ) )
-		//					{ 
-		//						mMaterial->SetUniform( uniformName, Enjon::Vec2( vals[ 0 ], vals[ 1 ] ) );
-		//					}
-		//				} break;
-
-		//				case UniformType::Vec3:
-		//				{
-		//					UniformVec3* uf = uniform->Cast< UniformVec3 >( );
-		//					Enjon::Vec3 val = uf->GetValue( );
-		//					f32 vals[ 3 ];
-		//					vals[ 0 ] = val.x;
-		//					vals[ 1 ] = val.y;
-		//					vals[ 2 ] = val.z;
-		//					if ( ImGui::SliderFloat3( uniformName.c_str( ), (f32*)&vals, 0.0f, 3.0f ) )
-		//					{ 
-		//						mMaterial->SetUniform( uniformName, Enjon::Vec3( vals[ 0 ], vals[ 1 ], vals[ 2 ] ) );
-		//					}
-		//				} break;
-
-		//				case UniformType::Vec4:
-		//				{
-		//					UniformVec4* uf = uniform->Cast< UniformVec4 >( );
-		//					Enjon::Vec4 val = uf->GetValue( );
-		//					f32 vals[ 4 ];
-		//					vals[ 0 ] = val.x;
-		//					vals[ 1 ] = val.y;
-		//					vals[ 2 ] = val.z;
-		//					vals[ 3 ] = val.w;
-		//					if ( ImGui::SliderFloat4( uniformName.c_str( ), (f32*)&vals, 0.0f, 3.0f ) )
-		//					{ 
-		//						mMaterial->SetUniform( uniformName, Enjon::Vec4( vals[ 0 ], vals[ 1 ], vals[ 2 ], vals[ 3 ] ) );
-		//					}
-		//				} break;
-
-		//				case UniformType::TextureSampler2D:
-		//				{
-		//					UniformTexture* uf = uniform->Cast< UniformTexture >( );
-		//					if ( ImGui::CollapsingHeader( uf->GetName( ).c_str( ) ) )
-		//					{
-		//						const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
-		//						ImGui::ListBoxHeader( ( "##textures" + uniformName ).c_str( ) );
-		//						{
-		//							for ( auto& a : *am->GetAssets< Enjon::Texture >( ) )
-		//							{
-		//								Enjon::String texName = a.second.GetAssetName();
-		//								ImGui::Selectable( texName.c_str( ) );
-		//								if ( ImGui::IsItemActive( ) )
-		//								{
-		//									Enjon::AssetHandle< Enjon::Texture > newTex = am->GetAsset< Enjon::Texture >( texName );
-		//									mMaterial->SetUniform( uniformName, newTex ); 
-		//								}
-		//							} 
-
-		//							// Get default texture and list that as well
-		//							Enjon::AssetHandle< Enjon::Texture > defaultTex = am->GetDefaultAsset< Enjon::Texture >( );
-		//								
-		//							Enjon::String texName = defaultTex->GetName( );
-		//							ImGui::Selectable( texName.c_str( ) );
-		//							if ( ImGui::IsItemActive( ) )
-		//							{
-		//								Enjon::AssetHandle< Enjon::Texture > newTex = am->GetAsset< Enjon::Texture >( texName );
-		//								mMaterial->SetUniform( uniformName, newTex ); 
-		//							} 
-		//						}
-		//						ImGui::ListBoxFooter( );
-		//					}
-		//				} break;
-		//			}
-		//		} 
-		//	}
-		//}
 	}
 
 	//======================================================================================================= 

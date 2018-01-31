@@ -333,6 +333,7 @@ namespace Enjon
 						case SDL_WINDOWEVENT_RESIZED: 
 						{
 							mGraphics->GetWindow( )->ConstCast< Window >()->SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
+							mGraphics->ReinitializeRenderTargets( );
 						}
 						break; 
 

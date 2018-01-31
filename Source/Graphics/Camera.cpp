@@ -215,7 +215,7 @@ namespace Enjon
 
 	//=======================================================================================================
 
-	// Source Implementation: https://stackoverflow.com/questions/23644470/how-to-convert-mouse-coordinate-on-screen-to-3d-coordinate
+	// Edited from Source Implementation: https://stackoverflow.com/questions/23644470/how-to-convert-mouse-coordinate-on-screen-to-3d-coordinate
 	Vec3 Camera::Unproject( const Vec3& screenCoords )
 	{
 		Vec3 worldCoordinates;
@@ -234,11 +234,6 @@ namespace Enjon
 
 		// Transform from ndc
 		Vec4 in;
-		//in.x = ( f32( winX - viewport.x ) ) / (f32)viewport.x * 2.0f - 1.0f;
-		//in.y = ( f32( winY - viewport.y ) ) / (f32)viewport.y * 2.0f - 1.0f;
-		//in.z = 2.0f * f32( winZ ) - 1.0f;
-		//in.w = 1.0f; 
-
 		in.x = ( winX / (f32)viewport.x ) * 2.0f - 1.0f;
 		in.y = 1.0f - ( winY / (f32)viewport.y ) * 2.0f;
 		in.z = 2.0f * winZ - 1.0f;
