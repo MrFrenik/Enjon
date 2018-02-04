@@ -100,6 +100,9 @@ namespace Enjon
 				record.mAssetLoaderClass = Object::GetClass( buffer.Read< String >( ) );	// Loader class
 				record.mAssetFilePath = p.path( ).string( );								// Asset file path 
 
+				// Set location type of record
+				record.mAssetLocationType = mAssetManager->GetAssetLocationType( );
+
 				// Add record
 				AddRecord( record );
 

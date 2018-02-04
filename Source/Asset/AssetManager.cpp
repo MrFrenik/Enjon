@@ -85,14 +85,44 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
+	// Base initialization method called from engine
 	Result AssetManager::Initialize()
 	{ 
 		// Initialize the manifest and read in records
 		mCacheManifest.Initialize( mAssetsDirectoryPath + "/Intermediate/CacheManifest.bin", this ); 
 
+		// NOTE(): After first initialization, set asset location type to be application specific
+		// NOTE(): I hate this, by the way...
+		mAssetLocationType = AssetLocationType::ApplicationAsset;
+
+ 
 		return Result::SUCCESS;
 	} 
 	
+	//============================================================================================ 
+
+	void AssetManager::Reinitialize( const String& assetsPath )
+	{
+		// Clear records for loaders
+		for ( auto& l : mLoadersByAssetId )
+		{
+			l.second->ClearRecords( );
+		}
+
+		// Set assets directory path as well as cache path
+		SetAssetsDirectoryPath( assetsPath );
+
+		// Call initialize function
+		Initialize( );
+	}
+	
+	//============================================================================================ 
+
+	AssetLocationType AssetManager::GetAssetLocationType( ) const
+	{
+		return mAssetLocationType;
+	}
+
 	//============================================================================================ 
 
 	void AssetManager::Update( const f32 dT )
@@ -111,7 +141,8 @@ namespace Enjon
 			
 	void AssetManager::SetAssetsDirectoryPath( const String& path )
 	{
-		mAssetsDirectoryPath = path;
+		mAssetsDirectoryPath = path; 
+		SetCachedAssetsDirectoryPath( mAssetsDirectoryPath + "Cache/" );
 	}
 	
 	//============================================================================================ 
@@ -557,11 +588,7 @@ namespace Enjon
 		// Get meta class of loader 
 		const MetaClass* cls = mLoadersByAssetId[ idx ]->Class( );
 		// Register by meta class
-		mLoadersByMetaClass[ cls ] = mLoadersByAssetId[ idx ];
-
-		// TODO(): This crashes for now. I want to set this here, so figure it out.
-		// Register default asset from loader
-		//mLoadersByAssetId[ idx ]->RegisterDefaultAsset( ); 
+		mLoadersByMetaClass[ cls ] = mLoadersByAssetId[ idx ]; 
 
 		return Result::SUCCESS;
 	}

@@ -12,13 +12,20 @@
 #include "Base/Object.h"
 
 namespace Enjon
-{
+{ 
+	enum class AssetLocationType
+	{
+		EngineAsset,
+		ApplicationAsset
+	};
+
 	struct CacheManifestRecord
 	{
-		UUID mAssetUUID						= UUID::Invalid();
-		String mAssetFilePath				= "";
-		String mAssetName					= "";
-		const MetaClass* mAssetLoaderClass	= nullptr;
+		UUID mAssetUUID							= UUID::Invalid();
+		String mAssetFilePath					= "";
+		String mAssetName						= "";
+		AssetLocationType mAssetLocationType	= AssetLocationType::ApplicationAsset;
+		const MetaClass* mAssetLoaderClass		= nullptr;
 	};
 
 	class CacheRegistryManifest

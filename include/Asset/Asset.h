@@ -25,6 +25,7 @@ namespace Enjon
 	template <typename T>
 	class AssetHandle;
 
+
 	ENJON_CLASS( )
 	class Asset : public Enjon::Object
 	{ 

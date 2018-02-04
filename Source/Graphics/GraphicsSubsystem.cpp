@@ -1248,24 +1248,23 @@ namespace Enjon
 					assert( curMaterial != nullptr );
 
 					// Grab shader from graph
-					Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
-
-					if ( material != curMaterial )
+					if ( sg )
 					{
-						// Set material
-						material = curMaterial;
+						Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
 
-						if ( sg )
+						if ( material != curMaterial )
 						{
+							// Set material
+							material = curMaterial;
+
 							sgShader->Use( );
 							sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
 							sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
 							sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
 							material->Bind( sgShader );
-						}
-					} 
-					if ( sg )
-					{
+						} 
+
+						// Render object
 						sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
 						renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
 					}
@@ -1316,28 +1315,27 @@ namespace Enjon
 					AssetHandle< ShaderGraph > sg = curMaterial->GetShaderGraph( );
 					assert( curMaterial != nullptr );
 
-					// Grab shader from graph
-					Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
-
-					if ( material != curMaterial )
+					if ( sg )
 					{
-						// Set material
-						material = curMaterial;
+						// Grab shader from graph
+						Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
 
-						if ( sg )
+						if ( material != curMaterial )
 						{
+							// Set material
+							material = curMaterial;
+
 							sgShader->Use( );
 							sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
 							sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
 							sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
 							material->Bind( sgShader );
-						}
-					} 
-					if ( sg )
-					{
+						} 
+
+						// Render object
 						sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
 						renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
-					}
+					} 
 				}
 			}
 		}

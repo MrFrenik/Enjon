@@ -30,49 +30,55 @@ namespace Enjon
 
 		public:
 
-			/*
+			/**
 			* @brief Default Constructor
 			*/
 			AssetRecordInfo( ) = default;
 
-			/*
+			/**
 			* @brief Constructor
 			*/
 			AssetRecordInfo( Asset* asset );
 
-			/*
+			/**
 			* @brief Default Destructor
 			*/
 			~AssetRecordInfo( ) = default;
 
-			/*
+			/**
 			* @brief
 			*/
 			const Asset* GetAsset( ) const;
 
-			/*
+			/**
 			* @brief
 			*/
 			String GetAssetName( ) const;
 
-			/*
+			/**
 			* @brief
 			*/
 			AssetLoadStatus GetAssetLoadStatus( ) const; 
 			
-			/*
+			/**
 			* @brief
 			*/
-			String GetAssetFilePath( ) const;
+			String GetAssetFilePath( ) const; 
+
+			/**
+			* @brief
+			*/
+			void Destroy( );
 
 
 		private:
-			Asset* mAsset						= nullptr; 
-			String mAssetFilePath				= "Invalid_Asset_Path";
-			String mAssetName					= "Invalid_Asset";
-			UUID mAssetUUID						= UUID::Invalid( );
-			const MetaClass* mAssetLoaderClass	= nullptr;
-			AssetLoadStatus mAssetLoadStatus	= AssetLoadStatus::Unloaded;
+			Asset* mAsset							= nullptr; 
+			String mAssetFilePath					= "Invalid_Asset_Path";
+			String mAssetName						= "Invalid_Asset";
+			UUID mAssetUUID							= UUID::Invalid( );
+			const MetaClass* mAssetLoaderClass		= nullptr;
+			AssetLoadStatus mAssetLoadStatus		= AssetLoadStatus::Unloaded;
+			AssetLocationType mAssetLocationType	= AssetLocationType::ApplicationAsset;
 	}; 
 
 	// Forward declaration
@@ -125,11 +131,16 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			bool Exists( UUID uuid ) const;
+			bool Exists( UUID uuid ) const; 
 
 		protected:
 
-			/*
+			/**
+			* @brief
+			*/
+			void ClearRecords( );
+
+			/**
 			* @brief
 			*/
 			void LoadRecord( AssetRecordInfo* record );

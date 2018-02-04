@@ -44,7 +44,7 @@ namespace Enjon
 			void InteractWithWidget( );
 			void EndInteraction( );
 			TransformWidgetRenderableType GetInteractedWidgetType( );
-			TransformationMode GetTransformationMode( );
+			TransformationMode GetTransformationMode( ); 
 
 			bool IsInteractingWithWidget( ) const;
 			Vec3 GetDelta( ) const; 

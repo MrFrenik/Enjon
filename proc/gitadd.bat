@@ -6,6 +6,8 @@ git add Include
 
 git add Assets/Shaders
 
+git add Assets/Cache
+
 git add BuildAndRun.bat
 
 git add CMakeLists.txt

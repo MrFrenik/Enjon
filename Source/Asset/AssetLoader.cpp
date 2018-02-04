@@ -41,6 +41,17 @@ namespace Enjon
 
 	//=================================================================
 
+	void AssetRecordInfo::Destroy( )
+	{
+		// Release memory for asset
+		delete mAsset;
+
+		// Set to nullptr
+		mAsset = nullptr;
+	}
+
+	//=================================================================
+
 	String AssetRecordInfo::GetAssetName( ) const
 	{
 		return mAssetName;
@@ -259,6 +270,7 @@ namespace Enjon
 		// Info record to fill out based on manifest record
 		AssetRecordInfo info; 
 		info.mAssetLoadStatus = AssetLoadStatus::Unloaded;
+		info.mAssetLocationType = record.mAssetLocationType;
 		info.mAssetFilePath = record.mAssetFilePath;
 		info.mAssetName = record.mAssetName;
 		info.mAssetUUID = record.mAssetUUID;
@@ -278,6 +290,36 @@ namespace Enjon
 
 		return Result::FAILURE;
 	} 
+	
+	//=================================================================
+
+	void AssetLoader::ClearRecords( )
+	{
+		Vector< AssetRecordInfo > mEngineAssetRecords;
+
+		// Clear all assets by uuid
+		for ( auto& a : mAssetsByUUID )
+		{
+			if ( a.second.mAssetLocationType == AssetLocationType::EngineAsset )
+			{
+				mEngineAssetRecords.push_back( a.second );
+			}
+			else
+			{
+				a.second.Destroy( ); 
+			}
+		}
+
+		mAssetsByName.clear( );
+		mAssetsByUUID.clear( );
+
+		// Reassign engine asset records
+		for ( auto& rec : mEngineAssetRecords )
+		{
+			mAssetsByUUID[ rec.mAssetUUID.ToString( ) ] = rec;
+			mAssetsByName[ rec.mAssetName ] = &mAssetsByUUID[ rec.mAssetUUID.ToString() ];
+		}
+	}
 	
 	//=================================================================
 }

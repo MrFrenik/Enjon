@@ -69,6 +69,73 @@ namespace Enjon
 		}
 	}
 
+	void EnjonEditor::InspectorView( bool* enabled )
+	{
+		if ( mSelectedEntity )
+		{
+			// Debug dump the entity ( Probably shouldn't do this and should tailor it more... )
+			Entity* ent = mSelectedEntity.Get( ); 
+			ImGuiManager::DebugDumpObject( ent );
+
+			if ( ImGui::CollapsingHeader( "ADD COMPONENT" ) )
+			{
+				// Get component list
+				EntityManager* entities = EngineSubsystem( EntityManager );
+				auto compMetaClsList = entities->GetComponentMetaClassList( );
+
+				ImGui::ListBoxHeader( "" );
+				{
+					for ( auto& cls : compMetaClsList )
+					{
+						if ( !ent->HasComponent( cls ) )
+						{
+							// Add component to mEntity
+							if ( ImGui::Selectable( cls->GetName( ).c_str( ) ) )
+							{
+								ent->AddComponent( cls );
+							} 
+						}
+					} 
+				}
+				ImGui::ListBoxFooter( );
+			}
+
+			for ( auto& c : ent->GetComponents( ) )
+			{
+				if ( ImGui::CollapsingHeader( c->Class( )->GetName( ).c_str( ) ) )
+				{
+					ImGuiManager::DebugDumpObject( c );
+				}
+			}
+
+			//if ( ImGui::TreeNode( fmt::format( "Components##{}", ent->GetID( ) ).c_str( ) ) )
+			//{
+			//	for ( auto& c : ent->GetComponents( ) )
+			//	{ 
+			//		if ( c->Class( ) == Object::GetClass<RigidBodyComponent >( ) )
+			//		{
+			//			RigidBodyComponent* rbc = c->ConstCast<RigidBodyComponent>( );
+			//			if ( rbc )
+			//			{
+			//				f32 mass = rbc->GetMass( );
+			//				if ( ImGui::DragFloat( "Mass", &mass, 1.0f, 0.0f, 100.0f ) )
+			//				{
+			//					rbc->SetMass( mass );
+			//				}
+			//			}
+			//		}
+
+			//		else
+			//		{
+			//			Enjon::ImGuiManager::DebugDumpObject( c ); 
+			//		}
+			//	} 
+			//	ImGui::TreePop( );
+			//}
+
+		}
+	}
+
 	void EnjonEditor::SceneView( bool* viewBool )
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
@@ -133,6 +200,16 @@ namespace Enjon
 			ImGui::TreePop( );
 		} 
 
+		if ( ImGui::TreeNode( "World Time" ) )
+		{
+			WorldTime wt = Engine::GetInstance( )->GetWorldTime( ); 
+			if ( ImGui::SliderFloat( "Time Scale", &wt.mTimeScale, 0.001, 1.0f ) )
+			{
+				Engine::GetInstance( )->SetWorldTimeScale( wt.mTimeScale );
+			}
+			ImGui::TreePop( );
+		}
+
 		/*
 		if ( ImGui::TreeNode( "XZAxis" ) )
 		{
@@ -182,6 +259,29 @@ namespace Enjon
 				cam->SetPosition( mPreviousCameraTransform.Position );
 				cam->SetRotation( mPreviousCameraTransform.Rotation ); 
 			}
+
+			static bool isPaused = false;
+
+			if ( !isPaused )
+			{
+				ImGui::SameLine( );
+				if ( ImGui::Button( "Pause" ) )
+				{
+					isPaused = true;
+					PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
+					physx->PauseSystem( true );
+				} 
+			} 
+			else
+			{
+				ImGui::SameLine( );
+				if ( ImGui::Button( "Resume" ) )
+				{
+					isPaused = false;
+					PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
+					physx->PauseSystem( false );
+				} 
+			}
 		}
 		else
 		{
@@ -207,6 +307,7 @@ namespace Enjon
 				}
 			}
 
+			ImGui::SameLine( );
 			if ( ImGui::Button( "Reload" ) )
 			{ 
 				LoadDLL( );
@@ -356,6 +457,40 @@ namespace Enjon
 
 	//================================================================================================================================
 
+	void EnjonEditor::UnloadScene( )
+	{
+		EntityManager* em = EngineSubsystem( EntityManager );
+		for ( auto& e : em->GetActiveEntities( ) )
+		{
+			e->Destroy( );
+		}
+
+		em->ForceCleanup( );
+	}
+
+	//================================================================================================================================
+
+	void EnjonEditor::LoadProject( const Project& project )
+	{ 
+		// TODO(): Unload current project - which means to destroy all current entities
+		UnloadScene( );
+
+		// Unload previous dll
+		UnloadDLL( );
+
+		// Set project
+		mProject = project;
+
+		// Load project dll
+		LoadDLL( );
+
+		// Reinitialize asset manager
+		AssetManager* am = EngineSubsystem( AssetManager );
+		am->Reinitialize( mProject.GetProjectPath( ) + "Assets/" );
+	}
+
+	//================================================================================================================================
+
 	void EnjonEditor::LoadProjectSolution( )
 	{
 		// Now call BuildAndRun.bat
@@ -401,6 +536,9 @@ namespace Enjon
 					{
 						if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
 						{ 
+							// Load the project
+							LoadProject( p );
+
 							// Unload previous dll
 							UnloadDLL( );
 
@@ -483,16 +621,16 @@ namespace Enjon
 
 		// NOTE(): VERY SPECIFIC IMPL THAT WILL BE GENERALIZED TO RELOADING SCENE
 		// Serialize mEntity ( this will be the scene, essentially... )
-		EntityArchiver::Serialize( mSceneEntity, &buffer );
+		//EntityArchiver::Serialize( mSceneEntity, &buffer );
 
 		// Destroy scene entity
-		mSceneEntity.Get()->Destroy( );
+		//mSceneEntity.Get()->Destroy( );
 
 		// Clean mSceneEntities
-		mSceneEntities.clear( );
+		//mSceneEntities.clear( );
 
 		// Force the scene to clean up ahead of frame
-		CleanupScene( ); 
+		//CleanupScene( ); 
 
 		// Actual code starts here...
 		bool needsReload = UnloadDLL( &buffer );
@@ -644,13 +782,10 @@ namespace Enjon
 	 
 	Enjon::Result EnjonEditor::Initialize( )
 	{ 
-		mApplicationName = "EnjonEditor";
-
-		std::cout << fmt::format( "Size of material: {}\n", sizeof( Enjon::Material ) );
-		std::cout << fmt::format( "Size of shader graph: {}\n", sizeof( Enjon::ShaderGraph ) );
+		mApplicationName = "EnjonEditor"; 
 
 		Enjon::String mAssetsDirectoryPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + "Editor/Assets/";
-		Enjon::String cacheDirectoryPath = mAssetsDirectoryPath + "/Cache/";
+		//Enjon::String cacheDirectoryPath = mAssetsDirectoryPath + "/Cache/";
 
 		// Get asset manager and set its properties ( I don't like this )
 		AssetManager* mAssetManager = EngineSubsystem( AssetManager );
@@ -661,13 +796,13 @@ namespace Enjon
 		physx->PauseSystem( true ); 
 
 		// This also needs to be done through a config file or cmake
-		mAssetManager->SetAssetsDirectoryPath( mAssetsDirectoryPath );
-		mAssetManager->SetCachedAssetsDirectoryPath( cacheDirectoryPath );
-		mAssetManager->SetDatabaseName( GetApplicationName( ) );
-		mAssetManager->Initialize( ); 
+		//mAssetManager->SetAssetsDirectoryPath( mAssetsDirectoryPath );
+		//mAssetManager->SetCachedAssetsDirectoryPath( cacheDirectoryPath );
+		//mAssetManager->SetDatabaseName( GetApplicationName( ) );
+		//mAssetManager->Initialize( ); 
 
 		// Load all resources and cache them
-		LoadResources( );
+		//LoadResources( );
 
 		// Register project template files
 		mProjectSourceTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectSourceTemplate.cpp" ).c_str() ); 
@@ -682,32 +817,32 @@ namespace Enjon
 		CollectAllProjectsOnDisk( );
 
 		// Initialize scene entity
-		EntityManager* entities = EngineSubsystem( EntityManager );
-		mSceneEntity = entities->Allocate( );
-		if ( mSceneEntity.Get() ) 
-		{ 
-			Entity* ent = mSceneEntity.Get( );
-			auto gfxComp = ent->AddComponent< GraphicsComponent >( );
-			if ( gfxComp )
-			{
-				gfxComp->SetMesh( mAssetManager->GetAsset< Mesh >( "models.monkey" ) );
-				gfxComp->SetMaterial( mAssetManager->GetDefaultAsset< Material >( ) );
-			}
-			ent->SetLocalPosition( Vec3( 5.0f, 2.0f, 4.0f ) );
-		} 
+		//EntityManager* entities = EngineSubsystem( EntityManager );
+		//mSceneEntity = entities->Allocate( );
+		//if ( mSceneEntity.Get() ) 
+		//{ 
+		//	Entity* ent = mSceneEntity.Get( );
+		//	auto gfxComp = ent->AddComponent< GraphicsComponent >( );
+		//	if ( gfxComp )
+		//	{
+		//		gfxComp->SetMesh( mAssetManager->GetAsset< Mesh >( "models.monkey" ) );
+		//		gfxComp->SetMaterial( mAssetManager->GetDefaultAsset< Material >( ) );
+		//	}
+		//	ent->SetLocalPosition( Vec3( 5.0f, 2.0f, 4.0f ) );
+		//} 
 
-		EntityHandle floorEnt = entities->Allocate( );
-		if ( floorEnt.Get() ) 
-		{ 
-			Entity* ent = floorEnt.Get( );
-			auto gfxComp = ent->AddComponent< GraphicsComponent >( );
-			if ( gfxComp )
-			{
-				gfxComp->SetMesh( mAssetManager->GetAsset< Mesh >( "models.unit_cube" ) );
-				gfxComp->SetMaterial( mAssetManager->GetAsset< Material >( "MahogFloorMaterial" ) );
-			}
-			ent->SetLocalScale( Vec3( 100.0f, 0.1f, 100.0f ) );
-		} 
+		//EntityHandle floorEnt = entities->Allocate( );
+		//if ( floorEnt.Get() ) 
+		//{ 
+		//	Entity* ent = floorEnt.Get( );
+		//	auto gfxComp = ent->AddComponent< GraphicsComponent >( );
+		//	if ( gfxComp )
+		//	{
+		//		gfxComp->SetMesh( mAssetManager->GetAsset< Mesh >( "models.unit_cube" ) );
+		//		gfxComp->SetMaterial( mAssetManager->GetAsset< Material >( "MahogFloorMaterial" ) );
+		//	}
+		//	ent->SetLocalScale( Vec3( 100.0f, 0.1f, 100.0f ) );
+		//} 
 
 		// Initialize transform widget
 		mTransformWidget.Initialize( this );
@@ -772,6 +907,15 @@ namespace Enjon
 			ImGui::EndDock( );
 		} );
 
+		Enjon::ImGuiManager::RegisterWindow( [ & ]
+		{
+			if ( ImGui::BeginDock( "Inspector View", nullptr ) )
+			{
+				InspectorView( nullptr );
+			}
+			ImGui::EndDock( );
+		} );
+
 		mShowSceneView = true;
 		auto sceneViewOption = [ & ] ( )
 		{
@@ -788,6 +932,7 @@ namespace Enjon
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene", ImGui::DockSlotType::Slot_Top, 0.1f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Play Options", ImGui::DockSlotType::Slot_Tab, 0.1f ) );
+		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Inspector View", "World Outliner", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -833,7 +978,6 @@ namespace Enjon
 
 	Enjon::Result EnjonEditor::ProcessInput( f32 dt )
 	{
-		static EntityHandle mSelectedEntity;
 		static bool mInteractingWithTransformWidget = false;
 		static TransformMode mMode = TransformMode::Translate;
 		static Vec3 mIntersectionStartPosition;

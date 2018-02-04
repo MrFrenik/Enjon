@@ -64,6 +64,11 @@ namespace Enjon
 			*@brief
 			*/
 			virtual Result Shutdown();
+
+			/**
+			*@brief
+			*/
+			void Reinitialize( const String& assetsPath );
 	
 			/**
 			*@brief Adds asset to project form given file path
@@ -74,6 +79,11 @@ namespace Enjon
 			*@brief
 			*/
 			Result SaveAsset( const Asset* asset ) const;
+
+			/**
+			*@brief
+			*/
+			AssetLocationType GetAssetLocationType( ) const;
 
 			/*
 			* @brief Creates a new asset of given type, adds it into the database and returns a handle it
@@ -239,6 +249,7 @@ namespace Enjon
 			String mCachedDirectoryPath;
 			String mName; 
 			CacheRegistryManifest mCacheManifest;
+			AssetLocationType mAssetLocationType = AssetLocationType::EngineAsset;
 	};
 
 	#include "Asset/AssetManager.inl"

@@ -55,12 +55,16 @@ namespace Enjon
 		* @brief
 		*/
 		u32 GetID( ) const;
-
-			
+ 
 		/*
 		* @brief
 		*/
-		friend bool operator==( EntityHandle left, const EntityHandle& other);
+		friend bool operator==( EntityHandle left, const EntityHandle& other); 
+
+		/*
+		* @brief
+		*/
+		explicit operator bool( );
 
 		/*
 		* @brief

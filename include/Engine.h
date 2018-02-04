@@ -51,9 +51,15 @@ namespace Enjon
 			{ 
 			}
 
+			f32 GetTimeScale( ) const 
+			{
+				return mTimeScale;
+			}
+
 		f32 mTotalTime = 0.0f;;
 		f32 mDT = 0.0f;
 		f32 mFPS = 0.0f;
+		f32 mTimeScale = 1.0f;
 	};
 
 	class Engine
@@ -148,6 +154,11 @@ namespace Enjon
 			* @brief
 			*/
 			GraphicsSubsystem* GetGraphicsSubsystem( ) const;
+
+			void SetWorldTimeScale( const f32& timeScale )
+			{
+				mWorldTime.mTimeScale = timeScale;
+			}
 
 		private:
 			

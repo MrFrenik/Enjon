@@ -21,7 +21,7 @@ namespace Enjon { namespace Utils {
 		void Begin();
 
 		//End limiter and return FPS
-		float End();
+		bool End();
 
 		//Setters
 		void SetMaxFPS(float maxFPS) { m_maxFPS = maxFPS; }

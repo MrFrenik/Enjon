@@ -37,27 +37,48 @@ namespace Enjon { namespace Utils {
 			m_startTicks = SDL_GetTicks();				
 		}
 
-		float FPSLimiter::End()
+		bool FPSLimiter::End()
 		{
 			static float second = SECOND;
+			static f32 t = 0.0f;
 
 			//Calculate the FPS to be limited and returned 
 			CalculateFPS();
 
-			//Calculate ticks
-			Uint32 frameTicks = SDL_GetTicks() - m_startTicks; 
+			u32 ticks = SDL_GetTicks( );
 
-			mDT = (f32)frameTicks / 1000.0f;
+			//Calculate ticks
+			Uint32 frameTicks = ticks - m_startTicks; 
+
+			//mDT = (f32)frameTicks / 1000.0f;
+			mDT = ( f32 )frameTicks;
+			t += mDT; 
 
 			//TODO:: Implement this using time-steps
 			// if (m_FPS > m_maxFPS + 2.0f) second = SECOND * 2.0f;
 			// else if (m_FPS < m_maxFPS - 2.0f) second = SECOND / 2.0f;
 			// else second = SECOND; 
 
-			if (second / m_maxFPS > frameTicks)
+			//std::cout << ticks << ", " << m_startTicks << "\n";
+			//if ((f32)second / m_maxFPS > frameTicks)
+			//{
+			//	//SDL_Delay(Uint32(second / m_maxFPS - frameTicks));
+			//	return true;
+			//}	 
+
+			if ( ( ( f32 )second / ( f32 )m_maxFPS ) / 60.0f > t )
 			{
-				SDL_Delay(Uint32(second / m_maxFPS - frameTicks));
-			}	 
+				return false;
+			}
+
+			//if ( ( (f32)second / (f32)m_maxFPS ) > (f32)frameTicks )
+			//{
+			//	return false;
+			//	//return true;
+			//}
+
+			t = 0.0f;
+			return true; 
 						
 			//Limit the FPS to maxFPS
 			// if (SECOND / m_maxFPS > frameTicks)
@@ -67,8 +88,7 @@ namespace Enjon { namespace Utils {
 			
 
 			//return FPS
-			return m_FPS; 
-		}
+		} 
 
 		void FPSLimiter::CalculateFPS()
 		{ 

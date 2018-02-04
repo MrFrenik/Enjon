@@ -47,6 +47,13 @@ namespace Enjon
  
 	//================================================================================================
 
+	EntityHandle::operator bool( )
+	{
+		return ( Get( ) != nullptr );
+	}
+ 
+	//================================================================================================
+
 	u32 EntityHandle::GetID( ) const
 	{
 		return mID;
@@ -56,7 +63,8 @@ namespace Enjon
 
 	Enjon::Entity* EntityHandle::Get( ) const
 	{ 
-		return Engine::GetInstance( )->GetSubsystemCatalog( )->Get< EntityManager >( )->ConstCast< EntityManager >( )->GetRawEntity( mID );
+		EntityManager* manager = EngineSubsystem( EntityManager );
+		return manager->GetRawEntity( mID );
 	}
 		
 	//================================================================================================

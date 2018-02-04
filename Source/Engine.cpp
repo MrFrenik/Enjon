@@ -147,6 +147,10 @@ namespace Enjon
 		mEntities		= mSubsystemCatalog->Register<EntityManager>( );
 		mPhysics		= mSubsystemCatalog->Register<PhysicsSubsystem>( );
 
+		// Default setting for assets directory
+		mAssetManager->SetAssetsDirectoryPath( mConfig.GetRoot( ) + "Assets/" );
+		mAssetManager->Initialize( );
+
 		// Initialize imgui manager
 		Enjon::ImGuiManager::Init( mGraphics->GetWindow()->ConstCast< Window >()->GetSDLWindow() ); 
 
@@ -191,7 +195,7 @@ namespace Enjon
 
 	Enjon::Result Engine::Run()
 	{
-		static float dt = 0.01f;
+		//static float dt = 0.01f;
 
 		// Assert that application is registered with engine
 		assert( mApp != nullptr ); 
@@ -203,7 +207,14 @@ namespace Enjon
 		bool mIsRunning = true;
 		while (mIsRunning)
 		{
-			 mLimiter.Begin();
+			static u32 thisTime = 0;
+			static u32 lastTime = 0;
+			f32 dt = 0.0f;
+ 
+			thisTime = SDL_GetTicks( );
+			u32 ticks = thisTime - lastTime;
+			dt = ( f32 )( ticks ) / 1000.0f;
+			lastTime = thisTime; 
 
 			 // Update input manager
 			 mInput->Update( dt );
@@ -233,23 +244,26 @@ namespace Enjon
 			}
 
 			// Update entity manager
-			mEntities->Update( dt );
+			mEntities->Update( dt ); 
 
 			// Update physics
-			mPhysics->Update( dt );
+			mPhysics->Update( dt ); 
 
 			// Update graphics
-			mGraphics->Update( dt );
-
-			// Clamp frame rate
-			//mLimiter.End(); 
-
-			f32 fps = mLimiter.GetFPS( true );
+			mGraphics->Update( dt ); 
 
 			// Update world time
 			mWorldTime.mDT = dt;
 			mWorldTime.mTotalTime += mWorldTime.mDT;
-			mWorldTime.mFPS = fps;
+			mWorldTime.mFPS = dt;
+			
+			// Clamp frame rate to ease up on CPU usage
+			static f32 t = 0.0f;
+			const f32 frameRate = 60.0f;
+			if ( (f32)ticks < 1000.0f / frameRate )
+			{
+				SDL_Delay( u32( (1000.0f / frameRate ) - ( (f32)ticks ) ) );
+			}
 		}
 
 		Enjon::Result res = ShutDown();

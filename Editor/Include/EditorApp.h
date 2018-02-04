@@ -48,6 +48,8 @@ namespace Enjon
 
 			void CreateNewProject( const String& projectName );
 
+			void UnloadScene( );
+			void LoadProject( const Project& project );
 			bool UnloadDLL( ByteBuffer* buffer = nullptr );
 			void LoadDLL( );
 
@@ -61,6 +63,7 @@ namespace Enjon
 
 			void LoadResources( ); 
 
+			void InspectorView( bool* enabled );
 			void SceneView( bool* viewBool );
 
 		private:
@@ -98,6 +101,7 @@ namespace Enjon
 
 			Vec2 mSceneViewWindowPosition;
 			Vec2 mSceneViewWindowSize;
+			EntityHandle mSelectedEntity;
 	}; 
 }
 
