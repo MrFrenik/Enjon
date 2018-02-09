@@ -41,9 +41,9 @@ Enjon::String copyDir = "";
 Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 //Enjon::String mProjectsDir = "W:/Projects/";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -436,7 +436,7 @@ namespace Enjon
 #ifdef ENJON_SYSTEM_WINDOWS 
 		// TODO(): Error check the fuck out of this call
 		// Is it possible to know whether or not this succeeded?
-		s32 code = system( String( projectDir + "Proc/" + "BuildAndRun.bat" + " " + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + " " + projectName ).c_str() ); 
+		s32 code = system( String( "start " + projectDir + "Proc/" + "BuildAndRun.bat" + " " + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + " " + projectName ).c_str() ); 
 		if ( code == 0 )
 		{
 			// Can set the project path now
@@ -497,7 +497,7 @@ namespace Enjon
 #ifdef ENJON_SYSTEM_WINDOWS 
 		// TODO(): Error check the fuck out of this call
 		// Is it possible to know whether or not this succeeded?
-		s32 code = system( String( "call " + mProject.GetProjectPath() + "Build/" + mProject.GetProjectName() + ".sln" ).c_str() ); 
+		s32 code = system( String( "start " + mProject.GetProjectPath() + "Build/" + mProject.GetProjectName() + ".sln" ).c_str() ); 
 #endif
 	}
 
@@ -570,7 +570,7 @@ namespace Enjon
 	void EnjonEditor::CleanupScene( )
 	{ 
 		// Force the scene to clean up ahead of frame
-		EntityManager* entities = EngineSubsystem( EntityManager ) ;
+		EntityManager* entities = EngineSubsystem( EntityManager );
 		entities->ForceCleanup( );
 	}
 
@@ -587,7 +587,6 @@ namespace Enjon
 				Application* app = mProject.GetApplication( );
 				if ( app )
 				{
-					// NOTE(): Will not work if the layout of the data has changed! Need versioning working first...
 					Enjon::ObjectArchiver::Serialize( app, buffer );
 					needsReload = true;
 

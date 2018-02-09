@@ -8,6 +8,7 @@ cd Build
 cmake ../. -G"Visual Studio 14 2015"
 
 echo "Running %projName%..."
-call %projName%.sln
+start %projName%.sln
 
 popd
+exit 0
