@@ -33,7 +33,10 @@ namespace Enjon
 	{ 
 		public:
 			TransformHeirarchy( ) = default;
-			~TransformHeirarchy( ) = default;
+			~TransformHeirarchy( )
+			{
+				mChildren.clear( );
+			}
 
 			bool HasParent( )
 			{
@@ -140,7 +143,10 @@ namespace Enjon
 	{
 		public:
 			EditorWidget( ) = default;
-			~EditorWidget( ) = default;
+			~EditorWidget( )
+			{
+				mTransformHeirarchies.clear( );
+			}
 
 			virtual void Update( );
 			virtual void Initialize( EditorTransformWidget* owner ) = 0;

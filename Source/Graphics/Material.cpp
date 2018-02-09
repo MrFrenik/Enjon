@@ -29,6 +29,14 @@ namespace Enjon {
 
 	Material::~Material()
 	{
+		// Free memory
+		for ( auto& u : mUniformOverrides )
+		{
+			delete( u.second );
+			u.second = nullptr;
+		}
+
+		mUniformOverrides.clear( );
 	} 
 	
 	//======================================================================== 

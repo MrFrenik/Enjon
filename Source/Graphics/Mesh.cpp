@@ -35,6 +35,9 @@ namespace Enjon
 			glDeleteBuffers( 1, &mVBO ); 
 		}
 
+		mVerticies.clear( );
+		mIndicies.clear( );
+
 		return Result::SUCCESS;
 	}
 
@@ -271,6 +274,9 @@ namespace Enjon
 	{
 		std::cout << "Deserializing mesh...\n";
 
+		// Make sure that memory is cleared first before assigning
+		Release( );
+
 		// Get size of verts from archiver
 		usize vertCount = buffer->Read< usize >( );
 
@@ -300,10 +306,7 @@ namespace Enjon
 
 			// Push back vert
 			mVerticies.push_back( v );
-		}
-
-		// Make sure that memory is cleared first before assigning
-		Release( );
+		} 
 
 		// Create and upload mesh data
 		glGenBuffers( 1, &mVBO );

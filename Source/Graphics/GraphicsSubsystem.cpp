@@ -65,20 +65,57 @@ namespace Enjon
 	//======================================================================================================
 
 	Enjon::Result GraphicsSubsystem::Shutdown()
-	{
-		delete(mGbuffer);
-		delete(mDebugTarget);
-		delete(mSmallBlurHorizontal);
-		delete(mSmallBlurVertical);
-		delete(mMediumBlurHorizontal);
-		delete(mMediumBlurVertical);
-		delete(mLargeBlurHorizontal);
-		delete(mLargeBlurVertical);
-		delete(mCompositeTarget);
-		delete(mLightingBuffer);
-		delete(mLuminanceTarget);
-		delete(mFXAATarget);
-		delete(mShadowDepth);
+	{ 
+		// Free all framebuffers and rendertargets
+		delete( mGbuffer );
+		delete( mDebugTarget );
+		delete( mSmallBlurHorizontal );
+		delete( mSmallBlurVertical );
+		delete( mMediumBlurHorizontal );
+		delete( mMediumBlurVertical );
+		delete( mLargeBlurHorizontal );
+		delete( mLargeBlurVertical );
+		delete( mCompositeTarget );
+		delete( mLightingBuffer );
+		delete( mLuminanceTarget );
+		delete( mFXAATarget );
+		delete( mShadowDepth );
+		delete( mFinalTarget );
+		delete( mSSAOTarget );
+		delete( mSSAOBlurTarget );
+		delete( mBatch );
+		delete( mFullScreenQuad );
+		delete[] mModelMatricies; 
+		delete mInstancedRenderable;
+
+		mGbuffer = nullptr;
+		mDebugTarget = nullptr;
+		mSmallBlurVertical = nullptr;
+		mSmallBlurHorizontal = nullptr;
+		mMediumBlurHorizontal = nullptr;
+		mMediumBlurVertical = nullptr;
+		mLargeBlurHorizontal = nullptr;
+		mLargeBlurVertical = nullptr;
+		mCompositeTarget = nullptr;
+		mLightingBuffer = nullptr;
+		mLuminanceTarget = nullptr;
+		mFXAATarget = nullptr;
+		mShadowDepth = nullptr;
+		mFinalTarget = nullptr;
+		mSSAOTarget = nullptr;
+		mSSAOBlurTarget = nullptr;
+		mFullScreenQuad = nullptr;
+		mBatch = nullptr;
+		mModelMatricies = nullptr;
+
+		// Shutdown shader manager
+		ShaderManager::DeleteShaders( );
+
+		// Shutdown font manager
+		FontManager::DeleteFonts( );
+
+		// Clear noise kernel
+		mSSAOKernel.clear( );
 
 		return Result::SUCCESS; 
 	}
@@ -478,15 +515,16 @@ namespace Enjon
 			// Set bunny mesh for later use
 			mInstancedRenderable = new Enjon::Renderable( );
 			mInstancedRenderable->SetMesh( mesh );
-			Enjon::Material* instancedMat = new Enjon::Material( );
-			instancedMat->TwoSided( true );
-			instancedMat->SetTexture(Enjon::TextureSlotType::Albedo, db->GetAsset<Enjon::Texture>("materials.copperrock.albedo"));
-			instancedMat->SetTexture(Enjon::TextureSlotType::Normal, db->GetAsset<Enjon::Texture>("materials.copperrock.normal"));
-			instancedMat->SetTexture(Enjon::TextureSlotType::Metallic, db->GetAsset<Enjon::Texture>("materials.copperrock.roughness"));
-			instancedMat->SetTexture(Enjon::TextureSlotType::Roughness, db->GetAsset<Enjon::Texture>("materials.copperrock.metallic"));
-			instancedMat->SetTexture(Enjon::TextureSlotType::Emissive, db->GetAsset<Enjon::Texture>("textures.black"));
-			instancedMat->SetTexture(Enjon::TextureSlotType::AO, db->GetAsset<Enjon::Texture>("materials.copperrock.ao"));
-			mInstancedRenderable->SetMaterial( instancedMat );
+			mInstancedRenderable->SetMaterial( db->GetDefaultAsset<Material>( ) );
+			//Enjon::Material* instancedMat = new Enjon::Material( );
+			//instancedMat->TwoSided( true );
+			//instancedMat->SetTexture(Enjon::TextureSlotType::Albedo, db->GetAsset<Enjon::Texture>("materials.copperrock.albedo"));
+			//instancedMat->SetTexture(Enjon::TextureSlotType::Normal, db->GetAsset<Enjon::Texture>("materials.copperrock.normal"));
+			//instancedMat->SetTexture(Enjon::TextureSlotType::Metallic, db->GetAsset<Enjon::Texture>("materials.copperrock.roughness"));
+			//instancedMat->SetTexture(Enjon::TextureSlotType::Roughness, db->GetAsset<Enjon::Texture>("materials.copperrock.metallic"));
+			//instancedMat->SetTexture(Enjon::TextureSlotType::Emissive, db->GetAsset<Enjon::Texture>("textures.black"));
+			//instancedMat->SetTexture(Enjon::TextureSlotType::AO, db->GetAsset<Enjon::Texture>("materials.copperrock.ao"));
+			//mInstancedRenderable->SetMaterial( instancedMat );
 
 			glGenBuffers( 1, &mInstancedVBO );
 			glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
@@ -1553,20 +1591,21 @@ namespace Enjon
 
 	void GraphicsSubsystem::RegisterCVars()
 	{
-		Enjon::CVarsSystem::Register("exposure", &mToneMapSettings.mExposure, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("gamma", &mToneMapSettings.mGamma, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("bloomScale", &mToneMapSettings.mBloomScalar, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("saturation", &mToneMapSettings.mSaturation, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("blur_weight_small", &mBloomSettings.mWeights.x, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("blur_weight_medium", &mBloomSettings.mWeights.y, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("blur_weight_large", &mBloomSettings.mWeights.z, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("blur_iter_small", &mBloomSettings.mIterations.x, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("blur_iter_medium", &mBloomSettings.mIterations.y, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("blur_iter_large", &mBloomSettings.mIterations.z, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("threshold", &mToneMapSettings.mThreshold, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("blur_radius_small", &mBloomSettings.mRadius.x, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("blur_radius_medium", &mBloomSettings.mRadius.y, Enjon::CVarType::TYPE_FLOAT);
-		Enjon::CVarsSystem::Register("blur_radius_large", &mBloomSettings.mRadius.z, Enjon::CVarType::TYPE_FLOAT);
+		// NOTE(): These aren't being cleared properly; will have them commented out until then.
+		//Enjon::CVarsSystem::Register("exposure", &mToneMapSettings.mExposure, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("gamma", &mToneMapSettings.mGamma, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("bloomScale", &mToneMapSettings.mBloomScalar, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("saturation", &mToneMapSettings.mSaturation, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("blur_weight_small", &mBloomSettings.mWeights.x, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("blur_weight_medium", &mBloomSettings.mWeights.y, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("blur_weight_large", &mBloomSettings.mWeights.z, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("blur_iter_small", &mBloomSettings.mIterations.x, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("blur_iter_medium", &mBloomSettings.mIterations.y, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("blur_iter_large", &mBloomSettings.mIterations.z, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("threshold", &mToneMapSettings.mThreshold, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("blur_radius_small", &mBloomSettings.mRadius.x, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("blur_radius_medium", &mBloomSettings.mRadius.y, Enjon::CVarType::TYPE_FLOAT);
+		//Enjon::CVarsSystem::Register("blur_radius_large", &mBloomSettings.mRadius.z, Enjon::CVarType::TYPE_FLOAT);
 	}
 
 	//======================================================================================================

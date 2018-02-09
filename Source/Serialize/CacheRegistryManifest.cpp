@@ -21,6 +21,13 @@ namespace Enjon
 
 	//=========================================================================================
 
+	CacheRegistryManifest::~CacheRegistryManifest( )
+	{
+		Reset( );
+	}
+
+	//=========================================================================================
+
 	Result CacheRegistryManifest::Initialize( const String& manifestPath, const AssetManager* manager )
 	{
 		// Check if directory exists - if not, create it

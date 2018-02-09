@@ -566,7 +566,8 @@ namespace Enjon
 		}
 
 		mNextAvailableID = 0;
-		mEntities = new std::array<Entity, MAX_ENTITIES>;
+		//mEntities = new std::array<Entity, MAX_ENTITIES>;
+		mEntities.resize( MAX_ENTITIES );
 	}
 
 	//---------------------------------------------------------------
@@ -575,16 +576,15 @@ namespace Enjon
 		// Detach all components from entities
 		for (u32 i = 0; i < MAX_ENTITIES; ++i)
 		{
-			Destroy( mEntities->at( i ).GetHandle( ) );	
-		}
-
-		delete[] mEntities;
+			//Destroy( mEntities->at( i ).GetHandle( ) );	
+			Destroy( mEntities.at( i ).GetHandle( ) );	
+		} 
 
 		// Deallocate all components
-		for (u32 i = 0; i < mComponents.size(); ++i)
+		for ( auto& c : mComponents )
 		{
-			delete mComponents.at(i);
-			mComponents.at(i) = nullptr;
+			delete c.second;
+			c.second = nullptr;
 		}
 	}
 
@@ -594,7 +594,7 @@ namespace Enjon
 		// Iterate from current available id to MAX_ENTITIES
 		for (u32 i = mNextAvailableID; i < MAX_ENTITIES; ++i)
 		{
-			if (mEntities->at(i).mState == EntityState::INACTIVE)
+			if (mEntities.at(i).mState == EntityState::INACTIVE)
 			{
 				mNextAvailableID = i;
 				return mNextAvailableID;
@@ -604,7 +604,7 @@ namespace Enjon
 		// Iterate from 0 to mNextAvailableID
 		for (u32 i = 0; i < mNextAvailableID; ++i)
 		{
-			if (mEntities->at(i).mState == EntityState::INACTIVE)
+			if (mEntities.at(i).mState == EntityState::INACTIVE)
 			{
 				mNextAvailableID = i;
 				return mNextAvailableID;
@@ -628,14 +628,14 @@ namespace Enjon
 		Enjon::EntityHandle handle;
 
 		// Find entity in array and set values
-		Entity* entity = &mEntities->at(id);
+		Entity* entity = &mEntities.at(id);
 		handle.mEntity = entity;
 		handle.mID = id;
 		entity->mID = id;				
 		entity->mHandle = handle;
 		entity->mState = EntityState::ACTIVE; 
 		entity->mManager = this;
-		entity->mUUID = UUID::GenerateUUID( );
+		//entity->mUUID = UUID::GenerateUUID( );
 
 		// Push back live entity into active entity vector
 		mActiveEntities.push_back(entity); 
@@ -648,9 +648,9 @@ namespace Enjon
 
 	Entity* EntityManager::GetRawEntity( const u32& id )
 	{
-		if ( id < MAX_ENTITIES && mEntities->at( id ).mState == EntityState::ACTIVE )
+		if ( id < MAX_ENTITIES && mEntities.at( id ).mState == EntityState::ACTIVE )
 		{
-			return &mEntities->at( id );
+			return &mEntities.at( id );
 		}
 
 		return nullptr;
@@ -680,7 +680,7 @@ namespace Enjon
 		{
 			if ( e < MAX_ENTITIES )
 			{
-				Entity* ent = &mEntities->at( e );
+				Entity* ent = &mEntities.at( e );
 
 				if ( ent && ent->mState == EntityState::ACTIVE )
 				{

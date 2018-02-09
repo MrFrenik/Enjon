@@ -47,6 +47,12 @@ namespace Enjon
 		// Save dock
 		// ImGui::SaveDock();
 
+		// Clear all functions and docks
+		mGuiFuncs.clear( );
+		mWindows.clear( );
+		mMainMenuOptions.clear( );
+		mDockingLayouts.clear( );
+
 		// Shut down 
 		ImGui_ImplSdlGL3_Shutdown();
 	}
@@ -934,7 +940,7 @@ namespace Enjon
 
 		ImGuiIO& io = ImGui::GetIO();
 
-		io.Fonts->Clear();
+		//io.Fonts->Clear();
 		io.Fonts->AddFontFromFileTTF((const char*)( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16);
 		io.Fonts->AddFontFromFileTTF((const char*)( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14);
 		io.Fonts->Build(); 

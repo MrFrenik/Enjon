@@ -230,14 +230,24 @@ namespace Enjon
 			infile.seekg( 0, std::ios::beg );
 
 			// Create and read data
-			oData = new u8[size + 1];
+			oData = (u8*)malloc( size + 1 );
+
+			if ( !oData )
+			{
+				mStatus = BufferStatus::Invalid;
+				free( oData );
+				oData = nullptr;
+				return;
+			}
+
+			//oData = new u8[size + 1];
 			infile.read( (char*)oData, size );
 			oData[size] = '\0';
 
 			// Delete previous buffer that was allocated
 			if ( mBuffer )
 			{
-				delete mBuffer;
+				delete [] mBuffer;
 			}
 
 			// Set buffer to oData and reset fields
@@ -247,7 +257,7 @@ namespace Enjon
 			mWritePosition = 0;
 
 			// Set status to being ready for reading
-			mStatus = BufferStatus::ReadyToRead;
+			mStatus = BufferStatus::ReadyToRead; 
 		}
 		else
 		{

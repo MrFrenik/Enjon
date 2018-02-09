@@ -48,6 +48,45 @@ namespace Enjon
 
 	//======================================================================
 
+	Result PhysicsSubsystem::Shutdown( )
+	{
+		// Clean up bullet systems 
+		if ( mCollisionConfiguration )
+		{
+			delete( mCollisionConfiguration ); 
+			mCollisionConfiguration = nullptr;
+		}
+
+		if ( mDispatcher )
+		{
+			delete( mDispatcher ); 
+			mDispatcher = nullptr;
+		}
+
+		if ( mOverlappingPairCache )
+		{
+			delete( mOverlappingPairCache ); 
+			mOverlappingPairCache = nullptr;
+		}
+
+		if ( mSolver )
+		{
+			delete( mSolver );
+			mSolver = nullptr;
+		}
+
+		// NOTE(): Cannot free this using 'delete'. Investigate.
+		//if ( mDynamicsWorld )
+		//{
+		//	delete( mDynamicsWorld ); 
+		//	mDynamicsWorld = nullptr;
+		//}
+
+		return Result::SUCCESS;
+	}
+
+	//======================================================================
+
 	void PhysicsSubsystem::Update( const f32 dt )
 	{
 		// Set physics simulation
@@ -205,13 +244,6 @@ namespace Enjon
 		{
 			k.second.erase( comp );
 		}
-	}
-
-	//====================================================================== 
-
-	Result PhysicsSubsystem::Shutdown( )
-	{
-		return Result::SUCCESS;
 	} 
 
 	//====================================================================== 

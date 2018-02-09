@@ -23,7 +23,9 @@ namespace Enjon
 			/**
 			*@brief Constructor
 			*/
-			~Subsystem() {}
+			virtual ~Subsystem( )
+			{ 
+			}
 			
 			/**
 			*@brief

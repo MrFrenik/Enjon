@@ -207,6 +207,9 @@ namespace Enjon
 	    // Destroy FreeType once we're finished
 	    FT_Done_Face(face);
 	    FT_Done_FreeType(ft);
+
+		delete[] rects;
+		rects = nullptr;
 	}
 
 	/* Creates and returns new font */
@@ -833,7 +836,7 @@ namespace Enjon
 
 	UIFont::~UIFont( ) 
 	{
-
+		
 	} 
 
 	//========================================================================================================================

@@ -266,15 +266,16 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			Vector< EntityHandle > mChildren; 
 
-			ENJON_PROPERTY( )
-			UUID mUUID;
+			//ENJON_PROPERTY( )
+			//UUID mUUID;
 
 			Enjon::EntityManager* mManager;
 			Enjon::EntityState mState;
 			EntityHandle mHandle;
 	};
 
-	using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
+	//using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
+	using EntityStorage				= Vector< Entity >;
 	using MarkedForDestructionList	= Vector< u32 >;
 	using ActiveEntityList 			= Vector<Entity*>;
 	using ComponentBaseArray		= HashMap< u32, ComponentWrapperBase* >;

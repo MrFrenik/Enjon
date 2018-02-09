@@ -4,7 +4,8 @@
 
 #include "EditorApp.h"
 
-#include <filesystem>
+#include <filesystem> 
+#include <vld.h>
 
 namespace FS = std::experimental::filesystem;
 

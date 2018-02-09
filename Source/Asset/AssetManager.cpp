@@ -49,14 +49,6 @@ namespace Enjon
 			
 	AssetManager::~AssetManager()
 	{ 
-		// Release all loaders from memory
-		for (auto& loader : mLoadersByAssetId)
-		{
-			delete loader.second;
-		}
-
-		// Clear map
-		mLoadersByAssetId.clear();
 	}
 	
 	//============================================================================================ 
@@ -134,6 +126,19 @@ namespace Enjon
 
 	Result AssetManager::Shutdown()
 	{
+		// Delete all asset loaders
+		for ( auto& l : mLoadersByAssetId )
+		{
+			delete l.second;
+			l.second = nullptr;
+		} 
+
+		mLoadersByAssetId.clear( );
+		mLoadersByMetaClass.clear();
+
+		// Reset cache registry manifest
+		mCacheManifest.Reset( );
+
 		return Result::SUCCESS;
 	}
 	

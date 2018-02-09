@@ -186,7 +186,24 @@ namespace Enjon
 	//=========================================================================================================================
 
 	ShaderGraph::~ShaderGraph( )
-	{
+	{ 
+		// Free all memory
+		for ( auto& s : mShaders )
+		{
+			delete s.second;
+			s.second = nullptr;
+		} 
+
+		for ( auto& u : mUniforms )
+		{
+			delete u.second;
+			u.second = nullptr;
+		}
+
+		mShaderPassCode.clear( );
+		mShaders.clear( );
+		mNodes.clear( );
+		mUniforms.clear( );
 	}
 
 	//=========================================================================================================================

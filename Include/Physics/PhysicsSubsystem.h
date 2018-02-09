@@ -108,7 +108,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			virtual Result Shutdown();
+			virtual Result Shutdown() override;
 
 			/**
 			*@brief

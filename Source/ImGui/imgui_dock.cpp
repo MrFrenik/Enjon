@@ -199,7 +199,16 @@ namespace ImGui
 		EndAction_ m_end_action;
 
 
-		~DockContext() {}
+		~DockContext() 
+		{
+			for ( auto& d : m_docks )
+			{
+				delete d;
+				d = nullptr;
+			}
+
+			m_docks.clear( );
+		}
 
 		Dock& getDock(const char* label, bool opened)
 		{

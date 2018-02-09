@@ -43,6 +43,14 @@ namespace Enjon
 	Engine::~Engine()
 	{
 		// Shutdown all instances
+		delete( mMetaClassRegisty );
+		mMetaClassRegisty = nullptr;
+ 
+		delete( mSubsystemCatalog );
+		mSubsystemCatalog = nullptr; 
+
+		// Shutdown imguimanager
+		ImGuiManager::ShutDown( );
 	}
 
 	//=======================================================

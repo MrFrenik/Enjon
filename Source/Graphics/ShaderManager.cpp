@@ -60,6 +60,11 @@ namespace Enjon { namespace ShaderManager {
 		ShaderManager::AddShader("Instanced", sp + "deferred/Instanced.v.glsl", sp + "deferred/Instanced.f.glsl"); 
 	}
 
+	void Shutdown( )
+	{
+
+	}
+
 	void AddShader( const Enjon::String& shadername, const Enjon::String& vertpath, const Enjon::String& fragpath )
 	{
 		GLSLProgram* p = new GLSLProgram;
@@ -118,7 +123,13 @@ namespace Enjon { namespace ShaderManager {
 	
 	void DeleteShaders()
 	{ 
+		for ( auto& s : Shaders )
+		{
+			delete s.second;
+			s.second = nullptr;
+		}
 
+		Shaders.clear( );
 	}
 
 }}

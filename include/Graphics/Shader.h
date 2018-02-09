@@ -128,7 +128,9 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			~ShaderUniform( ) {}
+			virtual ~ShaderUniform( ) 
+			{
+			}
 
 			/*
 			* @brief

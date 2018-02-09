@@ -76,10 +76,16 @@ namespace Enjon { namespace FontManager {
 	}
 
 	// Delete all animations and clear any memory used
-	void DeletFonts()
+	void DeleteFonts()
 	{
+		for ( auto& f : Fonts )
+		{
+			delete f.second;
+			f.second = nullptr;
+		}
 
-	}
+		Fonts.clear( );
+	} 
 }}
 
 

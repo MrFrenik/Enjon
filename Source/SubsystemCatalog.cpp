@@ -21,6 +21,15 @@ namespace Enjon
 
 	SubsystemCatalog::~SubsystemCatalog()
 	{ 
+		// Shutdown individual subsystems
+		for ( auto& s : mSubsystems )
+		{
+			s.second->Shutdown( );
+			delete s.second;
+			s.second = nullptr; 
+		}
+
+		mSubsystems.clear( );
 	}
 	
 	//======================================================================================================

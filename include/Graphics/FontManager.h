@@ -21,7 +21,7 @@ namespace Enjon { namespace FontManager {
 	Font* GetFont(std::string FontName);
 
 	// Delete all animations and clear any memory used
-	void DeletFonts();
+	void DeleteFonts();
 }}
 
 #endif

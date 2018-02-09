@@ -20,6 +20,13 @@ namespace Enjon {
 
 	Scene::~Scene()
 	{
+		// Free all memory
+		mRenderables.clear( );
+		mNonDepthTestedRenderables.clear( ); 
+		mQuadBatches.clear();
+		mDirectionalLights.clear();
+		mPointLights.clear();
+		mSpotLights.clear(); 
 	}
 
 	//====================================================================================================

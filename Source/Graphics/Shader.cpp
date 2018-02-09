@@ -147,6 +147,9 @@ namespace Enjon
 			glDeleteShader( mFragmentShaderID );
 		}
 
+		// Release all uniforms
+		mUniformMap.clear( );
+
 		return Enjon::Result::SUCCESS;
 	}
 
@@ -436,6 +439,7 @@ namespace Enjon
 			
 	UniformTexture::~UniformTexture( )
 	{ 
+		std::cout << "Here\n";
 	}
 
 	//======================================================================================================================= 

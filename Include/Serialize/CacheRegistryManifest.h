@@ -41,7 +41,7 @@ namespace Enjon
 			/*
 			* @brief Default destructor
 			*/
-			~CacheRegistryManifest( ) = default; 
+			~CacheRegistryManifest( );
 
 		protected: 
 

@@ -26,6 +26,10 @@ namespace Enjon
 		public:
 			virtual void Base() = 0;
 
+			virtual ~ComponentWrapperBase( )
+			{ 
+			}
+
 			virtual bool HasEntity( const u32& entityID ) = 0;
 
 			virtual Component* AddComponent( const u32& entityId, Component* component ) = 0;

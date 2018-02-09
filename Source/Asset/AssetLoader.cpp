@@ -89,6 +89,13 @@ namespace Enjon
 
 		mAssetsByName.clear();
 		mAssetsByUUID.clear();
+
+		// Delete default asset
+		if ( mDefaultAsset )
+		{
+			delete mDefaultAsset; 
+			mDefaultAsset = nullptr;
+		} 
 	}
 
 	//=================================================================

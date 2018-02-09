@@ -44,7 +44,9 @@ namespace Enjon
 			/**
 			*@brief Virtual destructor
 			*/
-			~Asset() {} 
+			virtual ~Asset() 
+			{
+			} 
 
 			/**
 			*@brief
