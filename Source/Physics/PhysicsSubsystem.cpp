@@ -50,37 +50,38 @@ namespace Enjon
 
 	Result PhysicsSubsystem::Shutdown( )
 	{
+		// NOTE(): Cannot free this using 'delete'. Investigate.
+		//if ( mDynamicsWorld )
+		//{
+		//	delete( mDynamicsWorld ); 
+		//	//mDynamicsWorld = nullptr;
+		//}
+
 		// Clean up bullet systems 
 		if ( mCollisionConfiguration )
 		{
 			delete( mCollisionConfiguration ); 
-			mCollisionConfiguration = nullptr;
+			//mCollisionConfiguration = nullptr;
 		}
 
 		if ( mDispatcher )
 		{
 			delete( mDispatcher ); 
-			mDispatcher = nullptr;
+			//mDispatcher = nullptr;
 		}
 
 		if ( mOverlappingPairCache )
 		{
 			delete( mOverlappingPairCache ); 
-			mOverlappingPairCache = nullptr;
+			//mOverlappingPairCache = nullptr;
 		}
 
 		if ( mSolver )
 		{
 			delete( mSolver );
-			mSolver = nullptr;
+			//mSolver = nullptr;
 		}
 
-		// NOTE(): Cannot free this using 'delete'. Investigate.
-		//if ( mDynamicsWorld )
-		//{
-		//	delete( mDynamicsWorld ); 
-		//	mDynamicsWorld = nullptr;
-		//}
 
 		return Result::SUCCESS;
 	}

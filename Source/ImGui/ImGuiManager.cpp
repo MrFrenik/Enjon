@@ -941,8 +941,8 @@ namespace Enjon
 		ImGuiIO& io = ImGui::GetIO();
 
 		//io.Fonts->Clear();
-		io.Fonts->AddFontFromFileTTF((const char*)( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16);
-		io.Fonts->AddFontFromFileTTF((const char*)( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14);
+		io.Fonts->AddFontFromFileTTF(( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16);
+		io.Fonts->AddFontFromFileTTF(( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14);
 		io.Fonts->Build(); 
 
 		// Grab reference to style

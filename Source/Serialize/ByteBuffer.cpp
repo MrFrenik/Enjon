@@ -50,7 +50,7 @@ namespace Enjon
 	void ByteBuffer::ReleaseData( )
 	{
 		// Delete all of its data
-		delete mBuffer;
+		free( mBuffer );
 		mBuffer = nullptr;
 	}
 
@@ -247,7 +247,7 @@ namespace Enjon
 			// Delete previous buffer that was allocated
 			if ( mBuffer )
 			{
-				delete [] mBuffer;
+				free( mBuffer );
 			}
 
 			// Set buffer to oData and reset fields
