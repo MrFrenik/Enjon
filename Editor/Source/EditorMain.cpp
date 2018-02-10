@@ -9,6 +9,11 @@
 
 namespace FS = std::experimental::filesystem;
 
+struct Thing
+{
+	Enjon::f32 value = 1.0f;
+};
+
 int main(int argc, char** argv)
 { 
 	Enjon::EnjonEditor mEditor;

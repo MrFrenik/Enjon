@@ -38,8 +38,8 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mProjectsDir = "W:/Projects/";
 
 //Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
