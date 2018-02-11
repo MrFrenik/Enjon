@@ -196,6 +196,11 @@ namespace Enjon
 			*/
 			static bool HasFileExtension( const String& file, const String& extension );
 
+			/**
+			* @brief Compares the given string parameter with all of the asset loaders file extensions in the current assetmanager
+			*/
+			static bool HasAnyAssetFileExtension( const String& file );
+
 		protected:
 
 		private: 

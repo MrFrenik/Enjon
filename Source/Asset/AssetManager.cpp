@@ -8,10 +8,12 @@
 #include "Asset/FontAssetLoader.h"
 #include "Asset/MaterialAssetLoader.h"
 #include "Asset/ShaderGraphAssetLoader.h"
+#include "Asset/SceneAssetLoader.h"
 #include "Utils/FileUtils.h"
 #include "Serialize/ObjectArchiver.h"
 #include "Serialize/AssetArchiver.h"
 #include "Engine.h"
+#include "SubsystemCatalog.h"
 
 #include <fmt/printf.h>
 
@@ -61,6 +63,7 @@ namespace Enjon
 		RegisterAssetLoader< UIFont,		FontAssetLoader >( );
 		RegisterAssetLoader< ShaderGraph,	ShaderGraphAssetLoader >( );
 		RegisterAssetLoader< Material,		MaterialAssetLoader >( );
+		RegisterAssetLoader< Scene,			SceneAssetLoader >( );
 
 		// Create file extension map
 		mFileExtensionMap[ "png" ]	= GetAssetTypeId< Texture >( );
@@ -419,8 +422,11 @@ namespace Enjon
 
 		Result res = archiver.Serialize( asset ); 
 
+		// Get file extension from loader
+		String fileExtension = asset->mLoader->GetAssetFileExtension( );
+
 		// Write to file using archiver 
-		String path = mCachedDirectoryPath + asset->mName + ".easset"; 
+		String path = mCachedDirectoryPath + asset->mName + fileExtension; 
 		archiver.WriteToFile( path );
 
 		// Construct and add record to manifest
@@ -438,7 +444,8 @@ namespace Enjon
 
 	Result AssetManager::SaveAsset( const Asset* asset ) const
 	{
-		if ( asset )
+		// Can only save asset if it's valid and NOT a default engine asset
+		if ( asset && !asset->IsDefault() )
 		{
 			const AssetRecordInfo* info = asset->GetAssetRecordInfo( );
 			if ( info )
@@ -578,6 +585,30 @@ namespace Enjon
 
 	//======================================================================================================
 
+	bool AssetManager::HasAnyAssetFileExtension( const String& file )
+	{
+		AssetManager* am = EngineSubsystem( AssetManager ); 
+		if ( am )
+		{
+			// Get file extension of passed in file
+			String fileExt = "." + Enjon::Utils::SplitString( file, "." ).back( );
+
+			// Check for matches
+			for ( auto& l : am->mLoadersByAssetId )
+			{ 
+				if ( fileExt.compare( l.second->GetAssetFileExtension( ) ) == 0 )
+				{
+					return true;
+				}
+			}
+		}
+
+		// Couldn't file match
+		return false; 
+	}
+
+	//======================================================================================================
+
 	bool AssetManager::HasFileExtension( const String& file, const String& extension )
 	{
 		return ( Enjon::Utils::SplitString( file, "." ).back( ).compare( extension ) == 0 );
@@ -641,6 +672,56 @@ namespace Enjon
 
 	//======================================================================================================
 }
+
+
+/*
+	// The only thing scenes will do is hold onto binary/json data to be loaded... they don't hold onto run time information...
+	ENJON_CLASS( Construct )
+	class Scene : public Asset
+	{ 
+		ENJON_CLASS_BODY( )
+
+		public:
+
+		protected:
+
+		private:
+	}; 
+
+	// Need to be able to save/load scenes while in a project from its asset database
+	// Cannot save scene at runtime
+	// Can load scenes either at runtime or at edit-time
+	// Need to be able to create new entities during edit-time
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

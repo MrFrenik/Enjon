@@ -1,7 +1,7 @@
 #include "Entity/Components/PointLightComponent.h"
 #include "Entity/EntityManager.h"
 #include "Serialize/ByteBuffer.h"
-#include "Graphics/Scene.h"
+#include "Graphics/GraphicsScene.h"
 #include "Graphics/GraphicsSubsystem.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
@@ -14,7 +14,7 @@ namespace Enjon
 	{
 		// Add renderable to scene
 		GraphicsSubsystem* gs = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem >( )->ConstCast< GraphicsSubsystem >( );
-		gs->GetScene( )->AddPointLight( &mLight );
+		gs->GetGraphicsScene( )->AddPointLight( &mLight );
 	}
 
 	//==================================================================================
@@ -22,9 +22,9 @@ namespace Enjon
 	PointLightComponent::~PointLightComponent()
 	{
 		// Remove renderable from scene
-		if (mLight.GetScene() != nullptr)
+		if (mLight.GetGraphicsScene() != nullptr)
 		{
-			mLight.GetScene()->RemovePointLight(&mLight);
+			mLight.GetGraphicsScene()->RemovePointLight(&mLight);
 		}
 	}
 

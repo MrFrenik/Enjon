@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENJON_SCENE_H
-#define ENJON_SCENE_H
+#ifndef ENJON_GRAPHICS_SCENE_H
+#define ENJON_GRAPHICS_SCENE_H
 
 #include "Defines.h"
 #include "System/Types.h"
@@ -45,7 +45,7 @@ namespace Enjon {
 	using RenderableID = u32;
 
 	ENJON_CLASS( )
-	class Scene : public Enjon::Object
+	class GraphicsScene : public Enjon::Object
 	{
 		ENJON_CLASS_BODY( )
 
@@ -53,12 +53,12 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			Scene();
+			GraphicsScene();
 
 			/*
 			* @brief
 			*/
-			~Scene();
+			~GraphicsScene();
 
 			/*
 			* @brief

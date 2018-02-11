@@ -1,3 +1,4 @@
+/*
 #include "Graphics/SceneNode.h"
 #include "Entity/EntityManager.h"
 
@@ -77,3 +78,4 @@ namespace Enjon
 	}
 	
 }
+*/

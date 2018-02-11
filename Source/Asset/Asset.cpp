@@ -10,20 +10,35 @@
 #include "SubsystemCatalog.h"
 			
 namespace Enjon
-{
+{ 
+	//================================================================================================================
+
 	template <typename T>
 	const AssetLoader* AssetHandle<T>::GetLoader( ) const
 	{
 		Engine::GetInstance( )->GetSubsystemCatalog( )->Get<AssetManager>( )->GetLoaderByAssetType( Object::GetClass<T>( ) );
 	} 
 
+	//================================================================================================================
+
 	const AssetRecordInfo* Asset::GetAssetRecordInfo( ) const
 	{
 		return mRecordInfo;
 	}
 
+	//================================================================================================================
+
 	Result Asset::Save( ) const
 	{
 		return Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->SaveAsset( this );
 	}
+
+	//================================================================================================================
+
+	bool Asset::IsDefault( ) const
+	{
+		return mIsDefault;
+	}
+
+	//================================================================================================================ 
 }

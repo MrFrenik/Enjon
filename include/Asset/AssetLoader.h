@@ -68,6 +68,16 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void LoadAsset( ) const;
+
+			/**
+			* @brief
+			*/
+			void UnloadAsset( );
+
+			/**
+			* @brief
+			*/
 			void Destroy( );
 
 
@@ -121,6 +131,14 @@ namespace Enjon
 			*/
 			virtual void RegisterDefaultAsset( )
 			{ 
+			}
+
+			/**
+			* @brief Returns the file extension that this particular asset will use on disk
+			*/
+			virtual String GetAssetFileExtension( ) const
+			{
+				return ".easset";
 			}
 
 			/**
@@ -192,14 +210,14 @@ namespace Enjon
 
 				// TODO(): MAKE THIS GO THROUGH A CENTRALIZED GRAPHICS FACTORY
 				std::experimental::filesystem::path originalPath = manager->GetAssetsDirectoryPath() + "Cache/" + usedAssetName;
-				std::experimental::filesystem::path p = originalPath.string() + ".easset";
+				std::experimental::filesystem::path p = originalPath.string() + GetAssetFileExtension();
 
 				// Look for cached asset based on name and continue until name is unique
 				u32 index = 0;
 				while ( std::experimental::filesystem::exists( p ) )
 				{
 					index++;
-					p = std::experimental::filesystem::path( originalPath.string() + std::to_string( index ) + ".easset" );
+					p = std::experimental::filesystem::path( originalPath.string() + std::to_string( index ) + GetAssetFileExtension() );
 					usedAssetName = originalAssetName + std::to_string( index );
 				} 
 
@@ -217,6 +235,7 @@ namespace Enjon
 				info.mAssetUUID = asset->mUUID;
 				info.mAssetFilePath = p.string( );					
 				info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+				info.mAssetLoaderClass = Class( );
 
 				// Add to loader
 				const Asset* cnstAsset = AddToAssets( info ); 
@@ -276,7 +295,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			const Asset* AddToAssets( const AssetRecordInfo& info );
+			const Asset* AddToAssets( const AssetRecordInfo& info ); 
 
 		protected:
 			

@@ -72,7 +72,7 @@ namespace Enjon
 			/* 
 			* @brief Get scene of renderable 
 			*/
-			Scene* GetScene() const;
+			GraphicsScene* GetGraphicsScene() const;
 
 			/* 
 			* @brief Get world transform 
@@ -122,7 +122,7 @@ namespace Enjon
 			/* 
 			* @brief Set scene of renderable 
 			*/
-			void SetScene(Scene* scene);
+			void SetGraphicsScene(GraphicsScene* scene);
 
 			/* 
 			* @brief Set Renderable 

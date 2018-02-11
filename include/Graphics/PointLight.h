@@ -9,7 +9,7 @@
 
 namespace Enjon { 
 
-	class Scene;
+	class GraphicsScene;
 
 	ENJON_CLASS( Construct )
 	class PointLight : public Enjon::Object
@@ -63,7 +63,7 @@ namespace Enjon {
 			void SetIntensity(float intensity);
 			
 			ENJON_FUNCTION() 
-			void SetScene(Scene* scene);
+			void SetGraphicsScene(GraphicsScene* scene);
 			
 			ENJON_FUNCTION() 
 			void SetPosition(Enjon::Vec3& position);
@@ -77,7 +77,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			Scene* GetScene( ) const; 
+			GraphicsScene* GetGraphicsScene( ) const; 
 
 		private: 
 
@@ -96,7 +96,7 @@ namespace Enjon {
 			ENJON_PROPERTY( Editable, UIMin = 0.0f, UIMax = 1.0f )
 			ColorRGBA32 mColor;
 			
-			Scene* mScene = nullptr;
+			GraphicsScene* mGraphicsScene = nullptr;
 	};
 
 }

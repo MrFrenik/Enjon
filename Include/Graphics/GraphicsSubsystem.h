@@ -4,7 +4,7 @@
 #include "Defines.h"
 #include "System/Types.h"
 #include "Graphics/Window.h"
-#include "Graphics/Scene.h"
+#include "Graphics/GraphicsScene.h"
 #include "Graphics/Camera.h" 
 #include "Graphics/SpriteBatch.h"
 #include "Entity/EntityManager.h"
@@ -113,14 +113,14 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			Scene* GetScene() { return &mScene; }
+			GraphicsScene* GetGraphicsScene() { return &mGraphicsScene; }
 
 			/**
 			*@brief
 			*/
-			const Camera* GetSceneCamera() const 
+			const Camera* GetGraphicsSceneCamera() const 
 			{ 
-				return &mSceneCamera; 
+				return &mGraphicsSceneCamera; 
 			}
 			
 			/**
@@ -287,9 +287,9 @@ namespace Enjon
 			FullScreenQuad* mFullScreenQuad 	= nullptr;
 
 			// Graphics scene
-			Scene 				mScene;
+			GraphicsScene 		mGraphicsScene;
 			Window 				mWindow;
-			Camera 				mSceneCamera;   // Probably part of scene instead
+			Camera 				mGraphicsSceneCamera;   // Probably part of scene instead
 			Camera 				mShadowCamera;	// Probably part of light or scene?
 
 			SpriteBatch* 	mBatch 			= nullptr; 

@@ -580,6 +580,9 @@ namespace Enjon
 			Destroy( mEntities.at( i ).GetHandle( ) );	
 		} 
 
+		// Force destroy all entities and their components
+		ForceCleanup( );
+
 		// Deallocate all components
 		for ( auto& c : mComponents )
 		{
@@ -642,6 +645,22 @@ namespace Enjon
 
 		// Return entity handle
 		return handle;
+	}
+
+	//---------------------------------------------------------------
+
+	Vector<EntityHandle> EntityManager::GetRootLevelEntities( )
+	{
+		Vector<EntityHandle> entities;
+		for ( auto& e : mActiveEntities )
+		{
+			if ( !e->HasParent( ) )
+			{
+				entities.push_back( e->GetHandle( ) );
+			}
+		}
+
+		return entities;
 	}
 
 	//---------------------------------------------------------------

@@ -1,9 +1,9 @@
 #include "Graphics/DirectionalLight.h"
-#include "Graphics/Scene.h"
+#include "Graphics/GraphicsScene.h"
 #include "Math/Mat4.h"
 
-namespace Enjon {
-
+namespace Enjon 
+{ 
 	DirectionalLight::DirectionalLight()
 	{
 		mDirection = Vec3(1, 1, 1);
@@ -36,9 +36,9 @@ namespace Enjon {
 		mIntensity = intensity;
 	}
 
-	void DirectionalLight::SetScene(Scene* scene)
+	void DirectionalLight::SetGraphicsScene(GraphicsScene* scene)
 	{
-		mScene = scene;
+		mGraphicsScene = scene;
 	}
 
 }

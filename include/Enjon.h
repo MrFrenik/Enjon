@@ -32,7 +32,7 @@
 #include "Graphics/GBuffer.h"
 #include "Graphics/Material.h"
 #include "Graphics/Mesh.h"
-#include "Graphics/Scene.h"
+#include "Graphics/GraphicsScene.h"
 #include "Graphics/ShaderGraph.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/DirectionalLight.h"

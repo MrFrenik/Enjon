@@ -17,7 +17,7 @@ namespace Enjon
 
 		for ( auto& t : mTransformHeirarchies )
 		{
-			gfx->GetScene( )->AddNonDepthTestedRenderable( &t->mRenderable );
+			gfx->GetGraphicsScene( )->AddNonDepthTestedRenderable( &t->mRenderable );
 		} 
 	}
 
@@ -28,14 +28,14 @@ namespace Enjon
 
 		for ( auto& t : mTransformHeirarchies )
 		{
-			gfx->GetScene( )->RemoveNonDepthTestedRenderable( &t->mRenderable );
+			gfx->GetGraphicsScene( )->RemoveNonDepthTestedRenderable( &t->mRenderable );
 		} 
 	}
 
 	void EditorWidget::Update( )
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-		const Camera* cam = gfx->GetSceneCamera( ); 
+		const Camera* cam = gfx->GetGraphicsSceneCamera( ); 
 
 		// Set scale of root based on distance from camera
 		f32 dist = Vec3::Distance( cam->GetPosition( ), mRootHeirarchy->mLocalTransform.GetPosition() );

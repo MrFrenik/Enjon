@@ -1,3 +1,4 @@
+/*
 #pragma once
 #ifndef ENJON_SCENE_NODE_H
 #define ENJON_SCENE_NODE_H
@@ -32,3 +33,4 @@ namespace Enjon
 }
 
 #endif
+*/

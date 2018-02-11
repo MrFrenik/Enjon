@@ -1,4 +1,5 @@
 #include "EditorApp.h"
+#include "EditorSceneView.h"
 
 #include <Engine.h>
 #include <Asset/AssetManager.h>
@@ -41,9 +42,9 @@ Enjon::String copyDir = "";
 Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 //Enjon::String mProjectsDir = "W:/Projects/";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -69,7 +70,7 @@ namespace Enjon
 		}
 	}
 
-	void EnjonEditor::InspectorView( bool* enabled )
+	void EditorApp::InspectorView( bool* enabled )
 	{
 		if ( mSelectedEntity )
 		{
@@ -136,7 +137,36 @@ namespace Enjon
 		}
 	}
 
-	void EnjonEditor::SceneView( bool* viewBool )
+	//===========================================================================================
+
+	void EditorWidgetManager::Finalize( )
+	{
+		// Register windows with ImGuiManager
+		for ( auto& v : mViews ) 
+		{ 
+			// Register individual windows
+			Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
+			{
+				// Docking windows
+				if ( ImGui::BeginDock( v->GetViewName().c_str(), &mViewEnabledMap[v], v->GetViewFlags() ) )
+				{
+					v->Update( );
+				}
+				ImGui::EndDock( ); 
+			}); 
+		}
+	}
+
+	//===========================================================================================
+
+	EditorWidgetManager* EditorApp::GetEditorWidgetManager( )
+	{
+		return &mEditorWidgetManager;
+	}
+
+	//===========================================================================================
+
+	void EditorApp::SceneView( bool* viewBool )
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 		u32 currentTextureId = gfx->GetCurrentRenderTextureId( ); 
@@ -160,28 +190,18 @@ namespace Enjon
 		f32 fps = ImGui::GetIO( ).Framerate;
 
 		// Update camera aspect ratio
-		gfx->GetSceneCamera( )->ConstCast< Enjon::Camera >( )->SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
+		gfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >( )->SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
 	}
 
-	Vec2 EnjonEditor::GetSceneViewProjectedCursorPosition( )
+	Vec2 EditorApp::GetSceneViewProjectedCursorPosition( )
 	{
-		// Need to get percentage of screen and things and stuff from mouse position
-		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem ); 
-		Input* input = EngineSubsystem( Input );
-		iVec2 viewport = gfx->GetViewport( );
-		Vec2 mp = input->GetMouseCoords( );
-		
-		// X screen percentage
-		f32 pX = f32( mp.x - mSceneViewWindowPosition.x ) / f32( mSceneViewWindowSize.x );
-		f32 pY = f32( mp.y - mSceneViewWindowPosition.y ) / f32( mSceneViewWindowSize.y ); 
-
-		return Vec2( (s32)( pX * viewport.x ), (s32)( pY * viewport.y ) );
+		return mEditorSceneView->GetSceneViewProjectedCursorPosition( );
 	}
 
-	void EnjonEditor::CameraOptions( bool* enable )
+	void EditorApp::CameraOptions( bool* enable )
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-		const Enjon::Camera* cam = gfx->GetSceneCamera( );
+		const Enjon::Camera* cam = gfx->GetGraphicsSceneCamera( );
 
 		if ( ImGui::TreeNode( "Camera" ) )
 		{
@@ -238,7 +258,7 @@ namespace Enjon
 		*/
 	}
 
-	void EnjonEditor::PlayOptions( )
+	void EditorApp::PlayOptions( )
 	{
 		if ( mPlaying )
 		{
@@ -255,7 +275,7 @@ namespace Enjon
 				}
 
 				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-				auto cam = gfx->GetSceneCamera( )->ConstCast< Camera >();
+				auto cam = gfx->GetGraphicsSceneCamera( )->ConstCast< Camera >();
 				cam->SetPosition( mPreviousCameraTransform.Position );
 				cam->SetRotation( mPreviousCameraTransform.Rotation ); 
 			}
@@ -291,7 +311,7 @@ namespace Enjon
 				mMoveCamera = true;
 
 				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-				auto cam = gfx->GetSceneCamera( );
+				auto cam = gfx->GetGraphicsSceneCamera( );
 				mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) );
 
 				// Call start up function for game
@@ -315,71 +335,38 @@ namespace Enjon
 		} 
 	}
 
-	void EnjonEditor::WorldOutlinerView( )
+	void EditorApp::SelectEntity( const EntityHandle& handle )
 	{
-		EntityManager* entities = EngineSubsystem( EntityManager );
-		ImGui::Text( fmt::format( "Entities: {}", entities->GetActiveEntities().size() ).c_str() ); 
+		mSelectedEntity = handle;
+		mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) );
+		mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) );
+	}
 
+	void EditorApp::WorldOutlinerView( )
+	{ 
+		if ( !mCurrentScene )
+		{
+			return;
+		}
+
+		EntityManager* entities = EngineSubsystem( EntityManager );
+
+		// Print out scene name
+		ImGui::Text( ( "Scene: " + mCurrentScene->GetName( ) ).c_str( ) );
+
+		ImGui::Separator( );
+
+		// List out active entities
 		for ( auto& e : entities->GetActiveEntities( ) )
 		{
-			if ( ImGui::TreeNode( fmt::format( "{}", e->GetID( ) ).c_str( ) ) )
+			if ( ImGui::Selectable( fmt::format( "{}", e->GetID() ).c_str( ) ) )
 			{
-				Enjon::ImGuiManager::DebugDumpObject( e );
-
-				if ( ImGui::TreeNode( fmt::format( "Components##{}", e->GetID( ) ).c_str( ) ) )
-				{
-					for ( auto& c : e->GetComponents( ) )
-					{ 
-						if ( c->Class( ) == Object::GetClass<RigidBodyComponent >( ) )
-						{
-							RigidBodyComponent* rbc = c->ConstCast<RigidBodyComponent>( );
-							if ( rbc )
-							{
-								f32 mass = rbc->GetMass( );
-								if ( ImGui::DragFloat( "Mass", &mass, 1.0f, 0.0f, 100.0f ) )
-								{
-									rbc->SetMass( mass );
-								}
-							}
-						}
-
-						else
-						{
-							Enjon::ImGuiManager::DebugDumpObject( c ); 
-						}
-					} 
-					ImGui::TreePop( );
-				}
-
-				if ( ImGui::CollapsingHeader( "ADD COMPONENT" ) )
-				{
-					// Get component list
-					EntityManager* entities = EngineSubsystem( EntityManager );
-					auto compMetaClsList = entities->GetComponentMetaClassList( );
-
-					ImGui::ListBoxHeader( "" );
-					{
-						for ( auto& cls : compMetaClsList )
-						{
-							if ( !mSceneEntity.Get( )->HasComponent( cls ) )
-							{
-								// Add component to mEntity
-								if ( ImGui::Selectable( cls->GetName( ).c_str( ) ) )
-								{
-									mSceneEntity.Get( )->AddComponent( cls );
-								} 
-							}
-						} 
-					}
-					ImGui::ListBoxFooter( );
-				}
-
-				ImGui::TreePop( );
-			}
+				SelectEntity( e );
+			} 
 		}
 	}
 
-	void EnjonEditor::LoadResourceFromFile( )
+	void EditorApp::LoadResourceFromFile( )
 	{
 		// Load file
 		if ( ImGui::CollapsingHeader( "Load Resource" ) )
@@ -400,8 +387,64 @@ namespace Enjon
 	}
 
 	//================================================================================================================================
+
+	void EditorApp::SelectSceneView( )
+	{
+		// Grab all available scenes and display them	
+		if ( ImGui::CollapsingHeader( "Available Scenes" ) )
+		{
+			// If there's a valid application set
+			if ( mProject.GetApplication( ) )
+			{
+				// Get component list
+				AssetManager* am = EngineSubsystem( AssetManager );
+				const HashMap<String, AssetRecordInfo>* scenes = am->GetAssets<Scene>( );
+
+				ImGui::ListBoxHeader( "" );
+				{
+					for ( auto& record : *scenes )
+					{ 
+						// Add component to mEntity
+						if ( ImGui::Selectable( record.second.GetAssetName( ).c_str( ) ) )
+						{
+							// Load asset from disk ( this is not what I want, though... )
+							if ( mCurrentScene )
+							{
+								// Unload scene
+								mCurrentScene.Unload( );
+							}
+
+							// Unload all current entities in scene ( This is something that a scene manager would likely handle )
+							UnloadScene( );
+
+							// Load the asset from disk
+							record.second.LoadAsset( ); 
+
+							// Set current scene with record's asset
+							mCurrentScene = record.second.GetAsset();
+						} 
+					} 
+				}
+				ImGui::ListBoxFooter( ); 
+			}
+			else
+			{
+				ImGui::Text( "No project loaded." );
+			}
+		}
+
+		if ( mCurrentScene )
+		{
+			if ( ImGui::Button( "Save Scene" ) )
+			{
+				mCurrentScene->Save( );
+			}
+		}
+	}
+
+	//================================================================================================================================
 	 
-	void EnjonEditor::CreateNewProject( const String& projectName )
+	void EditorApp::CreateNewProject( const String& projectName )
 	{ 
 		// Just output the source files for now... This is already going to get ugly, so need to split this all up pretty quickly
 		String projectDir = mProjectsDir + projectName + "/";
@@ -457,20 +500,19 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EnjonEditor::UnloadScene( )
+	void EditorApp::UnloadScene( )
 	{
 		EntityManager* em = EngineSubsystem( EntityManager );
 		for ( auto& e : em->GetActiveEntities( ) )
 		{
 			e->Destroy( );
-		}
-
+		} 
 		em->ForceCleanup( );
 	}
 
 	//================================================================================================================================
 
-	void EnjonEditor::LoadProject( const Project& project )
+	void EditorApp::LoadProject( const Project& project )
 	{ 
 		// TODO(): Unload current project - which means to destroy all current entities
 		UnloadScene( );
@@ -491,7 +533,7 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EnjonEditor::LoadProjectSolution( )
+	void EditorApp::LoadProjectSolution( )
 	{
 		// Now call BuildAndRun.bat
 #ifdef ENJON_SYSTEM_WINDOWS 
@@ -503,7 +545,7 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EnjonEditor::CreateProjectView( )
+	void EditorApp::CreateProjectView( )
 	{
 		char buffer[ 256 ];
 		strncpy( buffer, mNewProjectName.c_str( ), 256 );
@@ -567,7 +609,7 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EnjonEditor::CleanupScene( )
+	void EditorApp::CleanupScene( )
 	{ 
 		// Force the scene to clean up ahead of frame
 		EntityManager* entities = EngineSubsystem( EntityManager );
@@ -576,7 +618,7 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	bool EnjonEditor::UnloadDLL( ByteBuffer* buffer )
+	bool EditorApp::UnloadDLL( ByteBuffer* buffer )
 	{
 		bool needsReload = false;
 
@@ -614,7 +656,7 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EnjonEditor::LoadDLL( )
+	void EditorApp::LoadDLL( )
 	{
 		Enjon::ByteBuffer buffer;
 
@@ -697,7 +739,7 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EnjonEditor::CollectAllProjectsOnDisk( )
+	void EditorApp::CollectAllProjectsOnDisk( )
 	{ 
 		for ( auto& p : fs::recursive_directory_iterator( mProjectsDir ) )
 		{
@@ -721,7 +763,7 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EnjonEditor::InitializeProjectApp( )
+	void EditorApp::InitializeProjectApp( )
 	{
 		Application* app = mProject.GetApplication( );
 		if ( app )
@@ -741,7 +783,7 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EnjonEditor::ShutdownProjectApp( ByteBuffer* buffer )
+	void EditorApp::ShutdownProjectApp( ByteBuffer* buffer )
 	{
 		Application* app = mProject.GetApplication( );
 		if ( app )
@@ -779,9 +821,9 @@ namespace Enjon
 		}
 	}
 	 
-	Enjon::Result EnjonEditor::Initialize( )
+	Enjon::Result EditorApp::Initialize( )
 	{ 
-		mApplicationName = "EnjonEditor"; 
+		mApplicationName = "EditorApp"; 
 
 		Enjon::String mAssetsDirectoryPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + "Editor/Assets/";
 		//Enjon::String cacheDirectoryPath = mAssetsDirectoryPath + "/Cache/";
@@ -843,20 +885,26 @@ namespace Enjon
 		//	ent->SetLocalScale( Vec3( 100.0f, 0.1f, 100.0f ) );
 		//} 
 
+		// Add all necessary views into editor widget manager
+		mEditorWidgetManager.AddView( new EditorSceneView( this ) );
+
+		// Initialize editor widget manager
+		mEditorWidgetManager.Finalize( );
+
 		// Initialize transform widget
 		mTransformWidget.Initialize( this );
 
 		// Register individual windows
-		Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
-		{
-			// Docking windows
-			if ( ImGui::BeginDock( "Scene", &mShowSceneView, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
-			{
-				// Print docking information
-				SceneView( &mShowSceneView );
-			}
-			ImGui::EndDock( ); 
-		}); 
+		//Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
+		//{
+		//	// Docking windows
+		//	if ( ImGui::BeginDock( "Scene", &mShowSceneView, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
+		//	{
+		//		// Print docking information
+		//		SceneView( &mShowSceneView );
+		//	}
+		//	ImGui::EndDock( ); 
+		//}); 
 
 		// Register individual windows
 		Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
@@ -915,40 +963,109 @@ namespace Enjon
 			ImGui::EndDock( );
 		} );
 
+		Enjon::ImGuiManager::RegisterWindow( [ & ]
+		{
+			if ( ImGui::BeginDock( "Scene Selection View", nullptr ) )
+			{
+				SelectSceneView( );
+			}
+			ImGui::EndDock( );
+		} );
+
 		mShowSceneView = true;
 		auto sceneViewOption = [ & ] ( )
 		{
 			ImGui::MenuItem( "Scene##options", NULL, &mShowSceneView );
 		};
 
+		auto createViewOption = [&]()
+		{
+			if ( mProject.GetApplication() && !mPlaying )
+			{
+				if ( ImGui::MenuItem( "Empty##options", NULL ) )
+				{
+					std::cout << "Creating empty entity...\n";
+					EntityManager* em = EngineSubsystem( EntityManager );
+					EntityHandle empty = em->Allocate( );
+				}
+
+				if ( ImGui::MenuItem( "Cube##options", NULL ) )
+				{
+					std::cout << "Creating cube...\n";
+					EntityManager* em = EngineSubsystem( EntityManager );
+					AssetManager* am = EngineSubsystem( AssetManager );
+					GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
+					EntityHandle cube = em->Allocate( );
+					if ( cube )
+					{
+						Entity* ent = cube.Get( );
+						GraphicsComponent* gfx = ent->AddComponent<GraphicsComponent>( );
+						gfx->SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
+						gfx->SetMaterial( am->GetDefaultAsset<Material>( ) );
+
+						const Camera* cam = gs->GetGraphicsSceneCamera( );
+						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
+					}
+				}
+
+				if ( ImGui::MenuItem( "Sphere##options", NULL ) )
+				{
+					std::cout << "Creating sphere...\n";
+					EntityManager* em = EngineSubsystem( EntityManager );
+					AssetManager* am = EngineSubsystem( AssetManager );
+					GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
+					EntityHandle cube = em->Allocate( );
+					if ( cube )
+					{
+						Entity* ent = cube.Get( );
+						GraphicsComponent* gfx = ent->AddComponent<GraphicsComponent>( );
+						gfx->SetMesh( am->GetAsset< Mesh >( "models.unit_sphere" ) );
+						gfx->SetMaterial( am->GetDefaultAsset<Material>( ) );
+
+						const Camera* cam = gs->GetGraphicsSceneCamera( );
+						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
+					}
+				}
+
+				if ( ImGui::MenuItem( "Scene##options", NULL ) )
+				{
+					// Construct scene and save it
+					AssetManager* am = EngineSubsystem( AssetManager );
+					AssetHandle< Scene > scene = am->ConstructAsset< Scene >( );
+
+					// Unload scene after saving it
+					scene.Unload( ); 
+				} 
+			}
+		}; 
+
 		// Register menu options
-		ImGuiManager::RegisterMenuOption( "View", sceneViewOption );
+		ImGuiManager::RegisterMenuOption( "Create", createViewOption );
 
 		// Register docking layouts 
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Scene", ImGui::DockSlotType::Slot_Right, 0.2f ) );
+		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene View", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
+		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Scene View", ImGui::DockSlotType::Slot_Right, 0.2f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Camera", ImGui::DockSlotType::Slot_Bottom, 0.3f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) );
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene", ImGui::DockSlotType::Slot_Top, 0.1f ) );
+		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene View", ImGui::DockSlotType::Slot_Top, 0.1f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Play Options", ImGui::DockSlotType::Slot_Tab, 0.1f ) );
 		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Inspector View", "World Outliner", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
+		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene Selection View", "World Outliner", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
 
 		return Enjon::Result::SUCCESS;
 	}
 
-	Enjon::Result EnjonEditor::Update( f32 dt )
+	//=================================================================================================
+
+	void EditorApp::SetEditorSceneView( EditorSceneView* view )
 	{
-		static float t = 0.0f;
-		t += dt;
+		mEditorSceneView = view;
+	}
 
-		//GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-		//const Camera* cam = gfx->GetSceneCamera( );
+	//=================================================================================================
 
-		//// Set scale of root based on distance from camera
-		//f32 distSqred = Vec3::DistanceSquared( cam->GetPosition( ), mTransformWidget.GetWorldTransform( ).GetPosition( ) );
-		//f32 scale = Clamp( distSqred, 0.5f, 100.0f );
-		//mTransformWidget.SetScale( scale );
-
+	Enjon::Result EditorApp::Update( f32 dt )
+	{ 
 		// Update transform widget
 		mTransformWidget.Update( );
 
@@ -975,7 +1092,7 @@ namespace Enjon
 		Scale
 	};
 
-	Enjon::Result EnjonEditor::ProcessInput( f32 dt )
+	Enjon::Result EditorApp::ProcessInput( f32 dt )
 	{
 		static bool mInteractingWithTransformWidget = false;
 		static TransformMode mMode = TransformMode::Translate;
@@ -983,15 +1100,30 @@ namespace Enjon
 		static Vec3 mRootStartPosition;
 		static Vec3 mRootStartScale;
 		static TransformWidgetRenderableType mType;
-		static
-			GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
+		static GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
+		static Vec2 mMouseCoordsDelta = Vec2( 0.0f );
 		Input* mInput = EngineSubsystem( Input );
-		Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >( );
+		Camera* camera = mGfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >( );
+		Enjon::iVec2 viewPort = mGfx->GetViewport( ); 
+		f32 mouseSensitivity = 10.0f; 
+		Enjon::Window* window = mGfx->GetWindow( )->ConstCast< Enjon::Window >( );
 
-		if ( mInput->IsKeyPressed( Enjon::KeyCode::T ) )
-		{
-			mMoveCamera ^= 1;
+		// Can move camera if scene view has focus
+		bool previousCamMove = mMoveCamera;
+		mMoveCamera = mEditorWidgetManager.GetFocused( mEditorSceneView );
+		if ( mMoveCamera && ( mMoveCamera != previousCamMove ) )
+		{ 
+			Vec2 mc = mInput->GetMouseCoords( );
+			//Vec2 mc = mEditorSceneView->GetSceneViewProjectedCursorPosition( );
+			Vec2 center = mEditorSceneView->GetCenterOfViewport( );
+			mMouseCoordsDelta = Vec2( (f32)(viewPort.x) / 2.0f - mc.x, (f32)(viewPort.y) / 2.0f - mc.y );
+			//SDL_WarpMouseInWindow( window->GetWindowContext( ), (s32)center.x, (s32)center.y );
 		}
+
+		//if ( mInput->IsKeyPressed( Enjon::KeyCode::T ) )
+		//{
+		//	mMoveCamera ^= 1;
+		//}
 
 		if ( mInput->IsKeyPressed( KeyCode::One ) )
 		{
@@ -1153,26 +1285,21 @@ namespace Enjon
 
 			// Set camera rotation
 			// Get mouse input and change orientation of camera
-			//Enjon::Vec2 mouseCoords = mInput->GetMouseCoords( );
+			Enjon::Vec2 mouseCoords = mInput->GetMouseCoords( );
 
-			Vec2 mouseCoords = mInput->GetMouseCoords( );
-
-			Enjon::iVec2 viewPort = mGfx->GetViewport( );
-
-			f32 mouseSensitivity = 10.0f;
-
-			// Grab window from graphics subsystem
-		Enjon::Window* window = mGfx->GetWindow( )->ConstCast< Enjon::Window >( );
+			//Vec2 mouseCoords = mEditorSceneView->GetSceneViewProjectedCursorPosition( );
 
 			// Set cursor to not visible
 			window->ShowMouseCursor( false );
 
 			// Reset the mouse coords after having gotten the mouse coordinates
-			SDL_WarpMouseInWindow( window->GetWindowContext( ), ( f32 )viewPort.x / 2.0f, ( f32 )viewPort.y / 2.0f );
+			Vec2 center = mEditorSceneView->GetCenterOfViewport( );
+			//SDL_WarpMouseInWindow( window->GetWindowContext( ), (s32)center.x, (s32)center.y );
+			SDL_WarpMouseInWindow( window->GetWindowContext( ), ( f32 )viewPort.x / 2.0f - mMouseCoordsDelta.x, ( f32 )viewPort.y / 2.0f - mMouseCoordsDelta.y );
 
 			// Offset camera orientation
-			f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x ) * dt * mouseSensitivity;
-			f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y ) * dt * mouseSensitivity;
+			f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * dt * mouseSensitivity;
+			f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * dt * mouseSensitivity;
 			camera->OffsetOrientation( xOffset, yOffset );
 		}
 
@@ -1242,12 +1369,12 @@ namespace Enjon
 		return Enjon::Result::PROCESS_RUNNING;
 	}
 
-	Enjon::Result EnjonEditor::Shutdown( )
+	Enjon::Result EditorApp::Shutdown( )
 	{ 
 		return Enjon::Result::SUCCESS;
 	} 
 
-	void EnjonEditor::LoadResources( )
+	void EditorApp::LoadResources( )
 	{
 		// Paths to resources
 		Enjon::String toyBoxDispPath		= Enjon::String("Textures/toy_box_disp.png");
@@ -1462,7 +1589,7 @@ namespace Enjon
 		redMat->Save( );
 		greenMat->Save( );
 		blueMat->Save( );
-		yellowMat->Save( );
+		yellowMat->Save( ); 
 	}
 }
 

@@ -155,7 +155,7 @@ void Game::TestObjectSerialize( )
 
 	// Test serializing/deserializing directional lights in a scene
 	Enjon::u32 i = 0;
-	for ( auto& dl : mGfx->GetScene()->GetDirectionalLights() )
+	for ( auto& dl : mGfx->GetGraphicsScene()->GetDirectionalLights() )
 	{ 
 		String outputAssetPath = am->GetCachedAssetsDirectoryPath( ) + "directionalLight" + std::to_string(i);
 		ObjectArchiver oa;
@@ -251,7 +251,7 @@ void Game::TestObjectSerialize( )
 		if ( 1 )
 		{
 			// Try serializing the camera Enjon::ObjectArchiver archiver;
-			archiver.Serialize( mGfx->GetSceneCamera( ) );
+			archiver.Serialize( mGfx->GetGraphicsSceneCamera( ) );
 			archiver.WriteToFile( am->GetCachedAssetsDirectoryPath() + "camera" ); 
 		}
 		if ( 0 )
@@ -298,11 +298,11 @@ void Game::TestObjectSerialize( )
 			String path = am->GetAssetsDirectoryPath( ) + "/Cache/testEntity";
 			archiver.WriteToFile( path ); 
 
-			mGfx->GetScene( )->AddRenderable( gfxCmp->GetRenderable( ) );
-			mGfx->GetScene( )->AddRenderable( childGfx->GetRenderable( ) );
-			mGfx->GetScene( )->AddRenderable( child0Gfx->GetRenderable( ) );
-			mGfx->GetScene( )->AddRenderable( child1Gfx->GetRenderable( ) );
-			mGfx->GetScene( )->AddPointLight( plCmp->GetLight( ) );
+			mGfx->GetGraphicsScene( )->AddRenderable( gfxCmp->GetRenderable( ) );
+			mGfx->GetGraphicsScene( )->AddRenderable( childGfx->GetRenderable( ) );
+			mGfx->GetGraphicsScene( )->AddRenderable( child0Gfx->GetRenderable( ) );
+			mGfx->GetGraphicsScene( )->AddRenderable( child1Gfx->GetRenderable( ) );
+			mGfx->GetGraphicsScene( )->AddPointLight( plCmp->GetLight( ) );
 		}
 		else
 		{
@@ -314,13 +314,13 @@ void Game::TestObjectSerialize( )
 				auto gfxCmp = mSerializedEntity.Get( )->GetComponent< GraphicsComponent >( );
 				if ( gfxCmp )
 				{
-					mGfx->GetScene( )->AddRenderable( gfxCmp->GetRenderable() );
+					mGfx->GetGraphicsScene( )->AddRenderable( gfxCmp->GetRenderable() );
 				}
 
 				auto pointLightComp = mSerializedEntity.Get( )->GetComponent< PointLightComponent >( );
 				if ( pointLightComp )
 				{
-					mGfx->GetScene( )->AddPointLight( pointLightComp->GetLight( ) );
+					mGfx->GetGraphicsScene( )->AddPointLight( pointLightComp->GetLight( ) );
 				}
 
 				auto addChildrenGfx = [ & ] ( const EntityHandle& handle )
@@ -330,7 +330,7 @@ void Game::TestObjectSerialize( )
 						auto cGfxCmp = c.Get( )->GetComponent< GraphicsComponent >( );
 						if ( cGfxCmp )
 						{
-							mGfx->GetScene( )->AddRenderable( cGfxCmp->GetRenderable( ) );
+							mGfx->GetGraphicsScene( )->AddRenderable( cGfxCmp->GetRenderable( ) );
 						} 
 					}
 				};
@@ -341,7 +341,7 @@ void Game::TestObjectSerialize( )
 					auto cGfxCmp = c.Get( )->GetComponent< GraphicsComponent >( );
 					if ( cGfxCmp )
 					{ 
-						mGfx->GetScene( )->AddRenderable( cGfxCmp->GetRenderable( ) );
+						mGfx->GetGraphicsScene( )->AddRenderable( cGfxCmp->GetRenderable( ) );
 					}
 
 					addChildrenGfx( c );
@@ -384,7 +384,7 @@ void Game::TestObjectSerialize( )
 			entityHandles.push_back( handle );
 			
 			// Construct camera
-			Enjon::Camera cam = *mGfx->GetSceneCamera( );
+			Enjon::Camera cam = *mGfx->GetGraphicsSceneCamera( );
 			cam.SetPosition( Enjon::Vec3( 5.425f, 7.267f, -6.224f ) );
 			cam.LookAt( handle.Get( )->GetWorldPosition( ) ); 
 
@@ -441,7 +441,7 @@ void Game::TestObjectSerialize( )
 			entityHandles.push_back( handle );
 			
 			// Construct camera
-			Enjon::Camera cam = *mGfx->GetSceneCamera( );
+			Enjon::Camera cam = *mGfx->GetGraphicsSceneCamera( );
 			cam.SetPosition( Enjon::Vec3( -3.9f, 6.2f, -4.6f ) );
 			cam.LookAt( handle.Get( )->GetWorldPosition( ) ); 
 
@@ -1026,14 +1026,14 @@ Enjon::Result Game::Initialize()
 				} break;
 			}
 			// Add to scene
-			auto scene = mGfx->GetScene();
+			auto scene = mGfx->GetGraphicsScene();
 			scene->AddRenderable( eh.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 		} 
 	}
 
 	if (mGfx)
 	{
-		auto scene = mGfx->GetScene();
+		auto scene = mGfx->GetGraphicsScene();
 		scene->AddDirectionalLight( mSun );
 		//scene->AddDirectionalLight( mSun2 );
 		scene->AddRenderable(gc->GetRenderable());
@@ -1049,7 +1049,7 @@ Enjon::Result Game::Initialize()
 		scene->SetAmbientColor(Enjon::SetOpacity(Enjon::RGBA32_White(), 0.1f));
 
 		// Set graphics camera position
-		Enjon::Camera* cam = mGfx->GetSceneCamera()->ConstCast< Enjon::Camera >();
+		Enjon::Camera* cam = mGfx->GetGraphicsSceneCamera()->ConstCast< Enjon::Camera >();
 		cam->SetPosition(Enjon::Vec3(0.0f, 5.0f, -10.0f));
 		cam->LookAt(Enjon::Vec3(0, 0, 0));
 	} 
@@ -1097,13 +1097,13 @@ Enjon::Result Game::Initialize()
 
 							if ( entityHandle.Get( )->HasComponent< Enjon::GraphicsComponent >( ) )
 							{
-								mGfx->GetScene( )->AddRenderable( entityHandle.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+								mGfx->GetGraphicsScene( )->AddRenderable( entityHandle.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 
 								for ( auto& c : entityHandle.Get( )->GetChildren( ) )
 								{
 									if ( c.Get( )->HasComponent< Enjon::GraphicsComponent >( ) )
 									{
-										mGfx->GetScene( )->AddRenderable( c.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+										mGfx->GetGraphicsScene( )->AddRenderable( c.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 									}
 								}
 							}
@@ -1111,7 +1111,7 @@ Enjon::Result Game::Initialize()
 					}
 
 					// Set the scene camera to active scene's camera
-					*mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >( ) = mActiveScene.mCamera;
+					*mGfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >( ) = mActiveScene.mCamera;
 				} 
 			}
 
@@ -1120,7 +1120,7 @@ Enjon::Result Game::Initialize()
 			{ 
 				const Enjon::AssetManager* am = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 				Enjon::ObjectArchiver deserializeBuffer;
-				deserializeBuffer.Deserialize( am->GetCachedAssetsDirectoryPath( ) + "camera", mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >( ) );
+				deserializeBuffer.Deserialize( am->GetCachedAssetsDirectoryPath( ) + "camera", mGfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >( ) );
 			}
 
 			// Load file
@@ -1208,7 +1208,7 @@ Enjon::Result Game::Initialize()
 				testSignal.Emit( mCameraSpeed );
 			}
 
-			auto cam = mGfx->GetSceneCamera( );
+			auto cam = mGfx->GetGraphicsSceneCamera( );
 			ImGui::InputFloat3( "Cam Position", ( float* )&cam->GetPosition( ) );
 			ImGui::InputFloat4( "Cam Rotation", ( float* )&cam->GetRotation( ) );
 
@@ -1228,7 +1228,7 @@ Enjon::Result Game::Initialize()
 
 			if ( ImGui::CollapsingHeader( "Scene" ) )
 			{
-				Enjon::ImGuiManager::DebugDumpObject( mGfx->GetScene( ) );
+				Enjon::ImGuiManager::DebugDumpObject( mGfx->GetGraphicsScene( ) );
 			}
 
 			if ( ImGui::CollapsingHeader( "Sun" ) )
@@ -1546,7 +1546,7 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 
 Enjon::Result Game::ProcessInput( f32 dt )
 {
-	Enjon::Camera* cam = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >();
+	Enjon::Camera* cam = mGfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >();
 
 	if ( mInput->IsKeyPressed( Enjon::KeyCode::Escape ) )
 	{
@@ -1575,14 +1575,14 @@ Enjon::Result Game::ProcessInput( f32 dt )
 
 	if ( mRotateCamera && mLockCamera )
 	{
-		Enjon::Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >();
+		Enjon::Camera* camera = mGfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >();
 		camera->Transform.Position += camera->Right( ).Normalize( ) * mCameraSpeed;
 		camera->LookAt( mSerializedEntity.Get()->GetWorldPosition() );
 	}
 
 	if ( mMovementOn )
 	{
-		Enjon::Camera* camera = mGfx->GetSceneCamera( )->ConstCast< Enjon::Camera >();
+		Enjon::Camera* camera = mGfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >();
 		Enjon::Vec3 velDir( 0, 0, 0 );
 
 		if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
@@ -1621,7 +1621,7 @@ Enjon::Result Game::ProcessInput( f32 dt )
 
 		if ( mInput->IsKeyDown( Enjon::KeyCode::LeftMouseButton ) )
 		{
-			Enjon::Scene* scene = mGfx->GetScene();
+			Enjon::GraphicsScene* scene = mGfx->GetGraphicsScene();
 			Enjon::Vec3 pos = cam->GetPosition() + cam->Forward() * 2.0f;
 			Enjon::Vec3 vel = cam->Forward() * ballSpeed;
 

@@ -19,7 +19,7 @@
 namespace Enjon { 
 
 	class Material;
-	class Scene;
+	class GraphicsScene;
 
 	struct QuadVert
 	{
@@ -83,8 +83,8 @@ namespace Enjon {
 			void Begin(QuadGlyphSortType SortType = QuadGlyphSortType::TEXTURE);
 			void End();
 
-			void SetScene(Scene* scene);
-			Scene* GetScene() { return mScene; }
+			void SetGraphicsScene(GraphicsScene* scene);
+			GraphicsScene* GetGraphicsScene() { return mGraphicsScene; }
 
 			// Sets material of quadbatch
 			void SetMaterial(Material* mat);
@@ -124,7 +124,7 @@ namespace Enjon {
 			std::vector<QuadGlyph*> QuadGlyphPointers;
 			std::vector<QuadRenderBatch> RenderBatches;
 			Material* mMaterial = nullptr;
-			Scene* mScene 		= nullptr;
+			GraphicsScene* mGraphicsScene 		= nullptr;
 	};
 
 }

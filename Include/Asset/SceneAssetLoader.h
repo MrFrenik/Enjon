@@ -1,17 +1,17 @@
-// Copyright 2016-2017 John Jackson. All Rights Reserved.
-// File: MaterialAssetLoader.h
+// File: SceneAssetLoader.h
+// Copyright 2016-2018 John Jackson. All Rights Reserved.
 
 #pragma  once
-#ifndef ENJON_MATERIAL_ASSET_LOADER_H
-#define ENJON_MATERIAL_ASSET_LOADER_H 
+#ifndef ENJON_SCENE_ASSET_LOADER_H
+#define ENJON_SCENE_ASSET_LOADER_H 
 
-#include "Graphics/Material.h"
+#include "Scene/Scene.h"
 #include "Asset/AssetLoader.h"
 
 namespace Enjon
 {
 	ENJON_CLASS( )
-	class MaterialAssetLoader : public AssetLoader
+	class SceneAssetLoader : public AssetLoader
 	{
 		ENJON_CLASS_BODY( )
 		
@@ -20,12 +20,19 @@ namespace Enjon
 			/**
 			* @brief Constructor
 			*/
-			MaterialAssetLoader( ) = default;
+			SceneAssetLoader( ) = default;
 
 			/**
 			* @brief Destructor
 			*/
-			~MaterialAssetLoader( ) = default;
+			~SceneAssetLoader( ) = default;
+
+		public:
+
+			/**
+			* @brief
+			*/
+			virtual String GetAssetFileExtension( ) const override;
 
 		protected:
 
@@ -35,6 +42,7 @@ namespace Enjon
 			virtual void RegisterDefaultAsset( ) override; 
 
 		private:
+
 			/**
 			* @brief
 			*/

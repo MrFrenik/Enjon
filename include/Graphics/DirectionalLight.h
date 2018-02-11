@@ -8,9 +8,9 @@
 #include "Graphics/RenderTarget.h"
 #include "Defines.h"
 
-namespace Enjon {
-
-	class Scene;
+namespace Enjon 
+{ 
+	class GraphicsScene;
 
 	ENJON_CLASS( Construct )
 	class DirectionalLight : public Enjon::Object
@@ -43,7 +43,7 @@ namespace Enjon {
 				void SetIntensity(float intensity);
 
 				ENJON_FUNCTION()
-				void SetScene(Scene* scene);
+				void SetGraphicsScene(GraphicsScene* scene);
 
 		private:
 				ENJON_PROPERTY( )
@@ -55,7 +55,7 @@ namespace Enjon {
 				ENJON_PROPERTY( )
 				f32 mIntensity;
 
-				Scene* mScene = nullptr;
+				GraphicsScene* mGraphicsScene = nullptr;
 
 	};
 }

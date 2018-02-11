@@ -16,7 +16,7 @@ struct Thing
 
 int main(int argc, char** argv)
 { 
-	Enjon::EnjonEditor mEditor;
+	Enjon::EditorApp mApp;
 	Enjon::Engine mEngine; 
 	Enjon::EngineConfig mConfig; 
 
@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 	mConfig.SetRootPath( enjonDir );
 
 	// Startup engine
-	Enjon::Result res = mEngine.StartUp( &mEditor, mConfig ); 
+	Enjon::Result res = mEngine.StartUp( &mApp, mConfig ); 
 
 	// If successful startup, then run the engine
 	if ( res == Enjon::Result::SUCCESS )

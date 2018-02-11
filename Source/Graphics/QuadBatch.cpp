@@ -1,5 +1,5 @@
 #include "Graphics/QuadBatch.h"
-#include "Graphics/Scene.h"
+#include "Graphics/GraphicsScene.h"
 #include "Graphics/Material.h"
 #include "IO/ResourceManager.h"
 #include <stdio.h>
@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <assert.h>
 
-namespace Enjon { 
-
+namespace Enjon 
+{ 
 	static Vec3 Static_TL(-1.0f, 1.0f, 0.0f);
 	static Vec3 Static_BL(-1.0f, -1.0f, 0.0f);
 	static Vec3 Static_TR(1.0f, 1.0f, 0.0f);
@@ -579,9 +579,9 @@ namespace Enjon {
 		mMaterial = mat;	
 	}
 
-	void QuadBatch::SetScene(Scene* scene)
+	void QuadBatch::SetGraphicsScene(GraphicsScene* scene)
 	{
-		mScene = scene;
+		mGraphicsScene = scene;
 	}
 
 	bool QuadBatch::CompareFrontToBack(QuadGlyph* A, QuadGlyph* B)

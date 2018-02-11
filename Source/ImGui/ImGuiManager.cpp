@@ -893,6 +893,8 @@ namespace Enjon
 	s32 ImGuiManager::MainMenu()
 	{
 		s32 menuHeight = 0;
+
+		// TODO(): Need to organize this in a much better manner...
 		if (ImGui::BeginMainMenuBar())
 		{
 			// Display all menu options
@@ -903,6 +905,15 @@ namespace Enjon
 					sub();		
 				}
 				ImGui::EndMenu();
+			}
+
+			if ( ImGui::BeginMenu( "Create" ) )
+			{
+				for ( auto& sub : mMainMenuOptions[ "Create" ] )
+				{
+					sub( );
+				}
+				ImGui::EndMenu( );
 			}
 
 			if (ImGui::BeginMenu("View"))

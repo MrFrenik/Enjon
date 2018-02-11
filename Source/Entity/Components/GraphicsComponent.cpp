@@ -1,6 +1,6 @@
 #include "Entity/Components/GraphicsComponent.h"
 #include "Entity/EntityManager.h" 
-#include "Graphics/Scene.h"
+#include "Graphics/GraphicsScene.h"
 #include "Serialize/AssetArchiver.h"
 #include "Asset/AssetManager.h"
 #include "Graphics/GraphicsSubsystem.h"
@@ -20,7 +20,7 @@ namespace Enjon
 
 		// Add renderable to scene
 		GraphicsSubsystem* gs = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem >( )->ConstCast< GraphicsSubsystem >( );
-		gs->GetScene( )->AddRenderable( &mRenderable );
+		gs->GetGraphicsScene( )->AddRenderable( &mRenderable );
 	}
 
 	//====================================================================
@@ -35,9 +35,9 @@ namespace Enjon
 	GraphicsComponent::~GraphicsComponent()
 	{
 		// Remove renderable from scene
-		if (mRenderable.GetScene() != nullptr)
+		if (mRenderable.GetGraphicsScene() != nullptr)
 		{
-			mRenderable.GetScene()->RemoveRenderable(&mRenderable);
+			mRenderable.GetGraphicsScene()->RemoveRenderable(&mRenderable);
 		}
 	}
 
@@ -96,9 +96,9 @@ namespace Enjon
 
 	//====================================================================
 
-	Scene* GraphicsComponent::GetScene() const
+	GraphicsScene* GraphicsComponent::GetGraphicsScene() const
 	{ 
-		return mRenderable.GetScene(); 
+		return mRenderable.GetGraphicsScene(); 
 	}
 
 	//====================================================================
@@ -165,9 +165,9 @@ namespace Enjon
 
 	//====================================================================
 
-	void GraphicsComponent::SetScene(Scene* scene)
+	void GraphicsComponent::SetGraphicsScene(GraphicsScene* scene)
 	{
-		mRenderable.SetScene(scene);
+		mRenderable.SetGraphicsScene(scene);
 	}
 
 	//==================================================================== 

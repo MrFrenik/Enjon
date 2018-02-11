@@ -14,7 +14,7 @@
 
 namespace Enjon 
 { 
-	class Scene;
+	class GraphicsScene;
 	class GraphicsSubsystem;
 	class GLSLProgram;
 	class ColorRGBA32;
@@ -22,7 +22,7 @@ namespace Enjon
 	ENJON_CLASS( )
 	class Renderable : public Enjon::Object
 	{ 
-		friend Scene;
+		friend GraphicsScene;
 		friend GraphicsSubsystem;
 
 		ENJON_CLASS_BODY( )
@@ -51,7 +51,7 @@ namespace Enjon
 			AssetHandle< Mesh > GetMesh() const;
 
 			/* Get scene of renderable */
-			Scene* GetScene() const;
+			GraphicsScene* GetGraphicsScene() const;
 
 			/* Gets world transform */
 			Transform GetTransform() const;
@@ -78,7 +78,7 @@ namespace Enjon
 			void SetMesh(const AssetHandle<Mesh>& mesh);
 
 			/* Set scene of renderable */
-			void SetScene(Scene* scene); 
+			void SetGraphicsScene(GraphicsScene* scene); 
  
 			/** 
 			* @brief
@@ -125,7 +125,7 @@ namespace Enjon
 
 		private: 
 			Transform mTransform; 
-			Scene* mScene = nullptr;
+			GraphicsScene* mGraphicsScene = nullptr;
 	};
 }
 

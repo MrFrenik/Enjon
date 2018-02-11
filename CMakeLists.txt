@@ -119,6 +119,11 @@ file(GLOB_RECURSE SRC_SERIALIZE
 	"${ENJON_SRC}/Serialize/*.cpp"
 	"${ENJON_INC}/Serialize/*.inl")
 
+file(GLOB_RECURSE SRC_SCENE
+	"${ENJON_INC}/Scene/*.h"
+	"${ENJON_SRC}/Scene/*.cpp"
+	"${ENJON_INC}/Scene/*.inl")
+
 file(GLOB_RECURSE GAME_FILES
 	"${ENJON_DIR}/IsoARPG/include/Game.h"
 	"${ENJON_DIR}/IsoARPG/src/Game.cpp"
@@ -166,6 +171,7 @@ set(
 	${SRC_PHYSICS} 
 	${SRC_MATH} 
 	${SRC_ASSET} 
+	${SRC_SCENE}
 	${SRC_SHADER_GRAPH}
 	${SRC_SERIALIZE}
 	${GAME_FILES}
@@ -211,6 +217,7 @@ source_group("Utils"		FILES ${SRC_UTILS})
 source_group("Asset"		FILES ${SRC_ASSET})
 source_group("ShaderGraph"	FILES ${SRC_SHADER_GRAPH}) 
 source_group("Serialize"	FILES ${SRC_SERIALIZE}) 
+source_group("Scene"		FILES ${SRC_SCENE}) 
 source_group("Game"			FILES ${GAME_FILES}) 
 source_group("Shaders"		FILES ${SHADERS}) 
 

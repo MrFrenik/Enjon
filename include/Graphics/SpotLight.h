@@ -8,9 +8,9 @@
 
 #include "Base/Object.h"
 
-namespace Enjon { 
-
-	class Scene;
+namespace Enjon 
+{ 
+	class GraphicsScene;
 
 	struct SpotLightParameters
 	{
@@ -62,7 +62,7 @@ namespace Enjon {
 			void SetDirection(Vec3& direction);
 			void SetColor(ColorRGBA32& color);
 			void SetIntensity(float intensity);
-			void SetScene(Scene* scene);
+			void SetGraphicsScene(GraphicsScene* scene);
 			void SetParams(SLParams& params);
 
 		private:
@@ -77,7 +77,7 @@ namespace Enjon {
 			ENJON_PROPERTY( Editable )
 			ColorRGBA32 mColor;
 
-			Scene* mScene = nullptr;
+			GraphicsScene* mGraphicsScene = nullptr;
 	};
 
 }

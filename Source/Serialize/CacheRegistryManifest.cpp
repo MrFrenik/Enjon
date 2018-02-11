@@ -85,7 +85,7 @@ namespace Enjon
 	{
 		for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( mAssetManager->GetAssetsDirectoryPath( ) + "/" ) )
 		{
-			if ( Enjon::AssetManager::HasFileExtension( p.path( ).string( ), "easset" ) )
+			if ( Enjon::AssetManager::HasAnyAssetFileExtension( p.path().string() ) )
 			{
 				// Asset record to fill out
 				CacheManifestRecord record; 

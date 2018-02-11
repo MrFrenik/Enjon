@@ -115,8 +115,11 @@ namespace Enjon
 			template <typename T>
 			void RemoveComponent();
 
-			/// @brief Detaches component from entity, if exists
-			void RemoveComponent( const MetaClass* cls);
+			/** 
+			* @brief Detaches component from entity, if exists
+			* @note NOT ITERABLE ( Will remove from the list of existing components )
+			*/
+			void RemoveComponent( const MetaClass* cls );
 
 			/// @brief Sets local transform of entity
 			void SetLocalTransform( const Transform& transform, bool propagateToComponents = true );
@@ -383,6 +386,11 @@ namespace Enjon
 			*@brief
 			*/
 			void Destroy(const EntityHandle& entity);
+
+			/**
+			* @brief Returns vector of active entities that have no parent
+			*/
+			Vector<EntityHandle> GetRootLevelEntities( );
 
 			/**
 			*@brief

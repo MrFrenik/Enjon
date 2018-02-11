@@ -1,4 +1,4 @@
-#include "Graphics/Scene.h"
+#include "Graphics/GraphicsScene.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/DirectionalLight.h"
 #include "Graphics/SpotLight.h"
@@ -14,12 +14,42 @@
 
 namespace Enjon { 
 
-	Scene::Scene()
+	GraphicsScene::GraphicsScene()
 	{
 	}
 
-	Scene::~Scene()
+	GraphicsScene::~GraphicsScene()
 	{
+		for ( auto& r : mRenderables )
+		{
+			r->SetGraphicsScene( nullptr );
+		}
+
+		for ( auto& r : mNonDepthTestedRenderables )
+		{
+			r->SetGraphicsScene( nullptr );
+		}
+
+		for ( auto& q : mQuadBatches )
+		{
+			q->SetGraphicsScene( nullptr );
+		}
+
+		for ( auto& d : mDirectionalLights )
+		{
+			d->SetGraphicsScene( nullptr );
+		}
+
+		for ( auto& p : mPointLights )
+		{
+			p->SetGraphicsScene( nullptr );
+		}
+
+		for ( auto& s : mSpotLights )
+		{
+			s->SetGraphicsScene( nullptr );
+		}
+
 		// Free all memory
 		mRenderables.clear( );
 		mNonDepthTestedRenderables.clear( ); 
@@ -31,7 +61,7 @@ namespace Enjon {
 
 	//====================================================================================================
 
-	void Scene::SortRenderables( RenderableSortType type )
+	void GraphicsScene::SortRenderables( RenderableSortType type )
 	{
 		switch( type )
 		{
@@ -54,12 +84,12 @@ namespace Enjon {
 
 	//====================================================================================================
 
-	const Vector<Renderable*>& Scene::GetRenderables( ) const
+	const Vector<Renderable*>& GraphicsScene::GetRenderables( ) const
 	{ 
 		return mSortedRenderables;
 	}
 
-	const Vector<Renderable*>& Scene::GetNonDepthTestedRenderables( )
+	const Vector<Renderable*>& GraphicsScene::GetNonDepthTestedRenderables( )
 	{
 		// Sort by depth to camera
 		std::stable_sort( mNonDepthTestedRenderables.begin( ), mNonDepthTestedRenderables.end( ), CompareDepth );
@@ -67,13 +97,13 @@ namespace Enjon {
 		return mNonDepthTestedRenderables;
 	} 
 
-	void Scene::AddRenderable(Renderable* renderable)
+	void GraphicsScene::AddRenderable(Renderable* renderable)
 	{
 		auto query = mRenderables.find(renderable);
 		if (query == mRenderables.end())
 		{
 			mRenderables.insert(renderable);
-			renderable->SetScene(this);
+			renderable->SetGraphicsScene(this);
 
 			// Add to sorted renderables
 			mSortedRenderables.push_back( renderable );
@@ -83,12 +113,12 @@ namespace Enjon {
 		}
 	}
 
-	void Scene::RemoveRenderable(Renderable* renderable)
+	void GraphicsScene::RemoveRenderable(Renderable* renderable)
 	{
 		auto query = mRenderables.find(renderable);
 		if (query != mRenderables.end())
 		{
-			renderable->SetScene(nullptr);
+			renderable->SetGraphicsScene(nullptr);
 			mRenderables.erase(renderable);
 
 			// Remove renderable from sorted list
@@ -99,117 +129,117 @@ namespace Enjon {
 		}
 	}
 
-	void Scene::AddNonDepthTestedRenderable( Renderable* renderable )
+	void GraphicsScene::AddNonDepthTestedRenderable( Renderable* renderable )
 	{
 		auto query = std::find( mNonDepthTestedRenderables.begin( ), mNonDepthTestedRenderables.end( ), renderable );
 		if ( query == mNonDepthTestedRenderables.end( ) )
 		{
 			mNonDepthTestedRenderables.push_back( renderable );
-			renderable->SetScene( this );
+			renderable->SetGraphicsScene( this );
 		}
 	}
 
-	void Scene::RemoveNonDepthTestedRenderable( Renderable* renderable )
+	void GraphicsScene::RemoveNonDepthTestedRenderable( Renderable* renderable )
 	{
 		mNonDepthTestedRenderables.erase( std::remove( mNonDepthTestedRenderables.begin( ), mNonDepthTestedRenderables.end( ), renderable ), mNonDepthTestedRenderables.end( ) );
 	} 
 
-	void Scene::AddQuadBatch(QuadBatch* batch)
+	void GraphicsScene::AddQuadBatch(QuadBatch* batch)
 	{
 		auto query = mQuadBatches.find(batch);
 		if (query == mQuadBatches.end())
 		{
-			batch->SetScene(this);
+			batch->SetGraphicsScene(this);
 			mQuadBatches.insert(batch);
 		}
 	}
 
-	void Scene::RemoveQuadBatch(QuadBatch* batch)
+	void GraphicsScene::RemoveQuadBatch(QuadBatch* batch)
 	{
 		auto query = mQuadBatches.find(batch);
 		if (query != mQuadBatches.end())
 		{
-			batch->SetScene(nullptr);
+			batch->SetGraphicsScene(nullptr);
 			mQuadBatches.erase(batch);
 		}
 	}
 
-	void Scene::AddDirectionalLight(DirectionalLight* light)
+	void GraphicsScene::AddDirectionalLight(DirectionalLight* light)
 	{
 		auto query = mDirectionalLights.find(light);
 		if (query == mDirectionalLights.end())
 		{
 			mDirectionalLights.insert(light);
-			light->SetScene(this);
+			light->SetGraphicsScene(this);
 		}
 	}
 
-	void Scene::RemoveDirectionLight(DirectionalLight* light)
+	void GraphicsScene::RemoveDirectionLight(DirectionalLight* light)
 	{
 		auto query = mDirectionalLights.find(light);
 		if (query != mDirectionalLights.end())
 		{
 			mDirectionalLights.erase(light);
-			light->SetScene(nullptr);
+			light->SetGraphicsScene(nullptr);
 		}
 	}
 
-	void Scene::AddPointLight(PointLight* light)
+	void GraphicsScene::AddPointLight(PointLight* light)
 	{
 		auto query = mPointLights.find(light);
 		if (query == mPointLights.end())
 		{
 			mPointLights.insert(light);
-			light->SetScene(this);
+			light->SetGraphicsScene(this);
 		}
 	}
 
-	void Scene::RemovePointLight(PointLight* light)
+	void GraphicsScene::RemovePointLight(PointLight* light)
 	{
 		auto query = mPointLights.find(light);
 		if (query != mPointLights.end())
 		{
 			mPointLights.erase(light);
-			light->SetScene(nullptr);
+			light->SetGraphicsScene(nullptr);
 		}
 	}
 
-	void Scene::AddSpotLight(SpotLight* light)
+	void GraphicsScene::AddSpotLight(SpotLight* light)
 	{
 		auto query = mSpotLights.find(light);
 		if (query == mSpotLights.end())
 		{
 			mSpotLights.insert(light);
-			light->SetScene(this);
+			light->SetGraphicsScene(this);
 		}
 	}
 
-	void Scene::RemoveSpotLight(SpotLight* light)
+	void GraphicsScene::RemoveSpotLight(SpotLight* light)
 	{
 		auto query = mSpotLights.find(light);
 		if (query != mSpotLights.end())
 		{
 			mSpotLights.erase(light);
-			light->SetScene(nullptr);
+			light->SetGraphicsScene(nullptr);
 		}
 	}
 
-	void Scene::SetAmbientSettings(AmbientSettings& settings)
+	void GraphicsScene::SetAmbientSettings(AmbientSettings& settings)
 	{
 		mAmbientSettings = settings;
 	}
 
-	void Scene::SetAmbientColor(ColorRGBA32& color)
+	void GraphicsScene::SetAmbientColor(ColorRGBA32& color)
 	{
 		mAmbientSettings.mColor = color;
 		mAmbientSettings.mIntensity = color.a;
 	}
 
-	bool Scene::CompareDepth(Renderable* a, Renderable* b)
+	bool GraphicsScene::CompareDepth(Renderable* a, Renderable* b)
 	{
 		// Get camera position
 		const GraphicsSubsystem* gfx = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<GraphicsSubsystem>( );
-		v3 camPos = gfx->GetSceneCamera()->GetPosition();
+		v3 camPos = gfx->GetGraphicsSceneCamera()->GetPosition();
 
 		// Get a pos
 		v3 aPos = a->GetPosition();
@@ -223,7 +253,7 @@ namespace Enjon {
 	}
 
 	// TODO(): Come up with better way to compare materials
-	bool Scene::CompareMaterial(Renderable* a, Renderable* b)
+	bool GraphicsScene::CompareMaterial(Renderable* a, Renderable* b)
 	{
 		// Need a good metric for comparing materials by shader program ids...
 		if ( a && b )

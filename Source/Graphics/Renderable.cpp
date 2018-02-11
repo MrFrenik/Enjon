@@ -1,5 +1,5 @@
 #include "Graphics/Renderable.h"
-#include "Graphics/Scene.h"
+#include "Graphics/GraphicsScene.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Material.h"
 #include "Graphics/Shader.h"
@@ -59,9 +59,9 @@ namespace Enjon
 
 	//==============================================================
 
-	Scene* Renderable::GetScene() const 
+	GraphicsScene* Renderable::GetGraphicsScene() const 
 	{ 
-		return mScene; 
+		return mGraphicsScene; 
 	}
 
 	//==============================================================
@@ -127,9 +127,9 @@ namespace Enjon
 	}
 
 	//--------------------------------------------------------------------
-	void Renderable::SetScene(Scene* scene)
+	void Renderable::SetGraphicsScene(GraphicsScene* scene) 
 	{
-		mScene = scene;
+		mGraphicsScene = scene;
 	}
 
 	//==============================================================================

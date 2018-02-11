@@ -78,10 +78,15 @@ namespace Enjon
 			/**
 			*@brief
 			*/
+			bool IsDefault( ) const;
+
+			/**
+			*@brief
+			*/
 			const AssetLoader* GetLoader( ) const 
 			{ 
 				return mLoader; 
-			}
+			} 
 
 			/*
 			* @brief
@@ -112,6 +117,9 @@ namespace Enjon
 
 			ENJON_PROPERTY( )
 			Enjon::String mName; 
+
+			ENJON_PROPERTY( )
+			u32 mIsDefault = false;
 
 			const AssetLoader* mLoader = nullptr;
 
@@ -174,6 +182,18 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			void Unload( )
+			{
+				// Unload asset from record info if valid
+				if ( mAsset )
+				{
+					const_cast< AssetRecordInfo* >( mAsset->GetAssetRecordInfo( ) )->UnloadAsset( );
+				}
+			}
+
+			/*
+			* @brief
+			*/
 			const T* Get() const 
 			{ 
 				return mAsset->Cast<T>(); 
@@ -220,7 +240,7 @@ namespace Enjon
 			*/
 			Result Save( )
 			{
-				if ( mAsset )
+				if ( mAsset && !mAsset->IsDefault() )
 				{
 					return mAsset->Save( );
 				} 

@@ -116,7 +116,7 @@ namespace Enjon
 
 		// Clear noise kernel
 		mSSAOKernel.clear( );
-
+ 
 		return Result::SUCCESS; 
 	}
 
@@ -136,10 +136,10 @@ namespace Enjon
 		Enjon::FontManager::Init();
 
 		// Initialize scene camera
-		mSceneCamera = Enjon::Camera(mWindow.GetViewport());
-		mSceneCamera.SetNearFar( 0.01f, 1000.0f );
-		mSceneCamera.SetProjection(ProjectionType::Perspective);
-		mSceneCamera.SetPosition(Vec3(0, 5, 10));
+		mGraphicsSceneCamera = Enjon::Camera(mWindow.GetViewport());
+		mGraphicsSceneCamera.SetNearFar( 0.01f, 1000.0f );
+		mGraphicsSceneCamera.SetProjection(ProjectionType::Perspective);
+		mGraphicsSceneCamera.SetPosition(Vec3(0, 5, 10));
 
 		// Initialize sprite batch ( not really needed, I don't think...)
 		mBatch 						= new SpriteBatch();
@@ -679,9 +679,9 @@ namespace Enjon
 		 //mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, mBGColor);
 
 		// Get sorted renderables by material
-		const Vector<Renderable*>& sortedRenderables = mScene.GetRenderables();
-		const Vector<Renderable*>& nonDepthTestedRenderables = mScene.GetNonDepthTestedRenderables( );
-		const std::set<QuadBatch*>& sortedQuadBatches = mScene.GetQuadBatches(); 
+		const Vector<Renderable*>& sortedRenderables = mGraphicsScene.GetRenderables();
+		const Vector<Renderable*>& nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
+		const std::set<QuadBatch*>& sortedQuadBatches = mGraphicsScene.GetQuadBatches(); 
 
 		// Shader graph to be used
 		Enjon::AssetHandle< Enjon::ShaderGraph > sg; 
@@ -708,9 +708,9 @@ namespace Enjon
 					if ( sg )
 					{
 						sgShader->Use( );
-						sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
+						sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
 						sgShader->SetUniform( "uWorldTime", wt );
-						sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
+						sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
 						material->Bind( sgShader );
 					}
 
@@ -720,7 +720,7 @@ namespace Enjon
 						gbufferShader->Use( );
 
 						// Set set shared uniform
-						gbufferShader->SetUniform("u_camera", mSceneCamera.GetViewProjection());
+						gbufferShader->SetUniform("u_camera", mGraphicsSceneCamera.GetViewProjection());
 
 						// Set material textures
 						gbufferShader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
@@ -772,9 +772,9 @@ namespace Enjon
 
 		sgShader->Use( );
 		{
-			sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
+			sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
 			sgShader->SetUniform( "uWorldTime", wt ); 
-			sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) ); 
+			sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) ); 
 			mMaterial->Bind( sgShader ); 
 
 			for ( auto& r : mRenderables )
@@ -791,7 +791,7 @@ namespace Enjon
 		if (!sortedQuadBatches.empty())
 		{
 			// Set shared uniform
-			shader->SetUniform("u_camera", mSceneCamera.GetViewProjection());
+			shader->SetUniform("u_camera", mGraphicsSceneCamera.GetViewProjection());
 
 			Material* material = nullptr;
 			for (auto& quadBatch : sortedQuadBatches)
@@ -837,8 +837,8 @@ namespace Enjon
 		shader->Use( );
 		{
 			// Set set shared uniform
-			shader->SetUniform( "uProjection", mSceneCamera.GetProjection( ) );
-			shader->SetUniform( "uView", mSceneCamera.GetView( ) );
+			shader->SetUniform( "uProjection", mGraphicsSceneCamera.GetProjection( ) );
+			shader->SetUniform( "uView", mGraphicsSceneCamera.GetView( ) );
 
 			// Get material
 			const Material* material = mInstancedRenderable->GetMaterial( ).Get();
@@ -874,8 +874,8 @@ namespace Enjon
 		//Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
 		//skyBoxShader->Use( );
 		//{
-		//	skyBoxShader->SetUniform( "view", mSceneCamera.GetView( ) );
-		//	skyBoxShader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
+		//	skyBoxShader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
+		//	skyBoxShader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
 		//	skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
 
 		//	// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
@@ -909,14 +909,14 @@ namespace Enjon
 			{ 
 				// Upload kernel uniform
 				glUniform3fv( glGetUniformLocation( shader->GetProgramID( ), "samples" ), 16 * 3, ( f32* )&mSSAOKernel[ 0 ] );
-				shader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
-				shader->SetUniform( "view", mSceneCamera.GetView( ) );
+				shader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
+				shader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
 				shader->SetUniform( "uScreenResolution", Vec2( screenRes.x, screenRes.y ) );
 				shader->SetUniform( "radius", mSSAORadius );
 				shader->SetUniform( "bias", mSSAOBias );
 				shader->SetUniform( "uIntensity", mSSAOIntensity );
-				shader->SetUniform( "near", mSceneCamera.GetNear() );
-				shader->SetUniform( "far", mSceneCamera.GetFar() );
+				shader->SetUniform( "near", mGraphicsSceneCamera.GetNear() );
+				shader->SetUniform( "far", mGraphicsSceneCamera.GetFar() );
 				shader->BindTexture( "gPosition", mGbuffer->GetTexture( GBufferTextureType::POSITION ), 0 );
 				shader->BindTexture( "gNormal", mGbuffer->GetTexture( GBufferTextureType::NORMAL ), 1 );
 				shader->BindTexture( "texNoise", mSSAONoiseTexture, 2 ); 
@@ -955,11 +955,11 @@ namespace Enjon
 		GLSLProgram* pointShader 		= Enjon::ShaderManager::Get("PBRPointLight");	
 		GLSLProgram* spotShader 		= Enjon::ShaderManager::Get("SpotLight");	
 
-		const std::set<DirectionalLight*>& directionalLights 	= mScene.GetDirectionalLights();	
-		const std::set<SpotLight*>& spotLights 					= mScene.GetSpotLights();	
-		const std::set<PointLight*>& pointLights 				= mScene.GetPointLights();
+		const std::set<DirectionalLight*>& directionalLights 	= mGraphicsScene.GetDirectionalLights();	
+		const std::set<SpotLight*>& spotLights 					= mGraphicsScene.GetSpotLights();	
+		const std::set<PointLight*>& pointLights 				= mGraphicsScene.GetPointLights();
 
-		AmbientSettings* aS = mScene.GetAmbientSettings();
+		AmbientSettings* aS = mGraphicsScene.GetAmbientSettings();
 
 		mWindow.Clear();
 
@@ -988,7 +988,7 @@ namespace Enjon
 			ambientShader->BindTexture("uSSAOMap", mSSAOBlurTarget->GetTexture(), 8);
 			ambientShader->BindTexture("uDepthMap", mSSAOBlurTarget->GetTexture(), 9);
 			ambientShader->SetUniform("uResolution", mGbuffer->GetResolution());
-			ambientShader->SetUniform( "uCamPos", mSceneCamera.GetPosition() );
+			ambientShader->SetUniform( "uCamPos", mGraphicsSceneCamera.GetPosition() );
 
 			// Render
 			mFullScreenQuad->Submit( );
@@ -997,7 +997,7 @@ namespace Enjon
 
 		directionalShader->Use();
 		{
-			directionalShader->SetUniform( "u_camPos", mSceneCamera.GetPosition( ) );
+			directionalShader->SetUniform( "u_camPos", mGraphicsSceneCamera.GetPosition( ) );
 			for (auto& l : directionalLights)
 			{
 				ColorRGBA32 color = l->GetColor();
@@ -1029,7 +1029,7 @@ namespace Enjon
 			pointShader->BindTexture( "u_matProps", mGbuffer->GetTexture( GBufferTextureType::MAT_PROPS ), 3 );
 			pointShader->BindTexture( "u_ssao", mSSAOBlurTarget->GetTexture( ), 4 );
 			pointShader->SetUniform( "u_resolution", mGbuffer->GetResolution( ) );
-			pointShader->SetUniform( "u_camPos", mSceneCamera.GetPosition( ) );
+			pointShader->SetUniform( "u_camPos", mGraphicsSceneCamera.GetPosition( ) );
 
 			for (auto& l : pointLights)
 			{
@@ -1055,7 +1055,7 @@ namespace Enjon
 			spotShader->BindTexture("u_positionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 2);
 			// spotShader->BindTexture("u_matProps", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
 			spotShader->SetUniform("u_resolution", mGbuffer->GetResolution());
-			spotShader->SetUniform("u_camPos", mSceneCamera.GetPosition());			
+			spotShader->SetUniform("u_camPos", mGraphicsSceneCamera.GetPosition());			
 
 			for (auto& l : spotLights)
 			{
@@ -1272,7 +1272,7 @@ namespace Enjon
 
 			glClear( GL_DEPTH_BUFFER_BIT );
 
-			const Vector<Renderable*>& nonDepthTestedRenderables = mScene.GetNonDepthTestedRenderables( );
+			const Vector<Renderable*>& nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
 
 			// None depth tested renderables
 			if ( !nonDepthTestedRenderables.empty( ) )
@@ -1296,9 +1296,9 @@ namespace Enjon
 							material = curMaterial;
 
 							sgShader->Use( );
-							sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
+							sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
 							sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
-							sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
+							sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
 							material->Bind( sgShader );
 						} 
 
@@ -1316,8 +1316,8 @@ namespace Enjon
 			//Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
 			//skyBoxShader->Use( );
 			//{
-			//	skyBoxShader->SetUniform( "view", mSceneCamera.GetView( ) );
-			//	skyBoxShader->SetUniform( "projection", mSceneCamera.GetProjection( ) );
+			//	skyBoxShader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
+			//	skyBoxShader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
 			//	skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
 
 			//	// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
@@ -1340,7 +1340,7 @@ namespace Enjon
 		{ 
 			glClear( GL_DEPTH_BUFFER_BIT );
 
-			const Vector<Renderable*>& nonDepthTestedRenderables = mScene.GetNonDepthTestedRenderables( );
+			const Vector<Renderable*>& nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
 
 			// None depth tested renderables
 			if ( !nonDepthTestedRenderables.empty( ) )
@@ -1364,9 +1364,9 @@ namespace Enjon
 							material = curMaterial;
 
 							sgShader->Use( );
-							sgShader->SetUniform( "uViewProjection", mSceneCamera.GetViewProjection( ) );
+							sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
 							sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
-							sgShader->SetUniform( "uViewPositionWorldSpace", mSceneCamera.GetPosition( ) );
+							sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
 							material->Bind( sgShader );
 						} 
 
@@ -1392,7 +1392,7 @@ namespace Enjon
 
         // Queue up gui
         ImGuiManager::Render(mWindow.GetSDLWindow());
-		 //ImGuiManager::RenderGameUI(&mWindow, mSceneCamera.GetView().elements, mSceneCamera.GetProjection().elements);
+		 //ImGuiManager::RenderGameUI(&mWindow, mGraphicsSceneCamera.GetView().elements, mGraphicsSceneCamera.GetProjection().elements);
 
         // Flush
         glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
@@ -1864,9 +1864,9 @@ namespace Enjon
 
 	    if (ImGui::TreeNode("Sunlight"))
 	    {
-			if ( mScene.GetSun( ) )
+			if ( mGraphicsScene.GetSun( ) )
 			{
-				ImGuiManager::DebugDumpObject( mScene.GetSun( ) );
+				ImGuiManager::DebugDumpObject( mGraphicsScene.GetSun( ) );
 			}
 
 	    	ImGui::TreePop();
@@ -1874,7 +1874,7 @@ namespace Enjon
 
 	    if (ImGui::TreeNode("Camera"))
 	    {
-			ImGuiManager::DebugDumpObject( &mSceneCamera );
+			ImGuiManager::DebugDumpObject( &mGraphicsSceneCamera );
 	    	ImGui::TreePop();
 	    }
 

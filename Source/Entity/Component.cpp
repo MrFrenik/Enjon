@@ -15,15 +15,6 @@ namespace Enjon
 
 	ComponentArray::~ComponentArray( )
 	{
-		// Deallocate all memory for components here
-		for ( auto iter = mComponentMap.begin( ); iter != mComponentMap.end( ); ++iter )
-		{
-			if ( iter->second->mEntity )
-			{
-				// Removing component frees its memory
-				iter->second->mEntity->RemoveComponent( iter->second->Class( ) );
-			}
-		}
 		mComponentMap.clear( );
 		mComponentPtrs.clear( );
 	}

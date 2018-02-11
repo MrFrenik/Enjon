@@ -13,7 +13,7 @@
 
 namespace Enjon
 {
-	void EditorTransformWidget::Initialize( EnjonEditor* app )
+	void EditorTransformWidget::Initialize( EditorApp* app )
 	{
 		// Initialize the translation widget
 		mTranslationWidget.Initialize( this );
@@ -109,7 +109,7 @@ namespace Enjon
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 		Input* input = EngineSubsystem( Input );
-		Camera* camera = gfx->GetSceneCamera( )->ConstCast< Camera >( );
+		Camera* camera = gfx->GetGraphicsSceneCamera( )->ConstCast< Camera >( );
 
 		// Find dot between cam forward and right axis
 		Vec3 cF = camera->Forward( ).Normalize( );
@@ -158,7 +158,7 @@ namespace Enjon
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 		Input* input = EngineSubsystem( Input );
-		Camera* camera = gfx->GetSceneCamera( )->ConstCast< Camera >( );
+		Camera* camera = gfx->GetGraphicsSceneCamera( )->ConstCast< Camera >( );
 
 		if ( mInteractingWithTransformWidget )
 		{
@@ -629,7 +629,7 @@ namespace Enjon
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 		Input* input = EngineSubsystem( Input );
-		Camera* camera = gfx->GetSceneCamera( )->ConstCast< Camera >();
+		Camera* camera = gfx->GetGraphicsSceneCamera( )->ConstCast< Camera >();
 
 		// Begin interaction with active widget
 		if ( mActiveWidget )

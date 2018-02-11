@@ -1,5 +1,5 @@
 #include "Graphics/PointLight.h"
-#include "Graphics/Scene.h"
+#include "Graphics/GraphicsScene.h"
 
 namespace Enjon {
 
@@ -23,9 +23,9 @@ namespace Enjon {
 
 	PointLight::~PointLight()
 	{
-		if (mScene != nullptr)
+		if (mGraphicsScene != nullptr)
 		{
-			mScene->RemovePointLight(this);
+			mGraphicsScene->RemovePointLight(this);
 		}
 	}
 
@@ -39,9 +39,9 @@ namespace Enjon {
 		mIntensity = intensity;	
 	}
 
-	void PointLight::SetScene(Scene* scene)
+	void PointLight::SetGraphicsScene(GraphicsScene* scene)
 	{
-		mScene = scene;
+		mGraphicsScene = scene;
 	}
 
 	void PointLight::SetPosition(Vec3& position)
@@ -61,9 +61,9 @@ namespace Enjon {
 
 	//==============================================================================================
 
-	Scene* PointLight::GetScene( ) const
+	GraphicsScene* PointLight::GetGraphicsScene( ) const
 	{
-		return mScene;
+		return mGraphicsScene;
 	}
 
 	//============================================================================================== 

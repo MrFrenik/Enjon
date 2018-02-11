@@ -22,18 +22,10 @@ namespace Enjon
 
 	const Asset* AssetRecordInfo::GetAsset( ) const
 	{
+		// If asset isn't available, then load it from disk
 		if ( !mAsset )
 		{
-			// Get the asset manager from engine
-			const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
-
-			// Grab the loader
-			AssetLoader* al = am->GetLoader( mAssetLoaderClass )->ConstCast< AssetLoader >();
-
-			//Asset* asset = al->LoadAssetForRecord( mAssetUUID ); 
-			const Asset* asset = al->GetAsset( mAssetUUID ); 
-			
-			const_cast< AssetRecordInfo *> ( this )->mAsset = const_cast< Asset* >( asset );
+			LoadAsset( ); 
 		}
 
 		return mAsset;
@@ -41,13 +33,44 @@ namespace Enjon
 
 	//=================================================================
 
+	void AssetRecordInfo::LoadAsset( ) const
+	{
+		// Get the asset manager from engine
+		AssetManager* am = EngineSubsystem( AssetManager );
+
+		// Grab the loader
+		AssetLoader* al = am->GetLoader( mAssetLoaderClass )->ConstCast< AssetLoader >();
+
+		// Get asset from asset loader
+		const Asset* asset = al->GetAsset( mAssetUUID ); 
+		
+		// Set the asset
+		const_cast< AssetRecordInfo *> ( this )->mAsset = const_cast< Asset* >( asset ); 
+	}
+
+	//=================================================================
+
+	void AssetRecordInfo::UnloadAsset( )
+	{
+		// Delete the asset if not null
+		if ( mAsset )
+		{
+			// Delete asset
+			delete mAsset;
+
+			// Set to null for future
+			mAsset = nullptr;
+		}
+
+		// Set load status to unloaded after releasing memory
+		mAssetLoadStatus = AssetLoadStatus::Unloaded;
+	}
+
+	//=================================================================
+
 	void AssetRecordInfo::Destroy( )
 	{
-		// Release memory for asset
-		delete mAsset;
-
-		// Set to nullptr
-		mAsset = nullptr;
+		UnloadAsset( ); 
 	}
 
 	//=================================================================
@@ -250,6 +273,10 @@ namespace Enjon
 		}
 
 		RegisterDefaultAsset( ); 
+
+		// Set default asset to being default
+		mDefaultAsset->mIsDefault = true;
+
 		return mDefaultAsset;
 	} 
 	
@@ -266,6 +293,9 @@ namespace Enjon
 		// Add asset
 		mAssetsByUUID[ info.mAsset->GetUUID( ).ToString( ) ] = info;
 		mAssetsByName[ info.mAsset->GetName() ] = &mAssetsByUUID[ info.mAsset->GetUUID().ToString() ];
+
+		// Set info for asset
+		info.mAsset->mRecordInfo = &mAssetsByUUID[ info.mAsset->GetUUID( ).ToString( ) ];
 
 		return info.mAsset; 
 	}

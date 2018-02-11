@@ -3,14 +3,137 @@
 
 #include "Project.h"
 #include "EditorTransformWidget.h"
+#include "EditorView.h"
+#include "EditorSceneView.h"
+#include "EditorObject.h"
 
 #include <Application.h>
 #include <Entity/EntityManager.h>
 #include <Graphics/Renderable.h> 
+#include <Scene/Scene.h>
 
 namespace Enjon
 { 
-	class EnjonEditor : public Enjon::Application
+	class EditorWidgetManager
+	{ 
+		public: 
+
+			/**
+			* @brief
+			*/
+			EditorWidgetManager( ) = default;
+
+			/**
+			* @brief
+			*/
+			~EditorWidgetManager( )
+			{
+				// Free memory
+				for ( auto& v : mViews )
+				{
+					delete v;
+					v = nullptr;
+				}
+
+				// Free all memory from maps
+				mFocusedMap.clear( );
+				mHoveredMap.clear( );
+				mViews.clear( );
+				mEditorObjects.clear( );
+			} 
+
+			/**
+			* @brief ONLY TO BE CALLED AFTER VIEWS AND WIDGETS HAVE BEEN ADDED
+			*/
+			void Finalize( );
+ 
+			/**
+			* @brief
+			*/ 
+			bool HasView( EditorView* view )
+			{
+				return ( std::find( mViews.begin( ), mViews.end( ), view ) != mViews.end( ) );
+			}
+
+			/**
+			* @brief
+			*/
+			void AddView( EditorView* view )
+			{ 
+				if ( !HasView( view ) )
+				{
+					mFocusedMap[ view ] = false;
+					mHoveredMap[ view ] = false;
+					mViewEnabledMap[ view ] = true;
+					mViews.push_back( view );
+				}
+			}
+
+			/**
+			* @brief
+			*/
+			void SetHovered( EditorObject* object, bool hovered )
+			{ 
+				mHoveredMap[ object ] = hovered;
+			}
+
+			/**
+			* @brief
+			*/
+			void SetFocused( EditorObject* object, bool focused )
+			{
+				mFocusedMap[ object ] = focused;
+			} 
+
+			/**
+			* @brief
+			*/
+			bool GetHovered( EditorObject* object )
+			{
+				if ( HasHoveredObject( object ) )
+				{
+					return mHoveredMap[ object ];
+				}
+
+				return false;
+			}
+
+			/**
+			* @brief
+			*/
+			bool GetFocused( EditorObject* object )
+			{
+				if ( HasFocusedObject( object ) )
+				{
+					return mFocusedMap[ object ];
+				}
+
+				return false;
+			}
+
+		private:
+
+			bool HasHoveredObject( EditorObject* object )
+			{
+				return mHoveredMap.find( object ) != mHoveredMap.end( );
+			}
+
+			bool HasFocusedObject( EditorObject* object )
+			{
+				return mFocusedMap.find( object ) != mFocusedMap.end( );
+			}
+
+		private: 
+
+			HashMap< EditorObject*, bool > mFocusedMap;
+			HashMap< EditorObject*, bool > mHoveredMap; 
+			HashMap< EditorView*, bool > mViewEnabledMap;
+
+			Vector< EditorObject* > mEditorObjects;
+			Vector< EditorView* > mViews;
+	};
+
+	class EditorApp : public Enjon::Application
 	{
 		public:
 
@@ -39,14 +162,27 @@ namespace Enjon
 			*/
 			Vec2 GetSceneViewProjectedCursorPosition( );
 
+			/**
+			* @brief 
+			*/
+			EditorWidgetManager* GetEditorWidgetManager( );
+
+			/**
+			* @brief 
+			*/
+			void SetEditorSceneView( EditorSceneView* view ); 
+
 		private:
 			void LoadResourceFromFile( );
 			void WorldOutlinerView( );
 			void PlayOptions( );
 			void CameraOptions( bool* enable );
 			void CreateProjectView( );
+			void SelectSceneView( );
 
 			void CreateNewProject( const String& projectName );
+
+			void SelectEntity( const EntityHandle& handle );
 
 			void UnloadScene( );
 			void LoadProject( const Project& project );
@@ -102,6 +238,13 @@ namespace Enjon
 			Vec2 mSceneViewWindowPosition;
 			Vec2 mSceneViewWindowSize;
 			EntityHandle mSelectedEntity;
+
+			// This could get dangerous...
+			AssetHandle<Scene> mCurrentScene;
+
+			EditorWidgetManager mEditorWidgetManager;
+
+			EditorSceneView* mEditorSceneView = nullptr;
 	}; 
 }
 

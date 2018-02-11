@@ -1,9 +1,9 @@
 #include "Graphics/SpotLight.h"
-#include "Graphics/Scene.h"
+#include "Graphics/GraphicsScene.h"
 
 
-namespace Enjon {
-
+namespace Enjon 
+{ 
 	SpotLight::SpotLight()
 	{
 		mPosition 	= Vec3(0.0f, 0.0f, 0.0f);
@@ -39,10 +39,11 @@ namespace Enjon {
 		mIntensity = intensity;
 	}
 
-	void SpotLight::SetScene(Scene* scene)
+	void SpotLight::SetGraphicsScene(GraphicsScene* scene)
 	{
-		mScene = scene;	
+		mGraphicsScene = scene;	
 	}
+
 	void SpotLight::SetPosition(Vec3& position)
 	{
 		mPosition = position;
