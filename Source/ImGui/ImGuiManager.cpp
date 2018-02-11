@@ -11,6 +11,7 @@
 #include "Serialize/UUID.h" 
 #include "Asset/AssetManager.h"
 #include "Base/Object.h"
+#include "Physics/CollisionShape.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
 
@@ -805,14 +806,30 @@ namespace Enjon
 				// Object type
 				case Enjon::MetaPropertyType::Object:
 				{ 
-					const Enjon::Object* obj = cls->GetValueAs< Enjon::Object >( object, prop );
-					if ( obj )
+					if ( prop->GetTraits( ).IsPointer( ) )
 					{
-						if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
+						const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
+						const Enjon::Object* obj = base->GetValueAsObject( object );
+						if ( obj )
 						{
-							ImGuiManager::DebugDumpObject( obj ); 
-							ImGui::TreePop( ); 
+							if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
+							{
+								ImGuiManager::DebugDumpObject( obj ); 
+								ImGui::TreePop( );
+							}
 						}
+					}
+					else
+					{
+						const Enjon::Object* obj = cls->GetValueAs< Enjon::Object >( object, prop );
+						if ( obj )
+						{
+							if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
+							{
+								ImGuiManager::DebugDumpObject( obj ); 
+								ImGui::TreePop( ); 
+							}
+						} 
 					}
 
 				} break;

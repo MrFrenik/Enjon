@@ -28,6 +28,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			RigidBody( const CollisionShapeType& type );
+
+			/**
+			* @brief
+			*/
 			~RigidBody( );
 
 			/**
@@ -250,8 +255,11 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			u32 mCCDEnabled = false;
 
+		public:
 			ENJON_PROPERTY( )
 			CollisionShape* mShape = nullptr;
+
+			f32 mOtherValue = 1.0f;
 
 		private:
 			BulletRigidBody* mBody = nullptr;

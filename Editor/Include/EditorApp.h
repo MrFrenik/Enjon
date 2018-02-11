@@ -216,6 +216,7 @@ namespace Enjon
 			bool mNeedsShutdown = false;
 
 			Enjon::f32 mCameraSpeed = 10.0f;
+			Enjon::f32 mMouseSensitivity = 10.0f;
 			Enjon::Transform mPreviousCameraTransform;
 
 			Project mProject;

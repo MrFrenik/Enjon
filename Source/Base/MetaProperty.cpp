@@ -38,5 +38,10 @@ namespace Enjon
 	{
 		return ( mUIMin != mUIMax );
 	}
+
+	bool MetaPropertyTraits::IsPointer( ) const
+	{
+		return mIsPointer;
+	}
 }
 

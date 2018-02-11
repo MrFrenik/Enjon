@@ -1068,6 +1068,12 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 	// TODO(): Pointer types / Const references
 	if ( lexer->PeekAtNextToken( ).IsType( TokenType::Token_Asterisk ) || lexer->PeekAtNextToken( ).IsType( TokenType::Token_Ampersand ) )
 	{
+		// Store pointer
+		if ( lexer->PeekAtNextToken( ).IsType( TokenType::Token_Asterisk ) )
+		{
+			prop->mTraits.IsPointer = true;
+		}
+
 		lexer->GetNextToken( );
 	}
 		
@@ -1502,8 +1508,11 @@ void Introspection::Compile( const ReflectionConfig& config )
 					std::string traits = "MetaPropertyTraits( "; 
 					traits += prop.second->mTraits.IsEditable ? "true" : "false";
 					traits += ", ";
-					traits += std::to_string(prop.second->mTraits.UIMin) + "f, ";
+					traits += std::to_string(prop.second->mTraits.UIMin) + "f";
+					traits += ", ";
 					traits += std::to_string(prop.second->mTraits.UIMax) + "f";
+					traits += ", ";
+					traits += prop.second->mTraits.IsPointer ? "true" : "false";
 					traits += " )"; 
 
 					// Get property name
@@ -1634,8 +1643,18 @@ void Introspection::Compile( const ReflectionConfig& config )
 
 						default:
 						{
-							code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" 
-															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
+
+							if ( prop.second->mTraits.IsPointer )
+							{
+								code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyPointer< " + cn + ", " + prop.second->mTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
+																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", &" + cn + "::" + pn + " );" ); 
+							}
+							else
+							{
+								code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" 
+																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
+							}
+							//cls->mProperties[ 7 ] = new Enjon::MetaPropertyPointer<RigidBody, CollisionShape>( MetaPropertyType::Object, "mShape", ( u32 )&( ( RigidBody* )0 )->mShape, 7, MetaPropertyTraits( false, 0.000000f, 0.000000f, true ), &RigidBody::mShape );
 						} break;
 					}
 				} 

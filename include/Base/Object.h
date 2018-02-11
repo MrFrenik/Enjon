@@ -104,8 +104,8 @@ namespace Enjon
 	// Don't really like this, but, ya know... wha ya gon' do?
 	struct MetaPropertyTraits
 	{
-		MetaPropertyTraits( bool isEditable = false, f32 uiMin = 0.0f, f32 uiMax = 1.0f )
-			: mIsEditable( isEditable ), mUIMin( uiMin ), mUIMax( uiMax )
+		MetaPropertyTraits( u32 isEditable = false, f32 uiMin = 0.0f, f32 uiMax = 1.0f, u32 isPointer = false )
+			: mIsEditable( isEditable ), mUIMin( uiMin ), mUIMax( uiMax ), mIsPointer( isPointer )
 		{ 
 		}
 
@@ -128,9 +128,15 @@ namespace Enjon
 		*/
 		bool UseSlider( ) const;
 
-		bool mIsEditable;
-		f32 mUIMin;
-		f32 mUIMax;
+		/*
+		* @brief
+		*/
+		bool IsPointer( ) const;
+
+		bool mIsEditable = false;
+		bool mIsPointer = false;
+		f32 mUIMin = 0.0f;
+		f32 mUIMax = 1.0f;
 	};
 
 	class MetaProperty
@@ -214,6 +220,49 @@ namespace Enjon
 			u32 mOffset;
 			u32 mIndex;
 			MetaPropertyTraits mTraits;
+	};
+
+	class MetaPropertyPointerBase : public MetaProperty 
+	{
+		friend MetaClass; 
+		friend Object;
+
+		public:
+			MetaPropertyPointerBase( ) = default;
+			~MetaPropertyPointerBase( ) = default; 
+
+			virtual const Object* GetValueAsObject( const Object* obj ) const = 0;
+	};
+
+	template <typename BaseType, typename ValueType>
+	class MetaPropertyPointer : public MetaPropertyPointerBase
+	{
+		public:
+			MetaPropertyPointer() = default;
+			MetaPropertyPointer( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits, ValueType* BaseType::*memberPointer )
+			{
+				mType = type;
+				mName = name;
+				mOffset = offset;
+				mIndex = propIndex;
+				mTraits = traits;
+				mMemberPointer = memberPointer;
+			}
+			~MetaPropertyPointer() = default;
+
+			// Need to be able to access the type like this: 
+			const ValueType* GetValue( const Object* obj )
+			{
+				return reinterpret_cast< const BaseType* >( obj )->*mMemberPointer;
+			}
+
+			virtual const Object* GetValueAsObject( const Object* obj ) const override
+			{
+				return reinterpret_cast< const BaseType* >( obj )->*mMemberPointer;
+			}
+
+		private:
+			ValueType* BaseType::*mMemberPointer;
 	};
 
 	class MetaPropertyEnum;
@@ -940,13 +989,35 @@ namespace Enjon
 				}
 			} 
 
+			template < typename T >
+			const T* GetValueAsObject( const Object* object, const MetaProperty* prop ) const
+			{
+				if ( HasProperty( prop ) )
+				{
+					if ( prop->GetTraits( ).IsPointer( ) )
+					{
+						const T* obj = ( const T* )( usize( object ) + prop->mOffset );
+						return obj;
+					}
+				}
+
+				return nullptr;
+			}
+
 			template < typename T > 
 			const T* GetValueAs( const Object* object, const MetaProperty* prop ) const
 			{
 				if ( HasProperty( prop ) )
 				{
-					const T* val = reinterpret_cast< const T* >( usize( object ) +  prop->mOffset );
-					return val;
+					if ( prop->GetTraits( ).IsPointer( ) )
+					{
+						return nullptr;
+					}
+					else
+					{
+						const T* val = reinterpret_cast< const T* >( usize( object ) +  prop->mOffset );
+						return val; 
+					}
 				}
 
 				return nullptr;

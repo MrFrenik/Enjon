@@ -20,6 +20,23 @@ namespace Enjon
 
 	//========================================================================
 
+	RigidBody::RigidBody( const CollisionShapeType& type )
+	{
+		switch ( type )
+		{
+			case CollisionShapeType::Box:
+			{
+				mShape = new BoxCollisionShape( );
+			} break;
+			case CollisionShapeType::Sphere:
+			{
+				mShape = new SphereCollisionShape( );
+			} break;
+		}
+	}
+
+	//========================================================================
+
 	RigidBody::~RigidBody( )
 	{
 		// Remove body from physics world
@@ -33,6 +50,12 @@ namespace Enjon
 		if ( mMotionState )
 		{
 			delete mMotionState; 
+		}
+
+		if ( mShape )
+		{
+			delete mShape;
+			mShape = nullptr;
 		}
 
 		// Set both to null
@@ -140,7 +163,7 @@ namespace Enjon
 	void RigidBody::SetShape( CollisionShapeType type )
 	{ 
 		// Setting the shape will remove the body from the world then reset the shape correctly
-		if ( GetCollisionShape( )->GetCollisionShapeType( ) == type )
+		if ( GetCollisionShape( ) && GetCollisionShape( )->GetCollisionShapeType( ) == type )
 		{
 			return;
 		}
@@ -149,8 +172,11 @@ namespace Enjon
 		RemoveFromWorld( );
 
 		// Delete the previous shape and set to null
-		delete mShape;
-		mShape = nullptr;
+		if ( mShape )
+		{
+			delete mShape;
+			mShape = nullptr; 
+		}
 
 		// Create new shape based on type 
 		switch ( type )
