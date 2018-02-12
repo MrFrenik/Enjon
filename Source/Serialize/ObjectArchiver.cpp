@@ -902,11 +902,25 @@ namespace Enjon
 						// If is pointer
 						if ( prop->GetTraits( ).IsPointer( ) )
 						{
-							// Grab object from deserializer
-							Object* obj = ObjectArchiver::Deserialize( buffer );
+							const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
+							Object* actualObj = base->GetValueAsObject( object )->ConstCast<Object>( );
+ 
+							if ( actualObj )
+							{
+								// Grab object from deserializer
+								ObjectArchiver::Deserialize( buffer, actualObj ); 
 
-							// Set value
-							cls->SetValue( object, prop, obj ); 
+								// Set value
+								cls->SetValue( object, prop, actualObj ); 
+							}
+							else
+							{
+								// Grab object from deserializer
+								Object* obj = ObjectArchiver::Deserialize( buffer );
+
+								// Set value
+								cls->SetValue( object, prop, obj ); 
+							} 
 						}
 						else
 						{
