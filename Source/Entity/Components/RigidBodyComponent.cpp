@@ -3,6 +3,8 @@
 
 #include "Entity/Components/RigidBodyComponent.h"
 #include "Entity/EntityManager.h"
+#include "Serialize/ByteBuffer.h"
+#include "Serialize/ObjectArchiver.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
 
@@ -182,6 +184,13 @@ namespace Enjon
 
 	//========================================================================
 
+	CollisionShapeType RigidBodyComponent::GetShapeType( ) const
+	{
+		return mBody.GetShapeType( );
+	}
+
+	//========================================================================
+
 	void RigidBodyComponent::SetContinuousCollisionDetectionEnabled( bool enabled )
 	{
 		mBody.SetContinuousCollisionDetectionEnabled( enabled );
@@ -222,6 +231,22 @@ namespace Enjon
 	//{
 	//	mCollisionExitCallbacks.push_back( callback );
 	//}
+
+	//======================================================================== 
+
+	Result RigidBodyComponent::SerializeData( ByteBuffer* buffer ) const 	
+	{
+		// Serialize out mBody
+		return ObjectArchiver::Serialize( &mBody, buffer ); 
+	}
+
+	//======================================================================== 
+
+	Result RigidBodyComponent::DeserializeData( ByteBuffer* buffer )
+	{
+		// Deserialize mBody 
+		return ObjectArchiver::Deserialize( buffer, &mBody ); 
+	}
 
 	//======================================================================== 
 

@@ -24,7 +24,11 @@ namespace Enjon
 		// Set transformation mode to translation
 		SetTransformationMode( TransformationMode::Translation );
 
-		mEditorApp = app;
+		// Deactivate current widget
+		mActiveWidget->Disable( );
+
+		// Set editor app
+		mEditorApp = app; 
 	}
 
 	void EditorTransformWidget::SetTransformationMode( TransformationMode mode )
@@ -75,6 +79,26 @@ namespace Enjon
 	{ 
 		// Update active widget
 		mActiveWidget->Update( ); 
+	}
+
+	void EditorTransformWidget::Enable( bool enable )
+	{
+		if ( enable == mEnabled )
+		{
+			return;
+		}
+
+		// Set enabled state
+		mEnabled = enable;
+
+		if ( mEnabled )
+		{
+			mActiveWidget->Enable( );
+		}
+		else
+		{
+			mActiveWidget->Disable( );
+		}
 	}
 
 	Transform EditorTransformWidget::GetWorldTransform( )
@@ -806,5 +830,16 @@ namespace Enjon
 	TransformWidgetRenderableType EditorTransformWidget::GetInteractedWidgetType( )
 	{
 		return mType;
+	}
+
+	bool EditorTransformWidget::IsValidID( const u32& id )
+	{
+		s32 value = ( s32 )id - MAX_ENTITIES;
+		if ( value >= 0 && value < ( s32 )TransformWidgetRenderableType::Count )
+		{
+			return true;
+		}
+
+		return false;
 	}
 }

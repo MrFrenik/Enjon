@@ -55,10 +55,10 @@ namespace Enjon
 		if ( mShape )
 		{
 			delete mShape;
-			mShape = nullptr;
 		}
 
-		// Set both to null
+		// Set all to null
+		mShape = nullptr;
 		mBody = nullptr;
 		mMotionState = nullptr;
 	}
@@ -160,21 +160,30 @@ namespace Enjon
 
 	//========================================================================
 
+	CollisionShapeType RigidBody::GetShapeType( ) const
+	{
+		return mShape->GetCollisionShapeType( );
+	}
+
 	void RigidBody::SetShape( CollisionShapeType type )
 	{ 
 		// Setting the shape will remove the body from the world then reset the shape correctly
-		if ( GetCollisionShape( ) && GetCollisionShape( )->GetCollisionShapeType( ) == type )
-		{
-			return;
-		}
+		//if ( GetCollisionShape( ) && GetCollisionShape( )->GetCollisionShapeType( ) == type )
+		//{
+		//	return;
+		//}
 
-		// Otherwise, need to remove body from world
-		RemoveFromWorld( );
 
-		// Delete the previous shape and set to null
+		// Remove previous shape from world, delete, and set to null
 		if ( mShape )
 		{
+			// Remove from physics world
+			RemoveFromWorld( );
+
+			// Delete the shape
 			delete mShape;
+
+			// Set to nullptr
 			mShape = nullptr; 
 		}
 

@@ -42,9 +42,9 @@ Enjon::String copyDir = "";
 Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 //Enjon::String mProjectsDir = "W:/Projects/";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -77,6 +77,27 @@ namespace Enjon
 			// Debug dump the entity ( Probably shouldn't do this and should tailor it more... )
 			Entity* ent = mSelectedEntity.Get( ); 
 			ImGuiManager::DebugDumpObject( ent );
+ 
+			if ( ImGui::Button( "ADD SOMETHING YOU DIDN'T CODE YOURSELF" ) )
+			{ 
+				ImGui::OpenPopup( "##Popup" );
+			}
+
+			if ( ImGui::BeginPopupModal( "##Popup" ) )
+			{
+				AssetManager* am = EngineSubsystem( AssetManager );
+				AssetHandle<Texture> john = am->GetAsset< Texture >( "textures.john" );
+
+				ImGui::Image( (ImTextureID)john.Get()->GetTextureId( ), ImVec2(64, 64), ImVec2(0, 0 ), ImVec2( 1, 1 ) );
+				ImGui::Text( "GO FUCK YOURSELF." );
+				
+				if ( ImGui::Button( "Close" ) )
+				{
+					ImGui::CloseCurrentPopup( ); 
+				}
+
+				ImGui::EndPopup( );
+			}
 
 			if ( ImGui::CollapsingHeader( "ADD COMPONENT" ) )
 			{
@@ -105,7 +126,26 @@ namespace Enjon
 			{
 				if ( ImGui::CollapsingHeader( c->Class( )->GetName( ).c_str( ) ) )
 				{
-					ImGuiManager::DebugDumpObject( c );
+					MetaClass* cls = const_cast< MetaClass * > ( c->Class( ) );
+					s32 shapeType = -1;
+					if ( cls->InstanceOf<RigidBodyComponent>( ) )
+					{
+						shapeType = (s32)c->Cast<RigidBodyComponent>( )->GetShapeType( );
+					}
+
+					ImGuiManager::DebugDumpObject( c ); 
+
+					// Shape type changed
+					if ( shapeType != -1 && shapeType != (s32)c->Cast< RigidBodyComponent >()->GetShapeType() )
+					{
+						c->ConstCast< RigidBodyComponent >( )->SetShape( c->Cast< RigidBodyComponent >( )->GetShapeType( ) );
+					}
+
+					if ( cls->InstanceOf<RigidBodyComponent>( ) )
+					{
+						RigidBodyComponent* rbc = c->ConstCast< RigidBodyComponent >( );
+						rbc->SetMass( rbc->GetMass( ) );
+					} 
 				}
 			}
 
@@ -339,8 +379,22 @@ namespace Enjon
 	void EditorApp::SelectEntity( const EntityHandle& handle )
 	{
 		mSelectedEntity = handle;
+
+		// Enable transform widget
+		mTransformWidget.Enable( true );
+
+		// Set transform to selected entity
 		mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) );
 		mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) );
+	}
+
+	void EditorApp::DeselectEntity( )
+	{
+		// Set to invalid entity handle
+		mSelectedEntity = EntityHandle::Invalid();
+
+		// Deactivate transform widget
+		mTransformWidget.Enable( false );
 	}
 
 	void EditorApp::WorldOutlinerView( )
@@ -416,6 +470,9 @@ namespace Enjon
 
 							// Set current scene with record's asset
 							mCurrentScene = record.second.GetAsset();
+
+							// Deselect entity
+							DeselectEntity( );
 						} 
 					} 
 				}
@@ -929,6 +986,9 @@ namespace Enjon
 					std::cout << "Creating empty entity...\n";
 					EntityManager* em = EngineSubsystem( EntityManager );
 					EntityHandle empty = em->Allocate( );
+
+					// Set to selected entity
+					SelectEntity( empty );
 				}
 
 				if ( ImGui::MenuItem( "Cube##options", NULL ) )
@@ -948,6 +1008,9 @@ namespace Enjon
 						const Camera* cam = gs->GetGraphicsSceneCamera( );
 						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
 					}
+
+					// Select entity
+					SelectEntity( cube );
 				}
 
 				if ( ImGui::MenuItem( "Sphere##options", NULL ) )
@@ -956,10 +1019,10 @@ namespace Enjon
 					EntityManager* em = EngineSubsystem( EntityManager );
 					AssetManager* am = EngineSubsystem( AssetManager );
 					GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
-					EntityHandle cube = em->Allocate( );
-					if ( cube )
+					EntityHandle sphere = em->Allocate( );
+					if ( sphere )
 					{
-						Entity* ent = cube.Get( );
+						Entity* ent = sphere.Get( );
 						GraphicsComponent* gfx = ent->AddComponent<GraphicsComponent>( );
 						gfx->SetMesh( am->GetAsset< Mesh >( "models.unit_sphere" ) );
 						gfx->SetMaterial( am->GetDefaultAsset<Material>( ) );
@@ -967,6 +1030,9 @@ namespace Enjon
 						const Camera* cam = gs->GetGraphicsSceneCamera( );
 						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
 					}
+
+					// Select entity
+					SelectEntity( sphere );
 				}
 
 				if ( ImGui::MenuItem( "Scene##options", NULL ) )
@@ -1068,6 +1134,14 @@ namespace Enjon
 
 		if ( !mMoveCamera )
 		{
+			if ( mInput->IsKeyPressed( KeyCode::Delete ) )
+			{
+				if ( mSelectedEntity )
+				{
+					mSelectedEntity.Get( )->Destroy( );
+					DeselectEntity( );
+				}
+			}
 			if ( mInput->IsKeyPressed( KeyCode::W ) )
 			{
 				mTransformWidget.SetTransformationMode( TransformationMode::Translation );
@@ -1262,15 +1336,22 @@ namespace Enjon
 				PickResult pr = mGfx->GetPickedObjectResult( GetSceneViewProjectedCursorPosition( ) );
 				if ( pr.mEntity.Get( ) )
 				{
-					mTransformWidget.SetRotation( pr.mEntity.Get( )->GetWorldRotation( ) );
-					mTransformWidget.SetPosition( pr.mEntity.Get( )->GetWorldPosition( ) );
-					mSelectedEntity = pr.mEntity;
+					// Set selected entity
+					SelectEntity( pr.mEntity );
 				}
 				// Translation widget interaction
-				else
+				else if ( EditorTransformWidget::IsValidID( pr.mId ) )
 				{
 					// Begin widget interaction
 					mTransformWidget.BeginWidgetInteraction( TransformWidgetRenderableType( pr.mId - MAX_ENTITIES ) );
+				}
+				else
+				{
+					// Deselect entity if click in scene view and not anything valid
+					if ( mEditorWidgetManager.GetHovered( mEditorSceneView ) )
+					{
+						DeselectEntity( ); 
+					}
 				}
 			}
 		}
@@ -1309,6 +1390,12 @@ namespace Enjon
 					camera->SetRotation( mPreviousCameraTransform.Rotation );
 				}
 			}
+		}
+
+		if ( !mTransformWidget.IsInteractingWithWidget( ) && mSelectedEntity )
+		{
+			mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) );
+			mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) );
 		}
 
 		return Enjon::Result::PROCESS_RUNNING;

@@ -159,6 +159,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			CollisionShapeType GetShapeType( ) const;
+
+			/**
+			* @brief
+			*/
 			void SetContinuousCollisionDetectionEnabled( bool enabled ); 
 
 			/**
@@ -200,6 +205,16 @@ namespace Enjon
 			* @brief
 			*/
 			virtual void UpdateTransform( const Transform& transform ) override;
+ 
+			/*
+			* @brief
+			*/
+			virtual Result SerializeData( ByteBuffer* buffer ) const override;
+
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
 		protected: 
 			ENJON_PROPERTY( )

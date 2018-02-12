@@ -183,6 +183,7 @@ namespace Enjon
 			void CreateNewProject( const String& projectName );
 
 			void SelectEntity( const EntityHandle& handle );
+			void DeselectEntity( );
 
 			void UnloadScene( );
 			void LoadProject( const Project& project );

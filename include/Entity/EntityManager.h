@@ -64,6 +64,11 @@ namespace Enjon
 		/*
 		* @brief
 		*/
+		static EntityHandle Invalid( );
+
+		/*
+		* @brief
+		*/
 		explicit operator bool( );
 
 		/*

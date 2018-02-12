@@ -51,6 +51,10 @@ namespace Enjon
 
 			void SetTransformationMode( TransformationMode mode ); 
 
+			void Enable( bool enable );
+
+			static bool IsValidID( const u32& id );
+
 		private:
 			LineIntersectionResult GetLineIntersectionResult( const Vec3& axisA, const Vec3& axisB, const Vec3& axisC, bool comparedSupportingAxes = true, const Vec3& axisToUseAsPlaneNormal = Vec3(0.0f) );
 			LineIntersectionResult GetLineIntersectionResultSingleAxis( const Vec3& axis );
@@ -67,6 +71,7 @@ namespace Enjon
 			Vec3 mDelta;
 			Vec2 mPreviousMouseCoords;
 			bool mInteractingWithTransformWidget = true; 
+			bool mEnabled = false;
 	}; 
 }
 

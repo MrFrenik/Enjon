@@ -294,6 +294,28 @@ namespace Enjon
 					}
 				} break;
 
+				case MetaPropertyType::Object:
+				{
+					// Serialize out object to temporary buffer
+					ByteBuffer temp;
+
+					// Treat this differently if is pointer
+					if ( prop->GetTraits( ).IsPointer( ) )
+					{
+						const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
+						const Object* obj = base->GetValueAsObject( object );
+						ObjectArchiver::Serialize( obj, &temp );
+						buffer->Write< usize >( temp.GetSize( ) );
+
+						// Serialize object data to actual buffer
+						ObjectArchiver::Serialize( obj, buffer );
+					}
+					else
+					{
+						// Not supported yet...
+					} 
+				} break;
+
 				case MetaPropertyType::Enum:
 				{
 					// Write size of enum integral value
@@ -873,6 +895,23 @@ namespace Enjon
 
 						// Set ColorRGBA32 property
 						cls->SetValue( object, prop, ColorRGBA32( r, g, b, a ) );
+					} break;
+
+					case MetaPropertyType::Object:
+					{
+						// If is pointer
+						if ( prop->GetTraits( ).IsPointer( ) )
+						{
+							// Grab object from deserializer
+							Object* obj = ObjectArchiver::Deserialize( buffer );
+
+							// Set value
+							cls->SetValue( object, prop, obj ); 
+						}
+						else
+						{
+							// Not handled yet...
+						}
 					} break;
 
 					case MetaPropertyType::Enum:

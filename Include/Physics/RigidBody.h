@@ -170,6 +170,11 @@ namespace Enjon
 			*/
 			void SetUserPointer( void* pointer );
 
+			/**
+			* @brief
+			*/
+			CollisionShapeType GetShapeType( ) const;
+
 		// Serialized properties
 		private:
 

@@ -253,14 +253,18 @@ namespace Enjon
 	{
 		mContactEvents.clear( ); 
 		mNewContactEvents.clear( );
+		ClearAllForces( );
 	}
 
 	//====================================================================== 
 
 	void PhysicsSubsystem::AddBody( RigidBody* body )
 	{
-		mRigidBodies.insert( body );
-		mDynamicsWorld->addRigidBody( body->GetRawBody() );
+		if ( mRigidBodies.find( body ) == mRigidBodies.end( ) )
+		{
+			mRigidBodies.insert( body );
+			mDynamicsWorld->addRigidBody( body->GetRawBody() ); 
+		}
 	}
 
 	//====================================================================== 
@@ -285,6 +289,7 @@ namespace Enjon
 		for ( auto& b : mRigidBodies )
 		{
 			b->ClearForces( );
+			b->Reinitialize( );
 		}
 	}
 

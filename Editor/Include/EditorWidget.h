@@ -26,7 +26,8 @@ namespace Enjon
 		ScaleRightAxis,
 		ScaleXYAxes,
 		ScaleXZAxes,
-		ScaleYZAxes
+		ScaleYZAxes,
+		Count
 	};
 
 	class TransformHeirarchy : public Object
