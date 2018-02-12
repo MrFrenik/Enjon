@@ -98,7 +98,12 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void SetLinearVelocity( const Vec3& gravity );
+			void SetLinearVelocity( const Vec3& velocity );
+
+			/**
+			* @brief
+			*/
+			void SetAngularVelocity( const Vec3& velocity );
 
 			/**
 			* @brief
@@ -175,6 +180,19 @@ namespace Enjon
 			*/
 			CollisionShapeType GetShapeType( ) const;
 
+		protected:
+
+			/**
+			* @brief
+			*/
+			virtual Result SerializeData( ByteBuffer* buffer ) const override;
+
+			/**
+			* @brief
+			*/
+			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
+
+
 		// Serialized properties
 		private:
 
@@ -239,23 +257,23 @@ namespace Enjon
 
 			*/
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 100.0f )
 			f32 mMass = 1.0f;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
 			f32 mRestitution = 0.0f;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
 			f32 mFriction = 0.8f;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
 			f32 mLinearDamping = 0.05f;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
 			f32 mAngularDamping = 0.4f;
 
 			ENJON_PROPERTY( )
-			Vec3 mGravity = Vec3( 0.0f, -10.0f, 10.0f );
+			Vec3 mGravity = Vec3( 0.0f, -10.0f, 0.0f );
 
 			ENJON_PROPERTY( )
 			u32 mCCDEnabled = false;
@@ -263,8 +281,6 @@ namespace Enjon
 		public:
 			ENJON_PROPERTY( )
 			CollisionShape* mShape = nullptr;
-
-			f32 mOtherValue = 1.0f;
 
 		private:
 			BulletRigidBody* mBody = nullptr;

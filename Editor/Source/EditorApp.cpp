@@ -39,8 +39,8 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mProjectsDir = "W:/Projects/";
 
 //Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -353,7 +353,7 @@ namespace Enjon
 
 				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 				auto cam = gfx->GetGraphicsSceneCamera( );
-				mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) );
+				mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) ); 
 
 				// Call start up function for game
 				if ( mProject.GetApplication() )
@@ -371,7 +371,8 @@ namespace Enjon
 			ImGui::SameLine( );
 			if ( ImGui::Button( "Reload" ) )
 			{ 
-				LoadDLL( );
+				// ReloadDLL without release scene asset
+				LoadDLL( false );
 			}
 		} 
 	}
@@ -551,21 +552,26 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EditorApp::UnloadScene( )
+	void EditorApp::UnloadScene( bool releaseSceneAsset )
 	{
 		EntityManager* em = EngineSubsystem( EntityManager );
 		for ( auto& e : em->GetActiveEntities( ) )
 		{
 			e->Destroy( );
 		} 
+
+		// Force cleanup of scene
 		em->ForceCleanup( );
 
-		if ( mCurrentScene )
+		if ( releaseSceneAsset )
 		{
-			mCurrentScene.Unload( ); 
-		}
+			if ( mCurrentScene )
+			{
+				mCurrentScene.Unload( ); 
+			}
 
-		mCurrentScene = nullptr;
+			mCurrentScene = nullptr; 
+		}
 	}
 
 	//================================================================================================================================
@@ -705,7 +711,7 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EditorApp::LoadDLL( )
+	void EditorApp::LoadDLL( bool releaseSceneAsset )
 	{
 		Enjon::ByteBuffer buffer;
 
@@ -721,6 +727,9 @@ namespace Enjon
 
 		// Force the scene to clean up ahead of frame
 		//CleanupScene( ); 
+
+		// Unload previous scene 
+		UnloadScene( releaseSceneAsset ); 
 
 		// Actual code starts here...
 		bool needsReload = UnloadDLL( &buffer );
@@ -784,6 +793,15 @@ namespace Enjon
 
 			std::cout << "Could not load library\n";
 		}
+
+		// Reload scene if available
+		if ( !releaseSceneAsset )
+		{
+			if ( mCurrentScene )
+			{
+				mCurrentScene.Reload( ); 
+			}
+		}
 	}
 
 	//================================================================================================================================
@@ -812,14 +830,28 @@ namespace Enjon
 
 	//================================================================================================================================
 
+	void EditorApp::ReloadScene( )
+	{
+		if ( mCurrentScene )
+		{
+			mCurrentScene.Reload( );
+		}
+	}
+
+	//================================================================================================================================
+
 	void EditorApp::InitializeProjectApp( )
 	{
 		Application* app = mProject.GetApplication( );
-		if ( app )
+		if ( app && mCurrentScene )
 		{
 			// Cache off all entity handles in scene before app starts
 			EntityManager* em = EngineSubsystem( EntityManager );
 			mSceneEntities = em->GetActiveEntities( );
+
+			// NOTE(): Don't really like this at all...
+			// Save current scene before starting so we can reload on stop 
+			mCurrentScene.Save( );
 
 			// Initialize the app
 			app->Initialize( );
@@ -848,8 +880,9 @@ namespace Enjon
 					c->Shutdown( );
 				}
 
+				// Destroy all entities
 				// If either null or not in original cached entity list then destroy
-				if ( !e || std::find( mSceneEntities.begin( ), mSceneEntities.end( ), e ) == mSceneEntities.end( ) )
+				//if ( !e || std::find( mSceneEntities.begin( ), mSceneEntities.end( ), e ) == mSceneEntities.end( ) )
 				{
 					e->Destroy( );
 				}
@@ -860,6 +893,9 @@ namespace Enjon
 
 			// Force the scene to clean up ahead of frame
 			CleanupScene( ); 
+
+			// Reload current scene
+			ReloadScene( );
 
 			// Clean up physics subsystem from contact events as well
 			PhysicsSubsystem* phys = EngineSubsystem( PhysicsSubsystem );

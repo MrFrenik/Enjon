@@ -185,15 +185,16 @@ namespace Enjon
 			void SelectEntity( const EntityHandle& handle );
 			void DeselectEntity( );
 
-			void UnloadScene( );
+			void UnloadScene( bool releaseSceneAsset = true );
 			void LoadProject( const Project& project );
 			bool UnloadDLL( ByteBuffer* buffer = nullptr );
-			void LoadDLL( );
+			void LoadDLL( bool releaseSceneAsset = true );
 
 			void CollectAllProjectsOnDisk( );
 			void LoadProjectSolution( );
 
 			void CleanupScene( );
+			void ReloadScene( );
 
 			void InitializeProjectApp( );
 			void ShutdownProjectApp( ByteBuffer* buffer );

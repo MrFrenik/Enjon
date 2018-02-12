@@ -286,11 +286,11 @@ namespace Enjon
 
 	void PhysicsSubsystem::ClearAllForces( )
 	{
-		for ( auto& b : mRigidBodies )
-		{
-			b->ClearForces( );
-			b->Reinitialize( );
-		}
+		//for ( auto& b : mRigidBodies )
+		//{
+		//	//b->ClearForces( );
+		//	//b->Reinitialize( );
+		//}
 	}
 
 	//====================================================================== 

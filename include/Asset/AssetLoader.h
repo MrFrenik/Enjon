@@ -78,6 +78,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void ReloadAsset( );
+
+			/**
+			* @brief
+			*/
 			void Destroy( );
 
 

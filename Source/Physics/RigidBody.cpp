@@ -7,6 +7,8 @@
 #include "Physics/BoxCollisionShape.h"
 #include "Physics/SphereCollisionShape.h"
 #include "Physics/EmptyCollisionShape.h"
+#include "Serialize/ObjectArchiver.h"
+#include "Serialize/ByteBuffer.h"
 
 #include <Bullet/btBulletCollisionCommon.h>
 
@@ -149,6 +151,11 @@ namespace Enjon
 	void RigidBody::ClearForces( )
 	{
 		mBody->clearForces( );
+		// Calculate local inertia using shape
+		BTransform initialTransform;
+
+		BV3 localInertia = mShape->CalculateLocalInertia( mMass );
+		mBody->setMassProps( mMass, localInertia );
 	}
 
 	//========================================================================
@@ -277,6 +284,13 @@ namespace Enjon
 
 	//========================================================================
 
+	void RigidBody::SetAngularVelocity( const Vec3& velocity )
+	{
+		mBody->setAngularVelocity( PhysicsUtils::Vec3ToBV3( velocity ) );
+	}
+
+	//========================================================================
+
 	BulletRigidBodyMotionState* RigidBody::GetMotionState( ) const 
 	{
 		return mMotionState;
@@ -371,6 +385,8 @@ namespace Enjon
 		// Set local scaling of shape
 		mShape->SetLocalScaling( transform.Scale ); 
 
+		SetLinearVelocity( 0.0f );
+		SetAngularVelocity( 0.0f );
 		mBody->setWorldTransform( bTransform );
 		mBody->getMotionState( )->setWorldTransform( bTransform );
 
@@ -415,6 +431,84 @@ namespace Enjon
 	void RigidBody::SetUserPointer( void* pointer )
 	{
 		mBody->setUserPointer( pointer );
+	}
+
+	//========================================================================
+
+	Result RigidBody::SerializeData( ByteBuffer* buffer ) const
+	{
+		// Write out mass
+		buffer->Write< f32 >( mMass );
+
+		// Write out restitution
+		buffer->Write< f32 >( mRestitution ); 
+
+		// Write out friction
+		buffer->Write< f32 >( mFriction ); 
+
+		// Write out linear damping
+		buffer->Write< f32 >( mLinearDamping );
+
+		// Write out angular damping
+		buffer->Write< f32 >( mAngularDamping );
+
+		// Write out gravity
+		buffer->Write< f32 >( mGravity.x );;
+		buffer->Write< f32 >( mGravity.y );;
+		buffer->Write< f32 >( mGravity.z );;
+
+		// Write out ccd enabled
+		buffer->Write< u32 >( mCCDEnabled );
+
+		// Serialize out collision shape
+		ObjectArchiver::Serialize( mShape, buffer );
+
+		return Result::SUCCESS;
+	}
+
+	//========================================================================
+
+	Result RigidBody::DeserializeData( ByteBuffer* buffer )
+	{
+		// Read in mass
+		SetMass( buffer->Read< f32 >( ) );
+
+		// Read in restitution
+		SetRestitution( buffer->Read< f32 >( ) );
+
+		// Read in friction
+		SetFriction( buffer->Read< f32 >( ) );
+
+		// Read in linear damping
+		SetLinearDamping( buffer->Read< f32 >( ) );
+
+		// Read in angular damping
+		SetAngularDamping( buffer->Read< f32 >( ) );
+
+		// Read in gravity
+		Vec3 gravity;
+		gravity.x = buffer->Read< f32 >( );
+		gravity.y = buffer->Read< f32 >( );
+		gravity.z = buffer->Read< f32 >( );
+		SetGravity( gravity );
+
+		// Read in ccd enabled
+		SetContinuousCollisionDetectionEnabled( buffer->Read< u32 >( ) );
+
+		// Release memory for shape first
+		if ( mShape )
+		{
+			delete mShape;
+			mShape = nullptr;
+		} 
+
+		// Deserialize collision shape
+		mShape = (CollisionShape*)ObjectArchiver::Deserialize( buffer ); 
+
+		// Reset raw collision shape
+		mBody->setCollisionShape( mShape->GetRawShape( ) );
+
+		return Result::SUCCESS;
 	}
 
 	//========================================================================

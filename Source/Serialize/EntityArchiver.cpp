@@ -206,6 +206,9 @@ namespace Enjon
 					{
 						res = DeserializeObjectDataDefault( cmp, cmpCls, buffer );
 					}
+
+					// Deserialize late init ( Not sure where to do this... )
+					cmp->DeserializeLateInit( );
 				}
 			}
 			else

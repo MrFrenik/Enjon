@@ -68,6 +68,30 @@ namespace Enjon
 
 	//=================================================================
 
+	void AssetRecordInfo::ReloadAsset( )
+	{ 
+		// Do not want to unload asset, since other assethandle references will be lost
+		if ( mAsset )
+		{ 
+			// Archiver to use to load asset from disk
+			AssetArchiver archiver; 
+
+			ByteBuffer buffer;
+			buffer.ReadFromFile( mAssetFilePath );
+
+			// Error checking...
+			if ( buffer.GetStatus( ) == BufferStatus::Invalid )
+			{
+				return;
+			}
+
+			// Set the asset
+			AssetArchiver::Deserialize( &buffer, mAsset );
+		} 
+	} 
+
+	//=================================================================
+
 	void AssetRecordInfo::Destroy( )
 	{
 		UnloadAsset( ); 

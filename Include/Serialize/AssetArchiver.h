@@ -42,6 +42,11 @@ namespace Enjon
 			*/
 			Asset* Deserialize( const String& filePath );
 
+			/*
+			* @brief
+			*/
+			static void Deserialize( ByteBuffer* buffer, Asset* asset );
+
 		protected:
 
 		private: 

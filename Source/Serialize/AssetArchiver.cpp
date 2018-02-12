@@ -67,6 +67,69 @@ namespace Enjon
 
 	//====================================================================================
 
+	void AssetArchiver::Deserialize( ByteBuffer* buffer, Asset* asset )
+	{
+		//==================================================
+		// Object Header 
+		//==================================================
+		const MetaClass* cls = Object::GetClass( buffer->Read< String >( ) );	// Read class type
+		u32 versionNumber = buffer->Read< u32 >( );								// Read version number id 
+
+		//==================================================
+		// Asset Header 
+		//==================================================
+		UUID uuid = buffer->Read< UUID >( );										// UUID of asset
+		String assetName = buffer->Read< String >( );								// Asset name
+		String loaderName = buffer->Read< String >( );								// Loader class name
+
+		if ( cls )
+		{
+			// If asset doesn't exist, then construct it
+			if ( !asset )
+			{
+				// Construct new object based on class
+				asset = (Asset*)cls->Construct( ); 
+			}
+
+			// Couldn't construct object
+			if ( !asset )
+			{
+				delete asset;
+				asset = nullptr;
+			} 
+			// Successfully constructed, now deserialize data into it
+			else
+			{
+				Result res = asset->DeserializeData( buffer ); 
+
+				// Set asset properties
+				asset->mLoader = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->GetLoaderByAssetClass( asset->Class( ) );
+				asset->mName = assetName;
+				asset->mUUID = uuid;
+
+				// Default deserialization method if not asset does not handle its own deserialization
+				if ( res == Result::INCOMPLETE )
+				{
+					res = DeserializeObjectDataDefault( asset, cls, buffer );
+				} 
+
+				// Delete object if not deserialized correctly
+				if ( res != Result::SUCCESS )
+				{
+					delete asset;
+					asset = nullptr;
+				}
+				// Otherwise call late init after deserializing
+				else
+				{
+					asset->DeserializeLateInit( );
+				}
+			} 
+		}
+	}
+
+	//====================================================================================
+
 	Asset* AssetArchiver::Deserialize( const String& filePath )
 	{ 
 		// Reset the buffer

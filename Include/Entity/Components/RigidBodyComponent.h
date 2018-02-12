@@ -84,6 +84,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			virtual void Shutdown( ) override;
+
+			/**
+			* @brief
+			*/
 			void SetMass( const f32& mass );
 
 			/**
@@ -215,6 +220,11 @@ namespace Enjon
 			* @brief
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
+
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeLateInit( ) override;
 
 		protected: 
 			ENJON_PROPERTY( )

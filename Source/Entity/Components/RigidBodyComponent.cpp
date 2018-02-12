@@ -67,6 +67,14 @@ namespace Enjon
 
 	//========================================================================
 
+	void RigidBodyComponent::Shutdown( )
+	{
+		// Set transform of rigidbody and clear forces
+		mBody.SetWorldTransform( mEntity->GetWorldTransform( ) );
+	}
+
+	//========================================================================
+
 	void RigidBodyComponent::SetShape( CollisionShapeType collisionType )
 	{
 		// Set shape on rigid body 
@@ -246,6 +254,19 @@ namespace Enjon
 	{
 		// Deserialize mBody 
 		return ObjectArchiver::Deserialize( buffer, &mBody ); 
+	}
+
+	//======================================================================== 
+
+	Result RigidBodyComponent::DeserializeLateInit( )
+	{
+		// Reset world transform
+		if ( mEntity )
+		{
+			mBody.SetWorldTransform( mEntity->GetWorldTransform( ) );
+		}
+
+		return Result::SUCCESS;
 	}
 
 	//======================================================================== 

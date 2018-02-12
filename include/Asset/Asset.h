@@ -191,6 +191,15 @@ namespace Enjon
 				}
 			}
 
+			void Reload( )
+			{
+				if ( mAsset )
+				{
+					// Reload and reset asset
+					const_cast<AssetRecordInfo*>( mAsset->GetAssetRecordInfo( ) )->ReloadAsset( );
+				}
+			}
+
 			/*
 			* @brief
 			*/
