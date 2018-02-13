@@ -14,8 +14,6 @@ namespace Enjon
 
 	RigidBodyComponent::RigidBodyComponent( )
 	{
-		// Set up the bullet rigid body
-		mBody.Initialize( );
 	}
 
 	//========================================================================
@@ -25,6 +23,14 @@ namespace Enjon
 		// Remove component from physics subsystem's contact events
 		Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->ConstCast< PhysicsSubsystem >( )->RemoveFromContactEvents( this );
 
+		// Delete all subscriptions
+		ClearAllCallbacks( );
+	}
+
+	//========================================================================
+
+	void RigidBodyComponent::ClearAllCallbacks( )
+	{
 		// Delete all subscriptions
 		for ( auto& m : mCollisionEnterCallbacks )
 		{
@@ -41,13 +47,16 @@ namespace Enjon
 
 		// Clear subscriptions
 		mCollisionExitCallbacks.clear( );
-		mCollisionExitCallbacks.clear( );
+		mCollisionExitCallbacks.clear( ); 
 	}
 
 	//========================================================================
  
-	void RigidBodyComponent::Initialize( )
+	void RigidBodyComponent::PostConstruction( )
 	{
+		// Initialize the rigidbody
+		mBody.Initialize( );
+
 		// Set user pointer to this physics component
 		mBody.SetUserPointer( this );
 
@@ -62,9 +71,24 @@ namespace Enjon
 
 	void RigidBodyComponent::Update( const f32& dt )
 	{
-		Transform wt = mBody.GetWorldTransform( );
-		mEntity->SetLocalPosition( wt.Position, false );
-		mEntity->SetLocalRotation( wt.Rotation, false );
+		PhysicsSubsystem* phys = EngineSubsystem( PhysicsSubsystem );
+		if ( !phys->IsPaused( ) )
+		{
+			Transform wt = mBody.GetWorldTransform( );
+			mEntity->SetLocalPosition( wt.Position, false );
+			mEntity->SetLocalRotation( wt.Rotation, false ); 
+		}
+	}
+
+	//========================================================================
+
+	void RigidBodyComponent::Initialize( )
+	{ 
+		// Reinitialize rigidbody
+		mBody.Reinitialize( ); 
+
+		// Set world transform of rigidbody
+		mBody.SetWorldTransform( mEntity->GetWorldTransform( ) );
 	}
 
 	//========================================================================
@@ -155,6 +179,7 @@ namespace Enjon
 	{
 		// Reset state position state 
 		mBody.SetWorldTransform( transform );
+		mBody.SetAwake( true );
 	}
 
 	//========================================================================

@@ -58,6 +58,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void SetAwake( bool enable );
+
+			/**
+			* @brief
+			*/
 			void SetShape( CollisionShapeType type );
 
 			/**
@@ -93,7 +98,17 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			f32 GetLinearDamping( ) const;
+
+			/**
+			* @brief
+			*/
 			void SetAngularDamping( const f32& damping );
+
+			/**
+			* @brief
+			*/
+			f32 GetAngularDamping( ) const;
 
 			/**
 			* @brief
@@ -286,10 +301,10 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			Vec3 mGravity = Vec3( 0.0f, -10.0f, 0.0f );
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
 			u32 mCCDEnabled = false;
 
-			ENJON_PROPERTY( UIMin = 0.0, UIMax = 1.0 )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
 			u32 mIsTriggerVolume = false;
 
 		public:

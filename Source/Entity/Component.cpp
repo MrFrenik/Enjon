@@ -49,16 +49,30 @@ namespace Enjon
 	
 	//=========================================================================
 
-	void Component::Update( const f32& dT )
+	void Component::PostConstruction( )
 	{ 
-		// Nothing by default
+		// Nothing by default...
 	}
 	
 	//=========================================================================
 
 	void Component::Initialize( )
 	{ 
-		// Nothing by default
+		// Nothing by default...
+	}
+	
+	//=========================================================================
+
+	void Component::Start( )
+	{ 
+		// Nothing by default...
+	}
+	
+	//=========================================================================
+
+	void Component::Update( const f32& dT )
+	{ 
+		// Nothing by default...
 	} 
 	
 	//=========================================================================

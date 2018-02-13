@@ -118,6 +118,12 @@ namespace Enjon
 		// Set mass properties of bullet rigid body
 		mBody->setMassProps( mMass, localInertia );
 
+		// Set whether or not this body is a trigger volume
+		SetIsTriggerVolume( GetIsTriggerVolume( ) );
+
+		// Set whether or not this body is using ccd
+		SetContinuousCollisionDetectionEnabled( mCCDEnabled );
+
 		// Add body to physics world and set physics world pointer
 		AddToWorld( );
 	}
@@ -156,6 +162,13 @@ namespace Enjon
 
 		BV3 localInertia = mShape->CalculateLocalInertia( mMass );
 		mBody->setMassProps( mMass, localInertia );
+	}
+
+	//========================================================================
+
+	void RigidBody::SetAwake( bool enable )
+	{
+		mBody->activate( enable );
 	}
 
 	//========================================================================
@@ -280,10 +293,24 @@ namespace Enjon
 
 	//========================================================================
 
+	f32 RigidBody::GetLinearDamping( ) const
+	{
+		return mLinearDamping;
+	}
+
+	//========================================================================
+
 	void RigidBody::SetAngularDamping( const f32& damping )
 	{ 
 		mAngularDamping = damping;
 		mBody->setDamping( mLinearDamping, mAngularDamping );
+	}
+
+	//========================================================================
+
+	f32 RigidBody::GetAngularDamping( ) const
+	{
+		return mAngularDamping;
 	}
 
 	//========================================================================
@@ -407,7 +434,7 @@ namespace Enjon
 		const Quaternion* elr = &transform.Rotation;
 		const Vec3* els = &transform.Scale;
 		bTransform.setOrigin( BV3( elp->x, elp->y, elp->z ) );
-		bTransform.setRotation( BQuat( elr->x, elr->y, elr->z, elr->w ) );
+		bTransform.setRotation( BQuat( elr->x, elr->y, elr->z, -elr->w ) );
 
 		// Set local scaling of shape
 		mShape->SetLocalScaling( transform.Scale ); 

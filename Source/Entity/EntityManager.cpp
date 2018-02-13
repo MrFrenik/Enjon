@@ -849,7 +849,7 @@ namespace Enjon
 			component->SetID(compIdx);
 			component->SetBase( base );
 			component->mEntityID = entity->mID;
-			component->Initialize( ); 
+			component->PostConstruction( ); 
 
 			// Get component ptr and push back into entity components
 			entity->mComponents.push_back( compIdx );

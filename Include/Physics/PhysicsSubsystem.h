@@ -63,21 +63,6 @@ namespace Enjon
 			RigidBodyComponent* mHitComponent = nullptr; 
 	};
 
-	struct CollisionReport
-	{ 
-		CollisionReport( RigidBodyComponent* cmpA, RigidBodyComponent* cmpB )
-			: mCompA( cmpA ), mCompB( cmpB )
-		{
-		}
-
-		Entity* GetMatchingEntityFromReport( Component* comp ) const;
-
-		RigidBodyComponent* mCompA;
-		RigidBodyComponent* mCompB;
-	};
-
-	
-
 	ENJON_CLASS( ) 
 	class PhysicsSubsystem : public Subsystem
 	{ 
@@ -124,6 +109,11 @@ namespace Enjon
 			*@brief
 			*/
 			void PauseSystem( bool enabled );
+
+			/**
+			*@brief
+			*/
+			bool IsPaused( ) const;
 
 			/**
 			*@brief

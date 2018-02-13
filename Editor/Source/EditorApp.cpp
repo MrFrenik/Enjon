@@ -39,8 +39,8 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mProjectsDir = "W:/Projects/";
 
 //Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -141,11 +141,11 @@ namespace Enjon
 						c->ConstCast< RigidBodyComponent >( )->SetShape( c->Cast< RigidBodyComponent >( )->GetShapeType( ) );
 					}
 
-					if ( cls->InstanceOf<RigidBodyComponent>( ) )
-					{
-						RigidBodyComponent* rbc = c->ConstCast< RigidBodyComponent >( );
-						rbc->SetMass( rbc->GetMass( ) );
-					} 
+					//if ( cls->InstanceOf<RigidBodyComponent>( ) )
+					//{
+					//	RigidBodyComponent* rbc = c->ConstCast< RigidBodyComponent >( );
+					//	rbc->SetMass( rbc->GetMass( ) );
+					//} 
 				}
 			}
 
@@ -855,6 +855,24 @@ namespace Enjon
 
 			// Initialize the app
 			app->Initialize( );
+
+			// Run through all components for entities and call their initialize function
+			for ( auto& e : em->GetActiveEntities( ) )
+			{
+				for ( auto& c : e->GetComponents( ) )
+				{
+					c->Initialize( );
+				}
+			}
+
+			// Run through all components for entities and call their start function
+			for ( auto& e : em->GetActiveEntities( ) )
+			{
+				for ( auto& c : e->GetComponents( ) )
+				{
+					c->Start( );
+				}
+			}
 
 			// Turn on the physics simulation
 			PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );

@@ -133,20 +133,30 @@ namespace Enjon
 
 			virtual ~Component( )
 			{ 
-			}
+			}	
 
 			/**
-			* @brief
+			* @brief Called immediately after constructing the component. Can assume entity ownership at this point however cannot assume that any components are available for reference.
+			*/
+			virtual void PostConstruction( );
+
+			/**
+			* @brief Called once per life-cycle of each component BEFORE Start() is called. Not safe to assume any other components are initialized or registered.
 			*/
 			virtual void Initialize( );
 
 			/**
-			* @brief
+			* @brief Called once per life-cycle of each component. It is safe to assume at this point that all other components are initailized and registered.
+			*/
+			virtual void Start( );
+
+			/**
+			* @brief Called once per frame on each component.
 			*/
 			virtual void Update( const f32& dT );
 
 			/**
-			* @brief
+			* @brief Called at the end of the component life-cycle. Any state or memory that needs to be cleaned up with happen here.
 			*/
 			virtual void Shutdown( );
 
@@ -167,6 +177,8 @@ namespace Enjon
 
 
 		protected:
+
+		
 
 			/**
 			* @brief

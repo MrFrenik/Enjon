@@ -9,6 +9,7 @@
 #include "Entity/Component.h"
 #include "Physics/PhysicsSubsystem.h"
 #include "Physics/RigidBody.h"
+#include "Physics/CollisionReport.h"
 #include "System/Types.h"
 
 namespace Enjon
@@ -74,7 +75,12 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual void Initialize( ) override;
+			virtual void PostConstruction( ) override; 
+
+			/**
+			* @brief
+			*/
+			virtual void Initialize( ) override; 
 
 			/**
 			* @brief
@@ -201,30 +207,31 @@ namespace Enjon
 
 		protected:
 
-			/**
-			* @brief
-			*/
-			void PostConstruction( ); 
 
 			/**
 			* @brief
 			*/
 			virtual void UpdateTransform( const Transform& transform ) override;
  
-			/*
+			/**
 			* @brief
 			*/
 			virtual Result SerializeData( ByteBuffer* buffer ) const override;
 
-			/*
+			/**
 			* @brief
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
-			/*
+			/**
 			* @brief
 			*/
 			virtual Result DeserializeLateInit( ) override;
+
+			/**
+			* @brief
+			*/
+			void ClearAllCallbacks( );
 
 		protected: 
 			ENJON_PROPERTY( )

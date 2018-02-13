@@ -5,7 +5,11 @@
 #include "EditorApp.h"
 
 #include <filesystem> 
-//#include <vld.h> 
+
+#define ENJON_MEMORY_LEAK_DETECTION 0 
+#if ENJON_MEMORY_LEAK_DETECTION
+	#include <vld.h> 
+#endif
 
 namespace FS = std::experimental::filesystem; 
 

@@ -43,13 +43,10 @@ namespace Enjon
 
 	//==================================================================== 
 
-	void GraphicsComponent::Initialize( )
+	void GraphicsComponent::PostConstruction( )
 	{
 		// Set id of renderable to entity id
-		if ( mEntity ) 
-		{
-			mRenderable.SetRenderableID( mEntity->GetID( ) );
-		}
+		mRenderable.SetRenderableID( mEntity->GetID( ) );
 	}
 
 	//==================================================================== 

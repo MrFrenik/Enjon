@@ -7,6 +7,7 @@
 #include "Entity/EntityManager.h"
 #include "Entity/Components/RigidBodyComponent.h"
 #include "Physics/PhysicsUtils.h"
+#include "Physics/CollisionReport.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
  
@@ -143,7 +144,7 @@ namespace Enjon
 				btManifoldPoint& pt = contactManifold->getContactPoint( j );
 
 				// Check collision state.
-				if ( pt.getDistance( ) < 0.f )
+				if ( pt.getDistance( ) < 0.001f )
 				{
 					inContact = true;
 
@@ -292,6 +293,13 @@ namespace Enjon
 
 	//====================================================================== 
 
+	bool PhysicsSubsystem::IsPaused( ) const
+	{
+		return mIsPaused;
+	}
+
+	//====================================================================== 
+
 	void PhysicsSubsystem::ClearAllForces( )
 	{
 		for ( auto& b : mRigidBodies )
@@ -334,22 +342,7 @@ namespace Enjon
 		} 
 	}
 
-	//====================================================================== 
-
-	Entity* CollisionReport::GetMatchingEntityFromReport( Component* comp ) const
-	{
-		if ( mCompA == nullptr || mCompB == nullptr || comp == nullptr )
-		{
-			return nullptr;
-		}
-
-		Entity* entA = mCompA->GetEntity( );
-		Entity* entB = mCompB->GetEntity( );
-		Entity* entC = comp->GetEntity( );
-
-		Entity* retEnt = entA == entC ? entA : entB == entC ? entB : nullptr;
-		return retEnt;
-	}
+	
 
 	//====================================================================== 
 			

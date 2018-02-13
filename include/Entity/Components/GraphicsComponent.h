@@ -37,13 +37,13 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void Update( const f32& dT) override; 
+			virtual void PostConstruction( ) override;
 
 			/*
 			* @brief
 			*/
-			virtual void Initialize( ) override;
-
+			virtual void Update( const f32& dT) override; 
+ 
 			/* 
 			* @brief Get position of transform 
 			*/
@@ -138,6 +138,9 @@ namespace Enjon
 			* @brief
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
+
+		protected:
+
 
 		private: 
 			
