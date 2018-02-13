@@ -25,19 +25,21 @@ namespace Enjon
 		// Remove component from physics subsystem's contact events
 		Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->ConstCast< PhysicsSubsystem >( )->RemoveFromContactEvents( this );
 
-		// Delete all messages
+		// Delete all subscriptions
 		for ( auto& m : mCollisionEnterCallbacks )
 		{
 			delete m;
 			m = nullptr;
 		}
 
+		// Delete all subscriptions
 		for ( auto& m : mCollisionExitCallbacks )
 		{
 			delete m;
 			m = nullptr;
 		}
 
+		// Clear subscriptions
 		mCollisionExitCallbacks.clear( );
 		mCollisionExitCallbacks.clear( );
 	}
@@ -224,21 +226,7 @@ namespace Enjon
 		{
 			c->Invoke( collision );
 		}
-	}
-
-	//========================================================================
-
-	//void RigidBodyComponent::AddCollisionEnterCallback( const CollisionCallbackSubscription& callback )
-	//{
-	//	mCollisionEnterCallbacks.push_back( callback );
-	//}
-
-	////========================================================================
-
-	//void RigidBodyComponent::AddCollisionExitCallback( const CollisionCallbackSubscription& callback )
-	//{
-	//	mCollisionExitCallbacks.push_back( callback );
-	//}
+	} 
 
 	//======================================================================== 
 

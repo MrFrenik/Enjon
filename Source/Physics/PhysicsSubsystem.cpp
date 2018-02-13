@@ -162,8 +162,16 @@ namespace Enjon
 						mNewContactEvents[ compA ] = HashSet< RigidBodyComponent* >( );
 					}
 
+					// If set doesn't exist, then make it
+					if ( mNewContactEvents.find( compB ) == mNewContactEvents.end( ) )
+					{
+						mNewContactEvents[ compB ] = HashSet< RigidBodyComponent* >( );
+					}
+
 					// Insert new contact event into set for idA
 					mNewContactEvents[ compA ].insert( compB );
+					mNewContactEvents[ compB ].insert( compA );
+
 
 					// Now need to check if this collision exist in current contacts. If not, then collision begin event has begun.  
 					bool contains = false;
@@ -286,11 +294,10 @@ namespace Enjon
 
 	void PhysicsSubsystem::ClearAllForces( )
 	{
-		//for ( auto& b : mRigidBodies )
-		//{
-		//	//b->ClearForces( );
-		//	//b->Reinitialize( );
-		//}
+		for ( auto& b : mRigidBodies )
+		{
+			b->ClearForces( );
+		}
 	}
 
 	//====================================================================== 

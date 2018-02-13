@@ -237,6 +237,33 @@ namespace Enjon
 
 	//========================================================================
 
+	void RigidBody::SetIsTriggerVolume( bool enable )
+	{
+		mIsTriggerVolume = enable;
+
+		if ( mIsTriggerVolume )
+		{
+			mBody->setCollisionFlags( mBody->getCollisionFlags( ) | btCollisionObject::CF_NO_CONTACT_RESPONSE );
+		}
+		else
+		{
+			// Switch off if previously enabled
+			if ( mBody->getCollisionFlags( ) & btCollisionObject::CF_NO_CONTACT_RESPONSE )
+			{
+				mBody->setCollisionFlags( mBody->getCollisionFlags( ) & ~btCollisionObject::CF_NO_CONTACT_RESPONSE );
+			}
+		}
+	}
+
+	//========================================================================
+
+	u32 RigidBody::GetIsTriggerVolume( ) const
+	{
+		return mIsTriggerVolume;
+	}
+
+	//========================================================================
+
 	void RigidBody::SetRestitution( const f32& restitution )
 	{ 
 		mRestitution = restitution;
@@ -460,6 +487,9 @@ namespace Enjon
 		// Write out ccd enabled
 		buffer->Write< u32 >( mCCDEnabled );
 
+		// Write out whether or not is trigger
+		buffer->Write< u32 >( mIsTriggerVolume );
+
 		// Serialize out collision shape
 		ObjectArchiver::Serialize( mShape, buffer );
 
@@ -494,6 +524,9 @@ namespace Enjon
 
 		// Read in ccd enabled
 		SetContinuousCollisionDetectionEnabled( buffer->Read< u32 >( ) );
+
+		// Read in is trigger volume
+		SetIsTriggerVolume( buffer->Read< u32 >( ) );
 
 		// Release memory for shape first
 		if ( mShape )

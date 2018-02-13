@@ -268,7 +268,7 @@ namespace Enjon
 			
 			// Clamp frame rate to ease up on CPU usage
 			static f32 t = 0.0f;
-			const f32 frameRate = 60.0f;
+			const f32 frameRate = 120.0f;
 			if ( (f32)ticks < 1000.0f / frameRate )
 			{
 				SDL_Delay( u32( (1000.0f / frameRate ) - ( (f32)ticks ) ) );

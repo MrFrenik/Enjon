@@ -73,6 +73,16 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void SetIsTriggerVolume( bool enable );
+
+			/**
+			* @brief
+			*/
+			u32 GetIsTriggerVolume( ) const;
+
+			/**
+			* @brief
+			*/
 			void SetRestitution( const f32& restitution );
 
 			/**
@@ -174,6 +184,7 @@ namespace Enjon
 			* @brief
 			*/
 			void SetUserPointer( void* pointer );
+
 
 			/**
 			* @brief
@@ -277,6 +288,9 @@ namespace Enjon
 
 			ENJON_PROPERTY( )
 			u32 mCCDEnabled = false;
+
+			ENJON_PROPERTY( UIMin = 0.0, UIMax = 1.0 )
+			u32 mIsTriggerVolume = false;
 
 		public:
 			ENJON_PROPERTY( )
