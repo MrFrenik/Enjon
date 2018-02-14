@@ -128,6 +128,11 @@ namespace Enjon
 			/**
 			*@brief
 			*/
+			const HashSet< RigidBodyComponent* >* GetContactList( RigidBodyComponent* component );
+
+			/**
+			*@brief
+			*/
 			BulletDynamicPhysicsWorld* GetWorld( ) const;
 
 			/**
@@ -141,6 +146,12 @@ namespace Enjon
 			void CastRay( RayCastResult* ray );
 
 		private:
+
+			/**
+			*@brief
+			*/
+			bool HasContact( RigidBodyComponent* component );
+
 			/**
 			*@brief
 			*/

@@ -265,6 +265,9 @@ namespace Enjon
 			mWorldTime.mDT = dt;
 			mWorldTime.mTotalTime += mWorldTime.mDT;
 			mWorldTime.mFPS = dt;
+
+			// Calculate average delta time for world time
+			mWorldTime.CalculateAverageDeltaTime( );
 			
 			// Clamp frame rate to ease up on CPU usage
 			static f32 t = 0.0f;
@@ -297,6 +300,13 @@ namespace Enjon
 	WorldTime Engine::GetWorldTime( ) const
 	{
 		return mWorldTime;
+	}
+
+	//======================================================= 
+
+	const Application* Engine::GetApplication( )
+	{
+		return mApp;
 	}
 
 	//======================================================= 
@@ -457,6 +467,58 @@ namespace Enjon
 	String EngineConfig::GetEngineResourcePath() const
 	{
 		return mRootPath + "/Assets";
+	}
+	
+	//======================================================= 
+
+	f32 WorldTime::GetDeltaTime( )
+	{
+		return mDT;
+	}
+	
+	//======================================================= 
+
+	f32 WorldTime::GetTotalTimeElapsed( )
+	{
+		return mTotalTime;
+	}
+	
+	//======================================================= 
+
+	f32 WorldTime::GetAverageDeltaTime( )
+	{
+		return mAverageDT;
+	}
+	
+	//======================================================= 
+
+	void WorldTime::CalculateAverageDeltaTime( )
+	{
+		static u32 tc = 10;
+		static f32 mDTs[ 10 ];
+		static u32 count = 0;
+		static bool wrapped = false;
+
+		mDTs[ count ] = mDT;
+		count++;
+		if ( count >= tc )
+		{
+			count = 0;
+			wrapped = true;
+		}
+
+		if ( wrapped )
+		{
+			f32 sum = 0.0f;
+			for ( u32 i = 0; i < tc; ++i )
+			{
+				sum += mDTs[ i ];
+			}
+
+			// Have wrapped, so calculate average
+			sum /= ( f32 )tc;
+			mAverageDT = sum;
+		} 
 	}
 	
 	//======================================================= 

@@ -21,6 +21,9 @@ namespace Enjon
 		// Add renderable to scene
 		GraphicsSubsystem* gs = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem >( )->ConstCast< GraphicsSubsystem >( );
 		gs->GetGraphicsScene( )->AddRenderable( &mRenderable );
+
+		// Set explicit tick state
+		mTickState = ComponentTickState::TickAlways;
 	}
 
 	//====================================================================
@@ -28,6 +31,8 @@ namespace Enjon
 	GraphicsComponent::GraphicsComponent(const Renderable& renderable)
 		: mRenderable(renderable)
 	{
+		// Set explicit tick state
+		mTickState = ComponentTickState::TickAlways;
 	}
 
 	//====================================================================

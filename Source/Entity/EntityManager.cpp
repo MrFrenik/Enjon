@@ -159,13 +159,18 @@ namespace Enjon
 
 	void Entity::Update( const f32& dt )
 	{
-		// Update all core components
+		const Application* app = Engine::GetInstance()->GetApplication( );
+
+		// Update all components
 		for ( auto& c : mComponents )
 		{
 			auto comp = mManager->GetComponent( GetHandle(), c );
 			if ( comp )
 			{
-				comp->Update( dt ); 
+				if ( comp->GetTickState() == ComponentTickState::TickAlways || app->GetApplicationState( ) == ApplicationState::Running )
+				{
+					comp->Update( dt ); 
+				}
 			}
 		} 
 	}
@@ -648,7 +653,7 @@ namespace Enjon
 		//entity->mUUID = UUID::GenerateUUID( );
 
 		// Push back live entity into active entity vector
-		mActiveEntities.push_back(entity); 
+		mMarkedForAdd.push_back( entity );
 
 		// Return entity handle
 		return handle;
@@ -687,10 +692,26 @@ namespace Enjon
 	void EntityManager::Destroy( const EntityHandle& entity )
 	{ 
 		// Push for deferred removal from active entities
-		mMarkedForDestruction.push_back(entity.GetID());
+		mMarkedForDestruction.push_back(entity.GetID()); 
 	}
 
 	//==============================================================================
+
+	void EntityManager::DestroyAll( )
+	{
+		for ( auto& e : mActiveEntities )
+		{
+			e->Destroy( );
+		}
+
+		for ( auto& e : mMarkedForAdd )
+		{
+			e->Destroy( );
+		} 
+
+		mActiveEntities.clear( );
+		mMarkedForAdd.clear( );
+	}
 
 	void EntityManager::ForceCleanup( )
 	{
@@ -754,10 +775,24 @@ namespace Enjon
 		// Clean any entities that were marked for destruction
 		Cleanup( );
 
+		// Add all new entities into active entities
+		for ( auto& e : mMarkedForAdd )
+		{
+			mActiveEntities.push_back( e );
+		}
+
+		// Clear the marked for add entities
+		mMarkedForAdd.clear( );
+
 		// Update all components on entities
 		for ( auto& e : mActiveEntities )
 		{
-			e->Update( dt );
+			// Only update if state is active 
+			// NOTE(): I don't really like this, since it forces an unecessary branch...
+			if ( e->mState == EntityState::ACTIVE )
+			{
+				e->Update( dt ); 
+			}
 		} 
 	}
 
@@ -794,8 +829,8 @@ namespace Enjon
 	//========================================================================================================================
 
 	// TODO(): Need to have a destinction here on whether or not the component being 
-	// Asked to unregistered is an engine-level component or not - Most likely NEVER want to be able to 
-	// remove one of those
+	// asked to unregistered is an engine-level component or not - Most likely NEVER want to be able to 
+	// unregister one of those
 	void EntityManager::UnregisterComponent( const MetaClass* cls )
 	{
 		u32 index = cls->GetTypeId( ); 

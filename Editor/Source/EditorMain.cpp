@@ -6,7 +6,7 @@
 
 #include <filesystem> 
 
-#define ENJON_MEMORY_LEAK_DETECTION 0 
+#define ENJON_MEMORY_LEAK_DETECTION 0
 #if ENJON_MEMORY_LEAK_DETECTION
 	#include <vld.h> 
 #endif

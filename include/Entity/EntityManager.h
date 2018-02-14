@@ -33,6 +33,7 @@ namespace Enjon
 
 	class EntityHandle
 	{
+		friend Application;
 		friend EntityManager;
 
 	public:
@@ -392,6 +393,7 @@ namespace Enjon
 			*/
 			void Destroy(const EntityHandle& entity);
 
+
 			/**
 			* @brief Returns vector of active entities that have no parent
 			*/
@@ -415,7 +417,14 @@ namespace Enjon
 			*/
 			bool ComponentBaseExists( const u32& compIdx );
 
+			/**
+			* @brief Destroys all entities - both active and pending( will clear all lists, so is not iterable safe )
+			* @note NOT SAFE TO CALL DURING ANY ENTITY UPDATE LOOP (Only call within application update)
+			*/
+			void DestroyAll();
+
 		protected: 
+
 
 			/**
 			* @brief
@@ -459,6 +468,7 @@ namespace Enjon
 			EntityStorage 				mEntities;
 			ComponentBaseArray 			mComponents;	
 			ActiveEntityList 			mActiveEntities;
+			ActiveEntityList 			mMarkedForAdd;
 			MarkedForDestructionList 	mMarkedForDestruction;
 			u32 						mNextAvailableID = 0;
 	};

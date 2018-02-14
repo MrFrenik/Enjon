@@ -150,6 +150,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void Translate( const Vec3& translation );
+
+			/**
+			* @brief
+			*/
 			void ApplyCentralForce( const Vec3& force );
 
 			/**
@@ -190,6 +195,16 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void OnCollisionOverlap( const CollisionReport& collision );
+
+			/**
+			* @brief
+			*/
+			Vector< EntityHandle > GetOverlappingEntities( );
+
+			/**
+			* @brief
+			*/
 			template <typename T>
 			void AddCollisionEnterCallback( T* obj, const std::function<void(T*, const CollisionReport& ) >& func )
 			{
@@ -205,8 +220,13 @@ namespace Enjon
 				mCollisionExitCallbacks.push_back( new CollisionCallbackSubscription<T>( obj, func ) );
 			}
 
-		protected:
+			template <typename T>
+			void AddCollisionOverlapCallback( T* obj, const std::function<void( T*, const CollisionReport& ) >& func )
+			{
+				mCollisionOverlapCallbacks.push_back( new CollisionCallbackSubscription< T >( obj, func ) );
+			}
 
+		protected:
 
 			/**
 			* @brief
@@ -240,6 +260,7 @@ namespace Enjon
 		protected: 
 			Vector < CollisionCallbackSubscriptionBase* > mCollisionEnterCallbacks;
 			Vector < CollisionCallbackSubscriptionBase* > mCollisionExitCallbacks;
+			Vector < CollisionCallbackSubscriptionBase* > mCollisionOverlapCallbacks;
 	};
 }
 

@@ -15,6 +15,9 @@ namespace Enjon
 		// Add renderable to scene
 		GraphicsSubsystem* gs = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem >( )->ConstCast< GraphicsSubsystem >( );
 		gs->GetGraphicsScene( )->AddPointLight( &mLight );
+
+		// Set explicit tick state
+		mTickState = ComponentTickState::TickAlways;
 	}
 
 	//==================================================================================

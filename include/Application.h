@@ -11,6 +11,14 @@
 
 namespace Enjon
 {
+	enum class ApplicationState
+	{
+		Running,
+		Paused,
+		Stopped,
+		ShuttingDown
+	};
+
 	class Application : public Enjon::Object
 	{
 		public:
@@ -48,6 +56,15 @@ namespace Enjon
 			* @return Enjon::Result
 			*/
 			virtual Enjon::Result Shutdown() = 0; 
+
+			/**
+			* @brief
+			* @return ApplicationState
+			*/
+			ApplicationState GetApplicationState( ) const
+			{
+				return mState;
+			}
 			
 			/**
 			* @brief Returns name of application
@@ -72,10 +89,22 @@ namespace Enjon
 			virtual Enjon::Result UnbindApplicationMetaClasses( )
 			{
 				return Enjon::Result::INCOMPLETE;
+			} 
+
+		protected:
+
+			/**
+			* @brief
+			*/
+			void SetApplicationState( ApplicationState state )
+			{
+				mState = state;
 			}
 
 		protected: 
-			Enjon::String mApplicationName = "";
+			Enjon::String mApplicationName = ""; 
+
+			ApplicationState mState = ApplicationState::Running;
 	};
 }
 

@@ -45,9 +45,17 @@ namespace Enjon
 			m = nullptr;
 		}
 
+		// Delete all subscriptions
+		for ( auto& m : mCollisionOverlapCallbacks )
+		{
+			delete m;
+			m = nullptr;
+		}
+
 		// Clear subscriptions
 		mCollisionExitCallbacks.clear( );
 		mCollisionExitCallbacks.clear( ); 
+		mCollisionOverlapCallbacks.clear( );
 	}
 
 	//========================================================================
@@ -191,6 +199,13 @@ namespace Enjon
 
 	//========================================================================
 
+	void RigidBodyComponent::Translate( const Vec3& translation )
+	{
+		mBody.Translate( translation );
+	}
+
+	//========================================================================
+
 	void RigidBodyComponent::ApplyCentralForce( const Vec3& force )
 	{
 		mBody.ApplyCentralForce( force );
@@ -252,6 +267,41 @@ namespace Enjon
 			c->Invoke( collision );
 		}
 	} 
+
+	//======================================================================== 
+
+	void RigidBodyComponent::OnCollisionOverlap( const CollisionReport& collision )
+	{
+		// Callbacks for overlap collision
+		for ( auto& c : mCollisionOverlapCallbacks )
+		{
+			c->Invoke( collision );
+		}
+	}
+
+	//======================================================================== 
+
+	Vector< EntityHandle > RigidBodyComponent::GetOverlappingEntities( )
+	{
+		// Get physics
+		PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
+
+		// Get set of rigidbodycomponents from contact lists
+		const HashSet<RigidBodyComponent*>* contacts = physx->GetContactList( this );
+
+		// Fill out entities to return
+		Vector<EntityHandle> entities;
+
+		if ( contacts )
+		{
+			for ( auto& c : *contacts )
+			{
+				entities.push_back( c->GetEntity( ) );
+			} 
+		}
+
+		return entities; 
+	}
 
 	//======================================================================== 
 

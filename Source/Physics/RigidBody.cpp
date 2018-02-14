@@ -345,6 +345,21 @@ namespace Enjon
 
 	//========================================================================
 
+	void RigidBody::SetLinearFactor( const Vec3& factor )
+	{ 
+		mBody->setLinearFactor( PhysicsUtils::Vec3ToBV3( factor ) );
+		
+	}
+
+	//========================================================================
+
+	void RigidBody::SetAngularFactor( const Vec3& factor )
+	{
+		mBody->setAngularFactor( PhysicsUtils::Vec3ToBV3( factor ) );
+	}
+
+	//========================================================================
+
 	BulletRigidBodyMotionState* RigidBody::GetMotionState( ) const 
 	{
 		return mMotionState;
@@ -361,6 +376,7 @@ namespace Enjon
 
 	void RigidBody::SetContinuousCollisionDetectionEnabled( bool enabled )
 	{
+		mCCDEnabled = enabled;
 		mBody->setCcdMotionThreshold( (f32)enabled );
 		if ( enabled )
 		{
@@ -414,6 +430,20 @@ namespace Enjon
 		}
 
 		mBody->applyImpulse( PhysicsUtils::Vec3ToBV3( force ), PhysicsUtils::Vec3ToBV3( relativePosition ) );
+	}
+
+	//========================================================================
+
+	void RigidBody::Translate( const Vec3& translation )
+	{ 
+		// Get the world transform from motion state
+		BTransform wt;
+		wt = mBody->getCenterOfMassTransform( );
+		
+		// Apply translation
+		wt.getOrigin( ) += PhysicsUtils::Vec3ToBV3( translation ); 
+		mBody->setCenterOfMassTransform( wt );
+		mBody->getMotionState( )->setWorldTransform( wt ); 
 	}
 
 	//========================================================================

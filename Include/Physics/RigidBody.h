@@ -133,6 +133,21 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void SetLinearFactor( const Vec3& factor );
+
+			/**
+			* @brief
+			*/
+			void SetAngularFactor( const Vec3& factor );
+
+			/**
+			* @brief
+			*/
+			void Translate( const Vec3& translation );
+
+			/**
+			* @brief
+			*/
 			void ClearForces( );
 
 			/**

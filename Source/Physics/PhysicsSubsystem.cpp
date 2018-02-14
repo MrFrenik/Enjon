@@ -224,10 +224,10 @@ namespace Enjon
 					{ 
 						curVal->OnCollisionExit( CollisionReport( curVal, curKey.first ) );
 					}
-					// Otherwise was found, so processing current contact
+					// Otherwise was found, so processing current overlap
 					else
 					{ 
-						//	std::cout << "Processing Contact!\n"; 
+						curVal->OnCollisionOverlap( CollisionReport( curVal, curKey.first ) );
 					}
 				}
 			}
@@ -255,6 +255,25 @@ namespace Enjon
 			k.second.erase( comp );
 		}
 	} 
+
+	//====================================================================== 
+
+	bool PhysicsSubsystem::HasContact( RigidBodyComponent* component )
+	{
+		return ( mContactEvents.find( component ) != mContactEvents.end( ) );
+	}
+
+	//====================================================================== 
+
+	const HashSet< RigidBodyComponent* >* PhysicsSubsystem::GetContactList( RigidBodyComponent* component )
+	{
+		if ( HasContact( component ) )
+		{
+			return &mContactEvents[ component ];
+		}
+
+		return nullptr;
+	}
 
 	//====================================================================== 
 

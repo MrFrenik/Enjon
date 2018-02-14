@@ -39,12 +39,12 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mProjectsDir = "W:/Projects/";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -555,10 +555,9 @@ namespace Enjon
 	void EditorApp::UnloadScene( bool releaseSceneAsset )
 	{
 		EntityManager* em = EngineSubsystem( EntityManager );
-		for ( auto& e : em->GetActiveEntities( ) )
-		{
-			e->Destroy( );
-		} 
+
+		// Destroy all entities that are pending to be added as well
+		em->DestroyAll( );
 
 		// Force cleanup of scene
 		em->ForceCleanup( );
@@ -845,6 +844,9 @@ namespace Enjon
 		Application* app = mProject.GetApplication( );
 		if ( app && mCurrentScene )
 		{
+			// Set application state to running
+			SetApplicationState( ApplicationState::Running );
+
 			// Cache off all entity handles in scene before app starts
 			EntityManager* em = EngineSubsystem( EntityManager );
 			mSceneEntities = em->GetActiveEntities( );
@@ -887,6 +889,9 @@ namespace Enjon
 		Application* app = mProject.GetApplication( );
 		if ( app )
 		{
+			// Shutdown application state
+			SetApplicationState( ApplicationState::Stopped );
+
 			EntityManager* em = EngineSubsystem( EntityManager );
 			Vector<Entity*> entities = em->GetActiveEntities( );
 			// Destroy any entities alive that aren't in the cached off entity list
@@ -901,10 +906,13 @@ namespace Enjon
 				// Destroy all entities
 				// If either null or not in original cached entity list then destroy
 				//if ( !e || std::find( mSceneEntities.begin( ), mSceneEntities.end( ), e ) == mSceneEntities.end( ) )
-				{
-					e->Destroy( );
-				}
+				//{
+				//	e->Destroy( );
+				//}
 			} 
+
+			// Destroy all entities
+			em->DestroyAll( );
 
 			// Shutodwn the application
 			app->Shutdown( ); 
@@ -927,6 +935,9 @@ namespace Enjon
 	Enjon::Result EditorApp::Initialize( )
 	{ 
 		mApplicationName = "EditorApp"; 
+
+		// Set application state to stopped by default
+		SetApplicationState( ApplicationState::Stopped );
 
 		Enjon::String mAssetsDirectoryPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + "Editor/Assets/";
 
@@ -1353,8 +1364,10 @@ namespace Enjon
 			// Normalize velocity
 			velDir = Enjon::Vec3::Normalize( velDir );
 
+			f32 avgDT = Engine::GetInstance( )->GetWorldTime( ).GetAverageDeltaTime( );
+
 			// Set camera position
-			camera->Transform.Position += dt * mCameraSpeed * velDir;
+			camera->Transform.Position += avgDT * mCameraSpeed * velDir;
 
 			// Set camera rotation
 			// Get mouse input and change orientation of camera
@@ -1371,8 +1384,8 @@ namespace Enjon
 			SDL_WarpMouseInWindow( window->GetWindowContext( ), ( f32 )viewPort.x / 2.0f - mMouseCoordsDelta.x, ( f32 )viewPort.y / 2.0f - mMouseCoordsDelta.y );
 
 			// Offset camera orientation
-			f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * dt * mMouseSensitivity;
-			f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * dt * mMouseSensitivity;
+			f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * avgDT * mMouseSensitivity;
+			f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * avgDT * mMouseSensitivity;
 			camera->OffsetOrientation( xOffset, yOffset );
 		}
 

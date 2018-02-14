@@ -117,6 +117,12 @@ namespace Enjon
 
 	using ComponentID = u32;
 
+	enum class ComponentTickState
+	{
+		TickAlways,
+		TickOnRunOnly
+	};
+
 	class Component : public Enjon::Object
 	{
 		friend Entity;
@@ -175,10 +181,16 @@ namespace Enjon
 			*/
 			EntityManager* GetEntityManager() const; 
 
+			/**
+			* @brief
+			*/
+			ComponentTickState GetTickState( ) const
+			{
+				return mTickState;
+			}
+
 
 		protected:
-
-		
 
 			/**
 			* @brief
@@ -235,11 +247,13 @@ namespace Enjon
 			Entity* mEntity = nullptr;
 			EntityManager* mManager = nullptr;
 
+			ComponentTickState mTickState = ComponentTickState::TickOnRunOnly;
+
 			u32 mEntityID; 
 			u32 mComponentID = 0;
 
 		private:
-			ComponentWrapperBase* mBase = nullptr;
+			ComponentWrapperBase* mBase = nullptr; 
 	}; 
 
 
