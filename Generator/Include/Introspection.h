@@ -37,6 +37,7 @@ enum class PropertyType
 	Array,
 	HashMap,
 	Vec2,
+	iVec3,
 	Vec3,
 	Vec4,
 	Mat4,

@@ -133,12 +133,12 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void SetLinearFactor( const Vec3& factor );
+			void SetLinearFactor( const iVec3& factor );
 
 			/**
 			* @brief
 			*/
-			void SetAngularFactor( const Vec3& factor );
+			void SetAngularFactor( const iVec3& factor );
 
 			/**
 			* @brief
@@ -321,6 +321,12 @@ namespace Enjon
 
 			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
 			u32 mIsTriggerVolume = false;
+
+			ENJON_PROPERTY( UIMin = 0, UIMax = 1 )
+			iVec3 mLinearFactor = iVec3( 1 );
+
+			ENJON_PROPERTY( UIMin = 0, UIMax = 1 )
+			iVec3 mAngularFactor = iVec3( 1 );
 
 		public:
 			ENJON_PROPERTY( )

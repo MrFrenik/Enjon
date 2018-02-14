@@ -518,6 +518,35 @@ namespace Enjon
 				}
 			} break;
 
+			case Enjon::MetaPropertyType::iVec3:
+			{
+				Enjon::iVec3 val;
+				cls->GetValue( object, prop, &val );
+				s32 col[ 3 ] = { val.x, val.y, val.z };
+				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				ImGui::Text( name.c_str( ) ); ImGui::SameLine( );
+				if ( traits.UseSlider( ) )
+				{
+					if ( ImGui::DragInt3( ( "##" + name ).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
+					{
+						val.x = col[ 0 ];
+						val.y = col[ 1 ];
+						val.z = col[ 2 ];
+						cls->SetValue( object, prop, val );
+					}
+				}
+				else
+				{ 
+					if ( ImGui::DragInt3( ( "##" + name ).c_str(), col ) )
+					{
+						val.x = col[ 0 ];
+						val.y = col[ 1 ];
+						val.z = col[ 2 ];
+						cls->SetValue( object, prop, val );
+					}
+				}
+			} break;
+
 			case Enjon::MetaPropertyType::Vec4:
 			{
 				Enjon::Vec4 val;
@@ -634,6 +663,7 @@ namespace Enjon
 				case Enjon::MetaPropertyType::S32: 
 				case Enjon::MetaPropertyType::F32: 
 				case Enjon::MetaPropertyType::Vec2: 
+				case Enjon::MetaPropertyType::iVec3: 
 				case Enjon::MetaPropertyType::Vec3: 
 				case Enjon::MetaPropertyType::Vec4:
 				case Enjon::MetaPropertyType::ColorRGBA32:

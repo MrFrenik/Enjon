@@ -183,6 +183,20 @@ namespace Enjon
 
 	//========================================================================
 
+	void RigidBodyComponent::SetLinearFactor( const iVec3& factor )
+	{
+		mBody.SetLinearFactor( factor );
+	}
+
+	//========================================================================
+	
+	void RigidBodyComponent::SetAngularFactor( const iVec3& factor )
+	{
+		mBody.SetAngularFactor( factor );
+	}
+
+	//========================================================================
+
 	void RigidBodyComponent::UpdateTransform( const Transform& transform )
 	{
 		// Reset state position state 

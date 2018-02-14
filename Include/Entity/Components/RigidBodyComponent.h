@@ -150,6 +150,16 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void SetLinearFactor( const iVec3& factor );
+			
+			/**
+			* @brief
+			*/
+			void SetAngularFactor( const iVec3& factor );
+
+			/**
+			* @brief
+			*/
 			void Translate( const Vec3& translation );
 
 			/**

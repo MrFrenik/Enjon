@@ -9,6 +9,7 @@
 namespace Enjon
 { 
 	class Vec3;
+	class iVec3;
 
 	namespace PhysicsUtils
 	{
@@ -16,6 +17,11 @@ namespace Enjon
 		* @brief
 		*/
 		 BV3 Vec3ToBV3( const Vec3& vec ); 
+
+		/**
+		* @brief
+		*/
+		 BV3 iVec3ToBV3( const iVec3& vec ); 
 
 		/**
 		* @brief

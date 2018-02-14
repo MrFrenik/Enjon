@@ -55,7 +55,8 @@ namespace Enjon
 		UUID,
 		Transform,
 		AssetHandle,
-		EntityHandle
+		EntityHandle,
+		iVec3
 	};
 
 	enum MetaPropertyFlags : u32

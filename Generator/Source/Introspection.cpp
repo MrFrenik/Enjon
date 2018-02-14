@@ -70,6 +70,7 @@ void Introspection::InitPropertyMap( )
 	STRING_TO_PROP( "int64_t", S64 )
 	STRING_TO_PROP( "Vec2", Vec2 )
 	STRING_TO_PROP( "Vec3", Vec3 )
+	STRING_TO_PROP( "iVec3", iVec3 )
 	STRING_TO_PROP( "Vec4", Vec4 )
 	STRING_TO_PROP( "ColorRGBA32", ColorRGBA32 )
 	STRING_TO_PROP( "UUID", UUID )
@@ -1088,6 +1089,8 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 
 	// Get name
 	prop->mName = curToken.ToString( ); 
+
+	std::cout << prop->mName << ": " << GetTypeAsString( prop->mType ) << "\n";
 
 	// Add to class
 	cls->AddProperty( prop ); 

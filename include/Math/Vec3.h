@@ -345,7 +345,7 @@ namespace Enjon {
 			* @param val - s32 value to be set
 			*/
 			iVec3(const s32& val)
-				: x(val), y(val)
+				: x(val), y(val), z(val)
 			{
 			}
 			

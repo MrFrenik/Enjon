@@ -87,7 +87,9 @@ namespace Enjon
 		mBody->setRestitution( mRestitution );
 		mBody->setFriction( mFriction );
 		mBody->setDamping( mLinearDamping, mAngularDamping );
-		mBody->setGravity( BV3( mGravity.x, mGravity.y, mGravity.z ) ); 
+		mBody->setGravity( PhysicsUtils::Vec3ToBV3( mGravity ) ); 
+		mBody->setLinearFactor( PhysicsUtils::iVec3ToBV3( mLinearFactor ) );
+		mBody->setAngularFactor( PhysicsUtils::iVec3ToBV3( mAngularFactor ) );
 
 		// Add body to physics world and set physics world pointer
 		AddToWorld( );
@@ -113,7 +115,9 @@ namespace Enjon
 		mBody->setRestitution( mRestitution );
 		mBody->setFriction( mFriction );
 		mBody->setDamping( mLinearDamping, mAngularDamping );
-		mBody->setGravity( BV3( mGravity.x, mGravity.y, mGravity.z ) ); 
+		mBody->setGravity( PhysicsUtils::Vec3ToBV3( mGravity ) ); 
+		mBody->setLinearFactor( PhysicsUtils::iVec3ToBV3( mLinearFactor ) );
+		mBody->setAngularFactor( PhysicsUtils::iVec3ToBV3( mAngularFactor ) );
 
 		// Set mass properties of bullet rigid body
 		mBody->setMassProps( mMass, localInertia );
@@ -345,17 +349,18 @@ namespace Enjon
 
 	//========================================================================
 
-	void RigidBody::SetLinearFactor( const Vec3& factor )
+	void RigidBody::SetLinearFactor( const iVec3& factor )
 	{ 
-		mBody->setLinearFactor( PhysicsUtils::Vec3ToBV3( factor ) );
-		
+		mBody->setLinearFactor( PhysicsUtils::iVec3ToBV3( factor ) ); 
+		mLinearFactor = factor;
 	}
 
 	//========================================================================
 
-	void RigidBody::SetAngularFactor( const Vec3& factor )
+	void RigidBody::SetAngularFactor( const iVec3& factor ) 
 	{
-		mBody->setAngularFactor( PhysicsUtils::Vec3ToBV3( factor ) );
+		mAngularFactor = factor;
+		mBody->setAngularFactor( PhysicsUtils::iVec3ToBV3( factor ) );
 	}
 
 	//========================================================================
@@ -547,6 +552,16 @@ namespace Enjon
 		// Write out whether or not is trigger
 		buffer->Write< u32 >( mIsTriggerVolume );
 
+		// Write out linear factor
+		buffer->Write< s32 >( mLinearFactor.x );
+		buffer->Write< s32 >( mLinearFactor.y );
+		buffer->Write< s32 >( mLinearFactor.z );
+
+		// Write out angular factor
+		buffer->Write< s32 >( mAngularFactor.x );
+		buffer->Write< s32 >( mAngularFactor.y );
+		buffer->Write< s32 >( mAngularFactor.z );
+
 		// Serialize out collision shape
 		ObjectArchiver::Serialize( mShape, buffer );
 
@@ -584,6 +599,20 @@ namespace Enjon
 
 		// Read in is trigger volume
 		SetIsTriggerVolume( buffer->Read< u32 >( ) );
+
+		// Read in linear factor
+		iVec3 linearFactor;
+		linearFactor.x = buffer->Read< s32 >( );
+		linearFactor.y = buffer->Read< s32 >( );
+		linearFactor.z = buffer->Read< s32 >( );
+		SetLinearFactor( linearFactor );
+
+		// Read in angular factor
+		iVec3 angularFactor;
+		angularFactor.x = buffer->Read< s32 >( );
+		angularFactor.y = buffer->Read< s32 >( );
+		angularFactor.z = buffer->Read< s32 >( );
+		SetAngularFactor( angularFactor );
 
 		// Release memory for shape first
 		if ( mShape )

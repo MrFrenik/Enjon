@@ -12,14 +12,28 @@ namespace Enjon
 {
 	namespace PhysicsUtils
 	{
+
+		//============================================================
+
 		BV3 Vec3ToBV3( const Vec3& vec ) 
 		{
 			return BV3( vec.x, vec.y, vec.z );
 		} 
 
+		//============================================================
+
+		BV3 iVec3ToBV3( const iVec3& vec )
+		{
+			return BV3( vec.x, vec.y, vec.z );
+		 }
+
+		//============================================================
+
 		Vec3 BV3ToVec3( const BV3& vec )
 		{
 			return Vec3( vec.getX( ), vec.getY( ), vec.getZ( ) );
 		}
+
+		//============================================================
 	}
 }
