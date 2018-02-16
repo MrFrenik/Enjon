@@ -624,6 +624,9 @@ namespace Enjon
 					Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ).NegativeAngleAxis( ) * Vec3::ZAxis( ) ).Normalize();
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( planeNormal);
 
+					f32 distFromCam = ( mActiveWidget->GetWorldTransform( ).GetPosition( ).Distance( camera->GetPosition( ) ) );
+					f32 denom = distFromCam != 0.0f ? distFromCam: 2.0f;
+
 					if ( intersectionResult.mHit )
 					{
 						const Vec3 endPositionVector = ( intersectionResult.mHitPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) );
@@ -641,7 +644,11 @@ namespace Enjon
 							angle *= -1.0f;
 						} 
 						mAngleDelta = angle; 
-						mActiveWidget->SetRotation( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal ) );
+						mDeltaRotation = Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
+						mIntersectionStartPosition = intersectionResult.mHitPosition; 
+
+						Vec3 c = endNormal.Cross( planeNormal );
+						std::cout << c << "\n";
 					}
 
 				} break; 
@@ -652,12 +659,15 @@ namespace Enjon
 					Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ).NegativeAngleAxis( ) * Vec3::XAxis( ) ).Normalize();
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( planeNormal);
 
+					f32 distFromCam = ( mActiveWidget->GetWorldTransform( ).GetPosition( ).Distance( camera->GetPosition( ) ) );
+					f32 denom = distFromCam != 0.0f ? distFromCam: 2.0f;
+
 					if ( intersectionResult.mHit )
 					{
 						const Vec3 endPositionVector = ( intersectionResult.mHitPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) );
 						const Vec3 startNormal = ( mIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
 						const Vec3 endNormal = ( endPositionVector ).Normalize( ); 
-						f32 length = endPositionVector.Length( ) / 2.0f;
+						f32 length = endPositionVector.Length( ) / denom;
 						f32 angle = ToDegrees( endNormal.SignedAngleBetween( startNormal ) );
 						if ( length > 1.0f )
 						{
@@ -669,7 +679,8 @@ namespace Enjon
 							angle *= -1.0f;
 						} 
 						mAngleDelta = angle; 
-						mActiveWidget->SetRotation( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal ) );
+						mDeltaRotation = Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
+						mIntersectionStartPosition = intersectionResult.mHitPosition; 
 					}
 
 				} break;
@@ -679,13 +690,16 @@ namespace Enjon
 					// Define plane and get intersection result with ray from mouse
 					Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ).NegativeAngleAxis( ) * Vec3::YAxis( ) ).Normalize();
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( planeNormal);
+					
+					f32 distFromCam = ( mActiveWidget->GetWorldTransform( ).GetPosition( ).Distance( camera->GetPosition( ) ) );
+					f32 denom = distFromCam != 0.0f ? distFromCam: 2.0f;
 
 					if ( intersectionResult.mHit )
 					{
 						const Vec3 endPositionVector = ( intersectionResult.mHitPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) );
 						const Vec3 startNormal = ( mIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
 						const Vec3 endNormal = ( endPositionVector ).Normalize( ); 
-						f32 length = endPositionVector.Length( ) / 2.0f;
+						f32 length = endPositionVector.Length( ) / denom;
 						f32 angle = ToDegrees( endNormal.SignedAngleBetween( startNormal ) );
 						if ( length > 1.0f )
 						{
@@ -697,7 +711,8 @@ namespace Enjon
 							angle *= -1.0f;
 						} 
 						mAngleDelta = angle; 
-						mActiveWidget->SetRotation( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal ) );
+						mDeltaRotation = Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
+						mIntersectionStartPosition = intersectionResult.mHitPosition; 
 					}
 				} break;
 
@@ -730,6 +745,7 @@ namespace Enjon
 			mInteractingWithTransformWidget = true;
 			mType = type;
 			mIntersectionStartPosition = result.mHitPosition;
+			mImmutableIntersectionStartPosition = result.mHitPosition;
 			mRootStartPosition = mTranslationWidget.mRoot.mWorldTransform.GetPosition( );
 			mPreviousMouseCoords = mEditorApp->GetSceneViewProjectedCursorPosition( );
 			//mPreviousMouseCoords = input->GetMouseCoords( );
@@ -943,6 +959,11 @@ namespace Enjon
 	f32 EditorTransformWidget::GetAngleDelta( ) const
 	{
 		return mAngleDelta;
+	}
+
+	Quaternion EditorTransformWidget::GetDeltaRotation( ) const
+	{
+		return mDeltaRotation;
 	}
 
 	TransformWidgetRenderableType EditorTransformWidget::GetInteractedWidgetType( )

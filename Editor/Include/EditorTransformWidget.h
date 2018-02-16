@@ -51,6 +51,7 @@ namespace Enjon
 			bool IsInteractingWithWidget( ) const;
 			Vec3 GetDelta( ) const; 
 			f32 GetAngleDelta( ) const;
+			Quaternion GetDeltaRotation( ) const;
 
 			void SetTransformationMode( TransformationMode mode ); 
 
@@ -70,9 +71,11 @@ namespace Enjon
 			TransformationMode mMode = TransformationMode::Translation;
 			TransformWidgetRenderableType mType = TransformWidgetRenderableType::TranslationRightAxis;
 			Vec3 mIntersectionStartPosition;
+			Vec3 mImmutableIntersectionStartPosition;
 			Vec3 mRootStartPosition;
 			Vec3 mDelta;
 			f32 mAngleDelta;
+			Quaternion mDeltaRotation;
 			Vec2 mPreviousMouseCoords;
 			bool mInteractingWithTransformWidget = true; 
 			bool mEnabled = false;

@@ -39,8 +39,8 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mProjectsDir = "W:/Projects/";
 
 //Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -1327,34 +1327,11 @@ namespace Enjon
 						} break;
 
 						case TransformationMode::Rotation:
-						{
-							Vec3 axis = Vec3( 1.0f );
-							switch ( mTransformWidget.GetInteractedWidgetType( ) )
-							{
-								case TransformWidgetRenderableType::RotationForwardAxis:
-								{
-									axis = Vec3::ZAxis( );
-								} break;
-								case TransformWidgetRenderableType::RotationRightAxis:
-								{
-									axis = Vec3::XAxis( );
-								} break;
-								case TransformWidgetRenderableType::RotationUpAxis:
-								{
-									axis = Vec3::YAxis( );
-								} break;
-							}
-
+						{ 
 							Entity* ent = mSelectedEntity.Get( );
 							if ( ent )
 							{
-								Quaternion entRotation = ent->GetLocalRotation( );
-								f32 delta = mTransformWidget.GetAngleDelta( ); 
-								f32 angle = ToDegrees( entRotation.Angle( ) );
-								//angle += delta;
-								//entRotation = Quaternion::AngleAxis( ToRadians( delta ), axis );
-								//ent->SetLocalRotation( entRotation );
-								ent->SetLocalRotation( mTransformWidget.GetWorldTransform( ).GetRotation( ) );
+								ent->SetLocalRotation( ent->GetLocalRotation() * mTransformWidget.GetDeltaRotation() );
 							}
 						} break;
 					}
