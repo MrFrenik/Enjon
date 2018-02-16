@@ -230,6 +230,22 @@ namespace Enjon {
 			Vec3 operator*( const Quaternion& V ) const;
 
 			/**
+			* @brief Returns angle between two normalized vectors
+			* @param other - vector to perform angle between with
+			* @return f32 - angle in radians
+			* @note MUST BE NORMALIZED VECTORS
+			*/
+			f32 AngleBetween( const Vec3& other ) const;
+
+			/**
+			* @brief Returns signed angle between two normalized vectors
+			* @param other - vector to perform angle between with
+			* @return f32 - angle in radians
+			* @note MUST BE NORMALIZED VECTORS
+			*/
+			f32 SignedAngleBetween( const Vec3& other ) const;
+
+			/**
 			* @brief Performs dot product with other vector and returns the calculated value
 			* @param other - vector to perform dot product with
 			* @return f32 - value of dot product

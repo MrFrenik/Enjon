@@ -39,12 +39,12 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mProjectsDir = "W:/Projects/";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -136,6 +136,7 @@ namespace Enjon
 					ImGuiManager::DebugDumpObject( c ); 
 
 					// Shape type changed
+					// TODO(): Be able to hook in specific delegates for property changes through reflection system
 					if ( shapeType != -1 && shapeType != (s32)c->Cast< RigidBodyComponent >()->GetShapeType() )
 					{
 						c->ConstCast< RigidBodyComponent >( )->SetShape( c->Cast< RigidBodyComponent >( )->GetShapeType( ) );
@@ -944,7 +945,7 @@ namespace Enjon
 		// Get asset manager and set its properties ( I don't like this )
 		AssetManager* mAssetManager = EngineSubsystem( AssetManager );
 		GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
-		PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
+		PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem ); 
 
 		// Pause the physics simulation
 		physx->PauseSystem( true ); 
@@ -1211,6 +1212,10 @@ namespace Enjon
 			{
 				mTransformWidget.SetTransformationMode( TransformationMode::Translation );
 			}
+			if ( mInput->IsKeyPressed( KeyCode::E ) )
+			{
+				mTransformWidget.SetTransformationMode( TransformationMode::Rotation );
+			}
 			if ( mInput->IsKeyPressed( KeyCode::R ) )
 			{
 				mTransformWidget.SetTransformationMode( TransformationMode::Scale );
@@ -1319,6 +1324,38 @@ namespace Enjon
 								} break;
 							}
 
+						} break;
+
+						case TransformationMode::Rotation:
+						{
+							Vec3 axis = Vec3( 1.0f );
+							switch ( mTransformWidget.GetInteractedWidgetType( ) )
+							{
+								case TransformWidgetRenderableType::RotationForwardAxis:
+								{
+									axis = Vec3::ZAxis( );
+								} break;
+								case TransformWidgetRenderableType::RotationRightAxis:
+								{
+									axis = Vec3::XAxis( );
+								} break;
+								case TransformWidgetRenderableType::RotationUpAxis:
+								{
+									axis = Vec3::YAxis( );
+								} break;
+							}
+
+							Entity* ent = mSelectedEntity.Get( );
+							if ( ent )
+							{
+								Quaternion entRotation = ent->GetLocalRotation( );
+								f32 delta = mTransformWidget.GetAngleDelta( ); 
+								f32 angle = ToDegrees( entRotation.Angle( ) );
+								//angle += delta;
+								//entRotation = Quaternion::AngleAxis( ToRadians( delta ), axis );
+								//ent->SetLocalRotation( entRotation );
+								ent->SetLocalRotation( mTransformWidget.GetWorldTransform( ).GetRotation( ) );
+							}
 						} break;
 					}
 

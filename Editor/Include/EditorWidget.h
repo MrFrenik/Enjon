@@ -27,6 +27,9 @@ namespace Enjon
 		ScaleXYAxes,
 		ScaleXZAxes,
 		ScaleYZAxes,
+		RotationForwardAxis,
+		RotationRightAxis,
+		RotationUpAxis,
 		Count
 	};
 

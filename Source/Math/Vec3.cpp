@@ -201,6 +201,20 @@ namespace Enjon
 	
 	//================================================
 
+	f32 Vec3::AngleBetween( const Vec3& other ) const
+	{
+		return acosf( this->Dot( other ) );
+	}
+	
+	//================================================ 
+
+	f32 Vec3::SignedAngleBetween( const Vec3& other ) const
+	{
+		return asinf( Cross( other ).Length( ) );
+	}
+	
+	//================================================ 
+
 	f32 Vec3::Dot(const Vec3& other) const
 	{
 		return x * other.x + y * other.y + z * other.z;

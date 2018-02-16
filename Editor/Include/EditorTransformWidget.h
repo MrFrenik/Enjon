@@ -8,6 +8,7 @@
 #include "EditorWidget.h"
 #include "EditorTranslationWidget.h"
 #include "EditorScaleWidget.h"
+#include "EditorRotationWidget.h"
 
 #include <Graphics/Renderable.h>
 
@@ -39,6 +40,7 @@ namespace Enjon
 
 			EditorTranslationWidget mTranslationWidget;
 			EditorScaleWidget mScaleWidget;
+			EditorRotationWidget mRotationWidget;
 
 			void BeginWidgetInteraction( TransformWidgetRenderableType type );
 			void InteractWithWidget( );
@@ -48,6 +50,7 @@ namespace Enjon
 
 			bool IsInteractingWithWidget( ) const;
 			Vec3 GetDelta( ) const; 
+			f32 GetAngleDelta( ) const;
 
 			void SetTransformationMode( TransformationMode mode ); 
 
@@ -69,6 +72,7 @@ namespace Enjon
 			Vec3 mIntersectionStartPosition;
 			Vec3 mRootStartPosition;
 			Vec3 mDelta;
+			f32 mAngleDelta;
 			Vec2 mPreviousMouseCoords;
 			bool mInteractingWithTransformWidget = true; 
 			bool mEnabled = false;
