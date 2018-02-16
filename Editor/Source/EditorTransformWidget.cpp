@@ -632,7 +632,7 @@ namespace Enjon
 						const Vec3 endPositionVector = ( intersectionResult.mHitPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) );
 						const Vec3 startNormal = ( mIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
 						const Vec3 endNormal = ( endPositionVector ).Normalize( ); 
-						f32 length = endPositionVector.Length( ) / 2.0f;
+						f32 length = endPositionVector.Length( ) / denom;
 						f32 angle = ToDegrees( endNormal.SignedAngleBetween( startNormal ) );
 						if ( length > 1.0f )
 						{
@@ -643,12 +643,11 @@ namespace Enjon
 						{
 							angle *= -1.0f;
 						} 
+						std::cout << "Angle: " << angle << "\n";
 						mAngleDelta = angle; 
+						//mDeltaRotation = mStartRotation * Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
 						mDeltaRotation = Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
-						mIntersectionStartPosition = intersectionResult.mHitPosition; 
-
-						Vec3 c = endNormal.Cross( planeNormal );
-						std::cout << c << "\n";
+						//mIntersectionStartPosition = intersectionResult.mHitPosition; 
 					}
 
 				} break; 
@@ -746,9 +745,9 @@ namespace Enjon
 			mType = type;
 			mIntersectionStartPosition = result.mHitPosition;
 			mImmutableIntersectionStartPosition = result.mHitPosition;
-			mRootStartPosition = mTranslationWidget.mRoot.mWorldTransform.GetPosition( );
+			mRootStartPosition = mActiveWidget->GetWorldTransform().GetPosition( );
 			mPreviousMouseCoords = mEditorApp->GetSceneViewProjectedCursorPosition( );
-			//mPreviousMouseCoords = input->GetMouseCoords( );
+			mStartRotation = mActiveWidget->GetWorldTransform( ).GetRotation( );
 		} 
 	} 
 

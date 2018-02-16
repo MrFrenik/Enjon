@@ -73,6 +73,7 @@ namespace Enjon
 			Vec3 mIntersectionStartPosition;
 			Vec3 mImmutableIntersectionStartPosition;
 			Vec3 mRootStartPosition;
+			Quaternion mStartRotation;
 			Vec3 mDelta;
 			f32 mAngleDelta;
 			Quaternion mDeltaRotation;

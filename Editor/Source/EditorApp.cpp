@@ -1332,6 +1332,7 @@ namespace Enjon
 							if ( ent )
 							{
 								ent->SetLocalRotation( ent->GetLocalRotation() * mTransformWidget.GetDeltaRotation() );
+								//ent->SetLocalRotation( mTransformWidget.GetDeltaRotation() );
 							}
 						} break;
 					}
