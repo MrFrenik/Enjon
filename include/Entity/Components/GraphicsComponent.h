@@ -12,9 +12,6 @@ namespace Enjon
 	ENJON_CLASS( Construct )
 	class GraphicsComponent : public Component
 	{
-		ENJON_CLASS_BODY( ) 
-
-		// Don't really like that I have to do BOTH of these... Would rather this just be within one single macro or at least generated...
 		ENJON_COMPONENT( GraphicsComponent )
 
 		public:

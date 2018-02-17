@@ -625,7 +625,7 @@ namespace Enjon
 				Enjon::UUID val;
 				cls->GetValue( object, prop, &val );
 				Enjon::String str = val.ToString( );
-				ImGui::Text( name.c_str( ), &str[ 0 ], str.size( ) );
+				ImGui::Text( fmt::format( "{}: {}", name, str ).c_str( ) );
 			} break;
 		}
 	}

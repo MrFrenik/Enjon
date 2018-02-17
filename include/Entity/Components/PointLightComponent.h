@@ -9,9 +9,7 @@ namespace Enjon
 {
 	ENJON_CLASS( Construct )
 	class PointLightComponent : public Component
-	{
-		ENJON_CLASS_BODY( ) 
-
+	{ 
 		ENJON_COMPONENT( PointLightComponent )
 
 		public:

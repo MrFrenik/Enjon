@@ -60,6 +60,9 @@ namespace Enjon
 		buffer->Write< f32 >( local.Scale.y );
 		buffer->Write< f32 >( local.Scale.z );
 
+		// Write out entity UUID
+		buffer->Write< UUID >( entity.Get( )->GetUUID( ) );
+
 		//==========================================================================
 		// Components
 		//========================================================================== 
@@ -181,6 +184,9 @@ namespace Enjon
 
 		 //Set the transform of the entity
 		handle.Get( )->SetLocalTransform( local );
+
+		// Read in uuid
+		handle.Get( )->SetUUID( buffer->Read< UUID >( ) );
 
 		//=================================================================
 		// Components

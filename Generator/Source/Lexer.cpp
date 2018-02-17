@@ -48,6 +48,33 @@ bool Lexer::ContinueTo( TokenType type )
 	bool retVal = !token.IsType( TokenType::Token_EndOfStream );
 	return retVal;
 }
+
+bool Lexer::ContinueToAnyIdentifier( const std::vector< std::string >& identifiers )
+{
+	Token token = GetNextToken( );
+
+	// Continue to search for identifier or hit end of stream
+	auto equalsAnyIdentifier = [&] ( ) -> bool
+	{
+		for ( auto& i : identifiers )
+		{
+			if ( token.Equals( i ) )
+			{
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+	while ( !equalsAnyIdentifier() && !token.IsType( TokenType::Token_EndOfStream ) )
+	{
+		token = GetNextToken( );
+	}
+
+	// If EOS hit, then didn't find identifier
+	return !token.IsType( TokenType::Token_EndOfStream ); 
+}
 		
 bool Lexer::ContinueToIdentifier( const std::string& identifier )
 {

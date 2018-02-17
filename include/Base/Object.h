@@ -1422,6 +1422,12 @@ namespace Enjon
 				static u32 lastId { 1 };
 				return lastId++;
 			} 
+
+		protected:
+			virtual const Enjon::MetaClass* GetClassInternal( ) const
+			{
+				return nullptr;
+			}
 	};
 }
 

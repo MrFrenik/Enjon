@@ -643,11 +643,11 @@ namespace Enjon
 						{
 							angle *= -1.0f;
 						} 
+
 						std::cout << "Angle: " << angle << "\n";
 						mAngleDelta = angle; 
-						//mDeltaRotation = mStartRotation * Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
 						mDeltaRotation = Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
-						//mIntersectionStartPosition = intersectionResult.mHitPosition; 
+						mIntersectionStartPosition = intersectionResult.mHitPosition; 
 					}
 
 				} break; 

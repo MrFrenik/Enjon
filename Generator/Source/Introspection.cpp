@@ -445,7 +445,16 @@ void Introspection::ParseClass( Lexer* lexer )
 	Class::PushScope( ); 
 
 	// Continue to class body tag, if not found then remove class and return
-	if ( !lexer->ContinueToIdentifier( "ENJON_CLASS_BODY" ) )
+	//if ( !lexer->ContinueToIdentifier( "ENJON_CLASS_BODY" ) )
+	//{
+	//	// Remove class
+	//	RemoveClass( qualifiedClassName );
+
+	//	return;
+	//}
+
+	std::vector<std::string> identifiers{ "ENJON_CLASS_BODY", "ENJON_COMPONENT", "ENJON_MODULE_BODY" };
+	if ( !lexer->ContinueToAnyIdentifier( identifiers ) )
 	{
 		// Remove class
 		RemoveClass( qualifiedClassName );
@@ -482,7 +491,25 @@ const Class* Introspection::FindApplicationClass( )
 //=================================================================================================
 		
 void Introspection::ParseClassBody( Lexer* lexer, Class* cls )
-{
+{ 
+	std::cout << "Class name: " << cls->mName << "\n";
+	std::cout << "Lexer current token: " << lexer->GetCurrentToken( ).ToString( ) << "\n";
+
+	// Look for specific other body modifiers as well
+	if ( lexer->GetCurrentToken( ).Equals( "ENJON_COMPONENT" ) )
+	{
+		cls->mMetaClassType = MetaClassType::Component;
+	}
+	else if ( lexer->GetCurrentToken( ).Equals( "ENJON_MODULE_BODY" ) )
+	{
+		cls->mMetaClassType = MetaClassType::Application; 
+		std::cout << "Was here\n";
+	}
+	else
+	{
+		cls->mMetaClassType = MetaClassType::Object;
+	}
+
 	// Grab next token and make sure is parentheses
 	if ( !lexer->RequireToken( TokenType::Token_OpenParen, true ) )
 	{
@@ -497,21 +524,7 @@ void Introspection::ParseClassBody( Lexer* lexer, Class* cls )
 		RemoveClass( cls->mName );
 
 		return;
-	}
-
-	// Look for specific other body modifiers as well
-	if ( lexer->PeekAtNextToken( ).Equals( "ENJON_COMPONENT" ) )
-	{
-		cls->mMetaClassType = MetaClassType::Component;
-	}
-	else if ( lexer->PeekAtNextToken( ).Equals( "ENJON_MODULE_BODY" ) )
-	{
-		cls->mMetaClassType = MetaClassType::Application; 
-	}
-	else
-	{
-		cls->mMetaClassType = MetaClassType::Object;
-	}
+	} 
 
 	// Now need to parse all remaining members of class
 	ParseClassMembers( lexer, cls ); 

@@ -20,6 +20,7 @@
 namespace Enjon 
 { 
 	class EntityManager;
+	class EntityArchiver;
 
 	enum class EntityState
 	{
@@ -89,6 +90,7 @@ namespace Enjon
 
 		friend EntityHandle;
 		friend EntityManager; 
+		friend EntityArchiver;
 
 		public:
 			Entity();
@@ -97,6 +99,9 @@ namespace Enjon
 
 			/// @brief Get id of this entity
 			u32 GetID() { return mID; }
+
+			/// @brief Get uuid of this entity
+			UUID GetUUID( ) const;
 
 			/// @brief Checks whether or not entity has given component
 			template <typename T>
@@ -228,6 +233,11 @@ namespace Enjon
 			*/
 			void CalculateWorldTransform();
 
+			/*
+			* @brief
+			*/
+			void SetUUID( const UUID& uuid );
+
 		private:
 			/*
 			* @brief
@@ -275,8 +285,8 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			Vector< EntityHandle > mChildren; 
 
-			//ENJON_PROPERTY( )
-			//UUID mUUID;
+			ENJON_PROPERTY( )
+			UUID mUUID;
 
 			Enjon::EntityManager* mManager;
 			Enjon::EntityState mState;

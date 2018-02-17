@@ -39,12 +39,12 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mProjectsDir = "W:/Projects/";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -78,26 +78,26 @@ namespace Enjon
 			Entity* ent = mSelectedEntity.Get( ); 
 			ImGuiManager::DebugDumpObject( ent );
  
-			if ( ImGui::Button( "ADD SOMETHING YOU DIDN'T CODE YOURSELF" ) )
-			{ 
-				ImGui::OpenPopup( "##Popup" );
-			}
+			//if ( ImGui::Button( "ADD SOMETHING YOU DIDN'T CODE YOURSELF" ) )
+			//{ 
+			//	ImGui::OpenPopup( "##Popup" );
+			//}
 
-			if ( ImGui::BeginPopupModal( "##Popup" ) )
-			{
-				AssetManager* am = EngineSubsystem( AssetManager );
-				AssetHandle<Texture> john = am->GetAsset< Texture >( "textures.john" );
+			//if ( ImGui::BeginPopupModal( "##Popup" ) )
+			//{
+			//	AssetManager* am = EngineSubsystem( AssetManager );
+			//	AssetHandle<Texture> john = am->GetAsset< Texture >( "textures.john" );
 
-				ImGui::Image( (ImTextureID)john.Get()->GetTextureId( ), ImVec2(64, 64), ImVec2(0, 0 ), ImVec2( 1, 1 ) );
-				ImGui::Text( "GO FUCK YOURSELF." );
-				
-				if ( ImGui::Button( "Close" ) )
-				{
-					ImGui::CloseCurrentPopup( ); 
-				}
+			//	ImGui::Image( (ImTextureID)john.Get()->GetTextureId( ), ImVec2(64, 64), ImVec2(0, 0 ), ImVec2( 1, 1 ) );
+			//	ImGui::Text( "GO FUCK YOURSELF." );
+			//	
+			//	if ( ImGui::Button( "Close" ) )
+			//	{
+			//		ImGui::CloseCurrentPopup( ); 
+			//	}
 
-				ImGui::EndPopup( );
-			}
+			//	ImGui::EndPopup( );
+			//}
 
 			if ( ImGui::CollapsingHeader( "ADD COMPONENT" ) )
 			{
@@ -1220,45 +1220,6 @@ namespace Enjon
 			{
 				mTransformWidget.SetTransformationMode( TransformationMode::Scale );
 			}
-
-			if ( mInput->IsKeyDown( KeyCode::N ) )
-			{
-				Entity* ent = mSelectedEntity.Get( );
-				if ( ent )
-				{
-					static f32 angle = 0.0f;
-					angle += 10.0f * 0.001f; 
-					Quaternion rotation = Quaternion::AngleAxis( ToRadians( angle ), Vec3::XAxis( ) );
-					ent->SetLocalRotation( ent->GetLocalRotation( ) * rotation );
-					mTransformWidget.SetRotation( ent->GetWorldRotation( ) );
-				}
-			} 
-
-			if ( mInput->IsKeyDown( KeyCode::M ) )
-			{
-				Entity* ent = mSelectedEntity.Get( );
-				if ( ent )
-				{
-					static f32 angle = 0.0f;
-					angle += 10.0f * 0.001f;
-					Quaternion rotation = Quaternion::AngleAxis( ToRadians( angle ), Vec3::YAxis( ) );
-					ent->SetLocalRotation( ent->GetLocalRotation( ) * rotation );
-					mTransformWidget.SetRotation( ent->GetWorldRotation( ) );
-				}
-			} 
-
-			if ( mInput->IsKeyDown( KeyCode::Comma ) )
-			{
-				Entity* ent = mSelectedEntity.Get( );
-				if ( ent )
-				{
-					static f32 angle = 0.0f;
-					angle += 10.0f * 0.001f;;
-					Quaternion rotation = Quaternion::AngleAxis( ToRadians( angle ), Vec3::ZAxis( ) );
-					ent->SetLocalRotation( ent->GetLocalRotation( ) * rotation );
-					mTransformWidget.SetRotation( ent->GetWorldRotation( ) );
-				}
-			} 
 
 			if ( mInput->IsKeyDown( KeyCode::LeftMouseButton ) )
 			{

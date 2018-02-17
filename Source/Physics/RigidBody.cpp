@@ -474,13 +474,13 @@ namespace Enjon
 		// Set local scaling of shape
 		mShape->SetLocalScaling( transform.Scale ); 
 
-		SetLinearVelocity( 0.0f );
-		SetAngularVelocity( 0.0f );
+		//SetLinearVelocity( 0.0f );
+		//SetAngularVelocity( 0.0f );
 		mBody->setWorldTransform( bTransform );
 		mBody->getMotionState( )->setWorldTransform( bTransform );
 
 		// Clear forces
-		ClearForces( ); 
+		//ClearForces( ); 
 	}
 
 	//========================================================================

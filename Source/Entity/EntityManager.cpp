@@ -126,6 +126,13 @@ namespace Enjon
 
 	//=================================================================
 
+	UUID Entity::GetUUID( ) const 
+	{
+		return mUUID;
+	}
+
+	//=================================================================
+
 	void Entity::Reset()
 	{
 		assert(mManager != nullptr);
@@ -559,6 +566,13 @@ namespace Enjon
  
 	//---------------------------------------------------------------
 
+	void Entity::SetUUID( const UUID& uuid )
+	{
+		mUUID = uuid;
+	}
+ 
+	//---------------------------------------------------------------
+
 	Component* EntityManager::GetComponent( const EntityHandle& entity, const u32& ComponentID )
 	{
 		if ( mComponents.find( ComponentID ) != mComponents.end( ) )
@@ -650,7 +664,7 @@ namespace Enjon
 		entity->mHandle = handle;
 		entity->mState = EntityState::ACTIVE; 
 		entity->mManager = this;
-		//entity->mUUID = UUID::GenerateUUID( );
+		entity->mUUID = UUID::GenerateUUID( );
 
 		// Push back live entity into active entity vector
 		mMarkedForAdd.push_back( entity );

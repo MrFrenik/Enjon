@@ -14,15 +14,23 @@
 		{\
 			return GetClassInternal();\
 		}\
-	private:\
-		const Enjon::MetaClass* GetClassInternal() const; 
+	protected:\
+		virtual const Enjon::MetaClass* GetClassInternal() const override; 
 
 #define ENJON_COMPONENT( type )\
-public:\
-	virtual void Destroy() override\
-	{\
-		DestroyBase<type>();\
-	} 
+	friend Enjon::Object;																			\
+	public:																							\
+		virtual const Enjon::MetaClass* Class( ) const override\
+		{\
+			return GetClassInternal();\
+		}\
+	protected:\
+		virtual const Enjon::MetaClass* GetClassInternal() const override;\
+	public:\
+		virtual void Destroy() override\
+		{\
+			DestroyBase<type>();\
+		} 
 
 #define ENJON_ENUM( ... )
 #define ENJON_PROPERTY( ... )
@@ -35,6 +43,14 @@ public:\
 #endif
 
 #define ENJON_MODULE_BODY( ModuleName )\
+	friend Enjon::Object;																			\
+	public:																							\
+		virtual const Enjon::MetaClass* Class( ) const override\
+		{\
+			return GetClassInternal();\
+		}\
+	protected:\
+		virtual const Enjon::MetaClass* GetClassInternal() const override;\
 	public:\
 		virtual Enjon::Result ModuleName::BindApplicationMetaClasses() override;\
 		virtual Enjon::Result ModuleName::UnbindApplicationMetaClasses() override;\

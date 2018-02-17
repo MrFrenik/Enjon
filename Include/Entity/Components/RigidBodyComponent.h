@@ -57,7 +57,6 @@ namespace Enjon
 	ENJON_CLASS( Construct )
 	class RigidBodyComponent : public Component
 	{
-		ENJON_CLASS_BODY( )
 		ENJON_COMPONENT( RigidBodyComponent )
 
 		public: 

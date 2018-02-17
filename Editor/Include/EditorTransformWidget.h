@@ -80,6 +80,8 @@ namespace Enjon
 			Vec2 mPreviousMouseCoords;
 			bool mInteractingWithTransformWidget = true; 
 			bool mEnabled = false;
+			bool mSetPreviousAngle = false;
+			f32 mPreviousAngle = 0.0f;
 	}; 
 }
 

@@ -33,7 +33,9 @@ class Lexer
 
 		bool ContinueTo( TokenType type );
 
-		bool ContinueToIdentifier( const std::string& identifier );
+		bool ContinueToIdentifier( const std::string& identifier ); 
+
+		bool ContinueToAnyIdentifier( const std::vector< std::string >& identifiers );
 
 		void ConsumeAllNamespaceQualifiers( );
 	
