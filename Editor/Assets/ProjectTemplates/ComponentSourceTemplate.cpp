@@ -1,7 +1,7 @@
 #HEADERFILEBEGIN
 #pragma once
-#ifndef ENJON_#PROJECTNAME_H
-#define ENJON_#PROJECTNAME_H
+#ifndef ENJON_#COMPONENTNAME_H
+#define ENJON_#COMPONENTNAME_H
 
 // Enjon includes
 #include <Enjon.h>
@@ -9,32 +9,27 @@
 namespace Enjon
 {
 	ENJON_CLASS( Construct )
-	class #PROJECTNAME : public Enjon::Application
+	class #COMPONENTNAME : public Enjon::Component
 	{
-		ENJON_MODULE_BODY( #PROJECTNAME )
+		ENJON_COMPONENT( #COMPONENTNAME )
 
 		public:
 			/**
-			* @brief Overrides application initialization method. Gets called on startup of application.
+			* @brief Overrides component initialization method. Gets called on startup of application.
 			*/
 			virtual Enjon::Result Initialize() override;
 
 			/**
-			* @brief Overrides application update method. Gets called once per frame.
+			* @brief Overrides component update method. Gets called once per frame.
 			*/
 			virtual Enjon::Result Update( Enjon::f32 dt ) override;
 
 			/**
-			* @brief Overrides application shutdown method. Gets called when application is stopped.
+			* @brief Overrides component shutdown method. Gets called when application is stopped.
 			*/
 			virtual Enjon::Result Shutdown( ) override;
 	};
-
-	// Declaration for module export
-	ENJON_MODULE_DECLARE( #PROJECTNAME )
 }
-
-
 
 #endif
 
@@ -42,30 +37,27 @@ namespace Enjon
 
 #SOURCEFILEBEGIN
 // Project includes
-#include "#PROJECTNAME.h"
+#include "#COMPONENTNAME.h"
 
 using namespace Enjon;
 
-// Module implementation definition
-ENJON_MODULE_DEFINE( #PROJECTNAME )
-
 //==================================================================
 
-Result #PROJECTNAME::Initialize()
+Result #COMPONENTNAME::Initialize()
 {
 	return Result::SUCCESS;
 }
 
 //==================================================================
 
-Result #PROJECTNAME::Update( f32 dt )
+Result #COMPONENTNAME::Update( f32 dt )
 {
 	return Result::PROCESS_RUNNING;
 }
 
 //==================================================================
 
-Result #PROJECTNAME::Shutdown()
+Result #COMPONENTNAME::Shutdown()
 {
 	return Result::SUCCESS;
 }

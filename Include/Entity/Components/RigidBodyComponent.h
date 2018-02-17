@@ -64,12 +64,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			RigidBodyComponent( );
-
-			/**
-			* @brief
-			*/
-			~RigidBodyComponent();
+			void ExplicitDestructor( ) override;
 
 			/**
 			* @brief

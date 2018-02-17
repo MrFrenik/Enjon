@@ -10,7 +10,7 @@ namespace Enjon
 {
 	//==================================================================================
 
-	PointLightComponent::PointLightComponent()
+	void PointLightComponent::ExplicitConstructor()
 	{
 		// Add renderable to scene
 		GraphicsSubsystem* gs = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem >( )->ConstCast< GraphicsSubsystem >( );
@@ -22,7 +22,7 @@ namespace Enjon
 
 	//==================================================================================
 
-	PointLightComponent::~PointLightComponent()
+	void PointLightComponent::ExplicitDestructor()
 	{
 		// Remove renderable from scene
 		if (mLight.GetGraphicsScene() != nullptr)

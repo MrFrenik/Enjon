@@ -1187,16 +1187,9 @@ namespace Enjon
 		if ( mMoveCamera && ( mMoveCamera != previousCamMove ) )
 		{ 
 			Vec2 mc = mInput->GetMouseCoords( );
-			//Vec2 mc = mEditorSceneView->GetSceneViewProjectedCursorPosition( );
 			Vec2 center = mEditorSceneView->GetCenterOfViewport( );
 			mMouseCoordsDelta = Vec2( (f32)(viewPort.x) / 2.0f - mc.x, (f32)(viewPort.y) / 2.0f - mc.y );
-			//SDL_WarpMouseInWindow( window->GetWindowContext( ), (s32)center.x, (s32)center.y );
 		}
-
-		//if ( mInput->IsKeyPressed( Enjon::KeyCode::T ) )
-		//{
-		//	mMoveCamera ^= 1;
-		//}
 
 		if ( !mMoveCamera )
 		{
@@ -1208,17 +1201,21 @@ namespace Enjon
 					DeselectEntity( );
 				}
 			}
-			if ( mInput->IsKeyPressed( KeyCode::W ) )
+
+			if ( mSelectedEntity )
 			{
-				mTransformWidget.SetTransformationMode( TransformationMode::Translation );
-			}
-			if ( mInput->IsKeyPressed( KeyCode::E ) )
-			{
-				mTransformWidget.SetTransformationMode( TransformationMode::Rotation );
-			}
-			if ( mInput->IsKeyPressed( KeyCode::R ) )
-			{
-				mTransformWidget.SetTransformationMode( TransformationMode::Scale );
+				if ( mInput->IsKeyPressed( KeyCode::W ) )
+				{
+					mTransformWidget.SetTransformationMode( TransformationMode::Translation );
+				}
+				if ( mInput->IsKeyPressed( KeyCode::E ) )
+				{
+					mTransformWidget.SetTransformationMode( TransformationMode::Rotation );
+				}
+				if ( mInput->IsKeyPressed( KeyCode::R ) )
+				{
+					mTransformWidget.SetTransformationMode( TransformationMode::Scale );
+				} 
 			}
 
 			if ( mInput->IsKeyDown( KeyCode::LeftMouseButton ) )

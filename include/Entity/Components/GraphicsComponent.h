@@ -19,17 +19,12 @@ namespace Enjon
 			/* 
 			* @brief
 			*/
-			GraphicsComponent();
+			virtual void ExplicitConstructor() override; 
 
 			/*
 			* @brief
 			*/
-			GraphicsComponent(const Renderable& renderable);
-
-			/*
-			* @brief
-			*/
-			~GraphicsComponent();
+			virtual void ExplicitDestructor() override;
 
 			/*
 			* @brief

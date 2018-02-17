@@ -11,7 +11,7 @@ namespace Enjon
 {
 	//====================================================================
 
-	GraphicsComponent::GraphicsComponent()
+	void GraphicsComponent::ExplicitConstructor()
 	{ 
 		// Add default mesh and material for renderable
 		const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
@@ -24,20 +24,11 @@ namespace Enjon
 
 		// Set explicit tick state
 		mTickState = ComponentTickState::TickAlways;
-	}
+	} 
 
 	//====================================================================
 
-	GraphicsComponent::GraphicsComponent(const Renderable& renderable)
-		: mRenderable(renderable)
-	{
-		// Set explicit tick state
-		mTickState = ComponentTickState::TickAlways;
-	}
-
-	//====================================================================
-
-	GraphicsComponent::~GraphicsComponent()
+	void GraphicsComponent::ExplicitDestructor()
 	{
 		// Remove renderable from scene
 		if (mRenderable.GetGraphicsScene() != nullptr)

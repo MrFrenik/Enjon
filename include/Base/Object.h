@@ -1253,12 +1253,16 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			Object( ) {}
+			Object( ) 
+			{
+			}
 
 			/**
 			*@brief
 			*/
-			~Object( ) {}
+			virtual ~Object( )
+			{ 
+			}
 
 			/**
 			*@brief
@@ -1267,14 +1271,6 @@ namespace Enjon
 			{
 				return nullptr;
 			}
-
-			/**
-			*@brief
-			*/
-			//virtual u32 GetTypeId( ) const
-			//{
-			//	return EnjonMaxTypeId;
-			//} 
 
 			/**
 			*@brief
@@ -1427,6 +1423,16 @@ namespace Enjon
 			virtual const Enjon::MetaClass* GetClassInternal( ) const
 			{
 				return nullptr;
+			}
+
+			virtual void ExplicitConstructor( )
+			{ 
+				// Do nothing by default
+			}
+
+			virtual void ExplicitDestructor( )
+			{ 
+				// Do nothing by default
 			}
 	};
 }

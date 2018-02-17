@@ -17,12 +17,12 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			PointLightComponent();
+			void ExplicitConstructor() override;
 
 			/*
 			* @brief
 			*/
-			~PointLightComponent();
+			void ExplicitDestructor() override;
 
 			/*
 			* @brief

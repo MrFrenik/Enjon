@@ -9,16 +9,10 @@
 #include "Engine.h"
 
 namespace Enjon
-{
+{ 
 	//========================================================================
 
-	RigidBodyComponent::RigidBodyComponent( )
-	{
-	}
-
-	//========================================================================
-
-	RigidBodyComponent::~RigidBodyComponent( )
+	void RigidBodyComponent::ExplicitDestructor( )
 	{
 		// Remove component from physics subsystem's contact events
 		Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->ConstCast< PhysicsSubsystem >( )->RemoveFromContactEvents( this );
