@@ -47,7 +47,7 @@ namespace Enjon
 
 	//==================================================================== 
 
-	void GraphicsComponent::Update( const f32& dt)
+	void GraphicsComponent::Update( )
 	{
 		mRenderable.SetTransform(mEntity->GetWorldTransform());
 	}

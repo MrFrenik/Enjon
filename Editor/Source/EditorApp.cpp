@@ -39,12 +39,12 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mProjectsDir = "W:/Projects/";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -70,56 +70,112 @@ namespace Enjon
 		}
 	}
 
+	void EditorApp::AddComponentPopupView( )
+	{
+		if ( ImGui::BeginPopupModal( "##NewComponent" ) )
+		{
+			// Get component list
+			EntityManager* entities = EngineSubsystem( EntityManager );
+			auto compMetaClsList = entities->GetComponentMetaClassList( );
+
+			static String componentName;
+			bool closePopup = false;
+
+			// Use to check if the component already exists
+			auto alreadyExists = [ & ] ( const String& name ) -> bool
+			{
+				for ( auto& c : compMetaClsList )
+				{
+					if ( c->GetName( ).compare( name ) == 0 )
+					{
+						return true;
+					}
+
+					return false;
+				}
+			};
+
+			char buffer[ 256 ];
+			strncpy( buffer, componentName.c_str( ), 256 );
+			if ( ImGui::InputText( "Component Name", buffer, 256 ) )
+			{
+				// Reset component name
+				componentName = String(buffer);
+			} 
+
+			if ( ImGui::Button( "Create" ) )
+			{
+				if ( !alreadyExists( componentName ) )
+				{
+					closePopup = true;
+					std::cout << "Creating component!\n";
+				}
+				else
+				{
+					std::cout << "Component already exists!\n";
+				}
+			}
+
+			if ( ImGui::Button( "Cancel" ) )
+			{
+				closePopup = true;
+			}
+
+			if ( closePopup )
+			{
+				ImGui::CloseCurrentPopup( );
+				mNewComponentPopupDialogue = false; 
+			}
+
+			ImGui::EndPopup( );
+		}
+	}
+
 	void EditorApp::InspectorView( bool* enabled )
 	{
 		if ( mSelectedEntity )
 		{
 			// Debug dump the entity ( Probably shouldn't do this and should tailor it more... )
 			Entity* ent = mSelectedEntity.Get( ); 
-			ImGuiManager::DebugDumpObject( ent );
- 
-			//if ( ImGui::Button( "ADD SOMETHING YOU DIDN'T CODE YOURSELF" ) )
-			//{ 
-			//	ImGui::OpenPopup( "##Popup" );
-			//}
+			//ImGuiManager::DebugDumpObject( ent );
 
-			//if ( ImGui::BeginPopupModal( "##Popup" ) )
-			//{
-			//	AssetManager* am = EngineSubsystem( AssetManager );
-			//	AssetHandle<Texture> john = am->GetAsset< Texture >( "textures.john" );
+			// Transform information
+			if ( ImGui::CollapsingHeader( "Local Transform" ) )
+			{
+				ImGuiManager::DebugDumpProperty( ent, ent->Class( )->GetPropertyByName( "mLocalTransform" ) ); 
+			}
 
-			//	ImGui::Image( (ImTextureID)john.Get()->GetTextureId( ), ImVec2(64, 64), ImVec2(0, 0 ), ImVec2( 1, 1 ) );
-			//	ImGui::Text( "GO FUCK YOURSELF." );
-			//	
-			//	if ( ImGui::Button( "Close" ) )
-			//	{
-			//		ImGui::CloseCurrentPopup( ); 
-			//	}
-
-			//	ImGui::EndPopup( );
-			//}
-
-			if ( ImGui::CollapsingHeader( "ADD COMPONENT" ) )
+			if ( ImGui::BeginCombo( "##ADDCOMPONENT", "Add Component..." ) )
 			{
 				// Get component list
 				EntityManager* entities = EngineSubsystem( EntityManager );
 				auto compMetaClsList = entities->GetComponentMetaClassList( );
 
-				ImGui::ListBoxHeader( "" );
+				for ( auto& cls : compMetaClsList )
 				{
-					for ( auto& cls : compMetaClsList )
+					if ( !ent->HasComponent( cls ) )
 					{
-						if ( !ent->HasComponent( cls ) )
+						// Add component to mEntity
+						if ( ImGui::Selectable( cls->GetName( ).c_str( ) ) )
 						{
-							// Add component to mEntity
-							if ( ImGui::Selectable( cls->GetName( ).c_str( ) ) )
-							{
-								ent->AddComponent( cls );
-							} 
-						}
-					} 
+							ent->AddComponent( cls );
+						} 
+					}
 				}
-				ImGui::ListBoxFooter( );
+
+				if ( ImGui::Selectable( "New Component..." ) )
+				{
+					mNewComponentPopupDialogue = true;
+				}
+
+				ImGui::EndCombo( );
+			}
+
+			// Add new component dialogue window
+			if ( mNewComponentPopupDialogue )
+			{
+				ImGui::OpenPopup( "##NewComponent" );
+				AddComponentPopupView( );
 			}
 
 			for ( auto& c : ent->GetComponents( ) )
@@ -140,41 +196,14 @@ namespace Enjon
 					if ( shapeType != -1 && shapeType != (s32)c->Cast< RigidBodyComponent >()->GetShapeType() )
 					{
 						c->ConstCast< RigidBodyComponent >( )->SetShape( c->Cast< RigidBodyComponent >( )->GetShapeType( ) );
-					}
+					} 
 
-					//if ( cls->InstanceOf<RigidBodyComponent>( ) )
-					//{
-					//	RigidBodyComponent* rbc = c->ConstCast< RigidBodyComponent >( );
-					//	rbc->SetMass( rbc->GetMass( ) );
-					//} 
+					if ( ImGui::Button( "Remove" ) )
+					{
+						ent->RemoveComponent( c->Class( ) );
+					}
 				}
 			}
-
-			//if ( ImGui::TreeNode( fmt::format( "Components##{}", ent->GetID( ) ).c_str( ) ) )
-			//{
-			//	for ( auto& c : ent->GetComponents( ) )
-			//	{ 
-			//		if ( c->Class( ) == Object::GetClass<RigidBodyComponent >( ) )
-			//		{
-			//			RigidBodyComponent* rbc = c->ConstCast<RigidBodyComponent>( );
-			//			if ( rbc )
-			//			{
-			//				f32 mass = rbc->GetMass( );
-			//				if ( ImGui::DragFloat( "Mass", &mass, 1.0f, 0.0f, 100.0f ) )
-			//				{
-			//					rbc->SetMass( mass );
-			//				}
-			//			}
-			//		}
-
-			//		else
-			//		{
-			//			Enjon::ImGuiManager::DebugDumpObject( c ); 
-			//		}
-			//	} 
-			//	ImGui::TreePop( );
-			//}
-
 		}
 	}
 

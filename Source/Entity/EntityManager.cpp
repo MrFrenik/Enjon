@@ -15,8 +15,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include "ImGui/ImGuizmo.h"
-
 #include <fmt/printf.h> 
 #include <stdio.h>
 
@@ -176,7 +174,7 @@ namespace Enjon
 			{
 				if ( comp->GetTickState() == ComponentTickState::TickAlways || app->GetApplicationState( ) == ApplicationState::Running )
 				{
-					comp->Update( dt ); 
+					comp->Update( ); 
 				}
 			}
 		} 
@@ -915,7 +913,9 @@ namespace Enjon
 		if ( comp )
 		{
 			comp->Destroy( );
-		}
+		} 
+		auto comps = &entity.Get( )->mComponents;
+		comps->erase( std::remove( comps->begin(), comps->end(), compCls->GetTypeId() ), comps->end() ); 
 		delete comp;
 		comp = nullptr;
 	}

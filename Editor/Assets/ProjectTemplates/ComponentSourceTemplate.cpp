@@ -15,19 +15,24 @@ namespace Enjon
 
 		public:
 			/**
-			* @brief Overrides component initialization method. Gets called on startup of application.
+			* @brief Overrides component initialization method. Gets called on startup of application before Start().
 			*/
-			virtual Enjon::Result Initialize() override;
+			virtual void Initialize( ) override;
+
+			/**
+			* @brief Overrides component start method. Gets called on startup of application after Initialize().
+			*/
+			virtual void Start( ) override;
 
 			/**
 			* @brief Overrides component update method. Gets called once per frame.
 			*/
-			virtual Enjon::Result Update( Enjon::f32 dt ) override;
+			virtual void Update( ) override;
 
 			/**
 			* @brief Overrides component shutdown method. Gets called when application is stopped.
 			*/
-			virtual Enjon::Result Shutdown( ) override;
+			virtual void Shutdown( ) override;
 	};
 }
 
@@ -43,23 +48,26 @@ using namespace Enjon;
 
 //==================================================================
 
-Result #COMPONENTNAME::Initialize()
+void #COMPONENTNAME::Initialize( )
 {
-	return Result::SUCCESS;
 }
 
 //==================================================================
 
-Result #COMPONENTNAME::Update( f32 dt )
+void #COMPONENTNAME::Start( )
 {
-	return Result::PROCESS_RUNNING;
 }
 
 //==================================================================
 
-Result #COMPONENTNAME::Shutdown()
+void #COMPONENTNAME::Update( )
 {
-	return Result::SUCCESS;
+}
+
+//==================================================================
+
+void #COMPONENTNAME::Shutdown( )
+{
 }
 
 //==================================================================

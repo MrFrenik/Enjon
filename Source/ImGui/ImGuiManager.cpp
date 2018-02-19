@@ -86,79 +86,6 @@ namespace Enjon
 		// Original screen coords
 		auto dimensions = window->GetViewport();
 		Enjon::Vec2 center = Enjon::Vec2((f32)dimensions.x / 2.0f, (f32)dimensions.y / 2.0f);
-
-	    ImGuizmo::BeginFrame();
-		static Mat4 model = Mat4::Identity();
-		Enjon::Vec2 translate(0, 0);
-    	ImGui::SliderFloat("Translate X", &translate.x, 0.0f, 1.0f);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
-    	ImGui::SliderFloat("Translate Y", &translate.y, 0.0f, 1.0f);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
-
-    	Vec3 scale(1, 1, 1);
-    	ImGui::SliderFloat("Scale X", &scale.x, 0.01f, 1.0);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
-    	ImGui::SliderFloat("Scale Y", &scale.y, 0.01f, 1.0);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
-    	ImGui::SliderFloat("Scale Z", &scale.z, 0.01f, 1.0);     // adjust display_format to decorate the value with a prefix or a suffix. Use power!=1.0 for logarithmic sliders
-
-    	model *= Mat4::Translate(Vec3(translate, 0.0f));
-    	model *= Mat4::Scale(scale);
-
-	    // Imguizmo 
-	    static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
-	    static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
-	    if (ImGui::IsKeyPressed(90))
-		mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-		if (ImGui::IsKeyPressed(69))
-			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-		if (ImGui::IsKeyPressed(82)) // r Key
-			mCurrentGizmoOperation = ImGuizmo::SCALE;
-		if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
-			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-		ImGui::SameLine();
-		if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
-			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-		ImGui::SameLine();
-		if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
-			mCurrentGizmoOperation = ImGuizmo::SCALE;
-		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-		ImGuizmo::DecomposeMatrixToComponents(model.elements, matrixTranslation, matrixRotation, matrixScale);
-		ImGui::InputFloat3("Tr", matrixTranslation, 3);
-		ImGui::InputFloat3("Rt", matrixRotation, 3);
-		ImGui::InputFloat3("Sc", matrixScale, 3);
-		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, model.elements);
-
-		if (mCurrentGizmoOperation != ImGuizmo::SCALE)
-		{
-			if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
-				mCurrentGizmoMode = ImGuizmo::LOCAL;
-			ImGui::SameLine();
-			if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
-				mCurrentGizmoMode = ImGuizmo::WORLD;
-		}
-		static bool useSnap(false);
-		if (ImGui::IsKeyPressed(83))
-			useSnap = !useSnap;
-		ImGui::Checkbox("", &useSnap);
-		ImGui::SameLine();
-		Enjon::Vec2 snap;
-
-		/*
-		switch (mCurrentGizmoOperation)
-		{
-		case ImGuizmo::TRANSLATE:
-			snap = config.mSnapTranslation;
-			ImGui::InputFloat3("Snap", &snap.x);
-			break;
-		case ImGuizmo::ROTATE:
-			snap = config.mSnapRotation;
-			ImGui::InputFloat("Angle Snap", &snap.x);
-			break;
-		case ImGuizmo::SCALE:
-			snap = config.mSnapScale;
-			ImGui::InputFloat("Scale Snap", &snap.x);
-			break;
-		}
-		*/
-
-		ImGuizmo::Manipulate(view, projection, mCurrentGizmoOperation, mCurrentGizmoMode, model.elements, NULL, useSnap ? &snap.x : NULL);
 	}
 
 #define MAP_KEY_PRIMITIVE( keyType, valType, ImGuiCastType, ImGuiFunc, object, prop )\
@@ -627,6 +554,61 @@ namespace Enjon
 				Enjon::String str = val.ToString( );
 				ImGui::Text( fmt::format( "{}: {}", name, str ).c_str( ) );
 			} break;
+
+			// Type is transform
+			case Enjon::MetaPropertyType::Transform:
+			{
+				Enjon::Transform val;
+				cls->GetValue( object, prop, &val );
+				Enjon::Vec3 pos = val.GetPosition( );
+				Enjon::Quaternion rot = val.GetRotation( );
+				Enjon::Vec3 scl = val.GetScale( );
+
+				if ( ImGui::TreeNode( Enjon::String( prop->GetName( ) + "##" + std::to_string( (u32)object ) ).c_str( ) ) )
+				{ 
+					// Position
+					{
+						f32 col[ 3 ] = { pos.x, pos.y, pos.z };
+						if ( ImGui::DragFloat3( Enjon::String( "Position##" + prop->GetName() ).c_str( ), col ) )
+						{
+							pos.x = col[ 0 ];
+							pos.y = col[ 1 ];
+							pos.z = col[ 2 ]; 
+							val.SetPosition( pos );
+							cls->SetValue( object, prop, val );
+						} 
+					}
+					
+					// Rotation
+					{
+						f32 col[ 4 ] = { rot.x, rot.y, rot.z, rot.w };
+						if ( ImGui::DragFloat4( Enjon::String( "Rotation##" + prop->GetName() ).c_str( ), col ) )
+						{
+							rot.x = col[ 0 ];
+							rot.y = col[ 1 ];
+							rot.z = col[ 2 ];
+							val.SetRotation( rot );
+							cls->SetValue( object, prop, val );
+						} 
+					}
+					
+					// Scale
+					{
+						f32 col[ 3 ] = { scl.x, scl.y, scl.z };
+						if ( ImGui::DragFloat3( Enjon::String( "Scale##" + prop->GetName() ).c_str( ), col ) )
+						{
+							scl.x = col[ 0 ];
+							scl.y = col[ 1 ];
+							scl.z = col[ 2 ];
+							val.SetScale( scl );
+							cls->SetValue( object, prop, val );
+						} 
+					} 
+
+					ImGui::TreePop( ); 
+				} 
+
+			} break;
 		}
 	}
 
@@ -669,6 +651,7 @@ namespace Enjon
 				case Enjon::MetaPropertyType::ColorRGBA32:
 				case Enjon::MetaPropertyType::String:
 				case Enjon::MetaPropertyType::UUID: 
+				case Enjon::MetaPropertyType::Transform:
 				{
 					DebugDumpProperty( object, prop );
 				} break; 
@@ -737,60 +720,7 @@ namespace Enjon
 
 				} break;
 				
-				// Type is transform
-				case Enjon::MetaPropertyType::Transform:
-				{
-					Enjon::Transform val;
-					cls->GetValue( object, prop, &val );
-					Enjon::Vec3 pos = val.GetPosition( );
-					Enjon::Quaternion rot = val.GetRotation( );
-					Enjon::Vec3 scl = val.GetScale( );
-
-					if ( ImGui::TreeNode( Enjon::String( prop->GetName( ) + "##" + std::to_string( (u32)object ) ).c_str( ) ) )
-					{ 
-						// Position
-						{
-							f32 col[ 3 ] = { pos.x, pos.y, pos.z };
-							if ( ImGui::DragFloat3( Enjon::String( "Position##" + prop->GetName() ).c_str( ), col ) )
-							{
-								pos.x = col[ 0 ];
-								pos.y = col[ 1 ];
-								pos.z = col[ 2 ]; 
-								val.SetPosition( pos );
-								cls->SetValue( object, prop, val );
-							} 
-						}
-						
-						// Rotation
-						{
-							f32 col[ 4 ] = { rot.x, rot.y, rot.z, rot.w };
-							if ( ImGui::DragFloat4( Enjon::String( "Rotation##" + prop->GetName() ).c_str( ), col ) )
-							{
-								rot.x = col[ 0 ];
-								rot.y = col[ 1 ];
-								rot.z = col[ 2 ];
-								val.SetRotation( rot );
-								cls->SetValue( object, prop, val );
-							} 
-						}
-						
-						// Scale
-						{
-							f32 col[ 3 ] = { scl.x, scl.y, scl.z };
-							if ( ImGui::DragFloat3( Enjon::String( "Scale##" + prop->GetName() ).c_str( ), col ) )
-							{
-								scl.x = col[ 0 ];
-								scl.y = col[ 1 ];
-								scl.z = col[ 2 ];
-								val.SetScale( scl );
-								cls->SetValue( object, prop, val );
-							} 
-						} 
-
-						ImGui::TreePop( ); 
-					} 
-
-				} break;
+				
 
 				// AssetHandle type
 				case Enjon::MetaPropertyType::AssetHandle:
@@ -1040,7 +970,6 @@ namespace Enjon
 		style.Colors[ImGuiCol_ScrollbarGrab]         = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
 		style.Colors[ImGuiCol_ScrollbarGrabHovered]  = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
 		style.Colors[ImGuiCol_ScrollbarGrabActive]   = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
-		style.Colors[ImGuiCol_ComboBg]               = ImVec4(0.14f, 0.14f, 0.14f, 0.85f);
 		style.Colors[ImGuiCol_CheckMark]             = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
 		style.Colors[ImGuiCol_SliderGrab]            = ImVec4(0.24f, 0.52f, 0.88f, 1.00f);
 		style.Colors[ImGuiCol_SliderGrabActive]      = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);

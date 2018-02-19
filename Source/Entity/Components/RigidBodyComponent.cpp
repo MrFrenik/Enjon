@@ -71,7 +71,7 @@ namespace Enjon
 		UpdateTransform( mEntity->GetWorldTransform( ) );
 	}
 
-	void RigidBodyComponent::Update( const f32& dt )
+	void RigidBodyComponent::Update( )
 	{
 		PhysicsSubsystem* phys = EngineSubsystem( PhysicsSubsystem );
 		if ( !phys->IsPaused( ) )

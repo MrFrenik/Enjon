@@ -492,9 +492,6 @@ const Class* Introspection::FindApplicationClass( )
 		
 void Introspection::ParseClassBody( Lexer* lexer, Class* cls )
 { 
-	std::cout << "Class name: " << cls->mName << "\n";
-	std::cout << "Lexer current token: " << lexer->GetCurrentToken( ).ToString( ) << "\n";
-
 	// Look for specific other body modifiers as well
 	if ( lexer->GetCurrentToken( ).Equals( "ENJON_COMPONENT" ) )
 	{
@@ -503,7 +500,6 @@ void Introspection::ParseClassBody( Lexer* lexer, Class* cls )
 	else if ( lexer->GetCurrentToken( ).Equals( "ENJON_MODULE_BODY" ) )
 	{
 		cls->mMetaClassType = MetaClassType::Application; 
-		std::cout << "Was here\n";
 	}
 	else
 	{
@@ -1102,8 +1098,6 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 
 	// Get name
 	prop->mName = curToken.ToString( ); 
-
-	std::cout << prop->mName << ": " << GetTypeAsString( prop->mType ) << "\n";
 
 	// Add to class
 	cls->AddProperty( prop ); 

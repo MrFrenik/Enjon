@@ -79,7 +79,7 @@ namespace Enjon
 		EditorWidgetManager* wm = mApp->GetEditorWidgetManager( );
 
 		// Capture hovered state
-		bool isHovered = ImGui::IsMouseHoveringWindow( ); 
+		bool isHovered = ImGui::IsWindowHovered( ); 
 		wm->SetHovered( this, isHovered );
 
 		// Capture focused state

@@ -70,7 +70,7 @@ namespace Enjon
 	
 	//=========================================================================
 
-	void Component::Update( const f32& dT )
+	void Component::Update( )
 	{ 
 		// Nothing by default...
 	} 

@@ -159,7 +159,7 @@ namespace Enjon
 			/**
 			* @brief Called once per frame on each component.
 			*/
-			virtual void Update( const f32& dT );
+			virtual void Update( );
 
 			/**
 			* @brief Called at the end of the component life-cycle. Any state or memory that needs to be cleaned up with happen here.

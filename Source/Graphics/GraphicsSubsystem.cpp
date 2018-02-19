@@ -1397,6 +1397,7 @@ namespace Enjon
         // Flush
         glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
         ImGui::Render(); 
+		ImGui_ImplSdlGL3_RenderDrawData( ImGui::GetDrawData( ) );
 	}
 
 	//======================================================================================================
@@ -1614,7 +1615,7 @@ namespace Enjon
 	{
 	    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);                                 // Right align, keep 140 pixels for labels
 
-        ImGui::PushStyleColor(ImGuiCol_Text, ImColor(1.0, 0.6f, 0.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 0.6f, 0.0f, 1.0f));
         ImGui::Text("Graphics Options");
         ImGui::PopStyleColor(1);
         ImGui::Separator(); 
@@ -1747,7 +1748,7 @@ namespace Enjon
 	    {
 	    	ImFontAtlas* atlas = ImGui::GetIO().Fonts;
 	    	ImGui::PushFont(atlas->Fonts[1]);
-	        ImGui::PushStyleColor(ImGuiCol_Text, ImColor(0.2, 0.6f, 0.6f, 1.0f));
+	        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2, 0.6f, 0.6f, 1.0f));
 	    	for (u32 i = 0; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
 	    	{
 	    		const char* string_name = mGbuffer->FrameBufferToString(i);
@@ -1877,14 +1878,6 @@ namespace Enjon
 			ImGuiManager::DebugDumpObject( &mGraphicsSceneCamera );
 	    	ImGui::TreePop();
 	    }
-
-	    if (ImGui::TreeNode("Background"))
-	    {
-	    	static const char* labels[] = {"R", "G", "B"};
-	    	ImGui::Text("Color");
-            ImGui::DragFloat3Labels("##bgcolor", labels, mBGColor, 0.1f, 0.0f, 30.0f);
-	    	ImGui::TreePop();
-	    } 
 	}
 
 	//======================================================================================================= 

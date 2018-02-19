@@ -33,7 +33,7 @@ namespace Enjon
 
 	//==================================================================================
 
-	void PointLightComponent::Update(const f32& dt)
+	void PointLightComponent::Update()
 	{
 		mLight.SetPosition(mEntity->GetWorldPosition());	
 	} 

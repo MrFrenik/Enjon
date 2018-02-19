@@ -79,7 +79,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual void Update( const f32& dt ) override;
+			virtual void Update( ) override;
 
 			/**
 			* @brief

@@ -179,6 +179,7 @@ namespace Enjon
 			void CameraOptions( bool* enable );
 			void CreateProjectView( );
 			void SelectSceneView( );
+			void AddComponentPopupView( );
 
 			void CreateNewProject( const String& projectName );
 
@@ -212,6 +213,7 @@ namespace Enjon
 			bool mShowSceneView = true;
 			Enjon::String mResourceFilePathToLoad = "";
 			bool mMoveCamera = false; 
+			bool mNewComponentPopupDialogue = false;
 
 			bool mPlaying = false;
 			bool mNeedsStartup = true; 

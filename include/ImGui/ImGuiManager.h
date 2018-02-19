@@ -6,7 +6,6 @@
 #include "ImGui/imgui_impl_sdl_gl3.h"
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_dock.h"
-#include "ImGui/ImGuizmo.h"
 #include "System/Types.h"
 
 #include <SDL2/sdl.h>
@@ -42,15 +41,14 @@ namespace Enjon
 			static void Render(SDL_Window* window);
 			static void ShutDown();
 			static void DebugDumpObject( const Enjon::Object* object );
+			static void DebugDumpProperty( const Enjon::Object* object, const Enjon::MetaProperty* prop );
+			static void DebugDumpArrayProperty( const Enjon::Object* object, const Enjon::MetaPropertyArrayBase* prop );
+			static void DebugDumpHashMapProperty( const Enjon::Object* object, const Enjon::MetaPropertyHashMapBase* prop );
 
 		private:
 			static s32 MainMenu();
 			static void ImGuiStyles();
-			static void InitializeDefaults();
-
-			static void DebugDumpArrayProperty( const Enjon::Object* object, const Enjon::MetaPropertyArrayBase* prop );
-			static void DebugDumpHashMapProperty( const Enjon::Object* object, const Enjon::MetaPropertyHashMapBase* prop );
-			static void DebugDumpProperty( const Enjon::Object* object, const Enjon::MetaProperty* prop );
+			static void InitializeDefaults(); 
 
 		private:
 			static std::vector<std::function<void()>> mGuiFuncs;
