@@ -908,7 +908,7 @@ namespace Enjon
 			shader->Use( );
 			{ 
 				// Upload kernel uniform
-				glUniform3fv( glGetUniformLocation( shader->GetProgramID( ), "samples" ), 16 * 3, ( f32* )&mSSAOKernel[ 0 ] );
+				glUniform3fv( glGetUniformLocation( shader->GetProgramID( ), "samples" ), mSSAOKernelSize * 3, ( f32* )&mSSAOKernel[ 0 ] );
 				shader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
 				shader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
 				shader->SetUniform( "uScreenResolution", Vec2( screenRes.x, screenRes.y ) );
@@ -1463,11 +1463,11 @@ namespace Enjon
 		// Generate sample kernel
 		std::uniform_real_distribution< f32 > randomFloats( 0.0f, 1.0f );
 		std::default_random_engine generator;
-		for ( u32 i = 0; i < 16; ++i )
+		for ( u32 i = 0; i < mSSAOKernelSize; ++i )
 		{
 			Enjon::Vec3 sample( randomFloats( generator ) * 2.0f - 1.0f, randomFloats( generator ) * 2.0f - 1.0f, randomFloats( generator ) );
 			sample *= randomFloats( generator );
-			f32 scale = f32( i ) / 64.0;
+			f32 scale = f32( i ) / (f32)mSSAOKernelSize;
 
 			// scale samples s.t. they're more aligned to center of kernel
 			scale = Enjon::Lerp( 0.1f, 1.0f, scale * scale );
@@ -1542,7 +1542,7 @@ namespace Enjon
 		mFXAATarget 				= new RenderTarget(width, height);
 		mShadowDepth 				= new RenderTarget(2048, 2048);
 		mFinalTarget 				= new RenderTarget(width, height);
-		mSSAOTarget					= new RenderTarget( width, height );
+		mSSAOTarget					= new RenderTarget( width / 2, height / 2 );
 		mSSAOBlurTarget				= new RenderTarget( width, height ); 
 	}
 
