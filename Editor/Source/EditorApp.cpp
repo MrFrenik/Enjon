@@ -89,10 +89,10 @@ namespace Enjon
 					if ( c->GetName( ).compare( name ) == 0 )
 					{
 						return true;
-					}
-
-					return false;
+					} 
 				}
+
+				return false;
 			};
 
 			char buffer[ 256 ];
@@ -1366,10 +1366,10 @@ namespace Enjon
 			// Normalize velocity
 			velDir = Enjon::Vec3::Normalize( velDir );
 
-			f32 avgDT = Engine::GetInstance( )->GetWorldTime( ).GetAverageDeltaTime( );
+			f32 avgDT = Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( );
 
 			// Set camera position
-			camera->Transform.Position += avgDT * mCameraSpeed * velDir;
+			camera->Transform.Position += mCameraSpeed * velDir;
 
 			// Set camera rotation
 			// Get mouse input and change orientation of camera
@@ -1386,8 +1386,8 @@ namespace Enjon
 			SDL_WarpMouseInWindow( window->GetWindowContext( ), ( f32 )viewPort.x / 2.0f - mMouseCoordsDelta.x, ( f32 )viewPort.y / 2.0f - mMouseCoordsDelta.y );
 
 			// Offset camera orientation
-			f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * avgDT * mMouseSensitivity;
-			f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * avgDT * mMouseSensitivity;
+			f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * mMouseSensitivity;
+			f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * mMouseSensitivity;
 			camera->OffsetOrientation( xOffset, yOffset );
 		}
 

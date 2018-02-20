@@ -1542,7 +1542,7 @@ namespace Enjon
 		mFXAATarget 				= new RenderTarget(width, height);
 		mShadowDepth 				= new RenderTarget(2048, 2048);
 		mFinalTarget 				= new RenderTarget(width, height);
-		mSSAOTarget					= new RenderTarget( width / 2, height / 2 );
+		mSSAOTarget					= new RenderTarget( width / 4, height / 4 );
 		mSSAOBlurTarget				= new RenderTarget( width, height ); 
 	}
 
