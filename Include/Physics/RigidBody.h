@@ -63,87 +63,140 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			void SetShape( CollisionShapeType type );
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			void SetMass( const f32& mass );
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			f32 GetMass( ) const;
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			void SetIsTriggerVolume( bool enable );
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			u32 GetIsTriggerVolume( ) const;
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			void SetRestitution( const f32& restitution );
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
+			f32 GetRestitution( ) const;
+
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
 			void SetLinearDamping( const f32& damping );
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			f32 GetLinearDamping( ) const;
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			void SetAngularDamping( const f32& damping );
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			f32 GetAngularDamping( ) const;
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			void SetFriction( const f32& friction );
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
+			f32 GetFriction( ) const;
+
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
 			void SetGravity( const Vec3& gravity );
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
+			Vec3 GetGravity( ) const;
+
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
 			void SetLinearVelocity( const Vec3& velocity );
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			void SetAngularVelocity( const Vec3& velocity );
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
 			void SetLinearFactor( const iVec3& factor );
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
+			iVec3 GetLinearFactor( ) const;
+
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
 			void SetAngularFactor( const iVec3& factor );
 
 			/**
 			* @brief
 			*/
+			ENJON_FUNCTION( )
+			iVec3 GetAngularFactor( ) const;
+
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
 			void SetIsKinematic( bool enable );
+
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
+			bool GetIsKinematic( ) const;
 
 			/**
 			* @brief
@@ -218,8 +271,12 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void SetUserPointer( void* pointer );
+			bool GetContinuousCollisionDetectionEnabled( ) const;
 
+			/**
+			* @brief
+			*/
+			void SetUserPointer( void* pointer ); 
 
 			/**
 			* @brief
@@ -243,7 +300,6 @@ namespace Enjon
 		private:
 
 			/*
-
 				Want to have a way to be able to register callback function for a metaproperty that will be called whenever it's changed...
 				Could this only be editor specific, or game related as well? Not sure...
 				How would this even look?
@@ -299,41 +355,39 @@ namespace Enjon
 				}
 
 				prop->CallSetter(obj, val); 
-
-
 			*/
 
-			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 100.0f )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 100.0f, Delegates[ Accessor = GetMass, Mutator = SetMass ] )
 			f32 mMass = 1.0f;
 
-			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f, Delegates[ Accessor = GetRestitution, Mutator = SetRestitution ] )
 			f32 mRestitution = 0.0f;
 
-			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f, Delegates[ Accessor = GetFriction, Mutator = SetFriction ] )
 			f32 mFriction = 0.8f;
 
-			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f, Delegates[ Accessor = GetLinearDamping, Mutator = SetLinearDamping ] )
 			f32 mLinearDamping = 0.05f;
 
-			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f, Delegates[ Accessor = GetAngularDamping, Mutator = SetAngularDamping ] )
 			f32 mAngularDamping = 0.4f;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( Delegates[ Accessor = GetGravity, Mutator = SetGravity ] )
 			Vec3 mGravity = Vec3( 0.0f, -10.0f, 0.0f );
 
-			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f, Delegates[ Accessor = GetContinuousCollisionDetectionEnabled, Mutator = SetContinuousCollisionDetectionEnabled ] )
 			u32 mCCDEnabled = false;
 
-			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
+			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f, Delegates[ Accessor = GetIsTriggerVolume, Mutator = SetIsTriggerVolume ] )
 			u32 mIsTriggerVolume = false;
 
-			ENJON_PROPERTY( UIMin = 0, UIMax = 1 )
+			ENJON_PROPERTY( UIMin = 0, UIMax = 1, Delegates[ Accessor = GetLinearFactor, Mutator = SetLinearFactor ] )
 			iVec3 mLinearFactor = iVec3( 1 );
 
-			ENJON_PROPERTY( UIMin = 0, UIMax = 1 )
+			ENJON_PROPERTY( UIMin = 0, UIMax = 1, Delegates[ Accessor = GetAngularFactor, Mutator = SetAngularFactor ] )
 			iVec3 mAngularFactor = iVec3( 1 );
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( Delegates[ Accessor = GetIsKinematic, Mutator = SetIsKinematic ] )
 			bool mIsKinematic = false;
 
 		public:

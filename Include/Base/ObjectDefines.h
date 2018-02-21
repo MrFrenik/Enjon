@@ -4,6 +4,16 @@
 
 #include "System/Config.h"
 
+enum MetaPropertyEnumDefines
+{
+	UIMin, 
+	UIMax,
+	Delegates,
+	Accessor,
+	Mutator,
+	Editable
+};
+
 /*
 	Used as boilerplate for all classes participating in object/reflection model.
 */

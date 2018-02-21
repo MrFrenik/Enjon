@@ -154,8 +154,8 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			MetaProperty( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits )
-				: mType( type ), mName( name ), mOffset( offset ), mIndex( propIndex ), mTraits( traits )
+			MetaProperty( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits, const Vector<MetaFunction*>& accessors = Vector<MetaFunction*>(), const Vector<MetaFunction*>& mutators = Vector<MetaFunction*>() )
+				: mType( type ), mName( name ), mOffset( offset ), mIndex( propIndex ), mTraits( traits ), mAccessorCallbacks( accessors ), mMutatorCallbacks( mutators )
 			{
 			}
 
@@ -217,10 +217,12 @@ namespace Enjon
 
 		protected:
 			MetaPropertyType mType;
-			std::string mName;
+			String mName;
 			u32 mOffset;
 			u32 mIndex;
 			MetaPropertyTraits mTraits;
+			Vector<MetaFunction*> mAccessorCallbacks;
+			Vector<MetaFunction*> mMutatorCallbacks;
 	};
 
 	class MetaPropertyPointerBase : public MetaProperty 
@@ -986,24 +988,9 @@ namespace Enjon
 				if ( HasProperty( prop ) )
 				{
 					T* val = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
-					*out = *val;
+					*out = *val; 
 				}
 			} 
-
-			template < typename T >
-			const T* GetValueAsObject( const Object* object, const MetaProperty* prop ) const
-			{
-				if ( HasProperty( prop ) )
-				{
-					if ( prop->GetTraits( ).IsPointer( ) )
-					{
-						const T* obj = ( const T* )( usize( object ) + prop->mOffset );
-						return obj;
-					}
-				}
-
-				return nullptr;
-			}
 
 			template < typename T > 
 			const T* GetValueAs( const Object* object, const MetaProperty* prop ) const
@@ -1031,14 +1018,15 @@ namespace Enjon
 				{
 					T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
 					*dest = value;
-
-					// Call virtual setter on property here?
-					/*
-						for ( auto& callback : prop->GetCallbacks() )
+					
+					// Call mutator callbacks
+					for ( auto& mutator : prop->mMutatorCallbacks )
+					{
+						if ( mutator )
 						{
-							callback(value);
+							mutator->Invoke<void>( object, value ); 
 						}
-					*/
+					} 
 				}
 			} 
 
@@ -1049,6 +1037,15 @@ namespace Enjon
 				{
 					T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
 					*dest = value;
+
+					// Call mutator callbacks
+					for ( auto& mutator : prop->mMutatorCallbacks )
+					{
+						if ( mutator )
+						{
+							mutator->Invoke<void>( object, value ); 
+						}
+					} 
 				}
 			} 
 

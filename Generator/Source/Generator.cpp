@@ -31,6 +31,8 @@ int main( int argc, char** argv )
 		} 
 	} 
 
+	//mConfig.mRootPath = "W:/Enjon/";
+
 	// Grab the config file
 	mConfig.mConfigFilePath = mConfig.mRootPath + "Build/Generator/reflection.cfg"; 
 	mConfig.mOutputDirectory = mConfig.mRootPath + "Build/Generator/Intermediate";

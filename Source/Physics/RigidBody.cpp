@@ -8,16 +8,17 @@
 #include "Physics/SphereCollisionShape.h"
 #include "Physics/EmptyCollisionShape.h"
 #include "Serialize/ObjectArchiver.h"
+#include "Serialize/BaseTypeSerializeMethods.h"
 #include "Serialize/ByteBuffer.h"
 
 #include <Bullet/btBulletCollisionCommon.h>
 
 namespace Enjon
-{ 
+{
 	//========================================================================
 
 	RigidBody::RigidBody( )
-	{ 
+	{
 	}
 
 	//========================================================================
@@ -26,14 +27,14 @@ namespace Enjon
 	{
 		switch ( type )
 		{
-			case CollisionShapeType::Box:
-			{
-				mShape = new BoxCollisionShape( );
-			} break;
-			case CollisionShapeType::Sphere:
-			{
-				mShape = new SphereCollisionShape( );
-			} break;
+		case CollisionShapeType::Box:
+		{
+			mShape = new BoxCollisionShape( );
+		} break;
+		case CollisionShapeType::Sphere:
+		{
+			mShape = new SphereCollisionShape( );
+		} break;
 		}
 	}
 
@@ -51,7 +52,7 @@ namespace Enjon
 		// Delete motion state
 		if ( mMotionState )
 		{
-			delete mMotionState; 
+			delete mMotionState;
 		}
 
 		if ( mShape )
@@ -82,14 +83,14 @@ namespace Enjon
 
 		// Motion state
 		mMotionState = new BulletDefaultMotionState( transform );
-		BulletRigidBodyConstructionInfo rbInfo( mMass, mMotionState, mShape->GetRawShape(), localInertia );
+		BulletRigidBodyConstructionInfo rbInfo( mMass, mMotionState, mShape->GetRawShape( ), localInertia );
 		mBody = new BulletRigidBody( rbInfo );
 		mBody->setRestitution( mRestitution );
 		mBody->setFriction( mFriction );
 		mBody->setDamping( mLinearDamping, mAngularDamping );
-		mBody->setGravity( PhysicsUtils::Vec3ToBV3( mGravity ) ); 
+		mBody->setGravity( PhysicsUtils::Vec3ToBV3( mGravity ) );
 		mBody->setLinearFactor( PhysicsUtils::iVec3ToBV3( mLinearFactor ) );
-		mBody->setAngularFactor( PhysicsUtils::iVec3ToBV3( mAngularFactor ) ); 
+		mBody->setAngularFactor( PhysicsUtils::iVec3ToBV3( mAngularFactor ) );
 		SetIsTriggerVolume( mIsTriggerVolume );
 		SetIsKinematic( mIsKinematic );
 
@@ -117,7 +118,7 @@ namespace Enjon
 		mBody->setRestitution( mRestitution );
 		mBody->setFriction( mFriction );
 		mBody->setDamping( mLinearDamping, mAngularDamping );
-		mBody->setGravity( PhysicsUtils::Vec3ToBV3( mGravity ) ); 
+		mBody->setGravity( PhysicsUtils::Vec3ToBV3( mGravity ) );
 		mBody->setLinearFactor( PhysicsUtils::iVec3ToBV3( mLinearFactor ) );
 		mBody->setAngularFactor( PhysicsUtils::iVec3ToBV3( mAngularFactor ) );
 		SetIsTriggerVolume( mIsTriggerVolume );
@@ -145,7 +146,7 @@ namespace Enjon
 
 		// Add body to physics world and set physics world pointer
 		phys->AddBody( this );
-		mWorld = phys->GetWorld( ); 
+		mWorld = phys->GetWorld( );
 	}
 
 	//========================================================================
@@ -194,7 +195,7 @@ namespace Enjon
 	}
 
 	void RigidBody::SetShape( CollisionShapeType type )
-	{ 
+	{
 		// Setting the shape will remove the body from the world then reset the shape correctly
 		//if ( GetCollisionShape( ) && GetCollisionShape( )->GetCollisionShapeType( ) == type )
 		//{
@@ -211,23 +212,23 @@ namespace Enjon
 			delete mShape;
 
 			// Set to nullptr
-			mShape = nullptr; 
+			mShape = nullptr;
 		}
 
 		// Create new shape based on type 
 		switch ( type )
 		{
-			default:
-			case CollisionShapeType::Empty:
-			case CollisionShapeType::Box:
-			{
-				mShape = new BoxCollisionShape( );
-			} break;
-			
-			case CollisionShapeType::Sphere:
-			{
-				mShape = new SphereCollisionShape( );
-			} break;
+		default:
+		case CollisionShapeType::Empty:
+		case CollisionShapeType::Box:
+		{
+			mShape = new BoxCollisionShape( );
+		} break;
+
+		case CollisionShapeType::Sphere:
+		{
+			mShape = new SphereCollisionShape( );
+		} break;
 		}
 
 		// Need to reinitialize body
@@ -237,7 +238,7 @@ namespace Enjon
 	//========================================================================
 
 	void RigidBody::SetMass( const f32& mass )
-	{ 
+	{
 		// Set mass property
 		mMass = mass;
 
@@ -285,9 +286,16 @@ namespace Enjon
 	//========================================================================
 
 	void RigidBody::SetRestitution( const f32& restitution )
-	{ 
+	{
 		mRestitution = restitution;
 		mBody->setRestitution( restitution );
+	}
+
+	//========================================================================
+
+	f32 RigidBody::GetRestitution( ) const
+	{
+		return mRestitution;
 	}
 
 	//========================================================================
@@ -308,7 +316,7 @@ namespace Enjon
 	//========================================================================
 
 	void RigidBody::SetAngularDamping( const f32& damping )
-	{ 
+	{
 		mAngularDamping = damping;
 		mBody->setDamping( mLinearDamping, mAngularDamping );
 	}
@@ -330,10 +338,24 @@ namespace Enjon
 
 	//========================================================================
 
+	f32 RigidBody::GetFriction( ) const
+	{
+		return mFriction;
+	}
+
+	//========================================================================
+
 	void RigidBody::SetGravity( const Vec3& gravity )
 	{
 		mGravity = gravity;
 		mBody->setGravity( PhysicsUtils::Vec3ToBV3( gravity ) );
+	}
+
+	//========================================================================
+
+	Vec3 RigidBody::GetGravity( ) const
+	{
+		return mGravity;
 	}
 
 	//========================================================================
@@ -353,14 +375,28 @@ namespace Enjon
 	//========================================================================
 
 	void RigidBody::SetLinearFactor( const iVec3& factor )
-	{ 
-		mBody->setLinearFactor( PhysicsUtils::iVec3ToBV3( factor ) ); 
+	{
+		mBody->setLinearFactor( PhysicsUtils::iVec3ToBV3( factor ) );
 		mLinearFactor = factor;
 	}
 
 	//========================================================================
 
-	void RigidBody::SetAngularFactor( const iVec3& factor ) 
+	iVec3 RigidBody::GetLinearFactor( ) const 
+	{
+		return mLinearFactor;
+	} 
+
+	//========================================================================
+
+	iVec3 RigidBody::GetAngularFactor( ) const
+	{ 
+		return mAngularFactor;
+	}
+
+	//========================================================================
+
+	void RigidBody::SetAngularFactor( const iVec3& factor )
 	{
 		mAngularFactor = factor;
 		mBody->setAngularFactor( PhysicsUtils::iVec3ToBV3( factor ) );
@@ -369,7 +405,7 @@ namespace Enjon
 	//========================================================================
 
 	void RigidBody::SetIsKinematic( bool enable )
-	{ 
+	{
 		// Set state
 		mIsKinematic = enable;
 
@@ -390,10 +426,17 @@ namespace Enjon
 
 	//========================================================================
 
-	BulletRigidBodyMotionState* RigidBody::GetMotionState( ) const 
+	bool RigidBody::GetIsKinematic( ) const
+	{
+		return mIsKinematic;
+	}
+
+	//========================================================================
+
+	BulletRigidBodyMotionState* RigidBody::GetMotionState( ) const
 	{
 		return mMotionState;
-	} 
+	}
 
 	//========================================================================
 
@@ -415,6 +458,13 @@ namespace Enjon
 	}
 
 	//========================================================================
+
+	bool RigidBody::GetContinuousCollisionDetectionEnabled( ) const
+	{
+		return mCCDEnabled;
+	}
+
+	//======================================================================== 
 
 	void RigidBody::ApplyCentralForce( const Vec3& force )
 	{ 
@@ -551,6 +601,7 @@ namespace Enjon
 
 	Result RigidBody::SerializeData( ByteBuffer* buffer ) const
 	{
+		
 		// Write out mass
 		buffer->Write< f32 >( mMass );
 

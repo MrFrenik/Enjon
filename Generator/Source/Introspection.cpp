@@ -678,6 +678,77 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 					traits.IsEditable = true;
 				}
 
+				// Parse delegates
+				if ( curToken.Equals( "Delegates" ) )
+				{
+					// Get opening bracket
+					if ( !lexer->RequireToken( TokenType::Token_OpenBracket, true ) )
+					{
+						return;
+					}
+
+					while ( !curToken.IsType( TokenType::Token_CloseBracket ) && !curToken.IsType( TokenType::Token_EndOfStream ) )
+					{ 
+						// Get next identifier
+						if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
+						{
+							return;
+						}
+
+						curToken = lexer->GetCurrentToken( );
+
+						// Accessor
+						if ( curToken.Equals( "Accessor" ) )
+						{
+							// Get equals
+							if ( !lexer->RequireToken( TokenType::Token_Equal, true ) )
+							{
+								return;
+							}
+
+							// Get identifier for function name
+							if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
+							{
+								return;
+							}
+
+							// Get identifier from token
+							curToken = lexer->GetCurrentToken( );
+
+							// Add delegate to accessors
+							traits.mAccessors.push_back( curToken.ToString( ) );
+						}
+						// Mutator
+						else if ( curToken.Equals( "Mutator" ) )
+						{
+							// Get equals
+							if ( !lexer->RequireToken( TokenType::Token_Equal, true ) )
+							{
+								return;
+							}
+
+							// Get identifier for function name
+							if ( !lexer->RequireToken( TokenType::Token_Identifier, true ) )
+							{
+								return;
+							}
+
+							// Get identifier from token
+							curToken = lexer->GetCurrentToken( );
+
+							// Add delegate to accessors
+							traits.mMutators.push_back( curToken.ToString( ) );
+						} 
+
+						// Get comma after fact
+						if ( lexer->PeekAtNextToken( ).IsType( TokenType::Token_Comma ) || lexer->PeekAtNextToken().IsType( TokenType::Token_CloseBracket ) )
+						{
+							// Skip past comma
+							curToken = lexer->GetNextToken( );
+						}
+					} 
+				}
+
 				if ( curToken.Equals( "UIMin" ) || curToken.Equals( "UIMax" ) )
 				{
 					// Store token
@@ -1478,11 +1549,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 			code += OutputLine( "template <>" );
 			code += OutputLine( "MetaClass* Object::ConstructMetaClass< " + qualifiedName + " >( )" );
 			code += OutputLine( "{" );
-			code += OutputTabbedLine( "MetaClass* cls = new MetaClass( );\n" ); 
-
-			// Construct properties
-			code += OutputTabbedLine( "// Construct properties" );
-			code += OutputTabbedLine( "cls->mPropertyCount = " + std::to_string( properties.size( ) ) + ";" ); 
+			code += OutputTabbedLine( "MetaClass* cls = new MetaClass( );" ); 
 
 			// Construct function
 			if ( c.second.mTraits.mConstruct )
@@ -1491,8 +1558,43 @@ void Introspection::Compile( const ReflectionConfig& config )
 				code += OutputTabbedLine( "cls->mConstructor = ([](){" );
 				code += OutputTabbedLine( "\treturn new " + qualifiedName + "();" );
 				code += OutputTabbedLine( "});" );
-				code += OutputLine( "" ); 
 			}
+
+			// Iterate through all functions and output code
+			if ( !functions.empty( ) )
+			{
+				code += OutputLine( "" );
+				code += OutputTabbedLine( "// Construct functions" );
+				code += OutputTabbedLine( "cls->mFunctionCount = " + std::to_string( functions.size( ) ) + ";" );
+				
+				// For each function
+				for ( auto& func : functions )
+				{
+					// Get function name
+					std::string fn = func.second.mSignature.mFunctionName;
+
+					// Get return type
+					std::string retType = func.second.mSignature.mRetType;
+
+					// Build template signature
+					std::string templateSignature = qualifiedName + ", " + retType ;
+
+					// Add parameter list to template signature
+					for ( auto& param : func.second.mSignature.mParameterList )
+					{
+						templateSignature += ", " + param;
+					}
+
+					code += OutputTabbedLine( "cls->mFunctions[ \"" + fn + "\" ] = new Enjon::MetaFunctionImpl< " + templateSignature + " >( &" + qualifiedName + "::" + fn + ", \"" + fn + "\" );" );
+				} 
+			}
+
+			// Formatting
+			code += OutputLine( "" );
+
+			// Construct properties
+			code += OutputTabbedLine( "// Construct properties" );
+			code += OutputTabbedLine( "cls->mPropertyCount = " + std::to_string( properties.size( ) ) + ";" ); 
 
 			// Iterate through properties and output code
 			u32 index = 0;
@@ -1525,6 +1627,50 @@ void Introspection::Compile( const ReflectionConfig& config )
 					traits += prop.second->mTraits.IsPointer ? "true" : "false";
 					traits += " )"; 
 
+					// Accessor functions for properties
+					std::string accessorStr = "std::vector<MetaFunction*>{";
+					
+					// Mutator functions for properties
+					std::string mutatorStr = "std::vector<MetaFunction*>{";
+
+					// Fill out accessors
+					if ( prop.second->mTraits.mAccessors.size( ) )
+					{ 
+						u32 aSize = prop.second->mTraits.mAccessors.size( );
+						for ( u32 i = 0; i < aSize; ++i )
+						{ 
+							std::string commaString = "";
+							if ( i != aSize - 1 )
+							{
+								commaString = ", ";
+							}
+
+							accessorStr += "cls->mFunctions[\"" + prop.second->mTraits.mAccessors.at( i ) + "\"]" + commaString;
+						} 
+					} 
+
+					// Close accessor string
+					accessorStr += "}"; 
+
+					// Fill out mutators
+					if ( prop.second->mTraits.mMutators.size( ) )
+					{ 
+						u32 aSize = prop.second->mTraits.mMutators.size( );
+						for ( u32 i = 0; i < aSize; ++i )
+						{ 
+							std::string commaString = "";
+							if ( i != aSize - 1 )
+							{
+								commaString = ", ";
+							}
+
+							mutatorStr += "cls->mFunctions[\"" + prop.second->mTraits.mMutators.at( i ) + "\"]" + commaString;
+						} 
+					} 
+					
+					// Close mutator string
+					mutatorStr += "}";
+
 					// Get property name
 					std::string pn = prop.second->mName;
 
@@ -1535,7 +1681,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 					std::string pi = std::to_string( index++ );
 
 					// Get end character
-					std::string endChar = index <= properties.size( ) - 1 ? "," : "";
+					std::string endChar = index <= properties.size( ) - 1 ? "," : ""; 
 
 					// Output line based on meta property type
 					switch ( metaProp )
@@ -1652,8 +1798,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 						} break;
 
 						default:
-						{
-
+						{ 
 							if ( prop.second->mTraits.IsPointer )
 							{
 								code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyPointer< " + cn + ", " + prop.second->mTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
@@ -1662,49 +1807,16 @@ void Introspection::Compile( const ReflectionConfig& config )
 							else
 							{
 								code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" 
-																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
+																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", " + accessorStr + ", " + mutatorStr + " );" ); 
 							}
-							//cls->mProperties[ 7 ] = new Enjon::MetaPropertyPointer<RigidBody, CollisionShape>( MetaPropertyType::Object, "mShape", ( u32 )&( ( RigidBody* )0 )->mShape, 7, MetaPropertyTraits( false, 0.000000f, 0.000000f, true ), &RigidBody::mShape );
 						} break;
 					}
 				} 
 
 				// Formatting
 				code += OutputLine( "" ); 
-			}
+			} 
 
-			// Iterate through all functions and output code
-			if ( !functions.empty( ) )
-			{
-				code += OutputLine( "" );
-				code += OutputTabbedLine( "// Construct functions" );
-				code += OutputTabbedLine( "cls->mFunctionCount = " + std::to_string( functions.size( ) ) + ";" );
-				
-				// For each function
-				for ( auto& func : functions )
-				{
-					// Get function name
-					std::string fn = func.second.mSignature.mFunctionName;
-
-					// Get return type
-					std::string retType = func.second.mSignature.mRetType;
-
-					// Build template signature
-					std::string templateSignature = qualifiedName + ", " + retType ;
-
-					// Add parameter list to template signature
-					for ( auto& param : func.second.mSignature.mParameterList )
-					{
-						templateSignature += ", " + param;
-					}
-
-					code += OutputTabbedLine( "cls->mFunctions[ \"" + fn + "\" ] = new Enjon::MetaFunctionImpl< " + templateSignature + " >( &" + qualifiedName + "::" + fn + ", \"" + fn + "\" );" );
-				}
-
-			}
-
-			// Formatting
-			code += OutputLine( "" );
 
 			// Set up typeid field
 			code += OutputTabbedLine( "cls->mTypeId = " + std::to_string( c.second.mObjectTypeId ) + ";\n" );

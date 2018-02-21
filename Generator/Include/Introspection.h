@@ -95,6 +95,8 @@ struct PropertyTraits
 	bool IsEditable = false;
 	float UIMin = 0.0f;
 	float UIMax = 0.0f;
+	std::vector <std::string> mAccessors;
+	std::vector <std::string> mMutators;
 };
 
 class Property
