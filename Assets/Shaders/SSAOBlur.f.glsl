@@ -4,7 +4,7 @@ out vec4 FragColor;
 in vec2 TexCoords;
 
 uniform sampler2D ssaoInput;
-int size = 2;
+int size = 4;
 
 void main() 
 {
@@ -18,6 +18,6 @@ void main()
             result += texture(ssaoInput, TexCoords + offset).r;
         }
     }
-	float color = result / ( (size + 1) * (size + 1) );
+	float color = result / ( (size ) * (size ) );
     FragColor = vec4( vec3( color ), 1.0 );
 }  

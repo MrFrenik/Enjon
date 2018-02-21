@@ -900,7 +900,7 @@ namespace Enjon
 		Enjon::iVec2 screenRes = GetViewport( ); 
 
 		// SSAO pass
-		mSSAOTarget->Bind( );
+		mSSAOBlurTarget->Bind( );
 		{
 			glClear( GL_COLOR_BUFFER_BIT );
 
@@ -908,7 +908,7 @@ namespace Enjon
 			shader->Use( );
 			{ 
 				// Upload kernel uniform
-				glUniform3fv( glGetUniformLocation( shader->GetProgramID( ), "samples" ), mSSAOKernelSize * 3, ( f32* )&mSSAOKernel[ 0 ] );
+				//glUniform3fv( glGetUniformLocation( shader->GetProgramID( ), "samples" ), mSSAOKernelSize * 3, ( f32* )&mSSAOKernel[ 0 ] );
 				shader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
 				shader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
 				shader->SetUniform( "uScreenResolution", Vec2( screenRes.x, screenRes.y ) );
@@ -925,8 +925,9 @@ namespace Enjon
 			}
 			shader->Unuse( ); 
 		}
-		mSSAOTarget->Unbind( );
+		mSSAOBlurTarget->Unbind( );
 
+		/*
 		// Blur SSAO to remove noise
 		mSSAOBlurTarget->Bind( );
 		{
@@ -941,6 +942,7 @@ namespace Enjon
 			shader->Unuse( ); 
 		}
 		mSSAOBlurTarget->Unbind( );
+		*/
 	}
 
 	//======================================================================================================
@@ -1541,7 +1543,7 @@ namespace Enjon
 		mLuminanceTarget 			= new RenderTarget(width / 2, height / 2);
 		mFXAATarget 				= new RenderTarget(width, height);
 		mShadowDepth 				= new RenderTarget(2048, 2048);
-		mFinalTarget 				= new RenderTarget(width, height);
+		mFinalTarget				= new RenderTarget( width, height );
 		mSSAOTarget					= new RenderTarget( width / 2, height / 2 );
 		mSSAOBlurTarget				= new RenderTarget( width, height ); 
 	}

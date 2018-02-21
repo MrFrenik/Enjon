@@ -37,12 +37,23 @@ void main( )
 {
 	mat4 inverseProjection = inverse( projection );
 
+	vec3 sample_sphere[KERNEL_SIZE] = vec3[](
+		  vec3( 0.5381, 0.1856,-0.4319), vec3( 0.1379, 0.2486, 0.4430),
+		  vec3( 0.3371, 0.5679,-0.0057), vec3(-0.6999,-0.0451,-0.0019),
+		  vec3( 0.0689,-0.1598,-0.8547), vec3( 0.0560, 0.0069,-0.1843),
+		  vec3(-0.0146, 0.1402, 0.0762), vec3( 0.0100,-0.1924,-0.0344),
+		  vec3(-0.3577,-0.5301,-0.4358), vec3(-0.3169, 0.1063, 0.0158),
+		  vec3( 0.0103,-0.5869, 0.0046), vec3(-0.0897,-0.4940, 0.3287),
+		  vec3( 0.7119,-0.0154,-0.0918), vec3(-0.0533, 0.0596,-0.5411),
+		  vec3( 0.0352,-0.0631, 0.5460), vec3(-0.4776, 0.2847,-0.0271)
+	);
+
 	vec2 noiseScale = vec2( uScreenResolution.x / 128.0, uScreenResolution.y / 128.0 );
 
 	// get input for SSAO algorithm
 	vec3 fragPos = ( view * texture( gPosition, TexCoords ) ).xyz;
 	vec3 normal = normalize( ( view * texture( gNormal, TexCoords ) ).rgb );
-	vec3 randomVec = normalize( ( view * texture( texNoise, TexCoords * noiseScale ) ).xyz );
+	vec3 randomVec = normalize( ( texture( texNoise, TexCoords * noiseScale ) ).xyz );
 
 	float depth = LinearizeDepth( texture( uDepthMap, TexCoords ).r ) / far;
 
@@ -53,10 +64,10 @@ void main( )
 
 	// iterate over the sample kernel and calculate occlusion factor
 	float occlusion = 0.0;
-	for ( int i = 0; i < kernelSize; ++i )
+	for ( int i = 0; i < KERNEL_SIZE; ++i )
 	{
 		// get sample position
-		vec3 sample = TBN * samples[i]; // from tangent to view-space
+		vec3 sample = TBN * sample_sphere[i]; // from tangent to view-space
 		sample = fragPos + sample * radius;
 
 		// project sample position (to sample texture) (to get position on screen/texture)
@@ -65,12 +76,12 @@ void main( )
 		offset.xyz /= offset.w; // perspective divide
 		offset.xyz = offset.xyz * 0.5 + 0.5; // transform to range 0.0 - 1.0
 
-											 // get sample depth
-		float sampleDepth = ( view * texture( gPosition, offset.xy ) ).z; // get depth value of kernel sample
+		 // get sample depth
+		float sampleDepth = ( view * texture( gPosition, offset.xy ) ).z; 
 
-																		  // range check & accumulate
+		// range check & accumulate
 		float rangeCheck = smoothstep( 0.0, 1.0, radius / abs( fragPos.z - sampleDepth ) );
-		occlusion += ( sampleDepth < 1.0 && sampleDepth >= sample.z + bias ? 1.0 : 0.0 ) * rangeCheck;
+		occlusion += ( sampleDepth >= sample.z + bias ? 1.0 : 0.0 ) * rangeCheck;
 	}
 	occlusion = 1.0 - ( occlusion / kernelSize );
 	occlusion = max( 0.0, pow( occlusion, uIntensity ) );
