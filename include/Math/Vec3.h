@@ -351,8 +351,8 @@ namespace Enjon {
 			* @param x - s32 value to be set for x component
 			* @param y - s32 value to be set for y component
 			*/
-			iVec3(const s32& _x, const s32& _y)
-				: x(_x), y(_y)
+			iVec3( const s32& _x, const s32& _y, const s32& _z )
+				: x( _x ), y( _y ), z( _z )
 			{
 			} 
 

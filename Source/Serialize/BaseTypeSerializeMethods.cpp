@@ -127,6 +127,19 @@ namespace Enjon
 					WRITE_PROP( buffer, cls, object, prop, String )
 				} break;
 
+				case MetaPropertyType::iVec3:
+				{
+					WRITE_PROP_SIZE_POD( buffer, iVec3 );
+
+					// Get ivec3
+					const iVec3* val = cls->GetValueAs< iVec3 >( object, prop );
+
+					// Write out individual elements of ivec2
+					buffer->Write< s32 >( val->x );
+					buffer->Write< s32 >( val->y );
+					buffer->Write< s32 >( val->z ); 
+				} break;
+
 				case MetaPropertyType::Vec2:
 				{
 					WRITE_PROP_SIZE_POD( buffer, Vec2 )
@@ -520,6 +533,18 @@ namespace Enjon
 
 					} break;
 
+					case MetaPropertyType::iVec3:
+					{
+						// Read individual elements of Vec2
+						s32 x = buffer->Read< s32 >( );
+						s32 y = buffer->Read< s32 >( );
+						s32 z = buffer->Read< s32 >( );
+
+						// Set iVec3 property
+						cls->SetValue( object, prop, iVec3( x, y, z ) );
+
+					} break;
+
 					case MetaPropertyType::Vec2:
 					{
 						// Read individual elements of Vec2
@@ -597,22 +622,18 @@ namespace Enjon
 							const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
 							Object* actualObj = base->GetValueAsObject( object )->ConstCast<Object>( );
  
+							// Destroy the object for now and recreate it
 							if ( actualObj )
 							{
-								// Grab object from deserializer
-								ObjectArchiver::Deserialize( buffer, actualObj ); 
-
-								// Set value
-								cls->SetValue( object, prop, actualObj ); 
+								delete actualObj;
+								actualObj = nullptr;
 							}
-							else
-							{
-								// Grab object from deserializer
-								Object* obj = ObjectArchiver::Deserialize( buffer );
 
-								// Set value
-								cls->SetValue( object, prop, obj ); 
-							} 
+							// Grab object from deserializer
+							Object* obj = ObjectArchiver::Deserialize( buffer );
+
+							// Set value
+							cls->SetValue( object, prop, obj ); 
 						}
 						else
 						{

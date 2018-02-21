@@ -85,12 +85,6 @@ namespace Enjon
 
 	//=====================================================================
 
-#define WRITE_PROP_SIZE_POD( buffer, valType )\
-	buffer->Write< usize >( sizeof( valType ) );
-
-#define WRITE_PROP( buffer, cls, object, prop, valType )\
-	buffer->Write< valType >( *cls->GetValueAs< valType >( object, prop ) );
-
 	Result ObjectArchiver::SerializeObjectDataDefault( const Object* object, const MetaClass* cls, ByteBuffer* buffer )
 	{ 
 		// Write out property count to buffer
@@ -109,7 +103,6 @@ namespace Enjon
 
 			// Serialize out the property
 			PropertyArchiver::Serialize( object, prop, buffer );
-
 		}
 
 		return Result::SUCCESS;
