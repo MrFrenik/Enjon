@@ -143,6 +143,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void SetIsKinematic( bool enable );
+
+			/**
+			* @brief
+			*/
 			void Translate( const Vec3& translation );
 
 			/**
@@ -327,6 +332,9 @@ namespace Enjon
 
 			ENJON_PROPERTY( UIMin = 0, UIMax = 1 )
 			iVec3 mAngularFactor = iVec3( 1 );
+
+			ENJON_PROPERTY( )
+			bool mIsKinematic = false;
 
 		public:
 			ENJON_PROPERTY( )

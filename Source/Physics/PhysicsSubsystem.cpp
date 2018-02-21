@@ -187,8 +187,8 @@ namespace Enjon
 					// Was not there, so we have begun contact
 					if ( !contains )
 					{
-						compA->OnCollisionEnter( CollisionReport( compA, compB ) );
-						compB->OnCollisionEnter( CollisionReport( compB, compA ) );
+						compA->OnCollisionEnter( CollisionReport( compB ) );
+						compB->OnCollisionEnter( CollisionReport( compA ) );
 					} 
 				}
 
@@ -209,7 +209,7 @@ namespace Enjon
 				for ( auto& curVal : mContactEvents[ curKey.first ] )
 				{ 
 					// End contact for values
-					curVal->OnCollisionExit( CollisionReport( curVal, curKey.first ) );
+					curVal->OnCollisionExit( CollisionReport( curKey.first ) );
 				}
 			}
 			else
@@ -222,12 +222,12 @@ namespace Enjon
 					// Not found in the newer set, so must process end contact event
 					if ( newSet->find( curVal ) == newSet->end( ) )
 					{ 
-						curVal->OnCollisionExit( CollisionReport( curVal, curKey.first ) );
+						curVal->OnCollisionExit( CollisionReport( curKey.first ) );
 					}
 					// Otherwise was found, so processing current overlap
 					else
 					{ 
-						curVal->OnCollisionOverlap( CollisionReport( curVal, curKey.first ) );
+						curVal->OnCollisionOverlap( CollisionReport( curKey.first ) );
 					}
 				}
 			}

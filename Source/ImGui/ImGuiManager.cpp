@@ -327,6 +327,17 @@ namespace Enjon
 
 		switch ( prop->GetType( ) )
 		{
+			case Enjon::MetaPropertyType::Bool:
+			{
+				bool val = 0;
+				cls->GetValue( object, prop, &val );
+				if ( ImGui::Checkbox( name.c_str( ), &val ) )
+				{
+					cls->SetValue( object, prop, val );
+				}
+
+			} break;
+
 			case Enjon::MetaPropertyType::U32:
 			{
 				u32 val = 0;
@@ -652,6 +663,7 @@ namespace Enjon
 				case Enjon::MetaPropertyType::String:
 				case Enjon::MetaPropertyType::UUID: 
 				case Enjon::MetaPropertyType::Transform:
+				case Enjon::MetaPropertyType::Bool:
 				{
 					DebugDumpProperty( object, prop );
 				} break; 

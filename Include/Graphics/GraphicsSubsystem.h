@@ -331,7 +331,7 @@ namespace Enjon
 			f32 mSSAORadius = 5.0f;
 			f32 mSSAOBias = 0.73f;
 			f32 mSSAOIntensity = 2.5f;
-			u32 mSSAOKernelSize = 32;
+			u32 mSSAOKernelSize = 16;
 
 			Enjon::Mat4* mModelMatricies = nullptr;
 			Enjon::Renderable* mInstancedRenderable = nullptr;

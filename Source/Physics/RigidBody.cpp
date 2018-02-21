@@ -89,7 +89,9 @@ namespace Enjon
 		mBody->setDamping( mLinearDamping, mAngularDamping );
 		mBody->setGravity( PhysicsUtils::Vec3ToBV3( mGravity ) ); 
 		mBody->setLinearFactor( PhysicsUtils::iVec3ToBV3( mLinearFactor ) );
-		mBody->setAngularFactor( PhysicsUtils::iVec3ToBV3( mAngularFactor ) );
+		mBody->setAngularFactor( PhysicsUtils::iVec3ToBV3( mAngularFactor ) ); 
+		SetIsTriggerVolume( mIsTriggerVolume );
+		SetIsKinematic( mIsKinematic );
 
 		// Add body to physics world and set physics world pointer
 		AddToWorld( );
@@ -118,6 +120,8 @@ namespace Enjon
 		mBody->setGravity( PhysicsUtils::Vec3ToBV3( mGravity ) ); 
 		mBody->setLinearFactor( PhysicsUtils::iVec3ToBV3( mLinearFactor ) );
 		mBody->setAngularFactor( PhysicsUtils::iVec3ToBV3( mAngularFactor ) );
+		SetIsTriggerVolume( mIsTriggerVolume );
+		SetIsKinematic( mIsKinematic );
 
 		// Set mass properties of bullet rigid body
 		mBody->setMassProps( mMass, localInertia );
@@ -196,7 +200,6 @@ namespace Enjon
 		//{
 		//	return;
 		//}
-
 
 		// Remove previous shape from world, delete, and set to null
 		if ( mShape )
@@ -361,6 +364,28 @@ namespace Enjon
 	{
 		mAngularFactor = factor;
 		mBody->setAngularFactor( PhysicsUtils::iVec3ToBV3( factor ) );
+	}
+
+	//========================================================================
+
+	void RigidBody::SetIsKinematic( bool enable )
+	{ 
+		// Set state
+		mIsKinematic = enable;
+
+		// If set to kinematic object
+		if ( enable )
+		{
+			mBody->setCollisionFlags( mBody->getCollisionFlags( ) | btCollisionObject::CF_KINEMATIC_OBJECT );
+		}
+		else
+		{
+			// Switch off if previously enabled
+			if ( mBody->getCollisionFlags( ) & btCollisionObject::CF_KINEMATIC_OBJECT )
+			{
+				mBody->setCollisionFlags( mBody->getCollisionFlags( ) & ~btCollisionObject::CF_KINEMATIC_OBJECT );
+			}
+		};
 	}
 
 	//========================================================================
@@ -562,6 +587,8 @@ namespace Enjon
 		buffer->Write< s32 >( mAngularFactor.y );
 		buffer->Write< s32 >( mAngularFactor.z );
 
+		buffer->Write< bool >( mIsKinematic );
+
 		// Serialize out collision shape
 		ObjectArchiver::Serialize( mShape, buffer );
 
@@ -613,6 +640,9 @@ namespace Enjon
 		angularFactor.y = buffer->Read< s32 >( );
 		angularFactor.z = buffer->Read< s32 >( );
 		SetAngularFactor( angularFactor );
+
+		// Read in kinematic object
+		SetIsKinematic( buffer->Read< bool >( ) );
 
 		// Release memory for shape first
 		if ( mShape )

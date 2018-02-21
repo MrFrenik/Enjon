@@ -13,16 +13,12 @@ namespace Enjon
 	{ 
 		public:
 
-			CollisionReport( RigidBodyComponent* cmpA, RigidBodyComponent* cmpB )
-				: mCompA( cmpA ), mCompB( cmpB )
+			CollisionReport( RigidBodyComponent* collider )
+				: mCollider( collider )
 			{
 			}
-
-			EntityHandle GetMatchingEntityFromReport( Component* comp ) const;
-			EntityHandle GetNonMatchingEntityFromReport( Component* comp ) const;
-
-			RigidBodyComponent* mCompA;
-			RigidBodyComponent* mCompB;
+ 
+			RigidBodyComponent* mCollider;
 	}; 
 }
 
