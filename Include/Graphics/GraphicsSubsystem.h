@@ -299,7 +299,13 @@ namespace Enjon
 			// Post processing settings
 			FXAASettings mFXAASettings = FXAASettings(8.0f, 1.0f/8.0f, 1.0f/128.0f);	// Stock settings
 			//FXAASettings mFXAASettings = FXAASettings(8.0f, 0.00001f, 0.00001f);
-			ToneMapSettings mToneMapSettings = ToneMapSettings(0.9f, 2.f, 0.61f, 7.74f, 1.6f);
+
+			//float mExposure;
+			//float mGamma;
+			//float mBloomScalar;
+			//float mThreshold;
+			//float mSaturation;
+			ToneMapSettings mToneMapSettings = ToneMapSettings(0.77f, 1.84f, 0.61f, 7.74f, 1.2f);
 			BloomSettings mBloomSettings = BloomSettings(Vec3(0.384f, 0.366f, 0.500f), Vec3(3, 3, 2), Vec3(0.001f, 0.006f, 0.015f)); 
 
 			bool mShowGame = true;
@@ -328,9 +334,9 @@ namespace Enjon
 
 			Enjon::Mesh* mMesh = nullptr;
 
-			f32 mSSAORadius = 0.5f;
+			f32 mSSAORadius = 0.115f;
 			f32 mSSAOBias = 0.01f;
-			f32 mSSAOIntensity = 1.18f;
+			f32 mSSAOIntensity = 0.34f;
 			u32 mSSAOKernelSize = 16;
 
 			Enjon::Mat4* mModelMatricies = nullptr;

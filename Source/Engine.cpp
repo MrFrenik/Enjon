@@ -274,7 +274,7 @@ namespace Enjon
 			const f32 frameRate = 60.0f;
 			if ( (f32)ticks < 1000.0f / frameRate )
 			{
-				SDL_Delay( u32( (1000.0f / frameRate ) - ( (f32)ticks ) ) );
+				//SDL_Delay( u32( (1000.0f / frameRate ) - ( (f32)ticks ) ) );
 			}
 		}
 

@@ -279,7 +279,7 @@ namespace Enjon
 			ImGui::TreePop( );
 		}
 
-		ImGui::DragFloat( "Camera Speed", &mCameraSpeed, 0.1f, 0.1f, 100.0f ); 
+		ImGui::DragFloat( "Camera Speed", &mCameraSpeed, 0.01f, 0.01f, 100.0f ); 
 		ImGui::DragFloat( "Mouse Sensitivity", &mMouseSensitivity, 0.1f, 0.1f, 10.0f ); 
 
 		if ( ImGui::TreeNode( "Application" ) )
@@ -300,33 +300,6 @@ namespace Enjon
 			}
 			ImGui::TreePop( );
 		}
-
-		/*
-		if ( ImGui::TreeNode( "XZAxis" ) )
-		{
-			ImGuiManager::DebugDumpObject( &mTransformWidget.mTranslationWidget.mXZAxis );
-
-			ImGui::TreePop( );
-		}
-		if ( ImGui::TreeNode( "XYAxis" ) )
-		{
-			ImGuiManager::DebugDumpObject( &mTransformWidget.mTranslationWidget.mXYAxis );
-
-			ImGui::TreePop( );
-		}
-		if ( ImGui::TreeNode( "YZAxis" ) )
-		{
-			ImGuiManager::DebugDumpObject( &mTransformWidget.mTranslationWidget.mYZAxis );
-
-			ImGui::TreePop( );
-		} 
-		if ( ImGui::TreeNode( "TranslationRoot" ) )
-		{
-			ImGuiManager::DebugDumpObject( &mTransformWidget.mTranslationWidget.mRoot );
-
-			ImGui::TreePop( );
-		}
-		*/
 	}
 
 	void EditorApp::PlayOptions( )
@@ -476,9 +449,9 @@ namespace Enjon
 
 	void EditorApp::SelectSceneView( )
 	{
-		// Grab all available scenes and display them	
-		if ( ImGui::CollapsingHeader( "Available Scenes" ) )
-		{
+		String defaultText = mCurrentScene.Get( ) == nullptr ? "Available Scenes..." : mCurrentScene->GetName( );
+		if ( ImGui::BeginCombo( "##Available Scenes", defaultText.c_str() ) )
+		{ 
 			// If there's a valid application set
 			if ( mProject.GetApplication( ) )
 			{
@@ -486,33 +459,31 @@ namespace Enjon
 				AssetManager* am = EngineSubsystem( AssetManager );
 				const HashMap<String, AssetRecordInfo>* scenes = am->GetAssets<Scene>( );
 
-				ImGui::ListBoxHeader( "" );
-				{
-					for ( auto& record : *scenes )
+				for ( auto& record : *scenes )
+				{ 
+					// Add component to mEntity
+					if ( ImGui::Selectable( record.second.GetAssetName( ).c_str( ) ) )
 					{ 
-						// Add component to mEntity
-						if ( ImGui::Selectable( record.second.GetAssetName( ).c_str( ) ) )
-						{ 
-							// Unload all current entities in scene ( This is something that a scene manager would likely handle )
-							UnloadScene( );
+						// Unload all current entities in scene ( This is something that a scene manager would likely handle )
+						UnloadScene( );
 
-							// Load the asset from disk
-							record.second.LoadAsset( ); 
+						// Load the asset from disk
+						record.second.LoadAsset( ); 
 
-							// Set current scene with record's asset
-							mCurrentScene = record.second.GetAsset();
+						// Set current scene with record's asset
+						mCurrentScene = record.second.GetAsset();
 
-							// Deselect entity
-							DeselectEntity( );
-						} 
+						// Deselect entity
+						DeselectEntity( );
 					} 
-				}
-				ImGui::ListBoxFooter( ); 
+				} 
 			}
 			else
 			{
 				ImGui::Text( "No project loaded." );
 			}
+
+			ImGui::EndCombo( ); 
 		}
 
 		if ( mCurrentScene )
@@ -662,21 +633,20 @@ namespace Enjon
 		}
 
 		if ( !mPlaying )
-		{
-			if ( ImGui::CollapsingHeader( "Existing Projects" ) )
+		{ 
+			String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
+			if ( ImGui::BeginCombo( "##LOADPROJECT", defaultText.c_str() ) )
 			{
-				ImGui::ListBoxHeader( "##projects" );
+				for ( auto& p : mProjectsOnDisk )
 				{
-					for ( auto& p : mProjectsOnDisk )
-					{
-						if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
-						{ 
-							// Load the project
-							LoadProject( p );
-						}
+					if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
+					{ 
+						// Load the project
+						LoadProject( p );
 					}
 				}
-				ImGui::ListBoxFooter( );
+
+				ImGui::EndCombo( );
 			} 
 
 			// Load visual studio project 
@@ -1100,6 +1070,9 @@ namespace Enjon
 						gfx->SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
 						gfx->SetMaterial( am->GetDefaultAsset<Material>( ) );
 
+						RigidBodyComponent* rbc = ent->AddComponent<RigidBodyComponent>( );
+						rbc->SetShape( CollisionShapeType::Box ); 
+
 						const Camera* cam = gs->GetGraphicsSceneCamera( );
 						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
 					}
@@ -1121,6 +1094,9 @@ namespace Enjon
 						GraphicsComponent* gfx = ent->AddComponent<GraphicsComponent>( );
 						gfx->SetMesh( am->GetAsset< Mesh >( "models.unit_sphere" ) );
 						gfx->SetMaterial( am->GetDefaultAsset<Material>( ) );
+
+						RigidBodyComponent* rbc = ent->AddComponent< RigidBodyComponent >( );
+						rbc->SetShape( CollisionShapeType::Sphere );
 
 						const Camera* cam = gs->GetGraphicsSceneCamera( );
 						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
@@ -1369,7 +1345,7 @@ namespace Enjon
 			f32 avgDT = Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( );
 
 			// Set camera position
-			camera->Transform.Position += mCameraSpeed * velDir;
+			camera->Transform.Position += mCameraSpeed * avgDT * velDir;
 
 			// Set camera rotation
 			// Get mouse input and change orientation of camera
@@ -1386,8 +1362,8 @@ namespace Enjon
 			SDL_WarpMouseInWindow( window->GetWindowContext( ), ( f32 )viewPort.x / 2.0f - mMouseCoordsDelta.x, ( f32 )viewPort.y / 2.0f - mMouseCoordsDelta.y );
 
 			// Offset camera orientation
-			f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * mMouseSensitivity;
-			f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * mMouseSensitivity;
+			f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * avgDT * mMouseSensitivity;
+			f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * avgDT * mMouseSensitivity;
 			camera->OffsetOrientation( xOffset, yOffset );
 		}
 

@@ -868,23 +868,23 @@ namespace Enjon
 		shader->Unuse( ); 
 
 		// Cubemap
-		//glEnable( GL_DEPTH_TEST );
-		//glDepthFunc( GL_LEQUAL );
-		//glCullFace( GL_FRONT );
-		//Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
-		//skyBoxShader->Use( );
-		//{
-		//	skyBoxShader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
-		//	skyBoxShader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
-		//	skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
+		glEnable( GL_DEPTH_TEST );
+		glDepthFunc( GL_LEQUAL );
+		glCullFace( GL_FRONT );
+		Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
+		skyBoxShader->Use( );
+		{
+			skyBoxShader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
+			skyBoxShader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
+			skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
 
-		//	// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
-		//	glActiveTexture( GL_TEXTURE0 );
-		//	glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+			// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
+			glActiveTexture( GL_TEXTURE0 );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
 
-		//	RenderCube( );
-		//}
-		//skyBoxShader->Unuse( );
+			RenderCube( );
+		}
+		skyBoxShader->Unuse( );
 
 		// Unbind gbuffer
 		mGbuffer->Unbind();
@@ -900,7 +900,7 @@ namespace Enjon
 		Enjon::iVec2 screenRes = GetViewport( ); 
 
 		// SSAO pass
-		mSSAOBlurTarget->Bind( );
+		mSSAOTarget->Bind( );
 		{
 			glClear( GL_COLOR_BUFFER_BIT );
 
@@ -925,9 +925,8 @@ namespace Enjon
 			}
 			shader->Unuse( ); 
 		}
-		mSSAOBlurTarget->Unbind( );
+		mSSAOTarget->Unbind( );
 
-		/*
 		// Blur SSAO to remove noise
 		mSSAOBlurTarget->Bind( );
 		{
@@ -942,7 +941,6 @@ namespace Enjon
 			shader->Unuse( ); 
 		}
 		mSSAOBlurTarget->Unbind( );
-		*/
 	}
 
 	//======================================================================================================

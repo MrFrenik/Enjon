@@ -413,6 +413,7 @@ namespace Enjon
 		if ( enable )
 		{
 			mBody->setCollisionFlags( mBody->getCollisionFlags( ) | btCollisionObject::CF_KINEMATIC_OBJECT );
+			mBody->setActivationState( DISABLE_DEACTIVATION );
 		}
 		else
 		{
@@ -420,6 +421,7 @@ namespace Enjon
 			if ( mBody->getCollisionFlags( ) & btCollisionObject::CF_KINEMATIC_OBJECT )
 			{
 				mBody->setCollisionFlags( mBody->getCollisionFlags( ) & ~btCollisionObject::CF_KINEMATIC_OBJECT );
+				mBody->activate( true );
 			}
 		};
 	}
