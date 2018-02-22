@@ -61,16 +61,6 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void SetTexture( const TextureSlotType& type, const AssetHandle<Texture>& textureHandle ) const;
-
-			/*
-			* @brief
-			*/
-			AssetHandle<Texture> GetTexture(const TextureSlotType& type) const; 
-
-			/*
-			* @brief
-			*/
 			bool TwoSided( ) const { return mTwoSided; }
 
 			/*
@@ -149,9 +139,6 @@ namespace Enjon {
 
 			ENJON_PROPERTY( Editable ) 
 			bool mTwoSided = false; 
-
-			ENJON_PROPERTY( )
-			AssetHandle<Texture> mTextureHandles[(u32)TextureSlotType::Count]; 
 	}; 
 }
 

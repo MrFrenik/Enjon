@@ -11,36 +11,56 @@ namespace Enjon
 		mIntensity = 1.0f;
 	}
 
+	//==============================================================================
+
 	DirectionalLight::DirectionalLight(Vec3& direction, ColorRGBA32& color, float intensity)
 		: mDirection(direction), mColor(color), mIntensity(intensity)
 	{
 	}
+
+	//==============================================================================
 
 	DirectionalLight::~DirectionalLight()
 	{
 
 	}
 
+	//==============================================================================
+
 	void DirectionalLight::SetDirection(const Vec3& direction)
 	{
 		mDirection = direction;
 	}
+
+	//==============================================================================
 
 	void DirectionalLight::SetColor(const ColorRGBA32& color)
 	{
 		mColor = color;
 	}
 
+	//==============================================================================
+
 	void DirectionalLight::SetIntensity(float intensity)
 	{
 		mIntensity = intensity;
 	}
+
+	//==============================================================================
 
 	void DirectionalLight::SetGraphicsScene(GraphicsScene* scene)
 	{
 		mGraphicsScene = scene;
 	}
 
+	//==============================================================================
+
+	GraphicsScene* DirectionalLight::GetGraphicsScene( ) const
+	{
+		return mGraphicsScene;
+	}
+
+	//============================================================================== 
 }
 
 

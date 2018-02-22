@@ -37,10 +37,11 @@ vec2 getRandom(vec2 uv)
 
 float doAmbientOcclusion(vec2 tcoord, vec2 uv, vec3 p, vec3 cnorm)
 {
+	float b = bias * p.z;
 	vec3 diff = getPosition( tcoord + uv ) - p;
 	vec3 v = normalize( diff );
 	float d = length( diff ) * uScale;
-	return max( 0.0, dot( cnorm, v ) - bias ) * ( 1.0 / ( 1.0 + d ) );
+	return max( 0.0, dot( cnorm, v ) - b ) * ( 1.0 / ( 1.0 + d ) );
 }
 
 void main()
@@ -70,6 +71,6 @@ void main()
 	  ao += doAmbientOcclusion(TexCoords,coord2, p, n);
 	}
 	ao = 1.0 - ( ao / kernelSize );
-	ao = max( 0.0, pow( ao, uIntensity ) );
+	ao = clamp( pow( ao, uIntensity ), 0.0, 1.0 );
 	FragColor = vec4(vec3(ao, ao, ao),  1.0);
 }

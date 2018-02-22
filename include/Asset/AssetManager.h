@@ -73,7 +73,7 @@ namespace Enjon
 			/**
 			*@brief Adds asset to project form given file path
 			*/
-			Result AddToDatabase( const String& filePath, bool cache = true, bool isRelativePath = true );
+			Result AddToDatabase( const String& filePath, bool cache = true, bool isRelativePath = true, AssetLocationType locationType = AssetLocationType::ApplicationAsset );
 
 			/*
 			*@brief

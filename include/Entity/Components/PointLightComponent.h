@@ -87,16 +87,6 @@ namespace Enjon
 			*/
 			void SetRadius(float radius); 
 
-			/*
-			* @brief
-			*/
-			virtual Result SerializeData( ByteBuffer* buffer ) const override;
-
-			/*
-			* @brief
-			*/
-			virtual Result DeserializeData( ByteBuffer* buffer ) override;
-
 		private:
 			ENJON_PROPERTY( )
 			PointLight mLight;	

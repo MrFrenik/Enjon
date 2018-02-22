@@ -251,7 +251,13 @@ namespace Enjon
 
 					else
 					{
-						// Not supported yet...
+						// Write out to temp to write size of object
+						const Object* obj = cls->GetValueAs< Object >( object, prop );
+						ObjectArchiver::Serialize( obj, &temp );
+						buffer->Write< usize >( temp.GetSize( ) );
+
+						// Serialize object data
+						ObjectArchiver::Serialize( obj, buffer );
 					} 
 
 				} break;
@@ -637,7 +643,10 @@ namespace Enjon
 						}
 						else
 						{
-							// Not handled yet...
+							// Grab the object pointer
+							Object* obj = cls->GetValueAs< Object >( object, prop )->ConstCast< Object >( );
+							// Deserialize data
+							ObjectArchiver::Deserialize( buffer, obj );
 						}
 					} break;
 

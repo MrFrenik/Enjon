@@ -176,7 +176,7 @@ void Game::TestObjectSerialize( )
 
 		Enjon::AssetHandle< Enjon::Texture > cachedTexture = am->GetAsset< Enjon::Texture >( "textures.beast" );
 		Enjon::Material* gunMat = const_cast< Enjon::Material* >( mGun.Get( )->GetComponent< GraphicsComponent >( )->GetMaterial( ).Get() );
-		gunMat->SetTexture( Enjon::TextureSlotType::Albedo, cachedTexture );
+		//gunMat->SetTexture( Enjon::TextureSlotType::Albedo, cachedTexture );
 
 		Enjon::AssetHandle< Enjon::Mesh > cachedMesh = am->GetAsset< Enjon::Mesh >( "models.unit_cube" );
 		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMesh( cachedMesh );
@@ -760,38 +760,6 @@ Enjon::Result Game::Initialize()
 	pc->GetLight( )->SetRadius( 100.0f );
 	pc->GetLight( )->SetColor( Enjon::RGBA32_Orange( ) );
 
-	mPlasticMat = new Enjon::Material;
-	mPlasticMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("materials.scuffedplastic.albedo"));
-	mPlasticMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("materials.scuffedplastic.normal"));
-	mPlasticMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("materials.scuffedplastic.metallic"));
-	mPlasticMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("materials.scuffedplastic.roughness"));
-	mPlasticMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("textures.black"));
-	mPlasticMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("materials.scuffedplastic.ao"));
-	
-	mGoldMat = new Enjon::Material;
-	mGoldMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("materials.scuffedgold.albedo"));
-	mGoldMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("materials.scuffedgold.normal"));
-	mGoldMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("materials.scuffedgold.metallic"));
-	mGoldMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("materials.scuffedgold.roughness"));
-	mGoldMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("textures.black"));
-	mGoldMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("textures.white")); 
-	
-	mRockMat 	= new Enjon::Material; 
-	mRockMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("materials.rustediron.albedo"));
-	mRockMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("materials.rustediron.normal"));
-	mRockMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("materials.rustediron.metallic"));
-	mRockMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("materials.rustediron.roughness"));
-	mRockMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("textures.black"));
-	mRockMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("textures.white"));
-
-	mGunMat 	= new Enjon::Material; 
-	mGunMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.albedo"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.normal"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.metallic"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.roughness"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("materials.cerebus.emissive"));
-	mGunMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("textures.white"));
-
 	mGun.Get()->SetLocalPosition(Enjon::Vec3(0.0f, 0.0f, 0.0f));
 	mGun.Get()->SetLocalRotation( Enjon::Quaternion::AngleAxis( 45.0f, Enjon::Vec3::ZAxis() ) );
 	gc->SetMesh(mAssetManager->GetAsset<Enjon::Mesh>("models.cat"));
@@ -803,49 +771,9 @@ Enjon::Result Game::Initialize()
 
 	auto mSun2 = new Enjon::DirectionalLight(Enjon::Vec3(0.5f, 0.5f, -0.75f), Enjon::RGBA32_SkyBlue(), 10.0f); 
 
-	mFloorMat = new Enjon::Material();
-	//mFloorMat->SetTexture(Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset<Enjon::Texture>("textures.white"));
-	mFloorMat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetDefaultAsset<Enjon::Texture>( ) );
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Normal, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.normal"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset<Enjon::Texture>("textures.black"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.roughness"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.emissive"));
-	mFloorMat->SetTexture(Enjon::TextureSlotType::AO, mAssetManager->GetAsset<Enjon::Texture>("materials.mahogfloor.ao"));
-	mFloorMat->TwoSided( true );
-
-	mBlueMat = new Enjon::Material( );
-	mBlueMat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >("textures.blue") );
-	mBlueMat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >("materials.cerebus.normal") );
-	mBlueMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("materials.cerebus.metallic") );
-	mBlueMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("materials.cerebus.roughness") );
-	mBlueMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("textures.blue") );
-	mBlueMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("textures.white") );
-	
-	mRedMat = new Enjon::Material( );
-	mRedMat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >("textures.red") );
-	mRedMat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >("materials.cerebus.normal") );
-	mRedMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("materials.cerebus.metallic") );
-	mRedMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("materials.cerebus.roughness") );
-	mRedMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("textures.red") );
-	mRedMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("textures.white") );
-	
-	mGreenMat = new Enjon::Material( );
-	mGreenMat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetAsset< Enjon::Texture >("textures.green") );
-	mGreenMat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >("materials.cerebus.normal") );
-	mGreenMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("materials.cerebus.metallic") );
-	mGreenMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("materials.cerebus.roughness") );
-	mGreenMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("textures.green") );
-	mGreenMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("textures.white") );
-
 	mFontMat = new Enjon::Material( );
 	auto f = mFont.Get( );
 	f->GetAtlas( 14 );
-	mFontMat->SetTexture( Enjon::TextureSlotType::Albedo, mFont.Get( )->GetAtlas( 14 )->GetAtlasTexture( ) );
-	mFontMat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >("materials.cerebus.normal") );
-	mFontMat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >("materials.cerebus.metallic") );
-	mFontMat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >("materials.cerebus.roughness") );
-	mFontMat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >("textures.green") );
-	mFontMat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >("textures.white") );
 	mFontMat->TwoSided( true );
 
 	mGreen.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mGreenMat );
@@ -907,129 +835,6 @@ Enjon::Result Game::Initialize()
 		Count
 	};
 
-	// Set up shader ball scene
-	for ( u32 i = 0; i < (u32)GreyScale::Count; ++i )  // Metallic
-	{
-		for ( u32 j = 0; j < ( u32 )GreyScale::Count; ++j )  // Roughnes
-		{ 
-			// Make new entity
-			Enjon::EntityHandle eh = mEntities->Allocate( );
-			auto gfxcmp = eh.Get( )->AddComponent< Enjon::GraphicsComponent >( ); 
-			Enjon::Material* mat = new Enjon::Material( );
-			mat->SetTexture( Enjon::TextureSlotType::Albedo, mAssetManager->GetDefaultAsset< Enjon::Texture >( ) );
-			mat->SetTexture( Enjon::TextureSlotType::Normal, mAssetManager->GetAsset< Enjon::Texture >( "materials.scuffedgold.normal" ) );
-			mat->SetTexture( Enjon::TextureSlotType::Emissive, mAssetManager->GetAsset< Enjon::Texture >( "textures.black" ) );
-			mat->SetTexture( Enjon::TextureSlotType::AO, mAssetManager->GetAsset< Enjon::Texture >( "materials.mahogfloor.ao" ) );
-			gfxcmp->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >( "models.shaderball" ) ); 
-			gfxcmp->SetMaterial( mat );
-
-			eh.Get( )->SetLocalScale( Enjon::Vec3( 0.009f ) );
-			eh.Get( )->SetLocalPosition( Enjon::Vec3( j * 3.0f, 0.0f, i * 3.0f ) + Enjon::Vec3( 15, 0, 15 ) );
-
-			switch ( GreyScale( i ) )
-			{
-				case GreyScale::Black:
-				{
-					mat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >( "textures.black" ) );
-
-					switch ( GreyScale( j ) )
-					{
-						case GreyScale::Black:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.black" ) );
-						} break;
-						case GreyScale::Grey:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.grey" ) );
-						} break;
-						case GreyScale::LightGrey:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.light_grey" ) );
-						} break;
-						case GreyScale::White:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.white" ) );
-						} break;
-					} 
-				} break;
-				case GreyScale::Grey:
-				{
-					mat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >( "textures.grey" ) );
-
-					switch ( GreyScale( j ) )
-					{
-						case GreyScale::Black:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.black" ) );
-						} break;
-						case GreyScale::Grey:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.grey" ) );
-						} break;
-						case GreyScale::LightGrey:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.light_grey" ) );
-						} break;
-						case GreyScale::White:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.white" ) );
-						} break;
-					} 
-				} break;
-				case GreyScale::LightGrey:
-				{
-					mat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >( "textures.light_grey" ) );
-
-					switch ( GreyScale( j ) )
-					{
-						case GreyScale::Black:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.black" ) );
-						} break;
-						case GreyScale::Grey:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.grey" ) );
-						} break;
-						case GreyScale::LightGrey:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.light_grey" ) );
-						} break;
-						case GreyScale::White:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.white" ) );
-						} break;
-					} 
-				} break;
-				case GreyScale::White:
-				{
-					mat->SetTexture( Enjon::TextureSlotType::Metallic, mAssetManager->GetAsset< Enjon::Texture >( "textures.white" ) );
-
-					switch ( GreyScale( j ) )
-					{
-						case GreyScale::Black:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.black" ) );
-						} break;
-						case GreyScale::Grey:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.grey" ) );
-						} break;
-						case GreyScale::LightGrey:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.light_grey" ) );
-						} break;
-						case GreyScale::White:
-						{
-							mat->SetTexture( Enjon::TextureSlotType::Roughness, mAssetManager->GetAsset< Enjon::Texture >( "textures.white" ) );
-						} break;
-					} 
-				} break;
-			}
-			// Add to scene
-			auto scene = mGfx->GetGraphicsScene();
-			scene->AddRenderable( eh.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
-		} 
-	}
 
 	if (mGfx)
 	{

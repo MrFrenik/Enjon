@@ -44,15 +44,18 @@ namespace Enjon
 
 				ENJON_FUNCTION()
 				void SetGraphicsScene(GraphicsScene* scene);
+ 
+				ENJON_FUNCTION()
+				GraphicsScene* GetGraphicsScene( ) const;
 
 		private:
 				ENJON_PROPERTY( )
 				Vec3 mDirection;
 
-				ENJON_PROPERTY( )
+				ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f )
 				ColorRGBA32 mColor;
 
-				ENJON_PROPERTY( )
+				ENJON_PROPERTY( UIMin = 0.0f, UIMax = 100.0f )
 				f32 mIntensity;
 
 				GraphicsScene* mGraphicsScene = nullptr;

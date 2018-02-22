@@ -258,7 +258,7 @@ namespace Enjon
 		//Enjon::String hdrFilePath = rootPath + "IsoARPG/Assets/Textures/HDR/Mans_Outside_2k.hdr";
 
 		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->ConstCast< AssetManager >();
-		am->AddToDatabase( hdrFilePath ); 
+		//am->AddToDatabase( hdrFilePath ); 
 		Enjon::String qualifiedName = AssetLoader::GetQualifiedName( hdrFilePath ); 
 		Enjon::AssetHandle< Enjon::Texture > hdrEnv = am->GetAsset< Enjon::Texture >( qualifiedName ); 
 
@@ -673,13 +673,12 @@ namespace Enjon
 		// Clear albedo render target buffer (default)
 		glClearBufferfv(GL_COLOR, (u32)GBufferTextureType::ALBEDO, mBGColor); 
 		// Clear object id render target buffer
-		GLfloat whiteColor[ ] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		const GLfloat whiteColor[ ] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		glClearBufferfv(GL_COLOR, (u32)GBufferTextureType::OBJECT_ID, whiteColor); 
-
-		//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
-
-		 //mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, mBGColor);
-
+		// Clear normal render target
+		const GLfloat blackColor[ ] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		glClearBufferfv(GL_COLOR, (u32)GBufferTextureType::NORMAL, blackColor); 
+ 
 		// Get sorted renderables by material
 		const Vector<Renderable*>& sortedRenderables = mGraphicsScene.GetRenderables();
 		const Vector<Renderable*>& nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
@@ -702,89 +701,25 @@ namespace Enjon
 				// Grab shader from graph
 				Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
 
-				if (material != curMaterial)
+				if ( sg )
 				{
-					// Set material
-					material = curMaterial;
-
-					if ( sg )
+					if (material != curMaterial)
 					{
+						// Set material
+						material = curMaterial;
+
 						sgShader->Use( );
 						sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
 						sgShader->SetUniform( "uWorldTime", wt );
 						sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
 						material->Bind( sgShader );
-					}
-
-					if ( !sg )
-					{
-						// Use gbuffer shader 
-						gbufferShader->Use( );
-
-						// Set set shared uniform
-						gbufferShader->SetUniform("u_camera", mGraphicsSceneCamera.GetViewProjection());
-
-						// Set material textures
-						gbufferShader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
-						gbufferShader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::Normal).Get()->GetTextureId(), 1);
-						gbufferShader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::Emissive).Get()->GetTextureId(), 2);
-						gbufferShader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::Metallic).Get()->GetTextureId(), 3);
-						gbufferShader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::Roughness).Get()->GetTextureId(), 4);
-						gbufferShader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO).Get()->GetTextureId(), 5); 
 					} 
-				}
 
-				// Render
-				if ( !sg )
-				{
-					// Render mesh ( Could make this all within one call to renderable, which submits mesh and material information )
-					renderable->Submit( gbufferShader ); 
-				}
-				else
-				{
 					sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
 					renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
-				}
+				} 
 			}
 		}
-
-		// Render the bunny
-		gbufferShader->Use( );
-		{
-			auto material = mInstancedRenderable->GetMaterial( );
-			gbufferShader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
-			gbufferShader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::Normal).Get()->GetTextureId(), 1);
-			gbufferShader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::Emissive).Get()->GetTextureId(), 2);
-			gbufferShader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::Metallic).Get()->GetTextureId(), 3);
-			gbufferShader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::Roughness).Get()->GetTextureId(), 4);
-			gbufferShader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO).Get()->GetTextureId(), 5); 
-		} 
-		// Unuse gbuffer shader
-		gbufferShader->Unuse();
-
-		/////////////////////////////////////////////////
-		// SHADER GRAPH TEST ////////////////////////////
-		///////////////////////////////////////////////// 
-
-		// Do shader graph test here
-		
-
-		Enjon::ShaderGraph* sGraph = const_cast< ShaderGraph* >( mMaterial->GetShaderGraph( ).Get( ) );
-		Enjon::Shader* sgShader = const_cast< Shader*> ( sGraph->GetShader( ShaderPassType::StaticGeom ) ); 
-
-		sgShader->Use( );
-		{
-			sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
-			sgShader->SetUniform( "uWorldTime", wt ); 
-			sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) ); 
-			mMaterial->Bind( sgShader ); 
-
-			for ( auto& r : mRenderables )
-			{ 
-				r.Submit( sgShader );
-			}
-		} 
-		sgShader->Unuse( ); 
 
 		// Quadbatches
 		Enjon::GLSLProgram* shader = Enjon::ShaderManager::Get("QuadBatch");
@@ -795,38 +730,47 @@ namespace Enjon
 			// Set shared uniform
 			shader->SetUniform("u_camera", mGraphicsSceneCamera.GetViewProjection());
 
-			Material* material = nullptr;
+			const Material* material = nullptr;
 			for (auto& quadBatch : sortedQuadBatches)
-			{
-				Material* curMaterial = quadBatch->GetMaterial();
-				assert(curMaterial != nullptr);
-				if (material != curMaterial)
-				{ 
-					// Set material
-					material = curMaterial;
-					
-					// Check whether or not to be rendered two sided
-					if ( material->TwoSided( ) )
-					{
-						glDisable( GL_CULL_FACE );
-					}
-					else
-					{
-						glEnable( GL_CULL_FACE );
-						glCullFace( GL_BACK );
+			{ 
+				// Check for material switch 
+				const Material* curMaterial = quadBatch->GetMaterial().Get();
+				sg = curMaterial->GetShaderGraph( );
+				assert(curMaterial != nullptr); 
+
+				// Grab shader from graph
+				Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
+
+				if ( sg )
+				{
+					if (material != curMaterial)
+					{ 
+						// Set material
+						material = curMaterial;
+						
+						// Check whether or not to be rendered two sided
+						if ( material->TwoSided( ) )
+						{
+							glDisable( GL_CULL_FACE );
+						}
+						else
+						{
+							glEnable( GL_CULL_FACE );
+							glCullFace( GL_BACK );
+						}
+						
+						sgShader->Use( );
+						sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
+						sgShader->SetUniform( "uWorldTime", wt );
+						sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
+						material->Bind( sgShader ); 
 					}
 
-					// Set material tetxures
-					shader->BindTexture("u_albedoMap", material->GetTexture(Enjon::TextureSlotType::Albedo).Get()->GetTextureId(), 0);
-					shader->BindTexture("u_normalMap", material->GetTexture(Enjon::TextureSlotType::Normal).Get()->GetTextureId(), 1);
-					shader->BindTexture("u_emissiveMap", material->GetTexture(Enjon::TextureSlotType::Emissive).Get()->GetTextureId(), 2);
-					shader->BindTexture("u_metallicMap", material->GetTexture(Enjon::TextureSlotType::Metallic).Get()->GetTextureId(), 3);
-					shader->BindTexture("u_roughnessMap", material->GetTexture(Enjon::TextureSlotType::Roughness).Get()->GetTextureId(), 4);
-					shader->BindTexture("u_aoMap", material->GetTexture(Enjon::TextureSlotType::AO).Get()->GetTextureId(), 5);
-				}
-
-				// Render batch
-				quadBatch->RenderBatch();
+					// Need to set up renderable ids for quadbatches
+					//sgShader->SetUniform( "uObjectID", Renderable::IdToColor( quadBatch->GetRenderableID( ) ) );
+					// Render batch
+					quadBatch->RenderBatch(); 
+				} 
 			}
 		}
 		shader->Unuse();
@@ -846,15 +790,15 @@ namespace Enjon
 			const Material* material = mInstancedRenderable->GetMaterial( ).Get();
 
 			// Set material textures
-			shader->BindTexture( "uAlbedoMap", material->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTextureId( ), 0 );
+			/*shader->BindTexture( "uAlbedoMap", material->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTextureId( ), 0 );
 			shader->BindTexture( "uNormalMap", material->GetTexture( Enjon::TextureSlotType::Normal ).Get( )->GetTextureId( ), 1 );
 			shader->BindTexture( "uEmissiveMap", material->GetTexture( Enjon::TextureSlotType::Emissive ).Get( )->GetTextureId( ), 2 );
 			shader->BindTexture( "uMetallicMap", material->GetTexture( Enjon::TextureSlotType::Metallic ).Get( )->GetTextureId( ), 3 );
 			shader->BindTexture( "uRoughnessMap", material->GetTexture( Enjon::TextureSlotType::Roughness ).Get( )->GetTextureId( ), 4 );
-			shader->BindTexture( "uAoMap", material->GetTexture( Enjon::TextureSlotType::AO ).Get( )->GetTextureId( ), 5 );
+			shader->BindTexture( "uAoMap", material->GetTexture( Enjon::TextureSlotType::AO ).Get( )->GetTextureId( ), 5 );*/
 
 			// Render instanced mesh
-			mInstancedRenderable->GetMesh( ).Get( )->Bind( );
+			//mInstancedRenderable->GetMesh( ).Get( )->Bind( );
 		
 			//glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
 			//for ( u32 i = 0; i < mInstancedAmount; ++i )
@@ -863,9 +807,9 @@ namespace Enjon
 			//}
 			//glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ] );
 
-			glDrawArraysInstanced( GL_TRIANGLES, 0, mInstancedRenderable->GetMesh( ).Get( )->GetDrawCount(), mInstancedAmount );
+			//glDrawArraysInstanced( GL_TRIANGLES, 0, mInstancedRenderable->GetMesh( ).Get( )->GetDrawCount(), mInstancedAmount );
 
-			mInstancedRenderable->GetMesh( ).Get( )->Unbind( ); 
+			//mInstancedRenderable->GetMesh( ).Get( )->Unbind( ); 
 		} 
 		shader->Unuse( ); 
 

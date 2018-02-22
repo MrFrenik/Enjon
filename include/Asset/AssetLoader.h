@@ -234,6 +234,7 @@ namespace Enjon
 				asset->mLoader = this;
 				asset->mUUID = UUID::GenerateUUID( ); 
 				asset->mFilePath = p.string( );
+				asset->mIsDefault = false;
 
 				info.mAsset = asset;
 				info.mAssetName = asset->mName;

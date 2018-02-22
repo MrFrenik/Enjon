@@ -39,22 +39,6 @@ namespace Enjon {
 		mUniformOverrides.clear( );
 	} 
 	
-	//======================================================================== 
-	
-	void Material::SetTexture(const TextureSlotType& type, const AssetHandle<Texture>& textureHandle) const
-	{
-		assert((u32)type < (u32)TextureSlotType::Count);
-		const_cast< Material* >( this )->mTextureHandles[(u32)type] = textureHandle;
-	}
-
-	//========================================================================
-
-	AssetHandle<Texture> Material::GetTexture(const TextureSlotType& type) const
-	{ 
-		assert((u32)type < (u32)TextureSlotType::Count);
-		return mTextureHandles[(u32)type];
-	} 
-
 	//========================================================================
 			
 	void Material::AddOverride( ShaderUniform* uniform )

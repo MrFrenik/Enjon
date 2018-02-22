@@ -574,7 +574,7 @@ namespace Enjon
 		}
 	}
 
-	void QuadBatch::SetMaterial(Material* mat)
+	void QuadBatch::SetMaterial(const AssetHandle<Material>& mat)
 	{
 		mMaterial = mat;	
 	}

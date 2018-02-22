@@ -98,7 +98,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void RemoveDirectionLight(DirectionalLight* light);
+			void RemoveDirectionalLight(DirectionalLight* light);
 
 			/*
 			* @brief

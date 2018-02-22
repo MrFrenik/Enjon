@@ -273,7 +273,7 @@ namespace Enjon
  
 	//============================================================================================ 
 			
-	Result AssetManager::AddToDatabase( const String& resourceFilePath, bool cache, bool isRelativePath )
+	Result AssetManager::AddToDatabase( const String& resourceFilePath, bool cache, bool isRelativePath, AssetLocationType locationType )
 	{ 
 		// Result to be returned
 		Result res = Result::SUCCESS;

@@ -7,6 +7,7 @@
 #include "System/Types.h"
 #include "Math/Maths.h"
 #include "Defines.h"
+#include "Asset/Asset.h"
 #include "Graphics/Color.h"
 
 #define GL_QUAD_VERTEX_ATTRIB_POSITION 	0
@@ -87,10 +88,10 @@ namespace Enjon {
 			GraphicsScene* GetGraphicsScene() { return mGraphicsScene; }
 
 			// Sets material of quadbatch
-			void SetMaterial(Material* mat);
+			void SetMaterial(const AssetHandle<Material>& mat);
 
 			// Gets material of quadbatch
-			Material* GetMaterial() { return mMaterial; }
+			AssetHandle<Material> GetMaterial() { return mMaterial; }
 
 			// Adds quadglyph to quadbatch to be rendered
 			void Add(Transform& Transform, Vec4& UVRect = Vec4(0, 0, 1, 1), GLuint Texture = 0, ColorRGBA32& Color = RGBA32(1.0f), float Depth = 1.0f);
@@ -123,7 +124,7 @@ namespace Enjon {
 			std::vector<QuadGlyph> QuadGlyphs;
 			std::vector<QuadGlyph*> QuadGlyphPointers;
 			std::vector<QuadRenderBatch> RenderBatches;
-			Material* mMaterial = nullptr;
+			AssetHandle<Material> mMaterial;
 			GraphicsScene* mGraphicsScene 		= nullptr;
 	};
 

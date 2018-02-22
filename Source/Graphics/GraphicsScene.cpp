@@ -174,7 +174,7 @@ namespace Enjon {
 		}
 	}
 
-	void GraphicsScene::RemoveDirectionLight(DirectionalLight* light)
+	void GraphicsScene::RemoveDirectionalLight(DirectionalLight* light)
 	{
 		auto query = mDirectionalLights.find(light);
 		if (query != mDirectionalLights.end())

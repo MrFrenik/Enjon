@@ -19,12 +19,6 @@ namespace Enjon
 		material->mShaderGraph = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->GetDefaultAsset< ShaderGraph >( );
 		material->mName = "DefaultMaterial";
 
-		// Set default textures for texture slots, even though this will be deprecated soon...
-		for ( u32 i = 0; i < (u32)TextureSlotType::Count; ++i )
-		{
-			material->mTextureHandles[i] = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->GetDefaultAsset< Texture >( );
-		} 
-
 		// Set default asset
 		mDefaultAsset = material;
 	}
