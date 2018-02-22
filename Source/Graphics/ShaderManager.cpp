@@ -55,7 +55,7 @@ namespace Enjon { namespace ShaderManager {
 		ShaderManager::AddShader("IrradianceCapture", sp + "pbr/Irradiance.v.glsl", sp + "pbr/Irradiance.f.glsl");
 		ShaderManager::AddShader("PrefilterConvolution", sp + "pbr/PrefilterConvolution.v.glsl", sp + "pbr/PrefilterConvolution.f.glsl");
 		ShaderManager::AddShader("BRDFLUT", sp + "pbr/BRDF.v.glsl", sp + "pbr/BRDF.f.glsl");
-		ShaderManager::AddShader("SSAO", sp + "SSAO.v.glsl", sp + "SSAO.f.glsl");
+		ShaderManager::AddShader("SSAO", sp + "SSAO.v.glsl", sp + "SSAO2.f.glsl");
 		ShaderManager::AddShader("SSAOBlur", sp + "SSAOBlur.v.glsl", sp + "SSAOBlur.f.glsl"); 
 		ShaderManager::AddShader("Instanced", sp + "deferred/Instanced.v.glsl", sp + "deferred/Instanced.f.glsl"); 
 	}

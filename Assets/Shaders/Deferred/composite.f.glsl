@@ -50,6 +50,6 @@ void main()
 	vec3 diff = result.rgb - vec3(lum);
 
 	// Final
-	color = vec4(vec3(diff) * u_saturation + lum, 1.0);
+	color = vec4(vec3(diff) * u_saturation + lum, 1.0); 
 }
 

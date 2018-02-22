@@ -40,6 +40,8 @@
 #include <fmt/string.h>
 #include <fmt/printf.h>
 
+#define SSAO_KERNEL_SIZE 16
+
 Enjon::Renderable mRenderable; 
 std::vector < Enjon::Renderable > mRenderables;
 Enjon::AssetHandle< Enjon::Texture > mBRDFHandle;
@@ -868,23 +870,23 @@ namespace Enjon
 		shader->Unuse( ); 
 
 		// Cubemap
-		glEnable( GL_DEPTH_TEST );
-		glDepthFunc( GL_LEQUAL );
-		glCullFace( GL_FRONT );
-		Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
-		skyBoxShader->Use( );
-		{
-			skyBoxShader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
-			skyBoxShader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
-			skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
+		//glEnable( GL_DEPTH_TEST );
+		//glDepthFunc( GL_LEQUAL );
+		//glCullFace( GL_FRONT );
+		//Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
+		//skyBoxShader->Use( );
+		//{
+		//	skyBoxShader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
+		//	skyBoxShader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
+		//	skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
 
-			// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
-			glActiveTexture( GL_TEXTURE0 );
-			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+		//	// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
+		//	glActiveTexture( GL_TEXTURE0 );
+		//	glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
 
-			RenderCube( );
-		}
-		skyBoxShader->Unuse( );
+		//	RenderCube( );
+		//}
+		//skyBoxShader->Unuse( );
 
 		// Unbind gbuffer
 		mGbuffer->Unbind();
@@ -908,13 +910,14 @@ namespace Enjon
 			shader->Use( );
 			{ 
 				// Upload kernel uniform
-				//glUniform3fv( glGetUniformLocation( shader->GetProgramID( ), "samples" ), mSSAOKernelSize * 3, ( f32* )&mSSAOKernel[ 0 ] );
+				glUniform3fv( glGetUniformLocation( shader->GetProgramID( ), "samples" ), SSAO_KERNEL_SIZE * 3, ( f32* )&mSSAOKernel[ 0 ] );
 				shader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
 				shader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
 				shader->SetUniform( "uScreenResolution", Vec2( screenRes.x, screenRes.y ) );
 				shader->SetUniform( "radius", mSSAORadius );
 				shader->SetUniform( "bias", mSSAOBias );
 				shader->SetUniform( "uIntensity", mSSAOIntensity );
+				shader->SetUniform( "uScale", mSSAOScale );
 				shader->SetUniform( "near", mGraphicsSceneCamera.GetNear() );
 				shader->SetUniform( "far", mGraphicsSceneCamera.GetFar() );
 				shader->BindTexture( "gPosition", mGbuffer->GetTexture( GBufferTextureType::POSITION ), 0 );
@@ -979,6 +982,7 @@ namespace Enjon
 			glActiveTexture( GL_TEXTURE1 );
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mPrefilteredMap ); 
 
+			// Bind textures
 			ambientShader->BindTexture( "uBRDFLUT", mBRDFLUT, 2 );
 			ambientShader->BindTexture("uAlbedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 3);
 			ambientShader->BindTexture("uNormalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 4);
@@ -986,7 +990,8 @@ namespace Enjon
 			ambientShader->BindTexture("uEmissiveMap", mGbuffer->GetTexture(GBufferTextureType::EMISSIVE), 6);
 			ambientShader->BindTexture("uMaterialMap", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 7);
 			ambientShader->BindTexture("uSSAOMap", mSSAOBlurTarget->GetTexture(), 8);
-			ambientShader->BindTexture("uDepthMap", mSSAOBlurTarget->GetTexture(), 9);
+
+			// Bind uniforms
 			ambientShader->SetUniform("uResolution", mGbuffer->GetResolution());
 			ambientShader->SetUniform( "uCamPos", mGraphicsSceneCamera.GetPosition() );
 
@@ -1463,11 +1468,11 @@ namespace Enjon
 		// Generate sample kernel
 		std::uniform_real_distribution< f32 > randomFloats( 0.0f, 1.0f );
 		std::default_random_engine generator;
-		for ( u32 i = 0; i < mSSAOKernelSize; ++i )
+		for ( u32 i = 0; i < SSAO_KERNEL_SIZE; ++i )
 		{
 			Enjon::Vec3 sample( randomFloats( generator ) * 2.0f - 1.0f, randomFloats( generator ) * 2.0f - 1.0f, randomFloats( generator ) );
 			sample *= randomFloats( generator );
-			f32 scale = f32( i ) / (f32)mSSAOKernelSize;
+			f32 scale = f32( i ) / (f32)SSAO_KERNEL_SIZE;
 
 			// scale samples s.t. they're more aligned to center of kernel
 			scale = Enjon::Lerp( 0.1f, 1.0f, scale * scale );
@@ -1737,9 +1742,10 @@ namespace Enjon
 	    
 		if (ImGui::TreeNode("SSAO"))
 	    {
-		    ImGui::SliderFloat("Radius##ssao", &mSSAORadius, 0.01, 1.0f, "%.3f");
+		    ImGui::SliderFloat("Radius##ssao", &mSSAORadius, 0.01, 5.0f, "%.3f");
 		    ImGui::SliderFloat("Bias##ssao", &mSSAOBias, 1.0, 0.01f, "%.3f"); 
-		    ImGui::SliderFloat("Intensity##ssao", &mSSAOIntensity, 0.0f, 5.0f, "%.2f"); 
+		    ImGui::SliderFloat("Intensity##ssao", &mSSAOIntensity, 0.0f, 15.0f, "%.2f"); 
+		    ImGui::SliderFloat("Scale##ssao", &mSSAOScale, 0.0f, 5.0f, "%.2f"); 
 
 		    ImGui::TreePop();
 	    }
