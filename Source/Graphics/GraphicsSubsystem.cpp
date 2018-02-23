@@ -846,7 +846,7 @@ namespace Enjon
 		Enjon::iVec2 screenRes = GetViewport( ); 
 
 		// SSAO pass
-		mSSAOTarget->Bind( );
+		mSSAOBlurTarget->Bind( );
 		{
 			glClear( GL_COLOR_BUFFER_BIT );
 
@@ -872,8 +872,9 @@ namespace Enjon
 			}
 			shader->Unuse( ); 
 		}
-		mSSAOTarget->Unbind( );
+		mSSAOBlurTarget->Unbind( );
 
+		/*
 		// Blur SSAO to remove noise
 		mSSAOBlurTarget->Bind( );
 		{
@@ -888,6 +889,7 @@ namespace Enjon
 			shader->Unuse( ); 
 		}
 		mSSAOBlurTarget->Unbind( );
+		*/
 	}
 
 	//======================================================================================================
