@@ -407,7 +407,13 @@ namespace Enjon
 			/**
 			* @brief Returns vector of active entities that have no parent
 			*/
-			Vector<EntityHandle> GetRootLevelEntities( );
+			Vector<EntityHandle> GetRootLevelEntities( ); 
+
+			/**
+			* @brief Returns vector of active components of given type
+			*/
+			template <typename T>
+			Vector<Component*> GetAllComponentsOfType( );
 
 			/**
 			*@brief

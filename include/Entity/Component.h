@@ -43,6 +43,8 @@ namespace Enjon
 			virtual bool IsEmpty( ) const = 0;
 
 			virtual u32 GetSize( ) const = 0;
+
+			virtual Vector<Component*> GetComponents( ) = 0;
 	};
 
 	class ComponentArray : public ComponentWrapperBase
@@ -108,6 +110,11 @@ namespace Enjon
 			virtual bool IsEmpty( ) const override
 			{
 				return ( GetSize( ) == 0 );
+			}
+
+			virtual Vector<Component*> GetComponents( ) override
+			{
+				return mComponentPtrs;
 			}
 
 		private:

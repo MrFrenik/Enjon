@@ -147,6 +147,26 @@ bool EntityManager::ComponentBaseExists( )
 
 //=======================================================================================
 
+template <typename T>
+Vector<Component*> EntityManager::GetAllComponentsOfType( )
+{
+	// Get idx of component
+	u32 idx = Component::GetComponentType< T >( );
+
+	// If the component exists, then return its component array
+	if ( ComponentBaseExists( idx ) )
+	{
+		return mComponents[idx]->GetComponents( );
+	}
+	// Otherwise return empty vector
+	else
+	{ 
+		return Vector<Component*>( );
+	}
+}
+
+//=======================================================================================
+
 
 
 

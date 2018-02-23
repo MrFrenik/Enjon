@@ -751,7 +751,8 @@ namespace Enjon
 						{
 							if ( assets )
 							{
-								ImGui::ListBoxHeader( Enjon::String( "##" + prop->GetName( ) ).c_str( ) );
+								String label = val ? val->GetName( ) : assetCls->GetName( );
+								if ( ImGui::BeginCombo( fmt::format("##{}", prop->GetName() ).c_str(), label.c_str() ) )
 								{
 									// For each record in assets
 									for ( auto& a : *assets )
@@ -762,8 +763,8 @@ namespace Enjon
 											cls->SetValue( object, prop, val );
 										}
 									}
+									ImGui::EndCombo( );
 								} 
-								ImGui::ListBoxFooter( ); 
 							}
 							if ( val )
 							{
