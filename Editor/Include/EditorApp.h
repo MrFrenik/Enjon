@@ -201,6 +201,7 @@ namespace Enjon
 			void ShutdownProjectApp( ByteBuffer* buffer );
 
 			void LoadResources( ); 
+			void LoadProjectResources( ); 
 
 			void InspectorView( bool* enabled );
 			void SceneView( bool* viewBool );

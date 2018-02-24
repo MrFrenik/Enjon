@@ -14,13 +14,17 @@ out VS_OUT
 	vec3 ViewPositionTangentSpace;
 	vec3 FragPositionTangentSpace;
 	vec4 ObjectID;
+	vec4 PreviousFragPositionClipSpace;
+	vec4 CurrentFragPositionClipSpace;
 } vs_out;
 
 // Gloabl Uniforms
 uniform float uWorldTime = 1.0f;
 uniform mat4 uViewProjection;
+uniform mat4 uPreviousViewProjection;
 uniform vec3 uViewPositionWorldSpace;
 uniform mat4 uModel = mat4( 1.0f );
+uniform mat4 uPreviousModel = mat4( 1.0f );
 uniform vec4 uObjectID;
 
 // Variable Declarations
@@ -52,6 +56,8 @@ void main()
 	vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );
 	vs_out.ViewPositionTangentSpace = TS_TBN * uViewPositionWorldSpace;
 	vs_out.FragPositionTangentSpace = TS_TBN * vs_out.FragPositionWorldSpace;
+	vs_out.CurrentFragPositionClipSpace = gl_Position;
+	vs_out.PreviousFragPositionClipSpace = uPreviousViewProjection * uPreviousModel * vec4( aVertexPosition, 1.0 );
 	vs_out.TBN = TBN;
 	vs_out.TS_TBN = TS_TBN;
 	vs_out.ObjectID = uObjectID;

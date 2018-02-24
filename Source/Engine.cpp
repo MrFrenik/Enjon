@@ -264,7 +264,7 @@ namespace Enjon
 			// Update world time
 			mWorldTime.mDT = dt;
 			mWorldTime.mTotalTime += mWorldTime.mDT;
-			mWorldTime.mFPS = dt;
+			mWorldTime.mFPS = 1000.0f / Max( mWorldTime.mDT, 0.00001f );
 
 			// Calculate average delta time for world time
 			mWorldTime.CalculateAverageDeltaTime( );
@@ -490,6 +490,13 @@ namespace Enjon
 		return mAverageDT;
 	}
 	
+	//======================================================= 
+
+	f32 WorldTime::GetFPS( )
+	{
+		return mFPS;
+	}
+
 	//======================================================= 
 
 	void WorldTime::CalculateAverageDeltaTime( )

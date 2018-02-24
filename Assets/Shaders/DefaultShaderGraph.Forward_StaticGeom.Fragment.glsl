@@ -8,6 +8,8 @@ layout (location = 4) out vec4 MatPropsOut;
 
 layout (location = 5) out vec4 ObjectIDOut;
 
+layout (location = 6) out vec4 VelocityOut;
+
 
 in VS_OUT
 {
@@ -18,11 +20,15 @@ in VS_OUT
 	vec3 ViewPositionTangentSpace;
 	vec3 FragPositionTangentSpace;
 	vec4 ObjectID;
+	vec4 PreviousFragPositionClipSpace;
+	vec4 CurrentFragPositionClipSpace;
 } fs_in;
 
 // Global Uniforms
 uniform float uWorldTime = 1.0f;
 uniform vec3 uViewPositionWorldSpace;
+uniform mat4 uPreviousViewProjection;
+uniform mat4 uViewProjection;
 
 // Variable Declarations
 

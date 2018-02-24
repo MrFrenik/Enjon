@@ -126,6 +126,7 @@ namespace Enjon
 		private: 
 			Transform mTransform; 
 			GraphicsScene* mGraphicsScene = nullptr;
+			Mat4 mPreviousModelMatrix = Mat4::Identity( );
 	};
 }
 

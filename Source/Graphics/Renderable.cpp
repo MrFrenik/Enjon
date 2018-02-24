@@ -153,7 +153,11 @@ namespace Enjon
 				Model *= QuaternionToMat4( GetRotation( ) );
 				Model *= Mat4::Scale( GetScale( ) );
 				const_cast< Enjon::Shader* > ( shader )->SetUniform( "uModel", Model );
+				const_cast< Enjon::Shader* > ( shader )->SetUniform( "uPreviousModel", mPreviousModelMatrix );
 				mesh->Submit( );
+
+				// Set the previous model matrix with current one
+				mPreviousModelMatrix = Model;
 			}
 			mesh->Unbind( ); 
 		} 
@@ -178,7 +182,11 @@ namespace Enjon
 				Model *= QuaternionToMat4( GetRotation( ) );
 				Model *= Mat4::Scale( GetScale( ) );
 				const_cast< Enjon::GLSLProgram* > ( shader )->SetUniform( "u_model", Model );
+				const_cast< Enjon::GLSLProgram* > ( shader )->SetUniform( "uPreviousModel", mPreviousModelMatrix );
 				mesh->Submit( );
+
+				// Set the previous model matrix with current one
+				mPreviousModelMatrix = Model;
 			}
 			mesh->Unbind( ); 
 		} 

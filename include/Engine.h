@@ -74,6 +74,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			f32 GetFPS( ); 
+
+			/**
+			* @brief
+			*/
 			void CalculateAverageDeltaTime( );
 
 		f32 mTotalTime = 0.0f;;

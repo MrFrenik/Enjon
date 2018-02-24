@@ -41,12 +41,12 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mProjectsDir = "W:/Projects/";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -595,6 +595,8 @@ namespace Enjon
 		// Reinitialize asset manager
 		AssetManager* am = EngineSubsystem( AssetManager );
 		am->Reinitialize( mProject.GetProjectPath( ) + "Assets/" );
+
+		LoadProjectResources( );
 	}
 
 	//================================================================================================================================
@@ -1492,6 +1494,34 @@ namespace Enjon
 	{ 
 		return Enjon::Result::SUCCESS;
 	} 
+
+	void EditorApp::LoadProjectResources( )
+	{
+		Enjon::String paintPeelingAlbedoPath = Enjon::String( "Materials/PaintPeeling/Albedo.png" );
+		Enjon::String paintPeelingNormalPath = Enjon::String( "Materials/PaintPeeling/Normal.png" );
+		Enjon::String paintPeelingRoughnessPath = Enjon::String( "Materials/PaintPeeling/Roughness.png" );
+		Enjon::String paintPeelingMetallicPath = Enjon::String( "Materials/PaintPeeling/Metallic.png" );
+		Enjon::String paintPeelingAOPath = Enjon::String( "Materials/PaintPeeling/ao.png" );
+
+		AssetManager* am = EngineSubsystem( AssetManager );
+
+		am->AddToDatabase( paintPeelingAlbedoPath );
+		am->AddToDatabase( paintPeelingNormalPath );
+		am->AddToDatabase( paintPeelingMetallicPath );
+		am->AddToDatabase( paintPeelingRoughnessPath );
+		am->AddToDatabase( paintPeelingAOPath );
+
+		AssetHandle< Material > pp = am->ConstructAsset< Material >( );
+		AssetHandle< ShaderGraph > sg = am->GetAsset< ShaderGraph >( "shaders.shadergraphs.defaultstaticgeom" ); 
+		pp->SetShaderGraph( sg );
+		pp.Get()->ConstCast< Material >()->SetUniform( "albedoMap", am->GetAsset< Texture >( "materials.paintpeeling.albedo" ) );
+		pp.Get()->ConstCast< Material >()->SetUniform( "normalMap", am->GetAsset< Texture >( "materials.paintpeeling.normal" ) );
+		pp.Get()->ConstCast< Material >()->SetUniform( "metallicMap", am->GetAsset< Texture >( "materials.paintpeeling.metallic" ) );
+		pp.Get()->ConstCast< Material >()->SetUniform( "roughMap", am->GetAsset< Texture >( "materials.paintpeeling.roughness" ) );
+		pp.Get()->ConstCast< Material >()->SetUniform( "aoMap", am->GetAsset< Texture >( "materials.paintpeeling.ao" ) );
+		pp.Get()->ConstCast< Material >()->SetUniform( "emissiveMap", am->GetAsset< Texture >( "textures.black" ) );
+		pp->Save( );
+	}
 
 	void EditorApp::LoadResources( )
 	{

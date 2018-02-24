@@ -578,9 +578,11 @@ namespace Enjon
 		// Bloom pass
 		BloomPass();
 		// Composite Pass
-		CompositePass(mLightingBuffer);
+		CompositePass( mLightingBuffer );
+		// Motion Blur Pass
+		MotionBlurPass( mCompositeTarget );
 		// FXAA pass
-		FXAAPass(mCompositeTarget); 
+		 FXAAPass( mMotionBlurTarget );
 		// Do UI pass
 		UIPass( mFXAATarget ); 
  
@@ -681,7 +683,6 @@ namespace Enjon
  
 		// Get sorted renderables by material
 		const Vector<Renderable*>& sortedRenderables = mGraphicsScene.GetRenderables();
-		const Vector<Renderable*>& nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
 		const std::set<QuadBatch*>& sortedQuadBatches = mGraphicsScene.GetQuadBatches(); 
 
 		// Shader graph to be used
@@ -712,6 +713,7 @@ namespace Enjon
 						sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
 						sgShader->SetUniform( "uWorldTime", wt );
 						sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
+						sgShader->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix );
 						material->Bind( sgShader );
 					} 
 
@@ -763,6 +765,7 @@ namespace Enjon
 						sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
 						sgShader->SetUniform( "uWorldTime", wt );
 						sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
+						sgShader->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix );
 						material->Bind( sgShader ); 
 					}
 
@@ -835,6 +838,9 @@ namespace Enjon
 		// Unbind gbuffer
 		mGbuffer->Unbind();
 
+		// Store the previous view projection matrix
+		mPreviousViewProjectionMatrix = mGraphicsSceneCamera.GetViewProjection( );
+
 		glEnable( GL_DEPTH_TEST );
 		glCullFace( GL_BACK );
 	}
@@ -862,8 +868,8 @@ namespace Enjon
 				shader->SetUniform( "bias", mSSAOBias );
 				shader->SetUniform( "uIntensity", mSSAOIntensity );
 				shader->SetUniform( "uScale", mSSAOScale );
-				shader->SetUniform( "near", mGraphicsSceneCamera.GetNear() );
-				shader->SetUniform( "far", mGraphicsSceneCamera.GetFar() );
+				shader->SetUniform( "uNear", mGraphicsSceneCamera.GetNear() );
+				shader->SetUniform( "uFar", mGraphicsSceneCamera.GetFar() );
 				shader->BindTexture( "gPosition", mGbuffer->GetTexture( GBufferTextureType::POSITION ), 0 );
 				shader->BindTexture( "gNormal", mGbuffer->GetTexture( GBufferTextureType::NORMAL ), 1 );
 				shader->BindTexture( "texNoise", mSSAONoiseTexture, 2 ); 
@@ -1199,9 +1205,36 @@ namespace Enjon
 
 	//======================================================================================================
 
+	void GraphicsSubsystem::MotionBlurPass( RenderTarget* inputTarget )
+	{
+		GLSLProgram* motionBlurProgram = ShaderManager::Get( "MotionBlur" );
+		mMotionBlurTarget->Bind( );
+		{
+			mWindow.Clear( );
+			motionBlurProgram->Use( );
+			{
+				auto viewPort = GetViewport( );
+				motionBlurProgram->BindTexture( "uInputTextureMap", inputTarget->GetTexture( ), 0 );
+				motionBlurProgram->BindTexture( "uVelocityMap", mGbuffer->GetTexture( GBufferTextureType::VELOCITY ), 1 );
+
+				//f32 velocityScale = Engine::GetInstance( )->GetWorldTime( ).GetFPS( ) / 60.0f;
+				motionBlurProgram->SetUniform( "uVelocityScale", mMotionBlurVelocityScale ); 
+				motionBlurProgram->SetUniform( "uEnabled", (bool)mMotionBlurEnabled );
+
+				// Render
+				mFullScreenQuad->Submit( );
+			}
+			motionBlurProgram->Unuse( );
+		}
+		mMotionBlurTarget->Unbind( );
+	}
+
+	//======================================================================================================
+
 	void GraphicsSubsystem::CompositePass(RenderTarget* input)
 	{
-		GLSLProgram* compositeProgram = Enjon::ShaderManager::Get("Composite");
+		GLSLProgram* compositeProgram = Enjon::ShaderManager::Get("Composite"); 
+		const Vector<Renderable*>& nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( ); 
 		mCompositeTarget->Bind();
 		{
 			mWindow.Clear();
@@ -1221,9 +1254,7 @@ namespace Enjon
 			}
 			compositeProgram->Unuse();
 
-			glClear( GL_DEPTH_BUFFER_BIT );
-
-			const Vector<Renderable*>& nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
+			glClear( GL_DEPTH_BUFFER_BIT ); 
 
 			// None depth tested renderables
 			if ( !nonDepthTestedRenderables.empty( ) )
@@ -1250,6 +1281,7 @@ namespace Enjon
 							sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
 							sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
 							sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
+							sgShader->SetUniform( "uPreviousViewProjection", mGraphicsSceneCamera.GetViewProjection() );
 							material->Bind( sgShader );
 						} 
 
@@ -1291,7 +1323,6 @@ namespace Enjon
 		{ 
 			glClear( GL_DEPTH_BUFFER_BIT );
 
-			const Vector<Renderable*>& nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
 
 			// None depth tested renderables
 			if ( !nonDepthTestedRenderables.empty( ) )
@@ -1318,6 +1349,7 @@ namespace Enjon
 							sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
 							sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
 							sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
+							sgShader->SetUniform( "uPreviousViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
 							material->Bind( sgShader );
 						} 
 
@@ -1495,6 +1527,7 @@ namespace Enjon
 		mFinalTarget				= new RenderTarget( width, height );
 		mSSAOTarget					= new RenderTarget( width / 2, height / 2 );
 		mSSAOBlurTarget				= new RenderTarget( width, height ); 
+		mMotionBlurTarget			= new RenderTarget( width, height ); 
 	}
 
 	//======================================================================================================
@@ -1696,11 +1729,19 @@ namespace Enjon
 		    ImGui::TreePop();
 	    }
 
+		if (ImGui::TreeNode("Motion Blur"))
+	    {
+		    ImGui::SliderFloat("Velocity Scale##motionblur", &mMotionBlurVelocityScale, 0.01, 5.0f, "%.3f");
+		    ImGui::Checkbox("Enabled##motionblur", (bool*)&mMotionBlurEnabled ); 
+		    ImGui::TreePop();
+	    }
+
 	    if (ImGui::TreeNode("FrameBuffers"))
 	    {
 	    	ImFontAtlas* atlas = ImGui::GetIO().Fonts;
 	    	ImGui::PushFont(atlas->Fonts[1]);
-	        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2, 0.6f, 0.6f, 1.0f));
+	        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2, 0.6f, 0.6f, 1.0f)); 
+ 
 	    	for (u32 i = 0; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
 	    	{
 	    		const char* string_name = mGbuffer->FrameBufferToString(i);
@@ -1797,6 +1838,16 @@ namespace Enjon
 				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
 				{
 					mCurrentRenderTexture = mSSAONoiseTexture;
+				}
+			}
+
+			{
+				const char* string_name = "Motion Blur";
+				ImGui::Text( string_name );
+				ImTextureID img = (ImTextureID)mMotionBlurTarget->GetTexture( );
+				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
+				{
+					mCurrentRenderTexture = mMotionBlurTarget->GetTexture( );
 				}
 			}
 

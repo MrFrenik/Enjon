@@ -1059,14 +1059,18 @@ namespace Enjon
 		code += OutputTabbedLine( "vec3 ViewPositionTangentSpace;" );
 		code += OutputTabbedLine( "vec3 FragPositionTangentSpace;" );
 		code += OutputTabbedLine( "vec4 ObjectID;" );
+		code += OutputTabbedLine( "vec4 PreviousFragPositionClipSpace;" );
+		code += OutputTabbedLine( "vec4 CurrentFragPositionClipSpace;" );
 		code += OutputLine( "} vs_out;\n" );
 
 		// Global uniforms
 		code += OutputLine( "// Gloabl Uniforms" );
 		code += OutputLine( "uniform float uWorldTime = 1.0f;" );
 		code += OutputLine( "uniform mat4 uViewProjection;" );
+		code += OutputLine( "uniform mat4 uPreviousViewProjection;" );
 		code += OutputLine( "uniform vec3 uViewPositionWorldSpace;" );
 		code += OutputLine( "uniform mat4 uModel = mat4( 1.0f );" );
+		code += OutputLine( "uniform mat4 uPreviousModel = mat4( 1.0f );" );
 		code += OutputLine( "uniform vec4 uObjectID;" );
 
 		// Comment for declarations
@@ -1344,9 +1348,6 @@ namespace Enjon
 
 				// Final position output 
 				code += OutputTabbedLine( "gl_Position = uViewProjection * vec4( worldPosition, 1.0 );\n" );
- 
-				//code += OutputTabbedLine( "vec3 N = normalize( ( uModel * vec4( aVertexNormal, 0.0 ) ).xyz );" );
-				//code += OutputTabbedLine( "vec3 T = normalize( ( uModel * vec4( aVertexTangent, 0.0 ) ).xyz );\n\n" );
 				
 				code += OutputTabbedLine( "vec3 N = normalize( mat3(uModel) * aVertexNormal );" );
 				code += OutputTabbedLine( "vec3 T = normalize( mat3(uModel) * aVertexTangent );" );
@@ -1361,21 +1362,15 @@ namespace Enjon
 				code += OutputTabbedLine( "mat3 TBN = mat3( T, B, N );\n\n" );
 
 				code += OutputTabbedLine( "// TS_TBN" );
-				//code += OutputTabbedLine( "vec3 TS_T = normalize(mat3(uModel) * aVertexTangent);" );
-				//code += OutputTabbedLine( "vec3 TS_N = normalize(mat3(uModel) * aVertexNormal);" );
-				//code += OutputTabbedLine( "vec3 TS_T = normalize(aVertexTangent * mat3(uModel));" );
-				//code += OutputTabbedLine( "vec3 TS_N = normalize(aVertexNormal * mat3(uModel));" );
-				//code += OutputTabbedLine( "vec3 TS_B = normalize(cross(TS_N, TS_T));" );
-				//code += OutputTabbedLine( "mat3 TS_TBN = transpose(mat3( TS_T, TS_B, TS_N ));\n" );
 				code += OutputTabbedLine( "mat3 TS_TBN = transpose( TBN );\n" );
 
 				code += OutputTabbedLine( "// Output Vertex Data" );
 				code += OutputTabbedLine( "vs_out.FragPositionWorldSpace = worldPosition;" );
 				code += OutputTabbedLine( "vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );" );
-				//code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = uViewPositionWorldSpace * TS_TBN;" );
-				//code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = vs_out.FragPositionWorldSpace * TS_TBN;" );
 				code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = TS_TBN * uViewPositionWorldSpace;" );
 				code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = TS_TBN * vs_out.FragPositionWorldSpace;" );
+				code += OutputTabbedLine( "vs_out.CurrentFragPositionClipSpace = gl_Position;" );
+				code += OutputTabbedLine( "vs_out.PreviousFragPositionClipSpace = uPreviousViewProjection * uPreviousModel * vec4( aVertexPosition, 1.0 );" );
 
 				code += OutputTabbedLine( "vs_out.TBN = TBN;" );
 				code += OutputTabbedLine( "vs_out.TS_TBN = TS_TBN;" );
@@ -1480,6 +1475,7 @@ namespace Enjon
 		code += OutputLine( "layout (location = 3) out vec4 EmissiveOut;" );
 		code += OutputLine( "layout (location = 4) out vec4 MatPropsOut;\n" );
 		code += OutputLine( "layout (location = 5) out vec4 ObjectIDOut;\n" );
+		code += OutputLine( "layout (location = 6) out vec4 VelocityOut;\n" );
 
 		// Fragment Data In 
 		code += OutputLine( "\nin VS_OUT" );
@@ -1491,12 +1487,16 @@ namespace Enjon
 		code += OutputTabbedLine( "vec3 ViewPositionTangentSpace;" );
 		code += OutputTabbedLine( "vec3 FragPositionTangentSpace;" );
 		code += OutputTabbedLine( "vec4 ObjectID;" );
+		code += OutputTabbedLine( "vec4 PreviousFragPositionClipSpace;" );
+		code += OutputTabbedLine( "vec4 CurrentFragPositionClipSpace;" );
 		code += OutputLine( "} fs_in;\n" );
 
 		// Comment for declarations
 		code += OutputLine( "// Global Uniforms" );
 		code += OutputLine( "uniform float uWorldTime = 1.0f;" );
 		code += OutputLine( "uniform vec3 uViewPositionWorldSpace;" );
+		code += OutputLine( "uniform mat4 uPreviousViewProjection;" );
+		code += OutputLine( "uniform mat4 uViewProjection;" );
 
 		// Comment for declarations
 		code += OutputLine( "\n// Variable Declarations" );
@@ -1845,6 +1845,12 @@ namespace Enjon
 				// Other default code
 				code += OutputTabbedLine( "PositionOut = vec4( fs_in.FragPositionWorldSpace, 1.0 );" );
 				code += OutputTabbedLine( "ObjectIDOut = fs_in.ObjectID;" );
+				code += OutputTabbedLine( "vec2 _a = ( fs_in.CurrentFragPositionClipSpace.xy / fs_in.CurrentFragPositionClipSpace.w ) * 0.5 + 0.5;" );
+				code += OutputTabbedLine( "vec2 _b = ( fs_in.PreviousFragPositionClipSpace.xy / fs_in.PreviousFragPositionClipSpace.w ) * 0.5 + 0.5;" );
+				code += OutputTabbedLine( "vec2 _vel = vec2( _a - _b );" );
+
+				code += OutputTabbedLine( "VelocityOut = vec4( _vel, 0.0, 1.0 );" );
+				//code += OutputTabbedLine( "VelocityOut = vec4( 1.0, 0.0, 0.0, 1.0 );" );
 
 			} break;
 

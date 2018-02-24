@@ -27,7 +27,7 @@ namespace Enjon {
 		glBindTexture( GL_TEXTURE_2D, 0 );\
 	}
 
-	GBuffer::GBuffer(uint32 _Width, uint32 _Height)
+	GBuffer::GBuffer(u32 _Width, u32 _Height)
 	{
 		// Save extensions
 		Width  = _Width;
@@ -43,6 +43,7 @@ namespace Enjon {
 		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GL_FLOAT, GBufferTextureType::EMISSIVE )
 		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GL_FLOAT, GBufferTextureType::MAT_PROPS )
 		CREATE_RENDER_TARGET( GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GBufferTextureType::OBJECT_ID )
+		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GL_FLOAT, GBufferTextureType::VELOCITY )
 
 		// Bind depth render buffer
 		glBindRenderbufferEXT( GL_RENDERBUFFER, DepthBuffer );
@@ -140,6 +141,7 @@ namespace Enjon {
 			case 3: return "Emissive";
 			case 4: return "Materials";
 			case 5: return "ObjectID";
+			case 6: return "Velocity";
 			default: return "Unknown";
 		}	
 	}

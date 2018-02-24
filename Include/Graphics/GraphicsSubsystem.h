@@ -214,6 +214,11 @@ namespace Enjon
 			*@brief
 			*/
 			void BloomPass2( );
+
+			/**
+			*@brief
+			*/
+			void MotionBlurPass(RenderTarget* inputTarget);
 			
 			/**
 			*@brief
@@ -280,6 +285,7 @@ namespace Enjon
 			RenderTarget* mFinalTarget								= nullptr;
 			RenderTarget* mSSAOTarget								= nullptr;
 			RenderTarget* mSSAOBlurTarget							= nullptr;
+			RenderTarget* mMotionBlurTarget							= nullptr;
 
 			GLuint mCurrentRenderTexture; 
 
@@ -346,6 +352,11 @@ namespace Enjon
 			u32 mInstancedVBO; 
 
 			Enjon::SpriteBatch mUIBatch;
+
+			Mat4 mPreviousViewProjectionMatrix = Mat4::Identity( );
+
+			f32 mMotionBlurVelocityScale = 1.0f;
+			u32 mMotionBlurEnabled = true;
 	};
 }
 
