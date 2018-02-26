@@ -37,13 +37,12 @@ namespace Enjon {
 	    glGenFramebuffers(1, &FBO);
 	    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 		
-		CREATE_RENDER_TARGET( GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GBufferTextureType::ALBEDO )
-		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GL_FLOAT, GBufferTextureType::NORMAL )
-		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GL_FLOAT, GBufferTextureType::POSITION )
-		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GL_FLOAT, GBufferTextureType::EMISSIVE )
-		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GL_FLOAT, GBufferTextureType::MAT_PROPS )
-		CREATE_RENDER_TARGET( GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GBufferTextureType::OBJECT_ID )
-		CREATE_RENDER_TARGET( GL_RGBA32F, GL_RGBA, GL_FLOAT, GBufferTextureType::VELOCITY )
+		CREATE_RENDER_TARGET( GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, GBufferTextureType::ALBEDO )
+		CREATE_RENDER_TARGET( GL_RGB16F, GL_RGB, GL_FLOAT, GBufferTextureType::NORMAL )
+		CREATE_RENDER_TARGET( GL_RGB16F, GL_RGB, GL_FLOAT, GBufferTextureType::EMISSIVE )
+		CREATE_RENDER_TARGET( GL_RGB16F, GL_RGB, GL_FLOAT, GBufferTextureType::MAT_PROPS )
+		CREATE_RENDER_TARGET( GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, GBufferTextureType::OBJECT_ID )
+		CREATE_RENDER_TARGET( GL_RG16F, GL_RG, GL_FLOAT, GBufferTextureType::VELOCITY )
 
 		// Bind depth render buffer
 		glBindRenderbufferEXT( GL_RENDERBUFFER, DepthBuffer );
@@ -53,7 +52,7 @@ namespace Enjon {
 		// - Depth buffer texture
 		glGenTextures( 1, &DepthTexture );
 		glBindTexture( GL_TEXTURE_2D, DepthTexture );
-		glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, Width, Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, Width, Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
@@ -137,11 +136,10 @@ namespace Enjon {
 		{
 			case 0: return "Albedo";
 			case 1: return "Normal";
-			case 2: return "Position";
-			case 3: return "Emissive";
-			case 4: return "Materials";
-			case 5: return "ObjectID";
-			case 6: return "Velocity";
+			case 2: return "Emissive";
+			case 3: return "Materials";
+			case 4: return "ObjectID";
+			case 5: return "Velocity";
 			default: return "Unknown";
 		}	
 	}

@@ -15,11 +15,13 @@ uniform samplerCube uPrefilterMap;
 uniform sampler2D uBRDFLUT;
 uniform sampler2D uAlbedoMap;
 uniform sampler2D uNormalMap;
-uniform sampler2D uPositionMap;
+uniform sampler2D uDepthMap;
 uniform sampler2D uEmissiveMap;
 uniform sampler2D uMaterialMap;
 uniform sampler2D uSSAOMap;
 
+uniform mat4 uProjMatrixInv;
+uniform mat4 uViewMatrixInv;
 uniform vec2 uResolution;
 uniform vec3 uCamPos;
 
@@ -28,6 +30,21 @@ float GeometrySchlickGGX(float NdotV, float Roughness);
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float Roughness);
 vec3 FresnelSchlickRoughness(float CosTheta, vec3 F0, float Roughness);
 vec3 FresnelSchlick(float cosTheta, vec3 F0);
+
+vec3 WorldPosFromDepth(float depth, vec2 uv) 
+{
+    float z = depth * 2.0 - 1.0;
+
+    vec4 clipSpacePosition = vec4(uv * 2.0 - 1.0, z, 1.0);
+    vec4 viewSpacePosition = uProjMatrixInv * clipSpacePosition;
+
+    // Perspective division
+    viewSpacePosition /= viewSpacePosition.w;
+
+    vec4 worldSpacePosition = uViewMatrixInv * viewSpacePosition;
+
+    return worldSpacePosition.xyz;
+}
 
 vec2 CalculateTexCoord()
 {
@@ -45,7 +62,8 @@ void main()
     vec4 emissive = texture2D(uEmissiveMap, TexCoords);
     
 	// Get world position
-    vec3 worldPos = texture2D(uPositionMap, TexCoords).xyz;
+	float depth = texture( uDepthMap, TexCoords ).r;
+	vec3 worldPos = WorldPosFromDepth( depth, TexCoords );
     
 	// Obtain normal from normal map in range (world coords)
     vec3 N = normalize(texture2D(uNormalMap, TexCoords).xyz); 

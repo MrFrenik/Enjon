@@ -158,6 +158,7 @@ namespace Enjon
 		EntityManager* entities = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< EntityManager >( )->ConstCast< EntityManager >( );
 
 		// Handle to fill out
+		// TODO(): This will fail if entity cannot be allocated! Need to check for that and then exit gracefully.
 		EntityHandle handle = entities->Allocate( );
 
 		//==========================================================================

@@ -7,11 +7,13 @@ const float kPi = 3.13159265;
 
 uniform sampler2D u_albedoMap;
 uniform sampler2D u_normalMap;
-uniform sampler2D u_positionMap;
+uniform sampler2D u_depthMap;
 uniform sampler2D u_matProps;
 uniform sampler2D u_ssao;
 // uniform sampler2D u_shadowMap;
 
+uniform mat4 uProjMatrixInv;
+uniform mat4 uViewMatrixInv;
 uniform vec3 u_camPos;
 uniform vec3 u_lightColor;
 uniform vec3 u_lightDirection;
@@ -29,6 +31,21 @@ in DATA
 vec2 CalculateTexCoord()
 {
     return gl_FragCoord.xy / u_resolution;
+}
+
+vec3 WorldPosFromDepth(float depth, vec2 uv) 
+{
+    float z = depth * 2.0 - 1.0;
+
+    vec4 clipSpacePosition = vec4(uv * 2.0 - 1.0, z, 1.0);
+    vec4 viewSpacePosition = uProjMatrixInv * clipSpacePosition;
+
+    // Perspective division
+    viewSpacePosition /= viewSpacePosition.w;
+
+    vec4 worldSpacePosition = uViewMatrixInv * viewSpacePosition;
+
+    return worldSpacePosition.xyz;
 }
 
 /*
@@ -73,8 +90,11 @@ void main()
     vec3 Albedo = texture(u_albedoMap, TexCoords).rgb;
     Albedo = vec3(pow(Albedo.r, 2.2), pow(Albedo.g, 2.2), pow(Albedo.b, 2.2));
 
+	float depth = texture( u_depthMap, TexCoords ).r;
+
     // Get world position
-    vec3 WorldPos = texture(u_positionMap, TexCoords).xyz;
+    // vec3 WorldPos = texture(u_positionMap, TexCoords).xyz;
+	vec3 WorldPos = WorldPosFromDepth( depth, TexCoords );
 
     // Obtain normal from normal map in range (world coords)
     vec3 N = normalize(texture(u_normalMap, TexCoords).xyz);

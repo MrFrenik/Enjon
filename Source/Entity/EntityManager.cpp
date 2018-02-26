@@ -4,6 +4,7 @@
 #include "Entity/Components/PointLightComponent.h"
 #include "Entity/Components/RigidBodyComponent.h"
 #include "SubsystemCatalog.h"
+#include "Serialize/EntityArchiver.h"
 #include "Application.h"
 #include "Engine.h"
 
@@ -942,6 +943,33 @@ namespace Enjon
 		}
 
 		return metaClassList;
+	}
+
+	//=========================================================================================
+
+	EntityHandle EntityManager::CopyEntity( const EntityHandle& entity )
+	{ 
+		// Use to serialize entity data for new entity
+		ByteBuffer buffer;
+
+		// Set up the handle using the other
+		if ( entity.Get() )
+		{
+			// Get entities
+			Entity* sourceEnt = entity.Get( ); 
+
+			// Serialize entity into buffer
+			EntityArchiver::Serialize( entity, &buffer );
+
+			// Deserialize into new entity
+			EntityHandle newHandle = EntityArchiver::Deserialize( &buffer );
+
+			// Return the handle, valid or not
+			return newHandle; 
+		}
+
+		// Return empty handle
+		return EntityHandle( ); 
 	}
 
 	//=========================================================================================

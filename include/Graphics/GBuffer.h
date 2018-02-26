@@ -12,7 +12,6 @@ namespace Enjon {
 	{
 		ALBEDO,
 		NORMAL,
-		POSITION,
 		EMISSIVE,
 		MAT_PROPS,
 		OBJECT_ID,

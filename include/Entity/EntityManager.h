@@ -401,6 +401,11 @@ namespace Enjon
 			/**
 			*@brief
 			*/
+			EntityHandle CopyEntity( const EntityHandle& entity );
+
+			/**
+			*@brief
+			*/
 			void Destroy(const EntityHandle& entity);
 
 

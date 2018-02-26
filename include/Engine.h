@@ -9,7 +9,7 @@
 #include "System/Types.h" 
 
 #define EngineSubsystem(type)\
-	Engine::GetInstance()->GetSubsystemCatalog()->Get<type>()->ConstCast<type>();
+	Engine::GetInstance()->GetSubsystemCatalog()->Get<type>()->ConstCast<type>()
 
 namespace Enjon
 { 

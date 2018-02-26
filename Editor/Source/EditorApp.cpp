@@ -41,11 +41,11 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mProjectsDir = "W:/Projects/";
 
-Enjon::String configuration = "Release";
-//Enjon::String configuration = "RelWithDebInfo";
+//Enjon::String configuration = "Release";
+Enjon::String configuration = "RelWithDebInfo";
 //Enjon::String configuration = "Debug";
 
 namespace Enjon
@@ -386,12 +386,15 @@ namespace Enjon
 	{
 		mSelectedEntity = handle;
 
-		// Enable transform widget
-		mTransformWidget.Enable( true );
+		if ( mSelectedEntity )
+		{
+			// Enable transform widget
+			mTransformWidget.Enable( true );
 
-		// Set transform to selected entity
-		mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) );
-		mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) );
+			// Set transform to selected entity
+			mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) );
+			mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) ); 
+		} 
 	}
 
 	void EditorApp::DeselectEntity( )
@@ -594,9 +597,7 @@ namespace Enjon
 
 		// Reinitialize asset manager
 		AssetManager* am = EngineSubsystem( AssetManager );
-		am->Reinitialize( mProject.GetProjectPath( ) + "Assets/" );
-
-		LoadProjectResources( );
+		am->Reinitialize( mProject.GetProjectPath( ) + "Assets/" ); 
 	}
 
 	//================================================================================================================================
@@ -1265,6 +1266,17 @@ namespace Enjon
 				{
 					mTransformWidget.SetTransformationMode( TransformationMode::Scale );
 				} 
+
+				// Copy entity
+				if ( mInput->IsKeyDown( KeyCode::LeftCtrl ) && mInput->IsKeyPressed( KeyCode::D ) )
+				{
+					EntityManager* em = EngineSubsystem( EntityManager );
+					EntityHandle newEnt = em->CopyEntity( mSelectedEntity );
+					if ( newEnt )
+					{
+						SelectEntity( newEnt );
+					}
+				}
 			}
 
 			if ( mInput->IsKeyDown( KeyCode::LeftMouseButton ) )
@@ -1406,8 +1418,8 @@ namespace Enjon
 			SDL_WarpMouseInWindow( window->GetWindowContext( ), ( f32 )viewPort.x / 2.0f - mMouseCoordsDelta.x, ( f32 )viewPort.y / 2.0f - mMouseCoordsDelta.y );
 
 			// Offset camera orientation
-			f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * avgDT * mMouseSensitivity;
-			f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * avgDT * mMouseSensitivity;
+			f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * mMouseSensitivity / 100.0f;
+			f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * mMouseSensitivity / 100.0f;
 			camera->OffsetOrientation( xOffset, yOffset );
 		}
 

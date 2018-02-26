@@ -4,7 +4,7 @@ out vec4 FragColor;
 in vec2 TexCoords;
 
 uniform sampler2D ssaoInput;
-int size = 2;
+int size = 4;
 
 void main() 
 {

@@ -225,6 +225,9 @@ namespace Enjon
 			dt = ( f32 )( ticks ) / 1000.0f;
 			lastTime = thisTime; 
 
+			// Update physics
+			mPhysics->Update( dt ); 
+
 			 // Update input manager
 			 mInput->Update( dt );
 
@@ -255,9 +258,7 @@ namespace Enjon
 			// Update entity manager
 			mEntities->Update( dt ); 
 
-			// Update physics
-			mPhysics->Update( dt ); 
-
+			u32 graphicsStartTick = SDL_GetTicks( ); 
 			// Update graphics
 			mGraphics->Update( dt ); 
 
@@ -274,7 +275,7 @@ namespace Enjon
 			const f32 frameRate = 60.0f;
 			if ( (f32)ticks < 1000.0f / frameRate )
 			{
-				//SDL_Delay( u32( (1000.0f / frameRate ) - ( (f32)ticks ) ) );
+				SDL_Delay( u32( (1000.0f / frameRate ) - ( (f32)ticks ) ) );
 			}
 		}
 

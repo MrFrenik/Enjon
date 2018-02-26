@@ -663,10 +663,10 @@ namespace Enjon
 			wt = 0.0f;
 		}
 
-		glDepthFunc( GL_LESS );
 		glEnable( GL_CULL_FACE );
 		glCullFace( GL_BACK );
 		glEnable(GL_DEPTH_TEST);
+		glDepthFunc( GL_LESS );
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Bind gbuffer
@@ -860,8 +860,9 @@ namespace Enjon
 			shader->Use( );
 			{ 
 				// Upload kernel uniform
-				glUniform3fv( glGetUniformLocation( shader->GetProgramID( ), "samples" ), SSAO_KERNEL_SIZE * 3, ( f32* )&mSSAOKernel[ 0 ] );
 				shader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
+				shader->SetUniform( "uProjMatrixInv", Mat4::Inverse( mGraphicsSceneCamera.GetProjection( ) ) );
+				shader->SetUniform( "uViewMatrixInv", Mat4::Inverse( mGraphicsSceneCamera.GetView( ) ) );
 				shader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
 				shader->SetUniform( "uScreenResolution", Vec2( screenRes.x, screenRes.y ) );
 				shader->SetUniform( "radius", mSSAORadius );
@@ -870,32 +871,29 @@ namespace Enjon
 				shader->SetUniform( "uScale", mSSAOScale );
 				shader->SetUniform( "uNear", mGraphicsSceneCamera.GetNear() );
 				shader->SetUniform( "uFar", mGraphicsSceneCamera.GetFar() );
-				shader->BindTexture( "gPosition", mGbuffer->GetTexture( GBufferTextureType::POSITION ), 0 );
-				shader->BindTexture( "gNormal", mGbuffer->GetTexture( GBufferTextureType::NORMAL ), 1 );
-				shader->BindTexture( "texNoise", mSSAONoiseTexture, 2 ); 
-				shader->BindTexture( "uDepthMap", mGbuffer->GetDepth( ), 3 ); 
+				shader->BindTexture( "gNormal", mGbuffer->GetTexture( GBufferTextureType::NORMAL ), 0 );
+				shader->BindTexture( "texNoise", mSSAONoiseTexture, 1 ); 
+				shader->BindTexture( "uDepthMap", mGbuffer->GetDepth( ), 2 ); 
 				mFullScreenQuad->Submit( );
 			}
 			shader->Unuse( ); 
 		}
 		mSSAOBlurTarget->Unbind( );
 
-		/*
 		// Blur SSAO to remove noise
-		mSSAOBlurTarget->Bind( );
-		{
-			glClear( GL_COLOR_BUFFER_BIT );
+		//mSSAOBlurTarget->Bind( );
+		//{
+		//	glClear( GL_COLOR_BUFFER_BIT );
 
-			GLSLProgram* shader = ShaderManager::Get( "SSAOBlur" );
-			shader->Use( );
-			{
-				shader->BindTexture( "ssaoInput", mSSAOTarget->GetTexture( ), 0 );
-				mFullScreenQuad->Submit( );
-			}
-			shader->Unuse( ); 
-		}
-		mSSAOBlurTarget->Unbind( );
-		*/
+		//	GLSLProgram* shader = ShaderManager::Get( "SSAOBlur" );
+		//	shader->Use( );
+		//	{
+		//		shader->BindTexture( "ssaoInput", mSSAOTarget->GetTexture( ), 0 );
+		//		mFullScreenQuad->Submit( );
+		//	}
+		//	shader->Unuse( ); 
+		//}
+		//mSSAOBlurTarget->Unbind( );
 	}
 
 	//======================================================================================================
@@ -916,6 +914,9 @@ namespace Enjon
 
 		AmbientSettings* aS = mGraphicsScene.GetAmbientSettings();
 
+		Mat4 projInverse = Mat4::Inverse( mGraphicsSceneCamera.GetProjection( ) );
+		Mat4 viewInverse = Mat4::Inverse( mGraphicsSceneCamera.GetView( ) );
+
 		mWindow.Clear();
 
 		// TODO(): Abstract these away 
@@ -928,7 +929,6 @@ namespace Enjon
 		{ 
 			ambientShader->SetUniform( "uIrradianceMap", 0 );
 			ambientShader->SetUniform( "uPrefilterMap", 1 );
-			ambientShader->SetUniform( "uBRDFLUT", 2 );
 			glActiveTexture( GL_TEXTURE0 );
 			glBindTexture( GL_TEXTURE_CUBE_MAP, mIrradianceMap );
 			glActiveTexture( GL_TEXTURE1 );
@@ -938,7 +938,7 @@ namespace Enjon
 			ambientShader->BindTexture( "uBRDFLUT", mBRDFLUT, 2 );
 			ambientShader->BindTexture("uAlbedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 3);
 			ambientShader->BindTexture("uNormalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 4);
-			ambientShader->BindTexture("uPositionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 5);
+			ambientShader->BindTexture("uDepthMap", mGbuffer->GetDepth(), 5);
 			ambientShader->BindTexture("uEmissiveMap", mGbuffer->GetTexture(GBufferTextureType::EMISSIVE), 6);
 			ambientShader->BindTexture("uMaterialMap", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 7);
 			ambientShader->BindTexture("uSSAOMap", mSSAOBlurTarget->GetTexture(), 8);
@@ -946,7 +946,8 @@ namespace Enjon
 			// Bind uniforms
 			ambientShader->SetUniform("uResolution", mGbuffer->GetResolution());
 			ambientShader->SetUniform( "uCamPos", mGraphicsSceneCamera.GetPosition() );
-
+			ambientShader->SetUniform( "uProjMatrixInv", projInverse );
+			ambientShader->SetUniform( "uViewMatrixInv", viewInverse );
 			// Render
 			mFullScreenQuad->Submit( );
 		}
@@ -961,11 +962,13 @@ namespace Enjon
 
 				directionalShader->BindTexture("u_albedoMap", 	mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
 				directionalShader->BindTexture("u_normalMap", 	mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
-				directionalShader->BindTexture("u_positionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 2);
+				directionalShader->BindTexture("u_depthMap", mGbuffer->GetDepth(), 2);
 				directionalShader->BindTexture("u_matProps", 	mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
 				directionalShader->BindTexture("u_ssao", 		mSSAOBlurTarget->GetTexture(), 4);
 				// directionalShader->BindTexture("u_shadowMap", 		mShadowDepth->GetDepth(), 4);
 				directionalShader->SetUniform("u_resolution", 		mGbuffer->GetResolution());
+				directionalShader->SetUniform( "uProjMatrixInv", projInverse );
+				directionalShader->SetUniform( "uViewMatrixInv", viewInverse );
 				// directionalShader->SetUniform("u_lightSpaceMatrix", mShadowCamera->GetViewProjectionMatrix());
 				// directionalShader->SetUniform("u_shadowBias", 		EM::Vec2(0.005f, ShadowBiasMax));
 				directionalShader->SetUniform("u_lightDirection", 	l->GetDirection());															
@@ -982,11 +985,13 @@ namespace Enjon
 		{
 			pointShader->BindTexture( "u_albedoMap", mGbuffer->GetTexture( GBufferTextureType::ALBEDO ), 0 );
 			pointShader->BindTexture( "u_normalMap", mGbuffer->GetTexture( GBufferTextureType::NORMAL ), 1 );
-			pointShader->BindTexture( "u_positionMap", mGbuffer->GetTexture( GBufferTextureType::POSITION ), 2 );
+			pointShader->BindTexture( "u_depthMap", mGbuffer->GetDepth( ), 2 );
 			pointShader->BindTexture( "u_matProps", mGbuffer->GetTexture( GBufferTextureType::MAT_PROPS ), 3 );
 			pointShader->BindTexture( "u_ssao", mSSAOBlurTarget->GetTexture( ), 4 );
 			pointShader->SetUniform( "u_resolution", mGbuffer->GetResolution( ) );
 			pointShader->SetUniform( "u_camPos", mGraphicsSceneCamera.GetPosition( ) );
+			pointShader->SetUniform( "uProjMatrixInv", projInverse );
+			pointShader->SetUniform( "uViewMatrixInv", viewInverse );
 
 			for (auto& l : pointLights)
 			{
@@ -1009,7 +1014,6 @@ namespace Enjon
 		{
 			spotShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
 			spotShader->BindTexture("u_normalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
-			spotShader->BindTexture("u_positionMap", mGbuffer->GetTexture(GBufferTextureType::POSITION), 2);
 			// spotShader->BindTexture("u_matProps", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
 			spotShader->SetUniform("u_resolution", mGbuffer->GetResolution());
 			spotShader->SetUniform("u_camPos", mGraphicsSceneCamera.GetPosition());			
@@ -1525,7 +1529,7 @@ namespace Enjon
 		mFXAATarget 				= new RenderTarget(width, height);
 		mShadowDepth 				= new RenderTarget(2048, 2048);
 		mFinalTarget				= new RenderTarget( width, height );
-		mSSAOTarget					= new RenderTarget( width / 2, height / 2 );
+		mSSAOTarget					= new RenderTarget( width, height );
 		mSSAOBlurTarget				= new RenderTarget( width, height ); 
 		mMotionBlurTarget			= new RenderTarget( width, height ); 
 	}

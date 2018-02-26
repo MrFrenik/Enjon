@@ -1471,11 +1471,10 @@ namespace Enjon
 		// FragData Layout
 		code += OutputLine( "layout (location = 0) out vec4 AlbedoOut;" );
 		code += OutputLine( "layout (location = 1) out vec4 NormalsOut;" );
-		code += OutputLine( "layout (location = 2) out vec4 PositionOut;" );
-		code += OutputLine( "layout (location = 3) out vec4 EmissiveOut;" );
-		code += OutputLine( "layout (location = 4) out vec4 MatPropsOut;\n" );
-		code += OutputLine( "layout (location = 5) out vec4 ObjectIDOut;\n" );
-		code += OutputLine( "layout (location = 6) out vec4 VelocityOut;\n" );
+		code += OutputLine( "layout (location = 2) out vec4 EmissiveOut;" );
+		code += OutputLine( "layout (location = 3) out vec4 MatPropsOut;\n" );
+		code += OutputLine( "layout (location = 4) out vec4 ObjectIDOut;\n" );
+		code += OutputLine( "layout (location = 5) out vec4 VelocityOut;\n" );
 
 		// Fragment Data In 
 		code += OutputLine( "\nin VS_OUT" );
@@ -1843,14 +1842,11 @@ namespace Enjon
 				}
 
 				// Other default code
-				code += OutputTabbedLine( "PositionOut = vec4( fs_in.FragPositionWorldSpace, 1.0 );" );
 				code += OutputTabbedLine( "ObjectIDOut = fs_in.ObjectID;" );
 				code += OutputTabbedLine( "vec2 _a = ( fs_in.CurrentFragPositionClipSpace.xy / fs_in.CurrentFragPositionClipSpace.w ) * 0.5 + 0.5;" );
 				code += OutputTabbedLine( "vec2 _b = ( fs_in.PreviousFragPositionClipSpace.xy / fs_in.PreviousFragPositionClipSpace.w ) * 0.5 + 0.5;" );
-				code += OutputTabbedLine( "vec2 _vel = vec2( _a - _b );" );
-
+				code += OutputTabbedLine( "vec2 _vel = vec2( _a - _b );" ); 
 				code += OutputTabbedLine( "VelocityOut = vec4( _vel, 0.0, 1.0 );" );
-				//code += OutputTabbedLine( "VelocityOut = vec4( 1.0, 0.0, 0.0, 1.0 );" );
 
 			} break;
 

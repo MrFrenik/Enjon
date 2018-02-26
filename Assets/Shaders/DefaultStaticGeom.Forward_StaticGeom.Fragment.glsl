@@ -2,13 +2,12 @@
 
 layout (location = 0) out vec4 AlbedoOut;
 layout (location = 1) out vec4 NormalsOut;
-layout (location = 2) out vec4 PositionOut;
-layout (location = 3) out vec4 EmissiveOut;
-layout (location = 4) out vec4 MatPropsOut;
+layout (location = 2) out vec4 EmissiveOut;
+layout (location = 3) out vec4 MatPropsOut;
 
-layout (location = 5) out vec4 ObjectIDOut;
+layout (location = 4) out vec4 ObjectIDOut;
 
-layout (location = 6) out vec4 VelocityOut;
+layout (location = 5) out vec4 VelocityOut;
 
 
 in VS_OUT

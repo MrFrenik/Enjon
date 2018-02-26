@@ -7,10 +7,12 @@ const float kPi = 3.13159265;
 
 uniform sampler2D u_albedoMap;
 uniform sampler2D u_normalMap;
-uniform sampler2D u_positionMap;
+uniform sampler2D u_depthMap;
 uniform sampler2D u_matProps;
 uniform sampler2D u_ssao;
 
+uniform mat4 uProjMatrixInv;
+uniform mat4 uViewMatrixInv;
 uniform vec3 u_camPos;
 uniform float u_radius;
 uniform vec3 u_lightColor;
@@ -26,6 +28,21 @@ in DATA
     vec3 FragPos;
     vec2 TexCoords;
 }fs_in;
+
+vec3 WorldPosFromDepth(float depth, vec2 uv) 
+{
+    float z = depth * 2.0 - 1.0;
+
+    vec4 clipSpacePosition = vec4(uv * 2.0 - 1.0, z, 1.0);
+    vec4 viewSpacePosition = uProjMatrixInv * clipSpacePosition;
+
+    // Perspective division
+    viewSpacePosition /= viewSpacePosition.w;
+
+    vec4 worldSpacePosition = uViewMatrixInv * viewSpacePosition;
+
+    return worldSpacePosition.xyz;
+}
 
 vec2 CalculateTexCoord()
 {
@@ -46,7 +63,8 @@ void main()
     Albedo = vec3(pow(Albedo.r, 2.2), pow(Albedo.g, 2.2), pow(Albedo.b, 2.2));
 
     // Get world position
-    vec3 WorldPos = texture2D(u_positionMap, TexCoords).xyz;
+	float depth = texture( u_depthMap, TexCoords ).r;
+	vec3 WorldPos = WorldPosFromDepth( depth, TexCoords );
 
     // Get material properties
     vec4 MaterialProps = texture2D(u_matProps, TexCoords);

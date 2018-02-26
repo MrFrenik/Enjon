@@ -2,13 +2,12 @@
 
 layout (location = 0) out vec4 AlbedoOut;
 layout (location = 1) out vec4 NormalsOut;
-layout (location = 2) out vec4 PositionOut;
-layout (location = 3) out vec4 EmissiveOut;
-layout (location = 4) out vec4 MatPropsOut;
+layout (location = 2) out vec4 EmissiveOut;
+layout (location = 3) out vec4 MatPropsOut;
 
-layout (location = 5) out vec4 ObjectIDOut;
+layout (location = 4) out vec4 ObjectIDOut;
 
-layout (location = 6) out vec4 VelocityOut;
+layout (location = 5) out vec4 VelocityOut;
 
 
 in VS_OUT
@@ -67,7 +66,6 @@ vec4 emissiveMap_sampler = texture2D( emissiveMap, fs_in.TexCoords );
 emissiveMult = emissiveIntensity * emissiveMap_sampler.rgb;
 	EmissiveOut = vec4(emissiveMult, 1.0);
 
-	PositionOut = vec4( fs_in.FragPositionWorldSpace, 1.0 );
 	ObjectIDOut = fs_in.ObjectID;
 	vec2 _a = ( fs_in.CurrentFragPositionClipSpace.xy / fs_in.CurrentFragPositionClipSpace.w ) * 0.5 + 0.5;
 	vec2 _b = ( fs_in.PreviousFragPositionClipSpace.xy / fs_in.PreviousFragPositionClipSpace.w ) * 0.5 + 0.5;

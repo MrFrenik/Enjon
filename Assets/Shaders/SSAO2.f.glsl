@@ -6,7 +6,6 @@ in vec2 TexCoords;
 
 out vec4 FragColor;
 
-uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D texNoise;
 uniform sampler2D uDepthMap;
@@ -19,14 +18,27 @@ uniform float uIntensity = 1.0;
 uniform float uScale = 1.0;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 uProjMatrixInv;
+uniform mat4 uViewMatrixInv;
 uniform vec2 uScreenResolution;
 uniform vec3 uCameraPosition;
 uniform float uNear;
 uniform float uFar;
 
-vec3 getPosition(vec2 uv)
+// this is supposed to get the world position from the depth buffer
+vec3 WorldPosFromDepth(float depth, vec2 TexCoord) 
 {
-	return ( texture(gPosition,uv) ).xyz;
+    float z = depth * 2.0 - 1.0;
+
+    vec4 clipSpacePosition = vec4(TexCoord * 2.0 - 1.0, z, 1.0);
+    vec4 viewSpacePosition = uProjMatrixInv * clipSpacePosition;
+
+    // Perspective division
+    viewSpacePosition /= viewSpacePosition.w;
+
+    vec4 worldSpacePosition = uViewMatrixInv * viewSpacePosition;
+
+    return worldSpacePosition.xyz;
 }
 
 vec3 getNormal(vec2 uv)
@@ -48,7 +60,9 @@ float LinearizeDepth( float depth )
 float doAmbientOcclusion(vec2 tcoord, vec2 uv, vec3 p, vec3 cnorm, float depth)
 {
 	float b = bias * depth;
-	vec3 diff = getPosition( tcoord + uv ) - p;
+	float sampleDepth = texture( uDepthMap, tcoord + uv ).r;
+	vec3 samplePos = WorldPosFromDepth( sampleDepth, tcoord + uv );
+	vec3 diff = samplePos - p;
 	vec3 v = normalize( diff );
 	float d = length( diff ) * uScale;
 	return max( 0.0, dot( cnorm, v ) - b ) * ( 1.0 / ( 1.0 + d ) );
@@ -56,16 +70,15 @@ float doAmbientOcclusion(vec2 tcoord, vec2 uv, vec3 p, vec3 cnorm, float depth)
 
 void main()
 { 
-	const vec2 vec[4] = vec2[](vec2(1,0),vec2(-1,0),
-				vec2(0,1),vec2(0,-1));
+	const vec2 vec[4] = vec2[](vec2(1,0),vec2(-1,0), vec2(0,1),vec2(0,-1));
 
-	vec3 p = getPosition(TexCoords);
 	vec3 n = getNormal(TexCoords);
 	vec2 rand = getRandom(TexCoords); 
-	float depth = LinearizeDepth( texture( uDepthMap, TexCoords ).r );
+	float depth = texture( uDepthMap, TexCoords ).r;
+	vec3 p = WorldPosFromDepth( depth, TexCoords );
 
 	float ao = 0.0f;
-	float rad = radius/( depth + 0.00001 );
+	float rad = radius / ( depth + 0.00001 );
 
 	//**SSAO Calculation**//
 	int kernelSize = 4 * 4;
@@ -73,8 +86,7 @@ void main()
 	for (int j = 0; j < iterations; ++j)
 	{
 	  vec2 coord1 = reflect( vec[j], rand ) * rad;
-	  vec2 coord2 = vec2(coord1.x*0.707 - coord1.y*0.707,
-				  coord1.x*0.707 + coord1.y*0.707);
+	  vec2 coord2 = vec2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
 	  
 	  ao += doAmbientOcclusion(TexCoords,coord1*0.25, p, n, depth);
 	  ao += doAmbientOcclusion(TexCoords,coord2*0.5, p, n, depth);

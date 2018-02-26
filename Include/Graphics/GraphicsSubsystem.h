@@ -340,10 +340,10 @@ namespace Enjon
 
 			Enjon::Mesh* mMesh = nullptr;
 
-			f32 mSSAORadius = 0.142f;
+			f32 mSSAORadius = 0.01f;
 			f32 mSSAOScale = 5.0f;
-			f32 mSSAOBias = 0.057f;
-			f32 mSSAOIntensity = 15.0f;
+			f32 mSSAOBias = 0.10f;
+			f32 mSSAOIntensity = 8.0f;
 			u32 mSSAOKernelSize = 16;
 
 			Enjon::Mat4* mModelMatricies = nullptr;
@@ -355,7 +355,7 @@ namespace Enjon
 
 			Mat4 mPreviousViewProjectionMatrix = Mat4::Identity( );
 
-			f32 mMotionBlurVelocityScale = 1.0f;
+			f32 mMotionBlurVelocityScale = 2.0f;
 			u32 mMotionBlurEnabled = true;
 	};
 }
