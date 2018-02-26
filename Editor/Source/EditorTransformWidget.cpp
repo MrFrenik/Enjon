@@ -49,13 +49,10 @@ namespace Enjon
 		{
 			previousWidget = mActiveWidget;
 			mActiveWidget->Disable( ); 
-		}
-
-		// Set mode
-		mMode = mode; 
+		} 
 
 		// Set newly active widget
-		switch ( mMode )
+		switch ( mode )
 		{
 			case TransformationMode::Translation:
 			{
@@ -63,8 +60,12 @@ namespace Enjon
 			} break;
 
 			case TransformationMode::Scale:
-			{
+			{ 
 				mActiveWidget = &mScaleWidget;
+
+				// Set transform space to local
+				SetTransformSpace( TransformSpace::Local );
+
 			} break;
 
 			case TransformationMode::Rotation:
@@ -72,6 +73,9 @@ namespace Enjon
 				mActiveWidget = &mRotationWidget;
 			}
 		}
+
+		// Set mode
+		mMode = mode; 
 
 		// If previous widget available, set transform of that widget to this one
 		if ( previousWidget )
@@ -126,12 +130,34 @@ namespace Enjon
 
 	void EditorTransformWidget::SetRotation( const Quaternion& rotation )
 	{
-		mActiveWidget->SetRotation( rotation );
+		if ( mTransformSpace == TransformSpace::Local )
+		{
+			mActiveWidget->SetRotation( rotation ); 
+		}
 	}
 
 	TransformationMode EditorTransformWidget::GetTransformationMode()
 	{
 		return mMode;
+	}
+
+	TransformSpace EditorTransformWidget::GetTransformSpace( ) const
+	{
+		return mTransformSpace;
+	} 
+
+	void EditorTransformWidget::SetTransformSpace( TransformSpace space )
+	{
+		if ( mMode != TransformationMode::Scale )
+		{
+			mTransformSpace = space;
+
+			// Reset rotation if world space
+			if ( space == TransformSpace::World )
+			{
+				mActiveWidget->SetRotation( Quaternion( ) );
+			} 
+		}
 	}
 
 	LineIntersectionResult EditorTransformWidget::GetLineIntersectionResult( const Vec3& axisA, const Vec3& axisB, const Vec3& axisC, bool compareSupportingAxes, const Vec3& axisToUseAsPlaneNormal ) 

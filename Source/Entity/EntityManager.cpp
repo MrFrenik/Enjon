@@ -964,6 +964,9 @@ namespace Enjon
 			// Deserialize into new entity
 			EntityHandle newHandle = EntityArchiver::Deserialize( &buffer );
 
+			// Construct new UUID for entity
+			newHandle.Get( )->mUUID = UUID::GenerateUUID( );
+
 			// Return the handle, valid or not
 			return newHandle; 
 		}

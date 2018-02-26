@@ -44,8 +44,8 @@ Enjon::String copyDir = "";
 Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 //Enjon::String mProjectsDir = "W:/Projects/";
 
-//Enjon::String configuration = "Release";
-Enjon::String configuration = "RelWithDebInfo";
+Enjon::String configuration = "Release";
+//Enjon::String configuration = "RelWithDebInfo";
 //Enjon::String configuration = "Debug";
 
 namespace Enjon
@@ -392,8 +392,8 @@ namespace Enjon
 			mTransformWidget.Enable( true );
 
 			// Set transform to selected entity
-			mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) );
 			mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) ); 
+			mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) ); 
 		} 
 	}
 
@@ -1266,6 +1266,20 @@ namespace Enjon
 				{
 					mTransformWidget.SetTransformationMode( TransformationMode::Scale );
 				} 
+				if ( mInput->IsKeyPressed( KeyCode::L ) )
+				{
+					switch ( mTransformWidget.GetTransformSpace( ) )
+					{
+						case TransformSpace::Local:
+						{
+							mTransformWidget.SetTransformSpace( TransformSpace::World ); 
+						} break;
+						case TransformSpace::World:
+						{
+							mTransformWidget.SetTransformSpace( TransformSpace::Local ); 
+						} break;
+					}
+				}
 
 				// Copy entity
 				if ( mInput->IsKeyDown( KeyCode::LeftCtrl ) && mInput->IsKeyPressed( KeyCode::D ) )
@@ -1360,8 +1374,8 @@ namespace Enjon
 					{
 						Entity* ent = mSelectedEntity.Get( );
 						// Set position and rotation to that of entity
-						mTransformWidget.SetPosition( ent->GetWorldPosition( ) );
-						mTransformWidget.SetRotation( ent->GetWorldRotation( ) );
+						mTransformWidget.SetPosition( ent->GetWorldPosition( ) ); 
+						mTransformWidget.SetRotation( ent->GetWorldRotation( ) ); 
 					}
 				} 
 			}
@@ -1495,7 +1509,7 @@ namespace Enjon
 
 		if ( !mTransformWidget.IsInteractingWithWidget( ) && mSelectedEntity )
 		{
-			mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) );
+			mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) ); 
 			mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) );
 		}
 

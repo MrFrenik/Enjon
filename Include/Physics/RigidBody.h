@@ -319,6 +319,9 @@ namespace Enjon
 			ENJON_PROPERTY( Delegates[ Accessor = GetIsKinematic, Mutator = SetIsKinematic ] )
 			bool mIsKinematic = false; 
 
+			ENJON_PROPERTY( Delegates[ Accessor = SetShape ] )
+			CollisionShapeType mShapeType = CollisionShapeType::Empty;
+
 		public:
 			ENJON_PROPERTY( )
 			CollisionShape* mShape = nullptr;

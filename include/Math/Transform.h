@@ -17,8 +17,8 @@ namespace Enjon
 { 
 	enum class TransformSpace
 	{
-		LOCAL,
-		WORLD
+		Local,
+		World
 	};
 
 	class Transform

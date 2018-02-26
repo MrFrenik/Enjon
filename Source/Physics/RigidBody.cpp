@@ -7,6 +7,9 @@
 #include "Physics/BoxCollisionShape.h"
 #include "Physics/SphereCollisionShape.h"
 #include "Physics/EmptyCollisionShape.h"
+#include "Physics/CylinderCollisionShape.h"
+#include "Physics/ConeCollisionShape.h"
+#include "Physics/CapsuleCollisionShape.h"
 #include "Serialize/ObjectArchiver.h"
 #include "Serialize/BaseTypeSerializeMethods.h"
 #include "Serialize/ByteBuffer.h"
@@ -195,13 +198,7 @@ namespace Enjon
 	}
 
 	void RigidBody::SetShape( CollisionShapeType type )
-	{
-		// Setting the shape will remove the body from the world then reset the shape correctly
-		//if ( GetCollisionShape( ) && GetCollisionShape( )->GetCollisionShapeType( ) == type )
-		//{
-		//	return;
-		//}
-
+	{ 
 		// Remove previous shape from world, delete, and set to null
 		if ( mShape )
 		{
@@ -218,17 +215,35 @@ namespace Enjon
 		// Create new shape based on type 
 		switch ( type )
 		{
-		default:
-		case CollisionShapeType::Empty:
-		case CollisionShapeType::Box:
-		{
-			mShape = new BoxCollisionShape( );
-		} break;
+			default:
+			case CollisionShapeType::Empty:
+			{
+				mShape = new EmptyCollisionShape( );
+			} break;
+			case CollisionShapeType::Box:
+			{
+				mShape = new BoxCollisionShape( );
+			} break;
 
-		case CollisionShapeType::Sphere:
-		{
-			mShape = new SphereCollisionShape( );
-		} break;
+			case CollisionShapeType::Sphere:
+			{
+				mShape = new SphereCollisionShape( );
+			} break;
+
+			case CollisionShapeType::Cylinder:
+			{
+				mShape = new CylinderCollisionShape( );
+			} break;
+
+			case CollisionShapeType::Capsule:
+			{
+				mShape = new CapsuleCollisionShape( ); 
+			} 
+
+			case CollisionShapeType::Cone:
+			{
+				mShape = new ConeCollisionShape( ); 
+			} 
 		}
 
 		// Need to reinitialize body
