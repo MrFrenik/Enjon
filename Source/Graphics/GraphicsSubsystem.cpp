@@ -1189,6 +1189,7 @@ namespace Enjon
 	void GraphicsSubsystem::FXAAPass(RenderTarget* input)
 	{
 		GLSLProgram* fxaaProgram = Enjon::ShaderManager::Get("FXAA");
+		Vector<Renderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
 		mFXAATarget->Bind();
 		{
 			mWindow.Clear();
@@ -1238,7 +1239,6 @@ namespace Enjon
 	void GraphicsSubsystem::CompositePass(RenderTarget* input)
 	{
 		GLSLProgram* compositeProgram = Enjon::ShaderManager::Get("Composite"); 
-		const Vector<Renderable*>& nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( ); 
 		mCompositeTarget->Bind();
 		{
 			mWindow.Clear();
@@ -1257,7 +1257,62 @@ namespace Enjon
 				mFullScreenQuad->Submit( );
 			}
 			compositeProgram->Unuse();
+		} 
 
+		mCompositeTarget->Unbind();
+	}
+
+	//======================================================================================================
+
+	void GraphicsSubsystem::ImGuiPass()
+	{
+		static bool show_test_window = false;
+		static bool show_frame_rate = false;
+		static bool show_graphics_window = true;
+		static bool show_app_layout = false;
+		static bool show_game_viewport = true;
+
+        // Queue up gui
+        ImGuiManager::Render(mWindow.GetSDLWindow());
+		 //ImGuiManager::RenderGameUI(&mWindow, mGraphicsSceneCamera.GetView().elements, mGraphicsSceneCamera.GetProjection().elements);
+
+        // Flush
+        glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+        ImGui::Render(); 
+		ImGui_ImplSdlGL3_RenderDrawData( ImGui::GetDrawData( ) );
+	}
+
+	//======================================================================================================
+
+	void GraphicsSubsystem::UIPass( RenderTarget* inputTarget )
+	{
+		// Just try and render some text to the screen, maybe?
+
+		Vector<Renderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
+		inputTarget->Bind( RenderTarget::BindType::WRITE, false );
+		{
+			auto shader = ShaderManager::GetShader( "Text" ); 
+			shader->Use( );
+			{
+				auto dispX = ( s32 )ImGui::GetIO( ).DisplaySize.x; 
+				auto dispY = ( s32 )ImGui::GetIO( ).DisplaySize.y;
+				Mat4 ortho = Mat4::Orthographic(0.0f, (f32)dispX, 0.0f, (f32)dispY, -1, 1);
+				shader->SetUniform( "projection", ortho );
+				mUIBatch.Begin( );
+				{
+					auto wt = Engine::GetInstance( )->GetWorldTime( ).mTotalTime;
+					auto uiFont = FontManager::GetFont("WeblySleek_16"); 
+					//f32 fps = ImGui::GetIO( ).Framerate;
+					f32 fps = Engine::GetInstance( )->GetWorldTime( ).mFPS;
+					f32 frameTime = ( 1.0f / fps ) * 1000.0f;
+					Enjon::PrintText( 10.0f, 10.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch ); 
+				}
+				mUIBatch.End( );
+				mUIBatch.RenderBatch( ); 
+			}
+			shader->Unuse( ); 
+
+			// Render non depth tested renderables
 			glClear( GL_DEPTH_BUFFER_BIT ); 
 
 			// None depth tested renderables
@@ -1283,50 +1338,25 @@ namespace Enjon
 
 							sgShader->Use( );
 							sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
-							sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
+							sgShader->SetUniform( "uWorldTime", Engine::GetInstance( )->GetWorldTime( ).mTotalTime );
 							sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
-							sgShader->SetUniform( "uPreviousViewProjection", mGraphicsSceneCamera.GetViewProjection() );
+							sgShader->SetUniform( "uPreviousViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
 							material->Bind( sgShader );
-						} 
+						}
 
 						// Render object
 						sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
 						renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
 					}
-				}
-			} 
-
-			// Cubemap
-			//glEnable( GL_DEPTH_TEST );
-			//glDepthFunc( GL_LEQUAL );
-			//glCullFace( GL_FRONT );
-			//Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
-			//skyBoxShader->Use( );
-			//{
-			//	skyBoxShader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
-			//	skyBoxShader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
-			//	skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
-
-			//	// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
-			//	glActiveTexture( GL_TEXTURE0 );
-			//	glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
-
-			//	RenderCube( );
-			//}
-			//skyBoxShader->Unuse( ); 
-
-			//glEnable( GL_DEPTH_TEST );
-			//glCullFace( GL_BACK );
-			
-		} 
-
-		mCompositeTarget->Unbind();
+				} 
+			}
+		}
+		inputTarget->Unbind( ); 
 
 		// Simply to write object ID
 		mGbuffer->Bind( BindType::WRITE, false );
 		{ 
 			glClear( GL_DEPTH_BUFFER_BIT );
-
 
 			// None depth tested renderables
 			if ( !nonDepthTestedRenderables.empty( ) )
@@ -1365,58 +1395,6 @@ namespace Enjon
 			}
 		}
 		mGbuffer->Unbind( );
-	}
-
-	//======================================================================================================
-
-	void GraphicsSubsystem::ImGuiPass()
-	{
-		static bool show_test_window = false;
-		static bool show_frame_rate = false;
-		static bool show_graphics_window = true;
-		static bool show_app_layout = false;
-		static bool show_game_viewport = true;
-
-        // Queue up gui
-        ImGuiManager::Render(mWindow.GetSDLWindow());
-		 //ImGuiManager::RenderGameUI(&mWindow, mGraphicsSceneCamera.GetView().elements, mGraphicsSceneCamera.GetProjection().elements);
-
-        // Flush
-        glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
-        ImGui::Render(); 
-		ImGui_ImplSdlGL3_RenderDrawData( ImGui::GetDrawData( ) );
-	}
-
-	//======================================================================================================
-
-	void GraphicsSubsystem::UIPass( RenderTarget* inputTarget )
-	{
-		// Just try and render some text to the screen, maybe?
-
-		inputTarget->Bind( RenderTarget::BindType::WRITE, false );
-		{
-			auto shader = ShaderManager::GetShader( "Text" ); 
-			shader->Use( );
-			{
-				auto dispX = ( s32 )ImGui::GetIO( ).DisplaySize.x; 
-				auto dispY = ( s32 )ImGui::GetIO( ).DisplaySize.y;
-				Mat4 ortho = Mat4::Orthographic(0.0f, (f32)dispX, 0.0f, (f32)dispY, -1, 1);
-				shader->SetUniform( "projection", ortho );
-				mUIBatch.Begin( );
-				{
-					auto wt = Engine::GetInstance( )->GetWorldTime( ).mTotalTime;
-					auto uiFont = FontManager::GetFont("WeblySleek_16"); 
-					//f32 fps = ImGui::GetIO( ).Framerate;
-					f32 fps = Engine::GetInstance( )->GetWorldTime( ).mFPS;
-					f32 frameTime = ( 1.0f / fps ) * 1000.0f;
-					Enjon::PrintText( 10.0f, 10.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch ); 
-				}
-				mUIBatch.End( );
-				mUIBatch.RenderBatch( ); 
-			}
-			shader->Unuse( ); 
-		}
-		inputTarget->Unbind( ); 
 	}
 
 	//======================================================================================================
