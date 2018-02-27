@@ -456,6 +456,12 @@ namespace Enjon
 						LoadDLL( false );
 					}
 				} 
+
+				ImGui::SameLine( );
+				if ( ImGui::Button( "Build" ) )
+				{
+					Result res = mProject.BuildProject( );
+				}
 			}
 		} 
 	}
@@ -903,6 +909,18 @@ namespace Enjon
 
 	//================================================================================================================================
 
+	String EditorApp::GetCompileProjectCMakeTemplate( ) const
+	{
+		return mCompileProjectCMakeTemplate;
+	}
+
+	//================================================================================================================================
+
+	String EditorApp::GetProjectMainTemplate( ) const
+	{
+		return mProjectMainTemplate;
+	} 
+
 	void EditorApp::CollectAllProjectsOnDisk( )
 	{ 
 		for ( auto& p : fs::recursive_directory_iterator( mProjectsDir ) )
@@ -1055,6 +1073,8 @@ namespace Enjon
 		mProjectBuildAndRunTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRun.bat" ).c_str( ) ); 
 		mComponentSourceTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ComponentSourceTemplate.cpp" ).c_str( ) ); 
 		mCompileProjectBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/CompileProject.bat" ).c_str( ) ); 
+		mCompileProjectCMakeTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectCompileCMakeTemplate.txt" ).c_str( ) ); 
+		mProjectMainTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectAppMain.cpp" ).c_str( ) ); 
 
 		// Set up copy directory for project dll
 		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";

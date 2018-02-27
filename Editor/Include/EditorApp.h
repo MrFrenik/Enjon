@@ -180,7 +180,11 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
-			String EditorApp::GetVisualStudioDirectoryPath( ) const;
+			String GetVisualStudioDirectoryPath( ) const;
+
+			String GetProjectMainTemplate( ) const;
+
+			String GetCompileProjectCMakeTemplate( ) const;
 
 		private:
 			void CreateComponent( const String& componentName );
@@ -246,6 +250,8 @@ namespace Enjon
 			String mProjectBuildAndRunTemplate = "";
 			String mComponentSourceTemplate = "";
 			String mCompileProjectBatTemplate = "";
+			String mCompileProjectCMakeTemplate = "";
+			String mProjectMainTemplate = "";
 
 			Vector<Project> mProjectsOnDisk;
 			Vector<Entity*> mSceneEntities;

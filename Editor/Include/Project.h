@@ -28,6 +28,8 @@ namespace Enjon
 
 			Result CompileProject( );
 
+			Result BuildProject( );
+
 		private:
 
 			void CreateBuildDirectory( );

@@ -73,30 +73,28 @@ namespace Enjon
 
 		// Create subdirectory for platform
 #ifdef ENJON_SYSTEM_WINDOWS
-		buildDir += "/Windows/";
+		buildDir += "Windows/";
 #endif
 
-		// Create the build directory if it doesn't exist
-		if ( !FileSystem::exists( "" ) )
-		{ 
-			FileSystem::create_directory( buildDir );
-			FileSystem::create_directory( buildDir + "Assets/" );
-		} 
+		// Create the build directory and others if they don't already exist
+		FileSystem::create_directory( buildDir );
+		FileSystem::create_directory( buildDir + "Assets/" );
+		FileSystem::create_directory( buildDir + "Intermediate/" );
 
-		//String includeFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::ParseFromTo( "#HEADERFILEBEGIN", "#HEADERFILEEND", mProjectSourceTemplate, false ), "#PROJECTNAME", projectName );
-		//String sourceFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::ParseFromTo( "#SOURCEFILEBEGIN", "#SOURCEFILEEND", mProjectSourceTemplate, false ), "#PROJECTNAME", projectName ); 
-		//String cmakeFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::FindReplaceAll( mProjectCMakeTemplate, "#PROJECTNAME", projectName ), "#ENJONDIRECTORY", Enjon::Utils::FindReplaceAll( Engine::GetInstance( )->GetConfig( ).GetRoot( ), "\\", "/" ) );
-		//String delBatFile = mProjectDelBatTemplate;
+		// Grab needed source templates from editor app that need to be compiled into project
+		String mainTemplate = Utils::FindReplaceAll( mEditor->GetProjectMainTemplate( ), "#PROJECT_NAME", mProjectName );
+
+		// Write mainTemplate to file
+		Utils::WriteToFile( mainTemplate, buildDir + "Intermediate/main.cpp" );
+
+		// Get cmake file and replace necessary tags
+		String cmakeFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::FindReplaceAll( mEditor->GetCompileProjectCMakeTemplate(), "#PROJECTNAME", mProjectName ), "#ENJONDIRECTORY", Enjon::Utils::FindReplaceAll( Engine::GetInstance( )->GetConfig( ).GetRoot( ), "\\", "/" ) );
+		cmakeFile = Utils::FindReplaceAll( cmakeFile, "#PROJECT_BUILD_DIR", buildDir );
 		//String buildAndRunFIle = mProjectBuildAndRunTemplate;
 
-		//// Write to file
-		//Enjon::Utils::WriteToFile( includeFile, projectDir + "Source/" + projectName + ".h" );
-		//Enjon::Utils::WriteToFile( sourceFile, projectDir + "Source/" + projectName + ".cpp" ); 
-		//Enjon::Utils::WriteToFile( cmakeFile, projectDir + "CMakeLists.txt" ); 
-		//Enjon::Utils::WriteToFile( delBatFile, projectDir + "Proc/" + "DelPDB.bat" ); 
+		// Write to file
+		Enjon::Utils::WriteToFile( cmakeFile, buildDir + "Intermediate/CMakeLists.txt" ); 
 		//Enjon::Utils::WriteToFile( buildAndRunFIle, projectDir + "Proc/" + "BuildAndRun.bat" ); 
-		//Enjon::Utils::WriteToFile( "", projectDir + "Build/Generator/Linked/" + projectName + "_Generated.cpp" ); 
-		//Enjon::Utils::WriteToFile( projectDir, projectDir + projectName + ".eproj" );
 	}
 
 	//====================================================================== 
@@ -121,6 +119,16 @@ namespace Enjon
 #endif
 		return Result::SUCCESS; 
 	} 
+
+	//======================================================================
+
+	Result Project::BuildProject( )
+	{
+		// Create build directory if not already made
+		CreateBuildDirectory( );
+
+		return Result::SUCCESS;
+	}
 
 	//======================================================================
 }

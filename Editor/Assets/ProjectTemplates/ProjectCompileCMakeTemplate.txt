@@ -227,7 +227,7 @@ set(
 # List of build directories
 set(
 		BUILD_DIRECTORIES
-		${TARGET_RELEASE_DIR}
+		${TARGET_BUILD_DIR}
 	)
 
 # Install directories
