@@ -42,9 +42,10 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mVisualStudioDir = "E:/Programs/MicrosoftVisualStudio14.0/";
-//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mVisualStudioDir = "E:/Programs/MicrosoftVisualStudio14.0/";
+Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
 //Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -638,6 +639,7 @@ namespace Enjon
 		Project proj; 
 		proj.SetProjectPath( projectDir );
 		proj.SetProjectName( projectName );
+		proj.SetEditor( this );
 		mProjectsOnDisk.push_back( proj ); 
 	}
 
@@ -916,10 +918,26 @@ namespace Enjon
 
 	//================================================================================================================================
 
+	String EditorApp::GetBuildAndRunCompileTemplate( ) const
+	{
+		return mProjectBuildAndRunCompileTemplate;
+	}
+
+	//================================================================================================================================
+
+	String EditorApp::GetProjectEnjonDefinesTemplate( ) const
+	{
+		return mProjectEnjonDefinesTemplate;
+	}
+
+	//================================================================================================================================
+
 	String EditorApp::GetProjectMainTemplate( ) const
 	{
 		return mProjectMainTemplate;
 	} 
+
+	//================================================================================================================================
 
 	void EditorApp::CollectAllProjectsOnDisk( )
 	{ 
@@ -1075,6 +1093,8 @@ namespace Enjon
 		mCompileProjectBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/CompileProject.bat" ).c_str( ) ); 
 		mCompileProjectCMakeTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectCompileCMakeTemplate.txt" ).c_str( ) ); 
 		mProjectMainTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectAppMain.cpp" ).c_str( ) ); 
+		mProjectBuildAndRunCompileTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRunCompile.bat" ).c_str( ) ); 
+		mProjectEnjonDefinesTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectEnjonDefines.h" ).c_str( ) ); 
 
 		// Set up copy directory for project dll
 		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";

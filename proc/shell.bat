@@ -2,7 +2,7 @@
 IF %1.==. GOTO Error1
 set arg1=%1
 if not defined DevEnvDir (
-	call "E:\Programs\MicrosoftVisualStudio14.0\VC\vcvarsall.bat" %arg1%
+	call "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC\vcvarsall.bat" %arg1%
 )
 GOTO End
 

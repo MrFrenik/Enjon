@@ -6,16 +6,21 @@ set ( TARGET_NAME #PROJECTNAME )
 project(${TARGET_NAME} C CXX)
 
 # set top level directory
-set (TARGET_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set ( ENJON_DIR "#ENJONDIRECTORY" )
-set (ENJON_INC ${ENJON_DIR}/Include)
-set (ENJON_BUILD_DIR ${ENJON_DIR}/Build)
-set (ENJON_GENERATED_DIR "${ENJON_BUILD_DIR}/Generator/Linked/")
-set (TARGET_BUILD_DIR "#PROJECT_BUILD_DIR")
+set ( TARGET_DIR "#CURRENT_SOURCE_DIR" )
+set ( ENJON_DIR "#ENJON_DIRECTORY" )
+set ( ENJON_INC ${ENJON_DIR}/Include/ )
+set ( ENJON_SRC ${ENJON_DIR}/Source/ )
+set ( ENJON_BUILD_DIR ${ENJON_DIR}/Build/ )
+set ( ENJON_GENERATED_DIR ${ENJON_BUILD_DIR}/Generator/Linked/ )
+set ( TARGET_BUILD_DIR #PROJECT_BUILD_DIR )
+set ( TARGET_ROOT_DIR #PROJECT_ROOT_DIR )
+set ( PROJECT_GEN_DIR ${TARGET_ROOT_DIR}/Build/Generator/Linked/ )
+set ( TARGET_INTERMEDIATE_DIR ${TARGET_BUILD_DIR}/ )
+set ( TARGET_SOURCE_DIR ${TARGET_ROOT_DIR}/Source/ )
+set ( TARGET_INC_DIR ${TARGET_ROOT_DIR}/Include/ )
 
 # Set build directory for solution
 set (EXECUTABLE_OUTPUT_PATH ${TARGET_BUILD_DIR})
-set (LIBRARY_OUTPUT_PATH ${TARGET_BUILD_DIR})
 
 # Turn on ability to create folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -30,6 +35,8 @@ message("cxx FLgs:" ${CMAKE_CXX_FLAGS})
 # Add include directories
 include_directories(
 					${TARGET_DIR}/Source
+					${TARGET_SOURCE_DIR}
+					${TARGET_INC_DIR}
 					${ENJON_DIR}/ThirdParty/Build/Include
 					${ENJON_DIR}/Source
 					${ENJON_INC}
@@ -37,13 +44,13 @@ include_directories(
 
 # Add lib directories
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Release)
+link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Debug)
 
-set(TARGET_INC_DIR "${TARGET_DIR}/Source/")
-set(TARGET_SOURCE_DIR "${TARGET_DIR}/Source/")
 set(TARGET_GENERATED_DIR ${TARGET_BUILD_DIR}/Generator/Linked/)
 
 file( 
 		GLOB_RECURSE TARGET_SOURCES
+		"${TARGET_INC_DIR}/*.h"
 		"${TARGET_INC_DIR}/*.h"
 		"${TARGET_INC_DIR}/*.c"
 		"${TARGET_SOURCE_DIR}/*.cpp"
@@ -125,7 +132,6 @@ set(
 	${ENJON_INC}/Application.h
 	${ENJON_INC}/Console.h
 	${ENJON_INC}/CVarsSystem.h
-	${ENJON_INC}/Defines.h
 	${ENJON_INC}/Engine.h
 	${ENJON_INC}/Enjon.h
 	${ENJON_INC}/TypeCatalog.h
@@ -159,7 +165,9 @@ set(
 		${SRC_SHADER_GRAPH}
 		${SRC_SERIALIZE}
 		${GENERAL_SOURCES}
-		${TARGET_GENERATED_DIR}/${TARGET_NAME}_Generated.cpp
+		${PROJECT_GEN_DIR}/${TARGET_NAME}_Generated.cpp
+		${TARGET_INTERMEDIATE_DIR}/main.cpp
+		${TARGET_INTERMEDIATE_DIR}/Defines.h
 	)
 
 file(
@@ -169,8 +177,9 @@ file(
 
 add_executable(${TARGET_NAME} ${ALL_SRC}) 
 
+add_definitions(-DENJON_STANDALONE_APPLICATION)
+
 # Link libraries to target
-target_link_libraries( ${TARGET_NAME} debug Enjond.lib optimized Enjon.lib )
 target_link_libraries( ${TARGET_NAME} debug Opengl32.lib optimized Opengl32.lib ) 
 target_link_libraries( ${TARGET_NAME} debug SDL2_d.lib optimized SDL2.lib )
 target_link_libraries( ${TARGET_NAME} debug SDL2main_d.lib optimized SDL2main.lib )
@@ -193,27 +202,6 @@ set_target_properties(
 						PROPERTIES 
 						LINKER_LANGUAGE CXX 
 					)
-
-set_target_properties(
-						${TARGET_NAME} 
-						PROPERTIES 
-						PDB_NAME "$(TargetName)-$([System.DateTime]::Now.ToString(\"HH_mm_ss_fff\"))"
-					)
-
-source_group("Source" FILES ${TARGET_SOURCES})
-
-# Write to .user file for command arguments
-if (MSVC)
-	file(WRITE ${TARGET_DIR}/Build/${TARGET_NAME}.vcxproj.user
-		"<?xml version=\"1.0\" encoding=\"utf-8\"?>
-		<Project ToolsVersion=\"14.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">
-		  <PropertyGroup>
-		    <LocalDebuggerCommandArguments>--target-path ${TARGET_DIR}</LocalDebuggerCommandArguments>
-		     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-		  </PropertyGroup>
-		</Project>" 
-	)
-endif()
 
 # List of necessary DLLs 
 set(

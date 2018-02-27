@@ -1,13 +1,26 @@
-set projDir=%1
-set projName=%2
+set projName=%1
+set projDir=%2
+set vsCall="%3"
 
-pushd %1
+@echo off
+pushd "%projDir%"
 
 echo "Building %projName%..."
+@echo off
 cmake -G"Visual Studio 14 2015"
-
 echo "Running %projName%..."
-start %projName%.sln
+@echo off
 
+echo %vsCall%\VC\vcvarsall.bat x86
+
+if not defined DevEnvDir (
+	pushd "%vsCall%"
+	call VC\vcvarsall.bat x86
+	popd
+)
+
+devenv %projName%.sln /Build Release
+
+@echo off
 popd
 exit 0

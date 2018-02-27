@@ -186,6 +186,10 @@ namespace Enjon
 
 			String GetCompileProjectCMakeTemplate( ) const;
 
+			String GetBuildAndRunCompileTemplate( ) const;
+
+			String GetProjectEnjonDefinesTemplate( ) const;
+
 		private:
 			void CreateComponent( const String& componentName );
 			void LoadResourceFromFile( );
@@ -248,10 +252,12 @@ namespace Enjon
 			String mProjectCMakeTemplate = "";
 			String mProjectDelBatTemplate = "";
 			String mProjectBuildAndRunTemplate = "";
+			String mProjectBuildAndRunCompileTemplate = "";
 			String mComponentSourceTemplate = "";
 			String mCompileProjectBatTemplate = "";
 			String mCompileProjectCMakeTemplate = "";
 			String mProjectMainTemplate = "";
+			String mProjectEnjonDefinesTemplate = "";
 
 			Vector<Project> mProjectsOnDisk;
 			Vector<Entity*> mSceneEntities;

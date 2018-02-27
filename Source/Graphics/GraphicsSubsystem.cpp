@@ -25,6 +25,7 @@
 #include "Graphics/ShaderGraph.h"
 #include "Engine.h"
 #include "SubsystemCatalog.h"
+#include "Defines.h"
 
 #include <string>
 #include <cassert>
@@ -590,7 +591,7 @@ namespace Enjon
 		mWindow.Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
 
 		// Editor gui pass (ImGUI)
-#ifdef ENJON_EDITOR
+#ifndef ENJON_STANDALONE_APPLICATION
 		ImGuiPass();
 #else
 		// Otherwise render back buffer (scene view) 
