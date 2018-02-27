@@ -91,7 +91,7 @@ namespace Enjon
 	{ 
 		// Update active widget
 		mActiveWidget->Update( ); 
-	}
+	} 
 
 	void EditorTransformWidget::Enable( bool enable )
 	{

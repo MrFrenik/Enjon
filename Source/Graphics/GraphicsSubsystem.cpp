@@ -590,27 +590,30 @@ namespace Enjon
 		mWindow.Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
 
 		// Editor gui pass (ImGUI)
-		if (true)
-		{
-			ImGuiPass();
-		} 
+#ifdef ENJON_EDITOR
+		ImGuiPass();
+#else
 		// Otherwise render back buffer (scene view) 
-		else
-		{ 
-			glViewport( 0, 0, (s32)ImGui::GetIO().DisplaySize.x, (s32)ImGui::GetIO().DisplaySize.y );
-			auto program = Enjon::ShaderManager::Get("NoCameraProjection");	
-			program->Use();
-			{ 
-				program->BindTexture( "tex", mCurrentRenderTexture, 0 ); 
-				mFullScreenQuad->Submit( );
-			}
-			program->Unuse();
-		}
+		PresentBackBuffer( );
+#endif
 
 		mWindow.SwapBuffer();
 	}
 
 	//======================================================================================================
+
+	void GraphicsSubsystem::PresentBackBuffer( )
+	{
+
+		glViewport( 0, 0, ( s32 )GetViewport().x, ( s32 )GetViewport().y );
+		auto program = Enjon::ShaderManager::Get( "NoCameraProjection" );
+		program->Use( );
+		{
+			program->BindTexture( "tex", mCurrentRenderTexture, 0 );
+			mFullScreenQuad->Submit( );
+		}
+		program->Unuse( );
+	}
 
 	iVec2 GraphicsSubsystem::GetImGuiViewport( ) const
 	{

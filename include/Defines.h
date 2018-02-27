@@ -8,6 +8,8 @@
 #define ENJON_FUNCTION(...)
 #define ENJON_PROP(...)
 
+#define ENJON_EDITOR
+
 #define ER 		Enjon::Random
 #define EU 		Enjon::Utils
 #define EA		Enjon::Animation

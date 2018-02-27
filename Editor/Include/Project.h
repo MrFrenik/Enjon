@@ -8,6 +8,7 @@
 namespace Enjon
 {
 	class Application;
+	class EditorApp;
 
 	class Project
 	{
@@ -15,6 +16,7 @@ namespace Enjon
 			Project( ) = default;
 			~Project( ) = default; 
 
+			void SetEditor( EditorApp* app );
 			void SetApplication( Enjon::Application* app ); 
 			Enjon::Application* GetApplication( );
 
@@ -23,11 +25,19 @@ namespace Enjon
 
 			void SetProjectName( const String& name );
 			String GetProjectName( ) const;
+
+			Result CompileProject( );
+
+		private:
+
+			void CreateBuildDirectory( );
 			
 		private:
 			String mProjectName = "";
 			Enjon::Application* mApp = nullptr; 
 			String mProjectPath = "";
+			String mBuildDirectory = "";
+			EditorApp* mEditor = nullptr;
 	};
 }
 

@@ -239,6 +239,11 @@ namespace Enjon
 			*@brief
 			*/
 			void ImGuiPass();
+
+			/**
+			*@brief
+			*/
+			void PresentBackBuffer( );
 			
 			/**
 			*@brief

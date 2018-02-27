@@ -17,6 +17,7 @@
 #include <Entity/Components/PointLightComponent.h>
 #include <Entity/Components/DirectionalLightComponent.h>
 #include <Utils/FileUtils.h>
+#include <Utils/Tokenizer.h>
 
 #include <Bullet/btBulletDynamicsCommon.h> 
 
@@ -42,11 +43,12 @@ Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
 Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mVisualStudioDir = "E:/Programs/MicrosoftVisualStudio14.0/";
 //Enjon::String mProjectsDir = "W:/Projects/";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -105,16 +107,34 @@ namespace Enjon
 				componentName = String(buffer);
 			} 
 
+			bool compExists = true;
+			bool isValidCPPClassName = true;
+
 			if ( ImGui::Button( "Create" ) )
 			{
-				if ( !alreadyExists( componentName ) )
+				compExists = alreadyExists( componentName );
+				isValidCPPClassName = Utils::IsValidCPPClassName( componentName );
+
+				if ( !compExists && isValidCPPClassName )
 				{
-					closePopup = true;
 					std::cout << "Creating component!\n";
+					closePopup = true;
+					CreateComponent( componentName );
+
+					// After creating new component, need to attach to entity
+					if ( mSelectedEntity )
+					{
+						// Add using meta class 
+						mSelectedEntity.Get( )->AddComponent( Object::GetClass( componentName ) );
+					}
+				}
+				else if ( compExists )
+				{ 
+					std::cout << "Component already exists!\n";
 				}
 				else
 				{
-					std::cout << "Component already exists!\n";
+					std::cout << "Not a valid class name!\n"; 
 				}
 			}
 
@@ -132,6 +152,42 @@ namespace Enjon
 			ImGui::EndPopup( );
 		}
 	}
+
+	//==================================================================================================================
+
+	void EditorApp::CreateComponent( const String& componentName )
+	{ 
+		// Replace meta tags with component name
+		String includeFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::ParseFromTo( "#HEADERFILEBEGIN", "#HEADERFILEEND", mComponentSourceTemplate, false ), "#COMPONENTNAME", componentName );
+		String sourceFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::ParseFromTo( "#SOURCEFILEBEGIN", "#SOURCEFILEEND", mComponentSourceTemplate, false ), "#COMPONENTNAME", componentName ); 
+
+		// Need to copy the include files into the source directory for the project
+		Utils::WriteToFile( includeFile, mProject.GetProjectPath( ) + "Source/" + componentName + ".h" );
+		Utils::WriteToFile( sourceFile, mProject.GetProjectPath( ) + "Source/" + componentName + ".cpp" );
+
+		String cmakePath = mProject.GetProjectPath( ) + "CMakeLists.txt";
+		if ( fs::exists( cmakePath ) )
+		{
+			// Grab the content
+			String cmakeContent = Utils::read_file_sstream( cmakePath.c_str() ); 
+			// Resave it 
+			Utils::WriteToFile( cmakeContent, cmakePath );
+		} 
+
+		// Compile the project
+		mProject.CompileProject( );
+
+		// Save scene
+		if ( mCurrentScene )
+		{
+			mCurrentScene->Save( );
+		}
+
+		//Reload the dll after compilation
+		LoadDLL( false ); 
+	}
+
+	//==================================================================================================================
 
 	void EditorApp::InspectorView( bool* enabled )
 	{
@@ -379,6 +435,28 @@ namespace Enjon
 				// ReloadDLL without release scene asset
 				LoadDLL( false );
 			}
+
+			// Compile the project if available
+			if ( mProject.GetApplication( ) )
+			{
+				ImGui::SameLine( ); 
+				if ( ImGui::Button( "Compile" ) )
+				{
+					Result res = mProject.CompileProject( );
+
+					// Save the scene
+					if ( mCurrentScene )
+					{
+						mCurrentScene->Save( );
+					}
+
+					// Force reload the project after successful compilation
+					if ( res == Result::SUCCESS )
+					{
+						LoadDLL( false );
+					}
+				} 
+			}
 		} 
 	}
 
@@ -532,6 +610,7 @@ namespace Enjon
 		Enjon::Utils::WriteToFile( buildAndRunFIle, projectDir + "Proc/" + "BuildAndRun.bat" ); 
 		Enjon::Utils::WriteToFile( "", projectDir + "Build/Generator/Linked/" + projectName + "_Generated.cpp" ); 
 		Enjon::Utils::WriteToFile( projectDir, projectDir + projectName + ".eproj" );
+		Enjon::Utils::WriteToFile( mCompileProjectBatTemplate, projectDir + "Proc/" + "CompileProject.bat" );
 
 		// Now call BuildAndRun.bat
 #ifdef ENJON_SYSTEM_WINDOWS 
@@ -810,6 +889,20 @@ namespace Enjon
 
 	//================================================================================================================================
 
+	String EditorApp::GetBuildConfig( ) const
+	{
+		return configuration;
+	}
+
+	//================================================================================================================================
+
+	String EditorApp::GetVisualStudioDirectoryPath( ) const
+	{
+		return mVisualStudioDir;
+	}
+
+	//================================================================================================================================
+
 	void EditorApp::CollectAllProjectsOnDisk( )
 	{ 
 		for ( auto& p : fs::recursive_directory_iterator( mProjectsDir ) )
@@ -827,6 +920,7 @@ namespace Enjon
 
 				proj.SetProjectPath( path );
 				proj.SetProjectName( Enjon::Utils::SplitString( Enjon::Utils::SplitString( p.path( ).string( ), "\\" ).back(), "." ).front() );
+				proj.SetEditor( this );
 				mProjectsOnDisk.push_back( proj );
 			}
 		} 
@@ -959,6 +1053,8 @@ namespace Enjon
 		mProjectCMakeTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectCMakeTemplate.txt" ).c_str( ) );
 		mProjectDelBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/DelPDB.bat" ).c_str( ) );
 		mProjectBuildAndRunTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRun.bat" ).c_str( ) ); 
+		mComponentSourceTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ComponentSourceTemplate.cpp" ).c_str( ) ); 
+		mCompileProjectBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/CompileProject.bat" ).c_str( ) ); 
 
 		// Set up copy directory for project dll
 		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";

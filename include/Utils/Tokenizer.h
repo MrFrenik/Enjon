@@ -1,6 +1,9 @@
 #ifndef ENJON_TOKENIZER_H
 #define ENJON_TOKENIZER_H
 
+#include "Defines.h"
+#include "System/Types.h"
+
 namespace Enjon { namespace Utils { 
 
 	enum token_type
@@ -39,7 +42,7 @@ namespace Enjon { namespace Utils {
 		char *At;
 	};
 	
-	char* NullTerminatedStringFromToken(token* Token)
+	inline char* NullTerminatedStringFromToken(token* Token)
 	{
 		char* ReturnString = (char*)malloc(Token->TextLength + 1);
 		int i;
@@ -70,23 +73,47 @@ namespace Enjon { namespace Utils {
 		return (C == '\n' || C == '\r');
 	}
 
-	inline bool IsWhiteSpace(char C)
-	{
-		return ((C == ' ')  ||
-				(C == '\t') ||
-				IsEndOfLine(C));
-	}
-
 	inline bool IsAlphabetical(char C)
 	{
 		return ((C >= 'a' && C <= 'z' ) ||
 				(C >= 'A' && C <= 'Z'));
 	}
 
+	inline bool IsSpecialCharacter( char c )
+	{
+		return ( !IsAlphabetical( c ) );
+	}
+
+	inline bool IsWhiteSpace(char C)
+	{
+		return ((C == ' ')  ||
+				(C == '\t') ||
+				IsEndOfLine(C));
+	} 
+
 	inline bool IsNumeric(char C)
 	{
-
 		return (C >= '0' && C <= '9');	
+	}
+
+	inline bool IsValidCPPClassName( const String& name )
+	{
+		// Can't be empty string
+		if ( name.length( ) == 0 )
+		{
+			return false;
+		} 
+
+		// Make sure no white space or non-alpha tokens in name
+		for ( auto& c : name )
+		{
+			if ( !IsAlphabetical( c ) )
+			{
+				return false;
+			}
+		}
+
+		return true; 
 	}
 
 	inline void ParseNumber(tokenizer* Tokenizer, token* Token)

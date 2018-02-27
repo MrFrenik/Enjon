@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 2.6)
 # Declare project file
 project(Enjon)
 
+message( status ${VS_DIR} )
+
 # set top level directory
 set (ENJON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/)
 set (REFLECTION_DIR "${ENJON_DIR}/GENERATOR/")
