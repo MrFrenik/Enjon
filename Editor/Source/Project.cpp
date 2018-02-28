@@ -178,7 +178,7 @@ namespace Enjon
 		// Run the build bat for project
 #ifdef ENJON_SYSTEM_WINDOWS 
 		// TODO(): Spawn up a separate thread to call this so we know when it's finished
-		s32 code = system( String( "call " + mProjectPath + "Proc/" + "CompileProject.bat" + " " + Enjon::Utils::FindReplaceAll( mProjectPath, "/", "\\" ) + " " + mProjectName + " " + buildConfig + " " + visualStudioPath ).c_str() ); 
+		s32 code = system( String( "call " + mProjectPath + "Proc/" + "CompileProject.bat" + " " + mProjectPath + " " + mProjectName + " " + buildConfig + " " + visualStudioPath ).c_str() ); 
 		if ( code == 0 )
 		{
 			// Success...

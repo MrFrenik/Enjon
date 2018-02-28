@@ -697,6 +697,22 @@ namespace Enjon
 
 	//---------------------------------------------------------------
 
+	EntityHandle EntityManager::GetEntityByUUID( const UUID& uuid )
+	{
+		// Serach for matching UUID ( Should have map for this rather )
+		for ( auto& e : mActiveEntities )
+		{
+			if ( e->GetUUID( ) == uuid )
+			{
+				return EntityHandle( e );
+			}
+		}
+
+		return EntityHandle::Invalid( );
+	}
+
+	//---------------------------------------------------------------
+
 	Entity* EntityManager::GetRawEntity( const u32& id )
 	{
 		if ( id < MAX_ENTITIES && mEntities.at( id ).mState == EntityState::ACTIVE )

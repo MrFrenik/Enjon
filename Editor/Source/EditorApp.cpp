@@ -118,9 +118,19 @@ namespace Enjon
 
 				if ( !compExists && isValidCPPClassName )
 				{
+					// Get total count of entities
+					UUID curUUID = mSelectedEntity.Get( )->GetUUID( );
+
 					std::cout << "Creating component!\n";
 					closePopup = true;
-					CreateComponent( componentName );
+					CreateComponent( componentName ); 
+
+					// Force add all the entities ( NOTE(): HATE THIS )
+					EntityManager* em = EngineSubsystem( EntityManager );
+					em->ForceAddEntities( );
+
+					// Reselect entity by uuid
+					SelectEntity( em->GetEntityByUUID( curUUID ) );
 
 					// After creating new component, need to attach to entity
 					if ( mSelectedEntity )
@@ -184,8 +194,7 @@ namespace Enjon
 			mCurrentScene->Save( );
 		}
 
-		//Reload the dll after compilation
-		LoadDLL( false ); 
+		ReloadDLL( );
 	}
 
 	//==================================================================================================================
@@ -433,8 +442,8 @@ namespace Enjon
 			ImGui::SameLine( );
 			if ( ImGui::Button( "Reload" ) )
 			{ 
-				// ReloadDLL without release scene asset
-				LoadDLL( false );
+				// Reload the dll
+				ReloadDLL( );
 			}
 
 			// Compile the project if available
@@ -454,7 +463,7 @@ namespace Enjon
 					// Force reload the project after successful compilation
 					if ( res == Result::SUCCESS )
 					{
-						LoadDLL( false );
+						ReloadDLL( );
 					}
 				} 
 
@@ -615,32 +624,46 @@ namespace Enjon
 		Enjon::Utils::WriteToFile( cmakeFile, projectDir + "CMakeLists.txt" ); 
 		Enjon::Utils::WriteToFile( delBatFile, projectDir + "Proc/" + "DelPDB.bat" ); 
 		Enjon::Utils::WriteToFile( buildAndRunFIle, projectDir + "Proc/" + "BuildAndRun.bat" ); 
+		Enjon::Utils::WriteToFile( mProjectBuildBatTemplate, projectDir + "Proc/" + "Build.bat" ); 
 		Enjon::Utils::WriteToFile( "", projectDir + "Build/Generator/Linked/" + projectName + "_Generated.cpp" ); 
 		Enjon::Utils::WriteToFile( projectDir, projectDir + projectName + ".eproj" );
 		Enjon::Utils::WriteToFile( mCompileProjectBatTemplate, projectDir + "Proc/" + "CompileProject.bat" );
 
+
 		// Now call BuildAndRun.bat
 #ifdef ENJON_SYSTEM_WINDOWS 
-		// TODO(): Error check the fuck out of this call
-		// Is it possible to know whether or not this succeeded?
-		s32 code = system( String( "start " + projectDir + "Proc/" + "BuildAndRun.bat" + " " + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + " " + projectName ).c_str() ); 
+		// Start the projection solution
+		s32 code = system( String( "start " + projectDir + "Proc/" + "Build.bat" + " " + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + " " + projectName ).c_str() ); 
 		if ( code == 0 )
 		{
-			// Can set the project path now
-			mProject.SetProjectPath( projectDir ); 
-			mProject.SetProjectName( projectName );
-
 			// Unload previous project
 			UnloadDLL( ); 
+
+			// Create new project
+			Project proj; 
+			proj.SetProjectPath( projectDir );
+			proj.SetProjectName( projectName );
+			proj.SetEditor( this );
+
+			// Compile the project
+			proj.CompileProject( ); 
+
+			// Add project to list
+			mProjectsOnDisk.push_back( proj ); 
+
+			// Load the new project
+			LoadProject( proj ); 
+
+			// Load the solution for the project
+			LoadProjectSolution( );
+		}
+		else
+		{
+			std::cout << "Could not build project.\n";
 		}
 #endif
 
-		// Add project to disk
-		Project proj; 
-		proj.SetProjectPath( projectDir );
-		proj.SetProjectName( projectName );
-		proj.SetEditor( this );
-		mProjectsOnDisk.push_back( proj ); 
+
 	}
 
 	//================================================================================================================================
@@ -798,6 +821,14 @@ namespace Enjon
 		}
 
 		return needsReload;
+	}
+
+	//================================================================================================================================
+
+	void EditorApp::ReloadDLL( )
+	{
+		// ReloadDLL without release scene asset
+		LoadDLL( false ); 
 	}
 
 	//================================================================================================================================
@@ -1089,6 +1120,7 @@ namespace Enjon
 		mProjectCMakeTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectCMakeTemplate.txt" ).c_str( ) );
 		mProjectDelBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/DelPDB.bat" ).c_str( ) );
 		mProjectBuildAndRunTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRun.bat" ).c_str( ) ); 
+		mProjectBuildBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/Build.bat" ).c_str( ) ); 
 		mComponentSourceTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ComponentSourceTemplate.cpp" ).c_str( ) ); 
 		mCompileProjectBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/CompileProject.bat" ).c_str( ) ); 
 		mCompileProjectCMakeTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectCompileCMakeTemplate.txt" ).c_str( ) ); 

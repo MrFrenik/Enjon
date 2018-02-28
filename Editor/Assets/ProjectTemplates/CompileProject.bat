@@ -14,7 +14,7 @@ if not defined DevEnvDir (
 echo Compiling %projName%...
 
 @echo off
-devenv %projDir%/Build/%projName%.sln /Build %buildConfig%
+devenv %projDir%Build/%projName%.sln /Build %buildConfig%
 
 @echo off
 popd

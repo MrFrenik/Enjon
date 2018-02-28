@@ -450,6 +450,11 @@ namespace Enjon
 			*/
 			void DestroyAll();
 
+			/**
+			* @brief
+			*/
+			EntityHandle GetEntityByUUID( const UUID& uuid );
+
 		protected: 
 
 

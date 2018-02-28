@@ -209,6 +209,7 @@ namespace Enjon
 			void LoadProject( const Project& project );
 			bool UnloadDLL( ByteBuffer* buffer = nullptr );
 			void LoadDLL( bool releaseSceneAsset = true );
+			void ReloadDLL( );
 
 			void CollectAllProjectsOnDisk( );
 			void LoadProjectSolution( );
@@ -258,6 +259,7 @@ namespace Enjon
 			String mCompileProjectCMakeTemplate = "";
 			String mProjectMainTemplate = "";
 			String mProjectEnjonDefinesTemplate = "";
+			String mProjectBuildBatTemplate = "";
 
 			Vector<Project> mProjectsOnDisk;
 			Vector<Entity*> mSceneEntities;
