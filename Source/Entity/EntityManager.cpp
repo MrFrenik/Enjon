@@ -725,10 +725,26 @@ namespace Enjon
 		mActiveEntities.clear( );
 		mMarkedForAdd.clear( );
 	}
+ 
+	//==============================================================================
 
 	void EntityManager::ForceCleanup( )
 	{
 		Cleanup( );
+	}
+ 
+	//==============================================================================
+
+	void EntityManager::ForceAddEntities( )
+	{
+		// Add all new entities into active entities
+		for ( auto& e : mMarkedForAdd )
+		{
+			mActiveEntities.push_back( e );
+		}
+
+		// Clear the marked for add entities
+		mMarkedForAdd.clear( );
 	}
  
 	//==============================================================================

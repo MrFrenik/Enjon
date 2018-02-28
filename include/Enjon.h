@@ -41,6 +41,8 @@
 #include "Graphics/QuadBatch.h"
 #include "Graphics/GraphicsSubsystem.h"
 
+#include "Scene/Scene.h"
+
 #include "GUI/Signal.h"
 
 #include "IO/InputManager.h"

@@ -433,6 +433,11 @@ namespace Enjon
 			*/
 			void ForceCleanup( );
 
+			/*
+			* @brief
+			*/
+			void ForceAddEntities( );
+
 			/**
 			* @brief
 			*/
