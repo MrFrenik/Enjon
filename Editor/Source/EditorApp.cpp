@@ -42,10 +42,10 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-//Enjon::String mProjectsDir = "W:/Projects/";
-//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
 //Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -633,7 +633,7 @@ namespace Enjon
 		// Now call BuildAndRun.bat
 #ifdef ENJON_SYSTEM_WINDOWS 
 		// Start the projection solution
-		s32 code = system( String( "start " + projectDir + "Proc/" + "Build.bat" + " " + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + " " + projectName ).c_str() ); 
+		s32 code = system( String( "call " + projectDir + "Proc/" + "Build.bat" + " " + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + " " + projectName ).c_str() ); 
 		if ( code == 0 )
 		{
 			// Unload previous project
@@ -827,8 +827,25 @@ namespace Enjon
 
 	void EditorApp::ReloadDLL( )
 	{
+		// Save the current scene and store uuid
+		UUID uuid;
+		if ( mCurrentScene )
+		{
+			uuid = mCurrentScene->GetUUID( );
+			mCurrentScene.Unload( );
+		} 
+
+		// Set scene to nullptr
+		mCurrentScene = nullptr;
+
 		// ReloadDLL without release scene asset
 		LoadDLL( false ); 
+
+		// Set current scene using previous id if valid
+		if ( uuid )
+		{
+			mCurrentScene = EngineSubsystem( AssetManager )->GetAsset< Scene >( uuid ); 
+		}
 	}
 
 	//================================================================================================================================

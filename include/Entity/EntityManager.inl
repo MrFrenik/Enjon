@@ -59,14 +59,21 @@ T* EntityManager::AddComponent(const Enjon::EntityHandle& handle)
 
 	// Otherwise new component and place into map
 	T* component = (T*)base->AddComponent( Object::GetClass< T >(), eid );
-	component->SetEntity(entity);
-	component->SetID(compIdx);
-	component->SetBase( base );
-	component->mEntityID = entity->mID; 
-	component->PostConstruction( );
+	if ( component )
+	{
+		component->SetEntity(entity);
+		component->SetID(compIdx);
+		component->SetBase( base );
+		component->mEntityID = entity->mID; 
+		component->PostConstruction( );
 
-	// Get component ptr and push back into entity components
-	entity->mComponents.push_back( compIdx ); 
+		// Get component ptr and push back into entity components
+		entity->mComponents.push_back( compIdx ); 
+
+		// Push back for need initilization and start
+		mNeedInitializationList.push_back( component );
+		mNeedStartList.push_back( component ); 
+	}
 
 	return component;
  
@@ -85,7 +92,7 @@ void EntityManager::RemoveComponent(Entity* entity)
 	DetachComponentFromEntity<T>(entity);
 
 	// Set bitmask field for component
-	entity->mComponentMask ^= Enjon::GetComponentBitMask<T>();
+	//entity->mComponentMask ^= Enjon::GetComponentBitMask<T>();
 }
 
 //--------------------------------------------------------------------------

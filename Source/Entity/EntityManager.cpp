@@ -766,7 +766,7 @@ namespace Enjon
 		// Add all new entities into active entities
 		for ( auto& e : mMarkedForAdd )
 		{
-			mActiveEntities.push_back( e );
+			mActiveEntities.push_back( e ); 
 		}
 
 		// Clear the marked for add entities
@@ -836,11 +836,11 @@ namespace Enjon
 			mActiveEntities.push_back( e );
 
 			// Push back entity's components into need initialization/start lists
-			for ( auto& c : e->GetComponents( ) )
-			{ 
-				mNeedInitializationList.push_back( c );
-				mNeedStartList.push_back( c );
-			} 
+			//for ( auto& c : e->GetComponents( ) )
+			//{ 
+			//	mNeedInitializationList.push_back( c );
+			//	mNeedStartList.push_back( c );
+			//} 
 		}
 
 		// Clear the marked for add entities
@@ -970,6 +970,10 @@ namespace Enjon
 
 			// Get component ptr and push back into entity components
 			entity->mComponents.push_back( compIdx );
+
+			// Push back for need initilization and start
+			mNeedInitializationList.push_back( component );
+			mNeedStartList.push_back( component );
 		} 
 
 		return component; 
