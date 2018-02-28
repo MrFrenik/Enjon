@@ -156,6 +156,9 @@ namespace Enjon
 		// Register all base object meta classes
 		Enjon::Object::BindMetaClasses( );
 
+		// Register and bind all application specific meta classes
+		mApp->BindApplicationMetaClasses( );
+
 		// Register subsystems with catalog
 		mAssetManager	= mSubsystemCatalog->Register<Enjon::AssetManager>( false );		// Will do manual initialization of asset management system, since it's project dependent
 		mGraphics		= mSubsystemCatalog->Register<Enjon::GraphicsSubsystem>( );
@@ -232,9 +235,6 @@ namespace Enjon
 			dt = ( f32 )( ticks ) / 1000.0f;
 			lastTime = thisTime; 
 
-			// Update physics
-			mPhysics->Update( dt ); 
-
 			 // Update input manager
 			 mInput->Update( dt );
 
@@ -265,7 +265,9 @@ namespace Enjon
 			// Update entity manager
 			mEntities->Update( dt ); 
 
-			u32 graphicsStartTick = SDL_GetTicks( ); 
+			// Update physics
+			mPhysics->Update( dt ); 
+
 			// Update graphics
 			mGraphics->Update( dt ); 
 

@@ -298,6 +298,7 @@ namespace Enjon
 	using MarkedForDestructionList	= Vector< u32 >;
 	using ActiveEntityList 			= Vector<Entity*>;
 	using ComponentBaseArray		= HashMap< u32, ComponentWrapperBase* >;
+	using ComponentList				= Vector< Component* >;
 
 	ENJON_CLASS( )
 	class EntityManager : public Subsystem
@@ -496,6 +497,8 @@ namespace Enjon
 			ActiveEntityList 			mActiveEntities;
 			ActiveEntityList 			mMarkedForAdd;
 			MarkedForDestructionList 	mMarkedForDestruction;
+			ComponentList				mNeedInitializationList;
+			ComponentList				mNeedStartList;
 			u32 						mNextAvailableID = 0;
 	};
 

@@ -69,47 +69,19 @@ namespace Enjon
 
 	Enjon::Result GraphicsSubsystem::Shutdown()
 	{ 
-		// Free all framebuffers and rendertargets
-		delete( mGbuffer );
-		delete( mDebugTarget );
-		delete( mSmallBlurHorizontal );
-		delete( mSmallBlurVertical );
-		delete( mMediumBlurHorizontal );
-		delete( mMediumBlurVertical );
-		delete( mLargeBlurHorizontal );
-		delete( mLargeBlurVertical );
-		delete( mCompositeTarget );
-		delete( mLightingBuffer );
-		delete( mLuminanceTarget );
-		delete( mFXAATarget );
-		delete( mShadowDepth );
-		delete( mFinalTarget );
-		delete( mSSAOTarget );
-		delete( mSSAOBlurTarget );
+		// Delete auxillary items
 		delete( mBatch );
 		delete( mFullScreenQuad );
 		delete[] mModelMatricies; 
 		delete mInstancedRenderable;
 
-		mGbuffer = nullptr;
-		mDebugTarget = nullptr;
-		mSmallBlurVertical = nullptr;
-		mSmallBlurHorizontal = nullptr;
-		mMediumBlurHorizontal = nullptr;
-		mMediumBlurVertical = nullptr;
-		mLargeBlurHorizontal = nullptr;
-		mLargeBlurVertical = nullptr;
-		mCompositeTarget = nullptr;
-		mLightingBuffer = nullptr;
-		mLuminanceTarget = nullptr;
-		mFXAATarget = nullptr;
-		mShadowDepth = nullptr;
-		mFinalTarget = nullptr;
-		mSSAOTarget = nullptr;
-		mSSAOBlurTarget = nullptr;
+		mInstancedRenderable = nullptr;
 		mFullScreenQuad = nullptr;
 		mBatch = nullptr;
 		mModelMatricies = nullptr;
+
+		// Free all memory for render targets / frame buffers
+		FreeAllRenderTargets( );
 
 		// Shutdown shader manager
 		ShaderManager::DeleteShaders( );
@@ -1466,7 +1438,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::ReinitializeRenderTargets( )
+	void GraphicsSubsystem::FreeAllRenderTargets( )
 	{
 		// Free all framebuffers and rendertargets
 		delete( mGbuffer );
@@ -1485,7 +1457,33 @@ namespace Enjon
 		delete( mFinalTarget );
 		delete( mSSAOTarget );
 		delete( mSSAOBlurTarget );
+		delete( mMotionBlurTarget );
 
+		mGbuffer = nullptr;
+		mDebugTarget = nullptr;
+		mSmallBlurHorizontal = nullptr;
+		mSmallBlurVertical = nullptr;
+		mMediumBlurHorizontal = nullptr;
+		mMediumBlurVertical = nullptr;
+		mLargeBlurHorizontal = nullptr;
+		mLargeBlurVertical = nullptr;
+		mCompositeTarget = nullptr;
+		mLightingBuffer = nullptr;
+		mLuminanceTarget = nullptr;
+		mFXAATarget = nullptr;
+		mShadowDepth = nullptr;
+		mFinalTarget = nullptr;
+		mSSAOTarget = nullptr;
+		mSSAOBlurTarget = nullptr;
+		mMotionBlurTarget = nullptr; 
+	}
+
+	void GraphicsSubsystem::ReinitializeRenderTargets( )
+	{
+		// Free all previous memory for rendertargets / framebuffers
+		FreeAllRenderTargets( );
+
+		// Reinitialize frame buffers
 		InitializeFrameBuffers( );
 
 		// Reset current rendertarget 

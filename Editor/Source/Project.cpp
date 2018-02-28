@@ -90,7 +90,7 @@ namespace Enjon
 
 		// Get cmake file and replace necessary tags
 		String cmakeFile = Enjon::Utils::FindReplaceAll( mEditor->GetCompileProjectCMakeTemplate(), "#PROJECTNAME", mProjectName );
-		cmakeFile = Utils::FindReplaceAll( cmakeFile, "#ENJON_DIRECTORY", "W:/enjon/" );
+		cmakeFile = Utils::FindReplaceAll( cmakeFile, "#ENJON_DIRECTORY", enginePath );
 		cmakeFile = Utils::FindReplaceAll( cmakeFile, "#PROJECT_BUILD_DIR", buildDir + "Intermediate/" ); 
 		cmakeFile = Utils::FindReplaceAll( cmakeFile, "#PROJECT_ROOT_DIR", mProjectPath );
 		cmakeFile = Utils::FindReplaceAll( cmakeFile, "#CURRENT_SOURCE_DIR", buildDir );
@@ -178,7 +178,7 @@ namespace Enjon
 		// Run the build bat for project
 #ifdef ENJON_SYSTEM_WINDOWS 
 		// TODO(): Spawn up a separate thread to call this so we know when it's finished
-		s32 code = system( String( "call " + mProjectPath + "Proc/" + "CompileProject.bat" + " " + Enjon::Utils::FindReplaceAll( mProjectPath, "/", "\\" ) + " " + mProjectName + " " + buildConfig ).c_str() ); 
+		s32 code = system( String( "call " + mProjectPath + "Proc/" + "CompileProject.bat" + " " + Enjon::Utils::FindReplaceAll( mProjectPath, "/", "\\" ) + " " + mProjectName + " " + buildConfig + " " + visualStudioPath ).c_str() ); 
 		if ( code == 0 )
 		{
 			// Success...

@@ -173,6 +173,11 @@ namespace Enjon
 			/**
 			*@brief
 			*/
+			void FreeAllRenderTargets( );
+
+			/**
+			*@brief
+			*/
 			void InitializeFrameBuffers();
 			
 			/**

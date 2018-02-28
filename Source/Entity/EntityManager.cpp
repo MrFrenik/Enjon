@@ -614,6 +614,13 @@ namespace Enjon
 			delete c.second;
 			c.second = nullptr;
 		}
+
+		// Clear all lists to free memory
+		mNeedStartList.clear( );
+		mActiveEntities.clear( );
+		mNeedInitializationList.clear( );
+		mMarkedForAdd.clear( );
+		mMarkedForDestruction.clear( );
 	}
 
 	//---------------------------------------------------------------
@@ -731,6 +738,9 @@ namespace Enjon
 	void EntityManager::ForceCleanup( )
 	{
 		Cleanup( );
+
+		mNeedInitializationList.clear( );
+		mNeedStartList.clear( );
 	}
  
 	//==============================================================================
@@ -808,10 +818,37 @@ namespace Enjon
 		for ( auto& e : mMarkedForAdd )
 		{
 			mActiveEntities.push_back( e );
+
+			// Push back entity's components into need initialization/start lists
+			for ( auto& c : e->GetComponents( ) )
+			{ 
+				mNeedInitializationList.push_back( c );
+				mNeedStartList.push_back( c );
+			} 
 		}
 
 		// Clear the marked for add entities
 		mMarkedForAdd.clear( );
+
+		// If the application is running 
+		if ( Engine::GetInstance()->GetApplication()->GetApplicationState() == ApplicationState::Running )
+		{
+			// Process all components that need initialization from last frame
+			for ( auto& c : mNeedInitializationList )
+			{
+				c->Initialize( );
+			}
+
+			// Process all components that need startup from last frame 
+			for ( auto& c : mNeedStartList )
+			{
+				c->Start( );
+			} 
+
+			// Clear both lists
+			mNeedInitializationList.clear( );
+			mNeedStartList.clear( );
+		} 
 
 		// Update all components on entities
 		for ( auto& e : mActiveEntities )

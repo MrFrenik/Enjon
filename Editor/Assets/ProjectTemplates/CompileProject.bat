@@ -6,7 +6,9 @@ set buildConfig=%3
 set vsPath=%4
 
 if not defined DevEnvDir (
-	call "%vsPath%VC\vcvarsall.bat" x86
+	pushd "%vsPath%"
+	call VC\vcvarsall.bat x86
+	popd
 )
 
 echo Compiling %projName%...

@@ -42,14 +42,14 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mVisualStudioDir = "E:/Programs/MicrosoftVisualStudio14.0/";
-Enjon::String mProjectsDir = "W:/Projects/";
-Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -994,22 +994,22 @@ namespace Enjon
 			app->Initialize( );
 
 			// Run through all components for entities and call their initialize function
-			for ( auto& e : em->GetActiveEntities( ) )
-			{
-				for ( auto& c : e->GetComponents( ) )
-				{
-					c->Initialize( );
-				}
-			}
+			//for ( auto& e : em->GetActiveEntities( ) )
+			//{
+			//	for ( auto& c : e->GetComponents( ) )
+			//	{
+			//		c->Initialize( );
+			//	}
+			//}
 
-			// Run through all components for entities and call their start function
-			for ( auto& e : em->GetActiveEntities( ) )
-			{
-				for ( auto& c : e->GetComponents( ) )
-				{
-					c->Start( );
-				}
-			}
+			//// Run through all components for entities and call their start function
+			//for ( auto& e : em->GetActiveEntities( ) )
+			//{
+			//	for ( auto& c : e->GetComponents( ) )
+			//	{
+			//		c->Start( );
+			//	}
+			//}
 
 			// Turn on the physics simulation
 			PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
