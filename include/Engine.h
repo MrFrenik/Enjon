@@ -24,8 +24,10 @@ namespace Enjon
 	class MetaClass;
 	class Subsystem;
 	
+	class Engine;
 	class EngineConfig
 	{
+		friend Engine;
 		public:
 			EngineConfig() = default; 
 			Result ParseArguments(s32 argc, char** argv); 
@@ -34,8 +36,13 @@ namespace Enjon
 			String GetEngineResourcePath() const;
 
 			void SetRootPath( const String& path ); 
+
+			bool IsStandAloneApplication( ) const;
+
+			void SetIsStandAloneApplication( bool enabled );
 			
 		private:
+			bool mIsStandalone = false;
 			String mRootPath; 
 			String mProjectPath;
 	}; 
@@ -181,10 +188,18 @@ namespace Enjon
 			*/
 			GraphicsSubsystem* GetGraphicsSubsystem( ) const;
 
+			/**
+			* @brief
+			*/
 			void SetWorldTimeScale( const f32& timeScale )
 			{
 				mWorldTime.mTimeScale = timeScale;
 			}
+
+			/**
+			* @brief Don't call this unless you know what you're doing - which most likely, you don't. 
+			*/
+			void SetIsStandAloneApplication( bool enabled );
 
 		private:
 			
@@ -206,7 +221,6 @@ namespace Enjon
 			* @return b8 - Returns true if success and false if failure.
 			*/
 			Enjon::Result ProcessInput(Input* input, float dt);
-
 
 		private:
 

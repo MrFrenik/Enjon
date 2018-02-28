@@ -108,9 +108,13 @@ namespace Enjon
 		FileSystem::remove_all( buildDir + "Assets/Cache" );
 		FileSystem::remove_all( buildDir + "Assets/Fonts" );
 
+		// Copy engine assets
 		FileSystem::copy( engineAssetsPath + "Shaders/", buildDir + "Assets/Shaders", FileSystem::copy_options::recursive );
 		FileSystem::copy( engineAssetsPath + "Cache/", buildDir + "Assets/Cache", FileSystem::copy_options::recursive );
 		FileSystem::copy( engineAssetsPath + "Fonts/", buildDir + "Assets/Fonts", FileSystem::copy_options::recursive );
+
+		// Copy project assets
+		FileSystem::copy( mProjectPath + "Assets/", buildDir + "Assets/Cache", FileSystem::copy_options::recursive );
 
 #ifdef ENJON_SYSTEM_WINDOWS 
 		// Run the bat file to build and run the solution
@@ -150,7 +154,7 @@ namespace Enjon
 			FileSystem::copy( enginePath + "Build/Release/" + "glew32.dll", buildDir + "glew32.dll" ); 
 
 			// Remove intermediate directory after compilation
-			FileSystem::remove_all( buildDir + "Intermediate" );
+			//FileSystem::remove_all( buildDir + "Intermediate" );
 		}
 #endif
 	}

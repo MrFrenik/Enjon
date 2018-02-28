@@ -45,6 +45,8 @@ include_directories(
 # Add lib directories
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Release)
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Debug)
+link_directories(${ENJON_DIR}/Build/Debug)
+link_directories(${ENJON_DIR}/Build/Release)
 
 set(TARGET_GENERATED_DIR ${TARGET_BUILD_DIR}/Generator/Linked/)
 
@@ -56,115 +58,9 @@ file(
 		"${TARGET_SOURCE_DIR}/*.cpp"
 	)
 
-file(GLOB_RECURSE SRC_BASE
-	"${ENJON_INC}/Base/*.h"
-	"${ENJON_INC}/Base/*.inl"
-	"${ENJON_SRC}/Base/*.cpp")
-
-file(GLOB_RECURSE SRC_ENTITY
-	"${ENJON_INC}/Entity/*.h"
-	"${ENJON_SRC}/Entity/*.cpp"
-	"${ENJON_INC}/Entity/*.inl")
-
-file(GLOB_RECURSE SRC_MATH
-	"${ENJON_INC}/Math/*.h"
-	"${ENJON_SRC}/Math/*.cpp"
-	"${ENJON_INC}/Math/*.inl")
-
-file(GLOB_RECURSE SRC_PHYSICS
-	"${ENJON_INC}/Physics/*.h"
-	"${ENJON_SRC}/Physics/*.cpp"
-	"${ENJON_INC}/Physics/*.inl")
-
-file(GLOB_RECURSE SRC_UI
-	"${ENJON_INC}/ImGui/*.h"
-	"${ENJON_SRC}/ImGui/*.cpp"
-	"${ENJON_INC}/ImGui/*.inl")
-
-file(GLOB_RECURSE SRC_GRAPHICS
-	"${ENJON_INC}/Graphics/*.h"
-	"${ENJON_SRC}/Graphics/*.cpp"
-	"${ENJON_INC}/Graphics/*.inl")
-
-file(GLOB_RECURSE SRC_INPUT
-	"${ENJON_INC}/IO/*.h"
-	"${ENJON_SRC}/IO/*.cpp"
-	"${ENJON_INC}/IO/*.inl")
-
-file(GLOB_RECURSE SRC_SYSTEM
-	"${ENJON_INC}/System/*.h"
-	"${ENJON_SRC}/System/*.cpp"
-	"${ENJON_INC}/System/*.inl")
-
-file(GLOB_RECURSE SRC_RESOURCE
-	"${ENJON_INC}/Resource/*.h"
-	"${ENJON_SRC}/Resource/*.cpp"
-	"${ENJON_INC}/Resource/*.inl")
-
-file(GLOB_RECURSE SRC_SHADER_GRAPH
-	"${ENJON_INC}/Graphics/ShaderGraph/*.h"
-	"${ENJON_SRC}/Graphics/ShaderGraph/*.cpp"
-	"${ENJON_INC}/Graphics/ShaderGraph/*.inl")
-
-file(GLOB_RECURSE SRC_UTILS
-	"${ENJON_INC}/Utils/*.h"
-	"${ENJON_SRC}/Utils/*.cpp"
-	"${ENJON_INC}/Utils/*.inl")
-
-file(GLOB_RECURSE SRC_ASSET
-	"${ENJON_INC}/Asset/*.h"
-	"${ENJON_SRC}/Asset/*.cpp"
-	"${ENJON_INC}/Asset/*.inl")
-
-file(GLOB_RECURSE SRC_SERIALIZE
-	"${ENJON_INC}/Serialize/*.h"
-	"${ENJON_SRC}/Serialize/*.cpp"
-	"${ENJON_INC}/Serialize/*.inl")
-
-file(GLOB_RECURSE SRC_SCENE
-	"${ENJON_INC}/Scene/*.h"
-	"${ENJON_SRC}/Scene/*.cpp"
-	"${ENJON_INC}/Scene/*.inl")
-
-# Add all engine source files
-set(
-	GENERAL_SOURCES
-	${ENJON_INC}/Application.h
-	${ENJON_INC}/Console.h
-	${ENJON_INC}/CVarsSystem.h
-	${ENJON_INC}/Engine.h
-	${ENJON_INC}/Enjon.h
-	${ENJON_INC}/TypeCatalog.h
-	${ENJON_INC}/Subsystem.h
-	${ENJON_INC}/SubsystemCatalog.h
-
-	${ENJON_SRC}/Application.cpp
-	${ENJON_SRC}/Console.cpp
-	${ENJON_SRC}/CVarsSystem.cpp
-	${ENJON_SRC}/Engine.cpp
-	${ENJON_SRC}/TypeCatalog.cpp
-	${ENJON_SRC}/SubsystemCatalog.cpp
-	${ENJON_GENERATED_DIR}/Enjon_Generated.cpp
-	)
-
 set(
 		ALL_SRC 
 		${TARGET_SOURCES}
-		${SRC_BASE}
-		${SRC_ENTITY} 
-		${SRC_UTILS} 
-		${SRC_GRAPHICS} 
-		${SRC_RESOURCE} 
-		${SRC_SYSTEM} 
-		${SRC_INPUT} 
-		${SRC_UI} 
-		${SRC_PHYSICS} 
-		${SRC_MATH} 
-		${SRC_ASSET} 
-		${SRC_SCENE}
-		${SRC_SHADER_GRAPH}
-		${SRC_SERIALIZE}
-		${GENERAL_SOURCES}
 		${PROJECT_GEN_DIR}/${TARGET_NAME}_Generated.cpp
 		${TARGET_INTERMEDIATE_DIR}/main.cpp
 		${TARGET_INTERMEDIATE_DIR}/Defines.h
@@ -180,6 +76,7 @@ add_executable(${TARGET_NAME} ${ALL_SRC})
 add_definitions(-DENJON_STANDALONE_APPLICATION)
 
 # Link libraries to target
+target_link_libraries( ${TARGET_NAME} debug Enjond.lib optimized Enjon.lib )
 target_link_libraries( ${TARGET_NAME} debug Opengl32.lib optimized Opengl32.lib ) 
 target_link_libraries( ${TARGET_NAME} debug SDL2_d.lib optimized SDL2.lib )
 target_link_libraries( ${TARGET_NAME} debug SDL2main_d.lib optimized SDL2main.lib )

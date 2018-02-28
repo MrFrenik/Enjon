@@ -23,6 +23,8 @@ int main(int argc, char** argv)
 
 	// Set root path to engine
 	mConfig.SetRootPath( curDir ); 
+	// Declare that the engine will tick this as a stand alone application ( not running in editor )
+	mConfig.SetIsStandAloneApplication( true );
 
 	// Startup engine
 	Enjon::Result res = mEngine.StartUp( &mApp, mConfig ); 

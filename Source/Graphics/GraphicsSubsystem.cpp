@@ -590,13 +590,16 @@ namespace Enjon
 		// Clear default buffer
 		mWindow.Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
 
-		// Editor gui pass (ImGUI)
-#ifndef ENJON_STANDALONE_APPLICATION
-		ImGuiPass();
-#else
-		// Otherwise render back buffer (scene view) 
-		PresentBackBuffer( );
-#endif
+		// TODO(): Hate this : Compile it out
+		if ( Engine::GetInstance( )->GetConfig( ).IsStandAloneApplication( ) )
+		{
+			PresentBackBuffer( );
+		} 
+		else
+		{
+			// Otherwise Enjon Editor views
+			ImGuiPass(); 
+		}
 
 		mWindow.SwapBuffer();
 	}

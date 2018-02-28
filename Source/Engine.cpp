@@ -138,8 +138,15 @@ namespace Enjon
 	
 	//=======================================================
 
-	Enjon::Result Engine::InitSubsystems()
+	void Engine::SetIsStandAloneApplication( bool enabled )
 	{
+		mConfig.SetIsStandAloneApplication( enabled );
+	}
+	
+	//=======================================================
+
+	Enjon::Result Engine::InitSubsystems()
+	{ 
 		// Create new subsystem catalog
 		mSubsystemCatalog = new SubsystemCatalog();
 
@@ -173,7 +180,7 @@ namespace Enjon
 		 mLimiter.Init( 60.0f );
 
 		// Late init for systems that need it
-		Enjon::ImGuiManager::LateInit( mGraphics->GetWindow()->ConstCast< Window >()->GetSDLWindow() );
+		Enjon::ImGuiManager::LateInit( mGraphics->GetWindow()->ConstCast< Window >()->GetSDLWindow() ); 
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -447,6 +454,20 @@ namespace Enjon
 		assert( ( mRootPath.compare( "" ) != 0 ) );
 
 		return Result::SUCCESS;
+	}
+
+	//======================================================= 
+
+	void EngineConfig::SetIsStandAloneApplication( bool enabled )
+	{
+		mIsStandalone = enabled;
+	}
+
+	//======================================================= 
+
+	bool EngineConfig::IsStandAloneApplication( ) const
+	{
+		return mIsStandalone;
 	}
 
 	//======================================================= 
