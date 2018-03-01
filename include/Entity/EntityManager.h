@@ -199,6 +199,21 @@ namespace Enjon
 			/// @brief Returns whether or not entity is valid
 			b8 Entity::IsValid();
 
+			/*
+			* @brief
+			*/
+			Vec3 Forward( );
+
+			/*
+			* @brief
+			*/
+			Vec3 Right( );
+
+			/*
+			* @brief
+			*/
+			Vec3 Up( );
+
 			const Vector< EntityHandle >& GetChildren() const { return mChildren; }
 
 			const Vector<u32>& GetComponentIndicies( ) const 
@@ -312,12 +327,12 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			EntityManager();
+			EntityManager( ) = default;
 
 			/*
 			* @brief
 			*/
-			~EntityManager();
+			~EntityManager( ) = default;
 			
 			/*
 			* @brief
@@ -348,7 +363,6 @@ namespace Enjon
 			*@brief
 			*/
 			virtual Enjon::Result Shutdown( ) override; 
-
 
 			/**
 			*@brief

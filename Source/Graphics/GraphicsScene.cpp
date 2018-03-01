@@ -6,6 +6,7 @@
 #include "Graphics/QuadBatch.h"
 #include "Graphics/GLTexture.h"
 #include "Graphics/Material.h"
+#include "Graphics/Camera.h"
 #include "Graphics/GraphicsSubsystem.h" 
 #include "SubsystemCatalog.h"
 #include "Engine.h"
@@ -80,6 +81,20 @@ namespace Enjon {
 			default:
 			case RenderableSortType::NONE: break;
 		} 
+	}
+
+	//====================================================================================================
+
+	Camera* GraphicsScene::GetActiveCamera( ) const
+	{
+		return mActiveCamera;
+	}
+
+	//====================================================================================================
+
+	void GraphicsScene::SetActiveCamera( Camera* camera )
+	{
+		mActiveCamera = camera;
 	}
 
 	//====================================================================================================
@@ -223,6 +238,41 @@ namespace Enjon {
 			light->SetGraphicsScene(nullptr);
 		}
 	}
+
+	//==================================================================================================
+
+	void GraphicsScene::AddCamera( Camera* camera )
+	{
+		auto query = mCameras.find( camera );
+		if ( query == mCameras.end( ) )
+		{
+			mCameras.insert( camera );
+			camera->SetGraphicsScene( this );
+
+			// Set the active camera to this
+			mActiveCamera = camera;
+		}
+	}
+
+	//==================================================================================================
+
+	void GraphicsScene::RemoveCamera( Camera* camera )
+	{
+		auto query = mCameras.find( camera );
+		if ( query != mCameras.end( ) )
+		{
+			mCameras.erase( camera );
+			camera->SetGraphicsScene( nullptr );
+
+			// Set active camera to next avilable camera
+			if ( mCameras.size( ) )
+			{
+				SetActiveCamera( *mCameras.begin() );
+			}
+		}
+	}
+
+	//==================================================================================================
 
 	void GraphicsScene::SetAmbientSettings(AmbientSettings& settings)
 	{

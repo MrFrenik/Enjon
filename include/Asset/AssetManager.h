@@ -46,9 +46,9 @@ namespace Enjon
 			AssetManager(const String& name, const String& assetsPath);
 
 			/**
-			*@brief Virtual destructor
+			*@brief destructor
 			*/
-			~AssetManager();
+			~AssetManager( ) = default;
 
 			/**
 			*@brief

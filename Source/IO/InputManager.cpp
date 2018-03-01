@@ -5,20 +5,6 @@
 
 namespace Enjon 
 { 
-	Input::Input() 
-		: mMouseCoords(0.0f) 
-	{
-		Initialize();
-	}
-
-	Input::~Input()
-	{
-		if ( GamePadController.ControllerHandle )
-		{
-			SDL_GameControllerClose( GamePadController.ControllerHandle );
-		}
-	}
-
 	Result Input::Initialize()
 	{
 		// Set up GamePadController
@@ -63,7 +49,15 @@ namespace Enjon
 
 	Result Input::Shutdown()
 	{
-		// Do things here...
+		if ( GamePadController.ControllerHandle )
+		{
+			SDL_GameControllerClose( GamePadController.ControllerHandle );
+		}
+ 
+		mKeyMap.clear( );
+		mPreviousKeyMap.clear();
+		mButtonMap.clear();
+		mPreviousButtonMap.clear();
 
 		return Result::SUCCESS;
 	}

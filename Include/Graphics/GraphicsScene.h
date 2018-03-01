@@ -17,6 +17,7 @@ namespace Enjon {
 	class PointLight;
 	class SpotLight;
 	class QuadBatch;
+	class Camera;
 
 	enum class RenderableSortType
 	{
@@ -63,62 +64,72 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void AddRenderable(Renderable* renderable);
+			void AddRenderable( Renderable* renderable );
 
 			/*
 			* @brief
 			*/
-			void AddNonDepthTestedRenderable(Renderable* renderable);
+			void AddNonDepthTestedRenderable( Renderable* renderable );
 
 			/*
 			* @brief
 			*/
-			void RemoveRenderable(Renderable* renderable);
+			void RemoveRenderable( Renderable* renderable );
 
 			/*
 			* @brief
 			*/
-			void RemoveNonDepthTestedRenderable(Renderable* renderable);
+			void RemoveNonDepthTestedRenderable( Renderable* renderable );
 
 			/*
 			* @brief
 			*/
-			void AddQuadBatch(QuadBatch* batch);
+			void AddQuadBatch( QuadBatch* batch );
 
 			/*
 			* @brief
 			*/
-			void RemoveQuadBatch(QuadBatch* batch);
+			void RemoveQuadBatch( QuadBatch* batch );
 
 			/*
 			* @brief
 			*/
-			void AddDirectionalLight(DirectionalLight* light);
+			void AddDirectionalLight( DirectionalLight* light );
 			
 			/*
 			* @brief
 			*/
-			void RemoveDirectionalLight(DirectionalLight* light);
+			void RemoveDirectionalLight( DirectionalLight* light );
 
 			/*
 			* @brief
 			*/
-			void AddPointLight(PointLight* light);
+			void AddPointLight( PointLight* light );
 
 			/*
 			* @brief
 			*/
-			void RemovePointLight(PointLight* light);
+			void RemovePointLight( PointLight* light );
 
 			/*
 			* @brief
 			*/
-			void AddSpotLight(SpotLight* light);
+			void AddSpotLight( SpotLight* light );
 
 			/*
 			* @brief
 			*/
-			void RemoveSpotLight(SpotLight* light);
+			void RemoveSpotLight( SpotLight* light );
+
+			/*
+			* @brief
+			*/
+			void AddCamera( Camera* camera );
+
+			/*
+			* @brief
+			*/
+			void RemoveCamera( Camera* camera );
 
 			/*
 			* @brief
@@ -128,52 +139,52 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void SetAmbientSettings(AmbientSettings& settings);
+			void SetAmbientSettings( AmbientSettings& settings );
 
 			/*
 			* @brief
 			*/
-			void SetAmbientColor(ColorRGBA32& color);
+			void SetAmbientColor( ColorRGBA32& color );
 
 			/*
 			* @brief
 			*/
-			void SetSun(DirectionalLight* light) { mSun = light; }
-			
-			/*
-			* @brief
-			*/
-			DirectionalLight* GetSun() const { return mSun; }
+			const Vector<Renderable*>& GetRenderables( ) const;
 
 			/*
 			* @brief
 			*/
-			const std::vector<Renderable*>& GetRenderables() const;
+			const Vector<Renderable*>& GetNonDepthTestedRenderables();
 
 			/*
 			* @brief
 			*/
-			const std::vector<Renderable*>& GetNonDepthTestedRenderables();
+			const HashSet<QuadBatch*>& GetQuadBatches() const { return mQuadBatches; }
 
 			/*
 			* @brief
 			*/
-			const std::set<QuadBatch*>& GetQuadBatches() const { return mQuadBatches; }
+			const HashSet<DirectionalLight*>& GetDirectionalLights() const { return mDirectionalLights; }
 
 			/*
 			* @brief
 			*/
-			const std::set<DirectionalLight*>& GetDirectionalLights() const { return mDirectionalLights; }
+			const HashSet<PointLight*>& GetPointLights() const { return mPointLights; }
 
 			/*
 			* @brief
 			*/
-			const std::set<PointLight*>& GetPointLights() const { return mPointLights; }
+			const HashSet<SpotLight*>& GetSpotLights() const { return mSpotLights; }
 
 			/*
 			* @brief
 			*/
-			const std::set<SpotLight*>& GetSpotLights() const { return mSpotLights; }
+			Camera* GetActiveCamera( ) const;
+
+			/*
+			* @brief
+			*/
+			void SetActiveCamera( Camera* camera );
 
 		private:
 			
@@ -185,7 +196,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void SortRenderables( RenderableSortType type = RenderableSortType::DEPTH );
+			void SortRenderables( RenderableSortType type = RenderableSortType::MATERIAL );
 
 		private:
 
@@ -206,13 +217,16 @@ namespace Enjon {
  
 			Vector<Renderable*> mNonDepthTestedRenderables;
 
-			std::set<Renderable*> mRenderables;
-			std::set<QuadBatch*> mQuadBatches;
-			std::set<DirectionalLight*> mDirectionalLights;
-			std::set<PointLight*> mPointLights;
-			std::set<SpotLight*> mSpotLights; 
+			HashSet<Camera*> mCameras;
+			HashSet<Renderable*> mRenderables;
+			HashSet<QuadBatch*> mQuadBatches;
+			HashSet<DirectionalLight*> mDirectionalLights;
+			HashSet<PointLight*> mPointLights;
+			HashSet<SpotLight*> mSpotLights; 
 			AmbientSettings mAmbientSettings; 
-			DirectionalLight* mSun = nullptr; 
+
+			// Not sure that I like this "solution"
+			Camera* mActiveCamera = nullptr;
 
 			// Scene should own all the data for renderables, lights, etc. and should hand those out on request from components
 			// Or could have a graphics subsystem which holds all of these objects?

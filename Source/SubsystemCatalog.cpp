@@ -2,6 +2,11 @@
 // @file: SubsystemCatalog.cpp
 
 #include "SubsystemCatalog.h"
+#include "Asset/AssetManager.h"
+#include "Physics/PhysicsSubsystem.h"
+#include "Entity/EntityManager.h"
+#include "Graphics/GraphicsSubsystem.h"
+#include "IO/InputManager.h"
 
 #include <assert.h>
 
@@ -22,9 +27,18 @@ namespace Enjon
 	SubsystemCatalog::~SubsystemCatalog()
 	{ 
 		// Shutdown individual subsystems
-		for ( auto& s : mSubsystems )
-		{
-			s.second->Shutdown( );
+		// NOTE(): Need to explicit in ordering of shutdowns to prevent crashes!
+
+		EngineSubsystem( EntityManager )->Shutdown( ); 
+		EngineSubsystem( AssetManager )->Shutdown( );
+		EngineSubsystem( Input )->Shutdown( );
+		EngineSubsystem( PhysicsSubsystem )->Shutdown( ); 
+		EngineSubsystem( GraphicsSubsystem )->Shutdown( );
+
+		// Delete all subsystems to clear memory
+		// NOTE(): No subsystem should have an explicit destructor! Not safe to do so, since order or shutdown matters!
+		for ( auto& s : mSubsystems ) 
+		{ 
 			delete s.second;
 			s.second = nullptr; 
 		}

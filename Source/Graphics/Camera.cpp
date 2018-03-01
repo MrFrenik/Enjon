@@ -2,6 +2,7 @@
 #include "Math/Quaternion.h"
 #include "Math/Constants.h"
 #include "Math/Vec2.h"
+#include "Math/Transform.h"
 #include "Engine.h"
 #include "SubsystemCatalog.h"
 #include "Graphics/GraphicsSubsystem.h"
@@ -12,28 +13,28 @@ namespace Enjon
 	//=======================================================================================================
 
 	Camera::Camera()
-		: ViewPortAspectRatio(4.0f / 3.0f), ScreenDimensions(Vec2(800, 600))
+		: mViewPortAspectRatio(4.0f / 3.0f), mScreenDimensions(Vec2(800, 600))
 	{
 	}
 
 	//=======================================================================================================
 
 	Camera::Camera(const u32& Width, const u32& Height)
-		: ViewPortAspectRatio((Enjon::f32)Width / (Enjon::f32)Height), ScreenDimensions(Vec2(Width, Height))
+		: mViewPortAspectRatio((Enjon::f32)Width / (Enjon::f32)Height), mScreenDimensions(Vec2(Width, Height))
 	{
 	}
 
 	//=======================================================================================================
 
 	Camera::Camera(const iVec2& dimensions)
-		: ViewPortAspectRatio((Enjon::f32)dimensions.x / (Enjon::f32)dimensions.y), ScreenDimensions(Vec2(dimensions.x, dimensions.y))
+		: mViewPortAspectRatio((Enjon::f32)dimensions.x / (Enjon::f32)dimensions.y), mScreenDimensions(Vec2(dimensions.x, dimensions.y))
 	{
 	}
 
 	//=======================================================================================================
 
 	Camera::Camera( const Camera& Other )
-		: ViewPortAspectRatio( Other.ViewPortAspectRatio ), ScreenDimensions( Other.ScreenDimensions ), Transform( Other.Transform )
+		: mViewPortAspectRatio( Other.mViewPortAspectRatio ), mScreenDimensions( Other.mScreenDimensions ), mTransform( Other.mTransform )
 	{ 
 	}
 
@@ -41,7 +42,14 @@ namespace Enjon
 
 	void Camera::SetPosition(const Vec3& position)
 	{
-		Transform.Position = position;
+		mTransform.Position = position;
+	}
+
+	//=======================================================================================================
+
+	void Camera::SetTransform( const Transform& transform )
+	{
+		mTransform = transform;
 	}
 
 	//=======================================================================================================
@@ -78,7 +86,7 @@ namespace Enjon
 
 	void Camera::LookAt(const Vec3& Position, const Vec3& Up)
 	{
-		Vec3& Pos = Transform.Position;
+		Vec3& Pos = mTransform.Position;
 
 		// Ignore, since you cannot look at yourself
 		if ((Pos - Position).Length() < 0.001f) return;
@@ -93,14 +101,14 @@ namespace Enjon
 		Mat4 LA = Mat4::LookAt(Pos, Position, Up);
 
 		// Set Transform
-		Transform.Rotation = Enjon::Mat4ToQuaternion(LA);
+		mTransform.Rotation = Enjon::Mat4ToQuaternion(LA);
 	} 
 
 	//=======================================================================================================
 
 	void Camera::SetRotation( const Quaternion& q )
 	{
-		Transform.Rotation = q;
+		mTransform.Rotation = q;
 	}
 
 	//=======================================================================================================
@@ -110,49 +118,49 @@ namespace Enjon
 		Quaternion X = Quaternion::AngleAxis(Yaw, 	Vec3(0, 1, 0)); 	// Absolute Up
 		Quaternion Y = Quaternion::AngleAxis(Pitch, Right());			// Relative Right
 
-		Transform.Rotation = X * Y * Transform.Rotation;
+		mTransform.Rotation = X * Y * mTransform.Rotation;
 	}
 
 	//=======================================================================================================
 
 	Vec3 Camera::Forward() const
 	{
-		return Transform.Rotation * Vec3(0, 0, -1);
+		return mTransform.Rotation * Vec3(0, 0, -1);
 	}
 
 	//=======================================================================================================
 
 	Vec3 Camera::Backward() const
 	{
-		return Transform.Rotation * Vec3(0, 0, 1);
+		return mTransform.Rotation * Vec3(0, 0, 1);
 	}
 
 	//=======================================================================================================
 
 	Vec3 Camera::Right() const
 	{
-		return Transform.Rotation * Vec3(1, 0, 0);
+		return mTransform.Rotation * Vec3(1, 0, 0);
 	}
 
 	//=======================================================================================================
 
 	Vec3 Camera::Left() const
 	{
-		return Transform.Rotation * Vec3(-1, 0, 0);
+		return mTransform.Rotation * Vec3(-1, 0, 0);
 	}
 
 	//=======================================================================================================
 
 	Vec3 Camera::Up() const
 	{
-		return Transform.Rotation * Vec3(0, 1, 0);
+		return mTransform.Rotation * Vec3(0, 1, 0);
 	}
 
 	//=======================================================================================================
 
 	Vec3 Camera::Down() const
 	{
-		return Transform.Rotation * Vec3(0, -1, 0);
+		return mTransform.Rotation * Vec3(0, -1, 0);
 	}
 
 	//=======================================================================================================
@@ -173,31 +181,31 @@ namespace Enjon
 
 	Mat4 Camera::GetProjection() const
 	{
-		Mat4 Projection;
+		Mat4 projection;
 
-		switch(ProjType)
+		switch( mProjType )
 		{
 			case ProjectionType::Perspective:
 			{
-				Projection = Mat4::Perspective(FOV, ViewPortAspectRatio, NearPlane, FarPlane);
+				projection = Mat4::Perspective( mFOV, mViewPortAspectRatio, mNearPlane, mFarPlane );
 			} break;
 
 			case ProjectionType::Orthographic:
 			{
-				f32 Distance = 0.5f * (FarPlane - NearPlane);
-				Projection = Mat4::Orthographic(
-														-OrthographicScale * ViewPortAspectRatio, 
-														OrthographicScale * ViewPortAspectRatio, 
-														-OrthographicScale, 
-														OrthographicScale, 
-														-Distance, 
-														Distance	
+				f32 distance = 0.5f * ( mFarPlane - mNearPlane );
+				projection = Mat4::Orthographic(
+														-mOrthographicScale * mViewPortAspectRatio, 
+														mOrthographicScale * mViewPortAspectRatio, 
+														-mOrthographicScale, 
+														mOrthographicScale, 
+														-distance, 
+														distance	
 													);
 
 			} break;
 		}
 
-		return Projection;
+		return projection;
 	}
 
 	//=======================================================================================================
@@ -208,7 +216,7 @@ namespace Enjon
 		//Mat4 rotation = QuaternionToMat4(Transform.Rotation);
 		//Mat4 translate = Mat4::Translate(Transform.Position * -1.0f); 
 
-		return Mat4::LookAt( Transform.Position, Transform.Position + Forward( ), Up( ) );
+		return Mat4::LookAt( mTransform.Position, mTransform.Position + Forward( ), Up( ) );
 
 		//return (scale * rotation * translate);
 	}
@@ -279,6 +287,20 @@ namespace Enjon
 	Ray Camera::ScreenToWorldRay( const Vec2& coords )
 	{
 		return this->ScreenToWorldRay( coords.x, coords.y );
+	}
+
+	//=======================================================================================================
+
+	void Camera::SetGraphicsScene( GraphicsScene* scene )
+	{
+		mGraphicsScene = scene;
+	}
+
+	//=======================================================================================================
+
+	GraphicsScene* Camera::GetGraphicsScene( ) const
+	{
+		return mGraphicsScene;
 	}
 
 	//=======================================================================================================

@@ -49,12 +49,6 @@ namespace Enjon
 	
 	//============================================================================================ 
 			
-	AssetManager::~AssetManager()
-	{ 
-	}
-	
-	//============================================================================================ 
-			
 	void AssetManager::RegisterLoaders( )
 	{
 		// Register the loaders with manager 

@@ -42,14 +42,14 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-Enjon::String mProjectsDir = "W:/Projects/";
-Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -1129,6 +1129,13 @@ namespace Enjon
 		GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
 		PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem ); 
 
+		// Set up camera and then add to graphics scene
+		mEditorCamera = Camera( mGfx->GetViewport() );
+		mEditorCamera.SetNearFar( 0.01f, 1000.0f );
+		mEditorCamera.SetProjection(ProjectionType::Perspective);
+		mEditorCamera.SetPosition(Vec3(0, 5, 10)); 
+		mGfx->GetGraphicsScene( )->AddCamera( &mEditorCamera );
+
 		// Pause the physics simulation
 		physx->PauseSystem( true ); 
 
@@ -1600,7 +1607,7 @@ namespace Enjon
 			f32 avgDT = Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( );
 
 			// Set camera position
-			camera->Transform.Position += mCameraSpeed * avgDT * velDir;
+			camera->SetPosition( camera->GetPosition() + ( mCameraSpeed * avgDT * velDir ) );
 
 			// Set camera rotation
 			// Get mouse input and change orientation of camera

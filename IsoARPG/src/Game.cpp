@@ -850,7 +850,6 @@ Enjon::Result Game::Initialize()
 		scene->AddRenderable( mRock2.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
 		scene->AddQuadBatch(mBatch);
 		scene->AddQuadBatch(mTextBatch);
-		scene->SetSun(mSun);
 		scene->SetAmbientColor(Enjon::SetOpacity(Enjon::RGBA32_White(), 0.1f));
 
 		// Set graphics camera position
@@ -1380,9 +1379,9 @@ Enjon::Result Game::ProcessInput( f32 dt )
 
 	if ( mRotateCamera && mLockCamera )
 	{
-		Enjon::Camera* camera = mGfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >();
-		camera->Transform.Position += camera->Right( ).Normalize( ) * mCameraSpeed;
-		camera->LookAt( mSerializedEntity.Get()->GetWorldPosition() );
+		//Enjon::Camera* camera = mGfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >();
+		//camera->Transform.Position += camera->Right( ).Normalize( ) * mCameraSpeed;
+		//camera->LookAt( mSerializedEntity.Get()->GetWorldPosition() );
 	}
 
 	if ( mMovementOn )
@@ -1487,7 +1486,7 @@ Enjon::Result Game::ProcessInput( f32 dt )
 
 		if (velDir.Length()) velDir = Enjon::Vec3::Normalize(velDir);
 
-		camera->Transform.Position += mCameraSpeed * dt * velDir; 
+		//camera->Transform.Position += mCameraSpeed * dt * velDir; 
 
 		// Set mouse sensitivity
 		f32 MouseSensitivity = 10.0f;

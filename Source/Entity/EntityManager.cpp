@@ -3,6 +3,7 @@
 #include "Entity/Components/GraphicsComponent.h"
 #include "Entity/Components/PointLightComponent.h"
 #include "Entity/Components/RigidBodyComponent.h"
+#include "Entity/Components/CameraComponent.h"
 #include "SubsystemCatalog.h"
 #include "Serialize/EntityArchiver.h"
 #include "Application.h"
@@ -565,6 +566,28 @@ namespace Enjon
  
 	//---------------------------------------------------------------
 
+	Vec3 Entity::Forward( )
+	{
+		// Return -Z axis ( for right handed system )
+		return GetWorldRotation( ) * -Vec3::ZAxis( );
+	}
+ 
+	//---------------------------------------------------------------
+
+	Vec3 Entity::Right( )
+	{
+		return GetWorldRotation( ) * Vec3::XAxis( ); 
+	}
+ 
+	//---------------------------------------------------------------
+
+	Vec3 Entity::Up( )
+	{
+		return GetWorldRotation( ) * Vec3::YAxis( ); 
+	}
+	
+	//---------------------------------------------------------------
+
 	void Entity::SetUUID( const UUID& uuid )
 	{
 		mUUID = uuid;
@@ -583,47 +606,7 @@ namespace Enjon
 	}
  
 	//---------------------------------------------------------------
-	EntityManager::EntityManager()
-	{
-		for (auto i = 0; i < mComponents.size(); i++)
-		{
-			mComponents.at(i) = nullptr;
-		}
 
-		mNextAvailableID = 0;
-		//mEntities = new std::array<Entity, MAX_ENTITIES>;
-		mEntities.resize( MAX_ENTITIES );
-	}
-
-	//---------------------------------------------------------------
-	EntityManager::~EntityManager()
-	{
-		// Detach all components from entities
-		for (u32 i = 0; i < MAX_ENTITIES; ++i)
-		{
-			//Destroy( mEntities->at( i ).GetHandle( ) );	
-			Destroy( mEntities.at( i ).GetHandle( ) );	
-		} 
-
-		// Force destroy all entities and their components
-		ForceCleanup( );
-
-		// Deallocate all components
-		for ( auto& c : mComponents )
-		{
-			delete c.second;
-			c.second = nullptr;
-		}
-
-		// Clear all lists to free memory
-		mNeedStartList.clear( );
-		mActiveEntities.clear( );
-		mNeedInitializationList.clear( );
-		mMarkedForAdd.clear( );
-		mMarkedForDestruction.clear( );
-	}
-
-	//---------------------------------------------------------------
 	u32 EntityManager::FindNextAvailableID()
 	{
 		// Iterate from current available id to MAX_ENTITIES
@@ -815,10 +798,21 @@ namespace Enjon
 
 	Result EntityManager::Initialize( )
 	{ 
+		// Set all components to null
+		for (auto i = 0; i < mComponents.size(); i++)
+		{
+			mComponents.at(i) = nullptr;
+		}
+
+		// Reset available id and then resize entity storage array
+		mNextAvailableID = 0;
+		mEntities.resize( MAX_ENTITIES );
+
 		// Register engine components here
 		RegisterComponent< GraphicsComponent >( );
 		RegisterComponent< PointLightComponent >( );
-		RegisterComponent< RigidBodyComponent >( );
+		RegisterComponent< RigidBodyComponent >( ); 
+		RegisterComponent< CameraComponent >( );
 
 		return Result::SUCCESS;
 	}
@@ -833,14 +827,7 @@ namespace Enjon
 		// Add all new entities into active entities
 		for ( auto& e : mMarkedForAdd )
 		{
-			mActiveEntities.push_back( e );
-
-			// Push back entity's components into need initialization/start lists
-			//for ( auto& c : e->GetComponents( ) )
-			//{ 
-			//	mNeedInitializationList.push_back( c );
-			//	mNeedStartList.push_back( c );
-			//} 
+			mActiveEntities.push_back( e ); 
 		}
 
 		// Clear the marked for add entities
@@ -890,6 +877,30 @@ namespace Enjon
 
 	Result EntityManager::Shutdown( )
 	{ 
+		// Detach all components from entities
+		for (u32 i = 0; i < MAX_ENTITIES; ++i)
+		{
+			//Destroy( mEntities->at( i ).GetHandle( ) );	
+			Destroy( mEntities.at( i ).GetHandle( ) );	
+		} 
+
+		// Force destroy all entities and their components
+		ForceCleanup( );
+
+		// Deallocate all components
+		for ( auto& c : mComponents )
+		{
+			delete c.second;
+			c.second = nullptr;
+		}
+
+		// Clear all lists to free memory
+		mNeedStartList.clear( );
+		mActiveEntities.clear( );
+		mNeedInitializationList.clear( );
+		mMarkedForAdd.clear( );
+		mMarkedForDestruction.clear( );
+
 		return Result::SUCCESS;
 	}
 

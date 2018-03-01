@@ -59,6 +59,7 @@
 #include "Entity/Components/GraphicsComponent.h" 
 #include "Entity/Components/BoxComponent.h" 
 #include "Entity/Components/RigidBodyComponent.h" 
+#include "Entity/Components/CameraComponent.h"
 
 #include "Application.h"
 #include "TypeCatalog.h"

@@ -181,12 +181,12 @@ namespace Enjon
 			/**
 			* @brief Constructor
 			*/
-			Input();
+			Input( ) = default;
 
 			/**
 			* @brief Destructor
 			*/
-			~Input(); 
+			~Input( ) = default;
 
 			/**
 			* @brief

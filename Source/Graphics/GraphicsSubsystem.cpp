@@ -55,48 +55,6 @@ namespace Enjon
 { 
 	//======================================================================================================
 
-	GraphicsSubsystem::GraphicsSubsystem()
-	{
-	}
-
-	//======================================================================================================
-
-	GraphicsSubsystem::~GraphicsSubsystem()
-	{
-	}
-
-	//======================================================================================================
-
-	Enjon::Result GraphicsSubsystem::Shutdown()
-	{ 
-		// Delete auxillary items
-		delete( mBatch );
-		delete( mFullScreenQuad );
-		delete[] mModelMatricies; 
-		delete mInstancedRenderable;
-
-		mInstancedRenderable = nullptr;
-		mFullScreenQuad = nullptr;
-		mBatch = nullptr;
-		mModelMatricies = nullptr;
-
-		// Free all memory for render targets / frame buffers
-		FreeAllRenderTargets( );
-
-		// Shutdown shader manager
-		ShaderManager::DeleteShaders( );
-
-		// Shutdown font manager
-		FontManager::DeleteFonts( );
-
-		// Clear noise kernel
-		mSSAOKernel.clear( );
- 
-		return Result::SUCCESS; 
-	}
-
-	//======================================================================================================
-
 	Enjon::Result GraphicsSubsystem::Initialize()
 	{
 		// TODO(John): Need to have a way to have an .ini that's read or grab these values from a static
@@ -111,10 +69,10 @@ namespace Enjon
 		Enjon::FontManager::Init();
 
 		// Initialize scene camera
-		mGraphicsSceneCamera = Enjon::Camera(mWindow.GetViewport());
-		mGraphicsSceneCamera.SetNearFar( 0.01f, 1000.0f );
-		mGraphicsSceneCamera.SetProjection(ProjectionType::Perspective);
-		mGraphicsSceneCamera.SetPosition(Vec3(0, 5, 10));
+		//mGraphicsSceneCamera = Enjon::Camera(mWindow.GetViewport());
+		//mGraphicsSceneCamera.SetNearFar( 0.01f, 1000.0f );
+		//mGraphicsSceneCamera.SetProjection(ProjectionType::Perspective);
+		//mGraphicsSceneCamera.SetPosition(Vec3(0, 5, 10));
 
 		// Initialize sprite batch ( not really needed, I don't think...)
 		mBatch 						= new SpriteBatch();
@@ -212,6 +170,36 @@ namespace Enjon
 			mActiveShader = const_cast< Shader*> ( shader );
 			mActiveShader->Use( );
 		}
+	} 
+
+	//======================================================================================================
+
+	Enjon::Result GraphicsSubsystem::Shutdown()
+	{ 
+		// Delete auxillary items
+		delete( mBatch );
+		delete( mFullScreenQuad );
+		delete[] mModelMatricies; 
+		delete mInstancedRenderable;
+
+		mInstancedRenderable = nullptr;
+		mFullScreenQuad = nullptr;
+		mBatch = nullptr;
+		mModelMatricies = nullptr;
+
+		// Free all memory for render targets / frame buffers
+		FreeAllRenderTargets( );
+
+		// Shutdown shader manager
+		ShaderManager::DeleteShaders( );
+
+		// Shutdown font manager
+		FontManager::DeleteFonts( );
+
+		// Clear noise kernel
+		mSSAOKernel.clear( );
+ 
+		return Result::SUCCESS; 
 	}
 
 	//======================================================================================================
@@ -662,7 +650,12 @@ namespace Enjon
  
 		// Get sorted renderables by material
 		const Vector<Renderable*>& sortedRenderables = mGraphicsScene.GetRenderables();
-		const std::set<QuadBatch*>& sortedQuadBatches = mGraphicsScene.GetQuadBatches(); 
+		const HashSet<QuadBatch*>& sortedQuadBatches = mGraphicsScene.GetQuadBatches(); 
+
+		Camera* camera = mGraphicsScene.GetActiveCamera( );
+		Mat4 viewMtx = camera->GetView( );
+		Mat4 projMtx = camera->GetProjection( );
+		Mat4 viewProjMtx = camera->GetViewProjection( );
 
 		// Shader graph to be used
 		Enjon::AssetHandle< Enjon::ShaderGraph > sg; 
@@ -689,9 +682,9 @@ namespace Enjon
 						material = curMaterial;
 
 						sgShader->Use( );
-						sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
+						sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
 						sgShader->SetUniform( "uWorldTime", wt );
-						sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
+						sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
 						sgShader->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix );
 						material->Bind( sgShader );
 					} 
@@ -709,7 +702,7 @@ namespace Enjon
 		if (!sortedQuadBatches.empty())
 		{
 			// Set shared uniform
-			shader->SetUniform("u_camera", mGraphicsSceneCamera.GetViewProjection());
+			shader->SetUniform("u_camera", camera->GetViewProjection());
 
 			const Material* material = nullptr;
 			for (auto& quadBatch : sortedQuadBatches)
@@ -741,9 +734,9 @@ namespace Enjon
 						}
 						
 						sgShader->Use( );
-						sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
+						sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
 						sgShader->SetUniform( "uWorldTime", wt );
-						sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
+						sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
 						sgShader->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix );
 						material->Bind( sgShader ); 
 					}
@@ -765,8 +758,8 @@ namespace Enjon
 		shader->Use( );
 		{
 			// Set set shared uniform
-			shader->SetUniform( "uProjection", mGraphicsSceneCamera.GetProjection( ) );
-			shader->SetUniform( "uView", mGraphicsSceneCamera.GetView( ) );
+			shader->SetUniform( "uProjection", camera->GetProjection( ) );
+			shader->SetUniform( "uView", camera->GetView( ) );
 
 			// Get material
 			const Material* material = mInstancedRenderable->GetMaterial( ).Get();
@@ -818,7 +811,7 @@ namespace Enjon
 		mGbuffer->Unbind();
 
 		// Store the previous view projection matrix
-		mPreviousViewProjectionMatrix = mGraphicsSceneCamera.GetViewProjection( );
+		mPreviousViewProjectionMatrix = camera->GetViewProjection( );
 
 		glEnable( GL_DEPTH_TEST );
 		glCullFace( GL_BACK );
@@ -830,6 +823,8 @@ namespace Enjon
 	{
 		Enjon::iVec2 screenRes = GetViewport( ); 
 
+		Camera* camera = mGraphicsScene.GetActiveCamera( );
+
 		// SSAO pass
 		mSSAOBlurTarget->Bind( );
 		{
@@ -839,17 +834,17 @@ namespace Enjon
 			shader->Use( );
 			{ 
 				// Upload kernel uniform
-				shader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
-				shader->SetUniform( "uProjMatrixInv", Mat4::Inverse( mGraphicsSceneCamera.GetProjection( ) ) );
-				shader->SetUniform( "uViewMatrixInv", Mat4::Inverse( mGraphicsSceneCamera.GetView( ) ) );
-				shader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
+				shader->SetUniform( "projection", camera->GetProjection( ) );
+				shader->SetUniform( "uProjMatrixInv", Mat4::Inverse( camera->GetProjection( ) ) );
+				shader->SetUniform( "uViewMatrixInv", Mat4::Inverse( camera->GetView( ) ) );
+				shader->SetUniform( "view", camera->GetView( ) );
 				shader->SetUniform( "uScreenResolution", Vec2( screenRes.x, screenRes.y ) );
 				shader->SetUniform( "radius", mSSAORadius );
 				shader->SetUniform( "bias", mSSAOBias );
 				shader->SetUniform( "uIntensity", mSSAOIntensity );
 				shader->SetUniform( "uScale", mSSAOScale );
-				shader->SetUniform( "uNear", mGraphicsSceneCamera.GetNear() );
-				shader->SetUniform( "uFar", mGraphicsSceneCamera.GetFar() );
+				shader->SetUniform( "uNear", camera->GetNear() );
+				shader->SetUniform( "uFar", camera->GetFar() );
 				shader->BindTexture( "gNormal", mGbuffer->GetTexture( GBufferTextureType::NORMAL ), 0 );
 				shader->BindTexture( "texNoise", mSSAONoiseTexture, 1 ); 
 				shader->BindTexture( "uDepthMap", mGbuffer->GetDepth( ), 2 ); 
@@ -879,22 +874,23 @@ namespace Enjon
 
 	void GraphicsSubsystem::LightingPass()
 	{
+		Camera* camera = mGraphicsScene.GetActiveCamera( );
+
 		mLightingBuffer->Bind();
-		// mFullScreenQuad->Bind();
 		
 		GLSLProgram* ambientShader 		= Enjon::ShaderManager::Get("AmbientLight");
 		GLSLProgram* directionalShader 	= Enjon::ShaderManager::Get("PBRDirectionalLight");	
 		GLSLProgram* pointShader 		= Enjon::ShaderManager::Get("PBRPointLight");	
 		GLSLProgram* spotShader 		= Enjon::ShaderManager::Get("SpotLight");	
 
-		const std::set<DirectionalLight*>& directionalLights 	= mGraphicsScene.GetDirectionalLights();	
-		const std::set<SpotLight*>& spotLights 					= mGraphicsScene.GetSpotLights();	
-		const std::set<PointLight*>& pointLights 				= mGraphicsScene.GetPointLights();
+		const HashSet<DirectionalLight*>& directionalLights 	= mGraphicsScene.GetDirectionalLights();	
+		const HashSet<SpotLight*>& spotLights 					= mGraphicsScene.GetSpotLights();	
+		const HashSet<PointLight*>& pointLights 				= mGraphicsScene.GetPointLights();
 
 		AmbientSettings* aS = mGraphicsScene.GetAmbientSettings();
 
-		Mat4 projInverse = Mat4::Inverse( mGraphicsSceneCamera.GetProjection( ) );
-		Mat4 viewInverse = Mat4::Inverse( mGraphicsSceneCamera.GetView( ) );
+		Mat4 projInverse = Mat4::Inverse( camera->GetProjection( ) );
+		Mat4 viewInverse = Mat4::Inverse( camera->GetView( ) );
 
 		mWindow.Clear();
 
@@ -924,7 +920,7 @@ namespace Enjon
 
 			// Bind uniforms
 			ambientShader->SetUniform("uResolution", mGbuffer->GetResolution());
-			ambientShader->SetUniform( "uCamPos", mGraphicsSceneCamera.GetPosition() );
+			ambientShader->SetUniform( "uCamPos", camera->GetPosition() );
 			ambientShader->SetUniform( "uProjMatrixInv", projInverse );
 			ambientShader->SetUniform( "uViewMatrixInv", viewInverse );
 			// Render
@@ -934,14 +930,14 @@ namespace Enjon
 
 		directionalShader->Use();
 		{
-			directionalShader->SetUniform( "u_camPos", mGraphicsSceneCamera.GetPosition( ) );
+			directionalShader->SetUniform( "u_camPos", camera->GetPosition( ) );
 			for (auto& l : directionalLights)
 			{
 				ColorRGBA32 color = l->GetColor();
 
 				directionalShader->BindTexture("u_albedoMap", 	mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
 				directionalShader->BindTexture("u_normalMap", 	mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
-				directionalShader->BindTexture("u_depthMap", mGbuffer->GetDepth(), 2);
+				directionalShader->BindTexture("u_depthMap",	mGbuffer->GetDepth(), 2);
 				directionalShader->BindTexture("u_matProps", 	mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
 				directionalShader->BindTexture("u_ssao", 		mSSAOBlurTarget->GetTexture(), 4);
 				// directionalShader->BindTexture("u_shadowMap", 		mShadowDepth->GetDepth(), 4);
@@ -968,7 +964,7 @@ namespace Enjon
 			pointShader->BindTexture( "u_matProps", mGbuffer->GetTexture( GBufferTextureType::MAT_PROPS ), 3 );
 			pointShader->BindTexture( "u_ssao", mSSAOBlurTarget->GetTexture( ), 4 );
 			pointShader->SetUniform( "u_resolution", mGbuffer->GetResolution( ) );
-			pointShader->SetUniform( "u_camPos", mGraphicsSceneCamera.GetPosition( ) );
+			pointShader->SetUniform( "u_camPos", camera->GetPosition( ) );
 			pointShader->SetUniform( "uProjMatrixInv", projInverse );
 			pointShader->SetUniform( "uViewMatrixInv", viewInverse );
 
@@ -995,7 +991,7 @@ namespace Enjon
 			spotShader->BindTexture("u_normalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
 			// spotShader->BindTexture("u_matProps", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
 			spotShader->SetUniform("u_resolution", mGbuffer->GetResolution());
-			spotShader->SetUniform("u_camPos", mGraphicsSceneCamera.GetPosition());			
+			spotShader->SetUniform("u_camPos", camera->GetPosition());			
 
 			for (auto& l : spotLights)
 			{
@@ -1265,7 +1261,7 @@ namespace Enjon
 
 	void GraphicsSubsystem::UIPass( RenderTarget* inputTarget )
 	{
-		// Just try and render some text to the screen, maybe?
+		Camera* camera = mGraphicsScene.GetActiveCamera( );
 
 		Vector<Renderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
 		inputTarget->Bind( RenderTarget::BindType::WRITE, false );
@@ -1316,10 +1312,10 @@ namespace Enjon
 							material = curMaterial;
 
 							sgShader->Use( );
-							sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
+							sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
 							sgShader->SetUniform( "uWorldTime", Engine::GetInstance( )->GetWorldTime( ).mTotalTime );
-							sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
-							sgShader->SetUniform( "uPreviousViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
+							sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
+							sgShader->SetUniform( "uPreviousViewProjection", camera->GetViewProjection( ) );
 							material->Bind( sgShader );
 						}
 
@@ -1359,10 +1355,10 @@ namespace Enjon
 							material = curMaterial;
 
 							sgShader->Use( );
-							sgShader->SetUniform( "uViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
+							sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
 							sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
-							sgShader->SetUniform( "uViewPositionWorldSpace", mGraphicsSceneCamera.GetPosition( ) );
-							sgShader->SetUniform( "uPreviousViewProjection", mGraphicsSceneCamera.GetViewProjection( ) );
+							sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
+							sgShader->SetUniform( "uPreviousViewProjection", camera->GetViewProjection( ) );
 							material->Bind( sgShader );
 						} 
 
@@ -1851,23 +1847,7 @@ namespace Enjon
 	    	ImGui::PopStyleColor(1);
 	    	ImGui::PopFont();
 	    	ImGui::TreePop();
-	    }
-
-	    if (ImGui::TreeNode("Sunlight"))
-	    {
-			if ( mGraphicsScene.GetSun( ) )
-			{
-				ImGuiManager::DebugDumpObject( mGraphicsScene.GetSun( ) );
-			}
-
-	    	ImGui::TreePop();
-	    }
-
-	    if (ImGui::TreeNode("Camera"))
-	    {
-			ImGuiManager::DebugDumpObject( &mGraphicsSceneCamera );
-	    	ImGui::TreePop();
-	    }
+	    } 
 	}
 
 	//======================================================================================================= 

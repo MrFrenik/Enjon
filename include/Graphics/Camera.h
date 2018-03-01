@@ -14,6 +14,8 @@ namespace Enjon
 { 
 	// TODO(): Move as many functions from this file to the source file
 
+	class GraphicsScene;
+
 	ENJON_ENUM( )
 	enum class ProjectionType
 	{
@@ -122,7 +124,7 @@ namespace Enjon
 			*/
 			inline Vec2 GetNearFar() const 
 			{ 
-				return Vec2( NearPlane, FarPlane );
+				return Vec2( mNearPlane, mFarPlane );
 			}
 
 			/*
@@ -130,7 +132,7 @@ namespace Enjon
 			*/
 			inline f32 GetNear() const
 			{ 
-				return NearPlane; 
+				return mNearPlane; 
 			}
 
 			/*
@@ -138,7 +140,7 @@ namespace Enjon
 			*/
 			inline f32 GetFar() const
 			{ 
-				return FarPlane; 
+				return mFarPlane; 
 			}
 
 			/*
@@ -146,7 +148,7 @@ namespace Enjon
 			*/
 			const ProjectionType GetProjectionType( ) const 
 			{ 
-				return ProjType;  
+				return mProjType;  
 			}
 
 			/*
@@ -154,7 +156,7 @@ namespace Enjon
 			*/
 			f32 GetOrthographicScale( ) const 
 			{ 
-				return OrthographicScale; 
+				return mOrthographicScale; 
 			}
 
 			/*
@@ -162,7 +164,7 @@ namespace Enjon
 			*/
 			f32 GetAspectRatio( ) const 
 			{ 
-				return ViewPortAspectRatio; 
+				return mViewPortAspectRatio; 
 			}
 
 			/*
@@ -170,7 +172,7 @@ namespace Enjon
 			*/
 			inline void SetAspectRatio( const f32& aspectRatio ) 
 			{ 
-				ViewPortAspectRatio = aspectRatio; 
+				mViewPortAspectRatio = aspectRatio; 
 			}
 
 			/*
@@ -178,21 +180,24 @@ namespace Enjon
 			*/
 			inline void SetNearFar(const f32& near, const f32& far) 
 			{ 
-				NearPlane = near; 
-				FarPlane = far; 
+				mNearPlane = near; 
+				mFarPlane = far; 
 			}
 
 			/*
 			* @brief
 			*/
-			inline void SetProjection(ProjectionType type) { ProjType = type; }
+			inline void SetProjection(ProjectionType type) 
+			{ 
+				mProjType = type; 
+			}
 
 			/*
 			* @brief
 			*/
 			inline void SetOrthographicScale(const f32& scale) 
 			{ 
-				OrthographicScale = scale; 
+				mOrthographicScale = scale; 
 			}
 
 			/*
@@ -200,8 +205,13 @@ namespace Enjon
 			*/
 			void SetProjectionType( ProjectionType type ) 
 			{ 
-				ProjType = type; 
-			}
+				mProjType = type; 
+			} 
+
+			/*
+			* @brief
+			*/
+			void SetTransform( const Transform& transform );
 
 			/*
 			* @brief
@@ -213,7 +223,7 @@ namespace Enjon
 			*/
 			Vec3 GetPosition() const 
 			{ 
-				return Transform.GetPosition(); 
+				return mTransform.GetPosition(); 
 			}
 			
 			/*
@@ -226,7 +236,7 @@ namespace Enjon
 			*/
 			Quaternion GetRotation() const 
 			{ 
-				return Transform.Rotation; 
+				return mTransform.Rotation; 
 			}
 
 			/*
@@ -239,6 +249,16 @@ namespace Enjon
 			*/
 			Ray ScreenToWorldRay( const Vec2& coords );
 
+			/*
+			* @brief
+			*/
+			void SetGraphicsScene( GraphicsScene* scene );
+
+			/*
+			* @brief
+			*/
+			GraphicsScene* GetGraphicsScene( ) const;
+
 		private:
 
 			/*
@@ -246,31 +266,35 @@ namespace Enjon
 			*/
 			Vec3 Unproject( const Vec3& screenCoords );
 
-		public:
+		private:
 
 			// Member variables
 			ENJON_PROPERTY()
-			Transform Transform;
+			Transform mTransform;
 
 			ENJON_PROPERTY()
-			f32 FOV	= 60.0f;
+			f32 mFOV = 60.0f;
 
 			ENJON_PROPERTY()
-			f32 NearPlane = 0.1f;
+			f32 mNearPlane = 0.1f;
 
 			ENJON_PROPERTY()
-			f32 FarPlane = 100.0f;
+			f32 mFarPlane = 100.0f;
 
 			ENJON_PROPERTY()
-			f32 ViewPortAspectRatio;
+			f32 mViewPortAspectRatio;
 
 			ENJON_PROPERTY()
-			f32 OrthographicScale = 1.0f;
+			f32 mOrthographicScale = 1.0f;
 
 			ENJON_PROPERTY()
-			ProjectionType ProjType	= ProjectionType::Perspective;
+			ProjectionType mProjType = ProjectionType::Perspective;
 
-			Vec2 ScreenDimensions;
+			Vec2 mScreenDimensions;
+
+		private:
+
+			GraphicsScene* mGraphicsScene = nullptr; 
 	};
 }
 

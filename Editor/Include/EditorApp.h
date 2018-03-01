@@ -10,6 +10,7 @@
 #include <Application.h>
 #include <Entity/EntityManager.h>
 #include <Graphics/Renderable.h> 
+#include <Graphics/Camera.h>
 #include <Scene/Scene.h>
 
 namespace Enjon
@@ -278,6 +279,8 @@ namespace Enjon
 			EditorWidgetManager mEditorWidgetManager;
 
 			EditorSceneView* mEditorSceneView = nullptr;
+
+			Camera mEditorCamera;
 	}; 
 }
 

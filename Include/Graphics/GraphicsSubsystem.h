@@ -78,12 +78,12 @@ namespace Enjon
 			/**
 			*@brief Constructor
 			*/
-			GraphicsSubsystem();
+			GraphicsSubsystem( ) = default;
 			
 			/**
 			*@brief Destructor
 			*/
-			~GraphicsSubsystem();
+			~GraphicsSubsystem( ) = default;
 
 			/**
 			*@brief
@@ -120,7 +120,7 @@ namespace Enjon
 			*/
 			const Camera* GetGraphicsSceneCamera() const 
 			{ 
-				return &mGraphicsSceneCamera; 
+				return mGraphicsScene.GetActiveCamera(); 
 			}
 			
 			/**
@@ -305,7 +305,6 @@ namespace Enjon
 			// Graphics scene
 			GraphicsScene 		mGraphicsScene;
 			Window 				mWindow;
-			Camera 				mGraphicsSceneCamera;   // Probably part of scene instead
 			Camera 				mShadowCamera;	// Probably part of light or scene?
 
 			SpriteBatch* 	mBatch 			= nullptr; 

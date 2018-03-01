@@ -65,7 +65,7 @@ namespace Enjon
 	{
 		// Grab the engine configuration
 		EngineConfig engCfg = Engine::GetInstance( )->GetConfig( );
-		String enginePath = engCfg.GetRoot( );
+		String enginePath = Utils::FindReplaceAll( engCfg.GetRoot( ), "\\", "/" );
 		
 		String buildDir = mProjectPath + "Compiled/";
 
@@ -101,7 +101,7 @@ namespace Enjon
 		Enjon::Utils::WriteToFile( mEditor->GetProjectEnjonDefinesTemplate(), buildDir + "Intermediate/" + "Defines.h" ); 
 
 		// Copy all Enjon assets into build directory as well
-		String engineAssetsPath = Engine::GetInstance( )->GetConfig( ).GetRoot( ) + "Assets/";
+		String engineAssetsPath = enginePath + "Assets/";
 
 		// Remove all previous content from directories
 		FileSystem::remove_all( buildDir + "Assets/Shaders" );
