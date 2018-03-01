@@ -62,12 +62,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void OffsetOrientation(const f32& Yaw, const f32& Pitch);
-
-			/*
-			* @brief
-			*/
-			Vec3 GetWorldPosition();
+			void OffsetOrientation(const f32& Yaw, const f32& Pitch); 
 
 			/*
 			* @brief

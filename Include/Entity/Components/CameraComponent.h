@@ -34,6 +34,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			virtual void Initialize( ) override;
+
+			/*
+			* @brief
+			*/
 			Camera* GetCamera( );
 			
 			/* 

@@ -39,9 +39,22 @@ namespace Enjon
 
 	//==================================================================== 
 
+	void CameraComponent::Initialize( )
+	{
+		// Set camera to active camera in scene
+		if ( mCamera.GetGraphicsScene( ) )
+		{
+			mCamera.GetGraphicsScene( )->SetActiveCamera( &mCamera );
+		}
+	}
+
+	//==================================================================== 
+
 	void CameraComponent::Update( )
 	{
-		mCamera.SetTransform(mEntity->GetWorldTransform());
+		mCamera.SetTransform( mEntity->GetWorldTransform( ) );
+		//mCamera.SetPosition(mEntity->GetWorldPosition()); 
+		//mCamera.LookAt( mCamera.GetPosition( ) + mEntity->Forward( ) );
 	}
 	
 	//==================================================================== 

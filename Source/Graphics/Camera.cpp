@@ -54,55 +54,55 @@ namespace Enjon
 
 	//=======================================================================================================
 
-	//void Camera::LookAt( const Vec3& target, const Vec3& up )
-	//{
-	//	// Get normalized direction towards target
-	//	//Vec3 direction = ( target - GetPosition( ) ).Normalize( );
+	void Camera::LookAt( const Vec3& target, const Vec3& up )
+	{
+		// Get normalized direction towards target
+		//Vec3 direction = ( target - GetPosition( ) ).Normalize( );
 
-	//	//// Find rotation between camera forward and desired target
-	//	//Quaternion rot1 = Quaternion::RotationBetweenVectors( Forward( ), direction );
+		//// Find rotation between camera forward and desired target
+		//Quaternion rot1 = Quaternion::RotationBetweenVectors( Forward( ), direction );
 
-	//	//// Recompute desired up 
-	//	//Vec3 right = direction.Cross( up );
-	//	//Vec3 desiredUp = right.Cross( direction );
+		//// Recompute desired up 
+		//Vec3 right = direction.Cross( up );
+		//Vec3 desiredUp = right.Cross( direction );
 
-	//	//Vec3 newUp = rot1 * Vec3( 0.0f, 1.0f, 0.0f );
-	//	//Quaternion rot2 = Quaternion::RotationBetweenVectors( newUp, up );
+		//Vec3 newUp = rot1 * Vec3( 0.0f, 1.0f, 0.0f );
+		//Quaternion rot2 = Quaternion::RotationBetweenVectors( newUp, up );
 
-	//	//// Set orientation of camera
-	//	//SetRotation( rot2 * rot1 );
+		//// Set orientation of camera
+		//SetRotation( rot2 * rot1 );
 
-	//	Vec3 forwardVector = ( target - Transform.Position ).Normalize( );
-	//	f32 dot = Vec3( 0.0f, 0.0f, -1.0f ).Dot( forwardVector );
+		Vec3 forwardVector = ( target - mTransform.Position ).Normalize( );
+		f32 dot = Vec3( 0.0f, 0.0f, -1.0f ).Dot( forwardVector );
 
-	//	f32 rotationAngle = ( f32 )std::acos( dot );
-	//	Vec3 rotationAxis = ( Vec3( 0.0f, 0.0f, 1.0f ).Cross( forwardVector ) ).Normalize( );
-	//	Quaternion rotation = Quaternion::AngleAxis( rotationAngle, rotationAxis ).Normalize( );
+		f32 rotationAngle = ( f32 )std::acos( dot );
+		Vec3 rotationAxis = ( Vec3( 0.0f, 0.0f, 1.0f ).Cross( forwardVector ) ).Normalize( );
+		Quaternion rotation = Quaternion::AngleAxis( rotationAngle, rotationAxis ).Normalize( );
 
-	//	SetRotation( rotation );
-	//}
+		SetRotation( rotation );
+	}
 
 	//=======================================================================================================
 
-	void Camera::LookAt(const Vec3& Position, const Vec3& Up)
-	{
-		Vec3& Pos = mTransform.Position;
+	//void Camera::LookAt(const Vec3& Position, const Vec3& Up)
+	//{
+	//	Vec3& Pos = mTransform.Position;
 
-		// Ignore, since you cannot look at yourself
-		if ((Pos - Position).Length() < 0.001f) return;
+	//	// Ignore, since you cannot look at yourself
+	//	if ((Pos - Position).Length() < 0.001f) return;
 
-		if (std::fabs(Pos.Dot(Up)) - 1.0f < 0.001f)
-		{
-			// Lookat and view direction are colinear
-			return;
-		}	
+	//	if (std::fabs(Pos.Dot(Up)) - 1.0f < 0.001f)
+	//	{
+	//		// Lookat and view direction are colinear
+	//		return;
+	//	}	
 
-		// Get look at 
-		Mat4 LA = Mat4::LookAt(Pos, Position, Up);
+	//	// Get look at 
+	//	Mat4 LA = Mat4::LookAt(Pos, Position, Up);
 
-		// Set Transform
-		mTransform.Rotation = Enjon::Mat4ToQuaternion(LA);
-	} 
+	//	// Set Transform
+	//	mTransform.Rotation = Enjon::Mat4ToQuaternion(LA);
+	//} 
 
 	//=======================================================================================================
 

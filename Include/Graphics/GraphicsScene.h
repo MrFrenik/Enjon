@@ -5,6 +5,7 @@
 #include "Defines.h"
 #include "System/Types.h"
 #include "Graphics/Color.h"
+#include "Graphics/Camera.h"
 #include "Base/Object.h"
 
 #include <set>
@@ -17,7 +18,6 @@ namespace Enjon {
 	class PointLight;
 	class SpotLight;
 	class QuadBatch;
-	class Camera;
 
 	enum class RenderableSortType
 	{
@@ -179,7 +179,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			Camera* GetActiveCamera( ) const;
+			Camera* GetActiveCamera( );
 
 			/*
 			* @brief
@@ -227,6 +227,7 @@ namespace Enjon {
 
 			// Not sure that I like this "solution"
 			Camera* mActiveCamera = nullptr;
+			Camera mDefaultCamera;
 
 			// Scene should own all the data for renderables, lights, etc. and should hand those out on request from components
 			// Or could have a graphics subsystem which holds all of these objects?

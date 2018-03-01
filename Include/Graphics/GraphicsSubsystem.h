@@ -118,7 +118,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			const Camera* GetGraphicsSceneCamera() const 
+			const Camera* GetGraphicsSceneCamera() 
 			{ 
 				return mGraphicsScene.GetActiveCamera(); 
 			}

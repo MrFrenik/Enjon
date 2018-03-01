@@ -85,8 +85,13 @@ namespace Enjon {
 
 	//====================================================================================================
 
-	Camera* GraphicsScene::GetActiveCamera( ) const
+	Camera* GraphicsScene::GetActiveCamera( )
 	{
+		if ( !mActiveCamera )
+		{
+			return &mDefaultCamera;
+		}
+
 		return mActiveCamera;
 	}
 
@@ -248,9 +253,6 @@ namespace Enjon {
 		{
 			mCameras.insert( camera );
 			camera->SetGraphicsScene( this );
-
-			// Set the active camera to this
-			mActiveCamera = camera;
 		}
 	}
 
@@ -288,7 +290,7 @@ namespace Enjon {
 	bool GraphicsScene::CompareDepth(Renderable* a, Renderable* b)
 	{
 		// Get camera position
-		const GraphicsSubsystem* gfx = Engine::GetInstance( )->GetSubsystemCatalog( )->Get<GraphicsSubsystem>( );
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 		v3 camPos = gfx->GetGraphicsSceneCamera()->GetPosition();
 
 		// Get a pos
