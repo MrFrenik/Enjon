@@ -51,6 +51,11 @@ namespace Enjon
 			*/
 			void SetGraphicsScene(GraphicsScene* scene); 
 
+			/* 
+			* @brief Set scene of renderable 
+			*/
+			void SetActiveCamera( );
+
 		private: 
 			
 			ENJON_PROPERTY( )

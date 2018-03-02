@@ -42,10 +42,10 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-//Enjon::String mProjectsDir = "W:/Projects/";
-//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
 //Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -1134,6 +1134,7 @@ namespace Enjon
 		mEditorCamera.SetProjection(ProjectionType::Perspective);
 		mEditorCamera.SetPosition(Vec3(0, 5, 10)); 
 		mGfx->GetGraphicsScene( )->AddCamera( &mEditorCamera );
+		mGfx->GetGraphicsScene()->SetActiveCamera( &mEditorCamera );
 
 		// Pause the physics simulation
 		physx->PauseSystem( true ); 
@@ -1471,6 +1472,16 @@ namespace Enjon
 							{
 								mTransformWidget.SetTransformSpace( TransformSpace::Local ); 
 							} break;
+						}
+					}
+
+					// Move entity to editor camera position and set rotation
+					if ( mInput->IsKeyDown( KeyCode::LeftShift ) && mInput->IsKeyDown( KeyCode::LeftCtrl ) )
+					{
+						if ( mInput->IsKeyPressed( KeyCode::F ) )
+						{
+							mSelectedEntity.Get( )->SetLocalPosition( mEditorCamera.GetPosition( ) );
+							mSelectedEntity.Get( )->SetLocalRotation( mEditorCamera.GetRotation( ) );
 						}
 					}
 
