@@ -42,14 +42,14 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-Enjon::String mProjectsDir = "W:/Projects/";
-Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -854,19 +854,6 @@ namespace Enjon
 	{
 		Enjon::ByteBuffer buffer;
 
-		// NOTE(): VERY SPECIFIC IMPL THAT WILL BE GENERALIZED TO RELOADING SCENE
-		// Serialize mEntity ( this will be the scene, essentially... )
-		//EntityArchiver::Serialize( mSceneEntity, &buffer );
-
-		// Destroy scene entity
-		//mSceneEntity.Get()->Destroy( );
-
-		// Clean mSceneEntities
-		//mSceneEntities.clear( );
-
-		// Force the scene to clean up ahead of frame
-		//CleanupScene( ); 
-
 		// Unload previous scene 
 		UnloadScene( releaseSceneAsset ); 
 
@@ -1041,27 +1028,12 @@ namespace Enjon
 			// Initialize the app
 			app->Initialize( );
 
-			// Run through all components for entities and call their initialize function
-			//for ( auto& e : em->GetActiveEntities( ) )
-			//{
-			//	for ( auto& c : e->GetComponents( ) )
-			//	{
-			//		c->Initialize( );
-			//	}
-			//}
-
-			//// Run through all components for entities and call their start function
-			//for ( auto& e : em->GetActiveEntities( ) )
-			//{
-			//	for ( auto& c : e->GetComponents( ) )
-			//	{
-			//		c->Start( );
-			//	}
-			//}
-
 			// Turn on the physics simulation
 			PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
 			physx->PauseSystem( false ); 
+
+			// Turn off the selection widget
+			mTransformWidget.Enable( false );
 		}
 	}
 
@@ -1391,10 +1363,10 @@ namespace Enjon
 			Application* app = mProject.GetApplication( );
 			if ( app )
 			{
-				//static Enjon::ByteBuffer temp;
-				//Enjon::ObjectArchiver::Serialize( app, &temp );
-
+				// Process application input
 				app->ProcessInput( dt );
+
+				// Update application ( ^ Could be called in the same tick )
 				app->Update( dt );
 			}
 		}
@@ -1481,7 +1453,7 @@ namespace Enjon
 						if ( mInput->IsKeyPressed( KeyCode::F ) )
 						{
 							mSelectedEntity.Get( )->SetLocalPosition( mEditorCamera.GetPosition( ) );
-							mSelectedEntity.Get( )->SetLocalRotation( mEditorCamera.GetRotation( ) );
+							mSelectedEntity.Get( )->SetLocalRotation( mEditorCamera.GetRotation( ).Normalize() ); 
 						}
 					}
 
@@ -1579,7 +1551,7 @@ namespace Enjon
 							Entity* ent = mSelectedEntity.Get( );
 							// Set position and rotation to that of entity
 							mTransformWidget.SetPosition( ent->GetWorldPosition( ) ); 
-							mTransformWidget.SetRotation( ent->GetWorldRotation( ) ); 
+							mTransformWidget.SetRotation( -ent->GetWorldRotation( ) ); 
 						}
 					} 
 				}
@@ -1639,6 +1611,10 @@ namespace Enjon
 				f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * mMouseSensitivity / 100.0f;
 				f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * mMouseSensitivity / 100.0f;
 				camera->OffsetOrientation( xOffset, yOffset );
+
+				// Adjust rotator
+				mCameraRotator.x += xOffset;
+				mCameraRotator.y += yOffset;
 			}
 
 			// Mouse cursor on, interact with world
@@ -1764,17 +1740,20 @@ namespace Enjon
 		Enjon::String lightGreyPath			= Enjon::String("Textures/light_grey.png"); 
 		Enjon::String whitePath				= Enjon::String("Textures/white.png"); 
 		Enjon::String yellowPath			= Enjon::String("Textures/yellow.png"); 
+		Enjon::String axisBoxDiffusePath	= Enjon::String("Textures/axisBoxDiffuse.png"); 
 		Enjon::String hdrPath				= Enjon::String("Textures/HDR/03-ueno-shrine_3k.hdr"); 
 		Enjon::String cubePath				= Enjon::String("Models/unit_cube.obj"); 
 		Enjon::String spherePath			= Enjon::String("Models/unit_sphere.obj"); 
 		Enjon::String conePath				= Enjon::String("Models/unit_cone.obj"); 
 		Enjon::String cylinderPath			= Enjon::String("Models/unit_cylinder.obj"); 
 		Enjon::String ringPath				= Enjon::String("Models/unit_ring.obj"); 
+		Enjon::String axisBoxPath			= Enjon::String("Models/axisBox.obj"); 
 		Enjon::String shaderGraphPath		= Enjon::String("Shaders/ShaderGraphs/DefaultStaticGeom.sg"); 
 
 		AssetManager* mAssetManager = EngineSubsystem( AssetManager );
 		
 		// Add to asset database( will serialize the asset if not loaded from disk, otherwise will load the asset )
+		mAssetManager->AddToDatabase( axisBoxDiffusePath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( greenPath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( redPath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( midGreyPath, true, true, AssetLocationType::EngineAsset );
@@ -1789,6 +1768,7 @@ namespace Enjon
 		mAssetManager->AddToDatabase( conePath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( cylinderPath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( ringPath, true, true, AssetLocationType::EngineAsset );
+		mAssetManager->AddToDatabase( axisBoxPath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( shaderGraphPath, true, true, AssetLocationType::EngineAsset );
 
 		// Create materials
@@ -1796,7 +1776,16 @@ namespace Enjon
 		AssetHandle< Material > greenMat = mAssetManager->ConstructAsset< Material >( "GreenMaterial" );
 		AssetHandle< Material > blueMat = mAssetManager->ConstructAsset< Material >( "BlueMaterial" );
 		AssetHandle< Material > yellowMat = mAssetManager->ConstructAsset< Material >( "YellowMaterial" );
+		AssetHandle< Material > axisBoxMat = mAssetManager->ConstructAsset< Material >( "AxisBoxMat" );
 		AssetHandle< ShaderGraph > sg = mAssetManager->GetAsset< ShaderGraph >( "shaders.shadergraphs.defaultstaticgeom" );
+
+		axisBoxMat->SetShaderGraph( sg );
+		axisBoxMat.Get()->ConstCast< Material >()->SetUniform( "albedoMap", mAssetManager->GetAsset< Texture >( "textures.axisboxdiffuse" ) );
+		axisBoxMat.Get()->ConstCast< Material >()->SetUniform( "normalMap", mAssetManager->GetAsset< Texture >( "textures.front_normal" ) );
+		axisBoxMat.Get()->ConstCast< Material >()->SetUniform( "metallicMap", mAssetManager->GetAsset< Texture >( "textures.black" ) );
+		axisBoxMat.Get()->ConstCast< Material >()->SetUniform( "roughMap", mAssetManager->GetAsset< Texture >( "textures.white" ) );
+		axisBoxMat.Get()->ConstCast< Material >()->SetUniform( "aoMap", mAssetManager->GetAsset< Texture >( "textures.white" ) );
+		axisBoxMat.Get()->ConstCast< Material >()->SetUniform( "emissiveMap", mAssetManager->GetAsset< Texture >( "textures.black" ) );
 
 		redMat->SetShaderGraph( sg );
 		redMat.Get()->ConstCast< Material >()->SetUniform( "albedoMap", mAssetManager->GetAsset< Texture >( "textures.red" ) );
@@ -1830,6 +1819,7 @@ namespace Enjon
 		yellowMat.Get()->ConstCast< Material >()->SetUniform( "aoMap", mAssetManager->GetAsset< Texture >( "textures.white" ) );
 		yellowMat.Get()->ConstCast< Material >()->SetUniform( "emissiveMap", mAssetManager->GetAsset< Texture >( "textures.black" ) );
 
+		axisBoxMat->Save( );
 		redMat->Save( );
 		greenMat->Save( );
 		blueMat->Save( );

@@ -62,9 +62,9 @@ namespace Enjon
 
 	void CameraComponent::Update( )
 	{
-		//mCamera.SetTransform( mEntity->GetWorldTransform( ) );
-		mCamera.SetPosition(mEntity->GetWorldPosition()); 
-		mCamera.LookAt( mEntity->GetWorldPosition( ) + mEntity->GetWorldRotation( ) * -Vec3::ZAxis( ) );
+		mCamera.SetTransform( mEntity->GetWorldTransform( ) );
+		//mCamera.SetPosition(mEntity->GetWorldPosition()); 
+		//mCamera.LookAt( mEntity->GetWorldPosition( ) + mEntity->GetWorldRotation( ) * -Vec3::ZAxis( ) );
 	}
 	
 	//==================================================================== 

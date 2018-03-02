@@ -281,6 +281,7 @@ namespace Enjon
 			EditorSceneView* mEditorSceneView = nullptr;
 
 			Camera mEditorCamera;
+			Vec3 mCameraRotator = Vec3( 0.0f );
 	}; 
 }
 
