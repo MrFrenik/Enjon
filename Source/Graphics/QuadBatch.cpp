@@ -126,9 +126,9 @@ namespace Enjon
 		// Transform all verticies by model matrix
 		Mat4 Model;
 		// L = T*R*S
-		Model *= Mat4::Translate(Transform.Position);
-		Model *= QuaternionToMat4(Transform.Rotation);
-		Model *= Mat4::Scale(Transform.Scale);
+		Model *= Mat4::Translate(Transform.GetPosition());
+		Model *= QuaternionToMat4(Transform.GetRotation());
+		Model *= Mat4::Scale(Transform.GetScale());
 
 		Vec4 Position, Normal, Tangent, Bitangent;
 		Vec3 T, B, N, P;
@@ -257,9 +257,9 @@ namespace Enjon
 		// Transform all verticies by model matrix
 		Mat4 Model;
 		// L = T*R*S
-		Model *= Mat4::Translate(Transform.Position);
-		Model *= Enjon::QuaternionToMat4(Transform.Rotation);
-		Model *= Mat4::Scale(Transform.Scale);
+		Model *= Mat4::Translate(Transform.GetPosition());
+		Model *= Enjon::QuaternionToMat4(Transform.GetRotation());
+		Model *= Mat4::Scale(Transform.GetScale());
 
 		Vec4 Position, Normal, Tangent, Bitangent;
 		Vec3 T, B, N, P;

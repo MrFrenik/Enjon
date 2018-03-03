@@ -45,20 +45,20 @@ namespace Enjon
 		Transform local = entity.Get( )->GetLocalTransform( );
 
 		// Write out position
-		buffer->Write< f32 >( local.Position.x );
-		buffer->Write< f32 >( local.Position.y );
-		buffer->Write< f32 >( local.Position.z );
+		buffer->Write< f32 >( local.GetPosition().x );
+		buffer->Write< f32 >( local.GetPosition().y );
+		buffer->Write< f32 >( local.GetPosition().z );
 
 		// Write out rotation
-		buffer->Write< f32 >( local.Rotation.x );
-		buffer->Write< f32 >( local.Rotation.y );
-		buffer->Write< f32 >( local.Rotation.z );
-		buffer->Write< f32 >( local.Rotation.w );
+		buffer->Write< f32 >( local.GetRotation().x );
+		buffer->Write< f32 >( local.GetRotation().y );
+		buffer->Write< f32 >( local.GetRotation().z );
+		buffer->Write< f32 >( local.GetRotation().w );
 
 		// Write out scale
-		buffer->Write< f32 >( local.Scale.x );
-		buffer->Write< f32 >( local.Scale.y );
-		buffer->Write< f32 >( local.Scale.z );
+		buffer->Write< f32 >( local.GetScale().x );
+		buffer->Write< f32 >( local.GetScale().y );
+		buffer->Write< f32 >( local.GetScale().z );
 
 		// Write out entity UUID
 		buffer->Write< UUID >( entity.Get( )->GetUUID( ) );
@@ -168,20 +168,26 @@ namespace Enjon
 		Transform local;
 
 		// Read in position
-		local.Position.x = buffer->Read< f32 >( );
-		local.Position.y = buffer->Read< f32 >( );
-		local.Position.z = buffer->Read< f32 >( ); 
+		Vec3 position; 
+		position.x = buffer->Read< f32 >( );
+		position.y = buffer->Read< f32 >( );
+		position.z = buffer->Read< f32 >( ); 
+		local.SetPosition( position );
 
 		// Read in rotation
-		local.Rotation.x = buffer->Read< f32 >( );
-		local.Rotation.y = buffer->Read< f32 >( );
-		local.Rotation.z = buffer->Read< f32 >( );
-		local.Rotation.w = buffer->Read< f32 >( );
+		Quaternion rotation;
+		rotation.x = buffer->Read< f32 >( );
+		rotation.y = buffer->Read< f32 >( );
+		rotation.z = buffer->Read< f32 >( );
+		rotation.w = buffer->Read< f32 >( );
+		local.SetRotation( rotation );
 
 		// Read in scale
-		local.Scale.x = buffer->Read< f32 >( );
-		local.Scale.y = buffer->Read< f32 >( );
-		local.Scale.z = buffer->Read< f32 >( );
+		Vec3 scale;
+		scale.x = buffer->Read< f32 >( );
+		scale.y = buffer->Read< f32 >( );
+		scale.z = buffer->Read< f32 >( );
+		local.SetScale( scale );
 
 		 //Set the transform of the entity
 		handle.Get( )->SetLocalTransform( local );

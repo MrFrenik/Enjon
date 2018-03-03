@@ -9,9 +9,9 @@ namespace Enjon
 
 	Transform::Transform()
 		: 
-			Position(Vec3(0.0f, 0.0f, 0.0f)), 
-			Rotation(Quaternion(0, 0, 0, 1)), 
-			Scale(Vec3(1, 1, 1))
+			mPosition(Vec3(0.0f, 0.0f, 0.0f)), 
+			mRotation(Quaternion(0, 0, 0, 1)), 
+			mScale(Vec3(1, 1, 1))
 	{
 	}
 		
@@ -19,18 +19,18 @@ namespace Enjon
 
 	Transform::Transform(const Transform& t)
 		: 
-			Position(t.Position), 
-			Rotation(t.Rotation), 
-			Scale(t.Scale)
+			mPosition(t.mPosition), 
+			mRotation(t.mRotation), 
+			mScale(t.mScale)
 	{
 	}
 	//==========================================================================
 	
 	Transform::Transform(const Vec3& position, const Quaternion& rotation, const Vec3& scale)
 		: 
-			Position(position), 
-			Rotation(rotation), 
-			Scale(scale)
+			mPosition(position), 
+			mRotation(rotation), 
+			mScale(scale)
 	{
 	}
 
@@ -46,9 +46,9 @@ namespace Enjon
 	{
 		Transform WorldSpace;
 
-		WorldSpace.Position		= Rotation.Rotate( rhs.Position ) + Position;
-		WorldSpace.Rotation 	= Rotation * rhs.Rotation;
-		WorldSpace.Scale 		= Scale * rhs.Scale;
+		WorldSpace.mPosition	= mRotation.Rotate( rhs.mPosition ) + mPosition;
+		WorldSpace.mRotation 	= mRotation * rhs.mRotation;
+		WorldSpace.mScale 		= mScale * rhs.mScale;
 
 		return WorldSpace;
 	}
@@ -67,15 +67,36 @@ namespace Enjon
 	{
 		Transform Local;
 
-		Vec3 inverseScale = 1.0f / rhs.Scale;
-		Quaternion inverseRotation = rhs.Rotation.Inverse( );
-		auto ParentConjugate = rhs.Rotation.Conjugate();
+		Vec3 inverseScale = 1.0f / rhs.mScale;
+		Quaternion inverseRotation = rhs.mRotation.Inverse( );
+		auto ParentConjugate = rhs.mRotation.Conjugate();
 
-		Local.Position 		= (ParentConjugate * (Position - rhs.Position)) / rhs.Scale;
-		Local.Rotation 		= ParentConjugate * Rotation;
-		Local.Scale 		= (Scale / rhs.Scale);
+		Local.mPosition 	= (ParentConjugate * (mPosition - rhs.mPosition)) / rhs.mScale;
+		Local.mRotation 	= ParentConjugate * mRotation;
+		Local.mScale 		= (mScale / rhs.mScale);
 
 		return Local;
+	}
+
+	//==========================================================================
+
+	Vec3 Transform::GetPosition( ) const
+	{
+		return mPosition;
+	}
+
+	//==========================================================================
+	
+	Vec3 Transform::GetScale( ) const
+	{
+		return mScale;
+	}
+
+	//==========================================================================
+	
+	Quaternion Transform::GetRotation( ) const
+	{
+		return mRotation;
 	}
 
 	//==========================================================================
@@ -91,27 +112,27 @@ namespace Enjon
 
 	void Transform::SetPosition(const Vec3& position)
 	{
-		Position = position;
+		mPosition = position;
 	}
 
 	//==========================================================================
 
 	void Transform::SetScale(const Vec3& scale)
 	{
-		Scale = Vec3(scale);
+		mScale = Vec3(scale);
 	}
 
 	//==========================================================================
 
 	void Transform::SetScale(const f32& scale)
 	{
-		Scale = scale;
+		mScale = scale;
 	}
 
 	//==========================================================================
 	
 	void Transform::SetRotation(const Quaternion& rotation)
 	{
-		Rotation = rotation;
+		mRotation = rotation;
 	} 
 }

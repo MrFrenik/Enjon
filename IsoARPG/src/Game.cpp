@@ -966,9 +966,9 @@ Enjon::Result Game::Initialize()
 			{
 				ImGui::Text( "Child Local:" );
 				Enjon::Transform trans = c.Get( )->GetLocalTransform( );
-				auto position 	= trans.Position;
-				auto scale 		= trans.Scale;
-				auto rotation 	= trans.Rotation;
+				auto position 	= trans.GetPosition();
+				auto scale 		= trans.GetScale();
+				auto rotation 	= trans.GetRotation();
 
 				f32 pos[] = {position.x, position.y, position.z}; 
 				f32 scl[] = {scale.x, scale.y, scale.z}; 
@@ -985,9 +985,9 @@ Enjon::Result Game::Initialize()
 			{
 				ImGui::Text( "Child World:" );
 				Enjon::Transform trans = c.Get( )->GetWorldTransform( );
-				auto position 	= trans.Position;
-				auto scale 		= trans.Scale;
-				auto rotation 	= trans.Rotation;
+				auto position 	= trans.GetPosition();
+				auto scale 		= trans.GetScale();
+				auto rotation 	= trans.GetRotation();
 
 				f32 pos[] = {position.x, position.y, position.z}; 
 				f32 scl[] = {scale.x, scale.y, scale.z}; 

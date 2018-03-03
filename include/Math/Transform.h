@@ -84,21 +84,21 @@ namespace Enjon
 			* @param
 			* @return
 			*/
-			Vec3 GetPosition() const { return Position; }
+			Vec3 GetPosition( ) const;
 			
 			/**
 			* @brief 
 			* @param
 			* @return
 			*/
-			Vec3 GetScale() const { return Scale; }
+			Vec3 GetScale( ) const;
 			
 			/**
 			* @brief 
 			* @param
 			* @return
 			*/
-			Quaternion GetRotation() const { return Rotation; }
+			Quaternion GetRotation( ) const;
 
 			/**
 			* @brief 
@@ -128,12 +128,12 @@ namespace Enjon
 			*/
 			void SetRotation(const Quaternion& rotation);
 
-		public: 
-			Vec3 Position;
+		private: 
+			Vec3 mPosition;
 
-			Quaternion Rotation;
+			Quaternion mRotation;
 
-			Vec3 Scale;
+			Vec3 mScale;
 	}; 
 }
 

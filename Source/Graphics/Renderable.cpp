@@ -107,10 +107,10 @@ namespace Enjon
 
 	void Renderable::OffsetRotation(const f32& Yaw, const f32& Pitch)
 	{
-		Quaternion X = Quaternion::AngleAxis(Yaw, 	Vec3(0, 1, 0)); 						// Absolute Up
-		Quaternion Y = Quaternion::AngleAxis(Pitch, mTransform.Rotation * Vec3(1, 0, 0));	// Relative Right
+		Quaternion X = Quaternion::AngleAxis(Yaw, Vec3::YAxis()); 								// Absolute Up
+		Quaternion Y = Quaternion::AngleAxis(Pitch, mTransform.GetRotation() * Vec3(1, 0, 0));	// Relative Right
 
-		mTransform.Rotation = X * Y * mTransform.Rotation;
+		mTransform.SetRotation( X * Y * mTransform.GetRotation( ) );
 	}
 
 	//--------------------------------------------------------------------

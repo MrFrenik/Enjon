@@ -231,7 +231,7 @@ namespace Enjon
 			*/
 			Quaternion GetRotation() const 
 			{ 
-				return mTransform.Rotation; 
+				return mTransform.GetRotation(); 
 			}
 
 			/*

@@ -341,12 +341,12 @@ namespace Enjon
 
 	void PrintText(Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA32 Color, float Spacing, TextStyle Style)
 	{
-		Vec3& Position = Transform.Position;
-		Quaternion& Rotation = Transform.Rotation;
-		Vec3& Scale = Transform.Scale;
+		Vec3& Position = Transform.GetPosition();
+		Quaternion& Rotation = Transform.GetRotation();
+		Vec3& Scale = Transform.GetScale();
 
-		float x = Transform.Position.x;
-		float y = Transform.Position.y;
+		float x = Transform.GetPosition().x;
+		float y = Transform.GetPosition().y;
 
 	    // if (Style == TextStyle::SHADOW) 
 	    // {

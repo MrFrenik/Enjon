@@ -77,8 +77,8 @@ namespace Enjon
 		if ( !phys->IsPaused( ) )
 		{
 			Transform wt = mBody.GetWorldTransform( );
-			mEntity->SetLocalPosition( wt.Position, false );
-			mEntity->SetLocalRotation( wt.Rotation, false ); 
+			mEntity->SetLocalPosition( wt.GetPosition(), false );
+			mEntity->SetLocalRotation( wt.GetRotation(), false ); 
 		}
 	}
 

@@ -270,11 +270,11 @@ namespace Enjon
 			Enjon::Entity* parent = mParent.Get( );
 
 			Transform parentTransform = parent->GetWorldTransform( );
-			Enjon::Quaternion parentInverse = parentTransform.Rotation.Inverse( ).Normalize(); 
+			Enjon::Quaternion parentInverse = parentTransform.GetRotation().Inverse( ).Normalize(); 
 
-			Vec3 relativeScale = mWorldTransform.Scale / parentTransform.Scale;
-			Quaternion relativeRot = ( parentInverse * mWorldTransform.Rotation ).Normalize();
-			Vec3 relativePos = ( parentInverse * ( mWorldTransform.Position - parentTransform.Position ) ) / parentTransform.Scale;
+			Vec3 relativeScale = mWorldTransform.GetScale() / parentTransform.GetScale();
+			Quaternion relativeRot = ( parentInverse * mWorldTransform.GetRotation() ).Normalize();
+			Vec3 relativePos = ( parentInverse * ( mWorldTransform.GetPosition() - parentTransform.GetPosition() ) ) / parentTransform.GetScale();
 
 			mLocalTransform = Transform( relativePos, relativeRot, relativeScale );
 		}
@@ -298,9 +298,9 @@ namespace Enjon
 		Enjon::Entity* p = mParent.Get( );
 		Transform parent = p->GetWorldTransform( );
 
-		Enjon::Vec3 worldScale = parent.Scale * mLocalTransform.Scale;
-		Enjon::Quaternion worldRot = ( mLocalTransform.Rotation * parent.Rotation ).Normalize( );
-		Enjon::Vec3 worldPos = parent.Position + ( parent.Rotation.Inverse().Normalize() * ( parent.Scale * mLocalTransform.Position ) );
+		Enjon::Vec3 worldScale = parent.GetScale() * mLocalTransform.GetScale();
+		Enjon::Quaternion worldRot = ( mLocalTransform.GetRotation() * parent.GetRotation() ).Normalize( );
+		Enjon::Vec3 worldPos = parent.GetPosition() + ( parent.GetRotation().Inverse().Normalize() * ( parent.GetScale() * mLocalTransform.GetPosition() ) );
 
 		mWorldTransform = Transform( worldPos, worldRot, worldScale );
 

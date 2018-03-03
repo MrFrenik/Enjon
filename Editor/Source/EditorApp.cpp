@@ -388,8 +388,8 @@ namespace Enjon
 
 				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 				auto cam = gfx->GetGraphicsSceneCamera( )->ConstCast< Camera >();
-				cam->SetPosition( mPreviousCameraTransform.Position );
-				cam->SetRotation( mPreviousCameraTransform.Rotation ); 
+				cam->SetPosition( mPreviousCameraTransform.GetPosition() );
+				cam->SetRotation( mPreviousCameraTransform.GetRotation() ); 
 			}
 
 			static bool isPaused = false;
@@ -1453,7 +1453,11 @@ namespace Enjon
 						if ( mInput->IsKeyPressed( KeyCode::F ) )
 						{
 							mSelectedEntity.Get( )->SetLocalPosition( mEditorCamera.GetPosition( ) );
-							mSelectedEntity.Get( )->SetLocalRotation( mEditorCamera.GetRotation( ).Normalize() ); 
+							mSelectedEntity.Get( )->SetLocalRotation( mEditorCamera.GetRotation( ).NegativeAngleAxis().Normalize() ); 
+
+							//Vec3 eulerAngles = mEditorCamera.GetRotation( ).NegativeAngleAxis().EulerAngles( );
+							//Quaternion newRot = Quaternion::FromEulerAngles( Vec3( eulerAngles.x, eulerAngles.y, -eulerAngles.z ) );
+							//mSelectedEntity.Get()->SetLocalRotation( newRot.Normalize() );
 						}
 					}
 
@@ -1541,7 +1545,6 @@ namespace Enjon
 								if ( ent )
 								{
 									ent->SetLocalRotation( ent->GetLocalRotation() * mTransformWidget.GetDeltaRotation() );
-									//ent->SetLocalRotation( mTransformWidget.GetDeltaRotation() );
 								}
 							} break;
 						}
@@ -1688,8 +1691,8 @@ namespace Enjon
 					ShutdownProjectApp( nullptr );
 				}
 
-				camera->SetPosition( mPreviousCameraTransform.Position );
-				camera->SetRotation( mPreviousCameraTransform.Rotation );
+				camera->SetPosition( mPreviousCameraTransform.GetPosition() );
+				camera->SetRotation( mPreviousCameraTransform.GetRotation() );
 			}
 		} 
 

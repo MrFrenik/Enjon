@@ -557,14 +557,14 @@ namespace Enjon
 		// Create new bullet transform
 		BTransform bTransform;
 		bTransform.setIdentity( );
-		const Vec3* elp = &transform.Position;
-		const Quaternion* elr = &transform.Rotation;
-		const Vec3* els = &transform.Scale;
+		const Vec3* elp = &transform.GetPosition();
+		const Quaternion* elr = &transform.GetRotation();
+		const Vec3* els = &transform.GetScale();
 		bTransform.setOrigin( BV3( elp->x, elp->y, elp->z ) );
 		bTransform.setRotation( BQuat( elr->x, elr->y, elr->z, -elr->w ) );
 
 		// Set local scaling of shape
-		mShape->SetLocalScaling( transform.Scale ); 
+		mShape->SetLocalScaling( transform.GetScale() ); 
 
 		//SetLinearVelocity( 0.0f );
 		//SetAngularVelocity( 0.0f );
@@ -590,9 +590,9 @@ namespace Enjon
 			BQuat rot = trans.getRotation( );
 
 			// Fill out transform information 
-			returnTrans.Position = Vec3( origin.getX( ), origin.getY( ), origin.getZ( ) );
-			returnTrans.Rotation = Quaternion( rot.x( ), rot.y( ), rot.z( ), -rot.w( ) );
-			returnTrans.Scale = GetCollisionShape( )->GetLocalScaling( );
+			returnTrans.SetPosition( Vec3( origin.getX( ), origin.getY( ), origin.getZ( ) ) );
+			returnTrans.SetRotation( Quaternion( rot.x( ), rot.y( ), rot.z( ), -rot.w( ) ) );
+			returnTrans.SetScale( GetCollisionShape( )->GetLocalScaling( ) );
 		} 
 
 		// Return transform information

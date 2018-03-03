@@ -187,20 +187,20 @@ namespace Enjon
 					const Transform* val = cls->GetValueAs< Transform >( object, prop );
 
 					// Write out position
-					buffer->Write< f32 >( val->Position.x );
-					buffer->Write< f32 >( val->Position.y );
-					buffer->Write< f32 >( val->Position.z );
+					buffer->Write< f32 >( val->GetPosition().x );
+					buffer->Write< f32 >( val->GetPosition().y );
+					buffer->Write< f32 >( val->GetPosition().z );
 
 					// Write out rotation
-					buffer->Write< f32 >( val->Rotation.x );
-					buffer->Write< f32 >( val->Rotation.y );
-					buffer->Write< f32 >( val->Rotation.z );
-					buffer->Write< f32 >( val->Rotation.w );
+					buffer->Write< f32 >( val->GetRotation().x );
+					buffer->Write< f32 >( val->GetRotation().y );
+					buffer->Write< f32 >( val->GetRotation().z );
+					buffer->Write< f32 >( val->GetRotation().w );
 
 					// Write out scale
-					buffer->Write< f32 >( val->Scale.x );
-					buffer->Write< f32 >( val->Scale.y );
-					buffer->Write< f32 >( val->Scale.z ); 
+					buffer->Write< f32 >( val->GetScale().x );
+					buffer->Write< f32 >( val->GetScale().y );
+					buffer->Write< f32 >( val->GetScale().z ); 
 				} break;
 
 				case MetaPropertyType::UUID:
@@ -589,20 +589,25 @@ namespace Enjon
 						Transform val;
 		 
 						// Read in position
-						val.Position.x = buffer->Read< f32 >( );
-						val.Position.y = buffer->Read< f32 >( );
-						val.Position.z = buffer->Read< f32 >( );
+						Vec3 position;
+						position.x = buffer->Read< f32 >( );
+						position.y = buffer->Read< f32 >( );
+						position.z = buffer->Read< f32 >( );
+						val.SetPosition( position );
 
 						// Read in rotation
-						val.Rotation.x = buffer->Read< f32 >( );
-						val.Rotation.y = buffer->Read< f32 >( );
-						val.Rotation.z = buffer->Read< f32 >( );
-						val.Rotation.w = buffer->Read< f32 >( );
+						Quaternion rotation;
+						rotation.x = buffer->Read< f32 >( );
+						rotation.y = buffer->Read< f32 >( );
+						rotation.z = buffer->Read< f32 >( );
+						rotation.w = buffer->Read< f32 >( );
+						val.SetRotation( rotation );
 
 						// Read in scale
-						val.Scale.x = buffer->Read< f32 >( );
-						val.Scale.y = buffer->Read< f32 >( );
-						val.Scale.z = buffer->Read< f32 >( );
+						Vec3 scale;
+						scale.x = buffer->Read< f32 >( );
+						scale.y = buffer->Read< f32 >( );
+						scale.z = buffer->Read< f32 >( );
 
 						// Set transform property
 						cls->SetValue( object, prop, val ); 

@@ -42,7 +42,7 @@ namespace Enjon
 
 	void Camera::SetPosition(const Vec3& position)
 	{
-		mTransform.Position = position;
+		mTransform.SetPosition( position );
 	}
 
 	//=======================================================================================================
@@ -86,7 +86,7 @@ namespace Enjon
 
 	void Camera::LookAt(const Vec3& Position, const Vec3& Up)
 	{
-		Vec3& Pos = mTransform.Position;
+		Vec3& Pos = mTransform.GetPosition();
 
 		// Ignore, since you cannot look at yourself
 		if ((Pos - Position).Length() < 0.001f) return;
@@ -101,14 +101,14 @@ namespace Enjon
 		Mat4 LA = Mat4::LookAt(Pos, Position, Up);
 
 		// Set Transform
-		mTransform.Rotation = Enjon::Mat4ToQuaternion(LA);
+		mTransform.SetRotation( Mat4ToQuaternion(LA) );
 	} 
 
 	//=======================================================================================================
 
 	void Camera::SetRotation( const Quaternion& q )
 	{
-		mTransform.Rotation = q;
+		mTransform.SetRotation( q );
 	}
 
 	//=======================================================================================================
@@ -118,49 +118,49 @@ namespace Enjon
 		Quaternion X = Quaternion::AngleAxis(Yaw, 	Vec3(0, 1, 0)); 	// Absolute Up
 		Quaternion Y = Quaternion::AngleAxis(Pitch, Right());			// Relative Right
 
-		mTransform.Rotation = X * Y * mTransform.Rotation;
+		mTransform.SetRotation( X * Y * mTransform.GetRotation() );
 	}
 
 	//=======================================================================================================
 
 	Vec3 Camera::Forward() const
 	{
-		return mTransform.Rotation * Vec3(0, 0, -1);
+		return mTransform.GetRotation() * Vec3(0, 0, -1);
 	}
 
 	//=======================================================================================================
 
 	Vec3 Camera::Backward() const
 	{
-		return mTransform.Rotation * Vec3(0, 0, 1);
+		return mTransform.GetRotation() * Vec3(0, 0, 1);
 	}
 
 	//=======================================================================================================
 
 	Vec3 Camera::Right() const
 	{
-		return mTransform.Rotation * Vec3(1, 0, 0);
+		return mTransform.GetRotation() * Vec3(1, 0, 0);
 	}
 
 	//=======================================================================================================
 
 	Vec3 Camera::Left() const
 	{
-		return mTransform.Rotation * Vec3(-1, 0, 0);
+		return mTransform.GetRotation() * Vec3(-1, 0, 0);
 	}
 
 	//=======================================================================================================
 
 	Vec3 Camera::Up() const
 	{
-		return mTransform.Rotation * Vec3(0, 1, 0);
+		return mTransform.GetRotation() * Vec3(0, 1, 0);
 	}
 
 	//=======================================================================================================
 
 	Vec3 Camera::Down() const
 	{
-		return mTransform.Rotation * Vec3(0, -1, 0);
+		return mTransform.GetRotation() * Vec3(0, -1, 0);
 	}
 
 	//=======================================================================================================
@@ -216,7 +216,7 @@ namespace Enjon
 		//Mat4 rotation = QuaternionToMat4(Transform.Rotation);
 		//Mat4 translate = Mat4::Translate(Transform.Position * -1.0f); 
 
-		return Mat4::LookAt( mTransform.Position, mTransform.Position + Forward( ), Up( ) );
+		return Mat4::LookAt( mTransform.GetPosition(), mTransform.GetPosition() + Forward( ), Up( ) );
 
 		//return (scale * rotation * translate);
 	}
