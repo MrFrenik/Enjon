@@ -63,11 +63,7 @@ namespace Enjon
 	void CameraComponent::Update( )
 	{
 		Transform wt = mEntity->GetWorldTransform( );
-		mCamera.SetPosition( wt.GetPosition( ) );
-
-		//Vec3 eulerAngles = wt.GetRotation( ).NegativeAngleAxis().EulerAngles( );
-		//Quaternion newRot = Quaternion::FromEulerAngles( Vec3( eulerAngles.x, eulerAngles.y, eulerAngles.z ) );
-		//mCamera.SetRotation( newRot.Normalize() );
+		mCamera.SetPosition( wt.GetPosition( ) ); 
 		mCamera.SetRotation( wt.GetRotation().NegativeAngleAxis().Normalize() );
 	}
 	

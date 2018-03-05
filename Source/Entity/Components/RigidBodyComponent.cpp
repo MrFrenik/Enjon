@@ -75,10 +75,14 @@ namespace Enjon
 	{
 		PhysicsSubsystem* phys = EngineSubsystem( PhysicsSubsystem );
 		if ( !phys->IsPaused( ) )
-		{
-			Transform wt = mBody.GetWorldTransform( );
-			mEntity->SetLocalPosition( wt.GetPosition(), false );
-			mEntity->SetLocalRotation( wt.GetRotation(), false ); 
+		{ 
+			// Only set position and rotation if not kinematic - could make a derived kinematic body component for this
+			if ( !mBody.GetIsKinematic( ) )
+			{
+				Transform wt = mBody.GetWorldTransform( );
+				mEntity->SetLocalPosition( wt.GetPosition(), false );
+				mEntity->SetLocalRotation( wt.GetRotation(), false ); 
+			}
 		}
 	}
 
