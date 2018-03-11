@@ -117,6 +117,16 @@ namespace Enjon
 		mMouseCoords.y = y;
 	}
 
+	void Input::SetMouseWheel( const Vec2& wheel )
+	{
+		mMouseWheel = wheel;
+	}
+
+	Vec2 Input::GetMouseWheel( ) const
+	{
+		return mMouseWheel;
+	}
+
 	void Controller::PressButton( u32 buttonID )
 	{
 		m_buttonMap[buttonID] = true;

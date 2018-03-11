@@ -302,9 +302,9 @@ namespace Enjon
 	void GLSLProgram::SetUniform(const std::string& name, const Transform& T)
 	{
 		// TODO(John): Figure out a decent way to cache these
-		glUniform3f(GetUniformLocation(name + ".position"), T.Position.x, T.Position.y, T.Position.z);	
-		glUniform4f(GetUniformLocation(name + ".rotation"), T.Rotation.x, T.Rotation.y, T.Rotation.z, T.Rotation.w);	
-		glUniform3f(GetUniformLocation(name + ".scale"), T.Scale.x, T.Scale.y, T.Scale.z);
+		glUniform3f(GetUniformLocation(name + ".position"), T.GetPosition().x, T.GetPosition().y, T.GetPosition().z);	
+		glUniform4f(GetUniformLocation(name + ".rotation"), T.GetRotation().x, T.GetRotation().y, T.GetRotation().z, T.GetRotation().w);	
+		glUniform3f(GetUniformLocation(name + ".scale"), T.GetScale().x, T.GetScale().y, T.GetScale().z);
 	}
 
 	void GLSLProgram::SetUniform(const std::string& name, ColorRGBA32& C)

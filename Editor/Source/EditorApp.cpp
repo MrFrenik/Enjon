@@ -12,6 +12,7 @@
 #include <Graphics/Window.h>
 #include <Entity/EntityManager.h>
 #include <Physics/PhysicsSubsystem.h>
+#include <Scene/SceneManager.h>
 #include <Entity/Components/GraphicsComponent.h>
 #include <Entity/Components/RigidBodyComponent.h>
 #include <Entity/Components/PointLightComponent.h>
@@ -189,9 +190,10 @@ namespace Enjon
 		mProject.CompileProject( );
 
 		// Save scene
-		if ( mCurrentScene )
+		SceneManager* sm = EngineSubsystem( SceneManager );
+		if ( sm->GetScene() )
 		{
-			mCurrentScene->Save( );
+			sm->GetScene()->Save( );
 		}
 
 		ReloadDLL( );
@@ -454,10 +456,12 @@ namespace Enjon
 				{
 					Result res = mProject.CompileProject( );
 
+					AssetHandle< Scene > scene = EngineSubsystem( SceneManager )->GetScene( );
+
 					// Save the scene
-					if ( mCurrentScene )
+					if ( scene )
 					{
-						mCurrentScene->Save( );
+						scene->Save( );
 					}
 
 					// Force reload the project after successful compilation
@@ -502,7 +506,9 @@ namespace Enjon
 
 	void EditorApp::WorldOutlinerView( )
 	{ 
-		if ( !mCurrentScene )
+		AssetHandle< Scene > scene = EngineSubsystem( SceneManager )->GetScene( );
+
+		if ( !scene )
 		{
 			return;
 		}
@@ -510,7 +516,7 @@ namespace Enjon
 		EntityManager* entities = EngineSubsystem( EntityManager );
 
 		// Print out scene name
-		ImGui::Text( ( "Scene: " + mCurrentScene->GetName( ) ).c_str( ) );
+		ImGui::Text( ( "Scene: " + scene->GetName( ) ).c_str( ) );
 
 		ImGui::Separator( );
 
@@ -548,7 +554,9 @@ namespace Enjon
 
 	void EditorApp::SelectSceneView( )
 	{
-		String defaultText = mCurrentScene.Get( ) == nullptr ? "Available Scenes..." : mCurrentScene->GetName( );
+		SceneManager* sm = EngineSubsystem( SceneManager );
+		AssetHandle< Scene > scene = sm->GetScene( ); 
+		String defaultText = scene.Get( ) == nullptr ? "Available Scenes..." : scene->GetName( );
 		if ( ImGui::BeginCombo( "##Available Scenes", defaultText.c_str() ) )
 		{ 
 			// If there's a valid application set
@@ -563,14 +571,11 @@ namespace Enjon
 					// Add component to mEntity
 					if ( ImGui::Selectable( record.second.GetAssetName( ).c_str( ) ) )
 					{ 
-						// Unload all current entities in scene ( This is something that a scene manager would likely handle )
-						UnloadScene( );
+						// Get uuid of asset
+						UUID uuid = record.second.GetAssetUUID( );
 
-						// Load the asset from disk
-						record.second.LoadAsset( ); 
-
-						// Set current scene with record's asset
-						mCurrentScene = record.second.GetAsset();
+						// Load the scene
+						sm->LoadScene( uuid ); 
 
 						// Deselect entity
 						DeselectEntity( );
@@ -585,11 +590,11 @@ namespace Enjon
 			ImGui::EndCombo( ); 
 		}
 
-		if ( mCurrentScene )
+		if ( sm->GetScene() )
 		{
 			if ( ImGui::Button( "Save Scene" ) )
 			{
-				mCurrentScene->Save( );
+				sm->GetScene()->Save( );
 			}
 		}
 	}
@@ -670,31 +675,35 @@ namespace Enjon
 
 	void EditorApp::UnloadScene( bool releaseSceneAsset )
 	{
-		EntityManager* em = EngineSubsystem( EntityManager );
+		//EntityManager* em = EngineSubsystem( EntityManager );
 
-		// Destroy all entities that are pending to be added as well
-		em->DestroyAll( );
+		//// Destroy all entities that are pending to be added as well
+		//em->DestroyAll( );
 
-		// Force cleanup of scene
-		em->ForceCleanup( );
+		//// Force cleanup of scene
+		//em->ForceCleanup( );
 
-		if ( releaseSceneAsset )
-		{
-			if ( mCurrentScene )
-			{
-				mCurrentScene.Unload( ); 
-			}
+		//if ( releaseSceneAsset )
+		//{
+		//	if ( mCurrentScene )
+		//	{
+		//		mCurrentScene.Unload( ); 
+		//	}
 
-			mCurrentScene = nullptr; 
-		}
+		//	mCurrentScene = nullptr; 
+		//}
 	}
 
 	//================================================================================================================================
 
 	void EditorApp::LoadProject( const Project& project )
 	{ 
+		SceneManager* sm = EngineSubsystem( SceneManager );
+
+		sm->UnloadScene( );
+
 		// TODO(): Unload current project - which means to destroy all current entities
-		UnloadScene( );
+		//UnloadScene( );
 
 		// Unload previous dll
 		UnloadDLL( );
@@ -829,14 +838,12 @@ namespace Enjon
 	{
 		// Save the current scene and store uuid
 		UUID uuid;
-		if ( mCurrentScene )
+		SceneManager* sm = EngineSubsystem( SceneManager );
+		if ( sm->GetScene() )
 		{
-			uuid = mCurrentScene->GetUUID( );
-			mCurrentScene.Unload( );
+			uuid = sm->GetScene()->GetUUID( );
+			sm->UnloadScene( );
 		} 
-
-		// Set scene to nullptr
-		mCurrentScene = nullptr;
 
 		// ReloadDLL without release scene asset
 		LoadDLL( false ); 
@@ -844,7 +851,7 @@ namespace Enjon
 		// Set current scene using previous id if valid
 		if ( uuid )
 		{
-			mCurrentScene = EngineSubsystem( AssetManager )->GetAsset< Scene >( uuid ); 
+			sm->LoadScene( uuid );
 		}
 	}
 
@@ -854,8 +861,10 @@ namespace Enjon
 	{
 		Enjon::ByteBuffer buffer;
 
+		// Unload previous scene
+		EngineSubsystem( SceneManager )->UnloadScene( );
 		// Unload previous scene 
-		UnloadScene( releaseSceneAsset ); 
+		//UnloadScene( releaseSceneAsset ); 
 
 		// Actual code starts here...
 		bool needsReload = UnloadDLL( &buffer );
@@ -920,14 +929,18 @@ namespace Enjon
 			std::cout << "Could not load library\n";
 		}
 
+		// Reload current scene
+		SceneManager* sm = EngineSubsystem( SceneManager );
+		sm->ReloadScene( );
+
 		// Reload scene if available
-		if ( !releaseSceneAsset )
-		{
-			if ( mCurrentScene )
-			{
-				mCurrentScene.Reload( ); 
-			}
-		}
+		//if ( !releaseSceneAsset )
+		//{
+		//	if ( mCurrentScene )
+		//	{
+		//		mCurrentScene.Reload( ); 
+		//	}
+		//}
 	}
 
 	//================================================================================================================================
@@ -1001,18 +1014,24 @@ namespace Enjon
 
 	void EditorApp::ReloadScene( )
 	{
-		if ( mCurrentScene )
-		{
-			mCurrentScene.Reload( );
-		}
+		//if ( mCurrentScene )
+		//{
+		//	mCurrentScene.Reload( );
+		//}
 	}
 
 	//================================================================================================================================
 
 	void EditorApp::InitializeProjectApp( )
 	{
+		// Get project application
 		Application* app = mProject.GetApplication( );
-		if ( app && mCurrentScene )
+
+		// Get current loaded scene
+		AssetHandle< Scene > scene = EngineSubsystem( SceneManager )->GetScene( );
+
+		// If both are loaded then can initialize application
+		if ( app && scene )
 		{
 			// Set application state to running
 			SetApplicationState( ApplicationState::Running );
@@ -1023,7 +1042,7 @@ namespace Enjon
 
 			// NOTE(): Don't really like this at all...
 			// Save current scene before starting so we can reload on stop 
-			mCurrentScene.Save( );
+			scene.Save( );
 
 			// Initialize the app
 			app->Initialize( );
@@ -1048,28 +1067,36 @@ namespace Enjon
 			SetApplicationState( ApplicationState::Stopped );
 
 			EntityManager* em = EngineSubsystem( EntityManager );
-			Vector<Entity*> entities = em->GetActiveEntities( );
-			// Destroy any entities alive that aren't in the cached off entity list
-			for ( auto& e : entities )
-			{ 
-				// Shutdown its components
-				for ( auto& c : e->GetComponents( ) )
-				{
-					c->Shutdown( );
-				} 
-			} 
+			SceneManager* sm = EngineSubsystem( SceneManager );
+			Vector<Entity*> entities = em->GetActiveEntities( ); 
 
-			// Destroy all entities
-			em->DestroyAll( );
+			// Destroy any entities alive that aren't in the cached off entity list
+			//for ( auto& e : entities )
+			//{ 
+			//	// Shutdown its components
+			//	for ( auto& c : e->GetComponents( ) )
+			//	{
+			//		c->Shutdown( );
+			//	} 
+			//} 
+
+			//// Destroy all entities
+			//em->DestroyAll( );
 
 			// Shutodwn the application
 			app->Shutdown( ); 
 
+			// Unload current scene and catch its uuid
+			UUID uuid = sm->UnloadScene( );
+
 			// Force the scene to clean up ahead of frame
-			CleanupScene( ); 
+			//CleanupScene( ); 
 
 			// Reload current scene
-			ReloadScene( );
+			//ReloadScene( );
+
+			// Reload scene with previous uuid
+			sm->LoadScene( uuid );
 
 			// Clean up physics subsystem from contact events as well
 			PhysicsSubsystem* phys = EngineSubsystem( PhysicsSubsystem );
@@ -1322,8 +1349,18 @@ namespace Enjon
 					AssetHandle< Scene > scene = am->ConstructAsset< Scene >( );
 
 					// Unload scene after saving it
+					// NOTE(): Shouldn't have to do this
 					scene.Unload( ); 
 				} 
+
+				if ( ImGui::MenuItem( "Material##Options", NULL ) )
+				{
+					// Construct material asset and save it
+					AssetManager* am = EngineSubsystem( AssetManager );
+
+					// Don't name it for now
+					AssetHandle< Material > mat = am->ConstructAsset< Material >( ); 
+				}
 			}
 		}; 
 
@@ -1567,7 +1604,12 @@ namespace Enjon
 
 			if ( mMoveCamera )
 			{ 
-				Enjon::Vec3 velDir( 0, 0, 0 );
+				Enjon::Vec3 velDir( 0, 0, 0 ); 
+
+				// Set camera speed 
+				Vec2 mw = mInput->GetMouseWheel( ).y;
+				f32 mult = mw.y == 1.0f ? 2.0f : mw.y == -1.0f ? 0.5f : 1.0f;
+				mCameraSpeed = Clamp(mCameraSpeed * mult, 0.25f, 128.0f);
 
 				if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
 				{

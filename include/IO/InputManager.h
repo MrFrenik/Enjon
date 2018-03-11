@@ -282,6 +282,16 @@ namespace Enjon
 			* @brief
 			*/
 			void SetMouseCoords( f32 x, f32 y );
+
+			/**
+			* @brief
+			*/
+			void SetMouseWheel( const Vec2& wheel );
+
+			/**
+			* @brief
+			*/
+			Vec2 GetMouseWheel( ) const;
 			
 			/**
 			* @brief
@@ -300,7 +310,8 @@ namespace Enjon
 			KeyCodeMap mPreviousKeyMap;
 			KeyCodeMap mButtonMap;
 			KeyCodeMap mPreviousButtonMap;
-			Enjon::Vec2 mMouseCoords;
+			Vec2 mMouseCoords;
+			Vec2 mMouseWheel;
 	}; 
 }
 

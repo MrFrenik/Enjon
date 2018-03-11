@@ -745,7 +745,7 @@ namespace Enjon
 					{ 
 						Enjon::AssetHandle<Enjon::Asset> val; 
 						cls->GetValue( object, prop, &val );
-						const Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
+						AssetManager* am = EngineSubsystem( AssetManager );
 						auto assets = am->GetAssets( assetCls ); 
 						if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
 						{
@@ -769,6 +769,12 @@ namespace Enjon
 							if ( val )
 							{
 								ImGuiManager::DebugDumpObject( val.Get( ) ); 
+
+								// Save the asset if pressed
+								if ( !const_cast< MetaClass* >( cls )->InstanceOf< Texture >() && ImGui::Button( fmt::format( "Save##{}", (u32)prop ).c_str( ) ) )
+								{
+									val.Save( );
+								}
 							}
 							ImGui::TreePop( );
 						}

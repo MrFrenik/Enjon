@@ -120,6 +120,13 @@ namespace Enjon
 
 	//=================================================================
 
+	UUID AssetRecordInfo::GetAssetUUID( ) const
+	{
+		return mAssetUUID;
+	}
+
+	//=================================================================
+
 	AssetLoader::AssetLoader()
 	{ 
 	}

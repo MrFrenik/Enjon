@@ -11,6 +11,7 @@
 #include "IO/InputManager.h"
 #include "ImGui/ImGuiManager.h"
 #include "Physics/PhysicsSubsystem.h"
+#include "Scene/SceneManager.h"
 #include "Utils/Timing.h"
 #include "SubsystemCatalog.h"
 
@@ -160,11 +161,12 @@ namespace Enjon
 		mApp->BindApplicationMetaClasses( );
 
 		// Register subsystems with catalog
-		mAssetManager	= mSubsystemCatalog->Register<Enjon::AssetManager>( false );		// Will do manual initialization of asset management system, since it's project dependent
-		mGraphics		= mSubsystemCatalog->Register<Enjon::GraphicsSubsystem>( );
-		mInput			= mSubsystemCatalog->Register<Enjon::Input>( ); 
-		mEntities		= mSubsystemCatalog->Register<EntityManager>( );
-		mPhysics		= mSubsystemCatalog->Register<PhysicsSubsystem>( );
+		mAssetManager	= mSubsystemCatalog->Register< AssetManager >( false );		// Will do manual initialization of asset management system, since it's project dependent
+		mGraphics		= mSubsystemCatalog->Register< GraphicsSubsystem >( );
+		mInput			= mSubsystemCatalog->Register< Input >( ); 
+		mEntities		= mSubsystemCatalog->Register< EntityManager >( );
+		mPhysics		= mSubsystemCatalog->Register< PhysicsSubsystem >( );
+		mSceneManager	= mSubsystemCatalog->Register< SceneManager >( );
 
 		// Default setting for assets directory
 		mAssetManager->SetAssetsDirectoryPath( mConfig.GetRoot( ) + "Assets/" );
@@ -332,6 +334,7 @@ namespace Enjon
 	Enjon::Result Engine::ProcessInput( Enjon::Input* input, const f32 dt )
 	{
 	    SDL_Event event;
+		Vec2 mouseWheel( 0.0f );
 	   //Will keep looping until there are no more events to process
 	    while ( SDL_PollEvent( &event ) ) 
 	    {
@@ -367,6 +370,12 @@ namespace Enjon
 				case SDL_MOUSEMOTION:
 				{
 					input->SetMouseCoords( (f32)event.motion.x, (f32)event.motion.y ); 
+				} break;
+
+				case SDL_MOUSEWHEEL:
+				{
+					// Set mouse wheel for this frame
+					mouseWheel = Vec2( event.wheel.x, event.wheel.y );
 				} break;
 
 				case SDL_WINDOWEVENT: 
@@ -421,11 +430,13 @@ namespace Enjon
 				} break; 
 
 				default:
-				{
-
+				{ 
 				} break;
-			}
+			} 
 	    } 
+
+		// Set mouse wheel this frame
+		input->SetMouseWheel( mouseWheel );
 
 	    return Result::PROCESS_RUNNING;
 	}

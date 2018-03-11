@@ -21,6 +21,7 @@ namespace Enjon
 	class Application; 
 	class MetaClassRegistry;
 	class EntityManager;
+	class SceneManager;
 	class MetaClass;
 	class Subsystem;
 	
@@ -237,7 +238,8 @@ namespace Enjon
 			AssetManager*		mAssetManager		= nullptr;
 			MetaClassRegistry*	mMetaClassRegisty	= nullptr;
 			EntityManager*		mEntities			= nullptr;
-			PhysicsSubsystem*	mPhysics = nullptr;
+			PhysicsSubsystem*	mPhysics			= nullptr;
+			SceneManager*		mSceneManager		= nullptr;
 
 			// Engine configuration settings
 			EngineConfig mConfig;

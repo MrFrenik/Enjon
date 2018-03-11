@@ -712,6 +712,42 @@ namespace Enjon
 	{ 
 		// Push for deferred removal from active entities
 		mMarkedForDestruction.push_back(entity.GetID()); 
+
+		// Remove from need initialization lists
+		RemoveFromNeedInitLists( entity );
+
+		// Remove from need start lists
+		RemoveFromNeedStartLists( entity );
+	}
+
+	//==============================================================================
+
+	void EntityManager::RemoveFromNeedInitLists( const EntityHandle& entity )
+	{
+		Entity* ent = entity.Get( );
+		if ( ent )
+		{
+			// Remove all components
+			for ( auto& c : ent->GetComponents( ) )
+			{
+				mNeedInitializationList.erase( std::remove( mNeedInitializationList.begin( ), mNeedInitializationList.end( ), c ), mNeedInitializationList.end( ) );
+			}
+		}
+	}
+
+	//==============================================================================
+
+	void EntityManager::RemoveFromNeedStartLists( const EntityHandle& entity )
+	{
+		Entity* ent = entity.Get( );
+		if ( ent )
+		{
+			// Remove all components
+			for ( auto& c : ent->GetComponents( ) )
+			{
+				mNeedStartList.erase( std::remove( mNeedStartList.begin( ), mNeedStartList.end( ), c ), mNeedStartList.end( ) );
+			}
+		} 
 	}
 
 	//==============================================================================
@@ -730,6 +766,8 @@ namespace Enjon
 
 		mActiveEntities.clear( );
 		mMarkedForAdd.clear( );
+		mNeedInitializationList.clear( );
+		mNeedStartList.clear( );
 	}
  
 	//==============================================================================
@@ -775,10 +813,15 @@ namespace Enjon
 						auto comp = GetComponent( ent->GetHandle( ), c );
 						if ( comp )
 						{
+							// Call shutdown on component
+							comp->Shutdown( );
+							// Destroy the component
 							comp->Destroy(); 
 						}
 
+						// Free component memory
 						delete comp;
+						// Set to null
 						comp = nullptr;
 					}
 
@@ -839,13 +882,19 @@ namespace Enjon
 			// Process all components that need initialization from last frame
 			for ( auto& c : mNeedInitializationList )
 			{
-				c->Initialize( );
+				if ( c )
+				{
+					c->Initialize( ); 
+				}
 			}
 
 			// Process all components that need startup from last frame 
 			for ( auto& c : mNeedStartList )
 			{
-				c->Start( );
+				if ( c )
+				{
+					c->Start( ); 
+				}
 			} 
 
 			// Clear both lists
@@ -997,12 +1046,24 @@ namespace Enjon
 		auto comp = GetComponent( entity, compCls->GetTypeId() );
 		if ( comp )
 		{
-			comp->Destroy( );
+			// Remove from initialization list
+			mNeedInitializationList.erase( std::remove( mNeedInitializationList.begin( ), mNeedInitializationList.end( ), comp ), mNeedInitializationList.end( ) );
+
+			// Remove from start list
+			mNeedStartList.erase( std::remove( mNeedStartList.begin( ), mNeedStartList.end( ), comp ), mNeedStartList.end( ) );
+
+			// Destroy component
+			comp->Destroy( ); 
+
+			// Remove from entity component list
+			auto comps = &entity.Get( )->mComponents;
+			comps->erase( std::remove( comps->begin(), comps->end(), compCls->GetTypeId() ), comps->end() ); 
+
+			// Free memory of component
+			delete comp;
+			// Set to null
+			comp = nullptr;
 		} 
-		auto comps = &entity.Get( )->mComponents;
-		comps->erase( std::remove( comps->begin(), comps->end(), compCls->GetTypeId() ), comps->end() ); 
-		delete comp;
-		comp = nullptr;
 	}
 
 	//=========================================================================================

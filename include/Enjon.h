@@ -42,6 +42,7 @@
 #include "Graphics/GraphicsSubsystem.h"
 
 #include "Scene/Scene.h"
+#include "Scene/SceneManager.h"
 
 #include "GUI/Signal.h"
 

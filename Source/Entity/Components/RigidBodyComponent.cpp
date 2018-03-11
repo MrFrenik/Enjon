@@ -83,6 +83,7 @@ namespace Enjon
 				mEntity->SetLocalPosition( wt.GetPosition(), false );
 				mEntity->SetLocalRotation( wt.GetRotation(), false ); 
 			}
+			Transform wt = mBody.GetWorldTransform( );
 		}
 	}
 

@@ -503,6 +503,16 @@ namespace Enjon
 			*@brief
 			*/
 			void UpdateAllActiveTransforms(f32 dt);
+ 
+			/**
+			*@brief
+			*/
+			void RemoveFromNeedInitLists( const EntityHandle& entity );
+
+			/**
+			*@brief
+			*/
+			void RemoveFromNeedStartLists( const EntityHandle& entity );
 
 			/**
 			*@brief

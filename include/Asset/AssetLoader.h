@@ -68,6 +68,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			UUID GetAssetUUID( ) const;
+
+			/**
+			* @brief
+			*/
 			void LoadAsset( ) const;
 
 			/**
