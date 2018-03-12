@@ -86,7 +86,7 @@ namespace Enjon
 				ImGui::OpenPopup( popupName ); 
 			}
 			ImGui::SetNextWindowSize( ImVec2( 600.0f, 150.0f ) );
-			if( ImGui::BeginPopupModal( popupName ) )
+			if( ImGui::BeginPopupModal( popupName, NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize ) )
 			{
 					String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
 					if ( ImGui::BeginCombo( "##LOADPROJECTLIST", defaultText.c_str() ) )
@@ -326,7 +326,9 @@ namespace Enjon
 			// Transform information
 			if ( ImGui::CollapsingHeader( "Transform" ) )
 			{
+				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
 				ImGuiManager::DebugDumpProperty( ent, ent->Class( )->GetPropertyByName( "mLocalTransform" ) ); 
+				ImGui::PopFont( );
 			}
 
 
@@ -341,7 +343,9 @@ namespace Enjon
 						shapeType = (s32)c->Cast<RigidBodyComponent>( )->GetShapeType( );
 					}
 
+					ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
 					ImGuiManager::DebugDumpObject( c ); 
+					ImGui::PopFont( );
 
 					// Shape type changed
 					// TODO(): Be able to hook in specific delegates for property changes through reflection system
