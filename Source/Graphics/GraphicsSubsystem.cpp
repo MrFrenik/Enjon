@@ -1,5 +1,5 @@
 #include "Graphics/GraphicsSubsystem.h"
-#include "Graphics/RenderTarget.h"
+#include "Graphics/FrameBuffer.h"
 #include "Graphics/GBuffer.h"
 #include "Graphics/FullScreenQuad.h"
 #include "Graphics/SpriteBatch.h"
@@ -61,18 +61,17 @@ namespace Enjon
 		// engine config file
 		// mWindow.Init("Game", 1920, 1080, WindowFlagsMask((u32)WindowFlags::FULLSCREEN)); 
 		mWindow.Init( "Game", 1440, 900, WindowFlags::RESIZABLE ); 
+		mWindows.push_back( &mWindow ); 
+
+		// Set current window
+		mCurrentWindow = &mWindow;
+		mWindow.MakeCurrent( );
 
 		// Initialize shader manager
 		Enjon::ShaderManager::Init();
 
 		// Initialize font manager
 		Enjon::FontManager::Init();
-
-		// Initialize scene camera
-		//mGraphicsSceneCamera = Enjon::Camera(mWindow.GetViewport());
-		//mGraphicsSceneCamera.SetNearFar( 0.01f, 1000.0f );
-		//mGraphicsSceneCamera.SetProjection(ProjectionType::Perspective);
-		//mGraphicsSceneCamera.SetPosition(Vec3(0, 5, 10));
 
 		// Initialize sprite batch ( not really needed, I don't think...)
 		mBatch 						= new SpriteBatch();
@@ -102,6 +101,12 @@ namespace Enjon
         	ImGui::MenuItem("Graphics##options", NULL, &mShowGraphicsOptionsWindow);
 		};
 
+		mShowStyles = true;
+		auto stylesMenuOption = [&]()
+		{
+        	ImGui::MenuItem("Styles##options", NULL, &mShowStyles);
+		};
+
 		mShowGame = true;
 		auto showGameViewportFunc = [&]()
 		{
@@ -125,7 +130,6 @@ namespace Enjon
 			ImGui::EndDock();
 		};
 
-	 	mShowStyles = true;
 	 	auto showStylesWindowFunc = [&]()
 	 	{
 			if (ImGui::BeginDock("Styles##options", &mShowStyles))
@@ -139,12 +143,14 @@ namespace Enjon
 		// TODO(John): I HATE the way this looks
 		ImGuiManager::RegisterMenuOption("View", graphicsMenuOption);
 		ImGuiManager::RegisterWindow(showGraphicsViewportFunc);
+		ImGuiManager::RegisterMenuOption("View", stylesMenuOption);
+		ImGuiManager::RegisterWindow(showStylesWindowFunc);
 
 		// Set current render texture
 		mCurrentRenderTexture = mFXAATarget->GetTexture();
 
 		// Register docking layouts
-	    ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Graphics", nullptr, ImGui::DockSlotType::Slot_Right, 0.2f));
+	    //ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Graphics", nullptr, ImGui::DockSlotType::Slot_Right, 0.2f));
 	
 		// Register shader graph templates
 		Enjon::ShaderGraph::DeserializeTemplate( Enjon::Engine::GetInstance( )->GetConfig( ).GetEngineResourcePath( ) + "/Shaders/ShaderGraphTemplates/ShaderTemplates.json" );
@@ -188,7 +194,7 @@ namespace Enjon
 		mModelMatricies = nullptr;
 
 		// Free all memory for render targets / frame buffers
-		FreeAllRenderTargets( );
+		FreeAllFrameBuffers( );
 
 		// Shutdown shader manager
 		ShaderManager::DeleteShaders( );
@@ -521,54 +527,126 @@ namespace Enjon
 
 	void GraphicsSubsystem::Update(const f32 dT)
 	{ 
-		static bool set = false;
-		if ( !set )
+		for ( auto& w : mWindows )
 		{ 
-			STBTest( );
-			set = true;
+			// Set current window
+			mCurrentWindow = w;
+			w->MakeCurrent( );
+
+			static bool set = false;
+			if ( !set )
+			{ 
+				STBTest( );
+				set = true;
+			} 
+
+			// Gbuffer pass
+			GBufferPass();
+			// SSAO pass
+			SSAOPass( );
+			// Lighting pass
+			LightingPass();
+			// Luminance Pass
+			LuminancePass();
+			// Bloom pass
+			BloomPass();
+			// Composite Pass
+			CompositePass( mLightingBuffer );
+			// Motion Blur Pass
+			MotionBlurPass( mCompositeTarget );
+			// FXAA pass
+			 FXAAPass( mMotionBlurTarget );
+			// Do UI pass
+			UIPass( mFXAATarget ); 
+	 
+			// Clear default buffer
+			mCurrentWindow->Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
+
+			// TODO(): Hate this : Compile it out
+			if ( Engine::GetInstance( )->GetConfig( ).IsStandAloneApplication( ) )
+			{
+				PresentBackBuffer( );
+			} 
+			else
+			{
+				// Otherwise Enjon Editor views
+				ImGuiPass(); 
+			}
+
+			mCurrentWindow->SwapBuffer(); 
 		} 
 
-		// Gbuffer pass
-		GBufferPass();
-		// SSAO pass
-		SSAOPass( );
-		// Lighting pass
-		LightingPass();
-		// Luminance Pass
-		LuminancePass();
-		// Bloom pass
-		BloomPass();
-		// Composite Pass
-		CompositePass( mLightingBuffer );
-		// Motion Blur Pass
-		MotionBlurPass( mCompositeTarget );
-		// FXAA pass
-		 FXAAPass( mMotionBlurTarget );
-		// Do UI pass
-		UIPass( mFXAATarget ); 
- 
-		// Clear default buffer
-		mWindow.Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
-
-		// TODO(): Hate this : Compile it out
-		if ( Engine::GetInstance( )->GetConfig( ).IsStandAloneApplication( ) )
-		{
-			PresentBackBuffer( );
-		} 
-		else
-		{
-			// Otherwise Enjon Editor views
-			ImGuiPass(); 
-		}
-
-		mWindow.SwapBuffer();
+		// Reset current window back to base window
+		// TODO(): This will be handled elsewhere
+		mCurrentWindow = &mWindow;
+		mCurrentWindow->MakeCurrent( ); 
 	}
 
 	//======================================================================================================
 
+	/*
+
+		// Possible implementation of future system
+		GraphicsSubsystem::Update()
+		{
+			// Grab all windows to be submitted
+			WindowManager* wm = EngineSubsystem( WindowManager );
+
+			for ( auto& window : wm->GetWindows() )
+			{ 
+				window->Submit();
+			}
+		}
+
+		Window::Submit()
+		{
+			// Make this window current
+			EngineSubsystem( WindowManager )->MakeCurrent( this );
+
+			// Submit all render passes
+			for ( auto& rt : mRenderTargets() )
+			{
+				rt->Submit();
+			}
+		}
+
+		GBufferPass::Submit()  // RenderPass implementation
+		{
+			// Do Gbuffer stuff and write to render targets	
+			// Need access to scene - not sure where this needs to be pulled from...
+		} 
+
+		SSAOPass::Submit()
+		{
+			// REQUIRES THAT A GBUFFER IS ATTACHED ( Not sure that I like having this dependency... )
+		}
+
+		-> 
+
+		// Constructor requires a GBufferPass* that it will use ?
+		// Or can it get a pass of type GBufferPass from GetFrameBuffer
+
+		ex. SSAOPass::Submit()
+		{
+			// Get GBuffer from window
+			GBuffer* gbuffer = mWindow->GetFrameBuffer< GBufferPass >();
+
+			// Can only continue with valid gbuffer
+			if ( gbuffer )
+			{
+
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+
+		So Window will hold HashMap[u32, FrameBuffer*] mFrameBuffers;
+	*/
+
 	void GraphicsSubsystem::PresentBackBuffer( )
 	{
-
 		glViewport( 0, 0, ( s32 )GetViewport().x, ( s32 )GetViewport().y );
 		auto program = Enjon::ShaderManager::Get( "NoCameraProjection" );
 		program->Use( );
@@ -892,7 +970,7 @@ namespace Enjon
 		Mat4 projInverse = Mat4::Inverse( camera->GetProjection( ) );
 		Mat4 viewInverse = Mat4::Inverse( camera->GetView( ) );
 
-		mWindow.Clear();
+		mCurrentWindow->Clear();
 
 		// TODO(): Abstract these away 
 		glEnable(GL_BLEND);
@@ -1027,7 +1105,7 @@ namespace Enjon
 		GLSLProgram* luminanceProgram = Enjon::ShaderManager::Get("Bright");
 		mLuminanceTarget->Bind();
 		{
-			mWindow.Clear(1.0f, GL_COLOR_BUFFER_BIT, RGBA32_Black());
+			mCurrentWindow->Clear(1.0f, GL_COLOR_BUFFER_BIT, RGBA32_Black());
 			luminanceProgram->Use();
 			{
 				luminanceProgram->BindTexture( "tex", mLightingBuffer->GetTexture( ), 0 );
@@ -1057,10 +1135,10 @@ namespace Enjon
     	for (u32 i = 0; i < (u32)mBloomSettings.mIterations.x * 2; ++i)
     	{
     		bool isEven = (i % 2 == 0);
-    		RenderTarget* target = isEven ? mSmallBlurHorizontal : mSmallBlurVertical;
+    		FrameBuffer* target = isEven ? mSmallBlurHorizontal : mSmallBlurVertical;
     		GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
 
-			target->Bind(RenderTarget::BindType::WRITE);
+			target->Bind(BindType::WRITE);
 			{
 				program->Use();
 				{
@@ -1087,10 +1165,10 @@ namespace Enjon
     	for (u32 i = 0; i < (u32)mBloomSettings.mIterations.y * 2; ++i)
     	{
     		bool isEven = (i % 2 == 0);
-    		RenderTarget* target = isEven ? mMediumBlurHorizontal : mMediumBlurVertical;
+    		FrameBuffer* target = isEven ? mMediumBlurHorizontal : mMediumBlurVertical;
     		GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
 
-			target->Bind(RenderTarget::BindType::WRITE);
+			target->Bind(BindType::WRITE);
 			{
 				program->Use();
 				{
@@ -1117,10 +1195,10 @@ namespace Enjon
     	for (u32 i = 0; i < (u32)mBloomSettings.mIterations.z * 2; ++i)
     	{
     		bool isEven = (i % 2 == 0);
-    		RenderTarget* target = isEven ? mLargeBlurHorizontal : mLargeBlurVertical;
+    		FrameBuffer* target = isEven ? mLargeBlurHorizontal : mLargeBlurVertical;
     		GLSLProgram* program = isEven ? horizontalBlurProgram : verticalBlurProgram;
 
-			target->Bind(RenderTarget::BindType::WRITE);
+			target->Bind(BindType::WRITE);
 			{
 				program->Use();
 				{
@@ -1161,13 +1239,13 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::FXAAPass(RenderTarget* input)
+	void GraphicsSubsystem::FXAAPass(FrameBuffer* input)
 	{
 		GLSLProgram* fxaaProgram = Enjon::ShaderManager::Get("FXAA");
 		Vector<Renderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
 		mFXAATarget->Bind();
 		{
-			mWindow.Clear();
+			mCurrentWindow->Clear();
 			fxaaProgram->Use();
 			{
 				auto viewPort = GetViewport();
@@ -1185,12 +1263,12 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::MotionBlurPass( RenderTarget* inputTarget )
+	void GraphicsSubsystem::MotionBlurPass( FrameBuffer* inputTarget )
 	{
 		GLSLProgram* motionBlurProgram = ShaderManager::Get( "MotionBlur" );
 		mMotionBlurTarget->Bind( );
 		{
-			mWindow.Clear( );
+			mCurrentWindow->Clear( );
 			motionBlurProgram->Use( );
 			{
 				auto viewPort = GetViewport( );
@@ -1211,12 +1289,12 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::CompositePass(RenderTarget* input)
+	void GraphicsSubsystem::CompositePass(FrameBuffer* input)
 	{
 		GLSLProgram* compositeProgram = Enjon::ShaderManager::Get("Composite"); 
 		mCompositeTarget->Bind();
 		{
-			mWindow.Clear();
+			mCurrentWindow->Clear();
 			compositeProgram->Use();
 			{
 				compositeProgram->BindTexture( "tex", input->GetTexture( ), 0 );
@@ -1248,7 +1326,7 @@ namespace Enjon
 		static bool show_game_viewport = true;
 
         // Queue up gui
-        ImGuiManager::Render(mWindow.GetSDLWindow());
+        ImGuiManager::Render(mCurrentWindow->GetSDLWindow());
 		 //ImGuiManager::RenderGameUI(&mWindow, mGraphicsSceneCamera.GetView().elements, mGraphicsSceneCamera.GetProjection().elements);
 
         // Flush
@@ -1259,12 +1337,12 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::UIPass( RenderTarget* inputTarget )
+	void GraphicsSubsystem::UIPass( FrameBuffer* inputTarget )
 	{
 		Camera* camera = mGraphicsScene.GetActiveCamera( );
 
 		Vector<Renderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
-		inputTarget->Bind( RenderTarget::BindType::WRITE, false );
+		inputTarget->Bind( BindType::WRITE, false );
 		{
 			auto shader = ShaderManager::GetShader( "Text" ); 
 			shader->Use( );
@@ -1376,14 +1454,14 @@ namespace Enjon
 
 	void GraphicsSubsystem::SetViewport(iVec2& dimensions)
 	{
-		mWindow.SetViewport(dimensions);
+		mCurrentWindow->SetViewport(dimensions);
 	}
 
 	//======================================================================================================
 
 	iVec2 GraphicsSubsystem::GetViewport() const
 	{
-		return mWindow.GetViewport();
+		return mCurrentWindow->GetViewport();
 	}
 
 	//======================================================================================================
@@ -1434,7 +1512,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::FreeAllRenderTargets( )
+	void GraphicsSubsystem::FreeAllFrameBuffers( )
 	{
 		// Free all framebuffers and rendertargets
 		delete( mGbuffer );
@@ -1474,10 +1552,10 @@ namespace Enjon
 		mMotionBlurTarget = nullptr; 
 	}
 
-	void GraphicsSubsystem::ReinitializeRenderTargets( )
+	void GraphicsSubsystem::ReinitializeFrameBuffers( )
 	{
 		// Free all previous memory for rendertargets / framebuffers
-		FreeAllRenderTargets( );
+		FreeAllFrameBuffers( );
 
 		// Reinitialize frame buffers
 		InitializeFrameBuffers( );
@@ -1490,27 +1568,27 @@ namespace Enjon
 
 	void GraphicsSubsystem::InitializeFrameBuffers()
 	{
-		auto viewport = mWindow.GetViewport();
+		auto viewport = mCurrentWindow->GetViewport();
 		Enjon::u32 width = (Enjon::u32)viewport.x;
 		Enjon::u32 height = (Enjon::u32)viewport.y;
 
 		mGbuffer 					= new GBuffer(width, height);
-		mDebugTarget 				= new RenderTarget(width, height);
-		mSmallBlurHorizontal 		= new RenderTarget(width / 4, height / 4);
-		mSmallBlurVertical 			= new RenderTarget(width / 4, height / 4);
-		mMediumBlurHorizontal 		= new RenderTarget(width  / 8, height  / 8);
-		mMediumBlurVertical 		= new RenderTarget(width  / 8, height  / 8);
-		mLargeBlurHorizontal 		= new RenderTarget(width / 16, height / 16);
-		mLargeBlurVertical 			= new RenderTarget(width / 16, height / 16);
-		mCompositeTarget 			= new RenderTarget(width, height);
-		mLightingBuffer 			= new RenderTarget(width, height);
-		mLuminanceTarget 			= new RenderTarget(width / 2, height / 2);
-		mFXAATarget 				= new RenderTarget(width, height);
-		mShadowDepth 				= new RenderTarget(2048, 2048);
-		mFinalTarget				= new RenderTarget( width, height );
-		mSSAOTarget					= new RenderTarget( width, height );
-		mSSAOBlurTarget				= new RenderTarget( width, height ); 
-		mMotionBlurTarget			= new RenderTarget( width, height ); 
+		mDebugTarget 				= new FrameBuffer(width, height);
+		mSmallBlurHorizontal 		= new FrameBuffer(width / 4, height / 4);
+		mSmallBlurVertical 			= new FrameBuffer(width / 4, height / 4);
+		mMediumBlurHorizontal 		= new FrameBuffer(width  / 8, height  / 8);
+		mMediumBlurVertical 		= new FrameBuffer(width  / 8, height  / 8);
+		mLargeBlurHorizontal 		= new FrameBuffer(width / 16, height / 16);
+		mLargeBlurVertical 			= new FrameBuffer(width / 16, height / 16);
+		mCompositeTarget 			= new FrameBuffer(width, height);
+		mLightingBuffer 			= new FrameBuffer(width, height);
+		mLuminanceTarget 			= new FrameBuffer(width / 2, height / 2);
+		mFXAATarget 				= new FrameBuffer(width, height);
+		mShadowDepth 				= new FrameBuffer(2048, 2048);
+		mFinalTarget				= new FrameBuffer( width, height );
+		mSSAOTarget					= new FrameBuffer( width, height );
+		mSSAOBlurTarget				= new FrameBuffer( width, height ); 
+		mMotionBlurTarget			= new FrameBuffer( width, height ); 
 	}
 
 	//======================================================================================================

@@ -238,7 +238,7 @@ namespace Enjon
 			lastTime = thisTime; 
 
 			 // Update input manager
-			 mInput->Update( dt );
+			mInput->Update( dt ); 
 
 			// Update input
 			Enjon::Result res = ProcessInput( mInput, dt );
@@ -340,36 +340,36 @@ namespace Enjon
 	    {
 	    	ImGui_ImplSdlGL3_ProcessEvent( &event ); 
 
-	        switch ( event.type ) 
-	        {
-	            case SDL_QUIT:
+			switch ( event.type )
+			{
+				case SDL_QUIT:
 				{
-	                return Result::FAILURE;
-				} break; 
+					return Result::FAILURE;
+				} break;
 
 				case SDL_KEYUP:
-				{ 
-					input->ReleaseKey( event.key.keysym.sym ); 
+				{
+					input->ReleaseKey( event.key.keysym.sym );
 				} break;
 
 				case SDL_KEYDOWN:
 				{
 					input->PressKey( event.key.keysym.sym );
-				} break; 
+				} break;
 
 				case SDL_MOUSEBUTTONDOWN:
 				{
 					input->PressKey( event.button.button );
-				} break; 
+				} break;
 
 				case SDL_MOUSEBUTTONUP:
 				{
 					input->ReleaseKey( event.button.button );
-				} break; 
+				} break;
 
 				case SDL_MOUSEMOTION:
 				{
-					input->SetMouseCoords( (f32)event.motion.x, (f32)event.motion.y ); 
+					input->SetMouseCoords( ( f32 )event.motion.x, ( f32 )event.motion.y );
 				} break;
 
 				case SDL_MOUSEWHEEL:
@@ -378,61 +378,14 @@ namespace Enjon
 					mouseWheel = Vec2( event.wheel.x, event.wheel.y );
 				} break;
 
-				case SDL_WINDOWEVENT: 
-				{
-					switch ( event.window.event )
-					{
-						case SDL_WINDOWEVENT_RESIZED: 
-						{
-							mGraphics->GetWindow( )->ConstCast< Window >()->SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
-							mGraphics->ReinitializeRenderTargets( );
-						}
-						break; 
+			}
 
-						case SDL_WINDOWEVENT_ENTER: 
-						{
+			// Pass event to windows
+			for ( auto& w : mGraphics->GetWindows( ) )
+			{
+				w->ProcessInput( event );
+			}
 
-						}
-						break;
-						
-						case SDL_WINDOWEVENT_LEAVE: 
-						{
-
-						}
-						break;
-
-						case SDL_WINDOWEVENT_MOVED:
-						{
-
-						}
-						break;
-
-						case SDL_WINDOWEVENT_RESTORED:
-						{
-
-						} break;
-
-						case SDL_WINDOWEVENT_FOCUS_GAINED: 
-						{
-
-						} break;
-
-						case SDL_WINDOWEVENT_FOCUS_LOST: 
-						{
-
-						} break;
-						
-						case SDL_WINDOWEVENT_CLOSE: 
-						{
-
-						} break; 
-					}
-				} break; 
-
-				default:
-				{ 
-				} break;
-			} 
 	    } 
 
 		// Set mouse wheel this frame

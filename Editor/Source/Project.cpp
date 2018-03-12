@@ -190,6 +190,22 @@ namespace Enjon
 
 	//======================================================================
 
+	void Project::Simluate( )
+	{
+#ifdef ENJON_SYSTEM_WINDOWS 
+		// TODO(): Spawn up a separate thread to call this so we know when it's finished
+		String cd = "pushd \"E:/Development/EnjonProjects/PongProject/Compiled/Windows/\"";
+		s32 code = system( String( cd + "\ncall " + mProjectName + ".exe\n" + "popd\nexit 0" ).c_str() ); 
+		//s32 code = system( String( cd ).c_str() ); 
+		if ( code == 0 )
+		{
+			// Success...
+		}
+
+#endif
+
+	}
+
 	Result Project::BuildProject( )
 	{
 		if ( !mEditor )

@@ -76,14 +76,61 @@ namespace Enjon
 		}
 	}
 
-	void EditorApp::AddComponentPopupView( )
-	{
-		if ( ImGui::BeginPopupModal( "##NewComponent" ) )
+	void EditorApp::LoadProjectView( )
+	{ 
+		if ( !mPlaying )
+		{ 
+			const char* popupName = "Load Project##Modal";
+			if ( !ImGui::IsPopupOpen( popupName ) )
+			{
+				ImGui::OpenPopup( popupName ); 
+			}
+			ImGui::SetNextWindowSize( ImVec2( 600.0f, 150.0f ) );
+			if( ImGui::BeginPopupModal( popupName ) )
+			{
+					String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
+					if ( ImGui::BeginCombo( "##LOADPROJECTLIST", defaultText.c_str() ) )
+					{
+						for ( auto& p : mProjectsOnDisk )
+						{
+							if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
+							{ 
+								// Load the project
+								LoadProject( p );
+								mLoadProjectPopupDialogue = false;
+								ImGui::CloseCurrentPopup( );
+							}
+						}
+
+						ImGui::EndCombo( );
+					} 
+
+					if ( ImGui::Button( "Cancel" ) )
+					{
+						mLoadProjectPopupDialogue = false;
+						ImGui::CloseCurrentPopup( );
+					}
+
+				ImGui::EndPopup( );
+			} 
+		} 
+		else
 		{
+			mLoadProjectPopupDialogue = false;
+		}
+	}
+
+	void EditorApp::AddComponentPopupView( )
+	{ 
+		ImGui::SetNextWindowSize( ImVec2( 500.0f, 120.0f ) );
+
+		if ( ImGui::BeginPopupModal( "Add C++ Component##NewComponent", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
+		{ 
 			// Get component list
 			EntityManager* entities = EngineSubsystem( EntityManager );
 			auto compMetaClsList = entities->GetComponentMetaClassList( );
 
+			static String componentErrorMessage = "";
 			static String componentName;
 			bool closePopup = false;
 
@@ -142,13 +189,15 @@ namespace Enjon
 				}
 				else if ( compExists )
 				{ 
-					std::cout << "Component already exists!\n";
+					componentErrorMessage = "Component already exists!";
 				}
 				else
 				{
-					std::cout << "Not a valid class name!\n"; 
+					componentErrorMessage = "Not a valid C++ class name!";
 				}
 			}
+
+			ImGui::SameLine( );
 
 			if ( ImGui::Button( "Cancel" ) )
 			{
@@ -159,6 +208,14 @@ namespace Enjon
 			{
 				ImGui::CloseCurrentPopup( );
 				mNewComponentPopupDialogue = false; 
+				componentErrorMessage = "";
+				componentName = "";
+			}
+
+			// If not empty string
+			if ( componentErrorMessage.compare( "" ) != 0 )
+			{
+				ImGui::Text( componentErrorMessage.c_str() );
 			}
 
 			ImGui::EndPopup( );
@@ -207,46 +264,71 @@ namespace Enjon
 		{
 			// Debug dump the entity ( Probably shouldn't do this and should tailor it more... )
 			Entity* ent = mSelectedEntity.Get( ); 
-			//ImGuiManager::DebugDumpObject( ent );
 
-			// Transform information
-			if ( ImGui::CollapsingHeader( "Local Transform" ) )
+			// New component dialogue
+			ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_20" ) );
+			if ( ImGui::BeginCombo( "##ADDCOMPONENT", "+ Add Component..." ) )
 			{
-				ImGuiManager::DebugDumpProperty( ent, ent->Class( )->GetPropertyByName( "mLocalTransform" ) ); 
-			}
+				// Label for scripting type of component class
+				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_10" ) );
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
+				ImGui::Text( "Scripting" );
+				ImGui::PopStyleColor( );
+				ImGui::PopFont( );
 
-			if ( ImGui::BeginCombo( "##ADDCOMPONENT", "Add Component..." ) )
-			{
+				// Add new component pop up
+				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_16" ) );
+				if ( ImGui::Selectable( "\tCreate New Component..." ) )
+				{
+					mNewComponentPopupDialogue = true;
+				}
+				ImGui::PopFont( );
+
+				// Separator line
+				ImGui::Separator( );
+
 				// Get component list
 				EntityManager* entities = EngineSubsystem( EntityManager );
 				auto compMetaClsList = entities->GetComponentMetaClassList( );
 
+				// Label for scripting type of component class
+				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_10" ) );
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
+				ImGui::Text( "Custom" );
+				ImGui::PopStyleColor( );
+				ImGui::PopFont( );
+
+				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_16" ) );
 				for ( auto& cls : compMetaClsList )
 				{
 					if ( !ent->HasComponent( cls ) )
 					{
 						// Add component to mEntity
-						if ( ImGui::Selectable( cls->GetName( ).c_str( ) ) )
+						if ( ImGui::Selectable( fmt::format( "\t{}", cls->GetName( ) ).c_str() ) )
 						{
 							ent->AddComponent( cls );
 						} 
 					}
-				}
-
-				if ( ImGui::Selectable( "New Component..." ) )
-				{
-					mNewComponentPopupDialogue = true;
-				}
+				} 
+				ImGui::PopFont( );
 
 				ImGui::EndCombo( );
 			}
+			ImGui::PopFont( ); 
 
 			// Add new component dialogue window
 			if ( mNewComponentPopupDialogue )
 			{
-				ImGui::OpenPopup( "##NewComponent" );
+				ImGui::OpenPopup( "Add C++ Component##NewComponent" );
 				AddComponentPopupView( );
 			}
+
+			// Transform information
+			if ( ImGui::CollapsingHeader( "Transform" ) )
+			{
+				ImGuiManager::DebugDumpProperty( ent, ent->Class( )->GetPropertyByName( "mLocalTransform" ) ); 
+			}
+
 
 			for ( auto& c : ent->GetComponents( ) )
 			{
@@ -274,26 +356,6 @@ namespace Enjon
 					}
 				}
 			}
-		}
-	}
-
-	//===========================================================================================
-
-	void EditorWidgetManager::Finalize( )
-	{
-		// Register windows with ImGuiManager
-		for ( auto& v : mViews ) 
-		{ 
-			// Register individual windows
-			Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
-			{
-				// Docking windows
-				if ( ImGui::BeginDock( v->GetViewName().c_str(), &mViewEnabledMap[v], v->GetViewFlags() ) )
-				{
-					v->Update( );
-				}
-				ImGui::EndDock( ); 
-			}); 
 		}
 	}
 
@@ -351,6 +413,9 @@ namespace Enjon
 
 		ImGui::DragFloat( "Camera Speed", &mCameraSpeed, 0.01f, 0.01f, 100.0f ); 
 		ImGui::DragFloat( "Mouse Sensitivity", &mMouseSensitivity, 0.1f, 0.1f, 10.0f ); 
+		f32 col[ 4 ] = { mRectColor.x, mRectColor.y, mRectColor.z, mRectColor.w };
+		ImGui::DragFloat4( "Rect Color", col, 0.01f, 0.0f, 1.0f );
+		mRectColor = Vec4( col[ 0 ], col[ 1 ], col[ 2 ], col[ 3 ] );
 
 		if ( ImGui::TreeNode( "Application" ) )
 		{
@@ -475,6 +540,16 @@ namespace Enjon
 				if ( ImGui::Button( "Build" ) )
 				{
 					Result res = mProject.BuildProject( );
+				}
+
+				ImGui::SameLine( );
+				if ( ImGui::Button( "Simulate" ) )
+				{
+					Result res = mProject.BuildProject( );
+					if ( res == Result::SUCCESS )
+					{
+						mProject.Simluate( );
+					} 
 				}
 			}
 		} 
@@ -673,37 +748,11 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EditorApp::UnloadScene( bool releaseSceneAsset )
-	{
-		//EntityManager* em = EngineSubsystem( EntityManager );
-
-		//// Destroy all entities that are pending to be added as well
-		//em->DestroyAll( );
-
-		//// Force cleanup of scene
-		//em->ForceCleanup( );
-
-		//if ( releaseSceneAsset )
-		//{
-		//	if ( mCurrentScene )
-		//	{
-		//		mCurrentScene.Unload( ); 
-		//	}
-
-		//	mCurrentScene = nullptr; 
-		//}
-	}
-
-	//================================================================================================================================
-
 	void EditorApp::LoadProject( const Project& project )
 	{ 
 		SceneManager* sm = EngineSubsystem( SceneManager );
 
 		sm->UnloadScene( );
-
-		// TODO(): Unload current project - which means to destroy all current entities
-		//UnloadScene( );
 
 		// Unload previous dll
 		UnloadDLL( );
@@ -758,21 +807,6 @@ namespace Enjon
 
 		if ( !mPlaying )
 		{ 
-			String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
-			if ( ImGui::BeginCombo( "##LOADPROJECT", defaultText.c_str() ) )
-			{
-				for ( auto& p : mProjectsOnDisk )
-				{
-					if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
-					{ 
-						// Load the project
-						LoadProject( p );
-					}
-				}
-
-				ImGui::EndCombo( );
-			} 
-
 			// Load visual studio project 
 			if ( ImGui::Button( "Load Project Solution" ) )
 			{
@@ -932,15 +966,6 @@ namespace Enjon
 		// Reload current scene
 		SceneManager* sm = EngineSubsystem( SceneManager );
 		sm->ReloadScene( );
-
-		// Reload scene if available
-		//if ( !releaseSceneAsset )
-		//{
-		//	if ( mCurrentScene )
-		//	{
-		//		mCurrentScene.Reload( ); 
-		//	}
-		//}
 	}
 
 	//================================================================================================================================
@@ -1012,16 +1037,6 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EditorApp::ReloadScene( )
-	{
-		//if ( mCurrentScene )
-		//{
-		//	mCurrentScene.Reload( );
-		//}
-	}
-
-	//================================================================================================================================
-
 	void EditorApp::InitializeProjectApp( )
 	{
 		// Get project application
@@ -1070,30 +1085,11 @@ namespace Enjon
 			SceneManager* sm = EngineSubsystem( SceneManager );
 			Vector<Entity*> entities = em->GetActiveEntities( ); 
 
-			// Destroy any entities alive that aren't in the cached off entity list
-			//for ( auto& e : entities )
-			//{ 
-			//	// Shutdown its components
-			//	for ( auto& c : e->GetComponents( ) )
-			//	{
-			//		c->Shutdown( );
-			//	} 
-			//} 
-
-			//// Destroy all entities
-			//em->DestroyAll( );
-
 			// Shutodwn the application
 			app->Shutdown( ); 
 
 			// Unload current scene and catch its uuid
 			UUID uuid = sm->UnloadScene( );
-
-			// Force the scene to clean up ahead of frame
-			//CleanupScene( ); 
-
-			// Reload current scene
-			//ReloadScene( );
 
 			// Reload scene with previous uuid
 			sm->LoadScene( uuid );
@@ -1162,9 +1158,6 @@ namespace Enjon
 		// Add all necessary views into editor widget manager
 		mEditorWidgetManager.AddView( new EditorSceneView( this ) );
 
-		// Initialize editor widget manager
-		mEditorWidgetManager.Finalize( );
-
 		// Initialize transform widget
 		mTransformWidget.Initialize( this ); 
 
@@ -1225,20 +1218,16 @@ namespace Enjon
 			ImGui::EndDock( );
 		} );
 
+		static bool sceneSelectionViewOpen = true;
 		Enjon::ImGuiManager::RegisterWindow( [ & ]
 		{
-			if ( ImGui::BeginDock( "Scene Selection View", nullptr ) )
+			if ( ImGui::BeginDock( "Scene Selection View", &sceneSelectionViewOpen ) )
 			{
 				SelectSceneView( );
+				CheckForPopups( );
 			}
 			ImGui::EndDock( );
-		} );
-
-		mShowSceneView = true;
-		auto sceneViewOption = [ & ] ( )
-		{
-			ImGui::MenuItem( "Scene##options", NULL, &mShowSceneView );
-		};
+		} ); 
 
 		auto createViewOption = [&]()
 		{
@@ -1364,18 +1353,25 @@ namespace Enjon
 			}
 		}; 
 
+		auto loadProjectMenuOption = [&]()
+		{
+			ImGui::MenuItem( "Load Project...##options", NULL, &mLoadProjectPopupDialogue );
+		};
+		ImGuiManager::RegisterMenuOption("File", loadProjectMenuOption);
+ 
 		// Register menu options
 		ImGuiManager::RegisterMenuOption( "Create", createViewOption );
 
 		// Register docking layouts 
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene View", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Scene View", ImGui::DockSlotType::Slot_Right, 0.2f ) );
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Camera", ImGui::DockSlotType::Slot_Bottom, 0.3f ) );
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) );
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene View", ImGui::DockSlotType::Slot_Top, 0.1f ) );
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Play Options", ImGui::DockSlotType::Slot_Tab, 0.1f ) );
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Inspector View", "World Outliner", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
-		Enjon::ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene Selection View", "World Outliner", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene View", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
+	    ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Graphics", nullptr, ImGui::DockSlotType::Slot_Bottom, 0.2f));
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", nullptr, ImGui::DockSlotType::Slot_Right, 0.2f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Graphics", ImGui::DockSlotType::Slot_Tab, 0.15f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene View", ImGui::DockSlotType::Slot_Top, 0.1f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Scene View", ImGui::DockSlotType::Slot_Bottom, 0.1f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Inspector View", "World Outliner", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene Selection View", "Create Project", ImGui::DockSlotType::Slot_Tab, 0.5f ) );
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -1388,6 +1384,14 @@ namespace Enjon
 	}
 
 	//=================================================================================================
+
+	void EditorApp::CheckForPopups( )
+	{
+		if ( mLoadProjectPopupDialogue )
+		{
+			LoadProjectView( );
+		}
+	}
 
 	Enjon::Result EditorApp::Update( f32 dt )
 	{ 
@@ -1406,7 +1410,7 @@ namespace Enjon
 				// Update application ( ^ Could be called in the same tick )
 				app->Update( dt );
 			}
-		}
+		} 
 
 		return Enjon::Result::PROCESS_RUNNING;
 	}
@@ -1608,7 +1612,7 @@ namespace Enjon
 
 				// Set camera speed 
 				Vec2 mw = mInput->GetMouseWheel( ).y;
-				f32 mult = mw.y == 1.0f ? 2.0f : mw.y == -1.0f ? 0.5f : 1.0f;
+				f32 mult = mw.y == 1.0f ? 1.5f : mw.y == -1.0f ? 0.75f : 1.0f;
 				mCameraSpeed = Clamp(mCameraSpeed * mult, 0.25f, 128.0f);
 
 				if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
@@ -1666,48 +1670,35 @@ namespace Enjon
 			else
 			{
 				mGfx->GetWindow( )->ConstCast< Enjon::Window >( )->ShowMouseCursor( true );
-
-				if ( mInput->IsKeyPressed( KeyCode::LeftMouseButton ) )
+ 
+				if ( mEditorWidgetManager.GetHovered( mEditorSceneView ) )
 				{
-					auto viewport = mGfx->GetViewport( );
-					auto mp = GetSceneViewProjectedCursorPosition( );
+					if ( mInput->IsKeyPressed( KeyCode::LeftMouseButton ) )
+					{
+						auto viewport = mGfx->GetViewport( );
+						auto mp = GetSceneViewProjectedCursorPosition( );
 
-					iVec2 dispSize = mGfx->GetViewport( );
-					PickResult pr = mGfx->GetPickedObjectResult( GetSceneViewProjectedCursorPosition( ) );
-					if ( pr.mEntity.Get( ) )
-					{
-						// Set selected entity
-						SelectEntity( pr.mEntity );
-					}
-					// Translation widget interaction
-					else if ( EditorTransformWidget::IsValidID( pr.mId ) )
-					{
-						// Begin widget interaction
-						mTransformWidget.BeginWidgetInteraction( TransformWidgetRenderableType( pr.mId - MAX_ENTITIES ) );
-					}
-					else
-					{
-						// Deselect entity if click in scene view and not anything valid
-						if ( mEditorWidgetManager.GetHovered( mEditorSceneView ) )
+						iVec2 dispSize = mGfx->GetViewport( );
+						PickResult pr = mGfx->GetPickedObjectResult( GetSceneViewProjectedCursorPosition( ) );
+						if ( pr.mEntity.Get( ) )
 						{
+							// Set selected entity
+							SelectEntity( pr.mEntity );
+						}
+						// Translation widget interaction
+						else if ( EditorTransformWidget::IsValidID( pr.mId ) )
+						{
+							// Begin widget interaction
+							mTransformWidget.BeginWidgetInteraction( TransformWidgetRenderableType( pr.mId - MAX_ENTITIES ) );
+						}
+						else
+						{
+							// Deselect entity if click in scene view and not anything valid
 							DeselectEntity( ); 
 						}
-					}
+					} 
 				}
-			}
-
-			if ( mInput->IsKeyPressed( KeyCode::Y ) )
-			{
-				Entity* ent = mSelectedEntity.Get( );
-				if ( ent )
-				{
-					ent->SetLocalPosition( Vec3( 0.0f ) );
-					ent->SetLocalRotation( Quaternion( ) );
-				}
-
-				mTransformWidget.SetPosition( Vec3( 0.0f ) );
-				mTransformWidget.SetRotation( Quaternion( ) );
-			}
+			} 
 
 
 			if ( !mTransformWidget.IsInteractingWithWidget( ) && mSelectedEntity )

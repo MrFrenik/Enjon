@@ -30,6 +30,8 @@ namespace Enjon
 
 			Result BuildProject( );
 
+			void Simluate( );
+
 		private:
 
 			void CreateBuildDirectory( );

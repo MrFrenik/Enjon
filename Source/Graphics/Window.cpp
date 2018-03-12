@@ -1,9 +1,13 @@
-#include <Graphics/Window.h>
-#include <Utils/Errors.h>
-#include <iostream>
-#include <Math/Maths.h>
+#include "Graphics/Window.h"
+#include "Utils/Errors.h"
+#include "Math/Maths.h"
+#include "Graphics/GraphicsSubsystem.h"
+#include "Engine.h"
+#include "SubsystemCatalog.h"
 
 namespace Enjon {
+
+	SDL_GLContext Window::mGLContext = nullptr;
 
 	Window::Window()
 		: m_isfullscreen(false)
@@ -53,10 +57,16 @@ namespace Enjon {
 		}
 
 		//Set up our OpenGL context
-		SDL_GLContext glContext = SDL_GL_CreateContext(m_sdlWindow);
-		if (glContext == nullptr) {
-			Utils::FatalError("ENJON::WINDOW::CREATE::SD_GL_CONTEXT_NOT_CREATED");
+		if ( !mGLContext )
+		{
+			mGLContext = SDL_GL_CreateContext(m_sdlWindow);
+			if (mGLContext == nullptr) {
+				Utils::FatalError("ENJON::WINDOW::CREATE::SD_GL_CONTEXT_NOT_CREATED");
+			} 
 		}
+
+		// Set current context and window
+		SDL_GL_MakeCurrent( m_sdlWindow, mGLContext );
 
 		//Set up glew (optional but recommended)
 		GLenum error = glewInit();
@@ -86,6 +96,11 @@ namespace Enjon {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		return 0;
+	}
+ 
+	void Window::MakeCurrent( )
+	{
+		SDL_GL_MakeCurrent( m_sdlWindow, mGLContext );
 	}
 
 	void Window::SetViewport(s32 width, s32 height)
@@ -128,4 +143,62 @@ namespace Enjon {
 		//Need to figure this one out...
 	}
 
+	Result Window::ProcessInput( const SDL_Event& event )
+	{ 
+		GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
+
+		switch ( event.type )
+		{
+			case SDL_WINDOWEVENT: 
+			{
+				switch ( event.window.event )
+				{
+					case SDL_WINDOWEVENT_RESIZED: 
+					{
+						SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
+						gs->ReinitializeFrameBuffers( );
+					}
+					break; 
+
+					case SDL_WINDOWEVENT_ENTER: 
+					{
+					}
+					break;
+					
+					case SDL_WINDOWEVENT_LEAVE: 
+					{
+					}
+					break;
+
+					case SDL_WINDOWEVENT_MOVED:
+					{
+					}
+					break;
+
+					case SDL_WINDOWEVENT_RESTORED:
+					{ 
+					} break;
+
+					case SDL_WINDOWEVENT_FOCUS_GAINED: 
+					{
+					} break;
+
+					case SDL_WINDOWEVENT_FOCUS_LOST: 
+					{
+					} break;
+					
+					case SDL_WINDOWEVENT_CLOSE: 
+					{ 
+						return Result::FAILURE;
+					} break; 
+				}
+			} break; 
+
+			default:
+			{ 
+			} break;
+		} 
+
+		return Result::PROCESS_RUNNING;
+	} 
 }

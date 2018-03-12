@@ -7,6 +7,7 @@
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_dock.h"
 #include "System/Types.h"
+#include "Defines.h"
 
 #include <SDL2/sdl.h>
 
@@ -24,10 +25,11 @@ namespace Enjon
 	class MetaPropertyHashMapBase;
 	class MetaProperty;
 
+
 	/*
 		Static class meant to be a central hub for registering 
 		ImGui commands
-	*/
+	*/ 
 	class ImGuiManager
 	{
 		public:
@@ -44,6 +46,7 @@ namespace Enjon
 			static void DebugDumpProperty( const Enjon::Object* object, const Enjon::MetaProperty* prop );
 			static void DebugDumpArrayProperty( const Enjon::Object* object, const Enjon::MetaPropertyArrayBase* prop );
 			static void DebugDumpHashMapProperty( const Enjon::Object* object, const Enjon::MetaPropertyHashMapBase* prop );
+			static ImFont* GetFont( const Enjon::String& name );
 
 		private:
 			static s32 MainMenu();
@@ -54,7 +57,8 @@ namespace Enjon
 			static std::vector<std::function<void()>> mGuiFuncs;
 			static std::vector<std::function<void()>> mWindows;
 			static std::unordered_map<std::string, std::vector<std::function<void()>>> mMainMenuOptions;
-			static std::vector<ImGui::DockingLayout> mDockingLayouts;
+			static std::vector<ImGui::DockingLayout> mDockingLayouts; 
+			static HashMap< Enjon::String, ImFont* > mFonts;
 	};
 }
 

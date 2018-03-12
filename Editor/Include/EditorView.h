@@ -43,8 +43,13 @@ namespace Enjon
 
 			/**
 			* @brief
-			*/
+			*/ 
 			virtual u32 GetViewFlags( );
+
+			/**
+			* @brief
+			*/ 
+			bool GetEnabled( );
  
 		protected: 
 
@@ -80,6 +85,7 @@ namespace Enjon
 			EditorApp* mApp = nullptr;
 			String mName = "EditorView"; 
 			u32 mViewFlags = 0;
+			bool mViewEnabled = true;
 	};
 }
 

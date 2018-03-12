@@ -68,10 +68,15 @@ namespace Enjon
 						const ColorRGBA32& color = RGBA32_Black());
 			void SwapBuffer(); 
 
+			void MakeCurrent( );
+
+			Result ProcessInput( const SDL_Event& event );
+
 			SDL_Window* GetWindowContext() { return m_sdlWindow; }
 			SDL_Window* GetSDLWindow() { return m_sdlWindow; }
 
 		private:
+			static SDL_GLContext mGLContext;
 			SDL_Window* m_sdlWindow;
 			int m_screenWidth;
 			int m_screenHeight;

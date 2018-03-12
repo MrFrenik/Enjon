@@ -1,6 +1,7 @@
 #ifndef ENJON_GBUFFER_H
 #define ENJON_GBUFFER_H
 
+#include "Graphics/FrameBuffer.h"
 #include "System/Types.h"
 #include "GLEW/glew.h"
 #include "Defines.h"
@@ -17,46 +18,76 @@ namespace Enjon {
 		OBJECT_ID,
 		VELOCITY,
 		GBUFFER_TEXTURE_COUNT
-	};
+	}; 
 
-	enum class BindType
+	ENJON_CLASS( )
+	class GBuffer : public FrameBuffer
 	{
-		READ, 
-		WRITE
-	};
+		ENJON_CLASS_BODY( )
 
-	class GBuffer
-	{
 		public:
-			GBuffer(){}
+			/**
+			*@brief
+			*/
+			GBuffer( ) = default;
+
+			/**
+			*@brief
+			*/
 			GBuffer(u32 _Width, u32 _Height);
+
+			/**
+			*@brief
+			*/
 			~GBuffer();
 
-			void Bind(BindType Type = BindType::WRITE, bool clear = true);
-			void Unbind();
+			/**
+			*@brief
+			*/
+			virtual void Bind(BindType Type = BindType::WRITE, bool clear = true) override;
 
-			GLuint inline GetTexture(GBufferTextureType Type) { return Textures[(GLuint)Type]; }
-			GLuint inline GetTexture(u32 index) { return Textures[index]; }
-			GLuint inline GetDepth() { return DepthTexture; }
-			Vec2 inline GetResolution() { return Vec2(Width, Height); }
-			void SetViewport(const Vec4& Viewport);
+			/**
+			*@brief
+			*/
+			virtual void Unbind();
 
-			u32 GetWidth() { return Width; }
-			u32 GetHeight() { return Height; }
+			/**
+			*@brief
+			*/
+			GLuint inline GetTexture(GBufferTextureType Type) 
+			{ 
+				return mTextures[(GLuint)Type]; 
+			}
 
+			/**
+			*@brief
+			*/
+			GLuint inline GetTexture(u32 index) 
+			{ 
+				return mTextures[index]; 
+			}
+
+			/**
+			*@brief
+			*/
+			GLuint inline GetDepth()
+			{ 
+				return mDepthTexture; 
+			} 
+
+			/**
+			*@brief
+			*/
+			void SetViewport(const Vec4& Viewport); 
+ 
+			/**
+			*@brief
+			*/
 			const char* FrameBufferToString(u32 i);
 
 		private:
-			uint32 Width;
-			uint32 Height;
-			GLuint FBO;
-			GLuint DepthBuffer;
-			GLuint DepthTexture;
-
-			GLuint TargetIDs[(u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT];
-			GLuint Textures[(u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT];
-
-			Vec4 Viewport;
+			GLuint mTargetIDs[(u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT];
+			GLuint mTextures[(u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT]; 
 	}; 
 }
 

@@ -44,7 +44,7 @@ namespace Enjon
 		for ( auto& button : GamePadController.m_buttonMap )
 		{
 			GamePadController.m_previousButtonMap[button.first] = button.second;
-		}
+		} 
 	}
 
 	Result Input::Shutdown()

@@ -5,7 +5,7 @@
 #include "Base/Object.h"
 #include "Math/Vec3.h"
 #include "Graphics/Color.h"
-#include "Graphics/RenderTarget.h"
+#include "Graphics/FrameBuffer.h"
 #include "Defines.h"
 
 namespace Enjon 

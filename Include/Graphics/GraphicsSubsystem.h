@@ -12,7 +12,7 @@
 
 namespace Enjon 
 { 
-	class RenderTarget;
+	class FrameBuffer;
 	class Mesh; 
 	class GBuffer;
 	class FullScreenQuad; 
@@ -126,7 +126,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			const Window* GetWindow() const { return &mWindow; }
+			const Window* GetWindow() const { return mCurrentWindow; }
 
 			/*
 			* @brief
@@ -166,14 +166,22 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void ReinitializeRenderTargets( );
+			Vector< Window* > GetWindows( ) const
+			{
+				return mWindows;
+			}
+
+			/**
+			*@brief
+			*/
+			void ReinitializeFrameBuffers( );
 
 		private:
 
 			/**
 			*@brief
 			*/
-			void FreeAllRenderTargets( );
+			void FreeAllFrameBuffers( );
 
 			/**
 			*@brief
@@ -223,22 +231,22 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void MotionBlurPass(RenderTarget* inputTarget);
+			void MotionBlurPass( FrameBuffer* inputTarget );
 			
 			/**
 			*@brief
 			*/
-			void FXAAPass(RenderTarget* inputTarget);
+			void FXAAPass( FrameBuffer* inputTarget );
 			
 			/**
 			*@brief
 			*/
-			void CompositePass(RenderTarget* inputTarget);
+			void CompositePass( FrameBuffer* inputTarget );
 
 			/**
 			*@brief
 			*/
-			void UIPass( RenderTarget* inputTarget ); 
+			void UIPass( FrameBuffer* inputTarget ); 
 			
 			/**
 			*@brief
@@ -280,22 +288,22 @@ namespace Enjon
 		private:
 			// Frame buffers
 			GBuffer* mGbuffer 										= nullptr;
-			RenderTarget* mDebugTarget 								= nullptr;
-			RenderTarget* mSmallBlurHorizontal						= nullptr;
-			RenderTarget* mSmallBlurVertical 						= nullptr;
-			RenderTarget* mMediumBlurHorizontal						= nullptr;
-			RenderTarget* mMediumBlurVertical 						= nullptr;
-			RenderTarget* mLargeBlurHorizontal 						= nullptr;
-			RenderTarget* mLargeBlurVertical 						= nullptr;
-			RenderTarget* mCompositeTarget 							= nullptr;
-			RenderTarget* mLightingBuffer							= nullptr;
-			RenderTarget* mLuminanceTarget							= nullptr;
-			RenderTarget* mFXAATarget								= nullptr;
-			RenderTarget* mShadowDepth								= nullptr;
-			RenderTarget* mFinalTarget								= nullptr;
-			RenderTarget* mSSAOTarget								= nullptr;
-			RenderTarget* mSSAOBlurTarget							= nullptr;
-			RenderTarget* mMotionBlurTarget							= nullptr;
+			FrameBuffer* mDebugTarget 								= nullptr;
+			FrameBuffer* mSmallBlurHorizontal						= nullptr;
+			FrameBuffer* mSmallBlurVertical 						= nullptr;
+			FrameBuffer* mMediumBlurHorizontal						= nullptr;
+			FrameBuffer* mMediumBlurVertical 						= nullptr;
+			FrameBuffer* mLargeBlurHorizontal 						= nullptr;
+			FrameBuffer* mLargeBlurVertical 						= nullptr;
+			FrameBuffer* mCompositeTarget 							= nullptr;
+			FrameBuffer* mLightingBuffer							= nullptr;
+			FrameBuffer* mLuminanceTarget							= nullptr;
+			FrameBuffer* mFXAATarget								= nullptr;
+			FrameBuffer* mShadowDepth								= nullptr;
+			FrameBuffer* mFinalTarget								= nullptr;
+			FrameBuffer* mSSAOTarget								= nullptr;
+			FrameBuffer* mSSAOBlurTarget							= nullptr;
+			FrameBuffer* mMotionBlurTarget							= nullptr;
 
 			GLuint mCurrentRenderTexture; 
 
@@ -305,6 +313,9 @@ namespace Enjon
 			// Graphics scene
 			GraphicsScene 		mGraphicsScene;
 			Window 				mWindow;
+			Window 				mWindowOther;
+			Window*				mCurrentWindow = nullptr;
+			Vector<Window*>		mWindows;
 			Camera 				mShadowCamera;	// Probably part of light or scene?
 
 			SpriteBatch* 	mBatch 			= nullptr; 
@@ -365,7 +376,7 @@ namespace Enjon
 			Mat4 mPreviousViewProjectionMatrix = Mat4::Identity( );
 
 			f32 mMotionBlurVelocityScale = 2.0f;
-			u32 mMotionBlurEnabled = true;
+			u32 mMotionBlurEnabled = true; 
 	};
 }
 

@@ -42,11 +42,6 @@ namespace Enjon
 				mViews.clear( );
 				mEditorObjects.clear( );
 			} 
-
-			/**
-			* @brief ONLY TO BE CALLED AFTER VIEWS AND WIDGETS HAVE BEEN ADDED
-			*/
-			void Finalize( );
  
 			/**
 			* @brief
@@ -65,7 +60,7 @@ namespace Enjon
 				{
 					mFocusedMap[ view ] = false;
 					mHoveredMap[ view ] = false;
-					mViewEnabledMap[ view ] = true;
+					mViewEnabledMap[ view ] = view->GetEnabled();
 					mViews.push_back( view );
 				}
 			}
@@ -191,6 +186,10 @@ namespace Enjon
 
 			String GetProjectEnjonDefinesTemplate( ) const;
 
+
+		public:
+			Vec4 mRectColor = Vec4( 0.8f, 0.3f, 0.1f, 1.0f );
+
 		private:
 			void CreateComponent( const String& componentName );
 			void LoadResourceFromFile( );
@@ -201,12 +200,14 @@ namespace Enjon
 			void SelectSceneView( );
 			void AddComponentPopupView( );
 
+			void LoadProjectView( );
+			void CheckForPopups( );
+
 			void CreateNewProject( const String& projectName );
 
 			void SelectEntity( const EntityHandle& handle );
 			void DeselectEntity( );
 
-			void UnloadScene( bool releaseSceneAsset = true );
 			void LoadProject( const Project& project );
 			bool UnloadDLL( ByteBuffer* buffer = nullptr );
 			void LoadDLL( bool releaseSceneAsset = true );
@@ -216,7 +217,6 @@ namespace Enjon
 			void LoadProjectSolution( );
 
 			void CleanupScene( );
-			void ReloadScene( );
 
 			void InitializeProjectApp( );
 			void ShutdownProjectApp( ByteBuffer* buffer );
@@ -236,6 +236,7 @@ namespace Enjon
 			Enjon::String mResourceFilePathToLoad = "";
 			bool mMoveCamera = false; 
 			bool mNewComponentPopupDialogue = false;
+			bool mLoadProjectPopupDialogue = false;
 
 			bool mPlaying = false;
 			bool mNeedsStartup = true; 

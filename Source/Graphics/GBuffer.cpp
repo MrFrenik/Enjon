@@ -8,34 +8,36 @@ namespace Enjon {
 #define CREATE_RENDER_TARGET(InternalFormat, Format, DataType, GBufferAttachment)\
 	{\
 		u32 index = (u32)GBufferAttachment;\
-		glBindRenderbufferEXT(GL_RENDERBUFFER, TargetIDs[index]);\
-		glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, Width, Height);\
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, TargetIDs[index]);\
+		glBindRenderbufferEXT(GL_RENDERBUFFER, mTargetIDs[index]);\
+		glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, mWidth, mHeight);\
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, mTargetIDs[index]);\
 		\
-		glGenTextures(1, &Textures[index]);\
-		glBindTexture(GL_TEXTURE_2D, Textures[index]);\
+		glGenTextures(1, &mTextures[index]);\
+		glBindTexture(GL_TEXTURE_2D, mTextures[index]);\
 		\
-		glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, Width, Height, 0, Format, DataType, NULL);\
+		glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, mWidth, mHeight, 0, Format, DataType, NULL);\
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);\
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );\
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );\
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );\
-		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, Textures[ index ], 0 );\
+		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, mTextures[ index ], 0 );\
 		\
 		glGenerateMipmap( GL_TEXTURE_2D );\
 		\
 		glBindTexture( GL_TEXTURE_2D, 0 );\
 	}
 
-	GBuffer::GBuffer(u32 _Width, u32 _Height)
+	GBuffer::GBuffer(u32 width, u32 height)
 	{
 		// Save extensions
-		Width  = _Width;
-		Height = _Height;
-		Viewport = Vec4(0, 0, Width, Height);
+		mWidth  = width;
+		mHeight = height;
 
-	    glGenFramebuffers(1, &FBO);
-	    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+		// Set up viewport
+		mViewport = Vec4(0, 0, mWidth, mHeight);
+
+	    glGenFramebuffers(1, &mFrameBufferID);
+	    glBindFramebuffer(GL_FRAMEBUFFER, mFrameBufferID);
 		
 		CREATE_RENDER_TARGET( GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, GBufferTextureType::ALBEDO )
 		CREATE_RENDER_TARGET( GL_RGB16F, GL_RGB, GL_FLOAT, GBufferTextureType::NORMAL )
@@ -45,19 +47,19 @@ namespace Enjon {
 		CREATE_RENDER_TARGET( GL_RG16F, GL_RG, GL_FLOAT, GBufferTextureType::VELOCITY )
 
 		// Bind depth render buffer
-		glBindRenderbufferEXT( GL_RENDERBUFFER, DepthBuffer );
-		glRenderbufferStorageEXT( GL_RENDERBUFFER, GL_RGBA, Width, Height );
-		glFramebufferRenderbufferEXT( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBuffer );
+		glBindRenderbufferEXT( GL_RENDERBUFFER, mDepthBuffer );
+		glRenderbufferStorageEXT( GL_RENDERBUFFER, GL_RGBA, mWidth, mHeight );
+		glFramebufferRenderbufferEXT( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer );
 
 		// - Depth buffer texture
-		glGenTextures( 1, &DepthTexture );
-		glBindTexture( GL_TEXTURE_2D, DepthTexture );
-		glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, Width, Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL );
+		glGenTextures( 1, &mDepthTexture );
+		glBindTexture( GL_TEXTURE_2D, mDepthTexture );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, mWidth, mHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthTexture, 0 ); 
+		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mDepthTexture, 0 ); 
 
 		glBindTexture( GL_TEXTURE_2D, 0 );
 		
@@ -67,22 +69,22 @@ namespace Enjon {
 	    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void GBuffer::SetViewport(const Vec4& _Viewport)
+	void GBuffer::SetViewport(const Vec4& viewport)
 	{
-		Viewport = _Viewport;	
+		mViewport = viewport;	
 	}
 
 	GBuffer::~GBuffer()
 	{
 		for (u32 i = 0; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
 		{
-			glDeleteTextures(1, &Textures[i]);
-			glDeleteRenderbuffers(1, &TargetIDs[i]);
+			glDeleteTextures(1, &mTextures[i]);
+			glDeleteRenderbuffers(1, &mTargetIDs[i]);
 		}
 
 		// Clean up buffers
-		glDeleteFramebuffers(1, &FBO);
-		glDeleteRenderbuffers(1, &DepthBuffer);
+		glDeleteFramebuffers(1, &mFrameBufferID);
+		glDeleteRenderbuffers(1, &mDepthBuffer);
 	}
 
 	void GBuffer::Bind(BindType Type, bool clear)
@@ -92,9 +94,9 @@ namespace Enjon {
 			case BindType::WRITE:
 			{
 				// Bind our FBO and set the viewport to the proper size
-				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FBO);
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFrameBufferID);
 				glPushAttrib(GL_VIEWPORT_BIT);
-				glViewport((u32)Viewport.x, (u32)Viewport.y, (u32)Viewport.z, (u32)Viewport.w);
+				glViewport((u32)mViewport.x, (u32)mViewport.y, (u32)mViewport.z, (u32)mViewport.w);
 
 				// Clear the render targets
 				if ( clear )
@@ -118,7 +120,7 @@ namespace Enjon {
 
 			case BindType::READ:
 			{
-				glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO);
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, mFrameBufferID);
 			} break;
 		}
 	}

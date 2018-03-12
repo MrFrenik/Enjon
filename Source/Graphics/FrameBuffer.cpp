@@ -1,43 +1,49 @@
-#include "Graphics/RenderTarget.h"
+// Copyright 2016-2017 John Jackson. All Rights Reserved.
+// File: FrameBuffer.cpp
+
+#include "Graphics/FrameBuffer.h"
 #include "Utils/Errors.h"
 #include <stdio.h>
 
-namespace Enjon { 
-
-	RenderTarget::RenderTarget()
+namespace Enjon 
+{ 
+	FrameBuffer::FrameBuffer()
 	{
-		Width = 1024;
-		Height = 1024;
+		mWidth = 1024;
+		mHeight = 1024;
 	}
 
-	RenderTarget::RenderTarget(uint32 _Width, uint32 _Height, GLuint TexParam)
+	FrameBuffer::FrameBuffer(u32 width, u32 height, GLuint texParam)
 	{
 		// Save extensions
-		Width  = _Width;
-		Height = _Height;
+		mWidth  = width;
+		mHeight = height;
 
-	    glGenFramebuffers(1, &FrameBufferID);
-	    glBindFramebuffer(GL_FRAMEBUFFER, FrameBufferID);
+		// Set up viewport
+		mViewport = Vec4(0, 0, mWidth, mHeight);
+
+	    glGenFramebuffers(1, &mFrameBufferID);
+	    glBindFramebuffer(GL_FRAMEBUFFER, mFrameBufferID);
 
 	    // Bind the color render target
-		glBindRenderbufferEXT(GL_RENDERBUFFER, TargetID);
-		glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, Width, Height);
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, TargetID);
+		glBindRenderbufferEXT(GL_RENDERBUFFER, mTargetID);
+		glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, mWidth, mHeight);
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mTargetID);
 
 	    // - color buffer
-	    glGenTextures(1, &Texture);
-	    glBindTexture(GL_TEXTURE_2D, Texture);
-	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Width, Height, 0, GL_RGB, GL_FLOAT, NULL);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, TexParam);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, TexParam);
+	    glGenTextures(1, &mTexture);
+	    glBindTexture(GL_TEXTURE_2D, mTexture);
+	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mWidth, mHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texParam);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texParam);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture, 0);
+	    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture, 0);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		glGenTextures(1, &DepthBuffer);
-	    glBindTexture(GL_TEXTURE_2D, DepthBuffer);
-	    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Width, Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glGenTextures(1, &mDepthBuffer);
+	    glBindTexture(GL_TEXTURE_2D, mDepthBuffer);
+	    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, mWidth, mHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
@@ -45,7 +51,7 @@ namespace Enjon {
 	   	GLfloat borderColor[] = {1.0, 1.0, 1.0, 1.0}; 
 	   	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthBuffer, 0);
+	    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mDepthBuffer, 0);
 	    glDrawBuffer(GL_NONE);
 	    glReadBuffer(GL_NONE);
 	 
@@ -61,24 +67,24 @@ namespace Enjon {
 	    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	RenderTarget::~RenderTarget()
+	FrameBuffer::~FrameBuffer()
 	{
-		glDeleteTextures(1, &Texture);
-		glDeleteFramebuffersEXT(1, &FrameBufferID);
-		glDeleteRenderbuffersEXT(1, &TargetID);
-		glDeleteRenderbuffersEXT(1, &DepthBuffer);
+		glDeleteTextures(1, &mTexture);
+		glDeleteFramebuffersEXT(1, &mFrameBufferID);
+		glDeleteRenderbuffersEXT(1, &mTargetID);
+		glDeleteRenderbuffersEXT(1, &mDepthBuffer);
 	}
 
-	void RenderTarget::Bind(BindType Type, bool clear)
+	void FrameBuffer::Bind(BindType type, bool clear)
 	{
-		switch(Type)
+		switch( type )
 		{
 			case BindType::WRITE:
 			{
 				// Bind our FBO and set the viewport to the proper size
-				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FrameBufferID);
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFrameBufferID);
 				glPushAttrib(GL_VIEWPORT_BIT);
-				glViewport(0, 0, Width, Height);
+				glViewport(0, 0, mWidth, mHeight);
 
 				if (clear) glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -92,12 +98,12 @@ namespace Enjon {
 
 			case BindType::READ:
 			{
-				glBindFramebuffer(GL_READ_FRAMEBUFFER, FrameBufferID);
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, mFrameBufferID);
 			} break;
 		}
 	}
 			
-	void RenderTarget::Unbind()
+	void FrameBuffer::Unbind()
 	{
 		// Stop acquiring and unbind the FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
