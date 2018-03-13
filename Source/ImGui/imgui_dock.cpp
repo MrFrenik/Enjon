@@ -618,6 +618,8 @@ namespace ImGui
 
 		void drawTabbarListButton(Dock& dock)
 		{
+			return;
+
 			if (!dock.next_tab) return;
 
 			ImDrawList* draw_list = GetWindowDrawList();
@@ -727,7 +729,7 @@ namespace ImGui
 					// Tab BG
 					draw_list->AddRectFilled(pos+ImVec2(tabOffset, 0.0),
 											 pos+size,
-											 hovered ? color_hovered : (dock_tab->active ? color_active : color), 1.5f, ImDrawCornerFlags_TopLeft | ImDrawCornerFlags_TopRight );
+											 dock_tab->active ? color_active : (hovered ? color_hovered : color), 1.5f, ImDrawCornerFlags_TopLeft | ImDrawCornerFlags_TopRight );
 					if ( dock_tab->active )
 					{
 						lineLeftStart = dock.pos + ImVec2( pos.x + tabOffset, tab_base + line_height - 1.0f );

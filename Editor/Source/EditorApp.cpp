@@ -642,6 +642,7 @@ namespace Enjon
 		SceneManager* sm = EngineSubsystem( SceneManager );
 		AssetHandle< Scene > scene = sm->GetScene( ); 
 		String defaultText = scene.Get( ) == nullptr ? "Available Scenes..." : scene->GetName( );
+		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( ImColor( ImGui::GetStyle( ).Colors[ ImGuiCol_FrameBg ] ) ) );
 		if ( ImGui::BeginCombo( "##Available Scenes", defaultText.c_str() ) )
 		{ 
 			// If there's a valid application set
@@ -674,6 +675,7 @@ namespace Enjon
 
 			ImGui::EndCombo( ); 
 		}
+		ImGui::PopStyleColor( );
 
 		if ( sm->GetScene() )
 		{
@@ -1375,13 +1377,13 @@ namespace Enjon
 		// Register docking layouts 
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene View", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
 	    ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Graphics", nullptr, ImGui::DockSlotType::Slot_Bottom, 0.2f));
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", nullptr, ImGui::DockSlotType::Slot_Right, 0.2f ) );
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Graphics", ImGui::DockSlotType::Slot_Tab, 0.15f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", "Camera", ImGui::DockSlotType::Slot_Top, 0.7f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", nullptr, ImGui::DockSlotType::Slot_Right, 0.35f ) );
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene View", ImGui::DockSlotType::Slot_Top, 0.1f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Scene View", ImGui::DockSlotType::Slot_Bottom, 0.1f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Inspector View", "World Outliner", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene Selection View", "Create Project", ImGui::DockSlotType::Slot_Tab, 0.5f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Scene View", ImGui::DockSlotType::Slot_Bottom, 0.2f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Inspector View", "World Outliner", ImGui::DockSlotType::Slot_Right, 0.7f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Inspector View", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene Selection View", "Create Project", ImGui::DockSlotType::Slot_Tab, 0.6f ) );
 
 		return Enjon::Result::SUCCESS;
 	}

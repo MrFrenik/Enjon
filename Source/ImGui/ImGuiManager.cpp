@@ -992,14 +992,14 @@ namespace Enjon
 		ImGuiStyle& style = ImGui::GetStyle(); 
 
 		// Set default font
-		io.FontDefault = mFonts[ "WeblySleek_14" ];
+		io.FontDefault = mFonts[ "WeblySleek_16" ];
 
 		style.WindowTitleAlign 		= ImVec2(0.5f, 0.41f);
 		style.ButtonTextAlign 		= ImVec2(0.5f, 0.5f); 
 		style.WindowPadding			= ImVec2(10, 8);
 		style.WindowRounding		= 0.0f;
 		style.FramePadding			= ImVec2(10, 3);
-		style.FrameRounding			= 3.0f;
+		style.FrameRounding			= 2.0f;
 		style.ItemSpacing			= ImVec2(9, 3);
 		style.ItemInnerSpacing		= ImVec2(2, 3);
 		style.IndentSpacing			= 20.0f;
@@ -1009,7 +1009,7 @@ namespace Enjon
 		style.GrabRounding			= 2.0f;
 		style.Alpha					= 1.0f;
 		style.FrameBorderSize		= 0.0f;
-		style.WindowBorderSize		= 0.0f;
+		style.WindowBorderSize		= 1.0f;
 
 		ImVec4* colors = ImGui::GetStyle( ).Colors;
 		colors[ ImGuiCol_Text ] = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
@@ -1017,8 +1017,8 @@ namespace Enjon
 		colors[ ImGuiCol_WindowBg ] = ImVec4( 0.16f, 0.16f, 0.16f, 1.00f );
 		colors[ ImGuiCol_ChildBg ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.00f );
 		colors[ ImGuiCol_PopupBg ] = ImVec4( 0.10f, 0.10f, 0.10f, 1.00f );
-		colors[ ImGuiCol_Border ] = ImVec4( 0.19f, 0.19f, 0.19f, 1.00f );
-		colors[ ImGuiCol_BorderShadow ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.32f );
+		colors[ ImGuiCol_Border ] = ImVec4( 0.12f, 0.12f, 0.12f, 0.45f );
+		colors[ ImGuiCol_BorderShadow ] = ImVec4( 0.00f, 0.00f, 0.00f, 1.00f );
 		colors[ ImGuiCol_FrameBg ] = ImVec4( 0.14f, 0.14f, 0.14f, 0.63f );
 		colors[ ImGuiCol_FrameBgHovered ] = ImVec4( 0.10f, 0.10f, 0.11f, 0.89f );
 		colors[ ImGuiCol_FrameBgActive ] = ImVec4( 0.21f, 0.21f, 0.22f, 1.00f );
@@ -1057,6 +1057,8 @@ namespace Enjon
 		colors[ ImGuiCol_DragDropTarget ] = ImVec4( 1.00f, 1.00f, 0.00f, 0.90f );
 		colors[ ImGuiCol_NavHighlight ] = ImVec4( 0.26f, 0.59f, 0.98f, 1.00f );
 		colors[ ImGuiCol_NavWindowingHighlight ] = ImVec4( 1.00f, 1.00f, 1.00f, 0.70f );
+
+
 
 		// Load dock
 		// ImGui::LoadDock();
