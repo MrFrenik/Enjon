@@ -43,10 +43,10 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-Enjon::String mProjectsDir = "W:/Projects/";
-Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
 Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -323,43 +323,46 @@ namespace Enjon
 				AddComponentPopupView( );
 			}
 
-			// Transform information
-			if ( ImGui::CollapsingHeader( "Transform" ) )
+			ImGui::ListBoxHeader( "##CompLists", ImVec2(ImGui::GetWindowSize().x - 20.0f, ImGui::GetWindowSize().y - 40.0f ) );
 			{
-				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
-				ImGuiManager::DebugDumpProperty( ent, ent->Class( )->GetPropertyByName( "mLocalTransform" ) ); 
-				ImGui::PopFont( );
-			}
-
-
-			for ( auto& c : ent->GetComponents( ) )
-			{
-				if ( ImGui::CollapsingHeader( c->Class( )->GetName( ).c_str( ) ) )
+				// Transform information
+				if ( ImGui::CollapsingHeader( "Transform" ) )
 				{
-					MetaClass* cls = const_cast< MetaClass * > ( c->Class( ) );
-					s32 shapeType = -1;
-					if ( cls->InstanceOf<RigidBodyComponent>( ) )
-					{
-						shapeType = (s32)c->Cast<RigidBodyComponent>( )->GetShapeType( );
-					}
-
 					ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
-					ImGuiManager::DebugDumpObject( c ); 
+					ImGuiManager::DebugDumpProperty( ent, ent->Class( )->GetPropertyByName( "mLocalTransform" ) ); 
 					ImGui::PopFont( );
+				} 
 
-					// Shape type changed
-					// TODO(): Be able to hook in specific delegates for property changes through reflection system
-					if ( shapeType != -1 && shapeType != (s32)c->Cast< RigidBodyComponent >()->GetShapeType() )
+				for ( auto& c : ent->GetComponents( ) )
+				{
+					if ( ImGui::CollapsingHeader( c->Class( )->GetName( ).c_str( ) ) )
 					{
-						c->ConstCast< RigidBodyComponent >( )->SetShape( c->Cast< RigidBodyComponent >( )->GetShapeType( ) );
-					} 
+						MetaClass* cls = const_cast< MetaClass * > ( c->Class( ) );
+						s32 shapeType = -1;
+						if ( cls->InstanceOf<RigidBodyComponent>( ) )
+						{
+							shapeType = (s32)c->Cast<RigidBodyComponent>( )->GetShapeType( );
+						}
 
-					if ( ImGui::Button( fmt::format( "Remove##{}", (u32)c ).c_str() ) )
-					{
-						ent->RemoveComponent( c->Class( ) );
+						ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
+						ImGuiManager::DebugDumpObject( c ); 
+						ImGui::PopFont( );
+
+						// Shape type changed
+						// TODO(): Be able to hook in specific delegates for property changes through reflection system
+						if ( shapeType != -1 && shapeType != (s32)c->Cast< RigidBodyComponent >()->GetShapeType() )
+						{
+							c->ConstCast< RigidBodyComponent >( )->SetShape( c->Cast< RigidBodyComponent >( )->GetShapeType( ) );
+						} 
+
+						if ( ImGui::Button( fmt::format( "Remove##{}", (u32)c ).c_str() ) )
+						{
+							ent->RemoveComponent( c->Class( ) );
+						}
 					}
-				}
+				} 
 			}
+			ImGui::ListBoxFooter( );
 		}
 	}
 
@@ -598,13 +601,18 @@ namespace Enjon
 		ImGui::Separator( );
 
 		// List out active entities
-		for ( auto& e : entities->GetActiveEntities( ) )
+		ImVec2 padding( 20.0f, 50.0f );
+		ImGui::ListBoxHeader( "##EntitiesListWorldOutliner", ImVec2( ImGui::GetWindowSize( ).x - padding.x, ImGui::GetWindowSize( ).y - padding.y ) );
 		{
-			if ( ImGui::Selectable( fmt::format( "{}", e->GetID() ).c_str( ) ) )
+			for ( auto& e : entities->GetActiveEntities( ) )
 			{
-				SelectEntity( e );
+				if ( ImGui::Selectable( fmt::format( "{}", e->GetID() ).c_str( ) ) )
+				{
+					SelectEntity( e );
+				} 
 			} 
 		}
+		ImGui::ListBoxFooter( );
 	}
 
 	void EditorApp::LoadResourceFromFile( )
@@ -1213,7 +1221,7 @@ namespace Enjon
 
 		Enjon::ImGuiManager::RegisterWindow( [ & ]
 		{
-			if ( ImGui::BeginDock( "Inspector View", nullptr ) )
+			if ( ImGui::BeginDock( "Inspector View", nullptr, ImGuiWindowFlags_NoScrollbar ) )
 			{
 				InspectorView( nullptr );
 			}

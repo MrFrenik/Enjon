@@ -261,19 +261,20 @@ namespace ImGui
 		void splits()
 		{
 			if (GetFrameCount() == m_last_frame) return;
-			m_last_frame = GetFrameCount();
+			m_last_frame = GetFrameCount(); 
 
 			putInBackground();
 
 			float splitSize = 5.0f;
-			ImU32 color = GetColorU32(ImGuiCol_Button);
+			ImColor color = ImColor(GetColorU32(ImGuiCol_Button));
+			color.Value.w = 0.0f;
 			ImU32 color_hovered = GetColorU32(ImGuiCol_ButtonHovered);
 			ImDrawList* draw_list = GetWindowDrawList();
 			ImGuiIO& io = GetIO();
 			for (int i = 0; i < m_docks.size(); ++i)
 			{
 				Dock& dock = *m_docks[i];
-				if (!dock.isContainer()) continue;
+				if (!dock.isContainer()) continue; 
 
 				PushID(i);
 				if (!IsMouseDown(0)) dock.status = Status_Docked;
@@ -285,6 +286,7 @@ namespace ImGui
 				ImVec2 min_size1 = dock.children[1]->getMinSize();
 				if (dock.isHorizontal())
 				{
+					SetCursorScreenPos( ImVec2( GetCursorScreenPos( ).x - 2.0f, GetCursorScreenPos( ).y ) );
 					InvisibleButton("split", ImVec2(splitSize, dock.size.y));
 					if (dock.status == Status_Dragged) dsize.x = io.MouseDelta.x;
 					dsize.x = -ImMin(-dsize.x, dock.children[0]->size.x - min_size0.x);
@@ -292,7 +294,7 @@ namespace ImGui
 				}
 				else
 				{
-					SetCursorScreenPos( ImVec2( GetCursorScreenPos( ).x + splitSize, GetCursorScreenPos( ).y - 5.0f ) );
+					SetCursorScreenPos( ImVec2( GetCursorScreenPos( ).x + splitSize, GetCursorScreenPos( ).y ) );
 					InvisibleButton("split", ImVec2(dock.size.x - splitSize, splitSize));
 					if (dock.status == Status_Dragged) dsize.y = io.MouseDelta.y;
 					dsize.y = -ImMin(-dsize.y, dock.children[0]->size.y - min_size0.y);
@@ -638,19 +640,19 @@ namespace ImGui
 				EndPopup();
 			}
 
-			bool hovered = IsItemHovered();
-			ImVec2 min = GetItemRectMin();
-			ImVec2 max = GetItemRectMax();
-			ImVec2 center = (min + max) * 0.5f;
-			ImU32 text_color = GetColorU32(ImGuiCol_Text);
-			ImU32 color_active = GetColorU32(ImGuiCol_FrameBgActive);
-			draw_list->AddRectFilled(ImVec2(center.x - 4, min.y + 3),
-				ImVec2(center.x + 4, min.y + 5),
-				hovered ? color_active : text_color);
-			draw_list->AddTriangleFilled(ImVec2(center.x - 4, min.y + 7),
-				ImVec2(center.x + 4, min.y + 7),
-				ImVec2(center.x, min.y + 12),
-				hovered ? color_active : text_color);
+			//bool hovered = IsItemHovered();
+			//ImVec2 min = GetItemRectMin();
+			//ImVec2 max = GetItemRectMax();
+			//ImVec2 center = (min + max) * 0.5f;
+			//ImU32 text_color = GetColorU32(ImGuiCol_Text);
+			//ImU32 color_active = GetColorU32(ImGuiCol_FrameBgActive);
+			//draw_list->AddRectFilled(ImVec2(center.x - 4, min.y + 3),
+			//	ImVec2(center.x + 4, min.y + 5),
+			//	hovered ? color_active : text_color);
+			//draw_list->AddTriangleFilled(ImVec2(center.x - 4, min.y + 7),
+			//	ImVec2(center.x + 4, min.y + 7),
+			//	ImVec2(center.x, min.y + 12),
+			//	hovered ? color_active : text_color);
 		}
 
 
@@ -715,17 +717,17 @@ namespace ImGui
 						ImColor ac = ImColor( color_active );
 						ac = ImColor( ac.Value.x, ac.Value.y, ac.Value.z, 0.3f );
 						// Shadow on left side of tab
-						draw_list->AddLine( ImVec2( pos.x + tabOffset - 1.0f, pos.y - 2.0f ), ImVec2( pos.x + tabOffset - 1.0f, pos.y + size.y ), ImColor( 0.0f, 0.0f, 0.0f, 0.2f ), 1.0f );
-						draw_list->AddLine( ImVec2( pos.x + tabOffset - 2.0f, pos.y ), ImVec2( pos.x + tabOffset - 1.0f, pos.y + size.y ), ac, 1.0f );
+						//draw_list->AddLine( ImVec2( pos.x + tabOffset - 1.0f, pos.y - 2.0f ), ImVec2( pos.x + tabOffset - 1.0f, pos.y + size.y ), ImColor( 0.0f, 0.0f, 0.0f, 0.2f ), 1.0f );
+						//draw_list->AddLine( ImVec2( pos.x + tabOffset - 2.0f, pos.y ), ImVec2( pos.x + tabOffset - 1.0f, pos.y + size.y ), ac, 1.0f );
 						// Shadow on right side of tab
-						draw_list->AddLine( ImVec2( pos.x + size.x, pos.y - 2.0f ), ImVec2( pos.x + size.x, pos.y + size.y ), ImColor( 0.0f, 0.0f, 0.0f, 0.2f ), 1.0f ); 
-						draw_list->AddLine( ImVec2( pos.x + size.x + 1.0f, pos.y ), ImVec2( pos.x + size.x + 1.0f, pos.y + size.y ), ac, 1.0f ); 
+						draw_list->AddLine( ImVec2( pos.x + size.x, pos.y), ImVec2( pos.x + size.x, pos.y + size.y - 1.0f ), ImColor( 0.0f, 0.0f, 0.0f, 0.2f ), 1.0f ); 
+						//draw_list->AddLine( ImVec2( pos.x + size.x + 1.0f, pos.y ), ImVec2( pos.x + size.x + 1.0f, pos.y + size.y ), ac, 1.0f ); 
 					}
 
 					// Tab BG
 					draw_list->AddRectFilled(pos+ImVec2(tabOffset, 0.0),
 											 pos+size,
-											 hovered ? color_hovered : (dock_tab->active ? color_active : color), 1.5f);
+											 hovered ? color_hovered : (dock_tab->active ? color_active : color), 1.5f, ImDrawCornerFlags_TopLeft | ImDrawCornerFlags_TopRight );
 					if ( dock_tab->active )
 					{
 						lineLeftStart = dock.pos + ImVec2( pos.x + tabOffset, tab_base + line_height - 1.0f );
@@ -756,6 +758,7 @@ namespace ImGui
 
 						draw_list->AddLine( center + ImVec2(-3.5f, -3.5f), center + ImVec2(3.5f, 3.5f), text_color);
 						draw_list->AddLine( center + ImVec2(3.5f, -3.5f), center + ImVec2(-3.5f, 3.5f), text_color); 
+
 					} else 
 					{
 						if(!dock_tab->active && close_button) 
@@ -784,10 +787,11 @@ namespace ImGui
 				// Dividing line underneath tab with shadow
 				ImVec2 cp(dock.pos.x, tab_base + line_height);
 				// Shadow and triangle separators
-				draw_list->AddLine(ImVec2( cp.x, cp.y + 1.5f ), cp + ImVec2(dock.size.x, 1.5f), ImColor(0.0f, 0.0f, 0.0f, 0.3f), 1.0f);
-				// Dividing line
-				draw_list->AddLine(cp, cp + ImVec2(dock.size.x, 0.0f), color_active, 1.5f); 
-				draw_list->AddLine(cp + ImVec2(0.0f, + 2.0f), cp + ImVec2(dock.size.x, + 2.0f), ImColor(0.0f, 0.0f, 0.0f, 0.3f ), 1.5f); 
+				//draw_list->AddLine(ImVec2( cp.x, cp.y + 1.5f ), cp + ImVec2(dock.size.x, 1.5f), ImColor(0.0f, 0.0f, 0.0f, 0.3f), 1.0f);
+				//// Dividing line
+				//draw_list->AddLine(cp, cp + ImVec2(dock.size.x, 0.0f), color_active, 1.5f); 
+				//draw_list->AddLine(cp + ImVec2(0.0f, + 2.0f), cp + ImVec2(dock.size.x, + 2.0f), ImColor(0.0f, 0.0f, 0.0f, 0.3f ), 1.5f); 
+
 			}
 			EndChild();
 
@@ -1051,6 +1055,15 @@ namespace ImGui
 			PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
 			PushStyleColor(ImGuiCol_BorderShadow, ImVec4(0, 0, 0, 0));
 			float tabbar_height = GetTextLineHeightWithSpacing();
+
+			// Background frame
+			auto dl = ImGui::GetWindowDrawList( );
+			ImVec4* colors = ImGui::GetStyle( ).Colors;
+			dl->AddRectFilled( dock.pos + ImVec2(5.0f, tabbar_height + 8.0f), dock.pos + ImVec2(-5.0f, tabbar_height - 20.0f) + dock.size, ImColor(colors[ImGuiCol_FrameBgActive]) );
+			ImVec2 la = dock.pos + ImVec2( 5.0f, tabbar_height - 20.0f );
+			ImVec2 lb = ImVec2( dock.pos.x - 5.0f + dock.size.x, la.y );
+			dl->AddLine( la, lb, ImColor( 0.0f, 0.0f, 0.0f, 0.4f ) );
+
 			if (tabbar(dock.getFirstTab(), opened != nullptr))
 			{
 				fillLocation(dock);
