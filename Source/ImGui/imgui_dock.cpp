@@ -265,6 +265,7 @@ namespace ImGui
 
 			putInBackground();
 
+			float splitSize = 5.0f;
 			ImU32 color = GetColorU32(ImGuiCol_Button);
 			ImU32 color_hovered = GetColorU32(ImGuiCol_ButtonHovered);
 			ImDrawList* draw_list = GetWindowDrawList();
@@ -284,14 +285,15 @@ namespace ImGui
 				ImVec2 min_size1 = dock.children[1]->getMinSize();
 				if (dock.isHorizontal())
 				{
-					InvisibleButton("split", ImVec2(5, dock.size.y));
+					InvisibleButton("split", ImVec2(splitSize, dock.size.y));
 					if (dock.status == Status_Dragged) dsize.x = io.MouseDelta.x;
 					dsize.x = -ImMin(-dsize.x, dock.children[0]->size.x - min_size0.x);
 					dsize.x = ImMin(dsize.x, dock.children[1]->size.x - min_size1.x);
 				}
 				else
 				{
-					InvisibleButton("split", ImVec2(dock.size.x, 5));
+					SetCursorScreenPos( ImVec2( GetCursorScreenPos( ).x + splitSize, GetCursorScreenPos( ).y - 5.0f ) );
+					InvisibleButton("split", ImVec2(dock.size.x - splitSize, splitSize));
 					if (dock.status == Status_Dragged) dsize.y = io.MouseDelta.y;
 					dsize.y = -ImMin(-dsize.y, dock.children[0]->size.y - min_size0.y);
 					dsize.y = ImMin(dsize.y, dock.children[1]->size.y - min_size1.y);
@@ -305,11 +307,11 @@ namespace ImGui
 				if (IsItemHovered() && IsMouseClicked(0))
 				{
 					dock.status = Status_Dragged;
-				}
+				} 
 
 				draw_list->AddRectFilled(
 					GetItemRectMin(), GetItemRectMax(), IsItemHovered() ? color_hovered : color);
-				PopID();
+				PopID(); 
 			}
 		}
 
@@ -666,7 +668,8 @@ namespace ImGui
 				Dock* dock_tab = &dock;
 
 				ImDrawList* draw_list = GetWindowDrawList();
-				ImU32 color = GetColorU32(ImGuiCol_FrameBg);
+				ImColor color = GetColorU32(ImGuiCol_FrameBg);
+				color.Value.w = 0.2f;
 				ImU32 color_active = GetColorU32(ImGuiCol_FrameBgActive);
 				ImU32 color_hovered = GetColorU32(ImGuiCol_FrameBgHovered);
 				ImU32 text_color = GetColorU32(ImGuiCol_Text);
@@ -676,9 +679,16 @@ namespace ImGui
 
 				drawTabbarListButton(dock);
 
+				ImVec2 lineLeftStart;
+				ImVec2 lineLeftEnd;
+				ImVec2 lineRightStart; 
+				ImVec2 lineRightEnd;
+
 				while (dock_tab)
 				{
 					SameLine(0, 15);
+
+					float tabOffset = -8.0f;
 
 					const char* text_end = FindRenderedTextEnd(dock_tab->label);
 					ImVec2 size(CalcTextSize(dock_tab->label, text_end).x, line_height);
@@ -700,36 +710,87 @@ namespace ImGui
 					
 					tab_base = pos.y;
 
-					draw_list->AddRectFilled(pos+ImVec2(-8.0f, 0.0),
+					if ( dock_tab->active )
+					{
+						ImColor ac = ImColor( color_active );
+						ac = ImColor( ac.Value.x, ac.Value.y, ac.Value.z, 0.3f );
+						// Shadow on left side of tab
+						draw_list->AddLine( ImVec2( pos.x + tabOffset - 1.0f, pos.y - 2.0f ), ImVec2( pos.x + tabOffset - 1.0f, pos.y + size.y ), ImColor( 0.0f, 0.0f, 0.0f, 0.2f ), 1.0f );
+						draw_list->AddLine( ImVec2( pos.x + tabOffset - 2.0f, pos.y ), ImVec2( pos.x + tabOffset - 1.0f, pos.y + size.y ), ac, 1.0f );
+						// Shadow on right side of tab
+						draw_list->AddLine( ImVec2( pos.x + size.x, pos.y - 2.0f ), ImVec2( pos.x + size.x, pos.y + size.y ), ImColor( 0.0f, 0.0f, 0.0f, 0.2f ), 1.0f ); 
+						draw_list->AddLine( ImVec2( pos.x + size.x + 1.0f, pos.y ), ImVec2( pos.x + size.x + 1.0f, pos.y + size.y ), ac, 1.0f ); 
+					}
+
+					// Tab BG
+					draw_list->AddRectFilled(pos+ImVec2(tabOffset, 0.0),
 											 pos+size,
-											 hovered ? color_hovered : (dock_tab->active ? color_active : color));
+											 hovered ? color_hovered : (dock_tab->active ? color_active : color), 1.5f);
+					if ( dock_tab->active )
+					{
+						lineLeftStart = dock.pos + ImVec2( pos.x + tabOffset, tab_base + line_height - 1.0f );
+						lineLeftEnd = dock.pos + ImVec2( 0.0f, tab_base + line_height - 1.0f );
+						lineRightStart = pos + dock_tab->size; 
+						lineRightEnd = dock.pos + dock.size; 
+					}
+
+					// Shadow text
+					draw_list->AddText(pos + ImVec2(1.0f, 1.0f), ImColor(0.0f, 0.0f, 0.0f, 0.7f ), dock_tab->label, text_end);
+					// Tab text
 					draw_list->AddText(pos, text_color, dock_tab->label, text_end);
 
 					if (dock_tab->active && close_button)
-	                    {
-	                        SameLine();
-	                        tab_closed = InvisibleButton("close", ImVec2(16, 16));
+					{
+						SameLine();
+						tab_closed = InvisibleButton("close", ImVec2(16, 16)); 
 
-	                        ImVec2 center = ((GetItemRectMin() + GetItemRectMax()) * 0.5f);
-	                        draw_list->AddLine( center + ImVec2(-3.5f, -3.5f), center + ImVec2(3.5f, 3.5f), text_color);
-	                        draw_list->AddLine( center + ImVec2(3.5f, -3.5f), center + ImVec2(-3.5f, 3.5f), text_color);
-	                    } else {
-	                        if(!dock_tab->active && close_button) {
-	                            SameLine();
-	                            InvisibleButton("close", ImVec2(16, 16));
+						ImVec2 center = ((GetItemRectMin() + GetItemRectMax()) * 0.5f);
 
-	                            ImVec2 center = ((GetItemRectMin() + GetItemRectMax()) * 0.5f);
-	                            draw_list->AddLine( center + ImVec2(-3.5f, -3.5f), center + ImVec2(3.5f, 3.5f), text_color_disabled);
-	                            draw_list->AddLine( center + ImVec2(3.5f, -3.5f), center + ImVec2(-3.5f, 3.5f), text_color_disabled);
-	                        }
-	                    }
+						// Draw hovered button
+						ImVec2 ba = center + ImVec2( -5.5f, -5.5f );
+						ImVec2 bb = center + ImVec2( 5.5f, 5.5f );
+						if ( ImGui::IsMouseHoveringRect( center + ImVec2( -3.5f, -3.5f ), center + ImVec2( 3.5f, 3.5f ) ) )
+						{
+							draw_list->AddRectFilled( ba, bb, ImColor( 0.5f, 0.5f, 0.5f, 0.7f ), 2.0f );
+						}
+
+						draw_list->AddLine( center + ImVec2(-3.5f, -3.5f), center + ImVec2(3.5f, 3.5f), text_color);
+						draw_list->AddLine( center + ImVec2(3.5f, -3.5f), center + ImVec2(-3.5f, 3.5f), text_color); 
+					} else 
+					{
+						if(!dock_tab->active && close_button) 
+						{
+							SameLine();
+							InvisibleButton( "close", ImVec2( 16, 16 ) );
+
+							ImVec2 center = ((GetItemRectMin() + GetItemRectMax()) * 0.5f);
+
+							// Draw hovered button
+							ImVec2 ba = center + ImVec2( -5.5f, -5.5f );
+							ImVec2 bb = center + ImVec2( 5.5f, 5.5f );
+							if ( ImGui::IsMouseHoveringRect( center + ImVec2( -3.5f, -3.5f ), center + ImVec2( 3.5f, 3.5f ) ) )
+							{
+								draw_list->AddRectFilled( ba, bb, ImColor( 0.5f, 0.5f, 0.5f, 0.7f ), 2.0f );
+							}
+
+							draw_list->AddLine( center + ImVec2(-3.5f, -3.5f), center + ImVec2(3.5f, 3.5f), text_color_disabled);
+							draw_list->AddLine( center + ImVec2(3.5f, -3.5f), center + ImVec2(-3.5f, 3.5f), text_color_disabled);
+						}
+					}
 
 					dock_tab = dock_tab->next_tab;
 				}
+
+				// Dividing line underneath tab with shadow
 				ImVec2 cp(dock.pos.x, tab_base + line_height);
-				draw_list->AddLine(cp, cp + ImVec2(dock.size.x, 0), color);
+				// Shadow and triangle separators
+				draw_list->AddLine(ImVec2( cp.x, cp.y + 1.5f ), cp + ImVec2(dock.size.x, 1.5f), ImColor(0.0f, 0.0f, 0.0f, 0.3f), 1.0f);
+				// Dividing line
+				draw_list->AddLine(cp, cp + ImVec2(dock.size.x, 0.0f), color_active, 1.5f); 
+				draw_list->AddLine(cp + ImVec2(0.0f, + 2.0f), cp + ImVec2(dock.size.x, + 2.0f), ImColor(0.0f, 0.0f, 0.0f, 0.3f ), 1.5f); 
 			}
 			EndChild();
+
 			return tab_closed;
 		}
 
@@ -950,8 +1011,12 @@ namespace ImGui
 			m_end_action = EndAction_Panel;
 			beginPanel();
 
+			// Handle split dragging
 			m_current = &dock;
-			if (dock.status == Status_Dragged) handleDrag(dock);
+			if ( dock.status == Status_Dragged )
+			{
+				handleDrag( dock );
+			}
 
 			bool is_float = dock.status == Status_Float;
 

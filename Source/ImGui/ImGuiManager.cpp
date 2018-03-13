@@ -326,13 +326,24 @@ namespace Enjon
 		const Enjon::MetaClass* cls = object->Class( ); 
 		Enjon::String name = prop->GetName( );
 
+		f32 startCursorX = ImGui::GetCursorPosX( );
+		f32 windowWidth = ImGui::GetWindowWidth( );
+
+		if ( prop->GetType( ) != MetaPropertyType::Transform )
+		{
+			ImGui::Text( name.c_str( ) ); 
+			ImGui::SameLine( );
+			ImGui::SetCursorPosX( windowWidth * 0.4f );
+			ImGui::PushItemWidth( windowWidth / 2.0f ); 
+		}
+
 		switch ( prop->GetType( ) )
 		{
 			case Enjon::MetaPropertyType::Bool:
 			{
 				bool val = 0;
 				cls->GetValue( object, prop, &val );
-				if ( ImGui::Checkbox( name.c_str( ), &val ) )
+				if ( ImGui::Checkbox( fmt::format("##{}", name).c_str(), &val ) )
 				{
 					cls->SetValue( object, prop, val );
 				}
@@ -346,14 +357,14 @@ namespace Enjon
 				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderInt( name.c_str(), ( s32* )&val, ( s32 )traits.GetUIMin( ), ( s32 )traits.GetUIMax( ) ) )
+					if ( ImGui::SliderInt( fmt::format("##{}", name).c_str(), ( s32* )&val, ( s32 )traits.GetUIMin( ), ( s32 )traits.GetUIMax( ) ) )
 					{
 						cls->SetValue( object, prop, ( u32 )val );
 					}
 				}
 				else
 				{
-					if ( ImGui::DragInt( name.c_str( ), ( s32* )&val ) )
+					if ( ImGui::DragInt( fmt::format("##{}", name).c_str(), ( s32* )&val ) )
 					{
 						cls->SetValue( object, prop, ( u32 )val );
 					}
@@ -367,14 +378,14 @@ namespace Enjon
 				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderInt( name.c_str( ), ( s32* )&val, ( s32 )traits.GetUIMin( ), ( s32 )traits.GetUIMax( ) ) )
+					if ( ImGui::SliderInt( fmt::format("##{}", name).c_str( ), ( s32* )&val, ( s32 )traits.GetUIMin( ), ( s32 )traits.GetUIMax( ) ) )
 					{
 						cls->SetValue( object, prop, ( s32 )val );
 					}
 				}
 				else
 				{
-					if ( ImGui::DragInt( name.c_str( ), ( s32* )&val ) )
+					if ( ImGui::DragInt( fmt::format("##{}", name).c_str( ), ( s32* )&val ) )
 					{
 						cls->SetValue( object, prop, ( s32 )val ); 
 					}
@@ -388,21 +399,17 @@ namespace Enjon
 				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
-					ImGui::PushItemWidth( 100.0f );
-					if ( ImGui::SliderFloat( name.c_str( ), &val, traits.GetUIMin( ), traits.GetUIMax( ) ) )
+					if ( ImGui::SliderFloat( fmt::format("##{}", name).c_str(), &val, traits.GetUIMin( ), traits.GetUIMax( ) ) )
 					{
 						cls->SetValue( object, prop, val );
 					}
-					ImGui::PopItemWidth( );
 				}
 				else
 				{
-					ImGui::PushItemWidth( 100.0f );
-					if ( ImGui::DragFloat( name.c_str( ), &val ) )
+					if ( ImGui::DragFloat( fmt::format("##{}", name).c_str(), &val ) )
 					{
 						cls->SetValue( object, prop, val );
 					}
-					ImGui::PopItemWidth( );
 				}
 			} break;
 
@@ -414,7 +421,7 @@ namespace Enjon
 				f32 col[ 2 ] = { val.x, val.y };
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderFloat2( name.c_str( ), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
+					if ( ImGui::SliderFloat2( fmt::format("##{}", name).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -423,7 +430,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::DragFloat2( name.c_str( ), col ) )
+					if ( ImGui::DragFloat2( fmt::format("##{}", name).c_str(), col ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -438,7 +445,6 @@ namespace Enjon
 				cls->GetValue( object, prop, &val );
 				f32 col[ 3 ] = { val.x, val.y, val.z };
 				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
-				ImGui::Text( name.c_str( ) ); ImGui::SameLine( );
 				if ( traits.UseSlider( ) )
 				{
 					if ( ImGui::SliderFloat3( ( "##" + name ).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
@@ -467,10 +473,9 @@ namespace Enjon
 				cls->GetValue( object, prop, &val );
 				s32 col[ 3 ] = { val.x, val.y, val.z };
 				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
-				ImGui::Text( name.c_str( ) ); ImGui::SameLine( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::DragInt3( ( "##" + name ).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
+					if ( ImGui::SliderInt3( ( "##" + name ).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -498,7 +503,7 @@ namespace Enjon
 				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderFloat4( name.c_str( ), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
+					if ( ImGui::SliderFloat4( fmt::format("##{}", name).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -509,7 +514,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::DragFloat4( name.c_str( ), col ) )
+					if ( ImGui::DragFloat4( fmt::format("##{}", name).c_str(), col ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -528,7 +533,7 @@ namespace Enjon
 				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderFloat4( name.c_str( ), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
+					if ( ImGui::SliderFloat4( fmt::format("##{}", name).c_str( ), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
 					{
 						val.r = col[ 0 ];
 						val.g = col[ 1 ];
@@ -539,7 +544,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::DragFloat4( name.c_str( ), col ) )
+					if ( ImGui::DragFloat4( fmt::format("##{}", name).c_str( ), col ) )
 					{
 						val.r = col[ 0 ];
 						val.g = col[ 1 ];
@@ -556,7 +561,7 @@ namespace Enjon
 				cls->GetValue( object, prop, &val );
 				char buffer[ 256 ];
 				strncpy_s( buffer, &val[0], 256 );
-				if ( ImGui::InputText( name.c_str( ), buffer, 256 ) )
+				if ( ImGui::InputText( fmt::format("##{}", name).c_str( ), buffer, 256 ) )
 				{
 					// Reset string
 					cls->SetValue( object, prop, String( buffer ) ); 
@@ -568,7 +573,7 @@ namespace Enjon
 				Enjon::UUID val;
 				cls->GetValue( object, prop, &val );
 				Enjon::String str = val.ToString( );
-				ImGui::Text( fmt::format( "{}: {}", name, str ).c_str( ) );
+				ImGui::Text( fmt::format( "{}", str ).c_str( ) );
 			} break;
 
 			// Type is transform
@@ -582,10 +587,14 @@ namespace Enjon
 
 				if ( ImGui::TreeNode( Enjon::String( prop->GetName( ) + "##" + std::to_string( (u32)object ) ).c_str( ) ) )
 				{ 
-					// Position
+					// Position 
+					ImGui::Text( fmt::format( "Position", prop->GetName( ) ).c_str( ) );
+					ImGui::SameLine( );
+					ImGui::SetCursorPosX( windowWidth * 0.4f );
+					ImGui::PushItemWidth( windowWidth / 2.0f ); 
 					{
 						f32 col[ 3 ] = { pos.x, pos.y, pos.z };
-						if ( ImGui::DragFloat3( Enjon::String( "Position##" + prop->GetName() ).c_str( ), col ) )
+						if ( ImGui::DragFloat3( Enjon::String( "##position" + prop->GetName() ).c_str( ), col ) )
 						{
 							pos.x = col[ 0 ];
 							pos.y = col[ 1 ];
@@ -594,11 +603,16 @@ namespace Enjon
 							cls->SetValue( object, prop, val );
 						} 
 					}
+					ImGui::PopItemWidth( );
 					
 					// Rotation
+					ImGui::Text( fmt::format( "Rotation", prop->GetName( ) ).c_str( ) );
+					ImGui::SameLine( );
+					ImGui::SetCursorPosX( windowWidth * 0.4f );
+					ImGui::PushItemWidth( windowWidth / 2.0f ); 
 					{
 						f32 col[ 4 ] = { rot.x, rot.y, rot.z, rot.w };
-						if ( ImGui::DragFloat4( Enjon::String( "Rotation##" + prop->GetName() ).c_str( ), col ) )
+						if ( ImGui::DragFloat4( Enjon::String( "##rotation" + prop->GetName() ).c_str( ), col ) )
 						{
 							rot.x = col[ 0 ];
 							rot.y = col[ 1 ];
@@ -607,11 +621,16 @@ namespace Enjon
 							cls->SetValue( object, prop, val );
 						} 
 					}
+					ImGui::PopItemWidth( );
 					
 					// Scale
+					ImGui::Text( fmt::format( "Scale", prop->GetName( ) ).c_str( ) );
+					ImGui::SameLine( );
+					ImGui::SetCursorPosX( windowWidth * 0.4f );
+					ImGui::PushItemWidth( windowWidth / 2.0f ); 
 					{
 						f32 col[ 3 ] = { scl.x, scl.y, scl.z };
-						if ( ImGui::DragFloat3( Enjon::String( "Scale##" + prop->GetName() ).c_str( ), col ) )
+						if ( ImGui::DragFloat3( Enjon::String( "##scale" + prop->GetName() ).c_str( ), col ) )
 						{
 							scl.x = col[ 0 ];
 							scl.y = col[ 1 ];
@@ -620,6 +639,7 @@ namespace Enjon
 							cls->SetValue( object, prop, val );
 						} 
 					} 
+					ImGui::PopItemWidth( );
 
 					ImGui::TreePop( ); 
 				} 
@@ -972,18 +992,18 @@ namespace Enjon
 		ImGuiStyle& style = ImGui::GetStyle(); 
 
 		// Set default font
-		io.FontDefault = mFonts[ "WeblySleek_16" ];
+		io.FontDefault = mFonts[ "WeblySleek_14" ];
 
 		style.WindowTitleAlign 		= ImVec2(0.5f, 0.41f);
 		style.ButtonTextAlign 		= ImVec2(0.5f, 0.5f); 
-		style.WindowPadding			= ImVec2(11, 9);
+		style.WindowPadding			= ImVec2(13, 7);
 		style.WindowRounding		= 0.0f;
-		style.FramePadding			= ImVec2(6, 3);
+		style.FramePadding			= ImVec2(6, 4);
 		style.FrameRounding			= 3.0f;
-		style.ItemSpacing			= ImVec2(10, 4);
-		style.ItemInnerSpacing		= ImVec2(10, 3);
+		style.ItemSpacing			= ImVec2(8, 3);
+		style.ItemInnerSpacing		= ImVec2(2, 3);
 		style.IndentSpacing			= 20.0f;
-		style.ScrollbarSize			= 17.0f;
+		style.ScrollbarSize			= 18.0f;
 		style.ScrollbarRounding		= 0.0f;
 		style.GrabMinSize			= 4.0f;
 		style.GrabRounding			= 3.0f;
@@ -991,61 +1011,51 @@ namespace Enjon
 		style.FrameBorderSize		= 1.0f;
 
 		ImVec4* colors = ImGui::GetStyle( ).Colors;
-		colors[ ImGuiCol_Text ] = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
-		colors[ ImGuiCol_TextDisabled ] = ImVec4( 0.50f, 0.50f, 0.50f, 0.47f );
-		colors[ ImGuiCol_WindowBg ] = ImVec4( 0.16f, 0.16f, 0.18f, 1.00f );
-		colors[ ImGuiCol_ChildBg ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.00f );
-		colors[ ImGuiCol_PopupBg ] = ImVec4( 0.12f, 0.12f, 0.12f, 1.00f );
-		colors[ ImGuiCol_Border ] = ImVec4( 0.19f, 0.19f, 0.19f, 1.00f );
-		colors[ ImGuiCol_BorderShadow ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.07f );
-		colors[ ImGuiCol_FrameBg ] = ImVec4( 0.11f, 0.11f, 0.11f, 1.00f );
-		colors[ ImGuiCol_FrameBgHovered ] = ImVec4( 0.19f, 0.42f, 0.58f, 1.00f );
-		colors[ ImGuiCol_FrameBgActive ] = ImVec4( 0.22f, 0.34f, 0.42f, 1.00f );
-		colors[ ImGuiCol_TitleBg ] = ImVec4( 0.04f, 0.04f, 0.04f, 1.00f );
-		colors[ ImGuiCol_TitleBgActive ] = ImVec4( 0.18f, 0.35f, 0.46f, 1.00f );
-		colors[ ImGuiCol_TitleBgCollapsed ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.51f );
-		colors[ ImGuiCol_MenuBarBg ] = ImVec4( 0.14f, 0.14f, 0.14f, 1.00f );
-		colors[ ImGuiCol_ScrollbarBg ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.40f );
-		colors[ ImGuiCol_ScrollbarGrab ] = ImVec4( 0.31f, 0.31f, 0.31f, 1.00f );
-		colors[ ImGuiCol_ScrollbarGrabHovered ] = ImVec4( 0.41f, 0.41f, 0.41f, 1.00f );
-		colors[ ImGuiCol_ScrollbarGrabActive ] = ImVec4( 0.51f, 0.51f, 0.51f, 1.00f );
-		colors[ ImGuiCol_CheckMark ] = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
-		colors[ ImGuiCol_SliderGrab ] = ImVec4( 0.18f, 0.35f, 0.46f, 1.00f );
-		colors[ ImGuiCol_SliderGrabActive ] = ImVec4( 0.23f, 0.58f, 0.83f, 1.00f );
-		colors[ ImGuiCol_Button ] = ImVec4( 0.24f, 0.24f, 0.24f, 1.00f );
-		colors[ ImGuiCol_ButtonHovered ] = ImVec4( 0.27f, 0.27f, 0.27f, 1.00f );
-		colors[ ImGuiCol_ButtonActive ] = ImVec4( 0.33f, 0.33f, 0.33f, 1.00f );
-		colors[ ImGuiCol_Header ] = ImVec4( 0.31f, 0.37f, 0.42f, 0.31f );
-		colors[ ImGuiCol_HeaderHovered ] = ImVec4( 0.19f, 0.42f, 0.58f, 1.00f );
-		colors[ ImGuiCol_HeaderActive ] = ImVec4( 0.19f, 0.42f, 0.58f, 1.00f );
-		colors[ ImGuiCol_Separator ] = ImVec4( 0.29f, 0.29f, 0.29f, 0.50f );
-		colors[ ImGuiCol_SeparatorHovered ] = ImVec4( 0.21f, 0.52f, 0.74f, 1.00f );
-		colors[ ImGuiCol_SeparatorActive ] = ImVec4( 0.10f, 0.40f, 0.75f, 1.00f );
-		colors[ ImGuiCol_ResizeGrip ] = ImVec4( 0.26f, 0.59f, 0.98f, 0.25f );
-		colors[ ImGuiCol_ResizeGripHovered ] = ImVec4( 0.26f, 0.59f, 0.98f, 0.67f );
-		colors[ ImGuiCol_ResizeGripActive ] = ImVec4( 0.26f, 0.59f, 0.98f, 0.95f );
-		colors[ ImGuiCol_CloseButton ] = ImVec4( 0.41f, 0.41f, 0.41f, 0.50f );
-		colors[ ImGuiCol_CloseButtonHovered ] = ImVec4( 0.98f, 0.39f, 0.36f, 1.00f );
-		colors[ ImGuiCol_CloseButtonActive ] = ImVec4( 0.98f, 0.39f, 0.36f, 1.00f );
-		colors[ ImGuiCol_PlotLines ] = ImVec4( 0.61f, 0.61f, 0.61f, 1.00f );
-		colors[ ImGuiCol_PlotLinesHovered ] = ImVec4( 1.00f, 0.43f, 0.35f, 1.00f );
-		colors[ ImGuiCol_PlotHistogram ] = ImVec4( 0.90f, 0.70f, 0.00f, 1.00f );
-		colors[ ImGuiCol_PlotHistogramHovered ] = ImVec4( 1.00f, 0.60f, 0.00f, 1.00f );
-		colors[ ImGuiCol_TextSelectedBg ] = ImVec4( 0.26f, 0.59f, 0.98f, 0.35f );
-		colors[ ImGuiCol_ModalWindowDarkening ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.78f );
-		colors[ ImGuiCol_DragDropTarget ] = ImVec4( 1.00f, 1.00f, 0.00f, 0.90f );
-		colors[ ImGuiCol_NavHighlight ] = ImVec4( 0.26f, 0.59f, 0.98f, 1.00f );
-		colors[ ImGuiCol_NavWindowingHighlight ] = ImVec4( 1.00f, 1.00f, 1.00f, 0.70f );
-
-		;
-
-
-
-
-
-
-
-
+		colors[ImGuiCol_Text] = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
+		colors[ImGuiCol_TextDisabled] = ImVec4( 0.50f, 0.50f, 0.50f, 0.47f );
+		colors[ImGuiCol_WindowBg] = ImVec4( 0.08f, 0.09f, 0.10f, 1.00f );
+		colors[ImGuiCol_ChildBg] = ImVec4( 0.00f, 0.00f, 0.00f, 0.00f );
+		colors[ImGuiCol_PopupBg] = ImVec4( 0.06f, 0.06f, 0.06f, 1.00f );
+		colors[ImGuiCol_Border] = ImVec4( 0.19f, 0.19f, 0.19f, 1.00f );
+		colors[ImGuiCol_BorderShadow] = ImVec4( 0.00f, 0.00f, 0.00f, 0.07f );
+		colors[ImGuiCol_FrameBg] = ImVec4( 0.07f, 0.07f, 0.08f, 1.00f );
+		colors[ImGuiCol_FrameBgHovered] = ImVec4( 0.21f, 0.41f, 0.38f, 1.00f );
+		colors[ImGuiCol_FrameBgActive] = ImVec4( 0.21f, 0.41f, 0.38f, 1.00f );
+		colors[ImGuiCol_TitleBg] = ImVec4( 0.04f, 0.04f, 0.04f, 1.00f );
+		colors[ImGuiCol_TitleBgActive] = ImVec4( 0.24f, 0.33f, 0.47f, 1.00f );
+		colors[ImGuiCol_TitleBgCollapsed] = ImVec4( 0.00f, 0.00f, 0.00f, 0.51f );
+		colors[ImGuiCol_MenuBarBg] = ImVec4( 0.14f, 0.14f, 0.14f, 1.00f );
+		colors[ImGuiCol_ScrollbarBg] = ImVec4( 0.00f, 0.00f, 0.00f, 0.40f );
+		colors[ImGuiCol_ScrollbarGrab] = ImVec4( 0.31f, 0.31f, 0.31f, 1.00f );
+		colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4( 0.41f, 0.41f, 0.41f, 1.00f );
+		colors[ImGuiCol_ScrollbarGrabActive] = ImVec4( 0.51f, 0.51f, 0.51f, 1.00f );
+		colors[ImGuiCol_CheckMark] = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
+		colors[ImGuiCol_SliderGrab] = ImVec4( 0.24f, 0.33f, 0.47f, 1.00f );
+		colors[ImGuiCol_SliderGrabActive] = ImVec4( 0.28f, 0.39f, 0.56f, 1.00f );
+		colors[ImGuiCol_Button] = ImVec4( 0.42f, 0.42f, 0.42f, 0.28f );
+		colors[ImGuiCol_ButtonHovered] = ImVec4( 0.28f, 0.28f, 0.28f, 1.00f );
+		colors[ImGuiCol_ButtonActive] = ImVec4( 0.14f, 0.14f, 0.14f, 1.00f );
+		colors[ImGuiCol_Header] = ImVec4( 0.31f, 0.31f, 0.31f, 0.31f );
+		colors[ImGuiCol_HeaderHovered] = ImVec4( 0.21f, 0.41f, 0.38f, 1.00f );
+		colors[ImGuiCol_HeaderActive] = ImVec4( 0.21f, 0.41f, 0.38f, 1.00f );
+		colors[ImGuiCol_Separator] = ImVec4( 0.29f, 0.29f, 0.29f, 0.50f );
+		colors[ImGuiCol_SeparatorHovered] = ImVec4( 0.21f, 0.52f, 0.74f, 1.00f );
+		colors[ImGuiCol_SeparatorActive] = ImVec4( 0.10f, 0.40f, 0.75f, 1.00f );
+		colors[ImGuiCol_ResizeGrip] = ImVec4( 0.26f, 0.59f, 0.98f, 0.25f );
+		colors[ImGuiCol_ResizeGripHovered] = ImVec4( 0.26f, 0.59f, 0.98f, 0.67f );
+		colors[ImGuiCol_ResizeGripActive] = ImVec4( 0.26f, 0.59f, 0.98f, 0.95f );
+		colors[ImGuiCol_CloseButton] = ImVec4( 0.41f, 0.41f, 0.41f, 0.50f );
+		colors[ImGuiCol_CloseButtonHovered] = ImVec4( 0.98f, 0.39f, 0.36f, 1.00f );
+		colors[ImGuiCol_CloseButtonActive] = ImVec4( 0.98f, 0.39f, 0.36f, 1.00f );
+		colors[ImGuiCol_PlotLines] = ImVec4( 0.61f, 0.61f, 0.61f, 1.00f );
+		colors[ImGuiCol_PlotLinesHovered] = ImVec4( 1.00f, 0.43f, 0.35f, 1.00f );
+		colors[ImGuiCol_PlotHistogram] = ImVec4( 0.90f, 0.70f, 0.00f, 1.00f );
+		colors[ImGuiCol_PlotHistogramHovered] = ImVec4( 1.00f, 0.60f, 0.00f, 1.00f );
+		colors[ImGuiCol_TextSelectedBg] = ImVec4( 0.26f, 0.59f, 0.98f, 0.35f );
+		colors[ImGuiCol_ModalWindowDarkening] = ImVec4( 0.00f, 0.00f, 0.00f, 0.78f );
+		colors[ImGuiCol_DragDropTarget] = ImVec4( 1.00f, 1.00f, 0.00f, 0.90f );
+		colors[ImGuiCol_NavHighlight] = ImVec4( 0.26f, 0.59f, 0.98f, 1.00f );
+		colors[ImGuiCol_NavWindowingHighlight] = ImVec4( 1.00f, 1.00f, 1.00f, 0.70f );
 
 		// Load dock
 		// ImGui::LoadDock();

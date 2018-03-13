@@ -304,11 +304,11 @@ namespace Enjon
 			ENJON_PROPERTY( Delegates[ Accessor = GetGravity, Mutator = SetGravity ] )
 			Vec3 mGravity = Vec3( 0.0f, -10.0f, 0.0f );
 
-			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f, Delegates[ Accessor = GetContinuousCollisionDetectionEnabled, Mutator = SetContinuousCollisionDetectionEnabled ] )
-			u32 mCCDEnabled = false;
+			ENJON_PROPERTY( Delegates[ Accessor = GetContinuousCollisionDetectionEnabled, Mutator = SetContinuousCollisionDetectionEnabled ] )
+			bool mCCDEnabled = false;
 
 			ENJON_PROPERTY( UIMin = 0.0f, UIMax = 1.0f, Delegates[ Accessor = GetIsTriggerVolume, Mutator = SetIsTriggerVolume ] )
-			u32 mIsTriggerVolume = false;
+			bool mIsTriggerVolume = false;
 
 			ENJON_PROPERTY( UIMin = 0, UIMax = 1, Delegates[ Accessor = GetLinearFactor, Mutator = SetLinearFactor ] )
 			iVec3 mLinearFactor = iVec3( 1 );
@@ -318,9 +318,6 @@ namespace Enjon
 
 			ENJON_PROPERTY( Delegates[ Accessor = GetIsKinematic, Mutator = SetIsKinematic ] )
 			bool mIsKinematic = false; 
-
-			ENJON_PROPERTY( Delegates[ Accessor = SetShape ] )
-			CollisionShapeType mShapeType = CollisionShapeType::Empty;
 
 		public:
 			ENJON_PROPERTY( )

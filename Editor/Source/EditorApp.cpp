@@ -43,10 +43,10 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-//Enjon::String mProjectsDir = "W:/Projects/";
-//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
 Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -266,7 +266,7 @@ namespace Enjon
 			Entity* ent = mSelectedEntity.Get( ); 
 
 			// New component dialogue
-			ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_20" ) );
+			ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_16" ) );
 			if ( ImGui::BeginCombo( "##ADDCOMPONENT", "+ Add Component..." ) )
 			{
 				// Label for scripting type of component class
@@ -277,7 +277,7 @@ namespace Enjon
 				ImGui::PopFont( );
 
 				// Add new component pop up
-				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_16" ) );
+				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
 				if ( ImGui::Selectable( "\tCreate New Component..." ) )
 				{
 					mNewComponentPopupDialogue = true;
@@ -298,7 +298,7 @@ namespace Enjon
 				ImGui::PopStyleColor( );
 				ImGui::PopFont( );
 
-				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_16" ) );
+				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
 				for ( auto& cls : compMetaClsList )
 				{
 					if ( !ent->HasComponent( cls ) )
@@ -461,16 +461,14 @@ namespace Enjon
 				auto cam = gfx->GetGraphicsSceneCamera( )->ConstCast< Camera >();
 				cam->SetPosition( mPreviousCameraTransform.GetPosition() );
 				cam->SetRotation( mPreviousCameraTransform.GetRotation() ); 
-			}
+			} 
 
-			static bool isPaused = false;
-
-			if ( !isPaused )
+			if ( mState != ApplicationState::Paused )
 			{
 				ImGui::SameLine( );
 				if ( ImGui::Button( "Pause" ) )
 				{
-					isPaused = true;
+					SetApplicationState( ApplicationState::Paused );
 					PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
 					physx->PauseSystem( true );
 				} 
@@ -480,7 +478,7 @@ namespace Enjon
 				ImGui::SameLine( );
 				if ( ImGui::Button( "Resume" ) )
 				{
-					isPaused = false;
+					SetApplicationState( ApplicationState::Running );
 					PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
 					physx->PauseSystem( false );
 				} 
@@ -1083,7 +1081,7 @@ namespace Enjon
 		if ( app )
 		{
 			// Shutdown application state
-			SetApplicationState( ApplicationState::Stopped );
+			SetApplicationState( ApplicationState::Stopped ); 
 
 			EntityManager* em = EngineSubsystem( EntityManager );
 			SceneManager* sm = EngineSubsystem( SceneManager );
@@ -1782,6 +1780,8 @@ namespace Enjon
 		Enjon::String yellowPath			= Enjon::String("Textures/yellow.png"); 
 		Enjon::String axisBoxDiffusePath	= Enjon::String("Textures/axisBoxDiffuse.png"); 
 		Enjon::String hdrPath				= Enjon::String("Textures/HDR/03-ueno-shrine_3k.hdr"); 
+		Enjon::String hdrPath2				= Enjon::String("Textures/HDR/GCanyon_C_YumaPoint_3k.hdr"); 
+		Enjon::String hdrPath3				= Enjon::String("Textures/HDR/WinterForest_Ref.hdr"); 
 		Enjon::String cubePath				= Enjon::String("Models/unit_cube.obj"); 
 		Enjon::String spherePath			= Enjon::String("Models/unit_sphere.obj"); 
 		Enjon::String conePath				= Enjon::String("Models/unit_cone.obj"); 
@@ -1803,6 +1803,8 @@ namespace Enjon
 		mAssetManager->AddToDatabase( whitePath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( yellowPath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( hdrPath, true, true, AssetLocationType::EngineAsset );
+		mAssetManager->AddToDatabase( hdrPath2, true, true, AssetLocationType::EngineAsset );
+		mAssetManager->AddToDatabase( hdrPath3, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( cubePath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( spherePath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( conePath, true, true, AssetLocationType::EngineAsset );
