@@ -1212,7 +1212,7 @@ namespace Enjon
 
 		Enjon::ImGuiManager::RegisterWindow( [ & ]
 		{
-			if ( ImGui::BeginDock( "Play Options", nullptr ) )
+			if ( ImGui::BeginDock( "Play Options", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 			{
 				PlayOptions( );
 			}

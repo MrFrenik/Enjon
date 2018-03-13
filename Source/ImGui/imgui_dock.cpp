@@ -737,9 +737,17 @@ namespace ImGui
 					}
 
 					// Shadow text
-					draw_list->AddText(pos + ImVec2(1.0f, 1.0f), ImColor(0.0f, 0.0f, 0.0f, 0.7f ), dock_tab->label, text_end);
-					// Tab text
-					draw_list->AddText(pos, text_color, dock_tab->label, text_end);
+					if ( dock_tab->active )
+					{
+						// Tab text
+						draw_list->AddText(pos + ImVec2(1.0f, 1.0f), ImColor(0.0f, 0.0f, 0.0f, 0.4f ), dock_tab->label, text_end);
+						draw_list->AddText(pos, text_color, dock_tab->label, text_end); 
+					}
+					else
+					{
+						// Tab text
+						draw_list->AddText(pos, text_color_disabled, dock_tab->label, text_end); 
+					}
 
 					if (dock_tab->active && close_button)
 					{
