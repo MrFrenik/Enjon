@@ -276,7 +276,9 @@ namespace Enjon
 			// Update world time
 			mWorldTime.mDT = dt;
 			mWorldTime.mTotalTime += mWorldTime.mDT;
-			mWorldTime.mFPS = 1000.0f / Max( mWorldTime.mDT, 0.00001f ); 
+			mWorldTime.mFPS = 1000.0f / Max( mWorldTime.mDT, 0.00001f );
+
+			std::cout << "FPS: " << mWorldTime.mFPS << ", DT: " << mWorldTime.mDT << "\n";
 
 			// Calculate average delta time for world time
 			mWorldTime.CalculateAverageDeltaTime( );
