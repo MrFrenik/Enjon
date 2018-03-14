@@ -12,7 +12,7 @@ namespace Enjon
 	//=================================================================
 
 	EditorSceneView::EditorSceneView( EditorApp* app )
-		: EditorView( app, "Scene View", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
+		: EditorView( app, "Scene", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
 	{ 
 		// Don't like having to do this here...
 		mApp->SetEditorSceneView( this );
@@ -36,7 +36,7 @@ namespace Enjon
 		ImVec2 cursorPos = ImGui::GetCursorScreenPos( );
 
 		// Cache off cursor position for scene view
-		Vec2 padding( -20.0f, -20.0f );
+		Vec2 padding( -20.0f, -40.0f );
 		mSceneViewWindowPosition = Vec2( cursorPos.x, cursorPos.y );
 		mSceneViewWindowSize = Vec2( ImGui::GetWindowWidth( ), ImGui::GetWindowHeight( ) ) + padding;
 

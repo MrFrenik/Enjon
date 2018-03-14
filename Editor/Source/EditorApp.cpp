@@ -606,7 +606,7 @@ namespace Enjon
 		{
 			for ( auto& e : entities->GetActiveEntities( ) )
 			{
-				if ( ImGui::Selectable( fmt::format( "{}", e->GetID() ).c_str( ) ) )
+				if ( ImGui::Selectable( fmt::format( "{}", e->GetID() ).c_str( ), mSelectedEntity == e ) )
 				{
 					SelectEntity( e );
 				} 
@@ -1223,7 +1223,7 @@ namespace Enjon
 
 		Enjon::ImGuiManager::RegisterWindow( [ & ]
 		{
-			if ( ImGui::BeginDock( "Inspector View", nullptr, ImGuiWindowFlags_NoScrollbar ) )
+			if ( ImGui::BeginDock( "Inspector", nullptr, ImGuiWindowFlags_NoScrollbar ) )
 			{
 				InspectorView( nullptr );
 			}
@@ -1233,7 +1233,7 @@ namespace Enjon
 		static bool sceneSelectionViewOpen = true;
 		Enjon::ImGuiManager::RegisterWindow( [ & ]
 		{
-			if ( ImGui::BeginDock( "Scene Selection View", &sceneSelectionViewOpen ) )
+			if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
 			{
 				SelectSceneView( );
 				CheckForPopups( );
@@ -1375,15 +1375,15 @@ namespace Enjon
 		ImGuiManager::RegisterMenuOption( "Create", createViewOption );
 
 		// Register docking layouts 
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene View", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
 	    ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Graphics", nullptr, ImGui::DockSlotType::Slot_Bottom, 0.2f));
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Graphics", ImGui::DockSlotType::Slot_Tab, 0.15f ) );
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", nullptr, ImGui::DockSlotType::Slot_Right, 0.35f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene View", ImGui::DockSlotType::Slot_Top, 0.1f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Scene View", ImGui::DockSlotType::Slot_Bottom, 0.2f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Inspector View", "World Outliner", ImGui::DockSlotType::Slot_Right, 0.7f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Inspector View", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene Selection View", "Create Project", ImGui::DockSlotType::Slot_Tab, 0.6f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene", ImGui::DockSlotType::Slot_Top, 0.1f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Scene", ImGui::DockSlotType::Slot_Bottom, 0.2f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Inspector", "World Outliner", ImGui::DockSlotType::Slot_Right, 0.7f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Inspector", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene Selection", "Create Project", ImGui::DockSlotType::Slot_Tab, 0.6f ) );
 
 		return Enjon::Result::SUCCESS;
 	}

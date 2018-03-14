@@ -868,14 +868,12 @@ namespace Enjon
 		shader->Unuse( ); 
 
 		// Cubemap
-		//glEnable( GL_DEPTH_TEST );
-		//glDepthFunc( GL_LEQUAL );
 		//glCullFace( GL_FRONT );
 		//Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
 		//skyBoxShader->Use( );
 		//{
-		//	skyBoxShader->SetUniform( "view", mGraphicsSceneCamera.GetView( ) );
-		//	skyBoxShader->SetUniform( "projection", mGraphicsSceneCamera.GetProjection( ) );
+		//	skyBoxShader->SetUniform( "view", mGraphicsScene.GetActiveCamera()->GetView( ) );
+		//	skyBoxShader->SetUniform( "projection", mGraphicsScene.GetActiveCamera()->GetProjection( ) );
 		//	skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
 
 		//	// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
@@ -893,6 +891,7 @@ namespace Enjon
 		mPreviousViewProjectionMatrix = camera->GetViewProjection( );
 
 		glEnable( GL_DEPTH_TEST );
+		glDepthFunc( GL_LEQUAL );
 		glCullFace( GL_BACK );
 	}
 
@@ -1265,7 +1264,7 @@ namespace Enjon
 	//======================================================================================================
 
 	void GraphicsSubsystem::MotionBlurPass( FrameBuffer* inputTarget )
-	{ 
+	{
 		Camera* camera = mGraphicsScene.GetActiveCamera( );
 		Vector<Renderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
 		GLSLProgram* motionBlurProgram = ShaderManager::Get( "MotionBlur" );
@@ -1279,7 +1278,7 @@ namespace Enjon
 				motionBlurProgram->BindTexture( "uVelocityMap", mGbuffer->GetTexture( GBufferTextureType::VELOCITY ), 1 );
 
 				//f32 velocityScale = Engine::GetInstance( )->GetWorldTime( ).GetFPS( ) / 60.0f;
-				motionBlurProgram->SetUniform( "uVelocityScale", mMotionBlurVelocityScale ); 
+				motionBlurProgram->SetUniform( "uVelocityScale", mMotionBlurVelocityScale );
 				motionBlurProgram->SetUniform( "uEnabled", (bool)mMotionBlurEnabled );
 
 				// Render
@@ -1289,7 +1288,7 @@ namespace Enjon
 		}
 
 		// Render non depth tested renderables
-		glClear( GL_DEPTH_BUFFER_BIT ); 
+		glClear( GL_DEPTH_BUFFER_BIT );
 
 		// None depth tested renderables
 		if ( !nonDepthTestedRenderables.empty( ) )
@@ -1305,7 +1304,7 @@ namespace Enjon
 				// Grab shader from graph
 				if ( sg )
 				{
-					Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
+					Enjon::Shader* sgShader = const_cast<Enjon::Shader*>( sg->GetShader( ShaderPassType::StaticGeom ) );
 
 					if ( material != curMaterial )
 					{
@@ -1324,13 +1323,13 @@ namespace Enjon
 					sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
 					renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
 				}
-			} 
+			}
 		}
 		mMotionBlurTarget->Unbind( );
 
 		// Simply to write object ID
 		mGbuffer->Bind( BindType::WRITE, false );
-		{ 
+		{
 			glClear( GL_DEPTH_BUFFER_BIT );
 
 			// None depth tested renderables
@@ -1347,7 +1346,7 @@ namespace Enjon
 					if ( sg )
 					{
 						// Grab shader from graph
-						Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
+						Enjon::Shader* sgShader = const_cast<Enjon::Shader*>( sg->GetShader( ShaderPassType::StaticGeom ) );
 
 						if ( material != curMaterial )
 						{
@@ -1356,20 +1355,20 @@ namespace Enjon
 
 							sgShader->Use( );
 							sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
-							sgShader->SetUniform( "uWorldTime", Engine::GetInstance()->GetWorldTime().mTotalTime );
+							sgShader->SetUniform( "uWorldTime", Engine::GetInstance( )->GetWorldTime( ).mTotalTime );
 							sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
 							sgShader->SetUniform( "uPreviousViewProjection", camera->GetViewProjection( ) );
 							material->Bind( sgShader );
-						} 
+						}
 
 						// Render object
 						sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
 						renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
-					} 
+					}
 				}
 			}
 		}
-		mGbuffer->Unbind( );
+		mGbuffer->Unbind( ); 
 	}
 
 	//======================================================================================================

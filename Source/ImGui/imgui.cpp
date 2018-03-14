@@ -6712,6 +6712,9 @@ const char* ImGui::GetStyleColorName(ImGuiCol idx)
     case ImGuiCol_DragDropTarget: return "DragDropTarget";
     case ImGuiCol_NavHighlight: return "NavHighlight";
     case ImGuiCol_NavWindowingHighlight: return "NavWindowingHighlight"; 
+	case ImGuiCol_Selectable: return "Selectable";
+	case ImGuiCol_SelectableHovered: return "SelectableHovered";
+	case ImGuiCol_SelectableActive: return "SelectableActive";
     }
     IM_ASSERT(0);
     return "Unknown";
@@ -10847,7 +10850,11 @@ bool ImGui::Selectable(const char* label, bool selected, ImGuiSelectableFlags fl
     // Render
     if (hovered || selected)
     {
-        const ImU32 col = GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
+        ImU32 col = GetColorU32((held && hovered) ? ImGuiCol_SelectableActive : hovered ? ImGuiCol_SelectableHovered : ImGuiCol_Selectable);
+		if ( selected )
+		{
+			col = GetColorU32( ImGuiCol_SelectableActive );
+		}
         RenderFrame(bb_with_spacing.Min, bb_with_spacing.Max, col, false, 0.0f);
         RenderNavHighlight(bb_with_spacing, id, ImGuiNavHighlightFlags_TypeThin | ImGuiNavHighlightFlags_NoRounding);
     }

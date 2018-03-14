@@ -801,6 +801,9 @@ enum ImGuiCol_
     ImGuiCol_DragDropTarget,
     ImGuiCol_NavHighlight,          // gamepad/keyboard: current highlighted item 
     ImGuiCol_NavWindowingHighlight, // gamepad/keyboard: when holding NavMenu to focus/move/resize windows
+	ImGuiCol_SelectableHovered,
+	ImGuiCol_SelectableActive,
+	ImGuiCol_Selectable,
     ImGuiCol_COUNT
 
     // Obsolete names (will be removed)

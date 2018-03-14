@@ -286,8 +286,8 @@ namespace ImGui
 				ImVec2 min_size1 = dock.children[1]->getMinSize();
 				if (dock.isHorizontal())
 				{
-					SetCursorScreenPos( ImVec2( GetCursorScreenPos( ).x - 2.0f, GetCursorScreenPos( ).y ) );
-					InvisibleButton("split", ImVec2(splitSize, dock.size.y));
+					SetCursorScreenPos( ImVec2( GetCursorScreenPos( ).x - 2.2f, GetCursorScreenPos( ).y + 5.0f ) );
+					InvisibleButton("split", ImVec2(splitSize, dock.size.y - 5.0f));
 					if (dock.status == Status_Dragged) dsize.x = io.MouseDelta.x;
 					dsize.x = -ImMin(-dsize.x, dock.children[0]->size.x - min_size0.x);
 					dsize.x = ImMin(dsize.x, dock.children[1]->size.x - min_size1.x);
@@ -311,8 +311,7 @@ namespace ImGui
 					dock.status = Status_Dragged;
 				} 
 
-				draw_list->AddRectFilled(
-					GetItemRectMin(), GetItemRectMax(), IsItemHovered() ? color_hovered : color);
+				draw_list->AddRectFilled( GetItemRectMin(), GetItemRectMax(), IsItemHovered() ? color_hovered : color);
 				PopID(); 
 			}
 		}
@@ -399,7 +398,7 @@ namespace ImGui
 				case Slot_Top: return ImRect(rect.Min, rect.Min + ImVec2(rect.Max.x, half_size.y));
 				case Slot_Right: return ImRect(rect.Min + ImVec2(half_size.x, 0), rect.Max);
 				case Slot_Bottom: return ImRect(rect.Min + ImVec2(0, half_size.y), rect.Max);
-				case Slot_Left: return ImRect(rect.Min, rect.Min + ImVec2(half_size.x, rect.Max.y));
+				case Slot_Left: return ImRect(rect.Min, rect.Min + ImVec2(half_size.x, rect.GetSize().y));
 			}
 		}
 
@@ -426,17 +425,17 @@ namespace ImGui
 			switch (dock_slot)
 			{
 				case Slot_Top:
-					return ImRect(ImVec2(center.x - 20, parent_rect.Min.y + 10),
-						ImVec2(center.x + 20, parent_rect.Min.y + 30));
+					return ImRect(ImVec2(center.x - 10, parent_rect.Min.y + 10),
+						ImVec2(center.x + 10, parent_rect.Min.y + 10));
 				case Slot_Left:
-					return ImRect(ImVec2(parent_rect.Min.x + 10, center.y - 20),
-						ImVec2(parent_rect.Min.x + 30, center.y + 20));
+					return ImRect(ImVec2(parent_rect.Min.x + 10, center.y - 10),
+						ImVec2(parent_rect.Min.x + 10, center.y + 10));
 				case Slot_Bottom:
-					return ImRect(ImVec2(center.x - 20, parent_rect.Max.y - 30),
-						ImVec2(center.x + 20, parent_rect.Max.y - 10));
+					return ImRect(ImVec2(center.x - 10, parent_rect.Max.y - 10),
+						ImVec2(center.x + 10, parent_rect.Max.y - 10));
 				case Slot_Right:
-					return ImRect(ImVec2(parent_rect.Max.x - 30, center.y - 20),
-						ImVec2(parent_rect.Max.x - 10, center.y + 20));
+					return ImRect(ImVec2(parent_rect.Max.x - 10, center.y - 10),
+						ImVec2(parent_rect.Max.x - 10, center.y + 10));
 				default: ASSERT(false);
 			}
 			IM_ASSERT(false);
@@ -461,16 +460,40 @@ namespace ImGui
 		bool dockSlots(Dock& dock, Dock* dest_dock, const ImRect& rect, bool on_border)
 		{
 			ImDrawList* canvas = GetWindowDrawList();
-			ImU32 color = GetColorU32(ImGuiCol_Button);
-			ImU32 color_hovered = GetColorU32(ImGuiCol_ButtonHovered);
+			ImU32 color = GetColorU32(ImGuiCol_HeaderActive);
+			ImU32 color_hovered = GetColorU32(ImGuiCol_HeaderHovered);
 			ImVec2 mouse_pos = GetIO().MousePos;
 			for (int i = 0; i < (on_border ? 4 : 5); ++i)
 			{
 				ImRect r =
 					on_border ? getSlotRectOnBorder(rect, (DockSlotType)i) : getSlotRect(rect, (DockSlotType)i);
 				bool hovered = r.Contains(mouse_pos);
+
+				float borderSize = 3.0f;
+				canvas->AddRectFilled(r.Min - ImVec2(borderSize, borderSize), r.Max + ImVec2(borderSize, borderSize), hovered ? ImColor(0.3f, 0.3f, 0.3f, 0.3f) : ImColor(0.1f, 0.1f, 0.1f, 0.8f), 2.0f);
+				canvas->AddRect(r.Min, r.Max, hovered ? color_hovered : color);
+				canvas->AddRectFilled(r.Min, r.Min + ImVec2(r.GetSize().x, 3.0f), hovered ? color_hovered : color);
+
+				switch ( DockSlotType( i ) )
+				{
+					case Slot_Top:
+					{
+
+					} break;
+					case Slot_Left:
+					{
+
+					} break;
+					case Slot_Bottom:
+					{
+
+					} break;
+					case Slot_Right:
+					{
+
+					} break;
+				}
 				
-				canvas->AddRectFilled(r.Min, r.Max, hovered ? color_hovered : color);
 				if (!hovered) continue;
 
 				if (!IsMouseDown(0))
@@ -479,7 +502,9 @@ namespace ImGui
 					return true;
 				}
 				ImRect docked_rect = getDockedRect(rect, (DockSlotType)i);
-				canvas->AddRectFilled(docked_rect.Min, docked_rect.Max, GetColorU32(ImGuiCol_Button));
+				ImColor rectColor = ImColor( GetColorU32( ImGuiCol_HeaderHovered ) );
+				rectColor.Value.w = 0.3f; 
+				canvas->AddRectFilled(docked_rect.Min, docked_rect.Max, rectColor);
 			}
 			return false;
 		}

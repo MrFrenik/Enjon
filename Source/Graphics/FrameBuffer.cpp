@@ -86,7 +86,10 @@ namespace Enjon
 				glPushAttrib(GL_VIEWPORT_BIT);
 				glViewport(0, 0, mWidth, mHeight);
 
-				if (clear) glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				if ( clear )
+				{
+					glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+				}
 
 				glActiveTextureARB(GL_TEXTURE0_ARB);
 				glEnable(GL_TEXTURE_2D);
