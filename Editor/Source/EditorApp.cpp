@@ -1,5 +1,9 @@
+// @file EditorApp.cpp
+// Copyright 2016-2018 John Jackson. All Rights Reserved.
+
 #include "EditorApp.h"
 #include "EditorSceneView.h"
+#include "EditorAssetBrowserView.h"
 
 #include <Engine.h>
 #include <Asset/AssetManager.h>
@@ -43,14 +47,14 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-//Enjon::String mProjectsDir = "W:/Projects/";
-//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -1169,6 +1173,7 @@ namespace Enjon
 
 		// Add all necessary views into editor widget manager
 		mEditorWidgetManager.AddView( new EditorSceneView( this ) );
+		mEditorWidgetManager.AddView( new EditorAssetBrowserView( this ) );
 
 		// Initialize transform widget
 		mTransformWidget.Initialize( this ); 
@@ -1384,6 +1389,7 @@ namespace Enjon
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Inspector", "World Outliner", ImGui::DockSlotType::Slot_Right, 0.7f ) );
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Inspector", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene Selection", "Create Project", ImGui::DockSlotType::Slot_Tab, 0.6f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Asset Browser", "Camera", ImGui::DockSlotType::Slot_Tab, 0.6f ) );
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -1403,6 +1409,11 @@ namespace Enjon
 		{
 			LoadProjectView( );
 		}
+	}
+	
+	Project* EditorApp::GetProject( )
+	{
+		return &mProject;
 	}
 
 	Enjon::Result EditorApp::Update( f32 dt )

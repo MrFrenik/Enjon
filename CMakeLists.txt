@@ -42,8 +42,7 @@ if (NOT IS_DIRECTORY ${ENJON_GENERATED_DIR})
 	file(MAKE_DIRECTORY ${dir})
 endif()
 
-if ( EXISTS ${ENJON_GENERATED_DIR}/Enjon_Generated.cpp )
-else()
+if ( NOT EXISTS ${ENJON_GENERATED_DIR}/Enjon_Generated.cpp )
 	file(WRITE ${ENJON_GENERATED_DIR}/Enjon_Generated.cpp "// Enjon_Generated.cpp\n") 
 endif()
 
@@ -298,7 +297,7 @@ foreach( file ${REFLECTION_INCLUDES} )
 endforeach(file) 
 
 add_custom_command(TARGET Enjon PRE_BUILD
-	COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe ARGS --target-path ${ENJON_DIR}/
+	COMMAND call ${ENJON_RELEASE_DIR}/Reflection.exe ARGS --target-path ${ENJON_DIR}/
 	)
 
 

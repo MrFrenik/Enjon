@@ -1,3 +1,6 @@
+// File: EditorSceneView.cpp
+// Copyright 2016-2018 John Jackson. All Rights Reserved.
+
 #include "EditorSceneView.h"
 #include "EditorApp.h"
 

@@ -186,6 +186,8 @@ namespace Enjon
 
 			String GetProjectEnjonDefinesTemplate( ) const;
 
+			Project* GetProject( );
+
 
 		public:
 			Vec4 mRectColor = Vec4( 0.8f, 0.3f, 0.1f, 1.0f );

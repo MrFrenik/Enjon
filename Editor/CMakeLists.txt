@@ -55,7 +55,6 @@ if (NOT IS_DIRECTORY ${TARGET_GENERATED_DIR})
 endif()
 
 if ( NOT EXISTS ${TARGET_GENERATED_DIR}/${TARGET_NAME}_Generated.cpp )
-else()
 	file(WRITE ${TARGET_GENERATED_DIR}/${TARGET_NAME}_Generated.cpp "// Target_Generated.cpp\n") 
 endif()
 
@@ -142,5 +141,5 @@ endforeach(file)
 # Need to get this working with projects
 add_custom_command(
 	TARGET ${TARGET_NAME} PRE_BUILD
-	COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe ARGS --target-path ${TARGET_DIR}/
+	COMMAND call ${ENJON_RELEASE_DIR}/Reflection.exe ARGS --target-path ${TARGET_DIR}/
 )
