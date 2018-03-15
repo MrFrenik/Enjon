@@ -6,6 +6,7 @@
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_dock.h"
 
+#include "Math/Vec2.h"
 #include "System/Types.h"
 #include "Subsystem.h"
 #include "Defines.h"
@@ -98,7 +99,17 @@ namespace Enjon
 			ImFont* GetFont( const Enjon::String& name );
 			ImGuiContext* GetContext( );
 
+		public:
+
+			/**
+			* @brief
+			*/
 			void Text( const String& text );
+
+			/**
+			* @brief
+			*/
+			bool DragFloat2( const String& label, Vec2* vec, f32 speed = 1.0f, f32 min = 0.0f, f32 max = 0.0f );
 
 		protected:
 			void BindContext( ); 

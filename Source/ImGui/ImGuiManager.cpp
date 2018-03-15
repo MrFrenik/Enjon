@@ -1123,4 +1123,11 @@ namespace Enjon
 	}
 
 	//=====================================================================
+
+	bool ImGuiManager::DragFloat2( const String& label, Vec2* vec, f32 speed, f32 min, f32 max )
+	{
+		return ImGui::DragFloat2( label.c_str( ), (float*)vec, speed, min, max );
+	}
+
+	//=====================================================================
 }
