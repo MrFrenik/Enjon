@@ -33,19 +33,22 @@ namespace Enjon
 			// Debug dump the entity ( Probably shouldn't do this and should tailor it more... )
 			Entity* ent = mApp->GetSelectedEntity( ).Get( );
 
+			// Get ImGuiManager subsystem
+			ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
 			// New component dialogue
-			ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_16" ) );
+			ImGui::PushFont( igm->GetFont( "WeblySleek_16" ) );
 			if ( ImGui::BeginCombo( "##ADDCOMPONENT", "+ Add Component..." ) )
 			{
 				// Label for scripting type of component class
-				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_10" ) );
+				ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
 				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
 				ImGui::Text( "Scripting" );
 				ImGui::PopStyleColor( );
 				ImGui::PopFont( );
 
 				// Add new component pop up
-				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
+				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
 				if ( ImGui::Selectable( "\tCreate New Component..." ) )
 				{
 					mApp->OpenNewComponentDialogue( );
@@ -60,13 +63,13 @@ namespace Enjon
 				auto compMetaClsList = entities->GetComponentMetaClassList( );
 
 				// Label for scripting type of component class
-				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_10" ) );
+				ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
 				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
 				ImGui::Text( "Custom" );
 				ImGui::PopStyleColor( );
 				ImGui::PopFont( );
 
-				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
+				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
 				for ( auto& cls : compMetaClsList )
 				{
 					if ( !ent->HasComponent( cls ) )
@@ -89,8 +92,8 @@ namespace Enjon
 				// Transform information
 				if ( ImGui::CollapsingHeader( "Transform" ) )
 				{
-					ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
-					ImGuiManager::DebugDumpProperty( ent, ent->Class( )->GetPropertyByName( "mLocalTransform" ) ); 
+					ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
+					igm->DebugDumpProperty( ent, ent->Class( )->GetPropertyByName( "mLocalTransform" ) ); 
 					ImGui::PopFont( );
 				} 
 
@@ -105,8 +108,8 @@ namespace Enjon
 							shapeType = (s32)c->Cast<RigidBodyComponent>( )->GetShapeType( );
 						}
 
-						ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
-						ImGuiManager::DebugDumpObject( c ); 
+						ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
+						igm->DebugDumpObject( c ); 
 						ImGui::PopFont( );
 
 						// Shape type changed

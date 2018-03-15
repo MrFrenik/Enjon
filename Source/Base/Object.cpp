@@ -4,7 +4,9 @@
 #include "Serialize/ObjectArchiver.h"
 #include "Serialize/AssetArchiver.h"
 #include "Entity/EntityManager.h"
+#include "ImGui/ImGuiManager.h"
 #include "Engine.h"
+#include "SubsystemCatalog.h"
 
 namespace Enjon
 { 
@@ -106,6 +108,11 @@ namespace Enjon
 	}
 
 	//======================================================================================
+
+	Result Object::OnEditorUI( ) const
+	{
+		return Result::INCOMPLETE;
+	}
 } 
 
 

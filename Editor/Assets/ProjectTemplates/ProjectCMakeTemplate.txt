@@ -183,5 +183,5 @@ add_custom_command(
 # Need to get this working with projects
 add_custom_command(
 	TARGET ${TARGET_NAME} PRE_BUILD
-	COMMAND call ${ENJON_RELDEBUGINFO_DIR}/Reflection.exe ARGS --target-path ${TARGET_DIR}/
+	COMMAND call ${ENJON_RELEASE_DIR}/Reflection.exe ARGS --target-path ${TARGET_DIR}/
 )

@@ -52,6 +52,7 @@
 #include <Bullet/btBulletDynamicsCommon.h> 
 
 #include <Base/MetaClassRegistry.h>
+#include <ImGui/imgui.h>
 
 using namespace Enjon;
 
@@ -1025,33 +1026,35 @@ Enjon::Result Game::Initialize()
 			ImGui::Text( "32 bit prop size: %d", sizeof( Enjon::Property<f32> ) );
 			ImGui::Text( "32 bit signal size: %d", sizeof( Enjon::Signal<f32> ) ); 
 
+			ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
 			if ( ImGui::CollapsingHeader( "Test Object" ) )
 			{
-				Enjon::ImGuiManager::DebugDumpObject( &mTestObject );
+				igm->DebugDumpObject( &mTestObject );
 			}
 
 			if ( ImGui::CollapsingHeader( "Scene" ) )
 			{
-				Enjon::ImGuiManager::DebugDumpObject( mGfx->GetGraphicsScene( ) );
+				igm->DebugDumpObject( mGfx->GetGraphicsScene( ) );
 			}
 
 			if ( ImGui::CollapsingHeader( "Sun" ) )
 			{
-				Enjon::ImGuiManager::DebugDumpObject( mSun ); 
+				igm->DebugDumpObject( mSun ); 
 			}
 
 			// Testing meta functions
 			if ( ImGui::CollapsingHeader( "Entity" ) )
 			{ 
 				const Enjon::Material* gfxMat = mGun.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetMaterial( ).Get();
-				Enjon::ImGuiManager::DebugDumpObject( gfxMat ); 
+				igm->DebugDumpObject( gfxMat ); 
 			} 
 
 			if ( ImGui::CollapsingHeader( "PointLight" ) )
 			{
 				auto plc = mGun.Get( )->GetComponent< Enjon::PointLightComponent >( );
 				auto light = plc->GetLight( );
-				Enjon::ImGuiManager::DebugDumpObject( light );
+				igm->DebugDumpObject( light );
 
 				Enjon::MetaClass* cls = const_cast< Enjon::MetaClass* > ( light->Class( ) ); 
 				Enjon::MetaFunction* getWPFunc = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "GetPosition" ) );
@@ -1082,7 +1085,7 @@ Enjon::Result Game::Initialize()
 
 						if ( ImGui::TreeNode( tex->GetName( ).c_str( ) ) )
 						{
-							Enjon::ImGuiManager::DebugDumpObject( tex ); 
+							igm->DebugDumpObject( tex ); 
 
 							Enjon::MetaFunction* func = const_cast< Enjon::MetaFunction* > ( cls->GetFunction( "GetWidth" ) );
 							if ( func )
@@ -1103,13 +1106,13 @@ Enjon::Result Game::Initialize()
 				Enjon::Material* mat = mGunMat;
 				if ( mat )
 				{
-					Enjon::ImGuiManager::DebugDumpObject( mat );
+					igm->DebugDumpObject( mat );
 				} 
 			}
 			if ( ImGui::CollapsingHeader( "GraphicsComponent" ) )
 			{
 				auto gc = mGun.Get( )->GetComponent< Enjon::GraphicsComponent >( );
-				Enjon::ImGuiManager::DebugDumpObject( gc ); 
+				igm->DebugDumpObject( gc ); 
 			} 
 
 			// Show texture
@@ -1132,11 +1135,13 @@ Enjon::Result Game::Initialize()
 		ImGui::EndDock();
 	};
 
+	ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
 	// Set up way to dock these initially at start up of all systems
-	Enjon::ImGuiManager::RegisterWindow(showEntities);
+	igm->RegisterWindow(showEntities);
 
 	// Set up docking layout
-	Enjon::ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Entities", "Game View", ImGui::DockSlotType::Slot_Left, 0.1f));
+	igm->RegisterDockingLayout(GUIDockingLayout("Entities", "Game View", GUIDockSlotType::Slot_Left, 0.1f));
 
 	//------------------------------------------------------
 	// Physics	

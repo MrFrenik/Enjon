@@ -15,13 +15,15 @@ namespace Enjon
 	EditorView::EditorView( EditorApp* app, const String& name, const u32& flags )
 		: mApp( app ), mName( name ), mViewFlags( flags )
 	{
-		ImGuiManager::RegisterMenuOption( "View", [ & ] ( )
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
+		igm->RegisterMenuOption( "View", [ & ] ( )
 		{
 			ImGui::MenuItem( fmt::format( "{}##options", mName ).c_str( ), NULL, &mViewEnabled );
 		});
 
 		// Register individual window with docking system
-		Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
+		igm->RegisterWindow( [ & ] ( )
 		{
 			// Docking windows
 			if ( ImGui::BeginDock( GetViewName().c_str(), &mViewEnabled, GetViewFlags() ) )

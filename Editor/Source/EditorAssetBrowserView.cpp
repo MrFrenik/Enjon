@@ -162,6 +162,9 @@ namespace Enjon
 		// Get input system
 		Input* input = EngineSubsystem( Input ); 
 
+		// Get ImGuiManager subsystem
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
 		// Set position of menu
 		Vec2 menuPos = menu->GetPosition( ); 
 		Vec2 menuSize = menu->GetSize( ); 
@@ -199,7 +202,7 @@ namespace Enjon
 
 			// Folder option group
 			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( ImGui::GetStyle( ).Colors[ImGuiCol_TextDisabled] ) );
-			ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_10" ) );
+			ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
 			{
 				ImGui::Text( "Folder" );
 			}

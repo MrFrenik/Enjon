@@ -6,7 +6,7 @@
 
 enum MetaPropertyEnumDefines
 {
-	UIMin, 
+	UIMin,
 	UIMax,
 	Delegates,
 	Accessor,
@@ -94,6 +94,7 @@ enum MetaPropertyEnumDefines
 			if ( app )\
 			{\
 				Enjon::Engine::SetInstance( engine );\
+				Enjon::Engine::BindImGuiContext();\
 				app->BindApplicationMetaClasses();\
 				return app;\
 			}\

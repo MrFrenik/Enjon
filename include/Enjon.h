@@ -48,6 +48,8 @@
 
 #include "IO/InputManager.h"
 
+#include "ImGui/ImGuiManager.h"
+
 #include "Asset/AssetManager.h"
 
 #include "Physics/PhysicsSubsystem.h" 

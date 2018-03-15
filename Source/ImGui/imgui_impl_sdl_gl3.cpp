@@ -337,6 +337,11 @@ void    ImGui_ImplSdlGL3_InvalidateDeviceObjects( )
 	}
 }
 
+ImGuiContext* ImGui_ImplSdlGL3_GetContext( )
+{
+	return mCtx;
+}
+
 bool    ImGui_ImplSdlGL3_Init( SDL_Window* window )
 {
 	mCtx = ImGui::CreateContext( );

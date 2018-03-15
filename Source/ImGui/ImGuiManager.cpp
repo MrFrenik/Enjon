@@ -1,5 +1,4 @@
-#include "ImGui/ImGuiManager.h"
-#include "ImGui/imgui_impl_sdl_gl3.h"
+#include "ImGui/ImGuiManager.h" 
 #include "Graphics/Camera.h"
 #include "Graphics/Window.h"
 #include "Asset/Asset.h"
@@ -23,13 +22,17 @@
 
 namespace Enjon
 {
-	std::vector<std::function<void()>> ImGuiManager::mGuiFuncs;
-	std::vector<std::function<void()>> ImGuiManager::mWindows;
-	std::unordered_map<std::string, std::vector<std::function<void()>>> ImGuiManager::mMainMenuOptions;
-	std::vector<ImGui::DockingLayout> ImGuiManager::mDockingLayouts;
-	HashMap< String, ImFont* > ImGuiManager::mFonts;
+	//=============================================================
 
-	//---------------------------------------------------
+	Result ImGuiManager::Initialize( )
+	{
+		return Result::SUCCESS;
+	}
+
+	void ImGuiManager::Update( const f32 dT )
+	{ 
+	} 
+
 	void ImGuiManager::Init(SDL_Window* window)
 	{
 		assert(window != nullptr);
@@ -41,14 +44,14 @@ namespace Enjon
 		ImGuiStyles();
 
 		// Initialize default windows/menus
-		InitializeDefaults();
+		InitializeDefaults(); 
+
+		// Cache context
+		mContext = ImGui_ImplSdlGL3_GetContext( );
 	}
 
-	void ImGuiManager::ShutDown()
-	{
-		// Save dock
-		// ImGui::SaveDock();
-
+	Result ImGuiManager::Shutdown()
+	{ 
 		// Clear all functions and docks
 		mGuiFuncs.clear( );
 		mWindows.clear( );
@@ -57,6 +60,8 @@ namespace Enjon
 
 		// Shut down 
 		ImGui_ImplSdlGL3_Shutdown();
+
+		return Result::SUCCESS;
 	}
 
 	//---------------------------------------------------
@@ -646,12 +651,24 @@ namespace Enjon
 
 			} break;
 		}
+	} 
+
+	ImGuiContext* ImGuiManager::GetContext( )
+	{
+		return mContext;
 	}
 
-	//---------------------------------------------------
+	void ImGuiManager::InspectObject( const Object* object )
+	{ 
+		Result res = object->OnEditorUI( );
+		if ( res == Result::INCOMPLETE )
+		{
+			DebugDumpObject( object );
+		}
+	}
 			
 	void ImGuiManager::DebugDumpObject( const Enjon::Object* object )
-	{
+	{ 
 		if ( !object )
 		{
 			return;
@@ -887,13 +904,22 @@ namespace Enjon
 	    }
 	}
 
-	//---------------------------------------------------
-	void ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout& layout)
+	//============================================================================================
+
+	void ImGuiManager::ProcessEvent( SDL_Event* event )
+	{
+		ImGui_ImplSdlGL3_ProcessEvent( event ); 
+	} 
+
+	//============================================================================================
+
+	void ImGuiManager::RegisterDockingLayout(const GUIDockingLayout& layout)
 	{
 		mDockingLayouts.push_back(layout);
 	}
 
-	//---------------------------------------------------
+	//============================================================================================
+
 	void ImGuiManager::LateInit(SDL_Window* window)
 	{
 		Render(window);
@@ -901,14 +927,15 @@ namespace Enjon
 		// Run through docking layouts here
     	for (auto& dl : mDockingLayouts)
     	{
-    		ImGui::DockWith(dl.mChild, dl.mParent, dl.mSlotType, dl.mWeight);
+    		ImGui::DockWith(dl.mChild, dl.mParent, (ImGui::DockSlotType)(u32)dl.mSlotType, dl.mWeight);
     	}
 
     	// Clear docking layouts after to prevent from running through them again
     	mDockingLayouts.clear();
 	}
 
-	//---------------------------------------------------
+	//============================================================================================
+
 	s32 ImGuiManager::MainMenu()
 	{
 		s32 menuHeight = 0;
@@ -962,6 +989,8 @@ namespace Enjon
 		return menuHeight;
 	} 
 
+	//============================================================================================
+
 	ImFont* ImGuiManager::GetFont( const String& name )
 	{
 		auto query = mFonts.find( name );
@@ -973,7 +1002,8 @@ namespace Enjon
 		return nullptr;
 	}
 
-	//------------------------------------------------------------------------------
+	//============================================================================================
+
 	void ImGuiManager::ImGuiStyles()
 	{
 		String rootPath = Engine::GetInstance()->GetConfig( ).GetRoot( );
@@ -1067,7 +1097,8 @@ namespace Enjon
 		// ImGui::LoadDock();
 	}
 
-	//--------------------------------------------------
+	//=====================================================================
+
 	void ImGuiManager::InitializeDefaults()
 	{
 		mMainMenuOptions["File"].push_back([&]()
@@ -1076,4 +1107,20 @@ namespace Enjon
 	    	ImGui::MenuItem("Save##file", NULL, &on);
 		});
 	}
+
+	//=====================================================================
+
+	void ImGuiManager::BindContext( )
+	{
+		ImGui::SetCurrentContext( mContext );
+	}
+
+	//=====================================================================
+
+	void ImGuiManager::Text( const String& text )
+	{
+		ImGui::Text( text.c_str( ) );
+	}
+
+	//=====================================================================
 }

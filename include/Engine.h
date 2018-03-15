@@ -20,6 +20,7 @@ namespace Enjon
 	class AssetManager; 
 	class Application; 
 	class MetaClassRegistry;
+	class ImGuiManager;
 	class EntityManager;
 	class SceneManager;
 	class MetaClass;
@@ -176,6 +177,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			static void BindImGuiContext( );
+
+			/**
+			* @brief
+			*/
 			WorldTime GetWorldTime( ) const;
 
 			/**
@@ -221,7 +227,7 @@ namespace Enjon
 			* @brief Processes and updates input system.
 			* @return b8 - Returns true if success and false if failure.
 			*/
-			Enjon::Result ProcessInput(Input* input, float dt);
+			Enjon::Result ProcessInput(Input* input, float dt); 
 
 		private:
 
@@ -240,6 +246,7 @@ namespace Enjon
 			EntityManager*		mEntities			= nullptr;
 			PhysicsSubsystem*	mPhysics			= nullptr;
 			SceneManager*		mSceneManager		= nullptr;
+			ImGuiManager*		mImGuiManager		= nullptr;
 
 			// Engine configuration settings
 			EngineConfig mConfig;

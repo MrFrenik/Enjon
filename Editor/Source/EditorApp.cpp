@@ -48,14 +48,14 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-//Enjon::String mProjectsDir = "W:/Projects/";
-//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -280,24 +280,26 @@ namespace Enjon
 
 	void EditorApp::InspectorView( bool* enabled )
 	{
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
 		if ( mSelectedEntity )
 		{
 			// Debug dump the entity ( Probably shouldn't do this and should tailor it more... )
 			Entity* ent = mSelectedEntity.Get( ); 
 
 			// New component dialogue
-			ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_16" ) );
+			ImGui::PushFont( igm->GetFont( "WeblySleek_16" ) );
 			if ( ImGui::BeginCombo( "##ADDCOMPONENT", "+ Add Component..." ) )
 			{
 				// Label for scripting type of component class
-				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_10" ) );
+				ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
 				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
 				ImGui::Text( "Scripting" );
 				ImGui::PopStyleColor( );
 				ImGui::PopFont( );
 
 				// Add new component pop up
-				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
+				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
 				if ( ImGui::Selectable( "\tCreate New Component..." ) )
 				{
 					mNewComponentPopupDialogue = true;
@@ -312,13 +314,13 @@ namespace Enjon
 				auto compMetaClsList = entities->GetComponentMetaClassList( );
 
 				// Label for scripting type of component class
-				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_10" ) );
+				ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
 				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
 				ImGui::Text( "Custom" );
 				ImGui::PopStyleColor( );
 				ImGui::PopFont( );
 
-				ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
+				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
 				for ( auto& cls : compMetaClsList )
 				{
 					if ( !ent->HasComponent( cls ) )
@@ -348,8 +350,8 @@ namespace Enjon
 				// Transform information
 				if ( ImGui::CollapsingHeader( "Transform" ) )
 				{
-					ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
-					ImGuiManager::DebugDumpProperty( ent, ent->Class( )->GetPropertyByName( "mLocalTransform" ) ); 
+					ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
+					igm->DebugDumpProperty( ent, ent->Class( )->GetPropertyByName( "mLocalTransform" ) ); 
 					ImGui::PopFont( );
 				} 
 
@@ -364,8 +366,9 @@ namespace Enjon
 							shapeType = (s32)c->Cast<RigidBodyComponent>( )->GetShapeType( );
 						}
 
-						ImGui::PushFont( ImGuiManager::GetFont( "WeblySleek_14" ) );
-						ImGuiManager::DebugDumpObject( c ); 
+						ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
+						//ImGuiManager::DebugDumpObject( c ); 
+						igm->InspectObject( c ); 
 						ImGui::PopFont( );
 
 						// Shape type changed
@@ -429,12 +432,13 @@ namespace Enjon
 
 	void EditorApp::CameraOptions( bool* enable )
 	{
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 		const Enjon::Camera* cam = gfx->GetGraphicsSceneCamera( );
 
 		if ( ImGui::TreeNode( "Camera" ) )
 		{
-			Enjon::ImGuiManager::DebugDumpObject( cam ); 
+			igm->DebugDumpObject( cam ); 
 			ImGui::TreePop( );
 		}
 
@@ -448,7 +452,7 @@ namespace Enjon
 		{
 			if ( mProject.GetApplication() )
 			{
-				Enjon::ImGuiManager::DebugDumpObject( mProject.GetApplication() ); 
+				igm->DebugDumpObject( mProject.GetApplication() ); 
 			}
 			ImGui::TreePop( );
 		} 
@@ -1203,13 +1207,15 @@ namespace Enjon
 		// Add all necessary views into editor widget manager
 		mEditorWidgetManager.AddView( new EditorSceneView( this ) );
 		mEditorWidgetManager.AddView( new EditorAssetBrowserView( this ) );
-		mEditorWidgetManager.AddView( new EditorInspectorView( this ) );
+		//mEditorWidgetManager.AddView( new EditorInspectorView( this ) );
 
 		// Initialize transform widget
 		mTransformWidget.Initialize( this ); 
 
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
 		// Register individual windows
-		Enjon::ImGuiManager::RegisterWindow( [ & ] ( )
+		igm->RegisterWindow( [ & ] ( )
 		{
 			// Docking windows
 			if ( ImGui::BeginDock( "Create Project", &mShowCreateProjectView, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
@@ -1220,7 +1226,7 @@ namespace Enjon
 			ImGui::EndDock( );
 		} );
 
-		Enjon::ImGuiManager::RegisterWindow( [ & ]
+		igm->RegisterWindow( [ & ]
 		{
 			if ( ImGui::BeginDock( "Camera", &mShowCameraOptions ) )
 			{
@@ -1229,7 +1235,7 @@ namespace Enjon
 			ImGui::EndDock( );
 		});
 
-		Enjon::ImGuiManager::RegisterWindow( [ & ]
+		igm->RegisterWindow( [ & ]
 		{
 			if ( ImGui::BeginDock( "Load Resource", &mShowLoadResourceOption ) )
 			{
@@ -1238,7 +1244,7 @@ namespace Enjon
 			ImGui::EndDock( );
 		});
 
-		Enjon::ImGuiManager::RegisterWindow( [ & ]
+		igm->RegisterWindow( [ & ]
 		{
 			if ( ImGui::BeginDock( "World Outliner", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 			{
@@ -1247,7 +1253,7 @@ namespace Enjon
 			ImGui::EndDock( );
 		});
 
-		Enjon::ImGuiManager::RegisterWindow( [ & ]
+		igm->RegisterWindow( [ & ]
 		{
 			if ( ImGui::BeginDock( "Play Options", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 			{
@@ -1256,17 +1262,17 @@ namespace Enjon
 			ImGui::EndDock( );
 		} );
 
-		//Enjon::ImGuiManager::RegisterWindow( [ & ]
-		//{
-		//	if ( ImGui::BeginDock( "Inspector", nullptr, ImGuiWindowFlags_NoScrollbar ) )
-		//	{
-		//		InspectorView( nullptr );
-		//	}
-		//	ImGui::EndDock( );
-		//} );
+		igm->RegisterWindow( [ & ]
+		{
+			if ( ImGui::BeginDock( "Inspector", nullptr, ImGuiWindowFlags_NoScrollbar ) )
+			{
+				InspectorView( nullptr );
+			}
+			ImGui::EndDock( );
+		} );
 
 		static bool sceneSelectionViewOpen = true;
-		Enjon::ImGuiManager::RegisterWindow( [ & ]
+		igm->RegisterWindow( [ & ]
 		{
 			if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
 			{
@@ -1404,22 +1410,22 @@ namespace Enjon
 		{
 			ImGui::MenuItem( "Load Project...##options", NULL, &mLoadProjectPopupDialogue );
 		};
-		ImGuiManager::RegisterMenuOption("File", loadProjectMenuOption);
+		igm->RegisterMenuOption("File", loadProjectMenuOption);
  
 		// Register menu options
-		ImGuiManager::RegisterMenuOption( "Create", createViewOption );
+		igm->RegisterMenuOption( "Create", createViewOption );
 
 		// Register docking layouts 
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
-	    ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Graphics", nullptr, ImGui::DockSlotType::Slot_Bottom, 0.2f));
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Graphics", ImGui::DockSlotType::Slot_Tab, 0.15f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", nullptr, ImGui::DockSlotType::Slot_Right, 0.3f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene", ImGui::DockSlotType::Slot_Top, 0.1f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Scene", ImGui::DockSlotType::Slot_Bottom, 0.2f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Inspector", "World Outliner", ImGui::DockSlotType::Slot_Bottom, 0.7f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Inspector", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene Selection", "Create Project", ImGui::DockSlotType::Slot_Tab, 0.6f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Asset Browser", "Camera", ImGui::DockSlotType::Slot_Tab, 0.6f ) );
+		igm->RegisterDockingLayout( GUIDockingLayout( "Scene", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );
+	    igm->RegisterDockingLayout( GUIDockingLayout( "Graphics", nullptr, GUIDockSlotType::Slot_Bottom, 0.2f));
+		igm->RegisterDockingLayout( GUIDockingLayout( "Load Resource", "Graphics", GUIDockSlotType::Slot_Tab, 0.15f ) );
+		igm->RegisterDockingLayout( GUIDockingLayout( "World Outliner", nullptr, GUIDockSlotType::Slot_Right, 0.3f ) );
+		igm->RegisterDockingLayout( GUIDockingLayout( "Play Options", "Scene", GUIDockSlotType::Slot_Top, 0.1f ) );
+		igm->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Scene", GUIDockSlotType::Slot_Bottom, 0.2f ) );
+		igm->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.7f ) );
+		igm->RegisterDockingLayout( GUIDockingLayout( "Camera", "Inspector", GUIDockSlotType::Slot_Bottom, 0.5f ) );
+		igm->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", "Create Project", GUIDockSlotType::Slot_Tab, 0.6f ) );
+		igm->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Camera", GUIDockSlotType::Slot_Tab, 0.6f ) );
 
 		return Enjon::Result::SUCCESS;
 	}

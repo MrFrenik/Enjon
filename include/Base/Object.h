@@ -1405,6 +1405,8 @@ namespace Enjon
 			*/
 			virtual Result DeserializeLateInit( );
 
+			virtual Result OnEditorUI( ) const;
+
 		private:
 
 			/**

@@ -44,7 +44,7 @@ namespace Enjon
 	Engine::~Engine()
 	{ 
 		// Shutdown imguimanager
-		ImGuiManager::ShutDown( );
+		//ImGuiManager::ShutDown( );
 
 		// Shutdown all subsystems
 		delete( mSubsystemCatalog );
@@ -158,9 +158,12 @@ namespace Enjon
 		Enjon::Object::BindMetaClasses( );
 
 		// Register and bind all application specific meta classes
-		mApp->BindApplicationMetaClasses( );
+		mApp->BindApplicationMetaClasses( ); 
 
-		// Register subsystems with catalog
+		// Register imgui manager and initialize
+		mImGuiManager	= mSubsystemCatalog->Register< ImGuiManager >( false ); 
+
+		// Register remaining subsystems
 		mAssetManager	= mSubsystemCatalog->Register< AssetManager >( false );		// Will do manual initialization of asset management system, since it's project dependent
 		mGraphics		= mSubsystemCatalog->Register< GraphicsSubsystem >( );
 		mInput			= mSubsystemCatalog->Register< Input >( ); 
@@ -170,10 +173,10 @@ namespace Enjon
 
 		// Default setting for assets directory
 		mAssetManager->SetAssetsDirectoryPath( mConfig.GetRoot( ) + "Assets/" );
-		mAssetManager->Initialize( );
+		mAssetManager->Initialize( ); 
 
 		// Initialize imgui manager
-		Enjon::ImGuiManager::Init( mGraphics->GetWindow()->ConstCast< Window >()->GetSDLWindow() ); 
+		mImGuiManager->Init( mGraphics->GetWindow( )->ConstCast< Window >( )->GetSDLWindow( ) );
 
 		// Initialize application if one is registered
 		if ( mApp )
@@ -185,7 +188,7 @@ namespace Enjon
 		 mLimiter.Init( 60.0f );
 
 		// Late init for systems that need it
-		Enjon::ImGuiManager::LateInit( mGraphics->GetWindow()->ConstCast< Window >()->GetSDLWindow() ); 
+		 mImGuiManager->LateInit( mGraphics->GetWindow( )->ConstCast< Window >( )->GetSDLWindow( ) );
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -332,13 +335,13 @@ namespace Enjon
 
 	// TODO(): This belongs in window class
 	Enjon::Result Engine::ProcessInput( Enjon::Input* input, const f32 dt )
-	{
+	{ 
 	    SDL_Event event;
 		Vec2 mouseWheel( 0.0f );
 	   //Will keep looping until there are no more events to process
 	    while ( SDL_PollEvent( &event ) ) 
-	    {
-	    	ImGui_ImplSdlGL3_ProcessEvent( &event ); 
+	    { 
+			mImGuiManager->ProcessEvent( &event );
 
 			switch ( event.type )
 			{
@@ -518,4 +521,13 @@ namespace Enjon
 	
 	//======================================================= 
 
+	void Engine::BindImGuiContext( )
+	{
+		// Grab imguimanager 
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		// Bind the context to this memory
+		igm->BindContext( );
+	}
+	
+	//======================================================= 
 }

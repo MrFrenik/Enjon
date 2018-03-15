@@ -139,12 +139,14 @@ namespace Enjon
 			ImGui::EndDock();
 	 	}; 
 
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
 		// ImGuiManager::Register(graphicsMenuOption);
 		// TODO(John): I HATE the way this looks
-		ImGuiManager::RegisterMenuOption("View", graphicsMenuOption);
-		ImGuiManager::RegisterWindow(showGraphicsViewportFunc);
-		ImGuiManager::RegisterMenuOption("View", stylesMenuOption);
-		ImGuiManager::RegisterWindow(showStylesWindowFunc);
+		igm->RegisterMenuOption("View", graphicsMenuOption);
+		igm->RegisterWindow(showGraphicsViewportFunc);
+		igm->RegisterMenuOption("View", stylesMenuOption);
+		igm->RegisterWindow(showStylesWindowFunc);
 
 		// Set current render texture
 		mCurrentRenderTexture = mFXAATarget->GetTexture();
@@ -1403,6 +1405,8 @@ namespace Enjon
 
 	void GraphicsSubsystem::ImGuiPass()
 	{
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
 		static bool show_test_window = false;
 		static bool show_frame_rate = false;
 		static bool show_graphics_window = true;
@@ -1410,8 +1414,7 @@ namespace Enjon
 		static bool show_game_viewport = true;
 
         // Queue up gui
-        ImGuiManager::Render(mCurrentWindow->GetSDLWindow());
-		 //ImGuiManager::RenderGameUI(&mWindow, mGraphicsSceneCamera.GetView().elements, mGraphicsSceneCamera.GetProjection().elements);
+        igm->Render(mCurrentWindow->GetSDLWindow());
 
         // Flush
         glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);

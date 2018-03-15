@@ -33,6 +33,9 @@ namespace Enjon
 			* @brief Overrides component shutdown method. Gets called when application is stopped.
 			*/
 			virtual void Shutdown( ) override;
+
+		private:
+
 	};
 }
 
