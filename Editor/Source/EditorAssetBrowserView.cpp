@@ -138,6 +138,36 @@ namespace Enjon
 				{
 					mContextMenu.Activate( input->GetMouseCoords() );
 				} 
+
+				/*
+					mTestPopupWindow.SetPosition( input->GetMouseCoords( ) );
+					mTestPopupWindow.Activate( ); 
+
+					GUIWidget::Activate()
+					{
+						// Push state onto imgui manager?
+						ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+						igm->PushWidget( this );
+					}
+
+					GUIWidget::Deactivate()
+					{
+						// Pop state
+						ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+						igm->PopWidget( );
+					}
+
+					ImGuiManager::Update()
+					{
+						// Do all windows, I suppose?
+
+						// Then update widgets?
+						// Not sure how this shit is supposed to go...
+						// Definitely an issue with having rendering/logic so tightly coupled...  
+
+						mWidgets.front()->Update(); // Will completely be out of sync from everything...
+					} 
+				*/
 			}
 
 			if ( !hoveringItem && input->IsKeyPressed(KeyCode::LeftMouseButton ) )

@@ -93,6 +93,8 @@ namespace Enjon
 			String mCurrentDirectory = "";
 			String mRootDirectory = "";
 			String mSelectedPath = "";
+
+			PopUpWindow mTestPopupWindow;
 	};
 }
 

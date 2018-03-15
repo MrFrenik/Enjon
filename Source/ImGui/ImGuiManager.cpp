@@ -1130,4 +1130,39 @@ namespace Enjon
 	}
 
 	//=====================================================================
+
+	GUIWidget::GUIWidget( const String& label )
+		: mLabel( label )
+	{ 
+	}
+
+	//===================================================================== 
+
+	GUIWidget::GUIWidget( const String& label, const Vec2& position, const Vec2& size )
+		: mLabel( label ), mPosition( position ), mSize( size )
+	{ 
+	}
+
+	//===================================================================== 
+
+	Vec2 GUIWidget::GetSize( )
+	{
+		return mSize;
+	}
+
+	//===================================================================== 
+
+	Vec2 GUIWidget::GetPosition( )
+	{ 
+		return mPosition;
+	}
+
+	//===================================================================== 
+
+	PopUpWindow::PopUpWindow( const String& label, const Vec2& position, const Vec2& size )
+		: GUIWidget( label, position, size )
+	{ 
+	}
+
+	//===================================================================== 
 }

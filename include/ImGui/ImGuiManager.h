@@ -42,6 +42,68 @@ namespace Enjon
 		Slot_None
 	};
 
+	class GUIWidget
+	{ 
+		public:
+			/**
+			* @brief
+			*/
+			GUIWidget( ) = default;
+
+			/**
+			* @brief
+			*/
+			GUIWidget( const String& label );
+
+			/**
+			* @brief
+			*/
+			GUIWidget( const String& label, const Vec2& position, const Vec2& size );
+
+			/**
+			* @brief
+			*/
+			virtual ~GUIWidget( ) = default;
+
+			/**
+			* @brief
+			*/
+			Vec2 GetSize( );
+
+			/**
+			* @brief
+			*/
+			Vec2 GetPosition( ); 
+
+		protected: 
+			Vec2 mPosition;
+			Vec2 mSize; 
+			String mLabel;
+	};
+
+	class PopUpWindow : public GUIWidget
+	{ 
+		public:
+
+			/**
+			* @brief
+			*/
+			PopUpWindow( ) = default;
+
+			/**
+			* @brief
+			*/
+			PopUpWindow( const String& label, const Vec2& position, const Vec2& size );
+
+			/**
+			* @brief
+			*/
+			~PopUpWindow( ) = default; 
+
+		protected:
+		private:
+	};
+
 	struct GUIDockingLayout
 	{
 		GUIDockingLayout(const char* child, const char* parent, GUIDockSlotType st, float weight)
@@ -63,6 +125,7 @@ namespace Enjon
 	class ImGuiManager : public Subsystem
 	{
 		friend Engine;
+		friend GUIWidget;
 
 		ENJON_CLASS_BODY( )
 
