@@ -243,22 +243,7 @@ namespace Enjon
 
 	void EditorAssetBrowserView::Initialize( )
 	{ 
-	}
-
-	//=========================================================================
-
-	void EditorAssetBrowserView::CaptureState( )
-	{ 
-		Input* input = EngineSubsystem( Input );
-		EditorWidgetManager* wm = mApp->GetEditorWidgetManager( );
-
-		ImVec2 wp = ImGui::GetWindowPos( );
-		ImVec2 ws = ImGui::GetWindowSize( );
-
-		// Capture hovered state
-		bool isHovered = ImGui::IsMouseHoveringRect( wp, ImVec2( wp.x + ws.x, wp.y + ws.y ) );
-		wm->SetHovered( this, isHovered );
-	}
+	} 
 
 	//=========================================================================
 }

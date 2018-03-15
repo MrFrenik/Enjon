@@ -4,6 +4,7 @@
 #include "EditorApp.h"
 #include "EditorSceneView.h"
 #include "EditorAssetBrowserView.h"
+#include "EditorInspectorView.h"
 
 #include <Engine.h>
 #include <Asset/AssetManager.h>
@@ -260,6 +261,21 @@ namespace Enjon
 		ReloadDLL( );
 	}
 
+	//==================================================================================================================
+
+	EntityHandle EditorApp::GetSelectedEntity( )
+	{
+		return mSelectedEntity;
+	}
+
+	//==================================================================================================================
+
+	void EditorApp::OpenNewComponentDialogue( )
+	{
+		mNewComponentPopupDialogue = mNewComponentPopupDialogue = true;;
+		ImGui::OpenPopup( "Add C++ Component##NewComponent" );
+	}
+	
 	//==================================================================================================================
 
 	void EditorApp::InspectorView( bool* enabled )
@@ -1187,6 +1203,7 @@ namespace Enjon
 		// Add all necessary views into editor widget manager
 		mEditorWidgetManager.AddView( new EditorSceneView( this ) );
 		mEditorWidgetManager.AddView( new EditorAssetBrowserView( this ) );
+		mEditorWidgetManager.AddView( new EditorInspectorView( this ) );
 
 		// Initialize transform widget
 		mTransformWidget.Initialize( this ); 
@@ -1239,14 +1256,14 @@ namespace Enjon
 			ImGui::EndDock( );
 		} );
 
-		Enjon::ImGuiManager::RegisterWindow( [ & ]
-		{
-			if ( ImGui::BeginDock( "Inspector", nullptr, ImGuiWindowFlags_NoScrollbar ) )
-			{
-				InspectorView( nullptr );
-			}
-			ImGui::EndDock( );
-		} );
+		//Enjon::ImGuiManager::RegisterWindow( [ & ]
+		//{
+		//	if ( ImGui::BeginDock( "Inspector", nullptr, ImGuiWindowFlags_NoScrollbar ) )
+		//	{
+		//		InspectorView( nullptr );
+		//	}
+		//	ImGui::EndDock( );
+		//} );
 
 		static bool sceneSelectionViewOpen = true;
 		Enjon::ImGuiManager::RegisterWindow( [ & ]

@@ -80,11 +80,6 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual void CaptureState( );
-
-			/**
-			* @brief
-			*/
 			void ContextMenuInteraction( ContextMenu* menu );
 
 			void InitializeCurrentDirectory( Project* project );

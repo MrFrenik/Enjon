@@ -188,6 +188,10 @@ namespace Enjon
 
 			Project* GetProject( );
 
+			EntityHandle GetSelectedEntity( );
+
+			void OpenNewComponentDialogue( ); 
+			void AddComponentPopupView( );
 
 		public:
 			Vec4 mRectColor = Vec4( 0.8f, 0.3f, 0.1f, 1.0f );
@@ -200,7 +204,6 @@ namespace Enjon
 			void CameraOptions( bool* enable );
 			void CreateProjectView( );
 			void SelectSceneView( );
-			void AddComponentPopupView( );
 
 			void LoadProjectView( );
 			void CheckForPopups( );
@@ -227,7 +230,7 @@ namespace Enjon
 			void LoadProjectResources( ); 
 
 			void InspectorView( bool* enabled );
-			void SceneView( bool* viewBool );
+			void SceneView( bool* viewBool ); 
 
 		private:
 			bool mViewBool = true;

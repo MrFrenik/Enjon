@@ -76,8 +76,12 @@ namespace Enjon
 		Input* input = EngineSubsystem( Input );
 		EditorWidgetManager* wm = mApp->GetEditorWidgetManager( );
 
+		// Get position and dimensions
+		ImVec2 wp = ImGui::GetWindowPos( );
+		ImVec2 ws = ImGui::GetWindowSize( );
+
 		// Capture hovered state
-		bool isHovered = ImGui::IsMouseHoveringWindow( ); 
+		bool isHovered = ImGui::IsMouseHoveringRect( wp, ImVec2( wp.x + ws.x, wp.y + ws.y ) );
 		wm->SetHovered( this, isHovered );
 
 		// Capture focused state
