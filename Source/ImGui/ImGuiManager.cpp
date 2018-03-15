@@ -1014,14 +1014,14 @@ namespace Enjon
 		ImVec4* colors = ImGui::GetStyle( ).Colors;
 		colors[ ImGuiCol_Text ] = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
 		colors[ ImGuiCol_TextDisabled ] = ImVec4( 0.50f, 0.50f, 0.50f, 0.57f );
-		colors[ ImGuiCol_WindowBg ] = ImVec4( 0.16f, 0.16f, 0.16f, 1.00f );
+		colors[ ImGuiCol_WindowBg ] = ImVec4( 0.12f, 0.12f, 0.12f, 1.00f );
 		colors[ ImGuiCol_ChildBg ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.00f );
-		colors[ ImGuiCol_PopupBg ] = ImVec4( 0.10f, 0.10f, 0.10f, 1.00f );
+		colors[ ImGuiCol_PopupBg ] = ImVec4( 0.05f, 0.05f, 0.05f, 1.00f );
 		colors[ ImGuiCol_Border ] = ImVec4( 0.12f, 0.12f, 0.12f, 0.45f );
 		colors[ ImGuiCol_BorderShadow ] = ImVec4( 0.00f, 0.00f, 0.00f, 1.00f );
-		colors[ ImGuiCol_FrameBg ] = ImVec4( 0.14f, 0.14f, 0.14f, 0.63f );
-		colors[ ImGuiCol_FrameBgHovered ] = ImVec4( 0.10f, 0.10f, 0.11f, 0.89f );
-		colors[ ImGuiCol_FrameBgActive ] = ImVec4( 0.21f, 0.21f, 0.22f, 1.00f );
+		colors[ ImGuiCol_FrameBg ] = ImVec4( 0.14f, 0.14f, 0.14f, 0.61f );
+		colors[ ImGuiCol_FrameBgHovered ] = ImVec4( 0.09f, 0.09f, 0.09f, 1.00f );
+		colors[ ImGuiCol_FrameBgActive ] = ImVec4( 0.21f, 0.21f, 0.21f, 1.00f );
 		colors[ ImGuiCol_TitleBg ] = ImVec4( 0.04f, 0.04f, 0.04f, 1.00f );
 		colors[ ImGuiCol_TitleBgActive ] = ImVec4( 0.10f, 0.57f, 0.35f, 1.00f );
 		colors[ ImGuiCol_TitleBgCollapsed ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.51f );
@@ -1060,6 +1060,8 @@ namespace Enjon
 		colors[ ImGuiCol_SelectableHovered ] = ImVec4( 0.14f, 0.23f, 0.32f, 1.00f );
 		colors[ ImGuiCol_SelectableActive ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
 		colors[ ImGuiCol_Selectable ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
+		colors[ ImGuiCol_ComboBox ] = ImVec4( 0.14f, 0.14f, 0.14f, 1.00f );
+		colors[ ImGuiCol_ComboBoxHovered ] = ImVec4( 0.09f, 0.09f, 0.09f, 1.00f );
 
 		// Load dock
 		// ImGui::LoadDock();

@@ -6715,6 +6715,8 @@ const char* ImGui::GetStyleColorName(ImGuiCol idx)
 	case ImGuiCol_Selectable: return "Selectable";
 	case ImGuiCol_SelectableHovered: return "SelectableHovered";
 	case ImGuiCol_SelectableActive: return "SelectableActive";
+	case ImGuiCol_ComboBox: return "ComboBox";
+	case ImGuiCol_ComboBoxHovered: return "ComboBoxHovered";
     }
     IM_ASSERT(0);
     return "Unknown";
@@ -10613,11 +10615,13 @@ bool ImGui::BeginCombo(const char* label, const char* preview_value, ImGuiComboF
     bool pressed = ButtonBehavior(frame_bb, id, &hovered, &held);
     bool popup_open = IsPopupOpen(id);
 
+	ImColor color = GetColorU32( ImGuiCol_ComboBox );
+	ImColor colorHovered = GetColorU32( ImGuiCol_ComboBoxHovered );
     const float arrow_size = GetFrameHeight();
     const ImRect value_bb(frame_bb.Min, frame_bb.Max - ImVec2(arrow_size, 0.0f));
     RenderNavHighlight(frame_bb, id);
-    RenderFrame(frame_bb.Min, frame_bb.Max, GetColorU32(ImGuiCol_FrameBg), true, style.FrameRounding);
-    RenderFrame(ImVec2(frame_bb.Max.x-arrow_size, frame_bb.Min.y), frame_bb.Max, GetColorU32(popup_open || hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button), true, style.FrameRounding); // FIXME-ROUNDING
+    RenderFrame(frame_bb.Min, frame_bb.Max, popup_open || hovered ? colorHovered : color, true, style.FrameRounding);
+    RenderFrame(ImVec2(frame_bb.Max.x-arrow_size, frame_bb.Min.y), frame_bb.Max, popup_open || hovered ? colorHovered : color, true, style.FrameRounding); // FIXME-ROUNDING
     RenderTriangle(ImVec2(frame_bb.Max.x - arrow_size + style.FramePadding.y, frame_bb.Min.y + style.FramePadding.y), ImGuiDir_Down);
     if (preview_value != NULL)
         RenderTextClipped(frame_bb.Min + style.FramePadding, value_bb.Max, preview_value, NULL, NULL, ImVec2(0.0f,0.0f));

@@ -47,14 +47,14 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-Enjon::String mProjectsDir = "W:/Projects/";
-Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -605,7 +605,7 @@ namespace Enjon
 		ImGui::Separator( );
 
 		// List out active entities
-		ImVec2 padding( 20.0f, 50.0f );
+		ImVec2 padding( 20.0f, 80.0f );
 		ImGui::ListBoxHeader( "##EntitiesListWorldOutliner", ImVec2( ImGui::GetWindowSize( ).x - padding.x, ImGui::GetWindowSize( ).y - padding.y ) );
 		{
 			for ( auto& e : entities->GetActiveEntities( ) )
@@ -617,6 +617,12 @@ namespace Enjon
 			} 
 		}
 		ImGui::ListBoxFooter( );
+
+		// Formatting
+		ImGui::Separator( );
+
+		// Display total amount of entities
+		ImGui::Text( fmt::format( "{} Entities", entities->GetActiveEntities().size() ).c_str( ) );
 	}
 
 	void EditorApp::LoadResourceFromFile( )
@@ -1383,10 +1389,10 @@ namespace Enjon
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene", nullptr, ImGui::DockSlotType::Slot_Top, 1.0f ) );
 	    ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Graphics", nullptr, ImGui::DockSlotType::Slot_Bottom, 0.2f));
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Load Resource", "Graphics", ImGui::DockSlotType::Slot_Tab, 0.15f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", nullptr, ImGui::DockSlotType::Slot_Right, 0.35f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "World Outliner", nullptr, ImGui::DockSlotType::Slot_Right, 0.3f ) );
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Play Options", "Scene", ImGui::DockSlotType::Slot_Top, 0.1f ) );
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Create Project", "Scene", ImGui::DockSlotType::Slot_Bottom, 0.2f ) );
-		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Inspector", "World Outliner", ImGui::DockSlotType::Slot_Right, 0.7f ) );
+		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Inspector", "World Outliner", ImGui::DockSlotType::Slot_Bottom, 0.7f ) );
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Camera", "Inspector", ImGui::DockSlotType::Slot_Bottom, 0.5f ) );
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Scene Selection", "Create Project", ImGui::DockSlotType::Slot_Tab, 0.6f ) );
 		ImGuiManager::RegisterDockingLayout( ImGui::DockingLayout( "Asset Browser", "Camera", ImGui::DockSlotType::Slot_Tab, 0.6f ) );

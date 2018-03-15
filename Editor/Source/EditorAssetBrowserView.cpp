@@ -64,6 +64,13 @@ namespace Enjon
 
 	//=========================================================================
 
+	void EditorAssetBrowserView::SetSelectedPath( const String& path )
+	{
+		mSelectedPath = path;
+	}
+
+	//=========================================================================
+
 	void EditorAssetBrowserView::UpdateView( )
 	{ 
 		// Get editor widget manager
@@ -95,27 +102,50 @@ namespace Enjon
 			ImGui::Separator( );
 
 			// Iterate the current directory
-			for ( auto& p : FS::directory_iterator( mCurrentDirectory ) )
+			ImVec2 listBoxMin = ImGui::GetCursorScreenPos( );
+			ImVec2 listBoxSize = ImVec2( ImGui::GetWindowWidth( ) - 20.0f, ImGui::GetWindowHeight( ) - 80.0f );
+			bool hoveringItem = false;
+			ImGui::ListBoxHeader( "##AssetDirectory", listBoxSize );
 			{
-				// Select directory
-				if ( ImGui::Selectable( p.path( ).string( ).c_str( ) ) )
+				for ( auto& p : FS::directory_iterator( mCurrentDirectory ) )
 				{
-					if ( FS::is_directory( p ) )
+					// Select directory
+					if ( ImGui::Selectable( p.path( ).string( ).c_str( ), p == FS::path( mSelectedPath ) ) )
 					{
-						mCurrentDirectory = p.path( ).string( ); 
+						SetSelectedPath( p.path( ).string( ) );
+					}
+
+					if ( ImGui::IsItemHovered( ) )
+					{
+						hoveringItem = true;
+
+						if ( ImGui::IsMouseDoubleClicked( 0 ) )
+						{
+							if ( FS::is_directory( p ) )
+							{
+								mCurrentDirectory = p.path( ).string( ); 
+							} 
+						} 
 					}
 				} 
 			} 
 
 			// If the window is hovered
-			if ( wm->GetHovered( this ) )
+			if ( ImGui::IsMouseHoveringRect( listBoxMin, ImVec2( listBoxMin.x + listBoxSize.x, listBoxMin.y + listBoxSize.y ) ) )
 			{
 				// Set active context menu and cache mouse coordinates
 				if ( input->IsKeyPressed( KeyCode::RightMouseButton ) )
 				{
 					mContextMenu.Activate( input->GetMouseCoords() );
-				}
-			} 
+				} 
+			}
+
+			if ( !hoveringItem && input->IsKeyPressed(KeyCode::LeftMouseButton ) )
+			{
+				SetSelectedPath( "" );
+			}
+
+			ImGui::ListBoxFooter( ); 
 		} 
 
 		// Opening context menu
@@ -222,8 +252,11 @@ namespace Enjon
 		Input* input = EngineSubsystem( Input );
 		EditorWidgetManager* wm = mApp->GetEditorWidgetManager( );
 
+		ImVec2 wp = ImGui::GetWindowPos( );
+		ImVec2 ws = ImGui::GetWindowSize( );
+
 		// Capture hovered state
-		bool isHovered = ImGui::IsWindowHovered( ); 
+		bool isHovered = ImGui::IsMouseHoveringRect( wp, ImVec2( wp.x + ws.x, wp.y + ws.y ) );
 		wm->SetHovered( this, isHovered );
 	}
 

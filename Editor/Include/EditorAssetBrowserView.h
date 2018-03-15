@@ -91,10 +91,13 @@ namespace Enjon
 
 			void AttemptDirectoryBackTraversal( );
 
+			void SetSelectedPath( const String& path );
+
 		protected: 
 			ContextMenu mContextMenu;
 			String mCurrentDirectory = "";
 			String mRootDirectory = "";
+			String mSelectedPath = "";
 	};
 }
 
