@@ -590,6 +590,8 @@ namespace Enjon
 
 	void EditorApp::WorldOutlinerView( )
 	{ 
+		ImDrawList* dl = ImGui::GetWindowDrawList( );
+
 		AssetHandle< Scene > scene = EngineSubsystem( SceneManager )->GetScene( );
 
 		if ( !scene )
@@ -619,7 +621,12 @@ namespace Enjon
 		ImGui::ListBoxFooter( );
 
 		// Formatting
-		ImGui::Separator( );
+		ImVec2 csp = ImGui::GetCursorScreenPos( );
+		ImVec2 la = ImVec2( csp.x, csp.y );
+		ImVec2 lb = ImVec2( la.x + ImGui::GetWindowSize().x - padding.x, la.y );
+		dl->AddLine( la, lb, ImGui::GetColorU32( ImGuiCol_Separator ) );
+
+		ImGui::SetCursorScreenPos( ImVec2( csp.x, csp.y + 10.0f ) );
 
 		// Display total amount of entities
 		ImGui::Text( fmt::format( "{} Entities", entities->GetActiveEntities().size() ).c_str( ) );
@@ -1216,7 +1223,7 @@ namespace Enjon
 
 		Enjon::ImGuiManager::RegisterWindow( [ & ]
 		{
-			if ( ImGui::BeginDock( "World Outliner", nullptr ) )
+			if ( ImGui::BeginDock( "World Outliner", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 			{
 				WorldOutlinerView( );
 			}
