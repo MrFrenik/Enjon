@@ -43,5 +43,10 @@ namespace Enjon
 	{
 		return mIsPointer;
 	}
+
+	bool MetaPropertyTraits::IsVisible( ) const
+	{
+		return mIsVisible;
+	}
 }
 

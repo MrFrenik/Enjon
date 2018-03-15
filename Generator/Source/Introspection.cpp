@@ -678,6 +678,11 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 					traits.IsEditable = true;
 				}
 
+				if ( curToken.Equals( "HideInEditor" ) )
+				{
+					traits.IsVisible = false;
+				}
+
 				// Parse delegates
 				if ( curToken.Equals( "Delegates" ) )
 				{
@@ -1625,6 +1630,8 @@ void Introspection::Compile( const ReflectionConfig& config )
 					traits += std::to_string(prop.second->mTraits.UIMax) + "f";
 					traits += ", ";
 					traits += prop.second->mTraits.IsPointer ? "true" : "false";
+					traits += ", ";
+					traits += prop.second->mTraits.IsVisible ? "true" : "false";
 					traits += " )"; 
 
 					// Accessor functions for properties

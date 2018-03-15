@@ -105,8 +105,8 @@ namespace Enjon
 	// Don't really like this, but, ya know... wha ya gon' do?
 	struct MetaPropertyTraits
 	{
-		MetaPropertyTraits( u32 isEditable = false, f32 uiMin = 0.0f, f32 uiMax = 1.0f, u32 isPointer = false )
-			: mIsEditable( isEditable ), mUIMin( uiMin ), mUIMax( uiMax ), mIsPointer( isPointer )
+		MetaPropertyTraits( u32 isEditable = false, f32 uiMin = 0.0f, f32 uiMax = 1.0f, u32 isPointer = false, bool isVisible = true )
+			: mIsEditable( isEditable ), mUIMin( uiMin ), mUIMax( uiMax ), mIsPointer( isPointer ), mIsVisible( isVisible )
 		{ 
 		}
 
@@ -134,8 +134,14 @@ namespace Enjon
 		*/
 		bool IsPointer( ) const;
 
+		/*
+		* @brief
+		*/
+		bool IsVisible( ) const;
+
 		bool mIsEditable = false;
 		bool mIsPointer = false;
+		bool mIsVisible = true;
 		f32 mUIMin = 0.0f;
 		f32 mUIMax = 1.0f;
 	};
@@ -1404,8 +1410,11 @@ namespace Enjon
 			* @brief
 			*/
 			virtual Result DeserializeLateInit( );
-
-			virtual Result OnEditorUI( ) const;
+ 
+			/*
+			* @brief
+			*/
+			virtual Result OnEditorUI( );
 
 		private:
 

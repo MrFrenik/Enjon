@@ -109,7 +109,7 @@ namespace Enjon
 
 	//======================================================================================
 
-	Result Object::OnEditorUI( ) const
+	Result Object::OnEditorUI( )
 	{
 		return Result::INCOMPLETE;
 	}

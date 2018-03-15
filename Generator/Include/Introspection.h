@@ -92,6 +92,7 @@ typedef std::unordered_map< PropertyType, std::string > PropertyTypeAsStringMap;
 struct PropertyTraits
 {
 	bool IsPointer = false;
+	bool IsVisible = true;
 	bool IsEditable = false;
 	float UIMin = 0.0f;
 	float UIMax = 0.0f;

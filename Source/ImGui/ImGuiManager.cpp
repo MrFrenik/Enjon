@@ -660,7 +660,7 @@ namespace Enjon
 
 	void ImGuiManager::InspectObject( const Object* object )
 	{ 
-		Result res = object->OnEditorUI( );
+		Result res = const_cast< Object* >( object )->OnEditorUI( );
 		if ( res == Result::INCOMPLETE )
 		{
 			DebugDumpObject( object );
@@ -681,13 +681,21 @@ namespace Enjon
 			// Grab property from class
 			const MetaProperty* prop = cls ->GetProperty( i );
 
+			// If not valid, then continue
 			if ( !prop )
 			{
 				continue;
 			}
 
+			// If not visible in editor, then skip
+			MetaPropertyTraits traits = prop->GetTraits( );
+			if ( !traits.IsVisible( ) )
+			{
+				continue;
+			}
+
 			// Get property name
-			Enjon::String name = prop->GetName( );
+			Enjon::String name = prop->GetName( ); 
 
 			switch ( prop->GetType( ) )
 			{
@@ -772,8 +780,6 @@ namespace Enjon
 
 				} break;
 				
-				
-
 				// AssetHandle type
 				case Enjon::MetaPropertyType::AssetHandle:
 				{
@@ -809,12 +815,6 @@ namespace Enjon
 							if ( val )
 							{
 								ImGuiManager::DebugDumpObject( val.Get( ) ); 
-
-								// Save the asset if pressed
-								if ( !const_cast< MetaClass* >( cls )->InstanceOf< Texture >() && ImGui::Button( fmt::format( "Save##{}", (u32)prop ).c_str( ) ) )
-								{
-									val.Save( );
-								}
 							}
 							ImGui::TreePop( );
 						}

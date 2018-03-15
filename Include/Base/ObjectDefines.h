@@ -11,7 +11,8 @@ enum MetaPropertyEnumDefines
 	Delegates,
 	Accessor,
 	Mutator,
-	Editable
+	Editable,
+	HideInEditor
 };
 
 /*

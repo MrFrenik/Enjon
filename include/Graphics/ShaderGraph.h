@@ -333,13 +333,13 @@ namespace Enjon
 
 		protected:
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			Enjon::String mName;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			u32 mTextureSamplerLocation = 0;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			HashMap< ShaderPassType, String > mShaderPassCode;
 
 			ENJON_PROPERTY( )

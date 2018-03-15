@@ -6,6 +6,9 @@
 #include "Graphics/GLSLProgram.h"
 #include "Graphics/GraphicsSubsystem.h" 
 #include "Graphics/Color.h"
+#include "ImGui/ImGuiManager.h"
+#include "Engine.h"
+#include "SubsystemCatalog.h"
 
 #include <assert.h>
 
@@ -228,7 +231,7 @@ namespace Enjon
 		return id;
 	}
 
-	//=================================================================================================
+	//================================================================================================= 
 }
 
 

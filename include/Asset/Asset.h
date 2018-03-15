@@ -109,16 +109,16 @@ namespace Enjon
 
 		protected: 
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			UUID mUUID;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			Enjon::String mFilePath;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			Enjon::String mName; 
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			u32 mIsDefault = false;
 
 			const AssetLoader* mLoader = nullptr;

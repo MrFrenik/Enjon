@@ -5,6 +5,7 @@
 #include "Asset/AssetManager.h"
 #include "Graphics/GraphicsSubsystem.h"
 #include "SubsystemCatalog.h"
+#include "ImGui/ImGuiManager.h"
 #include "Engine.h"
 
 namespace Enjon
@@ -193,6 +194,18 @@ namespace Enjon
 		mRenderable.SetMesh( am->GetAsset< Mesh >( buffer->Read< UUID >( ) ) );
 		// Set material 
 		mRenderable.SetMaterial( am->GetAsset< Material >( buffer->Read< UUID >( ) ).Get( ) );
+
+		return Result::SUCCESS;
+	}
+
+	//==================================================================== 
+
+	Result GraphicsComponent::OnEditorUI( )
+	{
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
+		// Debug dump renderable
+		igm->InspectObject( &mRenderable );
 
 		return Result::SUCCESS;
 	}

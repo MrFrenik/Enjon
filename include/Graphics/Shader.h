@@ -160,13 +160,13 @@ namespace Enjon
 			UniformType GetType( ) const { return mType; }
 
 		protected: 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			UniformType mType;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			u32 mLocation = 0;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			Enjon::String mName;
 	}; 
 
