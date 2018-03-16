@@ -7,6 +7,8 @@
 
 #include "EditorView.h"
 
+#include <ImGui/ImGuiManager.h>
+
 #include <Math/Vec2.h>
 
 namespace Enjon

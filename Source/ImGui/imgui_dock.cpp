@@ -295,7 +295,7 @@ namespace ImGui
 				else
 				{
 					SetCursorScreenPos( ImVec2( GetCursorScreenPos( ).x + splitSize, GetCursorScreenPos( ).y ) );
-					InvisibleButton("split", ImVec2(dock.size.x - splitSize, splitSize));
+					InvisibleButton("split", ImVec2(dock.size.x - 2.0f * splitSize, splitSize));
 					if (dock.status == Status_Dragged) dsize.y = io.MouseDelta.y;
 					dsize.y = -ImMin(-dsize.y, dock.children[0]->size.y - min_size0.y);
 					dsize.y = ImMin(dsize.y, dock.children[1]->size.y - min_size1.y);
