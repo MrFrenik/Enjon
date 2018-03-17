@@ -25,7 +25,6 @@ namespace Enjon
 
 	void EditorSceneView::Initialize( )
 	{
-		mName = "Scene View";
 	}
 
 	//=================================================================

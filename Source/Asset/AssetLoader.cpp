@@ -106,6 +106,14 @@ namespace Enjon
 
 	//=================================================================
 
+	String AssetRecordInfo::GetAssetDisplayName( ) const
+	{
+		return mAssetDisplayName;
+	}
+
+	//=================================================================
+
+
 	AssetLoadStatus AssetRecordInfo::GetAssetLoadStatus( ) const
 	{
 		return mAssetLoadStatus;
@@ -156,8 +164,9 @@ namespace Enjon
 
 	String AssetLoader::GetQualifiedName( const String& filePath )
 	{
-		std::vector<String> splits = Enjon::Utils::SplitString( filePath, "." );
-		String res = Enjon::Utils::Remove( Enjon::Utils::Replace( splits.at( 0 ), '/', '.' ), ':' );
+		Vector<String> splits = Utils::SplitString( filePath, "." );
+		String res = Utils::Remove( Enjon::Utils::Replace( splits.at( 0 ), '/', '.' ), ':' );
+		res = Utils::FindReplaceAll( res, "\\", "." );
 		return Enjon::Utils::ToLower( res );
 	} 
 	

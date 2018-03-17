@@ -62,6 +62,9 @@ namespace Enjon
 					mHoveredMap[ view ] = false;
 					mViewEnabledMap[ view ] = view->GetEnabled();
 					mViews.push_back( view );
+
+					// Initialize view
+					view->Initialize( );
 				}
 			}
 

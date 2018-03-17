@@ -50,23 +50,23 @@ namespace Enjon
 			* @brief
 			*/ 
 			bool GetEnabled( );
+
+			/**
+			* @brief
+			*/
+			virtual void Initialize( );
  
 		protected: 
 
 			/**
-			* @brief Must be overriden
+			* @brief Must be overridden
 			*/
 			virtual void UpdateView( ) = 0;
 
 			/**
-			* @brief Must be overriden
+			* @brief Must be overridden
 			*/
-			virtual void ProcessViewInput( ) = 0;
-
-			/**
-			* @brief Must be overriden
-			*/
-			virtual void Initialize( ) = 0;
+			virtual void ProcessViewInput( ) = 0; 
 
 			/**
 			* @brief

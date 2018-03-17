@@ -58,6 +58,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			String GetAssetDisplayName( ) const;
+
+			/**
+			* @brief
+			*/
 			AssetLoadStatus GetAssetLoadStatus( ) const; 
 			
 			/**
@@ -95,6 +100,7 @@ namespace Enjon
 			Asset* mAsset							= nullptr; 
 			String mAssetFilePath					= "Invalid_Asset_Path";
 			String mAssetName						= "Invalid_Asset";
+			String mAssetDisplayName				= "Invalid_Asset";
 			UUID mAssetUUID							= UUID::Invalid( );
 			const MetaClass* mAssetLoaderClass		= nullptr;
 			AssetLoadStatus mAssetLoadStatus		= AssetLoadStatus::Unloaded;
@@ -199,7 +205,7 @@ namespace Enjon
 			} 
 
 			template < typename T >
-			Result ConstructAsset( const AssetManager* manager, AssetHandle< T >* handle, const String& assetName = "" )
+			Result ConstructAsset( const AssetManager* manager, AssetHandle< T >* handle, const String& assetName = "", const String& path = "" )
 			{
 				// Make sure that asset with that name doesn't exist already
 				if ( Exists( assetName ) )
@@ -216,26 +222,35 @@ namespace Enjon
 				// Construct unique name for asset to be saved
 				String typeName = asset->Class( )->GetName( ); 
 				String originalAssetName = assetName.compare("") != 0 ? assetName : "New" + typeName;
-				String usedAssetName = originalAssetName;
+				String usedAssetName = originalAssetName; 
 
 				// TODO(): MAKE THIS GO THROUGH A CENTRALIZED GRAPHICS FACTORY
 				std::experimental::filesystem::path originalPath = manager->GetAssetsDirectoryPath() + "Cache/" + usedAssetName;
 				std::experimental::filesystem::path p = originalPath.string() + GetAssetFileExtension();
+
+				// If path is given
+				if ( path.compare( "" ) != 0 )
+				{
+					originalPath = path;
+					p = originalPath.string( ) + "/" + usedAssetName + GetAssetFileExtension( );
+				}
 
 				// Look for cached asset based on name and continue until name is unique
 				u32 index = 0;
 				while ( std::experimental::filesystem::exists( p ) )
 				{
 					index++;
-					p = std::experimental::filesystem::path( originalPath.string() + std::to_string( index ) + GetAssetFileExtension() );
 					usedAssetName = originalAssetName + std::to_string( index );
+					p = std::experimental::filesystem::path( originalPath.string() + "/" + usedAssetName + GetAssetFileExtension() );
 				} 
+
+				String finalAssetName = AssetLoader::GetQualifiedName( p.string() );
 
 				//====================================================================================
 				// Asset header information
 				//====================================================================================
 				AssetRecordInfo info;
-				asset->mName = usedAssetName;
+				asset->mName = finalAssetName;
 				asset->mLoader = this;
 				asset->mUUID = UUID::GenerateUUID( ); 
 				asset->mFilePath = p.string( );
@@ -247,6 +262,7 @@ namespace Enjon
 				info.mAssetFilePath = p.string( );					
 				info.mAssetLoadStatus = AssetLoadStatus::Loaded;
 				info.mAssetLoaderClass = Class( );
+				info.mAssetDisplayName = usedAssetName;
 
 				// Add to loader
 				const Asset* cnstAsset = AddToAssets( info ); 

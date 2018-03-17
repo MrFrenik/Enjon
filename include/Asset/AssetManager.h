@@ -94,7 +94,7 @@ namespace Enjon
 			* @brief Creates a new asset of given type, adds it into the database and returns a handle it
 			*/
 			template <typename T>
-			AssetHandle< T > ConstructAsset( const String& assetName = "" );
+			AssetHandle< T > ConstructAsset( const String& assetName = "", const String& path = "" ); 
 
 			/**
 			*@brief Gets asset manager name
@@ -208,7 +208,7 @@ namespace Enjon
 			/**
 			*@brief Adds asset to project form given file path
 			*/
-			Result SerializeAsset( const Asset* asset );
+			Result SerializeAsset( const Asset* asset, const String& assetName, const String& path = "" );
 
 			/**
 			*@brief

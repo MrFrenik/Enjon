@@ -13,40 +13,7 @@
 
 namespace Enjon
 {
-	class Project;
-
-	struct ContextMenu
-	{
-		void Activate( const Vec2& coords )
-		{
-			mOpened = true;
-			mOpenPosition = coords;
-		}
-
-		Vec2 GetPosition( )
-		{
-			return mOpenPosition;
-		}
-
-		Vec2 GetSize( )
-		{
-			return mSize;
-		}
-
-		void Deactivate( )
-		{
-			mOpened = false;
-		}
-
-		bool IsActive( )
-		{
-			return mOpened;
-		}
-
-		bool mOpened = false;
-		Vec2 mOpenPosition; 
-		Vec2 mSize = Vec2( 200.0f, 300.0f );
-	};
+	class Project; 
 
 	class EditorAssetBrowserView : public EditorView
 	{
@@ -65,24 +32,19 @@ namespace Enjon
 		protected: 
 
 			/**
-			* @brief Must be overriden
+			* @brief Must be overridden
 			*/
 			virtual void UpdateView( ) override;
 
 			/**
-			* @brief Must be overriden
+			* @brief Must be overridden
 			*/
 			virtual void ProcessViewInput( ) override;
 
 			/**
-			* @brief Must be overriden
+			* @brief Must be overridden
 			*/
 			virtual void Initialize( ) override; 
-
-			/**
-			* @brief
-			*/
-			void ContextMenuInteraction( ContextMenu* menu );
 
 			void InitializeCurrentDirectory( Project* project );
 
@@ -90,13 +52,18 @@ namespace Enjon
 
 			void SetSelectedPath( const String& path );
 
+			void FolderMenuPopup( );
+
+			void NewFolderMenuOption( );
+
+			void CreateMenuOption( );
+
 		protected: 
-			ContextMenu mContextMenu;
 			String mCurrentDirectory = "";
 			String mRootDirectory = "";
 			String mSelectedPath = "";
 
-			PopUpWindow mTestPopupWindow;
+			PopupWindow mFolderMenuPopup;
 	};
 }
 

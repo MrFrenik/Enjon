@@ -15,6 +15,7 @@
 #include "Engine.h"
 
 #include <fmt/printf.h> 
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <assert.h>
@@ -1145,6 +1146,14 @@ namespace Enjon
 
 	//===================================================================== 
 
+	void GUIWidget::SetSize( const Vec2& size )
+	{ 
+		mSize = size;
+		mAutoCalculateSize = false;
+	}
+
+	//===================================================================== 
+
 	Vec2 GUIWidget::GetSize( )
 	{
 		return mSize;
@@ -1159,9 +1168,181 @@ namespace Enjon
 
 	//===================================================================== 
 
-	PopUpWindow::PopUpWindow( const String& label, const Vec2& position, const Vec2& size )
+	PopupWindow::PopupWindow( const String& label, const Vec2& position, const Vec2& size )
 		: GUIWidget( label, position, size )
 	{ 
+	}
+
+	//===================================================================== 
+
+	void PopupWindow::operator+=( const GUICallbackFunc& func )
+	{
+		this->RegisterCallback( func );
+	}
+
+	//===================================================================== 
+
+	void PopupWindow::RegisterCallback( const GUICallbackFunc& func )
+	{
+		mCallbacks.push_back( func );
+	}
+
+	//===================================================================== 
+
+	void PopupWindow::SetFadeInSpeed( const f32& speed )
+	{
+		mFadeInSpeed = speed;
+	}
+
+	//===================================================================== 
+
+	void PopupWindow::SetFadeOutSpeed( const f32& speed )
+	{
+		mFadeOutSpeed = speed;
+	}
+
+	//===================================================================== 
+
+	void PopupWindow::Activate( const Vec2& position )
+	{
+		mPosition = position; 
+		mEnabled = true;
+		mFadeTimer = 0.0f;
+	}
+
+	//===================================================================== 
+
+	void PopupWindow::Deactivate( )
+	{
+		mBeginDisable = true;
+		mFadeTimer = 0.0f;
+	}
+
+	//===================================================================== 
+
+	void PopupWindow::DoWidget( )
+	{
+		if ( !mEnabled )
+		{
+			return;
+		}
+
+		// Get display size
+		ImVec2 dispSize = ImGui::GetIO( ).DisplaySize; 
+
+		ImVec2 position = ImVec2( mPosition.x, mPosition.y );
+
+		// Calculate max position
+		ImVec2 popupMaxPos = ImVec2( position.x + mSize.x, position.y + mSize.y ); 
+ 
+		// Clamp menu position to inside of window
+		if ( popupMaxPos.x > dispSize.x )
+		{ 
+			position.x = dispSize.x - mSize.x;
+		} 
+
+		// Clamp to being inside of the window and not negative
+		position.x = Max( position.x, 0.0f ); 
+
+		// If below half-way ( offset by size of window )
+		if ( position.y > dispSize.y / 2.0f )
+		{
+			position.y -= mSize.y;
+		}
+
+		// Calculate popupbg color using fade
+		ImVec4 bgColor = ImColor( ImGui::GetColorU32( ImGuiCol_WindowBg ) );
+		f32 bgAlpha = 1.0f;
+		if ( !mBeginDisable )
+		{
+			// Increment fade timer by delta time
+			mFadeTimer += mFadeInSpeed * Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( );
+			
+			// Calculate fade amount for animation 
+			bgAlpha =  Clamp( mFadeTimer / 1.0f, 0.0f, 1.0f ); 
+		}
+		else
+		{
+			// Increment fade timer by delta time
+			mFadeOutTimer -= mFadeOutSpeed * Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( ); 
+			mFadeOutTimer = Clamp( mFadeOutTimer, 0.0f, 1.0f ); 
+			bgAlpha = mFadeOutTimer;
+		}
+
+		// Push background color
+		ImGui::PushStyleColor( ImGuiCol_WindowBg, ImVec4( bgColor.x, bgColor.y, bgColor.z, bgAlpha ) ); 
+
+		// Set window position
+		ImGui::SetNextWindowPos( position );
+
+		// Set window size
+		if ( !mAutoCalculateSize )
+		{
+			ImGui::SetNextWindowSize( ImVec2( mSize.x, mSize.y ) );
+		}
+
+		// Open popup window
+		const char* label = fmt::format( "{}##{}", mLabel, (u32)this ).c_str();
+		//ImGui::OpenPopup( label );
+		ImGui::Begin( label, &mEnabled, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
+		{
+			// Capture hovered state
+			ImVec2 pa = position;
+			ImVec2 pb = ImVec2( position.x + mSize.x, position.y + mSize.y );
+			mHovered = ImGui::IsMouseHoveringRect( pa, pb ); 
+
+			// Do all callbacks
+			for ( auto& f : mCallbacks )
+			{
+				f( );
+			}
+
+			// If any of the callbacks deactivated the popup, then close it
+			if ( mBeginDisable )
+			{
+				if ( mFadeOutTimer <= 0.0f )
+				{ 
+					Reset( );
+				}
+			}
+
+			// If need to calculate size, then do so
+			if ( mAutoCalculateSize )
+			{
+				// Reset size based on popup content ( questionable... )
+				mSize = Vec2( ImGui::GetWindowSize( ).x, ImGui::GetWindowSize( ).y ); 
+			}
+		} 
+		ImGui::End( );
+
+		// Pop color vars
+		ImGui::PopStyleColor( );
+	}
+
+	//===================================================================== 
+
+	void PopupWindow::Reset( )
+	{ 
+		mBeginDisable = false;
+		mEnabled = false;
+		mFadeTimer = 0.0f;
+		mFadeInSpeed = 10.0f;
+		mFadeOutSpeed = 20.0f;
+		mFadeOutTimer = 1.0f;
+	}
+
+	//===================================================================== 
+
+	bool PopupWindow::Enabled( )
+	{
+		return mEnabled;
+	}
+
+	//===================================================================== 
+
+	bool PopupWindow::Hovered( )
+	{
+		return mHovered;
 	}
 
 	//===================================================================== 

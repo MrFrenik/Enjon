@@ -9,6 +9,7 @@
 #include <SubsystemCatalog.h>
 #include <ImGui/ImGuiManager.h>
 #include <IO/InputManager.h>
+#include <Asset/AssetManager.h>
 #include <Utils/FileUtils.h>
 
 #include <filesystem>
@@ -130,44 +131,14 @@ namespace Enjon
 				} 
 			} 
 
-			// If the window is hovered
+			// If the list box is hovered
 			if ( ImGui::IsMouseHoveringRect( listBoxMin, ImVec2( listBoxMin.x + listBoxSize.x, listBoxMin.y + listBoxSize.y ) ) )
 			{
 				// Set active context menu and cache mouse coordinates
-				if ( input->IsKeyPressed( KeyCode::RightMouseButton ) )
+				if ( !hoveringItem && input->IsKeyPressed( KeyCode::RightMouseButton ) )
 				{
-					mContextMenu.Activate( input->GetMouseCoords() );
+					mFolderMenuPopup.Activate( input->GetMouseCoords() );
 				} 
-
-				/*
-					mTestPopupWindow.SetPosition( input->GetMouseCoords( ) );
-					mTestPopupWindow.Activate( ); 
-
-					GUIWidget::Activate()
-					{
-						// Push state onto imgui manager?
-						ImGuiManager* igm = EngineSubsystem( ImGuiManager );
-						igm->PushWidget( this );
-					}
-
-					GUIWidget::Deactivate()
-					{
-						// Pop state
-						ImGuiManager* igm = EngineSubsystem( ImGuiManager );
-						igm->PopWidget( );
-					}
-
-					ImGuiManager::Update()
-					{
-						// Do all windows, I suppose?
-
-						// Then update widgets?
-						// Not sure how this shit is supposed to go...
-						// Definitely an issue with having rendering/logic so tightly coupled...  
-
-						mWidgets.front()->Update(); // Will completely be out of sync from everything...
-					} 
-				*/
 			}
 
 			if ( !hoveringItem && input->IsKeyPressed(KeyCode::LeftMouseButton ) )
@@ -178,92 +149,11 @@ namespace Enjon
 			ImGui::ListBoxFooter( ); 
 		} 
 
-		// Opening context menu
-		if ( mContextMenu.IsActive() )
+		// Do pop-ups
+		if ( mFolderMenuPopup.Enabled( ) )
 		{
-			ContextMenuInteraction( &mContextMenu );
+			mFolderMenuPopup.DoWidget( );
 		}
-	}
-
-	//=========================================================================
-
-	void EditorAssetBrowserView::ContextMenuInteraction( ContextMenu* menu )
-	{ 
-		// Get input system
-		Input* input = EngineSubsystem( Input ); 
-
-		// Get ImGuiManager subsystem
-		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
-
-		// Set position of menu
-		Vec2 menuPos = menu->GetPosition( ); 
-		Vec2 menuSize = menu->GetSize( ); 
-		ImVec2 menuMaxPos = ImVec2( menuPos.x + menuSize.x, menuPos.y + menuSize.y );
-
-		// Get display size
-		ImVec2 dispSize = ImGui::GetIO( ).DisplaySize; 
- 
-		// Clamp menu position to inside of window
-		if ( menuMaxPos.x > dispSize.x )
-		{ 
-			menuPos.x = dispSize.x - menuSize.x;
-		} 
-
-		// Clamp to being inside of the window and not negative
-		menuPos.x = Max( menuPos.x, 0.0f ); 
-
-		// If below half-way ( offset by size of window )
-		if ( menuPos.y > dispSize.y / 2.0f )
-		{
-			menuPos.y -= menuSize.y;
-		}
-
-		ImGui::SetNextWindowPos( ImVec2( menuPos.x, menuPos.y ) );
-		ImGui::SetNextWindowSize( ImVec2( menuSize.x, menuSize.y ) ); 
-		ImGui::PushStyleColor( ImGuiCol_WindowBg, ImVec4( ImGui::GetStyle( ).Colors[ImGuiCol_PopupBg] ) );
-		ImGui::PushStyleColor( ImGuiCol_Border, ImVec4( 0.0f, 0.0f, 0.0f, 0.8f ) );
-		ImGui::Begin( "##assetbrowswercontextmenu", &menu->mOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
-		{
-			// Close context menu
-			if ( input->IsKeyPressed( KeyCode::LeftMouseButton ) && !ImGui::IsMouseHoveringWindow() )
-			{
-				menu->Deactivate( );
-			} 
-
-			// Folder option group
-			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( ImGui::GetStyle( ).Colors[ImGuiCol_TextDisabled] ) );
-			ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
-			{
-				ImGui::Text( "Folder" );
-			}
-			ImGui::PopFont( ); 
-			ImGui::PopStyleColor( );
-
-			// Construct new folder option
-			if ( ImGui::Selectable( "\t+ New Folder" ) )
-			{ 
-				// Starting folder name
-				String folderName = "NewFolder";
-				String dir = mCurrentDirectory + "/NewFolder/";
-
-				// Continue to try and create new directory
-				u32 index = 0;
-				while ( FS::exists( dir ) )
-				{
-					index++;
-					dir = mCurrentDirectory + "/NewFolder" + std::to_string( index );
-				}
-
-				// Attempt to create the directory
-				FS::create_directory( dir );
-
-				menu->Deactivate( ); 
-			} 
-
-			ImGui::Separator( );
-		}
-		ImGui::End( );
-		ImGui::PopStyleColor( 2 );
 	}
 
 	//=========================================================================
@@ -274,8 +164,106 @@ namespace Enjon
 
 	//=========================================================================
 
+	void EditorAssetBrowserView::NewFolderMenuOption( )
+	{
+		Input* input = EngineSubsystem( Input );
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
+		// Folder option group
+		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( ImGui::GetStyle( ).Colors[ImGuiCol_TextDisabled] ) );
+		ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
+		{
+			ImGui::Text( "Folder" );
+		}
+		ImGui::PopFont( ); 
+		ImGui::PopStyleColor( );
+
+		// Construct new folder option
+		if ( ImGui::Selectable( "\t+ New Folder" ) )
+		{ 
+			// Starting folder name
+			String folderName = "NewFolder";
+			String dir = mCurrentDirectory + "/NewFolder/";
+
+			// Continue to try and create new directory
+			u32 index = 0;
+			while ( FS::exists( dir ) )
+			{
+				index++;
+				dir = mCurrentDirectory + "/NewFolder" + std::to_string( index );
+			}
+
+			// Attempt to create the directory
+			FS::create_directory( dir );
+
+			mFolderMenuPopup.Deactivate( ); 
+		} 
+
+		// Separator at end of folder menu option
+		ImGui::Separator( );
+	}
+
+	//=========================================================================
+
+	void EditorAssetBrowserView::CreateMenuOption( )
+	{
+		Input* input = EngineSubsystem( Input );
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		AssetManager* am = EngineSubsystem( AssetManager );
+
+		// Folder option group
+		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( ImGui::GetStyle( ).Colors[ImGuiCol_TextDisabled] ) );
+		ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
+		{
+			ImGui::Text( "Create Assets" );
+		}
+		ImGui::PopFont( ); 
+		ImGui::PopStyleColor( );
+
+		// Construct material option
+		if ( ImGui::Selectable( "\t+ Material" ) )
+		{ 
+			// Construct asset with current directory
+			am->ConstructAsset< Material >( "NewMaterial", mCurrentDirectory );
+
+			mFolderMenuPopup.Deactivate( ); 
+		} 
+
+		// Separator at end of folder menu option
+		ImGui::Separator( );
+	}
+
+	void EditorAssetBrowserView::FolderMenuPopup( ) 
+	{ 
+		Input* input = EngineSubsystem( Input );
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
+		// Close folder popup menu
+		if ( input->IsKeyPressed( KeyCode::LeftMouseButton ) && !mFolderMenuPopup.Hovered() )
+		{
+			mFolderMenuPopup.Deactivate( );
+		} 
+
+		// New folder option
+		NewFolderMenuOption( ); 
+
+		// Create menu option
+		CreateMenuOption( );
+	}
+
 	void EditorAssetBrowserView::Initialize( )
 	{ 
+		// Set up folder menu popup
+		mFolderMenuPopup.SetSize( Vec2( 200.0f, 400.0f ) );
+		mFolderMenuPopup.SetFadeInSpeed( 5.0f ); 
+		mFolderMenuPopup.SetFadeOutSpeed( 10.0f );
+
+		// Popup window callback
+		mFolderMenuPopup.RegisterCallback( [&]( )
+		{ 
+			// Do folder menu popup function
+			FolderMenuPopup( );
+		});
 	} 
 
 	//=========================================================================

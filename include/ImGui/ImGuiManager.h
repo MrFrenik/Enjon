@@ -42,6 +42,12 @@ namespace Enjon
 		Slot_None
 	};
 
+	enum class GUIFlags
+	{
+		AutoCalculateSize,
+		None
+	};
+
 	class GUIWidget
 	{ 
 		public:
@@ -68,6 +74,19 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			virtual void DoWidget( )
+			{ 
+				// Nothing by default
+			}
+
+			/**
+			* @brief
+			*/
+			void SetSize( const Vec2& size );
+
+			/**
+			* @brief
+			*/
 			Vec2 GetSize( );
 
 			/**
@@ -79,29 +98,91 @@ namespace Enjon
 			Vec2 mPosition;
 			Vec2 mSize; 
 			String mLabel;
+			bool mEnabled = false; 
+			bool mHovered = false;
+			bool mAutoCalculateSize = true;
 	};
 
-	class PopUpWindow : public GUIWidget
+	using GUICallbackFunc = std::function<void( )>;
+
+	class PopupWindow : public GUIWidget
 	{ 
 		public:
 
 			/**
 			* @brief
 			*/
-			PopUpWindow( ) = default;
+			PopupWindow( ) = default;
 
 			/**
 			* @brief
 			*/
-			PopUpWindow( const String& label, const Vec2& position, const Vec2& size );
+			PopupWindow( const String& label, const Vec2& position, const Vec2& size );
 
 			/**
 			* @brief
 			*/
-			~PopUpWindow( ) = default; 
+			~PopupWindow( ) = default; 
+
+			/**
+			* @brief
+			*/
+			void operator+=( const GUICallbackFunc& func );
+
+			/**
+			* @brief
+			*/
+			bool Enabled( ); 
+
+			/**
+			* @brief
+			*/
+			void RegisterCallback( const GUICallbackFunc& func ); 
+
+			/**
+			* @brief
+			*/
+			void SetFadeInSpeed( const f32& speed );
+
+			/** 
+			* @brief
+			*/
+			void SetFadeOutSpeed( const f32& speed );
+
+			/**
+			* @brief
+			*/
+			void Activate( const Vec2& position );
+
+			/**
+			* @brief
+			*/
+			void Deactivate( );
+
+			/**
+			* @brief
+			*/
+			bool Hovered( );
+
+			/**
+			* @brief
+			*/
+			virtual void DoWidget( ) override;
 
 		protected:
+
+			/**
+			* @brief
+			*/
+			void Reset( );
+
 		private:
+			Vector< GUICallbackFunc > mCallbacks;
+			f32 mFadeTimer = 0.0f;
+			f32 mFadeInSpeed = 10.0f;
+			f32 mFadeOutSpeed = 20.0f;
+			f32 mFadeOutTimer = 1.0f;
+			bool mBeginDisable = false;
 	};
 
 	struct GUIDockingLayout

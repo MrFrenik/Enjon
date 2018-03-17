@@ -398,7 +398,7 @@ namespace Enjon
 		if ( needToCache && cache )
 		{
 			// Handle serialization of asset file
-			res = SerializeAsset( asset ); 
+			res = SerializeAsset( asset, qualifiedName ); 
 		}
 
 		return res;
@@ -406,7 +406,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	Result AssetManager::SerializeAsset( const Asset* asset )
+	Result AssetManager::SerializeAsset( const Asset* asset, const String& assetName, const String& path )
 	{
 		// Serialize asset with archiver
 		AssetArchiver archiver; 
@@ -420,13 +420,25 @@ namespace Enjon
 		String fileExtension = asset->mLoader->GetAssetFileExtension( );
 
 		// Write to file using archiver 
-		String path = mCachedDirectoryPath + asset->mName + fileExtension; 
-		archiver.WriteToFile( path );
+		String assetPath = path;
+
+		// If path is empty, then set assetPath to cached directory
+		if ( path.compare( "" ) == 0 )
+		{
+			assetPath = mCachedDirectoryPath + assetName + fileExtension; 
+		}
+		else
+		{
+			assetPath = path + "/" + asset->GetAssetRecordInfo()->GetAssetDisplayName() + fileExtension;
+		}
+
+		// Write the binary to file
+		archiver.WriteToFile( Utils::FindReplaceAll( assetPath, "\\", "/" ) );
 
 		// Construct and add record to manifest
 		CacheManifestRecord record;
 		record.mAssetUUID = asset->mUUID;
-		record.mAssetFilePath = path;
+		record.mAssetFilePath = assetPath;
 		record.mAssetLoaderClass = asset->mLoader->Class( );
 		record.mAssetName = asset->mName;
 		mCacheManifest.AddRecord( record ); 
