@@ -1787,8 +1787,8 @@ namespace Enjon
 	    
 		if (ImGui::TreeNode("SSAO"))
 	    {
-		    ImGui::SliderFloat("Radius##ssao", &mSSAORadius, 0.01, 5.0f, "%.3f");
-		    ImGui::SliderFloat("Bias##ssao", &mSSAOBias, 1.0, 0.01f, "%.3f"); 
+		    ImGui::SliderFloat("Radius##ssao", &mSSAORadius, 0.01, 0.1f, "%.3f");
+		    ImGui::SliderFloat("Bias##ssao", &mSSAOBias, 0.01, 1.0f, "%.3f"); 
 		    ImGui::SliderFloat("Intensity##ssao", &mSSAOIntensity, 0.0f, 15.0f, "%.2f"); 
 		    ImGui::SliderFloat("Scale##ssao", &mSSAOScale, 0.0f, 5.0f, "%.2f"); 
 

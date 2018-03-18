@@ -342,7 +342,7 @@ namespace Enjon
 			ENJON_PROPERTY( HideInEditor )
 			HashMap< ShaderPassType, String > mShaderPassCode;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			HashMap< String, ShaderUniform* > mUniforms; 
 			
 			HashMap< String, ShaderGraphNode > mNodes;

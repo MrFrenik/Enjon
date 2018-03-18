@@ -31,16 +31,16 @@ namespace Enjon
  
 		// Set up materials
 		mRoot.mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ) );
-		mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
-		mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) );
-		mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) ); 
-		mForwardAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
-		mUpAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) );
-		mRightAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) );
+		mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.BlueMaterial" ) );
+		mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.RedMaterial" ) );
+		mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.GreenMaterial" ) ); 
+		mForwardAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.BlueMaterial" ) );
+		mUpAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.GreenMaterial" ) );
+		mRightAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.RedMaterial" ) );
 
-		mXYAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
-		mXZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) );
-		mYZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) );
+		mXYAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.BlueMaterial" ) );
+		mXZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.GreenMaterial" ) );
+		mYZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.RedMaterial" ) );
 
 		// Child heirarchies
 		mRoot.AddChild( &mForwardAxis );
@@ -132,40 +132,40 @@ namespace Enjon
 		{
 			case TransformWidgetRenderableType::ScaleRoot:
 			{
-				mRoot.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+				mRoot.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
 			} break; 
 
 			case TransformWidgetRenderableType::ScaleForwardAxis:
 			{
-				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
-				mForwardAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
+				mForwardAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
 			} break;
 
 			case TransformWidgetRenderableType::ScaleRightAxis:
 			{
-				mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
-				mRightAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) ); 
+				mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
+				mRightAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) ); 
 			} break;
 
 			case TransformWidgetRenderableType::ScaleUpAxis:
 			{
-				mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
-				mUpAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) ); 
+				mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
+				mUpAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) ); 
 			} break; 
 
 			case TransformWidgetRenderableType::ScaleXYAxes:
 			{
-				mXYAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+				mXYAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
 			} break; 
 
 			case TransformWidgetRenderableType::ScaleXZAxes:
 			{
-				mXZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+				mXZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
 			} break; 
 
 			case TransformWidgetRenderableType::ScaleYZAxes:
 			{
-				mYZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+				mYZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
 			} break; 
 		}
 	}
@@ -189,35 +189,35 @@ namespace Enjon
 
 			case TransformWidgetRenderableType::ScaleXYAxes:
 			{
-				mXYAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
+				mXYAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.BlueMaterial" ) );
 			} break; 
 
 			case TransformWidgetRenderableType::ScaleXZAxes:
 			{
-				mXZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) );
+				mXZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.GreenMaterial" ) );
 			} break; 
 
 			case TransformWidgetRenderableType::ScaleYZAxes:
 			{
-				mYZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) );
+				mYZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.RedMaterial" ) );
 			} break; 
 
 			case TransformWidgetRenderableType::ScaleForwardAxis:
 			{
-				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
-				mForwardAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
+				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.BlueMaterial" ) );
+				mForwardAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.BlueMaterial" ) );
 			} break; 
 
 			case TransformWidgetRenderableType::ScaleRightAxis:
 			{
-				mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) );
-				mRightAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) ); 
+				mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.RedMaterial" ) );
+				mRightAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.RedMaterial" ) ); 
 			} break;
 
 			case TransformWidgetRenderableType::ScaleUpAxis:
 			{
-				mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) );
-				mUpAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) ); 
+				mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.GreenMaterial" ) );
+				mUpAxisArrow.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.GreenMaterial" ) ); 
 			} break; 
 		}
 

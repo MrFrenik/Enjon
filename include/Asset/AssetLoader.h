@@ -207,26 +207,17 @@ namespace Enjon
 			template < typename T >
 			Result ConstructAsset( const AssetManager* manager, AssetHandle< T >* handle, const String& assetName = "", const String& path = "" )
 			{
-				// Make sure that asset with that name doesn't exist already
-				if ( Exists( assetName ) )
-				{
-					handle->Set( GetAsset( assetName ) );
-					return Result::SUCCESS;
-				}
-
-				// Construct new asset
-				T* asset = new T( ); 
-				// Copy values from default asset
-				*asset = *(T*)GetDefaultAsset( );
+				// Get default asset from this loader
+				T* defaultAsset = (T*)GetDefaultAsset( );
 
 				// Construct unique name for asset to be saved
-				String typeName = asset->Class( )->GetName( ); 
+				String typeName = defaultAsset->Class( )->GetName( ); 
 				String originalAssetName = assetName.compare("") != 0 ? assetName : "New" + typeName;
 				String usedAssetName = originalAssetName; 
 
 				// TODO(): MAKE THIS GO THROUGH A CENTRALIZED GRAPHICS FACTORY
-				std::experimental::filesystem::path originalPath = manager->GetAssetsDirectoryPath() + "Cache/" + usedAssetName;
-				std::experimental::filesystem::path p = originalPath.string() + GetAssetFileExtension();
+				std::experimental::filesystem::path originalPath = manager->GetAssetsDirectoryPath() + "Cache/";
+				std::experimental::filesystem::path p = originalPath.string() + "/" + usedAssetName + GetAssetFileExtension();
 
 				// If path is given
 				if ( path.compare( "" ) != 0 )
@@ -244,7 +235,14 @@ namespace Enjon
 					p = std::experimental::filesystem::path( originalPath.string() + "/" + usedAssetName + GetAssetFileExtension() );
 				} 
 
-				String finalAssetName = AssetLoader::GetQualifiedName( p.string() );
+				String finalPath = Utils::FindReplaceAll( p.string( ), "\\", "/" );
+				finalPath = Utils::FindReplaceAll( finalPath, "//", "/" );
+				String finalAssetName = AssetLoader::GetQualifiedName( finalPath ); 
+
+				// Construct new asset
+				T* asset = new T( ); 
+				// Copy values from default asset
+				*asset = *defaultAsset; 
 
 				//====================================================================================
 				// Asset header information

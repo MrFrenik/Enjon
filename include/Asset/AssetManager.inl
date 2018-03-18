@@ -2,7 +2,7 @@
 // File: AssetManager.inl
 
 //================================================================================================
-			
+
 template <typename T, typename K>
 Enjon::Result AssetManager::RegisterAssetLoader()
 {

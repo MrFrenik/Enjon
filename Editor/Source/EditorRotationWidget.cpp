@@ -25,9 +25,9 @@ namespace Enjon
  
 		// Set up materials
 		mRoot.mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ) );
-		mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
-		mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) );
-		mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) ); 
+		mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.BlueMaterial" ) );
+		mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.RedMaterial" ) );
+		mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.GreenMaterial" ) ); 
 
 		mRoot.mLocalTransform.SetScale( 0.2f );
 
@@ -79,17 +79,17 @@ namespace Enjon
 		{ 
 			case TransformWidgetRenderableType::RotationForwardAxis:
 			{
-				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
 			} break;
 
 			case TransformWidgetRenderableType::RotationRightAxis:
 			{
-				mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+				mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
 			} break;
 
 			case TransformWidgetRenderableType::RotationUpAxis:
 			{
-				mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "YellowMaterial" ) );
+				mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
 			} break; 
 		}
 	}
@@ -108,17 +108,17 @@ namespace Enjon
 		{
 			case TransformWidgetRenderableType::RotationForwardAxis:
 			{
-				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "BlueMaterial" ) );
+				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.BlueMaterial" ) );
 			} break; 
 
 			case TransformWidgetRenderableType::RotationRightAxis:
 			{
-				mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "RedMaterial" ) );
+				mRightAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.RedMaterial" ) );
 			} break;
 
 			case TransformWidgetRenderableType::RotationUpAxis:
 			{
-				mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "GreenMaterial" ) );
+				mUpAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.GreenMaterial" ) );
 			} break; 
 		}
 	}

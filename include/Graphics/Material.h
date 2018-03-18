@@ -131,10 +131,10 @@ namespace Enjon {
 			void AddOverride( ShaderUniform* uniform );
 
 		protected: 
-			ENJON_PROPERTY( Editable )
+			ENJON_PROPERTY( Editable, HideInEditor )
 			AssetHandle< ShaderGraph > mShaderGraph; 
 			
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			HashMap< String, ShaderUniform* > mUniformOverrides;
 
 			ENJON_PROPERTY( Editable ) 

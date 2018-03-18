@@ -54,16 +54,28 @@ namespace Enjon
 
 			void FolderMenuPopup( );
 
+			void FolderOptionsMenuPopup( );
+
 			void NewFolderMenuOption( );
 
 			void CreateMenuOption( );
+
+			void PushActivePopupWindow( PopupWindow* window );
+
+			bool ActivePopupWindowEnabled( );
+
 
 		protected: 
 			String mCurrentDirectory = "";
 			String mRootDirectory = "";
 			String mSelectedPath = "";
+			String mRightClickedPath = "";
+			bool mPathNeedsRename = false;
 
 			PopupWindow mFolderMenuPopup;
+			PopupWindow mFolderOptionsMenuPopup;
+
+			PopupWindow* mActivePopupWindow = nullptr;
 	};
 }
 

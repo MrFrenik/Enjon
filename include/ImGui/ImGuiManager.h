@@ -96,7 +96,7 @@ namespace Enjon
 
 		protected: 
 			Vec2 mPosition;
-			Vec2 mSize; 
+			Vec2 mSize = Vec2( 200.0f, 400.0f );
 			String mLabel;
 			bool mEnabled = false; 
 			bool mHovered = false;
@@ -179,8 +179,8 @@ namespace Enjon
 		private:
 			Vector< GUICallbackFunc > mCallbacks;
 			f32 mFadeTimer = 0.0f;
-			f32 mFadeInSpeed = 10.0f;
-			f32 mFadeOutSpeed = 20.0f;
+			f32 mFadeInSpeed = 5.0f;
+			f32 mFadeOutSpeed = 10.0f;
 			f32 mFadeOutTimer = 1.0f;
 			bool mBeginDisable = false;
 	};

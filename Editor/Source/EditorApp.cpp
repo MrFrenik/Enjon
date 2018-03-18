@@ -48,14 +48,14 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-Enjon::String mProjectsDir = "W:/Projects/";
-Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -155,7 +155,7 @@ namespace Enjon
 
 			char buffer[ 256 ];
 			strncpy( buffer, componentName.c_str( ), 256 );
-			if ( ImGui::InputText( "Component Name", buffer, 256 ) )
+			if ( ImGui::InputText( "Component Name", buffer, 256, ImGuiInputTextFlags_AlwaysInsertMode | ImGuiInputTextFlags_AllowTabInput ) )
 			{
 				// Reset component name
 				componentName = String(buffer);
@@ -386,6 +386,19 @@ namespace Enjon
 				} 
 			}
 			ImGui::ListBoxFooter( );
+		}
+
+		// No selected entity
+		else
+		{
+			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_TextDisabled ) ) ) );
+			ImVec2 centerPos = ImVec2( ImGui::GetWindowPos( ).x + ImGui::GetWindowWidth() / 2.0f, ImGui::GetWindowPos( ).y + ImGui::GetWindowHeight() / 2.0f );
+			ImVec2 textSize = ImGui::CalcTextSize( "Nothing to Inspect." );
+			centerPos.x -= textSize.x / 2.0f;
+			centerPos.y -= textSize.y / 2.0f;
+			ImGui::SetCursorScreenPos( centerPos );
+			ImGui::Text( "Select Entity to Inspect." );
+			ImGui::PopStyleColor( );
 		}
 	}
 
@@ -1202,7 +1215,7 @@ namespace Enjon
 		// Grab all .eproj files and store them for loading later
 		CollectAllProjectsOnDisk( ); 
 
-		LoadResources( );
+		//LoadResources( );
 
 		// Add all necessary views into editor widget manager
 		mEditorWidgetManager.AddView( new EditorSceneView( this ) );

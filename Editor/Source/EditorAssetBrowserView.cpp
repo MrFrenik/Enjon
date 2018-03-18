@@ -72,6 +72,25 @@ namespace Enjon
 
 	//=========================================================================
 
+	void EditorAssetBrowserView::PushActivePopupWindow( PopupWindow* window )
+	{
+		mActivePopupWindow = window;
+	}
+
+	//=========================================================================
+
+	bool EditorAssetBrowserView::ActivePopupWindowEnabled( )
+	{
+		if ( mActivePopupWindow == nullptr )
+		{
+			return false;
+		}
+
+		return mActivePopupWindow->Enabled( ); 
+	}
+
+	//=========================================================================
+
 	void EditorAssetBrowserView::UpdateView( )
 	{ 
 		// Get editor widget manager
@@ -90,6 +109,14 @@ namespace Enjon
 
 			Application* app = project->GetApplication( );
 
+			// Add new button
+			if ( ImGui::Button( "+ Add New" ) )
+			{
+				mFolderMenuPopup.Activate( input->GetMouseCoords( ) );
+			} 
+
+			ImGui::SameLine( );
+
 			// Go back a directory...So fancy
 			if ( ImGui::Button( "<-" ) )
 			{
@@ -104,17 +131,64 @@ namespace Enjon
 
 			// Iterate the current directory
 			ImVec2 listBoxMin = ImGui::GetCursorScreenPos( );
-			ImVec2 listBoxSize = ImVec2( ImGui::GetWindowWidth( ) - 20.0f, ImGui::GetWindowHeight( ) - 80.0f );
+			ImVec2 listBoxSize = ImVec2( ImGui::GetWindowWidth( ) - 20.0f, ImGui::GetWindowHeight( ) - 100.0f );
 			bool hoveringItem = false;
 			ImGui::ListBoxHeader( "##AssetDirectory", listBoxSize );
 			{
 				for ( auto& p : FS::directory_iterator( mCurrentDirectory ) )
 				{
+					bool isDir = FS::is_directory( p );
+					bool isSelected = p == FS::path( mSelectedPath );
+
+					String pathLabel = Utils::SplitString( p.path( ).string( ), "\\" ).back( );
+					ImColor headerHovered = ImColor( ImGui::GetColorU32( ImGuiCol_HeaderHovered ) );
+					ImColor textColor = ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
+
+					// Get file extension
+					String fileExtension = isDir ? "" : Utils::SplitString( pathLabel, "." ).back( );
+
 					// Select directory
-					if ( ImGui::Selectable( p.path( ).string( ).c_str( ), p == FS::path( mSelectedPath ) ) )
+					ImColor finalColor = isDir ? isSelected ? textColor : headerHovered : textColor ;
+
+					ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( finalColor ) );
+					if ( mPathNeedsRename && p == FS::path( mSelectedPath ) )
+					{
+						ImGui::SetKeyboardFocusHere( -1 );
+
+						char buffer[ 256 ];
+						strncpy( buffer, pathLabel.c_str( ), 256 );
+						if ( ImGui::InputText( "##pathRename", buffer, 256, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll ) )
+						{
+							pathLabel = buffer;
+
+							String newPath = "";
+							Vector<String> splits = Utils::SplitString( p.path( ).string( ), "\\" );
+							for ( u32 i = 0; i < splits.size( ) - 1; ++i )
+							{
+								newPath += splits.at( i );
+								newPath += i == splits.size( ) - 2 ? "" : "/";
+							}
+
+							// Rename the path if it doens't exist
+							String finalPath = newPath + "/" + pathLabel + fileExtension;
+							if ( !FS::exists( finalPath ) )
+							{
+								FS::rename( p, newPath + "/" + pathLabel + fileExtension ); 
+							}
+
+							mPathNeedsRename = false;
+						}
+
+						if ( input->IsKeyPressed( KeyCode::LeftMouseButton ) && !ImGui::IsItemHovered( ) )
+						{
+							mPathNeedsRename = false;
+						}
+					} 
+					else if ( ImGui::Selectable( pathLabel.c_str( ), isSelected ) )
 					{
 						SetSelectedPath( p.path( ).string( ) );
 					}
+					ImGui::PopStyleColor( );
 
 					if ( ImGui::IsItemHovered( ) )
 					{
@@ -127,6 +201,11 @@ namespace Enjon
 								mCurrentDirectory = p.path( ).string( ); 
 							} 
 						} 
+
+						if ( input->IsKeyPressed( KeyCode::RightMouseButton ) )
+						{
+							SetSelectedPath( p.path( ).string( ) );
+						}
 					}
 				} 
 			} 
@@ -135,13 +214,26 @@ namespace Enjon
 			if ( ImGui::IsMouseHoveringRect( listBoxMin, ImVec2( listBoxMin.x + listBoxSize.x, listBoxMin.y + listBoxSize.y ) ) )
 			{
 				// Set active context menu and cache mouse coordinates
-				if ( !hoveringItem && input->IsKeyPressed( KeyCode::RightMouseButton ) )
+				if ( input->IsKeyPressed( KeyCode::RightMouseButton ) )
 				{
-					mFolderMenuPopup.Activate( input->GetMouseCoords() );
+					if ( !hoveringItem )
+					{
+						mFolderMenuPopup.Activate( input->GetMouseCoords( ) );
+						PushActivePopupWindow( &mFolderMenuPopup );
+					}
+					else
+					{
+						if ( FS::is_directory( mSelectedPath ) )
+						{
+							mFolderOptionsMenuPopup.Activate( input->GetMouseCoords( ) ); 
+							PushActivePopupWindow( &mFolderOptionsMenuPopup );
+						} 
+					}
 				} 
 			}
 
-			if ( !hoveringItem && input->IsKeyPressed(KeyCode::LeftMouseButton ) )
+			// TODO(): Input states are starting to get wonky - need to unify through one central area
+			if ( !hoveringItem && !mPathNeedsRename && !ActivePopupWindowEnabled() && input->IsKeyPressed(KeyCode::LeftMouseButton ) )
 			{
 				SetSelectedPath( "" );
 			}
@@ -149,10 +241,15 @@ namespace Enjon
 			ImGui::ListBoxFooter( ); 
 		} 
 
-		// Do pop-ups
-		if ( mFolderMenuPopup.Enabled( ) )
+		// Do active popup window
+		if ( ActivePopupWindowEnabled( ) )
 		{
-			mFolderMenuPopup.DoWidget( );
+			mActivePopupWindow->DoWidget( );
+		} 
+
+		if ( mSelectedPath.compare( "" ) != 0 && input->IsKeyPressed( KeyCode::F2 ) && FS::is_directory( mSelectedPath ) )
+		{
+			mPathNeedsRename = true;
 		}
 	}
 
@@ -160,6 +257,48 @@ namespace Enjon
 
 	void EditorAssetBrowserView::ProcessViewInput( )
 	{ 
+	}
+
+	//=========================================================================
+
+	void EditorAssetBrowserView::FolderOptionsMenuPopup( )
+	{
+		Input* input = EngineSubsystem( Input );
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
+		// Folder option group
+		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( ImGui::GetStyle( ).Colors[ImGuiCol_TextDisabled] ) );
+		ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
+		{
+			ImGui::Text( "Folder" );
+		}
+		ImGui::PopFont( ); 
+		ImGui::PopStyleColor( );
+
+		// Construct new folder option
+		if ( ImGui::Selectable( "\tDelete" ) )
+		{ 
+			// Attempt to create the directory
+			FS::remove_all( mSelectedPath );
+
+			mFolderOptionsMenuPopup.Deactivate( ); 
+		} 
+
+		// Construct new folder option
+		if ( ImGui::Selectable( "\tRename" ) )
+		{ 
+			mPathNeedsRename = true; 
+
+			mFolderOptionsMenuPopup.Deactivate( ); 
+		} 
+
+		if ( input->IsKeyDown( KeyCode::LeftMouseButton ) && !mFolderOptionsMenuPopup.Hovered( ) )
+		{
+			mFolderOptionsMenuPopup.Deactivate( );
+		}
+
+		// Separator at end of folder menu option
+		ImGui::Separator( ); 
 	}
 
 	//=========================================================================
@@ -183,21 +322,32 @@ namespace Enjon
 		{ 
 			// Starting folder name
 			String folderName = "NewFolder";
-			String dir = mCurrentDirectory + "/NewFolder/";
+			String dir = mCurrentDirectory + "\\NewFolder";
 
 			// Continue to try and create new directory
 			u32 index = 0;
 			while ( FS::exists( dir ) )
 			{
 				index++;
-				dir = mCurrentDirectory + "/NewFolder" + std::to_string( index );
+				dir = mCurrentDirectory + "\\NewFolder" + std::to_string( index );
 			}
 
 			// Attempt to create the directory
 			FS::create_directory( dir );
 
+			// Select the path
+			SetSelectedPath( dir );
+
+			// Set to needing rename
+			mPathNeedsRename = true; 
+
 			mFolderMenuPopup.Deactivate( ); 
 		} 
+
+		if ( input->IsKeyDown( KeyCode::LeftMouseButton ) && !mFolderMenuPopup.Hovered( ) )
+		{
+			mFolderMenuPopup.Deactivate( );
+		}
 
 		// Separator at end of folder menu option
 		ImGui::Separator( );
@@ -253,17 +403,21 @@ namespace Enjon
 
 	void EditorAssetBrowserView::Initialize( )
 	{ 
-		// Set up folder menu popup
 		mFolderMenuPopup.SetSize( Vec2( 200.0f, 400.0f ) );
-		mFolderMenuPopup.SetFadeInSpeed( 5.0f ); 
-		mFolderMenuPopup.SetFadeOutSpeed( 10.0f );
+		mFolderOptionsMenuPopup.SetSize( Vec2( 200.0f, 400.0f ) );
 
-		// Popup window callback
+		// Set up folder menu popup 
 		mFolderMenuPopup.RegisterCallback( [&]( )
 		{ 
 			// Do folder menu popup function
 			FolderMenuPopup( );
-		});
+		} );
+
+		// Set up folder options menu popup
+		mFolderOptionsMenuPopup.RegisterCallback( [ & ] ( )
+		{
+			FolderOptionsMenuPopup( );
+		} );
 	} 
 
 	//=========================================================================

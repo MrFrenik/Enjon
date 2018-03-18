@@ -165,9 +165,18 @@ namespace Enjon
 	String AssetLoader::GetQualifiedName( const String& filePath )
 	{
 		Vector<String> splits = Utils::SplitString( filePath, "." );
-		String res = Utils::Remove( Enjon::Utils::Replace( splits.at( 0 ), '/', '.' ), ':' );
+		String res = Utils::Remove( Enjon::Utils::Replace( splits.size() > 1 ? splits.at( splits.size() - 2 ) : splits.at( 0 ), '/', '.' ), ':' );
 		res = Utils::FindReplaceAll( res, "\\", "." );
-		return Enjon::Utils::ToLower( res );
+		Vector<String> sp2 = Utils::SplitString( res, ".Assets." );
+		String finalRes = sp2.size( ) > 1 ? sp2.at( sp2.size( ) - 1 ) : res;
+		Vector<String> sp3 = Utils::SplitString( finalRes, "." );
+		finalRes = "";
+		for ( usize i = 1; i < sp3.size(); ++i )
+		{
+			finalRes += sp3.at( i );
+			finalRes += i == sp3.size( ) - 1 ? "" : ".";
+		}
+		return Enjon::Utils::ToLower( finalRes );
 	} 
 	
 	//=================================================================
@@ -222,10 +231,12 @@ namespace Enjon
 
 	const Asset* AssetLoader::GetAsset( const String& name )
 	{
-		if ( Exists( name ) )
+		String qualifiedName = Utils::ToLower( name );
+
+		if ( Exists( qualifiedName ) )
 		{
 			// Need to check for loaded status here
-			AssetRecordInfo* info = mAssetsByName[name];
+			AssetRecordInfo* info = mAssetsByName[qualifiedName];
 
 			// If unloaded, load asset from disk
 			if ( info->GetAssetLoadStatus( ) == AssetLoadStatus::Unloaded )
@@ -265,9 +276,11 @@ namespace Enjon
 
 	bool AssetLoader::FindRecordInfoByName( const String& name, AssetRecordInfo* info )
 	{
+		String qualifiedName = Utils::ToLower( name );
+
 		for ( auto iter = mAssetsByUUID.begin( ); iter != mAssetsByUUID.end( ); ++iter )
 		{
-			if ( iter->second.GetAssetName( ) == name )
+			if ( iter->second.GetAssetName( ).compare( qualifiedName ) == 0 )
 			{
 				*info = iter->second;
 				return true;
