@@ -425,7 +425,7 @@ namespace Enjon
 		// If path is empty, then set assetPath to cached directory
 		if ( path.compare( "" ) == 0 )
 		{
-			assetPath = mCachedDirectoryPath + assetName + fileExtension; 
+			assetPath = mCachedDirectoryPath + asset->GetAssetRecordInfo()->GetAssetDisplayName() + fileExtension; 
 		}
 		else
 		{

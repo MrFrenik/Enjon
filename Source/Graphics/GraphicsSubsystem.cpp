@@ -217,8 +217,8 @@ namespace Enjon
 		glDisable( GL_CULL_FACE );
 
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
-		//Enjon::String hdrFilePath = "Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
-		Enjon::String hdrFilePath = "Textures/HDR/WinterForest_Ref.hdr";
+		Enjon::String hdrFilePath = "Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
+		//Enjon::String hdrFilePath = "Textures/HDR/WinterForest_Ref.hdr";
 		//Enjon::String hdrFilePath = "Textures/HDR/03-Ueno-Shrine_3k.hdr";
 		//Enjon::String hdrFilePath = "Textures/HDR/Newport_Loft_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "IsoARPG/Assets/Textures/HDR/Factory_Catwalk_2k.hdr";
@@ -956,7 +956,6 @@ namespace Enjon
 	{
 		Camera* camera = mGraphicsScene.GetActiveCamera( );
 
-		mLightingBuffer->Bind();
 		
 		GLSLProgram* ambientShader 		= Enjon::ShaderManager::Get("AmbientLight");
 		GLSLProgram* directionalShader 	= Enjon::ShaderManager::Get("PBRDirectionalLight");	
@@ -972,7 +971,33 @@ namespace Enjon
 		Mat4 projInverse = Mat4::Inverse( camera->GetProjection( ) );
 		Mat4 viewInverse = Mat4::Inverse( camera->GetView( ) );
 
-		mCurrentWindow->Clear();
+		mCurrentWindow->Clear(); 
+
+		mGbuffer->Bind( BindType::READ, false ); 
+		mLightingBuffer->Bind();
+		glBlitFramebuffer( 0, 0, mGbuffer->GetResolution( ).x, mGbuffer->GetResolution( ).y, 0, 0, mLightingBuffer->GetResolution( ).x, mLightingBuffer->GetResolution( ).y, GL_DEPTH_BUFFER_BIT, GL_NEAREST );
+
+		// Cubemap
+		glCullFace( GL_FRONT );
+		Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
+		skyBoxShader->Use( );
+		{
+			skyBoxShader->SetUniform( "view", mGraphicsScene.GetActiveCamera()->GetView( ) );
+			skyBoxShader->SetUniform( "projection", mGraphicsScene.GetActiveCamera()->GetProjection( ) );
+			skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
+
+			// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
+			glActiveTexture( GL_TEXTURE0 );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mIrradianceMap );
+
+			RenderCube( );
+		}
+		skyBoxShader->Unuse( );
+		glCullFace( GL_BACK );
+
+		mGbuffer->Unbind( );
+
+		mLightingBuffer->Bind( BindType::WRITE, false );
 
 		// TODO(): Abstract these away 
 		glEnable(GL_BLEND);

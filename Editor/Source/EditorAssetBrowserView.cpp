@@ -233,7 +233,7 @@ namespace Enjon
 			}
 
 			// TODO(): Input states are starting to get wonky - need to unify through one central area
-			if ( !hoveringItem && !mPathNeedsRename && !ActivePopupWindowEnabled() && input->IsKeyPressed(KeyCode::LeftMouseButton ) )
+			if ( !hoveringItem && !mPathNeedsRename && !ActivePopupWindowEnabled() && ( input->IsKeyPressed(KeyCode::LeftMouseButton ) || input->IsKeyPressed( KeyCode::RightMouseButton ) ) )
 			{
 				SetSelectedPath( "" );
 			}

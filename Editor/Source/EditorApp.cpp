@@ -53,9 +53,9 @@ Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\""
 //Enjon::String mProjectsDir = "W:/Projects/";
 //Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -397,7 +397,7 @@ namespace Enjon
 			centerPos.x -= textSize.x / 2.0f;
 			centerPos.y -= textSize.y / 2.0f;
 			ImGui::SetCursorScreenPos( centerPos );
-			ImGui::Text( "Select Entity to Inspect." );
+			ImGui::Text( "Select Object to Inspect." );
 			ImGui::PopStyleColor( );
 		}
 	}
