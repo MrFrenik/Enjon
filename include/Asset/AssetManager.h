@@ -97,6 +97,16 @@ namespace Enjon
 			AssetHandle< T > ConstructAsset( const String& assetName = "", const String& path = "" ); 
 
 			/**
+			* @brief
+			*/
+			AssetHandle< Asset > GetAssetFromFilePath( const String& path );
+
+			/**
+			* @brief
+			*/
+			void RenameAssetFilePath( const AssetHandle< Asset >&, const String& path );
+
+			/**
 			*@brief Gets asset manager name
 			*/
 			Enjon::String GetName( );

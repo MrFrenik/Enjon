@@ -14,6 +14,7 @@
 namespace Enjon
 {
 	class Project; 
+	class Asset;
 
 	class EditorAssetBrowserView : public EditorView
 	{
@@ -76,6 +77,7 @@ namespace Enjon
 			PopupWindow mFolderOptionsMenuPopup;
 
 			PopupWindow* mActivePopupWindow = nullptr;
+			const Asset* mSelectedAsset = nullptr;
 	};
 }
 

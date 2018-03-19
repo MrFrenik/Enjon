@@ -20,6 +20,8 @@
 
 namespace Enjon 
 { 
+	class Window;
+
 	enum class KeyCode : u32
 	{
 		A				= SDLK_a,
@@ -173,8 +175,10 @@ namespace Enjon
 
 	ENJON_CLASS( )
 	class Input : public Subsystem
-	{
+	{ 
 		ENJON_CLASS_BODY( )
+
+		friend Window;
 
 		public: 
 
@@ -222,6 +226,11 @@ namespace Enjon
 			* @brief
 			*/
 			bool IsKeyPressed( KeyCode code ) const;
+
+			/**
+			* @brief
+			*/
+			bool IsKeyReleased( KeyCode code ) const;
 			
 			/**
 			* @brief
@@ -300,6 +309,9 @@ namespace Enjon
 			{ 
 				return mMouseCoords; 
 			}
+
+		protected: 
+			void SetButtonState( KeyCode code, bool currentState, bool previousState );
 
 		public:
 			std::vector<SDL_GameController*> ControllerHandles;

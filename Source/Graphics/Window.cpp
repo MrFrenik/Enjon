@@ -2,6 +2,7 @@
 #include "Utils/Errors.h"
 #include "Math/Maths.h"
 #include "Graphics/GraphicsSubsystem.h"
+#include "IO/InputManager.h"
 #include "Engine.h"
 #include "SubsystemCatalog.h"
 
@@ -17,6 +18,7 @@ namespace Enjon {
 
 	Window::~Window()
 	{
+		mDroppedFiles.clear( );
 	}
 
 	int Window::Init(std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags) 
@@ -103,6 +105,11 @@ namespace Enjon {
 		SDL_GL_MakeCurrent( m_sdlWindow, mGLContext );
 	}
 
+	const Vector<String>& Window::GetDroppedFiles( ) const
+	{
+		return mDroppedFiles;
+	}
+
 	void Window::SetViewport(s32 width, s32 height)
 	{
 		m_screenWidth = width;
@@ -147,8 +154,23 @@ namespace Enjon {
 	{ 
 		GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
 
+		// Clear all dropped files from previous frame
+		mDroppedFiles.clear( );
+
 		switch ( event.type )
 		{
+			case SDL_DROPFILE:
+			{ 
+				// Push back new dropped file
+				mDroppedFiles.push_back( String(event.drop.file) ); 
+
+				// Just released, so need to explicitly set button state 
+				EngineSubsystem( Input )->SetButtonState( KeyCode::LeftMouseButton, false, true ); 
+
+				// Free the filename memory
+				SDL_free( event.drop.file ); 
+			} break;
+
 			case SDL_WINDOWEVENT: 
 			{
 				switch ( event.window.event )

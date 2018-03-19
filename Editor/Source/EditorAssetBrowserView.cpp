@@ -2,6 +2,7 @@
 // Copyright 2016-2018 John Jackson. All Rights Reserved.
 
 #include "EditorAssetBrowserView.h"
+#include "EditorInspectorView.h"
 #include "EditorApp.h"
 #include "Project.h"
 
@@ -10,7 +11,11 @@
 #include <ImGui/ImGuiManager.h>
 #include <IO/InputManager.h>
 #include <Asset/AssetManager.h>
+#include <Graphics/GraphicsSubsystem.h>
+#include <Graphics/Window.h>
 #include <Utils/FileUtils.h>
+#include <Engine.h>
+#include <SubsystemCatalog.h>
 
 #include <filesystem>
 #include <fmt/format.h>
@@ -67,6 +72,39 @@ namespace Enjon
 
 	void EditorAssetBrowserView::SetSelectedPath( const String& path )
 	{
+		if ( !FS::is_directory( path ) )
+		{
+			// Want to be able to inspect this asset
+			AssetHandle< Asset > asset = EngineSubsystem( AssetManager )->GetAssetFromFilePath( Utils::FindReplaceAll( path, "\\", "/" ) );
+
+			// If asset, then set to be inspected...God, this will fall apart so fucking fast...
+			if ( asset )
+			{
+				// Set to be inspected
+				mApp->GetInspectorView( )->SetInspetedObject( asset.Get() );
+
+				// Set selected asset
+				mSelectedAsset = asset.Get( );
+			}
+			else
+			{
+				// Set inspected asset to be null
+				mApp->GetInspectorView( )->SetInspetedObject( nullptr ); 
+
+				// Set selected asset to be null
+				mSelectedAsset = nullptr;
+			}
+		}
+		else
+		{
+			// Set inspected asset to be null
+			mApp->GetInspectorView( )->SetInspetedObject( nullptr ); 
+
+			// Set selected asset to be null
+			mSelectedAsset = nullptr; 
+		}
+
+		// Set selected path
 		mSelectedPath = path;
 	}
 
@@ -169,11 +207,21 @@ namespace Enjon
 								newPath += i == splits.size( ) - 2 ? "" : "/";
 							}
 
-							// Rename the path if it doens't exist
-							String finalPath = newPath + "/" + pathLabel + fileExtension;
+							// Final path to be created
+							String finalPath = isDir ? newPath + "/" + pathLabel : newPath + "/" + pathLabel + "." + fileExtension;
+ 
+							// If path doesn't exist, then rename this path
 							if ( !FS::exists( finalPath ) )
 							{
-								FS::rename( p, newPath + "/" + pathLabel + fileExtension ); 
+								// Rename the filepath
+								FS::rename( p, finalPath ); 
+
+								// If not a directory, then rename the asset
+								if ( !isDir )
+								{
+									// Use asset manager to set filepath of selected asset
+									EngineSubsystem( AssetManager )->RenameAssetFilePath( mSelectedAsset, finalPath );
+								}
 							}
 
 							mPathNeedsRename = false;
@@ -233,9 +281,47 @@ namespace Enjon
 			}
 
 			// TODO(): Input states are starting to get wonky - need to unify through one central area
-			if ( !hoveringItem && !mPathNeedsRename && !ActivePopupWindowEnabled() && ( input->IsKeyPressed(KeyCode::LeftMouseButton ) || input->IsKeyPressed( KeyCode::RightMouseButton ) ) )
+			if ( 
+					wm->GetHovered( this ) && 
+					!hoveringItem && 
+					!mPathNeedsRename && 
+					!ActivePopupWindowEnabled() && 
+					( input->IsKeyPressed(KeyCode::LeftMouseButton ) || input->IsKeyPressed( KeyCode::RightMouseButton ) ) 
+				)
 			{
 				SetSelectedPath( "" );
+			}
+
+			// Check for dropped files
+			//if ( wm->GetHovered( this ) &&
+			//	!hoveringItem
+			//	)
+			//{
+			//	if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) )
+			//	{
+			//		auto window = EngineSubsystem( GraphicsSubsystem )->GetWindow( );
+			//		auto dropFiles = window->GetDroppedFiles( );
+			//		if ( dropFiles.size( ) )
+			//		{
+			//			std::cout << "Dropped files: \n";
+			//			for ( auto& f : dropFiles )
+			//			{
+			//				std::cout << f << "\n";
+			//			}
+			//		}
+			//	}
+			//}
+
+			AssetManager* am = EngineSubsystem( AssetManager );
+			auto window = EngineSubsystem( GraphicsSubsystem )->GetWindow( );
+			auto dropFiles = window->GetDroppedFiles( );
+			if ( dropFiles.size( ) )
+			{
+				std::cout << "Dropped files: \n";
+				for ( auto& f : dropFiles )
+				{
+					am->AddToDatabase( f, true, false ); 
+				}
 			}
 
 			ImGui::ListBoxFooter( ); 
@@ -247,10 +333,11 @@ namespace Enjon
 			mActivePopupWindow->DoWidget( );
 		} 
 
-		if ( mSelectedPath.compare( "" ) != 0 && input->IsKeyPressed( KeyCode::F2 ) && FS::is_directory( mSelectedPath ) )
+		if ( mSelectedPath.compare( "" ) != 0 && input->IsKeyPressed( KeyCode::F2 ) )
 		{
 			mPathNeedsRename = true;
 		}
+
 	}
 
 	//=========================================================================

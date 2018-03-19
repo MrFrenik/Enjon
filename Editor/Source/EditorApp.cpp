@@ -48,10 +48,10 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-//Enjon::String mProjectsDir = "W:/Projects/";
-//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
 //Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -266,6 +266,13 @@ namespace Enjon
 	EntityHandle EditorApp::GetSelectedEntity( )
 	{
 		return mSelectedEntity;
+	}
+
+	//==================================================================================================================
+
+	EditorInspectorView* EditorApp::GetInspectorView( )
+	{
+		return mInspectorView;
 	}
 
 	//==================================================================================================================

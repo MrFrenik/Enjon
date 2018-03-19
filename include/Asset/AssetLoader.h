@@ -180,6 +180,11 @@ namespace Enjon
 			void LoadRecord( AssetRecordInfo* record );
 
 			/**
+			* @brief
+			*/
+			void RenameAssetFilePath( Asset* asset, const String& path );
+
+			/**
 			* @brief Templated argument to get asset of specific type by name
 			*/
 			template <typename T>
@@ -235,9 +240,8 @@ namespace Enjon
 					p = std::experimental::filesystem::path( originalPath.string() + "/" + usedAssetName + GetAssetFileExtension() );
 				} 
 
-				String finalPath = Utils::FindReplaceAll( p.string( ), "\\", "/" );
-				finalPath = Utils::FindReplaceAll( finalPath, "//", "/" );
-				String finalAssetName = AssetLoader::GetQualifiedName( finalPath ); 
+				// Get qualified name for asset
+				String finalAssetName = AssetLoader::GetQualifiedName( p.string( ) );
 
 				// Construct new asset
 				T* asset = new T( ); 

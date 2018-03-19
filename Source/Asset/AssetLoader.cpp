@@ -164,7 +164,9 @@ namespace Enjon
 
 	String AssetLoader::GetQualifiedName( const String& filePath )
 	{
-		Vector<String> splits = Utils::SplitString( filePath, "." );
+		String finalPath = Utils::FindReplaceAll( filePath, "\\", "/" );
+		finalPath = Utils::FindReplaceAll( finalPath, "//", "/" );
+		Vector<String> splits = Utils::SplitString( finalPath, "." );
 		String res = Utils::Remove( Enjon::Utils::Replace( splits.size() > 1 ? splits.at( splits.size() - 2 ) : splits.at( 0 ), '/', '.' ), ':' );
 		res = Utils::FindReplaceAll( res, "\\", "." );
 		Vector<String> sp2 = Utils::SplitString( res, ".Assets." );
@@ -213,6 +215,9 @@ namespace Enjon
 
 				// Set record info of asset
 				info->mAsset->mRecordInfo = info; 
+
+				// Set asset file path
+				info->mAsset->mFilePath = info->mAssetFilePath;
 			} 
 
 			// Set default asset if not valid asset
@@ -258,6 +263,9 @@ namespace Enjon
 
 				// Set record info for asset
 				info->mAsset->mRecordInfo = info; 
+
+				// Set asset file path
+				info->mAsset->mFilePath = info->mAssetFilePath;
 			}
 
 			// Return asset from info record
@@ -409,6 +417,35 @@ namespace Enjon
 			mAssetsByUUID[ rec.mAssetUUID.ToString( ) ] = rec;
 			mAssetsByName[ rec.mAssetName ] = &mAssetsByUUID[ rec.mAssetUUID.ToString() ];
 		}
+	}
+	
+	//=================================================================
+
+	void AssetLoader::RenameAssetFilePath( Asset* asset, const String& path )
+	{ 
+		// Grab the record info for this asset
+		AssetRecordInfo* info = &mAssetsByUUID[asset->GetUUID( ).ToString( )];
+
+		// Set info file path
+		info->mAssetFilePath = path;
+
+		// Have to change a lot here...
+		info->mAsset->mFilePath = path; 
+
+		// Remove from name assets map
+		mAssetsByName.erase( info->mAssetName );
+
+		// Get new qualified asset name
+		String newAssetName = AssetLoader::GetQualifiedName( path ); 
+
+		// Set info asset name
+		info->mAssetName = newAssetName;
+
+		// Set raw asset name
+		info->mAsset->mName = newAssetName;
+
+		// Put into map
+		mAssetsByName[ info->mAssetName ] = info;
 	}
 	
 	//=================================================================

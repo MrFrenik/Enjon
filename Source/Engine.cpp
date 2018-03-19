@@ -336,6 +336,9 @@ namespace Enjon
 	// TODO(): This belongs in window class
 	Enjon::Result Engine::ProcessInput( Enjon::Input* input, const f32 dt )
 	{ 
+		// Enable drop states for window
+		SDL_EventState( SDL_DROPFILE, SDL_ENABLE );
+
 	    SDL_Event event;
 		Vec2 mouseWheel( 0.0f );
 	   //Will keep looping until there are no more events to process
@@ -380,6 +383,7 @@ namespace Enjon
 					// Set mouse wheel for this frame
 					mouseWheel = Vec2( event.wheel.x, event.wheel.y );
 				} break;
+
 
 			}
 

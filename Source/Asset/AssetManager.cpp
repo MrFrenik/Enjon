@@ -16,6 +16,9 @@
 #include "SubsystemCatalog.h"
 
 #include <fmt/printf.h>
+#include <filesystem>
+
+namespace FS = std::experimental::filesystem; 
 
 namespace Enjon
 {
@@ -368,6 +371,9 @@ namespace Enjon
 
 					else
 					{
+						// Need to cache file 
+						needToCache = true;
+
 						// Load asset from file
 						asset = query->second->LoadResourceFromFile( resourceFilePath );
 
@@ -674,6 +680,42 @@ namespace Enjon
 		}
 
 		return nullptr;
+	}
+
+	//======================================================================================================
+
+	AssetHandle< Asset > AssetManager::GetAssetFromFilePath( const String& path )
+	{
+		// For each loader
+		for ( auto& l : mLoadersByAssetId )
+		{
+			// For each asset record in loader
+			for ( auto& r : l.second->mAssetsByUUID )
+			{
+				// If the path's are identical, then we've hit gold
+				if ( FS::path( Utils::FindReplaceAll( Utils::FindReplaceAll( r.second.GetAssetFilePath( ), "\\", "/" ), "//", "/" ) ) == FS::path( path ) )
+				{
+					return r.second.GetAsset( );
+				}
+			}
+		}
+
+		// If not found, return blank asset handle
+		return AssetHandle< Asset >( );
+	}
+
+	//======================================================================================================
+
+	void AssetManager::RenameAssetFilePath( const AssetHandle< Asset >& asset, const String& path )
+	{
+		if ( asset.Get() )
+		{
+			// Grab the asset from the handle
+			Asset* a = asset.Get( )->ConstCast< Asset >();
+
+			// Update in the loader
+			a->GetLoader( )->ConstCast< AssetLoader >( )->RenameAssetFilePath( a, path ); 
+		}
 	}
 
 	//======================================================================================================

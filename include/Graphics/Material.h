@@ -123,12 +123,22 @@ namespace Enjon {
 			*/
 			AssetHandle< ShaderGraph > GetShaderGraph( ) const;
 
+			/*
+			* @brief
+			*/
+			virtual Result OnEditorUI( ) override;
+
 		protected:
 
 			/*
 			* @brief
 			*/
 			void AddOverride( ShaderUniform* uniform );
+
+			/*
+			* @brief
+			*/
+			void ClearAllOverrides( );
 
 		protected: 
 			ENJON_PROPERTY( Editable, HideInEditor )

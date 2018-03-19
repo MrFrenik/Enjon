@@ -2,6 +2,7 @@
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
 
 #include "IO/InputManager.h" 
+#include "Graphics/Window.h"
 
 namespace Enjon 
 { 
@@ -62,6 +63,12 @@ namespace Enjon
 		return Result::SUCCESS;
 	}
 
+	void Input::SetButtonState( KeyCode code, bool currentState, bool previousState )
+	{
+		mKeyMap[ KeyCode( code ) ] = currentState;
+		mPreviousKeyMap[KeyCode( code )] = previousState;
+	}
+
 	void Input::PressKey( u32 code )
 	{ 
 		mKeyMap[(KeyCode)code] = true;
@@ -70,6 +77,22 @@ namespace Enjon
 	void Input::ReleaseKey( u32 code )
 	{
 		mKeyMap[(KeyCode)code] = false;
+	}
+
+	bool Input::IsKeyReleased( KeyCode code ) const
+	{
+		auto query = mKeyMap.find( code );
+		if ( query != mKeyMap.end( ) )
+		{
+			bool isDown = query->second;
+			bool wasDown = WasKeyDown( code );
+			if ( wasDown && !isDown )
+			{
+				return true;
+			} 
+		}
+
+		return false;
 	}
 
 	//Returns true if key held down	
