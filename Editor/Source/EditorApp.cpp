@@ -272,10 +272,20 @@ namespace Enjon
 
 	void EditorApp::OpenNewComponentDialogue( )
 	{
-		mNewComponentPopupDialogue = mNewComponentPopupDialogue = true;;
-		ImGui::OpenPopup( "Add C++ Component##NewComponent" );
+		if ( mNewComponentPopupDialogue )
+		{
+			ImGui::OpenPopup( "Add C++ Component##NewComponent" );
+			AddComponentPopupView( ); 
+		}
 	}
 	
+	//==================================================================================================================
+
+	void EditorApp::EnableOpenNewComponentDialogue( )
+	{
+		mNewComponentPopupDialogue = mNewComponentPopupDialogue = true;; 
+	}
+
 	//==================================================================================================================
 
 	void EditorApp::InspectorView( bool* enabled )
@@ -609,16 +619,22 @@ namespace Enjon
 			// Set transform to selected entity
 			mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) ); 
 			mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) ); 
+
+			// Set selected object in inspector view
+			mInspectorView->SetInspetedObject( mSelectedEntity.Get( ) );
 		} 
 	}
 
 	void EditorApp::DeselectEntity( )
 	{
+		// Uninspect object
+		mInspectorView->DeselectInspectedObject( mSelectedEntity.Get( ) );
+
 		// Set to invalid entity handle
 		mSelectedEntity = EntityHandle::Invalid();
 
 		// Deactivate transform widget
-		mTransformWidget.Enable( false );
+		mTransformWidget.Enable( false ); 
 	}
 
 	void EditorApp::WorldOutlinerView( )
@@ -1220,7 +1236,7 @@ namespace Enjon
 		// Add all necessary views into editor widget manager
 		mEditorWidgetManager.AddView( new EditorSceneView( this ) );
 		mEditorWidgetManager.AddView( new EditorAssetBrowserView( this ) );
-		//mEditorWidgetManager.AddView( new EditorInspectorView( this ) );
+		mInspectorView = ( EditorInspectorView* )mEditorWidgetManager.AddView( new EditorInspectorView( this ) );
 
 		// Initialize transform widget
 		mTransformWidget.Initialize( this ); 
@@ -1275,14 +1291,14 @@ namespace Enjon
 			ImGui::EndDock( );
 		} );
 
-		igm->RegisterWindow( [ & ]
-		{
-			if ( ImGui::BeginDock( "Inspector", nullptr, ImGuiWindowFlags_NoScrollbar ) )
-			{
-				InspectorView( nullptr );
-			}
-			ImGui::EndDock( );
-		} );
+		//igm->RegisterWindow( [ & ]
+		//{
+		//	if ( ImGui::BeginDock( "Inspector", nullptr, ImGuiWindowFlags_NoScrollbar ) )
+		//	{
+		//		InspectorView( nullptr );
+		//	}
+		//	ImGui::EndDock( );
+		//} );
 
 		static bool sceneSelectionViewOpen = true;
 		igm->RegisterWindow( [ & ]

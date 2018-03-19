@@ -1,3 +1,6 @@
+// File: EntityManager.h
+// Copyright 2016-2018 John Jackson. All Rights Reserved.
+
 #ifndef ENJON_ENTITY_MANAGER_H
 #define ENJON_ENTITY_MANAGER_H
 #pragma once
@@ -102,6 +105,11 @@ namespace Enjon
 
 			/// @brief Get uuid of this entity
 			UUID GetUUID( ) const;
+
+			/**
+			* @brief
+			*/
+			virtual Result OnEditorUI( ) override;
 
 			/// @brief Checks whether or not entity has given component
 			template <typename T>

@@ -9,6 +9,8 @@
 
 namespace Enjon
 { 
+	class Entity;
+
 	class EditorInspectorView : public EditorView
 	{
 		public:
@@ -22,6 +24,16 @@ namespace Enjon
 			* @brief
 			*/
 			~EditorInspectorView( ) = default; 
+
+			/**
+			* @brief
+			*/
+			void SetInspetedObject( const Object* object );
+
+			/**
+			* @brief
+			*/
+			void DeselectInspectedObject( const Object* object );
  
 		protected: 
 
@@ -40,7 +52,14 @@ namespace Enjon
 			*/
 			virtual void Initialize( ) override; 
 
+			/**
+			* @brief
+			*/
+			void InspectEntityViewHeader( Entity* ent );
+
 		protected: 
+
+			const Object* mInspectedObject = nullptr;
 	};
 }
 

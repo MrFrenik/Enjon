@@ -5,6 +5,7 @@
 #include "EditorTransformWidget.h"
 #include "EditorView.h"
 #include "EditorSceneView.h"
+#include "EditorInspectorView.h"
 #include "EditorObject.h"
 
 #include <Application.h>
@@ -54,7 +55,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void AddView( EditorView* view )
+			EditorView* AddView( EditorView* view )
 			{ 
 				if ( !HasView( view ) )
 				{
@@ -66,6 +67,9 @@ namespace Enjon
 					// Initialize view
 					view->Initialize( );
 				}
+
+				// Return the view from the function
+				return view;
 			}
 
 			/**
@@ -174,6 +178,11 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
+			EditorInspectorView* GetInspectorView( );
+
+			/**
+			* @brief 
+			*/
 			String GetBuildConfig( ) const;
  
 			/**
@@ -193,6 +202,7 @@ namespace Enjon
 
 			EntityHandle GetSelectedEntity( );
 
+			void EnableOpenNewComponentDialogue( );
 			void OpenNewComponentDialogue( ); 
 			void AddComponentPopupView( );
 
@@ -288,6 +298,8 @@ namespace Enjon
 			EditorWidgetManager mEditorWidgetManager;
 
 			EditorSceneView* mEditorSceneView = nullptr;
+
+			EditorInspectorView* mInspectorView = nullptr;
 
 			Camera mEditorCamera;
 			Vec3 mCameraRotator = Vec3( 0.0f );
