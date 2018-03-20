@@ -253,6 +253,21 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void Separator( );
+
+			/**
+			* @brief
+			*/
+			void PushFont( const String& fontName );
+
+			/**
+			* @brief
+			*/
+			void PopFont( );
+
+			/**
+			* @brief
+			*/
 			bool DragFloat2( const String& label, Vec2* vec, f32 speed = 1.0f, f32 min = 0.0f, f32 max = 0.0f );
 
 		protected:

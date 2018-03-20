@@ -13,6 +13,9 @@
 #include "Serialize/ObjectArchiver.h"
 #include "Serialize/BaseTypeSerializeMethods.h"
 #include "Serialize/ByteBuffer.h"
+#include "ImGui/ImGuiManager.h"
+#include "SubsystemCatalog.h"
+#include "Engine.h"
 
 #include <Bullet/btBulletCollisionCommon.h>
 
@@ -615,4 +618,33 @@ namespace Enjon
 	}
 
 	//========================================================================
+
+	Result RigidBody::OnEditorUI( )
+	{
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
+		// Dump self
+		igm->DebugDumpObject( this ); 
+
+		// Inspect collision shape
+		if ( mShape )
+		{
+			// Draw separator line
+			igm->Separator( ); 
+
+			// Cache shape type before inspection
+			CollisionShapeType curShapeType = mShape->GetCollisionShapeType( ); 
+			
+			// Inspect shape
+			igm->InspectObject( mShape );
+
+			// Reset shape if necessary
+			if ( curShapeType != mShape->GetCollisionShapeType( ) )
+			{
+				SetShape( mShape->GetCollisionShapeType( ) );
+			}
+		} 
+
+		return Result::SUCCESS;
+	}
 }

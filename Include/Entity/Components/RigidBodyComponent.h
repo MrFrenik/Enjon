@@ -89,6 +89,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			virtual Result OnEditorUI( ) override;
+
+			/**
+			* @brief
+			*/
 			void SetMass( const f32& mass );
 
 			/**
@@ -250,7 +255,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual Result DeserializeLateInit( ) override;
+			virtual Result DeserializeLateInit( ) override; 
 
 			/**
 			* @brief

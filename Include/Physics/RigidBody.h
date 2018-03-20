@@ -38,6 +38,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			virtual Result OnEditorUI( ) override;
+
+			/**
+			* @brief
+			*/
 			void Initialize( );
 
 			/**
@@ -320,7 +325,7 @@ namespace Enjon
 			bool mIsKinematic = false; 
 
 		public:
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			CollisionShape* mShape = nullptr;
 
 		private:

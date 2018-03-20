@@ -651,6 +651,44 @@ namespace Enjon
 				} 
 
 			} break;
+
+			// Enum type
+			case Enjon::MetaPropertyType::Enum:
+			{
+				// Property is enum prop, so need to convert it
+				const MetaPropertyEnum* enumProp = prop->Cast< MetaPropertyEnum >( ); 
+
+				s32 enumInt = *cls->GetValueAs<s32>( object, prop ); 
+
+				if ( ImGui::BeginCombo( "##enumProps", enumProp->GetEnumName().c_str() ) )
+				{ 
+					// For each element in the enum
+					for ( auto& e : enumProp->GetElements( ) )
+					{ 
+						// Has this value, so need to display it differently
+						bool pushedColor = false;
+						if ( e.Value( ) == enumInt )
+						{
+							ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.8f, 0.3f, 0.1f, 1.0f ) );
+							pushedColor = true;
+						}
+
+						if ( ImGui::Selectable( e.Identifier( ).c_str() ) )
+						{
+							cls->SetValue( object, prop, e.Value( ) );
+						} 
+
+						if ( pushedColor )
+						{
+							ImGui::PopStyleColor( );
+						}
+
+					} 
+
+					ImGui::EndCombo( );
+				}
+
+			} break;
 		}
 	} 
 
@@ -713,6 +751,7 @@ namespace Enjon
 				case Enjon::MetaPropertyType::UUID: 
 				case Enjon::MetaPropertyType::Transform:
 				case Enjon::MetaPropertyType::Bool:
+				case Enjon::MetaPropertyType::Enum:
 				{
 					DebugDumpProperty( object, prop );
 				} break; 
@@ -740,46 +779,7 @@ namespace Enjon
 
 				} break;
 
-				// Enum type
-				case Enjon::MetaPropertyType::Enum:
-				{
-					// Property is enum prop, so need to convert it
-					const MetaPropertyEnum* enumProp = prop->Cast< MetaPropertyEnum >( ); 
-
-					if ( ImGui::TreeNode( prop->GetName().c_str() ) )
-					{
-						ImGui::ListBoxHeader( "##enumProps" );
-						{
-							s32 enumInt = *cls->GetValueAs<s32>( object, prop ); 
-
-							// For each element in the enum
-							for ( auto& e : enumProp->GetElements( ) )
-							{ 
-								// Has this value, so need to display it differently
-								bool pushedColor = false;
-								if ( e.Value( ) == enumInt )
-								{
-									ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.8f, 0.3f, 0.1f, 1.0f ) );
-									pushedColor = true;
-								}
-
-								if ( ImGui::Selectable( e.Identifier( ).c_str( ) ) )
-								{
-									cls->SetValue( object, prop, e.Value( ) );
-								} 
-
-								if ( pushedColor )
-								{
-									ImGui::PopStyleColor( );
-								}
-
-							} 
-						}
-						ImGui::ListBoxFooter( ); 
-						ImGui::TreePop( );
-					}
-
-				} break;
+				
 				
 				// AssetHandle type
 				case Enjon::MetaPropertyType::AssetHandle:
@@ -1123,6 +1123,27 @@ namespace Enjon
 		ImGui::Text( text.c_str( ) );
 	}
 
+	//=====================================================================
+
+	void ImGuiManager::Separator( )
+	{
+		ImGui::Separator( );
+	}
+	
+	//=====================================================================
+
+	void ImGuiManager::PushFont( const String& fontName )
+	{
+		ImGui::PushFont( GetFont( fontName ) );
+	}
+	
+	//=====================================================================
+
+	void ImGuiManager::PopFont( )
+	{
+		ImGui::PopFont( );
+	}
+	
 	//=====================================================================
 
 	bool ImGuiManager::DragFloat2( const String& label, Vec2* vec, f32 speed, f32 min, f32 max )

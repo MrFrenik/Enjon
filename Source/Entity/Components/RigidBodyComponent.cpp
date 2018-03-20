@@ -5,6 +5,7 @@
 #include "Entity/EntityManager.h"
 #include "Serialize/ByteBuffer.h"
 #include "Serialize/ObjectArchiver.h"
+#include "ImGui/ImGuiManager.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
 
@@ -346,5 +347,13 @@ namespace Enjon
 	}
 
 	//======================================================================== 
+
+	Result RigidBodyComponent::OnEditorUI( )
+	{
+		// Inspect rigid body 
+		EngineSubsystem( ImGuiManager )->InspectObject( &mBody );
+
+		return Result::SUCCESS;
+	}
 
 }
