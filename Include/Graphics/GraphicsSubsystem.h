@@ -1,12 +1,15 @@
 #ifndef ENJON_GRAPHICS_SUBSYSTEM_H
 #define ENJON_GRAPHICS_SUBSYSTEM_H
 
+#define MAX_DEBUG_LINES 100000
+
 #include "Defines.h"
 #include "System/Types.h"
 #include "Graphics/Window.h"
 #include "Graphics/GraphicsScene.h"
 #include "Graphics/Camera.h" 
 #include "Graphics/SpriteBatch.h"
+#include "Graphics/Color.h"
 #include "Entity/EntityManager.h"
 #include "Subsystem.h" 
 
@@ -67,6 +70,13 @@ namespace Enjon
 		u32 mId;
 	};
 
+	struct DebugLine
+	{
+		Vec3 mStart;
+		Vec3 mStartColor;
+		Vec3 mEnd;
+		Vec3 mEndColor;
+	}; 
 
 	ENJON_CLASS( )
 	class GraphicsSubsystem : public Subsystem
@@ -176,7 +186,15 @@ namespace Enjon
 			*/
 			void ReinitializeFrameBuffers( );
 
+			void DrawDebugLine( const Vec3& start, const Vec3& end, const Vec3& color = Vec3( 1.0f ) );
+
 		private:
+
+			void SubmitSkybox( );
+
+			void InitDebugDrawing( );
+
+			void DebugDrawSubmit( );
 
 			/**
 			*@brief
@@ -377,6 +395,10 @@ namespace Enjon
 
 			f32 mMotionBlurVelocityScale = 2.0f;
 			u32 mMotionBlurEnabled = true; 
+
+			Vector< DebugLine > mDebugLines;
+			GLuint mDebugLineVAO; 
+			GLuint mDebugLineVBO; 
 	};
 }
 

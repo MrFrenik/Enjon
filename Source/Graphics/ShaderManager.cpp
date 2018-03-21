@@ -59,6 +59,7 @@ namespace Enjon { namespace ShaderManager {
 		ShaderManager::AddShader("SSAOBlur", sp + "SSAOBlur.v.glsl", sp + "SSAOBlur.f.glsl"); 
 		ShaderManager::AddShader("Instanced", sp + "deferred/Instanced.v.glsl", sp + "deferred/Instanced.f.glsl"); 
 		ShaderManager::AddShader("MotionBlur", sp + "PostProcessing/MotionBlur.v.glsl", sp + "PostProcessing/MotionBlur.f.glsl"); 
+		ShaderManager::AddShader("DebugLine", sp + "DebugLine.v.glsl", sp + "DebugLine.f.glsl"); 
 	}
 
 	void Shutdown( )

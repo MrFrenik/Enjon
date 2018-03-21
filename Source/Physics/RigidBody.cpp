@@ -10,6 +10,7 @@
 #include "Physics/CylinderCollisionShape.h"
 #include "Physics/ConeCollisionShape.h"
 #include "Physics/CapsuleCollisionShape.h"
+#include "Graphics/GraphicsSubsystem.h"
 #include "Serialize/ObjectArchiver.h"
 #include "Serialize/BaseTypeSerializeMethods.h"
 #include "Serialize/ByteBuffer.h"
@@ -643,6 +644,32 @@ namespace Enjon
 			{
 				SetShape( mShape->GetCollisionShapeType( ) );
 			}
+
+			// Get bullet transform from bullet motion body
+			BTransform trans;
+			BV3 aabbMin;
+			BV3 aabbMax;
+			mBody->getMotionState( )->getWorldTransform( trans ); 
+			mShape->GetRawShape( )->getAabb( trans, aabbMin, aabbMax );
+
+			f32 width = aabbMax.getX( ) - aabbMin.getX( );
+			f32 height = aabbMax.getY( ) - aabbMin.getY( );
+			f32 depth = aabbMax.getZ( ) - aabbMin.getZ( );
+
+			GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+
+			// Add debug lines
+			Vec3 color = Vec3( 0.0f, 1.0f, 0.0f );
+			Vec3 start = PhysicsUtils::BV3ToVec3( aabbMin ); 
+			// Top left line
+			gfx->DrawDebugLine( start, start + Vec3(width, 0.0f, 0.0f ), color );
+
+			// Left side
+			gfx->DrawDebugLine( start, start + Vec3( 0.0f, height, 0.0f ), color );
+
+			gfx->DrawDebugLine( start + Vec3(width, 0.0f, 0.0f), start + Vec3( width, height, 0.0f ), color );
+
+			gfx->DrawDebugLine( start + Vec3(width, 0.0f, 0.0f), start + Vec3( width, 0.0f, depth ), color );
 		} 
 
 		return Result::SUCCESS;

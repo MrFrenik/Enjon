@@ -168,6 +168,9 @@ namespace Enjon
 		glEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
+		// Initialize debug drawing
+		InitDebugDrawing( );
+
 		return Result::SUCCESS;
 	}
 
@@ -541,6 +544,17 @@ namespace Enjon
 			{ 
 				STBTest( );
 				set = true;
+			} 
+
+			for ( u32 i = 0; i < 100; ++i )
+			{
+				for ( u32 j = 0; j < 100; ++j )
+				{
+					f32 x = i * 2.0f;
+					f32 z = j * 2.0f;
+					// Add a debug line for test
+					DrawDebugLine( Vec3( x, 0.0f, z ), Vec3( x, 5.0f, z ), Vec3( 1.0f, 0.0f, 0.0f ) ); 
+				} 
 			} 
 
 			// Gbuffer pass
@@ -978,22 +992,7 @@ namespace Enjon
 		glBlitFramebuffer( 0, 0, mGbuffer->GetResolution( ).x, mGbuffer->GetResolution( ).y, 0, 0, mLightingBuffer->GetResolution( ).x, mLightingBuffer->GetResolution( ).y, GL_DEPTH_BUFFER_BIT, GL_NEAREST );
 
 		// Cubemap
-		glCullFace( GL_FRONT );
-		Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
-		skyBoxShader->Use( );
-		{
-			skyBoxShader->SetUniform( "view", mGraphicsScene.GetActiveCamera()->GetView( ) );
-			skyBoxShader->SetUniform( "projection", mGraphicsScene.GetActiveCamera()->GetProjection( ) );
-			skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
-
-			// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
-			glActiveTexture( GL_TEXTURE0 );
-			glBindTexture( GL_TEXTURE_CUBE_MAP, mIrradianceMap );
-
-			RenderCube( );
-		}
-		skyBoxShader->Unuse( );
-		glCullFace( GL_BACK );
+		//SubmitSkybox( ); 
 
 		mGbuffer->Unbind( );
 
@@ -1123,6 +1122,29 @@ namespace Enjon
 
 		glEnable(GL_DEPTH_TEST);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	}
+
+	//======================================================================================================
+
+	void GraphicsSubsystem::SubmitSkybox( )
+	{
+		// Cubemap
+		glCullFace( GL_FRONT );
+		Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
+		skyBoxShader->Use( );
+		{
+			skyBoxShader->SetUniform( "view", mGraphicsScene.GetActiveCamera()->GetView( ) );
+			skyBoxShader->SetUniform( "projection", mGraphicsScene.GetActiveCamera()->GetProjection( ) );
+			skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
+
+			// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
+			glActiveTexture( GL_TEXTURE0 );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mIrradianceMap );
+
+			RenderCube( );
+		}
+		skyBoxShader->Unuse( );
+		glCullFace( GL_BACK );
 	}
 
 	//======================================================================================================
@@ -1352,6 +1374,21 @@ namespace Enjon
 				}
 			}
 		}
+
+		// Draw debug lines
+		{
+			// Blit the gbuffer depth first
+			mGbuffer->Bind( BindType::READ, false ); 
+			glBlitFramebuffer( 0, 0, mGbuffer->GetResolution( ).x, mGbuffer->GetResolution( ).y, 0, 0, mMotionBlurTarget->GetResolution( ).x, mMotionBlurTarget->GetResolution( ).y, GL_DEPTH_BUFFER_BIT, GL_NEAREST ); 
+
+			// Draw the lines
+			DebugDrawSubmit( );
+
+			// Unbind the gbuffer from reading
+			mGbuffer->Unbind( ); 
+		}
+
+		// Unbind the motion blur target
 		mMotionBlurTarget->Unbind( );
 
 		// Simply to write object ID
@@ -1477,6 +1514,7 @@ namespace Enjon
 			}
 			shader->Unuse( ); 
 		}
+
 		inputTarget->Unbind( ); 
 	}
 
@@ -2034,9 +2072,6 @@ namespace Enjon
 	}
 
 
-	/**
-	*@brief
-	*/
 	ShaderUniform* GraphicsSubsystem::NewShaderUniform( const MetaClass* uniformClass ) const
 	{
 		if ( uniformClass )
@@ -2047,6 +2082,109 @@ namespace Enjon
 		}
 
 		return nullptr;
+	}
+
+	void GraphicsSubsystem::DrawDebugLine( const Vec3& start, const Vec3& end, const Vec3& color )
+	{
+		// Construct new debug line
+		DebugLine line = { start, color, end, color };
+
+		// Push back into lines
+		mDebugLines.push_back( line );
+	}
+
+	void GraphicsSubsystem::DebugDrawSubmit( )
+	{
+		// Bind the buffer
+		glBindBuffer( GL_ARRAY_BUFFER, mDebugLineVBO );
+
+		// Upload the data
+		u32 count = 0;
+		for ( auto& l : mDebugLines )
+		{
+			float sd[ 12 ];
+			sd[ 0 ] = l.mStart.x;
+			sd[ 1 ] = l.mStart.y;
+			sd[ 2 ] = l.mStart.z;
+			sd[ 3 ] = l.mStartColor.x;
+			sd[ 4 ] = l.mStartColor.y;
+			sd[ 5 ] = l.mStartColor.z;
+
+			sd[ 6 ] = l.mEnd.x;
+			sd[ 7 ] = l.mEnd.y;
+			sd[ 8 ] = l.mEnd.z;
+			sd[ 9 ] = l.mEndColor.x;
+			sd[ 10 ] = l.mEndColor.y;
+			sd[ 11 ] = l.mEndColor.z;
+
+			GLintptr os = sizeof( sd ) * count;
+			GLsizei sz = sizeof( sd );
+			glBufferSubData(GL_ARRAY_BUFFER, os, sz, sd ); 
+			count++;
+		}
+
+		// Unbind buffer
+		glBindBuffer( GL_ARRAY_BUFFER, 0 ); 
+
+		// Get the shader
+		GLSLProgram* shader = ShaderManager::Get( "DebugLine" );
+		shader->Use( );
+		{
+			// Set uniforms
+			shader->SetUniform( "uView", mGraphicsScene.GetActiveCamera( )->GetView( ) );
+			shader->SetUniform( "uProjection", mGraphicsScene.GetActiveCamera( )->GetProjection( ) );
+
+			// Submit data
+			glBindVertexArray( mDebugLineVAO ); 
+			{
+				glDrawArrays( GL_LINES, 0, 2 * count );
+			} 
+			glBindVertexArray( 0 ); 
+		}
+		shader->Unuse( ); 
+
+		// Clear debug lines
+		mDebugLines.clear( );
+	}
+
+	void GraphicsSubsystem::InitDebugDrawing( )
+	{
+			// Generate the VAO if it isn't already generated 
+			if (mDebugLineVAO == 0) 
+			{
+				glGenVertexArrays(1, &mDebugLineVAO);
+			}
+
+			// Bind the VAO. All subsequent opengl calls will modify its state.
+			glBindVertexArray(mDebugLineVAO);
+
+			// Generate the VBO if it isn't already generated 
+			if (mDebugLineVBO == 0) 
+			{
+				glGenBuffers(1, &mDebugLineVBO);
+			}
+			glBindBuffer(GL_ARRAY_BUFFER, mDebugLineVBO);
+
+			// Data size
+			glBufferData( GL_ARRAY_BUFFER, sizeof( DebugLine ) * MAX_DEBUG_LINES, NULL, GL_DYNAMIC_DRAW );
+
+			// Tell opengl what attribute arrays we need 
+			glEnableVertexAttribArray(0);	// Point
+			glEnableVertexAttribArray(1);	// Color
+
+			// Calculate stride of overall data
+			GLsizei stride = ( GLsizei )( ( f32 )( sizeof( DebugLine ) ) / 2.0f );
+			// Compute offset for color within stride
+			GLintptr offs = 4 * 3;
+
+			// This is the position attribute pointer 
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
+			// This is the color attribute pointer 
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (GLvoid*)offs );
+
+			// Unbind the VAO 
+			glBindVertexArray(0);
+			glBindBuffer( GL_ARRAY_BUFFER, 0 );
 	}
 
 }
