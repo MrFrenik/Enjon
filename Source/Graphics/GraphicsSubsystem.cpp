@@ -2093,6 +2093,50 @@ namespace Enjon
 		mDebugLines.push_back( line );
 	}
 
+	void GraphicsSubsystem::DrawDebugAABB( const Vec3& min, const Vec3& max, const Vec3& color )
+	{
+		// Calculate dimensions
+		f32 width = max.x - min.x;
+		f32 height = max.y - min.y;
+		f32 depth = max.z - min.z; 
+
+		// 0
+		DrawDebugLine( min, min + Vec3(width, 0.0f, 0.0f ), color );
+
+		// 1
+		DrawDebugLine( min, min + Vec3( 0.0f, height, 0.0f ), color );
+
+		// 2
+		DrawDebugLine( min + Vec3(width, 0.0f, 0.0f), min + Vec3( width, height, 0.0f ), color );
+
+		// 3
+		DrawDebugLine( min + Vec3(0.0f, height, 0.0f), min + Vec3( width, height, 0.0f ), color );
+
+		// 4
+		DrawDebugLine( min + Vec3(width, 0.0f, 0.0f), min + Vec3( width, 0.0f, depth ), color );
+
+		// 5
+		DrawDebugLine( min, min + Vec3( 0.0f, 0.0f, depth ), color ); 
+
+		// 6
+		DrawDebugLine( min + Vec3( 0.0f, height, 0.0f ), min + Vec3( 0.0f, height, depth ), color ); 
+
+		// 7
+		DrawDebugLine( min + Vec3( 0.0f, 0.0f, depth ), min + Vec3( 0.0f, height, depth ), color ); 
+
+		// 8
+		DrawDebugLine( min + Vec3( width, height, 0.0f ), min + Vec3( width, height, depth ), color ); 
+
+		// 9
+		DrawDebugLine( min + Vec3( 0.0f, 0.0f, depth ), min + Vec3( width, 0.0f, depth ), color ); 
+
+		// 10
+		DrawDebugLine( min + Vec3( 0.0f, height, depth ), min + Vec3( width, height, depth ), color ); 
+
+		// 11
+		DrawDebugLine( min + Vec3( width, 0.0f, depth ), min + Vec3( width, height, depth ), color ); 
+	}
+
 	void GraphicsSubsystem::DebugDrawSubmit( )
 	{
 		// Bind the buffer

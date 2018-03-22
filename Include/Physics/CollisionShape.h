@@ -14,6 +14,7 @@ namespace Enjon
 {
 	class RigidBody;
 	class PhysicsSubsystem;
+	class RigidBodyComponent;
 
 	ENJON_ENUM()
 	enum class CollisionShapeType
@@ -31,6 +32,7 @@ namespace Enjon
 	{
 		friend RigidBody;
 		friend PhysicsSubsystem;
+		friend RigidBodyComponent;
 
 		ENJON_CLASS_BODY( )
 

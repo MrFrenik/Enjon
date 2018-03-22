@@ -6,6 +6,7 @@
 #include "Physics/PhysicsSubsystem.h"
 #include "Entity/EntityManager.h"
 #include "Graphics/GraphicsSubsystem.h"
+#include "ImGui/ImGuiManager.h"
 #include "IO/InputManager.h"
 
 #include <assert.h>
@@ -34,6 +35,7 @@ namespace Enjon
 		EngineSubsystem( Input )->Shutdown( );
 		EngineSubsystem( PhysicsSubsystem )->Shutdown( ); 
 		EngineSubsystem( GraphicsSubsystem )->Shutdown( );
+		EngineSubsystem( ImGuiManager )->Shutdown( );
 
 		// Delete all subsystems to clear memory
 		// NOTE(): No subsystem should have an explicit destructor! Not safe to do so, since order or shutdown matters!

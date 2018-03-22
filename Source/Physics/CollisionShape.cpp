@@ -5,6 +5,7 @@
 #include "Physics/PhysicsUtils.h"
 #include "Physics/PhysicsSubsystem.h"
 #include "Physics/RigidBody.h"
+#include "Entity/Components/RigidBodyComponent.h"
 #include "Math/Vec3.h"
 
 namespace Enjon

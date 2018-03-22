@@ -5,6 +5,7 @@
 // TODO(): Abstract away Bullet Implementations
 #include <Bullet/btBulletCollisionCommon.h> 
 #include <Bullet/btBulletDynamicsCommon.h>
+#include <Bullet/LinearMath/btIDebugDraw.h>
 
 namespace Enjon 
 {
@@ -32,6 +33,7 @@ namespace Enjon
 	using BulletClosestRayResultCallback			= btCollisionWorld::ClosestRayResultCallback;
 	using BulletClosestConvexResultCallback			= btCollisionWorld::ClosestConvexResultCallback;
 	using BulletAllHitsRayResultCallback			= btCollisionWorld::AllHitsRayResultCallback;
+	using BulletIDebugDraw							= btIDebugDraw;
 }
 
 #endif

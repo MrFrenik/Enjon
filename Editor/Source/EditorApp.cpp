@@ -668,7 +668,7 @@ namespace Enjon
 		{
 			for ( auto& e : entities->GetActiveEntities( ) )
 			{
-				if ( ImGui::Selectable( fmt::format( "{}", e->GetID() ).c_str( ), mSelectedEntity == e ) )
+				if ( ImGui::Selectable( fmt::format( "{}", e->GetID() ).c_str( ) ) )
 				{
 					SelectEntity( e );
 				} 

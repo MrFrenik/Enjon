@@ -8,6 +8,7 @@
 #include "Entity/Components/RigidBodyComponent.h"
 #include "Physics/PhysicsUtils.h"
 #include "Physics/CollisionReport.h"
+#include "Graphics/GraphicsSubsystem.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
  
@@ -43,6 +44,12 @@ namespace Enjon
 
 		// Set up physics world gravity
 		mDynamicsWorld->setGravity( BV3( 0, -10, 0 ) ); 
+
+		// Set debug drawer for world
+		mDynamicsWorld->setDebugDrawer( &mDebugDrawer );
+
+		// Set mode for debug drawer
+		mDebugDrawer.setDebugMode( btIDebugDraw::DBG_DrawWireframe );
 
 		return Result::SUCCESS;
 	}
@@ -102,7 +109,8 @@ namespace Enjon
 
 			// Check collisions and process callbacks
 			CheckCollisions( dt ); 
-		}
+
+		} 
 	}
 
 	//======================================================================
@@ -392,6 +400,49 @@ namespace Enjon
 			// Store hit normal
 			mHitNormal = PhysicsUtils::BV3ToVec3( callback.m_hitNormalWorld ); 
 		}
+	}
+
+	//====================================================================== 
+
+	void PhysicsDebugDrawer::drawLine( const BV3& from, const BV3& to, const BV3& color )
+	{
+		// Grab the graphics subsystem
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		
+		// Pass the line to be drawn
+		gfx->DrawDebugLine( PhysicsUtils::BV3ToVec3( from ), PhysicsUtils::BV3ToVec3( to ), PhysicsUtils::BV3ToVec3( color ) );
+	}
+
+	//====================================================================== 
+
+	void PhysicsDebugDrawer::drawContactPoint( const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color )
+	{ 
+	}
+
+	//====================================================================== 
+
+	void PhysicsDebugDrawer::reportErrorWarning( const char* warningString )
+	{ 
+	}
+
+	//====================================================================== 
+
+	void PhysicsDebugDrawer::draw3dText( const btVector3& location, const char* textString )
+	{ 
+	}
+
+	//====================================================================== 
+
+	void PhysicsDebugDrawer::setDebugMode( s32 debugMode )
+	{ 
+		mDebugMode = debugMode;
+	}
+
+	//====================================================================== 
+
+	s32 PhysicsDebugDrawer::getDebugMode( ) const 
+	{ 
+		return mDebugMode; 
 	}
 
 	//====================================================================== 

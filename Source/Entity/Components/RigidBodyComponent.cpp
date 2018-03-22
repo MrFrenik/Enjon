@@ -92,9 +92,6 @@ namespace Enjon
 
 	void RigidBodyComponent::Initialize( )
 	{ 
-		// Reinitialize rigidbody
-		mBody.Reinitialize( ); 
-
 		// Set world transform of rigidbody
 		mBody.SetWorldTransform( mEntity->GetWorldTransform( ) );
 	}
@@ -337,6 +334,9 @@ namespace Enjon
 
 	Result RigidBodyComponent::DeserializeLateInit( )
 	{
+		// Reinitialize rigidbody
+		mBody.Reinitialize( ); 
+
 		// Reset world transform
 		if ( mEntity )
 		{
@@ -351,7 +351,7 @@ namespace Enjon
 	Result RigidBodyComponent::OnEditorUI( )
 	{
 		// Inspect rigid body 
-		EngineSubsystem( ImGuiManager )->InspectObject( &mBody );
+		EngineSubsystem( ImGuiManager )->InspectObject( &mBody ); 
 
 		return Result::SUCCESS;
 	}

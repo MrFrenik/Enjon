@@ -188,6 +188,8 @@ namespace Enjon
 
 			void DrawDebugLine( const Vec3& start, const Vec3& end, const Vec3& color = Vec3( 1.0f ) );
 
+			void DrawDebugAABB( const Vec3& min, const Vec3& max, const Vec3& color = Vec3( 1.0f ) );
+
 		private:
 
 			void SubmitSkybox( );

@@ -18,8 +18,49 @@ namespace Enjon
 	class Entity; 
 	class Component;
 
-	// What does a ray cast result give you?
+	class PhysicsDebugDrawer : public BulletIDebugDraw
+	{
+		public:
+			/**
+			* @brief
+			*/
+			PhysicsDebugDrawer( ) = default;
 
+			/**
+			* @brief
+			*/
+			virtual void drawLine( const BV3& from, const BV3& to, const BV3& color ); 
+
+			/**
+			* @brief
+			*/
+			virtual void drawContactPoint( const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color );
+
+			/**
+			* @brief
+			*/
+			virtual void reportErrorWarning( const char* warningString );
+
+			/**
+			* @brief
+			*/
+			virtual void draw3dText( const btVector3& location, const char* textString );
+
+			/**
+			* @brief
+			*/
+			virtual void setDebugMode( s32 debugMode );
+
+			/**
+			* @brief
+			*/
+			virtual s32 getDebugMode( ) const;
+
+		private:
+			s32 mDebugMode = 1;
+	};
+
+	// What does a ray cast result give you?  
 	class RayCastResult
 	{
 		public: 
@@ -167,6 +208,8 @@ namespace Enjon
 			HashSet<RigidBody*> mRigidBodies;
 			HashMap< RigidBodyComponent*, HashSet< RigidBodyComponent* > > mContactEvents;
 			HashMap< RigidBodyComponent*, HashSet< RigidBodyComponent* > > mNewContactEvents;
+
+			PhysicsDebugDrawer mDebugDrawer;
 
 			u32 mIsPaused = false;
 	}; 

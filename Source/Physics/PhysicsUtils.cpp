@@ -35,5 +35,36 @@ namespace Enjon
 		}
 
 		//============================================================
+
+		Transform BTransformToTransform( const BTransform& transform )
+		{ 
+			// Create new Enjon Transform
+			Transform newTrans;
+			BV3 pos = transform.getOrigin( );
+			BQuat rot = transform.getRotation( );
+
+			newTrans.SetPosition( BV3ToVec3( pos ) );
+			newTrans.SetRotation( Quaternion( rot.getX( ), rot.getY( ), rot.getZ( ), -rot.getW( ) ) ); 
+
+			return newTrans;
+		}
+
+		//============================================================
+
+		BTransform TransformToBTransform( const Transform& transform )
+		{ 
+			// Create new bullet transform
+			BTransform bTransform;
+			bTransform.setIdentity( );
+			const Vec3* elp = &transform.GetPosition();
+			const Quaternion* elr = &transform.GetRotation();
+			const Vec3* els = &transform.GetScale();
+			bTransform.setOrigin( BV3( elp->x, elp->y, elp->z ) );
+			bTransform.setRotation( BQuat( elr->x, elr->y, elr->z, -elr->w ) );
+
+			return bTransform;
+		}
+
+		//============================================================
 	}
 }
