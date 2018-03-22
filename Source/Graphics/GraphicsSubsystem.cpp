@@ -992,7 +992,7 @@ namespace Enjon
 		glBlitFramebuffer( 0, 0, mGbuffer->GetResolution( ).x, mGbuffer->GetResolution( ).y, 0, 0, mLightingBuffer->GetResolution( ).x, mLightingBuffer->GetResolution( ).y, GL_DEPTH_BUFFER_BIT, GL_NEAREST );
 
 		// Cubemap
-		//SubmitSkybox( ); 
+		SubmitSkybox( ); 
 
 		mGbuffer->Unbind( );
 
