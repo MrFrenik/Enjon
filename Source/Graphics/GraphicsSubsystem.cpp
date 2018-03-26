@@ -546,17 +546,6 @@ namespace Enjon
 				set = true;
 			} 
 
-			for ( u32 i = 0; i < 100; ++i )
-			{
-				for ( u32 j = 0; j < 100; ++j )
-				{
-					f32 x = i * 2.0f;
-					f32 z = j * 2.0f;
-					// Add a debug line for test
-					DrawDebugLine( Vec3( x, 0.0f, z ), Vec3( x, 5.0f, z ), Vec3( 1.0f, 0.0f, 0.0f ) ); 
-				} 
-			} 
-
 			// Gbuffer pass
 			GBufferPass();
 			// SSAO pass
@@ -1488,9 +1477,21 @@ namespace Enjon
 
 	void GraphicsSubsystem::UIPass( FrameBuffer* inputTarget )
 	{
+		bool isStandalone = Engine::GetInstance( )->GetConfig( ).IsStandAloneApplication( );
+
 		Camera* camera = mGraphicsScene.GetActiveCamera( );
 
-		Vector<Renderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
+		if ( isStandalone )
+		{
+			// Queue up gui
+			igm->Render(mCurrentWindow->GetSDLWindow()); 
+			// Flush
+			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+			ImGui::Render(); 
+		}
+
 		inputTarget->Bind( BindType::WRITE, false );
 		{
 			auto shader = ShaderManager::GetShader( "Text" ); 
@@ -1504,10 +1505,11 @@ namespace Enjon
 				{
 					auto wt = Engine::GetInstance( )->GetWorldTime( ).mTotalTime;
 					auto uiFont = FontManager::GetFont("WeblySleek_16"); 
-					//f32 fps = ImGui::GetIO( ).Framerate;
-					f32 fps = Engine::GetInstance( )->GetWorldTime( ).mFPS;
-					f32 frameTime = ( 1.0f / fps ) * 1000.0f;
-					Enjon::PrintText( 10.0f, 10.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch ); 
+					f32 frameTime = 1000.0f / ( f32 )ImGui::GetIO( ).Framerate;
+
+					auto vp = GetViewport( );
+					Enjon::PrintText( 10.0f, vp.y - 20.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch ); 
+					Enjon::PrintText( 10.0f, vp.y - 40.0f, 1.0f, isStandalone ? "Standalone" : "Editor", uiFont, mUIBatch ); 
 				}
 				mUIBatch.End( );
 				mUIBatch.RenderBatch( ); 

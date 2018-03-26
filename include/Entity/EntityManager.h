@@ -96,32 +96,67 @@ namespace Enjon
 		friend EntityArchiver;
 
 		public:
+			
+			/**
+			* @brief
+			*/
 			Entity();
+
+			/**
+			* @brief
+			*/
 			Entity(EntityManager* manager);
+
+			/**
+			* @brief
+			*/
 			~Entity();
 
-			/// @brief Get id of this entity
-			u32 GetID() { return mID; }
+			/**
+			* @brief Get id of this entity
+			*/
+			u32 GetID( ) const;
 
-			/// @brief Get uuid of this entity
+			/**
+			* @brief Get uuid of this entity
+			*/
 			UUID GetUUID( ) const;
+
+			/**
+			* @brief Get name of this entity
+			*/
+			String GetName( ) const;
+
+			/*
+			* @brief
+			*/
+			void SetName( const String& uuid );
 
 			/**
 			* @brief
 			*/
 			virtual Result OnEditorUI( ) override;
 
-			/// @brief Checks whether or not entity has given component
+			/**
+			* @brief Checks whether or not entity has given component
+			*/
 			template <typename T>
 			bool HasComponent();
 
+			/**
+			* @brief
+			*/
 			bool HasComponent( const MetaClass* compCls );
 
-			/// @brief Gets component from entity, if exists
+			/**
+			* @brief Gets component from entity, if exists
+			*/
 			template <typename T>
 			T* GetComponent();
 
-			/// @brief Attaches component to entity, if exists
+			/**
+			* @brief Attaches component to entity, if exists
+			*/
 			template <typename T>
 			T* AddComponent();
 
@@ -130,7 +165,9 @@ namespace Enjon
 			*/
 			Component* AddComponent( const MetaClass* compCls );
 
-			/// @brief Detaches component from entity, if exists
+			/**
+			* @brief Detaches component from entity, if exists
+			*/
 			template <typename T>
 			void RemoveComponent();
 
@@ -140,72 +177,116 @@ namespace Enjon
 			*/
 			void RemoveComponent( const MetaClass* cls );
 
-			/// @brief Sets local transform of entity
+			/**
+			* @brief Sets local transform of entity
+			*/
 			void SetLocalTransform( const Transform& transform, bool propagateToComponents = true );
 
-			/// @brief Gets local transform of entity relative to parent entity, if exists
+			/**
+			* @brief Gets local transform of entity relative to parent entity, if exists 
+			*/
 			Transform GetLocalTransform();
-
-			/// @brief Gets World transform of entity which calculates world transform if dirty flag is set
+			
+			/**
+			* @brief Gets World transform of entity which calculates world transform if dirty flag is set 
+			*/
 			Transform GetWorldTransform();
 
-			/// @brief Sets local position of entity relative to parent, if exists
+			/**
+			* @brief Sets local position of entity relative to parent, if exists
+			*/
 			void SetLocalPosition( Vec3& position, bool propagateToComponents = true );
 
-			/// @brief Sets local scale of entity relative to parent, if exists
+			/**
+			* @brief Sets local scale of entity relative to parent, if exists
+			*/
 			void SetLocalScale(Vec3& scale, bool propagateToComponents = true );
 
-			/// @brief Sets local scale of entity relative to parent, if exists
+			/**
+			* @brief Sets local scale of entity relative to parent, if exists
+			*/
 			void SetLocalScale(f32 scale, bool propagateToComponents = true );
 
-			/// @brief Sets local orientation of entity relative to parent, if exists
+			/**
+			* @brief Sets local orientation of entity relative to parent, if exists
+			*/
 			void SetLocalRotation(Quaternion& rotation, bool propagateToComponents = true );
 
-			/// @brief Gets local position of entity relative to parent, if exists
+			/**
+			* @brief Gets local position of entity relative to parent, if exists
+			*/
 			Vec3 GetLocalPosition();
 
-			/// @brief Gets local scale of entity relative to parent, if exists
+			/**
+			* @brief Gets local scale of entity relative to parent, if exists
+			*/
 			Vec3 GetLocalScale();
 
-			/// @brief Gets local rotation of entity relative to parent, if exists
+			/**
+			* @brief Gets local rotation of entity relative to parent, if exists
+			*/
 			Quaternion GetLocalRotation();
 
-			/// @brief Gets World position of entity which calculates world transform if dirty flag is set
+			/**
+			* @brief Gets World position of entity which calculates world transform if dirty flag is set 
+			*/
 			ENJON_FUNCTION( )
 			Vec3 GetWorldPosition();
 
-			/// @brief Gets World scale of entity which calculates world transform if dirty flag is set
+			/**
+			* @brief Gets World scale of entity which calculates world transform if dirty flag is set
+			*/
 			Vec3 GetWorldScale();
 
-			/// @brief Gets World rotation of entity which calculates world transform if dirty flag is set
+			/**
+			* @brief Gets World rotation of entity which calculates world transform if dirty flag is set
+			*/
 			Quaternion GetWorldRotation();
 
-			/// @brief Gets parent of this entity, returns nullptr if doesn't exist
+			/** 
+			* @brief Gets parent of this entity, returns nullptr if doesn't exist
+			*/
 			EntityHandle GetParent() { return mParent; }
 
-			/// @brief Registers a child with this entity
+			/**
+			* @brief Registers a child with this entity
+			*/
 			void AddChild(const EntityHandle& child);
 
-			/// @brief Removes child from entity, if exists
+			/**
+			* @brief Removes child from entity, if exists
+			*/
 			void DetachChild(const EntityHandle& child, bool deferRemovalFromList = false );	
 
-			/// @brief Sets parent of entity, if one doesn't already exist
+			/**
+			* @brief Sets parent of entity, if one doesn't already exist
+			*/
 			void SetParent(const EntityHandle& parent);
 
-			/// @brief Removes parent from entity, if one exists
+			/**
+			* @brief Removes parent from entity, if one exists
+			*/
 			void RemoveParent( bool deferRemovalFromList = false );
 			
-			/// @brief 
+			/**
+			* @brief 
+			*/
 			EntityHandle GetHandle( );
 
-			/// @brief Returns whether or not has parent
-			b8 Entity::HasParent();
+			/** 
+			* @brief Returns whether or not has parent
+			*/
+			b8 HasParent();
 
-			/// @brief Returns whether or not has children
-			b8 Entity::HasChildren();
+			/**
+			* @brief Returns whether or not has children
+			*/
+			b8 HasChildren();
 
-			/// @brief Returns whether or not entity is valid
-			b8 Entity::IsValid();
+			/**
+			* @brief Returns whether or not entity is valid
+			*/
+			b8 IsValid();
 
 			/*
 			* @brief
@@ -222,16 +303,27 @@ namespace Enjon
 			*/
 			Vec3 Up( );
 
+			/**
+			* @brief
+			*/
 			const Vector< EntityHandle >& GetChildren() const { return mChildren; }
 
+			/**
+			* @brief
+			*/
 			const Vector<u32>& GetComponentIndicies( ) const 
 			{ 
 				return mComponents; 
 			}
 
+			/**
+			* @brief
+			*/
 			Vector<Component*> GetComponents( ); 
 
-			/// @brief Propagates transform down through all components
+			/**
+			* @brief Propagates transform down through all components
+			*/
 			void UpdateComponentTransforms();
 
 			/*
@@ -259,7 +351,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void SetUUID( const UUID& uuid );
+			void SetUUID( const UUID& uuid ); 
 
 		private:
 			/*
@@ -302,7 +394,7 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			Transform mWorldTransform;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			Vector<u32> mComponents;
  
 			ENJON_PROPERTY( )
@@ -311,9 +403,11 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			UUID mUUID;
 
+			ENJON_PROPERTY( )
+			String mName = "Entity";
+
 			Enjon::EntityManager* mManager;
 			Enjon::EntityState mState;
-			EntityHandle mHandle;
 	};
 
 	//using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
@@ -478,6 +572,11 @@ namespace Enjon
 			EntityHandle GetEntityByUUID( const UUID& uuid );
 
 		protected: 
+
+			/**
+			* @brief
+			*/
+			void RegisterAllEngineComponents( );
 
 
 			/**

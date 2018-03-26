@@ -45,6 +45,8 @@ namespace Enjon
 			virtual u32 GetSize( ) const = 0;
 
 			virtual Vector<Component*> GetComponents( ) = 0;
+
+			virtual void Update( ) = 0;
 	};
 
 	class ComponentArray : public ComponentWrapperBase
@@ -62,6 +64,11 @@ namespace Enjon
 
 			using ComponentPtrs = Vector<Component*>; 
 			using ComponentMap = HashMap<u32, Component*>;
+
+			/**
+			* @brief
+			*/
+			virtual void Update( ) override;
 
 			virtual Component* AddComponent( const u32& entityId, Component* component ) override
 			{

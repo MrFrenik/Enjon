@@ -129,7 +129,7 @@ namespace Enjon {
 			mSortedRenderables.push_back( renderable );
 
 			// Sort renderables
-			SortRenderables( );
+			//SortRenderables( );
 		}
 	}
 
@@ -145,7 +145,7 @@ namespace Enjon {
 			mSortedRenderables.erase( std::remove( mSortedRenderables.begin( ), mSortedRenderables.end( ), renderable ), mSortedRenderables.end( ) );
 
 			// Sort renderables
-			SortRenderables( );
+			//SortRenderables( );
 		}
 	}
 

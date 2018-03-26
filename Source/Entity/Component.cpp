@@ -1,6 +1,8 @@
 #include "Entity/Component.h"
 #include "Entity/Entity.h"
 #include "Entity/EntityManager.h"
+#include "Engine.h"
+#include "Application.h"
 
 namespace Enjon 
 { 
@@ -113,4 +115,27 @@ namespace Enjon
 	}
 	
 	//=========================================================================
+
+	void ComponentArray::Update( )
+	{
+		// Get the application
+		const Application* app = Engine::GetInstance( )->GetApplication( );
+ 
+		// Update all components
+		for ( auto& c : mComponentPtrs )
+		{
+			if ( c->GetTickState() == ComponentTickState::TickAlways || app->GetApplicationState( ) == ApplicationState::Running )
+			{
+				c->Update( ); 
+			}
+			// Otherwise kill loop and return ( Note: not cache friendly, but oh wells )
+			else
+			{
+				return;
+			}
+		} 
+	}
+
+	//=========================================================================
 }
+

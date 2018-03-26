@@ -17,8 +17,12 @@ namespace Enjon
 		// Grab imgui manager
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
+		ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
+		igm->DebugDumpProperty( this, Class( )->GetPropertyByName( "mName" ) ); 
+		ImGui::PopFont( );
+
 		// Display all components and transform information
-		ImGui::ListBoxHeader( "##CompLists", ImVec2(ImGui::GetWindowSize().x - 20.0f, ImGui::GetWindowSize().y - 40.0f ) );
+		ImGui::ListBoxHeader( "##CompLists", ImVec2(ImGui::GetWindowSize().x - 20.0f, ImGui::GetWindowSize().y - 80.0f ) );
 		{
 			// Transform information
 			if ( ImGui::CollapsingHeader( "Transform" ) )
@@ -49,4 +53,25 @@ namespace Enjon
 	} 
 
 	//=====================================================================
+	
+	u32 Entity::GetID() const
+	{ 
+		return mID; 
+	}
+
+	//===================================================================== 
+
+	String Entity::GetName( ) const
+	{
+		return mName;
+	}
+
+	//===================================================================== 
+
+	void Entity::SetName( const String& name )
+	{
+		mName = name;
+	}
+
+	//===================================================================== 
 }

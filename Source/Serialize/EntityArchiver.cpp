@@ -63,6 +63,9 @@ namespace Enjon
 		// Write out entity UUID
 		buffer->Write< UUID >( entity.Get( )->GetUUID( ) );
 
+		// Write out entity name
+		buffer->Write< String >( entity.Get( )->GetName( ) );
+
 		//==========================================================================
 		// Components
 		//========================================================================== 
@@ -189,11 +192,17 @@ namespace Enjon
 		scale.z = buffer->Read< f32 >( );
 		local.SetScale( scale );
 
+		// Get the entity
+		Entity* ent = handle.Get( );
+
 		 //Set the transform of the entity
-		handle.Get( )->SetLocalTransform( local );
+		ent->SetLocalTransform( local );
 
 		// Read in uuid
-		handle.Get( )->SetUUID( buffer->Read< UUID >( ) );
+		ent->SetUUID( buffer->Read< UUID >( ) );
+
+		// Read in name
+		ent->SetName( buffer->Read< String >( ) );
 
 		//=================================================================
 		// Components
@@ -211,7 +220,7 @@ namespace Enjon
 			if ( cmpCls )
 			{
 				// Attach new component to entity using MetaClass
-				Component* cmp = handle.Get( )->AddComponent( cmpCls );
+				Component* cmp = ent->AddComponent( cmpCls );
 				if ( cmp )
 				{
 					Result res = cmp->DeserializeData( buffer );
@@ -240,20 +249,21 @@ namespace Enjon
 		for ( u32 i = 0; i < numChildren; ++i )
 		{
 			EntityHandle child = Deserialize( buffer );
-			if ( child.Get() )
+			Entity* childEnt = child.Get( );
+			if ( childEnt )
 			{
 				// Grab local transform of child that was just deserialized
-				Transform localTrans = child.Get( )->GetLocalTransform( );
+				Transform localTrans = childEnt->GetLocalTransform( );
 
 				// After adding child, local transform will be incorrect
-				handle.Get( )->AddChild( child );
+				ent->AddChild( child );
 
 				// Restore local transform
-				child.Get( )->SetLocalTransform( localTrans );
+				childEnt->SetLocalTransform( localTrans );
 			}
 		}
 
-		return handle.Get( );
+		return ent;
 	} 
 
 	//========================================================================================= 

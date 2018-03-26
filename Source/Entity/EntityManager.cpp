@@ -2,6 +2,7 @@
 #include "Entity/Component.h"
 #include "Entity/Components/GraphicsComponent.h"
 #include "Entity/Components/PointLightComponent.h"
+#include "Entity/Components/DirectionalLightComponent.h"
 #include "Entity/Components/RigidBodyComponent.h"
 #include "Entity/Components/CameraComponent.h"
 #include "SubsystemCatalog.h"
@@ -650,7 +651,6 @@ namespace Enjon
 		handle.mEntity = entity;
 		handle.mID = id;
 		entity->mID = id;				
-		entity->mHandle = handle;
 		entity->mState = EntityState::ACTIVE; 
 		entity->mManager = this;
 		entity->mUUID = UUID::GenerateUUID( );
@@ -851,11 +851,8 @@ namespace Enjon
 		mNextAvailableID = 0;
 		mEntities.resize( MAX_ENTITIES );
 
-		// Register engine components here
-		RegisterComponent< GraphicsComponent >( );
-		RegisterComponent< PointLightComponent >( );
-		RegisterComponent< RigidBodyComponent >( ); 
-		RegisterComponent< CameraComponent >( );
+		// Register all engine level components with component array 
+		RegisterAllEngineComponents( );
 
 		return Result::SUCCESS;
 	}
@@ -902,16 +899,11 @@ namespace Enjon
 			mNeedStartList.clear( );
 		} 
 
-		// Update all components on entities
-		for ( auto& e : mActiveEntities )
+		// Update all component systems
+		for ( auto& system : mComponents )
 		{
-			// Only update if state is active 
-			// NOTE(): I don't really like this, since it forces an unecessary branch...
-			if ( e->mState == EntityState::ACTIVE )
-			{
-				e->Update( dt ); 
-			}
-		} 
+			system.second->Update( );
+		}
 	}
 
 	//==================================================================================================
@@ -951,6 +943,18 @@ namespace Enjon
 		mMarkedForDestruction.clear( );
 
 		return Result::SUCCESS;
+	}
+
+	//================================================================================================== 
+
+	void EntityManager::RegisterAllEngineComponents( )
+	{
+		// Register engine components here
+		RegisterComponent< GraphicsComponent >( );
+		RegisterComponent< PointLightComponent >( );
+		RegisterComponent< RigidBodyComponent >( ); 
+		RegisterComponent< DirectionalLightComponent >( ); 
+		RegisterComponent< CameraComponent >( ); 
 	}
 
 	//================================================================================================== 

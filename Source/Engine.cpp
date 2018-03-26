@@ -243,6 +243,9 @@ namespace Enjon
 			 // Update input manager
 			mInput->Update( dt ); 
 
+			// Update physics
+			mPhysics->Update( dt ); 
+
 			// Update input
 			Enjon::Result res = ProcessInput( mInput, dt );
 			if ( res != Result::PROCESS_RUNNING )
@@ -269,9 +272,6 @@ namespace Enjon
 
 			// Update entity manager
 			mEntities->Update( dt ); 
-
-			// Update physics
-			mPhysics->Update( dt ); 
 
 			// Update graphics
 			mGraphics->Update( dt ); 

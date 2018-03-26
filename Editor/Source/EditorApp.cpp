@@ -668,7 +668,7 @@ namespace Enjon
 		{
 			for ( auto& e : entities->GetActiveEntities( ) )
 			{
-				if ( ImGui::Selectable( fmt::format( "{}", e->GetID() ).c_str( ), mSelectedEntity == e ) )
+				if ( ImGui::Selectable( fmt::format( "{}##{}", e->GetName(), e->GetID() ).c_str( ), mSelectedEntity == e ) )
 				{
 					SelectEntity( e );
 				} 
@@ -1327,6 +1327,7 @@ namespace Enjon
 					std::cout << "Creating empty entity...\n";
 					EntityManager* em = EngineSubsystem( EntityManager );
 					EntityHandle empty = em->Allocate( );
+					empty.Get( )->SetName( "Empty" );
 
 					// Set to selected entity
 					SelectEntity( empty );
@@ -1351,6 +1352,8 @@ namespace Enjon
 
 						const Camera* cam = gs->GetGraphicsSceneCamera( );
 						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
+
+						ent->SetName( "Cube" );
 					}
 
 					// Select entity
@@ -1376,6 +1379,8 @@ namespace Enjon
 
 						const Camera* cam = gs->GetGraphicsSceneCamera( );
 						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
+
+						ent->SetName( "Sphere" );
 					}
 
 					// Select entity
@@ -1395,6 +1400,8 @@ namespace Enjon
 
 						const Camera* cam = gs->GetGraphicsSceneCamera( );
 						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
+
+						ent->SetName( "PointLight" );
 					}
 
 					// Select entity
@@ -1414,6 +1421,8 @@ namespace Enjon
 
 						const Camera* cam = gs->GetGraphicsSceneCamera( );
 						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
+
+						ent->SetName( "DirectionalLight" );
 					}
 
 					// Select entity

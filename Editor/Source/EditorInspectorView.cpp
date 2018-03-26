@@ -154,7 +154,7 @@ namespace Enjon
 	void EditorInspectorView::InspectEntityViewHeader( Entity* ent )
 	{
 		 //Get ImGuiManager subsystem
-		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
 
 		// New component dialogue
 		ImGui::PushFont( igm->GetFont( "WeblySleek_16" ) );

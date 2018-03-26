@@ -280,10 +280,10 @@ namespace Enjon
 			void InitializeDefaults(); 
 
 		private:
-			std::vector<std::function<void()>> mGuiFuncs;
-			std::vector<std::function<void()>> mWindows;
-			std::unordered_map<std::string, std::vector<std::function<void()>>> mMainMenuOptions;
-			std::vector<GUIDockingLayout> mDockingLayouts; 
+			Vector<std::function<void()>> mGuiFuncs;
+			Vector<std::function<void()>> mWindows;
+			HashMap<String, Vector<std::function<void()>>> mMainMenuOptions;
+			Vector<GUIDockingLayout> mDockingLayouts; 
 			HashMap< Enjon::String, ImFont* > mFonts;
 			ImGuiContext* mContext = nullptr;
 	};

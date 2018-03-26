@@ -54,6 +54,15 @@ namespace Enjon
 		ImVec2 a( mSceneViewWindowPosition.x, mSceneViewWindowPosition.y );
 		ImVec2 b( mSceneViewWindowPosition.x + mSceneViewWindowSize.x, mSceneViewWindowPosition.y + mSceneViewWindowSize.y ); 
 		dl->AddRect( a, b, ImColor( 0.0f, 0.64f, 1.0f, 0.48f ), 1.0f, 15, 1.5f ); 
+
+		//ImGui::SetCursorPosX( ImGui::GetWindowWidth( ) + padding.x - 20.0f );
+		//ImGui::SetCursorScreenPos( ImVec2( cursorPos.x + ImGui::GetWindowWidth() - 60.0f, cursorPos.y + 10.0f ) );
+		//ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.2f, 0.2f, 0.2f, 0.3f ) );
+		//if ( ImGui::Button( "[ ]" ) )
+		//{
+		//	// Close all other tabs and make this the only one open
+		//}
+		//ImGui::PopStyleColor( );
 	}
 
 	//=================================================================

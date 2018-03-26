@@ -329,6 +329,11 @@ namespace Enjon
 
 	void ImGuiManager::DebugDumpProperty( const Enjon::Object* object, const Enjon::MetaProperty* prop )
 	{
+		if ( !prop || !object )
+		{
+			return;
+		} 
+
 		const Enjon::MetaClass* cls = object->Class( ); 
 		Enjon::String name = prop->GetName( );
 
@@ -591,64 +596,59 @@ namespace Enjon
 				Enjon::Quaternion rot = val.GetRotation( );
 				Enjon::Vec3 scl = val.GetScale( );
 
-				if ( ImGui::TreeNode( Enjon::String( prop->GetName( ) + "##" + std::to_string( (u32)object ) ).c_str( ) ) )
-				{ 
-					// Position 
-					ImGui::Text( fmt::format( "Position", prop->GetName( ) ).c_str( ) );
-					ImGui::SameLine( );
-					ImGui::SetCursorPosX( windowWidth * 0.4f );
-					ImGui::PushItemWidth( windowWidth / 2.0f ); 
+				// Position 
+				ImGui::Text( fmt::format( "Position", prop->GetName( ) ).c_str( ) );
+				ImGui::SameLine( );
+				ImGui::SetCursorPosX( windowWidth * 0.4f );
+				ImGui::PushItemWidth( windowWidth / 2.0f ); 
+				{
+					f32 col[ 3 ] = { pos.x, pos.y, pos.z };
+					if ( ImGui::DragFloat3( Enjon::String( "##position" + prop->GetName() ).c_str( ), col ) )
 					{
-						f32 col[ 3 ] = { pos.x, pos.y, pos.z };
-						if ( ImGui::DragFloat3( Enjon::String( "##position" + prop->GetName() ).c_str( ), col ) )
-						{
-							pos.x = col[ 0 ];
-							pos.y = col[ 1 ];
-							pos.z = col[ 2 ]; 
-							val.SetPosition( pos );
-							cls->SetValue( object, prop, val );
-						} 
-					}
-					ImGui::PopItemWidth( );
-					
-					// Rotation
-					ImGui::Text( fmt::format( "Rotation", prop->GetName( ) ).c_str( ) );
-					ImGui::SameLine( );
-					ImGui::SetCursorPosX( windowWidth * 0.4f );
-					ImGui::PushItemWidth( windowWidth / 2.0f ); 
-					{
-						f32 col[ 4 ] = { rot.x, rot.y, rot.z, rot.w };
-						if ( ImGui::DragFloat4( Enjon::String( "##rotation" + prop->GetName() ).c_str( ), col ) )
-						{
-							rot.x = col[ 0 ];
-							rot.y = col[ 1 ];
-							rot.z = col[ 2 ];
-							val.SetRotation( rot );
-							cls->SetValue( object, prop, val );
-						} 
-					}
-					ImGui::PopItemWidth( );
-					
-					// Scale
-					ImGui::Text( fmt::format( "Scale", prop->GetName( ) ).c_str( ) );
-					ImGui::SameLine( );
-					ImGui::SetCursorPosX( windowWidth * 0.4f );
-					ImGui::PushItemWidth( windowWidth / 2.0f ); 
-					{
-						f32 col[ 3 ] = { scl.x, scl.y, scl.z };
-						if ( ImGui::DragFloat3( Enjon::String( "##scale" + prop->GetName() ).c_str( ), col ) )
-						{
-							scl.x = col[ 0 ];
-							scl.y = col[ 1 ];
-							scl.z = col[ 2 ];
-							val.SetScale( scl );
-							cls->SetValue( object, prop, val );
-						} 
+						pos.x = col[ 0 ];
+						pos.y = col[ 1 ];
+						pos.z = col[ 2 ]; 
+						val.SetPosition( pos );
+						cls->SetValue( object, prop, val );
 					} 
-					ImGui::PopItemWidth( );
-
-					ImGui::TreePop( ); 
+				}
+				ImGui::PopItemWidth( );
+				
+				// Rotation
+				ImGui::Text( fmt::format( "Rotation", prop->GetName( ) ).c_str( ) );
+				ImGui::SameLine( );
+				ImGui::SetCursorPosX( windowWidth * 0.4f );
+				ImGui::PushItemWidth( windowWidth / 2.0f ); 
+				{
+					f32 col[ 4 ] = { rot.x, rot.y, rot.z, rot.w };
+					if ( ImGui::DragFloat4( Enjon::String( "##rotation" + prop->GetName() ).c_str( ), col ) )
+					{
+						rot.x = col[ 0 ];
+						rot.y = col[ 1 ];
+						rot.z = col[ 2 ];
+						val.SetRotation( rot );
+						cls->SetValue( object, prop, val );
+					} 
+				}
+				ImGui::PopItemWidth( );
+				
+				// Scale
+				ImGui::Text( fmt::format( "Scale", prop->GetName( ) ).c_str( ) );
+				ImGui::SameLine( );
+				ImGui::SetCursorPosX( windowWidth * 0.4f );
+				ImGui::PushItemWidth( windowWidth / 2.0f ); 
+				{
+					f32 col[ 3 ] = { scl.x, scl.y, scl.z };
+					if ( ImGui::DragFloat3( Enjon::String( "##scale" + prop->GetName() ).c_str( ), col ) )
+					{
+						scl.x = col[ 0 ];
+						scl.y = col[ 1 ];
+						scl.z = col[ 2 ];
+						val.SetScale( scl );
+						cls->SetValue( object, prop, val );
+					} 
 				} 
+				ImGui::PopItemWidth( );
 
 			} break;
 
