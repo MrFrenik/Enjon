@@ -62,22 +62,17 @@ namespace Enjon
 		f32 coneYOffset = 1.2f;
 		Vec3 coneScale = Vec3( 2.0f, 0.3f, 2.0f );
 		Vec3 sharedAxisScale = Vec3( 3.0f, 0.4f, 0.2f );
-
-		mForwardAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( 90.0f ), Vec3::XAxis() ) );
+		mForwardAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( -90.0f ), Vec3::XAxis() ) );
 		mRightAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( 90.0f ), Vec3::ZAxis() ) );
-
 		mForwardAxis.mLocalTransform.SetScale( Vec3( xzScale, yScale, xzScale ) );
 		mRightAxis.mLocalTransform.SetScale( Vec3( xzScale, yScale, xzScale ) );
 		mUpAxis.mLocalTransform.SetScale( Vec3( xzScale, yScale, xzScale ) );
-
-		mForwardAxis.mLocalTransform.SetPosition( Vec3( 0.0f, 0.0f, -( yScale + bias ) ) );
+		mForwardAxis.mLocalTransform.SetPosition( Vec3( 0.0f, 0.0f, yScale + bias ) );
 		mRightAxis.mLocalTransform.SetPosition( Vec3( yScale + bias, 0.0f, 0.0f ) );
 		mUpAxis.mLocalTransform.SetPosition( Vec3( 0.0f, yScale + bias, 0.0f ) );
-
 		mForwardAxisArrow.mLocalTransform.SetPosition( Vec3( 0.0f, coneYOffset, 0.0f ) );
 		mRightAxisArrow.mLocalTransform.SetPosition( Vec3( 0.0f, coneYOffset, 0.0f ) );
 		mUpAxisArrow.mLocalTransform.SetPosition( Vec3( 0.0f, coneYOffset, 0.0f ) );
-
 		mForwardAxisArrow.mLocalTransform.SetScale( coneScale );
 		mUpAxisArrow.mLocalTransform.SetScale( coneScale );
 		mRightAxisArrow.mLocalTransform.SetScale( coneScale ); 

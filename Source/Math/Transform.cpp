@@ -135,4 +135,26 @@ namespace Enjon
 	{
 		mRotation = rotation;
 	} 
+
+	//==========================================================================
+
+	void Transform::LookAt( const Vec3& target, const Vec3& up )
+	{ 
+		// Ignore, since you cannot look at yourself
+		if ((mPosition - target).Length() < 0.001f) return;
+
+		if (std::fabs(mPosition.Dot(up)) - 1.0f < 0.001f)
+		{
+			// Lookat and view direction are colinear
+			return;
+		}	
+
+		// Get look at 
+		Mat4 LA = Mat4::LookAt(mPosition, target, up);
+
+		// Set rotation
+		SetRotation( Mat4ToQuaternion(LA) ); 
+	}
+
+	//==========================================================================
 }

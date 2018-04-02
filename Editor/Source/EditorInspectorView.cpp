@@ -156,6 +156,7 @@ namespace Enjon
 		 //Get ImGuiManager subsystem
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
 
+
 		// New component dialogue
 		ImGui::PushFont( igm->GetFont( "WeblySleek_16" ) );
 		if ( ImGui::BeginCombo( "##ADDCOMPONENT", "+ Add Component..." ) )

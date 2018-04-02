@@ -128,6 +128,13 @@ namespace Enjon
 			*/
 			void SetRotation(const Quaternion& rotation);
 
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			void LookAt( const Vec3& target, const Vec3& up = Vec3( 0.0f, 1.0f, 0.0f ) );
+
 		private: 
 			Vec3 mPosition;
 

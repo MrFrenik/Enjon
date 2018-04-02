@@ -24,73 +24,73 @@ namespace Enjon
 {
 	//============================================================================================ 
 
-	AssetManager::AssetManager() 
+	AssetManager::AssetManager( )
 	{
 		// Set to default
 		mName = "";
 
 		// Set to default
 		mAssetsDirectoryPath = "";
-		
+
 		// Register the loaders with manager 
 		RegisterLoaders( );
 	}
 
 	//============================================================================================ 
 
-	AssetManager::AssetManager(const String& name, const String& assetsPath)
+	AssetManager::AssetManager( const String& name, const String& assetsPath )
 	{
 		// Set name
 		mName = name;
 
 		// Set project asset path
-		mAssetsDirectoryPath = assetsPath; 
+		mAssetsDirectoryPath = assetsPath;
 
 		// Register the loaders with manager 
 		RegisterLoaders( );
 	}
-	
+
 	//============================================================================================ 
-			
+
 	void AssetManager::RegisterLoaders( )
 	{
 		// Register the loaders with manager 
-		RegisterAssetLoader< Texture,		TextureAssetLoader >( );
-		RegisterAssetLoader< Mesh,			MeshAssetLoader >( );
-		RegisterAssetLoader< UIFont,		FontAssetLoader >( );
-		RegisterAssetLoader< ShaderGraph,	ShaderGraphAssetLoader >( );
-		RegisterAssetLoader< Material,		MaterialAssetLoader >( );
-		RegisterAssetLoader< Scene,			SceneAssetLoader >( );
+		RegisterAssetLoader< Texture, TextureAssetLoader >( );
+		RegisterAssetLoader< Mesh, MeshAssetLoader >( );
+		RegisterAssetLoader< UIFont, FontAssetLoader >( );
+		RegisterAssetLoader< ShaderGraph, ShaderGraphAssetLoader >( );
+		RegisterAssetLoader< Material, MaterialAssetLoader >( );
+		RegisterAssetLoader< Scene, SceneAssetLoader >( );
 
 		// Create file extension map
-		mFileExtensionMap[ "png" ]	= GetAssetTypeId< Texture >( );
-		mFileExtensionMap[ "tga" ]	= GetAssetTypeId< Texture >( );
+		mFileExtensionMap[ "png" ] = GetAssetTypeId< Texture >( );
+		mFileExtensionMap[ "tga" ] = GetAssetTypeId< Texture >( );
 		mFileExtensionMap[ "jpeg" ] = GetAssetTypeId< Texture >( );
-		mFileExtensionMap[ "bmp" ]	= GetAssetTypeId< Texture >( );
-		mFileExtensionMap[ "hdr" ]	= GetAssetTypeId< Texture >( );
-		mFileExtensionMap[ "fbx" ]	= GetAssetTypeId< Mesh >( );
-		mFileExtensionMap[ "obj" ]	= GetAssetTypeId< Mesh >( );
-		mFileExtensionMap[ "ttf" ]	= GetAssetTypeId< UIFont >( );
-		mFileExtensionMap[ "otf" ]	= GetAssetTypeId< UIFont >( ); 
-		mFileExtensionMap[ "sg" ]	= GetAssetTypeId< ShaderGraph >( ); 
+		mFileExtensionMap[ "bmp" ] = GetAssetTypeId< Texture >( );
+		mFileExtensionMap[ "hdr" ] = GetAssetTypeId< Texture >( );
+		mFileExtensionMap[ "fbx" ] = GetAssetTypeId< Mesh >( );
+		mFileExtensionMap[ "obj" ] = GetAssetTypeId< Mesh >( );
+		mFileExtensionMap[ "ttf" ] = GetAssetTypeId< UIFont >( );
+		mFileExtensionMap[ "otf" ] = GetAssetTypeId< UIFont >( );
+		mFileExtensionMap[ "sg" ] = GetAssetTypeId< ShaderGraph >( );
 	}
-	
+
 	//============================================================================================ 
-			
+
 	// Base initialization method called from engine
-	Result AssetManager::Initialize()
-	{ 
+	Result AssetManager::Initialize( )
+	{
 		// Initialize the manifest and read in records
-		mCacheManifest.Initialize( mAssetsDirectoryPath + "/Intermediate/CacheManifest.bin", this ); 
+		mCacheManifest.Initialize( mAssetsDirectoryPath + "/Intermediate/CacheManifest.bin", this );
 
 		// NOTE(): After first initialization, set asset location type to be application specific
 		// NOTE(): I hate this, by the way...
 		mAssetLocationType = AssetLocationType::ApplicationAsset;
 
- 
+
 		return Result::SUCCESS;
-	} 
-	
+	}
+
 	//============================================================================================ 
 
 	void AssetManager::Reinitialize( const String& assetsPath )
@@ -107,7 +107,7 @@ namespace Enjon
 		// Call initialize function
 		Initialize( );
 	}
-	
+
 	//============================================================================================ 
 
 	AssetLocationType AssetManager::GetAssetLocationType( ) const
@@ -118,75 +118,75 @@ namespace Enjon
 	//============================================================================================ 
 
 	void AssetManager::Update( const f32 dT )
-	{ 
+	{
 		// In here could check for file updates on hot loaded resources
 	}
-	
+
 	//============================================================================================ 
 
-	Result AssetManager::Shutdown()
+	Result AssetManager::Shutdown( )
 	{
 		// Delete all asset loaders
 		for ( auto& l : mLoadersByAssetId )
 		{
 			delete l.second;
 			l.second = nullptr;
-		} 
+		}
 
 		mLoadersByAssetId.clear( );
-		mLoadersByMetaClass.clear();
+		mLoadersByMetaClass.clear( );
 
 		// Reset cache registry manifest
 		mCacheManifest.Reset( );
 
 		return Result::SUCCESS;
 	}
-	
+
 	//============================================================================================ 
-			
+
 	void AssetManager::SetAssetsDirectoryPath( const String& path )
 	{
-		mAssetsDirectoryPath = path; 
+		mAssetsDirectoryPath = path;
 		SetCachedAssetsDirectoryPath( mAssetsDirectoryPath + "Cache/" );
 	}
-	
+
 	//============================================================================================ 
-			
+
 	Enjon::String AssetManager::GetAssetsDirectoryPath( ) const
 	{
 		return mAssetsDirectoryPath;
 	}
-	
+
 	//============================================================================================ 
-			
+
 	void AssetManager::SetCachedAssetsDirectoryPath( const String& filePath )
 	{
 		mCachedDirectoryPath = filePath;
 	}
-	
+
 	//============================================================================================ 
-	
+
 	const Enjon::String& AssetManager::GetCachedAssetsDirectoryPath( ) const
 	{
 		return mCachedDirectoryPath;
 	}
-	
+
 	//============================================================================================ 
-			
+
 	void AssetManager::SetDatabaseName( const String& name )
 	{
 		mName = name;
 	}
-	
+
 	//============================================================================================ 
 
 	s32 AssetManager::GetLoaderIdxByFileExtension( const String& filePath )
-	{ 
+	{
 		// If not found, will return -1
 		s32 idx = -1;
 
 		// Get file extension of file
-		String fileExtension = Utils::SplitString( filePath, "." ).back( ); 
+		String fileExtension = Utils::SplitString( filePath, "." ).back( );
 
 		// Search for file extension relation with loader
 		auto query = mFileExtensionMap.find( fileExtension );
@@ -195,15 +195,15 @@ namespace Enjon
 			idx = mFileExtensionMap[ fileExtension ];
 		}
 
-		return idx; 
+		return idx;
 	}
-	
+
 	//============================================================================================ 
-			
+
 	Enjon::String AssetManager::GetName( )
 	{
 		return mName;
-	} 
+	}
 
 	//============================================================================================ 
 
@@ -213,18 +213,18 @@ namespace Enjon
 		assert( cls != nullptr );
 
 		// Get type id of class
-		u32 idx = cls->GetTypeId( ); 
+		u32 idx = cls->GetTypeId( );
 
 		if ( Exists( idx ) )
 		{
-			return ConstCast< AssetManager >()->mLoadersByAssetId[ idx ]->GetDefault( );
+			return ConstCast< AssetManager >( )->mLoadersByAssetId[ idx ]->GetDefault( );
 		}
 
 		return nullptr;
 	}
-	
+
 	//============================================================================================ 
-			
+
 	const Asset* AssetManager::GetAsset( const MetaClass* cls, const UUID& id ) const
 	{
 		// Get type id of class
@@ -237,9 +237,9 @@ namespace Enjon
 
 		return nullptr;
 	}
-	
+
 	//============================================================================================ 
-			
+
 	const HashMap< Enjon::String, AssetRecordInfo >* AssetManager::GetAssets( const Enjon::MetaClass* cls ) const
 	{
 		// Make sure class is valid
@@ -250,23 +250,127 @@ namespace Enjon
 
 		if ( Exists( idx ) )
 		{
-			return ConstCast< AssetManager >()->mLoadersByAssetId[ idx ]->GetAssets( );
-		} 
+			return ConstCast< AssetManager >( )->mLoadersByAssetId[ idx ]->GetAssets( );
+		}
 
 		return nullptr;
 	}
 
 	/*
 		How to create a new material asset and then serialize it?
-	 
+
 		// Needs a unique name:
 		//	- Save out default name as "New" + cls->GetName() + unique instance number // For instance, a new material will have name "NewMaterial1", if there was one other existing file named "NewMaterial"
 		AssetHandle<Asset> AssetManager::CreateAsset( const MetaClass* cls )
 		{
-					
+
 		}
 
-	*/ 
+	*/
+
+	//============================================================================================ 
+
+	Result AssetManager::AddToDatabase( const String& resourceFilePath, const String& destDir, bool cache, AssetLocationType locationType )
+	{
+		Result res = Result::SUCCESS;
+
+		bool needToCache = false;
+
+		// Get idx of loader
+		s32 idx = GetLoaderIdxByFileExtension( resourceFilePath );
+
+		Asset* asset = nullptr;
+
+		// Load not found
+		if ( idx < 0 )
+		{
+			return Result::FAILURE;
+		}
+
+		// Get original name of asset
+		String resourceFilePathName = Utils::FindReplaceAll( resourceFilePath, "\\", "/" );
+		Vector<String> splits = Utils::SplitString( resourceFilePathName, "/" );
+		// Get back of splits for file name
+		resourceFilePathName = splits.back( );
+
+		// Get asset name
+		String assetDisplayName = Utils::SplitString( resourceFilePathName, "." ).at( 0 );
+
+		// Construct asset path
+		String destAssetPath = Utils::FindReplaceAll( destDir + "/" + resourceFilePathName, "\\", "/" );
+ 
+		// Get qualified name of asset
+		String qualifiedName = AssetLoader::GetQualifiedName( destAssetPath );
+
+		auto query = mLoadersByAssetId.find( ( u32 )idx );
+		if ( query != mLoadersByAssetId.end( ) )
+		{
+			if ( !query->second )
+			{
+				return Result::FAILURE;
+			}
+
+			// Make sure it doesn't exist already before trying to load it
+			if ( query->second->Exists( qualifiedName ) )
+			{
+				return Result::FAILURE;
+			}
+			else
+			{
+				// Load asset and place into database
+
+				// Return failure if path doesn't exist
+				if ( !Utils::FileExists( resourceFilePath ) )
+				{
+					return Result::FAILURE;
+				}
+
+				//// If file exists, grab that
+				//if ( query->second->Exists( Utils::ToLower( mName ) + qualifiedName ) )
+				//{
+				//	return Result::SUCCESS;
+				//}
+
+				else
+				{
+					// We need to cache the asset at the end of this operation
+					needToCache = true;
+
+					// Load the asset from file
+					asset = query->second->LoadResourceFromFile( resourceFilePath );
+
+					// If asset is valid
+					if ( asset )
+					{
+						// Add to loader assets with asset record info
+						AssetRecordInfo info;
+						asset->mName = qualifiedName;
+						asset->mFilePath = destAssetPath;				// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
+						asset->mUUID = UUID::GenerateUUID( );
+						asset->mLoader = query->second;
+						info.mAsset = asset;
+						info.mAssetName = asset->mName;
+						info.mAssetUUID = asset->mUUID;
+						info.mAssetFilePath = destAssetPath;							// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
+						info.mAssetDisplayName = assetDisplayName;
+						info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+
+						// Add to loader
+						query->second->AddToAssets( info );
+					}
+				}
+			}
+		}
+
+		// If we need to cache the asset, then do that shit now
+		if ( needToCache && cache )
+		{
+			// Handle serialization of asset file
+			res = SerializeAsset( asset, qualifiedName, destDir );
+		}
+
+		return res;
+	}
  
 	//============================================================================================ 
 			
@@ -282,7 +386,7 @@ namespace Enjon
 		s32 idx = GetLoaderIdxByFileExtension( resourceFilePath );
 
 		// Asset to be returned from loading if successful
-		Asset* asset = nullptr;
+		Asset* asset = nullptr; 
 
 		// If out of bounds, return failure since file extension was unknown
 		if ( idx < 0 )

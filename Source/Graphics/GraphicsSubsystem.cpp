@@ -1503,13 +1503,17 @@ namespace Enjon
 				shader->SetUniform( "projection", ortho );
 				mUIBatch.Begin( );
 				{
-					auto wt = Engine::GetInstance( )->GetWorldTime( ).mTotalTime;
-					auto uiFont = FontManager::GetFont("WeblySleek_16"); 
-					f32 frameTime = 1000.0f / ( f32 )ImGui::GetIO( ).Framerate;
+					// Print out frame time 
+					if ( isStandalone )
+					{
+						auto wt = Engine::GetInstance( )->GetWorldTime( ).mTotalTime;
+						auto uiFont = FontManager::GetFont("WeblySleek_16"); 
+						f32 frameTime = 1000.0f / ( f32 )ImGui::GetIO( ).Framerate;
 
-					auto vp = GetViewport( );
-					Enjon::PrintText( 10.0f, vp.y - 20.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch ); 
-					Enjon::PrintText( 10.0f, vp.y - 40.0f, 1.0f, isStandalone ? "Standalone" : "Editor", uiFont, mUIBatch ); 
+						auto vp = GetViewport( );
+						Enjon::PrintText( 10.0f, vp.y - 20.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch ); 
+						Enjon::PrintText( 10.0f, vp.y - 40.0f, 1.0f, isStandalone ? "Standalone" : "Editor", uiFont, mUIBatch ); 
+					}
 				}
 				mUIBatch.End( );
 				mUIBatch.RenderBatch( ); 

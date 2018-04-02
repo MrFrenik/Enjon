@@ -3,6 +3,8 @@
 
 #include <Math/Quaternion.h>
 
+#include <glm/glm.hpp>
+
 namespace Enjon 
 { 
 	Vec3 Quaternion::XYZ()
@@ -200,7 +202,7 @@ namespace Enjon
 
 	Vec3 Quaternion::EulerAngles()
 	{
-		//return Vec3(this->Roll(), this->Pitch(), this->Yaw());
+		return Vec3(this->Roll(), this->Pitch(), this->Yaw());
 
 		double ysqr = y * y;
 
@@ -220,7 +222,7 @@ namespace Enjon
 		double t4 = +1.0 - 2.0 * ( ysqr + z * z );
 		double yaw = std::atan2( t3, t4 );
 
-		return Vec3( roll, pitch, yaw );
+		return Vec3( ToDegrees(roll), ToDegrees(pitch), ToDegrees(yaw) );
 	} 
 
 	Quaternion Quaternion::NegativeAngleAxis( )

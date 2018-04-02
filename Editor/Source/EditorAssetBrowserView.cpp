@@ -320,7 +320,8 @@ namespace Enjon
 				std::cout << "Dropped files: \n";
 				for ( auto& f : dropFiles )
 				{
-					am->AddToDatabase( f, true, false ); 
+					am->AddToDatabase( f, mCurrentDirectory, true );
+					//am->AddToDatabase( f, true, false ); 
 				}
 			}
 

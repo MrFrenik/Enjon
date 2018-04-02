@@ -957,7 +957,14 @@ namespace Enjon
 	{
 		// Save the current scene and store uuid
 		UUID uuid;
+		UUID mSelectedEntityUUID;
 		SceneManager* sm = EngineSubsystem( SceneManager );
+
+		if ( mSelectedEntity )
+		{
+			mSelectedEntityUUID = mSelectedEntity.Get( )->GetUUID();
+		}
+
 		if ( sm->GetScene() )
 		{
 			uuid = sm->GetScene()->GetUUID( );
@@ -971,6 +978,12 @@ namespace Enjon
 		if ( uuid )
 		{
 			sm->LoadScene( uuid );
+		}
+
+		// Reselect the previous entity
+		if ( mSelectedEntityUUID )
+		{
+			SelectEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( mSelectedEntityUUID ) );
 		}
 	}
 
@@ -1550,7 +1563,7 @@ namespace Enjon
 			mMouseCoordsDelta = Vec2( (f32)(viewPort.x) / 2.0f - mc.x, (f32)(viewPort.y) / 2.0f - mc.y );
 		}
 
-		if ( !mPlaying )
+		//if ( !mPlaying )
 		{
 			if ( !mMoveCamera )
 			{

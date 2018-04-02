@@ -620,13 +620,19 @@ namespace Enjon
 				ImGui::SetCursorPosX( windowWidth * 0.4f );
 				ImGui::PushItemWidth( windowWidth / 2.0f ); 
 				{
-					f32 col[ 4 ] = { rot.x, rot.y, rot.z, rot.w };
-					if ( ImGui::DragFloat4( Enjon::String( "##rotation" + prop->GetName() ).c_str( ), col ) )
+					Vec3 euler = rot.EulerAngles( );
+					f32 vals[ 3 ] = { ToDegrees(euler.x), ToDegrees(euler.y), ToDegrees(euler.z) };
+
+					//f32 col[ 4 ] = { rot.x, rot.y, rot.z, rot.w };
+					if ( ImGui::DragFloat3( Enjon::String( "##rotation" + prop->GetName() ).c_str( ), vals ) )
 					{
-						rot.x = col[ 0 ];
-						rot.y = col[ 1 ];
-						rot.z = col[ 2 ];
-						val.SetRotation( rot );
+						euler.x = vals[ 0 ];
+						euler.y = vals[ 1 ];
+						euler.z = vals[ 2 ];
+						//rot.x = col[ 0 ];
+						//rot.y = col[ 1 ];
+						//rot.z = col[ 2 ];
+						val.SetRotation( Quaternion::FromEulerAngles( euler ) );
 						cls->SetValue( object, prop, val );
 					} 
 				}

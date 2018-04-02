@@ -105,7 +105,8 @@ namespace Enjon
 
 			// Simulate the dynamics world step
 			//mDynamicsWorld->stepSimulation( 1.f / 60.f, 0 ); 
-			mDynamicsWorld->stepSimulation( dt * wt.GetTimeScale(), 10 ); 
+			mDynamicsWorld->stepSimulation( wt.GetAverageDeltaTime() * wt.GetTimeScale(), 10 ); 
+			//mDynamicsWorld->stepSimulation( dt * wt.GetTimeScale(), 10 ); 
 
 			// Check collisions and process callbacks
 			CheckCollisions( dt ); 

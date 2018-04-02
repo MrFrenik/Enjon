@@ -16,14 +16,18 @@ namespace Enjon
 	{
 		// Grab imgui manager
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
-
-		ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
-		igm->DebugDumpProperty( this, Class( )->GetPropertyByName( "mName" ) ); 
-		ImGui::PopFont( );
-
+ 
 		// Display all components and transform information
 		ImGui::ListBoxHeader( "##CompLists", ImVec2(ImGui::GetWindowSize().x - 20.0f, ImGui::GetWindowSize().y - 80.0f ) );
 		{
+			// Name / Tag information
+			if ( ImGui::CollapsingHeader( "Label" ) )
+			{
+				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
+				igm->DebugDumpProperty( this, Class( )->GetPropertyByName( "mName" ) ); 
+				ImGui::PopFont( ); 
+			}
+
 			// Transform information
 			if ( ImGui::CollapsingHeader( "Transform" ) )
 			{
