@@ -1138,7 +1138,7 @@ Enjon::Result Game::Initialize()
 	ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
 	// Set up way to dock these initially at start up of all systems
-	igm->RegisterWindow(showEntities);
+	igm->RegisterWindow("Entities", showEntities);
 
 	// Set up docking layout
 	igm->RegisterDockingLayout(GUIDockingLayout("Entities", "Game View", GUIDockSlotType::Slot_Left, 0.1f));

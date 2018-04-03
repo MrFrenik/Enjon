@@ -65,11 +65,31 @@ namespace Enjon
 		return Result::SUCCESS;
 	}
 
+	//==============================================================================================
+
+	bool ImGuiManager::HasWindow( const String& windowName )
+	{
+		return ( mWindows.find( windowName ) != mWindows.end( ) );
+	}
+
+	//==============================================================================================
+
+	bool ImGuiManager::HasMenuOption( const String& menu, const String& menuOptionName )
+	{
+		if ( mMainMenuOptions.find( menu ) != mMainMenuOptions.end( ) )
+		{
+			return ( mMainMenuOptions[menu].find( menuOptionName ) != mMainMenuOptions[menu].end( ) );
+		}
+
+		return false;
+	}
+
 	//---------------------------------------------------
-	void ImGuiManager::RegisterMenuOption(std::string name, std::function<void()> func)
+
+	void ImGuiManager::RegisterMenuOption(const String& menuName, const String& optionName, std::function<void()> func)
 	{
 		// Will create the vector if not there
-		mMainMenuOptions[name].push_back(func);
+		mMainMenuOptions[menuName][optionName] = func;
 	}
 
 	//---------------------------------------------------
@@ -80,9 +100,12 @@ namespace Enjon
 	}
 
 	//---------------------------------------------------
-	void ImGuiManager::RegisterWindow(std::function<void()> func)
+	void ImGuiManager::RegisterWindow(const String& windowName, std::function<void()> func)
 	{
-		mWindows.push_back(func);
+		if ( !HasWindow( windowName ) )
+		{
+			mWindows[windowName] = func; 
+		}
 	}
 
 	void ImGuiManager::RenderGameUI(Window* window, f32* view, f32* projection)
@@ -907,7 +930,7 @@ namespace Enjon
 	    // Display all registered windows
 	    for (auto& wind : mWindows)
 	    {
-	    	wind();
+			wind.second( );
 	    }
 	}
 
@@ -955,7 +978,7 @@ namespace Enjon
 			{
 				for (auto& sub : mMainMenuOptions["File"])
 				{
-					sub();		
+					sub.second( );
 				}
 				ImGui::EndMenu();
 			}
@@ -964,7 +987,7 @@ namespace Enjon
 			{
 				for ( auto& sub : mMainMenuOptions[ "Create" ] )
 				{
-					sub( );
+					sub.second( );
 				}
 				ImGui::EndMenu( );
 			}
@@ -973,7 +996,7 @@ namespace Enjon
 			{
 				for (auto& sub : mMainMenuOptions["View"])
 				{
-					sub();		
+					sub.second( );
 				}
 
 				ImGui::EndMenu();
@@ -983,7 +1006,7 @@ namespace Enjon
 			{
 				for (auto& sub : mMainMenuOptions["Help"])
 				{
-					sub();		
+					sub.second();		
 				}
 				ImGui::EndMenu();
 			}
@@ -1108,7 +1131,7 @@ namespace Enjon
 
 	void ImGuiManager::InitializeDefaults()
 	{
-		mMainMenuOptions["File"].push_back([&]()
+		mMainMenuOptions["File"]["Save"] = ([&]()
 		{
 			static bool on = false;
 	    	ImGui::MenuItem("Save##file", NULL, &on);
@@ -1370,6 +1393,39 @@ namespace Enjon
 	bool PopupWindow::Hovered( )
 	{
 		return mHovered;
+	}
+
+	//===================================================================== 
+
+	DockingWindow::DockingWindow( const String& label, const Vec2& position, const Vec2& size, u32 viewFlags )
+		: GUIWidget( label, position, size ), mViewFlags( viewFlags )
+	{
+		// Register window on construction
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
+
+		igm->RegisterMenuOption( "View", mLabel, [ & ] ( )
+		{
+			ImGui::MenuItem( fmt::format( "{}##options", mLabel ).c_str( ), NULL, &mEnabled );
+		});
+
+		// Register individual window with docking system
+		igm->RegisterWindow( mLabel, [ & ] ( )
+		{
+			// Docking windows
+			if ( ImGui::BeginDock( mLabel.c_str(), &mEnabled, mViewFlags ) )
+			{
+				DoWidget( );
+			}
+			ImGui::EndDock( ); 
+		}); 
+	}
+
+	//===================================================================== 
+
+	DockingWindow::~DockingWindow( )
+	{ 
+		// Register window on construction
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
 	}
 
 	//===================================================================== 

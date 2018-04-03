@@ -105,6 +105,39 @@ namespace Enjon
 
 	using GUICallbackFunc = std::function<void( )>;
 
+	class DockingWindow : public GUIWidget
+	{
+		public:
+			/**
+			* @brief
+			*/
+			DockingWindow( ) = default;
+
+			/**
+			* @brief
+			*/
+			DockingWindow( const String& label, const Vec2& position, const Vec2& size, u32 mViewFlags );
+
+			/**
+			* @brief
+			*/
+			~DockingWindow( ); 
+
+			/**
+			* @brief
+			*/
+			virtual void DoWidget( )
+			{ 
+				// Nothing by default...
+			}
+
+		protected:
+
+		private:
+			u32 mViewFlags = 0;
+
+	};
+
 	class PopupWindow : public GUIWidget
 	{ 
 		public:
@@ -229,9 +262,11 @@ namespace Enjon
 
 			void Init(SDL_Window* window);
 			void LateInit(SDL_Window* window);
+			bool HasWindow( const String& windowName );
+			bool HasMenuOption( const String& menu, const String& menuOptionName );
 			void Register(std::function<void()> func);
-			void RegisterMenuOption(std::string name, std::function<void()> func);
-			void RegisterWindow(std::function<void()> func);
+			void RegisterMenuOption( const String& menuName, const String& optionName, std::function<void( )> func );
+			void RegisterWindow(const String& windowName, std::function<void()> func);
 			void RegisterDockingLayout(const GUIDockingLayout& layout);
 			void RenderGameUI(Enjon::Window* window, f32* view, f32* projection);
 			void Render(SDL_Window* window);
@@ -281,8 +316,8 @@ namespace Enjon
 
 		private:
 			Vector<std::function<void()>> mGuiFuncs;
-			Vector<std::function<void()>> mWindows;
-			HashMap<String, Vector<std::function<void()>>> mMainMenuOptions;
+			HashMap<String, std::function<void()>> mWindows;
+			HashMap<String, HashMap<String, std::function<void()>>> mMainMenuOptions;
 			Vector<GUIDockingLayout> mDockingLayouts; 
 			HashMap< Enjon::String, ImFont* > mFonts;
 			ImGuiContext* mContext = nullptr;

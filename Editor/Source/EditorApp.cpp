@@ -48,10 +48,10 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-//Enjon::String mProjectsDir = "W:/Projects/";
-//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
 Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -1264,7 +1264,7 @@ namespace Enjon
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
 		// Register individual windows
-		igm->RegisterWindow( [ & ] ( )
+		igm->RegisterWindow( "Create Project", [ & ] ( )
 		{
 			// Docking windows
 			if ( ImGui::BeginDock( "Create Project", &mShowCreateProjectView, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
@@ -1275,7 +1275,7 @@ namespace Enjon
 			ImGui::EndDock( );
 		} );
 
-		igm->RegisterWindow( [ & ]
+		igm->RegisterWindow( "Camera", [ & ]
 		{
 			if ( ImGui::BeginDock( "Camera", &mShowCameraOptions ) )
 			{
@@ -1284,7 +1284,7 @@ namespace Enjon
 			ImGui::EndDock( );
 		});
 
-		igm->RegisterWindow( [ & ]
+		igm->RegisterWindow( "Load Resource", [ & ]
 		{
 			if ( ImGui::BeginDock( "Load Resource", &mShowLoadResourceOption ) )
 			{
@@ -1293,7 +1293,7 @@ namespace Enjon
 			ImGui::EndDock( );
 		});
 
-		igm->RegisterWindow( [ & ]
+		igm->RegisterWindow( "World Outliner", [ & ]
 		{
 			if ( ImGui::BeginDock( "World Outliner", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 			{
@@ -1302,7 +1302,7 @@ namespace Enjon
 			ImGui::EndDock( );
 		});
 
-		igm->RegisterWindow( [ & ]
+		igm->RegisterWindow( "Play Options", [ & ]
 		{
 			if ( ImGui::BeginDock( "Play Options", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 			{
@@ -1321,7 +1321,7 @@ namespace Enjon
 		//} );
 
 		static bool sceneSelectionViewOpen = true;
-		igm->RegisterWindow( [ & ]
+		igm->RegisterWindow( "Scene Selection", [ & ]
 		{
 			if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
 			{
@@ -1468,10 +1468,10 @@ namespace Enjon
 		{
 			ImGui::MenuItem( "Load Project...##options", NULL, &mLoadProjectPopupDialogue );
 		};
-		igm->RegisterMenuOption("File", loadProjectMenuOption);
+		igm->RegisterMenuOption("File", "Load Project...##options", loadProjectMenuOption);
  
 		// Register menu options
-		igm->RegisterMenuOption( "Create", createViewOption );
+		igm->RegisterMenuOption( "Create", "Create", createViewOption );
 
 		// Register docking layouts 
 		igm->RegisterDockingLayout( GUIDockingLayout( "Scene", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );

@@ -31,6 +31,7 @@ message("cxx FLgs:" ${CMAKE_CXX_FLAGS})
 # Add additional sub-directories
 add_subdirectory( Generator )
 add_subdirectory( Editor )
+add_subdirectory( TestSuite )
 
 # Add include directories
 include_directories(${ENJON_DIR}/Include

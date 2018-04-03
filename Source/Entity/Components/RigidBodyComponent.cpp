@@ -77,6 +77,7 @@ namespace Enjon
 		PhysicsSubsystem* phys = EngineSubsystem( PhysicsSubsystem );
 		if ( !phys->IsPaused( ) )
 		{ 
+			// Need to make sure to only set this if the physics was ticked this scene
 			// Only set position and rotation if not kinematic - could make a derived kinematic body component for this
 			if ( !mBody.GetIsKinematic( ) )
 			{
@@ -84,7 +85,6 @@ namespace Enjon
 				mEntity->SetLocalPosition( wt.GetPosition(), false );
 				mEntity->SetLocalRotation( wt.GetRotation(), false ); 
 			}
-			Transform wt = mBody.GetWorldTransform( );
 		}
 	}
 

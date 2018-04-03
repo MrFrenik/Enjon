@@ -17,13 +17,13 @@ namespace Enjon
 	{
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
-		igm->RegisterMenuOption( "View", [ & ] ( )
+		igm->RegisterMenuOption( "View", mName, [ & ] ( )
 		{
 			ImGui::MenuItem( fmt::format( "{}##options", mName ).c_str( ), NULL, &mViewEnabled );
 		});
 
 		// Register individual window with docking system
-		igm->RegisterWindow( [ & ] ( )
+		igm->RegisterWindow( mName, [ & ] ( )
 		{
 			// Docking windows
 			if ( ImGui::BeginDock( GetViewName().c_str(), &mViewEnabled, GetViewFlags() ) )

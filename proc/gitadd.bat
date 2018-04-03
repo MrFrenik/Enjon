@@ -32,4 +32,10 @@ git add IsoARPG/include
 
 git add IsoARPG/src
 
+git add TestSuite/Include
+
+git add TestSuite/Source
+
+git add TestSuite/CMakeLists.txt
+
 git add proc/gitadd.bat

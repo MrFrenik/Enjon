@@ -212,6 +212,7 @@ namespace Enjon
 			PhysicsDebugDrawer mDebugDrawer;
 
 			u32 mIsPaused = false;
+			u32 mWasTicked = false;
 	}; 
 }
 

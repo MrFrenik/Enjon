@@ -143,10 +143,10 @@ namespace Enjon
 
 		// ImGuiManager::Register(graphicsMenuOption);
 		// TODO(John): I HATE the way this looks
-		igm->RegisterMenuOption("View", graphicsMenuOption);
-		igm->RegisterWindow(showGraphicsViewportFunc);
-		igm->RegisterMenuOption("View", stylesMenuOption);
-		igm->RegisterWindow(showStylesWindowFunc);
+		igm->RegisterMenuOption("View", "Graphics##Options", graphicsMenuOption);
+		igm->RegisterWindow("Graphics", showGraphicsViewportFunc);
+		igm->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
+		igm->RegisterWindow("Styles", showStylesWindowFunc);
 
 		// Set current render texture
 		mCurrentRenderTexture = mFXAATarget->GetTexture();
