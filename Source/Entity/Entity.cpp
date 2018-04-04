@@ -17,8 +17,10 @@ namespace Enjon
 		// Grab imgui manager
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
  
+		Vec2 padding( 20.0f, 7.0f );
+		f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
 		// Display all components and transform information
-		ImGui::ListBoxHeader( "##CompLists", ImVec2(ImGui::GetWindowSize().x - 20.0f, ImGui::GetWindowSize().y - 80.0f ) );
+		ImGui::ListBoxHeader( "##CompLists", ImVec2(ImGui::GetWindowSize().x - 20.0f, height ) );
 		{
 			// Name / Tag information
 			if ( ImGui::CollapsingHeader( "Label" ) )

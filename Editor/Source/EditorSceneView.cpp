@@ -38,12 +38,15 @@ namespace Enjon
 		ImVec2 cursorPos = ImGui::GetCursorScreenPos( );
 
 		// Cache off cursor position for scene view
-		Vec2 padding( -20.0f, -40.0f );
+		Vec2 padding( 20.0f, 8.0f );
+		//Vec2 padding( -20.0f, -40.0f );
+		f32 width = ImGui::GetWindowWidth( ) - padding.x;
+		f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
 		mSceneViewWindowPosition = Vec2( cursorPos.x, cursorPos.y );
-		mSceneViewWindowSize = Vec2( ImGui::GetWindowWidth( ), ImGui::GetWindowHeight( ) ) + padding;
+		mSceneViewWindowSize = Vec2( width, height );
 
 		ImTextureID img = ( ImTextureID )currentTextureId;
-		ImGui::Image( img, ImVec2( ImGui::GetWindowWidth( ) + padding.x, ImGui::GetWindowHeight( ) + padding.y ),
+		ImGui::Image( img, ImVec2( width, height ),
 			ImVec2( 0, 1 ), ImVec2( 1, 0 ), ImColor( 255, 255, 255, 255 ), ImColor( 255, 255, 255, 0 ) );
 
 		// Update camera aspect ratio

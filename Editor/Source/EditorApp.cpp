@@ -48,10 +48,10 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-Enjon::String mProjectsDir = "W:/Projects/";
-Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
 Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -663,8 +663,9 @@ namespace Enjon
 		ImGui::Separator( );
 
 		// List out active entities
-		ImVec2 padding( 20.0f, 80.0f );
-		ImGui::ListBoxHeader( "##EntitiesListWorldOutliner", ImVec2( ImGui::GetWindowSize( ).x - padding.x, ImGui::GetWindowSize( ).y - padding.y ) );
+		Vec2 padding( 20.0f, 40.0f );
+		f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
+		ImGui::ListBoxHeader( "##EntitiesListWorldOutliner", ImVec2( ImGui::GetWindowSize( ).x - padding.x, height ) );
 		{
 			for ( auto& e : entities->GetActiveEntities( ) )
 			{
@@ -685,7 +686,11 @@ namespace Enjon
 		ImGui::SetCursorScreenPos( ImVec2( csp.x, csp.y + 10.0f ) );
 
 		// Display total amount of entities
+		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_TextDisabled ) ) ) );
+		ImGui::PushFont( EngineSubsystem( ImGuiManager )->GetFont( "Roboto-MediumItalic_14" ) );
 		ImGui::Text( fmt::format( "{} Entities", entities->GetActiveEntities().size() ).c_str( ) );
+		ImGui::PopFont( );
+		ImGui::PopStyleColor( );
 	}
 
 	void EditorApp::LoadResourceFromFile( )
@@ -1273,25 +1278,7 @@ namespace Enjon
 				CreateProjectView( );
 			}
 			ImGui::EndDock( );
-		} );
-
-		igm->RegisterWindow( "Camera", [ & ]
-		{
-			if ( ImGui::BeginDock( "Camera", &mShowCameraOptions ) )
-			{
-				CameraOptions( &mShowCameraOptions );
-			}
-			ImGui::EndDock( );
-		});
-
-		igm->RegisterWindow( "Load Resource", [ & ]
-		{
-			if ( ImGui::BeginDock( "Load Resource", &mShowLoadResourceOption ) )
-			{
-				LoadResourceFromFile( );
-			}
-			ImGui::EndDock( );
-		});
+		} ); 
 
 		igm->RegisterWindow( "World Outliner", [ & ]
 		{
@@ -1475,15 +1462,12 @@ namespace Enjon
 
 		// Register docking layouts 
 		igm->RegisterDockingLayout( GUIDockingLayout( "Scene", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );
-	    igm->RegisterDockingLayout( GUIDockingLayout( "Graphics", nullptr, GUIDockSlotType::Slot_Bottom, 0.2f));
-		igm->RegisterDockingLayout( GUIDockingLayout( "Load Resource", "Graphics", GUIDockSlotType::Slot_Tab, 0.15f ) );
-		igm->RegisterDockingLayout( GUIDockingLayout( "World Outliner", nullptr, GUIDockSlotType::Slot_Right, 0.3f ) );
 		igm->RegisterDockingLayout( GUIDockingLayout( "Play Options", "Scene", GUIDockSlotType::Slot_Top, 0.1f ) );
-		igm->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Scene", GUIDockSlotType::Slot_Bottom, 0.2f ) );
+		igm->RegisterDockingLayout( GUIDockingLayout( "World Outliner", nullptr, GUIDockSlotType::Slot_Right, 0.3f ) );
+		igm->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", "Play Options", GUIDockSlotType::Slot_Right, 0.6f ) );
+		igm->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Scene Selection", GUIDockSlotType::Slot_Tab, 0.2f ) );
 		igm->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.7f ) );
-		igm->RegisterDockingLayout( GUIDockingLayout( "Camera", "Inspector", GUIDockSlotType::Slot_Bottom, 0.5f ) );
-		igm->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", "Create Project", GUIDockSlotType::Slot_Tab, 0.6f ) );
-		igm->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Camera", GUIDockSlotType::Slot_Tab, 0.6f ) );
+		igm->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene", GUIDockSlotType::Slot_Bottom, 0.3f ) );
 
 		return Enjon::Result::SUCCESS;
 	}

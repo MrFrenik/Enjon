@@ -1042,10 +1042,12 @@ namespace Enjon
 		ImGuiIO& io = ImGui::GetIO();
 
 		io.Fonts->Clear();
-		mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF(( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14);
+		mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF(( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 10);
 		mFonts["WeblySleek_14"] = io.Fonts->AddFontFromFileTTF(( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14);
 		mFonts["WeblySleek_16"] = io.Fonts->AddFontFromFileTTF(( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16);
 		mFonts["WeblySleek_20"] = io.Fonts->AddFontFromFileTTF(( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 20);
+		mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF(( fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14);
+		mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF(( fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12);
 		io.Fonts->Build(); 
 
 		// Grab reference to style

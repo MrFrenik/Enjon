@@ -351,7 +351,7 @@ namespace Enjon
 			//float mBloomScalar;
 			//float mThreshold;
 			//float mSaturation;
-			ToneMapSettings mToneMapSettings = ToneMapSettings(0.77f, 1.84f, 0.61f, 7.74f, 1.2f);
+			ToneMapSettings mToneMapSettings = ToneMapSettings(0.77f, 2.2f, 0.61f, 7.74f, 1.3f);
 			BloomSettings mBloomSettings = BloomSettings(Vec3(0.384f, 0.366f, 0.500f), Vec3(3, 3, 2), Vec3(0.001f, 0.006f, 0.015f)); 
 
 			bool mShowGame = true;
@@ -382,8 +382,8 @@ namespace Enjon
 
 			f32 mSSAORadius = 0.01f;
 			f32 mSSAOScale = 5.0f;
-			f32 mSSAOBias = 0.10f;
-			f32 mSSAOIntensity = 8.0f;
+			f32 mSSAOBias = 0.078f;
+			f32 mSSAOIntensity = 15.0f;
 			u32 mSSAOKernelSize = 16;
 
 			Enjon::Mat4* mModelMatricies = nullptr;

@@ -161,15 +161,22 @@ namespace Enjon
 				AttemptDirectoryBackTraversal( );
 			}
 
+			ImGui::SameLine( );
+
+			String curDir = Utils::SplitString( Utils::FindReplaceAll( mCurrentDirectory, "Assets", "!" ), "!" ).back( );
+			curDir = Utils::FindReplaceAll( curDir, "\\", "/" );
+
 			// Display the current directory path
-			ImGui::Text( fmt::format( "Current Dir: {}", mCurrentDirectory ).c_str( ) );
+			ImGui::Text( fmt::format( "Current Dir: Assets{}", curDir ).c_str( ) );
 
 			// Separator for formatting
 			ImGui::Separator( );
 
 			// Iterate the current directory
+			Vec2 padding( 20.0f, 8.0f );
+			f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
 			ImVec2 listBoxMin = ImGui::GetCursorScreenPos( );
-			ImVec2 listBoxSize = ImVec2( ImGui::GetWindowWidth( ) - 20.0f, ImGui::GetWindowHeight( ) - 100.0f );
+			ImVec2 listBoxSize = ImVec2( ImGui::GetWindowWidth( ) - 20.0f, height );
 			bool hoveringItem = false;
 			ImGui::ListBoxHeader( "##AssetDirectory", listBoxSize );
 			{

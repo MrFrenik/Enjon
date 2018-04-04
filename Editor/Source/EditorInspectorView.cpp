@@ -158,54 +158,61 @@ namespace Enjon
 
 
 		// New component dialogue
-		ImGui::PushFont( igm->GetFont( "WeblySleek_16" ) );
+		ImColor textCol = ImGui::GetColorU32( ImGuiCol_Text );
+		ImGui::PushFont( igm->GetFont( "Roboto-MediumItalic_14" ) );
+		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_TextDisabled ) ) ) );
 		if ( ImGui::BeginCombo( "##ADDCOMPONENT", "+ Add Component..." ) )
 		{
-			// Label for scripting type of component class
-			ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
-			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
-			ImGui::Text( "Scripting" );
-			ImGui::PopStyleColor( );
-			ImGui::PopFont( );
+			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( textCol ) );
+			{ 
+				// Label for scripting type of component class
+				ImGui::PushFont( igm->GetFont( "Roboto-MediumItalic_12" ) );
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
+				ImGui::Text( "Scripting" );
+				ImGui::PopStyleColor( );
+				ImGui::PopFont( );
 
-			// Add new component pop up
-			ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
-			if ( ImGui::Selectable( "\tCreate New Component..." ) )
-			{
-				mApp->EnableOpenNewComponentDialogue( );
-			}
-			ImGui::PopFont( );
-
-			// Separator line
-			ImGui::Separator( );
-
-			// Get component list
-			EntityManager* entities = EngineSubsystem( EntityManager );
-			auto compMetaClsList = entities->GetComponentMetaClassList( );
-
-			// Label for scripting type of component class
-			ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
-			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
-			ImGui::Text( "Custom" );
-			ImGui::PopStyleColor( );
-			ImGui::PopFont( );
-
-			ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
-			for ( auto& cls : compMetaClsList )
-			{
-				if ( !ent->HasComponent( cls ) )
+				// Add new component pop up
+				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
+				if ( ImGui::Selectable( "\tCreate New Component..." ) )
 				{
-					// Add component to mEntity
-					if ( ImGui::Selectable( fmt::format( "\t{}", cls->GetName( ) ).c_str() ) )
-					{
-						ent->AddComponent( cls );
-					} 
+					mApp->EnableOpenNewComponentDialogue( );
 				}
-			} 
-			ImGui::PopFont( );
+				ImGui::PopFont( );
+
+				// Separator line
+				ImGui::Separator( );
+
+				// Get component list
+				EntityManager* entities = EngineSubsystem( EntityManager );
+				auto compMetaClsList = entities->GetComponentMetaClassList( );
+
+				// Label for scripting type of component class
+				ImGui::PushFont( igm->GetFont( "Roboto-MediumItalic_12" ) );
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
+				ImGui::Text( "Custom" );
+				ImGui::PopStyleColor( );
+				ImGui::PopFont( );
+
+				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
+				for ( auto& cls : compMetaClsList )
+				{
+					if ( !ent->HasComponent( cls ) )
+					{
+						// Add component to mEntity
+						if ( ImGui::Selectable( fmt::format( "\t{}", cls->GetName( ) ).c_str() ) )
+						{
+							ent->AddComponent( cls );
+						} 
+					}
+				} 
+				ImGui::PopFont( );
+			}
+			ImGui::PopStyleColor( );
 
 			ImGui::EndCombo( );
 		}
+		ImGui::PopStyleColor( );
 		ImGui::PopFont( ); 
 
 		// Attempt to open new component dialogue box
