@@ -6,6 +6,11 @@
 
 #include <filesystem>
 
+#ifdef ENJON_SYSTEM_WINDOWS 
+	#define WINDOWS_LEAN_AND_MEAN
+	#include <windows.h>
+#endif
+
 namespace FileSystem = std::experimental::filesystem; 
 
 namespace Enjon
@@ -61,7 +66,7 @@ namespace Enjon
 
 	//======================================================================
 
-	void Project::CreateBuildDirectory( )
+	String Project::CreateBuildDirectory( )
 	{
 		// Grab the engine configuration
 		EngineConfig engCfg = Engine::GetInstance( )->GetConfig( );
@@ -115,6 +120,8 @@ namespace Enjon
 
 		// Copy project assets
 		FileSystem::copy( mProjectPath + "Assets/", buildDir + "Assets/Cache", FileSystem::copy_options::recursive );
+
+		return buildDir;
 
 #ifdef ENJON_SYSTEM_WINDOWS 
 		// Run the bat file to build and run the solution
@@ -177,12 +184,49 @@ namespace Enjon
 
 		// Run the build bat for project
 #ifdef ENJON_SYSTEM_WINDOWS 
-		// TODO(): Spawn up a separate thread to call this so we know when it's finished
-		s32 code = system( String( "call " + mProjectPath + "Proc/" + "CompileProject.bat" + " " + mProjectPath + " " + mProjectName + " " + buildConfig + " " + visualStudioPath ).c_str() ); 
-		if ( code == 0 )
+
+		STARTUPINFO si;
+		PROCESS_INFORMATION pi;
+
+		ZeroMemory( &si, sizeof( si ) );
+		si.cb = sizeof( si );
+		ZeroMemory( &pi, sizeof( pi ) );
+
+		String path = Utils::FindReplaceAll( mProjectPath + "Proc\\\\CompileProject.bat", "/", "\\\\" ).c_str(); 
+		String args = const_cast<LPSTR>( ( mProjectPath + " " + mProjectName + " " + buildConfig + " " + visualStudioPath ).c_str( ) ); 
+		String cmdLineStr = ( "cmd.exe /c " + path + " " + args ); 
+
+		char* cmdLineStrBuffer = new char[ cmdLineStr.size( ) + 1 ];
+		strncpy( cmdLineStrBuffer, cmdLineStr.c_str( ), cmdLineStr.size( ) ); 
+		cmdLineStrBuffer[ cmdLineStr.size( ) ] = '\0'; 
+
+		// Start the child process. 
+		//if ( !CreateProcess( path,   // No module name (use command line)
+		if ( !CreateProcess( NULL,   // No module name (use command line)
+			cmdLineStrBuffer,			// Command line
+			NULL,           // Process handle not inheritable
+			NULL,           // Thread handle not inheritable
+			FALSE,          // Set handle inheritance to FALSE
+			CREATE_UNICODE_ENVIRONMENT,              // No creation flags
+			NULL,           // Use parent's environment block
+			NULL,           // Use parent's starting directory 
+			&si,            // Pointer to STARTUPINFO structure
+			&pi )           // Pointer to PROCESS_INFORMATION structure
+			)
 		{
-			// Success...
+			delete cmdLineStrBuffer;
+			printf( "CreateProcess failed (%d).\n", GetLastError( ) );
+			return Result::FAILURE;
 		}
+
+		// Wait for process to finish
+		WaitForSingleObject( pi.hProcess, INFINITE );
+
+		// Close process and thread handles
+		CloseHandle( pi.hProcess );
+		CloseHandle( pi.hThread );
+
+		delete cmdLineStrBuffer;
 
 #endif
 		return Result::SUCCESS; 
@@ -215,7 +259,51 @@ namespace Enjon
 		}
 
 		// Create build directory if not already made
-		CreateBuildDirectory( );
+		String buildDir = CreateBuildDirectory( );
+		String enginePath = Utils::FindReplaceAll( Engine::GetInstance()->GetConfig().GetRoot( ), "\\", "/" );
+
+#ifdef ENJON_SYSTEM_WINDOWS 
+		// Run the bat file to build and run the solution
+		String vsPath = mEditor->GetVisualStudioDirectoryPath( ); 
+
+		s32 code = system( String( "call " + buildDir + "Intermediate/" + "Build.bat" + " " + mProjectName + " " + buildDir + "Intermediate/" + " " +  vsPath ).c_str() ); 
+
+		// Copy the executable to the main project build directory
+		if ( FileSystem::exists( buildDir + "Intermediate/Release/" + mProjectName + ".exe" ) )
+		{
+			// Remove previous instance
+			if ( FileSystem::exists( buildDir + mProjectName + ".exe" ) )
+			{
+				FileSystem::remove( buildDir + mProjectName + ".exe" );
+			}
+			
+			// Remove previous SDL2 .dll
+			if ( FileSystem::exists( buildDir + "SDL2.dll" ) )
+			{
+				FileSystem::remove( buildDir + "SDL2.dll" );
+			}
+			// Remove previous glew32 .dlls
+			if ( FileSystem::exists( buildDir + "glew32.dll" ) )
+			{
+				FileSystem::remove( buildDir + "glew32.dll" );
+			}
+			// Remove previous freetype6 .dlls
+			if ( FileSystem::exists( buildDir + "freetype6.dll" ) )
+			{
+				FileSystem::remove( buildDir + "freetype6.dll" );
+			}
+
+			// Copy executable
+			FileSystem::copy( buildDir + "Intermediate/Release/" + mProjectName + ".exe", buildDir + mProjectName + ".exe" );
+			// Copy dlls
+			FileSystem::copy( enginePath + "Build/Release/" + "SDL2.dll", buildDir + "SDL2.dll" );
+			FileSystem::copy( enginePath + "Build/Release/" + "freetype6.dll", buildDir + "freetype6.dll" );
+			FileSystem::copy( enginePath + "Build/Release/" + "glew32.dll", buildDir + "glew32.dll" ); 
+
+			// Remove intermediate directory after compilation
+			//FileSystem::remove_all( buildDir + "Intermediate" );
+		}
+#endif
 
 		return Result::SUCCESS;
 	}

@@ -11,15 +11,7 @@ cmake -G"Visual Studio 14 2015"
 echo "Running %projName%..."
 @echo off
 
-echo %vsCall%\VC\vcvarsall.bat x86
-
-if not defined DevEnvDir (
-	pushd "%vsCall%"
-	call VC\vcvarsall.bat x86
-	popd
-)
-
-devenv %projName%.sln /Build Release
+MSBuild %projName%.sln /t:Build /p:Configuation=Release
 
 @echo off
 popd

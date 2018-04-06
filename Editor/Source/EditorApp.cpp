@@ -1294,6 +1294,7 @@ namespace Enjon
 			if ( ImGui::BeginDock( "Play Options", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 			{
 				PlayOptions( );
+				CheckForPopups( );
 			}
 			ImGui::EndDock( );
 		} );
@@ -1313,7 +1314,6 @@ namespace Enjon
 			if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
 			{
 				SelectSceneView( );
-				CheckForPopups( );
 			}
 			ImGui::EndDock( );
 		} ); 

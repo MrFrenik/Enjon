@@ -34,7 +34,7 @@ namespace Enjon
 
 		private:
 
-			void CreateBuildDirectory( );
+			String CreateBuildDirectory( );
 			
 		private:
 			String mProjectName = "";
