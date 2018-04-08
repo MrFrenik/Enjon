@@ -1688,7 +1688,7 @@ namespace Enjon
 								{
 									ent->SetLocalRotation( ent->GetLocalRotation() * mTransformWidget.GetDeltaRotation() );
 								}
-							} break;
+							} ;
 						}
 
 						if ( mSelectedEntity.Get( ) )
@@ -1696,7 +1696,7 @@ namespace Enjon
 							Entity* ent = mSelectedEntity.Get( );
 							// Set position and rotation to that of entity
 							mTransformWidget.SetPosition( ent->GetWorldPosition( ) ); 
-							mTransformWidget.SetRotation( -ent->GetWorldRotation( ) ); 
+							mTransformWidget.SetRotation( ent->GetWorldRotation( ) ); 
 						}
 					} 
 				}

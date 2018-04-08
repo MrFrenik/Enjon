@@ -96,10 +96,10 @@ namespace Enjon
 			Quaternion Inverse();
 
 			// Get angle from quaternion in radians
-			f32 Angle();
+			f32 Angle() const;
 
 			// Get axis from quaternion
-			Vec3 Axis();
+			Vec3 Axis() const;
 
 			// Get Euler roll from quaternion
 			f32 Roll();
@@ -116,7 +116,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			Quaternion NegativeAngleAxis( );
+			Quaternion NegativeAngleAxis( ) const;
 
 			/*
 			* @brief
@@ -180,6 +180,10 @@ namespace Enjon
 			f32 x, y, z, w;
 	}; 
 
+	/*
+	* @brief Convert this quaternion into equivalent 4X4 rotation matrix
+	* @note: From http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm 
+	*/
 	static inline Enjon::Mat4 QuaternionToMat4(Quaternion B)
 	{
 		Mat4 Mat = Mat4::Identity();
@@ -196,15 +200,15 @@ namespace Enjon
 		f32 wz = Q.w*Q.z;
 
 		Mat.Elements[0][0] = 1.0f - 2.0f * (yy + zz);
-		Mat.Elements[1][0] = 2.0f * (xy + wz);
-		Mat.Elements[2][0] = 2.0f * (xz - wy);
+		Mat.Elements[1][0] = 2.0f * (xy - wz);
+		Mat.Elements[2][0] = 2.0f * (xz + wy);
 
-		Mat.Elements[0][1] = 2.0f * (xy - wz);
+		Mat.Elements[0][1] = 2.0f * (xy + wz);
 		Mat.Elements[1][1] = 1.0f - 2.0f * (xx + zz);
-		Mat.Elements[2][1] = 2.0f * (yz + wx);
+		Mat.Elements[2][1] = 2.0f * (yz - wx);
 
-		Mat.Elements[0][2] = 2.0f * (xz + wy);
-		Mat.Elements[1][2] = 2.0f * (yz - wx);
+		Mat.Elements[0][2] = 2.0f * (xz - wy);
+		Mat.Elements[1][2] = 2.0f * (yz + wx);
 		Mat.Elements[2][2] = 1.0f - 2.0f * (xx + yy);
 
 		return Mat;

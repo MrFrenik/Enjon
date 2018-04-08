@@ -569,8 +569,7 @@ namespace Enjon
 
 	Vec3 Entity::Forward( )
 	{
-		// Return -Z axis ( for right handed system )
-		return GetWorldRotation( ) * -Vec3::ZAxis( );
+		return GetWorldRotation( ) * Vec3::ZAxis( );
 	}
  
 	//---------------------------------------------------------------

@@ -63,8 +63,8 @@ namespace Enjon
 				Transform parent = mParent->mWorldTransform;
 
 				Enjon::Vec3 worldScale = parent.GetScale() * mLocalTransform.GetScale();
-				Enjon::Quaternion worldRot = ( mLocalTransform.GetRotation() * parent.GetRotation() ).Normalize( );
-				Enjon::Vec3 worldPos = parent.GetPosition() + ( parent.GetRotation().Inverse().Normalize() * ( parent.GetScale() * mLocalTransform.GetPosition() ) );
+				Enjon::Quaternion worldRot = ( parent.GetRotation() * mLocalTransform.GetRotation() ).Normalize( );
+				Enjon::Vec3 worldPos = parent.GetPosition() + ( parent.GetRotation().Normalize() * ( parent.GetScale() * mLocalTransform.GetPosition() ) );
 
 				mWorldTransform = Transform( worldPos, worldRot, worldScale ); 
 			}

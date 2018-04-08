@@ -168,7 +168,7 @@ namespace Enjon
 
 		// Find dot between cam forward and right axis
 		Vec3 cF = camera->Forward( ).Normalize( );
-		Vec3 Ta = ( mActiveWidget->GetWorldTransform().GetRotation( ).NegativeAngleAxis( ) * axisA ).Normalize( );
+		Vec3 Ta = ( mActiveWidget->GetWorldTransform().GetRotation( ) * axisA ).Normalize( );
 		f32 cFDotTa = std::fabs( cF.Dot( Ta ) ); 
 
 		Plane intersectionPlane;
@@ -177,8 +177,8 @@ namespace Enjon
 		if ( compareSupportingAxes )
 		{
 			// Now determine appropriate axis to move along
-			Vec3 Tb = ( mActiveWidget->GetWorldTransform().GetRotation( ).NegativeAngleAxis( ) * axisB ).Normalize( );
-			Vec3 Tc = ( mActiveWidget->GetWorldTransform().GetRotation( ).NegativeAngleAxis( ) * axisC ).Normalize( );
+			Vec3 Tb = ( mActiveWidget->GetWorldTransform().GetRotation( ) * axisB ).Normalize( );
+			Vec3 Tc = ( mActiveWidget->GetWorldTransform().GetRotation( ) * axisC ).Normalize( );
 
 			f32 cFDotTb = std::fabs( cF.Dot( Tb ) );
 			f32 cFDotTc = std::fabs( cF.Dot( Tc ) ); 
@@ -240,7 +240,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::TranslationRightAxis ):
 				{
 					// Right axis transformed by orientation
-					Vec3 Tx = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::XAxis( ) ).Normalize( ); 
+					Vec3 Tx = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( ); 
 
 					// Get intersection result
 					LineIntersectionResult intersectionResult = GetLineIntersectionResult( Vec3::XAxis(), Vec3::YAxis(), Vec3::ZAxis() ); 
@@ -275,7 +275,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::TranslationForwardAxis ) :
 				{
 					// Find dot between cam forward and right axis
-					Vec3 Tz = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::ZAxis( ) ).Normalize( );
+					Vec3 Tz = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::ZAxis( ) ).Normalize( );
 
 					// Get line intersection result
 					LineIntersectionResult intersectionResult = GetLineIntersectionResult( Vec3::ZAxis( ), Vec3::XAxis( ), Vec3::YAxis( ) );
@@ -308,7 +308,7 @@ namespace Enjon
 
 				case ( TransformWidgetRenderableType::TranslationUpAxis ) :
 				{
-					Vec3 Ty = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::YAxis( ) ).Normalize( );
+					Vec3 Ty = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) ).Normalize( );
  
 					// Get line intersection result
 					LineIntersectionResult intersectionResult = GetLineIntersectionResult( Vec3::YAxis( ), Vec3::XAxis( ), Vec3::ZAxis( ) ); 
@@ -340,7 +340,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::TranslationXYAxes ):
 				{ 
 					// Axis of rotation
-					Vec3 Tz = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::ZAxis( ) ).Normalize( );
+					Vec3 Tz = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::ZAxis( ) ).Normalize( );
 
 					// Get line intersection result with plane
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tz );
@@ -368,7 +368,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::TranslationXZAxes ):
 				{ 
 					// Axis of rotation
-					Vec3 Ty = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3( 0.0f, 1.0f, 0.0f ) ).Normalize( ); 
+					Vec3 Ty = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3( 0.0f, 1.0f, 0.0f ) ).Normalize( ); 
 
 					// Get intersection result of plane 
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Ty );
@@ -396,7 +396,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::TranslationYZAxes ):
 				{ 
 					// Axis of rotation
-					Vec3 Tx = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::XAxis( ) ).Normalize( );
+					Vec3 Tx = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( );
 
 					// Get intersection result of plane 
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tx );
@@ -423,7 +423,7 @@ namespace Enjon
 
 				case ( TransformWidgetRenderableType::ScaleRightAxis ):
 				{
-					Vec3 Tx = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::XAxis( ) ).Normalize( );
+					Vec3 Tx = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( );
  
 					f32 TxDotXAxis = Tx.Dot( Vec3::XAxis( ) );
 
@@ -460,7 +460,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::ScaleForwardAxis ) :
 				{
 					// Find dot between cam forward and right axis
-					Vec3 Tz = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::ZAxis( ) ).Normalize( );
+					Vec3 Tz = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::ZAxis( ) ).Normalize( );
  
 					f32 TzDotZAxis = Tz.Dot( Vec3::ZAxis( ) ); 
 
@@ -497,7 +497,7 @@ namespace Enjon
 
 				case ( TransformWidgetRenderableType::ScaleUpAxis ) :
 				{
-					Vec3 Ty = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::YAxis( ) ).Normalize( );
+					Vec3 Ty = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) ).Normalize( );
  
 					f32 TyDotYAxis = Ty.Dot( Vec3::YAxis( ) );
 
@@ -537,7 +537,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::ScaleYZAxes ):
 				{ 
 					// Axis of rotation
-					Vec3 Tx = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::XAxis( ) ).Normalize( );
+					Vec3 Tx = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( );
 
 					// Get intersection result of plane 
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tx );
@@ -565,7 +565,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::ScaleXYAxes ):
 				{ 
 					// Axis of rotation
-					Vec3 Tz = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::ZAxis( ) ).Normalize( );
+					Vec3 Tz = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::ZAxis( ) ).Normalize( );
 
 					// Get line intersection result with plane
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tz );
@@ -590,7 +590,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::ScaleXZAxes ):
 				{ 
 					// Axis of rotation
-					Vec3 Ty = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3( 0.0f, 1.0f, 0.0f ) ).Normalize( );
+					Vec3 Ty = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3( 0.0f, 1.0f, 0.0f ) ).Normalize( );
 
 					// Get intersection result of plane 
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Ty );
@@ -647,7 +647,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::RotationForwardAxis ) :
 				{
 					// Define plane and get intersection result with ray from mouse
-					Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ).NegativeAngleAxis( ) * Vec3::ZAxis( ) ).Normalize();
+					Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::ZAxis( ) ).Normalize();
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( planeNormal);
 
 					f32 distFromCam = ( mActiveWidget->GetWorldTransform( ).GetPosition( ).Distance( camera->GetPosition( ) ) );
@@ -681,7 +681,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::RotationRightAxis ):
 				{
 					// Define plane and get intersection result with ray from mouse
-					Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ).NegativeAngleAxis( ) * Vec3::XAxis( ) ).Normalize();
+					Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::XAxis( ) ).Normalize();
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( planeNormal);
 
 					f32 distFromCam = ( mActiveWidget->GetWorldTransform( ).GetPosition( ).Distance( camera->GetPosition( ) ) );
@@ -713,7 +713,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::RotationUpAxis ) :
 				{
 					// Define plane and get intersection result with ray from mouse
-					Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ).NegativeAngleAxis( ) * Vec3::YAxis( ) ).Normalize();
+					Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::YAxis( ) ).Normalize();
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( planeNormal);
 					
 					f32 distFromCam = ( mActiveWidget->GetWorldTransform( ).GetPosition( ).Distance( camera->GetPosition( ) ) );
@@ -834,7 +834,7 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::TranslationXYAxes ):
 			{ 
 				// Axis of rotation
-				Vec3 Tz = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation().NegativeAngleAxis() * Vec3::ZAxis() ).Normalize(); 
+				Vec3 Tz = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation() * Vec3::ZAxis() ).Normalize(); 
 
 				// Get intersection result of plane 
 				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tz );
@@ -846,7 +846,7 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::TranslationXZAxes ):
 			{ 
 				// Axis of rotation
-				Vec3 Ty = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::YAxis( ) ).Normalize( );
+				Vec3 Ty = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) ).Normalize( );
 
 				// Get intersection result of plane 
 				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Ty );
@@ -858,7 +858,7 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::TranslationYZAxes ):
 			{ 
 				// Axis of rotation
-				Vec3 Tx = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::XAxis( ) ).Normalize( ); 
+				Vec3 Tx = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( ); 
 
 				// Get intersection result of plane 
 				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tx );
@@ -897,7 +897,7 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::ScaleYZAxes ):
 			{ 
 				// Axis of rotation
-				Vec3 Tx = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::XAxis( ) ).Normalize( );
+				Vec3 Tx = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( );
 
 				// Get intersection result of plane 
 				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tx );
@@ -909,7 +909,7 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::ScaleXYAxes ):
 			{ 
 				// Axis of rotation
-				Vec3 Tz = ( mScaleWidget.mRoot.mWorldTransform.GetRotation().NegativeAngleAxis() * Vec3::ZAxis() ).Normalize();
+				Vec3 Tz = ( mScaleWidget.mRoot.mWorldTransform.GetRotation() * Vec3::ZAxis() ).Normalize();
 
 				// Get intersection result of plane 
 				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tz );
@@ -921,7 +921,7 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::ScaleXZAxes ):
 			{ 
 				// Axis of rotation
-				Vec3 Ty = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ).NegativeAngleAxis() * Vec3::YAxis( ) ).Normalize( );
+				Vec3 Ty = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) ).Normalize( );
 
 				// Get intersection result of plane 
 				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Ty );
@@ -945,7 +945,7 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::RotationForwardAxis ) :
 			{
 				// Get line intersection result
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( mActiveWidget->GetWorldTransform( ).GetRotation( ).NegativeAngleAxis( ) * Vec3::ZAxis( ) );
+				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::ZAxis( ) );
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::RotationForwardAxis ); 
@@ -954,7 +954,7 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::RotationRightAxis ) :
 			{
 				// Get line intersection result
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( mActiveWidget->GetWorldTransform( ).GetRotation( ).NegativeAngleAxis( ) * Vec3::XAxis( ) );
+				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::XAxis( ) );
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::RotationRightAxis ); 
@@ -963,7 +963,7 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::RotationUpAxis ) :
 			{
 				// Get line intersection result
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( mActiveWidget->GetWorldTransform( ).GetRotation( ).NegativeAngleAxis( ) * Vec3::YAxis( ) );
+				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::YAxis( ) );
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::RotationUpAxis ); 

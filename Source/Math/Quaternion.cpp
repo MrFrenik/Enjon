@@ -167,12 +167,12 @@ namespace Enjon
 		return C;
 	}
 
-	f32 Quaternion::Angle()
+	f32 Quaternion::Angle() const
 	{
 		return 2.0f * std::acos(w);
 	}
 
-	Vec3 Quaternion::Axis()
+	Vec3 Quaternion::Axis() const
 	{
 		// 1 - cos(theta/2)^2 = sin(theta/2);
 		f32 S2 = 1.0f - w * w;
@@ -225,17 +225,20 @@ namespace Enjon
 		return Vec3( ToDegrees(roll), ToDegrees(pitch), ToDegrees(yaw) );
 	} 
 
-	Quaternion Quaternion::NegativeAngleAxis( )
+	Quaternion Quaternion::NegativeAngleAxis( ) const
 	{
 		return AngleAxis( -this->Angle( ), this->Axis( ) );
 	}
 
 	Vec3 Quaternion::operator*(const Vec3& V) const
 	{
-		Vec3 Qxyz = Vec3(x, y, z); 
-		f32 s = this->w; 
-		Vec3 vprime = 2.0f * Qxyz.Dot( V ) * Qxyz + ( s * s - Qxyz.Dot( Qxyz ) ) * V + 2.0f * s * Qxyz.Cross( V );
-		return vprime;
+		//Vec3 Qxyz = Vec3(x, y, z); 
+		//f32 s = this->w; 
+		//Vec3 vprime = 2.0f * Qxyz.Dot( V ) * Qxyz + ( s * s - Qxyz.Dot( Qxyz ) ) * V + 2.0f * s * Qxyz.Cross( V );
+		//return vprime; 
+
+		return this->Rotate( V );
+		
 		//const Vec3 t = 2.0f * Qxyz.Cross( V );
 		//return ( V + w * t + Qxyz.Cross( t ) ); 
 	} 

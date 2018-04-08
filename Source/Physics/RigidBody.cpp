@@ -565,7 +565,7 @@ namespace Enjon
 		const Quaternion* elr = &transform.GetRotation();
 		const Vec3* els = &transform.GetScale();
 		bTransform.setOrigin( BV3( elp->x, elp->y, elp->z ) );
-		bTransform.setRotation( BQuat( elr->x, elr->y, elr->z, -elr->w ) );
+		bTransform.setRotation( BQuat( elr->x, elr->y, elr->z, elr->w ) );
 
 		// Set local scaling of shape
 		mShape->SetLocalScaling( transform.GetScale() ); 
@@ -595,7 +595,7 @@ namespace Enjon
 
 			// Fill out transform information 
 			returnTrans.SetPosition( Vec3( origin.getX( ), origin.getY( ), origin.getZ( ) ) );
-			returnTrans.SetRotation( Quaternion( rot.x( ), rot.y( ), rot.z( ), -rot.w( ) ) );
+			returnTrans.SetRotation( Quaternion( rot.x( ), rot.y( ), rot.z( ), rot.w( ) ) );
 			returnTrans.SetScale( GetCollisionShape( )->GetLocalScaling( ) );
 		} 
 
