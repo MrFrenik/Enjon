@@ -103,10 +103,17 @@ namespace Enjon {
 	void Window::MakeCurrent( )
 	{
 		SDL_GL_MakeCurrent( m_sdlWindow, mGLContext );
+	} 
+
+	void Window::ClearDroppedFiles( )
+	{
+		mDroppedFiles.clear( );
+		mNeedToClearDroppedFiles = false;
 	}
 
-	const Vector<String>& Window::GetDroppedFiles( ) const
+	const Vector<String>& Window::GetDroppedFiles( )
 	{
+		mNeedToClearDroppedFiles = true;
 		return mDroppedFiles;
 	}
 
@@ -155,7 +162,10 @@ namespace Enjon {
 		GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
 
 		// Clear all dropped files from previous frame
-		mDroppedFiles.clear( );
+		if ( mNeedToClearDroppedFiles )
+		{
+			ClearDroppedFiles( );
+		}
 
 		switch ( event.type )
 		{

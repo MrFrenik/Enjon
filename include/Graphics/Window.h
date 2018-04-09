@@ -75,7 +75,11 @@ namespace Enjon
 			SDL_Window* GetWindowContext() { return m_sdlWindow; }
 			SDL_Window* GetSDLWindow() { return m_sdlWindow; }
 
-			const Vector<String>& GetDroppedFiles( ) const;
+			const Vector<String>& GetDroppedFiles( );
+
+		protected:
+
+			void ClearDroppedFiles( );
 
 		private:
 			static SDL_GLContext mGLContext;
@@ -84,6 +88,7 @@ namespace Enjon
 			int m_screenHeight;
 			bool m_isfullscreen; 
 			Vector<String> mDroppedFiles;
+			bool mNeedToClearDroppedFiles = false;
 	};
 }
 

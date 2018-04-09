@@ -320,7 +320,7 @@ namespace Enjon
 			//}
 
 			AssetManager* am = EngineSubsystem( AssetManager );
-			auto window = EngineSubsystem( GraphicsSubsystem )->GetWindow( );
+			auto window = EngineSubsystem( GraphicsSubsystem )->GetWindow( )->ConstCast< Window >();
 			auto dropFiles = window->GetDroppedFiles( );
 			if ( dropFiles.size( ) )
 			{
