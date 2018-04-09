@@ -71,7 +71,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			AssetHandle< Scene > GetScene( ) const;
+			AssetHandle< Scene > GetScene( ) const; 
 
 		public:
 

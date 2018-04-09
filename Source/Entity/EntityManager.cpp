@@ -21,16 +21,16 @@
 #include <fmt/printf.h> 
 #include <stdio.h>
 
-namespace Enjon 
-{ 
+namespace Enjon
+{
 	//================================================================================================
 
 	EntityHandle::EntityHandle( )
-	{ 
+	{
 	}
- 
+
 	//================================================================================================
-		
+
 	EntityHandle::EntityHandle( const Entity* entity )
 		: mEntity( entity )
 	{
@@ -39,27 +39,27 @@ namespace Enjon
 			mID = mEntity->mID;
 		}
 	}
- 
+
 	//================================================================================================
 
 	EntityHandle::~EntityHandle( )
-	{ 
+	{
 	}
- 
+
 	//================================================================================================
 
 	EntityHandle::operator bool( )
 	{
 		return ( Get( ) != nullptr );
 	}
- 
+
 	//================================================================================================
 
 	EntityHandle EntityHandle::Invalid( )
 	{
 		return EntityHandle( );
 	}
- 
+
 	//================================================================================================
 
 	u32 EntityHandle::GetID( ) const
@@ -70,48 +70,48 @@ namespace Enjon
 	//================================================================================================
 
 	Enjon::Entity* EntityHandle::Get( ) const
-	{ 
+	{
 		EntityManager* manager = EngineSubsystem( EntityManager );
 		return manager->GetRawEntity( mID );
 	}
-		
+
 	//================================================================================================
 
 	bool operator==( EntityHandle left, const EntityHandle& other )
 	{
 		// Compare raw entity pointers and ids for match
 		return ( left.Get( ) == other.Get( ) ) && ( left.mID == other.mID );
-	} 
+	}
 
 	//================================================================================================
 
-	Entity::Entity()
-	: mID(MAX_ENTITIES), 
-	  mState(EntityState::INACTIVE), 
-	  mManager(nullptr),
-	  mWorldTransformDirty(true)
+	Entity::Entity( )
+		: mID( MAX_ENTITIES ),
+		mState( EntityState::INACTIVE ),
+		mManager( nullptr ),
+		mWorldTransformDirty( true )
 	{
 	}
 
 	//================================================================================================
 
-	Entity::Entity(EntityManager* manager)
-	: mID(MAX_ENTITIES), 
-	  mState(EntityState::INACTIVE), 
-	  mManager(manager),
-	  mWorldTransformDirty(true)
+	Entity::Entity( EntityManager* manager )
+		: mID( MAX_ENTITIES ),
+		mState( EntityState::INACTIVE ),
+		mManager( manager ),
+		mWorldTransformDirty( true )
 	{
 	}
 
 	//=================================================================
 
-	Entity::~Entity()
+	Entity::~Entity( )
 	{
 		this->Destroy( );
 	}
 
 	//=================================================================
-			
+
 	EntityHandle Entity::GetHandle( )
 	{
 		return EntityHandle( this );
@@ -121,66 +121,66 @@ namespace Enjon
 	{
 		if ( mManager )
 		{
-			mManager->Destroy( GetHandle( ) ); 
+			mManager->Destroy( GetHandle( ) );
 		}
-	} 
+	}
 
 	//=================================================================
 
-	UUID Entity::GetUUID( ) const 
+	UUID Entity::GetUUID( ) const
 	{
 		return mUUID;
 	}
 
 	//=================================================================
 
-	void Entity::Reset()
+	void Entity::Reset( )
 	{
-		assert(mManager != nullptr);
+		assert( mManager != nullptr );
 
 		RemoveParent( );
 
 		// Remove all children and add to parent hierarchy list
-		for (auto& c : mChildren)
+		for ( auto& c : mChildren )
 		{
 			Enjon::Entity* e = c.Get( );
 			if ( e )
 			{
 				// Remove but don't remove from list just yet since we're iterating it
-				e ->RemoveParent( true ); 
+				e->RemoveParent( true );
 
 			}
-		} 
+		}
 
 		// Reset all fields
 		mLocalTransform = Enjon::Transform( );
-		mWorldTransform = Enjon::Transform( ); 
+		mWorldTransform = Enjon::Transform( );
 		mID = MAX_ENTITIES;
 		mState = EntityState::INACTIVE;
 		mWorldTransformDirty = true;
 		mManager = nullptr;
-		mComponents.clear();
-		mChildren.clear();
+		mComponents.clear( );
+		mChildren.clear( );
 	}
 
 	//====================================================================================================
 
 	void Entity::Update( const f32& dt )
 	{
-		const Application* app = Engine::GetInstance()->GetApplication( );
+		const Application* app = Engine::GetInstance( )->GetApplication( );
 
 		// Update all components
 		for ( auto& c : mComponents )
 		{
-			auto comp = mManager->GetComponent( GetHandle(), c );
+			auto comp = mManager->GetComponent( GetHandle( ), c );
 			if ( comp )
 			{
-				if ( comp->GetTickState() == ComponentTickState::TickAlways || app->GetApplicationState( ) == ApplicationState::Running )
+				if ( comp->GetTickState( ) == ComponentTickState::TickAlways || app->GetApplicationState( ) == ApplicationState::Running )
 				{
-					comp->Update( ); 
+					comp->Update( );
 				}
 			}
-		} 
+		}
 	}
 
 	//====================================================================================================
@@ -194,18 +194,18 @@ namespace Enjon
 
 	Component* Entity::AddComponent( const MetaClass* compCls )
 	{
-		return mManager->AddComponent( compCls, GetHandle() );
+		return mManager->AddComponent( compCls, GetHandle( ) );
 	}
 
 	//====================================================================================================
 
 	bool Entity::HasComponent( const MetaClass* compCls )
-	{ 
+	{
 		return ( std::find( mComponents.begin( ), mComponents.end( ), compCls->GetTypeId( ) ) != mComponents.end( ) );
 	}
 
 	//---------------------------------------------------------------
-	void Entity::SetID(u32 id)
+	void Entity::SetID( u32 id )
 	{
 		mID = id;
 	}
@@ -234,7 +234,7 @@ namespace Enjon
 		mLocalTransform = transform;
 
 		if ( propagateToComponents )
-		{ 
+		{
 			CalculateWorldTransform( );
 			UpdateComponentTransforms( );
 		}
@@ -243,16 +243,16 @@ namespace Enjon
 	}
 
 	//---------------------------------------------------------------
-	Transform Entity::GetLocalTransform()
+	Transform Entity::GetLocalTransform( )
 	{
 		return mLocalTransform;
 	}
 
 	//---------------------------------------------------------------
-	Transform Entity::GetWorldTransform()
+	Transform Entity::GetWorldTransform( )
 	{
 		// Calculate world transform
-		CalculateWorldTransform();
+		CalculateWorldTransform( );
 
 		// Return world transform
 		return mWorldTransform;
@@ -260,7 +260,7 @@ namespace Enjon
 
 	//===========================================================================
 
-	void Entity::CalculateLocalTransform( ) 
+	void Entity::CalculateLocalTransform( )
 	{
 		// RelScale = WorldScale / ParentScale 
 		// RelRot	= Inverse(ParentRot) * WorldRot
@@ -271,11 +271,11 @@ namespace Enjon
 			Enjon::Entity* parent = mParent.Get( );
 
 			Transform parentTransform = parent->GetWorldTransform( );
-			Enjon::Quaternion parentInverse = parentTransform.GetRotation().Inverse( ).Normalize(); 
+			Enjon::Quaternion parentInverse = parentTransform.GetRotation( ).Inverse( ).Normalize( );
 
-			Vec3 relativeScale = mWorldTransform.GetScale() / parentTransform.GetScale();
-			Quaternion relativeRot = ( parentInverse * mWorldTransform.GetRotation() ).Normalize();
-			Vec3 relativePos = ( parentInverse * ( mWorldTransform.GetPosition() - parentTransform.GetPosition() ) ) / parentTransform.GetScale();
+			Vec3 relativeScale = mWorldTransform.GetScale( ) / parentTransform.GetScale( );
+			Quaternion relativeRot = ( parentInverse * mWorldTransform.GetRotation( ) ).Normalize( );
+			Vec3 relativePos = ( parentInverse * ( mWorldTransform.GetPosition( ) - parentTransform.GetPosition( ) ) ) / parentTransform.GetScale( );
 
 			mLocalTransform = Transform( relativePos, relativeRot, relativeScale );
 		}
@@ -283,8 +283,8 @@ namespace Enjon
 
 	//===========================================================================
 
-	void Entity::CalculateWorldTransform()
-	{ 
+	void Entity::CalculateWorldTransform( )
+	{
 		// WorldScale = ParentScale * LocalScale
 		// WorldRot = LocalRot * ParentRot
 		// WorldPos = ParentPos + [ ParentRot * ( ParentScale * LocalPos ) ]
@@ -297,11 +297,11 @@ namespace Enjon
 
 		// Get parent transform recursively
 		Enjon::Entity* p = mParent.Get( );
-		Transform parent = p->GetWorldTransform( ); 
+		Transform parent = p->GetWorldTransform( );
 
-		Enjon::Vec3 worldScale = parent.GetScale() * mLocalTransform.GetScale();
-		Enjon::Quaternion worldRot = ( parent.GetRotation() * mLocalTransform.GetRotation() ).Normalize();
-		Enjon::Vec3 worldPos = parent.GetPosition() + ( parent.GetRotation().Normalize() * ( parent.GetScale() * mLocalTransform.GetPosition() ) );
+		Enjon::Vec3 worldScale = parent.GetScale( ) * mLocalTransform.GetScale( );
+		Enjon::Quaternion worldRot = ( parent.GetRotation( ) * mLocalTransform.GetRotation( ) ).Normalize( );
+		Enjon::Vec3 worldPos = parent.GetPosition( ) + ( parent.GetRotation( ).Normalize( ) * ( parent.GetScale( ) * mLocalTransform.GetPosition( ) ) );
 
 		mWorldTransform = Transform( worldPos, worldRot, worldScale );
 
@@ -322,12 +322,12 @@ namespace Enjon
 
 	void Entity::SetLocalPosition( Vec3& position, bool propagateToComponents )
 	{
-		mLocalTransform.SetPosition(position); 
+		mLocalTransform.SetPosition( position );
 
 		if ( propagateToComponents )
 		{
-			CalculateWorldTransform( ); 
-			UpdateComponentTransforms( ); 
+			CalculateWorldTransform( );
+			UpdateComponentTransforms( );
 		}
 
 		mWorldTransformDirty = true;
@@ -337,12 +337,12 @@ namespace Enjon
 
 	void Entity::SetLocalScale( f32 scale, bool propagateToComponents )
 	{
-		SetLocalScale(v3(scale)); 
+		SetLocalScale( v3( scale ) );
 
 		if ( propagateToComponents )
 		{
-			CalculateWorldTransform( ); 
-			UpdateComponentTransforms( ); 
+			CalculateWorldTransform( );
+			UpdateComponentTransforms( );
 		}
 
 		mWorldTransformDirty = true;
@@ -351,12 +351,12 @@ namespace Enjon
 	//---------------------------------------------------------------
 	void Entity::SetLocalScale( Vec3& scale, bool propagateToComponents )
 	{
-		mLocalTransform.SetScale(scale);
+		mLocalTransform.SetScale( scale );
 
 		if ( propagateToComponents )
 		{
-			CalculateWorldTransform( ); 
-			UpdateComponentTransforms( ); 
+			CalculateWorldTransform( );
+			UpdateComponentTransforms( );
 		}
 
 		mWorldTransformDirty = true;
@@ -365,18 +365,34 @@ namespace Enjon
 	//---------------------------------------------------------------
 	void Entity::SetLocalRotation( Quaternion& rotation, bool propagateToComponents )
 	{
-		mLocalTransform.SetRotation(rotation);
+		mLocalTransform.SetRotation( rotation );
 
 		if ( propagateToComponents )
 		{
-			CalculateWorldTransform( ); 
-			UpdateComponentTransforms( ); 
+			CalculateWorldTransform( );
+			UpdateComponentTransforms( );
 		}
 
 		mWorldTransformDirty = true;
 	}
 
-	//---------------------------------------------------------------
+	//--------------------------------------------------------------- 
+
+	void Entity::SetLocalRotation( Vec3& eulerAngles, bool propagateToComponents )
+	{
+		mLocalTransform.SetRotation( eulerAngles );
+
+		if ( propagateToComponents )
+		{
+			CalculateWorldTransform( );
+			UpdateComponentTransforms( );
+		}
+
+		mWorldTransformDirty = true;
+	} 
+
+	//--------------------------------------------------------------- 
+
 	Vec3 Entity::GetLocalPosition()
 	{
 		return mLocalTransform.GetPosition();

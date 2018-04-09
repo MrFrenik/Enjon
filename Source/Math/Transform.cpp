@@ -17,11 +17,12 @@ namespace Enjon
 		
 	//==========================================================================
 
-	Transform::Transform(const Transform& t)
-		: 
-			mPosition(t.mPosition), 
-			mRotation(t.mRotation), 
-			mScale(t.mScale)
+	Transform::Transform( const Transform& t )
+		:
+			mPosition( t.mPosition ),
+			mRotation( t.mRotation ),
+			mScale( t.mScale ),
+			mEulerAngles( t.mEulerAngles )
 	{
 	}
 	//==========================================================================
@@ -32,7 +33,8 @@ namespace Enjon
 			mRotation(rotation), 
 			mScale(scale)
 	{
-	}
+		mEulerAngles = mRotation.EulerAngles( );
+	} 
 
 	//==========================================================================
 
@@ -101,6 +103,13 @@ namespace Enjon
 
 	//==========================================================================
 
+	Vec3 Transform::GetEulerAngles( ) const
+	{
+		return mEulerAngles;
+	}
+
+	//==========================================================================
+
 	Transform Transform::Inverse()
 	{
 		Transform I;
@@ -133,8 +142,23 @@ namespace Enjon
 	
 	void Transform::SetRotation(const Quaternion& rotation)
 	{
+		// Set quaternion rotation
 		mRotation = rotation;
+
+		// Set euler angles from quaternion
+		mEulerAngles = mRotation.EulerAngles( );
 	} 
+
+	//==========================================================================
+
+	void Transform::SetRotation( const Vec3& eulerAngles )
+	{
+		// Set euler angles
+		mEulerAngles = eulerAngles;
+
+		// Set quaternion rotation from angles
+		mRotation = Quaternion::FromEulerAngles( eulerAngles ); 
+	}
 
 	//==========================================================================
 

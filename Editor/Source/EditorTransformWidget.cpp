@@ -136,6 +136,14 @@ namespace Enjon
 		}
 	}
 
+	void EditorTransformWidget::SetRotation( const Vec3& eulerAngles )
+	{
+		if ( mTransformSpace == TransformSpace::Local )
+		{
+			mActiveWidget->SetRotation( eulerAngles );
+		}
+	}
+
 	TransformationMode EditorTransformWidget::GetTransformationMode()
 	{
 		return mMode;
@@ -644,25 +652,35 @@ namespace Enjon
 
 				case ( TransformWidgetRenderableType::RotationForwardAxis ) :
 				{
+					GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+
 					// Define plane and get intersection result with ray from mouse
-					Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::ZAxis( ) ).Normalize();
+					//Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::ZAxis( ) ).Normalize();
+					Vec3 planeNormal = Vec3::ZAxis( );
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( planeNormal);
 
 					f32 distFromCam = ( mActiveWidget->GetWorldTransform( ).GetPosition( ).Distance( camera->GetPosition( ) ) );
 					f32 denom = distFromCam != 0.0f ? distFromCam: 2.0f;
 
 					if ( intersectionResult.mHit )
-					{
+					{ 
 						const Vec3 endPositionVector = ( intersectionResult.mHitPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) );
 						const Vec3 startNormal = ( mIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
 						const Vec3 endNormal = ( endPositionVector ).Normalize( ); 
+						const Vec3 immutableStartNormal = ( mImmutableIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
+
+						// Start normal
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) +  immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
+						// End normal
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
+
 						f32 length = endPositionVector.Length( ) / denom;
 						f32 angle = ToDegrees( endNormal.SignedAngleBetween( startNormal ) );
 						if ( length > 1.0f )
 						{
 							angle *= length;
 						}
-						Vec3 cross = endNormal.Cross( startNormal );
+						Vec3 cross = startNormal.Cross( endNormal );
 						if ( planeNormal.Dot( cross ) < 0.0f )
 						{
 							angle *= -1.0f;
@@ -678,7 +696,8 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::RotationRightAxis ):
 				{
 					// Define plane and get intersection result with ray from mouse
-					Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::XAxis( ) ).Normalize();
+					//Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::XAxis( ) ).Normalize();
+					Vec3 planeNormal = ( Vec3::XAxis( ) ).Normalize();
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( planeNormal);
 
 					f32 distFromCam = ( mActiveWidget->GetWorldTransform( ).GetPosition( ).Distance( camera->GetPosition( ) ) );
@@ -689,13 +708,21 @@ namespace Enjon
 						const Vec3 endPositionVector = ( intersectionResult.mHitPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) );
 						const Vec3 startNormal = ( mIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
 						const Vec3 endNormal = ( endPositionVector ).Normalize( ); 
+
+						const Vec3 immutableStartNormal = ( mImmutableIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
+
+						// Start normal
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) +  immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
+						// End normal
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
+
 						f32 length = endPositionVector.Length( ) / denom;
 						f32 angle = ToDegrees( endNormal.SignedAngleBetween( startNormal ) );
 						if ( length > 1.0f )
 						{
 							angle *= length;
 						}
-						Vec3 cross = endNormal.Cross( startNormal );
+						Vec3 cross = startNormal.Cross( endNormal );
 						if ( planeNormal.Dot( cross ) < 0.0f )
 						{
 							angle *= -1.0f;
@@ -709,8 +736,9 @@ namespace Enjon
 
 				case ( TransformWidgetRenderableType::RotationUpAxis ) :
 				{
-					// Define plane and get intersection result with ray from mouse
-					Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::YAxis( ) ).Normalize();
+					// Define plane and get intersection result with ray from mouse 
+					//Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::YAxis( ) ).Normalize();
+					Vec3 planeNormal = ( Vec3::YAxis( ) ).Normalize();
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( planeNormal);
 					
 					f32 distFromCam = ( mActiveWidget->GetWorldTransform( ).GetPosition( ).Distance( camera->GetPosition( ) ) );
@@ -721,13 +749,21 @@ namespace Enjon
 						const Vec3 endPositionVector = ( intersectionResult.mHitPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) );
 						const Vec3 startNormal = ( mIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
 						const Vec3 endNormal = ( endPositionVector ).Normalize( ); 
+
+						const Vec3 immutableStartNormal = ( mImmutableIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
+
+						// Start normal
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) +  immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
+						// End normal
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
+
 						f32 length = endPositionVector.Length( ) / denom;
 						f32 angle = ToDegrees( endNormal.SignedAngleBetween( startNormal ) );
 						if ( length > 1.0f )
 						{
 							angle *= length;
 						}
-						Vec3 cross = endNormal.Cross( startNormal );
+						Vec3 cross = startNormal.Cross( endNormal );
 						if ( planeNormal.Dot( cross ) < 0.0f )
 						{
 							angle *= -1.0f;

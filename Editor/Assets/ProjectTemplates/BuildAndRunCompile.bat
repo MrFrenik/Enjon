@@ -11,7 +11,7 @@ cmake -G"Visual Studio 14 2015"
 echo "Running %projName%..."
 @echo off
 
-MSBuild %projName%.sln /t:Build /p:Configuation=Release
+MSBuild %projName%.sln /t:Build /p:Configuration=Release
 
 @echo off
 popd

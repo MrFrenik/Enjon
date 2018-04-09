@@ -37,6 +37,7 @@ namespace Enjon
 			void SetPosition( const Vec3& position );
 			void SetScale( const f32& scale );
 			void SetRotation( const Quaternion& rotation );
+			void SetRotation( const Vec3& eulerAngles );
 
 			EditorTranslationWidget mTranslationWidget;
 			EditorScaleWidget mScaleWidget;

@@ -213,6 +213,11 @@ namespace Enjon
 			void SetLocalRotation(Quaternion& rotation, bool propagateToComponents = true );
 
 			/**
+			* @brief Sets local orientation of entity relative to parent, if exists
+			*/
+			void SetLocalRotation(Vec3& eulerAngles, bool propagateToComponents = true );
+
+			/**
 			* @brief Gets local position of entity relative to parent, if exists
 			*/
 			Vec3 GetLocalPosition();

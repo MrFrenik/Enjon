@@ -6,6 +6,7 @@
 
 #include <Engine.h>
 #include <Graphics/GraphicsSubsystem.h>
+#include <Scene/SceneManager.h>
 #include <SubsystemCatalog.h>
 #include <ImGui/ImGuiManager.h>
 #include <IO/InputManager.h>
@@ -58,14 +59,27 @@ namespace Enjon
 		ImVec2 b( mSceneViewWindowPosition.x + mSceneViewWindowSize.x, mSceneViewWindowPosition.y + mSceneViewWindowSize.y ); 
 		dl->AddRect( a, b, ImColor( 0.0f, 0.64f, 1.0f, 0.48f ), 1.0f, 15, 1.5f ); 
 
-		//ImGui::SetCursorPosX( ImGui::GetWindowWidth( ) + padding.x - 20.0f );
-		//ImGui::SetCursorScreenPos( ImVec2( cursorPos.x + ImGui::GetWindowWidth() - 60.0f, cursorPos.y + 10.0f ) );
-		//ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.2f, 0.2f, 0.2f, 0.3f ) );
-		//if ( ImGui::Button( "[ ]" ) )
-		//{
-		//	// Close all other tabs and make this the only one open
-		//}
-		//ImGui::PopStyleColor( );
+		AssetHandle< Scene > mCurrentScene = EngineSubsystem( SceneManager )->GetScene( );
+		if ( mCurrentScene )
+		{
+			String sceneLabel = "Scene: " + mCurrentScene->GetName( );
+			ImVec2 sz = ImGui::CalcTextSize( sceneLabel.c_str( ) ); 
+			ImVec2 rectPadding( 5.0f, 5.0f );
+			ImVec2 padding( 10.0f, 10.0f );
+
+			// Draw bg rect behind scene label text for visibility 
+			//dl->AddRectFilled( ImVec2( b.x - sz.x - rectPadding.x - 10.0f , b.y - sz.y - rectPadding.y - 5.0f ), ImVec2( b.x - rectPadding.x, b.y - rectPadding.y ), ImColor( 0.0f, 0.0f, 0.0f, 0.2f ) );
+
+			// Draw shadow text
+			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
+			ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x + 1.0f, b.y - sz.y - padding.y + 1.0f ) ); 
+			ImGui::Text( sceneLabel.c_str( ) );
+			ImGui::PopStyleColor( );
+
+			// Draw text
+			ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x, b.y - sz.y - padding.y ) ); 
+			ImGui::Text( sceneLabel.c_str( ) );
+		} 
 	}
 
 	//=================================================================

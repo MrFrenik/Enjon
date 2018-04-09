@@ -105,6 +105,13 @@ namespace Enjon
 			* @param
 			* @return
 			*/
+			Vec3 GetEulerAngles( ) const;
+
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
 			void SetPosition(const Vec3& position);
 			
 			/**
@@ -133,6 +140,13 @@ namespace Enjon
 			* @param
 			* @return
 			*/
+			void SetRotation(const Vec3& eulerAngles);
+
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
 			void LookAt( const Vec3& target, const Vec3& up = Vec3( 0.0f, 1.0f, 0.0f ) );
 
 		private: 
@@ -141,6 +155,8 @@ namespace Enjon
 			Quaternion mRotation;
 
 			Vec3 mScale;
+
+			Vec3 mEulerAngles;
 	}; 
 }
 

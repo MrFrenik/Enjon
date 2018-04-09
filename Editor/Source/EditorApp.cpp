@@ -48,14 +48,14 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-//Enjon::String mProjectsDir = "W:/Projects/";
-//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+Enjon::String mProjectsDir = "W:/Projects/";
+Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -610,7 +610,7 @@ namespace Enjon
 						mProject.Simluate( );
 					} 
 				}
-			}
+			} 
 		} 
 	}
 
@@ -625,7 +625,7 @@ namespace Enjon
 
 			// Set transform to selected entity
 			mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) ); 
-			mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) ); 
+			mTransformWidget.SetRotation( -mSelectedEntity.Get( )->GetWorldRotation( ) ); 
 
 			// Set selected object in inspector view
 			mInspectorView->SetInspetedObject( mSelectedEntity.Get( ) );
@@ -1681,10 +1681,33 @@ namespace Enjon
 							{ 
 								Entity* ent = mSelectedEntity.Get( );
 								if ( ent )
-								{
-									ent->SetLocalRotation( ent->GetLocalRotation() * mTransformWidget.GetDeltaRotation() );
+								{ 
+									f32 da = ToRadians( mTransformWidget.GetAngleDelta( ) );
+									Transform localTrans = ent->GetLocalTransform( );
+									Vec3 ea = localTrans.GetEulerAngles( ); 
+
+									switch ( mTransformWidget.GetInteractedWidgetType( ) )
+									{ 
+										case TransformWidgetRenderableType::RotationRightAxis:
+										{ 
+											ent->SetLocalRotation( ent->GetLocalRotation( ) * mTransformWidget.GetDeltaRotation( ) );
+											//ent->SetLocalRotation( ea + Vec3(da, 0.0f, 0.0f) );
+										} break;
+
+										case TransformWidgetRenderableType::RotationUpAxis:
+										{ 
+											ent->SetLocalRotation( ent->GetLocalRotation( ) * mTransformWidget.GetDeltaRotation( ) );
+											//ent->SetLocalRotation( ea + Vec3(0.0f, da, 0.0f) );
+										} break;
+
+										case TransformWidgetRenderableType::RotationForwardAxis:
+										{
+											ent->SetLocalRotation( ent->GetLocalRotation( ) * mTransformWidget.GetDeltaRotation( ) );
+											//ent->SetLocalRotation( ea + Vec3( 0.0f, 0.0f, da ) ); 
+										} break;
+									}
 								}
-							} ;
+							} break;
 						}
 
 						if ( mSelectedEntity.Get( ) )
@@ -1692,7 +1715,7 @@ namespace Enjon
 							Entity* ent = mSelectedEntity.Get( );
 							// Set position and rotation to that of entity
 							mTransformWidget.SetPosition( ent->GetWorldPosition( ) ); 
-							mTransformWidget.SetRotation( ent->GetWorldRotation( ) ); 
+							mTransformWidget.SetRotation( -ent->GetWorldRotation( ) ); 
 						}
 					} 
 				}
@@ -1801,7 +1824,7 @@ namespace Enjon
 			if ( !mTransformWidget.IsInteractingWithWidget( ) && mSelectedEntity )
 			{
 				mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) ); 
-				mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) );
+				mTransformWidget.SetRotation( -mSelectedEntity.Get( )->GetWorldRotation( ) );
 			}
 		}
 

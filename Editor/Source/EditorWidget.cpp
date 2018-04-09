@@ -80,6 +80,12 @@ namespace Enjon
 		mRootHeirarchy->mLocalTransform.SetRotation( rotation );
 		Update( );
 	} 
+ 
+	void EditorWidget::SetRotation( const Vec3& eulerAngles )
+	{
+		mRootHeirarchy->mLocalTransform.SetRotation( eulerAngles );
+		Update( );
+	}
 
 	void EditorWidget::SetTransform( const Transform& transform )
 	{
