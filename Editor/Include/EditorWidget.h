@@ -51,7 +51,7 @@ namespace Enjon
 			{ 
 				// WorldScale = ParentScale * LocalScale
 				// WorldRot = LocalRot * ParentRot
-				// WorldPos = ParentPos + [ Inverse(ParentRot) * ( ParentScale * LocalPos ) ]
+				// WorldPos = ParentPos + [ ParentRot * ( ParentScale * LocalPos ) ]
 
 				if ( !HasParent( ) )
 				{

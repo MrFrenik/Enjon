@@ -287,7 +287,7 @@ namespace Enjon
 	{ 
 		// WorldScale = ParentScale * LocalScale
 		// WorldRot = LocalRot * ParentRot
-		// WorldPos = ParentPos + [ Inverse(ParentRot) * ( ParentScale * LocalPos ) ]
+		// WorldPos = ParentPos + [ ParentRot * ( ParentScale * LocalPos ) ]
 
 		if ( !HasParent( ) )
 		{
@@ -297,11 +297,11 @@ namespace Enjon
 
 		// Get parent transform recursively
 		Enjon::Entity* p = mParent.Get( );
-		Transform parent = p->GetWorldTransform( );
+		Transform parent = p->GetWorldTransform( ); 
 
 		Enjon::Vec3 worldScale = parent.GetScale() * mLocalTransform.GetScale();
-		Enjon::Quaternion worldRot = ( mLocalTransform.GetRotation() * parent.GetRotation() ).Normalize( );
-		Enjon::Vec3 worldPos = parent.GetPosition() + ( parent.GetRotation().Inverse().Normalize() * ( parent.GetScale() * mLocalTransform.GetPosition() ) );
+		Enjon::Quaternion worldRot = ( parent.GetRotation() * mLocalTransform.GetRotation() ).Normalize();
+		Enjon::Vec3 worldPos = parent.GetPosition() + ( parent.GetRotation().Normalize() * ( parent.GetScale() * mLocalTransform.GetPosition() ) );
 
 		mWorldTransform = Transform( worldPos, worldRot, worldScale );
 

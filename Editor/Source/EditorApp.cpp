@@ -1595,11 +1595,7 @@ namespace Enjon
 						if ( mInput->IsKeyPressed( KeyCode::F ) )
 						{
 							mSelectedEntity.Get( )->SetLocalPosition( mEditorCamera.GetPosition( ) );
-							mSelectedEntity.Get( )->SetLocalRotation( mEditorCamera.GetRotation( ).NegativeAngleAxis().Normalize() ); 
-
-							//Vec3 eulerAngles = mEditorCamera.GetRotation( ).NegativeAngleAxis().EulerAngles( );
-							//Quaternion newRot = Quaternion::FromEulerAngles( Vec3( eulerAngles.x, eulerAngles.y, -eulerAngles.z ) );
-							//mSelectedEntity.Get()->SetLocalRotation( newRot.Normalize() );
+							mSelectedEntity.Get( )->SetLocalRotation( mEditorCamera.GetRotation( ).Normalize() ); 
 						}
 					}
 

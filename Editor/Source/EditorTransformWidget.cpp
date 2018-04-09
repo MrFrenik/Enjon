@@ -529,8 +529,6 @@ namespace Enjon
 						mDelta.z = 0.0f;
 
 						mDelta.y = Clamp( mDelta.y, -5.0f, 5.0f );
-
-						std::cout << fmt::format( "dot: {}, delta: {}, {}, {}\n", TyDotYAxis, mDelta.x, mDelta.y, mDelta.z ); 
 					}
 				} break;
 
@@ -670,7 +668,6 @@ namespace Enjon
 							angle *= -1.0f;
 						} 
 
-						std::cout << "Angle: " << angle << "\n";
 						mAngleDelta = angle; 
 						mDeltaRotation = Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
