@@ -1686,26 +1686,17 @@ namespace Enjon
 									Transform localTrans = ent->GetLocalTransform( );
 									Vec3 ea = localTrans.GetEulerAngles( ); 
 
-									switch ( mTransformWidget.GetInteractedWidgetType( ) )
-									{ 
-										case TransformWidgetRenderableType::RotationRightAxis:
-										{ 
-											ent->SetLocalRotation( ent->GetLocalRotation( ) * mTransformWidget.GetDeltaRotation( ) );
-											//ent->SetLocalRotation( ea + Vec3(da, 0.0f, 0.0f) );
-										} break;
-
-										case TransformWidgetRenderableType::RotationUpAxis:
-										{ 
-											ent->SetLocalRotation( ent->GetLocalRotation( ) * mTransformWidget.GetDeltaRotation( ) );
-											//ent->SetLocalRotation( ea + Vec3(0.0f, da, 0.0f) );
-										} break;
-
-										case TransformWidgetRenderableType::RotationForwardAxis:
+									switch ( mTransformWidget.GetTransformSpace( ) )
+									{
+										case TransformSpace::Local: 
 										{
 											ent->SetLocalRotation( ent->GetLocalRotation( ) * mTransformWidget.GetDeltaRotation( ) );
-											//ent->SetLocalRotation( ea + Vec3( 0.0f, 0.0f, da ) ); 
 										} break;
-									}
+										case TransformSpace::World:
+										{
+											ent->SetLocalRotation( mTransformWidget.GetDeltaRotation( ) * ent->GetLocalRotation( ) );
+										} break;
+									} 
 								}
 							} break;
 						}
