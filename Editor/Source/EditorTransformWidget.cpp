@@ -168,7 +168,7 @@ namespace Enjon
 		}
 	}
 
-	LineIntersectionResult EditorTransformWidget::GetLineIntersectionResult( const Vec3& axisA, const Vec3& axisB, const Vec3& axisC, bool compareSupportingAxes, const Vec3& axisToUseAsPlaneNormal ) 
+	LineIntersectionResult EditorTransformWidget::GetLineIntersectionResult( const Vec3& axisA, const Vec3& axisB, const Vec3& axisC, bool compareSupportingAxes, bool overrideAxis, const Vec3& axisToUseAsPlaneNormal ) 
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 		Input* input = EngineSubsystem( Input );
@@ -196,8 +196,16 @@ namespace Enjon
 		}
 		else
 		{
-			// Plane defined by axis normal and transform point
-			 intersectionPlane = Plane( axisToUseAsPlaneNormal, oP ); 
+			if ( overrideAxis )
+			{
+				// Plane defined by axis normal and transform point
+				 intersectionPlane = Plane( axisToUseAsPlaneNormal, oP ); 
+			}
+			else
+			{
+				// Plane defined by axis normal and transform point
+				 intersectionPlane = Plane( Ta, oP ); 
+			}
 		}
 
 		// Get ray from camera
@@ -212,7 +220,12 @@ namespace Enjon
 
 	LineIntersectionResult EditorTransformWidget::GetLineIntersectionResultSingleAxis( const Vec3& axis )
 	{
-		return GetLineIntersectionResult( axis, Vec3( ), Vec3( ), false, axis );
+		return GetLineIntersectionResult( axis, Vec3( ), Vec3( ), false, false, axis );
+	}
+
+	LineIntersectionResult EditorTransformWidget::GetLineIntersectionResultSingleAxisOverride( const Vec3& axis )
+	{
+		return GetLineIntersectionResult( axis, Vec3( ), Vec3( ), false, true, axis );
 	}
 
 	void EditorTransformWidget::InteractWithWidget( )
@@ -228,7 +241,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::TranslationRoot ):
 				{
 					// Get intersection result
-					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( camera->Forward( ).Normalize( ) ); 
+					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( camera->Forward( ).Normalize( ) ); 
 
 					// Check for intersection hit result
 					if ( intersectionResult.mHit )
@@ -351,7 +364,7 @@ namespace Enjon
 					Vec3 Tz = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::ZAxis( ) ).Normalize( );
 
 					// Get line intersection result with plane
-					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tz );
+					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Tz );
 
 					// Check for intersection hit result
 					if ( intersectionResult.mHit )
@@ -379,7 +392,7 @@ namespace Enjon
 					Vec3 Ty = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3( 0.0f, 1.0f, 0.0f ) ).Normalize( ); 
 
 					// Get intersection result of plane 
-					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Ty );
+					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Ty );
 
 					// Check for intersection hit result
 					if ( intersectionResult.mHit )
@@ -407,7 +420,7 @@ namespace Enjon
 					Vec3 Tx = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( );
 
 					// Get intersection result of plane 
-					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tx );
+					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Tx );
 
 					// Check for intersection hit result
 					if ( intersectionResult.mHit )
@@ -546,7 +559,7 @@ namespace Enjon
 					Vec3 Tx = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( );
 
 					// Get intersection result of plane 
-					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tx );
+					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Tx );
 
 					// Check for intersection hit result
 					if ( intersectionResult.mHit )
@@ -574,7 +587,7 @@ namespace Enjon
 					Vec3 Tz = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::ZAxis( ) ).Normalize( );
 
 					// Get line intersection result with plane
-					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tz );
+					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Tz );
 
 					// Check for intersection hit result
 					if ( intersectionResult.mHit )
@@ -599,7 +612,7 @@ namespace Enjon
 					Vec3 Ty = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3( 0.0f, 1.0f, 0.0f ) ).Normalize( );
 
 					// Get intersection result of plane 
-					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Ty );
+					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Ty );
 
 					// Check for intersection hit result
 					if ( intersectionResult.mHit )
@@ -621,7 +634,7 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::ScaleRoot ):
 				{
 					// Get intersection result
-					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( camera->Forward( ).Normalize( ) ); 
+					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( camera->Forward( ).Normalize( ) ); 
 
 					// Check for intersection hit result
 					if ( intersectionResult.mHit )
@@ -655,33 +668,39 @@ namespace Enjon
 					GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 
 					// Define plane and get intersection result with ray from mouse
-					//Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::ZAxis( ) ).Normalize();
 					Vec3 planeNormal = Vec3::ZAxis( );
-					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( planeNormal);
+					LineIntersectionResult intersectionResult = mTransformSpace == TransformSpace::Local ? GetLineIntersectionResultSingleAxis( planeNormal ) : GetLineIntersectionResultSingleAxisOverride( planeNormal ); 
 
 					f32 distFromCam = ( mActiveWidget->GetWorldTransform( ).GetPosition( ).Distance( camera->GetPosition( ) ) );
 					f32 denom = distFromCam != 0.0f ? distFromCam: 2.0f;
+ 
+					Vec3 camDir = ( camera->GetPosition( ) - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
 
 					if ( intersectionResult.mHit )
-					{ 
+					{
 						const Vec3 endPositionVector = ( intersectionResult.mHitPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) );
-						const Vec3 startNormal = ( mIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
-						const Vec3 endNormal = ( endPositionVector ).Normalize( ); 
+						Vec3 startNormal = ( mIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
+						const Vec3 endNormal = ( endPositionVector ).Normalize( );
 						const Vec3 immutableStartNormal = ( mImmutableIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
+						const Vec3 rotationForward = mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3( 0.0f, 0.0f, 1.0f );
 
 						// Start normal
-						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) +  immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
 						// End normal
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
+						// Widget forward
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + rotationForward * 2.0f, Vec3( 0.0f, 0.0f, 1.0f ) );
 
 						f32 length = endPositionVector.Length( ) / denom;
-						f32 angle = ToDegrees( endNormal.SignedAngleBetween( startNormal ) );
+						f32 angle = ToDegrees( startNormal.SignedAngleBetween( endNormal ) );
+
 						if ( length > 1.0f )
 						{
 							angle *= length;
-						}
+						} 
+
 						Vec3 cross = startNormal.Cross( endNormal );
-						if ( planeNormal.Dot( cross ) < 0.0f )
+						if ( rotationForward.Dot( cross ) < 0.0f )
 						{
 							angle *= -1.0f;
 						} 
@@ -696,9 +715,8 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::RotationRightAxis ):
 				{
 					// Define plane and get intersection result with ray from mouse
-					//Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::XAxis( ) ).Normalize();
-					Vec3 planeNormal = ( Vec3::XAxis( ) ).Normalize();
-					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( planeNormal);
+					Vec3 planeNormal = Vec3::XAxis( );
+					LineIntersectionResult intersectionResult = mTransformSpace == TransformSpace::Local ? GetLineIntersectionResultSingleAxis( planeNormal ) : GetLineIntersectionResultSingleAxisOverride( planeNormal ); 
 
 					f32 distFromCam = ( mActiveWidget->GetWorldTransform( ).GetPosition( ).Distance( camera->GetPosition( ) ) );
 					f32 denom = distFromCam != 0.0f ? distFromCam: 2.0f;
@@ -708,25 +726,30 @@ namespace Enjon
 						const Vec3 endPositionVector = ( intersectionResult.mHitPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) );
 						const Vec3 startNormal = ( mIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
 						const Vec3 endNormal = ( endPositionVector ).Normalize( ); 
-
 						const Vec3 immutableStartNormal = ( mImmutableIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
+						const Vec3 rotationRight = mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3( 1.0f, 0.0f, 0.0f );
 
 						// Start normal
-						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) +  immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
 						// End normal
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
+						// Widget forward
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + rotationRight * 2.0f, Vec3( 0.0f, 0.0f, 1.0f ) );
 
 						f32 length = endPositionVector.Length( ) / denom;
-						f32 angle = ToDegrees( endNormal.SignedAngleBetween( startNormal ) );
+						f32 angle = ToDegrees( startNormal.SignedAngleBetween( endNormal ) );
+
 						if ( length > 1.0f )
 						{
 							angle *= length;
-						}
+						} 
+
 						Vec3 cross = startNormal.Cross( endNormal );
-						if ( planeNormal.Dot( cross ) < 0.0f )
+						if ( rotationRight.Dot( cross ) < 0.0f )
 						{
 							angle *= -1.0f;
 						} 
+
 						mAngleDelta = angle; 
 						mDeltaRotation = Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
@@ -737,9 +760,8 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::RotationUpAxis ) :
 				{
 					// Define plane and get intersection result with ray from mouse 
-					//Vec3 planeNormal = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::YAxis( ) ).Normalize();
-					Vec3 planeNormal = ( Vec3::YAxis( ) ).Normalize();
-					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( planeNormal);
+					Vec3 planeNormal = Vec3::YAxis( );
+					LineIntersectionResult intersectionResult = mTransformSpace == TransformSpace::Local ? GetLineIntersectionResultSingleAxis( planeNormal ) : GetLineIntersectionResultSingleAxisOverride( planeNormal ); 
 					
 					f32 distFromCam = ( mActiveWidget->GetWorldTransform( ).GetPosition( ).Distance( camera->GetPosition( ) ) );
 					f32 denom = distFromCam != 0.0f ? distFromCam: 2.0f;
@@ -749,25 +771,30 @@ namespace Enjon
 						const Vec3 endPositionVector = ( intersectionResult.mHitPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) );
 						const Vec3 startNormal = ( mIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
 						const Vec3 endNormal = ( endPositionVector ).Normalize( ); 
-
-						const Vec3 immutableStartNormal = ( mImmutableIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( );
+						const Vec3 immutableStartNormal = ( mImmutableIntersectionStartPosition - mActiveWidget->GetWorldTransform( ).GetPosition( ) ).Normalize( ); 
+						const Vec3 rotationUp = mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3( 0.0f, 1.0f, 0.0f );
 
 						// Start normal
-						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) +  immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
 						// End normal
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
+						// Widget forward
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + rotationUp * 2.0f, Vec3( 0.0f, 0.0f, 1.0f ) );
 
 						f32 length = endPositionVector.Length( ) / denom;
-						f32 angle = ToDegrees( endNormal.SignedAngleBetween( startNormal ) );
+						f32 angle = ToDegrees( startNormal.SignedAngleBetween( endNormal ) );
+
 						if ( length > 1.0f )
 						{
 							angle *= length;
-						}
+						} 
+
 						Vec3 cross = startNormal.Cross( endNormal );
-						if ( planeNormal.Dot( cross ) < 0.0f )
+						if ( rotationUp.Dot( cross ) < 0.0f )
 						{
 							angle *= -1.0f;
 						} 
+
 						mAngleDelta = angle; 
 						mDeltaRotation = Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
@@ -831,7 +858,7 @@ namespace Enjon
 				Vec3 cF = camera->Forward( ).Normalize( ); 
 
 				// Do intersection test
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( cF );
+				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( cF );
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::TranslationRoot ); 
@@ -870,7 +897,7 @@ namespace Enjon
 				Vec3 Tz = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation() * Vec3::ZAxis() ).Normalize(); 
 
 				// Get intersection result of plane 
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tz );
+				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Tz );
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::TranslationXYAxes ); 
@@ -882,7 +909,7 @@ namespace Enjon
 				Vec3 Ty = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) ).Normalize( );
 
 				// Get intersection result of plane 
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Ty );
+				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Ty );
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::TranslationXZAxes ); 
@@ -894,7 +921,7 @@ namespace Enjon
 				Vec3 Tx = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( ); 
 
 				// Get intersection result of plane 
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tx );
+				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Tx );
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::TranslationYZAxes ); 
@@ -930,10 +957,10 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::ScaleYZAxes ):
 			{ 
 				// Axis of rotation
-				Vec3 Tx = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( );
+				Vec3 Tx = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::XAxis( ) ).Normalize( );
 
 				// Get intersection result of plane 
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tx );
+				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Tx );
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::ScaleYZAxes ); 
@@ -942,10 +969,10 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::ScaleXYAxes ):
 			{ 
 				// Axis of rotation
-				Vec3 Tz = ( mScaleWidget.mRoot.mWorldTransform.GetRotation() * Vec3::ZAxis() ).Normalize();
+				Vec3 Tz = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::ZAxis( ) ).Normalize( );
 
 				// Get intersection result of plane 
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Tz );
+				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Tz );
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::ScaleXYAxes ); 
@@ -954,10 +981,10 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::ScaleXZAxes ):
 			{ 
 				// Axis of rotation
-				Vec3 Ty = ( mScaleWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) ).Normalize( );
+				Vec3 Ty = ( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::YAxis( ) ).Normalize( );
 
 				// Get intersection result of plane 
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( Ty );
+				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Ty );
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::ScaleXZAxes ); 
@@ -969,7 +996,7 @@ namespace Enjon
 				Vec3 cF = camera->Forward( ).Normalize( ); 
 
 				// Do intersection test
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( cF );
+				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( cF );
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::ScaleRoot ); 
@@ -978,7 +1005,7 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::RotationForwardAxis ) :
 			{
 				// Get line intersection result
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::ZAxis( ) );
+				LineIntersectionResult intersectionResult = mTransformSpace == TransformSpace::Local ? GetLineIntersectionResultSingleAxis( Vec3::ZAxis() ) : GetLineIntersectionResultSingleAxisOverride( Vec3::ZAxis() ); 
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::RotationForwardAxis ); 
@@ -987,7 +1014,7 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::RotationRightAxis ) :
 			{
 				// Get line intersection result
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::XAxis( ) );
+				LineIntersectionResult intersectionResult = mTransformSpace == TransformSpace::Local ? GetLineIntersectionResultSingleAxis( Vec3::XAxis() ) : GetLineIntersectionResultSingleAxisOverride( Vec3::XAxis() ); 
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::RotationRightAxis ); 
@@ -996,7 +1023,7 @@ namespace Enjon
 			case ( TransformWidgetRenderableType::RotationUpAxis ) :
 			{
 				// Get line intersection result
-				LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxis( mActiveWidget->GetWorldTransform( ).GetRotation( ) * Vec3::YAxis( ) );
+				LineIntersectionResult intersectionResult = mTransformSpace == TransformSpace::Local ? GetLineIntersectionResultSingleAxis( Vec3::YAxis() ) : GetLineIntersectionResultSingleAxisOverride( Vec3::YAxis() ); 
 
 				// Store information
 				StoreIntersectionResultInformation( intersectionResult, TransformWidgetRenderableType::RotationUpAxis ); 

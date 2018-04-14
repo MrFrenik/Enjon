@@ -300,25 +300,6 @@ namespace Enjon
 			}
 
 			// Check for dropped files
-			//if ( wm->GetHovered( this ) &&
-			//	!hoveringItem
-			//	)
-			//{
-			//	if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) )
-			//	{
-			//		auto window = EngineSubsystem( GraphicsSubsystem )->GetWindow( );
-			//		auto dropFiles = window->GetDroppedFiles( );
-			//		if ( dropFiles.size( ) )
-			//		{
-			//			std::cout << "Dropped files: \n";
-			//			for ( auto& f : dropFiles )
-			//			{
-			//				std::cout << f << "\n";
-			//			}
-			//		}
-			//	}
-			//}
-
 			AssetManager* am = EngineSubsystem( AssetManager );
 			auto window = EngineSubsystem( GraphicsSubsystem )->GetWindow( )->ConstCast< Window >();
 			auto dropFiles = window->GetDroppedFiles( );
@@ -328,7 +309,6 @@ namespace Enjon
 				for ( auto& f : dropFiles )
 				{
 					am->AddToDatabase( f, mCurrentDirectory, true );
-					//am->AddToDatabase( f, true, false ); 
 				}
 			}
 

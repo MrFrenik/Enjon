@@ -64,8 +64,9 @@ namespace Enjon
 			static bool IsValidID( const u32& id );
 
 		private:
-			LineIntersectionResult GetLineIntersectionResult( const Vec3& axisA, const Vec3& axisB, const Vec3& axisC, bool comparedSupportingAxes = true, const Vec3& axisToUseAsPlaneNormal = Vec3(0.0f) );
+			LineIntersectionResult GetLineIntersectionResult( const Vec3& axisA, const Vec3& axisB, const Vec3& axisC, bool comparedSupportingAxes = true, bool overrideAxis = false, const Vec3& axisToUseAsPlaneNormal = Vec3(0.0f) );
 			LineIntersectionResult GetLineIntersectionResultSingleAxis( const Vec3& axis );
+			LineIntersectionResult GetLineIntersectionResultSingleAxisOverride( const Vec3& axis );
 			void StoreIntersectionResultInformation( const LineIntersectionResult& result, TransformWidgetRenderableType type ); 
 
 		private:
