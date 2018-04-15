@@ -112,6 +112,9 @@ namespace Enjon
 		// Set shape
 		mBody->setCollisionShape( mShape->GetRawShape( ) );
 
+		// Reset body of shape
+		mShape->SetBody( this );
+
 		// Calculate local inertia using shape
 		BV3 localInertia = mShape->CalculateLocalInertia( mMass );
 
@@ -222,31 +225,31 @@ namespace Enjon
 			default:
 			case CollisionShapeType::Empty:
 			{
-				mShape = new EmptyCollisionShape( );
+				mShape = new EmptyCollisionShape( this );
 			} break;
 			case CollisionShapeType::Box:
 			{
-				mShape = new BoxCollisionShape( );
+				mShape = new BoxCollisionShape( this );
 			} break;
 
 			case CollisionShapeType::Sphere:
 			{
-				mShape = new SphereCollisionShape( );
+				mShape = new SphereCollisionShape( this );
 			} break;
 
 			case CollisionShapeType::Cylinder:
 			{
-				mShape = new CylinderCollisionShape( );
+				mShape = new CylinderCollisionShape( this );
 			} break;
 
 			case CollisionShapeType::Capsule:
 			{
-				mShape = new CapsuleCollisionShape( ); 
+				mShape = new CapsuleCollisionShape( this ); 
 			} break;
 
 			case CollisionShapeType::Cone:
 			{
-				mShape = new ConeCollisionShape( ); 
+				mShape = new ConeCollisionShape( this ); 
 			} break;
 		}
 
@@ -556,15 +559,26 @@ namespace Enjon
 
 	//========================================================================
 
+	void RigidBody::RefreshTransform( )
+	{
+		// Totally useless function that needs to be handled better...
+		SetWorldTransform( GetWorldTransform( ) );
+	}
+
+	//========================================================================
+
 	void RigidBody::SetWorldTransform( const Transform& transform )
 	{
 		// Create new bullet transform
 		BTransform bTransform;
 		bTransform.setIdentity( );
+
 		const Vec3* elp = &transform.GetPosition();
 		const Quaternion* elr = &transform.GetRotation();
 		const Vec3* els = &transform.GetScale();
-		bTransform.setOrigin( BV3( elp->x, elp->y, elp->z ) );
+		Vec3 offset = *elr * mShape->GetOffset( ); 
+
+		bTransform.setOrigin( BV3( elp->x + offset.x, elp->y + offset.y, elp->z + offset.z ) );
 		bTransform.setRotation( BQuat( elr->x, elr->y, elr->z, elr->w ) );
 
 		// Set local scaling of shape
@@ -591,11 +605,13 @@ namespace Enjon
 			// Get bullet transform from bullet motion body
 			mBody->getMotionState( )->getWorldTransform( trans );
 			BV3 origin = trans.getOrigin( );
-			BQuat rot = trans.getRotation( );
+			BQuat bRot = trans.getRotation( ); 
+			Quaternion rot( bRot.x( ), bRot.y( ), bRot.z( ), bRot.w( ) );
+			Vec3 offset = rot * mShape->GetOffset( );
 
 			// Fill out transform information 
-			returnTrans.SetPosition( Vec3( origin.getX( ), origin.getY( ), origin.getZ( ) ) );
-			returnTrans.SetRotation( Quaternion( rot.x( ), rot.y( ), rot.z( ), rot.w( ) ) );
+			returnTrans.SetPosition( Vec3( origin.getX( ), origin.getY( ), origin.getZ( ) ) - offset );
+			returnTrans.SetRotation( rot );
 			returnTrans.SetScale( GetCollisionShape( )->GetLocalScaling( ) );
 		} 
 

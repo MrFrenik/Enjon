@@ -19,11 +19,22 @@ namespace Enjon
 
 	//==============================================================
 
+	CylinderCollisionShape::CylinderCollisionShape( RigidBody* body )
+		: CollisionShape( body )
+	{
+		// Construct box collision shape
+		mShape = new BulletCylinderShape( BV3( mHalfExtents.x, mHalfExtents.y, mHalfExtents.z ) );
+
+		// Set up shape type
+		mShapeType = CollisionShapeType::Cylinder; 
+	}
+
+	//==============================================================
+
 	CylinderCollisionShape::~CylinderCollisionShape( )
 	{
 		// Release memory for shape
-		delete mShape;
-		mShape = nullptr;
+		DeleteShape( );
 	}
 
 	//==============================================================

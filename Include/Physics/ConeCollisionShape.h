@@ -25,6 +25,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			ConeCollisionShape( RigidBody* body );
+
+			/**
+			* @brief
+			*/
 			~ConeCollisionShape( );
 
 		private:

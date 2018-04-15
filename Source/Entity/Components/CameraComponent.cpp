@@ -64,7 +64,7 @@ namespace Enjon
 	{
 		Transform wt = mEntity->GetWorldTransform( );
 		mCamera.SetPosition( wt.GetPosition( ) ); 
-		mCamera.SetRotation( wt.GetRotation().NegativeAngleAxis().Normalize() );
+		mCamera.SetRotation( wt.GetRotation().Normalize() );
 	}
 	
 	//==================================================================== 

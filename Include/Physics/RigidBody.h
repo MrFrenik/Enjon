@@ -266,6 +266,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void RefreshTransform( );
+
+			/**
+			* @brief
+			*/
 			void SetLocalScaling( const Vec3& scale );
 
 			/**

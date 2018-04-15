@@ -18,6 +18,13 @@ namespace Enjon
 
 	//===========================================================
 
+	CollisionShape::CollisionShape( RigidBody* body )
+		: mBody( body )
+	{ 
+	}
+
+	//===========================================================
+
 	CollisionShape::~CollisionShape( )
 	{ 
 		// Delete the shape
@@ -67,6 +74,44 @@ namespace Enjon
 	CollisionShapeType CollisionShape::GetCollisionShapeType( ) const
 	{
 		return mShapeType;
+	}
+
+	//===========================================================
+
+	void CollisionShape::DeleteShape( )
+	{
+		if ( mShape )
+		{
+			delete mShape;
+			mShape = nullptr;
+		}
+	}
+
+	//===========================================================
+
+	void CollisionShape::SetOffset( const Vec3& offset )
+	{
+		mOffset = offset;
+
+		// Refresh transform body
+		if ( mBody )
+		{
+			mBody->RefreshTransform( );
+		}
+	}
+
+	//===========================================================
+
+	Vec3 CollisionShape::GetOffset( )
+	{
+		return mOffset;
+	}
+
+	//===========================================================
+
+	void CollisionShape::SetBody( RigidBody* body )
+	{
+		mBody = body;
 	}
 
 	//===========================================================

@@ -19,11 +19,22 @@ namespace Enjon
 
 	//==============================================================
 
+	SphereCollisionShape::SphereCollisionShape( RigidBody* body )
+		: CollisionShape( body )
+	{ 
+		// Construct box collision shape
+		mShape = new BulletSphereShape( mRadius );
+
+		// Set up shape type
+		mShapeType = CollisionShapeType::Sphere;
+	}
+
+	//==============================================================
+
 	SphereCollisionShape::~SphereCollisionShape( )
 	{
 		// Release memory for shape
-		delete mShape;
-		mShape = nullptr;
+		DeleteShape( );
 	}
 
 	//==============================================================

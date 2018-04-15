@@ -19,11 +19,22 @@ namespace Enjon
 
 	//==============================================================
 
+	CapsuleCollisionShape::CapsuleCollisionShape( RigidBody* body )
+		: CollisionShape( body )
+	{
+		// Construct box collision shape
+		mShape = new BulletCapsuleShape( mRadius, mHeight );
+
+		// Set up shape type
+		mShapeType = CollisionShapeType::Capsule; 
+	}
+
+	//==============================================================
+
 	CapsuleCollisionShape::~CapsuleCollisionShape( )
 	{
 		// Release memory for shape
-		delete mShape;
-		mShape = nullptr;
+		DeleteShape( );
 	}
 
 	//==============================================================

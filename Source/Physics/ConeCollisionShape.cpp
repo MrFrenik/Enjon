@@ -19,11 +19,22 @@ namespace Enjon
 
 	//==============================================================
 
+	ConeCollisionShape::ConeCollisionShape( RigidBody* body )
+		: CollisionShape( body )
+	{
+		// Construct box collision shape
+		mShape = new BulletConeShape( mRadius, mHeight );
+
+		// Set up shape type
+		mShapeType = CollisionShapeType::Cone; 
+	}
+
+	//==============================================================
+
 	ConeCollisionShape::~ConeCollisionShape( )
 	{
 		// Release memory for shape
-		delete mShape;
-		mShape = nullptr;
+		DeleteShape( );
 	}
 
 	//==============================================================

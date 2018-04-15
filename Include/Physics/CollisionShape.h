@@ -46,9 +46,31 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			CollisionShape( RigidBody* body );
+
+			/**
+			* @brief
+			*/
 			~CollisionShape( );
 
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
+			void SetOffset( const Vec3& offset ); 
+
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
+			Vec3 GetOffset( ); 
+
 		protected:
+
+			/**
+			* @brief
+			*/
+			void SetBody( RigidBody* body );
 
 			/**
 			* @brief
@@ -75,6 +97,11 @@ namespace Enjon
 			*/
 			CollisionShapeType GetCollisionShapeType( ) const;
 
+			/**
+			* @brief
+			*/
+			void DeleteShape( );
+
 		private:
 
 			/**
@@ -87,11 +114,15 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			Vec3 mLocalScaling = Vec3( 1.0f );
 
+			ENJON_PROPERTY( UIMin = -5.0f, UIMax = 5.0f, Delegates[ Mutator = SetOffset ] )
+			Vec3 mOffset = Vec3( 0.0f );
+
 			ENJON_PROPERTY( )
 			CollisionShapeType mShapeType = CollisionShapeType::Empty;
 
 		protected: 
 			BulletCollisionShape* mShape = nullptr;
+			RigidBody* mBody = nullptr;
 	}; 
 }
 

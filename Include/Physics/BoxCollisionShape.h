@@ -27,18 +27,34 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			~BoxCollisionShape( );
-
-		private:
+			BoxCollisionShape( RigidBody* body );
 
 			/**
 			* @brief
 			*/
-			virtual void Base( ) override;
+			~BoxCollisionShape( );
+
+			/*
+			* @brief
+			*/
+			ENJON_FUNCTION( )
+			void SetHalfExtents( const Vec3& extents );
+
+		private: 
+
+			/**
+			* @brief
+			*/
+			virtual void Base( ) override; 
+
+			/**
+			* @brief
+			*/
+			void ConstructShape( ); 
 
 		private:
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( UIMin = 0, UIMax = 1, Delegates[ Mutator = SetHalfExtents ] )
 			Vec3 mHalfExtents = Vec3( 1.0f ); 
 	};
 }
