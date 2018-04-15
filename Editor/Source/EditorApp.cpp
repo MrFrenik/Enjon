@@ -6,6 +6,7 @@
 #include "EditorAssetBrowserView.h"
 #include "EditorInspectorView.h"
 
+
 #include <Engine.h>
 #include <Asset/AssetManager.h>
 #include <Serialize/ObjectArchiver.h>
@@ -1345,7 +1346,7 @@ namespace Enjon
 						Entity* ent = cube.Get( );
 						GraphicsComponent* gfx = ent->AddComponent<GraphicsComponent>( );
 						gfx->SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
-						gfx->SetMaterial( am->GetDefaultAsset<Material>( ) );
+						gfx->SetMaterial( am->GetDefaultAsset<Material>( ), 0 );
 
 						RigidBodyComponent* rbc = ent->AddComponent<RigidBodyComponent>( );
 						rbc->SetShape( CollisionShapeType::Box ); 
@@ -1372,7 +1373,7 @@ namespace Enjon
 						Entity* ent = sphere.Get( );
 						GraphicsComponent* gfx = ent->AddComponent<GraphicsComponent>( );
 						gfx->SetMesh( am->GetAsset< Mesh >( "models.unit_sphere" ) );
-						gfx->SetMaterial( am->GetDefaultAsset<Material>( ) );
+						gfx->SetMaterial( am->GetDefaultAsset<Material>( ), 0 );
 
 						RigidBodyComponent* rbc = ent->AddComponent< RigidBodyComponent >( );
 						rbc->SetShape( CollisionShapeType::Sphere );

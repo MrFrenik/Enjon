@@ -10,17 +10,104 @@
 
 #include <vector>
 
-namespace Enjon { 
+namespace Enjon 
+{ 
+	// Forward Declarations
+	class Mesh;
+	class MeshAssetLoader;
 
-	struct Vert
+	struct Vert 
 	{
 		float Position[3];
 		float Normals[3];
 		float Tangent[3];
 		float UV[2];	
-	};
+	}; 
 
-	class MeshAssetLoader;
+	ENJON_CLASS( Construct )
+	class SubMesh : public Object
+	{ 
+		friend MeshAssetLoader;
+		friend Mesh;
+
+		ENJON_CLASS_BODY( )
+
+		public:
+			/*
+			* @brief Constructor
+			*/
+			SubMesh();
+
+			/*
+			* @brief Destructor
+			*/
+			~SubMesh();
+
+			/*
+			* @brief
+			*/
+			void Bind() const;
+
+			/*
+			* @brief
+			*/
+			void Unbind() const;
+
+			/* 
+			* @brief 
+			*/
+			void Submit() const; 
+
+			/*
+			* @brief
+			*/
+			u32 GetDrawCount( ) const; 
+
+			/*
+			* @brief
+			*/
+			u32 GetVAO( ) const;
+
+			/*
+			* @brief
+			*/
+			u32 GetVBO( ) const;
+
+			/*
+			* @brief
+			*/
+			u32 GetIBO( ) const;
+
+		protected: 
+
+			/*
+			* @brief
+			*/
+			Result Release( ); 
+
+		public:
+			/*
+			* @brief
+			*/
+			virtual Result SerializeData( ByteBuffer* buffer ) const override;
+
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
+
+		protected: 
+			Vector< Vert > mVerticies; 
+			Vector< u32 > mIndicies;	
+
+			GLenum mDrawType;
+			GLint mDrawStart = 0;
+			GLint mDrawCount = 0;
+			GLuint mVAO = 0;
+			GLuint mVBO = 0;
+			GLuint mIBO = 0;
+
+	}; 
 
 	ENJON_CLASS( Construct )
 	class Mesh : public Asset
@@ -58,22 +145,12 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			u32 GetDrawCount( ) const; 
+			const Vector<SubMesh>& GetSubmeshes( ) const;
 
 			/*
 			* @brief
 			*/
-			u32 GetVAO( ) const;
-
-			/*
-			* @brief
-			*/
-			u32 GetVBO( ) const;
-
-			/*
-			* @brief
-			*/
-			u32 GetIBO( ) const;
+			u32 GetSubMeshCount( ) const;
 
 		protected:
 
@@ -99,16 +176,7 @@ namespace Enjon {
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
 		protected: 
-			Vector< Vert > mVerticies;
-
-			Vector< u32 > mIndicies;	
-
-			GLenum mDrawType;
-			GLint mDrawStart = 0;
-			GLint mDrawCount = 0;
-			GLuint mVAO = 0;
-			GLuint mVBO = 0;
-			GLuint mIBO = 0;
+			Vector< SubMesh > mSubMeshes;
 	}; 
 }
 

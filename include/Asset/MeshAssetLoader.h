@@ -8,6 +8,11 @@
 #include "Asset/AssetLoader.h"
 #include "Graphics/Mesh.h"
 
+// Assimp specifics
+struct aiMesh;
+struct aiNode;
+struct aiScene;
+
 namespace Enjon
 {
 	ENJON_CLASS()
@@ -38,7 +43,17 @@ namespace Enjon
 			/**
 			* @brief Destructor
 			*/
-			virtual Asset* LoadResourceFromFile(const String& filePath ) override;
+			virtual Asset* LoadResourceFromFile(const String& filePath ) override; 
+
+			/**
+			* @brief
+			*/
+			void ProcessNode( aiNode* node, const aiScene* scene, Mesh* mesh );
+
+			/**
+			* @brief
+			*/
+			SubMesh ProcessMesh( aiMesh* aim, const aiScene* scene );
 	}; 
 }
 

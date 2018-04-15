@@ -59,7 +59,7 @@ namespace Enjon
 			/* 
 			* @brief Get material of renderable 
 			*/
-			AssetHandle< Material > GetMaterial() const;
+			AssetHandle< Material > GetMaterial( const u32& idx = 0 ) const;
 
 			/* 
 			* @brief Get mesh of renderable 
@@ -109,7 +109,7 @@ namespace Enjon
 			/* 
 			* @brief Set material of renderable 
 			*/
-			void SetMaterial( const AssetHandle< Material >& material );
+			void SetMaterial( const AssetHandle< Material >& material, const u32& idx = 0 );
 
 			/* 
 			* @brief Set mesh of renderable 

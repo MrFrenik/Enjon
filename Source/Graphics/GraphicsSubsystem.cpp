@@ -436,7 +436,7 @@ namespace Enjon
 					Enjon::Renderable renderable;
 					
 					// Set renderable material
-					renderable.SetMaterial( mMaterial );
+					renderable.SetMaterial( mMaterial, 0 );
 					renderable.SetMesh( am->GetAsset< Enjon::Mesh >( "models.monkey" ) );
 					renderable.SetPosition( Enjon::Vec3( j, 1.0f, i ) + Enjon::Vec3( -25, 0, 5 ) );
 
@@ -485,48 +485,48 @@ namespace Enjon
 		// Get a mesh and make it instanced... or something
 		auto db = Enjon::Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 		Enjon::AssetHandle< Enjon::Mesh > mesh = db->GetAsset< Enjon::Mesh >( "models.unit_cube" );
-		if ( mesh )
-		{
-			// Set bunny mesh for later use
-			mInstancedRenderable = new Enjon::Renderable( );
-			mInstancedRenderable->SetMesh( mesh );
-			mInstancedRenderable->SetMaterial( db->GetDefaultAsset<Material>( ) );
-			//Enjon::Material* instancedMat = new Enjon::Material( );
-			//instancedMat->TwoSided( true );
-			//instancedMat->SetTexture(Enjon::TextureSlotType::Albedo, db->GetAsset<Enjon::Texture>("materials.copperrock.albedo"));
-			//instancedMat->SetTexture(Enjon::TextureSlotType::Normal, db->GetAsset<Enjon::Texture>("materials.copperrock.normal"));
-			//instancedMat->SetTexture(Enjon::TextureSlotType::Metallic, db->GetAsset<Enjon::Texture>("materials.copperrock.roughness"));
-			//instancedMat->SetTexture(Enjon::TextureSlotType::Roughness, db->GetAsset<Enjon::Texture>("materials.copperrock.metallic"));
-			//instancedMat->SetTexture(Enjon::TextureSlotType::Emissive, db->GetAsset<Enjon::Texture>("textures.black"));
-			//instancedMat->SetTexture(Enjon::TextureSlotType::AO, db->GetAsset<Enjon::Texture>("materials.copperrock.ao"));
-			//mInstancedRenderable->SetMaterial( instancedMat );
+		//if ( mesh )
+		//{
+		//	// Set bunny mesh for later use
+		//	mInstancedRenderable = new Enjon::Renderable( );
+		//	mInstancedRenderable->SetMesh( mesh );
+		//	mInstancedRenderable->SetMaterial( db->GetDefaultAsset<Material>( ) );
+		//	//Enjon::Material* instancedMat = new Enjon::Material( );
+		//	//instancedMat->TwoSided( true );
+		//	//instancedMat->SetTexture(Enjon::TextureSlotType::Albedo, db->GetAsset<Enjon::Texture>("materials.copperrock.albedo"));
+		//	//instancedMat->SetTexture(Enjon::TextureSlotType::Normal, db->GetAsset<Enjon::Texture>("materials.copperrock.normal"));
+		//	//instancedMat->SetTexture(Enjon::TextureSlotType::Metallic, db->GetAsset<Enjon::Texture>("materials.copperrock.roughness"));
+		//	//instancedMat->SetTexture(Enjon::TextureSlotType::Roughness, db->GetAsset<Enjon::Texture>("materials.copperrock.metallic"));
+		//	//instancedMat->SetTexture(Enjon::TextureSlotType::Emissive, db->GetAsset<Enjon::Texture>("textures.black"));
+		//	//instancedMat->SetTexture(Enjon::TextureSlotType::AO, db->GetAsset<Enjon::Texture>("materials.copperrock.ao"));
+		//	//mInstancedRenderable->SetMaterial( instancedMat );
 
-			glGenBuffers( 1, &mInstancedVBO );
-			glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
-			glBufferData( GL_ARRAY_BUFFER, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ], GL_DYNAMIC_DRAW );
+		//	glGenBuffers( 1, &mInstancedVBO );
+		//	glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
+		//	glBufferData( GL_ARRAY_BUFFER, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ], GL_DYNAMIC_DRAW );
 
-			// Vertex attributes for instanced model matrix
-			glBindVertexArray( mesh.Get( )->GetVAO() );
-			// Set attrib pointers for matrix
-			glEnableVertexAttribArray( 4 );
-			glVertexAttribPointer( 4, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )0 );
+		//	// Vertex attributes for instanced model matrix
+		//	glBindVertexArray( mesh.Get( )->GetSubmeshes(0)() );
+		//	// Set attrib pointers for matrix
+		//	glEnableVertexAttribArray( 4 );
+		//	glVertexAttribPointer( 4, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )0 );
 
-			glEnableVertexAttribArray( 5 );
-			glVertexAttribPointer( 5, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )sizeof(Enjon::Vec4) );
+		//	glEnableVertexAttribArray( 5 );
+		//	glVertexAttribPointer( 5, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )sizeof(Enjon::Vec4) );
 
-			glEnableVertexAttribArray( 6 );
-			glVertexAttribPointer( 6, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )( 2 * sizeof(Enjon::Vec4) ) );
+		//	glEnableVertexAttribArray( 6 );
+		//	glVertexAttribPointer( 6, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )( 2 * sizeof(Enjon::Vec4) ) );
 
-			glEnableVertexAttribArray( 7 );
-			glVertexAttribPointer( 7, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )( 3 * sizeof(Enjon::Vec4) ) );
+		//	glEnableVertexAttribArray( 7 );
+		//	glVertexAttribPointer( 7, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )( 3 * sizeof(Enjon::Vec4) ) );
 
-			glVertexAttribDivisor( 4, 1 );
-			glVertexAttribDivisor( 5, 1 );
-			glVertexAttribDivisor( 6, 1 );
-			glVertexAttribDivisor( 7, 1 );
+		//	glVertexAttribDivisor( 4, 1 );
+		//	glVertexAttribDivisor( 5, 1 );
+		//	glVertexAttribDivisor( 6, 1 );
+		//	glVertexAttribDivisor( 7, 1 );
 
-			glBindVertexArray( 0 );
-		} 
+		//	glBindVertexArray( 0 );
+		//} 
 	}
 
 	//======================================================================================================
@@ -749,33 +749,67 @@ namespace Enjon
 		{ 
 			const Material* material = nullptr;
 			for (auto& renderable : sortedRenderables)
-			{
-				// Check for material switch 
-				const Material* curMaterial = renderable->GetMaterial().Get();
-				sg = curMaterial->GetShaderGraph( );
-				assert(curMaterial != nullptr); 
-
-				// Grab shader from graph
-				Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
-
-				if ( sg )
+			{ 
+				renderable->Bind( );
 				{
-					if (material != curMaterial)
+					// For each submesh
+					const Vector< SubMesh >& subMeshes = renderable->GetMesh( ).Get( )->GetSubmeshes( );
+					for ( u32 i = 0; i < subMeshes.size(); ++i )
 					{
-						// Set material
-						material = curMaterial;
+						const Material* curMaterial = renderable->GetMaterial( i ).Get( );
+						sg = curMaterial->GetShaderGraph( );
+						assert( curMaterial != nullptr );
 
-						sgShader->Use( );
-						sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
-						sgShader->SetUniform( "uWorldTime", wt );
-						sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
-						sgShader->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix );
-						material->Bind( sgShader );
+						if ( sg )
+						{
+							Enjon::Shader* sgShader = const_cast< Shader * >( sg->GetShader( ShaderPassType::StaticGeom ) );
+							if ( material != curMaterial )
+							{
+								// Set material
+								material = curMaterial;
+
+								// Bind uniforms
+								sgShader->Use( );
+								sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
+								sgShader->SetUniform( "uWorldTime", wt );
+								sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
+								sgShader->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix );
+								material->Bind( sgShader );
+							}
+
+							sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) ); 
+							renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ), subMeshes.at( i ) );
+						}
 					} 
+				}
+				renderable->Unbind( );
 
-					sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
-					renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
-				} 
+				//// Check for material switch 
+				//const Material* curMaterial = renderable->GetMaterial( 0 ).Get();
+				//sg = curMaterial->GetShaderGraph( );
+				//assert(curMaterial != nullptr); 
+
+				//// Grab shader from graph
+				//Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
+
+				//if ( sg )
+				//{
+				//	if (material != curMaterial)
+				//	{
+				//		// Set material
+				//		material = curMaterial;
+
+				//		sgShader->Use( );
+				//		sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
+				//		sgShader->SetUniform( "uWorldTime", wt );
+				//		sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
+				//		sgShader->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix );
+				//		material->Bind( sgShader );
+				//	} 
+
+				//	sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
+				//	renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
+				//} 
 			}
 		}
 
@@ -846,7 +880,7 @@ namespace Enjon
 			shader->SetUniform( "uView", camera->GetView( ) );
 
 			// Get material
-			const Material* material = mInstancedRenderable->GetMaterial( ).Get();
+			//const Material* material = mInstancedRenderable->GetMaterial( ).Get();
 
 			// Set material textures
 			/*shader->BindTexture( "uAlbedoMap", material->GetTexture( Enjon::TextureSlotType::Albedo ).Get( )->GetTextureId( ), 0 );
@@ -1335,7 +1369,7 @@ namespace Enjon
 			for ( auto& renderable : nonDepthTestedRenderables )
 			{
 				// Check for material switch 
-				const Material* curMaterial = renderable->GetMaterial( ).Get( );
+				const Material* curMaterial = renderable->GetMaterial( 0  ).Get( );
 				AssetHandle< ShaderGraph > sg = curMaterial->GetShaderGraph( );
 				assert( curMaterial != nullptr );
 
@@ -1392,7 +1426,7 @@ namespace Enjon
 				for ( auto& renderable : nonDepthTestedRenderables )
 				{
 					// Check for material switch 
-					const Material* curMaterial = renderable->GetMaterial( ).Get( );
+					const Material* curMaterial = renderable->GetMaterial( 0 ).Get( );
 					AssetHandle< ShaderGraph > sg = curMaterial->GetShaderGraph( );
 					assert( curMaterial != nullptr );
 

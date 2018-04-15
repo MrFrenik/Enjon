@@ -7,16 +7,16 @@
 #include "Graphics/GraphicsSubsystem.h" 
 #include "Graphics/Color.h"
 #include "ImGui/ImGuiManager.h"
+#include "Asset/AssetManager.h"
 #include "Engine.h"
 #include "SubsystemCatalog.h"
 
-#include <assert.h>
+#include <assert.h> 
 
 namespace Enjon  
 {
 	//--------------------------------------------------------------------
 	Renderable::Renderable()
-		: mMaterial(nullptr)
 	{
 	}
 
@@ -48,10 +48,16 @@ namespace Enjon
 
 	//==============================================================
 
-	AssetHandle< Material > Renderable::GetMaterial() const
+	AssetHandle< Material > Renderable::GetMaterial( const u32& idx ) const
 	{ 
-		return mMaterial; 
-	}
+		if ( idx < mMaterialElements.size( ) )
+		{
+			return mMaterialElements.at( idx );
+		}
+
+		// Otherwise return last element
+		return mMaterialElements.back( );
+	} 
 
 	//==============================================================
 
@@ -118,21 +124,116 @@ namespace Enjon
 
 	//--------------------------------------------------------------------
 
-	void Renderable::SetMaterial( const AssetHandle< Material >& material )
+	void Renderable::SetMaterial( const AssetHandle< Material >& material, const u32& idx )
 	{
-		mMaterial = material;
+		if ( idx < mMaterialElements.size( ) )
+		{
+			mMaterialElements.at( idx ) = material; 
+		}
 	}
 
 	//--------------------------------------------------------------------
 	void Renderable::SetMesh(const AssetHandle<Mesh>& mesh)
 	{
 		mMesh = mesh;
+
+		// Make sure that material element vector matches amount of submeshes
+		u32 subMeshCount = mMesh->GetSubMeshCount( );
+
+		// Early out if equal
+		if ( mMaterialElements.size( ) == subMeshCount )
+		{
+			return;
+		}
+
+		// If there were too many materials, then iterate up to mesh count
+		if ( mMaterialElements.size( ) > subMeshCount )
+		{
+			Vector<AssetHandle<Material>> newMats; 
+			for ( u32 i = 0; i < subMeshCount; ++i )
+			{
+				newMats.push_back( mMaterialElements.at( i ) );
+			}
+
+			// Set materials
+			mMaterialElements = newMats;
+		}
+		// Otherwise there weren't enough, so iterate up to material elements
+		else
+		{
+			u32 diff = subMeshCount - mMaterialElements.size( );
+			Vector<AssetHandle<Material>> newMats; 
+			for ( u32 i = 0; i < mMaterialElements.size(); ++i )
+			{
+				newMats.push_back( mMaterialElements.at( i ) );
+			}
+
+			AssetManager* am = EngineSubsystem( AssetManager );
+
+			for ( u32 i = 0; i < diff; ++i )
+			{
+				newMats.push_back( am->GetDefaultAsset< Material >( ) );
+			} 
+
+			// Set materials
+			mMaterialElements = newMats; 
+		}
 	}
 
 	//--------------------------------------------------------------------
 	void Renderable::SetGraphicsScene(GraphicsScene* scene) 
 	{
 		mGraphicsScene = scene;
+	}
+
+	//==============================================================================
+
+	u32 Renderable::GetMaterialsCount( ) const
+	{
+		return mMaterialElements.size( );
+	}
+
+	//==============================================================================
+
+	const Vector<AssetHandle<Material>>& Renderable::GetMaterials( ) const
+	{
+		return mMaterialElements;
+	}
+
+	//==============================================================================
+
+	void Renderable::Bind( )
+	{ 
+		mCurrentModelMatrix = Mat4::Translate( GetPosition( ) ) * QuaternionToMat4( GetRotation( ) ) * Mat4::Scale( GetScale( ) );
+	}
+
+	//==============================================================================
+
+	void Renderable::Unbind( )
+	{
+		mPreviousModelMatrix = mCurrentModelMatrix; 
+	}
+
+	//==============================================================================
+
+	void Renderable::Submit( const Enjon::Shader* shader, const SubMesh& subMesh )
+	{
+		if ( shader == nullptr )
+		{
+			return;
+		}
+
+		const_cast< Enjon::Shader* > ( shader )->SetUniform( "uModel", mCurrentModelMatrix );
+		const_cast< Enjon::Shader* > ( shader )->SetUniform( "uPreviousModel", mPreviousModelMatrix );
+
+		// Bind submesh
+		subMesh.Bind( );
+		{
+			// Submit for rendering
+			subMesh.Submit( ); 
+		}
+		// Unbind submesh
+		subMesh.Unbind( ); 
 	}
 
 	//==============================================================================
@@ -149,7 +250,27 @@ namespace Enjon
 		const Mesh* mesh = GetMesh( ).Get( );
 		if ( mesh != nullptr )
 		{
-			mesh->Bind( );
+			// Check if mesh has submeshes first
+			const Vector<SubMesh>& subMeshes = mesh->GetSubmeshes( );
+
+			//if ( subMeshes.empty( ) )
+			//{
+			//	mesh->Bind( );
+			//	{
+			//		Mat4 Model;
+			//		Model *= Mat4::Translate( GetPosition( ) );
+			//		Model *= QuaternionToMat4( GetRotation( ) );
+			//		Model *= Mat4::Scale( GetScale( ) );
+			//		const_cast< Enjon::Shader* > ( shader )->SetUniform( "uModel", Model );
+			//		const_cast< Enjon::Shader* > ( shader )->SetUniform( "uPreviousModel", mPreviousModelMatrix );
+			//		mesh->Submit( );
+
+			//		// Set the previous model matrix with current one
+			//		mPreviousModelMatrix = Model;
+			//	}
+			//	mesh->Unbind( ); 
+			//}
+			//else
 			{
 				Mat4 Model;
 				Model *= Mat4::Translate( GetPosition( ) );
@@ -157,12 +278,20 @@ namespace Enjon
 				Model *= Mat4::Scale( GetScale( ) );
 				const_cast< Enjon::Shader* > ( shader )->SetUniform( "uModel", Model );
 				const_cast< Enjon::Shader* > ( shader )->SetUniform( "uPreviousModel", mPreviousModelMatrix );
-				mesh->Submit( );
+
+				// For each submesh, bind
+				for ( auto& sm : subMeshes )
+				{
+					sm.Bind( );
+					{
+						sm.Submit( ); 
+					}
+					sm.Unbind( );
+				}
 
 				// Set the previous model matrix with current one
 				mPreviousModelMatrix = Model;
-			}
-			mesh->Unbind( ); 
+			} 
 		} 
 	}
 	
@@ -175,24 +304,24 @@ namespace Enjon
 		}
 
 		// Bind mesh and submit
-		const Mesh* mesh = GetMesh( ).Get( );
-		if ( mesh != nullptr )
-		{
-			mesh->Bind( );
-			{
-				Mat4 Model;
-				Model *= Mat4::Translate( GetPosition( ) );
-				Model *= QuaternionToMat4( GetRotation( ) );
-				Model *= Mat4::Scale( GetScale( ) );
-				const_cast< Enjon::GLSLProgram* > ( shader )->SetUniform( "u_model", Model );
-				const_cast< Enjon::GLSLProgram* > ( shader )->SetUniform( "uPreviousModel", mPreviousModelMatrix );
-				mesh->Submit( );
+		//const Mesh* mesh = GetMesh( ).Get( );
+		//if ( mesh != nullptr )
+		//{
+		//	mesh->Bind( );
+		//	{
+		//		Mat4 Model;
+		//		Model *= Mat4::Translate( GetPosition( ) );
+		//		Model *= QuaternionToMat4( GetRotation( ) );
+		//		Model *= Mat4::Scale( GetScale( ) );
+		//		const_cast< Enjon::GLSLProgram* > ( shader )->SetUniform( "u_model", Model );
+		//		const_cast< Enjon::GLSLProgram* > ( shader )->SetUniform( "uPreviousModel", mPreviousModelMatrix );
+		//		mesh->Submit( );
 
-				// Set the previous model matrix with current one
-				mPreviousModelMatrix = Model;
-			}
-			mesh->Unbind( ); 
-		} 
+		//		// Set the previous model matrix with current one
+		//		mPreviousModelMatrix = Model;
+		//	}
+		//	mesh->Unbind( ); 
+		//} 
 	}
 
 	//=================================================================================================
@@ -229,6 +358,18 @@ namespace Enjon
 						+ color.b * 255 * 256 * 256 );
 
 		return id;
+	}
+
+	//================================================================================================= 
+
+	Result Renderable::OnEditorUI( )
+	{
+		// Show mesh
+
+		
+		// Show material elements
+
+		return Result::INCOMPLETE;
 	}
 
 	//================================================================================================= 

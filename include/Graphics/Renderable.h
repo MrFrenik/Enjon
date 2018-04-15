@@ -31,6 +31,11 @@ namespace Enjon
 			Renderable();
 			~Renderable();
 
+			/*
+			* @brief
+			*/
+			virtual Result OnEditorUI( ) override;
+
 			/* Get position of transform */
 			Vec3 GetPosition() const;
 
@@ -44,8 +49,7 @@ namespace Enjon
 			void Renderable::OffsetRotation(const f32& Yaw, const f32& Pitch);
 
 			/* Get material of renderable */
-			//const Material* GetMaterial() const;
-			AssetHandle< Material > GetMaterial( ) const;
+			AssetHandle< Material > GetMaterial( const u32& idx = 0 ) const;
 
 			/* Get mesh of renderable */
 			AssetHandle< Mesh > GetMesh() const;
@@ -72,13 +76,23 @@ namespace Enjon
 			void SetRotation(const Quaternion& rotation); 
 
 			/* Set material of renderable */
-			void SetMaterial( const AssetHandle< Material >& material );
+			void SetMaterial( const AssetHandle< Material >& material, const u32& idx = 0 );
 
 			/* Set mesh of renderable */
 			void SetMesh(const AssetHandle<Mesh>& mesh);
 
 			/* Set scene of renderable */
 			void SetGraphicsScene(GraphicsScene* scene); 
+
+			/*
+			* @brief
+			*/
+			u32 GetMaterialsCount( ) const;
+
+			/*
+			* @brief
+			*/
+			const Vector<AssetHandle<Material>>& GetMaterials( ) const;
  
 			/** 
 			* @brief
@@ -103,10 +117,26 @@ namespace Enjon
 			static u32 ColorToID( const ColorRGBA32& color );
 
 		protected:
+
+			/*
+			* @brief
+			*/
+			void Bind( );
+
+			/*
+			* @brief
+			*/
+			void Unbind( );
+
 			/*
 			* @brief
 			*/
 			void Submit( const Enjon::Shader* shader );
+
+			/*
+			* @brief
+			*/
+			void Submit( const Enjon::Shader* shader, const SubMesh& subMesh );
 	
 			/*
 			* @brief
@@ -115,11 +145,11 @@ namespace Enjon
 
 		private: 
 			// Enjon Properties
-			ENJON_PROPERTY( Editable )
-			AssetHandle<Mesh> mMesh;
+			ENJON_PROPERTY( Editable, Delegates[ Mutator = SetMesh ] )
+			AssetHandle<Mesh> mMesh; 
 
 			ENJON_PROPERTY( )
-			AssetHandle<Material> mMaterial;
+			Vector<AssetHandle<Material>> mMaterialElements;
 			
 			u32 mRenderableID = MAX_ENTITIES;
 
@@ -127,6 +157,7 @@ namespace Enjon
 			Transform mTransform; 
 			GraphicsScene* mGraphicsScene = nullptr;
 			Mat4 mPreviousModelMatrix = Mat4::Identity( );
+			Mat4 mCurrentModelMatrix = Mat4::Identity( );
 	};
 }
 

@@ -17,7 +17,12 @@ namespace Enjon
 		// Add default mesh and material for renderable
 		const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
 		mRenderable.SetMesh( am->GetDefaultAsset< Mesh >( ) );
-		mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ) ); 
+
+		// Set default materials for all material elements
+		for ( u32 i = 0; i < mRenderable.GetMesh( ).Get( )->GetSubMeshCount( ); ++i ) 
+		{
+			mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
+		}
 
 		// Add renderable to scene
 		GraphicsSubsystem* gs = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem >( )->ConstCast< GraphicsSubsystem >( );
@@ -76,9 +81,9 @@ namespace Enjon
 
 	//====================================================================
 
-	AssetHandle< Material > GraphicsComponent::GetMaterial() const
+	AssetHandle< Material > GraphicsComponent::GetMaterial( const u32& idx ) const
 	{ 
-		return mRenderable.GetMaterial(); 
+		return mRenderable.GetMaterial( idx ); 
 	}
 
 	//====================================================================
@@ -145,9 +150,9 @@ namespace Enjon
  
 	//====================================================================
 
-	void GraphicsComponent::SetMaterial( const AssetHandle< Material >& material ) 
+	void GraphicsComponent::SetMaterial( const AssetHandle< Material >& material, const u32& idx ) 
 	{
-		mRenderable.SetMaterial( material );
+		mRenderable.SetMaterial( material, idx );
 	}
 
 	//====================================================================
@@ -177,8 +182,15 @@ namespace Enjon
 	{
 		// Write uuid of mesh
 		mRenderable.GetMesh( ) ? buffer->Write< UUID >( mRenderable.GetMesh( )->GetUUID( ) ) : buffer->Write< UUID >( UUID::Invalid( ) );
-		// Write uuid of material
-		mRenderable.GetMaterial( ) ? buffer->Write< UUID >( mRenderable.GetMaterial( )->GetUUID( ) ) : buffer->Write< UUID >( UUID::Invalid( ) );
+
+		// Write out renderable material size
+		buffer->Write< u32 >( mRenderable.GetMaterialsCount( ) );
+
+		// Write uuid of materials in renderable
+		for ( auto& mat : mRenderable.GetMaterials( ) )
+		{
+			buffer->Write< UUID >( mat.Get()->GetUUID( ) );
+		}
 
 		return Result::SUCCESS;
 	}
@@ -192,8 +204,19 @@ namespace Enjon
 
 		// Set mesh
 		mRenderable.SetMesh( am->GetAsset< Mesh >( buffer->Read< UUID >( ) ) );
-		// Set material 
-		mRenderable.SetMaterial( am->GetAsset< Material >( buffer->Read< UUID >( ) ).Get( ) );
+
+		// Get count of materials
+		u32 matCount = buffer->Read< u32 >( );
+
+		// Deserialize materials
+		for ( u32 i = 0; i < matCount; ++i )
+		{
+			// Grab the material
+			AssetHandle< Material > mat = am->GetAsset< Material >( buffer->Read< UUID >( ) );
+
+			// Set material in renderable at index
+			mRenderable.SetMaterial( mat, i );
+		} 
 
 		return Result::SUCCESS;
 	}
@@ -206,6 +229,9 @@ namespace Enjon
 
 		// Debug dump renderable
 		igm->InspectObject( &mRenderable );
+
+		// Reset renderable mesh
+		mRenderable.SetMesh( mRenderable.GetMesh( ) );
 
 		return Result::SUCCESS;
 	}

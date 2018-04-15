@@ -171,9 +171,10 @@ namespace Enjon
 		res = Utils::FindReplaceAll( res, "\\", "." );
 		Vector<String> sp2 = Utils::SplitString( res, ".Assets." );
 		String finalRes = sp2.size( ) > 1 ? sp2.at( sp2.size( ) - 1 ) : res;
-		Vector<String> sp3 = Utils::SplitString( finalRes, "." );
+		Vector<String> sp3 = Utils::SplitString( finalRes, "." ); 
+		u32 startIdx = sp3.at( 0 ).compare( "Assets" ) == 0 ? 1 : 0;
 		finalRes = "";
-		for ( usize i = 1; i < sp3.size(); ++i )
+		for ( usize i = startIdx; i < sp3.size(); ++i )
 		{
 			finalRes += sp3.at( i );
 			finalRes += i == sp3.size( ) - 1 ? "" : ".";

@@ -186,7 +186,7 @@ namespace Enjon
 		s32 idx = -1;
 
 		// Get file extension of file
-		String fileExtension = Utils::SplitString( filePath, "." ).back( );
+		String fileExtension = Utils::ToLower( Utils::SplitString( filePath, "." ).back( ) );
 
 		// Search for file extension relation with loader
 		auto query = mFileExtensionMap.find( fileExtension );
@@ -451,6 +451,7 @@ namespace Enjon
 							info.mAssetUUID = asset->mUUID;
 							info.mAssetFilePath = asset->mFilePath;							// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
 							info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+							info.mAssetDisplayName = asset->mName;
 
 							// Add to loader
 							query->second->AddToAssets( info );
@@ -495,6 +496,7 @@ namespace Enjon
 							info.mAssetUUID = asset->mUUID;
 							info.mAssetFilePath = asset->mFilePath;
 							info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+							info.mAssetDisplayName = asset->mName;
 
 							// Add to loader
 							query->second->AddToAssets( info );
