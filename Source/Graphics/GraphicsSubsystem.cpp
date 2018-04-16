@@ -1158,11 +1158,11 @@ namespace Enjon
 		{
 			skyBoxShader->SetUniform( "view", mGraphicsScene.GetActiveCamera()->GetView( ) );
 			skyBoxShader->SetUniform( "projection", mGraphicsScene.GetActiveCamera()->GetProjection( ) );
-			skyBoxShader->BindTexture( "environmentMap", mEnvCubemapID, 0 );
+			skyBoxShader->BindTexture( "environmentMap", mIrradianceMap, 0 );
 
 			// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
 			glActiveTexture( GL_TEXTURE0 );
-			glBindTexture( GL_TEXTURE_CUBE_MAP, mEnvCubemapID );
+			glBindTexture( GL_TEXTURE_CUBE_MAP, mIrradianceMap );
 
 			RenderCube( );
 		}

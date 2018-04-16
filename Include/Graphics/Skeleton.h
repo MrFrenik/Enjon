@@ -18,9 +18,7 @@ namespace Enjon
 	{ 
 		friend Skeleton;
 
-		public:
-
-		protected: 
+		public: 
 
 			/*
 			* @brief Constructor
