@@ -6,9 +6,7 @@
 #include "Defines.h"
 #include "Math/Maths.h"
 #include "Graphics/Vertex.h"
-#include "Asset/Asset.h"
-
-#include <vector>
+#include "Asset/Asset.h" 
 
 namespace Enjon 
 { 

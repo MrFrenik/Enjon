@@ -1229,7 +1229,7 @@ namespace Enjon
 
 		// Set up camera and then add to graphics scene
 		mEditorCamera = Camera( mGfx->GetViewport() );
-		mEditorCamera.SetNearFar( 0.01f, 1000.0f );
+		mEditorCamera.SetNearFar( 0.1f, 1000.0f );
 		mEditorCamera.SetProjection(ProjectionType::Perspective);
 		mEditorCamera.SetPosition(Vec3(0, 5, 10)); 
 		mGfx->GetGraphicsScene( )->AddCamera( &mEditorCamera );
