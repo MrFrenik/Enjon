@@ -33,9 +33,7 @@ namespace Enjon
 		protected:
 			Vector<Bone*>	mChildren;
 			u32				mID;
-			Transform		mAnimatedTransform;
-			Transform		mLocalBindTransform; 
-			Transform		mInverseBindTrasform;
+			Transform		mInverseBindTransform;
 			String			mName;
 	};
 
