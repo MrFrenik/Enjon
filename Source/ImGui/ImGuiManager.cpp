@@ -942,7 +942,7 @@ namespace Enjon
 	void ImGuiManager::RegisterDockingLayout(const GUIDockingLayout& layout)
 	{
 		mDockingLayouts.push_back(layout);
-	}
+	} 
 
 	//============================================================================================
 
@@ -955,7 +955,28 @@ namespace Enjon
     	{
     		ImGui::DockWith(dl.mChild, dl.mParent, (ImGui::DockSlotType)(u32)dl.mSlotType, dl.mWeight);
     	}
+ 
+		// Create callbacks for docks
+		auto onEnterHorizontalSplitHover = [ & ] ( ) -> void
+		{ 
+			Window::SetWindowCursor( CursorType::SizeWE );
+		};
 
+		auto onEnterVerticalSplitHover = [ & ] ( ) -> void
+		{ 
+			Window::SetWindowCursor( CursorType::SizeNS );
+		};
+
+		auto onExitSplitHover = [ & ] ( ) -> void 
+		{ 
+			Window::SetWindowCursor( CursorType::Arrow );
+		}; 
+
+		// Set these callbacks
+		ImGui::SetEventCallback( onEnterHorizontalSplitHover, ImGui::CallBackEventType::OnEnterHorizontalSplitHover );
+		ImGui::SetEventCallback( onEnterVerticalSplitHover, ImGui::CallBackEventType::OnEnterVerticalSplitHover );
+		ImGui::SetEventCallback( onExitSplitHover, ImGui::CallBackEventType::OnExitSplitHover );
+ 
     	// Clear docking layouts after to prevent from running through them again
     	mDockingLayouts.clear();
 	}

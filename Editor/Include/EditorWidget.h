@@ -60,13 +60,15 @@ namespace Enjon
 				}
 
 				// Get parent transform recursively
-				Transform parent = mParent->mWorldTransform;
+				//Transform parent = mParent->mWorldTransform;
 
-				Enjon::Vec3 worldScale = parent.GetScale() * mLocalTransform.GetScale();
-				Enjon::Quaternion worldRot = ( parent.GetRotation() * mLocalTransform.GetRotation() ).Normalize( );
-				Enjon::Vec3 worldPos = parent.GetPosition() + ( parent.GetRotation().Normalize() * ( parent.GetScale() * mLocalTransform.GetPosition() ) );
+				//Enjon::Vec3 worldScale = parent.GetScale() * mLocalTransform.GetScale();
+				//Enjon::Quaternion worldRot = ( parent.GetRotation() * mLocalTransform.GetRotation() ).Normalize( );
+				//Enjon::Vec3 worldPos = parent.GetPosition() + ( parent.GetRotation().Normalize() * ( parent.GetScale() * mLocalTransform.GetPosition() ) );
 
-				mWorldTransform = Transform( worldPos, worldRot, worldScale ); 
+				mWorldTransform = mLocalTransform * mParent->mWorldTransform;
+
+				//mWorldTransform = Transform( worldPos, worldRot, worldScale ); 
 			}
 
 			void CalculateLocalTransform( ) 
@@ -77,14 +79,16 @@ namespace Enjon
 
 				if ( HasParent( ) )
 				{ 
-					Transform parentTransform = mParent->mWorldTransform;
-					Enjon::Quaternion parentInverse = parentTransform.GetRotation().Inverse( ).Normalize(); 
+					//Transform parentTransform = mParent->mWorldTransform;
+					//Enjon::Quaternion parentInverse = parentTransform.GetRotation().Inverse( ).Normalize(); 
 
-					Vec3 relativeScale = mWorldTransform.GetScale() / parentTransform.GetScale();
-					Quaternion relativeRot = ( parentInverse * mWorldTransform.GetRotation() ).Normalize();
-					Vec3 relativePos = ( parentInverse * ( mWorldTransform.GetPosition() - parentTransform.GetPosition() ) ) / parentTransform.GetScale();
+					//Vec3 relativeScale = mWorldTransform.GetScale() / parentTransform.GetScale();
+					//Quaternion relativeRot = ( parentInverse * mWorldTransform.GetRotation() ).Normalize();
+					//Vec3 relativePos = ( parentInverse * ( mWorldTransform.GetPosition() - parentTransform.GetPosition() ) ) / parentTransform.GetScale(); 
 
-					mLocalTransform = Transform( relativePos, relativeRot, relativeScale );
+					//mLocalTransform = Transform( relativePos, relativeRot, relativeScale );
+
+					mLocalTransform = mWorldTransform / mParent->mWorldTransform;
 				}
 			}
 

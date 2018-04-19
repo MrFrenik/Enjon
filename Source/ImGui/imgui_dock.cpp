@@ -1,7 +1,9 @@
 #include "ImGui/imgui.h"
 #define IMGUI_DEFINE_PLACEMENT_NEW
 #include "ImGui/imgui_internal.h"
-#include "ImGui/imgui_dock.h"
+#include "ImGui/imgui_dock.h" 
+
+#include <vector>
 
 ImVec2 operator+(ImVec2 lhs, ImVec2 rhs) {
     return ImVec2(lhs.x+rhs.x, lhs.y+rhs.y);
@@ -36,6 +38,7 @@ namespace ImGui
 		};
 
 
+
 		struct Dock
 		{
 			Dock()
@@ -49,6 +52,7 @@ namespace ImGui
 				, active(true)
 				, status(Status_Float)
 				, opened(false)
+				, hovered(false)
 			{
 				location[0] = 0;
 				children[0] = children[1] = nullptr;
@@ -182,16 +186,20 @@ namespace ImGui
 			ImVec2 size;
 			bool active;
 			Status_ status;
-			bool opened;
+			bool opened; 
 
 			Dock* children[2];
 			char location[16];
 			int last_frame;
 			int invalid_frames;
 			bool first;
-		};
+			bool hovered;
+		}; 
 
-
+		VoidCallback mOnEnterHorizontalSplitHoverCallback;
+		VoidCallback mOnEnterVerticalSplitHoverCallback;
+		VoidCallback mOnExitSplitHoverCallback;
+		
 		ImVector<Dock*> m_docks;
 		ImVec2 m_drag_offset;
 		Dock* m_current = nullptr;
@@ -209,6 +217,38 @@ namespace ImGui
 
 			m_docks.clear( );
 		}
+
+		void setEventCallback( const VoidCallback& callback, const CallBackEventType& type )
+		{
+			switch ( type )
+			{
+				case CallBackEventType::OnEnterVerticalSplitHover:
+				{
+					mOnEnterVerticalSplitHoverCallback = callback;
+				} break;
+
+				case CallBackEventType::OnEnterHorizontalSplitHover:
+				{ 
+					mOnEnterHorizontalSplitHoverCallback = callback;
+				} break;
+
+				case CallBackEventType::OnExitSplitHover:
+				{ 
+					mOnExitSplitHoverCallback = callback;
+				} break;
+			}
+		}
+
+		bool dockExists( const char* label ) 
+		{
+			ImU32 id = ImHash(label, 0);
+			for (int i = 0; i < m_docks.size(); ++i)
+			{
+				if ( m_docks[ i ]->id == id ) return true;
+			} 
+
+			return false;
+		} 
 
 		Dock& getDock(const char* label, bool opened)
 		{
@@ -257,7 +297,6 @@ namespace ImGui
 			}
 		}
 
-
 		void splits()
 		{
 			if (GetFrameCount() == m_last_frame) return;
@@ -269,6 +308,8 @@ namespace ImGui
 			ImColor color = ImColor(GetColorU32(ImGuiCol_Button));
 			color.Value.w = 0.0f;
 			ImU32 color_hovered = GetColorU32(ImGuiCol_ButtonHovered);
+			ImColor color_hovered_alpha_low = ImColor( color_hovered );
+			color_hovered_alpha_low.Value.w = ( 100.0f / 255.0f ); 
 			ImDrawList* draw_list = GetWindowDrawList();
 			ImGuiIO& io = GetIO();
 			for (int i = 0; i < m_docks.size(); ++i)
@@ -311,7 +352,52 @@ namespace ImGui
 					dock.status = Status_Dragged;
 				} 
 
-				draw_list->AddRectFilled( GetItemRectMin(), GetItemRectMax(), IsItemHovered() ? color_hovered : color);
+				// Callback for hovered state
+				if ( IsItemHovered( ) )
+				{
+					if ( dock.isHorizontal( ) )
+					{
+						mOnEnterHorizontalSplitHoverCallback( ); 
+					}
+					else
+					{
+						mOnEnterVerticalSplitHoverCallback( ); 
+					}
+				}
+
+				// Callbacks for exit hovered state
+				else if ( !IsItemHovered( ) && dock.hovered && dock.status != Status_Dragged || ( ImGui::IsMouseReleased( 0 ) && !dock.hovered ) )
+				{
+					mOnExitSplitHoverCallback( );
+				}
+ 
+				// Set hovered state of dock
+				dock.hovered = IsItemHovered( );
+
+				draw_list->AddRectFilled( GetItemRectMin(), GetItemRectMax(), IsItemHovered() ? color_hovered_alpha_low : color);
+
+				// Add three dots in the middle if not hovered
+				//if ( !IsItemHovered( ) )
+				{
+					float r = 2.0f;
+					float r2 = 2.5f * r;
+					float rd2 = r / 1.5f;
+					ImVec2 centerPos = ImVec2( GetItemRectMin( ).x + GetItemRectSize( ).x / 2.0f, GetItemRectMin( ).y + GetItemRectSize( ).y / 2.0f ); 
+					ImColor circleColor = IsItemHovered() || dock.status == Status_Dragged ? color_hovered : color_hovered_alpha_low;
+					if ( dock.isHorizontal( ) )
+					{
+						draw_list->AddCircleFilled( ImVec2( centerPos.x, centerPos.y + r2 ), rd2, circleColor ); 
+						draw_list->AddCircleFilled( ImVec2( centerPos.x, centerPos.y - r2 ), rd2, circleColor ); 
+						draw_list->AddCircleFilled( centerPos, r, circleColor );
+					}
+					else
+					{
+						draw_list->AddCircleFilled( ImVec2( centerPos.x + r2, centerPos.y ), rd2, circleColor ); 
+						draw_list->AddCircleFilled( ImVec2( centerPos.x - r2, centerPos.y ), rd2, circleColor ); 
+						draw_list->AddCircleFilled( ImVec2( centerPos.x, centerPos.y ), r, circleColor );
+					} 
+				} 
+
 				PopID(); 
 			}
 		}
@@ -1332,7 +1418,10 @@ namespace ImGui
 		g_dock.load();
 	}
 
-
+	void SetEventCallback( const VoidCallback& callback, const CallBackEventType& eventType )
+	{
+		g_dock.setEventCallback( callback, eventType );
+	} 
 
 	void DockWith( const char* dock, const char* container, DockSlotType slot, float weight)
 	{

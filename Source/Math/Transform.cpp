@@ -42,18 +42,27 @@ namespace Enjon
 	{
 	}
 
-	//==========================================================================
-	
-	Transform Transform::operator*(const Transform& rhs) const
-	{
-		Transform WorldSpace;
+	//========================================================================== 
 
-		WorldSpace.mPosition	= mRotation.Rotate( rhs.mPosition ) + mPosition;
-		WorldSpace.mRotation 	= mRotation * rhs.mRotation;
-		WorldSpace.mScale 		= mScale * rhs.mScale;
+	// WorldScale	= ParentScale * LocalScale
+	// WorldRot		= LocalRot * ParentRot
+	// WorldTrans	= ParentPos + [ ParentRot * ( ParentScale * LocalPos ) ]
+	Transform Transform::operator*( const Transform& rhs ) const
+	{ 
+		// Normalized rotations
+		Quaternion rhsRotNorm = rhs.GetRotation( ).Normalize( );
+		Quaternion rotNorm = GetRotation( ).Normalize( );
 
-		return WorldSpace;
-	}
+		// Calculate scale
+		Vec3 scale = rhs.GetScale( ) * GetScale( );
+		// Calculate rotation
+		Quaternion rot = ( rhsRotNorm * rotNorm ).Normalize( );
+		// Calculate translation
+		Vec3 trans = rhs.GetPosition( ) + ( rhsRotNorm * ( rhs.GetScale( ) * GetPosition( ) ) );
+
+		// Return final transformation
+		return Transform( trans, rot, scale );
+	} 
 
 	//==========================================================================
 
@@ -63,22 +72,25 @@ namespace Enjon
 		return *this;	
 	}	
 
-	//==========================================================================
+	//========================================================================== 
 
-	Transform Transform::operator/(Transform& rhs)
+	// RelScale = WorldScale / ParentScale 
+	// RelRot	= Inverse(ParentRot) * WorldRot
+	// RelTrans	= [Inverse(ParentRot) * (WorldPos - ParentPosition)] / ParentScale;
+	Transform Transform::operator/( const Transform& rhs ) const
 	{
-		Transform Local;
+		// Get inverse rotation normalized
+		Quaternion parentInverse = rhs.GetRotation( ).Inverse( ).Normalize( );
+		// Get rotation normalized
+		Quaternion rotNorm = GetRotation( ).Normalize( ); 
 
-		Vec3 inverseScale = 1.0f / rhs.mScale;
-		Quaternion inverseRotation = rhs.mRotation.Inverse( );
-		auto ParentConjugate = rhs.mRotation.Conjugate();
+		Vec3 relativeScale = GetScale( ) / rhs.GetScale( );
+		Quaternion relativeRot = ( parentInverse * rotNorm ).Normalize( );
+		Vec3 relativePos = ( parentInverse * ( GetPosition( ) - rhs.GetPosition( ) ) ) / rhs.GetScale( );
 
-		Local.mPosition 	= (ParentConjugate * (mPosition - rhs.mPosition)) / rhs.mScale;
-		Local.mRotation 	= ParentConjugate * mRotation;
-		Local.mScale 		= (mScale / rhs.mScale);
-
-		return Local;
-	}
+		// Return relative transform
+		return Transform( relativePos, relativeRot, relativeScale ); 
+	} 
 
 	//==========================================================================
 

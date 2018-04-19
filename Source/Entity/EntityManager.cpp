@@ -270,14 +270,17 @@ namespace Enjon
 		{
 			Enjon::Entity* parent = mParent.Get( );
 
-			Transform parentTransform = parent->GetWorldTransform( );
-			Enjon::Quaternion parentInverse = parentTransform.GetRotation( ).Inverse( ).Normalize( );
+			//Transform parentTransform = parent->GetWorldTransform( );
+			//Enjon::Quaternion parentInverse = parentTransform.GetRotation( ).Inverse( ).Normalize( );
 
-			Vec3 relativeScale = mWorldTransform.GetScale( ) / parentTransform.GetScale( );
-			Quaternion relativeRot = ( parentInverse * mWorldTransform.GetRotation( ) ).Normalize( );
-			Vec3 relativePos = ( parentInverse * ( mWorldTransform.GetPosition( ) - parentTransform.GetPosition( ) ) ) / parentTransform.GetScale( );
+			//Vec3 relativeScale = mWorldTransform.GetScale( ) / parentTransform.GetScale( );
+			//Quaternion relativeRot = ( parentInverse * mWorldTransform.GetRotation( ) ).Normalize( );
+			//Vec3 relativePos = ( parentInverse * ( mWorldTransform.GetPosition( ) - parentTransform.GetPosition( ) ) ) / parentTransform.GetScale( );
 
-			mLocalTransform = Transform( relativePos, relativeRot, relativeScale );
+			//mLocalTransform = Transform( relativePos, relativeRot, relativeScale );
+
+			// Set local transform relative to parent transform
+			mLocalTransform = mWorldTransform / parent->GetWorldTransform( );
 		}
 	}
 
@@ -297,13 +300,16 @@ namespace Enjon
 
 		// Get parent transform recursively
 		Enjon::Entity* p = mParent.Get( );
-		Transform parent = p->GetWorldTransform( );
+		//Transform parent = p->GetWorldTransform( );
 
-		Enjon::Vec3 worldScale = parent.GetScale( ) * mLocalTransform.GetScale( );
-		Enjon::Quaternion worldRot = ( parent.GetRotation( ) * mLocalTransform.GetRotation( ) ).Normalize( );
-		Enjon::Vec3 worldPos = parent.GetPosition( ) + ( parent.GetRotation( ).Normalize( ) * ( parent.GetScale( ) * mLocalTransform.GetPosition( ) ) );
+		//Enjon::Vec3 worldScale = parent.GetScale( ) * mLocalTransform.GetScale( );
+		//Enjon::Quaternion worldRot = ( parent.GetRotation( ) * mLocalTransform.GetRotation( ) ).Normalize( );
+		//Enjon::Vec3 worldPos = parent.GetPosition( ) + ( parent.GetRotation( ).Normalize( ) * ( parent.GetScale( ) * mLocalTransform.GetPosition( ) ) );
 
-		mWorldTransform = Transform( worldPos, worldRot, worldScale );
+		//mWorldTransform = Transform( worldPos, worldRot, worldScale );
+
+		// Set world transform
+		mWorldTransform = mLocalTransform * p->GetWorldTransform();
 
 		mWorldTransformDirty = false;
 	}

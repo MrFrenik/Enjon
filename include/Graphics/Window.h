@@ -17,7 +17,20 @@
 
 namespace Enjon 
 {
+	class GraphicsSubsystem;
 	class iVec2;
+
+	enum CursorType
+	{
+		Arrow,
+		IBeam,
+		SizeNWSE,
+		SizeNESW,
+		SizeWE,
+		SizeNS,
+		SizeAll,
+		Hand 
+	};
 
 	enum WindowFlags : u32
 	{ 
@@ -45,7 +58,9 @@ namespace Enjon
 
 	class Window : public Enjon::Object
 	{
-		public:
+		friend GraphicsSubsystem;
+
+		public: 
 			Window();
 			~Window();
 
@@ -75,9 +90,13 @@ namespace Enjon
 			SDL_Window* GetWindowContext() { return m_sdlWindow; }
 			SDL_Window* GetSDLWindow() { return m_sdlWindow; }
 
-			const Vector<String>& GetDroppedFiles( );
+			const Vector<String>& GetDroppedFiles( ); 
+
+			static void SetWindowCursor( CursorType type );
 
 		protected:
+
+			static void InitSDLCursors( );
 
 			void ClearDroppedFiles( );
 
@@ -89,6 +108,7 @@ namespace Enjon
 			bool m_isfullscreen; 
 			Vector<String> mDroppedFiles;
 			bool mNeedToClearDroppedFiles = false;
+			static HashMap<CursorType, SDL_Cursor*> mSDLCursors;
 	};
 }
 

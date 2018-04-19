@@ -67,6 +67,9 @@ namespace Enjon
 		mCurrentWindow = &mWindow;
 		mWindow.MakeCurrent( );
 
+		// Initialize window sdl cursors
+		Window::InitSDLCursors( );
+
 		// Initialize shader manager
 		Enjon::ShaderManager::Init();
 

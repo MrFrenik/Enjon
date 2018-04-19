@@ -2,8 +2,12 @@
 #ifndef ENJON_IMGUI_DOCK_H
 #define ENJON_IMGUI_DOCK_H
 
+#include <functional>
+
 namespace ImGui
-{
+{ 
+	using VoidCallback = std::function< void( void ) > ;
+
 	enum DockSlotType
 	{
 		Slot_Left,
@@ -14,6 +18,13 @@ namespace ImGui
 
 		Slot_Float,
 		Slot_None
+	}; 
+
+	enum CallBackEventType
+	{
+		OnEnterHorizontalSplitHover,
+		OnEnterVerticalSplitHover,
+		OnExitSplitHover
 	};
 
 	struct DockingLayout
@@ -39,6 +50,7 @@ namespace ImGui
 	IMGUI_API void Print();
 
 	void DockWith( const char* dock, const char* container, DockSlotType slot, float weight = 0.5f );
+	void SetEventCallback( const VoidCallback& callback, const CallBackEventType& eventType );
 } // namespace ImGui
 
 #endif

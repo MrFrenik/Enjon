@@ -21,6 +21,9 @@ namespace Enjon
 		World
 	};
 
+	/*
+	* @brief VQS transform
+	*/
 	class Transform
 	{ 
 		public:
@@ -35,14 +38,14 @@ namespace Enjon
 			* @param
 			* @return
 			*/
-			Transform(const Vec3& position, const Quaternion& rotation, const Vec3& scale);
+			Transform( const Vec3& position, const Quaternion& rotation, const Vec3& scale );
 			
 			/**
 			* @brief Copy constructor
 			* @param
 			* @return
 			*/
-			Transform(const Transform& t);
+			Transform( const Transform& t );
 
 			/**
 			* @brief 
@@ -56,21 +59,21 @@ namespace Enjon
 			* @param
 			* @return
 			*/
-			Transform operator*(const Transform& rhs) const;	
+			Transform operator*( const Transform& rhs ) const;
 
 			/**
 			* @brief 
 			* @param
 			* @return
 			*/
-			Transform& operator*=(const Transform& rhs);
+			Transform& operator*=( const Transform& rhs );
 
 			/**
 			* @brief 
 			* @param
 			* @return
 			*/
-			Transform operator/(Transform& rhs);
+			Transform operator/( const Transform& rhs ) const;
 
 			/**
 			* @brief 

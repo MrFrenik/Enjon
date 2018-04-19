@@ -9,12 +9,12 @@
 namespace Enjon {
 
 	SDL_GLContext Window::mGLContext = nullptr;
+	HashMap< CursorType, SDL_Cursor* > Window::mSDLCursors;
 
 	Window::Window()
 		: m_isfullscreen(false)
 	{
-	}
-
+	} 
 
 	Window::~Window()
 	{
@@ -233,4 +233,28 @@ namespace Enjon {
 
 		return Result::PROCESS_RUNNING;
 	} 
+
+	//==============================================================================
+
+	void Window::SetWindowCursor( CursorType type )
+	{
+		// Error checks are for pussies.
+		SDL_SetCursor( mSDLCursors[ type ] );
+	}
+
+	//==============================================================================
+
+	void Window::InitSDLCursors( )
+	{
+		mSDLCursors[ CursorType::Arrow ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_ARROW );
+		mSDLCursors[ CursorType::IBeam ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_IBEAM );
+		mSDLCursors[ CursorType::SizeAll ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEALL );
+		mSDLCursors[ CursorType::SizeNESW ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENESW );
+		mSDLCursors[ CursorType::SizeNWSE ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENWSE );
+		mSDLCursors[ CursorType::SizeWE ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEWE );
+		mSDLCursors[ CursorType::SizeNS ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENS );
+		mSDLCursors[ CursorType::Hand ]		= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_HAND );
+	}
+
+	//==============================================================================
 }

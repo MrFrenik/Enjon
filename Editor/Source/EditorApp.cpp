@@ -49,10 +49,10 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-Enjon::String mProjectsDir = "W:/Projects/";
-Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
 Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -192,6 +192,11 @@ namespace Enjon
 						// Add using meta class 
 						mSelectedEntity.Get( )->AddComponent( Object::GetClass( componentName ) );
 					}
+
+					// Attempt to open the header in visual studio
+					String headerFilePath = mProject.GetProjectPath( ) + "Source/" + componentName + ".h"; 
+					s32 code = system( String( "start " + headerFilePath ).c_str() ); 
+
 				}
 				else if ( compExists )
 				{ 
@@ -1537,6 +1542,9 @@ namespace Enjon
 		Camera* camera = mGfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >( );
 		Enjon::iVec2 viewPort = mGfx->GetViewport( ); 
 		Enjon::Window* window = mGfx->GetWindow( )->ConstCast< Enjon::Window >( );
+		SDL_Cursor* cursorNS = nullptr;
+		SDL_Cursor* cursorArrow = nullptr;
+		static bool createCursor = false; 
 
 		// Can move camera if scene view has focus
 		bool previousCamMove = mMoveCamera;
