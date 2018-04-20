@@ -183,7 +183,7 @@ namespace Enjon
 
 			// Owning mesh
 			Mesh* mMesh = nullptr; 
-			ByteBuffer* mVertexData = nullptr;
+			ByteBuffer mVertexData;
 
 			GLenum mDrawType;
 			GLint mDrawStart = 0;

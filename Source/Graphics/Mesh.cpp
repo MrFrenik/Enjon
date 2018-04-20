@@ -1,3 +1,4 @@
+
 #include "Graphics/Mesh.h"
 #include "Asset/MeshAssetLoader.h"
 #include "Serialize/ObjectArchiver.h"
@@ -202,7 +203,6 @@ namespace Enjon
 
 	SubMesh::SubMesh( )
 	{
-		mVertexData = new ByteBuffer( );
 	}
 
 	SubMesh::SubMesh( const SubMesh& other )
@@ -211,24 +211,17 @@ namespace Enjon
 		mDrawType = other.mDrawType; 
 		mDrawCount = other.mDrawCount;
 		mDrawStart = other.mDrawStart;
-		mVertexData = new ByteBuffer( );
-		mVertexData = other.mVertexData;
+		mVertexData.CopyFromOther( other.mVertexData );
 	}
 
 	SubMesh::SubMesh( Mesh* mesh )
 	{
 		mMesh = mesh;
-		mVertexData = new ByteBuffer( );
 	}
 
 	SubMesh::~SubMesh( )
 	{ 
-		Release( );
-
-		if ( mVertexData )
-		{
-			delete( mVertexData );
-		}
+		Release( ); 
 	}
 	
 	Result SubMesh::Release( )
@@ -304,15 +297,23 @@ namespace Enjon
 	Result SubMesh::SerializeData( ByteBuffer* buffer ) const
 	{ 
 		// Write out size of data
-		buffer->Write< u32 >( mVertexData->GetSize( ) );
+		buffer->Write< u32 >( mVertexData.GetSize( ) );
 
 		// Write out vertex data
-		buffer->AppendBuffer( *mVertexData );
+		buffer->AppendBuffer( mVertexData );
 
 		return Result::SUCCESS;
 	}
 
 	//=========================================================================
+
+#define STRUCT_PACKED_4( struct_name, elem1Type, elem2Type, elem3Type, elem4Type )\
+struct struct_name {\
+	elem1Type elem1;\
+	elem2Type elem2;\
+	elem3Type elem3;\
+	elem4Type elem4;\
+};
 
 	Result SubMesh::DeserializeData( ByteBuffer* buffer ) 
 	{
@@ -325,7 +326,7 @@ namespace Enjon
 		// God...this is horrible, but it should work
 		for ( u32 i = 0; i < byteSize; ++i )
 		{
-			mVertexData->Write< u8 >( buffer->Read< u8 >( ) );
+			mVertexData.Write< u8 >( buffer->Read< u8 >( ) );
 		}
 
 		// If owning mesh doesn't exit, then return failure
@@ -337,14 +338,52 @@ namespace Enjon
 		// Get vertex data decl from owning mesh
 		const VertexDataDeclaration& vertDecl = mMesh->GetVertexDeclaration( );
 
+		// Create struct for data
+		STRUCT_PACKED_4( PackedStruct, Vec3, Vec3, Vec3, Vec2 ); 
+
+		// Set draw type
+		mDrawType = GL_TRIANGLES;
+		// Set draw count
+		mDrawCount = mVertexData.GetSize( ) / vertDecl.GetSizeInBytes( );
+
+		// How many structs are there? As many vertices there are
+		u32 vertCount = GetDrawCount( ); 
+		Vector< PackedStruct > verts;
+
+		// Reset read position in data stream
+		mVertexData.SetReadPosition( 0 );
+		for ( u32 i = 0; i < vertCount; ++i ) 
+		{ 
+			// Fill out vertex packed struct
+			PackedStruct packed; 
+			// Position
+			packed.elem1.x = mVertexData.Read< f32 >( );
+			packed.elem1.y = mVertexData.Read< f32 >( );
+			packed.elem1.z = mVertexData.Read< f32 >( );
+			// Normal
+			packed.elem2.x = mVertexData.Read< f32 >( );
+			packed.elem2.y = mVertexData.Read< f32 >( );
+			packed.elem2.z = mVertexData.Read< f32 >( );
+			// Tangent
+			packed.elem3.x = mVertexData.Read< f32 >( );
+			packed.elem3.y = mVertexData.Read< f32 >( );
+			packed.elem3.z = mVertexData.Read< f32 >( );
+			// UV
+			packed.elem4.x = mVertexData.Read< f32 >( );
+			packed.elem4.y = mVertexData.Read< f32 >( ); 
+
+			// Add to verts
+			verts.push_back( packed );
+		}
+
 		// Create and upload mesh data
 		glGenBuffers( 1, &mVBO );
 		glBindBuffer( GL_ARRAY_BUFFER, mVBO );
-		glBufferData( GL_ARRAY_BUFFER, mVertexData->GetSize(), mVertexData->GetData(), GL_STATIC_DRAW );
+		glBufferData( GL_ARRAY_BUFFER, vertCount * sizeof( PackedStruct ), &verts[0], GL_STATIC_DRAW );
  
 		glGenVertexArrays( 1, &mVAO );
 		glBindVertexArray( mVAO ); 
-
+ 
 		// Grab total size in bytes for data declaration
 		usize vertexDeclSize = vertDecl.GetSizeInBytes( );
 
@@ -405,10 +444,6 @@ namespace Enjon
 		// Unbind mVAO
 		glBindVertexArray( 0 ); 
 
-		// Set draw type
-		mDrawType = GL_TRIANGLES;
-		// Set draw count
-		mDrawCount = mVertexData->GetSize( ) / vertDecl.GetSizeInBytes( );
 
 		return Result::SUCCESS; 
 	} 

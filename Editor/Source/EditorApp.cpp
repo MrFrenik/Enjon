@@ -1,11 +1,10 @@
 // @file EditorApp.cpp
-// Copyright 2016-2018 John Jackson. All Rights Reserved.
+// Copyright 2016-2018 John Jackson. All Rights Reserved.  
 
 #include "EditorApp.h"
 #include "EditorSceneView.h"
 #include "EditorAssetBrowserView.h"
-#include "EditorInspectorView.h"
-
+#include "EditorInspectorView.h" 
 
 #include <Engine.h>
 #include <Asset/AssetManager.h>
@@ -24,14 +23,14 @@
 #include <Entity/Components/PointLightComponent.h>
 #include <Entity/Components/DirectionalLightComponent.h>
 #include <Utils/FileUtils.h>
-#include <Utils/Tokenizer.h>
-
-#include <Bullet/btBulletDynamicsCommon.h> 
+#include <Utils/Tokenizer.h> 
 
 #include <windows.h>
 #include <fmt/format.h>
 #include <chrono>
 #include <ctime>
+
+#define LOAD_ENGINE_RESOURCES	0
 
 typedef void( *funcSetEngineInstance )( Enjon::Engine* instance );
 typedef Enjon::Application*( *funcCreateApp )( Enjon::Engine* );
@@ -49,10 +48,10 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-Enjon::String mProjectsDir = "W:/Projects/";
-Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
+Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+//Enjon::String mProjectsDir = "W:/Projects/";
+//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
 //Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
@@ -1262,7 +1261,9 @@ namespace Enjon
 		// Grab all .eproj files and store them for loading later
 		CollectAllProjectsOnDisk( ); 
 
+#if LOAD_ENGINE_RESOURCES
 		LoadResources( );
+#endif
 
 		// Add all necessary views into editor widget manager
 		mEditorWidgetManager.AddView( new EditorSceneView( this ) );

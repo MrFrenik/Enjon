@@ -320,6 +320,33 @@ namespace Enjon
 
 	//========================================================================
 
+	void ByteBuffer::SetReadPosition( const u32& position )
+	{
+		if ( position >= GetSize( ) )
+		{
+			return;
+		}
+
+		mReadPosition = position;
+	}
+
+	//========================================================================
+
+	void ByteBuffer::CopyFromOther( const ByteBuffer& other ) 
+	{ 
+		// Release previous data
+		ReleaseData( );
+
+		mBuffer = (u8*)malloc( sizeof( u8 ) * other.GetSize( ) );
+		assert( mBuffer != nullptr );
+		mStatus = BufferStatus::ReadyToWrite;
+
+		// Cpy data over from other buffer
+		memcpy( mBuffer, other.GetData( ), other.GetSize( ) ); 
+	}
+
+	//========================================================================
+
 	void ByteBuffer::AppendBuffer( const ByteBuffer& other )
 	{
 		// Brute force loop for now...

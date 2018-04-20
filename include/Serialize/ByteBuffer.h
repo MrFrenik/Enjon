@@ -99,6 +99,16 @@ namespace Enjon
 			*/
 			void AppendBuffer( const ByteBuffer& other );
 
+			/*
+			* @brief
+			*/
+			void CopyFromOther( const ByteBuffer& other );
+
+			/*
+			* @brief
+			*/
+			void SetReadPosition( const u32& position );
+
 		private:
 			/*
 			* @brief Destructor

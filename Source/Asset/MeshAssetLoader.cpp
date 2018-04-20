@@ -33,17 +33,17 @@ namespace Enjon
 	VertexName.Tangent[ 2 ] = T.z;
 
 #define WRITE_VERT_DATA( vertData, buffer )\
-	buffer->Write< f32 >( vertData.Position[ 0 ] );\
-	buffer->Write< f32 >( vertData.Position[ 1 ] );\
-	buffer->Write< f32 >( vertData.Position[ 2 ] );\
-	buffer->Write< f32 >( vertData.Normals[ 0 ] );\
-	buffer->Write< f32 >( vertData.Normals[ 1 ] );\
-	buffer->Write< f32 >( vertData.Normals[ 2 ] );\
-	buffer->Write< f32 >( vertData.Tangent[ 0 ] );\
-	buffer->Write< f32 >( vertData.Tangent[ 1 ] );\
-	buffer->Write< f32 >( vertData.Tangent[ 2 ] );\
-	buffer->Write< f32 >( vertData.UV[ 0 ] );\
-	buffer->Write< f32 >( vertData.UV[ 1 ] );
+	buffer.Write< f32 >( vertData.Position[ 0 ] );\
+	buffer.Write< f32 >( vertData.Position[ 1 ] );\
+	buffer.Write< f32 >( vertData.Position[ 2 ] );\
+	buffer.Write< f32 >( vertData.Normals[ 0 ] );\
+	buffer.Write< f32 >( vertData.Normals[ 1 ] );\
+	buffer.Write< f32 >( vertData.Normals[ 2 ] );\
+	buffer.Write< f32 >( vertData.Tangent[ 0 ] );\
+	buffer.Write< f32 >( vertData.Tangent[ 1 ] );\
+	buffer.Write< f32 >( vertData.Tangent[ 2 ] );\
+	buffer.Write< f32 >( vertData.UV[ 0 ] );\
+	buffer.Write< f32 >( vertData.UV[ 1 ] );
 	
 	void MeshAssetLoader::RegisterDefaultAsset( )
 	{
@@ -76,7 +76,7 @@ namespace Enjon
 		// Create and upload mesh data
 		glGenBuffers( 1, &sm.mVBO );
 		glBindBuffer( GL_ARRAY_BUFFER, sm.mVBO );
-		glBufferData( GL_ARRAY_BUFFER, sm.mVertexData->GetSize( ), sm.mVertexData->GetData( ), GL_STATIC_DRAW );
+		glBufferData( GL_ARRAY_BUFFER, sm.mVertexData.GetSize( ), sm.mVertexData.GetData( ), GL_STATIC_DRAW );
 
 		glGenVertexArrays( 1, &sm.mVAO );
 		glBindVertexArray( sm.mVAO );
@@ -147,7 +147,7 @@ namespace Enjon
 		// Set draw type
 		sm.mDrawType = GL_TRIANGLES;
 		// Set draw count
-		sm.mDrawCount = sm.mVertexData->GetSize( ) / vertDecl.GetSizeInBytes( ); 
+		sm.mDrawCount = sm.mVertexData.GetSize( ) / vertDecl.GetSizeInBytes( ); 
 		// Set mesh name
 		mesh->mName = "DefaultMesh";
 
@@ -201,11 +201,11 @@ namespace Enjon
 		bool hasSkeleton = HasSkeleton( scene->mRootNode, scene );
 
 		// If has skeleton, then construct skeleton from here
-		if ( hasSkeleton )
-		{
-			SkeletalMesh* mesh = new SkeletalMesh( );
-			ProcessNodeSkeletal( scene->mRootNode, scene, mesh );
-		}
+		//if ( hasSkeleton )
+		//{
+		//	SkeletalMesh* mesh = new SkeletalMesh( );
+		//	ProcessNodeSkeletal( scene->mRootNode, scene, mesh );
+		//}
  
 		// Construct new mesh to be filled out
 		Mesh* mesh = new Mesh( ); 
@@ -384,46 +384,46 @@ namespace Enjon
 		// For each vertex in mesh
 		for ( u32 i = 0; i < mesh->mNumVertices; ++i )
 		{
-			sm->mVertexData->Write< f32 >( mesh->mVertices[i].x );
-			sm->mVertexData->Write< f32 >( mesh->mVertices[i].y );
-			sm->mVertexData->Write< f32 >( mesh->mVertices[i].z );
+			sm->mVertexData.Write< f32 >( mesh->mVertices[i].x );
+			sm->mVertexData.Write< f32 >( mesh->mVertices[i].y );
+			sm->mVertexData.Write< f32 >( mesh->mVertices[i].z );
 
 			// Vertex normal
 			if ( mesh->mNormals )
 			{
-				sm->mVertexData->Write< f32 >( mesh->mNormals[i].x );
-				sm->mVertexData->Write< f32 >( mesh->mNormals[i].y );
-				sm->mVertexData->Write< f32 >( mesh->mNormals[i].z );
+				sm->mVertexData.Write< f32 >( mesh->mNormals[i].x );
+				sm->mVertexData.Write< f32 >( mesh->mNormals[i].y );
+				sm->mVertexData.Write< f32 >( mesh->mNormals[i].z );
 			}
 			else
 			{
-				sm->mVertexData->Write< f32 >( 0.0f );
-				sm->mVertexData->Write< f32 >( 0.0f );
-				sm->mVertexData->Write< f32 >( 1.0f );
+				sm->mVertexData.Write< f32 >( 0.0f );
+				sm->mVertexData.Write< f32 >( 0.0f );
+				sm->mVertexData.Write< f32 >( 1.0f );
 			}
 			// Vertex uvs 
 			if ( mesh->mTextureCoords[ 0 ] )
 			{
-				sm->mVertexData->Write< f32 >( mesh->mTextureCoords[0][i].x );
-				sm->mVertexData->Write< f32 >( mesh->mTextureCoords[0][i].y );
+				sm->mVertexData.Write< f32 >( mesh->mTextureCoords[0][i].x );
+				sm->mVertexData.Write< f32 >( mesh->mTextureCoords[0][i].y );
 			}
 			else
 			{
-				sm->mVertexData->Write< f32 >( 0.0f );
-				sm->mVertexData->Write< f32 >( 0.0f );
+				sm->mVertexData.Write< f32 >( 0.0f );
+				sm->mVertexData.Write< f32 >( 0.0f );
 			}
 
 			if ( mesh->mTangents )
 			{
-				sm->mVertexData->Write< f32 >( mesh->mTangents[i].x );
-				sm->mVertexData->Write< f32 >( mesh->mTangents[i].y );
-				sm->mVertexData->Write< f32 >( mesh->mTangents[i].z );
+				sm->mVertexData.Write< f32 >( mesh->mTangents[i].x );
+				sm->mVertexData.Write< f32 >( mesh->mTangents[i].y );
+				sm->mVertexData.Write< f32 >( mesh->mTangents[i].z );
 			}
 			else
 			{
-				sm->mVertexData->Write< f32 >( 1.0f );
-				sm->mVertexData->Write< f32 >( 0.0f );
-				sm->mVertexData->Write< f32 >( 0.0f );
+				sm->mVertexData.Write< f32 >( 1.0f );
+				sm->mVertexData.Write< f32 >( 0.0f );
+				sm->mVertexData.Write< f32 >( 0.0f );
 			}
 		} 
 
@@ -488,7 +488,7 @@ namespace Enjon
 		sm->mDrawType = GL_TRIANGLES;
 
 		// Set draw count
-		sm->mDrawCount = sm->mVertexData->GetSize( ) / vertDecl.GetSizeInBytes( ); 
+		sm->mDrawCount = sm->mVertexData.GetSize( ) / vertDecl.GetSizeInBytes( ); 
 	}
 
 	//=====================================================================================================
