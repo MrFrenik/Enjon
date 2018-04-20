@@ -49,12 +49,14 @@ namespace Enjon
 	{
 		Mesh* mesh = new Enjon::Mesh;
 
+		// Construct new vertex decl
 		VertexDataDeclaration decl;
 		decl.Add( VertexAttributeFormat::Float3 );			// Position
 		decl.Add( VertexAttributeFormat::Float3 );			// Normal
 		decl.Add( VertexAttributeFormat::Float3 );			// Tangent
 		decl.Add( VertexAttributeFormat::Float2 );			// UV
 
+		// Set vertex declaration
 		mesh->SetVertexDecl( decl );
 
 		// Shared normal
@@ -66,23 +68,25 @@ namespace Enjon
 		CREATE_QUAD_VERTEX( BR, 1.0f, 1.0f, 1.0f, 1.0f )
 		CREATE_QUAD_VERTEX( BL, 0.0f, 1.0f, 0.0f, 1.0f )
 
-		SubMesh sm( mesh ); 
+		// Construct new submesh
+		SubMesh* sm = mesh->ConstructSubmesh( );
 
-		WRITE_VERT_DATA( TL, sm.mVertexData )
-		WRITE_VERT_DATA( TR, sm.mVertexData )
-		WRITE_VERT_DATA( BR, sm.mVertexData )
-		WRITE_VERT_DATA( BL, sm.mVertexData ) 
+		WRITE_VERT_DATA( TL, sm->mVertexData )
+		WRITE_VERT_DATA( BL, sm->mVertexData ) 
+		WRITE_VERT_DATA( BR, sm->mVertexData )
+		WRITE_VERT_DATA( BR, sm->mVertexData )
+		WRITE_VERT_DATA( TR, sm->mVertexData )
+		WRITE_VERT_DATA( TL, sm->mVertexData )
 
 		// Create and upload mesh data
-		glGenBuffers( 1, &sm.mVBO );
-		glBindBuffer( GL_ARRAY_BUFFER, sm.mVBO );
-		glBufferData( GL_ARRAY_BUFFER, sm.mVertexData.GetSize( ), sm.mVertexData.GetData( ), GL_STATIC_DRAW );
-
-		glGenVertexArrays( 1, &sm.mVAO );
-		glBindVertexArray( sm.mVAO );
+		glGenBuffers( 1, &sm->mVBO );
+		glBindBuffer( GL_ARRAY_BUFFER, sm->mVBO );
+		glBufferData( GL_ARRAY_BUFFER, sm->mVertexData.GetSize( ), sm->mVertexData.GetData( ), GL_STATIC_DRAW );
+		glGenVertexArrays( 1, &sm->mVAO );
+		glBindVertexArray( sm->mVAO );
 
 		// Get vertex data decl from owning mesh
-		const VertexDataDeclaration& vertDecl = sm.mMesh->GetVertexDeclaration( );
+		const VertexDataDeclaration& vertDecl = mesh->GetVertexDeclaration( );
 
 		// Grab total size in bytes for data declaration
 		usize vertexDeclSize = vertDecl.GetSizeInBytes( );
@@ -145,14 +149,11 @@ namespace Enjon
 		glBindVertexArray( 0 );
 
 		// Set draw type
-		sm.mDrawType = GL_TRIANGLES;
+		sm->mDrawType = GL_TRIANGLES;
 		// Set draw count
-		sm.mDrawCount = sm.mVertexData.GetSize( ) / vertDecl.GetSizeInBytes( ); 
+		sm->mDrawCount = sm->mVertexData.GetSize( ) / vertDecl.GetSizeInBytes( ); 
 		// Set mesh name
-		mesh->mName = "DefaultMesh";
-
-		// Add submesh to meshs
-		mesh->mSubMeshes.push_back( sm );
+		mesh->mName = "DefaultMesh"; 
 
 		// Set default
 		mDefaultAsset = mesh; 
@@ -187,7 +188,9 @@ namespace Enjon
 	{
 		// Construct new mesh from filepath 
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile( filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace );
+
+		// NOTE(): Flipping UVs FUCKS IT ALL because I'm already flipping UVs in the shader generation process (shadergraph). Need to fix this.  
+		const aiScene* scene = importer.ReadFile( filePath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace );
 
 		if ( !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
 		{
@@ -238,9 +241,6 @@ namespace Enjon
 
 			// Construct submesh from aiMesh and scene
 			SubMesh sm = ProcessSkeletalMesh( aim, scene ); 
-
-			// Add submesh to mesh
-			mesh->mSubMeshes.push_back( sm );
 		}
 
 		// Process all children in node
@@ -372,23 +372,21 @@ namespace Enjon
 
 	void MeshAssetLoader::ProcessMesh( aiMesh* mesh, const aiScene* scene, Mesh* owningMesh )
 	{ 
-		// Push back new mesh
-		owningMesh->mSubMeshes.emplace_back( owningMesh );
-
-		// Get pointer to mesh
-		SubMesh* sm = &owningMesh->mSubMeshes.back( );
+		// Construct new mesh in owning mesh and get pointer to it
+		SubMesh* sm = owningMesh->ConstructSubmesh( );
 
 		// Get decl from mesh
 		const VertexDataDeclaration& vertDecl = owningMesh->GetVertexDeclaration( ); 
 
-		// For each vertex in mesh
+		// Load vertex data into submesh vertex buffer 
 		for ( u32 i = 0; i < mesh->mNumVertices; ++i )
-		{
+		{ 
+			// Position
 			sm->mVertexData.Write< f32 >( mesh->mVertices[i].x );
 			sm->mVertexData.Write< f32 >( mesh->mVertices[i].y );
 			sm->mVertexData.Write< f32 >( mesh->mVertices[i].z );
 
-			// Vertex normal
+			// Normal
 			if ( mesh->mNormals )
 			{
 				sm->mVertexData.Write< f32 >( mesh->mNormals[i].x );
@@ -399,9 +397,24 @@ namespace Enjon
 			{
 				sm->mVertexData.Write< f32 >( 0.0f );
 				sm->mVertexData.Write< f32 >( 0.0f );
-				sm->mVertexData.Write< f32 >( 1.0f );
+				sm->mVertexData.Write< f32 >( 1.0f ); 
+			} 
+
+			// Tangent
+			if ( mesh->mTangents )
+			{
+				sm->mVertexData.Write< f32 >( mesh->mTangents[i].x );
+				sm->mVertexData.Write< f32 >( mesh->mTangents[i].y );
+				sm->mVertexData.Write< f32 >( mesh->mTangents[i].z ); 
 			}
-			// Vertex uvs 
+			else
+			{
+				sm->mVertexData.Write< f32 >( 1.0f );
+				sm->mVertexData.Write< f32 >( 0.0f );
+				sm->mVertexData.Write< f32 >( 0.0f );
+			}
+
+			// UV
 			if ( mesh->mTextureCoords[ 0 ] )
 			{
 				sm->mVertexData.Write< f32 >( mesh->mTextureCoords[0][i].x );
@@ -412,20 +425,14 @@ namespace Enjon
 				sm->mVertexData.Write< f32 >( 0.0f );
 				sm->mVertexData.Write< f32 >( 0.0f );
 			}
+		}
 
-			if ( mesh->mTangents )
-			{
-				sm->mVertexData.Write< f32 >( mesh->mTangents[i].x );
-				sm->mVertexData.Write< f32 >( mesh->mTangents[i].y );
-				sm->mVertexData.Write< f32 >( mesh->mTangents[i].z );
-			}
-			else
-			{
-				sm->mVertexData.Write< f32 >( 1.0f );
-				sm->mVertexData.Write< f32 >( 0.0f );
-				sm->mVertexData.Write< f32 >( 0.0f );
-			}
-		} 
+		// Create and upload mesh data 
+		glGenBuffers( 1, &sm->mVBO );
+		glBindBuffer( GL_ARRAY_BUFFER, sm->mVBO );
+		glBufferData( GL_ARRAY_BUFFER, sm->mVertexData.GetSize( ), sm->mVertexData.GetData( ), GL_STATIC_DRAW ); 
+		glGenVertexArrays( 1, &sm->mVAO );
+		glBindVertexArray( sm->mVAO );
 
 		// Grab total size in bytes for data declaration
 		usize vertexDeclSize = vertDecl.GetSizeInBytes( );
@@ -483,6 +490,9 @@ namespace Enjon
 				} break;
 			}
 		} 
+
+		// Unbind vertex array
+		glBindVertexArray( 0 );
 
 		// Set draw type
 		sm->mDrawType = GL_TRIANGLES;

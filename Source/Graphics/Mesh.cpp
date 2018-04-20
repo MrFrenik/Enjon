@@ -16,6 +16,26 @@ namespace Enjon
 	} 
 
 	//=========================================================================
+	
+	s32 GetByteSizeOfAttribute( const VertexAttributeFormat& format )
+	{
+		s32 byteSize = 0; 
+		switch ( format )
+		{
+			case VertexAttributeFormat::Float4:			{ byteSize = 4 * 4; } break;
+			case VertexAttributeFormat::Float3:			{ byteSize = 4 * 3; } break;
+			case VertexAttributeFormat::Float2:			{ byteSize = 4 * 2; } break;
+			case VertexAttributeFormat::Float:			{ byteSize = 4 * 1; } break;
+			case VertexAttributeFormat::UnsignedInt4:	{ byteSize = 4 * 4; } break;
+			case VertexAttributeFormat::UnsignedInt3:	{ byteSize = 4 * 3; } break;
+			case VertexAttributeFormat::UnsignedInt2:	{ byteSize = 4 * 2; } break;
+			case VertexAttributeFormat::UnsignedInt:	{ byteSize = 4 * 1; } break;
+		} 
+
+		return byteSize;
+	}
+
+	//=========================================================================
 
 	s32 VertexDataDeclaration::GetByteOffset( const u32& attributeIndex ) const
 	{ 
@@ -24,13 +44,21 @@ namespace Enjon
 		{
 			return -1;
 		}
-
+ 
 		// Recursively calculate offset
 		s32 totalOffset = 0;
+
+		// Base case
+		if ( attributeIndex == 0 )
+		{
+			return totalOffset;
+		} 
+
+		// Calculate total offset up to this point
 		for ( u32 i = 0; i < attributeIndex; ++i )
 		{ 
-			totalOffset += GetByteOffset( i );
-		}
+			totalOffset += GetByteSizeOfAttribute( mDecl.at( i ) );
+		} 
 
 		return totalOffset;
 	}
@@ -119,7 +147,17 @@ namespace Enjon
 	//=========================================================================
 
 	Result Mesh::Release( )
-	{
+	{ 
+		// Release all submesh data
+		for ( auto& sm : mSubMeshes )
+		{
+			if ( sm )
+			{
+				delete( sm ); 
+				sm = nullptr;
+			}
+		}
+
 		// Clear all submesh data
 		mSubMeshes.clear( ); 
 
@@ -128,7 +166,7 @@ namespace Enjon
 
 	//=========================================================================
 
-	const Vector<SubMesh>& Mesh::GetSubmeshes( ) const
+	const Vector<SubMesh*>& Mesh::GetSubmeshes( ) const
 	{
 		return mSubMeshes;
 	}
@@ -169,7 +207,7 @@ namespace Enjon
 		// Write out each submesh to file
 		for ( auto& sm : mSubMeshes )
 		{
-			sm.SerializeData( buffer );
+			sm->SerializeData( buffer );
 		}
 
 		return Result::SUCCESS;
@@ -190,10 +228,8 @@ namespace Enjon
 		// Deserialize all submesh data
 		for ( u32 i = 0; i < numSubMeshes; ++i )
 		{
-			// Emplace new submesh
-			mSubMeshes.emplace_back( this );
-			// pointer to submesh
-			SubMesh* sm = &mSubMeshes.back( );
+			// Construct submesh and get pointer to it
+			SubMesh* sm = ConstructSubmesh( );
 			// Deserialize submesh data
 			sm->DeserializeData( buffer );
 		}
@@ -201,17 +237,19 @@ namespace Enjon
 		return Result::SUCCESS;
 	} 
 
-	SubMesh::SubMesh( )
+	//=========================================================================
+
+	SubMesh* Mesh::ConstructSubmesh( )
 	{
+		SubMesh* sm = new SubMesh( this );
+		mSubMeshes.push_back( sm );
+		return sm;
 	}
 
-	SubMesh::SubMesh( const SubMesh& other )
+	//=========================================================================
+
+	SubMesh::SubMesh( )
 	{
-		mMesh = other.mMesh;
-		mDrawType = other.mDrawType; 
-		mDrawCount = other.mDrawCount;
-		mDrawStart = other.mDrawStart;
-		mVertexData.CopyFromOther( other.mVertexData );
 	}
 
 	SubMesh::SubMesh( Mesh* mesh )
@@ -338,48 +376,15 @@ struct struct_name {\
 		// Get vertex data decl from owning mesh
 		const VertexDataDeclaration& vertDecl = mMesh->GetVertexDeclaration( );
 
-		// Create struct for data
-		STRUCT_PACKED_4( PackedStruct, Vec3, Vec3, Vec3, Vec2 ); 
-
 		// Set draw type
 		mDrawType = GL_TRIANGLES;
 		// Set draw count
 		mDrawCount = mVertexData.GetSize( ) / vertDecl.GetSizeInBytes( );
 
-		// How many structs are there? As many vertices there are
-		u32 vertCount = GetDrawCount( ); 
-		Vector< PackedStruct > verts;
-
-		// Reset read position in data stream
-		mVertexData.SetReadPosition( 0 );
-		for ( u32 i = 0; i < vertCount; ++i ) 
-		{ 
-			// Fill out vertex packed struct
-			PackedStruct packed; 
-			// Position
-			packed.elem1.x = mVertexData.Read< f32 >( );
-			packed.elem1.y = mVertexData.Read< f32 >( );
-			packed.elem1.z = mVertexData.Read< f32 >( );
-			// Normal
-			packed.elem2.x = mVertexData.Read< f32 >( );
-			packed.elem2.y = mVertexData.Read< f32 >( );
-			packed.elem2.z = mVertexData.Read< f32 >( );
-			// Tangent
-			packed.elem3.x = mVertexData.Read< f32 >( );
-			packed.elem3.y = mVertexData.Read< f32 >( );
-			packed.elem3.z = mVertexData.Read< f32 >( );
-			// UV
-			packed.elem4.x = mVertexData.Read< f32 >( );
-			packed.elem4.y = mVertexData.Read< f32 >( ); 
-
-			// Add to verts
-			verts.push_back( packed );
-		}
-
 		// Create and upload mesh data
 		glGenBuffers( 1, &mVBO );
 		glBindBuffer( GL_ARRAY_BUFFER, mVBO );
-		glBufferData( GL_ARRAY_BUFFER, vertCount * sizeof( PackedStruct ), &verts[0], GL_STATIC_DRAW );
+		glBufferData( GL_ARRAY_BUFFER, mVertexData.GetSize( ), mVertexData.GetData( ), GL_STATIC_DRAW );
  
 		glGenVertexArrays( 1, &mVAO );
 		glBindVertexArray( mVAO ); 

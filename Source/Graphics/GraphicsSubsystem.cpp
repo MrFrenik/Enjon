@@ -756,7 +756,7 @@ namespace Enjon
 				renderable->Bind( );
 				{
 					// For each submesh
-					const Vector< SubMesh >& subMeshes = renderable->GetMesh( ).Get( )->GetSubmeshes( );
+					const Vector< SubMesh* >& subMeshes = renderable->GetMesh( ).Get( )->GetSubmeshes( );
 					for ( u32 i = 0; i < subMeshes.size(); ++i )
 					{
 						const Material* curMaterial = renderable->GetMaterial( i ).Get( );

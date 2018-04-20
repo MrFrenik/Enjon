@@ -216,7 +216,7 @@ namespace Enjon
 
 	//==============================================================================
 
-	void Renderable::Submit( const Enjon::Shader* shader, const SubMesh& subMesh )
+	void Renderable::Submit( const Enjon::Shader* shader, const SubMesh* subMesh )
 	{
 		if ( shader == nullptr )
 		{
@@ -227,13 +227,13 @@ namespace Enjon
 		const_cast< Enjon::Shader* > ( shader )->SetUniform( "uPreviousModel", mPreviousModelMatrix );
 
 		// Bind submesh
-		subMesh.Bind( );
+		subMesh->Bind( );
 		{
 			// Submit for rendering
-			subMesh.Submit( ); 
+			subMesh->Submit( ); 
 		}
 		// Unbind submesh
-		subMesh.Unbind( ); 
+		subMesh->Unbind( ); 
 	}
 
 	//==============================================================================
@@ -251,7 +251,7 @@ namespace Enjon
 		if ( mesh != nullptr )
 		{
 			// Check if mesh has submeshes first
-			const Vector<SubMesh>& subMeshes = mesh->GetSubmeshes( );
+			const Vector<SubMesh*>& subMeshes = mesh->GetSubmeshes( );
 
 			//if ( subMeshes.empty( ) )
 			//{
@@ -282,11 +282,11 @@ namespace Enjon
 				// For each submesh, bind
 				for ( auto& sm : subMeshes )
 				{
-					sm.Bind( );
+					sm->Bind( );
 					{
-						sm.Submit( ); 
+						sm->Submit( ); 
 					}
-					sm.Unbind( );
+					sm->Unbind( );
 				}
 
 				// Set the previous model matrix with current one

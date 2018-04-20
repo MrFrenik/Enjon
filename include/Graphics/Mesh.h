@@ -112,7 +112,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			SubMesh( const SubMesh& other );
+			//SubMesh( const SubMesh& other );
 
 			/*
 			* @brief Constructor
@@ -214,7 +214,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			const Vector<SubMesh>& GetSubmeshes( ) const;
+			const Vector<SubMesh*>& GetSubmeshes( ) const;
 
 			/*
 			* @brief
@@ -249,9 +249,16 @@ namespace Enjon
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
+		private:
+
+			/*
+			* @brief
+			*/
+			SubMesh* ConstructSubmesh( );
+
 		protected: 
 			VertexDataDeclaration mVertexDecl;
-			Vector< SubMesh > mSubMeshes;
+			Vector< SubMesh* > mSubMeshes;
 	}; 
 }
 
