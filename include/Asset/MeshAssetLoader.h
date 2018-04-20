@@ -7,6 +7,7 @@
 
 #include "Asset/AssetLoader.h"
 #include "Graphics/Mesh.h"
+#include "Graphics/Skeleton.h"
 
 // Assimp specifics
 struct aiMesh;
@@ -53,7 +54,13 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			SubMesh ProcessMesh( aiMesh* aim, const aiScene* scene );
+			void ProcessMesh( aiMesh* aim, const aiScene* scene, Mesh* mesh );
+
+			bool HasSkeleton( aiNode* node, const aiScene* scene );
+
+			SubMesh ProcessSkeletalMesh( aiMesh* mesh, const aiScene* scene );
+
+			void ProcessNodeSkeletal( aiNode* node, const aiScene* scene, SkeletalMesh* mesh );
 	}; 
 }
 

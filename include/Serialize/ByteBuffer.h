@@ -31,6 +31,11 @@ namespace Enjon
 			* @brief Constructor
 			*/
 			ByteBuffer( const String& filePath );
+
+			/*
+			* @brief
+			*/
+			ByteBuffer( const ByteBuffer& other );
 			
 			/*
 			* @brief Destructor
@@ -83,6 +88,16 @@ namespace Enjon
 			* @brief
 			*/
 			void AdvanceReadPosition( const usize& amount );
+
+			/*
+			* @brief
+			*/
+			const u8* GetData( ) const;
+
+			/*
+			* @brief
+			*/
+			void AppendBuffer( const ByteBuffer& other );
 
 		private:
 			/*

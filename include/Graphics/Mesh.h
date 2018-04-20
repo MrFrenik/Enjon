@@ -11,8 +11,81 @@
 namespace Enjon 
 { 
 	// Forward Declarations
+	class SubMesh;
 	class Mesh;
-	class MeshAssetLoader;
+	class MeshAssetLoader; 
+
+	ENJON_ENUM( )
+	enum class VertexAttributeFormat
+	{
+		Float4,
+		Float3,
+		Float2,
+		Float,
+		UnsignedInt4,
+		UnsignedInt3,
+		UnsignedInt2,
+		UnsignedInt
+	};
+
+	ENJON_CLASS( )
+	class VertexDataDeclaration : public Object
+	{
+		friend MeshAssetLoader;
+		friend SubMesh;
+		friend Mesh;
+
+		ENJON_CLASS_BODY( )
+
+		public: 
+
+			/*
+			* @brief
+			*/
+			VertexDataDeclaration( ) = default;
+
+			/*
+			* @brief
+			*/
+			~VertexDataDeclaration( ) = default; 
+
+			/*
+			* @brief
+			*/
+			usize GetSizeInBytes( ) const;
+
+			/*
+			* @brief
+			*/
+			s32 GetByteOffset( const u32& attributeIndex ) const; 
+
+
+			/*
+			* @brief
+			*/
+			void Add( const VertexAttributeFormat& format ); 
+
+		protected:
+
+			/*
+			* @brief
+			*/
+			virtual Result SerializeData( ByteBuffer* buffer ) const override;
+
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeData( ByteBuffer* buffer ) override;
+
+		private: 
+
+			void CalculateSizeInBytes( );
+
+		protected: 
+			usize mSizeInBytes = 0;
+			Vector< VertexAttributeFormat > mDecl; 
+	};
+
 
 	struct Vert 
 	{
@@ -34,7 +107,17 @@ namespace Enjon
 			/*
 			* @brief Constructor
 			*/
-			SubMesh();
+			SubMesh( );
+
+			/*
+			* @brief
+			*/
+			SubMesh( const SubMesh& other );
+
+			/*
+			* @brief Constructor
+			*/
+			SubMesh( Mesh* mesh );
 
 			/*
 			* @brief Destructor
@@ -98,13 +181,16 @@ namespace Enjon
 			Vector< Vert > mVerticies; 
 			Vector< u32 > mIndicies;	
 
+			// Owning mesh
+			Mesh* mMesh = nullptr; 
+			ByteBuffer* mVertexData = nullptr;
+
 			GLenum mDrawType;
 			GLint mDrawStart = 0;
 			GLint mDrawCount = 0;
 			GLuint mVAO = 0;
 			GLuint mVBO = 0;
 			GLuint mIBO = 0;
-
 	}; 
 
 	ENJON_CLASS( Construct )
@@ -128,21 +214,6 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void Bind() const;
-
-			/*
-			* @brief
-			*/
-			void Unbind() const;
-
-			/* 
-			* @brief 
-			*/
-			void Submit() const; 
-
-			/*
-			* @brief
-			*/
 			const Vector<SubMesh>& GetSubmeshes( ) const;
 
 			/*
@@ -150,12 +221,17 @@ namespace Enjon
 			*/
 			u32 GetSubMeshCount( ) const;
 
+			/*
+			* @brief
+			*/
+			const VertexDataDeclaration& GetVertexDeclaration( );
+
 		protected:
 
 			/*
-			* @brief Protected Constructor
+			* @brief
 			*/
-			Mesh( const Enjon::String& filePath );
+			void SetVertexDecl( const VertexDataDeclaration& decl );
 
 			/*
 			* @brief
@@ -174,6 +250,7 @@ namespace Enjon
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
 		protected: 
+			VertexDataDeclaration mVertexDecl;
 			Vector< SubMesh > mSubMeshes;
 	}; 
 }

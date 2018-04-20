@@ -27,6 +27,21 @@ namespace Enjon
 
 	//========================================================================
 
+	ByteBuffer::ByteBuffer( const ByteBuffer& other )
+	{ 
+		// Release previous data
+		ReleaseData( );
+
+		mBuffer = (u8*)malloc( sizeof( u8 ) * other.GetSize( ) );
+		assert( mBuffer != nullptr );
+		mStatus = BufferStatus::ReadyToWrite;
+
+		// Cpy data over from other buffer
+		memcpy( mBuffer, other.GetData( ), other.GetSize( ) ); 
+	}
+
+	//========================================================================
+
 	ByteBuffer::ByteBuffer( const String& filePath )
 	{
 		// Allocate memory for buffer
@@ -49,8 +64,11 @@ namespace Enjon
 
 	void ByteBuffer::ReleaseData( )
 	{
-		// Delete all of its data
-		free( mBuffer );
+		if ( mBuffer )
+		{
+			// Delete all of its data
+			free( mBuffer ); 
+		}
 		mBuffer = nullptr;
 	}
 
@@ -291,6 +309,25 @@ namespace Enjon
 	const u32 ByteBuffer::GetSize( ) const
 	{
 		return mSize;
+	}
+
+	//========================================================================
+
+	const u8* ByteBuffer::GetData( ) const
+	{
+		return mBuffer;
+	}
+
+	//========================================================================
+
+	void ByteBuffer::AppendBuffer( const ByteBuffer& other )
+	{
+		// Brute force loop for now...
+		for ( u32 i = 0; i < other.GetSize( ); ++i )
+		{
+			// Write to buffer
+			Write< u8 >( other.mBuffer[i] );
+		} 
 	}
 
 	//========================================================================

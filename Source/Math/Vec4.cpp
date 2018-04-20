@@ -144,4 +144,139 @@ namespace Enjon {
 	{
 		return Vec3(this->x, this->y, this->z);
 	}
+
+	std::ostream& operator<<(std::ostream& stream, iVec4& vector)
+	{
+		stream << "Vector3i: (" << vector.x << ", " << vector.y << ", " << vector.z << ")";
+		return stream; 
+	}
+	
+	//================================================
+
+	iVec4& iVec4::Add(const iVec4& other)
+	{
+		x += other.x;
+		y += other.y;
+		z += other.z;
+		return *this; 
+	}
+	
+	//================================================
+	
+	iVec4& iVec4::Subtract(const iVec4& other)
+	{
+		x -= other.x;
+		y -= other.y;
+		z -= other.z;
+		return *this; 
+	}
+	
+	//================================================
+	
+	iVec4& iVec4::Multiply(const iVec4& other)
+	{
+		x *= other.x;
+		y *= other.y;
+		z *= other.z;
+		return *this; 
+	}
+	
+	//================================================
+	
+	iVec4& iVec4::Divide(const iVec4& other)
+	{ 
+		x /= other.x;
+		y /= other.y;
+		z /= other.z;
+		return *this; 
+	}
+	
+	//================================================
+	
+	iVec4& iVec4::Scale(const s32& scalar)
+	{
+		x *= scalar;
+		y *= scalar;
+		z *= scalar;
+		return *this;
+	}
+	
+	//================================================
+
+	iVec4 operator+(iVec4 left, const iVec4& right)
+	{
+		return left.Add(right); 
+	}
+	
+	//================================================
+	
+	iVec4 operator-(iVec4 left, const iVec4& right)
+	{
+		return left.Subtract(right); 
+	}
+	
+	//================================================
+	
+	iVec4 operator*(iVec4 left, const iVec4& right)
+	{
+		return left.Multiply(right); 
+	}
+	
+	//================================================
+	
+	iVec4 operator/(iVec4 left, const iVec4& right)
+	{
+		return left.Divide(right);
+	}
+	
+	//================================================
+	
+	b8 operator==(iVec4 left, const iVec4& right)
+	{ 
+		return (left.x == right.x && left.y == right.y && left.z == right.z);
+	}
+	
+	//================================================
+	
+	b8 operator!=(iVec4 left, const iVec4& right)
+	{
+		return !(left == right);
+	}
+	
+	//================================================
+
+	iVec4& iVec4::operator+=(const iVec4& other)
+	{
+		return Add(other); 
+	}
+	
+	//================================================
+	
+	iVec4& iVec4::operator-=(const iVec4& other)
+	{ 
+		return Subtract(other); 
+	}
+	
+	//================================================
+	
+	iVec4& iVec4::operator*=(const iVec4& other)
+	{
+		return Multiply(other);
+	}
+	
+	//================================================
+	
+	iVec4& iVec4::operator/=(const iVec4& other)
+	{
+		return Divide(other); 
+	}
+	
+	//================================================
+	
+	iVec4& iVec4::operator*=(const s32& scalar)
+	{
+		return Multiply(iVec4(scalar));
+	}
+
+	//================================================
 }

@@ -5,8 +5,8 @@
 #include <Math/Vec4.h>
 #include <Defines.h>
 
-namespace Enjon {  
-
+namespace Enjon 
+{ 
 	// Strict POD ColorRGBA8 struct
 	struct ColorRGBA8
 	{
@@ -160,12 +160,6 @@ namespace Enjon {
 		return RGBA32(color.r, color.g, color.b, a); 
 	}
 }
-
-
-
-
-
-
 
 
 #endif
