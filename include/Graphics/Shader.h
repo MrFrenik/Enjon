@@ -83,7 +83,7 @@ namespace Enjon
 			void SetUniform(const std::string& name, const Vec2& vector);
 			void SetUniform(const std::string& name, const Vec3& vector);
 			void SetUniform(const std::string& name, const Vec4& vector);
-			void SetUniform(const std::string& name, const Mat4& matrix); 
+			void SetUniform(const std::string& name, const Mat4x4& matrix); 
 			void SetUniform( const std::string& name, const ColorRGBA32& color );
 
 			void BindTexture(const std::string& name, const u32& TextureID, const u32 Index);

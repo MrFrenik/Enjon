@@ -204,11 +204,31 @@ namespace Enjon
 		bool hasSkeleton = HasSkeleton( scene->mRootNode, scene );
 
 		// If has skeleton, then construct skeleton from here
-		//if ( hasSkeleton )
-		//{
-		//	SkeletalMesh* mesh = new SkeletalMesh( );
-		//	ProcessNodeSkeletal( scene->mRootNode, scene, mesh );
-		//}
+		if ( hasSkeleton )
+		{
+			// Construct new mesh
+			Mesh* skeletalMesh = new Mesh( );
+			// Construct new skeleton
+			Skeleton* skeleton = new Skeleton( );
+
+			// Calculate bone weight size and resize vector
+			u32 totalVertCount = 0;
+			for ( u32 i = 0; i < scene->mNumMeshes; ++i )
+			{
+				totalVertCount += scene->mMeshes[i]->mNumVertices;
+			}
+			skeleton->mVertexBoneData.resize( totalVertCount * ENJON_MAX_NUM_BONES_PER_VERTEX );
+
+			// Continue
+			ProcessNodeSkeletal( scene->mRootNode, scene, skeleton, skeletalMesh );
+
+			// For now, just delete those two until they start being used...
+			delete ( skeleton );
+			delete ( skeletalMesh );
+
+			skeleton = nullptr;
+			skeletalMesh = nullptr;
+		} 
  
 		// Construct new mesh to be filled out
 		Mesh* mesh = new Mesh( ); 
@@ -232,7 +252,7 @@ namespace Enjon
 
 	//===================================================================================================== 
 
-	void MeshAssetLoader::ProcessNodeSkeletal( aiNode* node, const aiScene* scene, SkeletalMesh* mesh )
+	void MeshAssetLoader::ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleton, Mesh* mesh )
 	{
 		// Process all meshes in node
 		for ( u32 i = 0; i < node->mNumMeshes; ++i  ) 
@@ -240,113 +260,104 @@ namespace Enjon
 			aiMesh* aim = scene->mMeshes[ node->mMeshes[ i ] ]; 
 
 			// Construct submesh from aiMesh and scene
-			SubMesh sm = ProcessSkeletalMesh( aim, scene ); 
+			ProcessSkeletalMesh( aim, scene, skeleton, mesh ); 
 		}
 
 		// Process all children in node
 		for ( u32 i = 0; i < node->mNumChildren; ++i )
 		{
-			ProcessNode( node->mChildren[ i ], scene, mesh );
+			ProcessNodeSkeletal( node->mChildren[ i ], scene, skeleton, mesh );
 		} 
 	}
 
 	//===================================================================================================== 
 
-	SubMesh MeshAssetLoader::ProcessSkeletalMesh( aiMesh* mesh, const aiScene* scene )
-	{
-		//struct SkeletalVertexData
-		//{ 
-		//	Vec3	mPosition;
-		//	Vec3	mNormal;
-		//	Vec3	mTangent;
-		//	Vec2	mUV;
-		//	u32		mJointIndicies[ENJON_MAX_NUM_JOINTS_PER_VERTEX];
-		//	f32		mJointWeights[ENJON_MAX_NUM_JOINTS_PER_VERTEX];
-		//};
+	void MeshAssetLoader::ProcessSkeletalMesh( aiMesh* aim, const aiScene* scene, Skeleton* skeleton, Mesh* mesh )
+	{ 
+		// Id of this submesh is the size of the number of sub-meshes in owning mesh
+		u32 meshID = mesh->mSubMeshes.size( );
+		u32 baseVertexID = mesh->GetBaseVertexID( meshID );
 
-		// SubMesh to construct and fill out
-		SkeletalSubMesh sm; 
+		// Construct new submesh
+		SubMesh* sm = mesh->ConstructSubmesh( );
 
-		// For each vertex in mesh
-		for ( u32 i = 0; i < mesh->mNumVertices; ++i ) 
-		{ 
-			SkeletalVertexData vertex = { }; 
+		// Load bone data
+		for ( u32 i = 0; i < aim->mNumBones; ++i )
+		{
+			// Grab bone pointer
+			aiBone* aBone = aim->mBones[i];
 
-			// Vertex position
-			vertex.mPosition.x = mesh->mVertices[ i ].x;
-			vertex.mPosition.y = mesh->mVertices[ i ].y;
-			vertex.mPosition.z = mesh->mVertices[ i ].z;
-			// Vertex normal
-			if ( mesh->mNormals )
-			{
-				vertex.mNormal.x = mesh->mNormals[ i ].x;
-				vertex.mNormal.y = mesh->mNormals[ i ].y;
-				vertex.mNormal.z = mesh->mNormals[ i ].z; 
-			}
+			u32 boneID = 0;
+			String boneName( aBone->mName.data ); 
+
+			// If joint not found in skeleton name lookup then construct new bone and push back
+			if ( skeleton->mBoneNameLookup.find( boneName ) == skeleton->mBoneNameLookup.end( ) )
+			{ 
+				// Construct new bone
+				Bone bone; 
+				// Set id
+				bone.mID = boneID;
+				// Set bone name
+				bone.mName = boneName;
+				// Increment bone id
+				boneID++;
+
+				// Set up bone offset
+				aiMatrix4x4 offsetMatrix = aBone->mOffsetMatrix;
+
+				// Get transform from offset matrix
+				aiVector3t<f32> scale;
+				aiVector3t<f32> axis;
+				f32 angle;
+				aiVector3t<f32> position; 
+				offsetMatrix.Decompose( scale, axis, angle, position );			// Decompose into elements
+
+				// Construct matrix from transform 
+				bone.mInverseBindMatrix = Mat4x4::Identity( );
+				bone.mInverseBindMatrix *= Mat4x4::Translate( Vec3( position.x, position.y, position.z ) );
+				bone.mInverseBindMatrix *= QuaternionToMat4x4( Quaternion::AngleAxis( angle, Vec3( axis.x, axis.y, axis.z ) ) );
+				bone.mInverseBindMatrix *= Mat4x4::Scale( Vec3( scale.x, scale.y, scale.z ) ); 
+
+				// Push bone back 
+				skeleton->mBones.push_back( bone ); 
+				// Set mapping between bone id and name
+				skeleton->mBoneNameLookup[boneName] = boneID; 
+			} 
 			else
 			{
-				vertex.mNormal = Vec3( 0.0f );
-			}
-			// Vertex uvs 
-			if ( mesh->mTextureCoords[ 0 ] )
+				boneID = skeleton->mBoneNameLookup[ boneName ];
+			} 
+
+			// Set weights for vertices that this bone effects
+			for ( u32 j = 0; j < aBone->mNumWeights; ++j )
 			{
-				vertex.mUV.x = mesh->mTextureCoords[ 0 ][ i ].x; 
-				vertex.mUV.y = mesh->mTextureCoords[ 0 ][ i ].y; 
-			}
-			else
-			{
-				vertex.mUV = Vec2( 0.0f );
-			}
+				// Grab weight structure
+				aiVertexWeight aiWeight = aBone->mWeights[j];
 
-			if ( mesh->mTangents )
-			{
-				vertex.mTangent.x = mesh->mTangents[ i ].x;
-				vertex.mTangent.y = mesh->mTangents[ i ].y;
-				vertex.mTangent.z = mesh->mTangents[ i ].z;
-			}
+				// Grab weight
+				f32 weight = aiWeight.mWeight;
 
-			// Push back vertex into submesh
-			sm.mSkeletalVertexData.push_back( vertex ); 
-		} 
+				// Calculate absolute vertex id
+				u32 vertID = baseVertexID + aiWeight.mVertexId; 
 
-		// Create and upload mesh data
-		glGenBuffers( 1, &sm.mVBO );
-		glBindBuffer( GL_ARRAY_BUFFER, sm.mVBO );
-		glBufferData( GL_ARRAY_BUFFER, sizeof( SkeletalVertexData ) * sm.mSkeletalVertexData.size( ), &sm.mSkeletalVertexData[ 0 ], GL_STATIC_DRAW );
+				// Add vertex bone data
+				for ( u32 k = 0, bool found = false; k < ENJON_MAX_NUM_BONES_PER_VERTEX, found != false; ++k )
+				{
+					// We loop the weights until we find one not set
+					if ( skeleton->mVertexBoneData.at( vertID ).mIDS[k] == -1 )
+					{
+						skeleton->mVertexBoneData.at( vertID ).mWeights[k] = weight;
+						skeleton->mVertexBoneData.at( vertID ).mIDS[k] = boneID;
 
-		glGenVertexArrays( 1, &sm.mVAO );
-		glBindVertexArray( sm.mVAO );
+						// We set a weight, so break out
+						found = true;
+					}
+				} 
+			} 
+		}
 
-		// Position
-		glEnableVertexAttribArray( 0 );
-		glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( SkeletalVertexData ), ( void* )offsetof( SkeletalVertexData, mPosition) );
-		// Normal
-		glEnableVertexAttribArray( 1 );
-		glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, sizeof( SkeletalVertexData ), ( void* )offsetof( SkeletalVertexData, mNormal ) );
-		// Tangent
-		glEnableVertexAttribArray( 2 );
-		glVertexAttribPointer( 2, 3, GL_FLOAT, GL_FALSE, sizeof( SkeletalVertexData ), ( void* )offsetof( SkeletalVertexData, mTangent ) );
-		// UV
-		glEnableVertexAttribArray( 3 );
-		glVertexAttribPointer( 3, 2, GL_FLOAT, GL_FALSE, sizeof( SkeletalVertexData ), ( void* )offsetof( SkeletalVertexData, mUV ) );
-		// Joint Indices
-		glEnableVertexAttribArray( 4 );
-		glVertexAttribPointer( 4, 4, GL_UNSIGNED_INT, GL_FALSE, sizeof( SkeletalVertexData ), (void*)offsetof( SkeletalVertexData, mJointIndices ) );
-		// Joint Weights
-		glEnableVertexAttribArray( 5 );
-		glVertexAttribPointer( 5, 4, GL_FLOAT, GL_FALSE, sizeof( SkeletalVertexData ), (void*)offsetof( SkeletalVertexData, mJointWeights ) );
-
-		// Unbind mVAO
-		glBindVertexArray( 0 );
-
-		// Set draw type
-		sm.mDrawType = GL_TRIANGLES;
-		// Set draw count
-		sm.mDrawCount = sm.mVerticies.size( ); 
-
-		// Return submesh
-		return sm;
-	}
+		// Construct submesh here...
+	} 
 
 	//=====================================================================================================
 
@@ -370,28 +381,28 @@ namespace Enjon
 
 	//=====================================================================================================
 
-	void MeshAssetLoader::ProcessMesh( aiMesh* mesh, const aiScene* scene, Mesh* owningMesh )
+	void MeshAssetLoader::ProcessMesh( aiMesh* aim, const aiScene* scene, Mesh* mesh )
 	{ 
 		// Construct new mesh in owning mesh and get pointer to it
-		SubMesh* sm = owningMesh->ConstructSubmesh( );
+		SubMesh* sm = mesh->ConstructSubmesh( );
 
 		// Get decl from mesh
-		const VertexDataDeclaration& vertDecl = owningMesh->GetVertexDeclaration( ); 
+		const VertexDataDeclaration& vertDecl = mesh->GetVertexDeclaration( ); 
 
 		// Load vertex data into submesh vertex buffer 
-		for ( u32 i = 0; i < mesh->mNumVertices; ++i )
+		for ( u32 i = 0; i < aim->mNumVertices; ++i )
 		{ 
 			// Position
-			sm->mVertexData.Write< f32 >( mesh->mVertices[i].x );
-			sm->mVertexData.Write< f32 >( mesh->mVertices[i].y );
-			sm->mVertexData.Write< f32 >( mesh->mVertices[i].z );
+			sm->mVertexData.Write< f32 >( aim->mVertices[i].x );
+			sm->mVertexData.Write< f32 >( aim->mVertices[i].y );
+			sm->mVertexData.Write< f32 >( aim->mVertices[i].z );
 
 			// Normal
-			if ( mesh->mNormals )
+			if ( aim->mNormals )
 			{
-				sm->mVertexData.Write< f32 >( mesh->mNormals[i].x );
-				sm->mVertexData.Write< f32 >( mesh->mNormals[i].y );
-				sm->mVertexData.Write< f32 >( mesh->mNormals[i].z );
+				sm->mVertexData.Write< f32 >( aim->mNormals[i].x );
+				sm->mVertexData.Write< f32 >( aim->mNormals[i].y );
+				sm->mVertexData.Write< f32 >( aim->mNormals[i].z );
 			}
 			else
 			{
@@ -401,11 +412,11 @@ namespace Enjon
 			} 
 
 			// Tangent
-			if ( mesh->mTangents )
+			if ( aim->mTangents )
 			{
-				sm->mVertexData.Write< f32 >( mesh->mTangents[i].x );
-				sm->mVertexData.Write< f32 >( mesh->mTangents[i].y );
-				sm->mVertexData.Write< f32 >( mesh->mTangents[i].z ); 
+				sm->mVertexData.Write< f32 >( aim->mTangents[i].x );
+				sm->mVertexData.Write< f32 >( aim->mTangents[i].y );
+				sm->mVertexData.Write< f32 >( aim->mTangents[i].z ); 
 			}
 			else
 			{
@@ -415,10 +426,10 @@ namespace Enjon
 			}
 
 			// UV
-			if ( mesh->mTextureCoords[ 0 ] )
+			if ( aim->mTextureCoords[ 0 ] )
 			{
-				sm->mVertexData.Write< f32 >( mesh->mTextureCoords[0][i].x );
-				sm->mVertexData.Write< f32 >( mesh->mTextureCoords[0][i].y );
+				sm->mVertexData.Write< f32 >( aim->mTextureCoords[0][i].x );
+				sm->mVertexData.Write< f32 >( aim->mTextureCoords[0][i].y );
 			}
 			else
 			{
@@ -471,22 +482,22 @@ namespace Enjon
 
 				case VertexAttributeFormat::UnsignedInt4:
 				{
-					glVertexAttribPointer( i, 4, GL_UNSIGNED_INT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 4, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
 				} break;
 
 				case VertexAttributeFormat::UnsignedInt3:
 				{
-					glVertexAttribPointer( i, 3, GL_UNSIGNED_INT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 3, GL_UNSIGNED_INT, GL_FALSE, (void*)vertDecl.GetByteOffset( i ) );
 				} break;
 
 				case VertexAttributeFormat::UnsignedInt2:
 				{
-					glVertexAttribPointer( i, 2, GL_UNSIGNED_INT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 2, GL_UNSIGNED_INT, GL_FALSE, (void*)vertDecl.GetByteOffset( i ) );
 				} break;
 
 				case VertexAttributeFormat::UnsignedInt:
 				{
-					glVertexAttribPointer( i, 1, GL_UNSIGNED_INT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 1, GL_UNSIGNED_INT, GL_FALSE, (void*)vertDecl.GetByteOffset( i ) );
 				} break;
 			}
 		} 

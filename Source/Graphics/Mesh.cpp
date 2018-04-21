@@ -166,6 +166,25 @@ namespace Enjon
 
 	//=========================================================================
 
+	u32 Mesh::GetBaseVertexID( const u32& subMeshID )
+	{
+		if ( subMeshID > mSubMeshes.size( ) )
+		{
+			return 0;
+		}
+
+		u32 id = 0;
+		for ( u32 i = 0; i < subMeshID; ++i )
+		{
+			// Add on the number of vertices
+			id += mSubMeshes.at( i )->GetVertexCount( );
+		}
+
+		return id;
+	}
+
+	//=========================================================================
+
 	const Vector<SubMesh*>& Mesh::GetSubmeshes( ) const
 	{
 		return mSubMeshes;
@@ -304,6 +323,18 @@ namespace Enjon
 
 	//=========================================================================
 
+	u32 SubMesh::GetVertexCount( ) const
+	{ 
+		if ( !mMesh || mMesh->GetVertexDeclaration().GetSizeInBytes() == 0 )
+		{
+			return 0;
+		}
+
+		return mVertexData.GetSize( ) / mMesh->GetVertexDeclaration().GetSizeInBytes( ); 
+	}
+
+	//=========================================================================
+
 	u32 SubMesh::GetDrawCount( ) const
 	{ 
 		return mDrawCount;
@@ -426,22 +457,22 @@ struct struct_name {\
 
 				case VertexAttributeFormat::UnsignedInt4:
 				{
-					glVertexAttribPointer( i, 4, GL_UNSIGNED_INT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 4, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
 				} break;
 
 				case VertexAttributeFormat::UnsignedInt3:
 				{
-					glVertexAttribPointer( i, 3, GL_UNSIGNED_INT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 3, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
 				} break;
 
 				case VertexAttributeFormat::UnsignedInt2:
 				{
-					glVertexAttribPointer( i, 2, GL_UNSIGNED_INT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 2, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
 				} break;
 
 				case VertexAttributeFormat::UnsignedInt:
 				{
-					glVertexAttribPointer( i, 1, GL_UNSIGNED_INT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 1, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
 				} break;
 			}
 		} 

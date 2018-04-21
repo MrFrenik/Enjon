@@ -13,6 +13,7 @@
 struct aiMesh;
 struct aiNode;
 struct aiScene;
+struct aiMatrix4x4;
 
 namespace Enjon
 {
@@ -58,9 +59,11 @@ namespace Enjon
 
 			bool HasSkeleton( aiNode* node, const aiScene* scene );
 
-			SubMesh ProcessSkeletalMesh( aiMesh* mesh, const aiScene* scene );
+			void ProcessSkeletalMesh( aiMesh* aim, const aiScene* scene, Skeleton* skeleton, Mesh* mesh );
 
-			void ProcessNodeSkeletal( aiNode* node, const aiScene* scene, SkeletalMesh* mesh );
+			void ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleon, Mesh* mesh );
+
+			void ProcessAnimation( aiNode* node, const aiScene* scene ); 
 	}; 
 }
 

@@ -142,6 +142,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			u32 GetVertexCount( ) const;
+
+			/*
+			* @brief
+			*/
 			u32 GetDrawCount( ) const; 
 
 			/*
@@ -237,6 +242,11 @@ namespace Enjon
 			* @brief
 			*/
 			Result Release( ); 
+
+			/*
+			* @brief
+			*/
+			u32 GetBaseVertexID( const u32& subMeshID );
 
 		public:
 			/*

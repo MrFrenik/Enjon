@@ -193,7 +193,7 @@ namespace Enjon
 		return location;
 	} 
 		
-	void GLSLProgram::SetUniform(const std::string& name, const Mat4& matrix)
+	void GLSLProgram::SetUniform(const std::string& name, const Mat4x4& matrix)
 	{
 		// glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, matrix.elements);	
 		auto Search = UniformMap.find(name);

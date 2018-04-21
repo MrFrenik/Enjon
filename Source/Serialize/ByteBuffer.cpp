@@ -341,7 +341,7 @@ namespace Enjon
 		assert( mBuffer != nullptr );
 		mStatus = BufferStatus::ReadyToWrite;
 
-		// Cpy data over from other buffer
+		// Copy data over from other buffer
 		memcpy( mBuffer, other.GetData( ), other.GetSize( ) ); 
 	}
 

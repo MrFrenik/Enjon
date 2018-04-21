@@ -19,7 +19,7 @@ namespace Enjon {
 	class Vec2;
 	class Vec3;
 	class Vec4;
-	class Mat4;
+	class Mat4x4;
 	class Transform;
 
 	class GLSLProgram
@@ -48,7 +48,7 @@ namespace Enjon {
 		void SetUniform(const std::string& name, const Vec2& vector);
 		void SetUniform(const std::string& name, const Vec3& vector);
 		void SetUniform(const std::string& name, const Vec4& vector);
-		void SetUniform(const std::string& name, const Mat4& matrix); 
+		void SetUniform(const std::string& name, const Mat4x4& matrix); 
 		void SetUniform(const std::string& name, const Transform& T);
 		void SetUniform(const std::string& name, ColorRGBA32& C);
 		

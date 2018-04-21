@@ -302,7 +302,7 @@ namespace Enjon
 		return location;
 	} 
 
-	void Shader::SetUniform(const std::string& name, const Mat4& matrix)
+	void Shader::SetUniform(const std::string& name, const Mat4x4& matrix)
 	{
 		// glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, matrix.elements);	
 		auto Search = mUniformMap.find(name);

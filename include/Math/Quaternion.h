@@ -184,9 +184,9 @@ namespace Enjon
 	* @brief Convert this quaternion into equivalent 4X4 rotation matrix
 	* @note: From http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm 
 	*/
-	static inline Enjon::Mat4 QuaternionToMat4(Quaternion B)
+	static inline Enjon::Mat4x4 QuaternionToMat4x4(Quaternion B)
 	{
-		Mat4 Mat = Mat4::Identity();
+		Mat4x4 Mat = Mat4x4::Identity();
 		Quaternion Q = B.Normalize();
 
 		f32 xx = Q.x*Q.x;	
@@ -215,7 +215,7 @@ namespace Enjon
 	}
 
 	// NOTE(John): Assumes matrix is only rotational matrix and has no skew applied
-	static inline Quaternion Mat4ToQuaternion(const Mat4& Mat)
+	static inline Quaternion Mat4ToQuaternion(const Mat4x4& Mat)
 	{
 		Quaternion Q;
 		auto& E = Mat.elements;

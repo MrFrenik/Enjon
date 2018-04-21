@@ -2,19 +2,19 @@
 // Copyright 2016-2018 John Jackson. All Rights Reserved.
 
 #include "Graphics/Skeleton.h"
-
+#include "Asset/MeshAssetLoader.h"
 
 namespace Enjon
 { 
 	//====================================================================
 
-	Joint::Joint( )
+	Bone::Bone( )
 	{ 
 	}
 
 	//====================================================================
 
-	Joint::~Joint( )
+	Bone::~Bone( )
 	{ 
 	}
 
@@ -29,18 +29,6 @@ namespace Enjon
 	Skeleton::~Skeleton( )
 	{ 
 	}
-
-	//==================================================================== 
-
-	SkeletalMesh::SkeletalMesh( )
-	{ 
-	}
-
-	//==================================================================== 
-
-	SkeletalMesh::~SkeletalMesh( )
-	{ 
-	}
-
+ 
 	//==================================================================== 
 }

@@ -13,14 +13,17 @@
 #include "Graphics/Mesh.h"
 #include "Math/Vec4.h" 
 
-#define ENJON_MAX_NUM_JOINTS_PER_VERTEX		4
+#define ENJON_MAX_NUM_BONES_PER_VERTEX		4
 
 namespace Enjon
 {
+	// Forward Declarations
+	class MeshAssetLoader;
 	class Skeleton;
 
-	class Joint
+	class Bone
 	{ 
+		friend MeshAssetLoader;
 		friend Skeleton;
 
 		public: 
@@ -28,32 +31,40 @@ namespace Enjon
 			/*
 			* @brief Constructor
 			*/
-			Joint( );
+			Bone( );
 
 			/*
 			* @brief Constructor
 			*/
-			~Joint( );
+			~Bone( );
 
 		protected:
-			Vector<u32>		mChildren;
-			u32				mID;
-			Transform		mInverseBindTransform;
-			String			mName;
-	};
+			Vector< u32 >		mChildren;
+			u32					mID;
+			Mat4x4				mInverseBindMatrix;
+			String				mName;
+	}; 
 
-	struct SkeletalVertexData
-	{ 
-		Vec3	mPosition;
-		Vec3	mNormal;
-		Vec3	mTangent;
-		Vec2	mUV;
-		u32		mJointIndices[ENJON_MAX_NUM_JOINTS_PER_VERTEX];
-		f32		mJointWeights[ENJON_MAX_NUM_JOINTS_PER_VERTEX];
+	struct VertexBoneData
+	{
+		VertexBoneData( )
+		{
+			// Init data
+			for ( u32 i = 0; i < ENJON_MAX_NUM_BONES_PER_VERTEX; ++i )
+			{
+				mWeights[i] = 0.0f;
+				mIDS[i] = -1;
+			}
+		}
+
+		f32 mWeights[ENJON_MAX_NUM_BONES_PER_VERTEX];
+		s32 mIDS[ENJON_MAX_NUM_BONES_PER_VERTEX];
 	};
 
 	class Skeleton
 	{ 
+		friend MeshAssetLoader;
+
 		public:
 
 			/*
@@ -66,45 +77,11 @@ namespace Enjon
 			*/
 			~Skeleton( ); 
 
-		private: 
+		protected: 
 			u32							mRootID;
-			Vector< Joint >				mBones;
-			HashMap< String, u32 >		BoneNameLookup;
-	};
-
-	ENJON_CLASS( Construct )
-	class SkeletalSubMesh : public SubMesh
-	{
-		friend MeshAssetLoader;
-		friend Mesh;
-
-		ENJON_CLASS_BODY( )
-
-	public:
-		SkeletalSubMesh( ) = default;
-
-		~SkeletalSubMesh( ) = default;
-
-	private:
-		Vector< SkeletalVertexData > mSkeletalVertexData ; 
-	}; 
-
-	class SkeletalMesh : public Mesh
-	{ 
-		public:
-
-			/*
-			* @brief
-			*/
-			SkeletalMesh( );
-
-			/*
-			* @brief
-			*/
-			~SkeletalMesh( );
-
-		private: 
-			Vector< SkeletalSubMesh > mSkeletalSubmeshes;
+			Vector< Bone >				mBones;
+			HashMap< String, u32 >		mBoneNameLookup;
+			Vector< VertexBoneData >	mVertexBoneData;
 	};
 }
 

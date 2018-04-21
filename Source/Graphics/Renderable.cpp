@@ -204,7 +204,7 @@ namespace Enjon
 
 	void Renderable::Bind( )
 	{ 
-		mCurrentModelMatrix = Mat4::Translate( GetPosition( ) ) * QuaternionToMat4( GetRotation( ) ) * Mat4::Scale( GetScale( ) );
+		mCurrentModelMatrix = Mat4x4::Translate( GetPosition( ) ) * QuaternionToMat4x4( GetRotation( ) ) * Mat4x4::Scale( GetScale( ) );
 	}
 
 	//==============================================================================
@@ -272,10 +272,10 @@ namespace Enjon
 			//}
 			//else
 			{
-				Mat4 Model;
-				Model *= Mat4::Translate( GetPosition( ) );
-				Model *= QuaternionToMat4( GetRotation( ) );
-				Model *= Mat4::Scale( GetScale( ) );
+				Mat4x4 Model;
+				Model *= Mat4x4::Translate( GetPosition( ) );
+				Model *= QuaternionToMat4x4( GetRotation( ) );
+				Model *= Mat4x4::Scale( GetScale( ) );
 				const_cast< Enjon::Shader* > ( shader )->SetUniform( "uModel", Model );
 				const_cast< Enjon::Shader* > ( shader )->SetUniform( "uPreviousModel", mPreviousModelMatrix );
 

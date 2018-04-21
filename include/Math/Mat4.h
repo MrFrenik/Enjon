@@ -1,5 +1,5 @@
-#ifndef ENJON_MAT4_H
-#define ENJON_MAT4_H
+#ifndef ENJON_MAT4X4_H
+#define ENJON_MAT4X4_H
 
 #include <ostream>
 #include <Math/Vec3.h>
@@ -7,9 +7,9 @@
 #include <Math/Vec4.h>
 #include <Math/Common.h>
 
-namespace Enjon {
-
-	class Mat4
+namespace Enjon 
+{ 
+	class Mat4x4
 	{
 		public:
 
@@ -24,33 +24,33 @@ namespace Enjon {
 				Vec4 columns[4];
 			};
 
-			Mat4();
+			Mat4x4();
 
-			Mat4(const f32& value);
+			Mat4x4(const f32& value);
 			
-			Mat4(const Mat4& other);
+			Mat4x4(const Mat4x4& other);
 
-			Mat4& Multiply(const Mat4& other);
+			Mat4x4& Multiply(const Mat4x4& other);
 
-			~Mat4( )
+			~Mat4x4( )
 			{ 
 			}
 
-			friend Mat4 operator*(Mat4 left, const Mat4& right);
-			Mat4& operator*=(const Mat4& other);
+			friend Mat4x4 operator*(Mat4x4 left, const Mat4x4& right);
+			Mat4x4& operator*=(const Mat4x4& other);
 
 			Vec3 Multiply(const Vec3& other) const;
-			friend Vec3 operator*(const Mat4& left, const Vec3& right);
+			friend Vec3 operator*(const Mat4x4& left, const Vec3& right);
 
 			Vec4 Multiply(const Vec4& other) const;
-			friend Vec4 operator*(const Mat4& left, const Vec4& right);
+			friend Vec4 operator*(const Mat4x4& left, const Vec4& right);
 
 			inline Vec4& operator[]( usize index ) { return columns[ index ]; }
 			inline const Vec4& operator[]( usize index ) const { return columns[ index ]; }
 
-			Mat4& Invert();
+			Mat4x4& Invert();
 
-			static Mat4 Orthographic(const f32& left, 
+			static Mat4x4 Orthographic(const f32& left, 
 									const f32& right, 
 									const f32& bottom, 
 									const f32& top, 
@@ -64,24 +64,31 @@ namespace Enjon {
 			* @param near - near plane
 			* @param far - far plane
 			*/
-			static Mat4 Perspective(const f32& FOV, const f32& aspectRatio, const f32& near, const f32& far);
+			static Mat4x4 Perspective(const f32& FOV, const f32& aspectRatio, const f32& near, const f32& far);
 
-			static Mat4 Identity();
-			static Mat4 Scale(const Vec3& vector);
-			static Mat4 Translate(const Vec3& vector);
-			static Mat4 Rotate(const f32& angle, const Vec3& axis);
-			static Mat4 Inverse(const Mat4& M);
+			static Mat4x4 Identity();
+			static Mat4x4 Scale(const Vec3& vector);
+			static Mat4x4 Translate(const Vec3& vector);
+			static Mat4x4 Rotate(const f32& angle, const Vec3& axis);
+			static Mat4x4 Inverse(const Mat4x4& M);
 
 			/*
 			* @brief Look at RH
 			*/
-			static Mat4 LookAt(const Vec3& Position, const Vec3& Target, const Vec3& Up);
+			static Mat4x4 LookAt(const Vec3& Position, const Vec3& Target, const Vec3& Up);
 
-			friend std::ostream& operator<<(std::ostream& stream, const Mat4& Mat);
+			friend std::ostream& operator<<(std::ostream& stream, const Mat4x4& Mat);
+	}; 
+
+	// Fill this out eventually...
+	class Mat4x3
+	{
+		public:
+			Mat4x3( ) = default;
+
+		private:
 	};
-
 }
-typedef Enjon::Mat4 mat4;
 
 
 #endif

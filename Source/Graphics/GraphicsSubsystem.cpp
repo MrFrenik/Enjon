@@ -263,15 +263,15 @@ namespace Enjon
 			glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); 
  
 			// Capture onto cubemap faces
-			Mat4 captureProj = Mat4::Perspective( 90.0f, 1.0f, 0.1f, 10.0f );
-			Mat4 captureViews[ ] =  
+			Mat4x4 captureProj = Mat4x4::Perspective( 90.0f, 1.0f, 0.1f, 10.0f );
+			Mat4x4 captureViews[ ] =  
 			{
-				Mat4::LookAt( Vec3(0.0f), Vec3( 1.0f, 0.0f, 0.0f ), Vec3( 0.0f, -1.0f, 0.0f ) ),
-				Mat4::LookAt( Vec3(0.0f), Vec3( -1.0f, 0.0f, 0.0f ), Vec3( 0.0f, -1.0f, 0.0f ) ),
-				Mat4::LookAt( Vec3(0.0f), Vec3( 0.0f, 1.0f, 0.0f ), Vec3( 0.0f, 0.0f, 1.0f ) ),
-				Mat4::LookAt( Vec3(0.0f), Vec3( 0.0f, -1.0f, 0.0f ), Vec3( 0.0f, 0.0f, -1.0f ) ),
-				Mat4::LookAt( Vec3(0.0f), Vec3( 0.0f, 0.0f, 1.0f ), Vec3( 0.0f, -1.0f, 0.0f ) ),
-				Mat4::LookAt( Vec3(0.0f), Vec3( 0.0f, 0.0f, -1.0f ), Vec3( 0.0f, -1.0f, 0.0f ) )
+				Mat4x4::LookAt( Vec3(0.0f), Vec3( 1.0f, 0.0f, 0.0f ), Vec3( 0.0f, -1.0f, 0.0f ) ),
+				Mat4x4::LookAt( Vec3(0.0f), Vec3( -1.0f, 0.0f, 0.0f ), Vec3( 0.0f, -1.0f, 0.0f ) ),
+				Mat4x4::LookAt( Vec3(0.0f), Vec3( 0.0f, 1.0f, 0.0f ), Vec3( 0.0f, 0.0f, 1.0f ) ),
+				Mat4x4::LookAt( Vec3(0.0f), Vec3( 0.0f, -1.0f, 0.0f ), Vec3( 0.0f, 0.0f, -1.0f ) ),
+				Mat4x4::LookAt( Vec3(0.0f), Vec3( 0.0f, 0.0f, 1.0f ), Vec3( 0.0f, -1.0f, 0.0f ) ),
+				Mat4x4::LookAt( Vec3(0.0f), Vec3( 0.0f, 0.0f, -1.0f ), Vec3( 0.0f, -1.0f, 0.0f ) )
 			}; 
 
 			glBindFramebuffer( GL_FRAMEBUFFER, mCaptureFBO ); 
@@ -457,12 +457,12 @@ namespace Enjon
 	{
 		// generate a large list of semi-random model transformation matrices
 		// ------------------------------------------------------------------
-		mModelMatricies = new Enjon::Mat4[ mInstancedAmount ];
+		mModelMatricies = new Enjon::Mat4x4[ mInstancedAmount ];
 		f32 radius = 120.0;
 		f32 offset = 40.0f;
 		for ( u32 i = 0; i < mInstancedAmount; i++ )
 		{
-			Enjon::Mat4 model;
+			Enjon::Mat4x4 model;
 			 //1. translation: displace along circle with 'radius' in range [-offset, offset]
 			f32 angle = ( f32 )i / ( f32 )mInstancedAmount * 360.0f;
 			f32 displacement = ( rand( ) % ( s32 )( 2 * offset * 100 ) ) / 100.0f - offset;
@@ -471,15 +471,15 @@ namespace Enjon
 			f32 y = displacement * 0.4f; // keep height of asteroid field smaller compared to width of x and z
 			displacement = ( rand( ) % ( s32 )( 2 * offset * 100 ) ) / 100.0f - offset;
 			f32 z = cos( angle ) * radius + displacement;
-			model *= Enjon::Mat4::Translate( Enjon::Vec3( x, y, z ) );
+			model *= Enjon::Mat4x4::Translate( Enjon::Vec3( x, y, z ) );
 
 			// 2. scale: Scale between 0.05 and 0.25f
 			f32 scale = ( rand( ) % 40 ) / 100.0f + 0.05;
-			model *= Enjon::Mat4::Scale( Enjon::Vec3( scale ) );
+			model *= Enjon::Mat4x4::Scale( Enjon::Vec3( scale ) );
 
 			// 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
 			f32 rotAngle = ( rand( ) % 360 );
-			model *= Enjon::Mat4::Rotate( rotAngle, Enjon::Vec3( 0.4f, 0.6f, 0.8f ) ); 
+			model *= Enjon::Mat4x4::Rotate( rotAngle, Enjon::Vec3( 0.4f, 0.6f, 0.8f ) ); 
 
 			// 4. now add to list of matrices
 			mModelMatricies[ i ] = model;
@@ -506,22 +506,22 @@ namespace Enjon
 
 		//	glGenBuffers( 1, &mInstancedVBO );
 		//	glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
-		//	glBufferData( GL_ARRAY_BUFFER, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ], GL_DYNAMIC_DRAW );
+		//	glBufferData( GL_ARRAY_BUFFER, mInstancedAmount * sizeof( Enjon::Mat4x4 ), &mModelMatricies[ 0 ], GL_DYNAMIC_DRAW );
 
 		//	// Vertex attributes for instanced model matrix
 		//	glBindVertexArray( mesh.Get( )->GetSubmeshes(0)() );
 		//	// Set attrib pointers for matrix
 		//	glEnableVertexAttribArray( 4 );
-		//	glVertexAttribPointer( 4, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )0 );
+		//	glVertexAttribPointer( 4, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4x4 ), ( void* )0 );
 
 		//	glEnableVertexAttribArray( 5 );
-		//	glVertexAttribPointer( 5, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )sizeof(Enjon::Vec4) );
+		//	glVertexAttribPointer( 5, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4x4 ), ( void* )sizeof(Enjon::Vec4) );
 
 		//	glEnableVertexAttribArray( 6 );
-		//	glVertexAttribPointer( 6, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )( 2 * sizeof(Enjon::Vec4) ) );
+		//	glVertexAttribPointer( 6, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4x4 ), ( void* )( 2 * sizeof(Enjon::Vec4) ) );
 
 		//	glEnableVertexAttribArray( 7 );
-		//	glVertexAttribPointer( 7, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4 ), ( void* )( 3 * sizeof(Enjon::Vec4) ) );
+		//	glVertexAttribPointer( 7, 4, GL_FLOAT, GL_FALSE, sizeof( Enjon::Mat4x4 ), ( void* )( 3 * sizeof(Enjon::Vec4) ) );
 
 		//	glVertexAttribDivisor( 4, 1 );
 		//	glVertexAttribDivisor( 5, 1 );
@@ -740,9 +740,9 @@ namespace Enjon
 		const HashSet<QuadBatch*>& sortedQuadBatches = mGraphicsScene.GetQuadBatches(); 
 
 		Camera* camera = mGraphicsScene.GetActiveCamera( );
-		Mat4 viewMtx = camera->GetView( );
-		Mat4 projMtx = camera->GetProjection( );
-		Mat4 viewProjMtx = camera->GetViewProjection( );
+		Mat4x4 viewMtx = camera->GetView( );
+		Mat4x4 projMtx = camera->GetProjection( );
+		Mat4x4 viewProjMtx = camera->GetViewProjection( );
 
 		// Shader graph to be used
 		Enjon::AssetHandle< Enjon::ShaderGraph > sg; 
@@ -899,9 +899,9 @@ namespace Enjon
 			//glBindBuffer( GL_ARRAY_BUFFER, mInstancedVBO );
 			//for ( u32 i = 0; i < mInstancedAmount; ++i )
 			//{
-			//	mModelMatricies[ i ] *= Enjon::Mat4::Rotate( rotT, Enjon::Vec3( 0, 1, 0 ) );
+			//	mModelMatricies[ i ] *= Enjon::Mat4x4::Rotate( rotT, Enjon::Vec3( 0, 1, 0 ) );
 			//}
-			//glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4 ), &mModelMatricies[ 0 ] );
+			//glBufferSubData( GL_ARRAY_BUFFER, 0, mInstancedAmount * sizeof( Enjon::Mat4x4 ), &mModelMatricies[ 0 ] );
 
 			//glDrawArraysInstanced( GL_TRIANGLES, 0, mInstancedRenderable->GetMesh( ).Get( )->GetDrawCount(), mInstancedAmount );
 
@@ -955,8 +955,8 @@ namespace Enjon
 			{ 
 				// Upload kernel uniform
 				shader->SetUniform( "projection", camera->GetProjection( ) );
-				shader->SetUniform( "uProjMatrixInv", Mat4::Inverse( camera->GetProjection( ) ) );
-				shader->SetUniform( "uViewMatrixInv", Mat4::Inverse( camera->GetView( ) ) );
+				shader->SetUniform( "uProjMatrixInv", Mat4x4::Inverse( camera->GetProjection( ) ) );
+				shader->SetUniform( "uViewMatrixInv", Mat4x4::Inverse( camera->GetView( ) ) );
 				shader->SetUniform( "view", camera->GetView( ) );
 				shader->SetUniform( "uScreenResolution", Vec2( screenRes.x, screenRes.y ) );
 				shader->SetUniform( "radius", mSSAORadius );
@@ -1008,8 +1008,8 @@ namespace Enjon
 
 		AmbientSettings* aS = mGraphicsScene.GetAmbientSettings();
 
-		Mat4 projInverse = Mat4::Inverse( camera->GetProjection( ) );
-		Mat4 viewInverse = Mat4::Inverse( camera->GetView( ) );
+		Mat4x4 projInverse = Mat4x4::Inverse( camera->GetProjection( ) );
+		Mat4x4 viewInverse = Mat4x4::Inverse( camera->GetView( ) );
 
 		mCurrentWindow->Clear(); 
 
@@ -1536,7 +1536,7 @@ namespace Enjon
 			{
 				auto dispX = ( s32 )ImGui::GetIO( ).DisplaySize.x; 
 				auto dispY = ( s32 )ImGui::GetIO( ).DisplaySize.y;
-				Mat4 ortho = Mat4::Orthographic(0.0f, (f32)dispX, 0.0f, (f32)dispY, -1, 1);
+				Mat4x4 ortho = Mat4x4::Orthographic(0.0f, (f32)dispX, 0.0f, (f32)dispY, -1, 1);
 				shader->SetUniform( "projection", ortho );
 				mUIBatch.Begin( );
 				{

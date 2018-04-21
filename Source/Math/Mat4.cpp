@@ -1,4 +1,4 @@
-#include "math/Mat4.h"
+#include "Math/Mat4.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/matrix.hpp>
@@ -6,16 +6,15 @@
 
 #include <sstream>
 
-namespace Enjon {
-
-	Mat4::Mat4()
+namespace Enjon 
+{ 
+	Mat4x4::Mat4x4()
 	{
 		//Set each element to 0.0f
-		// for (int i = 0; i < 4 * 4; i++) this->elements[i] = 0.0f;
-		*this = Mat4::Identity();
+		*this = Mat4x4::Identity();
 	}
 
-	Mat4::Mat4(const f32& diagonal)
+	Mat4x4::Mat4x4(const f32& diagonal)
 	{
 		for (int i = 0; i < 4 * 4; i++)
 			elements[i] = 0.0f;
@@ -28,7 +27,7 @@ namespace Enjon {
 
 	}
 			
-	Mat4::Mat4(const Mat4& other)
+	Mat4x4::Mat4x4(const Mat4x4& other)
 	{ 
 		for (u32 i = 0; i < 16; ++i)
 		{
@@ -36,7 +35,7 @@ namespace Enjon {
 		}
 	}
 		
-	Mat4& Mat4::Multiply(const Mat4& other)
+	Mat4x4& Mat4x4::Multiply(const Mat4x4& other)
 	{ 
 		f32 data[16];
 		for (int y = 0; y < 4; y++)
@@ -53,29 +52,10 @@ namespace Enjon {
 		}
 		memcpy(elements, data, 4 * 4 * sizeof(f32));
 
-		//Vec4 bt_0 = Vec4( columns[ 0 ].x, columns[ 1 ].x, columns[ 2 ].x, columns[ 3 ].x );
-		//Vec4 bt_1 = Vec4( columns[ 0 ].y, columns[ 1 ].y, columns[ 2 ].y, columns[ 3 ].y );
-		//Vec4 bt_2 = Vec4( columns[ 0 ].z, columns[ 1 ].z, columns[ 2 ].z, columns[ 3 ].z );
-		//Vec4 bt_3 = Vec4( columns[ 0 ].w, columns[ 1 ].w, columns[ 2 ].w, columns[ 3 ].w ); 
-
-		//Mat4 ret( other );
-
-		//for ( usize i = 0; i < 4; ++i )
-		//{
-		//	ret.columns[ i ] = Vec4(
-		//		ret.columns[ i ].Dot( bt_0 ),
-		//		ret.columns[ i ].Dot( bt_1 ), 
-		//		ret.columns[ i ].Dot(bt_2 ),
-		//		ret.columns[i].Dot(bt_3 )
-		//	);
-		//}
-
-		//*this = Mat4( ret );
-
 		return *this;
 	}
 	
-	Vec3 Mat4::Multiply(const Vec3& other) const
+	Vec3 Mat4x4::Multiply(const Vec3& other) const
 	{
 		return Vec3(
 			columns[0].x * other.x + columns[1].x * other.y + columns[2].x * other.z + columns[3].x,
@@ -84,7 +64,7 @@ namespace Enjon {
 		);
 	}
 	
-	Vec4 Mat4::Multiply(const Vec4& other) const
+	Vec4 Mat4x4::Multiply(const Vec4& other) const
 	{
 		return Vec4(
 			columns[0].x * other.x + columns[1].x * other.y + columns[2].x * other.z + columns[3].x * other.w,
@@ -94,28 +74,28 @@ namespace Enjon {
 		);
 	}
 
-	Mat4 operator*(Mat4 left, const Mat4& right)
+	Mat4x4 operator*(Mat4x4 left, const Mat4x4& right)
 	{
 		return left.Multiply(right);
 	}
 
-	Mat4& Mat4::operator*=(const Mat4& other)
+	Mat4x4& Mat4x4::operator*=(const Mat4x4& other)
 	{
 		return Multiply(other);
 	}
 		
 
-	Vec3 operator*(const Mat4& left, const Vec3& right)
+	Vec3 operator*(const Mat4x4& left, const Vec3& right)
 	{
 		return left.Multiply(right);
 	}
 		
-	Vec4 operator*(const Mat4& left, const Vec4& right)
+	Vec4 operator*(const Mat4x4& left, const Vec4& right)
 	{
 		return left.Multiply(right);
 	}
 
-	Mat4 Mat4::Orthographic(const f32& left, 
+	Mat4x4 Mat4x4::Orthographic(const f32& left, 
 							const f32& right, 
 							const f32& bottom, 
 							const f32& top, 
@@ -123,7 +103,7 @@ namespace Enjon {
 							const f32& far)
 	{
 		//Create identiy matrix
-		Mat4 result(1.0f);
+		Mat4x4 result(1.0f);
 
 		//Main diagonal
 		result.elements[0 + 0 * 4] = 2.0f / (right - left);
@@ -138,12 +118,12 @@ namespace Enjon {
 		return result; 
 	}
 
-	Mat4 Mat4::Perspective(const f32& FOV, 
+	Mat4x4 Mat4x4::Perspective(const f32& FOV, 
 							const f32& aspectRatio, 
 							const f32& near, 
 							const f32& far)
 	{
-		Mat4 result(0.0f);
+		Mat4x4 result(0.0f);
 
 		f32 q = 1.0f / tan(Enjon::ToRadians(0.5f * FOV));
 		f32 a = q / aspectRatio;
@@ -160,15 +140,15 @@ namespace Enjon {
 	}
 
 
-	Mat4 Mat4::Identity()
+	Mat4x4 Mat4x4::Identity()
 	{
-		return Mat4(1.0f);
+		return Mat4x4(1.0f);
 	}
 
-	Mat4 Mat4::Translate(const Vec3& vector)
+	Mat4x4 Mat4x4::Translate(const Vec3& vector)
 	{
 		//Identity matrix
-		Mat4 result(1.0f);
+		Mat4x4 result(1.0f);
 		
 		result.elements[0 + 3 * 4] = vector.x;
 		result.elements[1 + 3 * 4] = vector.y;
@@ -177,10 +157,10 @@ namespace Enjon {
 		return result;
 	}
 	
-	Mat4 Mat4::Scale(const Vec3& vector)
+	Mat4x4 Mat4x4::Scale(const Vec3& vector)
 	{
 		//Identity
-		Mat4 result(1.0f);
+		Mat4x4 result(1.0f);
 
 		result.elements[0 + 0 * 4] = vector.x;
 		result.elements[1 + 1 * 4] = vector.y;
@@ -189,10 +169,10 @@ namespace Enjon {
 		return result;
 	}
 
-	Mat4 Mat4::Rotate(const f32& angle, const Vec3& axis)
+	Mat4x4 Mat4x4::Rotate(const f32& angle, const Vec3& axis)
 	{
 		//Identity
-		Mat4 result(1.0f);
+		Mat4x4 result(1.0f);
 	
 		f32 a = Enjon::ToRadians(angle);
 		f32 c = cos(a);
@@ -220,13 +200,13 @@ namespace Enjon {
 		return result; 
 	}
 
-	Mat4 Mat4::LookAt(const Vec3& Position, const Vec3& Target, const Vec3& Up)
+	Mat4x4 Mat4x4::LookAt(const Vec3& Position, const Vec3& Target, const Vec3& Up)
 	{
 		Vec3 f = Vec3::Normalize( Target - Position );
 		Vec3 s = Vec3::Normalize( f.Cross( Up ) );
 		Vec3 u = s.Cross( f );
 		
-		Mat4 lookAt = Mat4::Identity( ); 
+		Mat4x4 lookAt = Mat4x4::Identity( ); 
 		lookAt[ 0 ][ 0 ] = s.x;
 		lookAt[ 1 ][ 0 ] = s.y;
 		lookAt[ 2 ][ 0 ] = s.z;
@@ -246,7 +226,7 @@ namespace Enjon {
 		return lookAt;
 	}
 
-	Mat4& Mat4::Invert()
+	Mat4x4& Mat4x4::Invert()
 	{
 		double temp[16];
 
@@ -371,15 +351,15 @@ namespace Enjon {
 		return *this;
 	}
 
-	Mat4 Mat4::Inverse(const Mat4& M)
+	Mat4x4 Mat4x4::Inverse(const Mat4x4& M)
 	{
-		Mat4 R = M;
+		Mat4x4 R = M;
 		return R.Invert();
 	}
 
-	std::ostream& operator<<(std::ostream& stream, const Mat4& Mat)
+	std::ostream& operator<<(std::ostream& stream, const Mat4x4& Mat)
 	{
-		stream << "Mat4: \n\t";
+		stream << "Mat4x4: \n\t";
 		
 		for(auto c : Mat.columns)
 		{
