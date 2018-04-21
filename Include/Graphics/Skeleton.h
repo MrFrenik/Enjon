@@ -81,6 +81,7 @@ namespace Enjon
 			u32							mRootID;
 			Vector< Bone >				mBones;
 			HashMap< String, u32 >		mBoneNameLookup;
+			Mat4x4						mGlobalInverseTransform;
 			Vector< VertexBoneData >	mVertexBoneData;
 	};
 }

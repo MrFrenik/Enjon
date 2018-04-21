@@ -63,6 +63,8 @@ namespace Enjon
 			void ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleon, Mesh* mesh );
 
 			void ProcessAnimation( aiNode* node, const aiScene* scene ); 
+
+			Vector< Skeleton* > mSkeletons;
 	}; 
 }
 

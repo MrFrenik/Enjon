@@ -786,33 +786,6 @@ namespace Enjon
 					} 
 				}
 				renderable->Unbind( );
-
-				//// Check for material switch 
-				//const Material* curMaterial = renderable->GetMaterial( 0 ).Get();
-				//sg = curMaterial->GetShaderGraph( );
-				//assert(curMaterial != nullptr); 
-
-				//// Grab shader from graph
-				//Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
-
-				//if ( sg )
-				//{
-				//	if (material != curMaterial)
-				//	{
-				//		// Set material
-				//		material = curMaterial;
-
-				//		sgShader->Use( );
-				//		sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
-				//		sgShader->SetUniform( "uWorldTime", wt );
-				//		sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
-				//		sgShader->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix );
-				//		material->Bind( sgShader );
-				//	} 
-
-				//	sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
-				//	renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
-				//} 
 			}
 		}
 

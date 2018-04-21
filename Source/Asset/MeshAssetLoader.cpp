@@ -10,13 +10,38 @@
 
 namespace Enjon
 {
+	//==========================================================================================
+
+	Mat4x4 AIMat4x4ToMat4x4( const aiMatrix4x4& aiMat )
+	{ 
+		// Get transform from offset matrix
+		aiVector3t<f32> scale;
+		aiVector3t<f32> axis;
+		f32 angle;
+		aiVector3t<f32> position; 
+		aiMat.Decompose( scale, axis, angle, position );			// Decompose into elements 
+ 
+		Mat4x4 mat4 = Mat4x4::Identity( ); 
+		mat4 *= Mat4x4::Translate( Vec3( position.x, position.y, position.z ) );
+		mat4 *= QuaternionToMat4x4( Quaternion::AngleAxis( angle, Vec3( axis.x, axis.y, axis.z ) ) );
+		mat4 *= Mat4x4::Scale( Vec3( scale.x, scale.y, scale.z ) ); 
+
+		return mat4;
+	}
+
+	//==========================================================================================
+
 	MeshAssetLoader::MeshAssetLoader()
 	{
 	} 
 
+	//==========================================================================================
+
 	MeshAssetLoader::~MeshAssetLoader()
 	{
 	}
+
+	//==========================================================================================
 
 #define CREATE_QUAD_VERTEX( VertexName, X, Y, U, V )\
 	Vert VertexName = { };\
@@ -224,6 +249,9 @@ namespace Enjon
 			// Construct new skeleton
 			Skeleton* skeleton = new Skeleton( );
 
+			// Store scene's global inverse transform in skeleton
+			skeleton->mGlobalInverseTransform = AIMat4x4ToMat4x4( scene->mRootNode->mTransformation.Inverse( ) );
+
 			// Calculate bone weight size and resize vector
 			u32 totalVertCount = 0;
 			for ( u32 i = 0; i < scene->mNumMeshes; ++i )
@@ -234,6 +262,9 @@ namespace Enjon
 
 			// Continue
 			ProcessNodeSkeletal( scene->mRootNode, scene, skeleton, mesh ); 
+
+			// Store the skeleton for now ( totally just for debugging )
+			mSkeletons.push_back( skeleton );
 		} 
 		// Non skeletal-mesh
 		else

@@ -60,6 +60,7 @@ namespace Enjon { namespace ShaderManager {
 		ShaderManager::AddShader("Instanced", sp + "deferred/Instanced.v.glsl", sp + "deferred/Instanced.f.glsl"); 
 		ShaderManager::AddShader("MotionBlur", sp + "PostProcessing/MotionBlur.v.glsl", sp + "PostProcessing/MotionBlur.f.glsl"); 
 		ShaderManager::AddShader("DebugLine", sp + "DebugLine.v.glsl", sp + "DebugLine.f.glsl"); 
+		ShaderManager::AddShader("SkeletalMesh", sp + "Animation/SkinnedMesh.v.glsl", sp + "Animation/SkinnedMesh.f.glsl"); 
 	}
 
 	void Shutdown( )
