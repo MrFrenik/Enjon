@@ -13,8 +13,8 @@
 
 //#include <windows.h>
 
-namespace Enjon {
- 
+namespace Enjon 
+{ 
 	//======================================================================== 
 
 	Material::Material()
@@ -240,7 +240,7 @@ namespace Enjon {
 
 	//=========================================================================================
 
-	void Material::SetUniform( const String& name, const Mat4& value )
+	void Material::SetUniform( const String& name, const Mat4x4& value )
 	{ 
 		// Figure this one out later...
 		/*

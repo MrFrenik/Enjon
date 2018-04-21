@@ -97,22 +97,22 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			Mat4 GetViewProjectionMatrix() const;
+			Mat4x4 GetViewProjectionMatrix() const;
 
 			/*
 			* @brief
 			*/
-			Mat4 GetViewProjection() const;
+			Mat4x4 GetViewProjection() const;
 
 			/*
 			* @brief
 			*/
-			Mat4 GetProjection() const;
+			Mat4x4 GetProjection() const;
 
 			/*
 			* @brief
 			*/
-			Mat4 GetView() const;
+			Mat4x4 GetView() const;
 
 			/*
 			* @brief

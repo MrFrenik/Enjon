@@ -156,8 +156,8 @@ namespace Enjon
 		private: 
 			Transform mTransform; 
 			GraphicsScene* mGraphicsScene = nullptr;
-			Mat4 mPreviousModelMatrix = Mat4::Identity( );
-			Mat4 mCurrentModelMatrix = Mat4::Identity( );
+			Mat4x4 mPreviousModelMatrix = Mat4x4::Identity( );
+			Mat4x4 mCurrentModelMatrix = Mat4x4::Identity( );
 	};
 }
 

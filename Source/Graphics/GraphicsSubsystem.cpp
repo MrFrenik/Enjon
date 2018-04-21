@@ -765,7 +765,7 @@ namespace Enjon
 
 						if ( sg )
 						{
-							Enjon::Shader* sgShader = const_cast< Shader * >( sg->GetShader( ShaderPassType::StaticGeom ) );
+							Enjon::Shader* sgShader = const_cast< Shader * >( sg->GetShader( ShaderPassType::Deferred_StaticGeom ) );
 							if ( material != curMaterial )
 							{
 								// Set material
@@ -781,7 +781,7 @@ namespace Enjon
 							}
 
 							sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) ); 
-							renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ), subMeshes.at( i ) );
+							renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ), subMeshes.at( i ) );
 						}
 					} 
 				}
@@ -834,7 +834,7 @@ namespace Enjon
 				assert(curMaterial != nullptr); 
 
 				// Grab shader from graph
-				Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::StaticGeom ) );
+				Enjon::Shader* sgShader = const_cast< Enjon::Shader* >( sg->GetShader( ShaderPassType::Deferred_StaticGeom ) );
 
 				if ( sg )
 				{
@@ -1379,7 +1379,7 @@ namespace Enjon
 				// Grab shader from graph
 				if ( sg )
 				{
-					Enjon::Shader* sgShader = const_cast<Enjon::Shader*>( sg->GetShader( ShaderPassType::StaticGeom ) );
+					Enjon::Shader* sgShader = const_cast<Enjon::Shader*>( sg->GetShader( ShaderPassType::Deferred_StaticGeom ) );
 
 					if ( material != curMaterial )
 					{
@@ -1396,7 +1396,7 @@ namespace Enjon
 
 					// Render object
 					sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
-					renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
+					renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ) );
 				}
 			}
 		}
@@ -1436,7 +1436,7 @@ namespace Enjon
 					if ( sg )
 					{
 						// Grab shader from graph
-						Enjon::Shader* sgShader = const_cast<Enjon::Shader*>( sg->GetShader( ShaderPassType::StaticGeom ) );
+						Enjon::Shader* sgShader = const_cast<Enjon::Shader*>( sg->GetShader( ShaderPassType::Deferred_StaticGeom ) );
 
 						if ( material != curMaterial )
 						{
@@ -1453,7 +1453,7 @@ namespace Enjon
 
 						// Render object
 						sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
-						renderable->Submit( sg->GetShader( ShaderPassType::StaticGeom ) );
+						renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ) );
 					}
 				}
 			}

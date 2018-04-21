@@ -60,7 +60,7 @@ namespace Enjon
 		RegisterAssetLoader< UIFont, FontAssetLoader >( );
 		RegisterAssetLoader< ShaderGraph, ShaderGraphAssetLoader >( );
 		RegisterAssetLoader< Material, MaterialAssetLoader >( );
-		RegisterAssetLoader< Scene, SceneAssetLoader >( );
+		RegisterAssetLoader< Scene, SceneAssetLoader >( ); 
 
 		// Create file extension map
 		mFileExtensionMap[ "png" ] = GetAssetTypeId< Texture >( );

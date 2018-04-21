@@ -106,7 +106,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void SetUniform( const String& name, const Mat4& value );
+			void SetUniform( const String& name, const Mat4x4& value );
 
 			/*
 			* @brief

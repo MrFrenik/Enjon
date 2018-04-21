@@ -13,7 +13,6 @@
 struct aiMesh;
 struct aiNode;
 struct aiScene;
-struct aiMatrix4x4;
 
 namespace Enjon
 {

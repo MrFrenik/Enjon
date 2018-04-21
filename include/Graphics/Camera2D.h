@@ -34,7 +34,7 @@ namespace Enjon {
 	//Getters	
 	inline Enjon::Vec2 GetPosition() const {return m_position;}
 	inline float GetScale() const {return m_scalar;}
-	inline Enjon::Mat4 GetCameraMatrix() const {return m_cameraMatrix;}
+	inline Enjon::Mat4x4 GetCameraMatrix() const {return m_cameraMatrix;}
 
 	// Screen Shake
 	void ShakeScreen(float Intensity);
@@ -43,8 +43,8 @@ namespace Enjon {
 		int m_screenWidth, m_screenHeight;
 		bool m_needsMatrixUpdate;
 		Vec2 m_position;
-		Mat4 m_cameraMatrix;
-		Mat4 m_orthoMatrix;
+		Mat4x4 m_cameraMatrix;
+		Mat4x4 m_orthoMatrix;
 		f32 m_scalar;
 		f32 m_shake_counter;
 		f32 m_shake_intensity;

@@ -186,10 +186,10 @@ namespace Enjon
 		}	
 
 		// Get look at 
-		Mat4 LA = Mat4::LookAt(mPosition, target, up);
+		Mat4x4 LA = Mat4x4::LookAt(mPosition, target, up);
 
 		// Set rotation
-		SetRotation( Mat4ToQuaternion(LA) ); 
+		SetRotation( Mat4x4ToQuaternion(LA) ); 
 	}
 
 	//==========================================================================

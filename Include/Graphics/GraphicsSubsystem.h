@@ -386,14 +386,14 @@ namespace Enjon
 			f32 mSSAOIntensity = 15.0f;
 			u32 mSSAOKernelSize = 16;
 
-			Enjon::Mat4* mModelMatricies = nullptr;
+			Enjon::Mat4x4* mModelMatricies = nullptr;
 			Enjon::Renderable* mInstancedRenderable = nullptr;
 			u32 mInstancedAmount = 0;
 			u32 mInstancedVBO; 
 
 			Enjon::SpriteBatch mUIBatch;
 
-			Mat4 mPreviousViewProjectionMatrix = Mat4::Identity( );
+			Mat4x4 mPreviousViewProjectionMatrix = Mat4x4::Identity( );
 
 			f32 mMotionBlurVelocityScale = 2.0f;
 			u32 mMotionBlurEnabled = true; 

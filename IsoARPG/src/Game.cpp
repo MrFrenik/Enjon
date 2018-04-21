@@ -1216,7 +1216,7 @@ Enjon::Result Game::Initialize()
 	Enjon::Quaternion CamRotation = Enjon::Quaternion( -0.194232f, -0.243939f, -0.049514f, 0.948411f );
 	Enjon::Vec3 CamForward = CamRotation * Enjon::Vec3( 0.0f, 0.0f, -1.0f );
 	Enjon::Vec3 CamUp = CamRotation * Enjon::Vec3( 0.0f, 1.0f, 0.0f );
-	Enjon::Mat4 ViewMatrix = Enjon::Mat4::LookAt( CamPosition, CamPosition + CamForward, CamUp ); 
+	Enjon::Mat4x4 ViewMatrix = Enjon::Mat4x4::LookAt( CamPosition, CamPosition + CamForward, CamUp );
 
 	// Find perspective matrix
 	f32 FOV = 60.0f;
@@ -1224,15 +1224,15 @@ Enjon::Result Game::Initialize()
 	f32 Far = 1000.0f;
 	f32 SW = 1400.0f;
 	f32 SH = 900.0f;
-	f32 AspectRatio = 1.837563f; 
-	Enjon::Mat4 ProjectionMatrix = Enjon::Mat4::Perspective( FOV, AspectRatio, Near, Far );
+	f32 AspectRatio = 1.837563f;
+	Enjon::Mat4x4 ProjectionMatrix = Enjon::Mat4x4::Perspective( FOV, AspectRatio, Near, Far );
 
 
 	// Calculate model matrix
-	Enjon::Mat4 ModelMatrix = Enjon::Mat4::Identity( );
-	ModelMatrix *= Enjon::Mat4::Translate( ObjectPosition );
-	ModelMatrix *= Enjon::QuaternionToMat4( ObjectRotation );
-	ModelMatrix *= Enjon::Mat4::Scale( ObjectScale );
+	Enjon::Mat4x4 ModelMatrix = Enjon::Mat4x4::Identity( );
+	ModelMatrix *= Enjon::Mat4x4::Translate( ObjectPosition );
+	ModelMatrix *= Enjon::QuaternionToMat4x4( ObjectRotation );
+	ModelMatrix *= Enjon::Mat4x4::Scale( ObjectScale );
 
 	Enjon::String output = "";
 
@@ -1260,7 +1260,7 @@ Enjon::Result Game::Initialize()
 	} 
 	Enjon::Quaternion q = Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::YAxis( ) ) *
 						  Enjon::Quaternion::AngleAxis( Enjon::ToRadians( -36.0f ), Enjon::Vec3::ZAxis( ) );
-	Enjon::Mat4 mat = Enjon::QuaternionToMat4( q );
+	Enjon::Mat4x4 mat = Enjon::QuaternionToMat4x4( q );
 
 
 	TestObjectSerialize( );

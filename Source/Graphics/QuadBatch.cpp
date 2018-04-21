@@ -124,11 +124,11 @@ namespace Enjon
 	:	Texture(_Texture), Depth(_Depth) 	
 	{
 		// Transform all verticies by model matrix
-		Mat4 Model;
+		Mat4x4 Model;
 		// L = T*R*S
-		Model *= Mat4::Translate(Transform.GetPosition());
-		Model *= QuaternionToMat4(Transform.GetRotation());
-		Model *= Mat4::Scale(Transform.GetScale());
+		Model *= Mat4x4::Translate(Transform.GetPosition());
+		Model *= QuaternionToMat4x4(Transform.GetRotation());
+		Model *= Mat4x4::Scale(Transform.GetScale());
 
 		Vec4 Position, Normal, Tangent, Bitangent;
 		Vec3 T, B, N, P;
@@ -255,11 +255,11 @@ namespace Enjon
 	:	Texture(_Texture), Depth(_Depth)
 	{
 		// Transform all verticies by model matrix
-		Mat4 Model;
+		Mat4x4 Model;
 		// L = T*R*S
-		Model *= Mat4::Translate(Transform.GetPosition());
-		Model *= Enjon::QuaternionToMat4(Transform.GetRotation());
-		Model *= Mat4::Scale(Transform.GetScale());
+		Model *= Mat4x4::Translate(Transform.GetPosition());
+		Model *= Enjon::QuaternionToMat4x4(Transform.GetRotation());
+		Model *= Mat4x4::Scale(Transform.GetScale());
 
 		Vec4 Position, Normal, Tangent, Bitangent;
 		Vec3 T, B, N, P;

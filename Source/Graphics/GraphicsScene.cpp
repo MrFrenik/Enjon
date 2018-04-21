@@ -310,8 +310,8 @@ namespace Enjon {
 		// Need a good metric for comparing materials by shader program ids...
 		if ( a && b )
 		{
-			u32 pA = a->GetMaterial( 0 )->GetShaderGraph( )->GetShader( Enjon::ShaderPassType::StaticGeom )->GetProgramID( );
-			u32 pB = a->GetMaterial( 0 )->GetShaderGraph( )->GetShader( Enjon::ShaderPassType::StaticGeom )->GetProgramID( );
+			u32 pA = a->GetMaterial( 0 )->GetShaderGraph( )->GetShader( Enjon::ShaderPassType::Deferred_StaticGeom )->GetProgramID( );
+			u32 pB = a->GetMaterial( 0 )->GetShaderGraph( )->GetShader( Enjon::ShaderPassType::Deferred_StaticGeom )->GetProgramID( );
 			return pA > pB;
 		}
 

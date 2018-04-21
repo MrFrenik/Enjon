@@ -203,11 +203,24 @@ namespace Enjon
 		// Will construct the skeleton here if has bones and we want to create a new skeleton in the import process
 		bool hasSkeleton = HasSkeleton( scene->mRootNode, scene );
 
+		// Mesh to construct
+		Mesh* mesh = new Mesh( );
+
 		// If has skeleton, then construct skeleton from here
 		if ( hasSkeleton )
-		{
-			// Construct new mesh
-			Mesh* skeletalMesh = new Mesh( );
+		{ 
+			// Construct decl for new mesh
+			VertexDataDeclaration decl;
+			decl.Add( VertexAttributeFormat::Float3 );			// Position
+			decl.Add( VertexAttributeFormat::Float3 );			// Normal
+			decl.Add( VertexAttributeFormat::Float3 );			// Tangent
+			decl.Add( VertexAttributeFormat::Float2 );			// UV
+			decl.Add( VertexAttributeFormat::UnsignedInt4 );	// BoneIndices
+			decl.Add( VertexAttributeFormat::Float4 );			// BoneWeights
+
+			// Set vertex decl for mesh
+			mesh->SetVertexDecl( decl );
+
 			// Construct new skeleton
 			Skeleton* skeleton = new Skeleton( );
 
@@ -220,31 +233,24 @@ namespace Enjon
 			skeleton->mVertexBoneData.resize( totalVertCount * ENJON_MAX_NUM_BONES_PER_VERTEX );
 
 			// Continue
-			ProcessNodeSkeletal( scene->mRootNode, scene, skeleton, skeletalMesh );
-
-			// For now, just delete those two until they start being used...
-			delete ( skeleton );
-			delete ( skeletalMesh );
-
-			skeleton = nullptr;
-			skeletalMesh = nullptr;
+			ProcessNodeSkeletal( scene->mRootNode, scene, skeleton, mesh ); 
 		} 
- 
-		// Construct new mesh to be filled out
-		Mesh* mesh = new Mesh( ); 
+		// Non skeletal-mesh
+		else
+		{
+			// Construct decl for new mesh
+			VertexDataDeclaration decl;
+			decl.Add( VertexAttributeFormat::Float3 );			// Position
+			decl.Add( VertexAttributeFormat::Float3 );			// Normal
+			decl.Add( VertexAttributeFormat::Float3 );			// Tangent
+			decl.Add( VertexAttributeFormat::Float2 );			// UV
 
-		// Construct decl for new mesh
-		VertexDataDeclaration decl;
-		decl.Add( VertexAttributeFormat::Float3 );			// Position
-		decl.Add( VertexAttributeFormat::Float3 );			// Normal
-		decl.Add( VertexAttributeFormat::Float3 );			// Tangent
-		decl.Add( VertexAttributeFormat::Float2 );			// UV
+			// Set vertex decl for mesh
+			mesh->SetVertexDecl( decl );
 
-		// Set vertex decl for mesh
-		mesh->SetVertexDecl( decl );
-
-		// Process node of mesh
-		ProcessNode( scene->mRootNode, scene, mesh );
+			// Process node of mesh
+			ProcessNode( scene->mRootNode, scene, mesh ); 
+		} 
 
 		// Return mesh
 		return mesh; 
@@ -287,7 +293,8 @@ namespace Enjon
 			// Grab bone pointer
 			aiBone* aBone = aim->mBones[i];
 
-			u32 boneID = 0;
+			// Get bone id ( which is the amount of bones )
+			u32 boneID = skeleton->mBones.size( );
 			String boneName( aBone->mName.data ); 
 
 			// If joint not found in skeleton name lookup then construct new bone and push back
@@ -299,8 +306,6 @@ namespace Enjon
 				bone.mID = boneID;
 				// Set bone name
 				bone.mName = boneName;
-				// Increment bone id
-				boneID++;
 
 				// Set up bone offset
 				aiMatrix4x4 offsetMatrix = aBone->mOffsetMatrix;
@@ -320,8 +325,10 @@ namespace Enjon
 
 				// Push bone back 
 				skeleton->mBones.push_back( bone ); 
+
 				// Set mapping between bone id and name
-				skeleton->mBoneNameLookup[boneName] = boneID; 
+				skeleton->mBoneNameLookup[boneName] = bone.mID; 
+
 			} 
 			else
 			{
@@ -341,22 +348,160 @@ namespace Enjon
 				u32 vertID = baseVertexID + aiWeight.mVertexId; 
 
 				// Add vertex bone data
-				for ( u32 k = 0, bool found = false; k < ENJON_MAX_NUM_BONES_PER_VERTEX, found != false; ++k )
+				for ( u32 k = 0; k < ENJON_MAX_NUM_BONES_PER_VERTEX; ++k )
 				{
 					// We loop the weights until we find one not set
-					if ( skeleton->mVertexBoneData.at( vertID ).mIDS[k] == -1 )
+					if ( skeleton->mVertexBoneData.at( vertID ).mWeights[k] == 0.0f )
 					{
 						skeleton->mVertexBoneData.at( vertID ).mWeights[k] = weight;
 						skeleton->mVertexBoneData.at( vertID ).mIDS[k] = boneID;
 
 						// We set a weight, so break out
-						found = true;
+						break;
 					}
 				} 
 			} 
 		}
 
-		// Construct submesh here...
+		// Load vertex data into submesh vertex buffer 
+		for ( u32 i = 0; i < aim->mNumVertices; ++i )
+		{ 
+			// Position
+			sm->mVertexData.Write< f32 >( aim->mVertices[i].x );
+			sm->mVertexData.Write< f32 >( aim->mVertices[i].y );
+			sm->mVertexData.Write< f32 >( aim->mVertices[i].z );
+
+			// Normal
+			if ( aim->mNormals )
+			{
+				sm->mVertexData.Write< f32 >( aim->mNormals[i].x );
+				sm->mVertexData.Write< f32 >( aim->mNormals[i].y );
+				sm->mVertexData.Write< f32 >( aim->mNormals[i].z );
+			}
+			else
+			{
+				sm->mVertexData.Write< f32 >( 0.0f );
+				sm->mVertexData.Write< f32 >( 0.0f );
+				sm->mVertexData.Write< f32 >( 1.0f ); 
+			} 
+
+			// Tangent
+			if ( aim->mTangents )
+			{
+				sm->mVertexData.Write< f32 >( aim->mTangents[i].x );
+				sm->mVertexData.Write< f32 >( aim->mTangents[i].y );
+				sm->mVertexData.Write< f32 >( aim->mTangents[i].z ); 
+			}
+			else
+			{
+				sm->mVertexData.Write< f32 >( 1.0f );
+				sm->mVertexData.Write< f32 >( 0.0f );
+				sm->mVertexData.Write< f32 >( 0.0f );
+			}
+
+			// UV
+			if ( aim->mTextureCoords[ 0 ] )
+			{
+				sm->mVertexData.Write< f32 >( aim->mTextureCoords[0][i].x );
+				sm->mVertexData.Write< f32 >( aim->mTextureCoords[0][i].y );
+			}
+			else
+			{
+				sm->mVertexData.Write< f32 >( 0.0f );
+				sm->mVertexData.Write< f32 >( 0.0f );
+			}
+
+			// Get absolute vertex id from relative id
+			u32 vertID = baseVertexID + i; 
+
+			// Bone Indices
+			for ( u32 i = 0; i < ENJON_MAX_NUM_BONES_PER_VERTEX; ++i )
+			{
+				sm->mVertexData.Write< u32 >( skeleton->mVertexBoneData.at( vertID ).mIDS[ i ] );
+			}
+
+			// Bone Weights
+			for ( u32 i = 0; i < ENJON_MAX_NUM_BONES_PER_VERTEX; ++i ) 
+			{
+				sm->mVertexData.Write< f32 >( skeleton->mVertexBoneData.at( vertID ).mWeights[ i ] );
+			} 
+		}
+
+		// Get decl from mesh
+		const VertexDataDeclaration& vertDecl = mesh->GetVertexDeclaration( ); 
+
+		// Create and upload mesh data 
+		glGenBuffers( 1, &sm->mVBO );
+		glBindBuffer( GL_ARRAY_BUFFER, sm->mVBO );
+		glBufferData( GL_ARRAY_BUFFER, sm->mVertexData.GetSize( ), sm->mVertexData.GetData( ), GL_STATIC_DRAW ); 
+		glGenVertexArrays( 1, &sm->mVAO );
+		glBindVertexArray( sm->mVAO );
+
+		// Grab total size in bytes for data declaration
+		usize vertexDeclSize = vertDecl.GetSizeInBytes( );
+
+		// Vertex Attributes
+		for ( u32 i = 0; i < vertDecl.mDecl.size(); ++i )
+		{
+			// Grab attribute
+			VertexAttributeFormat attribute = vertDecl.mDecl.at( i );
+
+			// Enable vertex attribute array
+			glEnableVertexAttribArray( i );
+
+			// Upload attribute
+			switch ( attribute )
+			{
+				case VertexAttributeFormat::Float4:
+				{
+					glVertexAttribPointer( i, 4, GL_FLOAT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+				} break;
+
+				case VertexAttributeFormat::Float3:
+				{
+					glVertexAttribPointer( i, 3, GL_FLOAT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+				} break;
+
+				case VertexAttributeFormat::Float2:
+				{
+					glVertexAttribPointer( i, 2, GL_FLOAT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+				} break;
+
+				case VertexAttributeFormat::Float:
+				{
+					glVertexAttribPointer( i, 1, GL_FLOAT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+				} break;
+
+				case VertexAttributeFormat::UnsignedInt4:
+				{
+					glVertexAttribIPointer( i, 4, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+				} break;
+
+				case VertexAttributeFormat::UnsignedInt3:
+				{
+					glVertexAttribIPointer( i, 3, GL_UNSIGNED_INT, GL_FALSE, (void*)vertDecl.GetByteOffset( i ) );
+				} break;
+
+				case VertexAttributeFormat::UnsignedInt2:
+				{
+					glVertexAttribIPointer( i, 2, GL_UNSIGNED_INT, GL_FALSE, (void*)vertDecl.GetByteOffset( i ) );
+				} break;
+
+				case VertexAttributeFormat::UnsignedInt:
+				{
+					glVertexAttribIPointer( i, 1, GL_UNSIGNED_INT, GL_FALSE, (void*)vertDecl.GetByteOffset( i ) );
+				} break;
+			}
+		} 
+
+		// Unbind vertex array
+		glBindVertexArray( 0 );
+
+		// Set draw type
+		sm->mDrawType = GL_TRIANGLES;
+
+		// Set draw count
+		sm->mDrawCount = sm->mVertexData.GetSize( ) / vertDecl.GetSizeInBytes( ); 
 	} 
 
 	//=====================================================================================================

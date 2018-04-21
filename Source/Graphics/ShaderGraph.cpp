@@ -246,14 +246,14 @@ namespace Enjon
 	{
 		switch ( type )
 		{
-			case ShaderPassType::StaticGeom:
+			case ShaderPassType::Deferred_StaticGeom:
 			{
-				return "StaticGeom";
+				return "Deferred_StaticGeom";
 			}; break;
 
-			case ShaderPassType::InstancedGeom:
+			case ShaderPassType::Deferred_InstancedGeom:
 			{
-				return "InstancedGeom";
+				return "Deferred_InstancedGeom";
 			}; break;
 			
 			case ShaderPassType::Forward_StaticGeom:
@@ -1002,7 +1002,7 @@ namespace Enjon
 		switch ( pass )
 		{
 			case ShaderPassType::Forward_StaticGeom:
-			case ShaderPassType::StaticGeom:
+			case ShaderPassType::Deferred_StaticGeom:
 			{
 				// Vertex Attribute Layouts
 				code += OutputLine( "layout (location = 0) in vec3 aVertexPosition;" );
@@ -1011,7 +1011,7 @@ namespace Enjon
 				code += OutputLine( "layout (location = 3) in vec3 aVertexUV;" );
 			} break;
 
-			case ShaderPassType::InstancedGeom:
+			case ShaderPassType::Deferred_InstancedGeom:
 			{
 				// Vertex Attribute Layouts
 				code += OutputLine( "layout (location = 0) in vec3 aVertexPosition;" );
@@ -1080,8 +1080,8 @@ namespace Enjon
 		switch ( pass )
 		{
 			case ShaderPassType::Forward_StaticGeom:
-			case ShaderPassType::InstancedGeom:
-			case ShaderPassType::StaticGeom:
+			case ShaderPassType::Deferred_InstancedGeom:
+			case ShaderPassType::Deferred_StaticGeom:
 			{
 				// Should only have one link
 				NodeLink* link = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
@@ -1312,7 +1312,7 @@ namespace Enjon
 		switch ( pass )
 		{
 			case ShaderPassType::Forward_StaticGeom:
-			case ShaderPassType::StaticGeom:
+			case ShaderPassType::Deferred_StaticGeom:
 			{
 				// Evaluate world position offsets for world position offets
 				NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
@@ -1378,7 +1378,7 @@ namespace Enjon
 
 			} break;
 
-			case ShaderPassType::InstancedGeom:
+			case ShaderPassType::Deferred_InstancedGeom:
 			{
 				// Evaluate world position offsets for world position offets
 				NodeLink* link = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
@@ -1504,8 +1504,8 @@ namespace Enjon
 		switch ( pass )
 		{
 			case ShaderPassType::Forward_StaticGeom:
-			case ShaderPassType::InstancedGeom:
-			case ShaderPassType::StaticGeom:
+			case ShaderPassType::Deferred_InstancedGeom:
+			case ShaderPassType::Deferred_StaticGeom:
 			{
 				// BaseColor link
 				NodeLink* baseColorLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "BaseColor" ) );
@@ -1602,8 +1602,8 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
-			case ShaderPassType::InstancedGeom:
-			case ShaderPassType::StaticGeom:
+			case ShaderPassType::Deferred_InstancedGeom:
+			case ShaderPassType::Deferred_StaticGeom:
 			{
 				// Evaluate world position offsets for world position offets
 				NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "BaseColor" ) );

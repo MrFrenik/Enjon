@@ -98,10 +98,10 @@ namespace Enjon
 		}	
 
 		// Get look at 
-		Mat4 LA = Mat4::LookAt(Pos, Position, Up);
+		Mat4x4 LA = Mat4x4::LookAt(Pos, Position, Up);
 
 		// Set Transform
-		mTransform.SetRotation( Mat4ToQuaternion(LA) );
+		mTransform.SetRotation( Mat4x4ToQuaternion(LA) );
 	} 
 
 	//=======================================================================================================
@@ -165,35 +165,35 @@ namespace Enjon
 
 	//=======================================================================================================
 
-	Mat4 Camera::GetViewProjectionMatrix() const
+	Mat4x4 Camera::GetViewProjectionMatrix() const
 	{
 		return GetProjection() * GetView();
 	}
 
 	//=======================================================================================================
 
-	Mat4 Camera::GetViewProjection() const 
+	Mat4x4 Camera::GetViewProjection() const 
 	{
 		return GetProjection() * GetView();
 	}
 
 	//=======================================================================================================
 
-	Mat4 Camera::GetProjection() const
+	Mat4x4 Camera::GetProjection() const
 	{
-		Mat4 projection;
+		Mat4x4 projection;
 
 		switch( mProjType )
 		{
 			case ProjectionType::Perspective:
 			{
-				projection = Mat4::Perspective( mFOV, mViewPortAspectRatio, mNearPlane, mFarPlane );
+				projection = Mat4x4::Perspective( mFOV, mViewPortAspectRatio, mNearPlane, mFarPlane );
 			} break;
 
 			case ProjectionType::Orthographic:
 			{
 				f32 distance = 0.5f * ( mFarPlane - mNearPlane );
-				projection = Mat4::Orthographic(
+				projection = Mat4x4::Orthographic(
 														-mOrthographicScale * mViewPortAspectRatio, 
 														mOrthographicScale * mViewPortAspectRatio, 
 														-mOrthographicScale, 
@@ -210,13 +210,13 @@ namespace Enjon
 
 	//=======================================================================================================
 
-	Mat4 Camera::GetView() const
+	Mat4x4 Camera::GetView() const
 	{ 
-		//Mat4 scale = Mat4::Scale(Vec3(1.0f, 1.0f, 1.0f) / Transform.GetScale());
-		//Mat4 rotation = QuaternionToMat4(Transform.Rotation);
-		//Mat4 translate = Mat4::Translate(Transform.Position * -1.0f); 
+		//Mat4x4 scale = Mat4x4::Scale(Vec3(1.0f, 1.0f, 1.0f) / Transform.GetScale());
+		//Mat4x4 rotation = QuaternionToMat4x4(Transform.Rotation);
+		//Mat4x4 translate = Mat4x4::Translate(Transform.Position * -1.0f); 
 
-		return Mat4::LookAt( mTransform.GetPosition(), mTransform.GetPosition() + Forward( ), Up( ) );
+		return Mat4x4::LookAt( mTransform.GetPosition(), mTransform.GetPosition() + Forward( ), Up( ) );
 
 		//return (scale * rotation * translate);
 	}
@@ -229,7 +229,7 @@ namespace Enjon
 		Vec3 worldCoordinates;
 
 		// Get inverse of view project matrix from camera
-		Mat4 inverseViewProjection = Mat4::Inverse( GetViewProjection( ) );
+		Mat4x4 inverseViewProjection = Mat4x4::Inverse( GetViewProjection( ) );
 
 		// Get viewport dimensions
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );

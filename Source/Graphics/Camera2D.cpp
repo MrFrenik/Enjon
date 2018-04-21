@@ -26,7 +26,7 @@ namespace Enjon {
 	void Camera2D::Init(s32 screenWidth, s32 screenHeight){
 		m_screenWidth = screenWidth;
 		m_screenHeight = screenHeight;
-		m_orthoMatrix = Mat4::Orthographic(0.0f, (f32)m_screenWidth, 0.0f, (f32)m_screenHeight, -1, 1);
+		m_orthoMatrix = Mat4x4::Orthographic(0.0f, (f32)m_screenWidth, 0.0f, (f32)m_screenHeight, -1, 1);
 		m_shake_counter = 0.0f;
 		m_shake_intensity = 0.0f;
 
@@ -42,11 +42,11 @@ namespace Enjon {
 		{ 
 			//Create translate matrix and pass to camera
 			Vec3 translate(-m_position.x + m_screenWidth/2, -m_position.y + m_screenHeight/2, 0.0f);
-			m_cameraMatrix = m_orthoMatrix * Mat4::Translate(translate); 
+			m_cameraMatrix = m_orthoMatrix * Mat4x4::Translate(translate); 
 			
 			//Create scale matrix and pass to camera
 			Vec3 scale(m_scalar, m_scalar, 0.0f);
-			m_cameraMatrix = Mat4::Scale(scale) * m_cameraMatrix;
+			m_cameraMatrix = Mat4x4::Scale(scale) * m_cameraMatrix;
 
 			//Reset matrix update bool to false
 			m_needsMatrixUpdate = false;

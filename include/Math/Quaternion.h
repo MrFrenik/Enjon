@@ -215,7 +215,7 @@ namespace Enjon
 	}
 
 	// NOTE(John): Assumes matrix is only rotational matrix and has no skew applied
-	static inline Quaternion Mat4ToQuaternion(const Mat4x4& Mat)
+	static inline Quaternion Mat4x4ToQuaternion(const Mat4x4& Mat)
 	{
 		Quaternion Q;
 		auto& E = Mat.elements;

@@ -53,12 +53,12 @@ namespace Enjon
 			for ( u32 i = 0; i < ENJON_MAX_NUM_BONES_PER_VERTEX; ++i )
 			{
 				mWeights[i] = 0.0f;
-				mIDS[i] = -1;
+				mIDS[i] = 0;
 			}
 		}
 
 		f32 mWeights[ENJON_MAX_NUM_BONES_PER_VERTEX];
-		s32 mIDS[ENJON_MAX_NUM_BONES_PER_VERTEX];
+		u32 mIDS[ENJON_MAX_NUM_BONES_PER_VERTEX];
 	};
 
 	class Skeleton

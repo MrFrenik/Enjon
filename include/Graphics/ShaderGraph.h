@@ -220,9 +220,10 @@ namespace Enjon
 	ENJON_ENUM( )
 	enum class ShaderPassType
 	{
-		StaticGeom,
-		InstancedGeom,
+		Deferred_StaticGeom,
+		Deferred_InstancedGeom,
 		Forward_StaticGeom,
+		Deferred_Skinned_Geom,
 		Count
 	}; 
 
