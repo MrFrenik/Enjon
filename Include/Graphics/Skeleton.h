@@ -39,6 +39,7 @@ namespace Enjon
 			~Bone( );
 
 		protected:
+			s32					mParentID;
 			Vector< u32 >		mChildren;
 			u32					mID;
 			Mat4x4				mInverseBindMatrix;
@@ -76,6 +77,11 @@ namespace Enjon
 			* @brief
 			*/
 			~Skeleton( ); 
+
+			/*
+			* @brief
+			*/
+			bool HasBone( const String& name );
 
 		protected: 
 			u32							mRootID;

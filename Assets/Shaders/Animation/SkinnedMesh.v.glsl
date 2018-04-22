@@ -39,7 +39,7 @@ void main()
 	vec3 worldPosition = ( uModel * posL ).xyz;
 	gl_Position = uViewProjection * vec4( worldPosition, 1.0 );
 
-	vec4 normalL = jointTransform * vec4(aVertexNormal, 0.0);
+	vec3 normalL = ( jointTransform * vec4(aVertexNormal, 0.0) ).xyz;
 	vec3 N = normalize( mat3(uModel) * normalL );
 	vec3 T = normalize( mat3(uModel) * aVertexTangent );
 	// Reorthogonalize with respect to N
@@ -55,13 +55,8 @@ void main()
 	mat3 TS_TBN = transpose( TBN );
 
 	// Output Vertex Data
-	vs_out.FragPositionWorldSpace = worldPosition;
-	vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );
-	vs_out.ViewPositionTangentSpace = TS_TBN * uViewPositionWorldSpace;
-	vs_out.FragPositionTangentSpace = TS_TBN * vs_out.FragPositionWorldSpace;
 	vs_out.CurrentFragPositionClipSpace = gl_Position;
 	vs_out.PreviousFragPositionClipSpace = uPreviousViewProjection * uPreviousModel * vec4( aVertexPosition, 1.0 );
 	vs_out.TBN = TBN;
-	vs_out.TS_TBN = TS_TBN;
 	vs_out.ObjectID = uObjectID;
 }

@@ -31,4 +31,11 @@ namespace Enjon
 	}
  
 	//==================================================================== 
+
+	bool Skeleton::HasBone( const String& name )
+	{
+		return ( mBoneNameLookup.find( name ) != mBoneNameLookup.end( ) );
+	}
+
+	//==================================================================== 
 }

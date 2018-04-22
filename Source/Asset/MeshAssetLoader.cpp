@@ -250,7 +250,18 @@ namespace Enjon
 			Skeleton* skeleton = new Skeleton( );
 
 			// Store scene's global inverse transform in skeleton
-			skeleton->mGlobalInverseTransform = AIMat4x4ToMat4x4( scene->mRootNode->mTransformation.Inverse( ) );
+			skeleton->mGlobalInverseTransform = AIMat4x4ToMat4x4( scene->mRootNode->mTransformation.Inverse( ) ); 
+
+			// Add root bone to skeleton
+			//aiNode* root = scene->mRootNode;
+			//Bone rootBone;
+			//rootBone.mID = 0; 
+			//rootBone.mName = root->mName.C_Str( );
+			//rootBone.mParentID = -1;
+			//rootBone.mInverseBindMatrix = Mat4x4::Identity( );
+			//skeleton->mRootID = rootBone.mID;;
+			//skeleton->mBones.push_back( rootBone );
+			//skeleton->mBoneNameLookup[ rootBone.mName ] = rootBone.mID;
 
 			// Calculate bone weight size and resize vector
 			u32 totalVertCount = 0;
@@ -262,6 +273,9 @@ namespace Enjon
 
 			// Continue
 			ProcessNodeSkeletal( scene->mRootNode, scene, skeleton, mesh ); 
+
+			// Build the bone heirarchy for this skeleton
+			BuildBoneHeirarchy( scene->mRootNode, nullptr, skeleton );
 
 			// Store the skeleton for now ( totally just for debugging )
 			mSkeletons.push_back( skeleton );
@@ -309,11 +323,94 @@ namespace Enjon
 
 	//===================================================================================================== 
 
+	void PrintHeirarchy( const aiNode* node, u32 indent )
+	{
+		// Indentation
+		for ( u32 i = 0; i < indent; ++i )
+		{
+			std::cout << " ";
+		}
+		std::cout << "* ";
+		// Print node name
+		std::cout << node->mName.C_Str() << "\n";
+
+		// Print all children
+		for ( u32 i = 0; i < node->mNumChildren; ++i )
+		{
+			PrintHeirarchy( node->mChildren[ i ], indent + 1 );
+		}
+	}
+
+	void MeshAssetLoader::BuildBoneHeirarchy( const aiNode* node, const aiNode* parent, Skeleton* skeleton )
+	{ 
+		u32 boneIndex = 0;
+
+		// Grab bone index
+		if ( skeleton->HasBone( node->mName.C_Str( ) ) )
+		{
+			boneIndex = skeleton->mBoneNameLookup[ node->mName.C_Str( ) ];
+
+			// If parent is valid ( not root )
+			if ( parent )
+			{
+				// Set parent id
+				if ( skeleton->HasBone( parent->mName.C_Str( ) ) )
+				{
+					u32 parentID = skeleton->mBoneNameLookup[ parent->mName.C_Str( ) ];
+					skeleton->mBones.at( boneIndex ).mParentID = parentID;
+				} 
+			}
+			else
+			{
+				skeleton->mBones.at( boneIndex ).mParentID = -1;
+			}
+
+			// Set children for this node
+			for ( u32 i = 0; i < node->mNumChildren; ++i )
+			{
+				// Grab child
+				aiNode* child = node->mChildren[ i ];
+
+				// If exists, then set index of child
+				if ( skeleton->HasBone( child->mName.C_Str( ) ) )
+				{
+					skeleton->mBones.at( boneIndex ).mChildren.push_back( skeleton->mBoneNameLookup[ child->mName.C_Str( ) ] );
+				} 
+
+				// Do heiarchy for this child
+				BuildBoneHeirarchy( child, node, skeleton );
+			}
+		}
+		// Can't find bone, so continue, I suppose...
+		else 
+		{ 
+			// Children of this node, but pass in previous parent	
+			for ( u32 i = 0; i < node->mNumChildren; ++i )
+			{
+				aiNode* child = node->mChildren[ i ]; 
+
+				// Try to add child to parent
+				if ( skeleton->HasBone( child->mName.C_Str( ) ) )
+				{
+					if ( parent && skeleton->HasBone( parent->mName.C_Str( ) ) )
+					{
+						u32 childIdx = skeleton->mBoneNameLookup[ child->mName.C_Str( ) ];
+						u32 parentIdx = skeleton->mBoneNameLookup[ parent->mName.C_Str( ) ];
+						skeleton->mBones.at( parentIdx ).mChildren.push_back( childIdx );
+					}
+				}
+
+				BuildBoneHeirarchy( child, parent, skeleton );
+			}
+		}
+
+	}
+
 	void MeshAssetLoader::ProcessSkeletalMesh( aiMesh* aim, const aiScene* scene, Skeleton* skeleton, Mesh* mesh )
 	{ 
 		// Id of this submesh is the size of the number of sub-meshes in owning mesh
 		u32 meshID = mesh->mSubMeshes.size( );
-		u32 baseVertexID = mesh->GetBaseVertexID( meshID );
+		u32 baseVertexID = mesh->GetBaseVertexID( meshID ); 
 
 		// Construct new submesh
 		SubMesh* sm = mesh->ConstructSubmesh( );
@@ -392,7 +489,8 @@ namespace Enjon
 					}
 				} 
 			} 
-		}
+		} 
+		
 
 		// Load vertex data into submesh vertex buffer 
 		for ( u32 i = 0; i < aim->mNumVertices; ++i )

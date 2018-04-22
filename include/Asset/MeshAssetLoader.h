@@ -64,6 +64,8 @@ namespace Enjon
 
 			void ProcessAnimation( aiNode* node, const aiScene* scene ); 
 
+			void BuildBoneHeirarchy( const aiNode* node, const aiNode* parent, Skeleton* skeleton );
+
 			Vector< Skeleton* > mSkeletons;
 	}; 
 }
