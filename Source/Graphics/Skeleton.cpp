@@ -41,9 +41,7 @@ namespace Enjon
 }
 
 
-
 /*
-	
 	// Used to calculate local space transform for all bones
 	void CalculateTransform( const u32& boneID, const Mat4x4& parentMatrix, const Skeleton* skeleton, Vector<Matrix4x4>& outMatrices )
 	{
