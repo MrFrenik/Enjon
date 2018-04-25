@@ -188,6 +188,10 @@ namespace Enjon
 
 			void DrawDebugLine( const Vec3& start, const Vec3& end, const Vec3& color = Vec3( 1.0f ) );
 
+			void DrawDebugCircle( const Vec3& center, const f32& radius, const Vec3& normal = Vec3::ZAxis(), const u32& numSegments = 8, const Vec3& color = Vec3( 1.0f ) );
+
+			void DrawDebugSphere( const Vec3& center, const f32& radius, const u32& numSlices = 5, const u32& numSegments = 8, const Vec3& color = Vec3( 1.0f ) );
+
 			void DrawDebugAABB( const Vec3& min, const Vec3& max, const Vec3& color = Vec3( 1.0f ) );
 
 		private:

@@ -15,16 +15,36 @@ namespace Enjon
 	Mat4x4 AIMat4x4ToMat4x4( const aiMatrix4x4& aiMat )
 	{ 
 		// Get transform from offset matrix
-		aiVector3t<f32> scale;
-		aiVector3t<f32> axis;
-		f32 angle;
-		aiVector3t<f32> position; 
-		aiMat.Decompose( scale, axis, angle, position );			// Decompose into elements 
+		//aiVector3t<f32> scale;
+		//aiVector3t<f32> axis;
+		//f32 angle;
+		//aiVector3t<f32> position; 
+		//aiMat.Decompose( scale, axis, angle, position );			// Decompose into elements 
  
 		Mat4x4 mat4 = Mat4x4::Identity( ); 
-		mat4 *= Mat4x4::Translate( Vec3( position.x, position.y, position.z ) );
-		mat4 *= QuaternionToMat4x4( Quaternion::AngleAxis( angle, Vec3( axis.x, axis.y, axis.z ) ) );
-		mat4 *= Mat4x4::Scale( Vec3( scale.x, scale.y, scale.z ) ); 
+		//mat4 *= Mat4x4::Translate( Vec3( position.x, position.y, position.z ) );
+		//mat4 *= QuaternionToMat4x4( Quaternion::AngleAxis( angle, Vec3( axis.x, axis.y, axis.z ) ) );
+		//mat4 *= Mat4x4::Scale( Vec3( scale.x, scale.y, scale.z ) ); 
+
+		mat4.elements[ 0 ] = aiMat.a1;
+		mat4.elements[ 1 ] = aiMat.b1;
+		mat4.elements[ 2 ] = aiMat.c1;
+		mat4.elements[ 3 ] = aiMat.d1;
+
+		mat4.elements[ 4 ] = aiMat.a2;
+		mat4.elements[ 5 ] = aiMat.b2;
+		mat4.elements[ 6 ] = aiMat.c2;
+		mat4.elements[ 7 ] = aiMat.d2;
+
+		mat4.elements[ 8 ] = aiMat.a3;
+		mat4.elements[ 9 ] = aiMat.b3;
+		mat4.elements[ 10 ] = aiMat.c3;
+		mat4.elements[ 11 ] = aiMat.d3;
+
+		mat4.elements[ 12 ] = aiMat.a4;
+		mat4.elements[ 13 ] = aiMat.b4;
+		mat4.elements[ 14 ] = aiMat.c4;
+		mat4.elements[ 15 ] = aiMat.d4;
 
 		return mat4;
 	}
@@ -277,6 +297,9 @@ namespace Enjon
 			// Build the bone heirarchy for this skeleton
 			BuildBoneHeirarchy( scene->mRootNode, nullptr, skeleton );
 
+			// Set root bone id of skeleton
+			skeleton->mRootID = skeleton->mBones.empty() ? 0 : skeleton->mBones.at( 0 ).mID; 
+
 			// Store the skeleton for now ( totally just for debugging )
 			mSkeletons.push_back( skeleton );
 		} 
@@ -437,19 +460,20 @@ namespace Enjon
 
 				// Set up bone offset
 				aiMatrix4x4 offsetMatrix = aBone->mOffsetMatrix;
+				bone.mInverseBindMatrix = AIMat4x4ToMat4x4( aBone->mOffsetMatrix );
 
 				// Get transform from offset matrix
-				aiVector3t<f32> scale;
-				aiVector3t<f32> axis;
-				f32 angle;
-				aiVector3t<f32> position; 
-				offsetMatrix.Decompose( scale, axis, angle, position );			// Decompose into elements
+				//aiVector3t<f32> scale;
+				//aiVector3t<f32> axis;
+				//f32 angle;
+				//aiVector3t<f32> position; 
+				//offsetMatrix.Decompose( scale, axis, angle, position );			// Decompose into elements
 
-				// Construct matrix from transform 
-				bone.mInverseBindMatrix = Mat4x4::Identity( );
-				bone.mInverseBindMatrix *= Mat4x4::Translate( Vec3( position.x, position.y, position.z ) );
-				bone.mInverseBindMatrix *= QuaternionToMat4x4( Quaternion::AngleAxis( angle, Vec3( axis.x, axis.y, axis.z ) ) );
-				bone.mInverseBindMatrix *= Mat4x4::Scale( Vec3( scale.x, scale.y, scale.z ) ); 
+				//// Construct matrix from transform 
+				//bone.mInverseBindMatrix = Mat4x4::Identity( );
+				//bone.mInverseBindMatrix *= Mat4x4::Translate( Vec3( position.x, position.y, position.z ) );
+				//bone.mInverseBindMatrix *= QuaternionToMat4x4( Quaternion::AngleAxis( angle, Vec3( axis.x, axis.y, axis.z ) ) );
+				//bone.mInverseBindMatrix *= Mat4x4::Scale( Vec3( scale.x, scale.y, scale.z ) ); 
 
 				// Push bone back 
 				skeleton->mBones.push_back( bone ); 

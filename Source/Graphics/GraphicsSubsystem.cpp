@@ -2100,6 +2100,8 @@ namespace Enjon
 		return nullptr;
 	}
 
+	//====================================================================================================================
+
 	void GraphicsSubsystem::DrawDebugLine( const Vec3& start, const Vec3& end, const Vec3& color )
 	{
 		// Construct new debug line
@@ -2108,6 +2110,64 @@ namespace Enjon
 		// Push back into lines
 		mDebugLines.push_back( line );
 	}
+
+	//====================================================================================================================
+
+	void GraphicsSubsystem::DrawDebugCircle( const Vec3& center, const f32& radius, const Vec3& normal, const u32& numSegments, const Vec3& color )
+	{
+		u32 numSegs = numSegments < 4 ? 4 : numSegments;
+		f32 dt = 360.0f / ( f32 )numSegs;
+
+		// Compute rotation for circle
+		Quaternion rot = Vec3::ZAxis( ).GetRotationTowards( normal );
+
+		for ( f32 theta = dt; theta <= 360.0f; theta += dt )
+		{
+			f32 thetaRad = ToRadians( theta );
+			f32 prevThetaRad = ToRadians( theta - dt );
+			Vec3 startPos = rot * ( center + Vec3( std::cosf( thetaRad ), std::sinf( thetaRad ), 0.0f ) * radius );
+			Vec3 endPos = rot * ( center + Vec3( std::cosf( prevThetaRad ), std::sinf( prevThetaRad ), 0.0f ) * radius );
+
+			// Draw Line
+			DrawDebugLine( startPos, endPos, color );
+		} 
+
+		// Draw end line
+		f32 thetaRad = ToRadians( 0.0f );
+		f32 prevThetaRad = ToRadians( 360.0f - dt );
+		Vec3 startPos = rot * ( center + Vec3( std::cosf( thetaRad ), std::sinf( thetaRad ), 0.0f ) * radius );
+		Vec3 endPos = rot * ( center + Vec3( std::cosf( prevThetaRad ), std::sinf( prevThetaRad ), 0.0f ) * radius );
+
+		// Draw Line
+		DrawDebugLine( startPos, endPos, color );
+
+	}
+
+	//====================================================================================================================
+
+	void GraphicsSubsystem::DrawDebugSphere( const Vec3& center, const f32& radius, const u32& numSlices, const u32& numSegments, const Vec3& color )
+	{
+		u32 slices = numSlices < 5 ? 5 : numSlices; 
+		f32 radSquared = radius * radius; 
+		f32 dh = radius / (f32)numSlices;
+		for ( f32 h = -radius; h <= radius; h += dh )
+		{
+			// Compute radius at this slice
+			f32 a = std::sqrtf( radSquared - ( h * h ) );
+			// Draw circle slice
+			DrawDebugCircle( center + Vec3( 0.0f, 0.0f, h ), a, Vec3::YAxis( ), numSegments, color );
+		} 
+
+		// Draw encapsulating circles
+		f32 dt = 360.0f / (f32)numSlices;
+		for ( f32 theta = 0.0f; theta <= 360.0f; theta += dt )
+		{
+			Vec3 normal = Quaternion::AngleAxis( ToRadians( theta ), Vec3::YAxis( ) ) * Vec3::ZAxis( );
+			DrawDebugCircle( center, radius, normal, numSegments, color );
+		}
+	} 
+
+	//====================================================================================================================
 
 	void GraphicsSubsystem::DrawDebugAABB( const Vec3& min, const Vec3& max, const Vec3& color )
 	{

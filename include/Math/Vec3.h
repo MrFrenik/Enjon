@@ -284,6 +284,11 @@ namespace Enjon {
 			*/	
 			f32 Distance(const Vec3& other) const;
 
+			/*
+			* @brief
+			*/
+			Quaternion GetRotationTowards( const Vec3& other ) const;
+
 			/**
 			* @brief Static function which returns basis vector along X axis
 			* @return Vec3 - Basis vector along X axis

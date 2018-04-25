@@ -40,6 +40,7 @@
 #include "Graphics/PointLight.h"
 #include "Graphics/QuadBatch.h"
 #include "Graphics/GraphicsSubsystem.h"
+#include "Graphics/Skeleton.h"
 
 #include "Scene/Scene.h"
 #include "Scene/SceneManager.h"

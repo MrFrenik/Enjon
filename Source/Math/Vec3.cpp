@@ -269,6 +269,23 @@ namespace Enjon
 	}
 	
 	//================================================
+
+	Quaternion Vec3::GetRotationTowards( const Vec3& other ) const
+	{
+		// Normalize vectors
+		Vec3 norm = this->Normalize( );
+		Vec3 otherNorm = other.Normalize( );
+
+		// Angle between two vectors
+		f32 angle = std::acosf( norm.Dot( otherNorm ) );
+
+		// Axis for rotation
+		Vec3 axis = norm.Cross( otherNorm ); 
+
+		return Quaternion::AngleAxis( angle, axis ); 
+	}
+
+	//================================================
 			
 	f32 Vec3::DistanceSquared(const Vec3& a, const Vec3& b)
 	{

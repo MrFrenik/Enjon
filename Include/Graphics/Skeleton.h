@@ -83,6 +83,18 @@ namespace Enjon
 			*/
 			bool HasBone( const String& name );
 
+			/*
+			* @brief
+			*/
+			Vector< Mat4x4 > GetTransforms( );
+
+		private:
+
+			/*
+			* @brief
+			*/
+			void CalculateTransform( const u32& boneID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices );
+
 		protected: 
 			u32							mRootID;
 			Vector< Bone >				mBones;

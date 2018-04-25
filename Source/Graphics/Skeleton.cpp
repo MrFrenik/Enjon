@@ -38,30 +38,38 @@ namespace Enjon
 	}
 
 	//==================================================================== 
-}
 
+	Vector< Mat4x4 > Skeleton::GetTransforms( )
+	{
+		Vector< Mat4x4 > matrices;
+		matrices.resize( mBones.size( ) );
+		CalculateTransform( mRootID, Mat4x4::Identity( ), matrices );
+		return matrices;
+	}
 
-/*
-	// Used to calculate local space transform for all bones
-	void CalculateTransform( const u32& boneID, const Mat4x4& parentMatrix, const Skeleton* skeleton, Vector<Matrix4x4>& outMatrices )
+	//==================================================================== 
+
+	void Skeleton::CalculateTransform( const u32& boneID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices )
 	{
 		// Get bone
-		Bone* bone = skeleton->mBones.at( bondID );
+		Bone* bone = &mBones.at( boneID );
 
-		// Calculate bone transform ( bone space )
-		Mat4x4 boneTransform = matTrans * matRotation * matScale;
+		// Calculate bone transform ( bone space ) // Identity for now ( No animation )
+		Mat4x4 boneTransform = Mat4x4::Identity( );
+		//Mat4x4 boneTransform = matTrans * matRotation * matScale;
 
 		// Calculate relative to parent
 		Mat4x4 relativeTransform = parentMatrix * boneTransform;
 
 		// Calculate and set local space matrix
-		outMatrices.at( bone->mID ) = skeleton->mGlobalInverseTransform * relativeTransform * bone->mOffsetTransform;
+		outMatrices.at( bone->mID ) = mGlobalInverseTransform * relativeTransform * bone->mInverseBindMatrix;
 
 		// Iterate through children
-		for ( u32 i = 0; i < bone->mChildren; ++i )
+		for ( u32 i = 0; i < bone->mChildren.size(); ++i )
 		{
-			CalculateTransform( bone->mChildren.at( i ), relativeTransform, skeleton, outMatrices );				
+			CalculateTransform( bone->mChildren.at( i ), relativeTransform, outMatrices );				
 		}
 	} 
+}
 
-*/
+

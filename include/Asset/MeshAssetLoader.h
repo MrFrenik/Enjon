@@ -33,6 +33,11 @@ namespace Enjon
 			*/
 			~MeshAssetLoader(); 
 
+			Vector< Skeleton* > GetSkeletons( )
+			{
+				return mSkeletons;
+			}
+
 		protected:
 
 			/**
