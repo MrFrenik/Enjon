@@ -65,7 +65,7 @@ namespace Enjon
 		// Create file extension map
 		mFileExtensionMap[ "png" ] = GetAssetTypeId< Texture >( );
 		mFileExtensionMap[ "tga" ] = GetAssetTypeId< Texture >( );
-		mFileExtensionMap[ "jpeg" ] = GetAssetTypeId< Texture >( );
+		mFileExtensionMap[ "jpg" ] = GetAssetTypeId< Texture >( );
 		mFileExtensionMap[ "bmp" ] = GetAssetTypeId< Texture >( );
 		mFileExtensionMap[ "hdr" ] = GetAssetTypeId< Texture >( );
 		mFileExtensionMap[ "fbx" ] = GetAssetTypeId< Mesh >( );

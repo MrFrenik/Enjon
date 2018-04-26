@@ -238,6 +238,26 @@ namespace Enjon
 
 	//==============================================================================
 
+	void Renderable::Submit( const GLSLProgram* shader, const SubMesh* subMesh )
+	{ 
+		if ( shader == nullptr )
+		{
+			return;
+		}
+
+		const_cast< Enjon::GLSLProgram* > ( shader )->SetUniform( "uModel", mCurrentModelMatrix );
+		const_cast< Enjon::GLSLProgram* > ( shader )->SetUniform( "uPreviousModel", mPreviousModelMatrix );
+
+		// Bind submesh
+		subMesh->Bind( );
+		{
+			// Submit for rendering
+			subMesh->Submit( ); 
+		}
+		// Unbind submesh
+		subMesh->Unbind( ); 
+	}
+
 	void Renderable::Submit( const Enjon::Shader* shader )
 	{
 		// Check for shader validity

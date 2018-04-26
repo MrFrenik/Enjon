@@ -260,7 +260,7 @@ namespace Enjon
 			decl.Add( VertexAttributeFormat::Float3 );			// Normal
 			decl.Add( VertexAttributeFormat::Float3 );			// Tangent
 			decl.Add( VertexAttributeFormat::Float2 );			// UV
-			decl.Add( VertexAttributeFormat::UnsignedInt4 );	// BoneIndices
+			decl.Add( VertexAttributeFormat::Float4 );			// BoneIndices
 			decl.Add( VertexAttributeFormat::Float4 );			// BoneWeights
 
 			// Set vertex decl for mesh
@@ -632,17 +632,17 @@ namespace Enjon
 
 				case VertexAttributeFormat::UnsignedInt3:
 				{
-					glVertexAttribIPointer( i, 3, GL_UNSIGNED_INT, GL_FALSE, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 3, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
 				} break;
 
 				case VertexAttributeFormat::UnsignedInt2:
 				{
-					glVertexAttribIPointer( i, 2, GL_UNSIGNED_INT, GL_FALSE, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 2, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
 				} break;
 
 				case VertexAttributeFormat::UnsignedInt:
 				{
-					glVertexAttribIPointer( i, 1, GL_UNSIGNED_INT, GL_FALSE, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 1, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
 				} break;
 			}
 		} 

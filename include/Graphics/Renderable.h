@@ -137,6 +137,11 @@ namespace Enjon
 			* @brief
 			*/
 			void Submit( const Enjon::Shader* shader, const SubMesh* subMesh );
+
+			/*
+			* @brief
+			*/
+			void Submit( const GLSLProgram* shader, const SubMesh* subMesh );
 	
 			/*
 			* @brief

@@ -18,10 +18,12 @@
 #include "Graphics/ShaderGraph.h"
 #include "IO/ResourceManager.h"
 #include "Asset/AssetManager.h"
+#include "Asset/MeshAssetLoader.h"
 #include "Console.h"
 #include "CVarsSystem.h"
 #include "ImGui/ImGuiManager.h"
 #include "Graphics/Texture.h"
+#include "Graphics/Skeleton.h"
 #include "Graphics/ShaderGraph.h"
 #include "Engine.h"
 #include "SubsystemCatalog.h"
@@ -787,6 +789,55 @@ namespace Enjon
 				}
 				renderable->Unbind( );
 			}
+		}
+
+		// Attempt to do the skinned mesh things
+		static Renderable skinnedRenderable;
+		GLSLProgram* skinnedMeshProgram = ShaderManager::Get( "SkinnedMesh" );
+		if ( skinnedMeshProgram )
+		{
+			skinnedMeshProgram->Use( );
+			{
+				// Grab mesh asset loader
+				MeshAssetLoader* ml = EngineSubsystem( AssetManager )->GetLoader( Object::GetClass< MeshAssetLoader >( ) )->ConstCast< MeshAssetLoader >( );
+				Vector<Skeleton*> skeletons = ml->GetSkeletons( );
+				if ( !skeletons.empty( ) )
+				{
+					Skeleton* sk = skeletons.at( 0 );
+					// Grab mesh to use for this skeleton ( "We'll just assume sk_mannequin, I think" )
+					AssetHandle< Mesh > mesh = EngineSubsystem( AssetManager )->GetAsset< Mesh >( "meshes.maw" );
+					AssetHandle< Material > mat = EngineSubsystem( AssetManager )->GetDefaultAsset< Material >( );
+					
+					skinnedRenderable.SetMesh( mesh );
+					skinnedRenderable.SetMaterial( mat );
+
+					skinnedRenderable.Bind( );
+					{
+						if ( mesh && sk )
+						{
+							auto transforms = sk->GetTransforms( );
+
+							// Set transforms uniforms in shader
+							for ( u32 i = 0; i < transforms.size(); ++i )
+							{
+								skinnedMeshProgram->SetUniform( "uJointTransforms[" + std::to_string( i ) + "]", transforms.at( i ) );
+							}
+
+							skinnedMeshProgram->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
+							skinnedMeshProgram->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix ); 
+
+							skinnedMeshProgram->SetUniform( "uObjectID", Renderable::IdToColor( skinnedRenderable.GetRenderableID( ) ) ); 
+
+							for ( u32 i = 0; i < mesh->GetSubMeshCount( ); ++i )
+							{
+								skinnedRenderable.Submit( skinnedMeshProgram, mesh->GetSubmeshes().at( i ) ); 
+							}
+						} 
+					}
+					skinnedRenderable.Unbind( );
+				}
+			}
+			skinnedMeshProgram->Unuse( );
 		}
 
 		// Quadbatches
