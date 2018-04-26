@@ -358,6 +358,10 @@ namespace Enjon
 						// Add to loader
 						query->second->AddToAssets( info );
 					}
+					else
+					{
+						return Result::FAILURE;
+					}
 				}
 			}
 		}
@@ -456,6 +460,10 @@ namespace Enjon
 							// Add to loader
 							query->second->AddToAssets( info );
 						} 
+						else
+						{
+							return Result::FAILURE;
+						}
 					} 
 				}
 
@@ -501,6 +509,10 @@ namespace Enjon
 							// Add to loader
 							query->second->AddToAssets( info );
 						} 
+						else
+						{
+							return Result::FAILURE;
+						}
 					} 
 				}
 			}

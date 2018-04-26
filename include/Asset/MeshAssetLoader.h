@@ -63,6 +63,8 @@ namespace Enjon
 
 			bool HasSkeleton( aiNode* node, const aiScene* scene );
 
+			bool HasMesh( aiNode* node, const aiScene* scene );
+
 			void ProcessSkeletalMesh( aiMesh* aim, const aiScene* scene, Skeleton* skeleton, Mesh* mesh );
 
 			void ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleon, Mesh* mesh );

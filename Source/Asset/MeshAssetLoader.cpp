@@ -229,6 +229,28 @@ namespace Enjon
 		return hasBones;
 	}
 
+	//=====================================================================================================
+
+	bool MeshAssetLoader::HasMesh( aiNode* node, const aiScene* scene )
+	{ 
+		// Process all meshes in node
+		bool hasMesh = false;
+		if ( node->mNumMeshes != 0 )
+		{
+			return true;
+		}
+
+		// Process all children in node to determine if they contain any animation data as well
+		for ( u32 i = 0; i < node->mNumChildren; ++i )
+		{
+			hasMesh |= HasMesh( node->mChildren[i], scene );
+		}
+
+		return hasMesh;
+	}
+
+	//=====================================================================================================
+
 	Asset* MeshAssetLoader::LoadResourceFromFile(const String& filePath )
 	{
 		// Construct new mesh from filepath 
@@ -248,80 +270,89 @@ namespace Enjon
 		// Will construct the skeleton here if has bones and we want to create a new skeleton in the import process
 		bool hasSkeleton = HasSkeleton( scene->mRootNode, scene );
 
-		// Mesh to construct
-		Mesh* mesh = new Mesh( );
+		// Detect whether or not scene has any mesh data
+		bool hasMesh = HasMesh( scene->mRootNode, scene );
 
-		// If has skeleton, then construct skeleton from here
-		if ( hasSkeleton )
-		{ 
-			// Construct decl for new mesh
-			VertexDataDeclaration decl;
-			decl.Add( VertexAttributeFormat::Float3 );			// Position
-			decl.Add( VertexAttributeFormat::Float3 );			// Normal
-			decl.Add( VertexAttributeFormat::Float3 );			// Tangent
-			decl.Add( VertexAttributeFormat::Float2 );			// UV
-			decl.Add( VertexAttributeFormat::Float4 );			// BoneIndices
-			decl.Add( VertexAttributeFormat::Float4 );			// BoneWeights
-
-			// Set vertex decl for mesh
-			mesh->SetVertexDecl( decl );
-
-			// Construct new skeleton
-			Skeleton* skeleton = new Skeleton( );
-
-			// Store scene's global inverse transform in skeleton
-			skeleton->mGlobalInverseTransform = AIMat4x4ToMat4x4( scene->mRootNode->mTransformation.Inverse( ) ); 
-
-			// Add root bone to skeleton
-			//aiNode* root = scene->mRootNode;
-			//Bone rootBone;
-			//rootBone.mID = 0; 
-			//rootBone.mName = root->mName.C_Str( );
-			//rootBone.mParentID = -1;
-			//rootBone.mInverseBindMatrix = Mat4x4::Identity( );
-			//skeleton->mRootID = rootBone.mID;;
-			//skeleton->mBones.push_back( rootBone );
-			//skeleton->mBoneNameLookup[ rootBone.mName ] = rootBone.mID;
-
-			// Calculate bone weight size and resize vector
-			u32 totalVertCount = 0;
-			for ( u32 i = 0; i < scene->mNumMeshes; ++i )
-			{
-				totalVertCount += scene->mMeshes[i]->mNumVertices;
-			}
-			skeleton->mVertexBoneData.resize( totalVertCount * ENJON_MAX_NUM_BONES_PER_VERTEX );
-
-			// Continue
-			ProcessNodeSkeletal( scene->mRootNode, scene, skeleton, mesh ); 
-
-			// Build the bone heirarchy for this skeleton
-			BuildBoneHeirarchy( scene->mRootNode, nullptr, skeleton );
-
-			// Set root bone id of skeleton
-			skeleton->mRootID = skeleton->mBones.empty() ? 0 : skeleton->mBones.at( 0 ).mID; 
-
-			// Store the skeleton for now ( totally just for debugging )
-			mSkeletons.push_back( skeleton );
-		} 
-		// Non skeletal-mesh
-		else
+		if ( hasMesh )
 		{
-			// Construct decl for new mesh
-			VertexDataDeclaration decl;
-			decl.Add( VertexAttributeFormat::Float3 );			// Position
-			decl.Add( VertexAttributeFormat::Float3 );			// Normal
-			decl.Add( VertexAttributeFormat::Float3 );			// Tangent
-			decl.Add( VertexAttributeFormat::Float2 );			// UV
+			// Mesh to construct
+			Mesh* mesh = new Mesh( ); 
 
-			// Set vertex decl for mesh
-			mesh->SetVertexDecl( decl );
+			// If has skeleton, then construct skeleton from here
+			if ( hasSkeleton )
+			{ 
+				// Construct decl for new mesh
+				VertexDataDeclaration decl;
+				decl.Add( VertexAttributeFormat::Float3 );			// Position
+				decl.Add( VertexAttributeFormat::Float3 );			// Normal
+				decl.Add( VertexAttributeFormat::Float3 );			// Tangent
+				decl.Add( VertexAttributeFormat::Float2 );			// UV
+				decl.Add( VertexAttributeFormat::Float4 );			// BoneIndices
+				decl.Add( VertexAttributeFormat::Float4 );			// BoneWeights
 
-			// Process node of mesh
-			ProcessNode( scene->mRootNode, scene, mesh ); 
-		} 
+				// Set vertex decl for mesh
+				mesh->SetVertexDecl( decl );
 
-		// Return mesh
-		return mesh; 
+				// Construct new skeleton
+				Skeleton* skeleton = new Skeleton( );
+
+				// Store scene's global inverse transform in skeleton
+				skeleton->mGlobalInverseTransform = AIMat4x4ToMat4x4( scene->mRootNode->mTransformation.Inverse( ) ); 
+
+				// Add root bone to skeleton
+				//aiNode* root = scene->mRootNode;
+				//Bone rootBone;
+				//rootBone.mID = 0; 
+				//rootBone.mName = root->mName.C_Str( );
+				//rootBone.mParentID = -1;
+				//rootBone.mInverseBindMatrix = Mat4x4::Identity( );
+				//skeleton->mRootID = rootBone.mID;;
+				//skeleton->mBones.push_back( rootBone );
+				//skeleton->mBoneNameLookup[ rootBone.mName ] = rootBone.mID;
+
+				// Calculate bone weight size and resize vector
+				u32 totalVertCount = 0;
+				for ( u32 i = 0; i < scene->mNumMeshes; ++i )
+				{
+					totalVertCount += scene->mMeshes[i]->mNumVertices;
+				}
+				skeleton->mVertexBoneData.resize( totalVertCount * ENJON_MAX_NUM_BONES_PER_VERTEX );
+
+				// Continue
+				ProcessNodeSkeletal( scene->mRootNode, scene, skeleton, mesh ); 
+
+				// Build the bone heirarchy for this skeleton
+				BuildBoneHeirarchy( scene->mRootNode, nullptr, skeleton );
+
+				// Set root bone id of skeleton
+				skeleton->mRootID = skeleton->mBones.empty() ? 0 : skeleton->mBones.at( 0 ).mID; 
+
+				// Store the skeleton for now ( totally just for debugging )
+				mSkeletons.push_back( skeleton );
+			} 
+			// Non skeletal-mesh
+			else
+			{
+				// Construct decl for new mesh
+				VertexDataDeclaration decl;
+				decl.Add( VertexAttributeFormat::Float3 );			// Position
+				decl.Add( VertexAttributeFormat::Float3 );			// Normal
+				decl.Add( VertexAttributeFormat::Float3 );			// Tangent
+				decl.Add( VertexAttributeFormat::Float2 );			// UV
+
+				// Set vertex decl for mesh
+				mesh->SetVertexDecl( decl );
+
+				// Process node of mesh
+				ProcessNode( scene->mRootNode, scene, mesh ); 
+			} 
+
+			// Return mesh
+			return mesh; 
+		}
+
+		// No mesh created
+		return nullptr; 
 	} 
 
 	//===================================================================================================== 
