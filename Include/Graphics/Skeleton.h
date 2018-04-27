@@ -11,7 +11,6 @@
 #include "Math/Maths.h"
 #include "Asset/Asset.h" 
 #include "Graphics/Mesh.h"
-#include "Math/Vec4.h" 
 
 #define ENJON_MAX_NUM_BONES_PER_VERTEX		4
 
