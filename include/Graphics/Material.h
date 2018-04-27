@@ -2,7 +2,6 @@
 #ifndef ENJON_MATERIAL_H
 #define ENJON_MATERIAL_H 
 
-#include "Graphics/GLTexture.h"
 #include "Graphics/Texture.h"
 #include "Graphics/Shader.h"
 #include "Graphics/ShaderGraph.h"

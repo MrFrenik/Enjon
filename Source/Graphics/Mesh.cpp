@@ -3,9 +3,6 @@
 #include "Asset/MeshAssetLoader.h"
 #include "Serialize/ObjectArchiver.h"
 
-#define TINYOBJLOADER_IMPLEMENTATION // define this in only *one* .cc
-#include <IO/TinyLoader.h>
-
 namespace Enjon 
 { 
 	//=========================================================================

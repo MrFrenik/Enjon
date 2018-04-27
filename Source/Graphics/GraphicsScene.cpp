@@ -4,7 +4,6 @@
 #include "Graphics/SpotLight.h"
 #include "Graphics/PointLight.h"
 #include "Graphics/QuadBatch.h"
-#include "Graphics/GLTexture.h"
 #include "Graphics/Material.h"
 #include "Graphics/Camera.h"
 #include "Graphics/GraphicsSubsystem.h" 

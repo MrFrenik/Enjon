@@ -3,7 +3,6 @@
 #include <Entity/EntityManager.h>
 #include <Entity/Components/GraphicsComponent.h>
 #include <Entity/Components/PointLightComponent.h>
-#include <IO/ResourceManager.h>
 #include <Graphics/GraphicsSubsystem.h>
 #include <Graphics/DirectionalLight.h>
 #include <Graphics/QuadBatch.h>

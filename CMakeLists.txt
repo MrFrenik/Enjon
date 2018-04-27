@@ -142,7 +142,6 @@ file(GLOB_RECURSE REFLECTION_INCLUDES
 set(
 	GENERAL_SOURCES
 	${ENJON_INC}/Application.h
-	${ENJON_INC}/Console.h
 	${ENJON_INC}/CVarsSystem.h
 	${ENJON_INC}/Defines.h
 	${ENJON_INC}/Engine.h
@@ -152,7 +151,6 @@ set(
 	${ENJON_INC}/SubsystemCatalog.h
 
 	${ENJON_SRC}/Application.cpp
-	${ENJON_SRC}/Console.cpp
 	${ENJON_SRC}/CVarsSystem.cpp
 	${ENJON_SRC}/Engine.cpp
 	${ENJON_SRC}/TypeCatalog.cpp

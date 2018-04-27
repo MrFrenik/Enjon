@@ -267,9 +267,7 @@ namespace Enjon {
 			std::vector<Glyph> m_glyphs;
 			std::vector<Glyph*> m_glyphpointers;
 			std::vector<Enjon::RenderBatch> m_renderBatches;
-		};
-
-		void DrawRectBorder(SpriteBatch* Batch, const Vec4& Dims, float Thickness = 1.0f, ColorRGBA32& Color = RGBA32_White(), float Depth = 0.0f, float BorderRadius = 1.0f);
+		}; 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

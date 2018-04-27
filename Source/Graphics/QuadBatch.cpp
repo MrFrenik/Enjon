@@ -1,7 +1,6 @@
 #include "Graphics/QuadBatch.h"
 #include "Graphics/GraphicsScene.h"
 #include "Graphics/Material.h"
-#include "IO/ResourceManager.h"
 #include <stdio.h>
 
 #include <algorithm>

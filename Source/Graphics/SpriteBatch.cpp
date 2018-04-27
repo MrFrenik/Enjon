@@ -1,6 +1,4 @@
 #include "Graphics/SpriteBatch.h"
-#include "IO/ResourceManager.h"
-#include "Graphics/Shapes.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,13 +54,7 @@ namespace Enjon {
 			{
 				// Make this a shadow texture
 				m_glyphs.emplace_back(NewGlyph(Vec4(destRect.x + ShadowOffset.x, destRect.y - ShadowOffset.y, destRect.z, destRect.w), uvRect, texture, depth, SetOpacity(RGBA32_Black(), 0.3f)));
-			}
-
-			if (Options & DrawOptions::BORDER)
-			{
-				// Draw border
-				DrawRectBorder(this, destRect, BorderThickness, BorderColor, depth, BorderRadius);
-			}
+			} 
 
 			// Place back new glyph
 			m_glyphs.emplace_back(NewGlyph(destRect, uvRect, texture, depth, color));
@@ -236,124 +228,4 @@ namespace Enjon {
 		{
 			return (a->texture < b->texture);
 		}
-
-		void DrawRectBorder(SpriteBatch* Batch, const Vec4& Dims, float Thickness, ColorRGBA32& Color, float Depth, float BorderRadius)
-		{
-			/*
-				|-  z  -|
-				--------- -
-				|		| |
-				|		| w
-				|		| |
-				--------- -
-			 (x, y)
-			*/
-
-			float X, Y, Width, Height, EndX, EndY, BorderEndX, BorderEndY, ControlX, ControlY, ControlEndX, ControlEndY;
-
-			float BorderThickness = BorderRadius;
-			Enjon::uint32 AmountOfAngles = 360;
-
-			//////////////////////
-			// TOP BORDER ////////
-
-			// Get Necessary dimensions 
-			X = Dims.x;
-			Y = Dims.y + Dims.w + Thickness / 2.0f;
-			EndX = Dims.x + Dims.z;
-			EndY = Y;
-
-			Shapes::DrawLine(Batch, Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
-			Shapes::DrawHollowCircle(
-				Batch,
-				Enjon::Vec2(
-					EndX + 0.5f,
-					EndY - BorderRadius / 4.0f - 0.5f
-				),
-				Enjon::Vec2(0.0f, 90.0f),
-				Thickness,
-				BorderThickness,
-				AmountOfAngles,
-				Color,
-				Depth - 1.0f
-			);
-
-			////////////////////////
-			// RIGHT BORDER ////////
-
-			// Get Necessary dimensions 
-			X = Dims.x + Dims.z + Thickness / 2.0f;
-			Y = Dims.y + Dims.w;
-			EndX = X;
-			EndY = Dims.y;
-
-			Shapes::DrawLine(Batch, Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
-			Shapes::DrawHollowCircle(
-				Batch,
-				Enjon::Vec2(
-					EndX - BorderRadius / 4.0f - 0.5f,
-					EndY - BorderRadius / 8.0f + 1.5f
-				),
-				Enjon::Vec2(270.0f, 360.0f),
-				Thickness,
-				BorderThickness,
-				AmountOfAngles,
-				Color,
-				Depth - 1.0f
-			);
-
-			/////////////////////////
-			// BOTTOM BORDER ////////
-
-			// Get Necessary dimensions 
-			X = Dims.x;
-			Y = Dims.y - Thickness / 2.0f;
-			EndX = Dims.x + Dims.z;
-			EndY = Y;
-
-			Enjon::Shapes::DrawLine(Batch, Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
-			Enjon::Shapes::DrawHollowCircle(
-				Batch,
-				Enjon::Vec2(
-					X - 0.5f,
-					Y + BorderRadius / 8.0f + 2.5f
-				),
-				Enjon::Vec2(270.0f, 360.0f),
-				Thickness,
-				BorderThickness,
-				AmountOfAngles,
-				Color,
-				Depth - 1.0f
-			);
-
-			///////////////////////
-			// LEFT BORDER ////////
-
-			// Get Necessary dimensions 
-			X = Dims.x - Thickness / 2.0f;
-			Y = Dims.y;
-			EndX = X;
-			EndY = Dims.y + Dims.w;
-
-			Enjon::Shapes::DrawLine(Batch, Vec4(X, Y, EndX, EndY), Thickness, Color, Depth - 1.0f);
-
-			X = Dims.x;
-			Y = Dims.y + Dims.w + Thickness / 2.0f;
-			EndX = Dims.x + Dims.z;
-			EndY = Y;
-
-			Enjon::Shapes::DrawHollowCircle(
-				Batch,
-				Enjon::Vec2(
-					X - 0.5f,
-					EndY - BorderRadius / 4.0f - 0.5f
-				),
-				Enjon::Vec2(270.0f, 360.0f),
-				Thickness,
-				BorderThickness,
-				AmountOfAngles,
-				Color,
-				Depth - 1.0f
-			); 
-		} 
 }
