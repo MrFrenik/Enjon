@@ -6,7 +6,6 @@
 #include "Math/Maths.h"
 #include "Utils/FileUtils.h"
 #include "Utils/Errors.h"
-#include "Graphics/GLTexture.h"
 #include "Graphics/GraphicsSubsystem.h"
 #include "Engine.h"
 
@@ -329,19 +328,14 @@ namespace Enjon
 		glBindTexture( GL_TEXTURE_2D, TextureID );
 	}
 
-	void GLSLProgram::BindTexture(const std::string& name, const GLTexture& texture, const GLuint index)
+	void GLSLProgram::SetUniformArrayElement( const std::string& name, const u32& index, const Mat4x4& mat )
 	{
-		glActiveTexture(GL_TEXTURE0 + index);
-
-		auto Search = UniformMap.find(name);
-		if (Search != UniformMap.end())
+		auto search = UniformMap.find( name + "[0]" );
+		if ( search != UniformMap.end( ) )
 		{
-			glUniform1i(Search->second, index);
+			glUniformMatrix4fv(search->second + index, 1, GL_FALSE, mat.elements);
 		}
-
-		glBindTexture(GL_TEXTURE_2D, texture.id);
-
-	}
+	} 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

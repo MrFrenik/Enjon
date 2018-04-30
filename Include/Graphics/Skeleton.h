@@ -17,6 +17,7 @@
 namespace Enjon
 {
 	// Forward Declarations
+	class SkeletalAnimation;
 	class MeshAssetLoader;
 	class Skeleton;
 
@@ -92,7 +93,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void CalculateTransform( const u32& boneID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices );
+			void CalculateTransform( const u32& boneID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, SkeletalAnimation* animation, const f32& time );
 
 		protected: 
 			u32							mRootID;

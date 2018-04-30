@@ -105,10 +105,10 @@ namespace Enjon {
 
 			if (format == CoordinateFormat::ISOMETRIC)
 			{
-				*TL = Enjon::CartesianToIso(*TL);
-				*TR = Enjon::CartesianToIso(*TR);
-				*BL = Enjon::CartesianToIso(*BL);
-				*BR = Enjon::CartesianToIso(*BR);
+				*TL = Math::CartesianToIso(*TL);
+				*TR = Math::CartesianToIso(*TR);
+				*BL = Math::CartesianToIso(*BL);
+				*BR = Math::CartesianToIso(*BR);
 			}
 
 			/* Set topLeft vertex */
@@ -154,10 +154,10 @@ namespace Enjon {
 
 			if (Format == CoordinateFormat::ISOMETRIC)
 			{
-				tl = Enjon::CartesianToIso(tl);
-				bl = Enjon::CartesianToIso(bl);
-				br = Enjon::CartesianToIso(br);
-				tr = Enjon::CartesianToIso(tr);
+				tl = Math::CartesianToIso(tl);
+				bl = Math::CartesianToIso(bl);
+				br = Math::CartesianToIso(br);
+				tr = Math::CartesianToIso(tr);
 			}
 
 

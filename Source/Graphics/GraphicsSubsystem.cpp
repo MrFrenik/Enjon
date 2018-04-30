@@ -803,22 +803,24 @@ namespace Enjon
 				{
 					Skeleton* sk = skeletons.at( 0 );
 					// Grab mesh to use for this skeleton ( "We'll just assume sk_mannequin, I think" )
-					AssetHandle< Mesh > mesh = EngineSubsystem( AssetManager )->GetAsset< Mesh >( "meshes.maw" );
+					AssetHandle< Mesh > mesh = EngineSubsystem( AssetManager )->GetAsset< Mesh >( "rampage" );
 					AssetHandle< Material > mat = EngineSubsystem( AssetManager )->GetDefaultAsset< Material >( );
 					
 					skinnedRenderable.SetMesh( mesh );
 					skinnedRenderable.SetMaterial( mat );
+					skinnedRenderable.SetRotation( Quaternion::AngleAxis( Math::ToRadians( -90.0f ), Vec3::XAxis( ) ) );
 
 					skinnedRenderable.Bind( );
 					{
 						if ( mesh && sk )
 						{
 							auto transforms = sk->GetTransforms( );
-
+ 
 							// Set transforms uniforms in shader
 							for ( u32 i = 0; i < transforms.size(); ++i )
 							{
-								skinnedMeshProgram->SetUniform( "uJointTransforms[" + std::to_string( i ) + "]", transforms.at( i ) );
+								//skinnedMeshProgram->SetUniform( "uJointTransforms[" + std::to_string( i ) + "]", transforms.at( i ) );
+								skinnedMeshProgram->SetUniformArrayElement( "uJointTransforms", i, transforms.at( i ) );
 							}
 
 							skinnedMeshProgram->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
@@ -1621,7 +1623,7 @@ namespace Enjon
 			f32 scale = f32( i ) / (f32)SSAO_KERNEL_SIZE;
 
 			// scale samples s.t. they're more aligned to center of kernel
-			scale = Enjon::Lerp( 0.1f, 1.0f, scale * scale );
+			scale = Math::Lerp( 0.1f, 1.0f, scale * scale );
 			sample *= scale;
 			mSSAOKernel.push_back( sample );
 		}
@@ -2172,8 +2174,8 @@ namespace Enjon
 
 		for ( f32 theta = dt; theta <= 360.0f; theta += dt )
 		{
-			f32 thetaRad = ToRadians( theta );
-			f32 prevThetaRad = ToRadians( theta - dt );
+			f32 thetaRad = Math::ToRadians( theta );
+			f32 prevThetaRad = Math::ToRadians( theta - dt );
 			Vec3 startPos = rot * ( center + Vec3( std::cosf( thetaRad ), std::sinf( thetaRad ), 0.0f ) * radius );
 			Vec3 endPos = rot * ( center + Vec3( std::cosf( prevThetaRad ), std::sinf( prevThetaRad ), 0.0f ) * radius );
 
@@ -2182,8 +2184,8 @@ namespace Enjon
 		} 
 
 		// Draw end line
-		f32 thetaRad = ToRadians( 0.0f );
-		f32 prevThetaRad = ToRadians( 360.0f - dt );
+		f32 thetaRad = Math::ToRadians( 0.0f );
+		f32 prevThetaRad = Math::ToRadians( 360.0f - dt );
 		Vec3 startPos = rot * ( center + Vec3( std::cosf( thetaRad ), std::sinf( thetaRad ), 0.0f ) * radius );
 		Vec3 endPos = rot * ( center + Vec3( std::cosf( prevThetaRad ), std::sinf( prevThetaRad ), 0.0f ) * radius );
 
@@ -2211,7 +2213,7 @@ namespace Enjon
 		f32 dt = 360.0f / (f32)numSlices;
 		for ( f32 theta = 0.0f; theta <= 360.0f; theta += dt )
 		{
-			Vec3 normal = Quaternion::AngleAxis( ToRadians( theta ), Vec3::YAxis( ) ) * Vec3::ZAxis( );
+			Vec3 normal = Quaternion::AngleAxis( Math::ToRadians( theta ), Vec3::YAxis( ) ) * Vec3::ZAxis( );
 			DrawDebugCircle( center, radius, normal, numSegments, color );
 		}
 	} 

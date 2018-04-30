@@ -43,8 +43,8 @@ namespace Enjon
 		f32 coneYOffset = 1.2f;
 		Vec3 coneScale = Vec3( 2.0f, 0.3f, 2.0f );
 		Vec3 sharedAxisScale = Vec3( 3.0f, 0.4f, 0.2f );
-		mForwardAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( 90.0f ), Vec3::XAxis() ) );
-		mRightAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( -90.0f ), Vec3::ZAxis() ) );
+		mForwardAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( Math::ToRadians( 90.0f ), Vec3::XAxis() ) );
+		mRightAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( Math::ToRadians( -90.0f ), Vec3::ZAxis() ) );
 		mForwardAxis.mLocalTransform.SetScale( Vec3( xzScale, yScale, xzScale ) );
 		mRightAxis.mLocalTransform.SetScale( Vec3( xzScale, yScale, xzScale ) );
 		mUpAxis.mLocalTransform.SetScale( Vec3( xzScale, yScale, xzScale ) );

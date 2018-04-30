@@ -16,6 +16,8 @@ struct aiScene;
 
 namespace Enjon
 {
+	class SkeletalAnimation;
+
 	ENJON_CLASS()
 	class MeshAssetLoader : public AssetLoader
 	{
@@ -33,9 +35,21 @@ namespace Enjon
 			*/
 			~MeshAssetLoader(); 
 
+			// NOTE(): Total temporary
 			Vector< Skeleton* > GetSkeletons( )
 			{
 				return mSkeletons;
+			}
+
+			// NOTE(): Total temporary
+			SkeletalAnimation* GetAnimation( const u32& index ) const
+			{
+				if ( index >= mAnimations.size( ) )
+				{
+					return nullptr;
+				}
+
+				return mAnimations.at( index );
 			}
 
 		protected:
@@ -67,13 +81,14 @@ namespace Enjon
 
 			void ProcessSkeletalMesh( aiMesh* aim, const aiScene* scene, Skeleton* skeleton, Mesh* mesh );
 
-			void ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleon, Mesh* mesh );
+			void ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleon, Mesh* mesh ); 
 
-			void ProcessAnimation( aiNode* node, const aiScene* scene ); 
+			void ProcessAnimNode( aiNode* node, const aiScene* scene, Skeleton* skeleton, SkeletalAnimation* animation );
 
 			void BuildBoneHeirarchy( const aiNode* node, const aiNode* parent, Skeleton* skeleton );
 
 			Vector< Skeleton* > mSkeletons;
+			Vector< SkeletalAnimation* > mAnimations;
 	}; 
 }
 

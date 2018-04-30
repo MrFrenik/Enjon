@@ -283,7 +283,7 @@ namespace Enjon
 						// Reset start position
 						mIntersectionStartPosition = mIntersectionStartPosition + mDelta; 
 
-						// Clamp to x axis check
+						// Math::Clamp to x axis check
 						if ( Tx == Vec3::XAxis( ) )
 						{
 							mDelta.y = 0.0f; 
@@ -318,7 +318,7 @@ namespace Enjon
 						// Reset start position 
 						mIntersectionStartPosition = mIntersectionStartPosition + mDelta; 
 
-						// Clamp to z axis check
+						// Math::Clamp to z axis check
 						if ( Tz == Vec3::ZAxis( ) )
 						{
 							mDelta.x = 0.0f; 
@@ -349,7 +349,7 @@ namespace Enjon
 						// Reset start position
 						mIntersectionStartPosition = mIntersectionStartPosition + mDelta; 
 
-						// Clamp to y axis check 
+						// Math::Clamp to y axis check 
 						if ( Ty == Vec3::YAxis( ) )
 						{
 							mDelta.x = 0.0f; 
@@ -374,7 +374,7 @@ namespace Enjon
 						// Calculate delta from starting position ( lock to xY axes )
 						mDelta = intersectionResult.mHitPosition - mIntersectionStartPosition;
 
-						// Clamp z axis check
+						// Math::Clamp z axis check
 						if ( Tz == Vec3::ZAxis( ) )
 						{
 							mDelta.z = 0.0f; 
@@ -402,7 +402,7 @@ namespace Enjon
 						// Calculate delta from starting position ( lock to xY axes )
 						mDelta = intersectionResult.mHitPosition - mIntersectionStartPosition;
 
-						// Clamp to y axis check
+						// Math::Clamp to y axis check
 						if ( Ty == Vec3::YAxis( ) )
 						{
 							mDelta.y = 0.0f; 
@@ -430,7 +430,7 @@ namespace Enjon
 						// Calculate delta from starting position ( lock to xY axes )
 						mDelta = intersectionResult.mHitPosition - mIntersectionStartPosition;
 
-						// Clamp to x axis check
+						// Math::Clamp to x axis check
 						if ( Tx == Vec3::XAxis( ) )
 						{
 							mDelta.x = 0.0f; 
@@ -471,7 +471,7 @@ namespace Enjon
 
 						mDelta *= negation;
 
-						// Clamp to x axis check 
+						// Math::Clamp to x axis check 
 						mDelta.y = 0.0f; 
 						mDelta.z = 0.0f;
 					}
@@ -510,7 +510,7 @@ namespace Enjon
 
 						mDelta *= negation;
 
-						// Clamp to z axis check
+						// Math::Clamp to z axis check
 						mDelta.x = 0.0f; 
 						mDelta.y = 0.0f;
 					}
@@ -545,11 +545,11 @@ namespace Enjon
 
 						mDelta *= negation;
 
-						// Clamp to y axis check 
+						// Math::Clamp to y axis check 
 						mDelta.x = 0.0f; 
 						mDelta.z = 0.0f;
 
-						mDelta.y = Clamp( mDelta.y, -5.0f, 5.0f );
+						mDelta.y = Math::Clamp( mDelta.y, -5.0f, 5.0f );
 					}
 				} break;
 
@@ -569,7 +569,7 @@ namespace Enjon
 						// Calculate delta from starting position ( lock to xY axes )
 						mDelta = intersectionResult.mHitPosition - mIntersectionStartPosition;
 
-						// Clamp to x axis check
+						// Math::Clamp to x axis check
 						if ( Tx == Vec3::XAxis( ) )
 						{
 							mDelta.x = 0.0f; 
@@ -597,7 +597,7 @@ namespace Enjon
 						// Calculate delta from starting position ( lock to xY axes )
 						mDelta = intersectionResult.mHitPosition - mIntersectionStartPosition;
 
-						// Clamp z axis check
+						// Math::Clamp z axis check
 						mDelta.z = 0.0f; 
 
 						// Store previous position as new intersection position
@@ -622,7 +622,7 @@ namespace Enjon
 						// Calculate delta from starting position ( lock to xY axes )
 						mDelta = intersectionResult.mHitPosition - mIntersectionStartPosition;
 
-						// Clamp to y axis check
+						// Math::Clamp to y axis check
 						mDelta.y = 0.0f; 
 
 						// Store previous position as new intersection position
@@ -657,7 +657,7 @@ namespace Enjon
 						f32 xDiff = mc.x - mPreviousMouseCoords.x;
 						f32 sign = xDiff > 0.0f ? 1.0f : -1.0f ; 
 
-						// Clamp to x axis
+						// Math::Clamp to x axis
 						mDelta = Vec3( fabs( mDelta.x ) * sign );
 					}
 
@@ -692,7 +692,7 @@ namespace Enjon
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + rotationForward * 2.0f, Vec3( 0.0f, 0.0f, 1.0f ) );
 
 						f32 length = endPositionVector.Length( ) / denom;
-						f32 angle = ToDegrees( startNormal.SignedAngleBetween( endNormal ) );
+						f32 angle = Math::ToDegrees( startNormal.SignedAngleBetween( endNormal ) );
 
 						if ( length > 1.0f )
 						{
@@ -706,7 +706,7 @@ namespace Enjon
 						} 
 
 						mAngleDelta = angle; 
-						mDeltaRotation = Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
+						mDeltaRotation = Quaternion::AngleAxis( Math::ToRadians( mAngleDelta ), planeNormal );
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
 					}
 
@@ -737,7 +737,7 @@ namespace Enjon
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + rotationRight * 2.0f, Vec3( 0.0f, 0.0f, 1.0f ) );
 
 						f32 length = endPositionVector.Length( ) / denom;
-						f32 angle = ToDegrees( startNormal.SignedAngleBetween( endNormal ) );
+						f32 angle = Math::ToDegrees( startNormal.SignedAngleBetween( endNormal ) );
 
 						if ( length > 1.0f )
 						{
@@ -751,7 +751,7 @@ namespace Enjon
 						} 
 
 						mAngleDelta = angle; 
-						mDeltaRotation = Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
+						mDeltaRotation = Quaternion::AngleAxis( Math::ToRadians( mAngleDelta ), planeNormal );
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
 					}
 
@@ -782,7 +782,7 @@ namespace Enjon
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + rotationUp * 2.0f, Vec3( 0.0f, 0.0f, 1.0f ) );
 
 						f32 length = endPositionVector.Length( ) / denom;
-						f32 angle = ToDegrees( startNormal.SignedAngleBetween( endNormal ) );
+						f32 angle = Math::ToDegrees( startNormal.SignedAngleBetween( endNormal ) );
 
 						if ( length > 1.0f )
 						{
@@ -796,7 +796,7 @@ namespace Enjon
 						} 
 
 						mAngleDelta = angle; 
-						mDeltaRotation = Quaternion::AngleAxis( ToRadians( mAngleDelta ), planeNormal );
+						mDeltaRotation = Quaternion::AngleAxis( Math::ToRadians( mAngleDelta ), planeNormal );
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
 					}
 				} break;

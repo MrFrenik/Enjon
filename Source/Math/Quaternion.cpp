@@ -137,9 +137,9 @@ namespace Enjon
 		return v + uv + uuv;
 	}
 
-	f32 Quaternion::Dot(Quaternion& Q)
+	f32 Quaternion::Dot( const Quaternion& other ) const
 	{ 
-		return x*Q.x + y*Q.y + z*Q.z + w*Q.w;
+		return ( this->x * other.x + this->y * other.y + this->z * other.z + this->w * other.w );
 	}
 
 	// Returns cross product with another quaternion
@@ -198,7 +198,7 @@ namespace Enjon
 	f32 Quaternion::Yaw()
 	{
 		return std::asin(-2.0f * (x*z - w*y));
-	}
+	} 
 
 	Vec3 Quaternion::EulerAngles()
 	{
@@ -222,7 +222,7 @@ namespace Enjon
 		double t4 = +1.0 - 2.0 * ( ysqr + z * z );
 		double yaw = std::atan2( t3, t4 );
 
-		return Vec3( ToDegrees(roll), ToDegrees(pitch), ToDegrees(yaw) );
+		return Vec3( Math::ToDegrees(roll), Math::ToDegrees(pitch), Math::ToDegrees(yaw) );
 	} 
 
 	Quaternion Quaternion::NegativeAngleAxis( ) const
@@ -242,7 +242,47 @@ namespace Enjon
 		//const Vec3 t = 2.0f * Qxyz.Cross( V );
 		//return ( V + w * t + Qxyz.Cross( t ) ); 
 	} 
+
+	Quaternion Quaternion::Slerp( const Quaternion& a, const Quaternion& b, const f32& t )
+	{
+		f32 c = a.Dot( b );
+
+		Quaternion end = b;
+		if ( c < 0.0f )
+		{
+			// Reverse all signs
+			c *= -1.0f;
+			end.x *= -1.0f;
+			end.y *= -1.0f;
+			end.z *= -1.0f;
+			end.w *= -1.0f;
+		}
+
+		// Calculate coefficients
+		f32 sclp, sclq;
+		if ( ( 1.0f - c ) > 0.0001f )
+		{
+			f32 omega = std::acosf( c );
+			f32 s = std::sinf( omega );
+			sclp = std::sinf( ( 1.0f - t ) * omega ) / s;
+			sclq = std::sinf( t * omega ) / s; 
+		}
+		else
+		{
+			sclp = 1.0f - t;
+			sclq = t;
+		}
+
+		Quaternion q;
+		q.x = sclp * a.x + sclq * end.x;
+		q.y = sclp * a.y + sclq * end.y;
+		q.z = sclp * a.z + sclq * end.z;
+		q.w = sclp * a.w + sclq * end.w;
+
+		return q;
+	}
 			
+	// Modified from: http://assimp.sourcearchive.com/documentation/2.0.863plus-pdfsg-1/aiQuaternion_8h_source.html
 	Quaternion Quaternion::RotationBetweenVectors( const Vec3& s, const Vec3& d )
 	{
 		Vec3 start = start.Normalize( );
@@ -262,7 +302,7 @@ namespace Enjon
 				rotationAxis = Vec3( 1.0f, 0.0f, 0.0f ).Cross( start );
 
 			rotationAxis = rotationAxis.Normalize();
-			return Quaternion::AngleAxis( ToRadians( 180.0f ), rotationAxis );
+			return Quaternion::AngleAxis( Math::ToRadians( 180.0f ), rotationAxis );
 		}
 
 		// Implementation from Stan Melax's Game Programming Gems 1 article

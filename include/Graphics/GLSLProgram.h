@@ -51,6 +51,7 @@ namespace Enjon {
 		void SetUniform(const std::string& name, const Mat4x4& matrix); 
 		void SetUniform(const std::string& name, const Transform& T);
 		void SetUniform(const std::string& name, ColorRGBA32& C);
+		void SetUniformArrayElement( const std::string& name, const u32& index, const Mat4x4& mat );
 		
 		GLuint inline GetProgramID() const { return m_programID; } 
 	

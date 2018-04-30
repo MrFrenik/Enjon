@@ -5,7 +5,7 @@ layout (location = 1) out vec4 NormalsOut;
 layout (location = 2) out vec4 EmissiveOut;
 layout (location = 3) out vec4 MatPropsOut;
 layout (location = 4) out vec4 ObjectIDOut;
- layout (location = 5) out vec4 VelocityOut;
+layout (location = 5) out vec4 VelocityOut;
 
 in VS_OUT
 {
@@ -13,6 +13,8 @@ in VS_OUT
 	vec4 ObjectID;
 	vec4 PreviousFragPositionClipSpace;
 	vec4 CurrentFragPositionClipSpace;
+	vec4 JointIDs;
+	vec4 JointWeights;
 } fs_in;
 
 // Global Uniforms
@@ -27,6 +29,10 @@ void main()
 {
 	// Base Color
 	AlbedoOut = vec4(1.0, 1.0, 1.0, 1.0);
+	// float r = fs_in.JointIDs.x;
+	// float g = fs_in.JointIDs.y;
+	// float b = fs_in.JointIDs.z;
+	// AlbedoOut = vec4(r, g, b, 1.0);
 
 	// Normal
 	vec3 normal = fs_in.TBN[2];

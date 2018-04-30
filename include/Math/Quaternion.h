@@ -84,7 +84,7 @@ namespace Enjon
 			Quaternion Conjugate() const;
 
 			// Returns dot product with another quaternion
-			f32 Dot(Quaternion& Q);
+			f32 Dot( const Quaternion& Q ) const;
 
 			// Returns cross product with another quaternion
 			Quaternion Cross(const Quaternion& Q) const;
@@ -122,7 +122,12 @@ namespace Enjon
 			* @brief
 			* @note implementation from: https://github.com/opengl-tutorials/ogl/blob/master/common/quaternion_utils.cpp
 			*/
-			static Quaternion RotationBetweenVectors( const Vec3& start, const Vec3& destination );
+			static Quaternion RotationBetweenVectors( const Vec3& start, const Vec3& destination ); 
+
+			/*
+			* @brief
+			*/
+			static Quaternion Slerp( const Quaternion& a, const Quaternion& b, const f32& t );
 
 			/**
 			* @brief Expects angle in degrees

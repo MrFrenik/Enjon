@@ -3,6 +3,7 @@
 
 #include "Asset/MeshAssetLoader.h" 
 #include "Graphics/Skeleton.h"
+#include "Graphics/SkeletalAnimation.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -350,9 +351,96 @@ namespace Enjon
 			// Return mesh
 			return mesh; 
 		}
+		// Gon' build that animation, bro
+		else if ( hasAnimation )
+		{ 
+			// Need to have a skeleton to refer to, so for now if there isn't one, we're going to bail
+			if ( mSkeletons.empty( ) )
+			{
+				return nullptr;
+			}
+
+			// Grab the first skeleton
+			Skeleton* skeleton = mSkeletons.at( 0 );
+
+			// Now you may proceed...
+			SkeletalAnimation* animation = new SkeletalAnimation( ); 
+
+			// Process and fill out the skeletal animation
+			ProcessAnimNode( scene->mRootNode, scene, skeleton, animation ); 
+
+			// Push back animation
+			mAnimations.push_back( animation ); 
+		}
 
 		// No mesh created
 		return nullptr; 
+	} 
+
+	//===================================================================================================== 
+
+	void MeshAssetLoader::ProcessAnimNode( aiNode* node, const aiScene* scene, Skeleton* skeleton, SkeletalAnimation* animation )
+	{ 
+		if ( !skeleton )
+		{
+			// Error...
+			return;
+		}
+
+		aiAnimation* aiAnim = scene->mAnimations[ 0 ];
+
+		// Resize channel data for animation
+		animation->mChannelData.resize( skeleton->mBones.size() );
+
+		// Set ticks per second for the animation
+		animation->mTicksPerSecond = aiAnim->mTicksPerSecond;
+
+		// Set duration in ticks for animation
+		animation->mNumberOfTicks = aiAnim->mDuration;
+
+		Vector< aiNodeAnim* > aiAnimNodes;
+
+		for ( u32 i = 0; i < aiAnim->mNumChannels; ++i )
+		{
+			aiNodeAnim* animNode = aiAnim->mChannels[ i ];
+			String channelName = animNode->mNodeName.C_Str();
+
+			// Grab bone...hehe
+			if ( !skeleton->HasBone( channelName ) )
+			{
+				// Error...
+				std::cout << "Ain't got that bone: " + channelName + "\n";
+				continue;
+				//return;
+			}
+
+			// Get index of bone
+			u32 boneId = skeleton->mBoneNameLookup[ channelName ];
+
+			// Get channel by id
+			ChannelData* channelData = &animation->mChannelData.at( boneId );
+
+			// Position data
+			for ( u32 i = 0; i < animNode->mNumPositionKeys; ++i )
+			{ 
+				auto pos = animNode->mPositionKeys[ i ];
+				channelData->mPositionKeys.emplace_back( (f32)pos.mTime, Vec3( pos.mValue.x, pos.mValue.y, pos.mValue.z ) ); 
+			}
+
+			// Rotation data
+			for ( u32 i = 0; i < animNode->mNumRotationKeys; ++i )
+			{ 
+				auto rot = animNode->mRotationKeys[ i ];
+				channelData->mRotationKeys.emplace_back( (f32)rot.mTime, Quaternion( rot.mValue.x, rot.mValue.y, rot.mValue.z, rot.mValue.w ) ); 
+			}
+
+			// Scale data
+			for ( u32 i = 0; i < animNode->mNumScalingKeys; ++i )
+			{ 
+				auto scl = animNode->mScalingKeys[ i ];
+				channelData->mScaleKeys.emplace_back( (f32)scl.mTime, Vec3( scl.mValue.x, scl.mValue.y, scl.mValue.z ) ); 
+			} 
+		} 
 	} 
 
 	//===================================================================================================== 
@@ -601,7 +689,7 @@ namespace Enjon
 			// Bone Indices
 			for ( u32 i = 0; i < ENJON_MAX_NUM_BONES_PER_VERTEX; ++i )
 			{
-				sm->mVertexData.Write< u32 >( skeleton->mVertexBoneData.at( vertID ).mIDS[ i ] );
+				sm->mVertexData.Write< f32 >( (f32)skeleton->mVertexBoneData.at( vertID ).mIDS[ i ] );
 			}
 
 			// Bone Weights

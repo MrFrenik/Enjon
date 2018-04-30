@@ -7,7 +7,7 @@ layout (location = 3) in vec2 aVertexUV;
 layout (location = 4) in vec4 aJointIDs;
 layout (location = 5) in vec4 aJointWeights;
 
-const int MAX_JOINTS = 200;
+const int MAX_JOINTS = 210;
 
 out VS_OUT
 {
@@ -15,6 +15,8 @@ out VS_OUT
 	vec4 ObjectID;
 	vec4 PreviousFragPositionClipSpace;
 	vec4 CurrentFragPositionClipSpace;
+	vec4 JointIDs;
+	vec4 JointWeights;
 } vs_out;
 
 // Gloabl Uniforms
@@ -40,12 +42,10 @@ void main()
 	jointTransform += uJointTransforms[i3] * aJointWeights[3];
 
 	vec4 posL = jointTransform * vec4(aVertexPosition, 1.0);
-	// vec4 posL = vec4(aVertexPosition, 1.0);
 	vec3 worldPosition = ( uModel * posL ).xyz;
 	gl_Position = uViewProjection * vec4( worldPosition, 1.0 );
 
 	vec3 normalL = ( jointTransform * vec4(aVertexNormal, 0.0) ).xyz;
-	// vec3 normalL = aVertexNormal;
 	vec3 N = normalize( mat3(uModel) * normalL );
 	vec3 T = normalize( mat3(uModel) * aVertexTangent );
 	// Reorthogonalize with respect to N
@@ -62,8 +62,9 @@ void main()
 
 	// Output Vertex Data
 	vs_out.CurrentFragPositionClipSpace = gl_Position;
-	// vs_out.PreviousFragPositionClipSpace = uPreviousViewProjection * uPreviousModel * vec4( aVertexPosition, 1.0 );
 	vs_out.PreviousFragPositionClipSpace = uPreviousViewProjection * uPreviousModel * jointTransform * vec4( aVertexPosition, 1.0 );
 	vs_out.TBN = TBN;
 	vs_out.ObjectID = uObjectID;
+	vs_out.JointIDs = aJointIDs;
+	vs_out.JointWeights = aJointWeights;
 }

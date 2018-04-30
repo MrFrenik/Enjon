@@ -12,10 +12,20 @@
 
 namespace Enjon
 {
-	class Animation;
+	// Forward Declarations
+	class MeshAssetLoader;
+	class Skeleton;
+	class SkeletalAnimation;
+	class ChannelData;
 
+	template <typename T>
 	class KeyFrame
 	{ 
+		friend ChannelData;
+		friend SkeletalAnimation;
+		friend MeshAssetLoader;
+		friend Skeleton;
+
 		public:
 
 			/*
@@ -28,31 +38,65 @@ namespace Enjon
 			*/
 			~KeyFrame( ) = default;
 
+			/*
+			* @brief
+			*/
+			KeyFrame( const f32& timeStamp, const T& value )
+				: mTimeStamp( timeStamp ), mValue( value )
+			{ 
+			} 
+
 		protected:
 
 		private: 
-			Vector< Mat4x4 > mJointTransforms;
+			T mValue;
 			f32 mTimeStamp;
 	};
 
-	class Animation
+	struct ChannelData
+	{
+		u32 GetRotationFrameID( const f32& time );
+		u32 GetPositionFrameID( const f32& time );
+		u32 GetScaleFrameID( const f32& time );
+
+		Vector< KeyFrame< Quaternion > > mRotationKeys;
+		Vector< KeyFrame< Vec3 > > mPositionKeys;
+		Vector< KeyFrame< Vec3 > > mScaleKeys;
+	};
+
+	class SkeletalAnimation
 	{ 
+		friend MeshAssetLoader;
+		friend Skeleton;
+
 		public:
 
 			/*
 			* @brief
 			*/
-			Animation( ) = default;
+			SkeletalAnimation( );
 
 			/*
 			* @brief
 			*/
-			~Animation( ) = default;
+			~SkeletalAnimation( ); 
 
-		protected:
+			/*
+			* @brief
+			*/
+			Transform CalculateInterpolatedTransform( const f32& time, const u32& boneID );
+
+			/*
+			* @brief
+			*/
+			f32 GetDuration( ) const;
+
+		protected: 
 
 		private:
-			Vector< KeyFrame > mKeyFrames;
+			Vector< ChannelData > mChannelData;
+			f32 mTicksPerSecond = 30.0f;
+			f32 mNumberOfTicks = 1.0f;
 	};
 }
 

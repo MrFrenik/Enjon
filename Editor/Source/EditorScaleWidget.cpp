@@ -60,8 +60,8 @@ namespace Enjon
 		f32 coneYOffset = 1.2f;
 		Vec3 coneScale = Vec3( 2.0f, 0.3f, 2.0f );
 		Vec3 sharedAxisScale = Vec3( 3.0f, 0.4f, 0.2f );
-		mForwardAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( 90.0f ), Vec3::XAxis() ) );
-		mRightAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( -90.0f ), Vec3::ZAxis() ) );
+		mForwardAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( Math::ToRadians( 90.0f ), Vec3::XAxis() ) );
+		mRightAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( Math::ToRadians( -90.0f ), Vec3::ZAxis() ) );
 		mForwardAxis.mLocalTransform.SetScale( Vec3( xzScale, yScale, xzScale ) );
 		mRightAxis.mLocalTransform.SetScale( Vec3( xzScale, yScale, xzScale ) );
 		mUpAxis.mLocalTransform.SetScale( Vec3( xzScale, yScale, xzScale ) );
@@ -76,15 +76,15 @@ namespace Enjon
 		mRightAxisArrow.mLocalTransform.SetScale( coneScale ); 
 
 		mXZAxis.mLocalTransform.SetScale( sharedAxisScale );
-		mXZAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( 90.0f ), Vec3::ZAxis( ) ) );
+		mXZAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( Math::ToRadians( 90.0f ), Vec3::ZAxis( ) ) );
 		mXZAxis.mLocalTransform.SetPosition( Vec3( 9.0f, -0.2f, 0.0f ) );
 
 		mXYAxis.mLocalTransform.SetScale( sharedAxisScale );
-		mXYAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( 0.0f ), Vec3::YAxis( ) ) );
+		mXYAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( Math::ToRadians( 0.0f ), Vec3::YAxis( ) ) );
 		mXYAxis.mLocalTransform.SetPosition( Vec3( 9.0f, 0.0f, 0.0f ) ); 
 
 		mYZAxis.mLocalTransform.SetScale( sharedAxisScale );
-		mYZAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( ToRadians( -90.0f ), Vec3::YAxis( ) ) );
+		mYZAxis.mLocalTransform.SetRotation( Quaternion::AngleAxis( Math::ToRadians( -90.0f ), Vec3::YAxis( ) ) );
 		mYZAxis.mLocalTransform.SetPosition( Vec3( 0.0f, 0.0f, 9.0f ) ); 
 
 		// Set renderable ids 

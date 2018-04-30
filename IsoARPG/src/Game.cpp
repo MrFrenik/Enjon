@@ -259,7 +259,7 @@ void Game::TestObjectSerialize( )
 			// Parent
 			mSerializedEntity = mEntities->Allocate( ); 
 			mSerializedEntity.Get( )->SetLocalPosition( Vec3( -8, 3, 0 ) );
-			mSerializedEntity.Get( )->SetLocalRotation( Quaternion::AngleAxis( ToRadians( 20.0f ), Vec3::XAxis( ) ) );
+			mSerializedEntity.Get( )->SetLocalRotation( Quaternion::AngleAxis( Math::ToRadians( 20.0f ), Vec3::XAxis( ) ) );
 			mSerializedEntity.Get( )->SetLocalScale( 0.5f );
 			auto gfxCmp = mSerializedEntity.Get( )->AddComponent< GraphicsComponent >( );
 			auto plCmp = mSerializedEntity.Get( )->AddComponent< PointLightComponent >( );
@@ -367,7 +367,7 @@ void Game::TestObjectSerialize( )
 			}
 			handle.Get( )->SetLocalPosition( Enjon::Vec3( 1.0, 3.0f, -10.0f ) );
 			handle.Get( )->SetLocalScale( Enjon::Vec3( 2.0f ) );
-			handle.Get( )->SetLocalRotation( Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::ZAxis( ) ) );
+			handle.Get( )->SetLocalRotation( Enjon::Quaternion::AngleAxis( Math::ToRadians( 45.0f ), Enjon::Vec3::ZAxis( ) ) );
 
 			Enjon::EntityHandle child = mEntities->Allocate( );
 			auto childGfxCmp = child.Get( )->AddComponent< Enjon::GraphicsComponent >( );
@@ -811,7 +811,7 @@ Enjon::Result Game::Initialize()
 			for (Enjon::s32 j = -dimSize; j < dimSize; ++j)
 			{
 				Enjon::Vec3 pos(j * 2.0f, 0.0f, i * 2.0f);
-				Enjon::Quaternion rot = Enjon::Quaternion::AngleAxis(Enjon::ToRadians(90.0f), Enjon::Vec3::XAxis());
+				Enjon::Quaternion rot = Enjon::Quaternion::AngleAxis( Math::ToRadians(90.0f), Enjon::Vec3::XAxis());
 				Enjon::Vec3 scale(1.0f);
 				Enjon::Transform t(pos, rot, scale);
 				mBatch->Add(t);
@@ -1257,8 +1257,8 @@ Enjon::Result Game::Initialize()
 		outFile.write( output.c_str( ), output.length( ) );
 		outFile.close( );
 	} 
-	Enjon::Quaternion q = Enjon::Quaternion::AngleAxis( Enjon::ToRadians( 45.0f ), Enjon::Vec3::YAxis( ) ) *
-						  Enjon::Quaternion::AngleAxis( Enjon::ToRadians( -36.0f ), Enjon::Vec3::ZAxis( ) );
+	Enjon::Quaternion q = Enjon::Quaternion::AngleAxis( Math::ToRadians( 45.0f ), Enjon::Vec3::YAxis( ) ) *
+						  Enjon::Quaternion::AngleAxis( Math::ToRadians( -36.0f ), Enjon::Vec3::ZAxis( ) );
 	Enjon::Mat4x4 mat = Enjon::QuaternionToMat4x4( q );
 
 
@@ -1516,8 +1516,8 @@ Enjon::Result Game::ProcessInput( f32 dt )
 		else
 		{
 			// Offset camera orientation
-			f32 xOffset = Enjon::ToRadians((f32)viewPort.x / 2.0f - MouseCoords.x) * dt * MouseSensitivity;
-			f32 yOffset = Enjon::ToRadians((f32)viewPort.y / 2.0f - MouseCoords.y) * dt * MouseSensitivity;
+			f32 xOffset = Math::ToRadians((f32)viewPort.x / 2.0f - MouseCoords.x) * dt * MouseSensitivity;
+			f32 yOffset = Math::ToRadians((f32)viewPort.y / 2.0f - MouseCoords.y) * dt * MouseSensitivity;
 			camera->OffsetOrientation(xOffset, yOffset); 
 		}
 

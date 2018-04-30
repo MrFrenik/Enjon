@@ -152,6 +152,13 @@ namespace Enjon
 			*/
 			void LookAt( const Vec3& target, const Vec3& up = Vec3( 0.0f, 1.0f, 0.0f ) );
 
+			/**
+			* @brief 
+			* @param
+			* @return
+			*/
+			Mat4x4 ToMat4x4( ) const; 
+
 		private: 
 			Vec3 mPosition;
 

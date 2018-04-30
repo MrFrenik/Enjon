@@ -125,7 +125,7 @@ namespace Enjon
 	{
 		Mat4x4 result(0.0f);
 
-		f32 q = 1.0f / tan(Enjon::ToRadians(0.5f * FOV));
+		f32 q = 1.0f / tan(Math::ToRadians(0.5f * FOV));
 		f32 a = q / aspectRatio;
 		f32 b = (near + far) / (near - far);
 		f32 c = (2.0f * near * far) / (near - far);
@@ -174,7 +174,7 @@ namespace Enjon
 		//Identity
 		Mat4x4 result(1.0f);
 	
-		f32 a = Enjon::ToRadians(angle);
+		f32 a = Math::ToRadians(angle);
 		f32 c = cos(a);
 		f32 s = sin(a);
 

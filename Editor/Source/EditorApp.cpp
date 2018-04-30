@@ -1692,7 +1692,7 @@ namespace Enjon
 								Entity* ent = mSelectedEntity.Get( );
 								if ( ent )
 								{ 
-									f32 da = ToRadians( mTransformWidget.GetAngleDelta( ) );
+									f32 da = Math::ToRadians( mTransformWidget.GetAngleDelta( ) );
 									Transform localTrans = ent->GetLocalTransform( );
 									Vec3 ea = localTrans.GetEulerAngles( ); 
 
@@ -1734,7 +1734,7 @@ namespace Enjon
 				// Set camera speed 
 				Vec2 mw = mInput->GetMouseWheel( ).y;
 				f32 mult = mw.y == 1.0f ? 1.5f : mw.y == -1.0f ? 0.75f : 1.0f;
-				mCameraSpeed = Clamp(mCameraSpeed * mult, 0.25f, 128.0f);
+				mCameraSpeed = Math::Clamp(mCameraSpeed * mult, 0.25f, 128.0f);
 
 				if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
 				{
@@ -1778,8 +1778,8 @@ namespace Enjon
 				SDL_WarpMouseInWindow( window->GetWindowContext( ), ( f32 )viewPort.x / 2.0f - mMouseCoordsDelta.x, ( f32 )viewPort.y / 2.0f - mMouseCoordsDelta.y );
 
 				// Offset camera orientation
-				f32 xOffset = Enjon::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * mMouseSensitivity / 100.0f;
-				f32 yOffset = Enjon::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * mMouseSensitivity / 100.0f;
+				f32 xOffset = Enjon::Math::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * mMouseSensitivity / 100.0f;
+				f32 yOffset = Enjon::Math::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * mMouseSensitivity / 100.0f;
 				camera->OffsetOrientation( xOffset, yOffset );
 
 				// Adjust rotator

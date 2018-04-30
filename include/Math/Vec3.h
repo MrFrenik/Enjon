@@ -284,6 +284,13 @@ namespace Enjon {
 			*/	
 			f32 Distance(const Vec3& other) const;
 
+			/** 
+			* @brief Calculates distance between two vectors
+			* @param other - RH vector used in distance calculation
+			* @return f32 - distance between two vectors
+			*/	
+			static Vec3 Lerp( const Vec3& a, const Vec3& b, const f32& t );
+
 			/*
 			* @brief
 			*/

@@ -193,4 +193,15 @@ namespace Enjon
 	}
 
 	//==========================================================================
+
+	Mat4x4 Transform::ToMat4x4( ) const
+	{
+		Mat4x4 mat = Mat4x4::Identity( );
+		mat *= Mat4x4::Translate( mPosition );
+		mat *= QuaternionToMat4x4( mRotation );
+		mat *= Mat4x4::Scale( mScale ); 
+		return mat;
+	}
+
+	//==========================================================================
 }

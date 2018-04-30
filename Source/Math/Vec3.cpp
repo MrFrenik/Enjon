@@ -270,6 +270,14 @@ namespace Enjon
 	
 	//================================================
 
+	Vec3 Vec3::Lerp( const Vec3& a, const Vec3& b, const f32& t )
+	{
+		f32 x = Math::Lerp( a.x, b.x, t );
+		f32 y = Math::Lerp( a.y, b.y, t );
+		f32 z = Math::Lerp( a.z, b.z, t );
+		return Vec3( x, y, z );
+	}
+
 	Quaternion Vec3::GetRotationTowards( const Vec3& other ) const
 	{
 		// Normalize vectors

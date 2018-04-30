@@ -1304,14 +1304,14 @@ namespace Enjon
 		// Calculate max position
 		ImVec2 popupMaxPos = ImVec2( position.x + mSize.x, position.y + mSize.y ); 
  
-		// Clamp menu position to inside of window
+		// Math::Clamp menu position to inside of window
 		if ( popupMaxPos.x > dispSize.x )
 		{ 
 			position.x = dispSize.x - mSize.x;
 		} 
 
-		// Clamp to being inside of the window and not negative
-		position.x = Max( position.x, 0.0f ); 
+		// Math::Clamp to being inside of the window and not negative
+		position.x = Math::Max( position.x, 0.0f ); 
 
 		// If below half-way ( offset by size of window )
 		if ( position.y > dispSize.y / 2.0f )
@@ -1328,13 +1328,13 @@ namespace Enjon
 			mFadeTimer += mFadeInSpeed * Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( );
 			
 			// Calculate fade amount for animation 
-			bgAlpha =  Clamp( mFadeTimer / 1.0f, 0.0f, 1.0f ); 
+			bgAlpha =  Math::Clamp( mFadeTimer / 1.0f, 0.0f, 1.0f ); 
 		}
 		else
 		{
 			// Increment fade timer by delta time
 			mFadeOutTimer -= mFadeOutSpeed * Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( ); 
-			mFadeOutTimer = Clamp( mFadeOutTimer, 0.0f, 1.0f ); 
+			mFadeOutTimer = Math::Clamp( mFadeOutTimer, 0.0f, 1.0f ); 
 			bgAlpha = mFadeOutTimer;
 		}
 
