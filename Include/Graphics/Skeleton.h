@@ -62,7 +62,7 @@ namespace Enjon
 		u32 mIDS[ENJON_MAX_NUM_BONES_PER_VERTEX];
 	};
 
-	class Skeleton
+	class Skeleton : public Asset
 	{ 
 		friend MeshAssetLoader;
 

@@ -803,7 +803,7 @@ namespace Enjon
 				{
 					Skeleton* sk = skeletons.at( 0 );
 					// Grab mesh to use for this skeleton ( "We'll just assume sk_mannequin, I think" )
-					AssetHandle< Mesh > mesh = EngineSubsystem( AssetManager )->GetAsset< Mesh >( "rampage" );
+					AssetHandle< Mesh > mesh = EngineSubsystem( AssetManager )->GetAsset< Mesh >( "vampire" );
 					AssetHandle< Material > mat = EngineSubsystem( AssetManager )->GetDefaultAsset< Material >( );
 					
 					skinnedRenderable.SetMesh( mesh );

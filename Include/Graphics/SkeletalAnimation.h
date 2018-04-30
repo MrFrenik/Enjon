@@ -64,10 +64,13 @@ namespace Enjon
 		Vector< KeyFrame< Vec3 > > mScaleKeys;
 	};
 
-	class SkeletalAnimation
+	ENJON_CLASS( Construct )
+	class SkeletalAnimation : public Asset
 	{ 
 		friend MeshAssetLoader;
 		friend Skeleton;
+
+		ENJON_CLASS_BODY( )
 
 		public:
 
