@@ -861,7 +861,116 @@ namespace Enjon
 */
 
 
+/*
 
+	// Import options
+	class ImportOptions // Base class
+	{
+		public:
+			virtual Result OnEditorView() = 0;
+	};
+
+	class MeshImportOptions : public ImportOptions
+	{ 
+		virtual Result OnEditorView()
+		{
+			ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
+			//  Create skeleton
+			if ( mShowSkeletonCreateDialogue )
+			{
+				igm->CheckBox( "Skeleton", &mCreateSkeleton );
+			}
+
+			if ( mShowMeshCreateDialogue )
+			{
+				igm->CheckBox( "Mesh", &mCreateMesh );
+			} 
+
+			if ( mShowAnimationCreateDialogue )
+			{
+				igm->CheckBox( "Animation", &mCreateAnimations );
+			}
+
+			// Skeletal asset drop down
+			if ( mShowAnimationCreateDialogue && !mShowSkeletonCreateDialogue )   // However this would work...
+			{
+				// Grab all skeletons in database
+				HashMap< String, AssetRecordInfo >* skeletons = EngineSubsystem( AssetManager )->GetAssets< Skeleton >();	
+
+				// Drop down box for these...
+				for ( auto& s : skeletons )
+				{
+					if ( igm->Selectable( s.second->GetAssetName() )
+					{
+						mSkeletonAsset = s.second->GetAsset();	
+					}
+				}
+			}
+
+			// Make sure can import at this point
+			if ( igm->Button( "Import" )
+			{
+				// Load asset 
+				EngineSubsystem( AssetManager )->LoadResourceFromFile( this );
+
+				// Return successful operation
+				return Result::SUCCESS;
+			}
+
+			if ( igm->Button( "Cancel" )
+			{
+				return Result::SUCCESS;
+			}
+
+			return Result::RUNNING;
+		}
+	};
+
+	// Need to assess from asset manager what type of asset is being loaded
+	const ImportOptions* mImportOptions = nullptr;
+
+	// Start import process on asset file drop...
+	AssetLoader* loader = GetLoaderFromResource( filePath ); 
+	if ( loader )
+	{
+		mImportOptions = loader->ImportOptions( filePath );
+	}
+
+	// How to do this shit? Need to ask asset manager, "Hey, fucker, what kind of asset is this?". 
+	if ( mImportOptions )
+	{
+		Result res = mImportOptions->OnEditorView();
+		if ( res == Result::SUCCESS )
+		{
+			// We're done, so result the pointer
+			mImportOptions = nullptr;
+		}
+	} 
+
+	// MeshAssetLoader holds its own MeshImportOptions instance internally 
+
+	const ImportOptions* MeshAssetLoader::ImportOptions( const String& filePath )
+	{
+		// Clear previous options from last use
+		mImportOptions.Clear();	
+
+		// Reset based on filePath passed in
+		bool hasMesh = HasMesh( filePath ); 
+		bool hasAnimation = HasAnimation( filePath );
+		bool hasSkeleton = HasSkeleton( filePath );
+
+		mImportOptions.mShowSkeletonCreateDialogue = hasSkeleton;
+		mImportOptions.mShowAnimationCreateDialgoue = hasAnimation;
+		mImportOptions.mShowMeshCreateDialogue = hasMesh;
+
+		// Other shit...
+
+		return &mImportOptions;
+	}
+	
+
+*/
 
 
 

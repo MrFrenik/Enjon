@@ -9,6 +9,7 @@
 #include "System/Types.h"
 #include "Defines.h"
 #include "Math/Maths.h"
+#include "Asset/Asset.h"
 
 namespace Enjon
 {

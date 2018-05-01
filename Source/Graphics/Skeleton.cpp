@@ -72,15 +72,22 @@ namespace Enjon
 		{
 			Transform t =  animation->CalculateInterpolatedTransform( time, boneID );
 			boneTransform = t.ToMat4x4( );
-		}
+		} 
 
 		// Calculate relative to parent
 		Mat4x4 relativeTransform = parentMatrix * boneTransform;
 
 		// Calculate and set local space matrix
-		outMatrices.at( bone->mID ) = mGlobalInverseTransform * relativeTransform * bone->mInverseBindMatrix;
+		if ( animation != nullptr )
+		{
+			outMatrices.at( bone->mID ) = mGlobalInverseTransform * relativeTransform * bone->mInverseBindMatrix; 
+		}
+		else
+		{
+			outMatrices.at( bone->mID ) = boneTransform;
+		}
 
-		// Iterate through children
+		// Iterate through children 
 		for ( u32 i = 0; i < bone->mChildren.size(); ++i )
 		{
 			CalculateTransform( bone->mChildren.at( i ), relativeTransform, outMatrices, animation, time );				
