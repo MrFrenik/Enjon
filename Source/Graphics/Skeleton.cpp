@@ -13,13 +13,13 @@ namespace Enjon
 { 
 	//====================================================================
 
-	Bone::Bone( )
+	Joint::Joint( )
 	{ 
 	}
 
 	//====================================================================
 
-	Bone::~Bone( )
+	Joint::~Joint( )
 	{ 
 	}
 
@@ -37,9 +37,9 @@ namespace Enjon
  
 	//==================================================================== 
 
-	bool Skeleton::HasBone( const String& name )
+	bool Skeleton::HasJoint( const String& name )
 	{
-		return ( mBoneNameLookup.find( name ) != mBoneNameLookup.end( ) );
+		return ( mJointNameLookup.find( name ) != mJointNameLookup.end( ) );
 	}
 
 	//==================================================================== 
@@ -47,7 +47,7 @@ namespace Enjon
 	Vector< Mat4x4 > Skeleton::GetTransforms( )
 	{
 		Vector< Mat4x4 > matrices;
-		matrices.resize( mBones.size( ) );
+		matrices.resize( mJoints.size( ) );
 		SkeletalAnimation* animation = EngineSubsystem( AssetManager )->GetLoader( Object::GetClass< MeshAssetLoader >( ) )->Cast< MeshAssetLoader >( )->GetAnimation( 0 );
 		static f32 t = 0.0f; 
 		f32 dt = Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( );
@@ -61,36 +61,36 @@ namespace Enjon
 
 	//==================================================================== 
 
-	void Skeleton::CalculateTransform( const u32& boneID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, SkeletalAnimation* animation, const f32& time )
+	void Skeleton::CalculateTransform( const u32& jointID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, SkeletalAnimation* animation, const f32& time )
 	{
-		// Get bone
-		Bone* bone = &mBones.at( boneID );
+		// Get joint
+		Joint* joint = &mJoints.at( jointID );
 
 		// Calculate bone transform ( bone space ) // Identity for now ( No animation )
-		Mat4x4 boneTransform = Mat4x4::Identity( );
+		Mat4x4 jointTransform = Mat4x4::Identity( );
 		if ( animation )
 		{
-			Transform t =  animation->CalculateInterpolatedTransform( time, boneID );
-			boneTransform = t.ToMat4x4( );
+			Transform t =  animation->CalculateInterpolatedTransform( time, jointID );
+			jointTransform = t.ToMat4x4( );
 		} 
 
 		// Calculate relative to parent
-		Mat4x4 relativeTransform = parentMatrix * boneTransform;
+		Mat4x4 relativeTransform = parentMatrix * jointTransform;
 
 		// Calculate and set local space matrix
 		if ( animation != nullptr )
 		{
-			outMatrices.at( bone->mID ) = mGlobalInverseTransform * relativeTransform * bone->mInverseBindMatrix; 
+			outMatrices.at( joint->mID ) = mGlobalInverseTransform * relativeTransform * joint->mInverseBindMatrix; 
 		}
 		else
 		{
-			outMatrices.at( bone->mID ) = boneTransform;
+			outMatrices.at( joint->mID ) = jointTransform;
 		}
 
 		// Iterate through children 
-		for ( u32 i = 0; i < bone->mChildren.size(); ++i )
+		for ( u32 i = 0; i < joint->mChildren.size(); ++i )
 		{
-			CalculateTransform( bone->mChildren.at( i ), relativeTransform, outMatrices, animation, time );				
+			CalculateTransform( joint->mChildren.at( i ), relativeTransform, outMatrices, animation, time );				
 		}
 	} 
 }

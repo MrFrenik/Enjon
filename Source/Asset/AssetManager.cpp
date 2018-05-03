@@ -119,7 +119,7 @@ namespace Enjon
 
 	void AssetManager::Update( const f32 dT )
 	{
-		// In here could check for file updates on hot loaded resources
+		// In here could check for file updates on hot loaded resources 
 	}
 
 	//============================================================================================ 
@@ -270,6 +270,19 @@ namespace Enjon
 
 	//============================================================================================ 
 
+	Result AssetManager::AddToDatabase( const ImportOptions* options )
+	{
+		if ( !options )
+		{
+			return Result::FAILURE;
+		}
+
+		// Grab resource file path
+		return AddToDatabase( options->GetResourceFilePath( ), options->GetDestinationAssetDirectory( ) );
+	}
+
+	//============================================================================================ 
+
 	Result AssetManager::AddToDatabase( const String& resourceFilePath, const String& destDir, bool cache, AssetLocationType locationType )
 	{
 		Result res = Result::SUCCESS;
@@ -324,12 +337,6 @@ namespace Enjon
 				{
 					return Result::FAILURE;
 				}
-
-				//// If file exists, grab that
-				//if ( query->second->Exists( Utils::ToLower( mName ) + qualifiedName ) )
-				//{
-				//	return Result::SUCCESS;
-				//}
 
 				else
 				{
@@ -787,6 +794,17 @@ namespace Enjon
 
 	//======================================================================================================
 
+	const AssetLoader* AssetManager::GetLoaderByResourceFilePath( const String& filePath ) const 
+	{
+		s32 loaderId = this->ConstCast<AssetManager>()->GetLoaderIdxByFileExtension( filePath );
+		if ( Exists( loaderId ) )
+		{
+			return ConstCast< AssetManager >( )->mLoadersByAssetId[ loaderId ];
+		}
+	}
+
+	//======================================================================================================
+
 	const AssetLoader* AssetManager::GetLoaderByAssetClass( const MetaClass* cls ) const
 	{
 		// Get loader id from cls
@@ -925,31 +943,23 @@ namespace Enjon
 
 			return Result::RUNNING;
 		}
-	};
-
-	// Need to assess from asset manager what type of asset is being loaded
-	const ImportOptions* mImportOptions = nullptr;
+	}; 
 
 	// Start import process on asset file drop...
 	AssetLoader* loader = GetLoaderFromResource( filePath ); 
-	if ( loader )
+
+	// Begin import process if not already started
+	if ( loader && !loader->IsImporting() )
 	{
-		mImportOptions = loader->ImportOptions( filePath );
+		loader->StartImport( filePath );
 	}
 
-	// How to do this shit? Need to ask asset manager, "Hey, fucker, what kind of asset is this?". 
-	if ( mImportOptions )
+	if ( loader->IsImporting() )
 	{
-		Result res = mImportOptions->OnEditorView();
-		if ( res == Result::SUCCESS )
-		{
-			// We're done, so result the pointer
-			mImportOptions = nullptr;
-		}
+		loader->DoImport();
 	} 
 
 	// MeshAssetLoader holds its own MeshImportOptions instance internally 
-
 	const ImportOptions* MeshAssetLoader::ImportOptions( const String& filePath )
 	{
 		// Clear previous options from last use

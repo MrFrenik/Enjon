@@ -2,8 +2,12 @@
 // File: MeshAssetLoader.cpp
 
 #include "Asset/MeshAssetLoader.h" 
+#include "Asset/AssetManager.h"
 #include "Graphics/Skeleton.h"
 #include "Graphics/SkeletalAnimation.h"
+#include "ImGui/ImGuiManager.h"
+#include "SubsystemCatalog.h"
+#include "Engine.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -15,17 +19,7 @@ namespace Enjon
 
 	Mat4x4 AIMat4x4ToMat4x4( const aiMatrix4x4& aiMat )
 	{ 
-		// Get transform from offset matrix
-		//aiVector3t<f32> scale;
-		//aiVector3t<f32> axis;
-		//f32 angle;
-		//aiVector3t<f32> position; 
-		//aiMat.Decompose( scale, axis, angle, position );			// Decompose into elements 
- 
 		Mat4x4 mat4 = Mat4x4::Identity( ); 
-		//mat4 *= Mat4x4::Translate( Vec3( position.x, position.y, position.z ) );
-		//mat4 *= QuaternionToMat4x4( Quaternion::AngleAxis( angle, Vec3( axis.x, axis.y, axis.z ) ) );
-		//mat4 *= Mat4x4::Scale( Vec3( scale.x, scale.y, scale.z ) ); 
 
 		mat4.elements[ 0 ] = aiMat.a1;
 		mat4.elements[ 1 ] = aiMat.b1;
@@ -300,24 +294,13 @@ namespace Enjon
 				// Store scene's global inverse transform in skeleton
 				skeleton->mGlobalInverseTransform = AIMat4x4ToMat4x4( scene->mRootNode->mTransformation.Inverse( ) ); 
 
-				// Add root bone to skeleton
-				//aiNode* root = scene->mRootNode;
-				//Bone rootBone;
-				//rootBone.mID = 0; 
-				//rootBone.mName = root->mName.C_Str( );
-				//rootBone.mParentID = -1;
-				//rootBone.mInverseBindMatrix = Mat4x4::Identity( );
-				//skeleton->mRootID = rootBone.mID;;
-				//skeleton->mBones.push_back( rootBone );
-				//skeleton->mBoneNameLookup[ rootBone.mName ] = rootBone.mID;
-
 				// Calculate bone weight size and resize vector
 				u32 totalVertCount = 0;
 				for ( u32 i = 0; i < scene->mNumMeshes; ++i )
 				{
 					totalVertCount += scene->mMeshes[i]->mNumVertices;
 				}
-				skeleton->mVertexBoneData.resize( totalVertCount * ENJON_MAX_NUM_BONES_PER_VERTEX );
+				skeleton->mVertexJointData.resize( totalVertCount * ENJON_MAX_NUM_JOINTS_PER_VERTEX );
 
 				// Continue
 				ProcessNodeSkeletal( scene->mRootNode, scene, skeleton, mesh ); 
@@ -326,7 +309,7 @@ namespace Enjon
 				BuildBoneHeirarchy( scene->mRootNode, nullptr, skeleton );
 
 				// Set root bone id of skeleton
-				skeleton->mRootID = skeleton->mBones.empty() ? 0 : skeleton->mBones.at( 0 ).mID; 
+				skeleton->mRootID = skeleton->mJoints.empty() ? 0 : skeleton->mJoints.at( 0 ).mID; 
 
 				// Store the skeleton for now ( totally just for debugging )
 				mSkeletons.push_back( skeleton );
@@ -390,7 +373,7 @@ namespace Enjon
 		aiAnimation* aiAnim = scene->mAnimations[ 0 ];
 
 		// Resize channel data for animation
-		animation->mChannelData.resize( skeleton->mBones.size() );
+		animation->mChannelData.resize( skeleton->mJoints.size() );
 
 		// Set ticks per second for the animation
 		animation->mTicksPerSecond = aiAnim->mTicksPerSecond;
@@ -405,20 +388,19 @@ namespace Enjon
 			aiNodeAnim* animNode = aiAnim->mChannels[ i ];
 			String channelName = animNode->mNodeName.C_Str();
 
-			// Grab bone...hehe
-			if ( !skeleton->HasBone( channelName ) )
+			if ( !skeleton->HasJoint( channelName ) )
 			{
 				// Error...
-				std::cout << "Ain't got that bone: " + channelName + "\n";
+				std::cout << "Ain't got that joint: " + channelName + "\n";
 				continue;
 				//return;
 			}
 
-			// Get index of bone
-			u32 boneId = skeleton->mBoneNameLookup[ channelName ];
+			// Get index of joint
+			u32 jointID = skeleton->mJointNameLookup[ channelName ];
 
 			// Get channel by id
-			ChannelData* channelData = &animation->mChannelData.at( boneId );
+			ChannelData* channelData = &animation->mChannelData.at( jointID );
 
 			// Position data
 			for ( u32 i = 0; i < animNode->mNumPositionKeys; ++i )
@@ -485,26 +467,26 @@ namespace Enjon
 
 	void MeshAssetLoader::BuildBoneHeirarchy( const aiNode* node, const aiNode* parent, Skeleton* skeleton )
 	{ 
-		u32 boneIndex = 0;
+		u32 jointIndex = 0;
 
-		// Grab bone index
-		if ( skeleton->HasBone( node->mName.C_Str( ) ) )
+		// Grab joint index
+		if ( skeleton->HasJoint( node->mName.C_Str( ) ) )
 		{
-			boneIndex = skeleton->mBoneNameLookup[ node->mName.C_Str( ) ];
+			jointIndex = skeleton->mJointNameLookup[ node->mName.C_Str( ) ];
 
 			// If parent is valid ( not root )
 			if ( parent )
 			{
 				// Set parent id
-				if ( skeleton->HasBone( parent->mName.C_Str( ) ) )
+				if ( skeleton->HasJoint( parent->mName.C_Str( ) ) )
 				{
-					u32 parentID = skeleton->mBoneNameLookup[ parent->mName.C_Str( ) ];
-					skeleton->mBones.at( boneIndex ).mParentID = parentID;
+					u32 parentID = skeleton->mJointNameLookup[ parent->mName.C_Str( ) ];
+					skeleton->mJoints.at( jointIndex ).mParentID = parentID;
 				} 
 			}
 			else
 			{
-				skeleton->mBones.at( boneIndex ).mParentID = -1;
+				skeleton->mJoints.at( jointIndex ).mParentID = -1;
 			}
 
 			// Set children for this node
@@ -514,16 +496,16 @@ namespace Enjon
 				aiNode* child = node->mChildren[ i ];
 
 				// If exists, then set index of child
-				if ( skeleton->HasBone( child->mName.C_Str( ) ) )
+				if ( skeleton->HasJoint( child->mName.C_Str( ) ) )
 				{
-					skeleton->mBones.at( boneIndex ).mChildren.push_back( skeleton->mBoneNameLookup[ child->mName.C_Str( ) ] );
+					skeleton->mJoints.at( jointIndex ).mChildren.push_back( skeleton->mJointNameLookup[ child->mName.C_Str( ) ] );
 				} 
 
 				// Do heiarchy for this child
 				BuildBoneHeirarchy( child, node, skeleton );
 			}
 		}
-		// Can't find bone, so continue, I suppose...
+		// Can't find joint, so continue, I suppose...
 		else 
 		{ 
 			// Children of this node, but pass in previous parent	
@@ -532,13 +514,13 @@ namespace Enjon
 				aiNode* child = node->mChildren[ i ]; 
 
 				// Try to add child to parent
-				if ( skeleton->HasBone( child->mName.C_Str( ) ) )
+				if ( skeleton->HasJoint( child->mName.C_Str( ) ) )
 				{
-					if ( parent && skeleton->HasBone( parent->mName.C_Str( ) ) )
+					if ( parent && skeleton->HasJoint( parent->mName.C_Str( ) ) )
 					{
-						u32 childIdx = skeleton->mBoneNameLookup[ child->mName.C_Str( ) ];
-						u32 parentIdx = skeleton->mBoneNameLookup[ parent->mName.C_Str( ) ];
-						skeleton->mBones.at( parentIdx ).mChildren.push_back( childIdx );
+						u32 childIdx = skeleton->mJointNameLookup[ child->mName.C_Str( ) ];
+						u32 parentIdx = skeleton->mJointNameLookup[ parent->mName.C_Str( ) ];
+						skeleton->mJoints.at( parentIdx ).mChildren.push_back( childIdx );
 					}
 				}
 
@@ -563,47 +545,34 @@ namespace Enjon
 			// Grab bone pointer
 			aiBone* aBone = aim->mBones[i];
 
-			// Get bone id ( which is the amount of bones )
-			u32 boneID = skeleton->mBones.size( );
-			String boneName( aBone->mName.data ); 
+			// Get joint id ( which is the amount of bones )
+			u32 jointID = skeleton->mJoints.size( );
+			String jointName( aBone->mName.data ); 
 
 			// If joint not found in skeleton name lookup then construct new bone and push back
-			if ( skeleton->mBoneNameLookup.find( boneName ) == skeleton->mBoneNameLookup.end( ) )
+			if ( skeleton->mJointNameLookup.find( jointName ) == skeleton->mJointNameLookup.end( ) )
 			{ 
-				// Construct new bone
-				Bone bone; 
+				// Construct new joint
+				Joint joint; 
 				// Set id
-				bone.mID = boneID;
+				joint.mID = jointID;
 				// Set bone name
-				bone.mName = boneName;
+				joint.mName = jointName;
 
-				// Set up bone offset
+				// Set up joint offset
 				aiMatrix4x4 offsetMatrix = aBone->mOffsetMatrix;
-				bone.mInverseBindMatrix = AIMat4x4ToMat4x4( aBone->mOffsetMatrix );
-
-				// Get transform from offset matrix
-				//aiVector3t<f32> scale;
-				//aiVector3t<f32> axis;
-				//f32 angle;
-				//aiVector3t<f32> position; 
-				//offsetMatrix.Decompose( scale, axis, angle, position );			// Decompose into elements
-
-				//// Construct matrix from transform 
-				//bone.mInverseBindMatrix = Mat4x4::Identity( );
-				//bone.mInverseBindMatrix *= Mat4x4::Translate( Vec3( position.x, position.y, position.z ) );
-				//bone.mInverseBindMatrix *= QuaternionToMat4x4( Quaternion::AngleAxis( angle, Vec3( axis.x, axis.y, axis.z ) ) );
-				//bone.mInverseBindMatrix *= Mat4x4::Scale( Vec3( scale.x, scale.y, scale.z ) ); 
+				joint.mInverseBindMatrix = AIMat4x4ToMat4x4( aBone->mOffsetMatrix ); 
 
 				// Push bone back 
-				skeleton->mBones.push_back( bone ); 
+				skeleton->mJoints.push_back( joint ); 
 
 				// Set mapping between bone id and name
-				skeleton->mBoneNameLookup[boneName] = bone.mID; 
+				skeleton->mJointNameLookup[jointName] = joint.mID; 
 
 			} 
 			else
 			{
-				boneID = skeleton->mBoneNameLookup[ boneName ];
+				jointID = skeleton->mJointNameLookup[ jointName ];
 			} 
 
 			// Set weights for vertices that this bone effects
@@ -619,13 +588,13 @@ namespace Enjon
 				u32 vertID = baseVertexID + aiWeight.mVertexId; 
 
 				// Add vertex bone data
-				for ( u32 k = 0; k < ENJON_MAX_NUM_BONES_PER_VERTEX; ++k )
+				for ( u32 k = 0; k < ENJON_MAX_NUM_JOINTS_PER_VERTEX; ++k )
 				{
 					// We loop the weights until we find one not set
-					if ( skeleton->mVertexBoneData.at( vertID ).mWeights[k] == 0.0f )
+					if ( skeleton->mVertexJointData.at( vertID ).mWeights[k] == 0.0f )
 					{
-						skeleton->mVertexBoneData.at( vertID ).mWeights[k] = weight;
-						skeleton->mVertexBoneData.at( vertID ).mIDS[k] = boneID;
+						skeleton->mVertexJointData.at( vertID ).mWeights[k] = weight;
+						skeleton->mVertexJointData.at( vertID ).mIDS[k] = jointID;
 
 						// We set a weight, so break out
 						break;
@@ -687,15 +656,15 @@ namespace Enjon
 			u32 vertID = baseVertexID + i; 
 
 			// Bone Indices
-			for ( u32 i = 0; i < ENJON_MAX_NUM_BONES_PER_VERTEX; ++i )
+			for ( u32 i = 0; i < ENJON_MAX_NUM_JOINTS_PER_VERTEX; ++i )
 			{
-				sm->mVertexData.Write< f32 >( (f32)skeleton->mVertexBoneData.at( vertID ).mIDS[ i ] );
+				sm->mVertexData.Write< f32 >( (f32)skeleton->mVertexJointData.at( vertID ).mIDS[ i ] );
 			}
 
 			// Bone Weights
-			for ( u32 i = 0; i < ENJON_MAX_NUM_BONES_PER_VERTEX; ++i ) 
+			for ( u32 i = 0; i < ENJON_MAX_NUM_JOINTS_PER_VERTEX; ++i ) 
 			{
-				sm->mVertexData.Write< f32 >( skeleton->mVertexBoneData.at( vertID ).mWeights[ i ] );
+				sm->mVertexData.Write< f32 >( skeleton->mVertexJointData.at( vertID ).mWeights[ i ] );
 			} 
 		}
 
@@ -929,6 +898,89 @@ namespace Enjon
 		sm->mDrawCount = sm->mVertexData.GetSize( ) / vertDecl.GetSizeInBytes( ); 
 	}
 
+	//=====================================================================================================
+
+	void MeshAssetLoader::BeginImporting( const String& filepath )
+	{
+		// Do things here...
+	}
+
+	//=====================================================================================================
+
+	const ImportOptions* MeshAssetLoader::GetImportOptions( ) const
+	{
+		return &mImportOptions;
+	} 
+
+	//=====================================================================================================
+
+	Result MeshImportOptions::OnEditorView( )
+	{
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
+		//  Create skeleton
+		if ( mShowSkeletonCreateDialogue )
+		{
+			bool createSkeleton = mCreateSkeleton;
+			if ( igm->CheckBox( "Skeleton", &createSkeleton ) )
+			{
+				mCreateSkeleton = createSkeleton; 
+			}
+		}
+
+		if ( mShowMeshCreateDialogue )
+		{ 
+			bool createMesh = mCreateMesh;
+			if ( igm->CheckBox( "Mesh", &createMesh ) )
+			{
+				mCreateMesh = createMesh;
+			}
+		} 
+
+		if ( mShowAnimationCreateDialogue )
+		{
+			bool createAnimations = mCreateAnimations;
+			if ( igm->CheckBox( "Animation", &createAnimations ) )
+			{
+				mCreateAnimations = createAnimations;
+			}
+		}
+
+		// Skeletal asset drop down
+		if ( mShowAnimationCreateDialogue && !mShowSkeletonCreateDialogue )   // However this would work...
+		{
+			// Grab all skeletons in database
+			const HashMap< String, AssetRecordInfo >* skeletons = EngineSubsystem( AssetManager )->GetAssets< Skeleton >();	
+
+			// Need combo box...	
+			for ( auto& s : *skeletons )
+			{
+				// Assign skeleton
+				if ( igm->Selectable( s.second.GetAssetName() ) )
+				{
+					mSkeletonAsset = s.second.GetAsset();	
+				}
+			}
+		}
+
+		// Make sure can import at this point
+		if ( igm->Button( "Import" ) )
+		{
+			// Load asset into database
+			EngineSubsystem( AssetManager )->AddToDatabase( this );
+
+			// Return successful operation
+			return Result::SUCCESS;
+		}
+
+		if ( igm->Button( "Cancel" ) )
+		{
+			return Result::SUCCESS;
+		}
+
+		return Result::PROCESS_RUNNING;
+	} 
+	
 	//=====================================================================================================
 } 
 

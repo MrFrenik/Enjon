@@ -5,6 +5,7 @@
 #ifndef ENJON_MESH_ASSET_LOADER_H
 #define ENJON_MESH_ASSET_LOADER_H 
 
+#include "Asset/ImportOptions.h"
 #include "Asset/AssetLoader.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Skeleton.h"
@@ -16,7 +17,40 @@ struct aiScene;
 
 namespace Enjon
 {
+	// Forward Declarations
+	class MeshAssetLoader;
 	class SkeletalAnimation;
+
+	class MeshImportOptions : public ImportOptions
+	{
+		friend MeshAssetLoader;
+
+		public:
+
+			/*
+			* @brief
+			*/
+			MeshImportOptions( ) = default;
+
+			/*
+			* @brief
+			*/
+			~MeshImportOptions( ) = default;
+
+			/*
+			* @brief
+			*/
+			virtual Result OnEditorView( ) override; 
+
+		protected: 
+			u32 mShowSkeletonCreateDialogue : 1;
+			u32 mCreateSkeleton : 1;
+			u32 mShowMeshCreateDialogue : 1;
+			u32 mCreateMesh : 1;
+			u32 mShowAnimationCreateDialogue : 1;
+			u32 mCreateAnimations : 1;
+			AssetHandle< Skeleton > mSkeletonAsset;
+	};
 
 	ENJON_CLASS()
 	class MeshAssetLoader : public AssetLoader
@@ -58,12 +92,22 @@ namespace Enjon
 			* @brief
 			*/
 			virtual void RegisterDefaultAsset( ) override;
+
+			/**
+			* @brief
+			*/
+			virtual void BeginImporting( const String& filepath ) override;
+
+			/**
+			* @brief
+			*/
+			virtual const ImportOptions* GetImportOptions( ) const override;
 			
 		private: 
 			/**
 			* @brief Destructor
 			*/
-			virtual Asset* LoadResourceFromFile(const String& filePath ) override; 
+			virtual Asset* LoadResourceFromFile( const String& filePath ) override; 
 
 			/**
 			* @brief
@@ -89,6 +133,7 @@ namespace Enjon
 
 			Vector< Skeleton* > mSkeletons;
 			Vector< SkeletalAnimation* > mAnimations;
+			MeshImportOptions mImportOptions;
 	}; 
 }
 

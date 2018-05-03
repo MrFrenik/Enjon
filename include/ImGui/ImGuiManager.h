@@ -288,6 +288,21 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			bool CheckBox( const String& text, bool* option = nullptr );
+
+			/**
+			* @brief
+			*/
+			bool Button( const String& text );
+
+			/**
+			* @brief
+			*/
+			bool Selectable( const String& text );
+
+			/**
+			* @brief
+			*/
 			void Separator( );
 
 			/**

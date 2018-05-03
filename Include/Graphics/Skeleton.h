@@ -12,7 +12,7 @@
 #include "Asset/Asset.h" 
 #include "Graphics/Mesh.h"
 
-#define ENJON_MAX_NUM_BONES_PER_VERTEX		4
+#define ENJON_MAX_NUM_JOINTS_PER_VERTEX		4
 
 namespace Enjon
 {
@@ -21,7 +21,7 @@ namespace Enjon
 	class MeshAssetLoader;
 	class Skeleton;
 
-	class Bone
+	class Joint
 	{ 
 		friend MeshAssetLoader;
 		friend Skeleton;
@@ -31,12 +31,12 @@ namespace Enjon
 			/*
 			* @brief Constructor
 			*/
-			Bone( );
+			Joint( );
 
 			/*
 			* @brief Constructor
 			*/
-			~Bone( );
+			~Joint( );
 
 		protected:
 			s32					mParentID;
@@ -46,24 +46,27 @@ namespace Enjon
 			String				mName;
 	}; 
 
-	struct VertexBoneData
+	struct VertexJointData
 	{
-		VertexBoneData( )
+		VertexJointData( )
 		{
 			// Init data
-			for ( u32 i = 0; i < ENJON_MAX_NUM_BONES_PER_VERTEX; ++i )
+			for ( u32 i = 0; i < ENJON_MAX_NUM_JOINTS_PER_VERTEX; ++i )
 			{
 				mWeights[i] = 0.0f;
 				mIDS[i] = 0;
 			}
 		}
 
-		f32 mWeights[ENJON_MAX_NUM_BONES_PER_VERTEX];
-		u32 mIDS[ENJON_MAX_NUM_BONES_PER_VERTEX];
+		f32 mWeights[ENJON_MAX_NUM_JOINTS_PER_VERTEX];
+		u32 mIDS[ENJON_MAX_NUM_JOINTS_PER_VERTEX];
 	};
 
+	ENJON_CLASS( )
 	class Skeleton : public Asset
 	{ 
+		ENJON_CLASS_BODY( )
+
 		friend MeshAssetLoader;
 
 		public:
@@ -81,7 +84,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			bool HasBone( const String& name );
+			bool HasJoint( const String& name );
 
 			/*
 			* @brief
@@ -93,14 +96,14 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void CalculateTransform( const u32& boneID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, SkeletalAnimation* animation, const f32& time );
+			void CalculateTransform( const u32& jointID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, SkeletalAnimation* animation, const f32& time );
 
 		protected: 
 			u32							mRootID;
-			Vector< Bone >				mBones;
-			HashMap< String, u32 >		mBoneNameLookup;
+			Vector< Joint >				mJoints;
+			HashMap< String, u32 >		mJointNameLookup;
 			Mat4x4						mGlobalInverseTransform;
-			Vector< VertexBoneData >	mVertexBoneData;
+			Vector< VertexJointData >	mVertexJointData;
 	};
 }
 

@@ -308,12 +308,31 @@ namespace Enjon
 				std::cout << "Dropped files: \n";
 				for ( auto& f : dropFiles )
 				{
+					// Push back file 
+					mFilesToImport.push_back( f );
+
+					// This shouldn't happen here anymore...
 					am->AddToDatabase( f, mCurrentDirectory, true );
+
+					// Start import process on asset file drop...
+					AssetLoader* loader = am->GetLoaderByResourceFilePath( f )->ConstCast< AssetLoader >( );
+
+					// Begin import process if not already started ( this will take several frames, so need to make sure to do cache off list and process them one at a time... )
+					if ( loader && !loader->IsImporting() )
+					{
+						loader->BeginImport( f );
+					} 
 				}
 			}
 
 			ImGui::ListBoxFooter( ); 
 		} 
+
+		// Here need to process file importing...
+		/*
+			If there's a loader currently importing something, then process that here. Otherwise, 
+			while there are files to be imported, begin import process 
+		*/
 
 		// Do active popup window
 		if ( ActivePopupWindowEnabled( ) )

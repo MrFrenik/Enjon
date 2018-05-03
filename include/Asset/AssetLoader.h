@@ -5,6 +5,7 @@
 #ifndef ENJON_ASSET_LOADER_H
 #define ENJON_ASSET_LOADER_H 
 
+#include "Asset/ImportOptions.h"
  #include "Asset/Asset.h" 
 #include "Serialize/CacheRegistryManifest.h"
 #include "Defines.h"
@@ -167,7 +168,17 @@ namespace Enjon
 			*/
 			bool Exists( UUID uuid ) const; 
 
-		protected:
+			/**
+			* @brief
+			*/
+			bool IsImporting( ) const;
+
+			/**
+			* @brief
+			*/
+			virtual void BeginImport( const String& filepath );
+
+		protected: 
 
 			/**
 			* @brief
@@ -183,6 +194,11 @@ namespace Enjon
 			* @brief
 			*/
 			void RenameAssetFilePath( Asset* asset, const String& path );
+
+			/**
+			* @brief
+			*/
+			virtual const ImportOptions* GetImportOptions( ) const;
 
 			/**
 			* @brief Templated argument to get asset of specific type by name
@@ -342,7 +358,7 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
-			virtual Asset* LoadResourceFromFile( const String& filePath ) = 0;
+			virtual Asset* LoadResourceFromFile( const String& filePath ) = 0; 
 	};
 } 
 

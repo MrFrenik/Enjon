@@ -8,6 +8,7 @@
 #include "System/Types.h"
 #include "Asset/AssetLoader.h"
 #include "Serialize/CacheRegistryManifest.h"
+#include "Asset/ImportOptions.h"
 #include "Defines.h" 
 #include "Engine.h"
 
@@ -15,7 +16,7 @@
 
 namespace Enjon
 {
-	class AssetLoader;
+	class AssetLoader; 
 	class Asset; 
 
 	ENJON_CLASS( )
@@ -71,14 +72,19 @@ namespace Enjon
 			void Reinitialize( const String& assetsPath );
 	
 			/**
-			*@brief Adds asset to project form given file path
+			*@brief Adds asset to project from given file path
 			*/
 			Result AddToDatabase( const String& resourceFilePath, bool cache = true, bool isRelativePath = true, AssetLocationType locationType = AssetLocationType::ApplicationAsset );
 
 			/**
-			*@brief Adds asset to project form given file path
+			*@brief Adds asset to project from given file path
 			*/
 			Result AddToDatabase( const String& resourceFilePath, const String& destDir, bool cache = true, AssetLocationType locationType = AssetLocationType::ApplicationAsset );
+
+			/**
+			*@brief Adds asset to project from given import options
+			*/
+			Result AddToDatabase( const ImportOptions* options );
 
 			/*
 			*@brief
@@ -196,6 +202,11 @@ namespace Enjon
 			const AssetLoader* GetLoader( const MetaClass* cls ) const;
 
 			/**
+			* @brief Gets loader by resource file path. If not found, returns nullptr;
+			*/
+			const AssetLoader* GetLoaderByResourceFilePath( const String& filePath ) const;
+
+			/**
 			*@brief Gets loader by meta class of asset type. If not found, returns nullptr.
 			*/
 			template <typename T>
@@ -228,7 +239,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			s32 GetLoaderIdxByFileExtension(const String& filePath);
+			s32 GetLoaderIdxByFileExtension( const String& filePath );
 
 			/**
 			*@brief

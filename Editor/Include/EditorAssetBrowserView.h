@@ -78,6 +78,7 @@ namespace Enjon
 
 			PopupWindow* mActivePopupWindow = nullptr;
 			const Asset* mSelectedAsset = nullptr;
+			Vector< String > mFilesToImport;
 	};
 }
 
