@@ -900,11 +900,29 @@ namespace Enjon
 
 	//=====================================================================================================
 
-	Result MeshAssetLoader::BeginImportInternal( const String& filepath, const String& cacheDirectory )
+	Result MeshAssetLoader::BeginImportInternal( const String& filePath, const String& cacheDirectory )
 	{
 		// Do things here...
-		mImportOptions.mResourceFilePath = filepath;
-		mImportOptions.mDestinationAssetDirectory = cacheDirectory;
+		mImportOptions.mResourceFilePath = filePath;
+		mImportOptions.mDestinationAssetDirectory = cacheDirectory; 
+
+		// Construct new mesh from filepath 
+		Assimp::Importer importer;
+
+		// NOTE(): Flipping UVs FUCKS IT ALL because I'm already flipping UVs in the shader generation process (shadergraph). Need to fix this.  
+		const aiScene* scene = importer.ReadFile( filePath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace );
+
+		if ( !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
+		{
+			// Error 
+		} 
+
+		// Check whether or not the scene has animations
+		mImportOptions.mShowAnimationCreateDialogue = scene->HasAnimations( );
+		// Will construct the skeleton here if has bones and we want to create a new skeleton in the import process
+		mImportOptions.mShowMeshCreateDialogue = HasSkeleton( scene->mRootNode, scene );
+		// Detect whether or not scene has any mesh data
+		mImportOptions.mShowSkeletonCreateDialogue = HasMesh( scene->mRootNode, scene );
 
 		return Result::SUCCESS;
 	}
@@ -956,14 +974,17 @@ namespace Enjon
 			// Grab all skeletons in database
 			const HashMap< String, AssetRecordInfo >* skeletons = EngineSubsystem( AssetManager )->GetAssets< Skeleton >();	
 
-			// Need combo box...	
-			for ( auto& s : *skeletons )
+			if ( skeletons )
 			{
-				// Assign skeleton
-				if ( igm->Selectable( s.second.GetAssetName() ) )
+				// Need combo box...	
+				for ( auto& s : *skeletons )
 				{
-					mSkeletonAsset = s.second.GetAsset();	
-				}
+					// Assign skeleton
+					if ( igm->Selectable( s.second.GetAssetName() ) )
+					{
+						mSkeletonAsset = s.second.GetAsset();	
+					}
+				} 
 			}
 		}
 

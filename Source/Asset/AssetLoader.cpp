@@ -473,11 +473,16 @@ namespace Enjon
 			// Begin internal import process
 			Result res = BeginImportInternal( filePath, cacheDirectory );
 		} 
+		else
+		{
+			// Basic import at this process
+			EngineSubsystem( AssetManager )->AddToDatabase( filePath, cacheDirectory ); 
+		}
 	} 
 
 	//=================================================================
 
-	Result AssetLoader::BeginImportInternal( const String& filepath, const String& cacheDirectory )
+	Result AssetLoader::BeginImportInternal( const String& filePath, const String& cacheDirectory )
 	{
 		// Nothing by default, so reset...	
 		if ( GetImportOptions( ) )
