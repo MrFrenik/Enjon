@@ -303,24 +303,18 @@ namespace Enjon
 			AssetManager* am = EngineSubsystem( AssetManager );
 			auto window = EngineSubsystem( GraphicsSubsystem )->GetWindow( )->ConstCast< Window >();
 			auto dropFiles = window->GetDroppedFiles( );
-			if ( dropFiles.size( ) )
+
+			// Only process newly dropped files if we're not currently loading the previously dropped files
+			if ( dropFiles.size( ) && !mCurrentAssetLoader )
 			{
 				std::cout << "Dropped files: \n";
 				for ( auto& f : dropFiles )
 				{
-					// Push back file 
-					mFilesToImport.push_back( f );
-
-					// This shouldn't happen here anymore...
-					am->AddToDatabase( f, mCurrentDirectory, true );
-
-					// Start import process on asset file drop...
-					AssetLoader* loader = am->GetLoaderByResourceFilePath( f )->ConstCast< AssetLoader >( );
-
-					// Begin import process if not already started ( this will take several frames, so need to make sure to do cache off list and process them one at a time... )
-					if ( loader && !loader->IsImporting() )
+					// Have to make sure doesn't exit already in asset manager before inserting
+					if ( !am->AssetExists( f, mCurrentDirectory ) )
 					{
-						loader->BeginImport( f );
+						// Push back file 
+						mFilesToImport.insert( f ); 
 					} 
 				}
 			}
@@ -328,11 +322,8 @@ namespace Enjon
 			ImGui::ListBoxFooter( ); 
 		} 
 
-		// Here need to process file importing...
-		/*
-			If there's a loader currently importing something, then process that here. Otherwise, 
-			while there are files to be imported, begin import process 
-		*/
+		// Check for any file drops that have occurred
+		ProcessFileDrops( );
 
 		// Do active popup window
 		if ( ActivePopupWindowEnabled( ) )
@@ -345,6 +336,47 @@ namespace Enjon
 			mPathNeedsRename = true;
 		}
 
+	}
+
+	//=========================================================================
+
+	void EditorAssetBrowserView::ProcessFileDrops( )
+	{
+		if ( !mFilesToImport.empty() )
+		{
+			// If a current asset loader hasn't been processed yet
+			if ( mCurrentAssetLoader == nullptr )
+			{
+				// Get next file to pop off
+				auto elem = mFilesToImport.begin( );
+				String filePath = *elem;
+				mFilesToImport.erase( elem );
+
+				// Grab asset loader
+				AssetManager* am = EngineSubsystem( AssetManager );
+				mCurrentAssetLoader = am->GetLoaderByResourceFilePath( filePath )->ConstCast< AssetLoader >(); 
+
+				// Begin the import process using the loader
+				if ( mCurrentAssetLoader && !mCurrentAssetLoader->IsImporting( ) )
+				{
+					mCurrentAssetLoader->BeginImport( filePath, mCurrentDirectory );
+				}
+			}
+		}
+
+		// Reset current asset loader if done with importing previous file
+		if ( mCurrentAssetLoader )
+		{
+			// Done, so reset to nullptr
+			if ( !mCurrentAssetLoader->IsImporting( ) )
+			{
+				mCurrentAssetLoader = nullptr; 
+			}
+			else
+			{
+				mCurrentAssetLoader->ConstCast< AssetLoader >( )->GetImportOptions( )->ConstCast< ImportOptions >( )->OnEditorUI( );
+			}
+		}
 	}
 
 	//=========================================================================

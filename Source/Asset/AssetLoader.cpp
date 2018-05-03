@@ -457,14 +457,37 @@ namespace Enjon
 		{
 			return GetImportOptions()->IsImporting( );
 		}
+
+		return false;
 	}
 
 	//=================================================================
 
-	void AssetLoader::BeginImport( const String& filepath )
+	void AssetLoader::BeginImport( const String& filePath, const String& cacheDirectory )
 	{ 
-		// Not sure what to do here...
+		if ( GetImportOptions( ) )
+		{
+			// Set import options to importing
+			GetImportOptions( )->ConstCast< ImportOptions >()->mIsImporting = true;
+
+			// Begin internal import process
+			Result res = BeginImportInternal( filePath, cacheDirectory );
+		} 
 	} 
+
+	//=================================================================
+
+	Result AssetLoader::BeginImportInternal( const String& filepath, const String& cacheDirectory )
+	{
+		// Nothing by default, so reset...	
+		if ( GetImportOptions( ) )
+		{
+			// Set import options to importing
+			GetImportOptions( )->ConstCast< ImportOptions >()->mIsImporting = false; 
+		}
+
+		return Result::SUCCESS;
+	}
 
 	//=================================================================
 

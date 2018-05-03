@@ -11,8 +11,15 @@
 
 namespace Enjon
 {
-	class ImportOptions
+	class AssetLoader;
+
+	ENJON_CLASS( )
+	class ImportOptions : public Object
 	{
+		friend AssetLoader;
+
+		ENJON_CLASS_BODY( )
+
 		public:
 
 			/*
@@ -23,12 +30,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			~ImportOptions( ) = default;
-
-			/*
-			* @brief
-			*/
-			virtual Result OnEditorView( ) = 0; 
+			~ImportOptions( ) = default; 
 
 			/*
 			* @brief
@@ -43,12 +45,24 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			String GetDestinationAssetDirectory( ) const;
+			String GetDestinationAssetDirectory( ) const; 
+
+			/*
+			* @brief
+			*/
+			virtual Result OnEditorUI( ) override; 
+
+		protected:
+
+			/*
+			* @brief
+			*/
+			virtual Result OnEditorUIInternal( ) = 0;
 
 		protected: 
 			String mResourceFilePath;
 			String mDestinationAssetDirectory; 
-			u32 mIsImporting : 1;
+			bool mIsImporting = false;
 	}; 
 }
 

@@ -900,9 +900,13 @@ namespace Enjon
 
 	//=====================================================================================================
 
-	void MeshAssetLoader::BeginImporting( const String& filepath )
+	Result MeshAssetLoader::BeginImportInternal( const String& filepath, const String& cacheDirectory )
 	{
 		// Do things here...
+		mImportOptions.mResourceFilePath = filepath;
+		mImportOptions.mDestinationAssetDirectory = cacheDirectory;
+
+		return Result::SUCCESS;
 	}
 
 	//=====================================================================================================
@@ -914,7 +918,7 @@ namespace Enjon
 
 	//=====================================================================================================
 
-	Result MeshImportOptions::OnEditorView( )
+	Result MeshImportOptions::OnEditorUIInternal( )
 	{
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
@@ -967,16 +971,9 @@ namespace Enjon
 		if ( igm->Button( "Import" ) )
 		{
 			// Load asset into database
-			EngineSubsystem( AssetManager )->AddToDatabase( this );
-
-			// Return successful operation
+			EngineSubsystem( AssetManager )->AddToDatabase( this ); 
 			return Result::SUCCESS;
-		}
-
-		if ( igm->Button( "Cancel" ) )
-		{
-			return Result::SUCCESS;
-		}
+		} 
 
 		return Result::PROCESS_RUNNING;
 	} 

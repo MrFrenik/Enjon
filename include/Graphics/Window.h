@@ -90,7 +90,7 @@ namespace Enjon
 			SDL_Window* GetWindowContext() { return m_sdlWindow; }
 			SDL_Window* GetSDLWindow() { return m_sdlWindow; }
 
-			const Vector<String>& GetDroppedFiles( ); 
+			const HashSet<String>& GetDroppedFiles( ); 
 
 			static void SetWindowCursor( CursorType type );
 
@@ -106,7 +106,7 @@ namespace Enjon
 			int m_screenWidth;
 			int m_screenHeight;
 			bool m_isfullscreen; 
-			Vector<String> mDroppedFiles;
+			HashSet<String> mDroppedFiles;
 			bool mNeedToClearDroppedFiles = false;
 			static HashMap<CursorType, SDL_Cursor*> mSDLCursors;
 	};

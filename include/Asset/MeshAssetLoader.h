@@ -37,10 +37,12 @@ namespace Enjon
 			*/
 			~MeshImportOptions( ) = default;
 
+		protected:
+
 			/*
 			* @brief
 			*/
-			virtual Result OnEditorView( ) override; 
+			virtual Result OnEditorUIInternal( ) override; 
 
 		protected: 
 			u32 mShowSkeletonCreateDialogue : 1;
@@ -86,6 +88,11 @@ namespace Enjon
 				return mAnimations.at( index );
 			}
 
+			/**
+			* @brief
+			*/
+			virtual const ImportOptions* GetImportOptions( ) const override;
+
 		protected:
 
 			/**
@@ -96,12 +103,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual void BeginImporting( const String& filepath ) override;
-
-			/**
-			* @brief
-			*/
-			virtual const ImportOptions* GetImportOptions( ) const override;
+			virtual Result BeginImportInternal( const String& filepath, const String& cacheDirectory ) override; 
 			
 		private: 
 			/**

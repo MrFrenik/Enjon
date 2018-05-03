@@ -111,7 +111,7 @@ namespace Enjon {
 		mNeedToClearDroppedFiles = false;
 	}
 
-	const Vector<String>& Window::GetDroppedFiles( )
+	const HashSet<String>& Window::GetDroppedFiles( )
 	{
 		mNeedToClearDroppedFiles = true;
 		return mDroppedFiles;
@@ -172,7 +172,7 @@ namespace Enjon {
 			case SDL_DROPFILE:
 			{ 
 				// Push back new dropped file
-				mDroppedFiles.push_back( String(event.drop.file) ); 
+				mDroppedFiles.insert( String(event.drop.file) ); 
 
 				// Just released, so need to explicitly set button state 
 				EngineSubsystem( Input )->SetButtonState( KeyCode::LeftMouseButton, false, true ); 

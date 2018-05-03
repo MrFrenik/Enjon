@@ -20,6 +20,7 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+#include <queue>
 
 namespace Enjon
 {
@@ -42,6 +43,9 @@ namespace Enjon
 
 	template <typename T>
 	using HashSet = std::unordered_set<T>;
+
+	template <typename T>
+	using Queue = std::queue<T>;
 }
 
 #endif

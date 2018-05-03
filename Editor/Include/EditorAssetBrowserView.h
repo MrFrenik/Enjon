@@ -15,6 +15,7 @@ namespace Enjon
 {
 	class Project; 
 	class Asset;
+	class AssetLoader;
 
 	class EditorAssetBrowserView : public EditorView
 	{
@@ -65,6 +66,7 @@ namespace Enjon
 
 			bool ActivePopupWindowEnabled( );
 
+			void ProcessFileDrops( ); 
 
 		protected: 
 			String mCurrentDirectory = "";
@@ -78,7 +80,8 @@ namespace Enjon
 
 			PopupWindow* mActivePopupWindow = nullptr;
 			const Asset* mSelectedAsset = nullptr;
-			Vector< String > mFilesToImport;
+			HashSet<String> mFilesToImport;
+			AssetLoader* mCurrentAssetLoader = nullptr;
 	};
 }
 

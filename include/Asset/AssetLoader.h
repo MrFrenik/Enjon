@@ -174,11 +174,21 @@ namespace Enjon
 			bool IsImporting( ) const;
 
 			/**
-			* @brief
+			* @brief Construct import options to use
 			*/
-			virtual void BeginImport( const String& filepath );
+			void BeginImport( const String& filepath, const String& cacheDirectory );
+
+			/**
+			* @brief 
+			*/
+			virtual const ImportOptions* GetImportOptions( ) const;
 
 		protected: 
+
+			/**
+			* @brief
+			*/
+			virtual Result BeginImportInternal( const String& filepath, const String& cacheDirectory );
 
 			/**
 			* @brief
@@ -193,12 +203,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void RenameAssetFilePath( Asset* asset, const String& path );
-
-			/**
-			* @brief
-			*/
-			virtual const ImportOptions* GetImportOptions( ) const;
+			void RenameAssetFilePath( Asset* asset, const String& path ); 
 
 			/**
 			* @brief Templated argument to get asset of specific type by name

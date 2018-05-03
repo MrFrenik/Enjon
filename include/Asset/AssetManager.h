@@ -86,6 +86,16 @@ namespace Enjon
 			*/
 			Result AddToDatabase( const ImportOptions* options );
 
+			/**
+			*@brief Adds asset to project from given import options
+			*/
+			String GetAssetQualifiedName( const String& resourceFilePath, const String& cacheDirectory );
+
+			/**
+			*@brief
+			*/
+			bool AssetExists( const String& resourceFilePath, const String& cacheDirectory );
+
 			/*
 			*@brief
 			*/

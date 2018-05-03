@@ -270,6 +270,46 @@ namespace Enjon
 
 	//============================================================================================ 
 
+	String AssetManager::GetAssetQualifiedName( const String& resourceFilePath, const String& cacheDirectory )
+	{
+		// Get original name of asset
+		String resourceFilePathName = Utils::FindReplaceAll( resourceFilePath, "\\", "/" );
+		Vector<String> splits = Utils::SplitString( resourceFilePathName, "/" );
+		// Get back of splits for file name
+		resourceFilePathName = splits.back( );
+
+		// Get asset name
+		String assetDisplayName = Utils::SplitString( resourceFilePathName, "." ).at( 0 );
+
+		// Construct asset path
+		String destAssetPath = Utils::FindReplaceAll( cacheDirectory + "/" + resourceFilePathName, "\\", "/" );
+ 
+		// Get qualified name of asset
+		String qualifiedName = AssetLoader::GetQualifiedName( destAssetPath );
+
+		return qualifiedName; 
+	}
+
+	//============================================================================================ 
+
+	bool AssetManager::AssetExists( const String& resourceFilePath, const String& cacheDirectory )
+	{
+		// Get qualified name of asset
+		String qualifiedName = GetAssetQualifiedName( resourceFilePath, cacheDirectory );
+
+		const AssetLoader* loader = GetLoaderByResourceFilePath( resourceFilePath );
+
+		// Check if exists in asset loader
+		if ( loader )
+		{
+			return loader->Exists( qualifiedName );
+		}
+
+		return false;
+	}
+
+	//============================================================================================ 
+
 	Result AssetManager::AddToDatabase( const ImportOptions* options )
 	{
 		if ( !options )
@@ -801,6 +841,8 @@ namespace Enjon
 		{
 			return ConstCast< AssetManager >( )->mLoadersByAssetId[ loaderId ];
 		}
+
+		return nullptr;
 	}
 
 	//======================================================================================================
