@@ -37,6 +37,11 @@ namespace Enjon
 			*/
 			~MeshImportOptions( ) = default;
 
+			/*
+			* @brief
+			*/
+			AssetHandle< Skeleton > GetSkeleton( ) const;
+
 		protected:
 
 			/*
@@ -112,6 +117,11 @@ namespace Enjon
 			virtual Asset* LoadResourceFromFile( const String& filePath ) override; 
 
 			/**
+			* @brief 
+			*/
+			virtual Asset* LoadResourceFromImporter( const ImportOptions* options ) override;
+
+			/**
 			* @brief
 			*/
 			void ProcessNode( aiNode* node, const aiScene* scene, Mesh* mesh );
@@ -125,9 +135,9 @@ namespace Enjon
 
 			bool HasMesh( aiNode* node, const aiScene* scene );
 
-			void ProcessSkeletalMesh( aiMesh* aim, const aiScene* scene, Skeleton* skeleton, Mesh* mesh );
+			void ProcessSkeletalMesh( aiMesh* aim, const aiScene* scene, Skeleton* skeleton, Mesh* mesh, Vector< VertexJointData >* vertexJointData );
 
-			void ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleon, Mesh* mesh ); 
+			void ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleon, Mesh* mesh, Vector< VertexJointData >* vertexJointData ); 
 
 			void ProcessAnimNode( aiNode* node, const aiScene* scene, Skeleton* skeleton, SkeletalAnimation* animation );
 

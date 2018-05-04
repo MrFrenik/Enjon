@@ -256,22 +256,10 @@ namespace Enjon
 		return nullptr;
 	}
 
-	/*
-		How to create a new material asset and then serialize it?
-
-		// Needs a unique name:
-		//	- Save out default name as "New" + cls->GetName() + unique instance number // For instance, a new material will have name "NewMaterial1", if there was one other existing file named "NewMaterial"
-		AssetHandle<Asset> AssetManager::CreateAsset( const MetaClass* cls )
-		{
-
-		}
-
-	*/
-
 	//============================================================================================ 
 
-	String AssetManager::GetAssetQualifiedName( const String& resourceFilePath, const String& cacheDirectory )
-	{
+	AssetStringInformation AssetManager::GetAssetQualifiedInformation( const String& resourceFilePath, const String& cacheDirectory )
+	{ 
 		// Get original name of asset
 		String resourceFilePathName = Utils::FindReplaceAll( resourceFilePath, "\\", "/" );
 		Vector<String> splits = Utils::SplitString( resourceFilePathName, "/" );
@@ -287,7 +275,7 @@ namespace Enjon
 		// Get qualified name of asset
 		String qualifiedName = AssetLoader::GetQualifiedName( destAssetPath );
 
-		return qualifiedName; 
+		return AssetStringInformation{ qualifiedName, assetDisplayName, destAssetPath };
 	}
 
 	//============================================================================================ 
@@ -295,14 +283,14 @@ namespace Enjon
 	bool AssetManager::AssetExists( const String& resourceFilePath, const String& cacheDirectory )
 	{
 		// Get qualified name of asset
-		String qualifiedName = GetAssetQualifiedName( resourceFilePath, cacheDirectory );
+		AssetStringInformation info = GetAssetQualifiedInformation( resourceFilePath, cacheDirectory );
 
 		const AssetLoader* loader = GetLoaderByResourceFilePath( resourceFilePath );
 
 		// Check if exists in asset loader
 		if ( loader )
 		{
-			return loader->Exists( qualifiedName );
+			return loader->Exists( info.mQualifiedName );
 		}
 
 		return false;
@@ -315,10 +303,71 @@ namespace Enjon
 		if ( !options )
 		{
 			return Result::FAILURE;
+		} 
+
+		Result res = Result::SUCCESS;
+
+		bool needToCache = false;
+
+		Asset* asset = nullptr;
+
+		// If loader not valid, fail
+		if ( !options->GetLoader( ) || !Exists( options->GetLoader()->Class() ) )
+		{
+			return Result::FAILURE;
 		}
 
-		// Grab resource file path
-		return AddToDatabase( options->GetResourceFilePath( ), options->GetDestinationAssetDirectory( ) );
+		// Grab loader from options
+		AssetLoader* loader = options->GetLoader( )->ConstCast< AssetLoader >( );
+ 
+		// Grab asset info
+		AssetStringInformation assetInfo = GetAssetQualifiedInformation( options->GetResourceFilePath(), options->GetDestinationAssetDirectory() ); 
+
+		// Make sure it doesn't exist already before trying to load it
+		if ( loader->Exists( assetInfo.mQualifiedName ) )
+		{
+			return Result::FAILURE;
+		}
+
+		// Return failure if path doesn't exist
+		if ( !Utils::FileExists( options->GetResourceFilePath( ) ) )
+		{
+			return Result::FAILURE;
+		}
+
+		// Load the asset from import options
+		asset = loader->LoadResourceFromImporter( options );
+
+		// If asset is valid
+		if ( asset )
+		{
+			// Add to loader assets with asset record info
+			AssetRecordInfo info;
+			asset->mName = assetInfo.mQualifiedName;
+			asset->mFilePath = assetInfo.mAssetDestinationPath;				// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
+			asset->mUUID = UUID::GenerateUUID( );
+			asset->mLoader = loader;
+			info.mAsset = asset;
+			info.mAssetName = asset->mName;
+			info.mAssetUUID = asset->mUUID;
+			info.mAssetFilePath = assetInfo.mAssetDestinationPath;							// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
+			info.mAssetDisplayName = assetInfo.mDisplayName;
+			info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+
+			// Add to loader
+			loader->AddToAssets( info );
+		} 
+		// Could not load asset
+		else
+		{
+			return Result::FAILURE;
+		}
+ 
+		// Cache asset afterwards
+		res = SerializeAsset( asset, assetInfo.mQualifiedName, options->GetDestinationAssetDirectory( ) );
+
+		// Return successful state
+		return Result::SUCCESS;
 	}
 
 	//============================================================================================ 
@@ -339,21 +388,8 @@ namespace Enjon
 		{
 			return Result::FAILURE;
 		}
-
-		// Get original name of asset
-		String resourceFilePathName = Utils::FindReplaceAll( resourceFilePath, "\\", "/" );
-		Vector<String> splits = Utils::SplitString( resourceFilePathName, "/" );
-		// Get back of splits for file name
-		resourceFilePathName = splits.back( );
-
-		// Get asset name
-		String assetDisplayName = Utils::SplitString( resourceFilePathName, "." ).at( 0 );
-
-		// Construct asset path
-		String destAssetPath = Utils::FindReplaceAll( destDir + "/" + resourceFilePathName, "\\", "/" );
- 
-		// Get qualified name of asset
-		String qualifiedName = AssetLoader::GetQualifiedName( destAssetPath );
+		
+		AssetStringInformation assetInfo = GetAssetQualifiedInformation( resourceFilePath, destDir ); 
 
 		auto query = mLoadersByAssetId.find( ( u32 )idx );
 		if ( query != mLoadersByAssetId.end( ) )
@@ -364,7 +400,7 @@ namespace Enjon
 			}
 
 			// Make sure it doesn't exist already before trying to load it
-			if ( query->second->Exists( qualifiedName ) )
+			if ( query->second->Exists( assetInfo.mQualifiedName ) )
 			{
 				return Result::FAILURE;
 			}
@@ -391,15 +427,15 @@ namespace Enjon
 					{
 						// Add to loader assets with asset record info
 						AssetRecordInfo info;
-						asset->mName = qualifiedName;
-						asset->mFilePath = destAssetPath;				// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
+						asset->mName = assetInfo.mQualifiedName;
+						asset->mFilePath = assetInfo.mAssetDestinationPath;				// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
 						asset->mUUID = UUID::GenerateUUID( );
 						asset->mLoader = query->second;
 						info.mAsset = asset;
 						info.mAssetName = asset->mName;
 						info.mAssetUUID = asset->mUUID;
-						info.mAssetFilePath = destAssetPath;							// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
-						info.mAssetDisplayName = assetDisplayName;
+						info.mAssetFilePath = assetInfo.mAssetDestinationPath;							// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
+						info.mAssetDisplayName = assetInfo.mDisplayName;
 						info.mAssetLoadStatus = AssetLoadStatus::Loaded;
 
 						// Add to loader
@@ -417,7 +453,7 @@ namespace Enjon
 		if ( needToCache && cache )
 		{
 			// Handle serialization of asset file
-			res = SerializeAsset( asset, qualifiedName, destDir );
+			res = SerializeAsset( asset, assetInfo.mQualifiedName, destDir );
 		}
 
 		return res;

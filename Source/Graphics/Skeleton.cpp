@@ -3,6 +3,8 @@
 
 #include "Graphics/Skeleton.h"
 #include "Asset/MeshAssetLoader.h"
+#include "Asset/SkeletalMeshAssetLoader.h"
+#include "Asset/SkeletonAssetLoader.h"
 #include "Graphics/SkeletalAnimation.h"
 #include "Asset/AssetManager.h"
 #include "Asset/MeshAssetLoader.h"
@@ -37,7 +39,7 @@ namespace Enjon
  
 	//==================================================================== 
 
-	bool Skeleton::HasJoint( const String& name )
+	bool Skeleton::HasJoint( const String& name ) const
 	{
 		return ( mJointNameLookup.find( name ) != mJointNameLookup.end( ) );
 	}
@@ -93,6 +95,27 @@ namespace Enjon
 			CalculateTransform( joint->mChildren.at( i ), relativeTransform, outMatrices, animation, time );				
 		}
 	} 
+
+	//==================================================================== 
+
+	u32 Skeleton::GetNumberOfJoints( ) const
+	{
+		return mJoints.size( );
+	}
+
+	//==================================================================== 
+
+	s32 Skeleton::GetJointIndex( const String& name ) const
+	{
+		if ( HasJoint( name ) )
+		{
+			return mJointNameLookup.at( name );
+		}
+
+		return -1;
+	}
+
+	//==================================================================== 
 }
 
 

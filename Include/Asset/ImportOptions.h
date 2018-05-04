@@ -52,6 +52,11 @@ namespace Enjon
 			*/
 			virtual Result OnEditorUI( ) override; 
 
+			/*
+			* @brief
+			*/
+			const AssetLoader* GetLoader( ) const;
+
 		protected:
 
 			/*
@@ -63,6 +68,7 @@ namespace Enjon
 			String mResourceFilePath;
 			String mDestinationAssetDirectory; 
 			bool mIsImporting = false;
+			const AssetLoader* mLoader = nullptr;
 	}; 
 }
 

@@ -11,8 +11,15 @@
 #include "Asset/AssetLoader.h"
 #include "Graphics/SkeletalAnimation.h"
 
+// Assimp specifics
+struct aiMesh;
+struct aiNode;
+struct aiScene;
+
 namespace Enjon
 {
+	class Skeleton;
+
 	ENJON_CLASS()
 	class SkeletalAnimationAssetLoader : public AssetLoader
 	{
@@ -30,19 +37,29 @@ namespace Enjon
 			*/
 			~SkeletalAnimationAssetLoader(); 
 
+			/**
+			* @brief 
+			*/
+			virtual Asset* DirectImport( const ImportOptions* options ) override;
+
 		protected:
 
 			/**
 			* @brief
 			*/
-			virtual void RegisterDefaultAsset( ) override;
-
-		private: 
+			virtual void RegisterDefaultAsset( ) override; 
 
 			/**
-			* @brief Destructor
+			* @brief 
 			*/
-			virtual Asset* LoadResourceFromFile(const String& filePath ) override; 
+			virtual Asset* LoadResourceFromImporter( const ImportOptions* options ) override;
+
+		private:
+
+			/**
+			* @brief 
+			*/
+			void ProcessAnimNode( aiNode* node, const aiScene* scene, const AssetHandle< Skeleton >& skeleton, SkeletalAnimation* animation );
 
 	}; 
 }

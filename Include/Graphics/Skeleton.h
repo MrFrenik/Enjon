@@ -18,12 +18,17 @@ namespace Enjon
 {
 	// Forward Declarations
 	class SkeletalAnimation;
-	class MeshAssetLoader;
+	class SkeletalMeshAssetLoader;
+	class SkeletonAssetLoader;
 	class Skeleton;
 
-	class Joint
+	ENJON_CLASS( )
+	class Joint : public Object
 	{ 
-		friend MeshAssetLoader;
+		ENJON_CLASS_BODY( )
+
+		friend SkeletonAssetLoader;
+		friend SkeletalMeshAssetLoader;
 		friend Skeleton;
 
 		public: 
@@ -67,7 +72,8 @@ namespace Enjon
 	{ 
 		ENJON_CLASS_BODY( )
 
-		friend MeshAssetLoader;
+		friend SkeletonAssetLoader;
+		friend SkeletalMeshAssetLoader;
 
 		public:
 
@@ -84,12 +90,22 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			bool HasJoint( const String& name );
+			bool HasJoint( const String& name ) const;
 
 			/*
 			* @brief
 			*/
 			Vector< Mat4x4 > GetTransforms( );
+
+			/*
+			* @brief
+			*/
+			u32 GetNumberOfJoints( ) const;
+
+			/*
+			* @brief
+			*/
+			s32 GetJointIndex( const String& name ) const;
 
 		private:
 
@@ -99,11 +115,17 @@ namespace Enjon
 			void CalculateTransform( const u32& jointID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, SkeletalAnimation* animation, const f32& time );
 
 		protected: 
+			ENJON_PROPERTY( HideInEditor )
 			u32							mRootID;
+
+			ENJON_PROPERTY( HideInEditor )
 			Vector< Joint >				mJoints;
+
+			ENJON_PROPERTY( HideInEditor )
 			HashMap< String, u32 >		mJointNameLookup;
-			Mat4x4						mGlobalInverseTransform;
-			Vector< VertexJointData >	mVertexJointData;
+ 
+			// Can't Serialize this just yet...
+			Mat4x4						mGlobalInverseTransform; 
 	};
 }
 

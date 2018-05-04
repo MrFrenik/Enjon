@@ -2,6 +2,7 @@
 #include "Graphics/Mesh.h"
 #include "Asset/MeshAssetLoader.h"
 #include "Serialize/ObjectArchiver.h"
+#include "Asset/SkeletalMeshAssetLoader.h"
 
 namespace Enjon 
 { 

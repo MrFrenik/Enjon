@@ -14,9 +14,9 @@
 namespace Enjon
 {
 	// Forward Declarations
-	class MeshAssetLoader;
 	class Skeleton;
 	class SkeletalAnimation;
+	class SkeletalAnimationAssetLoader;
 	class ChannelData;
 
 	template <typename T>
@@ -24,7 +24,7 @@ namespace Enjon
 	{ 
 		friend ChannelData;
 		friend SkeletalAnimation;
-		friend MeshAssetLoader;
+		friend SkeletalAnimationAssetLoader;
 		friend Skeleton;
 
 		public:
@@ -68,7 +68,7 @@ namespace Enjon
 	ENJON_CLASS( Construct )
 	class SkeletalAnimation : public Asset
 	{ 
-		friend MeshAssetLoader;
+		friend SkeletalAnimationAssetLoader;
 		friend Skeleton;
 
 		ENJON_CLASS_BODY( )

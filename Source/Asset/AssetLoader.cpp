@@ -301,6 +301,27 @@ namespace Enjon
 
 	//=================================================================
 
+	Asset* AssetLoader::LoadResourceFromImporter( const ImportOptions* options )
+	{
+		return nullptr;
+	}
+
+	//=================================================================
+
+	Asset* AssetLoader::LoadResourceFromFile( const String& filePath )
+	{
+		return nullptr;
+	}
+
+	//=================================================================
+
+	Asset* AssetLoader::DirectImport( const ImportOptions* options )
+	{
+		return nullptr;
+	}
+
+	//=================================================================
+
 	bool AssetLoader::Exists( const String& name ) const
 	{
 		auto query = mAssetsByName.find( name );

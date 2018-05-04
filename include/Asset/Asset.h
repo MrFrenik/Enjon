@@ -168,7 +168,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			UUID GetUUID( )
+			UUID GetUUID( ) const
 			{
 				// Return UUID if valid
 				if ( IsValid( ) )
@@ -227,7 +227,7 @@ namespace Enjon
 			/*
 			* @brief 
 			*/
-			bool IsValid()
+			bool IsValid() const
 			{
 				return (mAsset != nullptr);
 			} 

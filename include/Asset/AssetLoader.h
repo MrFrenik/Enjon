@@ -183,6 +183,11 @@ namespace Enjon
 			*/
 			virtual const ImportOptions* GetImportOptions( ) const;
 
+			/**
+			* @brief DO NOT CALL DIRECTLY
+			*/
+			virtual Asset* DirectImport( const ImportOptions* options );
+
 		protected: 
 
 			/**
@@ -347,6 +352,7 @@ namespace Enjon
 			*/
 			const Asset* AddToAssets( const AssetRecordInfo& info ); 
 
+
 		protected:
 			
 			HashMap< String, AssetRecordInfo* > mAssetsByName;
@@ -363,7 +369,12 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
-			virtual Asset* LoadResourceFromFile( const String& filePath ) = 0; 
+			virtual Asset* LoadResourceFromFile( const String& filePath ); 
+
+			/**
+			* @brief 
+			*/
+			virtual Asset* LoadResourceFromImporter( const ImportOptions* options ); 
 	};
 } 
 

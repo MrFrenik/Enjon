@@ -2,7 +2,7 @@
 // Copyright 2016-2018 John Jackson. All Rights Reserved.
 
 #include "Graphics/SkeletalAnimation.h"
-#include "Asset/MeshAssetLoader.h"
+#include "Asset/SkeletalAnimationAssetLoader.h"
 #include "Graphics/Skeleton.h"
 
 namespace Enjon

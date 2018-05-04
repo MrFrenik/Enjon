@@ -11,6 +11,7 @@
 namespace Enjon 
 { 
 	// Forward Declarations
+	class SkeletalMeshAssetLoader;
 	class SubMesh;
 	class Mesh;
 	class MeshAssetLoader; 
@@ -31,6 +32,7 @@ namespace Enjon
 	ENJON_CLASS( )
 	class VertexDataDeclaration : public Object
 	{
+		friend SkeletalMeshAssetLoader;
 		friend MeshAssetLoader;
 		friend SubMesh;
 		friend Mesh;
@@ -98,6 +100,7 @@ namespace Enjon
 	ENJON_CLASS( Construct )
 	class SubMesh : public Object
 	{ 
+		friend SkeletalMeshAssetLoader;
 		friend MeshAssetLoader;
 		friend Mesh;
 
@@ -259,7 +262,7 @@ namespace Enjon
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
-		private:
+		protected:
 
 			/*
 			* @brief

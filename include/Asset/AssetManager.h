@@ -19,6 +19,13 @@ namespace Enjon
 	class AssetLoader; 
 	class Asset; 
 
+	struct AssetStringInformation
+	{
+		String mQualifiedName;
+		String mDisplayName;
+		String mAssetDestinationPath;
+	};
+
 	ENJON_CLASS( )
 	class AssetManager : public Subsystem
 	{
@@ -84,12 +91,12 @@ namespace Enjon
 			/**
 			*@brief Adds asset to project from given import options
 			*/
-			Result AddToDatabase( const ImportOptions* options );
+			Result AddToDatabase( const ImportOptions* options ); 
 
 			/**
 			*@brief Adds asset to project from given import options
 			*/
-			String GetAssetQualifiedName( const String& resourceFilePath, const String& cacheDirectory );
+			AssetStringInformation GetAssetQualifiedInformation( const String& resourceFilePath, const String& cacheDirectory );
 
 			/**
 			*@brief
@@ -237,14 +244,16 @@ namespace Enjon
 			*/
 			static bool HasAnyAssetFileExtension( const String& file );
 
+			/**
+			*@brief Adds asset to project form given file path 
+			*@note DO NOT CALL DIRECTLY; THIS IS CURRENTLY JUST USED FOR ASSET LOADERS TO BE ABLE TO SERIALIZE ASSETS CORRECTLY INTERNALLY
+			*/
+			Result SerializeAsset( const Asset* asset, const String& assetName, const String& path = "" );
+
 		protected:
 
 		private: 
 
-			/**
-			*@brief Adds asset to project form given file path
-			*/
-			Result SerializeAsset( const Asset* asset, const String& assetName, const String& path = "" );
 
 			/**
 			*@brief
