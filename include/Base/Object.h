@@ -49,7 +49,7 @@ namespace Enjon
 		Vec2,
 		Vec3,
 		Vec4,
-		Mat4,
+		Mat4x4,
 		Quat,
 		Enum,
 		UUID,

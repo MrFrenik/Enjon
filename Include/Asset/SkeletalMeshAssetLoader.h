@@ -9,6 +9,7 @@
 #include "Asset/AssetLoader.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Skeleton.h"
+#include "Graphics/SkeletalMesh.h"
 
 // Assimp specifics
 struct aiMesh;

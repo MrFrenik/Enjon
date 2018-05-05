@@ -83,6 +83,7 @@ void Introspection::InitPropertyMap( )
 	STRING_TO_PROP( "Array", Array )
 	STRING_TO_PROP( "HashMap", HashMap )
 	STRING_TO_PROP( "Vector", Array )
+	STRING_TO_PROP( "Mat4x4", Mat4x4 )
 }
 
 

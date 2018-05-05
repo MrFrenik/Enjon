@@ -4,6 +4,9 @@
 #include "Asset/SkeletalAnimationAssetLoader.h" 
 #include "Asset/MeshAssetLoader.h"
 #include "Graphics/Skeleton.h"
+#include "Asset/AssetManager.h"
+#include "SubsystemCatalog.h"
+#include "Engine.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -39,7 +42,10 @@ namespace Enjon
 
 		if ( animation )
 		{
-			// Register it correctly, cache it correctly...
+			// Register, cache asset
+			MeshImportOptions mo = *options->ConstCast< MeshImportOptions >( ); 
+			mo.mLoader = this; 
+			EngineSubsystem( AssetManager )->AddToDatabase( animation, &mo );
 		}
 
 		// Return mesh after processing

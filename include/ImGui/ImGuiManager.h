@@ -293,6 +293,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void SameLine( );
+
+			/**
+			* @brief
+			*/
 			bool Button( const String& text );
 
 			/**

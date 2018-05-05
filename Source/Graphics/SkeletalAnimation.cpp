@@ -9,6 +9,121 @@ namespace Enjon
 { 
 	//=============================================================== 
 
+	Result ChannelData::SerializeData( ByteBuffer* buffer ) const
+	{ 
+		// Write out rotation key size
+		buffer->Write< usize >( mRotationKeys.size( ) );
+
+		// Write out rotation keys
+		for ( auto& k : mRotationKeys )
+		{
+			// Time stamp
+			buffer->Write< f32 >( k.mTimeStamp );
+
+			// Quaternion rotation
+			buffer->Write< f32 >( k.mValue.x );
+			buffer->Write< f32 >( k.mValue.y );
+			buffer->Write< f32 >( k.mValue.z );
+			buffer->Write< f32 >( k.mValue.w );
+		}
+
+		// Write out position key size
+		buffer->Write< usize >( mPositionKeys.size( ) ); 
+
+		// Write out position keys
+		for ( auto& k : mPositionKeys )
+		{
+			// Time stamp
+			buffer->Write< f32 >( k.mTimeStamp );
+
+			// Vec3 position
+			buffer->Write< f32 >( k.mValue.x );
+			buffer->Write< f32 >( k.mValue.y );
+			buffer->Write< f32 >( k.mValue.z );
+		}
+
+		// Write out scale key size
+		buffer->Write< usize >( mScaleKeys.size( ) ); 
+
+		// Write out position keys
+		for ( auto& k : mScaleKeys )
+		{
+			// Time stamp
+			buffer->Write< f32 >( k.mTimeStamp );
+
+			// Vec3 scale
+			buffer->Write< f32 >( k.mValue.x );
+			buffer->Write< f32 >( k.mValue.y );
+			buffer->Write< f32 >( k.mValue.z ); 
+		} 
+
+		return Result::SUCCESS;
+	}
+
+	//=============================================================== 
+	
+	Result ChannelData::DeserializeData( ByteBuffer* buffer )
+	{
+		// Read in rotation key size
+		mRotationKeys.resize( buffer->Read< usize >( ) );
+
+		// Write out rotation keys
+		for ( usize i = 0; i < mRotationKeys.size( ); ++i )
+		{
+			// Grab reference to keyframe
+			KeyFrame< Quaternion >& k = mRotationKeys.at( i ); 
+			
+			// Time stamp
+			k.mTimeStamp = buffer->Read< f32 >( );
+
+			// Quaternion rotation
+			k.mValue.x = buffer->Read< f32 >( );
+			k.mValue.y = buffer->Read< f32 >( );
+			k.mValue.z = buffer->Read< f32 >( );
+			k.mValue.w = buffer->Read< f32 >( );
+		}
+
+		// Read in rotation key size
+		mPositionKeys.resize( buffer->Read< usize >( ) );
+
+		// Write out rotation keys
+		for ( usize i = 0; i < mPositionKeys.size( ); ++i )
+		{
+			// Grab reference to keyframe
+			KeyFrame< Vec3 >& k = mPositionKeys.at( i ); 
+			
+			// Time stamp
+			k.mTimeStamp = buffer->Read< f32 >( );
+
+			// Vec3 position
+			k.mValue.x = buffer->Read< f32 >( );
+			k.mValue.y = buffer->Read< f32 >( );
+			k.mValue.z = buffer->Read< f32 >( );
+		}
+
+		// Read in scale key size
+		mScaleKeys.resize( buffer->Read< usize >( ) );
+
+		// Write out rotation keys
+		for ( usize i = 0; i < mScaleKeys.size( ); ++i )
+		{
+			// Grab reference to keyframe
+			KeyFrame< Vec3 >& k = mPositionKeys.at( i ); 
+			
+			// Time stamp
+			k.mTimeStamp = buffer->Read< f32 >( );
+
+			// Vec3 scale
+			k.mValue.x = buffer->Read< f32 >( );
+			k.mValue.y = buffer->Read< f32 >( );
+			k.mValue.z = buffer->Read< f32 >( );
+		} 
+
+		return Result::SUCCESS;
+	}
+
+	//=============================================================== 
+
 	u32 ChannelData::GetRotationFrameID( const f32& time )
 	{
 		for ( u32 i = 1; i < mRotationKeys.size( ); ++i )
@@ -128,6 +243,53 @@ namespace Enjon
 		Vec3 lerpScl = Vec3::Lerp( scale, nextScale, sclFactor );
 
 		return Transform( lerpPos, lerpRot, lerpScl );
+	}
+
+	//=============================================================== 
+
+	Result SkeletalAnimation::SerializeData( ByteBuffer* buffer ) const
+	{ 
+		// Channel data size
+		buffer->Write< usize >( mChannelData.size( ) );
+
+		// Write out channel data
+		for ( auto& c : mChannelData )
+		{
+			c.SerializeData( buffer );
+		} 
+
+		// Ticks per second
+		buffer->Write< f32 >( mTicksPerSecond );
+
+		// Number of ticks
+		buffer->Write< f32 >( mNumberOfTicks ); 
+
+		return Result::SUCCESS;
+	}
+
+	//=============================================================== 
+
+	Result SkeletalAnimation::DeserializeData( ByteBuffer* buffer )
+	{
+		// Read in channel data size
+		mChannelData.resize( buffer->Read< usize >( ) );
+
+		// Read in channel data
+		for ( usize i = 0; i < mChannelData.size( ); ++i )
+		{ 
+			// Grab reference to channel data
+			ChannelData& c = mChannelData.at( i );
+
+			c.DeserializeData( buffer );
+		}
+
+		// Ticks per second
+		mTicksPerSecond = buffer->Read< f32 >( );
+
+		// Number of ticks
+		mNumberOfTicks = buffer->Read< f32 >( ); 
+
+		return Result::SUCCESS; 
 	}
 
 	//=============================================================== 

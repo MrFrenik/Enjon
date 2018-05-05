@@ -13,6 +13,13 @@ namespace Enjon
 {
 	class AssetLoader;
 
+	struct AssetStringInformation
+	{
+		String mQualifiedName;
+		String mDisplayName;
+		String mAssetDestinationPath;
+	};
+
 	ENJON_CLASS( )
 	class ImportOptions : public Object
 	{
@@ -57,6 +64,16 @@ namespace Enjon
 			*/
 			const AssetLoader* GetLoader( ) const;
 
+			/*
+			* @brief
+			*/
+			bool UseAssetInfoOverrideInformation( ) const;
+
+			/*
+			* @brief
+			*/
+			AssetStringInformation GetAssetOverrideInformation( ) const;
+
 		protected:
 
 			/*
@@ -67,7 +84,10 @@ namespace Enjon
 		protected: 
 			String mResourceFilePath;
 			String mDestinationAssetDirectory; 
+			String mAssetName = "";
 			bool mIsImporting = false;
+			AssetStringInformation mOverrideInformation;
+			bool mUseAssetInfoOverride = false;
 			const AssetLoader* mLoader = nullptr;
 	}; 
 }

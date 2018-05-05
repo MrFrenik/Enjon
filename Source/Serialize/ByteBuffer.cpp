@@ -4,6 +4,7 @@
 #include "Serialize/ByteBuffer.h"
 #include "Utils/FileUtils.h"
 #include "Serialize/UUID.h"
+#include "Math/Mat4.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -157,7 +158,24 @@ namespace Enjon
 		return uuid;
 	}
 
-	//========================================================================
+	//======================================================================== 
+
+	template<>
+	Mat4x4 ByteBuffer::Read< Mat4x4 >( )
+	{
+		// Matrix to fill
+		Mat4x4 mat;
+
+		// Fill matrix elements from buffer
+		for ( u32 i = 0; i < 16; ++i )
+		{
+			mat.elements[i] = Read< f32 >( ); 
+		}
+
+		return mat;
+	}
+
+	//======================================================================== 
 
 	template < typename T >
 	void ByteBuffer::Write( const T& val )
@@ -186,6 +204,20 @@ namespace Enjon
 		mWritePosition += size;
 		mSize += size;
 	}
+
+	//======================================================================== 
+
+	template<>
+	void ByteBuffer::Write< Mat4x4 >( const Mat4x4& mat )
+	{
+		// Write out element buffer
+		for ( auto& e : mat.elements )
+		{
+			Write< f32 >( e );
+		}
+	}
+
+	//======================================================================== 
 
 	template<>
 	void ByteBuffer::Write< String >( const String& val )
@@ -220,6 +252,8 @@ namespace Enjon
 			mSize += 1;
 		}
 	}
+
+	//======================================================================== 
 
 	template<>
 	void ByteBuffer::Write< UUID >( const UUID& val )
@@ -386,5 +420,6 @@ namespace Enjon
 	BYTE_BUFFER_RW( u64 )
 	BYTE_BUFFER_RW( f64 )
 	BYTE_BUFFER_RW( usize )
+	BYTE_BUFFER_RW( Mat4x4 )
 }
 

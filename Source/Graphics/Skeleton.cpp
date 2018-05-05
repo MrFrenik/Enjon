@@ -116,6 +116,116 @@ namespace Enjon
 	}
 
 	//==================================================================== 
+
+	Result Skeleton::SerializeData( ByteBuffer* buffer ) const
+	{ 
+		// Write out root id
+		buffer->Write< u32 >( mRootID );
+
+		// Write out size of joints
+		buffer->Write< usize >( GetNumberOfJoints( ) );
+
+		// Write out joints
+		for ( auto& j : mJoints )
+		{
+			j.SerializeData( buffer );
+		}
+
+		// Write out joint name lookup map
+		for ( auto& j : mJointNameLookup )
+		{
+			buffer->Write< String >( j.first );
+			buffer->Write< u32 >( j.second );
+		}
+
+		// Write out global inverse matrix
+		buffer->Write< Mat4x4 >( mGlobalInverseTransform );
+
+		return Result::SUCCESS;
+	}
+
+	//==================================================================== 
+
+	Result Skeleton::DeserializeData( ByteBuffer* buffer )
+	{
+		// Read in root id
+		mRootID = buffer->Read< u32 >( ); 
+
+		// Resize number of joints
+		mJoints.resize( buffer->Read< usize >( ) );
+
+		// Write out joints
+		for ( usize i = 0; i < mJoints.size( ); ++i )
+		{
+			mJoints.at( i ).DeserializeData( buffer );
+		}
+
+		// Read in joint map name data
+		for ( u32 i = 0; i < mJoints.size( ); ++i )
+		{
+			String key = buffer->Read< String >( );
+			u32 val = buffer->Read< u32 >( );
+			mJointNameLookup[key] = val;
+		}
+
+		// Read in global inverse matrix
+		mGlobalInverseTransform = buffer->Read< Mat4x4 >( );
+
+		return Result::SUCCESS;
+	}
+
+	//==================================================================== 
+
+	Result Joint::SerializeData( ByteBuffer* buffer ) const
+	{ 
+		// Write out parent id
+		buffer->Write< s32 >( mParentID );
+
+		// Write out children id size
+		buffer->Write< usize >( mChildren.size( ) );
+
+		// Write out children ids
+		for ( auto& c : mChildren )
+		{
+			buffer->Write< u32 >( c );
+		}
+
+		// Write out id
+		buffer->Write< u32 >( mID );
+
+		// Write out inverse bind matrix
+		buffer->Write< Mat4x4 >( mInverseBindMatrix ); 
+
+		return Result::SUCCESS;
+	}
+
+	//==================================================================== 
+
+	Result Joint::DeserializeData( ByteBuffer* buffer )
+	{
+		// Read in parent id
+		mParentID = buffer->Read< s32 >( );
+
+		// Read in children size
+		mChildren.resize( buffer->Read< usize >( ) );
+
+		// Read in children ids
+		for ( usize i = 0; i < mChildren.size( ); ++i )
+		{
+			mChildren.at( i ) = buffer->Read< u32 >( );
+		}
+
+		// Read in id
+		mID = buffer->Read< u32 >( );
+
+		// Read in inverse bind matrix
+		mInverseBindMatrix = buffer->Read< Mat4x4 >( );
+
+		return Result::SUCCESS;
+	}
+
+	//==================================================================== 
+
 }
 
 

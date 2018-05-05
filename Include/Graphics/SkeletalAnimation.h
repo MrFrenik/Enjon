@@ -54,15 +54,50 @@ namespace Enjon
 			f32 mTimeStamp;
 	};
 
-	struct ChannelData
+	ENJON_CLASS( )
+	class ChannelData : public Object
 	{
-		u32 GetRotationFrameID( const f32& time );
-		u32 GetPositionFrameID( const f32& time );
-		u32 GetScaleFrameID( const f32& time );
+		ENJON_CLASS_BODY( )
 
-		Vector< KeyFrame< Quaternion > > mRotationKeys;
-		Vector< KeyFrame< Vec3 > > mPositionKeys;
-		Vector< KeyFrame< Vec3 > > mScaleKeys;
+		public: 
+			/*
+			* @brief
+			*/
+			ChannelData( ) = default;
+
+			/*
+			* @brief
+			*/
+			~ChannelData( ) = default;
+
+			/*
+			* @brief
+			*/
+			u32 GetRotationFrameID( const f32& time );
+
+			/*
+			* @brief
+			*/ 
+			u32 GetPositionFrameID( const f32& time );
+
+			/*
+			* @brief
+			*/
+			u32 GetScaleFrameID( const f32& time );
+
+			/*
+			* @brief
+			*/
+			Result SerializeData( ByteBuffer* buffer ) const override;
+			
+			/*
+			* @brief
+			*/
+			Result DeserializeData( ByteBuffer* buffer ) override;
+
+			Vector< KeyFrame< Quaternion > > mRotationKeys;
+			Vector< KeyFrame< Vec3 > > mPositionKeys;
+			Vector< KeyFrame< Vec3 > > mScaleKeys;
 	};
 
 	ENJON_CLASS( Construct )
@@ -93,13 +128,25 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			f32 GetDuration( ) const;
+			f32 GetDuration( ) const; 
 
-		protected: 
+			/*
+			* @brief
+			*/
+			virtual Result SerializeData( ByteBuffer* buffer ) const override;
+
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
 		private:
 			Vector< ChannelData > mChannelData;
+
+			ENJON_PROPERTY( HideInEditor )
 			f32 mTicksPerSecond = 30.0f;
+
+			ENJON_PROPERTY( HideInEditor )
 			f32 mNumberOfTicks = 1.0f;
 	};
 }

@@ -3,6 +3,10 @@
 
 #include "Asset/MeshAssetLoader.h"
 #include "Asset/SkeletonAssetLoader.h"
+#include "Asset/AssetManager.h"
+#include "Utils/FileUtils.h"
+#include "SubsystemCatalog.h"
+#include "Engine.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -61,7 +65,14 @@ namespace Enjon
 
 		if ( skeleton )
 		{
-			// Register it correctly, cache it correctly...
+			// Register and cache
+			MeshImportOptions mo = *options->ConstCast< MeshImportOptions >( ); 
+			mo.mLoader = this;
+			mo.mUseAssetInfoOverride = true;
+			mo.mOverrideInformation = EngineSubsystem( AssetManager )->GetAssetQualifiedInformation( mo.GetResourceFilePath( ), mo.GetDestinationAssetDirectory( ) );
+			mo.mOverrideInformation.mQualifiedName += "_SKL";
+			mo.mOverrideInformation.mDisplayName += "_SKL";
+			EngineSubsystem( AssetManager )->AddToDatabase( skeleton, &mo );
 		}
 
 		// Return mesh after processing

@@ -19,13 +19,6 @@ namespace Enjon
 	class AssetLoader; 
 	class Asset; 
 
-	struct AssetStringInformation
-	{
-		String mQualifiedName;
-		String mDisplayName;
-		String mAssetDestinationPath;
-	};
-
 	ENJON_CLASS( )
 	class AssetManager : public Subsystem
 	{
@@ -96,7 +89,12 @@ namespace Enjon
 			/**
 			*@brief Adds asset to project from given import options
 			*/
-			AssetStringInformation GetAssetQualifiedInformation( const String& resourceFilePath, const String& cacheDirectory );
+			Result AddToDatabase( Asset* asset, const ImportOptions* options );
+
+			/**
+			*@brief Adds asset to project from given import options
+			*/
+			static AssetStringInformation GetAssetQualifiedInformation( const String& resourceFilePath, const String& cacheDirectory );
 
 			/**
 			*@brief

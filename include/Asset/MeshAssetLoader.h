@@ -20,9 +20,15 @@ namespace Enjon
 	// Forward Declarations
 	class MeshAssetLoader;
 	class SkeletalAnimation;
+	class SkeletonAssetLoader;
+	class SkeletalMeshAssetLoader;
+	class SkeletalAnimationAssetLoader;
 
 	class MeshImportOptions : public ImportOptions
 	{
+		friend SkeletonAssetLoader;
+		friend SkeletalMeshAssetLoader;
+		friend SkeletalAnimationAssetLoader;
 		friend MeshAssetLoader;
 
 		public:

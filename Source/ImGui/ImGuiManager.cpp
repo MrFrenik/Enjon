@@ -1173,6 +1173,13 @@ namespace Enjon
 
 	//=====================================================================
 
+	void ImGuiManager::SameLine( )
+	{
+		ImGui::SameLine( );
+	}
+
+	//=====================================================================
+
 	bool ImGuiManager::CheckBox( const String& text, bool* option )
 	{
 		return ImGui::Checkbox( text.c_str( ), option );

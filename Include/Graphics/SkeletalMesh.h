@@ -43,6 +43,7 @@ namespace Enjon
 
 		protected: 
 			
+			ENJON_PROPERTY( )
 			AssetHandle< Skeleton > mSkeleton;
 	}; 
 }

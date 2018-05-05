@@ -9,6 +9,9 @@
 #include "Asset/MaterialAssetLoader.h"
 #include "Asset/ShaderGraphAssetLoader.h"
 #include "Asset/SceneAssetLoader.h"
+#include "Asset/SkeletonAssetLoader.h"
+#include "Asset/SkeletalMeshAssetLoader.h"
+#include "Asset/SkeletalAnimationAssetLoader.h"
 #include "Utils/FileUtils.h"
 #include "Serialize/ObjectArchiver.h"
 #include "Serialize/AssetArchiver.h"
@@ -61,6 +64,9 @@ namespace Enjon
 		RegisterAssetLoader< ShaderGraph, ShaderGraphAssetLoader >( );
 		RegisterAssetLoader< Material, MaterialAssetLoader >( );
 		RegisterAssetLoader< Scene, SceneAssetLoader >( ); 
+		RegisterAssetLoader< SkeletalMesh, SkeletalMeshAssetLoader >( );
+		RegisterAssetLoader< SkeletalAnimation, SkeletalAnimationAssetLoader >( );
+		RegisterAssetLoader< Skeleton, SkeletonAssetLoader >( ); 
 
 		// Create file extension map
 		mFileExtensionMap[ "png" ] = GetAssetTypeId< Texture >( );
@@ -368,6 +374,66 @@ namespace Enjon
 
 		// Return successful state
 		return Result::SUCCESS;
+	}
+
+	//============================================================================================ 
+
+	Result AssetManager::AddToDatabase( Asset* asset, const ImportOptions* options )
+	{
+		if ( !options || !asset )
+		{
+			return Result::FAILURE;
+		} 
+
+		// If loader not valid, fail
+		if ( !options->GetLoader( ) || !Exists( options->GetLoader()->Class() ) )
+		{
+			return Result::FAILURE;
+		}
+
+		// Grab loader from options
+		AssetLoader* loader = options->GetLoader( )->ConstCast< AssetLoader >( );
+
+		// Grab asset info
+		AssetStringInformation assetInfo = GetAssetQualifiedInformation( options->GetResourceFilePath(), options->GetDestinationAssetDirectory() ); 
+
+		if ( options->UseAssetInfoOverrideInformation() )
+		{
+			assetInfo = options->GetAssetOverrideInformation( );
+		}
+
+		// Make sure it doesn't exist already before trying to load it
+		if ( loader->Exists( assetInfo.mQualifiedName ) )
+		{
+			return Result::FAILURE;
+		}
+
+		// Return failure if path doesn't exist
+		if ( !Utils::FileExists( options->GetResourceFilePath( ) ) )
+		{
+			return Result::FAILURE;
+		}
+
+		// Add to loader assets with asset record info
+		AssetRecordInfo info;
+		asset->mName = assetInfo.mQualifiedName;
+		asset->mFilePath = assetInfo.mAssetDestinationPath;				// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
+		asset->mUUID = UUID::GenerateUUID( );
+		asset->mLoader = loader;
+		info.mAsset = asset;
+		info.mAssetName = asset->mName;
+		info.mAssetUUID = asset->mUUID;
+		info.mAssetFilePath = assetInfo.mAssetDestinationPath;							// THIS IS INCORRECT! NEED TO CHANGE TO BEING THE ACTUAL CACHED ASSET PATH!
+		info.mAssetDisplayName = assetInfo.mDisplayName;
+		info.mAssetLoadStatus = AssetLoadStatus::Loaded;
+
+		// Add to loader
+		loader->AddToAssets( info );
+ 
+		// Cache asset afterwards
+		Result res = SerializeAsset( asset, assetInfo.mQualifiedName, options->GetDestinationAssetDirectory( ) );
+
+		return res;
 	}
 
 	//============================================================================================ 

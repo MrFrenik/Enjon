@@ -583,14 +583,6 @@ namespace Enjon
 					}
 				} 
 			}
-		}
-
-		// Make sure can import at this point
-		if ( igm->Button( "Import" ) )
-		{
-			// Load asset into database
-			EngineSubsystem( AssetManager )->AddToDatabase( this ); 
-			return Result::SUCCESS;
 		} 
 
 		return Result::PROCESS_RUNNING;

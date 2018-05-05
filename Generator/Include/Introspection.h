@@ -40,7 +40,7 @@ enum class PropertyType
 	iVec3,
 	Vec3,
 	Vec4,
-	Mat4,
+	Mat4x4,
 	Quat,
 	Enum,
 	UUID,

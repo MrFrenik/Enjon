@@ -39,15 +39,34 @@ namespace Enjon
 			Joint( );
 
 			/*
-			* @brief Constructor
+			* @brief Destructor
 			*/
 			~Joint( );
 
+			/*
+			* @brief
+			*/
+			virtual Result SerializeData( ByteBuffer* buffer ) const override;
+
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeData( ByteBuffer* buffer ) override;
+
 		protected:
+			ENJON_PROPERTY( HideInEditor ) 
 			s32					mParentID;
+
+			ENJON_PROPERTY( HideInEditor )
 			Vector< u32 >		mChildren;
+
+			ENJON_PROPERTY( HideInEditor )
 			u32					mID;
+
+			ENJON_PROPERTY( HideInEditor )
 			Mat4x4				mInverseBindMatrix;
+
+			ENJON_PROPERTY( HideInEditor )
 			String				mName;
 	}; 
 
@@ -107,6 +126,16 @@ namespace Enjon
 			*/
 			s32 GetJointIndex( const String& name ) const;
 
+			/*
+			* @brief
+			*/
+			virtual Result SerializeData( ByteBuffer* buffer ) const override;
+
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeData( ByteBuffer* buffer ) override;
+
 		private:
 
 			/*
@@ -124,7 +153,7 @@ namespace Enjon
 			ENJON_PROPERTY( HideInEditor )
 			HashMap< String, u32 >		mJointNameLookup;
  
-			// Can't Serialize this just yet...
+			ENJON_PROPERTY( HideInEditor )
 			Mat4x4						mGlobalInverseTransform; 
 	};
 }
