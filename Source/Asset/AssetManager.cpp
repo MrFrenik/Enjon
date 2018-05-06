@@ -397,11 +397,6 @@ namespace Enjon
 		// Grab asset info
 		AssetStringInformation assetInfo = GetAssetQualifiedInformation( options->GetResourceFilePath(), options->GetDestinationAssetDirectory() ); 
 
-		if ( options->UseAssetInfoOverrideInformation() )
-		{
-			assetInfo = options->GetAssetOverrideInformation( );
-		}
-
 		// Make sure it doesn't exist already before trying to load it
 		if ( loader->Exists( assetInfo.mQualifiedName ) )
 		{

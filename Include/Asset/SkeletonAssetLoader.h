@@ -40,6 +40,13 @@ namespace Enjon
 			*/
 			virtual Asset* DirectImport( const ImportOptions* options ) override; 
 
+			/**
+			* @brief 
+			*/
+			virtual String SkeletonAssetLoader::GetAssetFileExtension( ) const override;
+
+			static void DecomposeMatrix( const Mat4x4& original, Vec3& position, Vec3& scale, Quaternion& rotation );
+
 		protected:
 
 			/**

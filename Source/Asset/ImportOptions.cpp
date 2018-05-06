@@ -89,21 +89,7 @@ namespace Enjon
 	const AssetLoader* ImportOptions::GetLoader( ) const
 	{
 		return mLoader;
-	}
-
-	//============================================================================
-
-	bool ImportOptions::UseAssetInfoOverrideInformation( ) const
-	{
-		return mUseAssetInfoOverride;
-	}
-
-	//============================================================================
-
-	AssetStringInformation ImportOptions::GetAssetOverrideInformation( ) const
-	{
-		return mOverrideInformation;
-	}
+	} 
 
 	//============================================================================
 }

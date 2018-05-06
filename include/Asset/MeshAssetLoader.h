@@ -104,6 +104,11 @@ namespace Enjon
 			*/
 			virtual const ImportOptions* GetImportOptions( ) const override;
 
+			/**
+			* @brief
+			*/
+			virtual String GetAssetFileExtension( ) const override;
+
 		protected:
 
 			/**

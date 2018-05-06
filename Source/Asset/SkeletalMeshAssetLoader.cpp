@@ -339,4 +339,13 @@ namespace Enjon
 		// Set draw count
 		sm->mDrawCount = sm->mVertexData.GetSize( ) / vertDecl.GetSizeInBytes( ); 
 	} 
+
+	//===================================================================================
+
+	String SkeletalMeshAssetLoader::GetAssetFileExtension( ) const
+	{
+		return ".eskm";
+	}
+
+	//===================================================================================
 }

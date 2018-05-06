@@ -510,9 +510,9 @@ namespace Enjon
 		// Check whether or not the scene has animations
 		mImportOptions.mShowAnimationCreateDialogue = scene->HasAnimations( );
 		// Will construct the skeleton here if has bones and we want to create a new skeleton in the import process
-		mImportOptions.mShowMeshCreateDialogue = HasSkeleton( scene->mRootNode, scene );
+		mImportOptions.mShowSkeletonCreateDialogue = HasSkeleton( scene->mRootNode, scene );
 		// Detect whether or not scene has any mesh data
-		mImportOptions.mShowSkeletonCreateDialogue = HasMesh( scene->mRootNode, scene );
+		mImportOptions.mShowMeshCreateDialogue = HasMesh( scene->mRootNode, scene );
 
 		return Result::SUCCESS;
 	}
@@ -546,6 +546,10 @@ namespace Enjon
 				mCreateSkeleton = createSkeleton; 
 			}
 		}
+		else
+		{
+			mCreateSkeleton = false;
+		}
 
 		if ( mShowMeshCreateDialogue )
 		{ 
@@ -555,6 +559,10 @@ namespace Enjon
 				mCreateMesh = createMesh;
 			}
 		} 
+		else
+		{
+			mCreateMesh = false;
+		}
 
 		if ( mShowAnimationCreateDialogue )
 		{
@@ -564,30 +572,45 @@ namespace Enjon
 				mCreateAnimations = createAnimations;
 			}
 		}
+		else
+		{
+			mCreateAnimations = false;
+		}
 
-		// Skeletal asset drop down
 		if ( mShowAnimationCreateDialogue && !mShowSkeletonCreateDialogue )   // However this would work...
 		{
-			// Grab all skeletons in database
-			const HashMap< String, AssetRecordInfo >* skeletons = EngineSubsystem( AssetManager )->GetAssets< Skeleton >();	
-
-			if ( skeletons )
+			if ( ImGui::BeginCombo( "##skeletons", ( mSkeletonAsset ? mSkeletonAsset->GetName() : "Skeleton..." ).c_str( ) ) )
 			{
-				// Need combo box...	
-				for ( auto& s : *skeletons )
+				// Grab all skeletons in database
+				const HashMap< String, AssetRecordInfo >* skeletons = EngineSubsystem( AssetManager )->GetAssets< Skeleton >();	
+
+				if ( skeletons )
 				{
-					// Assign skeleton
-					if ( igm->Selectable( s.second.GetAssetName() ) )
+					// Need combo box...	
+					for ( auto& s : *skeletons )
 					{
-						mSkeletonAsset = s.second.GetAsset();	
-					}
+						// Assign skeleton
+						if ( igm->Selectable( s.second.GetAssetName() ) )
+						{
+							mSkeletonAsset = s.second.GetAsset();	
+						}
+					} 
 				} 
+
+				ImGui::EndCombo( );
 			}
 		} 
 
 		return Result::PROCESS_RUNNING;
 	} 
 	
+	//=====================================================================================================
+
+	String MeshAssetLoader::GetAssetFileExtension( ) const
+	{
+		return ".emsh";
+	}
+
 	//=====================================================================================================
 } 
 

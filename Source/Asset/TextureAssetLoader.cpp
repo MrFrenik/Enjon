@@ -92,4 +92,13 @@ namespace Enjon
 		// Set default texture
 		mDefaultAsset = defaultTex;
 	} 
+
+	//===================================================================================
+
+	String TextureAssetLoader::GetAssetFileExtension( ) const
+	{
+		return ".etex";
+	}
+
+	//===================================================================================
 }

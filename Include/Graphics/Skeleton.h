@@ -86,7 +86,7 @@ namespace Enjon
 		u32 mIDS[ENJON_MAX_NUM_JOINTS_PER_VERTEX];
 	};
 
-	ENJON_CLASS( )
+	ENJON_CLASS( Construct )
 	class Skeleton : public Asset
 	{ 
 		ENJON_CLASS_BODY( )
@@ -114,7 +114,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			Vector< Mat4x4 > GetTransforms( );
+			Vector< Mat4x4 > GetTransforms( const AssetHandle< SkeletalAnimation >& animation, const f32& time ) const; 
 
 			/*
 			* @brief
@@ -141,11 +141,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void CalculateTransform( const u32& jointID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, SkeletalAnimation* animation, const f32& time );
+			void CalculateTransform( const u32& jointID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, const SkeletalAnimation* animation, const f32& time ) const;
 
 		protected: 
 			ENJON_PROPERTY( HideInEditor )
-			u32							mRootID;
+			s32							mRootID = -1;
 
 			ENJON_PROPERTY( HideInEditor )
 			Vector< Joint >				mJoints;

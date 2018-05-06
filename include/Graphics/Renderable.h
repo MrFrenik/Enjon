@@ -104,6 +104,16 @@ namespace Enjon
 			*/
 			u32 GetRenderableID( ) const; 
 
+			/** 
+			* @brief
+			*/
+			const Mat4x4 GetModelMatrix( ) const;
+
+			/** 
+			* @brief
+			*/
+			const Mat4x4 GetPreviousModelMatrix( ) const;
+
 		public:
 
 			/** 
@@ -114,7 +124,7 @@ namespace Enjon
 			/** 
 			* @brief
 			*/
-			static u32 ColorToID( const ColorRGBA32& color );
+			static u32 ColorToID( const ColorRGBA32& color ); 
 
 		protected:
 

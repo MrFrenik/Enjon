@@ -42,31 +42,32 @@ namespace Enjon
 	bool Skeleton::HasJoint( const String& name ) const
 	{
 		return ( mJointNameLookup.find( name ) != mJointNameLookup.end( ) );
-	}
+	} 
 
 	//==================================================================== 
 
-	Vector< Mat4x4 > Skeleton::GetTransforms( )
+	Vector< Mat4x4 > Skeleton::GetTransforms( const AssetHandle< SkeletalAnimation >& animationHandle, const f32& time ) const
 	{
 		Vector< Mat4x4 > matrices;
-		matrices.resize( mJoints.size( ) );
-		SkeletalAnimation* animation = EngineSubsystem( AssetManager )->GetLoader( Object::GetClass< MeshAssetLoader >( ) )->Cast< MeshAssetLoader >( )->GetAnimation( 0 );
-		static f32 t = 0.0f; 
-		f32 dt = Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( );
-		if ( animation )
-		{ 
-			t = std::fmod( t + dt, animation->GetDuration( ) );
+
+		if ( mJoints.empty( ) || mRootID == -1 )
+		{
+			return matrices;
 		}
-		CalculateTransform( mRootID, Mat4x4::Identity( ), matrices, animation, t );
+
+		matrices.resize( mJoints.size( ) );
+		
+		CalculateTransform( mRootID, Mat4x4::Identity( ), matrices, animationHandle.Get(), time );
+
 		return matrices;
 	}
 
 	//==================================================================== 
 
-	void Skeleton::CalculateTransform( const u32& jointID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, SkeletalAnimation* animation, const f32& time )
+	void Skeleton::CalculateTransform( const u32& jointID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, const SkeletalAnimation* animation, const f32& time ) const
 	{
 		// Get joint
-		Joint* joint = &mJoints.at( jointID );
+		const Joint* joint = &mJoints.at( jointID );
 
 		// Calculate bone transform ( bone space ) // Identity for now ( No animation )
 		Mat4x4 jointTransform = Mat4x4::Identity( );
@@ -86,7 +87,7 @@ namespace Enjon
 		}
 		else
 		{
-			outMatrices.at( joint->mID ) = jointTransform;
+			outMatrices.at( joint->mID ) = mGlobalInverseTransform * joint->mInverseBindMatrix;
 		}
 
 		// Iterate through children 
@@ -120,7 +121,7 @@ namespace Enjon
 	Result Skeleton::SerializeData( ByteBuffer* buffer ) const
 	{ 
 		// Write out root id
-		buffer->Write< u32 >( mRootID );
+		buffer->Write< s32 >( mRootID );
 
 		// Write out size of joints
 		buffer->Write< usize >( GetNumberOfJoints( ) );
@@ -149,7 +150,7 @@ namespace Enjon
 	Result Skeleton::DeserializeData( ByteBuffer* buffer )
 	{
 		// Read in root id
-		mRootID = buffer->Read< u32 >( ); 
+		mRootID = buffer->Read< s32 >( ); 
 
 		// Resize number of joints
 		mJoints.resize( buffer->Read< usize >( ) );

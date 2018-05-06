@@ -73,17 +73,17 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			u32 GetRotationFrameID( const f32& time );
+			u32 GetRotationFrameID( const f32& time ) const;
 
 			/*
 			* @brief
 			*/ 
-			u32 GetPositionFrameID( const f32& time );
+			u32 GetPositionFrameID( const f32& time ) const;
 
 			/*
 			* @brief
 			*/
-			u32 GetScaleFrameID( const f32& time );
+			u32 GetScaleFrameID( const f32& time ) const;
 
 			/*
 			* @brief
@@ -123,7 +123,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			Transform CalculateInterpolatedTransform( const f32& time, const u32& boneID );
+			Transform CalculateInterpolatedTransform( const f32& time, const u32& boneID ) const;
 
 			/*
 			* @brief
@@ -144,10 +144,13 @@ namespace Enjon
 			Vector< ChannelData > mChannelData;
 
 			ENJON_PROPERTY( HideInEditor )
+			AssetHandle< Skeleton > mSkeleton;
+
+			ENJON_PROPERTY( HideInEditor )
 			f32 mTicksPerSecond = 30.0f;
 
 			ENJON_PROPERTY( HideInEditor )
-			f32 mNumberOfTicks = 1.0f;
+			f32 mNumberOfTicks = 1.0f; 
 	};
 }
 

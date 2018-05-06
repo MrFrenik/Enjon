@@ -27,6 +27,10 @@ namespace Enjon
 			*/
 			~ShaderGraphAssetLoader( );
 
+			/**
+			* @brief 
+			*/
+			virtual String GetAssetFileExtension( ) const override; 
 
 		protected:
 

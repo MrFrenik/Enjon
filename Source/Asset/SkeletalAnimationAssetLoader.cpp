@@ -69,7 +69,7 @@ namespace Enjon
 		if ( !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
 		{
 			// Error 
-			return nullptr;
+			//return nullptr;
 		}
 
 		// Grab skeleton asset to use for this animation from import options
@@ -84,6 +84,9 @@ namespace Enjon
 
 		// Process skeleton
 		ProcessAnimNode( scene->mRootNode, scene, skeleton, animation );
+
+		// Set the skeleton reference
+		animation->mSkeleton = skeleton;
 
 		// Return skeleton after processing
 		return animation;
@@ -152,5 +155,12 @@ namespace Enjon
 	}
 
 	//======================================================================
+
+	String SkeletalAnimationAssetLoader::GetAssetFileExtension( ) const
+	{
+		return ".eanm";
+	}
+
+	//=======================================================================================
 }
 

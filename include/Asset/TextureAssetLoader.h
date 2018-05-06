@@ -27,6 +27,11 @@ namespace Enjon
 			* @brief Destructor
 			*/
 			~TextureAssetLoader(); 
+
+			/**
+			* @brief
+			*/
+			virtual String GetAssetFileExtension( ) const override;
 			
 		protected:
 			/**

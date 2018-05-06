@@ -42,6 +42,11 @@ namespace Enjon
 			*/
 			virtual Asset* DirectImport( const ImportOptions* options ) override;
 
+			/**
+			* @brief 
+			*/
+			virtual String GetAssetFileExtension( ) const override;
+
 		protected:
 
 			/**

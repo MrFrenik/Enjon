@@ -13,7 +13,7 @@
 #include <assimp/postprocess.h>
 
 namespace Enjon
-{
+{ 
 
 	//=========================================================================
 
@@ -46,6 +46,49 @@ namespace Enjon
 
 	//=========================================================================
 
+	aiMatrix4x4 Mat4x4ToAIMat4x4( const Mat4x4& mat4 )
+	{ 
+		aiMatrix4x4 aiMat;
+
+		aiMat.a1 = mat4.elements[ 0 ];
+		aiMat.b1 = mat4.elements[ 1 ];
+		aiMat.c1 = mat4.elements[ 3 ];
+		aiMat.d1 = mat4.elements[ 3 ];
+
+		aiMat.a2 = mat4.elements[ 4 ];
+		aiMat.b2 = mat4.elements[ 5 ];
+		aiMat.c2 = mat4.elements[ 6 ];
+		aiMat.d2 = mat4.elements[ 7 ];
+
+		aiMat.a3 = mat4.elements[ 8 ];
+		aiMat.b3 = mat4.elements[ 9 ];
+		aiMat.c3 = mat4.elements[ 10 ];
+		aiMat.d3 = mat4.elements[ 11 ];
+
+		aiMat.a4 = mat4.elements[ 12 ];
+		aiMat.b4 = mat4.elements[ 13 ];
+		aiMat.c4 = mat4.elements[ 14 ];
+		aiMat.d4 = mat4.elements[ 15 ]; 
+
+		return aiMat;
+	}
+
+	//=========================================================================
+
+	void SkeletonAssetLoader::DecomposeMatrix( const Mat4x4& original, Vec3& position, Vec3& scale, Quaternion& rotation )
+	{
+		aiMatrix4x4 mat = Mat4x4ToAIMat4x4( original );
+		aiVector3D aiPos, aiScl;
+		aiQuaternion aiRot;
+		mat.Decompose( aiScl, aiRot, aiPos );
+
+		position = Vec3( aiPos.x, aiPos.y, aiPos.z );
+		scale = Vec3( aiScl.x, aiScl.y, aiScl.z );
+		rotation = Quaternion( aiRot.x, aiRot.y, aiRot.z, aiRot.w );
+	}
+
+	//=========================================================================
+
 	SkeletonAssetLoader::SkeletonAssetLoader( )
 	{ 
 	}
@@ -68,10 +111,6 @@ namespace Enjon
 			// Register and cache
 			MeshImportOptions mo = *options->ConstCast< MeshImportOptions >( ); 
 			mo.mLoader = this;
-			mo.mUseAssetInfoOverride = true;
-			mo.mOverrideInformation = EngineSubsystem( AssetManager )->GetAssetQualifiedInformation( mo.GetResourceFilePath( ), mo.GetDestinationAssetDirectory( ) );
-			mo.mOverrideInformation.mQualifiedName += "_SKL";
-			mo.mOverrideInformation.mDisplayName += "_SKL";
 			EngineSubsystem( AssetManager )->AddToDatabase( skeleton, &mo );
 		}
 
@@ -111,6 +150,9 @@ namespace Enjon
 
 		// Build the bone heirarchy for this skeleton
 		BuildBoneHeirarchy( scene->mRootNode, nullptr, skeleton );
+
+		// Set root id for skeleton
+		skeleton->mRootID = skeleton->mJoints.empty() ? -1 : skeleton->mJoints.at( 0 ).mID;
 
 		// Return skeleton after processing
 		return skeleton; 
@@ -240,4 +282,13 @@ namespace Enjon
 		}
 
 	}
+
+	//=======================================================================================
+
+	String SkeletonAssetLoader::GetAssetFileExtension( ) const
+	{
+		return ".eskl";
+	}
+
+	//=======================================================================================
 }

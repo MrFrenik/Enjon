@@ -4,6 +4,9 @@
 #include "Graphics/SkeletalAnimation.h"
 #include "Asset/SkeletalAnimationAssetLoader.h"
 #include "Graphics/Skeleton.h"
+#include "Asset/AssetManager.h"
+#include "SubsystemCatalog.h"
+#include "Engine.h"
 
 namespace Enjon
 { 
@@ -108,7 +111,7 @@ namespace Enjon
 		for ( usize i = 0; i < mScaleKeys.size( ); ++i )
 		{
 			// Grab reference to keyframe
-			KeyFrame< Vec3 >& k = mPositionKeys.at( i ); 
+			KeyFrame< Vec3 >& k = mScaleKeys.at( i ); 
 			
 			// Time stamp
 			k.mTimeStamp = buffer->Read< f32 >( );
@@ -124,7 +127,7 @@ namespace Enjon
 
 	//=============================================================== 
 
-	u32 ChannelData::GetRotationFrameID( const f32& time )
+	u32 ChannelData::GetRotationFrameID( const f32& time ) const
 	{
 		for ( u32 i = 1; i < mRotationKeys.size( ); ++i )
 		{
@@ -139,7 +142,7 @@ namespace Enjon
 
 	//=============================================================== 
 
-	u32 ChannelData::GetPositionFrameID( const f32& time )
+	u32 ChannelData::GetPositionFrameID( const f32& time ) const
 	{
 		for ( u32 i = 1; i < mPositionKeys.size( ); ++i )
 		{
@@ -154,7 +157,7 @@ namespace Enjon
 
 	//=============================================================== 
 	
-	u32 ChannelData::GetScaleFrameID( const f32& time )
+	u32 ChannelData::GetScaleFrameID( const f32& time ) const
 	{ 
 		for ( u32 i = 1; i < mScaleKeys.size( ); ++i )
 		{
@@ -192,16 +195,16 @@ namespace Enjon
 		return ( t - min ) / ( range == 0.0f ? 0.00001f : range );
 	}
 
-	Transform SkeletalAnimation::CalculateInterpolatedTransform( const f32& time, const u32& boneID )
+	Transform SkeletalAnimation::CalculateInterpolatedTransform( const f32& time, const u32& boneID ) const
 	{
 		// Just return identity transform
-		if ( boneID > mChannelData.size() )
+		if ( boneID > mChannelData.size() || mChannelData.empty() )
 		{ 
 			return Transform( );
 		}
 
 		// Grab channel data for bone
-		ChannelData* data = &mChannelData.at( boneID );
+		const ChannelData* data = &mChannelData.at( boneID );
 
 		// Need to get appropriate keyframe for data
 		u32 rotationID = data->GetRotationFrameID( time );
@@ -213,24 +216,24 @@ namespace Enjon
 		u32 nextScaleID = ( scaleID + 1 ) % data->mScaleKeys.size( );
 
 		// This current frame's transform
-		Vec3& position = data->mPositionKeys.at( positionID ).mValue;
-		Quaternion& rotation = data->mRotationKeys.at( rotationID ).mValue;
-		Vec3& scale = data->mScaleKeys.at( scaleID ).mValue;
+		const Vec3& position = data->mPositionKeys.at( positionID ).mValue;
+		const Quaternion& rotation = data->mRotationKeys.at( rotationID ).mValue;
+		const Vec3& scale = data->mScaleKeys.at( scaleID ).mValue;
 
 		// Current frame's Time stamps
-		f32& posTime = data->mPositionKeys.at( positionID ).mTimeStamp;
-		f32& rotTime = data->mPositionKeys.at( rotationID ).mTimeStamp;
-		f32& sclTime = data->mPositionKeys.at( scaleID ).mTimeStamp;
+		const f32& posTime = data->mPositionKeys.at( positionID ).mTimeStamp;
+		const f32& rotTime = data->mPositionKeys.at( rotationID ).mTimeStamp;
+		const f32& sclTime = data->mPositionKeys.at( scaleID ).mTimeStamp;
 
 		// Next frame's transform
-		Vec3& nextPosition = data->mPositionKeys.at( nextPositionID ).mValue;
-		Quaternion& nextRotation = data->mRotationKeys.at( nextRotationID ).mValue;
-		Vec3& nextScale = data->mScaleKeys.at( nextScaleID ).mValue; 
+		const Vec3& nextPosition = data->mPositionKeys.at( nextPositionID ).mValue;
+		const Quaternion& nextRotation = data->mRotationKeys.at( nextRotationID ).mValue;
+		const Vec3& nextScale = data->mScaleKeys.at( nextScaleID ).mValue; 
 
 		// Next frame's Time stamps
-		f32& nextPosTime = data->mPositionKeys.at( nextPositionID ).mTimeStamp;
-		f32& nextRotTime = data->mPositionKeys.at( nextRotationID ).mTimeStamp;
-		f32& nextSclTIme = data->mPositionKeys.at( nextScaleID ).mTimeStamp; 
+		const f32& nextPosTime = data->mPositionKeys.at( nextPositionID ).mTimeStamp;
+		const f32& nextRotTime = data->mPositionKeys.at( nextRotationID ).mTimeStamp;
+		const f32& nextSclTIme = data->mPositionKeys.at( nextScaleID ).mTimeStamp; 
 
 		f32 posFactor = Map01( posTime, nextPosTime, time );
 		f32 rotFactor = Map01( rotTime, nextRotTime, time );
@@ -264,6 +267,9 @@ namespace Enjon
 		// Number of ticks
 		buffer->Write< f32 >( mNumberOfTicks ); 
 
+		// Write out skeleton asset reference
+		buffer->Write< UUID >( mSkeleton.GetUUID( ) );
+
 		return Result::SUCCESS;
 	}
 
@@ -288,6 +294,9 @@ namespace Enjon
 
 		// Number of ticks
 		mNumberOfTicks = buffer->Read< f32 >( ); 
+
+		// Set skeleton asset
+		mSkeleton = EngineSubsystem( AssetManager )->GetAsset< Skeleton >( buffer->Read< UUID >( ) );
 
 		return Result::SUCCESS; 
 	}

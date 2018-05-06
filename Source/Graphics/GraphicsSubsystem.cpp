@@ -23,9 +23,12 @@
 #include "Graphics/Texture.h"
 #include "Graphics/Skeleton.h"
 #include "Graphics/ShaderGraph.h"
+#include "Graphics/SkeletalMesh.h"
+#include "Graphics/SkeletalAnimation.h"
 #include "Engine.h"
 #include "SubsystemCatalog.h"
 #include "Defines.h"
+#include "Asset/SkeletonAssetLoader.h"
 
 #include <string>
 #include <cassert>
@@ -797,44 +800,95 @@ namespace Enjon
 			skinnedMeshProgram->Use( );
 			{
 				// Grab mesh asset loader
-				MeshAssetLoader* ml = EngineSubsystem( AssetManager )->GetLoader( Object::GetClass< MeshAssetLoader >( ) )->ConstCast< MeshAssetLoader >( );
-				Vector<Skeleton*> skeletons = ml->GetSkeletons( );
-				if ( !skeletons.empty( ) )
+				if ( true )
 				{
-					Skeleton* sk = skeletons.at( 0 );
 					// Grab mesh to use for this skeleton ( "We'll just assume sk_mannequin, I think" )
-					AssetHandle< Mesh > mesh = EngineSubsystem( AssetManager )->GetAsset< Mesh >( "vampire" );
-					AssetHandle< Material > mat = EngineSubsystem( AssetManager )->GetDefaultAsset< Material >( );
-					
-					skinnedRenderable.SetMesh( mesh );
-					skinnedRenderable.SetMaterial( mat );
-					skinnedRenderable.SetRotation( Quaternion::AngleAxis( Math::ToRadians( -90.0f ), Vec3::XAxis( ) ) );
+					AssetHandle< Skeleton > skl = EngineSubsystem( AssetManager )->GetAsset< Skeleton >( "vampire" );
+					AssetHandle< SkeletalMesh > mesh = EngineSubsystem( AssetManager )->GetAsset< SkeletalMesh >( "vampire" );
+					AssetHandle< SkeletalAnimation > animation = EngineSubsystem( AssetManager )->GetAsset< SkeletalAnimation >( "maximo_vampire_sword_swing" ); 
+					AssetHandle< Material > mat = EngineSubsystem( AssetManager )->GetDefaultAsset< Material >( ); 
+					u32 handIDX = 0;
 
-					skinnedRenderable.Bind( );
+					const usize ssize = 1;
+					static bool b = false;
+					static Vector< Renderable > mSkinnedMeshes;
+					if ( !b && skl->GetUUID( ) != UUID::Invalid( ) )
 					{
-						if ( mesh && sk )
+						mSkinnedMeshes.resize( ssize );
+						for ( u32 i = 0; i < ssize; ++i )
 						{
-							auto transforms = sk->GetTransforms( );
- 
-							// Set transforms uniforms in shader
-							for ( u32 i = 0; i < transforms.size(); ++i )
-							{
-								//skinnedMeshProgram->SetUniform( "uJointTransforms[" + std::to_string( i ) + "]", transforms.at( i ) );
-								skinnedMeshProgram->SetUniformArrayElement( "uJointTransforms", i, transforms.at( i ) );
-							}
+							mSkinnedMeshes.at( i ).SetMaterial( mat );
+							mSkinnedMeshes.at( i ).SetRotation( Quaternion::AngleAxis( Math::ToRadians( -90.0f ), Vec3::XAxis( ) ) );
+							mSkinnedMeshes.at( i ).SetPosition( Vec3( i * 120.0f, 0.0f, 0.0f ) );
+						}
 
-							skinnedMeshProgram->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
-							skinnedMeshProgram->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix ); 
+						handIDX = skl.Get( )->GetJointIndex( "RightHand" );
 
-							skinnedMeshProgram->SetUniform( "uObjectID", Renderable::IdToColor( skinnedRenderable.GetRenderableID( ) ) ); 
+						b = true;
+					} 
 
-							for ( u32 i = 0; i < mesh->GetSubMeshCount( ); ++i )
-							{
-								skinnedRenderable.Submit( skinnedMeshProgram, mesh->GetSubmeshes().at( i ) ); 
-							}
-						} 
+					static f32 t = 0.0f; 
+					f32 dt = Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( );
+					if ( animation.GetUUID() != EngineSubsystem( AssetManager )->GetDefaultAsset< SkeletalAnimation >( )->GetUUID() )
+					{ 
+						t = std::fmod( t + dt, animation->GetDuration( ) );
+					} 
+
+					for ( auto& s : mSkinnedMeshes )
+					{ 
+						//s.SetPosition( s.GetPosition( ) + Vec3( 0.0f, std::sinf(t), 0.0f ) );
+						s.Bind( );
+						{
+							if ( mesh && skl )
+							{ 
+								auto transforms = skl.Get()->GetTransforms( animation, t );
+	 
+								// Set transforms uniforms in shader
+								for ( u32 i = 0; i < transforms.size(); ++i )
+								{
+									//skinnedMeshProgram->SetUniform( "uJointTransforms[" + std::to_string( i ) + "]", transforms.at( i ) );
+									skinnedMeshProgram->SetUniformArrayElement( "uJointTransforms", i, transforms.at( i ) );
+								}
+
+								// Get rh matrix
+								Mat4x4 rhTransform = transforms.at( handIDX ); 
+								rhTransform = s.GetModelMatrix( ) * rhTransform;
+
+								// Draw debug sphere at position
+								Vec3 rhPosition, rhScale;
+								Quaternion rhRotation;
+								Vec4 pos = rhTransform * Vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+								SkeletonAssetLoader::DecomposeMatrix( rhTransform, rhPosition, rhScale, rhRotation );
+								DrawDebugCircle( Vec3( pos.x, pos.y, pos.z ), 5.0f );
+
+								skinnedMeshProgram->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
+								skinnedMeshProgram->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix ); 
+
+								skinnedMeshProgram->SetUniform( "uObjectID", Renderable::IdToColor( s.GetRenderableID( ) ) ); 
+
+								auto subMeshes = mesh->GetSubmeshes( ); 
+
+								skinnedMeshProgram->SetUniform( "uModel", s.GetModelMatrix() );
+								skinnedMeshProgram->SetUniform( "uPreviousModel", s.GetPreviousModelMatrix( ) );
+
+								// Submesh submit
+								for ( u32 i = 0; i < mesh->GetSubMeshCount( ); ++i )
+								{ 
+									auto subMesh = subMeshes.at( i );
+
+									// Bind submesh
+									subMesh->Bind( );
+									{
+										// Submit for rendering
+										subMesh->Submit( ); 
+									}
+									// Unbind submesh
+									subMesh->Unbind( ); 
+								}
+							} 
+						}
+						s.Unbind( );
 					}
-					skinnedRenderable.Unbind( );
 				}
 			}
 			skinnedMeshProgram->Unuse( );

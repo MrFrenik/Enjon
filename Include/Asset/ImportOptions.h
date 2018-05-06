@@ -62,17 +62,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			const AssetLoader* GetLoader( ) const;
-
-			/*
-			* @brief
-			*/
-			bool UseAssetInfoOverrideInformation( ) const;
-
-			/*
-			* @brief
-			*/
-			AssetStringInformation GetAssetOverrideInformation( ) const;
+			const AssetLoader* GetLoader( ) const; 
 
 		protected:
 
@@ -86,8 +76,6 @@ namespace Enjon
 			String mDestinationAssetDirectory; 
 			String mAssetName = "";
 			bool mIsImporting = false;
-			AssetStringInformation mOverrideInformation;
-			bool mUseAssetInfoOverride = false;
 			const AssetLoader* mLoader = nullptr;
 	}; 
 }

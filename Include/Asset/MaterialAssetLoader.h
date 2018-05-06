@@ -27,6 +27,11 @@ namespace Enjon
 			*/
 			~MaterialAssetLoader( ) = default;
 
+			/**
+			* @brief Destructor
+			*/
+			virtual String GetAssetFileExtension( ) const override;
+
 		protected:
 
 			/**
