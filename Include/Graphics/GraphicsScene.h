@@ -161,6 +161,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			const Vector<SkeletalMeshRenderable*>& GetSkeletalMeshRenderables( ) const;
+
+			/*
+			* @brief
+			*/
 			const HashSet<QuadBatch*>& GetQuadBatches() const { return mQuadBatches; }
 
 			/*
@@ -216,7 +221,11 @@ namespace Enjon
 
 			ENJON_PROPERTY( )
 			Vector< StaticMeshRenderable* > mSortedStaticMeshRenderables; 
+
+			ENJON_PROPERTY( )
+			Vector< SkeletalMeshRenderable* > mSortedSkeletalMeshRenderables; 
  
+			ENJON_PROPERTY( )
 			Vector< StaticMeshRenderable* > mNonDepthTestedStaticMeshRenderables;
 
 			HashSet<Camera*> mCameras;

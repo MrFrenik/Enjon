@@ -122,6 +122,13 @@ namespace Enjon {
 
 	//====================================================================================================
 
+	const Vector<SkeletalMeshRenderable*>& GraphicsScene::GetSkeletalMeshRenderables( ) const
+	{
+		return mSortedSkeletalMeshRenderables;
+	}
+
+	//====================================================================================================
+
 	void GraphicsScene::AddStaticMeshRenderable(StaticMeshRenderable* renderable)
 	{
 		auto query = mStaticMeshRenderables.find(renderable);
