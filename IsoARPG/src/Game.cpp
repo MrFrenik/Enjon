@@ -298,10 +298,10 @@ void Game::TestObjectSerialize( )
 			String path = am->GetAssetsDirectoryPath( ) + "/Cache/testEntity";
 			archiver.WriteToFile( path ); 
 
-			mGfx->GetGraphicsScene( )->AddRenderable( gfxCmp->GetRenderable( ) );
-			mGfx->GetGraphicsScene( )->AddRenderable( childGfx->GetRenderable( ) );
-			mGfx->GetGraphicsScene( )->AddRenderable( child0Gfx->GetRenderable( ) );
-			mGfx->GetGraphicsScene( )->AddRenderable( child1Gfx->GetRenderable( ) );
+			mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( gfxCmp->GetRenderable( ) );
+			mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( childGfx->GetRenderable( ) );
+			mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( child0Gfx->GetRenderable( ) );
+			mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( child1Gfx->GetRenderable( ) );
 			mGfx->GetGraphicsScene( )->AddPointLight( plCmp->GetLight( ) );
 		}
 		else
@@ -314,7 +314,7 @@ void Game::TestObjectSerialize( )
 				auto gfxCmp = mSerializedEntity.Get( )->GetComponent< GraphicsComponent >( );
 				if ( gfxCmp )
 				{
-					mGfx->GetGraphicsScene( )->AddRenderable( gfxCmp->GetRenderable() );
+					mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( gfxCmp->GetRenderable() );
 				}
 
 				auto pointLightComp = mSerializedEntity.Get( )->GetComponent< PointLightComponent >( );
@@ -330,7 +330,7 @@ void Game::TestObjectSerialize( )
 						auto cGfxCmp = c.Get( )->GetComponent< GraphicsComponent >( );
 						if ( cGfxCmp )
 						{
-							mGfx->GetGraphicsScene( )->AddRenderable( cGfxCmp->GetRenderable( ) );
+							mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( cGfxCmp->GetRenderable( ) );
 						} 
 					}
 				};
@@ -341,7 +341,7 @@ void Game::TestObjectSerialize( )
 					auto cGfxCmp = c.Get( )->GetComponent< GraphicsComponent >( );
 					if ( cGfxCmp )
 					{ 
-						mGfx->GetGraphicsScene( )->AddRenderable( cGfxCmp->GetRenderable( ) );
+						mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( cGfxCmp->GetRenderable( ) );
 					}
 
 					addChildrenGfx( c );
@@ -841,13 +841,13 @@ Enjon::Result Game::Initialize()
 		auto scene = mGfx->GetGraphicsScene();
 		scene->AddDirectionalLight( mSun );
 		//scene->AddDirectionalLight( mSun2 );
-		scene->AddRenderable(gc->GetRenderable());
+		scene->AddStaticMeshRenderable(gc->GetRenderable());
 		scene->AddPointLight( pc->GetLight( ) );
-		scene->AddRenderable( mGreen.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
-		scene->AddRenderable( mRed.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
-		scene->AddRenderable( mBlue.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
-		scene->AddRenderable( mRock.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
-		scene->AddRenderable( mRock2.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
+		scene->AddStaticMeshRenderable( mGreen.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+		scene->AddStaticMeshRenderable( mRed.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+		scene->AddStaticMeshRenderable( mBlue.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
+		scene->AddStaticMeshRenderable( mRock.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
+		scene->AddStaticMeshRenderable( mRock2.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
 		scene->AddQuadBatch(mBatch);
 		scene->AddQuadBatch(mTextBatch);
 		scene->SetAmbientColor(Enjon::SetOpacity(Enjon::RGBA32_White(), 0.1f));
@@ -901,13 +901,13 @@ Enjon::Result Game::Initialize()
 
 							if ( entityHandle.Get( )->HasComponent< Enjon::GraphicsComponent >( ) )
 							{
-								mGfx->GetGraphicsScene( )->AddRenderable( entityHandle.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+								mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( entityHandle.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 
 								for ( auto& c : entityHandle.Get( )->GetChildren( ) )
 								{
 									if ( c.Get( )->HasComponent< Enjon::GraphicsComponent >( ) )
 									{
-										mGfx->GetGraphicsScene( )->AddRenderable( c.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+										mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( c.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
 									}
 								}
 							}
@@ -1480,7 +1480,7 @@ Enjon::Result Game::ProcessInput( f32 dt )
 				default: gc->SetMaterial( mGunMat ); break;
 			}
 
-			scene->AddRenderable(gc->GetRenderable());
+			scene->AddStaticMeshRenderable(gc->GetRenderable());
 
 			mBodies.push_back(body);
 			mPhysicsEntities.push_back(ent);

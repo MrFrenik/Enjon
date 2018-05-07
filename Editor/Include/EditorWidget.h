@@ -5,7 +5,7 @@
 #ifndef ENJON_EDITOR_WIDGET_H
 #define ENJON_EDITOR_WIDGET_H
 
-#include <Graphics/Renderable.h>
+#include <Graphics/StaticMeshRenderable.h>
 
 namespace Enjon
 {
@@ -144,7 +144,7 @@ namespace Enjon
 			TransformRenderableHeirarchy( ) = default;
 			~TransformRenderableHeirarchy( ) = default;
 
-			Renderable mRenderable;
+			StaticMeshRenderable mRenderable;
 	}; 
 
 	class EditorWidget

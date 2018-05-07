@@ -61,13 +61,6 @@ namespace Enjon
 
 	//==============================================================
 
-	AssetHandle< Mesh > Renderable::GetMesh() const 
-	{ 
-		return mMesh; 
-	}
-
-	//==============================================================
-
 	GraphicsScene* Renderable::GetGraphicsScene() const 
 	{ 
 		return mGraphicsScene; 
@@ -130,57 +123,10 @@ namespace Enjon
 		{
 			mMaterialElements.at( idx ) = material; 
 		}
-	}
+	} 
 
 	//--------------------------------------------------------------------
-	void Renderable::SetMesh(const AssetHandle<Mesh>& mesh)
-	{
-		mMesh = mesh;
 
-		// Make sure that material element vector matches amount of submeshes
-		u32 subMeshCount = mMesh->GetSubMeshCount( );
-
-		// Early out if equal
-		if ( mMaterialElements.size( ) == subMeshCount )
-		{
-			return;
-		}
-
-		// If there were too many materials, then iterate up to mesh count
-		if ( mMaterialElements.size( ) > subMeshCount )
-		{
-			Vector<AssetHandle<Material>> newMats; 
-			for ( u32 i = 0; i < subMeshCount; ++i )
-			{
-				newMats.push_back( mMaterialElements.at( i ) );
-			}
-
-			// Set materials
-			mMaterialElements = newMats;
-		}
-		// Otherwise there weren't enough, so iterate up to material elements
-		else
-		{
-			u32 diff = subMeshCount - mMaterialElements.size( );
-			Vector<AssetHandle<Material>> newMats; 
-			for ( u32 i = 0; i < mMaterialElements.size(); ++i )
-			{
-				newMats.push_back( mMaterialElements.at( i ) );
-			}
-
-			AssetManager* am = EngineSubsystem( AssetManager );
-
-			for ( u32 i = 0; i < diff; ++i )
-			{
-				newMats.push_back( am->GetDefaultAsset< Material >( ) );
-			} 
-
-			// Set materials
-			mMaterialElements = newMats; 
-		}
-	}
-
-	//--------------------------------------------------------------------
 	void Renderable::SetGraphicsScene(GraphicsScene* scene) 
 	{
 		mGraphicsScene = scene;
@@ -267,30 +213,12 @@ namespace Enjon
 		}
 
 		// Bind mesh and submit
-		const Mesh* mesh = GetMesh( ).Get( );
+		const Mesh* mesh = GetMesh( );
 		if ( mesh != nullptr )
 		{
 			// Check if mesh has submeshes first
 			const Vector<SubMesh*>& subMeshes = mesh->GetSubmeshes( );
 
-			//if ( subMeshes.empty( ) )
-			//{
-			//	mesh->Bind( );
-			//	{
-			//		Mat4 Model;
-			//		Model *= Mat4::Translate( GetPosition( ) );
-			//		Model *= QuaternionToMat4( GetRotation( ) );
-			//		Model *= Mat4::Scale( GetScale( ) );
-			//		const_cast< Enjon::Shader* > ( shader )->SetUniform( "uModel", Model );
-			//		const_cast< Enjon::Shader* > ( shader )->SetUniform( "uPreviousModel", mPreviousModelMatrix );
-			//		mesh->Submit( );
-
-			//		// Set the previous model matrix with current one
-			//		mPreviousModelMatrix = Model;
-			//	}
-			//	mesh->Unbind( ); 
-			//}
-			//else
 			{
 				Mat4x4 Model;
 				Model *= Mat4x4::Translate( GetPosition( ) );

@@ -1,3 +1,6 @@
+// @file Renderable.h
+// Copyright 2016-2018 John Jackson. All Rights Reserved.
+
 #pragma once
 #ifndef ENJON_RENDERABLE_H
 #define ENJON_RENDERABLE_H
@@ -9,11 +12,12 @@
 #include "Asset/Asset.h"
 #include "Base/Object.h"
 #include "Entity/EntityDefines.h"
-#include "Graphics/Mesh.h"
 #include "Graphics/Material.h"
 
 namespace Enjon 
 { 
+	class SubMesh;
+	class Mesh;
 	class GraphicsScene;
 	class GraphicsSubsystem;
 	class GLSLProgram;
@@ -49,10 +53,7 @@ namespace Enjon
 			void Renderable::OffsetRotation(const f32& Yaw, const f32& Pitch);
 
 			/* Get material of renderable */
-			AssetHandle< Material > GetMaterial( const u32& idx = 0 ) const;
-
-			/* Get mesh of renderable */
-			AssetHandle< Mesh > GetMesh() const;
+			AssetHandle< Material > GetMaterial( const u32& idx = 0 ) const; 
 
 			/* Get scene of renderable */
 			GraphicsScene* GetGraphicsScene() const;
@@ -76,13 +77,16 @@ namespace Enjon
 			void SetRotation(const Quaternion& rotation); 
 
 			/* Set material of renderable */
-			void SetMaterial( const AssetHandle< Material >& material, const u32& idx = 0 );
-
-			/* Set mesh of renderable */
-			void SetMesh(const AssetHandle<Mesh>& mesh);
+			void SetMaterial( const AssetHandle< Material >& material, const u32& idx = 0 ); 
 
 			/* Set scene of renderable */
 			void SetGraphicsScene(GraphicsScene* scene); 
+
+			/* Set mesh of renderable */
+			virtual void SetMesh( const Mesh* mesh ) = 0;
+
+			/* Get mesh of renderable */
+			virtual const Mesh* GetMesh() const = 0;
 
 			/*
 			* @brief
@@ -158,17 +162,12 @@ namespace Enjon
 			*/
 			void Submit( const Enjon::GLSLProgram* shader );
 
-		private: 
-			// Enjon Properties
-			ENJON_PROPERTY( Editable, Delegates[ Mutator = SetMesh ] )
-			AssetHandle<Mesh> mMesh; 
-
-			ENJON_PROPERTY( )
-			Vector<AssetHandle<Material>> mMaterialElements;
+		protected: 
 			
-			u32 mRenderableID = MAX_ENTITIES;
+			ENJON_PROPERTY( )
+			Vector<AssetHandle<Material>> mMaterialElements; 
 
-		private: 
+			u32 mRenderableID = MAX_ENTITIES; 
 			Transform mTransform; 
 			GraphicsScene* mGraphicsScene = nullptr;
 			Mat4x4 mPreviousModelMatrix = Mat4x4::Identity( );

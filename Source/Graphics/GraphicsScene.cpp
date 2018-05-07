@@ -6,6 +6,8 @@
 #include "Graphics/QuadBatch.h"
 #include "Graphics/Material.h"
 #include "Graphics/Camera.h"
+#include "Graphics/StaticMeshRenderable.h"
+#include "Graphics/SkeletalMeshRenderable.h"
 #include "Graphics/GraphicsSubsystem.h" 
 #include "SubsystemCatalog.h"
 #include "Engine.h"
@@ -20,12 +22,12 @@ namespace Enjon {
 
 	GraphicsScene::~GraphicsScene()
 	{
-		for ( auto& r : mRenderables )
+		for ( auto& r : mStaticMeshRenderables )
 		{
 			r->SetGraphicsScene( nullptr );
 		}
 
-		for ( auto& r : mNonDepthTestedRenderables )
+		for ( auto& r : mNonDepthTestedStaticMeshRenderables )
 		{
 			r->SetGraphicsScene( nullptr );
 		}
@@ -51,8 +53,8 @@ namespace Enjon {
 		}
 
 		// Free all memory
-		mRenderables.clear( );
-		mNonDepthTestedRenderables.clear( ); 
+		mStaticMeshRenderables.clear( );
+		mNonDepthTestedStaticMeshRenderables.clear( ); 
 		mQuadBatches.clear();
 		mDirectionalLights.clear();
 		mPointLights.clear();
@@ -61,19 +63,19 @@ namespace Enjon {
 
 	//====================================================================================================
 
-	void GraphicsScene::SortRenderables( RenderableSortType type )
+	void GraphicsScene::SortStaticMeshRenderables( RenderableSortType type )
 	{
 		switch( type )
 		{
 			case RenderableSortType::MATERIAL:
 			{
-				std::stable_sort(mSortedRenderables.begin(), mSortedRenderables.end(), CompareMaterial);
+				std::stable_sort(mSortedStaticMeshRenderables.begin(), mSortedStaticMeshRenderables.end(), CompareMaterial);
 			} 
 			break;
 
 			case RenderableSortType::DEPTH:
 			{
-				std::stable_sort(mSortedRenderables.begin(), mSortedRenderables.end(), CompareDepth);
+				std::stable_sort(mSortedStaticMeshRenderables.begin(), mSortedStaticMeshRenderables.end(), CompareDepth);
 			}
 			break;
 
@@ -103,64 +105,68 @@ namespace Enjon {
 
 	//====================================================================================================
 
-	const Vector<Renderable*>& GraphicsScene::GetRenderables( ) const
+	const Vector<StaticMeshRenderable*>& GraphicsScene::GetStaticMeshRenderables( ) const
 	{ 
-		return mSortedRenderables;
+		return mSortedStaticMeshRenderables;
 	}
 
-	const Vector<Renderable*>& GraphicsScene::GetNonDepthTestedRenderables( )
+	//====================================================================================================
+
+	const Vector<StaticMeshRenderable*>& GraphicsScene::GetNonDepthTestedStaticMeshRenderables( )
 	{
 		// Sort by depth to camera
-		std::stable_sort( mNonDepthTestedRenderables.begin( ), mNonDepthTestedRenderables.end( ), CompareDepth );
+		std::stable_sort( mNonDepthTestedStaticMeshRenderables.begin( ), mNonDepthTestedStaticMeshRenderables.end( ), CompareDepth );
 
-		return mNonDepthTestedRenderables;
+		return mNonDepthTestedStaticMeshRenderables;
 	} 
 
-	void GraphicsScene::AddRenderable(Renderable* renderable)
+	//====================================================================================================
+
+	void GraphicsScene::AddStaticMeshRenderable(StaticMeshRenderable* renderable)
 	{
-		auto query = mRenderables.find(renderable);
-		if (query == mRenderables.end())
+		auto query = mStaticMeshRenderables.find(renderable);
+		if (query == mStaticMeshRenderables.end())
 		{
-			mRenderables.insert(renderable);
+			mStaticMeshRenderables.insert(renderable);
 			renderable->SetGraphicsScene(this);
 
 			// Add to sorted renderables
-			mSortedRenderables.push_back( renderable );
+			mSortedStaticMeshRenderables.push_back( renderable );
 
 			// Sort renderables
 			//SortRenderables( );
 		}
 	}
 
-	void GraphicsScene::RemoveRenderable(Renderable* renderable)
+	void GraphicsScene::RemoveStaticMeshRenderable(StaticMeshRenderable* renderable)
 	{
-		auto query = mRenderables.find(renderable);
-		if (query != mRenderables.end())
+		auto query = mStaticMeshRenderables.find(renderable);
+		if (query != mStaticMeshRenderables.end())
 		{
 			renderable->SetGraphicsScene(nullptr);
-			mRenderables.erase(renderable);
+			mStaticMeshRenderables.erase(renderable);
 
 			// Remove renderable from sorted list
-			mSortedRenderables.erase( std::remove( mSortedRenderables.begin( ), mSortedRenderables.end( ), renderable ), mSortedRenderables.end( ) );
+			mSortedStaticMeshRenderables.erase( std::remove( mSortedStaticMeshRenderables.begin( ), mSortedStaticMeshRenderables.end( ), renderable ), mSortedStaticMeshRenderables.end( ) );
 
 			// Sort renderables
 			//SortRenderables( );
 		}
 	}
 
-	void GraphicsScene::AddNonDepthTestedRenderable( Renderable* renderable )
+	void GraphicsScene::AddNonDepthTestedStaticMeshRenderable( StaticMeshRenderable* renderable )
 	{
-		auto query = std::find( mNonDepthTestedRenderables.begin( ), mNonDepthTestedRenderables.end( ), renderable );
-		if ( query == mNonDepthTestedRenderables.end( ) )
+		auto query = std::find( mNonDepthTestedStaticMeshRenderables.begin( ), mNonDepthTestedStaticMeshRenderables.end( ), renderable );
+		if ( query == mNonDepthTestedStaticMeshRenderables.end( ) )
 		{
-			mNonDepthTestedRenderables.push_back( renderable );
+			mNonDepthTestedStaticMeshRenderables.push_back( renderable );
 			renderable->SetGraphicsScene( this );
 		}
 	}
 
-	void GraphicsScene::RemoveNonDepthTestedRenderable( Renderable* renderable )
+	void GraphicsScene::RemoveNonDepthTestedStaticMeshRenderable( StaticMeshRenderable* renderable )
 	{
-		mNonDepthTestedRenderables.erase( std::remove( mNonDepthTestedRenderables.begin( ), mNonDepthTestedRenderables.end( ), renderable ), mNonDepthTestedRenderables.end( ) );
+		mNonDepthTestedStaticMeshRenderables.erase( std::remove( mNonDepthTestedStaticMeshRenderables.begin( ), mNonDepthTestedStaticMeshRenderables.end( ), renderable ), mNonDepthTestedStaticMeshRenderables.end( ) );
 	} 
 
 	void GraphicsScene::AddQuadBatch(QuadBatch* batch)

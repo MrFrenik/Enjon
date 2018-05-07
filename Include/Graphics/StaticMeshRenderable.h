@@ -1,32 +1,31 @@
-// @file SkeletalMeshRenderable.h
+// @file StaticMeshRenderable.h
 // Copyright 2016-2018 John Jackson. All Rights Reserved.
 
 #pragma once
-#ifndef ENJON_SKELETAL_MESH_RENDERABLE_H
-#define ENJON_SKELETAL_MESH_RENDERABLE_H
+#ifndef ENJON_STATIC_MESH_RENDERABLE_H
+#define ENJON_STATIC_MESH_RENDERABLE_H
 
-#include "System/Types.h"
 #include "Graphics/Renderable.h"
-#include "Graphics/SkeletalMesh.h"
+#include "Graphics/Mesh.h"
 
 namespace Enjon
 {
 	ENJON_CLASS( Construct )
-	class SkeletalMeshRenderable : public Renderable
+	class StaticMeshRenderable : public Renderable
 	{
 		ENJON_CLASS_BODY( )
 
 		public:
 
-			/*
+			/**
 			* @brief
 			*/
-			SkeletalMeshRenderable( ) = default;
+			StaticMeshRenderable( ) = default;
 
-			/*
+			/**
 			* @brief
 			*/
-			~SkeletalMeshRenderable( ) = default;
+			~StaticMeshRenderable( ) = default;
 
 			/**
 			* @brief
@@ -41,16 +40,14 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void SetMesh( const AssetHandle< SkeletalMesh >& mesh );
+			void SetMesh( const AssetHandle< Mesh >& mesh ); 
 
 		protected:
 
 			ENJON_PROPERTY( Editable, Delegates[ Mutator = SetMesh ] )
-			AssetHandle< SkeletalMesh > mMesh;
-
-		private:
-
+			AssetHandle< Mesh > mMesh; 
 	};
 }
+
 
 #endif

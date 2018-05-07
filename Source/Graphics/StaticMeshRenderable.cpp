@@ -1,16 +1,13 @@
-// @file SkeletalMeshRenderable.cpp
-// Copyright 2016-2018 John Jackson. All Rights Reserved.
-
-#include "Graphics/SkeletalMeshRenderable.h"
+#include "Graphics/StaticMeshRenderable.h"
 #include "Asset/AssetManager.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
 
 namespace Enjon
-{
-	//===================================================================================
+{ 
+	//====================================================================================
 
-	void SkeletalMeshRenderable::SetMesh( const Mesh* mesh )
+	void StaticMeshRenderable::SetMesh( const Mesh* mesh )
 	{
 		mMesh = mesh;
 
@@ -55,19 +52,18 @@ namespace Enjon
 			// Set materials
 			mMaterialElements = newMats; 
 		}
+	} 
 
-	}
+	//====================================================================================
 
-	//===================================================================================
-
-	const Mesh* SkeletalMeshRenderable::GetMesh( ) const
+	const Mesh* StaticMeshRenderable::GetMesh( ) const
 	{
-		return mMesh.Get( );
+		return mMesh.Get();
 	}
 
-	//===================================================================================
+	//====================================================================================
 
-	void SkeletalMeshRenderable::SetMesh( const AssetHandle< SkeletalMesh >& mesh )
+	void StaticMeshRenderable::SetMesh( const AssetHandle< Mesh >& mesh )
 	{
 		mMesh = mesh;
 
@@ -114,5 +110,5 @@ namespace Enjon
 		}
 	}
 
-	//=================================================================================== 
+	//====================================================================================
 }

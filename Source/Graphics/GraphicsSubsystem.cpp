@@ -29,6 +29,8 @@
 #include "SubsystemCatalog.h"
 #include "Defines.h"
 #include "Asset/SkeletonAssetLoader.h"
+#include "Graphics/StaticMeshRenderable.h"
+#include "Graphics/SkeletalMeshRenderable.h"
 
 #include <string>
 #include <cassert>
@@ -46,8 +48,8 @@
 
 #define SSAO_KERNEL_SIZE 16
 
-Enjon::Renderable mRenderable; 
-std::vector < Enjon::Renderable > mRenderables;
+Enjon::StaticMeshRenderable mRenderable; 
+std::vector < Enjon::StaticMeshRenderable > mRenderables;
 Enjon::AssetHandle< Enjon::Texture > mBRDFHandle;
 Enjon::AssetHandle< Enjon::ShaderGraph > mTestShaderGraph;
 Enjon::Material* mMaterial = nullptr;
@@ -439,7 +441,7 @@ namespace Enjon
 			{
 				for ( u32 j = 0; j < 0; ++j )
 				{
-					Enjon::Renderable renderable;
+					Enjon::StaticMeshRenderable renderable;
 					
 					// Set renderable material
 					renderable.SetMaterial( mMaterial, 0 );
@@ -739,7 +741,7 @@ namespace Enjon
 		glClearBufferfv(GL_COLOR, (u32)GBufferTextureType::NORMAL, blackColor); 
  
 		// Get sorted renderables by material
-		const Vector<Renderable*>& sortedRenderables = mGraphicsScene.GetRenderables();
+		const Vector<StaticMeshRenderable*>& sortedStaticMeshRenderables = mGraphicsScene.GetStaticMeshRenderables();
 		const HashSet<QuadBatch*>& sortedQuadBatches = mGraphicsScene.GetQuadBatches(); 
 
 		Camera* camera = mGraphicsScene.GetActiveCamera( );
@@ -751,15 +753,15 @@ namespace Enjon
 		Enjon::AssetHandle< Enjon::ShaderGraph > sg; 
 		GLSLProgram* gbufferShader = Enjon::ShaderManager::Get("GBuffer");
 
-		if (!sortedRenderables.empty())
+		if (!sortedStaticMeshRenderables.empty())
 		{ 
 			const Material* material = nullptr;
-			for (auto& renderable : sortedRenderables)
+			for (auto& renderable : sortedStaticMeshRenderables)
 			{ 
 				renderable->Bind( );
 				{
 					// For each submesh
-					const Vector< SubMesh* >& subMeshes = renderable->GetMesh( ).Get( )->GetSubmeshes( );
+					const Vector< SubMesh* >& subMeshes = renderable->GetMesh( )->GetSubmeshes( );
 					for ( u32 i = 0; i < subMeshes.size(); ++i )
 					{
 						const Material* curMaterial = renderable->GetMaterial( i ).Get( );
@@ -793,7 +795,7 @@ namespace Enjon
 		}
 
 		// Attempt to do the skinned mesh things
-		static Renderable skinnedRenderable;
+		static StaticMeshRenderable skinnedRenderable;
 		GLSLProgram* skinnedMeshProgram = ShaderManager::Get( "SkinnedMesh" );
 		if ( skinnedMeshProgram )
 		{
@@ -811,15 +813,17 @@ namespace Enjon
 
 					const usize ssize = 1;
 					static bool b = false;
-					static Vector< Renderable > mSkinnedMeshes;
+					static Vector< SkeletalMeshRenderable > mSkinnedMeshes;
 					if ( !b && skl->GetUUID( ) != UUID::Invalid( ) )
 					{
 						mSkinnedMeshes.resize( ssize );
 						for ( u32 i = 0; i < ssize; ++i )
 						{
+							mSkinnedMeshes.at( i ).SetMesh( mesh );
 							mSkinnedMeshes.at( i ).SetMaterial( mat );
 							mSkinnedMeshes.at( i ).SetRotation( Quaternion::AngleAxis( Math::ToRadians( -90.0f ), Vec3::XAxis( ) ) );
 							mSkinnedMeshes.at( i ).SetPosition( Vec3( i * 120.0f, 0.0f, 0.0f ) );
+							mSkinnedMeshes.at( i ).SetScale( 0.1f );
 						}
 
 						handIDX = skl.Get( )->GetJointIndex( "RightHand" );
@@ -1395,7 +1399,7 @@ namespace Enjon
 	void GraphicsSubsystem::FXAAPass(FrameBuffer* input)
 	{
 		GLSLProgram* fxaaProgram = Enjon::ShaderManager::Get("FXAA");
-		Vector<Renderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
+		Vector<StaticMeshRenderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedStaticMeshRenderables( );
 		mFXAATarget->Bind();
 		{
 			mCurrentWindow->Clear();
@@ -1419,7 +1423,7 @@ namespace Enjon
 	void GraphicsSubsystem::MotionBlurPass( FrameBuffer* inputTarget )
 	{
 		Camera* camera = mGraphicsScene.GetActiveCamera( );
-		Vector<Renderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedRenderables( );
+		Vector<StaticMeshRenderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedStaticMeshRenderables( );
 		GLSLProgram* motionBlurProgram = ShaderManager::Get( "MotionBlur" );
 		mMotionBlurTarget->Bind( );
 		{

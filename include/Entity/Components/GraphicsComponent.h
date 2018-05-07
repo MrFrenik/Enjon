@@ -5,6 +5,7 @@
 #include "Entity/Component.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Material.h"
+#include "Graphics/StaticMeshRenderable.h"
 #include "System/Types.h"
 
 namespace Enjon
@@ -79,7 +80,7 @@ namespace Enjon
 			/* 
 			* @brief Get renderable 
 			*/
-			Renderable* GetRenderable();
+			StaticMeshRenderable* GetRenderable();
 
 			/* 
 			* @brief Sets world transform 
@@ -119,12 +120,7 @@ namespace Enjon
 			/* 
 			* @brief Set scene of renderable 
 			*/
-			void SetGraphicsScene(GraphicsScene* scene);
-
-			/* 
-			* @brief Set Renderable 
-			*/
-			void SetRenderable(const Renderable& renderable); 
+			void SetGraphicsScene(GraphicsScene* scene); 
 
 			/*
 			* @brief
@@ -136,13 +132,12 @@ namespace Enjon
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
-		protected:
-
+		protected: 
 
 		private: 
 			
 			ENJON_PROPERTY( )
-			Renderable mRenderable;
+			StaticMeshRenderable mRenderable;
 	};
 }
 

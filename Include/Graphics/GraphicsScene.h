@@ -11,9 +11,11 @@
 #include <set>
 #include <vector>
 
-namespace Enjon { 
-
+namespace Enjon 
+{ 
 	class Renderable;
+	class StaticMeshRenderable;
+	class SkeletalMeshRenderable;
 	class DirectionalLight;
 	class PointLight;
 	class SpotLight;
@@ -64,22 +66,22 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void AddRenderable( Renderable* renderable );
+			void AddStaticMeshRenderable( StaticMeshRenderable* renderable );
 
 			/*
 			* @brief
 			*/
-			void AddNonDepthTestedRenderable( Renderable* renderable );
+			void AddNonDepthTestedStaticMeshRenderable( StaticMeshRenderable* renderable );
 
 			/*
 			* @brief
 			*/
-			void RemoveRenderable( Renderable* renderable );
+			void RemoveStaticMeshRenderable( StaticMeshRenderable* renderable );
 
 			/*
 			* @brief
 			*/
-			void RemoveNonDepthTestedRenderable( Renderable* renderable );
+			void RemoveNonDepthTestedStaticMeshRenderable( StaticMeshRenderable* renderable );
 
 			/*
 			* @brief
@@ -149,12 +151,12 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			const Vector<Renderable*>& GetRenderables( ) const;
+			const Vector<StaticMeshRenderable*>& GetStaticMeshRenderables( ) const;
 
 			/*
 			* @brief
 			*/
-			const Vector<Renderable*>& GetNonDepthTestedRenderables();
+			const Vector<StaticMeshRenderable*>& GetNonDepthTestedStaticMeshRenderables();
 
 			/*
 			* @brief
@@ -196,7 +198,7 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			void SortRenderables( RenderableSortType type = RenderableSortType::MATERIAL );
+			void SortStaticMeshRenderables( RenderableSortType type = RenderableSortType::MATERIAL );
 
 		private:
 
@@ -213,12 +215,13 @@ namespace Enjon {
 		private:
 
 			ENJON_PROPERTY( )
-			Vector< Renderable* > mSortedRenderables; 
+			Vector< StaticMeshRenderable* > mSortedStaticMeshRenderables; 
  
-			Vector<Renderable*> mNonDepthTestedRenderables;
+			Vector< StaticMeshRenderable* > mNonDepthTestedStaticMeshRenderables;
 
 			HashSet<Camera*> mCameras;
-			HashSet<Renderable*> mRenderables;
+			HashSet<StaticMeshRenderable*> mStaticMeshRenderables;
+			HashSet<SkeletalMeshRenderable*> mSkeletalMeshRenderables;
 			HashSet<QuadBatch*> mQuadBatches;
 			HashSet<DirectionalLight*> mDirectionalLights;
 			HashSet<PointLight*> mPointLights;

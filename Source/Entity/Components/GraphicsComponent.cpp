@@ -19,14 +19,14 @@ namespace Enjon
 		mRenderable.SetMesh( am->GetDefaultAsset< Mesh >( ) );
 
 		// Set default materials for all material elements
-		for ( u32 i = 0; i < mRenderable.GetMesh( ).Get( )->GetSubMeshCount( ); ++i ) 
+		for ( u32 i = 0; i < mRenderable.GetMesh( )->GetSubMeshCount( ); ++i ) 
 		{
 			mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
 		}
 
 		// Add renderable to scene
 		GraphicsSubsystem* gs = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem >( )->ConstCast< GraphicsSubsystem >( );
-		gs->GetGraphicsScene( )->AddRenderable( &mRenderable );
+		gs->GetGraphicsScene( )->AddStaticMeshRenderable( &mRenderable );
 
 		// Set explicit tick state
 		mTickState = ComponentTickState::TickAlways;
@@ -39,7 +39,7 @@ namespace Enjon
 		// Remove renderable from scene
 		if (mRenderable.GetGraphicsScene() != nullptr)
 		{
-			mRenderable.GetGraphicsScene()->RemoveRenderable(&mRenderable);
+			mRenderable.GetGraphicsScene()->RemoveStaticMeshRenderable(&mRenderable);
 		}
 	}
 
@@ -109,7 +109,7 @@ namespace Enjon
 
 	//====================================================================
 
-	Renderable* GraphicsComponent::GetRenderable()
+	StaticMeshRenderable* GraphicsComponent::GetRenderable()
 	{ 
 		return &mRenderable; 
 	}
@@ -159,7 +159,7 @@ namespace Enjon
 
 	void GraphicsComponent::SetMesh(const AssetHandle<Mesh>& mesh)
 	{
-		mRenderable.SetMesh(mesh);
+		mRenderable.SetMesh( mesh );
 	}
 
 	//====================================================================
@@ -167,13 +167,6 @@ namespace Enjon
 	void GraphicsComponent::SetGraphicsScene(GraphicsScene* scene)
 	{
 		mRenderable.SetGraphicsScene(scene);
-	}
-
-	//==================================================================== 
-
-	void GraphicsComponent::SetRenderable(const Renderable& renderable)
-	{
-		mRenderable = renderable;
 	} 
 
 	//====================================================================
@@ -181,7 +174,7 @@ namespace Enjon
 	Result GraphicsComponent::SerializeData( ByteBuffer* buffer ) const
 	{
 		// Write uuid of mesh
-		mRenderable.GetMesh( ) ? buffer->Write< UUID >( mRenderable.GetMesh( )->GetUUID( ) ) : buffer->Write< UUID >( UUID::Invalid( ) );
+		buffer->Write< UUID >( mRenderable.GetMesh( )->GetUUID( ) );
 
 		// Write out renderable material size
 		buffer->Write< u32 >( mRenderable.GetMaterialsCount( ) );

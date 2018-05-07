@@ -17,7 +17,7 @@ namespace Enjon
 
 		for ( auto& t : mTransformHeirarchies )
 		{
-			gfx->GetGraphicsScene( )->AddNonDepthTestedRenderable( &t->mRenderable );
+			gfx->GetGraphicsScene( )->AddNonDepthTestedStaticMeshRenderable( &t->mRenderable );
 		} 
 	}
 
@@ -28,7 +28,7 @@ namespace Enjon
 
 		for ( auto& t : mTransformHeirarchies )
 		{
-			gfx->GetGraphicsScene( )->RemoveNonDepthTestedRenderable( &t->mRenderable );
+			gfx->GetGraphicsScene( )->RemoveNonDepthTestedStaticMeshRenderable( &t->mRenderable );
 		} 
 	}
 
