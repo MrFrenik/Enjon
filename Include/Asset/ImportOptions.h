@@ -14,9 +14,11 @@ namespace Enjon
 	class AssetLoader;
 
 	struct AssetStringInformation
-	{
+	{ 
 		String mQualifiedName;
+
 		String mDisplayName;
+
 		String mAssetDestinationPath;
 	};
 

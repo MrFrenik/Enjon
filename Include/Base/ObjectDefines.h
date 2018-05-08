@@ -4,6 +4,12 @@
 
 #include "System/Config.h"
 
+enum MetaClassEnumDefines
+{
+	Construct,
+	Abstract
+};
+
 enum MetaPropertyEnumDefines
 {
 	UIMin,
@@ -18,7 +24,7 @@ enum MetaPropertyEnumDefines
 /*
 	Used as boilerplate for all classes participating in object/reflection model.
 */
-#define ENJON_CLASS_BODY( ... )																	\
+#define ENJON_CLASS_BODY_INTERNAL( ... )															\
 	friend Enjon::Object;																			\
 	public:																							\
 		virtual const Enjon::MetaClass* Class( ) const override\
@@ -28,7 +34,10 @@ enum MetaPropertyEnumDefines
 	protected:\
 		virtual const Enjon::MetaClass* GetClassInternal() const override; 
 
-#define ENJON_COMPONENT( ComponentName )\
+#define ENJON_CLASS_BODY( ... )\
+	ENJON_CLASS_BODY_INTERNAL( ... )
+
+#define ENJON_COMPONENT_INTERNAL( ComponentName )\
 	friend Enjon::Object;																			\
 	public:																							\
 		ComponentName()\
@@ -51,7 +60,10 @@ enum MetaPropertyEnumDefines
 			DestroyBase<ComponentName>();\
 		} 
 
-#define ENJON_MODULE_BODY( ModuleName )\
+#define ENJON_COMPONENT( ComponentName )\
+	ENJON_COMPONENT_INTERNAL( ComponentName )
+
+#define ENJON_MODULE_BODY_INTERNAL( ModuleName )\
 	friend Enjon::Object;																			\
 	public:																							\
 		ModuleName() = default;\
@@ -66,6 +78,10 @@ enum MetaPropertyEnumDefines
 		virtual Enjon::Result ModuleName::BindApplicationMetaClasses() override;\
 		virtual Enjon::Result ModuleName::UnbindApplicationMetaClasses() override;\
 
+#define ENJON_MODULE_BODY( ModuleName )\
+	ENJON_MODULE_BODY_INTERNAL( ModuleName )
+
+
 #define ENJON_ENUM( ... )
 #define ENJON_PROPERTY( ... )
 #define ENJON_FUNCTION( ... )
@@ -76,8 +92,7 @@ enum MetaPropertyEnumDefines
 #define ENJON_EXPORT __declspec(dllexport) 
 #endif
 
-
-#define ENJON_MODULE_DECLARE( ModuleName )\
+#define ENJON_MODULE_DECLARE_INTERNAL( ModuleName )\
 	class ModuleName;\
 	extern "C"\
 	{\
@@ -86,7 +101,10 @@ enum MetaPropertyEnumDefines
 		ENJON_EXPORT void DeleteApplication( Enjon::Application* app );\
 	}
 
-#define ENJON_MODULE_DEFINE( ModuleName )\
+#define ENJON_MODULE_DECLARE( ModuleName )\
+	ENJON_MODULE_DECLARE_INTERNAL( ModuleName )
+
+#define ENJON_MODULE_DEFINE_INTERNAL( ModuleName )\
 	extern "C"\
 	{\
 		ENJON_EXPORT Enjon::Application* CreateApplication( Enjon::Engine* engine )\
@@ -112,5 +130,9 @@ enum MetaPropertyEnumDefines
 			}\
 		}\
 	} 
+
+#define ENJON_MODULE_DEFINE( ModuleName )\
+	ENJON_MODULE_DEFINE_INTERNAL( ModuleName )
+
 
 #endif

@@ -204,8 +204,13 @@ void Introspection::Parse( Lexer* lexer )
 			case TokenType::Token_Identifier:
 			{ 
 				// Parse class when object identifier is found
-				if ( token.Equals( "ENJON_CLASS" ) )
+				if ( token.Equals( "ENJON_CLASS" ) || token.Equals( "ENJON_STRUCT" ) )
 				{
+					if ( token.Equals( "ENJON_STRUCT" ) )
+					{
+						std::cout << "Found Struct" << "\n";
+					}
+
 					ParseClass( lexer );
 				} 
 
