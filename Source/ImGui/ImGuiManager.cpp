@@ -1471,8 +1471,6 @@ namespace Enjon
 
 	DockingWindow::~DockingWindow( )
 	{ 
-		// Register window on construction
-		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
 	}
 
 	//===================================================================== 

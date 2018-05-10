@@ -32,10 +32,7 @@ namespace Enjon
 			*/
 			virtual Result Shutdown() override;
 
-		protected:
-
-		private:
-
+		protected: 
 	};
 }
 

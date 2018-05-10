@@ -11,6 +11,7 @@
 #include "IO/InputManager.h"
 #include "ImGui/ImGuiManager.h"
 #include "Physics/PhysicsSubsystem.h"
+#include "Graphics/AnimationSubsystem.h"
 #include "Scene/SceneManager.h"
 #include "Utils/Timing.h"
 #include "SubsystemCatalog.h"
@@ -164,12 +165,13 @@ namespace Enjon
 		mImGuiManager	= mSubsystemCatalog->Register< ImGuiManager >( false ); 
 
 		// Register remaining subsystems
-		mAssetManager	= mSubsystemCatalog->Register< AssetManager >( false );		// Will do manual initialization of asset management system, since it's project dependent
-		mGraphics		= mSubsystemCatalog->Register< GraphicsSubsystem >( );
-		mInput			= mSubsystemCatalog->Register< Input >( ); 
-		mEntities		= mSubsystemCatalog->Register< EntityManager >( );
-		mPhysics		= mSubsystemCatalog->Register< PhysicsSubsystem >( );
-		mSceneManager	= mSubsystemCatalog->Register< SceneManager >( );
+		mAssetManager		= mSubsystemCatalog->Register< AssetManager >( false );		// Will do manual initialization of asset management system, since it's project dependent
+		mGraphics			= mSubsystemCatalog->Register< GraphicsSubsystem >( );
+		mInput				= mSubsystemCatalog->Register< Input >( ); 
+		mEntities			= mSubsystemCatalog->Register< EntityManager >( );
+		mPhysics			= mSubsystemCatalog->Register< PhysicsSubsystem >( );
+		mSceneManager		= mSubsystemCatalog->Register< SceneManager >( );
+		mAnimationSystem	= mSubsystemCatalog->Register< AnimationSubsystem >( );
 
 		// Default setting for assets directory
 		mAssetManager->SetAssetsDirectoryPath( mConfig.GetRoot( ) + "Assets/" );

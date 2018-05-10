@@ -227,7 +227,6 @@ namespace Enjon
 		Count
 	}; 
 
-
 	ENJON_CLASS( Construct )
 	class ShaderGraph : public Asset
 	{ 

@@ -6337,6 +6337,13 @@ void ImGui::Scrollbar(ImGuiLayoutType direction)
         grab_rect = ImRect(ImLerp(bb.Min.x, bb.Max.x, grab_v_norm), bb.Min.y, ImMin(ImLerp(bb.Min.x, bb.Max.x, grab_v_norm) + grab_h_pixels, window_rect.Max.x), bb.Max.y);
     else
         grab_rect = ImRect(bb.Min.x, ImLerp(bb.Min.y, bb.Max.y, grab_v_norm), bb.Max.x, ImMin(ImLerp(bb.Min.y, bb.Max.y, grab_v_norm) + grab_h_pixels, window_rect.Max.y));
+
+	// Draw line
+	ImVec2 lineStart = ImVec2( bb.GetCenter().x , bb.GetTL().y );
+	ImVec2 lineEnd = ImVec2( lineStart.x, lineStart.y + bb.GetHeight() );
+	window->DrawList->AddLine( lineStart, lineEnd, GetColorU32( ImGuiCol_ScrollbarGrab ) );
+
+	// Draw rect for scroll bar
     window->DrawList->AddRectFilled(grab_rect.Min, grab_rect.Max, grab_col, style.ScrollbarRounding);
 }
 

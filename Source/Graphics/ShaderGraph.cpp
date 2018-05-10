@@ -261,6 +261,11 @@ namespace Enjon
 				return "Forward_StaticGeom";
 			}; break;
 
+			case ShaderPassType::Deferred_Skinned_Geom:
+			{
+				return "Deferred_Skinned_Geom";
+			} break;
+
 			default:
 			{
 				return "";
@@ -1020,6 +1025,17 @@ namespace Enjon
 				code += OutputLine( "layout (location = 3) in vec3 aVertexUV;" );
 				code += OutputLine( "layout (location = 4) in mat4 aInstanceMatrix;" );
 			} break; 
+
+			case ShaderPassType::Deferred_Skinned_Geom:
+			{
+				// Vertex Attribute Layouts
+				code += OutputLine( "layout (location = 0) in vec3 aVertexPosition;" );
+				code += OutputLine( "layout (location = 1) in vec3 aVertexNormal;" );
+				code += OutputLine( "layout (location = 2) in vec3 aVertexTangent;" );
+				code += OutputLine( "layout (location = 3) in vec2 aVertexUV;" );
+				code += OutputLine( "layout (location = 4) in vec4 aJointIndices;" );
+				code += OutputLine( "layout (location = 5) in vec4 aJointWeights;" );
+			} break;
 		}
 
 		return code;

@@ -14,6 +14,7 @@
 namespace Enjon
 { 
 	class SubsystemCatalog;
+	class AnimationSubsystem;
 	class GraphicsSubsystem; 
 	class PhysicsSubsystem;
 	class Input;
@@ -247,6 +248,7 @@ namespace Enjon
 			PhysicsSubsystem*	mPhysics			= nullptr;
 			SceneManager*		mSceneManager		= nullptr;
 			ImGuiManager*		mImGuiManager		= nullptr;
+			AnimationSubsystem* mAnimationSystem	= nullptr;
 
 			// Engine configuration settings
 			EngineConfig mConfig;
