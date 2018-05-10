@@ -24,8 +24,11 @@ namespace Enjon
 			Vector< SkeletalAnimationComponent* > comps = em->GetAllComponentsOfType< SkeletalAnimationComponent >( ); 
 			for ( auto& c : comps )
 			{
-				// Update animation transforms ( or however this needs to operate... )
+				// Calculate transforms for this frame
 				c->CalculateTransforms(); 
+
+				// Update animation time for next frame
+				c->mCurrentTime += Engine::GetInstance()->GetWorldTime()->GetDeltaTime();
 			}
 		*/
 	}
@@ -39,4 +42,34 @@ namespace Enjon
 
 	//==========================================================================
 }
+
+/*
+	ENJON_CLASS( Construct )
+	class SkeletalAnimationComponent : public Component
+	{
+		ENJON_COMPONENT_BODY( SkeletalAnimationComponent )
+
+		public: 
+
+			virtual void Update( ) override; 
+
+		protected: 
+
+			void CalculateTransforms();
+
+		private:
+			ENJON_PROPERTY( )
+			AssetHandle< SkeletalAnimation > mAnimation; 
+
+			f32 mCurrentTime = 0.0f;
+
+			Vector< Mat4x4 > mJointTransforms; 
+	}; 
+
+	SkeletalAnimationComponent::CalculateTransforms()
+	{
+		// Do things here...  
+	}
+
+*/
 
