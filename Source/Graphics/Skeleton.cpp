@@ -6,6 +6,7 @@
 #include "Asset/SkeletalMeshAssetLoader.h"
 #include "Asset/SkeletonAssetLoader.h"
 #include "Graphics/SkeletalAnimation.h"
+#include "Entity/Components/SkeletalAnimationComponent.h"
 #include "Asset/AssetManager.h"
 #include "Asset/MeshAssetLoader.h"
 #include "SubsystemCatalog.h"
@@ -177,6 +178,13 @@ namespace Enjon
 
 	//==================================================================== 
 
+	s32 Skeleton::GetRootID( ) const
+	{
+		return mRootID;
+	}
+
+	//==================================================================== 
+
 	Result Joint::SerializeData( ByteBuffer* buffer ) const
 	{ 
 		// Write out parent id
@@ -226,7 +234,6 @@ namespace Enjon
 	}
 
 	//==================================================================== 
-
 }
 
 

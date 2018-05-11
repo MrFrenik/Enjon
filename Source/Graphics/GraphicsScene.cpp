@@ -129,6 +129,42 @@ namespace Enjon {
 
 	//====================================================================================================
 
+	void GraphicsScene::AddSkeletalMeshRenderable( SkeletalMeshRenderable* renderable )
+	{
+		auto query = mSkeletalMeshRenderables.find(renderable);
+		if (query == mSkeletalMeshRenderables.end())
+		{
+			mSkeletalMeshRenderables.insert(renderable);
+			renderable->SetGraphicsScene(this);
+
+			// Add to sorted renderables
+			mSortedSkeletalMeshRenderables.push_back( renderable );
+
+			// Sort renderables
+			//SortRenderables( );
+		}
+	}
+
+	//====================================================================================================
+
+	void GraphicsScene::RemoveSkeletalMeshRenderable( SkeletalMeshRenderable* renderable )
+	{
+		auto query = mSkeletalMeshRenderables.find(renderable);
+		if (query != mSkeletalMeshRenderables.end())
+		{
+			renderable->SetGraphicsScene(nullptr);
+			mSkeletalMeshRenderables.erase(renderable);
+
+			// Remove renderable from sorted list
+			mSortedSkeletalMeshRenderables.erase( std::remove( mSortedSkeletalMeshRenderables.begin( ), mSortedSkeletalMeshRenderables.end( ), renderable ), mSortedSkeletalMeshRenderables.end( ) );
+
+			// Sort renderables
+			//SortRenderables( );
+		}
+	}
+
+	//====================================================================================================
+
 	void GraphicsScene::AddStaticMeshRenderable(StaticMeshRenderable* renderable)
 	{
 		auto query = mStaticMeshRenderables.find(renderable);
@@ -144,6 +180,8 @@ namespace Enjon {
 			//SortRenderables( );
 		}
 	}
+
+	//====================================================================================================
 
 	void GraphicsScene::RemoveStaticMeshRenderable(StaticMeshRenderable* renderable)
 	{
@@ -161,6 +199,8 @@ namespace Enjon {
 		}
 	}
 
+	//====================================================================================================
+
 	void GraphicsScene::AddNonDepthTestedStaticMeshRenderable( StaticMeshRenderable* renderable )
 	{
 		auto query = std::find( mNonDepthTestedStaticMeshRenderables.begin( ), mNonDepthTestedStaticMeshRenderables.end( ), renderable );
@@ -171,10 +211,14 @@ namespace Enjon {
 		}
 	}
 
+	//====================================================================================================
+
 	void GraphicsScene::RemoveNonDepthTestedStaticMeshRenderable( StaticMeshRenderable* renderable )
 	{
 		mNonDepthTestedStaticMeshRenderables.erase( std::remove( mNonDepthTestedStaticMeshRenderables.begin( ), mNonDepthTestedStaticMeshRenderables.end( ), renderable ), mNonDepthTestedStaticMeshRenderables.end( ) );
 	} 
+
+	//====================================================================================================
 
 	void GraphicsScene::AddQuadBatch(QuadBatch* batch)
 	{
@@ -186,6 +230,8 @@ namespace Enjon {
 		}
 	}
 
+	//====================================================================================================
+
 	void GraphicsScene::RemoveQuadBatch(QuadBatch* batch)
 	{
 		auto query = mQuadBatches.find(batch);
@@ -195,6 +241,8 @@ namespace Enjon {
 			mQuadBatches.erase(batch);
 		}
 	}
+
+	//==================================================================================================== 
 
 	void GraphicsScene::AddDirectionalLight(DirectionalLight* light)
 	{
@@ -206,6 +254,8 @@ namespace Enjon {
 		}
 	}
 
+	//==================================================================================================== 
+
 	void GraphicsScene::RemoveDirectionalLight(DirectionalLight* light)
 	{
 		auto query = mDirectionalLights.find(light);
@@ -215,6 +265,8 @@ namespace Enjon {
 			light->SetGraphicsScene(nullptr);
 		}
 	}
+
+	//==================================================================================================== 
 
 	void GraphicsScene::AddPointLight(PointLight* light)
 	{
@@ -226,6 +278,8 @@ namespace Enjon {
 		}
 	}
 
+	//==================================================================================================== 
+
 	void GraphicsScene::RemovePointLight(PointLight* light)
 	{
 		auto query = mPointLights.find(light);
@@ -235,6 +289,8 @@ namespace Enjon {
 			light->SetGraphicsScene(nullptr);
 		}
 	}
+
+	//==================================================================================================== 
 
 	void GraphicsScene::AddSpotLight(SpotLight* light)
 	{
@@ -246,6 +302,8 @@ namespace Enjon {
 		}
 	}
 
+	//==================================================================================================== 
+
 	void GraphicsScene::RemoveSpotLight(SpotLight* light)
 	{
 		auto query = mSpotLights.find(light);
@@ -254,7 +312,7 @@ namespace Enjon {
 			mSpotLights.erase(light);
 			light->SetGraphicsScene(nullptr);
 		}
-	}
+	} 
 
 	//==================================================================================================
 
@@ -293,11 +351,15 @@ namespace Enjon {
 		mAmbientSettings = settings;
 	}
 
+	//==================================================================================================
+
 	void GraphicsScene::SetAmbientColor(ColorRGBA32& color)
 	{
 		mAmbientSettings.mColor = color;
 		mAmbientSettings.mIntensity = color.a;
 	}
+
+	//==================================================================================================
 
 	bool GraphicsScene::CompareDepth(Renderable* a, Renderable* b)
 	{
@@ -315,6 +377,8 @@ namespace Enjon {
 
 		return aDist < bDist;
 	}
+
+	//==================================================================================================
 
 	// TODO(): Come up with better way to compare materials
 	bool GraphicsScene::CompareMaterial(Renderable* a, Renderable* b)
@@ -336,5 +400,6 @@ namespace Enjon {
 		//return texA.Get()->GetTextureId() > texB.Get()->GetTextureId();
 	}
 
+	//================================================================================================== 
 }
 

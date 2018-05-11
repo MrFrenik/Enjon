@@ -319,7 +319,7 @@ void Introspection::ParseClassTraits( Lexer* lexer, ClassMarkupTraits* traits )
 			if ( curToken.Equals( "Construct" ) )
 			{
 				traits->Construct( true );
-			}
+			} 
 		}
 
 		// Get next token after processing this one
@@ -450,16 +450,9 @@ void Introspection::ParseClass( Lexer* lexer )
 	// Need to push scope now, since open brace has been found
 	Class::PushScope( ); 
 
-	// Continue to class body tag, if not found then remove class and return
-	//if ( !lexer->ContinueToIdentifier( "ENJON_CLASS_BODY" ) )
-	//{
-	//	// Remove class
-	//	RemoveClass( qualifiedClassName );
-
-	//	return;
-	//}
-
+	// Identifiers to search for
 	std::vector<std::string> identifiers{ "ENJON_CLASS_BODY", "ENJON_COMPONENT", "ENJON_MODULE_BODY" };
+
 	if ( !lexer->ContinueToAnyIdentifier( identifiers ) )
 	{
 		// Remove class
@@ -495,21 +488,66 @@ const Class* Introspection::FindApplicationClass( )
 }
 
 //=================================================================================================
+
+void Introspection::ParseComponentTraits( Lexer*lexer, Class* cls )
+{
+	Token curToken = lexer->GetCurrentToken( );
+	while ( !curToken.IsType( TokenType::Token_CloseParen ) && !curToken.IsType( TokenType::Token_EndOfStream ) )
+	{
+		// Requires
+		if ( curToken.Equals( "Requires" ) )
+		{ 
+			// Must be of type component for this meta tag to work properly
+			if ( cls->mTraits.mMetaClassType != MetaClassType::Component )
+			{
+				continue;
+			} 
+
+			// Require opening bracket for require
+			if ( !lexer->RequireToken( TokenType::Token_OpenBracket, true ) )
+			{
+				return;
+			}
+
+			// Parse until closed bracket is found or EOF
+			Token token = lexer->GetNextToken( ); 
+
+			while ( !token.IsType( TokenType::Token_CloseBracket ) || token.IsType( TokenType::Token_EndOfStream ) )
+			{
+				// Parse identifier for require
+				if ( token.IsType( TokenType::Token_Identifier ) )
+				{
+
+					// Add the required meta class back
+					cls->mTraits.mRequiredClasses.push_back( token.ToString( ) );
+				}
+
+				// Grab next token
+				token = lexer->GetNextToken( );
+			}
+		} 
+
+		// Get next token from lexer
+		curToken = lexer->GetNextToken( );
+	} 
+}
+
+//=================================================================================================
 		
 void Introspection::ParseClassBody( Lexer* lexer, Class* cls )
 { 
 	// Look for specific other body modifiers as well
 	if ( lexer->GetCurrentToken( ).Equals( "ENJON_COMPONENT" ) )
 	{
-		cls->mMetaClassType = MetaClassType::Component;
+		cls->mTraits.mMetaClassType = MetaClassType::Component; 
 	}
 	else if ( lexer->GetCurrentToken( ).Equals( "ENJON_MODULE_BODY" ) )
 	{
-		cls->mMetaClassType = MetaClassType::Application; 
+		cls->mTraits.mMetaClassType = MetaClassType::Application; 
 	}
 	else
 	{
-		cls->mMetaClassType = MetaClassType::Object;
+		cls->mTraits.mMetaClassType = MetaClassType::Object;
 	}
 
 	// Grab next token and make sure is parentheses
@@ -520,12 +558,110 @@ void Introspection::ParseClassBody( Lexer* lexer, Class* cls )
 		return;
 	} 
 
-	// Continue to last paren
-	if ( !lexer->ContinueTo( TokenType::Token_CloseParen ) ) 
+	switch ( cls->mTraits.mMetaClassType )
 	{
-		RemoveClass( cls->mName );
+		case MetaClassType::Application:
+		case MetaClassType::Object:
+		{ 
+			// Continue to last paren
+			if ( !lexer->ContinueTo( TokenType::Token_CloseParen ) ) 
+			{
+				RemoveClass( cls->mName );
 
-		return;
+				return;
+			} 
+		} break;
+
+		case MetaClassType::Component:
+		{
+			// Continue to last paren
+			//if ( !lexer->ContinueTo( TokenType::Token_CloseParen ) ) 
+			//{
+			//	RemoveClass( cls->mName );
+
+			//	return;
+			//} 
+
+			ParseComponentTraits( lexer, cls );
+
+			//Token curToken = lexer->GetNextToken( );
+			//while ( !curToken.IsType( TokenType::Token_CloseParen ) )
+			//{
+			//	if ( curToken.Equals( "Requires" ) )
+			//	{
+			//		// Must be of type component for this meta tag to work properly
+			//		if ( cls->mTraits.mMetaClassType != MetaClassType::Component )
+			//		{
+			//			continue;
+			//		}
+
+			//		// Require opening bracket for require
+			//		if ( !lexer->RequireToken( TokenType::Token_OpenBracket, true ) )
+			//		{
+			//			return;
+			//		}
+
+			//		// Parse until closed bracket is found or EOF
+			//		Token token = lexer->GetNextToken( ); 
+
+			//		while ( !token.IsType( TokenType::Token_CloseBracket ) )
+			//		{
+			//			// Parse identifier for require
+			//			if ( token.IsType( TokenType::Token_Identifier ) )
+			//			{
+
+			//				// Add the required meta class back
+			//				cls->mTraits.mRequiredClasses.push_back( token.ToString( ) );
+			//			}
+
+			//			// Grab next token
+			//			token = lexer->GetNextToken( );
+			//		}
+			//	}
+			//	curToken = lexer->GetNextToken( );
+			//} 
+
+		//	Token curToken = lexer->GetCurrentToken( );
+		//	while ( !curToken.IsType( TokenType::Token_CloseParen ) && !curToken.IsType( TokenType::Token_EndOfStream ) )
+		//	{
+		//		// Requires
+		//		if ( curToken.Equals( "Requires" ) )
+		//		{ 
+		//			std::cout << "Here\n";
+
+		//			// Must be of type component for this meta tag to work properly
+		//			if ( cls->mTraits.mMetaClassType != MetaClassType::Component )
+		//			{
+		//				continue;
+		//			}
+
+		//			std::cout << "Here Too\n";
+
+		//			// Require opening bracket for require
+		//			if ( !lexer->RequireToken( TokenType::Token_OpenBracket, true ) )
+		//			{
+		//				return;
+		//			}
+
+		//			// Parse until closed bracket is found or EOF
+		//			Token token = lexer->GetNextToken( ); 
+
+		//			while ( !token.IsType( TokenType::Token_CloseBracket ) || token.IsType( TokenType::Token_EndOfStream ) )
+		//			{
+		//				// Parse identifier for require
+		//				if ( token.IsType( TokenType::Token_Identifier ) )
+		//				{
+
+		//					// Add the required meta class back
+		//					cls->mTraits.mRequiredClasses.push_back( token.ToString( ) );
+		//				}
+		//			}
+		//		} 
+
+		//		// Get next token from lexer
+		//		curToken = lexer->GetNextToken( );
+		//	} 
+		} break;
 	} 
 
 	// Now need to parse all remaining members of class
@@ -1560,7 +1696,22 @@ void Introspection::Compile( const ReflectionConfig& config )
 			code += OutputLine( "template <>" );
 			code += OutputLine( "MetaClass* Object::ConstructMetaClass< " + qualifiedName + " >( )" );
 			code += OutputLine( "{" );
-			code += OutputTabbedLine( "MetaClass* cls = new MetaClass( );" ); 
+
+			// Construction of meta class( Depends on the type of the class here )
+			switch ( c.second.mTraits.mMetaClassType )
+			{
+				default:
+				case MetaClassType::Object:
+				case MetaClassType::Application:
+				{
+					code += OutputTabbedLine( "MetaClass* cls = new MetaClass( );" ); 
+				} break;
+
+				case MetaClassType::Component:
+				{
+					code += OutputTabbedLine( "MetaClassComponent* cls = new MetaClassComponent( );" ); 
+				} break;
+			}
 
 			// Construct function
 			if ( c.second.mTraits.mConstruct )
@@ -1835,7 +1986,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 			code += OutputTabbedLine( "cls->mTypeId = " + std::to_string( c.second.mObjectTypeId ) + ";\n" );
 
 			// Set up meta class type field
-			switch ( c.second.mMetaClassType )
+			switch ( c.second.mTraits.mMetaClassType )
 			{
 				case MetaClassType::Object:
 				{
@@ -1854,8 +2005,32 @@ void Introspection::Compile( const ReflectionConfig& config )
 			// Set up name field
 			code += OutputTabbedLine( "cls->mName = \"" + qualifiedName + "\";\n" );
 
+			// Set up additional class traits ( for now only affects components )
+			switch ( c.second.mTraits.mMetaClassType )
+			{
+				case MetaClassType::Component:
+				{
+					std::string l = "cls->mRequiredComponentList = { ";
+					for ( u32 i = 0; i < c.second.mTraits.mRequiredClasses.size( ); ++i )
+					{
+						l += "\"" + c.second.mTraits.mRequiredClasses.at( i ) + "\"";
+						if ( i < c.second.mTraits.mRequiredClasses.size( ) - 1 )
+						{
+							l += ", "; 
+						}
+					} 
+					l += " };";
+
+					code += OutputTabbedLine( l );
+				} break;
+			}
+
+			// Format
+			code += OutputLine( "" );
+
 			// Return statement
 			code += OutputTabbedLine( "return cls;" );
+
 			code += OutputLine( "}\n" ); 
 
 			// GetClassInternal()

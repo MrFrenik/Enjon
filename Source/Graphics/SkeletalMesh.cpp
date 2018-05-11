@@ -38,9 +38,16 @@ namespace Enjon
 		Mesh::DeserializeData( buffer );
 
 		// Deserialize skeleton asset
-		mSkeleton = EngineSubsystem( AssetManager )->GetAsset<Skeleton>( buffer->Read< UUID >( ) );
+		mSkeleton = EngineSubsystem( AssetManager )->GetAsset< Skeleton >( buffer->Read< UUID >( ) );
 
 		return Result::SUCCESS;
+	}
+
+	//=============================================================================
+
+	AssetHandle< Skeleton > SkeletalMesh::GetSkeleton( ) const
+	{
+		return mSkeleton;
 	}
 
 	//=============================================================================

@@ -20,6 +20,7 @@ namespace Enjon
 	class SkeletalAnimation;
 	class SkeletalMeshAssetLoader;
 	class SkeletonAssetLoader;
+	class SkeletalAnimationComponent;
 	class Skeleton;
 
 	ENJON_CLASS( )
@@ -51,7 +52,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual Result DeserializeData( ByteBuffer* buffer ) override;
+			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
 		protected:
 			ENJON_PROPERTY( HideInEditor ) 
@@ -93,6 +94,7 @@ namespace Enjon
 
 		friend SkeletonAssetLoader;
 		friend SkeletalMeshAssetLoader;
+		friend SkeletalAnimationComponent;
 
 		public:
 
@@ -136,7 +138,12 @@ namespace Enjon
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override;
 
-		private:
+			/*
+			* @brief
+			*/
+			s32 GetRootID( ) const;
+
+		protected:
 
 			/*
 			* @brief

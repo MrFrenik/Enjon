@@ -1106,7 +1106,30 @@ namespace Enjon
 			ConstructFunction mConstructor = nullptr;
 	};
 
-	class Object;
+	class MetaClassComponent : public MetaClass
+	{
+		friend Object;
+
+		public: 
+
+			/*
+			* @brief
+			*/
+			MetaClassComponent( ) = default;
+
+			/*
+			* @brief
+			*/
+			const Vector< String >& GetRequiredComponentList( ) const
+			{
+				return mRequiredComponentList;
+			}
+
+		protected: 
+
+			Vector< String > mRequiredComponentList;
+	};
+
 	class MetaClassRegistry
 	{
 		public:

@@ -2,6 +2,7 @@
 // Copyright 2016-2018 John Jackson. All Rights Reserved.
 
 #include "Graphics/AnimationSubsystem.h"
+#include "Entity/Components/SkeletalAnimationComponent.h"
 #include "Entity/EntityManager.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
@@ -19,18 +20,19 @@ namespace Enjon
 
 	void AnimationSubsystem::Update( const f32 dT )
 	{
-		/*
-			EntityManager* em = EngineSubsystem( EntityManager );
-			Vector< SkeletalAnimationComponent* > comps = em->GetAllComponentsOfType< SkeletalAnimationComponent >( ); 
-			for ( auto& c : comps )
+		EntityManager* em = EngineSubsystem( EntityManager );
+		Vector< Component* > comps = em->GetAllComponentsOfType< SkeletalAnimationComponent >( ); 
+		for ( auto& c : comps )
+		{
+			// Cast to skeletal animation component
+			SkeletalAnimationComponent* sac = c->ConstCast< SkeletalAnimationComponent >( );
+
+			if ( sac )
 			{
 				// Calculate transforms for this frame
-				c->CalculateTransforms(); 
-
-				// Update animation time for next frame
-				c->mCurrentTime += Engine::GetInstance()->GetWorldTime()->GetDeltaTime();
-			}
-		*/
+				sac->UpdateAndCalculateTransforms(); 
+			} 
+		}
 	}
 
 	//==========================================================================
@@ -55,7 +57,7 @@ namespace Enjon
 
 		protected: 
 
-			void CalculateTransforms();
+			void UpdateAndCalculateTransforms();
 
 		private:
 			ENJON_PROPERTY( )
@@ -66,7 +68,7 @@ namespace Enjon
 			Vector< Mat4x4 > mJointTransforms; 
 	}; 
 
-	SkeletalAnimationComponent::CalculateTransforms()
+	SkeletalAnimationComponent::UpdateAndCalculateTransforms()
 	{
 		// Do things here...  
 	}

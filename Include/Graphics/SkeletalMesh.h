@@ -31,19 +31,24 @@ namespace Enjon
 			~SkeletalMesh(); 
 
 		public:
-			/*
+			/**
 			* @brief
 			*/
 			virtual Result SerializeData( ByteBuffer* buffer ) const override;
 
-			/*
+			/**
 			* @brief
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
+			/**
+			* @brief
+			*/
+			AssetHandle< Skeleton > GetSkeleton( ) const;
+
 		protected: 
 			
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor )
 			AssetHandle< Skeleton > mSkeleton;
 	}; 
 }

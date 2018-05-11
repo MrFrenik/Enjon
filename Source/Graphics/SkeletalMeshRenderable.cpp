@@ -2,6 +2,8 @@
 // Copyright 2016-2018 John Jackson. All Rights Reserved.
 
 #include "Graphics/SkeletalMeshRenderable.h"
+#include "Graphics/AnimationSubsystem.h"
+#include "Entity/Components/SkeletalAnimationComponent.h"
 #include "Asset/AssetManager.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
@@ -112,6 +114,20 @@ namespace Enjon
 			// Set materials
 			mMaterialElements = newMats; 
 		}
+	}
+
+	//=================================================================================== 
+
+	AssetHandle< Skeleton > SkeletalMeshRenderable::GetSkeleton( ) const 
+	{
+		return mMesh.Get( )->GetSkeleton( );
+	}
+
+	//=================================================================================== 
+
+	const Vector< Mat4x4 >& SkeletalMeshRenderable::GetJointTransforms( ) const
+	{
+		return mFinalJointTransforms;
 	}
 
 	//=================================================================================== 

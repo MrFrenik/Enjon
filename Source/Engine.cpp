@@ -245,6 +245,9 @@ namespace Enjon
 			 // Update input manager
 			mInput->Update( dt ); 
 
+			// Update animations
+			mAnimationSystem->Update( dt );
+
 			// Update physics
 			mPhysics->Update( dt ); 
 

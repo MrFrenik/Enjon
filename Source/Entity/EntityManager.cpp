@@ -1,10 +1,12 @@
 #include "Entity/EntityManager.h"
 #include "Entity/Component.h"
-#include "Entity/Components/GraphicsComponent.h"
+#include "Entity/Components/StaticMeshComponent.h"
 #include "Entity/Components/PointLightComponent.h"
 #include "Entity/Components/DirectionalLightComponent.h"
 #include "Entity/Components/RigidBodyComponent.h"
 #include "Entity/Components/CameraComponent.h"
+#include "Entity/Components/SkeletalMeshComponent.h"
+#include "Entity/Components/SkeletalAnimationComponent.h"
 #include "SubsystemCatalog.h"
 #include "Serialize/EntityArchiver.h"
 #include "Application.h"
@@ -268,16 +270,8 @@ namespace Enjon
 
 		if ( HasParent( ) )
 		{
-			Enjon::Entity* parent = mParent.Get( );
-
-			//Transform parentTransform = parent->GetWorldTransform( );
-			//Enjon::Quaternion parentInverse = parentTransform.GetRotation( ).Inverse( ).Normalize( );
-
-			//Vec3 relativeScale = mWorldTransform.GetScale( ) / parentTransform.GetScale( );
-			//Quaternion relativeRot = ( parentInverse * mWorldTransform.GetRotation( ) ).Normalize( );
-			//Vec3 relativePos = ( parentInverse * ( mWorldTransform.GetPosition( ) - parentTransform.GetPosition( ) ) ) / parentTransform.GetScale( );
-
-			//mLocalTransform = Transform( relativePos, relativeRot, relativeScale );
+			// Grab parent entity
+			Enjon::Entity* parent = mParent.Get( ); 
 
 			// Set local transform relative to parent transform
 			mLocalTransform = mWorldTransform / parent->GetWorldTransform( );
@@ -300,17 +294,11 @@ namespace Enjon
 
 		// Get parent transform recursively
 		Enjon::Entity* p = mParent.Get( );
-		//Transform parent = p->GetWorldTransform( );
-
-		//Enjon::Vec3 worldScale = parent.GetScale( ) * mLocalTransform.GetScale( );
-		//Enjon::Quaternion worldRot = ( parent.GetRotation( ) * mLocalTransform.GetRotation( ) ).Normalize( );
-		//Enjon::Vec3 worldPos = parent.GetPosition( ) + ( parent.GetRotation( ).Normalize( ) * ( parent.GetScale( ) * mLocalTransform.GetPosition( ) ) );
-
-		//mWorldTransform = Transform( worldPos, worldRot, worldScale );
 
 		// Set world transform
 		mWorldTransform = mLocalTransform * p->GetWorldTransform();
 
+		// Set world transform flag to being clean
 		mWorldTransformDirty = false;
 	}
 
@@ -971,11 +959,13 @@ namespace Enjon
 	void EntityManager::RegisterAllEngineComponents( )
 	{
 		// Register engine components here
-		RegisterComponent< GraphicsComponent >( );
+		RegisterComponent< StaticMeshComponent >( );
 		RegisterComponent< PointLightComponent >( );
 		RegisterComponent< RigidBodyComponent >( ); 
 		RegisterComponent< DirectionalLightComponent >( ); 
 		RegisterComponent< CameraComponent >( ); 
+		RegisterComponent< SkeletalMeshComponent >( );
+		RegisterComponent< SkeletalAnimationComponent >( );
 	}
 
 	//================================================================================================== 
@@ -1059,6 +1049,24 @@ namespace Enjon
 			// Push back for need initilization and start
 			mNeedInitializationList.push_back( component );
 			mNeedStartList.push_back( component );
+
+			// Need to add required components from meta class
+			const MetaClassComponent* cc = static_cast<const MetaClassComponent*>( compCls );
+			if ( cc )
+			{
+				for ( auto& c : cc->GetRequiredComponentList( ) )
+				{
+					const MetaClass* cls = Object::GetClass( c );
+					if ( cls )
+					{
+						// Add component if entity doesn't already contain this one
+						if ( !entity->HasComponent( cls ) )
+						{
+							AddComponent( cls, entity );
+						}
+					}
+				}
+			} 
 		} 
 
 		return component; 

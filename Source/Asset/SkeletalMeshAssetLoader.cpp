@@ -113,6 +113,7 @@ namespace Enjon
 		{
 			// Needs to cache the skeletal mesh now 
 			MeshImportOptions mo = *options->ConstCast< MeshImportOptions >( ); 
+			mesh->mSkeleton = mo.mSkeletonAsset;
 			mo.mLoader = this; 
 			EngineSubsystem( AssetManager )->AddToDatabase( mesh, &mo );
 		}

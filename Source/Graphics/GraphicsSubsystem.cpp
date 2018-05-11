@@ -857,98 +857,49 @@ namespace Enjon
 		{
 			skinnedMeshProgram->Use( );
 			{
-				// Grab mesh asset loader
-				if ( true )
-				{
-					// Grab mesh to use for this skeleton ( "We'll just assume sk_mannequin, I think" )
-					AssetHandle< Skeleton > skl = EngineSubsystem( AssetManager )->GetAsset< Skeleton >( "vampire" );
-					AssetHandle< SkeletalMesh > mesh = EngineSubsystem( AssetManager )->GetAsset< SkeletalMesh >( "vampire" );
-					AssetHandle< SkeletalAnimation > animation = EngineSubsystem( AssetManager )->GetAsset< SkeletalAnimation >( "maximo_vampire_sword_swing" ); 
-					AssetHandle< Material > mat = EngineSubsystem( AssetManager )->GetDefaultAsset< Material >( ); 
-					u32 handIDX = 0;
-
-					const usize ssize = 1;
-					static bool b = false;
-					static Vector< SkeletalMeshRenderable > mSkinnedMeshes;
-					if ( !b && skl->GetUUID( ) != UUID::Invalid( ) )
+				for ( auto& s : sortedSkeletalMeshRenderables )
+				{ 
+					s->Bind( );
 					{
-						mSkinnedMeshes.resize( ssize );
-						for ( u32 i = 0; i < ssize; ++i )
+						// Grab joint transforms from renderable
+						const Vector< Mat4x4 >& transforms = s->GetJointTransforms( );
+
+						// Set transforms uniforms in shader
+						for ( u32 i = 0; i < transforms.size(); ++i )
 						{
-							mSkinnedMeshes.at( i ).SetMesh( mesh );
-							mSkinnedMeshes.at( i ).SetMaterial( mat );
-							mSkinnedMeshes.at( i ).SetRotation( Quaternion::AngleAxis( Math::ToRadians( -90.0f ), Vec3::XAxis( ) ) );
-							mSkinnedMeshes.at( i ).SetPosition( Vec3( i * 120.0f, 0.0f, 0.0f ) );
-							mSkinnedMeshes.at( i ).SetScale( 0.1f );
+							//skinnedMeshProgram->SetUniform( "uJointTransforms[" + std::to_string( i ) + "]", transforms.at( i ) );
+							skinnedMeshProgram->SetUniformArrayElement( "uJointTransforms", i, transforms.at( i ) );
+						} 
+
+						// Get mesh from renderable
+						AssetHandle< SkeletalMesh > mesh = s->GetMesh( );
+
+						// Upload relevant uniforms for renderable
+						skinnedMeshProgram->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
+						skinnedMeshProgram->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix ); 
+						skinnedMeshProgram->SetUniform( "uObjectID", Renderable::IdToColor( s->GetRenderableID( ) ) ); 
+						skinnedMeshProgram->SetUniform( "uModel", s->GetModelMatrix() );
+						skinnedMeshProgram->SetUniform( "uPreviousModel", s->GetPreviousModelMatrix( ) );
+
+						// Get submeshes
+						const Vector< SubMesh* >& subMeshes = mesh->GetSubmeshes( ); 
+
+						// Submesh submit
+						for ( u32 i = 0; i < mesh->GetSubMeshCount( ); ++i )
+						{ 
+							auto subMesh = subMeshes.at( i );
+
+							// Bind submesh
+							subMesh->Bind( );
+							{
+								// Submit for rendering
+								subMesh->Submit( ); 
+							}
+							// Unbind submesh
+							subMesh->Unbind( ); 
 						}
-
-						handIDX = skl.Get( )->GetJointIndex( "RightHand" );
-
-						b = true;
 					} 
-
-					static f32 t = 0.0f; 
-					f32 dt = Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( );
-					if ( animation.GetUUID() != EngineSubsystem( AssetManager )->GetDefaultAsset< SkeletalAnimation >( )->GetUUID() )
-					{ 
-						t = std::fmod( t + dt, animation->GetDuration( ) );
-					} 
-
-					for ( auto& s : mSkinnedMeshes )
-					{ 
-						//s.SetPosition( s.GetPosition( ) + Vec3( 0.0f, std::sinf(t), 0.0f ) );
-						s.Bind( );
-						{
-							if ( mesh && skl )
-							{ 
-								auto transforms = skl.Get()->GetTransforms( animation, t );
-	 
-								// Set transforms uniforms in shader
-								for ( u32 i = 0; i < transforms.size(); ++i )
-								{
-									//skinnedMeshProgram->SetUniform( "uJointTransforms[" + std::to_string( i ) + "]", transforms.at( i ) );
-									skinnedMeshProgram->SetUniformArrayElement( "uJointTransforms", i, transforms.at( i ) );
-								}
-
-								// Get rh matrix
-								Mat4x4 rhTransform = transforms.at( handIDX ); 
-								rhTransform = s.GetModelMatrix( ) * rhTransform;
-
-								// Draw debug sphere at position
-								Vec3 rhPosition, rhScale;
-								Quaternion rhRotation;
-								Vec4 pos = rhTransform * Vec4( 0.0f, 0.0f, 0.0f, 1.0f );
-								SkeletonAssetLoader::DecomposeMatrix( rhTransform, rhPosition, rhScale, rhRotation );
-								DrawDebugCircle( Vec3( pos.x, pos.y, pos.z ), 5.0f );
-
-								skinnedMeshProgram->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
-								skinnedMeshProgram->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix ); 
-
-								skinnedMeshProgram->SetUniform( "uObjectID", Renderable::IdToColor( s.GetRenderableID( ) ) ); 
-
-								auto subMeshes = mesh->GetSubmeshes( ); 
-
-								skinnedMeshProgram->SetUniform( "uModel", s.GetModelMatrix() );
-								skinnedMeshProgram->SetUniform( "uPreviousModel", s.GetPreviousModelMatrix( ) );
-
-								// Submesh submit
-								for ( u32 i = 0; i < mesh->GetSubMeshCount( ); ++i )
-								{ 
-									auto subMesh = subMeshes.at( i );
-
-									// Bind submesh
-									subMesh->Bind( );
-									{
-										// Submit for rendering
-										subMesh->Submit( ); 
-									}
-									// Unbind submesh
-									subMesh->Unbind( ); 
-								}
-							} 
-						}
-						s.Unbind( );
-					}
+					s->Unbind( );
 				}
 			}
 			skinnedMeshProgram->Unuse( );

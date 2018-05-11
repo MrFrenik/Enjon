@@ -11,9 +11,15 @@
 
 namespace Enjon
 {
+	class AnimationSubsystem;
+	class SkeletalAnimationComponent;
+
 	ENJON_CLASS( Construct )
 	class SkeletalMeshRenderable : public Renderable
 	{
+		friend AnimationSubsystem;
+		friend SkeletalAnimationComponent;
+
 		ENJON_CLASS_BODY( )
 
 		public:
@@ -36,20 +42,29 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void SetMesh( const AssetHandle< SkeletalMesh >& mesh ); 
+
+			/**
+			* @brief
+			*/
 			virtual const Mesh* GetMesh() const override; 
 
 			/**
 			* @brief
 			*/
-			void SetMesh( const AssetHandle< SkeletalMesh >& mesh );
+			AssetHandle< Skeleton > GetSkeleton( ) const;
+
+			/**
+			* @brief
+			*/
+			const Vector< Mat4x4 >& GetJointTransforms( ) const; 
 
 		protected:
 
 			ENJON_PROPERTY( Editable, Delegates[ Mutator = SetMesh ] )
 			AssetHandle< SkeletalMesh > mMesh;
 
-		private:
-
+			Vector< Mat4x4 > mFinalJointTransforms; 
 	};
 }
 

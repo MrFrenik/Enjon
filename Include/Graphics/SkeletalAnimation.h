@@ -17,6 +17,7 @@ namespace Enjon
 	class Skeleton;
 	class SkeletalAnimation;
 	class SkeletalAnimationAssetLoader;
+	class SkeletalAnimationComponent;
 	class ChannelData;
 
 	template <typename T>
@@ -103,6 +104,7 @@ namespace Enjon
 	ENJON_CLASS( Construct )
 	class SkeletalAnimation : public Asset
 	{ 
+		friend SkeletalAnimationComponent;
 		friend SkeletalAnimationAssetLoader;
 		friend Skeleton;
 
@@ -140,7 +142,7 @@ namespace Enjon
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
-		private:
+		protected:
 			Vector< ChannelData > mChannelData;
 
 			ENJON_PROPERTY( HideInEditor )

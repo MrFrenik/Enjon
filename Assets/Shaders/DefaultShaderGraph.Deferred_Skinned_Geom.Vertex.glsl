@@ -3,7 +3,9 @@
 layout (location = 0) in vec3 aVertexPosition;
 layout (location = 1) in vec3 aVertexNormal;
 layout (location = 2) in vec3 aVertexTangent;
-layout (location = 3) in vec3 aVertexUV;
+layout (location = 3) in vec2 aVertexUV;
+layout (location = 4) in vec4 aJointIndices;
+layout (location = 5) in vec4 aJointWeights;
 
 out VS_OUT
 {

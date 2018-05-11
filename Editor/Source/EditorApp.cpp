@@ -18,7 +18,7 @@
 #include <Entity/EntityManager.h>
 #include <Physics/PhysicsSubsystem.h>
 #include <Scene/SceneManager.h>
-#include <Entity/Components/GraphicsComponent.h>
+#include <Entity/Components/StaticMeshComponent.h>
 #include <Entity/Components/RigidBodyComponent.h>
 #include <Entity/Components/PointLightComponent.h>
 #include <Entity/Components/DirectionalLightComponent.h>
@@ -53,9 +53,9 @@ Enjon::String copyDir = "";
 Enjon::String mProjectsDir = "W:/Projects/";
 Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -1350,7 +1350,7 @@ namespace Enjon
 					if ( cube )
 					{
 						Entity* ent = cube.Get( );
-						GraphicsComponent* gfx = ent->AddComponent<GraphicsComponent>( );
+						StaticMeshComponent* gfx = ent->AddComponent<StaticMeshComponent>( );
 						gfx->SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
 						gfx->SetMaterial( am->GetDefaultAsset<Material>( ), 0 );
 
@@ -1377,7 +1377,7 @@ namespace Enjon
 					if ( sphere )
 					{
 						Entity* ent = sphere.Get( );
-						GraphicsComponent* gfx = ent->AddComponent<GraphicsComponent>( );
+						StaticMeshComponent* gfx = ent->AddComponent<StaticMeshComponent>( );
 						gfx->SetMesh( am->GetAsset< Mesh >( "models.unit_sphere" ) );
 						gfx->SetMaterial( am->GetDefaultAsset<Material>( ), 0 );
 

@@ -66,6 +66,16 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			void AddSkeletalMeshRenderable( SkeletalMeshRenderable* renderable );
+
+			/*
+			* @brief
+			*/
+			void RemoveSkeletalMeshRenderable( SkeletalMeshRenderable* renderable );
+
+			/*
+			* @brief
+			*/
 			void AddStaticMeshRenderable( StaticMeshRenderable* renderable );
 
 			/*
@@ -193,12 +203,7 @@ namespace Enjon
 			*/
 			void SetActiveCamera( Camera* camera );
 
-		private:
-			
-			/*
-			* @brief
-			*/
-			void AssignRenderableID(Renderable* renderable);
+		private: 
 
 			/*
 			* @brief

@@ -4,8 +4,6 @@
 #include "Serialize/EntityArchiver.h"
 #include "SubsystemCatalog.h"
 
-#include "Graphics/GraphicsSubsystem.h"
-#include "Entity/Components/GraphicsComponent.h"
 #include "Engine.h"
 #include "SubsystemCatalog.h"
 

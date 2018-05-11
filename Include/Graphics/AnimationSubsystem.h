@@ -1,4 +1,4 @@
-// @file AnimatoinSubsystem.h
+// @file AnimationSubsystem.h
 // Copyright 2016-2018 John Jackson. All Rights Reserved.
 
 #pragma once

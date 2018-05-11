@@ -10,6 +10,11 @@ enum MetaClassEnumDefines
 	Abstract
 };
 
+enum MetaClassComponentDefines
+{
+	Requires
+};
+
 enum MetaPropertyEnumDefines
 {
 	UIMin,
@@ -37,7 +42,7 @@ enum MetaPropertyEnumDefines
 #define ENJON_CLASS_BODY( ... )\
 	ENJON_CLASS_BODY_INTERNAL( ... )
 
-#define ENJON_COMPONENT_INTERNAL( ComponentName )\
+#define ENJON_COMPONENT_INTERNAL( ComponentName, ... )\
 	friend Enjon::Object;																			\
 	public:																							\
 		ComponentName()\
@@ -60,8 +65,8 @@ enum MetaPropertyEnumDefines
 			DestroyBase<ComponentName>();\
 		} 
 
-#define ENJON_COMPONENT( ComponentName )\
-	ENJON_COMPONENT_INTERNAL( ComponentName )
+#define ENJON_COMPONENT( ComponentName, ... )\
+	ENJON_COMPONENT_INTERNAL( ComponentName, ... )
 
 #define ENJON_MODULE_BODY_INTERNAL( ModuleName )\
 	friend Enjon::Object;																			\

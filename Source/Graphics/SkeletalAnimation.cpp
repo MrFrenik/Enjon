@@ -3,6 +3,7 @@
 
 #include "Graphics/SkeletalAnimation.h"
 #include "Asset/SkeletalAnimationAssetLoader.h"
+#include "Entity/Components/SkeletalAnimationComponent.h"
 #include "Graphics/Skeleton.h"
 #include "Asset/AssetManager.h"
 #include "SubsystemCatalog.h"

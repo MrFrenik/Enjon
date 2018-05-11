@@ -1,7 +1,7 @@
 #include "Game.h"
 
 #include <Entity/EntityManager.h>
-#include <Entity/Components/GraphicsComponent.h>
+#include <Entity/Components/StaticMeshComponent.h>
 #include <Entity/Components/PointLightComponent.h>
 #include <Graphics/GraphicsSubsystem.h>
 #include <Graphics/DirectionalLight.h>
@@ -175,11 +175,11 @@ void Game::TestObjectSerialize( )
 		am->AddToDatabase( assetPath );
 
 		Enjon::AssetHandle< Enjon::Texture > cachedTexture = am->GetAsset< Enjon::Texture >( "textures.beast" );
-		Enjon::Material* gunMat = const_cast< Enjon::Material* >( mGun.Get( )->GetComponent< GraphicsComponent >( )->GetMaterial( ).Get() );
+		Enjon::Material* gunMat = const_cast< Enjon::Material* >( mGun.Get( )->GetComponent< StaticMeshComponent >( )->GetMaterial( ).Get() );
 		//gunMat->SetTexture( Enjon::TextureSlotType::Albedo, cachedTexture );
 
 		Enjon::AssetHandle< Enjon::Mesh > cachedMesh = am->GetAsset< Enjon::Mesh >( "models.unit_cube" );
-		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMesh( cachedMesh );
+		mGun.Get( )->GetComponent< StaticMeshComponent >( )->SetMesh( cachedMesh );
 	} 
 
 	{
@@ -243,7 +243,7 @@ void Game::TestObjectSerialize( )
 		}
 
 		// Set gun material
-		mGun.Get( )->GetComponent< GraphicsComponent >( )->SetMaterial( paintPeelingMat.Get( ) );
+		mGun.Get( )->GetComponent< StaticMeshComponent >( )->SetMaterial( paintPeelingMat.Get( ) );
 	}
 
 	// Serialize / Deserialize entity information
@@ -261,7 +261,7 @@ void Game::TestObjectSerialize( )
 			mSerializedEntity.Get( )->SetLocalPosition( Vec3( -8, 3, 0 ) );
 			mSerializedEntity.Get( )->SetLocalRotation( Quaternion::AngleAxis( Math::ToRadians( 20.0f ), Vec3::XAxis( ) ) );
 			mSerializedEntity.Get( )->SetLocalScale( 0.5f );
-			auto gfxCmp = mSerializedEntity.Get( )->AddComponent< GraphicsComponent >( );
+			auto gfxCmp = mSerializedEntity.Get( )->AddComponent< StaticMeshComponent >( );
 			auto plCmp = mSerializedEntity.Get( )->AddComponent< PointLightComponent >( );
 			plCmp->SetColor( ColorRGBA32( 1.0f, 0.0f, 0.0f, 1.0f ) );
 			plCmp->SetIntensity( 30.0f );
@@ -271,7 +271,7 @@ void Game::TestObjectSerialize( )
 
 			// Child
 			EntityHandle child = mEntities->Allocate( );
-			auto childGfx = child.Get( )->AddComponent< GraphicsComponent >( );
+			auto childGfx = child.Get( )->AddComponent< StaticMeshComponent >( );
 			childGfx->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
 			childGfx->SetMesh( am->GetAsset< Mesh >( "models.monkey" ) );
 			mSerializedEntity.Get( )->AddChild( child );
@@ -279,14 +279,14 @@ void Game::TestObjectSerialize( )
 
 			// Other children
 			EntityHandle child0 = mEntities->Allocate( );
-			auto child0Gfx = child0.Get( )->AddComponent< GraphicsComponent >( );
+			auto child0Gfx = child0.Get( )->AddComponent< StaticMeshComponent >( );
 			child0Gfx->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
 			child0Gfx->SetMesh( am->GetAsset< Mesh >( "models.monkey" ) );
 			child.Get( )->AddChild( child0 );
 			child0.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( -2, 2, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.75f ) ) ); 
 
 			EntityHandle child1 = mEntities->Allocate( );
-			auto child1Gfx = child1.Get( )->AddComponent< GraphicsComponent >( );
+			auto child1Gfx = child1.Get( )->AddComponent< StaticMeshComponent >( );
 			child1Gfx->SetMaterial( am->GetAsset< Material >( "NewMaterial" ).Get( ) );
 			child1Gfx->SetMesh( am->GetAsset< Mesh >( "models.monkey" ) );
 			child.Get( )->AddChild( child1 );
@@ -311,7 +311,7 @@ void Game::TestObjectSerialize( )
 			mSerializedEntity = archiver.Deserialize( path );
 			if ( mSerializedEntity.Get( ) )
 			{
-				auto gfxCmp = mSerializedEntity.Get( )->GetComponent< GraphicsComponent >( );
+				auto gfxCmp = mSerializedEntity.Get( )->GetComponent< StaticMeshComponent >( );
 				if ( gfxCmp )
 				{
 					mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( gfxCmp->GetRenderable() );
@@ -327,7 +327,7 @@ void Game::TestObjectSerialize( )
 				{
 					for ( auto& c : handle.Get( )->GetChildren( ) )
 					{
-						auto cGfxCmp = c.Get( )->GetComponent< GraphicsComponent >( );
+						auto cGfxCmp = c.Get( )->GetComponent< StaticMeshComponent >( );
 						if ( cGfxCmp )
 						{
 							mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( cGfxCmp->GetRenderable( ) );
@@ -338,7 +338,7 @@ void Game::TestObjectSerialize( )
 				// Need an automated way of doing this in the graphics component ( maybe in late update or something )
 				for ( auto& c : mSerializedEntity.Get( )->GetChildren( ) )
 				{
-					auto cGfxCmp = c.Get( )->GetComponent< GraphicsComponent >( );
+					auto cGfxCmp = c.Get( )->GetComponent< StaticMeshComponent >( );
 					if ( cGfxCmp )
 					{ 
 						mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( cGfxCmp->GetRenderable( ) );
@@ -359,7 +359,7 @@ void Game::TestObjectSerialize( )
 		if ( serializeScene1 )
 		{
 			Enjon::EntityHandle handle = mEntities->Allocate( );
-			auto gfxCmp = handle.Get( )->AddComponent( Enjon::Object::GetClass< Enjon::GraphicsComponent >( ) )->ConstCast< Enjon::GraphicsComponent >();
+			auto gfxCmp = handle.Get( )->AddComponent( Enjon::Object::GetClass< Enjon::StaticMeshComponent >( ) )->ConstCast< Enjon::StaticMeshComponent >();
 			if ( gfxCmp )
 			{
 				gfxCmp->SetMesh( am->GetAsset< Enjon::Mesh >( "models.unit_cube" ) );
@@ -370,7 +370,7 @@ void Game::TestObjectSerialize( )
 			handle.Get( )->SetLocalRotation( Enjon::Quaternion::AngleAxis( Math::ToRadians( 45.0f ), Enjon::Vec3::ZAxis( ) ) );
 
 			Enjon::EntityHandle child = mEntities->Allocate( );
-			auto childGfxCmp = child.Get( )->AddComponent< Enjon::GraphicsComponent >( );
+			auto childGfxCmp = child.Get( )->AddComponent< Enjon::StaticMeshComponent >( );
 			if ( childGfxCmp )
 			{
 				childGfxCmp->SetMesh( am->GetAsset< Enjon::Mesh >( "models.unit_sphere" ) );
@@ -421,7 +421,7 @@ void Game::TestObjectSerialize( )
 		if ( serializeScene2 )
 		{
 			Enjon::EntityHandle handle = mEntities->Allocate( );
-			auto gfxCmp = handle.Get( )->AddComponent( Enjon::Object::GetClass< Enjon::GraphicsComponent >( ) )->ConstCast< Enjon::GraphicsComponent >( );
+			auto gfxCmp = handle.Get( )->AddComponent( Enjon::Object::GetClass< Enjon::StaticMeshComponent >( ) )->ConstCast< Enjon::StaticMeshComponent >( );
 			if ( gfxCmp )
 			{
 				gfxCmp->SetMesh( am->GetAsset< Enjon::Mesh >( "models.unit_sphere" ) );
@@ -745,14 +745,14 @@ Enjon::Result Game::Initialize()
 	mGun = mEntities->Allocate( );
 	mRock = mEntities->Allocate( );
 	mRock2 = mEntities->Allocate( );
-	Enjon::GraphicsComponent* rgc = mRock.Get( )->AddComponent( Enjon::Object::GetClass< Enjon::GraphicsComponent >( ) )->ConstCast< Enjon::GraphicsComponent >( );
-	auto rgc2 = mRock2.Get( )->AddComponent< Enjon::GraphicsComponent >( );
-	auto gc = mGun.Get()->AddComponent<Enjon::GraphicsComponent>(); 
+	Enjon::StaticMeshComponent* rgc = mRock.Get( )->AddComponent( Enjon::Object::GetClass< Enjon::StaticMeshComponent >( ) )->ConstCast< Enjon::StaticMeshComponent >( );
+	auto rgc2 = mRock2.Get( )->AddComponent< Enjon::StaticMeshComponent >( );
+	auto gc = mGun.Get()->AddComponent<Enjon::StaticMeshComponent>(); 
 	auto pc = mGun.Get()->AddComponent<Enjon::PointLightComponent>(); 
 
-	mRed.Get()->AddComponent< Enjon::GraphicsComponent >( );
-	mGreen.Get()->AddComponent< Enjon::GraphicsComponent >( );
-	mBlue.Get()->AddComponent< Enjon::GraphicsComponent >( );
+	mRed.Get()->AddComponent< Enjon::StaticMeshComponent >( );
+	mGreen.Get()->AddComponent< Enjon::StaticMeshComponent >( );
+	mBlue.Get()->AddComponent< Enjon::StaticMeshComponent >( );
 
 	pc->GetLight( )->SetPosition( Enjon::Vec3( 10.0f, 2.0f, 4.0f ) );
 	pc->GetLight( )->SetIntensity( 20.0f );
@@ -776,12 +776,12 @@ Enjon::Result Game::Initialize()
 	f->GetAtlas( 14 );
 	mFontMat->TwoSided( true );
 
-	mGreen.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mGreenMat );
-	mGreen.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("models.unit_cube" ) );
-	mRed.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mRedMat ); 
-	mRed.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("models.unit_cube" ) );
-	mBlue.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMaterial( mBlueMat );
-	mBlue.Get()->GetComponent< Enjon::GraphicsComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("models.unit_cube" ) );
+	mGreen.Get()->GetComponent< Enjon::StaticMeshComponent >( )->SetMaterial( mGreenMat );
+	mGreen.Get()->GetComponent< Enjon::StaticMeshComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("models.unit_cube" ) );
+	mRed.Get()->GetComponent< Enjon::StaticMeshComponent >( )->SetMaterial( mRedMat ); 
+	mRed.Get()->GetComponent< Enjon::StaticMeshComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("models.unit_cube" ) );
+	mBlue.Get()->GetComponent< Enjon::StaticMeshComponent >( )->SetMaterial( mBlueMat );
+	mBlue.Get()->GetComponent< Enjon::StaticMeshComponent >( )->SetMesh( mAssetManager->GetAsset< Enjon::Mesh >("models.unit_cube" ) );
 
 	mGun.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 0, 5, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 1.5f ) ) );
 	mGreen.Get()->SetLocalTransform( Enjon::Transform( Enjon::Vec3( 0, 7, 0 ), Enjon::Quaternion( 0, 0, 0, 1 ), Enjon::Vec3( 0.5f ) ) );
@@ -843,11 +843,11 @@ Enjon::Result Game::Initialize()
 		//scene->AddDirectionalLight( mSun2 );
 		scene->AddStaticMeshRenderable(gc->GetRenderable());
 		scene->AddPointLight( pc->GetLight( ) );
-		scene->AddStaticMeshRenderable( mGreen.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
-		scene->AddStaticMeshRenderable( mRed.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
-		scene->AddStaticMeshRenderable( mBlue.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
-		scene->AddStaticMeshRenderable( mRock.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
-		scene->AddStaticMeshRenderable( mRock2.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) ); 
+		scene->AddStaticMeshRenderable( mGreen.Get( )->GetComponent< Enjon::StaticMeshComponent >( )->GetRenderable( ) );
+		scene->AddStaticMeshRenderable( mRed.Get( )->GetComponent< Enjon::StaticMeshComponent >( )->GetRenderable( ) );
+		scene->AddStaticMeshRenderable( mBlue.Get( )->GetComponent< Enjon::StaticMeshComponent >( )->GetRenderable( ) ); 
+		scene->AddStaticMeshRenderable( mRock.Get( )->GetComponent< Enjon::StaticMeshComponent >( )->GetRenderable( ) ); 
+		scene->AddStaticMeshRenderable( mRock2.Get( )->GetComponent< Enjon::StaticMeshComponent >( )->GetRenderable( ) ); 
 		scene->AddQuadBatch(mBatch);
 		scene->AddQuadBatch(mTextBatch);
 		scene->SetAmbientColor(Enjon::SetOpacity(Enjon::RGBA32_White(), 0.1f));
@@ -899,15 +899,15 @@ Enjon::Result Game::Initialize()
 							Enjon::EntityHandle entityHandle = Enjon::EntityArchiver::Deserialize( &buffer );
 							mActiveScene.mEntities.push_back( entityHandle );
 
-							if ( entityHandle.Get( )->HasComponent< Enjon::GraphicsComponent >( ) )
+							if ( entityHandle.Get( )->HasComponent< Enjon::StaticMeshComponent >( ) )
 							{
-								mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( entityHandle.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+								mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( entityHandle.Get( )->GetComponent< Enjon::StaticMeshComponent >( )->GetRenderable( ) );
 
 								for ( auto& c : entityHandle.Get( )->GetChildren( ) )
 								{
-									if ( c.Get( )->HasComponent< Enjon::GraphicsComponent >( ) )
+									if ( c.Get( )->HasComponent< Enjon::StaticMeshComponent >( ) )
 									{
-										mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( c.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetRenderable( ) );
+										mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( c.Get( )->GetComponent< Enjon::StaticMeshComponent >( )->GetRenderable( ) );
 									}
 								}
 							}
@@ -1045,7 +1045,7 @@ Enjon::Result Game::Initialize()
 			// Testing meta functions
 			if ( ImGui::CollapsingHeader( "Entity" ) )
 			{ 
-				const Enjon::Material* gfxMat = mGun.Get( )->GetComponent< Enjon::GraphicsComponent >( )->GetMaterial( ).Get();
+				const Enjon::Material* gfxMat = mGun.Get( )->GetComponent< Enjon::StaticMeshComponent >( )->GetMaterial( ).Get();
 				igm->DebugDumpObject( gfxMat ); 
 			} 
 
@@ -1108,9 +1108,9 @@ Enjon::Result Game::Initialize()
 					igm->DebugDumpObject( mat );
 				} 
 			}
-			if ( ImGui::CollapsingHeader( "GraphicsComponent" ) )
+			if ( ImGui::CollapsingHeader( "StaticMeshComponent" ) )
 			{
-				auto gc = mGun.Get( )->GetComponent< Enjon::GraphicsComponent >( );
+				auto gc = mGun.Get( )->GetComponent< Enjon::StaticMeshComponent >( );
 				igm->DebugDumpObject( gc ); 
 			} 
 
@@ -1276,9 +1276,9 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 	static Enjon::f32 t = 0.0f;
 	t += 0.1f * dt;
 
-	Enjon::GraphicsComponent* gc 	= nullptr;
-	Enjon::GraphicsComponent* gc2 	= nullptr;
-	Enjon::GraphicsComponent* gc3 	= nullptr; 
+	Enjon::StaticMeshComponent* gc 	= nullptr;
+	Enjon::StaticMeshComponent* gc2 	= nullptr;
+	Enjon::StaticMeshComponent* gc3 	= nullptr; 
 
 	if ( mGun.Get( ) ) 
 	{
@@ -1329,9 +1329,9 @@ Enjon::Result Game::Update(Enjon::f32 dt)
 		if ( body && body->getMotionState( ) )
 		{
 			body->getMotionState( )->getWorldTransform( trans );
-			if ( entity && entity->HasComponent<Enjon::GraphicsComponent>( ) )
+			if ( entity && entity->HasComponent<Enjon::StaticMeshComponent>( ) )
 			{
-				auto gComp = entity->GetComponent<Enjon::GraphicsComponent>( );
+				auto gComp = entity->GetComponent<Enjon::StaticMeshComponent>( );
 				Enjon::Vec3 pos = Enjon::Vec3( trans.getOrigin( ).getX( ), trans.getOrigin( ).getY( ), trans.getOrigin( ).getZ( ) );
 				Enjon::Quaternion rot = Enjon::Quaternion( trans.getRotation( ).x( ), trans.getRotation( ).y( ), trans.getRotation( ).z( ), -trans.getRotation( ).w( ) );
 				entity->SetLocalPosition( pos );
@@ -1463,7 +1463,7 @@ Enjon::Result Game::ProcessInput( f32 dt )
 
 			Enjon::EntityHandle handle = mEntities->Allocate( );
 			Enjon::Entity* ent = handle.Get( );
-			Enjon::GraphicsComponent* gc = ent->AddComponent<Enjon::GraphicsComponent>();
+			Enjon::StaticMeshComponent* gc = ent->AddComponent<Enjon::StaticMeshComponent>();
 			ent->SetLocalScale(v3(scalar));
 			gc->SetMesh(mSphereMesh);
 

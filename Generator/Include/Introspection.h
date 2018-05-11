@@ -215,6 +215,8 @@ struct ClassMarkupTraits
 
 	NamespaceQualifiers mNamespaceQualifiers; 
 	bool mConstruct = false;
+	MetaClassType mMetaClassType = MetaClassType::Object;
+	std::vector< std::string > mRequiredClasses;
 };
 
 class Class
@@ -282,7 +284,6 @@ class Class
 		std::string mParent = "";
 		u32 mObjectTypeId = 0;
 		bool mIsApplication = false;
-		MetaClassType mMetaClassType = MetaClassType::Object;
 }; 
 
 
@@ -338,6 +339,8 @@ class Introspection
 		void ParseClass( Lexer* lexer );
 
 		void ParseClassTraits( Lexer*, ClassMarkupTraits* traits );
+
+		void ParseComponentTraits( Lexer*, Class* cls ); 
 		
 		void ParseClassMembers( Lexer* lexer, Class* cls );
 

@@ -188,12 +188,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			u32 GetID() const { return mComponentID; }
-
-			/**
-			* @brief
-			*/
-			EntityManager* GetEntityManager() const; 
+			u32 GetID() const { return mComponentID; } 
 
 			/**
 			* @brief
@@ -227,10 +222,6 @@ namespace Enjon
 			virtual void UpdateTransform( const Transform& transform );
 
 		private:
-			/**
-			* @brief
-			*/
-			void SetEntityManager( EntityManager* manager );
 
 			/**
 			* @brief

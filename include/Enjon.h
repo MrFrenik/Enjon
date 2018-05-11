@@ -59,10 +59,12 @@
 #include "Entity/Component.h"
 
 #include "Entity/Components/PointLightComponent.h"
-#include "Entity/Components/GraphicsComponent.h" 
+#include "Entity/Components/StaticMeshComponent.h" 
 #include "Entity/Components/BoxComponent.h" 
 #include "Entity/Components/RigidBodyComponent.h" 
 #include "Entity/Components/CameraComponent.h"
+#include "Entity/Components/SkeletalMeshComponent.h"
+#include "Entity/Components/SkeletalAnimationComponent.h"
 
 #include "Application.h"
 #include "TypeCatalog.h"
