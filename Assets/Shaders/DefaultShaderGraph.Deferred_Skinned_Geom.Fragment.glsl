@@ -34,4 +34,21 @@ uniform mat4 uViewProjection;
 // Fragment Main
 void main()
 {
+	// Base Color
+	AlbedoOut = vec4( 1.0, 1.0, 1.0, 1.0 );
+
+	// Normal
+	NormalsOut = vec4( fs_in.TBN[2], 1.0 );
+
+	// Material Properties
+	MatPropsOut = vec4( clamp( 0.0, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), clamp( 1.0, 0.0, 1.0 ), 1.0);
+
+	// Emissive
+	EmissiveOut = vec4( 0.0, 0.0, 0.0, 1.0 );
+
+	ObjectIDOut = fs_in.ObjectID;
+	vec2 _a = ( fs_in.CurrentFragPositionClipSpace.xy / fs_in.CurrentFragPositionClipSpace.w ) * 0.5 + 0.5;
+	vec2 _b = ( fs_in.PreviousFragPositionClipSpace.xy / fs_in.PreviousFragPositionClipSpace.w ) * 0.5 + 0.5;
+	vec2 _vel = vec2( _a - _b );
+	VelocityOut = vec4( _vel, 0.0, 1.0 );
 }

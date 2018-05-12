@@ -56,7 +56,7 @@ namespace Enjon
 		skeleton.Get( )->CalculateTransform( rootID, Mat4x4::Identity( ), mats, mAnimation.Get(), mCurrentAnimationTime ); 
 
 		// Increment current animation time ( this is hacked to just use a single animation for now... )
-		mCurrentAnimationTime = std::fmod( mCurrentAnimationTime + Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( ), mAnimation->GetDuration( ) );
+		mCurrentAnimationTime = std::fmod( mCurrentAnimationTime + Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( ) * mAnimationSpeed, mAnimation->GetDuration( ) );
 	} 
 
 	//================================================================================== 

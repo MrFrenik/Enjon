@@ -1065,6 +1065,15 @@ namespace Enjon
 		// Vertex Attribute Layouts
 		code += OutputVertexAttributes( pass, status );
 
+		// Shader pass constants
+		switch ( pass )
+		{
+			case ShaderPassType::Deferred_Skinned_Geom:
+			{
+				code += OutputLine( "const int MAX_JOINTS = 210;" );
+			} break;
+		}
+
 		// Vertex output struct
 		code += OutputLine( "\nout VS_OUT" );
 		code += OutputLine( "{" );
@@ -1089,6 +1098,15 @@ namespace Enjon
 		code += OutputLine( "uniform mat4 uPreviousModel = mat4( 1.0f );" );
 		code += OutputLine( "uniform vec4 uObjectID;" );
 
+		// Additional uniforms required per pass
+		switch ( pass )
+		{
+			case ShaderPassType::Deferred_Skinned_Geom:
+			{
+				code += OutputLine( "uniform mat4 uJointTransforms[MAX_JOINTS];" );
+			} break;
+		}
+
 		// Comment for declarations
 		code += OutputLine( "\n// Variable Declarations" );
 
@@ -1098,6 +1116,7 @@ namespace Enjon
 			case ShaderPassType::Forward_StaticGeom:
 			case ShaderPassType::Deferred_InstancedGeom:
 			case ShaderPassType::Deferred_StaticGeom:
+			case ShaderPassType::Deferred_Skinned_Geom:
 			{
 				// Should only have one link
 				NodeLink* link = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
@@ -1456,6 +1475,88 @@ namespace Enjon
 				code += OutputTabbedLine( "vs_out.ObjectID = uObjectID;" );
 
 			} break;
+
+			case ShaderPassType::Deferred_Skinned_Geom:
+			{
+				// Default values necessary for joint calculations
+				code += OutputTabbedLine( "int i0 = int( aJointIndices[0] );" );
+				code += OutputTabbedLine( "int i1 = int( aJointIndices[1] );" );
+				code += OutputTabbedLine( "int i2 = int( aJointIndices[2] );" );
+				code += OutputTabbedLine( "int i3 = int( aJointIndices[3] );" );
+				code += OutputTabbedLine( "" );
+
+				code += OutputTabbedLine( "// Calculate joint transform" );
+				code += OutputTabbedLine( "mat4 jointTransform = uJointTransforms[i0] * aJointWeights[0];" );
+				code += OutputTabbedLine( "jointTransform += uJointTransforms[i1] * aJointWeights[1];" );
+				code += OutputTabbedLine( "jointTransform += uJointTransforms[i2] * aJointWeights[2];" );
+				code += OutputTabbedLine( "jointTransform += uJointTransforms[i3] * aJointWeights[3];" );
+				code += OutputTabbedLine( "" ); 
+
+				code += OutputTabbedLine( "vec4 posL = jointTransform * vec4( aVertexPosition, 1.0 );" );
+
+				// Evaluate world position offsets for world position offets
+				NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "WorldPositionOffset" ) );
+
+				// If link exists
+				if ( link )
+				{
+					// Evaluate definitions for this node
+					NodeLink* l = link;
+					if ( l->mConnectingNode->IsDeclared( ) )
+					{
+						code += OutputTabbedLine( const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+						Enjon::String evalType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+						code += OutputTabbedLine( "vec3 worldPosition = ( uModel * posL ).xyz;" );
+						code += OutputTabbedLine( "worldPosition += " + ShaderGraph::TransformOutputType( linkEval, evalType, +"vec3" ) + ";" );
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: WorldPositionOffset: Link" + l->mConnectingNode->mName + ";" );
+					}
+				}
+				// Otherwise, vertex position doesn't get changed
+				else
+				{
+					code += OutputTabbedLine( "vec3 worldPosition = ( uModel * posL ).xyz;" );
+				}
+
+				// Final position output 
+				code += OutputTabbedLine( "gl_Position = uViewProjection * vec4( worldPosition, 1.0 );\n" );
+				
+				code += OutputTabbedLine( "vec3 normalL = ( jointTransform * vec4(aVertexNormal, 0.0) ).xyz;" );
+				code += OutputTabbedLine( "vec3 N = normalize( mat3(uModel) * normalL );" );
+				code += OutputTabbedLine( "vec3 T = normalize( mat3(uModel) * aVertexTangent );" );
+				
+				code += OutputTabbedLine( "// Reorthogonalize with respect to N" );
+				code += OutputTabbedLine( "T = normalize( T - dot(T, N) * N );\n\n" );
+
+				code += OutputTabbedLine( "// Calculate Bitangent" );
+				code += OutputTabbedLine( "vec3 B = cross( N, T );\n" );
+
+				code += OutputTabbedLine( "// TBN" );
+				code += OutputTabbedLine( "mat3 TBN = mat3( T, B, N );\n\n" );
+
+				code += OutputTabbedLine( "// TS_TBN" );
+				code += OutputTabbedLine( "mat3 TS_TBN = transpose( TBN );\n" );
+
+				code += OutputTabbedLine( "// Output Vertex Data" );
+				code += OutputTabbedLine( "vs_out.FragPositionWorldSpace = worldPosition;" );
+				code += OutputTabbedLine( "vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );" );
+				code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = TS_TBN * uViewPositionWorldSpace;" );
+				code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = TS_TBN * vs_out.FragPositionWorldSpace;" );
+				code += OutputTabbedLine( "vs_out.CurrentFragPositionClipSpace = gl_Position;" );
+				code += OutputTabbedLine( "vs_out.PreviousFragPositionClipSpace = uPreviousViewProjection * uPreviousModel * jointTransform * vec4( aVertexPosition, 1.0 );" );
+
+				code += OutputTabbedLine( "vs_out.TBN = TBN;" );
+				code += OutputTabbedLine( "vs_out.TS_TBN = TS_TBN;" );
+				code += OutputTabbedLine( "vs_out.ObjectID = uObjectID;" );
+			} break;
 		}
 
 		return code;
@@ -1522,6 +1623,7 @@ namespace Enjon
 			case ShaderPassType::Forward_StaticGeom:
 			case ShaderPassType::Deferred_InstancedGeom:
 			case ShaderPassType::Deferred_StaticGeom:
+			case ShaderPassType::Deferred_Skinned_Geom:
 			{
 				// BaseColor link
 				NodeLink* baseColorLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "BaseColor" ) );
@@ -1620,6 +1722,7 @@ namespace Enjon
 		{
 			case ShaderPassType::Deferred_InstancedGeom:
 			case ShaderPassType::Deferred_StaticGeom:
+			case ShaderPassType::Deferred_Skinned_Geom:
 			{
 				// Evaluate world position offsets for world position offets
 				NodeLink* link = const_cast<NodeLink*>( mMainSurfaceNode.GetLink( "BaseColor" ) );

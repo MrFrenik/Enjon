@@ -401,6 +401,15 @@ namespace Enjon
 		}
 	}
 
+	void Shader::SetUniformArrayElement( const std::string& name, const u32& index, const Mat4x4& mat ) 
+	{
+		auto search = mUniformMap.find( name + "[0]" );
+		if ( search != mUniformMap.end( ) )
+		{
+			glUniformMatrix4fv(search->second + index, 1, GL_FALSE, mat.elements);
+		}
+	}
+
 	void Shader::BindTexture(const std::string& name, const u32& TextureID, const u32 Index)
 	{
 		glEnable(GL_TEXTURE_2D);

@@ -34,6 +34,9 @@ namespace Enjon
 
 			ENJON_PROPERTY( )
 			f32 mCurrentAnimationTime = 0.0f; 
+
+			ENJON_PROPERTY( UIMin = 0.1f, UIMax = 10.0f )
+			f32 mAnimationSpeed = 1.0f; 
 	};
 }
 

@@ -750,13 +750,12 @@ namespace Enjon
 		Mat4x4 projMtx = camera->GetProjection( );
 		Mat4x4 viewProjMtx = camera->GetViewProjection( );
 
-		// Shader graph to be used
-		Enjon::AssetHandle< Enjon::ShaderGraph > sg; 
-		GLSLProgram* gbufferShader = Enjon::ShaderManager::Get("GBuffer");
-
 		if (!sortedStaticMeshRenderables.empty())
 		{ 
+			// Shader graph to be used
+			Enjon::AssetHandle< Enjon::ShaderGraph > sg; 
 			const Material* material = nullptr;
+
 			for (auto& renderable : sortedStaticMeshRenderables)
 			{ 
 				renderable->Bind( );
@@ -795,25 +794,17 @@ namespace Enjon
 			}
 		}
 
-		/*
 		// Shader graph to be used
-		Enjon::AssetHandle< Enjon::ShaderGraph > sg; 
-		GLSLProgram* gbufferShader = Enjon::ShaderManager::Get("GBuffer");
-
 		if (!sortedSkeletalMeshRenderables.empty())
 		{ 
+			AssetHandle< ShaderGraph > sg;
 			const Material* material = nullptr;
+
 			for (auto& renderable : sortedSkeletalMeshRenderables)
 			{ 
 				renderable->Bind( );
 				{
-					auto transforms = renderable->GetJointTransforms();
-
-					// Set transforms uniforms in shader
-					for ( u32 i = 0; i < transforms.size(); ++i )
-					{
-						skinnedMeshProgram->SetUniformArrayElement( "uJointTransforms", i, transforms.at( i ) );
-					}
+					auto transforms = renderable->GetJointTransforms(); 
 
 					// For each submesh
 					const Vector< SubMesh* >& subMeshes = renderable->GetMesh( )->GetSubmeshes( );
@@ -821,11 +812,10 @@ namespace Enjon
 					{
 						const Material* curMaterial = renderable->GetMaterial( i ).Get( );
 						sg = curMaterial->GetShaderGraph( );
-						assert( curMaterial != nullptr );
-
+						assert( curMaterial != nullptr ); 
 						if ( sg )
 						{
-							Enjon::Shader* sgShader = const_cast< Shader * >( sg->GetShader( ShaderPassType::Deferred_SkeletalGeom ) );
+							Enjon::Shader* sgShader = const_cast< Shader * >( sg->GetShader( ShaderPassType::Deferred_Skinned_Geom ) );
 							if ( material != curMaterial )
 							{
 								// Set material
@@ -841,69 +831,86 @@ namespace Enjon
 							}
 
 							sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) ); 
-							renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ), subMeshes.at( i ) );
+
+							// Set transform uniforms in shader
+							for ( u32 i = 0; i < transforms.size(); ++i )
+							{
+								sgShader->SetUniformArrayElement( "uJointTransforms", i, transforms.at( i ) );
+							}
+
+							sgShader->SetUniform( "uModel", renderable->GetModelMatrix( ) );
+							sgShader->SetUniform( "uPreviousModel", renderable->GetPreviousModelMatrix( ) );
+
+							//renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ), subMeshes.at( i ) );
+
+							// Bind submesh
+							subMeshes.at( i )->Bind( );
+							{
+								// Submit for rendering
+								subMeshes.at( i )->Submit( ); 
+							}
+							// Unbind submesh
+							subMeshes.at( i )->Unbind( ); 
 						}
 					} 
 				}
 				renderable->Unbind( );
 			}
 		}
-		*/
 
 		// Attempt to do the skinned mesh things
-		static StaticMeshRenderable skinnedRenderable;
-		GLSLProgram* skinnedMeshProgram = ShaderManager::Get( "SkinnedMesh" );
-		if ( skinnedMeshProgram )
-		{
-			skinnedMeshProgram->Use( );
-			{
-				for ( auto& s : sortedSkeletalMeshRenderables )
-				{ 
-					s->Bind( );
-					{
-						// Grab joint transforms from renderable
-						const Vector< Mat4x4 >& transforms = s->GetJointTransforms( );
+		//static StaticMeshRenderable skinnedRenderable;
+		//GLSLProgram* skinnedMeshProgram = ShaderManager::Get( "SkinnedMesh" );
+		//if ( skinnedMeshProgram )
+		//{
+		//	skinnedMeshProgram->Use( );
+		//	{
+		//		for ( auto& s : sortedSkeletalMeshRenderables )
+		//		{ 
+		//			s->Bind( );
+		//			{
+		//				// Grab joint transforms from renderable
+		//				const Vector< Mat4x4 >& transforms = s->GetJointTransforms( );
 
-						// Set transforms uniforms in shader
-						for ( u32 i = 0; i < transforms.size(); ++i )
-						{
-							//skinnedMeshProgram->SetUniform( "uJointTransforms[" + std::to_string( i ) + "]", transforms.at( i ) );
-							skinnedMeshProgram->SetUniformArrayElement( "uJointTransforms", i, transforms.at( i ) );
-						} 
+		//				// Set transforms uniforms in shader
+		//				for ( u32 i = 0; i < transforms.size(); ++i )
+		//				{
+		//					skinnedMeshProgram->SetUniformArrayElement( "uJointTransforms", i, transforms.at( i ) );
+		//				} 
 
-						// Get mesh from renderable
-						AssetHandle< SkeletalMesh > mesh = s->GetMesh( );
+		//				// Get mesh from renderable
+		//				AssetHandle< SkeletalMesh > mesh = s->GetMesh( );
 
-						// Upload relevant uniforms for renderable
-						skinnedMeshProgram->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
-						skinnedMeshProgram->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix ); 
-						skinnedMeshProgram->SetUniform( "uObjectID", Renderable::IdToColor( s->GetRenderableID( ) ) ); 
-						skinnedMeshProgram->SetUniform( "uModel", s->GetModelMatrix() );
-						skinnedMeshProgram->SetUniform( "uPreviousModel", s->GetPreviousModelMatrix( ) );
+		//				// Upload relevant uniforms for renderable
+		//				skinnedMeshProgram->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
+		//				skinnedMeshProgram->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix ); 
+		//				skinnedMeshProgram->SetUniform( "uObjectID", Renderable::IdToColor( s->GetRenderableID( ) ) ); 
+		//				skinnedMeshProgram->SetUniform( "uModel", s->GetModelMatrix() );
+		//				skinnedMeshProgram->SetUniform( "uPreviousModel", s->GetPreviousModelMatrix( ) );
 
-						// Get submeshes
-						const Vector< SubMesh* >& subMeshes = mesh->GetSubmeshes( ); 
+		//				// Get submeshes
+		//				const Vector< SubMesh* >& subMeshes = mesh->GetSubmeshes( ); 
 
-						// Submesh submit
-						for ( u32 i = 0; i < mesh->GetSubMeshCount( ); ++i )
-						{ 
-							auto subMesh = subMeshes.at( i );
+		//				// Submesh submit
+		//				for ( u32 i = 0; i < mesh->GetSubMeshCount( ); ++i )
+		//				{ 
+		//					auto subMesh = subMeshes.at( i );
 
-							// Bind submesh
-							subMesh->Bind( );
-							{
-								// Submit for rendering
-								subMesh->Submit( ); 
-							}
-							// Unbind submesh
-							subMesh->Unbind( ); 
-						}
-					} 
-					s->Unbind( );
-				}
-			}
-			skinnedMeshProgram->Unuse( );
-		}
+		//					// Bind submesh
+		//					subMesh->Bind( );
+		//					{
+		//						// Submit for rendering
+		//						subMesh->Submit( ); 
+		//					}
+		//					// Unbind submesh
+		//					subMesh->Unbind( ); 
+		//				}
+		//			} 
+		//			s->Unbind( );
+		//		}
+		//	}
+		//	skinnedMeshProgram->Unuse( );
+		//}
 
 		// Quadbatches
 		Enjon::GLSLProgram* shader = Enjon::ShaderManager::Get("QuadBatch");
@@ -914,7 +921,9 @@ namespace Enjon
 			// Set shared uniform
 			shader->SetUniform("u_camera", camera->GetViewProjection());
 
+			AssetHandle< ShaderGraph > sg;
 			const Material* material = nullptr;
+
 			for (auto& quadBatch : sortedQuadBatches)
 			{ 
 				// Check for material switch 
