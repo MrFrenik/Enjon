@@ -496,32 +496,47 @@ namespace Enjon
 
 						String comboLabel = tex ? tex->GetName( ) : "Texture Uniform";
 
-						if ( ImGui::BeginCombo( fmt::format( "##{}", uTexture->GetName( ) ).c_str( ), comboLabel.c_str( ) ) )
+						static ImGuiTextFilter filter; 
+
+						Vec2 padding( 20.0f, 7.0f );
+						f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
+
+						if ( ImGui::BeginCombo( fmt::format( "##{}", uTexture->GetName( ) ).c_str( ), comboLabel.c_str( ), ImGuiComboFlags_HeightRegular ) )
 						{
+							// Draw for filtering
+							filter.Draw( "" );
+
+							Vec2 padding( 20.0f, 7.0f );
+							f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
+							// Display all components and transform information
+							//ImGui::ListBoxHeader( "##CompLists", ImVec2(ImGui::GetWindowSize().x - 20.0f, height ) );
 							// For each record in assets
-							for ( auto& a : *am->GetAssets< Texture >() )
+							for ( auto& a : *am->GetAssets< Texture >( ) )
 							{
-								if ( ImGui::Selectable( a.second.GetAssetName().c_str( ) ) )
-								{ 
-									// If override exists, simply set the texture
-									if ( bHasOverride )
+								if ( filter.PassFilter( a.second.GetAssetName( ).c_str( ) ) )
+								{
+									if ( ImGui::Selectable( a.second.GetAssetName( ).c_str( ) ) )
 									{
-										uTexture->SetTexture( a.second.GetAsset( ) );
-									}
-									else
-									{
-										// Construct new texture uniform and copy fields from original
-										UniformTexture* newUniform = new UniformTexture( );
-										newUniform->CopyFields( uTexture );
+										// If override exists, simply set the texture
+										if ( bHasOverride )
+										{
+											uTexture->SetTexture( a.second.GetAsset( ) );
+										}
+										else
+										{
+											// Construct new texture uniform and copy fields from original
+											UniformTexture* newUniform = new UniformTexture( );
+											newUniform->CopyFields( uTexture );
 
-										// Set new texture value
-										newUniform->SetTexture( a.second.GetAsset( ) );
+											// Set new texture value
+											newUniform->SetTexture( a.second.GetAsset( ) );
 
-										// Add override
-										AddOverride( newUniform ); 
+											// Add override
+											AddOverride( newUniform );
+										}
 									}
 								}
-							} 
+							}
 							ImGui::EndCombo( );
 						} 
 

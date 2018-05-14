@@ -567,8 +567,8 @@ namespace Enjon
 				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderFloat4( fmt::format("##{}", name).c_str( ), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
-					{
+					if ( ImGui::ColorEdit4( fmt::format( "##{}", name ).c_str( ), col ) )
+					{ 
 						val.r = col[ 0 ];
 						val.g = col[ 1 ];
 						val.b = col[ 2 ];
@@ -577,9 +577,9 @@ namespace Enjon
 					}
 				}
 				else
-				{
-					if ( ImGui::DragFloat4( fmt::format("##{}", name).c_str( ), col ) )
-					{
+				{ 
+					if ( ImGui::ColorEdit4( fmt::format( "##{}", name ).c_str( ), col ) )
+					{ 
 						val.r = col[ 0 ];
 						val.g = col[ 1 ];
 						val.b = col[ 2 ];
@@ -803,7 +803,6 @@ namespace Enjon
 					}
 
 				} break;
-
 				
 				
 				// AssetHandle type
@@ -823,16 +822,23 @@ namespace Enjon
 						{
 							if ( assets )
 							{
+								static ImGuiTextFilter filter;
+								static String filterString = "";
 								String label = val ? val->GetName( ) : assetCls->GetName( );
 								if ( ImGui::BeginCombo( fmt::format("##{}", prop->GetName() ).c_str(), label.c_str() ) )
 								{
 									// For each record in assets
 									for ( auto& a : *assets )
 									{
-										if ( ImGui::Selectable( a.second.GetAssetName().c_str( ) ) )
-										{ 
-											val.Set( const_cast< Asset* > ( a.second.GetAsset() ) );
-											cls->SetValue( object, prop, val );
+										char buffer[ 256 ];
+										strncpy( buffer, filterString.c_str( ), 256 );
+										if ( filter.PassFilter( buffer ) )
+										{
+											if ( ImGui::Selectable( a.second.GetAssetName().c_str( ) ) )
+											{ 
+												val.Set( const_cast< Asset* > ( a.second.GetAsset() ) );
+												cls->SetValue( object, prop, val );
+											} 
 										}
 									}
 									ImGui::EndCombo( );
