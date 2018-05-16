@@ -337,6 +337,22 @@ namespace Enjon
 								}
 							}
 						} break;
+
+						case MetaPropertyType::Object:
+						{
+							const MetaPropertyArray< Object* >* arrProp = base->Cast < MetaPropertyArray< Object * > >( );
+							if ( arrProp )
+							{
+								for ( usize j = 0; j < arrProp->GetSize( object ); ++j )
+								{
+									Object* obj = arrProp->GetValueAs( object, j );
+									if ( obj )
+									{
+										ObjectArchiver::Serialize( obj, buffer ); 
+									}
+								}
+							}
+						} break; 
 					}
 				} break;
 
@@ -725,8 +741,19 @@ namespace Enjon
 									arrProp->SetValueAt( object, j, newAsset );
 								}
 							} break;
-						}
-
+							
+							case MetaPropertyType::Object:
+							{
+								const MetaPropertyArray< Object* >* arrProp = prop->Cast< MetaPropertyArray< Object* > >( );
+								if ( arrProp )
+								{
+									for ( usize j = 0; j < arraySize; ++j )
+									{
+										arrProp->SetValueAt( object, j, ObjectArchiver::Deserialize( buffer ) );
+									}
+								}
+							} break;
+						} 
 					} break;
 
 

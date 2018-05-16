@@ -496,7 +496,7 @@ namespace Enjon
 				{
 					( ( Vector<T>* )( usize( object ) + mOffset ) )->resize( (usize)arraySize ); 
 				}
-			}
+			} 
 
 			/*
 			* @brief

@@ -260,21 +260,39 @@ namespace Enjon
 			} break;
 
 			case MetaPropertyType::Object:
-			{
-				const MetaPropertyArray< Object* >* arrayProp = static_cast< const MetaPropertyArray< Object* >* >( prop );
-				if ( arrayProp )
-				{
-					for ( usize i = 0; i < arrayProp->GetSize( object ); ++i )
-					{
-						const Object* arrObj = arrayProp->GetValueAs( object, i );
-						const MetaClass* arrPropCls = arrObj->Class( ); 
+			{ 
+				const MetaPropertyArrayBase* arrBase = prop->Cast< MetaPropertyArrayBase >( );
+				const MetaProperty* arrPropTypeBase = arrBase->GetProxy( ).mArrayPropertyTypeBase; 
 
-						if ( ImGui::TreeNode( Enjon::String( arrPropCls->GetName() + "##" + std::to_string(u32(arrayProp->GetValueAs( object, i ) ) ) ).c_str( ) ) )
+				// If not pointer, then stacked based allocated object
+				if ( !arrPropTypeBase->GetTraits( ).IsPointer( ) )
+				{
+					// Not working for now...
+				} 
+
+				else
+				{
+					const MetaPropertyArray< Object* >* arrayProp = static_cast< const MetaPropertyArray< Object* >* >( prop ); 
+					if ( arrayProp )
+					{
+						for ( usize i = 0; i < arrayProp->GetSize( object ); ++i )
 						{
-							DebugDumpObject( arrayProp->GetValueAs( object, i ) );
-							ImGui::TreePop( );
+							const Object* arrObj = arrayProp->GetValueAs( object, i );
+
+							if ( !arrObj )
+							{
+								continue;
+							}
+
+							const MetaClass* arrPropCls = arrObj->Class( ); 
+
+							if ( ImGui::TreeNode( Enjon::String( arrPropCls->GetName() + "##" + std::to_string( u32( arrObj ) ) ).c_str( ) ) )
+							{
+								DebugDumpObject( arrayProp->GetValueAs( object, i ) );
+								ImGui::TreePop( );
+							}
 						}
-					}
+					} 
 				}
 			} break;
 

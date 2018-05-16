@@ -698,8 +698,18 @@ namespace Enjon
 			{
 				return EntityHandle( e );
 			}
+		} 
+
+		// Serach for matching UUID in marked for add list
+		for ( auto& e : mMarkedForAdd )
+		{
+			if ( e->GetUUID( ) == uuid )
+			{
+				return EntityHandle( e );
+			} 
 		}
 
+		// Return invalid entity if not found
 		return EntityHandle::Invalid( );
 	}
 

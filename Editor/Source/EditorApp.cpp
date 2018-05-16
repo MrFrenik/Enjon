@@ -53,9 +53,9 @@ Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\""
 //Enjon::String mProjectsDir = "W:/Projects/";
 //Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -966,18 +966,18 @@ namespace Enjon
 	void EditorApp::ReloadDLL( )
 	{
 		// Save the current scene and store uuid
-		UUID uuid;
-		UUID mSelectedEntityUUID;
+		UUID sceneUUID;
+		UUID selectedEntityUUID;
 		SceneManager* sm = EngineSubsystem( SceneManager );
 
 		if ( mSelectedEntity )
 		{
-			mSelectedEntityUUID = mSelectedEntity.Get( )->GetUUID();
+			selectedEntityUUID = mSelectedEntity.Get( )->GetUUID();
 		}
 
 		if ( sm->GetScene() )
 		{
-			uuid = sm->GetScene()->GetUUID( );
+			sceneUUID = sm->GetScene()->GetUUID( );
 			sm->UnloadScene( );
 		} 
 
@@ -985,15 +985,15 @@ namespace Enjon
 		LoadDLL( false ); 
 
 		// Set current scene using previous id if valid
-		if ( uuid )
+		if ( sceneUUID )
 		{
-			sm->LoadScene( uuid );
+			sm->LoadScene( sceneUUID );
 		}
 
 		// Reselect the previous entity
-		if ( mSelectedEntityUUID )
+		if ( selectedEntityUUID )
 		{
-			SelectEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( mSelectedEntityUUID ) );
+			SelectEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( selectedEntityUUID ) );
 		}
 	}
 
