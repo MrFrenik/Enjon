@@ -29,24 +29,12 @@ namespace Enjon
 	ENJON_CLASS( )
 	class Asset : public Enjon::Object
 	{ 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( Asset )
 
 		public: 
 			friend AssetLoader;
 			friend AssetManager;
-			friend AssetArchiver;
-
-			/**
-			*@brief Constructor
-			*/
-			Asset() {}
-
-			/**
-			*@brief Virtual destructor
-			*/
-			virtual ~Asset() 
-			{
-			} 
+			friend AssetArchiver; 
 
 			/**
 			*@brief

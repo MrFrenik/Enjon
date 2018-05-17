@@ -21,13 +21,7 @@
 #include <Bullet/btBulletCollisionCommon.h>
 
 namespace Enjon
-{
-	//========================================================================
-
-	RigidBody::RigidBody( )
-	{
-	}
-
+{ 
 	//========================================================================
 
 	RigidBody::RigidBody( const CollisionShapeType& type )
@@ -47,7 +41,7 @@ namespace Enjon
 
 	//========================================================================
 
-	RigidBody::~RigidBody( )
+	void RigidBody::ExplicitDestructor( )
 	{
 		// Remove body from physics world
 		if ( mBody )

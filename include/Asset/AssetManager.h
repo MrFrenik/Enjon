@@ -22,7 +22,7 @@ namespace Enjon
 	ENJON_CLASS( )
 	class AssetManager : public Subsystem
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( AssetManager )
 
 		enum class LoaderType
 		{
@@ -39,17 +39,12 @@ namespace Enjon
 			/**
 			*@brief Constructor
 			*/
-			AssetManager();
+			virtual void ExplicitConstructor( ) override;
 
 			/**
 			*@brief Constructor
 			*/
-			AssetManager(const String& name, const String& assetsPath);
-
-			/**
-			*@brief destructor
-			*/
-			~AssetManager( ) = default;
+			AssetManager(const String& name, const String& assetsPath); 
 
 			/**
 			*@brief

@@ -20,17 +20,11 @@ namespace Enjon
 { 
 	//==========================================================================================
 
-	MeshAssetLoader::MeshAssetLoader()
+	void MeshAssetLoader::ExplicitConstructor( )
 	{
 		// Set import options loader
 		mImportOptions.mLoader = this;
 	} 
-
-	//==========================================================================================
-
-	MeshAssetLoader::~MeshAssetLoader()
-	{
-	}
 
 	//==========================================================================================
 

@@ -12,24 +12,12 @@ namespace Enjon
 {
 	class SceneAssetLoader;
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class Scene : public Asset
 	{
 		friend SceneAssetLoader;
 
-		ENJON_CLASS_BODY( )
-
-		public:
-
-			/**
-			* @brief
-			*/
-			Scene( );
-
-			/**
-			* @brief
-			*/
-			~Scene( );
+		ENJON_CLASS_BODY( Scene ) 
 
 		public:
 			/*

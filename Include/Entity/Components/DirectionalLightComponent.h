@@ -7,7 +7,7 @@
 
 namespace Enjon
 {
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class DirectionalLightComponent : public Component
 	{ 
 		ENJON_COMPONENT( DirectionalLightComponent )
@@ -17,12 +17,12 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void ExplicitConstructor() override;
+			virtual void ExplicitConstructor() override;
 
 			/*
 			* @brief
 			*/
-			void ExplicitDestructor() override;
+			virtual void ExplicitDestructor() override;
 
 			/*
 			* @brief

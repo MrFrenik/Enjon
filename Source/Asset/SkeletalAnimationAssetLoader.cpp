@@ -13,19 +13,7 @@
 #include <assimp/postprocess.h>
 
 namespace Enjon
-{
-	//======================================================================
-
-	SkeletalAnimationAssetLoader::SkeletalAnimationAssetLoader( )
-	{
-	}
-
-	//======================================================================
-
-	SkeletalAnimationAssetLoader::~SkeletalAnimationAssetLoader( )
-	{
-	}
-
+{ 
 	//======================================================================
 
 	void SkeletalAnimationAssetLoader::RegisterDefaultAsset( )

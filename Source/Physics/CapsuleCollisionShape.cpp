@@ -8,7 +8,7 @@ namespace Enjon
 {
 	//==============================================================
 
-	CapsuleCollisionShape::CapsuleCollisionShape( )
+	void CapsuleCollisionShape::ExplicitConstructor( )
 	{
 		// Construct box collision shape
 		mShape = new BulletCapsuleShape( mRadius, mHeight );
@@ -31,7 +31,7 @@ namespace Enjon
 
 	//==============================================================
 
-	CapsuleCollisionShape::~CapsuleCollisionShape( )
+	void CapsuleCollisionShape::ExplicitDestructor( )
 	{
 		// Release memory for shape
 		DeleteShape( );

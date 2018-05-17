@@ -13,19 +13,7 @@ namespace Enjon
 	ENJON_CLASS( )
 	class SceneAssetLoader : public AssetLoader
 	{
-		ENJON_CLASS_BODY( )
-		
-		public:
-
-			/**
-			* @brief Constructor
-			*/
-			SceneAssetLoader( ) = default;
-
-			/**
-			* @brief Destructor
-			*/
-			~SceneAssetLoader( ) = default;
+		ENJON_CLASS_BODY( SceneAssetLoader ) 
 
 		public:
 

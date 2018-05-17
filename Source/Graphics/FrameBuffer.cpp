@@ -7,7 +7,7 @@
 
 namespace Enjon 
 { 
-	FrameBuffer::FrameBuffer()
+	void FrameBuffer::ExplicitConstructor( )
 	{
 		mWidth = 1024;
 		mHeight = 1024;
@@ -67,7 +67,7 @@ namespace Enjon
 	    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	FrameBuffer::~FrameBuffer()
+	void FrameBuffer::ExplicitDestructor( )
 	{
 		glDeleteTextures(1, &mTexture);
 		glDeleteFramebuffersEXT(1, &mFrameBufferID);

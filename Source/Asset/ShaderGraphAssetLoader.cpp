@@ -4,19 +4,7 @@
 #include "Asset/ShaderGraphAssetLoader.h"
 
 namespace Enjon
-{
-	//=================================================================================
-
-	ShaderGraphAssetLoader::ShaderGraphAssetLoader( )
-	{
-	}
-
-	//================================================================================= 
-
-	ShaderGraphAssetLoader::~ShaderGraphAssetLoader( )
-	{
-	} 
-
+{ 
 	//================================================================================= 
 
 	void ShaderGraphAssetLoader::RegisterDefaultAsset( ) 

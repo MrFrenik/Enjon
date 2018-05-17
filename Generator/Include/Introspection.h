@@ -214,7 +214,7 @@ struct ClassMarkupTraits
 	}
 
 	NamespaceQualifiers mNamespaceQualifiers; 
-	bool mConstruct = false;
+	bool mConstruct = true;
 	MetaClassType mMetaClassType = MetaClassType::Object;
 	std::vector< std::string > mRequiredClasses;
 };

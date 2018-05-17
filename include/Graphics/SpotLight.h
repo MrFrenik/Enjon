@@ -46,23 +46,68 @@ namespace Enjon
 	ENJON_CLASS( )
 	class SpotLight : public Enjon::Object
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( SpotLight )
 
 		public:
-			SpotLight();
-			SpotLight(Vec3& position, SLParams& params, ColorRGBA32& color, float intensity = 1.0f);
-			~SpotLight();
 
+			/** 
+			* @brief
+			*/
+			virtual void ExplicitConstructor( ) override;
+
+			/** 
+			* @brief
+			*/
+			SpotLight(Vec3& position, SLParams& params, ColorRGBA32& color, float intensity = 1.0f); 
+
+			/** 
+			* @brief
+			*/
 			Vec3& GetPosition() { return mPosition; }
+
+			/** 
+			* @brief
+			*/
 			ColorRGBA32& GetColor() { return mColor; }
+
+			/** 
+			* @brief
+			*/
 			SLParams& GetParams() { return mParams; }
+
+			/** 
+			* @brief
+			*/
 			float GetIntensity() { return mIntensity; }
 
+			/** 
+			* @brief
+			*/
 			void SetPosition(Vec3& position);
+
+			/** 
+			* @brief
+			*/
 			void SetDirection(Vec3& direction);
+
+			/** 
+			* @brief
+			*/
 			void SetColor(ColorRGBA32& color);
+
+			/** 
+			* @brief
+			*/
 			void SetIntensity(float intensity);
+
+			/** 
+			* @brief
+			*/
 			void SetGraphicsScene(GraphicsScene* scene);
+
+			/** 
+			* @brief
+			*/
 			void SetParams(SLParams& params);
 
 		private:

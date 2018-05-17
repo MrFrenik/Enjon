@@ -18,22 +18,12 @@ struct aiScene;
 
 namespace Enjon
 {
-	ENJON_CLASS()
+	ENJON_CLASS( )
 	class SkeletonAssetLoader : public AssetLoader
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( SkeletonAssetLoader )
 
-		public:
-
-			/**
-			* @brief Constructor
-			*/
-			SkeletonAssetLoader();
-
-			/**
-			* @brief Destructor
-			*/
-			~SkeletonAssetLoader(); 
+		public: 
 
 			/**
 			* @brief 

@@ -20,22 +20,12 @@ namespace Enjon
 {
 	class Skeleton;
 
-	ENJON_CLASS()
+	ENJON_CLASS( )
 	class SkeletalAnimationAssetLoader : public AssetLoader
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( SkeletalAnimationAssetLoader )
 
-		public:
-
-			/**
-			* @brief Constructor
-			*/
-			SkeletalAnimationAssetLoader();
-
-			/**
-			* @brief Destructor
-			*/
-			~SkeletalAnimationAssetLoader(); 
+		public: 
 
 			/**
 			* @brief 

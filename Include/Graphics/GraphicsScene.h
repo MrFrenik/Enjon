@@ -50,18 +50,14 @@ namespace Enjon
 	ENJON_CLASS( )
 	class GraphicsScene : public Enjon::Object
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( GraphicsScene )
 
 		public:
-			/*
-			* @brief
-			*/
-			GraphicsScene();
 
 			/*
 			* @brief
 			*/
-			~GraphicsScene();
+			virtual void ExplicitDestructor( ) override;
 
 			/*
 			* @brief

@@ -10,27 +10,27 @@
 
 namespace Enjon
 { 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class SphereCollisionShape : public CollisionShape
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( SphereCollisionShape )
 
 		public:
 
 			/**
 			* @brief
 			*/
-			SphereCollisionShape( );
+			virtual void ExplicitConstructor( ) override;
+
+			/**
+			* @brief
+			*/
+			virtual void ExplicitDestructor( ) override;
 
 			/**
 			* @brief
 			*/
 			SphereCollisionShape( RigidBody* body );
-
-			/**
-			* @brief
-			*/
-			~SphereCollisionShape( );
 
 		private:
 

@@ -54,7 +54,7 @@ namespace Enjon
 	};
 
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class RigidBodyComponent : public Component
 	{
 		ENJON_COMPONENT( RigidBodyComponent )
@@ -64,7 +64,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void ExplicitDestructor( ) override;
+			virtual void ExplicitDestructor( ) override;
 
 			/**
 			* @brief

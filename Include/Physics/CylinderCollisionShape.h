@@ -10,27 +10,27 @@
 
 namespace Enjon
 { 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class CylinderCollisionShape : public CollisionShape
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( CylinderCollisionShape )
 
 		public:
 
 			/**
 			* @brief
 			*/
-			CylinderCollisionShape( );
+			virtual void ExplicitConstructor( ) override;
 
 			/**
 			* @brief
 			*/
-			CylinderCollisionShape( RigidBody* body );
+			virtual void ExplicitDestructor( ) override;
 
 			/**
 			* @brief
 			*/
-			~CylinderCollisionShape( );
+			CylinderCollisionShape( RigidBody* body ); 
 
 		private:
 

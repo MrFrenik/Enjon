@@ -14,25 +14,15 @@ namespace Enjon
 	class AnimationSubsystem;
 	class SkeletalAnimationComponent;
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class SkeletalMeshRenderable : public Renderable
 	{
 		friend AnimationSubsystem;
 		friend SkeletalAnimationComponent;
 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( SkeletalMeshRenderable )
 
-		public:
-
-			/*
-			* @brief
-			*/
-			SkeletalMeshRenderable( ) = default;
-
-			/*
-			* @brief
-			*/
-			~SkeletalMeshRenderable( ) = default;
+		public: 
 
 			/**
 			* @brief

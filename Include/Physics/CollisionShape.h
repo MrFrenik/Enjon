@@ -16,7 +16,7 @@ namespace Enjon
 	class PhysicsSubsystem;
 	class RigidBodyComponent;
 
-	ENJON_ENUM()
+	ENJON_ENUM( )
 	enum class CollisionShapeType
 	{
 		Empty,
@@ -27,21 +27,16 @@ namespace Enjon
 		Capsule
 	};
 
-	ENJON_CLASS( )
+	ENJON_CLASS( Abstract )
 	class CollisionShape : public Object 
 	{
 		friend RigidBody;
 		friend PhysicsSubsystem;
 		friend RigidBodyComponent;
 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( CollisionShape )
 
-		public:
-
-			/**
-			* @brief
-			*/
-			CollisionShape( );
+		public: 
 
 			/**
 			* @brief
@@ -51,7 +46,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			~CollisionShape( );
+			virtual void ExplicitDestructor( ) override;
 
 			/**
 			* @brief

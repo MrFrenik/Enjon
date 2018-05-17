@@ -100,17 +100,17 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			Entity();
+			virtual void ExplicitConstructor( ) override;
 
 			/**
 			* @brief
 			*/
-			Entity(EntityManager* manager);
+			virtual void ExplicitDestructor( );
 
 			/**
 			* @brief
 			*/
-			~Entity();
+			Entity(EntityManager* manager); 
 
 			/**
 			* @brief Get id of this entity
@@ -425,21 +425,11 @@ namespace Enjon
 	ENJON_CLASS( )
 	class EntityManager : public Subsystem
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( EntityManager )
 
 		friend Entity;
 		friend Application;
-		public:
-
-			/*
-			* @brief
-			*/
-			EntityManager( ) = default;
-
-			/*
-			* @brief
-			*/
-			~EntityManager( ) = default;
+		public: 
 			
 			/*
 			* @brief

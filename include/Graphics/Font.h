@@ -149,18 +149,13 @@ namespace Enjon
 		friend FontAssetLoader;
 		friend FontAtlas;
 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( UIFont )
 
 		public:
 			/**
 			* @brief Constructor
 			*/
-			UIFont( const Enjon::String& fontPath );
-
-			/**
-			* @brief Constructor
-			*/
-			~UIFont( );
+			UIFont( const Enjon::String& fontPath ); 
 
 			/**
 			* @brief

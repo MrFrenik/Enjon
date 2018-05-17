@@ -13,7 +13,7 @@ namespace Enjon
 { 
 	class AnimationSubsystem;
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class SkeletalAnimationComponent : public Component
 	{ 
 		friend AnimationSubsystem;

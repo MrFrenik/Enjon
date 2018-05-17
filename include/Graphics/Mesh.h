@@ -37,19 +37,9 @@ namespace Enjon
 		friend SubMesh;
 		friend Mesh;
 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( VertexDataDeclaration )
 
 		public: 
-
-			/*
-			* @brief
-			*/
-			VertexDataDeclaration( ) = default;
-
-			/*
-			* @brief
-			*/
-			~VertexDataDeclaration( ) = default; 
 
 			/*
 			* @brief
@@ -97,25 +87,16 @@ namespace Enjon
 		float UV[2];	
 	}; 
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class SubMesh : public Object
 	{ 
 		friend SkeletalMeshAssetLoader;
 		friend MeshAssetLoader;
 		friend Mesh;
 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( SubMesh )
 
 		public:
-			/*
-			* @brief Constructor
-			*/
-			SubMesh( );
-
-			/*
-			* @brief
-			*/
-			//SubMesh( const SubMesh& other );
 
 			/*
 			* @brief Constructor
@@ -123,9 +104,9 @@ namespace Enjon
 			SubMesh( Mesh* mesh );
 
 			/*
-			* @brief Destructor
+			* @brief Explicit Destructor
 			*/
-			~SubMesh();
+			virtual void ExplicitDestructor( ) override;
 
 			/*
 			* @brief
@@ -201,23 +182,19 @@ namespace Enjon
 			GLuint mIBO = 0;
 	}; 
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class Mesh : public Asset
 	{
 		friend MeshAssetLoader;
 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( Mesh )
 
 		public:
-			/*
-			* @brief Constructor
-			*/
-			Mesh();
 
 			/*
-			* @brief Destructor
+			* @brief Explicit Destructor
 			*/
-			~Mesh();
+			virtual void ExplicitDestructor( ) override;
 
 			/*
 			* @brief

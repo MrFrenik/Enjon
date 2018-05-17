@@ -315,11 +315,11 @@ void Introspection::ParseClassTraits( Lexer* lexer, ClassMarkupTraits* traits )
 				}
 			} 
 
-			// Construct
-			if ( curToken.Equals( "Construct" ) )
+			// If is abstract
+			if ( curToken.Equals( "Abstract" ) )
 			{
-				traits->Construct( true );
-			} 
+				traits->Construct( false );
+			}
 		}
 
 		// Get next token after processing this one
@@ -1719,7 +1719,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 				code += OutputLine( "" );
 				code += OutputTabbedLine( "cls->mConstructor = ([](){" );
 				code += OutputTabbedLine( "\treturn new " + qualifiedName + "();" );
-				code += OutputTabbedLine( "});" );
+				code += OutputTabbedLine( "});" ); 
 			}
 
 			// Iterate through all functions and output code

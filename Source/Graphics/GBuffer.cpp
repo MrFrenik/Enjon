@@ -74,7 +74,7 @@ namespace Enjon {
 		mViewport = viewport;	
 	}
 
-	GBuffer::~GBuffer()
+	void GBuffer::ExplicitDestructor( )
 	{
 		for (u32 i = 0; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
 		{

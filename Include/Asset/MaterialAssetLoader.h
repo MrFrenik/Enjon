@@ -13,19 +13,9 @@ namespace Enjon
 	ENJON_CLASS( )
 	class MaterialAssetLoader : public AssetLoader
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( MaterialAssetLoader )
 		
-		public:
-
-			/**
-			* @brief Constructor
-			*/
-			MaterialAssetLoader( ) = default;
-
-			/**
-			* @brief Destructor
-			*/
-			~MaterialAssetLoader( ) = default;
+		public: 
 
 			/**
 			* @brief Destructor

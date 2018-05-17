@@ -11,22 +11,12 @@
 
 namespace Enjon
 { 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class SceneManager : public Subsystem
 	{ 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( SceneManager )
 
-		public:
-
-			/**
-			* @brief
-			*/
-			SceneManager( ) = default;
-
-			/**
-			*@brief destructor
-			*/
-			~SceneManager( ) = default;
+		public: 
 
 			/**
 			*@brief

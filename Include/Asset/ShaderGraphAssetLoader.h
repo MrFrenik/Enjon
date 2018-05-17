@@ -10,22 +10,12 @@
 
 namespace Enjon
 {
-	ENJON_CLASS()
+	ENJON_CLASS( )
 	class ShaderGraphAssetLoader : public AssetLoader
 	{
-		ENJON_CLASS_BODY()
+		ENJON_CLASS_BODY( ShaderGraphAssetLoader)
 
-		public:
-
-			/**
-			* @brief Constructor
-			*/
-			ShaderGraphAssetLoader( );
-
-			/**
-			* @brief Destructor
-			*/
-			~ShaderGraphAssetLoader( );
+		public: 
 
 			/**
 			* @brief 

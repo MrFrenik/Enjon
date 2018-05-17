@@ -26,24 +26,13 @@ namespace Enjon
 	ENJON_CLASS( )
 	class Joint : public Object
 	{ 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( Joint )
 
 		friend SkeletonAssetLoader;
 		friend SkeletalMeshAssetLoader;
 		friend Skeleton;
 
 		public: 
-
-			/*
-			* @brief Constructor
-			*/
-			Joint( );
-
-			/*
-			* @brief Destructor
-			*/
-			~Joint( );
-
 			/*
 			* @brief
 			*/
@@ -87,26 +76,16 @@ namespace Enjon
 		u32 mIDS[ENJON_MAX_NUM_JOINTS_PER_VERTEX];
 	};
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class Skeleton : public Asset
 	{ 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( Skeleton )
 
 		friend SkeletonAssetLoader;
 		friend SkeletalMeshAssetLoader;
 		friend SkeletalAnimationComponent;
 
-		public:
-
-			/*
-			* @brief
-			*/
-			Skeleton( );
-
-			/*
-			* @brief
-			*/
-			~Skeleton( ); 
+		public: 
 
 			/*
 			* @brief

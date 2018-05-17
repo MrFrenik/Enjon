@@ -241,7 +241,7 @@ namespace Enjon
 		friend Engine;
 		friend GUIWidget;
 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( ImGuiManager )
 
 		public:
 

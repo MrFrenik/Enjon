@@ -12,9 +12,10 @@ namespace Enjon
 { 
 	//=======================================================================================================
 
-	Camera::Camera()
-		: mViewPortAspectRatio(4.0f / 3.0f), mScreenDimensions(Vec2(800, 600))
+	void Camera::ExplicitConstructor()
 	{
+		mViewPortAspectRatio = ( 4.0f / 3.0f );
+		mScreenDimensions = Vec2( 800, 600 );
 	}
 
 	//=======================================================================================================

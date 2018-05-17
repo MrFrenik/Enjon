@@ -12,27 +12,27 @@ namespace Enjon
 {
 	class Vec3;
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class BoxCollisionShape : public CollisionShape
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( BoxCollisionShape )
 
 		public:
 
 			/**
 			* @brief
 			*/
-			BoxCollisionShape( );
+			virtual void ExplicitConstructor( ) override;
 
 			/**
 			* @brief
 			*/
-			BoxCollisionShape( RigidBody* body );
+			virtual void ExplicitDestructor( ) override;
 
 			/**
 			* @brief
 			*/
-			~BoxCollisionShape( );
+			BoxCollisionShape( RigidBody* body ); 
 
 			/*
 			* @brief

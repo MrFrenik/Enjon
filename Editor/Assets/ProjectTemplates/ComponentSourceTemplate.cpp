@@ -8,7 +8,7 @@
 
 namespace Enjon
 {
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class #COMPONENTNAME : public Enjon::Component
 	{
 		ENJON_COMPONENT( #COMPONENTNAME )

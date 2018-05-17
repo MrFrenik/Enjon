@@ -17,20 +17,6 @@ namespace Enjon
 { 
 	//========================================================================================
 
-	SkeletalMeshAssetLoader::SkeletalMeshAssetLoader( ) 
-	{
-
-	}
-
-	//========================================================================================
-
-	SkeletalMeshAssetLoader::~SkeletalMeshAssetLoader( )
-	{
-
-	}
-
-	//========================================================================================
-
 	void SkeletalMeshAssetLoader::RegisterDefaultAsset( )
 	{
 		// Not sure what this is supposed to look like...

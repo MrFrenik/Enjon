@@ -81,19 +81,9 @@ namespace Enjon
 	ENJON_CLASS( )
 	class GraphicsSubsystem : public Subsystem
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( GraphicsSubsystem )
 
-		public:
-
-			/**
-			*@brief Constructor
-			*/
-			GraphicsSubsystem( ) = default;
-			
-			/**
-			*@brief Destructor
-			*/
-			~GraphicsSubsystem( ) = default;
+		public: 
 
 			/**
 			*@brief

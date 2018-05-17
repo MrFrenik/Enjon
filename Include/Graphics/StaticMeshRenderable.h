@@ -10,22 +10,12 @@
 
 namespace Enjon
 {
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class StaticMeshRenderable : public Renderable
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( StaticMeshRenderable )
 
-		public:
-
-			/**
-			* @brief
-			*/
-			StaticMeshRenderable( ) = default;
-
-			/**
-			* @brief
-			*/
-			~StaticMeshRenderable( ) = default;
+		public: 
 
 			/**
 			* @brief

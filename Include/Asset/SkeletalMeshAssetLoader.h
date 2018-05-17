@@ -11,7 +11,7 @@
 #include "Graphics/Skeleton.h"
 #include "Graphics/SkeletalMesh.h"
 
-// Assimp specifics
+// Forward delcaration: Assimp specifics
 struct aiMesh;
 struct aiNode;
 struct aiScene;
@@ -20,23 +20,13 @@ namespace Enjon
 {
 	class SkeletalMesh;
 
-	ENJON_CLASS()
+	ENJON_CLASS( )
 	class SkeletalMeshAssetLoader : public AssetLoader
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( SkeletalMeshAssetLoader )
 
 		public:
-
-			/**
-			* @brief Constructor
-			*/
-			SkeletalMeshAssetLoader( ); 
-
-			/**
-			* @brief Constructor
-			*/
-			~SkeletalMeshAssetLoader( ); 
-
+ 
 			/**
 			* @brief 
 			*/

@@ -175,17 +175,11 @@ namespace Enjon
 	bool ShaderGraphNodeTemplate::IsFunction( ) const
 	{
 		return ( mType == ShaderGraphNodeType::Function );
-	}
+	} 
 
 	//=========================================================================================================================
 
-	ShaderGraph::ShaderGraph( )
-	{
-	}
-
-	//=========================================================================================================================
-
-	ShaderGraph::~ShaderGraph( )
+	void ShaderGraph::ExplicitDestructor( )
 	{ 
 		// Free all memory
 		for ( auto& s : mShaders )

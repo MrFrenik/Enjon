@@ -65,22 +65,17 @@ namespace Enjon
 			AssetHandle< Skeleton > mSkeletonAsset;
 	};
 
-	ENJON_CLASS()
+	ENJON_CLASS( )
 	class MeshAssetLoader : public AssetLoader
 	{
-		ENJON_CLASS_BODY()
+		ENJON_CLASS_BODY( MeshAssetLoader )
 
 		public:
 
 			/**
 			* @brief Constructor
 			*/
-			MeshAssetLoader();
-
-			/**
-			* @brief Destructor
-			*/
-			~MeshAssetLoader(); 
+			void virtual ExplicitConstructor() override; 
 
 			// NOTE(): Total temporary
 			Vector< Skeleton* > GetSkeletons( )

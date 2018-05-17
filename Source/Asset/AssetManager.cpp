@@ -27,7 +27,7 @@ namespace Enjon
 {
 	//============================================================================================ 
 
-	AssetManager::AssetManager( )
+	void AssetManager::ExplicitConstructor( )
 	{
 		// Set to default
 		mName = "";

@@ -12,23 +12,12 @@ namespace Enjon
 	class Mesh;
 	class SkeletalMeshAssetLoader; 
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class SkeletalMesh : public Mesh
 	{
 		friend SkeletalMeshAssetLoader;
 
-		ENJON_CLASS_BODY( )
-
-		public:
-			/*
-			* @brief Constructor
-			*/
-			SkeletalMesh();
-
-			/*
-			* @brief Destructor
-			*/
-			~SkeletalMesh(); 
+		ENJON_CLASS_BODY( SkeletalMesh ) 
 
 		public:
 			/**

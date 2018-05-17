@@ -14,13 +14,11 @@
 
 #include <algorithm>
 
-namespace Enjon { 
+namespace Enjon 
+{ 
+	//=========================================================================================
 
-	GraphicsScene::GraphicsScene()
-	{
-	}
-
-	GraphicsScene::~GraphicsScene()
+	void GraphicsScene::ExplicitDestructor()
 	{
 		for ( auto& r : mStaticMeshRenderables )
 		{

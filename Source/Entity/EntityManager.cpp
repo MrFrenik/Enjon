@@ -87,12 +87,12 @@ namespace Enjon
 
 	//================================================================================================
 
-	Entity::Entity( )
-		: mID( MAX_ENTITIES ),
-		mState( EntityState::INACTIVE ),
-		mManager( nullptr ),
-		mWorldTransformDirty( true )
+	void Entity::ExplicitConstructor( )
 	{
+		mID = MAX_ENTITIES;
+		mState = EntityState::INACTIVE;
+		mManager = nullptr;
+		mWorldTransformDirty = true;
 	}
 
 	//================================================================================================
@@ -107,7 +107,7 @@ namespace Enjon
 
 	//=================================================================
 
-	Entity::~Entity( )
+	void Entity::ExplicitDestructor( )
 	{
 		this->Destroy( );
 	}
@@ -1168,6 +1168,22 @@ namespace Enjon
 }
 
 
+/*
+
+	// Archetypes...
+
+	// How are these going to be constructed?
+
+	Entities can be instantiated from archetypes
+
+	ENJON_CLASS( )
+	class Archetype : public Asset
+	{
+		ENJON_CLASS_BODY( Archetype )	
+	};
+
+
+*/
 
 
 

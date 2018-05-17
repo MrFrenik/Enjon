@@ -23,13 +23,9 @@ namespace Enjon {
 	ENJON_CLASS( )
 	class GBuffer : public FrameBuffer
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( GBuffer )
 
 		public:
-			/**
-			*@brief
-			*/
-			GBuffer( ) = default;
 
 			/**
 			*@brief
@@ -39,7 +35,7 @@ namespace Enjon {
 			/**
 			*@brief
 			*/
-			~GBuffer();
+			virtual void ExplicitDestructor( ) override;
 
 			/**
 			*@brief

@@ -8,7 +8,7 @@ namespace Enjon
 {
 	//==============================================================
 
-	EmptyCollisionShape::EmptyCollisionShape( )
+	void EmptyCollisionShape::ExplicitConstructor( )
 	{
 		// Construct box collision shape
 		mShape = new btEmptyShape( );
@@ -31,7 +31,7 @@ namespace Enjon
 
 	//==============================================================
 
-	EmptyCollisionShape::~EmptyCollisionShape( )
+	void EmptyCollisionShape::ExplicitDestructor( )
 	{
 		// Release memory for shape
 		delete mShape;

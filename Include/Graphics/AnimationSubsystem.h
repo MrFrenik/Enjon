@@ -13,7 +13,7 @@ namespace Enjon
 	ENJON_CLASS( )
 	class AnimationSubsystem : public Subsystem 
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( AnimationSubsystem )
 
 		public:
 

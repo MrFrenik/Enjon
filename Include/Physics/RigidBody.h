@@ -16,14 +16,9 @@ namespace Enjon
 	ENJON_CLASS( )
 	class RigidBody : public Object
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( RigidBody )
 
-		public:
-
-			/**
-			* @brief
-			*/
-			RigidBody( );
+		public: 
 
 			/**
 			* @brief
@@ -33,7 +28,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			~RigidBody( );
+			virtual void ExplicitDestructor( ) override;
 
 			/**
 			* @brief

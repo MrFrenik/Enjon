@@ -10,23 +10,11 @@
 
 namespace Enjon
 {
-	ENJON_CLASS()
+	ENJON_CLASS( )
 	class FontAssetLoader : public AssetLoader
 	{
-		ENJON_CLASS_BODY()
-
-		public:
-
-			/**
-			* @brief Constructor
-			*/
-			FontAssetLoader( );
-
-			/**
-			* @brief Destructor
-			*/
-			~FontAssetLoader( );
-
+		ENJON_CLASS_BODY( FontAssetLoader ) 
+ 
 		protected:
 			/**
 			* @brief

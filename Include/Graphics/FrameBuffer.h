@@ -22,14 +22,14 @@ namespace Enjon
 	ENJON_CLASS( )
 	class FrameBuffer : public Object
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( FrameBuffer )
 
 		 public:
 
 			/**
 			* @brief
 			*/
-			FrameBuffer();
+			virtual void ExplicitConstructor( ) override;
 
 			/**
 			* @brief
@@ -39,7 +39,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			~FrameBuffer();
+			virtual void ExplicitDestructor( ) override;
 
 			/**
 			* @brief

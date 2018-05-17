@@ -4,7 +4,7 @@
 
 namespace Enjon 
 { 
-	SpotLight::SpotLight()
+	void SpotLight::ExplicitConstructor()
 	{
 		mPosition 	= Vec3(0.0f, 0.0f, 0.0f);
 		mColor 		= RGBA32_White(); 
@@ -23,11 +23,7 @@ namespace Enjon
 		const float quadratic 	= mParams.mQuadratic;
 
 		// Not really doing anything with these for some reason...
-	}
-
-	SpotLight::~SpotLight()
-	{
-	}
+	} 
 
 	void SpotLight::SetColor(ColorRGBA32& color)
 	{

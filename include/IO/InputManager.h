@@ -176,21 +176,11 @@ namespace Enjon
 	ENJON_CLASS( )
 	class Input : public Subsystem
 	{ 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( Input )
 
 		friend Window;
 
 		public: 
-
-			/**
-			* @brief Constructor
-			*/
-			Input( ) = default;
-
-			/**
-			* @brief Destructor
-			*/
-			~Input( ) = default;
 
 			/**
 			* @brief

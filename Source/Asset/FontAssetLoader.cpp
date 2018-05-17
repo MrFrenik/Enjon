@@ -4,19 +4,7 @@
 #include "Asset/FontAssetLoader.h" 
 
 namespace Enjon
-{
-	//======================================================================
-
-	FontAssetLoader::FontAssetLoader( )
-	{
-	}
-
-	//======================================================================
-
-	FontAssetLoader::~FontAssetLoader( )
-	{
-	}
-
+{ 
 	//======================================================================
 
 	void FontAssetLoader::RegisterDefaultAsset( )

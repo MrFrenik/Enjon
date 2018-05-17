@@ -8,7 +8,7 @@ namespace Enjon
 {
 	//==============================================================
 
-	CylinderCollisionShape::CylinderCollisionShape( )
+	void CylinderCollisionShape::ExplicitConstructor( )
 	{
 		// Construct box collision shape
 		mShape = new BulletCylinderShape( BV3( mHalfExtents.x, mHalfExtents.y, mHalfExtents.z ) );
@@ -31,7 +31,7 @@ namespace Enjon
 
 	//==============================================================
 
-	CylinderCollisionShape::~CylinderCollisionShape( )
+	void CylinderCollisionShape::ExplicitDestructor( )
 	{
 		// Release memory for shape
 		DeleteShape( );

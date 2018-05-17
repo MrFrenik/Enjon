@@ -119,29 +119,24 @@ namespace Enjon
 			T* mData;
 	}; 
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class Texture : public Asset
 	{
 		friend TextureAssetLoader;
 
-		ENJON_CLASS_BODY( ) 
+		ENJON_CLASS_BODY( Texture ) 
 
 		public:	
 
 			/**
 			* @brief Constructor
 			*/
-			Texture();
+			virtual void ExplicitConstructor( ) override;
 			
 			/**
 			* @brief Constructor
 			*/
-			Texture( u32 width, u32 height, u32 textureID );
-
-			/**
-			* @brief Destructor
-			*/
-			~Texture();
+			Texture( u32 width, u32 height, u32 textureID ); 
 
 			/**
 			* @brief 

@@ -119,19 +119,14 @@ namespace Enjon
 		friend AssetRecordInfo;
 
 		// Don't like this here, but apparently I need it or the linker freaks out...
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( AssetLoader )
 		
 		public: 
-			
-			/**
-			* @brief Constructor - Base class for all loaders
-			*/
-			AssetLoader();
 
 			/**
-			* @brief Destructor
+			* @brief Explicit Destructor
 			*/
-			~AssetLoader();
+			virtual void ExplicitDestructor( ) override;
 
 			/**
 			* @brief 

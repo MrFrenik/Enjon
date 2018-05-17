@@ -1,9 +1,11 @@
 #include "Graphics/PointLight.h"
 #include "Graphics/GraphicsScene.h"
 
-namespace Enjon {
+namespace Enjon 
+{ 
+	//============================================================================================================================
 
-	PointLight::PointLight()
+	void PointLight::ExplicitConstructor()
 	{
 		mPosition 	= Vec3(0.0f, 0.0f, 0.0f);
 		mColor 		= RGBA32_White(); 
@@ -11,6 +13,8 @@ namespace Enjon {
 		mIntensity = 10.0f;
 		mRadius = 100.0f;
 	}
+
+	//============================================================================================================================
 
 	PointLight::PointLight(Vec3& position, float attenuationRate, ColorRGBA32& color, float intensity, float radius)
 	{
@@ -21,7 +25,9 @@ namespace Enjon {
 		mRadius = radius;
 	}
 
-	PointLight::~PointLight()
+	//============================================================================================================================
+
+	void PointLight::ExplicitDestructor()
 	{
 		if (mGraphicsScene != nullptr)
 		{
@@ -29,10 +35,14 @@ namespace Enjon {
 		}
 	}
 
+	//============================================================================================================================
+
 	void PointLight::SetColor(ColorRGBA32& color)
 	{
 		mColor = color;
 	}
+
+	//============================================================================================================================
 
 	void PointLight::SetIntensity(float intensity)
 	{
@@ -64,6 +74,41 @@ namespace Enjon {
 	GraphicsScene* PointLight::GetGraphicsScene( ) const
 	{
 		return mGraphicsScene;
+	}
+
+	//============================================================================================== 
+
+	float PointLight::GetAttenuationRate() const 
+	{ 
+		return mAttenuationRate; 
+	}
+
+	//============================================================================================== 
+	
+	float PointLight::GetRadius() const
+	{ 
+		return mRadius; 
+	}
+
+	//============================================================================================== 
+
+	Vec3 PointLight::GetPosition() const 	
+	{ 
+		return mPosition; 
+	}
+
+	//============================================================================================== 
+
+	ColorRGBA32 PointLight::GetColor() const  
+	{ 
+		return mColor; 
+	}
+
+	//============================================================================================== 
+
+	float PointLight::GetIntensity() const
+	{ 
+		return mIntensity; 
 	}
 
 	//============================================================================================== 

@@ -22,24 +22,14 @@ namespace Enjon
 		String mAssetDestinationPath;
 	};
 
-	ENJON_CLASS( )
+	ENJON_CLASS( Abstract )
 	class ImportOptions : public Object
 	{
 		friend AssetLoader;
 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( ImportOptions )
 
-		public:
-
-			/*
-			* @brief
-			*/
-			ImportOptions( ) = default;
-
-			/*
-			* @brief
-			*/
-			~ImportOptions( ) = default; 
+		public: 
 
 			/*
 			* @brief

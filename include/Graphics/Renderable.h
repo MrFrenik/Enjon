@@ -23,17 +23,15 @@ namespace Enjon
 	class GLSLProgram;
 	class ColorRGBA32;
 
-	ENJON_CLASS( )
+	ENJON_CLASS( Abstract )
 	class Renderable : public Enjon::Object
 	{ 
 		friend GraphicsScene;
 		friend GraphicsSubsystem;
 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( Renderable )
 
 		public:
-			Renderable();
-			~Renderable();
 
 			/*
 			* @brief

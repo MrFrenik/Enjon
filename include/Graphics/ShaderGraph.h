@@ -227,18 +227,16 @@ namespace Enjon
 		Count
 	}; 
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class ShaderGraph : public Asset
 	{ 
-		ENJON_CLASS_BODY( ) 
+		ENJON_CLASS_BODY( ShaderGraph ) 
 
 		public: 
 
-			friend ShaderGraphAssetLoader;
+			friend ShaderGraphAssetLoader; 
 
-			ShaderGraph( );
-
-			~ShaderGraph( );
+			virtual void ExplicitDestructor( ) override;
 
 			void Validate( );
 

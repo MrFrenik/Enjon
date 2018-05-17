@@ -12,41 +12,70 @@ namespace Enjon
 { 
 	class GraphicsScene;
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class DirectionalLight : public Enjon::Object
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( DirectionalLight )
 
 		public:
-				DirectionalLight();
-				DirectionalLight(Vec3& direction, 
-								ColorRGBA32& color, 
-								float intensity = 1.0f);
-				~DirectionalLight();
 
-				ENJON_FUNCTION()
-				Vec3 GetDirection() const { return mDirection; }
+			/**
+			* @brief
+			*/
+			virtual void ExplicitConstructor( ) override; 
 
-				ENJON_FUNCTION()
-				ColorRGBA32 GetColor() const { return mColor; }
+			/**
+			* @brief
+			*/
+			DirectionalLight(Vec3& direction, ColorRGBA32& color, float intensity = 1.0f);
 
-				ENJON_FUNCTION()
-				f32 GetIntensity() const { return mIntensity; }
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION()
+			Vec3 GetDirection() const { return mDirection; }
 
-				ENJON_FUNCTION()
-				void SetDirection(const Vec3& direction);
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION()
+			ColorRGBA32 GetColor() const { return mColor; }
 
-				ENJON_FUNCTION()
-				void SetColor(const ColorRGBA32& color);
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION()
+			f32 GetIntensity() const { return mIntensity; }
 
-				ENJON_FUNCTION()
-				void SetIntensity(float intensity);
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION()
+			void SetDirection(const Vec3& direction);
 
-				ENJON_FUNCTION()
-				void SetGraphicsScene(GraphicsScene* scene);
- 
-				ENJON_FUNCTION()
-				GraphicsScene* GetGraphicsScene( ) const;
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION()
+			void SetColor(const ColorRGBA32& color);
+
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION()
+			void SetIntensity(float intensity);
+
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION()
+			void SetGraphicsScene(GraphicsScene* scene);
+
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION()
+			GraphicsScene* GetGraphicsScene( ) const;
 
 		private:
 				ENJON_PROPERTY( )

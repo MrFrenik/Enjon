@@ -6,7 +6,6 @@
 
 enum MetaClassEnumDefines
 {
-	Construct,
 	Abstract
 };
 
@@ -15,6 +14,7 @@ enum MetaClassComponentDefines
 	Requires
 };
 
+// Would like for these to actually be user-defined attributes, similar to what users can define in C#
 enum MetaPropertyEnumDefines
 {
 	UIMin,
@@ -23,15 +23,24 @@ enum MetaPropertyEnumDefines
 	Accessor,
 	Mutator,
 	Editable,
-	HideInEditor
+	HideInEditor,
+	NonSerializeable
 };
 
 /*
 	Used as boilerplate for all classes participating in object/reflection model.
 */
-#define ENJON_CLASS_BODY_INTERNAL( ... )															\
-	friend Enjon::Object;																			\
-	public:																							\
+#define ENJON_CLASS_BODY_INTERNAL( ClassName, ... )\
+	friend Enjon::Object;\
+	public:\
+		ClassName()\
+		{\
+			ExplicitConstructor( );\
+		}\
+		~ClassName()\
+		{\
+			ExplicitDestructor( );\
+		}\
 		virtual const Enjon::MetaClass* Class( ) const override\
 		{\
 			return GetClassInternal();\
@@ -39,19 +48,19 @@ enum MetaPropertyEnumDefines
 	protected:\
 		virtual const Enjon::MetaClass* GetClassInternal() const override; 
 
-#define ENJON_CLASS_BODY( ... )\
-	ENJON_CLASS_BODY_INTERNAL( ... )
+#define ENJON_CLASS_BODY( ClassName, ... )\
+	ENJON_CLASS_BODY_INTERNAL( ClassName, ... )
 
 #define ENJON_COMPONENT_INTERNAL( ComponentName, ... )\
-	friend Enjon::Object;																			\
-	public:																							\
+	friend Enjon::Object;\
+	public:\
 		ComponentName()\
 		{\
-			ExplicitConstructor();\
+			ExplicitConstructor( );\
 		}\
 		~ComponentName()\
 		{\
-			ExplicitDestructor();\
+			ExplicitDestructor( );\
 		}\
 		virtual const Enjon::MetaClass* Class( ) const override\
 		{\
@@ -69,8 +78,8 @@ enum MetaPropertyEnumDefines
 	ENJON_COMPONENT_INTERNAL( ComponentName, ... )
 
 #define ENJON_MODULE_BODY_INTERNAL( ModuleName )\
-	friend Enjon::Object;																			\
-	public:																							\
+	friend Enjon::Object;\
+	public:\
 		ModuleName() = default;\
 		~ModuleName() = default;\
 		virtual const Enjon::MetaClass* Class( ) const override\

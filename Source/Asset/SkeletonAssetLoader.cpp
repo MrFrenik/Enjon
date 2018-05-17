@@ -85,18 +85,6 @@ namespace Enjon
 		position = Vec3( aiPos.x, aiPos.y, aiPos.z );
 		scale = Vec3( aiScl.x, aiScl.y, aiScl.z );
 		rotation = Quaternion( aiRot.x, aiRot.y, aiRot.z, aiRot.w );
-	}
-
-	//=========================================================================
-
-	SkeletonAssetLoader::SkeletonAssetLoader( )
-	{ 
-	}
-
-	//=========================================================================
-
-	SkeletonAssetLoader::~SkeletonAssetLoader( )
-	{ 
 	} 
 
 	//=========================================================================

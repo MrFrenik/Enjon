@@ -10,11 +10,11 @@
 #include "Defines.h"
 #include "Math/Maths.h"
 #include "Asset/Asset.h"
+#include "Graphics/Skeleton.h"
 
 namespace Enjon
 {
 	// Forward Declarations
-	class Skeleton;
 	class SkeletalAnimation;
 	class SkeletalAnimationAssetLoader;
 	class SkeletalAnimationComponent;
@@ -58,18 +58,9 @@ namespace Enjon
 	ENJON_CLASS( )
 	class ChannelData : public Object
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( ChannelData )
 
 		public: 
-			/*
-			* @brief
-			*/
-			ChannelData( ) = default;
-
-			/*
-			* @brief
-			*/
-			~ChannelData( ) = default;
 
 			/*
 			* @brief
@@ -101,26 +92,16 @@ namespace Enjon
 			Vector< KeyFrame< Vec3 > > mScaleKeys;
 	};
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class SkeletalAnimation : public Asset
 	{ 
 		friend SkeletalAnimationComponent;
 		friend SkeletalAnimationAssetLoader;
 		friend Skeleton;
 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( SkeletalAnimation )
 
-		public:
-
-			/*
-			* @brief
-			*/
-			SkeletalAnimation( );
-
-			/*
-			* @brief
-			*/
-			~SkeletalAnimation( ); 
+		public: 
 
 			/*
 			* @brief

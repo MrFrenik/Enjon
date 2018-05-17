@@ -11,22 +11,12 @@
 
 namespace Enjon
 {
-	ENJON_CLASS()
+	ENJON_CLASS( )
 	class TextureAssetLoader : public AssetLoader
 	{ 
-		ENJON_CLASS_BODY()
+		ENJON_CLASS_BODY( TextureAssetLoader )
 
-		public:
-
-			/**
-			* @brief Constructor
-			*/
-			TextureAssetLoader();
-
-			/**
-			* @brief Destructor
-			*/
-			~TextureAssetLoader(); 
+		public: 
 
 			/**
 			* @brief

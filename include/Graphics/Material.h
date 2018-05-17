@@ -26,21 +26,16 @@ namespace Enjon {
 		Count
 	};
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class Material : public Asset
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( Material )
 
 		friend Shader;
 		friend ShaderGraph;
 		friend MaterialAssetLoader;
 
-		public:
-
-			/*
-			* @brief
-			*/
-			Material();
+		public: 
 			
 			/*
 			* @brief
@@ -50,12 +45,12 @@ namespace Enjon {
 			/*
 			* @brief
 			*/
-			Material( const AssetHandle< ShaderGraph >& shaderGraph );
+			Material( const AssetHandle< ShaderGraph >& shaderGraph ); 
 
 			/*
 			* @brief
 			*/
-			~Material(); 
+			virtual void ExplicitDestructor( ) override;
 
 			/*
 			* @brief

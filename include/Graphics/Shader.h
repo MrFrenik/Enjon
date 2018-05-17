@@ -115,23 +115,12 @@ namespace Enjon
 			AssetHandle<ShaderGraph> mGraph;
 	}; 
 	
-	ENJON_CLASS( )
+	ENJON_CLASS( Abstract )
 	class ShaderUniform : public Enjon::Object
 	{ 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( ShaderUniform )
 
-		public:
-			/*
-			* @brief
-			*/ 
-			ShaderUniform( ) {}
-
-			/*
-			* @brief
-			*/
-			virtual ~ShaderUniform( ) 
-			{
-			}
+		public: 
 
 			/*
 			* @brief
@@ -171,27 +160,17 @@ namespace Enjon
 			Enjon::String mName;
 	}; 
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( ) 
 	class UniformTexture : public ShaderUniform
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( UniformTexture )
 
 		public:	
 
 			/*
 			* @brief
 			*/
-			UniformTexture( ) = default;
-
-			/*
-			* @brief
-			*/
-			UniformTexture( const Enjon::String& name, const Enjon::AssetHandle< Enjon::Texture >& texture, u32 location );
-			
-			/*
-			* @brief
-			*/
-			~UniformTexture( ); 
+			UniformTexture( const Enjon::String& name, const Enjon::AssetHandle< Enjon::Texture >& texture, u32 location ); 
 
 			/*
 			* @brief
@@ -225,17 +204,12 @@ namespace Enjon
 			Enjon::AssetHandle< Enjon::Texture > mTexture;
 	};
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class UniformVec2 : public ShaderUniform
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( UniformVec2 )
 
-		public:
-
-			/*
-			* @brief
-			*/
-			UniformVec2( ) = default;
+		public: 
 
 			/*
 			* @brief
@@ -246,12 +220,7 @@ namespace Enjon
 				mLocation = location;
 				mValue = value;
 				mType = UniformType::Vec2; 
-			}
-
-			/*
-			* @brief
-			*/
-			~UniformVec2( ) {}
+			} 
 
 			/*
 			* @brief
@@ -282,17 +251,12 @@ namespace Enjon
 			Vec2 mValue;
 	};
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class UniformVec3 : public ShaderUniform
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( UniformVec3 )
 
-	public:
-
-		/*
-		* @brief
-		*/
-		UniformVec3( ) = default;
+	public: 
 
 		/*
 		* @brief
@@ -303,12 +267,7 @@ namespace Enjon
 			mLocation = location;
 			mValue = value;
 			mType = UniformType::Vec3;
-		}
-
-		/*
-		* @brief
-		*/
-		~UniformVec3( ) = default;
+		} 
 
 		/*
 		* @brief
@@ -339,18 +298,13 @@ namespace Enjon
 		Vec3 mValue;
 	};
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class UniformVec4 : public ShaderUniform
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( UniformVec4 )
 
 	public:
-
-		/*
-		* @brief
-		*/
-		UniformVec4( ) = default;
-
+ 
 		/*
 		* @brief
 		*/
@@ -360,12 +314,7 @@ namespace Enjon
 			mLocation = location;
 			mValue = value;
 			mType = UniformType::Vec4;
-		}
-
-		/*
-		* @brief
-		*/
-		~UniformVec4( ) = default;
+		} 
 
 		/*
 		* @brief
@@ -396,17 +345,12 @@ namespace Enjon
 		Vec4 mValue;
 	};
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class UniformFloat : public ShaderUniform
 	{
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( UniformFloat )
 
-		public:
-
-			/*
-			* @brief
-			*/ 
-			UniformFloat( ) = default;
+		public: 
 
 			/*
 			* @brief
@@ -417,12 +361,7 @@ namespace Enjon
 				mLocation = location;
 				mValue = value;
 				mType = UniformType::Float;
-			}
-
-			/*
-			* @brief
-			*/
-			~UniformFloat( ) = default;
+			} 
 
 			/*
 			* @brief

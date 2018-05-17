@@ -107,19 +107,9 @@ namespace Enjon
 	ENJON_CLASS( ) 
 	class PhysicsSubsystem : public Subsystem
 	{ 
-		ENJON_CLASS_BODY( )
+		ENJON_CLASS_BODY( PhysicsSubsystem )
 
-		public:
-
-			/**
-			*@brief
-			*/
-			PhysicsSubsystem( ) = default;
-
-			/**
-			*@brief
-			*/
-			~PhysicsSubsystem( ) = default;
+		public: 
 
 			/**
 			*@brief

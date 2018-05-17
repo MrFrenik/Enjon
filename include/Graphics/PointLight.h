@@ -11,66 +11,92 @@ namespace Enjon {
 
 	class GraphicsScene;
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class PointLight : public Enjon::Object
 	{
-		ENJON_CLASS_BODY ( ) 
+		ENJON_CLASS_BODY ( PointLight ) 
 
 		public:
-			ENJON_FUNCTION( Constructor ) 
-			PointLight();
+
+			/**
+			* @brief
+			*/
+			virtual void ExplicitConstructor( );
+
+			/**
+			* @brief
+			*/
+			virtual void ExplicitDestructor( );
 			
+			/**
+			* @brief
+			*/
 			ENJON_FUNCTION( Constructor ) 
-			PointLight(Vec3& position, float attenuationRate, ColorRGBA32& color, float intensity = 1.0f, float radius = 1.0f);
+			PointLight(Vec3& position, float attenuationRate, ColorRGBA32& color, float intensity = 1.0f, float radius = 1.0f); 
 
-			ENJON_FUNCTION( Destructor ) 
-			~PointLight();
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
+			Vec3 GetPosition( ) const;
 
-			ENJON_FUNCTION() 
-			Vec3 GetPosition() const 	
-			{ 
-				return mPosition; 
-			}
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
+			ColorRGBA32 GetColor( ) const;
 
-			ENJON_FUNCTION() 
-			ColorRGBA32 GetColor() const  
-			{ 
-				return mColor; 
-			}
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
+			float GetIntensity( ) const;
 
-			ENJON_FUNCTION() 
-			float GetIntensity() const
-			{ 
-				return mIntensity; 
-			}
-
-			ENJON_FUNCTION() 
-			float GetAttenuationRate() const 
-			{ 
-				return mAttenuationRate; 
-			}
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
+			float GetAttenuationRate( ) const;
 			
-			ENJON_FUNCTION() 
-			float GetRadius() const
-			{ 
-				return mRadius; 
-			}
+			/**
+			* @brief
+			*/
+			ENJON_FUNCTION( )
+			float GetRadius( ) const;
 
+			/**
+			* @brief
+			*/
 			ENJON_FUNCTION() 
 			void SetColor(ColorRGBA32& color);
 
+			/**
+			* @brief
+			*/
 			ENJON_FUNCTION() 
 			void SetIntensity(float intensity);
 			
+			/**
+			* @brief
+			*/
 			ENJON_FUNCTION() 
 			void SetGraphicsScene(GraphicsScene* scene);
 			
+			/**
+			* @brief
+			*/
 			ENJON_FUNCTION() 
 			void SetPosition(Enjon::Vec3& position);
 			
+			/**
+			* @brief
+			*/
 			ENJON_FUNCTION() 
 			void SetAttenuationRate(float rate);
 
+			/**
+			* @brief
+			*/
 			ENJON_FUNCTION() 
 			void SetRadius(float radius); 
 

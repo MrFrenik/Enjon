@@ -131,17 +131,11 @@ namespace Enjon
 	UUID AssetRecordInfo::GetAssetUUID( ) const
 	{
 		return mAssetUUID;
-	}
+	} 
 
 	//=================================================================
 
-	AssetLoader::AssetLoader( )
-	{
-	}
-
-	//=================================================================
-
-	AssetLoader::~AssetLoader( )
+	void AssetLoader::ExplicitDestructor( )
 	{
 		// Delete all associated assets
 		for ( auto& asset : mAssetsByUUID )

@@ -10,7 +10,7 @@
 
 namespace Enjon
 {
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class StaticMeshComponent : public Component
 	{
 		ENJON_COMPONENT( StaticMeshComponent )

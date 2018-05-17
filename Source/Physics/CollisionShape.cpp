@@ -12,12 +12,6 @@ namespace Enjon
 { 
 	//===========================================================
 
-	CollisionShape::CollisionShape( )
-	{ 
-	}
-
-	//===========================================================
-
 	CollisionShape::CollisionShape( RigidBody* body )
 		: mBody( body )
 	{ 
@@ -25,7 +19,7 @@ namespace Enjon
 
 	//===========================================================
 
-	CollisionShape::~CollisionShape( )
+	void CollisionShape::ExplicitDestructor( )
 	{ 
 		// Delete the shape
 		if ( mShape )

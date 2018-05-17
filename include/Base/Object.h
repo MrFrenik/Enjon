@@ -1464,7 +1464,7 @@ namespace Enjon
 			virtual void ExplicitDestructor( )
 			{ 
 				// Do nothing by default
-			}
+			} 
 	};
 }
 

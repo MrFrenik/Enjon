@@ -34,7 +34,7 @@ namespace Enjon
 		ENJON_CLASS( Namespace = [ TestNamespace ], Construct )
 		class PointLight : public Enjon::Object
 		{
-			ENJON_CLASS_BODY( ) 
+			ENJON_CLASS_BODY( PointLight ) 
 				
 		protected:
 			virtual Result SerializeData( ByteBuffer* buffer ) const override

@@ -12,15 +12,7 @@
 #include <vector> 
 
 namespace Enjon
-{
-	TextureAssetLoader::TextureAssetLoader()
-	{ 
-	}
-			
-	TextureAssetLoader::~TextureAssetLoader()
-	{ 
-	} 
-
+{ 
 	//============================================================================================== 
 
 	Asset* TextureAssetLoader::LoadResourceFromFile(const String& filePath )

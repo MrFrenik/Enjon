@@ -4,19 +4,7 @@
 #include "Engine.h"
 
 namespace Enjon
-{
-	//=============================================================================
-
-	SkeletalMesh::SkeletalMesh( )
-	{ 
-	}
-
-	//=============================================================================
-
-	SkeletalMesh::~SkeletalMesh( )
-	{ 
-	}
-
+{ 
 	//=============================================================================
 
 	Result SkeletalMesh::SerializeData( ByteBuffer* buffer ) const

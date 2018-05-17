@@ -23,16 +23,16 @@ namespace Enjon
 		Orthographic
 	};
 
-	ENJON_CLASS( Construct )
+	ENJON_CLASS( )
 	class Camera : public Enjon::Object
 	{
-		ENJON_CLASS_BODY()
+		ENJON_CLASS_BODY( Camera )
 
 		public:
 			/*
 			* @brief Constructor
 			*/
-			Camera( );
+			virtual void ExplicitConstructor( ) override;
 
 			/*
 			* @brief Constructor
@@ -47,12 +47,7 @@ namespace Enjon
 			/*
 			* @brief Copy Constructor
 			*/
-			Camera(const Camera& Other);
-
-			/*
-			* @brief Destructor
-			*/
-			~Camera( ) = default;
+			Camera(const Camera& Other); 
 
 			/*
 			* @brief
