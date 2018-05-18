@@ -34,11 +34,10 @@ namespace Enjon
 	//================================================================================================
 
 	EntityHandle::EntityHandle( const Entity* entity )
-		: mEntity( entity )
 	{
-		if ( mEntity )
+		if ( entity )
 		{
-			mID = mEntity->mID;
+			mID = entity->mID;
 		}
 	}
 
@@ -90,7 +89,7 @@ namespace Enjon
 	void Entity::ExplicitConstructor( )
 	{
 		mID = MAX_ENTITIES;
-		mState = EntityState::INACTIVE;
+		mState = EntityState::INVALID;
 		mManager = nullptr;
 		mWorldTransformDirty = true;
 	}
@@ -99,7 +98,7 @@ namespace Enjon
 
 	Entity::Entity( EntityManager* manager )
 		: mID( MAX_ENTITIES ),
-		mState( EntityState::INACTIVE ),
+		mState( EntityState::INVALID ),
 		mManager( manager ),
 		mWorldTransformDirty( true )
 	{
@@ -118,6 +117,15 @@ namespace Enjon
 	{
 		return EntityHandle( this );
 	}
+
+	//=================================================================
+
+	const EntityState& Entity::GetState( ) const
+	{
+		return mState;
+	}
+
+	//=================================================================
 
 	void Entity::Destroy( )
 	{
@@ -158,7 +166,7 @@ namespace Enjon
 		mLocalTransform = Enjon::Transform( );
 		mWorldTransform = Enjon::Transform( );
 		mID = MAX_ENTITIES;
-		mState = EntityState::INACTIVE;
+		mState = EntityState::INVALID;
 		mWorldTransformDirty = true;
 		mManager = nullptr;
 		mComponents.clear( );
@@ -518,7 +526,7 @@ namespace Enjon
 	//---------------------------------------------------------------
 	b8 Entity::IsValid()
 	{
-		return (mState != EntityState::INACTIVE);
+		return (mState != EntityState::INVALID);
 	}
 
 	//---------------------------------------------------------------
@@ -622,7 +630,7 @@ namespace Enjon
 		// Iterate from current available id to MAX_ENTITIES
 		for (u32 i = mNextAvailableID; i < MAX_ENTITIES; ++i)
 		{
-			if (mEntities.at(i).mState == EntityState::INACTIVE)
+			if (mEntities.at(i).mState == EntityState::INVALID)
 			{
 				mNextAvailableID = i;
 				return mNextAvailableID;
@@ -632,7 +640,7 @@ namespace Enjon
 		// Iterate from 0 to mNextAvailableID
 		for (u32 i = 0; i < mNextAvailableID; ++i)
 		{
-			if (mEntities.at(i).mState == EntityState::INACTIVE)
+			if (mEntities.at(i).mState == EntityState::INVALID)
 			{
 				mNextAvailableID = i;
 				return mNextAvailableID;
@@ -657,7 +665,6 @@ namespace Enjon
 
 		// Find entity in array and set values
 		Entity* entity = &mEntities.at(id);
-		handle.mEntity = entity;
 		handle.mID = id;
 		entity->mID = id;				
 		entity->mState = EntityState::ACTIVE; 
@@ -717,7 +724,7 @@ namespace Enjon
 
 	Entity* EntityManager::GetRawEntity( const u32& id )
 	{
-		if ( id < MAX_ENTITIES && mEntities.at( id ).mState == EntityState::ACTIVE )
+		if ( id < MAX_ENTITIES && mEntities.at( id ).mState != EntityState::INVALID )
 		{
 			return &mEntities.at( id );
 		}
@@ -731,6 +738,9 @@ namespace Enjon
 	{ 
 		// Push for deferred removal from active entities
 		mMarkedForDestruction.push_back(entity.GetID()); 
+
+		// Set entity to be invalid
+		entity.Get( )->mState = EntityState::INVALID;
 
 		// Remove from need initialization lists
 		RemoveFromNeedInitLists( entity );

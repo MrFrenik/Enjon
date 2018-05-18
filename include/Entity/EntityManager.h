@@ -28,7 +28,8 @@ namespace Enjon
 	enum class EntityState
 	{
 		INACTIVE,
-		ACTIVE
+		ACTIVE,
+		INVALID
 	};
 
 	// Forward declaration
@@ -82,7 +83,6 @@ namespace Enjon
 		Enjon::Entity* Get( ) const;
 
 	private:
-		const Enjon::Entity* mEntity = nullptr;
 		u32 mID = MAX_ENTITIES;
 	};
 
@@ -336,6 +336,11 @@ namespace Enjon
 			*/
 			void Destroy( );
 
+			/*
+			* @brief
+			*/
+			const EntityState& GetState( ) const;
+
 		protected: 
 
 			/*
@@ -418,7 +423,7 @@ namespace Enjon
 	//using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
 	using EntityStorage				= Vector< Entity >;
 	using MarkedForDestructionList	= Vector< u32 >;
-	using ActiveEntityList 			= Vector<Entity*>;
+	using EntityList 				= Vector<Entity*>;
 	using ComponentBaseArray		= HashMap< u32, ComponentWrapperBase* >;
 	using ComponentList				= Vector< Component* >;
 
@@ -625,8 +630,8 @@ namespace Enjon
 		private:
 			EntityStorage 				mEntities;
 			ComponentBaseArray 			mComponents;	
-			ActiveEntityList 			mActiveEntities;
-			ActiveEntityList 			mMarkedForAdd;
+			EntityList 					mActiveEntities;
+			EntityList 					mMarkedForAdd;
 			MarkedForDestructionList 	mMarkedForDestruction;
 			ComponentList				mNeedInitializationList;
 			ComponentList				mNeedStartList;

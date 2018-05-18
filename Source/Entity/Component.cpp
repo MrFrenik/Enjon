@@ -126,7 +126,10 @@ namespace Enjon
 		{
 			if ( c->GetTickState() == ComponentTickState::TickAlways || app->GetApplicationState( ) == ApplicationState::Running )
 			{
-				c->Update( ); 
+				if ( c->GetEntity( )->GetState( ) == EntityState::ACTIVE )
+				{
+					c->Update( ); 
+				}
 			}
 			// Otherwise kill loop and return ( Note: not cache friendly, but oh wells )
 			else
