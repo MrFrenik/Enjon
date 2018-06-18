@@ -90,19 +90,8 @@ namespace Enjon
 	{
 		mID = MAX_ENTITIES;
 		mState = EntityState::INVALID;
-		mManager = nullptr;
 		mWorldTransformDirty = true;
-	}
-
-	//================================================================================================
-
-	Entity::Entity( EntityManager* manager )
-		: mID( MAX_ENTITIES ),
-		mState( EntityState::INVALID ),
-		mManager( manager ),
-		mWorldTransformDirty( true )
-	{
-	}
+	} 
 
 	//=================================================================
 
@@ -129,10 +118,7 @@ namespace Enjon
 
 	void Entity::Destroy( )
 	{
-		if ( mManager )
-		{
-			mManager->Destroy( GetHandle( ) );
-		}
+		EngineSubsystem( EntityManager )->Destroy( GetHandle( ) );
 	}
 
 	//=================================================================
@@ -145,9 +131,7 @@ namespace Enjon
 	//=================================================================
 
 	void Entity::Reset( )
-	{
-		assert( mManager != nullptr );
-
+	{ 
 		RemoveParent( );
 
 		// Remove all children and add to parent hierarchy list
@@ -157,8 +141,7 @@ namespace Enjon
 			if ( e )
 			{
 				// Remove but don't remove from list just yet since we're iterating it
-				e->RemoveParent( true );
-
+				e->RemoveParent( true ); 
 			}
 		}
 
@@ -168,7 +151,6 @@ namespace Enjon
 		mID = MAX_ENTITIES;
 		mState = EntityState::INVALID;
 		mWorldTransformDirty = true;
-		mManager = nullptr;
 		mComponents.clear( );
 		mChildren.clear( );
 	}
@@ -177,12 +159,14 @@ namespace Enjon
 
 	void Entity::Update( const f32& dt )
 	{
+		EntityManager* em = EngineSubsystem( EntityManager );
+
 		const Application* app = Engine::GetInstance( )->GetApplication( );
 
 		// Update all components
 		for ( auto& c : mComponents )
 		{
-			auto comp = mManager->GetComponent( GetHandle( ), c );
+			auto comp = em->GetComponent( GetHandle( ), c );
 			if ( comp )
 			{
 				if ( comp->GetTickState( ) == ComponentTickState::TickAlways || app->GetApplicationState( ) == ApplicationState::Running )
@@ -197,14 +181,14 @@ namespace Enjon
 
 	void Entity::RemoveComponent( const MetaClass* cls )
 	{
-		mManager->RemoveComponent( cls, GetHandle( ) );
+		EngineSubsystem( EntityManager )->RemoveComponent( cls, GetHandle( ) );
 	}
 
 	//====================================================================================================
 
 	Component* Entity::AddComponent( const MetaClass* compCls )
 	{
-		return mManager->AddComponent( compCls, GetHandle( ) );
+		return EngineSubsystem( EntityManager )->AddComponent( compCls, GetHandle( ) );
 	}
 
 	//====================================================================================================
@@ -224,10 +208,11 @@ namespace Enjon
 
 	Vector<Component*> Entity::GetComponents( )
 	{
+		EntityManager* em = EngineSubsystem( EntityManager );
 		Vector<Component*> compReturns;
 		for ( auto& c : mComponents )
-		{
-			auto comp = mManager->GetComponent( GetHandle( ), c );
+		{ 
+			auto comp = em->GetComponent( GetHandle( ), c );
 			if ( comp )
 			{
 				compReturns.push_back( comp );
@@ -465,10 +450,7 @@ namespace Enjon
 
 	//-----------------------------------------
 	void Entity::DetachChild( const EntityHandle& child, bool deferRemovalFromList )
-	{
-		// Make sure child exists
-		assert( mManager != nullptr );
-
+	{ 
 		// Find and erase
 		if ( !deferRemovalFromList )
 		{
@@ -484,10 +466,7 @@ namespace Enjon
 
 	//-----------------------------------------
 	void Entity::SetParent( const EntityHandle& parent )
-	{
-		// Make sure this child doesn't have a parent
-		assert(mManager != nullptr); 
-		
+	{ 
 		// Calculate world transform ( No parent yet, so set world to local )
 		CalculateWorldTransform( ); 
 		
@@ -668,7 +647,6 @@ namespace Enjon
 		handle.mID = id;
 		entity->mID = id;				
 		entity->mState = EntityState::ACTIVE; 
-		entity->mManager = this;
 		entity->mUUID = UUID::GenerateUUID( );
 
 		// Push back live entity into active entity vector
@@ -736,6 +714,11 @@ namespace Enjon
 
 	void EntityManager::Destroy( const EntityHandle& entity )
 	{ 
+		if ( !entity.Get( ) )
+		{
+			return;
+		}
+
 		// Push for deferred removal from active entities
 		mMarkedForDestruction.push_back(entity.GetID()); 
 

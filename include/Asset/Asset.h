@@ -26,7 +26,7 @@ namespace Enjon
 	class AssetHandle;
 
 
-	ENJON_CLASS( )
+	ENJON_CLASS( Abstract )
 	class Asset : public Enjon::Object
 	{ 
 		ENJON_CLASS_BODY( Asset )

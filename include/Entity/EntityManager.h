@@ -14,6 +14,8 @@
 #include "Serialize/UUID.h"
 #include "Defines.h"
 #include "Subsystem.h"
+#include "SubsystemCatalog.h"
+#include "Engine.h"
 
 #include <array>
 #include <vector>
@@ -60,7 +62,7 @@ namespace Enjon
 		/*
 		* @brief
 		*/
-		u32 GetID( ) const;
+		u32 GetID( ) const; 
  
 		/*
 		* @brief
@@ -105,12 +107,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual void ExplicitDestructor( );
-
-			/**
-			* @brief
-			*/
-			Entity(EntityManager* manager); 
+			virtual void ExplicitDestructor( ); 
 
 			/**
 			* @brief Get id of this entity
@@ -416,7 +413,6 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			String mName = "Entity";
 
-			Enjon::EntityManager* mManager;
 			Enjon::EntityState mState;
 	};
 

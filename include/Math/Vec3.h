@@ -285,9 +285,10 @@ namespace Enjon {
 			f32 Distance(const Vec3& other) const;
 
 			/** 
-			* @brief Calculates distance between two vectors
-			* @param other - RH vector used in distance calculation
-			* @return f32 - distance between two vectors
+			* @brief Linear interpolation between two vectors by normalized value t
+			* @param a - LH vector used in lerp ( starting vector )
+			* @param b - RH vector used in lerp ( ending vector )
+			* @return t - Normalized value [ 0.0f, 1.0f ] to indicate parameter value for interpolation
 			*/	
 			static Vec3 Lerp( const Vec3& a, const Vec3& b, const f32& t );
 

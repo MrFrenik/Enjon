@@ -5,6 +5,7 @@
 #include "EditorSceneView.h"
 #include "EditorAssetBrowserView.h"
 #include "EditorInspectorView.h" 
+#include "EditorWorldOutlinerView.h"
 
 #include <Engine.h>
 #include <Asset/AssetManager.h>
@@ -649,6 +650,7 @@ namespace Enjon
 		mTransformWidget.Enable( false ); 
 	}
 
+	/*
 	void EditorApp::WorldOutlinerView( )
 	{ 
 		ImDrawList* dl = ImGui::GetWindowDrawList( );
@@ -697,6 +699,7 @@ namespace Enjon
 		ImGui::PopFont( );
 		ImGui::PopStyleColor( );
 	}
+	*/
 
 	void EditorApp::LoadResourceFromFile( )
 	{
@@ -1268,6 +1271,7 @@ namespace Enjon
 		// Add all necessary views into editor widget manager
 		mEditorWidgetManager.AddView( new EditorSceneView( this ) );
 		mEditorWidgetManager.AddView( new EditorAssetBrowserView( this ) );
+		mEditorWidgetManager.AddView( new EditorWorldOutlinerView( this ) );
 		mInspectorView = ( EditorInspectorView* )mEditorWidgetManager.AddView( new EditorInspectorView( this ) );
 
 		// Initialize transform widget
@@ -1286,15 +1290,6 @@ namespace Enjon
 			}
 			ImGui::EndDock( );
 		} ); 
-
-		igm->RegisterWindow( "World Outliner", [ & ]
-		{
-			if ( ImGui::BeginDock( "World Outliner", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
-			{
-				WorldOutlinerView( );
-			}
-			ImGui::EndDock( );
-		});
 
 		igm->RegisterWindow( "Play Options", [ & ]
 		{

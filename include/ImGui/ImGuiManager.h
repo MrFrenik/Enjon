@@ -342,6 +342,43 @@ namespace Enjon
 			HashMap< Enjon::String, ImFont* > mFonts;
 			ImGuiContext* mContext = nullptr;
 	};
+
+	ENJON_CLASS( )
+	class EditorEvent : public Object
+	{ 
+		ENJON_CLASS_BODY( EditorEvent )
+
+		public:
+
+		protected:
+
+	};
+
+	ENJON_CLASS( )
+	class EditorDraggedItemEvent : public EditorEvent
+	{
+		ENJON_CLASS_BODY( EditorDraggedItemEvent )
+
+		public:
+			EditorDraggedItemEvent( Object* object )
+				: mObject( object )
+			{
+			}
+
+		protected:
+			Object* mObject = nullptr; 
+	};
 }
 
 #endif
+
+
+
+
+
+
+
+
+
+
+

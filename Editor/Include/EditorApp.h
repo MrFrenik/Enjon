@@ -202,6 +202,10 @@ namespace Enjon
 
 			EntityHandle GetSelectedEntity( );
 
+			void SelectEntity( const EntityHandle& handle );
+
+			void DeselectEntity( );
+
 			void EnableOpenNewComponentDialogue( );
 			void OpenNewComponentDialogue( ); 
 			void AddComponentPopupView( );
@@ -212,7 +216,6 @@ namespace Enjon
 		private:
 			void CreateComponent( const String& componentName );
 			void LoadResourceFromFile( );
-			void WorldOutlinerView( );
 			void PlayOptions( );
 			void CameraOptions( bool* enable );
 			void CreateProjectView( );
@@ -223,8 +226,6 @@ namespace Enjon
 
 			void CreateNewProject( const String& projectName );
 
-			void SelectEntity( const EntityHandle& handle );
-			void DeselectEntity( );
 
 			void LoadProject( const Project& project );
 			bool UnloadDLL( ByteBuffer* buffer = nullptr );

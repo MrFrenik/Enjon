@@ -858,60 +858,6 @@ namespace Enjon
 			}
 		}
 
-		// Attempt to do the skinned mesh things
-		//static StaticMeshRenderable skinnedRenderable;
-		//GLSLProgram* skinnedMeshProgram = ShaderManager::Get( "SkinnedMesh" );
-		//if ( skinnedMeshProgram )
-		//{
-		//	skinnedMeshProgram->Use( );
-		//	{
-		//		for ( auto& s : sortedSkeletalMeshRenderables )
-		//		{ 
-		//			s->Bind( );
-		//			{
-		//				// Grab joint transforms from renderable
-		//				const Vector< Mat4x4 >& transforms = s->GetJointTransforms( );
-
-		//				// Set transforms uniforms in shader
-		//				for ( u32 i = 0; i < transforms.size(); ++i )
-		//				{
-		//					skinnedMeshProgram->SetUniformArrayElement( "uJointTransforms", i, transforms.at( i ) );
-		//				} 
-
-		//				// Get mesh from renderable
-		//				AssetHandle< SkeletalMesh > mesh = s->GetMesh( );
-
-		//				// Upload relevant uniforms for renderable
-		//				skinnedMeshProgram->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
-		//				skinnedMeshProgram->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix ); 
-		//				skinnedMeshProgram->SetUniform( "uObjectID", Renderable::IdToColor( s->GetRenderableID( ) ) ); 
-		//				skinnedMeshProgram->SetUniform( "uModel", s->GetModelMatrix() );
-		//				skinnedMeshProgram->SetUniform( "uPreviousModel", s->GetPreviousModelMatrix( ) );
-
-		//				// Get submeshes
-		//				const Vector< SubMesh* >& subMeshes = mesh->GetSubmeshes( ); 
-
-		//				// Submesh submit
-		//				for ( u32 i = 0; i < mesh->GetSubMeshCount( ); ++i )
-		//				{ 
-		//					auto subMesh = subMeshes.at( i );
-
-		//					// Bind submesh
-		//					subMesh->Bind( );
-		//					{
-		//						// Submit for rendering
-		//						subMesh->Submit( ); 
-		//					}
-		//					// Unbind submesh
-		//					subMesh->Unbind( ); 
-		//				}
-		//			} 
-		//			s->Unbind( );
-		//		}
-		//	}
-		//	skinnedMeshProgram->Unuse( );
-		//}
-
 		// Quadbatches
 		Enjon::GLSLProgram* shader = Enjon::ShaderManager::Get("QuadBatch");
 		shader->Use();
@@ -1156,22 +1102,24 @@ namespace Enjon
 		}
 		ambientShader->Unuse();
 
+		// Directional Lights
 		directionalShader->Use();
 		{
 			directionalShader->SetUniform( "u_camPos", camera->GetPosition( ) );
+			directionalShader->BindTexture("u_albedoMap", 	mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
+			directionalShader->BindTexture("u_normalMap", 	mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
+			directionalShader->BindTexture("u_depthMap",	mGbuffer->GetDepth(), 2);
+			directionalShader->BindTexture("u_matProps", 	mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
+			directionalShader->BindTexture("u_ssao", 		mSSAOBlurTarget->GetTexture(), 4);
+			directionalShader->SetUniform("u_resolution", 		mGbuffer->GetResolution());
+			directionalShader->SetUniform( "uProjMatrixInv", projInverse );
+			directionalShader->SetUniform( "uViewMatrixInv", viewInverse );
+			
+			// Bind individual light and render
 			for (auto& l : directionalLights)
 			{
 				ColorRGBA32 color = l->GetColor();
 
-				directionalShader->BindTexture("u_albedoMap", 	mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
-				directionalShader->BindTexture("u_normalMap", 	mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
-				directionalShader->BindTexture("u_depthMap",	mGbuffer->GetDepth(), 2);
-				directionalShader->BindTexture("u_matProps", 	mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
-				directionalShader->BindTexture("u_ssao", 		mSSAOBlurTarget->GetTexture(), 4);
-				// directionalShader->BindTexture("u_shadowMap", 		mShadowDepth->GetDepth(), 4);
-				directionalShader->SetUniform("u_resolution", 		mGbuffer->GetResolution());
-				directionalShader->SetUniform( "uProjMatrixInv", projInverse );
-				directionalShader->SetUniform( "uViewMatrixInv", viewInverse );
 				// directionalShader->SetUniform("u_lightSpaceMatrix", mShadowCamera->GetViewProjectionMatrix());
 				// directionalShader->SetUniform("u_shadowBias", 		EM::Vec2(0.005f, ShadowBiasMax));
 				directionalShader->SetUniform("u_lightDirection", 	l->GetDirection());															
@@ -1184,6 +1132,7 @@ namespace Enjon
 		}
 		directionalShader->Unuse();
 
+		// Point Lights
 		pointShader->Use();
 		{
 			pointShader->BindTexture( "u_albedoMap", mGbuffer->GetTexture( GBufferTextureType::ALBEDO ), 0 );
@@ -1213,6 +1162,7 @@ namespace Enjon
 		}
 		pointShader->Unuse();
 
+		// Spot Lights
 		spotShader->Use();
 		{
 			spotShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
@@ -1241,7 +1191,6 @@ namespace Enjon
 		}
 		spotShader->Unuse();
 
-		// mFullScreenQuad->Unbind();
 		mLightingBuffer->Unbind();	
 
 		glEnable(GL_DEPTH_TEST);

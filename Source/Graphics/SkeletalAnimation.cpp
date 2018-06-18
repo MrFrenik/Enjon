@@ -229,9 +229,7 @@ namespace Enjon
 		f32 sclFactor = Map01( sclTime, nextSclTIme, time );
  
 		Vec3 lerpPos = Vec3::Lerp( position, nextPosition, posFactor );
-		//Vec3 lerpPos = position;
 		Quaternion lerpRot = Quaternion::Slerp( rotation, nextRotation, rotFactor ).Normalize( );
-		//Quaternion lerpRot = rotation;
 		Vec3 lerpScl = Vec3::Lerp( scale, nextScale, sclFactor );
 
 		return Transform( lerpPos, lerpRot, lerpScl );
