@@ -8,6 +8,7 @@
 #include "EditorView.h"
 
 #include <Math/Vec2.h>
+#include <Entity/EntityManager.h>
 
 namespace Enjon
 {
@@ -48,6 +49,12 @@ namespace Enjon
 			virtual void CaptureState( );
 
 		protected: 
+
+		private:
+
+			bool DisplayEntityRecursively( const EntityHandle& handle, const u32& indentionLevel = 0 );
+
+			EntityHandle mGrabbedEntity = EntityHandle::Invalid( );
 	};
 }
 

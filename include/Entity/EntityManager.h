@@ -286,6 +286,11 @@ namespace Enjon
 			b8 HasChildren();
 
 			/**
+			* @brief
+			*/
+			b8 HasChild( const EntityHandle& child );
+
+			/**
 			* @brief Returns whether or not entity is valid
 			*/
 			b8 IsValid();
@@ -308,7 +313,12 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			const Vector< EntityHandle >& GetChildren() const { return mChildren; }
+			//const Vector< EntityHandle >& GetChildren() const { return mChildren; }
+
+			/**
+			* @brief
+			*/
+			Vector< EntityHandle > GetChildren( );
 
 			/**
 			* @brief

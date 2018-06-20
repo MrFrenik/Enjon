@@ -206,6 +206,13 @@ namespace Enjon
 
 	//---------------------------------------------------------------
 
+	Vector< EntityHandle > Entity::GetChildren( )
+	{
+		return mChildren;
+	}
+
+	//---------------------------------------------------------------
+
 	Vector<Component*> Entity::GetComponents( )
 	{
 		EntityManager* em = EngineSubsystem( EntityManager );
@@ -460,6 +467,9 @@ namespace Enjon
 		// Recalculate world transform of child
 		child.Get( )->CalculateWorldTransform();
 
+		// Reset local transform to new world transform
+		child.Get( )->mLocalTransform = child.Get( )->mWorldTransform;
+
 		// Set parent to invalid entity handle
 		child.Get( )->mParent = EntityHandle( ); 
 	} 
@@ -491,6 +501,22 @@ namespace Enjon
 	}
 
 	//---------------------------------------------------------------
+
+	b8 Entity::HasChild( const EntityHandle& child )
+	{ 
+		for ( auto& c : mChildren )
+		{
+			if ( c.Get( ) == child.Get( ) )
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	//---------------------------------------------------------------
+
 	b8 Entity::HasChildren()
 	{
 		return (mChildren.size() > 0);
@@ -723,7 +749,7 @@ namespace Enjon
 		mMarkedForDestruction.push_back(entity.GetID()); 
 
 		// Set entity to be invalid
-		entity.Get( )->mState = EntityState::INVALID;
+		entity.Get( )->mState = EntityState::INACTIVE;
 
 		// Remove from need initialization lists
 		RemoveFromNeedInitLists( entity );
@@ -817,7 +843,7 @@ namespace Enjon
 			{
 				Entity* ent = &mEntities.at( e );
 
-				if ( ent && ent->mState == EntityState::ACTIVE )
+				if ( ent && ent->mState != EntityState::INVALID )
 				{
 					// Destroy all components
 					for (auto& c : ent->mComponents)
