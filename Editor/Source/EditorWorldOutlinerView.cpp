@@ -95,7 +95,7 @@ namespace Enjon
 		// boolean to return
 		bool anyItemHovered = false;
 
-		static HashMap< u32, bool > mIsTreeOpen;
+		static HashMap< String, bool > mIsTreeOpen;
 
 		const float indentionLevelOffset = 10.0f;
 		const float boxIndentionLevelOffset = 20.0f;
@@ -121,6 +121,9 @@ namespace Enjon
 		// Set hovered
 		hovered = ImGui::IsMouseHoveringRect( a, b );
 
+		// Get UUID string
+		String entityUUIDStr = entity->GetUUID( ).ToString( );
+
 		// Add background if hovered or selected
 		if ( hovered || selected )
 		{
@@ -135,14 +138,14 @@ namespace Enjon
 		// Draw triangle
 		bool boxSelected = false;
 		if ( entity->HasChildren( ) )
-		{
-			auto query = mIsTreeOpen.find( entity->GetID( ) );
+		{ 
+			auto query = mIsTreeOpen.find( entityUUIDStr );
 			if ( query == mIsTreeOpen.end( ) )
 			{
-				mIsTreeOpen[ entity->GetID( ) ] = false;
+				mIsTreeOpen[ entityUUIDStr ] = false;
 			} 
 
-			bool isOpen = mIsTreeOpen[ entity->GetID( ) ]; 
+			bool isOpen = mIsTreeOpen[ entityUUIDStr ]; 
 
 			// Draw box for tree 
 			float boxSize = 8.0f;
@@ -198,14 +201,14 @@ namespace Enjon
 				if ( input->IsKeyPressed( KeyCode::LeftMouseButton ) ) 
 				{
 					boxSelected = true;
-					auto query = mIsTreeOpen.find( entity->GetID( ) );
+					auto query = mIsTreeOpen.find( entityUUIDStr );
 					if ( query == mIsTreeOpen.end( ) )
 					{
-						mIsTreeOpen[ entity->GetID( ) ] = true;
+						mIsTreeOpen[ entityUUIDStr ] = true;
 					}
 					else
 					{
-						mIsTreeOpen[ entity->GetID( ) ] = !mIsTreeOpen[ entity->GetID( ) ]; 
+						mIsTreeOpen[ entityUUIDStr ] = !mIsTreeOpen[ entityUUIDStr ]; 
 					}	
 				}
 			}
@@ -244,10 +247,10 @@ namespace Enjon
 					if ( added )
 					{
 						
-						auto query = mIsTreeOpen.find( entity->GetID( ) );
+						auto query = mIsTreeOpen.find( entityUUIDStr );
 						if ( query == mIsTreeOpen.end( ) )
 						{
-							mIsTreeOpen[ entity->GetID( ) ] = true;
+							mIsTreeOpen[ entityUUIDStr ] = true;
 						}
 					}
 				}
@@ -263,7 +266,7 @@ namespace Enjon
 		// Display all entity children
 		if ( entity->HasChildren( ) )
 		{
-			if ( mIsTreeOpen[ entity->GetID( ) ] )
+			if ( mIsTreeOpen[ entityUUIDStr ] )
 			{
 				for ( auto& c : entity->GetChildren( ) )
 				{

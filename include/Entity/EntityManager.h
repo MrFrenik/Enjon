@@ -529,6 +529,11 @@ namespace Enjon
 			/**
 			*@brief
 			*/
+			void RecurisvelyGenerateNewUUIDs( const EntityHandle& entity );
+
+			/**
+			*@brief
+			*/
 			void Destroy(const EntityHandle& entity);
 
 

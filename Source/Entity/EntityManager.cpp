@@ -1154,6 +1154,26 @@ namespace Enjon
 
 	//=========================================================================================
 
+	void EntityManager::RecurisvelyGenerateNewUUIDs( const EntityHandle& entity )
+	{
+		Entity* ent = entity.Get( );
+		if ( !ent ) 
+		{
+			return;
+		}
+
+		// Generate new UUID
+		ent->mUUID = UUID::GenerateUUID( );
+
+		// Continue for each child
+		for ( auto& c : ent->GetChildren( ) )
+		{
+			RecurisvelyGenerateNewUUIDs( c );
+		}
+	}
+
+	//=========================================================================================
+
 	EntityHandle EntityManager::CopyEntity( const EntityHandle& entity )
 	{ 
 		// Use to serialize entity data for new entity
@@ -1173,6 +1193,12 @@ namespace Enjon
 
 			// Construct new UUID for entity
 			newHandle.Get( )->mUUID = UUID::GenerateUUID( );
+
+			// Ensure that all UUIDs are unique
+			for ( auto& c : newHandle.Get( )->GetChildren( ) )
+			{
+				RecurisvelyGenerateNewUUIDs( c );
+			} 
 
 			// Return the handle, valid or not
 			return newHandle; 
