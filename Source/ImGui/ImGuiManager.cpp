@@ -1101,9 +1101,9 @@ namespace Enjon
 		style.ButtonTextAlign 		= ImVec2(0.5f, 0.5f); 
 		style.WindowPadding			= ImVec2(10, 8);
 		style.WindowRounding		= 0.0f;
-		style.FramePadding			= ImVec2(10, 3);
+		style.FramePadding			= ImVec2(6, 3);
 		style.FrameRounding			= 2.0f;
-		style.ItemSpacing			= ImVec2(9, 3);
+		style.ItemSpacing			= ImVec2(8, 3);
 		style.ItemInnerSpacing		= ImVec2(2, 3);
 		style.IndentSpacing			= 20.0f;
 		style.ScrollbarSize			= 14.0f;

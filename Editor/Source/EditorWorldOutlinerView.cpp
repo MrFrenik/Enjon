@@ -45,17 +45,17 @@ namespace Enjon
 		return IsParentInChildHierarchy( parent, child->GetParent( ).Get( ) ); 
 	}
 
-	void AttemptToAddChild( Entity* parent, Entity* child )
+	bool AttemptToAddChild( Entity* parent, Entity* child )
 	{
 		if ( !parent || !child )
 		{
-			return;
+			return false;
 		} 
 
 		// If already has child, then return
 		if ( parent->HasChild( child ) || child->HasChild( parent ) )
 		{
-			return;
+			return false;
 		}
 
 		// If child has parent, then un-parent it
@@ -71,98 +71,9 @@ namespace Enjon
 		{
 			parent->AddChild( child );
 		}
+
+		return true;
 	}
-
-	/*
-	bool EditorWorldOutlinerView::DisplayEntityRecursively( const EntityHandle& entity )
-	{
-		Entity* e = entity.Get( );
-		if ( !e ) 
-		{
-			return false;
-		}
-
-		Input* input = EngineSubsystem( Input );
-		EntityHandle selectedEntityHandle = mApp->GetSelectedEntity( );
-		Entity* selectedEntity = selectedEntityHandle.Get( );
-		ImVec2 a, b;
-		static bool held = false;
-		bool anyItemHovered = false;
-		static ImVec2 rectSize;
- 
-		// Capture a
-		a = ImGui::GetCursorScreenPos( ); 
-		b = ImVec2( a.x + rectSize.x, a.y + rectSize.y );
-
-		// Draw background rect
-		if ( ImGui::IsMouseHoveringRect( a, b ) )
-		{
-			ImGui::GetWindowDrawList( )->AddRectFilled( a, b, ImGui::GetColorU32( ImGuiCol_HeaderHovered ) );
-		}
-
-		if ( e->HasChildren( ) )
-		{ 
-			if ( ImGui::TreeNodeEx( fmt::format( "{}##{}", e->GetName( ), e->GetID( ) ).c_str( ), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen ) )
-			{
-				rectSize = ImVec2( ImGui::GetWindowWidth(), ImGui::GetItemRectSize( ).y );
-				b = ImVec2( a.x + ImGui::GetItemRectSize( ).x, a.y + ImGui::GetItemRectSize( ).y );
-
-				// Display children if collapsed
-				for ( auto& c : e->GetChildren( ) )
-				{
-					anyItemHovered |= DisplayEntityRecursively( c );
-				} 
-				ImGui::TreePop( );
-			}
-			else
-			{
-				b = ImVec2( a.x + ImGui::GetItemRectSize( ).x, a.y + ImGui::GetItemRectSize( ).y ); 
-			} 
-		}
-		else
-		{
-			if ( ImGui::Selectable( fmt::format( "{}##{}", e->GetName( ), e->GetID( ) ).c_str( ), selectedEntity == e ) )
-			{
-				mApp->SelectEntity( e );
-			} 
-			b = ImVec2( a.x + ImGui::GetItemRectSize( ).x, a.y + ImGui::GetItemRectSize( ).y ); 
-		}
-
-		if ( ImGui::IsMouseHoveringRect( a, b ) )
-		{ 
-			anyItemHovered = true;
-
-			if ( input->IsKeyPressed( KeyCode::LeftMouseButton ) )
-			{
-				// Select entity
-				mApp->SelectEntity( e );
-			}
-
-			if ( input->IsKeyDown( KeyCode::LeftMouseButton ) )
-			{
-				if ( !held )
-				{
-					mGrabbedEntity = e;
-					held = true;
-				}
-			}
-
-			if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) )
-			{
-				Entity* c = mGrabbedEntity.Get( );
-				if ( c && e != c && c->GetParent().Get() != e )
-				{
-					AttemptToAddChild( e, c );
-				}
-
-				held = false;
-				mGrabbedEntity = EntityHandle::Invalid( );
-			} 
-		}
-
-		return anyItemHovered;
-	}
-	*/
 
 	bool EditorWorldOutlinerView::DisplayEntityRecursively( const EntityHandle& handle, const u32& indentionLevel )
 	{
@@ -172,11 +83,22 @@ namespace Enjon
 			return false;
 		} 
 
+		EntityHandle selectedHandle = mApp->GetSelectedEntity( );
+		Entity* selectedEnt = selectedHandle.Get( );
 		Input* input = EngineSubsystem( Input );
+
+		// Whether or not the entity is selected
+		bool selected = entity == selectedEnt;
+		// Whether or not the entity text is hovered
+		bool hovered = false;
+
+		// boolean to return
+		bool anyItemHovered = false;
 
 		static HashMap< u32, bool > mIsTreeOpen;
 
-		const float indentionLevelOffset = 20.0f;
+		const float indentionLevelOffset = 10.0f;
+		const float boxIndentionLevelOffset = 20.0f;
 		auto dl = ImGui::GetWindowDrawList( );
 
 		ImVec2 a, b; 
@@ -196,7 +118,22 @@ namespace Enjon
 		// Display entity name at indention level
 		ImGui::SetCursorPosX( ImGui::GetCursorPosX() + indentionLevel * indentionLevelOffset ); 
 
+		// Set hovered
+		hovered = ImGui::IsMouseHoveringRect( a, b );
+
+		// Add background if hovered or selected
+		if ( hovered || selected )
+		{
+			ImColor hoveredColor = selected ? ImGui::GetColorU32( ImGuiCol_HeaderActive ) :  ImGui::GetColorU32( ImGuiCol_HeaderHovered );
+			if ( !selected )
+			{
+				hoveredColor.Value.w = 0.4f; 
+			}
+			dl->AddRectFilled( a, b, hoveredColor ); 
+		}
+
 		// Draw triangle
+		bool boxSelected = false;
 		if ( entity->HasChildren( ) )
 		{
 			auto query = mIsTreeOpen.find( entity->GetID( ) );
@@ -204,28 +141,79 @@ namespace Enjon
 			{
 				mIsTreeOpen[ entity->GetID( ) ] = false;
 			} 
-		}
+
+			// Draw box for tree 
+			float boxSize = 8.0f;
+			ImVec2 ba = ImVec2( ImGui::GetCursorScreenPos( ).x + boxSize / 2.0f, ImGui::GetCursorScreenPos( ).y + textSize.y / 2.0f - boxSize / 2.0f );
+			ImVec2 bb = ImVec2( ba.x + boxSize, ba.y + boxSize );
+			dl->AddRect( ba, bb, ImColor( 1.0f, 1.0f, 1.0f, 1.0f ) ); 
+
+			if ( ImGui::IsMouseHoveringRect( ba, bb ) )
+			{
+				if ( input->IsKeyPressed( KeyCode::LeftMouseButton ) ) 
+				{
+					boxSelected = true;
+					auto query = mIsTreeOpen.find( entity->GetID( ) );
+					if ( query == mIsTreeOpen.end( ) )
+					{
+						mIsTreeOpen[ entity->GetID( ) ] = true;
+					}
+					else
+					{
+						mIsTreeOpen[ entity->GetID( ) ] = !mIsTreeOpen[ entity->GetID( ) ]; 
+					}	
+				}
+			}
+		} 
+
+		// Reset cursor position + box offset
+		ImGui::SetCursorPosX( ImGui::GetCursorPosX() + boxIndentionLevelOffset ); 
+		ImGui::SetCursorPosY( ImGui::GetCursorPosY( ) - textSize.y / 12.0f );
 
 		// Bounding rect box hovering
-		if ( ImGui::IsMouseHoveringRect( a, b ) )
-		{
-			dl->AddRectFilled( a, b, ImGui::GetColorU32( ImGuiCol_HeaderHovered ) );
+		if ( hovered )
+		{ 
+			static bool held = false;
 
-			if ( input->IsKeyPressed( KeyCode::LeftMouseButton ) )
+			// Select entity
+			if ( input->IsKeyPressed( KeyCode::LeftMouseButton ) && !boxSelected )
 			{
-				auto query = mIsTreeOpen.find( entity->GetID( ) );
-				if ( query == mIsTreeOpen.end( ) )
+				mApp->SelectEntity( entity );
+			} 
+
+			if ( ImGui::IsMouseDown( 0 ) && ImGui::IsMouseDragging( 0 ) )
+			{
+				if ( !held )
 				{
-					mIsTreeOpen[ entity->GetID( ) ] = true;
+					mGrabbedEntity = entity;
+					held = true;
 				}
-				else
+			}
+
+			if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) )
+			{
+				Entity* c = mGrabbedEntity.Get( );
+				if ( c && entity != c && c->GetParent().Get() != entity )
 				{
-					mIsTreeOpen[ entity->GetID( ) ] = !mIsTreeOpen[ entity->GetID( ) ]; 
+					bool added = AttemptToAddChild( entity, c ); 
+					if ( added )
+					{
+						
+						auto query = mIsTreeOpen.find( entity->GetID( ) );
+						if ( query == mIsTreeOpen.end( ) )
+						{
+							mIsTreeOpen[ entity->GetID( ) ] = true;
+						}
+					}
 				}
+
+				held = false;
+				mGrabbedEntity = EntityHandle::Invalid( );
 			} 
 		}
 
-		ImGui::Text( fmt::format( "{}##{}", entity->GetName( ), entity->GetID( ) ).c_str( ) ); 
+		// Display label text
+		ImGui::Text( entityLabelText.c_str() ); 
 
 		// Display all entity children
 		if ( entity->HasChildren( ) )
@@ -234,12 +222,12 @@ namespace Enjon
 			{
 				for ( auto& c : entity->GetChildren( ) )
 				{
-					DisplayEntityRecursively( c, indentionLevel + 1 );
+					anyItemHovered |= DisplayEntityRecursively( c, indentionLevel + 1 );
 				} 
 			}
 		} 
 
-		return false; 
+		return ( anyItemHovered | hovered ); 
 	}
 
 	void EditorWorldOutlinerView::UpdateView( )
@@ -288,16 +276,20 @@ namespace Enjon
 
 		if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) )
 		{
-			if ( !anyItemHovered )
+			if ( ImGui::IsMouseHoveringRect( ImGui::GetWindowPos( ), ImVec2( ImGui::GetWindowPos( ).x + ImGui::GetWindowSize( ).x, ImGui::GetWindowPos( ).y + ImGui::GetWindowSize( ).y ) ) )
 			{
-				if ( mGrabbedEntity )
+				if ( !anyItemHovered )
 				{
-					if ( ImGui::IsMouseHoveringRect(ImGui::GetWindowPos(), ImVec2( ImGui::GetWindowPos().x + ImGui::GetWindowSize().x, ImGui::GetWindowPos().y + ImGui::GetWindowSize().y ) ) )
+					if ( mGrabbedEntity )
 					{
 						mGrabbedEntity.Get( )->RemoveParent( );
 						mGrabbedEntity = EntityHandle::Invalid( ); 
+					} 
+					else
+					{
+						mApp->DeselectEntity( );
 					}
-				}
+				} 
 			}
 		} 
 
