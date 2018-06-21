@@ -142,13 +142,58 @@ namespace Enjon
 				mIsTreeOpen[ entity->GetID( ) ] = false;
 			} 
 
+			bool isOpen = mIsTreeOpen[ entity->GetID( ) ]; 
+
 			// Draw box for tree 
 			float boxSize = 8.0f;
 			ImVec2 ba = ImVec2( ImGui::GetCursorScreenPos( ).x + boxSize / 2.0f, ImGui::GetCursorScreenPos( ).y + textSize.y / 2.0f - boxSize / 2.0f );
 			ImVec2 bb = ImVec2( ba.x + boxSize, ba.y + boxSize );
-			dl->AddRect( ba, bb, ImColor( 1.0f, 1.0f, 1.0f, 1.0f ) ); 
 
-			if ( ImGui::IsMouseHoveringRect( ba, bb ) )
+			bool hoveringCollapseTriangle = ImGui::IsMouseHoveringRect( ba, bb );
+
+			// Draw open triangle
+			if ( isOpen )
+			{
+				if ( hoveringCollapseTriangle )
+				{
+					ImColor triangleColor = ImColor( 1.0f, 1.0f, 1.0f, 1.0f );
+					if ( input->IsKeyDown( KeyCode::LeftMouseButton ) )
+					{ 
+						float diff = 2.0f;
+						dl->AddTriangleFilled( ImVec2( bb.x, bb.y + diff ), ImVec2( ba.x, bb.y + diff ), ImVec2( bb.x, ba.y + diff ), triangleColor ); 
+					}
+					else
+					{
+						dl->AddTriangleFilled( bb, ImVec2( ba.x, bb.y ), ImVec2( bb.x, ba.y ), triangleColor ); 
+					}
+				}
+				else
+				{
+					dl->AddTriangle( bb, ImVec2( ba.x, bb.y ), ImVec2( bb.x, ba.y ), ImColor( 1.0f, 1.0f, 1.0f, 1.0f ) ); 
+				}
+			}
+			// Draw collapsed triangle
+			else
+			{
+				if ( hoveringCollapseTriangle )
+				{
+					if ( input->IsKeyDown( KeyCode::LeftMouseButton ) )
+					{
+						float diff = 2.0f;
+						dl->AddTriangleFilled( ImVec2( ba.x, ba.y + diff ), ImVec2( ba.x, bb.y + diff ), ImVec2( bb.x, ( ba.y + bb.y ) / 2.0f + diff ), ImColor( 1.0f, 1.0f, 1.0f, 1.0f ) ); 
+					}
+					else
+					{
+						dl->AddTriangleFilled( ba, ImVec2( ba.x, bb.y ), ImVec2( bb.x, ( ba.y + bb.y ) / 2.0f ), ImColor( 1.0f, 1.0f, 1.0f, 1.0f ) ); 
+					}
+				}
+				else
+				{
+					dl->AddTriangle( ba, ImVec2( ba.x, bb.y ), ImVec2( bb.x, ( ba.y + bb.y ) / 2.0f ), ImColor( 1.0f, 1.0f, 1.0f, 1.0f ) ); 
+				}
+			}
+
+			if ( hoveringCollapseTriangle )
 			{
 				if ( input->IsKeyPressed( KeyCode::LeftMouseButton ) ) 
 				{
