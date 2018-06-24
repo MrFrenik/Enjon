@@ -250,6 +250,11 @@ namespace Enjon
 			*/
 			EntityHandle GetParent() { return mParent; }
 
+			/** 
+			* @brief
+			*/
+			bool ExistsInChildHierarchy( const EntityHandle& child );
+
 			/**
 			* @brief Registers a child with this entity
 			*/

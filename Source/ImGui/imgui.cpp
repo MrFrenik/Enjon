@@ -6724,8 +6724,11 @@ const char* ImGui::GetStyleColorName(ImGuiCol idx)
 	case ImGuiCol_SelectableActive: return "SelectableActive";
 	case ImGuiCol_ComboBox: return "ComboBox";
 	case ImGuiCol_ComboBoxHovered: return "ComboBoxHovered";
+	case ImGuiCol_ListSelection: return "ListSelection";
+	case ImGuiCol_ListSelectionHovered: return "ListSelectionHovered";
+	case ImGuiCol_ListSelectionActive: return "ListSelectionActive";
     }
-    IM_ASSERT(0);
+    //IM_ASSERT(0);
     return "Unknown";
 }
 

@@ -54,6 +54,7 @@ namespace Enjon
 
 			bool DisplayEntityRecursively( const EntityHandle& handle, const u32& indentionLevel = 0 );
 
+			Vec2 mHeldMousePosition = Vec2( -1, -1 );
 			EntityHandle mGrabbedEntity = EntityHandle::Invalid( );
 	};
 }

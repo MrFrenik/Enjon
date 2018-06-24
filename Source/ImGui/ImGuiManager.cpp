@@ -1165,6 +1165,13 @@ namespace Enjon
 		colors[ ImGuiCol_Selectable ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
 		colors[ ImGuiCol_ComboBox ] = ImVec4( 0.14f, 0.14f, 0.14f, 1.00f );
 		colors[ ImGuiCol_ComboBoxHovered ] = ImVec4( 0.09f, 0.09f, 0.09f, 1.00f );
+		colors[ ImGuiCol_ListSelection ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
+		colors[ ImGuiCol_ListSelectionHovered ] = ImVec4( 0.88f, 0.40f, 0.18f, 1.00f );
+		colors[ ImGuiCol_ListSelectionActive ] = ImVec4( 0.88f, 0.40f, 0.18f, 1.00f );
+
+
+
+
 
 		// Load dock
 		// ImGui::LoadDock();

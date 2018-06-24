@@ -53,26 +53,76 @@ namespace Enjon
 		} 
 
 		// If already has child, then return
-		if ( parent->HasChild( child ) || child->HasChild( parent ) )
+		if ( child->HasChild( parent ) )
 		{
 			return false;
 		}
 
 		// If child has parent, then un-parent it
-		if ( child->HasParent( ) )
+		if ( child->HasParent( ) && child->GetParent( ) == parent )
 		{
 			child->RemoveParent( );
 		}
+		else
+		{ 
+			// Recursively determine if parent is in child's hiearchy already
+			//bool isInHierarchy = IsParentInChildHierarchy( parent, child ); 
+			bool isInHierarchy = IsParentInChildHierarchy( child, parent );
 
-		// Recursively determine if parent is in child's hiearchy already
-		bool isInHierarchy = IsParentInChildHierarchy( parent, child ); 
+			if ( !isInHierarchy )
+			{
+				if ( child->HasParent( ) )
+				{
+					child->RemoveParent( );
+				}
 
-		if ( !isInHierarchy )
-		{
-			parent->AddChild( child );
+				parent->AddChild( child );
+			} 
 		}
 
 		return true;
+	}
+
+	bool CanParentTo( const EntityHandle& parent, const EntityHandle& child )
+	{
+		return ( ( parent.Get( ) != child.Get( ) ) && !( IsParentInChildHierarchy( child.Get( ), parent.Get( ) ) ) );
+	}
+
+	String GetAttachmentLabel( const EntityHandle& parent, const EntityHandle& child )
+	{
+		String label = "";
+
+		Entity* pEnt = parent.Get( );
+		Entity* cEnt = child.Get( );
+
+		// Cannot be null
+		if ( pEnt == nullptr || cEnt == nullptr )
+		{
+			return "";
+		}
+
+		// If they're the same
+		if ( pEnt == cEnt )
+		{
+			label = fmt::format( "Cannot attach {} to self.", cEnt->GetName() );
+		}
+
+		// Is parent
+		else if ( cEnt->GetParent( ) == pEnt ) 
+		{
+			label = fmt::format( "Detach {} from {}.", cEnt->GetName( ), pEnt->GetName( ) );
+		}
+
+		else if ( CanParentTo( parent, child ) )
+		{
+			label = fmt::format( "Attach {} to {}.", cEnt->GetName(), pEnt->GetName() ); 
+		}
+		else
+		{
+			label = fmt::format( "Cannot attach {} to {}.", cEnt->GetName(), pEnt->GetName() ); 
+		} 
+
+		return label; 
 	}
 
 	bool EditorWorldOutlinerView::DisplayEntityRecursively( const EntityHandle& handle, const u32& indentionLevel )
@@ -100,11 +150,13 @@ namespace Enjon
 		const float indentionLevelOffset = 10.0f;
 		const float boxIndentionLevelOffset = 20.0f;
 		auto dl = ImGui::GetWindowDrawList( );
+		const float rXO = 5.0f;
+		bool validParentOption = true;
 
 		ImVec2 a, b; 
 
 		// Capture a
-		a = ImVec2( ImGui::GetWindowPos().x, ImGui::GetCursorScreenPos( ).y );
+		a = ImVec2( ImGui::GetWindowPos().x + rXO, ImGui::GetCursorScreenPos( ).y );
 
 		// Entity label text for name
 		String entityLabelText = entity->GetName( );
@@ -113,7 +165,7 @@ namespace Enjon
 		ImVec2 textSize = ImGui::CalcTextSize( entityLabelText.c_str( ) ); 
 
 		// Capture b
-		b = ImVec2( a.x + ImGui::GetWindowSize().x, a.y + textSize.y );
+		b = ImVec2( a.x + ImGui::GetWindowSize().x - rXO - 5.0f, a.y + textSize.y );
 
 		// Display entity name at indention level
 		ImGui::SetCursorPosX( ImGui::GetCursorPosX() + indentionLevel * indentionLevelOffset ); 
@@ -127,13 +179,16 @@ namespace Enjon
 		// Add background if hovered or selected
 		if ( hovered || selected )
 		{
-			ImColor hoveredColor = selected ? ImGui::GetColorU32( ImGuiCol_HeaderActive ) :  ImGui::GetColorU32( ImGuiCol_HeaderHovered );
+			ImColor hoveredColor = selected ? ImGui::GetColorU32( ImGuiCol_ListSelectionActive ) :  ImGui::GetColorU32( ImGuiCol_ListSelectionHovered );
 			if ( !selected )
 			{
 				hoveredColor.Value.w = 0.4f; 
 			}
 			dl->AddRectFilled( a, b, hoveredColor ); 
 		}
+
+		// Debug draw rect
+		dl->AddRect( a, b, ImColor( 1.0f, 1.0f, 1.0f, 0.1f ) );
 
 		// Draw triangle
 		bool boxSelected = false;
@@ -216,7 +271,7 @@ namespace Enjon
 
 		// Reset cursor position + box offset
 		ImGui::SetCursorPosX( ImGui::GetCursorPosX() + boxIndentionLevelOffset ); 
-		ImGui::SetCursorPosY( ImGui::GetCursorPosY( ) - textSize.y / 12.0f );
+		ImGui::SetCursorPosY( ImGui::GetCursorPosY( ) - textSize.y / 12.0f ); 
 
 		// Bounding rect box hovering
 		if ( hovered )
@@ -229,19 +284,41 @@ namespace Enjon
 				mApp->SelectEntity( entity );
 			} 
 
-			if ( ImGui::IsMouseDown( 0 ) && ImGui::IsMouseDragging( 0 ) )
-			{
+			if ( ImGui::IsMouseDown( 0 ) )
+			{ 
 				if ( !held )
 				{
-					mGrabbedEntity = entity;
+					mHeldMousePosition = input->GetMouseCoords( );
+					//mGrabbedEntity = entity;
 					held = true;
 				}
+				else if ( held && !mGrabbedEntity )
+				{
+					if ( mHeldMousePosition != input->GetMouseCoords() )
+					{ 
+						mGrabbedEntity = entity;
+					} 
+				}
+			}
+
+			// Label for attachment
+			if ( ImGui::IsMouseDown( 0 ) && mGrabbedEntity )
+			{
+				String label = GetAttachmentLabel( entity, mGrabbedEntity );
+				ImVec2 txtSize = ImGui::CalcTextSize( label.c_str( ) );
+				ImGui::SetNextWindowPos( ImVec2( ImGui::GetMousePos( ).x + 15.0f, ImGui::GetMousePos().y + 5.0f ) );
+				ImGui::SetNextWindowSize( ImVec2( txtSize.x + 20.0f, txtSize.y ) );
+				ImGui::Begin( "##window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
+				{
+					ImGui::Text( label.c_str( ) );
+				}
+				ImGui::End( );
 			}
 
 			if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) )
 			{
 				Entity* c = mGrabbedEntity.Get( );
-				if ( c && entity != c && c->GetParent().Get() != entity )
+				if ( c && entity != c )
 				{
 					bool added = AttemptToAddChild( entity, c ); 
 					if ( added )
@@ -257,11 +334,17 @@ namespace Enjon
 
 				held = false;
 				mGrabbedEntity = EntityHandle::Invalid( );
+				mHeldMousePosition = Vec2( -1, -1 );
 			} 
 		}
 
+		auto colors = ImGui::GetStyle( ).Colors;
+		ImColor textColor = mGrabbedEntity ? CanParentTo( entity, mGrabbedEntity ) ? colors[ ImGuiCol_Text ] : colors[ ImGuiCol_TextDisabled ] : colors[ ImGuiCol_Text ];
+
 		// Display label text
+		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( textColor ) );
 		ImGui::Text( entityLabelText.c_str() ); 
+		ImGui::PopStyleColor( );
 
 		// Display all entity children
 		if ( entity->HasChildren( ) )
@@ -322,22 +405,39 @@ namespace Enjon
 
 		EditorWidgetManager* wm = mApp->GetEditorWidgetManager( );
 
-		if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) )
+		if ( ImGui::IsMouseHoveringRect( ImGui::GetWindowPos( ), ImVec2( ImGui::GetWindowPos( ).x + ImGui::GetWindowSize( ).x, ImGui::GetWindowPos( ).y + ImGui::GetWindowSize( ).y ) ) )
 		{
-			if ( ImGui::IsMouseHoveringRect( ImGui::GetWindowPos( ), ImVec2( ImGui::GetWindowPos( ).x + ImGui::GetWindowSize( ).x, ImGui::GetWindowPos( ).y + ImGui::GetWindowSize( ).y ) ) )
+			if ( !anyItemHovered )
 			{
-				if ( !anyItemHovered )
+				// Attachment label
+				if ( input->IsKeyDown( KeyCode::LeftMouseButton ) )
+				{
+					if ( mGrabbedEntity )
+					{
+						String label = fmt::format( "Detach {}.", mGrabbedEntity.Get( )->GetName( ) );
+						ImVec2 txtSize = ImGui::CalcTextSize( label.c_str( ) );
+						ImGui::SetNextWindowPos( ImVec2( ImGui::GetMousePos( ).x + 15.0f, ImGui::GetMousePos().y + 5.0f ) );
+						ImGui::SetNextWindowSize( ImVec2( txtSize.x + 20.0f, txtSize.y ) );
+						ImGui::Begin( "##window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
+						{
+							ImGui::Text( label.c_str( ) );
+						}
+						ImGui::End( ); 
+					}
+				}
+				else if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) || ImGui::IsMouseReleased( 0 ) )
 				{
 					if ( mGrabbedEntity )
 					{
 						mGrabbedEntity.Get( )->RemoveParent( );
 						mGrabbedEntity = EntityHandle::Invalid( ); 
-					} 
+						mHeldMousePosition = Vec2( -1, -1 );
+					}
 					else
 					{
 						mApp->DeselectEntity( );
 					}
-				} 
+				}
 			}
 		} 
 

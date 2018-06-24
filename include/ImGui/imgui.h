@@ -806,6 +806,9 @@ enum ImGuiCol_
 	ImGuiCol_Selectable,
 	ImGuiCol_ComboBox,
 	ImGuiCol_ComboBoxHovered,
+	ImGuiCol_ListSelection,
+	ImGuiCol_ListSelectionHovered,
+	ImGuiCol_ListSelectionActive,
     ImGuiCol_COUNT
 
     // Obsolete names (will be removed)

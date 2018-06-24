@@ -427,11 +427,45 @@ namespace Enjon
 
 	//-----------------------------------------
 
+	bool Entity::ExistsInChildHierarchy( const EntityHandle& child )
+	{
+		Entity* childEnt = child.Get( );
+		if ( !childEnt )
+		{
+			return false;
+		}
+
+		bool exists = false;
+
+		// Cannot parent to self
+		exists |= ( childEnt == this );
+
+		for ( auto& c : mChildren )
+		{
+			if ( childEnt == c.Get( ) )
+			{
+				exists |= true;
+			}
+
+			exists |= c.Get()->ExistsInChildHierarchy( child );
+		}
+
+		return exists;
+	}
+
+	//-----------------------------------------
+
 	void Entity::AddChild(const EntityHandle& child)
 	{
 		Enjon::Entity* ent = child.Get( );
 
 		if ( ent == nullptr )
+		{
+			return;
+		} 
+
+		// Already in child hierachy, cannot add
+		if ( ExistsInChildHierarchy( child ) )
 		{
 			return;
 		}
@@ -1191,14 +1225,23 @@ namespace Enjon
 			// Deserialize into new entity
 			EntityHandle newHandle = EntityArchiver::Deserialize( &buffer );
 
+			// Destination entity
+			Entity* destEnt = newHandle.Get( );
+
 			// Construct new UUID for entity
-			newHandle.Get( )->mUUID = UUID::GenerateUUID( );
+			destEnt->mUUID = UUID::GenerateUUID( );
 
 			// Ensure that all UUIDs are unique
-			for ( auto& c : newHandle.Get( )->GetChildren( ) )
+			for ( auto& c : destEnt->GetChildren( ) )
 			{
 				RecurisvelyGenerateNewUUIDs( c );
 			} 
+			
+			// Set parent of new handle
+			if ( sourceEnt->GetParent( ) )
+			{
+				sourceEnt->GetParent( ).Get( )->AddChild( destEnt );
+			}
 
 			// Return the handle, valid or not
 			return newHandle; 
