@@ -2,6 +2,7 @@
 #include "Utils/Errors.h"
 #include "Math/Maths.h"
 #include "Graphics/GraphicsSubsystem.h"
+#include "ImGui/ImGuiManager.h"
 #include "IO/InputManager.h"
 #include "Engine.h"
 #include "SubsystemCatalog.h"
@@ -102,7 +103,12 @@ namespace Enjon {
  
 	void Window::MakeCurrent( )
 	{
+		// Set current window in SDL
 		SDL_GL_MakeCurrent( m_sdlWindow, mGLContext );
+
+		// Set current ImGuiContext 
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		igm->SetContextByWindow( m_sdlWindow ); 
 	} 
 
 	void Window::ClearDroppedFiles( )

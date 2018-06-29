@@ -278,6 +278,11 @@ namespace Enjon
 			ImFont* GetFont( const Enjon::String& name );
 			ImGuiContext* GetContext( );
 
+			void SetContextByWindow( SDL_Window* window ); 
+			void InitWindow( SDL_Window* window );
+
+			ImGuiContext* GetContextByWindow( SDL_Window* window ); 
+
 		public:
 
 			/**
@@ -334,6 +339,9 @@ namespace Enjon
 			void ImGuiStyles();
 			void InitializeDefaults(); 
 
+			void AddWindowToContextMap( SDL_Window* window, ImGuiContext* ctx );
+
+
 		private:
 			Vector<std::function<void()>> mGuiFuncs;
 			HashMap<String, std::function<void()>> mWindows;
@@ -341,6 +349,7 @@ namespace Enjon
 			Vector<GUIDockingLayout> mDockingLayouts; 
 			HashMap< Enjon::String, ImFont* > mFonts;
 			ImGuiContext* mContext = nullptr;
+			HashMap< SDL_Window*, ImGuiContext* > mImGuiContextMap;
 	};
 
 	ENJON_CLASS( )
@@ -367,7 +376,7 @@ namespace Enjon
 
 		protected:
 			Object* mObject = nullptr; 
-	};
+	}; 
 }
 
 #endif

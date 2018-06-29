@@ -171,6 +171,12 @@ namespace Enjon
 				return mWindows;
 			}
 
+			// NOTE(): HACK HACK HACK! Just for testing
+			Window* GetMainWindow( )
+			{
+				return mWindows.at( 0 );
+			}
+
 			/**
 			*@brief
 			*/

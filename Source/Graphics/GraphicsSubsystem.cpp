@@ -68,6 +68,10 @@ namespace Enjon
 		mWindow.Init( "Game", 1440, 900, WindowFlags::RESIZABLE ); 
 		mWindows.push_back( &mWindow ); 
 
+		Window* w = new Window( );
+		w->Init( "Second Window", 800, 600, WindowFlags::RESIZABLE );
+		mWindows.push_back( w ); 
+
 		// Set current window
 		mCurrentWindow = &mWindow;
 		mWindow.MakeCurrent( );
@@ -155,6 +159,9 @@ namespace Enjon
 		igm->RegisterWindow("Graphics", showGraphicsViewportFunc);
 		igm->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
 		igm->RegisterWindow("Styles", showStylesWindowFunc);
+
+		// Create contexts for windows
+		igm->Init( w->GetSDLWindow( ) );
 
 		// Set current render texture
 		mCurrentRenderTexture = mFXAATarget->GetTexture();
@@ -574,18 +581,32 @@ namespace Enjon
 			UIPass( mFXAATarget ); 
 	 
 			// Clear default buffer
-			mCurrentWindow->Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
-
-			// TODO(): Hate this : Compile it out
-			if ( Engine::GetInstance( )->GetConfig( ).IsStandAloneApplication( ) )
+			if ( mCurrentWindow == &mWindow )
 			{
-				PresentBackBuffer( );
-			} 
+				mCurrentWindow->Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
+			}
 			else
 			{
-				// Otherwise Enjon Editor views
-				ImGuiPass(); 
+				mCurrentWindow->Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Orange( ) );
 			}
+ 
+			//if ( mCurrentWindow == &mWindow )
+			{
+				// TODO(): Hate this : Compile it out
+				if ( Engine::GetInstance( )->GetConfig( ).IsStandAloneApplication( ) )
+				{
+					PresentBackBuffer( );
+				} 
+				else
+				{
+					// Otherwise Enjon Editor views
+					ImGuiPass(); 
+				} 
+			}
+			//else
+			//{
+			//	PresentBackBuffer( ); 
+			//}
 
 			mCurrentWindow->SwapBuffer(); 
 		} 

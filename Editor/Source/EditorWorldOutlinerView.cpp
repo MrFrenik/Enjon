@@ -125,8 +125,8 @@ namespace Enjon
 		return label; 
 	}
 
-	bool EditorWorldOutlinerView::DisplayEntityRecursively( const EntityHandle& handle, const u32& indentionLevel )
-	{
+	bool EditorWorldOutlinerView::DisplayEntityRecursively( const EntityHandle& handle, u32* entityNumber, const u32& indentionLevel )
+	{ 
 		Entity* entity = handle.Get( );
 		if ( entity == nullptr )
 		{
@@ -188,7 +188,8 @@ namespace Enjon
 		}
 
 		// Debug draw rect
-		dl->AddRect( a, b, ImColor( 1.0f, 1.0f, 1.0f, 0.1f ) );
+		dl->AddRectFilled( a, b, *entityNumber % 2 == 0 ? ImColor( 0.5f, 0.5f, 0.5f, 0.05f ) : ImColor( 1.0f, 1.0f, 1.0f, 0.0f ) );
+		*entityNumber = *entityNumber + 1;
 
 		// Draw triangle
 		bool boxSelected = false;
@@ -294,7 +295,7 @@ namespace Enjon
 				}
 				else if ( held && !mGrabbedEntity )
 				{
-					if ( mHeldMousePosition != input->GetMouseCoords() )
+					if ( mHeldMousePosition != input->GetMouseCoords() && mHeldMousePosition.Distance(input->GetMouseCoords()) >= 2.0f )
 					{ 
 						mGrabbedEntity = entity;
 					} 
@@ -344,7 +345,7 @@ namespace Enjon
 		// Display label text
 		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( textColor ) );
 		ImGui::Text( entityLabelText.c_str() ); 
-		ImGui::PopStyleColor( );
+		ImGui::PopStyleColor( ); 
 
 		// Display all entity children
 		if ( entity->HasChildren( ) )
@@ -352,8 +353,8 @@ namespace Enjon
 			if ( mIsTreeOpen[ entityUUIDStr ] )
 			{
 				for ( auto& c : entity->GetChildren( ) )
-				{
-					anyItemHovered |= DisplayEntityRecursively( c, indentionLevel + 1 );
+				{ 
+					anyItemHovered |= DisplayEntityRecursively( c, entityNumber, indentionLevel + 1 );
 				} 
 			}
 		} 
@@ -385,6 +386,7 @@ namespace Enjon
 		Vec2 padding( 20.0f, 40.0f );
 		f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
 		bool anyItemHovered = false;
+		u32 entityNumber = 0;
 		ImGui::ListBoxHeader( "##EntitiesListWorldOutliner", ImVec2( ImGui::GetWindowSize( ).x - padding.x, height ) );
 		{
 			EntityHandle selectedEntityHandle = mApp->GetSelectedEntity( );
@@ -398,7 +400,7 @@ namespace Enjon
 				} 
 
 				// Display entity
-				anyItemHovered |= DisplayEntityRecursively( e ); 
+				anyItemHovered |= DisplayEntityRecursively( e, &entityNumber ); 
 			} 
 		}
 		ImGui::ListBoxFooter( ); 

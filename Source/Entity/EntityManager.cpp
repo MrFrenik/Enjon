@@ -1236,11 +1236,17 @@ namespace Enjon
 			{
 				RecurisvelyGenerateNewUUIDs( c );
 			} 
+
+			// Cache off local transform of destination entity before parenting
+			Transform localTrans = destEnt->GetLocalTransform( );
 			
 			// Set parent of new handle
 			if ( sourceEnt->GetParent( ) )
 			{
 				sourceEnt->GetParent( ).Get( )->AddChild( destEnt );
+
+				// Reset local transform
+				destEnt->SetLocalTransform( localTrans );
 			}
 
 			// Return the handle, valid or not

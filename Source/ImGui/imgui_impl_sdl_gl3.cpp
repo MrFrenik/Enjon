@@ -38,6 +38,20 @@
 #include <SDL2/SDL_syswm.h>
 #include <GLEW/glew.h>
 
+#include <unordered_map> 
+
+struct DeviceData
+{
+	// Data
+	Uint64       mTime = 0;
+	bool         mMousePressed[ 3 ] = { false, false, false };
+	GLuint       mFontTexture = 0;
+	int          mShaderHandle = 0, mVertHandle = 0, mFragHandle = 0;
+	int          mAttribLocationTex = 0, mAttribLocationProjMtx = 0;
+	int          mAttribLocationPosition = 0, mAttribLocationUV = 0, mAttribLocationColor = 0;
+	unsigned int mVboHandle = 0, mVaoHandle = 0, mElementsHandle = 0; 
+};
+
 // Data
 static Uint64       g_Time = 0;
 static bool         g_MousePressed[ 3 ] = { false, false, false };
@@ -48,6 +62,20 @@ static int          g_AttribLocationPosition = 0, g_AttribLocationUV = 0, g_Attr
 static unsigned int g_VboHandle = 0, g_VaoHandle = 0, g_ElementsHandle = 0;
 static SDL_Cursor*  g_SdlCursors[ ImGuiMouseCursor_Count_ ] = { 0 };
 ImGuiContext*		mCtx = nullptr;
+
+std::unordered_map< ImGuiContext*, DeviceData* > mGraphicsDeviceData;
+std::unordered_map< SDL_Window*, bool > mGraphicsDeviceInitialized;
+
+DeviceData* GetDeviceData( ImGuiContext* ctx )
+{
+	auto query = mGraphicsDeviceData.find( ctx );
+	if ( query != mGraphicsDeviceData.end( ) )
+	{
+		return mGraphicsDeviceData[ ctx ];
+	}
+
+	return nullptr; 
+}
 
 // This is the main rendering function that you have to implement and provide to ImGui (via setting up 'RenderDrawListsFn' in the ImGuiIO structure)
 // Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly, in order to be able to run within any OpenGL engine that doesn't do so. 
@@ -61,6 +89,16 @@ void ImGui_ImplSdlGL3_RenderDrawData( ImDrawData* draw_data )
 	if ( fb_width == 0 || fb_height == 0 )
 		return;
 	draw_data->ScaleClipRects( io.DisplayFramebufferScale );
+
+	// Grab current ctx
+	ImGuiContext* ctx = ImGui::GetCurrentContext( );
+	// Get device data
+	DeviceData* data = GetDeviceData( ctx );
+
+	if ( !data )
+	{
+		return;
+	} 
 
 	// Backup GL state
 	GLenum last_active_texture; glGetIntegerv( GL_ACTIVE_TEXTURE, ( GLint* )&last_active_texture );
@@ -103,22 +141,35 @@ void ImGui_ImplSdlGL3_RenderDrawData( ImDrawData* draw_data )
 		{ 0.0f,                  0.0f,                  -1.0f, 0.0f },
 		{ -1.0f,                  1.0f,                   0.0f, 1.0f },
 	};
-	glUseProgram( g_ShaderHandle );
-	glUniform1i( g_AttribLocationTex, 0 );
-	glUniformMatrix4fv( g_AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[ 0 ][ 0 ] );
-	glBindVertexArray( g_VaoHandle );
+
+	glUseProgram( data->mShaderHandle );
+	glUniform1i( data->mAttribLocationTex, 0 );
+	glUniformMatrix4fv( data->mAttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[ 0 ][ 0 ] );
+	glBindVertexArray( data->mVaoHandle );
 	glBindSampler( 0, 0 ); // Rely on combined texture/sampler state.
+
+	//glUseProgram( g_ShaderHandle );
+	//glUniform1i( g_AttribLocationTex, 0 );
+	//glUniformMatrix4fv( g_AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[ 0 ][ 0 ] );
+	//glBindVertexArray( g_VaoHandle );
+	//glBindSampler( 0, 0 ); // Rely on combined texture/sampler state.
 
 	for ( int n = 0; n < draw_data->CmdListsCount; n++ )
 	{
 		const ImDrawList* cmd_list = draw_data->CmdLists[ n ];
 		const ImDrawIdx* idx_buffer_offset = 0;
 
-		glBindBuffer( GL_ARRAY_BUFFER, g_VboHandle );
+		glBindBuffer( GL_ARRAY_BUFFER, data->mVboHandle );
 		glBufferData( GL_ARRAY_BUFFER, ( GLsizeiptr )cmd_list->VtxBuffer.Size * sizeof( ImDrawVert ), ( const GLvoid* )cmd_list->VtxBuffer.Data, GL_STREAM_DRAW );
 
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, g_ElementsHandle );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, data->mElementsHandle );
 		glBufferData( GL_ELEMENT_ARRAY_BUFFER, ( GLsizeiptr )cmd_list->IdxBuffer.Size * sizeof( ImDrawIdx ), ( const GLvoid* )cmd_list->IdxBuffer.Data, GL_STREAM_DRAW );
+
+		//glBindBuffer( GL_ARRAY_BUFFER, g_VboHandle );
+		//glBufferData( GL_ARRAY_BUFFER, ( GLsizeiptr )cmd_list->VtxBuffer.Size * sizeof( ImDrawVert ), ( const GLvoid* )cmd_list->VtxBuffer.Data, GL_STREAM_DRAW );
+
+		//glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, g_ElementsHandle );
+		//glBufferData( GL_ELEMENT_ARRAY_BUFFER, ( GLsizeiptr )cmd_list->IdxBuffer.Size * sizeof( ImDrawIdx ), ( const GLvoid* )cmd_list->IdxBuffer.Data, GL_STREAM_DRAW );
 
 		for ( int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++ )
 		{
@@ -211,33 +262,63 @@ bool ImGui_ImplSdlGL3_ProcessEvent( SDL_Event* event )
 	return false;
 }
 
-void ImGui_ImplSdlGL3_CreateFontsTexture( )
+void ImGui_ImplSdlGL3_CreateFontsTexture( ImGuiContext* ctx )
 {
+	if ( !ctx )
+	{
+		assert( false );
+	}
+
 	// Build texture atlas
 	ImGuiIO& io = ImGui::GetIO( );
 	unsigned char* pixels;
 	int width, height;
-	io.Fonts->GetTexDataAsRGBA32( &pixels, &width, &height );   // Load as RGBA 32-bits for OpenGL3 demo because it is more likely to be compatible with user's existing shader.
+	io.Fonts->GetTexDataAsRGBA32( &pixels, &width, &height );   // Load as RGBA 32-bits for OpenGL3 demo because it is more likely to be compatible with user's existing shader.  
 
-																// Upload texture to graphics system
+	// Can probably keep this global
+	DeviceData* data = mGraphicsDeviceData[ ctx ];
+
 	GLint last_texture;
 	glGetIntegerv( GL_TEXTURE_BINDING_2D, &last_texture );
-	glGenTextures( 1, &g_FontTexture );
-	glBindTexture( GL_TEXTURE_2D, g_FontTexture );
+	glGenTextures( 1, &data->mFontTexture );
+	glBindTexture( GL_TEXTURE_2D, data->mFontTexture );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
 	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels );
 
 	// Store our identifier
-	io.Fonts->TexID = ( void * )( intptr_t )g_FontTexture;
+	io.Fonts->TexID = ( void * )( intptr_t )data->mFontTexture;
+
+																// Upload texture to graphics system
+	//GLint last_texture;
+	//glGetIntegerv( GL_TEXTURE_BINDING_2D, &last_texture );
+	//glGenTextures( 1, &g_FontTexture );
+	//glBindTexture( GL_TEXTURE_2D, g_FontTexture );
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	//glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
+	//glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels );
+
+	//// Store our identifier
+	//io.Fonts->TexID = ( void * )( intptr_t )g_FontTexture;
 
 	// Restore state
 	glBindTexture( GL_TEXTURE_2D, last_texture );
 }
 
-bool ImGui_ImplSdlGL3_CreateDeviceObjects( )
-{
+bool ImGui_ImplSdlGL3_CreateDeviceObjects( ImGuiContext* ctx )
+{ 
+	// Blow up
+	if ( !ctx )
+	{
+		assert( false );
+	}
+
+	// Not currently in graphics device data map, so construct new device data object
+	mGraphicsDeviceData[ ctx ] = new DeviceData( );
+	DeviceData* data = mGraphicsDeviceData[ ctx ];
+
 	// Backup GL state
 	GLint last_texture, last_array_buffer, last_vertex_array;
 	glGetIntegerv( GL_TEXTURE_BINDING_2D, &last_texture );
@@ -270,38 +351,70 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects( )
 		"	Out_Color = Frag_Color * texture( Texture, Frag_UV.st);\n"
 		"}\n";
 
-	g_ShaderHandle = glCreateProgram( );
-	g_VertHandle = glCreateShader( GL_VERTEX_SHADER );
-	g_FragHandle = glCreateShader( GL_FRAGMENT_SHADER );
-	glShaderSource( g_VertHandle, 1, &vertex_shader, 0 );
-	glShaderSource( g_FragHandle, 1, &fragment_shader, 0 );
-	glCompileShader( g_VertHandle );
-	glCompileShader( g_FragHandle );
-	glAttachShader( g_ShaderHandle, g_VertHandle );
-	glAttachShader( g_ShaderHandle, g_FragHandle );
-	glLinkProgram( g_ShaderHandle );
+	// Construct device data properties
+	data->mShaderHandle = glCreateProgram( );
+	data->mVertHandle = glCreateShader( GL_VERTEX_SHADER );
+	data->mFragHandle = glCreateShader( GL_FRAGMENT_SHADER );
+	glShaderSource( data->mVertHandle, 1, &vertex_shader, 0 );
+	glShaderSource( data->mFragHandle, 1, &fragment_shader, 0 );
+	glCompileShader( data->mVertHandle );
+	glCompileShader( data->mFragHandle );
+	glAttachShader( data->mShaderHandle, data->mVertHandle );
+	glAttachShader( data->mShaderHandle, data->mFragHandle );
+	glLinkProgram( data->mShaderHandle );
 
-	g_AttribLocationTex = glGetUniformLocation( g_ShaderHandle, "Texture" );
-	g_AttribLocationProjMtx = glGetUniformLocation( g_ShaderHandle, "ProjMtx" );
-	g_AttribLocationPosition = glGetAttribLocation( g_ShaderHandle, "Position" );
-	g_AttribLocationUV = glGetAttribLocation( g_ShaderHandle, "UV" );
-	g_AttribLocationColor = glGetAttribLocation( g_ShaderHandle, "Color" );
+	//g_ShaderHandle = glCreateProgram( );
+	//g_VertHandle = glCreateShader( GL_VERTEX_SHADER );
+	//g_FragHandle = glCreateShader( GL_FRAGMENT_SHADER );
+	//glShaderSource( g_VertHandle, 1, &vertex_shader, 0 );
+	//glShaderSource( g_FragHandle, 1, &fragment_shader, 0 );
+	//glCompileShader( g_VertHandle );
+	//glCompileShader( g_FragHandle );
+	//glAttachShader( g_ShaderHandle, g_VertHandle );
+	//glAttachShader( g_ShaderHandle, g_FragHandle );
+	//glLinkProgram( g_ShaderHandle );
 
-	glGenBuffers( 1, &g_VboHandle );
-	glGenBuffers( 1, &g_ElementsHandle );
+	data->mAttribLocationTex = glGetUniformLocation( data->mShaderHandle, "Texture" ); 
+	data->mAttribLocationProjMtx = glGetUniformLocation( data->mShaderHandle, "ProjMtx" );
+	data->mAttribLocationPosition = glGetAttribLocation( data->mShaderHandle, "Position" );
+	data->mAttribLocationUV = glGetAttribLocation( data->mShaderHandle, "UV" );
+	data->mAttribLocationColor = glGetAttribLocation( data->mShaderHandle, "Color" );
 
-	glGenVertexArrays( 1, &g_VaoHandle );
-	glBindVertexArray( g_VaoHandle );
-	glBindBuffer( GL_ARRAY_BUFFER, g_VboHandle );
-	glEnableVertexAttribArray( g_AttribLocationPosition );
-	glEnableVertexAttribArray( g_AttribLocationUV );
-	glEnableVertexAttribArray( g_AttribLocationColor );
+	//g_AttribLocationTex = glGetUniformLocation( g_ShaderHandle, "Texture" );
+	//g_AttribLocationProjMtx = glGetUniformLocation( g_ShaderHandle, "ProjMtx" );
+	//g_AttribLocationPosition = glGetAttribLocation( g_ShaderHandle, "Position" );
+	//g_AttribLocationUV = glGetAttribLocation( g_ShaderHandle, "UV" );
+	//g_AttribLocationColor = glGetAttribLocation( g_ShaderHandle, "Color" );
 
-	glVertexAttribPointer( g_AttribLocationPosition, 2, GL_FLOAT, GL_FALSE, sizeof( ImDrawVert ), ( GLvoid* )IM_OFFSETOF( ImDrawVert, pos ) );
-	glVertexAttribPointer( g_AttribLocationUV, 2, GL_FLOAT, GL_FALSE, sizeof( ImDrawVert ), ( GLvoid* )IM_OFFSETOF( ImDrawVert, uv ) );
-	glVertexAttribPointer( g_AttribLocationColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof( ImDrawVert ), ( GLvoid* )IM_OFFSETOF( ImDrawVert, col ) );
+	glGenBuffers( 1, &data->mVboHandle );
+	glGenBuffers( 1, &data->mElementsHandle );
 
-	ImGui_ImplSdlGL3_CreateFontsTexture( );
+	glGenVertexArrays( 1, &data->mVaoHandle );
+	glBindVertexArray( data->mVaoHandle );
+	glBindBuffer( GL_ARRAY_BUFFER, data->mVboHandle );
+	glEnableVertexAttribArray( data->mAttribLocationPosition );
+	glEnableVertexAttribArray( data->mAttribLocationUV );
+	glEnableVertexAttribArray( data->mAttribLocationColor );
+
+	glVertexAttribPointer( data->mAttribLocationPosition, 2, GL_FLOAT, GL_FALSE, sizeof( ImDrawVert ), ( GLvoid* )IM_OFFSETOF( ImDrawVert, pos ) );
+	glVertexAttribPointer( data->mAttribLocationUV, 2, GL_FLOAT, GL_FALSE, sizeof( ImDrawVert ), ( GLvoid* )IM_OFFSETOF( ImDrawVert, uv ) );
+	glVertexAttribPointer( data->mAttribLocationColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof( ImDrawVert ), ( GLvoid* )IM_OFFSETOF( ImDrawVert, col ) );
+
+	//glGenBuffers( 1, &g_VboHandle );
+	//glGenBuffers( 1, &g_ElementsHandle );
+
+	//glGenVertexArrays( 1, &g_VaoHandle );
+	//glBindVertexArray( g_VaoHandle );
+	//glBindBuffer( GL_ARRAY_BUFFER, g_VboHandle );
+	//glEnableVertexAttribArray( g_AttribLocationPosition );
+	//glEnableVertexAttribArray( g_AttribLocationUV );
+	//glEnableVertexAttribArray( g_AttribLocationColor );
+
+	//glVertexAttribPointer( g_AttribLocationPosition, 2, GL_FLOAT, GL_FALSE, sizeof( ImDrawVert ), ( GLvoid* )IM_OFFSETOF( ImDrawVert, pos ) );
+	//glVertexAttribPointer( g_AttribLocationUV, 2, GL_FLOAT, GL_FALSE, sizeof( ImDrawVert ), ( GLvoid* )IM_OFFSETOF( ImDrawVert, uv ) );
+	//glVertexAttribPointer( g_AttribLocationColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof( ImDrawVert ), ( GLvoid* )IM_OFFSETOF( ImDrawVert, col ) );
+
+	ImGui_ImplSdlGL3_CreateFontsTexture( ctx );
 
 	// Restore modified GL state
 	glBindTexture( GL_TEXTURE_2D, last_texture );
@@ -313,6 +426,10 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects( )
 
 void    ImGui_ImplSdlGL3_InvalidateDeviceObjects( )
 {
+	// Free up memory
+	ImGuiContext* ctx = ImGui::GetCurrentContext( ); 
+	DeviceData* data = mGraphicsDeviceData[ ctx ];
+
 	if ( g_VaoHandle ) glDeleteVertexArrays( 1, &g_VaoHandle );
 	if ( g_VboHandle ) glDeleteBuffers( 1, &g_VboHandle );
 	if ( g_ElementsHandle ) glDeleteBuffers( 1, &g_ElementsHandle );
@@ -342,9 +459,18 @@ ImGuiContext* ImGui_ImplSdlGL3_GetContext( )
 	return mCtx;
 }
 
-bool    ImGui_ImplSdlGL3_Init( SDL_Window* window )
+ImGuiContext*			ImGui_ImplSdlGL3_CreateContext( )
 {
-	mCtx = ImGui::CreateContext( );
+	ImGuiContext* ctx = ImGui::CreateContext( ); 
+
+	return ctx;
+} 
+
+ImGuiContext*    ImGui_ImplSdlGL3_Init( SDL_Window* window )
+{
+	ImGuiContext* ctx = ImGui::CreateContext( );
+
+	ImGui::SetCurrentContext( ctx );
 
 	// Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
 	ImGuiIO& io = ImGui::GetIO( );
@@ -374,13 +500,34 @@ bool    ImGui_ImplSdlGL3_Init( SDL_Window* window )
 	io.GetClipboardTextFn = ImGui_ImplSdlGL3_GetClipboardText;
 	io.ClipboardUserData = NULL;
 
-	g_SdlCursors[ ImGuiMouseCursor_Arrow ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_ARROW );
-	g_SdlCursors[ ImGuiMouseCursor_TextInput ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_IBEAM );
-	g_SdlCursors[ ImGuiMouseCursor_ResizeAll ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEALL );
-	g_SdlCursors[ ImGuiMouseCursor_ResizeNS ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENS );
-	g_SdlCursors[ ImGuiMouseCursor_ResizeEW ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEWE );
-	g_SdlCursors[ ImGuiMouseCursor_ResizeNESW ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENESW );
-	g_SdlCursors[ ImGuiMouseCursor_ResizeNWSE ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENWSE );
+	if ( !g_SdlCursors[ ImGuiMouseCursor_Arrow ] )
+	{
+		g_SdlCursors[ ImGuiMouseCursor_Arrow ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_ARROW ); 
+	}
+	if ( !g_SdlCursors[ ImGuiMouseCursor_TextInput ] )
+	{
+		g_SdlCursors[ ImGuiMouseCursor_TextInput ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_IBEAM ); 
+	}
+	if ( !g_SdlCursors[ ImGuiMouseCursor_ResizeAll ] )
+	{
+		g_SdlCursors[ ImGuiMouseCursor_ResizeAll ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEALL ); 
+	}
+	if ( !g_SdlCursors[ ImGuiMouseCursor_ResizeNS ] )
+	{
+		g_SdlCursors[ ImGuiMouseCursor_ResizeNS ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENS ); 
+	}
+	if ( !g_SdlCursors[ ImGuiMouseCursor_ResizeEW ] )
+	{
+		g_SdlCursors[ ImGuiMouseCursor_ResizeEW ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEWE );
+	}
+	if ( !g_SdlCursors[ ImGuiMouseCursor_ResizeNESW ] )
+	{
+		g_SdlCursors[ ImGuiMouseCursor_ResizeNESW ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENESW ); 
+	}
+	if ( !g_SdlCursors[ ImGuiMouseCursor_ResizeNWSE ] )
+	{
+		g_SdlCursors[ ImGuiMouseCursor_ResizeNWSE ] = SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENWSE ); 
+	}
 
 #ifdef _WIN32
 	SDL_SysWMinfo wmInfo;
@@ -391,9 +538,9 @@ bool    ImGui_ImplSdlGL3_Init( SDL_Window* window )
 	( void )window;
 #endif
 
-	ImGui::SetCurrentContext( mCtx );
+	//ImGui::SetCurrentContext( ctx ); 
 
-	return true;
+	return ctx;
 }
 
 void ImGui_ImplSdlGL3_Shutdown( )
@@ -406,10 +553,39 @@ void ImGui_ImplSdlGL3_Shutdown( )
 	ImGui::DestroyContext( mCtx );
 }
 
-void ImGui_ImplSdlGL3_NewFrame( SDL_Window* window )
+bool HasDeviceObject( ImGuiContext* ctx )
+{ 
+	// If found
+	auto query = mGraphicsDeviceData.find( ctx );
+	if ( query != mGraphicsDeviceData.end( ) )
+	{ 
+		return ( mGraphicsDeviceData[ ctx ] != nullptr );
+	}
+
+	// Not found
+	return false;
+}
+
+void ImGui_ImplSdlGL3_NewFrame( SDL_Window* window, ImGuiContext* ctx )
 {
-	if ( !g_FontTexture )
-		ImGui_ImplSdlGL3_CreateDeviceObjects( );
+	// Switch away from these being global - must be registered to individual window instances
+	//if ( !g_FontTexture )
+	//	ImGui_ImplSdlGL3_CreateDeviceObjects( ); 
+
+	// Just blow up here at this point...
+	if ( !ctx )
+	{
+		assert( false );
+	}
+
+	// Set this context to being current
+	ImGui::SetCurrentContext( ctx );
+
+	// Create device object if not already available
+	if ( !HasDeviceObject( ctx ) )
+	{
+		ImGui_ImplSdlGL3_CreateDeviceObjects( ctx );
+	}
 
 	ImGuiIO& io = ImGui::GetIO( );
 

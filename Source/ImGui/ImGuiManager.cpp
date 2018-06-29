@@ -14,6 +14,9 @@
 #include "SubsystemCatalog.h"
 #include "Engine.h"
 
+#include "Graphics/GraphicsSubsystem.h"
+#include "SubsystemCatalog.h"
+
 #include <fmt/printf.h> 
 #include <fmt/format.h>
 
@@ -34,12 +37,41 @@ namespace Enjon
 	{ 
 	} 
 
+	void ImGuiManager::AddWindowToContextMap( SDL_Window* window, ImGuiContext* ctx )
+	{
+		auto query = mImGuiContextMap.find( window );
+		if ( query == mImGuiContextMap.end( ) )
+		{
+			mImGuiContextMap[ window ] = ctx;
+		}
+	}
+
+	ImGuiContext* ImGuiManager::GetContextByWindow( SDL_Window* window )
+	{
+		auto query = mImGuiContextMap.find( window );
+		if ( query != mImGuiContextMap.end( ) )
+		{
+			return mImGuiContextMap[ window ];
+		}
+
+		return nullptr;
+	}
+
+	void ImGuiManager::SetContextByWindow( SDL_Window* window )
+	{
+		ImGuiContext* ctx = GetContextByWindow( window );
+		if ( ctx )
+		{
+			ImGui::SetCurrentContext( ctx );
+		}
+	}
+
 	void ImGuiManager::Init(SDL_Window* window)
 	{
 		assert(window != nullptr);
 
 		// Init window
-		ImGui_ImplSdlGL3_Init(window); 
+		ImGuiContext* ctx = ImGui_ImplSdlGL3_Init(window); 
 
 		// Init style
 		ImGuiStyles();
@@ -48,7 +80,22 @@ namespace Enjon
 		InitializeDefaults(); 
 
 		// Cache context
-		mContext = ImGui_ImplSdlGL3_GetContext( );
+		mContext = ImGui_ImplSdlGL3_GetContext( ); 
+
+		// Set imgui context
+		AddWindowToContextMap( window, ctx ); 
+	}
+
+	void ImGuiManager::InitWindow( SDL_Window* window )
+	{
+		assert(window != nullptr);
+
+		// Init window
+		//ImGuiContext* ctx = ImGui_ImplSdlGL3_CreateContext( window );
+		ImGuiContext* ctx = ImGui_ImplSdlGL3_Init(window); 
+
+		// Set imgui context
+		AddWindowToContextMap( window, ctx ); 
 	}
 
 	Result ImGuiManager::Shutdown()
@@ -926,32 +973,51 @@ namespace Enjon
 	void ImGuiManager::Render(SDL_Window* window)
 	{
 	    // Make a new window
-		ImGui_ImplSdlGL3_NewFrame(window);
+		ImGui_ImplSdlGL3_NewFrame( window, GetContextByWindow( window ) );
 
-		static bool show_scene1 = true;
+		Window* w = EngineSubsystem( GraphicsSubsystem )->GetMainWindow( );
 
-		s32 menu_height = MainMenu();
+		if ( window == w->GetSDLWindow() )
+		{ 
+			ImGui::Begin( "Main Window" );
+			{
+				ImGui::Text( "Main Window" );
+			}
+			ImGui::End( );
 
-	    if (ImGui::GetIO().DisplaySize.y > 0) 
+			//static bool show_scene1 = true;
+
+			//s32 menu_height = MainMenu();
+
+			//if (ImGui::GetIO().DisplaySize.y > 0) 
+			//{
+			//	auto pos = ImVec2(0, menu_height);
+			//	auto size = ImGui::GetIO().DisplaySize;
+			//	size.y -= pos.y;
+			//	ImGui::RootDock(pos, ImVec2(size.x, size.y - 25.0f));
+
+			//	// Draw status bar (no docking)
+			//	ImGui::SetNextWindowSize(ImVec2(size.x, 25.0f), ImGuiSetCond_Always);
+			//	ImGui::SetNextWindowPos(ImVec2(0, size.y - 6.0f), ImGuiSetCond_Always);
+			//	ImGui::Begin("statusbar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoResize);
+			//	ImGui::Text("Frame: %.5f ms", 1000.0f / (f32)ImGui::GetIO().Framerate);
+			//	ImGui::End();
+			//} 
+
+			//// Display all registered windows
+			//for (auto& wind : mWindows)
+			//{
+			//	wind.second( );
+			//}
+		}
+		else
 		{
-	        auto pos = ImVec2(0, menu_height);
-	        auto size = ImGui::GetIO().DisplaySize;
-	        size.y -= pos.y;
-	        ImGui::RootDock(pos, ImVec2(size.x, size.y - 25.0f));
-
-	        // Draw status bar (no docking)
-	        ImGui::SetNextWindowSize(ImVec2(size.x, 25.0f), ImGuiSetCond_Always);
-	        ImGui::SetNextWindowPos(ImVec2(0, size.y - 6.0f), ImGuiSetCond_Always);
-	        ImGui::Begin("statusbar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoResize);
-	        ImGui::Text("Frame: %.5f ms", 1000.0f / (f32)ImGui::GetIO().Framerate);
-	        ImGui::End();
-	    }
-
-	    // Display all registered windows
-	    for (auto& wind : mWindows)
-	    {
-			wind.second( );
-	    }
+			ImGui::Begin( "Another Window" );
+			{
+				ImGui::Text( "Separate Window" ); 
+			}
+			ImGui::End( );
+		} 
 	}
 
 	//============================================================================================
@@ -972,7 +1038,10 @@ namespace Enjon
 
 	void ImGuiManager::LateInit(SDL_Window* window)
 	{
-		Render(window);
+		for ( auto& w : EngineSubsystem( GraphicsSubsystem )->GetWindows( ) )
+		{
+			Render( w->GetSDLWindow( ) );
+		}
 
 		// Run through docking layouts here
     	for (auto& dl : mDockingLayouts)
