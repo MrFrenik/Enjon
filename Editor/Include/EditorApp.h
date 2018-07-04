@@ -246,6 +246,8 @@ namespace Enjon
 			void InspectorView( bool* enabled );
 			void SceneView( bool* viewBool ); 
 
+			void TestSecondWindow( );
+
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;

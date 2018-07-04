@@ -15,8 +15,8 @@ namespace Enjon
 {
 	//=================================================================
 
-	EditorSceneView::EditorSceneView( EditorApp* app )
-		: EditorView( app, "Scene", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
+	EditorSceneView::EditorSceneView( EditorApp* app, Window* window )
+		: EditorView( app, window, "Scene", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
 	{ 
 		// Don't like having to do this here...
 		mApp->SetEditorSceneView( this );

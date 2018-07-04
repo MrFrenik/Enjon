@@ -5,10 +5,11 @@
 #ifndef ENJON_EDITOR_VIEW_H
 #define ENJON_EDITOR_VIEW_H 
 
-#include "EditorObject.h"
+#include "EditorObject.h" 
 
 namespace Enjon
 {
+	class Window;
 	class EditorApp;
 
 	class EditorView : public EditorObject
@@ -22,7 +23,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			EditorView( EditorApp* app, const String& name = "Editor View", const u32& viewFlags = 0 );
+			EditorView( EditorApp* app, Window* window, const String& name = "Editor View", const u32& viewFlags = 0 );
 
 			/**
 			* @brief

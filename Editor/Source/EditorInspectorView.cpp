@@ -19,8 +19,8 @@ namespace Enjon
 {
 	//==========================================================================
 
-	EditorInspectorView::EditorInspectorView( EditorApp* app ) 
-		: EditorView( app, "Inspector", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
+	EditorInspectorView::EditorInspectorView( EditorApp* app, Window* window ) 
+		: EditorView( app, window, "Inspector", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
 	{ 
 	}
 

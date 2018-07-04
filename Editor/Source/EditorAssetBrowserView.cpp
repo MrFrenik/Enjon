@@ -26,8 +26,8 @@ namespace Enjon
 {
 	//=========================================================================
 
-	EditorAssetBrowserView::EditorAssetBrowserView( EditorApp* app )
-		: EditorView( app, "Asset Browser", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
+	EditorAssetBrowserView::EditorAssetBrowserView( EditorApp* app, Window* window )
+		: EditorView( app, window, "Asset Browser", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
 	{ 
 	}
 

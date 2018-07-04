@@ -62,6 +62,9 @@ namespace Enjon
 
 	Enjon::Result GraphicsSubsystem::Initialize()
 	{
+		// Clear previous windows ( if any )
+		mWindows.clear( );
+
 		// TODO(John): Need to have a way to have an .ini that's read or grab these values from a static
 		// engine config file
 		// mWindow.Init("Game", 1920, 1080, WindowFlagsMask((u32)WindowFlags::FULLSCREEN)); 
@@ -151,23 +154,20 @@ namespace Enjon
 			ImGui::EndDock();
 	 	}; 
 
-		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		Window* mainWindow = GetMainWindow( );
+		assert( mainWindow != nullptr );
 
-		// ImGuiManager::Register(graphicsMenuOption);
-		// TODO(John): I HATE the way this looks
-		igm->RegisterMenuOption("View", "Graphics##Options", graphicsMenuOption);
-		igm->RegisterWindow("Graphics", showGraphicsViewportFunc);
-		igm->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
-		igm->RegisterWindow("Styles", showStylesWindowFunc);
+		GUIContext* guiContext = mainWindow->GetGUIContext( );
+		assert( guiContext->GetContext( ) != nullptr );
 
-		// Create contexts for windows
-		igm->Init( w->GetSDLWindow( ) );
+		// Register graphics options with main window menus ( still hate the way this looks, but it's better than before )
+		guiContext->RegisterMenuOption("View", "Graphics##Options", graphicsMenuOption);
+		guiContext->RegisterWindow("Graphics", showGraphicsViewportFunc);
+		guiContext->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
+		guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
 
 		// Set current render texture
-		mCurrentRenderTexture = mFXAATarget->GetTexture();
-
-		// Register docking layouts
-	    //ImGuiManager::RegisterDockingLayout(ImGui::DockingLayout("Graphics", nullptr, ImGui::DockSlotType::Slot_Right, 0.2f));
+		mCurrentRenderTexture = mFXAATarget->GetTexture(); 
 	
 		// Register shader graph templates
 		Enjon::ShaderGraph::DeserializeTemplate( Enjon::Engine::GetInstance( )->GetConfig( ).GetEngineResourcePath( ) + "/Shaders/ShaderGraphTemplates/ShaderTemplates.json" );
@@ -581,32 +581,18 @@ namespace Enjon
 			UIPass( mFXAATarget ); 
 	 
 			// Clear default buffer
-			if ( mCurrentWindow == &mWindow )
+			mCurrentWindow->Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
+ 
+			// TODO(): Hate this : Compile it out
+			if ( Engine::GetInstance( )->GetConfig( ).IsStandAloneApplication( ) )
 			{
-				mCurrentWindow->Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
-			}
+				PresentBackBuffer( );
+			} 
 			else
 			{
-				mCurrentWindow->Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Orange( ) );
-			}
- 
-			//if ( mCurrentWindow == &mWindow )
-			{
-				// TODO(): Hate this : Compile it out
-				if ( Engine::GetInstance( )->GetConfig( ).IsStandAloneApplication( ) )
-				{
-					PresentBackBuffer( );
-				} 
-				else
-				{
-					// Otherwise Enjon Editor views
-					ImGuiPass(); 
-				} 
-			}
-			//else
-			//{
-			//	PresentBackBuffer( ); 
-			//}
+				// Otherwise Enjon Editor views
+				ImGuiPass(); 
+			} 
 
 			mCurrentWindow->SwapBuffer(); 
 		} 
@@ -1570,7 +1556,7 @@ namespace Enjon
 		static bool show_game_viewport = true;
 
         // Queue up gui
-        igm->Render(mCurrentWindow->GetSDLWindow());
+		igm->Render( mCurrentWindow );
 
         // Flush
         glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
@@ -1591,7 +1577,7 @@ namespace Enjon
 		if ( isStandalone )
 		{
 			// Queue up gui
-			igm->Render(mCurrentWindow->GetSDLWindow()); 
+			igm->Render(mCurrentWindow); 
 			// Flush
 			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
 			ImGui::Render(); 

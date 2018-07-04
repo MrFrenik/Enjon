@@ -24,7 +24,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			EditorAssetBrowserView( EditorApp* app );
+			EditorAssetBrowserView( EditorApp* app, Window* window );
 
 			/**
 			* @brief

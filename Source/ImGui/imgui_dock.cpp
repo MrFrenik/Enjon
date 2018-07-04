@@ -2,8 +2,10 @@
 #define IMGUI_DEFINE_PLACEMENT_NEW
 #include "ImGui/imgui_internal.h"
 #include "ImGui/imgui_dock.h" 
-
+ 
 #include <vector>
+
+#include "ImGui/ImGuiManager.h"
 
 ImVec2 operator+(ImVec2 lhs, ImVec2 rhs) {
     return ImVec2(lhs.x+rhs.x, lhs.y+rhs.y);
@@ -36,8 +38,6 @@ namespace ImGui
 			Status_Float,
 			Status_Dragged
 		};
-
-
 
 		struct Dock
 		{
@@ -1351,81 +1351,112 @@ namespace ImGui
 		    doDock( dock, container, slot, weight );
 		}
 	};
+ 
+	std::unordered_map< ImGuiContext*, DockContext > mContextMap;
 
-	static DockContext g_dock;
+	void ConstructNewDockingContextForCurrentImGuiContext( )
+	{
+		DockContext context;
+		mContextMap[ ImGui::GetCurrentContext() ] = context;
+	}
 
-	void Print() {
-		for (int i = 0; i < g_dock.m_docks.size(); ++i)
+	DockContext* GetCurrentDockingContext( )
+	{
+		ImGuiContext* ctx = ImGui::GetCurrentContext( );
+
+		auto query = mContextMap.find( ctx ); 
+		if ( query == mContextMap.end( ) )
+		{
+			// Construct new context
+			ConstructNewDockingContextForCurrentImGuiContext( );
+		}
+
+		return &mContextMap[ ctx ];
+	} 
+
+	void Print() 
+	{ 
+		DockContext* ctx = GetCurrentDockingContext( );
+		for (int i = 0; i < ctx->m_docks.size(); ++i)
 		{
 			ImGui::Text("i=%d this=0x%.8p state=(%d %d) pos=(%.0f %.0f) size=(%.0f %.0f) children=(%s %s) tabs=(%s %s) parent=%s status=%d  location='%s' label='%s'\n", i, 
-						(void*)g_dock.m_docks[i],
-						g_dock.m_docks[i]->active,
-						g_dock.m_docks[i]->opened,
-						g_dock.m_docks[i]->pos.x,
-						g_dock.m_docks[i]->pos.y,
-						g_dock.m_docks[i]->size.x,
-						g_dock.m_docks[i]->size.y,
-						g_dock.m_docks[i]->children[0] ? g_dock.m_docks[i]->children[0]->label : "None",
-						g_dock.m_docks[i]->children[1] ? g_dock.m_docks[i]->children[1]->label : "None",
-						g_dock.m_docks[i]->prev_tab    ? g_dock.m_docks[i]->prev_tab->label    : "None",
-						g_dock.m_docks[i]->next_tab    ? g_dock.m_docks[i]->next_tab->label    : "None",
-						g_dock.m_docks[i]->parent      ? g_dock.m_docks[i]->parent->label      : "None",
-						g_dock.m_docks[i]->status,
-						g_dock.m_docks[i]->location,
-						g_dock.m_docks[i]->label);
+						(void*)ctx->m_docks[i],
+						ctx->m_docks[i]->active,
+						ctx->m_docks[i]->opened,
+						ctx->m_docks[i]->pos.x,
+						ctx->m_docks[i]->pos.y,
+						ctx->m_docks[i]->size.x,
+						ctx->m_docks[i]->size.y,
+						ctx->m_docks[i]->children[0] ? ctx->m_docks[i]->children[0]->label : "None",
+						ctx->m_docks[i]->children[1] ? ctx->m_docks[i]->children[1]->label : "None",
+						ctx->m_docks[i]->prev_tab    ? ctx->m_docks[i]->prev_tab->label    : "None",
+						ctx->m_docks[i]->next_tab    ? ctx->m_docks[i]->next_tab->label    : "None",
+						ctx->m_docks[i]->parent      ? ctx->m_docks[i]->parent->label      : "None",
+						ctx->m_docks[i]->status,
+						ctx->m_docks[i]->location,
+						ctx->m_docks[i]->label);
 
 		}
 	}
 
 	void ShutdownDock()
 	{
-		for (int i = 0; i < g_dock.m_docks.size(); ++i)
+		DockContext* ctx = GetCurrentDockingContext( );
+		for (int i = 0; i < ctx->m_docks.size(); ++i)
 		{
-			g_dock.m_docks[i]->~Dock();
-			MemFree(g_dock.m_docks[i]);
+			ctx->m_docks[i]->~Dock();
+			MemFree(ctx->m_docks[i]);
 		}
-		g_dock.m_docks.clear();
+		ctx->m_docks.clear();
 	}
 
 	void RootDock(const ImVec2& pos, const ImVec2& size)
 	{
-		g_dock.rootDock(pos, size);
-	}
-
+		DockContext* ctx = GetCurrentDockingContext( );
+		ctx->rootDock(pos, size);
+	} 
 
 	void SetDockActive()
 	{
-		g_dock.setDockActive();
+		DockContext* ctx = GetCurrentDockingContext( );
+		ctx->setDockActive();
 	}
 
 	bool BeginDock(const char* label, bool* opened, ImGuiWindowFlags extra_flags)
 	{
-		return g_dock.begin(label, opened, extra_flags);
+		DockContext* ctx = GetCurrentDockingContext( );
+		return ctx->begin(label, opened, extra_flags);
 	}
 
 	void EndDock()
 	{
-		g_dock.end();
+		DockContext* ctx = GetCurrentDockingContext( );
+		ctx->end();
 	}
 
 	void SaveDock()
 	{
-		g_dock.save();
+		DockContext* ctx = GetCurrentDockingContext( );
+		ctx->save();
 	}
 
 	void LoadDock()
 	{
-		g_dock.load();
+		DockContext* ctx = GetCurrentDockingContext( );
+		ctx->load();
 	}
 
 	void SetEventCallback( const VoidCallback& callback, const CallBackEventType& eventType )
 	{
-		g_dock.setEventCallback( callback, eventType );
+		DockContext* ctx = GetCurrentDockingContext( );
+		ctx->setEventCallback( callback, eventType );
 	} 
 
 	void DockWith( const char* dock, const char* container, DockSlotType slot, float weight)
 	{
-	    g_dock.dockWith( dock, container, slot, weight );
+		DockContext* ctx = GetCurrentDockingContext( );
+	    ctx->dockWith( dock, container, slot, weight );
 	}
+
 
 } // namespace ImGui

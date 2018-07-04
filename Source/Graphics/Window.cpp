@@ -27,8 +27,7 @@ namespace Enjon {
 		m_screenWidth = screenWidth;
 		m_screenHeight = screenHeight;
 
-		Uint32 flags = SDL_WINDOW_OPENGL;
-		
+		Uint32 flags = SDL_WINDOW_OPENGL; 
 		
 		if((currentFlags & WindowFlagsMask(WindowFlags::INVISIBLE)) != 0)
 		{
@@ -98,6 +97,13 @@ namespace Enjon {
 		//Set blend function type
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		// Construct gui context
+		mGUIContext = GUIContext( this );
+
+		// Initialize ImGUI context and set
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
+		mGUIContext.mContext = igm->Init( this );
+
 		return 0;
 	}
  
@@ -108,7 +114,7 @@ namespace Enjon {
 
 		// Set current ImGuiContext 
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
-		igm->SetContextByWindow( m_sdlWindow ); 
+		igm->SetContextByWindow( this ); 
 	} 
 
 	void Window::ClearDroppedFiles( )

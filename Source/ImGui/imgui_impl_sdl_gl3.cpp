@@ -494,7 +494,7 @@ ImGuiContext*    ImGui_ImplSdlGL3_Init( SDL_Window* window )
 	io.KeyMap[ ImGuiKey_V ] = SDL_SCANCODE_V;
 	io.KeyMap[ ImGuiKey_X ] = SDL_SCANCODE_X;
 	io.KeyMap[ ImGuiKey_Y ] = SDL_SCANCODE_Y;
-	io.KeyMap[ ImGuiKey_Z ] = SDL_SCANCODE_Z;
+	io.KeyMap[ ImGuiKey_Z ] = SDL_SCANCODE_Z; 
 
 	io.SetClipboardTextFn = ImGui_ImplSdlGL3_SetClipboardText;
 	io.GetClipboardTextFn = ImGui_ImplSdlGL3_GetClipboardText;

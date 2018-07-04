@@ -13,18 +13,22 @@ namespace Enjon
 {
 	//=====================================================================
 
-	EditorView::EditorView( EditorApp* app, const String& name, const u32& flags )
+	EditorView::EditorView( EditorApp* app, Window* window, const String& name, const u32& flags )
 		: mApp( app ), mName( name ), mViewFlags( flags )
 	{
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
-		igm->RegisterMenuOption( "View", mName, [ & ] ( )
+		// Grab gui context from window
+		GUIContext* ctx = window->GetGUIContext( );
+		assert( ctx != nullptr ); 
+
+		ctx->RegisterMenuOption( "View", mName, [ & ] ( )
 		{
 			ImGui::MenuItem( fmt::format( "{}##options", mName ).c_str( ), NULL, &mViewEnabled );
 		});
 
 		// Register individual window with docking system
-		igm->RegisterWindow( mName, [ & ] ( )
+		ctx->RegisterWindow( mName, [ & ] ( )
 		{
 			// Docking windows
 			if ( ImGui::BeginDock( GetViewName().c_str(), &mViewEnabled, GetViewFlags() ) )

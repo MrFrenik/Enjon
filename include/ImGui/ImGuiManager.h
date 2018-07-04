@@ -15,13 +15,14 @@
 
 #include <functional>
 #include <unordered_map>
-#include <vector>
+#include <vector> 
 
 struct ImFont;
 struct ImGuiContext;
 
 namespace Enjon
 { 
+	class ImGuiManager;
 	class Window;
 	class Vec4;
 	class Object;
@@ -29,7 +30,9 @@ namespace Enjon
 	class MetaPropertyArrayBase;
 	class MetaPropertyHashMapBase;
 	class MetaProperty;
-	class Engine;
+	class Engine; 
+
+	using GUICallbackFunc = std::function<void( )>;
 
 	enum GUIDockSlotType
 	{
@@ -102,8 +105,6 @@ namespace Enjon
 			bool mHovered = false;
 			bool mAutoCalculateSize = true;
 	};
-
-	using GUICallbackFunc = std::function<void( )>;
 
 	class DockingWindow : public GUIWidget
 	{
@@ -230,11 +231,94 @@ namespace Enjon
 		GUIDockSlotType mSlotType;
 		float mWeight;
 	};
+ 
+	class GUIContext
+	{
+		friend Window;
+		friend ImGuiManager;
 
-	/*
-		Static class meant to be a central hub for registering 
-		ImGui commands
-	*/ 
+		public:
+
+			/**
+			* @brief
+			*/
+			GUIContext( ) = default;
+
+			/**
+			* @brief
+			*/
+			~GUIContext( ) = default;
+
+			/**
+			* @brief
+			*/
+			GUIContext( Window* window )
+				: mWindow( window )
+			{ 
+			}
+
+			ImGuiContext* GetContext( )
+			{
+				return mContext;
+			}
+
+			/** 
+			* @brief
+			*/
+			bool HasWindow( const String& windowName );
+
+			/** 
+			* @brief
+			*/
+			bool HasMenuOption( const String& menu, const String& menuOptionName );
+
+			/** 
+			* @brief
+			*/
+			void Register( const GUICallbackFunc& func);
+
+			/** 
+			* @brief
+			*/
+			void RegisterMenuOption( const String& menuName, const String& optionName, const GUICallbackFunc& func );
+
+			/** 
+			* @brief
+			*/
+			void RegisterWindow(const String& windowName, const GUICallbackFunc& func);
+
+			/** 
+			* @brief
+			*/
+			void RegisterDockingLayout(const GUIDockingLayout& layout);
+
+		protected:
+
+			/** 
+			* @brief
+			*/
+			void LateInit( );
+
+			/** 
+			* @brief
+			*/
+			s32 GUIContext::MainMenu( );
+
+			/** 
+			* @brief
+			*/
+			void Render( );
+
+		private: 
+			Vector<GUICallbackFunc> mGuiFuncs;
+			HashMap<String, GUICallbackFunc> mWindows;
+			HashMap<String, HashMap<String, GUICallbackFunc>> mMainMenuOptions;
+			Vector<GUIDockingLayout> mDockingLayouts; 
+			HashMap< Enjon::String, ImFont* > mFonts;
+			ImGuiContext* mContext = nullptr;
+			Window* mWindow = nullptr;
+	};
+
 	ENJON_CLASS( )
 	class ImGuiManager : public Subsystem
 	{
@@ -260,8 +344,8 @@ namespace Enjon
 			*/
 			virtual Result Shutdown() override;
 
-			void Init(SDL_Window* window);
-			void LateInit(SDL_Window* window);
+			ImGuiContext* Init(Window* window);
+			void LateInit(Window* window);
 			bool HasWindow( const String& windowName );
 			bool HasMenuOption( const String& menu, const String& menuOptionName );
 			void Register(std::function<void()> func);
@@ -269,7 +353,7 @@ namespace Enjon
 			void RegisterWindow(const String& windowName, std::function<void()> func);
 			void RegisterDockingLayout(const GUIDockingLayout& layout);
 			void RenderGameUI(Enjon::Window* window, f32* view, f32* projection);
-			void Render(SDL_Window* window);
+			void Render(Window* window);
 			void InspectObject( const Object* object );
 			void DebugDumpObject( const Enjon::Object* object );
 			void DebugDumpProperty( const Enjon::Object* object, const Enjon::MetaProperty* prop );
@@ -278,10 +362,7 @@ namespace Enjon
 			ImFont* GetFont( const Enjon::String& name );
 			ImGuiContext* GetContext( );
 
-			void SetContextByWindow( SDL_Window* window ); 
-			void InitWindow( SDL_Window* window );
-
-			ImGuiContext* GetContextByWindow( SDL_Window* window ); 
+			void SetContextByWindow( Window* window ); 
 
 		public:
 

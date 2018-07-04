@@ -18,7 +18,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			EditorInspectorView( EditorApp* app );
+			EditorInspectorView( EditorApp* app, Window* window );
 
 			/**
 			* @brief

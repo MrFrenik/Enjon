@@ -28,6 +28,177 @@ namespace Enjon
 {
 	//=============================================================
 
+	bool GUIContext::HasWindow( const String& windowName )
+	{
+		return ( mWindows.find( windowName ) != mWindows.end( ) );
+	}
+
+	//==============================================================================================
+
+	bool GUIContext::HasMenuOption( const String& menu, const String& menuOptionName )
+	{
+		if ( mMainMenuOptions.find( menu ) != mMainMenuOptions.end( ) )
+		{
+			return ( mMainMenuOptions[menu].find( menuOptionName ) != mMainMenuOptions[menu].end( ) );
+		}
+
+		return false;
+	}
+
+	//===================================================================================================
+
+	void GUIContext::RegisterMenuOption(const String& menuName, const String& optionName, const GUICallbackFunc& func)
+	{
+		// Will create the vector if not there
+		mMainMenuOptions[menuName][optionName] = func;
+	} 
+
+	//===================================================================================================
+
+	void GUIContext::Register( const GUICallbackFunc& func)
+	{
+		// TODO(): Search for function first before adding
+		mGuiFuncs.push_back(func);
+	}
+
+	//===================================================================================================
+
+	void GUIContext::RegisterWindow(const String& windowName, const GUICallbackFunc& func)
+	{
+		if ( !HasWindow( windowName ) )
+		{
+			mWindows[windowName] = func; 
+		}
+	}
+
+	//===================================================================================================
+
+	void GUIContext::RegisterDockingLayout(const GUIDockingLayout& layout)
+	{
+		mDockingLayouts.push_back(layout);
+	} 
+
+	//===================================================================================================
+
+	void GUIContext::LateInit( )
+	{
+		// Set current context
+		ImGui::SetCurrentContext( GetContext( ) );
+
+		// Run through docking layouts here
+    	for (auto& dl : mDockingLayouts)
+    	{
+    		ImGui::DockWith(dl.mChild, dl.mParent, (ImGui::DockSlotType)(u32)dl.mSlotType, dl.mWeight);
+    	}
+ 
+		// Create callbacks for docks
+		auto onEnterHorizontalSplitHover = [ & ] ( ) -> void
+		{ 
+			Window::SetWindowCursor( CursorType::SizeWE );
+		};
+
+		auto onEnterVerticalSplitHover = [ & ] ( ) -> void
+		{ 
+			Window::SetWindowCursor( CursorType::SizeNS );
+		};
+
+		auto onExitSplitHover = [ & ] ( ) -> void 
+		{ 
+			Window::SetWindowCursor( CursorType::Arrow );
+		}; 
+
+		// Set these callbacks
+		ImGui::SetEventCallback( onEnterHorizontalSplitHover, ImGui::CallBackEventType::OnEnterHorizontalSplitHover );
+		ImGui::SetEventCallback( onEnterVerticalSplitHover, ImGui::CallBackEventType::OnEnterVerticalSplitHover );
+		ImGui::SetEventCallback( onExitSplitHover, ImGui::CallBackEventType::OnExitSplitHover ); 
+	}
+
+	//===================================================================================================
+
+	void GUIContext::Render( )
+	{ 
+	    // Make a new ImGui window frame
+		ImGui_ImplSdlGL3_NewFrame( mWindow->GetSDLWindow(), GetContext( ) ); 
+
+		s32 menu_height = MainMenu();
+
+		if (ImGui::GetIO().DisplaySize.y > 0) 
+		{
+			auto pos = ImVec2(0, menu_height);
+			auto size = ImGui::GetIO().DisplaySize;
+			size.y -= pos.y;
+			ImGui::RootDock(pos, ImVec2(size.x, size.y - 25.0f));
+
+			// Draw status bar (no docking)
+			ImGui::SetNextWindowSize(ImVec2(size.x, 25.0f), ImGuiSetCond_Always);
+			ImGui::SetNextWindowPos(ImVec2(0, size.y - 6.0f), ImGuiSetCond_Always);
+			ImGui::Begin("statusbar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoResize);
+			ImGui::Text("Frame: %.5f ms", 1000.0f / (f32)ImGui::GetIO().Framerate);
+			ImGui::End();
+		} 
+
+		// Display all registered windows
+		for (auto& wind : mWindows)
+		{
+			wind.second( );
+		}
+	}
+	
+	//=================================================================================================== 
+
+	s32 GUIContext::MainMenu()
+	{
+		s32 menuHeight = 0;
+
+		// TODO(): Need to organize this in a much better manner...
+		if (ImGui::BeginMainMenuBar())
+		{
+			// Display all menu options
+			if (ImGui::BeginMenu("File"))
+			{
+				for (auto& sub : mMainMenuOptions["File"])
+				{
+					sub.second( );
+				}
+				ImGui::EndMenu();
+			}
+
+			if ( ImGui::BeginMenu( "Create" ) )
+			{
+				for ( auto& sub : mMainMenuOptions[ "Create" ] )
+				{
+					sub.second( );
+				}
+				ImGui::EndMenu( );
+			}
+
+			if (ImGui::BeginMenu("View"))
+			{
+				for (auto& sub : mMainMenuOptions["View"])
+				{
+					sub.second( );
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Help"))
+			{
+				for (auto& sub : mMainMenuOptions["Help"])
+				{
+					sub.second();		
+				}
+				ImGui::EndMenu();
+			}
+
+			menuHeight = ImGui::GetWindowSize().y;
+
+			ImGui::EndMainMenuBar();
+		}
+
+		return menuHeight;
+	} 
+
 	Result ImGuiManager::Initialize( )
 	{
 		return Result::SUCCESS;
@@ -44,34 +215,24 @@ namespace Enjon
 		{
 			mImGuiContextMap[ window ] = ctx;
 		}
-	}
+	} 
 
-	ImGuiContext* ImGuiManager::GetContextByWindow( SDL_Window* window )
+	void ImGuiManager::SetContextByWindow( Window* window )
 	{
-		auto query = mImGuiContextMap.find( window );
-		if ( query != mImGuiContextMap.end( ) )
-		{
-			return mImGuiContextMap[ window ];
-		}
-
-		return nullptr;
-	}
-
-	void ImGuiManager::SetContextByWindow( SDL_Window* window )
-	{
-		ImGuiContext* ctx = GetContextByWindow( window );
+		GUIContext* guiCtx = window->GetGUIContext( );
+		ImGuiContext* ctx = guiCtx->GetContext( );
 		if ( ctx )
 		{
 			ImGui::SetCurrentContext( ctx );
 		}
 	}
 
-	void ImGuiManager::Init(SDL_Window* window)
+	ImGuiContext* ImGuiManager::Init(Window* window)
 	{
-		assert(window != nullptr);
+		assert( window != nullptr );
 
 		// Init window
-		ImGuiContext* ctx = ImGui_ImplSdlGL3_Init(window); 
+		ImGuiContext* ctx = ImGui_ImplSdlGL3_Init( window->GetSDLWindow( ) );
 
 		// Init style
 		ImGuiStyles();
@@ -79,24 +240,11 @@ namespace Enjon
 		// Initialize default windows/menus
 		InitializeDefaults(); 
 
-		// Cache context
-		mContext = ImGui_ImplSdlGL3_GetContext( ); 
-
 		// Set imgui context
-		AddWindowToContextMap( window, ctx ); 
-	}
+		AddWindowToContextMap( window->GetSDLWindow(), ctx ); 
 
-	void ImGuiManager::InitWindow( SDL_Window* window )
-	{
-		assert(window != nullptr);
-
-		// Init window
-		//ImGuiContext* ctx = ImGui_ImplSdlGL3_CreateContext( window );
-		ImGuiContext* ctx = ImGui_ImplSdlGL3_Init(window); 
-
-		// Set imgui context
-		AddWindowToContextMap( window, ctx ); 
-	}
+		return ctx;
+	} 
 
 	Result ImGuiManager::Shutdown()
 	{ 
@@ -970,54 +1118,12 @@ namespace Enjon
 	}
 
 	//---------------------------------------------------
-	void ImGuiManager::Render(SDL_Window* window)
-	{
-	    // Make a new window
-		ImGui_ImplSdlGL3_NewFrame( window, GetContextByWindow( window ) );
-
+	void ImGuiManager::Render(Window* window)
+	{ 
 		Window* w = EngineSubsystem( GraphicsSubsystem )->GetMainWindow( );
 
-		if ( window == w->GetSDLWindow() )
-		{ 
-			ImGui::Begin( "Main Window" );
-			{
-				ImGui::Text( "Main Window" );
-			}
-			ImGui::End( );
-
-			//static bool show_scene1 = true;
-
-			//s32 menu_height = MainMenu();
-
-			//if (ImGui::GetIO().DisplaySize.y > 0) 
-			//{
-			//	auto pos = ImVec2(0, menu_height);
-			//	auto size = ImGui::GetIO().DisplaySize;
-			//	size.y -= pos.y;
-			//	ImGui::RootDock(pos, ImVec2(size.x, size.y - 25.0f));
-
-			//	// Draw status bar (no docking)
-			//	ImGui::SetNextWindowSize(ImVec2(size.x, 25.0f), ImGuiSetCond_Always);
-			//	ImGui::SetNextWindowPos(ImVec2(0, size.y - 6.0f), ImGuiSetCond_Always);
-			//	ImGui::Begin("statusbar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoResize);
-			//	ImGui::Text("Frame: %.5f ms", 1000.0f / (f32)ImGui::GetIO().Framerate);
-			//	ImGui::End();
-			//} 
-
-			//// Display all registered windows
-			//for (auto& wind : mWindows)
-			//{
-			//	wind.second( );
-			//}
-		}
-		else
-		{
-			ImGui::Begin( "Another Window" );
-			{
-				ImGui::Text( "Separate Window" ); 
-			}
-			ImGui::End( );
-		} 
+		// Render gui context
+		window->GetGUIContext( )->Render( ); 
 	}
 
 	//============================================================================================
@@ -1036,11 +1142,16 @@ namespace Enjon
 
 	//============================================================================================
 
-	void ImGuiManager::LateInit(SDL_Window* window)
+	void ImGuiManager::LateInit( Window* window )
 	{
 		for ( auto& w : EngineSubsystem( GraphicsSubsystem )->GetWindows( ) )
 		{
-			Render( w->GetSDLWindow( ) );
+			Render( w ); 
+		}
+
+		for ( auto& w : EngineSubsystem( GraphicsSubsystem )->GetWindows( ) )
+		{
+			w->GetGUIContext( )->LateInit( );
 		}
 
 		// Run through docking layouts here

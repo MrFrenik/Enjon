@@ -178,7 +178,7 @@ namespace Enjon
 		mAssetManager->Initialize( ); 
 
 		// Initialize imgui manager
-		mImGuiManager->Init( mGraphics->GetWindow( )->ConstCast< Window >( )->GetSDLWindow( ) );
+		//mImGuiManager->Init( mGraphics->GetWindow( )->ConstCast< Window >( ) );
 
 		// Initialize application if one is registered
 		if ( mApp )
@@ -190,7 +190,7 @@ namespace Enjon
 		 mLimiter.Init( 60.0f );
 
 		// Late init for systems that need it
-		 mImGuiManager->LateInit( mGraphics->GetWindow( )->ConstCast< Window >( )->GetSDLWindow( ) );
+		 mImGuiManager->LateInit( mGraphics->GetWindow( )->ConstCast< Window >( ) );
 
 		return Enjon::Result::SUCCESS;
 	}

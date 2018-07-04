@@ -42,6 +42,7 @@ struct ImGuiTextEditState;
 struct ImGuiPopupRef;
 struct ImGuiWindow;
 struct ImGuiWindowSettings;
+struct DockContext;
 
 typedef int ImGuiLayoutType;        // enum: horizontal or vertical             // enum ImGuiLayoutType_
 typedef int ImGuiButtonFlags;       // flags: for ButtonEx(), ButtonBehavior()  // enum ImGuiButtonFlags_
@@ -706,7 +707,7 @@ struct ImGuiContext
     int                     WantCaptureMouseNextFrame;          // explicit capture via CaptureInputs() sets those flags
     int                     WantCaptureKeyboardNextFrame;
     int                     WantTextInputNextFrame;
-    char                    TempBuffer[1024*3+1];               // temporary text buffer
+    char                    TempBuffer[1024*3+1];               // temporary text buffer 
 
     ImGuiContext(ImFontAtlas* shared_font_atlas) : OverlayDrawList(NULL)
     {

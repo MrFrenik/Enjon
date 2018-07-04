@@ -17,8 +17,8 @@ namespace Enjon
 {
 	//=================================================================
 
-	EditorWorldOutlinerView::EditorWorldOutlinerView( EditorApp* app )
-		: EditorView( app, "World Outliner", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
+	EditorWorldOutlinerView::EditorWorldOutlinerView( EditorApp* app, Window* window )
+		: EditorView( app, window, "World Outliner", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
 	{ 
 	} 
 

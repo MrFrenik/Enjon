@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <GLEW/glew.h>
 
+#include "ImGui/ImGuiManager.h"
 #include "Base/Object.h"
 #include "Graphics/Vertex.h"
 #include "System/Types.h"
@@ -94,6 +95,11 @@ namespace Enjon
 
 			static void SetWindowCursor( CursorType type );
 
+			GUIContext* GetGUIContext( )
+			{
+				return &mGUIContext;
+			}
+
 		protected:
 
 			static void InitSDLCursors( );
@@ -108,7 +114,8 @@ namespace Enjon
 			bool m_isfullscreen; 
 			HashSet<String> mDroppedFiles;
 			bool mNeedToClearDroppedFiles = false;
-			static HashMap<CursorType, SDL_Cursor*> mSDLCursors;
+			static HashMap<CursorType, SDL_Cursor*> mSDLCursors; 
+			GUIContext mGUIContext;
 	};
 }
 

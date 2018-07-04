@@ -1268,11 +1268,17 @@ namespace Enjon
 		LoadResources( );
 #endif
 
+		Window* mainWindow = EngineSubsystem( GraphicsSubsystem )->GetMainWindow( );
+		assert( mainWindow != nullptr );
+
+		GUIContext* guiContext = mainWindow->GetGUIContext( );
+		assert( guiContext->GetContext( ) != nullptr );
+
 		// Add all necessary views into editor widget manager
-		mEditorWidgetManager.AddView( new EditorSceneView( this ) );
-		mEditorWidgetManager.AddView( new EditorAssetBrowserView( this ) );
-		mEditorWidgetManager.AddView( new EditorWorldOutlinerView( this ) );
-		mInspectorView = ( EditorInspectorView* )mEditorWidgetManager.AddView( new EditorInspectorView( this ) );
+		mEditorWidgetManager.AddView( new EditorSceneView( this, mainWindow ) );
+		mEditorWidgetManager.AddView( new EditorAssetBrowserView( this, mainWindow ) );
+		mEditorWidgetManager.AddView( new EditorWorldOutlinerView( this, mainWindow ) );
+		mInspectorView = ( EditorInspectorView* )mEditorWidgetManager.AddView( new EditorInspectorView( this, mainWindow ) );
 
 		// Initialize transform widget
 		mTransformWidget.Initialize( this ); 
@@ -1280,7 +1286,7 @@ namespace Enjon
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
 		// Register individual windows
-		igm->RegisterWindow( "Create Project", [ & ] ( )
+		guiContext->RegisterWindow( "Create Project", [ & ] ( )
 		{
 			// Docking windows
 			if ( ImGui::BeginDock( "Create Project", &mShowCreateProjectView, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
@@ -1291,7 +1297,7 @@ namespace Enjon
 			ImGui::EndDock( );
 		} ); 
 
-		igm->RegisterWindow( "Play Options", [ & ]
+		guiContext->RegisterWindow( "Play Options", [ & ]
 		{
 			if ( ImGui::BeginDock( "Play Options", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 			{
@@ -1301,17 +1307,8 @@ namespace Enjon
 			ImGui::EndDock( );
 		} );
 
-		//igm->RegisterWindow( [ & ]
-		//{
-		//	if ( ImGui::BeginDock( "Inspector", nullptr, ImGuiWindowFlags_NoScrollbar ) )
-		//	{
-		//		InspectorView( nullptr );
-		//	}
-		//	ImGui::EndDock( );
-		//} );
-
 		static bool sceneSelectionViewOpen = true;
-		igm->RegisterWindow( "Scene Selection", [ & ]
+		guiContext->RegisterWindow( "Scene Selection", [ & ]
 		{
 			if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
 			{
@@ -1457,24 +1454,49 @@ namespace Enjon
 		{
 			ImGui::MenuItem( "Load Project...##options", NULL, &mLoadProjectPopupDialogue );
 		};
-		igm->RegisterMenuOption("File", "Load Project...##options", loadProjectMenuOption);
- 
+
 		// Register menu options
-		igm->RegisterMenuOption( "Create", "Create", createViewOption );
+		guiContext->RegisterMenuOption("File", "Load Project...##options", loadProjectMenuOption); 
+		guiContext->RegisterMenuOption( "Create", "Create", createViewOption );
 
 		// Register docking layouts 
-		igm->RegisterDockingLayout( GUIDockingLayout( "Scene", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );
-		igm->RegisterDockingLayout( GUIDockingLayout( "Play Options", "Scene", GUIDockSlotType::Slot_Top, 0.1f ) );
-		igm->RegisterDockingLayout( GUIDockingLayout( "World Outliner", nullptr, GUIDockSlotType::Slot_Right, 0.3f ) );
-		igm->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", "Play Options", GUIDockSlotType::Slot_Right, 0.6f ) );
-		igm->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Scene Selection", GUIDockSlotType::Slot_Tab, 0.2f ) );
-		igm->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.7f ) );
-		igm->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene", GUIDockSlotType::Slot_Bottom, 0.3f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Play Options", "Scene", GUIDockSlotType::Slot_Top, 0.1f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "World Outliner", nullptr, GUIDockSlotType::Slot_Right, 0.3f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", "Play Options", GUIDockSlotType::Slot_Right, 0.6f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Scene Selection", GUIDockSlotType::Slot_Tab, 0.2f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.7f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene", GUIDockSlotType::Slot_Bottom, 0.3f ) );
+
+		// Secondary window testing
+		TestSecondWindow( );
 
 		return Enjon::Result::SUCCESS;
 	}
 
 	//=================================================================================================
+
+	void EditorApp::TestSecondWindow( )
+	{
+		// Get secondary window
+		Window* window = EngineSubsystem( GraphicsSubsystem )->GetWindows( ).at( 1 );
+		assert( window != nullptr );
+
+		GUIContext* guiContext = window->GetGUIContext( );
+		assert( guiContext->GetContext( ) != nullptr );
+
+		static bool sceneSelectionViewOpen = true;
+		guiContext->RegisterWindow( "Scene Selection", [ & ]
+		{
+			if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
+			{
+				SelectSceneView( );
+			}
+			ImGui::EndDock( );
+		} ); 
+
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) ); 
+	}
 
 	void EditorApp::SetEditorSceneView( EditorSceneView* view )
 	{

@@ -19,7 +19,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			EditorWorldOutlinerView( EditorApp* app );
+			EditorWorldOutlinerView( EditorApp* app, Window* window );
 
 			/**
 			* @brief
