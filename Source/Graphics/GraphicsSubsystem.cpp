@@ -666,6 +666,15 @@ namespace Enjon
 		So Window will hold HashMap[u32, FrameBuffer*] mFrameBuffers;
 	*/
 
+	//=====================================================================================================
+
+	void GraphicsSubsystem::RemoveWindow( Window* window )
+	{
+		mWindows.erase( std::remove( mWindows.begin(), mWindows.end(), window ), mWindows.end() ); 
+	}
+
+	//=====================================================================================================
+
 	void GraphicsSubsystem::PresentBackBuffer( )
 	{
 		glViewport( 0, 0, ( s32 )GetViewport().x, ( s32 )GetViewport().y );
@@ -676,7 +685,7 @@ namespace Enjon
 			mFullScreenQuad->Submit( );
 		}
 		program->Unuse( );
-	}
+	} 
 
 	iVec2 GraphicsSubsystem::GetImGuiViewport( ) const
 	{

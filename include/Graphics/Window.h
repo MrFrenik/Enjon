@@ -100,7 +100,14 @@ namespace Enjon
 				return &mGUIContext;
 			}
 
+			bool IsMouseInWindow( );
+
 		protected:
+
+			/** 
+			* @brief
+			*/
+			void Destroy( );
 
 			static void InitSDLCursors( );
 
@@ -116,6 +123,7 @@ namespace Enjon
 			bool mNeedToClearDroppedFiles = false;
 			static HashMap<CursorType, SDL_Cursor*> mSDLCursors; 
 			GUIContext mGUIContext;
+			bool mMouseIsHovering = false;
 	};
 }
 

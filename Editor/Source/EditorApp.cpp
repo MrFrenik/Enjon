@@ -1495,7 +1495,11 @@ namespace Enjon
 			ImGui::EndDock( );
 		} ); 
 
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) ); 
+		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) ); 
+
+		mEditorWidgetManager.AddView( new EditorAssetBrowserView( this, window ) );
+
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) ); 
 	}
 
 	void EditorApp::SetEditorSceneView( EditorSceneView* view )

@@ -177,6 +177,11 @@ namespace Enjon
 				return mWindows.at( 0 );
 			}
 
+			/** 
+			* @brief
+			*/
+			void RemoveWindow( Window* window );
+
 			/**
 			*@brief
 			*/

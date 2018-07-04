@@ -341,63 +341,75 @@ namespace Enjon
 	// TODO(): This belongs in window class
 	Enjon::Result Engine::ProcessInput( Enjon::Input* input, const f32 dt )
 	{ 
-		// Enable drop states for window
-		SDL_EventState( SDL_DROPFILE, SDL_ENABLE );
-
-	    SDL_Event event;
 		Vec2 mouseWheel( 0.0f );
-	   //Will keep looping until there are no more events to process
-	    while ( SDL_PollEvent( &event ) ) 
-	    { 
-			mImGuiManager->ProcessEvent( &event );
 
-			switch ( event.type )
+		// Grab windows from graphics subsystem
+		Vector< Window* > windows = mGraphics->GetWindows( );
+
+		// If there are no windows left to process, end application
+		if ( windows.empty( ) )
+		{
+			return Result::FAILURE;
+		}
+
+		for ( auto& w : windows )
+		{
+			// Enable drop states for window
+			SDL_EventState( SDL_DROPFILE, SDL_ENABLE );
+
+			SDL_Event event;
+		   //Will keep looping until there are no more events to process
+			while ( SDL_PollEvent( &event ) )
 			{
-				case SDL_QUIT:
+				mImGuiManager->ProcessEvent( &event );
+
+				switch ( event.type )
 				{
-					return Result::FAILURE;
-				} break;
+					case SDL_QUIT:
+					{
+						return Result::FAILURE;
+					} break;
 
-				case SDL_KEYUP:
+					case SDL_KEYUP:
+					{
+						input->ReleaseKey( event.key.keysym.sym );
+					} break;
+
+					case SDL_KEYDOWN:
+					{
+						input->PressKey( event.key.keysym.sym );
+					} break;
+
+					case SDL_MOUSEBUTTONDOWN:
+					{
+						input->PressKey( event.button.button );
+					} break;
+
+					case SDL_MOUSEBUTTONUP:
+					{
+						input->ReleaseKey( event.button.button );
+					} break;
+
+					case SDL_MOUSEMOTION:
+					{
+						input->SetMouseCoords( ( f32 )event.motion.x, ( f32 )event.motion.y );
+					} break;
+
+					case SDL_MOUSEWHEEL:
+					{
+						// Set mouse wheel for this frame
+						mouseWheel = Vec2( event.wheel.x, event.wheel.y );
+					} break;
+
+				}
+
+				// Pass event to windows
+				for ( auto& w : mGraphics->GetWindows( ) )
 				{
-					input->ReleaseKey( event.key.keysym.sym );
-				} break;
-
-				case SDL_KEYDOWN:
-				{
-					input->PressKey( event.key.keysym.sym );
-				} break;
-
-				case SDL_MOUSEBUTTONDOWN:
-				{
-					input->PressKey( event.button.button );
-				} break;
-
-				case SDL_MOUSEBUTTONUP:
-				{
-					input->ReleaseKey( event.button.button );
-				} break;
-
-				case SDL_MOUSEMOTION:
-				{
-					input->SetMouseCoords( ( f32 )event.motion.x, ( f32 )event.motion.y );
-				} break;
-
-				case SDL_MOUSEWHEEL:
-				{
-					// Set mouse wheel for this frame
-					mouseWheel = Vec2( event.wheel.x, event.wheel.y );
-				} break;
-
-
+					w->MakeCurrent( );
+					w->ProcessInput( event );
+				}
 			}
-
-			// Pass event to windows
-			for ( auto& w : mGraphics->GetWindows( ) )
-			{
-				w->ProcessInput( event );
-			}
-
 	    } 
 
 		// Set mouse wheel this frame

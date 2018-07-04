@@ -169,6 +169,24 @@ namespace Enjon {
 		//Need to figure this one out...
 	}
 
+	bool Window::IsMouseInWindow( )
+	{
+		Vec2 mouseCoords = EngineSubsystem( Input )->GetMouseCoords( );
+		iVec2 mc;
+		
+		int x, y, w, h;
+		SDL_GetWindowPosition( m_sdlWindow, &x, &y );
+		SDL_GetWindowSize( m_sdlWindow, &w, &h );
+
+		if ( mouseCoords.x < x || mouseCoords.x > x + w ||
+			mouseCoords.y < y || mouseCoords.y > y + h )
+		{
+			return false;
+		}
+
+		return true; 
+	}
+
 	Result Window::ProcessInput( const SDL_Event& event )
 	{ 
 		GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
@@ -177,20 +195,25 @@ namespace Enjon {
 		if ( mNeedToClearDroppedFiles )
 		{
 			ClearDroppedFiles( );
-		}
+		} 
+
+		IsMouseInWindow( );
 
 		switch ( event.type )
 		{
 			case SDL_DROPFILE:
 			{ 
-				// Push back new dropped file
-				mDroppedFiles.insert( String(event.drop.file) ); 
+				if ( mMouseIsHovering )
+				{
+					// Push back new dropped file
+					mDroppedFiles.insert( String(event.drop.file) ); 
 
-				// Just released, so need to explicitly set button state 
-				EngineSubsystem( Input )->SetButtonState( KeyCode::LeftMouseButton, false, true ); 
+					// Just released, so need to explicitly set button state 
+					EngineSubsystem( Input )->SetButtonState( KeyCode::LeftMouseButton, false, true ); 
 
-				// Free the filename memory
-				SDL_free( event.drop.file ); 
+					// Free the filename memory
+					SDL_free( event.drop.file ); 
+				}
 			} break;
 
 			case SDL_WINDOWEVENT: 
@@ -199,18 +222,31 @@ namespace Enjon {
 				{
 					case SDL_WINDOWEVENT_RESIZED: 
 					{
-						SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
-						gs->ReinitializeFrameBuffers( );
+						// For now only reinitialize the frame buffers for main window
+						if ( event.window.windowID == SDL_GetWindowID( EngineSubsystem( GraphicsSubsystem )->GetMainWindow()->GetSDLWindow() ) )
+						{
+							SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
+							gs->ReinitializeFrameBuffers( );
+						}
+
 					}
 					break; 
 
 					case SDL_WINDOWEVENT_ENTER: 
 					{
+						if ( event.window.windowID == SDL_GetWindowID( m_sdlWindow ) )
+						{
+							mMouseIsHovering = true;
+						}
 					}
 					break;
 					
 					case SDL_WINDOWEVENT_LEAVE: 
 					{
+						if ( event.window.windowID == SDL_GetWindowID( m_sdlWindow ) )
+						{
+							mMouseIsHovering = false;
+						}
 					}
 					break;
 
@@ -233,9 +269,13 @@ namespace Enjon {
 					
 					case SDL_WINDOWEVENT_CLOSE: 
 					{ 
-						return Result::FAILURE;
+						if ( event.window.windowID == SDL_GetWindowID( m_sdlWindow ) )
+						{
+							Destroy( ); 
+							return Result::FAILURE;
+						}
 					} break; 
-				}
+				} 
 			} break; 
 
 			default:
@@ -245,6 +285,31 @@ namespace Enjon {
 
 		return Result::PROCESS_RUNNING;
 	} 
+
+	//==============================================================================
+
+	void Window::Destroy( )
+	{
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+
+		// Cache main window
+		Window* mainWindow = gfx->GetMainWindow( );
+
+		// Remove from graphics subsystem
+		gfx->RemoveWindow( this ); 
+
+		// Destroy SDL window
+		SDL_DestroyWindow( m_sdlWindow );
+
+		// Need to check for main window to destroy everything
+		if ( mainWindow == this )
+		{ 
+			for ( auto& w : gfx->GetWindows( ) )
+			{
+				w->Destroy( );
+			}
+		}
+	}
 
 	//==============================================================================
 
