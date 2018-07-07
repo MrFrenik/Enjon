@@ -350,67 +350,66 @@ namespace Enjon
 		if ( windows.empty( ) )
 		{
 			return Result::FAILURE;
-		}
+		} 
 
-		for ( auto& w : windows )
-		{
-			// Enable drop states for window
-			SDL_EventState( SDL_DROPFILE, SDL_ENABLE );
+		// Enable drop states for window
+		SDL_EventState( SDL_DROPFILE, SDL_ENABLE );
 
-			SDL_Event event;
-		   //Will keep looping until there are no more events to process
-			while ( SDL_PollEvent( &event ) )
+		SDL_Event event;
+	   //Will keep looping until there are no more events to process
+		while ( SDL_PollEvent( &event ) )
+		{ 
+			switch ( event.type )
 			{
-				mImGuiManager->ProcessEvent( &event );
-
-				switch ( event.type )
+				case SDL_QUIT:
 				{
-					case SDL_QUIT:
-					{
-						return Result::FAILURE;
-					} break;
+					return Result::FAILURE;
+				} break;
 
-					case SDL_KEYUP:
-					{
-						input->ReleaseKey( event.key.keysym.sym );
-					} break;
+				case SDL_KEYUP:
+				{
+					input->ReleaseKey( event.key.keysym.sym );
+				} break;
 
-					case SDL_KEYDOWN:
-					{
-						input->PressKey( event.key.keysym.sym );
-					} break;
+				case SDL_KEYDOWN:
+				{
+					input->PressKey( event.key.keysym.sym );
+				} break;
 
-					case SDL_MOUSEBUTTONDOWN:
-					{
-						input->PressKey( event.button.button );
-					} break;
+				case SDL_MOUSEBUTTONDOWN:
+				{
+					input->PressKey( event.button.button );
+				} break;
 
-					case SDL_MOUSEBUTTONUP:
-					{
-						input->ReleaseKey( event.button.button );
-					} break;
+				case SDL_MOUSEBUTTONUP:
+				{
+					input->ReleaseKey( event.button.button );
+				} break;
 
-					case SDL_MOUSEMOTION:
-					{
-						input->SetMouseCoords( ( f32 )event.motion.x, ( f32 )event.motion.y );
-					} break;
+				case SDL_MOUSEMOTION:
+				{
+					input->SetMouseCoords( ( f32 )event.motion.x, ( f32 )event.motion.y );
+				} break;
 
-					case SDL_MOUSEWHEEL:
-					{
-						// Set mouse wheel for this frame
-						mouseWheel = Vec2( event.wheel.x, event.wheel.y );
-					} break;
+				case SDL_MOUSEWHEEL:
+				{
+					// Set mouse wheel for this frame
+					mouseWheel = Vec2( event.wheel.x, event.wheel.y );
+				} break;
 
-				}
+			}
+
+			// Pass event to all windows
+			for ( auto& w : windows )
+			{
+				w->MakeCurrent( );
+				mImGuiManager->ProcessEvent( &event ); 
 
 				// Pass event to windows
-				for ( auto& w : mGraphics->GetWindows( ) )
-				{
-					w->MakeCurrent( );
-					w->ProcessInput( event );
-				}
+				w->ProcessInput( event );
 			}
-	    } 
+
+		}
 
 		// Set mouse wheel this frame
 		input->SetMouseWheel( mouseWheel );
