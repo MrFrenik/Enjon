@@ -65,7 +65,7 @@ namespace Enjon
 			Window();
 			~Window();
 
-			int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( (u32)WindowFlags::DEFAULT ) ); 
+			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( (u32)WindowFlags::DEFAULT ) ); 
 			void SetWindowTitle(const char* title);
 			void SetWindowFullScreen(int screenWidth, int screenHeight);
 
@@ -102,6 +102,10 @@ namespace Enjon
 
 			bool IsMouseInWindow( );
 
+			// TOTAL HACKS FOR NOW
+			void SetWorld( World* world );
+			World* GetWorld( );
+
 		protected:
 
 			/** 
@@ -113,7 +117,7 @@ namespace Enjon
 
 			void ClearDroppedFiles( );
 
-		private:
+		protected:
 			static SDL_GLContext mGLContext;
 			SDL_Window* m_sdlWindow;
 			int m_screenWidth;
@@ -124,6 +128,7 @@ namespace Enjon
 			static HashMap<CursorType, SDL_Cursor*> mSDLCursors; 
 			GUIContext mGUIContext;
 			bool mMouseIsHovering = false;
+			World* mWorld = nullptr;
 	};
 }
 

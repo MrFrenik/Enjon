@@ -15,6 +15,7 @@
 #include "Scene/SceneManager.h"
 #include "Utils/Timing.h"
 #include "SubsystemCatalog.h"
+#include "Base/World.h"
 
 #include <fmt/printf.h> 
 #include <SDL2/sdl.h>
@@ -54,6 +55,10 @@ namespace Enjon
 		// Shutdown meta class registry
 		delete( mMetaClassRegisty );
 		mMetaClassRegisty = nullptr;
+
+		// Cleanup world
+		delete( mWorld );
+		mWorld = nullptr;
 	}
 
 	//=======================================================
@@ -173,12 +178,16 @@ namespace Enjon
 		mSceneManager		= mSubsystemCatalog->Register< SceneManager >( );
 		mAnimationSystem	= mSubsystemCatalog->Register< AnimationSubsystem >( );
 
+		// Construct world and register contexts
+		mWorld = new World( ); 
+		mWorld->RegisterContext< GraphicsSubsystemContext >( );
+
+		// Set main window world
+		mGraphics->GetMainWindow( )->SetWorld( mWorld );
+
 		// Default setting for assets directory
 		mAssetManager->SetAssetsDirectoryPath( mConfig.GetRoot( ) + "Assets/" );
 		mAssetManager->Initialize( ); 
-
-		// Initialize imgui manager
-		//mImGuiManager->Init( mGraphics->GetWindow( )->ConstCast< Window >( ) );
 
 		// Initialize application if one is registered
 		if ( mApp )
@@ -190,7 +199,7 @@ namespace Enjon
 		 mLimiter.Init( 60.0f );
 
 		// Late init for systems that need it
-		 mImGuiManager->LateInit( mGraphics->GetWindow( )->ConstCast< Window >( ) );
+		 mImGuiManager->LateInit( mGraphics->GetMainWindow( )->ConstCast< Window >( ) );
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -331,6 +340,13 @@ namespace Enjon
 
 	//======================================================= 
 
+	World* Engine::GetWorld( )
+	{
+		return mWorld;
+	}
+
+	//======================================================= 
+
 	GraphicsSubsystem* Engine::GetGraphicsSubsystem( ) const
 	{
 		return mGraphics;
@@ -408,7 +424,6 @@ namespace Enjon
 				// Pass event to windows
 				w->ProcessInput( event );
 			}
-
 		}
 
 		// Set mouse wheel this frame

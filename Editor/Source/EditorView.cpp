@@ -14,7 +14,7 @@ namespace Enjon
 	//=====================================================================
 
 	EditorView::EditorView( EditorApp* app, Window* window, const String& name, const u32& flags )
-		: mApp( app ), mName( name ), mViewFlags( flags )
+		: mApp( app ), mName( name ), mViewFlags( flags ), mWindow( window )
 	{
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 

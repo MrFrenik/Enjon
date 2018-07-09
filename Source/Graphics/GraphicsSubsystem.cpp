@@ -31,6 +31,7 @@
 #include "Asset/SkeletonAssetLoader.h"
 #include "Graphics/StaticMeshRenderable.h"
 #include "Graphics/SkeletalMeshRenderable.h"
+#include "Base/World.h"
 
 #include <string>
 #include <cassert>
@@ -60,10 +61,73 @@ namespace Enjon
 { 
 	//======================================================================================================
 
+	GraphicsSubsystemContext::GraphicsSubsystemContext( World* world )
+		: SubsystemContext( world )
+	{ 
+		// Allocate new frame buffer for back buffer with default values ( will be changed by viewport )
+		// These should also just be handles that are given 
+		mBackBuffer = new FrameBuffer(800, 600);
+
+		// Add context to graphics subsystem ( ...also another initialization order issue )
+		// Would prefer that the subsystem itself would construct and give these out
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		gfx->AddContext( this );
+	}
+
+	//======================================================================================================
+
+	void GraphicsSubsystemContext::ExplicitDestructor( )
+	{
+		// Remove context from graphics subsystem
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		gfx->RemoveContext( this );
+
+		// Free backbuffer
+		if ( mBackBuffer )
+		{
+			delete( mBackBuffer );
+			mBackBuffer = nullptr;
+		}
+	}
+
+	//======================================================================================================
+	
+	FrameBuffer* GraphicsSubsystemContext::GetFrameBuffer( ) const
+	{
+		return mBackBuffer;
+	} 
+
+	//======================================================================================================
+
+	GraphicsScene* GraphicsSubsystemContext::GetGraphicsScene( )
+	{
+		return &mScene;
+	}
+
+	//======================================================================================================
+
+	GraphicsScene* GraphicsSubsystem::GetGraphicsScene( )
+	{
+		World* mainWorld = Engine::GetInstance( )->GetWorld( );
+		GraphicsSubsystemContext* ctx = mainWorld->GetContext< GraphicsSubsystemContext >( );
+		return ctx->GetGraphicsScene( );
+	}
+
+	//======================================================================================================
+
+	const Camera* GraphicsSubsystem::GetGraphicsSceneCamera( )
+	{ 
+		World* mainWorld = Engine::GetInstance( )->GetWorld( );
+		GraphicsSubsystemContext* ctx = mainWorld->GetContext< GraphicsSubsystemContext >( );
+		return ctx->GetGraphicsScene( )->GetActiveCamera( );
+	}
+
+	//======================================================================================================
+
 	Enjon::Result GraphicsSubsystem::Initialize()
 	{
 		// Clear previous windows ( if any )
-		mWindows.clear( );
+		mWindows.clear( ); 
 
 		// TODO(John): Need to have a way to have an .ini that's read or grab these values from a static
 		// engine config file
@@ -548,37 +612,44 @@ namespace Enjon
 
 	void GraphicsSubsystem::Update(const f32 dT)
 	{ 
+		static bool set = false;
+		if ( !set )
+		{ 
+			STBTest( );
+			set = true;
+		} 
+
 		for ( auto& w : mWindows )
 		{ 
 			// Set current window
 			mCurrentWindow = w;
-			w->MakeCurrent( );
+			w->MakeCurrent( ); 
 
-			static bool set = false;
-			if ( !set )
-			{ 
-				STBTest( );
-				set = true;
+			World* world = w->GetWorld( );
+			if ( world )
+			{
+				GraphicsSubsystemContext* gfxCtx = world->GetContext< GraphicsSubsystemContext >( );
+
+				// Gbuffer pass
+				GBufferPass( gfxCtx );
+				// SSAO pass
+				SSAOPass( gfxCtx );
+				// Lighting pass
+				LightingPass( gfxCtx );
+				// Luminance Pass
+				LuminancePass( gfxCtx );
+				// Bloom pass
+				BloomPass( gfxCtx);
+				// Composite Pass
+				CompositePass( mLightingBuffer, gfxCtx );
+				// Motion Blur Pass
+				MotionBlurPass( mCompositeTarget, gfxCtx );
+				// FXAA pass
+				 FXAAPass( mMotionBlurTarget, gfxCtx );
+				// Do UI pass
+				//UIPass( mFXAATarget, gfxCtx ); 
+				 UIPass( gfxCtx->GetFrameBuffer( ), gfxCtx );
 			} 
-
-			// Gbuffer pass
-			GBufferPass();
-			// SSAO pass
-			SSAOPass( );
-			// Lighting pass
-			LightingPass();
-			// Luminance Pass
-			LuminancePass();
-			// Bloom pass
-			BloomPass();
-			// Composite Pass
-			CompositePass( mLightingBuffer );
-			// Motion Blur Pass
-			MotionBlurPass( mCompositeTarget );
-			// FXAA pass
-			 FXAAPass( mMotionBlurTarget );
-			// Do UI pass
-			UIPass( mFXAATarget ); 
 	 
 			// Clear default buffer
 			mCurrentWindow->Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
@@ -729,7 +800,7 @@ namespace Enjon
 
 	//======================================================================================================
 	
-	void GraphicsSubsystem::GBufferPass()
+	void GraphicsSubsystem::GBufferPass( GraphicsSubsystemContext* ctx )
 	{
 		static float wt = 0.0f;
 		wt += 0.001f;
@@ -755,13 +826,16 @@ namespace Enjon
 		// Clear normal render target
 		const GLfloat blackColor[ ] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		glClearBufferfv(GL_COLOR, (u32)GBufferTextureType::NORMAL, blackColor); 
+
+		// Grab graphics scene from context
+		GraphicsScene* scene = ctx->GetGraphicsScene( );
  
 		// Get sorted renderables by material
-		const Vector< StaticMeshRenderable* >& sortedStaticMeshRenderables = mGraphicsScene.GetStaticMeshRenderables();
-		const Vector< SkeletalMeshRenderable* >& sortedSkeletalMeshRenderables = mGraphicsScene.GetSkeletalMeshRenderables( );
-		const HashSet< QuadBatch* >& sortedQuadBatches = mGraphicsScene.GetQuadBatches(); 
+		const Vector< StaticMeshRenderable* >& sortedStaticMeshRenderables = scene->GetStaticMeshRenderables();
+		const Vector< SkeletalMeshRenderable* >& sortedSkeletalMeshRenderables = scene->GetSkeletalMeshRenderables( );
+		const HashSet< QuadBatch* >& sortedQuadBatches = scene->GetQuadBatches(); 
 
-		Camera* camera = mGraphicsScene.GetActiveCamera( );
+		Camera* camera = scene->GetActiveCamera( );
 		Mat4x4 viewMtx = camera->GetView( );
 		Mat4x4 projMtx = camera->GetProjection( );
 		Mat4x4 viewProjMtx = camera->GetViewProjection( );
@@ -935,12 +1009,12 @@ namespace Enjon
 		rotT += 0.01f; 
 
 		// Instancing test
-		shader = Enjon::ShaderManager::Get( "Instanced" ); 
-		shader->Use( );
-		{
-			// Set set shared uniform
-			shader->SetUniform( "uProjection", camera->GetProjection( ) );
-			shader->SetUniform( "uView", camera->GetView( ) );
+		//shader = Enjon::ShaderManager::Get( "Instanced" ); 
+		//shader->Use( );
+		//{
+		//	// Set set shared uniform
+		//	shader->SetUniform( "uProjection", camera->GetProjection( ) );
+		//	shader->SetUniform( "uView", camera->GetView( ) );
 
 			// Get material
 			//const Material* material = mInstancedRenderable->GetMaterial( ).Get();
@@ -966,8 +1040,8 @@ namespace Enjon
 			//glDrawArraysInstanced( GL_TRIANGLES, 0, mInstancedRenderable->GetMesh( ).Get( )->GetDrawCount(), mInstancedAmount );
 
 			//mInstancedRenderable->GetMesh( ).Get( )->Unbind( ); 
-		} 
-		shader->Unuse( ); 
+		//} 
+		//shader->Unuse( ); 
 
 		// Cubemap
 		//glCullFace( GL_FRONT );
@@ -999,11 +1073,13 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::SSAOPass( )
+	void GraphicsSubsystem::SSAOPass( GraphicsSubsystemContext* ctx )
 	{
 		Enjon::iVec2 screenRes = GetViewport( ); 
 
-		Camera* camera = mGraphicsScene.GetActiveCamera( );
+		GraphicsScene* scene = ctx->GetGraphicsScene( );
+
+		Camera* camera = scene->GetActiveCamera( );
 
 		// SSAO pass
 		mSSAOBlurTarget->Bind( );
@@ -1052,9 +1128,11 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::LightingPass()
+	void GraphicsSubsystem::LightingPass( GraphicsSubsystemContext* ctx )
 	{
-		Camera* camera = mGraphicsScene.GetActiveCamera( );
+		GraphicsScene* scene = ctx->GetGraphicsScene( );
+		Camera* camera = scene->GetActiveCamera( );
+		//Camera* camera = mGraphicsScene.GetActiveCamera( );
 
 		
 		GLSLProgram* ambientShader 		= Enjon::ShaderManager::Get("AmbientLight");
@@ -1062,11 +1140,16 @@ namespace Enjon
 		GLSLProgram* pointShader 		= Enjon::ShaderManager::Get("PBRPointLight");	
 		GLSLProgram* spotShader 		= Enjon::ShaderManager::Get("SpotLight");	
 
-		const HashSet<DirectionalLight*>& directionalLights 	= mGraphicsScene.GetDirectionalLights();	
-		const HashSet<SpotLight*>& spotLights 					= mGraphicsScene.GetSpotLights();	
-		const HashSet<PointLight*>& pointLights 				= mGraphicsScene.GetPointLights();
+		//const HashSet<DirectionalLight*>& directionalLights 	= mGraphicsScene.GetDirectionalLights();	
+		//const HashSet<SpotLight*>& spotLights 					= mGraphicsScene.GetSpotLights();	
+		//const HashSet<PointLight*>& pointLights 				= mGraphicsScene.GetPointLights();
 
-		AmbientSettings* aS = mGraphicsScene.GetAmbientSettings();
+		const HashSet<DirectionalLight*>& directionalLights 	= scene->GetDirectionalLights();	
+		const HashSet<SpotLight*>& spotLights 					= scene->GetSpotLights();	
+		const HashSet<PointLight*>& pointLights 				= scene->GetPointLights();
+
+		AmbientSettings* aS = scene->GetAmbientSettings( );
+		//AmbientSettings* aS = mGraphicsScene.GetAmbientSettings();
 
 		Mat4x4 projInverse = Mat4x4::Inverse( camera->GetProjection( ) );
 		Mat4x4 viewInverse = Mat4x4::Inverse( camera->GetView( ) );
@@ -1078,7 +1161,7 @@ namespace Enjon
 		glBlitFramebuffer( 0, 0, mGbuffer->GetResolution( ).x, mGbuffer->GetResolution( ).y, 0, 0, mLightingBuffer->GetResolution( ).x, mLightingBuffer->GetResolution( ).y, GL_DEPTH_BUFFER_BIT, GL_NEAREST );
 
 		// Cubemap
-		SubmitSkybox( ); 
+		SubmitSkybox( ctx ); 
 
 		mGbuffer->Unbind( );
 
@@ -1215,15 +1298,17 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::SubmitSkybox( )
+	void GraphicsSubsystem::SubmitSkybox( GraphicsSubsystemContext* ctx )
 	{
+		GraphicsScene* scene = ctx->GetGraphicsScene( );
+
 		// Cubemap
 		glCullFace( GL_FRONT );
 		Enjon::GLSLProgram* skyBoxShader = Enjon::ShaderManager::Get( "SkyBox" );
 		skyBoxShader->Use( );
 		{
-			skyBoxShader->SetUniform( "view", mGraphicsScene.GetActiveCamera()->GetView( ) );
-			skyBoxShader->SetUniform( "projection", mGraphicsScene.GetActiveCamera()->GetProjection( ) );
+			skyBoxShader->SetUniform( "view", scene->GetActiveCamera()->GetView( ) );
+			skyBoxShader->SetUniform( "projection", scene->GetActiveCamera()->GetProjection( ) );
 			skyBoxShader->BindTexture( "environmentMap", mIrradianceMap, 0 );
 
 			// TODO: When setting BindTexture on shader, have to set what the texture type is ( Texture2D, SamplerCube, etc. )
@@ -1238,7 +1323,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::LuminancePass()
+	void GraphicsSubsystem::LuminancePass( GraphicsSubsystemContext* ctx )
 	{
 		GLSLProgram* luminanceProgram = Enjon::ShaderManager::Get("Bright");
 		mLuminanceTarget->Bind();
@@ -1260,7 +1345,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::BloomPass()
+	void GraphicsSubsystem::BloomPass( GraphicsSubsystemContext* ctx )
 	{
 		GLSLProgram* horizontalBlurProgram = Enjon::ShaderManager::Get("HorizontalBlur");
 		GLSLProgram* verticalBlurProgram = Enjon::ShaderManager::Get("VerticalBlur");
@@ -1365,7 +1450,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::BloomPass2( )
+	void GraphicsSubsystem::BloomPass2( GraphicsSubsystemContext* ctx )
 	{
 		GLSLProgram* horizontalBlurProgram = Enjon::ShaderManager::Get( "HorizontalBlur" );
 		GLSLProgram* verticalBlurProgram = Enjon::ShaderManager::Get( "VerticalBlur" );
@@ -1377,15 +1462,22 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::FXAAPass(FrameBuffer* input)
+	void GraphicsSubsystem::FXAAPass( FrameBuffer* input, GraphicsSubsystemContext* ctx )
 	{
+		GraphicsScene* scene = ctx->GetGraphicsScene( );
 		GLSLProgram* fxaaProgram = Enjon::ShaderManager::Get("FXAA");
-		Vector<StaticMeshRenderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedStaticMeshRenderables( );
-		mFXAATarget->Bind();
+		Vector<StaticMeshRenderable*> nonDepthTestedRenderables = scene->GetNonDepthTestedStaticMeshRenderables( );
+
+		// Grab context framebuffer ( back buffer )
+		FrameBuffer* ctxBuffer = ctx->GetFrameBuffer( );
+
+		//mFXAATarget->Bind();
+		ctxBuffer->Bind( );
 		{
 			mCurrentWindow->Clear();
 			fxaaProgram->Use();
 			{
+				// Needs to be grabbed from the viewport that's actually in this context
 				auto viewPort = GetViewport();
 				fxaaProgram->BindTexture( "tex", input->GetTexture( ), 0 );
 				fxaaProgram->SetUniform("u_resolution", Vec2(viewPort.x, viewPort.y));
@@ -1396,15 +1488,17 @@ namespace Enjon
 			}
 			fxaaProgram->Unuse();
 		}
-		mFXAATarget->Unbind();
+		//mFXAATarget->Unbind();
+		ctxBuffer->Unbind( );
 	}
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::MotionBlurPass( FrameBuffer* inputTarget )
+	void GraphicsSubsystem::MotionBlurPass( FrameBuffer* inputTarget, GraphicsSubsystemContext* ctx )
 	{
-		Camera* camera = mGraphicsScene.GetActiveCamera( );
-		Vector<StaticMeshRenderable*> nonDepthTestedRenderables = mGraphicsScene.GetNonDepthTestedStaticMeshRenderables( );
+		GraphicsScene* scene = ctx->GetGraphicsScene( );
+		Camera* camera = scene->GetActiveCamera( );
+		Vector<StaticMeshRenderable*> nonDepthTestedRenderables = scene->GetNonDepthTestedStaticMeshRenderables( );
 		GLSLProgram* motionBlurProgram = ShaderManager::Get( "MotionBlur" );
 		mMotionBlurTarget->Bind( );
 		{
@@ -1526,7 +1620,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::CompositePass(FrameBuffer* input)
+	void GraphicsSubsystem::CompositePass(FrameBuffer* input, GraphicsSubsystemContext* ctx )
 	{
 		GLSLProgram* compositeProgram = Enjon::ShaderManager::Get("Composite"); 
 		mCompositeTarget->Bind();
@@ -1575,11 +1669,13 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::UIPass( FrameBuffer* inputTarget )
+	void GraphicsSubsystem::UIPass( FrameBuffer* inputTarget, GraphicsSubsystemContext* ctx )
 	{
+		GraphicsScene* scene = ctx->GetGraphicsScene( );
+
 		bool isStandalone = Engine::GetInstance( )->GetConfig( ).IsStandAloneApplication( );
 
-		Camera* camera = mGraphicsScene.GetActiveCamera( );
+		Camera* camera = scene->GetActiveCamera( );
 
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
@@ -1622,6 +1718,20 @@ namespace Enjon
 		}
 
 		inputTarget->Unbind( ); 
+	}
+
+	//======================================================================================================
+
+	void GraphicsSubsystem::AddContext( GraphicsSubsystemContext* context )
+	{
+		mContexts.insert( context );
+	}
+
+	//======================================================================================================
+
+	void GraphicsSubsystem::RemoveContext( GraphicsSubsystemContext* context )
+	{
+		mContexts.erase( context );
 	}
 
 	//======================================================================================================

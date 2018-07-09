@@ -13,6 +13,7 @@
 #include <Graphics/Renderable.h> 
 #include <Graphics/Camera.h>
 #include <Scene/Scene.h>
+#include <Base/World.h> 
 
 namespace Enjon
 { 

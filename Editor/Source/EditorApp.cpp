@@ -23,8 +23,10 @@
 #include <Entity/Components/RigidBodyComponent.h>
 #include <Entity/Components/PointLightComponent.h>
 #include <Entity/Components/DirectionalLightComponent.h>
-#include <Utils/FileUtils.h>
+#include <Utils/FileUtils.h> 
 #include <Utils/Tokenizer.h> 
+
+#include <Base/World.h> 
 
 #include <windows.h>
 #include <fmt/format.h>
@@ -57,6 +59,22 @@ Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\""
 //Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
 Enjon::String configuration = "Debug";
+
+namespace Enjon
+{
+	class EditorWindow : public Window
+	{
+		public:
+
+			EditorWindow( ) = default;
+
+			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::DEFAULT ) ) override;
+
+		protected: 
+
+			World* mWorld = nullptr; 
+	}; 
+}
 
 namespace Enjon
 {
@@ -1495,11 +1513,10 @@ namespace Enjon
 			ImGui::EndDock( );
 		} ); 
 
-		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) ); 
-
 		mEditorWidgetManager.AddView( new EditorAssetBrowserView( this, window ) );
 
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) ); 
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) ); 
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene Selection", GUIDockSlotType::Slot_Top, 0.5f ) ); 
 	}
 
 	void EditorApp::SetEditorSceneView( EditorSceneView* view )
@@ -2007,6 +2024,315 @@ namespace Enjon
 		blueMat->Save( );
 		yellowMat->Save( ); 
 	}
+
+	class EditorViewport : public EditorView
+	{
+		public:
+			/**
+			* @brief
+			*/
+			EditorViewport( EditorApp* app, Window* window, World* world )
+				: EditorView( app, window, "Viewport", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ), mWorld( world )
+			{ 
+			}
+
+			/**
+			* @brief
+			*/
+			~EditorViewport( ) = default; 
+
+		protected:
+
+			/**
+			* @brief Must be overriden
+			*/
+			virtual void UpdateView( ) override
+			{ 
+				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem ); 
+				
+				// Grab graphics context from world and then get framebuffer rendertarget texture
+				GraphicsSubsystemContext* gfxCtx = mWorld->GetContext< GraphicsSubsystemContext >( );
+				u32 currentTextureId = gfxCtx->GetFrameBuffer( )->GetTexture( ); 
+
+				// Render game in window
+				ImVec2 cursorPos = ImGui::GetCursorScreenPos( );
+
+				// Cache off cursor position for scene view
+				Vec2 padding( 20.0f, 8.0f );
+				//Vec2 padding( -20.0f, -40.0f );
+				f32 width = ImGui::GetWindowWidth( ) - padding.x;
+				f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
+				mSceneViewWindowPosition = Vec2( cursorPos.x, cursorPos.y );
+				mSceneViewWindowSize = Vec2( width, height );
+
+				ImTextureID img = ( ImTextureID )currentTextureId;
+				ImGui::Image( img, ImVec2( width, height ),
+					ImVec2( 0, 1 ), ImVec2( 1, 0 ), ImColor( 255, 255, 255, 255 ), ImColor( 255, 255, 255, 0 ) );
+
+				// Update camera aspect ratio
+				gfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >( )->SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
+
+				// Draw border around image
+				ImDrawList* dl = ImGui::GetWindowDrawList( );
+				ImVec2 a( mSceneViewWindowPosition.x, mSceneViewWindowPosition.y );
+				ImVec2 b( mSceneViewWindowPosition.x + mSceneViewWindowSize.x, mSceneViewWindowPosition.y + mSceneViewWindowSize.y ); 
+				dl->AddRect( a, b, ImColor( 0.0f, 0.64f, 1.0f, 0.48f ), 1.0f, 15, 1.5f ); 
+
+				AssetHandle< Scene > mCurrentScene = EngineSubsystem( SceneManager )->GetScene( );
+				if ( mCurrentScene )
+				{
+					String sceneLabel = "Scene: " + mCurrentScene->GetName( );
+					ImVec2 sz = ImGui::CalcTextSize( sceneLabel.c_str( ) ); 
+					ImVec2 rectPadding( 5.0f, 5.0f );
+					ImVec2 padding( 10.0f, 10.0f );
+
+					// Draw shadow text
+					ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
+					ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x + 1.0f, b.y - sz.y - padding.y + 1.0f ) ); 
+					ImGui::Text( sceneLabel.c_str( ) );
+					ImGui::PopStyleColor( );
+
+					// Draw text
+					ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x, b.y - sz.y - padding.y ) ); 
+					ImGui::Text( sceneLabel.c_str( ) );
+				} 
+			}
+
+			/**
+			* @brief Must be overriden
+			*/
+			virtual void ProcessViewInput( ) override
+			{
+
+			}
+
+			/**
+			* @brief Must be overriden
+			*/
+			virtual void Initialize( ) override
+			{
+
+			}
+
+			/**
+			* @brief
+			*/
+			virtual void CaptureState( )
+			{
+
+			} 
+
+		protected:
+			World* mWorld = nullptr;
+			Vec2 mSceneViewWindowPosition;
+			Vec2 mSceneViewWindowSize; 
+	}; 
+
+	int EditorWindow::Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags )
+	{
+		// Init window base
+		Window::Init( windowName, screenWidth, screenHeight, currentFlags );
+
+		// Create world 
+		mWorld = new World( ); 
+		// Register contexts with world
+		mWorld->RegisterContext< GraphicsSubsystemContext >( ); 
+
+		GUIContext* guiContext = GetGUIContext( );
+
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene Selection", GUIDockSlotType::Slot_Top, 0.5f ) );
+
+		return 1;
+	}
 }
+
+
+/*
+
+	// Constructing new editor window ideas
+
+	// Example - shader graph editor window
+
+	class ShaderGraphEditorWindow : public EditorWindow
+	{
+		public:
+
+			ShaderGraphEditorWindow()
+			{
+				// How should this work? Should it have a world with it? How would the user be able to do something like this? 
+				// Should the material window even KNOW about the world it's using? 
+
+				// Need to grab a scene ( how should this work, in general? )
+				
+				World* world = GetWorld();
+
+				// Where are worlds stored? How are they created / accessed / destroyed and cleaned up? 
+				// Have a concern about doing tons of post processing for multiple scenes as well
+				// Might need to look into a job system sooner than later
+
+				// The shader graph editor window has multiple docked tabs ( I need a good way to associate myself with these; right now, there's no real way to do this... )
+				// Properties view
+				// Viewport
+				// Node Graph Canvas
+
+				// The viewport has a scene associated with it ( it either needs to create a new scene, or it needs to grab a scene from an existing viewport )
+				// The viewport docked tab creates a new scene by default? I don't know if I like this, to be honest; it seems odd;
+				// Do viewports hold graphics scenes? That seems fucking weird. It would seem more logical that a viewport has the option to simply be used for the rendering of any scene available. 
+			}
+
+		protected:
+			StaticMeshRenderable mRenderable;
+			AssetHandle< ShaderGraph > mCurrentGraph; 
+	}; 
+
+	class EntityContext
+	{
+		protected:
+			Vector< EntityHandle > mActiveEntities;
+	};
+
+	EntityContext EntityManager::ConstructContext( World* world )
+	{
+		EntityContext ctx; 
+	}
+
+	ENJON_CLASS( )
+	class World : public Object
+	{
+		ENJON_CLASS_BODY( World )
+
+		public:
+
+			World()
+			{
+				// Construct contexts
+				mEntityContext = EngineSubsystem( EntityManager )->ConstructContext( this );
+				mPhysicsContext = EngineSubsytem( PhysicsSubsystem )->ConstructContext( this );
+				mGraphicsContext = EngineSubsystem( GraphicsSubsystem )->ConstructContext( this ); 
+			}
+
+		protected: 
+			EntityContext mEntityContext;
+			PhysicsContext mPhysicsContext;
+			GraphicsContext mGraphicsContext;	
+
+		private:
+	};
+
+	class EditorWindow : public Window
+	{
+		public:
+
+			void Init()
+			{
+				// Call init to the base window class to initialize this window
+				Window::Init();			
+
+				GUIContext* guiContext = GetGUIContext( );
+				assert( guiContext->GetContext( ) != nullptr );
+
+				static bool sceneSelectionViewOpen = true;
+				guiContext->RegisterWindow( "Scene Selection", [ & ]
+				{
+					if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
+					{
+						SelectSceneView( );
+					}
+					ImGui::EndDock( );
+				} ); 
+ 
+				guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) ); 
+				guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene Selection", GUIDockSlotType::Slot_Top, 0.5f ) ); 
+			}
+
+		protected:
+
+	};
+
+	class EditorViewportView : public EditorView
+	{
+		public:
+
+			EditorViewportView( EditorApp* app, Window* window, const String& name = "Viewport" )
+				: EditorView( app, window, "Viewport", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
+			{ 
+				// Construct new viewport and grab handle from graphics subsystem
+				mViewport = EngineSubsystem( GraphicsSubsystem )->ConstructViewport(); 
+
+				mViewportCamera = Camera( iVec2( mViewport.GetDimensions() );
+				mViewportCamera.SetNearFar( 0.1f, 1000.0f );
+				mViewportCamera.SetProjection(ProjectionType::Perspective);
+				mViewportCamera.SetPosition(Vec3(0, 5, 10)); 
+
+				// Where do the scenes live? Does a world own a scene? I think that's a decent compromise and setup;
+ 
+				mGfx->GetGraphicsScene( )->AddCamera( &mEditorCamera );
+				mGfx->GetGraphicsScene()->SetActiveCamera( &mEditorCamera );
+			}
+
+		protected:
+
+			String mName = "Viewport";
+
+		private: 
+			Viewport mViewport;
+			Camera mViewportCamera;
+	}; 
+
+	ViewportHandle GraphicsSubsystem::ConstructViewport( const u32& width, const u32& height )
+	{
+		Viewport viewport;
+		viewport.mWidth = width;
+		viewport.mHeight = height;
+		viewport.mRendertargetHandle = Construct< RenderTarget >(); 
+
+		return viewport;
+	}
+
+	// Docks should be considered as "child windows", which means that they can only be docked with their own parent windows and can only have other docks dock with them that share the same parent window 
+
+	// Should viewports be controlled by cameras? So you call - Viewport.SetCamera( Camera* cam ) ? And this is what the viewport uses itself? I don't think that cameras themselves should necessary be responsible for holding
+	// Viewports, since a camera can be swapped around between views easily. 
+	// Currently, the user gets a graphics scene then sets its active camera ( could do the same with a viewport );
+
+	class Viewport
+	{
+		friend GraphicsSubsystem;
+
+		public:
+			
+			iVec2 GetDimensions()
+			{
+				return iVec2( mWidth, mHeight );
+			}
+
+		protected: 
+			u32 mWidth;
+			u32 mHeight;
+			GraphicsHandle< RenderTarget > mRendertargetHandle; 
+	};
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 
 

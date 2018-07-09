@@ -13,6 +13,7 @@
 
 namespace Enjon
 { 
+	class World;
 	class SubsystemCatalog;
 	class AnimationSubsystem;
 	class GraphicsSubsystem; 
@@ -157,6 +158,11 @@ namespace Enjon
 			* @return Engine* - Pointer to engine instance.
 			*/
 			const Application* GetApplication( );
+
+			/** 
+			* @brief
+			*/
+			World* GetWorld( );
 			
 			/**
 			* @brief Returns pointer to meta class registry.
@@ -249,6 +255,7 @@ namespace Enjon
 			SceneManager*		mSceneManager		= nullptr;
 			ImGuiManager*		mImGuiManager		= nullptr;
 			AnimationSubsystem* mAnimationSystem	= nullptr;
+			World*				mWorld				= nullptr;
 
 			// Engine configuration settings
 			EngineConfig mConfig;

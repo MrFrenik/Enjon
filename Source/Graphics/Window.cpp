@@ -334,4 +334,14 @@ namespace Enjon {
 	}
 
 	//==============================================================================
+
+	void Window::SetWorld( World* world )
+	{
+		mWorld = world;
+	}
+
+	World* Window::GetWorld( )
+	{
+		return mWorld;
+	}
 }

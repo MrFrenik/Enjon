@@ -10,6 +10,7 @@
 #include <SubsystemCatalog.h>
 #include <ImGui/ImGuiManager.h>
 #include <IO/InputManager.h>
+#include <Graphics/FrameBuffer.h>
 
 namespace Enjon
 {
@@ -33,7 +34,11 @@ namespace Enjon
 	void EditorSceneView::UpdateView( )
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-		u32 currentTextureId = gfx->GetCurrentRenderTextureId( ); 
+
+		// Get context for main window
+		GraphicsSubsystemContext* gfxCtx = gfx->GetMainWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( );
+		u32 currentTextureId = gfxCtx->GetFrameBuffer( )->GetTexture( );
+		//u32 currentTextureId = gfx->GetCurrentRenderTextureId( ); 
 
 		// Render game in window
 		ImVec2 cursorPos = ImGui::GetCursorScreenPos( );
@@ -51,7 +56,7 @@ namespace Enjon
 			ImVec2( 0, 1 ), ImVec2( 1, 0 ), ImColor( 255, 255, 255, 255 ), ImColor( 255, 255, 255, 0 ) );
 
 		// Update camera aspect ratio
-		gfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >( )->SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
+		gfxCtx->GetGraphicsScene( )->GetActiveCamera( )->SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
 
 		// Draw border around image
 		ImDrawList* dl = ImGui::GetWindowDrawList( );

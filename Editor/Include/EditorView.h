@@ -87,6 +87,7 @@ namespace Enjon
 			String mName = "EditorView"; 
 			u32 mViewFlags = 0;
 			bool mViewEnabled = true;
+			Window* mWindow = nullptr;
 	};
 }
 

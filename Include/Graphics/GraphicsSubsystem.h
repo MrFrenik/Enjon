@@ -11,6 +11,7 @@
 #include "Graphics/SpriteBatch.h"
 #include "Graphics/Color.h"
 #include "Entity/EntityManager.h"
+#include "Base/SubsystemContext.h"
 #include "Subsystem.h" 
 
 namespace Enjon 
@@ -23,6 +24,40 @@ namespace Enjon
 	class iVec2;
 	class Shader;
 	class ShaderUniform;
+	class World;
+
+	ENJON_CLASS( )
+	class GraphicsSubsystemContext : public SubsystemContext
+	{
+		ENJON_CLASS_BODY( GraphicsSubsystemContext )
+
+		public:
+
+			/**
+			* @brief
+			*/
+			GraphicsSubsystemContext( World* world );
+
+			/**
+			* @brief
+			*/
+			virtual void ExplicitDestructor( ) override;
+
+			/**
+			* @brief
+			*/
+			GraphicsScene* GetGraphicsScene( );
+
+			/**
+			* @brief
+			*/
+			FrameBuffer* GetFrameBuffer( ) const; 
+
+		protected: 
+
+			GraphicsScene mScene;
+			FrameBuffer* mBackBuffer = nullptr;	// Eventually will need to just have a rendertarget that can be used with a "global" framebuffer
+	};
 
 	struct ToneMapSettings
 	{
@@ -112,16 +147,23 @@ namespace Enjon
 
 			/**
 			*@brief
-			*/
-			GraphicsScene* GetGraphicsScene() { return &mGraphicsScene; }
+			*/ 
+			void AddContext( GraphicsSubsystemContext* context );
+
+			/**
+			*@brief
+			*/ 
+			void RemoveContext( GraphicsSubsystemContext* context );
 
 			/**
 			*@brief
 			*/
-			const Camera* GetGraphicsSceneCamera() 
-			{ 
-				return mGraphicsScene.GetActiveCamera(); 
-			}
+			GraphicsScene* GetGraphicsScene( );
+
+			/**
+			*@brief
+			*/
+			const Camera* GetGraphicsSceneCamera( );
 			
 			/**
 			*@brief
@@ -174,7 +216,12 @@ namespace Enjon
 			// NOTE(): HACK HACK HACK! Just for testing
 			Window* GetMainWindow( )
 			{
-				return mWindows.at( 0 );
+				if ( mWindows.size( ) )
+				{
+					return mWindows.at( 0 );
+				}
+
+				return nullptr;
 			}
 
 			/** 
@@ -197,7 +244,7 @@ namespace Enjon
 
 		private:
 
-			void SubmitSkybox( );
+			void SubmitSkybox( GraphicsSubsystemContext* ctx );
 
 			void InitDebugDrawing( );
 
@@ -226,57 +273,57 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void GBufferPass();
+			void GBufferPass( GraphicsSubsystemContext* ctx );
 			
 			/**
 			*@brief
 			*/
-			void SSAOPass();
+			void SSAOPass( GraphicsSubsystemContext* ctx );
 			
 			/**
 			*@brief
 			*/
-			void LightingPass();
+			void LightingPass( GraphicsSubsystemContext* ctx );
 			
 			/**
 			*@brief
 			*/
-			void LuminancePass();
+			void LuminancePass( GraphicsSubsystemContext* ctx );
 			
 			/**
 			*@brief
 			*/
-			void BloomPass();
+			void BloomPass( GraphicsSubsystemContext* ctx );
 
 			/**
 			*@brief
 			*/
-			void BloomPass2( );
+			void BloomPass2( GraphicsSubsystemContext* ctx );
 
 			/**
 			*@brief
 			*/
-			void MotionBlurPass( FrameBuffer* inputTarget );
+			void MotionBlurPass( FrameBuffer* inputTarget, GraphicsSubsystemContext* ctx );
 			
 			/**
 			*@brief
 			*/
-			void FXAAPass( FrameBuffer* inputTarget );
+			void FXAAPass( FrameBuffer* inputTarget, GraphicsSubsystemContext* ctx );
 			
 			/**
 			*@brief
 			*/
-			void CompositePass( FrameBuffer* inputTarget );
+			void CompositePass( FrameBuffer* inputTarget, GraphicsSubsystemContext* ctx );
 
 			/**
 			*@brief
 			*/
-			void UIPass( FrameBuffer* inputTarget ); 
+			void UIPass( FrameBuffer* inputTarget, GraphicsSubsystemContext* ctx ); 
 			
 			/**
 			*@brief
 			*/
-			void ImGuiPass();
+			void ImGuiPass( );
 
 			/**
 			*@brief
@@ -406,6 +453,8 @@ namespace Enjon
 			Vector< DebugLine > mDebugLines;
 			GLuint mDebugLineVAO; 
 			GLuint mDebugLineVBO; 
+
+			HashSet< GraphicsSubsystemContext* > mContexts;
 	};
 }
 
