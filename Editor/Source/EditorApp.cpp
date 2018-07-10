@@ -62,17 +62,142 @@ Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
+	class EditorViewport : public EditorView
+	{
+		public:
+			/**
+			* @brief
+			*/
+			EditorViewport( EditorApp* app, Window* window )
+				: EditorView( app, window, "Viewport", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
+			{ 
+			}
+
+			/**
+			* @brief
+			*/
+			~EditorViewport( ) = default; 
+
+		protected:
+
+			/**
+			* @brief Must be overriden
+			*/
+			virtual void UpdateView( ) override
+			{ 
+				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem ); 
+ 
+				// Grab graphics context from world and then get framebuffer rendertarget texture
+				World* world = mWindow->GetWorld( );
+				GraphicsSubsystemContext* gfxCtx = world->GetContext< GraphicsSubsystemContext >( );
+				u32 currentTextureId = gfxCtx->GetFrameBuffer( )->GetTexture( ); 
+				//u32 currentTextureId = gfx->GetGBufferTexture( GBufferTextureType::OBJECT_ID );
+
+				// Rotate camera over time
+				Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
+				//cam->SetRotation( Quaternion::AngleAxis( Engine::GetInstance( )->GetWorldTime( ).GetTotalTimeElapsed( ), Vec3::YAxis( ) ) );
+
+				// Render game in window
+				ImVec2 cursorPos = ImGui::GetCursorScreenPos( );
+
+				// Cache off cursor position for scene view
+				Vec2 padding( 20.0f, 8.0f );
+				//Vec2 padding( -20.0f, -40.0f );
+				f32 width = ImGui::GetWindowWidth( ) - padding.x;
+				f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
+				mSceneViewWindowPosition = Vec2( cursorPos.x, cursorPos.y );
+				mSceneViewWindowSize = Vec2( width, height );
+
+				ImTextureID img = ( ImTextureID )currentTextureId;
+				ImGui::Image( img, ImVec2( width, height ),
+					ImVec2( 0, 1 ), ImVec2( 1, 0 ), ImColor( 255, 255, 255, 255 ), ImColor( 255, 255, 255, 0 ) );
+
+				// Update camera aspect ratio
+				gfxCtx->GetGraphicsScene( )->GetActiveCamera( )->SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
+
+				// Draw border around image
+				ImDrawList* dl = ImGui::GetWindowDrawList( );
+				ImVec2 a( mSceneViewWindowPosition.x, mSceneViewWindowPosition.y );
+				ImVec2 b( mSceneViewWindowPosition.x + mSceneViewWindowSize.x, mSceneViewWindowPosition.y + mSceneViewWindowSize.y ); 
+				dl->AddRect( a, b, ImColor( 0.0f, 0.64f, 1.0f, 0.48f ), 1.0f, 15, 1.5f ); 
+
+				AssetHandle< Scene > mCurrentScene = EngineSubsystem( SceneManager )->GetScene( );
+				if ( mCurrentScene )
+				{
+					String sceneLabel = "Scene: " + mCurrentScene->GetName( );
+					ImVec2 sz = ImGui::CalcTextSize( sceneLabel.c_str( ) ); 
+					ImVec2 rectPadding( 5.0f, 5.0f );
+					ImVec2 padding( 10.0f, 10.0f );
+
+					// Draw shadow text
+					ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
+					ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x + 1.0f, b.y - sz.y - padding.y + 1.0f ) ); 
+					ImGui::Text( sceneLabel.c_str( ) );
+					ImGui::PopStyleColor( );
+
+					// Draw text
+					ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x, b.y - sz.y - padding.y ) ); 
+					ImGui::Text( sceneLabel.c_str( ) );
+				} 
+			}
+
+			/**
+			* @brief Must be overriden
+			*/
+			virtual void ProcessViewInput( ) override
+			{
+
+			}
+
+			/**
+			* @brief Must be overriden
+			*/
+			virtual void Initialize( ) override
+			{
+
+			}
+
+			/**
+			* @brief
+			*/
+			virtual void CaptureState( )
+			{
+
+			} 
+
+		protected:
+			Vec2 mSceneViewWindowPosition;
+			Vec2 mSceneViewWindowSize; 
+	}; 
+	
 	class EditorWindow : public Window
 	{
 		public:
 
 			EditorWindow( ) = default;
 
-			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::DEFAULT ) ) override;
+			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override
+			{
+				// Init window base
+				Window::Init( windowName, screenWidth, screenHeight, currentFlags );
+
+				// Initialize new world 
+				mWorld = new World( ); 
+				// Register contexts with world
+				mWorld->RegisterContext< GraphicsSubsystemContext >( ); 
+
+				GUIContext* guiContext = GetGUIContext( );
+
+				// Create viewport
+				mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this );
+
+				guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
+
+				return 1;
+			}
 
 		protected: 
-
-			World* mWorld = nullptr; 
+			EditorViewport* mViewport = nullptr;
 	}; 
 }
 
@@ -1497,26 +1622,46 @@ namespace Enjon
 	void EditorApp::TestSecondWindow( )
 	{
 		// Get secondary window
-		Window* window = EngineSubsystem( GraphicsSubsystem )->GetWindows( ).at( 1 );
-		assert( window != nullptr );
+		//Window* window = EngineSubsystem( GraphicsSubsystem )->GetWindows( ).at( 1 );
+		//assert( window != nullptr );
 
-		GUIContext* guiContext = window->GetGUIContext( );
-		assert( guiContext->GetContext( ) != nullptr );
+		//GUIContext* guiContext = window->GetGUIContext( );
+		//assert( guiContext->GetContext( ) != nullptr );
 
-		static bool sceneSelectionViewOpen = true;
-		guiContext->RegisterWindow( "Scene Selection", [ & ]
-		{
-			if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
-			{
-				SelectSceneView( );
-			}
-			ImGui::EndDock( );
-		} ); 
+		//static bool sceneSelectionViewOpen = true;
+		//guiContext->RegisterWindow( "Scene Selection", [ & ]
+		//{
+		//	if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
+		//	{
+		//		SelectSceneView( );
+		//	}
+		//	ImGui::EndDock( );
+		//} ); 
 
-		mEditorWidgetManager.AddView( new EditorAssetBrowserView( this, window ) );
+		//mEditorWidgetManager.AddView( new EditorAssetBrowserView( this, window ) );
 
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) ); 
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene Selection", GUIDockSlotType::Slot_Top, 0.5f ) ); 
+		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) ); 
+		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene Selection", GUIDockSlotType::Slot_Top, 0.5f ) ); 
+
+		mTestEditorWindow = new EditorWindow( );
+		mTestEditorWindow->Init( "Test Window", 1400, 900 );
+
+		// Add window to graphics subsystem ( totally stupid way to do this )
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		gfx->AddWindow( mTestEditorWindow );
+
+		World* world = mTestEditorWindow->GetWorld( );
+		GraphicsScene* scene = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
+		Camera* cam = scene->GetActiveCamera( );
+		cam->SetNearFar( 0.1f, 1000.0f );
+		cam->SetProjection( ProjectionType::Perspective );
+		cam->SetPosition( Vec3( 0.0f, 0.0f, -3.0f ) );
+		StaticMeshRenderable* renderable = new StaticMeshRenderable( );
+		renderable->SetMesh( EngineSubsystem( AssetManager )->GetAsset< Mesh >( "models.unit_sphere" ) );
+		renderable->SetPosition( cam->GetPosition() + cam->Forward() * 10.0f );
+		renderable->SetScale( 2.0f );
+		//renderable->SetMaterial( EngineSubsystem( AssetManager )->GetAsset< Material >( "Cache.BlueMaterial" ) );
+		scene->AddStaticMeshRenderable( renderable ); 
 	}
 
 	void EditorApp::SetEditorSceneView( EditorSceneView* view )
@@ -1838,7 +1983,7 @@ namespace Enjon
 						auto mp = GetSceneViewProjectedCursorPosition( );
 
 						iVec2 dispSize = mGfx->GetViewport( );
-						PickResult pr = mGfx->GetPickedObjectResult( GetSceneViewProjectedCursorPosition( ) );
+						PickResult pr = mGfx->GetPickedObjectResult( GetSceneViewProjectedCursorPosition( ), Engine::GetInstance( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( ) );
 						if ( pr.mEntity.Get( ) )
 						{
 							// Set selected entity
@@ -2023,127 +2168,6 @@ namespace Enjon
 		greenMat->Save( );
 		blueMat->Save( );
 		yellowMat->Save( ); 
-	}
-
-	class EditorViewport : public EditorView
-	{
-		public:
-			/**
-			* @brief
-			*/
-			EditorViewport( EditorApp* app, Window* window, World* world )
-				: EditorView( app, window, "Viewport", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ), mWorld( world )
-			{ 
-			}
-
-			/**
-			* @brief
-			*/
-			~EditorViewport( ) = default; 
-
-		protected:
-
-			/**
-			* @brief Must be overriden
-			*/
-			virtual void UpdateView( ) override
-			{ 
-				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem ); 
-				
-				// Grab graphics context from world and then get framebuffer rendertarget texture
-				GraphicsSubsystemContext* gfxCtx = mWorld->GetContext< GraphicsSubsystemContext >( );
-				u32 currentTextureId = gfxCtx->GetFrameBuffer( )->GetTexture( ); 
-
-				// Render game in window
-				ImVec2 cursorPos = ImGui::GetCursorScreenPos( );
-
-				// Cache off cursor position for scene view
-				Vec2 padding( 20.0f, 8.0f );
-				//Vec2 padding( -20.0f, -40.0f );
-				f32 width = ImGui::GetWindowWidth( ) - padding.x;
-				f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
-				mSceneViewWindowPosition = Vec2( cursorPos.x, cursorPos.y );
-				mSceneViewWindowSize = Vec2( width, height );
-
-				ImTextureID img = ( ImTextureID )currentTextureId;
-				ImGui::Image( img, ImVec2( width, height ),
-					ImVec2( 0, 1 ), ImVec2( 1, 0 ), ImColor( 255, 255, 255, 255 ), ImColor( 255, 255, 255, 0 ) );
-
-				// Update camera aspect ratio
-				gfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >( )->SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
-
-				// Draw border around image
-				ImDrawList* dl = ImGui::GetWindowDrawList( );
-				ImVec2 a( mSceneViewWindowPosition.x, mSceneViewWindowPosition.y );
-				ImVec2 b( mSceneViewWindowPosition.x + mSceneViewWindowSize.x, mSceneViewWindowPosition.y + mSceneViewWindowSize.y ); 
-				dl->AddRect( a, b, ImColor( 0.0f, 0.64f, 1.0f, 0.48f ), 1.0f, 15, 1.5f ); 
-
-				AssetHandle< Scene > mCurrentScene = EngineSubsystem( SceneManager )->GetScene( );
-				if ( mCurrentScene )
-				{
-					String sceneLabel = "Scene: " + mCurrentScene->GetName( );
-					ImVec2 sz = ImGui::CalcTextSize( sceneLabel.c_str( ) ); 
-					ImVec2 rectPadding( 5.0f, 5.0f );
-					ImVec2 padding( 10.0f, 10.0f );
-
-					// Draw shadow text
-					ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
-					ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x + 1.0f, b.y - sz.y - padding.y + 1.0f ) ); 
-					ImGui::Text( sceneLabel.c_str( ) );
-					ImGui::PopStyleColor( );
-
-					// Draw text
-					ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x, b.y - sz.y - padding.y ) ); 
-					ImGui::Text( sceneLabel.c_str( ) );
-				} 
-			}
-
-			/**
-			* @brief Must be overriden
-			*/
-			virtual void ProcessViewInput( ) override
-			{
-
-			}
-
-			/**
-			* @brief Must be overriden
-			*/
-			virtual void Initialize( ) override
-			{
-
-			}
-
-			/**
-			* @brief
-			*/
-			virtual void CaptureState( )
-			{
-
-			} 
-
-		protected:
-			World* mWorld = nullptr;
-			Vec2 mSceneViewWindowPosition;
-			Vec2 mSceneViewWindowSize; 
-	}; 
-
-	int EditorWindow::Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags )
-	{
-		// Init window base
-		Window::Init( windowName, screenWidth, screenHeight, currentFlags );
-
-		// Create world 
-		mWorld = new World( ); 
-		// Register contexts with world
-		mWorld->RegisterContext< GraphicsSubsystemContext >( ); 
-
-		GUIContext* guiContext = GetGUIContext( );
-
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene Selection", GUIDockSlotType::Slot_Top, 0.5f ) );
-
-		return 1;
 	}
 }
 

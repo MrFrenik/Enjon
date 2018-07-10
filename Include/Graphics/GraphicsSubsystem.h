@@ -12,13 +12,13 @@
 #include "Graphics/Color.h"
 #include "Entity/EntityManager.h"
 #include "Base/SubsystemContext.h"
+#include "Graphics/GBuffer.h"
 #include "Subsystem.h" 
 
 namespace Enjon 
 { 
 	class FrameBuffer;
 	class Mesh; 
-	class GBuffer;
 	class FullScreenQuad; 
 	class SpriteBatch;
 	class iVec2;
@@ -48,15 +48,38 @@ namespace Enjon
 			*/
 			GraphicsScene* GetGraphicsScene( );
 
+			// TODO(): HACK! DESTROY!
+			void SetScene( GraphicsScene* scene )
+			{
+				mScene = *scene;
+			}
+
 			/**
 			* @brief
 			*/
 			FrameBuffer* GetFrameBuffer( ) const; 
 
+			/**
+			* @brief
+			*/
+			GBuffer* GetGBuffer( ) const;
+
+			/**
+			* @brief
+			*/
+			FrameBuffer* GetObjectIDBuffer( ) const;
+
+			/**
+			* @brief
+			*/
+			void ReinitializeFrameBuffers( const iVec2& viewport );
+
 		protected: 
 
 			GraphicsScene mScene;
 			FrameBuffer* mBackBuffer = nullptr;	// Eventually will need to just have a rendertarget that can be used with a "global" framebuffer
+			FrameBuffer* mObjectIDBuffer = nullptr;
+			GBuffer* mGBuffer = nullptr;
 	};
 
 	struct ToneMapSettings
@@ -180,6 +203,11 @@ namespace Enjon
 			*/
 			u32 GetCurrentRenderTextureId( ) const;
 
+			/*
+			* @brief
+			*/
+			u32 GetGBufferTexture( GBufferTextureType type );
+
 			/**
 			*@brief
 			*/
@@ -193,12 +221,12 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			PickResult GetPickedObjectResult( const iVec2& screenPosition );
+			PickResult GetPickedObjectResult( const iVec2& screenPosition, GraphicsSubsystemContext* ctx );
 
 			/**
 			*@brief
 			*/
-			PickResult GetPickedObjectResult( const Vec2& screenPosition );
+			PickResult GetPickedObjectResult( const Vec2& screenPosition, GraphicsSubsystemContext* ctx );
 
 			/**
 			*@brief
@@ -222,6 +250,11 @@ namespace Enjon
 				}
 
 				return nullptr;
+			}
+
+			void AddWindow( Window* window )
+			{
+				mWindows.push_back( window );
 			}
 
 			/** 

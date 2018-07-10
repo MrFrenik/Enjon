@@ -66,12 +66,38 @@ namespace Enjon
 	{ 
 		// Allocate new frame buffer for back buffer with default values ( will be changed by viewport )
 		// These should also just be handles that are given 
-		mBackBuffer = new FrameBuffer(800, 600);
+		mBackBuffer = new FrameBuffer(1400, 900); 
+		mGBuffer = new GBuffer( 1400, 900 ); 
+		mObjectIDBuffer = new FrameBuffer( 1400, 900 );
 
 		// Add context to graphics subsystem ( ...also another initialization order issue )
 		// Would prefer that the subsystem itself would construct and give these out
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-		gfx->AddContext( this );
+		gfx->AddContext( this ); 
+	}
+
+	void GraphicsSubsystemContext::ReinitializeFrameBuffers( const iVec2& viewport )
+	{
+		if ( mBackBuffer )
+		{
+			delete mBackBuffer;
+			mBackBuffer = nullptr;
+		}
+		if ( mGBuffer )
+		{
+			delete mGBuffer;
+			mGBuffer = nullptr;
+		}
+
+		if ( mObjectIDBuffer )
+		{
+			delete mObjectIDBuffer;
+			mObjectIDBuffer = nullptr;
+		}
+
+		mBackBuffer = new FrameBuffer( viewport.x, viewport.y );
+		mGBuffer = new GBuffer( viewport.x, viewport.y ); 
+		mObjectIDBuffer = new FrameBuffer( viewport.x, viewport.y );
 	}
 
 	//======================================================================================================
@@ -88,6 +114,11 @@ namespace Enjon
 			delete( mBackBuffer );
 			mBackBuffer = nullptr;
 		}
+		if ( mGBuffer )
+		{
+			delete( mGBuffer );
+			mGBuffer = nullptr;
+		}
 	}
 
 	//======================================================================================================
@@ -96,6 +127,20 @@ namespace Enjon
 	{
 		return mBackBuffer;
 	} 
+
+	//======================================================================================================
+
+	GBuffer* GraphicsSubsystemContext::GetGBuffer( ) const
+	{
+		return mGBuffer;
+	}
+
+	//======================================================================================================
+
+	FrameBuffer* GraphicsSubsystemContext::GetObjectIDBuffer( ) const
+	{
+		return mObjectIDBuffer;
+	}
 
 	//======================================================================================================
 
@@ -135,9 +180,9 @@ namespace Enjon
 		mWindow.Init( "Game", 1440, 900, WindowFlags::RESIZABLE ); 
 		mWindows.push_back( &mWindow ); 
 
-		Window* w = new Window( );
-		w->Init( "Second Window", 800, 600, WindowFlags::RESIZABLE );
-		mWindows.push_back( w ); 
+		//Window* w = new Window( );
+		//w->Init( "Second Window", 800, 600, WindowFlags::RESIZABLE );
+		//mWindows.push_back( w ); 
 
 		// Set current window
 		mCurrentWindow = &mWindow;
@@ -623,9 +668,9 @@ namespace Enjon
 		{ 
 			// Set current window
 			mCurrentWindow = w;
-			w->MakeCurrent( ); 
 
-			World* world = w->GetWorld( );
+			World* world = w->GetWorld( ); 
+
 			if ( world )
 			{
 				GraphicsSubsystemContext* gfxCtx = world->GetContext< GraphicsSubsystemContext >( );
@@ -645,12 +690,15 @@ namespace Enjon
 				// Motion Blur Pass
 				MotionBlurPass( mCompositeTarget, gfxCtx );
 				// FXAA pass
-				 FXAAPass( mMotionBlurTarget, gfxCtx );
+				 FXAAPass( mMotionBlurTarget, gfxCtx ); 
+
 				// Do UI pass
 				//UIPass( mFXAATarget, gfxCtx ); 
 				 UIPass( gfxCtx->GetFrameBuffer( ), gfxCtx );
 			} 
 	 
+			// Set current window
+			w->MakeCurrent( ); 
 			// Clear default buffer
 			mCurrentWindow->Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
  
@@ -766,19 +814,23 @@ namespace Enjon
 
 	//======================================================================================================
 
-	PickResult GraphicsSubsystem::GetPickedObjectResult( const Vec2& screenPosition )
+	PickResult GraphicsSubsystem::GetPickedObjectResult( const Vec2& screenPosition, GraphicsSubsystemContext* ctx )
 	{
-		return this->GetPickedObjectResult( iVec2( screenPosition.x, screenPosition.y ) );
+		return this->GetPickedObjectResult( iVec2( screenPosition.x, screenPosition.y ), ctx );
 	}
 
 	//======================================================================================================
 
-	PickResult GraphicsSubsystem::GetPickedObjectResult( const iVec2& screenPosition )
+	PickResult GraphicsSubsystem::GetPickedObjectResult( const iVec2& screenPosition, GraphicsSubsystemContext* ctx )
 	{
 		// Set pixel alignment for unpacking
+		GBuffer* gBuffer = ctx->GetGBuffer( );
+		FrameBuffer* objectIDBuffer = ctx->GetObjectIDBuffer( );
 		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-		mGbuffer->Bind( BindType::READ );
-		glReadBuffer( GL_COLOR_ATTACHMENT0 + ( u32 )GBufferTextureType::OBJECT_ID );
+		//gBuffer->Bind( BindType::READ );
+		//glReadBuffer( GL_COLOR_ATTACHMENT0 + ( u32 )GBufferTextureType::OBJECT_ID );
+		objectIDBuffer->Bind( BindType::READ );
+		glReadBuffer( GL_COLOR_ATTACHMENT0 );
 
 		// Read at center of screen and convert to color
 		u8 data[ 4 ];
@@ -793,7 +845,7 @@ namespace Enjon
 		EntityHandle handle = em->GetRawEntity( id );
 
 		// Unbind buffer
-		mGbuffer->Unbind( );
+		gBuffer->Unbind( );
 
 		return PickResult { handle, id };
 	}
@@ -813,7 +865,7 @@ namespace Enjon
 		glCullFace( GL_BACK );
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc( GL_LESS );
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); 
 
 		// Bind gbuffer
 		mGbuffer->Bind(); 
@@ -1061,7 +1113,22 @@ namespace Enjon
 		//skyBoxShader->Unuse( );
 
 		// Unbind gbuffer
-		mGbuffer->Unbind();
+		mGbuffer->Unbind(); 
+
+		// Blit into object id buffer
+		//FrameBuffer* objectIDBuffer = ctx->GetObjectIDBuffer( );
+		//objectIDBuffer->Bind( );
+		//{
+		//	//glViewport( 0, 0, ( s32 )GetViewport().x, ( s32 )GetViewport().y );
+		//	auto program = Enjon::ShaderManager::Get( "NoCameraProjection" );
+		//	program->Use( );
+		//	{
+		//		program->BindTexture( "tex", mGbuffer->GetTexture( GBufferTextureType::OBJECT_ID ), 0 );
+		//		mFullScreenQuad->Submit( );
+		//	}
+		//	program->Unuse( ); 
+		//}
+		//objectIDBuffer->Unbind( );
 
 		// Store the previous view projection matrix
 		mPreviousViewProjectionMatrix = camera->GetViewProjection( );
@@ -1205,12 +1272,12 @@ namespace Enjon
 		directionalShader->Use();
 		{
 			directionalShader->SetUniform( "u_camPos", camera->GetPosition( ) );
-			directionalShader->BindTexture("u_albedoMap", 	mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
-			directionalShader->BindTexture("u_normalMap", 	mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
-			directionalShader->BindTexture("u_depthMap",	mGbuffer->GetDepth(), 2);
-			directionalShader->BindTexture("u_matProps", 	mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
+			directionalShader->BindTexture("u_albedoMap", mGbuffer->GetTexture(GBufferTextureType::ALBEDO), 0);
+			directionalShader->BindTexture("u_normalMap", mGbuffer->GetTexture(GBufferTextureType::NORMAL), 1);
+			directionalShader->BindTexture("u_depthMap", mGbuffer->GetDepth(), 2);
+			directionalShader->BindTexture("u_matProps", mGbuffer->GetTexture(GBufferTextureType::MAT_PROPS), 3);
 			directionalShader->BindTexture("u_ssao", 		mSSAOBlurTarget->GetTexture(), 4);
-			directionalShader->SetUniform("u_resolution", 		mGbuffer->GetResolution());
+			directionalShader->SetUniform("u_resolution", mGbuffer->GetResolution());
 			directionalShader->SetUniform( "uProjMatrixInv", projInverse );
 			directionalShader->SetUniform( "uViewMatrixInv", viewInverse );
 			
@@ -1499,7 +1566,7 @@ namespace Enjon
 		GraphicsScene* scene = ctx->GetGraphicsScene( );
 		Camera* camera = scene->GetActiveCamera( );
 		Vector<StaticMeshRenderable*> nonDepthTestedRenderables = scene->GetNonDepthTestedStaticMeshRenderables( );
-		GLSLProgram* motionBlurProgram = ShaderManager::Get( "MotionBlur" );
+		GLSLProgram* motionBlurProgram = ShaderManager::Get( "MotionBlur" ); 
 		mMotionBlurTarget->Bind( );
 		{
 			mCurrentWindow->Clear( );
@@ -1561,14 +1628,15 @@ namespace Enjon
 		// Draw debug lines
 		{
 			// Blit the gbuffer depth first
-			mGbuffer->Bind( BindType::READ, false ); 
-			glBlitFramebuffer( 0, 0, mGbuffer->GetResolution( ).x, mGbuffer->GetResolution( ).y, 0, 0, mMotionBlurTarget->GetResolution( ).x, mMotionBlurTarget->GetResolution( ).y, GL_DEPTH_BUFFER_BIT, GL_NEAREST ); 
+			mGbuffer->Bind( BindType::READ, false );
+			{
+				glBlitFramebuffer( 0, 0, mGbuffer->GetResolution( ).x, mGbuffer->GetResolution( ).y, 0, 0, mMotionBlurTarget->GetResolution( ).x, mMotionBlurTarget->GetResolution( ).y, GL_DEPTH_BUFFER_BIT, GL_NEAREST );
 
-			// Draw the lines
-			DebugDrawSubmit( );
-
+				// Draw the lines
+				DebugDrawSubmit( ); 
+			} 
 			// Unbind the gbuffer from reading
-			mGbuffer->Unbind( ); 
+			mGbuffer->Unbind( );
 		}
 
 		// Unbind the motion blur target
@@ -1615,7 +1683,22 @@ namespace Enjon
 				}
 			}
 		}
-		mGbuffer->Unbind( ); 
+		mGbuffer->Unbind( );
+
+		// Final blit into object id buffer
+		FrameBuffer* objectIDBuffer = ctx->GetObjectIDBuffer( );
+		objectIDBuffer->Bind( );
+		{
+			//glViewport( 0, 0, ( s32 )GetViewport().x, ( s32 )GetViewport().y );
+			auto program = Enjon::ShaderManager::Get( "NoCameraProjection" );
+			program->Use( );
+			{
+				program->BindTexture( "tex", mGbuffer->GetTexture( GBufferTextureType::OBJECT_ID ), 0 );
+				mFullScreenQuad->Submit( );
+			}
+			program->Unuse( ); 
+		}
+		objectIDBuffer->Unbind( );
 	}
 
 	//======================================================================================================
@@ -1700,7 +1783,7 @@ namespace Enjon
 				mUIBatch.Begin( );
 				{
 					// Print out frame time 
-					if ( isStandalone )
+					//if ( isStandalone )
 					{
 						auto wt = Engine::GetInstance( )->GetWorldTime( ).mTotalTime;
 						auto uiFont = FontManager::GetFont("WeblySleek_16"); 
@@ -1910,6 +1993,13 @@ namespace Enjon
 			f64 pdf = NormalPDF(x, 1.0);
 			mBloomSettings.mLargeGaussianCurve[i++] = pdf;
 		}
+	}
+
+	//======================================================================================================
+
+	u32 GraphicsSubsystem::GetGBufferTexture( GBufferTextureType type )
+	{
+		return mGbuffer->GetTexture( type );
 	}
 
 	//======================================================================================================

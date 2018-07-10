@@ -6,6 +6,7 @@
 #include "IO/InputManager.h"
 #include "Engine.h"
 #include "SubsystemCatalog.h"
+#include "Base/World.h"
 
 namespace Enjon {
 
@@ -140,6 +141,12 @@ namespace Enjon {
 		// TODO(John): Need to refresh screen here...
 		m_screenWidth = dimensions.x;
 		m_screenHeight = dimensions.y;
+
+		if ( mWorld )
+		{
+			GraphicsSubsystemContext* ctx = mWorld->GetContext< GraphicsSubsystemContext >( );
+			ctx->ReinitializeFrameBuffers( GetViewport( ) );
+		}
 	}
 
 	iVec2 Window::GetViewport() const 

@@ -17,6 +17,9 @@
 
 namespace Enjon
 { 
+	class EditorViewport;
+	class EditorWindow;
+
 	class EditorWidgetManager
 	{ 
 		public: 
@@ -307,6 +310,8 @@ namespace Enjon
 
 			Camera mEditorCamera;
 			Vec3 mCameraRotator = Vec3( 0.0f );
+
+			EditorWindow* mTestEditorWindow = nullptr;
 	}; 
 }
 
