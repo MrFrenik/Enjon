@@ -1056,7 +1056,7 @@ namespace Enjon
 			} 
 
 			template < typename T >
-			bool InstanceOf( ) 
+			bool InstanceOf( ) const
 			{
 				MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance( )->GetMetaClassRegistry( ) );
 				const MetaClass* cls = mr->Get< T >( );

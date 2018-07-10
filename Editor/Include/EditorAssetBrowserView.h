@@ -30,6 +30,11 @@ namespace Enjon
 			* @brief
 			*/
 			~EditorAssetBrowserView( ) = default; 
+
+			const Asset* GetSelectedAsset( )
+			{
+				return mSelectedAsset;
+			}
  
 		protected: 
 

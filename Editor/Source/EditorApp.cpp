@@ -56,9 +56,9 @@ Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\""
 //Enjon::String mProjectsDir = "W:/Projects/";
 //Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -1621,30 +1621,8 @@ namespace Enjon
 
 	void EditorApp::TestSecondWindow( )
 	{
-		// Get secondary window
-		//Window* window = EngineSubsystem( GraphicsSubsystem )->GetWindows( ).at( 1 );
-		//assert( window != nullptr );
-
-		//GUIContext* guiContext = window->GetGUIContext( );
-		//assert( guiContext->GetContext( ) != nullptr );
-
-		//static bool sceneSelectionViewOpen = true;
-		//guiContext->RegisterWindow( "Scene Selection", [ & ]
-		//{
-		//	if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
-		//	{
-		//		SelectSceneView( );
-		//	}
-		//	ImGui::EndDock( );
-		//} ); 
-
-		//mEditorWidgetManager.AddView( new EditorAssetBrowserView( this, window ) );
-
-		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", nullptr, GUIDockSlotType::Slot_Tab, 0.2f ) ); 
-		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene Selection", GUIDockSlotType::Slot_Top, 0.5f ) ); 
-
 		mTestEditorWindow = new EditorWindow( );
-		mTestEditorWindow->Init( "Test Window", 1400, 900 );
+		mTestEditorWindow->Init( "Test Window", 500, 400 );
 
 		// Add window to graphics subsystem ( totally stupid way to do this )
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
@@ -1656,12 +1634,51 @@ namespace Enjon
 		cam->SetNearFar( 0.1f, 1000.0f );
 		cam->SetProjection( ProjectionType::Perspective );
 		cam->SetPosition( Vec3( 0.0f, 0.0f, -3.0f ) );
-		StaticMeshRenderable* renderable = new StaticMeshRenderable( );
-		renderable->SetMesh( EngineSubsystem( AssetManager )->GetAsset< Mesh >( "models.unit_sphere" ) );
-		renderable->SetPosition( cam->GetPosition() + cam->Forward() * 10.0f );
-		renderable->SetScale( 2.0f );
+		mTestRenderable = new StaticMeshRenderable( );
+		mTestRenderable->SetMesh( EngineSubsystem( AssetManager )->GetAsset< Mesh >( "models.unit_sphere" ) );
+		mTestRenderable->SetPosition( cam->GetPosition() + cam->Forward() * 10.0f );
+		mTestRenderable->SetScale( 2.0f );
 		//renderable->SetMaterial( EngineSubsystem( AssetManager )->GetAsset< Material >( "Cache.BlueMaterial" ) );
-		scene->AddStaticMeshRenderable( renderable ); 
+		scene->AddStaticMeshRenderable( mTestRenderable ); 
+
+		GUIContext* guiContext = mTestEditorWindow->GetGUIContext( );
+
+		//static bool sceneSelectionViewOpen = true;
+		//guiContext->RegisterWindow( "Scene Selection", [ & ]
+		//{
+		//	if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
+		//	{
+		//		SelectSceneView( );
+		//	}
+		//	ImGui::EndDock( );
+		//} ); 
+
+		mTempABV = mEditorWidgetManager.AddView( new EditorAssetBrowserView( this, mTestEditorWindow ) )->ConstCast< EditorAssetBrowserView >( );
+		{
+			static bool openView = true;
+			guiContext->RegisterWindow( "Update Material", [ & ]
+			{
+				if ( ImGui::BeginDock( "Update Material", &openView ) )
+				{ 
+					const Asset* asset = mTempABV->GetSelectedAsset( );
+					if ( asset )
+					{
+						ImGui::Text( fmt::format( "Material: {}", asset->GetName( ) ).c_str( ) );
+
+						// If is material, then set material of renderable
+						if ( asset->Class( )->InstanceOf< Material >( ) )
+						{
+							mTestRenderable->SetMaterial( asset, 0 );
+						}
+					}
+					ImGui::EndDock( );
+				}
+			}); 
+		}
+
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Viewport", GUIDockSlotType::Slot_Right, 0.6f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Update Material", "Viewport", GUIDockSlotType::Slot_Bottom, 0.2f ) );
 	}
 
 	void EditorApp::SetEditorSceneView( EditorSceneView* view )

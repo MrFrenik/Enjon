@@ -668,6 +668,8 @@ namespace Enjon
 		{ 
 			// Set current window
 			mCurrentWindow = w;
+			// Set current window
+			w->MakeCurrent( ); 
 
 			World* world = w->GetWorld( ); 
 
@@ -697,8 +699,6 @@ namespace Enjon
 				 UIPass( gfxCtx->GetFrameBuffer( ), gfxCtx );
 			} 
 	 
-			// Set current window
-			w->MakeCurrent( ); 
 			// Clear default buffer
 			mCurrentWindow->Clear( 1.0f, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, RGBA32_Black() ); 
  
@@ -923,7 +923,7 @@ namespace Enjon
 								sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
 								sgShader->SetUniform( "uWorldTime", wt );
 								sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
-								sgShader->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix );
+								sgShader->SetUniform( "uPreviousViewProjection", ctx->mPreviousViewProjectionMatrix );
 								material->Bind( sgShader );
 							}
 
@@ -968,7 +968,7 @@ namespace Enjon
 								sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
 								sgShader->SetUniform( "uWorldTime", wt );
 								sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
-								sgShader->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix );
+								sgShader->SetUniform( "uPreviousViewProjection", ctx->mPreviousViewProjectionMatrix );
 								material->Bind( sgShader );
 							}
 
@@ -1044,7 +1044,7 @@ namespace Enjon
 						sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
 						sgShader->SetUniform( "uWorldTime", wt );
 						sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
-						sgShader->SetUniform( "uPreviousViewProjection", mPreviousViewProjectionMatrix );
+						sgShader->SetUniform( "uPreviousViewProjection", ctx->mPreviousViewProjectionMatrix );
 						material->Bind( sgShader ); 
 					}
 
@@ -1131,7 +1131,7 @@ namespace Enjon
 		//objectIDBuffer->Unbind( );
 
 		// Store the previous view projection matrix
-		mPreviousViewProjectionMatrix = camera->GetViewProjection( );
+		ctx->mPreviousViewProjectionMatrix = camera->GetViewProjection( );
 
 		glEnable( GL_DEPTH_TEST );
 		glDepthFunc( GL_LEQUAL );

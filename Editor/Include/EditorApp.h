@@ -17,6 +17,8 @@
 
 namespace Enjon
 { 
+	class StaticMeshRenderable;
+	class EditorAssetBrowserView;
 	class EditorViewport;
 	class EditorWindow;
 
@@ -312,6 +314,8 @@ namespace Enjon
 			Vec3 mCameraRotator = Vec3( 0.0f );
 
 			EditorWindow* mTestEditorWindow = nullptr;
+			EditorAssetBrowserView* mTempABV = nullptr;
+			StaticMeshRenderable* mTestRenderable = nullptr;
 	}; 
 }
 

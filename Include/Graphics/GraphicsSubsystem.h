@@ -17,6 +17,7 @@
 
 namespace Enjon 
 { 
+	class GraphicsSubsystem;
 	class FrameBuffer;
 	class Mesh; 
 	class FullScreenQuad; 
@@ -29,6 +30,8 @@ namespace Enjon
 	ENJON_CLASS( )
 	class GraphicsSubsystemContext : public SubsystemContext
 	{
+		friend GraphicsSubsystem;
+
 		ENJON_CLASS_BODY( GraphicsSubsystemContext )
 
 		public:
@@ -80,6 +83,7 @@ namespace Enjon
 			FrameBuffer* mBackBuffer = nullptr;	// Eventually will need to just have a rendertarget that can be used with a "global" framebuffer
 			FrameBuffer* mObjectIDBuffer = nullptr;
 			GBuffer* mGBuffer = nullptr;
+			Mat4x4 mPreviousViewProjectionMatrix = Mat4x4::Identity( );
 	};
 
 	struct ToneMapSettings
@@ -478,7 +482,6 @@ namespace Enjon
 
 			Enjon::SpriteBatch mUIBatch;
 
-			Mat4x4 mPreviousViewProjectionMatrix = Mat4x4::Identity( );
 
 			f32 mMotionBlurVelocityScale = 2.0f;
 			u32 mMotionBlurEnabled = true; 

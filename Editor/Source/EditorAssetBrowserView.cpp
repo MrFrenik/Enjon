@@ -75,7 +75,7 @@ namespace Enjon
 		if ( !FS::is_directory( path ) )
 		{
 			// Want to be able to inspect this asset
-			AssetHandle< Asset > asset = EngineSubsystem( AssetManager )->GetAssetFromFilePath( Utils::FindReplaceAll( path, "\\", "/" ) );
+			AssetHandle< Asset > asset = EngineSubsystem( AssetManager )->GetAssetFromFilePath( Utils::FindReplaceAll( path, "\\", "/" ) ); 
 
 			// If asset, then set to be inspected...God, this will fall apart so fucking fast...
 			if ( asset )
