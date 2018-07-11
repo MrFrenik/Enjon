@@ -199,6 +199,117 @@ namespace Enjon
 		protected: 
 			EditorViewport* mViewport = nullptr;
 	}; 
+
+	class MaterialEditorWindow : public Window
+	{
+		public: 
+
+			/**
+			* @brief
+			*/
+			MaterialEditorWindow( const AssetHandle< Material >& mat )
+				: mMaterial( mat ), mInitialized( false )
+			{ 
+			}
+
+			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override
+			{ 
+				// Construct scene in world
+				if ( !mInitialized )
+				{ 
+					// Init window base
+					Window::Init( windowName, screenWidth, screenHeight, currentFlags );
+
+					// Initialize new world 
+					mWorld = new World( ); 
+					// Register contexts with world
+					mWorld->RegisterContext< GraphicsSubsystemContext >( ); 
+
+					ConstructScene( );
+
+					mInitialized = true;
+				} 
+
+				return 1; 
+			} 
+
+		protected:
+
+			void ConstructScene( )
+			{ 
+				GUIContext* guiContext = GetGUIContext( );
+
+				// Create viewport
+				mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this );
+
+				guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) ); 
+
+				// NOTE(): This should be done automatically for the user in the backend
+				// Add window to graphics subsystem ( totally stupid way to do this )
+				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+				gfx->AddWindow( this );
+
+				World* world = GetWorld( );
+				GraphicsScene* scene = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
+
+				// Need to create an external scene camera held in the viewport that can manipulate the scene view
+				Camera* cam = scene->GetActiveCamera( );
+				cam->SetNearFar( 0.1f, 1000.0f );
+				cam->SetProjection( ProjectionType::Perspective );
+				cam->SetPosition( Vec3( 0.0f, 0.0f, -3.0f ) );
+
+				mRenderable.SetMesh( EngineSubsystem( AssetManager )->GetAsset< Mesh >( "models.unit_sphere" ) );
+				mRenderable.SetPosition( cam->GetPosition() + cam->Forward() * 10.0f );
+				mRenderable.SetScale( 2.0f );
+				mRenderable.SetMaterial( mMaterial );
+				scene->AddStaticMeshRenderable( &mRenderable ); 
+
+				EditorApp* app = Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( );
+				mTempABV = new EditorAssetBrowserView( app, this );
+				{
+					static bool openView = true;
+					guiContext->RegisterWindow( "Update Material", [ & ]
+					{
+						if ( ImGui::BeginDock( "Update Material", &openView ) )
+						{ 
+							const Asset* asset = mTempABV->GetSelectedAsset( );
+							if ( asset )
+							{
+								ImGui::Text( fmt::format( "Material: {}", asset->GetName( ) ).c_str( ) );
+
+								// If is material, then set material of renderable
+								if ( asset->Class( )->InstanceOf< Material >( ) )
+								{
+									mRenderable.SetMaterial( asset, 0 );
+
+									// Set material
+									mMaterial = asset; 
+								}
+							}
+
+							if ( mMaterial )
+							{
+								ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+								igm->InspectObject( mMaterial.Get( ) );
+							}
+
+							ImGui::EndDock( );
+						}
+					}); 
+				}
+
+				guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
+				guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Viewport", GUIDockSlotType::Slot_Right, 0.6f ) );
+				guiContext->RegisterDockingLayout( GUIDockingLayout( "Update Material", "Viewport", GUIDockSlotType::Slot_Bottom, 0.2f ) );
+			}
+
+		protected: 
+			EditorViewport* mViewport = nullptr;
+			EditorAssetBrowserView* mTempABV = nullptr;
+			AssetHandle< Material > mMaterial;
+			StaticMeshRenderable mRenderable;
+			u32 mInitialized : 1;
+	};
 }
 
 namespace Enjon
@@ -1620,65 +1731,9 @@ namespace Enjon
 	//=================================================================================================
 
 	void EditorApp::TestSecondWindow( )
-	{
-		mTestEditorWindow = new EditorWindow( );
+	{ 
+		mTestEditorWindow = new MaterialEditorWindow( EngineSubsystem( AssetManager )->GetDefaultAsset< Material >( ) );
 		mTestEditorWindow->Init( "Test Window", 500, 400 );
-
-		// Add window to graphics subsystem ( totally stupid way to do this )
-		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-		gfx->AddWindow( mTestEditorWindow );
-
-		World* world = mTestEditorWindow->GetWorld( );
-		GraphicsScene* scene = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
-		Camera* cam = scene->GetActiveCamera( );
-		cam->SetNearFar( 0.1f, 1000.0f );
-		cam->SetProjection( ProjectionType::Perspective );
-		cam->SetPosition( Vec3( 0.0f, 0.0f, -3.0f ) );
-		mTestRenderable = new StaticMeshRenderable( );
-		mTestRenderable->SetMesh( EngineSubsystem( AssetManager )->GetAsset< Mesh >( "models.unit_sphere" ) );
-		mTestRenderable->SetPosition( cam->GetPosition() + cam->Forward() * 10.0f );
-		mTestRenderable->SetScale( 2.0f );
-		//renderable->SetMaterial( EngineSubsystem( AssetManager )->GetAsset< Material >( "Cache.BlueMaterial" ) );
-		scene->AddStaticMeshRenderable( mTestRenderable ); 
-
-		GUIContext* guiContext = mTestEditorWindow->GetGUIContext( );
-
-		//static bool sceneSelectionViewOpen = true;
-		//guiContext->RegisterWindow( "Scene Selection", [ & ]
-		//{
-		//	if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
-		//	{
-		//		SelectSceneView( );
-		//	}
-		//	ImGui::EndDock( );
-		//} ); 
-
-		mTempABV = mEditorWidgetManager.AddView( new EditorAssetBrowserView( this, mTestEditorWindow ) )->ConstCast< EditorAssetBrowserView >( );
-		{
-			static bool openView = true;
-			guiContext->RegisterWindow( "Update Material", [ & ]
-			{
-				if ( ImGui::BeginDock( "Update Material", &openView ) )
-				{ 
-					const Asset* asset = mTempABV->GetSelectedAsset( );
-					if ( asset )
-					{
-						ImGui::Text( fmt::format( "Material: {}", asset->GetName( ) ).c_str( ) );
-
-						// If is material, then set material of renderable
-						if ( asset->Class( )->InstanceOf< Material >( ) )
-						{
-							mTestRenderable->SetMaterial( asset, 0 );
-						}
-					}
-					ImGui::EndDock( );
-				}
-			}); 
-		}
-
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Viewport", GUIDockSlotType::Slot_Right, 0.6f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Update Material", "Viewport", GUIDockSlotType::Slot_Bottom, 0.2f ) );
 	}
 
 	void EditorApp::SetEditorSceneView( EditorSceneView* view )

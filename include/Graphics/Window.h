@@ -75,6 +75,8 @@ namespace Enjon
 			inline int GetScreenWidth() const { return m_screenWidth; }
 			inline int GetScreenHeight() const { return m_screenHeight; }
 
+			virtual void Update( );
+
 			void SetViewport(int width, int height);
 			void SetViewport(Enjon::iVec2& dimensions);
 			iVec2 GetViewport() const;
