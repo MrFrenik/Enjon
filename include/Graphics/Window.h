@@ -57,6 +57,15 @@ namespace Enjon
 
 	typedef std::bitset<static_cast<size_t>(WindowFlags::COUNT)> WindowFlagsMask;
 
+	struct WindowParams
+	{
+		Window* mWindow;
+		String mName;
+		u32 mWidth;
+		u32 mHeight;
+		WindowFlagsMask mFlags;
+	};
+
 	class Window : public Enjon::Object
 	{
 		friend GraphicsSubsystem;
@@ -108,6 +117,10 @@ namespace Enjon
 			void SetWorld( World* world );
 			World* GetWorld( );
 
+			static void AddNewWindow( const WindowParams& params );
+
+			static void InitializeWindows( );
+
 		protected:
 
 			/** 
@@ -130,7 +143,8 @@ namespace Enjon
 			static HashMap<CursorType, SDL_Cursor*> mSDLCursors; 
 			GUIContext mGUIContext;
 			bool mMouseIsHovering = false;
-			World* mWorld = nullptr;
+			World* mWorld = nullptr; 
+			static Vector< WindowParams > mWindowsToInit;
 	};
 }
 

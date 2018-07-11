@@ -251,6 +251,9 @@ namespace Enjon
 			dt = ( f32 )( ticks ) / 1000.0f;
 			lastTime = thisTime; 
 
+			// Process all new windows to be created ( pretty hacky right here... )
+			Window::InitializeWindows( );
+
 			 // Update input manager
 			mInput->Update( dt ); 
 

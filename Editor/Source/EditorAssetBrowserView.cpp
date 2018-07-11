@@ -4,6 +4,7 @@
 #include "EditorAssetBrowserView.h"
 #include "EditorInspectorView.h"
 #include "EditorApp.h"
+#include "EditorMaterialEditWindow.h"
 #include "Project.h"
 
 #include <Engine.h>
@@ -255,6 +256,21 @@ namespace Enjon
 							{
 								mCurrentDirectory = p.path( ).string( ); 
 							} 
+							else
+							{
+								// Open up new window
+								if ( mSelectedAsset->Class( )->InstanceOf< Material >( ) )
+								{
+									//// Open new editor window for this material
+									WindowParams params;
+									params.mWindow = new EditorMaterialEditWindow( mSelectedAsset );
+									params.mName = mSelectedAsset->GetName( );
+									params.mWidth = 800;
+									params.mHeight = 400;
+									params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
+									Window::AddNewWindow( params );
+								}
+							}
 						} 
 
 						if ( input->IsKeyPressed( KeyCode::RightMouseButton ) )

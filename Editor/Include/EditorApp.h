@@ -21,7 +21,7 @@ namespace Enjon
 	class EditorAssetBrowserView;
 	class EditorViewport;
 	class EditorWindow;
-	class MaterialEditorWindow;
+	class EditorMaterialEditWindow; 
 
 	class EditorWidgetManager
 	{ 
@@ -314,7 +314,7 @@ namespace Enjon
 			Camera mEditorCamera;
 			Vec3 mCameraRotator = Vec3( 0.0f );
 
-			MaterialEditorWindow* mTestEditorWindow = nullptr;
+			EditorMaterialEditWindow* mTestEditorWindow = nullptr;
 			EditorAssetBrowserView* mTempABV = nullptr;
 			StaticMeshRenderable* mTestRenderable = nullptr;
 	}; 

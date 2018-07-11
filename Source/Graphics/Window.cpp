@@ -12,6 +12,7 @@ namespace Enjon {
 
 	SDL_GLContext Window::mGLContext = nullptr;
 	HashMap< CursorType, SDL_Cursor* > Window::mSDLCursors;
+	Vector< WindowParams > Window::mWindowsToInit;
 
 	Window::Window()
 		: m_isfullscreen(false)
@@ -69,7 +70,7 @@ namespace Enjon {
 		}
 
 		// Set current context and window
-		SDL_GL_MakeCurrent( m_sdlWindow, mGLContext );
+		//SDL_GL_MakeCurrent( m_sdlWindow, mGLContext );
 
 		//Set up glew (optional but recommended)
 		GLenum error = glewInit();
@@ -81,22 +82,22 @@ namespace Enjon {
 		glewExperimental = GL_TRUE;
 
 		//Check OpenGL version
-		std::printf("***    OpenGL Version:  %s    ***\n", glGetString(GL_VERSION));
+		//std::printf("***    OpenGL Version:  %s    ***\n", glGetString(GL_VERSION));
 
 		//Set viewport
-		glViewport(0, 0, m_screenWidth, m_screenHeight);
+		//glViewport(0, 0, m_screenWidth, m_screenHeight);
 
-		//Set the background color
-		glClearColor(0.2f, 0.3f, 0.8f, 1.0f);
+		////Set the background color
+		//glClearColor(0.2f, 0.3f, 0.8f, 1.0f);
 
 		//Set Vsync to enabled
 		SDL_GL_SetSwapInterval(0);
 
 		//Enable alpha blending
-		glEnable(GL_BLEND);
+		//glEnable(GL_BLEND);
 
-		//Set blend function type
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		////Set blend function type
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Construct gui context
 		mGUIContext = GUIContext( this );
@@ -358,5 +359,29 @@ namespace Enjon {
 	World* Window::GetWorld( )
 	{
 		return mWorld;
+	}
+
+	void Window::AddNewWindow( const WindowParams& params )
+	{
+		mWindowsToInit.push_back( params );
+	}
+
+	void Window::InitializeWindows( )
+	{
+		for ( auto& wp : mWindowsToInit )
+		{
+			Window* window = wp.mWindow;
+			if ( !window ) 
+			{
+				continue;
+			}
+			// Initialize window
+			window->Init( wp.mName, wp.mWidth, wp.mHeight, wp.mFlags );
+			// Late initialize gui context
+			window->GetGUIContext( )->LateInit( );
+		}
+
+		// Clear window set
+		mWindowsToInit.clear( );
 	}
 }

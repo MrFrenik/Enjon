@@ -231,6 +231,9 @@ namespace Enjon
 	{
 		assert( window != nullptr );
 
+		// Cache current context
+		ImGuiContext* curCtx = ImGui::GetCurrentContext( );
+
 		// Init window
 		ImGuiContext* ctx = ImGui_ImplSdlGL3_Init( window->GetSDLWindow( ) );
 
@@ -242,6 +245,9 @@ namespace Enjon
 
 		// Set imgui context
 		AddWindowToContextMap( window->GetSDLWindow(), ctx ); 
+
+		// Reset context
+		ImGui::SetCurrentContext( curCtx );
 
 		return ctx;
 	} 
