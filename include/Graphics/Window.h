@@ -118,7 +118,7 @@ namespace Enjon
 			World* GetWorld( );
 
 			static void AddNewWindow( const WindowParams& params );
-
+			static void DestroyWindow( Window* window ); 
 			static void InitializeWindows( );
 
 		protected:
@@ -131,6 +131,10 @@ namespace Enjon
 			static void InitSDLCursors( );
 
 			void ClearDroppedFiles( );
+
+			virtual void ExplicitDestroy( )
+			{ 
+			}
 
 		protected:
 			static SDL_GLContext mGLContext;
@@ -145,6 +149,7 @@ namespace Enjon
 			bool mMouseIsHovering = false;
 			World* mWorld = nullptr; 
 			static Vector< WindowParams > mWindowsToInit;
+			static Vector< Window* > mWindowsToDestroy;
 	};
 }
 

@@ -82,7 +82,7 @@ namespace Enjon
 			if ( asset )
 			{
 				// Set to be inspected
-				mApp->GetInspectorView( )->SetInspetedObject( asset.Get() );
+				//mApp->GetInspectorView( )->SetInspetedObject( asset.Get() );
 
 				// Set selected asset
 				mSelectedAsset = asset.Get( );
@@ -90,7 +90,7 @@ namespace Enjon
 			else
 			{
 				// Set inspected asset to be null
-				mApp->GetInspectorView( )->SetInspetedObject( nullptr ); 
+				//mApp->GetInspectorView( )->SetInspetedObject( nullptr ); 
 
 				// Set selected asset to be null
 				mSelectedAsset = nullptr;
@@ -99,7 +99,7 @@ namespace Enjon
 		else
 		{
 			// Set inspected asset to be null
-			mApp->GetInspectorView( )->SetInspetedObject( nullptr ); 
+			//mApp->GetInspectorView( )->SetInspetedObject( nullptr ); 
 
 			// Set selected asset to be null
 			mSelectedAsset = nullptr; 
@@ -250,7 +250,7 @@ namespace Enjon
 					{
 						hoveringItem = true;
 
-						if ( ImGui::IsMouseDoubleClicked( 0 ) )
+						if ( ImGui::IsMouseDoubleClicked( 0 ) || input->IsKeyPressed( KeyCode::Enter ) )
 						{
 							if ( FS::is_directory( p ) )
 							{
@@ -516,7 +516,13 @@ namespace Enjon
 		if ( ImGui::Selectable( "\t+ Material" ) )
 		{ 
 			// Construct asset with current directory
-			am->ConstructAsset< Material >( "NewMaterial", mCurrentDirectory );
+			AssetHandle< Material > mat = am->ConstructAsset< Material >( "NewMaterial", mCurrentDirectory );
+
+			// Select the path
+			SetSelectedPath( mat.Get( )->GetAssetRecordInfo( )->GetAssetFilePath( ) );
+
+			// Set needing to rename
+			mPathNeedsRename = true;
 
 			mFolderMenuPopup.Deactivate( ); 
 		} 

@@ -67,7 +67,6 @@ namespace Enjon
 		// Allocate new frame buffer for back buffer with default values ( will be changed by viewport )
 		// These should also just be handles that are given 
 		mBackBuffer = new FrameBuffer(1400, 900); 
-		mGBuffer = new GBuffer( 1400, 900 ); 
 		mObjectIDBuffer = new FrameBuffer( 1400, 900 );
 
 		// Add context to graphics subsystem ( ...also another initialization order issue )
@@ -82,13 +81,7 @@ namespace Enjon
 		{
 			delete mBackBuffer;
 			mBackBuffer = nullptr;
-		}
-		if ( mGBuffer )
-		{
-			delete mGBuffer;
-			mGBuffer = nullptr;
-		}
-
+		} 
 		if ( mObjectIDBuffer )
 		{
 			delete mObjectIDBuffer;
@@ -96,7 +89,6 @@ namespace Enjon
 		}
 
 		mBackBuffer = new FrameBuffer( viewport.x, viewport.y );
-		mGBuffer = new GBuffer( viewport.x, viewport.y ); 
 		mObjectIDBuffer = new FrameBuffer( viewport.x, viewport.y );
 	}
 
@@ -114,10 +106,10 @@ namespace Enjon
 			delete( mBackBuffer );
 			mBackBuffer = nullptr;
 		}
-		if ( mGBuffer )
+		if ( mObjectIDBuffer )
 		{
-			delete( mGBuffer );
-			mGBuffer = nullptr;
+			delete ( mObjectIDBuffer );
+			mObjectIDBuffer = nullptr;
 		}
 	}
 
@@ -127,13 +119,6 @@ namespace Enjon
 	{
 		return mBackBuffer;
 	} 
-
-	//======================================================================================================
-
-	GBuffer* GraphicsSubsystemContext::GetGBuffer( ) const
-	{
-		return mGBuffer;
-	}
 
 	//======================================================================================================
 
@@ -672,10 +657,12 @@ namespace Enjon
 			w->MakeCurrent( ); 
 
 			World* world = w->GetWorld( ); 
+			GraphicsSubsystemContext* gfxCtx = nullptr;
 
 			if ( world )
 			{
-				GraphicsSubsystemContext* gfxCtx = world->GetContext< GraphicsSubsystemContext >( );
+				// Grab graphics context
+				gfxCtx = world->GetContext< GraphicsSubsystemContext >( );
 
 				// Gbuffer pass
 				GBufferPass( gfxCtx );
@@ -705,7 +692,7 @@ namespace Enjon
 			// TODO(): Hate this : Compile it out
 			if ( Engine::GetInstance( )->GetConfig( ).IsStandAloneApplication( ) )
 			{
-				PresentBackBuffer( );
+				PresentBackBuffer( gfxCtx );
 			} 
 			else
 			{
@@ -794,13 +781,13 @@ namespace Enjon
 
 	//=====================================================================================================
 
-	void GraphicsSubsystem::PresentBackBuffer( )
+	void GraphicsSubsystem::PresentBackBuffer( GraphicsSubsystemContext* ctx )
 	{
 		glViewport( 0, 0, ( s32 )GetViewport().x, ( s32 )GetViewport().y );
 		auto program = Enjon::ShaderManager::Get( "NoCameraProjection" );
 		program->Use( );
 		{
-			program->BindTexture( "tex", mCurrentRenderTexture, 0 );
+			program->BindTexture( "tex", ctx->GetFrameBuffer( )->GetTexture( ), 0 );
 			mFullScreenQuad->Submit( );
 		}
 		program->Unuse( );
@@ -824,7 +811,6 @@ namespace Enjon
 	PickResult GraphicsSubsystem::GetPickedObjectResult( const iVec2& screenPosition, GraphicsSubsystemContext* ctx )
 	{
 		// Set pixel alignment for unpacking
-		GBuffer* gBuffer = ctx->GetGBuffer( );
 		FrameBuffer* objectIDBuffer = ctx->GetObjectIDBuffer( );
 		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 		//gBuffer->Bind( BindType::READ );
@@ -842,10 +828,9 @@ namespace Enjon
 
 		// Get the entity that this id corresponds to
 		EntityManager* em = EngineSubsystem( EntityManager );
-		EntityHandle handle = em->GetRawEntity( id );
+		EntityHandle handle = em->GetRawEntity( id ); 
 
-		// Unbind buffer
-		gBuffer->Unbind( );
+		objectIDBuffer->Unbind( ); 
 
 		return PickResult { handle, id };
 	}
@@ -1783,7 +1768,7 @@ namespace Enjon
 				mUIBatch.Begin( );
 				{
 					// Print out frame time 
-					//if ( isStandalone )
+					if ( isStandalone )
 					{
 						auto wt = Engine::GetInstance( )->GetWorldTime( ).mTotalTime;
 						auto uiFont = FontManager::GetFont("WeblySleek_16"); 

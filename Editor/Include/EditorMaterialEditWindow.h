@@ -76,6 +76,15 @@ namespace Enjon
 
 		protected:
 
+			virtual void ExplicitDestroy( ) override
+			{
+				if ( mViewport )
+				{
+					delete ( mViewport );
+					mViewport = nullptr;
+				}
+			}
+
 			void ConstructScene( ); 
 
 		protected: 

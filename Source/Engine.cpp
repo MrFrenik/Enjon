@@ -48,17 +48,17 @@ namespace Enjon
 		// Shutdown imguimanager
 		//ImGuiManager::ShutDown( );
 
+		// Cleanup world
+		delete( mWorld );
+		mWorld = nullptr;
+
 		// Shutdown all subsystems
 		delete( mSubsystemCatalog );
 		mSubsystemCatalog = nullptr; 
 
 		// Shutdown meta class registry
 		delete( mMetaClassRegisty );
-		mMetaClassRegisty = nullptr;
-
-		// Cleanup world
-		delete( mWorld );
-		mWorld = nullptr;
+		mMetaClassRegisty = nullptr; 
 	}
 
 	//=======================================================

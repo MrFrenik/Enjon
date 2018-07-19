@@ -13,6 +13,7 @@ namespace Enjon {
 	SDL_GLContext Window::mGLContext = nullptr;
 	HashMap< CursorType, SDL_Cursor* > Window::mSDLCursors;
 	Vector< WindowParams > Window::mWindowsToInit;
+	Vector< Window* > Window::mWindowsToDestroy;
 
 	Window::Window()
 		: m_isfullscreen(false)
@@ -21,7 +22,6 @@ namespace Enjon {
 
 	Window::~Window()
 	{
-		mDroppedFiles.clear( );
 	}
 
 	int Window::Init(std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags) 
@@ -287,7 +287,8 @@ namespace Enjon {
 					{ 
 						if ( event.window.windowID == SDL_GetWindowID( m_sdlWindow ) )
 						{
-							Destroy( ); 
+							// Need to push back into static window for destruction at top of frame
+							Window::DestroyWindow( this );
 							return Result::FAILURE;
 						}
 					} break; 
@@ -308,6 +309,8 @@ namespace Enjon {
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 
+		mDroppedFiles.clear( ); 
+
 		// Cache main window
 		Window* mainWindow = gfx->GetMainWindow( );
 
@@ -322,9 +325,18 @@ namespace Enjon {
 		{ 
 			for ( auto& w : gfx->GetWindows( ) )
 			{
-				w->Destroy( );
+				Window::DestroyWindow( w );
 			}
 		}
+
+		// Delete world
+		if ( mWorld )
+		{
+			delete mWorld;
+			mWorld = nullptr;
+		}
+
+		this->ExplicitDestroy( );
 	}
 
 	//==============================================================================
@@ -366,8 +378,27 @@ namespace Enjon {
 		mWindowsToInit.push_back( params );
 	}
 
+	void Window::DestroyWindow( Window* window )
+	{ 
+		mWindowsToDestroy.push_back( window );
+	}
+
 	void Window::InitializeWindows( )
 	{
+		// Destroy previous windows from past frame
+		for ( auto& w : mWindowsToDestroy )
+		{
+			if ( w )
+			{
+				w->Destroy( );
+				delete w;
+				w = nullptr; 
+			}
+		}
+
+		// Clear windows
+		mWindowsToDestroy.clear( );
+
 		for ( auto& wp : mWindowsToInit )
 		{
 			Window* window = wp.mWindow;
@@ -383,5 +414,5 @@ namespace Enjon {
 
 		// Clear window set
 		mWindowsToInit.clear( );
-	}
+	} 
 }

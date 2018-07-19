@@ -30,7 +30,10 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual ~SubsystemContext( ) = default;
+			~SubsystemContext( )
+			{
+				ExplicitDestructor( );
+			}
 
 			template <typename T>
 			inline static void AssertIsSubsystemContext( )

@@ -888,7 +888,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			~MetaClass( )
+			virtual ~MetaClass( )
 			{
 				// Delete all functions
 				for ( auto& f : mFunctions )
@@ -907,7 +907,10 @@ namespace Enjon
 				// Clear properties and functions
 				mProperties.clear( );
 				mFunctions.clear( );
-			}
+
+				// Any further destruction that needs to occur
+				this->Destroy( ); 
+			} 
 
 			MetaClassType GetMetaClassType( ) const 
 			{
@@ -1094,6 +1097,12 @@ namespace Enjon
 			}
 
 		protected:
+
+			virtual void Destroy( )
+			{ 
+			}
+
+		protected:
 			PropertyTable mProperties;
 			FunctionTable mFunctions;
 			u32 mPropertyCount;
@@ -1123,6 +1132,14 @@ namespace Enjon
 			const Vector< String >& GetRequiredComponentList( ) const
 			{
 				return mRequiredComponentList;
+			}
+
+
+		protected:
+
+			virtual void Destroy( ) override
+			{
+				mRequiredComponentList.clear( );
 			}
 
 		protected: 

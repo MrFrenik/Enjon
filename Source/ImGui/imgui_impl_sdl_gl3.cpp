@@ -452,6 +452,13 @@ void    ImGui_ImplSdlGL3_InvalidateDeviceObjects( )
 		ImGui::GetIO( ).Fonts->TexID = 0;
 		g_FontTexture = 0;
 	}
+
+	// Delete the previous data
+	delete data;
+	data = nullptr;
+
+	// Remove from map
+	mGraphicsDeviceData.erase( ctx );
 }
 
 ImGuiContext* ImGui_ImplSdlGL3_GetContext( )
@@ -548,9 +555,14 @@ void ImGui_ImplSdlGL3_Shutdown( )
 	ImGui_ImplSdlGL3_InvalidateDeviceObjects( );
 
 	for ( ImGuiMouseCursor cursor_n = 0; cursor_n < ImGuiMouseCursor_Count_; cursor_n++ )
-		SDL_FreeCursor( g_SdlCursors[ cursor_n ] );
+		SDL_FreeCursor( g_SdlCursors[ cursor_n ] ); 
 
-	ImGui::DestroyContext( mCtx );
+	mGraphicsDeviceData.clear( );
+
+	if ( mCtx )
+	{
+		ImGui::DestroyContext( mCtx ); 
+	}
 }
 
 bool HasDeviceObject( ImGuiContext* ctx )

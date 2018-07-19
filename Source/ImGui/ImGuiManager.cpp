@@ -258,7 +258,24 @@ namespace Enjon
 		mGuiFuncs.clear( );
 		mWindows.clear( );
 		mMainMenuOptions.clear( );
-		mDockingLayouts.clear( );
+		mDockingLayouts.clear( ); 
+
+		// Destroy all contexts ( if existing )
+		for ( auto& w : mImGuiContextMap )
+		{ 
+			if ( w.second )
+			{
+				// Set context
+				ImGui::SetCurrentContext( w.second );
+
+				// Destroy device data
+				ImGui_ImplSdlGL3_InvalidateDeviceObjects( );
+
+				// Destroy context
+				ImGui::DestroyContext( w.second );
+			}
+			w.second = nullptr;
+		}
 
 		// Shut down 
 		ImGui_ImplSdlGL3_Shutdown();

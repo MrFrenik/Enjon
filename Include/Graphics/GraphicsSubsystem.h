@@ -65,11 +65,6 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			GBuffer* GetGBuffer( ) const;
-
-			/**
-			* @brief
-			*/
 			FrameBuffer* GetObjectIDBuffer( ) const;
 
 			/**
@@ -82,7 +77,6 @@ namespace Enjon
 			GraphicsScene mScene;
 			FrameBuffer* mBackBuffer = nullptr;	// Eventually will need to just have a rendertarget that can be used with a "global" framebuffer
 			FrameBuffer* mObjectIDBuffer = nullptr;
-			GBuffer* mGBuffer = nullptr;
 			Mat4x4 mPreviousViewProjectionMatrix = Mat4x4::Identity( );
 	};
 
@@ -365,7 +359,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void PresentBackBuffer( );
+			void PresentBackBuffer( GraphicsSubsystemContext* ctx );
 			
 			/**
 			*@brief
