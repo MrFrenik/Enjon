@@ -959,6 +959,28 @@ namespace Enjon
 
 	//======================================================================================================
 
+	AssetRecordInfo* AssetManager::GetAssetRecordFromFilePath( const String& path )
+	{
+		// For each loader
+		for ( auto& l : mLoadersByAssetId )
+		{
+			// For each asset record in loader
+			for ( auto& r : l.second->mAssetsByUUID )
+			{
+				// If the path's are identical, then we've hit gold
+				if ( FS::path( Utils::FindReplaceAll( Utils::FindReplaceAll( r.second.GetAssetFilePath( ), "\\", "/" ), "//", "/" ) ) == FS::path( path ) )
+				{ 
+					return &r.second;
+				}
+			}
+		}
+
+		// If not found, return nullptr
+		return nullptr;
+	}
+
+	//======================================================================================================
+
 	AssetHandle< Asset > AssetManager::GetAssetFromFilePath( const String& path )
 	{
 		// For each loader

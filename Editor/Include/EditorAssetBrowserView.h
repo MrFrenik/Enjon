@@ -14,8 +14,9 @@
 namespace Enjon
 {
 	class Project; 
-	class Asset;
 	class AssetLoader;
+	class AssetRecordInfo;
+	class Asset;
 
 	class EditorAssetBrowserView : public EditorView
 	{
@@ -31,10 +32,10 @@ namespace Enjon
 			*/
 			~EditorAssetBrowserView( ) = default; 
 
-			const Asset* GetSelectedAsset( )
-			{
-				return mSelectedAsset;
-			}
+			/**
+			* @brief
+			*/
+			const Asset* GetSelectedAsset( );
  
 		protected: 
 
@@ -84,7 +85,7 @@ namespace Enjon
 			PopupWindow mFolderOptionsMenuPopup;
 
 			PopupWindow* mActivePopupWindow = nullptr;
-			const Asset* mSelectedAsset = nullptr;
+			AssetRecordInfo* mSelectedAssetInfo = nullptr;
 			HashSet<String> mFilesToImport;
 			AssetLoader* mCurrentAssetLoader = nullptr;
 	};

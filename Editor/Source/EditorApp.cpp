@@ -347,7 +347,7 @@ namespace Enjon
 				ImGui::OpenPopup( popupName ); 
 			}
 			ImGui::SetNextWindowSize( ImVec2( 600.0f, 150.0f ) );
-			if( ImGui::BeginPopupModal( popupName, NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize ) )
+			if( ImGui::BeginPopupModal( popupName, NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove ) )
 			{
 					String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
 					if ( ImGui::BeginCombo( "##LOADPROJECTLIST", defaultText.c_str() ) )
@@ -1710,8 +1710,21 @@ namespace Enjon
 			ImGui::MenuItem( "Load Project...##options", NULL, &mLoadProjectPopupDialogue );
 		};
 
+		auto saveSceneOption = [ & ] ( )
+		{ 
+			if ( ImGui::MenuItem( "Save Scene##options", NULL ) )
+			{
+				AssetHandle< Scene > currentScene = EngineSubsystem( SceneManager )->GetScene( );
+				if ( currentScene )
+				{
+					currentScene->Save( );
+				} 
+			}
+		};
+
 		// Register menu options
 		guiContext->RegisterMenuOption("File", "Load Project...##options", loadProjectMenuOption); 
+		guiContext->RegisterMenuOption("File", "Save Scene##options", saveSceneOption); 
 		guiContext->RegisterMenuOption( "Create", "Create", createViewOption );
 
 		// Register docking layouts 

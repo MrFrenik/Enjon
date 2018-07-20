@@ -99,6 +99,13 @@ namespace Enjon
 
 	//=================================================================
 
+	const MetaClass* AssetRecordInfo::GetAssetClass( )
+	{
+		return mAssetClass;
+	}
+
+	//=================================================================
+
 	String AssetRecordInfo::GetAssetName( ) const
 	{
 		return mAssetName;
@@ -213,6 +220,9 @@ namespace Enjon
 
 				// Set asset file path
 				info->mAsset->mFilePath = info->mAssetFilePath;
+
+				// Set asset class
+				info->mAssetClass = info->mAsset->Class( );
 			}
 
 			// Set default asset if not valid asset
@@ -261,6 +271,9 @@ namespace Enjon
 
 				// Set asset file path
 				info->mAsset->mFilePath = info->mAssetFilePath;
+
+				// Set asset class
+				info->mAssetClass = info->mAsset->Class( );
 			}
 
 			// Return asset from info record
@@ -390,6 +403,7 @@ namespace Enjon
 		info.mAssetUUID = record.mAssetUUID;
 		info.mAssetLoaderClass = record.mAssetLoaderClass;
 		info.mAsset = nullptr;
+		info.mAssetClass = record.mAssetClass;
 
 		// Add to assets
 		if ( !Exists( record.mAssetUUID ) )

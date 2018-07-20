@@ -13,6 +13,7 @@
 #include <IO/InputManager.h>
 #include <Asset/AssetManager.h>
 #include <Graphics/GraphicsSubsystem.h>
+#include <Scene/SceneManager.h>
 #include <Graphics/Window.h>
 #include <Utils/FileUtils.h>
 #include <Engine.h>
@@ -71,38 +72,43 @@ namespace Enjon
 
 	//=========================================================================
 
+	const Asset* EditorAssetBrowserView::GetSelectedAsset( )
+	{
+		if ( mSelectedAssetInfo )
+		{
+			// Load asset and return it
+			return mSelectedAssetInfo->GetAsset( );
+		}
+
+		return nullptr;
+	}
+
+	//=========================================================================
+
 	void EditorAssetBrowserView::SetSelectedPath( const String& path )
 	{
 		if ( !FS::is_directory( path ) )
-		{
+		{ 
 			// Want to be able to inspect this asset
-			AssetHandle< Asset > asset = EngineSubsystem( AssetManager )->GetAssetFromFilePath( Utils::FindReplaceAll( path, "\\", "/" ) ); 
+			AssetRecordInfo* info =  EngineSubsystem( AssetManager )->GetAssetRecordFromFilePath( Utils::FindReplaceAll( path, "\\", "/" ) );
+			//AssetHandle< Asset > asset = EngineSubsystem( AssetManager )->GetAssetFromFilePath( Utils::FindReplaceAll( path, "\\", "/" ) ); 
 
 			// If asset, then set to be inspected...God, this will fall apart so fucking fast...
-			if ( asset )
-			{
-				// Set to be inspected
-				//mApp->GetInspectorView( )->SetInspetedObject( asset.Get() );
-
+			if ( info )
+			{ 
 				// Set selected asset
-				mSelectedAsset = asset.Get( );
+				mSelectedAssetInfo = info;
 			}
 			else
-			{
-				// Set inspected asset to be null
-				//mApp->GetInspectorView( )->SetInspetedObject( nullptr ); 
-
+			{ 
 				// Set selected asset to be null
-				mSelectedAsset = nullptr;
+				mSelectedAssetInfo = nullptr;
 			}
 		}
 		else
-		{
-			// Set inspected asset to be null
-			//mApp->GetInspectorView( )->SetInspetedObject( nullptr ); 
-
+		{ 
 			// Set selected asset to be null
-			mSelectedAsset = nullptr; 
+			mSelectedAssetInfo = nullptr; 
 		}
 
 		// Set selected path
@@ -228,7 +234,7 @@ namespace Enjon
 								if ( !isDir )
 								{
 									// Use asset manager to set filepath of selected asset
-									EngineSubsystem( AssetManager )->RenameAssetFilePath( mSelectedAsset, finalPath );
+									EngineSubsystem( AssetManager )->RenameAssetFilePath( mSelectedAssetInfo->GetAsset(), finalPath );
 								}
 							}
 
@@ -258,17 +264,30 @@ namespace Enjon
 							} 
 							else
 							{
-								// Open up new window
-								if ( mSelectedAsset->Class( )->InstanceOf< Material >( ) )
+								const MetaClass* assetCls = mSelectedAssetInfo->GetAssetClass( );
+
+								if ( assetCls )
 								{
-									//// Open new editor window for this material
-									WindowParams params;
-									params.mWindow = new EditorMaterialEditWindow( mSelectedAsset );
-									params.mName = mSelectedAsset->GetName( );
-									params.mWidth = 800;
-									params.mHeight = 400;
-									params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
-									Window::AddNewWindow( params );
+									// Open up new window
+									if ( assetCls->InstanceOf< Material >( ) )
+									{
+										// Load asset
+										const Asset* mat = mSelectedAssetInfo->GetAsset( );
+
+										//// Open new editor window for this material
+										WindowParams params;
+										params.mWindow = new EditorMaterialEditWindow( mat );
+										params.mName = mat->GetName( );
+										params.mWidth = 800;
+										params.mHeight = 400;
+										params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
+										Window::AddNewWindow( params );
+									} 
+									else if ( assetCls->InstanceOf< Scene >( ) )
+									{
+										// Load scene from asset
+										EngineSubsystem( SceneManager )->LoadScene( mSelectedAssetInfo->GetAssetUUID( ) );
+									} 
 								}
 							}
 						} 
@@ -311,6 +330,11 @@ namespace Enjon
 					!ActivePopupWindowEnabled() && 
 					( input->IsKeyPressed(KeyCode::LeftMouseButton ) || input->IsKeyPressed( KeyCode::RightMouseButton ) ) 
 				)
+			{
+				SetSelectedPath( "" );
+			}
+
+			if ( !wm->GetHovered( this ) && ( input->IsKeyPressed( KeyCode::LeftMouseButton ) ) )
 			{
 				SetSelectedPath( "" );
 			}

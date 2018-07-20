@@ -125,6 +125,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			AssetRecordInfo* AssetManager::GetAssetRecordFromFilePath( const String& path );
+
+			/**
+			* @brief
+			*/
 			void RenameAssetFilePath( const AssetHandle< Asset >&, const String& path );
 
 			/**

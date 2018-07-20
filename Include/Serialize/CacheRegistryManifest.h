@@ -26,6 +26,7 @@ namespace Enjon
 		String mAssetName						= "";
 		AssetLocationType mAssetLocationType	= AssetLocationType::ApplicationAsset;
 		const MetaClass* mAssetLoaderClass		= nullptr;
+		const MetaClass* mAssetClass			= nullptr;
 	};
 
 	class CacheRegistryManifest

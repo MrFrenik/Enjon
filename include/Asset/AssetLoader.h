@@ -96,6 +96,11 @@ namespace Enjon
 			*/
 			void Destroy( );
 
+			/**
+			* @brief
+			*/
+			const MetaClass* GetAssetClass( );
+
 
 		private:
 			Asset* mAsset							= nullptr; 
@@ -106,6 +111,7 @@ namespace Enjon
 			const MetaClass* mAssetLoaderClass		= nullptr;
 			AssetLoadStatus mAssetLoadStatus		= AssetLoadStatus::Unloaded;
 			AssetLocationType mAssetLocationType	= AssetLocationType::ApplicationAsset;
+			const MetaClass* mAssetClass			= nullptr;
 	}; 
 
 	// Forward declaration
