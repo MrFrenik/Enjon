@@ -415,7 +415,7 @@ namespace Enjon
 
 			// Graphics scene
 			GraphicsScene 		mGraphicsScene;
-			Window 				mWindow;
+			Window* 			mWindow = nullptr;
 			Window 				mWindowOther;
 			Window*				mCurrentWindow = nullptr;
 			Vector<Window*>		mWindows;

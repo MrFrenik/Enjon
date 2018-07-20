@@ -162,16 +162,17 @@ namespace Enjon
 		// TODO(John): Need to have a way to have an .ini that's read or grab these values from a static
 		// engine config file
 		// mWindow.Init("Game", 1920, 1080, WindowFlagsMask((u32)WindowFlags::FULLSCREEN)); 
-		mWindow.Init( "Game", 1440, 900, WindowFlags::RESIZABLE ); 
-		mWindows.push_back( &mWindow ); 
+		mWindow = new Window( );
+		mWindow->Init( "Game", 1440, 900, WindowFlags::RESIZABLE ); 
+		mWindows.push_back( mWindow ); 
 
 		//Window* w = new Window( );
 		//w->Init( "Second Window", 800, 600, WindowFlags::RESIZABLE );
 		//mWindows.push_back( w ); 
 
 		// Set current window
-		mCurrentWindow = &mWindow;
-		mWindow.MakeCurrent( );
+		mCurrentWindow = mWindow;
+		mWindow->MakeCurrent( );
 
 		// Initialize window sdl cursors
 		Window::InitSDLCursors( );
@@ -705,7 +706,7 @@ namespace Enjon
 
 		// Reset current window back to base window
 		// TODO(): This will be handled elsewhere
-		mCurrentWindow = &mWindow;
+		mCurrentWindow = mWindow;
 		mCurrentWindow->MakeCurrent( ); 
 	}
 

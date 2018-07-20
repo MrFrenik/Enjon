@@ -126,7 +126,7 @@ namespace Enjon
 			/** 
 			* @brief
 			*/
-			void Destroy( );
+			Vector< Window* > Destroy( );
 
 			static void InitSDLCursors( );
 
@@ -135,6 +135,8 @@ namespace Enjon
 			virtual void ExplicitDestroy( )
 			{ 
 			}
+
+			void NukeAllNextFrame( );
 
 		protected:
 			static SDL_GLContext mGLContext;
@@ -150,6 +152,7 @@ namespace Enjon
 			World* mWorld = nullptr; 
 			static Vector< WindowParams > mWindowsToInit;
 			static Vector< Window* > mWindowsToDestroy;
+			static bool mNukeAll;
 	};
 }
 

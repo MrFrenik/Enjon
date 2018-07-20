@@ -305,7 +305,7 @@ namespace Enjon {
 
 	//==============================================================================
 
-	void Window::Destroy( )
+	Vector< Window* > Window::Destroy( )
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 
@@ -320,12 +320,14 @@ namespace Enjon {
 		// Destroy SDL window
 		SDL_DestroyWindow( m_sdlWindow );
 
+		Vector< Window* > windowsToPostDestroy;
+
 		// Need to check for main window to destroy everything
 		if ( mainWindow == this )
 		{ 
 			for ( auto& w : gfx->GetWindows( ) )
 			{
-				Window::DestroyWindow( w );
+				windowsToPostDestroy.push_back( w );
 			}
 		}
 
@@ -337,6 +339,8 @@ namespace Enjon {
 		}
 
 		this->ExplicitDestroy( );
+
+		return windowsToPostDestroy;
 	}
 
 	//==============================================================================
@@ -385,12 +389,19 @@ namespace Enjon {
 
 	void Window::InitializeWindows( )
 	{
-		// Destroy previous windows from past frame
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+
+		Vector< Window* > postDestroy;
+
 		for ( auto& w : mWindowsToDestroy )
 		{
 			if ( w )
 			{
-				w->Destroy( );
+				for ( auto& win : w->Destroy( ) )
+				{
+					postDestroy.push_back( win );
+				}
+				
 				delete w;
 				w = nullptr; 
 			}
@@ -398,6 +409,16 @@ namespace Enjon {
 
 		// Clear windows
 		mWindowsToDestroy.clear( );
+
+		for ( auto& w : postDestroy )
+		{
+			if ( w )
+			{
+				w->Destroy( );
+				delete w;
+				w = nullptr;
+			}
+		}
 
 		for ( auto& wp : mWindowsToInit )
 		{

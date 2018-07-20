@@ -49,8 +49,11 @@ namespace Enjon
 		//ImGuiManager::ShutDown( );
 
 		// Cleanup world
-		delete( mWorld );
-		mWorld = nullptr;
+		//if ( mWorld )
+		//{
+		//	delete( mWorld );
+		//	mWorld = nullptr; 
+		//}
 
 		// Shutdown all subsystems
 		delete( mSubsystemCatalog );

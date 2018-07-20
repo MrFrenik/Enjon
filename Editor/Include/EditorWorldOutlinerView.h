@@ -56,6 +56,7 @@ namespace Enjon
 
 			Vec2 mHeldMousePosition = Vec2( -1, -1 );
 			EntityHandle mGrabbedEntity = EntityHandle::Invalid( );
+			u32 mEntityNameChangeID = EntityHandle::Invalid( ).GetID( );
 	};
 }
 

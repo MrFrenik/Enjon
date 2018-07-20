@@ -340,12 +340,30 @@ namespace Enjon
 		}
 
 		auto colors = ImGui::GetStyle( ).Colors;
-		ImColor textColor = mGrabbedEntity ? CanParentTo( entity, mGrabbedEntity ) ? colors[ ImGuiCol_Text ] : colors[ ImGuiCol_TextDisabled ] : colors[ ImGuiCol_Text ];
+		ImColor textColor = mGrabbedEntity ? CanParentTo( entity, mGrabbedEntity ) ? colors[ ImGuiCol_Text ] : colors[ ImGuiCol_TextDisabled ] : colors[ ImGuiCol_Text ]; 
 
 		// Display label text
-		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( textColor ) );
-		ImGui::Text( entityLabelText.c_str() ); 
-		ImGui::PopStyleColor( ); 
+		if ( entity->GetID( ) == mEntityNameChangeID )
+		{ 
+			ImGui::SetKeyboardFocusHere( -1 );
+
+			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( textColor ) );
+			char buffer[ 256 ];
+			String name = entity->GetName( );
+			std::strncpy( buffer, name.c_str(), 256 );
+			if ( ImGui::InputText( "##", buffer, 256, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll ) )
+			{
+				entity->SetName( buffer );
+				mEntityNameChangeID = EntityHandle::Invalid( ).GetID( );
+			}
+			ImGui::PopStyleColor( ); 
+		}
+		else
+		{
+			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( textColor ) );
+			ImGui::Text( entityLabelText.c_str() ); 
+			ImGui::PopStyleColor( ); 
+		}
 
 		// Display all entity children
 		if ( entity->HasChildren( ) )
@@ -438,6 +456,7 @@ namespace Enjon
 					else
 					{
 						mApp->DeselectEntity( );
+						mEntityNameChangeID = EntityHandle::Invalid( ).GetID( );
 					}
 				}
 			}
@@ -457,6 +476,11 @@ namespace Enjon
 		ImGui::Text( fmt::format( "{} Entities", entities->GetActiveEntities().size() ).c_str( ) );
 		ImGui::PopFont( );
 		ImGui::PopStyleColor( );
+
+		if ( input->IsKeyPressed( KeyCode::F2 ) && mApp->GetSelectedEntity( ) )
+		{
+			mEntityNameChangeID = mApp->GetSelectedEntity( ).Get( )->GetID( );
+		}
 
 	}
 
