@@ -6727,6 +6727,7 @@ const char* ImGui::GetStyleColorName(ImGuiCol idx)
 	case ImGuiCol_ListSelection: return "ListSelection";
 	case ImGuiCol_ListSelectionHovered: return "ListSelectionHovered";
 	case ImGuiCol_ListSelectionActive: return "ListSelectionActive";
+	case ImGuiCol_ListSelectionRenamed: return "ListSelectionRenamed";
     }
     //IM_ASSERT(0);
     return "Unknown";

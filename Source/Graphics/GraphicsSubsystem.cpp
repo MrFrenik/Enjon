@@ -165,6 +165,7 @@ namespace Enjon
 		mWindow = new Window( );
 		mWindow->Init( "Game", 1440, 900, WindowFlags::RESIZABLE ); 
 		mWindows.push_back( mWindow ); 
+		mWindow->SetViewport( 1400, 900 );
 
 		//Window* w = new Window( );
 		//w->Init( "Second Window", 800, 600, WindowFlags::RESIZABLE );
@@ -1619,7 +1620,7 @@ namespace Enjon
 				glBlitFramebuffer( 0, 0, mGbuffer->GetResolution( ).x, mGbuffer->GetResolution( ).y, 0, 0, mMotionBlurTarget->GetResolution( ).x, mMotionBlurTarget->GetResolution( ).y, GL_DEPTH_BUFFER_BIT, GL_NEAREST );
 
 				// Draw the lines
-				DebugDrawSubmit( ); 
+				DebugDrawSubmit( ctx ); 
 			} 
 			// Unbind the gbuffer from reading
 			mGbuffer->Unbind( );
@@ -1921,7 +1922,7 @@ namespace Enjon
 
 	void GraphicsSubsystem::InitializeFrameBuffers()
 	{
-		auto viewport = mCurrentWindow->GetViewport();
+		auto viewport = GetMainWindow( )->GetViewport( );
 		Enjon::u32 width = (Enjon::u32)viewport.x;
 		Enjon::u32 height = (Enjon::u32)viewport.y;
 
@@ -2489,7 +2490,7 @@ namespace Enjon
 		DrawDebugLine( min + Vec3( width, 0.0f, depth ), min + Vec3( width, height, depth ), color ); 
 	}
 
-	void GraphicsSubsystem::DebugDrawSubmit( )
+	void GraphicsSubsystem::DebugDrawSubmit( GraphicsSubsystemContext* ctx )
 	{
 		// Bind the buffer
 		glBindBuffer( GL_ARRAY_BUFFER, mDebugLineVBO );
@@ -2522,13 +2523,15 @@ namespace Enjon
 		// Unbind buffer
 		glBindBuffer( GL_ARRAY_BUFFER, 0 ); 
 
+		Camera* cam = ctx->GetGraphicsScene( )->GetActiveCamera( );
+
 		// Get the shader
 		GLSLProgram* shader = ShaderManager::Get( "DebugLine" );
 		shader->Use( );
 		{
 			// Set uniforms
-			shader->SetUniform( "uView", mGraphicsScene.GetActiveCamera( )->GetView( ) );
-			shader->SetUniform( "uProjection", mGraphicsScene.GetActiveCamera( )->GetProjection( ) );
+			shader->SetUniform( "uView", cam->GetView( ) );
+			shader->SetUniform( "uProjection", cam->GetProjection( ) );
 
 			// Submit data
 			glBindVertexArray( mDebugLineVAO ); 

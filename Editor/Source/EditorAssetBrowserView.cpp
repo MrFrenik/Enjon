@@ -262,7 +262,7 @@ namespace Enjon
 							{
 								mCurrentDirectory = p.path( ).string( ); 
 							} 
-							else
+							else if ( mSelectedAssetInfo )
 							{
 								const MetaClass* assetCls = mSelectedAssetInfo->GetAssetClass( );
 

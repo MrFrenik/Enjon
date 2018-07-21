@@ -1541,16 +1541,16 @@ namespace Enjon
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
 		// Register individual windows
-		guiContext->RegisterWindow( "Create Project", [ & ] ( )
-		{
-			// Docking windows
-			if ( ImGui::BeginDock( "Create Project", &mShowCreateProjectView, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
-			{
-				// Print docking information
-				CreateProjectView( );
-			}
-			ImGui::EndDock( );
-		} ); 
+		//guiContext->RegisterWindow( "Create Project", [ & ] ( )
+		//{
+		//	// Docking windows
+		//	if ( ImGui::BeginDock( "Create Project", &mShowCreateProjectView, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
+		//	{
+		//		// Print docking information
+		//		CreateProjectView( );
+		//	}
+		//	ImGui::EndDock( );
+		//} ); 
 
 		guiContext->RegisterWindow( "Play Options", [ & ]
 		{
@@ -1562,15 +1562,15 @@ namespace Enjon
 			ImGui::EndDock( );
 		} );
 
-		static bool sceneSelectionViewOpen = true;
-		guiContext->RegisterWindow( "Scene Selection", [ & ]
-		{
-			if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
-			{
-				SelectSceneView( );
-			}
-			ImGui::EndDock( );
-		} ); 
+		//static bool sceneSelectionViewOpen = true;
+		//guiContext->RegisterWindow( "Scene Selection", [ & ]
+		//{
+		//	if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
+		//	{
+		//		SelectSceneView( );
+		//	}
+		//	ImGui::EndDock( );
+		//} ); 
 
 		auto createViewOption = [&]()
 		{
@@ -1712,14 +1712,22 @@ namespace Enjon
 
 		auto saveSceneOption = [ & ] ( )
 		{ 
+			AssetHandle< Scene > currentScene = EngineSubsystem( SceneManager )->GetScene( ); 
+			ImColor textColor = ImGui::GetColorU32( ImGuiCol_Text ); 
+			bool sceneValid = currentScene.IsValid( );
+			if ( !sceneValid )
+			{
+				textColor.Value = ImVec4( 0.2f, 0.2f, 0.2f, 1.0f ); 
+			}
+			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4(textColor) );
 			if ( ImGui::MenuItem( "Save Scene##options", NULL ) )
 			{
-				AssetHandle< Scene > currentScene = EngineSubsystem( SceneManager )->GetScene( );
-				if ( currentScene )
+				if ( sceneValid )
 				{
 					currentScene->Save( );
 				} 
 			}
+			ImGui::PopStyleColor( );
 		};
 
 		// Register menu options
@@ -1731,8 +1739,8 @@ namespace Enjon
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Play Options", "Scene", GUIDockSlotType::Slot_Top, 0.1f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "World Outliner", nullptr, GUIDockSlotType::Slot_Right, 0.3f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", "Play Options", GUIDockSlotType::Slot_Right, 0.6f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Scene Selection", GUIDockSlotType::Slot_Tab, 0.2f ) );
+		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", "Play Options", GUIDockSlotType::Slot_Right, 0.6f ) );
+		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Scene Selection", GUIDockSlotType::Slot_Tab, 0.2f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.7f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene", GUIDockSlotType::Slot_Bottom, 0.3f ) );
 

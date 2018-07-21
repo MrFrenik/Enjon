@@ -184,6 +184,14 @@ namespace Enjon
 			{
 				hoveredColor.Value.w = 0.4f; 
 			}
+
+			// If name change entity
+			if ( mEntityNameChangeID == entity->GetID( ) )
+			{
+				hoveredColor = ImGui::GetColorU32( ImGuiCol_ListSelectionRenamed );
+				b.y += 5.0f;
+			}
+
 			dl->AddRectFilled( a, b, hoveredColor ); 
 		}
 
@@ -283,6 +291,12 @@ namespace Enjon
 			if ( input->IsKeyPressed( KeyCode::LeftMouseButton ) && !boxSelected )
 			{
 				mApp->SelectEntity( entity );
+
+				// Stop name changing 
+				if ( mEntityNameChangeID != entity->GetID( ) )
+				{
+					mEntityNameChangeID = EntityHandle::Invalid( ).GetID( );
+				}
 			} 
 
 			if ( ImGui::IsMouseDown( 0 ) )
@@ -347,7 +361,8 @@ namespace Enjon
 		{ 
 			ImGui::SetKeyboardFocusHere( -1 );
 
-			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( textColor ) );
+			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.1f, 0.1f, 0.1f, 1.0f ) );
+			ImGui::PushStyleColor( ImGuiCol_FrameBg, ImVec4( 0.0f, 0.0f, 0.0f, 0.0f ) );
 			char buffer[ 256 ];
 			String name = entity->GetName( );
 			std::strncpy( buffer, name.c_str(), 256 );
@@ -356,7 +371,7 @@ namespace Enjon
 				entity->SetName( buffer );
 				mEntityNameChangeID = EntityHandle::Invalid( ).GetID( );
 			}
-			ImGui::PopStyleColor( ); 
+			ImGui::PopStyleColor( 2 ); 
 		}
 		else
 		{

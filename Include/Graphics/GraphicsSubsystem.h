@@ -279,7 +279,7 @@ namespace Enjon
 
 			void InitDebugDrawing( );
 
-			void DebugDrawSubmit( );
+			void DebugDrawSubmit( GraphicsSubsystemContext* ctx );
 
 			/**
 			*@brief

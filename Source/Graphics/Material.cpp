@@ -538,13 +538,7 @@ namespace Enjon
 					} break;
 				}
 			}
-		}
-
-		// Option to save the material
-		if ( ImGui::Button( "Save Material" ) )
-		{
-			Save( );
-		}
+		} 
 
 		return Result::SUCCESS;
 	}

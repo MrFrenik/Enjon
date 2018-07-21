@@ -809,6 +809,7 @@ enum ImGuiCol_
 	ImGuiCol_ListSelection,
 	ImGuiCol_ListSelectionHovered,
 	ImGuiCol_ListSelectionActive,
+	ImGuiCol_ListSelectionRenamed,
     ImGuiCol_COUNT
 
     // Obsolete names (will be removed)
