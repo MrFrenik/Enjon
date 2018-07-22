@@ -73,7 +73,6 @@ namespace Enjon
 			void ReinitializeFrameBuffers( const iVec2& viewport );
 
 		protected: 
-
 			GraphicsScene mScene;
 			FrameBuffer* mBackBuffer = nullptr;	// Eventually will need to just have a rendertarget that can be used with a "global" framebuffer
 			FrameBuffer* mObjectIDBuffer = nullptr;

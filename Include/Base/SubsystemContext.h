@@ -41,8 +41,7 @@ namespace Enjon
 				static_assert( std::is_base_of<SubsystemContext, T>::value, "T must inherit from SubsystemContext." ); 
 			} 
 
-		protected:
-
+		protected: 
 			World* mWorld = nullptr;
 	}; 
 }

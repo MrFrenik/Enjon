@@ -24,11 +24,12 @@
 #include <stdio.h>
 
 namespace Enjon
-{
+{ 
 	//================================================================================================
 
 	EntityHandle::EntityHandle( )
-	{
+		: mID( MAX_ENTITIES )
+	{ 
 	}
 
 	//================================================================================================
@@ -130,6 +131,17 @@ namespace Enjon
 
 	//=================================================================
 
+	void Entity::RemoveFromWorld( )
+	{
+		// If world exists, then remove this entity from it
+		if ( mWorld )
+		{
+			EngineSubsystem( EntityManager )->RemoveEntityFromWorld( this );
+		}
+	}
+
+	//=================================================================
+
 	void Entity::Reset( )
 	{ 
 		RemoveParent( );
@@ -144,6 +156,9 @@ namespace Enjon
 				e->RemoveParent( true ); 
 			}
 		}
+
+		// Remove from world
+		RemoveFromWorld( );
 
 		// Reset all fields
 		mLocalTransform = Enjon::Transform( );
@@ -691,8 +706,36 @@ namespace Enjon
 	}
 
 	//---------------------------------------------------------------
-	Enjon::EntityHandle EntityManager::Allocate( )
+
+	bool EntityManager::WorldExists( const World* world )
 	{
+		return ( mWorldEntityMap.find( world ) != mWorldEntityMap.end( ) ); 
+	}
+
+	//---------------------------------------------------------------
+
+	void EntityManager::AddWorld( const World* world )
+	{
+		// Construct new entity vector for this world entry
+		mWorldEntityMap[ world ] = Vector< Entity* >( );
+	}
+
+	//---------------------------------------------------------------
+
+	Enjon::EntityHandle EntityManager::Allocate( World* world )
+	{
+		// If no world passed in, grab default world from engine
+		if ( !world )
+		{
+			world = Engine::GetInstance( )->GetWorld( );
+		}
+
+		// TODO(John): Move this to being a one-time call at initialization of a new world that needs an entity context
+		if ( !WorldExists( world ) )
+		{
+			AddWorld( world );
+		}
+
 		// Grab next available id and assert that it's valid
 		u32 id = FindNextAvailableID();
 
@@ -708,6 +751,7 @@ namespace Enjon
 		entity->mID = id;				
 		entity->mState = EntityState::ACTIVE; 
 		entity->mUUID = UUID::GenerateUUID( );
+		entity->mWorld = world;
 
 		// Push back live entity into active entity vector
 		mMarkedForAdd.push_back( entity );
@@ -844,6 +888,16 @@ namespace Enjon
  
 	//==============================================================================
 
+	const Vector< Entity* >& EntityManager::GetEntitiesByWorld( const World* world )
+	{
+		// World must be registerd!
+		assert( WorldExists( world ) );
+
+		return mWorldEntityMap[ world ]; 
+	}
+
+	//==============================================================================
+
 	void EntityManager::ForceCleanup( )
 	{
 		Cleanup( );
@@ -895,13 +949,10 @@ namespace Enjon
 						delete comp;
 						// Set to null
 						comp = nullptr;
-					}
+					} 
 
-					// Reset entity
-					ent->Reset();
-
-					// Remove from active entities
-					mActiveEntities.erase(std::remove(mActiveEntities.begin(), mActiveEntities.end(), ent), mActiveEntities.end()); 
+					// Remove entity ( includes reset )
+					RemoveEntityUnsafe( ent );
 				} 
 			} 
 		}
@@ -911,6 +962,59 @@ namespace Enjon
 
 	//==================================================================================================
 
+	void EntityManager::RemoveEntityUnsafe( Entity* entity )
+	{
+		// Reset the entity
+		entity->Reset( );
+
+		// Remove from active entities
+		mActiveEntities.erase(std::remove(mActiveEntities.begin(), mActiveEntities.end(), entity), mActiveEntities.end()); 
+
+		// Remove from world map
+		RemoveEntityFromWorld( entity ); 
+	}
+
+	//==================================================================================================
+
+	void EntityManager::RemoveEntityFromWorld( Entity* entity )
+	{
+		const World* world = entity->GetWorld(); 
+		if ( world )
+		{
+			auto query = mWorldEntityMap.find( world ); 
+			if ( query != mWorldEntityMap.end( ) )
+			{
+				// Erase entity from list if found
+				Vector< Entity* >* ents = &mWorldEntityMap[ world ];
+				ents->erase( std::remove( ents->begin( ), ents->end( ), entity ), ents->end( ) );
+			} 
+		}
+	}
+
+	//==================================================================================================
+
+	void EntityManager::RemoveWorld( const World* world )
+	{
+		auto query = mWorldEntityMap.find( world );
+		if ( query != mWorldEntityMap.end( ) )
+		{
+			// Destroy all entities in list
+			Vector< Entity* >& ents = mWorldEntityMap[ world ];
+			for ( auto& e : ents )
+			{
+				e->Destroy( );
+			}
+
+			// Clear list
+			ents.clear( ); 
+		}
+
+		// Remove world from map
+		mWorldEntityMap.erase( world );
+	}
+
+	//==================================================================================================
+ 
 	Result EntityManager::Initialize( )
 	{ 
 		// Set all components to null
@@ -924,7 +1028,7 @@ namespace Enjon
 		mEntities.resize( MAX_ENTITIES );
 
 		// Register all engine level components with component array 
-		RegisterAllEngineComponents( );
+		RegisterAllEngineComponents( ); 
 
 		return Result::SUCCESS;
 	}
@@ -939,7 +1043,11 @@ namespace Enjon
 		// Add all new entities into active entities
 		for ( auto& e : mMarkedForAdd )
 		{
+			// Push back entity
 			mActiveEntities.push_back( e ); 
+
+			// Push back entity into its world map vector
+			mWorldEntityMap[ e->GetWorld() ].push_back( e );
 		}
 
 		// Clear the marked for add entities

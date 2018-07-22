@@ -73,10 +73,7 @@ namespace Enjon
 			String sceneLabel = "Scene: " + mCurrentScene->GetName( );
 			ImVec2 sz = ImGui::CalcTextSize( sceneLabel.c_str( ) ); 
 			ImVec2 rectPadding( 5.0f, 5.0f );
-			ImVec2 padding( 10.0f, 10.0f );
-
-			// Draw bg rect behind scene label text for visibility 
-			//dl->AddRectFilled( ImVec2( b.x - sz.x - rectPadding.x - 10.0f , b.y - sz.y - rectPadding.y - 5.0f ), ImVec2( b.x - rectPadding.x, b.y - rectPadding.y ), ImColor( 0.0f, 0.0f, 0.0f, 0.2f ) );
+			ImVec2 padding( 10.0f, 10.0f ); 
 
 			// Draw shadow text
 			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
@@ -101,7 +98,6 @@ namespace Enjon
 			mStartedFocusing = false;
 			mFocusSet = false;
 		}
-
 	}
  
 	//=================================================================

@@ -15,6 +15,7 @@
 #include "Defines.h"
 #include "Subsystem.h"
 #include "SubsystemCatalog.h"
+#include "Base/SubsystemContext.h"
 #include "Engine.h"
 
 #include <array>
@@ -25,7 +26,8 @@
 namespace Enjon 
 { 
 	class EntityManager;
-	class EntityArchiver;
+	class EntityArchiver; 
+	class World;
 
 	enum class EntityState
 	{
@@ -128,6 +130,11 @@ namespace Enjon
 			* @brief
 			*/
 			void SetName( const String& uuid );
+
+			/*
+			* @brief
+			*/
+			const World* GetWorld( ) const;
 
 			/**
 			* @brief
@@ -375,6 +382,11 @@ namespace Enjon
 			*/
 			void SetUUID( const UUID& uuid ); 
 
+			/*
+			* @brief
+			*/
+			void RemoveFromWorld( );
+
 		private:
 			/*
 			* @brief
@@ -429,6 +441,8 @@ namespace Enjon
 			String mName = "Entity";
 
 			Enjon::EntityState mState;
+
+			const World* mWorld = nullptr;
 	};
 
 	//using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
@@ -437,6 +451,7 @@ namespace Enjon
 	using EntityList 				= Vector<Entity*>;
 	using ComponentBaseArray		= HashMap< u32, ComponentWrapperBase* >;
 	using ComponentList				= Vector< Component* >;
+	using WorldEntityMap			= HashMap< const World*, Vector< Entity* > >;
 
 	ENJON_CLASS( )
 	class EntityManager : public Subsystem
@@ -445,12 +460,14 @@ namespace Enjon
 
 		friend Entity;
 		friend Application;
+		friend World;
+
 		public: 
 			
 			/*
 			* @brief
 			*/
-			Enjon::EntityHandle Allocate( );
+			Enjon::EntityHandle Allocate( World* world = nullptr );
 
 			/**
 			*@brief
@@ -561,6 +578,11 @@ namespace Enjon
 				return mActiveEntities; 
 			}
 
+			/**
+			*@brief
+			*/
+			const Vector< Entity* >& GetEntitiesByWorld( const World* world );
+
 			/*
 			* @brief
 			*/
@@ -585,7 +607,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			EntityHandle GetEntityByUUID( const UUID& uuid );
+			EntityHandle GetEntityByUUID( const UUID& uuid ); 
 
 		protected: 
 
@@ -600,11 +622,36 @@ namespace Enjon
 			*/
 			Component* GetComponent( const EntityHandle& entity, const u32& ComponentID );
 
+			/**
+			* @brief
+			*/
+			void RemoveWorld( const World* world );
+
+			/**
+			* @brief
+			*/
+			bool WorldExists( const World* world );
+
+			/**
+			* @brief
+			*/
+			void AddWorld( const World* world );
+
 		private:
 			/**
 			*@brief
 			*/
-			void EntityManager::Cleanup();
+			void Cleanup();
+
+			/**
+			*@brief
+			*/
+			void RemoveEntityUnsafe( Entity* entity );
+
+			/**
+			*@brief
+			*/
+			void RemoveEntityFromWorld( Entity* entity );
 
 			/**
 			*@brief
@@ -652,6 +699,7 @@ namespace Enjon
 			ComponentList				mNeedInitializationList;
 			ComponentList				mNeedStartList;
 			u32 						mNextAvailableID = 0;
+			WorldEntityMap				mWorldEntityMap;
 	};
 
 	#include "Entity/Entity.inl"

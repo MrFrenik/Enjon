@@ -80,4 +80,9 @@ namespace Enjon
 	}
 
 	//===================================================================== 
+
+	const World* Entity::GetWorld( ) const
+	{
+		return mWorld;
+	}
 }

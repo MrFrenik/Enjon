@@ -472,7 +472,7 @@ namespace Enjon
 			//EntityHandle selectedEntityHandle = mApp->GetSelectedEntity( );
 			EntityHandle selectedEntityHandle = GetSelectedEntity( );
 			Entity* selectedEntity = selectedEntityHandle.Get( );
-			for ( auto& e : entities->GetActiveEntities( ) )
+			for ( auto& e : entities->GetEntitiesByWorld( mWindow->GetWorld( ) ) )
 			{ 
 				// SKip over non-root entities
 				if ( e->HasParent( ) )
@@ -535,7 +535,7 @@ namespace Enjon
 		// Display total amount of entities
 		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_TextDisabled ) ) ) );
 		ImGui::PushFont( EngineSubsystem( ImGuiManager )->GetFont( "Roboto-MediumItalic_14" ) );
-		ImGui::Text( fmt::format( "{} Entities", entities->GetActiveEntities().size() ).c_str( ) );
+		ImGui::Text( fmt::format( "{} Entities", entities->GetEntitiesByWorld( mWindow->GetWorld( ) ).size() ).c_str( ) );
 		ImGui::PopFont( );
 		ImGui::PopStyleColor( );
 
