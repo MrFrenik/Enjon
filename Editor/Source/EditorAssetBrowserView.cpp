@@ -293,7 +293,7 @@ namespace Enjon
 										// Load asset
 										const Asset* mat = mSelectedAssetInfo->GetAsset( );
 
-										//// Open new editor window for this material
+										// Open new editor window for this material
 										WindowParams params;
 										params.mWindow = new EditorMaterialEditWindow( mat );
 										params.mName = mat->GetName( );

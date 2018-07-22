@@ -88,6 +88,8 @@ namespace Enjon
 			EntityHandle mSelectedEntity = EntityHandle::Invalid( ); 
 			Vector< EntitySelectionCallback > mEntitySelectionCallbacks;
 			Vector< EntityDeselectionCallback > mEntityDeselectionCallbacks;
+			bool mMouseHeld = false;
+			HashMap< String, bool > mIsTreeOpen;
 	};
 }
 

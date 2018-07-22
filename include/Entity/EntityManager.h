@@ -40,6 +40,27 @@ namespace Enjon
 	class Entity;
 	class EntityManager;
 
+	ENJON_CLASS( )
+	class EntitySubsystemContext : public SubsystemContext
+	{
+		ENJON_CLASS_BODY( EntitySubsystemContext )
+
+		public: 
+			/**
+			* @brief
+			*/
+			EntitySubsystemContext( World* world ); 
+
+			/**
+			* @brief
+			*/
+			virtual void ExplicitDestructor( );
+
+		protected:
+
+		private: 
+	}; 
+
 	class EntityHandle
 	{
 		friend Application;
@@ -461,6 +482,7 @@ namespace Enjon
 		friend Entity;
 		friend Application;
 		friend World;
+		friend EntitySubsystemContext;
 
 		public: 
 			

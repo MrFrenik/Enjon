@@ -6,6 +6,8 @@
 #include "Graphics/GraphicsSubsystem.h"
 #include "SubsystemCatalog.h"
 #include "ImGui/ImGuiManager.h"
+#include "Entity/EntityManager.h"
+#include "Base/World.h"
 #include "Engine.h"
 
 namespace Enjon
@@ -14,20 +16,6 @@ namespace Enjon
 
 	void StaticMeshComponent::ExplicitConstructor()
 	{ 
-		// Add default mesh and material for renderable
-		AssetManager* am = EngineSubsystem( AssetManager );
-		mRenderable.SetMesh( am->GetDefaultAsset< Mesh >( ) );
-
-		// Set default materials for all material elements
-		for ( u32 i = 0; i < mRenderable.GetMesh( )->GetSubMeshCount( ); ++i ) 
-		{
-			mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
-		}
-
-		// Add renderable to scene
-		GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
-		gs->GetGraphicsScene( )->AddStaticMeshRenderable( &mRenderable );
-
 		// Set explicit tick state
 		mTickState = ComponentTickState::TickAlways;
 	} 
@@ -47,8 +35,25 @@ namespace Enjon
 
 	void StaticMeshComponent::PostConstruction( )
 	{
+		// Add default mesh and material for renderable
+		AssetManager* am = EngineSubsystem( AssetManager );
+		mRenderable.SetMesh( am->GetDefaultAsset< Mesh >( ) );
+
+		// Set default materials for all material elements
+		for ( u32 i = 0; i < mRenderable.GetMesh( )->GetSubMeshCount( ); ++i ) 
+		{
+			mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
+		} 
+
+		// Get graphics scene from world graphics context
+		World* world = mEntity->GetWorld( )->ConstCast< World >( );
+		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
+
+		// Add renderable to scene
+		gs->AddStaticMeshRenderable( &mRenderable );
+
 		// Set id of renderable to entity id
-		mRenderable.SetRenderableID( mEntity->GetID( ) );
+		mRenderable.SetRenderableID( mEntity->GetID( ) ); 
 	}
 
 	//==================================================================== 

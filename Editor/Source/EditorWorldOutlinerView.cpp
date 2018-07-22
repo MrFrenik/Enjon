@@ -188,9 +188,7 @@ namespace Enjon
 		bool hovered = false;
 
 		// boolean to return
-		bool anyItemHovered = false;
-
-		static HashMap< String, bool > mIsTreeOpen;
+		bool anyItemHovered = false; 
 
 		const float indentionLevelOffset = 10.0f;
 		const float boxIndentionLevelOffset = 20.0f;
@@ -330,8 +328,6 @@ namespace Enjon
 		// Bounding rect box hovering
 		if ( hovered )
 		{ 
-			static bool held = false;
-
 			// Select entity
 			if ( input->IsKeyPressed( KeyCode::LeftMouseButton ) && !boxSelected )
 			{
@@ -348,13 +344,13 @@ namespace Enjon
 
 			if ( ImGui::IsMouseDown( 0 ) )
 			{ 
-				if ( !held )
+				if ( !mMouseHeld )
 				{
 					mHeldMousePosition = input->GetMouseCoords( );
 					//mGrabbedEntity = entity;
-					held = true;
+					mMouseHeld = true;
 				}
-				else if ( held && !mGrabbedEntity )
+				else if ( mMouseHeld && !mGrabbedEntity )
 				{
 					if ( mHeldMousePosition != input->GetMouseCoords() && mHeldMousePosition.Distance(input->GetMouseCoords()) >= 2.0f )
 					{ 
@@ -394,7 +390,7 @@ namespace Enjon
 					}
 				}
 
-				held = false;
+				mMouseHeld = false;
 				mGrabbedEntity = EntityHandle::Invalid( );
 				mHeldMousePosition = Vec2( -1, -1 );
 			} 
@@ -444,23 +440,11 @@ namespace Enjon
 
 	void EditorWorldOutlinerView::UpdateView( )
 	{
-		ImDrawList* dl = ImGui::GetWindowDrawList( );
-
-		AssetHandle< Scene > scene = EngineSubsystem( SceneManager )->GetScene( );
-
-		if ( !scene )
-		{
-			return;
-		}
+		ImDrawList* dl = ImGui::GetWindowDrawList( ); 
 
 		EntityManager* entities = EngineSubsystem( EntityManager );
 
-		Input* input = EngineSubsystem( Input );
-
-		// Print out scene name
-		ImGui::Text( ( "Scene: " + scene->GetName( ) ).c_str( ) );
-
-		ImGui::Separator( );
+		Input* input = EngineSubsystem( Input ); 
 
 		// List out active entities
 		Vec2 padding( 20.0f, 40.0f );

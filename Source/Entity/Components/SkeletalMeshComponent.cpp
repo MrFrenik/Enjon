@@ -8,6 +8,7 @@
 #include "Graphics/AnimationSubsystem.h"
 #include "SubsystemCatalog.h"
 #include "ImGui/ImGuiManager.h"
+#include "Base/World.h"
 #include "Engine.h"
 
 namespace Enjon
@@ -16,20 +17,6 @@ namespace Enjon
 
 	void SkeletalMeshComponent::ExplicitConstructor()
 	{ 
-		// Add default mesh and material for renderable
-		const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
-		mRenderable.SetMesh( am->GetDefaultAsset< SkeletalMesh >( ) );
-
-		// Set default materials for all material elements
-		for ( u32 i = 0; i < mRenderable.GetMesh( )->GetSubMeshCount( ); ++i ) 
-		{
-			mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
-		}
-
-		// Add renderable to scene
-		GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
-		gs->GetGraphicsScene( )->AddSkeletalMeshRenderable( &mRenderable );
-
 		// Set explicit tick state
 		mTickState = ComponentTickState::TickAlways;
 	} 
@@ -49,6 +36,23 @@ namespace Enjon
 
 	void SkeletalMeshComponent::PostConstruction( )
 	{
+		// Add default mesh and material for renderable
+		const AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( );
+		mRenderable.SetMesh( am->GetDefaultAsset< SkeletalMesh >( ) );
+
+		// Set default materials for all material elements
+		for ( u32 i = 0; i < mRenderable.GetMesh( )->GetSubMeshCount( ); ++i ) 
+		{
+			mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
+		}
+ 
+		// Get graphics context from world
+		World* world = mEntity->GetWorld( )->ConstCast< World >( );
+		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
+
+		// Add renderable to scene
+		gs->AddSkeletalMeshRenderable( &mRenderable );
+
 		// Set id of renderable to entity id
 		mRenderable.SetRenderableID( mEntity->GetID( ) );
 	}

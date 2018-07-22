@@ -1356,6 +1356,17 @@ namespace Enjon
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.7f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene", GUIDockSlotType::Slot_Bottom, 0.3f ) ); 
 
+		// Create archetype window 
+		WindowParams params;
+		params.mWindow = new EditorArchetypeEditWindow( );
+		params.mName = "Archetype Window";
+		params.mWidth = 800;
+		params.mHeight = 400;
+		params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
+		Window::AddNewWindow( params );
+
+		mArchetypeWindow = (EditorArchetypeEditWindow* )params.mWindow;
+
 		return Enjon::Result::SUCCESS;
 	}
 

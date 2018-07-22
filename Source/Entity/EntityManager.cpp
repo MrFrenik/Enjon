@@ -1367,6 +1367,22 @@ namespace Enjon
 
 	//=========================================================================================
 
+	EntitySubsystemContext::EntitySubsystemContext( World* world )
+		: SubsystemContext( world )
+	{
+		// Add world to entity manager
+		EngineSubsystem( EntityManager )->AddWorld( mWorld );
+	}
+
+	//=========================================================================================
+
+	void EntitySubsystemContext::ExplicitDestructor( )
+	{
+		// Remove from entity world
+		EngineSubsystem( EntityManager )->RemoveWorld( mWorld );
+	}
+
+	//========================================================================================= 
 }
 
 

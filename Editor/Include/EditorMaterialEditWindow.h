@@ -13,6 +13,7 @@
 namespace Enjon
 { 
 	class Material;
+	class EditorWorldOutlinerView;
 
 	class EditorViewport : public EditorView
 	{
@@ -29,6 +30,11 @@ namespace Enjon
 			* @brief
 			*/
 			~EditorViewport( ) = default; 
+
+			/**
+			* @brief
+			*/
+			Vec2 GetCenterOfViewport( );	 
 
 		protected:
 
@@ -54,13 +60,22 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual void CaptureState( )
-			{ 
-			} 
+			virtual void CaptureState( ) override;
 
-		protected:
+			/**
+			* @brief
+			*/
+			void UpdateCamera( );
+
+		protected: 
 			Vec2 mSceneViewWindowPosition;
 			Vec2 mSceneViewWindowSize; 
+			f32 mCameraSpeed = 10.f;
+			f32 mMouseSensitivity = 10.0f;
+			Transform mPreviousCameraTransform;
+			Vec2 mMouseCoordsDelta = Vec2( 0.0f );
+			bool mStartedFocusing = false;
+			bool mFocusSet = false;
 	}; 
 
 	class EditorMaterialEditWindow : public Window
@@ -93,6 +108,38 @@ namespace Enjon
 			StaticMeshRenderable mRenderable;
 			u32 mInitialized : 1;
 			bool mViewportOpen = true;
+	};
+
+	class EditorArchetypeEditWindow : public Window 
+	{
+		public: 
+
+			/**
+			* @brief
+			*/
+			EditorArchetypeEditWindow( );
+
+			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override; 
+
+		protected:
+
+			virtual void ExplicitDestroy( ) override
+			{
+				if ( mViewport )
+				{
+					delete ( mViewport );
+					mViewport = nullptr;
+				}
+			}
+
+			void ConstructScene( ); 
+
+		protected: 
+			EditorWorldOutlinerView* mWorldOutlinerView = nullptr;
+			EditorViewport* mViewport = nullptr;
+			u32 mInitialized : 1;
+			bool mViewportOpen = true;
+
 	};
 
 }

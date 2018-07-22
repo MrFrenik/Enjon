@@ -23,126 +23,7 @@ namespace Enjon
 	class EditorWindow;
 	class EditorMaterialEditWindow; 
 	class EditorWorldOutlinerView;
-
-	//class EditorWidgetManager
-	//{ 
-	//	public: 
-
-	//		/**
-	//		* @brief
-	//		*/
-	//		EditorWidgetManager( ) = default;
-
-	//		/**
-	//		* @brief
-	//		*/
-	//		~EditorWidgetManager( )
-	//		{
-	//			// Free memory
-	//			for ( auto& v : mViews )
-	//			{
-	//				delete v;
-	//				v = nullptr;
-	//			}
-
-	//			// Free all memory from maps
-	//			mFocusedMap.clear( );
-	//			mHoveredMap.clear( );
-	//			mViews.clear( );
-	//			mEditorObjects.clear( );
-	//		} 
- //
-	//		/**
-	//		* @brief
-	//		*/ 
-	//		bool HasView( EditorView* view )
-	//		{
-	//			return ( std::find( mViews.begin( ), mViews.end( ), view ) != mViews.end( ) );
-	//		}
-
-	//		/**
-	//		* @brief
-	//		*/
-	//		EditorView* AddView( EditorView* view )
-	//		{ 
-	//			if ( !HasView( view ) )
-	//			{
-	//				mFocusedMap[ view ] = false;
-	//				mHoveredMap[ view ] = false;
-	//				mViewEnabledMap[ view ] = view->GetEnabled();
-	//				mViews.push_back( view );
-
-	//				// Initialize view
-	//				view->Initialize( );
-	//			}
-
-	//			// Return the view from the function
-	//			return view;
-	//		}
-
-	//		/**
-	//		* @brief
-	//		*/
-	//		void SetHovered( EditorObject* object, bool hovered )
-	//		{ 
-	//			mHoveredMap[ object ] = hovered;
-	//		}
-
-	//		/**
-	//		* @brief
-	//		*/
-	//		void SetFocused( EditorObject* object, bool focused )
-	//		{
-	//			mFocusedMap[ object ] = focused;
-	//		} 
-
-	//		/**
-	//		* @brief
-	//		*/
-	//		bool GetHovered( EditorObject* object )
-	//		{
-	//			if ( HasHoveredObject( object ) )
-	//			{
-	//				return mHoveredMap[ object ];
-	//			}
-
-	//			return false;
-	//		}
-
-	//		/**
-	//		* @brief
-	//		*/
-	//		bool GetFocused( EditorObject* object )
-	//		{
-	//			if ( HasFocusedObject( object ) )
-	//			{
-	//				return mFocusedMap[ object ];
-	//			}
-
-	//			return false;
-	//		}
-
-	//	private:
-
-	//		bool HasHoveredObject( EditorObject* object )
-	//		{
-	//			return mHoveredMap.find( object ) != mHoveredMap.end( );
-	//		}
-
-	//		bool HasFocusedObject( EditorObject* object )
-	//		{
-	//			return mFocusedMap.find( object ) != mFocusedMap.end( );
-	//		}
-
-	//	private: 
-
-	//		HashMap< EditorObject*, bool > mFocusedMap;
-	//		HashMap< EditorObject*, bool > mHoveredMap; 
-	//		HashMap< EditorView*, bool > mViewEnabledMap;
-
-	//		Vector< EditorObject* > mEditorObjects;
-	//		Vector< EditorView* > mViews;
-	//};
+	class EditorArchetypeEditWindow; 
 
 	class EditorApp : public Enjon::Application
 	{
@@ -316,6 +197,8 @@ namespace Enjon
 			EditorAssetBrowserView* mAssetBroswerView = nullptr;
 
 			EditorWorldOutlinerView* mWorldOutlinerView = nullptr;
+
+			EditorArchetypeEditWindow* mArchetypeWindow = nullptr;
 
 			Camera mEditorCamera;
 			Vec3 mCameraRotator = Vec3( 0.0f ); 

@@ -184,6 +184,7 @@ namespace Enjon
 		// Construct world and register contexts
 		mWorld = new World( ); 
 		mWorld->RegisterContext< GraphicsSubsystemContext >( );
+		mWorld->RegisterContext< EntitySubsystemContext >( );
 
 		// Set main window world
 		mGraphics->GetMainWindow( )->SetWorld( mWorld );
