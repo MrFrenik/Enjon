@@ -98,6 +98,11 @@ namespace Enjon
 			* @brief
 			*/
 			void AppendBuffer( const ByteBuffer& other );
+ 
+			/*
+			* @brief Is destructive in that it advances the read position of the buffer parameter
+			*/
+			void AppendBufferFromReadPosition( ByteBuffer* other );
 
 			/*
 			* @brief

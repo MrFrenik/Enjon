@@ -6,6 +6,7 @@
 #include <Graphics/GraphicsSubsystem.h>
 #include <Scene/SceneManager.h>
 #include <Asset/AssetManager.h>
+#include <Entity/Archetype.h>
 #include <Graphics/StaticMeshRenderable.h>
 #include <Entity/Components/StaticMeshComponent.h>
 #include <IO/InputManager.h>
@@ -58,6 +59,12 @@ namespace Enjon
 		}
 		else
 		{
+			if ( mFocusSet )
+			{
+				// Reset to showing mouse cursor ( push and pop this, maybe? )
+				mWindow->ShowMouseCursor( true ); 
+			}
+
 			mStartedFocusing = false;
 			mFocusSet = false;
 		}
@@ -152,7 +159,6 @@ namespace Enjon
 		// Set camera rotation
 		// Get mouse input and change orientation of camera
 		Enjon::Vec2 mouseCoords = input->GetMouseCoords( ); 
-
 
 		// Set cursor to not visible
 		window->ShowMouseCursor( false );
@@ -264,8 +270,8 @@ namespace Enjon
 
 	//======================================================================================================================
 
-	EditorArchetypeEditWindow::EditorArchetypeEditWindow( )
-		: mInitialized( false )
+	EditorArchetypeEditWindow::EditorArchetypeEditWindow( const AssetHandle< Archetype >& archetype )
+		: mInitialized( false ), mArchetype( archetype )
 	{ 
 	}
 
@@ -306,10 +312,26 @@ namespace Enjon
 
 		// Create world outliner
 		mWorldOutlinerView = new EditorWorldOutlinerView( app, this ); 
+
+		// Create inspector view
+		mInspectorView = new EditorInspectorView( app, this );
+
+		// Register callback for entity selection
+		mWorldOutlinerView->RegisterEntitySelectionCallback( [ & ] ( const EntityHandle& handle )
+		{
+			mInspectorView->SetInspetedObject( handle.Get( ) );
+		});
+
+		// Register callback for entity deselection
+		mWorldOutlinerView->RegisterEntityDeselectionCallback( [ & ] ( )
+		{
+			mInspectorView->DeselectInspectedObject( );
+		});
  
 		// NOTE(John): For some reason, grabbing the view name of the docking window does not work with this function call... who knows?
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) ); 
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "World Outliner", "Viewport", GUIDockSlotType::Slot_Left, 0.3f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "World Outliner", "Viewport", GUIDockSlotType::Slot_Right, 0.45f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Top, 0.45f ) );
 
 		// NOTE(): This should be done automatically for the user in the backend
 		// Add window to graphics subsystem ( totally stupid way to do this )
@@ -325,24 +347,21 @@ namespace Enjon
 		cam->SetProjection( ProjectionType::Perspective );
 		cam->SetPosition( Vec3( 0.0f, 0.0f, -3.0f ) ); 
 
-		// Try to create an entity now
-		AssetManager* am = EngineSubsystem( AssetManager );
-		EntityManager* em = EngineSubsystem( EntityManager );
-		EntityHandle handle = em->Allocate( world ); 
-		if ( handle )
+		// Construct entity from archetype
+		if ( mArchetype )
 		{
-			Entity* ent = handle.Get( );
-			StaticMeshComponent* smc = ent->AddComponent< StaticMeshComponent >( );
-			smc->SetMesh( am->GetAsset< Mesh >( "models.unit_sphere" ) );
-			ent->SetLocalPosition( cam->GetPosition() + cam->Forward() * 5.0f );
-			ent->SetLocalScale( 2.0f );
+			Archetype* archType = mArchetype.Get( )->ConstCast< Archetype >( );
+			Transform t;
+			t.SetPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
+			t.SetScale( 2.0f );
+			EntityHandle entity = archType->Instantiate( t, GetWorld( ) );
 		}
 
-		/*mRenderable.SetMesh( EngineSubsystem( AssetManager )->GetAsset< Mesh >( "models.unit_sphere" ) );
-		mRenderable.SetPosition( cam->GetPosition() + cam->Forward() * 5.0f );
-		mRenderable.SetScale( 2.0f );
-		mRenderable.SetMaterial( mMaterial );
-		scene->AddStaticMeshRenderable( &mRenderable ); */ 
+		// Register callbacks for whenever project is reloaded ( dll reload )
+		app->RegisterReloadDLLCallback( [ & ] ( )
+		{
+			// What do we need to do on reload? Make sure that the entity is reset? 
+		} ); 
 	}
 
 	//======================================================================================================================

@@ -24,7 +24,8 @@ enum MetaPropertyEnumDefines
 	Mutator,
 	Editable,
 	HideInEditor,
-	NonSerializeable
+	NonSerializeable,
+	ReadOnly
 };
 
 /*

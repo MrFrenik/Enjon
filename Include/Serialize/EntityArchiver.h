@@ -13,6 +13,7 @@
 namespace Enjon
 {
 	class Entity; 
+	class World;
 
 	class EntityArchiver : public ObjectArchiver
 	{
@@ -55,7 +56,17 @@ namespace Enjon
 			*/
 			static EntityHandle Deserialize( ByteBuffer* buffer );
 
+			/*
+			* @brief Static method which deserializes entity data using an existing ByteBuffer and places into specific world when allocating
+			*/
+			static EntityHandle Deserialize( ByteBuffer* buffer, World* world );
+
 		protected:
+
+			/*
+			* @brief
+			*/
+			static EntityHandle DeserializeInternal( const EntityHandle& entiy, ByteBuffer* buffer );
 
 		private: 
 	};

@@ -17,6 +17,8 @@
 
 namespace Enjon
 { 
+	using ReloadDLLCallback = std::function< void( void ) >;
+
 	class StaticMeshRenderable;
 	class EditorAssetBrowserView;
 	class EditorViewport;
@@ -48,6 +50,11 @@ namespace Enjon
 			* @return Enjon::Result
 			*/
 			virtual Enjon::Result Shutdown() override; 
+
+			/**
+			* @brief 
+			*/
+			void RegisterReloadDLLCallback( const ReloadDLLCallback& callback ); 
 
 			/**
 			* @brief 
@@ -202,6 +209,8 @@ namespace Enjon
 
 			Camera mEditorCamera;
 			Vec3 mCameraRotator = Vec3( 0.0f ); 
+
+			Vector< ReloadDLLCallback > mReloadDLLCallbacks;
 	}; 
 }
 

@@ -381,10 +381,24 @@ namespace Enjon
 
 	//========================================================================
 
+	void ByteBuffer::AppendBufferFromReadPosition( ByteBuffer* other )
+	{
+		// Loop from other's read position, which does affect it
+		for ( u32 i = other->mReadPosition; i < other->mSize; ++i )
+		{ 
+			Write< u8 >( other->mBuffer[ i ] );
+		}
+
+		// Set the read position to the size of the buffer - 1
+		other->mReadPosition = other->mSize - 1;
+	}
+
+	//======================================================================== 
+
 	void ByteBuffer::AppendBuffer( const ByteBuffer& other )
 	{
 		// Brute force loop for now...
-		for ( u32 i = 0; i < other.GetSize( ); ++i )
+		for ( u32 i = 0; i < other.GetSize( ); ++i ) 
 		{
 			// Write to buffer
 			Write< u8 >( other.mBuffer[i] );

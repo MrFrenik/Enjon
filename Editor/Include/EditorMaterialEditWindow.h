@@ -13,7 +13,9 @@
 namespace Enjon
 { 
 	class Material;
+	class Archetype;
 	class EditorWorldOutlinerView;
+	class EditorInspectorView;
 
 	class EditorViewport : public EditorView
 	{
@@ -117,7 +119,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			EditorArchetypeEditWindow( );
+			EditorArchetypeEditWindow( const AssetHandle< Archetype >& archetype );
 
 			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override; 
 
@@ -135,8 +137,10 @@ namespace Enjon
 			void ConstructScene( ); 
 
 		protected: 
+			AssetHandle< Archetype > mArchetype;
 			EditorWorldOutlinerView* mWorldOutlinerView = nullptr;
 			EditorViewport* mViewport = nullptr;
+			EditorInspectorView* mInspectorView = nullptr;
 			u32 mInitialized : 1;
 			bool mViewportOpen = true;
 

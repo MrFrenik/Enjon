@@ -3,7 +3,7 @@
 
 #include "Serialize/EntityArchiver.h"
 #include "SubsystemCatalog.h"
-
+#include "Base/World.h" 
 #include "Engine.h"
 #include "SubsystemCatalog.h"
 
@@ -162,6 +162,39 @@ namespace Enjon
 		// TODO(): This will fail if entity cannot be allocated! Need to check for that and then exit gracefully.
 		EntityHandle handle = entities->Allocate( );
 
+		// Deseralize internally
+		return EntityArchiver::DeserializeInternal( handle, buffer );
+	} 
+
+	//========================================================================================= 
+
+	EntityHandle EntityArchiver::Deserialize( ByteBuffer* buffer, World* world )
+	{
+		// Read status of entity from buffer
+		u32 entityStatus = buffer->Read< u32 >( );
+
+		// If entity wasn't alive, then it wasn't serialized
+		if ( !entityStatus )
+		{
+			// Return empty entity handle
+			return EntityHandle();
+		}
+
+		// Get entity manager from engine
+		EntityManager* entities = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< EntityManager >( )->ConstCast< EntityManager >( );
+
+		// Handle to fill out
+		// TODO(): This will fail if entity cannot be allocated! Need to check for that and then exit gracefully.
+		EntityHandle handle = entities->Allocate( world );
+
+		// Continue to deserialize data into entity
+		return EntityArchiver::DeserializeInternal( handle, buffer ); 
+	}
+
+	//========================================================================================= 
+
+	EntityHandle EntityArchiver::DeserializeInternal( const EntityHandle& handle, ByteBuffer* buffer ) 
+	{
 		//==========================================================================
 		// Local Transform
 		//========================================================================== 
@@ -197,7 +230,7 @@ namespace Enjon
 		ent->SetLocalTransform( local );
 
 		// Read in uuid
-		ent->SetUUID( buffer->Read< UUID >( ) );
+		ent->SetUUID( buffer->Read< UUID >( ) ); 
 
 		// Read in name
 		ent->SetName( buffer->Read< String >( ) );
@@ -262,7 +295,7 @@ namespace Enjon
 		}
 
 		return ent;
-	} 
+	}
 
 	//========================================================================================= 
 }

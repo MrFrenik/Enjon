@@ -837,7 +837,7 @@ namespace Enjon
 		if ( selectedEntityUUID )
 		{
 			mWorldOutlinerView->SelectEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( selectedEntityUUID ) );
-		}
+		} 
 	}
 
 	//================================================================================================================================
@@ -1059,6 +1059,15 @@ namespace Enjon
 			mEditorCamera.GetGraphicsScene( )->SetActiveCamera( &mEditorCamera );
 		}
 	}
+
+	//================================================================================================================
+
+	void EditorApp::RegisterReloadDLLCallback( const ReloadDLLCallback& callback )
+	{
+		mReloadDLLCallbacks.push_back( callback );
+	}
+
+	//================================================================================================================
 	 
 	Enjon::Result EditorApp::Initialize( )
 	{ 
@@ -1141,7 +1150,7 @@ namespace Enjon
 		mWorldOutlinerView->RegisterEntityDeselectionCallback( [ & ] ( )
 		{
 			// Uninspect object
-			mInspectorView->DeselectInspectedObject( mWorldOutlinerView->GetSelectedEntity().Get( ) ); 
+			mInspectorView->DeselectInspectedObject( ); 
 
 			// Deactivate transform widget
 			mTransformWidget.Enable( false ); 
@@ -1355,17 +1364,6 @@ namespace Enjon
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Play Options", GUIDockSlotType::Slot_Right, 0.5f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.7f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene", GUIDockSlotType::Slot_Bottom, 0.3f ) ); 
-
-		// Create archetype window 
-		WindowParams params;
-		params.mWindow = new EditorArchetypeEditWindow( );
-		params.mName = "Archetype Window";
-		params.mWidth = 800;
-		params.mHeight = 400;
-		params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
-		Window::AddNewWindow( params );
-
-		mArchetypeWindow = (EditorArchetypeEditWindow* )params.mWindow;
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -1627,7 +1625,7 @@ namespace Enjon
 			// Mouse cursor on, interact with world
 			else
 			{
-				mGfx->GetMainWindow( )->ConstCast< Window >( )->ShowMouseCursor( true );
+				//mGfx->GetMainWindow( )->ConstCast< Window >( )->ShowMouseCursor( true );
  
 				if ( mEditorSceneView->IsHovered() )
 				{

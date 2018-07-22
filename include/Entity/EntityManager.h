@@ -16,6 +16,8 @@
 #include "Subsystem.h"
 #include "SubsystemCatalog.h"
 #include "Base/SubsystemContext.h"
+#include "Entity/Archetype.h"
+#include "Asset/Asset.h"
 #include "Engine.h"
 
 #include <array>
@@ -119,6 +121,7 @@ namespace Enjon
 		friend EntityHandle;
 		friend EntityManager; 
 		friend EntityArchiver;
+		friend Archetype;
 
 		public:
 			
@@ -460,6 +463,9 @@ namespace Enjon
 
 			ENJON_PROPERTY( )
 			String mName = "Entity";
+
+			ENJON_PROPERTY( HideInEditor, ReadOnly )
+			AssetHandle< Archetype > mArchetype;
 
 			Enjon::EntityState mState;
 

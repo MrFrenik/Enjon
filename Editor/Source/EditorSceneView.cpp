@@ -95,8 +95,14 @@ namespace Enjon
 		// Lose focus 
 		if ( !IsFocused() )
 		{
+			// We just lost focus
+			if ( mFocusSet )
+			{
+				mWindow->ShowMouseCursor( true ); 
+			}
+
 			mStartedFocusing = false;
-			mFocusSet = false;
+			mFocusSet = false; 
 		}
 	}
  

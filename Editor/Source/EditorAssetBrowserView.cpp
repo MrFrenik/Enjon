@@ -31,6 +31,7 @@ namespace Enjon
 	EditorAssetBrowserView::EditorAssetBrowserView( EditorApp* app, Window* window )
 		: EditorView( app, window, "Asset Browser", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
 	{ 
+		Initialize( );
 	}
 
 	//=========================================================================
@@ -307,6 +308,20 @@ namespace Enjon
 										// Load scene from asset
 										EngineSubsystem( SceneManager )->LoadScene( mSelectedAssetInfo->GetAssetUUID( ) );
 									} 
+									else if ( assetCls->InstanceOf< Archetype >( ) )
+									{
+										// Load archetype window
+										const Asset* archType = mSelectedAssetInfo->GetAsset( );
+
+										// Open new edit window for this archetype
+										WindowParams params;
+										params.mWindow = new EditorArchetypeEditWindow( archType );
+										params.mName = archType->GetName( );
+										params.mWidth = 800;
+										params.mHeight = 400;
+										params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
+										Window::AddNewWindow( params );
+									}
 								}
 							}
 						} 
@@ -629,19 +644,24 @@ namespace Enjon
 		ImGui::PopFont( ); 
 		ImGui::PopStyleColor( );
 
+		auto FinishAssetConstruction = [ & ] ( const Asset* asset )
+		{
+			// Select the path
+			SetSelectedPath( asset->GetAssetRecordInfo( )->GetAssetFilePath( ) );
+
+			// Set needing to rename
+			mPathNeedsRename = true;
+
+			mFolderMenuPopup.Deactivate( ); 
+		};
+
 		// Construct material option
 		if ( ImGui::Selectable( "\t+ Material" ) )
 		{ 
 			// Construct asset with current directory
 			AssetHandle< Material > mat = am->ConstructAsset< Material >( "NewMaterial", mCurrentDirectory );
 
-			// Select the path
-			SetSelectedPath( mat.Get( )->GetAssetRecordInfo( )->GetAssetFilePath( ) );
-
-			// Set needing to rename
-			mPathNeedsRename = true;
-
-			mFolderMenuPopup.Deactivate( ); 
+			FinishAssetConstruction( mat.Get( ) ); 
 		} 
 
 		// Construct scene option
@@ -650,13 +670,16 @@ namespace Enjon
 			// Construct asset with current directory
 			AssetHandle< Scene > scene = am->ConstructAsset< Scene >( "NewScene", mCurrentDirectory );
 
-			// Select the path
-			SetSelectedPath( scene.Get( )->GetAssetRecordInfo( )->GetAssetFilePath( ) );
+			FinishAssetConstruction( scene.Get( ) );
+		} 
 
-			// Set needing to rename
-			mPathNeedsRename = true;
+		// Construct scene option
+		if ( ImGui::Selectable( "\t+ Archetype" ) )
+		{ 
+			// Construct asset with current directory
+			AssetHandle< Archetype > archetype = am->ConstructAsset< Archetype >( "NewArchetype", mCurrentDirectory );
 
-			mFolderMenuPopup.Deactivate( ); 
+			FinishAssetConstruction( archetype.Get( ) );
 		} 
 
 		// Separator at end of folder menu option

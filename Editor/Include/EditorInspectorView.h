@@ -33,7 +33,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void DeselectInspectedObject( const Object* object );
+			void DeselectInspectedObject( );
  
 		protected: 
 
