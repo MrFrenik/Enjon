@@ -22,126 +22,127 @@ namespace Enjon
 	class EditorViewport;
 	class EditorWindow;
 	class EditorMaterialEditWindow; 
+	class EditorWorldOutlinerView;
 
-	class EditorWidgetManager
-	{ 
-		public: 
+	//class EditorWidgetManager
+	//{ 
+	//	public: 
 
-			/**
-			* @brief
-			*/
-			EditorWidgetManager( ) = default;
+	//		/**
+	//		* @brief
+	//		*/
+	//		EditorWidgetManager( ) = default;
 
-			/**
-			* @brief
-			*/
-			~EditorWidgetManager( )
-			{
-				// Free memory
-				for ( auto& v : mViews )
-				{
-					delete v;
-					v = nullptr;
-				}
+	//		/**
+	//		* @brief
+	//		*/
+	//		~EditorWidgetManager( )
+	//		{
+	//			// Free memory
+	//			for ( auto& v : mViews )
+	//			{
+	//				delete v;
+	//				v = nullptr;
+	//			}
 
-				// Free all memory from maps
-				mFocusedMap.clear( );
-				mHoveredMap.clear( );
-				mViews.clear( );
-				mEditorObjects.clear( );
-			} 
- 
-			/**
-			* @brief
-			*/ 
-			bool HasView( EditorView* view )
-			{
-				return ( std::find( mViews.begin( ), mViews.end( ), view ) != mViews.end( ) );
-			}
+	//			// Free all memory from maps
+	//			mFocusedMap.clear( );
+	//			mHoveredMap.clear( );
+	//			mViews.clear( );
+	//			mEditorObjects.clear( );
+	//		} 
+ //
+	//		/**
+	//		* @brief
+	//		*/ 
+	//		bool HasView( EditorView* view )
+	//		{
+	//			return ( std::find( mViews.begin( ), mViews.end( ), view ) != mViews.end( ) );
+	//		}
 
-			/**
-			* @brief
-			*/
-			EditorView* AddView( EditorView* view )
-			{ 
-				if ( !HasView( view ) )
-				{
-					mFocusedMap[ view ] = false;
-					mHoveredMap[ view ] = false;
-					mViewEnabledMap[ view ] = view->GetEnabled();
-					mViews.push_back( view );
+	//		/**
+	//		* @brief
+	//		*/
+	//		EditorView* AddView( EditorView* view )
+	//		{ 
+	//			if ( !HasView( view ) )
+	//			{
+	//				mFocusedMap[ view ] = false;
+	//				mHoveredMap[ view ] = false;
+	//				mViewEnabledMap[ view ] = view->GetEnabled();
+	//				mViews.push_back( view );
 
-					// Initialize view
-					view->Initialize( );
-				}
+	//				// Initialize view
+	//				view->Initialize( );
+	//			}
 
-				// Return the view from the function
-				return view;
-			}
+	//			// Return the view from the function
+	//			return view;
+	//		}
 
-			/**
-			* @brief
-			*/
-			void SetHovered( EditorObject* object, bool hovered )
-			{ 
-				mHoveredMap[ object ] = hovered;
-			}
+	//		/**
+	//		* @brief
+	//		*/
+	//		void SetHovered( EditorObject* object, bool hovered )
+	//		{ 
+	//			mHoveredMap[ object ] = hovered;
+	//		}
 
-			/**
-			* @brief
-			*/
-			void SetFocused( EditorObject* object, bool focused )
-			{
-				mFocusedMap[ object ] = focused;
-			} 
+	//		/**
+	//		* @brief
+	//		*/
+	//		void SetFocused( EditorObject* object, bool focused )
+	//		{
+	//			mFocusedMap[ object ] = focused;
+	//		} 
 
-			/**
-			* @brief
-			*/
-			bool GetHovered( EditorObject* object )
-			{
-				if ( HasHoveredObject( object ) )
-				{
-					return mHoveredMap[ object ];
-				}
+	//		/**
+	//		* @brief
+	//		*/
+	//		bool GetHovered( EditorObject* object )
+	//		{
+	//			if ( HasHoveredObject( object ) )
+	//			{
+	//				return mHoveredMap[ object ];
+	//			}
 
-				return false;
-			}
+	//			return false;
+	//		}
 
-			/**
-			* @brief
-			*/
-			bool GetFocused( EditorObject* object )
-			{
-				if ( HasFocusedObject( object ) )
-				{
-					return mFocusedMap[ object ];
-				}
+	//		/**
+	//		* @brief
+	//		*/
+	//		bool GetFocused( EditorObject* object )
+	//		{
+	//			if ( HasFocusedObject( object ) )
+	//			{
+	//				return mFocusedMap[ object ];
+	//			}
 
-				return false;
-			}
+	//			return false;
+	//		}
 
-		private:
+	//	private:
 
-			bool HasHoveredObject( EditorObject* object )
-			{
-				return mHoveredMap.find( object ) != mHoveredMap.end( );
-			}
+	//		bool HasHoveredObject( EditorObject* object )
+	//		{
+	//			return mHoveredMap.find( object ) != mHoveredMap.end( );
+	//		}
 
-			bool HasFocusedObject( EditorObject* object )
-			{
-				return mFocusedMap.find( object ) != mFocusedMap.end( );
-			}
+	//		bool HasFocusedObject( EditorObject* object )
+	//		{
+	//			return mFocusedMap.find( object ) != mFocusedMap.end( );
+	//		}
 
-		private: 
+	//	private: 
 
-			HashMap< EditorObject*, bool > mFocusedMap;
-			HashMap< EditorObject*, bool > mHoveredMap; 
-			HashMap< EditorView*, bool > mViewEnabledMap;
+	//		HashMap< EditorObject*, bool > mFocusedMap;
+	//		HashMap< EditorObject*, bool > mHoveredMap; 
+	//		HashMap< EditorView*, bool > mViewEnabledMap;
 
-			Vector< EditorObject* > mEditorObjects;
-			Vector< EditorView* > mViews;
-	};
+	//		Vector< EditorObject* > mEditorObjects;
+	//		Vector< EditorView* > mViews;
+	//};
 
 	class EditorApp : public Enjon::Application
 	{
@@ -175,7 +176,7 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
-			EditorWidgetManager* GetEditorWidgetManager( );
+			//EditorWidgetManager* GetEditorWidgetManager( );
 
 			/**
 			* @brief 
@@ -186,6 +187,11 @@ namespace Enjon
 			* @brief 
 			*/
 			EditorInspectorView* GetInspectorView( );
+
+			/**
+			* @brief 
+			*/
+			EditorAssetBrowserView* GetEditorAssetBrowserView( );
 
 			/**
 			* @brief 
@@ -253,8 +259,6 @@ namespace Enjon
 			void InspectorView( bool* enabled );
 			void SceneView( bool* viewBool ); 
 
-			void TestSecondWindow( );
-
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;
@@ -303,20 +307,18 @@ namespace Enjon
 			EntityHandle mSelectedEntity;
 
 			// This could get dangerous...
-			AssetHandle<Scene> mCurrentScene;
-
-			EditorWidgetManager mEditorWidgetManager;
+			AssetHandle<Scene> mCurrentScene; 
 
 			EditorSceneView* mEditorSceneView = nullptr;
 
 			EditorInspectorView* mInspectorView = nullptr;
 
-			Camera mEditorCamera;
-			Vec3 mCameraRotator = Vec3( 0.0f );
+			EditorAssetBrowserView* mAssetBroswerView = nullptr;
 
-			EditorMaterialEditWindow* mTestEditorWindow = nullptr;
-			EditorAssetBrowserView* mTempABV = nullptr;
-			StaticMeshRenderable* mTestRenderable = nullptr;
+			EditorWorldOutlinerView* mWorldOutlinerView = nullptr;
+
+			Camera mEditorCamera;
+			Vec3 mCameraRotator = Vec3( 0.0f ); 
 	}; 
 }
 

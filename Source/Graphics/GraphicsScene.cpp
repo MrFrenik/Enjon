@@ -25,6 +25,11 @@ namespace Enjon
 			r->SetGraphicsScene( nullptr );
 		}
 
+		for ( auto& r : mSkeletalMeshRenderables )
+		{
+			r->SetGraphicsScene( nullptr );
+		}
+
 		for ( auto& r : mNonDepthTestedStaticMeshRenderables )
 		{
 			r->SetGraphicsScene( nullptr );

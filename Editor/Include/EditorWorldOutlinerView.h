@@ -11,7 +11,10 @@
 #include <Entity/EntityManager.h>
 
 namespace Enjon
-{
+{ 
+	using EntitySelectionCallback = std::function< void( const EntityHandle& selectedEntity ) >;
+	using EntityDeselectionCallback = std::function< void( ) >;
+
 	class EditorWorldOutlinerView : public EditorView
 	{
 		public:
@@ -25,6 +28,31 @@ namespace Enjon
 			* @brief
 			*/
 			~EditorWorldOutlinerView( ) = default; 
+
+			/**
+			* @brief
+			*/
+			EntityHandle GetSelectedEntity( );
+
+			/**
+			* @brief
+			*/
+			void SelectEntity( const EntityHandle& handle );
+
+			/**
+			* @brief
+			*/
+			void DeselectEntity( );
+
+			/**
+			* @brief
+			*/
+			void RegisterEntitySelectionCallback( const EntitySelectionCallback& callback );
+
+			/**
+			* @brief
+			*/
+			void RegisterEntityDeselectionCallback( const EntityDeselectionCallback& callback );
  
 		protected: 
 
@@ -46,7 +74,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual void CaptureState( );
+			virtual void CaptureState( ); 
 
 		protected: 
 
@@ -57,6 +85,9 @@ namespace Enjon
 			Vec2 mHeldMousePosition = Vec2( -1, -1 );
 			EntityHandle mGrabbedEntity = EntityHandle::Invalid( );
 			u32 mEntityNameChangeID = EntityHandle::Invalid( ).GetID( );
+			EntityHandle mSelectedEntity = EntityHandle::Invalid( ); 
+			Vector< EntitySelectionCallback > mEntitySelectionCallbacks;
+			Vector< EntityDeselectionCallback > mEntityDeselectionCallbacks;
 	};
 }
 

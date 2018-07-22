@@ -30,14 +30,19 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			~EditorAssetBrowserView( ) = default; 
+			~EditorAssetBrowserView( ) = default;
 
 			/**
 			* @brief
 			*/
 			const Asset* GetSelectedAsset( );
- 
-		protected: 
+
+			/**
+			* @brief
+			*/
+			const Asset* GetGrabbedAsset( );
+
+		protected:
 
 			/**
 			* @brief Must be overridden
@@ -52,7 +57,7 @@ namespace Enjon
 			/**
 			* @brief Must be overridden
 			*/
-			virtual void Initialize( ) override; 
+			virtual void Initialize( ) override;
 
 			void InitializeCurrentDirectory( Project* project );
 
@@ -72,9 +77,15 @@ namespace Enjon
 
 			bool ActivePopupWindowEnabled( );
 
-			void ProcessFileDrops( ); 
+			void ProcessFileDrops( );
 
-		protected: 
+			void HandleDraggingGrabbedAsset( );
+
+			void ReleaseGrabbedAsset( );
+
+			void PrepareReleaseGrabbedAsset( );
+
+		protected:
 			String mCurrentDirectory = "";
 			String mRootDirectory = "";
 			String mSelectedPath = "";
@@ -88,7 +99,12 @@ namespace Enjon
 			AssetRecordInfo* mSelectedAssetInfo = nullptr;
 			HashSet<String> mFilesToImport;
 			AssetLoader* mCurrentAssetLoader = nullptr;
+			Vec2 mHeldMousePosition;
+			bool mMouseHeld = false;
+			const Asset* mGrabbedAsset = nullptr;
+			bool mNeedToReleaseAssetNextFrame = false;
 	};
+
 }
 
 #endif

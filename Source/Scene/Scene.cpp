@@ -15,6 +15,8 @@ namespace Enjon
 	Result Scene::SerializeData( ByteBuffer* archiver ) const
 	{
 		// For serializaing the data, need to write all of the entities in the scene at the moment
+		// NOTE(John): This will fail with the current multiple-world setup, since all the entities will be saved into this scene, regardless
+		// of the world they belong to. Need to take that into account for this, and the scene will need to know which world context it belongs to
 		EntityManager* em = EngineSubsystem( EntityManager );
 		if ( em )
 		{

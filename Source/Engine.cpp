@@ -255,7 +255,7 @@ namespace Enjon
 			lastTime = thisTime; 
 
 			// Process all new windows to be created ( pretty hacky right here... )
-			Window::InitializeWindows( );
+			Window::WindowsUpdate( );
 
 			 // Update input manager
 			mInput->Update( dt ); 
@@ -270,6 +270,7 @@ namespace Enjon
 			Enjon::Result res = ProcessInput( mInput, dt );
 			if ( res != Result::PROCESS_RUNNING )
 			{
+				// Not running anymore
 				mIsRunning = false;
 				break;
 			} 
@@ -325,7 +326,7 @@ namespace Enjon
 		if ( mApp )
 		{
 			mApp->Shutdown();
-		}
+		} 
 
 		return Enjon::Result::SUCCESS;
 	}

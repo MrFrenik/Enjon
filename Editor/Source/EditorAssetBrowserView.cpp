@@ -138,9 +138,12 @@ namespace Enjon
 
 	void EditorAssetBrowserView::UpdateView( )
 	{ 
-		// Get editor widget manager
-		EditorWidgetManager* wm = mApp->GetEditorWidgetManager( ); 
-
+		// Release any previously grabbed assets that need release
+		if ( mNeedToReleaseAssetNextFrame )
+		{
+			ReleaseGrabbedAsset( );
+		}
+ 
 		// Get input system
 		Input* input = EngineSubsystem( Input );
 
@@ -226,16 +229,32 @@ namespace Enjon
  
 							// If path doesn't exist, then rename this path
 							if ( !FS::exists( finalPath ) )
-							{
-								// Rename the filepath
-								FS::rename( p, finalPath ); 
-
+							{ 
 								// If not a directory, then rename the asset
 								if ( !isDir )
 								{
-									// Use asset manager to set filepath of selected asset
-									EngineSubsystem( AssetManager )->RenameAssetFilePath( mSelectedAssetInfo->GetAsset(), finalPath );
+									// Try to get selected asset info from this original selected path
+									if ( !mSelectedAssetInfo )
+									{ 
+										mSelectedAssetInfo = EngineSubsystem( AssetManager )->GetAssetRecordFromFilePath( Utils::FindReplaceAll( mSelectedPath, "\\", "/" ) );
+									}
+
+									// Can rename
+									if ( mSelectedAssetInfo )
+									{
+										// Use asset manager to set filepath of selected asset
+										EngineSubsystem( AssetManager )->RenameAssetFilePath( mSelectedAssetInfo->GetAsset(), finalPath ); 
+
+										// Rename the filepath
+										FS::rename( p, finalPath ); 
+									}
 								}
+								else
+								{
+									// Rename the filepath
+									FS::rename( p, finalPath ); 
+								}
+
 							}
 
 							mPathNeedsRename = false;
@@ -256,7 +275,7 @@ namespace Enjon
 					{
 						hoveringItem = true;
 
-						if ( ImGui::IsMouseDoubleClicked( 0 ) || input->IsKeyPressed( KeyCode::Enter ) )
+						if ( ImGui::IsMouseDoubleClicked( 0 ) )
 						{
 							if ( FS::is_directory( p ) )
 							{
@@ -296,6 +315,27 @@ namespace Enjon
 						{
 							SetSelectedPath( p.path( ).string( ) );
 						}
+ 
+						if ( ImGui::IsMouseDown( 0 ) )
+						{ 
+							AssetRecordInfo* info =  EngineSubsystem( AssetManager )->GetAssetRecordFromFilePath( Utils::FindReplaceAll( p.path().string(), "\\", "/" ) );
+
+							if ( info )
+							{
+								if ( !mMouseHeld )
+								{
+									mHeldMousePosition = input->GetMouseCoords( );
+									mMouseHeld = true;
+								}
+								else if ( mMouseHeld && !mGrabbedAsset )
+								{
+									if ( mHeldMousePosition != input->GetMouseCoords() && mHeldMousePosition.Distance(input->GetMouseCoords()) >= 2.0f )
+									{ 
+										mGrabbedAsset = info->GetAsset( );
+									} 
+								} 
+							}
+						}
 					}
 				} 
 			} 
@@ -324,21 +364,16 @@ namespace Enjon
 
 			// TODO(): Input states are starting to get wonky - need to unify through one central area
 			if ( 
-					wm->GetHovered( this ) && 
+					( ( IsHovered() && 
 					!hoveringItem && 
 					!mPathNeedsRename && 
-					!ActivePopupWindowEnabled() && 
+					!ActivePopupWindowEnabled() ) || ( !IsHovered() && !ActivePopupWindowEnabled() ) ) && 
 					( input->IsKeyPressed(KeyCode::LeftMouseButton ) || input->IsKeyPressed( KeyCode::RightMouseButton ) ) 
 				)
 			{
 				SetSelectedPath( "" );
-			}
-
-			if ( !wm->GetHovered( this ) && ( input->IsKeyPressed( KeyCode::LeftMouseButton ) ) )
-			{
-				SetSelectedPath( "" );
-			}
-
+			} 
+ 
 			// Check for dropped files
 			AssetManager* am = EngineSubsystem( AssetManager );
 			auto window = EngineSubsystem( GraphicsSubsystem )->GetWindow( )->ConstCast< Window >();
@@ -362,6 +397,12 @@ namespace Enjon
 			ImGui::ListBoxFooter( ); 
 		} 
 
+		// Draw window around mouse for grabbed asset
+		if ( mGrabbedAsset )
+		{
+			HandleDraggingGrabbedAsset( );
+		}
+
 		// Check for any file drops that have occurred
 		ProcessFileDrops( );
 
@@ -379,6 +420,58 @@ namespace Enjon
 	}
 
 	//=========================================================================
+
+	const Asset* EditorAssetBrowserView::GetGrabbedAsset( )
+	{
+		return mGrabbedAsset;
+	} 
+
+	//=========================================================================
+
+	void EditorAssetBrowserView::HandleDraggingGrabbedAsset( )
+	{
+		Input* input = EngineSubsystem( Input );
+
+		if ( !mGrabbedAsset )
+		{
+			return;
+		} 
+
+		// Draw window around mouse position
+		Vec2 mousePos = input->GetMouseCoords( );
+
+		String label = fmt::format( "Asset: {}", mGrabbedAsset->GetName( ) ).c_str( );
+		ImVec2 txtSize = ImGui::CalcTextSize( label.c_str( ) );
+		ImGui::SetNextWindowPos( ImVec2( ImGui::GetMousePos( ).x + 15.0f, ImGui::GetMousePos().y + 5.0f ) );
+		ImGui::SetNextWindowSize( ImVec2( txtSize.x + 20.0f, txtSize.y ) );
+		ImGui::Begin( "##grabbed_asset_window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
+		{
+			ImGui::Text( label.c_str( ) );
+		}
+		ImGui::End( );
+
+		// Release grabbed asset
+		if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) )
+		{
+			PrepareReleaseGrabbedAsset( );
+		}
+	} 
+
+	//=========================================================================
+
+	void EditorAssetBrowserView::PrepareReleaseGrabbedAsset( )
+	{
+		mNeedToReleaseAssetNextFrame = true;
+	}
+
+	//=========================================================================
+
+	void EditorAssetBrowserView::ReleaseGrabbedAsset( )
+	{
+		mNeedToReleaseAssetNextFrame = false;
+		mMouseHeld = false;
+		mGrabbedAsset = nullptr;
+	}
 
 	void EditorAssetBrowserView::ProcessFileDrops( )
 	{
@@ -544,6 +637,21 @@ namespace Enjon
 
 			// Select the path
 			SetSelectedPath( mat.Get( )->GetAssetRecordInfo( )->GetAssetFilePath( ) );
+
+			// Set needing to rename
+			mPathNeedsRename = true;
+
+			mFolderMenuPopup.Deactivate( ); 
+		} 
+
+		// Construct scene option
+		if ( ImGui::Selectable( "\t+ Scene" ) )
+		{ 
+			// Construct asset with current directory
+			AssetHandle< Scene > scene = am->ConstructAsset< Scene >( "NewScene", mCurrentDirectory );
+
+			// Select the path
+			SetSelectedPath( scene.Get( )->GetAssetRecordInfo( )->GetAssetFilePath( ) );
 
 			// Set needing to rename
 			mPathNeedsRename = true;

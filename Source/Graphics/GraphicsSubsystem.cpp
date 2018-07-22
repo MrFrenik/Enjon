@@ -319,7 +319,10 @@ namespace Enjon
 		FontManager::DeleteFonts( );
 
 		// Clear noise kernel
-		mSSAOKernel.clear( );
+		mSSAOKernel.clear( ); 
+
+		// Clean up windows
+		Window::CleanupWindows( true );
  
 		return Result::SUCCESS; 
 	}
@@ -815,15 +818,18 @@ namespace Enjon
 		// Set pixel alignment for unpacking
 		FrameBuffer* objectIDBuffer = ctx->GetObjectIDBuffer( );
 		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-		//gBuffer->Bind( BindType::READ );
-		//glReadBuffer( GL_COLOR_ATTACHMENT0 + ( u32 )GBufferTextureType::OBJECT_ID );
-		objectIDBuffer->Bind( BindType::READ );
+
+		// Bind for reading
+		objectIDBuffer->Bind( BindType::READ ); 
 		glReadBuffer( GL_COLOR_ATTACHMENT0 );
 
 		// Read at center of screen and convert to color
 		u8 data[ 4 ];
-		glReadPixels( screenPosition.x, GetViewport().y - screenPosition.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data );
+		glReadPixels( screenPosition.x, GetViewport().y - screenPosition.y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, data );
 		ColorRGBA32 color( ( f32 )data[ 0 ] / 255.0f, ( f32 )data[ 1 ] / 255.0f, ( f32 )data[ 2 ] / 255.0f, ( f32 )data[ 3 ] / 255.0f );
+
+		// Get submesh from color
+		u32 subMeshIdx = Renderable::ColorToSubMeshIdx( color );
 
 		// Get id from color
 		u32 id = Renderable::ColorToID( color );
@@ -834,7 +840,8 @@ namespace Enjon
 
 		objectIDBuffer->Unbind( ); 
 
-		return PickResult { handle, id };
+		// Return pick result
+		return PickResult { handle, id, subMeshIdx };
 	}
 
 	//======================================================================================================
@@ -865,6 +872,8 @@ namespace Enjon
 		// Clear normal render target
 		const GLfloat blackColor[ ] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		glClearBufferfv(GL_COLOR, (u32)GBufferTextureType::NORMAL, blackColor); 
+
+		glEnablei( GL_BLEND, ( u32 )GBufferTextureType::OBJECT_ID );
 
 		// Grab graphics scene from context
 		GraphicsScene* scene = ctx->GetGraphicsScene( );
@@ -914,8 +923,8 @@ namespace Enjon
 								material->Bind( sgShader );
 							}
 
-							sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) ); 
-							renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ), subMeshes.at( i ) );
+							//sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) ); 
+							renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ), subMeshes.at( i ), i );
 						}
 					} 
 				}
@@ -959,7 +968,7 @@ namespace Enjon
 								material->Bind( sgShader );
 							}
 
-							sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) ); 
+							sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ), i ) ); 
 
 							// Set transform uniforms in shader
 							for ( u32 i = 0; i < transforms.size(); ++i )
@@ -1606,7 +1615,7 @@ namespace Enjon
 					}
 
 					// Render object
-					sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
+					sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ), 0 ) );
 					renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ) );
 				}
 			}
@@ -1664,7 +1673,7 @@ namespace Enjon
 						}
 
 						// Render object
-						sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) );
+						sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ), 0 ) );
 						renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ) );
 					}
 				}

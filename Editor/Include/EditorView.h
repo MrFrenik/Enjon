@@ -44,8 +44,13 @@ namespace Enjon
 
 			/**
 			* @brief
+			*/
+			Window* GetWindow( );
+
+			/**
+			* @brief
 			*/ 
-			virtual u32 GetViewFlags( );
+			virtual u32 GetViewFlags( ); 
 
 			/**
 			* @brief
@@ -56,6 +61,16 @@ namespace Enjon
 			* @brief
 			*/
 			virtual void Initialize( );
+
+			/**
+			* @brief
+			*/
+			bool IsFocused( ) const;
+
+			/**
+			* @brief
+			*/
+			bool IsHovered( ) const;
  
 		protected: 
 
@@ -88,6 +103,8 @@ namespace Enjon
 			u32 mViewFlags = 0;
 			bool mViewEnabled = true;
 			Window* mWindow = nullptr;
+			bool mIsHovered = false;
+			bool mIsFocused = false;
 	};
 }
 

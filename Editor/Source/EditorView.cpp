@@ -50,6 +50,27 @@ namespace Enjon
 
 	//=====================================================================
 
+	bool EditorView::IsFocused( ) const
+	{	
+		return mIsFocused;
+	}
+
+	//=====================================================================
+
+	Window* EditorView::GetWindow( )
+	{
+		return mWindow;
+	}
+
+	//=====================================================================
+
+	bool EditorView::IsHovered( ) const
+	{
+		return mIsHovered;
+	}
+
+	//=====================================================================
+
 	bool EditorView::GetEnabled( )
 	{
 		return mViewEnabled;
@@ -66,16 +87,12 @@ namespace Enjon
 		this->UpdateView( );
  
 		// Call process input if focused view
-		EditorWidgetManager* wm = mApp->GetEditorWidgetManager( );
-		if ( wm->GetFocused( this ) )
+		//EditorWidgetManager* wm = mApp->GetEditorWidgetManager( ); 
+		//if ( wm->GetFocused( this ) )
+		if ( mIsFocused )
 		{
 			ProcessInput( ); 
-		}
-
-		//bool isHovered = wm->GetHovered( this );
-		//bool isFocused = wm->GetFocused( this );
-
-		//std::cout << fmt::format( "{} - focused: {}, hovered: {}\n", mName, isFocused, isHovered );
+		} 
 	}
 
 	//===================================================================== 
@@ -90,23 +107,23 @@ namespace Enjon
 	void EditorView::CaptureState( )
 	{ 
 		Input* input = EngineSubsystem( Input );
-		EditorWidgetManager* wm = mApp->GetEditorWidgetManager( );
+		//EditorWidgetManager* wm = mApp->GetEditorWidgetManager( );
 
 		// Get position and dimensions
 		ImVec2 wp = ImGui::GetWindowPos( );
 		ImVec2 ws = ImGui::GetWindowSize( );
 
 		// Capture hovered state
-		bool isHovered = ImGui::IsMouseHoveringRect( wp, ImVec2( wp.x + ws.x, wp.y + ws.y ) );
-		wm->SetHovered( this, isHovered );
+		mIsHovered = ImGui::IsMouseHoveringRect( wp, ImVec2( wp.x + ws.x, wp.y + ws.y ) );
+		//wm->SetHovered( this, isHovered );
 
 		// Capture focused state
-		bool isFocused = ( isHovered &&
+		bool isFocused = ( mIsHovered &&
 			( input->IsKeyPressed( KeyCode::LeftMouseButton ) ||
 				input->IsKeyPressed( KeyCode::RightMouseButton ) ||
 				input->IsKeyDown( KeyCode::LeftMouseButton ) ||
 				input->IsKeyDown( KeyCode::RightMouseButton ) ) );
-		wm->SetFocused( this, isFocused );
+		//wm->SetFocused( this, isFocused );
 	}
 
 	//===================================================================== 

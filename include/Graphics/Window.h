@@ -120,6 +120,8 @@ namespace Enjon
 			static void AddNewWindow( const WindowParams& params );
 			static void DestroyWindow( Window* window ); 
 			static void InitializeWindows( );
+			static void CleanupWindows( bool destroyAll = false );
+			static void WindowsUpdate( );
 
 		protected:
 

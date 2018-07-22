@@ -152,15 +152,17 @@ namespace Enjon
 
 	//==============================================================================
 
-	void Renderable::Submit( const Enjon::Shader* shader, const SubMesh* subMesh )
+	void Renderable::Submit( const Enjon::Shader* shader, const SubMesh* subMesh, const u32& subMeshIndex )
 	{
 		if ( shader == nullptr )
 		{
 			return;
 		}
 
-		const_cast< Enjon::Shader* > ( shader )->SetUniform( "uModel", mCurrentModelMatrix );
-		const_cast< Enjon::Shader* > ( shader )->SetUniform( "uPreviousModel", mPreviousModelMatrix );
+		Shader* shdr = const_cast< Shader* >( shader );
+		shdr->SetUniform( "uModel", mCurrentModelMatrix );
+		shdr->SetUniform( "uPreviousModel", mPreviousModelMatrix );
+		shdr->SetUniform( "uObjectID", Renderable::IdToColor( GetRenderableID( ), subMeshIndex ) ); 
 
 		// Bind submesh
 		subMesh->Bind( );
@@ -174,7 +176,7 @@ namespace Enjon
 
 	//==============================================================================
 
-	void Renderable::Submit( const GLSLProgram* shader, const SubMesh* subMesh )
+	void Renderable::Submit( const GLSLProgram* shader, const SubMesh* subMesh, const u32& subMeshIdx )
 	{ 
 		if ( shader == nullptr )
 		{
@@ -278,16 +280,17 @@ namespace Enjon
 
 	//=================================================================================================
 
-	ColorRGBA32 Renderable::IdToColor( const u32& id )
+	ColorRGBA32 Renderable::IdToColor( const u32& id, const u32& subMeshIdx )
 	{
 		f32 r = f32( ( id & 0x000000FF ) >> 0 ) / 255.0f;
 		f32 g = f32( ( id & 0x0000FF00 ) >> 8 ) / 255.0f;
-		f32 b = f32( ( id & 0x00FF0000 ) >> 16 ) / 255.0f;
+		f32 b = f32( ( id & 0x00FF0000 ) >> 16 ) / 255.0f; 
+		//f32 i = ( f32 )subMeshIdx / 255.0f;
 
 		return ColorRGBA32( r, g, b, 1.0f );
 	}
 
-	//=================================================================================================
+	//================================================================================================= 
 
 	u32 Renderable::ColorToID( const ColorRGBA32& color )
 	{
@@ -296,6 +299,14 @@ namespace Enjon
 						+ color.b * 255 * 256 * 256 );
 
 		return id;
+	}
+
+	//================================================================================================= 
+
+	u32 Renderable::ColorToSubMeshIdx( const ColorRGBA32& color )
+	{
+		u32 idx = ( u32 )( color.a * 255 );
+		return idx;
 	}
 
 	//================================================================================================= 

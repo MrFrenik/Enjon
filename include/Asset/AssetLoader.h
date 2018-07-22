@@ -292,6 +292,7 @@ namespace Enjon
 				info.mAssetLoadStatus = AssetLoadStatus::Loaded;
 				info.mAssetLoaderClass = Class( );
 				info.mAssetDisplayName = usedAssetName;
+				info.mAssetClass = asset->Class( );
 
 				// Add to loader
 				const Asset* cnstAsset = AddToAssets( info ); 

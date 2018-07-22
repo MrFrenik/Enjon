@@ -61,257 +61,38 @@ Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\""
 //Enjon::String configuration = "RelWithDebInfo";
 Enjon::String configuration = "Debug";
 
-namespace Enjon
-{
-	//class EditorViewport : public EditorView
-	//{
-	//	public:
-	//		/**
-	//		* @brief
-	//		*/
-	//		EditorViewport( EditorApp* app, Window* window )
-	//			: EditorView( app, window, "Viewport", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
-	//		{ 
-	//		}
-
-	//		/**
-	//		* @brief
-	//		*/
-	//		~EditorViewport( ) = default; 
-
-	//	protected:
-
-	//		/**
-	//		* @brief Must be overriden
-	//		*/
-	//		virtual void UpdateView( ) override
-	//		{ 
-	//			GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem ); 
- //
-	//			// Grab graphics context from world and then get framebuffer rendertarget texture
-	//			World* world = mWindow->GetWorld( );
-	//			GraphicsSubsystemContext* gfxCtx = world->GetContext< GraphicsSubsystemContext >( );
-	//			u32 currentTextureId = gfxCtx->GetFrameBuffer( )->GetTexture( ); 
-	//			//u32 currentTextureId = gfx->GetGBufferTexture( GBufferTextureType::OBJECT_ID );
-
-	//			// Rotate camera over time
-	//			Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
-	//			//cam->SetRotation( Quaternion::AngleAxis( Engine::GetInstance( )->GetWorldTime( ).GetTotalTimeElapsed( ), Vec3::YAxis( ) ) );
-
-	//			// Render game in window
-	//			ImVec2 cursorPos = ImGui::GetCursorScreenPos( );
-
-	//			// Cache off cursor position for scene view
-	//			Vec2 padding( 20.0f, 8.0f );
-	//			//Vec2 padding( -20.0f, -40.0f );
-	//			f32 width = ImGui::GetWindowWidth( ) - padding.x;
-	//			f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
-	//			mSceneViewWindowPosition = Vec2( cursorPos.x, cursorPos.y );
-	//			mSceneViewWindowSize = Vec2( width, height );
-
-	//			ImTextureID img = ( ImTextureID )currentTextureId;
-	//			ImGui::Image( img, ImVec2( width, height ),
-	//				ImVec2( 0, 1 ), ImVec2( 1, 0 ), ImColor( 255, 255, 255, 255 ), ImColor( 255, 255, 255, 0 ) );
-
-	//			// Update camera aspect ratio
-	//			gfxCtx->GetGraphicsScene( )->GetActiveCamera( )->SetAspectRatio( ImGui::GetWindowWidth( ) / ImGui::GetWindowHeight( ) );
-
-	//			// Draw border around image
-	//			ImDrawList* dl = ImGui::GetWindowDrawList( );
-	//			ImVec2 a( mSceneViewWindowPosition.x, mSceneViewWindowPosition.y );
-	//			ImVec2 b( mSceneViewWindowPosition.x + mSceneViewWindowSize.x, mSceneViewWindowPosition.y + mSceneViewWindowSize.y ); 
-	//			dl->AddRect( a, b, ImColor( 0.0f, 0.64f, 1.0f, 0.48f ), 1.0f, 15, 1.5f ); 
-
-	//			AssetHandle< Scene > mCurrentScene = EngineSubsystem( SceneManager )->GetScene( );
-	//			if ( mCurrentScene )
-	//			{
-	//				String sceneLabel = "Scene: " + mCurrentScene->GetName( );
-	//				ImVec2 sz = ImGui::CalcTextSize( sceneLabel.c_str( ) ); 
-	//				ImVec2 rectPadding( 5.0f, 5.0f );
-	//				ImVec2 padding( 10.0f, 10.0f );
-
-	//				// Draw shadow text
-	//				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
-	//				ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x + 1.0f, b.y - sz.y - padding.y + 1.0f ) ); 
-	//				ImGui::Text( sceneLabel.c_str( ) );
-	//				ImGui::PopStyleColor( );
-
-	//				// Draw text
-	//				ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x, b.y - sz.y - padding.y ) ); 
-	//				ImGui::Text( sceneLabel.c_str( ) );
-	//			} 
-	//		}
-
-	//		/**
-	//		* @brief Must be overriden
-	//		*/
-	//		virtual void ProcessViewInput( ) override
-	//		{
-
-	//		}
-
-	//		/**
-	//		* @brief Must be overriden
-	//		*/
-	//		virtual void Initialize( ) override
-	//		{
-
-	//		}
-
-	//		/**
-	//		* @brief
-	//		*/
-	//		virtual void CaptureState( )
-	//		{
-
-	//		} 
-
-	//	protected:
-	//		Vec2 mSceneViewWindowPosition;
-	//		Vec2 mSceneViewWindowSize; 
-	//}; 
-	
-	class EditorWindow : public Window
-	{
-		public:
-
-			EditorWindow( ) = default;
-
-			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override
-			{
-				// Init window base
-				Window::Init( windowName, screenWidth, screenHeight, currentFlags );
-
-				// Initialize new world 
-				mWorld = new World( ); 
-				// Register contexts with world
-				mWorld->RegisterContext< GraphicsSubsystemContext >( ); 
-
-				GUIContext* guiContext = GetGUIContext( );
-
-				// Create viewport
-				mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this );
-
-				guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
-
-				return 1;
-			}
-
-		protected: 
-			EditorViewport* mViewport = nullptr;
-	}; 
-
-	//class MaterialEditorWindow : public Window
-	//{
-	//	public: 
-
-	//		/**
-	//		* @brief
-	//		*/
-	//		MaterialEditorWindow( const AssetHandle< Material >& mat )
-	//			: mMaterial( mat ), mInitialized( false )
-	//		{ 
-	//		}
-
-	//		virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override
-	//		{ 
-	//			// Construct scene in world
-	//			if ( !mInitialized )
-	//			{ 
-	//				// Init window base
-	//				Window::Init( windowName, screenWidth, screenHeight, currentFlags );
-
-	//				// Initialize new world 
-	//				mWorld = new World( ); 
-	//				// Register contexts with world
-	//				mWorld->RegisterContext< GraphicsSubsystemContext >( ); 
-
-	//				ConstructScene( );
-
-	//				mInitialized = true;
-	//			} 
-
-	//			return 1; 
-	//		} 
-
-	//	protected:
-
-	//		void ConstructScene( )
-	//		{ 
-	//			GUIContext* guiContext = GetGUIContext( );
-
-	//			// Create viewport
-	//			mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this );
-
-	//			guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) ); 
-
-	//			// NOTE(): This should be done automatically for the user in the backend
-	//			// Add window to graphics subsystem ( totally stupid way to do this )
-	//			GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-	//			gfx->AddWindow( this );
-
-	//			World* world = GetWorld( );
-	//			GraphicsScene* scene = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
-
-	//			// Need to create an external scene camera held in the viewport that can manipulate the scene view
-	//			Camera* cam = scene->GetActiveCamera( );
-	//			cam->SetNearFar( 0.1f, 1000.0f );
-	//			cam->SetProjection( ProjectionType::Perspective );
-	//			cam->SetPosition( Vec3( 0.0f, 0.0f, -3.0f ) );
-
-	//			mRenderable.SetMesh( EngineSubsystem( AssetManager )->GetAsset< Mesh >( "models.unit_sphere" ) );
-	//			mRenderable.SetPosition( cam->GetPosition() + cam->Forward() * 10.0f );
-	//			mRenderable.SetScale( 2.0f );
-	//			mRenderable.SetMaterial( mMaterial );
-	//			scene->AddStaticMeshRenderable( &mRenderable ); 
-
-	//			EditorApp* app = Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( );
-	//			mTempABV = new EditorAssetBrowserView( app, this );
-	//			{
-	//				static bool openView = true;
-	//				guiContext->RegisterWindow( "Update Material", [ & ]
-	//				{
-	//					if ( ImGui::BeginDock( "Update Material", &openView ) )
-	//					{ 
-	//						const Asset* asset = mTempABV->GetSelectedAsset( );
-	//						if ( asset )
-	//						{
-	//							ImGui::Text( fmt::format( "Material: {}", asset->GetName( ) ).c_str( ) );
-
-	//							// If is material, then set material of renderable
-	//							if ( asset->Class( )->InstanceOf< Material >( ) )
-	//							{
-	//								mRenderable.SetMaterial( asset, 0 );
-
-	//								// Set material
-	//								mMaterial = asset; 
-	//							}
-	//						}
-
-	//						if ( mMaterial )
-	//						{
-	//							ImGuiManager* igm = EngineSubsystem( ImGuiManager );
-	//							igm->InspectObject( mMaterial.Get( ) );
-	//						}
-
-	//						ImGui::EndDock( );
-	//					}
-	//				}); 
-	//			}
-
-	//			guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
-	//			guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Viewport", GUIDockSlotType::Slot_Right, 0.6f ) );
-	//			guiContext->RegisterDockingLayout( GUIDockingLayout( "Update Material", "Viewport", GUIDockSlotType::Slot_Bottom, 0.2f ) );
-	//		}
-
-	//	protected: 
-	//		EditorViewport* mViewport = nullptr;
-	//		EditorAssetBrowserView* mTempABV = nullptr;
-	//		AssetHandle< Material > mMaterial;
-	//		StaticMeshRenderable mRenderable;
-	//		u32 mInitialized : 1;
-	//};
-}
+//namespace Enjon
+//{
+//	class EditorWindow : public Window
+//	{
+//		public:
+//
+//			EditorWindow( ) = default;
+//
+//			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override
+//			{
+//				// Init window base
+//				Window::Init( windowName, screenWidth, screenHeight, currentFlags );
+//
+//				// Initialize new world 
+//				mWorld = new World( ); 
+//				// Register contexts with world
+//				mWorld->RegisterContext< GraphicsSubsystemContext >( ); 
+//
+//				GUIContext* guiContext = GetGUIContext( );
+//
+//				// Create viewport
+//				mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this );
+//
+//				guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
+//
+//				return 1;
+//			}
+//
+//		protected: 
+//			EditorViewport* mViewport = nullptr;
+//	}; 
+//}
 
 namespace Enjon
 {
@@ -370,6 +151,7 @@ namespace Enjon
 					{
 						mLoadProjectPopupDialogue = false;
 						ImGui::CloseCurrentPopup( );
+
 					}
 
 				ImGui::EndPopup( );
@@ -426,9 +208,9 @@ namespace Enjon
 				isValidCPPClassName = Utils::IsValidCPPClassName( componentName );
 
 				if ( !compExists && isValidCPPClassName )
-				{
+				{ 
 					// Get total count of entities
-					UUID curUUID = mSelectedEntity.Get( )->GetUUID( );
+					UUID curUUID = mWorldOutlinerView->GetSelectedEntity( ).Get( )->GetUUID( );
 
 					std::cout << "Creating component!\n";
 					closePopup = true;
@@ -439,13 +221,14 @@ namespace Enjon
 					em->ForceAddEntities( );
 
 					// Reselect entity by uuid
-					SelectEntity( em->GetEntityByUUID( curUUID ) );
+					mWorldOutlinerView->SelectEntity( em->GetEntityByUUID( curUUID ) );
+					//SelectEntity( em->GetEntityByUUID( curUUID ) );
 
 					// After creating new component, need to attach to entity
-					if ( mSelectedEntity )
+					if ( mWorldOutlinerView->GetSelectedEntity() )
 					{
 						// Add using meta class 
-						mSelectedEntity.Get( )->AddComponent( Object::GetClass( componentName ) );
+						mWorldOutlinerView->GetSelectedEntity( ).Get( )->AddComponent( Object::GetClass( componentName ) );
 					}
 
 					// Attempt to open the header in visual studio
@@ -526,7 +309,7 @@ namespace Enjon
 
 	EntityHandle EditorApp::GetSelectedEntity( )
 	{
-		return mSelectedEntity;
+		return mWorldOutlinerView->GetSelectedEntity();
 	}
 
 	//==================================================================================================================
@@ -535,6 +318,13 @@ namespace Enjon
 	{
 		return mInspectorView;
 	}
+
+	//==================================================================================================================
+
+	EditorAssetBrowserView* EditorApp::GetEditorAssetBrowserView( )
+	{
+		return mAssetBroswerView;
+	} 
 
 	//==================================================================================================================
 
@@ -555,139 +345,6 @@ namespace Enjon
 	}
 
 	//==================================================================================================================
-
-	void EditorApp::InspectorView( bool* enabled )
-	{
-		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
-
-		if ( mSelectedEntity )
-		{
-			// Debug dump the entity ( Probably shouldn't do this and should tailor it more... )
-			Entity* ent = mSelectedEntity.Get( ); 
-
-			// New component dialogue
-			ImGui::PushFont( igm->GetFont( "WeblySleek_16" ) );
-			if ( ImGui::BeginCombo( "##ADDCOMPONENT", "+ Add Component..." ) )
-			{
-				// Label for scripting type of component class
-				ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
-				ImGui::Text( "Scripting" );
-				ImGui::PopStyleColor( );
-				ImGui::PopFont( );
-
-				// Add new component pop up
-				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
-				if ( ImGui::Selectable( "\tCreate New Component..." ) )
-				{
-					mNewComponentPopupDialogue = true;
-				}
-				ImGui::PopFont( );
-
-				// Separator line
-				ImGui::Separator( );
-
-				// Get component list
-				EntityManager* entities = EngineSubsystem( EntityManager );
-				auto compMetaClsList = entities->GetComponentMetaClassList( );
-
-				// Label for scripting type of component class
-				ImGui::PushFont( igm->GetFont( "WeblySleek_10" ) );
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
-				ImGui::Text( "Custom" );
-				ImGui::PopStyleColor( );
-				ImGui::PopFont( );
-
-				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
-				for ( auto& cls : compMetaClsList )
-				{
-					if ( !ent->HasComponent( cls ) )
-					{
-						// Add component to mEntity
-						if ( ImGui::Selectable( fmt::format( "\t{}", cls->GetName( ) ).c_str() ) )
-						{
-							ent->AddComponent( cls );
-						} 
-					}
-				} 
-				ImGui::PopFont( );
-
-				ImGui::EndCombo( );
-			}
-			ImGui::PopFont( ); 
-
-			// Add new component dialogue window
-			if ( mNewComponentPopupDialogue )
-			{
-				ImGui::OpenPopup( "Add C++ Component##NewComponent" );
-				AddComponentPopupView( );
-			}
-
-			ImGui::ListBoxHeader( "##CompLists", ImVec2(ImGui::GetWindowSize().x - 20.0f, ImGui::GetWindowSize().y - 40.0f ) );
-			{
-				// Transform information
-				if ( ImGui::CollapsingHeader( "Transform" ) )
-				{
-					ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
-					igm->DebugDumpProperty( ent, ent->Class( )->GetPropertyByName( "mLocalTransform" ) ); 
-					ImGui::PopFont( );
-				} 
-
-				for ( auto& c : ent->GetComponents( ) )
-				{
-					if ( ImGui::CollapsingHeader( c->Class( )->GetName( ).c_str( ) ) )
-					{
-						MetaClass* cls = const_cast< MetaClass * > ( c->Class( ) );
-						s32 shapeType = -1;
-						if ( cls->InstanceOf<RigidBodyComponent>( ) )
-						{
-							shapeType = (s32)c->Cast<RigidBodyComponent>( )->GetShapeType( );
-						}
-
-						ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
-						//ImGuiManager::DebugDumpObject( c ); 
-						igm->InspectObject( c ); 
-						ImGui::PopFont( );
-
-						// Shape type changed
-						// TODO(): Be able to hook in specific delegates for property changes through reflection system
-						if ( shapeType != -1 && shapeType != (s32)c->Cast< RigidBodyComponent >()->GetShapeType() )
-						{
-							c->ConstCast< RigidBodyComponent >( )->SetShape( c->Cast< RigidBodyComponent >( )->GetShapeType( ) );
-						} 
-
-						if ( ImGui::Button( fmt::format( "Remove##{}", (u32)c ).c_str() ) )
-						{
-							ent->RemoveComponent( c->Class( ) );
-						}
-					}
-				} 
-			}
-			ImGui::ListBoxFooter( );
-		}
-
-		// No selected entity
-		else
-		{
-			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_TextDisabled ) ) ) );
-			ImVec2 centerPos = ImVec2( ImGui::GetWindowPos( ).x + ImGui::GetWindowWidth() / 2.0f, ImGui::GetWindowPos( ).y + ImGui::GetWindowHeight() / 2.0f );
-			ImVec2 textSize = ImGui::CalcTextSize( "Nothing to Inspect." );
-			centerPos.x -= textSize.x / 2.0f;
-			centerPos.y -= textSize.y / 2.0f;
-			ImGui::SetCursorScreenPos( centerPos );
-			ImGui::Text( "Select Object to Inspect." );
-			ImGui::PopStyleColor( );
-		}
-	}
-
-	//===========================================================================================
-
-	EditorWidgetManager* EditorApp::GetEditorWidgetManager( )
-	{
-		return &mEditorWidgetManager;
-	}
-
-	//===========================================================================================
 
 	void EditorApp::SceneView( bool* viewBool )
 	{
@@ -877,84 +534,13 @@ namespace Enjon
 
 	void EditorApp::SelectEntity( const EntityHandle& handle )
 	{
-		mSelectedEntity = handle;
-
-		if ( mSelectedEntity )
-		{
-			// Enable transform widget
-			mTransformWidget.Enable( true );
-
-			// Set transform to selected entity
-			mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) ); 
-			mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) ); 
-
-			// Set selected object in inspector view
-			mInspectorView->SetInspetedObject( mSelectedEntity.Get( ) );
-		} 
+		mWorldOutlinerView->SelectEntity( handle );
 	}
 
 	void EditorApp::DeselectEntity( )
 	{
-		// Uninspect object
-		mInspectorView->DeselectInspectedObject( mSelectedEntity.Get( ) );
-
-		// Set to invalid entity handle
-		mSelectedEntity = EntityHandle::Invalid();
-
-		// Deactivate transform widget
-		mTransformWidget.Enable( false ); 
+		mWorldOutlinerView->DeselectEntity( );
 	}
-
-	/*
-	void EditorApp::WorldOutlinerView( )
-	{ 
-		ImDrawList* dl = ImGui::GetWindowDrawList( );
-
-		AssetHandle< Scene > scene = EngineSubsystem( SceneManager )->GetScene( );
-
-		if ( !scene )
-		{
-			return;
-		}
-
-		EntityManager* entities = EngineSubsystem( EntityManager );
-
-		// Print out scene name
-		ImGui::Text( ( "Scene: " + scene->GetName( ) ).c_str( ) );
-
-		ImGui::Separator( );
-
-		// List out active entities
-		Vec2 padding( 20.0f, 40.0f );
-		f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
-		ImGui::ListBoxHeader( "##EntitiesListWorldOutliner", ImVec2( ImGui::GetWindowSize( ).x - padding.x, height ) );
-		{
-			for ( auto& e : entities->GetActiveEntities( ) )
-			{
-				if ( ImGui::Selectable( fmt::format( "{}##{}", e->GetName(), e->GetID() ).c_str( ), mSelectedEntity == e ) )
-				{
-					SelectEntity( e );
-				} 
-			} 
-		}
-		ImGui::ListBoxFooter( );
-
-		// Formatting
-		ImVec2 csp = ImGui::GetCursorScreenPos( );
-		ImVec2 la = ImVec2( csp.x, csp.y );
-		ImVec2 lb = ImVec2( la.x + ImGui::GetWindowSize().x - padding.x, la.y );
-		dl->AddLine( la, lb, ImGui::GetColorU32( ImGuiCol_Separator ) );
-
-		ImGui::SetCursorScreenPos( ImVec2( csp.x, csp.y + 10.0f ) );
-
-		// Display total amount of entities
-		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_TextDisabled ) ) ) );
-		ImGui::PushFont( EngineSubsystem( ImGuiManager )->GetFont( "Roboto-MediumItalic_14" ) );
-		ImGui::Text( fmt::format( "{} Entities", entities->GetActiveEntities().size() ).c_str( ) );
-		ImGui::PopFont( );
-		ImGui::PopStyleColor( );
-	}
-	*/
 
 	void EditorApp::LoadResourceFromFile( )
 	{
@@ -1005,7 +591,7 @@ namespace Enjon
 						sm->LoadScene( uuid ); 
 
 						// Deselect entity
-						DeselectEntity( );
+						mWorldOutlinerView->DeselectEntity( );
 					} 
 				} 
 			}
@@ -1095,7 +681,6 @@ namespace Enjon
 			std::cout << "Could not build project.\n";
 		}
 #endif
-
 
 	}
 
@@ -1228,9 +813,9 @@ namespace Enjon
 		UUID selectedEntityUUID;
 		SceneManager* sm = EngineSubsystem( SceneManager );
 
-		if ( mSelectedEntity )
+		if ( mWorldOutlinerView->GetSelectedEntity() )
 		{
-			selectedEntityUUID = mSelectedEntity.Get( )->GetUUID();
+			selectedEntityUUID = mWorldOutlinerView->GetSelectedEntity().Get( )->GetUUID();
 		}
 
 		if ( sm->GetScene() )
@@ -1251,7 +836,7 @@ namespace Enjon
 		// Reselect the previous entity
 		if ( selectedEntityUUID )
 		{
-			SelectEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( selectedEntityUUID ) );
+			mWorldOutlinerView->SelectEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( selectedEntityUUID ) );
 		}
 	}
 
@@ -1530,10 +1115,37 @@ namespace Enjon
 		assert( guiContext->GetContext( ) != nullptr );
 
 		// Add all necessary views into editor widget manager
-		mEditorWidgetManager.AddView( new EditorSceneView( this, mainWindow ) );
-		mEditorWidgetManager.AddView( new EditorAssetBrowserView( this, mainWindow ) );
-		mEditorWidgetManager.AddView( new EditorWorldOutlinerView( this, mainWindow ) );
-		mInspectorView = ( EditorInspectorView* )mEditorWidgetManager.AddView( new EditorInspectorView( this, mainWindow ) );
+		mEditorSceneView = new EditorSceneView( this, mainWindow );
+		mWorldOutlinerView = new EditorWorldOutlinerView( this, mainWindow );
+		mAssetBroswerView = new EditorAssetBrowserView( this, mainWindow );
+		mInspectorView = new EditorInspectorView( this, mainWindow );
+
+		// Register selection callback with outliner view
+		mWorldOutlinerView->RegisterEntitySelectionCallback( [ & ] ( const EntityHandle& handle )
+		{
+			// If handle is valid, then we'll enable transforms and widgets
+			if ( handle.Get() )
+			{
+				// Enable transform widget
+				mTransformWidget.Enable( true );
+
+				// Set transform to selected entity
+				mTransformWidget.SetPosition( handle.Get( )->GetWorldPosition( ) ); 
+				mTransformWidget.SetRotation( handle.Get( )->GetWorldRotation( ) ); 
+
+				// Set selected object in inspector view
+				mInspectorView->SetInspetedObject( handle.Get( ) );
+			} 
+		} );
+
+		mWorldOutlinerView->RegisterEntityDeselectionCallback( [ & ] ( )
+		{
+			// Uninspect object
+			mInspectorView->DeselectInspectedObject( mWorldOutlinerView->GetSelectedEntity().Get( ) ); 
+
+			// Deactivate transform widget
+			mTransformWidget.Enable( false ); 
+		} );
 
 		// Initialize transform widget
 		mTransformWidget.Initialize( this ); 
@@ -1541,16 +1153,16 @@ namespace Enjon
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
 		// Register individual windows
-		//guiContext->RegisterWindow( "Create Project", [ & ] ( )
-		//{
-		//	// Docking windows
-		//	if ( ImGui::BeginDock( "Create Project", &mShowCreateProjectView, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
-		//	{
-		//		// Print docking information
-		//		CreateProjectView( );
-		//	}
-		//	ImGui::EndDock( );
-		//} ); 
+		guiContext->RegisterWindow( "Create Project", [ & ] ( )
+		{
+			// Docking windows
+			if ( ImGui::BeginDock( "Create Project", &mShowCreateProjectView, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
+			{
+				// Print docking information
+				CreateProjectView( );
+			}
+			ImGui::EndDock( );
+		} ); 
 
 		guiContext->RegisterWindow( "Play Options", [ & ]
 		{
@@ -1584,7 +1196,7 @@ namespace Enjon
 					empty.Get( )->SetName( "Empty" );
 
 					// Set to selected entity
-					SelectEntity( empty );
+					mWorldOutlinerView->SelectEntity( empty );
 				}
 
 				if ( ImGui::MenuItem( "Cube##options", NULL ) )
@@ -1611,7 +1223,7 @@ namespace Enjon
 					}
 
 					// Select entity
-					SelectEntity( cube );
+					mWorldOutlinerView->SelectEntity( cube );
 				}
 
 				if ( ImGui::MenuItem( "Sphere##options", NULL ) )
@@ -1638,7 +1250,7 @@ namespace Enjon
 					}
 
 					// Select entity
-					SelectEntity( sphere );
+					mWorldOutlinerView->SelectEntity( sphere );
 				}
 
 				if ( ImGui::MenuItem( "Point Light##options", NULL ) )
@@ -1659,7 +1271,7 @@ namespace Enjon
 					}
 
 					// Select entity
-					SelectEntity( pointLight );
+					mWorldOutlinerView->SelectEntity( pointLight );
 				}
 
 				if ( ImGui::MenuItem( "Directional Light##options", NULL ) )
@@ -1680,7 +1292,7 @@ namespace Enjon
 					}
 
 					// Select entity
-					SelectEntity( directionalLight );
+					mWorldOutlinerView->SelectEntity( directionalLight );
 				}
 
 				if ( ImGui::MenuItem( "Scene##options", NULL ) )
@@ -1740,23 +1352,14 @@ namespace Enjon
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Play Options", "Scene", GUIDockSlotType::Slot_Top, 0.1f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "World Outliner", nullptr, GUIDockSlotType::Slot_Right, 0.3f ) );
 		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", "Play Options", GUIDockSlotType::Slot_Right, 0.6f ) );
-		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Scene Selection", GUIDockSlotType::Slot_Tab, 0.2f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Play Options", GUIDockSlotType::Slot_Right, 0.5f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.7f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene", GUIDockSlotType::Slot_Bottom, 0.3f ) );
-
-		// Secondary window testing
-		//TestSecondWindow( );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene", GUIDockSlotType::Slot_Bottom, 0.3f ) ); 
 
 		return Enjon::Result::SUCCESS;
 	}
 
-	//=================================================================================================
-
-	void EditorApp::TestSecondWindow( )
-	{ 
-		mTestEditorWindow = new EditorMaterialEditWindow( EngineSubsystem( AssetManager )->GetDefaultAsset< Material >( ) );
-		mTestEditorWindow->Init( "Test Window", 500, 400 );
-	}
+	//================================================================================================= 
 
 	void EditorApp::SetEditorSceneView( EditorSceneView* view )
 	{
@@ -1826,7 +1429,7 @@ namespace Enjon
 
 		// Can move camera if scene view has focus
 		bool previousCamMove = mMoveCamera;
-		mMoveCamera = mEditorWidgetManager.GetFocused( mEditorSceneView );
+		mMoveCamera = mEditorSceneView->IsFocused( );
 		if ( mMoveCamera && ( mMoveCamera != previousCamMove ) )
 		{ 
 			Vec2 mc = mInput->GetMouseCoords( );
@@ -1840,14 +1443,14 @@ namespace Enjon
 			{
 				if ( mInput->IsKeyPressed( KeyCode::Delete ) )
 				{
-					if ( mSelectedEntity )
+					if ( mWorldOutlinerView->GetSelectedEntity() )
 					{
-						mSelectedEntity.Get( )->Destroy( );
-						DeselectEntity( );
+						mWorldOutlinerView->GetSelectedEntity().Get( )->Destroy( );
+						mWorldOutlinerView->DeselectEntity( );
 					}
 				}
 
-				if ( mSelectedEntity )
+				if ( mWorldOutlinerView->GetSelectedEntity() )
 				{
 					if ( mInput->IsKeyPressed( KeyCode::W ) )
 					{
@@ -1881,8 +1484,8 @@ namespace Enjon
 					{
 						if ( mInput->IsKeyPressed( KeyCode::F ) )
 						{
-							mSelectedEntity.Get( )->SetLocalPosition( mEditorCamera.GetPosition( ) );
-							mSelectedEntity.Get( )->SetLocalRotation( mEditorCamera.GetRotation( ).Normalize() ); 
+							mWorldOutlinerView->GetSelectedEntity().Get( )->SetLocalPosition( mEditorCamera.GetPosition( ) );
+							mWorldOutlinerView->GetSelectedEntity().Get( )->SetLocalRotation( mEditorCamera.GetRotation( ).Normalize() ); 
 						}
 					}
 
@@ -1890,10 +1493,10 @@ namespace Enjon
 					if ( mInput->IsKeyDown( KeyCode::LeftCtrl ) && mInput->IsKeyPressed( KeyCode::D ) )
 					{
 						EntityManager* em = EngineSubsystem( EntityManager );
-						EntityHandle newEnt = em->CopyEntity( mSelectedEntity );
+						EntityHandle newEnt = em->CopyEntity( mWorldOutlinerView->GetSelectedEntity() );
 						if ( newEnt )
 						{
-							SelectEntity( newEnt );
+							mWorldOutlinerView->SelectEntity( newEnt );
 						}
 					}
 				}
@@ -1921,7 +1524,7 @@ namespace Enjon
 									case TransformWidgetRenderableType::TranslationForwardAxis:
 									case TransformWidgetRenderableType::TranslationRightAxis:
 									{
-										Entity* ent = mSelectedEntity.Get( );
+										Entity* ent = mWorldOutlinerView->GetSelectedEntity().Get( );
 										if ( ent )
 										{
 											Vec3 lp = ent->GetLocalPosition( ) + delta;
@@ -1943,7 +1546,7 @@ namespace Enjon
 									case TransformWidgetRenderableType::ScaleUpAxis:
 									case TransformWidgetRenderableType::ScaleRightAxis:
 									{
-										Entity* ent = mSelectedEntity.Get( );
+										Entity* ent = mWorldOutlinerView->GetSelectedEntity().Get( );
 										if ( ent )
 										{
 											Vec3 ls = ent->GetLocalScale( ) + delta;
@@ -1952,7 +1555,7 @@ namespace Enjon
 									} break;
 									case TransformWidgetRenderableType::ScaleRoot:
 									{
-										Entity* ent = mSelectedEntity.Get( );
+										Entity* ent = mWorldOutlinerView->GetSelectedEntity().Get( );
 										if ( ent )
 										{
 											Vec3 ls = ent->GetLocalScale( ) + delta * ent->GetLocalScale( );
@@ -1966,7 +1569,7 @@ namespace Enjon
 
 							case TransformationMode::Rotation:
 							{ 
-								Entity* ent = mSelectedEntity.Get( );
+								Entity* ent = mWorldOutlinerView->GetSelectedEntity().Get( );
 								if ( ent )
 								{ 
 									f32 da = Math::ToRadians( mTransformWidget.GetAngleDelta( ) );
@@ -1988,9 +1591,9 @@ namespace Enjon
 							} break;
 						}
 
-						if ( mSelectedEntity.Get( ) )
+						if ( mWorldOutlinerView->GetSelectedEntity().Get( ) )
 						{
-							Entity* ent = mSelectedEntity.Get( );
+							Entity* ent = mWorldOutlinerView->GetSelectedEntity().Get( );
 							// Set position and rotation to that of entity
 							mTransformWidget.SetPosition( ent->GetWorldPosition( ) ); 
 							mTransformWidget.SetRotation( ent->GetWorldRotation( ) ); 
@@ -2004,72 +1607,18 @@ namespace Enjon
 
 			}
 
+			// Move scene view camera
 			if ( mMoveCamera )
 			{ 
-				Enjon::Vec3 velDir( 0, 0, 0 ); 
-
-				// Set camera speed 
-				Vec2 mw = mInput->GetMouseWheel( ).y;
-				f32 mult = mw.y == 1.0f ? 1.5f : mw.y == -1.0f ? 0.75f : 1.0f;
-				mCameraSpeed = Math::Clamp(mCameraSpeed * mult, 0.25f, 128.0f);
-
-				if ( mInput->IsKeyDown( Enjon::KeyCode::W ) )
-				{
-					Enjon::Vec3 F = camera->Forward( );
-					velDir += F;
-				}
-				if ( mInput->IsKeyDown( Enjon::KeyCode::S ) )
-				{
-					Enjon::Vec3 B = camera->Backward( );
-					velDir += B;
-				}
-				if ( mInput->IsKeyDown( Enjon::KeyCode::A ) )
-				{
-					velDir += camera->Left( );
-				}
-				if ( mInput->IsKeyDown( Enjon::KeyCode::D ) )
-				{
-					velDir += camera->Right( );
-				}
-
-				// Normalize velocity
-				velDir = Enjon::Vec3::Normalize( velDir );
-
-				f32 avgDT = Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( );
-
-				// Set camera position
-				camera->SetPosition( camera->GetPosition() + ( mCameraSpeed * avgDT * velDir ) );
-
-				// Set camera rotation
-				// Get mouse input and change orientation of camera
-				Enjon::Vec2 mouseCoords = mInput->GetMouseCoords( );
-
-				//Vec2 mouseCoords = mEditorSceneView->GetSceneViewProjectedCursorPosition( );
-
-				// Set cursor to not visible
-				window->ShowMouseCursor( false );
-
-				// Reset the mouse coords after having gotten the mouse coordinates
-				Vec2 center = mEditorSceneView->GetCenterOfViewport( );
-				//SDL_WarpMouseInWindow( window->GetWindowContext( ), (s32)center.x, (s32)center.y );
-				SDL_WarpMouseInWindow( window->GetWindowContext( ), ( f32 )viewPort.x / 2.0f - mMouseCoordsDelta.x, ( f32 )viewPort.y / 2.0f - mMouseCoordsDelta.y );
-
-				// Offset camera orientation
-				f32 xOffset = Enjon::Math::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * mMouseSensitivity / 100.0f;
-				f32 yOffset = Enjon::Math::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * mMouseSensitivity / 100.0f;
-				camera->OffsetOrientation( xOffset, yOffset );
-
-				// Adjust rotator
-				mCameraRotator.x += xOffset;
-				mCameraRotator.y += yOffset;
+				mEditorSceneView->UpdateCamera( );
 			}
 
 			// Mouse cursor on, interact with world
 			else
 			{
-				mGfx->GetWindow( )->ConstCast< Enjon::Window >( )->ShowMouseCursor( true );
+				mGfx->GetMainWindow( )->ConstCast< Window >( )->ShowMouseCursor( true );
  
-				if ( mEditorWidgetManager.GetHovered( mEditorSceneView ) )
+				if ( mEditorSceneView->IsHovered() )
 				{
 					if ( mInput->IsKeyPressed( KeyCode::LeftMouseButton ) )
 					{
@@ -2081,7 +1630,7 @@ namespace Enjon
 						if ( pr.mEntity.Get( ) )
 						{
 							// Set selected entity
-							SelectEntity( pr.mEntity );
+							mWorldOutlinerView->SelectEntity( pr.mEntity );
 						}
 						// Translation widget interaction
 						else if ( EditorTransformWidget::IsValidID( pr.mId ) )
@@ -2092,17 +1641,18 @@ namespace Enjon
 						else
 						{
 							// Deselect entity if click in scene view and not anything valid
-							DeselectEntity( ); 
+							mWorldOutlinerView->DeselectEntity( ); 
 						}
 					} 
 				}
 			} 
 
 
-			if ( !mTransformWidget.IsInteractingWithWidget( ) && mSelectedEntity )
+			if ( !mTransformWidget.IsInteractingWithWidget( ) && mWorldOutlinerView->GetSelectedEntity() )
 			{
-				mTransformWidget.SetPosition( mSelectedEntity.Get( )->GetWorldPosition( ) ); 
-				mTransformWidget.SetRotation( mSelectedEntity.Get( )->GetWorldRotation( ) );
+				Entity* ent = mWorldOutlinerView->GetSelectedEntity( ).Get( );
+				mTransformWidget.SetPosition( ent->GetWorldPosition( ) ); 
+				mTransformWidget.SetRotation( ent->GetWorldRotation( ) );
 			}
 		}
 
@@ -2132,6 +1682,31 @@ namespace Enjon
 
 	Enjon::Result EditorApp::Shutdown( )
 	{ 
+		// Clean up all views
+		if ( mEditorSceneView )
+		{
+			delete ( mEditorSceneView );
+			mEditorSceneView = nullptr;
+		}
+
+		if ( mWorldOutlinerView )
+		{
+			delete ( mWorldOutlinerView );
+			mWorldOutlinerView = nullptr;
+		}
+
+		if ( mAssetBroswerView )
+		{
+			delete ( mAssetBroswerView );
+			mAssetBroswerView = nullptr;
+		}
+
+		if ( mInspectorView )
+		{
+			delete ( mInspectorView );
+			mInspectorView = nullptr;
+		}
+
 		return Enjon::Result::SUCCESS;
 	} 
 

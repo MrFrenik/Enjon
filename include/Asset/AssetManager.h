@@ -89,7 +89,7 @@ namespace Enjon
 			/**
 			*@brief Adds asset to project from given import options
 			*/
-			static AssetStringInformation GetAssetQualifiedInformation( const String& resourceFilePath, const String& cacheDirectory );
+			static AssetStringInformation GetAssetQualifiedInformation( const String& resourceFilePath, const String& cacheDirectory, const AssetLoader* loader );
 
 			/**
 			*@brief

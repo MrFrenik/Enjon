@@ -35,6 +35,7 @@ namespace Enjon
 		EngineSubsystem( Input )->Shutdown( );
 		EngineSubsystem( PhysicsSubsystem )->Shutdown( ); 
 		EngineSubsystem( GraphicsSubsystem )->Shutdown( );
+
 		EngineSubsystem( ImGuiManager )->Shutdown( );
 
 		// Delete all subsystems to clear memory

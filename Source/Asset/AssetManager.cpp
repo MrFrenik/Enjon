@@ -264,7 +264,7 @@ namespace Enjon
 
 	//============================================================================================ 
 
-	AssetStringInformation AssetManager::GetAssetQualifiedInformation( const String& resourceFilePath, const String& cacheDirectory )
+	AssetStringInformation AssetManager::GetAssetQualifiedInformation( const String& resourceFilePath, const String& cacheDirectory, const AssetLoader* loader )
 	{ 
 		// Get original name of asset
 		String resourceFilePathName = Utils::FindReplaceAll( resourceFilePath, "\\", "/" );
@@ -277,21 +277,29 @@ namespace Enjon
 
 		// Construct asset path
 		String destAssetPath = Utils::FindReplaceAll( cacheDirectory + "/" + resourceFilePathName, "\\", "/" );
+
+		// Get asset extension for asset path 
+		String assetExtension = loader->GetAssetFileExtension( );
+
+		Vector<String> assetPathSplits = Utils::SplitString( destAssetPath, "." );
+
+		// Construct final destination asset path
+		String finalDestAssetPath = assetPathSplits.at( 0 ) + assetExtension;
  
 		// Get qualified name of asset
 		String qualifiedName = AssetLoader::GetQualifiedName( destAssetPath );
 
-		return AssetStringInformation{ qualifiedName, assetDisplayName, destAssetPath };
+		return AssetStringInformation{ qualifiedName, assetDisplayName, finalDestAssetPath };
 	}
 
 	//============================================================================================ 
 
 	bool AssetManager::AssetExists( const String& resourceFilePath, const String& cacheDirectory )
 	{
-		// Get qualified name of asset
-		AssetStringInformation info = GetAssetQualifiedInformation( resourceFilePath, cacheDirectory );
-
 		const AssetLoader* loader = GetLoaderByResourceFilePath( resourceFilePath );
+
+		// Get qualified name of asset
+		AssetStringInformation info = GetAssetQualifiedInformation( resourceFilePath, cacheDirectory, loader ); 
 
 		// Check if exists in asset loader
 		if ( loader )
@@ -327,7 +335,7 @@ namespace Enjon
 		AssetLoader* loader = options->GetLoader( )->ConstCast< AssetLoader >( );
  
 		// Grab asset info
-		AssetStringInformation assetInfo = GetAssetQualifiedInformation( options->GetResourceFilePath(), options->GetDestinationAssetDirectory() ); 
+		AssetStringInformation assetInfo = GetAssetQualifiedInformation( options->GetResourceFilePath(), options->GetDestinationAssetDirectory(), loader ); 
 
 		// Make sure it doesn't exist already before trying to load it
 		if ( loader->Exists( assetInfo.mQualifiedName ) )
@@ -395,7 +403,7 @@ namespace Enjon
 		AssetLoader* loader = options->GetLoader( )->ConstCast< AssetLoader >( );
 
 		// Grab asset info
-		AssetStringInformation assetInfo = GetAssetQualifiedInformation( options->GetResourceFilePath(), options->GetDestinationAssetDirectory() ); 
+		AssetStringInformation assetInfo = GetAssetQualifiedInformation( options->GetResourceFilePath(), options->GetDestinationAssetDirectory(), loader ); 
 
 		// Make sure it doesn't exist already before trying to load it
 		if ( loader->Exists( assetInfo.mQualifiedName ) )
@@ -449,8 +457,11 @@ namespace Enjon
 		{
 			return Result::FAILURE;
 		}
+
+		// Get loader for this resource
+		const AssetLoader* loader = GetLoaderByResourceFilePath( resourceFilePath );
 		
-		AssetStringInformation assetInfo = GetAssetQualifiedInformation( resourceFilePath, destDir ); 
+		AssetStringInformation assetInfo = GetAssetQualifiedInformation( resourceFilePath, destDir, loader ); 
 
 		auto query = mLoadersByAssetId.find( ( u32 )idx );
 		if ( query != mLoadersByAssetId.end( ) )

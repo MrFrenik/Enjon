@@ -8,8 +8,8 @@
 #include "SubsystemCatalog.h"
 #include "Base/World.h"
 
-namespace Enjon {
-
+namespace Enjon 
+{ 
 	SDL_GLContext Window::mGLContext = nullptr;
 	HashMap< CursorType, SDL_Cursor* > Window::mSDLCursors;
 	Vector< WindowParams > Window::mWindowsToInit;
@@ -289,7 +289,7 @@ namespace Enjon {
 						{
 							// Need to push back into static window for destruction at top of frame
 							Window::DestroyWindow( this );
-							return Result::FAILURE;
+							//return Result::FAILURE;
 						}
 					} break; 
 				} 
@@ -387,13 +387,13 @@ namespace Enjon {
 		mWindowsToDestroy.push_back( window );
 	}
 
-	void Window::InitializeWindows( )
+	void Window::CleanupWindows( bool destroyAll )
 	{
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 
 		Vector< Window* > postDestroy;
 
-		for ( auto& w : mWindowsToDestroy )
+		for ( auto& w : ( destroyAll ? gfx->GetWindows() : mWindowsToDestroy ) )
 		{
 			if ( w )
 			{
@@ -418,8 +418,20 @@ namespace Enjon {
 				delete w;
 				w = nullptr;
 			}
-		}
+		} 
+	}
 
+	void Window::WindowsUpdate( )
+	{
+		// Cleanup all previous windows that need destruction
+		CleanupWindows( );
+		// Initialize any new windows
+		InitializeWindows( ); 
+	}
+
+	void Window::InitializeWindows( )
+	{ 
+		// Initialize new windows
 		for ( auto& wp : mWindowsToInit )
 		{
 			Window* window = wp.mWindow;

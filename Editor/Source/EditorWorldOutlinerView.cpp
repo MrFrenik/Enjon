@@ -30,6 +30,52 @@ namespace Enjon
 
 	//=================================================================
 
+	void EditorWorldOutlinerView::RegisterEntitySelectionCallback( const EntitySelectionCallback& callback )
+	{
+		mEntitySelectionCallbacks.push_back( callback );
+	} 
+
+	//=================================================================
+
+	void EditorWorldOutlinerView::RegisterEntityDeselectionCallback( const EntityDeselectionCallback& callback )
+	{
+		mEntityDeselectionCallbacks.push_back( callback );
+	}
+
+	//=================================================================
+
+	EntityHandle EditorWorldOutlinerView::GetSelectedEntity( )
+	{
+		return mSelectedEntity;
+	}
+
+	//================================================================= 
+
+	void EditorWorldOutlinerView::DeselectEntity( )
+	{ 
+		for ( auto& f : mEntityDeselectionCallbacks )
+		{
+			f( );
+		}
+
+		mSelectedEntity = EntityHandle::Invalid( );
+	} 
+
+	//================================================================= 
+
+	void EditorWorldOutlinerView::SelectEntity( const EntityHandle& entity )
+	{
+		mSelectedEntity = entity;
+
+		// Callbacks for selected entity
+		for ( auto& f : mEntitySelectionCallbacks )
+		{
+			f( mSelectedEntity );
+		}
+	} 
+
+	//================================================================= 
+
 	bool IsParentInChildHierarchy( Entity* parent, Entity* child )
 	{ 
 		if ( !parent || !child || !child->GetParent() )
@@ -66,7 +112,6 @@ namespace Enjon
 		else
 		{ 
 			// Recursively determine if parent is in child's hiearchy already
-			//bool isInHierarchy = IsParentInChildHierarchy( parent, child ); 
 			bool isInHierarchy = IsParentInChildHierarchy( child, parent );
 
 			if ( !isInHierarchy )
@@ -133,7 +178,7 @@ namespace Enjon
 			return false;
 		} 
 
-		EntityHandle selectedHandle = mApp->GetSelectedEntity( );
+		EntityHandle selectedHandle = mSelectedEntity;
 		Entity* selectedEnt = selectedHandle.Get( );
 		Input* input = EngineSubsystem( Input );
 
@@ -290,7 +335,9 @@ namespace Enjon
 			// Select entity
 			if ( input->IsKeyPressed( KeyCode::LeftMouseButton ) && !boxSelected )
 			{
-				mApp->SelectEntity( entity );
+				//mApp->SelectEntity( entity ); 
+
+				SelectEntity( entity );
 
 				// Stop name changing 
 				if ( mEntityNameChangeID != entity->GetID( ) )
@@ -422,7 +469,8 @@ namespace Enjon
 		u32 entityNumber = 0;
 		ImGui::ListBoxHeader( "##EntitiesListWorldOutliner", ImVec2( ImGui::GetWindowSize( ).x - padding.x, height ) );
 		{
-			EntityHandle selectedEntityHandle = mApp->GetSelectedEntity( );
+			//EntityHandle selectedEntityHandle = mApp->GetSelectedEntity( );
+			EntityHandle selectedEntityHandle = GetSelectedEntity( );
 			Entity* selectedEntity = selectedEntityHandle.Get( );
 			for ( auto& e : entities->GetActiveEntities( ) )
 			{ 
@@ -437,8 +485,6 @@ namespace Enjon
 			} 
 		}
 		ImGui::ListBoxFooter( ); 
-
-		EditorWidgetManager* wm = mApp->GetEditorWidgetManager( );
 
 		if ( ImGui::IsMouseHoveringRect( ImGui::GetWindowPos( ), ImVec2( ImGui::GetWindowPos( ).x + ImGui::GetWindowSize( ).x, ImGui::GetWindowPos( ).y + ImGui::GetWindowSize( ).y ) ) )
 		{
@@ -470,7 +516,8 @@ namespace Enjon
 					}
 					else
 					{
-						mApp->DeselectEntity( );
+						DeselectEntity( );
+						//mApp->DeselectEntity( );
 						mEntityNameChangeID = EntityHandle::Invalid( ).GetID( );
 					}
 				}
@@ -492,11 +539,10 @@ namespace Enjon
 		ImGui::PopFont( );
 		ImGui::PopStyleColor( );
 
-		if ( input->IsKeyPressed( KeyCode::F2 ) && mApp->GetSelectedEntity( ) )
+		if ( input->IsKeyPressed( KeyCode::F2 ) && mSelectedEntity )
 		{
-			mEntityNameChangeID = mApp->GetSelectedEntity( ).Get( )->GetID( );
-		}
-
+			mEntityNameChangeID = mSelectedEntity.Get( )->GetID( );
+		} 
 	}
 
 	//=================================================================
@@ -511,15 +557,12 @@ namespace Enjon
 	void EditorWorldOutlinerView::CaptureState( )
 	{
 		Input* input = EngineSubsystem( Input );
-		EditorWidgetManager* wm = mApp->GetEditorWidgetManager( );
 
 		// Capture hovered state
-		bool isHovered = ImGui::IsWindowHovered( ); 
-		wm->SetHovered( this, isHovered );
+		mIsHovered = ImGui::IsWindowHovered( ); 
 
 		// Capture focused state
-		bool isFocused = ( isHovered && ( input->IsKeyDown( KeyCode::RightMouseButton ) ) );
-		wm->SetFocused( this, isFocused ); 
+		mIsFocused = ( mIsHovered && ( input->IsKeyDown( KeyCode::LeftMouseButton ) || input->IsKeyDown( KeyCode::RightMouseButton ) ) );
 	} 
 
 	//==================================================================

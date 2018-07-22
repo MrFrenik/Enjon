@@ -2,10 +2,13 @@
 // Copyright 2016-2018 John Jackson. All Rights Reserved.
 
 #include "EditorSceneView.h"
+#include "EditorAssetBrowserView.h"
 #include "EditorApp.h"
 
 #include <Engine.h>
 #include <Graphics/GraphicsSubsystem.h>
+#include <Entity/Components/StaticMeshComponent.h>
+#include <Entity/Components/SkeletalMeshComponent.h>
 #include <Scene/SceneManager.h>
 #include <SubsystemCatalog.h>
 #include <ImGui/ImGuiManager.h>
@@ -85,8 +88,60 @@ namespace Enjon
 			ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x, b.y - sz.y - padding.y ) ); 
 			ImGui::Text( sceneLabel.c_str( ) );
 		} 
-	}
 
+		EditorAssetBrowserView* abv = mApp->GetEditorAssetBrowserView( );
+		if ( abv->GetGrabbedAsset( ) && ImGui::IsMouseReleased( 0 ) && IsHovered() )
+		{
+			HandleAssetDrop( );
+		} 
+
+		// Lose focus 
+		if ( !IsFocused() )
+		{
+			mStartedFocusing = false;
+			mFocusSet = false;
+		}
+
+	}
+ 
+	//=================================================================
+
+	void EditorSceneView::HandleAssetDrop( )
+	{
+		// Get projected mouse position
+		Vec2 mp = GetSceneViewProjectedCursorPosition( );
+
+		const Asset* grabbedAsset = mApp->GetEditorAssetBrowserView( )->GetGrabbedAsset( );
+
+		// If material, then set material of overlapped object with this asset
+		if ( grabbedAsset->Class( )->InstanceOf< Material >( ) )
+		{
+			// Check against graphics system for object
+			GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem ); 
+
+			PickResult pickRes = gfx->GetPickedObjectResult( mp, gfx->GetMainWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( ) );
+
+			u32 subMeshIdx = pickRes.mSubmeshIndex;
+
+			Entity* ent = pickRes.mEntity.Get( );
+
+			if ( ent )
+			{
+				// If static mesh component
+				if ( ent->HasComponent< StaticMeshComponent >( ) )
+				{
+					StaticMeshComponent* smc = ent->GetComponent< StaticMeshComponent >( );
+					smc->SetMaterial( grabbedAsset );
+				}
+				else if ( ent->HasComponent< SkeletalMeshComponent >( ) )
+				{
+					SkeletalMeshComponent* smc = ent->GetComponent< SkeletalMeshComponent >( );
+					smc->SetMaterial( grabbedAsset );
+				}
+			}
+		} 
+	}
+ 
 	//=================================================================
 
 	void EditorSceneView::ProcessViewInput( )
@@ -116,15 +171,12 @@ namespace Enjon
 	void EditorSceneView::CaptureState( )
 	{
 		Input* input = EngineSubsystem( Input );
-		EditorWidgetManager* wm = mApp->GetEditorWidgetManager( );
 
 		// Capture hovered state
-		bool isHovered = ImGui::IsWindowHovered( ); 
-		wm->SetHovered( this, isHovered );
+		mIsHovered = ImGui::IsWindowHovered( ); 
 
 		// Capture focused state
-		bool isFocused = ( isHovered && ( input->IsKeyDown( KeyCode::RightMouseButton ) ) );
-		wm->SetFocused( this, isFocused ); 
+		mIsFocused = ( mIsHovered && ( input->IsKeyDown( KeyCode::RightMouseButton ) ) );
 	}
 
 	//==================================================================
@@ -135,5 +187,99 @@ namespace Enjon
 	}
 
 	//==================================================================
+
+	void EditorSceneView::UpdateCamera( )
+	{ 
+		if ( IsFocused( ) && !mFocusSet )
+		{
+			if ( !mStartedFocusing )
+			{
+				mStartedFocusing = true;
+				mFocusSet = true;
+			}
+		}
+
+		Input* input = EngineSubsystem( Input ); 
+ 
+		Enjon::Vec3 velDir( 0, 0, 0 ); 
+
+		Window* window = this->GetWindow( );
+
+		// Can't operate without a window
+		assert( window != nullptr );
+
+		World* world = window->GetWorld( );
+
+		// Can't operate without a world
+		assert( world != nullptr );
+
+		GraphicsSubsystemContext* gsc = world->GetContext< GraphicsSubsystemContext >( );
+
+		// Can't operate without a graphics subsystem context
+		assert( gsc != nullptr );
+
+		// Get viewport of window
+		iVec2 viewPort = window->GetViewport( );
+
+		if ( mStartedFocusing )
+		{
+			Vec2 mc = input->GetMouseCoords( );
+			Vec2 center = GetCenterOfViewport( );
+			mMouseCoordsDelta = Vec2( (f32)(viewPort.x) / 2.0f - mc.x, (f32)(viewPort.y) / 2.0f - mc.y ); 
+			mStartedFocusing = false;
+		}
+
+		Camera* camera = gsc->GetGraphicsScene( )->GetActiveCamera( );
+
+		// Set camera speed 
+		Vec2 mw = input->GetMouseWheel( ).y;
+		f32 mult = mw.y == 1.0f ? 1.5f : mw.y == -1.0f ? 0.75f : 1.0f;
+		mCameraSpeed = Math::Clamp(mCameraSpeed * mult, 0.25f, 128.0f);
+
+		if ( input->IsKeyDown( Enjon::KeyCode::W ) )
+		{
+			Enjon::Vec3 F = camera->Forward( );
+			velDir += F;
+		}
+		if ( input->IsKeyDown( Enjon::KeyCode::S ) )
+		{
+			Enjon::Vec3 B = camera->Backward( );
+			velDir += B;
+		}
+		if ( input->IsKeyDown( Enjon::KeyCode::A ) )
+		{
+			velDir += camera->Left( );
+		}
+		if ( input->IsKeyDown( Enjon::KeyCode::D ) )
+		{
+			velDir += camera->Right( );
+		}
+
+		// Normalize velocity
+		velDir = Enjon::Vec3::Normalize( velDir );
+
+		f32 avgDT = Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( );
+
+		// Set camera position
+		camera->SetPosition( camera->GetPosition() + ( mCameraSpeed * avgDT * velDir ) );
+
+		// Set camera rotation
+		// Get mouse input and change orientation of camera
+		Enjon::Vec2 mouseCoords = input->GetMouseCoords( ); 
+
+
+		// Set cursor to not visible
+		window->ShowMouseCursor( false );
+
+		// Reset the mouse coords after having gotten the mouse coordinates
+		Vec2 center = GetCenterOfViewport( );
+		//SDL_WarpMouseInWindow( window->GetWindowContext( ), (s32)center.x, (s32)center.y );
+		SDL_WarpMouseInWindow( window->GetWindowContext( ), ( f32 )viewPort.x / 2.0f - mMouseCoordsDelta.x, ( f32 )viewPort.y / 2.0f - mMouseCoordsDelta.y );
+
+		// Offset camera orientation
+		f32 xOffset = Enjon::Math::ToRadians( ( f32 )viewPort.x / 2.0f - mouseCoords.x - mMouseCoordsDelta.x ) * mMouseSensitivity / 100.0f;
+		f32 yOffset = Enjon::Math::ToRadians( ( f32 )viewPort.y / 2.0f - mouseCoords.y - mMouseCoordsDelta.y ) * mMouseSensitivity / 100.0f;
+		camera->OffsetOrientation( xOffset, yOffset ); 
+	}
 }
 

@@ -8,6 +8,7 @@
 #include "EditorView.h"
 
 #include <Math/Vec2.h>
+#include <Math/Transform.h>
 
 namespace Enjon
 {
@@ -34,6 +35,8 @@ namespace Enjon
 			* @brief
 			*/
 			Vec2 GetCenterOfViewport( );
+
+			void UpdateCamera( );
  
 		protected: 
 
@@ -57,9 +60,20 @@ namespace Enjon
 			*/
 			virtual void CaptureState( );
 
+			/**
+			* @brief
+			*/
+			void HandleAssetDrop( );
+
 		protected: 
 			Vec2 mSceneViewWindowPosition;
 			Vec2 mSceneViewWindowSize; 
+			f32 mCameraSpeed = 10.f;
+			f32 mMouseSensitivity = 10.0f;
+			Transform mPreviousCameraTransform;
+			Vec2 mMouseCoordsDelta = Vec2( 0.0f );
+			bool mStartedFocusing = false;
+			bool mFocusSet = false;
 	};
 }
 

@@ -124,6 +124,7 @@ namespace Enjon
 	{
 		EntityHandle mEntity;
 		u32 mId;
+		u32 mSubmeshIndex;
 	};
 
 	struct DebugLine

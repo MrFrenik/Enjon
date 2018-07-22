@@ -121,12 +121,17 @@ namespace Enjon
 			/** 
 			* @brief
 			*/
-			static ColorRGBA32 IdToColor( const u32& id );
+			static ColorRGBA32 IdToColor( const u32& id, const u32& subMeshIdx );
 
 			/** 
 			* @brief
 			*/
 			static u32 ColorToID( const ColorRGBA32& color ); 
+
+			/** 
+			* @brief
+			*/
+			static u32 ColorToSubMeshIdx( const ColorRGBA32& color );
 
 		protected:
 
@@ -148,12 +153,12 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void Submit( const Enjon::Shader* shader, const SubMesh* subMesh );
+			void Submit( const Enjon::Shader* shader, const SubMesh* subMesh, const u32& subMeshIdx );
 
 			/*
 			* @brief
 			*/
-			void Submit( const GLSLProgram* shader, const SubMesh* subMesh );
+			void Submit( const GLSLProgram* shader, const SubMesh* subMesh, const u32& subMeshIdx );
 	
 			/*
 			* @brief
