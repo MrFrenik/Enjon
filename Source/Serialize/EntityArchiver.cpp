@@ -162,8 +162,8 @@ namespace Enjon
 		// TODO(): This will fail if entity cannot be allocated! Need to check for that and then exit gracefully.
 		EntityHandle handle = entities->Allocate( );
 
-		// Deseralize internally
-		return EntityArchiver::DeserializeInternal( handle, buffer );
+		// Deseralize internally with default world
+		return EntityArchiver::DeserializeInternal( handle, buffer, Engine::GetInstance( )->GetWorld( ) );
 	} 
 
 	//========================================================================================= 
@@ -188,12 +188,12 @@ namespace Enjon
 		EntityHandle handle = entities->Allocate( world );
 
 		// Continue to deserialize data into entity
-		return EntityArchiver::DeserializeInternal( handle, buffer ); 
+		return EntityArchiver::DeserializeInternal( handle, buffer, world ); 
 	}
 
 	//========================================================================================= 
 
-	EntityHandle EntityArchiver::DeserializeInternal( const EntityHandle& handle, ByteBuffer* buffer ) 
+	EntityHandle EntityArchiver::DeserializeInternal( const EntityHandle& handle, ByteBuffer* buffer, World* world ) 
 	{
 		//==========================================================================
 		// Local Transform
@@ -279,7 +279,7 @@ namespace Enjon
 		// Deserialize all children and add to handle
 		for ( u32 i = 0; i < numChildren; ++i )
 		{
-			EntityHandle child = Deserialize( buffer );
+			EntityHandle child = Deserialize( buffer, world );
 			Entity* childEnt = child.Get( );
 			if ( childEnt )
 			{

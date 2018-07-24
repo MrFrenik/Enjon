@@ -89,6 +89,9 @@ namespace Enjon
 		// Set transform for entity
 		entity.Get( )->SetLocalTransform( transform ); 
 
+		// Reset read position of buffer
+		mEntityData.SetReadPosition( 0 );
+
 		// Return newly constructed entity
 		return entity;
 	}

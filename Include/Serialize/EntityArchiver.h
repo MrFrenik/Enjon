@@ -66,7 +66,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			static EntityHandle DeserializeInternal( const EntityHandle& entiy, ByteBuffer* buffer );
+			static EntityHandle DeserializeInternal( const EntityHandle& entiy, ByteBuffer* buffer, World* world );
 
 		private: 
 	};

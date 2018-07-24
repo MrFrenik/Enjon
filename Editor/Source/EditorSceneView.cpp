@@ -142,6 +142,18 @@ namespace Enjon
 				}
 			}
 		} 
+		else if ( grabbedAsset->Class( )->InstanceOf< Archetype >( ) )
+		{
+			Archetype* archType = grabbedAsset->ConstCast< Archetype >( );
+			if ( archType )
+			{
+				// Instantiate the archetype right in front of the camera for now
+				GraphicsSubsystemContext* gfxCtx = GetWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( );
+				Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
+				Vec3 position = cam->GetPosition() + cam->Forward( ) * 5.0f; 
+				EntityHandle handle = archType->Instantiate( Transform( position, Quaternion( ), Vec3( 1.0f ) ), GetWindow()->GetWorld() );
+			}
+		}
 	}
  
 	//=================================================================

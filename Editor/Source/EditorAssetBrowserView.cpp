@@ -317,8 +317,8 @@ namespace Enjon
 										WindowParams params;
 										params.mWindow = new EditorArchetypeEditWindow( archType );
 										params.mName = archType->GetName( );
-										params.mWidth = 800;
-										params.mHeight = 400;
+										params.mWidth = 1200;
+										params.mHeight = 800;
 										params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
 										Window::AddNewWindow( params );
 									}

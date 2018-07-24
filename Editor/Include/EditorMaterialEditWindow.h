@@ -143,6 +143,7 @@ namespace Enjon
 			EditorInspectorView* mInspectorView = nullptr;
 			u32 mInitialized : 1;
 			bool mViewportOpen = true;
+			EntityHandle mRootEntity;
 
 	};
 

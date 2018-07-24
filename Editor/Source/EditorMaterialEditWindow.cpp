@@ -330,8 +330,8 @@ namespace Enjon
  
 		// NOTE(John): For some reason, grabbing the view name of the docking window does not work with this function call... who knows?
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) ); 
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "World Outliner", "Viewport", GUIDockSlotType::Slot_Right, 0.45f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Top, 0.45f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "World Outliner", "Viewport", GUIDockSlotType::Slot_Right, 0.25f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Top, 0.50f ) );
 
 		// NOTE(): This should be done automatically for the user in the backend
 		// Add window to graphics subsystem ( totally stupid way to do this )
@@ -354,14 +354,48 @@ namespace Enjon
 			Transform t;
 			t.SetPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
 			t.SetScale( 2.0f );
-			EntityHandle entity = archType->Instantiate( t, GetWorld( ) );
+			mRootEntity = archType->Instantiate( t, GetWorld( ) );
 		}
 
 		// Register callbacks for whenever project is reloaded ( dll reload )
 		app->RegisterReloadDLLCallback( [ & ] ( )
 		{
 			// What do we need to do on reload? Make sure that the entity is reset? 
-		} ); 
+		} );
+
+		auto createViewOption = [&]()
+		{
+			// Construct new empty entity
+			if ( ImGui::MenuItem( "Empty##options", NULL ) )
+			{
+				EntityManager* em = EngineSubsystem( EntityManager );
+				EntityHandle empty = em->Allocate( GetWorld( ) );
+				empty.Get( )->SetName( "Empty" );
+
+				// Parent to root entity
+				mRootEntity.Get( )->AddChild( empty );
+
+				// Set to selected entity
+				mWorldOutlinerView->SelectEntity( empty );
+			}
+		}; 
+
+		auto saveArchetypeOption = [ & ] ( )
+		{ 
+			if ( ImGui::MenuItem( "Save##archetype_options", NULL ) )
+			{
+				// Use the root entity to save this archetype? 
+				// I think that's how this will work...
+				mArchetype.Get( )->ConstCast< Archetype >()->ConstructFromEntity( mRootEntity ); 
+
+				// Save after constructing
+				mArchetype.Save( );
+			}
+		};
+
+		// Register menu options
+		guiContext->RegisterMenuOption( "Create", "Create", createViewOption );
+		guiContext->RegisterMenuOption("File", "Save##archetype_options", saveArchetypeOption); 
 	}
 
 	//======================================================================================================================
