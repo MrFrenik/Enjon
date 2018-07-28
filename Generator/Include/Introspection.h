@@ -93,7 +93,8 @@ struct PropertyTraits
 {
 	bool IsPointer = false;
 	bool IsVisible = true;
-	bool IsEditable = false;
+	bool IsEditable = true;
+	bool IsSerializable = true;
 	float UIMin = 0.0f;
 	float UIMax = 0.0f;
 	std::vector <std::string> mAccessors;

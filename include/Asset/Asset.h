@@ -95,6 +95,14 @@ namespace Enjon
 			*/
 			Result Save( ) const;
 
+			/**
+			*@brief
+			*/
+			virtual Result CopyFromOther( const Asset* other )
+			{
+				return Result::INCOMPLETE;
+			} 
+
 		protected: 
 
 			ENJON_PROPERTY( HideInEditor )

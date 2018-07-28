@@ -87,8 +87,8 @@ namespace Enjon
 
 	Result ObjectArchiver::SerializeObjectDataDefault( const Object* object, const MetaClass* cls, ByteBuffer* buffer )
 	{ 
-		// Write out property count to buffer
-		buffer->Write< usize >( cls->GetPropertyCount( ) );
+		// Write out total count of serializable properties
+		buffer->Write< usize >( cls->GetSerializablePropertyCount( ) ); 
 
 		// Serialize all object properties
 		for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
@@ -96,7 +96,8 @@ namespace Enjon
 			// Get property
 			const MetaProperty* prop = cls->GetProperty( i );
 
-			if ( !prop )
+			// Do not serialize if property is null or non-serializable
+			if ( !prop || prop->HasFlags( MetaPropertyFlags::NonSerializable ) )
 			{
 				continue;
 			}
@@ -352,7 +353,7 @@ namespace Enjon
 
 	Result ObjectArchiver::DeserializeObjectDataDefault( const Object* object, const MetaClass* cls, ByteBuffer* buffer )
 	{ 
-		// Read in property count
+		// Read in property count of serializable properties
 		usize propCount = buffer->Read< usize >( );
 
 		for ( usize i = 0; i < propCount; ++i )

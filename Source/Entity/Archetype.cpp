@@ -14,6 +14,29 @@ namespace Enjon
 { 
 	//=======================================================================================
 
+	Result Archetype::CopyFromOther( const Asset* other )
+	{
+		// Make sure this object is of class archetype
+		MetaClass::AssertIsType< Archetype >( other );
+
+		// Cast to archetype
+		const Archetype* otherArch = other->Cast< Archetype >( );
+
+		// Copy byte buffer over
+		mEntityData.CopyFromOther( otherArch->mEntityData ); 
+
+		return Result::SUCCESS;
+	}
+
+	//=======================================================================================
+
+	Archetype::Archetype( const Archetype& other )
+	{
+		mEntityData.CopyFromOther( other.mEntityData );
+	}
+
+	//=======================================================================================
+
 	void Archetype::ExplicitConstructor( )
 	{
 		// Need to construct empty entity, fill out buffer data, then destroy entity

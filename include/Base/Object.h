@@ -61,9 +61,11 @@ namespace Enjon
 
 	enum MetaPropertyFlags : u32
 	{
-		None = 0x00,
-		IsPointer = 0x01,
-		IsDoublePointer = 0x02
+		Default			= 0x00,
+		IsPointer		= 0x01,
+		NonSerializable = 0x02,
+		ReadOnly		= 0x04,
+		HideInEditor	= 0x08
 	};
 
 	inline MetaPropertyFlags operator|( MetaPropertyFlags a, MetaPropertyFlags b )
@@ -101,12 +103,20 @@ namespace Enjon
 	class MetaProperty;
 	class MetaClass;
 	class Object;
+
+	union MetaClassPropertyTraitFlags
+	{
+		u32 IsEditable : 1;
+		u32 IsVisible : 1; 
+		u32 IsPointer : 1;
+		u32 IsSerializable : 1;
+	};
 	
 	// Don't really like this, but, ya know... wha ya gon' do?
 	struct MetaPropertyTraits
 	{
-		MetaPropertyTraits( u32 isEditable = false, f32 uiMin = 0.0f, f32 uiMax = 1.0f, u32 isPointer = false, bool isVisible = true )
-			: mIsEditable( isEditable ), mUIMin( uiMin ), mUIMax( uiMax ), mIsPointer( isPointer ), mIsVisible( isVisible )
+		MetaPropertyTraits( u32 isEditable = false, f32 uiMin = 0.0f, f32 uiMax = 1.0f, u32 isPointer = false, bool isVisible = true, MetaPropertyFlags flags = MetaPropertyFlags::Default )
+			: mIsEditable( isEditable ), mUIMin( uiMin ), mUIMax( uiMax ), mIsPointer( isPointer ), mIsVisible( isVisible ), mFlags( flags )
 		{ 
 		}
 
@@ -139,11 +149,17 @@ namespace Enjon
 		*/
 		bool IsVisible( ) const;
 
+		/*
+		* @brief
+		*/
+		bool HasFlags( const MetaPropertyFlags& flags ) const;
+
 		bool mIsEditable = false;
 		bool mIsPointer = false;
 		bool mIsVisible = true;
 		f32 mUIMin = 0.0f;
 		f32 mUIMax = 1.0f;
+		MetaPropertyFlags mFlags = MetaPropertyFlags::Default;
 	};
 
 	class MetaProperty
@@ -173,7 +189,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			bool HasFlags( MetaPropertyFlags flags );
+			bool HasFlags( const MetaPropertyFlags& flags ) const;
 			
 			/*
 			* @brief
@@ -947,6 +963,20 @@ namespace Enjon
 				return nullptr;
 			}
 
+			usize GetSerializablePropertyCount( ) const
+			{
+				usize count = 0;
+				for ( auto& p : mProperties )
+				{
+					if ( !p->HasFlags( MetaPropertyFlags::NonSerializable ) )
+					{
+						count++;
+					}
+				}
+
+				return count;
+			}
+
 			usize GetPropertyCount( ) const
 			{
 				return mPropertyCount;
@@ -1069,6 +1099,12 @@ namespace Enjon
 				} 
 
 				return ( cls && cls == this ); 
+			} 
+
+			template < typename T >
+			static void AssertIsType( const Object* object )
+			{
+				assert( Object::GetClass< T >( ) == object->Class() );
 			} 
 
 			// Method for getting type id from MetaClass instead of Object

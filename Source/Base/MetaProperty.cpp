@@ -13,15 +13,25 @@ namespace Enjon
 	{
 		return mType;
 	} 
+
+	bool MetaProperty::HasFlags( const MetaPropertyFlags& flags ) const
+	{
+		return ( ( mTraits.mFlags & flags ) == flags );
+	}
 			
 	bool MetaProperty::IsEditable( ) const
 	{
-		return mTraits.mIsEditable;
+		return HasFlags( MetaPropertyFlags::ReadOnly );
 	}
 			
 	MetaPropertyTraits MetaProperty::GetTraits( ) const
 	{
 		return mTraits;
+	}
+
+	bool MetaPropertyTraits::HasFlags( const MetaPropertyFlags& flags ) const
+	{
+		return ( ( mFlags & flags ) == flags );
 	}
 			
 	f32 MetaPropertyTraits::GetUIMax( ) const
@@ -41,12 +51,12 @@ namespace Enjon
 
 	bool MetaPropertyTraits::IsPointer( ) const
 	{
-		return mIsPointer;
+		return HasFlags( MetaPropertyFlags::IsPointer );
 	}
 
 	bool MetaPropertyTraits::IsVisible( ) const
 	{
-		return mIsVisible;
+		return !HasFlags( MetaPropertyFlags::HideInEditor );
 	}
 }
 

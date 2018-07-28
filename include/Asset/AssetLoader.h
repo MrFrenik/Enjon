@@ -272,8 +272,14 @@ namespace Enjon
 
 				// Construct new asset
 				T* asset = new T( ); 
-				// Copy values from default asset
-				*asset = *defaultAsset; 
+
+				// Attempt to copy default asset
+				Result res = asset->CopyFromOther( defaultAsset );
+				if ( res == Result::INCOMPLETE )
+				{
+					// Copy values from default asset
+					*asset = *defaultAsset; 
+				}
 
 				//====================================================================================
 				// Asset header information

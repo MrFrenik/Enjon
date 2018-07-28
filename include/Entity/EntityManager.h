@@ -438,38 +438,39 @@ namespace Enjon
 			void PropagateTransform(f32 dt); 
 
 		private:
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( NonSerializable, ReadOnly )
 			u32 mID = MAX_ENTITIES;	
 
-			u32 mWorldTransformDirty : 1; 					
-
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( NonSerializable, ReadOnly)
 			EntityHandle mParent;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( NonSerializable, ReadOnly )
 			Transform mLocalTransform;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( NonSerializable, ReadOnly )
 			Transform mWorldTransform;
 
-			ENJON_PROPERTY( HideInEditor )
+			ENJON_PROPERTY( NonSerializable, HideInEditor )
 			Vector<u32> mComponents;
  
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( NonSerializable )
 			Vector< EntityHandle > mChildren; 
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( NonSerializable, ReadOnly )
 			UUID mUUID;
 
-			ENJON_PROPERTY( )
-			String mName = "Entity";
+			ENJON_PROPERTY( NonSerializable )
+			String mName = "Entity"; 
+
+			ENJON_PROPERTY( HideInEditor, NonSerializable, ReadOnly )
+			Enjon::EntityState mState; 
 
 			ENJON_PROPERTY( HideInEditor, ReadOnly )
-			AssetHandle< Archetype > mArchetype;
-
-			Enjon::EntityState mState;
+			AssetHandle< Archetype > mArchetype; 
 
 			const World* mWorld = nullptr;
+
+			u32 mWorldTransformDirty : 1; 					
 	};
 
 	//using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;

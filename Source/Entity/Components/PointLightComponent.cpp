@@ -3,6 +3,7 @@
 #include "Serialize/ByteBuffer.h"
 #include "Graphics/GraphicsScene.h"
 #include "Graphics/GraphicsSubsystem.h"
+#include "Base/World.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
 
@@ -11,11 +12,7 @@ namespace Enjon
 	//==================================================================================
 
 	void PointLightComponent::ExplicitConstructor()
-	{
-		// Add renderable to scene
-		GraphicsSubsystem* gs = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< GraphicsSubsystem >( )->ConstCast< GraphicsSubsystem >( );
-		gs->GetGraphicsScene( )->AddPointLight( &mLight );
-
+	{ 
 		// Set explicit tick state
 		mTickState = ComponentTickState::TickAlways;
 	}
@@ -29,6 +26,18 @@ namespace Enjon
 		{
 			mLight.GetGraphicsScene()->RemovePointLight(&mLight);
 		}
+	}
+
+	//==================================================================================
+
+	void PointLightComponent::PostConstruction( )
+	{
+		// Get graphics scene from world graphics context
+		World* world = mEntity->GetWorld( )->ConstCast< World >( );
+		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
+
+		// Add light to scene
+		gs->AddPointLight( &mLight ); 
 	}
 
 	//==================================================================================

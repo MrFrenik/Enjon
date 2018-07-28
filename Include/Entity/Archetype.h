@@ -25,6 +25,11 @@ namespace Enjon
 		public:
 
 			/**
+			* @brief Copy Constructor
+			*/
+			Archetype( const Archetype& other );
+
+			/**
 			* @brief
 			*/
 			virtual void ExplicitConstructor( ) override; 
@@ -47,7 +52,12 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			EntityHandle Instantiate( const Transform& transform, World* world = nullptr );
+			EntityHandle Instantiate( const Transform& transform, World* world = nullptr ); 
+ 
+			/**
+			* @brief
+			*/
+			virtual Result CopyFromOther( const Asset* other );
 
 		protected: 
 			ByteBuffer mEntityData; 

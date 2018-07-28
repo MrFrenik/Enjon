@@ -27,6 +27,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			virtual void PostConstruction( ) override;
+
+			/*
+			* @brief
+			*/
 			virtual void Update() override;
 
 			/*

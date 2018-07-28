@@ -825,6 +825,16 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 					traits.IsVisible = false;
 				}
 
+				if ( curToken.Equals( "NonSerializable" ) )
+				{
+					traits.IsSerializable = false;
+				}
+
+				if ( curToken.Equals( "ReadOnly" ) )
+				{
+					traits.IsEditable = false;
+				}
+
 				// Parse delegates
 				if ( curToken.Equals( "Delegates" ) )
 				{
@@ -1777,6 +1787,13 @@ void Introspection::Compile( const ReflectionConfig& config )
 						metaProp = PropertyType::Enum;
 						metaPropStr = GetTypeAsString( metaProp );
 					}
+
+					std::string flags = "( ";
+					flags += !prop.second->mTraits.IsEditable		? "MetaPropertyFlags::ReadOnly | "			: "MetaPropertyFlags::Default | ";
+					flags += !prop.second->mTraits.IsSerializable	? "MetaPropertyFlags::NonSerializable | "	: "MetaPropertyFlags::Default | ";
+					flags += !prop.second->mTraits.IsVisible		? "MetaPropertyFlags::HideInEditor | "		: "MetaPropertyFlags::Default | ";
+					flags += prop.second->mTraits.IsPointer			? "MetaPropertyFlags::IsPointer"			: "MetaPropertyFlags::Default";
+					flags += " )";
 					
 					// Fill out property traits
 					std::string traits = "MetaPropertyTraits( "; 
@@ -1789,6 +1806,8 @@ void Introspection::Compile( const ReflectionConfig& config )
 					traits += prop.second->mTraits.IsPointer ? "true" : "false";
 					traits += ", ";
 					traits += prop.second->mTraits.IsVisible ? "true" : "false";
+					traits += ", ";
+					traits += flags;
 					traits += " )"; 
 
 					// Accessor functions for properties

@@ -114,6 +114,9 @@ namespace Enjon
 			Serialize( c, buffer );
 		}
 
+		// Serialize entity default ( remaining unserialized properties )
+		SerializeObjectDataDefault( entity.Get( ), entity.Get( )->Class( ), buffer );
+
 		return Result::SUCCESS;
 	}
 
@@ -293,6 +296,9 @@ namespace Enjon
 				childEnt->SetLocalTransform( localTrans );
 			}
 		}
+
+		// Deserialize object default
+		DeserializeObjectDataDefault( ent, ent->Class( ), buffer );
 
 		return ent;
 	}
