@@ -54,45 +54,10 @@ Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
 Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
-//Enjon::String mProjectsDir = "W:/Projects/";
-//Enjon::String mVisualStudioDir = "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\\"";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
-
-//namespace Enjon
-//{
-//	class EditorWindow : public Window
-//	{
-//		public:
-//
-//			EditorWindow( ) = default;
-//
-//			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override
-//			{
-//				// Init window base
-//				Window::Init( windowName, screenWidth, screenHeight, currentFlags );
-//
-//				// Initialize new world 
-//				mWorld = new World( ); 
-//				// Register contexts with world
-//				mWorld->RegisterContext< GraphicsSubsystemContext >( ); 
-//
-//				GUIContext* guiContext = GetGUIContext( );
-//
-//				// Create viewport
-//				mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this );
-//
-//				guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
-//
-//				return 1;
-//			}
-//
-//		protected: 
-//			EditorViewport* mViewport = nullptr;
-//	}; 
-//}
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {

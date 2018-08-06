@@ -3,7 +3,6 @@
 //#include "E:/Development/Enjon/Include/Base/Object.h"
 //#include "E:/Development/Enjon/Include/Entity/Component.h"
 //#include "E:/Development/Enjon/Include/Graphics/Material.h"
-//#include "E:/Development/Enjon/Include/Entity/Components/GraphicsComponent.h"
 //#include "E:/Development/Enjon/Include/Entity/Components/PointLightComponent.h"
 //#include "E:/Development/Enjon/Include/Entity/EntityManager.h"
 //#include "E:/Development/Enjon/Include/Graphics/Mesh.h"

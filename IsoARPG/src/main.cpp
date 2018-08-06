@@ -8576,11 +8576,7 @@ int main(int argc, char** argv)
 
 	// Create entity manager
 	mEntities = new Enjon::EntityManager();
-
-	// Register components
-	mEntities->RegisterComponent<Enjon::GraphicsComponent>();
-	mEntities->RegisterComponent<Enjon::PointLightComponent>();
-
+ 
 	handle1 = mEntities->Allocate();
 	handle2 = mEntities->Allocate();
 	handle3 = mEntities->Allocate();
@@ -8590,18 +8586,7 @@ int main(int argc, char** argv)
 	handle7 = mEntities->Allocate();
 	handle8 = mEntities->Allocate();
 	handle9 = mEntities->Allocate();
-	handle10 = mEntities->Allocate();
-
-	auto gc = handle1->Attach<Enjon::GraphicsComponent>();
-	auto gc2 = handle2->Attach<Enjon::GraphicsComponent>();
-	auto gc3 = handle3->Attach<Enjon::GraphicsComponent>();
-	auto gc4 = handle4->Attach<Enjon::GraphicsComponent>();
-	auto gc5 = handle5->Attach<Enjon::GraphicsComponent>();
-	auto gc6 = handle6->Attach<Enjon::GraphicsComponent>();
-	auto gc7 = handle7->Attach<Enjon::GraphicsComponent>();
-	auto gc8 = handle8->Attach<Enjon::GraphicsComponent>();
-	auto gc9 = handle9->Attach<Enjon::GraphicsComponent>();
-	auto gc10 = handle10->Attach<Enjon::GraphicsComponent>();
+	handle10 = mEntities->Allocate(); 
 
 	EG::Renderable* renderable = gc->GetRenderable();
 	EG::Renderable* renderable2 = gc2->GetRenderable();
