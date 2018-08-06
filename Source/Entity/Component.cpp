@@ -1,6 +1,7 @@
 #include "Entity/Component.h"
 #include "Entity/Entity.h"
 #include "Entity/EntityManager.h"
+#include "Base/World.h"
 #include "Engine.h"
 #include "Application.h"
 
@@ -126,7 +127,8 @@ namespace Enjon
 		{
 			if ( c->GetTickState() == ComponentTickState::TickAlways || app->GetApplicationState( ) == ApplicationState::Running )
 			{
-				if ( c->GetEntity( )->GetState( ) == EntityState::ACTIVE )
+				Entity* ent = c->GetEntity( );
+				if ( ent->GetWorld()->ShouldUpdate() && ent->GetState( ) == EntityState::ACTIVE )
 				{
 					c->Update( ); 
 				}

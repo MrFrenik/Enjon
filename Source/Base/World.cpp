@@ -8,7 +8,7 @@
 #include "Engine.h"
 
 namespace Enjon
-{ 
+{
 	//===============================================================
 
 	World::~World( )
@@ -21,10 +21,23 @@ namespace Enjon
 		{
 			delete ( c.second );
 			c.second = nullptr;
-		} 
+		}
 	}
 
 	//===============================================================
 
+	bool World::ShouldUpdate( ) const
+	{
+		return mShouldUpdate;
+	}
+
+	//===============================================================
+
+	void World::SetShouldUpdate( bool update )
+	{
+		mShouldUpdate = update;
+	}
+
+	//===============================================================
 }
 

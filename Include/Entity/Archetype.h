@@ -52,7 +52,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			EntityHandle Instantiate( const Transform& transform, World* world = nullptr ); 
+			EntityHandle Instantiate( const Transform& transform = Transform(), World* world = nullptr ); 
  
 			/**
 			* @brief

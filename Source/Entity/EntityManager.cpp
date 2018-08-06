@@ -7,8 +7,10 @@
 #include "Entity/Components/CameraComponent.h"
 #include "Entity/Components/SkeletalMeshComponent.h"
 #include "Entity/Components/SkeletalAnimationComponent.h"
+#include "Graphics/GraphicsSubsystem.h"
 #include "SubsystemCatalog.h"
 #include "Serialize/EntityArchiver.h"
+#include "Base/World.h"
 #include "Application.h"
 #include "Engine.h"
 
@@ -24,12 +26,12 @@
 #include <stdio.h>
 
 namespace Enjon
-{ 
+{
 	//================================================================================================
 
 	EntityHandle::EntityHandle( )
 		: mID( MAX_ENTITIES )
-	{ 
+	{
 	}
 
 	//================================================================================================
@@ -92,7 +94,7 @@ namespace Enjon
 		mID = MAX_ENTITIES;
 		mState = EntityState::INVALID;
 		mWorldTransformDirty = true;
-	} 
+	}
 
 	//=================================================================
 
@@ -131,6 +133,13 @@ namespace Enjon
 
 	//=================================================================
 
+	void Entity::SetArchetype( const AssetHandle< Archetype >& archType )
+	{
+		mArchetype = archType;
+	}
+
+	//=================================================================
+
 	void Entity::RemoveFromWorld( )
 	{
 		// If world exists, then remove this entity from it
@@ -143,7 +152,7 @@ namespace Enjon
 	//=================================================================
 
 	void Entity::Reset( )
-	{ 
+	{
 		RemoveParent( );
 
 		// Remove all children and add to parent hierarchy list
@@ -153,7 +162,7 @@ namespace Enjon
 			if ( e )
 			{
 				// Remove but don't remove from list just yet since we're iterating it
-				e->RemoveParent( true ); 
+				e->RemoveParent( true );
 			}
 		}
 
@@ -233,7 +242,7 @@ namespace Enjon
 		EntityManager* em = EngineSubsystem( EntityManager );
 		Vector<Component*> compReturns;
 		for ( auto& c : mComponents )
-		{ 
+		{
 			auto comp = em->GetComponent( GetHandle( ), c );
 			if ( comp )
 			{
@@ -260,6 +269,14 @@ namespace Enjon
 	}
 
 	//---------------------------------------------------------------
+
+	AssetHandle< Archetype > Entity::GetArchetype( ) const
+	{
+		return mArchetype;
+	}
+
+	//---------------------------------------------------------------
+
 	Transform Entity::GetLocalTransform( )
 	{
 		return mLocalTransform;
@@ -286,7 +303,7 @@ namespace Enjon
 		if ( HasParent( ) )
 		{
 			// Grab parent entity
-			Enjon::Entity* parent = mParent.Get( ); 
+			Enjon::Entity* parent = mParent.Get( );
 
 			// Set local transform relative to parent transform
 			mLocalTransform = mWorldTransform / parent->GetWorldTransform( );
@@ -311,7 +328,7 @@ namespace Enjon
 		Enjon::Entity* p = mParent.Get( );
 
 		// Set world transform
-		mWorldTransform = mLocalTransform * p->GetWorldTransform();
+		mWorldTransform = mLocalTransform * p->GetWorldTransform( );
 
 		// Set world transform flag to being clean
 		mWorldTransformDirty = false;
@@ -398,46 +415,46 @@ namespace Enjon
 		}
 
 		mWorldTransformDirty = true;
-	} 
+	}
 
 	//--------------------------------------------------------------- 
 
-	Vec3 Entity::GetLocalPosition()
+	Vec3 Entity::GetLocalPosition( )
 	{
-		return mLocalTransform.GetPosition();
+		return mLocalTransform.GetPosition( );
 	}
 
 	//---------------------------------------------------------------
-	Vec3 Entity::GetLocalScale()
+	Vec3 Entity::GetLocalScale( )
 	{
-		return mLocalTransform.GetScale();
+		return mLocalTransform.GetScale( );
 	}
 
 	//---------------------------------------------------------------
-	Quaternion Entity::GetLocalRotation()
+	Quaternion Entity::GetLocalRotation( )
 	{
-		return mLocalTransform.GetRotation();
+		return mLocalTransform.GetRotation( );
 	}
 
 	//---------------------------------------------------------------
-	Vec3 Entity::GetWorldPosition()
+	Vec3 Entity::GetWorldPosition( )
 	{
-		if (mWorldTransformDirty) CalculateWorldTransform();
-		return mWorldTransform.GetPosition();
+		if ( mWorldTransformDirty ) CalculateWorldTransform( );
+		return mWorldTransform.GetPosition( );
 	}
 
 	//---------------------------------------------------------------
-	Vec3 Entity::GetWorldScale()
+	Vec3 Entity::GetWorldScale( )
 	{
-		if (mWorldTransformDirty) CalculateWorldTransform();
-		return mWorldTransform.GetScale();
+		if ( mWorldTransformDirty ) CalculateWorldTransform( );
+		return mWorldTransform.GetScale( );
 	}
 
 	//---------------------------------------------------------------
-	Quaternion Entity::GetWorldRotation()
+	Quaternion Entity::GetWorldRotation( )
 	{
-		if (mWorldTransformDirty) CalculateWorldTransform();
-		return mWorldTransform.GetRotation();
+		if ( mWorldTransformDirty ) CalculateWorldTransform( );
+		return mWorldTransform.GetRotation( );
 	}
 
 	//-----------------------------------------
@@ -462,7 +479,7 @@ namespace Enjon
 				exists |= true;
 			}
 
-			exists |= c.Get()->ExistsInChildHierarchy( child );
+			exists |= c.Get( )->ExistsInChildHierarchy( child );
 		}
 
 		return exists;
@@ -470,14 +487,14 @@ namespace Enjon
 
 	//-----------------------------------------
 
-	void Entity::AddChild(const EntityHandle& child)
+	void Entity::AddChild( const EntityHandle& child )
 	{
 		Enjon::Entity* ent = child.Get( );
 
 		if ( ent == nullptr )
 		{
 			return;
-		} 
+		}
 
 		// Already in child hierachy, cannot add
 		if ( ExistsInChildHierarchy( child ) )
@@ -489,56 +506,56 @@ namespace Enjon
 		ent->SetParent( GetHandle( ) );
 
 		// Make sure child doesn't exist in vector before pushing back
-		auto query = std::find(mChildren.begin(), mChildren.end(), child);
-		if (query == mChildren.end())
+		auto query = std::find( mChildren.begin( ), mChildren.end( ), child );
+		if ( query == mChildren.end( ) )
 		{
 			// Add child to children list
-			mChildren.push_back(child);
+			mChildren.push_back( child );
 
 			// Calculate its world transform with respect to parent
-			ent->CalculateWorldTransform();
+			ent->CalculateWorldTransform( );
 		}
 		else
 		{
 			// Log a warning message here
-		} 
+		}
 	}
 
 	//-----------------------------------------
 	void Entity::DetachChild( const EntityHandle& child, bool deferRemovalFromList )
-	{ 
+	{
 		// Find and erase
 		if ( !deferRemovalFromList )
 		{
-			mChildren.erase( std::remove( mChildren.begin(), mChildren.end(), child ), mChildren.end() ); 
+			mChildren.erase( std::remove( mChildren.begin( ), mChildren.end( ), child ), mChildren.end( ) );
 		}
 
 		// Recalculate world transform of child
-		child.Get( )->CalculateWorldTransform();
+		child.Get( )->CalculateWorldTransform( );
 
 		// Reset local transform to new world transform
 		child.Get( )->mLocalTransform = child.Get( )->mWorldTransform;
 
 		// Set parent to invalid entity handle
-		child.Get( )->mParent = EntityHandle( ); 
-	} 
+		child.Get( )->mParent = EntityHandle( );
+	}
 
 	//-----------------------------------------
 	void Entity::SetParent( const EntityHandle& parent )
-	{ 
+	{
 		// Calculate world transform ( No parent yet, so set world to local )
-		CalculateWorldTransform( ); 
-		
+		CalculateWorldTransform( );
+
 		// Set parent to this
-		mParent = parent.Get( ); 
-		
+		mParent = parent.Get( );
+
 		// Calculate local transform relative to parent
-		CalculateLocalTransform( ); 
+		CalculateLocalTransform( );
 	}
 
 	//-----------------------------------------
 	void Entity::RemoveParent( bool deferRemovalFromList )
-	{ 
+	{
 		// No need to remove if nullptr
 		if ( mParent.Get( ) == nullptr )
 		{
@@ -546,13 +563,13 @@ namespace Enjon
 		}
 
 		// Remove child from parent
-		mParent.Get( )->DetachChild( GetHandle( ), deferRemovalFromList ); 
+		mParent.Get( )->DetachChild( GetHandle( ), deferRemovalFromList );
 	}
 
 	//---------------------------------------------------------------
 
 	b8 Entity::HasChild( const EntityHandle& child )
-	{ 
+	{
 		for ( auto& c : mChildren )
 		{
 			if ( c.Get( ) == child.Get( ) )
@@ -566,27 +583,27 @@ namespace Enjon
 
 	//---------------------------------------------------------------
 
-	b8 Entity::HasChildren()
+	b8 Entity::HasChildren( )
 	{
-		return (mChildren.size() > 0);
+		return ( mChildren.size( ) > 0 );
 	}
 
 	//---------------------------------------------------------------
-	b8 Entity::HasParent()
+	b8 Entity::HasParent( )
 	{
-		return (mParent.Get( ) != nullptr);
+		return ( mParent.Get( ) != nullptr );
 	}
 
 	//---------------------------------------------------------------
-	b8 Entity::IsValid()
+	b8 Entity::IsValid( )
 	{
-		return (mState != EntityState::INVALID);
+		return ( mState != EntityState::INVALID );
 	}
 
 	//---------------------------------------------------------------
-	void Entity::SetAllChildWorldTransformsDirty()
+	void Entity::SetAllChildWorldTransformsDirty( )
 	{
-		for (auto& c : mChildren)
+		for ( auto& c : mChildren )
 		{
 			Enjon::Entity* ent = c.Get( );
 			if ( ent )
@@ -595,12 +612,12 @@ namespace Enjon
 				ent->mWorldTransformDirty = true;
 
 				// Iterate through child's children to set their state dirty as well
-				ent->SetAllChildWorldTransformsDirty(); 
+				ent->SetAllChildWorldTransformsDirty( );
 			}
 		}
 	}
 
-	void Entity::PropagateTransform(f32 dt)
+	void Entity::PropagateTransform( f32 dt )
 	{
 		// Calculate world transform
 		mWorldTransform = mLocalTransform;
@@ -610,7 +627,7 @@ namespace Enjon
 		}
 
 		// Iterate through children and propagate down
-		for (auto& c : mChildren)
+		for ( auto& c : mChildren )
 		{
 			Enjon::Entity* ent = c.Get( );
 			if ( ent )
@@ -623,7 +640,7 @@ namespace Enjon
 	}
 
 	//---------------------------------------------------------------
-	void Entity::UpdateAllChildTransforms()
+	void Entity::UpdateAllChildTransforms( )
 	{
 		// Maybe this should just be to set their flags to dirty?
 		for ( auto& c : mChildren )
@@ -636,35 +653,35 @@ namespace Enjon
 			}
 		}
 	}
- 
+
 	//---------------------------------------------------------------
 
 	Vec3 Entity::Forward( )
 	{
 		return GetWorldRotation( ) * Vec3::ZAxis( );
 	}
- 
+
 	//---------------------------------------------------------------
 
 	Vec3 Entity::Right( )
 	{
-		return GetWorldRotation( ) * Vec3::XAxis( ); 
+		return GetWorldRotation( ) * Vec3::XAxis( );
 	}
- 
+
 	//---------------------------------------------------------------
 
 	Vec3 Entity::Up( )
 	{
-		return GetWorldRotation( ) * Vec3::YAxis( ); 
+		return GetWorldRotation( ) * Vec3::YAxis( );
 	}
-	
+
 	//---------------------------------------------------------------
 
 	void Entity::SetUUID( const UUID& uuid )
 	{
 		mUUID = uuid;
 	}
- 
+
 	//---------------------------------------------------------------
 
 	Component* EntityManager::GetComponent( const EntityHandle& entity, const u32& ComponentID )
@@ -676,15 +693,15 @@ namespace Enjon
 
 		return nullptr;
 	}
- 
+
 	//---------------------------------------------------------------
 
-	u32 EntityManager::FindNextAvailableID()
+	u32 EntityManager::FindNextAvailableID( )
 	{
 		// Iterate from current available id to MAX_ENTITIES
-		for (u32 i = mNextAvailableID; i < MAX_ENTITIES; ++i)
+		for ( u32 i = mNextAvailableID; i < MAX_ENTITIES; ++i )
 		{
-			if (mEntities.at(i).mState == EntityState::INVALID)
+			if ( mEntities.at( i ).mState == EntityState::INVALID )
 			{
 				mNextAvailableID = i;
 				return mNextAvailableID;
@@ -692,9 +709,9 @@ namespace Enjon
 		}
 
 		// Iterate from 0 to mNextAvailableID
-		for (u32 i = 0; i < mNextAvailableID; ++i)
+		for ( u32 i = 0; i < mNextAvailableID; ++i )
 		{
-			if (mEntities.at(i).mState == EntityState::INVALID)
+			if ( mEntities.at( i ).mState == EntityState::INVALID )
 			{
 				mNextAvailableID = i;
 				return mNextAvailableID;
@@ -709,7 +726,7 @@ namespace Enjon
 
 	bool EntityManager::WorldExists( const World* world )
 	{
-		return ( mWorldEntityMap.find( world ) != mWorldEntityMap.end( ) ); 
+		return ( mWorldEntityMap.find( world ) != mWorldEntityMap.end( ) );
 	}
 
 	//---------------------------------------------------------------
@@ -737,19 +754,19 @@ namespace Enjon
 		}
 
 		// Grab next available id and assert that it's valid
-		u32 id = FindNextAvailableID();
+		u32 id = FindNextAvailableID( );
 
 		// Make sure if valid id ( not out of room )
-		assert(id < MAX_ENTITIES);
+		assert( id < MAX_ENTITIES );
 
 		// Handle to return
 		Enjon::EntityHandle handle;
 
 		// Find entity in array and set values
-		Entity* entity = &mEntities.at(id);
+		Entity* entity = &mEntities.at( id );
 		handle.mID = id;
-		entity->mID = id;				
-		entity->mState = EntityState::ACTIVE; 
+		entity->mID = id;
+		entity->mState = EntityState::ACTIVE;
 		entity->mUUID = UUID::GenerateUUID( );
 		entity->mWorld = world;
 
@@ -762,14 +779,22 @@ namespace Enjon
 
 	//---------------------------------------------------------------
 
-	Vector<EntityHandle> EntityManager::GetRootLevelEntities( )
+	Vector<EntityHandle> EntityManager::GetRootLevelEntities( World* world )
 	{
-		Vector<EntityHandle> entities;
-		for ( auto& e : mActiveEntities )
+		if ( !world )
 		{
-			if ( !e->HasParent( ) )
+			world = Engine::GetInstance( )->GetWorld( );
+		}
+
+		Vector<EntityHandle> entities;
+		if ( WorldExists( world ) )
+		{
+			for ( auto& e : mWorldEntityMap[ world ] )
 			{
-				entities.push_back( e->GetHandle( ) );
+				if ( !e->HasParent( ) )
+				{
+					entities.push_back( e->GetHandle( ) );
+				}
 			}
 		}
 
@@ -787,7 +812,7 @@ namespace Enjon
 			{
 				return EntityHandle( e );
 			}
-		} 
+		}
 
 		// Serach for matching UUID in marked for add list
 		for ( auto& e : mMarkedForAdd )
@@ -795,7 +820,7 @@ namespace Enjon
 			if ( e->GetUUID( ) == uuid )
 			{
 				return EntityHandle( e );
-			} 
+			}
 		}
 
 		// Return invalid entity if not found
@@ -817,14 +842,14 @@ namespace Enjon
 	//---------------------------------------------------------------
 
 	void EntityManager::Destroy( const EntityHandle& entity )
-	{ 
+	{
 		if ( !entity.Get( ) )
 		{
 			return;
 		}
 
 		// Push for deferred removal from active entities
-		mMarkedForDestruction.push_back(entity.GetID()); 
+		mMarkedForDestruction.push_back( entity.GetID( ) );
 
 		// Set entity to be invalid
 		entity.Get( )->mState = EntityState::INACTIVE;
@@ -863,7 +888,7 @@ namespace Enjon
 			{
 				mNeedStartList.erase( std::remove( mNeedStartList.begin( ), mNeedStartList.end( ), c ), mNeedStartList.end( ) );
 			}
-		} 
+		}
 	}
 
 	//==============================================================================
@@ -878,14 +903,21 @@ namespace Enjon
 		for ( auto& e : mMarkedForAdd )
 		{
 			e->Destroy( );
-		} 
+		}
 
 		mActiveEntities.clear( );
 		mMarkedForAdd.clear( );
 		mNeedInitializationList.clear( );
 		mNeedStartList.clear( );
 	}
- 
+
+	//==============================================================================
+
+	World* EntityManager::GetArchetypeWorld( ) const
+	{
+		return mArchetypeWorld;
+	}
+
 	//==============================================================================
 
 	const Vector< Entity* >& EntityManager::GetEntitiesByWorld( const World* world )
@@ -893,7 +925,7 @@ namespace Enjon
 		// World must be registerd!
 		assert( WorldExists( world ) );
 
-		return mWorldEntityMap[ world ]; 
+		return mWorldEntityMap[ world ];
 	}
 
 	//==============================================================================
@@ -905,7 +937,7 @@ namespace Enjon
 		mNeedInitializationList.clear( );
 		mNeedStartList.clear( );
 	}
- 
+
 	//==============================================================================
 
 	void EntityManager::ForceAddEntities( )
@@ -913,19 +945,19 @@ namespace Enjon
 		// Add all new entities into active entities
 		for ( auto& e : mMarkedForAdd )
 		{
-			mActiveEntities.push_back( e ); 
+			mActiveEntities.push_back( e );
 		}
 
 		// Clear the marked for add entities
 		mMarkedForAdd.clear( );
 	}
- 
+
 	//==============================================================================
 
-	void EntityManager::Cleanup()
+	void EntityManager::Cleanup( )
 	{
 		// Move through dirty list and remove from active entities
-		for (auto& e : mMarkedForDestruction)
+		for ( auto& e : mMarkedForDestruction )
 		{
 			if ( e < MAX_ENTITIES )
 			{
@@ -934,7 +966,7 @@ namespace Enjon
 				if ( ent && ent->mState != EntityState::INVALID )
 				{
 					// Destroy all components
-					for (auto& c : ent->mComponents)
+					for ( auto& c : ent->mComponents )
 					{
 						auto comp = GetComponent( ent->GetHandle( ), c );
 						if ( comp )
@@ -942,22 +974,22 @@ namespace Enjon
 							// Call shutdown on component
 							comp->Shutdown( );
 							// Destroy the component
-							comp->Destroy(); 
+							comp->Destroy( );
 						}
 
 						// Free component memory
 						delete comp;
 						// Set to null
 						comp = nullptr;
-					} 
+					}
 
 					// Remove entity ( includes reset )
 					RemoveEntityUnsafe( ent );
-				} 
-			} 
+				}
+			}
 		}
 
-		mMarkedForDestruction.clear();
+		mMarkedForDestruction.clear( );
 	}
 
 	//==================================================================================================
@@ -968,26 +1000,26 @@ namespace Enjon
 		entity->Reset( );
 
 		// Remove from active entities
-		mActiveEntities.erase(std::remove(mActiveEntities.begin(), mActiveEntities.end(), entity), mActiveEntities.end()); 
+		mActiveEntities.erase( std::remove( mActiveEntities.begin( ), mActiveEntities.end( ), entity ), mActiveEntities.end( ) );
 
 		// Remove from world map
-		RemoveEntityFromWorld( entity ); 
+		RemoveEntityFromWorld( entity );
 	}
 
 	//==================================================================================================
 
 	void EntityManager::RemoveEntityFromWorld( Entity* entity )
 	{
-		const World* world = entity->GetWorld(); 
+		const World* world = entity->GetWorld( );
 		if ( world )
 		{
-			auto query = mWorldEntityMap.find( world ); 
+			auto query = mWorldEntityMap.find( world );
 			if ( query != mWorldEntityMap.end( ) )
 			{
 				// Erase entity from list if found
 				Vector< Entity* >* ents = &mWorldEntityMap[ world ];
 				ents->erase( std::remove( ents->begin( ), ents->end( ), entity ), ents->end( ) );
-			} 
+			}
 		}
 	}
 
@@ -1006,7 +1038,7 @@ namespace Enjon
 			}
 
 			// Clear list
-			ents.clear( ); 
+			ents.clear( );
 		}
 
 		// Remove world from map
@@ -1014,13 +1046,13 @@ namespace Enjon
 	}
 
 	//==================================================================================================
- 
+
 	Result EntityManager::Initialize( )
-	{ 
+	{
 		// Set all components to null
-		for (auto i = 0; i < mComponents.size(); i++)
+		for ( auto i = 0; i < mComponents.size( ); i++ )
 		{
-			mComponents.at(i) = nullptr;
+			mComponents.at( i ) = nullptr;
 		}
 
 		// Reset available id and then resize entity storage array
@@ -1028,7 +1060,16 @@ namespace Enjon
 		mEntities.resize( MAX_ENTITIES );
 
 		// Register all engine level components with component array 
-		RegisterAllEngineComponents( ); 
+		RegisterAllEngineComponents( );
+
+		// Construct archetype world and register contexts
+		mArchetypeWorld = new World( );
+		mArchetypeWorld->RegisterContext< EntitySubsystemContext >( );
+		mArchetypeWorld->RegisterContext< GraphicsSubsystemContext >( );
+		mArchetypeWorld->SetShouldUpdate( false );
+		// Set their updates to false
+		mArchetypeWorld->SetUpdates< EntitySubsystemContext >( false );
+		mArchetypeWorld->SetUpdates< GraphicsSubsystemContext >( false );
 
 		return Result::SUCCESS;
 	}
@@ -1036,7 +1077,7 @@ namespace Enjon
 	//==================================================================================================
 
 	void EntityManager::Update( const f32 dt )
-	{ 
+	{
 		// Clean any entities that were marked for destruction
 		Cleanup( );
 
@@ -1044,24 +1085,24 @@ namespace Enjon
 		for ( auto& e : mMarkedForAdd )
 		{
 			// Push back entity
-			mActiveEntities.push_back( e ); 
+			mActiveEntities.push_back( e );
 
 			// Push back entity into its world map vector
-			mWorldEntityMap[ e->GetWorld() ].push_back( e );
+			mWorldEntityMap[ e->GetWorld( ) ].push_back( e );
 		}
 
 		// Clear the marked for add entities
 		mMarkedForAdd.clear( );
 
 		// If the application is running 
-		if ( Engine::GetInstance()->GetApplication()->GetApplicationState() == ApplicationState::Running )
+		if ( Engine::GetInstance( )->GetApplication( )->GetApplicationState( ) == ApplicationState::Running )
 		{
 			// Process all components that need initialization from last frame
 			for ( auto& c : mNeedInitializationList )
 			{
 				if ( c )
 				{
-					c->Initialize( ); 
+					c->Initialize( );
 				}
 			}
 
@@ -1070,14 +1111,14 @@ namespace Enjon
 			{
 				if ( c )
 				{
-					c->Start( ); 
+					c->Start( );
 				}
-			} 
+			}
 
 			// Clear both lists
 			mNeedInitializationList.clear( );
 			mNeedStartList.clear( );
-		} 
+		}
 
 		// Update all component systems
 		for ( auto& system : mComponents )
@@ -1089,21 +1130,28 @@ namespace Enjon
 	//==================================================================================================
 
 	void EntityManager::LateUpdate( f32 dt )
-	{ 
+	{
 		// Clean any entities that were marked for destruction
-		UpdateAllActiveTransforms(dt);
+		UpdateAllActiveTransforms( dt );
 	}
 
 	//==================================================================================================
 
 	Result EntityManager::Shutdown( )
-	{ 
+	{
+		// Destroy world
+		if ( mArchetypeWorld )
+		{
+			delete ( mArchetypeWorld );
+			mArchetypeWorld = nullptr;
+		}
+
 		// Detach all components from entities
-		for (u32 i = 0; i < MAX_ENTITIES; ++i)
+		for ( u32 i = 0; i < MAX_ENTITIES; ++i )
 		{
 			//Destroy( mEntities->at( i ).GetHandle( ) );	
-			Destroy( mEntities.at( i ).GetHandle( ) );	
-		} 
+			Destroy( mEntities.at( i ).GetHandle( ) );
+		}
 
 		// Force destroy all entities and their components
 		ForceCleanup( );
@@ -1132,17 +1180,17 @@ namespace Enjon
 		// Register engine components here
 		RegisterComponent< StaticMeshComponent >( );
 		RegisterComponent< PointLightComponent >( );
-		RegisterComponent< RigidBodyComponent >( ); 
-		RegisterComponent< DirectionalLightComponent >( ); 
-		RegisterComponent< CameraComponent >( ); 
+		RegisterComponent< RigidBodyComponent >( );
+		RegisterComponent< DirectionalLightComponent >( );
+		RegisterComponent< CameraComponent >( );
 		RegisterComponent< SkeletalMeshComponent >( );
 		RegisterComponent< SkeletalAnimationComponent >( );
 	}
 
 	//================================================================================================== 
 
-	void EntityManager::UpdateAllActiveTransforms(f32 dt)
-	{ 
+	void EntityManager::UpdateAllActiveTransforms( f32 dt )
+	{
 		// Does nothing for now
 	}
 
@@ -1151,7 +1199,7 @@ namespace Enjon
 	void EntityManager::RegisterComponent( const MetaClass* cls )
 	{
 		u32 index = cls->GetTypeId( );
-		mComponents[index] = new ComponentArray( );
+		mComponents[ index ] = new ComponentArray( );
 	}
 
 	//========================================================================================================================
@@ -1161,12 +1209,12 @@ namespace Enjon
 	// unregister one of those
 	void EntityManager::UnregisterComponent( const MetaClass* cls )
 	{
-		u32 index = cls->GetTypeId( ); 
-	
+		u32 index = cls->GetTypeId( );
+
 		// For now will only erase if there are no components attached to any entities
-		if ( ComponentBaseExists( index ) && mComponents[index]->IsEmpty() )
+		if ( ComponentBaseExists( index ) && mComponents[ index ]->IsEmpty( ) )
 		{
-			ComponentWrapperBase* base = mComponents[index];
+			ComponentWrapperBase* base = mComponents[ index ];
 			mComponents.erase( index );
 			delete base;
 			base = nullptr;
@@ -1183,7 +1231,7 @@ namespace Enjon
 		Enjon::Entity* entity = handle.Get( );
 
 		// Assert entity is valid
-		assert(entity != nullptr);
+		assert( entity != nullptr );
 
 		// Doesn't have component
 		if ( !ComponentBaseExists( compIdx ) )
@@ -1191,16 +1239,16 @@ namespace Enjon
 			RegisterComponent( compCls );
 		}
 
-		assert(mComponents.at(compIdx) != nullptr); 
+		assert( mComponents.at( compIdx ) != nullptr );
 
 		// Entity id
-		u32 eid = entity->GetID(); 
+		u32 eid = entity->GetID( );
 
 		// If component exists, return it
 		if ( entity->HasComponent( compCls ) )
 		{
 			return mComponents.at( compIdx )->GetComponent( entity->mID );
-		} 
+		}
 
 		ComponentWrapperBase* base = mComponents[ compIdx ];
 
@@ -1208,11 +1256,11 @@ namespace Enjon
 		Component* component = base->AddComponent( compCls, eid );
 		if ( component )
 		{
-			component->SetEntity(entity);
-			component->SetID(compIdx);
+			component->SetEntity( entity );
+			component->SetID( compIdx );
 			component->SetBase( base );
 			component->mEntityID = entity->mID;
-			component->PostConstruction( ); 
+			component->PostConstruction( );
 
 			// Get component ptr and push back into entity components
 			entity->mComponents.push_back( compIdx );
@@ -1237,17 +1285,17 @@ namespace Enjon
 						}
 					}
 				}
-			} 
-		} 
+			}
+		}
 
-		return component; 
+		return component;
 	}
 
 	//=========================================================================================
 
 	void EntityManager::RemoveComponent( const MetaClass* compCls, const EntityHandle& entity )
 	{
-		auto comp = GetComponent( entity, compCls->GetTypeId() );
+		auto comp = GetComponent( entity, compCls->GetTypeId( ) );
 		if ( comp )
 		{
 			// Remove from initialization list
@@ -1257,17 +1305,17 @@ namespace Enjon
 			mNeedStartList.erase( std::remove( mNeedStartList.begin( ), mNeedStartList.end( ), comp ), mNeedStartList.end( ) );
 
 			// Destroy component
-			comp->Destroy( ); 
+			comp->Destroy( );
 
 			// Remove from entity component list
 			auto comps = &entity.Get( )->mComponents;
-			comps->erase( std::remove( comps->begin(), comps->end(), compCls->GetTypeId() ), comps->end() ); 
+			comps->erase( std::remove( comps->begin( ), comps->end( ), compCls->GetTypeId( ) ), comps->end( ) );
 
 			// Free memory of component
 			delete comp;
 			// Set to null
 			comp = nullptr;
-		} 
+		}
 	}
 
 	//=========================================================================================
@@ -1299,7 +1347,7 @@ namespace Enjon
 	void EntityManager::RecurisvelyGenerateNewUUIDs( const EntityHandle& entity )
 	{
 		Entity* ent = entity.Get( );
-		if ( !ent ) 
+		if ( !ent )
 		{
 			return;
 		}
@@ -1316,22 +1364,27 @@ namespace Enjon
 
 	//=========================================================================================
 
-	EntityHandle EntityManager::CopyEntity( const EntityHandle& entity )
-	{ 
+	EntityHandle EntityManager::CopyEntity( const EntityHandle& entity, World* world )
+	{
+		if ( world == nullptr )
+		{
+			world = Engine::GetInstance( )->GetWorld( );
+		}
+
 		// Use to serialize entity data for new entity
 		ByteBuffer buffer;
 
 		// Set up the handle using the other
-		if ( entity.Get() )
+		if ( entity.Get( ) )
 		{
 			// Get entities
-			Entity* sourceEnt = entity.Get( ); 
+			Entity* sourceEnt = entity.Get( );
 
 			// Serialize entity into buffer
 			EntityArchiver::Serialize( entity, &buffer );
 
 			// Deserialize into new entity
-			EntityHandle newHandle = EntityArchiver::Deserialize( &buffer );
+			EntityHandle newHandle = EntityArchiver::Deserialize( &buffer, world );
 
 			// Destination entity
 			Entity* destEnt = newHandle.Get( );
@@ -1343,11 +1396,11 @@ namespace Enjon
 			for ( auto& c : destEnt->GetChildren( ) )
 			{
 				RecurisvelyGenerateNewUUIDs( c );
-			} 
+			}
 
 			// Cache off local transform of destination entity before parenting
 			Transform localTrans = destEnt->GetLocalTransform( );
-			
+
 			// Set parent of new handle
 			if ( sourceEnt->GetParent( ) )
 			{
@@ -1358,11 +1411,11 @@ namespace Enjon
 			}
 
 			// Return the handle, valid or not
-			return newHandle; 
+			return newHandle;
 		}
 
 		// Return empty handle
-		return EntityHandle( ); 
+		return EntityHandle( );
 	}
 
 	//=========================================================================================
@@ -1388,17 +1441,17 @@ namespace Enjon
 
 /*
 
-	// Archetypes...
+// Archetypes...
 
-	// How are these going to be constructed?
+// How are these going to be constructed?
 
-	Entities can be instantiated from archetypes
+Entities can be instantiated from archetypes
 
-	ENJON_CLASS( )
-	class Archetype : public Asset
-	{
-		ENJON_CLASS_BODY( Archetype )	
-	};
+ENJON_CLASS( )
+class Archetype : public Asset
+{
+ENJON_CLASS_BODY( Archetype )
+};
 
 
 */

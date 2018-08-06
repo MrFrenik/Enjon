@@ -8,6 +8,9 @@
 #include "Asset/ArchetypeAssetLoader.h"
 #include "SubsystemCatalog.h"
 #include "Serialize/EntityArchiver.h"
+#include "Serialize/ObjectArchiver.h"
+#include "Serialize/BaseTypeSerializeMethods.h"
+#include "Serialize/EntityArchiver.h"
 #include "Engine.h" 
 
 namespace Enjon
@@ -48,7 +51,7 @@ namespace Enjon
 			return;
 		}
 
-		EntityHandle handle = EngineSubsystem( EntityManager )->Allocate( ); 
+		EntityHandle handle = EngineSubsystem( EntityManager )->Allocate( em->GetArchetypeWorld( ) );
 		handle.Get( )->SetName( "Root" );
 
 		// Serialize into data buffer
@@ -88,8 +91,14 @@ namespace Enjon
 		// Just clear the previous buffer data and then deserialize into it? 
 		mEntityData.Reset( );
 
+		AssetHandle< Archetype > archType = entity.Get( )->GetArchetype( );
+
+		entity.Get( )->SetArchetype( nullptr );
+
 		// Serialiize entity data using new entity
 		EntityArchiver::Serialize( entity, &mEntityData );
+
+		entity.Get( )->SetArchetype( archType );
 	} 
 
 	//=======================================================================================
@@ -111,6 +120,9 @@ namespace Enjon
 
 		// Set transform for entity
 		entity.Get( )->SetLocalTransform( transform ); 
+
+		// Set archetype of entity to this
+		entity.Get( )->SetArchetype( this );
 
 		// Reset read position of buffer
 		mEntityData.SetReadPosition( 0 );

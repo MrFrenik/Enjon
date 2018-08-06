@@ -25,10 +25,10 @@
 #include <cstdint>
 #include <assert.h>
 
-namespace Enjon 
-{ 
+namespace Enjon
+{
 	class EntityManager;
-	class EntityArchiver; 
+	class EntityArchiver;
 	class World;
 
 	enum class EntityState
@@ -43,25 +43,25 @@ namespace Enjon
 	class EntityManager;
 
 	ENJON_CLASS( )
-	class EntitySubsystemContext : public SubsystemContext
+		class EntitySubsystemContext : public SubsystemContext
 	{
 		ENJON_CLASS_BODY( EntitySubsystemContext )
 
-		public: 
-			/**
-			* @brief
-			*/
-			EntitySubsystemContext( World* world ); 
+	public:
+		/**
+		* @brief
+		*/
+		EntitySubsystemContext( World* world );
 
-			/**
-			* @brief
-			*/
-			virtual void ExplicitDestructor( );
+		/**
+		* @brief
+		*/
+		virtual void ExplicitDestructor( );
 
-		protected:
+	protected:
 
-		private: 
-	}; 
+	private:
+	};
 
 	class EntityHandle
 	{
@@ -73,7 +73,7 @@ namespace Enjon
 		* @brief Constructor
 		*/
 		EntityHandle( );
-		
+
 		/*
 		* @brief Constructor
 		*/
@@ -87,12 +87,12 @@ namespace Enjon
 		/*
 		* @brief
 		*/
-		u32 GetID( ) const; 
- 
+		u32 GetID( ) const;
+
 		/*
 		* @brief
 		*/
-		friend bool operator==( EntityHandle left, const EntityHandle& other); 
+		friend bool operator==( EntityHandle left, const EntityHandle& other );
 
 		/*
 		* @brief
@@ -114,625 +114,642 @@ namespace Enjon
 	};
 
 	ENJON_CLASS( )
-	class Entity : public Enjon::Object
+		class Entity : public Enjon::Object
 	{
 		ENJON_CLASS_BODY( Entity )
 
-		friend EntityHandle;
-		friend EntityManager; 
+			friend EntityHandle;
+		friend EntityManager;
 		friend EntityArchiver;
 		friend Archetype;
 
-		public:
-			
-			/**
-			* @brief
-			*/
-			virtual void ExplicitConstructor( ) override;
+	public:
 
-			/**
-			* @brief
-			*/
-			virtual void ExplicitDestructor( ); 
+		/**
+		* @brief
+		*/
+		virtual void ExplicitConstructor( ) override;
 
-			/**
-			* @brief Get id of this entity
-			*/
-			u32 GetID( ) const;
+		/**
+		* @brief
+		*/
+		virtual void ExplicitDestructor( );
 
-			/**
-			* @brief Get uuid of this entity
-			*/
-			UUID GetUUID( ) const;
+		/**
+		* @brief Get id of this entity
+		*/
+		u32 GetID( ) const;
 
-			/**
-			* @brief Get name of this entity
-			*/
-			String GetName( ) const;
+		/**
+		* @brief Get uuid of this entity
+		*/
+		UUID GetUUID( ) const;
 
-			/*
-			* @brief
-			*/
-			void SetName( const String& uuid );
+		/**
+		* @brief Get name of this entity
+		*/
+		String GetName( ) const;
 
-			/*
-			* @brief
-			*/
-			const World* GetWorld( ) const;
+		/*
+		* @brief
+		*/
+		void SetName( const String& uuid );
 
-			/**
-			* @brief
-			*/
-			virtual Result OnEditorUI( ) override;
+		/*
+		* @brief
+		*/
+		const World* GetWorld( ) const;
 
-			/**
-			* @brief Checks whether or not entity has given component
-			*/
-			template <typename T>
-			bool HasComponent();
+		/**
+		* @brief
+		*/
+		virtual Result OnEditorUI( ) override;
 
-			/**
-			* @brief
-			*/
-			bool HasComponent( const MetaClass* compCls );
+		/**
+		* @brief Checks whether or not entity has given component
+		*/
+		template <typename T>
+		bool HasComponent( );
 
-			/**
-			* @brief Gets component from entity, if exists
-			*/
-			template <typename T>
-			T* GetComponent();
+		/**
+		* @brief
+		*/
+		bool HasComponent( const MetaClass* compCls );
 
-			/**
-			* @brief Attaches component to entity, if exists
-			*/
-			template <typename T>
-			T* AddComponent();
+		/**
+		* @brief Gets component from entity, if exists
+		*/
+		template <typename T>
+		T* GetComponent( );
 
-			/*
-			* @brief
-			*/
-			Component* AddComponent( const MetaClass* compCls );
+		/**
+		* @brief Attaches component to entity, if exists
+		*/
+		template <typename T>
+		T* AddComponent( );
 
-			/**
-			* @brief Detaches component from entity, if exists
-			*/
-			template <typename T>
-			void RemoveComponent();
+		/*
+		* @brief
+		*/
+		Component* AddComponent( const MetaClass* compCls );
 
-			/** 
-			* @brief Detaches component from entity, if exists
-			* @note NOT ITERABLE ( Will remove from the list of existing components )
-			*/
-			void RemoveComponent( const MetaClass* cls );
+		/**
+		* @brief Detaches component from entity, if exists
+		*/
+		template <typename T>
+		void RemoveComponent( );
 
-			/**
-			* @brief Sets local transform of entity
-			*/
-			void SetLocalTransform( const Transform& transform, bool propagateToComponents = true );
+		/**
+		* @brief Detaches component from entity, if exists
+		* @note NOT ITERABLE ( Will remove from the list of existing components )
+		*/
+		void RemoveComponent( const MetaClass* cls );
 
-			/**
-			* @brief Gets local transform of entity relative to parent entity, if exists 
-			*/
-			Transform GetLocalTransform();
-			
-			/**
-			* @brief Gets World transform of entity which calculates world transform if dirty flag is set 
-			*/
-			Transform GetWorldTransform();
+		/**
+		* @brief Sets local transform of entity
+		*/
+		void SetLocalTransform( const Transform& transform, bool propagateToComponents = true );
 
-			/**
-			* @brief Sets local position of entity relative to parent, if exists
-			*/
-			void SetLocalPosition( Vec3& position, bool propagateToComponents = true );
+		/**
+		* @brief
+		*/
+		AssetHandle< Archetype > GetArchetype( ) const;
 
-			/**
-			* @brief Sets local scale of entity relative to parent, if exists
-			*/
-			void SetLocalScale(Vec3& scale, bool propagateToComponents = true );
+		/**
+		* @brief Gets local transform of entity relative to parent entity, if exists
+		*/
+		Transform GetLocalTransform( );
 
-			/**
-			* @brief Sets local scale of entity relative to parent, if exists
-			*/
-			void SetLocalScale(f32 scale, bool propagateToComponents = true );
+		/**
+		* @brief Gets World transform of entity which calculates world transform if dirty flag is set
+		*/
+		Transform GetWorldTransform( );
 
-			/**
-			* @brief Sets local orientation of entity relative to parent, if exists
-			*/
-			void SetLocalRotation(Quaternion& rotation, bool propagateToComponents = true );
+		/**
+		* @brief Sets local position of entity relative to parent, if exists
+		*/
+		void SetLocalPosition( Vec3& position, bool propagateToComponents = true );
 
-			/**
-			* @brief Sets local orientation of entity relative to parent, if exists
-			*/
-			void SetLocalRotation(Vec3& eulerAngles, bool propagateToComponents = true );
+		/**
+		* @brief Sets local scale of entity relative to parent, if exists
+		*/
+		void SetLocalScale( Vec3& scale, bool propagateToComponents = true );
 
-			/**
-			* @brief Gets local position of entity relative to parent, if exists
-			*/
-			Vec3 GetLocalPosition();
+		/**
+		* @brief Sets local scale of entity relative to parent, if exists
+		*/
+		void SetLocalScale( f32 scale, bool propagateToComponents = true );
 
-			/**
-			* @brief Gets local scale of entity relative to parent, if exists
-			*/
-			Vec3 GetLocalScale();
+		/**
+		* @brief Sets local orientation of entity relative to parent, if exists
+		*/
+		void SetLocalRotation( Quaternion& rotation, bool propagateToComponents = true );
 
-			/**
-			* @brief Gets local rotation of entity relative to parent, if exists
-			*/
-			Quaternion GetLocalRotation();
+		/**
+		* @brief Sets local orientation of entity relative to parent, if exists
+		*/
+		void SetLocalRotation( Vec3& eulerAngles, bool propagateToComponents = true );
 
-			/**
-			* @brief Gets World position of entity which calculates world transform if dirty flag is set 
-			*/
-			ENJON_FUNCTION( )
-			Vec3 GetWorldPosition();
+		/**
+		* @brief Gets local position of entity relative to parent, if exists
+		*/
+		Vec3 GetLocalPosition( );
 
-			/**
-			* @brief Gets World scale of entity which calculates world transform if dirty flag is set
-			*/
-			Vec3 GetWorldScale();
+		/**
+		* @brief Gets local scale of entity relative to parent, if exists
+		*/
+		Vec3 GetLocalScale( );
 
-			/**
-			* @brief Gets World rotation of entity which calculates world transform if dirty flag is set
-			*/
-			Quaternion GetWorldRotation();
+		/**
+		* @brief Gets local rotation of entity relative to parent, if exists
+		*/
+		Quaternion GetLocalRotation( );
 
-			/** 
-			* @brief Gets parent of this entity, returns nullptr if doesn't exist
-			*/
-			EntityHandle GetParent() { return mParent; }
+		/**
+		* @brief Gets World position of entity which calculates world transform if dirty flag is set
+		*/
+		ENJON_FUNCTION( )
+			Vec3 GetWorldPosition( );
 
-			/** 
-			* @brief
-			*/
-			bool ExistsInChildHierarchy( const EntityHandle& child );
+		/**
+		* @brief Gets World scale of entity which calculates world transform if dirty flag is set
+		*/
+		Vec3 GetWorldScale( );
 
-			/**
-			* @brief Registers a child with this entity
-			*/
-			void AddChild(const EntityHandle& child);
+		/**
+		* @brief Gets World rotation of entity which calculates world transform if dirty flag is set
+		*/
+		Quaternion GetWorldRotation( );
 
-			/**
-			* @brief Removes child from entity, if exists
-			*/
-			void DetachChild(const EntityHandle& child, bool deferRemovalFromList = false );	
+		/**
+		* @brief Gets parent of this entity, returns nullptr if doesn't exist
+		*/
+		EntityHandle GetParent( ) { return mParent; }
 
-			/**
-			* @brief Sets parent of entity, if one doesn't already exist
-			*/
-			void SetParent(const EntityHandle& parent);
+		/**
+		* @brief
+		*/
+		bool ExistsInChildHierarchy( const EntityHandle& child );
 
-			/**
-			* @brief Removes parent from entity, if one exists
-			*/
-			void RemoveParent( bool deferRemovalFromList = false );
-			
-			/**
-			* @brief 
-			*/
-			EntityHandle GetHandle( );
+		/**
+		* @brief Registers a child with this entity
+		*/
+		void AddChild( const EntityHandle& child );
 
-			/** 
-			* @brief Returns whether or not has parent
-			*/
-			b8 HasParent();
+		/**
+		* @brief Removes child from entity, if exists
+		*/
+		void DetachChild( const EntityHandle& child, bool deferRemovalFromList = false );
 
-			/**
-			* @brief Returns whether or not has children
-			*/
-			b8 HasChildren();
+		/**
+		* @brief Sets parent of entity, if one doesn't already exist
+		*/
+		void SetParent( const EntityHandle& parent );
 
-			/**
-			* @brief
-			*/
-			b8 HasChild( const EntityHandle& child );
+		/**
+		* @brief Removes parent from entity, if one exists
+		*/
+		void RemoveParent( bool deferRemovalFromList = false );
 
-			/**
-			* @brief Returns whether or not entity is valid
-			*/
-			b8 IsValid();
+		/**
+		* @brief
+		*/
+		EntityHandle GetHandle( );
 
-			/*
-			* @brief
-			*/
-			Vec3 Forward( );
+		/**
+		* @brief Returns whether or not has parent
+		*/
+		b8 HasParent( );
 
-			/*
-			* @brief
-			*/
-			Vec3 Right( );
+		/**
+		* @brief Returns whether or not has children
+		*/
+		b8 HasChildren( );
 
-			/*
-			* @brief
-			*/
-			Vec3 Up( );
+		/**
+		* @brief
+		*/
+		b8 HasChild( const EntityHandle& child );
 
-			/**
-			* @brief
-			*/
-			//const Vector< EntityHandle >& GetChildren() const { return mChildren; }
+		/**
+		* @brief Returns whether or not entity is valid
+		*/
+		b8 IsValid( );
 
-			/**
-			* @brief
-			*/
-			Vector< EntityHandle > GetChildren( );
+		/*
+		* @brief
+		*/
+		Vec3 Forward( );
 
-			/**
-			* @brief
-			*/
-			const Vector<u32>& GetComponentIndicies( ) const 
-			{ 
-				return mComponents; 
-			}
+		/*
+		* @brief
+		*/
+		Vec3 Right( );
 
-			/**
-			* @brief
-			*/
-			Vector<Component*> GetComponents( ); 
+		/*
+		* @brief
+		*/
+		Vec3 Up( );
 
-			/**
-			* @brief Propagates transform down through all components
-			*/
-			void UpdateComponentTransforms();
+		/**
+		* @brief
+		*/
+		//const Vector< EntityHandle >& GetChildren() const { return mChildren; }
 
-			/*
-			* @brief
-			*/
-			void Destroy( );
+		/**
+		* @brief
+		*/
+		Vector< EntityHandle > GetChildren( );
 
-			/*
-			* @brief
-			*/
-			const EntityState& GetState( ) const;
+		/**
+		* @brief
+		*/
+		const Vector<u32>& GetComponentIndicies( ) const
+		{
+			return mComponents;
+		}
 
-		protected: 
+		/**
+		* @brief
+		*/
+		Vector<Component*> GetComponents( );
 
-			/*
-			* @brief
-			*/
-			void Update( const f32& dt );
+		/**
+		* @brief Propagates transform down through all components
+		*/
+		void UpdateComponentTransforms( );
 
-			/*
-			* @brief
-			*/
-			void CalculateLocalTransform( );
+		/*
+		* @brief
+		*/
+		void Destroy( );
 
-			/*
-			* @brief
-			*/
-			void CalculateWorldTransform();
+		/*
+		* @brief
+		*/
+		const EntityState& GetState( ) const;
 
-			/*
-			* @brief
-			*/
-			void SetUUID( const UUID& uuid ); 
+	protected:
 
-			/*
-			* @brief
-			*/
-			void RemoveFromWorld( );
+		/*
+		* @brief
+		*/
+		void Update( const f32& dt );
 
-		private:
-			/*
-			* @brief
-			*/
-			void SetID(u32 id);
+		/*
+		* @brief
+		*/
+		void CalculateLocalTransform( );
 
-			/*
-			* @brief
-			*/
-			void Reset();
+		/*
+		* @brief
+		*/
+		void CalculateWorldTransform( );
 
-			/*
-			* @brief
-			*/
-			void SetAllChildWorldTransformsDirty();
+		/*
+		* @brief
+		*/
+		void SetUUID( const UUID& uuid );
 
-			/*
-			* @brief
-			*/
-			void UpdateAllChildTransforms();
+		/*
+		* @brief
+		*/
+		void RemoveFromWorld( );
 
-			/*
-			* @brief
-			*/
-			void PropagateTransform(f32 dt); 
+		/*
+		* @brief
+		*/
+		void SetArchetype( const AssetHandle< Archetype >& archType );
 
-		private:
-			ENJON_PROPERTY( NonSerializable, ReadOnly )
-			u32 mID = MAX_ENTITIES;	
+	private:
+		/*
+		* @brief
+		*/
+		void SetID( u32 id );
 
-			ENJON_PROPERTY( NonSerializable, ReadOnly)
+		/*
+		* @brief
+		*/
+		void Reset( );
+
+		/*
+		* @brief
+		*/
+		void SetAllChildWorldTransformsDirty( );
+
+		/*
+		* @brief
+		*/
+		void UpdateAllChildTransforms( );
+
+		/*
+		* @brief
+		*/
+		void PropagateTransform( f32 dt );
+
+	private:
+		ENJON_PROPERTY( NonSerializable, ReadOnly )
+			u32 mID = MAX_ENTITIES;
+
+		ENJON_PROPERTY( NonSerializable, ReadOnly )
 			EntityHandle mParent;
 
-			ENJON_PROPERTY( NonSerializable, ReadOnly )
+		ENJON_PROPERTY( NonSerializable, ReadOnly )
 			Transform mLocalTransform;
 
-			ENJON_PROPERTY( NonSerializable, ReadOnly )
+		ENJON_PROPERTY( NonSerializable, ReadOnly )
 			Transform mWorldTransform;
 
-			ENJON_PROPERTY( NonSerializable, HideInEditor )
+		ENJON_PROPERTY( NonSerializable, HideInEditor )
 			Vector<u32> mComponents;
- 
-			ENJON_PROPERTY( NonSerializable )
-			Vector< EntityHandle > mChildren; 
 
-			ENJON_PROPERTY( NonSerializable, ReadOnly )
+		ENJON_PROPERTY( NonSerializable )
+			Vector< EntityHandle > mChildren;
+
+		ENJON_PROPERTY( NonSerializable, ReadOnly )
 			UUID mUUID;
 
-			ENJON_PROPERTY( NonSerializable )
-			String mName = "Entity"; 
+		ENJON_PROPERTY( NonSerializable )
+			String mName = "Entity";
 
-			ENJON_PROPERTY( HideInEditor, NonSerializable, ReadOnly )
-			Enjon::EntityState mState; 
+		ENJON_PROPERTY( HideInEditor, ReadOnly )
+			AssetHandle< Archetype > mArchetype;
 
-			ENJON_PROPERTY( HideInEditor, ReadOnly )
-			AssetHandle< Archetype > mArchetype; 
+		const World* mWorld = nullptr;
 
-			const World* mWorld = nullptr;
+		Enjon::EntityState mState;
 
-			u32 mWorldTransformDirty : 1; 					
+		u32 mWorldTransformDirty : 1;
+
+		//HashMap< u32, PropertyOverride > mOverrides;
 	};
 
 	//using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
-	using EntityStorage				= Vector< Entity >;
-	using MarkedForDestructionList	= Vector< u32 >;
-	using EntityList 				= Vector<Entity*>;
-	using ComponentBaseArray		= HashMap< u32, ComponentWrapperBase* >;
-	using ComponentList				= Vector< Component* >;
-	using WorldEntityMap			= HashMap< const World*, Vector< Entity* > >;
+	using EntityStorage = Vector< Entity >;
+	using MarkedForDestructionList = Vector< u32 >;
+	using EntityList = Vector<Entity*>;
+	using ComponentBaseArray = HashMap< u32, ComponentWrapperBase* >;
+	using ComponentList = Vector< Component* >;
+	using WorldEntityMap = HashMap< const World*, Vector< Entity* > >;
 
 	ENJON_CLASS( )
-	class EntityManager : public Subsystem
+		class EntityManager : public Subsystem
 	{
 		ENJON_CLASS_BODY( EntityManager )
 
-		friend Entity;
+			friend Entity;
 		friend Application;
 		friend World;
 		friend EntitySubsystemContext;
 
-		public: 
-			
-			/*
-			* @brief
-			*/
-			Enjon::EntityHandle Allocate( World* world = nullptr );
+	public:
 
-			/**
-			*@brief
-			*/
-			virtual Enjon::Result Initialize( ) override;
+		/*
+		* @brief
+		*/
+		Enjon::EntityHandle Allocate( World* world = nullptr );
 
-			/**
-			* @brief
-			*/
-			Entity* GetRawEntity( const u32& id );
+		/**
+		*@brief
+		*/
+		virtual Enjon::Result Initialize( ) override;
 
-			/**
-			*@brief
-			*/
-			virtual void Update( const f32 dT ) override;
+		/**
+		* @brief
+		*/
+		Entity* GetRawEntity( const u32& id );
 
-			/*
-			* @brief
-			*/
-			void LateUpdate(f32 dt);
+		/**
+		*@brief
+		*/
+		virtual void Update( const f32 dT ) override;
 
-			/**
-			*@brief
-			*/
-			virtual Enjon::Result Shutdown( ) override; 
+		/*
+		* @brief
+		*/
+		void LateUpdate( f32 dt );
 
-			/**
-			*@brief
-			*/
-			template <typename T>
-			void RegisterComponent();
+		/**
+		*@brief
+		*/
+		virtual Enjon::Result Shutdown( ) override;
 
-			/**
-			*@brief
-			*/
-			void RegisterComponent( const MetaClass* cls );
+		/**
+		*@brief
+		*/
+		template <typename T>
+		void RegisterComponent( );
 
-			/**
-			*@brief
-			*/
-			void UnregisterComponent( const MetaClass* cls ); 
+		/**
+		*@brief
+		*/
+		void RegisterComponent( const MetaClass* cls );
 
-			/**
-			*@brief
-			*/ 
-			Vector<const MetaClass*> GetComponentMetaClassList( );
+		/**
+		*@brief
+		*/
+		void UnregisterComponent( const MetaClass* cls );
 
-			/**
-			*@brief
-			*/
-			template <typename T>
-			T* AddComponent(const Enjon::EntityHandle& entity);
+		/**
+		*@brief
+		*/
+		Vector<const MetaClass*> GetComponentMetaClassList( );
 
-			/**
-			*@brief
-			*/
-			Component* AddComponent( const MetaClass* compCls, const Enjon::EntityHandle& handle );
+		/**
+		*@brief
+		*/
+		template <typename T>
+		T* AddComponent( const Enjon::EntityHandle& entity );
 
-			/**
-			*@brief
-			*/
-			template <typename T>
-			void RemoveComponent(Entity* entity);
+		/**
+		*@brief
+		*/
+		Component* AddComponent( const MetaClass* compCls, const Enjon::EntityHandle& handle );
 
-			/**
-			*@brief
-			*/
-			void RemoveComponent(const MetaClass* compCls, const EntityHandle& entity);
+		/**
+		*@brief
+		*/
+		template <typename T>
+		void RemoveComponent( Entity* entity );
 
-			/**
-			*@brief
-			*/
-			template <typename T>
-			T* GetComponent(Entity* entity);
+		/**
+		*@brief
+		*/
+		void RemoveComponent( const MetaClass* compCls, const EntityHandle& entity );
 
-			/**
-			*@brief
-			*/
-			EntityHandle CopyEntity( const EntityHandle& entity );
+		/**
+		*@brief
+		*/
+		template <typename T>
+		T* GetComponent( Entity* entity );
 
-			/**
-			*@brief
-			*/
-			void RecurisvelyGenerateNewUUIDs( const EntityHandle& entity );
+		/**
+		*@brief
+		*/
+		EntityHandle CopyEntity( const EntityHandle& entity, World* world = nullptr );
 
-			/**
-			*@brief
-			*/
-			void Destroy(const EntityHandle& entity);
+		/**
+		*@brief
+		*/
+		void RecurisvelyGenerateNewUUIDs( const EntityHandle& entity );
 
-
-			/**
-			* @brief Returns vector of active entities that have no parent
-			*/
-			Vector<EntityHandle> GetRootLevelEntities( ); 
-
-			/**
-			* @brief Returns vector of active components of given type
-			*/
-			template <typename T>
-			Vector<Component*> GetAllComponentsOfType( );
-
-			/**
-			*@brief
-			*/
-			const Vector<Entity*>& GetActiveEntities() const
-			{ 
-				return mActiveEntities; 
-			}
-
-			/**
-			*@brief
-			*/
-			const Vector< Entity* >& GetEntitiesByWorld( const World* world );
-
-			/*
-			* @brief
-			*/
-			void ForceCleanup( );
-
-			/*
-			* @brief
-			*/
-			void ForceAddEntities( );
-
-			/**
-			* @brief
-			*/
-			bool ComponentBaseExists( const u32& compIdx );
-
-			/**
-			* @brief Destroys all entities - both active and pending( will clear all lists, so is not iterable safe )
-			* @note NOT SAFE TO CALL DURING ANY ENTITY UPDATE LOOP (Only call within application update)
-			*/
-			void DestroyAll();
-
-			/**
-			* @brief
-			*/
-			EntityHandle GetEntityByUUID( const UUID& uuid ); 
-
-		protected: 
-
-			/**
-			* @brief
-			*/
-			void RegisterAllEngineComponents( );
+		/**
+		*@brief
+		*/
+		void Destroy( const EntityHandle& entity );
 
 
-			/**
-			* @brief
-			*/
-			Component* GetComponent( const EntityHandle& entity, const u32& ComponentID );
+		/**
+		* @brief Returns vector of active entities that have no parent
+		*/
+		Vector<EntityHandle> GetRootLevelEntities( World* world = nullptr );
 
-			/**
-			* @brief
-			*/
-			void RemoveWorld( const World* world );
+		/**
+		* @brief Returns vector of active components of given type
+		*/
+		template <typename T>
+		Vector<Component*> GetAllComponentsOfType( );
 
-			/**
-			* @brief
-			*/
-			bool WorldExists( const World* world );
+		/**
+		*@brief
+		*/
+		const Vector<Entity*>& GetActiveEntities( ) const
+		{
+			return mActiveEntities;
+		}
 
-			/**
-			* @brief
-			*/
-			void AddWorld( const World* world );
+		/**
+		*@brief
+		*/
+		const Vector< Entity* >& GetEntitiesByWorld( const World* world );
 
-		private:
-			/**
-			*@brief
-			*/
-			void Cleanup();
+		/**
+		*@brief
+		*/
+		World* GetArchetypeWorld( ) const;
 
-			/**
-			*@brief
-			*/
-			void RemoveEntityUnsafe( Entity* entity );
+		/*
+		* @brief
+		*/
+		void ForceCleanup( );
 
-			/**
-			*@brief
-			*/
-			void RemoveEntityFromWorld( Entity* entity );
+		/*
+		* @brief
+		*/
+		void ForceAddEntities( );
 
-			/**
-			*@brief
-			*/
-			static b8 CompareEntityIDs(const Entity* a, const Entity* b);
+		/**
+		* @brief
+		*/
+		bool ComponentBaseExists( const u32& compIdx );
 
-			/**
-			*@brief
-			*/
-			template <typename T>
-			void DetachComponentFromEntity(Entity* entity);
+		/**
+		* @brief Destroys all entities - both active and pending( will clear all lists, so is not iterable safe )
+		* @note NOT SAFE TO CALL DURING ANY ENTITY UPDATE LOOP (Only call within application update)
+		*/
+		void DestroyAll( );
 
-			/**
-			*@brief
-			*/
-			u32 FindNextAvailableID();
+		/**
+		* @brief
+		*/
+		EntityHandle GetEntityByUUID( const UUID& uuid );
 
-			/**
-			*@brief
-			*/
-			void UpdateAllActiveTransforms(f32 dt);
- 
-			/**
-			*@brief
-			*/
-			void RemoveFromNeedInitLists( const EntityHandle& entity );
+	protected:
 
-			/**
-			*@brief
-			*/
-			void RemoveFromNeedStartLists( const EntityHandle& entity );
+		/**
+		* @brief
+		*/
+		void RegisterAllEngineComponents( );
 
-			/**
-			*@brief
-			*/
-			template <typename T >
-			bool ComponentBaseExists( ); 
 
-		private:
-			EntityStorage 				mEntities;
-			ComponentBaseArray 			mComponents;	
-			EntityList 					mActiveEntities;
-			EntityList 					mMarkedForAdd;
-			MarkedForDestructionList 	mMarkedForDestruction;
-			ComponentList				mNeedInitializationList;
-			ComponentList				mNeedStartList;
-			u32 						mNextAvailableID = 0;
-			WorldEntityMap				mWorldEntityMap;
+		/**
+		* @brief
+		*/
+		Component* GetComponent( const EntityHandle& entity, const u32& ComponentID );
+
+		/**
+		* @brief
+		*/
+		void RemoveWorld( const World* world );
+
+		/**
+		* @brief
+		*/
+		bool WorldExists( const World* world );
+
+		/**
+		* @brief
+		*/
+		void AddWorld( const World* world );
+
+	private:
+		/**
+		*@brief
+		*/
+		void Cleanup( );
+
+		/**
+		*@brief
+		*/
+		void RemoveEntityUnsafe( Entity* entity );
+
+		/**
+		*@brief
+		*/
+		void RemoveEntityFromWorld( Entity* entity );
+
+		/**
+		*@brief
+		*/
+		static b8 CompareEntityIDs( const Entity* a, const Entity* b );
+
+		/**
+		*@brief
+		*/
+		template <typename T>
+		void DetachComponentFromEntity( Entity* entity );
+
+		/**
+		*@brief
+		*/
+		u32 FindNextAvailableID( );
+
+		/**
+		*@brief
+		*/
+		void UpdateAllActiveTransforms( f32 dt );
+
+		/**
+		*@brief
+		*/
+		void RemoveFromNeedInitLists( const EntityHandle& entity );
+
+		/**
+		*@brief
+		*/
+		void RemoveFromNeedStartLists( const EntityHandle& entity );
+
+		/**
+		*@brief
+		*/
+		template <typename T >
+		bool ComponentBaseExists( );
+
+	private:
+		EntityStorage 				mEntities;
+		ComponentBaseArray 			mComponents;
+		EntityList 					mActiveEntities;
+		EntityList 					mMarkedForAdd;
+		MarkedForDestructionList 	mMarkedForDestruction;
+		ComponentList				mNeedInitializationList;
+		ComponentList				mNeedStartList;
+		u32 						mNextAvailableID = 0;
+		WorldEntityMap				mWorldEntityMap;
+		World*						mArchetypeWorld = nullptr;
 	};
 
-	#include "Entity/Entity.inl"
-	#include "Entity/EntityManager.inl"
+#include "Entity/Entity.inl"
+#include "Entity/EntityManager.inl"
 }
 
 #endif

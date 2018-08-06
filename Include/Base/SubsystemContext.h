@@ -13,37 +13,51 @@ namespace Enjon
 	class World;
 
 	ENJON_CLASS( Abstract )
-	class SubsystemContext : public Enjon::Object
-	{ 
-		public:
+		class SubsystemContext : public Enjon::Object
+	{
+	public:
 
-			/**
-			* @brief
-			*/
-			SubsystemContext( ) = default;
+		/**
+		* @brief
+		*/
+		SubsystemContext( )
+			: mUpdates( true )
+		{
+		}
 
-			/**
-			* @brief
-			*/
-			SubsystemContext( World* world );
+		/**
+		* @brief
+		*/
+		SubsystemContext( World* world );
 
-			/**
-			* @brief
-			*/
-			~SubsystemContext( )
-			{
-				ExplicitDestructor( );
-			}
+		/**
+		* @brief
+		*/
+		~SubsystemContext( )
+		{
+			ExplicitDestructor( );
+		}
 
-			template <typename T>
-			inline static void AssertIsSubsystemContext( )
-			{
-				static_assert( std::is_base_of<SubsystemContext, T>::value, "T must inherit from SubsystemContext." ); 
-			} 
+		template <typename T>
+		inline static void AssertIsSubsystemContext( )
+		{
+			static_assert( std::is_base_of<SubsystemContext, T>::value, "T must inherit from SubsystemContext." );
+		}
 
-		protected: 
-			World* mWorld = nullptr;
-	}; 
+		/**
+		* @brief
+		*/
+		void SetUpdates( bool updates );
+
+		/**
+		* @brief
+		*/
+		bool GetUpdates( ) const;
+
+	protected:
+		World* mWorld = nullptr;
+		u32 mUpdates : 1;
+	};
 }
 
 #endif

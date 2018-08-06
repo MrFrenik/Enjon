@@ -43,14 +43,14 @@ namespace Enjon
 				// Create new system
 				T* system = new T();
 
+				// Set into map
+				mSubsystems[idx] = system;
+
 				// Initialize system if set to true
 				if ( initialize )
 				{
 					system->Initialize();
-				}
-				
-				// Set into map
-				mSubsystems[idx] = system;
+				} 
 	
 				return system;
 			}

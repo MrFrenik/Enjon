@@ -13,61 +13,83 @@ namespace Enjon
 	class SubsystemContext;
 
 	ENJON_CLASS( Abstract )
-	class World : public Object
+		class World : public Object
 	{
-		public: 
+	public:
 
-			/**
-			* @brief
-			*/
-			World( ) = default;
+		/**
+		* @brief
+		*/
+		World( )
+			: mShouldUpdate( true )
+		{
+		}
 
-			/**
-			* @brief
-			*/
-			~World( );
+		/**
+		* @brief
+		*/
+		~World( );
 
-			/**
-			* @brief
-			*/
-			template < typename T >
-			bool HasContext( )
+		/**
+		* @brief
+		*/
+		template < typename T >
+		bool HasContext( )
+		{
+			const MetaClass* cls = Object::GetClass< T >( );
+			if ( cls )
+			{
+				return ( mContextMap.find( cls->GetTypeId( ) ) != mContextMap.end( ) );
+			}
+
+			return false;
+		}
+
+		template < typename T >
+		void RegisterContext( )
+		{
+			SubsystemContext::AssertIsSubsystemContext< T >( );
+			if ( !HasContext< T >( ) )
 			{
 				const MetaClass* cls = Object::GetClass< T >( );
-				if ( cls )
-				{
-					return ( mContextMap.find( cls->GetTypeId( ) ) != mContextMap.end( ) ); 
-				}
-
-				return false;
+				// Construct new context and set world reference to this
+				mContextMap[ cls->GetTypeId( ) ] = new T( this );
 			}
+		}
 
-			template < typename T >
-			void RegisterContext( )
-			{ 
-				SubsystemContext::AssertIsSubsystemContext< T >( );
-				if ( !HasContext< T >( ) )
-				{
-					const MetaClass* cls = Object::GetClass< T >( );
-					// Construct new context and set world reference to this
-					mContextMap[ cls->GetTypeId( ) ] = new T( this );
-				}
-			}
-
-			template < typename T >
-			T* GetContext( )
+		template < typename T >
+		T* GetContext( )
+		{
+			if ( HasContext< T >( ) )
 			{
-				if ( HasContext< T >( ) )
-				{
-					return mContextMap[ Object::GetClass< T >( )->GetTypeId( ) ]->ConstCast< T > ( );
-				}
-
-				return nullptr;
+				return mContextMap[ Object::GetClass< T >( )->GetTypeId( ) ]->ConstCast< T >( );
 			}
 
-		protected: 
-			HashMap< u32, SubsystemContext* > mContextMap;
+			return nullptr;
+		}
 
+		template < typename T >
+		void SetUpdates( bool updates )
+		{
+			if ( HasContext< T >( ) )
+			{
+				mContextMap[ Object::GetClass< T >( )->GetTypeId( ) ]->ConstCast< T >( )->SetUpdates( updates );
+			}
+		}
+
+		/*
+		* @brief
+		*/
+		bool ShouldUpdate( ) const;
+
+		/*
+		* @brief
+		*/
+		void SetShouldUpdate( bool update );
+
+	protected:
+		HashMap< u32, SubsystemContext* > mContextMap;
+		u32 mShouldUpdate : 1;
 	};
 }
 
