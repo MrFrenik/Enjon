@@ -212,7 +212,7 @@ namespace Enjon
 						ImGui::SetKeyboardFocusHere( -1 );
 
 						char buffer[ 256 ];
-						strncpy( buffer, pathLabel.c_str( ), 256 );
+						strncpy( buffer, isDir ? pathLabel.c_str( ) : Utils::SplitString( pathLabel, "." ).front( ).c_str( ), 256 );
 						if ( ImGui::InputText( "##pathRename", buffer, 256, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll ) )
 						{
 							pathLabel = buffer;
@@ -344,7 +344,7 @@ namespace Enjon
 								}
 								else if ( mMouseHeld && !mGrabbedAsset )
 								{
-									if ( mHeldMousePosition != input->GetMouseCoords() && mHeldMousePosition.Distance(input->GetMouseCoords()) >= 2.0f )
+									if ( mHeldMousePosition.Distance(input->GetMouseCoords()) >= 5.0f )
 									{ 
 										mGrabbedAsset = info->GetAsset( );
 									} 
@@ -415,7 +415,7 @@ namespace Enjon
 		// Draw window around mouse for grabbed asset
 		if ( mGrabbedAsset )
 		{
-			HandleDraggingGrabbedAsset( );
+			HandleDraggingGrabbedAsset( ); 
 		}
 
 		// Check for any file drops that have occurred
@@ -430,6 +430,11 @@ namespace Enjon
 		if ( mSelectedPath.compare( "" ) != 0 && input->IsKeyPressed( KeyCode::F2 ) )
 		{
 			mPathNeedsRename = true;
+		}
+
+		if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) )
+		{
+			mMouseHeld = false;
 		}
 
 	}
@@ -449,8 +454,16 @@ namespace Enjon
 
 		if ( !mGrabbedAsset )
 		{
+			PrepareReleaseGrabbedAsset( );
 			return;
 		} 
+
+		// Release grabbed asset
+		if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) )
+		{
+			PrepareReleaseGrabbedAsset( );
+			return;
+		}
 
 		// Draw window around mouse position
 		Vec2 mousePos = input->GetMouseCoords( );
@@ -463,13 +476,7 @@ namespace Enjon
 		{
 			ImGui::Text( label.c_str( ) );
 		}
-		ImGui::End( );
-
-		// Release grabbed asset
-		if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) )
-		{
-			PrepareReleaseGrabbedAsset( );
-		}
+		ImGui::End( ); 
 	} 
 
 	//=========================================================================
