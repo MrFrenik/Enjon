@@ -270,6 +270,19 @@ namespace Enjon
 			{
 				// Construct new static mesh to fill out...
 				mesh = new Mesh( );
+
+				// Construct decl for new mesh
+				VertexDataDeclaration decl;
+				decl.Add( VertexAttributeFormat::Float3 );			// Position
+				decl.Add( VertexAttributeFormat::Float3 );			// Normal
+				decl.Add( VertexAttributeFormat::Float3 );			// Tangent
+				decl.Add( VertexAttributeFormat::Float2 );			// UV
+
+				// Set vertex decl for mesh
+				mesh->SetVertexDecl( decl );
+
+				// Process node of mesh
+				ProcessNode( scene->mRootNode, scene, mesh ); 
 			}
 		} 
 
