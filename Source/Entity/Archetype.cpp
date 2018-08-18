@@ -113,6 +113,7 @@ namespace Enjon
 
 		// Deserialize data, construct new entity, and place into given world
 		// NOTE(John): Will fail if entity data is corrupted or not ready to read
+		// Another small change
 		EntityHandle entity = EntityArchiver::Deserialize( &mEntityData, world );
  
 		// Generate new uuid for entity
