@@ -111,7 +111,7 @@ namespace Enjon
 			world = Engine::GetInstance( )->GetWorld( );
 		} 
 
-		// Deserialize data and construct new entity and place into given world and generate new UUID for it
+		// Deserialize data, construct new entity, and place into given world
 		// NOTE(John): Will fail if entity data is corrupted or not ready to read
 		EntityHandle entity = EntityArchiver::Deserialize( &mEntityData, world );
  
@@ -122,7 +122,7 @@ namespace Enjon
 		entity.Get( )->SetLocalTransform( transform ); 
 
 		// Set archetype of entity to this
-		entity.Get( )->SetArchetype( this );
+		entity.Get( )->SetArchetype( this ); 
 
 		// Reset read position of buffer
 		mEntityData.SetReadPosition( 0 );
