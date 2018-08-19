@@ -23,6 +23,11 @@ namespace Enjon
 	{
 		return HasFlags( MetaPropertyFlags::ReadOnly );
 	}
+
+	bool MetaProperty::IsSerializeable( ) const
+	{
+		return ( mTraits.IsSerializeable( ) );
+	}
 			
 	MetaPropertyTraits MetaProperty::GetTraits( ) const
 	{
@@ -57,6 +62,11 @@ namespace Enjon
 	bool MetaPropertyTraits::IsVisible( ) const
 	{
 		return !HasFlags( MetaPropertyFlags::HideInEditor );
+	}
+ 
+	bool MetaPropertyTraits::IsSerializeable( ) const 
+	{
+		return !HasFlags( MetaPropertyFlags::NonSerializable );
 	}
 }
 

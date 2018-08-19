@@ -24,7 +24,7 @@ namespace Enjon
 	class ByteBuffer;
 }
 
-// TODO(): Clean up this file!
+// TODO(): Clean up this file!  
 
 namespace Enjon
 {
@@ -67,6 +67,15 @@ namespace Enjon
 		ReadOnly		= 0x04,
 		HideInEditor	= 0x08
 	};
+
+	enum class MergeType
+	{
+		AcceptSource,
+		AcceptDestination,
+		AcceptMerge
+	};
+
+	using VoidCallback = std::function< void( void ) >;
 
 	inline MetaPropertyFlags operator|( MetaPropertyFlags a, MetaPropertyFlags b )
 	{
@@ -152,6 +161,11 @@ namespace Enjon
 		/*
 		* @brief
 		*/
+		bool IsSerializeable( ) const;
+
+		/*
+		* @brief
+		*/
 		bool HasFlags( const MetaPropertyFlags& flags ) const;
 
 		bool mIsEditable = false;
@@ -199,6 +213,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			bool IsSerializeable( ) const;
+
+			/*
+			* @brief
+			*/
 			std::string GetName( ) const;
 
 			/*
@@ -237,6 +256,29 @@ namespace Enjon
 				return mIndex;
 			}
 
+			/*
+			* @brief
+			*/
+			bool HasOverride( const Object* obj ) const;
+
+			/*
+			* @brief
+			*/
+			void AddOverride( const Object* obj );
+
+			/*
+			* @brief
+			*/
+			void RemoveOverride( const Object* obj );
+
+			/*
+			* @brief
+			*/
+			void AddOnValueChangedCallback( const VoidCallback& cb )
+			{
+				mOnValueChangedCallbacks.push_back( cb );
+			}
+
 		protected:
 			MetaPropertyType mType;
 			String mName;
@@ -245,6 +287,8 @@ namespace Enjon
 			MetaPropertyTraits mTraits;
 			Vector<MetaFunction*> mAccessorCallbacks;
 			Vector<MetaFunction*> mMutatorCallbacks;
+			Vector<VoidCallback> mOnValueChangedCallbacks;
+			HashSet<const Object*> mPropertyOverrides;
 	};
 
 	class MetaPropertyPointerBase : public MetaProperty 
@@ -1066,6 +1110,11 @@ namespace Enjon
 							mutator->Invoke<void>( object, value ); 
 						}
 					} 
+
+					for ( auto& m : prop->mOnValueChangedCallbacks )
+					{
+						m( );
+					}
 				}
 			} 
 
@@ -1085,9 +1134,22 @@ namespace Enjon
 							mutator->Invoke<void>( object, value ); 
 						}
 					} 
+
+					for ( auto& m : prop->mOnValueChangedCallbacks )
+					{
+						m( );
+					}
 				}
 			} 
 
+			/** 
+			* @brief
+			*/
+			bool InstanceOf( const MetaClass* cls ) const;
+
+			/** 
+			* @brief
+			*/
 			template < typename T >
 			bool InstanceOf( ) const
 			{
@@ -1491,6 +1553,16 @@ namespace Enjon
 			* @brief
 			*/
 			virtual Result OnEditorUI( );
+ 
+			/*
+			* @brief
+			*/
+			virtual Result Object::MergeWith( Object* other, MergeType mergeType ); 
+
+			/*
+			* @brief
+			*/
+			virtual Result HasPropertyOverrides( bool& result ) const;
 
 		private:
 

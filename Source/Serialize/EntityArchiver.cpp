@@ -62,7 +62,7 @@ namespace Enjon
 		buffer->Write< UUID >( entity.Get( )->GetUUID( ) );
 
 		// Write out entity name
-		buffer->Write< String >( entity.Get( )->GetName( ) );
+		buffer->Write< String >( entity.Get( )->GetName( ) ); 
 
 		//==========================================================================
 		// Components
@@ -113,6 +113,9 @@ namespace Enjon
 		{
 			Serialize( c, buffer );
 		}
+
+		// Serialize the prototype entity UUID 
+		buffer->Write< UUID >( entity.Get( )->HasPrototypeEntity( ) ? entity.Get( )->GetPrototypeEntity( ).Get( )->GetUUID( ) : UUID::Invalid( ) );
 
 		// Serialize entity default ( remaining unserialized properties )
 		SerializeObjectDataDefault( entity.Get( ), entity.Get( )->Class( ), buffer );
@@ -296,6 +299,9 @@ namespace Enjon
 				childEnt->SetLocalTransform( localTrans );
 			}
 		}
+
+		// Deserialize the prototype entity UUID 
+		ent->mPrototypeEntity = EngineSubsystem( EntityManager )->GetEntityByUUID( buffer->Read< UUID >( ) );
 
 		// Deserialize object default
 		DeserializeObjectDataDefault( ent, ent->Class( ), buffer );

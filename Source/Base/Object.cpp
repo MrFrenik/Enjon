@@ -33,6 +33,34 @@ namespace Enjon
 
 	//=========================================================================
 
+	bool MetaClass::InstanceOf( const MetaClass* cls ) const
+	{
+		return ( cls && cls == this );
+	}
+
+	//=========================================================================
+
+	void MetaProperty::AddOverride( const Object* obj )
+	{
+		mPropertyOverrides.insert( obj );
+	}
+
+	//=========================================================================
+
+	void MetaProperty::RemoveOverride( const Object* obj )
+	{
+		mPropertyOverrides.erase( obj );
+	}
+
+	//=========================================================================
+
+	bool MetaProperty::HasOverride( const Object* obj ) const
+	{
+		return ( mPropertyOverrides.find( obj ) != mPropertyOverrides.end( ) );
+	}
+
+	//=========================================================================
+
 	void MetaClassRegistry::UnregisterMetaClass( const MetaClass* cls )
 	{ 
 		// If available, then return
@@ -110,6 +138,20 @@ namespace Enjon
 	//======================================================================================
 
 	Result Object::OnEditorUI( )
+	{
+		return Result::INCOMPLETE;
+	}
+
+	//======================================================================================
+
+	Result Object::MergeWith( Object* other, MergeType mergeType )
+	{
+		return Result::INCOMPLETE;
+	}
+
+	//====================================================================================== 
+
+	Result Object::HasPropertyOverrides( bool& result ) const
 	{
 		return Result::INCOMPLETE;
 	}

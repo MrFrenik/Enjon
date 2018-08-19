@@ -118,6 +118,31 @@ namespace Enjon
 			*/ 
 			static Result DeserializeObjectDataDefault( const Object* object, const MetaClass* cls, ByteBuffer* buffer );
 
+			/*
+			*@brief
+			*/ 
+			static Result MergeObjects( Object* source, Object* dest, MergeType mergeType );
+
+			/*
+			*@brief
+			*/ 
+			static Result MergeObjectsDefault( Object* source, Object* dest, MergeType mergeType );
+
+			/*
+			*@brief
+			*/ 
+			static Result MergeProperty( Object* source, Object* dest, const MetaProperty* prop );
+
+			/*
+			*@brief
+			*/ 
+			static bool HasPropertyOverrides( const Object* obj );
+
+			/*
+			*@brief
+			*/ 
+			static bool HasPropertyOverridesDefault( const Object* obj );
+
 		protected:
 			ByteBuffer mBuffer;
 	};

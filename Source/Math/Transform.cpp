@@ -7,12 +7,11 @@ namespace Enjon
 { 
 	//==========================================================================
 
-	Transform::Transform()
-		: 
-			mPosition(Vec3(0.0f, 0.0f, 0.0f)), 
-			mRotation(Quaternion(0, 0, 0, 1)), 
-			mScale(Vec3(1, 1, 1))
+	void Transform::ExplicitConstructor()
 	{
+		mPosition = Vec3( 0.0f, 0.0f, 0.0f );
+		mRotation = Quaternion( 0, 0, 0, 1 );
+		mScale = Vec3( 1, 1, 1 );
 	}
 		
 	//==========================================================================
@@ -35,12 +34,6 @@ namespace Enjon
 	{
 		mEulerAngles = mRotation.EulerAngles( );
 	} 
-
-	//==========================================================================
-
-	Transform::~Transform()
-	{
-	}
 
 	//========================================================================== 
 

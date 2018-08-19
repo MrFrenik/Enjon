@@ -43,7 +43,7 @@ namespace Enjon
 	class EntityManager;
 
 	ENJON_CLASS( )
-		class EntitySubsystemContext : public SubsystemContext
+	class EntitySubsystemContext : public SubsystemContext
 	{
 		ENJON_CLASS_BODY( EntitySubsystemContext )
 
@@ -102,6 +102,11 @@ namespace Enjon
 		/*
 		* @brief
 		*/
+		bool IsValid( ) const;
+
+		/*
+		* @brief
+		*/
 		explicit operator bool( );
 
 		/*
@@ -114,11 +119,11 @@ namespace Enjon
 	};
 
 	ENJON_CLASS( )
-		class Entity : public Enjon::Object
+	class Entity : public Enjon::Object
 	{
 		ENJON_CLASS_BODY( Entity )
 
-			friend EntityHandle;
+		friend EntityHandle;
 		friend EntityManager;
 		friend EntityArchiver;
 		friend Archetype;
@@ -165,6 +170,12 @@ namespace Enjon
 		*/
 		virtual Result OnEditorUI( ) override;
 
+
+		/**
+		* @brief
+		*/
+		virtual Result MergeWith( Object* source, MergeType mergeType ) override;
+
 		/**
 		* @brief Checks whether or not entity has given component
 		*/
@@ -181,6 +192,11 @@ namespace Enjon
 		*/
 		template <typename T>
 		T* GetComponent( );
+
+		/*
+		* @brief
+		*/
+		Component* GetComponent( const MetaClass* compCls );
 
 		/**
 		* @brief Attaches component to entity, if exists
@@ -269,7 +285,7 @@ namespace Enjon
 		* @brief Gets World position of entity which calculates world transform if dirty flag is set
 		*/
 		ENJON_FUNCTION( )
-			Vec3 GetWorldPosition( );
+		Vec3 GetWorldPosition( );
 
 		/**
 		* @brief Gets World scale of entity which calculates world transform if dirty flag is set
@@ -317,9 +333,19 @@ namespace Enjon
 		EntityHandle GetHandle( );
 
 		/**
+		* @brief Returns whether or not has prototype entity
+		*/
+		bool HasPrototypeEntity( ) const;
+
+		/**
+		* @brief
+		*/
+		EntityHandle GetPrototypeEntity( ) const;
+
+		/**
 		* @brief Returns whether or not has parent
 		*/
-		b8 HasParent( );
+		b8 HasParent( ); 
 
 		/**
 		* @brief Returns whether or not has children
@@ -449,39 +475,43 @@ namespace Enjon
 
 	private:
 		ENJON_PROPERTY( NonSerializable, ReadOnly )
-			u32 mID = MAX_ENTITIES;
+		u32 mID = MAX_ENTITIES;
 
 		ENJON_PROPERTY( NonSerializable, ReadOnly )
-			EntityHandle mParent;
+		EntityHandle mParent;
+ 
+		ENJON_PROPERTY( NonSerializable, ReadOnly )
+		Transform mLocalTransform;
 
 		ENJON_PROPERTY( NonSerializable, ReadOnly )
-			Transform mLocalTransform;
-
-		ENJON_PROPERTY( NonSerializable, ReadOnly )
-			Transform mWorldTransform;
+		Transform mWorldTransform;
 
 		ENJON_PROPERTY( NonSerializable, HideInEditor )
-			Vector<u32> mComponents;
+		Vector<u32> mComponents;
 
 		ENJON_PROPERTY( NonSerializable )
-			Vector< EntityHandle > mChildren;
+		Vector< EntityHandle > mChildren;
+
+		ENJON_PROPERTY( NonSerializable, HideInEditor, ReadOnly )
+		HashSet< u32 > mInstancedEntities;
 
 		ENJON_PROPERTY( NonSerializable, ReadOnly )
-			UUID mUUID;
+		UUID mUUID;
 
 		ENJON_PROPERTY( NonSerializable )
-			String mName = "Entity";
+		String mName = "Entity";
+
+		ENJON_PROPERTY( NonSerializable, ReadOnly )
+		EntityHandle mPrototypeEntity;
 
 		ENJON_PROPERTY( HideInEditor, ReadOnly )
-			AssetHandle< Archetype > mArchetype;
+		AssetHandle< Archetype > mArchetype; 
 
 		const World* mWorld = nullptr;
 
 		Enjon::EntityState mState;
 
-		u32 mWorldTransformDirty : 1;
-
-		//HashMap< u32, PropertyOverride > mOverrides;
+		u32 mWorldTransformDirty : 1; 
 	};
 
 	//using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
@@ -586,12 +616,27 @@ namespace Enjon
 		/**
 		*@brief
 		*/
+		Component* GetComponent( const MetaClass* compCls, const EntityHandle& entity );
+
+		/**
+		*@brief
+		*/
 		EntityHandle CopyEntity( const EntityHandle& entity, World* world = nullptr );
 
 		/**
 		*@brief
 		*/
+		EntityHandle InstanceEntity( const EntityHandle& entity, World* world = nullptr );
+
+		/**
+		*@brief
+		*/
 		void RecurisvelyGenerateNewUUIDs( const EntityHandle& entity );
+
+		/**
+		*@brief
+		*/
+		void RecursivelySetPrototypeEntities( const EntityHandle& source, const EntityHandle& dest );
 
 		/**
 		*@brief

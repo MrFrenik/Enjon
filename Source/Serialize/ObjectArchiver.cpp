@@ -381,4 +381,137 @@ namespace Enjon
 	} 
 
 	//=====================================================================
+
+	Result ObjectArchiver::MergeObjects( Object* source, Object* dest, MergeType mergeType )
+	{
+		const MetaClass* cls = source->Class();
+
+		if ( !cls->InstanceOf( dest->Class() ) )
+		{
+		// Error, can't operate on separate types.
+			return Result::FAILURE;
+		} 
+
+		// Attempt to do customized merging depending on the object itself
+		Result mergeResult = dest->MergeWith( source, mergeType );
+
+		// If incomplete operation, then default merging behavior
+		if ( mergeResult == Result::INCOMPLETE )
+		{
+			MergeObjectsDefault( source, dest, mergeType );
+		} 
+
+		return Result::SUCCESS;
+	}
+
+	//=====================================================================
+
+	Result ObjectArchiver::MergeObjectsDefault( Object* source, Object* dest, MergeType mergeType )
+	{
+		const MetaClass* cls = source->Class();
+
+		for ( usize i = 0; i < cls->GetPropertyCount(); ++i )
+		{
+			const MetaProperty* prop = cls->GetProperty( i );
+
+			// Maybe same as "IsSerializeable"? 
+			if ( prop->IsSerializeable() )
+			{
+				switch( mergeType )
+				{
+					case MergeType::AcceptSource:
+					{
+						MergeProperty( source, dest, prop );
+					} break;
+
+					case MergeType::AcceptDestination:
+					{
+						MergeProperty( dest, source, prop );
+					} break;
+
+					case MergeType::AcceptMerge:
+					{
+						// Only merge iff destination object doesn't have a property override
+						if ( !prop->HasOverride( dest ) )
+						{
+							MergeProperty( source, dest, prop );
+						}
+					} break;
+				}
+			}
+		} 
+
+		return Result::SUCCESS;
+	}
+
+	//=====================================================================
+
+	Result ObjectArchiver::MergeProperty( Object* source, Object* dest, const MetaProperty* prop )
+	{
+		// Will merge the source object property into the destination property
+		const MetaClass* cls = source->Class();
+		
+		switch ( prop->GetType() ) 
+		{
+			case MetaPropertyType::U32:
+			{ 
+				cls->SetValue( dest, prop, *cls->GetValueAs< u32 >( source, prop ) ); 
+			} break;
+
+			case MetaPropertyType::F32:
+			{ 
+				cls->SetValue( dest, prop, *cls->GetValueAs< f32 >( source, prop ) ); 
+			} break;
+
+			case MetaPropertyType::Vec3:
+			{
+				cls->SetValue( dest, prop, *cls->GetValueAs< Vec3 >( source, prop ) );
+			} break;
+
+			// Etc...
+		}
+
+		return Result::SUCCESS;
+	}
+
+	//===================================================================== 
+
+	bool ObjectArchiver::HasPropertyOverrides( const Object* obj )
+	{
+		bool hasOverrides = false;
+
+		// Attempt override function for collecting property overrides
+		Result res = obj->HasPropertyOverrides( hasOverrides );
+
+		// If incomplete result, then attempt default override collection
+		if ( res == Result::INCOMPLETE )
+		{
+			hasOverrides = HasPropertyOverridesDefault( obj );
+		}
+
+		return hasOverrides;
+	}
+
+	//===================================================================== 
+
+	bool ObjectArchiver::HasPropertyOverridesDefault( const Object* obj )
+	{
+		bool hasOverride = false;
+
+		// Collect class
+		const MetaClass* cls = obj->Class( );
+
+		for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
+		{
+			const MetaProperty* prop = cls->GetProperty( i );
+
+			// Add to has override result
+			hasOverride |= prop->HasOverride( obj );
+		}
+
+		// Return final result
+		return hasOverride;
+	}
+
+	//===================================================================== 
 }

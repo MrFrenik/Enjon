@@ -24,14 +24,17 @@ namespace Enjon
 	/*
 	* @brief VQS transform
 	*/
-	class Transform
+	ENJON_CLASS( )
+	class Transform : public Object
 	{ 
+		ENJON_CLASS_BODY( Transform )
+
 		public:
 
 			/**
 			* @brief Default constructor
 			*/
-			Transform();
+			virtual void ExplicitConstructor( ) override;
 
 			/**
 			* @brief 
@@ -45,14 +48,7 @@ namespace Enjon
 			* @param
 			* @return
 			*/
-			Transform( const Transform& t );
-
-			/**
-			* @brief 
-			* @param
-			* @return
-			*/
-			~Transform();
+			Transform( const Transform& t ); 
 
 			/**
 			* @brief 
@@ -160,10 +156,14 @@ namespace Enjon
 			Mat4x4 ToMat4x4( ) const; 
 
 		private: 
+
+			ENJON_PROPERTY( )
 			Vec3 mPosition;
 
+			ENJON_PROPERTY( )
 			Quaternion mRotation;
 
+			ENJON_PROPERTY( )
 			Vec3 mScale;
 
 			Vec3 mEulerAngles;

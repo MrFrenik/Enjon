@@ -5,6 +5,8 @@
 #include "ImGui/ImGuiManager.h"
 #include "Engine.h"
 #include "SubsystemCatalog.h"
+#include "Serialize/ObjectArchiver.h"
+#include "Base/World.h"
 
 #include <fmt/format.h>
 
@@ -26,7 +28,7 @@ namespace Enjon
 			if ( ImGui::CollapsingHeader( "Label" ) )
 			{
 				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
-				igm->DebugDumpProperty( this, Class( )->GetPropertyByName( "mName" ) ); 
+				igm->DebugDumpProperty( this, Class( )->GetPropertyByName( ENJON_TO_STRING( mName ) ) ); 
 				ImGui::PopFont( ); 
 			}
 
@@ -34,7 +36,7 @@ namespace Enjon
 			if ( ImGui::CollapsingHeader( "Transform" ) )
 			{
 				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
-				igm->DebugDumpProperty( this, Class( )->GetPropertyByName( "mLocalTransform" ) ); 
+				igm->DebugDumpProperty( this, Class( )->GetPropertyByName( ENJON_TO_STRING( mLocalTransform ) ) ); 
 				ImGui::PopFont( );
 			} 
 
@@ -52,8 +54,21 @@ namespace Enjon
 					}
 				}
 			} 
-		}
-		ImGui::ListBoxFooter( );
+			
+			if ( ImGui::Button( "Instance" ) )
+			{
+				EngineSubsystem( EntityManager )->InstanceEntity( this, GetWorld( )->ConstCast< World >( ) );
+			}
+
+			if ( ImGui::Button( "Update Instances" ) )
+			{
+				for ( auto& i : mInstancedEntities )
+				{
+					ObjectArchiver::MergeObjects( this, EngineSubsystem( EntityManager )->GetRawEntity( i ), MergeType::AcceptMerge );
+				}
+			}
+		} 
+		ImGui::ListBoxFooter( ); 
 
 		return Result::SUCCESS; 
 	} 
@@ -85,4 +100,126 @@ namespace Enjon
 	{
 		return mWorld;
 	}
+
+	Result Entity::MergeWith( Object* sourceObj, MergeType mergeType )
+	{
+		const MetaClass* cls = sourceObj->Class();
+
+		// Can't merge with an instance of another object type
+		if ( !cls->InstanceOf< Entity >( ) )
+		{
+			return Result::FAILURE;
+		}
+
+		// Cast to entity
+		Entity* source = sourceObj->ConstCast< Entity >( );
+
+		// Check local transform of objects
+		bool transformPropChanged = false;
+		if ( !ObjectArchiver::HasPropertyOverrides( &mLocalTransform ) )
+		{
+			const MetaProperty* scaleProp = mLocalTransform.Class( )->GetPropertyByName( "mScale" );
+			if ( !scaleProp->HasOverride( &mLocalTransform ) )
+			{
+				ObjectArchiver::MergeProperty( &source->mLocalTransform, &mLocalTransform, scaleProp );
+			}
+		} 
+
+		// Would like a generic way to be able to detect if a property change does exist eventually, but
+		// since the component list is just a list of opaque ids, tough to really do that 
+
+		bool componentPropChangeExists = false;
+		for ( auto& c : source->GetComponents() )
+		{
+			if ( !HasComponent( c->Class() ) )
+			{
+				componentPropChangeExists |= true;
+			}
+			else
+			{
+				// Maybe have a way of being able to merge this specifically depending on the component itself? Provide a way to override this? 
+				ObjectArchiver::MergeObjects( c, GetComponent( c->Class() ), mergeType );	
+			} 
+		}
+
+		// Add override if property changes
+		if ( componentPropChangeExists )
+		{
+			MetaProperty* prop = const_cast< MetaProperty* >( cls->GetPropertyByName( ENJON_TO_STRING( mComponents ) ) );
+			prop->AddOverride( this );
+		}
+
+		/////////////////////////
+		// Children /////////////
+		///////////////////////// 
+
+		// How to check if the children are correct...
+		for( auto& e : GetChildren() )
+		{
+			// Need to check and see if this child has a proto entity
+			Entity* child = e.Get();
+			if ( child->HasPrototypeEntity() )
+			{
+				EntityHandle protoEnt = child->GetPrototypeEntity();
+
+				// Case 1: Proto ent is invalid ( not found )
+				if ( !protoEnt )
+				{
+					// Delete the entity IFF there are no existing property overrides
+					if ( !ObjectArchiver::HasPropertyOverrides( child ) )
+					{
+						child->Destroy();
+					}
+				} 
+				// Case 2: Proto ent valid ( was found )
+				else
+				{
+					// Merge with proto ent
+					ObjectArchiver::MergeObjects( protoEnt.Get(), child, mergeType );
+				}
+			}
+		}
+
+		auto containsProtoEntity = [&]( const UUID& sourceId )
+		{
+			// Search for specific sourceId
+			for ( auto& e : GetChildren() )
+			{
+				Entity* child = e.Get();
+				if ( child->HasPrototypeEntity() && child->GetPrototypeEntity().Get()->GetUUID() == sourceId )
+				{
+					return true;
+				}
+			}
+
+			// Not found in child array
+			return false;
+		};
+
+		// Cache children vector
+		Vector< EntityHandle > children = source->GetChildren();	
+
+		// Attempt to merge new entities into arrays
+		for ( auto& e : children )
+		{
+			Entity* sourceEnt = e.Get();
+
+			// Get id of source entity
+			UUID sourceId = sourceEnt->GetUUID(); 
+
+			// Proto entity not found, so create new entity and add it
+			if ( !containsProtoEntity( sourceId ) )
+			{ 
+				// Construct new instanced entity
+				EntityHandle instanced = EngineSubsystem( EntityManager )->InstanceEntity( sourceEnt, GetWorld( )->ConstCast< World >( ) );
+
+				// Add to children
+				AddChild( instanced );
+			} 
+		}
+
+		// Return incomplete result so we can continue to merge other default properties
+		return Result::INCOMPLETE; 
+	} 
+
 }

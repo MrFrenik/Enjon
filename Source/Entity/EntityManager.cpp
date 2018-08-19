@@ -59,6 +59,13 @@ namespace Enjon
 
 	//================================================================================================
 
+	bool EntityHandle::IsValid( ) const
+	{
+		return ( Get( ) != nullptr );
+	}
+
+	//================================================================================================
+
 	EntityHandle EntityHandle::Invalid( )
 	{
 		return EntityHandle( );
@@ -108,6 +115,20 @@ namespace Enjon
 	EntityHandle Entity::GetHandle( )
 	{
 		return EntityHandle( this );
+	}
+
+	//=================================================================
+
+	bool Entity::HasPrototypeEntity( ) const
+	{
+		return ( mPrototypeEntity.IsValid( ) );
+	}
+
+	//=================================================================
+
+	EntityHandle Entity::GetPrototypeEntity( ) const
+	{
+		return mPrototypeEntity;
 	}
 
 	//=================================================================
@@ -206,6 +227,13 @@ namespace Enjon
 	void Entity::RemoveComponent( const MetaClass* cls )
 	{
 		EngineSubsystem( EntityManager )->RemoveComponent( cls, GetHandle( ) );
+	}
+
+	//====================================================================================================
+
+	Component* Entity::GetComponent( const MetaClass* compCls )
+	{
+		return EngineSubsystem( EntityManager )->GetComponent( compCls, GetHandle() );
 	}
 
 	//====================================================================================================
@@ -696,6 +724,14 @@ namespace Enjon
 
 	//---------------------------------------------------------------
 
+	Component* EntityManager::GetComponent( const MetaClass* compCls, const EntityHandle& entity )
+	{
+		u32 compId = compCls->GetTypeId( );
+		return GetComponent( entity, compId );
+	}
+
+	//---------------------------------------------------------------
+
 	u32 EntityManager::FindNextAvailableID( )
 	{
 		// Iterate from current available id to MAX_ENTITIES
@@ -814,7 +850,7 @@ namespace Enjon
 			}
 		}
 
-		// Serach for matching UUID in marked for add list
+		// Search for matching UUID in marked for add list
 		for ( auto& e : mMarkedForAdd )
 		{
 			if ( e->GetUUID( ) == uuid )
@@ -1058,6 +1094,22 @@ namespace Enjon
 		// Reset available id and then resize entity storage array
 		mNextAvailableID = 0;
 		mEntities.resize( MAX_ENTITIES );
+
+		// Add callbacks for all entities
+		const MetaClass* entityCls = Object::GetClass< Entity >( );
+
+		for ( u32 i = 0; i < MAX_ENTITIES; ++i )
+		{
+			Entity* ent = &mEntities.at( i );
+			MetaProperty* prop = const_cast< MetaProperty* >( ent->mLocalTransform.Class( )->GetPropertyByName( "mScale" ) );
+			prop->AddOnValueChangedCallback( [ & ] ( )
+			{
+				if ( ent->HasPrototypeEntity( ) )
+				{
+					prop->AddOverride( ent );
+				}
+			});
+		} 
 
 		// Register all engine level components with component array 
 		RegisterAllEngineComponents( );
@@ -1364,6 +1416,35 @@ namespace Enjon
 
 	//=========================================================================================
 
+	void EntityManager::RecursivelySetPrototypeEntities( const EntityHandle& source, const EntityHandle& dest )
+	{
+		Entity* destEnt = dest.Get( );
+		Entity* sourceEnt = source.Get( );
+
+		Vector< EntityHandle > destChildren = destEnt->GetChildren( );
+		Vector< EntityHandle > sourceChildren = sourceEnt->GetChildren( );
+
+		if ( destChildren.size( ) != sourceChildren.size( ) )
+		{
+			// Error...
+			return;
+		}
+
+		// Otherwise, set prototype entity
+		destEnt->mPrototypeEntity = sourceEnt; 
+ 
+		// Set instance entity for source ent
+		sourceEnt->mInstancedEntities.insert( destEnt->GetID( ) );
+
+		// For all children, recursively set prototype entities
+		for ( usize i = 0; i < destChildren.size(); ++i )
+		{
+			RecursivelySetPrototypeEntities( sourceChildren.at( i ), destChildren.at( i ) );
+		}
+	}
+
+	//=========================================================================================
+
 	EntityHandle EntityManager::CopyEntity( const EntityHandle& entity, World* world )
 	{
 		if ( world == nullptr )
@@ -1397,7 +1478,7 @@ namespace Enjon
 			{
 				RecurisvelyGenerateNewUUIDs( c );
 			}
-
+ 
 			// Cache off local transform of destination entity before parenting
 			Transform localTrans = destEnt->GetLocalTransform( );
 
@@ -1419,6 +1500,53 @@ namespace Enjon
 	}
 
 	//=========================================================================================
+
+	EntityHandle EntityManager::InstanceEntity( const EntityHandle& entity, World* world )
+	{
+		if ( world == nullptr )
+		{
+			world = Engine::GetInstance( )->GetWorld( );
+		}
+
+		// Use to serialize entity data for new entity
+		ByteBuffer buffer;
+
+		// Set up the handle using the other
+		if ( entity.Get( ) )
+		{
+			// Get entities
+			Entity* sourceEnt = entity.Get( );
+
+			// Serialize entity into buffer
+			EntityArchiver::Serialize( entity, &buffer );
+
+			// Deserialize into new entity
+			EntityHandle newHandle = EntityArchiver::Deserialize( &buffer, world );
+
+			// Destination entity
+			Entity* destEnt = newHandle.Get( );
+
+			// Construct new UUID for entity
+			destEnt->mUUID = UUID::GenerateUUID( );
+
+			// Ensure that all UUIDs are unique
+			for ( auto& c : destEnt->GetChildren( ) )
+			{
+				RecurisvelyGenerateNewUUIDs( c );
+			}
+
+			// Set all prototype entities
+			RecursivelySetPrototypeEntities( sourceEnt, destEnt );
+
+			// Return the handle, valid or not
+			return newHandle;
+		}
+
+		// Return empty handle
+		return EntityHandle( );
+	}
+
+	//========================================================================================= 
 
 	EntitySubsystemContext::EntitySubsystemContext( World* world )
 		: SubsystemContext( world )
