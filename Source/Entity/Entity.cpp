@@ -35,8 +35,23 @@ namespace Enjon
 			// Transform information
 			if ( ImGui::CollapsingHeader( "Transform" ) )
 			{
+				Transform current = mLocalTransform;
 				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
 				igm->DebugDumpProperty( this, Class( )->GetPropertyByName( ENJON_TO_STRING( mLocalTransform ) ) ); 
+
+				// NOTE(John): HACK HACK HACK
+				// Just check for scale changes for now
+				if ( mLocalTransform.GetScale( ) != current.GetScale( ) )
+				{
+					// Property override if has prototype entity
+					if ( HasPrototypeEntity( ) )
+					{
+						const MetaClass* transformClass = Object::GetClass< Transform >( );
+						MetaProperty* scaleProp = const_cast< MetaProperty* >( transformClass->GetPropertyByName( "mScale" ) );
+						scaleProp->AddOverride( &mLocalTransform ); 
+					}
+				}
+
 				ImGui::PopFont( );
 			} 
 

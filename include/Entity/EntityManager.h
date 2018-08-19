@@ -447,6 +447,16 @@ namespace Enjon
 		*/
 		void SetArchetype( const AssetHandle< Archetype >& archType );
 
+		/*
+		* @brief
+		*/
+		void SetPrototypeEntity( const EntityHandle& handle );
+
+		/*
+		* @brief
+		*/
+		void AddInstance( const EntityHandle& handle );
+
 	private:
 		/*
 		* @brief
@@ -471,7 +481,7 @@ namespace Enjon
 		/*
 		* @brief
 		*/
-		void PropagateTransform( f32 dt );
+		void PropagateTransform( f32 dt ); 
 
 	private:
 		ENJON_PROPERTY( NonSerializable, ReadOnly )

@@ -161,6 +161,28 @@ namespace Enjon
 
 	//=================================================================
 
+	void Entity::SetPrototypeEntity( const EntityHandle& handle )
+	{
+		// Set handle and add instance
+		if ( handle.Get( ) )
+		{
+			mPrototypeEntity = handle; 
+			mPrototypeEntity.Get( )->AddInstance( this );
+		}
+	}
+
+	//=================================================================
+
+	void Entity::AddInstance( const EntityHandle& handle )
+	{
+		if ( handle.Get( ) )
+		{
+			mInstancedEntities.insert( handle.GetID( ) );
+		}
+	}
+
+	//=================================================================
+
 	void Entity::RemoveFromWorld( )
 	{
 		// If world exists, then remove this entity from it
@@ -187,12 +209,32 @@ namespace Enjon
 			}
 		}
 
+		// Remove from prototype's instances
+		if ( mPrototypeEntity )
+		{
+			mPrototypeEntity.Get( )->mInstancedEntities.erase( mID );
+			mPrototypeEntity = EntityHandle::Invalid( );
+		}
+
+		EntityManager* em = EngineSubsystem( EntityManager );
+
+		// Remove all instanced entities
+		for ( auto& i : mInstancedEntities )
+		{
+			EntityHandle h = em->GetRawEntity( i );
+			if ( h )
+			{
+				h.Get( )->mPrototypeEntity = EntityHandle::Invalid( );
+			}
+		}
+
 		// Remove from world
 		RemoveFromWorld( );
 
 		// Reset all fields
 		mLocalTransform = Enjon::Transform( );
 		mWorldTransform = Enjon::Transform( );
+		mInstancedEntities.clear( );
 		mID = MAX_ENTITIES;
 		mState = EntityState::INVALID;
 		mWorldTransformDirty = true;
@@ -391,15 +433,7 @@ namespace Enjon
 
 	void Entity::SetLocalScale( f32 scale, bool propagateToComponents )
 	{
-		SetLocalScale( v3( scale ) );
-
-		if ( propagateToComponents )
-		{
-			CalculateWorldTransform( );
-			UpdateComponentTransforms( );
-		}
-
-		mWorldTransformDirty = true;
+		SetLocalScale( v3( scale ) ); 
 	}
 
 	//---------------------------------------------------------------
@@ -411,6 +445,13 @@ namespace Enjon
 		{
 			CalculateWorldTransform( );
 			UpdateComponentTransforms( );
+		}
+
+		// Add override from prototype entity
+		if ( mPrototypeEntity )
+		{
+			MetaProperty* scaleProp = const_cast< MetaProperty* >( mLocalTransform.Class( )->GetPropertyByName( "mScale" ) );
+			scaleProp->AddOverride( &mLocalTransform );
 		}
 
 		mWorldTransformDirty = true;
@@ -1093,23 +1134,7 @@ namespace Enjon
 
 		// Reset available id and then resize entity storage array
 		mNextAvailableID = 0;
-		mEntities.resize( MAX_ENTITIES );
-
-		// Add callbacks for all entities
-		const MetaClass* entityCls = Object::GetClass< Entity >( );
-
-		for ( u32 i = 0; i < MAX_ENTITIES; ++i )
-		{
-			Entity* ent = &mEntities.at( i );
-			MetaProperty* prop = const_cast< MetaProperty* >( ent->mLocalTransform.Class( )->GetPropertyByName( "mScale" ) );
-			prop->AddOnValueChangedCallback( [ & ] ( )
-			{
-				if ( ent->HasPrototypeEntity( ) )
-				{
-					prop->AddOverride( ent );
-				}
-			});
-		} 
+		mEntities.resize( MAX_ENTITIES ); 
 
 		// Register all engine level components with component array 
 		RegisterAllEngineComponents( );

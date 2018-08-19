@@ -892,8 +892,17 @@ namespace Enjon
 					} 
 				}
 				ImGui::PopItemWidth( );
+
+				// Draw line for whether or not is an override
+				ImColor col = ImGui::GetColorU32( ImGuiCol_Text );
+				auto dl = ImGui::GetWindowDrawList( );
+				if ( val.Class( )->GetPropertyByName( "mScale" )->HasOverride( cls->GetValueAs< Transform >( object, prop ) ) )
+				{
+					col = ImGui::GetColorU32( ImGuiCol_HeaderHovered );
+				}
 				
 				// Scale
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( col ) );
 				ImGui::Text( fmt::format( "Scale", prop->GetName( ) ).c_str( ) );
 				ImGui::SameLine( );
 				ImGui::SetCursorPosX( windowWidth * 0.4f );
@@ -910,6 +919,7 @@ namespace Enjon
 					} 
 				} 
 				ImGui::PopItemWidth( );
+				ImGui::PopStyleColor( );
 
 			} break;
 
