@@ -173,11 +173,32 @@ namespace Enjon
 
 	//=================================================================
 
+	void Entity::RemovePrototypeEntity( )
+	{
+		if ( mPrototypeEntity )
+		{
+			mPrototypeEntity.Get( )->RemoveInstance( this );
+			mPrototypeEntity = EntityHandle::Invalid( );
+		}
+	}
+
+	//=================================================================
+
 	void Entity::AddInstance( const EntityHandle& handle )
 	{
 		if ( handle.Get( ) )
 		{
 			mInstancedEntities.insert( handle.GetID( ) );
+		}
+	}
+
+	//=================================================================
+
+	void Entity::RemoveInstance( const EntityHandle& handle ) 
+	{
+		if ( handle.Get( ) )
+		{
+			mInstancedEntities.erase( handle.GetID( ) );
 		}
 	}
 
@@ -1455,11 +1476,8 @@ namespace Enjon
 			return;
 		}
 
-		// Otherwise, set prototype entity
-		destEnt->mPrototypeEntity = sourceEnt; 
- 
-		// Set instance entity for source ent
-		sourceEnt->mInstancedEntities.insert( destEnt->GetID( ) );
+		// Set prototype entity to the source entity
+		destEnt->SetPrototypeEntity( sourceEnt );
 
 		// For all children, recursively set prototype entities
 		for ( usize i = 0; i < destChildren.size(); ++i )
@@ -1553,6 +1571,12 @@ namespace Enjon
 
 			// Construct new UUID for entity
 			destEnt->mUUID = UUID::GenerateUUID( );
+
+			// Remove from previous prototype if available
+			if ( destEnt->HasPrototypeEntity( ) )
+			{
+				destEnt->RemovePrototypeEntity( );
+			}
 
 			// Ensure that all UUIDs are unique
 			for ( auto& c : destEnt->GetChildren( ) )

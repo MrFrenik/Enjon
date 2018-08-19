@@ -70,6 +70,7 @@ namespace Enjon
 				}
 			} 
 			
+			// NOTE(John): TEST STUFFS
 			if ( ImGui::Button( "Instance" ) )
 			{
 				EngineSubsystem( EntityManager )->InstanceEntity( this, GetWorld( )->ConstCast< World >( ) );

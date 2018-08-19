@@ -455,7 +455,17 @@ namespace Enjon
 		/*
 		* @brief
 		*/
+		void RemovePrototypeEntity( );
+
+		/*
+		* @brief
+		*/
 		void AddInstance( const EntityHandle& handle );
+
+		/*
+		* @brief
+		*/
+		void RemoveInstance( const EntityHandle& handle );
 
 	private:
 		/*
