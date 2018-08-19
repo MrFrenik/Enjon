@@ -468,6 +468,11 @@ namespace Enjon
 				cls->SetValue( dest, prop, *cls->GetValueAs< Vec3 >( source, prop ) );
 			} break;
 
+			case MetaPropertyType::AssetHandle:
+			{
+				cls->SetValue( dest, prop, *cls->GetValueAs< AssetHandle< Asset > >( source, prop ) );
+			} break;
+
 			// Etc...
 		}
 

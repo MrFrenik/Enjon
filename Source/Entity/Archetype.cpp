@@ -110,6 +110,16 @@ namespace Enjon
 
 	EntityHandle Archetype::GetRootEntity( )
 	{
+		if ( !mRoot )
+		{
+			// Grab entity manager
+			EntityManager* em = EngineSubsystem( EntityManager );
+
+			// Construct root if not available
+			mRoot = em->Allocate( em->GetArchetypeWorld( ) ).Get( );
+			mRoot->mIsArchetypeRoot = true;
+		}
+
 		return mRoot;
 	}
 
