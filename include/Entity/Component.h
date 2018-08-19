@@ -198,6 +198,13 @@ namespace Enjon
 				return mTickState;
 			}
 
+			virtual void AddToWorld( World* world )
+			{ 
+			} 
+
+			virtual void RemoveFromWorld( )
+			{ 
+			}
 
 		protected:
 

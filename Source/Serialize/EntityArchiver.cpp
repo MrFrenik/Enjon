@@ -300,11 +300,14 @@ namespace Enjon
 			}
 		}
 
-		// Deserialize the prototype entity UUID 
-		ent->SetPrototypeEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( buffer->Read< UUID >( ) ) );
+		// Store prototype id
+		UUID prototypeID = buffer->Read< UUID >( );
 
 		// Deserialize object default
 		DeserializeObjectDataDefault( ent, ent->Class( ), buffer );
+
+		// Deserialize the prototype entity UUID 
+		ent->SetPrototypeEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( prototypeID ) );
 
 		return ent;
 	}

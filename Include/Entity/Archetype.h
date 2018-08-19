@@ -47,20 +47,37 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void ConstructFromEntity( const EntityHandle& entity ); 
+			EntityHandle ConstructFromEntity( const EntityHandle& entity ); 
 
 			/**
 			* @brief
 			*/
 			EntityHandle Instantiate( const Transform& transform = Transform(), World* world = nullptr ); 
+
+			/**
+			* @brief
+			*/
+			EntityHandle GetRootEntity( ); 
+
+			/**
+			* @brief
+			*/
+			EntityHandle CopyRootEntity( Transform transform, World* world );
  
 			/**
 			* @brief
 			*/
 			virtual Result CopyFromOther( const Asset* other );
 
+		private:
+
+			/**
+			* @brief
+			*/
+			void RecursivelySetArchetype( const EntityHandle& handle );
+
 		protected: 
-			ByteBuffer mEntityData; 
+			Entity* mRoot = nullptr;
 	};
 }
 

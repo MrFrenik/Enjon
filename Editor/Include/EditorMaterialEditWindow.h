@@ -125,14 +125,7 @@ namespace Enjon
 
 		protected:
 
-			virtual void ExplicitDestroy( ) override
-			{
-				if ( mViewport )
-				{
-					delete ( mViewport );
-					mViewport = nullptr;
-				}
-			}
+			virtual void ExplicitDestroy( ) override;
 
 			void ConstructScene( ); 
 

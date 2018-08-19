@@ -30,7 +30,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void PostConstruction( ) override;
+			virtual void PostConstruction( ) override; 
 
 			/*
 			* @brief
@@ -41,6 +41,16 @@ namespace Enjon
 			* @brief
 			*/
 			virtual Result OnEditorUI( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual void AddToWorld( World* world ) override;
+
+			/*
+			* @brief
+			*/
+			virtual void RemoveFromWorld( ) override;
  
 			/* 
 			* @brief Get position of transform 

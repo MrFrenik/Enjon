@@ -390,6 +390,11 @@ namespace Enjon
 		/**
 		* @brief
 		*/
+		Vector< EntityHandle > GetInstancedEntities( );
+
+		/**
+		* @brief
+		*/
 		const Vector<u32>& GetComponentIndicies( ) const
 		{
 			return mComponents;
@@ -408,7 +413,12 @@ namespace Enjon
 		/*
 		* @brief
 		*/
-		void Destroy( );
+		void Destroy( ); 
+
+		/*
+		* @brief
+		*/
+		void MoveToWorld( World* world );
 
 		/*
 		* @brief
@@ -532,6 +542,7 @@ namespace Enjon
 		Enjon::EntityState mState;
 
 		u32 mWorldTransformDirty : 1; 
+		u32 mIsArchetypeRoot : 1;
 	};
 
 	//using EntityStorage 			= std::array<Entity, MAX_ENTITIES>*;
@@ -540,7 +551,7 @@ namespace Enjon
 	using EntityList = Vector<Entity*>;
 	using ComponentBaseArray = HashMap< u32, ComponentWrapperBase* >;
 	using ComponentList = Vector< Component* >;
-	using WorldEntityMap = HashMap< const World*, Vector< Entity* > >;
+	using WorldEntityMap = HashMap< const World*, HashSet< Entity* > >;
 
 	ENJON_CLASS( )
 		class EntityManager : public Subsystem
@@ -686,7 +697,7 @@ namespace Enjon
 		/**
 		*@brief
 		*/
-		const Vector< Entity* >& GetEntitiesByWorld( const World* world );
+		const HashSet< Entity* >& GetEntitiesByWorld( const World* world );
 
 		/**
 		*@brief
@@ -762,6 +773,11 @@ namespace Enjon
 		*@brief
 		*/
 		void RemoveEntityFromWorld( Entity* entity );
+
+		/**
+		*@brief
+		*/
+		void AddEntityToWorld( Entity* entity, World* world );
 
 		/**
 		*@brief

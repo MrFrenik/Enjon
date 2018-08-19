@@ -23,10 +23,7 @@ namespace Enjon
 		MetaClass::AssertIsType< Archetype >( other );
 
 		// Cast to archetype
-		const Archetype* otherArch = other->Cast< Archetype >( );
-
-		// Copy byte buffer over
-		mEntityData.CopyFromOther( otherArch->mEntityData ); 
+		const Archetype* otherArch = other->Cast< Archetype >( ); 
 
 		return Result::SUCCESS;
 	}
@@ -35,7 +32,6 @@ namespace Enjon
 
 	Archetype::Archetype( const Archetype& other )
 	{
-		mEntityData.CopyFromOther( other.mEntityData );
 	}
 
 	//=======================================================================================
@@ -50,15 +46,14 @@ namespace Enjon
 		{
 			return;
 		}
+ 
+		//EntityHandle handle = EngineSubsystem( EntityManager )->Allocate( em->GetArchetypeWorld( ) );
+		//handle.Get( )->SetName( "Root" );
 
-		EntityHandle handle = EngineSubsystem( EntityManager )->Allocate( em->GetArchetypeWorld( ) );
-		handle.Get( )->SetName( "Root" );
+		//// Stupid bullshit so it won't be destroyed when the window is closed...
+		//handle.Get( )->mIsArchetypeRoot = true;
 
-		// Serialize into data buffer
-		EntityArchiver::Serialize( handle, &mEntityData );
-
-		// Destroy empty entity
-		handle.Get( )->Destroy( );
+		//mRoot = handle.Get( ); 
 	}
 
 	//=======================================================================================
@@ -66,7 +61,23 @@ namespace Enjon
 	Result Archetype::SerializeData( ByteBuffer* buffer ) const 
 	{
 		// Just copy all entity data into the buffer
-		buffer->AppendBuffer( mEntityData );
+		if ( !mRoot )
+		{
+			EntityHandle handle = EngineSubsystem( EntityManager )->Allocate( );
+			EntityArchiver::Serialize( handle, buffer );
+			handle.Get( )->Destroy( );
+		}
+		else
+		{
+			// TODO(John): GET RID OF ALL OF THIS STUPID SHIT
+			// Save all the stupid shit and stuff...
+			for ( auto& c : mRoot->GetChildren( ) )
+			{
+				c.Get( )->mIsArchetypeRoot = true;
+			} 
+
+			EntityArchiver::Serialize( mRoot, buffer ); 
+		}
 
 		return Result::SUCCESS;
 	}
@@ -75,31 +86,89 @@ namespace Enjon
 
 	Result Archetype::DeserializeData( ByteBuffer* buffer )
 	{
-		// Reset data
-		mEntityData.Reset( );
+		// If already a root exists, then destroy it
+		if ( mRoot )
+		{
+			mRoot->mIsArchetypeRoot = false;
+			mRoot->Destroy( );
+		}
 
-		// Deserialize all remaining data from buffer into the entity data buffer from its current read position
-		mEntityData.AppendBufferFromReadPosition( buffer );
+		// Deserialize into root
+		mRoot = EntityArchiver::Deserialize( buffer, EngineSubsystem( EntityManager )->GetArchetypeWorld( ) ).Get( );
+		mRoot->mIsArchetypeRoot = true;
 
+		// THIS IS A FUCKING PROBLEM AND HACKY BULLSHIT. FUCKING FIX IT.
+		for ( auto& c : mRoot->GetChildren( ) )
+		{
+			c.Get( )->mIsArchetypeRoot = true;
+		}
+ 
 		return Result::SUCCESS; 
 	}
 
 	//=======================================================================================
 
-	void Archetype::ConstructFromEntity( const EntityHandle& entity )
+	EntityHandle Archetype::GetRootEntity( )
 	{
-		// Just clear the previous buffer data and then deserialize into it? 
-		mEntityData.Reset( );
+		return mRoot;
+	}
 
-		AssetHandle< Archetype > archType = entity.Get( )->GetArchetype( );
+	//=======================================================================================
 
-		entity.Get( )->SetArchetype( nullptr );
+	EntityHandle Archetype::CopyRootEntity( Transform transform, World* world )
+	{
+		EntityHandle rootCopy = EngineSubsystem( EntityManager )->CopyEntity( mRoot, world );
 
-		// Serialiize entity data using new entity
-		EntityArchiver::Serialize( entity, &mEntityData );
+		// Reset all the important things
+		Entity* copy = rootCopy.Get( );
+		copy->mInstancedEntities = mRoot->mInstancedEntities;
+		copy->mUUID = mRoot->mUUID;
+		copy->SetLocalTransform( transform );
 
-		entity.Get( )->SetArchetype( archType );
+		return rootCopy;
+	}
+
+	//=======================================================================================
+
+	EntityHandle Archetype::ConstructFromEntity( const EntityHandle& entity )
+	{
+		// All I need to do here is shallow copy all of the other entity's fields into this root entity's
+		if ( mRoot )
+		{ 
+			EntityManager* em = EngineSubsystem( EntityManager );
+			EntityHandle newRoot = em->CopyEntity( entity, entity.Get( )->GetWorld( )->ConstCast< World >( ) );
+			Entity* nr = newRoot.Get( );
+			nr->mInstancedEntities = mRoot->mInstancedEntities;
+			nr->mUUID = mRoot->mUUID; 
+			nr->mArchetype = mRoot->mArchetype;
+
+			// Destroy previous entity
+			mRoot->mIsArchetypeRoot = false;
+			mRoot->Destroy( );
+
+			// Reset to new entity
+			mRoot = nr;
+			mRoot->mIsArchetypeRoot = true;
+			for ( auto& c : mRoot->GetChildren( ) )
+			{
+				c.Get( )->mIsArchetypeRoot = true;
+			}
+		}
+
+		return mRoot;
 	} 
+
+	//=======================================================================================
+
+	void Archetype::RecursivelySetArchetype( const EntityHandle& handle )
+	{
+		Entity* ent = handle.Get( );
+		ent->SetArchetype( this );
+		for ( auto& c : ent->GetChildren( ) )
+		{
+			RecursivelySetArchetype( c );
+		}
+	}
 
 	//=======================================================================================
 
@@ -111,24 +180,17 @@ namespace Enjon
 			world = Engine::GetInstance( )->GetWorld( );
 		} 
 
-		// Deserialize data, construct new entity, and place into given world
-		// NOTE(John): Will fail if entity data is corrupted or not ready to read
-		EntityHandle entity = EntityArchiver::Deserialize( &mEntityData, world );
+		// Instance this entity
+		EntityHandle instanced = EngineSubsystem( EntityManager )->InstanceEntity( mRoot, world );
  
-		// Generate new uuid for entity
-		entity.Get( )->SetUUID( UUID::GenerateUUID( ) );
-
 		// Set transform for entity
-		entity.Get( )->SetLocalTransform( transform ); 
+		instanced.Get( )->SetLocalTransform( transform ); 
 
-		// Set archetype of entity to this
-		entity.Get( )->SetArchetype( this ); 
-
-		// Reset read position of buffer
-		mEntityData.SetReadPosition( 0 );
+		// Recursively set archetype of entity and children to this
+		RecursivelySetArchetype( instanced );
 
 		// Return newly constructed entity
-		return entity;
+		return instanced;
 	}
 
 	//=======================================================================================

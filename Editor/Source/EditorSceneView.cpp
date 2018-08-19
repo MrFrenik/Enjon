@@ -151,7 +151,8 @@ namespace Enjon
 				GraphicsSubsystemContext* gfxCtx = GetWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( );
 				Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
 				Vec3 position = cam->GetPosition() + cam->Forward( ) * 5.0f; 
-				EntityHandle handle = archType->Instantiate( Transform( position, Quaternion( ), Vec3( 1.0f ) ), GetWindow()->GetWorld() );
+				Vec3 scale = archType->GetRootEntity( ).Get( )->GetLocalScale( );
+				EntityHandle handle = archType->Instantiate( Transform( position, Quaternion( ), scale ), GetWindow()->GetWorld() );
 			}
 		}
 		else if ( grabbedAsset->Class( )->InstanceOf< SkeletalMesh >( ) )

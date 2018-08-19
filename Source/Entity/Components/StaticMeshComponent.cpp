@@ -58,6 +58,30 @@ namespace Enjon
 
 	//==================================================================== 
 
+	void StaticMeshComponent::AddToWorld( World* world )
+	{
+		RemoveFromWorld( );
+
+		// Get graphics scene from world graphics context
+		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
+
+		// Add to graphics scene
+		if ( gs )
+		{
+			gs->AddStaticMeshRenderable( &mRenderable );
+		}
+	}
+
+	//==================================================================== 
+
+	void StaticMeshComponent::RemoveFromWorld( )
+	{
+		if ( mRenderable.GetGraphicsScene( ) != nullptr )
+		{
+			mRenderable.GetGraphicsScene( )->RemoveStaticMeshRenderable( &mRenderable );
+		} 
+	}
+
 	void StaticMeshComponent::Update( )
 	{
 		mRenderable.SetTransform(mEntity->GetWorldTransform());

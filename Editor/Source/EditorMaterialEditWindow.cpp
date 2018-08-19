@@ -9,6 +9,7 @@
 #include <Entity/Archetype.h>
 #include <Graphics/StaticMeshRenderable.h>
 #include <Entity/Components/StaticMeshComponent.h>
+#include <Serialize/ObjectArchiver.h>
 #include <IO/InputManager.h>
 #include <SubsystemCatalog.h>
 #include <Engine.h>
@@ -277,6 +278,22 @@ namespace Enjon
 
 	//======================================================================================================================
 
+	void EditorArchetypeEditWindow::ExplicitDestroy( ) 
+	{
+		if ( mViewport )
+		{
+			delete ( mViewport );
+			mViewport = nullptr;
+		}
+
+		if ( mRootEntity )
+		{
+			mRootEntity.Get( )->MoveToWorld( EngineSubsystem( EntityManager )->GetArchetypeWorld( ) );
+		}
+	}
+
+	//======================================================================================================================
+
 	int EditorArchetypeEditWindow::Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags )
 	{ 
 		// Construct scene in world
@@ -354,7 +371,9 @@ namespace Enjon
 			Transform t;
 			t.SetPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
 			t.SetScale( 2.0f );
-			mRootEntity = archType->Instantiate( t, GetWorld( ) );
+			//mRootEntity = archType->CopyRootEntity( t, GetWorld( ) );
+			mRootEntity = archType->GetRootEntity( );
+			mRootEntity.Get( )->MoveToWorld( GetWorld( ) );
 		}
 
 		// Register callbacks for whenever project is reloaded ( dll reload )
@@ -376,7 +395,7 @@ namespace Enjon
 				mRootEntity.Get( )->AddChild( empty );
 
 				// Set to selected entity
-				mWorldOutlinerView->SelectEntity( empty );
+				mWorldOutlinerView->SelectEntity( empty ); 
 			}
 		}; 
 
@@ -386,10 +405,15 @@ namespace Enjon
 			{
 				// Use the root entity to save this archetype? 
 				// I think that's how this will work...
-				mArchetype.Get( )->ConstCast< Archetype >()->ConstructFromEntity( mRootEntity ); 
+				//mRootEntity = mArchetype.Get( )->ConstCast< Archetype >()->ConstructFromEntity( mRootEntity ); 
 
 				// Save after constructing
 				mArchetype.Save( );
+
+				for ( auto& e : mRootEntity.Get()->GetInstancedEntities() )
+				{
+					ObjectArchiver::MergeObjects( mRootEntity.Get( ), e.Get( ), MergeType::AcceptMerge );
+				}
 			}
 		};
 
