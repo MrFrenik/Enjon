@@ -38,7 +38,6 @@ namespace Enjon
 				Transform current = mLocalTransform;
 				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
 				igm->DebugDumpProperty( this, Class( )->GetPropertyByName( ENJON_TO_STRING( mLocalTransform ) ) ); 
-
 				ImGui::PopFont( );
 			} 
 

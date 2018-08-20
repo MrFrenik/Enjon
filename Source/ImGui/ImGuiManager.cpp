@@ -914,10 +914,30 @@ namespace Enjon
 
 				// Draw line for whether or not is an override 
 				col = ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
+				bool hasScaleOverride = false;
 				if ( val.Class( )->GetPropertyByName( "mScale" )->HasOverride( cls->GetValueAs< Transform >( object, prop ) ) )
 				{
+					hasScaleOverride = true;
 					col = ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorHovered ) ) );
 				} 
+
+				if ( hasScaleOverride )
+				{
+					if ( ImGui::Button( "Revert" ) )
+					{
+						MetaProperty* scaleProp = const_cast< MetaProperty* >( val.Class( )->GetPropertyByName( "mScale" ) );
+						Transform* sourceObj = scaleProp->GetSourceObject( cls->GetValueAs< Transform >( object, prop ) )->ConstCast< Transform >( );
+						if ( sourceObj )
+						{
+							// Set scale to source object's
+							val.SetScale( sourceObj->GetScale( ) );
+							cls->SetValue( object, prop, val );
+
+							// Remove property override
+							scaleProp->RemoveOverride( cls->GetValueAs< Transform >( object, prop ) );
+						}
+					}
+				}
 				
 				// Scale
 				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( col ) );
@@ -937,7 +957,7 @@ namespace Enjon
 					} 
 				} 
 				ImGui::PopItemWidth( );
-				ImGui::PopStyleColor( );
+				ImGui::PopStyleColor( ); 
 
 			} break;
 

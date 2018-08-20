@@ -40,16 +40,33 @@ namespace Enjon
 
 	//=========================================================================
 
-	void MetaProperty::AddOverride( const Object* obj )
+	void MetaProperty::AddOverride( const Object* obj, const Object* source )
 	{
-		mPropertyOverrides.insert( obj );
+		if ( mPropertyOverrides.find( obj ) == mPropertyOverrides.end( ) )
+		{
+			mPropertyOverrides.insert( obj ); 
+			mPropertyOverrideSourceMap[ obj ] = source;
+		}
+	}
+
+	//=========================================================================
+
+	const Object* MetaProperty::GetSourceObject( const Object* key )
+	{
+		if ( mPropertyOverrideSourceMap.find( key ) != mPropertyOverrideSourceMap.end() )
+		{
+			return mPropertyOverrideSourceMap[ key ];
+		}
+
+		return nullptr;
 	}
 
 	//=========================================================================
 
 	void MetaProperty::RemoveOverride( const Object* obj )
-	{
+	{ 
 		mPropertyOverrides.erase( obj );
+		mPropertyOverrideSourceMap.erase( obj );
 	}
 
 	//=========================================================================

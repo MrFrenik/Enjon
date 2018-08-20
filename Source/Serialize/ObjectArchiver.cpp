@@ -595,7 +595,7 @@ namespace Enjon
 \
 	if ( sourceVal != destVal )\
 	{\
-		prop->AddOverride( destObj );\
+		prop->AddOverride( destObj, sourceObj );\
 	}\
 }
 

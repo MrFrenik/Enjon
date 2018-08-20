@@ -264,7 +264,12 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void AddOverride( const Object* obj );
+			const Object* GetSourceObject( const Object* key );
+
+			/*
+			* @brief
+			*/
+			void AddOverride( const Object* obj, const Object* source );
 
 			/*
 			* @brief
@@ -289,6 +294,7 @@ namespace Enjon
 			Vector<MetaFunction*> mMutatorCallbacks;
 			Vector<VoidCallback> mOnValueChangedCallbacks;
 			HashSet<const Object*> mPropertyOverrides;
+			HashMap<const Object*, const Object*> mPropertyOverrideSourceMap;
 	};
 
 	class MetaPropertyPointerBase : public MetaProperty 
