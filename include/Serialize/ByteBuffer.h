@@ -114,6 +114,11 @@ namespace Enjon
 			*/
 			void SetReadPosition( const u32& position );
 
+			/*
+			* @brief
+			*/
+			static bool ContentsEqual( const ByteBuffer& left, const ByteBuffer& right );
+
 		private:
 			/*
 			* @brief Destructor

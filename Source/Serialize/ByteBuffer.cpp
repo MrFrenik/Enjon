@@ -420,6 +420,29 @@ namespace Enjon
 
 	//========================================================================
 
+	bool ByteBuffer::ContentsEqual( const ByteBuffer& left, const ByteBuffer& right )
+	{
+		if ( left.GetSize( ) != right.GetSize( ) )
+		{
+			return false;
+		}
+
+		auto leftData = left.GetData( );
+		auto rightData = right.GetData( );
+
+		for ( usize i = 0; i < left.GetSize( ); ++i )
+		{
+			if ( leftData[ i ] != rightData[ i ] )
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	//========================================================================
+
 	// Template Specializations
 	BYTE_BUFFER_RW( bool )
 	BYTE_BUFFER_RW( b1 )

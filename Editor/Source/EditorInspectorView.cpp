@@ -9,6 +9,7 @@
 #include <SubsystemCatalog.h>
 #include <ImGui/ImGuiManager.h>
 #include <IO/InputManager.h>
+#include <Serialize/EntityArchiver.h>
 #include <Utils/FileUtils.h>
 #include <Entity/Components/RigidBodyComponent.h>
 #include <Serialize/ObjectArchiver.h>
@@ -106,13 +107,23 @@ namespace Enjon
 			{
 				InspectEntityViewHeader( (Entity*)mInspectedObject );
 			}
+ 
+			// Don't really like this solution, but ya know...
+			ByteBuffer before, after;
+			EntityArchiver::Serialize( EntityHandle( ( Entity* )mInspectedObject ), &before ); 
 
 			ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 			igm->InspectObject( mInspectedObject ); 
 
+			// Serialize after
+			EntityArchiver::Serialize( EntityHandle( ( Entity* )mInspectedObject ), &after );
+
+			// Compare the contents for changes
+			bool changeOccured = !ByteBuffer::ContentsEqual( before, after );
+
 			// Record property overrides after editing
 			Entity* ent = mInspectedObject->ConstCast< Entity >( );
-			if ( ent && ent->GetPrototypeEntity() ) 
+			if ( ent && ent->GetPrototypeEntity() && changeOccured ) 
 			{
 				ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity().Get(), ent ); 
 			}
