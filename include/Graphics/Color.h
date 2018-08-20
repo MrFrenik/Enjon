@@ -92,6 +92,19 @@ namespace Enjon
 
 			ColorRGBA32(const Vec4& V) : r(V.x), g(V.y), b(V.z), a(V.w) {}
 
+			inline friend b8 operator==( const ColorRGBA32& left, const ColorRGBA32& right )
+			{
+				return ( left.r == right.r &&
+						 left.g == right.g &&
+						 left.b == right.b &&
+						 left.a == right.a );
+			}
+
+			inline friend b8 operator!=( const ColorRGBA32& left, const ColorRGBA32& right )
+			{
+				return !( left == right );
+			}
+
 			float r;
 			float g;
 			float b;

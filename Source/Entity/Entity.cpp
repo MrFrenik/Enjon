@@ -223,6 +223,9 @@ namespace Enjon
 				// Construct new instanced entity
 				EntityHandle instanced = EngineSubsystem( EntityManager )->InstanceEntity( sourceEnt, GetWorld( )->ConstCast< World >( ) );
 
+				// Cache local transform
+				Transform localTransform = instanced.Get( )->GetLocalTransform( );
+
 				// Add to children
 				AddChild( instanced );
 
@@ -231,6 +234,9 @@ namespace Enjon
 
 				// Set archetype of instanced entity to this archetype
 				instanced.Get( )->SetArchetype( mArchetype );
+
+				// Set local transform 
+				instanced.Get( )->SetLocalTransform( localTransform );
 			} 
 		}
 

@@ -369,11 +369,14 @@ namespace Enjon
 		{
 			Archetype* archType = mArchetype.Get( )->ConstCast< Archetype >( );
 			Transform t;
-			t.SetPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
+			t.SetPosition( cam->GetPosition( ) + cam->Forward( ) * 3.0f );
 			t.SetScale( 2.0f );
 			//mRootEntity = archType->CopyRootEntity( t, GetWorld( ) );
 			mRootEntity = archType->GetRootEntity( );
 			mRootEntity.Get( )->MoveToWorld( GetWorld( ) );
+			mRootEntity.Get( )->SetLocalPosition( t.GetPosition( ) );
+			cam->SetPosition( cam->GetPosition( ) + Vec3( 0.0f, 2.0f, 0.0f ) );
+			cam->LookAt( mRootEntity.Get( )->GetWorldPosition( ) );
 		}
 
 		// Register callbacks for whenever project is reloaded ( dll reload )

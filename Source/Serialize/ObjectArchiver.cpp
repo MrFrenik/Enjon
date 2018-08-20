@@ -446,6 +446,11 @@ namespace Enjon
 
 	//=====================================================================
 
+#define ENJON_MERGE_PROP_POD( cls, source, dest, prop, podType )\
+{\
+	cls->SetValue( dest, prop, *cls->GetValueAs< podType >( source, prop ) );\
+}
+
 	Result ObjectArchiver::MergeProperty( Object* source, Object* dest, const MetaProperty* prop, MergeType mergeType )
 	{
 		// Will merge the source object property into the destination property
@@ -453,25 +458,17 @@ namespace Enjon
 		
 		switch ( prop->GetType() ) 
 		{
-			case MetaPropertyType::U32:
-			{ 
-				cls->SetValue( dest, prop, *cls->GetValueAs< u32 >( source, prop ) ); 
-			} break;
-
-			case MetaPropertyType::F32:
-			{ 
-				cls->SetValue( dest, prop, *cls->GetValueAs< f32 >( source, prop ) ); 
-			} break;
-
-			case MetaPropertyType::Vec3:
-			{
-				cls->SetValue( dest, prop, *cls->GetValueAs< Vec3 >( source, prop ) );
-			} break;
-
-			case MetaPropertyType::AssetHandle:
-			{
-				cls->SetValue( dest, prop, *cls->GetValueAs< AssetHandle< Asset > >( source, prop ) );
-			} break;
+			case MetaPropertyType::Bool:		ENJON_MERGE_PROP_POD( cls, source, dest, prop, bool ); break; 
+			case MetaPropertyType::U32:			ENJON_MERGE_PROP_POD( cls, source, dest, prop, u32 ); break; 
+			case MetaPropertyType::S32:			ENJON_MERGE_PROP_POD( cls, source, dest, prop, s32 ); break; 
+			case MetaPropertyType::F32:			ENJON_MERGE_PROP_POD( cls, source, dest, prop, f32 ); break; 
+			case MetaPropertyType::iVec3:		ENJON_MERGE_PROP_POD( cls, source, dest, prop, iVec3 ); break; 
+			case MetaPropertyType::Vec2:		ENJON_MERGE_PROP_POD( cls, source, dest, prop, Vec2 ); break; 
+			case MetaPropertyType::Vec3:		ENJON_MERGE_PROP_POD( cls, source, dest, prop, Vec3 ); break; 
+			case MetaPropertyType::Vec4:		ENJON_MERGE_PROP_POD( cls, source, dest, prop, Vec4 ); break; 
+			case MetaPropertyType::Quat:		ENJON_MERGE_PROP_POD( cls, source, dest, prop, Quaternion ); break; 
+			case MetaPropertyType::ColorRGBA32:	ENJON_MERGE_PROP_POD( cls, source, dest, prop, ColorRGBA32 ); break; 
+			case MetaPropertyType::AssetHandle: ENJON_MERGE_PROP_POD( cls, source, dest, prop, AssetHandle< Asset > ); break; 
 
 			case MetaPropertyType::Object:
 			{
@@ -639,15 +636,16 @@ namespace Enjon
 
 			switch ( prop->GetType( ) )
 			{
-				case MetaPropertyType::Bool:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, bool ) break;
-				case MetaPropertyType::S32:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, s32 ); break; 
-				case MetaPropertyType::U32:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, u32 ); break; 
-				case MetaPropertyType::F32:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, f32 ); break; 
-				case MetaPropertyType::iVec3:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, iVec3 ) break;
-				case MetaPropertyType::Vec2:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec2 ); break; 
-				case MetaPropertyType::Vec3:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec3 ); break; 
-				case MetaPropertyType::Vec4:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec4 ); break; 
-				case MetaPropertyType::Quat:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Quaternion ); break; 
+				case MetaPropertyType::Bool:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, bool ) break;
+				case MetaPropertyType::S32:			ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, s32 ); break; 
+				case MetaPropertyType::U32:			ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, u32 ); break; 
+				case MetaPropertyType::F32:			ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, f32 ); break; 
+				case MetaPropertyType::iVec3:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, iVec3 ) break;
+				case MetaPropertyType::Vec2:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec2 ); break; 
+				case MetaPropertyType::Vec3:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec3 ); break; 
+				case MetaPropertyType::Vec4:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec4 ); break; 
+				case MetaPropertyType::ColorRGBA32:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, ColorRGBA32 ); break; 
+				case MetaPropertyType::Quat:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Quaternion ); break; 
 
 				case MetaPropertyType::Transform:
 				{ 
@@ -762,15 +760,16 @@ namespace Enjon
 
 		switch ( prop->GetType( ) )
 		{
-			case MetaPropertyType::Bool:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, bool ); break;
-			case MetaPropertyType::S32:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, s32 ); break;
-			case MetaPropertyType::U32:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, u32 ); break;
-			case MetaPropertyType::F32:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, f32 ); break;
-			case MetaPropertyType::iVec3:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, iVec3 ); break;
-			case MetaPropertyType::Vec2:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Vec2 ); break;
-			case MetaPropertyType::Vec3:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Vec3 ); break;
-			case MetaPropertyType::Vec4:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Vec4 ); break;
-			case MetaPropertyType::Quat:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Quaternion ); break;
+			case MetaPropertyType::Bool:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, bool ); break;
+			case MetaPropertyType::S32:			ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, s32 ); break;
+			case MetaPropertyType::U32:			ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, u32 ); break;
+			case MetaPropertyType::F32:			ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, f32 ); break;
+			case MetaPropertyType::iVec3:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, iVec3 ); break;
+			case MetaPropertyType::Vec2:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Vec2 ); break;
+			case MetaPropertyType::Vec3:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Vec3 ); break;
+			case MetaPropertyType::Vec4:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Vec4 ); break;
+			case MetaPropertyType::Quat:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Quaternion ); break;
+			case MetaPropertyType::ColorRGBA32:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, ColorRGBA32 ); break;
 		} 
 
 		return Result::SUCCESS;
