@@ -316,6 +316,16 @@ namespace Enjon
 		// Deserialize object default
 		DeserializeObjectDataDefault( ent, ent->Class( ), buffer );
 
+		// If prototype entity, then record all property overrides and then attempt merge
+		if ( ent->HasPrototypeEntity() )
+		{
+			// Record all property overrides
+			ObjectArchiver::RecordAllPropertyOverrides( ent->mPrototypeEntity.Get( ), ent );
+
+			// Merge objects 
+			ObjectArchiver::MergeObjects( ent->mPrototypeEntity.Get( ), ent, MergeType::AcceptMerge );
+		} 
+
 		return ent;
 	}
 

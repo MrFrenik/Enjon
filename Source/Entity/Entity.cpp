@@ -100,6 +100,8 @@ namespace Enjon
 		return mWorld;
 	}
 
+	//=====================================================================
+
 	Result Entity::MergeWith( Object* sourceObj, MergeType mergeType )
 	{
 		const MetaClass* cls = sourceObj->Class();
@@ -236,6 +238,8 @@ namespace Enjon
 		return Result::INCOMPLETE; 
 	} 
 
+	//=====================================================================
+
 #define ENJON_RECORD_OVERRIDE_POD( cls, sourceObj, destObj, prop, podType )\
 {\
 	podType sourceVal = *cls->GetValueAs< podType >( sourceObj, prop );\
@@ -302,4 +306,19 @@ namespace Enjon
 
 		return Result::SUCCESS;
 	} 
+
+	//=====================================================================
+
+	Result Entity::ClearAllPropertyOverrides( )
+	{
+		// Clear components
+		for ( auto& c : GetComponents( ) )
+		{
+			ObjectArchiver::ClearAllPropertyOverrides( c );
+		}
+
+		return Result::INCOMPLETE;
+	}
+
+	//=====================================================================
 }

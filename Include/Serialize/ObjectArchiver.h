@@ -128,7 +128,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			static Result ClearAllPropertyOverrides( );
+			static Result ClearAllPropertyOverrides( Object* obj );
 
 			/*
 			* @brief
@@ -166,6 +166,11 @@ namespace Enjon
 			*@brief
 			*/ 
 			static Result RecordAllPropertyOverridesDefault( Object* source, Object* dest ); 
+
+			/*
+			*@brief
+			*/ 
+			static Result ClearAllPropertyOverridesDefault( Object* obj );
 
 		protected:
 			ByteBuffer mBuffer;

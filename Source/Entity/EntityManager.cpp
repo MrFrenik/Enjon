@@ -229,6 +229,9 @@ namespace Enjon
 
 	void Entity::Reset( )
 	{
+		// Clear all property overrides
+		ObjectArchiver::ClearAllPropertyOverrides( this );
+
 		RemoveParent( );
 
 		// Remove all children and add to parent hierarchy list

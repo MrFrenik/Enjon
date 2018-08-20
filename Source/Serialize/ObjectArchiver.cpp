@@ -563,6 +563,28 @@ namespace Enjon
 		{
 			const MetaProperty* prop = cls->GetProperty( i );
 
+			switch ( prop->GetType( ) )
+			{
+				case MetaPropertyType::Object:
+				{
+					if ( prop->GetTraits( ).IsPointer( ) )
+					{
+						const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
+						hasOverride |= ObjectArchiver::HasPropertyOverrides( base->GetValueAsObject( obj ) );
+					}
+					else
+					{
+						Object* sourceObj = cls->GetValueAs< Object >( obj, prop )->ConstCast< Object >( );
+						hasOverride |= ObjectArchiver::HasPropertyOverrides( sourceObj ); 
+					}
+				} break;
+
+				default:
+				{
+					hasOverride |= prop->HasOverride( obj );
+				} break;
+			}
+
 			// Add to has override result
 			hasOverride |= prop->HasOverride( obj );
 		}
@@ -667,9 +689,49 @@ namespace Enjon
 
 	//===================================================================== 
 
-	Result ObjectArchiver::ClearAllPropertyOverrides( )
+	Result ObjectArchiver::ClearAllPropertyOverrides( Object* obj )
 	{ 
+		Result res = obj->ClearAllPropertyOverrides( );
+		if ( res == Result::INCOMPLETE )
+		{
+			res = ObjectArchiver::ClearAllPropertyOverridesDefault( obj );
+		}
+
+		return res;
+	}
+
+	//===================================================================== 
+
+	Result ObjectArchiver::ClearAllPropertyOverridesDefault( Object* obj )
+	{
+		const MetaClass* cls = obj->Class( );
+		for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
+		{
+			MetaProperty* prop = const_cast< MetaProperty* >( cls->GetProperty( i ) );
+			switch ( prop->GetType( ) )
+			{
+				case MetaPropertyType::Object:
+				{ 
+					if ( prop->GetTraits( ).IsPointer( ) )
+					{
+						const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
+						ObjectArchiver::ClearAllPropertyOverrides( base->GetValueAsObject( obj )->ConstCast< Object >( ) );
+					}
+					else
+					{
+						Enjon::Object* destObj = cls->GetValueAs< Object >( obj, prop )->ConstCast< Object >( );
+						ObjectArchiver::ClearAllPropertyOverrides( destObj );
+					}
+				} break;
+
+				default:
+				{
+					prop->RemoveOverride( obj );
+				} break;
+			}
+		}
 		return Result::SUCCESS;
+
 	}
 
 	//===================================================================== 

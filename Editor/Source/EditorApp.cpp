@@ -1503,6 +1503,11 @@ namespace Enjon
 										{
 											Vec3 lp = ent->GetLocalPosition( ) + delta;
 											ent->SetLocalPosition( lp );
+
+											if ( ent->HasPrototypeEntity( ) )
+											{
+												ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity( ).Get( ), ent );
+											}
 										}
 									} break;
 								}
@@ -1524,7 +1529,12 @@ namespace Enjon
 										if ( ent )
 										{
 											Vec3 ls = ent->GetLocalScale( ) + delta;
-											ent->SetLocalScale( ls );
+											ent->SetLocalScale( ls ); 
+
+											if ( ent->HasPrototypeEntity( ) )
+											{
+												ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity( ).Get( ), ent );
+											}
 										}
 									} break;
 									case TransformWidgetRenderableType::ScaleRoot:
@@ -1534,6 +1544,11 @@ namespace Enjon
 										{
 											Vec3 ls = ent->GetLocalScale( ) + delta * ent->GetLocalScale( );
 											ent->SetLocalScale( ls );
+
+											if ( ent->HasPrototypeEntity( ) )
+											{
+												ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity( ).Get( ), ent );
+											}
 										}
 
 									} break;
@@ -1560,7 +1575,13 @@ namespace Enjon
 										{
 											ent->SetLocalRotation( mTransformWidget.GetDeltaRotation( ) * ent->GetLocalRotation( ) );
 										} break;
+
 									} 
+
+									if ( ent->HasPrototypeEntity( ) )
+									{
+										ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity( ).Get( ), ent );
+									}
 								}
 							} break;
 						}

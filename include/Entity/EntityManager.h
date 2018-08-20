@@ -181,6 +181,11 @@ namespace Enjon
 		virtual Result RecordPropertyOverrides( Object* source ) override;
 
 		/**
+		* @brief
+		*/
+		virtual Result ClearAllPropertyOverrides( ) override;
+
+		/**
 		* @brief Checks whether or not entity has given component
 		*/
 		template <typename T>

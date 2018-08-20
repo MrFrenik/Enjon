@@ -107,6 +107,17 @@ namespace Enjon
 			{
 				InspectEntityViewHeader( (Entity*)mInspectedObject );
 			}
+
+			// Record property overrides after editing 
+			Entity* ent = mInspectedObject->ConstCast< Entity >( );
+
+			// Clear overrides if no prototype entity exists
+			if ( ent && !ent->GetPrototypeEntity( ) )
+			{
+				// Shouldn't have any property overrides, so just clear any that might be around
+				// NOTE(John): Getting pretty damn expensive at this point...
+				ent->ClearAllPropertyOverrides( ); 
+			} 
  
 			// Don't really like this solution, but ya know...
 			ByteBuffer before, after;
@@ -119,13 +130,15 @@ namespace Enjon
 			EntityArchiver::Serialize( EntityHandle( ( Entity* )mInspectedObject ), &after );
 
 			// Compare the contents for changes
-			bool changeOccured = !ByteBuffer::ContentsEqual( before, after );
+			bool changeOccured = !ByteBuffer::ContentsEqual( before, after ); 
 
-			// Record property overrides after editing
-			Entity* ent = mInspectedObject->ConstCast< Entity >( );
-			if ( ent && ent->GetPrototypeEntity() && changeOccured ) 
+			// If prototype entity exists
+			if ( ent && ent->GetPrototypeEntity() ) 
 			{
-				ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity().Get(), ent ); 
+				if ( changeOccured )
+				{ 
+					ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity().Get(), ent ); 
+				} 
 			}
 		}
 		else
