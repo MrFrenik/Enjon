@@ -11,6 +11,7 @@
 #include "Asset/AssetManager.h"
 #include "Base/Object.h"
 #include "Physics/CollisionShape.h"
+#include "Serialize/ObjectArchiver.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
 
@@ -596,16 +597,100 @@ namespace Enjon
 		const Enjon::MetaClass* cls = object->Class( ); 
 		Enjon::String name = prop->GetName( );
 
+		// Grab draw list 
+		ImDrawList* drawList = ImGui::GetWindowDrawList( );
+
 		f32 startCursorX = ImGui::GetCursorPosX( );
 		f32 windowWidth = ImGui::GetWindowWidth( );
 
+		// Get whether or not this particular property has an override for this object
+		bool hasPropertyOverride = prop->HasOverride( object ); 
+
+		// If property has override, then need to change text color
+		ImColor labelColor = hasPropertyOverride ? ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorHovered ) ) : ImColor( ImGui::GetColorU32( ImGuiCol_Text ) ); 
+
+		// Push color for label
+		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( labelColor ) );
+
+		// Size of button for reverting property
+		f32 buttonSize = 10.0f;
+
+		ImVec2 padding = ImVec2( 5.0f, 0.0f );
+
+		// Formatting
 		if ( prop->GetType( ) != MetaPropertyType::Transform )
 		{
+			// Property override button
+			if ( hasPropertyOverride )
+			{ 
+				ImVec2 bA = ImVec2( ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y + buttonSize / 3.0f );
+				ImVec2 bB = ImVec2( bA.x + buttonSize, bA.y + buttonSize );
+
+				bool buttonHovered = ImGui::IsMouseHoveringRect( bA, bB );
+				bool buttonActive = buttonHovered && ImGui::IsMouseDown( 0 );
+
+				ImColor buttonActiveColor = ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorHovered ) );
+				buttonActiveColor.Value.w *= 0.8f;
+				ImColor buttonHoveredColor = ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorHovered ) );
+				ImColor buttonColor = ImColor( ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorHovered ) ) );
+				buttonColor.Value.w *= 0.5f;
+
+				drawList->AddRectFilled( bA, bB, buttonActive ? buttonActiveColor : buttonHovered ? buttonHoveredColor : buttonColor );
+
+				if ( buttonActive )
+				{
+					// Revert property
+					ObjectArchiver::RevertProperty( object->ConstCast< Object >(), const_cast< MetaProperty* >( prop ) );
+				} 
+
+				// Display the source object's property in new window
+				else if ( buttonHovered )
+				{
+					ImVec2 windowPos = ImGui::GetMousePos( );
+					windowPos.x += 10.0f;
+					windowPos.y += 10.0f;
+					ImGui::SetNextWindowPos( windowPos );
+					Vec2 aspect = Vec2( 300.0f, 30.0f );
+					ImColor windowBG = ImGui::GetColorU32( ImGuiCol_WindowBg );
+					windowBG.Value.x *= 1.8f;
+					windowBG.Value.y *= 1.8f;
+					windowBG.Value.z *= 1.8f;
+					ImGui::SetNextWindowSize( ImVec2( aspect.x, aspect.y ) );
+					ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
+					ImGui::PushStyleColor( ImGuiCol_WindowBg, ImVec4( windowBG ) );
+					ImGui::Begin( "##SourceObjectPropertyView", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar );
+					{
+						// BG frame for window
+						ImVec2 framePaddingSize( 15.0f, 15.0f );
+						ImVec2 bgA( ImGui::GetWindowPos().x + framePaddingSize.x, ImGui::GetWindowPos().y + framePaddingSize.y );
+						ImVec2 bgB( ImGui::GetWindowPos().x + ImGui::GetWindowSize().x - framePaddingSize.x , ImGui::GetWindowPos().y + ImGui::GetWindowSize().y - framePaddingSize.y );
+						drawList->AddRectFilled( bgA, bgB, ImColor( 0.4f, 0.4f, 0.4f, 1.0f ) );
+
+						// Set cursor position for property drawing
+						ImGui::SetCursorScreenPos( ImVec2( ImGui::GetCursorScreenPos( ).x, ImGui::GetWindowPos( ).y + ImGui::GetWindowSize( ).y / 2.0f - 10.0f ) );
+
+						// Grab source object
+						const Object* sourceObject = const_cast< MetaProperty* >( prop )->GetSourceObject( object );
+						if ( sourceObject )
+						{
+							DebugDumpProperty( sourceObject, prop );
+						} 
+					}
+					ImGui::End( );
+					ImGui::PopStyleColor( );
+					ImGui::PopStyleColor( );
+				}
+			}
+
+			ImGui::SetCursorPosX( startCursorX + buttonSize + padding.x );
+
 			ImGui::Text( name.c_str( ) ); 
-			ImGui::SameLine( );
+			ImGui::SameLine( ); 
+
 			ImGui::SetCursorPosX( windowWidth * 0.4f );
 			ImGui::PushItemWidth( windowWidth / 2.0f ); 
-		}
+		} 
+
 
 		switch ( prop->GetType( ) )
 		{
@@ -795,6 +880,36 @@ namespace Enjon
 				}
 			} break;
 
+			case MetaPropertyType::Quat:
+			{
+				Enjon::Quaternion val;
+				cls->GetValue( object, prop, &val );
+				f32 col[ 4 ] = { val.x, val.y, val.z, val.w };
+				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				if ( traits.UseSlider( ) )
+				{
+					if ( ImGui::SliderFloat4( fmt::format("##{}", name).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
+					{
+						val.x = col[ 0 ];
+						val.y = col[ 1 ];
+						val.z = col[ 2 ];
+						val.w = col[ 3 ];
+						cls->SetValue( object, prop, val );
+					}
+				}
+				else
+				{
+					if ( ImGui::DragFloat4( fmt::format("##{}", name).c_str(), col ) )
+					{
+						val.x = col[ 0 ];
+						val.y = col[ 1 ];
+						val.z = col[ 2 ];
+						val.w = col[ 3 ];
+						cls->SetValue( object, prop, val );
+					}
+				} 
+			} break;
+
 			case Enjon::MetaPropertyType::ColorRGBA32:
 			{
 				Enjon::ColorRGBA32 val;
@@ -849,116 +964,7 @@ namespace Enjon
 			// Type is transform
 			case Enjon::MetaPropertyType::Transform:
 			{
-				Enjon::Transform val;
-				cls->GetValue( object, prop, &val );
-				Enjon::Vec3 pos = val.GetPosition( );
-				Enjon::Quaternion rot = val.GetRotation( );
-				Enjon::Vec3 scl = val.GetScale( );
-
-				// NOTE( John ): HATE THIS
-				// Draw line for whether or not is an override
-				ImVec4 col = ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
-				if ( val.Class( )->GetPropertyByName( "mPosition" )->HasOverride( cls->GetValueAs< Transform >( object, prop ) ) )
-				{
-					col = ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorHovered ) ) );
-				}
-
-				// Position 
-				ImGui::PushStyleColor( ImGuiCol_Text, col );
-				ImGui::Text( fmt::format( "Position", prop->GetName( ) ).c_str( ) );
-				ImGui::SameLine( );
-				ImGui::SetCursorPosX( windowWidth * 0.4f );
-				ImGui::PushItemWidth( windowWidth / 2.0f ); 
-				{
-					f32 col[ 3 ] = { pos.x, pos.y, pos.z };
-					if ( ImGui::DragFloat3( Enjon::String( "##position" + prop->GetName() ).c_str( ), col ) )
-					{
-						pos.x = col[ 0 ];
-						pos.y = col[ 1 ];
-						pos.z = col[ 2 ]; 
-						val.SetPosition( pos );
-						cls->SetValue( object, prop, val );
-					} 
-				}
-				ImGui::PopItemWidth( );
-				ImGui::PopStyleColor( );
-
-				// Draw line for whether or not is an override 
-				col = ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
-				if ( val.Class( )->GetPropertyByName( "mRotation" )->HasOverride( cls->GetValueAs< Transform >( object, prop ) ) )
-				{
-					col = ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorHovered ) ) );
-				} 
-				
-				// Rotation
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( col ) );
-				ImGui::Text( fmt::format( "Rotation", prop->GetName( ) ).c_str( ) );
-				ImGui::SameLine( );
-				ImGui::SetCursorPosX( windowWidth * 0.4f );
-				ImGui::PushItemWidth( windowWidth / 2.0f ); 
-				{ 
-					f32 col[ 4 ] = { rot.x, rot.y, rot.z, rot.w };
-					if ( ImGui::DragFloat4( Enjon::String( "##rotation" + prop->GetName() ).c_str( ), col ) )
-					{
-						rot.x = col[ 0 ];
-						rot.y = col[ 1 ];
-						rot.z = col[ 2 ];
-						rot.w = col[ 3 ];
-
-						val.SetRotation( rot );
-						cls->SetValue( object, prop, val );
-					} 
-				}
-				ImGui::PopItemWidth( );
-				ImGui::PopStyleColor( );
-
-				// Draw line for whether or not is an override 
-				col = ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
-				bool hasScaleOverride = false;
-				if ( val.Class( )->GetPropertyByName( "mScale" )->HasOverride( cls->GetValueAs< Transform >( object, prop ) ) )
-				{
-					hasScaleOverride = true;
-					col = ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorHovered ) ) );
-				} 
-
-				if ( hasScaleOverride )
-				{
-					if ( ImGui::Button( "Revert" ) )
-					{
-						MetaProperty* scaleProp = const_cast< MetaProperty* >( val.Class( )->GetPropertyByName( "mScale" ) );
-						Transform* sourceObj = scaleProp->GetSourceObject( cls->GetValueAs< Transform >( object, prop ) )->ConstCast< Transform >( );
-						if ( sourceObj )
-						{
-							// Set scale to source object's
-							val.SetScale( sourceObj->GetScale( ) );
-							cls->SetValue( object, prop, val );
-
-							// Remove property override
-							scaleProp->RemoveOverride( cls->GetValueAs< Transform >( object, prop ) );
-						}
-					}
-				}
-				
-				// Scale
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( col ) );
-				ImGui::Text( fmt::format( "Scale", prop->GetName( ) ).c_str( ) );
-				ImGui::SameLine( );
-				ImGui::SetCursorPosX( windowWidth * 0.4f );
-				ImGui::PushItemWidth( windowWidth / 2.0f ); 
-				{
-					f32 col[ 3 ] = { scl.x, scl.y, scl.z };
-					if ( ImGui::DragFloat3( Enjon::String( "##scale" + prop->GetName() ).c_str( ), col ) )
-					{
-						scl.x = col[ 0 ];
-						scl.y = col[ 1 ];
-						scl.z = col[ 2 ];
-						val.SetScale( scl );
-						cls->SetValue( object, prop, val );
-					} 
-				} 
-				ImGui::PopItemWidth( );
-				ImGui::PopStyleColor( ); 
-
+				InspectObject( cls->GetValueAs< Transform >( object, prop ) );
 			} break;
 
 			// Enum type
@@ -999,6 +1005,9 @@ namespace Enjon
 
 			} break;
 		}
+
+		// Pop color for label
+		ImGui::PopStyleColor( );
 	} 
 
 	ImGuiContext* ImGuiManager::GetContext( )
@@ -1055,6 +1064,7 @@ namespace Enjon
 				case Enjon::MetaPropertyType::iVec3: 
 				case Enjon::MetaPropertyType::Vec3: 
 				case Enjon::MetaPropertyType::Vec4:
+				case Enjon::MetaPropertyType::Quat:
 				case Enjon::MetaPropertyType::ColorRGBA32:
 				case Enjon::MetaPropertyType::String:
 				case Enjon::MetaPropertyType::UUID: 

@@ -236,4 +236,70 @@ namespace Enjon
 		return Result::INCOMPLETE; 
 	} 
 
+#define ENJON_RECORD_OVERRIDE_POD( cls, sourceObj, destObj, prop, podType )\
+{\
+	podType sourceVal = *cls->GetValueAs< podType >( sourceObj, prop );\
+	podType destVal = *cls->GetValueAs< podType >( destObj, prop );\
+\
+	if ( sourceVal != destVal )\
+	{\
+		prop->AddOverride( destObj, sourceObj );\
+	}\
+}
+
+	Result Entity::RecordPropertyOverrides( Object* source )
+	{
+		// Get source class
+		const MetaClass* cls = source->Class( );
+
+		if ( !source->Class( )->InstanceOf( Class() ) )
+		{
+			// Error, cannot operate on separate types
+			return Result::FAILURE;
+		}
+
+		for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
+		{
+			// Grab property from class
+			MetaProperty* prop = const_cast< MetaProperty* >( cls->GetProperty( i ) );
+
+			switch ( prop->GetType( ) )
+			{
+				case MetaPropertyType::S32: ENJON_RECORD_OVERRIDE_POD( cls, source, this, prop, s32 ); break; 
+				case MetaPropertyType::U32: ENJON_RECORD_OVERRIDE_POD( cls, source, this, prop, u32 ); break; 
+				case MetaPropertyType::F32: ENJON_RECORD_OVERRIDE_POD( cls, source, this, prop, f32 ); break; 
+				case MetaPropertyType::Vec2: ENJON_RECORD_OVERRIDE_POD( cls, source, this, prop, Vec2 ); break; 
+				case MetaPropertyType::Vec3: ENJON_RECORD_OVERRIDE_POD( cls, source, this, prop, Vec3 ); break; 
+				case MetaPropertyType::Vec4: ENJON_RECORD_OVERRIDE_POD( cls, source, this, prop, Vec4 ); break; 
+				case MetaPropertyType::Quat: ENJON_RECORD_OVERRIDE_POD( cls, source, this, prop, Quaternion ); break; 
+
+				case MetaPropertyType::Transform:
+				{ 
+					Transform* sourceTransform = cls->GetValueAs< Transform >( source, prop )->ConstCast< Transform >( );
+					Transform* destTransform = cls->GetValueAs< Transform >( this, prop )->ConstCast < Transform >( );
+
+					// Record property overrides
+					ObjectArchiver::RecordAllPropertyOverrides( sourceTransform, destTransform ); 
+				} break; 
+			}
+		} 
+
+		// Record children overrides with their prototype entities
+		for ( auto& c : mChildren )
+		{
+			if ( c.Get( )->HasPrototypeEntity( ) )
+			{
+				c.Get( )->RecordPropertyOverrides( c.Get( )->GetPrototypeEntity( ).Get( ) );
+			}
+		}
+
+		// Record overrides for components
+		for ( auto& c : GetComponents() )
+		{
+			Component* sourceComponent = mPrototypeEntity.Get( )->GetComponent( c->Class( ) );
+			ObjectArchiver::RecordAllPropertyOverrides( sourceComponent, c );
+		}
+
+		return Result::SUCCESS;
+	} 
 }

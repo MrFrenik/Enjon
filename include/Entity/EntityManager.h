@@ -169,12 +169,16 @@ namespace Enjon
 		* @brief
 		*/
 		virtual Result OnEditorUI( ) override;
-
-
+ 
 		/**
 		* @brief
 		*/
 		virtual Result MergeWith( Object* source, MergeType mergeType ) override;
+
+		/**
+		* @brief
+		*/
+		virtual Result RecordPropertyOverrides( Object* source ) override;
 
 		/**
 		* @brief Checks whether or not entity has given component

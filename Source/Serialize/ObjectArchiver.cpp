@@ -617,13 +617,15 @@ namespace Enjon
 
 			switch ( prop->GetType( ) )
 			{
-				case MetaPropertyType::S32: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, s32 ); break; 
-				case MetaPropertyType::U32: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, u32 ); break; 
-				case MetaPropertyType::F32: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, f32 ); break; 
-				case MetaPropertyType::Vec2: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec2 ); break; 
-				case MetaPropertyType::Vec3: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec3 ); break; 
-				case MetaPropertyType::Vec4: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec4 ); break; 
-				case MetaPropertyType::Quat: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Quaternion ); break; 
+				case MetaPropertyType::Bool:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, bool ) break;
+				case MetaPropertyType::S32:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, s32 ); break; 
+				case MetaPropertyType::U32:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, u32 ); break; 
+				case MetaPropertyType::F32:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, f32 ); break; 
+				case MetaPropertyType::iVec3:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, iVec3 ) break;
+				case MetaPropertyType::Vec2:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec2 ); break; 
+				case MetaPropertyType::Vec3:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec3 ); break; 
+				case MetaPropertyType::Vec4:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec4 ); break; 
+				case MetaPropertyType::Quat:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Quaternion ); break; 
 
 				case MetaPropertyType::Transform:
 				{ 
@@ -633,6 +635,30 @@ namespace Enjon
 					// Record property overrides
 					RecordAllPropertyOverrides( sourceTransform, destTransform ); 
 				} break; 
+
+				case MetaPropertyType::Object:
+				{
+					if ( prop->GetTraits( ).IsPointer( ) )
+					{
+						const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
+						Enjon::Object* sourceObj = base->GetValueAsObject( source )->ConstCast< Object >( );
+						Enjon::Object* destObj = base->GetValueAsObject( dest )->ConstCast< Object >( );
+						if ( sourceObj && destObj )
+						{
+							ObjectArchiver::RecordAllPropertyOverrides( sourceObj, destObj );
+						}
+					}
+					else
+					{
+						Enjon::Object* sourceObj = cls->GetValueAs< Object >( source, prop )->ConstCast< Object >( );
+						Enjon::Object* destObj = cls->GetValueAs< Object >( dest, prop )->ConstCast< Object >( );
+						if ( sourceObj && destObj )
+						{
+							ObjectArchiver::RecordAllPropertyOverrides( sourceObj, destObj );
+						}
+					}
+					
+				} break;
 			}
 		} 
 
@@ -643,6 +669,48 @@ namespace Enjon
 
 	Result ObjectArchiver::ClearAllPropertyOverrides( )
 	{ 
+		return Result::SUCCESS;
+	}
+
+	//===================================================================== 
+
+#define ENJON_REVERT_PROP_POD( cls, source, dest, prop, podType )\
+{\
+	podType sourceVal = *cls->GetValueAs< podType >( source, prop );\
+	cls->SetValue( dest, prop, sourceVal );\
+	prop->RemoveOverride( dest );\
+}
+
+	Result ObjectArchiver::RevertProperty( Object* object, MetaProperty* prop )
+	{
+		if ( !prop || !object )
+		{
+			return Result::FAILURE;
+		}
+
+		// Grab class of object
+		const MetaClass* cls = object->Class( );
+		// Grab source object from passed in destination object
+		const Object* sourceObject = prop->GetSourceObject( object ); 
+
+		if ( !sourceObject )
+		{
+			return Result::FAILURE;
+		}
+
+		switch ( prop->GetType( ) )
+		{
+			case MetaPropertyType::Bool:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, bool ); break;
+			case MetaPropertyType::S32:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, s32 ); break;
+			case MetaPropertyType::U32:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, u32 ); break;
+			case MetaPropertyType::F32:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, f32 ); break;
+			case MetaPropertyType::iVec3:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, iVec3 ); break;
+			case MetaPropertyType::Vec2:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Vec2 ); break;
+			case MetaPropertyType::Vec3:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Vec3 ); break;
+			case MetaPropertyType::Vec4:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Vec4 ); break;
+			case MetaPropertyType::Quat:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Quaternion ); break;
+		} 
+
 		return Result::SUCCESS;
 	}
 
