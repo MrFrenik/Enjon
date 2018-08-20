@@ -97,7 +97,7 @@ namespace Enjon
 			const MetaProperty* prop = cls->GetProperty( i );
 
 			// Do not serialize if property is null or non-serializable
-			if ( !prop || prop->HasFlags( MetaPropertyFlags::NonSerializable ) )
+			if ( !prop || prop->HasFlags( MetaPropertyFlags::NonSerializeable ) )
 			{
 				continue;
 			}
@@ -421,12 +421,12 @@ namespace Enjon
 				{
 					case MergeType::AcceptSource:
 					{
-						MergeProperty( source, dest, prop );
+						MergeProperty( source, dest, prop, mergeType );
 					} break;
 
 					case MergeType::AcceptDestination:
 					{
-						MergeProperty( dest, source, prop );
+						MergeProperty( dest, source, prop, mergeType );
 					} break;
 
 					case MergeType::AcceptMerge:
@@ -434,7 +434,7 @@ namespace Enjon
 						// Only merge iff destination object doesn't have a property override
 						if ( !prop->HasOverride( dest ) )
 						{
-							MergeProperty( source, dest, prop );
+							MergeProperty( source, dest, prop, mergeType );
 						}
 					} break;
 				}
@@ -446,7 +446,7 @@ namespace Enjon
 
 	//=====================================================================
 
-	Result ObjectArchiver::MergeProperty( Object* source, Object* dest, const MetaProperty* prop )
+	Result ObjectArchiver::MergeProperty( Object* source, Object* dest, const MetaProperty* prop, MergeType mergeType )
 	{
 		// Will merge the source object property into the destination property
 		const MetaClass* cls = source->Class();
@@ -471,6 +471,59 @@ namespace Enjon
 			case MetaPropertyType::AssetHandle:
 			{
 				cls->SetValue( dest, prop, *cls->GetValueAs< AssetHandle< Asset > >( source, prop ) );
+			} break;
+
+			case MetaPropertyType::Object:
+			{
+				// If object is pointer
+				if ( prop->GetTraits( ).IsPointer( ) )
+				{
+					const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
+					Object* sourceObj = base->GetValueAsObject( source )->ConstCast< Object >( );
+					Object* destObj = base->GetValueAsObject( dest )->ConstCast< Object >( );
+
+					// Merge objects based on merge type
+					ObjectArchiver::MergeObjects( sourceObj, destObj, mergeType );
+				} 
+				// Not pointer
+				else
+				{
+					// Write out to temp to write size of object
+					Object* sourceObj = cls->GetValueAs< Object >( source, prop )->ConstCast< Object >( );
+					Object* destObj = cls->GetValueAs< Object >( dest, prop )->ConstCast< Object >( );
+
+					// Merge objects based on merge type
+					ObjectArchiver::MergeObjects( sourceObj, destObj, mergeType );
+				} 
+			} break;
+
+			case MetaPropertyType::Array:
+			{
+				// Get base
+				const MetaPropertyArrayBase* base = prop->Cast< MetaPropertyArrayBase >( ); 
+
+				// Write out array elements
+				switch ( base->GetArrayType( ) )
+				{ 
+					case MetaPropertyType::AssetHandle:
+					{ 
+						// Grab array property
+						const MetaPropertyArray< AssetHandle< Asset > >* arrProp = base->Cast< MetaPropertyArray< AssetHandle< Asset > > >( );
+
+						// Get sizes of arrays
+						usize arrSize = arrProp->GetSize( source ) == arrProp->GetSize( dest ) ? arrProp->GetSize( source ) : 0; 
+
+						// Write out asset uuids in array
+						for ( usize j = 0; j < arrSize; ++j )
+						{
+							// Grab value from source
+							AssetHandle<Asset> asset;
+							arrProp->GetValueAt( source, j, &asset );
+							// Set destination value
+							arrProp->SetValueAt( dest, j, asset );
+						}
+					} break; 
+				}
 			} break;
 
 			// Etc...
@@ -519,4 +572,91 @@ namespace Enjon
 	}
 
 	//===================================================================== 
+
+	Result ObjectArchiver::RecordAllPropertyOverrides( Object* source, Object* dest )
+	{ 
+		// Attempt default behavior first
+		Result res = dest->RecordPropertyOverrides( source );
+		if ( res == Result::INCOMPLETE )
+		{
+			// Default behavior
+			res = RecordAllPropertyOverridesDefault( source, dest );
+		} 
+
+		return res;
+	}
+
+	//===================================================================== 
+
+#define ENJON_RECORD_OVERRIDE_POD( cls, sourceObj, destObj, prop, podType )\
+{\
+	podType sourceVal = *cls->GetValueAs< podType >( sourceObj, prop );\
+	podType destVal = *cls->GetValueAs< podType >( destObj, prop );\
+\
+	if ( sourceVal != destVal )\
+	{\
+		prop->AddOverride( destObj );\
+	}\
 }
+
+	Result ObjectArchiver::RecordAllPropertyOverridesDefault( Object* source, Object* dest )
+	{
+		// Get source class
+		const MetaClass* cls = source->Class( );
+
+		if ( !source->Class( )->InstanceOf( dest->Class() ) )
+		{
+			// Error, cannot operate on separate types
+			return Result::FAILURE;
+		}
+
+		for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
+		{
+			// Grab property from class
+			MetaProperty* prop = const_cast< MetaProperty* >( cls->GetProperty( i ) );
+
+			switch ( prop->GetType( ) )
+			{
+				case MetaPropertyType::S32: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, s32 ); break; 
+				case MetaPropertyType::U32: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, u32 ); break; 
+				case MetaPropertyType::F32: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, f32 ); break; 
+				case MetaPropertyType::Vec2: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec2 ); break; 
+				case MetaPropertyType::Vec3: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec3 ); break; 
+				case MetaPropertyType::Vec4: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec4 ); break; 
+				case MetaPropertyType::Quat: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Quaternion ); break; 
+
+				case MetaPropertyType::Transform:
+				{ 
+					Transform* sourceTransform = cls->GetValueAs< Transform >( source, prop )->ConstCast< Transform >( );
+					Transform* destTransform = cls->GetValueAs< Transform >( dest, prop )->ConstCast < Transform >( );
+
+					// Record property overrides
+					RecordAllPropertyOverrides( sourceTransform, destTransform ); 
+				} break; 
+			}
+		} 
+
+		return Result::SUCCESS;
+	}
+
+	//===================================================================== 
+
+	Result ObjectArchiver::ClearAllPropertyOverrides( )
+	{ 
+		return Result::SUCCESS;
+	}
+
+	//===================================================================== 
+}
+
+
+
+
+
+
+
+
+
+
+
+

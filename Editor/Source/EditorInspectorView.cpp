@@ -11,6 +11,7 @@
 #include <IO/InputManager.h>
 #include <Utils/FileUtils.h>
 #include <Entity/Components/RigidBodyComponent.h>
+#include <Serialize/ObjectArchiver.h>
 
 #include <filesystem>
 #include <fmt/format.h>
@@ -109,6 +110,12 @@ namespace Enjon
 			ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 			igm->InspectObject( mInspectedObject ); 
 
+			// Record property overrides after editing
+			Entity* ent = mInspectedObject->ConstCast< Entity >( );
+			if ( ent && ent->GetPrototypeEntity() ) 
+			{
+				ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity().Get(), ent ); 
+			}
 		}
 		else
 		{

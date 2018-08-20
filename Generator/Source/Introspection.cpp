@@ -825,7 +825,7 @@ void Introspection::ParseProperty( Lexer* lexer, Class* cls )
 					traits.IsVisible = false;
 				}
 
-				if ( curToken.Equals( "NonSerializable" ) )
+				if ( curToken.Equals( "NonSerializeable" ) )
 				{
 					traits.IsSerializable = false;
 				}
@@ -1790,7 +1790,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 
 					std::string flags = "( ";
 					flags += !prop.second->mTraits.IsEditable		? "MetaPropertyFlags::ReadOnly | "			: "MetaPropertyFlags::Default | ";
-					flags += !prop.second->mTraits.IsSerializable	? "MetaPropertyFlags::NonSerializable | "	: "MetaPropertyFlags::Default | ";
+					flags += !prop.second->mTraits.IsSerializable	? "MetaPropertyFlags::NonSerializeable | "	: "MetaPropertyFlags::Default | ";
 					flags += !prop.second->mTraits.IsVisible		? "MetaPropertyFlags::HideInEditor | "		: "MetaPropertyFlags::Default | ";
 					flags += prop.second->mTraits.IsPointer			? "MetaPropertyFlags::IsPointer"			: "MetaPropertyFlags::Default";
 					flags += " )";

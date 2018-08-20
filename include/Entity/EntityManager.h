@@ -47,20 +47,20 @@ namespace Enjon
 	{
 		ENJON_CLASS_BODY( EntitySubsystemContext )
 
-	public:
-		/**
-		* @brief
-		*/
-		EntitySubsystemContext( World* world );
+		public:
+			/**
+			* @brief
+			*/
+			EntitySubsystemContext( World* world );
 
-		/**
-		* @brief
-		*/
-		virtual void ExplicitDestructor( );
+			/**
+			* @brief
+			*/
+			virtual void ExplicitDestructor( );
 
-	protected:
+		protected:
 
-	private:
+		private:
 	};
 
 	class EntityHandle
@@ -504,37 +504,37 @@ namespace Enjon
 		void PropagateTransform( f32 dt ); 
 
 	private:
-		ENJON_PROPERTY( NonSerializable, ReadOnly )
+		ENJON_PROPERTY( NonSerializeable, ReadOnly )
 		u32 mID = MAX_ENTITIES;
 
-		ENJON_PROPERTY( NonSerializable, ReadOnly )
+		ENJON_PROPERTY( NonSerializeable, ReadOnly )
 		EntityHandle mParent;
  
-		ENJON_PROPERTY( NonSerializable, ReadOnly )
+		ENJON_PROPERTY( NonSerializeable, ReadOnly )
 		Transform mLocalTransform;
 
-		ENJON_PROPERTY( NonSerializable, ReadOnly )
+		ENJON_PROPERTY( NonSerializeable, ReadOnly )
 		Transform mWorldTransform;
 
-		ENJON_PROPERTY( NonSerializable, HideInEditor )
+		ENJON_PROPERTY( NonSerializeable, HideInEditor )
 		Vector<u32> mComponents;
 
-		ENJON_PROPERTY( NonSerializable )
+		ENJON_PROPERTY( NonSerializeable )
 		Vector< EntityHandle > mChildren;
 
-		ENJON_PROPERTY( NonSerializable, HideInEditor, ReadOnly )
+		ENJON_PROPERTY( NonSerializeable, HideInEditor, ReadOnly )
 		HashSet< u32 > mInstancedEntities;
 
-		ENJON_PROPERTY( NonSerializable, ReadOnly )
+		ENJON_PROPERTY( NonSerializeable, ReadOnly )
 		UUID mUUID;
 
-		ENJON_PROPERTY( NonSerializable )
+		ENJON_PROPERTY( NonSerializeable )
 		String mName = "Entity";
 
-		ENJON_PROPERTY( NonSerializable, ReadOnly )
+		ENJON_PROPERTY( NonSerializeable, ReadOnly )
 		EntityHandle mPrototypeEntity;
 
-		ENJON_PROPERTY( HideInEditor, ReadOnly )
+		ENJON_PROPERTY( NonSerializeable, ReadOnly, HideInEditor )
 		AssetHandle< Archetype > mArchetype; 
 
 		const World* mWorld = nullptr;

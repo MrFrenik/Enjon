@@ -19,14 +19,15 @@ namespace Enjon
 		// of the world they belong to. Need to take that into account for this, and the scene will need to know which world context it belongs to
 		EntityManager* em = EngineSubsystem( EntityManager );
 		if ( em )
-		{
+		{ 
+			// Get all root level entities in default world
 			Vector<EntityHandle> rootEntities = em->GetRootLevelEntities( );
 
 			// Write out count of vector
 			archiver->Write<u32>( rootEntities.size( ) );
 
 			// Serialize all root level entities into archive
-			for ( auto& e : em->GetRootLevelEntities( ) )
+			for ( auto& e : rootEntities )
 			{
 				EntityArchiver::Serialize( e, archiver );
 			}

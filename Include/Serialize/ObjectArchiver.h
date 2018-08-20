@@ -98,6 +98,40 @@ namespace Enjon
 			void Reset( ); 
 
 		public:
+
+			/*
+			*@brief
+			*/ 
+			static Result MergeObjects( Object* source, Object* dest, MergeType mergeType );
+
+
+			/*
+			*@brief
+			*/ 
+			static Result MergeProperty( Object* source, Object* dest, const MetaProperty* prop, MergeType mergeType );
+
+			/*
+			*@brief
+			*/ 
+			static bool HasPropertyOverrides( const Object* obj );
+
+			/*
+			*@brief
+			*/ 
+			static bool HasPropertyOverridesDefault( const Object* obj );
+
+			/*
+			*@brief
+			*/ 
+			static Result RecordAllPropertyOverrides( Object* source, Object* dest ); 
+
+			/*
+			* @brief
+			*/
+			static Result ClearAllPropertyOverrides( );
+			
+		protected:
+
 			/*
 			*@brief
 			*/ 
@@ -116,12 +150,7 @@ namespace Enjon
 			/*
 			*@brief
 			*/ 
-			static Result DeserializeObjectDataDefault( const Object* object, const MetaClass* cls, ByteBuffer* buffer );
-
-			/*
-			*@brief
-			*/ 
-			static Result MergeObjects( Object* source, Object* dest, MergeType mergeType );
+			static Result DeserializeObjectDataDefault( const Object* object, const MetaClass* cls, ByteBuffer* buffer ); 
 
 			/*
 			*@brief
@@ -131,17 +160,8 @@ namespace Enjon
 			/*
 			*@brief
 			*/ 
-			static Result MergeProperty( Object* source, Object* dest, const MetaProperty* prop );
+			static Result RecordAllPropertyOverridesDefault( Object* source, Object* dest );
 
-			/*
-			*@brief
-			*/ 
-			static bool HasPropertyOverrides( const Object* obj );
-
-			/*
-			*@brief
-			*/ 
-			static bool HasPropertyOverridesDefault( const Object* obj );
 
 		protected:
 			ByteBuffer mBuffer;

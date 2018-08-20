@@ -23,7 +23,7 @@ namespace Enjon
 		f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
 		// Display all components and transform information
 		ImGui::ListBoxHeader( "##CompLists", ImVec2(ImGui::GetWindowSize().x - 20.0f, height ) );
-		{
+		{ 
 			// Name / Tag information
 			if ( ImGui::CollapsingHeader( "Label" ) )
 			{
@@ -38,19 +38,6 @@ namespace Enjon
 				Transform current = mLocalTransform;
 				ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
 				igm->DebugDumpProperty( this, Class( )->GetPropertyByName( ENJON_TO_STRING( mLocalTransform ) ) ); 
-
-				// NOTE(John): HACK HACK HACK
-				// Just check for scale changes for now
-				if ( mLocalTransform.GetScale( ) != current.GetScale( ) )
-				{
-					// Property override if has prototype entity
-					if ( HasPrototypeEntity( ) )
-					{
-						const MetaClass* transformClass = Object::GetClass< Transform >( );
-						MetaProperty* scaleProp = const_cast< MetaProperty* >( transformClass->GetPropertyByName( "mScale" ) );
-						scaleProp->AddOverride( &mLocalTransform ); 
-					}
-				}
 
 				ImGui::PopFont( );
 			} 
@@ -69,20 +56,17 @@ namespace Enjon
 					}
 				}
 			} 
-			
-			// NOTE(John): TEST STUFFS
-			if ( ImGui::Button( "Instance" ) )
+
+			if ( mArchetype )
 			{
-				EngineSubsystem( EntityManager )->InstanceEntity( this, GetWorld( )->ConstCast< World >( ) );
+				ImGui::Text( fmt::format( "Archetype: {}", mArchetype->GetName( ) ).c_str( ) );
+			}
+			else
+			{
+				ImGui::Text( "Archetype: Default" ); 
 			}
 
-			if ( ImGui::Button( "Update Instances" ) )
-			{
-				for ( auto& i : mInstancedEntities )
-				{
-					ObjectArchiver::MergeObjects( this, EngineSubsystem( EntityManager )->GetRawEntity( i ), MergeType::AcceptMerge );
-				}
-			}
+			ImGui::Text( fmt::format( "ID: {}", GetID( ) ).c_str( ) );
 		} 
 		ImGui::ListBoxFooter( ); 
 
@@ -125,7 +109,7 @@ namespace Enjon
 		if ( !cls->InstanceOf< Entity >( ) )
 		{
 			return Result::FAILURE;
-		}
+		} 
 
 		// Cast to entity
 		Entity* source = sourceObj->ConstCast< Entity >( );
@@ -137,33 +121,42 @@ namespace Enjon
 			const MetaProperty* scaleProp = mLocalTransform.Class( )->GetPropertyByName( "mScale" );
 			if ( !scaleProp->HasOverride( &mLocalTransform ) )
 			{
-				ObjectArchiver::MergeProperty( &source->mLocalTransform, &mLocalTransform, scaleProp );
+				ObjectArchiver::MergeProperty( &source->mLocalTransform, &mLocalTransform, scaleProp, mergeType );
+			}
+
+			const MetaProperty* positionProp = mLocalTransform.Class( )->GetPropertyByName( "mPosition" );
+			if ( !positionProp->HasOverride( &mLocalTransform ) )
+			{
+				ObjectArchiver::MergeProperty( &source->mLocalTransform, &mLocalTransform, positionProp, mergeType );
+			}
+
+			const MetaProperty* rotationProp = mLocalTransform.Class( )->GetPropertyByName( "mRotation" );
+			if ( !rotationProp->HasOverride( &mLocalTransform ) )
+			{
+				ObjectArchiver::MergeProperty( &source->mLocalTransform, &mLocalTransform, rotationProp, mergeType );
 			}
 		} 
-
-		// Would like a generic way to be able to detect if a property change does exist eventually, but
-		// since the component list is just a list of opaque ids, tough to really do that 
 
 		bool componentPropChangeExists = false;
 		for ( auto& c : source->GetComponents() )
 		{
+			// If component doesn't exist, add it
 			if ( !HasComponent( c->Class() ) )
-			{
-				componentPropChangeExists |= true;
+			{ 
+				// Add component 
+				AddComponent( c->Class( ) );
 			}
-			else
-			{
-				// Maybe have a way of being able to merge this specifically depending on the component itself? Provide a way to override this? 
-				ObjectArchiver::MergeObjects( c, GetComponent( c->Class() ), mergeType );	
-			} 
+
+			// Attempt to merge the components 
+			ObjectArchiver::MergeObjects( c, GetComponent( c->Class() ), mergeType );	
 		}
 
 		// Add override if property changes
-		if ( componentPropChangeExists )
-		{
-			MetaProperty* prop = const_cast< MetaProperty* >( cls->GetPropertyByName( ENJON_TO_STRING( mComponents ) ) );
-			prop->AddOverride( this );
-		}
+		//if ( componentPropChangeExists )
+		//{
+		//	MetaProperty* prop = const_cast< MetaProperty* >( cls->GetPropertyByName( ENJON_TO_STRING( mComponents ) ) );
+		//	prop->AddOverride( this );
+		//}
 
 		/////////////////////////
 		// Children /////////////
@@ -231,6 +224,12 @@ namespace Enjon
 
 				// Add to children
 				AddChild( instanced );
+
+				// Guess I need to merge objects?
+				ObjectArchiver::MergeObjects( sourceEnt, instanced.Get( ), mergeType );
+
+				// Set archetype of instanced entity to this archetype
+				instanced.Get( )->SetArchetype( mArchetype );
 			} 
 		}
 

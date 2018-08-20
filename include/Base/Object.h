@@ -61,11 +61,11 @@ namespace Enjon
 
 	enum MetaPropertyFlags : u32
 	{
-		Default			= 0x00,
-		IsPointer		= 0x01,
-		NonSerializable = 0x02,
-		ReadOnly		= 0x04,
-		HideInEditor	= 0x08
+		Default			 = 0x00,
+		IsPointer		 = 0x01,
+		NonSerializeable = 0x02,
+		ReadOnly		 = 0x04,
+		HideInEditor	 = 0x08
 	};
 
 	enum class MergeType
@@ -1012,7 +1012,7 @@ namespace Enjon
 				usize count = 0;
 				for ( auto& p : mProperties )
 				{
-					if ( !p->HasFlags( MetaPropertyFlags::NonSerializable ) )
+					if ( !p->HasFlags( MetaPropertyFlags::NonSerializeable ) )
 					{
 						count++;
 					}
@@ -1557,7 +1557,17 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual Result Object::MergeWith( Object* other, MergeType mergeType ); 
+			virtual Result MergeWith( Object* other, MergeType mergeType ); 
+
+			/*
+			* @brief
+			*/
+			virtual Result RecordPropertyOverrides( Object* source ); 
+
+			/*
+			* @brief
+			*/
+			virtual Result ClearAllPropertyOverrides( );
 
 			/*
 			* @brief

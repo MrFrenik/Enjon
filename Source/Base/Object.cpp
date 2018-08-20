@@ -155,6 +155,23 @@ namespace Enjon
 	{
 		return Result::INCOMPLETE;
 	}
+
+	//====================================================================================== 
+
+	Result Object::RecordPropertyOverrides( Object* source )
+	{
+		return Result::INCOMPLETE;
+	}
+
+	//====================================================================================== 
+
+	Result Object::ClearAllPropertyOverrides( )
+	{
+		// Probably have some default behavior here...
+		return Result::INCOMPLETE;
+	}
+
+	//====================================================================================== 
 } 
 
 

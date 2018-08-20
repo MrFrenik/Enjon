@@ -855,7 +855,16 @@ namespace Enjon
 				Enjon::Quaternion rot = val.GetRotation( );
 				Enjon::Vec3 scl = val.GetScale( );
 
+				// NOTE( John ): HATE THIS
+				// Draw line for whether or not is an override
+				ImVec4 col = ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
+				if ( val.Class( )->GetPropertyByName( "mPosition" )->HasOverride( cls->GetValueAs< Transform >( object, prop ) ) )
+				{
+					col = ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorHovered ) ) );
+				}
+
 				// Position 
+				ImGui::PushStyleColor( ImGuiCol_Text, col );
 				ImGui::Text( fmt::format( "Position", prop->GetName( ) ).c_str( ) );
 				ImGui::SameLine( );
 				ImGui::SetCursorPosX( windowWidth * 0.4f );
@@ -872,8 +881,17 @@ namespace Enjon
 					} 
 				}
 				ImGui::PopItemWidth( );
+				ImGui::PopStyleColor( );
+
+				// Draw line for whether or not is an override 
+				col = ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
+				if ( val.Class( )->GetPropertyByName( "mRotation" )->HasOverride( cls->GetValueAs< Transform >( object, prop ) ) )
+				{
+					col = ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorHovered ) ) );
+				} 
 				
 				// Rotation
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( col ) );
 				ImGui::Text( fmt::format( "Rotation", prop->GetName( ) ).c_str( ) );
 				ImGui::SameLine( );
 				ImGui::SetCursorPosX( windowWidth * 0.4f );
@@ -892,14 +910,14 @@ namespace Enjon
 					} 
 				}
 				ImGui::PopItemWidth( );
+				ImGui::PopStyleColor( );
 
-				// Draw line for whether or not is an override
-				ImColor col = ImGui::GetColorU32( ImGuiCol_Text );
-				auto dl = ImGui::GetWindowDrawList( );
+				// Draw line for whether or not is an override 
+				col = ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
 				if ( val.Class( )->GetPropertyByName( "mScale" )->HasOverride( cls->GetValueAs< Transform >( object, prop ) ) )
 				{
-					col = ImGui::GetColorU32( ImGuiCol_HeaderHovered );
-				}
+					col = ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorHovered ) ) );
+				} 
 				
 				// Scale
 				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( col ) );
@@ -1356,7 +1374,7 @@ namespace Enjon
 		colors[ ImGuiCol_HeaderHovered ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
 		colors[ ImGuiCol_HeaderActive ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
 		colors[ ImGuiCol_Separator ] = ImVec4( 0.29f, 0.29f, 0.29f, 0.50f );
-		colors[ ImGuiCol_SeparatorHovered ] = ImVec4( 0.13f, 0.77f, 1.00f, 0.25f );
+		colors[ ImGuiCol_SeparatorHovered ] = ImVec4( 0.13f, 0.77f, 1.00f, 1.00f );
 		colors[ ImGuiCol_SeparatorActive ] = ImVec4( 0.10f, 0.40f, 0.75f, 1.00f );
 		colors[ ImGuiCol_ResizeGrip ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
 		colors[ ImGuiCol_ResizeGripHovered ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );

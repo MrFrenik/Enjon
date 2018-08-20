@@ -64,6 +64,7 @@ namespace Enjon
 		if ( !mRoot )
 		{
 			EntityHandle handle = EngineSubsystem( EntityManager )->Allocate( );
+			handle.Get( )->SetName( "Root" );
 			EntityArchiver::Serialize( handle, buffer );
 			handle.Get( )->Destroy( );
 		}
@@ -118,6 +119,7 @@ namespace Enjon
 			// Construct root if not available
 			mRoot = em->Allocate( em->GetArchetypeWorld( ) ).Get( );
 			mRoot->mIsArchetypeRoot = true;
+			mRoot->SetName( "Root" );
 		}
 
 		return mRoot;

@@ -1,6 +1,7 @@
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
 // File: EntityArchiver.cpp
 
+#include "Asset/AssetManager.h"
 #include "Serialize/EntityArchiver.h"
 #include "SubsystemCatalog.h"
 #include "Base/World.h" 
@@ -64,6 +65,12 @@ namespace Enjon
 		// Write out entity name
 		buffer->Write< String >( entity.Get( )->GetName( ) ); 
 
+		// Write out entity archetype
+		buffer->Write< UUID >( entity.Get( )->GetArchetype( ) ? entity.Get( )->GetArchetype( ).GetUUID( ) : UUID::Invalid( ) );
+
+		// Serialize the prototype entity UUID 
+		buffer->Write< UUID >( entity.Get( )->HasPrototypeEntity( ) ? entity.Get( )->GetPrototypeEntity( ).Get( )->GetUUID( ) : UUID::Invalid( ) );
+
 		//==========================================================================
 		// Components
 		//========================================================================== 
@@ -113,9 +120,6 @@ namespace Enjon
 		{
 			Serialize( c, buffer );
 		}
-
-		// Serialize the prototype entity UUID 
-		buffer->Write< UUID >( entity.Get( )->HasPrototypeEntity( ) ? entity.Get( )->GetPrototypeEntity( ).Get( )->GetUUID( ) : UUID::Invalid( ) );
 
 		// Serialize entity default ( remaining unserialized properties )
 		SerializeObjectDataDefault( entity.Get( ), entity.Get( )->Class( ), buffer );
@@ -241,6 +245,15 @@ namespace Enjon
 		// Read in name
 		ent->SetName( buffer->Read< String >( ) );
 
+		// Read in archetype
+		ent->SetArchetype( EngineSubsystem( AssetManager )->GetAsset< Archetype >( buffer->Read< UUID >( ) ) );
+
+		// Store prototype id
+		UUID prototypeID = buffer->Read< UUID >( );
+
+		// Deserialize the prototype entity UUID 
+		ent->SetPrototypeEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( prototypeID ) );
+
 		//=================================================================
 		// Components
 		//=================================================================
@@ -300,14 +313,8 @@ namespace Enjon
 			}
 		}
 
-		// Store prototype id
-		UUID prototypeID = buffer->Read< UUID >( );
-
 		// Deserialize object default
 		DeserializeObjectDataDefault( ent, ent->Class( ), buffer );
-
-		// Deserialize the prototype entity UUID 
-		ent->SetPrototypeEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( prototypeID ) );
 
 		return ent;
 	}

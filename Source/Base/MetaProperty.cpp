@@ -66,7 +66,7 @@ namespace Enjon
  
 	bool MetaPropertyTraits::IsSerializeable( ) const 
 	{
-		return !HasFlags( MetaPropertyFlags::NonSerializable );
+		return !HasFlags( MetaPropertyFlags::NonSerializeable );
 	}
 }
 

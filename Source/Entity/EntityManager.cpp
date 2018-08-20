@@ -492,14 +492,7 @@ namespace Enjon
 		{
 			CalculateWorldTransform( );
 			UpdateComponentTransforms( );
-		}
-
-		// Add override from prototype entity
-		if ( mPrototypeEntity )
-		{
-			MetaProperty* scaleProp = const_cast< MetaProperty* >( mLocalTransform.Class( )->GetPropertyByName( "mScale" ) );
-			scaleProp->AddOverride( &mLocalTransform );
-		}
+		} 
 
 		mWorldTransformDirty = true;
 	}
@@ -513,7 +506,7 @@ namespace Enjon
 		{
 			CalculateWorldTransform( );
 			UpdateComponentTransforms( );
-		}
+		} 
 
 		mWorldTransformDirty = true;
 	}
