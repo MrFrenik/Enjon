@@ -3,6 +3,9 @@
 
 #include "Math/Vec2.h"
 
+#include <iostream>
+#include <fmt/format.h>
+
 namespace Enjon 
 {  
 	//==================================================================
@@ -313,6 +316,56 @@ namespace Enjon
 	{ 
 		return a.Dot(b); 
 	}
+
+	//==================================================================
+
+	Rect::Rect( const Vec2& position, const Vec2& size )
+		: mPosition( position ), mSize( size )
+	{ 
+	}
+
+	//==================================================================
+
+	Rect::Rect( const f32& x, const f32& y, const f32& width, const f32& height )
+		: mPosition( Vec2( x, y ) ), mSize( Vec2( width, height ) )
+	{
+	}
+
+	//==================================================================
+
+	bool Rect::Contains( const Vec2& point, RectContainType containType )
+	{ 
+		switch ( containType )
+		{
+			default:
+			case RectContainType::Inclusive:
+			{ 
+				if ( point.x < mPosition.x ||
+					point.y < mPosition.y ||
+					point.x > mPosition.x + mSize.x ||
+					point.y > mPosition.y + mSize.y )
+				{
+					return false;
+				}
+			} break;
+
+			case RectContainType::Exclusive:
+			{
+				if ( point.x <= mPosition.x ||
+					point.y <= mPosition.y ||
+					point.x >= mPosition.x + mSize.x ||
+					point.y >= mPosition.y + mSize.y )
+				{
+					return false;
+				}
+
+			} break;
+		}
+
+		return true;
+	}
+
+	//==================================================================
 }
 
 

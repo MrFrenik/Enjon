@@ -1,6 +1,7 @@
 
 #include "EditorMaterialEditWindow.h"
 #include "EditorWorldOutlinerView.h"
+#include "EditorAssetBrowserView.h"
 #include "EditorApp.h"
 
 #include <Graphics/GraphicsSubsystem.h>
@@ -9,6 +10,7 @@
 #include <Entity/Archetype.h>
 #include <Graphics/StaticMeshRenderable.h>
 #include <Entity/Components/StaticMeshComponent.h>
+#include <Entity/Components/SkeletalMeshComponent.h>
 #include <Serialize/ObjectArchiver.h>
 #include <IO/InputManager.h>
 #include <SubsystemCatalog.h>
@@ -54,6 +56,35 @@ namespace Enjon
 		ImVec2 b( mSceneViewWindowPosition.x + mSceneViewWindowSize.x, mSceneViewWindowPosition.y + mSceneViewWindowSize.y ); 
 		dl->AddRect( a, b, ImColor( 0.0f, 0.64f, 1.0f, 0.48f ), 1.0f, 15, 1.5f ); 
 
+		EditorAssetBrowserView* abv = mApp->GetEditorAssetBrowserView( );
+		if ( abv->GetGrabbedAsset( ) && mWindow->IsMouseInWindow( ) )
+		{
+			mWindow->SetFocus( );
+		}
+
+		mWindow->PrintDebugInfo( ); 
+
+		if ( abv->GetGrabbedAsset( ) )
+		{ 
+			if ( mWindow->IsMouseInWindow( ) )
+			{ 
+				String label = fmt::format( "Asset: {}", abv->GetGrabbedAsset()->GetName( ) ).c_str( );
+				ImVec2 txtSize = ImGui::CalcTextSize( label.c_str( ) );
+				ImGui::SetNextWindowPos( ImVec2( ImGui::GetMousePos( ).x + 15.0f, ImGui::GetMousePos().y + 5.0f ) );
+				ImGui::SetNextWindowSize( ImVec2( txtSize.x + 20.0f, txtSize.y ) );
+				ImGui::Begin( "##grabbed_asset_window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
+				{
+					ImGui::Text( label.c_str( ) );
+				}
+				ImGui::End( ); 
+
+				if ( ImGui::IsMouseReleased( 0 ) && IsHovered( ) )
+				{
+					HandleAssetDrop( );
+				} 
+			} 
+		}
+
 		if ( IsFocused( ) )
 		{
 			UpdateCamera( );
@@ -70,6 +101,100 @@ namespace Enjon
 			mFocusSet = false;
 		}
 	} 
+
+	//===============================================================================================
+
+	Vec2 EditorViewport::GetSceneViewProjectedCursorPosition( )
+	{
+		// Need to get percentage of screen and things and stuff from mouse position
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem ); 
+		Input* input = EngineSubsystem( Input );
+		iVec2 viewport = gfx->GetViewport( );
+		Vec2 mp = input->GetMouseCoords( );
+		
+		// X screen percentage
+		f32 pX = f32( mp.x - mSceneViewWindowPosition.x ) / f32( mSceneViewWindowSize.x );
+		f32 pY = f32( mp.y - mSceneViewWindowPosition.y ) / f32( mSceneViewWindowSize.y ); 
+
+		return Vec2( (s32)( pX * viewport.x ), (s32)( pY * viewport.y ) );
+	}
+
+	void EditorViewport::HandleAssetDrop( )
+	{
+		// Get projected mouse position
+		Vec2 mp = GetSceneViewProjectedCursorPosition( );
+
+		const Asset* grabbedAsset = mApp->GetEditorAssetBrowserView( )->GetGrabbedAsset( );
+
+		// If material, then set material of overlapped object with this asset
+		if ( grabbedAsset->Class( )->InstanceOf< Material >( ) )
+		{
+			// Check against graphics system for object
+			GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem ); 
+
+			PickResult pickRes = gfx->GetPickedObjectResult( mp, mWindow->GetWorld( )->GetContext< GraphicsSubsystemContext >( ) );
+
+			u32 subMeshIdx = pickRes.mSubmeshIndex;
+
+			Entity* ent = pickRes.mEntity.Get( );
+
+			if ( ent )
+			{
+				// If static mesh component
+				if ( ent->HasComponent< StaticMeshComponent >( ) )
+				{
+					StaticMeshComponent* smc = ent->GetComponent< StaticMeshComponent >( );
+					smc->SetMaterial( grabbedAsset );
+				}
+				else if ( ent->HasComponent< SkeletalMeshComponent >( ) )
+				{
+					SkeletalMeshComponent* smc = ent->GetComponent< SkeletalMeshComponent >( );
+					smc->SetMaterial( grabbedAsset );
+				}
+			}
+		} 
+		//else if ( grabbedAsset->Class( )->InstanceOf< Archetype >( ) )
+		//{
+		//	Archetype* archType = grabbedAsset->ConstCast< Archetype >( );
+		//	if ( archType )
+		//	{
+		//		// Instantiate the archetype right in front of the camera for now
+		//		GraphicsSubsystemContext* gfxCtx = GetWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( );
+		//		Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
+		//		Vec3 position = cam->GetPosition() + cam->Forward( ) * 5.0f; 
+		//		Vec3 scale = archType->GetRootEntity( ).Get( )->GetLocalScale( );
+		//		EntityHandle handle = archType->Instantiate( Transform( position, Quaternion( ), scale ), GetWindow()->GetWorld() );
+		//	}
+		//}
+		else if ( grabbedAsset->Class( )->InstanceOf< SkeletalMesh >( ) )
+		{
+			// Do things...
+		}
+		else if ( grabbedAsset->Class( )->InstanceOf< Mesh >( ) )
+		{
+			// Construct new entity in front of camera
+			Mesh* mesh = grabbedAsset->ConstCast< Mesh >( );
+			if ( mesh )
+			{
+				// Instantiate the archetype right in front of the camera for now
+				GraphicsSubsystemContext* gfxCtx = GetWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( );
+				Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
+				Vec3 position = cam->GetPosition() + cam->Forward( ) * 5.0f; 
+				EntityHandle handle = EngineSubsystem( EntityManager )->Allocate( );
+				if ( handle )
+				{
+					Entity* newEnt = handle.Get( );
+					StaticMeshComponent* smc = newEnt->AddComponent< StaticMeshComponent >( );
+					smc->SetMesh( mesh );
+					newEnt->SetLocalPosition( position );
+					newEnt->SetName( mesh->GetName( ) );
+				}
+			}
+		}
+		
+	}
+
+	//===============================================================================================
 
 	void EditorViewport::CaptureState( )
 	{

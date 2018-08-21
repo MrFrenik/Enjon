@@ -72,10 +72,7 @@ namespace Enjon
 		{
 			// TODO(John): GET RID OF ALL OF THIS STUPID SHIT
 			// Save all the stupid shit and stuff...
-			for ( auto& c : mRoot->GetChildren( ) )
-			{
-				c.Get( )->mIsArchetypeRoot = true;
-			} 
+			this->ConstCast< Archetype >()->RecursivelySetToRoot( mRoot ); 
 
 			EntityArchiver::Serialize( mRoot, buffer ); 
 		}
@@ -96,13 +93,9 @@ namespace Enjon
 
 		// Deserialize into root
 		mRoot = EntityArchiver::Deserialize( buffer, EngineSubsystem( EntityManager )->GetArchetypeWorld( ) ).Get( );
-		mRoot->mIsArchetypeRoot = true;
 
 		// THIS IS A FUCKING PROBLEM AND HACKY BULLSHIT. FUCKING FIX IT.
-		for ( auto& c : mRoot->GetChildren( ) )
-		{
-			c.Get( )->mIsArchetypeRoot = true;
-		}
+		RecursivelySetToRoot( mRoot );
  
 		return Result::SUCCESS; 
 	}
@@ -118,7 +111,7 @@ namespace Enjon
 
 			// Construct root if not available
 			mRoot = em->Allocate( em->GetArchetypeWorld( ) ).Get( );
-			mRoot->mIsArchetypeRoot = true;
+			RecursivelySetToRoot( mRoot );
 			mRoot->SetName( "Root" );
 		}
 
@@ -142,6 +135,50 @@ namespace Enjon
 
 	//=======================================================================================
 
+	void Archetype::RecursivelySetToRoot( const EntityHandle& entity )
+	{
+		// Grab entity
+		Entity* ent = entity.Get( );
+
+		if ( !ent )
+		{
+			return;
+		}
+
+		// Set to root
+		ent->mIsArchetypeRoot = true;
+
+		// Set all children to root
+		for ( auto& c : ent->GetChildren( ) )
+		{
+			RecursivelySetToRoot( c );
+		}
+	}
+
+	//=======================================================================================
+
+	void Archetype::RecursivelyRemoveFromRoot( const EntityHandle& entity )
+	{
+		// Grab entity ( ...by the pussy )
+		Entity* ent = entity.Get( );
+
+		if ( !ent )
+		{
+			return;
+		}
+
+		// Set to root
+		ent->mIsArchetypeRoot = false;
+
+		// Set all children to root
+		for ( auto& c : ent->GetChildren( ) )
+		{
+			RecursivelySetToRoot( c );
+		}
+	}
+
+	//=======================================================================================
+
 	EntityHandle Archetype::ConstructFromEntity( const EntityHandle& entity )
 	{
 		// All I need to do here is shallow copy all of the other entity's fields into this root entity's
@@ -155,16 +192,14 @@ namespace Enjon
 			nr->mArchetype = mRoot->mArchetype;
 
 			// Destroy previous entity
-			mRoot->mIsArchetypeRoot = false;
+			RecursivelyRemoveFromRoot( mRoot );
 			mRoot->Destroy( );
+
+			// Recursively set all entities in this hierarchy to root entities ( so they can't be destroyed. Terribly named hacky solution )
+			RecursivelySetToRoot( nr );
 
 			// Reset to new entity
 			mRoot = nr;
-			mRoot->mIsArchetypeRoot = true;
-			for ( auto& c : mRoot->GetChildren( ) )
-			{
-				c.Get( )->mIsArchetypeRoot = true;
-			}
 		}
 
 		return mRoot;

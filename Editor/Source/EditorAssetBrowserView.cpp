@@ -464,19 +464,6 @@ namespace Enjon
 			PrepareReleaseGrabbedAsset( );
 			return;
 		}
-
-		// Draw window around mouse position
-		Vec2 mousePos = input->GetMouseCoords( );
-
-		String label = fmt::format( "Asset: {}", mGrabbedAsset->GetName( ) ).c_str( );
-		ImVec2 txtSize = ImGui::CalcTextSize( label.c_str( ) );
-		ImGui::SetNextWindowPos( ImVec2( ImGui::GetMousePos( ).x + 15.0f, ImGui::GetMousePos().y + 5.0f ) );
-		ImGui::SetNextWindowSize( ImVec2( txtSize.x + 20.0f, txtSize.y ) );
-		ImGui::Begin( "##grabbed_asset_window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
-		{
-			ImGui::Text( label.c_str( ) );
-		}
-		ImGui::End( ); 
 	} 
 
 	//=========================================================================

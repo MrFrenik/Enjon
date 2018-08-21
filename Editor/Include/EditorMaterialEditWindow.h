@@ -38,6 +38,11 @@ namespace Enjon
 			*/
 			Vec2 GetCenterOfViewport( );	 
 
+			/**
+			* @brief
+			*/
+			Vec2 GetSceneViewProjectedCursorPosition( );
+
 		protected:
 
 			/**
@@ -63,6 +68,11 @@ namespace Enjon
 			* @brief
 			*/
 			virtual void CaptureState( ) override;
+
+			/**
+			* @brief
+			*/
+			void HandleAssetDrop( ); 
 
 			/**
 			* @brief

@@ -15,6 +15,8 @@
 #include <IO/InputManager.h>
 #include <Graphics/FrameBuffer.h>
 
+#include <fmt/format.h>
+
 namespace Enjon
 {
 	//=================================================================
@@ -87,10 +89,38 @@ namespace Enjon
 		} 
 
 		EditorAssetBrowserView* abv = mApp->GetEditorAssetBrowserView( );
-		if ( abv->GetGrabbedAsset( ) && ImGui::IsMouseReleased( 0 ) && IsHovered() )
+		if ( abv->GetGrabbedAsset( ) && mWindow->IsMouseInWindow( ) )
 		{
-			HandleAssetDrop( );
-		} 
+			if ( !mWindow->IsFocused( ) )
+			{
+				mWindow->SetFocus( );
+			}
+		}
+
+		if ( abv->GetGrabbedAsset( ) )
+		{
+			if ( mWindow->IsMouseInWindow( ) )
+			{
+				mWindow->SetFocus( );
+
+				{
+					String label = fmt::format( "Asset: {}", abv->GetGrabbedAsset( )->GetName( ) ).c_str( );
+					ImVec2 txtSize = ImGui::CalcTextSize( label.c_str( ) );
+					ImGui::SetNextWindowPos( ImVec2( ImGui::GetMousePos( ).x + 15.0f, ImGui::GetMousePos().y + 5.0f ) );
+					ImGui::SetNextWindowSize( ImVec2( txtSize.x + 20.0f, txtSize.y ) );
+					ImGui::Begin( "##grabbed_asset_window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
+					{
+						ImGui::Text( label.c_str( ) );
+					}
+					ImGui::End( ); 
+				}
+
+				if ( ImGui::IsMouseReleased( 0 ) && IsFocused( ) )
+				{
+					HandleAssetDrop( );
+				} 
+			} 
+		}
 
 		// Lose focus 
 		if ( !IsFocused() )
@@ -180,6 +210,7 @@ namespace Enjon
 				}
 			}
 		}
+
 	}
  
 	//=================================================================

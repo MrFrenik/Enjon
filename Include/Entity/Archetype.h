@@ -76,6 +76,16 @@ namespace Enjon
 			*/
 			void RecursivelySetArchetype( const EntityHandle& handle );
 
+			/**
+			* @brief
+			*/
+			void RecursivelySetToRoot( const EntityHandle& entity );
+
+			/**
+			* @brief
+			*/
+			void RecursivelyRemoveFromRoot( const EntityHandle& entity );
+
 		protected: 
 			Entity* mRoot = nullptr;
 	};

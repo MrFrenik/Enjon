@@ -7,6 +7,7 @@
 
 #include <iostream>
 
+#include "Base/Object.h"
 #include "System/Types.h"
 
 namespace Enjon 
@@ -379,6 +380,40 @@ namespace Enjon
 		public:
 			s32 x; 
 			s32 y; 
+	};
+
+	ENJON_ENUM( )
+	enum class RectContainType
+	{
+		Inclusive,
+		Exclusive
+	};
+
+	ENJON_CLASS( )
+	class Rect : public Object
+	{
+		ENJON_CLASS_BODY( Rect )
+
+		public:
+
+			/*
+			* @brief
+			*/
+			Rect( const Vec2& position, const Vec2& size );
+
+			/*
+			* @brief
+			*/
+			Rect( const f32& x, const f32& y, const f32& width, const f32& height );
+
+			/*
+			* @brief
+			*/
+			bool Contains( const Vec2& point, RectContainType containType = RectContainType::Inclusive );
+
+		private: 
+			Vec2 mPosition;
+			Vec2 mSize;
 	};
 }
 

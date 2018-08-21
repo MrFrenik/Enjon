@@ -8,6 +8,12 @@
 #include "SubsystemCatalog.h"
 #include "Base/World.h"
 
+#ifdef ENJON_SYSTEM_WINDOWS
+	#include <Windows.h>
+#endif
+
+#include <fmt/format.h>
+
 namespace Enjon 
 { 
 	SDL_GLContext Window::mGLContext = nullptr;
@@ -185,22 +191,37 @@ namespace Enjon
 		//Need to figure this one out...
 	}
 
+	void Window::PrintDebugInfo( )
+	{
+#ifdef ENJON_SYSTEM_WINDOWS
+		s32 x, y, sizeX, sizeY;
+		SDL_GetWindowPosition( m_sdlWindow, &x, &y ); 
+		SDL_GetWindowSize( m_sdlWindow, &sizeX, &sizeY );
+		Vec2 mouseCoords = EngineSubsystem( Input )->GetMouseCoords( ); 
+		POINT point;
+		GetCursorPos( &point ); 
+		std::cout << fmt::format( "WindowMin: <{}, {}>, WindowMax: <{}, {}>, MouseCoords: <{}, {}>, Contains: {}\n", x, y, x + sizeX, y + sizeY, point.x, point.y, IsMouseInWindow( ) );
+#endif
+	}
+
 	bool Window::IsMouseInWindow( )
 	{
-		Vec2 mouseCoords = EngineSubsystem( Input )->GetMouseCoords( );
-		iVec2 mc;
-		
-		int x, y, w, h;
-		SDL_GetWindowPosition( m_sdlWindow, &x, &y );
-		SDL_GetWindowSize( m_sdlWindow, &w, &h );
+		s32 x, y, sizeX, sizeY;
+		SDL_GetWindowPosition( m_sdlWindow, &x, &y ); 
+		SDL_GetWindowSize( m_sdlWindow, &sizeX, &sizeY );
 
-		if ( mouseCoords.x < x || mouseCoords.x > x + w ||
-			mouseCoords.y < y || mouseCoords.y > y + h )
-		{
-			return false;
-		}
+		// Define rect
+		Rect rect( x, y, sizeX, sizeY );
 
-		return true; 
+		Vec2 mouseCoords;
+
+#ifdef ENJON_SYSTEM_WINDOWS
+	POINT point;
+	GetCursorPos( &point ); 
+	mouseCoords = Vec2( point.x, point.y );
+#endif
+ 
+		return ( rect.Contains( mouseCoords, RectContainType::Exclusive ) ); 
 	}
 
 	Result Window::ProcessInput( const SDL_Event& event )
@@ -212,8 +233,6 @@ namespace Enjon
 		{
 			ClearDroppedFiles( );
 		} 
-
-		IsMouseInWindow( );
 
 		switch ( event.type )
 		{
@@ -353,6 +372,20 @@ namespace Enjon
 
 	//==============================================================================
 
+	void Window::SetFocus( )
+	{
+		SDL_RaiseWindow( m_sdlWindow ); 
+	}
+
+	//==============================================================================
+
+	bool Window::IsFocused( )
+	{
+		return ( m_sdlWindow == SDL_GetMouseFocus( ) );
+	}
+
+	//==============================================================================
+
 	void Window::InitSDLCursors( )
 	{
 		mSDLCursors[ CursorType::Arrow ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_ARROW );
@@ -448,4 +481,21 @@ namespace Enjon
 		// Clear window set
 		mWindowsToInit.clear( );
 	} 
+
+	//==============================================================================================
+
+	bool Window::AnyWindowHovered( )
+	{
+		for ( auto& w : EngineSubsystem( GraphicsSubsystem )->GetWindows( ) )
+		{
+			if ( w->IsMouseInWindow( ) )
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	//==============================================================================================
 }

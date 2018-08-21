@@ -80,46 +80,120 @@ namespace Enjon
 
 			bool inline IsFullScreen() const { return m_isfullscreen; }
 
+			/*
+			* @brief
+			*/
 			inline int ShowMouseCursor(int val) const { return SDL_ShowCursor(val); } 
+
+			/*
+			* @brief
+			*/
 			inline int GetScreenWidth() const { return m_screenWidth; }
+
+			/*
+			* @brief
+			*/
 			inline int GetScreenHeight() const { return m_screenHeight; }
 
+			/*
+			* @brief
+			*/
 			virtual void Update( );
 
+			/*
+			* @brief
+			*/
 			void SetViewport(int width, int height);
+
+			/*
+			* @brief
+			*/
 			void SetViewport(Enjon::iVec2& dimensions);
+
+			/*
+			* @brief
+			*/
 			iVec2 GetViewport() const;
 		
+			/*
+			* @brief
+			*/
 			void Clear(float val = 1.0f, 
 						GLbitfield mask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, 
 						const ColorRGBA32& color = RGBA32_Black());
+
+			/*
+			* @brief
+			*/
 			void SwapBuffer(); 
 
+			/*
+			* @brief
+			*/
 			void MakeCurrent( );
 
+			/*
+			* @brief
+			*/
 			Result ProcessInput( const SDL_Event& event );
 
+			/*
+			* @brief
+			*/
 			SDL_Window* GetWindowContext() { return m_sdlWindow; }
+
+			/*
+			* @brief
+			*/
 			SDL_Window* GetSDLWindow() { return m_sdlWindow; }
 
+			/*
+			* @brief
+			*/
 			const HashSet<String>& GetDroppedFiles( ); 
 
+			/*
+			* @brief
+			*/
 			static void SetWindowCursor( CursorType type );
 
+			/*
+			* @brief
+			*/
 			GUIContext* GetGUIContext( )
 			{
 				return &mGUIContext;
 			}
 
+			/*
+			* @brief
+			*/
 			bool IsMouseInWindow( );
+
+
+			/*
+			* @brief
+			*/
+			void Window::PrintDebugInfo( );
+
+			/*
+			* @brief
+			*/
+			void SetFocus( );
+
+			/*
+			* @brief
+			*/
+			bool IsFocused( );
 
 			// TOTAL HACKS FOR NOW
 			void SetWorld( World* world );
 			World* GetWorld( );
 
-			static void AddNewWindow( const WindowParams& params );
+			static bool AnyWindowHovered( );
+			static void AddNewWindow( const WindowParams& params ); 
 			static void DestroyWindow( Window* window ); 
-			static void InitializeWindows( );
+			static void InitializeWindows( ); 
 			static void CleanupWindows( bool destroyAll = false );
 			static void WindowsUpdate( );
 
