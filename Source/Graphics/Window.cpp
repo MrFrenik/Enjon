@@ -260,10 +260,11 @@ namespace Enjon
 						// For now only reinitialize the frame buffers for main window
 						if ( event.window.windowID == SDL_GetWindowID( EngineSubsystem( GraphicsSubsystem )->GetMainWindow()->GetSDLWindow() ) )
 						{
-							SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
 							gs->ReinitializeFrameBuffers( );
 						}
 
+						// Resize viewport
+						SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
 					}
 					break; 
 
@@ -476,6 +477,8 @@ namespace Enjon
 			window->Init( wp.mName, wp.mWidth, wp.mHeight, wp.mFlags );
 			// Late initialize gui context
 			window->GetGUIContext( )->LateInit( );
+			// Resize viewport
+			window->SetViewport( iVec2( wp.mWidth, wp.mHeight ) );
 		}
 
 		// Clear window set
@@ -495,6 +498,22 @@ namespace Enjon
 		}
 
 		return false;
+	}
+
+	//==============================================================================================
+
+	u32 Window::NumberOfHoveredWindows( )
+	{
+		u32 count = 0;
+		for ( auto& w : EngineSubsystem( GraphicsSubsystem )->GetWindows( ) ) 
+		{
+			if ( w->IsMouseInWindow( ) )
+			{
+				count++;
+			}
+		}
+
+		return count;
 	}
 
 	//==============================================================================================

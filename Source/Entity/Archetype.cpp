@@ -38,22 +38,15 @@ namespace Enjon
 
 	void Archetype::ExplicitConstructor( )
 	{
-		// Need to construct empty entity, fill out buffer data, then destroy entity
-		EntityManager* em = EngineSubsystem( EntityManager );
+	}
 
-		// Cannot continue with construction
-		if ( !em )
-		{
-			return;
-		}
- 
-		//EntityHandle handle = EngineSubsystem( EntityManager )->Allocate( em->GetArchetypeWorld( ) );
-		//handle.Get( )->SetName( "Root" );
+	//=======================================================================================
 
-		//// Stupid bullshit so it won't be destroyed when the window is closed...
-		//handle.Get( )->mIsArchetypeRoot = true;
+	Result Archetype::Reload( )
+	{ 
+		const_cast< AssetLoader* >( mLoader )->ReloadAsset( this );
 
-		//mRoot = handle.Get( ); 
+		return Result::SUCCESS;
 	}
 
 	//=======================================================================================

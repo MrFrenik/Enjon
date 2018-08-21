@@ -525,6 +525,15 @@ namespace Enjon
 
 	//=================================================================
 
+	void AssetLoader::ReloadAsset( Asset* asset )
+	{
+		if ( asset )
+		{
+			AssetRecordInfo* info = const_cast< AssetRecordInfo* >( asset->GetAssetRecordInfo( ) );
+			info->ReloadAsset( );
+		}
+	}
+
 	const ImportOptions* AssetLoader::GetImportOptions( ) const
 	{
 		// Nothing by default

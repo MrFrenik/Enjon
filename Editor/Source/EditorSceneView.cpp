@@ -89,20 +89,15 @@ namespace Enjon
 		} 
 
 		EditorAssetBrowserView* abv = mApp->GetEditorAssetBrowserView( );
-		if ( abv->GetGrabbedAsset( ) && mWindow->IsMouseInWindow( ) )
+		if ( abv->GetGrabbedAsset( ) && mWindow->IsMouseInWindow( ) && Window::NumberOfHoveredWindows() == 1 )
 		{
-			if ( !mWindow->IsFocused( ) )
-			{
-				mWindow->SetFocus( );
-			}
+			mWindow->SetFocus( );
 		}
 
 		if ( abv->GetGrabbedAsset( ) )
 		{
-			if ( mWindow->IsMouseInWindow( ) )
-			{
-				mWindow->SetFocus( );
-
+			if ( mWindow->IsMouseInWindow( ) && mWindow->IsFocused( ) )
+			{ 
 				{
 					String label = fmt::format( "Asset: {}", abv->GetGrabbedAsset( )->GetName( ) ).c_str( );
 					ImVec2 txtSize = ImGui::CalcTextSize( label.c_str( ) );
@@ -115,7 +110,7 @@ namespace Enjon
 					ImGui::End( ); 
 				}
 
-				if ( ImGui::IsMouseReleased( 0 ) && IsFocused( ) )
+				if ( ImGui::IsMouseReleased( 0 ) && IsHovered( ) )
 				{
 					HandleAssetDrop( );
 				} 

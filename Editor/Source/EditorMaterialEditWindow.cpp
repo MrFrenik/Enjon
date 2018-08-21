@@ -29,7 +29,7 @@ namespace Enjon
 		// Grab graphics context from world and then get framebuffer rendertarget texture
 		World* world = mWindow->GetWorld( );
 		GraphicsSubsystemContext* gfxCtx = world->GetContext< GraphicsSubsystemContext >( );
-		u32 currentTextureId = gfxCtx->GetFrameBuffer( )->GetTexture( ); 
+		u32 currentTextureId = gfxCtx->GetFrameBuffer( )->GetTexture( );
 
 		// Rotate camera over time
 		Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
@@ -57,16 +57,16 @@ namespace Enjon
 		dl->AddRect( a, b, ImColor( 0.0f, 0.64f, 1.0f, 0.48f ), 1.0f, 15, 1.5f ); 
 
 		EditorAssetBrowserView* abv = mApp->GetEditorAssetBrowserView( );
-		if ( abv->GetGrabbedAsset( ) && mWindow->IsMouseInWindow( ) )
+		if ( abv->GetGrabbedAsset( ) && mWindow->IsMouseInWindow( ) && Window::NumberOfHoveredWindows() == 1 )
 		{
 			mWindow->SetFocus( );
-		}
-
-		mWindow->PrintDebugInfo( ); 
+		} 
 
 		if ( abv->GetGrabbedAsset( ) )
 		{ 
-			if ( mWindow->IsMouseInWindow( ) )
+			Vec2 mp = GetSceneViewProjectedCursorPosition( );
+
+			if ( mWindow->IsMouseInWindow( ) && mWindow->IsFocused( ) )
 			{ 
 				String label = fmt::format( "Asset: {}", abv->GetGrabbedAsset()->GetName( ) ).c_str( );
 				ImVec2 txtSize = ImGui::CalcTextSize( label.c_str( ) );
@@ -493,6 +493,10 @@ namespace Enjon
 		if ( mArchetype )
 		{
 			Archetype* archType = mArchetype.Get( )->ConstCast< Archetype >( );
+
+			// Force reload of archType
+			archType->Reload( );
+
 			Transform t;
 			t.SetPosition( cam->GetPosition( ) + cam->Forward( ) * 3.0f );
 			t.SetScale( 2.0f );

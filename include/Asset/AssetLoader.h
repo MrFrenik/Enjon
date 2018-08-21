@@ -147,6 +147,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void ReloadAsset( Asset* asset );
+
+			/**
+			* @brief
+			*/
 			virtual void RegisterDefaultAsset( )
 			{ 
 			}

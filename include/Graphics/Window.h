@@ -190,6 +190,7 @@ namespace Enjon
 			void SetWorld( World* world );
 			World* GetWorld( );
 
+			static u32 NumberOfHoveredWindows( );
 			static bool AnyWindowHovered( );
 			static void AddNewWindow( const WindowParams& params ); 
 			static void DestroyWindow( Window* window ); 

@@ -69,6 +69,11 @@ namespace Enjon
 			*/
 			virtual Result CopyFromOther( const Asset* other );
 
+			/**
+			* @brief
+			*/
+			virtual Result Reload( ) override;
+
 		private:
 
 			/**

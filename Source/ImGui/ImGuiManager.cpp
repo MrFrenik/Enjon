@@ -1004,6 +1004,52 @@ namespace Enjon
 				}
 
 			} break;
+			
+			// AssetHandle type
+			case Enjon::MetaPropertyType::AssetHandle:
+			{
+				// Property is of type MetaPropertyAssetHandle
+				const MetaPropertyTemplateBase* base = prop->Cast< MetaPropertyTemplateBase >( );
+				const MetaClass* assetCls = base->GetClassOfTemplatedArgument( );
+
+				if ( assetCls )
+				{
+					Enjon::AssetHandle<Enjon::Asset> val;
+					cls->GetValue( object, prop, &val );
+					AssetManager* am = EngineSubsystem( AssetManager );
+					auto assets = am->GetAssets( assetCls );
+					{
+						if ( assets )
+						{
+							static ImGuiTextFilter filter;
+							static String filterString = "";
+							String label = val ? val->GetName( ) : assetCls->GetName( );
+							if ( ImGui::BeginCombo( fmt::format( "##{}", prop->GetName( ) ).c_str( ), label.c_str( ) ) )
+							{
+								// For each record in assets
+								for ( auto& a : *assets )
+								{
+									char buffer[ 256 ];
+									strncpy( buffer, filterString.c_str( ), 256 );
+									if ( filter.PassFilter( buffer ) )
+									{
+										if ( ImGui::Selectable( a.second.GetAssetName( ).c_str( ) ) )
+										{
+											val.Set( const_cast< Asset* > ( a.second.GetAsset( ) ) );
+											cls->SetValue( object, prop, val );
+										}
+									}
+								}
+								ImGui::EndCombo( );
+							}
+						}
+						if ( val )
+						{
+							ImGuiManager::DebugDumpObject( val.Get( ) );
+						}
+					}
+				}
+			} break;
 		}
 
 		// Pop color for label
@@ -1071,6 +1117,7 @@ namespace Enjon
 				case Enjon::MetaPropertyType::Transform:
 				case Enjon::MetaPropertyType::Bool:
 				case Enjon::MetaPropertyType::Enum:
+				case Enjon::MetaPropertyType::AssetHandle:
 				{
 					DebugDumpProperty( object, prop );
 				} break; 
@@ -1095,56 +1142,6 @@ namespace Enjon
 						DebugDumpHashMapProperty( object, mapProp );
 						ImGui::TreePop( );
 					}
-
-				} break;
-				
-				
-				// AssetHandle type
-				case Enjon::MetaPropertyType::AssetHandle:
-				{
-					// Property is of type MetaPropertyAssetHandle
-					const MetaPropertyTemplateBase* base = prop->Cast< MetaPropertyTemplateBase >( );
-					const MetaClass* assetCls = base->GetClassOfTemplatedArgument( );
-
-					if ( assetCls )
-					{ 
-						Enjon::AssetHandle<Enjon::Asset> val; 
-						cls->GetValue( object, prop, &val );
-						AssetManager* am = EngineSubsystem( AssetManager );
-						auto assets = am->GetAssets( assetCls ); 
-						if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
-						{
-							if ( assets )
-							{
-								static ImGuiTextFilter filter;
-								static String filterString = "";
-								String label = val ? val->GetName( ) : assetCls->GetName( );
-								if ( ImGui::BeginCombo( fmt::format("##{}", prop->GetName() ).c_str(), label.c_str() ) )
-								{
-									// For each record in assets
-									for ( auto& a : *assets )
-									{
-										char buffer[ 256 ];
-										strncpy( buffer, filterString.c_str( ), 256 );
-										if ( filter.PassFilter( buffer ) )
-										{
-											if ( ImGui::Selectable( a.second.GetAssetName().c_str( ) ) )
-											{ 
-												val.Set( const_cast< Asset* > ( a.second.GetAsset() ) );
-												cls->SetValue( object, prop, val );
-											} 
-										}
-									}
-									ImGui::EndCombo( );
-								} 
-							}
-							if ( val )
-							{
-								ImGuiManager::DebugDumpObject( val.Get( ) ); 
-							}
-							ImGui::TreePop( );
-						}
-					} 
 
 				} break;
 
