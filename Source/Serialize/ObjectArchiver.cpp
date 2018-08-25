@@ -646,6 +646,7 @@ namespace Enjon
 				case MetaPropertyType::Vec4:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Vec4 ); break; 
 				case MetaPropertyType::ColorRGBA32:	ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, ColorRGBA32 ); break; 
 				case MetaPropertyType::Quat:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, Quaternion ); break; 
+				case MetaPropertyType::AssetHandle: ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, AssetHandle< Asset > ) break;
 
 				case MetaPropertyType::Transform:
 				{ 
@@ -770,6 +771,7 @@ namespace Enjon
 			case MetaPropertyType::Vec4:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Vec4 ); break;
 			case MetaPropertyType::Quat:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Quaternion ); break;
 			case MetaPropertyType::ColorRGBA32:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, ColorRGBA32 ); break;
+			case MetaPropertyType::AssetHandle: ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, AssetHandle< Asset > ) break;
 		} 
 
 		return Result::SUCCESS;

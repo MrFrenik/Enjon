@@ -164,6 +164,22 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			bool operator==( const AssetHandle< T >& other )
+			{
+				return ( Get( ) == other.Get( ) );
+			}
+
+			/*
+			* @brief
+			*/
+			bool operator!=( const AssetHandle< T >& other )
+			{
+				return !( Get( ) == other.Get( ) );
+			}
+
+			/*
+			* @brief
+			*/
 			UUID GetUUID( ) const
 			{
 				// Return UUID if valid

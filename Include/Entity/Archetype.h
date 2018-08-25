@@ -72,7 +72,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual Result Reload( ) override;
+			virtual Result Reload( ) override; 
 
 		private:
 
@@ -90,6 +90,21 @@ namespace Enjon
 			* @brief
 			*/
 			void RecursivelyRemoveFromRoot( const EntityHandle& entity );
+
+			/**
+			* @brief
+			*/
+			void RecursivelyFixInstancedEntities( const EntityHandle& dest, const HashMap< String, String >& uuidMap );
+
+			/**
+			* @brief
+			*/
+			void FillUUIDMap( const EntityHandle& entity, HashMap< String, String >* uuidMap ); 
+
+			/**
+			* @brief
+			*/
+			HashMap< String, String > ConstructUUIDMap( const EntityHandle& entity );
 
 		protected: 
 			Entity* mRoot = nullptr;

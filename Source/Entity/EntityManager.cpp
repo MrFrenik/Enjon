@@ -791,7 +791,10 @@ namespace Enjon
 
 	void Entity::SetUUID( const UUID& uuid )
 	{
-		mUUID = uuid;
+		mUUID = uuid; 
+
+		// Set uuid in map
+		EngineSubsystem( EntityManager )->mEntityUUIDMap[ mUUID.ToString( ) ] = this;
 	}
 
 	//---------------------------------------------------------------
@@ -888,13 +891,47 @@ namespace Enjon
 		entity->mID = id;
 		entity->mState = EntityState::ACTIVE;
 		entity->mUUID = UUID::GenerateUUID( );
-		entity->mWorld = world;
+		entity->mWorld = world; 
 
 		// Push back live entity into active entity vector
 		mMarkedForAdd.push_back( entity );
 
+		// Add to uuid map
+		AddToUUIDMap( entity ); 
+
 		// Return entity handle
 		return handle;
+	}
+
+	//---------------------------------------------------------------
+
+	void EntityManager::AddToUUIDMap( const EntityHandle& entity )
+	{
+		Entity* ent = entity.Get( );
+
+		// Can't operate on null entities
+		if ( !ent )
+		{
+			return;
+		}
+
+		// Add to map
+		mEntityUUIDMap[ ent->GetUUID( ).ToString( ) ] = ent;
+	}
+
+	//---------------------------------------------------------------
+
+	void EntityManager::RemoveFromUUIDMap( const EntityHandle& entity )
+	{
+		Entity* ent = entity.Get( );
+
+		if ( !ent )
+		{
+			return;
+		}
+
+		// Erase from map
+		mEntityUUIDMap.erase( ent->GetUUID( ).ToString( ) );
 	}
 
 	//---------------------------------------------------------------
@@ -925,37 +962,46 @@ namespace Enjon
 
 	EntityHandle EntityManager::GetEntityByUUID( const UUID& uuid )
 	{
-		// Serach for matching UUID ( Should have map for this rather )
-		for ( auto& e : mActiveEntities )
+		String uuidStr = uuid.ToString( );
+
+		if ( mEntityUUIDMap.find( uuidStr ) != mEntityUUIDMap.end( ) )
 		{
-			if ( e->GetUUID( ) == uuid )
-			{
-				return EntityHandle( e );
-			}
+			return mEntityUUIDMap[ uuidStr ];
 		}
 
-		// Search for matching UUID in marked for add list
-		for ( auto& e : mMarkedForAdd )
-		{
-			if ( e->GetUUID( ) == uuid )
-			{
-				return EntityHandle( e );
-			}
-		}
+		return EntityHandle::Invalid( );
 
-		for ( auto& w : mWorldEntityMap )
-		{
-			for ( auto& e : w.second )
-			{
-				if ( e->GetUUID( ) == uuid )
-				{
-					return EntityHandle( e );
-				}
-			}
-		}
+		//// Serach for matching UUID ( Should have map for this rather )
+		//for ( auto& e : mActiveEntities )
+		//{
+		//	if ( e->GetState() != EntityState::INACTIVE && e->GetUUID( ) == uuid )
+		//	{
+		//		return EntityHandle( e );
+		//	}
+		//}
+
+		//// Search for matching UUID in marked for add list
+		//for ( auto& e : mMarkedForAdd )
+		//{
+		//	if ( e->GetState() != EntityState::INACTIVE && e->GetUUID( ) == uuid )
+		//	{
+		//		return EntityHandle( e );
+		//	}
+		//}
+
+		//for ( auto& w : mWorldEntityMap )
+		//{
+		//	for ( auto& e : w.second )
+		//	{
+		//		if ( e->GetState() != EntityState::INACTIVE && e->GetUUID( ) == uuid )
+		//		{
+		//			return EntityHandle( e );
+		//		}
+		//	}
+		//}
 
 		// Return invalid entity if not found
-		return EntityHandle::Invalid( );
+		//return EntityHandle::Invalid( );
 	}
 
 	//---------------------------------------------------------------

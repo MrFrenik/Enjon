@@ -205,6 +205,9 @@ namespace Enjon
 
 	EntityHandle EntityArchiver::DeserializeInternal( const EntityHandle& handle, ByteBuffer* buffer, World* world ) 
 	{
+		// Cache off entity manager
+		EntityManager* em = EngineSubsystem( EntityManager );
+
 		//==========================================================================
 		// Local Transform
 		//========================================================================== 
@@ -239,8 +242,14 @@ namespace Enjon
 		 //Set the transform of the entity
 		ent->SetLocalTransform( local );
 
+		// Remove from uuid map before setting uuid
+		em->RemoveFromUUIDMap( ent );
+
 		// Read in uuid
 		ent->SetUUID( buffer->Read< UUID >( ) ); 
+
+		// Add to uuid map with new uuid 
+		em->AddToUUIDMap( ent );
 
 		// Read in name
 		ent->SetName( buffer->Read< String >( ) );

@@ -561,13 +561,15 @@ namespace Enjon
 	using ComponentBaseArray = HashMap< u32, ComponentWrapperBase* >;
 	using ComponentList = Vector< Component* >;
 	using WorldEntityMap = HashMap< const World*, HashSet< Entity* > >;
+	using EntityUUIDMap = HashMap< String, Entity* >;
 
 	ENJON_CLASS( )
-		class EntityManager : public Subsystem
+	class EntityManager : public Subsystem
 	{
 		ENJON_CLASS_BODY( EntityManager )
 
-			friend Entity;
+		friend EntityArchiver;
+		friend Entity;
 		friend Application;
 		friend World;
 		friend EntitySubsystemContext;
@@ -767,6 +769,16 @@ namespace Enjon
 		*/
 		void AddWorld( const World* world );
 
+		/**
+		* @brief
+		*/
+		void AddToUUIDMap( const EntityHandle& entity ); 
+
+		/**
+		* @brief
+		*/
+		void RemoveFromUUIDMap( const EntityHandle& entity );
+
 	private:
 		/**
 		*@brief
@@ -836,6 +848,7 @@ namespace Enjon
 		u32 						mNextAvailableID = 0;
 		WorldEntityMap				mWorldEntityMap;
 		World*						mArchetypeWorld = nullptr;
+		EntityUUIDMap				mEntityUUIDMap;
 	};
 
 #include "Entity/Entity.inl"

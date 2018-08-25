@@ -11,6 +11,7 @@
 #include "Serialize/ObjectArchiver.h"
 #include "Serialize/BaseTypeSerializeMethods.h"
 #include "Serialize/EntityArchiver.h"
+#include "Serialize/UUID.h"
 #include "Engine.h" 
 
 namespace Enjon
@@ -42,9 +43,101 @@ namespace Enjon
 
 	//=======================================================================================
 
+	void Archetype::FillUUIDMap( const EntityHandle& entity, HashMap< String, String >* uuidMap )
+	{
+		Entity* ent = entity.Get( );
+
+		if ( !ent )
+		{
+			return;
+		}
+
+		// Insert into map
+		if ( ent->HasPrototypeEntity( ) )
+		{
+			uuidMap->insert( std::pair<String, String>( ent->GetUUID().ToString( ), ent->GetPrototypeEntity( ).Get( )->GetUUID( ).ToString( ) ) );
+		} 
+
+		// Do all children
+		for ( auto& e : ent->GetChildren( ) )
+		{
+			FillUUIDMap( e, uuidMap );
+		}
+	}
+
+	//=======================================================================================
+
+	HashMap< String, String > Archetype::ConstructUUIDMap( const EntityHandle& entity )
+	{ 
+		HashMap< String, String > uuidMap; 
+		FillUUIDMap( entity, &uuidMap ); 
+		return uuidMap;
+	}
+
+	//=======================================================================================
+
+	void Archetype::RecursivelyFixInstancedEntities( const EntityHandle& dest, const HashMap< String, String >& uuidMap )
+	{ 
+		Entity* ent = dest.Get( );
+
+		// Serialize into buffer
+		ByteBuffer buffer;
+		EntityArchiver::Serialize( dest, &buffer );
+
+		ent->Destroy( ); 
+
+		// Nothing to do
+		if ( !ent )
+		{
+			return;
+		}
+
+		// Found uuid in map, so fix up prototype entity pointer
+		if ( uuidMap.find( ent->GetUUID( ).ToString( ) ) != uuidMap.end( ) )
+		{
+			ent->SetPrototypeEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( UUID( uuidMap.at(  ent->GetUUID( ).ToString( ) ) ) ) );
+		}
+
+		// Fix all children
+		for ( auto& e : ent->GetChildren( ) )
+		{
+			RecursivelyFixInstancedEntities( e, uuidMap );
+		}
+	}
+
 	Result Archetype::Reload( )
 	{ 
-		const_cast< AssetLoader* >( mLoader )->ReloadAsset( this );
+		// All entities that need to be pointed back to root entity ( since they're just using handles )
+		EntityManager* em = EngineSubsystem( EntityManager );
+		auto instancedEnts = mRoot->GetInstancedEntities( );
+		EntityHandle rootToDestroy = mRoot; 
+		Vector< ByteBuffer > mSerializedData;
+ 
+		// Serialize data into buffers
+		for ( auto& e : instancedEnts )
+		{
+			ByteBuffer buffer;
+			EntityArchiver::Serialize( e, &buffer );
+			mSerializedData.push_back( buffer );
+
+			// Destroy entity
+			e.Get( )->Destroy( );
+		}
+
+		// Reload asset
+		const_cast< AssetLoader* >( mLoader )->ReloadAsset( this ); 
+
+		// Force cleanup
+		em->ForceCleanup( ); 
+
+		// Force add entities
+		em->ForceAddEntities( );
+
+		// Reset previous entities
+		for ( auto& b : mSerializedData )
+		{
+			EntityArchiver::Deserialize( &b );
+		}
 
 		return Result::SUCCESS;
 	}

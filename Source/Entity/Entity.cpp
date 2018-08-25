@@ -65,7 +65,18 @@ namespace Enjon
 				ImGui::Text( "Archetype: Default" ); 
 			}
 
+			if ( mPrototypeEntity )
+			{
+				ImGui::Text( fmt::format( "Prototype Entity: {}", mPrototypeEntity.Get()->GetUUID().ToString() ).c_str( ) );
+				ImGui::Text( fmt::format( "Prototype Entity: {}", mPrototypeEntity.Get( )->GetID( ) ).c_str( ) );
+			}
+			else
+			{
+				ImGui::Text( "Prototype Entity: null" ); 
+			}
+
 			ImGui::Text( fmt::format( "ID: {}", GetID( ) ).c_str( ) );
+			ImGui::Text( fmt::format( "UUID: {}", GetUUID().ToString() ).c_str( ) );
 		} 
 		ImGui::ListBoxFooter( ); 
 
