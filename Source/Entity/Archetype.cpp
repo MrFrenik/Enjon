@@ -111,13 +111,13 @@ namespace Enjon
 		EntityManager* em = EngineSubsystem( EntityManager );
 		auto instancedEnts = mRoot->GetInstancedEntities( );
 		EntityHandle rootToDestroy = mRoot; 
-		Vector< ByteBuffer > mSerializedData;
+		Vector< ByteBuffer* > mSerializedData;
  
 		// Serialize data into buffers
 		for ( auto& e : instancedEnts )
 		{
-			ByteBuffer buffer;
-			EntityArchiver::Serialize( e, &buffer );
+			ByteBuffer* buffer = new ByteBuffer( );
+			EntityArchiver::Serialize( e, buffer );
 			mSerializedData.push_back( buffer );
 
 			// Destroy entity
@@ -136,8 +136,12 @@ namespace Enjon
 		// Reset previous entities
 		for ( auto& b : mSerializedData )
 		{
-			EntityArchiver::Deserialize( &b );
-		}
+			EntityArchiver::Deserialize( b );
+			delete ( b );
+			b = nullptr;
+		} 
+
+		mSerializedData.clear( );
 
 		return Result::SUCCESS;
 	}

@@ -1585,8 +1585,14 @@ namespace Enjon
 			return;
 		}
 
-		// Generate new UUID
+		// Remove entity from map
+		RemoveFromUUIDMap( ent );
+
+		// Construct new UUID for entity
 		ent->mUUID = UUID::GenerateUUID( );
+
+		// Add to uuid map with new id
+		AddToUUIDMap( ent ); 
 
 		// Continue for each child
 		for ( auto& c : ent->GetChildren( ) )
@@ -1648,14 +1654,8 @@ namespace Enjon
 			// Destination entity
 			Entity* destEnt = newHandle.Get( );
 
-			// Construct new UUID for entity
-			destEnt->mUUID = UUID::GenerateUUID( );
-
 			// Ensure that all UUIDs are unique
-			for ( auto& c : destEnt->GetChildren( ) )
-			{
-				RecurisvelyGenerateNewUUIDs( c );
-			}
+			RecurisvelyGenerateNewUUIDs( destEnt ); 
  
 			// Cache off local transform of destination entity before parenting
 			Transform localTrans = destEnt->GetLocalTransform( );
