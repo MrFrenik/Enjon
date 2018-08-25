@@ -17,6 +17,13 @@ namespace Enjon
 { 
 	//==============================================================
 
+	void Renderable::ExplicitDestructor( )
+	{
+		mMaterialElements.clear( );
+	}
+
+	//==============================================================
+
 	Vec3 Renderable::GetPosition() const
 	{
 		return mTransform.GetPosition();

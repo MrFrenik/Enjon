@@ -574,7 +574,7 @@ namespace Enjon
 		friend World;
 		friend EntitySubsystemContext;
 
-	public:
+	public: 
 
 		/*
 		* @brief

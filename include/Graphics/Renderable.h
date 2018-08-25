@@ -38,6 +38,11 @@ namespace Enjon
 			*/
 			virtual Result OnEditorUI( ) override;
 
+			/*
+			* @brief
+			*/
+			virtual void ExplicitDestructor( ) override;
+
 			/* Get position of transform */
 			Vec3 GetPosition() const;
 

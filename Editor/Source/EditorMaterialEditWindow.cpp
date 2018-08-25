@@ -415,6 +415,18 @@ namespace Enjon
 		{
 			mRootEntity.Get( )->MoveToWorld( EngineSubsystem( EntityManager )->GetArchetypeWorld( ) );
 		}
+
+		if ( mWorldOutlinerView )
+		{
+			delete ( mWorldOutlinerView );
+			mWorldOutlinerView = nullptr;
+		}
+
+		if ( mInspectorView )
+		{
+			delete ( mInspectorView );
+			mInspectorView = nullptr;
+		}
 	}
 
 	//======================================================================================================================

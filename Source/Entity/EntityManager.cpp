@@ -1382,7 +1382,7 @@ namespace Enjon
 		// Detach all components from entities
 		for ( u32 i = 0; i < MAX_ENTITIES; ++i )
 		{
-			//Destroy( mEntities->at( i ).GetHandle( ) );	
+			mEntities.at( i ).mIsArchetypeRoot = false;
 			Destroy( mEntities.at( i ).GetHandle( ) );
 		}
 
