@@ -77,6 +77,20 @@ namespace Enjon
 
 			ImGui::Text( fmt::format( "ID: {}", GetID( ) ).c_str( ) );
 			ImGui::Text( fmt::format( "UUID: {}", GetUUID().ToString() ).c_str( ) );
+
+			ImGui::Text( fmt::format( "Instanced Ent:" ).c_str( ) );
+			for ( auto& i : GetInstancedEntities() )
+			{
+				ImGui::Text( fmt::format( "\tID: {}", i.Get()->GetID( ) ).c_str( ) );
+				ImGui::Text( fmt::format( "\tUUID: {}", i.Get()->GetUUID().ToString() ).c_str( ) );
+
+			}
+			if ( mParent )
+			{ 
+				ImGui::Text( fmt::format( "Parent ID: {}", mParent.Get()->GetID( ) ).c_str( ) );
+				ImGui::Text( fmt::format( "Parent UUID: {}", mParent.Get( )->GetUUID( ).ToString( ) ).c_str( ) );
+			}
+			
 		} 
 		ImGui::ListBoxFooter( ); 
 

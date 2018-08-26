@@ -176,6 +176,11 @@ namespace Enjon
 
 		mSerializedData.clear( );
 
+		if ( mRoot->HasPrototypeEntity( ) )
+		{
+			mRoot->RemovePrototypeEntity( );
+		}
+
 		return Result::SUCCESS;
 	}
 
@@ -425,7 +430,7 @@ namespace Enjon
 		Entity* sourceEnt = source.Get( );
 		Entity* destEnt = dest.Get( );
 
-		if ( !sourceEnt || !destEnt )
+		if ( !sourceEnt || !destEnt || sourceEnt == destEnt )
 		{
 			return;
 		}

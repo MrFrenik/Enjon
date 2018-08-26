@@ -258,9 +258,6 @@ namespace Enjon
 		// Read in uuid
 		ent->SetUUID( buffer->Read< UUID >( ) ); 
 
-		// Add to uuid map with new uuid 
-		em->AddToUUIDMap( ent );
-
 		// Read in name
 		ent->SetName( buffer->Read< String >( ) );
 

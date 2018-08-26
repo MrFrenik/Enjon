@@ -164,6 +164,11 @@ namespace Enjon
 
 	void Entity::SetPrototypeEntity( const EntityHandle& handle )
 	{
+		if ( handle.Get( ) == this )
+		{
+			return;
+		}
+
 		// Set handle and add instance
 		if ( handle.Get( ) )
 		{ 
@@ -792,7 +797,7 @@ namespace Enjon
 		mUUID = uuid; 
 
 		// Set uuid in map
-		EngineSubsystem( EntityManager )->mEntityUUIDMap[ mUUID.ToString( ) ] = this;
+		EngineSubsystem( EntityManager )->AddToUUIDMap( this );
 	}
 
 	//---------------------------------------------------------------
@@ -913,8 +918,14 @@ namespace Enjon
 			return;
 		}
 
-		// Add to map
-		mEntityUUIDMap[ ent->GetUUID( ).ToString( ) ] = ent;
+		String uuidStr = ent->GetUUID( ).ToString( );
+
+		// Not found, so add it
+		if ( mEntityUUIDMap.find( uuidStr ) == mEntityUUIDMap.end( ) )
+		{
+			// Add to map
+			mEntityUUIDMap[ ent->GetUUID( ).ToString( ) ] = ent; 
+		} 
 	}
 
 	//---------------------------------------------------------------
@@ -926,6 +937,17 @@ namespace Enjon
 		if ( !ent )
 		{
 			return;
+		} 
+
+		String uuidStr = ent->GetUUID( ).ToString( );
+
+		// Cannot delete uuid from other entity
+		if ( mEntityUUIDMap.find( uuidStr ) != mEntityUUIDMap.end( ) )
+		{
+			if ( mEntityUUIDMap[ uuidStr ] != ent )
+			{
+				return;
+			}
 		}
 
 		// Erase from map
@@ -1022,7 +1044,7 @@ namespace Enjon
 		{
 			return;
 		}
-
+ 
 		// Destroy all children as well
 		for ( auto& e : entity.Get( )->GetChildren( ) )
 		{
@@ -1030,11 +1052,14 @@ namespace Enjon
 			e.Get()->Destroy( ); 
 		}
 
+		// Remove from uuid map
+		RemoveFromUUIDMap( entity );
+
 		// Push for deferred removal from active entities
 		mMarkedForDestruction.push_back( entity.GetID( ) );
 
 		// Set entity to be invalid
-		entity.Get( )->mState = EntityState::INACTIVE;
+		entity.Get( )->mState = EntityState::INACTIVE; 
 
 		// Remove from need initialization lists
 		RemoveFromNeedInitLists( entity );
@@ -1615,6 +1640,12 @@ namespace Enjon
 			return;
 		}
 
+		// Remove from previous prototype if available
+		if ( destEnt->HasPrototypeEntity( ) )
+		{
+			destEnt->RemovePrototypeEntity( );
+		} 
+
 		// Set prototype entity to the source entity
 		destEnt->SetPrototypeEntity( sourceEnt );
 
@@ -1703,13 +1734,7 @@ namespace Enjon
 			Entity* destEnt = newHandle.Get( );
 
 			// Construct new UUID for entity
-			destEnt->mUUID = UUID::GenerateUUID( );
-
-			// Remove from previous prototype if available
-			if ( destEnt->HasPrototypeEntity( ) )
-			{
-				destEnt->RemovePrototypeEntity( );
-			}
+			destEnt->SetUUID( UUID::GenerateUUID( ) );
 
 			// Ensure that all UUIDs are unique
 			for ( auto& c : destEnt->GetChildren( ) )

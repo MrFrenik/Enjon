@@ -680,6 +680,42 @@ namespace Enjon
 					}
 					
 				} break;
+
+				case MetaPropertyType::Array:
+				{
+					// Just check to see if arrays are equal ( if not, then override exists ) 
+					const MetaPropertyArrayBase* base = prop->Cast< MetaPropertyArrayBase >( ); 
+
+					// Write out array elements
+					switch ( base->GetArrayType( ) )
+					{ 
+						case MetaPropertyType::AssetHandle:
+						{ 
+							// Grab array property
+							const MetaPropertyArray< AssetHandle< Asset > >* arrProp = base->Cast< MetaPropertyArray< AssetHandle< Asset > > >( );
+
+							// Get sizes of arrays
+							usize arrSize = arrProp->GetSize( source ) == arrProp->GetSize( dest ) ? arrProp->GetSize( source ) : 0; 
+
+							// Write out asset uuids in array
+							for ( usize j = 0; j < arrSize; ++j )
+							{
+								// Grab value from source
+								AssetHandle<Asset> sourceAsset;
+								AssetHandle<Asset> destAsset;
+								arrProp->GetValueAt( source, j, &sourceAsset );
+								arrProp->GetValueAt( dest, j, &destAsset );
+
+								if ( sourceAsset != destAsset )
+								{
+									prop->AddOverride( dest, source );
+									break;
+								}
+							}
+						} break; 
+					}
+
+				} break;
 			}
 		} 
 
@@ -772,6 +808,38 @@ namespace Enjon
 			case MetaPropertyType::Quat:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, Quaternion ); break;
 			case MetaPropertyType::ColorRGBA32:	ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, ColorRGBA32 ); break;
 			case MetaPropertyType::AssetHandle: ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, AssetHandle< Asset > ) break;
+
+			case MetaPropertyType::Array:
+			{
+				// Just check to see if arrays are equal ( if not, then override exists ) 
+				const MetaPropertyArrayBase* base = prop->Cast< MetaPropertyArrayBase >( ); 
+
+				// Write out array elements
+				switch ( base->GetArrayType( ) )
+				{ 
+					case MetaPropertyType::AssetHandle:
+					{ 
+						// Grab array property
+						const MetaPropertyArray< AssetHandle< Asset > >* arrProp = base->Cast< MetaPropertyArray< AssetHandle< Asset > > >( ); 
+
+						// Get sizes of arrays
+						usize arrSize = Math::Min( arrProp->GetSize( sourceObject ), arrProp->GetSize( object ) );
+
+						// Write out asset uuids in array
+						for ( usize j = 0; j < arrSize; ++j )
+						{
+							// Grab value from source
+							AssetHandle<Asset> asset;
+							arrProp->GetValueAt( sourceObject, j, &asset );
+							arrProp->SetValueAt( object, j, asset );
+						}
+
+						// Remove override
+						const_cast< MetaPropertyArray< AssetHandle< Asset > >* >( arrProp )->RemoveOverride( object );
+
+					} break; 
+				}
+			} break;
 		} 
 
 		return Result::SUCCESS;
