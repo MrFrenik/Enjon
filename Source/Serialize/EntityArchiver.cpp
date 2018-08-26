@@ -71,6 +71,15 @@ namespace Enjon
 		// Serialize the prototype entity UUID 
 		buffer->Write< UUID >( entity.Get( )->HasPrototypeEntity( ) ? entity.Get( )->GetPrototypeEntity( ).Get( )->GetUUID( ) : UUID::Invalid( ) );
 
+		// Serialize instanced entity size
+		buffer->Write< usize >( entity.Get( )->GetInstancedEntities( ).size( ) );
+
+		// Serialize all entity instance uuids
+		for ( auto& e : entity.Get( )->GetInstancedEntities( ) )
+		{
+			buffer->Write< UUID >( e.Get( )->GetUUID( ) );
+		}
+
 		//==========================================================================
 		// Components
 		//========================================================================== 
@@ -207,6 +216,7 @@ namespace Enjon
 	{
 		// Cache off entity manager
 		EntityManager* em = EngineSubsystem( EntityManager );
+		AssetManager* am = EngineSubsystem( AssetManager );
 
 		//==========================================================================
 		// Local Transform
@@ -255,13 +265,34 @@ namespace Enjon
 		ent->SetName( buffer->Read< String >( ) );
 
 		// Read in archetype
-		ent->SetArchetype( EngineSubsystem( AssetManager )->GetAsset< Archetype >( buffer->Read< UUID >( ) ) );
+		ent->SetArchetype( am->GetAsset< Archetype >( buffer->Read< UUID >( ) ) );
 
 		// Store prototype id
 		UUID prototypeID = buffer->Read< UUID >( );
 
 		// Deserialize the prototype entity UUID 
-		ent->SetPrototypeEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( prototypeID ) );
+		ent->SetPrototypeEntity( em->GetEntityByUUID( prototypeID ) );
+
+		// If archetype is default, remove the archetype and then set the id to invalid
+		if ( ent->GetArchetype( ) == am->GetDefaultAsset< Archetype >( ) || !ent->GetArchetype( ) )
+		{
+			ent->SetArchetype( nullptr );
+			ent->SetPrototypeEntity( EntityHandle::Invalid( ) );
+		}
+		
+		// Deserialize instanced entity size
+		usize entityInstanceSize = buffer->Read< usize >( );
+
+		// Attempt to add entity instance
+		for ( usize i = 0; i < entityInstanceSize; ++i )
+		{
+			// If entity is valid, then set its prototype entity to this entity
+			EntityHandle h = em->GetEntityByUUID( buffer->Read< UUID >( ) );
+			if ( h )
+			{
+				h.Get( )->SetPrototypeEntity( ent );
+			}
+		} 
 
 		//=================================================================
 		// Components

@@ -74,6 +74,16 @@ namespace Enjon
 			*/
 			virtual Result Reload( ) override; 
 
+			/**
+			* @brief
+			*/
+			bool ExistsInHierachy( const AssetHandle< Archetype >& archetype );
+
+			/**
+			* @brief
+			*/
+			static void RecursivelyMergeEntities( const EntityHandle& source, const EntityHandle& dest, MergeType mergeType );
+
 		private:
 
 			/**
@@ -95,6 +105,11 @@ namespace Enjon
 			* @brief
 			*/
 			void RecursivelyFixInstancedEntities( const EntityHandle& dest, const HashMap< String, String >& uuidMap );
+
+			/**
+			* @brief
+			*/
+			bool RecursivelySearchForArchetypeInstance( const AssetHandle< Archetype >& archetype, const EntityHandle& entity );
 
 			/**
 			* @brief

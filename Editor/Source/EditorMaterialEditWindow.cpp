@@ -104,6 +104,13 @@ namespace Enjon
 
 	//===============================================================================================
 
+	void EditorViewport::SetViewportCallback( ViewportCallbackType type, const AssetCallback& callback )
+	{
+		mViewportCallbacks[ type ] = callback;
+	}
+
+	//===============================================================================================
+
 	Vec2 EditorViewport::GetSceneViewProjectedCursorPosition( )
 	{
 		// Need to get percentage of screen and things and stuff from mouse position
@@ -117,6 +124,11 @@ namespace Enjon
 		f32 pY = f32( mp.y - mSceneViewWindowPosition.y ) / f32( mSceneViewWindowSize.y ); 
 
 		return Vec2( (s32)( pX * viewport.x ), (s32)( pY * viewport.y ) );
+	}
+
+	bool EditorViewport::HasViewportCallback( const ViewportCallbackType& type )
+	{
+		return ( mViewportCallbacks.find( type ) != mViewportCallbacks.end( ) );
 	}
 
 	void EditorViewport::HandleAssetDrop( )
@@ -153,19 +165,24 @@ namespace Enjon
 				}
 			}
 		} 
-		//else if ( grabbedAsset->Class( )->InstanceOf< Archetype >( ) )
-		//{
-		//	Archetype* archType = grabbedAsset->ConstCast< Archetype >( );
-		//	if ( archType )
-		//	{
-		//		// Instantiate the archetype right in front of the camera for now
-		//		GraphicsSubsystemContext* gfxCtx = GetWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( );
-		//		Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
-		//		Vec3 position = cam->GetPosition() + cam->Forward( ) * 5.0f; 
-		//		Vec3 scale = archType->GetRootEntity( ).Get( )->GetLocalScale( );
-		//		EntityHandle handle = archType->Instantiate( Transform( position, Quaternion( ), scale ), GetWindow()->GetWorld() );
-		//	}
-		//}
+		else if ( grabbedAsset->Class( )->InstanceOf< Archetype >( ) )
+		{
+			if ( HasViewportCallback( ViewportCallbackType::AssetDropArchetype ) )
+			{
+				mViewportCallbacks[ ViewportCallbackType::AssetDropArchetype ]( grabbedAsset );
+			}
+
+			//Archetype* archType = grabbedAsset->ConstCast< Archetype >( );
+			//if ( archType )
+			//{
+			//	// Instantiate the archetype right in front of the camera for now
+			//	GraphicsSubsystemContext* gfxCtx = GetWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( );
+			//	Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
+			//	Vec3 position = cam->GetPosition() + cam->Forward( ) * 5.0f; 
+			//	Vec3 scale = archType->GetRootEntity( ).Get( )->GetLocalScale( );
+			//	EntityHandle handle = archType->Instantiate( Transform( position, Quaternion( ), scale ), GetWindow()->GetWorld() );
+			//}
+		}
 		else if ( grabbedAsset->Class( )->InstanceOf< SkeletalMesh >( ) )
 		{
 			// Do things...
@@ -180,7 +197,7 @@ namespace Enjon
 				GraphicsSubsystemContext* gfxCtx = GetWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( );
 				Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
 				Vec3 position = cam->GetPosition() + cam->Forward( ) * 5.0f; 
-				EntityHandle handle = EngineSubsystem( EntityManager )->Allocate( );
+				EntityHandle handle = EngineSubsystem( EntityManager )->Allocate( mWindow->GetWorld( ) );
 				if ( handle )
 				{
 					Entity* newEnt = handle.Get( );
@@ -507,7 +524,10 @@ namespace Enjon
 			Archetype* archType = mArchetype.Get( )->ConstCast< Archetype >( );
 
 			// Force reload of archType
-			archType->Reload( );
+			if ( archType->GetRootEntity( ) )
+			{
+				archType->Reload( ); 
+			}
 
 			Transform t;
 			t.SetPosition( cam->GetPosition( ) + cam->Forward( ) * 3.0f );
@@ -546,17 +566,13 @@ namespace Enjon
 		auto saveArchetypeOption = [ & ] ( )
 		{ 
 			if ( ImGui::MenuItem( "Save##archetype_options", NULL ) )
-			{
-				// Use the root entity to save this archetype? 
-				// I think that's how this will work...
-				//mRootEntity = mArchetype.Get( )->ConstCast< Archetype >()->ConstructFromEntity( mRootEntity ); 
-
+			{ 
 				// Save after constructing
 				mArchetype.Save( );
 
 				for ( auto& e : mRootEntity.Get()->GetInstancedEntities() )
 				{
-					ObjectArchiver::MergeObjects( mRootEntity.Get( ), e.Get( ), MergeType::AcceptMerge );
+					Archetype::RecursivelyMergeEntities( mRootEntity, e, MergeType::AcceptMerge );
 				}
 			}
 		};
@@ -564,6 +580,43 @@ namespace Enjon
 		// Register menu options
 		guiContext->RegisterMenuOption( "Create", "Create", createViewOption );
 		guiContext->RegisterMenuOption("File", "Save##archetype_options", saveArchetypeOption); 
+
+		// Register archetype drop callback with viewport
+		mViewport->SetViewportCallback( ViewportCallbackType::AssetDropArchetype, [ & ] ( const Asset* asset )
+		{
+			if ( asset )
+			{
+				// Cannot construct entity if asset is our archetype ( no recursive addition of archetypes )
+				if ( asset == mArchetype.Get( ) )
+				{
+					std::cout << "Cannot recursively include self in archetype definition: " << asset->GetName( ) << "\n";
+					return;
+				}
+
+				// Check the asset and look for any instance of this archetype in it
+				if ( asset->ConstCast< Archetype >( )->ExistsInHierachy( mArchetype ) )
+				{ 
+					std::cout << "Cannot recursively include self in archetype definition: " << asset->GetName( ) << "\n";
+					return;
+				}
+
+				std::cout << "Constructing: " << asset->GetName( ) << "\n"; 
+
+				Archetype* archType = asset->ConstCast< Archetype >( );
+				if ( archType )
+				{
+					// Instantiate the archetype right in front of the camera for now
+					GraphicsSubsystemContext* gfxCtx = GetWorld( )->GetContext< GraphicsSubsystemContext >( );
+					Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
+					Vec3 position = cam->GetPosition() + cam->Forward( ) * 5.0f; 
+					Vec3 scale = archType->GetRootEntity( ).Get( )->GetLocalScale( );
+					EntityHandle handle = archType->Instantiate( Transform( position, Quaternion( ), scale ), GetWorld() );
+
+					// Add to root entity
+					mRootEntity.Get( )->AddChild( handle );
+				} 
+			}
+		}); 
 	}
 
 	//======================================================================================================================

@@ -17,6 +17,16 @@ namespace Enjon
 	class EditorWorldOutlinerView;
 	class EditorInspectorView;
 
+	ENJON_ENUM( )
+	enum class ViewportCallbackType
+	{
+		AssetDropArchetype,
+		AssetDropStaticMesh,
+		AssetDropSkeletalMesh
+	};
+
+	using AssetCallback = std::function< void( const Asset* ) >;
+
 	class EditorViewport : public EditorView
 	{
 		public:
@@ -42,6 +52,16 @@ namespace Enjon
 			* @brief
 			*/
 			Vec2 GetSceneViewProjectedCursorPosition( );
+
+			/**
+			* @brief
+			*/
+			bool HasViewportCallback( const ViewportCallbackType& type );
+
+			/**
+			* @brief
+			*/
+			void SetViewportCallback( ViewportCallbackType type, const AssetCallback& callback );
 
 		protected:
 
@@ -88,6 +108,7 @@ namespace Enjon
 			Vec2 mMouseCoordsDelta = Vec2( 0.0f );
 			bool mStartedFocusing = false;
 			bool mFocusSet = false;
+			HashMap< ViewportCallbackType, AssetCallback > mViewportCallbacks;
 	}; 
 
 	class EditorMaterialEditWindow : public Window

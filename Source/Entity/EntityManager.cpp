@@ -166,7 +166,7 @@ namespace Enjon
 	{
 		// Set handle and add instance
 		if ( handle.Get( ) )
-		{
+		{ 
 			mPrototypeEntity = handle; 
 			mPrototypeEntity.Get( )->AddInstance( this );
 		}
@@ -249,20 +249,18 @@ namespace Enjon
 		// Remove from prototype's instances
 		if ( mPrototypeEntity )
 		{
-			mPrototypeEntity.Get( )->mInstancedEntities.erase( mID );
-			mPrototypeEntity = EntityHandle::Invalid( );
+			RemovePrototypeEntity( );
 		}
 
 		EntityManager* em = EngineSubsystem( EntityManager );
 
-		// Remove all instanced entities
-		for ( auto& i : mInstancedEntities )
+		Vector< EntityHandle > instancedEnts = GetInstancedEntities( );
+		for ( auto& i : instancedEnts )
 		{
-			EntityHandle h = em->GetRawEntity( i );
-			if ( h )
+			if ( i )
 			{
-				h.Get( )->mPrototypeEntity = EntityHandle::Invalid( );
-			}
+				i.Get( )->RemovePrototypeEntity( );
+			} 
 		} 
 
 		// Reset all fields

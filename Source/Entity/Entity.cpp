@@ -317,8 +317,12 @@ namespace Enjon
 		// Record overrides for components
 		for ( auto& c : GetComponents() )
 		{
+			// Only record overrides if proto entity has component as well
 			Component* sourceComponent = mPrototypeEntity.Get( )->GetComponent( c->Class( ) );
-			ObjectArchiver::RecordAllPropertyOverrides( sourceComponent, c );
+			if ( sourceComponent )
+			{
+				ObjectArchiver::RecordAllPropertyOverrides( sourceComponent, c ); 
+			}
 		}
 
 		return Result::SUCCESS;

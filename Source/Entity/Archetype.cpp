@@ -105,24 +105,44 @@ namespace Enjon
 		}
 	}
 
+	// Terribly named
+	struct InstanceData
+	{ 
+		ByteBuffer* buffer = nullptr;
+		const World* world = nullptr;
+		UUID mParentUUID;
+		bool mIsArchetypeRoot = false;
+	};
+
 	Result Archetype::Reload( )
 	{ 
 		// All entities that need to be pointed back to root entity ( since they're just using handles )
 		EntityManager* em = EngineSubsystem( EntityManager );
 		auto instancedEnts = mRoot->GetInstancedEntities( );
 		EntityHandle rootToDestroy = mRoot; 
-		Vector< ByteBuffer* > mSerializedData;
+		Vector< InstanceData > mSerializedData;
  
 		// Serialize data into buffers
 		for ( auto& e : instancedEnts )
 		{
-			ByteBuffer* buffer = new ByteBuffer( );
-			EntityArchiver::Serialize( e, buffer );
-			mSerializedData.push_back( buffer );
+			if ( e.Get( )->GetState( ) == EntityState::ACTIVE )
+			{
+				InstanceData data;
+				data.buffer = new ByteBuffer( );
+				data.world = e.Get( )->GetWorld( );
+				data.mParentUUID = e.Get( )->HasParent( ) ? e.Get( )->GetParent( ).Get( )->GetUUID( ) : UUID::Invalid( );
+				data.mIsArchetypeRoot = e.Get( )->mIsArchetypeRoot;
+				EntityArchiver::Serialize( e, data.buffer );
+				mSerializedData.push_back( data ); 
+			}
 
 			// Destroy entity
+			RecursivelyRemoveFromRoot( e.Get( ) );
 			e.Get( )->Destroy( );
 		}
+
+		// Force cleanup
+		em->ForceCleanup( ); 
 
 		// Reload asset
 		const_cast< AssetLoader* >( mLoader )->ReloadAsset( this ); 
@@ -134,11 +154,24 @@ namespace Enjon
 		em->ForceAddEntities( );
 
 		// Reset previous entities
-		for ( auto& b : mSerializedData )
+		for ( auto& d : mSerializedData )
 		{
-			EntityArchiver::Deserialize( b );
-			delete ( b );
-			b = nullptr;
+			EntityHandle handle = EntityArchiver::Deserialize( d.buffer, d.world->ConstCast< World >( ) ); 
+			if ( handle )
+			{
+				// Set archetype root back
+				handle.Get( )->mIsArchetypeRoot = d.mIsArchetypeRoot;
+				Transform local = handle.Get( )->GetLocalTransform( );
+				EntityHandle p = em->GetEntityByUUID( d.mParentUUID );
+				if ( p )
+				{
+					p.Get( )->AddChild( handle );
+					handle.Get( )->SetLocalTransform( local );
+				}
+			}
+
+			delete ( d.buffer );
+			d.buffer = nullptr;
 		} 
 
 		mSerializedData.clear( );
@@ -177,12 +210,16 @@ namespace Enjon
 		// If already a root exists, then destroy it
 		if ( mRoot )
 		{
-			mRoot->mIsArchetypeRoot = false;
+			RecursivelyRemoveFromRoot( mRoot );
 			mRoot->Destroy( );
 		}
+		
+		EntityManager* em = EngineSubsystem( EntityManager );
+
+		em->ForceCleanup( );
 
 		// Deserialize into root
-		mRoot = EntityArchiver::Deserialize( buffer, EngineSubsystem( EntityManager )->GetArchetypeWorld( ) ).Get( );
+		mRoot = EntityArchiver::Deserialize( buffer, em->GetArchetypeWorld( ) ).Get( );
 
 		// THIS IS A FUCKING PROBLEM AND HACKY BULLSHIT. FUCKING FIX IT.
 		RecursivelySetToRoot( mRoot );
@@ -263,7 +300,7 @@ namespace Enjon
 		// Set all children to root
 		for ( auto& c : ent->GetChildren( ) )
 		{
-			RecursivelySetToRoot( c );
+			RecursivelyRemoveFromRoot( c );
 		}
 	}
 
@@ -326,11 +363,84 @@ namespace Enjon
 		// Recursively set archetype of entity and children to this
 		RecursivelySetArchetype( instanced );
 
+		// Clear all property overrides
+		ObjectArchiver::ClearAllPropertyOverrides( instanced.Get( ) );
+
 		// Return newly constructed entity
 		return instanced;
 	}
 
 	//=======================================================================================
+
+	bool Archetype::RecursivelySearchForArchetypeInstance( const AssetHandle< Archetype >& archetype, const EntityHandle& entity )
+	{
+		Entity* ent = entity.Get( );
+		const Archetype* archType = archetype.Get( );
+
+		if ( ent == nullptr || archType == nullptr )
+		{
+			return false;
+		}
+
+		bool found = false;
+
+		// The entity belongs to this archetype, therefore exists in hierachy
+		if ( entity.Get( )->mArchetype == archetype )
+		{
+			return true;
+		}
+
+		// Search all children
+		for ( auto& c : entity.Get( )->GetChildren( ) )
+		{
+			found |= RecursivelySearchForArchetypeInstance( archetype, c );
+		}
+
+		// If an archetype exists for this entity and it wasn't the provided archetype, need to check it 
+		if ( entity.Get( )->mArchetype )
+		{
+			found |= ent->mArchetype.Get( )->ConstCast< Archetype >( )->ExistsInHierachy( archetype );
+		}
+
+		return found; 
+	}
+
+	//=======================================================================================
+
+	bool Archetype::ExistsInHierachy( const AssetHandle< Archetype >& archetype )
+	{
+		// Search the entire hiearchy for this specific archetype instance
+		if ( mRoot )
+		{
+			return RecursivelySearchForArchetypeInstance( archetype, mRoot ); 
+		}
+
+		return false;
+	}
+
+	//=======================================================================================
+
+	void Archetype::RecursivelyMergeEntities( const EntityHandle& source, const EntityHandle& dest, MergeType mergeType )
+	{
+		Entity* sourceEnt = source.Get( );
+		Entity* destEnt = dest.Get( );
+
+		if ( !sourceEnt || !destEnt )
+		{
+			return;
+		}
+ 
+		// Merge entities
+		ObjectArchiver::MergeObjects( sourceEnt, destEnt, mergeType );
+
+		// Merge destination entity's instanced entities as well
+		for ( auto& e : destEnt->GetInstancedEntities( ) )
+		{
+			Archetype::RecursivelyMergeEntities( destEnt, e, mergeType );
+		} 
+	}
+
+	//======================================================================================= 
 }
 
 
