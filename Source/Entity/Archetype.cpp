@@ -174,12 +174,7 @@ namespace Enjon
 			d.buffer = nullptr;
 		} 
 
-		mSerializedData.clear( );
-
-		if ( mRoot->HasPrototypeEntity( ) )
-		{
-			mRoot->RemovePrototypeEntity( );
-		}
+		mSerializedData.clear( ); 
 
 		return Result::SUCCESS;
 	}

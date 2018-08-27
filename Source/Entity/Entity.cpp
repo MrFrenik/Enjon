@@ -142,7 +142,7 @@ namespace Enjon
 
 		// Check local transform of objects
 		bool transformPropChanged = false;
-		if ( !ObjectArchiver::HasPropertyOverrides( &mLocalTransform ) )
+		//if ( !ObjectArchiver::HasPropertyOverrides( &mLocalTransform ) )
 		{
 			const MetaProperty* scaleProp = mLocalTransform.Class( )->GetPropertyByName( "mScale" );
 			if ( !scaleProp->HasOverride( &mLocalTransform ) )

@@ -1728,7 +1728,7 @@ namespace Enjon
 			EntityArchiver::Serialize( entity, &buffer );
 
 			// Deserialize into new entity
-			EntityHandle newHandle = EntityArchiver::Deserialize( &buffer, world );
+			EntityHandle newHandle = EntityArchiver::Deserialize( &buffer, world, true );
 
 			// Destination entity
 			Entity* destEnt = newHandle.Get( );

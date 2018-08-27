@@ -397,7 +397,7 @@ namespace Enjon
 		}
 
 		auto colors = ImGui::GetStyle( ).Colors;
-		ImColor textColor = mGrabbedEntity ? CanParentTo( entity, mGrabbedEntity ) ? colors[ ImGuiCol_Text ] : colors[ ImGuiCol_TextDisabled ] : colors[ ImGuiCol_Text ]; 
+		ImColor textColor = mGrabbedEntity ? CanParentTo( entity, mGrabbedEntity ) ? colors[ ImGuiCol_Text ] : colors[ ImGuiCol_TextDisabled ] : entity->HasPrototypeEntity() ? colors[ImGuiCol_SeparatorHovered] : colors[ ImGuiCol_Text ]; 
 
 		// Display label text
 		if ( entity->GetID( ) == mEntityNameChangeID )

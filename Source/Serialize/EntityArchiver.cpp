@@ -187,7 +187,7 @@ namespace Enjon
 
 	//========================================================================================= 
 
-	EntityHandle EntityArchiver::Deserialize( ByteBuffer* buffer, World* world )
+	EntityHandle EntityArchiver::Deserialize( ByteBuffer* buffer, World* world, bool isInstanced )
 	{
 		// Read status of entity from buffer
 		u32 entityStatus = buffer->Read< u32 >( );
@@ -207,12 +207,12 @@ namespace Enjon
 		EntityHandle handle = entities->Allocate( world );
 
 		// Continue to deserialize data into entity
-		return EntityArchiver::DeserializeInternal( handle, buffer, world ); 
+		return EntityArchiver::DeserializeInternal( handle, buffer, world, isInstanced ); 
 	}
 
 	//========================================================================================= 
 
-	EntityHandle EntityArchiver::DeserializeInternal( const EntityHandle& handle, ByteBuffer* buffer, World* world ) 
+	EntityHandle EntityArchiver::DeserializeInternal( const EntityHandle& handle, ByteBuffer* buffer, World* world, bool isInstanced ) 
 	{
 		// Cache off entity manager
 		EntityManager* em = EngineSubsystem( EntityManager );
@@ -285,7 +285,9 @@ namespace Enjon
 		{
 			// If entity is valid, then set its prototype entity to this entity
 			EntityHandle h = em->GetEntityByUUID( buffer->Read< UUID >( ) );
-			if ( h )
+
+			// Only set prototype entities IFF we're not instancing this entity from another source
+			if ( h && !isInstanced )
 			{
 				h.Get( )->SetPrototypeEntity( ent );
 			}
@@ -356,6 +358,9 @@ namespace Enjon
 		// If prototype entity, then record all property overrides and then attempt merge
 		if ( ent->HasPrototypeEntity() )
 		{
+			// Clear all property overrides
+			ObjectArchiver::ClearAllPropertyOverrides( ent );
+
 			// Record all property overrides
 			ObjectArchiver::RecordAllPropertyOverrides( ent->mPrototypeEntity.Get( ), ent );
 

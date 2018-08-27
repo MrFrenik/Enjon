@@ -59,14 +59,14 @@ namespace Enjon
 			/*
 			* @brief Static method which deserializes entity data using an existing ByteBuffer and places into specific world when allocating
 			*/
-			static EntityHandle Deserialize( ByteBuffer* buffer, World* world );
+			static EntityHandle Deserialize( ByteBuffer* buffer, World* world, bool isInstanced = false );
 
 		protected:
 
 			/*
 			* @brief
 			*/
-			static EntityHandle DeserializeInternal( const EntityHandle& entiy, ByteBuffer* buffer, World* world );
+			static EntityHandle DeserializeInternal( const EntityHandle& entiy, ByteBuffer* buffer, World* world, bool isInstanced = false );
 
 		private: 
 	};
