@@ -777,6 +777,10 @@ namespace Enjon
 		UUID sceneUUID;
 		UUID selectedEntityUUID;
 		SceneManager* sm = EngineSubsystem( SceneManager );
+		EntityManager* em = EngineSubsystem( EntityManager );
+
+		// Unload all archetypes
+		EngineSubsystem( AssetManager )->UnloadAssets< Archetype >( );
 
 		if ( mWorldOutlinerView->GetSelectedEntity() )
 		{
@@ -789,6 +793,12 @@ namespace Enjon
 			sm->UnloadScene( );
 		} 
 
+		// Destroy all archetype roots 
+		for ( auto& e : em->GetEntitiesByWorld( em->GetArchetypeWorld( ) ) )
+		{
+			e->ForceDestroy( );
+		}
+
 		// ReloadDLL without release scene asset
 		LoadDLL( false ); 
 
@@ -796,12 +806,12 @@ namespace Enjon
 		if ( sceneUUID )
 		{
 			sm->LoadScene( sceneUUID );
-		}
+		} 
 
 		// Reselect the previous entity
 		if ( selectedEntityUUID )
 		{
-			mWorldOutlinerView->SelectEntity( EngineSubsystem( EntityManager )->GetEntityByUUID( selectedEntityUUID ) );
+			mWorldOutlinerView->SelectEntity( em->GetEntityByUUID( selectedEntityUUID ) );
 		} 
 	}
 

@@ -541,5 +541,15 @@ namespace Enjon
 	} 
 
 	//=================================================================
+
+	void AssetLoader::UnloadAssets( )
+	{
+		for ( auto& info : mAssetsByUUID )
+		{
+			info.second.UnloadAsset( );
+		}
+	}
+
+	//=================================================================
 }
 

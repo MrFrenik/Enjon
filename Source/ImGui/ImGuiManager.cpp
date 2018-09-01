@@ -635,7 +635,7 @@ namespace Enjon
 				ImColor buttonColor = ImColor( ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorHovered ) ) );
 				buttonColor.Value.w *= 0.5f;
 
-				drawList->AddRectFilled( bA, bB, buttonActive ? buttonActiveColor : buttonHovered ? buttonHoveredColor : buttonColor );
+				drawList->AddRectFilled( bA, bB, buttonActive ? buttonActiveColor : buttonHovered ? buttonHoveredColor : buttonColor, 2.0f );
 
 				if ( buttonActive )
 				{

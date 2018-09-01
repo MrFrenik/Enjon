@@ -56,7 +56,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual void ExplicitDestructor( );
+			virtual void ExplicitDestructor( ); 
 
 		protected:
 
@@ -421,8 +421,13 @@ namespace Enjon
 
 		/*
 		* @brief
-		*/
+		*/ 
 		void Destroy( ); 
+
+		/*
+		* @brief
+		*/ 
+		void ForceDestroy( );
 
 		/*
 		* @brief

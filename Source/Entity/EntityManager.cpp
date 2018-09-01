@@ -148,6 +148,14 @@ namespace Enjon
 
 	//=================================================================
 
+	void Entity::ForceDestroy( )
+	{
+		mIsArchetypeRoot = false;
+		Destroy( );
+	}
+
+	//=================================================================
+
 	UUID Entity::GetUUID( ) const
 	{
 		return mUUID;

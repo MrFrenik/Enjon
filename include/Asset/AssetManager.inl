@@ -51,6 +51,21 @@ AssetHandle<T> AssetManager::GetDefaultAsset( ) const
 //================================================================================================ 
 
 template <typename T>
+void AssetManager::UnloadAssets( )
+{
+	// Get appropriate loader based on asset type
+	u32 loaderId = GetAssetTypeId<T>( );
+
+	if ( Exists( loaderId ) )
+	{
+		AssetLoader* loader = mLoadersByAssetId[ loaderId ];
+		loader->UnloadAssets( );
+	} 
+}
+
+//================================================================================================ 
+
+template <typename T>
 const HashMap< String, AssetRecordInfo >* AssetManager::GetAssets( ) const
 {
 	// Get appropriate loader based on asset type

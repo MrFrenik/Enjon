@@ -93,6 +93,11 @@ namespace Enjon
 			/**
 			*@brief
 			*/
+			Result Unload( );
+
+			/**
+			*@brief
+			*/
 			Result Save( ) const;
 
 			/**

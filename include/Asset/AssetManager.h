@@ -182,7 +182,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			const HashMap< Enjon::String, AssetRecordInfo >* AssetManager::GetAssets( const Enjon::MetaClass* cls ) const;
+			const HashMap< Enjon::String, AssetRecordInfo >* GetAssets( const Enjon::MetaClass* cls ) const;
 
 			/**
 			*@brief Searches for specific loader based on class id. Returns true if found, false otherwise.
@@ -199,6 +199,12 @@ namespace Enjon
 			*/
 			template <typename T>
 			const HashMap< String, AssetRecordInfo >* GetAssets( ) const; 
+
+			/**
+			*@brief
+			*/
+			template <typename T>
+			void UnloadAssets( );
 
 			/**
 			*@brief Gets loaded default asset in database from name. Will load the asset if not currently available.

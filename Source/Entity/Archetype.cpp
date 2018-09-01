@@ -232,7 +232,7 @@ namespace Enjon
 	EntityHandle Archetype::GetRootEntity( )
 	{
 		if ( !mRoot )
-		{
+		{ 
 			// Grab entity manager
 			EntityManager* em = EngineSubsystem( EntityManager );
 

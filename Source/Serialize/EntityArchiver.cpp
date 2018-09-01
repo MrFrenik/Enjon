@@ -356,7 +356,7 @@ namespace Enjon
 		DeserializeObjectDataDefault( ent, ent->Class( ), buffer );
 
 		// If prototype entity, then record all property overrides and then attempt merge
-		if ( ent->HasPrototypeEntity() )
+		if ( ent->HasPrototypeEntity() && !isInstanced )
 		{
 			// Clear all property overrides
 			ObjectArchiver::ClearAllPropertyOverrides( ent );

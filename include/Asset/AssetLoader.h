@@ -194,6 +194,11 @@ namespace Enjon
 			*/
 			virtual Asset* DirectImport( const ImportOptions* options );
 
+			/**
+			* @brief DO NOT CALL DIRECTLY
+			*/
+			void UnloadAssets( );
+
 		protected: 
 
 			/**
