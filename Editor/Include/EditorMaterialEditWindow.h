@@ -120,7 +120,7 @@ namespace Enjon
 			*/
 			EditorMaterialEditWindow( const AssetHandle< Material >& mat );
 
-			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override; 
+			virtual s32 Init( const String& windowName, const s32& screenWidth, const s32& screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override; 
 
 		protected:
 
@@ -152,7 +152,7 @@ namespace Enjon
 			*/
 			EditorArchetypeEditWindow( const AssetHandle< Archetype >& archetype );
 
-			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override; 
+			virtual s32 Init( const String& windowName, const s32& screenWidth, const s32& screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override; 
 
 		protected:
 

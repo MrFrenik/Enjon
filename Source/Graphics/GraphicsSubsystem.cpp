@@ -163,13 +163,9 @@ namespace Enjon
 		// engine config file
 		// mWindow.Init("Game", 1920, 1080, WindowFlagsMask((u32)WindowFlags::FULLSCREEN)); 
 		mWindow = new Window( );
-		mWindow->Init( "Game", 1440, 900, WindowFlags::RESIZABLE ); 
+		mWindow->Init( "Enjon", 1440, 900, WindowFlags::RESIZABLE ); 
 		mWindows.push_back( mWindow ); 
-		mWindow->SetViewport( 1400, 900 );
-
-		//Window* w = new Window( );
-		//w->Init( "Second Window", 800, 600, WindowFlags::RESIZABLE );
-		//mWindows.push_back( w ); 
+		mWindow->SetViewport( 1400, 900 ); 
 
 		// Set current window
 		mCurrentWindow = mWindow;

@@ -64,6 +64,22 @@ namespace Enjon
 
 	//===================================================================================================
 
+	void GUIContext::RegisterDockingWindow( const String& dockName, const GUICallbackFunc& windowFunc )
+	{
+		auto dockFunc = [ & ] ( )
+		{
+			if ( ImGui::BeginDock( dockName.c_str(), nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
+			{
+				windowFunc();
+			}
+			ImGui::EndDock( ); 
+		};
+
+		RegisterWindow( dockName, dockFunc );
+	}
+
+	//===================================================================================================
+
 	void GUIContext::RegisterWindow(const String& windowName, const GUICallbackFunc& func)
 	{
 		if ( !HasWindow( windowName ) )
@@ -78,6 +94,23 @@ namespace Enjon
 	{
 		mDockingLayouts.push_back(layout);
 	} 
+
+	//===================================================================================================
+
+	void GUIContext::Finalize( )
+	{
+		LateInit( );
+	}
+
+	//===================================================================================================
+
+	void GUIContext::ClearContext( )
+	{ 
+		mGuiFuncs.clear();
+		mWindows.clear();
+		mMainMenuOptions.clear();
+		mDockingLayouts.clear(); 
+	}
 
 	//===================================================================================================
 

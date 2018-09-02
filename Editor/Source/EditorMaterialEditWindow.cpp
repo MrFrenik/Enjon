@@ -328,7 +328,7 @@ namespace Enjon
 	}
 
 
-	int EditorMaterialEditWindow::Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags )
+	s32 EditorMaterialEditWindow::Init( const String& windowName, const s32& screenWidth, const s32& screenHeight, WindowFlagsMask currentFlags )
 	{ 
 		// Construct scene in world
 		if ( !mInitialized )
@@ -448,7 +448,7 @@ namespace Enjon
 
 	//======================================================================================================================
 
-	int EditorArchetypeEditWindow::Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags )
+	s32 EditorArchetypeEditWindow::Init( const String& windowName, const s32& screenWidth, const s32& screenHeight, WindowFlagsMask currentFlags )
 	{ 
 		// Construct scene in world
 		if ( !mInitialized )

@@ -71,14 +71,39 @@ namespace Enjon
 		friend GraphicsSubsystem;
 
 		public: 
+
+			/*
+			* @brief
+			*/
 			Window();
+
+			/*
+			* @brief
+			*/
 			~Window();
 
-			virtual int Init( std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( (u32)WindowFlags::DEFAULT ) ); 
-			void SetWindowTitle(const char* title);
-			void SetWindowFullScreen(int screenWidth, int screenHeight);
+			/*
+			* @brief
+			*/
+			virtual s32 Init( const String& windowName, const s32& screenWidth, const s32& screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( (u32)WindowFlags::DEFAULT ) ); 
 
-			bool inline IsFullScreen() const { return m_isfullscreen; }
+			/*
+			* @brief
+			*/
+			void SetWindowTitle( const String& title );
+			/*
+			* @brief
+			*/
+
+			void SetWindowFullScreen( const s32& screenWidth, const s32& screenHeight );
+
+			/*
+			* @brief
+			*/
+			bool inline IsFullScreen() const 
+			{ 
+				return m_isfullscreen; 
+			}
 
 			/*
 			* @brief
@@ -103,17 +128,22 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void SetViewport(int width, int height);
+			void SetViewport( const s32& width, const s32& height );
 
 			/*
 			* @brief
 			*/
-			void SetViewport(Enjon::iVec2& dimensions);
+			void SetViewport( const iVec2& dimensions );
 
 			/*
 			* @brief
 			*/
 			iVec2 GetViewport() const;
+
+			/*
+			* @brief
+			*/
+			void SetSize( const iVec2& dims );
 		
 			/*
 			* @brief

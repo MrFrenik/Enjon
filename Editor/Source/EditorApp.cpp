@@ -55,9 +55,9 @@ Enjon::String copyDir = "";
 Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
 
-//Enjon::String configuration = "Release";
+Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -1043,60 +1043,39 @@ namespace Enjon
 	}
 
 	//================================================================================================================
-	 
-	Enjon::Result EditorApp::Initialize( )
-	{ 
-		mApplicationName = "EditorApp"; 
 
-		// Set application state to stopped by default
-		SetApplicationState( ApplicationState::Stopped );
-
-		Enjon::String mAssetsDirectoryPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + "Editor/Assets/";
-
-		// Get asset manager and set its properties ( I don't like this )
-		AssetManager* mAssetManager = EngineSubsystem( AssetManager );
-		GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
-		PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem ); 
-
-		// Set up camera and then add to graphics scene
-		mEditorCamera = Camera( mGfx->GetViewport() );
-		mEditorCamera.SetNearFar( 0.1f, 1000.0f );
-		mEditorCamera.SetProjection(ProjectionType::Perspective);
-		mEditorCamera.SetPosition(Vec3(0, 5, 10)); 
-		mGfx->GetGraphicsScene( )->AddCamera( &mEditorCamera );
-		mGfx->GetGraphicsScene()->SetActiveCamera( &mEditorCamera );
-
-		// Pause the physics simulation
-		physx->PauseSystem( true ); 
-
-		// Register project template files
-		mProjectSourceTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectSourceTemplate.cpp" ).c_str() ); 
-		mProjectCMakeTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectCMakeTemplate.txt" ).c_str( ) );
-		mProjectDelBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/DelPDB.bat" ).c_str( ) );
-		mProjectBuildAndRunTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRun.bat" ).c_str( ) ); 
-		mProjectBuildBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/Build.bat" ).c_str( ) ); 
-		mComponentSourceTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ComponentSourceTemplate.cpp" ).c_str( ) ); 
-		mCompileProjectBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/CompileProject.bat" ).c_str( ) ); 
-		mCompileProjectCMakeTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectCompileCMakeTemplate.txt" ).c_str( ) ); 
-		mProjectMainTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectAppMain.cpp" ).c_str( ) ); 
-		mProjectBuildAndRunCompileTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRunCompile.bat" ).c_str( ) ); 
-		mProjectEnjonDefinesTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectEnjonDefines.h" ).c_str( ) ); 
-
-		// Set up copy directory for project dll
-		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";
-
-		// Grab all .eproj files and store them for loading later
-		CollectAllProjectsOnDisk( ); 
-
-#if LOAD_ENGINE_RESOURCES
-		LoadResources( );
-#endif
+	void EditorApp::CleanupGUIContext( )
+	{
+		if ( mEditorSceneView ) { delete ( mEditorSceneView ); mEditorSceneView = nullptr; } 
+		if ( mWorldOutlinerView ) { delete( mWorldOutlinerView ); mWorldOutlinerView = nullptr; } 
+		if ( mAssetBroswerView ) { delete( mAssetBroswerView ); mAssetBroswerView = nullptr; }
+		if ( mInspectorView ) { delete( mInspectorView ); mInspectorView = nullptr; }
 
 		Window* mainWindow = EngineSubsystem( GraphicsSubsystem )->GetMainWindow( );
 		assert( mainWindow != nullptr );
 
 		GUIContext* guiContext = mainWindow->GetGUIContext( );
 		assert( guiContext->GetContext( ) != nullptr );
+
+		// Clear previous context
+		guiContext->ClearContext( ); 
+	}
+
+	//================================================================================================================
+
+	void EditorApp::LoadProjectContext( )
+	{
+		Window* mainWindow = EngineSubsystem( GraphicsSubsystem )->GetMainWindow( );
+		assert( mainWindow != nullptr );
+
+		GUIContext* guiContext = mainWindow->GetGUIContext( );
+		assert( guiContext->GetContext( ) != nullptr );
+
+		mainWindow->SetSize( iVec2( 1400, 900 ) ); 
+		mainWindow->SetWindowTitle( "Enjon Editor: " + mProject.GetProjectName( ) );
+
+		// Destroy previous contexts and windows if available
+		CleanupGUIContext( ); 
 
 		// Add all necessary views into editor widget manager
 		mEditorSceneView = new EditorSceneView( this, mainWindow );
@@ -1157,16 +1136,6 @@ namespace Enjon
 			}
 			ImGui::EndDock( );
 		} );
-
-		//static bool sceneSelectionViewOpen = true;
-		//guiContext->RegisterWindow( "Scene Selection", [ & ]
-		//{
-		//	if ( ImGui::BeginDock( "Scene Selection", &sceneSelectionViewOpen ) )
-		//	{
-		//		SelectSceneView( );
-		//	}
-		//	ImGui::EndDock( );
-		//} ); 
 
 		auto createViewOption = [&]()
 		{
@@ -1335,10 +1304,120 @@ namespace Enjon
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Play Options", "Scene", GUIDockSlotType::Slot_Top, 0.1f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "World Outliner", nullptr, GUIDockSlotType::Slot_Right, 0.3f ) );
-		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene Selection", "Play Options", GUIDockSlotType::Slot_Right, 0.6f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Play Options", GUIDockSlotType::Slot_Right, 0.5f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.7f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene", GUIDockSlotType::Slot_Bottom, 0.3f ) ); 
+
+		guiContext->Finalize( );
+	}
+
+	//================================================================================================================
+
+	void EditorApp::LoadProjectSelectionContext( )
+	{
+		// Set the window to small
+		Window* window = EngineSubsystem( GraphicsSubsystem )->GetMainWindow( );
+		assert( window != nullptr );
+
+		// Set the size of the window
+		window->SetSize( iVec2( 1200, 500 ) ); 
+		window->SetWindowTitle( "Enjon Editor: Project Selection / Creation" );
+
+		GUIContext* guiCtx = window->GetGUIContext( );
+
+		auto createProjectView = [ & ] ( )
+		{ 
+			if ( ImGui::BeginDock( "Project Selection / Creation", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
+			{
+				String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
+				if ( ImGui::BeginCombo( "##LOADPROJECTLIST", defaultText.c_str() ) )
+				{
+					for ( auto& p : mProjectsOnDisk )
+					{
+						if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
+						{ 
+							// Preload project for next frame
+							PreloadProject( p );
+						}
+					}
+					ImGui::EndCombo( );
+				} 
+			}
+			ImGui::EndDock( );
+		};
+
+		guiCtx->RegisterWindow( "Project Selection / Creation", createProjectView ); 
+		guiCtx->RegisterDockingLayout( GUIDockingLayout( "Project Selection / Creation", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) ); 
+
+		guiCtx->Finalize( );
+	}
+
+	//================================================================================================================
+
+	void EditorApp::PreloadProject( const Project& project )
+	{
+		mPreloadProjectContext = true;
+		mProject = project;
+	}
+
+	//================================================================================================================
+	 
+	Enjon::Result EditorApp::Initialize( )
+	{ 
+		mApplicationName = "EditorApp"; 
+
+		// Set application state to stopped by default
+		SetApplicationState( ApplicationState::Stopped );
+
+		Enjon::String mAssetsDirectoryPath = Enjon::Engine::GetInstance()->GetConfig().GetRoot() + "Editor/Assets/";
+
+		// Get asset manager and set its properties ( I don't like this )
+		AssetManager* mAssetManager = EngineSubsystem( AssetManager );
+		GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
+		PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem ); 
+
+		// Set up camera and then add to graphics scene
+		mEditorCamera = Camera( mGfx->GetViewport() );
+		mEditorCamera.SetNearFar( 0.1f, 1000.0f );
+		mEditorCamera.SetProjection(ProjectionType::Perspective);
+		mEditorCamera.SetPosition(Vec3(0, 5, 10)); 
+		mGfx->GetGraphicsScene( )->AddCamera( &mEditorCamera );
+		mGfx->GetGraphicsScene()->SetActiveCamera( &mEditorCamera );
+
+		// Pause the physics simulation
+		physx->PauseSystem( true ); 
+
+		// Register project template files
+		mProjectSourceTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectSourceTemplate.cpp" ).c_str() ); 
+		mProjectCMakeTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectCMakeTemplate.txt" ).c_str( ) );
+		mProjectDelBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/DelPDB.bat" ).c_str( ) );
+		mProjectBuildAndRunTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRun.bat" ).c_str( ) ); 
+		mProjectBuildBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/Build.bat" ).c_str( ) ); 
+		mComponentSourceTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ComponentSourceTemplate.cpp" ).c_str( ) ); 
+		mCompileProjectBatTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/CompileProject.bat" ).c_str( ) ); 
+		mCompileProjectCMakeTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectCompileCMakeTemplate.txt" ).c_str( ) ); 
+		mProjectMainTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectAppMain.cpp" ).c_str( ) ); 
+		mProjectBuildAndRunCompileTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRunCompile.bat" ).c_str( ) ); 
+		mProjectEnjonDefinesTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectEnjonDefines.h" ).c_str( ) ); 
+
+		// Set up copy directory for project dll
+		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";
+
+		// Grab all .eproj files and store them for loading later
+		CollectAllProjectsOnDisk( ); 
+
+#if LOAD_ENGINE_RESOURCES
+		LoadResources( );
+#endif
+
+		if ( mProject.IsLoaded( ) )
+		{
+			LoadProjectContext( );
+		}
+		else
+		{
+			LoadProjectSelectionContext();
+		}
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -1367,6 +1446,18 @@ namespace Enjon
 
 	Enjon::Result EditorApp::Update( f32 dt )
 	{ 
+		if ( mPreloadProjectContext )
+		{
+			LoadProjectContext( );
+			LoadProject( mProject );
+			mPreloadProjectContext = false;
+		}
+
+		if ( !mProject.IsLoaded( ) )
+		{
+			return Result::PROCESS_RUNNING;
+		}
+		
 		// Update transform widget
 		mTransformWidget.Update( );
 
@@ -1395,6 +1486,12 @@ namespace Enjon
 
 	Enjon::Result EditorApp::ProcessInput( f32 dt )
 	{
+		// NOTE( John ): HACK! Need to appropriately set up input states to keep this from occuring 
+		if ( !mProject.IsLoaded( ) )
+		{
+			return Result::PROCESS_RUNNING;
+		}
+
 		static bool mInteractingWithTransformWidget = false;
 		static TransformMode mMode = TransformMode::Translate;
 		static Vec3 mIntersectionStartPosition;

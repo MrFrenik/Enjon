@@ -30,7 +30,7 @@ namespace Enjon
 	{
 	}
 
-	int Window::Init(std::string windowName, int screenWidth, int screenHeight, WindowFlagsMask currentFlags) 
+	s32 Window::Init( const String& windowName, const s32& screenWidth, const s32& screenHeight, WindowFlagsMask currentFlags ) 
 	{
 		m_screenWidth = screenWidth;
 		m_screenHeight = screenHeight;
@@ -145,13 +145,13 @@ namespace Enjon
 		return mDroppedFiles;
 	}
 
-	void Window::SetViewport(s32 width, s32 height)
+	void Window::SetViewport( const s32& width, const s32& height )
 	{
 		m_screenWidth = width;
 		m_screenHeight = height;	
 	}
 
-	void Window::SetViewport(iVec2& dimensions)
+	void Window::SetViewport( const iVec2& dimensions )
 	{
 		// TODO(John): Need to refresh screen here...
 		m_screenWidth = dimensions.x;
@@ -162,6 +162,12 @@ namespace Enjon
 			GraphicsSubsystemContext* ctx = mWorld->GetContext< GraphicsSubsystemContext >( );
 			ctx->ReinitializeFrameBuffers( GetViewport( ) );
 		}
+	}
+
+	void Window::SetSize( const iVec2& dims )
+	{
+		SDL_SetWindowSize( m_sdlWindow, dims.x, dims.y ); 
+		SetViewport( dims );
 	}
 
 	iVec2 Window::GetViewport() const 
@@ -181,12 +187,12 @@ namespace Enjon
 		glClear(mask); 
 	}
 
-	void Window::SetWindowTitle(const char* title)
+	void Window::SetWindowTitle( const String& title )
 	{
-		SDL_SetWindowTitle(m_sdlWindow, title);
+		SDL_SetWindowTitle( m_sdlWindow, title.c_str( ) );
 	}
 
-	void Window::SetWindowFullScreen(int screenWidth, int screenHeight)
+	void Window::SetWindowFullScreen( const s32& screenWidth, const s32& screenHeight )
 	{
 		//Need to figure this one out...
 	}

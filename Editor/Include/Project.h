@@ -32,6 +32,8 @@ namespace Enjon
 
 			void Simluate( );
 
+			bool IsLoaded( ) const;
+
 		private:
 
 			String CreateBuildDirectory( );

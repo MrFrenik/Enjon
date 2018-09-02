@@ -147,6 +147,13 @@ namespace Enjon
 			void InspectorView( bool* enabled );
 			void SceneView( bool* viewBool ); 
 
+			void LoadProjectContext( );
+			void LoadProjectSelectionContext( );
+
+			void PreloadProject( const Project& project );
+
+			void CleanupGUIContext( );
+
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;
@@ -157,6 +164,7 @@ namespace Enjon
 			bool mMoveCamera = false; 
 			bool mNewComponentPopupDialogue = false;
 			bool mLoadProjectPopupDialogue = false;
+			bool mPreloadProjectContext = false;
 
 			bool mPlaying = false;
 			bool mNeedsStartup = true; 

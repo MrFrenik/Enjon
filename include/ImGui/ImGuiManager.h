@@ -290,7 +290,24 @@ namespace Enjon
 			/** 
 			* @brief
 			*/
+			void RegisterDockingWindow( const String& dockName, const GUICallbackFunc& func );
+
+			/** 
+			* @brief
+			*/
 			void RegisterDockingLayout(const GUIDockingLayout& layout);
+
+			/** 
+			* @brief 
+			* @note NOT TO BE CALLED WHILE EXECUTING ANY IMGUI CODE
+			*/
+			void ClearContext( );
+
+			/** 
+			* @brief 
+			* @note NOT TO BE CALLED WHILE EXECUTING ANY IMGUI CODE
+			*/
+			void Finalize( );
 
 		protected:
 
