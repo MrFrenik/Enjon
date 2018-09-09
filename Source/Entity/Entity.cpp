@@ -56,6 +56,7 @@ namespace Enjon
 				}
 			} 
 
+			/*
 			if ( mArchetype )
 			{
 				ImGui::Text( fmt::format( "Archetype: {}", mArchetype->GetName( ) ).c_str( ) );
@@ -90,6 +91,7 @@ namespace Enjon
 				ImGui::Text( fmt::format( "Parent ID: {}", mParent.Get()->GetID( ) ).c_str( ) );
 				ImGui::Text( fmt::format( "Parent UUID: {}", mParent.Get( )->GetUUID( ).ToString( ) ).c_str( ) );
 			}
+			*/
 			
 		} 
 		ImGui::ListBoxFooter( ); 

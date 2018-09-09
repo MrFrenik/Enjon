@@ -111,6 +111,8 @@ namespace Enjon
 			void OpenNewComponentDialogue( ); 
 			void AddComponentPopupView( );
 
+			void SetProjectOnLoad( const String& projectDir );
+
 		public:
 			Vec4 mRectColor = Vec4( 0.8f, 0.3f, 0.1f, 1.0f );
 
@@ -119,7 +121,7 @@ namespace Enjon
 			void LoadResourceFromFile( );
 			void PlayOptions( );
 			void CameraOptions( bool* enable );
-			void CreateProjectView( );
+			bool CreateProjectView( );
 			void SelectSceneView( );
 
 			void LoadProjectView( );
@@ -154,6 +156,10 @@ namespace Enjon
 
 			void CleanupGUIContext( );
 
+			void PreCreateNewProject( const String& projectName );
+
+			void FindProjectOnLoad( );
+
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;
@@ -165,6 +171,7 @@ namespace Enjon
 			bool mNewComponentPopupDialogue = false;
 			bool mLoadProjectPopupDialogue = false;
 			bool mPreloadProjectContext = false;
+			bool mPrecreateNewProject = false; 
 
 			bool mPlaying = false;
 			bool mNeedsStartup = true; 
@@ -190,6 +197,8 @@ namespace Enjon
 			String mProjectMainTemplate = "";
 			String mProjectEnjonDefinesTemplate = "";
 			String mProjectBuildBatTemplate = "";
+
+			String mProjectOnLoad = "";
 
 			Vector<Project> mProjectsOnDisk;
 			Vector<Entity*> mSceneEntities;
@@ -219,6 +228,8 @@ namespace Enjon
 			Vec3 mCameraRotator = Vec3( 0.0f ); 
 
 			Vector< ReloadDLLCallback > mReloadDLLCallbacks;
+
+			Window* mProjectSelectionWindow = nullptr;
 	}; 
 }
 

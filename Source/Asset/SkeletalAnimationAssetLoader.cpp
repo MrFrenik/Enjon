@@ -54,7 +54,7 @@ namespace Enjon
 		Assimp::Importer importer;
 
 		const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath( ), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace );
-		if ( !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
+		if ( !scene ||!scene->mRootNode )
 		{
 			// Error 
 			//return nullptr;

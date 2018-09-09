@@ -58,6 +58,9 @@ if ( NOT EXISTS ${TARGET_GENERATED_DIR}/${TARGET_NAME}_Generated.cpp )
 	file(WRITE ${TARGET_GENERATED_DIR}/${TARGET_NAME}_Generated.cpp "// Target_Generated.cpp\n") 
 endif()
 
+# Pull in the resource file for the application
+set( RESOURCE_FILE ${TARGET_DIR}/editor_resource.rc )
+
 file(
 		GLOB_RECURSE TARGET_SOURCES
 
@@ -70,6 +73,7 @@ set(
 		ALL_SRC 
 		${TARGET_SOURCES}
 		${TARGET_GENERATED_DIR}/${TARGET_NAME}_Generated.cpp
+		${RESOURCE_FILE}
 	) 
 
 file(
@@ -78,7 +82,8 @@ file(
 		"${TARGET_INC_DIR}/*.h"
 	)
 
-add_executable(${TARGET_NAME} ${ALL_SRC}) 
+# Compile final executable
+add_executable( ${TARGET_NAME} ${ALL_SRC} ) 
 
 # Link libraries to target
 target_link_libraries( ${TARGET_NAME} debug Enjond.lib optimized Enjon.lib )

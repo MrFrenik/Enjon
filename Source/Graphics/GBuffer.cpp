@@ -8,9 +8,9 @@ namespace Enjon {
 #define CREATE_RENDER_TARGET(InternalFormat, Format, DataType, GBufferAttachment)\
 	{\
 		u32 index = (u32)GBufferAttachment;\
-		glBindRenderbufferEXT(GL_RENDERBUFFER, mTargetIDs[index]);\
-		glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, mWidth, mHeight);\
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, mTargetIDs[index]);\
+		glBindRenderbuffer(GL_RENDERBUFFER, mTargetIDs[index]);\
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, mWidth, mHeight);\
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, mTargetIDs[index]);\
 		\
 		glGenTextures(1, &mTextures[index]);\
 		glBindTexture(GL_TEXTURE_2D, mTextures[index]);\
@@ -47,9 +47,9 @@ namespace Enjon {
 		CREATE_RENDER_TARGET( GL_RG16F, GL_RG, GL_FLOAT, GBufferTextureType::VELOCITY )
 
 		// Bind depth render buffer
-		glBindRenderbufferEXT( GL_RENDERBUFFER, mDepthBuffer );
-		glRenderbufferStorageEXT( GL_RENDERBUFFER, GL_RGBA, mWidth, mHeight );
-		glFramebufferRenderbufferEXT( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer );
+		glBindRenderbuffer( GL_RENDERBUFFER, mDepthBuffer );
+		glRenderbufferStorage( GL_RENDERBUFFER, GL_RGBA, mWidth, mHeight );
+		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer );
 
 		// - Depth buffer texture
 		glGenTextures( 1, &mDepthTexture );

@@ -38,7 +38,7 @@ namespace Enjon
 
 		// Read aiscene
 		const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace ); 
-		if ( !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
+		if ( !scene || !scene->mRootNode )
 		{
 			// Error
 			return nullptr;
@@ -187,67 +187,75 @@ namespace Enjon
 		} 
 
 		// Load vertex data into submesh vertex buffer 
-		for ( u32 i = 0; i < aim->mNumVertices; ++i )
+		for ( u32 i = 0; i < aim->mNumFaces; ++i )
 		{ 
-			// Position
-			sm->mVertexData.Write< f32 >( aim->mVertices[i].x );
-			sm->mVertexData.Write< f32 >( aim->mVertices[i].y );
-			sm->mVertexData.Write< f32 >( aim->mVertices[i].z );
+			const aiFace& face = aim->mFaces[ i ];
+			assert( face.mNumIndices == 3 );
 
-			// Normal
-			if ( aim->mNormals )
+			for ( u32 j = 0; j < face.mNumIndices; ++j )
 			{
-				sm->mVertexData.Write< f32 >( aim->mNormals[i].x );
-				sm->mVertexData.Write< f32 >( aim->mNormals[i].y );
-				sm->mVertexData.Write< f32 >( aim->mNormals[i].z );
-			}
-			else
-			{
-				sm->mVertexData.Write< f32 >( 0.0f );
-				sm->mVertexData.Write< f32 >( 0.0f );
-				sm->mVertexData.Write< f32 >( 1.0f ); 
-			} 
+				u32 vi = face.mIndices[ j ];
 
-			// Tangent
-			if ( aim->mTangents )
-			{
-				sm->mVertexData.Write< f32 >( aim->mTangents[i].x );
-				sm->mVertexData.Write< f32 >( aim->mTangents[i].y );
-				sm->mVertexData.Write< f32 >( aim->mTangents[i].z ); 
-			}
-			else
-			{
-				sm->mVertexData.Write< f32 >( 1.0f );
-				sm->mVertexData.Write< f32 >( 0.0f );
-				sm->mVertexData.Write< f32 >( 0.0f );
-			}
+				// Position
+				sm->mVertexData.Write< f32 >( aim->mVertices[ vi ].x );
+				sm->mVertexData.Write< f32 >( aim->mVertices[ vi ].y );
+				sm->mVertexData.Write< f32 >( aim->mVertices[ vi ].z );
 
-			// UV
-			if ( aim->mTextureCoords[ 0 ] )
-			{
-				sm->mVertexData.Write< f32 >( aim->mTextureCoords[0][i].x );
-				sm->mVertexData.Write< f32 >( aim->mTextureCoords[0][i].y );
-			}
-			else
-			{
-				sm->mVertexData.Write< f32 >( 0.0f );
-				sm->mVertexData.Write< f32 >( 0.0f );
-			}
+				// Normal
+				if ( aim->mNormals )
+				{
+					sm->mVertexData.Write< f32 >( aim->mNormals[ vi ].x );
+					sm->mVertexData.Write< f32 >( aim->mNormals[ vi ].y );
+					sm->mVertexData.Write< f32 >( aim->mNormals[ vi ].z );
+				}
+				else
+				{
+					sm->mVertexData.Write< f32 >( 0.0f );
+					sm->mVertexData.Write< f32 >( 0.0f );
+					sm->mVertexData.Write< f32 >( 1.0f ); 
+				} 
 
-			// Get absolute vertex id from relative id
-			u32 vertID = baseVertexID + i; 
+				// Tangent
+				if ( aim->mTangents )
+				{
+					sm->mVertexData.Write< f32 >( aim->mTangents[ vi ].x );
+					sm->mVertexData.Write< f32 >( aim->mTangents[ vi ].y );
+					sm->mVertexData.Write< f32 >( aim->mTangents[ vi ].z );
+				}
+				else
+				{
+					sm->mVertexData.Write< f32 >( 1.0f );
+					sm->mVertexData.Write< f32 >( 0.0f );
+					sm->mVertexData.Write< f32 >( 0.0f );
+				}
 
-			// Bone Indices
-			for ( u32 i = 0; i < ENJON_MAX_NUM_JOINTS_PER_VERTEX; ++i )
-			{
-				sm->mVertexData.Write< f32 >( (f32)vertexJointData->at( vertID ).mIDS[ i ] );
+				// UV
+				if ( aim->mTextureCoords[ 0 ] )
+				{
+					sm->mVertexData.Write< f32 >( aim->mTextureCoords[0][ vi ].x );
+					sm->mVertexData.Write< f32 >( aim->mTextureCoords[0][ vi ].y );
+				}
+				else
+				{
+					sm->mVertexData.Write< f32 >( 0.0f );
+					sm->mVertexData.Write< f32 >( 0.0f );
+				}
+
+				// Get absolute vertex id from relative id
+				u32 vertID = baseVertexID + vi; 
+
+				// Bone Indices
+				for ( u32 bi = 0; bi < ENJON_MAX_NUM_JOINTS_PER_VERTEX; ++bi )
+				{
+					sm->mVertexData.Write< f32 >( (f32)vertexJointData->at( vertID ).mIDS[ bi ] );
+				}
+
+				// Bone Weights
+				for ( u32 wi = 0; wi < ENJON_MAX_NUM_JOINTS_PER_VERTEX; ++wi ) 
+				{
+					sm->mVertexData.Write< f32 >( vertexJointData->at( vertID ).mWeights[ wi ] );
+				} 
 			}
-
-			// Bone Weights
-			for ( u32 i = 0; i < ENJON_MAX_NUM_JOINTS_PER_VERTEX; ++i ) 
-			{
-				sm->mVertexData.Write< f32 >( vertexJointData->at( vertID ).mWeights[ i ] );
-			} 
 		}
 
 		// Get decl from mesh

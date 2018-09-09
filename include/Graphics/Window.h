@@ -198,6 +198,16 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			void HideWindow( );
+
+			/*
+			* @brief
+			*/
+			void ShowWindow( );
+
+			/*
+			* @brief
+			*/
 			bool IsMouseInWindow( );
 
 
@@ -260,6 +270,7 @@ namespace Enjon
 			static Vector< WindowParams > mWindowsToInit;
 			static Vector< Window* > mWindowsToDestroy;
 			static bool mNukeAll;
+			static SDL_Surface* mWindowIcon;
 	};
 }
 

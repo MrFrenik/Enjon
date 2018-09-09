@@ -84,6 +84,11 @@ namespace Enjon {
 			return val > max ? val : max;
 		}
 
+		template <typename T>
+		inline T Round( T val )
+		{
+			return std::roundf( val );
+		}
 	}
 }
 

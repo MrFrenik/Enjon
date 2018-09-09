@@ -155,7 +155,7 @@ namespace Enjon
 	//======================================================================================================
 
 	Enjon::Result GraphicsSubsystem::Initialize()
-	{
+	{ 
 		// Clear previous windows ( if any )
 		mWindows.clear( ); 
 
@@ -172,10 +172,10 @@ namespace Enjon
 		mWindow->MakeCurrent( );
 
 		// Initialize window sdl cursors
-		Window::InitSDLCursors( );
+		Window::InitSDLCursors( ); 
 
 		// Initialize shader manager
-		Enjon::ShaderManager::Init();
+		Enjon::ShaderManager::Init(); 
 
 		// Initialize font manager
 		Enjon::FontManager::Init();
@@ -194,7 +194,7 @@ namespace Enjon
 		// Calcualte blur weights
 		CalculateBlurWeights();
 		// Register cvars
-		RegisterCVars();
+		RegisterCVars(); 
 
 		GLSLProgram* shader = Enjon::ShaderManager::Get("GBuffer");
 		shader->Use();

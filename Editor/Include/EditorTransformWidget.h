@@ -43,8 +43,8 @@ namespace Enjon
 			EditorScaleWidget mScaleWidget;
 			EditorRotationWidget mRotationWidget;
 
-			void BeginWidgetInteraction( TransformWidgetRenderableType type );
-			void InteractWithWidget( );
+			void BeginInteraction( TransformWidgetRenderableType type, const Transform& transform );
+			void InteractWithWidget( Transform* transform );
 			void EndInteraction( );
 			TransformWidgetRenderableType GetInteractedWidgetType( );
 			TransformationMode GetTransformationMode( ); 
@@ -63,6 +63,18 @@ namespace Enjon
 
 			static bool IsValidID( const u32& id );
 
+			Vec3 GetTranslationSnap( ) const;
+			void SetTranslationSnap( const Vec3& snap );
+
+			Vec3 GetScaleSnap( ) const;
+			void SetScaleSnap( const Vec3& snap );
+
+			Vec3 GetIntersectionStartPosition( ) const;
+			Vec3 GetAccumulatedTranslationDelta( ) const;
+			Vec3 GetRootStartPosition( ) const;
+			Vec3 GetRootStartScale( ) const;
+			Vec3 GetAccumulatedScaleDelta( ) const; 
+
 		private:
 			LineIntersectionResult GetLineIntersectionResult( const Vec3& axisA, const Vec3& axisB, const Vec3& axisC, bool comparedSupportingAxes = true, bool overrideAxis = false, const Vec3& axisToUseAsPlaneNormal = Vec3(0.0f) );
 			LineIntersectionResult GetLineIntersectionResultSingleAxis( const Vec3& axis );
@@ -78,6 +90,7 @@ namespace Enjon
 			Vec3 mIntersectionStartPosition;
 			Vec3 mImmutableIntersectionStartPosition;
 			Vec3 mRootStartPosition;
+			Vec3 mRootStartScale;
 			Quaternion mStartRotation;
 			Vec3 mDelta;
 			f32 mAngleDelta;
@@ -87,7 +100,16 @@ namespace Enjon
 			bool mEnabled = false;
 			bool mSetPreviousAngle = false;
 			f32 mPreviousAngle = 0.0f;
-			TransformSpace mTransformSpace = TransformSpace::World;
+			TransformSpace mTransformSpace = TransformSpace::World; 
+
+			Vec3 mTranslationSnap = Vec3( 0.0f );
+			Vec3 mScaleSnap = Vec3( 0.0f );
+			Vec3 mRotationSnap = Vec3( 0.0f );
+			Vec3 mAccumulatedTranslationDelta = Vec3( 0.0f );
+			Vec3 mAccumulatedScaleDelta = Vec3( 0.0f );
+			Quaternion mAccumulatedRotationDelta = Quaternion( );
+
+			Transform mRootTransform;
 	}; 
 }
 

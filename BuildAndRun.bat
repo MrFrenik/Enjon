@@ -11,6 +11,9 @@ cd ..
 cd ..
 echo "Building Enjon Editor..."
 cd Editor
+
+Proc\WriteResourceFile.exe
+
 mkdir Build
 cd Build
 cmake ../. -G"Visual Studio 14 2015"

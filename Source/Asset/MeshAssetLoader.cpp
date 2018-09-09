@@ -227,9 +227,10 @@ namespace Enjon
 		Assimp::Importer importer;		
 	
 		const aiScene* scene = importer.ReadFile( meshOptions->mResourceFilePath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace ); 
-		if ( !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
+		if ( !scene || !scene->mRootNode )
 		{
 			// Error 
+			return nullptr;
 		} 
 
 		// Check whether or not the scene has animations
@@ -307,7 +308,7 @@ namespace Enjon
 		// NOTE(): Flipping UVs FUCKS IT ALL because I'm already flipping UVs in the shader generation process (shadergraph). Need to fix this.  
 		const aiScene* scene = importer.ReadFile( filePath, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace );
 
-		if ( !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
+		if ( !scene || !scene->mRootNode )
 		{
 			// Error 
 		} 
@@ -372,52 +373,61 @@ namespace Enjon
 		// Get decl from mesh
 		const VertexDataDeclaration& vertDecl = mesh->GetVertexDeclaration( ); 
 
-		// Load vertex data into submesh vertex buffer 
-		for ( u32 i = 0; i < aim->mNumVertices; ++i )
-		{ 
-			// Position
-			sm->mVertexData.Write< f32 >( aim->mVertices[i].x );
-			sm->mVertexData.Write< f32 >( aim->mVertices[i].y );
-			sm->mVertexData.Write< f32 >( aim->mVertices[i].z );
+		// Iterate through tris and build vert list
+		for ( u32 i = 0; i < aim->mNumFaces; ++i )
+		{
+			const aiFace& face = aim->mFaces[ i ];
 
-			// Normal
-			if ( aim->mNormals )
-			{
-				sm->mVertexData.Write< f32 >( aim->mNormals[i].x );
-				sm->mVertexData.Write< f32 >( aim->mNormals[i].y );
-				sm->mVertexData.Write< f32 >( aim->mNormals[i].z );
-			}
-			else
-			{
-				sm->mVertexData.Write< f32 >( 0.0f );
-				sm->mVertexData.Write< f32 >( 0.0f );
-				sm->mVertexData.Write< f32 >( 1.0f ); 
-			} 
+			// Must have 3 indices per face ( tri )
+			assert( face.mNumIndices == 3 );
 
-			// Tangent
-			if ( aim->mTangents )
+			for ( u32 j = 0; j < 3; ++j )
 			{
-				sm->mVertexData.Write< f32 >( aim->mTangents[i].x );
-				sm->mVertexData.Write< f32 >( aim->mTangents[i].y );
-				sm->mVertexData.Write< f32 >( aim->mTangents[i].z ); 
-			}
-			else
-			{
-				sm->mVertexData.Write< f32 >( 1.0f );
-				sm->mVertexData.Write< f32 >( 0.0f );
-				sm->mVertexData.Write< f32 >( 0.0f );
-			}
+				u32 vertIdx = face.mIndices[ j ];
 
-			// UV
-			if ( aim->mTextureCoords[ 0 ] )
-			{
-				sm->mVertexData.Write< f32 >( aim->mTextureCoords[0][i].x );
-				sm->mVertexData.Write< f32 >( aim->mTextureCoords[0][i].y );
-			}
-			else
-			{
-				sm->mVertexData.Write< f32 >( 0.0f );
-				sm->mVertexData.Write< f32 >( 0.0f );
+				sm->mVertexData.Write< f32 >( aim->mVertices[ vertIdx ].x );
+				sm->mVertexData.Write< f32 >( aim->mVertices[ vertIdx ].y );
+				sm->mVertexData.Write< f32 >( aim->mVertices[ vertIdx ].z );
+
+				// Normal
+				if ( aim->mNormals )
+				{
+					sm->mVertexData.Write< f32 >( aim->mNormals[ vertIdx ].x );
+					sm->mVertexData.Write< f32 >( aim->mNormals[ vertIdx ].y );
+					sm->mVertexData.Write< f32 >( aim->mNormals[ vertIdx ].z );
+				}
+				else
+				{
+					sm->mVertexData.Write< f32 >( 0.0f );
+					sm->mVertexData.Write< f32 >( 0.0f );
+					sm->mVertexData.Write< f32 >( 1.0f ); 
+				} 
+
+				// Tangent
+				if ( aim->mTangents )
+				{
+					sm->mVertexData.Write< f32 >( aim->mTangents[ vertIdx ].x );
+					sm->mVertexData.Write< f32 >( aim->mTangents[ vertIdx ].y );
+					sm->mVertexData.Write< f32 >( aim->mTangents[ vertIdx ].z ); 
+				}
+				else
+				{
+					sm->mVertexData.Write< f32 >( 1.0f );
+					sm->mVertexData.Write< f32 >( 0.0f );
+					sm->mVertexData.Write< f32 >( 0.0f );
+				}
+
+				// UV
+				if ( aim->mTextureCoords[ 0 ] )
+				{
+					sm->mVertexData.Write< f32 >( aim->mTextureCoords[ 0 ][ vertIdx ].x );
+					sm->mVertexData.Write< f32 >( aim->mTextureCoords[ 0 ][ vertIdx ].y );
+				}
+				else
+				{
+					sm->mVertexData.Write< f32 >( 0.0f );
+					sm->mVertexData.Write< f32 >( 0.0f );
+				}
 			}
 		}
 
@@ -509,9 +519,11 @@ namespace Enjon
 		// NOTE(): Flipping UVs FUCKS IT ALL because I'm already flipping UVs in the shader generation process (shadergraph). Need to fix this.  
 		const aiScene* scene = importer.ReadFile( filePath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace );
 
-		if ( !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
+		//if ( !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
+		if ( !scene || !scene->mRootNode )
 		{
 			// Error 
+			return Result::FAILURE;
 		} 
 
 		// Check whether or not the scene has animations

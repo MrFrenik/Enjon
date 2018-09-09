@@ -610,7 +610,7 @@ namespace Enjon
 		Enjon::Utils::WriteToFile( buildAndRunFIle, projectDir + "Proc/" + "BuildAndRun.bat" ); 
 		Enjon::Utils::WriteToFile( mProjectBuildBatTemplate, projectDir + "Proc/" + "Build.bat" ); 
 		Enjon::Utils::WriteToFile( "", projectDir + "Build/Generator/Linked/" + projectName + "_Generated.cpp" ); 
-		Enjon::Utils::WriteToFile( projectDir, projectDir + projectName + ".eproj" );
+		Enjon::Utils::WriteToFile( projectDir + "\n" + Engine::GetInstance()->GetConfig().GetRoot(), projectDir + projectName + ".eproj" );
 		Enjon::Utils::WriteToFile( mCompileProjectBatTemplate, projectDir + "Proc/" + "CompileProject.bat" );
 
 
@@ -685,7 +685,15 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EditorApp::CreateProjectView( )
+	void EditorApp::PreCreateNewProject( const String& projectName )
+	{
+		mPrecreateNewProject = true;
+		mNewProjectName = projectName;
+	}
+
+	//================================================================================================================================
+
+	bool EditorApp::CreateProjectView( )
 	{
 		char buffer[ 256 ];
 		strncpy( buffer, mNewProjectName.c_str( ), 256 );
@@ -700,7 +708,9 @@ namespace Enjon
 			String projectPath = mProjectsDir + "/" + mNewProjectName + "/";
 			if ( !fs::exists( projectPath ) )
 			{
-				CreateNewProject( mNewProjectName );
+				//CreateNewProject( mNewProjectName );
+				PreCreateNewProject( mNewProjectName );
+				return true;
 			}
 			else
 			{
@@ -708,17 +718,19 @@ namespace Enjon
 			} 
 		}
 
-		if ( !mPlaying )
-		{ 
-			// Load visual studio project 
-			if ( ImGui::Button( "Load Project Solution" ) )
-			{
-				if ( fs::exists( mProject.GetProjectPath( ) + "Build/" + mProject.GetProjectName( ) + ".sln" ) )
-				{ 
-					LoadProjectSolution( );
-				}
-			}
-		}
+		return false;
+
+		//if ( !mPlaying )
+		//{ 
+		//	// Load visual studio project 
+		//	if ( ImGui::Button( "Load Project Solution" ) )
+		//	{
+		//		if ( fs::exists( mProject.GetProjectPath( ) + "Build/" + mProject.GetProjectName( ) + ".sln" ) )
+		//		{ 
+		//			LoadProjectSolution( );
+		//		}
+		//	}
+		//}
 
 	}
 
@@ -963,6 +975,28 @@ namespace Enjon
 
 	//================================================================================================================================
 
+	void EditorApp::FindProjectOnLoad( )
+	{
+		if ( mProjectOnLoad.empty( ) )
+		{
+			return;
+		}
+
+		for ( auto& p : mProjectsOnDisk )
+		{
+			if ( p.GetProjectName( ).compare( mProjectOnLoad ) == 0 )
+			{
+				LoadProject( p );
+				return;
+			}
+		}
+	}
+
+	void EditorApp::SetProjectOnLoad( const String& projectDir )
+	{
+		mProjectOnLoad = projectDir;
+	}
+
 	void EditorApp::InitializeProjectApp( )
 	{
 		// Get project application
@@ -1065,6 +1099,8 @@ namespace Enjon
 
 	void EditorApp::LoadProjectContext( )
 	{
+		mPreloadProjectContext = false;
+
 		Window* mainWindow = EngineSubsystem( GraphicsSubsystem )->GetMainWindow( );
 		assert( mainWindow != nullptr );
 
@@ -1115,24 +1151,12 @@ namespace Enjon
 
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
-		// Register individual windows
-		guiContext->RegisterWindow( "Create Project", [ & ] ( )
-		{
-			// Docking windows
-			if ( ImGui::BeginDock( "Create Project", &mShowCreateProjectView, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse ) )
-			{
-				// Print docking information
-				CreateProjectView( );
-			}
-			ImGui::EndDock( );
-		} ); 
-
 		guiContext->RegisterWindow( "Play Options", [ & ]
 		{
 			if ( ImGui::BeginDock( "Play Options", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 			{
 				PlayOptions( );
-				CheckForPopups( );
+				//CheckForPopups( );
 			}
 			ImGui::EndDock( );
 		} );
@@ -1270,11 +1294,6 @@ namespace Enjon
 			}
 		}; 
 
-		auto loadProjectMenuOption = [&]()
-		{
-			ImGui::MenuItem( "Load Project...##options", NULL, &mLoadProjectPopupDialogue );
-		};
-
 		auto saveSceneOption = [ & ] ( )
 		{ 
 			AssetHandle< Scene > currentScene = EngineSubsystem( SceneManager )->GetScene( ); 
@@ -1295,8 +1314,28 @@ namespace Enjon
 			ImGui::PopStyleColor( );
 		};
 
+
+		guiContext->RegisterWindow( "Snap Options", [ & ]
+		{
+			Vec3 ts = mTransformWidget.GetTranslationSnap( );
+			f32 tsnap[ 3 ];
+			tsnap[ 0 ] = ts.x;
+			tsnap[ 1 ] = ts.y;
+			tsnap[ 2 ] = ts.z;
+			ImGui::DragFloat3( "T Snap", tsnap );
+			mTransformWidget.SetTranslationSnap( Vec3( tsnap[ 0 ], tsnap[ 1 ], tsnap[ 2 ] ) );
+
+			Vec3 ss = mTransformWidget.GetScaleSnap( );
+			f32 ssnap[ 3 ];
+			ssnap[ 0 ] = ss.x;
+			ssnap[ 1 ] = ss.y;
+			ssnap[ 2 ] = ss.z;
+			ImGui::DragFloat3( "S Snap", ssnap );
+			mTransformWidget.SetScaleSnap( Vec3( ssnap[ 0 ], ssnap[ 1 ], ssnap[ 2 ] ) );
+		});
+
 		// Register menu options
-		guiContext->RegisterMenuOption("File", "Load Project...##options", loadProjectMenuOption); 
+		//guiContext->RegisterMenuOption("File", "Load Project...##options", loadProjectMenuOption); 
 		guiContext->RegisterMenuOption("File", "Save Scene##options", saveSceneOption); 
 		guiContext->RegisterMenuOption( "Create", "Create", createViewOption );
 
@@ -1304,7 +1343,7 @@ namespace Enjon
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Play Options", "Scene", GUIDockSlotType::Slot_Top, 0.1f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "World Outliner", nullptr, GUIDockSlotType::Slot_Right, 0.3f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Play Options", GUIDockSlotType::Slot_Right, 0.5f ) );
+		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Play Options", GUIDockSlotType::Slot_Right, 0.5f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.7f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene", GUIDockSlotType::Slot_Bottom, 0.3f ) ); 
 
@@ -1320,10 +1359,14 @@ namespace Enjon
 		assert( window != nullptr );
 
 		// Set the size of the window
-		window->SetSize( iVec2( 1200, 500 ) ); 
-		window->SetWindowTitle( "Enjon Editor: Project Selection / Creation" );
+		window->HideWindow( );
 
-		GUIContext* guiCtx = window->GetGUIContext( );
+		mProjectSelectionWindow = new Window( );
+		mProjectSelectionWindow->Init( "Test", 1200, 500, WindowFlags::DEFAULT );
+		mProjectSelectionWindow->SetWindowTitle( "Enjon Editor: Project Selection / Creation" ); 
+		EngineSubsystem( GraphicsSubsystem )->AddWindow( mProjectSelectionWindow ); 
+
+		GUIContext* guiCtx = mProjectSelectionWindow->GetGUIContext( );
 
 		auto createProjectView = [ & ] ( )
 		{ 
@@ -1338,13 +1381,22 @@ namespace Enjon
 						{ 
 							// Preload project for next frame
 							PreloadProject( p );
+							Window::DestroyWindow( mProjectSelectionWindow );
 						}
 					}
 					ImGui::EndCombo( );
 				} 
+
+				// Create project view underneath this
+				ImGui::NewLine( );
+
+				if ( CreateProjectView( ) )
+				{
+					Window::DestroyWindow( mProjectSelectionWindow );
+				}
 			}
 			ImGui::EndDock( );
-		};
+		}; 
 
 		guiCtx->RegisterWindow( "Project Selection / Creation", createProjectView ); 
 		guiCtx->RegisterDockingLayout( GUIDockingLayout( "Project Selection / Creation", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) ); 
@@ -1408,11 +1460,16 @@ namespace Enjon
 
 #if LOAD_ENGINE_RESOURCES
 		LoadResources( );
-#endif
+#endif 
+		 
+		// Search for loaded project  
+		// NOTE(): ( this is hideous, by the way )
+		FindProjectOnLoad( );
 
-		if ( mProject.IsLoaded( ) )
+		if ( mProject.IsLoaded( ) || mPreloadProjectContext )
 		{
 			LoadProjectContext( );
+			ReloadDLL( );
 		}
 		else
 		{
@@ -1450,7 +1507,17 @@ namespace Enjon
 		{
 			LoadProjectContext( );
 			LoadProject( mProject );
+			EngineSubsystem( GraphicsSubsystem )->GetMainWindow( )->ShowWindow( );
 			mPreloadProjectContext = false;
+		}
+
+		if ( mPrecreateNewProject )
+		{
+			CreateNewProject( mNewProjectName );
+			LoadProjectContext( );
+			LoadProject( mProject );
+			EngineSubsystem( GraphicsSubsystem )->GetMainWindow( )->ShowWindow( );
+			mPrecreateNewProject = false;
 		}
 
 		if ( !mProject.IsLoaded( ) )
@@ -1582,123 +1649,18 @@ namespace Enjon
 					}
 				}
 
+				// Interact with transform widget code
 				if ( mInput->IsKeyDown( KeyCode::LeftMouseButton ) )
 				{
 					if ( mTransformWidget.IsInteractingWithWidget( ) )
 					{
-						mTransformWidget.InteractWithWidget( );
-						Vec3 delta = mTransformWidget.GetDelta( );
-
-						TransformationMode transformationMode = mTransformWidget.GetTransformationMode( );
-
-						switch ( transformationMode )
+						Entity* ent = mWorldOutlinerView->GetSelectedEntity().Get( );
+						Transform lt = ent->GetLocalTransform( ); 
+						mTransformWidget.InteractWithWidget( &lt );
+						ent->SetLocalTransform( lt );
+						if ( ent->HasPrototypeEntity( ) )
 						{
-							case TransformationMode::Translation:
-							{
-								switch ( mTransformWidget.GetInteractedWidgetType( ) )
-								{
-									case TransformWidgetRenderableType::TranslationXYAxes:
-									case TransformWidgetRenderableType::TranslationXZAxes:
-									case TransformWidgetRenderableType::TranslationYZAxes:
-									case TransformWidgetRenderableType::TranslationRoot:
-									case TransformWidgetRenderableType::TranslationUpAxis:
-									case TransformWidgetRenderableType::TranslationForwardAxis:
-									case TransformWidgetRenderableType::TranslationRightAxis:
-									{
-										Entity* ent = mWorldOutlinerView->GetSelectedEntity().Get( );
-										if ( ent )
-										{
-											Vec3 lp = ent->GetLocalPosition( ) + delta;
-											ent->SetLocalPosition( lp );
-
-											if ( ent->HasPrototypeEntity( ) )
-											{
-												ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity( ).Get( ), ent );
-											}
-										}
-									} break;
-								}
-
-							} break;
-
-							case TransformationMode::Scale:
-							{
-								switch ( mTransformWidget.GetInteractedWidgetType( ) )
-								{
-									case TransformWidgetRenderableType::ScaleYZAxes:
-									case TransformWidgetRenderableType::ScaleXZAxes:
-									case TransformWidgetRenderableType::ScaleXYAxes:
-									case TransformWidgetRenderableType::ScaleForwardAxis:
-									case TransformWidgetRenderableType::ScaleUpAxis:
-									case TransformWidgetRenderableType::ScaleRightAxis:
-									{
-										Entity* ent = mWorldOutlinerView->GetSelectedEntity().Get( );
-										if ( ent )
-										{
-											Vec3 ls = ent->GetLocalScale( ) + delta;
-											ent->SetLocalScale( ls ); 
-
-											if ( ent->HasPrototypeEntity( ) )
-											{
-												ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity( ).Get( ), ent );
-											}
-										}
-									} break;
-									case TransformWidgetRenderableType::ScaleRoot:
-									{
-										Entity* ent = mWorldOutlinerView->GetSelectedEntity().Get( );
-										if ( ent )
-										{
-											Vec3 ls = ent->GetLocalScale( ) + delta * ent->GetLocalScale( );
-											ent->SetLocalScale( ls );
-
-											if ( ent->HasPrototypeEntity( ) )
-											{
-												ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity( ).Get( ), ent );
-											}
-										}
-
-									} break;
-								}
-
-							} break;
-
-							case TransformationMode::Rotation:
-							{ 
-								Entity* ent = mWorldOutlinerView->GetSelectedEntity().Get( );
-								if ( ent )
-								{ 
-									f32 da = Math::ToRadians( mTransformWidget.GetAngleDelta( ) );
-									Transform localTrans = ent->GetLocalTransform( );
-									Vec3 ea = localTrans.GetEulerAngles( ); 
-
-									switch ( mTransformWidget.GetTransformSpace( ) )
-									{
-										case TransformSpace::Local: 
-										{
-											ent->SetLocalRotation( ent->GetLocalRotation( ) * mTransformWidget.GetDeltaRotation( ) );
-										} break;
-										case TransformSpace::World:
-										{
-											ent->SetLocalRotation( mTransformWidget.GetDeltaRotation( ) * ent->GetLocalRotation( ) );
-										} break;
-
-									} 
-
-									if ( ent->HasPrototypeEntity( ) )
-									{
-										ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity( ).Get( ), ent );
-									}
-								}
-							} break;
-						}
-
-						if ( mWorldOutlinerView->GetSelectedEntity().Get( ) )
-						{
-							Entity* ent = mWorldOutlinerView->GetSelectedEntity().Get( );
-							// Set position and rotation to that of entity
-							mTransformWidget.SetPosition( ent->GetWorldPosition( ) ); 
-							mTransformWidget.SetRotation( ent->GetWorldRotation( ) ); 
+							ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity( ).Get( ), ent );
 						}
 					} 
 				}
@@ -1706,7 +1668,6 @@ namespace Enjon
 				{
 					mTransformWidget.EndInteraction( );
 				}
-
 			}
 
 			// Move scene view camera
@@ -1738,7 +1699,7 @@ namespace Enjon
 						else if ( EditorTransformWidget::IsValidID( pr.mId ) )
 						{
 							// Begin widget interaction
-							mTransformWidget.BeginWidgetInteraction( TransformWidgetRenderableType( pr.mId - MAX_ENTITIES ) );
+							mTransformWidget.BeginInteraction( TransformWidgetRenderableType( pr.mId - MAX_ENTITIES ), mWorldOutlinerView->GetSelectedEntity( ).Get( )->GetWorldTransform( ) );
 						}
 						else
 						{

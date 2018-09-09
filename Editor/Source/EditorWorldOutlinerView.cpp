@@ -2,6 +2,7 @@
 // Copyright 2016-2018 John Jackson. All Rights Reserved.
 
 #include "EditorWorldOutlinerView.h"
+#include "EditorMaterialEditWindow.h"
 #include "EditorApp.h"
 
 #include <Engine.h>
@@ -208,13 +209,14 @@ namespace Enjon
 		ImVec2 textSize = ImGui::CalcTextSize( entityLabelText.c_str( ) ); 
 
 		// Capture b
+		ImVec2 selectionB = ImVec2( a.x + ImGui::GetWindowSize().x * 0.7f - rXO - 5.0f, a.y + textSize.y );
 		b = ImVec2( a.x + ImGui::GetWindowSize().x - rXO - 5.0f, a.y + textSize.y );
 
 		// Display entity name at indention level
 		ImGui::SetCursorPosX( ImGui::GetCursorPosX() + indentionLevel * indentionLevelOffset ); 
 
 		// Set hovered
-		hovered = ImGui::IsMouseHoveringRect( a, b );
+		hovered = ImGui::IsMouseHoveringRect( a, selectionB );
 
 		// Get UUID string
 		String entityUUIDStr = entity->GetUUID( ).ToString( );
@@ -240,7 +242,7 @@ namespace Enjon
 
 		// Debug draw rect
 		dl->AddRectFilled( a, b, *entityNumber % 2 == 0 ? ImColor( 0.5f, 0.5f, 0.5f, 0.05f ) : ImColor( 1.0f, 1.0f, 1.0f, 0.0f ) );
-		*entityNumber = *entityNumber + 1;
+		*entityNumber = *entityNumber + 1; 
 
 		// Draw triangle
 		bool boxSelected = false;
@@ -422,6 +424,36 @@ namespace Enjon
 			ImGui::Text( entityLabelText.c_str() ); 
 			ImGui::PopStyleColor( ); 
 		}
+ 
+		// If is an archetype, display options for that
+		if ( entity->GetArchetype( ) )
+		{
+			ImGui::SameLine( );
+
+			String label = "View Archetype";
+			f32 framePadding = 20.0f;
+			ImVec2 ts = ImGui::CalcTextSize( label.c_str( ) );
+			ImGui::SetCursorPosX( ImGui::GetWindowWidth( ) - ts.x - framePadding );
+			ImVec2 a = ImVec2( ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y );
+			ImVec2 b = ImVec2( a.x + ts.x, a.y + ts.y );
+			ImGui::PushClipRect( a, b, true );
+			ImGui::TextColored( ImGui::IsMouseHoveringRect( a, b ) ? ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorActive ) ) : ImColor( ImGui::GetColorU32( ImGuiCol_TextDisabled ) ), label.c_str( ) );
+			ImGui::PopClipRect( );
+			if ( ImGui::IsMouseClicked( 0 ) && ImGui::IsMouseHoveringRect( a, b ) )
+			{
+				// Open archetype window
+				const Asset* archType = entity->GetArchetype( ).Get( );
+
+				// Open new edit window for this archetype
+				WindowParams params;
+				params.mWindow = new EditorArchetypeEditWindow( archType );
+				params.mName = archType->GetName( );
+				params.mWidth = 1200;
+				params.mHeight = 800;
+				params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
+				Window::AddNewWindow( params ); 
+			}
+		}
 
 		// Display all entity children
 		if ( entity->HasChildren( ) )
@@ -470,6 +502,8 @@ namespace Enjon
 		}
 		ImGui::ListBoxFooter( ); 
 
+		ImVec2 selectionRectA = ImVec2( ImGui::GetWindowPos( ) );
+		ImVec2 selectionRectB = ImVec2( selectionRectA.x + ImGui::GetWindowSize( ).x * 0.7f, selectionRectA.y + ImGui::GetWindowSize( ).y );
 		if ( ImGui::IsMouseHoveringRect( ImGui::GetWindowPos( ), ImVec2( ImGui::GetWindowPos( ).x + ImGui::GetWindowSize( ).x, ImGui::GetWindowPos( ).y + ImGui::GetWindowSize( ).y ) ) )
 		{
 			if ( !anyItemHovered )
@@ -507,6 +541,15 @@ namespace Enjon
 				}
 			}
 		} 
+
+		if ( input->IsKeyReleased( KeyCode::LeftMouseButton ) )
+		{
+			if ( mGrabbedEntity )
+			{ 
+				mGrabbedEntity = EntityHandle::Invalid( ); 
+				mHeldMousePosition = Vec2( -1, -1 );
+			}
+		}
 
 		// Formatting
 		ImVec2 csp = ImGui::GetCursorScreenPos( );

@@ -26,9 +26,9 @@ namespace Enjon
 	    glBindFramebuffer(GL_FRAMEBUFFER, mFrameBufferID);
 
 	    // Bind the color render target
-		glBindRenderbufferEXT(GL_RENDERBUFFER, mTargetID);
-		glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, mWidth, mHeight);
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mTargetID);
+		glBindRenderbuffer(GL_RENDERBUFFER, mTargetID);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, mWidth, mHeight);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mTargetID);
 
 	    // - color buffer
 	    glGenTextures(1, &mTexture);
@@ -70,9 +70,9 @@ namespace Enjon
 	void FrameBuffer::ExplicitDestructor( )
 	{
 		glDeleteTextures(1, &mTexture);
-		glDeleteFramebuffersEXT(1, &mFrameBufferID);
-		glDeleteRenderbuffersEXT(1, &mTargetID);
-		glDeleteRenderbuffersEXT(1, &mDepthBuffer);
+		glDeleteFramebuffers(1, &mFrameBufferID);
+		glDeleteRenderbuffers(1, &mTargetID);
+		glDeleteRenderbuffers(1, &mDepthBuffer);
 	}
 
 	void FrameBuffer::Bind(BindType type, bool clear)

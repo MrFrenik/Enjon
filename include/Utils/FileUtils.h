@@ -329,8 +329,7 @@ namespace Enjon { namespace Utils
 
 	//==================================================================================================================
 
-	static inline void WriteToFile( const String& contents, const String& filePath )
-	{
+	static inline void WriteToFile( const String& contents, const String& filePath ) {
 		std::ofstream out( filePath );
 		if ( out )
 		{

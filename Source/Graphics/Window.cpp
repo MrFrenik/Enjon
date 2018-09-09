@@ -7,7 +7,7 @@
 #include "Engine.h"
 #include "SubsystemCatalog.h"
 #include "Base/World.h"
-
+ 
 #ifdef ENJON_SYSTEM_WINDOWS
 	#include <Windows.h>
 #endif
@@ -20,6 +20,7 @@ namespace Enjon
 	HashMap< CursorType, SDL_Cursor* > Window::mSDLCursors;
 	Vector< WindowParams > Window::mWindowsToInit;
 	Vector< Window* > Window::mWindowsToDestroy;
+	SDL_Surface* Window::mWindowIcon = nullptr;
 
 	Window::Window()
 		: m_isfullscreen(false)
@@ -33,7 +34,7 @@ namespace Enjon
 	s32 Window::Init( const String& windowName, const s32& screenWidth, const s32& screenHeight, WindowFlagsMask currentFlags ) 
 	{
 		m_screenWidth = screenWidth;
-		m_screenHeight = screenHeight;
+		m_screenHeight = screenHeight; 
 
 		Uint32 flags = SDL_WINDOW_OPENGL; 
 		
@@ -75,9 +76,6 @@ namespace Enjon
 			} 
 		}
 
-		// Set current context and window
-		//SDL_GL_MakeCurrent( m_sdlWindow, mGLContext );
-
 		//Set up glew (optional but recommended)
 		GLenum error = glewInit();
 		if (error != GLEW_OK) {
@@ -90,20 +88,8 @@ namespace Enjon
 		//Check OpenGL version
 		//std::printf("***    OpenGL Version:  %s    ***\n", glGetString(GL_VERSION));
 
-		//Set viewport
-		//glViewport(0, 0, m_screenWidth, m_screenHeight);
-
-		////Set the background color
-		//glClearColor(0.2f, 0.3f, 0.8f, 1.0f);
-
 		//Set Vsync to enabled
 		SDL_GL_SetSwapInterval(0);
-
-		//Enable alpha blending
-		//glEnable(GL_BLEND);
-
-		////Set blend function type
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Construct gui context
 		mGUIContext = GUIContext( this );
@@ -111,6 +97,17 @@ namespace Enjon
 		// Initialize ImGUI context and set
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
 		mGUIContext.mContext = igm->Init( this );
+
+		// Set window icon
+		if ( !mWindowIcon )
+		{
+			mWindowIcon = SDL_LoadBMP( ( Engine::GetInstance( )->GetConfig( ).GetEngineResourcePath( ) + "/Textures/enjonicon_32x32.bmp" ).c_str( ) );
+		}
+
+		if ( mWindowIcon )
+		{
+			SDL_SetWindowIcon( m_sdlWindow, mWindowIcon );
+		} 
 
 		return 0;
 	}
@@ -196,6 +193,22 @@ namespace Enjon
 	{
 		//Need to figure this one out...
 	}
+
+	//==================================================================================================
+
+	void Window::HideWindow( )
+	{
+		SDL_HideWindow( m_sdlWindow );
+	}
+
+	//==================================================================================================
+
+	void Window::ShowWindow( )
+	{
+		SDL_ShowWindow( m_sdlWindow );
+	}
+
+	//==================================================================================================
 
 	void Window::PrintDebugInfo( )
 	{

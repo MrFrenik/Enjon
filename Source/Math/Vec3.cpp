@@ -303,6 +303,20 @@ namespace Enjon
 
 		return x*x + y*y + z*z;
 	} 
+	
+	//================================================
+
+	Vec3 Vec3::SnapTo( const Vec3& in, const Vec3& snap )
+	{
+		Vec3 out;
+		out.x = snap.x != 0.0f ? Math::Round( in.x / snap.x ) * snap.x : in.x;
+		out.y = snap.y != 0.0f ? Math::Round( in.y / snap.y ) * snap.y : in.y;
+		out.z = snap.z != 0.0f ? Math::Round( in.z / snap.z ) * snap.z : in.z;
+
+		return out;
+	}
+	
+	//================================================
 			
 	Vec3 Vec3::XAxis()
 	{ 

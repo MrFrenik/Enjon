@@ -343,6 +343,11 @@ namespace Enjon {
 			* @return f32 - squared distance between two vectors
 			*/
 			static f32 DistanceSquared(const Vec3& a, const Vec3& b); 
+
+			/** 
+			* @brief
+			*/	
+			static Vec3 SnapTo( const Vec3& in, const Vec3& snap );
 		
 		public:
 			f32 x; 

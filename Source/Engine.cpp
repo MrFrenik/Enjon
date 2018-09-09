@@ -91,7 +91,7 @@ namespace Enjon
 		SDL_GL_SetSwapInterval( 1 );
 
 		// Set configuration
-		mConfig = config;
+		mConfig = config; 
 
 		InitSubsystems();
 
@@ -173,13 +173,13 @@ namespace Enjon
 		mImGuiManager	= mSubsystemCatalog->Register< ImGuiManager >( false ); 
 
 		// Register remaining subsystems
-		mAssetManager		= mSubsystemCatalog->Register< AssetManager >( false );		// Will do manual initialization of asset management system, since it's project dependent
-		mGraphics			= mSubsystemCatalog->Register< GraphicsSubsystem >( );
+		mAssetManager		= mSubsystemCatalog->Register< AssetManager >( false );		// Will do manual initialization of asset management system, since it's project dependent 
+		mGraphics			= mSubsystemCatalog->Register< GraphicsSubsystem >( ); 
 		mInput				= mSubsystemCatalog->Register< Input >( ); 
 		mEntities			= mSubsystemCatalog->Register< EntityManager >( );
 		mPhysics			= mSubsystemCatalog->Register< PhysicsSubsystem >( );
 		mSceneManager		= mSubsystemCatalog->Register< SceneManager >( );
-		mAnimationSystem	= mSubsystemCatalog->Register< AnimationSubsystem >( );
+		mAnimationSystem	= mSubsystemCatalog->Register< AnimationSubsystem >( ); 
 
 		// Construct world and register contexts
 		mWorld = new World( ); 

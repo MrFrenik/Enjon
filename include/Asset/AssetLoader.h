@@ -6,7 +6,7 @@
 #define ENJON_ASSET_LOADER_H 
 
 #include "Asset/ImportOptions.h"
- #include "Asset/Asset.h" 
+#include "Asset/Asset.h" 
 #include "Serialize/CacheRegistryManifest.h"
 #include "Defines.h"
 
