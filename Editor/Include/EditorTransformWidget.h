@@ -61,13 +61,18 @@ namespace Enjon
 
 			void Enable( bool enable );
 
-			static bool IsValidID( const u32& id );
+			static bool IsValidID( const u32& id ); 
 
-			Vec3 GetTranslationSnap( ) const;
-			void SetTranslationSnap( const Vec3& snap );
+			Vec3 GetSnapSettings( ) const;
+			void SetSnapSettings( const Vec3& snap );
 
-			Vec3 GetScaleSnap( ) const;
-			void SetScaleSnap( const Vec3& snap );
+			f32 GetTranslationSnap( ) const;
+			f32 GetScaleSnap( ) const;
+			f32 GetRotationSnap( ) const;
+
+			void SetTranslationSnap( const f32& snap );
+			void SetScaleSnap( const f32& snap );
+			void SetRotationSnap( const f32& snap );
 
 			Vec3 GetIntersectionStartPosition( ) const;
 			Vec3 GetAccumulatedTranslationDelta( ) const;
@@ -102,12 +107,12 @@ namespace Enjon
 			f32 mPreviousAngle = 0.0f;
 			TransformSpace mTransformSpace = TransformSpace::World; 
 
-			Vec3 mTranslationSnap = Vec3( 0.0f );
-			Vec3 mScaleSnap = Vec3( 0.0f );
-			Vec3 mRotationSnap = Vec3( 0.0f );
+			// X = Translation, Y = Rotation ( Degrees ), Z = Scale
+			Vec3 mSnapSettings = Vec3( 1.0f, 10.0f, 1.0f );
 			Vec3 mAccumulatedTranslationDelta = Vec3( 0.0f );
 			Vec3 mAccumulatedScaleDelta = Vec3( 0.0f );
 			Quaternion mAccumulatedRotationDelta = Quaternion( );
+			f32 mAccumulatedAngleDelta = 0.0f;
 
 			Transform mRootTransform;
 	}; 

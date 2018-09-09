@@ -723,9 +723,7 @@ namespace Enjon
 						// Store delta
 						mDelta = intersectionResult.mHitPosition - mIntersectionStartPosition;
 
-						// Get these positions in screen space coordinates to determine sign
-						//Vec2 mc = input->GetMouseCoords( ); 
-
+						// Screen projected mouse coordinates
 						Vec2 mc = mEditorApp->GetSceneViewProjectedCursorPosition( );
 
 						// Store previous position as new intersection position
@@ -771,7 +769,8 @@ namespace Enjon
 						// Start normal
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
 						// End normal
-						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
+						//gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * endPositionVector.Length( ), Vec3( 0.0f, 1.0f, 0.0f ) );
 						// Widget forward
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + rotationForward * 2.0f, Vec3( 0.0f, 0.0f, 1.0f ) );
 
@@ -789,16 +788,18 @@ namespace Enjon
 							angle *= -1.0f;
 						} 
 
-						mAngleDelta = angle; 
-						mDeltaRotation = Quaternion::AngleAxis( Math::ToRadians( mAngleDelta ), planeNormal );
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
 
-						mAccumulatedRotationDelta = mAccumulatedRotationDelta * mDeltaRotation;
+						mAngleDelta = angle; 
+						mAccumulatedAngleDelta += mAngleDelta;
+						f32 snapAngle = Vec3::SnapTo( Vec3( mAccumulatedAngleDelta ), GetRotationSnap() ).x;
+						mDeltaRotation = Quaternion::AngleAxis( Math::ToRadians( snapAngle ), planeNormal );
+
 						switch ( mTransformSpace )
 						{
-							case TransformSpace::Local: transform->SetRotation( mRootTransform.GetRotation( ) * mAccumulatedRotationDelta ); break;
-							case TransformSpace::World: transform->SetRotation( mAccumulatedRotationDelta * mRootTransform.GetRotation( ) ); break;
-						}
+							case TransformSpace::Local: transform->SetRotation( mRootTransform.GetRotation( ) * mDeltaRotation ); break;
+							case TransformSpace::World: transform->SetRotation( mDeltaRotation * mRootTransform.GetRotation( ) ); break; 
+						} 
 					}
 
 				} break; 
@@ -823,7 +824,8 @@ namespace Enjon
 						// Start normal
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
 						// End normal
-						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
+						//gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * endPositionVector.Length( ), Vec3( 0.0f, 1.0f, 0.0f ) );
 						// Widget forward
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + rotationRight * 2.0f, Vec3( 0.0f, 0.0f, 1.0f ) );
 
@@ -841,16 +843,18 @@ namespace Enjon
 							angle *= -1.0f;
 						} 
 
-						mAngleDelta = angle; 
-						mDeltaRotation = Quaternion::AngleAxis( Math::ToRadians( mAngleDelta ), planeNormal );
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
+ 
+						mAngleDelta = angle; 
+						mAccumulatedAngleDelta += mAngleDelta;
+						f32 snapAngle = Vec3::SnapTo( Vec3( mAccumulatedAngleDelta ), GetRotationSnap() ).x;
+						mDeltaRotation = Quaternion::AngleAxis( Math::ToRadians( snapAngle ), planeNormal );
 
-						mAccumulatedRotationDelta = mAccumulatedRotationDelta * mDeltaRotation;
 						switch ( mTransformSpace )
 						{
-							case TransformSpace::Local: transform->SetRotation( mRootTransform.GetRotation( ) * mAccumulatedRotationDelta ); break;
-							case TransformSpace::World: transform->SetRotation( mAccumulatedRotationDelta * mRootTransform.GetRotation( ) ); break;
-						}
+							case TransformSpace::Local: transform->SetRotation( mRootTransform.GetRotation( ) * mDeltaRotation ); break;
+							case TransformSpace::World: transform->SetRotation( mDeltaRotation * mRootTransform.GetRotation( ) ); break; 
+						} 
 					}
 
 				} break;
@@ -875,7 +879,8 @@ namespace Enjon
 						// Start normal
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
 						// End normal
-						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
+						//gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
+						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * endPositionVector.Length( ), Vec3( 0.0f, 1.0f, 0.0f ) );
 						// Widget forward
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + rotationUp * 2.0f, Vec3( 0.0f, 0.0f, 1.0f ) );
 
@@ -893,17 +898,18 @@ namespace Enjon
 							angle *= -1.0f;
 						} 
 
-						mAngleDelta = angle; 
-						mDeltaRotation = Quaternion::AngleAxis( Math::ToRadians( mAngleDelta ), planeNormal );
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
 
-						mAccumulatedRotationDelta = mAccumulatedRotationDelta * mDeltaRotation;
+						mAngleDelta = angle; 
+						mAccumulatedAngleDelta += mAngleDelta;
+						f32 snapAngle = Vec3::SnapTo( Vec3( mAccumulatedAngleDelta ), GetRotationSnap() ).x;
+						mDeltaRotation = Quaternion::AngleAxis( Math::ToRadians( snapAngle ), planeNormal );
 
 						switch ( mTransformSpace )
 						{
-							case TransformSpace::Local: transform->SetRotation( mRootTransform.GetRotation( ) * mAccumulatedRotationDelta ); break;
-							case TransformSpace::World: transform->SetRotation( mAccumulatedRotationDelta * mRootTransform.GetRotation( ) ); break;
-						}
+							case TransformSpace::Local: transform->SetRotation( mRootTransform.GetRotation( ) * mDeltaRotation ); break;
+							case TransformSpace::World: transform->SetRotation( mDeltaRotation * mRootTransform.GetRotation( ) ); break; 
+						} 
 					}
 				} break;
 
@@ -967,6 +973,7 @@ namespace Enjon
 		mAccumulatedTranslationDelta = Vec3( 0.0f );
 		mAccumulatedScaleDelta = Vec3( 0.0f );
 		mAccumulatedRotationDelta = Quaternion( );
+		mAccumulatedAngleDelta = 0.0f;
 
 		// Look for picked transform widget
 		switch ( type )
@@ -1184,27 +1191,48 @@ namespace Enjon
 		}
 
 		return false;
+	} 
+
+	Vec3 EditorTransformWidget::GetSnapSettings( ) const
+	{
+		return mSnapSettings;
 	}
 
-	Vec3 EditorTransformWidget::GetScaleSnap( ) const
+
+	void EditorTransformWidget::SetSnapSettings( const Vec3& snap )
 	{
-		return mScaleSnap;
+		mSnapSettings = snap;
 	}
 
-	void EditorTransformWidget::SetScaleSnap( const Vec3& snap )
+	f32 EditorTransformWidget::GetTranslationSnap( ) const
 	{
-		mScaleSnap = snap;
+		return mSnapSettings.x;
 	}
 
-	Vec3 EditorTransformWidget::GetTranslationSnap( ) const
+	f32 EditorTransformWidget::GetRotationSnap( ) const
 	{
-		return mTranslationSnap;
+		return mSnapSettings.y;
 	}
 
-	void EditorTransformWidget::SetTranslationSnap( const Vec3& snap ) 
+	f32 EditorTransformWidget::GetScaleSnap( ) const
 	{
-		mTranslationSnap = snap;
+		return mSnapSettings.z;
+	} 
+
+	void EditorTransformWidget::SetTranslationSnap( const f32& snap )
+	{
+		mSnapSettings.x = snap;
 	}
+
+	void EditorTransformWidget::SetRotationSnap( const f32& snap )
+	{
+		mSnapSettings.y = snap;
+	}
+
+	void EditorTransformWidget::SetScaleSnap( const f32& snap )
+	{
+		mSnapSettings.z = snap;
+	} 
 
 	Vec3 EditorTransformWidget::GetIntersectionStartPosition( ) const
 	{

@@ -1317,21 +1317,17 @@ namespace Enjon
 
 		guiContext->RegisterWindow( "Snap Options", [ & ]
 		{
-			Vec3 ts = mTransformWidget.GetTranslationSnap( );
-			f32 tsnap[ 3 ];
-			tsnap[ 0 ] = ts.x;
-			tsnap[ 1 ] = ts.y;
-			tsnap[ 2 ] = ts.z;
-			ImGui::DragFloat3( "T Snap", tsnap );
-			mTransformWidget.SetTranslationSnap( Vec3( tsnap[ 0 ], tsnap[ 1 ], tsnap[ 2 ] ) );
+			f32 ts = mTransformWidget.GetTranslationSnap( );
+			ImGui::DragFloat( "T Snap", &ts );
+			mTransformWidget.SetTranslationSnap( ts );
 
-			Vec3 ss = mTransformWidget.GetScaleSnap( );
-			f32 ssnap[ 3 ];
-			ssnap[ 0 ] = ss.x;
-			ssnap[ 1 ] = ss.y;
-			ssnap[ 2 ] = ss.z;
-			ImGui::DragFloat3( "S Snap", ssnap );
-			mTransformWidget.SetScaleSnap( Vec3( ssnap[ 0 ], ssnap[ 1 ], ssnap[ 2 ] ) );
+			f32 rs = mTransformWidget.GetRotationSnap( );
+			ImGui::DragFloat( "R Snap", &rs );
+			mTransformWidget.SetRotationSnap( rs );
+
+			f32 ss = mTransformWidget.GetScaleSnap( );
+			ImGui::DragFloat( "S Snap", &ss );
+			mTransformWidget.SetScaleSnap( ss ); 
 		});
 
 		// Register menu options
