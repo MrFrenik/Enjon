@@ -135,11 +135,12 @@ namespace Enjon
 			void SetRotation(const Quaternion& rotation);
 
 			/**
-			* @brief 
+			* @brief Accept euler angles ( in degrees )
 			* @param
 			* @return
 			*/
-			void SetRotation(const Vec3& eulerAngles);
+			ENJON_FUNCTION( )
+			void SetEulerRotation(const Vec3& eulerAngles);
 
 			/**
 			* @brief 
@@ -160,12 +161,13 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			Vec3 mPosition;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( HideInEditor, Delegates[ Mutator = SetRotation ] )
 			Quaternion mRotation;
 
 			ENJON_PROPERTY( )
 			Vec3 mScale;
 
+			ENJON_PROPERTY( Delegates[ Mutator = SetEulerRotation ] )
 			Vec3 mEulerAngles;
 	}; 
 }

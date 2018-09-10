@@ -202,27 +202,7 @@ namespace Enjon
 
 	Vec3 Quaternion::EulerAngles()
 	{
-		return Vec3(this->Roll(), this->Pitch(), this->Yaw());
-
-		double ysqr = y * y;
-
-		// roll (x-axis rotation)
-		double t0 = +2.0 * ( w * x + y * z );
-		double t1 = +1.0 - 2.0 * ( x * x + ysqr );
-		double roll = std::atan2( t0, t1 );
-
-		// pitch (y-axis rotation)
-		double t2 = +2.0 * ( w * y - z * x );
-		t2 = t2 > 1.0 ? 1.0 : t2;
-		t2 = t2 < -1.0 ? -1.0 : t2;
-		double pitch = std::asin( t2 );
-
-		// yaw (z-axis rotation)
-		double t3 = +2.0 * ( w * z + x * y );
-		double t4 = +1.0 - 2.0 * ( ysqr + z * z );
-		double yaw = std::atan2( t3, t4 );
-
-		return Vec3( Math::ToDegrees(roll), Math::ToDegrees(pitch), Math::ToDegrees(yaw) );
+		return ( Vec3( this->Pitch( ), this->Yaw( ), this->Roll( ) ) * ( 180.0f / ( f32 )PI ) );
 	} 
 
 	Quaternion Quaternion::NegativeAngleAxis( ) const
@@ -318,6 +298,29 @@ namespace Enjon
 			scalar * 0.5f
 		);
 	}
+
+	Quaternion Quaternion::FromEulerAngles( const f32& yawDeg, const f32& pitchDeg, const f32& rollDeg )
+	{
+		f32 yaw = Math::ToRadians( rollDeg );
+		f32 pitch = Math::ToRadians( pitchDeg );
+		f32 roll = Math::ToRadians( yawDeg );
+
+		Quaternion Q; 
+
+		f32 cy = std::cosf( yaw * 0.5f );
+		f32 sy = std::sinf( yaw * 0.5f );
+		f32 cr = std::cosf( roll * 0.5f );
+		f32 sr = std::sinf( roll * 0.5f );
+		f32 cp = std::cosf( pitch * 0.5f );
+		f32 sp = std::sinf( pitch * 0.5f );
+
+		Q.w = cy * cr * cp + sy * sr * sp;
+		Q.x = cy * sr * cp - sy * cr * sp;
+		Q.y = cy * cr * sp + sy * sr * cp;
+		Q.z = sy * cr * cp - cy * sr * sp;
+
+		return Q;
+	} 
 }
 
 

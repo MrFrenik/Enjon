@@ -127,40 +127,24 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			static Quaternion Slerp( const Quaternion& a, const Quaternion& b, const f32& t );
+			static Quaternion Slerp( const Quaternion& a, const Quaternion& b, const f32& t ); 
 
-			/**
-			* @brief Expects angle in degrees
+			/*
+			* @brief
 			*/
-			//static inline Quaternion FromEulerAngles( const f32& roll, const f32& pitch, const f32& yaw )
-			//{
-			//	return AngleAxis( ToRadians( roll ), Vec3::XAxis( ) ) * AngleAxis( ToRadians( pitch ), Vec3::YAxis( ) ) * AngleAxis( ToRadians( yaw ), Vec3::ZAxis( ) );
-			//} 
+			static Quaternion FromEulerAngles( const f32& yawDeg, const f32& pitchDeg, const f32& rollDeg );
 
-			static inline Quaternion FromEulerAngles( const f32& roll, const f32& pitch, const f32& yaw )
-			{
-				Quaternion Q; 
-
-				f32 cy = std::cosf( yaw * 0.5f );
-				f32 sy = std::sinf( yaw * 0.5f );
-				f32 cr = std::cosf( roll * 0.5f );
-				f32 sr = std::sinf( roll * 0.5f );
-				f32 cp = std::cosf( pitch * 0.5f );
-				f32 sp = std::sinf( pitch * 0.5f );
-
-				Q.w = cy * cr * cp + sy * sr * sp;
-				Q.x = cy * sr * cp - sy * cr * sp;
-				Q.y = cy * cr * sp + sy * sr * cp;
-				Q.z = sy * cr * cp - cy * sr * sp;
-
-				return Q;
-			} 
-
+			/*
+			* @brief
+			*/
 			static inline Quaternion FromEulerAngles( const Vec3& eulerAngles )
 			{
 				return Quaternion::FromEulerAngles( eulerAngles.x, eulerAngles.y, eulerAngles.z );
 			}
 			
+			/*
+			* @brief
+			*/
 			static inline Quaternion AngleAxis(const f32& Angle, const Vec3& Axis)
 			{
 				Quaternion Q;

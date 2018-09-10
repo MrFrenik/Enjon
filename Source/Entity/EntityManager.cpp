@@ -529,7 +529,7 @@ namespace Enjon
 
 	void Entity::SetLocalRotation( Vec3& eulerAngles, bool propagateToComponents )
 	{
-		mLocalTransform.SetRotation( eulerAngles );
+		mLocalTransform.SetEulerRotation( eulerAngles );
 
 		if ( propagateToComponents )
 		{

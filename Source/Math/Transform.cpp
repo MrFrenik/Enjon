@@ -152,17 +152,29 @@ namespace Enjon
 
 		// Set euler angles from quaternion
 		mEulerAngles = mRotation.EulerAngles( );
+		if ( mEulerAngles.x < 0.0f ) { while ( mEulerAngles.x < 0.0f ) mEulerAngles.x += 360.0f; }
+		if ( mEulerAngles.y < 0.0f ) { while ( mEulerAngles.y < 0.0f ) mEulerAngles.y += 360.0f; }
+		if ( mEulerAngles.z < 0.0f ) { while ( mEulerAngles.z < 0.0f ) mEulerAngles.z += 360.0f; }
+		if ( mEulerAngles.x > 360.0f ) { while ( mEulerAngles.x > 360.0f ) mEulerAngles.x -= 360.0f; }
+		if ( mEulerAngles.y > 360.0f ) { while ( mEulerAngles.y > 360.0f ) mEulerAngles.y -= 360.0f; }
+		if ( mEulerAngles.z > 360.0f ) { while ( mEulerAngles.z > 360.0f ) mEulerAngles.z -= 360.0f; }
 	} 
 
 	//==========================================================================
 
-	void Transform::SetRotation( const Vec3& eulerAngles )
+	void Transform::SetEulerRotation( const Vec3& eulerAngles )
 	{
 		// Set euler angles
 		mEulerAngles = eulerAngles;
+		if ( mEulerAngles.x < 0.0f ) { while ( mEulerAngles.x < 0.0f ) mEulerAngles.x += 360.0f; }
+		if ( mEulerAngles.y < 0.0f ) { while ( mEulerAngles.y < 0.0f ) mEulerAngles.y += 360.0f; }
+		if ( mEulerAngles.z < 0.0f ) { while ( mEulerAngles.z < 0.0f ) mEulerAngles.z += 360.0f; }
+		if ( mEulerAngles.x > 360.0f ) { while ( mEulerAngles.x > 360.0f ) mEulerAngles.x -= 360.0f; }
+		if ( mEulerAngles.y > 360.0f ) { while ( mEulerAngles.y > 360.0f ) mEulerAngles.y -= 360.0f; }
+		if ( mEulerAngles.z > 360.0f ) { while ( mEulerAngles.z > 360.0f ) mEulerAngles.z -= 360.0f; }
 
-		// Set quaternion rotation from angles
-		mRotation = Quaternion::FromEulerAngles( eulerAngles ); 
+		// Set quaternion rotation from angles ( accept as degrees )
+		mRotation = Quaternion::FromEulerAngles( eulerAngles );
 	}
 
 	//==========================================================================
