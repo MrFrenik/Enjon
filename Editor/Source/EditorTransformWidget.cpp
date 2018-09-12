@@ -416,6 +416,9 @@ namespace Enjon
 					// Axis of rotation
 					Vec3 Tz = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::ZAxis( ) ).Normalize( );
 
+					Vec3 Tx = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( );
+					Vec3 Ty = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) ).Normalize( );
+
 					// Get line intersection result with plane
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Tz );
 
@@ -443,8 +446,27 @@ namespace Enjon
 						Vec3 finalDelta = mAccumulatedTranslationDelta; 
 						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
 						{
-							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) );
-							finalDelta = mAccumulatedTranslationDelta.Normalize( ) * snapLen;
+							Vec3 u = mAccumulatedTranslationDelta;
+	 
+							// Need to project u onto n
+							f32 uXDotN = u.Dot( Tx );
+
+							// Store delta as final projection
+							Vec3 xDelta = Tx * uXDotN; 
+	 
+							// Need to project u onto n
+							f32 uYDotN = u.Dot( Ty );
+
+							// Store delta as final projection
+							Vec3 yDelta = Ty * uYDotN; 
+
+							f32 xSign = uXDotN >= 0.0f ? 1.0f : -1.0f;
+							f32 ySign = uYDotN >= 0.0f ? 1.0f : -1.0f;
+ 
+							xDelta = Tx * Math::Round( xDelta.Length( ) / GetTranslationSnap( ) ) * xSign;
+							yDelta = Ty * Math::Round( yDelta.Length( ) / GetTranslationSnap( ) ) * ySign;
+
+							finalDelta = xDelta + yDelta; 
 						}
 
 						// Set final position
@@ -456,7 +478,10 @@ namespace Enjon
 				case ( TransformWidgetRenderableType::TranslationXZAxes ):
 				{ 
 					// Axis of rotation
-					Vec3 Ty = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3( 0.0f, 1.0f, 0.0f ) ).Normalize( ); 
+					Vec3 Ty = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) ).Normalize( );
+
+					Vec3 Tx = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( );
+					Vec3 Tz = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::ZAxis( ) ).Normalize( );
 
 					// Get intersection result of plane 
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Ty );
@@ -485,8 +510,27 @@ namespace Enjon
 						Vec3 finalDelta = mAccumulatedTranslationDelta; 
 						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
 						{
-							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) );
-							finalDelta = mAccumulatedTranslationDelta.Normalize( ) * snapLen;
+							Vec3 u = mAccumulatedTranslationDelta;
+	 
+							// Need to project u onto n
+							f32 uXDotN = u.Dot( Tx );
+
+							// Store delta as final projection
+							Vec3 xDelta = Tx * uXDotN; 
+	 
+							// Need to project u onto n
+							f32 uZDotN = u.Dot( Tz );
+
+							// Store delta as final projection
+							Vec3 zDelta = Tz * uZDotN; 
+
+							f32 xSign = uXDotN >= 0.0f ? 1.0f : -1.0f;
+							f32 zSign = uZDotN >= 0.0f ? 1.0f : -1.0f;
+ 
+							xDelta = Tx * Math::Round( xDelta.Length( ) / GetTranslationSnap( ) ) * xSign;
+							zDelta = Tz * Math::Round( zDelta.Length( ) / GetTranslationSnap( ) ) * zSign;
+
+							finalDelta = xDelta + zDelta; 
 						}
 
 						// Set final position
@@ -519,7 +563,6 @@ namespace Enjon
 							mDelta.x = 0.0f; 
 						}
 
-
 						// Store previous position as new intersection position
 						mIntersectionStartPosition = intersectionResult.mHitPosition;
 
@@ -530,11 +573,6 @@ namespace Enjon
 						Vec3 finalDelta = mAccumulatedTranslationDelta; 
 						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
 						{
-							//f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) ); 
-							//finalDelta = mAccumulatedTranslationDelta.Normalize( ) * snapLen;
-
-							// Calculate delta from starting position ( lock to x axis )
-							//Vec3 u = intersectionResult.mHitPosition - mIntersectionStartPosition; 
 							Vec3 u = mAccumulatedTranslationDelta;
 	 
 							// Need to project u onto n
@@ -549,8 +587,11 @@ namespace Enjon
 							// Store delta as final projection
 							Vec3 zDelta = Tz * uZDotN; 
 
-							yDelta = Ty * Math::Round( yDelta.Length( ) / GetTranslationSnap( ) );
-							zDelta = Tz * Math::Round( zDelta.Length( ) / GetTranslationSnap( ) );
+							f32 ySign = uYDotN >= 0.0f ? 1.0f : -1.0f;
+							f32 zSign = uZDotN >= 0.0f ? 1.0f : -1.0f;
+ 
+							yDelta = Ty * Math::Round( yDelta.Length( ) / GetTranslationSnap( ) ) * ySign;
+							zDelta = Tz * Math::Round( zDelta.Length( ) / GetTranslationSnap( ) ) * zSign;
 
 							finalDelta = yDelta + zDelta; 
 						}
