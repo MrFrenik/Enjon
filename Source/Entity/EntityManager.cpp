@@ -366,7 +366,7 @@ namespace Enjon
 		return handles;
 	}
 
-	//---------------------------------------------------------------
+	//==========================================================================================
 
 	Vector<Component*> Entity::GetComponents( )
 	{
@@ -384,7 +384,7 @@ namespace Enjon
 		return compReturns;
 	}
 
-	//---------------------------------------------------------------
+	//==========================================================================================
 
 	void Entity::SetLocalTransform( const Transform& transform, bool propagateToComponents )
 	{
@@ -399,14 +399,27 @@ namespace Enjon
 		mWorldTransformDirty = true;
 	}
 
-	//---------------------------------------------------------------
+	//==========================================================================================
+
+	void Entity::SetWorldTransform( const Transform& transform, bool propagateToComponents )
+	{
+		mWorldTransform = transform; 
+		CalculateLocalTransform( );
+		if ( propagateToComponents )
+		{
+			UpdateComponentTransforms( );
+		} 
+		mWorldTransformDirty = false;
+	}
+
+	//==========================================================================================
 
 	AssetHandle< Archetype > Entity::GetArchetype( ) const
 	{
 		return mArchetype;
 	}
 
-	//---------------------------------------------------------------
+	//==========================================================================================
 
 	Transform Entity::GetLocalTransform( )
 	{
@@ -438,6 +451,10 @@ namespace Enjon
 
 			// Set local transform relative to parent transform
 			mLocalTransform = mWorldTransform / parent->GetWorldTransform( );
+		}
+		else
+		{
+			mLocalTransform = mWorldTransform;
 		}
 	}
 
@@ -497,7 +514,8 @@ namespace Enjon
 		SetLocalScale( v3( scale ) ); 
 	}
 
-	//---------------------------------------------------------------
+	//==============================================================================
+
 	void Entity::SetLocalScale( Vec3& scale, bool propagateToComponents )
 	{
 		mLocalTransform.SetScale( scale );
@@ -511,7 +529,8 @@ namespace Enjon
 		mWorldTransformDirty = true;
 	}
 
-	//---------------------------------------------------------------
+	//==============================================================================
+
 	void Entity::SetLocalRotation( Quaternion& rotation, bool propagateToComponents )
 	{
 		mLocalTransform.SetRotation( rotation );
@@ -525,7 +544,7 @@ namespace Enjon
 		mWorldTransformDirty = true;
 	}
 
-	//--------------------------------------------------------------- 
+	//==============================================================================
 
 	void Entity::SetLocalRotation( Vec3& eulerAngles, bool propagateToComponents )
 	{
@@ -540,26 +559,94 @@ namespace Enjon
 		mWorldTransformDirty = true;
 	}
 
-	//--------------------------------------------------------------- 
+	//==============================================================================
 
 	Vec3 Entity::GetLocalPosition( )
 	{
 		return mLocalTransform.GetPosition( );
 	}
 
-	//---------------------------------------------------------------
+	//==============================================================================
+
 	Vec3 Entity::GetLocalScale( )
 	{
 		return mLocalTransform.GetScale( );
 	}
 
-	//---------------------------------------------------------------
+	//==============================================================================
+
 	Quaternion Entity::GetLocalRotation( )
 	{
 		return mLocalTransform.GetRotation( );
 	}
 
-	//---------------------------------------------------------------
+	//==============================================================================
+
+	void Entity::SetWorldPosition( Vec3& position, bool propagateToComponents )
+	{ 
+		mWorldTransform.SetPosition( position );
+		CalculateLocalTransform( ); 
+		if ( propagateToComponents )
+		{
+			UpdateComponentTransforms( );
+		} 
+		mWorldTransformDirty = false;
+	}
+
+	//==============================================================================
+
+	void Entity::SetWorldScale( Vec3& scale, bool propagateToComponents )
+	{
+		mWorldTransform.SetScale( scale );
+		CalculateLocalTransform( ); 
+		if ( propagateToComponents )
+		{
+			UpdateComponentTransforms( );
+		} 
+		mWorldTransformDirty = false; 
+	}
+
+	//==============================================================================
+
+	void Entity::SetWorldScale( f32 scale, bool propagateToComponents )
+	{
+		mWorldTransform.SetScale( scale );
+		CalculateLocalTransform( ); 
+		if ( propagateToComponents )
+		{
+			UpdateComponentTransforms( );
+		} 
+		mWorldTransformDirty = false; 
+	}
+
+	//==============================================================================
+
+	void Entity::SetWorldRotation( Quaternion& rotation, bool propagateToComponents )
+	{
+		mWorldTransform.SetRotation( rotation );
+		CalculateLocalTransform( ); 
+		if ( propagateToComponents )
+		{
+			UpdateComponentTransforms( );
+		} 
+		mWorldTransformDirty = false; 
+	}
+
+	//==============================================================================
+	
+	void Entity::SetWorldRotation( Vec3& eulerAngles, bool propagateToComponents )
+	{
+		mWorldTransform.SetEulerRotation( eulerAngles );
+		CalculateLocalTransform( ); 
+		if ( propagateToComponents )
+		{
+			UpdateComponentTransforms( );
+		} 
+		mWorldTransformDirty = false; 
+	}
+
+	//==============================================================================
+
 	Vec3 Entity::GetWorldPosition( )
 	{
 		if ( mWorldTransformDirty ) CalculateWorldTransform( );

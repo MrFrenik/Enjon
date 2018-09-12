@@ -1567,21 +1567,12 @@ namespace Enjon
 			return Result::PROCESS_RUNNING;
 		}
 
-		static bool mInteractingWithTransformWidget = false;
-		static TransformMode mMode = TransformMode::Translate;
-		static Vec3 mIntersectionStartPosition;
-		static Vec3 mRootStartPosition;
-		static Vec3 mRootStartScale;
-		static TransformWidgetRenderableType mType;
-		static GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
+		GraphicsSubsystem* mGfx = EngineSubsystem( GraphicsSubsystem );
 		static Vec2 mMouseCoordsDelta = Vec2( 0.0f );
 		Input* mInput = EngineSubsystem( Input );
 		Camera* camera = mGfx->GetGraphicsSceneCamera( )->ConstCast< Enjon::Camera >( );
 		Enjon::iVec2 viewPort = mGfx->GetViewport( ); 
 		Enjon::Window* window = mGfx->GetWindow( )->ConstCast< Enjon::Window >( );
-		SDL_Cursor* cursorNS = nullptr;
-		SDL_Cursor* cursorArrow = nullptr;
-		static bool createCursor = false; 
 
 		// Can move camera if scene view has focus
 		bool previousCamMove = mMoveCamera;
@@ -1640,8 +1631,8 @@ namespace Enjon
 					{
 						if ( mInput->IsKeyPressed( KeyCode::F ) )
 						{
-							mWorldOutlinerView->GetSelectedEntity().Get( )->SetLocalPosition( mEditorCamera.GetPosition( ) );
-							mWorldOutlinerView->GetSelectedEntity().Get( )->SetLocalRotation( mEditorCamera.GetRotation( ).Normalize() ); 
+							mWorldOutlinerView->GetSelectedEntity().Get( )->SetWorldPosition( mEditorCamera.GetPosition( ) );
+							mWorldOutlinerView->GetSelectedEntity().Get( )->SetWorldRotation( mEditorCamera.GetRotation( ).Normalize() ); 
 						}
 					}
 
@@ -1663,9 +1654,9 @@ namespace Enjon
 					if ( mTransformWidget.IsInteractingWithWidget( ) )
 					{
 						Entity* ent = mWorldOutlinerView->GetSelectedEntity().Get( );
-						Transform lt = ent->GetLocalTransform( ); 
-						mTransformWidget.InteractWithWidget( &lt );
-						ent->SetLocalTransform( lt );
+						Transform wt = ent->GetWorldTransform( ); 
+						mTransformWidget.InteractWithWidget( &wt );
+						ent->SetWorldTransform( wt ); 
 						if ( ent->HasPrototypeEntity( ) )
 						{
 							ObjectArchiver::RecordAllPropertyOverrides( ent->GetPrototypeEntity( ).Get( ), ent );
@@ -1688,7 +1679,6 @@ namespace Enjon
 			else
 			{
 				//mGfx->GetMainWindow( )->ConstCast< Window >( )->ShowMouseCursor( true );
- 
 				if ( mEditorSceneView->IsHovered() )
 				{
 					if ( mInput->IsKeyPressed( KeyCode::LeftMouseButton ) )
@@ -1718,7 +1708,7 @@ namespace Enjon
 				}
 			} 
 
-
+			// NOTE(): Don't like having to do this here...
 			if ( !mTransformWidget.IsInteractingWithWidget( ) && mWorldOutlinerView->GetSelectedEntity() )
 			{
 				Entity* ent = mWorldOutlinerView->GetSelectedEntity( ).Get( );

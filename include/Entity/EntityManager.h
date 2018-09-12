@@ -236,6 +236,11 @@ namespace Enjon
 		void SetLocalTransform( const Transform& transform, bool propagateToComponents = true );
 
 		/**
+		* @brief Sets world transform of entity
+		*/
+		void SetWorldTransform( const Transform& transform, bool propagateToComponents = true );
+
+		/**
 		* @brief
 		*/
 		AssetHandle< Archetype > GetArchetype( ) const;
@@ -289,6 +294,31 @@ namespace Enjon
 		* @brief Gets local rotation of entity relative to parent, if exists
 		*/
 		Quaternion GetLocalRotation( );
+
+		/**
+		* @brief Sets world position of entity relative to parent, if exists
+		*/
+		void SetWorldPosition( Vec3& position, bool propagateToComponents = true );
+
+		/**
+		* @brief Sets local scale of entity relative to parent, if exists
+		*/
+		void SetWorldScale( Vec3& scale, bool propagateToComponents = true );
+
+		/**
+		* @brief Sets local scale of entity relative to parent, if exists
+		*/
+		void SetWorldScale( f32 scale, bool propagateToComponents = true );
+
+		/**
+		* @brief Sets local orientation of entity relative to parent, if exists
+		*/
+		void SetWorldRotation( Quaternion& rotation, bool propagateToComponents = true );
+
+		/**
+		* @brief Sets local orientation of entity relative to parent, if exists
+		*/
+		void SetWorldRotation( Vec3& eulerAngles, bool propagateToComponents = true );
 
 		/**
 		* @brief Gets World position of entity which calculates world transform if dirty flag is set
