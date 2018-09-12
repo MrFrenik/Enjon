@@ -65,6 +65,11 @@ namespace Enjon
 			*/
 			void HandleAssetDrop( );
 
+			/**
+			* @brief
+			*/
+			void RenderToolBar( );
+
 		protected: 
 			Vec2 mSceneViewWindowPosition;
 			Vec2 mSceneViewWindowSize; 

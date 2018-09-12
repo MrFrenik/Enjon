@@ -919,6 +919,9 @@ namespace Enjon
 				cls->GetValue( object, prop, &val );
 				f32 col[ 4 ] = { val.x, val.y, val.z, val.w };
 				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				// Make a change to a file in the engine.
+				// Watch how fast the reflection generation occurs.
+				// Already done :)
 				if ( traits.UseSlider( ) )
 				{
 					if ( ImGui::SliderFloat4( fmt::format("##{}", name).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )

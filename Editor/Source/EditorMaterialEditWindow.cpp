@@ -620,4 +620,68 @@ namespace Enjon
 	}
 
 	//======================================================================================================================
+
+	void EditorTransformWidgetToolBar::UpdateView( )
+	{
+		ImGui::ListBoxHeader( "##TransformOptions", ImVec2( Math::Min( ImGui::GetWindowSize( ).x * 0.95f, 900.0f ), Math::Min( ImGui::GetWindowSize( ).y * 0.7f, 30.0f ) ) );
+		{
+			// Translation snapping
+			bool tSnap = mApp->IsTransformSnappingEnabled( TransformationMode::Translation );
+			if ( ImGui::Checkbox( "Translation Snap", &tSnap ) )
+			{
+				mApp->EnableTransformSnapping( tSnap, TransformationMode::Translation );
+			}
+
+			ImGui::SameLine( );
+
+			f32 tSnapVal = mApp->GetTransformSnap( TransformationMode::Translation );
+			ImGui::PushItemWidth( Math::Min( ImGui::GetWindowSize( ).x * 0.95f, 100.0f ) );
+			if ( ImGui::SliderFloat( "##TranslationSnapAmount", &tSnapVal, 0.0f, 10.0f, "%.1f", 1.0f ) )
+			{
+				mApp->SetTransformSnap( TransformationMode::Translation, tSnapVal );
+			} 
+			ImGui::PopItemWidth( );
+
+			ImGui::SameLine( );
+
+			// Scale snapping
+			bool sSnap = mApp->IsTransformSnappingEnabled( TransformationMode::Scale );
+			if ( ImGui::Checkbox( "Scale Snap", &sSnap ) )
+			{
+				mApp->EnableTransformSnapping( sSnap, TransformationMode::Scale );
+			}
+
+			ImGui::SameLine( );
+
+			f32 sSnapVal = mApp->GetTransformSnap( TransformationMode::Scale );
+			ImGui::PushItemWidth( Math::Min( ImGui::GetWindowSize( ).x * 0.95f, 100.0f ) );
+			if ( ImGui::SliderFloat( "##ScaleSnapAmount", &sSnapVal, 0.0f, 10.0f, "%.1f", 1.0f ) )
+			{
+				mApp->SetTransformSnap( TransformationMode::Scale, sSnapVal );
+			} 
+			ImGui::PopItemWidth( );
+
+			ImGui::SameLine( );
+
+			// Rotation snapping
+			bool rSnap = mApp->IsTransformSnappingEnabled( TransformationMode::Rotation );
+			if ( ImGui::Checkbox( "Rotation Snap", &rSnap ) )
+			{
+				mApp->EnableTransformSnapping( rSnap, TransformationMode::Rotation );
+			}
+
+			ImGui::SameLine( );
+
+			f32 rSnapVal = mApp->GetTransformSnap( TransformationMode::Rotation );
+			ImGui::PushItemWidth( Math::Min( ImGui::GetWindowSize( ).x * 0.95f, 100.0f ) );
+			if ( ImGui::SliderFloat( "##RotationSnapAmount", &rSnapVal, 0.0f, 25.0f, "%.1f", 1.0f ) )
+			{
+				mApp->SetTransformSnap( TransformationMode::Rotation, rSnapVal );
+			} 
+			ImGui::PopItemWidth( );
+		}
+		ImGui::ListBoxFooter( );
+	}
+
+	//======================================================================================================================
 }

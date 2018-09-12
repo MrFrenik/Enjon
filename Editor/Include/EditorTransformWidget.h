@@ -20,7 +20,8 @@ namespace Enjon
 	{
 		Translation,
 		Scale,
-		Rotation
+		Rotation,
+		Count
 	};
 
 	class EditorTransformWidget
@@ -62,6 +63,9 @@ namespace Enjon
 			void Enable( bool enable );
 
 			static bool IsValidID( const u32& id ); 
+
+			void EnableSnapping( bool enable, const TransformationMode& mode );
+			bool IsSnapEnabled( const TransformationMode& mode );
 
 			Vec3 GetSnapSettings( ) const;
 			void SetSnapSettings( const Vec3& snap );
@@ -106,6 +110,8 @@ namespace Enjon
 			bool mSetPreviousAngle = false;
 			f32 mPreviousAngle = 0.0f;
 			TransformSpace mTransformSpace = TransformSpace::World; 
+
+			bool mSnapEnabled[ ( u32 )TransformationMode::Count ];
 
 			// X = Translation, Y = Rotation ( Degrees ), Z = Scale
 			Vec3 mSnapSettings = Vec3( 1.0f, 10.0f, 1.0f );

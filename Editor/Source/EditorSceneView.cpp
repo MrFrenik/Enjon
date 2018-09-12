@@ -88,6 +88,10 @@ namespace Enjon
 			ImGui::Text( sceneLabel.c_str( ) );
 		} 
 
+		// Render tool bar
+		ImGui::SetCursorScreenPos( ImVec2( mSceneViewWindowPosition.x + mSceneViewWindowSize.x * 0.7f, mSceneViewWindowPosition.y + mSceneViewWindowSize.y * 0.02f ) );
+		RenderToolBar( );
+
 		EditorAssetBrowserView* abv = mApp->GetEditorAssetBrowserView( );
 		if ( abv->GetGrabbedAsset( ) && mWindow->IsMouseInWindow( ) && Window::NumberOfHoveredWindows() == 1 )
 		{
@@ -131,6 +135,13 @@ namespace Enjon
 		}
 	}
  
+	//=================================================================
+
+	void EditorSceneView::RenderToolBar( )
+	{
+		// Nothing for now...
+	}
+	
 	//=================================================================
 
 	void EditorSceneView::HandleAssetDrop( )

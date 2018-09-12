@@ -32,6 +32,11 @@ namespace Enjon
 
 		// Set editor app
 		mEditorApp = app; 
+
+		for ( u32 i = 0; i < ( u32 )TransformationMode::Count; ++i )
+		{
+			mSnapEnabled[ i ] = true;
+		}
 	}
 
 	void EditorTransformWidget::SetTransformationMode( TransformationMode mode )
@@ -259,7 +264,7 @@ namespace Enjon
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
 
 						// Set final position
-						transform->SetPosition( Vec3::SnapTo( mRootTransform.GetPosition( ) + GetAccumulatedTranslationDelta( ), GetTranslationSnap( ) ) );
+						transform->SetPosition( Vec3::SnapTo( mRootTransform.GetPosition( ) + GetAccumulatedTranslationDelta( ), mSnapEnabled[ (u32)TransformationMode::Translation ] ? GetTranslationSnap( ) : 0.0f ) );
 					}
 
 				} break;
@@ -278,7 +283,7 @@ namespace Enjon
 						const Vec3* hp = &intersectionResult.mHitPosition; 
 
 						// Calculate delta from starting position ( lock to x axis )
-						Vec3 u = intersectionResult.mHitPosition - mIntersectionStartPosition; 
+						Vec3 u = intersectionResult.mHitPosition - mIntersectionStartPosition;
  
 						// Need to project u onto n
 						f32 uDotN = u.Dot( Tx );
@@ -299,8 +304,16 @@ namespace Enjon
 						// Store accumulated delta
 						mAccumulatedTranslationDelta += mDelta;
 
+						// Calculate final delta, based on snap settings
+						Vec3 finalDelta = mAccumulatedTranslationDelta; 
+						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
+						{
+							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) );
+							finalDelta = mAccumulatedTranslationDelta.Normalize( ) * snapLen;
+						}
+
 						// Set final position
-						transform->SetPosition( Vec3::SnapTo( mRootTransform.GetPosition( ) + GetAccumulatedTranslationDelta( ), GetTranslationSnap( ) ) );
+						transform->SetPosition( mRootTransform.GetPosition( ) + finalDelta );
 					}
 
 				} break;
@@ -340,8 +353,16 @@ namespace Enjon
 						// Store accumulated delta
 						mAccumulatedTranslationDelta += mDelta;
 
+						// Calculate final delta, based on snap settings
+						Vec3 finalDelta = mAccumulatedTranslationDelta; 
+						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
+						{
+							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) );
+							finalDelta = mAccumulatedTranslationDelta.Normalize( ) * snapLen;
+						}
+
 						// Set final position
-						transform->SetPosition( Vec3::SnapTo( mRootTransform.GetPosition( ) + GetAccumulatedTranslationDelta( ), GetTranslationSnap( ) ) );
+						transform->SetPosition( mRootTransform.GetPosition( ) + finalDelta );
 					}
 				} break;
 
@@ -377,8 +398,16 @@ namespace Enjon
 						// Store accumulated delta
 						mAccumulatedTranslationDelta += mDelta;
 
+						// Calculate final delta, based on snap settings
+						Vec3 finalDelta = mAccumulatedTranslationDelta; 
+						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
+						{
+							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) );
+							finalDelta = mAccumulatedTranslationDelta.Normalize( ) * snapLen;
+						}
+
 						// Set final position
-						transform->SetPosition( Vec3::SnapTo( mRootTransform.GetPosition( ) + GetAccumulatedTranslationDelta( ), GetTranslationSnap( ) ) );
+						transform->SetPosition( mRootTransform.GetPosition( ) + finalDelta );
 					}
 				} break;
 
@@ -410,8 +439,16 @@ namespace Enjon
 						// Store accumulated delta
 						mAccumulatedTranslationDelta += mDelta;
 
+						// Calculate final delta, based on snap settings
+						Vec3 finalDelta = mAccumulatedTranslationDelta; 
+						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
+						{
+							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) );
+							finalDelta = mAccumulatedTranslationDelta.Normalize( ) * snapLen;
+						}
+
 						// Set final position
-						transform->SetPosition( Vec3::SnapTo( mRootTransform.GetPosition( ) + GetAccumulatedTranslationDelta( ), GetTranslationSnap( ) ) );
+						transform->SetPosition( mRootTransform.GetPosition( ) + finalDelta );
 					}
 
 				} break;
@@ -444,8 +481,16 @@ namespace Enjon
 						// Store accumulated delta
 						mAccumulatedTranslationDelta += mDelta;
 
+						// Calculate final delta, based on snap settings
+						Vec3 finalDelta = mAccumulatedTranslationDelta; 
+						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
+						{
+							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) );
+							finalDelta = mAccumulatedTranslationDelta.Normalize( ) * snapLen;
+						}
+
 						// Set final position
-						transform->SetPosition( Vec3::SnapTo( mRootTransform.GetPosition( ) + GetAccumulatedTranslationDelta( ), GetTranslationSnap( ) ) );
+						transform->SetPosition( mRootTransform.GetPosition( ) + finalDelta );
 					}
 
 				} break;
@@ -454,6 +499,8 @@ namespace Enjon
 				{ 
 					// Axis of rotation
 					Vec3 Tx = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::XAxis( ) ).Normalize( );
+					Vec3 Ty = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::YAxis( ) ).Normalize( );
+					Vec3 Tz = ( mTranslationWidget.mRoot.mWorldTransform.GetRotation( ) * Vec3::ZAxis( ) ).Normalize( );
 
 					// Get intersection result of plane 
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( Tx );
@@ -472,14 +519,44 @@ namespace Enjon
 							mDelta.x = 0.0f; 
 						}
 
+
 						// Store previous position as new intersection position
 						mIntersectionStartPosition = intersectionResult.mHitPosition;
 
 						// Store accumulated delta
 						mAccumulatedTranslationDelta += mDelta;
 
+						// Calculate final delta, based on snap settings
+						Vec3 finalDelta = mAccumulatedTranslationDelta; 
+						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
+						{
+							//f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) ); 
+							//finalDelta = mAccumulatedTranslationDelta.Normalize( ) * snapLen;
+
+							// Calculate delta from starting position ( lock to x axis )
+							//Vec3 u = intersectionResult.mHitPosition - mIntersectionStartPosition; 
+							Vec3 u = mAccumulatedTranslationDelta;
+	 
+							// Need to project u onto n
+							f32 uYDotN = u.Dot( Ty );
+
+							// Store delta as final projection
+							Vec3 yDelta = Ty * uYDotN; 
+	 
+							// Need to project u onto n
+							f32 uZDotN = u.Dot( Tz );
+
+							// Store delta as final projection
+							Vec3 zDelta = Tz * uZDotN; 
+
+							yDelta = Ty * Math::Round( yDelta.Length( ) / GetTranslationSnap( ) );
+							zDelta = Tz * Math::Round( zDelta.Length( ) / GetTranslationSnap( ) );
+
+							finalDelta = yDelta + zDelta; 
+						}
+
 						// Set final position
-						transform->SetPosition( Vec3::SnapTo( mRootTransform.GetPosition( ) + GetAccumulatedTranslationDelta( ), GetTranslationSnap( ) ) );
+						transform->SetPosition( mRootTransform.GetPosition( ) + finalDelta );
 					}
 
 				} break;
@@ -521,7 +598,7 @@ namespace Enjon
 						mAccumulatedScaleDelta += mDelta; 
 
 						// Set final scale
-						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), GetScaleSnap( ) ) );
+						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), mSnapEnabled[ (u32)TransformationMode::Scale ] ? GetScaleSnap( ) : 0.0f ) );
 					}
 
 				} break;
@@ -566,7 +643,7 @@ namespace Enjon
 						mAccumulatedScaleDelta += mDelta; 
 
 						// Set final scale
-						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), GetScaleSnap( ) ) );
+						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), mSnapEnabled[ (u32)TransformationMode::Scale ] ? GetScaleSnap( ) : 0.0f ) );
 					}
 				} break;
 
@@ -609,7 +686,7 @@ namespace Enjon
 						mAccumulatedScaleDelta += mDelta; 
 
 						// Set final scale
-						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), GetScaleSnap( ) ) );
+						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), mSnapEnabled[ (u32)TransformationMode::Scale ] ? GetScaleSnap( ) : 0.0f ) );
 					}
 				} break;
 
@@ -642,7 +719,7 @@ namespace Enjon
 						mAccumulatedScaleDelta += mDelta; 
 
 						// Set final scale
-						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), GetScaleSnap( ) ) );
+						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), mSnapEnabled[ (u32)TransformationMode::Scale ] ? GetScaleSnap( ) : 0.0f ) );
 					}
 
 				} break;
@@ -673,7 +750,7 @@ namespace Enjon
 						mAccumulatedScaleDelta += mDelta; 
 
 						// Set final scale
-						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), GetScaleSnap( ) ) );
+						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), mSnapEnabled[ (u32)TransformationMode::Scale ] ? GetScaleSnap( ) : 0.0f ) );
 					}
 
 				} break;
@@ -704,7 +781,7 @@ namespace Enjon
 						mAccumulatedScaleDelta += mDelta; 
 
 						// Set final scale
-						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), GetScaleSnap( ) ) );
+						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), mSnapEnabled[ (u32)TransformationMode::Scale ] ? GetScaleSnap( ) : 0.0f ) );
 					}
 
 				} break;
@@ -740,7 +817,7 @@ namespace Enjon
 						mAccumulatedScaleDelta += mDelta; 
 
 						// Set final scale
-						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), GetScaleSnap( ) ) );
+						transform->SetScale( Vec3::SnapTo( mRootTransform.GetScale( ) + GetAccumulatedScaleDelta( ), mSnapEnabled[ (u32)TransformationMode::Scale ] ? GetScaleSnap( ) : 0.0f ) );
 					}
 
 				} break;
@@ -769,7 +846,6 @@ namespace Enjon
 						// Start normal
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + immutableStartNormal * 2.0f, Vec3( 1.0f, 0.0f, 0.0f ) );
 						// End normal
-						//gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * 2.0f, Vec3( 0.0f, 1.0f, 0.0f ) );
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + endNormal * endPositionVector.Length( ), Vec3( 0.0f, 1.0f, 0.0f ) );
 						// Widget forward
 						gfx->DrawDebugLine( mActiveWidget->GetWorldTransform( ).GetPosition( ), mActiveWidget->GetWorldTransform( ).GetPosition( ) + rotationForward * 2.0f, Vec3( 0.0f, 0.0f, 1.0f ) );
@@ -792,7 +868,7 @@ namespace Enjon
 
 						mAngleDelta = angle; 
 						mAccumulatedAngleDelta += mAngleDelta;
-						f32 snapAngle = Vec3::SnapTo( Vec3( mAccumulatedAngleDelta ), GetRotationSnap() ).x;
+						f32 snapAngle = Vec3::SnapTo( Vec3( mAccumulatedAngleDelta ), mSnapEnabled[ (u32)TransformationMode::Rotation ] ? GetRotationSnap() : 0.0f ).x;
 						mDeltaRotation = Quaternion::AngleAxis( Math::ToRadians( snapAngle ), planeNormal );
 
 						switch ( mTransformSpace )
@@ -847,7 +923,7 @@ namespace Enjon
  
 						mAngleDelta = angle; 
 						mAccumulatedAngleDelta += mAngleDelta;
-						f32 snapAngle = Vec3::SnapTo( Vec3( mAccumulatedAngleDelta ), GetRotationSnap() ).x;
+						f32 snapAngle = Vec3::SnapTo( Vec3( mAccumulatedAngleDelta ), mSnapEnabled[ (u32)TransformationMode::Rotation ] ? GetRotationSnap() : 0.0f ).x;
 						mDeltaRotation = Quaternion::AngleAxis( Math::ToRadians( snapAngle ), planeNormal );
 
 						switch ( mTransformSpace )
@@ -902,7 +978,7 @@ namespace Enjon
 
 						mAngleDelta = angle; 
 						mAccumulatedAngleDelta += mAngleDelta;
-						f32 snapAngle = Vec3::SnapTo( Vec3( mAccumulatedAngleDelta ), GetRotationSnap() ).x;
+						f32 snapAngle = Vec3::SnapTo( Vec3( mAccumulatedAngleDelta ), mSnapEnabled[ (u32)TransformationMode::Rotation ] ? GetRotationSnap() : 0.0f ).x;
 						mDeltaRotation = Quaternion::AngleAxis( Math::ToRadians( snapAngle ), planeNormal );
 
 						switch ( mTransformSpace )
@@ -1193,6 +1269,16 @@ namespace Enjon
 		return false;
 	} 
 
+	bool EditorTransformWidget::IsSnapEnabled( const TransformationMode& mode )
+	{
+		return mSnapEnabled[ ( u32 )mode ];
+	}
+
+	void EditorTransformWidget::EnableSnapping( bool enable, const TransformationMode& mode )
+	{
+		mSnapEnabled[ ( u32 )mode ] = enable;
+	}
+
 	Vec3 EditorTransformWidget::GetSnapSettings( ) const
 	{
 		return mSnapSettings;
@@ -1221,17 +1307,17 @@ namespace Enjon
 
 	void EditorTransformWidget::SetTranslationSnap( const f32& snap )
 	{
-		mSnapSettings.x = snap;
+		mSnapSettings.x = Math::Max( snap, 0.0f );
 	}
 
 	void EditorTransformWidget::SetRotationSnap( const f32& snap )
 	{
-		mSnapSettings.y = snap;
+		mSnapSettings.y = Math::Max( snap, 0.0f );
 	}
 
 	void EditorTransformWidget::SetScaleSnap( const f32& snap )
 	{
-		mSnapSettings.z = snap;
+		mSnapSettings.z = Math::Max( snap, 0.0f );
 	} 
 
 	Vec3 EditorTransformWidget::GetIntersectionStartPosition( ) const

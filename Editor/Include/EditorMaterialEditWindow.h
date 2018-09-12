@@ -111,6 +111,49 @@ namespace Enjon
 			HashMap< ViewportCallbackType, AssetCallback > mViewportCallbacks;
 	}; 
 
+	class EditorTransformWidgetToolBar : public EditorView
+	{
+		public:
+			/**
+			* @brief
+			*/
+			EditorTransformWidgetToolBar( EditorApp* app, Window* window )
+				: EditorView( app, window, "Transform ToolBar", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
+			{ 
+			}
+
+			/**
+			* @brief
+			*/
+			~EditorTransformWidgetToolBar( ) = default; 
+
+		protected:
+
+			/**
+			* @brief Must be overriden
+			*/
+			virtual void UpdateView( ) override;
+
+			/**
+			* @brief Must be overriden
+			*/
+			virtual void ProcessViewInput( ) override
+			{ 
+			}
+
+			/**
+			* @brief Must be overriden
+			*/
+			virtual void Initialize( ) override
+			{ 
+			}
+
+			///**
+			//* @brief
+			//*/
+			//virtual void CaptureState( ) override;
+	}; 
+
 	class EditorMaterialEditWindow : public Window
 	{
 		public: 

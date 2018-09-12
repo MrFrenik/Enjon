@@ -1084,6 +1084,7 @@ namespace Enjon
 		if ( mWorldOutlinerView ) { delete( mWorldOutlinerView ); mWorldOutlinerView = nullptr; } 
 		if ( mAssetBroswerView ) { delete( mAssetBroswerView ); mAssetBroswerView = nullptr; }
 		if ( mInspectorView ) { delete( mInspectorView ); mInspectorView = nullptr; }
+		if ( mTransformToolBar ) { delete( mTransformToolBar ); mTransformToolBar = nullptr; }
 
 		Window* mainWindow = EngineSubsystem( GraphicsSubsystem )->GetMainWindow( );
 		assert( mainWindow != nullptr );
@@ -1118,6 +1119,7 @@ namespace Enjon
 		mWorldOutlinerView = new EditorWorldOutlinerView( this, mainWindow );
 		mAssetBroswerView = new EditorAssetBrowserView( this, mainWindow );
 		mInspectorView = new EditorInspectorView( this, mainWindow );
+		mTransformToolBar = new EditorTransformWidgetToolBar( this, mainWindow );
 
 		// Register selection callback with outliner view
 		mWorldOutlinerView->RegisterEntitySelectionCallback( [ & ] ( const EntityHandle& handle )
@@ -1314,22 +1316,6 @@ namespace Enjon
 			ImGui::PopStyleColor( );
 		};
 
-
-		guiContext->RegisterWindow( "Snap Options", [ & ]
-		{
-			f32 ts = mTransformWidget.GetTranslationSnap( );
-			ImGui::DragFloat( "T Snap", &ts );
-			mTransformWidget.SetTranslationSnap( ts );
-
-			f32 rs = mTransformWidget.GetRotationSnap( );
-			ImGui::DragFloat( "R Snap", &rs );
-			mTransformWidget.SetRotationSnap( rs );
-
-			f32 ss = mTransformWidget.GetScaleSnap( );
-			ImGui::DragFloat( "S Snap", &ss );
-			mTransformWidget.SetScaleSnap( ss ); 
-		});
-
 		// Register menu options
 		//guiContext->RegisterMenuOption("File", "Load Project...##options", loadProjectMenuOption); 
 		guiContext->RegisterMenuOption("File", "Save Scene##options", saveSceneOption); 
@@ -1339,7 +1325,7 @@ namespace Enjon
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Play Options", "Scene", GUIDockSlotType::Slot_Top, 0.1f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "World Outliner", nullptr, GUIDockSlotType::Slot_Right, 0.3f ) );
-		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Create Project", "Play Options", GUIDockSlotType::Slot_Right, 0.5f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Transform ToolBar", "Play Options", GUIDockSlotType::Slot_Right, 0.7f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.7f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene", GUIDockSlotType::Slot_Bottom, 0.3f ) ); 
 
@@ -1541,11 +1527,37 @@ namespace Enjon
 		return Enjon::Result::PROCESS_RUNNING;
 	}
 
-	enum class TransformMode
+	void EditorApp::EnableTransformSnapping( bool enable, const TransformationMode& mode )
 	{
-		Translate,
-		Scale
-	};
+		mTransformWidget.EnableSnapping( enable, mode );
+	}
+
+	bool EditorApp::IsTransformSnappingEnabled( const TransformationMode& mode )
+	{
+		return mTransformWidget.IsSnapEnabled( mode );
+	}
+
+	f32 EditorApp::GetTransformSnap( const TransformationMode& mode )
+	{
+		switch ( mode )
+		{
+			case TransformationMode::Translation: { return mTransformWidget.GetTranslationSnap( ); } break;
+			case TransformationMode::Rotation: { return mTransformWidget.GetRotationSnap( ); } break;
+			case TransformationMode::Scale: { return mTransformWidget.GetScaleSnap( ); } break;
+		}
+
+		return 0.0f;
+	}
+
+	void EditorApp::SetTransformSnap( const TransformationMode& mode, const f32& val )
+	{
+		switch ( mode )
+		{
+			case TransformationMode::Translation: { mTransformWidget.SetTranslationSnap( val ); } break;
+			case TransformationMode::Rotation: { mTransformWidget.SetRotationSnap( val ); } break;
+			case TransformationMode::Scale: { mTransformWidget.SetScaleSnap( val ); } break;
+		} 
+	}
 
 	Enjon::Result EditorApp::ProcessInput( f32 dt )
 	{
@@ -1764,6 +1776,12 @@ namespace Enjon
 		{
 			delete ( mInspectorView );
 			mInspectorView = nullptr;
+		}
+
+		if ( mTransformToolBar )
+		{
+			delete( mTransformToolBar );
+			mTransformToolBar = nullptr;
 		}
 
 		return Enjon::Result::SUCCESS;

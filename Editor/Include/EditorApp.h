@@ -26,6 +26,14 @@ namespace Enjon
 	class EditorMaterialEditWindow; 
 	class EditorWorldOutlinerView;
 	class EditorArchetypeEditWindow; 
+	class EditorTransformWidgetToolBar;
+
+	enum class TransformMode
+	{
+		Translate,
+		Scale,
+		Rotate
+	};
 
 	class EditorApp : public Enjon::Application
 	{
@@ -112,6 +120,12 @@ namespace Enjon
 			void AddComponentPopupView( );
 
 			void SetProjectOnLoad( const String& projectDir );
+
+			void EnableTransformSnapping( bool enable, const TransformationMode& mode );
+			bool IsTransformSnappingEnabled( const TransformationMode& mode );
+
+			f32 GetTransformSnap( const TransformationMode& mode );
+			void SetTransformSnap( const TransformationMode& mode, const f32& val );
 
 		public:
 			Vec4 mRectColor = Vec4( 0.8f, 0.3f, 0.1f, 1.0f );
@@ -214,15 +228,12 @@ namespace Enjon
 			// This could get dangerous...
 			AssetHandle<Scene> mCurrentScene; 
 
-			EditorSceneView* mEditorSceneView = nullptr;
-
-			EditorInspectorView* mInspectorView = nullptr;
-
-			EditorAssetBrowserView* mAssetBroswerView = nullptr;
-
-			EditorWorldOutlinerView* mWorldOutlinerView = nullptr;
-
+			EditorSceneView* mEditorSceneView = nullptr; 
+			EditorInspectorView* mInspectorView = nullptr; 
+			EditorAssetBrowserView* mAssetBroswerView = nullptr; 
+			EditorWorldOutlinerView* mWorldOutlinerView = nullptr; 
 			EditorArchetypeEditWindow* mArchetypeWindow = nullptr;
+			EditorTransformWidgetToolBar* mTransformToolBar = nullptr;
 
 			Camera mEditorCamera;
 			Vec3 mCameraRotator = Vec3( 0.0f ); 
