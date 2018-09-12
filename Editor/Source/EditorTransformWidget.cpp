@@ -248,6 +248,11 @@ namespace Enjon
 					// Get intersection result
 					LineIntersectionResult intersectionResult = GetLineIntersectionResultSingleAxisOverride( camera->Forward( ).Normalize( ) ); 
 
+					// Right axis transformed by orientation
+					Vec3 Tx = ( camera->Right( ) ).Normalize( );
+					Vec3 Ty = ( camera->Up( ) ).Normalize( );
+					Vec3 Tz = ( camera->Forward( ) ).Normalize( );
+
 					// Check for intersection hit result
 					if ( intersectionResult.mHit )
 					{
@@ -263,8 +268,43 @@ namespace Enjon
 						// Store previous position as new intersection position
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
 
+						// Calculate final delta, based on snap settings
+						Vec3 finalDelta = mAccumulatedTranslationDelta; 
+						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
+						{
+							Vec3 u = mAccumulatedTranslationDelta;
+	 
+							// Need to project u onto n
+							f32 uXDotN = u.Dot( Tx );
+
+							// Store delta as final projection
+							Vec3 xDelta = Tx * uXDotN; 
+	 
+							// Need to project u onto n
+							f32 uYDotN = u.Dot( Ty );
+
+							// Store delta as final projection
+							Vec3 yDelta = Ty * uYDotN; 
+
+							// Need to project u onto n
+							f32 uZDotN = u.Dot( Tz );
+
+							// Store delta as final projection
+							Vec3 zDelta = Tz * uZDotN; 
+
+							f32 xSign = uXDotN >= 0.0f ? 1.0f : -1.0f;
+							f32 ySign = uYDotN >= 0.0f ? 1.0f : -1.0f;
+							f32 zSign = uZDotN >= 0.0f ? 1.0f : -1.0f;
+ 
+							xDelta = Tx * Math::Round( xDelta.Length( ) / GetTranslationSnap( ) ) * GetTranslationSnap( ) * xSign;
+							yDelta = Ty * Math::Round( yDelta.Length( ) / GetTranslationSnap( ) ) * GetTranslationSnap( ) * ySign;
+							zDelta = Tz * Math::Round( zDelta.Length( ) / GetTranslationSnap( ) ) * GetTranslationSnap( ) * zSign;
+
+							finalDelta = xDelta + yDelta + zDelta; 
+						}
+
 						// Set final position
-						transform->SetPosition( Vec3::SnapTo( mRootTransform.GetPosition( ) + GetAccumulatedTranslationDelta( ), mSnapEnabled[ (u32)TransformationMode::Translation ] ? GetTranslationSnap( ) : 0.0f ) );
+						transform->SetPosition( mRootTransform.GetPosition( ) + finalDelta );
 					}
 
 				} break;
@@ -308,7 +348,7 @@ namespace Enjon
 						Vec3 finalDelta = mAccumulatedTranslationDelta; 
 						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
 						{
-							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) );
+							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) ) * GetTranslationSnap( );
 							finalDelta = mAccumulatedTranslationDelta.Normalize( ) * snapLen;
 						}
 
@@ -357,7 +397,7 @@ namespace Enjon
 						Vec3 finalDelta = mAccumulatedTranslationDelta; 
 						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
 						{
-							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) );
+							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) ) * GetTranslationSnap( );
 							finalDelta = mAccumulatedTranslationDelta.Normalize( ) * snapLen;
 						}
 
@@ -402,7 +442,7 @@ namespace Enjon
 						Vec3 finalDelta = mAccumulatedTranslationDelta; 
 						if ( mSnapEnabled[ ( u32 )TransformationMode::Translation ] )
 						{
-							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) );
+							f32 snapLen = Math::Round( mAccumulatedTranslationDelta.Length( ) / GetTranslationSnap( ) ) * GetTranslationSnap( );
 							finalDelta = mAccumulatedTranslationDelta.Normalize( ) * snapLen;
 						}
 
@@ -463,8 +503,8 @@ namespace Enjon
 							f32 xSign = uXDotN >= 0.0f ? 1.0f : -1.0f;
 							f32 ySign = uYDotN >= 0.0f ? 1.0f : -1.0f;
  
-							xDelta = Tx * Math::Round( xDelta.Length( ) / GetTranslationSnap( ) ) * xSign;
-							yDelta = Ty * Math::Round( yDelta.Length( ) / GetTranslationSnap( ) ) * ySign;
+							xDelta = Tx * Math::Round( xDelta.Length( ) / GetTranslationSnap( ) ) * GetTranslationSnap( ) * xSign;
+							yDelta = Ty * Math::Round( yDelta.Length( ) / GetTranslationSnap( ) ) * GetTranslationSnap( ) * ySign;
 
 							finalDelta = xDelta + yDelta; 
 						}
@@ -527,8 +567,8 @@ namespace Enjon
 							f32 xSign = uXDotN >= 0.0f ? 1.0f : -1.0f;
 							f32 zSign = uZDotN >= 0.0f ? 1.0f : -1.0f;
  
-							xDelta = Tx * Math::Round( xDelta.Length( ) / GetTranslationSnap( ) ) * xSign;
-							zDelta = Tz * Math::Round( zDelta.Length( ) / GetTranslationSnap( ) ) * zSign;
+							xDelta = Tx * Math::Round( xDelta.Length( ) / GetTranslationSnap( ) ) * GetTranslationSnap( ) * xSign;
+							zDelta = Tz * Math::Round( zDelta.Length( ) / GetTranslationSnap( ) ) * GetTranslationSnap( ) * zSign;
 
 							finalDelta = xDelta + zDelta; 
 						}
@@ -590,8 +630,8 @@ namespace Enjon
 							f32 ySign = uYDotN >= 0.0f ? 1.0f : -1.0f;
 							f32 zSign = uZDotN >= 0.0f ? 1.0f : -1.0f;
  
-							yDelta = Ty * Math::Round( yDelta.Length( ) / GetTranslationSnap( ) ) * ySign;
-							zDelta = Tz * Math::Round( zDelta.Length( ) / GetTranslationSnap( ) ) * zSign;
+							yDelta = Ty * Math::Round( yDelta.Length( ) / GetTranslationSnap( ) ) * GetTranslationSnap( ) * ySign;
+							zDelta = Tz * Math::Round( zDelta.Length( ) / GetTranslationSnap( ) ) * GetTranslationSnap( ) * zSign;
 
 							finalDelta = yDelta + zDelta; 
 						}
