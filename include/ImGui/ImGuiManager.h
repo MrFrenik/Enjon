@@ -230,7 +230,7 @@ namespace Enjon
 		const char* mParent;
 		GUIDockSlotType mSlotType;
 		float mWeight;
-	};
+	}; 
  
 	class GUIContext
 	{
@@ -270,7 +270,12 @@ namespace Enjon
 			/** 
 			* @brief
 			*/
-			bool HasMenuOption( const String& menu, const String& menuOptionName );
+			bool HasMainMenu( const String& menu );
+
+			/** 
+			* @brief
+			*/
+			bool HasMainMenuOption( const String& menu, const String& menuOptionName );
 
 			/** 
 			* @brief
@@ -298,6 +303,11 @@ namespace Enjon
 			void RegisterDockingLayout(const GUIDockingLayout& layout);
 
 			/** 
+			* @brief
+			*/
+			void RegisterMainMenu( const String& menuName );
+
+			/** 
 			* @brief 
 			* @note NOT TO BE CALLED WHILE EXECUTING ANY IMGUI CODE
 			*/
@@ -311,6 +321,8 @@ namespace Enjon
 
 		protected:
 
+			void CreateMainMenu( const String& menuName );
+
 			/** 
 			* @brief
 			*/
@@ -319,7 +331,7 @@ namespace Enjon
 			/** 
 			* @brief
 			*/
-			s32 GUIContext::MainMenu( );
+			s32 MainMenu( );
 
 			/** 
 			* @brief
@@ -330,6 +342,7 @@ namespace Enjon
 			Vector<GUICallbackFunc> mGuiFuncs;
 			HashMap<String, GUICallbackFunc> mWindows;
 			HashMap<String, HashMap<String, GUICallbackFunc>> mMainMenuOptions;
+			Vector< String > mMainMenuLayout;
 			Vector<GUIDockingLayout> mDockingLayouts; 
 			HashMap< Enjon::String, ImFont* > mFonts;
 			ImGuiContext* mContext = nullptr;

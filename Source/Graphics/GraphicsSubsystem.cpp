@@ -330,9 +330,9 @@ namespace Enjon
 		glDisable( GL_CULL_FACE );
 
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
-		//Enjon::String hdrFilePath = "Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
+		Enjon::String hdrFilePath = "Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
 		//Enjon::String hdrFilePath = "Textures/HDR/WinterForest_Ref.hdr";
-		Enjon::String hdrFilePath = "Textures/HDR/03-Ueno-Shrine_3k.hdr";
+		//Enjon::String hdrFilePath = "Textures/HDR/03-Ueno-Shrine_3k.hdr";
 		//Enjon::String hdrFilePath = "Textures/HDR/Newport_Loft_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "IsoARPG/Assets/Textures/HDR/Factory_Catwalk_2k.hdr";
 		//Enjon::String hdrFilePath = rootPath + "IsoARPG/Assets/Textures/HDR/WinterForest_Ref.hdr";

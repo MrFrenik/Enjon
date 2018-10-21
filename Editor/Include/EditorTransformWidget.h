@@ -15,6 +15,7 @@
 namespace Enjon
 { 
 	class EditorApp;
+	class EditorViewport;
 
 	enum class TransformationMode
 	{
@@ -30,7 +31,7 @@ namespace Enjon
 			EditorTransformWidget( ) = default;
 			~EditorTransformWidget( ) = default;
 
-			void Initialize( EditorApp* editor );
+			void Initialize( EditorViewport* vp );
 			void Update( );
 
 			Transform GetWorldTransform( );
@@ -91,7 +92,7 @@ namespace Enjon
 			void StoreIntersectionResultInformation( const LineIntersectionResult& result, TransformWidgetRenderableType type ); 
 
 		private:
-			EditorApp* mEditorApp = nullptr;
+			EditorViewport* mViewport = nullptr;
 			EditorWidget* mActiveWidget = nullptr;
 			Transform mWorldTransform;					
 			TransformationMode mMode = TransformationMode::Translation;

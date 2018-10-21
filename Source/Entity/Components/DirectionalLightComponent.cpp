@@ -63,4 +63,14 @@ namespace Enjon
 	} 
 
 	//================================================================================== 
+
+	Result DirectionalLightComponent::OnEditorUI( )
+	{
+		// Inspect light 
+		EngineSubsystem( ImGuiManager )->InspectObject( &mLight ); 
+
+		return Result::SUCCESS;
+	}
+
+	//================================================================================== 
 }

@@ -67,17 +67,7 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
-			Vec2 GetSceneViewProjectedCursorPosition( );
-
-			/**
-			* @brief 
-			*/
-			//EditorWidgetManager* GetEditorWidgetManager( );
-
-			/**
-			* @brief 
-			*/
-			void SetEditorSceneView( EditorSceneView* view ); 
+			Vec2 GetSceneViewProjectedCursorPosition( ); 
 
 			/**
 			* @brief 
@@ -228,7 +218,8 @@ namespace Enjon
 			// This could get dangerous...
 			AssetHandle<Scene> mCurrentScene; 
 
-			EditorSceneView* mEditorSceneView = nullptr; 
+			EditorViewport* mEditorSceneView = nullptr;
+			//EditorSceneView* mEditorSceneView = nullptr; 
 			EditorInspectorView* mInspectorView = nullptr; 
 			EditorAssetBrowserView* mAssetBroswerView = nullptr; 
 			EditorWorldOutlinerView* mWorldOutlinerView = nullptr; 

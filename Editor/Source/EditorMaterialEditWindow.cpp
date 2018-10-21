@@ -353,6 +353,10 @@ namespace Enjon
 	{ 
 		GUIContext* guiContext = GetGUIContext( );
 
+		// Add main menu options
+		guiContext->RegisterMainMenu( "File" );
+		guiContext->RegisterMainMenu( "View" );
+
 		// Create viewport
 		mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this );
 
@@ -477,6 +481,11 @@ namespace Enjon
 		GUIContext* guiContext = GetGUIContext( );
 
 		EditorApp* app = Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( );
+
+		// Add main menu options
+		guiContext->RegisterMainMenu( "File" );
+		guiContext->RegisterMainMenu( "Create" );
+		guiContext->RegisterMainMenu( "View" );
 
 		// Create viewport
 		mViewport = new EditorViewport( app, this );

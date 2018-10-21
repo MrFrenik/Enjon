@@ -60,5 +60,12 @@ namespace Enjon
 	} 
 
 	//================================================================================== 
+
+	void SkeletalAnimationComponent::SetAnimation( const AssetHandle< SkeletalAnimation >& animation )
+	{
+		mAnimation = animation;
+	}
+
+	//================================================================================== 
 }
 

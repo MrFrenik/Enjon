@@ -1,5 +1,6 @@
 
 #include "EditorView.h"
+#include "EditorTransformWidget.h"
 
 #include <Entity/EntityManager.h>
 #include <Graphics/Renderable.h> 
@@ -33,10 +34,10 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			EditorViewport( EditorApp* app, Window* window )
-				: EditorView( app, window, "Viewport", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
+			EditorViewport( EditorApp* app, Window* window, const String& name = "Viewport" )
+				: EditorView( app, window, name, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
 			{ 
-			}
+			} 
 
 			/**
 			* @brief
@@ -62,6 +63,11 @@ namespace Enjon
 			* @brief
 			*/
 			void SetViewportCallback( ViewportCallbackType type, const AssetCallback& callback );
+
+			/**
+			* @brief
+			*/
+			void UpdateCamera( );
 
 		protected:
 
@@ -93,11 +99,6 @@ namespace Enjon
 			* @brief
 			*/
 			void HandleAssetDrop( ); 
-
-			/**
-			* @brief
-			*/
-			void UpdateCamera( );
 
 		protected: 
 			Vec2 mSceneViewWindowPosition;
@@ -211,7 +212,7 @@ namespace Enjon
 			u32 mInitialized : 1;
 			bool mViewportOpen = true;
 			EntityHandle mRootEntity;
-
+			EditorTransformWidget mTransformWidget;
 	};
 
 }

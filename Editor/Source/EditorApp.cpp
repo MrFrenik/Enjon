@@ -1114,8 +1114,14 @@ namespace Enjon
 		// Destroy previous contexts and windows if available
 		CleanupGUIContext( ); 
 
+		// Add main menu options ( order matters )
+		guiContext->RegisterMainMenu( "File" );
+		guiContext->RegisterMainMenu( "Edit" );
+		guiContext->RegisterMainMenu( "Create" );
+		guiContext->RegisterMainMenu( "View" );
+
 		// Add all necessary views into editor widget manager
-		mEditorSceneView = new EditorSceneView( this, mainWindow );
+		mEditorSceneView = new EditorViewport( this, mainWindow, "Viewport" );
 		mWorldOutlinerView = new EditorWorldOutlinerView( this, mainWindow );
 		mAssetBroswerView = new EditorAssetBrowserView( this, mainWindow );
 		mInspectorView = new EditorInspectorView( this, mainWindow );
@@ -1149,7 +1155,7 @@ namespace Enjon
 		} );
 
 		// Initialize transform widget
-		mTransformWidget.Initialize( this ); 
+		mTransformWidget.Initialize( mEditorSceneView ); 
 
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
@@ -1244,8 +1250,7 @@ namespace Enjon
 						PointLightComponent* plc = ent->AddComponent<PointLightComponent>( );
 
 						const Camera* cam = gs->GetGraphicsSceneCamera( );
-						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
-
+						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f ); 
 						ent->SetName( "PointLight" );
 					}
 
@@ -1322,12 +1327,12 @@ namespace Enjon
 		guiContext->RegisterMenuOption( "Create", "Create", createViewOption );
 
 		// Register docking layouts 
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Scene", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Play Options", "Scene", GUIDockSlotType::Slot_Top, 0.1f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Play Options", "Viewport", GUIDockSlotType::Slot_Top, 0.1f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "World Outliner", nullptr, GUIDockSlotType::Slot_Right, 0.3f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Transform ToolBar", "Play Options", GUIDockSlotType::Slot_Right, 0.7f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.7f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Scene", GUIDockSlotType::Slot_Bottom, 0.3f ) ); 
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.6f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Viewport", GUIDockSlotType::Slot_Bottom, 0.3f ) ); 
 
 		guiContext->Finalize( );
 	}
@@ -1459,14 +1464,7 @@ namespace Enjon
 		}
 
 		return Enjon::Result::SUCCESS;
-	}
-
-	//================================================================================================= 
-
-	void EditorApp::SetEditorSceneView( EditorSceneView* view )
-	{
-		mEditorSceneView = view;
-	}
+	} 
 
 	//=================================================================================================
 

@@ -34,6 +34,11 @@ namespace Enjon
 			*/
 			virtual void Update() override;
 
+			/**
+			* @brief
+			*/
+			virtual Result OnEditorUI( ) override;
+
 			/*
 			* @brief
 			*/

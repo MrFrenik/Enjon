@@ -24,7 +24,7 @@ namespace Enjon
 
 		ctx->RegisterMenuOption( "View", mName, [ & ] ( )
 		{
-			ImGui::MenuItem( fmt::format( "{}##options", mName ).c_str( ), NULL, &mViewEnabled );
+			ImGui::MenuItem( fmt::format( "{}##options{}", mName, (u32)this ).c_str( ), NULL, &mViewEnabled );
 		});
 
 		// Register individual window with docking system

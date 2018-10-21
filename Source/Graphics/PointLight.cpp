@@ -9,8 +9,8 @@ namespace Enjon
 	{
 		mPosition 	= Vec3(0.0f, 0.0f, 0.0f);
 		mColor 		= RGBA32_White(); 
-		mAttenuationRate = 1.0f;
-		mIntensity = 10.0f;
+		mAttenuationRate = 0.5f;
+		mIntensity = 100.0f;
 		mRadius = 100.0f;
 	}
 

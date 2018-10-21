@@ -9,6 +9,7 @@
 #include <Graphics/GraphicsSubsystem.h>
 #include <Entity/Components/StaticMeshComponent.h>
 #include <Entity/Components/SkeletalMeshComponent.h>
+#include <Entity/Components/SkeletalAnimationComponent.h>
 #include <Scene/SceneManager.h>
 #include <SubsystemCatalog.h>
 #include <ImGui/ImGuiManager.h>
@@ -24,8 +25,6 @@ namespace Enjon
 	EditorSceneView::EditorSceneView( EditorApp* app, Window* window )
 		: EditorView( app, window, "Scene", ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse )
 	{ 
-		// Don't like having to do this here...
-		mApp->SetEditorSceneView( this );
 	} 
 
 	//=================================================================
@@ -89,7 +88,7 @@ namespace Enjon
 		} 
 
 		// Render tool bar
-		ImGui::SetCursorScreenPos( ImVec2( mSceneViewWindowPosition.x + mSceneViewWindowSize.x * 0.7f, mSceneViewWindowPosition.y + mSceneViewWindowSize.y * 0.02f ) );
+		ImGui::SetCursorScreenPos( ImVec2( mSceneViewWindowPosition.x + mSceneViewWindowSize.x - 100.0f, mSceneViewWindowPosition.y + mSceneViewWindowSize.y * 0.01f ) );
 		RenderToolBar( );
 
 		EditorAssetBrowserView* abv = mApp->GetEditorAssetBrowserView( );
@@ -139,7 +138,18 @@ namespace Enjon
 
 	void EditorSceneView::RenderToolBar( )
 	{
-		// Nothing for now...
+		// Just render the frame time for now
+		ImVec2 cursorPos = ImGui::GetCursorScreenPos( );
+		ImGui::SetCursorScreenPos( ImVec2( cursorPos.x + 1.0f, cursorPos.y + 1.0f ) );
+		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.2f, 0.2f, 0.2f, 1.0f ) );
+		ImGui::Text( "Frame: %.3f", 1000.0f / ( f32 )ImGui::GetIO( ).Framerate );
+		ImGui::SetCursorScreenPos( ImVec2( cursorPos.x + 1.0f + 73.0f, cursorPos.y + 1.0f ) );
+		ImGui::Text( "ms" );
+		ImGui::PopStyleColor( );
+		ImGui::SetCursorScreenPos( cursorPos );
+		ImGui::Text( "Frame: %.3f", 1000.0f / ( f32 )ImGui::GetIO( ).Framerate );
+		ImGui::SetCursorScreenPos( ImVec2( cursorPos.x + 73.0f, cursorPos.y ) );
+		ImGui::Text( "ms" );
 	}
 	
 	//=================================================================
@@ -178,6 +188,28 @@ namespace Enjon
 				}
 			}
 		} 
+		else if ( grabbedAsset->Class( )->InstanceOf< SkeletalMesh >( ) )
+		{
+			// Construct new entity in front of camera
+			SkeletalMesh* mesh = grabbedAsset->ConstCast< SkeletalMesh >( );
+			if ( mesh )
+			{
+				// Instantiate the archetype right in front of the camera for now
+				GraphicsSubsystemContext* gfxCtx = GetWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( );
+				Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
+				Vec3 position = cam->GetPosition() + cam->Forward( ) * 5.0f; 
+				EntityHandle handle = EngineSubsystem( EntityManager )->Allocate( );
+				if ( handle )
+				{
+					Entity* newEnt = handle.Get( );
+					SkeletalMeshComponent* smc = newEnt->AddComponent< SkeletalMeshComponent >( );
+					SkeletalAnimationComponent* sac = newEnt->AddComponent< SkeletalAnimationComponent >( );
+					smc->SetMesh( mesh );
+					newEnt->SetLocalPosition( position );
+					newEnt->SetName( mesh->GetName( ) );
+				}
+			}
+		}
 		else if ( grabbedAsset->Class( )->InstanceOf< Archetype >( ) )
 		{
 			Archetype* archType = grabbedAsset->ConstCast< Archetype >( );

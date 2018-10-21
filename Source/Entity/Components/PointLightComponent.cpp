@@ -83,4 +83,14 @@ namespace Enjon
 	}
 
 	//================================================================================== 
+
+	Result PointLightComponent::OnEditorUI( )
+	{
+		// Inspect light 
+		EngineSubsystem( ImGuiManager )->InspectObject( &mLight ); 
+
+		return Result::SUCCESS;
+	} 
+
+	//================================================================================== 
 }

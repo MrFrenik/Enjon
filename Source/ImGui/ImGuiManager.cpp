@@ -29,6 +29,13 @@ namespace Enjon
 {
 	//=============================================================
 
+	bool GUIContext::HasMainMenu( const String& menu )
+	{
+		return ( mMainMenuOptions.find( menu ) != mMainMenuOptions.end( ) );
+	}
+
+	//=============================================================
+
 	bool GUIContext::HasWindow( const String& windowName )
 	{
 		return ( mWindows.find( windowName ) != mWindows.end( ) );
@@ -36,7 +43,7 @@ namespace Enjon
 
 	//==============================================================================================
 
-	bool GUIContext::HasMenuOption( const String& menu, const String& menuOptionName )
+	bool GUIContext::HasMainMenuOption( const String& menu, const String& menuOptionName )
 	{
 		if ( mMainMenuOptions.find( menu ) != mMainMenuOptions.end( ) )
 		{
@@ -48,10 +55,24 @@ namespace Enjon
 
 	//===================================================================================================
 
+	void GUIContext::CreateMainMenu( const String& menuName )
+	{
+		mMainMenuOptions[ menuName ] = HashMap< String, GUICallbackFunc >( );
+		mMainMenuLayout.push_back( menuName );
+	}
+
+	//===================================================================================================
+
 	void GUIContext::RegisterMenuOption(const String& menuName, const String& optionName, const GUICallbackFunc& func)
 	{
+		// Create main menu if not already available
+		if ( !HasMainMenu( menuName ) )
+		{
+			CreateMainMenu( menuName ); 
+		}
+
 		// Will create the vector if not there
-		mMainMenuOptions[menuName][optionName] = func;
+		mMainMenuOptions[menuName][optionName] = func; 
 	} 
 
 	//===================================================================================================
@@ -97,6 +118,16 @@ namespace Enjon
 
 	//===================================================================================================
 
+	void GUIContext::RegisterMainMenu( const String& menuName )
+	{
+		if ( !HasMainMenu( menuName ) )
+		{
+			CreateMainMenu( menuName );
+		}
+	}
+
+	//===================================================================================================
+
 	void GUIContext::Finalize( )
 	{
 		LateInit( );
@@ -110,6 +141,7 @@ namespace Enjon
 		mWindows.clear();
 		mMainMenuOptions.clear();
 		mDockingLayouts.clear(); 
+		mMainMenuLayout.clear( );
 	}
 
 	//===================================================================================================
@@ -167,7 +199,7 @@ namespace Enjon
 			ImGui::SetNextWindowSize(ImVec2(size.x, 25.0f), ImGuiSetCond_Always);
 			ImGui::SetNextWindowPos(ImVec2(0, size.y - 6.0f), ImGuiSetCond_Always);
 			ImGui::Begin("statusbar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoResize);
-			ImGui::Text("Frame: %.5f ms", 1000.0f / (f32)ImGui::GetIO().Framerate);
+			//ImGui::Text("Frame: %.5f ms", 1000.0f / (f32)ImGui::GetIO().Framerate);
 			ImGui::End();
 		} 
 
@@ -183,6 +215,31 @@ namespace Enjon
 	s32 GUIContext::MainMenu()
 	{
 		s32 menuHeight = 0;
+
+		if ( ImGui::BeginMainMenuBar( ) )
+		{ 
+			for ( auto& menu : mMainMenuLayout )
+			{
+				if ( HasMainMenu( menu ) )
+				{
+					if ( ImGui::BeginMenu( menu.c_str() ) )
+					{
+						for ( auto& sub : mMainMenuOptions[ menu ] )
+						{
+							sub.second( );
+						} 
+
+						ImGui::EndMenu( );
+					} 
+				}
+			} 
+
+			menuHeight = ImGui::GetWindowSize().y;
+
+			ImGui::EndMainMenuBar();
+		}
+
+		return menuHeight;
 
 		// TODO(): Need to organize this in a much better manner...
 		if (ImGui::BeginMainMenuBar())
@@ -324,19 +381,7 @@ namespace Enjon
 		return ( mWindows.find( windowName ) != mWindows.end( ) );
 	}
 
-	//==============================================================================================
-
-	bool ImGuiManager::HasMenuOption( const String& menu, const String& menuOptionName )
-	{
-		if ( mMainMenuOptions.find( menu ) != mMainMenuOptions.end( ) )
-		{
-			return ( mMainMenuOptions[menu].find( menuOptionName ) != mMainMenuOptions[menu].end( ) );
-		}
-
-		return false;
-	}
-
-	//---------------------------------------------------
+	//============================================================================================== 
 
 	void ImGuiManager::RegisterMenuOption(const String& menuName, const String& optionName, std::function<void()> func)
 	{

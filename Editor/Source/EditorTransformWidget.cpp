@@ -2,6 +2,7 @@
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
 
 #include "EditorTransformWidget.h" 
+#include "EditorMaterialEditWindow.h"
 #include "EditorApp.h"
 
 #include <Graphics/GraphicsSubsystem.h>
@@ -9,11 +10,11 @@
 #include <SubsystemCatalog.h>
 #include <IO/InputManager.h>
 
-#include <fmt/format.h>
+#include <fmt/format.h> 
 
 namespace Enjon
 {
-	void EditorTransformWidget::Initialize( EditorApp* app )
+	void EditorTransformWidget::Initialize( EditorViewport* vp )
 	{
 		// Initialize the translation widget
 		mTranslationWidget.Initialize( this );
@@ -31,7 +32,7 @@ namespace Enjon
 		mActiveWidget->Disable( );
 
 		// Set editor app
-		mEditorApp = app; 
+		mViewport = vp; 
 
 		for ( u32 i = 0; i < ( u32 )TransformationMode::Count; ++i )
 		{
@@ -214,8 +215,7 @@ namespace Enjon
 		}
 
 		// Get ray from camera
-		//Ray ray = camera->ScreenToWorldRay( input->GetMouseCoords( ) );
-		Ray ray = camera->ScreenToWorldRay( mEditorApp->GetSceneViewProjectedCursorPosition( ) );
+		Ray ray = camera->ScreenToWorldRay( mViewport->GetSceneViewProjectedCursorPosition( ) );
 
 		// Get intersection result of plane 
 		LineIntersectionResult intersectionResult = intersectionPlane.GetLineIntersection( ray.mPoint, ray.mPoint + ray.mDirection ); 
@@ -882,7 +882,7 @@ namespace Enjon
 						mDelta = intersectionResult.mHitPosition - mIntersectionStartPosition;
 
 						// Screen projected mouse coordinates
-						Vec2 mc = mEditorApp->GetSceneViewProjectedCursorPosition( );
+						Vec2 mc = mViewport->GetSceneViewProjectedCursorPosition( );
 
 						// Store previous position as new intersection position
 						mIntersectionStartPosition = intersectionResult.mHitPosition; 
@@ -1073,8 +1073,7 @@ namespace Enjon
 			} 
 
 			// Store previous mouse coordinates
-			//mPreviousMouseCoords = input->GetMouseCoords( );
-			mPreviousMouseCoords = mEditorApp->GetSceneViewProjectedCursorPosition( );
+			mPreviousMouseCoords = mViewport->GetSceneViewProjectedCursorPosition( );
 
 			// Set position and rotation of widget based on final transform
 			SetPosition( transform->GetPosition( ) );
@@ -1105,7 +1104,7 @@ namespace Enjon
 			mIntersectionStartPosition = result.mHitPosition;
 			mImmutableIntersectionStartPosition = result.mHitPosition;
 			mRootStartPosition = mActiveWidget->GetWorldTransform().GetPosition( );
-			mPreviousMouseCoords = mEditorApp->GetSceneViewProjectedCursorPosition( );
+			mPreviousMouseCoords = mViewport->GetSceneViewProjectedCursorPosition( );
 			mStartRotation = mActiveWidget->GetWorldTransform( ).GetRotation( );
 			mRootStartScale = mActiveWidget->GetWorldTransform( ).GetScale( );
 		} 

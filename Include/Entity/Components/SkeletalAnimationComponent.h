@@ -27,12 +27,17 @@ namespace Enjon
 			*/
 			void UpdateAndCalculateTransforms( ); 
 
+			/**
+			* @brief
+			*/
+			void SetAnimation( const AssetHandle< SkeletalAnimation >& animation );
+
 		private: 
 
 			ENJON_PROPERTY( )
 			AssetHandle< SkeletalAnimation > mAnimation; 
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( NonSerializeable, ReadOnly )
 			f32 mCurrentAnimationTime = 0.0f; 
 
 			ENJON_PROPERTY( UIMin = 0.1f, UIMax = 10.0f )
