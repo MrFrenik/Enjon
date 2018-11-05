@@ -8,6 +8,7 @@
 #include "ImGui/ImGuiManager.h"
 #include "Entity/EntityManager.h"
 #include "Base/World.h"
+#include "SubsystemCatalog.h"
 #include "Engine.h"
 
 namespace Enjon
@@ -17,7 +18,7 @@ namespace Enjon
 	void StaticMeshComponent::ExplicitConstructor()
 	{ 
 		// Set explicit tick state
-		mTickState = ComponentTickState::TickAlways;
+		mTickState = ComponentTickState::TickNever;
 	} 
 
 	//====================================================================
@@ -259,4 +260,19 @@ namespace Enjon
 	}
 
 	//==================================================================== 
+
+	void StaticMeshComponentSystem::ExplicitConstructor( )
+	{
+		mTickState = ComponentTickState::TickAlways;
+	}
+
+	//==================================================================== 
+
+	void StaticMeshComponentSystem::Update( )
+	{ 
+		for ( auto& c :  EngineSubsystem( EntityManager )->GetAllComponentsOfType< StaticMeshComponent >( ) )
+		{ 
+			c->ConstCast< StaticMeshComponent >()->SetTransform( c->GetEntity( )->GetWorldTransform( ) );
+		}
+	}
 }

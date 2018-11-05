@@ -19,7 +19,16 @@ namespace Enjon
 	// Forward declaration
 	class Entity;
 	class EntityManager;
-	class Component;
+	class Component; 
+
+	using ComponentID = u32;
+
+	enum class ComponentTickState
+	{
+		TickAlways,
+		TickOnRunOnly,
+		TickNever 
+	};
 
 	class ComponentWrapperBase
 	{
@@ -47,6 +56,8 @@ namespace Enjon
 			virtual Vector<Component*> GetComponents( ) = 0;
 
 			virtual void Update( ) = 0;
+
+			virtual ComponentTickState GetTickState( ) = 0;
 	};
 
 	class ComponentArray : public ComponentWrapperBase
@@ -124,17 +135,15 @@ namespace Enjon
 				return mComponentPtrs;
 			}
 
+			virtual ComponentTickState GetTickState( ) override
+			{
+				return mTickState;
+			}
+
 		private:
 			ComponentPtrs mComponentPtrs;
 			ComponentMap mComponentMap; 
-	};
-
-	using ComponentID = u32;
-
-	enum class ComponentTickState
-	{
-		TickAlways,
-		TickOnRunOnly
+			ComponentTickState mTickState;
 	};
 
 	class Component : public Enjon::Object
@@ -267,6 +276,30 @@ namespace Enjon
 		private:
 			ComponentWrapperBase* mBase = nullptr; 
 	}; 
+
+	ENJON_CLASS( Abstract )
+	class IComponentSystem : public Object
+	{
+		ENJON_CLASS_BODY( IComponentSystem )
+
+		public: 
+
+			/*
+			* @brief
+			*/
+			virtual void Update( ) = 0;
+
+			/*
+			* @brief
+			*/
+			const ComponentTickState GetTickState( )
+			{
+				return mTickState;
+			}
+
+		protected:
+			ComponentTickState mTickState = ComponentTickState::TickAlways;
+	};
 
 
 

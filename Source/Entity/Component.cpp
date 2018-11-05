@@ -125,6 +125,8 @@ namespace Enjon
 		// Update all components
 		for ( auto& c : mComponentPtrs )
 		{
+			mTickState = c->GetTickState( );
+
 			if ( c->GetTickState() == ComponentTickState::TickAlways || app->GetApplicationState( ) == ApplicationState::Running )
 			{
 				Entity* ent = c->GetEntity( );
@@ -143,4 +145,85 @@ namespace Enjon
 
 	//=========================================================================
 }
+
+
+
+
+// ECS Sketch Ideas
+/*
+
+ENJON_COMPONENT_DECL()
+class HealthComponent : public IComponent
+{
+	ENJON_COMPONENT_DECL_BODY( HealthComponent )
+
+	public:
+
+		ENJON_PROP()
+		f32 mHealth;
+
+		ENJON_PROP()
+		f32 mRegenRate;
+};
+ 
+// Precompiler takes this decl and then generates an InstanceData structure from it
+class HealthComponent_InstanceData : public IComponentInstanceData
+{
+	Vector< f32 > mHealth;
+	Vector< f32 > mRegenRate;
+};
+
+class IComponentDataManager
+{
+	virutal void Base() = 0;
+};
+
+template < typename T >
+class ComponentDataManager : public IComponentDataManager
+{
+	virtual void Base() override = {}
+
+	protected:
+		T mInstanceData;	
+		HashMap< u32, u32 > mIndexMap;
+};
+
+// How do you access data? How do you set data? 
+// Don't feel comfortable grabbing the entire data block for the user to set individual pieces of data
+
+// Generated class information
+class HealthComponentDataManager : public ComponentDataManager< HealthComponent_InstanceData >
+{
+			
+};
+
+class EntityManager
+{
+	//...
+
+	private:
+
+		HashMap< u32, IComponentDataManager* > mComponentDataManagers;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+
+
 

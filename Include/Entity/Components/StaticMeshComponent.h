@@ -149,6 +149,24 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			StaticMeshRenderable mRenderable;
 	};
+
+	ENJON_CLASS( )
+	class StaticMeshComponentSystem : public IComponentSystem
+	{
+		ENJON_CLASS_BODY( StaticMeshComponentSystem )
+
+		public: 
+
+			/*
+			* @brief
+			*/
+			virtual void ExplicitConstructor( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual void Update( ) override;
+	};
 }
 
 #endif

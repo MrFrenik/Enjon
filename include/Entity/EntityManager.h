@@ -597,6 +597,7 @@ namespace Enjon
 	using ComponentList = Vector< Component* >;
 	using WorldEntityMap = HashMap< const World*, HashSet< Entity* > >;
 	using EntityUUIDMap = HashMap< String, Entity* >;
+	using ComponentSystemMap = HashMap< u32, IComponentSystem* >;
 
 	ENJON_CLASS( )
 	class EntityManager : public Subsystem
@@ -650,7 +651,13 @@ namespace Enjon
 		/**
 		*@brief
 		*/
-		void RegisterComponent( const MetaClass* cls );
+		template <typename T>
+		void RegisterComponentSystem( );
+
+		/**
+		*@brief
+		*/
+		void RegisterComponent( const MetaClass* cls ); 
 
 		/**
 		*@brief
@@ -729,8 +736,8 @@ namespace Enjon
 		/**
 		* @brief Returns vector of active components of given type
 		*/
-		template <typename T>
-		Vector<Component*> GetAllComponentsOfType( );
+		template < typename T >
+		Vector< Component* > GetAllComponentsOfType( );
 
 		/**
 		*@brief
@@ -783,6 +790,11 @@ namespace Enjon
 		*/
 		void RegisterAllEngineComponents( );
 
+
+		/**
+		* @brief
+		*/
+		void RegisterAllEngineComponentSystems( );
 
 		/**
 		* @brief
@@ -875,6 +887,7 @@ namespace Enjon
 	private:
 		EntityStorage 				mEntities;
 		ComponentBaseArray 			mComponents;
+		ComponentSystemMap			mComponentSystems;
 		EntityList 					mActiveEntities;
 		EntityList 					mMarkedForAdd;
 		MarkedForDestructionList 	mMarkedForDestruction;

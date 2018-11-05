@@ -1410,6 +1410,9 @@ namespace Enjon
 		// Register all engine level components with component array 
 		RegisterAllEngineComponents( );
 
+		// Register all engine level component systems
+		RegisterAllEngineComponentSystems( );
+
 		// Construct archetype world and register contexts
 		mArchetypeWorld = new World( );
 		mArchetypeWorld->RegisterContext< EntitySubsystemContext >( );
@@ -1471,10 +1474,22 @@ namespace Enjon
 			mNeedStartList.clear( );
 		}
 
-		// Update all component systems
+		// Update all component arrays ( legacy )
 		for ( auto& system : mComponents )
 		{
-			system.second->Update( );
+			if ( system.second->GetTickState( ) != ComponentTickState::TickNever )
+			{
+				system.second->Update( ); 
+			}
+		}
+
+		// Update all component systems
+		for ( auto& system : mComponentSystems )
+		{
+			if ( system.second->GetTickState( ) != ComponentTickState::TickNever )
+			{
+				system.second->Update( );
+			}
 		}
 	}
 
@@ -1535,7 +1550,14 @@ namespace Enjon
 		RegisterComponent< DirectionalLightComponent >( );
 		RegisterComponent< CameraComponent >( );
 		RegisterComponent< SkeletalMeshComponent >( );
-		RegisterComponent< SkeletalAnimationComponent >( );
+		RegisterComponent< SkeletalAnimationComponent >( ); 
+	}
+
+	//================================================================================================== 
+
+	void EntityManager::RegisterAllEngineComponentSystems( )
+	{
+		RegisterComponentSystem< StaticMeshComponentSystem >( );
 	}
 
 	//================================================================================================== 

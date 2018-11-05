@@ -8,6 +8,14 @@ void EntityManager::RegisterComponent()
 	mComponents[ index ] = new ComponentArray( );
 }
 
+template <typename T>
+void EntityManager::RegisterComponentSystem( )
+{
+	static_assert(std::is_base_of<IComponentSystem, T>::value, "EntityManager::RegisterComponentSystem:: T must inherit from IComponentSystem.");
+	u32 index = static_cast< u32 >( Object::GetClass< T >()->GetTypeId() );
+	mComponentSystems[ index ] = new T( ); 
+}
+
 //--------------------------------------------------------------------------
 //template <typename T>
 //std::vector<T>* EntityManager::GetComponentList()
@@ -154,8 +162,8 @@ bool EntityManager::ComponentBaseExists( )
 
 //=======================================================================================
 
-template <typename T>
-Vector<Component*> EntityManager::GetAllComponentsOfType( )
+template < typename T >
+Vector< Component* > EntityManager::GetAllComponentsOfType( )
 {
 	// Get idx of component
 	u32 idx = Component::GetComponentType< T >( );
