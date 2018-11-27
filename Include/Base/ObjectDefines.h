@@ -11,7 +11,8 @@ enum MetaClassEnumDefines
 
 enum MetaClassComponentDefines
 {
-	Requires
+	Requires,
+	ConstructInstanceData
 };
 
 // Would like for these to actually be user-defined attributes, similar to what users can define in C#
@@ -56,6 +57,7 @@ enum MetaPropertyEnumDefines
 
 #define ENJON_COMPONENT_INTERNAL( ComponentName, ... )\
 	friend Enjon::Object;\
+	friend IComponentInstanceData;\
 	public:\
 		ComponentName()\
 		{\
@@ -149,7 +151,7 @@ enum MetaPropertyEnumDefines
 	} 
 
 #define ENJON_MODULE_DEFINE( ModuleName )\
-	ENJON_MODULE_DEFINE_INTERNAL( ModuleName )
+	ENJON_MODULE_DEFINE_INTERNAL( ModuleName ) 
 
 
 #endif

@@ -19,6 +19,7 @@
 #include "Entity/Archetype.h"
 #include "Asset/Asset.h"
 #include "Engine.h"
+#include "Graphics/Material.h"
 
 #include <array>
 #include <vector>
@@ -445,6 +446,11 @@ namespace Enjon
 		Vector<Component*> GetComponents( );
 
 		/**
+		* @brief
+		*/
+		Vector< IComponentRef* > GetIComponents( );
+
+		/**
 		* @brief Propagates transform down through all components
 		*/
 		void UpdateComponentTransforms( );
@@ -598,6 +604,7 @@ namespace Enjon
 	using WorldEntityMap = HashMap< const World*, HashSet< Entity* > >;
 	using EntityUUIDMap = HashMap< String, Entity* >;
 	using ComponentSystemMap = HashMap< u32, IComponentSystem* >;
+	using ComponentInstanceDataMap = HashMap< u32, IComponentInstanceData* >;
 
 	ENJON_CLASS( )
 	class EntityManager : public Subsystem
@@ -653,6 +660,28 @@ namespace Enjon
 		*/
 		template <typename T>
 		void RegisterComponentSystem( );
+
+		/**
+		* @brief
+		*/
+		template < typename T >
+		IComponentInstanceData*  RegisterIComponent( );
+
+		/**
+		* @brief
+		*/
+		IComponentInstanceData* RegisterIComponent( const MetaClass* cls );
+
+		/**
+		* @brief
+		*/
+		template < typename T >
+		IComponentInstanceData* GetIComponentInstanceData( );
+
+		/**
+		* @brief
+		*/
+		IComponentInstanceData* GetIComponentInstanceData( const MetaClass* cls );
 
 		/**
 		*@brief
@@ -790,6 +819,10 @@ namespace Enjon
 		*/
 		void RegisterAllEngineComponents( );
 
+		/**
+		* @brief
+		*/
+		void RegisterAllEngineIComponents( ); 
 
 		/**
 		* @brief
@@ -800,6 +833,11 @@ namespace Enjon
 		* @brief
 		*/
 		Component* GetComponent( const EntityHandle& entity, const u32& ComponentID );
+
+		/**
+		* @brief
+		*/
+		IComponentRef* GetIComponent( const EntityHandle& entity, const u32& ComponentID );
 
 		/**
 		* @brief
@@ -888,6 +926,7 @@ namespace Enjon
 		EntityStorage 				mEntities;
 		ComponentBaseArray 			mComponents;
 		ComponentSystemMap			mComponentSystems;
+		ComponentInstanceDataMap	mComponentInstanceDataMap;
 		EntityList 					mActiveEntities;
 		EntityList 					mMarkedForAdd;
 		MarkedForDestructionList 	mMarkedForDestruction;

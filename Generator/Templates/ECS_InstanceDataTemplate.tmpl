@@ -1,0 +1,178 @@
+struct #COMPONENT_NAME_Ref : public IComponentRef
+{
+	ENJON_CLASS_BODY( #COMPONENT_NAME_Ref )
+
+	public:
+		#COMPONENT_REF_CONSTRUCTOR_DECL
+			: #COMPONENT_REF_CONSTRUCTOR_PARAM_INITIALIZER
+		{
+		}
+
+	#COMPONENT_REF_MEMBER_DECL
+
+	private:
+		MetaClassComponent* mComponentMetaCls; 
+};
+
+// #COMPONENT_NAME_Ref
+template <>
+MetaClass* Object::ConstructMetaClass< #COMPONENT_NAME_Ref >( )
+{
+	MetaClass* cls = new MetaClass( );
+
+	cls->mConstructor = ([](){
+		return new #COMPONENT_NAME_Ref();
+	});
+
+	// Construct properties
+	cls->mPropertyCount = #COMPONENT_REF_META_PROPERTY_COUNT;
+	cls->mProperties.resize( cls->mPropertyCount );
+	#COMPONENT_REF_META_PROPERTY_DECL
+
+	// Type id
+	cls->mTypeId = #COMPONENT_REF_TYPE_ID;
+
+	// Meta class type
+	cls->mMetaClassType = Enjon::MetaClassType::Object;
+
+	// Name of meta class
+	cls->mName = "#COMPONENT_NAME_Ref";
+
+	return cls;
+}
+
+// GetClassInternal
+const MetaClass* #COMPONENT_NAME_Ref::GetClassInternal() const
+{
+	MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance()->GetMetaClassRegistry() );
+	const MetaClass* cls = mr->Get< #COMPONENT_NAME_Ref >( );
+	if ( !cls )
+	{
+		cls = mr->RegisterMetaClass< #COMPONENT_NAME_Ref >( );
+	}
+	return cls;
+}
+
+// MetaClassRegistry::GetTypeId
+template <>
+Enjon::u32 MetaClassRegistry::GetTypeId< #COMPONENT_NAME_Ref >() const
+{
+	return #COMPONENT_REF_TYPE_ID;
+}
+
+struct #COMPONENT_NAME_InstanceData : public IComponentInstanceData
+{
+	virtual void Allocate( const u32& id ) override;
+	virtual void Deallocate( const u32& id ) override;
+	virtual const usize GetCount() override; 
+	virtual IComponentRef* GetProxy( const u32& id ) override;
+
+	#COMPONENT_INSTANCE_DATA_ARRAY_DECL
+
+	HashMap< u32, #COMPONENT_NAME_Ref > mProxies;
+
+	private:
+		void ResetDataPtrs();
+};
+
+template <>
+IComponentInstanceData* IComponentInstanceData::ConstructComponentInstanceData< #COMPONENT_NAME >()
+{
+	return ( new #COMPONENT_NAME_InstanceData() );
+}
+
+const usize #COMPONENT_NAME_InstanceData::GetCount()
+{
+	return #COMPONENT_INSTANCE_DATA_COUNT_GETTER;
+}
+
+void #COMPONENT_NAME_InstanceData::ResetDataPtrs()
+{
+	#COMPONENT_INSTANCE_DATA_DEALLOCATE_DATA_ARRAY_PTR_RESET
+
+	u32 idx;
+	for ( auto& e : mEntityID_InstanceData )
+	{
+		idx = mEntityInstanceIndexMap[ e ];
+		#COMPONENT_NAME_Ref* proxy = &mProxies[ idx ];
+
+		#COMPONENT_REF_POINTER_RESET
+	}
+}
+
+IComponentRef* #COMPONENT_NAME_InstanceData::GetProxy( const u32& id )
+{
+	#COMPONENT_NAME_InstanceData* data = static_cast< #COMPONENT_NAME_InstanceData* > ( this );
+	#COMPONENT_NAME_Ref* proxy;
+	assert( HasComponent( id ) );
+	return &mProxies[ id ];
+}
+
+void #COMPONENT_NAME_InstanceData::Allocate( const u32& id )
+{
+	if ( !HasComponent( id ) )
+	{
+		// Just push back new instance ( would like to get rid of this )
+		#COMPONENT_NAME cmp;
+		cmp.SetEntityID( id );
+		cmp.PostConstruction();
+
+		#COMPONENT_INSTANCE_DATA_ALLOCATE_NEW
+
+		// Push back entity id
+		mEntityID_InstanceData.push_back( id );
+
+		// Update entity index map
+		mEntityInstanceIndexMap[ id ] = ( GetCount() - 1 );
+
+		// Allocate new proxy
+		u32 count = GetCount();
+		#COMPONENT_NAME_Ref proxy = {
+			#COMPONENT_REF_INITIALIZER
+		};
+		mProxies[ id ] = proxy;
+
+		// Reset data ptrs
+		ResetDataPtrs();
+	}
+}
+
+void #COMPONENT_NAME_InstanceData::Deallocate( const u32& id )
+{
+	if ( HasComponent( id ) )
+	{
+		// Grab component index from given entity id
+		u32 idx = mEntityInstanceIndexMap[ id ];
+
+		// Get size of data arrays
+		u32 dataCount = GetCount();
+
+		// Swap and pop all data ( slowest part of this entire operation )
+		if ( dataCount > 1)
+		{
+			#COMPONENT_INSTANCE_DATA_DEALLOCATE_DATA_SWAP
+
+			// Swap entity id instance as well
+			std::iter_swap( mEntityID_InstanceData.begin() + idx, mEntityID_InstanceData.end() - 1 );
+		}
+		bool idxIsLast = ( idx == ( dataCount - 1 ) );
+
+		// Pop all data arrays
+		#COMPONENT_INSTANCE_DATA_DEALLOCATE_DATA_ARRAY_POP
+
+		// Pop entity instance id data as well
+		mEntityID_InstanceData.pop_back();
+
+		// Erase entity id from index map
+		mEntityInstanceIndexMap.erase( id );
+
+		// Reset data ptrs
+		ResetDataPtrs();
+
+		// Swap around index indirection
+		if ( !#COMPONENT_INSTANCE_DATA_ARRAY_BEGIN.empty() && !idxIsLast )
+		{
+			mEntityInstanceIndexMap[ mEntityID_InstanceData.at( idx ) ] = idx;
+		}
+	}	
+}

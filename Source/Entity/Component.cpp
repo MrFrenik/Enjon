@@ -26,7 +26,7 @@ namespace Enjon
 
 	Entity* Component::GetEntity() const
 	{
-		return mEntity;
+		return EngineSubsystem( EntityManager )->GetRawEntity( mEntityID );
 	}
 	
 	//=========================================================================
@@ -44,6 +44,11 @@ namespace Enjon
 	}
 	
 	//=========================================================================
+
+	void Component::SetEntityID( const u32& id )
+	{
+		mEntityID = id;
+	}
 
 	void Component::SetBase( ComponentWrapperBase* base )
 	{

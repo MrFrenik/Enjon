@@ -319,7 +319,7 @@ namespace Enjon
 					}
 
 					// Deserialize late init ( Not sure where to do this... )
-					cmp->DeserializeLateInit( );
+					cmp->DeserializeLateInit( ); 
 				}
 			}
 			else

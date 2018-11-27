@@ -284,10 +284,10 @@ foreach(dll ${DLL_LIST})
 
 endforeach(dll) 
 
-
 # Create reflection list
 file(WRITE ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#target_dir \"${ENJON_DIR}\"\n") 
-file(WRITE ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#engine_dir \"${ENJON_DIR}\"\n") 
+file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#engine_dir \"${ENJON_DIR}\"\n") 
+file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#reflection_dir \"${REFLECTION_DIR}\"\n") 
 file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#project_name \"Enjon\"\n") 
 file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#files\n") 
 

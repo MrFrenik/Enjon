@@ -153,22 +153,22 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void Submit( const Enjon::Shader* shader );
+			const void Submit( const Enjon::Shader* shader );
 
 			/*
 			* @brief
 			*/
-			void Submit( const Enjon::Shader* shader, const SubMesh* subMesh, const u32& subMeshIdx );
+			const void Submit( const Enjon::Shader* shader, const SubMesh* subMesh, const u32& subMeshIdx );
 
 			/*
 			* @brief
 			*/
-			void Submit( const GLSLProgram* shader, const SubMesh* subMesh, const u32& subMeshIdx );
+			const void Submit( const GLSLProgram* shader, const SubMesh* subMesh, const u32& subMeshIdx );
 	
 			/*
 			* @brief
 			*/
-			void Submit( const Enjon::GLSLProgram* shader );
+			const void Submit( const Enjon::GLSLProgram* shader );
 
 		protected: 
 			

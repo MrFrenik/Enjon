@@ -9,6 +9,7 @@
 #include "Graphics/StaticMeshRenderable.h"
 #include "Graphics/SkeletalMeshRenderable.h"
 #include "Graphics/GraphicsSubsystem.h" 
+#include "Asset/AssetManager.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
 
@@ -104,6 +105,46 @@ namespace Enjon
 	void GraphicsScene::SetActiveCamera( Camera* camera )
 	{
 		mActiveCamera = camera;
+	}
+
+	//====================================================================================================
+
+	void GraphicsScene::AllocateStaticMeshRenderable( const u32& id ) 
+	{
+		if ( mStaticMeshRenderableResourceArray.mIndexMap.find( id ) == mStaticMeshRenderableResourceArray.mIndexMap.end( ) )
+		{
+			// Construct and new static mesh renderable
+			AssetManager* am = EngineSubsystem( AssetManager );
+			StaticMeshRenderable renderable;
+			renderable.SetGraphicsScene( this );
+			renderable.SetRenderableID( id );
+			renderable.SetMesh( am->GetDefaultAsset< Mesh >( ) ); 
+			// Set default materials for all material elements
+			for ( u32 i = 0; i < renderable.GetMesh( )->GetSubMeshCount( ); ++i ) 
+			{
+				renderable.SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
+			} 
+
+			// Add static mesh
+			mStaticMeshRenderableResourceArray.mResource.push_back( renderable );
+
+			// Fix up index map 
+			mStaticMeshRenderableResourceArray.mIndexMap[ id ] = mStaticMeshRenderableResourceArray.mResource.size( ) - 1;
+		}
+	}
+
+	//====================================================================================================
+
+	void GraphicsScene::SetStaticMeshRenderableMesh( const u32& id, const AssetHandle< Mesh >& mesh )
+	{
+		mStaticMeshRenderableResourceArray.mResource.at( mStaticMeshRenderableResourceArray.mIndexMap[ id ] ).SetMesh( mesh );
+	}
+
+	//====================================================================================================
+
+	void GraphicsScene::SetStaticMeshRenderableMaterial( const u32& id, const AssetHandle< Material >& material, const u32& matIdx )
+	{ 
+		mStaticMeshRenderableResourceArray.mResource.at( mStaticMeshRenderableResourceArray.mIndexMap[ id ] ).SetMaterial( material, matIdx );
 	}
 
 	//====================================================================================================

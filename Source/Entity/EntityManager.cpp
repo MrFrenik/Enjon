@@ -386,6 +386,24 @@ namespace Enjon
 
 	//==========================================================================================
 
+	Vector< IComponentRef* > Entity::GetIComponents( )
+	{
+		EntityManager* em = EngineSubsystem( EntityManager );
+		Vector< IComponentRef* > compReturns;
+		for ( auto& c : mComponents )
+		{
+			auto comp = em->GetIComponent( GetHandle( ), c );
+			if ( comp )
+			{
+				compReturns.push_back( comp );
+			}
+		}
+
+		return compReturns;
+	}
+
+	//==========================================================================================
+
 	void Entity::SetLocalTransform( const Transform& transform, bool propagateToComponents )
 	{
 		mLocalTransform = transform;
@@ -909,6 +927,17 @@ namespace Enjon
 
 	//---------------------------------------------------------------
 
+	IComponentRef* EntityManager::GetIComponent( const EntityHandle& entity, const u32& cId )
+	{
+		if ( mComponentInstanceDataMap.find( cId ) != mComponentInstanceDataMap.end( ) )
+		{
+			return mComponentInstanceDataMap[ cId ]->GetProxy( entity.GetID( ) );
+		}
+		return nullptr;
+	}
+
+	//---------------------------------------------------------------
+
 	Component* EntityManager::GetComponent( const MetaClass* compCls, const EntityHandle& entity )
 	{
 		u32 compId = compCls->GetTypeId( );
@@ -1410,6 +1439,9 @@ namespace Enjon
 		// Register all engine level components with component array 
 		RegisterAllEngineComponents( );
 
+		// Register all icomponents
+		RegisterAllEngineIComponents( );
+
 		// Register all engine level component systems
 		RegisterAllEngineComponentSystems( );
 
@@ -1484,13 +1516,13 @@ namespace Enjon
 		}
 
 		// Update all component systems
-		for ( auto& system : mComponentSystems )
-		{
-			if ( system.second->GetTickState( ) != ComponentTickState::TickNever )
-			{
-				system.second->Update( );
-			}
-		}
+		//for ( auto& system : mComponentSystems )
+		//{
+		//	if ( system.second->GetTickState( ) != ComponentTickState::TickNever )
+		//	{
+		//		system.second->Update( );
+		//	}
+		//}
 	}
 
 	//==================================================================================================
@@ -1555,6 +1587,13 @@ namespace Enjon
 
 	//================================================================================================== 
 
+	void EntityManager::RegisterAllEngineIComponents( )
+	{
+		RegisterIComponent< StaticMeshComponent >( );
+	}
+
+	//================================================================================================== 
+
 	void EntityManager::RegisterAllEngineComponentSystems( )
 	{
 		RegisterComponentSystem< StaticMeshComponentSystem >( );
@@ -1573,6 +1612,19 @@ namespace Enjon
 	{
 		u32 index = cls->GetTypeId( );
 		mComponents[ index ] = new ComponentArray( );
+	}
+
+	//========================================================================================================================
+
+	IComponentInstanceData* EntityManager::RegisterIComponent( const MetaClass* cls )
+	{
+		u32 idx = cls->GetTypeId( );
+		if ( mComponentInstanceDataMap.find( idx ) == mComponentInstanceDataMap.end( ) )
+		{
+			mComponentInstanceDataMap[ idx ] = const_cast< MetaClass* >( cls )->ConstructComponentInstanceData( );
+		}
+
+		return mComponentInstanceDataMap[ idx ];
 	}
 
 	//========================================================================================================================
@@ -1625,43 +1677,64 @@ namespace Enjon
 
 		ComponentWrapperBase* base = mComponents[ compIdx ];
 
-		// Create new component and place into map
-		Component* component = base->AddComponent( compCls, eid );
-		if ( component )
+		// Try and add new icomponent data here
+		if ( compCls->InstanceOf( Object::GetClass< StaticMeshComponent >( ) ) )
 		{
-			component->SetEntity( entity );
-			component->SetID( compIdx );
-			component->SetBase( base );
-			component->mEntityID = entity->mID;
-			component->PostConstruction( );
-
+			IComponentInstanceData* data = GetIComponentInstanceData( compCls ); 
+			data->Allocate( eid ); 
 			// Get component ptr and push back into entity components
 			entity->mComponents.push_back( compIdx );
-
-			// Push back for need initilization and start
-			mNeedInitializationList.push_back( component );
-			mNeedStartList.push_back( component );
-
-			// Need to add required components from meta class
-			const MetaClassComponent* cc = static_cast<const MetaClassComponent*>( compCls );
-			if ( cc )
-			{
-				for ( auto& c : cc->GetRequiredComponentList( ) )
+			// Do I need a way to be able to do post construction steps?
+			// Yes, but everything I'm coming up with sucks...
+			// Post construction here using callbacks?
+			/*
+				PostConstruction( eid, data )
 				{
-					const MetaClass* cls = Object::GetClass( c );
-					if ( cls )
+
+				}
+			*/
+		}
+		else
+		{
+			// Create new component and place into map
+			Component* component = base->AddComponent( compCls, eid );
+			if ( component )
+			{
+				component->SetEntity( entity );
+				component->SetID( compIdx );
+				component->SetBase( base );
+				component->mEntityID = entity->mID;
+				component->PostConstruction( );
+
+				// Get component ptr and push back into entity components
+				entity->mComponents.push_back( compIdx );
+
+				// Push back for need initilization and start
+				mNeedInitializationList.push_back( component );
+				mNeedStartList.push_back( component );
+
+				// Need to add required components from meta class
+				const MetaClassComponent* cc = static_cast<const MetaClassComponent*>( compCls );
+				if ( cc )
+				{
+					for ( auto& c : cc->GetRequiredComponentList( ) )
 					{
-						// Add component if entity doesn't already contain this one
-						if ( !entity->HasComponent( cls ) )
+						const MetaClass* cls = Object::GetClass( c );
+						if ( cls )
 						{
-							AddComponent( cls, entity );
+							// Add component if entity doesn't already contain this one
+							if ( !entity->HasComponent( cls ) )
+							{
+								AddComponent( cls, entity );
+							}
 						}
 					}
 				}
 			}
-		}
 
-		return component;
+			return component;
+		} 
+		return nullptr; 
 	}
 
 	//=========================================================================================
@@ -1692,6 +1765,13 @@ namespace Enjon
 	}
 
 	//=========================================================================================
+
+	IComponentInstanceData* EntityManager::GetIComponentInstanceData( const MetaClass* cls )
+	{
+		return ( RegisterIComponent( cls ) );
+	}
+
+	//========================================================================================= 
 
 	bool EntityManager::ComponentBaseExists( const u32& compIdx )
 	{

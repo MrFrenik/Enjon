@@ -6,6 +6,7 @@
 #include "System/Types.h"
 #include "Graphics/Color.h"
 #include "Graphics/Camera.h"
+#include "Graphics/StaticMeshRenderable.h"
 #include "Base/Object.h"
 
 #include <set>
@@ -43,6 +44,13 @@ namespace Enjon
 
 		ColorRGBA32 mColor;	
 		float mIntensity;
+	}; 
+
+	template < typename T >
+	struct ResourceArray
+	{
+		Vector< T > mResource;
+		HashMap< u32, u32 > mIndexMap;
 	};
 
 	using RenderableID = u32;
@@ -199,6 +207,29 @@ namespace Enjon
 			*/
 			void SetActiveCamera( Camera* camera );
 
+			/*
+			* @brief
+			*/
+			void AllocateStaticMeshRenderable( const u32& id );
+
+			/*
+			* @brief
+			*/
+			void SetStaticMeshRenderableMesh( const u32& id, const AssetHandle< Mesh >& mesh ); 
+
+			/*
+			* @brief
+			*/
+			void SetStaticMeshRenderableMaterial( const u32& id, const AssetHandle< Material >& material, const u32& matIdx ); 
+
+			/*
+			* @brief
+			*/
+			Vector< StaticMeshRenderable >* GetStaticMeshRenderableArray()
+			{
+				return ( &mStaticMeshRenderableResourceArray.mResource );
+			}
+
 		private: 
 
 			/*
@@ -237,6 +268,9 @@ namespace Enjon
 			HashSet<PointLight*> mPointLights;
 			HashSet<SpotLight*> mSpotLights; 
 			AmbientSettings mAmbientSettings; 
+
+			// Want a resource data system for renderables
+			ResourceArray< StaticMeshRenderable > mStaticMeshRenderableResourceArray;
 
 			// Not sure that I like this "solution"
 			Camera* mActiveCamera = nullptr;

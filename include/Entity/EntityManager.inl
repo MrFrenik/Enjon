@@ -1,5 +1,6 @@
 
-//--------------------------------------------------------------------------
+//======================================================================================================
+
 template <typename T>
 void EntityManager::RegisterComponent()
 {
@@ -7,6 +8,8 @@ void EntityManager::RegisterComponent()
 	u32 index = static_cast<u32>(Component::GetComponentType<T>());
 	mComponents[ index ] = new ComponentArray( );
 }
+
+//======================================================================================================
 
 template <typename T>
 void EntityManager::RegisterComponentSystem( )
@@ -16,77 +19,35 @@ void EntityManager::RegisterComponentSystem( )
 	mComponentSystems[ index ] = new T( ); 
 }
 
-//--------------------------------------------------------------------------
-//template <typename T>
-//std::vector<T>* EntityManager::GetComponentList()
-//{
-//	u32 index = Component::GetComponentType<T>();
-//	assert(Components.at(index) != nullptr); 
-//	return &(static_cast<ComponentWrapper<T>*>(Components.at(index))->mComponentPtrs);	
-//}
+//======================================================================================================
 
-//--------------------------------------------------------------------------
+template < typename T >
+IComponentInstanceData* EntityManager::RegisterIComponent( )
+{
+	static_assert( std::is_base_of< Component, T >::value, "EntityManager::RegisterIComponent:: T must inherit from IComponent." );
+	const MetaClass* cls =  Object::GetClass< T >( );
+	u32 cId = static_cast< u32 >( cls->GetTypeId( ) );
+	if ( mComponentInstanceDataMap.find( cId ) == mComponentInstanceDataMap.end( ) )
+	{
+		mComponentInstanceDataMap[ cId ] = IComponentInstanceData::ConstructComponentInstanceData< T >( );
+	}
+	return mComponentInstanceDataMap[ cId ];
+}
+
+//======================================================================================================
+
+template < typename T >
+IComponentInstanceData* EntityManager::GetIComponentInstanceData( )
+{
+	return ( RegisterIComponent< T >( ) );
+}
+
+//====================================================================================================== 
 
 template <typename T>
 T* EntityManager::AddComponent(const Enjon::EntityHandle& handle)
 {
-	Enjon::Entity* entity = handle.Get( );
-
-	// Assert entity is valid
-	assert(entity != nullptr);
-	// Check to make sure isn't already attached to this entity
-
-	// If component exists, return it
-	if ( entity->HasComponent< T >( ) )
-	{
-		return entity->GetComponent< T >( );
-	}
-
-	// Entity id
-	u32 eid = entity->GetID();
-
-	// Get index into vector and assert that entity manager has this component
-	u32 compIdx = Component::GetComponentType<T>();
-
-	// If the component doens't exist, need to register it
-	if ( !ComponentBaseExists< T >( ) )
-	{
-		RegisterComponent< T >( );
-	}
-
-	// Make sure that component isn't still null
-	assert(mComponents.at(compIdx) != nullptr); 
-
-	ComponentWrapperBase* base = mComponents[ compIdx ];
-
-	// If component already exists
-	if ( base->HasEntity( eid ) )
-	{
-		return (T*)base->GetComponent( eid );
-	}
-
-	// Otherwise new component and place into map
-	T* component = (T*)base->AddComponent( Object::GetClass< T >(), eid );
-	if ( component )
-	{
-		component->SetEntity(entity);
-		component->SetID(compIdx);
-		component->SetBase( base );
-		component->mEntityID = entity->mID; 
-		component->PostConstruction( );
-
-		// Get component ptr and push back into entity components
-		entity->mComponents.push_back( compIdx ); 
-
-		// Push back for need initilization and start
-		mNeedInitializationList.push_back( component );
-		mNeedStartList.push_back( component ); 
-	}
-
-	return component;
- 
-	// Shouldn't get here
-	return nullptr;
+	return ( T* )( AddComponent( Object::GetClass< T >( ), handle ) );
 }
 
 //--------------------------------------------------------------------------

@@ -56,6 +56,22 @@ namespace Enjon
 				}
 			} 
 
+			ImGui::Text( "IComponents" );
+			for ( auto& c : GetIComponents( ) )
+			{
+				if ( ImGui::CollapsingHeader( c->Class( )->GetName( ).c_str( ) ) )
+				{
+					ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
+					igm->InspectObject( c ); 
+					ImGui::PopFont( );
+
+					if ( ImGui::Button( fmt::format( "Remove##{}", (u32)c ).c_str() ) )
+					{
+						RemoveComponent( c->Class( ) );
+					}
+				} 
+			}
+
 			/*
 			if ( mArchetype )
 			{

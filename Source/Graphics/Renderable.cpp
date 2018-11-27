@@ -159,7 +159,7 @@ namespace Enjon
 
 	//==============================================================================
 
-	void Renderable::Submit( const Enjon::Shader* shader, const SubMesh* subMesh, const u32& subMeshIndex )
+	const void Renderable::Submit( const Enjon::Shader* shader, const SubMesh* subMesh, const u32& subMeshIndex )
 	{
 		if ( shader == nullptr )
 		{
@@ -183,7 +183,7 @@ namespace Enjon
 
 	//==============================================================================
 
-	void Renderable::Submit( const GLSLProgram* shader, const SubMesh* subMesh, const u32& subMeshIdx )
+	const void Renderable::Submit( const GLSLProgram* shader, const SubMesh* subMesh, const u32& subMeshIdx )
 	{ 
 		if ( shader == nullptr )
 		{
@@ -203,7 +203,7 @@ namespace Enjon
 		subMesh->Unbind( ); 
 	}
 
-	void Renderable::Submit( const Enjon::Shader* shader )
+	const void Renderable::Submit( const Enjon::Shader* shader )
 	{
 		// Check for shader validity
 		if ( shader == nullptr )
@@ -242,7 +242,7 @@ namespace Enjon
 		} 
 	}
 	
-	void Renderable::Submit( const Enjon::GLSLProgram* shader )
+	const void Renderable::Submit( const Enjon::GLSLProgram* shader )
 	{
 		// Check for shader validity
 		if ( shader == nullptr )

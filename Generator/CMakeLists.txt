@@ -29,11 +29,15 @@ file( GLOB_RECURSE SRC_REFL
 	  ${REFL_DIR}/Include/*.inl
 	) 
 
+#file(GLOB_RECURSE TEMPLATES "${REFL_DIR}/Templates/*.tmpl" ) 
+
 # Files to run over for reflection
 file( GLOB_RECURSE FILES "${ENJON_INC}/*.h" ) 
 
 # Add project executable
 add_executable( Reflection ${SRC_REFL} ) 
+
+#source_group("Templates" FILES ${TEMPLATES}) 
 
 # Write to .user file for command arguments
 if (MSVC)

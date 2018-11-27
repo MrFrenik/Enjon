@@ -14,8 +14,25 @@
 #include <type_traits>
 #include <unordered_map> 
 
+
 namespace Enjon 
 { 
+	template <typename T, typename U>
+	constexpr size_t offsetof_impl( T const* t, U T::* a ) {
+		return ( char const* )t - ( char const* )&( t->*a ) >= 0 ?
+			( char const* )t - ( char const* )&( t->*a ) :
+			( char const* )&( t->*a ) - ( char const* )t;
+	}
+
+	#define offset(Type_, Attr_)                          \
+		offsetof_impl((Type_ const*)nullptr, &Type_::Attr_)
+
+	template < typename T, typename V >
+	usize Offset( V T::*mp )
+	{
+		return offsetof_impl< T, V >( ( T const* )nullptr, mp );
+	}
+
 	// Forward declaration
 	class Entity;
 	class EntityManager;
@@ -146,8 +163,9 @@ namespace Enjon
 			ComponentTickState mTickState;
 	};
 
-	class Component : public Enjon::Object
-	{
+	class Component : public Object
+	{ 
+		friend IComponentInstanceData;
 		friend Entity;
 		friend EntityManager; 
 		friend ComponentWrapperBase;
@@ -202,6 +220,16 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void SetID( u32 id );
+
+			/**
+			* @brief
+			*/
+			void SetEntityID( const u32& id );
+
+			/**
+			* @brief
+			*/
 			ComponentTickState GetTickState( ) const
 			{
 				return mTickState;
@@ -244,10 +272,6 @@ namespace Enjon
 			*/
 			void SetEntity( Entity* entity );
 
-			/**
-			* @brief
-			*/
-			void SetID( u32 id );
 
 			/**
 			* @brief
@@ -276,6 +300,72 @@ namespace Enjon
 		private:
 			ComponentWrapperBase* mBase = nullptr; 
 	}; 
+
+	ENJON_CLASS( Abstract )
+	class IComponentRef : public Object
+	{
+		ENJON_CLASS_BODY( IComponentRef )
+
+		protected: 
+			const MetaClassComponent* mComponentMetaClass; 
+	};
+
+	ENJON_CLASS( Abstract )
+	class IComponentInstanceData : public Object
+	{
+		ENJON_CLASS_BODY( IComponentInstanceData )
+
+		public:
+			template < typename T >
+			static IComponentInstanceData* ConstructComponentInstanceData( );
+
+			template < typename T, typename V >
+			V* GetDataArray( V T::*mp )
+			{
+				return ( V* )( mDataIndexPtr[ Offset( mp ) ] );
+			}
+
+			template < typename T, typename V >
+			void SetValue( const u32& id, V T::*mp, const V& val )
+			{
+				GetDataArray( mp )[ mEntityInstanceIndexMap[ id ] ] = val;
+			}
+
+			template < typename T, typename V >
+			V GetValue( const u32& id, V T::*mp )
+			{
+				return GetDataArray( mp )[ mEntityInstanceIndexMap[ id ] ];
+			} 
+			
+			template < typename T, typename V >
+			V* GetValuePointer( const u32& id, V T::*mp )
+			{
+				return &( GetDataArray( mp )[ mEntityInstanceIndexMap[ id ] ] );
+			}
+
+			virtual void Allocate( const u32& id ) = 0;
+
+			virtual void Deallocate( const u32& id ) = 0;
+
+			virtual IComponentRef* GetProxy( const u32& id ) = 0;
+
+			bool HasComponent( const u32& id )
+			{
+				return mEntityInstanceIndexMap.find( id ) != mEntityInstanceIndexMap.end( );
+			}
+
+			const virtual usize GetCount( ) = 0;
+
+			const Vector< u32 >& GetEntityIDs( )
+			{
+				return mEntityID_InstanceData;
+			}
+
+		protected:
+			Vector< u32 > mEntityID_InstanceData;
+			HashMap< u32, u32 > mEntityInstanceIndexMap; 
+			HashMap< u32, void* > mDataIndexPtr;
+	};
 
 	ENJON_CLASS( Abstract )
 	class IComponentSystem : public Object

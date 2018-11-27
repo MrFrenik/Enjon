@@ -527,6 +527,17 @@ void Introspection::ParseComponentTraits( Lexer*lexer, Class* cls )
 			}
 		} 
 
+		// Construct instance data
+		if ( curToken.Equals( "ConstructInstanceData" ) )
+		{
+			if ( cls->mTraits.mMetaClassType != MetaClassType::Component )
+			{
+				continue;
+			}
+
+			cls->mTraits.mConstructComponentInstanceData = true;
+		}
+
 		// Get next token from lexer
 		curToken = lexer->GetNextToken( );
 	} 
@@ -1701,6 +1712,13 @@ void Introspection::Compile( const ReflectionConfig& config )
 				}
 			} 
 
+			///////////////////////////////////////////////////////////////
+			// OUTPUT COMPONENT INSTANCE DATA /////////////////////////////
+			if ( c.second.mTraits.mConstructComponentInstanceData )
+			{
+				code += OutputComponentInstanceData( config, &c.second );
+			} 
+
 			// Construct meta class function
 			code += OutputLine( "// " + qualifiedName );
 			code += OutputLine( "template <>" );
@@ -1720,6 +1738,14 @@ void Introspection::Compile( const ReflectionConfig& config )
 				case MetaClassType::Component:
 				{
 					code += OutputTabbedLine( "MetaClassComponent* cls = new MetaClassComponent( );" ); 
+
+					if ( c.second.mTraits.mConstructComponentInstanceData )
+					{
+						code += OutputTabbedLine( "cls->mConstructComponentInstanceData = [ ] ( ) " );
+						code += OutputTabbedLine( "{" );
+						code += OutputTabbedLine( "\treturn ( new " + qualifiedName + "_InstanceData( ) ); " );
+						code += OutputTabbedLine( "};" );
+					}
 				} break;
 			}
 
@@ -1984,8 +2010,16 @@ void Introspection::Compile( const ReflectionConfig& config )
 						{ 
 							if ( prop.second->mTraits.IsPointer )
 							{
-								code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyPointer< " + cn + ", " + prop.second->mTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
-																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", &" + cn + "::" + pn + " );" ); 
+								if ( prop.second->mType == PropertyType::Object )
+								{
+									code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyObjectPointer< " + cn + ", " + prop.second->mTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
+																	+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", &" + cn + "::" + pn + " );" ); 
+								}
+								else
+								{
+									code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyPointer< " + cn + ", " + prop.second->mTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
+																	+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", &" + cn + "::" + pn + " );" ); 
+								}
 							}
 							else
 							{
@@ -2124,6 +2158,9 @@ void Introspection::Link( const ReflectionConfig& config )
 	// Output namespace
 	code += OutputLine( "\nusing namespace Enjon;\n" ); 
 
+	// Output defines
+	//code += config.mUtilTemplate;
+
 	// Write enum structure definitions file
 	{
 		// Grab enum contents
@@ -2204,7 +2241,204 @@ void Introspection::Link( const ReflectionConfig& config )
 	}
 }
 
+std::string Introspection::GetTraitsString( Property* prop, bool forceIsPointer )
+{ 
+	std::string flags = "( ";
+	flags += !prop->mTraits.IsEditable						? "MetaPropertyFlags::ReadOnly | "			: "MetaPropertyFlags::Default | ";
+	flags += !prop->mTraits.IsSerializable					? "MetaPropertyFlags::NonSerializeable | "	: "MetaPropertyFlags::Default | ";
+	flags += !prop->mTraits.IsVisible						? "MetaPropertyFlags::HideInEditor | "		: "MetaPropertyFlags::Default | ";
+	flags += prop->mTraits.IsPointer || forceIsPointer		? "MetaPropertyFlags::IsPointer"			: "MetaPropertyFlags::Default";
+	flags += " )";
+	
+	// Fill out property traits
+	std::string traits = "MetaPropertyTraits( "; 
+	traits += prop->mTraits.IsEditable ? "true" : "false";
+	traits += ", ";
+	traits += std::to_string(prop->mTraits.UIMin) + "f";
+	traits += ", ";
+	traits += std::to_string(prop->mTraits.UIMax) + "f";
+	traits += ", ";
+	traits += prop->mTraits.IsPointer ? "true" : "false";
+	traits += ", ";
+	traits += prop->mTraits.IsVisible ? "true" : "false";
+	traits += ", ";
+	traits += flags;
+	traits += " )"; 
 
+	return traits;
+}
+
+std::string Introspection::OutputComponentInstanceData( const ReflectionConfig& config, Class* cls )
+{
+	// Copy component template string
+	std::string compTempl = config.mComponentInstanceDataTemplate;
+
+	// Find and replace all instances of component name meta tag
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_NAME", cls->GetQualifiedName() );
+
+	// Construct component instance data array declaration string
+	std::string componentInstanceDataArrayDecl;
+	for ( auto& prop : cls->mProperties )
+	{
+		std::string metaPropStr = prop.second->mTypeRaw;
+		componentInstanceDataArrayDecl += "Vector< " + metaPropStr + " > " + prop.second->mName + "_InstanceData;\n";
+	} 
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_INSTANCE_DATA_ARRAY_DECL", componentInstanceDataArrayDecl );
+
+	// Component instance data count getter
+	std::string componentInstanceDataCountGetter = !cls->mProperties.empty( ) ? ( cls->mProperties.begin()->second->mName + "_InstanceData.size()" ) : "0";
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_INSTANCE_DATA_COUNT_GETTER", componentInstanceDataCountGetter );
+
+	// Reset data ptrs 
+	//#COMPONENT_INSTANCE_DATA_DEALLOCATE_DATA_ARRAY_PTR_RESET
+	std::string componentInstanceDataDeallocateDataArrayPtrReset = "";
+	for ( auto& prop : cls->mProperties )
+	{
+		componentInstanceDataDeallocateDataArrayPtrReset += "mDataIndexPtr[ Offset( &" + cls->GetQualifiedName() + "::" + prop.second->mName + " ) ] \t= " + prop.second->mName + "_InstanceData.data();\n";
+	}
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_INSTANCE_DATA_DEALLOCATE_DATA_ARRAY_PTR_RESET", componentInstanceDataDeallocateDataArrayPtrReset );
+ 
+	//#COMPONENT_INSTANCE_DATA_PROXY_SETUP 
+	std::string componentInstanceDataProxySetup = "";
+	for ( auto& prop : cls->mProperties )
+	{
+		componentInstanceDataProxySetup += "cmp." + prop.second->mName + "\t= data->" + prop.second->mName + "_InstanceData.at( idx );\n";
+	}
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_INSTANCE_DATA_PROXY_SETUP", componentInstanceDataProxySetup );
+ 
+	// Just push back new instance ( would like to get rid of this )
+	//HealthComponent hc; 
+	std::string componentInstanceDataAllocateNew = "";
+	for ( auto& prop : cls->mProperties )
+	{
+		componentInstanceDataAllocateNew += prop.second->mName + "_InstanceData.push_back( cmp." + prop.second->mName + " );\n";
+	} 
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_INSTANCE_DATA_ALLOCATE_NEW", componentInstanceDataAllocateNew );
+
+	std::string componentInstanceDeallocateDataSwap = ""; 
+	for ( auto& prop : cls->mProperties )
+	{
+		const std::string& n = prop.second->mName;
+		componentInstanceDeallocateDataSwap += "std::iter_swap( " + n + "_InstanceData.begin() + idx, " + n + "_InstanceData.end() - 1 );\n";
+	} 
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_INSTANCE_DATA_DEALLOCATE_DATA_SWAP", componentInstanceDeallocateDataSwap );
+
+	//#COMPONENT_INSTANCE_DATA_DEALLOCATE_DATA_ARRAY_POP
+	std::string componentInstanceDeallocateDataArrayPop = "";
+	for ( auto& prop : cls->mProperties )
+	{
+		componentInstanceDeallocateDataArrayPop += prop.second->mName + "_InstanceData.pop_back();\n";
+	}
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_INSTANCE_DATA_DEALLOCATE_DATA_ARRAY_POP", componentInstanceDeallocateDataArrayPop ); 
+
+	//#COMPONENT_INSTANCE_DATA_ARRAY_BEGIN.
+	std::string componentInstanceDataArrayBegin = cls->mProperties.begin()->second->mName + "_InstanceData";
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_INSTANCE_DATA_ARRAY_BEGIN", componentInstanceDataArrayBegin );
+
+	//#COMPONENT_INSTANCE_DATA_SET_DATA_BY_PROXY
+	std::string componentInstanceDataSetDataByProxy = "";
+	for ( auto& prop : cls->mProperties )
+	{
+		const std::string& pn = prop.second->mName;
+		componentInstanceDataSetDataByProxy += "data->" + pn + "_InstanceData.at( idx ) \t= cmp." + pn + ";\n";
+	}
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_INSTANCE_DATA_SET_DATA_BY_PROXY", componentInstanceDataSetDataByProxy );
+
+	// #COMPONENT_REF_MEMBER_DECL
+	std::string componentRefMemberDecl = "";
+	for ( auto& prop : cls->mProperties )
+	{
+		const std::string& pn = prop.second->mName;
+		const std::string& pt = prop.second->mTypeRaw;
+		componentRefMemberDecl += pt + "* " + pn + ";";
+	}
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_REF_MEMBER_DECL", componentRefMemberDecl );
+
+	// #COMPONENT_REF_META_PROPERTY_DECL 
+	std::string componentRefMetaPropertyDecl = "";
+	u32 index = 0;
+	for ( auto& prop : cls->mProperties )
+	{
+		const std::string& pt = prop.second->mTypeRaw;
+ 
+		// Get qualified name of class
+		std::string qualifiedName = cls->GetQualifiedName( ); 
+
+		std::string pn = prop.second->mName;
+
+		// Get class name
+		std::string cn = qualifiedName + "_Ref";
+
+		auto metaProp = prop.second->mType;
+		std::string metaPropStr = GetTypeAsString( metaProp ); 
+
+		// Get property index
+		std::string pi = std::to_string( index++ );
+
+		// Get traits string
+		std::string traits = GetTraitsString( prop.second, true );
+
+		componentRefMetaPropertyDecl += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyPointer< " + cn + ", " + prop.second->mTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
+										+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", &" + cn + "::" + pn + " );" ); 
+	}
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_REF_META_PROPERTY_DECL", componentRefMetaPropertyDecl );
+
+	// #COMPONENT_REF_TYPE_ID
+	std::string componentRefTypeId = std::to_string( mLastObjectTypeId++ );
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_REF_TYPE_ID", componentRefTypeId );
+
+	// #COMPONENT_REF_INITIALIZER
+	std::string componentRefInitializer = "";
+	u32 c = 0;
+	for ( auto& prop : cls->mProperties )
+	{
+		componentRefInitializer += "&" + prop.second->mName + "_InstanceData.at( count - 1 )" + ( c < cls->mProperties.size() - 1 ? ", " : "" );
+		c++;
+	}
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_REF_INITIALIZER", componentRefInitializer );
+
+	// #COMPONENT_REF_CONSTRUCTOR_DECL
+	std::string componentRefConstructor = "";
+	componentRefConstructor += cls->mName + "_Ref( ";
+	// Set up parameter list
+	u32 pc = 0;
+	for ( auto& prop : cls->mProperties )
+	{ 
+		const std::string& pn = prop.second->mName;
+		const std::string& pt = prop.second->mTypeRaw;
+		componentRefConstructor += pt + "* " + "v_" + std::to_string( pc ) + ( pc < cls->mProperties.size( ) - 1 ? ", " : "" );
+		pc++;
+	}
+	componentRefConstructor += " )";
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_REF_CONSTRUCTOR_DECL", componentRefConstructor );
+
+	// #COMPONENT_REF_CONSTRUCTOR_PARAM_INITIALIZER
+	pc = 0;
+	std::string componentRefConstructorParamInitializer = "";
+	for ( auto& prop : cls->mProperties )
+	{
+		const std::string& pn = prop.second->mName; 
+		componentRefConstructorParamInitializer += pn + "( " + "v_" + std::to_string( pc ) + " )" + ( pc < cls->mProperties.size( ) - 1 ? ", " : "" );
+		pc++;
+	}
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_REF_CONSTRUCTOR_PARAM_INITIALIZER", componentRefConstructorParamInitializer ); 
+
+	// #COMPONENT_REF_POINTER_RESET
+	std::string componentRefPointerReset = "";
+	for ( auto& prop : cls->mProperties )
+	{
+		const std::string& pn = prop.second->mName; 
+		componentRefPointerReset += "proxy->" + pn + " = &" + pn + "_InstanceData.at( idx );";
+	}
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_REF_POINTER_RESET", componentRefPointerReset ); 
+
+	// #COMPONENT_REF_META_PROPERTY_COUNT
+	std::string componentRefMetaPropCount = std::to_string( cls->mProperties.size( ) );
+	compTempl = FindReplaceAll( compTempl, "#COMPONENT_REF_META_PROPERTY_COUNT", componentRefMetaPropCount ); 
+
+
+	return compTempl;
+}
 
 
 

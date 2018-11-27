@@ -47,14 +47,17 @@ namespace Enjon
 		} 
 
 		// Get graphics scene from world graphics context
-		World* world = mEntity->GetWorld( )->ConstCast< World >( );
+		World* world = GetEntity()->GetWorld( )->ConstCast< World >( );
 		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
 
 		// Add renderable to scene
 		gs->AddStaticMeshRenderable( &mRenderable );
 
 		// Set id of renderable to entity id
-		mRenderable.SetRenderableID( mEntity->GetID( ) ); 
+		mRenderable.SetRenderableID( GetEntity()->GetID( ) ); 
+
+		// Hate doing this. For real. Fucking hate it.
+		gs->AllocateStaticMeshRenderable( GetEntity()->GetID( ) ); 
 	}
 
 	//==================================================================== 
@@ -183,16 +186,28 @@ namespace Enjon
 	void StaticMeshComponent::SetMaterial( const AssetHandle< Material >& material, const u32& idx ) 
 	{
 		mRenderable.SetMaterial( material, idx );
+
+		// Get graphics scene from world graphics context
+		World* world = GetEntity()->GetWorld( )->ConstCast< World >( );
+		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
+
+		gs->SetStaticMeshRenderableMaterial( GetEntity()->GetID( ), material, idx ); 
 	}
 
 	//====================================================================
 
-	void StaticMeshComponent::SetMesh(const AssetHandle<Mesh>& mesh)
+	void StaticMeshComponent::SetMesh( const AssetHandle<Mesh>& mesh)
 	{
 		mRenderable.SetMesh( mesh );
+ 
+		// Get graphics scene from world graphics context
+		World* world = GetEntity()->GetWorld( )->ConstCast< World >( );
+		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
+
+		gs->SetStaticMeshRenderableMesh( GetEntity()->GetID( ), mesh ); 
 	}
 
-	//====================================================================
+	//==================================================================== 
 
 	void StaticMeshComponent::SetGraphicsScene(GraphicsScene* scene)
 	{
@@ -270,9 +285,22 @@ namespace Enjon
 
 	void StaticMeshComponentSystem::Update( )
 	{ 
-		for ( auto& c :  EngineSubsystem( EntityManager )->GetAllComponentsOfType< StaticMeshComponent >( ) )
-		{ 
-			c->ConstCast< StaticMeshComponent >()->SetTransform( c->GetEntity( )->GetWorldTransform( ) );
+		// Grab component instance data and update that
+		EntityManager* em = EngineSubsystem( EntityManager );
+
+		IComponentInstanceData* iData = em->GetIComponentInstanceData< StaticMeshComponent >( );
+		StaticMeshRenderable* rd = iData->GetDataArray( &StaticMeshComponent::mRenderable ); 
+		const Vector< u32 >& eids = iData->GetEntityIDs();
+
+		// Update all data
+		for ( usize i = 0; i < iData->GetCount( ); ++i )
+		{
+			rd[ i ].SetTransform( em->GetRawEntity( eids.at( i ) )->GetWorldTransform( ) );
 		}
+
+		//for ( auto& c :  EngineSubsystem( EntityManager )->GetAllComponentsOfType< StaticMeshComponent >( ) )
+		//{ 
+		//	c->ConstCast< StaticMeshComponent >()->SetTransform( c->GetEntity( )->GetWorldTransform( ) );
+		//}
 	}
 }

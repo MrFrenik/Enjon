@@ -22,6 +22,7 @@ namespace Enjon
 	class AssetArchiver;
 	class ObjectArchiver;
 	class ByteBuffer;
+	class IComponentInstanceData;
 }
 
 // TODO(): Clean up this file!  
@@ -106,6 +107,8 @@ namespace Enjon
 	{
 		a = a & b;
 	} 
+
+	using ComponentInstanceDataConstructor = std::function< IComponentInstanceData*( ) >; 
 
 	// Forward Declarations
 	class MetaFunction;
@@ -306,7 +309,42 @@ namespace Enjon
 			MetaPropertyPointerBase( ) = default;
 			~MetaPropertyPointerBase( ) = default; 
 
-			virtual const Object* GetValueAsObject( const Object* obj ) const = 0;
+			virtual const Object* GetValueAsObject( const Object* obj ) const
+			{
+				assert( false );
+				return nullptr;
+			};
+	};
+
+	template <typename BaseType, typename ValueType>
+	class MetaPropertyObjectPointer : public MetaPropertyPointerBase
+	{
+		public:
+			MetaPropertyObjectPointer() = default;
+			MetaPropertyObjectPointer( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits, ValueType* BaseType::*memberPointer )
+			{
+				mType = type;
+				mName = name;
+				mOffset = offset;
+				mIndex = propIndex;
+				mTraits = traits;
+				mMemberPointer = memberPointer;
+			}
+			~MetaPropertyObjectPointer() = default;
+
+			// Need to be able to access the type like this: 
+			const ValueType* GetValue( const Object* obj )
+			{
+				return reinterpret_cast< const BaseType* >( obj )->*mMemberPointer;
+			}
+
+			virtual const Object* GetValueAsObject( const Object* obj ) const override
+			{
+				return reinterpret_cast< const BaseType* >( obj )->*mMemberPointer;
+			}
+
+		private:
+			ValueType* BaseType::*mMemberPointer;
 	};
 
 	template <typename BaseType, typename ValueType>
@@ -329,12 +367,7 @@ namespace Enjon
 			const ValueType* GetValue( const Object* obj )
 			{
 				return reinterpret_cast< const BaseType* >( obj )->*mMemberPointer;
-			}
-
-			virtual const Object* GetValueAsObject( const Object* obj ) const override
-			{
-				return reinterpret_cast< const BaseType* >( obj )->*mMemberPointer;
-			}
+			} 
 
 		private:
 			ValueType* BaseType::*mMemberPointer;
@@ -1076,8 +1109,16 @@ namespace Enjon
 			{
 				if ( HasProperty( prop ) )
 				{
-					T* val = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
-					*out = *val; 
+					if ( prop->GetTraits( ).IsPointer( ) )
+					{
+						T** val = reinterpret_cast< T ** >( usize( object ) + prop->mOffset );
+						*out = **val;
+					}
+					else
+					{
+						T* val = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
+						*out = *val; 
+					}
 				}
 			} 
 
@@ -1088,7 +1129,8 @@ namespace Enjon
 				{
 					if ( prop->GetTraits( ).IsPointer( ) )
 					{
-						return nullptr;
+						const T** val = reinterpret_cast< const T** >( usize( object ) +  prop->mOffset );
+						return *val; 
 					}
 					else
 					{
@@ -1105,8 +1147,16 @@ namespace Enjon
 			{
 				if ( HasProperty( prop ) )
 				{
-					T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
-					*dest = value;
+					if ( prop->GetTraits( ).IsPointer( ) )
+					{
+						T** dest = reinterpret_cast< T** >( usize( object ) + prop->mOffset );
+						**dest = value; 
+					}
+					else
+					{
+						T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
+						*dest = value; 
+					}
 					
 					// Call mutator callbacks
 					for ( auto& mutator : prop->mMutatorCallbacks )
@@ -1129,8 +1179,16 @@ namespace Enjon
 			{
 				if ( HasProperty( prop ) )
 				{
-					T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
-					*dest = value;
+					if ( prop->GetTraits( ).IsPointer( ) )
+					{
+						T** dest = reinterpret_cast< T** >( usize( object ) + prop->mOffset );
+						**dest = value; 
+					}
+					else
+					{
+						T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
+						*dest = value; 
+					}
 
 					// Call mutator callbacks
 					for ( auto& mutator : prop->mMutatorCallbacks )
@@ -1200,6 +1258,11 @@ namespace Enjon
 				return nullptr;
 			}
 
+			IComponentInstanceData* ConstructComponentInstanceData( )
+			{
+				return ( mConstructComponentInstanceData( ) );
+			} 
+
 		protected:
 
 			virtual void Destroy( )
@@ -1217,6 +1280,7 @@ namespace Enjon
 
 			// Not sure if this is the best way to do this, but whatever...
 			ConstructFunction mConstructor = nullptr;
+			ComponentInstanceDataConstructor mConstructComponentInstanceData; 
 	};
 
 	class MetaClassComponent : public MetaClass

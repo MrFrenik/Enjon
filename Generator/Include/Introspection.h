@@ -218,6 +218,7 @@ struct ClassMarkupTraits
 	bool mConstruct = true;
 	MetaClassType mMetaClassType = MetaClassType::Object;
 	std::vector< std::string > mRequiredClasses;
+	bool mConstructComponentInstanceData = false;
 };
 
 class Class
@@ -317,6 +318,9 @@ struct ReflectionConfig
 	std::string mOutputDirectory;
 	std::string mLinkedDirectory;
 	std::string mProjectName; 
+	std::string mReflectionPath; 
+	std::string mComponentInstanceDataTemplate;
+	std::string mUtilTemplate;
 	std::vector< std::string > mFilesToParse;
 	std::vector< std::string > mAdditionalIncludes;
 	bool mIsApplication = false;
@@ -379,10 +383,14 @@ class Introspection
 
 		void Link( const ReflectionConfig& config );
 
+		std::string OutputComponentInstanceData( const ReflectionConfig&, Class* cls );
+
 		PropertyType GetTypeFromString( const std::string& str );
 		std::string GetTypeAsString( PropertyType type );
 
 		void SetTypeID( const u32& typeId );
+ 
+		std::string GetTraitsString( Property* prop, bool forceIsPointer );
 
 	private:
 		std::string OutputLinkedHeader( const ReflectionConfig& config );

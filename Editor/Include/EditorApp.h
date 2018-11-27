@@ -231,7 +231,7 @@ namespace Enjon
 
 			Vector< ReloadDLLCallback > mReloadDLLCallbacks;
 
-			Window* mProjectSelectionWindow = nullptr;
+			Window* mProjectSelectionWindow = nullptr; 
 	}; 
 }
 

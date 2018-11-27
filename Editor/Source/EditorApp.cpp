@@ -55,9 +55,9 @@ Enjon::String copyDir = "";
 Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
 
-Enjon::String configuration = "Release";
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
 
 namespace Enjon
 {
@@ -1167,7 +1167,7 @@ namespace Enjon
 				//CheckForPopups( );
 			}
 			ImGui::EndDock( );
-		} );
+		} ); 
 
 		auto createViewOption = [&]()
 		{
@@ -1182,6 +1182,41 @@ namespace Enjon
 
 					// Set to selected entity
 					mWorldOutlinerView->SelectEntity( empty );
+				}
+
+				if ( ImGui::MenuItem( "CubeIComponent##options", NULL ) )
+				{
+					std::cout << "Creating IComponent cube" << "\n";
+					EntityManager* em = EngineSubsystem( EntityManager );
+					AssetManager* am = EngineSubsystem( AssetManager );
+					GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
+
+					EntityHandle cube = em->Allocate( );
+					if ( cube )
+					{
+						Entity* ent = cube.Get( );
+						IComponentInstanceData* data = em->GetIComponentInstanceData< StaticMeshComponent >( );
+						em->AddComponent< StaticMeshComponent >( ent );
+						//data->Allocate( ent->GetID() ); 
+						IComponentRef* proxy = ( data->GetProxy( ent->GetID( ) ) ); 
+						StaticMeshRenderable* rend = data->GetValuePointer< StaticMeshComponent >( ent->GetID(), &StaticMeshComponent::mRenderable ); 
+
+						// Add to graphics subsystem just to see if this works
+						// Get graphics scene from world graphics context
+						World* world = ent->GetWorld( )->ConstCast< World >( );
+						GraphicsScene* gsc = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
+
+						// Add renderable to scene
+						gsc->AddStaticMeshRenderable( rend ); 
+
+						const Camera* cam = gs->GetGraphicsSceneCamera( );
+						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f ); 
+
+						ent->SetName( "Cube" );
+
+						// Select entity
+						mWorldOutlinerView->SelectEntity( cube );
+					}
 				}
 
 				if ( ImGui::MenuItem( "Cube##options", NULL ) )
@@ -1462,7 +1497,7 @@ namespace Enjon
 		{
 			LoadProjectSelectionContext();
 		}
-
+ 
 		return Enjon::Result::SUCCESS;
 	} 
 

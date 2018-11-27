@@ -1229,31 +1229,15 @@ namespace Enjon
 				// Object type
 				case Enjon::MetaPropertyType::Object:
 				{ 
-					if ( prop->GetTraits( ).IsPointer( ) )
+					const Enjon::Object* obj = cls->GetValueAs< Enjon::Object >( object, prop );
+					if ( obj )
 					{
-						const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
-						const Enjon::Object* obj = base->GetValueAsObject( object );
-						if ( obj )
+						if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
 						{
-							if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
-							{
-								ImGuiManager::DebugDumpObject( obj ); 
-								ImGui::TreePop( );
-							}
+							ImGuiManager::DebugDumpObject( obj ); 
+							ImGui::TreePop( ); 
 						}
-					}
-					else
-					{
-						const Enjon::Object* obj = cls->GetValueAs< Enjon::Object >( object, prop );
-						if ( obj )
-						{
-							if ( ImGui::TreeNode( prop->GetName( ).c_str( ) ) )
-							{
-								ImGuiManager::DebugDumpObject( obj ); 
-								ImGui::TreePop( ); 
-							}
-						} 
-					}
+					} 
 
 				} break;
 

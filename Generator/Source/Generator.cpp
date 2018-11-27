@@ -3,6 +3,7 @@
 #include "Lexer.h"
 #include "Introspection.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,14 +30,19 @@ int main( int argc, char** argv )
 		{
 			mConfig.mRootPath = String( argv[ i + 1 ] );
 		} 
+
+		if ( arg.compare( "--enjon-path" ) == 0 && (i + 1) < argc )
+		{
+			mConfig.mRootPath = String( argv[ i + 1 ] );
+		} 
 	} 
 
 	//mConfig.mRootPath = "W:/Enjon/";
 
 	// Grab the config file
-	mConfig.mConfigFilePath = mConfig.mRootPath + "Build/Generator/reflection.cfg"; 
-	mConfig.mOutputDirectory = mConfig.mRootPath + "Build/Generator/Intermediate";
-	mConfig.mLinkedDirectory = mConfig.mRootPath + "Build/Generator/Linked";
+	mConfig.mConfigFilePath = mConfig.mRootPath + "/Build/Generator/reflection.cfg"; 
+	mConfig.mOutputDirectory = mConfig.mRootPath + "/Build/Generator/Intermediate";
+	mConfig.mLinkedDirectory = mConfig.mRootPath + "/Build/Generator/Linked";
 
 	std::string configFileContents = ReadFileIntoString( mConfig.mConfigFilePath.c_str( ) );
 
@@ -44,7 +50,7 @@ int main( int argc, char** argv )
 	Lexer* lexer = new Lexer( configFileContents ); 
 
 	// Collect all necessary files for reflection
-	mConfig.CollectFiles( lexer );
+	mConfig.CollectFiles( lexer ); 
 
 	std::cout << "Starting Reflection Generation on: " << mConfig.mConfigFilePath << "\n";
 
@@ -154,6 +160,13 @@ void ReflectionConfig::CollectFiles( Lexer* lexer )
 							}
 						}
 					}
+					if ( nextToken.Equals( "reflection_dir" ) )
+					{
+						if ( lexer->RequireToken( TokenType::Token_String, true ) )
+						{
+							mReflectionPath = lexer->GetCurrentToken( ).ToString( );
+						}
+					}
 				}
 			} break;
 
@@ -170,5 +183,15 @@ void ReflectionConfig::CollectFiles( Lexer* lexer )
 			break; 
 		}
 	}
+
+	// TODO(): For now, just do this remind me to set the reflection path up on user application builds
+	if ( mReflectionPath.empty( ) )
+	{
+		assert( false );
+	}
+
+	// Push back component template 
+	mComponentInstanceDataTemplate = ReadFileIntoString( ( mReflectionPath + "/Templates/ECS_InstanceDataTemplate.tmpl" ).c_str() ); 
+	mUtilTemplate = ReadFileIntoString( ( mReflectionPath + "/Templates/UtilTemplate.tmpl" ).c_str( ) );
 }
 

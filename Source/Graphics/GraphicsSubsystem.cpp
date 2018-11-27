@@ -879,6 +879,8 @@ namespace Enjon
 		const Vector< SkeletalMeshRenderable* >& sortedSkeletalMeshRenderables = scene->GetSkeletalMeshRenderables( );
 		const HashSet< QuadBatch* >& sortedQuadBatches = scene->GetQuadBatches(); 
 
+		Vector< StaticMeshRenderable >* staticMeshRenderableArray = scene->GetStaticMeshRenderableArray( );
+
 		Camera* camera = scene->GetActiveCamera( );
 		Mat4x4 viewMtx = camera->GetView( );
 		Mat4x4 projMtx = camera->GetProjection( );
@@ -925,6 +927,50 @@ namespace Enjon
 					} 
 				}
 				renderable->Unbind( );
+			}
+		}
+
+		if ( !staticMeshRenderableArray->empty( ) )
+		{
+			// Shader graph to be used
+			Enjon::AssetHandle< Enjon::ShaderGraph > sg;
+			const Material* material = nullptr;
+
+			for ( auto& renderable : *staticMeshRenderableArray )
+			{
+				renderable.Bind( );
+				{
+					// For each submesh
+					const Vector< SubMesh* >& subMeshes = renderable.GetMesh( )->GetSubmeshes( );
+					for ( u32 i = 0; i < subMeshes.size( ); ++i )
+					{
+						const Material* curMaterial = renderable.GetMaterial( i ).Get( );
+						sg = curMaterial->GetShaderGraph( );
+						assert( curMaterial != nullptr );
+
+						if ( sg )
+						{
+							Enjon::Shader* sgShader = const_cast< Shader * >( sg->GetShader( ShaderPassType::Deferred_StaticGeom ) );
+							if ( material != curMaterial )
+							{
+								// Set material
+								material = curMaterial;
+
+								// Bind uniforms
+								sgShader->Use( );
+								sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
+								sgShader->SetUniform( "uWorldTime", wt );
+								sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
+								sgShader->SetUniform( "uPreviousViewProjection", ctx->mPreviousViewProjectionMatrix );
+								material->Bind( sgShader );
+							}
+
+							//sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) ); 
+							renderable.Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ), subMeshes.at( i ), i );
+						}
+					}
+				}
+				renderable.Unbind( );
 			}
 		}
 

@@ -1,0 +1,21 @@
+//////////////////////////////////////////////////////////
+// Generation Utils //////////////////////////////////////
+
+template <typename T, typename U>
+constexpr size_t offsetof_impl(T const* t, U T::* a) {
+    return (char const*)t - (char const*)&(t->*a) >= 0 ?
+           (char const*)t - (char const*)&(t->*a)      :
+           (char const*)&(t->*a) - (char const*)t;
+}
+
+#define offset(Type_, Attr_)                          \
+    offsetof_impl((Type_ const*)nullptr, &Type_::Attr_)
+
+template < typename T, typename V >
+usize Offset( V T::*mp )
+{
+	return offsetof_impl< T, V >( ( T const* )nullptr, mp );
+}
+
+//////////////////////////////////////////////////////////
+
