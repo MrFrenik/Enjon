@@ -279,6 +279,35 @@ namespace Enjon
 	void StaticMeshComponentSystem::ExplicitConstructor( )
 	{
 		mTickState = ComponentTickState::TickAlways;
+
+		// Register for component callback function
+		IComponentInstanceData* data = EngineSubsystem( EntityManager )->GetIComponentInstanceData< StaticMeshComponent >( ); 
+
+		// Or do a lambda which captures this with its member function
+		data->RegisterPostConstructionCallback( [ & ]( const u32& id, IComponentInstanceData* d ) 
+		{
+			return PostComponentConstruction( id, d );
+		} );
+	}
+
+	//==================================================================== 
+
+	Result StaticMeshComponentSystem::PostComponentConstruction( const u32& id, IComponentInstanceData* data )
+	{ 
+		// Get subsystems		
+		AssetManager* am = EngineSubsystem( AssetManager );
+		EntityManager* em = EngineSubsystem( EntityManager );
+
+		// Get graphics scene from world graphics context
+		Entity* ent = em->GetRawEntity( id );
+		World* world = ent->GetWorld( )->ConstCast< World >( );
+		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
+
+		// Allocate new renderable handle
+		u32 handle = gs->AllocateStaticMeshRenderable( ent->GetID( ) ); 
+		data->SetValue( id, &StaticMeshComponent::mRenderableHandle, handle ); 
+
+		return Result::SUCCESS;
 	}
 
 	//==================================================================== 
@@ -290,17 +319,18 @@ namespace Enjon
 
 		IComponentInstanceData* iData = em->GetIComponentInstanceData< StaticMeshComponent >( );
 		StaticMeshRenderable* rd = iData->GetDataArray( &StaticMeshComponent::mRenderable ); 
+		u32* rhd = iData->GetDataArray( &StaticMeshComponent::mRenderableHandle );
 		const Vector< u32 >& eids = iData->GetEntityIDs();
 
 		// Update all data
 		for ( usize i = 0; i < iData->GetCount( ); ++i )
 		{
-			rd[ i ].SetTransform( em->GetRawEntity( eids.at( i ) )->GetWorldTransform( ) );
-		}
+			// These things are slow. Need to address them.
+			Entity* ent = em->GetRawEntity( eids.at( i ) );
+			GraphicsScene* gs = em->GetArchetypeWorld( )->ConstCast< World >( )->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
+			gs->SetStaticMeshRenderableTransform( rhd[ i ], ent->GetWorldTransform( ) );
 
-		//for ( auto& c :  EngineSubsystem( EntityManager )->GetAllComponentsOfType< StaticMeshComponent >( ) )
-		//{ 
-		//	c->ConstCast< StaticMeshComponent >()->SetTransform( c->GetEntity( )->GetWorldTransform( ) );
-		//}
+			rd[ i ].SetTransform( em->GetRawEntity( eids.at( i ) )->GetWorldTransform( ) );
+		} 
 	}
 }

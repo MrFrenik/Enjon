@@ -1688,9 +1688,25 @@ namespace Enjon
 			// Yes, but everything I'm coming up with sucks...
 			// Post construction here using callbacks?
 			/*
-				PostConstruction( eid, data )
+				// So we register callbacks with EntityManager? Could be okay. Then in destruction of component data,
+				// just erase these callbacks. 
+				PostConstruction( eid, compCls, data )
 				{
+					for ( auto& f : mPostConstructionCallbacks[ compCls ] )
+					{
+						f( eid, data );
+					}
+				}
 
+				// Was thinking that the instance data could do this instead. 
+				InstanceData::Allocate() 
+				{
+					... // Allocation of component
+					
+					for ( auto& f : mPostConstructionCallbacks )
+					{
+						f( this, eid, cid );	
+					}
 				}
 			*/
 		}
@@ -1762,7 +1778,7 @@ namespace Enjon
 			// Set to null
 			comp = nullptr;
 		}
-	}
+	} 
 
 	//=========================================================================================
 

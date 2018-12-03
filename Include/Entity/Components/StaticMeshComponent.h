@@ -7,6 +7,7 @@
 #include "Graphics/Material.h"
 #include "Graphics/StaticMeshRenderable.h"
 #include "System/Types.h"
+#include "Graphics/GraphicsScene.h"
 
 namespace Enjon
 {
@@ -148,6 +149,9 @@ namespace Enjon
 			
 			ENJON_PROPERTY( )
 			StaticMeshRenderable mRenderable;
+
+			ENJON_PROPERTY( )
+			u32 mRenderableHandle = INVALID_RESOURCE_HANDLE;
 	};
 
 	ENJON_CLASS( )
@@ -166,6 +170,10 @@ namespace Enjon
 			* @brief
 			*/
 			virtual void Update( ) override;
+
+		protected:
+
+			Result PostComponentConstruction( const u32& id, IComponentInstanceData* data );
 	};
 }
 

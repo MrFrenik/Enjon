@@ -310,6 +310,9 @@ namespace Enjon
 			const MetaClassComponent* mComponentMetaClass; 
 	};
 
+	class IComponentInstanceData;
+	using PostConstructionComponentCallback = std::function< Result( const u32&, IComponentInstanceData* ) >;
+
 	ENJON_CLASS( Abstract )
 	class IComponentInstanceData : public Object
 	{
@@ -361,10 +364,26 @@ namespace Enjon
 				return mEntityID_InstanceData;
 			}
 
+			void RegisterPostConstructionCallback( const PostConstructionComponentCallback& cb )
+			{
+				mPostConstructionCallbacks.push_back( cb );
+			}
+
+		protected:
+
+			void PostComponentConstruction( const u32& id )
+			{
+				for ( auto& f : mPostConstructionCallbacks )
+				{
+					f( id, this );
+				}
+			}
+
 		protected:
 			Vector< u32 > mEntityID_InstanceData;
 			HashMap< u32, u32 > mEntityInstanceIndexMap; 
 			HashMap< u32, void* > mDataIndexPtr;
+			Vector< PostConstructionComponentCallback > mPostConstructionCallbacks;
 	};
 
 	ENJON_CLASS( Abstract )

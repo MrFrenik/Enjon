@@ -115,9 +115,11 @@ void #COMPONENT_NAME_InstanceData::Allocate( const u32& id )
 		// Just push back new instance ( would like to get rid of this )
 		#COMPONENT_NAME cmp;
 		cmp.SetEntityID( id );
-		cmp.PostConstruction();
 
 		#COMPONENT_INSTANCE_DATA_ALLOCATE_NEW
+
+		// Post construction on component data
+		PostComponentConstruction( id );
 
 		// Push back entity id
 		mEntityID_InstanceData.push_back( id );

@@ -914,7 +914,7 @@ namespace Enjon
 		/**
 		*@brief
 		*/
-		void RemoveFromNeedStartLists( const EntityHandle& entity );
+		void RemoveFromNeedStartLists( const EntityHandle& entity ); 
 
 		/**
 		*@brief
@@ -923,19 +923,19 @@ namespace Enjon
 		bool ComponentBaseExists( );
 
 	private:
-		EntityStorage 				mEntities;
-		ComponentBaseArray 			mComponents;
-		ComponentSystemMap			mComponentSystems;
-		ComponentInstanceDataMap	mComponentInstanceDataMap;
-		EntityList 					mActiveEntities;
-		EntityList 					mMarkedForAdd;
-		MarkedForDestructionList 	mMarkedForDestruction;
-		ComponentList				mNeedInitializationList;
-		ComponentList				mNeedStartList;
-		u32 						mNextAvailableID = 0;
-		WorldEntityMap				mWorldEntityMap;
-		World*						mArchetypeWorld = nullptr;
-		EntityUUIDMap				mEntityUUIDMap;
+		EntityStorage 							mEntities;
+		ComponentBaseArray 						mComponents;
+		ComponentSystemMap						mComponentSystems;
+		ComponentInstanceDataMap				mComponentInstanceDataMap;
+		EntityList 								mActiveEntities;
+		EntityList 								mMarkedForAdd;
+		MarkedForDestructionList 				mMarkedForDestruction;
+		ComponentList							mNeedInitializationList;
+		ComponentList							mNeedStartList;
+		u32 									mNextAvailableID = 0;
+		WorldEntityMap							mWorldEntityMap;
+		World*									mArchetypeWorld = nullptr;
+		EntityUUIDMap							mEntityUUIDMap;
 	};
 
 #include "Entity/Entity.inl"

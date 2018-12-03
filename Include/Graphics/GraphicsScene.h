@@ -22,6 +22,8 @@ namespace Enjon
 	class SpotLight;
 	class QuadBatch;
 
+	#define INVALID_RESOURCE_HANDLE		0
+
 	enum class RenderableSortType
 	{
 		MATERIAL,
@@ -51,6 +53,14 @@ namespace Enjon
 	{
 		Vector< T > mResource;
 		HashMap< u32, u32 > mIndexMap;
+
+		u32 AllocateHandle( )
+		{
+			return mLastUsedHandle++;
+		}
+ 
+		private:
+			u32 mLastUsedHandle = 1;
 	};
 
 	using RenderableID = u32;
@@ -210,17 +220,23 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void AllocateStaticMeshRenderable( const u32& id );
+			u32 AllocateStaticMeshRenderable( const u32& id );
 
 			/*
 			* @brief
 			*/
-			void SetStaticMeshRenderableMesh( const u32& id, const AssetHandle< Mesh >& mesh ); 
+			void SetStaticMeshRenderableMesh( const u32& handle, const AssetHandle< Mesh >& mesh ); 
 
 			/*
 			* @brief
 			*/
-			void SetStaticMeshRenderableMaterial( const u32& id, const AssetHandle< Material >& material, const u32& matIdx ); 
+			void SetStaticMeshRenderableMaterial( const u32& handle, const AssetHandle< Material >& material, const u32& matIdx ); 
+			
+			/*
+			* @brief
+			*/
+			void SetStaticMeshRenderableTransform( const u32& handle, const Transform& wt );
+
 
 			/*
 			* @brief

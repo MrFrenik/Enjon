@@ -109,42 +109,52 @@ namespace Enjon
 
 	//====================================================================================================
 
-	void GraphicsScene::AllocateStaticMeshRenderable( const u32& id ) 
+	u32 GraphicsScene::AllocateStaticMeshRenderable( const u32& id ) 
 	{
-		if ( mStaticMeshRenderableResourceArray.mIndexMap.find( id ) == mStaticMeshRenderableResourceArray.mIndexMap.end( ) )
+		u32 handle = mStaticMeshRenderableResourceArray.AllocateHandle( );
+
+		// Construct and new static mesh renderable
+		AssetManager* am = EngineSubsystem( AssetManager );
+		StaticMeshRenderable renderable;
+		renderable.SetGraphicsScene( this );
+		renderable.SetRenderableID( id );
+		renderable.SetMesh( am->GetDefaultAsset< Mesh >( ) ); 
+
+		// Set default materials for all material elements
+		for ( u32 i = 0; i < renderable.GetMesh( )->GetSubMeshCount( ); ++i ) 
 		{
-			// Construct and new static mesh renderable
-			AssetManager* am = EngineSubsystem( AssetManager );
-			StaticMeshRenderable renderable;
-			renderable.SetGraphicsScene( this );
-			renderable.SetRenderableID( id );
-			renderable.SetMesh( am->GetDefaultAsset< Mesh >( ) ); 
-			// Set default materials for all material elements
-			for ( u32 i = 0; i < renderable.GetMesh( )->GetSubMeshCount( ); ++i ) 
-			{
-				renderable.SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
-			} 
+			renderable.SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
+		} 
 
-			// Add static mesh
-			mStaticMeshRenderableResourceArray.mResource.push_back( renderable );
+		// Add static mesh
+		mStaticMeshRenderableResourceArray.mResource.push_back( renderable );
 
-			// Fix up index map 
-			mStaticMeshRenderableResourceArray.mIndexMap[ id ] = mStaticMeshRenderableResourceArray.mResource.size( ) - 1;
-		}
+		// Fix up index map 
+		mStaticMeshRenderableResourceArray.mIndexMap[ handle ] = mStaticMeshRenderableResourceArray.mResource.size( ) - 1;
+
+		return handle;
 	}
 
 	//====================================================================================================
 
-	void GraphicsScene::SetStaticMeshRenderableMesh( const u32& id, const AssetHandle< Mesh >& mesh )
+	void GraphicsScene::SetStaticMeshRenderableMesh( const u32& handle, const AssetHandle< Mesh >& mesh )
 	{
-		mStaticMeshRenderableResourceArray.mResource.at( mStaticMeshRenderableResourceArray.mIndexMap[ id ] ).SetMesh( mesh );
+		mStaticMeshRenderableResourceArray.mResource.at( mStaticMeshRenderableResourceArray.mIndexMap[ handle ] ).SetMesh( mesh );
 	}
 
 	//====================================================================================================
 
-	void GraphicsScene::SetStaticMeshRenderableMaterial( const u32& id, const AssetHandle< Material >& material, const u32& matIdx )
+	void GraphicsScene::SetStaticMeshRenderableMaterial( const u32& handle, const AssetHandle< Material >& material, const u32& matIdx )
 	{ 
-		mStaticMeshRenderableResourceArray.mResource.at( mStaticMeshRenderableResourceArray.mIndexMap[ id ] ).SetMaterial( material, matIdx );
+		mStaticMeshRenderableResourceArray.mResource.at( mStaticMeshRenderableResourceArray.mIndexMap[ handle ] ).SetMaterial( material, matIdx );
+	}
+
+	//====================================================================================================
+
+	void GraphicsScene::SetStaticMeshRenderableTransform( const u32& handle, const Transform& wt )
+	{
+		// TODO(John): Fix performance issues. This requires a map lookup everytime I want to just set this transform ( which will happen almost every frame )
+		mStaticMeshRenderableResourceArray.mResource.at( mStaticMeshRenderableResourceArray.mIndexMap[ handle ] ).SetTransform( wt );
 	}
 
 	//====================================================================================================
