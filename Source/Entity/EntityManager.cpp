@@ -1515,6 +1515,14 @@ namespace Enjon
 			}
 		}
 
+		for ( auto& system : mComponentSystems )
+		{
+			if ( system.second->GetTickState( ) != ComponentTickState::TickNever )
+			{
+				system.second->Update( );
+			}
+		}
+
 		// Update all component systems
 		//for ( auto& system : mComponentSystems )
 		//{

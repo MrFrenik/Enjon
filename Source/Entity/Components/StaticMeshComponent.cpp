@@ -292,6 +292,7 @@ namespace Enjon
 
 	//==================================================================== 
 
+	// This makes the IDIOTIC assumption that this component data is in face what I want. No type safety there whatsoever.
 	Result StaticMeshComponentSystem::PostComponentConstruction( const u32& id, IComponentInstanceData* data )
 	{ 
 		// Get subsystems		
@@ -315,7 +316,8 @@ namespace Enjon
 	void StaticMeshComponentSystem::Update( )
 	{ 
 		// Grab component instance data and update that
-		EntityManager* em = EngineSubsystem( EntityManager );
+		EntityManager* em = EngineSubsystem( EntityManager ); // This might make the case to have EntityManagers be an instanced thing PER world. That way all entities / systems / components are grouped logically together and reduces lookups 
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 
 		IComponentInstanceData* iData = em->GetIComponentInstanceData< StaticMeshComponent >( );
 		StaticMeshRenderable* rd = iData->GetDataArray( &StaticMeshComponent::mRenderable ); 
@@ -326,11 +328,9 @@ namespace Enjon
 		for ( usize i = 0; i < iData->GetCount( ); ++i )
 		{
 			// These things are slow. Need to address them.
-			Entity* ent = em->GetRawEntity( eids.at( i ) );
-			GraphicsScene* gs = em->GetArchetypeWorld( )->ConstCast< World >( )->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
-			gs->SetStaticMeshRenderableTransform( rhd[ i ], ent->GetWorldTransform( ) );
-
-			rd[ i ].SetTransform( em->GetRawEntity( eids.at( i ) )->GetWorldTransform( ) );
+			Entity* ent = em->GetRawEntity( eids.at( i ) );		// Getting raw entity isn't terrible, but the cache is killed by loading up an entity that has a UUID associated with it. Need to store these elsewhere ( probably just in the EntityMangager itself ); 
+			GraphicsScene* gs = ent->GetWorld( )->ConstCast< World >()->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );	// Instead of grabbing this, the renderable should KNOW which graphics scene it belongs to ( hashmap lookup )
+			gs->SetStaticMeshRenderableTransform( rhd[ i ], ent->GetWorldTransform( ) ); 
 		} 
 	}
 }

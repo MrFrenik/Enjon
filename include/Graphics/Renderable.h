@@ -20,6 +20,7 @@ namespace Enjon
 	class Mesh;
 	class GraphicsScene;
 	class GraphicsSubsystem;
+	class GraphicsSubsystemContext;
 	class GLSLProgram;
 	class ColorRGBA32;
 

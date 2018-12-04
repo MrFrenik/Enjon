@@ -10,8 +10,14 @@ struct #COMPONENT_NAME_Ref : public IComponentRef
 
 	#COMPONENT_REF_MEMBER_DECL
 
+		public Result OnEditorUI()
+		{
+			return mData->OnEditorUICallback( this );
+		};
+
 	private:
 		MetaClassComponent* mComponentMetaCls; 
+		IComponentInstanceData* mData;
 };
 
 // #COMPONENT_NAME_Ref
@@ -118,9 +124,6 @@ void #COMPONENT_NAME_InstanceData::Allocate( const u32& id )
 
 		#COMPONENT_INSTANCE_DATA_ALLOCATE_NEW
 
-		// Post construction on component data
-		PostComponentConstruction( id );
-
 		// Push back entity id
 		mEntityID_InstanceData.push_back( id );
 
@@ -136,6 +139,9 @@ void #COMPONENT_NAME_InstanceData::Allocate( const u32& id )
 
 		// Reset data ptrs
 		ResetDataPtrs();
+
+		// Post construction on component data
+		PostComponentConstruction( id );
 	}
 }
 

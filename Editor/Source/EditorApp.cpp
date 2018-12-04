@@ -1189,33 +1189,36 @@ namespace Enjon
 					std::cout << "Creating IComponent cube" << "\n";
 					EntityManager* em = EngineSubsystem( EntityManager );
 					AssetManager* am = EngineSubsystem( AssetManager );
-					GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
+					GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 
 					EntityHandle cube = em->Allocate( );
 					if ( cube )
 					{
 						Entity* ent = cube.Get( );
+						GraphicsScene* gs = ent->GetWorld( )->ConstCast< World >( )->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
 						IComponentInstanceData* data = em->GetIComponentInstanceData< StaticMeshComponent >( );
 						em->AddComponent< StaticMeshComponent >( ent );
+						u32 rid = data->GetValue( ent->GetID( ), &StaticMeshComponent::mRenderableHandle );
+						gs->SetStaticMeshRenderableMesh( rid, am->GetAsset< Mesh >( "models.unit_cube" ) );
 						//data->Allocate( ent->GetID() ); 
-						IComponentRef* proxy = ( data->GetProxy( ent->GetID( ) ) ); 
-						StaticMeshRenderable* rend = data->GetValuePointer< StaticMeshComponent >( ent->GetID(), &StaticMeshComponent::mRenderable ); 
+						//IComponentRef* proxy = ( data->GetProxy( ent->GetID( ) ) ); 
+						//StaticMeshRenderable* rend = data->GetValuePointer< StaticMeshComponent >( ent->GetID(), &StaticMeshComponent::mRenderable ); 
 
 						// Add to graphics subsystem just to see if this works
 						// Get graphics scene from world graphics context
-						World* world = ent->GetWorld( )->ConstCast< World >( );
-						GraphicsScene* gsc = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
+						//World* world = ent->GetWorld( )->ConstCast< World >( );
+						//GraphicsScene* gsc = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
 
 						// Add renderable to scene
-						gsc->AddStaticMeshRenderable( rend ); 
+						//gsc->AddStaticMeshRenderable( rend ); 
 
-						const Camera* cam = gs->GetGraphicsSceneCamera( );
+						const Camera* cam = gfx->GetGraphicsSceneCamera( );
 						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f ); 
 
 						ent->SetName( "Cube" );
 
 						// Select entity
-						mWorldOutlinerView->SelectEntity( cube );
+						mWorldOutlinerView->SelectEntity( cube ); 
 					}
 				}
 

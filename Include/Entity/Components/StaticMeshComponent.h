@@ -150,7 +150,7 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			StaticMeshRenderable mRenderable;
 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( NonSerializeable, HideInEditor )
 			u32 mRenderableHandle = INVALID_RESOURCE_HANDLE;
 	};
 
@@ -169,11 +169,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void Update( ) override;
+			virtual void Update( ) override; 
 
 		protected:
 
-			Result PostComponentConstruction( const u32& id, IComponentInstanceData* data );
+			Result PostComponentConstruction( const u32& id, IComponentInstanceData* data ); 
 	};
 }
 
