@@ -386,14 +386,14 @@ namespace Enjon
 
 	//==========================================================================================
 
-	Vector< IComponentRef* > Entity::GetIComponents( )
+	Vector< ComponentHandle< Component >* > Entity::GetIComponents( )
 	{
 		EntityManager* em = EngineSubsystem( EntityManager );
-		Vector< IComponentRef* > compReturns;
+		Vector< ComponentHandle< Component >* > compReturns;
 		for ( auto& c : mComponents )
 		{
 			auto comp = em->GetIComponent( GetHandle( ), c );
-			if ( comp )
+			if ( comp->mComponent )
 			{
 				compReturns.push_back( comp );
 			}
@@ -927,11 +927,11 @@ namespace Enjon
 
 	//---------------------------------------------------------------
 
-	IComponentRef* EntityManager::GetIComponent( const EntityHandle& entity, const u32& cId )
+	ComponentHandle< Component >* EntityManager::GetIComponent( const EntityHandle& entity, const u32& cId )
 	{
 		if ( mComponentInstanceDataMap.find( cId ) != mComponentInstanceDataMap.end( ) )
 		{
-			return mComponentInstanceDataMap[ cId ]->GetProxy( entity.GetID( ) );
+			return mComponentInstanceDataMap[ cId ]->GetComponentHandle< Component >( entity.GetID( ) );
 		}
 		return nullptr;
 	}

@@ -22,22 +22,22 @@ void EntityManager::RegisterComponentSystem( )
 //======================================================================================================
 
 template < typename T >
-IComponentInstanceData* EntityManager::RegisterIComponent( )
+ComponentInstanceData< T >* EntityManager::RegisterIComponent( )
 {
 	static_assert( std::is_base_of< Component, T >::value, "EntityManager::RegisterIComponent:: T must inherit from IComponent." );
 	const MetaClass* cls =  Object::GetClass< T >( );
 	u32 cId = static_cast< u32 >( cls->GetTypeId( ) );
 	if ( mComponentInstanceDataMap.find( cId ) == mComponentInstanceDataMap.end( ) )
 	{
-		mComponentInstanceDataMap[ cId ] = IComponentInstanceData::ConstructComponentInstanceData< T >( );
+		mComponentInstanceDataMap[ cId ] = ( ComponentInstanceData< T >* )( IComponentInstanceData::ConstructComponentInstanceData< T >( ) );
 	}
-	return mComponentInstanceDataMap[ cId ];
+	return ( ComponentInstanceData< T >* )( mComponentInstanceDataMap[ cId ] );
 }
 
 //======================================================================================================
 
 template < typename T >
-IComponentInstanceData* EntityManager::GetIComponentInstanceData( )
+ComponentInstanceData< T >* EntityManager::GetIComponentInstanceData( )
 {
 	return ( RegisterIComponent< T >( ) );
 }

@@ -14,7 +14,7 @@ namespace Enjon
 	ENJON_CLASS( )
 	class StaticMeshComponent : public Component
 	{
-		ENJON_COMPONENT( StaticMeshComponent, ConstructInstanceData  )
+		ENJON_COMPONENT( StaticMeshComponent  )
 
 		public:
 

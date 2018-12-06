@@ -59,15 +59,23 @@ namespace Enjon
 			ImGui::Text( "IComponents" );
 			for ( auto& c : GetIComponents( ) )
 			{
-				if ( ImGui::CollapsingHeader( c->Class( )->GetName( ).c_str( ) ) )
+				if ( !c )
+				{
+					continue;
+				}
+
+				Component* cmp = c->mComponent;
+
+				if ( ImGui::CollapsingHeader( cmp->Class( )->GetName( ).c_str( ) ) )
 				{
 					ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
-					igm->InspectObject( c ); 
+					igm->InspectObject( cmp ); 
 					ImGui::PopFont( );
 
 					if ( ImGui::Button( fmt::format( "Remove##{}", (u32)c ).c_str() ) )
 					{
-						RemoveComponent( c->Class( ) );
+						// This doesn't work the way I'd like it to anymore...
+						RemoveComponent( cmp->Class( ) );
 					}
 				} 
 			}

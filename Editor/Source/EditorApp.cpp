@@ -1198,8 +1198,10 @@ namespace Enjon
 						GraphicsScene* gs = ent->GetWorld( )->ConstCast< World >( )->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
 						IComponentInstanceData* data = em->GetIComponentInstanceData< StaticMeshComponent >( );
 						em->AddComponent< StaticMeshComponent >( ent );
-						u32 rid = data->GetValue( ent->GetID( ), &StaticMeshComponent::mRenderableHandle );
-						gs->SetStaticMeshRenderableMesh( rid, am->GetAsset< Mesh >( "models.unit_cube" ) );
+						ComponentHandle< StaticMeshComponent >* ch = data->GetComponentHandle< StaticMeshComponent >( ent->GetID( ) );
+						gs->SetStaticMeshRenderableMesh( ch->mComponent->mRenderableHandle, am->GetAsset< Mesh >( "models.unit_cube" ) );
+						//u32 rid = data->GetValue( ent->GetID( ), &StaticMeshComponent::mRenderableHandle );
+						//gs->SetStaticMeshRenderableMesh( rid, am->GetAsset< Mesh >( "models.unit_cube" ) );
 						//data->Allocate( ent->GetID() ); 
 						//IComponentRef* proxy = ( data->GetProxy( ent->GetID( ) ) ); 
 						//StaticMeshRenderable* rend = data->GetValuePointer< StaticMeshComponent >( ent->GetID(), &StaticMeshComponent::mRenderable ); 

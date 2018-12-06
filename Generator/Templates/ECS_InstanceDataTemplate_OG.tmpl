@@ -1,3 +1,20 @@
+struct #COMPONENT_NAME_Ref : public IComponentRef
+{
+	ENJON_CLASS_BODY( #COMPONENT_NAME_Ref )
+
+	public:
+		#COMPONENT_REF_CONSTRUCTOR_DECL
+			: #COMPONENT_REF_CONSTRUCTOR_PARAM_INITIALIZER
+		{
+		}
+
+	#COMPONENT_REF_MEMBER_DECL
+
+	private:
+		MetaClassComponent* mComponentMetaCls; 
+		IComponentInstanceData* mData;
+};
+
 // #COMPONENT_NAME_Ref
 template <>
 MetaClass* Object::ConstructMetaClass< #COMPONENT_NAME_Ref >( )
@@ -49,9 +66,14 @@ struct #COMPONENT_NAME_InstanceData : public IComponentInstanceData
 	virtual void Allocate( const u32& id ) override;
 	virtual void Deallocate( const u32& id ) override;
 	virtual const usize GetCount() override; 
-	virtual Component* GetComponentData() override;
+	virtual IComponentRef* GetProxy( const u32& id ) override;
 
-	Vector< #COMPONENT_NAME > mData;
+	#COMPONENT_INSTANCE_DATA_ARRAY_DECL
+
+	HashMap< u32, #COMPONENT_NAME_Ref > mProxies;
+
+	private:
+		void ResetDataPtrs();
 };
 
 template <>

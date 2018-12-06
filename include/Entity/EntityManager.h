@@ -448,7 +448,7 @@ namespace Enjon
 		/**
 		* @brief
 		*/
-		Vector< IComponentRef* > GetIComponents( );
+		Vector< ComponentHandle< Component >* > GetIComponents( );
 
 		/**
 		* @brief Propagates transform down through all components
@@ -665,7 +665,7 @@ namespace Enjon
 		* @brief
 		*/
 		template < typename T >
-		IComponentInstanceData*  RegisterIComponent( );
+		ComponentInstanceData< T >*  RegisterIComponent( );
 
 		/**
 		* @brief
@@ -676,7 +676,7 @@ namespace Enjon
 		* @brief
 		*/
 		template < typename T >
-		IComponentInstanceData* GetIComponentInstanceData( );
+		ComponentInstanceData< T >* GetIComponentInstanceData( );
 
 		/**
 		* @brief
@@ -837,7 +837,7 @@ namespace Enjon
 		/**
 		* @brief
 		*/
-		IComponentRef* GetIComponent( const EntityHandle& entity, const u32& ComponentID );
+		ComponentHandle< Component >* GetIComponent( const EntityHandle& entity, const u32& ComponentID );
 
 		/**
 		* @brief

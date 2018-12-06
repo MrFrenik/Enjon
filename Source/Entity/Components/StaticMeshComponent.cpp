@@ -304,9 +304,15 @@ namespace Enjon
 		World* world = ent->GetWorld( )->ConstCast< World >( );
 		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
 
+		// Should probably be a reference instead...
+		ComponentHandle< StaticMeshComponent >* smc = data->GetComponentHandle< StaticMeshComponent >( id );
+
 		// Allocate new renderable handle
 		u32 handle = gs->AllocateStaticMeshRenderable( ent->GetID( ) ); 
-		data->SetValue( id, &StaticMeshComponent::mRenderableHandle, handle ); 
+		smc->mComponent->mRenderableHandle = handle;
+			
+		// I still like this syntax
+		//data->SetValue( id, &StaticMeshComponent::mRenderableHandle, handle ); 
 
 		return Result::SUCCESS;
 	}
@@ -319,9 +325,8 @@ namespace Enjon
 		EntityManager* em = EngineSubsystem( EntityManager ); // This might make the case to have EntityManagers be an instanced thing PER world. That way all entities / systems / components are grouped logically together and reduces lookups 
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 
-		IComponentInstanceData* iData = em->GetIComponentInstanceData< StaticMeshComponent >( );
-		StaticMeshRenderable* rd = iData->GetDataArray( &StaticMeshComponent::mRenderable ); 
-		u32* rhd = iData->GetDataArray( &StaticMeshComponent::mRenderableHandle );
+		ComponentInstanceData< StaticMeshComponent >* iData = em->GetIComponentInstanceData< StaticMeshComponent >( );
+		StaticMeshComponent* compData = iData->GetComponentData( )->ConstCast< StaticMeshComponent >( );
 		const Vector< u32 >& eids = iData->GetEntityIDs();
 
 		// Update all data
@@ -330,7 +335,7 @@ namespace Enjon
 			// These things are slow. Need to address them.
 			Entity* ent = em->GetRawEntity( eids.at( i ) );		// Getting raw entity isn't terrible, but the cache is killed by loading up an entity that has a UUID associated with it. Need to store these elsewhere ( probably just in the EntityMangager itself ); 
 			GraphicsScene* gs = ent->GetWorld( )->ConstCast< World >()->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );	// Instead of grabbing this, the renderable should KNOW which graphics scene it belongs to ( hashmap lookup )
-			gs->SetStaticMeshRenderableTransform( rhd[ i ], ent->GetWorldTransform( ) ); 
+			gs->SetStaticMeshRenderableTransform( compData[ i ].mRenderableHandle, ent->GetWorldTransform( ) ); 
 		} 
 	}
 }
