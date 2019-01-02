@@ -315,8 +315,29 @@ namespace Enjon
 
 	template < typename T >	
 	struct ComponentHandle 
-	{
-		T* mComponent;
+	{ 
+		public:
+			T* Get( )
+			{
+				return mComponent;
+			}
+
+			T* operator ->( )
+			{
+				return Get();
+			} 
+
+			T* operator *( )
+			{
+				return Get( );
+			}
+
+			bool operator !( )
+			{
+				return ( Get( ) == nullptr );
+			}
+
+			T* mComponent; 
 	};
 
 	ENJON_CLASS( Abstract )
@@ -332,10 +353,10 @@ namespace Enjon
 			const virtual usize GetCount( ) = 0; 
 
 			template < typename T >
-			ComponentHandle< T >* GetComponentHandle( const u32& id )
+			ComponentHandle< T >& GetComponentHandle( const u32& id )
 			{
 				ComponentHandle< Component >* it = GetComponentHandleInternal( id );
-				return ( ComponentHandle< T >* )it; 
+				return ( ComponentHandle< T >& )*it; 
 				//Component* data = GetComponentData( );
 				//return ComponentHandle< T >{ data[ mEntityInstanceIndexMap[ id ] ] };
 			} 
@@ -373,18 +394,25 @@ namespace Enjon
 				}
 			}
 
+			// Really not safe to call other than in ONE particular instance
+			void SetEntity( Component* cmp, const u32& eid );
+
 		protected:
 			Vector< u32 > mEntityID_InstanceData;
 			HashMap< u32, u32 > mEntityInstanceIndexMap; 
 			HashMap< u32, void* > mDataIndexPtr;
 			Vector< PostConstructionComponentCallback > mPostConstructionCallbacks;
+			u32 mCapacity;
 	};
 
 	template < typename T >
 	class ComponentInstanceData : public IComponentInstanceData
 	{ 
 		public: 
-			ComponentInstanceData( ) = default;
+			ComponentInstanceData( )
+			{
+				//mData.reserve( 10 );
+			}
 
 			virtual Component* GetComponentData( ) override
 			{
@@ -414,8 +442,18 @@ namespace Enjon
 					// Add component handle
 					mComponentHandles[ id ] = ComponentHandle< T > { &mData.at( mData.size( ) - 1 ) };
 
+					// Adjust all the pointers
+					// If holding onto component handles, must go through and fix up pointers after allocating new 
+					// components, since memory might have been moved to another location. 
+					ResetPointers( ); 
+
+					// Post construction for component
+					ComponentHandle< T >& ch = mComponentHandles[ id ];
+					SetEntity( *mComponentHandles[ id ], id );
+					ch->PostConstruction( ); 
+
 					// Post construction on component data
-					PostComponentConstruction( id );
+					//PostComponentConstruction( id );
 				}
 			} 
 
@@ -465,6 +503,23 @@ namespace Enjon
 			{
 				return ( ComponentHandle< Component >* )( &mComponentHandles[ id ] );
 			}
+
+		private:
+			void ResetPointers( )
+			{
+				if ( mCapacity != mData.capacity( ) )
+				{
+					for ( auto& id : mEntityInstanceIndexMap )
+					{
+						u32 idx = id.second;
+						mComponentHandles[ id.first ].mComponent = &mData.at( idx );
+					} 
+				} 
+
+				mCapacity = mData.capacity( );
+			}
+
+		public:
 
 			Vector< T > mData; 
 			HashMap< u32, ComponentHandle< T > > mComponentHandles;

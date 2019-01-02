@@ -159,6 +159,13 @@ namespace Enjon
 
 	//====================================================================================================
 
+	StaticMeshRenderable* GraphicsScene::GetStaticMeshRenderable( const u32& handle )
+	{
+		return &mStaticMeshRenderableResourceArray.mResource.at( mStaticMeshRenderableResourceArray.mIndexMap[ handle ] );
+	}
+
+	//====================================================================================================
+
 	const Vector<StaticMeshRenderable*>& GraphicsScene::GetStaticMeshRenderables( ) const
 	{ 
 		return mSortedStaticMeshRenderables;

@@ -201,7 +201,7 @@ namespace Enjon
 		* @brief Gets component from entity, if exists
 		*/
 		template <typename T>
-		T* GetComponent( );
+		ComponentHandle< T >& GetComponent( );
 
 		/*
 		* @brief
@@ -212,7 +212,7 @@ namespace Enjon
 		* @brief Attaches component to entity, if exists
 		*/
 		template <typename T>
-		T* AddComponent( );
+		ComponentHandle< T >& AddComponent( );
 
 		/*
 		* @brief
@@ -702,7 +702,7 @@ namespace Enjon
 		*@brief
 		*/
 		template <typename T>
-		T* AddComponent( const Enjon::EntityHandle& entity );
+		ComponentHandle< T >& AddComponent( const Enjon::EntityHandle& entity );
 
 		/**
 		*@brief
@@ -724,7 +724,7 @@ namespace Enjon
 		*@brief
 		*/
 		template <typename T>
-		T* GetComponent( Entity* entity );
+		ComponentHandle< T >& GetComponent( Entity* entity );
 
 		/**
 		*@brief

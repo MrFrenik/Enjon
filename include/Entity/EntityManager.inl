@@ -45,9 +45,13 @@ ComponentInstanceData< T >* EntityManager::GetIComponentInstanceData( )
 //====================================================================================================== 
 
 template <typename T>
-T* EntityManager::AddComponent(const Enjon::EntityHandle& handle)
-{
-	return ( T* )( AddComponent( Object::GetClass< T >( ), handle ) );
+ComponentHandle< T >& EntityManager::AddComponent(const Enjon::EntityHandle& handle)
+{ 
+	AddComponent( Object::GetClass< T >( ), handle );
+	IComponentInstanceData* data = GetIComponentInstanceData< T >( ); 
+	u32 cId = static_cast< u32 >( Object::GetClass< T >()->GetTypeId( ) );
+	auto cData = ( ComponentInstanceData< T >* )( mComponentInstanceDataMap[ cId ] );
+	return cData->GetComponentHandle< T >( handle.GetID( ) );
 }
 
 //--------------------------------------------------------------------------
@@ -66,19 +70,17 @@ void EntityManager::RemoveComponent(Entity* entity)
 
 //--------------------------------------------------------------------------
 template <typename T>
-T* EntityManager::GetComponent(Entity* entity)
+ComponentHandle< T >& EntityManager::GetComponent(Entity* entity)
 { 
 	// Assert entity manager exists
 	assert(entity != nullptr);
 
 	u32 eid = entity->GetID();
 
-	// Get component idx
-	u32 compIdx = Component::GetComponentType<T>();
-	assert(mComponents.at(compIdx) != nullptr); 
-
-	ComponentWrapperBase* base = mComponents.at( compIdx );
-	return (T*)base->GetComponent( eid ); 
+	IComponentInstanceData* data = GetIComponentInstanceData< T >( ); 
+	u32 cId = static_cast< u32 >( Object::GetClass< T >()->GetTypeId( ) );
+	auto cData = ( ComponentInstanceData< T >* )( mComponentInstanceDataMap[ cId ] );
+	return cData->GetComponentHandle< T >( eid ); 
 }
 
 //=======================================================================================

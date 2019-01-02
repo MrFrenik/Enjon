@@ -152,6 +152,8 @@ namespace Enjon
 
 			ENJON_PROPERTY( NonSerializeable, HideInEditor )
 			u32 mRenderableHandle = INVALID_RESOURCE_HANDLE;
+
+			GraphicsScene* mGraphicsScene;
 	};
 
 	ENJON_CLASS( )

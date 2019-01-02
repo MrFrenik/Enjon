@@ -312,26 +312,17 @@ void Game::TestObjectSerialize( )
 			if ( mSerializedEntity.Get( ) )
 			{
 				auto gfxCmp = mSerializedEntity.Get( )->GetComponent< StaticMeshComponent >( );
-				if ( gfxCmp )
-				{
-					mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( gfxCmp->GetRenderable() );
-				}
+				mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( gfxCmp->GetRenderable() );
 
 				auto pointLightComp = mSerializedEntity.Get( )->GetComponent< PointLightComponent >( );
-				if ( pointLightComp )
-				{
-					mGfx->GetGraphicsScene( )->AddPointLight( pointLightComp->GetLight( ) );
-				}
+				mGfx->GetGraphicsScene( )->AddPointLight( pointLightComp->GetLight( ) );
 
 				auto addChildrenGfx = [ & ] ( const EntityHandle& handle )
 				{
 					for ( auto& c : handle.Get( )->GetChildren( ) )
 					{
 						auto cGfxCmp = c.Get( )->GetComponent< StaticMeshComponent >( );
-						if ( cGfxCmp )
-						{
-							mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( cGfxCmp->GetRenderable( ) );
-						} 
+						mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( cGfxCmp->GetRenderable( ) );
 					}
 				};
 
@@ -339,10 +330,7 @@ void Game::TestObjectSerialize( )
 				for ( auto& c : mSerializedEntity.Get( )->GetChildren( ) )
 				{
 					auto cGfxCmp = c.Get( )->GetComponent< StaticMeshComponent >( );
-					if ( cGfxCmp )
-					{ 
-						mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( cGfxCmp->GetRenderable( ) );
-					}
+					mGfx->GetGraphicsScene( )->AddStaticMeshRenderable( cGfxCmp->GetRenderable( ) );
 
 					addChildrenGfx( c );
 				}
@@ -371,7 +359,6 @@ void Game::TestObjectSerialize( )
 
 			Enjon::EntityHandle child = mEntities->Allocate( );
 			auto childGfxCmp = child.Get( )->AddComponent< Enjon::StaticMeshComponent >( );
-			if ( childGfxCmp )
 			{
 				childGfxCmp->SetMesh( am->GetAsset< Enjon::Mesh >( "models.unit_sphere" ) );
 				childGfxCmp->SetMaterial( am->GetAsset< Enjon::Material >( "NewMaterial1" ).Get( ) );
@@ -1111,7 +1098,7 @@ Enjon::Result Game::Initialize()
 			if ( ImGui::CollapsingHeader( "StaticMeshComponent" ) )
 			{
 				auto gc = mGun.Get( )->GetComponent< Enjon::StaticMeshComponent >( );
-				igm->DebugDumpObject( gc ); 
+				igm->DebugDumpObject( *gc ); 
 			} 
 
 			// Show texture
@@ -1463,7 +1450,7 @@ Enjon::Result Game::ProcessInput( f32 dt )
 
 			Enjon::EntityHandle handle = mEntities->Allocate( );
 			Enjon::Entity* ent = handle.Get( );
-			Enjon::StaticMeshComponent* gc = ent->AddComponent<Enjon::StaticMeshComponent>();
+			Enjon::StaticMeshComponent* gc = *ent->AddComponent<Enjon::StaticMeshComponent>();
 			ent->SetLocalScale(v3(scalar));
 			gc->SetMesh(mSphereMesh);
 

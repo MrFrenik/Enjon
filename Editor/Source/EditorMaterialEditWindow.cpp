@@ -155,12 +155,12 @@ namespace Enjon
 				// If static mesh component
 				if ( ent->HasComponent< StaticMeshComponent >( ) )
 				{
-					StaticMeshComponent* smc = ent->GetComponent< StaticMeshComponent >( );
+					ComponentHandle< StaticMeshComponent >& smc = ent->GetComponent< StaticMeshComponent >( );
 					smc->SetMaterial( grabbedAsset );
 				}
 				else if ( ent->HasComponent< SkeletalMeshComponent >( ) )
 				{
-					SkeletalMeshComponent* smc = ent->GetComponent< SkeletalMeshComponent >( );
+					ComponentHandle< SkeletalMeshComponent >& smc = ent->GetComponent< SkeletalMeshComponent >( );
 					smc->SetMaterial( grabbedAsset );
 				}
 			}
@@ -201,7 +201,7 @@ namespace Enjon
 				if ( handle )
 				{
 					Entity* newEnt = handle.Get( );
-					StaticMeshComponent* smc = newEnt->AddComponent< StaticMeshComponent >( );
+					ComponentHandle< StaticMeshComponent >& smc = newEnt->AddComponent< StaticMeshComponent >( ); 
 					smc->SetMesh( mesh );
 					newEnt->SetLocalPosition( position );
 					newEnt->SetName( mesh->GetName( ) );

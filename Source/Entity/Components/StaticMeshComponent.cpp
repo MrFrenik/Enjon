@@ -57,7 +57,9 @@ namespace Enjon
 		mRenderable.SetRenderableID( GetEntity()->GetID( ) ); 
 
 		// Hate doing this. For real. Fucking hate it.
-		gs->AllocateStaticMeshRenderable( GetEntity()->GetID( ) ); 
+		u32 handle = gs->AllocateStaticMeshRenderable( GetEntity()->GetID( ) ); 
+		mRenderableHandle = handle;
+		mGraphicsScene = gs;
 	}
 
 	//==================================================================== 
@@ -264,12 +266,17 @@ namespace Enjon
 	Result StaticMeshComponent::OnEditorUI( )
 	{
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		EntityManager* em = EngineSubsystem( EntityManager );
+
+		// Grab renderable from graphics subsystem
+		GraphicsScene* gs = em->GetRawEntity( mEntityID )->GetWorld( )->ConstCast< World >( )->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
+		StaticMeshRenderable* rend = gs->GetStaticMeshRenderable( mRenderableHandle ); 
 
 		// Debug dump renderable
-		igm->InspectObject( &mRenderable );
+		igm->InspectObject( rend );
 
 		// Reset renderable mesh
-		mRenderable.SetMesh( mRenderable.GetMesh( ) );
+		rend->SetMesh( rend->GetMesh( ) );
 
 		return Result::SUCCESS;
 	}
@@ -305,11 +312,12 @@ namespace Enjon
 		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
 
 		// Should probably be a reference instead...
-		ComponentHandle< StaticMeshComponent >* smc = data->GetComponentHandle< StaticMeshComponent >( id );
+		ComponentHandle< StaticMeshComponent >& smc = data->GetComponentHandle< StaticMeshComponent >( id );
 
 		// Allocate new renderable handle
 		u32 handle = gs->AllocateStaticMeshRenderable( ent->GetID( ) ); 
-		smc->mComponent->mRenderableHandle = handle;
+		smc->mRenderableHandle = handle;
+		smc->mGraphicsScene = gs;
 			
 		// I still like this syntax
 		//data->SetValue( id, &StaticMeshComponent::mRenderableHandle, handle ); 
@@ -332,10 +340,8 @@ namespace Enjon
 		// Update all data
 		for ( usize i = 0; i < iData->GetCount( ); ++i )
 		{
-			// These things are slow. Need to address them.
 			Entity* ent = em->GetRawEntity( eids.at( i ) );		// Getting raw entity isn't terrible, but the cache is killed by loading up an entity that has a UUID associated with it. Need to store these elsewhere ( probably just in the EntityMangager itself ); 
-			GraphicsScene* gs = ent->GetWorld( )->ConstCast< World >()->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );	// Instead of grabbing this, the renderable should KNOW which graphics scene it belongs to ( hashmap lookup )
-			gs->SetStaticMeshRenderableTransform( compData[ i ].mRenderableHandle, ent->GetWorldTransform( ) ); 
+			compData[ i ].mGraphicsScene->SetStaticMeshRenderableTransform( compData[ i ].mRenderableHandle, ent->GetWorldTransform( ) ); 
 		} 
 	}
 }

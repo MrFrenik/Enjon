@@ -9,7 +9,12 @@ namespace Enjon
 
 	void StaticMeshRenderable::SetMesh( const Mesh* mesh )
 	{
-		mMesh = mesh;
+		if ( !mesh )
+		{
+			return;
+		}
+
+		mMesh = mesh; 
 
 		// Make sure that material element vector matches amount of submeshes
 		u32 subMeshCount = mMesh->GetSubMeshCount( );

@@ -1198,8 +1198,8 @@ namespace Enjon
 						GraphicsScene* gs = ent->GetWorld( )->ConstCast< World >( )->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
 						IComponentInstanceData* data = em->GetIComponentInstanceData< StaticMeshComponent >( );
 						em->AddComponent< StaticMeshComponent >( ent );
-						ComponentHandle< StaticMeshComponent >* ch = data->GetComponentHandle< StaticMeshComponent >( ent->GetID( ) );
-						gs->SetStaticMeshRenderableMesh( ch->mComponent->mRenderableHandle, am->GetAsset< Mesh >( "models.unit_cube" ) );
+						ComponentHandle< StaticMeshComponent >& ch = data->GetComponentHandle< StaticMeshComponent >( ent->GetID( ) );
+						gs->SetStaticMeshRenderableMesh( ch->mRenderableHandle, am->GetAsset< Mesh >( "models.unit_cube" ) );
 						//u32 rid = data->GetValue( ent->GetID( ), &StaticMeshComponent::mRenderableHandle );
 						//gs->SetStaticMeshRenderableMesh( rid, am->GetAsset< Mesh >( "models.unit_cube" ) );
 						//data->Allocate( ent->GetID() ); 
@@ -1234,11 +1234,11 @@ namespace Enjon
 					if ( cube )
 					{
 						Entity* ent = cube.Get( );
-						StaticMeshComponent* gfx = ent->AddComponent<StaticMeshComponent>( );
+						ComponentHandle< StaticMeshComponent >& gfx = ent->AddComponent<StaticMeshComponent>( );
 						gfx->SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
 						gfx->SetMaterial( am->GetDefaultAsset<Material>( ), 0 );
 
-						RigidBodyComponent* rbc = ent->AddComponent<RigidBodyComponent>( );
+						ComponentHandle< RigidBodyComponent >& rbc = ent->AddComponent<RigidBodyComponent>( );
 						rbc->SetShape( CollisionShapeType::Box ); 
 
 						const Camera* cam = gs->GetGraphicsSceneCamera( );
@@ -1261,11 +1261,11 @@ namespace Enjon
 					if ( sphere )
 					{
 						Entity* ent = sphere.Get( );
-						StaticMeshComponent* gfx = ent->AddComponent<StaticMeshComponent>( );
+						ComponentHandle< StaticMeshComponent >& gfx = ent->AddComponent<StaticMeshComponent>( );
 						gfx->SetMesh( am->GetAsset< Mesh >( "models.unit_sphere" ) );
 						gfx->SetMaterial( am->GetDefaultAsset<Material>( ), 0 );
 
-						RigidBodyComponent* rbc = ent->AddComponent< RigidBodyComponent >( );
+						ComponentHandle< RigidBodyComponent >& rbc = ent->AddComponent< RigidBodyComponent >( );
 						rbc->SetShape( CollisionShapeType::Sphere );
 
 						const Camera* cam = gs->GetGraphicsSceneCamera( );
@@ -1287,7 +1287,7 @@ namespace Enjon
 					if ( pointLight )
 					{
 						Entity* ent = pointLight.Get( ); 
-						PointLightComponent* plc = ent->AddComponent<PointLightComponent>( );
+						ent->AddComponent<PointLightComponent>( );
 
 						const Camera* cam = gs->GetGraphicsSceneCamera( );
 						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f ); 

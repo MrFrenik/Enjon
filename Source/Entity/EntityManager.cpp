@@ -931,7 +931,7 @@ namespace Enjon
 	{
 		if ( mComponentInstanceDataMap.find( cId ) != mComponentInstanceDataMap.end( ) )
 		{
-			return mComponentInstanceDataMap[ cId ]->GetComponentHandle< Component >( entity.GetID( ) );
+			return &mComponentInstanceDataMap[ cId ]->GetComponentHandle< Component >( entity.GetID( ) );
 		}
 		return nullptr;
 	}
@@ -1515,22 +1515,14 @@ namespace Enjon
 			}
 		}
 
+		// Update all component systems
 		for ( auto& system : mComponentSystems )
 		{
 			if ( system.second->GetTickState( ) != ComponentTickState::TickNever )
 			{
 				system.second->Update( );
 			}
-		}
-
-		// Update all component systems
-		//for ( auto& system : mComponentSystems )
-		//{
-		//	if ( system.second->GetTickState( ) != ComponentTickState::TickNever )
-		//	{
-		//		system.second->Update( );
-		//	}
-		//}
+		} 
 	}
 
 	//==================================================================================================
@@ -1597,7 +1589,14 @@ namespace Enjon
 
 	void EntityManager::RegisterAllEngineIComponents( )
 	{
+		// Register engine components here
 		RegisterIComponent< StaticMeshComponent >( );
+		RegisterIComponent< PointLightComponent >( );
+		RegisterIComponent< RigidBodyComponent >( );
+		RegisterIComponent< DirectionalLightComponent >( );
+		RegisterIComponent< CameraComponent >( );
+		RegisterIComponent< SkeletalMeshComponent >( );
+		RegisterIComponent< SkeletalAnimationComponent >( ); 
 	}
 
 	//================================================================================================== 
@@ -1638,7 +1637,7 @@ namespace Enjon
 	//========================================================================================================================
 
 	// TODO(): Need to have a destinction here on whether or not the component being 
-	// asked to unregistered is an engine-level component or not - Most likely NEVER want to be able to 
+	// asked to unregister is an engine-level component or not - Most likely NEVER want to be able to 
 	// unregister one of those
 	void EntityManager::UnregisterComponent( const MetaClass* cls )
 	{
@@ -1686,78 +1685,73 @@ namespace Enjon
 		ComponentWrapperBase* base = mComponents[ compIdx ];
 
 		// Try and add new icomponent data here
-		if ( compCls->InstanceOf( Object::GetClass< StaticMeshComponent >( ) ) )
+		//if ( compCls->InstanceOf( Object::GetClass< StaticMeshComponent >( ) ) )
 		{
 			IComponentInstanceData* data = GetIComponentInstanceData( compCls ); 
 			data->Allocate( eid ); 
 			// Get component ptr and push back into entity components
 			entity->mComponents.push_back( compIdx );
-			// Do I need a way to be able to do post construction steps?
-			// Yes, but everything I'm coming up with sucks...
-			// Post construction here using callbacks?
-			/*
-				// So we register callbacks with EntityManager? Could be okay. Then in destruction of component data,
-				// just erase these callbacks. 
-				PostConstruction( eid, compCls, data )
-				{
-					for ( auto& f : mPostConstructionCallbacks[ compCls ] )
-					{
-						f( eid, data );
-					}
-				}
 
-				// Was thinking that the instance data could do this instead. 
-				InstanceData::Allocate() 
-				{
-					... // Allocation of component
-					
-					for ( auto& f : mPostConstructionCallbacks )
-					{
-						f( this, eid, cid );	
-					}
-				}
-			*/
-		}
-		else
-		{
-			// Create new component and place into map
-			Component* component = base->AddComponent( compCls, eid );
-			if ( component )
+			// Need to add required components from meta class
+			const MetaClassComponent* cc = static_cast<const MetaClassComponent*>( compCls );
+			if ( cc )
 			{
-				component->SetEntity( entity );
-				component->SetID( compIdx );
-				component->SetBase( base );
-				component->mEntityID = entity->mID;
-				component->PostConstruction( );
-
-				// Get component ptr and push back into entity components
-				entity->mComponents.push_back( compIdx );
-
-				// Push back for need initilization and start
-				mNeedInitializationList.push_back( component );
-				mNeedStartList.push_back( component );
-
-				// Need to add required components from meta class
-				const MetaClassComponent* cc = static_cast<const MetaClassComponent*>( compCls );
-				if ( cc )
+				for ( auto& c : cc->GetRequiredComponentList( ) )
 				{
-					for ( auto& c : cc->GetRequiredComponentList( ) )
+					const MetaClass* cls = Object::GetClass( c );
+					if ( cls )
 					{
-						const MetaClass* cls = Object::GetClass( c );
-						if ( cls )
+						// Add component if entity doesn't already contain this one
+						if ( !entity->HasComponent( cls ) )
 						{
-							// Add component if entity doesn't already contain this one
-							if ( !entity->HasComponent( cls ) )
-							{
-								AddComponent( cls, entity );
-							}
+							AddComponent( cls, entity );
 						}
 					}
 				}
 			}
 
-			return component;
-		} 
+			// Need to return a component handle pointer here
+		}
+		//else
+		//{
+		//	// Create new component and place into map
+		//	Component* component = base->AddComponent( compCls, eid );
+		//	if ( component )
+		//	{
+		//		component->SetEntity( entity );
+		//		component->SetID( compIdx );
+		//		component->SetBase( base );
+		//		component->mEntityID = entity->mID;
+		//		component->PostConstruction( );
+
+		//		// Get component ptr and push back into entity components
+		//		entity->mComponents.push_back( compIdx );
+
+		//		// Push back for need initilization and start
+		//		mNeedInitializationList.push_back( component );
+		//		mNeedStartList.push_back( component );
+
+		//		// Need to add required components from meta class
+		//		const MetaClassComponent* cc = static_cast<const MetaClassComponent*>( compCls );
+		//		if ( cc )
+		//		{
+		//			for ( auto& c : cc->GetRequiredComponentList( ) )
+		//			{
+		//				const MetaClass* cls = Object::GetClass( c );
+		//				if ( cls )
+		//				{
+		//					// Add component if entity doesn't already contain this one
+		//					if ( !entity->HasComponent( cls ) )
+		//					{
+		//						AddComponent( cls, entity );
+		//					}
+		//				}
+		//			}
+		//		}
+		//	}
+
+		//	return component;
+		//} 
 		return nullptr; 
 	}
 

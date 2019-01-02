@@ -13,7 +13,7 @@ namespace Enjon
 	void SkeletalAnimationComponent::UpdateAndCalculateTransforms( )
 	{
 		// Get skeletal mesh component and renderable from entity
-		SkeletalMeshComponent* smc = mEntity->GetComponent< SkeletalMeshComponent >( );
+		ComponentHandle< SkeletalMeshComponent >& smc = mEntity->GetComponent< SkeletalMeshComponent >( );
 
 		// If not valid, return ( NOTE(): this branching check will eventually go away with Require tags )
 		if ( !smc )

@@ -235,8 +235,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void SetStaticMeshRenderableTransform( const u32& handle, const Transform& wt );
-
+			void SetStaticMeshRenderableTransform( const u32& handle, const Transform& wt ); 
 
 			/*
 			* @brief
@@ -245,6 +244,9 @@ namespace Enjon
 			{
 				return ( &mStaticMeshRenderableResourceArray.mResource );
 			}
+
+			// HACK
+			StaticMeshRenderable* GetStaticMeshRenderable( const u32& handle );
 
 		private: 
 

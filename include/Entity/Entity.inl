@@ -9,14 +9,14 @@ bool Entity::HasComponent()
 
 //------------------------------------------------------------------------------
 template <typename T>
-T* Entity::GetComponent()
+ComponentHandle< T >& Entity::GetComponent()
 { 
 	return EngineSubsystem( EntityManager )->GetComponent< T >( this );
 }
 
 //------------------------------------------------------------------------------
 template <typename T>
-T* Entity::AddComponent()
+ComponentHandle< T >& Entity::AddComponent()
 { 
 	// If component exists, return it
 	if ( HasComponent< T >( ) )
