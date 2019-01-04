@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
+#include <stack>
 
 namespace Enjon
 {
@@ -46,6 +47,9 @@ namespace Enjon
 
 	template <typename T>
 	using Queue = std::queue<T>;
+
+	template <typename T>
+	using Stack = std::stack<T>;
 }
 
 #endif

@@ -343,5 +343,110 @@ namespace Enjon
 			Entity* ent = em->GetRawEntity( eids.at( i ) );		// Getting raw entity isn't terrible, but the cache is killed by loading up an entity that has a UUID associated with it. Need to store these elsewhere ( probably just in the EntityMangager itself ); 
 			compData[ i ].mGraphicsScene->SetStaticMeshRenderableTransform( compData[ i ].mRenderableHandle, ent->GetWorldTransform( ) ); 
 		} 
-	}
+	} 
+
+	/*
+		// Want a more robust internal resource handle system ( mainly for gfx objects like render targets, renderables, shaders, etc. that don't rely on the asset management system ) 
+
+		#include <limits>
+
+		const u32 INVALID_HANDLE = std::numeric_limits< u32 >::max();
+
+		template <typename Resource>
+		struct ResourceHandle
+		{
+			friend ResourceManager< Resource >;
+
+			Resource* operator ->() 
+			{
+				return mResourceManager->Lookup( mResourceID );
+			}
+
+			Resource* operator *()
+			{
+				return mResourceManager->Lookup( mResourceID );
+			}
+
+			private:
+				u32 mResourceID;
+				ResourceManager< Resource >* mResourceManager;
+		}; 
+
+		template <typename Resource> 
+		struct ResourceManager
+		{
+			public:
+
+				inline ResourceHandle< Resource > Add()
+				{ 
+					// Here's the tricky part. Want to push back a new index? Do I store a free list of indices? Do I iterate to find a free index? ( ideally would not do that last bit )	
+					// Free list stack? So you push a free index onto the stack and then pop off to get the newest available index? 
+					u32 freeIdx = GetNextAvailableIndex();
+
+					// Allocate new resource					
+					mResources.emplace(); 
+
+					// Push back new indirection index
+					mReverseIndirectionIndices.push_back( freeIdx );
+
+					// This gets the available index in the indirection list of indices, not in the actual resource array ( the reason being that the resource array can have its contents shifted around when adding / removing items )
+					// If the index is the last item in the list, then push that on to grow the array
+					mHandleIndices[ freeIdx ] = mResources.size() - 1;
+
+					return { freeIdx, this };
+				}
+
+				inline void Remove( const ResourceHandle< Resource >& res )
+				{
+					// Need to grab the actual resource index from the handle's indirection index
+					u32 idx = mHandleIndices[ res.mResourceID ];
+
+					// Need to pop and swap resources, but now also need to make sure that I update the handle index indirection map, which could be tricky
+					if ( mResources.size() > 1 )
+					{
+						std::iter_swap( mResources.begin() + idx, mResources.end() - 1 );
+						mResources.pop_back();
+					}
+					else
+					{
+						mResources.clear();
+					}
+
+					// Have to find a way to update the index in the indirection map...
+					
+				} 
+
+				inline Resource* Lookup( const ResourceHandle< Resource >& res ) override
+				{ 
+					// Something like this? Allocating a new resource would look for the next available index? Or would just push a new index onto stack?
+					return &mResources[ mIndices[ res.mResourceID ] ];
+				}
+
+			private: 
+
+				u32 GetNextAvailableIndex()
+				{
+					// If stack is empty, then simply return the size of the index array, which will be the back index after growing
+					if ( mIndexFreeList.empty() )
+					{
+						// Grow the array by 1
+						mHandleIndices.push_back( 0 );
+						// Return the last index
+						return mHandleIndices.size() - 1;
+					}
+
+					// Otherwise pop off stack and then return index
+					u32 idx = mIndexFreeList.top();
+					mIndexFreeList.pop();
+					return idx;
+				}
+
+			private: 
+				Vector<Resource> mResources;				// Use the index from the handle vector to get index into this array of actual resources
+				Vector<u32> mHandleIndices;					// Indices into this vector are returned to the user as handles
+				Vector<u32> mReverseIndirectionIndices;		// Indices into this vector give reverse indirection into handle indices from objects
+				Stack<u32> mIndexFreeList;					// Free list of most available indices
+		};
+
+	*/
 }
